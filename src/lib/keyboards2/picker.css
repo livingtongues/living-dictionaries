@@ -1,0 +1,115 @@
+.b0 {border: 0px solid white;}
+.b1 {border: 1px solid #aaa;}
+.bt0, .br0, .bb0, .bl0, .bt1, .br1, .bb1, .bl1, .bt2, .br2, .bb2, .bl2 {border-style:solid;border-color:#aaa;border-collapse:collapse;}
+.bt0 {border-top-width: 0px;}
+.br0 {border-right-width: 0px;}
+.bb0 {border-bottom-width: 0px;}
+.bl0 {border-left-width: 0px;}
+.bt1 {border-top-width: 1px;}
+.br1 {border-right-width: 1px;}
+.bb1 {border-bottom-width: 1px;}
+.bl1 {border-left-width: 1px;}
+.bt2 {border-top-width: 2px;}
+.br2 {border-right-width: 2px;}
+.bb2 {border-bottom-width: 2px;}
+.bl2 {border-left-width: 2px;}
+
+
+table {
+  text-align: center;
+  vertical-align: bottom;
+  border-collapse: collapse;
+  margin: 0em 1em 1em 0;
+  float: left;
+}
+.nd {background-color: #ccc;}
+td {
+  padding: 0;
+  margin: 0;
+}
+th {
+  font-size: 14px;
+  text-align: center;
+  padding: 5px 10px;
+  border: 1px solid #aaa;
+  font-weight: bold;
+  font-family: "Trebuchet MS", Arial, sans-serif;
+  background: #64B0FF; /*5181B3;*/
+}
+caption {
+  font-size: 100%;
+  background: #94C4F7;
+  border: 1px solid #BFBFA3;
+  font-family: Arial, sans-serif;
+  font-weight: bold;
+  padding: 5px 10px;
+}
+tr {line-height: 170%;}
+span.ipa {
+  padding: 5px;
+  font-size: 110%;
+  line-height: 25px;
+}
+span.ipa:hover {
+  display: inline-block;
+  cursor: pointer;
+  background-color: rgb(238, 238, 238);
+  transform: scale(1.75, 1.75);
+  line-height: 9px;
+}
+#vowels .ipa {
+  position: relative;
+}
+.vowel_row {
+  height: 32px;
+  width: 350px;
+  position: relative;
+}
+div.vowel_row > span {
+  background-color: white;
+  line-height: 12px;
+  position: absolute;
+  padding: 0;
+  top: 8px;
+}
+
+.rowheader {
+    text-align: right;
+    padding: 0 5px;
+    border: 1px solid #aaa;
+    font-size: 12px;
+    font-family: "Trebuchet MS", Arial, sans-serif;
+    background-color: #C9E1FA;
+    line-height: 100%;
+    word-wrap: normal;
+  }
+
+.vowelheader td {
+  background-color: #A4CAF2;
+  border: 1px solid #aaa;
+  font-family: "Trebuchet MS", Arial, sans-serif;
+  font-size: 12px;
+}
+
+.labial {
+    background: rgb(255, 230, 230);
+}
+.coronal {
+    background: rgb(244, 255, 230);
+}
+.dorsal {
+    background: rgb(230, 234, 255);
+}
+.radical {
+    background: rgb(230, 255, 240);
+}
+
+.consonant-header td {
+    border-top: 1px solid #aaa;
+    border-right: 1px solid #aaa;
+    padding: 1px;
+    font-family: "Trebuchet MS", Arial, sans-serif;
+    font-size: 11px;
+    text-align: center;
+    line-height: 100%;
+  }

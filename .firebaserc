@@ -1,0 +1,6 @@
+{
+  "projects": {
+    "default": "talking-dictionaries-dev",
+    "production": "talking-dictionaries-alpha"
+  }
+}

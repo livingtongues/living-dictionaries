@@ -1,0 +1,36 @@
+{
+	"name": "Living Dictionaries",
+	"short_name": "Living Dictionaries",
+	"theme_color": "#546e7a",
+	"background_color": "#ffffff",
+	"display": "standalone",
+	"scope": "/",
+	"start_url": "/?utm_source=a2hs",
+	"icons": [
+		{
+			"src": "icons/ld_icon_72.png",
+			"sizes": "72x72",
+			"type": "image/png"
+		},
+		{
+			"src": "icons/ld_icon_96.png",
+			"sizes": "96x96",
+			"type": "image/png"
+		},
+		{
+			"src": "icons/ld_icon_144.png",
+			"sizes": "144x144",
+			"type": "image/png"
+		},
+		{
+			"src": "icons/ld_icon_192.png",
+			"sizes": "192x192",
+			"type": "image/png"
+		},
+		{
+			"src": "icons/ld_icon_512.png",
+			"sizes": "512x512",
+			"type": "image/png"
+		}
+	]
+}

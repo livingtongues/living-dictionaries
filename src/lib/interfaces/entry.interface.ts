@@ -1,0 +1,82 @@
+import type { IGloss } from './gloss.interface';
+import type { IAudio } from './audio.interface';
+import type { IPhoto } from './photo.interface';
+import type { IExampleSentence } from './exampe-sentence.interface';
+// import type { Hit } from 'instantsearch.js';
+import type { FieldValue, Timestamp } from 'firebase/firestore';
+
+import type { IFirestoreMetaDataAbbreviated } from './firestore-metadata.interface';
+// TODO remove deprecated fields
+export interface IEntry extends IFirestoreMetaDataAbbreviated, LDAlgoliaFields, DeprecatedFields {
+  // Partial<Hit>
+  // Writing
+  lx: string; // lexeme
+  lo?: string; // Local Orthography
+  lo2?: string; // Local Orthography 2
+  lo3?: string; // Local Orthography 3
+  lo4?: string; // Local Orthography 4
+  lo5?: string; // Local Orthography 5
+
+  // Pronunciation
+  ph?: string; // phonetic
+
+  // Meaning & Morphology
+  gl: IGloss; // glosses
+  in?: string; // interlinearization
+  mr?: string; // morphology
+  ps?: string; // part of speech
+  sd?: string[]; // semantic domain strings, only using for custom semantic domains brought in from imports
+  sdn?: string[]; // semantic domain number, simplified system modeled after SemDom (eg. 2.1.2.3)
+  de?: string; // definition english, only in Bahasa Lani (jaRhn6MAZim4Blvr1iEv) deprecated by Greg
+
+  // Language & entry metadata
+  di?: string; // dialect for this entry
+  nt?: string; // notes
+  sr?: string[]; // Source(s)
+
+  // Usage
+  xv?: string; // example vernacular - used for old dictionary imports
+  xs?: IExampleSentence; // example sentences - new format which allows us to bring in example sentences from multiple languages (vernacular and gloss languages)
+  sf?: IAudio; // sound file
+  pf?: IPhoto; // photo file
+
+  // IDs
+  ii?: string; // importId which can be used to show all entries from a particular import
+  ei?: string; // Elicitation Id for Munda languages or Swadesh Composite number list from Comparalex
+
+  // Algolia added fields
+
+  // UI needed fields
+  updatedRecently?: boolean; // added by view component to load live entry from Firebase to avoid using 5-second stale data from Algolia when making updates
+}
+
+// TODO:
+// Convert deprecated fields that the database needs searched for: dialect, ab, glosses
+// Add video object
+// Add image attribution field
+
+// Custom fields? - by dictionary manager or us
+// 1. Dictionary manager creates custom field called "Culture"
+// Anyone editing entries can add data for the "Culture" field.
+
+// Future?
+// link entries - "this entry is used in ______"
+// or just a "related entries" section fueled by a search for the lexeme
+
+interface LDAlgoliaFields {
+  dictId?: string; // dictionary Id entry belongs to, to filter search results by dictionary
+  _highlightResult?: any;
+
+  hasImage?: boolean;
+  hasAudio?: boolean;
+  hasSpeaker?: boolean;
+  hasSemanticDomain?: boolean;
+  hasPartOfSpeech?: boolean;
+}
+
+interface DeprecatedFields {
+  createdBy?: string;
+  updatedBy?: string;
+  createdAt?: Timestamp & FieldValue;
+  updatedAt?: Timestamp & FieldValue;
+}

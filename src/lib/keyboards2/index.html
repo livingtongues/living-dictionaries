@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset='utf8'>
+	<meta name='viewport' content='width=device-width'>
+
+	<title>IPA Keyboard</title>
+
+	<link rel='stylesheet' href='bundle.css'>
+	<style>
+		@font-face {
+			font-family: CharisSILW;
+			src: url(CharisSIL-R.woff);
+		}
+		body, #ipaKeyboardTarget {
+			font-family: CharisSILW, sans-serif;
+		}
+	</style>
+</head>
+
+<body>
+	<input id='ipaKeyboardTarget' placeholder="External input" />
+	<div id="ipaKeyboardHome"></div>
+	<script src='bundle.js'></script>
+</body>
+</html>

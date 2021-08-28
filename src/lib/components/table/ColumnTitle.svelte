@@ -1,0 +1,20 @@
+<script lang="ts">
+  import type { IColumn } from '$lib/interfaces';
+  export let column: IColumn,
+    verbose = false;
+  import { _ } from 'svelte-i18n';
+</script>
+
+<span class:flex={!verbose}>
+  {#if column.field === 'soundFile'}
+    <i class="far fa-ear fa-fw mx-auto" />
+    {#if verbose}{$_('entry.audio', { default: 'Audio' })}{/if}
+  {:else if column.field === 'photoFile'}
+    <i class="far fa-image fa-fw mx-auto" />
+    {#if verbose}{$_('entry.image', { default: 'Image' })}{/if}
+  {:else if column.field === 'checked'}
+    ✓
+  {:else if column.gloss === true || column.exampleSentence === true || column.orthography === true}
+    <span class="capitalize" title={column.explanation}> {column.display} </span>
+  {:else}{$_('entry.' + column.field, { default: '~' })}{/if}
+</span>

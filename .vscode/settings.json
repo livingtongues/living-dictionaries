@@ -1,0 +1,33 @@
+{
+  "workbench.colorCustomizations": {
+    "activityBar.background": "#557c9b",
+    "activityBar.activeBorder": "#ef7853",
+    "activityBar.foreground": "#e7e7e7",
+    "activityBar.inactiveForeground": "#e7e7e799",
+    "activityBarBadge.background": "#ef7853",
+    "activityBarBadge.foreground": "#15202b",
+    "titleBar.activeBackground": "#557c9b",
+    "titleBar.inactiveBackground": "#557c9b99",
+    "titleBar.activeForeground": "#e7e7e7",
+    "titleBar.inactiveForeground": "#e7e7e799"
+  },
+  "debug.allowBreakpointsEverywhere": true,
+  "debug.javascript.usePreview": false,
+  "i18n-ally.localesPaths": ["src/locales"],
+  "i18n-ally.keystyle": "nested",
+  "i18n-ally.sourceLanguage": "en",
+  "emmet.includeLanguages": {
+    "postcss": "css"
+  },
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": true
+  },
+  "eslint.validate": ["javascript", "svelte"],
+  "jestrunner.configPath": "e2e/jest.individual-test.config.js",
+  "files.associations": {
+    "*.svench": "svelte",
+    "*.svx": "markdown"
+  }
+}

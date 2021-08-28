@@ -1,0 +1,4 @@
+User-agent: *
+Disallow: /onondaga/
+
+# Use https://www.npmjs.com/package/sitemap-generator-cli to build a sitemap on deployed code

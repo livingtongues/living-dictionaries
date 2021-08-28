@@ -1,0 +1,1 @@
+- run `npx npm-check -u` to update packages

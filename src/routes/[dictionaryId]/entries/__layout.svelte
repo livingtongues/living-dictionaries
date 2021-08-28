@@ -1,0 +1,76 @@
+<script lang="ts">
+  import { _ } from 'svelte-i18n';
+  import InstantSearch from '$lib/components/search/InstantSearch.svelte';
+  import SearchBox from '$lib/components/search/SearchBox.svelte';
+  import Stats from '$lib/components/search/Stats.svelte';
+  import EntryFilters from './_EntryFilters.svelte';
+
+  import { page } from '$app/stores';
+  import { browser } from '$app/env';
+
+  let showMobileFilters = false;
+</script>
+
+{#if browser}
+  <InstantSearch dictionaryId={$page.params.dictionaryId} let:search>
+    <div class="relative pb-3 flex-grow">
+      <div
+        class="flex mb-1 items-center sticky top-0 md:top-12 pt-2 md:pt-0 pb-1
+            bg-white z-20">
+        <SearchBox {search} on:showFilterMenu={() => (showMobileFilters = true)} />
+
+        <div class="w-2 md:w-1" />
+        <div
+          class="flex md:p-1 border bg-gray-200 rounded-md text-gray-600
+              font-medium text-xl md:text-sm">
+          <a
+            sveltekit:prefetch
+            href={'/' + $page.params.dictionaryId + '/entries/list'}
+            class="{$page.path.includes('list') ? 'bg-white shadow' : 'hover:bg-gray-100'}
+                px-2 py-1 rounded">
+            <i class="far fa-list" />
+            <span class="hidden md:inline">
+              {$_('entry.list', { default: 'List' })}
+            </span>
+          </a>
+          <div class="hidden md:block w-1" />
+          <a
+            sveltekit:prefetch
+            href={'/' + $page.params.dictionaryId + '/entries/table'}
+            class="{$page.path.includes('table') ? 'bg-white shadow' : 'hover:bg-gray-100'}
+            px-2 py-1 rounded">
+            <i class="fal fa-table" />
+            <span class="hidden md:inline">
+              {$_('entry.table', { default: 'Table' })}
+            </span>
+          </a>
+          <div class="hidden md:block w-1" />
+          <a
+            sveltekit:prefetch
+            href={'/' + $page.params.dictionaryId + '/entries/gallery'}
+            class="{$page.path.includes('gallery') ? 'bg-white shadow' : 'hover:bg-gray-100'}
+                px-2 py-1 rounded">
+            <i class="fal fa-image" />
+            <span class="hidden md:inline">
+              {$_('entry.gallery', { default: 'Gallery' })}
+            </span>
+          </a>
+        </div>
+      </div>
+
+      <div class="flex">
+        <div class="flex-grow w-0 relative">
+          <div class="flex justify-between">
+            <div class="italic text-xs text-gray-500 mb-1">
+              <Stats {search} />
+            </div>
+            <!-- <SortBy {search} /> -->
+          </div>
+          <slot />
+        </div>
+        <div class="hidden md:block w-3 flex-shrink-0" />
+        <EntryFilters {search} bind:showMobileFilters />
+      </div>
+    </div>
+  </InstantSearch>
+{/if}

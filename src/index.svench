@@ -1,0 +1,5 @@
+<script>
+  let name = 'John';
+</script>
+
+<h1>The testing home for {name}</h1>

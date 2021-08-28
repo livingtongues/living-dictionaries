@@ -1,0 +1,12 @@
+{
+  "ci": {
+    "assert": {
+      "assertions": {
+        "color-contrast": "off",
+        "crawlable-anchors": "off",
+        "unused-css-rules": "off",
+        "uses-rel-preconnect": "off"
+      }
+    }
+  }
+}
