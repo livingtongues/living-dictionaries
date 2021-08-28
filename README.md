@@ -24,13 +24,11 @@ Choose an already approved task from the [Development Roadmap](https://github.co
 
 Beginning developers, here are some general [development environment setup tips](docs/setup-tips-for-beginner-devs.md).
 
-Note that you will need to ask for our dev Mapbox and Firebase API keys or bring your own by adding `VITE_mapboxAccessToken=...` and
-`VITE_FirebaseDevApiKey=...` to a `.env.local` file on the root level.
-
 ## Developing
 
-Install dependencies with `npm install` and then run `npm run dev` to automatically open on [localhost:3051](http://localhost:3051). The app will hot reload as you make changes. As an alternative to have a dev environment set up you can use the Gitpod button here to open a ready-built dev environment w/ npm dependencies already installed:
+Install dependencies with `npm install` and then run `npm run dev` to automatically open on [localhost:3051](http://localhost:3051). The app will hot reload as you make changes.
 
-[![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/jwrunner/Living-Dictionaries)
+Note that you will need to ask for our dev Mapbox and Firebase API keys or bring your own by adding `VITE_mapboxAccessToken=...` and
+`VITE_FirebaseDevApiKey=...` to a `.env.local` file on the root level.
 
 \*_Note that on localhost you will not see the live (prod) site's data, but rather the data from the dev database, which allows us to develop and make changes freely without worrying about deleting or corrupting important data._
