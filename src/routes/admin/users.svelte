@@ -1,9 +1,9 @@
 <script lang="ts">
+  import type { IUser } from '$lib/interfaces';
+  import Collection from '$sveltefire/Collection.svelte';
   import UserRow from './_UserRow.svelte';
   import Filter from './_Filter.svelte';
-  import type { IUser } from '$lib/interfaces';
   import { exportCSVFile } from '$lib/stores';
-  import Collection from '$sveltefire/Collection.svelte';
   import Button from '$svelteui/ui/Button.svelte';
   import ResponsiveTable from '$lib/components/ui/ResponsiveTable.svelte';
   import SortUsers from './_SortUsers.svelte';

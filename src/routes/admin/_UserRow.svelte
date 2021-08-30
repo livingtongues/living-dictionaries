@@ -3,10 +3,10 @@
   import { update } from '$sveltefire/firestore';
   import type { IUser } from '$lib/interfaces';
   import { printDate } from '$lib/helpers/time';
-  import Button from '$svelteui/ui/Button.svelte';
   export let user: IUser;
   import { removeDictionaryManagePermission } from '$lib/helpers/dictionariesManaging';
   import ShowHide from '$svelteui/functions/ShowHide.svelte';
+  import BadgeArrayEmit from '$lib/components/editing/BadgeArrayEmit.svelte';
 </script>
 
 <tr title={$admin > 1 && JSON.stringify(user, null, 1)}>
@@ -17,22 +17,14 @@
     {user.email}
   </td>
   <td>
-    {#if user.managing && user.managing.length}
-      {#each user.managing as dictionaryId}
-        <Button
-          class="mr-1"
-          onclick={() => removeDictionaryManagePermission(user, dictionaryId)}
-          size="sm">
-          {dictionaryId}
-          <i class="far fa-times ml-1" />
-        </Button>
-      {/each}
-    {/if}
     <ShowHide let:show let:toggle>
-      <Button onclick={toggle} color="orange" size="sm">
-        <i class="far fa-plus mr-1" />
-        Add
-      </Button>
+      <BadgeArrayEmit
+        strings={user.managing}
+        canEdit
+        addMessage="Add"
+        on:itemclicked={(e) => window.open(`/${e.detail.value}`)}
+        on:itemremoved={(e) => removeDictionaryManagePermission(user, e.detail.value)}
+        on:addItem={toggle} />
       {#if show}
         {#await import('./_SelectDictionaryModal.svelte') then { default: SelectDictionaryModal }}
           <SelectDictionaryModal {user} on:close={toggle} />
