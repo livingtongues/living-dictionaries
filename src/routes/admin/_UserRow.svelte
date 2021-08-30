@@ -24,7 +24,7 @@
         addMessage="Add"
         on:itemclicked={(e) => window.open(`/${e.detail.value}`)}
         on:itemremoved={(e) => removeDictionaryManagePermission(user, e.detail.value)}
-        on:addItem={toggle} />
+        on:additem={toggle} />
       {#if show}
         {#await import('./_SelectDictionaryModal.svelte') then { default: SelectDictionaryModal }}
           <SelectDictionaryModal {user} on:close={toggle} />
