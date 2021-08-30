@@ -11,7 +11,7 @@
   const dispatch = createEventDispatcher<{
     itemclicked: { value: string; index: number };
     itemremoved: { value: string; index: number };
-    addItem: boolean;
+    additem: boolean;
   }>();
 </script>
 
@@ -32,7 +32,7 @@
         </DetectUrl>
       {/each}
     {/if}
-    <Button class="mb-1" onclick={() => dispatch('addItem')} color="orange" size="sm">
+    <Button class="mb-1" onclick={() => dispatch('additem')} color="orange" size="sm">
       <i class="fas fa-plus" />
       {addMessage}
     </Button>
