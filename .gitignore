@@ -4,6 +4,7 @@ node_modules
 *.local
 /.svench
 .vercel_build_output
+.vscode/settings.json
 
 # Firebase
 .firebase/
