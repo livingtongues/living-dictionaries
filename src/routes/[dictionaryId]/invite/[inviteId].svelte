@@ -105,8 +105,8 @@
             </span>
           </Button>
           {#if show}
-            {#await import('$sveltefire/FirebaseUiAuth.svelte') then { default: FirebaseUiAuth }}
-              <FirebaseUiAuth on:close={toggle} />
+            {#await import('$lib/components/shell/AuthModal.svelte') then { default: AuthModal }}
+              <AuthModal on:close={toggle} />
             {/await}
           {/if}
         </ShowHide>
