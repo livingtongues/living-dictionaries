@@ -50,7 +50,7 @@
   }
 
   import Button from '$svelteui/ui/Button.svelte';
-  import Doc from '$sveltefire/Doc.svelte';
+  import Doc from '$sveltefire/components/Doc.svelte';
   import { user } from '$sveltefire/user';
   import ShowHide from '$svelteui/functions/ShowHide.svelte';
   import { serverTimestamp } from 'firebase/firestore';
