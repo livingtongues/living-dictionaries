@@ -81,7 +81,7 @@
   }
 
   import { update } from '$sveltefire/firestore';
-  import Doc from '$sveltefire/Doc.svelte';
+  import Doc from '$sveltefire/components/Doc.svelte';
   import Button from '$svelteui/ui/Button.svelte';
   import { user } from '$sveltefire/user';
   async function saveUpdateToFirestore(e: {

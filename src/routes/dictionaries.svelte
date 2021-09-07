@@ -26,7 +26,7 @@
   import ResponsiveTable from '$lib/components/ui/ResponsiveTable.svelte';
   import Header from '$lib/components/shell/Header.svelte';
   import { orderBy, where } from 'firebase/firestore';
-  import Collection from '$sveltefire/Collection.svelte';
+  import Collection from '$sveltefire/components/Collection.svelte';
 
   let queryConstraints = [orderBy('name'), where('public', '==', true)];
   $: if (admin) {

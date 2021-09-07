@@ -14,6 +14,7 @@
   import { loadScriptOnce, loadStylesOnce } from '../helpers/loader';
   import { firebaseConfig } from '../config';
 
+  export let localizedAbbrev = 'en';
   export let tosUrl: firebaseui.auth.Config['tosUrl'] = undefined; // '.../terms' | () => window.location.assign("your-terms-url");
   export let privacyPolicyUrl: firebaseui.auth.Config['privacyPolicyUrl'] = undefined;
 
@@ -30,8 +31,16 @@
     if (window && window.firebase && window.firebase.apps && window.firebase.apps.length === 0) {
       window.firebase.initializeApp(firebaseConfig);
     }
-    await loadStylesOnce('https://www.gstatic.com/firebasejs/ui/4.8.1/firebase-ui-auth.css');
-    await loadScriptOnce('https://www.gstatic.com/firebasejs/ui/4.8.1/firebase-ui-auth.js');
+
+    if (localizedAbbrev === 'iw' || localizedAbbrev === 'ar') {
+      await loadStylesOnce('https://www.gstatic.com/firebasejs/ui/4.7.1/firebase-ui-auth-rtl.css');
+    } else {
+      await loadStylesOnce('https://www.gstatic.com/firebasejs/ui/4.8.1/firebase-ui-auth.css');
+    }
+    await loadScriptOnce(
+      `https://www.gstatic.com/firebasejs/ui/4.7.1/firebase-ui-auth__${localizedAbbrev}.js`
+    );
+
     initAuthUi();
   });
 
