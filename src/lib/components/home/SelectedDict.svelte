@@ -1,5 +1,5 @@
 <script lang="ts">
-  import Doc from '$sveltefire/Doc.svelte';
+  import Doc from '$sveltefire/components/Doc.svelte';
   import type { IAbout, IDictionary } from '$lib/interfaces';
 
   import { _ } from 'svelte-i18n';

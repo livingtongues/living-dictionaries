@@ -13,7 +13,7 @@
   import { firebaseConfig } from '$sveltefire/config';
   import Button from '$svelteui/ui/Button.svelte';
   import { update } from '$sveltefire/firestore';
-  import Collection from '$sveltefire/Collection.svelte';
+  import Collection from '$sveltefire/components/Collection.svelte';
   import type { IEntry, ISpeaker } from '$lib/interfaces';
   import { where } from 'firebase/firestore';
   export let entry: IEntry;
