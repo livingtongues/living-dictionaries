@@ -54,6 +54,7 @@
   import { user } from '$sveltefire/user';
   import ShowHide from '$svelteui/functions/ShowHide.svelte';
   import { serverTimestamp } from 'firebase/firestore';
+  import Json from '$svelteui/data/JSON.svelte';
 </script>
 
 <div>
@@ -115,12 +116,13 @@
       <p class="font-semibold mb-2">
         {$_('invite.invitation_claimed', {
           default: 'Invitation claimed',
-        })}: {invite.createdAt.toDate().toLocaleDateString(undefined, {
-          weekday: 'long',
-          year: 'numeric',
-          month: 'long',
-          day: 'numeric',
-        })}
+        })}: {invite.updatedAt &&
+          invite.updatedAt.toDate().toLocaleDateString(undefined, {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+          })}
       </p>
 
       <Button href={`/${dictionaryId}/entries/list`}>
