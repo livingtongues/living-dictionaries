@@ -9,16 +9,19 @@
 </script>
 
 <script lang="ts">
-  import Modal from '$lib/components/ui/Modal.svelte';
-  import { onMount } from 'svelte';
-  import { loadScriptOnce, loadStylesOnce } from './loader';
-  import { firebaseConfig } from '$sveltefire/config';
-  import { updateUserData } from '$sveltefire/auth';
-  import { createEventDispatcher } from 'svelte';
-  const dispatch = createEventDispatcher();
-  export let context: 'force' = undefined;
-  import { _, locale } from 'svelte-i18n';
+  import type { User } from 'firebase/auth';
+  import { onMount, createEventDispatcher } from 'svelte';
+  import { loadScriptOnce, loadStylesOnce } from '../helpers/loader';
+  import { firebaseConfig } from '../config';
 
+  export let localizedAbbrev = 'en';
+  export let tosUrl: firebaseui.auth.Config['tosUrl'] = undefined; // '.../terms' | () => window.location.assign("your-terms-url");
+  export let privacyPolicyUrl: firebaseui.auth.Config['privacyPolicyUrl'] = undefined;
+
+  const dispatch = createEventDispatcher<{
+    close: string | null;
+    updateuserdata: { user: User; isNewUser: boolean };
+  }>();
   let loading = true;
   let container: HTMLDivElement;
 
@@ -29,17 +32,11 @@
       window.firebase.initializeApp(firebaseConfig);
     }
 
-    let localizedAbbrev = $locale.substring(0, 2);
-    // https://github.com/firebase/firebaseui-web/blob/master/LANGUAGES.md
-    if (localizedAbbrev === 'he') localizedAbbrev = 'iw';
-    if (localizedAbbrev === 'ms') localizedAbbrev = 'en'; // Malay is not yet available
-
     if (localizedAbbrev === 'iw' || localizedAbbrev === 'ar') {
       await loadStylesOnce('https://www.gstatic.com/firebasejs/ui/4.7.1/firebase-ui-auth-rtl.css');
     } else {
       await loadStylesOnce('https://www.gstatic.com/firebasejs/ui/4.8.1/firebase-ui-auth.css');
     }
-
     await loadScriptOnce(
       `https://www.gstatic.com/firebasejs/ui/4.7.1/firebase-ui-auth__${localizedAbbrev}.js`
     );
@@ -51,15 +48,13 @@
     const uiConfig: firebaseui.auth.Config = {
       callbacks: {
         signInSuccessWithAuthResult: function (authResult) {
-          const user = authResult.user;
+          const user = authResult.user as User;
           // var credential = authResult.credential;
           const isNewUser = authResult.additionalUserInfo.isNewUser;
           // const providerId = authResult.additionalUserInfo.providerId; // password or google.com
           // var operationType = authResult.operationType; //signIn
-          updateUserData(user, isNewUser);
-          dispatch('close', {
-            text: 'auth success',
-          });
+          dispatch('updateuserdata', { user, isNewUser });
+          dispatch('close', 'auth success');
 
           // Do something with the returned AuthResult.
           // Return type determines whether we continue the redirect automatically
@@ -74,10 +69,7 @@
           // occurs. Check below for more details on this.
           return handleUIError(error);
         },
-        uiShown: function () {
-          // The widget is rendered.
-          loading = false;
-        },
+        uiShown: () => (loading = false),
       },
       credentialHelper: firebaseui.auth.CredentialHelper.NONE, // disabling for moment if it makes harder with redirect (is ok if works through popup)
       signInFlow: 'popup',
@@ -90,13 +82,10 @@
         // firebase.auth.PhoneAuthProvider.PROVIDER_ID // add Flag CSS back if using phone auth
         // firebaseui.auth.AnonymousAuthProvider.PROVIDER_ID
       ],
-      // tosUrl and privacyPolicyUrl accept either url string or a callback
-      // function.
-      tosUrl: 'https://livingdictionaries.app/terms',
-      // privacyPolicyUrl: function() {
-      //   window.location.assign("your-privacy-policy-url");
-      // }
     };
+
+    if (tosUrl) uiConfig.tosUrl = tosUrl;
+    if (privacyPolicyUrl) uiConfig.privacyPolicyUrl = privacyPolicyUrl;
 
     if (ui) {
       ui.reset();
@@ -113,18 +102,7 @@
   }
 </script>
 
-<Modal on:close>
-  <span slot="heading">{$_('header.login', { default: 'Sign In' })}</span>
-  {#if context === 'force'}
-    <h4 class="text-lg text-center">
-      {$_('header.please_create_account', {
-        default: 'Please create an account',
-      })}
-    </h4>
-  {/if}
-
-  {#if loading}
-    <div>{$_('misc.loading', { default: 'Loading' })}...</div>
-  {/if}
-  <div bind:this={container} />
-</Modal>
+{#if loading}
+  <div>Loading...</div>
+{/if}
+<div bind:this={container} />

@@ -2,7 +2,7 @@
   import DictionaryFieldEdit from './_DictionaryFieldEdit.svelte';
   import type { IDictionary } from '$lib/interfaces';
   import ResponsiveTable from '$lib/components/ui/ResponsiveTable.svelte';
-  import Collection from '$sveltefire/Collection.svelte';
+  import Collection from '$sveltefire/components/Collection.svelte';
   import { deleteField, GeoPoint, orderBy } from 'firebase/firestore';
   import { update } from '$sveltefire/firestore';
 
