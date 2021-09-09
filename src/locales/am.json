@@ -183,7 +183,8 @@
     "loading": "በመጫን ላይ",
     "edit": "አርትዕ",
     "invalid": "ዋጋ ቢስ",
-    "next": "ቀጥሎም"
+    "next": "ቀጥሎም",
+    "export": "ወደ ውጭ ይላኩ"
   },
   "settings": {
     "community_permission": "የንግግር ማህበረሰብ በዚህ ቋንቋ መስመር ላይ መሆን ያስችላቸዋል?",

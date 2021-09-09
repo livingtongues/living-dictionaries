@@ -183,7 +183,8 @@
     "loading": "Carregar",
     "edit": "Editar",
     "invalid": "Inválido",
-    "next": "A seguir"
+    "next": "A seguir",
+    "export": "Exportar"
   },
   "settings": {
     "community_permission": "A comunidade falante permite que esta língua esteja on-line?",

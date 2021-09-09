@@ -183,7 +183,8 @@
     "loading": "Memuat",
     "edit": "Menyunting",
     "invalid": "Tidak Valid",
-    "next": "Selanjutnya"
+    "next": "Selanjutnya",
+    "export": "Ekspor"
   },
   "settings": {
     "community_permission": "Apakah komunitas penutur bahasa mengijinkan bahasa ini online?",

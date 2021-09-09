@@ -183,7 +183,8 @@
     "loading": "Inafungua",
     "edit": "Hariri",
     "invalid": "Halali",
-    "next": "Ifuatayo"
+    "next": "Ifuatayo",
+    "export": "Export."
   },
   "settings": {
     "community_permission": "Je, jamii ya wazungumzaji inaruhusu lugha hii kuwekwa mtandaoni?",
