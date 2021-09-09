@@ -183,7 +183,8 @@
     "loading": "Chargement en cours",
     "edit": "Modifier",
     "invalid": "Non valide",
-    "next": "Suivant"
+    "next": "Suivant",
+    "export": "Exportation"
   },
   "settings": {
     "community_permission": "La communauté linguistique permet-elle à cette langue d'être en ligne ?",
