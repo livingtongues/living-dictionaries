@@ -4,4 +4,4 @@
 
 #### Summarize changes in this PR (for public-facing changelog)
 
-#### What routes/components should be reviewed? Please provide applicable links using the preview deployments and localhost.
+#### How can the changes be tested? Please also provide applicable links using preview deployments once they are available (will require editing this message once the preview deployment is ready).
