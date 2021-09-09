@@ -1,5 +1,5 @@
 <script lang="ts">
-  import BadgeArray from '$lib/components/editing/BadgeArray.svelte';
+  import BadgeArray from '$svelteui/data/BadgeArray.svelte';
   import { _ } from 'svelte-i18n';
   import MultiSelect from '$lib/components/ui/MultiSelect.svelte';
   import { glossingLanguages } from '$lib/mappings/glossing-languages';

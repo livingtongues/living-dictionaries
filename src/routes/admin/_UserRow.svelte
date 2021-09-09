@@ -6,7 +6,7 @@
   export let user: IUser;
   import { removeDictionaryManagePermission } from '$lib/helpers/dictionariesManaging';
   import ShowHide from '$svelteui/functions/ShowHide.svelte';
-  import BadgeArrayEmit from '$lib/components/editing/BadgeArrayEmit.svelte';
+  import BadgeArrayEmit from '$svelteui/data/BadgeArrayEmit.svelte';
 </script>
 
 <tr title={$admin > 1 && JSON.stringify(user, null, 1)}>
