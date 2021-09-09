@@ -1,6 +1,9 @@
 <script lang="ts">
-  import { browser } from '$app/env';
+  import { onDestroy, onMount, createEventDispatcher } from 'svelte';
+  import type { Unsubscriber } from 'svelte/store';
   import type { DocumentReference } from 'firebase/firestore';
+  import { docStore } from '../stores';
+
   export let path: DocumentReference<T> | string;
   export let log = false;
   export let traceId = '';
@@ -8,10 +11,6 @@
   export let startWith: T = undefined; // Why? Firestore returns null for docs that don't exist, predictible loading state.
   export let maxWait = 10000;
   export let once = false;
-
-  import { onDestroy, onMount, createEventDispatcher } from 'svelte';
-  import type { Unsubscriber } from 'svelte/store';
-  import { docStore } from './stores';
 
   const opts = {
     startWith,
@@ -32,7 +31,7 @@
 
   // Props changed
   $: {
-    if (browser) {
+    if (typeof window !== 'undefined') {
       if (unsub) {
         // Unsub and create new store
         unsub();

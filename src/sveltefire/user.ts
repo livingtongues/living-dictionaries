@@ -1,22 +1,22 @@
 import { get, writable } from 'svelte/store';
-import type { Writable, Unsubscriber } from 'svelte/store';
-import { browser } from '$app/env';
-import type { IUser } from '$lib/interfaces';
-import { setCookie } from '$lib/helpers/cookies';
+import type { Writable } from 'svelte/store';
+import type { Unsubscriber } from 'svelte/store';
 import { getAuth, onAuthStateChanged, signOut } from 'firebase/auth';
 import { doc, serverTimestamp, updateDoc } from 'firebase/firestore';
 
+import type { IGenericUser } from './interfaces';
 import { db, firebaseApp } from '.';
+import { setCookie } from './helpers/cookies';
 import { docStore } from './stores';
+import { firebaseConfig } from './config';
 
-const userKey = 'ld_firebase_user';
-let denotedVisit = false;
+const userKey = `${firebaseConfig.projectId}_firebase_user`;
 
 function createUserStore() {
-  const { subscribe, set } = writable<IUser>(null);
+  const { subscribe, set } = writable<IGenericUser>(null);
   let unsub: Unsubscriber;
 
-  if (browser) {
+  if (typeof window !== 'undefined') {
     const auth = getAuth(firebaseApp);
     let cached = null;
     cached = JSON.parse(localStorage.getItem(userKey));
@@ -26,12 +26,13 @@ function createUserStore() {
       auth,
       (u) => {
         if (u) {
-          const userStore = docStore<IUser>(`users/${u.uid}`, { log: true });
+          unsub && unsub();
+          const userStore = docStore<IGenericUser>(`users/${u.uid}`, { log: true });
           unsub = userStore.subscribe((user) => {
             if (user) {
               set(user);
               cacheUser(user);
-              !denotedVisit && denoteVisit(user);
+              denoteVisitOnce(user.uid);
             }
           });
         } else {
@@ -60,9 +61,9 @@ function createUserStore() {
 
 export const user = createUserStore();
 
-function cacheUser(user: IUser) {
+function cacheUser(user: IGenericUser) {
   localStorage.setItem(userKey, JSON.stringify(user));
-  const minimalUser: Partial<IUser> = {
+  const minimalUser: Partial<IGenericUser> = {
     displayName: user.displayName,
     email: user.email,
     photoURL: user.photoURL || null,
@@ -77,13 +78,27 @@ function removeCachedUser() {
   setCookie('user', null, { expires: yesterday });
 }
 
-async function denoteVisit(user: IUser) {
-  try {
-    // const Sentry = await import('@sentry/browser');
-    // Sentry.setUser({ email: user.email, id: user.uid, username: user.displayName || 'unknown' });
-    denotedVisit = true;
-    await updateDoc(doc(db, 'users', user.uid), { lastVisit: serverTimestamp() });
-  } catch (err) {
-    console.error(err);
-  }
-}
+const denoteVisitOnce = (() => {
+  let denoted = false;
+  return async function (uid: string) {
+    if (!denoted) {
+      denoted = true;
+      try {
+        await updateDoc(doc(db, 'users', uid), { lastVisit: serverTimestamp() });
+      } catch (err) {
+        console.error(err);
+      }
+      return true;
+    } else {
+      return true;
+    }
+  };
+})();
+
+// OLD
+// unsub = onSnapshot(doc(db, 'users', u.uid), (snapshot) => {
+//   const user = snapshot.data() as IUser;
+//   if (user) {
+//     console.log('retrieved: ', user);
+//   }
+// });

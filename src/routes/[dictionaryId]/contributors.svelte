@@ -13,7 +13,7 @@
   export let dictionaryId: string;
   import { _ } from 'svelte-i18n';
   import { isManager, isContributor, dictionary, admin } from '$lib/stores';
-  import Collection from '$sveltefire/Collection.svelte';
+  import Collection from '$sveltefire/components/Collection.svelte';
 
   function invite(role: 'manager' | 'contributor' = 'contributor') {
     const input = prompt(`${$_('contact.email', { default: 'Email' })}?`);
