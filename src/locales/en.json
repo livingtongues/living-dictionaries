@@ -183,7 +183,8 @@
     "loading": "Loading",
     "edit": "Edit",
     "invalid": "Invalid",
-    "next": "Next"
+    "next": "Next",
+    "export": "Export"
   },
   "settings": {
     "community_permission": "Does the speech community allow this language to be online?",
