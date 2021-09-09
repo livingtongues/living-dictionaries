@@ -37,7 +37,7 @@
   import EntrySemanticDomains from './_EntrySemanticDomains.svelte';
   import Image from '$lib/components/image/Image.svelte';
   import { share } from '$lib/helpers/share';
-  import BadgeArray from '$lib/components/editing/BadgeArray.svelte';
+  import BadgeArray from '$svelteui/data/BadgeArray.svelte';
 
   function printGlosses(obj) {
     Object.keys(obj).forEach((key) => !obj[key] && delete obj[key]);
