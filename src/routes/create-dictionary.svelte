@@ -360,8 +360,8 @@
 {/if}
 
 {#if modal === 'auth'}
-  {#await import('$sveltefire/FirebaseUiAuth.svelte') then { default: FirebaseUiAuth }}
-    <FirebaseUiAuth
+  {#await import('$lib/components/shell/AuthModal.svelte') then { default: AuthModal }}
+    <AuthModal
       context="force"
       on:close={() => {
         modal = null;

@@ -1,7 +1,7 @@
-import type { IUser } from '$lib/interfaces';
+import type { IUser } from '../interfaces';
 import type { User } from 'firebase/auth';
 import { serverTimestamp, setDoc } from 'firebase/firestore';
-import { docRef } from './firestore';
+import { docRef } from '../firestore';
 
 export async function updateUserData(user: User, isNewUser: boolean) {
   const data: IUser = {
@@ -28,6 +28,7 @@ export async function updateUserData(user: User, isNewUser: boolean) {
   }
 
   try {
+    await new Promise((resolve) => setTimeout(resolve, 1000)); // wait for authentication to complete for new users before trying to save to the database
     await setDoc(docRef(`users/${user.uid}`), data, { merge: true });
   } catch (err) {
     console.error(err);
