@@ -1,11 +1,15 @@
 <script lang="ts">
-  import Button from '$svelteui/ui/Button.svelte';
-  import Badge from '$svelteui/ui/Badge.svelte';
-  import DetectUrl from '$svelteui/functions/DetectUrl.svelte';
+  import Button from '../ui/Button.svelte';
+  import Badge from '../ui/Badge.svelte';
+  import DetectUrl from '../functions/DetectUrl.svelte';
 
   export let strings: string[] = [],
     canEdit = false,
     addMessage: string;
+
+  $: if (typeof strings === 'string') {
+    strings = [strings];
+  }
 
   import { createEventDispatcher } from 'svelte';
   const dispatch = createEventDispatcher<{

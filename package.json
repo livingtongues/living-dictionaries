@@ -2,7 +2,7 @@
   "name": "living-dictionaries",
   "version": "1.0.0",
   "scripts": {
-    "dev": "svelte-kit dev --host --port 3041",
+    "dev": "svelte-kit dev --host --port 3041 --open",
     "build": "svelte-kit build",
     "build:prod": "cross-env VITE_project=talking-dictionaries-alpha svelte-kit build",
     "preview": "svelte-kit preview --open --host --port 3040",
