@@ -3,7 +3,7 @@
   import Collection from '$sveltefire/components/Collection.svelte';
   import UserRow from './_UserRow.svelte';
   import Filter from './_Filter.svelte';
-  import { exportCSVFile } from '$lib/stores';
+  import { exportUsersAsCSV } from '$lib/export/csv';
   import Button from '$svelteui/ui/Button.svelte';
   import ResponsiveTable from '$lib/components/ui/ResponsiveTable.svelte';
   import SortUsers from './_SortUsers.svelte';
@@ -17,9 +17,9 @@
       <Button
         form="primary"
         color="black"
-        onclick={() => exportCSVFile(users, 'livingdictionary-users')}>
+        onclick={() => exportUsersAsCSV(filteredUsers, 'livingdictionary-users')}>
         <i class="fas fa-download mr-1" />
-        Download {users.length} Users as CSV
+        Download {filteredUsers.length} Users as CSV
       </Button>
     </div>
     <ResponsiveTable class="my-1">
