@@ -9,13 +9,25 @@
   import BadgeArrayEmit from '$svelteui/data/BadgeArrayEmit.svelte';
   import { createEventDispatcher } from 'svelte';
 
-  const dispatch =
-    createEventDispatcher<{ addalternatename: string; removealternatename: string }>();
+  const dispatch = createEventDispatcher<{
+    addalternatename: string;
+    removealternatename: string;
+    toggleprivacy: boolean;
+  }>();
 </script>
 
 <tr title={$admin > 1 && JSON.stringify(dictionary, null, 1)}>
-  <td class="italic !text-xs">
-    {dictionary.public ? 'Public' : 'Private'}
+  <td>
+    <Button
+      color={dictionary.public ? 'green' : 'orange'}
+      size="sm"
+      onclick={() => {
+        if (confirm("Flip this dictionary's visibility?")) {
+          dispatch('toggleprivacy');
+        }
+      }}>
+      {dictionary.public ? 'Public' : 'Private'}
+    </Button>
   </td>
   <td class="italic">
     <DictionaryFieldEdit field={'name'} value={dictionary.name} dictionaryId={dictionary.id} />
