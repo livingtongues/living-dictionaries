@@ -13,7 +13,7 @@
   export let dictionaryId: string;
   import { _ } from 'svelte-i18n';
   import { isManager, isContributor, dictionary, admin } from '$lib/stores';
-  import Collection from '$sveltefire/Collection.svelte';
+  import Collection from '$sveltefire/components/Collection.svelte';
 
   function invite(role: 'manager' | 'contributor' = 'contributor') {
     const input = prompt(`${$_('contact.email', { default: 'Email' })}?`);
@@ -302,7 +302,7 @@
   {$_('contributors.how_to_cite_academics', { default: 'How to Cite' })}
 </h3>
 
-<div style="direction: ltr;">
+<div class="mb-3" style="direction: ltr;">
   {new Date().getFullYear()}.
   {$dictionary.name}
   <span>{$_('misc.LD_singular', { default: 'Living Dictionary' })}.</span>

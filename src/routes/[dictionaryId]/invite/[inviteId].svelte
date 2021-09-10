@@ -50,10 +50,11 @@
   }
 
   import Button from '$svelteui/ui/Button.svelte';
-  import Doc from '$sveltefire/Doc.svelte';
+  import Doc from '$sveltefire/components/Doc.svelte';
   import { user } from '$sveltefire/user';
   import ShowHide from '$svelteui/functions/ShowHide.svelte';
   import { serverTimestamp } from 'firebase/firestore';
+  import Json from '$svelteui/data/JSON.svelte';
 </script>
 
 <div>
@@ -105,8 +106,8 @@
             </span>
           </Button>
           {#if show}
-            {#await import('$sveltefire/FirebaseUiAuth.svelte') then { default: FirebaseUiAuth }}
-              <FirebaseUiAuth on:close={toggle} />
+            {#await import('$lib/components/shell/AuthModal.svelte') then { default: AuthModal }}
+              <AuthModal on:close={toggle} />
             {/await}
           {/if}
         </ShowHide>
@@ -115,12 +116,13 @@
       <p class="font-semibold mb-2">
         {$_('invite.invitation_claimed', {
           default: 'Invitation claimed',
-        })}: {invite.createdAt.toDate().toLocaleDateString(undefined, {
-          weekday: 'long',
-          year: 'numeric',
-          month: 'long',
-          day: 'numeric',
-        })}
+        })}: {invite.updatedAt &&
+          invite.updatedAt.toDate().toLocaleDateString(undefined, {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+          })}
       </p>
 
       <Button href={`/${dictionaryId}/entries/list`}>

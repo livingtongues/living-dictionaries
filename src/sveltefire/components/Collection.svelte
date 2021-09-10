@@ -1,19 +1,17 @@
 <script lang="ts">
-  import { browser } from '$app/env';
+  import { onDestroy, onMount, createEventDispatcher } from 'svelte';
+  import type { Unsubscriber } from 'svelte/store';
   import type { CollectionReference, QueryConstraint } from 'firebase/firestore';
+  import { collectionStore } from '../stores';
+
   export let path: CollectionReference<T> | string;
-  export let queryConstraints: QueryConstraint[] = [];
-  // usage example: queryConstraints = [where('role', '==', 'contributor'), orderBy("name")];
+  export let queryConstraints: QueryConstraint[] = []; // usage example: [where('role', '==', 'contributor'), orderBy("name")];
   export let traceId = '';
   export let log = false;
   type T = $$Generic;
   export let startWith: T[] = undefined;
   export let maxWait = 10000;
   export let once = false;
-
-  import { onDestroy, onMount, createEventDispatcher } from 'svelte';
-  import type { Unsubscriber } from 'svelte/store';
-  import { collectionStore } from './stores';
 
   const opts = {
     startWith,
@@ -34,7 +32,7 @@
 
   // Props changed
   $: {
-    if (browser) {
+    if (typeof window !== 'undefined') {
       if (unsub) {
         unsub();
         store = collectionStore(path, queryConstraints, opts);
