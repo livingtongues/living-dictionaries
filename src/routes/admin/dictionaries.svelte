@@ -18,11 +18,7 @@
   move between cells.
 </div>
 
-<Collection
-  path={'dictionaries'}
-  startWith={dictionariesType}
-  let:data={dictionaries}
-  traceId={'editDictionaries'}>
+<Collection path={'dictionaries'} startWith={dictionariesType} let:data={dictionaries}>
   <Filter
     items={dictionaries}
     let:filteredItems={filteredDictionaries}
@@ -41,6 +37,18 @@
         {#each sortedDictionaries as dictionary}
           <DictionaryRow
             {dictionary}
+            on:toggleprivacy={() => {
+              try {
+                console.log({
+                  public: !dictionary.public,
+                });
+                update(`dictionaries/${dictionary.id}`, {
+                  public: !dictionary.public,
+                });
+              } catch (err) {
+                alert(err);
+              }
+            }}
             on:addalternatename={(event) => {
               try {
                 update(`dictionaries/${dictionary.id}`, {
