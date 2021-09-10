@@ -29,7 +29,7 @@
   import Collection from '$sveltefire/components/Collection.svelte';
 
   let queryConstraints = [orderBy('name'), where('public', '==', true)];
-  $: if (admin) {
+  $: if ($admin) {
     queryConstraints = [orderBy('name')];
   }
 </script>
@@ -89,7 +89,11 @@
             <a href={dictionary.url}>{dictionary.name}</a>
           </td>
           <td class="underline">
-            <a href={dictionary.url}>{dictionary.url}</a>
+            {#if dictionary.url}
+              <a href={dictionary.url} target="_blank">{dictionary.url}</a>
+            {:else}
+              <a href={`/${dictionary.id}`}>https://livingdictionaries.app/{dictionary.id}</a>
+            {/if}
           </td>
           <td>
             {dictionary.iso6393 ? dictionary.iso6393 : ''}
