@@ -8,6 +8,7 @@
   import Filter from './_Filter.svelte';
   import Button from '$svelteui/ui/Button.svelte';
   import DictionaryRow from './_DictionaryRow.svelte';
+  import SortDictionaries from './_SortDictionaries.svelte';
 
   let dictionariesType: IDictionary[] = [];
 </script>
@@ -36,64 +37,47 @@
       </Button>
     </div>
     <ResponsiveTable class="my-1">
-      <thead>
-        <th>Public</th>
-        <th>Dictionary Name</th>
-        <th>ISO 639-3</th>
-        <th>Glottocode</th>
-        <th>
-          Coordinates
-          <div class="text-xs text-gray-500">(Lat, Lng)</div>
-        </th>
-        <th>
-          Location
-          <div class="text-xs text-gray-500">plainly written</div>
-        </th>
-        <th>Entries</th>
-        <th>Gloss Languages</th>
-        <th>Alternate Names</th>
-        <th>Alternate Orthographies</th>
-        <th>Created</th>
-      </thead>
-      <!-- <SortDictionaries dictionaries={filteredDictionaries} let:sortedDictionaries> -->
-      {#each filteredDictionaries as dictionary}
-        <DictionaryRow
-          {dictionary}
-          on:addalternatename={(event) => {
-            try {
-              update(`dictionaries/${dictionary.id}`, { alternateNames: arrayUnion(event.detail) });
-            } catch (err) {
-              alert(err);
-            }
-          }}
-          on:removealternatename={(event) => {
-            try {
-              update(`dictionaries/${dictionary.id}`, {
-                alternateNames: arrayRemove(event.detail),
-              });
-            } catch (err) {
-              alert(err);
-            }
-          }}
-          on:save={(event) => {
-            try {
-              const location = new GeoPoint(event.detail.lat, event.detail.lng);
-              update(`dictionaries/${event.detail.dictionary.id}`, { coordinates: location });
-            } catch (err) {
-              alert(err);
-            }
-          }}
-          on:remove={(event) => {
-            try {
-              update(`dictionaries/${event.detail.dictionary.id}`, {
-                coordinates: deleteField(),
-              });
-            } catch (err) {
-              alert(err);
-            }
-          }} />
-      {/each}
-      <!-- </SortDictionaries> -->
+      <SortDictionaries dictionaries={filteredDictionaries} let:sortedDictionaries>
+        {#each sortedDictionaries as dictionary}
+          <DictionaryRow
+            {dictionary}
+            on:addalternatename={(event) => {
+              try {
+                update(`dictionaries/${dictionary.id}`, {
+                  alternateNames: arrayUnion(event.detail),
+                });
+              } catch (err) {
+                alert(err);
+              }
+            }}
+            on:removealternatename={(event) => {
+              try {
+                update(`dictionaries/${dictionary.id}`, {
+                  alternateNames: arrayRemove(event.detail),
+                });
+              } catch (err) {
+                alert(err);
+              }
+            }}
+            on:save={(event) => {
+              try {
+                const location = new GeoPoint(event.detail.lat, event.detail.lng);
+                update(`dictionaries/${event.detail.dictionary.id}`, { coordinates: location });
+              } catch (err) {
+                alert(err);
+              }
+            }}
+            on:remove={(event) => {
+              try {
+                update(`dictionaries/${event.detail.dictionary.id}`, {
+                  coordinates: deleteField(),
+                });
+              } catch (err) {
+                alert(err);
+              }
+            }} />
+        {/each}
+      </SortDictionaries>
     </ResponsiveTable>
   </Filter>
 </Collection>

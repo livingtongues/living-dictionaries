@@ -14,8 +14,8 @@
 </script>
 
 <tr title={$admin > 1 && JSON.stringify(dictionary, null, 1)}>
-  <td class="italic">
-    {dictionary.public ? 'Yes' : ''}
+  <td class="italic !text-xs">
+    {dictionary.public ? 'Public' : 'Private'}
   </td>
   <td class="italic">
     <DictionaryFieldEdit field={'name'} value={dictionary.name} dictionaryId={dictionary.id} />
