@@ -21,7 +21,7 @@
   export let fetchedDictionaries: IDictionary[] = [];
   import { admin } from '$lib/stores';
   import View from '$lib/components/ui/View.svelte';
-  import { exportCSVFile } from '$lib/helpers/downloadCSV';
+  import { exportDictionariesAsCSV } from '$lib/export/csv';
   import Button from '$svelteui/ui/Button.svelte';
   import ResponsiveTable from '$lib/components/ui/ResponsiveTable.svelte';
   import Header from '$lib/components/shell/Header.svelte';
@@ -52,7 +52,7 @@
       <Button
         form="primary"
         color="black"
-        onclick={() => exportCSVFile(dictionaries, 'living-dictionaries-list')}>
+        onclick={() => exportDictionariesAsCSV(dictionaries, 'living-dictionaries-list')}>
         <i class="fas fa-download mr-1" />
         {$_('misc.download', { default: 'Download' })}
         (.csv)

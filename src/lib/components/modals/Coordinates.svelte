@@ -121,7 +121,11 @@
   import { createEventDispatcher } from 'svelte';
   import Button from '$svelteui/ui/Button.svelte';
   import { loadScriptOnce, loadStylesOnce } from '$sveltefire/helpers/loader';
-  const dispatch = createEventDispatcher();
+  const dispatch = createEventDispatcher<{
+    save: { lat: number; lng: number; dictionary: Partial<IDictionary> };
+    remove: { dictionary: Partial<IDictionary> };
+    close: boolean;
+  }>();
   async function save() {
     dispatch('save', {
       lat,
