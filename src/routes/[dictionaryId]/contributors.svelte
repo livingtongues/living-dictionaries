@@ -302,7 +302,7 @@
   {$_('contributors.how_to_cite_academics', { default: 'How to Cite' })}
 </h3>
 
-<div style="direction: ltr;">
+<div class="mb-3" style="direction: ltr;">
   {new Date().getFullYear()}.
   {$dictionary.name}
   <span>{$_('misc.LD_singular', { default: 'Living Dictionary' })}.</span>
