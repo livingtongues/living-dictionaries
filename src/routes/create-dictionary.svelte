@@ -1,5 +1,5 @@
 <script lang="ts">
-  import BadgeArray from '$lib/components/editing/BadgeArray.svelte';
+  import BadgeArray from '$svelteui/data/BadgeArray.svelte';
   import { _ } from 'svelte-i18n';
   import MultiSelect from '$lib/components/ui/MultiSelect.svelte';
   import { glossingLanguages } from '$lib/mappings/glossing-languages';
@@ -360,8 +360,8 @@
 {/if}
 
 {#if modal === 'auth'}
-  {#await import('$sveltefire/FirebaseUiAuth.svelte') then { default: FirebaseUiAuth }}
-    <FirebaseUiAuth
+  {#await import('$lib/components/shell/AuthModal.svelte') then { default: AuthModal }}
+    <AuthModal
       context="force"
       on:close={() => {
         modal = null;

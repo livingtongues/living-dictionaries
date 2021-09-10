@@ -47,7 +47,7 @@
 </script>
 
 {#if $user && withinLastHour}
-  {#await import('$sveltefire/Collection.svelte') then { default: Collection }}
+  {#await import('$sveltefire/components/Collection.svelte') then { default: Collection }}
     <Collection
       path={`dictionaries/${$page.params.dictionaryId}/words`}
       queryConstraints={[

@@ -120,7 +120,7 @@
 
   import { createEventDispatcher } from 'svelte';
   import Button from '$svelteui/ui/Button.svelte';
-  import { loadScriptOnce, loadStylesOnce } from '$sveltefire/loader';
+  import { loadScriptOnce, loadStylesOnce } from '$sveltefire/helpers/loader';
   const dispatch = createEventDispatcher();
   async function save() {
     dispatch('save', {
