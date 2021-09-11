@@ -21,7 +21,7 @@
   export let fetchedDictionaries: IDictionary[] = [];
   import { admin } from '$lib/stores';
   import View from '$lib/components/ui/View.svelte';
-  import { exportCSVFile } from '$lib/helpers/downloadCSV';
+  import { exportDictionariesAsCSV } from '$lib/export/csv';
   import Button from '$svelteui/ui/Button.svelte';
   import ResponsiveTable from '$lib/components/ui/ResponsiveTable.svelte';
   import Header from '$lib/components/shell/Header.svelte';
@@ -29,7 +29,7 @@
   import Collection from '$sveltefire/components/Collection.svelte';
 
   let queryConstraints = [orderBy('name'), where('public', '==', true)];
-  $: if (admin) {
+  $: if ($admin) {
     queryConstraints = [orderBy('name')];
   }
 </script>
@@ -52,7 +52,7 @@
       <Button
         form="primary"
         color="black"
-        onclick={() => exportCSVFile(dictionaries, 'living-dictionaries-list')}>
+        onclick={() => exportDictionariesAsCSV(dictionaries, 'living-dictionaries-list')}>
         <i class="fas fa-download mr-1" />
         {$_('misc.download', { default: 'Download' })}
         (.csv)
@@ -89,7 +89,11 @@
             <a href={dictionary.url}>{dictionary.name}</a>
           </td>
           <td class="underline">
-            <a href={dictionary.url}>{dictionary.url}</a>
+            {#if dictionary.url}
+              <a href={dictionary.url} target="_blank">{dictionary.url}</a>
+            {:else}
+              <a href={`/${dictionary.id}`}>https://livingdictionaries.app/{dictionary.id}</a>
+            {/if}
           </td>
           <td>
             {dictionary.iso6393 ? dictionary.iso6393 : ''}

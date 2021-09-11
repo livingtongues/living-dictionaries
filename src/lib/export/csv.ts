@@ -1,4 +1,4 @@
-import type { IDictionary } from '$lib/interfaces';
+import type { IDictionary, IUser } from '$lib/interfaces';
 
 function convertToCSV(objArray) {
   const array = typeof objArray != 'object' ? JSON.parse(objArray) : objArray;
@@ -18,7 +18,7 @@ function convertToCSV(objArray) {
   return str;
 }
 
-export function exportCSVFile(data: IDictionary[], title) {
+export function exportDictionariesAsCSV(data: IDictionary[], title) {
   const headers = {
     name: 'Dictionary Name',
     url: 'URL',
@@ -47,6 +47,53 @@ export function exportCSVFile(data: IDictionary[], title) {
       latitude: (dictionary.coordinates && dictionary.coordinates.latitude) || '',
       longitude: (dictionary.coordinates && dictionary.coordinates.longitude) || '',
       thumbnail: dictionary.thumbnail || '',
+    });
+  });
+
+  if (headers) {
+    itemsFormatted.unshift(headers);
+  }
+
+  // Convert Object to JSON
+  const jsonObject = JSON.stringify(itemsFormatted);
+
+  const csv = convertToCSV(jsonObject);
+
+  const d = new Date();
+  const date = d.getMonth() + 1 + '_' + d.getDate() + '_' + d.getFullYear();
+  const exportedFilename = title + '_' + date + '.csv' || 'export.csv';
+
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  if (navigator.msSaveBlob) {
+    // IE 10+
+    navigator.msSaveBlob(blob, exportedFilename);
+  } else {
+    const link = document.createElement('a');
+    if (link.download !== undefined) {
+      // feature detection
+      // Browsers that support HTML5 download attribute
+      const url = URL.createObjectURL(blob);
+      link.setAttribute('href', url);
+      link.setAttribute('download', exportedFilename);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+  }
+}
+
+export function exportUsersAsCSV(data: IUser[], title) {
+  const headers = {
+    displayName: 'Name',
+    email: 'Email',
+  };
+
+  const itemsFormatted = [];
+  data.forEach((user) => {
+    itemsFormatted.push({
+      displayName: user.displayName,
+      email: user.email,
     });
   });
 
