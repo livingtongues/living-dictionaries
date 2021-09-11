@@ -1,4 +1,4 @@
-import { admin, exportCSVFile } from './admin';
+import { admin } from './admin';
 import { isManager, isContributor } from './editing';
 
 import { myDictionaries } from './dictionaries';
@@ -8,7 +8,6 @@ import { algoliaQueryParams } from './search';
 
 export {
   admin,
-  exportCSVFile,
   isManager,
   isContributor,
   myDictionaries,
