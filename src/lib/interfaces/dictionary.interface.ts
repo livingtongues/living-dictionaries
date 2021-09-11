@@ -1,3 +1,4 @@
+import type { GeoPoint } from 'firebase/firestore';
 import type { IFirestoreMetaData } from '.';
 
 export interface IDictionary extends IFirestoreMetaData {
@@ -8,9 +9,9 @@ export interface IDictionary extends IFirestoreMetaData {
   location?: string;
   iso6393?: string;
   glottocode?: string;
-  coordinates?: firebase.default.firestore.GeoPoint;
+  coordinates?: GeoPoint;
   public: boolean;
-  entryCount: any; // number | firebase.firestore.FieldValue;
+  entryCount: number; // number | firebase.firestore.FieldValue;
   copyright?: string; // Allow custom copyright in case "Copyright _______ community" isn't appropriate for dictionary (eg. Tehuelche)
   alternateOrthographies?: string[]; // Alternate Orthography titles (first item corresponds to entry.lo, then entry.lo2, entry.lo3) - used to be called Local Orthography but that is a misnomer it's turning out
 
