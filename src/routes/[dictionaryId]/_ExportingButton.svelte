@@ -1,4 +1,5 @@
 <script lang="ts">
+  import Button from '$svelteui/ui/Button.svelte';
   import { saveAs } from 'file-saver';
   import JSZip from 'jszip';
   import { _ } from 'svelte-i18n';
@@ -34,15 +35,4 @@
   }
 </script>
 
-<button on:click|preventDefault={downloadHandler}>
-  <i class="far fa-download" />
-  <span class="font-medium mx-2">
-    {$_('misc.export', { default: 'Export' })}
-  </span>
-</button>
-
-<style>
-  button {
-    @apply text-gray-600 hover:bg-gray-200 px-3 py-2 flex items-center md:rounded-lg mb-2 w-full;
-  }
-</style>
+<Button onclick={downloadHandler} form="primary">ZIP Export</Button>
