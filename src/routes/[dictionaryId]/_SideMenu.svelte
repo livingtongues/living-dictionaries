@@ -3,10 +3,6 @@
   import { _ } from 'svelte-i18n';
   import { dictionary, isManager } from '$lib/stores';
   import { page } from '$app/stores';
-  import ExportingButton from './_ExportingButton.svelte';
-
-  //Testing
-  let imgs = ['https://i.imgur.com/0LVyDUY.jpeg', 'https://i.imgur.com/4AA1jC4.jpeg'];
 </script>
 
 <div class="md:hidden">
@@ -74,8 +70,17 @@
         {$_('misc.settings', { default: 'Settings' })}
       </span>
     </a>
-    <ExportingButton images={imgs} />
   {/if}
+  <!--TESTING This should be an admin feature -->
+  <a
+    sveltekit:prefetch
+    href={'/' + $dictionary.id + '/export'}
+    class:active={$page.path.includes('export')}>
+    <i class="far fa-download" />
+    <span class="font-medium mx-2">
+      {$_('misc.export', { default: 'export' })}
+    </span>
+  </a>
 </div>
 
 <div class="mt-auto" />
