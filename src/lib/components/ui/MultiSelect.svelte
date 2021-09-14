@@ -244,7 +244,7 @@
     list-style: none;
     margin-block-end: 0;
     margin-block-start: 0;
-    max-height: 70vh;
+    max-height: 53vh;
     overflow: auto;
     padding-inline-start: 0;
     position: absolute;
