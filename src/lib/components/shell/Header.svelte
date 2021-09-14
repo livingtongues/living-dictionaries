@@ -4,7 +4,11 @@
   import ShowHide from '$svelteui/functions/ShowHide.svelte';
   import Button from '$svelteui/ui/Button.svelte';
   import { firebaseConfig } from '$sveltefire/config';
+  let screenWidth: number;
+  const mobileView = 639;
 </script>
+
+<svelte:window bind:innerWidth={screenWidth} />
 
 <header>
   {#if $$slots.default}
@@ -60,7 +64,11 @@
 
   <ShowHide let:show let:toggle>
     <Button form="text" class="print:hidden" onclick={toggle}>
-      <i class="far fa-comment" />
+      {#if screenWidth > mobileView}
+        <i class="far fa-comment" />
+      {:else}
+        <i class="far fa-question-circle" />
+      {/if}
       <span class="ml-1 hidden sm:inline">
         {$_('header.contact_us', { default: 'Contact Us' })}
       </span>
