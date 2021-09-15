@@ -1,7 +1,8 @@
 <script lang="ts">
   export let menuOpen: boolean;
   import { _ } from 'svelte-i18n';
-  import { dictionary, isManager, admin } from '$lib/stores';
+  import { dictionary, admin } from '$lib/stores';
+  import { isManager } from '$lib/stores/editing';
   import { page } from '$app/stores';
 </script>
 
