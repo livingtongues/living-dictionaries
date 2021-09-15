@@ -78,21 +78,12 @@
       class:active={$page.path.includes('export')}>
       <i class="far fa-download" />
       <span class="font-medium mx-2">
-        {$_('misc.export', { default: 'export' })}
+        {$_('misc.export', { default: 'Export' })}
       </span>
     </a>
   {/if}
-  <!--TESTING This should be an admin feature -->
-  <a
-    sveltekit:prefetch
-    href={'/' + $dictionary.id + '/export'}
-    class:active={$page.path.includes('export')}>
-    <i class="far fa-download" />
-    <span class="font-medium mx-2">
-      {$_('misc.export', { default: 'export' })}
-    </span>
-  </a>
 </div>
+
 <div class="mt-auto" />
 
 <a href="/terms" target="_blank" class="link">
