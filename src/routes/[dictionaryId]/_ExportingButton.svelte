@@ -1,12 +1,11 @@
 <script lang="ts">
   import Button from '$svelteui/ui/Button.svelte';
-  import { saveAs } from 'file-saver';
   import JSZip from 'jszip';
   import { _ } from 'svelte-i18n';
 
   export let images: string[];
 
-  async function downloadHandler() {
+  async function download() {
     let blobImgs = [];
     await Promise.all(
       images.map(async (url) => {
@@ -28,6 +27,7 @@
         photos.file(`image${i}.jpeg`, bi, { binary: true });
         i++;
       });
+      const { saveAs } = await import('file-saver');
       zip.generateAsync({ type: 'blob' }).then((blob) => {
         saveAs(blob, 'myImage.zip');
       });
@@ -35,4 +35,4 @@
   }
 </script>
 
-<Button onclick={downloadHandler} form="primary">ZIP Export</Button>
+<Button onclick={download} form="primary">ZIP Export</Button>
