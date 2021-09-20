@@ -43,8 +43,8 @@
     {#each entries as entry (entry.id)}
       <tr class="row-hover">
         {#each $columns as column, i}
+          <!-- TODO: retore class:bg-green-100={entry.updatedAt < 2Minutes} -->
           <td
-            class:bg-green-100={entry.updatedRecently}
             class="{column.sticky ? 'sticky bg-white' : ''} h-0"
             style="{column.sticky
               ? 'left:' + getLeftValue(i) + 'px; --border-right-width: 3px;'

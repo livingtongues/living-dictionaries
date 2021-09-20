@@ -25,7 +25,8 @@
 </script>
 
 <script lang="ts">
-  import { deleteDocument } from '$sveltefire/firestore';
+  import { update } from '$sveltefire/firestore';
+  import { serverTimestamp } from 'firebase/firestore';
   import { _ } from 'svelte-i18n';
   export let entry: IEntry, dictionaryId: string;
 
@@ -73,14 +74,16 @@
     ) {
       try {
         goto(`/${$dictionary.id}/entries/list${$algoliaQueryParams}`);
-        await deleteDocument(`dictionaries/${$dictionary.id}/words/${entry.id}`);
+        await update<IEntry>(`dictionaries/${$dictionary.id}/words/${entry.id}`, {
+          // @ts-ignore
+          deletedAt: serverTimestamp(),
+        });
       } catch (err) {
         alert(`${$_('misc.error', { default: 'Error' })}: ${err}`);
       }
     }
   }
 
-  import { update } from '$sveltefire/firestore';
   import Doc from '$sveltefire/components/Doc.svelte';
   import Button from '$svelteui/ui/Button.svelte';
   import { user } from '$sveltefire/user';
