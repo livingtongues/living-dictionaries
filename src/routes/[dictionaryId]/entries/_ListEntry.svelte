@@ -23,10 +23,10 @@
   }
 </script>
 
+<!-- TODO: class:border-b-2={entry.ua} -->
 <div
   dir="ltr"
   class="flex rounded shadow my-1 overflow-hidden items-stretch border-green-300"
-  class:border-b-2={entry.updatedRecently}
   style="margin-right: 2px;">
   {#if entry.sf || canEdit}
     <Audio class="bg-gray-100" {entry} minimal={true} />
@@ -37,8 +37,8 @@
     href={'/' + $page.params.dictionaryId + '/entry/' + entry.id}
     class="p-2 flex-grow flex flex-col justify-between hover:bg-gray-200 ">
     <div>
-      <span class="font-semibold text-gray-900 mr-1" class:text-green-800={entry.updatedRecently}
-        >{entry.lx}</span>
+      <!-- TODO: class:text-green-800={entry.ua} -->
+      <span class="font-semibold text-gray-900 mr-1">{entry.lx}</span>
       {#if entry.ph}
         <span class="mr-1 hidden sm:inline">[{entry.ph}]</span>
       {/if}
