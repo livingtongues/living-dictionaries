@@ -102,15 +102,15 @@
     "contributors": "Collaborateurs",
     "grammar": "Grammaire",
     "entries": "Entrées",
-    "youtube_terms": "Termes YouTube",
-    "google_terms": "Termis Google"
+    "youtube_terms": "Termes de YouTube",
+    "google_terms": "Termes de Google"
   },
   "entry": {
     "view_entries": "Voir les données",
     "audio": "Audio",
     "speaker": "Locuteur",
     "image": "Image",
-    "lx": "Lexème / mot",
+    "lx": "Lexème / mot / phrase",
     "ei": "ID",
     "mr": "Morphologie",
     "gloss": "Glose",
@@ -183,7 +183,8 @@
     "loading": "Chargement en cours",
     "edit": "Modifier",
     "invalid": "Non valide",
-    "next": "Suivant"
+    "next": "Suivant",
+    "export": "Exporter"
   },
   "settings": {
     "community_permission": "La communauté linguistique permet-elle à cette langue d'être en ligne ?",
