@@ -101,7 +101,9 @@
     "terms_of_use": "Syarat Penggunaan",
     "contributors": "Penyumbang",
     "grammar": "Tatabahasa",
-    "entries": "Entri"
+    "entries": "Entri",
+    "youtube_terms": "Terma YouTube",
+    "google_terms": "Terma Google"
   },
   "entry": {
     "view_entries": "Lihat Entri",
@@ -181,7 +183,8 @@
     "loading": "Memuat",
     "edit": "Edit",
     "invalid": "Tidak sah",
-    "next": "Berikut"
+    "next": "Berikut",
+    "export": "Eksport"
   },
   "settings": {
     "community_permission": "Adakah masyarakat penutur membenarkan bahasa ini berada dalam talian?",

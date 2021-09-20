@@ -183,7 +183,8 @@
     "loading": "载入中",
     "edit": "编辑",
     "invalid": "无效的",
-    "next": "下一个"
+    "next": "下一个",
+    "export": "出口"
   },
   "settings": {
     "community_permission": "此语言的语言社区允许这种语言通过网络传播吗？",

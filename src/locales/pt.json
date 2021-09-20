@@ -139,7 +139,7 @@
     "link_copied": "Link copiado",
     "copy_and_share": "Copiar e partilhar",
     "sr": "Fonte",
-    "example_sentence": "exemplo frase"
+    "example_sentence": "Exemplo frase"
   },
   "error": {
     "run_into_error": "Lamentamos, tivemos um erro.",
@@ -183,7 +183,8 @@
     "loading": "Carregar",
     "edit": "Editar",
     "invalid": "Inválido",
-    "next": "A seguir"
+    "next": "A seguir",
+    "export": "Exportar"
   },
   "settings": {
     "community_permission": "A comunidade falante permite que esta língua esteja on-line?",
