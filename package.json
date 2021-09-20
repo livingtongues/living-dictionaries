@@ -21,6 +21,7 @@
     "@testing-library/jest-dom": "^5.14.1",
     "@testing-library/svelte": "^3.0.3",
     "@types/d3-dsv": "^2.0.1",
+    "@types/file-saver": "^2.0.3",
     "@types/jest": "^26.0.24",
     "@types/mapbox-gl": "^2.3.0",
     "@types/recordrtc": "^5.6.6",
