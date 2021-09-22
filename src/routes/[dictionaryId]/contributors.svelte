@@ -288,6 +288,13 @@
       })}
     </span>
     <br />
+    Diego Córdova Nieto -
+    <span class="text-sm">
+      {$_('contributors.developer_designer', {
+        default: 'Web Developer and Interface Designer',
+      })}
+    </span>
+    <br />
   </div>
 {/if}
 
