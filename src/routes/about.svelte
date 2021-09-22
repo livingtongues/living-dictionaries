@@ -198,16 +198,16 @@
     <li>{$_('gl.ms', { default: 'Malay' })}: Nur Hidayah Binte Sunaryo</li>
     <li>{$_('gl.zu', { default: 'Zulu' })}: Mthulisi Ncube</li>
     <li>{$_('gl.it', { default: 'Italian' })}: Iara Mantenuto</li>
-    <li>{$_('gl.zh', { default: 'Mandarin' })}: Peng Dong</li>
-    <li>{$_('gl.', { default: 'Tamazight' })}: Radia Sami</li>
+    <li>{$_('gl.cmn', { default: 'Mandarin' })}: Peng Dong</li>
+    <li>{$_('gl.tzm', { default: 'Tamazight' })}: Radia Sami</li>
   </ul>
 
   <h3
     class="mb-3 text-2xl leading-8 font-bold text-gray-900 tracking-tight
     sm:text-3xl sm:leading-9">
     {$_('about.interns', {
-      default: 'Interns (Living Tongues Institute)',
-    })}
+      default: 'Interns',
+    })} (Living Tongues Institute)
   </h3>
   <p class="mb-3">
     Ashlie Devenney, Thorin Engeseth, Ariel Rabkin-Meyer, Ella Hannon, Cassie Gritton, Peyton A.
