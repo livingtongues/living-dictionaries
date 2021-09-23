@@ -10,11 +10,14 @@
     'https://i.imgur.com/4AA1jC4.jpeg',
     'https://firebasestorage.googleapis.com/v0/b/talking-dictionaries-alpha.appspot.com/o/images%2Fmandarin-practice%2FmogAtD3lTCtkuwj7tLDD_1630105898118.jpg?alt=media',
   ];
-  let Data = false;
-  let CSV = true;
-  let xlsx = false;
+  let data = false;
+  let dataType = '';
   let images = false;
   let audio = false;
+
+  $: if (!data) {
+    dataType = '';
+  }
 </script>
 
 <svelte:head>
@@ -31,19 +34,31 @@
   Options
 </h3>
 
-<div class="items-center mt-2 mb-6">
-  <input id="public" type="checkbox" bind:checked={Data} />
+<div class="items-center mt-2 mb-6 ml-3">
+  <input id="public" type="checkbox" bind:checked={data} />
   <label for="public" class="mx-2 block leading-5 text-gray-900">
     <!-- {$_('create.visible_to_public', { default: 'Visible to Public' })} -->
     Data
   </label>
-  <div class="ml-6 mt-2">
+  <div class={`ml-8 mt-2 py-2 px-4 ${data ? '' : 'opacity-50 cursor-not-allowed'}`}>
     <label class="inline-flex items-center">
-      <input type="radio" class="form-radio" name="accountType" />
+      <input
+        disabled={!data}
+        type="radio"
+        class="form-radio"
+        name="accountType"
+        bind:group={dataType}
+        value={'CSV'} />
       <span class="ml-2">CSV</span>
     </label>
     <label class="inline-flex items-center ml-6">
-      <input type="radio" class="form-radio" name="accountType" />
+      <input
+        disabled={!data}
+        type="radio"
+        class="form-radio"
+        name="accountType"
+        bind:group={dataType}
+        value={'xlxs'} />
       <span class="ml-2">xlsx</span>
     </label>
   </div>
