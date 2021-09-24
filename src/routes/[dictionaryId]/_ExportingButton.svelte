@@ -1,12 +1,20 @@
 <script lang="ts">
+  import { dictionary } from '$lib/stores';
+  import type { IDictionary } from '$lib/interfaces';
+  import { orderBy } from '@firebase/firestore';
+  import { where } from 'firebase/firestore';
   import Button from '$svelteui/ui/Button.svelte';
   import JSZip from 'jszip';
-  import { _ } from 'svelte-i18n';
+  import { getDocument } from '$sveltefire/firestore';
 
   export let images: string[];
+  let dataDictionary: IDictionary;
 
   async function download() {
-    let blobImgs = [];
+    dataDictionary = await getDocument<IDictionary>(`dictionaries/${$dictionary.id}`);
+    console.log(dataDictionary);
+    //Zip and downloading images
+    /* let blobImgs = [];
     await Promise.all(
       images.map(async (url) => {
         try {
@@ -31,7 +39,7 @@
       zip.generateAsync({ type: 'blob' }).then((blob) => {
         saveAs(blob, 'myImage.zip');
       });
-    }
+    } */
   }
 </script>
 
