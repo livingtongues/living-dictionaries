@@ -180,23 +180,44 @@
     <li>
       {$_('gl.as', { default: 'Assamese' })}: Palash Nath, Luke Horo
     </li>
-    <li>{$_('gl.bn', { default: 'Bangla' })}: Sumedha Sengupta</li>
+    <li>{$_('gl.bn', { default: 'Bangla' })}: Sumedha Sengupta, Prof. Arun Ghosh</li>
     <li>{$_('gl.fr', { default: 'French' })}: Anna Luisa Daigneault</li>
     <li>
       {$_('gl.he', { default: 'Hebrew' })}: Dana Melaver, Daniel Bögre Udell
     </li>
     <li>{$_('gl.sw', { default: 'KiSwahili' })}: Michael Karani</li>
-    <li>{$_('gl.hi', { default: 'Hindi' })}: Luke Horo, Bikram Jora</li>
-    <li>{$_('gl.or', { default: 'Oriya' })}: Anup Kumar Kujur</li>
+    <li>{$_('gl.hi', { default: 'Hindi' })}: Luke Horo, Bikram Jora, Prof. K.V. Subbarao</li>
+    <li>{$_('gl.or', { default: 'Oriya' })}: Anup Kumar Kujur, Panchanan Mohanty</li>
     <li>{$_('gl.pt', { default: 'Portuguese' })}: Crisofia Langa da Camara</li>
-    <li>{$_('gl.or', { default: 'Oriya' })}: Anup Kumar Kujur</li>
     <li>{$_('gl.ru', { default: 'Russian' })}: Denis Tokmashev</li>
     <li>{$_('gl.sn', { default: 'Shona' })}: Reggemore Marongedze</li>
     <li>
       {$_('gl.es', { default: 'Spanish' })}: Anna Luisa Daigneault, Amanda Chao Benbassat, Mónica
       Bonilla Parra
     </li>
+    <li>{$_('gl.ms', { default: 'Malay' })}: Nur Hidayah Binte Sunaryo</li>
+    <li>{$_('gl.zu', { default: 'Zulu' })}: Mthulisi Ncube</li>
+    <li>{$_('gl.it', { default: 'Italian' })}: Iara Mantenuto</li>
+    <li>{$_('gl.cmn', { default: 'Mandarin' })}: Peng Dong</li>
+    <li>{$_('gl.tzm', { default: 'Tamazight' })}: Radia Sami</li>
   </ul>
+
+  <h3
+    class="mb-3 text-2xl leading-8 font-bold text-gray-900 tracking-tight
+    sm:text-3xl sm:leading-9">
+    {$_('about.interns', {
+      default: 'Interns',
+    })} (Living Tongues Institute)
+  </h3>
+  <p class="mb-3">
+    Ashlie Devenney, Thorin Engeseth, Ariel Rabkin-Meyer, Ella Hannon, Cassie Gritton, Peyton A.
+    Nesler, Emilie Erbland, Kyra O’Connell, Louis Fillman, Liam Marshall-Butler, Shuangqi (Joy) Wu,
+    Catherine Huang, Molly Cutler, Luke Strom, Sydney Louchard, Alexis O'Connor, Cassidy Parong,
+    Chloe Bourdon, Sichen (Larry) Lyu, Tali Tukachinsky, Valeria Macias, Evelyn Ho, Barbara Lourenco
+    Oliveira Moreira, Adviye Pelin Teberoğlu, Sophie Shields, Anthony James Brandy, Rammi Quah,
+    Alexandra Winslade, Gabriela Collaço Horton, Vikram Nagapudi, Sasha Viola Fennimore, Polly
+    Vishner, Loren Schneider.
+  </p>
 
   <h3
     class="mb-3 text-2xl leading-8 font-bold text-gray-900 tracking-tight
