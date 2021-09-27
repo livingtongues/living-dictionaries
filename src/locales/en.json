@@ -25,7 +25,8 @@
     "two_decades_experience": "With nearly two decades of fieldwork experience, researchers at Living Tongues Institute for Endangered Languages have the skills and methods in place to help communities document, protect, and promote their languages.",
     "help_us_launch_more": "Help Us Launch More Living Dictionaries",
     "with_your_help": "With your help, we can continue to improve our software and make it available for any community that wishes to create their own Living Dictionary. Donate today and make an impact!",
-    "translators": "Translators"
+    "translators": "Translators",
+    "interns": "Interns"
   },
   "contributors": {
     "invite_contributors": "Invite Contributors",
@@ -183,7 +184,8 @@
     "loading": "Loading",
     "edit": "Edit",
     "invalid": "Invalid",
-    "next": "Next"
+    "next": "Next",
+    "export": "Export"
   },
   "settings": {
     "community_permission": "Does the speech community allow this language to be online?",

@@ -60,7 +60,12 @@
 
   <ShowHide let:show let:toggle>
     <Button form="text" class="print:hidden" onclick={toggle}>
-      <i class="far fa-question-circle" />
+      <span class="hidden lg:inline">
+        <i class="far fa-comment" />
+      </span>
+      <span class="lg:hidden">
+        <i class="far fa-question-circle" />
+      </span>
       <span class="ml-1 hidden sm:inline">
         {$_('header.contact_us', { default: 'Contact Us' })}
       </span>
