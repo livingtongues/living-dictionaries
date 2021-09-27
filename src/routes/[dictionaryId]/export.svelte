@@ -1,7 +1,10 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
   import { dictionary } from '$lib/stores';
-  import ExportingButton from './_ExportingButton.svelte';
+  import Button from '$svelteui/ui/Button.svelte';
+  import type { IEntry } from '$lib/interfaces';
+  import { getCollection } from '$sveltefire/firestore';
+  import { exportEntriesAsCSV } from '$lib/export/csv';
 
   //Testing
   let imgs = [
@@ -16,6 +19,11 @@
 
   $: if (!data) {
     dataType = '';
+  }
+
+  async function downloadEntries() {
+    const dataEntries = await getCollection<IEntry>(`dictionaries/${$dictionary.id}/words`);
+    exportEntriesAsCSV(dataEntries, $dictionary.name);
   }
 </script>
 
@@ -73,4 +81,4 @@
   </label>
 </div>
 
-<ExportingButton images={imgs} />
+<Button onclick={downloadEntries} form="primary">ZIP Export</Button>
