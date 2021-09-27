@@ -28,12 +28,18 @@
   {#if !isFirstPage}
     <button
       type="button"
-      on:click={() => refine(0)}
+      on:click={() => {
+        refine(0);
+        window.scrollTo({ top: 0 });
+      }}
       class="hidden sm:block rounded py-2 px-3 mr-1 text-sm leading-5 font-medium text-gray-500 hover:text-gray-700 hover:bg-gray-100 focus:text-gray-800 focus:outline-none transition ease-in-out duration-150">
       <i class="far fa-angle-double-left rtl-x-flip" /></button>
     <button
       type="button"
-      on:click={() => refine(currentRefinement - 1)}
+      on:click={() => {
+        refine(currentRefinement - 1);
+        window.scrollTo({ top: 0 });
+      }}
       class="rounded py-2 px-3 mr-1 sm:text-sm leading-5 font-medium text-gray-500 hover:text-gray-700 hover:bg-gray-100 focus:text-gray-800 focus:outline-none transition ease-in-out duration-150">
       <i class="far fa-angle-left rtl-x-flip">
         <!-- <span class="sm:hidden ml-1">Previous</span> -->
@@ -44,7 +50,10 @@
     {#each pages as page}
       <button
         type="button"
-        on:click={() => refine(page)}
+        on:click={() => {
+          refine(page);
+          window.scrollTo({ top: 0 });
+        }}
         class="{currentRefinement === page
           ? 'bg-blue-100 text-blue-700 focus:bg-blue-200 focus:text-blue-800'
           : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100 focus:text-gray-800'} rounded py-2 px-3 mr-1 inline-flex items-center text-sm leading-5 font-medium focus:outline-none  transition ease-in-out duration-150">
@@ -56,13 +65,19 @@
   {#if !isLastPage}
     <button
       type="button"
-      on:click={() => refine(currentRefinement + 1)}
+      on:click={() => {
+        refine(currentRefinement + 1);
+        window.scrollTo({ top: 0 });
+      }}
       class="rounded py-2 px-3 mr-1 sm:text-sm leading-5 font-medium text-gray-500 hover:text-gray-700 hover:bg-gray-100 focus:text-gray-800 focus:outline-none transition ease-in-out duration-150">
       <!-- <span class="sm:hidden mr-1">Next</span> -->
       <i class="far fa-angle-right rtl-x-flip" /></button>
     <button
       type="button"
-      on:click={() => refine(nbPages - 1)}
+      on:click={() => {
+        refine(nbPages - 1);
+        window.scrollTo({ top: 0 });
+      }}
       class="hidden sm:block rounded py-2 px-3 mr-1 text-sm leading-5 font-medium text-gray-500 hover:text-gray-700 hover:bg-gray-100 focus:text-gray-800 focus:outline-none transition ease-in-out duration-150">
       <i class="far fa-angle-double-right rtl-x-flip" /></button>
   {/if}
