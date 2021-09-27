@@ -45,6 +45,8 @@ export const semanticDomains: ISemanticDomain[] = [
   { key: '5.13', name: 'Construction' },
   { key: '5.14', name: 'Sports and games' },
   { key: '5.15', name: 'Transportation' },
+  { key: '5.16', name: 'Spirituality and Religion' },
+  { key: '5.17', name: 'Music and Entertainment' },
   { key: '6', name: 'Physical Actions and States' },
   { key: '6.1', name: 'Posture' },
   { key: '6.2', name: 'Motion' },
