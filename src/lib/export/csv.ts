@@ -1,6 +1,6 @@
-import type { IDictionary, IUser } from '$lib/interfaces';
+import type { IDictionary, IEntry, IUser } from '$lib/interfaces';
 
-function convertToCSV(objArray) {
+export function convertToCSV(objArray) {
   const array = typeof objArray != 'object' ? JSON.parse(objArray) : objArray;
   let str = '';
 
@@ -18,7 +18,31 @@ function convertToCSV(objArray) {
   return str;
 }
 
-export function exportDictionariesAsCSV(data: IDictionary[], title) {
+export function downloadObjectAsCSV(itemsFormatted: Record<string, unknown>[], title: string) {
+  const jsonObject = JSON.stringify(itemsFormatted);
+
+  const csv = convertToCSV(jsonObject);
+
+  const d = new Date();
+  const date = d.getMonth() + 1 + '_' + d.getDate() + '_' + d.getFullYear();
+  const exportedFilename = title + '_' + date + '.csv' || 'export.csv';
+
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const link = document.createElement('a');
+  if (link.download !== undefined) {
+    // feature detection
+    // Browsers that support HTML5 download attribute
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', exportedFilename);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
+}
+
+export function exportDictionariesAsCSV(data: IDictionary[], title: string) {
   const headers = {
     name: 'Dictionary Name',
     url: 'URL',
@@ -50,40 +74,11 @@ export function exportDictionariesAsCSV(data: IDictionary[], title) {
     });
   });
 
-  if (headers) {
-    itemsFormatted.unshift(headers);
-  }
-
-  // Convert Object to JSON
-  const jsonObject = JSON.stringify(itemsFormatted);
-
-  const csv = convertToCSV(jsonObject);
-
-  const d = new Date();
-  const date = d.getMonth() + 1 + '_' + d.getDate() + '_' + d.getFullYear();
-  const exportedFilename = title + '_' + date + '.csv' || 'export.csv';
-
-  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-  if (navigator.msSaveBlob) {
-    // IE 10+
-    navigator.msSaveBlob(blob, exportedFilename);
-  } else {
-    const link = document.createElement('a');
-    if (link.download !== undefined) {
-      // feature detection
-      // Browsers that support HTML5 download attribute
-      const url = URL.createObjectURL(blob);
-      link.setAttribute('href', url);
-      link.setAttribute('download', exportedFilename);
-      link.style.visibility = 'hidden';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    }
-  }
+  itemsFormatted.unshift(headers);
+  downloadObjectAsCSV(itemsFormatted, title);
 }
 
-export function exportUsersAsCSV(data: IUser[], title) {
+export function exportUsersAsCSV(data: IUser[], title: string) {
   const headers = {
     displayName: 'Name',
     email: 'Email',
@@ -97,35 +92,24 @@ export function exportUsersAsCSV(data: IUser[], title) {
     });
   });
 
-  if (headers) {
-    itemsFormatted.unshift(headers);
-  }
+  itemsFormatted.unshift(headers);
+  downloadObjectAsCSV(itemsFormatted, title);
+}
 
-  // Convert Object to JSON
-  const jsonObject = JSON.stringify(itemsFormatted);
+export function exportEntriesAsCSV(data: IEntry[], title: string) {
+  const headers = {
+    lx: 'Lexeme/Word/Phrase',
+    ph: 'Phonetic (IPA)',
+  };
 
-  const csv = convertToCSV(jsonObject);
+  const itemsFormatted = [];
+  data.forEach((entry) => {
+    itemsFormatted.push({
+      lx: entry.lx,
+      ph: entry.ph,
+    });
+  });
 
-  const d = new Date();
-  const date = d.getMonth() + 1 + '_' + d.getDate() + '_' + d.getFullYear();
-  const exportedFilename = title + '_' + date + '.csv' || 'export.csv';
-
-  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-  if (navigator.msSaveBlob) {
-    // IE 10+
-    navigator.msSaveBlob(blob, exportedFilename);
-  } else {
-    const link = document.createElement('a');
-    if (link.download !== undefined) {
-      // feature detection
-      // Browsers that support HTML5 download attribute
-      const url = URL.createObjectURL(blob);
-      link.setAttribute('href', url);
-      link.setAttribute('download', exportedFilename);
-      link.style.visibility = 'hidden';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    }
-  }
+  itemsFormatted.unshift(headers);
+  downloadObjectAsCSV(itemsFormatted, title);
 }
