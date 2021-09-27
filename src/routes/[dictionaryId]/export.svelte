@@ -1,7 +1,6 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
   import { dictionary } from '$lib/stores';
-  import ShowHide from '$svelteui/functions/ShowHide.svelte';
   import ExportingButton from './_ExportingButton.svelte';
 
   //Testing
@@ -74,6 +73,4 @@
   </label>
 </div>
 
-<ShowHide let:show let:toggle>
-  <ExportingButton images={imgs} />
-</ShowHide>
+<ExportingButton images={imgs} />
