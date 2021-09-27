@@ -25,7 +25,8 @@
     "two_decades_experience": "Tare da kusan biyu shekarun da suka gabata na fieldwork kwarewa, masu bincike, a Living Harsuna Institute for miyagun Harsuna suna da basira da kuma hanyoyin da wuri don taimakon al'umma daftarin aiki, kare, da kuma gabatar da su harsuna.",
     "help_us_launch_more": "Taimako Mu Launch More Rayuwa Dictionaries",
     "with_your_help": "Tare da taimakon ku, za mu iya ci gaba da inganta mu software da kuma yin shi samuwa ga wani al'umma cewa yanã son ya haifar da nasu Living Dictionary. Ba da kyauta yau kuma yi tasiri!",
-    "translators": "Maimaitawa"
+    "translators": "Maimaitawa",
+    "interns": "Kulawa"
   },
   "contributors": {
     "invite_contributors": "Gayyato da gudummuwa",
@@ -183,7 +184,8 @@
     "loading": "loading",
     "edit": "Shirya",
     "invalid": "mara inganci",
-    "next": "Daga nan"
+    "next": "Daga nan",
+    "export": "Fitad da kaya"
   },
   "settings": {
     "community_permission": "Shin magana al'umma damar wannan harshe ya zama online?",
