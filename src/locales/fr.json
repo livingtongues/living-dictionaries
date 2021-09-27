@@ -25,7 +25,8 @@
     "two_decades_experience": "Avec près de deux décennies d'expérience sur le terrain, les chercheurs l'Institut Living Tongues ont les compétences et les méthodes en place pour aider les communautés à documenter, protéger et promouvoir leurs langues.",
     "help_us_launch_more": "Aidez-nous à lancer plus de dictionnaires vivants",
     "with_your_help": "Avec votre aide, nous pouvons continuer à améliorer notre logiciel et le rendre disponible pour toute communauté qui souhaite créer son propre dictionnaire vivant. Faites un don aujourd'hui.",
-    "translators": "Traducteurs"
+    "translators": "Traducteurs",
+    "interns": "Stagiaires"
   },
   "contributors": {
     "invite_contributors": "Inviter des contributeurs",
@@ -102,15 +103,15 @@
     "contributors": "Collaborateurs",
     "grammar": "Grammaire",
     "entries": "Entrées",
-    "youtube_terms": "Termes YouTube",
-    "google_terms": "Termis Google"
+    "youtube_terms": "Termes de YouTube",
+    "google_terms": "Termes de Google"
   },
   "entry": {
     "view_entries": "Voir les données",
     "audio": "Audio",
     "speaker": "Locuteur",
     "image": "Image",
-    "lx": "Lexème / mot",
+    "lx": "Lexème / mot / phrase",
     "ei": "ID",
     "mr": "Morphologie",
     "gloss": "Glose",
@@ -183,7 +184,8 @@
     "loading": "Chargement en cours",
     "edit": "Modifier",
     "invalid": "Non valide",
-    "next": "Suivant"
+    "next": "Suivant",
+    "export": "Exporter"
   },
   "settings": {
     "community_permission": "La communauté linguistique permet-elle à cette langue d'être en ligne ?",
