@@ -31,8 +31,8 @@
 {/if}
 
 {#if edit}
-  {#await import('$lib/components/modals/EditFieldModal.svelte') then EditFieldModal}
-    <EditFieldModal.default
+  {#await import('$lib/components/modals/EditFieldModal.svelte') then { default: EditFieldModal }}
+    <EditFieldModal
       on:valueupdate
       {value}
       {field}
