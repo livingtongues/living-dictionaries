@@ -23,6 +23,10 @@
     });
     close();
   }
+
+  function autofocus(node: HTMLInputElement) {
+    setTimeout(() => node.focus(), 5);
+  }
 </script>
 
 <Modal on:close>
@@ -31,12 +35,11 @@
     <div>
       <!-- <label for="email" class="block text-sm font-medium leading-5 text-gray-700">Email</label> -->
       <div class="rounded-md shadow-sm">
-        <!-- svelte-ignore a11y-autofocus -->
         <input
           dir="ltr"
           type="text"
           required={field === 'lx'}
-          autofocus
+          use:autofocus
           bind:value
           class:sompeng={display === 'Sompeng-Mardir'}
           class="form-input block w-full" />
