@@ -66,12 +66,12 @@
     ) {
       try {
         goto(`/${$dictionary.id}/entries/list${$algoliaQueryParams}`);
-        await deleteDocument(`dictionaries/${$dictionary.id}/words/${entry.id}`);
         await set<IEntry>(`dictionaries/${$dictionary.id}/deletedEntries/${entry.id}`, {
           ...entry,
           // @ts-ignore
           deletedAt: serverTimestamp(),
         });
+        await deleteDocument(`dictionaries/${$dictionary.id}/words/${entry.id}`);
       } catch (err) {
         alert(`${$_('misc.error', { default: 'Error' })}: ${err}`);
       }
