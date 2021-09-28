@@ -19,6 +19,7 @@
 
   import { dictionary, canEdit } from '$lib/stores';
   import ListEntry from './_ListEntry.svelte';
+  import Doc from '$sveltefire/components/Doc.svelte';
 </script>
 
 <svelte:head>
@@ -27,17 +28,15 @@
 
 <Hits {search} let:entries>
   {#if $canEdit}
-    {#await import('$sveltefire/components/Doc.svelte') then { default: Doc }}
-      {#each entries as algoliaEntry (algoliaEntry.id)}
-        <Doc
-          path="dictionaries/{$dictionary.id}/words/{algoliaEntry.id}"
-          startWith={algoliaEntry}
-          let:data={entry}
-          log>
-          <ListEntry {entry} canEdit={$canEdit} />
-        </Doc>
-      {/each}
-    {/await}
+    {#each entries as algoliaEntry (algoliaEntry.id)}
+      <Doc
+        path="dictionaries/{$dictionary.id}/words/{algoliaEntry.id}"
+        startWith={algoliaEntry}
+        let:data={entry}
+        log>
+        <ListEntry {entry} canEdit={$canEdit} />
+      </Doc>
+    {/each}
   {:else}
     {#each entries as entry (entry.id)}
       <ListEntry {entry} />
