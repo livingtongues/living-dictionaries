@@ -5,6 +5,7 @@
 
   import { canEdit, columns, dictionary } from '$lib/stores';
   import Cell from './Cell.svelte';
+  import { minutesAgo } from '$lib/helpers/time';
 
   let selectedColumn: IColumn;
 
@@ -47,8 +48,10 @@
             log>
             <tr class="row-hover">
               {#each $columns as column, i}
-                <!-- TODO: retore class:bg-green-100={entry.updatedAt < 2Minutes} -->
                 <td
+                  class:bg-green-100={entry.ua &&
+                    entry.ua.toMillis &&
+                    entry.ua.toMillis() > minutesAgo(5)}
                   class="{column.sticky ? 'sticky bg-white' : ''} h-0"
                   style="{column.sticky
                     ? 'left:' + getLeftValue(i) + 'px; --border-right-width: 3px;'
@@ -64,7 +67,6 @@
       {#each entries as entry (entry.id)}
         <tr class="row-hover">
           {#each $columns as column, i}
-            <!-- TODO: retore class:bg-green-100={entry.updatedAt < 2Minutes} -->
             <td
               class="{column.sticky ? 'sticky bg-white' : ''} h-0"
               style="{column.sticky

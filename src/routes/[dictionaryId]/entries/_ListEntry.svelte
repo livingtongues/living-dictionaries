@@ -6,25 +6,24 @@
   import { page } from '$app/stores';
   import type { IEntry } from '$lib/interfaces';
   import { printGlosses } from '$lib/helpers/glosses';
+  import { minutesAgo } from '$lib/helpers/time';
   export let entry: IEntry;
   export let canEdit = false;
 </script>
 
-<!-- TODO: class:border-b-2={entry.ua} -->
 <div
   dir="ltr"
+  class:border-b-2={entry.ua && entry.ua.toMillis && entry.ua.toMillis() > minutesAgo(5)}
   class="flex rounded shadow my-1 overflow-hidden items-stretch border-green-300"
   style="margin-right: 2px;">
   {#if entry.sf || canEdit}
     <Audio class="bg-gray-100" {entry} minimal={true} />
   {/if}
-
   <a
     sveltekit:prefetch
     href={'/' + $page.params.dictionaryId + '/entry/' + entry.id}
     class="p-2 flex-grow flex flex-col justify-between hover:bg-gray-200 ">
     <div>
-      <!-- TODO: class:text-green-800={entry.ua} -->
       <span class="font-semibold text-gray-900 mr-1">{entry.lx}</span>
       {#if entry.ph}
         <span class="mr-1 hidden sm:inline">[{entry.ph}]</span>
