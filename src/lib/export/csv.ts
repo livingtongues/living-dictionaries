@@ -100,13 +100,27 @@ export function exportEntriesAsCSV(data: IEntry[], title: string) {
   const headers = {
     lx: 'Lexeme/Word/Phrase',
     ph: 'Phonetic (IPA)',
+    //glosses
+    in: 'Interlinearization',
+    mr: 'Morphology',
+    //Parts of speech
+    de: 'Definition',
   };
 
   const itemsFormatted = [];
   data.forEach((entry) => {
+    //Avoiding showing null values
+    const entryKeys = Object.keys(entry);
+    entryKeys.forEach((key) => (!entry[key] ? (entry[key] = '') : entry[key]));
+
     itemsFormatted.push({
       lx: entry.lx,
       ph: entry.ph,
+
+      in: entry.in,
+      mr: entry.mr,
+
+      de: entry.de,
     });
   });
 
