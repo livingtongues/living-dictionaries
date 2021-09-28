@@ -30,7 +30,14 @@
   import { _ } from 'svelte-i18n';
   export let entry: IEntry, dictionaryId: string;
 
-  import { dictionary, algoliaQueryParams, isManager, isContributor, admin } from '$lib/stores';
+  import {
+    dictionary,
+    algoliaQueryParams,
+    isManager,
+    isContributor,
+    canEdit,
+    admin,
+  } from '$lib/stores';
   import Audio from '../entries/_Audio.svelte';
   import AddImage from '../entries/_AddImage.svelte';
   import EntryField from './_EntryField.svelte';
@@ -108,7 +115,6 @@
   for (const bcp of Object.keys(entry.gl)) {
     glossLanguages.add(bcp);
   }
-  $: canEdit = $isManager || $isContributor;
 </script>
 
 <!-- TODO: wrap around component -->
@@ -158,7 +164,7 @@
   <div class="md:w-1/3 flex flex-col md:flex-col-reverse justify-end mt-2">
     {#if entry.pf}
       <div class="w-full overflow-hidden rounded relative mb-2" style="height: 25vh;">
-        <Image width={400} {entry} editable={canEdit} />
+        <Image width={400} {entry} {canEdit} />
       </div>
     {:else if canEdit}
       <AddImage {entry} class="rounded-md h-20 bg-gray-100 mb-2">

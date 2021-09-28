@@ -2,7 +2,7 @@
   import type { IEntry } from '$lib/interfaces';
   export let entries: IEntry[] = [];
   import Image from '$lib/components/image/Image.svelte';
-  import { isManager, isContributor } from '$lib/stores';
+  import { canEdit } from '$lib/stores';
 </script>
 
 <div class="grid">
@@ -11,7 +11,7 @@
       <div
         class="bg-gray-300 shadow relative rounded overflow-hidden"
         style="max-width: 500px; max-height: 500px;">
-        <Image square={480} {entry} editable={$isManager || $isContributor} />
+        <Image square={480} {entry} canEdit={$canEdit} />
         <div
           class="text-dark-shadow text-white font-semibold p-2 absolute top-0
             left-0">
@@ -45,27 +45,4 @@
     grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
     grid-auto-rows: 1fr;
   }
-
-  /* @media screen and (min-width: 600px) {
-  .card-tall {
-    grid-row: span 2 / auto;
-  }
-
-  .card-wide {
-    grid-column: span 2 / auto;
-  }
-} */
-  /* .grid::before {
-    content: '';
-    width: 0;
-    padding-bottom: 100%;
-    grid-row: 1 / 1;
-    grid-column: 1 / 1;
-  } */
-
-  /* .grid > *:first-child {
-    grid-row: 1 / 1;
-    grid-column: 1 / 1;
-  } */
-  /* https://medium.com/cloudaper/how-to-create-a-flexible-square-grid-with-css-grid-layout-ea48baf038f3 */
 </style>

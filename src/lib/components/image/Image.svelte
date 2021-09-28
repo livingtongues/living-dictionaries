@@ -2,7 +2,7 @@
   import { _ } from 'svelte-i18n';
   import type { IEntry } from '$lib/interfaces';
   export let entry: IEntry,
-    editable = false,
+    canEdit = false,
     square: number = undefined,
     width: number = undefined,
     height: number = undefined;
@@ -71,7 +71,7 @@
         <i class="far fa-times p-3 cursor-pointer" />
       </div>
       <img class="object-contain max-h-full" alt="Image of {entry.lx}" {src} />
-      {#if editable}
+      {#if canEdit}
         <div
           class="font-semibold text-red-500 p-4 flex justify-between
             items-center absolute bottom-0 inset-x-0 bg-opacity-25 bg-black">

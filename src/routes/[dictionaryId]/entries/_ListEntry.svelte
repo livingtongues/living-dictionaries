@@ -76,7 +76,7 @@
   </a>
   {#if entry.pf}
     <div class="media-block bg-gray-300 relative">
-      <Image square={128} {entry} editable={canEdit} />
+      <Image square={128} {entry} {canEdit} />
     </div>
   {:else if canEdit}
     <AddImage {entry} class="w-12 bg-gray-100">
