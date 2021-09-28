@@ -25,7 +25,7 @@
 </script>
 
 <script lang="ts">
-  import { update } from '$sveltefire/firestore';
+  import { deleteDocument, set, update } from '$sveltefire/firestore';
   import { serverTimestamp } from 'firebase/firestore';
   import { _ } from 'svelte-i18n';
   export let entry: IEntry, dictionaryId: string;
@@ -47,20 +47,6 @@
   import { share } from '$lib/helpers/share';
   import BadgeArray from '$svelteui/data/BadgeArray.svelte';
 
-  function printGlosses(obj) {
-    Object.keys(obj).forEach((key) => !obj[key] && delete obj[key]);
-    const keys = Object.keys(obj).sort();
-    if (keys.length > 1) {
-      return keys.map((bcp) => {
-        if (obj[bcp]) {
-          return `${$_('gl.' + bcp)}: ${obj[bcp]}`;
-        }
-      });
-    } else {
-      return [obj[keys[0]]];
-    }
-  }
-
   const title = `${entry.lx} (${$dictionary.name} Living Dictionary)`;
   const description = printGlosses(entry.gl).join(', ');
   const url = `https://livingdictionaries.app/${$dictionary.id}/entry/${entry.id}`;
@@ -70,18 +56,19 @@
   }
 
   import { goto } from '$app/navigation';
-  // not using i18n translation anymore: entry.signed_in_as_manager
   async function deleteEntry() {
     if (
       confirm(
-        `${$_('entry.delete_entry', {
+        $_('entry.delete_entry', {
           default: 'Delete entry?',
-        })} - note that it will still remain in the list view until you refresh the page`
+        })
       )
     ) {
       try {
         goto(`/${$dictionary.id}/entries/list${$algoliaQueryParams}`);
-        await update<IEntry>(`dictionaries/${$dictionary.id}/words/${entry.id}`, {
+        await deleteDocument(`dictionaries/${$dictionary.id}/words/${entry.id}`);
+        await set<IEntry>(`dictionaries/${$dictionary.id}/deletedEntries/${entry.id}`, {
+          ...entry,
           // @ts-ignore
           deletedAt: serverTimestamp(),
         });
@@ -94,6 +81,7 @@
   import Doc from '$sveltefire/components/Doc.svelte';
   import Button from '$svelteui/ui/Button.svelte';
   import { user } from '$sveltefire/user';
+  import { printGlosses } from '$lib/helpers/glosses';
   async function saveUpdateToFirestore(e: {
     detail: { field: string; newValue: string | string[] };
   }) {
@@ -156,7 +144,7 @@
     <EntryField
       value={entry.lx}
       field="lx"
-      {canEdit}
+      canEdit={$canEdit}
       display={$_('entry.lx', { default: 'Lexeme/Word/Phrase' })}
       on:valueupdate={saveUpdateToFirestore} />
   </div>
@@ -164,7 +152,7 @@
   <div class="md:w-1/3 flex flex-col md:flex-col-reverse justify-end mt-2">
     {#if entry.pf}
       <div class="w-full overflow-hidden rounded relative mb-2" style="height: 25vh;">
-        <Image width={400} {entry} {canEdit} />
+        <Image width={400} {entry} canEdit={$canEdit} />
       </div>
     {:else if canEdit}
       <AddImage {entry} class="rounded-md h-20 bg-gray-100 mb-2">
@@ -186,7 +174,7 @@
       <EntryField
         value={entry.lx}
         field="lx"
-        {canEdit}
+        canEdit={$canEdit}
         display={$_('entry.lx', { default: 'Lexeme/Word/Phrase' })}
         on:valueupdate={saveUpdateToFirestore} />
     </div>
@@ -196,7 +184,7 @@
         <EntryField
           value={entry[index === 0 ? 'lo' : `lo${index + 1}`]}
           field={index === 0 ? 'lo' : `lo${index + 1}`}
-          {canEdit}
+          canEdit={$canEdit}
           display={orthography}
           on:valueupdate={saveUpdateToFirestore} />
       {/each}
@@ -206,7 +194,7 @@
       <EntryField
         value={entry[field]}
         {field}
-        {canEdit}
+        canEdit={$canEdit}
         display={$_(`entry.${field}`)}
         on:valueupdate={saveUpdateToFirestore} />
     {/each}
@@ -215,7 +203,7 @@
       <EntryField
         value={entry.gl[bcp]}
         field={`gl.${bcp}`}
-        {canEdit}
+        canEdit={$canEdit}
         display={`${$_(`gl.${bcp}`)} ${$_('entry.gloss', {
           default: 'Gloss',
         })}`}
@@ -227,24 +215,24 @@
       <EntryField
         value={entry.de}
         field="de"
-        {canEdit}
+        canEdit={$canEdit}
         display="Definition (deprecated)"
         on:valueupdate={saveUpdateToFirestore} />
     {/if}
 
     <EntryPartOfSpeech
       value={entry.ps}
-      {canEdit}
+      canEdit={$canEdit}
       display={$_('entry.ps', { default: 'Part of Speech' })}
       on:valueupdate={saveUpdateToFirestore} />
 
-    <EntrySemanticDomains {canEdit} {entry} on:valueupdate={saveUpdateToFirestore} />
+    <EntrySemanticDomains canEdit={$canEdit} {entry} on:valueupdate={saveUpdateToFirestore} />
 
     {#each ['mr', 'in', 'di', 'nt'] as field}
       <EntryField
         value={entry[field]}
         {field}
-        {canEdit}
+        canEdit={$canEdit}
         display={$_(`entry.${field}`)}
         on:valueupdate={saveUpdateToFirestore} />
     {/each}
@@ -254,7 +242,7 @@
         <div class="rounded text-xs text-gray-500 mt-1 mb-2">{$_('entry.sr')}</div>
         <BadgeArray
           strings={entry.sr || []}
-          {canEdit}
+          canEdit={$canEdit}
           promptMessage={$_('entry.sr')}
           addMessage={$_('misc.add', { default: 'Add' })}
           on:valueupdated={(e) =>
@@ -268,7 +256,7 @@
       <EntryField
         value={entry.xv}
         field="xv"
-        {canEdit}
+        canEdit={$canEdit}
         display={$_('entry.example_sentence', { default: 'Example Sentence' })}
         on:valueupdate={saveUpdateToFirestore} />
     {/if}
@@ -276,7 +264,7 @@
     <EntryField
       value={entry.xs && entry.xs.vn}
       field="xs.vn"
-      {canEdit}
+      canEdit={$canEdit}
       display={$_('entry.example_sentence', { default: 'Example Sentence' })}
       on:valueupdate={saveUpdateToFirestore} />
 
@@ -284,7 +272,7 @@
       <EntryField
         value={entry.xs && entry.xs[bcp]}
         field={`xs.${bcp}`}
-        {canEdit}
+        canEdit={$canEdit}
         display={`${$_(`gl.${bcp}`)} ${$_('entry.example_sentence', {
           default: 'Example Sentence',
         })}`}
