@@ -26,7 +26,7 @@
     search.addWidgets([customHits({})]);
   });
 
-  function minutesAgo(minutes: number) {
+  function minutesAgoTimestamp(minutes: number) {
     return Timestamp.fromMillis(Date.now() - minutes * 1000 * 60);
   }
 </script>
@@ -39,7 +39,7 @@
       path={`dictionaries/${$dictionary.id}/words`}
       queryConstraints={[
         where('ub', '==', $user.uid),
-        where('ua', '>', minutesAgo(10)),
+        where('ua', '>', minutesAgoTimestamp(10)),
         orderBy('ua', 'desc'),
         limit(4),
       ]}
