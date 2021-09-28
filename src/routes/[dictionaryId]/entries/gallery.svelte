@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { _ } from 'svelte-i18n';
   import { getContext } from 'svelte';
   import type { InstantSearch } from 'instantsearch.js';
   const search: InstantSearch = getContext('search');
@@ -7,6 +6,8 @@
   import Hits from '$lib/components/search/Hits.svelte';
   import Pagination from '$lib/components/search/Pagination.svelte';
 
+  // import { configure } from 'instantsearch.js/es/widgets/index.js';
+  import { configure } from 'instantsearch.js/cjs/widgets/index.js';
   // import { connectToggleRefinement } from 'instantsearch.js/es/connectors';
   import { connectToggleRefinement } from 'instantsearch.js/cjs/connectors/index.js';
   import { onMount, onDestroy } from 'svelte';
@@ -22,21 +23,16 @@
       customToggleRefinement({
         attribute: 'hasImage',
       }),
-      // configure({
-      //   hitsPerPage: 10,
-      //   page: 1,
-      // }),
+      configure({
+        hitsPerPage: 20,
+        // page: 1,
+      }),
     ]);
 
     refine({ isRefined: false });
   });
 
   onDestroy(() => {
-    // search.addWidgets([
-    //   configure({
-    //     page: 1,
-    //   }),
-    // ]);
     refine({ isRefined: true });
   });
 </script>

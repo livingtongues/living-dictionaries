@@ -1,14 +1,12 @@
 <script lang="ts">
-  import type { IEntry } from '$lib/interfaces';
+  import type { IColumn, IEntry } from '$lib/interfaces';
   export let entries: IEntry[] = [];
   import ColumnTitle from './ColumnTitle.svelte';
 
-  import { columns } from '$lib/stores';
+  import { canEdit, columns, dictionary } from '$lib/stores';
   import Cell from './Cell.svelte';
-  import { isManager, isContributor } from '$lib/stores';
 
-  let adjustColumns = false;
-  let selectedColumn;
+  let selectedColumn: IColumn;
 
   function getLeftValue(index: number) {
     if (index === 0) {
@@ -29,7 +27,6 @@
         <th
           on:click={() => {
             selectedColumn = column;
-            adjustColumns = true;
           }}
           class="{column.sticky ? 'z-10' : ''} cursor-pointer bg-gray-100 top-0 sticky
             hover:bg-gray-200 active:bg-gray-300 text-xs font-semibold"
@@ -40,33 +37,54 @@
         </th>
       {/each}
     </tr>
-    {#each entries as entry (entry.id)}
-      <tr class="row-hover">
-        {#each $columns as column, i}
-          <!-- TODO: retore class:bg-green-100={entry.updatedAt < 2Minutes} -->
-          <td
-            class="{column.sticky ? 'sticky bg-white' : ''} h-0"
-            style="{column.sticky
-              ? 'left:' + getLeftValue(i) + 'px; --border-right-width: 3px;'
-              : ''} --col-width: {column.width}px;">
-            <Cell {column} {entry} canEdit={$isManager || $isContributor} />
-          </td>
+    {#if $canEdit}
+      {#await import('$sveltefire/components/Doc.svelte') then { default: Doc }}
+        {#each entries as algoliaEntry (algoliaEntry.id)}
+          <Doc
+            path="dictionaries/{$dictionary.id}/words/{algoliaEntry.id}"
+            startWith={algoliaEntry}
+            let:data={entry}
+            log>
+            <tr class="row-hover">
+              {#each $columns as column, i}
+                <!-- TODO: retore class:bg-green-100={entry.updatedAt < 2Minutes} -->
+                <td
+                  class="{column.sticky ? 'sticky bg-white' : ''} h-0"
+                  style="{column.sticky
+                    ? 'left:' + getLeftValue(i) + 'px; --border-right-width: 3px;'
+                    : ''} --col-width: {column.width}px;">
+                  <Cell {column} {entry} canEdit={$canEdit} />
+                </td>
+              {/each}
+            </tr>
+          </Doc>
         {/each}
-      </tr>
+      {/await}
     {:else}
-      <!-- <tr>
-        <td colspan="20"><i>No results</i></td>
-      </tr> -->
-    {/each}
+      {#each entries as entry (entry.id)}
+        <tr class="row-hover">
+          {#each $columns as column, i}
+            <!-- TODO: retore class:bg-green-100={entry.updatedAt < 2Minutes} -->
+            <td
+              class="{column.sticky ? 'sticky bg-white' : ''} h-0"
+              style="{column.sticky
+                ? 'left:' + getLeftValue(i) + 'px; --border-right-width: 3px;'
+                : ''} --col-width: {column.width}px;">
+              <Cell {column} {entry} canEdit={$canEdit} />
+            </td>
+          {/each}
+        </tr>
+      {/each}
+    {/if}
   </table>
 </div>
 
-{#if adjustColumns}
+{#if selectedColumn}
   {#await import('$lib/components/table/ColumnAdjustSlideover.svelte') then { default: ColumnAdjustSlideover }}
     <ColumnAdjustSlideover
       {selectedColumn}
       on:close={() => {
-        adjustColumns = null;
+        selectedColumn = null;
       }} />
   {/await}
 {/if}
