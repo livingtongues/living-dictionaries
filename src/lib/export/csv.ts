@@ -87,7 +87,7 @@ export function exportUsersAsCSV(data: IUser[], title: string) {
   const itemsFormatted = [];
   data.forEach((user) => {
     itemsFormatted.push({
-      displayName: user.displayName.replace(/,/, ''),
+      displayName: user.displayName && user.displayName.replace(/,/, ''),
       email: user.email,
     });
   });
