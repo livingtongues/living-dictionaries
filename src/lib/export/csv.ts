@@ -8,7 +8,6 @@ export function convertToCSV(objArray) {
     let line = '';
     for (const index in array[i]) {
       if (line != '') line += ',';
-      array[i][index] = array[i][index] === undefined ? '' : array[i][index];
 
       line += array[i][index];
     }
