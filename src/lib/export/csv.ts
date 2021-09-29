@@ -8,6 +8,7 @@ export function convertToCSV(objArray) {
     let line = '';
     for (const index in array[i]) {
       if (line != '') line += ',';
+      array[i][index] = array[i][index] === undefined ? '' : array[i][index];
 
       line += array[i][index];
     }
@@ -19,7 +20,14 @@ export function convertToCSV(objArray) {
 }
 
 export function downloadObjectAsCSV(itemsFormatted: Record<string, unknown>[], title: string) {
-  const jsonObject = JSON.stringify(itemsFormatted);
+  function replacer(_, value: any) {
+    // Filtering out properties
+    if (value === undefined || value === null) {
+      return '';
+    }
+    return value;
+  }
+  const jsonObject = JSON.stringify(itemsFormatted, replacer);
 
   const csv = convertToCSV(jsonObject);
 
@@ -129,17 +137,21 @@ export function exportEntriesAsCSV(data: IEntry[], title: string) {
 
       //xv: entry.xv,
     });
-    Object.keys(entry.xs).forEach((bcp) => {
-      Object.assign(headers, JSON.parse(`{ "${bcp}": "Example sentence in ${bcp}" }`));
-      Object.assign(
-        itemsFormatted[i],
-        JSON.parse(`{
-          "${bcp}": "${entry.xs[bcp]}"
-        }`)
-      );
-    });
-    i++;
+    if (entry.xs) {
+      Object.keys(entry.xs).forEach((bcp) => {
+        Object.assign(headers, JSON.parse(`{ "${bcp}": "Example sentence in ${bcp}" }`));
+        Object.assign(
+          itemsFormatted[i],
+          JSON.parse(`{
+            "${bcp}": "${entry.xs[bcp]}"
+          }`)
+        );
+      });
+      i++;
+    }
   });
+  //TESTING
+  console.dir(itemsFormatted);
 
   itemsFormatted.unshift(headers);
   downloadObjectAsCSV(itemsFormatted, title);
