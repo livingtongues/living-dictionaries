@@ -104,15 +104,18 @@ export function exportEntriesAsCSV(data: IEntry[], title: string) {
     in: 'Interlinearization',
     mr: 'Morphology',
     //Parts of speech
-    de: 'Definition',
+    //de: 'Definition', //Don't know if I should inlude this
+    di: 'Dialect for this entry',
+    nt: 'Notes',
+    //sr: 'Source(s)',
+    //xv: 'Example vernacular', //?
   };
 
   const itemsFormatted = [];
-  data.forEach((entry) => {
+  data.forEach((entry, i) => {
     //Avoiding showing null values
     const entryKeys = Object.keys(entry);
     entryKeys.forEach((key) => (!entry[key] ? (entry[key] = '') : entry[key]));
-
     itemsFormatted.push({
       lx: entry.lx,
       ph: entry.ph,
@@ -120,8 +123,22 @@ export function exportEntriesAsCSV(data: IEntry[], title: string) {
       in: entry.in,
       mr: entry.mr,
 
-      de: entry.de,
+      //de: entry.de,
+      di: entry.di,
+      nt: entry.nt,
+
+      //xv: entry.xv,
     });
+    Object.keys(entry.xs).forEach((bcp) => {
+      Object.assign(headers, JSON.parse(`{ "${bcp}": "Example sentence in ${bcp}" }`));
+      Object.assign(
+        itemsFormatted[i],
+        JSON.parse(`{
+          "${bcp}": "${entry.xs[bcp]}"
+        }`)
+      );
+    });
+    i++;
   });
 
   itemsFormatted.unshift(headers);
