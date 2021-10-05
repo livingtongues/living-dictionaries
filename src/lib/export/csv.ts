@@ -1,4 +1,5 @@
 import type { IDictionary, IEntry, IUser } from '$lib/interfaces';
+import { glossingLanguages } from './glossing-languages-temp';
 
 export function convertToCSV(objArray) {
   const array = typeof objArray != 'object' ? JSON.parse(objArray) : objArray;
@@ -107,11 +108,10 @@ export function exportEntriesAsCSV(data: IEntry[], title: string) {
   const headers = {
     lx: 'Lexeme/Word/Phrase',
     ph: 'Phonetic (IPA)',
-    //glosses
+    //glosses - "English Gloss", "**Spanish** Gloss"
     in: 'Interlinearization',
     mr: 'Morphology',
     //Parts of speech
-    //de: 'Definition', //Don't know if I should inlude this
     di: 'Dialect for this entry',
     nt: 'Notes',
     //sr: 'Source(s)',
@@ -138,7 +138,11 @@ export function exportEntriesAsCSV(data: IEntry[], title: string) {
     });
     if (entry.xs) {
       Object.keys(entry.xs).forEach((bcp) => {
-        Object.assign(headers, JSON.parse(`{ "${bcp}": "Example sentence in ${bcp}" }`));
+        Object.assign(
+          headers,
+          // JSON.parse(`{ "${bcp}": "${glossingLanguages[bcp]} Gloss" }`) // MOVE
+          JSON.parse(`{ "${bcp}": "Example sentence in ${glossingLanguages[bcp]}" }`)
+        );
         Object.assign(
           itemsFormatted[i],
           JSON.parse(`{
