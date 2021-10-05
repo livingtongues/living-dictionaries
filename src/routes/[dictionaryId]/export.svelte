@@ -2,9 +2,7 @@
   import { _ } from 'svelte-i18n';
   import { dictionary } from '$lib/stores';
   import Button from '$svelteui/ui/Button.svelte';
-  import type { IEntry } from '$lib/interfaces';
-  import { getCollection } from '$sveltefire/firestore';
-  import { exportEntriesAsCSV } from '$lib/export/csv';
+  import { getImages, downloadEntries } from './export/_fetchers';
 
   //Testing
   let imgs = [
@@ -12,6 +10,7 @@
     'https://i.imgur.com/4AA1jC4.jpeg',
     'https://firebasestorage.googleapis.com/v0/b/talking-dictionaries-alpha.appspot.com/o/images%2Fmandarin-practice%2FmogAtD3lTCtkuwj7tLDD_1630105898118.jpg?alt=media',
   ];
+
   let data = false;
   let dataType = '';
   let images = false;
@@ -19,11 +18,6 @@
 
   $: if (!data) {
     dataType = '';
-  }
-
-  async function downloadEntries() {
-    const dataEntries = await getCollection<IEntry>(`dictionaries/${$dictionary.id}/words`);
-    exportEntriesAsCSV(dataEntries, $dictionary.name);
   }
 </script>
 
@@ -81,4 +75,15 @@
   </label>
 </div>
 
-<Button onclick={downloadEntries} form="primary">ZIP Export</Button>
+<Button
+  onclick={() => {
+    if (data) {
+      if (dataType === 'CSV') {
+        downloadEntries($dictionary.id, $dictionary.name);
+      }
+    }
+    if (images) {
+      getImages(imgs);
+    }
+  }}
+  form="primary">ZIP Export</Button>

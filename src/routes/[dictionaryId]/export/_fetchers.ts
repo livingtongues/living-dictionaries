@@ -1,4 +1,7 @@
 import JSZip from 'jszip';
+import type { IEntry } from '$lib/interfaces';
+import { getCollection } from '$sveltefire/firestore';
+import { exportEntriesAsCSV } from '$lib/export/csv';
 
 export async function getImages(imageUrls: string[]) {
   //Zip and downloading images
@@ -28,4 +31,9 @@ export async function getImages(imageUrls: string[]) {
       saveAs(blob, 'myImage.zip');
     });
   }
+}
+
+export async function downloadEntries(id: string, name: string) {
+  const dataEntries = await getCollection<IEntry>(`dictionaries/${id}/words`);
+  exportEntriesAsCSV(dataEntries, name);
 }
