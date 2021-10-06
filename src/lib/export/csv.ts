@@ -104,18 +104,17 @@ export function exportUsersAsCSV(data: IUser[], title: string) {
   itemsFormatted.unshift(headers);
   downloadObjectAsCSV(itemsFormatted, title);
 }
-
-export function exportEntriesAsCSV(data: IEntry[], title: string) {
+//TODO add example sentences array
+export function exportEntriesAsCSV(data: IEntry[], title: string, glosses: string[]) {
   const headers = {
     lx: 'Lexeme/Word/Phrase',
     ph: 'Phonetic (IPA)',
     in: 'Interlinearization',
     mr: 'Morphology',
     ps: 'Parts of speech',
-    sd: 'Semantic domain',
     di: 'Dialect for this entry',
     nt: 'Notes',
-    //sr: 'Source(s)',
+    sr: 'Source(s)',
     //xv: 'Example vernacular', //?
   };
 
@@ -135,34 +134,44 @@ export function exportEntriesAsCSV(data: IEntry[], title: string) {
       //TODO sd,
       //xv: entry.xv,
     });
-    if (entry.gl) {
-      Object.keys(entry.gl).forEach((bcp) => {
-        if (glossingLanguages[bcp]) {
-          Object.assign(headers, JSON.parse(`{ "${bcp}": "${glossingLanguages[bcp]} Gloss" }`));
+    if (entry.sr) {
+      let sources = '';
+      sources += entry.sr.map((source) => source);
+      sources = sources.replaceAll(',', ' | ');
+      Object.assign(itemsFormatted[i], JSON.parse(`{"sr": "${sources}"}`));
+    } else {
+      Object.assign(itemsFormatted[i], { sr: '' });
+    }
+    //Assigning glosses
+    glosses.forEach((bcp) => {
+      Object.assign(headers, JSON.parse(`{ "gl${bcp}": "${glossingLanguages[bcp]} Gloss" }`));
+      Object.assign(
+        itemsFormatted[i],
+        JSON.parse(`{
+        "gl${bcp}": "${entry.gl[bcp] ? entry.gl[bcp] : ''}"
+      }`)
+      );
+    });
+    //Probably I need to delete this
+    if (entry.xs) {
+      Object.keys(entry.xs)
+        .sort()
+        .forEach((bcp) => {
+          Object.assign(
+            headers,
+            JSON.parse(
+              `{"xs${bcp}": "Example sentence in ${
+                glossingLanguages[bcp] ? glossingLanguages[bcp] : title
+              }"}`
+            )
+          );
           Object.assign(
             itemsFormatted[i],
             JSON.parse(`{
-              "gl${bcp}": "${entry.gl[bcp]}"
-            }`)
-          );
-        }
-      });
-    }
-    if (entry.xs) {
-      Object.keys(entry.xs).forEach((bcp) => {
-        Object.assign(
-          headers,
-          glossingLanguages[bcp]
-            ? JSON.parse(`{"xs${bcp}": "Example sentence in ${glossingLanguages[bcp]}"}`)
-            : JSON.parse(`{"xs${bcp}": "Example sentence in ${title}"}`)
-        );
-        Object.assign(
-          itemsFormatted[i],
-          JSON.parse(`{
-            "${bcp}": "${entry.xs[bcp]}"
+            "xs${bcp}": "${entry.xs[bcp]}"
           }`)
-        );
-      });
+          );
+        });
     }
     i++;
   });
