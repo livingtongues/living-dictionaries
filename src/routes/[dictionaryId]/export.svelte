@@ -2,7 +2,7 @@
   import { _ } from 'svelte-i18n';
   import { dictionary } from '$lib/stores';
   import Button from '$svelteui/ui/Button.svelte';
-  import { getImages, downloadEntries } from './export/_fetchers';
+  import { downloadImages, downloadEntries } from './export/_fetchers';
 
   //Testing
   let imgs = [
@@ -75,15 +75,23 @@
   </label>
 </div>
 
-<Button
-  onclick={() => {
-    if (data) {
-      if (dataType === 'CSV') {
-        downloadEntries($dictionary.id, $dictionary.name);
+{#if dataType === 'CSV' && !images}
+  <Button
+    onclick={() => {
+      downloadEntries($dictionary.id, $dictionary.name);
+    }}
+    form="primary">Download CSV</Button>
+{:else}
+  <Button
+    onclick={() => {
+      if (data) {
+        if (dataType === 'CSV') {
+          downloadEntries($dictionary.id, $dictionary.name);
+        }
       }
-    }
-    if (images) {
-      getImages(imgs);
-    }
-  }}
-  form="primary">ZIP Export</Button>
+      if (images) {
+        downloadImages(imgs);
+      }
+    }}
+    form="primary">ZIP Export</Button>
+{/if}

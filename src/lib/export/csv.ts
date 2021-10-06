@@ -1,4 +1,5 @@
 import type { IDictionary, IEntry, IUser } from '$lib/interfaces';
+import { dictionary } from 'svelte-i18n';
 import { glossingLanguages } from './glossing-languages-temp';
 
 export function convertToCSV(objArray) {
@@ -108,10 +109,10 @@ export function exportEntriesAsCSV(data: IEntry[], title: string) {
   const headers = {
     lx: 'Lexeme/Word/Phrase',
     ph: 'Phonetic (IPA)',
-    //glosses - "English Gloss", "**Spanish** Gloss"
     in: 'Interlinearization',
     mr: 'Morphology',
-    //Parts of speech
+    ps: 'Parts of speech',
+    sd: 'Semantic domain',
     di: 'Dialect for this entry',
     nt: 'Notes',
     //sr: 'Source(s)',
@@ -126,22 +127,34 @@ export function exportEntriesAsCSV(data: IEntry[], title: string) {
     itemsFormatted.push({
       lx: entry.lx,
       ph: entry.ph,
-
       in: entry.in,
       mr: entry.mr,
-
-      //de: entry.de,
+      ps: entry.ps,
       di: entry.di,
       nt: entry.nt,
-
+      //TODO sd,
       //xv: entry.xv,
     });
+    if (entry.gl) {
+      Object.keys(entry.gl).forEach((bcp) => {
+        if (glossingLanguages[bcp]) {
+          Object.assign(headers, JSON.parse(`{ "${bcp}": "${glossingLanguages[bcp]} Gloss" }`));
+          Object.assign(
+            itemsFormatted[i],
+            JSON.parse(`{
+              "gl${bcp}": "${entry.gl[bcp]}"
+            }`)
+          );
+        }
+      });
+    }
     if (entry.xs) {
       Object.keys(entry.xs).forEach((bcp) => {
         Object.assign(
           headers,
-          // JSON.parse(`{ "${bcp}": "${glossingLanguages[bcp]} Gloss" }`) // MOVE
-          JSON.parse(`{ "${bcp}": "Example sentence in ${glossingLanguages[bcp]}" }`)
+          glossingLanguages[bcp]
+            ? JSON.parse(`{"xs${bcp}": "Example sentence in ${glossingLanguages[bcp]}"}`)
+            : JSON.parse(`{"xs${bcp}": "Example sentence in ${title}"}`)
         );
         Object.assign(
           itemsFormatted[i],
@@ -150,8 +163,8 @@ export function exportEntriesAsCSV(data: IEntry[], title: string) {
           }`)
         );
       });
-      i++;
     }
+    i++;
   });
   //TESTING
   console.dir(itemsFormatted);
