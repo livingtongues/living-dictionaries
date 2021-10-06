@@ -134,6 +134,7 @@ export function exportEntriesAsCSV(data: IEntry[], title: string, glosses: strin
       //TODO sd,
       //xv: entry.xv,
     });
+    //Assigning sources
     if (entry.sr) {
       let sources = '';
       sources += entry.sr.map((source) => source);
@@ -152,26 +153,39 @@ export function exportEntriesAsCSV(data: IEntry[], title: string, glosses: strin
       }`)
       );
     });
-    //Probably I need to delete this
-    if (entry.xs) {
-      Object.keys(entry.xs)
-        .sort()
-        .forEach((bcp) => {
-          Object.assign(
-            headers,
-            JSON.parse(
-              `{"xs${bcp}": "Example sentence in ${
-                glossingLanguages[bcp] ? glossingLanguages[bcp] : title
-              }"}`
-            )
-          );
+    //Assigning example sentences. There's no way to do this in a declarative form.
+    for (let j = 0; j <= glosses.length; j++) {
+      if (j === glosses.length) {
+        Object.assign(headers, JSON.parse(`{"xs${title}": "Example sentence in ${title}"}`));
+        if (entry.xs) {
           Object.assign(
             itemsFormatted[i],
             JSON.parse(`{
-            "xs${bcp}": "${entry.xs[bcp]}"
+          "xs${title}": "${entry.xs['vn'] ? entry.xs['vn'] : ''}"
+        }`)
+          );
+        }
+      } else {
+        Object.assign(
+          headers,
+          JSON.parse(`{"xs${glosses[j]}": "Example sentence in ${glossingLanguages[glosses[j]]}"}`)
+        );
+        if (entry.xs) {
+          Object.assign(
+            itemsFormatted[i],
+            JSON.parse(`{
+            "xs${glosses[j]}": "${entry.xs[glosses[j]] ? entry.xs[glosses[j]] : ''}"
           }`)
           );
-        });
+        } else {
+          Object.assign(
+            itemsFormatted[i],
+            JSON.parse(`{
+            "xs${glosses[j]}": ""
+          }`)
+          );
+        }
+      }
     }
     i++;
   });
