@@ -33,7 +33,7 @@ export async function downloadImages(imageUrls: string[]) {
   }
 }
 
-export async function downloadEntries(id: string, name: string) {
+export async function downloadEntries(id: string, name: string, glosses: string[]) {
   const dataEntries = await getCollection<IEntry>(`dictionaries/${id}/words`);
-  exportEntriesAsCSV(dataEntries, name);
+  exportEntriesAsCSV(dataEntries, name, glosses);
 }

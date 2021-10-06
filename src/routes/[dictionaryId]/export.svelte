@@ -3,6 +3,7 @@
   import { dictionary } from '$lib/stores';
   import Button from '$svelteui/ui/Button.svelte';
   import { downloadImages, downloadEntries } from './export/_fetchers';
+  import { glossingLanguages } from '$lib/export/glossing-languages-temp';
 
   //Testing
   let imgs = [
@@ -18,6 +19,8 @@
 
   $: if (!data) {
     dataType = '';
+  } else {
+    dataType = 'CSV';
   }
 </script>
 
@@ -78,7 +81,7 @@
 {#if dataType === 'CSV' && !images}
   <Button
     onclick={() => {
-      downloadEntries($dictionary.id, $dictionary.name);
+      downloadEntries($dictionary.id, $dictionary.name, $dictionary.glossLanguages);
     }}
     form="primary">Download CSV</Button>
 {:else}
@@ -86,7 +89,7 @@
     onclick={() => {
       if (data) {
         if (dataType === 'CSV') {
-          downloadEntries($dictionary.id, $dictionary.name);
+          downloadEntries($dictionary.id, $dictionary.name, $dictionary.glossLanguages);
         }
       }
       if (images) {
