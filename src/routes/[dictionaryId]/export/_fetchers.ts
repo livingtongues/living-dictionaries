@@ -3,7 +3,7 @@ import type { IEntry } from '$lib/interfaces';
 import { getCollection } from '$sveltefire/firestore';
 import { exportEntriesAsCSV } from '$lib/export/csv';
 
-export async function getImages(imageUrls: string[]) {
+export async function downloadImages(imageUrls: string[]) {
   //Zip and downloading images
   const blobImgs = [];
   await Promise.all(
