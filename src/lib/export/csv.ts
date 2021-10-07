@@ -1,6 +1,7 @@
 import type { IDictionary, IEntry, IUser } from '$lib/interfaces';
 import { dictionary } from 'svelte-i18n';
 import { glossingLanguages } from './glossing-languages-temp';
+import { semanticDomains } from '$lib/mappings/semantic-domains';
 
 export function convertToCSV(objArray) {
   const array = typeof objArray != 'object' ? JSON.parse(objArray) : objArray;
@@ -48,6 +49,17 @@ export function downloadObjectAsCSV(itemsFormatted: Record<string, unknown>[], t
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+  }
+}
+//TODO new parameter fn replacing map function
+function valuesInColumn(itemsFormatted, i, values, columnName) {
+  if (values) {
+    let stringValue = '';
+    stringValue += values.map((el) => el);
+    stringValue = stringValue.replaceAll(',', ' | ');
+    Object.assign(itemsFormatted[i], JSON.parse(`{"${columnName}": "${stringValue}"}`));
+  } else {
+    Object.assign(itemsFormatted[i], JSON.parse(`{ "${columnName}": "" }`));
   }
 }
 
@@ -104,7 +116,7 @@ export function exportUsersAsCSV(data: IUser[], title: string) {
   itemsFormatted.unshift(headers);
   downloadObjectAsCSV(itemsFormatted, title);
 }
-//TODO add example sentences array
+//TODO fix parts-of-speech
 export function exportEntriesAsCSV(data: IEntry[], title: string, glosses: string[]) {
   const headers = {
     lx: 'Lexeme/Word/Phrase',
@@ -115,6 +127,7 @@ export function exportEntriesAsCSV(data: IEntry[], title: string, glosses: strin
     di: 'Dialect for this entry',
     nt: 'Notes',
     sr: 'Source(s)',
+    sd: 'Semantic domain',
     //xv: 'Example vernacular', //?
   };
 
@@ -135,14 +148,9 @@ export function exportEntriesAsCSV(data: IEntry[], title: string, glosses: strin
       //xv: entry.xv,
     });
     //Assigning sources
-    if (entry.sr) {
-      let sources = '';
-      sources += entry.sr.map((source) => source);
-      sources = sources.replaceAll(',', ' | ');
-      Object.assign(itemsFormatted[i], JSON.parse(`{"sr": "${sources}"}`));
-    } else {
-      Object.assign(itemsFormatted[i], { sr: '' });
-    }
+    valuesInColumn(itemsFormatted, i, entry.sr, 'sr');
+    //Assigning semantic domains
+    valuesInColumn(itemsFormatted, i, entry.sdn, 'sd');
     //Assigning glosses
     glosses.forEach((bcp) => {
       Object.assign(headers, JSON.parse(`{ "gl${bcp}": "${glossingLanguages[bcp]} Gloss" }`));
@@ -170,6 +178,7 @@ export function exportEntriesAsCSV(data: IEntry[], title: string, glosses: strin
           headers,
           JSON.parse(`{"xs${glosses[j]}": "Example sentence in ${glossingLanguages[glosses[j]]}"}`)
         );
+        // I think it can be refactored
         if (entry.xs) {
           Object.assign(
             itemsFormatted[i],
