@@ -56,6 +56,7 @@ export function downloadObjectAsCSV(itemsFormatted: Record<string, unknown>[], t
 function valuesInColumn(itemsFormatted, i, values, columnName, fn) {
   if (values) {
     let stringValue = '';
+    //In case some strings contain commas
     const list = values.map(fn);
     stringValue += list.map((el) => el.replace(/,/g, ' -'));
     stringValue = stringValue.replace(/,/g, ' | ');
@@ -131,7 +132,6 @@ export function exportEntriesAsCSV(data: IEntry[], title: string, glosses: strin
     ps: 'Parts of speech',
     sr: 'Source(s)',
     sd: 'Semantic domain',
-    //xv: 'Example vernacular', //?
   };
 
   const itemsFormatted = [];
@@ -199,6 +199,13 @@ export function exportEntriesAsCSV(data: IEntry[], title: string, glosses: strin
           "xs${title}": "${entry.xs['vn'] ? entry.xs['vn'] : ''}"
         }`)
           );
+        } else {
+          Object.assign(
+            itemsFormatted[i],
+            JSON.parse(`{
+              "xs${title}": ""
+            }`)
+          );
         }
       } else {
         Object.assign(
@@ -222,6 +229,28 @@ export function exportEntriesAsCSV(data: IEntry[], title: string, glosses: strin
         }
       }
     }
+    //Audio metadata
+    Object.assign(headers, {
+      aupa: 'Audio path',
+      ausn: 'Speaker name',
+      aubp: 'Speaker birthplace',
+    });
+    if (entry.sf) {
+      const path = entry.sf.path;
+      const speakerName = 'test speaker name';
+      const speakerBP = 'test speaker birthplace';
+      Object.assign(
+        itemsFormatted[i],
+        JSON.parse(`{
+        "aupa": "${path}",
+        "ausn": "${speakerName}",
+        "aubp": "${speakerBP}"
+      }`)
+      );
+    } else {
+      Object.assign(itemsFormatted[i], { aupa: '', ausn: '', aubp: '' });
+    }
+    console.log(entry.sf);
     i++;
   });
   //TESTING
