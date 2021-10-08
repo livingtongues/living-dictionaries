@@ -119,7 +119,7 @@ export function exportUsersAsCSV(data: IUser[], title: string) {
   itemsFormatted.unshift(headers);
   downloadObjectAsCSV(itemsFormatted, title);
 }
-
+//TODO some lexems have commas!
 export function exportEntriesAsCSV(data: IEntry[], title: string, glosses: string[]) {
   const headers = {
     lx: 'Lexeme/Word/Phrase',
@@ -156,7 +156,7 @@ export function exportEntriesAsCSV(data: IEntry[], title: string, glosses: strin
     }`)
     );
     if (entry.ps) {
-      const pos = partsOfSpeech.find((ps) => ps.enAbbrev === entry.ps).enName;
+      const pos = partsOfSpeech.find((ps) => ps.enAbbrev === entry.ps)?.enName;
       Object.assign(
         itemsFormatted[i],
         JSON.parse(`{
