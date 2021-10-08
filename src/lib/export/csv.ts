@@ -51,12 +51,13 @@ export function downloadObjectAsCSV(itemsFormatted: Record<string, unknown>[], t
     document.body.removeChild(link);
   }
 }
-//TODO new parameter fn replacing map function
-function valuesInColumn(itemsFormatted, i, values, columnName) {
+
+function valuesInColumn(itemsFormatted, i, values, columnName, fn) {
   if (values) {
     let stringValue = '';
-    stringValue += values.map((el) => el);
-    stringValue = stringValue.replaceAll(',', ' | ');
+    const list = values.map(fn);
+    stringValue += list.map((el) => el.replace(/,/g, ' -'));
+    stringValue = stringValue.replace(/,/g, ' | ');
     Object.assign(itemsFormatted[i], JSON.parse(`{"${columnName}": "${stringValue}"}`));
   } else {
     Object.assign(itemsFormatted[i], JSON.parse(`{ "${columnName}": "" }`));
@@ -148,9 +149,12 @@ export function exportEntriesAsCSV(data: IEntry[], title: string, glosses: strin
       //xv: entry.xv,
     });
     //Assigning sources
-    valuesInColumn(itemsFormatted, i, entry.sr, 'sr');
+    valuesInColumn(itemsFormatted, i, entry.sr, 'sr', (el) => el);
     //Assigning semantic domains
-    valuesInColumn(itemsFormatted, i, entry.sdn, 'sd');
+    valuesInColumn(itemsFormatted, i, entry.sdn, 'sd', (el) => {
+      const objSD = semanticDomains.find((sd) => sd.key === el);
+      return objSD.name;
+    });
     //Assigning glosses
     glosses.forEach((bcp) => {
       Object.assign(headers, JSON.parse(`{ "gl${bcp}": "${glossingLanguages[bcp]} Gloss" }`));
