@@ -24,3 +24,8 @@ export function printDateWithWeekday(date: Date | number): string {
     day: 'numeric',
   }).format(date);
 }
+
+export function minutesAgo(minutes: number) {
+  return Date.now() - minutes * 1000 * 60;
+  // return Timestamp.fromMillis(Date.now() - minutes * 1000 * 60);
+}

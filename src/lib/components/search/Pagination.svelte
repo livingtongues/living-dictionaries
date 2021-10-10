@@ -3,7 +3,7 @@
   // import { connectPagination } from 'instantsearch.js/es/connectors';
   import { connectPagination } from 'instantsearch.js/cjs/connectors/index.js';
   import { onMount } from 'svelte';
-  import { isManager, isContributor, dictionary } from '$lib/stores';
+  import { canEdit, dictionary } from '$lib/stores';
   import { _ } from 'svelte-i18n';
   import Button from '$svelteui/ui/Button.svelte';
 
@@ -84,7 +84,7 @@
 
   <div class="flex-grow" />
 
-  {#if $isManager || $isContributor}
+  {#if $canEdit}
     <span class="px-3 md:px-0 fixed md:sticky bottom-3 ltr:right-0 rtl:left-0 z-10">
       <Button href={'/' + $dictionary.id + '/entry/new'} form="primary">
         <i class="far fa-plus" />

@@ -3,7 +3,7 @@
 
   import { _ } from 'svelte-i18n';
   import { page } from '$app/stores';
-  import { isManager, isContributor, algoliaQueryParams, dictionary } from '$lib/stores';
+  import { canEdit, algoliaQueryParams, dictionary } from '$lib/stores';
 
   import type { IEntry } from '$lib/interfaces';
   let entry: IEntry = {
@@ -18,7 +18,7 @@
     if (!entry.lx) {
       return alert(`Missing: ${$_('entry.lx', { default: 'Lexeme/Word/Phrase' })}`);
     }
-    if (!$isManager && !$isContributor) {
+    if (!$canEdit) {
       return alert(
         `${$_('entry.signed_in_as_manager', {
           default: 'You must be signed in as a manager of this dictionary to make changes.',

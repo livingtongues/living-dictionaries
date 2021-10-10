@@ -3,6 +3,7 @@
   import type { InstantSearch } from 'instantsearch.js';
   const search: InstantSearch = getContext('search');
   import Hits from '$lib/components/search/Hits.svelte';
+
   import Pagination from '$lib/components/search/Pagination.svelte';
   import EntriesTable from '$lib/components/table/EntriesTable.svelte';
 
@@ -12,7 +13,7 @@
   onMount(() => {
     search.addWidgets([
       configure({
-        hitsPerPage: 30,
+        hitsPerPage: 35,
       }),
     ]);
   });
