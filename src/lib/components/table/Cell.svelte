@@ -39,7 +39,7 @@
     <AudioCell {canEdit} {entry} />
   {:else if column.field === 'photoFile'}
     {#if entry.pf}
-      <Image editable={canEdit} {entry} square={60} />
+      <Image {canEdit} {entry} square={60} />
     {/if}
   {:else if column.field === 'speaker'}
     <SelectSpeakerCell {canEdit} {entry} />

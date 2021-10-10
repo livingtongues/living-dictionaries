@@ -42,7 +42,7 @@
   });
 
   import Image from '$lib/components/image/Image.svelte';
-  import { isManager, isContributor } from '$lib/stores';
+  import { canEdit } from '$lib/stores';
   import type { IEntry } from '$lib/interfaces';
   let hitsType: IEntry;
 </script>
@@ -58,7 +58,7 @@
         <div
           class="bg-gray-300 shadow relative rounded overflow-hidden"
           style="max-width: 500px; max-height: 500px;">
-          <Image square={480} {entry} editable={$isManager || $isContributor} />
+          <Image square={480} {entry} canEdit={$canEdit} />
           <div
             class="text-dark-shadow text-white font-semibold p-2 absolute top-0
               left-0">
