@@ -10,7 +10,8 @@
 
   export let value = '',
     field: string,
-    display = $_('misc.edit', { default: 'Edit' });
+    display = $_('misc.edit', { default: 'Edit' }),
+    adding = false;
 
   function close() {
     dispatch('close');
@@ -50,9 +51,16 @@
       <Button onclick={close} form="simple" color="black">
         {$_('misc.cancel', { default: 'Cancel' })}
       </Button>
-      <Button type="submit" form="primary">
-        {$_('misc.save', { default: 'Save' })}
-      </Button>
+      {#if adding}
+        <Button type="submit" form="primary">
+          {$_('misc.next', { default: 'Next' })}
+          <i class="far fa-chevron-right rtl-x-flip" />
+        </Button>
+      {:else}
+        <Button type="submit" form="primary">
+          {$_('misc.save', { default: 'Save' })}
+        </Button>
+      {/if}
     </div>
   </form>
 </Modal>

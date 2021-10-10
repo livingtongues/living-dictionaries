@@ -32,8 +32,7 @@
       <Doc
         path="dictionaries/{$dictionary.id}/words/{algoliaEntry.id}"
         startWith={algoliaEntry}
-        let:data={entry}
-        log>
+        let:data={entry}>
         <ListEntry {entry} canEdit={$canEdit} />
       </Doc>
     {/each}
