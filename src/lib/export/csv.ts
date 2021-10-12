@@ -2,6 +2,7 @@ import type { IDictionary, IEntry, IUser } from '$lib/interfaces';
 import { dictionary } from 'svelte-i18n';
 import { glossingLanguages } from './glossing-languages-temp';
 import { semanticDomains } from '$lib/mappings/semantic-domains';
+import { partsOfSpeech } from '$lib/mappings/parts-of-speech';
 
 export function convertToCSV(objArray) {
   const array = typeof objArray != 'object' ? JSON.parse(objArray) : objArray;
@@ -51,12 +52,14 @@ export function downloadObjectAsCSV(itemsFormatted: Record<string, unknown>[], t
     document.body.removeChild(link);
   }
 }
-//TODO new parameter fn replacing map function
-function valuesInColumn(itemsFormatted, i, values, columnName) {
+
+function valuesInColumn(itemsFormatted, i, values, columnName, fn) {
   if (values) {
     let stringValue = '';
-    stringValue += values.map((el) => el);
-    stringValue = stringValue.replaceAll(',', ' | ');
+    //In case some strings contain commas
+    const list = values.map(fn);
+    stringValue += list.map((el) => el.replace(/,/g, ' -'));
+    stringValue = stringValue.replace(/,/g, ' | ');
     Object.assign(itemsFormatted[i], JSON.parse(`{"${columnName}": "${stringValue}"}`));
   } else {
     Object.assign(itemsFormatted[i], JSON.parse(`{ "${columnName}": "" }`));
@@ -116,19 +119,19 @@ export function exportUsersAsCSV(data: IUser[], title: string) {
   itemsFormatted.unshift(headers);
   downloadObjectAsCSV(itemsFormatted, title);
 }
-//TODO fix parts-of-speech
+//TODO some lexems have commas!
 export function exportEntriesAsCSV(data: IEntry[], title: string, glosses: string[]) {
   const headers = {
     lx: 'Lexeme/Word/Phrase',
     ph: 'Phonetic (IPA)',
     in: 'Interlinearization',
     mr: 'Morphology',
-    ps: 'Parts of speech',
     di: 'Dialect for this entry',
     nt: 'Notes',
+    psab: 'Parts of speech abbreviation',
+    ps: 'Parts of speech',
     sr: 'Source(s)',
     sd: 'Semantic domain',
-    //xv: 'Example vernacular', //?
   };
 
   const itemsFormatted = [];
@@ -141,16 +144,40 @@ export function exportEntriesAsCSV(data: IEntry[], title: string, glosses: strin
       ph: entry.ph,
       in: entry.in,
       mr: entry.mr,
-      ps: entry.ps,
       di: entry.di,
       nt: entry.nt,
-      //TODO sd,
       //xv: entry.xv,
     });
+    //Assigning parts of speech (abbreviation & name)
+    Object.assign(
+      itemsFormatted[i],
+      JSON.parse(`{
+      "psab": "${entry.ps ? entry.ps : ''}"
+    }`)
+    );
+    if (entry.ps) {
+      const pos = partsOfSpeech.find((ps) => ps.enAbbrev === entry.ps)?.enName;
+      Object.assign(
+        itemsFormatted[i],
+        JSON.parse(`{
+        "ps": "${pos}"
+      }`)
+      );
+    } else {
+      Object.assign(
+        itemsFormatted[i],
+        JSON.parse(`{
+        "ps": ""
+      }`)
+      );
+    }
     //Assigning sources
-    valuesInColumn(itemsFormatted, i, entry.sr, 'sr');
+    valuesInColumn(itemsFormatted, i, entry.sr, 'sr', (el) => el);
     //Assigning semantic domains
-    valuesInColumn(itemsFormatted, i, entry.sdn, 'sd');
+    valuesInColumn(itemsFormatted, i, entry.sdn, 'sd', (el) => {
+      const objSD = semanticDomains.find((sd) => sd.key === el);
+      return objSD.name;
+    });
     //Assigning glosses
     glosses.forEach((bcp) => {
       Object.assign(headers, JSON.parse(`{ "gl${bcp}": "${glossingLanguages[bcp]} Gloss" }`));
@@ -172,13 +199,19 @@ export function exportEntriesAsCSV(data: IEntry[], title: string, glosses: strin
           "xs${title}": "${entry.xs['vn'] ? entry.xs['vn'] : ''}"
         }`)
           );
+        } else {
+          Object.assign(
+            itemsFormatted[i],
+            JSON.parse(`{
+              "xs${title}": ""
+            }`)
+          );
         }
       } else {
         Object.assign(
           headers,
           JSON.parse(`{"xs${glosses[j]}": "Example sentence in ${glossingLanguages[glosses[j]]}"}`)
         );
-        // I think it can be refactored
         if (entry.xs) {
           Object.assign(
             itemsFormatted[i],
@@ -196,6 +229,28 @@ export function exportEntriesAsCSV(data: IEntry[], title: string, glosses: strin
         }
       }
     }
+    //Audio metadata
+    Object.assign(headers, {
+      aupa: 'Audio path',
+      ausn: 'Speaker name',
+      aubp: 'Speaker birthplace',
+    });
+    if (entry.sf) {
+      const path = entry.sf.path;
+      const speakerName = 'test speaker name';
+      const speakerBP = 'test speaker birthplace';
+      Object.assign(
+        itemsFormatted[i],
+        JSON.parse(`{
+        "aupa": "${path}",
+        "ausn": "${speakerName}",
+        "aubp": "${speakerBP}"
+      }`)
+      );
+    } else {
+      Object.assign(itemsFormatted[i], { aupa: '', ausn: '', aubp: '' });
+    }
+    console.log(entry.sf);
     i++;
   });
   //TESTING
