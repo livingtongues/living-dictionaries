@@ -3,7 +3,7 @@
   import type { IEntry } from '$lib/interfaces';
   export let entry: IEntry,
     minimal = false;
-  import { isManager, isContributor } from '$lib/stores';
+  import { canEdit } from '$lib/stores';
   import { longpress } from '$svelteui/actions/longpress';
   import { firebaseConfig } from '$sveltefire/config';
 
@@ -41,7 +41,7 @@
     justify-center cursor-pointer p-1 select-none"
     use:longpress={800}
     on:click={() => {
-      if ($isManager || $isContributor) {
+      if ($canEdit) {
         openAudioModal = true;
       } else {
         initAudio(entry.sf);
@@ -53,7 +53,7 @@
     {:else}<i class="far fa-ear fa-lg mt-1" />{/if}
     <div class="text-gray-600 text-sm mt-1">
       {$_('audio.listen', { default: 'Listen' })}
-      {#if !minimal && ($isManager || $isContributor)}
+      {#if !minimal && $canEdit}
         +
         {$_('audio.edit_audio', { default: 'Edit Audio' })}
       {/if}
@@ -68,7 +68,7 @@
       {/if} -->
     </div>
   </div>
-{:else if $isManager || $isContributor}
+{:else if $canEdit}
   <div
     class="{$$props.class} hover:bg-gray-300 flex flex-col items-center
     justify-center cursor-pointer p-2 text-lg"

@@ -37,3 +37,8 @@ export const isContributor: Readable<boolean> = derived(
     }
   }
 );
+
+export const canEdit: Readable<boolean> = derived(
+  [isManager, isContributor],
+  ([$isManager, $isContributor]) => $isManager || $isContributor
+);

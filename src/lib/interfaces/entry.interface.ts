@@ -44,10 +44,7 @@ export interface IEntry extends IFirestoreMetaDataAbbreviated, LDAlgoliaFields, 
   ii?: string; // importId which can be used to show all entries from a particular import
   ei?: string; // Elicitation Id for Munda languages or Swadesh Composite number list from Comparalex
 
-  // Algolia added fields
-
-  // UI needed fields
-  updatedRecently?: boolean; // added by view component to load live entry from Firebase to avoid using 5-second stale data from Algolia when making updates
+  deletedAt?: Timestamp & FieldValue; // whether this entry has been deleted
 }
 
 // TODO:
