@@ -119,7 +119,6 @@ export function exportUsersAsCSV(data: IUser[], title: string) {
   itemsFormatted.unshift(headers);
   downloadObjectAsCSV(itemsFormatted, title);
 }
-//TODO some lexems have commas!
 export function exportEntriesAsCSV(
   data: IEntry[],
   title: string,
