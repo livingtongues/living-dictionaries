@@ -1,5 +1,5 @@
 import JSZip from 'jszip';
-import type { IEntry } from '$lib/interfaces';
+import type { IEntry, ISpeaker } from '$lib/interfaces';
 import { getCollection } from '$sveltefire/firestore';
 import { exportEntriesAsCSV } from '$lib/export/csv';
 
@@ -35,5 +35,7 @@ export async function downloadImages(imageUrls: string[]) {
 
 export async function downloadEntries(id: string, name: string, glosses: string[]) {
   const dataEntries = await getCollection<IEntry>(`dictionaries/${id}/words`);
-  exportEntriesAsCSV(dataEntries, name, glosses);
+  //TODO change this for fetching speakers one by one inside exportEntriesAsCSV
+  const speakers = await getCollection<ISpeaker>('speakers');
+  exportEntriesAsCSV(dataEntries, name, glosses, speakers);
 }
