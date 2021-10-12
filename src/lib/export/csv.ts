@@ -195,7 +195,7 @@ export function exportEntriesAsCSV(
       Object.assign(
         itemsFormatted[i],
         JSON.parse(`{
-        "gl${bcp}": "${entry.gl[bcp] ? entry.gl[bcp] : ''}"
+        "gl${bcp}": "${entry.gl[bcp] ? entry.gl[bcp].replace(/,/g, ' -') : ''}"
       }`)
       );
     });
