@@ -131,7 +131,6 @@ export function exportEntriesAsCSV(data: IEntry[], title: string, glosses: strin
     psab: 'Parts of speech abbreviation',
     ps: 'Parts of speech',
     sr: 'Source(s)',
-    sd: 'Semantic domain',
   };
 
   const itemsFormatted = [];
@@ -174,9 +173,16 @@ export function exportEntriesAsCSV(data: IEntry[], title: string, glosses: strin
     //Assigning sources
     valuesInColumn(itemsFormatted, i, entry.sr, 'sr', (el) => el);
     //Assigning semantic domains
-    valuesInColumn(itemsFormatted, i, entry.sdn, 'sd', (el) => {
-      const objSD = semanticDomains.find((sd) => sd.key === el);
-      return objSD.name;
+    semanticDomains.forEach((sd, index) => {
+      Object.assign(headers, JSON.parse(`{"sd${index}": "${sd.name.replace(/,/g, ' -')}"}`));
+      if (entry.sdn) {
+        Object.assign(
+          itemsFormatted[i],
+          JSON.parse(`{"sd${index}": "${entry.sdn.includes(sd.key) ? '✔' : ''}"}`)
+        );
+      } else {
+        Object.assign(itemsFormatted[i], JSON.parse(`{"sd${index}": ""}`));
+      }
     });
     //Assigning glosses
     glosses.forEach((bcp) => {
