@@ -1,4 +1,4 @@
-import type { IDictionary, IEntry, IUser } from '$lib/interfaces';
+import type { IDictionary, IEntry, ISpeaker, IUser } from '$lib/interfaces';
 import { dictionary } from 'svelte-i18n';
 import { glossingLanguages } from './glossing-languages-temp';
 import { semanticDomains } from '$lib/mappings/semantic-domains';
@@ -120,7 +120,12 @@ export function exportUsersAsCSV(data: IUser[], title: string) {
   downloadObjectAsCSV(itemsFormatted, title);
 }
 //TODO some lexems have commas!
-export function exportEntriesAsCSV(data: IEntry[], title: string, glosses: string[]) {
+export function exportEntriesAsCSV(
+  data: IEntry[],
+  title: string,
+  glosses: string[],
+  speakers: ISpeaker[]
+) {
   const headers = {
     lx: 'Lexeme/Word/Phrase',
     ph: 'Phonetic (IPA)',
@@ -139,7 +144,7 @@ export function exportEntriesAsCSV(data: IEntry[], title: string, glosses: strin
     const entryKeys = Object.keys(entry);
     entryKeys.forEach((key) => (!entry[key] ? (entry[key] = '') : entry[key]));
     itemsFormatted.push({
-      lx: entry.lx,
+      lx: entry.lx.replace(/,/g, ' -'),
       ph: entry.ph,
       in: entry.in,
       mr: entry.mr,
@@ -240,21 +245,25 @@ export function exportEntriesAsCSV(data: IEntry[], title: string, glosses: strin
       aupa: 'Audio path',
       ausn: 'Speaker name',
       aubp: 'Speaker birthplace',
+      aude: 'Speaker decade',
     });
     if (entry.sf) {
-      const path = entry.sf.path;
-      const speakerName = 'test speaker name';
-      const speakerBP = 'test speaker birthplace';
+      const speaker = speakers.find((sp) => sp.id === entry.sf.sp);
+      const path = entry.sf.path || '';
+      const speakerName = speaker?.displayName || entry.sf.speakerName || '';
+      const speakerBP = speaker?.birthplace || '';
+      const speakerDecade = speaker?.decade || '';
       Object.assign(
         itemsFormatted[i],
         JSON.parse(`{
         "aupa": "${path}",
         "ausn": "${speakerName}",
-        "aubp": "${speakerBP}"
+        "aubp": "${speakerBP}",
+        "aude": "${speakerDecade}"
       }`)
       );
     } else {
-      Object.assign(itemsFormatted[i], { aupa: '', ausn: '', aubp: '' });
+      Object.assign(itemsFormatted[i], { aupa: '', ausn: '', aubp: '', aude: '' });
     }
     console.log(entry.sf);
     i++;
