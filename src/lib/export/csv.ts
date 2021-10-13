@@ -1,9 +1,10 @@
-import type { IDictionary, IEntry, ISpeaker, IUser } from '$lib/interfaces';
+import type { IDictionary, IEntry, IUser } from '$lib/interfaces';
 import { dictionary } from 'svelte-i18n';
 import { glossingLanguages } from './glossing-languages-temp';
 import { semanticDomains } from '$lib/mappings/semantic-domains';
 import { partsOfSpeech } from '$lib/mappings/parts-of-speech';
 import { firebaseConfig } from '$sveltefire/config';
+import { fetchSpeakers } from '../helpers/fetchSpeakers';
 
 export function convertToCSV(objArray) {
   const array = typeof objArray != 'object' ? JSON.parse(objArray) : objArray;
@@ -152,12 +153,8 @@ export function exportUsersAsCSV(data: IUser[], title: string) {
   itemsFormatted.unshift(headers);
   downloadObjectAsCSV(itemsFormatted, title);
 }
-export function exportEntriesAsCSV(
-  data: IEntry[],
-  title: string,
-  glosses: string[],
-  speakers: ISpeaker[]
-) {
+export async function exportEntriesAsCSV(data: IEntry[], title: string, glosses: string[]) {
+  const speakers = await fetchSpeakers(data);
   const imageUrls = [];
   const headers = {
     lx: 'Lexeme/Word/Phrase',
@@ -281,7 +278,7 @@ export function exportEntriesAsCSV(
       aude: 'Speaker decade',
     });
     if (entry.sf) {
-      const speaker = speakers.find((sp) => sp.id === entry.sf.sp);
+      const speaker = speakers.find((speaker) => speaker.id === entry.sf.sp);
       const path = entry.sf.path || '';
       const speakerName = speaker?.displayName || entry.sf.speakerName || '';
       const speakerBP = speaker?.birthplace || '';
@@ -316,6 +313,5 @@ export function exportEntriesAsCSV(
 
   itemsFormatted.unshift(headers);
   downloadObjectAsCSV(itemsFormatted, title);
-  console.dir(imageUrls);
   downloadImages(imageUrls);
 }
