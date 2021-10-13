@@ -35,7 +35,5 @@ export async function downloadImages(imageUrls: string[]) {
 
 export async function downloadEntries(id: string, name: string, glosses: string[]) {
   const dataEntries = await getCollection<IEntry>(`dictionaries/${id}/words`);
-  //TODO change this for fetching speakers one by one inside exportEntriesAsCSV
-  const speakers = await getCollection<ISpeaker>('speakers');
-  exportEntriesAsCSV(dataEntries, name, glosses, speakers);
+  exportEntriesAsCSV(dataEntries, name, glosses);
 }
