@@ -33,7 +33,17 @@ export async function downloadImages(imageUrls: string[]) {
   }
 }
 
-export async function downloadEntries(id: string, name: string, glosses: string[]) {
+export async function downloadEntries(
+  id: string,
+  name: string,
+  glosses: string[],
+  includeAudios = false,
+  includeImages = false
+) {
   const dataEntries = await getCollection<IEntry>(`dictionaries/${id}/words`);
-  exportEntriesAsCSV(dataEntries, name, glosses);
+  if (includeImages) {
+    exportEntriesAsCSV(dataEntries, name, glosses, false, true);
+  } else {
+    exportEntriesAsCSV(dataEntries, name, glosses);
+  }
 }
