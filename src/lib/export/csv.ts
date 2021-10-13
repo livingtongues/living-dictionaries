@@ -3,6 +3,7 @@ import { dictionary } from 'svelte-i18n';
 import { glossingLanguages } from './glossing-languages-temp';
 import { semanticDomains } from '$lib/mappings/semantic-domains';
 import { partsOfSpeech } from '$lib/mappings/parts-of-speech';
+import { firebaseConfig } from '$sveltefire/config';
 
 export function convertToCSV(objArray) {
   const array = typeof objArray != 'object' ? JSON.parse(objArray) : objArray;
@@ -20,6 +21,38 @@ export function convertToCSV(objArray) {
   }
 
   return str;
+}
+
+import JSZip from 'jszip';
+async function downloadImages(imageUrls: string[]) {
+  console.log('imageUrls', imageUrls);
+  //Zip and downloading images)
+  const blobImgs = [];
+  await Promise.all(
+    imageUrls.map(async (url) => {
+      try {
+        const fetchedImages = await fetch(url);
+        const blobs = await fetchedImages.blob();
+        blobImgs.push(blobs);
+      } catch {
+        //TODO I don't know what to do here!
+        console.log('Something is wrong!');
+      }
+    })
+  );
+  if (blobImgs.length > 0) {
+    const zip = new JSZip();
+    const photos = zip.folder('home/photos');
+    let i = 1;
+    blobImgs.forEach((bi) => {
+      photos.file(`image${i}.jpeg`, bi, { binary: true });
+      i++;
+    });
+    const { saveAs } = await import('file-saver');
+    zip.generateAsync({ type: 'blob' }).then((blob) => {
+      saveAs(blob, 'myImage.zip');
+    });
+  }
 }
 
 export function downloadObjectAsCSV(itemsFormatted: Record<string, unknown>[], title: string) {
@@ -125,6 +158,7 @@ export function exportEntriesAsCSV(
   glosses: string[],
   speakers: ISpeaker[]
 ) {
+  const imageUrls = [];
   const headers = {
     lx: 'Lexeme/Word/Phrase',
     ph: 'Phonetic (IPA)',
@@ -264,12 +298,24 @@ export function exportEntriesAsCSV(
     } else {
       Object.assign(itemsFormatted[i], { aupa: '', ausn: '', aubp: '', aude: '' });
     }
-    console.log(entry.sf);
+    //TESTING
+    if (entry.pf) {
+      const convertedPath = entry.pf.path.replace(/\//g, '%2F');
+      imageUrls.push(
+        `https://firebasestorage.googleapis.com/v0/b/${firebaseConfig.storageBucket}/o/${convertedPath}?alt=media`
+      );
+    }
+    /*  const convertedPath = entry?.sf?.path.replace(/\//g, '%2F');
+    console.log(
+      'audio',
+      `https://firebasestorage.googleapis.com/v0/b/${firebaseConfig.storageBucket}/o/${convertedPath}?alt=media`
+    ); */
     i++;
   });
   //TESTING
-  console.dir(itemsFormatted);
 
   itemsFormatted.unshift(headers);
   downloadObjectAsCSV(itemsFormatted, title);
+  console.dir(imageUrls);
+  downloadImages(imageUrls);
 }
