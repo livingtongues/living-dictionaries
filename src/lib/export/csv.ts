@@ -41,11 +41,16 @@ async function downloadImages(imageUrls: string[]) {
       }
     })
   );
-  if (blobImgs.length > 0) {
+  return blobImgs;
+}
+
+async function zipper(blobFiles: Blob[], CSVFile = null, CSVName = '') {
+  if (blobFiles.length > 0) {
     const zip = new JSZip();
+    CSVFile ? zip.file(CSVName, CSVFile) : '';
     const photos = zip.folder('home/photos');
     let i = 1;
-    blobImgs.forEach((bi) => {
+    blobFiles.forEach((bi) => {
       photos.file(`image${i}.jpeg`, bi, { binary: true });
       i++;
     });
@@ -56,7 +61,7 @@ async function downloadImages(imageUrls: string[]) {
   }
 }
 
-export function downloadObjectAsCSV(itemsFormatted: Record<string, unknown>[], title: string) {
+function fileAsBlob(itemsFormatted) {
   function replacer(_, value: any) {
     // Filtering out properties
     if (value === undefined || value === null) {
@@ -65,14 +70,17 @@ export function downloadObjectAsCSV(itemsFormatted: Record<string, unknown>[], t
     return value;
   }
   const jsonObject = JSON.stringify(itemsFormatted, replacer);
-
   const csv = convertToCSV(jsonObject);
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  return blob;
+}
 
+export function downloadObjectAsCSV(itemsFormatted: Record<string, unknown>[], title: string) {
+  const blob = fileAsBlob(itemsFormatted);
   const d = new Date();
   const date = d.getMonth() + 1 + '_' + d.getDate() + '_' + d.getFullYear();
   const exportedFilename = title + '_' + date + '.csv' || 'export.csv';
 
-  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
   const link = document.createElement('a');
   if (link.download !== undefined) {
     // feature detection
@@ -153,7 +161,14 @@ export function exportUsersAsCSV(data: IUser[], title: string) {
   itemsFormatted.unshift(headers);
   downloadObjectAsCSV(itemsFormatted, title);
 }
-export async function exportEntriesAsCSV(data: IEntry[], title: string, glosses: string[]) {
+
+export async function exportEntriesAsCSV(
+  data: IEntry[],
+  title: string,
+  glosses: string[],
+  includeAudios = false,
+  includeImages = false
+) {
   const speakers = await fetchSpeakers(data);
   const imageUrls = [];
   const headers = {
@@ -229,7 +244,7 @@ export async function exportEntriesAsCSV(data: IEntry[], title: string, glosses:
       }`)
       );
     });
-    //Assigning example sentences. There's no way to do this in a declarative form.
+    //Assigning example sentences
     for (let j = 0; j <= glosses.length; j++) {
       if (j === glosses.length) {
         Object.assign(headers, JSON.parse(`{"xs${title}": "Example sentence in ${title}"}`));
@@ -278,7 +293,7 @@ export async function exportEntriesAsCSV(data: IEntry[], title: string, glosses:
       aude: 'Speaker decade',
     });
     if (entry.sf) {
-      const speaker = speakers.find((speaker) => speaker.id === entry.sf.sp);
+      const speaker = speakers.find((speaker) => speaker?.id === entry.sf.sp);
       const path = entry.sf.path || '';
       const speakerName = speaker?.displayName || entry.sf.speakerName || '';
       const speakerBP = speaker?.birthplace || '';
@@ -309,9 +324,11 @@ export async function exportEntriesAsCSV(data: IEntry[], title: string, glosses:
     ); */
     i++;
   });
-  //TESTING
 
   itemsFormatted.unshift(headers);
-  downloadObjectAsCSV(itemsFormatted, title);
-  downloadImages(imageUrls);
+  const CSVBlob = fileAsBlob(itemsFormatted);
+  if (includeImages) {
+    const test = await downloadImages(imageUrls);
+    zipper(test, CSVBlob, `${title}.csv`);
+  }
 }
