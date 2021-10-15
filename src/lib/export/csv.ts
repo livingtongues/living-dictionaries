@@ -180,6 +180,14 @@ export async function exportEntriesAsCSV(
   includeAudios = false,
   includeImages = false
 ) {
+  //Getting the total number of semantic domains by entry if they have at least one
+  let totalSDN = 0;
+  const filterSDN = data.filter((entry) => (entry.sdn ? entry.sdn.length : ''));
+  if (filterSDN.length > 0) {
+    totalSDN = filterSDN
+      .map((entry) => entry.sdn.length)
+      .reduce((maxLength, sdnLength) => Math.max(maxLength, sdnLength));
+  }
   const speakers = await fetchSpeakers(data);
   const imageUrls = [];
   const audioUrls = [];
@@ -194,6 +202,34 @@ export async function exportEntriesAsCSV(
     ps: 'Parts of speech',
     sr: 'Source(s)',
   };
+  //Assigning semantic domains as headers
+  if (totalSDN > 0) {
+    for (let index = 0; index < totalSDN; index++) {
+      Object.assign(headers, JSON.parse(`{"sd${index + 1}": "Semantic domain ${index + 1}"}`));
+    }
+  }
+  //Assigning glosses as headers
+  glosses.forEach((bcp) => {
+    Object.assign(headers, JSON.parse(`{ "gl${bcp}": "${glossingLanguages[bcp]} Gloss" }`));
+  });
+  //Assigning example sentences as headers
+  for (let j = 0; j <= glosses.length; j++) {
+    if (j === glosses.length) {
+      Object.assign(headers, JSON.parse(`{"xsvn": "Example sentence in ${title}"}`));
+    } else {
+      Object.assign(
+        headers,
+        JSON.parse(`{"xs${glosses[j]}": "Example sentence in ${glossingLanguages[glosses[j]]}"}`)
+      );
+    }
+  }
+  //Assigning audio metadata as headers
+  Object.assign(headers, {
+    aupa: 'Audio path',
+    ausn: 'Speaker name',
+    aubp: 'Speaker birthplace',
+    aude: 'Speaker decade',
+  });
 
   const itemsFormatted = [];
   data.forEach((entry, i) => {
@@ -235,75 +271,68 @@ export async function exportEntriesAsCSV(
     //Assigning sources
     valuesInColumn(itemsFormatted, i, entry.sr, 'sr', (el) => el);
     //Assigning semantic domains
-    semanticDomains.forEach((sd, index) => {
-      Object.assign(headers, JSON.parse(`{"sd${index}": "${sd.name.replace(/,/g, ' -')}"}`));
-      if (entry.sdn) {
+    if (entry.sdn) {
+      for (let index = 0; index < totalSDN; index++) {
         Object.assign(
           itemsFormatted[i],
-          JSON.parse(`{"sd${index}": "${entry.sdn.includes(sd.key) ? '✔' : ''}"}`)
+          JSON.parse(
+            `{"sd${index + 1}": "${
+              entry.sdn[index]
+                ? semanticDomains.find((sd) => sd.key === entry.sdn[index]).name.replace(/,/g, ' -')
+                : ''
+            }"}`
+          )
         );
-      } else {
-        Object.assign(itemsFormatted[i], JSON.parse(`{"sd${index}": ""}`));
       }
-    });
+    } else {
+      for (let index = 0; index < totalSDN; index++) {
+        Object.assign(
+          itemsFormatted[i],
+          JSON.parse(`{
+            "sd${index + 1}": ""
+          }`)
+        );
+      }
+    }
     //Assigning glosses
     glosses.forEach((bcp) => {
-      Object.assign(headers, JSON.parse(`{ "gl${bcp}": "${glossingLanguages[bcp]} Gloss" }`));
       Object.assign(
         itemsFormatted[i],
         JSON.parse(`{
-        "gl${bcp}": "${entry.gl[bcp] ? entry.gl[bcp].replace(/,/g, ' -') : ''}"
-      }`)
+          "gl${bcp}": "${entry.gl[bcp] ? entry.gl[bcp].replace(/,/g, ' -') : ''}"
+        }`)
       );
     });
     //Assigning example sentences
     for (let j = 0; j <= glosses.length; j++) {
-      if (j === glosses.length) {
-        Object.assign(headers, JSON.parse(`{"xs${title}": "Example sentence in ${title}"}`));
-        if (entry.xs) {
+      if (entry.xs) {
+        if (j === glosses.length) {
           Object.assign(
             itemsFormatted[i],
             JSON.parse(`{
-          "xs${title}": "${entry.xs['vn'] ? entry.xs['vn'] : ''}"
-        }`)
+              "xs${glosses[j] ? glosses[j] : 'vn'}": "${entry.xs['vn'] ? entry.xs['vn'] : ''}"
+            }`)
           );
         } else {
           Object.assign(
             itemsFormatted[i],
             JSON.parse(`{
-              "xs${title}": ""
+              "xs${glosses[j] ? glosses[j] : 'vn'}": "${
+              entry.xs[glosses[j]] ? entry.xs[glosses[j]] : ''
+            }"
             }`)
           );
         }
       } else {
         Object.assign(
-          headers,
-          JSON.parse(`{"xs${glosses[j]}": "Example sentence in ${glossingLanguages[glosses[j]]}"}`)
+          itemsFormatted[i],
+          JSON.parse(`{
+            "xs${glosses[j] ? glosses[j] : 'vn'}": ""
+          }`)
         );
-        if (entry.xs) {
-          Object.assign(
-            itemsFormatted[i],
-            JSON.parse(`{
-            "xs${glosses[j]}": "${entry.xs[glosses[j]] ? entry.xs[glosses[j]] : ''}"
-          }`)
-          );
-        } else {
-          Object.assign(
-            itemsFormatted[i],
-            JSON.parse(`{
-            "xs${glosses[j]}": ""
-          }`)
-          );
-        }
       }
     }
     //Audio metadata
-    Object.assign(headers, {
-      aupa: 'Audio path',
-      ausn: 'Speaker name',
-      aubp: 'Speaker birthplace',
-      aude: 'Speaker decade',
-    });
     if (entry.sf) {
       const speaker = speakers.find((speaker) => speaker?.id === entry.sf.sp);
       const path = entry.sf.path || '';
@@ -326,6 +355,7 @@ export async function exportEntriesAsCSV(
     } else {
       Object.assign(itemsFormatted[i], { aupa: '', ausn: '', aubp: '', aude: '' });
     }
+
     //TESTING
     if (entry.pf) {
       const convertedImagesPath = entry.pf.path.replace(/\//g, '%2F');
@@ -338,6 +368,7 @@ export async function exportEntriesAsCSV(
 
   itemsFormatted.unshift(headers);
   const CSVBlob = fileAsBlob(itemsFormatted);
+
   if (includeImages && includeAudios) {
     const imagesURLs = await downloadMedia(imageUrls);
     const audiosURLs = await downloadMedia(audioUrls);
@@ -351,4 +382,5 @@ export async function exportEntriesAsCSV(
   } else {
     downloadObjectAsCSV(itemsFormatted, title);
   }
+  console.log('itemsFormatted', itemsFormatted);
 }
