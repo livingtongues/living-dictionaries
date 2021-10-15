@@ -2,21 +2,15 @@
   import { _ } from 'svelte-i18n';
   import { dictionary } from '$lib/stores';
   import Button from '$svelteui/ui/Button.svelte';
-  import { downloadImages, downloadEntries } from './export/_fetchers';
+  import { downloadEntries } from './export/_fetchers';
   import { glossingLanguages } from '$lib/export/glossing-languages-temp';
   import About from '../about.svelte';
 
-  //Testing
-  let imgs = [
-    'https://i.imgur.com/0LVyDUY.jpeg',
-    'https://i.imgur.com/4AA1jC4.jpeg',
-    'https://firebasestorage.googleapis.com/v0/b/talking-dictionaries-alpha.appspot.com/o/images%2Fmandarin-practice%2FmogAtD3lTCtkuwj7tLDD_1630105898118.jpg?alt=media',
-  ];
-
-  let data = false;
+  let data = true;
   let dataType = '';
   let images = false;
   let audio = false;
+  let loading = false;
 
   $: if (!data) {
     dataType = '';
@@ -40,7 +34,7 @@
 </h3>
 
 <div class="items-center mt-2 mb-6 ml-3">
-  <input id="public" type="checkbox" bind:checked={data} />
+  <input disabled id="public" type="checkbox" bind:checked={data} />
   <label for="public" class="mx-2 block leading-5 text-gray-900">
     <!-- {$_('create.visible_to_public', { default: 'Visible to Public' })} -->
     Data
@@ -56,7 +50,8 @@
         value={'CSV'} />
       <span class="ml-2">CSV</span>
     </label>
-    <label class="inline-flex items-center ml-6">
+    <!--TODO xlsx option-->
+    <!-- <label class="inline-flex items-center ml-6">
       <input
         disabled={!data}
         type="radio"
@@ -65,7 +60,7 @@
         bind:group={dataType}
         value={'xlxs'} />
       <span class="ml-2">xlsx</span>
-    </label>
+    </label> -->
   </div>
   <input id="public" type="checkbox" bind:checked={images} />
   <label for="public" class="mx-2 block leading-5 text-gray-900">
@@ -79,12 +74,38 @@
   </label>
 </div>
 
-{#if images}
-  <Button
-    onclick={() => {
-      downloadEntries($dictionary.id, $dictionary.name, $dictionary.glossLanguages, false, true);
-    }}
-    form="primary">Download CSV</Button>
+{#if !loading}
+  {#if images && audio}
+    <Button
+      onclick={() => {
+        loading = true;
+        downloadEntries($dictionary.id, $dictionary.name, $dictionary.glossLanguages, true, true);
+      }}
+      form="primary">Download CSV & Audio & Images</Button>
+  {:else if audio && !images}
+    <Button
+      onclick={() => {
+        loading = true;
+        downloadEntries($dictionary.id, $dictionary.name, $dictionary.glossLanguages, true);
+      }}
+      form="primary">Download CSV & Audio</Button>
+  {:else if images && !audio}
+    <Button
+      onclick={() => {
+        loading = true;
+        downloadEntries($dictionary.id, $dictionary.name, $dictionary.glossLanguages, false, true);
+      }}
+      form="primary">Download CSV & Images</Button>
+  {:else}
+    <Button
+      onclick={() => {
+        loading = true;
+        downloadEntries($dictionary.id, $dictionary.name, $dictionary.glossLanguages);
+      }}
+      form="primary">Download CSV</Button>
+  {/if}
+{:else}
+  <Button disabled form="primary">Loading...</Button>
 {/if}
 
 <!-- {#if dataType === 'CSV' && !images}

@@ -5,6 +5,7 @@ import { semanticDomains } from '$lib/mappings/semantic-domains';
 import { partsOfSpeech } from '$lib/mappings/parts-of-speech';
 import { firebaseConfig } from '$sveltefire/config';
 import { fetchSpeakers } from '../helpers/fetchSpeakers';
+import JSZip from 'jszip';
 
 export function convertToCSV(objArray) {
   const array = typeof objArray != 'object' ? JSON.parse(objArray) : objArray;
@@ -24,39 +25,49 @@ export function convertToCSV(objArray) {
   return str;
 }
 
-import JSZip from 'jszip';
-async function downloadImages(imageUrls: string[]) {
-  console.log('imageUrls', imageUrls);
+async function downloadMedia(mediaURLs: string[]) {
   //Zip and downloading images)
-  const blobImgs = [];
+  const blobMedia = [];
   await Promise.all(
-    imageUrls.map(async (url) => {
+    mediaURLs.map(async (url) => {
       try {
-        const fetchedImages = await fetch(url);
-        const blobs = await fetchedImages.blob();
-        blobImgs.push(blobs);
+        const fetchedMedia = await fetch(url);
+        const blobs = await fetchedMedia.blob();
+        blobMedia.push(blobs);
       } catch {
         //TODO I don't know what to do here!
         console.log('Something is wrong!');
       }
     })
   );
-  return blobImgs;
+  return blobMedia;
 }
 
-async function zipper(blobFiles: Blob[], CSVFile = null, CSVName = '') {
-  if (blobFiles.length > 0) {
+async function zipper(
+  zipName: string,
+  CSVFile = null,
+  CSVName: string,
+  blobAudios: Blob[],
+  blobImages: Blob[]
+) {
+  if (blobAudios.length > 0 || blobImages.length > 0) {
     const zip = new JSZip();
     CSVFile ? zip.file(CSVName, CSVFile) : '';
-    const photos = zip.folder('home/photos');
-    let i = 1;
-    blobFiles.forEach((bi) => {
-      photos.file(`image${i}.jpeg`, bi, { binary: true });
-      i++;
+    const media = zip.folder('media/');
+    let indexAudio = 1;
+    let indexImage = 1;
+    blobImages.forEach((bi) => {
+      media.folder('images/').file(`image${indexAudio}.jpeg`, bi, { binary: true });
+      indexAudio++;
     });
+    blobAudios.forEach((ba) => {
+      media.folder('audios/').file(`audios${indexImage}.wav`, ba, { binary: true });
+      indexImage++;
+    });
+
     const { saveAs } = await import('file-saver');
     zip.generateAsync({ type: 'blob' }).then((blob) => {
-      saveAs(blob, 'myImage.zip');
+      saveAs(blob, `${zipName}.zip`);
     });
   }
 }
@@ -171,6 +182,7 @@ export async function exportEntriesAsCSV(
 ) {
   const speakers = await fetchSpeakers(data);
   const imageUrls = [];
+  const audioUrls = [];
   const headers = {
     lx: 'Lexeme/Word/Phrase',
     ph: 'Phonetic (IPA)',
@@ -307,28 +319,36 @@ export async function exportEntriesAsCSV(
         "aude": "${speakerDecade}"
       }`)
       );
+      const convertedAudioPath = entry.sf?.path.replace(/\//g, '%2F');
+      audioUrls.push(
+        `https://firebasestorage.googleapis.com/v0/b/${firebaseConfig.storageBucket}/o/${convertedAudioPath}?alt=media`
+      );
     } else {
       Object.assign(itemsFormatted[i], { aupa: '', ausn: '', aubp: '', aude: '' });
     }
     //TESTING
     if (entry.pf) {
-      const convertedPath = entry.pf.path.replace(/\//g, '%2F');
+      const convertedImagesPath = entry.pf.path.replace(/\//g, '%2F');
       imageUrls.push(
-        `https://firebasestorage.googleapis.com/v0/b/${firebaseConfig.storageBucket}/o/${convertedPath}?alt=media`
+        `https://firebasestorage.googleapis.com/v0/b/${firebaseConfig.storageBucket}/o/${convertedImagesPath}?alt=media`
       );
     }
-    /*  const convertedPath = entry?.sf?.path.replace(/\//g, '%2F');
-    console.log(
-      'audio',
-      `https://firebasestorage.googleapis.com/v0/b/${firebaseConfig.storageBucket}/o/${convertedPath}?alt=media`
-    ); */
     i++;
   });
 
   itemsFormatted.unshift(headers);
   const CSVBlob = fileAsBlob(itemsFormatted);
-  if (includeImages) {
-    const test = await downloadImages(imageUrls);
-    zipper(test, CSVBlob, `${title}.csv`);
+  if (includeImages && includeAudios) {
+    const imagesURLs = await downloadMedia(imageUrls);
+    const audiosURLs = await downloadMedia(audioUrls);
+    zipper(title, CSVBlob, `${title}.csv`, audiosURLs, imagesURLs);
+  } else if (includeAudios) {
+    const audiosURLs = await downloadMedia(audioUrls);
+    zipper(title, CSVBlob, `${title}.csv`, audiosURLs, []);
+  } else if (includeImages) {
+    const imagesURLs = await downloadMedia(imageUrls);
+    zipper(title, CSVBlob, `${title}.csv`, [], imagesURLs);
+  } else {
+    downloadObjectAsCSV(itemsFormatted, title);
   }
 }
