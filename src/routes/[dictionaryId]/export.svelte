@@ -34,12 +34,12 @@
 </h3>
 
 <div class="items-center mt-2 mb-6 ml-3">
-  <input disabled id="public" type="checkbox" bind:checked={data} />
+  <input disabled id="public" type="checkbox" bind:checked={data} class="opacity-50" />
   <label for="public" class="mx-2 block leading-5 text-gray-900">
     <!-- {$_('create.visible_to_public', { default: 'Visible to Public' })} -->
     Data
   </label>
-  <div class={`ml-8 mt-2 py-2 px-4 ${data ? '' : 'opacity-50 cursor-not-allowed'}`}>
+  <div class={`ml-8 mt-2 py-2 px-4 opacity-50 ${data ? '' : 'opacity-50 cursor-not-allowed'}`}>
     <label class="inline-flex items-center">
       <input
         disabled={!data}
