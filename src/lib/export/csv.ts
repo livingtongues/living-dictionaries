@@ -44,30 +44,26 @@ async function downloadMedia(mediaURLs: string[]) {
 }
 
 async function zipper(
-  zipName: string,
-  CSVFile = null,
-  CSVName: string,
+  dictionaryName: string,
+  audioNames: string[],
+  imageNames: string[],
+  CSVFile: Blob,
   blobAudios: Blob[],
   blobImages: Blob[]
 ) {
   if (blobAudios.length > 0 || blobImages.length > 0) {
     const zip = new JSZip();
-    CSVFile ? zip.file(CSVName, CSVFile) : '';
-    const media = zip.folder('media/');
-    let indexAudio = 1;
-    let indexImage = 1;
-    blobImages.forEach((bi) => {
-      media.folder('images/').file(`image${indexAudio}.jpeg`, bi, { binary: true });
-      indexAudio++;
+    CSVFile ? zip.file(`${dictionaryName}.csv`, CSVFile) : '';
+    blobImages.forEach((bi, i) => {
+      zip.folder(`${dictionaryName}_Images/`).file(`${imageNames[i]}`, bi, { binary: true });
     });
-    blobAudios.forEach((ba) => {
-      media.folder('audios/').file(`audios${indexImage}.wav`, ba, { binary: true });
-      indexImage++;
+    blobAudios.forEach((ba, i) => {
+      zip.folder(`${dictionaryName}_Audio/`).file(`${audioNames[i]}`, ba, { binary: true });
     });
 
     const { saveAs } = await import('file-saver');
     zip.generateAsync({ type: 'blob' }).then((blob) => {
-      saveAs(blob, `${zipName}.zip`);
+      saveAs(blob, `${dictionaryName}.zip`);
     });
   }
 }
@@ -182,6 +178,7 @@ export async function exportEntriesAsCSV(
 ) {
   //Getting the total number of semantic domains by entry if they have at least one
   let totalSDN = 0;
+  //TODO try Diego's suggestion
   const filterSDN = data.filter((entry) => (entry.sdn ? entry.sdn.length : ''));
   if (filterSDN.length > 0) {
     totalSDN = filterSDN
@@ -189,9 +186,12 @@ export async function exportEntriesAsCSV(
       .reduce((maxLength, sdnLength) => Math.max(maxLength, sdnLength));
   }
   const speakers = await fetchSpeakers(data);
+  const imageNames = [];
   const imageUrls = [];
+  const audioNames = [];
   const audioUrls = [];
   const headers = {
+    id: 'Entry id',
     lx: 'Lexeme/Word/Phrase',
     ph: 'Phonetic (IPA)',
     in: 'Interlinearization',
@@ -231,18 +231,24 @@ export async function exportEntriesAsCSV(
     aude: 'Speaker decade',
   });
 
+  //Assigning images metadata as headers
+  Object.assign(headers, {
+    impa: 'Image path',
+  });
+
   const itemsFormatted = [];
   data.forEach((entry, i) => {
     //Avoiding showing null values
     const entryKeys = Object.keys(entry);
     entryKeys.forEach((key) => (!entry[key] ? (entry[key] = '') : entry[key]));
     itemsFormatted.push({
+      id: entry.id,
       lx: entry.lx.replace(/,/g, ' -'),
       ph: entry.ph,
-      in: entry.in,
+      in: entry.in ? entry.in.replace(/,/g, ' -') : '',
       mr: entry.mr,
-      di: entry.di,
-      nt: entry.nt,
+      di: entry.di ? entry.di.replace(/,/g, ' -') : '',
+      nt: entry.nt ? entry.nt.replace(/,/g, ' -') : '',
       //xv: entry.xv,
     });
     //Assigning parts of speech (abbreviation & name)
@@ -295,13 +301,14 @@ export async function exportEntriesAsCSV(
       }
     }
     //Assigning glosses
+    //TODO Gta? is still having problems. There's another character I need to avoid
     glosses.forEach((bcp) => {
-      Object.assign(
-        itemsFormatted[i],
-        JSON.parse(`{
-          "gl${bcp}": "${entry.gl[bcp] ? entry.gl[bcp].replace(/,/g, ' -') : ''}"
-        }`)
-      );
+      const chars = {
+        ',': ' -',
+        '"': "'",
+      };
+      const cleanEntry = entry.gl[bcp] ? entry.gl[bcp].replace(/[,"]/g, (m) => chars[m]) : '';
+      Object.assign(itemsFormatted[i], JSON.parse(`{"gl${bcp}": "${cleanEntry}"}`));
     });
     //Assigning example sentences
     for (let j = 0; j <= glosses.length; j++) {
@@ -310,7 +317,9 @@ export async function exportEntriesAsCSV(
           Object.assign(
             itemsFormatted[i],
             JSON.parse(`{
-              "xs${glosses[j] ? glosses[j] : 'vn'}": "${entry.xs['vn'] ? entry.xs['vn'] : ''}"
+              "xs${glosses[j] ? glosses[j] : 'vn'}": "${
+              entry.xs['vn'] ? entry.xs['vn'].replace(/,/g, ' -') : ''
+            }"
             }`)
           );
         } else {
@@ -336,8 +345,9 @@ export async function exportEntriesAsCSV(
     if (entry.sf) {
       const speaker = speakers.find((speaker) => speaker?.id === entry.sf.sp);
       const path = entry.sf.path || '';
-      const speakerName = speaker?.displayName || entry.sf.speakerName || '';
-      const speakerBP = speaker?.birthplace || '';
+      const speakerName =
+        speaker?.displayName.replace(/,/g, ' -') || entry.sf.speakerName.replace(/,/g, ' -') || '';
+      const speakerBP = speaker?.birthplace.replace(/,/g, ' -') || '';
       const speakerDecade = speaker?.decade || '';
       Object.assign(
         itemsFormatted[i],
@@ -348,7 +358,8 @@ export async function exportEntriesAsCSV(
         "aude": "${speakerDecade}"
       }`)
       );
-      const convertedAudioPath = entry.sf?.path.replace(/\//g, '%2F');
+      audioNames.push(entry.sf.path.substring(entry.sf.path.lastIndexOf('/') + 1));
+      const convertedAudioPath = entry.sf.path.replace(/\//g, '%2F');
       audioUrls.push(
         `https://firebasestorage.googleapis.com/v0/b/${firebaseConfig.storageBucket}/o/${convertedAudioPath}?alt=media`
       );
@@ -356,29 +367,36 @@ export async function exportEntriesAsCSV(
       Object.assign(itemsFormatted[i], { aupa: '', ausn: '', aubp: '', aude: '' });
     }
 
-    //TESTING
     if (entry.pf) {
+      Object.assign(
+        itemsFormatted[i],
+        JSON.parse(`{
+        "impa": "${entry.pf.path}"
+      }`)
+      );
+      imageNames.push(entry.pf.path.substring(entry.pf.path.lastIndexOf('/') + 1));
       const convertedImagesPath = entry.pf.path.replace(/\//g, '%2F');
       imageUrls.push(
         `https://firebasestorage.googleapis.com/v0/b/${firebaseConfig.storageBucket}/o/${convertedImagesPath}?alt=media`
       );
+    } else {
+      Object.assign(itemsFormatted[i], { impa: '' });
     }
     i++;
   });
-
   itemsFormatted.unshift(headers);
   const CSVBlob = fileAsBlob(itemsFormatted);
 
   if (includeImages && includeAudios) {
     const imagesURLs = await downloadMedia(imageUrls);
     const audiosURLs = await downloadMedia(audioUrls);
-    zipper(title, CSVBlob, `${title}.csv`, audiosURLs, imagesURLs);
+    zipper(title, audioNames, imageNames, CSVBlob, audiosURLs, imagesURLs);
   } else if (includeAudios) {
     const audiosURLs = await downloadMedia(audioUrls);
-    zipper(title, CSVBlob, `${title}.csv`, audiosURLs, []);
+    zipper(title, audioNames, imageNames, CSVBlob, audiosURLs, []);
   } else if (includeImages) {
     const imagesURLs = await downloadMedia(imageUrls);
-    zipper(title, CSVBlob, `${title}.csv`, [], imagesURLs);
+    zipper(title, audioNames, imageNames, CSVBlob, [], imagesURLs);
   } else {
     downloadObjectAsCSV(itemsFormatted, title);
   }
