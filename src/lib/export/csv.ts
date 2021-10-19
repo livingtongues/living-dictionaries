@@ -62,7 +62,7 @@ async function zipper(
     });
 
     const { saveAs } = await import('file-saver');
-    zip.generateAsync({ type: 'blob' }).then((blob) => {
+    await zip.generateAsync({ type: 'blob' }).then((blob) => {
       saveAs(blob, `${dictionaryName}.zip`);
     });
   }
@@ -345,9 +345,10 @@ export async function exportEntriesAsCSV(
     if (entry.sf) {
       const speaker = speakers.find((speaker) => speaker?.id === entry.sf.sp);
       const path = entry.sf.path || '';
-      const speakerName =
-        speaker?.displayName.replace(/,/g, ' -') || entry.sf.speakerName.replace(/,/g, ' -') || '';
-      const speakerBP = speaker?.birthplace.replace(/,/g, ' -') || '';
+      let speakerName = speaker?.displayName || entry.sf.speakerName || '';
+      speakerName = speakerName.replace(/,/g, ' -');
+      let speakerBP = speaker?.birthplace || '';
+      speakerBP = speakerBP.replace(/,/g, ' -');
       const speakerDecade = speaker?.decade || '';
       Object.assign(
         itemsFormatted[i],
@@ -390,13 +391,13 @@ export async function exportEntriesAsCSV(
   if (includeImages && includeAudios) {
     const imagesURLs = await downloadMedia(imageUrls);
     const audiosURLs = await downloadMedia(audioUrls);
-    zipper(title, audioNames, imageNames, CSVBlob, audiosURLs, imagesURLs);
+    await zipper(title, audioNames, imageNames, CSVBlob, audiosURLs, imagesURLs);
   } else if (includeAudios) {
     const audiosURLs = await downloadMedia(audioUrls);
-    zipper(title, audioNames, imageNames, CSVBlob, audiosURLs, []);
+    await zipper(title, audioNames, imageNames, CSVBlob, audiosURLs, []);
   } else if (includeImages) {
     const imagesURLs = await downloadMedia(imageUrls);
-    zipper(title, audioNames, imageNames, CSVBlob, [], imagesURLs);
+    await zipper(title, audioNames, imageNames, CSVBlob, [], imagesURLs);
   } else {
     downloadObjectAsCSV(itemsFormatted, title);
   }
