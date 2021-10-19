@@ -11,13 +11,12 @@ export async function downloadEntries(
 ) {
   const dataEntries = await getCollection<IEntry>(`dictionaries/${id}/words`);
   if (includeImages && includeAudios) {
-    exportEntriesAsCSV(dataEntries, name, glosses, true, true);
+    await exportEntriesAsCSV(dataEntries, name, glosses, true, true);
   } else if (includeAudios) {
-    exportEntriesAsCSV(dataEntries, name, glosses, true);
+    await exportEntriesAsCSV(dataEntries, name, glosses, true);
   } else if (includeImages) {
-    exportEntriesAsCSV(dataEntries, name, glosses, false, true);
+    await exportEntriesAsCSV(dataEntries, name, glosses, false, true);
   } else {
-    exportEntriesAsCSV(dataEntries, name, glosses);
+    await exportEntriesAsCSV(dataEntries, name, glosses);
   }
-  return true;
 }

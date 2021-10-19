@@ -77,30 +77,46 @@
 {#if !loading}
   {#if images && audio}
     <Button
-      onclick={() => {
+      onclick={async () => {
         loading = true;
-        downloadEntries($dictionary.id, $dictionary.name, $dictionary.glossLanguages, true, true);
+        await downloadEntries(
+          $dictionary.id,
+          $dictionary.name,
+          $dictionary.glossLanguages,
+          true,
+          true
+        );
+        loading = false;
       }}
       form="primary">Download CSV & Audio & Images</Button>
   {:else if audio && !images}
     <Button
-      onclick={() => {
+      onclick={async () => {
         loading = true;
-        downloadEntries($dictionary.id, $dictionary.name, $dictionary.glossLanguages, true);
+        await downloadEntries($dictionary.id, $dictionary.name, $dictionary.glossLanguages, true);
+        loading = false;
       }}
       form="primary">Download CSV & Audio</Button>
   {:else if images && !audio}
     <Button
-      onclick={() => {
+      onclick={async () => {
         loading = true;
-        downloadEntries($dictionary.id, $dictionary.name, $dictionary.glossLanguages, false, true);
+        await downloadEntries(
+          $dictionary.id,
+          $dictionary.name,
+          $dictionary.glossLanguages,
+          false,
+          true
+        );
+        loading = false;
       }}
       form="primary">Download CSV & Images</Button>
   {:else}
     <Button
-      onclick={() => {
+      onclick={async () => {
         loading = true;
-        downloadEntries($dictionary.id, $dictionary.name, $dictionary.glossLanguages);
+        await downloadEntries($dictionary.id, $dictionary.name, $dictionary.glossLanguages);
+        loading = false;
       }}
       form="primary">Download CSV</Button>
   {/if}
