@@ -82,8 +82,7 @@
     </div>
     {#if typeof havePhotoFile !== 'boolean'}
       <p class="text-xs italic text-orange-400 p-2">Checking if images are available</p>
-    {/if}
-    {#if havePhotoFile === false}
+    {:else if havePhotoFile === false}
       <p class="text-sm text-red-700 p-3">There are no images</p>
     {/if}
   </div>
