@@ -401,5 +401,4 @@ export async function exportEntriesAsCSV(
   } else {
     downloadObjectAsCSV(itemsFormatted, title);
   }
-  console.log('itemsFormatted', itemsFormatted);
 }
