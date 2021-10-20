@@ -26,7 +26,7 @@ export function convertToCSV(objArray) {
 }
 
 async function downloadMedia(mediaURLs: string[]) {
-  //Zip and downloading images)
+  //Zip and downloading images
   const blobMedia = [];
   await Promise.all(
     mediaURLs.map(async (url) => {
