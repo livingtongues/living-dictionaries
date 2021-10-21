@@ -185,7 +185,7 @@ export async function exportEntriesAsCSV(
       .map((entry) => entry.sdn.length)
       .reduce((maxLength, sdnLength) => Math.max(maxLength, sdnLength));
   }
-  const unwantedChars = {
+  const replacementChars = {
     ',': ' -',
     '"': "'",
   };
@@ -233,6 +233,7 @@ export async function exportEntriesAsCSV(
     ausn: 'Speaker name',
     aubp: 'Speaker birthplace',
     aude: 'Speaker decade',
+    auge: 'Speaker gender',
   });
 
   //Assigning images metadata as headers
@@ -247,12 +248,12 @@ export async function exportEntriesAsCSV(
     entryKeys.forEach((key) => (!entry[key] ? (entry[key] = '') : entry[key]));
     itemsFormatted.push({
       id: entry.id,
-      lx: entry.lx.replace(/[,"]/g, (m) => unwantedChars[m]),
+      lx: entry.lx.replace(/[,"]/g, (m) => replacementChars[m]),
       ph: entry.ph,
-      in: entry.in ? entry.in.replace(/[,"]/g, (m) => unwantedChars[m]) : '',
+      in: entry.in ? entry.in.replace(/[,"]/g, (m) => replacementChars[m]) : '',
       mr: entry.mr,
-      di: entry.di ? entry.di.replace(/[,"]/g, (m) => unwantedChars[m]) : '',
-      nt: entry.nt ? entry.nt.replace(/[,"]/g, (m) => unwantedChars[m]) : '',
+      di: entry.di ? entry.di.replace(/[,"]/g, (m) => replacementChars[m]) : '',
+      nt: entry.nt ? entry.nt.replace(/[,"]/g, (m) => replacementChars[m]) : '',
       //xv: entry.xv,
     });
     //Assigning parts of speech (abbreviation & name)
@@ -290,7 +291,7 @@ export async function exportEntriesAsCSV(
               entry.sdn[index]
                 ? semanticDomains
                     .find((sd) => sd.key === entry.sdn[index])
-                    .name.replace(/[,"]/g, (m) => unwantedChars[m])
+                    .name.replace(/[,"]/g, (m) => replacementChars[m])
                 : ''
             }"}`
           )
@@ -310,7 +311,7 @@ export async function exportEntriesAsCSV(
     //TODO Gta? is still having problems. There's another character I need to avoid
     glosses.forEach((bcp) => {
       const cleanEntry = entry.gl[bcp]
-        ? entry.gl[bcp].replace(/[,"]/g, (m) => unwantedChars[m])
+        ? entry.gl[bcp].replace(/[,"]/g, (m) => replacementChars[m])
         : '';
       Object.assign(itemsFormatted[i], JSON.parse(`{"gl${bcp}": "${cleanEntry}"}`));
     });
@@ -322,7 +323,7 @@ export async function exportEntriesAsCSV(
             itemsFormatted[i],
             JSON.parse(`{
               "xs${glosses[j] ? glosses[j] : 'vn'}": "${
-              entry.xs['vn'] ? entry.xs['vn'].replace(/[,"]/g, (m) => unwantedChars[m]) : ''
+              entry.xs['vn'] ? entry.xs['vn'].replace(/[,"]/g, (m) => replacementChars[m]) : ''
             }"
             }`)
           );
@@ -350,17 +351,19 @@ export async function exportEntriesAsCSV(
       const speaker = speakers.find((speaker) => speaker?.id === entry.sf.sp);
       const path = entry.sf.path || '';
       let speakerName = speaker?.displayName || entry.sf.speakerName || '';
-      speakerName = speakerName.replace(/[,"]/g, (m) => unwantedChars[m]);
+      speakerName = speakerName.replace(/[,"]/g, (m) => replacementChars[m]);
       let speakerBP = speaker?.birthplace || '';
-      speakerBP = speakerBP.replace(/[,"]/g, (m) => unwantedChars[m]);
+      speakerBP = speakerBP.replace(/[,"]/g, (m) => replacementChars[m]);
       const speakerDecade = speaker?.decade || '';
+      const speakerGender = speaker?.gender || '';
       Object.assign(
         itemsFormatted[i],
         JSON.parse(`{
         "aupa": "${path}",
         "ausn": "${speakerName}",
         "aubp": "${speakerBP}",
-        "aude": "${speakerDecade}"
+        "aude": "${speakerDecade}",
+        "auge": "${speakerGender}"
       }`)
       );
       audioNames.push(entry.sf.path.substring(entry.sf.path.lastIndexOf('/') + 1));
@@ -369,7 +372,7 @@ export async function exportEntriesAsCSV(
         `https://firebasestorage.googleapis.com/v0/b/${firebaseConfig.storageBucket}/o/${convertedAudioPath}?alt=media`
       );
     } else {
-      Object.assign(itemsFormatted[i], { aupa: '', ausn: '', aubp: '', aude: '' });
+      Object.assign(itemsFormatted[i], { aupa: '', ausn: '', aubp: '', aude: '', auge: '' });
     }
 
     if (entry.pf) {
