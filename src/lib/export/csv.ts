@@ -185,6 +185,10 @@ export async function exportEntriesAsCSV(
       .map((entry) => entry.sdn.length)
       .reduce((maxLength, sdnLength) => Math.max(maxLength, sdnLength));
   }
+  const unwantedChars = {
+    ',': ' -',
+    '"': "'",
+  };
   const speakers = await fetchSpeakers(data);
   const imageNames = [];
   const imageUrls = [];
@@ -243,12 +247,12 @@ export async function exportEntriesAsCSV(
     entryKeys.forEach((key) => (!entry[key] ? (entry[key] = '') : entry[key]));
     itemsFormatted.push({
       id: entry.id,
-      lx: entry.lx.replace(/,/g, ' -'),
+      lx: entry.lx.replace(/[,"]/g, (m) => unwantedChars[m]),
       ph: entry.ph,
-      in: entry.in ? entry.in.replace(/,/g, ' -') : '',
+      in: entry.in ? entry.in.replace(/[,"]/g, (m) => unwantedChars[m]) : '',
       mr: entry.mr,
-      di: entry.di ? entry.di.replace(/,/g, ' -') : '',
-      nt: entry.nt ? entry.nt.replace(/,/g, ' -') : '',
+      di: entry.di ? entry.di.replace(/[,"]/g, (m) => unwantedChars[m]) : '',
+      nt: entry.nt ? entry.nt.replace(/[,"]/g, (m) => unwantedChars[m]) : '',
       //xv: entry.xv,
     });
     //Assigning parts of speech (abbreviation & name)
@@ -284,7 +288,9 @@ export async function exportEntriesAsCSV(
           JSON.parse(
             `{"sd${index + 1}": "${
               entry.sdn[index]
-                ? semanticDomains.find((sd) => sd.key === entry.sdn[index]).name.replace(/,/g, ' -')
+                ? semanticDomains
+                    .find((sd) => sd.key === entry.sdn[index])
+                    .name.replace(/[,"]/g, (m) => unwantedChars[m])
                 : ''
             }"}`
           )
@@ -303,11 +309,9 @@ export async function exportEntriesAsCSV(
     //Assigning glosses
     //TODO Gta? is still having problems. There's another character I need to avoid
     glosses.forEach((bcp) => {
-      const chars = {
-        ',': ' -',
-        '"': "'",
-      };
-      const cleanEntry = entry.gl[bcp] ? entry.gl[bcp].replace(/[,"]/g, (m) => chars[m]) : '';
+      const cleanEntry = entry.gl[bcp]
+        ? entry.gl[bcp].replace(/[,"]/g, (m) => unwantedChars[m])
+        : '';
       Object.assign(itemsFormatted[i], JSON.parse(`{"gl${bcp}": "${cleanEntry}"}`));
     });
     //Assigning example sentences
@@ -318,7 +322,7 @@ export async function exportEntriesAsCSV(
             itemsFormatted[i],
             JSON.parse(`{
               "xs${glosses[j] ? glosses[j] : 'vn'}": "${
-              entry.xs['vn'] ? entry.xs['vn'].replace(/,/g, ' -') : ''
+              entry.xs['vn'] ? entry.xs['vn'].replace(/[,"]/g, (m) => unwantedChars[m]) : ''
             }"
             }`)
           );
@@ -346,9 +350,9 @@ export async function exportEntriesAsCSV(
       const speaker = speakers.find((speaker) => speaker?.id === entry.sf.sp);
       const path = entry.sf.path || '';
       let speakerName = speaker?.displayName || entry.sf.speakerName || '';
-      speakerName = speakerName.replace(/,/g, ' -');
+      speakerName = speakerName.replace(/[,"]/g, (m) => unwantedChars[m]);
       let speakerBP = speaker?.birthplace || '';
-      speakerBP = speakerBP.replace(/,/g, ' -');
+      speakerBP = speakerBP.replace(/[,"]/g, (m) => unwantedChars[m]);
       const speakerDecade = speaker?.decade || '';
       Object.assign(
         itemsFormatted[i],
