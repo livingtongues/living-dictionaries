@@ -34,11 +34,18 @@
       alert(`${$_('misc.error', { default: 'Error' })}: ${err}`);
     }
   }
+
+  let online = true;
 </script>
 
+<svelte:window bind:online />
+
 <ShowHide let:show let:toggle>
-  <Button form="primary" onclick={toggle}>
+  <Button form="primary" onclick={toggle} disabled={!online}>
     <i class="far fa-plus" />
+    {#if !online}
+      Return online to
+    {/if}
     {$_('entry.add_entry', { default: 'Add Entry' })}
   </Button>
   {#if show}
