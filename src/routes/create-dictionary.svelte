@@ -8,11 +8,12 @@
   import Header from '$lib/components/shell/Header.svelte';
   import Button from '$svelteui/ui/Button.svelte';
   import type { IDictionary, IManager, IUser } from '$lib/interfaces';
-  import { docExists, setOnline } from '$sveltefire/lite';
+  import { docExists, setOnline, updateOnline } from '$sveltefire/lite';
   import { GeoPoint, serverTimestamp } from 'firebase/firestore/lite';
   import { debounce } from '$lib/helpers/debounce';
 
   let modal: 'auth' | 'coordinates' = null;
+  let submitting = false;
 
   let alternateNames = [];
   let glossLanguages = ['en'];
@@ -72,6 +73,7 @@
       );
     }
     try {
+      submitting = true;
       // TODO: don't add fields that are empty
       const dictionaryData = {
         name: name.trim().replace(/^./, name[0].toUpperCase()),
@@ -84,22 +86,21 @@
         iso6393: iso6393.trim(),
         glottocode: glottocode.trim(),
       };
-      const dictionaryDoc = await setOnline<IDictionary>(`dictionaries/${url}`, dictionaryData);
-      console.log({ dictionaryDoc });
-      // const manager = {
-      //   id: $user.uid,
-      //   name: $user.displayName,
-      // };
-      // await set<IManager>(`dictionaries/${url}/managers/${$user.uid}`, manager);
-
-      // await update<IUser>(`users/${$user.uid}`, {
-      //   //@ts-ignore
-      //   termsAgreement: serverTimestamp(),
-      // });
+      await setOnline<IDictionary>(`dictionaries/${url}`, dictionaryData);
+      const manager = {
+        id: $user.uid,
+        name: $user.displayName,
+      };
+      await setOnline<IManager>(`dictionaries/${url}/managers/${$user.uid}`, manager);
+      await updateOnline<IUser>(`users/${$user.uid}`, {
+        //@ts-ignore
+        termsAgreement: serverTimestamp(),
+      });
       goto(`/${url}/entries/list`);
     } catch (err) {
-      return alert(`${$_('misc.error', { default: 'Error' })}: ${err}`);
+      alert(`${$_('misc.error', { default: 'Error' })}: ${err}`);
     }
+    submitting = false;
   }
 
   let dictionary: Partial<IDictionary>;
@@ -334,7 +335,7 @@
     </div>
 
     <div class="mt-6">
-      <Button type="submit" class="w-full" form="primary" disabled={!online}>
+      <Button type="submit" class="w-full" form="primary" disabled={!online} loading={submitting}>
         {#if !online}
           Return online to
         {/if}
