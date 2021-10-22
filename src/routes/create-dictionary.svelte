@@ -4,7 +4,6 @@
   import MultiSelect from '$lib/components/ui/MultiSelect.svelte';
   import { glossingLanguages } from '$lib/mappings/glossing-languages';
   import { user } from '$sveltefire/user';
-  import { goto } from '$app/navigation';
   import Header from '$lib/components/shell/Header.svelte';
   import Button from '$svelteui/ui/Button.svelte';
   import type { IDictionary, IManager, IUser } from '$lib/interfaces';
@@ -96,7 +95,7 @@
         //@ts-ignore
         termsAgreement: serverTimestamp(),
       });
-      goto(`/${url}/entries/list`);
+      window.location.replace(`/${url}/entries/list`);
     } catch (err) {
       alert(`${$_('misc.error', { default: 'Error' })}: ${err}`);
     }
