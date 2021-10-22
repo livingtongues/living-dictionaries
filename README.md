@@ -14,7 +14,7 @@ A mobile-first community focused web app built by [Living Tongues Institute for 
 Firebase is used for:
 
 - Authentication
-- Cloud Firestore (database)
+- Cloud Firestore (database w/ caching and realtime updates)
 - Storage
 - Cloud Functions, see [functions-unit-tests](docs/functions-unit-tests.md) and [functions-emulator](docs/functions-emulator.md) to learn how to emulate functions locally
 
