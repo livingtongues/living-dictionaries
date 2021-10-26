@@ -3,34 +3,49 @@
   import Button from '$svelteui/ui/Button.svelte';
   import { _ } from 'svelte-i18n';
   import EditFieldModal from '../modals/EditFieldModal.svelte';
-  import { add } from '$sveltefire/firestore';
-  import type { IEntry } from '$lib/interfaces';
+  import { getFirestore, addDoc, collection, serverTimestamp } from '@firebase/firestore/lite';
+  // import type { IEntry } from '$lib/interfaces';
   import { page } from '$app/stores';
   import { goto } from '$app/navigation';
+  import { getUid } from '$sveltefire/firestore';
 
   async function addNewEntry(lx: string) {
     if (!lx) {
       return alert(`Missing: ${$_('entry.lx', { default: 'Lexeme/Word/Phrase' })}`);
     }
     try {
-      const entryDoc = await add<IEntry>(
-        `dictionaries/${$page.params.dictionaryId}/words`,
-        { lx, gl: {} },
-        true
+      const data = {
+        lx,
+        gl: {},
+        ua: serverTimestamp(),
+        ca: serverTimestamp(),
+        ub: getUid(),
+        cb: getUid(),
+      };
+      const firestore = getFirestore();
+      const entryDoc = await addDoc(
+        collection(firestore, `dictionaries/${$page.params.dictionaryId}/words`),
+        data
       );
       console.log({ entryDoc });
       goto(`/${$page.params.dictionaryId}/entry/${entryDoc.id}`);
-      console.log('after goto');
     } catch (err) {
       console.error(err);
       alert(`${$_('misc.error', { default: 'Error' })}: ${err}`);
     }
   }
+
+  let online = true;
 </script>
 
+<svelte:window bind:online />
+
 <ShowHide let:show let:toggle>
-  <Button form="primary" onclick={toggle}>
+  <Button form="primary" onclick={toggle} disabled={!online}>
     <i class="far fa-plus" />
+    {#if !online}
+      Return online to
+    {/if}
     {$_('entry.add_entry', { default: 'Add Entry' })}
   </Button>
   {#if show}
