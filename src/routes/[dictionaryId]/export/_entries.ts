@@ -1,8 +1,7 @@
 import JSZip from 'jszip';
 import { downloadObjectAsCSV, fileAsBlob } from '$lib/export/csv';
-import { getCollection } from '$sveltefire/firestore';
 
-import type { IEntry } from '$lib/interfaces';
+import type { IDictionary, IEntry } from '$lib/interfaces';
 import { glossingLanguages } from './_glossing-languages-temp';
 import { semanticDomains } from '$lib/mappings/semantic-domains';
 import { partsOfSpeech } from '$lib/mappings/parts-of-speech';
@@ -67,10 +66,8 @@ function valuesInColumn(itemsFormatted, i, values, columnName, fn) {
 
 export async function exportEntriesAsCSV(
   data: IEntry[],
-  dictionaryName: string,
-  glossLanguages: string[],
-  includeAudio = false,
-  includeImages = false
+  { name: dictionaryName, glossLanguages }: IDictionary,
+  { includeAudio = false, includeImages = false }
 ) {
   //Getting the total number of semantic domains by entry if they have at least one
   let totalSDN = 0;
@@ -306,24 +303,5 @@ export async function exportEntriesAsCSV(
     await zipper(dictionaryName, audioNames, imageNames, CSVBlob, [], imagesURLs);
   } else {
     downloadObjectAsCSV(itemsFormatted, dictionaryName);
-  }
-}
-
-export async function downloadEntries(
-  id: string,
-  name: string,
-  glosses: string[],
-  includeAudios = false,
-  includeImages = false
-) {
-  const dataEntries = await getCollection<IEntry>(`dictionaries/${id}/words`);
-  if (includeImages && includeAudios) {
-    await exportEntriesAsCSV(dataEntries, name, glosses, true, true);
-  } else if (includeAudios) {
-    await exportEntriesAsCSV(dataEntries, name, glosses, true);
-  } else if (includeImages) {
-    await exportEntriesAsCSV(dataEntries, name, glosses, false, true);
-  } else {
-    await exportEntriesAsCSV(dataEntries, name, glosses);
   }
 }

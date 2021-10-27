@@ -1,7 +1,7 @@
 import { writable } from 'svelte/store';
 import type { IDictionary, IEntry } from '$lib/interfaces';
 
-export const dictionary = writable<Partial<IDictionary>>({
+export const dictionary = writable<IDictionary>({
   id: '',
   name: '---',
   public: false,
