@@ -145,35 +145,38 @@ export async function exportEntriesAsCSV(
     itemsFormatted.push({
       id: entry.id,
       lx: entry.lx.replace(/[,"]/g, (m) => replacementChars[m]),
-      ph: entry.ph,
+      ph: entry.ph ? entry.ph.replace(/[,"]/g, (m) => replacementChars[m]) : '',
       in: entry.in ? entry.in.replace(/[,"]/g, (m) => replacementChars[m]) : '',
-      mr: entry.mr,
+      mr: entry.mr ? entry.mr.replace(/[,"]/g, (m) => replacementChars[m]) : '',
       di: entry.di ? entry.di.replace(/[,"]/g, (m) => replacementChars[m]) : '',
       nt: entry.nt ? entry.nt.replace(/[,"]/g, (m) => replacementChars[m]) : '',
       //xv: entry.xv,
     });
     //Assigning parts of speech (abbreviation & name)
-    Object.assign(
-      itemsFormatted[i],
-      JSON.parse(`{
-      "psab": "${entry.ps ? entry.ps : ''}"
-    }`)
-    );
     if (entry.ps) {
       const pos = partsOfSpeech.find((ps) => ps.enAbbrev === entry.ps)?.enName;
-      Object.assign(
-        itemsFormatted[i],
-        JSON.parse(`{
-        "ps": "${pos}"
-      }`)
-      );
+      if (!pos) {
+        Object.assign(
+          itemsFormatted[i],
+          JSON.parse(`{
+          "psab": "",
+          "ps": "${entry.ps}"
+        }`)
+        );
+      } else {
+        Object.assign(
+          itemsFormatted[i],
+          JSON.parse(`{
+          "psab": "${entry.ps}",
+          "ps": "${pos}"
+        }`)
+        );
+      }
     } else {
-      Object.assign(
-        itemsFormatted[i],
-        JSON.parse(`{
-        "ps": ""
-      }`)
-      );
+      Object.assign(itemsFormatted[i], {
+        psab: '',
+        ps: '',
+      });
     }
     //Assigning sources
     valuesInColumn(itemsFormatted, i, entry.sr, 'sr', (el) => el);
