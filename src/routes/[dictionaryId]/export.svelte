@@ -3,14 +3,14 @@
   import { _ } from 'svelte-i18n';
   import { dictionary } from '$lib/stores';
   import Button from '$svelteui/ui/Button.svelte';
-  import { downloadEntries } from './export/_entries';
+  import { exportEntriesAsCSV } from './export/_entries';
   import type { IEntry } from '$lib/interfaces';
   import { getCollection } from '$sveltefire/firestore';
 
   let downloadData = true;
   $: dataType = downloadData ? 'CSV' : '';
-  let downloadImages = false;
-  let downloadAudio = false;
+  let includeImages = false;
+  let includeAudio = false;
 
   let entries: IEntry[] = [];
   let mounted = false;
@@ -64,7 +64,7 @@
   </div>
   <div>
     <div class={`${hasImages ? '' : 'opacity-50 cursor-not-allowed'}`}>
-      <input disabled={!hasImages} id="images" type="checkbox" bind:checked={downloadImages} />
+      <input disabled={!hasImages} id="images" type="checkbox" bind:checked={includeImages} />
       <label for="images" class="mx-2 block leading-5 text-gray-900"> Images </label>
     </div>
     {#if mounted}
@@ -75,7 +75,7 @@
   </div>
   <div>
     <div class={`${hasAudio ? '' : 'opacity-50 cursor-not-allowed'}`}>
-      <input id="audio" type="checkbox" bind:checked={downloadAudio} />
+      <input id="audio" type="checkbox" bind:checked={includeAudio} />
       <label for="audio" class="mx-2 block leading-5 text-gray-900"> Audio </label>
     </div>
     {#if mounted}
@@ -86,37 +86,15 @@
   </div>
 </div>
 
-{#if downloadImages && downloadAudio}
-  <Button
-    onclick={async () =>
-      await downloadEntries(
-        $dictionary.id,
-        $dictionary.name,
-        $dictionary.glossLanguages,
-        true,
-        true
-      )}
-    form="primary">Download CSV & Audio & Images</Button>
-{:else if downloadAudio && !downloadImages}
-  <Button
-    onclick={async () =>
-      await downloadEntries($dictionary.id, $dictionary.name, $dictionary.glossLanguages, true)}
-    form="primary">Download CSV & Audio</Button>
-{:else if downloadImages && !downloadAudio}
-  <Button
-    onclick={async () =>
-      await downloadEntries(
-        $dictionary.id,
-        $dictionary.name,
-        $dictionary.glossLanguages,
-        false,
-        true
-      )}
-    form="primary">Download CSV & Images</Button>
-{:else}
-  <Button
-    onclick={async () => {
-      await downloadEntries($dictionary.id, $dictionary.name, $dictionary.glossLanguages);
-    }}
-    form="primary">Download CSV</Button>
-{/if}
+<Button
+  onclick={async () =>
+    await exportEntriesAsCSV(entries, $dictionary, { includeImages, includeAudio })}
+  form="primary">
+  Download CSV
+  {#if includeImages}
+    & Images
+  {/if}
+  {#if includeAudio}
+    & Audio
+  {/if}
+</Button>
