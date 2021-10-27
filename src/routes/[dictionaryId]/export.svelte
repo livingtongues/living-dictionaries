@@ -35,17 +35,11 @@
 
 <h3 class="text-xl font-semibold">{$_('misc.export', { default: 'export' })}</h3>
 
-<h3 class="font-semibold text-lg mt-3">
-  <!-- {$_('dictionary.contributors', { default: 'Contributors' })} -->
-  Options
-</h3>
+<h3 class="font-semibold text-lg mt-3">Options</h3>
 
 <div class="items-center mt-2 mb-6 ml-3">
-  <input disabled id="public" type="checkbox" bind:checked={data} class="opacity-50" />
-  <label for="public" class="mx-2 block leading-5 text-gray-900">
-    <!-- {$_('create.visible_to_public', { default: 'Visible to Public' })} -->
-    Data
-  </label>
+  <input disabled id="data" type="checkbox" bind:checked={data} class="opacity-50" />
+  <label for="data" class="mx-2 block leading-5 text-gray-900"> Data </label>
   <div class={`ml-8 mt-2 py-2 px-4 opacity-50 ${data ? '' : 'opacity-50 cursor-not-allowed'}`}>
     <label class="inline-flex items-center">
       <input
@@ -71,11 +65,8 @@
   </div>
   <div>
     <div class={`${havePhotoFile ? '' : 'opacity-50 cursor-not-allowed'}`}>
-      <input disabled={!havePhotoFile} id="public" type="checkbox" bind:checked={images} />
-      <label for="public" class="mx-2 block leading-5 text-gray-900">
-        <!-- {$_('create.visible_to_public', { default: 'Visible to Public' })} -->
-        Images
-      </label>
+      <input disabled={!havePhotoFile} id="images" type="checkbox" bind:checked={images} />
+      <label for="images" class="mx-2 block leading-5 text-gray-900"> Images </label>
     </div>
     {#if typeof havePhotoFile !== 'boolean'}
       <p class="text-xs italic text-orange-400 p-2">Checking if images are available</p>
@@ -85,11 +76,8 @@
   </div>
   <div>
     <div class={`${haveAudioFile ? '' : 'opacity-50 cursor-not-allowed'}`}>
-      <input id="public" type="checkbox" bind:checked={audio} />
-      <label for="public" class="mx-2 block leading-5 text-gray-900">
-        <!-- {$_('create.visible_to_public', { default: 'Visible to Public' })} -->
-        Audio
-      </label>
+      <input id="audio" type="checkbox" bind:checked={audio} />
+      <label for="audio" class="mx-2 block leading-5 text-gray-900"> Audio </label>
     </div>
     {#if typeof haveAudioFile !== 'boolean'}
       <p class="text-xs italic text-orange-400 p-2">Checking if audio is available</p>
