@@ -67,9 +67,9 @@ function valuesInColumn(itemsFormatted, i, values, columnName, fn) {
 
 export async function exportEntriesAsCSV(
   data: IEntry[],
-  title: string,
-  glosses: string[],
-  includeAudios = false,
+  dictionaryName: string,
+  glossLanguages: string[],
+  includeAudio = false,
   includeImages = false
 ) {
   //Getting the total number of semantic domains by entry if they have at least one
@@ -108,17 +108,21 @@ export async function exportEntriesAsCSV(
     }
   }
   //Assigning glosses as headers
-  glosses.forEach((bcp) => {
+  glossLanguages.forEach((bcp) => {
     Object.assign(headers, JSON.parse(`{ "gl${bcp}": "${glossingLanguages[bcp]} Gloss" }`));
   });
   //Assigning example sentences as headers
-  for (let j = 0; j <= glosses.length; j++) {
-    if (j === glosses.length) {
-      Object.assign(headers, JSON.parse(`{"xsvn": "Example sentence in ${title}"}`));
+  for (let j = 0; j <= glossLanguages.length; j++) {
+    if (j === glossLanguages.length) {
+      Object.assign(headers, JSON.parse(`{"xsvn": "Example sentence in ${dictionaryName}"}`));
     } else {
       Object.assign(
         headers,
-        JSON.parse(`{"xs${glosses[j]}": "Example sentence in ${glossingLanguages[glosses[j]]}"}`)
+        JSON.parse(
+          `{"xs${glossLanguages[j]}": "Example sentence in ${
+            glossingLanguages[glossLanguages[j]]
+          }"}`
+        )
       );
     }
   }
@@ -204,20 +208,20 @@ export async function exportEntriesAsCSV(
     }
     //Assigning glosses
     //TODO Gta? is still having problems. There's another character I need to avoid
-    glosses.forEach((bcp) => {
+    glossLanguages.forEach((bcp) => {
       const cleanEntry = entry.gl[bcp]
         ? entry.gl[bcp].replace(/[,"]/g, (m) => replacementChars[m])
         : '';
       Object.assign(itemsFormatted[i], JSON.parse(`{"gl${bcp}": "${cleanEntry}"}`));
     });
     //Assigning example sentences
-    for (let j = 0; j <= glosses.length; j++) {
+    for (let j = 0; j <= glossLanguages.length; j++) {
       if (entry.xs) {
-        if (j === glosses.length) {
+        if (j === glossLanguages.length) {
           Object.assign(
             itemsFormatted[i],
             JSON.parse(`{
-              "xs${glosses[j] ? glosses[j] : 'vn'}": "${
+              "xs${glossLanguages[j] ? glossLanguages[j] : 'vn'}": "${
               entry.xs['vn'] ? entry.xs['vn'].replace(/[,"]/g, (m) => replacementChars[m]) : ''
             }"
             }`)
@@ -226,8 +230,8 @@ export async function exportEntriesAsCSV(
           Object.assign(
             itemsFormatted[i],
             JSON.parse(`{
-              "xs${glosses[j] ? glosses[j] : 'vn'}": "${
-              entry.xs[glosses[j]] ? entry.xs[glosses[j]] : ''
+              "xs${glossLanguages[j] ? glossLanguages[j] : 'vn'}": "${
+              entry.xs[glossLanguages[j]] ? entry.xs[glossLanguages[j]] : ''
             }"
             }`)
           );
@@ -236,7 +240,7 @@ export async function exportEntriesAsCSV(
         Object.assign(
           itemsFormatted[i],
           JSON.parse(`{
-            "xs${glosses[j] ? glosses[j] : 'vn'}": ""
+            "xs${glossLanguages[j] ? glossLanguages[j] : 'vn'}": ""
           }`)
         );
       }
@@ -290,18 +294,18 @@ export async function exportEntriesAsCSV(
   itemsFormatted.unshift(headers);
   const CSVBlob = fileAsBlob(itemsFormatted);
 
-  if (includeImages && includeAudios) {
+  if (includeImages && includeAudio) {
     const imagesURLs = await downloadMedia(imageUrls);
     const audiosURLs = await downloadMedia(audioUrls);
-    await zipper(title, audioNames, imageNames, CSVBlob, audiosURLs, imagesURLs);
-  } else if (includeAudios) {
+    await zipper(dictionaryName, audioNames, imageNames, CSVBlob, audiosURLs, imagesURLs);
+  } else if (includeAudio) {
     const audiosURLs = await downloadMedia(audioUrls);
-    await zipper(title, audioNames, imageNames, CSVBlob, audiosURLs, []);
+    await zipper(dictionaryName, audioNames, imageNames, CSVBlob, audiosURLs, []);
   } else if (includeImages) {
     const imagesURLs = await downloadMedia(imageUrls);
-    await zipper(title, audioNames, imageNames, CSVBlob, [], imagesURLs);
+    await zipper(dictionaryName, audioNames, imageNames, CSVBlob, [], imagesURLs);
   } else {
-    downloadObjectAsCSV(itemsFormatted, title);
+    downloadObjectAsCSV(itemsFormatted, dictionaryName);
   }
 }
 
