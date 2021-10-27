@@ -67,7 +67,7 @@
       <input disabled={!hasImages} id="images" type="checkbox" bind:checked={includeImages} />
       <label for="images" class="mx-2 block leading-5 text-gray-900"> Images </label>
     </div>
-    {#if mounted}
+    {#if !mounted}
       <p class="text-xs italic text-orange-400 p-2">Checking if images are available</p>
     {:else if !hasImages}
       <p class="text-sm text-red-700 p-3">There are no images</p>
@@ -78,7 +78,7 @@
       <input id="audio" type="checkbox" bind:checked={includeAudio} />
       <label for="audio" class="mx-2 block leading-5 text-gray-900"> Audio </label>
     </div>
-    {#if mounted}
+    {#if !mounted}
       <p class="text-xs italic text-orange-400 p-2">Checking if audio is available</p>
     {:else if !hasAudio}
       <p class="text-sm text-red-700 p-3">There are no audio files</p>
