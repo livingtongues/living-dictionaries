@@ -1,29 +1,27 @@
 <script lang="ts">
+  import { onMount } from 'svelte';
   import { _ } from 'svelte-i18n';
   import { dictionary } from '$lib/stores';
   import Button from '$svelteui/ui/Button.svelte';
-  import { downloadEntries, haveMediaFile } from './export/_entries';
+  import { downloadEntries } from './export/_entries';
+  import type { IEntry } from '$lib/interfaces';
+  import { getCollection } from '$sveltefire/firestore';
 
-  let data = true;
-  let dataType = '';
-  let images = false;
-  let audio = false;
-  let havePhotoFile: boolean;
-  let haveAudioFile: boolean;
+  let downloadData = true;
+  $: dataType = downloadData ? 'CSV' : '';
+  let downloadImages = false;
+  let downloadAudio = false;
 
-  async function mediaAvailable() {
-    const mediaResults = await haveMediaFile($dictionary.id);
-    havePhotoFile = mediaResults.images;
-    haveAudioFile = mediaResults.audio;
-  }
-  mediaAvailable();
-  $: havePhotoFile;
-  $: haveAudioFile;
-  $: if (!data) {
-    dataType = '';
-  } else {
-    dataType = 'CSV';
-  }
+  let entries: IEntry[] = [];
+  let mounted = false;
+
+  onMount(async () => {
+    entries = await getCollection<IEntry>(`dictionaries/${$dictionary.id}/words`);
+    mounted = true;
+  });
+
+  $: hasImages = entries.find((entry) => entry.pf);
+  $: hasAudio = entries.find((entry) => entry.sf);
 </script>
 
 <svelte:head>
@@ -38,12 +36,13 @@
 <h3 class="font-semibold text-lg mt-3">Options</h3>
 
 <div class="items-center mt-2 mb-6 ml-3">
-  <input disabled id="data" type="checkbox" bind:checked={data} class="opacity-50" />
+  <input disabled id="data" type="checkbox" bind:checked={downloadData} class="opacity-50" />
   <label for="data" class="mx-2 block leading-5 text-gray-900"> Data </label>
-  <div class={`ml-8 mt-2 py-2 px-4 opacity-50 ${data ? '' : 'opacity-50 cursor-not-allowed'}`}>
+  <div
+    class={`ml-8 mt-2 py-2 px-4 opacity-50 ${downloadData ? '' : 'opacity-50 cursor-not-allowed'}`}>
     <label class="inline-flex items-center">
       <input
-        disabled={!data}
+        disabled={!downloadData}
         type="radio"
         class="form-radio"
         name="accountType"
@@ -64,31 +63,30 @@
     </label> -->
   </div>
   <div>
-    <div class={`${havePhotoFile ? '' : 'opacity-50 cursor-not-allowed'}`}>
-      <input disabled={!havePhotoFile} id="images" type="checkbox" bind:checked={images} />
+    <div class={`${hasImages ? '' : 'opacity-50 cursor-not-allowed'}`}>
+      <input disabled={!hasImages} id="images" type="checkbox" bind:checked={downloadImages} />
       <label for="images" class="mx-2 block leading-5 text-gray-900"> Images </label>
     </div>
-    {#if typeof havePhotoFile !== 'boolean'}
+    {#if mounted}
       <p class="text-xs italic text-orange-400 p-2">Checking if images are available</p>
-    {:else if havePhotoFile === false}
+    {:else if !hasImages}
       <p class="text-sm text-red-700 p-3">There are no images</p>
     {/if}
   </div>
   <div>
-    <div class={`${haveAudioFile ? '' : 'opacity-50 cursor-not-allowed'}`}>
-      <input id="audio" type="checkbox" bind:checked={audio} />
+    <div class={`${hasAudio ? '' : 'opacity-50 cursor-not-allowed'}`}>
+      <input id="audio" type="checkbox" bind:checked={downloadAudio} />
       <label for="audio" class="mx-2 block leading-5 text-gray-900"> Audio </label>
     </div>
-    {#if typeof haveAudioFile !== 'boolean'}
+    {#if mounted}
       <p class="text-xs italic text-orange-400 p-2">Checking if audio is available</p>
-    {/if}
-    {#if haveAudioFile === false}
-      <p class="text-sm text-red-700 p-3">There is no audio</p>
+    {:else if !hasAudio}
+      <p class="text-sm text-red-700 p-3">There are no audio files</p>
     {/if}
   </div>
 </div>
 
-{#if images && audio}
+{#if downloadImages && downloadAudio}
   <Button
     onclick={async () =>
       await downloadEntries(
@@ -99,12 +97,12 @@
         true
       )}
     form="primary">Download CSV & Audio & Images</Button>
-{:else if audio && !images}
+{:else if downloadAudio && !downloadImages}
   <Button
     onclick={async () =>
       await downloadEntries($dictionary.id, $dictionary.name, $dictionary.glossLanguages, true)}
     form="primary">Download CSV & Audio</Button>
-{:else if images && !audio}
+{:else if downloadImages && !downloadAudio}
   <Button
     onclick={async () =>
       await downloadEntries(
