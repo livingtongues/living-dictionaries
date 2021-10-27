@@ -1,12 +1,13 @@
 import JSZip from 'jszip';
-import { downloadObjectAsCSV, fileAsBlob } from './csv';
+import { downloadObjectAsCSV, fileAsBlob } from '$lib/export/csv';
+import { getCollection } from '$sveltefire/firestore';
 
 import type { IEntry } from '$lib/interfaces';
-import { glossingLanguages } from './glossing-languages-temp';
+import { glossingLanguages } from './_glossing-languages-temp';
 import { semanticDomains } from '$lib/mappings/semantic-domains';
 import { partsOfSpeech } from '$lib/mappings/parts-of-speech';
 import { firebaseConfig } from '$sveltefire/config';
-import { fetchSpeakers } from '../helpers/fetchSpeakers';
+import { fetchSpeakers } from '$lib/helpers/fetchSpeakers';
 
 async function downloadMedia(mediaURLs: string[]) {
   //Zip and downloading images
@@ -303,4 +304,42 @@ export async function exportEntriesAsCSV(
   } else {
     downloadObjectAsCSV(itemsFormatted, title);
   }
+}
+
+export async function downloadEntries(
+  id: string,
+  name: string,
+  glosses: string[],
+  includeAudios = false,
+  includeImages = false
+) {
+  const dataEntries = await getCollection<IEntry>(`dictionaries/${id}/words`);
+  if (includeImages && includeAudios) {
+    await exportEntriesAsCSV(dataEntries, name, glosses, true, true);
+  } else if (includeAudios) {
+    await exportEntriesAsCSV(dataEntries, name, glosses, true);
+  } else if (includeImages) {
+    await exportEntriesAsCSV(dataEntries, name, glosses, false, true);
+  } else {
+    await exportEntriesAsCSV(dataEntries, name, glosses);
+  }
+}
+
+type MediaObject = {
+  audio: boolean;
+  images: boolean;
+};
+
+export async function haveMediaFile(id: string): Promise<MediaObject> {
+  const mediaObject = { audio: false, images: false };
+  const dataEntries = await getCollection<IEntry>(`dictionaries/${id}/words`);
+  const resultImages = dataEntries.find((entry) => entry.pf);
+  const resultAudio = dataEntries.find((entry) => entry.sf);
+  if (resultImages) {
+    mediaObject.images = true;
+  }
+  if (resultAudio) {
+    mediaObject.audio = true;
+  }
+  return mediaObject;
 }

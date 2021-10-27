@@ -2,7 +2,7 @@
   import { _ } from 'svelte-i18n';
   import { dictionary } from '$lib/stores';
   import Button from '$svelteui/ui/Button.svelte';
-  import { downloadEntries, haveMediaFile } from './export/_fetchers';
+  import { downloadEntries, haveMediaFile } from './export/_entries';
 
   let data = true;
   let dataType = '';
