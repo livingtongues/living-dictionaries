@@ -74,7 +74,6 @@ export async function exportEntriesAsCSV(
 ) {
   //Getting the total number of semantic domains by entry if they have at least one
   let totalSDN = 0;
-  //TODO try Diego's suggestion
   const filterSDN = data.filter((entry) => (entry.sdn ? entry.sdn.length : ''));
   if (filterSDN.length > 0) {
     totalSDN = filterSDN
