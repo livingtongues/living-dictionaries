@@ -6,7 +6,6 @@
   import Button from '$svelteui/ui/Button.svelte';
   import { add } from '$sveltefire/firestore';
   import type { ISpeaker } from '$lib/interfaces';
-  import type { Gender } from '$lib/interfaces/speaker.interface';
 
   const dispatch = createEventDispatcher();
   const close = () => dispatch('close');
@@ -14,7 +13,7 @@
   let displayName = '';
   let birthplace = '';
   let decade = 4;
-  let gender = 'm';
+  let gender: ISpeaker['gender'] = 'm';
   let agreeToBeOnline = true;
 
   async function addSpeaker() {
@@ -22,7 +21,7 @@
       displayName: displayName.trim(),
       birthplace: birthplace.trim(),
       decade,
-      gender: gender as Gender,
+      gender,
       contributingTo: [$dictionary.id],
     };
 
