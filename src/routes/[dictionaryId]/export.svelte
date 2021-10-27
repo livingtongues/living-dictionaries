@@ -3,14 +3,11 @@
   import { dictionary } from '$lib/stores';
   import Button from '$svelteui/ui/Button.svelte';
   import { downloadEntries, haveMediaFile } from './export/_fetchers';
-  import { glossingLanguages } from '$lib/export/glossing-languages-temp';
-  import About from '../about.svelte';
 
   let data = true;
   let dataType = '';
   let images = false;
   let audio = false;
-  let loading = false;
   let havePhotoFile: boolean;
   let haveAudioFile: boolean;
 
@@ -103,52 +100,37 @@
   </div>
 </div>
 
-{#if !loading}
-  {#if images && audio}
-    <Button
-      onclick={async () => {
-        loading = true;
-        await downloadEntries(
-          $dictionary.id,
-          $dictionary.name,
-          $dictionary.glossLanguages,
-          true,
-          true
-        );
-        loading = false;
-      }}
-      form="primary">Download CSV & Audio & Images</Button>
-  {:else if audio && !images}
-    <Button
-      onclick={async () => {
-        loading = true;
-        await downloadEntries($dictionary.id, $dictionary.name, $dictionary.glossLanguages, true);
-        loading = false;
-      }}
-      form="primary">Download CSV & Audio</Button>
-  {:else if images && !audio}
-    <Button
-      onclick={async () => {
-        loading = true;
-        await downloadEntries(
-          $dictionary.id,
-          $dictionary.name,
-          $dictionary.glossLanguages,
-          false,
-          true
-        );
-        loading = false;
-      }}
-      form="primary">Download CSV & Images</Button>
-  {:else}
-    <Button
-      onclick={async () => {
-        loading = true;
-        await downloadEntries($dictionary.id, $dictionary.name, $dictionary.glossLanguages);
-        loading = false;
-      }}
-      form="primary">Download CSV</Button>
-  {/if}
+{#if images && audio}
+  <Button
+    onclick={async () =>
+      await downloadEntries(
+        $dictionary.id,
+        $dictionary.name,
+        $dictionary.glossLanguages,
+        true,
+        true
+      )}
+    form="primary">Download CSV & Audio & Images</Button>
+{:else if audio && !images}
+  <Button
+    onclick={async () =>
+      await downloadEntries($dictionary.id, $dictionary.name, $dictionary.glossLanguages, true)}
+    form="primary">Download CSV & Audio</Button>
+{:else if images && !audio}
+  <Button
+    onclick={async () =>
+      await downloadEntries(
+        $dictionary.id,
+        $dictionary.name,
+        $dictionary.glossLanguages,
+        false,
+        true
+      )}
+    form="primary">Download CSV & Images</Button>
 {:else}
-  <Button disabled form="primary">Loading...</Button>
+  <Button
+    onclick={async () => {
+      await downloadEntries($dictionary.id, $dictionary.name, $dictionary.glossLanguages);
+    }}
+    form="primary">Download CSV</Button>
 {/if}
