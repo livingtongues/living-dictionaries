@@ -25,7 +25,6 @@ const config = {
       colors: {
         primary: colors.blue,
         orange: colors.orange,
-        red: colors.red,
       },
       screens: {
         print: { raw: 'print' },
