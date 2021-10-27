@@ -324,22 +324,3 @@ export async function downloadEntries(
     await exportEntriesAsCSV(dataEntries, name, glosses);
   }
 }
-
-type MediaObject = {
-  audio: boolean;
-  images: boolean;
-};
-
-export async function haveMediaFile(id: string): Promise<MediaObject> {
-  const mediaObject = { audio: false, images: false };
-  const dataEntries = await getCollection<IEntry>(`dictionaries/${id}/words`);
-  const resultImages = dataEntries.find((entry) => entry.pf);
-  const resultAudio = dataEntries.find((entry) => entry.sf);
-  if (resultImages) {
-    mediaObject.images = true;
-  }
-  if (resultAudio) {
-    mediaObject.audio = true;
-  }
-  return mediaObject;
-}
