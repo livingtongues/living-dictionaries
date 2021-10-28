@@ -9,9 +9,21 @@ import { firebaseConfig } from '$sveltefire/config';
 import { fetchSpeakers } from '$lib/helpers/fetchSpeakers';
 
 async function downloadMedia(mediaURLs: string[]) {
+  const mediaObj = mediaURLs.reduce((o, url, i) => Object.assign(o, { [i]: url }), {});
+  console.log('mediaObj', mediaObj);
   //Zip and downloading images
-  const blobMedia = [];
-  await Promise.all(
+  for (const key in mediaObj) {
+    try {
+      const fetchedMedia = await fetch(mediaObj[key]);
+      mediaObj[key] = await fetchedMedia.blob();
+    } catch {
+      //TODO I don't know what to do here!
+      console.log('Something is wrong!');
+    }
+  }
+  console.log(mediaObj);
+  /* await Promise.all(
+    Object.entries(mediaObj).map((media) => console.log(media))
     mediaURLs.map(async (url) => {
       try {
         const fetchedMedia = await fetch(url);
@@ -21,9 +33,9 @@ async function downloadMedia(mediaURLs: string[]) {
         //TODO I don't know what to do here!
         console.log('Something is wrong!');
       }
-    })
-  );
-  return blobMedia;
+    }) 
+  );*/
+  return '';
 }
 
 async function zipper(
@@ -297,13 +309,13 @@ export async function exportEntriesAsCSV(
   if (includeImages && includeAudio) {
     const imagesURLs = await downloadMedia(imageUrls);
     const audiosURLs = await downloadMedia(audioUrls);
-    await zipper(dictionaryName, audioNames, imageNames, CSVBlob, audiosURLs, imagesURLs);
+    //await zipper(dictionaryName, audioNames, imageNames, CSVBlob, audiosURLs, imagesURLs);
   } else if (includeAudio) {
     const audiosURLs = await downloadMedia(audioUrls);
-    await zipper(dictionaryName, audioNames, imageNames, CSVBlob, audiosURLs, []);
+    //await zipper(dictionaryName, audioNames, imageNames, CSVBlob, audiosURLs, []);
   } else if (includeImages) {
     const imagesURLs = await downloadMedia(imageUrls);
-    await zipper(dictionaryName, audioNames, imageNames, CSVBlob, [], imagesURLs);
+    //await zipper(dictionaryName, audioNames, imageNames, CSVBlob, [], imagesURLs);
   } else {
     downloadObjectAsCSV(itemsFormatted, dictionaryName);
   }
