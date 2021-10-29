@@ -9,9 +9,9 @@ import { firebaseConfig } from '$sveltefire/config';
 import { fetchSpeakers } from '$lib/helpers/fetchSpeakers';
 
 async function downloadMedia(mediaURLs: string[]) {
+  //first converting URLs array in an object in order to align the same way the elements no matter how they are being fetched
   const mediaObj = mediaURLs.reduce((o, url, i) => Object.assign(o, { [i]: url }), {});
-  console.log('mediaObj', mediaObj);
-  //Zip and downloading images
+  //Zip and downloading images and audios
   for (const key in mediaObj) {
     try {
       const fetchedMedia = await fetch(mediaObj[key]);
@@ -21,21 +21,8 @@ async function downloadMedia(mediaURLs: string[]) {
       console.log('Something is wrong!');
     }
   }
-  console.log(mediaObj);
-  /* await Promise.all(
-    Object.entries(mediaObj).map((media) => console.log(media))
-    mediaURLs.map(async (url) => {
-      try {
-        const fetchedMedia = await fetch(url);
-        const blobs = await fetchedMedia.blob();
-        blobMedia.push(blobs);
-      } catch {
-        //TODO I don't know what to do here!
-        console.log('Something is wrong!');
-      }
-    }) 
-  );*/
-  return '';
+  const blobList = Object.entries(mediaObj).map((el) => el[1]);
+  return blobList;
 }
 
 async function zipper(
@@ -43,8 +30,9 @@ async function zipper(
   audioNames: string[],
   imageNames: string[],
   CSVFile: Blob,
-  blobAudios: Blob[],
-  blobImages: Blob[]
+  //I don't understand why the previous process converted the Blob in unknown types but still works
+  blobAudios: any[],
+  blobImages: any[]
 ) {
   if (blobAudios.length > 0 || blobImages.length > 0) {
     const zip = new JSZip();
@@ -308,14 +296,14 @@ export async function exportEntriesAsCSV(
 
   if (includeImages && includeAudio) {
     const imagesURLs = await downloadMedia(imageUrls);
-    const audiosURLs = await downloadMedia(audioUrls);
-    //await zipper(dictionaryName, audioNames, imageNames, CSVBlob, audiosURLs, imagesURLs);
+    const blobAudios = await downloadMedia(audioUrls);
+    await zipper(dictionaryName, audioNames, imageNames, CSVBlob, blobAudios, imagesURLs);
   } else if (includeAudio) {
-    const audiosURLs = await downloadMedia(audioUrls);
-    //await zipper(dictionaryName, audioNames, imageNames, CSVBlob, audiosURLs, []);
+    const blobAudios = await downloadMedia(audioUrls);
+    await zipper(dictionaryName, audioNames, imageNames, CSVBlob, blobAudios, []);
   } else if (includeImages) {
     const imagesURLs = await downloadMedia(imageUrls);
-    //await zipper(dictionaryName, audioNames, imageNames, CSVBlob, [], imagesURLs);
+    await zipper(dictionaryName, audioNames, imageNames, CSVBlob, [], imagesURLs);
   } else {
     downloadObjectAsCSV(itemsFormatted, dictionaryName);
   }
