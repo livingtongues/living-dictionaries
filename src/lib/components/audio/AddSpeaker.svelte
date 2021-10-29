@@ -2,25 +2,26 @@
   import { _ } from 'svelte-i18n';
   import Modal from '$lib/components/ui/Modal.svelte';
   import { createEventDispatcher } from 'svelte';
+  import { dictionary } from '$lib/stores';
+  import Button from '$svelteui/ui/Button.svelte';
+  import { add } from '$sveltefire/firestore';
+  import type { ISpeaker } from '$lib/interfaces';
+
   const dispatch = createEventDispatcher();
   const close = () => dispatch('close');
 
   let displayName = '';
   let birthplace = '';
   let decade = 4;
-  let gender = 'm';
+  let gender: ISpeaker['gender'] = 'm';
   let agreeToBeOnline = true;
-
-  import { dictionary } from '$lib/stores';
-  import Button from '$svelteui/ui/Button.svelte';
-  import { add } from '$sveltefire/firestore';
-  import type { ISpeaker } from '$lib/interfaces';
 
   async function addSpeaker() {
     const speaker = {
       displayName: displayName.trim(),
       birthplace: birthplace.trim(),
       decade,
+      gender,
       contributingTo: [$dictionary.id],
     };
 
