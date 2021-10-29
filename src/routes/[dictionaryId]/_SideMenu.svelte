@@ -1,7 +1,7 @@
 <script lang="ts">
   export let menuOpen: boolean;
   import { _ } from 'svelte-i18n';
-  import { dictionary, isManager } from '$lib/stores';
+  import { dictionary, isManager, admin } from '$lib/stores';
   import { page } from '$app/stores';
 </script>
 
@@ -68,6 +68,17 @@
       <i class="far fa-cog fa-fw" />
       <span class="font-medium mx-2">
         {$_('misc.settings', { default: 'Settings' })}
+      </span>
+    </a>
+  {/if}
+  {#if $admin >= 1}
+    <a
+      sveltekit:prefetch
+      href={'/' + $dictionary.id + '/export'}
+      class:active={$page.path.includes('export')}>
+      <i class="far fa-download" />
+      <span class="font-medium mx-2">
+        {$_('misc.export', { default: 'Export' })}
       </span>
     </a>
   {/if}
