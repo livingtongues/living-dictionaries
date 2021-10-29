@@ -33,7 +33,9 @@
 
 <div
   class:sompeng={column.display === 'Sompeng-Mardir'}
-  class={updatedValue !== undefined ? 'bg-green-100 border-green-400 border' : ''}>
+  class="{updatedValue !== undefined
+    ? 'bg-green-100 border-green-400 border'
+    : ''} h-full w-full inline-block">
   {#if column.field === 'soundFile'}
     <AudioCell {canEdit} {entry} />
   {:else if column.field === 'photoFile'}
