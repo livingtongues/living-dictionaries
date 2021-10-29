@@ -78,7 +78,6 @@
     </div>
   </div>
 </div>
-<pre>{grammar}</pre>
 
 <style>
   :global(.grammar img) {
