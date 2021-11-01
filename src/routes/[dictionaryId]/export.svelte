@@ -6,7 +6,10 @@
   import { exportEntriesAsCSV } from './export/_entries';
   import type { IEntry } from '$lib/interfaces';
   import { getCollection } from '$sveltefire/firestore';
-
+  let NProgress;
+  onMount(async () => {
+    NProgress = await import('nprogress');
+  });
   // let downloadData = true;
   // $: dataType = downloadData ? 'CSV' : '';
   let includeImages = false;
@@ -83,8 +86,11 @@
 </div>
 
 <Button
-  onclick={async () =>
-    await exportEntriesAsCSV(entries, $dictionary, { includeImages, includeAudio })}
+  onclick={async () => {
+    NProgress.start();
+    await exportEntriesAsCSV(entries, $dictionary, { includeImages, includeAudio });
+    NProgress.done();
+  }}
   form="primary">
   Download CSV
   {#if includeImages}
