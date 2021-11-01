@@ -46,7 +46,9 @@ async function zipper(
 
     const { saveAs } = await import('file-saver');
     await zip.generateAsync({ type: 'blob' }).then((blob) => {
-      saveAs(blob, `${dictionaryName}.zip`);
+      const d = new Date();
+      const date = d.getMonth() + 1 + '_' + d.getDate() + '_' + d.getFullYear();
+      saveAs(blob, `${dictionaryName}_${date}.zip`);
     });
   }
 }
@@ -104,25 +106,20 @@ export async function exportEntriesAsCSV(
       Object.assign(headers, JSON.parse(`{"sd${index + 1}": "Semantic domain ${index + 1}"}`));
     }
   }
-  //Assigning glosses as headers
+  //Assigning gloss languages as gloss headers
   glossLanguages.forEach((bcp) => {
     Object.assign(headers, JSON.parse(`{ "gl${bcp}": "${glossingLanguages[bcp]} Gloss" }`));
   });
-  //Assigning example sentences as headers
-  for (let j = 0; j <= glossLanguages.length; j++) {
-    if (j === glossLanguages.length) {
-      Object.assign(headers, JSON.parse(`{"xsvn": "Example sentence in ${dictionaryName}"}`));
-    } else {
-      Object.assign(
-        headers,
-        JSON.parse(
-          `{"xs${glossLanguages[j]}": "Example sentence in ${
-            glossingLanguages[glossLanguages[j]]
-          }"}`
-        )
-      );
-    }
-  }
+
+  //Assigning vernacular and gloss languages as example sentence headers
+  Object.assign(headers, JSON.parse(`{"xsvn": "Example sentence in ${dictionaryName}"}`));
+  glossLanguages.forEach((bcp) => {
+    Object.assign(
+      headers,
+      JSON.parse(`{"xs${bcp}": "Example sentence in ${glossingLanguages[bcp]}"}`)
+    );
+  });
+
   //Assigning audio metadata as headers
   Object.assign(headers, {
     aupa: 'Audio path',
@@ -139,9 +136,10 @@ export async function exportEntriesAsCSV(
 
   const itemsFormatted = [];
   data.forEach((entry, i) => {
-    //Avoiding showing null values
+    // Replace null values with empty string
     const entryKeys = Object.keys(entry);
     entryKeys.forEach((key) => (!entry[key] ? (entry[key] = '') : entry[key]));
+
     itemsFormatted.push({
       id: entry.id,
       lx: entry.lx.replace(/[,"]/g, (m) => replacementChars[m]),
@@ -152,6 +150,7 @@ export async function exportEntriesAsCSV(
       nt: entry.nt ? entry.nt.replace(/[,"]/g, (m) => replacementChars[m]) : '',
       //xv: entry.xv,
     });
+
     //Assigning parts of speech (abbreviation & name)
     if (entry.ps) {
       const pos = partsOfSpeech.find((ps) => ps.enAbbrev === entry.ps)?.enName;
@@ -178,8 +177,10 @@ export async function exportEntriesAsCSV(
         ps: '',
       });
     }
+
     //Assigning sources
     valuesInColumn(itemsFormatted, i, entry.sr, 'sr', (el) => el);
+
     //Assigning semantic domains
     if (entry.sdn) {
       for (let index = 0; index < totalSDN; index++) {
@@ -294,16 +295,10 @@ export async function exportEntriesAsCSV(
   itemsFormatted.unshift(headers);
   const CSVBlob = fileAsBlob(itemsFormatted);
 
-  if (includeImages && includeAudio) {
-    const imagesURLs = await downloadMedia(imageUrls);
-    const blobAudios = await downloadMedia(audioUrls);
+  if (includeImages || includeAudio) {
+    const imagesURLs = includeImages ? await downloadMedia(imageUrls) : [];
+    const blobAudios = includeAudio ? await downloadMedia(audioUrls) : [];
     await zipper(dictionaryName, audioNames, imageNames, CSVBlob, blobAudios, imagesURLs);
-  } else if (includeAudio) {
-    const blobAudios = await downloadMedia(audioUrls);
-    await zipper(dictionaryName, audioNames, imageNames, CSVBlob, blobAudios, []);
-  } else if (includeImages) {
-    const imagesURLs = await downloadMedia(imageUrls);
-    await zipper(dictionaryName, audioNames, imageNames, CSVBlob, [], imagesURLs);
   } else {
     downloadObjectAsCSV(itemsFormatted, dictionaryName);
   }
