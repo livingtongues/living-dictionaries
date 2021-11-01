@@ -296,9 +296,9 @@ export async function exportEntriesAsCSV(
   const CSVBlob = fileAsBlob(itemsFormatted);
 
   if (includeImages || includeAudio) {
-    const imagesURLs = includeImages ? await downloadMedia(imageUrls) : [];
+    const blobImages = includeImages ? await downloadMedia(imageUrls) : [];
     const blobAudios = includeAudio ? await downloadMedia(audioUrls) : [];
-    await zipper(dictionaryName, audioNames, imageNames, CSVBlob, blobAudios, imagesURLs);
+    await zipper(dictionaryName, audioNames, imageNames, CSVBlob, blobAudios, blobImages);
   } else {
     downloadObjectAsCSV(itemsFormatted, dictionaryName);
   }
