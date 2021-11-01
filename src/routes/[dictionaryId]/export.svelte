@@ -7,17 +7,17 @@
   import type { IEntry } from '$lib/interfaces';
   import { getCollection } from '$sveltefire/firestore';
 
-  let downloadData = true;
-  $: dataType = downloadData ? 'CSV' : '';
+  // let downloadData = true;
+  // $: dataType = downloadData ? 'CSV' : '';
   let includeImages = false;
   let includeAudio = false;
 
   let entries: IEntry[] = [];
-  let mounted = false;
+  let entriesLoaded = false;
 
   onMount(async () => {
     entries = await getCollection<IEntry>(`dictionaries/${$dictionary.id}/words`);
-    mounted = true;
+    entriesLoaded = true;
   });
 
   $: hasImages = entries.find((entry) => entry.pf);
@@ -31,12 +31,16 @@
   </title>
 </svelte:head>
 
-<h3 class="text-xl font-semibold">{$_('misc.export', { default: 'export' })}</h3>
+<h3 class="text-xl font-semibold mb-4">{$_('misc.export', { default: 'export' })}</h3>
 
-<h3 class="font-semibold text-lg mt-3">Options</h3>
+<!-- <h3 class="font-semibold text-lg mt-3">Options</h3> -->
 
-<div class="items-center mt-2 mb-6 ml-3">
-  <div class="flex items-center">
+<div class="mb-6">
+  <div>
+    <i class="far fa-check" /> Data as CSV
+  </div>
+  <!--TODO xlsx option-->
+  <!-- <div class="flex items-center">
     <input disabled id="data" type="checkbox" bind:checked={downloadData} class="opacity-50" />
     <label for="data" class="mx-2 block leading-5 text-gray-900"> Data </label>
   </div>
@@ -46,8 +50,7 @@
       : 'opacity-50 cursor-not-allowed'}">
     <input disabled={!downloadData} type="radio" name="csv" bind:group={dataType} value={'CSV'} />
     <label for="csv" class="mx-2 block leading-5 text-gray-900"> CSV </label>
-    <!--TODO xlsx option-->
-    <!-- <label class="inline-flex items-center ml-6">
+    <label class="inline-flex items-center ml-6">
       <input
         disabled={!data}
         type="radio"
@@ -56,23 +59,24 @@
         bind:group={dataType}
         value={'xlxs'} />
       <span class="ml-2">xlsx</span>
-    </label> -->
-  </div>
-  <div class="flex items-center {hasImages ? '' : 'opacity-50 cursor-not-allowed'}">
+    </label>
+  </div>-->
+  <div class="flex items-center mt-2 {hasImages ? '' : 'opacity-50 cursor-not-allowed'}">
     <input disabled={!hasImages} id="images" type="checkbox" bind:checked={includeImages} />
     <label for="images" class="mx-2 block leading-5 text-gray-900"> Images </label>
   </div>
-  {#if !mounted}
-    <p class="text-xs italic text-orange-400 p-2">Checking if images are available</p>
+  {#if !entriesLoaded}
+    <p class="text-xs italic text-orange-400 p-2">Checking if images exist</p>
   {:else if !hasImages}
     <p class="text-sm text-red-700 p-3">There are no images</p>
   {/if}
-  <div class="flex items-center {hasAudio ? '' : 'opacity-50 cursor-not-allowed'}">
+
+  <div class="flex items-center mt-2 {hasAudio ? '' : 'opacity-50 cursor-not-allowed'}">
     <input id="audio" type="checkbox" bind:checked={includeAudio} />
     <label for="audio" class="mx-2 block leading-5 text-gray-900"> Audio </label>
   </div>
-  {#if !mounted}
-    <p class="text-xs italic text-orange-400 p-2">Checking if audio is available</p>
+  {#if !entriesLoaded}
+    <p class="text-xs italic text-orange-400 p-2">Checking if audio files exist</p>
   {:else if !hasAudio}
     <p class="text-sm text-red-700 p-3">There are no audio files</p>
   {/if}
@@ -84,9 +88,9 @@
   form="primary">
   Download CSV
   {#if includeImages}
-    & Images
+    + Images
   {/if}
   {#if includeAudio}
-    & Audio
+    + Audio
   {/if}
 </Button>
