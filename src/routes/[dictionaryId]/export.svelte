@@ -69,9 +69,9 @@
     <label for="images" class="mx-2 block leading-5 text-gray-900"> Images </label>
   </div>
   {#if !entriesLoaded}
-    <p class="text-xs italic text-orange-400 p-2">Checking if images exist</p>
+    <p class="text-xs italic text-orange-400 p-2">Checking if image files exist</p>
   {:else if !hasImages}
-    <p class="text-sm text-red-700 p-3">There are no images</p>
+    <p class="text-sm text-red-700 p-3">There are no image files</p>
   {/if}
 
   <div class="flex items-center mt-2 {hasAudio ? '' : 'opacity-50 cursor-not-allowed'}">
