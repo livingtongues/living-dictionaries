@@ -3,7 +3,7 @@
   import { _ } from 'svelte-i18n';
   import { dictionary } from '$lib/stores';
   import Button from '$svelteui/ui/Button.svelte';
-  import { formatEntriesForCSV } from './export/_entries';
+  import { formatEntriesForCSV } from './export/_formatEntries';
   import type { IEntry } from '$lib/interfaces';
   import { getCollection } from '$sveltefire/firestore';
   import { downloadObjArrAsCSV } from '$lib/export/csv';
