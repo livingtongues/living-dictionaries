@@ -32,7 +32,7 @@ export function fileAsBlob(itemsFormatted) {
   return blob;
 }
 
-export function downloadObjectAsCSV(itemsFormatted: Record<string, unknown>[], title: string) {
+export function downloadObjArrAsCSV(itemsFormatted: Record<string, unknown>[], title: string) {
   const blob = fileAsBlob(itemsFormatted);
   const d = new Date();
   const date = d.getMonth() + 1 + '_' + d.getDate() + '_' + d.getFullYear();
@@ -85,7 +85,7 @@ export function exportDictionariesAsCSV(data: IDictionary[], title: string) {
   });
 
   itemsFormatted.unshift(headers);
-  downloadObjectAsCSV(itemsFormatted, title);
+  downloadObjArrAsCSV(itemsFormatted, title);
 }
 
 export function exportUsersAsCSV(data: IUser[], title: string) {
@@ -103,5 +103,5 @@ export function exportUsersAsCSV(data: IUser[], title: string) {
   });
 
   itemsFormatted.unshift(headers);
-  downloadObjectAsCSV(itemsFormatted, title);
+  downloadObjArrAsCSV(itemsFormatted, title);
 }

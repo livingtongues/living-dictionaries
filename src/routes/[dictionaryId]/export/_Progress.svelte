@@ -1,11 +1,16 @@
 <script lang="ts">
   import { tweened } from 'svelte/motion';
   import { cubicOut } from 'svelte/easing';
-  let progress = tweened(0, {
+
+  export let progress = 0;
+  let tweenedProgress = tweened(0, {
     duration: 2000,
     easing: cubicOut,
   });
-  $: percentage = Math.floor($progress * 100);
+  $: {
+    tweenedProgress.set(progress);
+  }
+  $: percentage = Math.floor($tweenedProgress * 100);
 </script>
 
 <div class="relative pt-1">
