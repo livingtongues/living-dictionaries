@@ -5,11 +5,13 @@ import { partsOfSpeech } from '$lib/mappings/parts-of-speech';
 import { fetchSpeakers } from '$lib/helpers/fetchSpeakers';
 import { friendlyName } from '$lib/helpers/friendlyName';
 
-function valuesInColumn(itemsFormatted, i, values, columnName, fn) {
+function turnArrayIntoPipedString(itemsFormatted, i, values, columnName, fn) {
   if (values) {
     let stringValue = '';
-    //In case some strings contain commas
+    // There are some dictionaries (e.g. Kalanga) that have strings as sources instead of arrays
+    values = typeof values === 'string' ? [values] : values;
     const list = values.map(fn);
+    //In case some strings contain commas
     stringValue += list.map((el) => el.replace(/,/g, ' -'));
     stringValue = stringValue.replace(/,/g, ' | ');
     Object.assign(itemsFormatted[i], JSON.parse(`{"${columnName}": "${stringValue}"}`));
@@ -131,7 +133,7 @@ export async function formatEntriesForCSV(
     }
 
     //Assigning sources
-    valuesInColumn(itemsFormatted, i, entry.sr, 'sr', (el) => el);
+    turnArrayIntoPipedString(itemsFormatted, i, entry.sr, 'sr', (el) => el);
 
     //Assigning semantic domains
     if (entry.sdn) {
