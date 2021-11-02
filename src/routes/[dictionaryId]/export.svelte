@@ -26,16 +26,6 @@
     entriesWithAudio = formattedEntries.filter((entry) => entry.aupa);
     mounted = true;
   });
-
-  // TODO:
-  // use already established naming conventions (sf (soundfile) instead of au, pf (photofile) instead of im)
-  // put quotes around items that have commas instead of pulling out all commas and just do it at the end.
-  // Type things
-  // Test things
-  // Don't use JSON.parse and Object.assign when it makes code more verbose for no benefit
-  // use const ... for ... loops instead of the old style that is more verbose and confusing.
-  // don't fetch all speakers - just get ones for current dictionary
-  // XSLX option (see git history)
 </script>
 
 <svelte:head>
