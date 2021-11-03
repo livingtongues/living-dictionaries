@@ -145,7 +145,7 @@ export async function formatEntriesForCSV(
               entry.sdn[index]
                 ? semanticDomains
                     .find((sd) => sd.key === entry.sdn[index])
-                    .name.replace(/[,"]/g, (m) => replacementChars[m])
+                    ?.name.replace(/[,"]/g, (m) => replacementChars[m]) || ''
                 : ''
             }"}`
           )
