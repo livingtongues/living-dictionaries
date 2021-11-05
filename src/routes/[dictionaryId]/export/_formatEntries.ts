@@ -96,12 +96,12 @@ export async function formatEntriesForCSV(
 
     itemsFormatted.push({
       id: entry.id,
-      lx: entry.lx.replace(/[,"]/g, (m) => replacementChars[m]),
-      ph: entry.ph ? entry.ph.replace(/[,"]/g, (m) => replacementChars[m]) : '',
-      in: entry.in ? entry.in.replace(/[,"]/g, (m) => replacementChars[m]) : '',
-      mr: entry.mr ? entry.mr.replace(/[,"]/g, (m) => replacementChars[m]) : '',
-      di: entry.di ? entry.di.replace(/[,"]/g, (m) => replacementChars[m]) : '',
-      nt: entry.nt ? entry.nt.replace(/[,"]/g, (m) => replacementChars[m]) : '',
+      lx: entry.lx.replace(/[,"\r\n]/g, (m) => replacementChars[m]),
+      ph: entry.ph ? entry.ph.replace(/[,"\r\n]/g, (m) => replacementChars[m]) : '',
+      in: entry.in ? entry.in.replace(/[,"\r\n]/g, (m) => replacementChars[m]) : '',
+      mr: entry.mr ? entry.mr.replace(/[,"\r\n]/g, (m) => replacementChars[m]) : '',
+      di: entry.di ? entry.di.replace(/[,"\r\n]/g, (m) => replacementChars[m]) : '',
+      nt: entry.nt ? entry.nt.replace(/[,"\r\n]/g, (m) => replacementChars[m]) : '',
       //xv: entry.xv,
     });
 
@@ -145,7 +145,7 @@ export async function formatEntriesForCSV(
               entry.sdn[index]
                 ? semanticDomains
                     .find((sd) => sd.key === entry.sdn[index])
-                    ?.name.replace(/[,"]/g, (m) => replacementChars[m]) || ''
+                    ?.name.replace(/[,"\r\n]/g, (m) => replacementChars[m]) || ''
                 : ''
             }"}`
           )
@@ -162,10 +162,9 @@ export async function formatEntriesForCSV(
       }
     }
     //Assigning glosses
-    //TODO Gta? is still having problems. There's another character I need to avoid
     glossLanguages.forEach((bcp) => {
       const cleanEntry = entry.gl[bcp]
-        ? entry.gl[bcp].replace(/[,"]/g, (m) => replacementChars[m])
+        ? entry.gl[bcp].replace(/[,"\r\n]/g, (m) => replacementChars[m])
         : '';
       Object.assign(itemsFormatted[i], JSON.parse(`{"gl${bcp}": "${cleanEntry}"}`));
     });
@@ -177,7 +176,7 @@ export async function formatEntriesForCSV(
             itemsFormatted[i],
             JSON.parse(`{
               "xs${glossLanguages[j] ? glossLanguages[j] : 'vn'}": "${
-              entry.xs['vn'] ? entry.xs['vn'].replace(/[,"]/g, (m) => replacementChars[m]) : ''
+              entry.xs['vn'] ? entry.xs['vn'].replace(/[,"\r\n]/g, (m) => replacementChars[m]) : ''
             }"
             }`)
           );
@@ -204,9 +203,9 @@ export async function formatEntriesForCSV(
     if (entry.sf && entry.sf.path) {
       const speaker = speakers.find((speaker) => speaker?.id === entry.sf.sp);
       let speakerName = speaker?.displayName || entry.sf.speakerName || '';
-      speakerName = speakerName.replace(/[,"]/g, (m) => replacementChars[m]);
+      speakerName = speakerName.replace(/[,"\r\n]/g, (m) => replacementChars[m]);
       let speakerBP = speaker?.birthplace || '';
-      speakerBP = speakerBP.replace(/[,"]/g, (m) => replacementChars[m]);
+      speakerBP = speakerBP.replace(/[,"\r\n]/g, (m) => replacementChars[m]);
       const speakerDecade = speaker?.decade || '';
       const speakerGender = speaker?.gender || '';
       Object.assign(itemsFormatted[i], {
