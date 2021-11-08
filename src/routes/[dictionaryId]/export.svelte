@@ -105,9 +105,10 @@
     disabled={!formattedEntries.length}
     onclick={() => {
       const finalizedEntries = formattedEntries.map((entry) => {
-        delete entry.impa;
-        delete entry.aupa;
-        return entry;
+        const newEntry = { ...entry };
+        delete newEntry.impa;
+        delete newEntry.aupa;
+        return newEntry;
       });
       downloadObjArrAsCSV(finalizedEntries, $dictionary.name);
     }}
