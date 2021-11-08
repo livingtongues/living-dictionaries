@@ -72,7 +72,9 @@
     const date = d.getMonth() + 1 + '_' + d.getDate() + '_' + d.getFullYear();
     if (destroyed) return;
     saveAs(blob, `${dictionary.id}_${date}.zip`);
-    dispatch('completed');
+    if (!errors.length) {
+      dispatch('completed');
+    }
   });
 
   onDestroy(() => {
