@@ -2,7 +2,7 @@
   import JSZip from 'jszip';
   import { fileAsBlob } from '$lib/export/csv';
   import type { IDictionary } from '$lib/interfaces';
-  import { onMount } from 'svelte';
+  import { onDestroy, onMount } from 'svelte';
   import { getStorageDownloadUrl } from './_storageUrl';
 
   export let dictionary: IDictionary;
@@ -12,13 +12,15 @@
 
   let fetched = 0;
   $: progress = fetched / (entriesWithImages.length + entriesWithAudio.length);
-
   let errors = [];
+  let destroyed = false;
 
   onMount(async () => {
     const zip = new JSZip();
 
     for (const entry of entriesWithImages) {
+      if (destroyed) return;
+      console.log('fetching', entry.impa);
       try {
         const response = await fetch(getStorageDownloadUrl(entry.impa));
         if (response.ok) {
@@ -36,6 +38,8 @@
       fetched++;
     }
     for (const entry of entriesWithAudio) {
+      if (destroyed) return;
+      console.log('fetching', entry.aupa);
       try {
         const response = await fetch(getStorageDownloadUrl(entry.aupa));
         if (response.ok) {
@@ -53,6 +57,7 @@
       fetched++;
     }
 
+    console.log('preparing zip');
     for (const entry of formattedEntries) {
       delete entry.impa;
       delete entry.aupa;
@@ -64,8 +69,13 @@
     await zip.generateAsync({ type: 'blob' }).then((blob) => {
       const d = new Date();
       const date = d.getMonth() + 1 + '_' + d.getDate() + '_' + d.getFullYear();
+      if (destroyed) return;
       saveAs(blob, `${dictionary.id}_${date}.zip`);
     });
+  });
+
+  onDestroy(() => {
+    destroyed = true;
   });
 </script>
 
