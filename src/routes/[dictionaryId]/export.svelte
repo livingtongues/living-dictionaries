@@ -90,6 +90,7 @@
         {formattedEntries}
         entriesWithImages={includeImages ? entriesWithImages : []}
         entriesWithAudio={includeAudio ? entriesWithAudio : []}
+        on:completed={toggle}
         let:progress>
         <Progress {progress} />
         {#if progress < 1}
