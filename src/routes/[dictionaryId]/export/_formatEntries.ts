@@ -138,18 +138,16 @@ export async function formatEntriesForCSV(
     //Assigning semantic domains
     if (entry.sdn) {
       for (let index = 0; index < totalSDN; index++) {
-        Object.assign(
-          itemsFormatted[i],
-          JSON.parse(
-            `{"sd${index + 1}": "${
-              entry.sdn[index]
-                ? semanticDomains
-                    .find((sd) => sd.key === entry.sdn[index])
-                    ?.name.replace(/[,"\r\n]/g, (m) => replacementChars[m]) || ''
-                : ''
-            }"}`
-          )
-        );
+        itemsFormatted[i][`sd${index + 1}`] = '';
+        if (entry.sdn[index]) {
+          const matchingDomain = semanticDomains.find((sd) => sd.key === entry.sdn[index]);
+          if (matchingDomain) {
+            itemsFormatted[i][`sd${index + 1}`] = matchingDomain.name.replace(
+              /[,"\r\n]/g,
+              (m) => replacementChars[m]
+            );
+          }
+        }
       }
     } else {
       for (let index = 0; index < totalSDN; index++) {
