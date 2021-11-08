@@ -71,7 +71,7 @@
       </span>
     </a>
   {/if}
-  {#if $admin >= 1}
+  {#if $isManager}
     <a
       sveltekit:prefetch
       href={'/' + $dictionary.id + '/export'}
