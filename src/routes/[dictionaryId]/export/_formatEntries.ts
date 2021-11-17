@@ -14,9 +14,9 @@ function turnArrayIntoPipedString(itemsFormatted, i, values, columnName, fn) {
     //In case some strings contain commas
     stringValue += list.map((el) => el.replace(/,/g, ' -'));
     stringValue = stringValue.replace(/,/g, ' | ');
-    Object.assign(itemsFormatted[i], JSON.parse(`{"${columnName}": "${stringValue}"}`));
+    Object.assign(itemsFormatted[i], { columnName: stringValue });
   } else {
-    Object.assign(itemsFormatted[i], JSON.parse(`{ "${columnName}": "" }`));
+    Object.assign(itemsFormatted[i], { columnName: '' });
   }
 }
 
@@ -109,21 +109,15 @@ export async function formatEntriesForCSV(
     if (entry.ps) {
       const pos = partsOfSpeech.find((ps) => ps.enAbbrev === entry.ps)?.enName;
       if (!pos) {
-        Object.assign(
-          itemsFormatted[i],
-          JSON.parse(`{
-          "psab": "",
-          "ps": "${entry.ps}"
-        }`)
-        );
+        Object.assign(itemsFormatted[i], {
+          psab: '',
+          ps: entry.ps,
+        });
       } else {
-        Object.assign(
-          itemsFormatted[i],
-          JSON.parse(`{
-          "psab": "${entry.ps}",
-          "ps": "${pos}"
-        }`)
-        );
+        Object.assign(itemsFormatted[i], {
+          psab: entry.ps,
+          ps: pos,
+        });
       }
     } else {
       Object.assign(itemsFormatted[i], {
