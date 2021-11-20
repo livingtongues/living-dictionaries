@@ -54,7 +54,7 @@
     "recordrtc": "^5.6.2",
     "replace-in-file": "^6.3.2",
     "simple-git-hooks": "^2.7.0",
-    "svelte": "^3.44.2",
+    "svelte": "3.39.0",
     "svelte-check": "^2.2.10",
     "svelte-i18n": "^3.3.13",
     "svelte-jester": "^2.1.5",
