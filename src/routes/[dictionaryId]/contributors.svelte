@@ -14,6 +14,7 @@
   import { _ } from 'svelte-i18n';
   import { isManager, isContributor, dictionary, admin } from '$lib/stores';
   import Collection from '$sveltefire/components/Collection.svelte';
+  import { where } from 'firebase/firestore';
 
   function invite(role: 'manager' | 'contributor' = 'contributor') {
     const input = prompt(`${$_('contact.email', { default: 'Email' })}?`);
@@ -24,7 +25,6 @@
   }
 
   import { add, deleteDocument, update } from '$sveltefire/firestorelite';
-  import { where } from 'firebase/firestore/lite';
   import type { IInvite, IWriteInCollaborator, IContributor, IManager } from '$lib/interfaces';
   import Button from '$svelteui/ui/Button.svelte';
   import ShowHide from '$svelteui/functions/ShowHide.svelte';

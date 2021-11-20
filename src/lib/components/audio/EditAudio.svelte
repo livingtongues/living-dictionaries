@@ -9,13 +9,16 @@
   import SelectAudio from '$lib/components/audio/SelectAudio.svelte';
   import RecordAudio from '$lib/components/audio/RecordAudio.svelte';
   import { dictionary, admin } from '$lib/stores';
+  import Button from '$svelteui/ui/Button.svelte';
+
   import { deleteAudio } from '$lib/helpers/delete';
   import { firebaseConfig } from '$sveltefire/config';
-  import Button from '$svelteui/ui/Button.svelte';
   import { update } from '$sveltefire/firestorelite';
+
   import Collection from '$sveltefire/components/Collection.svelte';
+  import { where } from 'firebase/firestore';
+
   import type { IEntry, ISpeaker } from '$lib/interfaces';
-  import { where } from 'firebase/firestore/lite';
   export let entry: IEntry;
   let readyToRecord: boolean;
   let speakerId: string;
