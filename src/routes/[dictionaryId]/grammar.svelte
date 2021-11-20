@@ -24,12 +24,11 @@
     dictionaryId: string;
   import Button from '$svelteui/ui/Button.svelte';
   import { set } from '$sveltefire/firestorelite';
-  import { goto } from '$app/navigation';
 
   async function save() {
     try {
       await set<IGrammar>(`dictionaries/${dictionaryId}/info/grammar`, { grammar });
-      goto(`/${dictionaryId}/grammar`);
+      window.location.replace(`/${dictionaryId}/grammar`);
     } catch (err) {
       alert(err);
     }

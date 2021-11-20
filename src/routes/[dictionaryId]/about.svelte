@@ -24,12 +24,11 @@
   import Button from '$svelteui/ui/Button.svelte';
   import { set } from '$sveltefire/firestorelite';
   import type { IAbout } from '$lib/interfaces';
-  import { goto } from '$app/navigation';
 
   async function save() {
     try {
       await set<IAbout>(`dictionaries/${dictionaryId}/info/about`, { about });
-      goto(`/${dictionaryId}/about`);
+      window.location.replace(`/${dictionaryId}/about`);
     } catch (err) {
       alert(err);
     }
