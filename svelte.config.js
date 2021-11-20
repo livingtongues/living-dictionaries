@@ -16,14 +16,10 @@ const config = {
 		]
 	}),
 
-	disableDependencyReinclusion: ['svench'], // https://github.com/rixo/svench/issues/43
 	kit: {
 		adapter: vercel(),
 		target: '#svelte',
 		vite: {
-			ssr: {
-				external: ['whatwg-url', 'node-fetch'],
-			},
 			resolve: {
 				alias: {
 					$svelteui: path.resolve('./src/svelteui'),

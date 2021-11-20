@@ -15,5 +15,3 @@ export function stopTrace(t: PerformanceTrace) {
 }
 
 // add more from https://modularfirebase.web.app/common-use-cases/performance-monitoring/
-
-// throws error `IDBIndex is not defined` if used server side (maybe Vite 2.7 will solve?) - clued in by https://github.com/sveltejs/kit/issues/905
