@@ -86,7 +86,7 @@
   }
 
   import { update } from '$sveltefire/firestorelite';
-  import { dev } from '$app/env';
+  import { dev } from '$sveltefire/config';
   import { serverTimestamp } from 'firebase/firestore/lite';
   import { user } from '$sveltefire/user';
   import { processImageUrl } from './processImageUrl';
