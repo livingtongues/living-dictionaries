@@ -66,8 +66,11 @@
     ) {
       try {
         goto(`/${$dictionary.id}/entries/list${$algoliaQueryParams}`);
+        const timeStampRemovedEntry = { ...entry };
+        delete timeStampRemovedEntry.ca; // needed b/c error when entry is received by firestore and set by firestore/lite
+        delete timeStampRemovedEntry.ua;
         await set<IEntry>(`dictionaries/${$dictionary.id}/deletedEntries/${entry.id}`, {
-          ...entry,
+          ...timeStampRemovedEntry,
           // @ts-ignore
           deletedAt: serverTimestamp(),
         });
