@@ -2,8 +2,8 @@
   import type { IDictionary } from '$lib/interfaces';
   import ResponsiveTable from '$lib/components/ui/ResponsiveTable.svelte';
   import Collection from '$sveltefire/components/Collection.svelte';
-  import { arrayRemove, arrayUnion, deleteField, GeoPoint } from 'firebase/firestore';
-  import { update } from '$sveltefire/firestore';
+  import { update } from '$sveltefire/firestorelite';
+  import { arrayRemove, arrayUnion, deleteField, GeoPoint } from 'firebase/firestore/lite';
   import { exportDictionariesAsCSV } from '$lib/export/csv';
   import Filter from './_Filter.svelte';
   import Button from '$svelteui/ui/Button.svelte';
@@ -22,12 +22,14 @@
   <Filter
     items={dictionaries}
     let:filteredItems={filteredDictionaries}
-    placeholder="Search dictionaries">
+    placeholder="Search dictionaries"
+  >
     <div slot="right">
       <Button
         form="primary"
         color="black"
-        onclick={() => exportDictionariesAsCSV(filteredDictionaries, 'living-dictionaries-list')}>
+        onclick={() => exportDictionariesAsCSV(filteredDictionaries, 'living-dictionaries-list')}
+      >
         <i class="fas fa-download mr-1" />
         Download {filteredDictionaries.length} Dictionaries as CSV
       </Button>
@@ -83,7 +85,8 @@
               } catch (err) {
                 alert(err);
               }
-            }} />
+            }}
+          />
         {/each}
       </SortDictionaries>
     </ResponsiveTable>

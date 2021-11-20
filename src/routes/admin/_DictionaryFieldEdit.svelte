@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { update } from '$sveltefire/firestore';
+  import { update } from '$sveltefire/firestorelite';
   export let field;
   export let value;
   export let dictionaryId;
