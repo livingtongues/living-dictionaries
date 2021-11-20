@@ -1,55 +1,24 @@
-<!-- <script context="module" lang="ts">
-  Option 2: Type in module block
-  // import type * as RecordRTC from 'recordrtc';
-  // declare const RecordRTC;
-  On mount:
-  // await loadScriptOnce('https://cdnjs.cloudflare.com/ajax/libs/RecordRTC/5.5.6/RecordRTC.js');
-</script> -->
 <script lang="ts">
   import { _ } from 'svelte-i18n';
   import Button from '$svelteui/ui/Button.svelte';
 
   export let audioBlob = null;
   export let permissionGranted = false;
+  let permissionDenied = false;
 
-  import type * as RecordRTCType from 'recordrtc';
-  let RecordRTC: typeof RecordRTCType;
+  let RecordRTC: typeof import('recordrtc');
   import { onMount } from 'svelte';
   onMount(async () => {
-    RecordRTC = await import('recordrtc');
+    RecordRTC = (await import('recordrtc')).default;
+    // Could also use `await loadScriptOnce('https://cdnjs.cloudflare.com/ajax/libs/RecordRTC/5.5.6/RecordRTC.js');` in context module block
   });
 
-  let permissionDenied = false;
   // import type { StereoAudioRecorder } from 'recordrtc';
   // let recorder: StereoAudioRecorder = null;
   let recorder = null;
   let stream = null;
 
-  async function checkPermissions() {
-    try {
-      const result = await navigator.permissions.query({ name: 'microphone' });
-      if (result.state == 'granted') {
-        permissionGranted = true;
-      } else if (result.state == 'prompt') {
-        stream = await navigator.mediaDevices.getUserMedia({
-          audio: true,
-          video: false,
-        });
-        setTimeout(turnOffMic, 60);
-        checkPermissions();
-      } else if (result.state == 'denied') {
-        permissionDenied = true;
-      }
-      //   result.onchange = function (data) {
-      //     console.log(data);
-      //   };
-    } catch (err) {
-      console.log(err); // Firefox and Safari will throw errors as they don't support navigator.permissions.query({ name: "microphone" })
-      nonChromePermissionCheck();
-    }
-  }
-
-  async function nonChromePermissionCheck() {
+  async function checkAudioPermissions() {
     try {
       stream = await navigator.mediaDevices.getUserMedia({
         audio: true,
@@ -140,7 +109,8 @@
 
       <div>
         <Button class="mt-1" size="sm" onclick={() => location.reload()}
-          >{$_('audio.reload', { default: 'Reload' })}</Button>
+          >{$_('audio.reload', { default: 'Reload' })}</Button
+        >
         <Button
           size="sm"
           class="mt-1"
@@ -148,10 +118,11 @@
           color="green"
           href="https://www.google.com/search?q=How+do+I+enable+microphone+access"
           target="_blank"
-          rel="noopener">{$_('audio.learn_more', { default: 'Learn More' })}</Button>
+          rel="noopener">{$_('audio.learn_more', { default: 'Learn More' })}</Button
+        >
       </div>
     {:else}
-      <Button onclick={checkPermissions} class="w-full">
+      <Button onclick={checkAudioPermissions} class="w-full">
         <i class="far fa-microphone-alt" />
         {$_('audio.prepare_to_record', { default: 'Prepare to Record with Microphone' })}
       </Button>
