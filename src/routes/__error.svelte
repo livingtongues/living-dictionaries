@@ -10,7 +10,7 @@
   import { _ } from 'svelte-i18n';
   import Button from '$svelteui/ui/Button.svelte';
   import { onMount } from 'svelte';
-  import { dev } from '$app/env';
+  import { dev } from '$sveltefire/config';
   import ShowHide from '$svelteui/functions/ShowHide.svelte';
 
   export let status;

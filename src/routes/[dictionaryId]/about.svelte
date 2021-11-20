@@ -22,7 +22,7 @@
   export let about = '',
     dictionaryId: string;
   import Button from '$svelteui/ui/Button.svelte';
-  import { set } from '$sveltefire/firestore';
+  import { set } from '$sveltefire/firestorelite';
   import type { IAbout } from '$lib/interfaces';
 
   async function save() {
@@ -52,12 +52,15 @@
   {#if $isManager}
     {#if editing}
       <Button class="mb-2" onclick={() => (editing = false)}
-        >{$_('misc.cancel', { default: 'Cancel' })}</Button>
+        >{$_('misc.cancel', { default: 'Cancel' })}</Button
+      >
       <Button class="mb-2" form="primary" onclick={save}
-        >{$_('misc.save', { default: 'Save' })}</Button>
+        >{$_('misc.save', { default: 'Save' })}</Button
+      >
     {:else}
       <Button class="mb-2" onclick={() => (editing = true)}
-        >{$_('misc.edit', { default: 'Edit' })}</Button>
+        >{$_('misc.edit', { default: 'Edit' })}</Button
+      >
     {/if}
   {/if}
 
