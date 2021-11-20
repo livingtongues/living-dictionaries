@@ -15,7 +15,7 @@
   "devDependencies": {
     "@sentry/browser": "^6.15.0",
     "@sveltejs/adapter-vercel": "^1.0.0-next.31",
-    "@sveltejs/kit": "^1.0.0-next.156",
+    "@sveltejs/kit": "^1.0.0-next.196",
     "@tailwindcss/forms": "^0.3.4",
     "@tailwindcss/typography": "^0.4.1",
     "@testing-library/jest-dom": "^5.15.0",

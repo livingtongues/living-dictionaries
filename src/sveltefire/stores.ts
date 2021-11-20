@@ -4,7 +4,7 @@ import type { CollectionReference, DocumentReference, QueryConstraint } from 'fi
 import { writable } from 'svelte/store';
 import { db } from '.';
 import { colRef, docRef } from './firestore';
-import { startTrace, stopTrace } from './perf';
+// import { startTrace, stopTrace } from './perf';
 
 export function docStore<T>(
   path: DocumentReference<T> | string,
@@ -29,7 +29,7 @@ export function docStore<T>(
   }
 
   const ref = typeof path === 'string' ? docRef<T>(path) : path;
-  const trace = traceId && startTrace(traceId);
+  // const trace = traceId && startTrace(traceId);
 
   let _loading = typeof startWith !== undefined;
   let _firstValue = true;
@@ -45,7 +45,7 @@ export function docStore<T>(
     _waitForIt && clearTimeout(_waitForIt);
     _error = err || null;
     set(val);
-    trace && stopTrace(trace);
+    // trace && stopTrace(trace);
   };
 
   // Timout
@@ -145,7 +145,7 @@ export function collectionStore<T>(
 
   const ref = typeof path === 'string' ? colRef<T>(path) : path;
   const q = query(ref, ...queryConstraints);
-  const trace = traceId && startTrace(traceId);
+  // const trace = traceId && startTrace(traceId);
 
   let _loading = typeof startWith !== undefined;
   let _error = null;
@@ -166,7 +166,7 @@ export function collectionStore<T>(
     _error = err || null;
     _meta = calcMeta(val);
     set(val);
-    trace && stopTrace(trace);
+    // trace && stopTrace(trace);
   };
 
   const start = () => {
