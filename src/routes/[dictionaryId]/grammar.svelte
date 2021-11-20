@@ -23,12 +23,13 @@
   export let grammar = '',
     dictionaryId: string;
   import Button from '$svelteui/ui/Button.svelte';
-  import { set } from '$sveltefire/firestore';
+  import { set } from '$sveltefire/firestorelite';
+  import { goto } from '$app/navigation';
 
   async function save() {
     try {
       await set<IGrammar>(`dictionaries/${dictionaryId}/info/grammar`, { grammar });
-      window.location.replace(`/${dictionaryId}/grammar`);
+      goto(`/${dictionaryId}/grammar`);
     } catch (err) {
       alert(err);
     }
@@ -52,12 +53,15 @@
   {#if $isManager}
     {#if editing}
       <Button class="mb-2" onclick={() => (editing = false)}
-        >{$_('misc.cancel', { default: 'Cancel' })}</Button>
+        >{$_('misc.cancel', { default: 'Cancel' })}</Button
+      >
       <Button class="mb-2" form="primary" onclick={save}
-        >{$_('misc.save', { default: 'Save' })}</Button>
+        >{$_('misc.save', { default: 'Save' })}</Button
+      >
     {:else}
       <Button class="mb-2" onclick={() => (editing = true)}
-        >{$_('misc.edit', { default: 'Edit' })}</Button>
+        >{$_('misc.edit', { default: 'Edit' })}</Button
+      >
     {/if}
   {/if}
 
