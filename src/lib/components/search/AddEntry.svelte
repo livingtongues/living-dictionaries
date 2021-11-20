@@ -13,10 +13,14 @@
       return alert(`Missing: ${$_('entry.lx', { default: 'Lexeme/Word/Phrase' })}`);
     }
     try {
-      const entryDoc = await add<IEntry>(`dictionaries/${$page.params.dictionaryId}/words`, {
-        lx,
-        gl: {},
-      });
+      const entryDoc = await add<IEntry>(
+        `dictionaries/${$page.params.dictionaryId}/words`,
+        {
+          lx,
+          gl: {},
+        },
+        true
+      );
       goto(`/${$page.params.dictionaryId}/entry/${entryDoc.id}`);
     } catch (err) {
       console.error(err);
