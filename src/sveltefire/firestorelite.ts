@@ -2,6 +2,7 @@
 import { get } from 'svelte/store';
 import { user } from '$sveltefire/user';
 import {
+  getFirestore,
   addDoc,
   collection,
   deleteDoc,
@@ -12,9 +13,10 @@ import {
   serverTimestamp,
   setDoc,
   updateDoc,
-} from 'firebase/firestore';
-import type { CollectionReference, DocumentReference, QueryConstraint } from 'firebase/firestore';
-import { db } from '.';
+  CollectionReference,
+  DocumentReference,
+  QueryConstraint,
+} from 'firebase/firestore/lite';
 import type { IUser } from '$lib/interfaces';
 
 export const getUid = () => {
@@ -26,6 +28,7 @@ type CollectionPredicate<T> = string | CollectionReference<T>;
 type DocPredicate<T> = string | DocumentReference<T>;
 
 export function colRef<T>(ref: CollectionPredicate<T>): CollectionReference<T> {
+  const db = getFirestore();
   return typeof ref === 'string' ? (collection(db, ref) as CollectionReference<T>) : ref;
 }
 
