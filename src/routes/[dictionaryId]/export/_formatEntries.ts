@@ -56,6 +56,7 @@ export async function formatEntriesForCSV(
   //Assigning semantic domains as headers
   if (totalSDN > 0) {
     for (let index = 0; index < totalSDN; index++) {
+      // headers[`sd${index + 1}`] = `Semantic domain ${index + 1}`;
       Object.assign(headers, JSON.parse(`{"sd${index + 1}": "Semantic domain ${index + 1}"}`));
     }
   }
