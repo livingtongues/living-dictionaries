@@ -18,7 +18,8 @@
   export let inviteId: string, dictionaryId: string;
   let inviteType: IInvite;
 
-  import { set, update } from '$sveltefire/firestore';
+  import { set, update } from '$sveltefire/firestorelite';
+  import { serverTimestamp } from 'firebase/firestore/lite';
 
   async function acceptInvite(role: 'manager' | 'contributor') {
     try {
@@ -53,15 +54,14 @@
   import Doc from '$sveltefire/components/Doc.svelte';
   import { user } from '$sveltefire/user';
   import ShowHide from '$svelteui/functions/ShowHide.svelte';
-  import { serverTimestamp } from 'firebase/firestore';
-  import Json from '$svelteui/data/JSON.svelte';
 </script>
 
 <div>
   <Doc
     path={`dictionaries/${dictionaryId}/invites/${inviteId}`}
     let:data={invite}
-    startWith={inviteType}>
+    startWith={inviteType}
+  >
     {#if invite && invite.status === 'sent'}
       <p class="font-semibold mb-2">
         {$_('invite.invited_by', { default: 'Invited by' })}: {invite.inviterName}
@@ -85,7 +85,8 @@
           <Button form={'primary'} onclick={() => acceptInvite(invite.role)}
             >{$_('invite.accept_invitation', {
               default: 'Accept Invitation',
-            })}</Button>
+            })}</Button
+          >
 
           <div class="mt-2 text-sm text-gray-600">
             {$_('terms.agree_by_submit', {

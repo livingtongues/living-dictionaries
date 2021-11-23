@@ -23,20 +23,19 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
   import type { IDictionary } from '$lib/interfaces';
-  import { orderBy } from '@firebase/firestore';
-  import { where } from 'firebase/firestore';
   import { admin, myDictionaries } from '$lib/stores';
-  export let publicDictionaries: IDictionary[] = [];
 
   import Mapbox from '$lib/components/home/Mapbox.svelte';
   import Search from '$lib/components/home/Search.svelte';
   import Header from '$lib/components/shell/Header.svelte';
   import { getCollection } from '$sveltefire/firestore';
-  import { onMount } from 'svelte';
+  import { orderBy, where } from 'firebase/firestore';
 
+  export let publicDictionaries: IDictionary[] = [];
+  let privateDictionaries: IDictionary[] = [];
   let selectedDictionaryId: string;
 
-  let privateDictionaries: IDictionary[] = [];
+  import { onMount } from 'svelte';
   onMount(async () => {
     if ($admin) {
       privateDictionaries = await getCollection<IDictionary>('dictionaries', [
@@ -57,14 +56,16 @@
     <div class="sm:w-72 max-h-full" slot="sidebar">
       <Search
         dictionaries={[...publicDictionaries, ...privateDictionaries, ...$myDictionaries]}
-        bind:selectedDictionaryId />
+        bind:selectedDictionaryId
+      />
     </div>
     {#await import('$lib/components/home/Dictionaries.svelte') then { default: Dictionaries }}
       {#if privateDictionaries.length}
         <Dictionaries
           dictionaries={privateDictionaries}
           source="private"
-          bind:selectedDictionaryId />
+          bind:selectedDictionaryId
+        />
       {/if}
       <Dictionaries dictionaries={publicDictionaries} bind:selectedDictionaryId />
       {#if $myDictionaries.length}

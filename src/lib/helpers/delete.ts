@@ -3,7 +3,7 @@ import { get } from 'svelte/store';
 import { _ } from 'svelte-i18n';
 
 import type { IEntry } from '$lib/interfaces';
-import { update } from '$sveltefire/firestore';
+import { update } from '$sveltefire/firestorelite';
 
 export async function deleteImage(entry: IEntry) {
   const $_ = get(_);

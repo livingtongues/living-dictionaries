@@ -7,9 +7,11 @@
     const dictionaryId = params.dictionaryId;
     try {
       const grammarDoc = await fetchDoc<IGrammar>(`dictionaries/${dictionaryId}/info/grammar`);
-      return { props: { grammarDoc, dictionaryId } };
+      if (grammarDoc && grammarDoc.grammar) {
+        return { props: { grammar: grammarDoc.grammar, dictionaryId } };
+      } else return { props: { grammar: null, dictionaryId } };
     } catch (err) {
-      return { props: { grammarDoc: null, dictionaryId } };
+      return { props: { grammar: null, dictionaryId } };
     }
   };
 </script>
@@ -18,14 +20,14 @@
   import { _ } from 'svelte-i18n';
   import { dictionary, isManager } from '$lib/stores';
 
-  export let grammarDoc: IGrammar = { grammar: '' },
+  export let grammar = '',
     dictionaryId: string;
   import Button from '$svelteui/ui/Button.svelte';
-  import { set } from '$sveltefire/firestore';
+  import { set } from '$sveltefire/firestorelite';
 
   async function save() {
     try {
-      await set(`dictionaries/${dictionaryId}/info/grammar`, grammarDoc);
+      await set<IGrammar>(`dictionaries/${dictionaryId}/info/grammar`, { grammar });
       window.location.replace(`/${dictionaryId}/grammar`);
     } catch (err) {
       alert(err);
@@ -50,12 +52,15 @@
   {#if $isManager}
     {#if editing}
       <Button class="mb-2" onclick={() => (editing = false)}
-        >{$_('misc.cancel', { default: 'Cancel' })}</Button>
+        >{$_('misc.cancel', { default: 'Cancel' })}</Button
+      >
       <Button class="mb-2" form="primary" onclick={save}
-        >{$_('misc.save', { default: 'Save' })}</Button>
+        >{$_('misc.save', { default: 'Save' })}</Button
+      >
     {:else}
       <Button class="mb-2" onclick={() => (editing = true)}
-        >{$_('misc.edit', { default: 'Edit' })}</Button>
+        >{$_('misc.edit', { default: 'Edit' })}</Button
+      >
     {/if}
   {/if}
 
@@ -63,13 +68,13 @@
     {#if editing}
       <div class="max-w-screen-md prose prose-lg">
         {#await import('$lib/components/editor/ClassicCustomized.svelte') then { default: ClassicCustomized }}
-          <ClassicCustomized bind:html={grammarDoc.grammar} />
+          <ClassicCustomized bind:html={grammar} />
         {/await}
       </div>
     {/if}
     <div class="prose prose-lg max-w-screen-md {editing && 'hidden md:block mt-14 ml-3'}">
-      {#if grammarDoc && grammarDoc.grammar}
-        {@html grammarDoc.grammar}
+      {#if grammar}
+        {@html grammar}
       {:else}
         <i>{$_('dictionary.no_info_yet', { default: 'No information yet' })}</i>
       {/if}

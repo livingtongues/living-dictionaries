@@ -6,7 +6,9 @@
     const dictionaryId = params.dictionaryId;
     try {
       const aboutDoc = await fetchDoc<IAbout>(`dictionaries/${dictionaryId}/info/about`);
-      return { props: { aboutDoc, dictionaryId } };
+      if (aboutDoc && aboutDoc.about) {
+        return { props: { about: aboutDoc.about, dictionaryId } };
+      } else return { props: { about: null, dictionaryId } };
     } catch (err) {
       return { props: { aboutDoc: null, dictionaryId } };
     }
@@ -17,15 +19,15 @@
   import { _ } from 'svelte-i18n';
   import { dictionary, isManager } from '$lib/stores';
 
-  export let aboutDoc: IAbout = { about: '' },
+  export let about = '',
     dictionaryId: string;
   import Button from '$svelteui/ui/Button.svelte';
-  import { set } from '$sveltefire/firestore';
+  import { set } from '$sveltefire/firestorelite';
   import type { IAbout } from '$lib/interfaces';
 
   async function save() {
     try {
-      await set(`dictionaries/${dictionaryId}/info/about`, aboutDoc);
+      await set<IAbout>(`dictionaries/${dictionaryId}/info/about`, { about });
       window.location.replace(`/${dictionaryId}/about`);
     } catch (err) {
       alert(err);
@@ -50,12 +52,15 @@
   {#if $isManager}
     {#if editing}
       <Button class="mb-2" onclick={() => (editing = false)}
-        >{$_('misc.cancel', { default: 'Cancel' })}</Button>
+        >{$_('misc.cancel', { default: 'Cancel' })}</Button
+      >
       <Button class="mb-2" form="primary" onclick={save}
-        >{$_('misc.save', { default: 'Save' })}</Button>
+        >{$_('misc.save', { default: 'Save' })}</Button
+      >
     {:else}
       <Button class="mb-2" onclick={() => (editing = true)}
-        >{$_('misc.edit', { default: 'Edit' })}</Button>
+        >{$_('misc.edit', { default: 'Edit' })}</Button
+      >
     {/if}
   {/if}
 
@@ -63,13 +68,13 @@
     {#if editing}
       <div class="max-w-screen-md prose prose-lg">
         {#await import('$lib/components/editor/ClassicCustomized.svelte') then { default: ClassicCustomized }}
-          <ClassicCustomized bind:html={aboutDoc.about} />
+          <ClassicCustomized bind:html={about} />
         {/await}
       </div>
     {/if}
     <div class="prose prose-lg max-w-screen-md {editing && 'hidden md:block mt-14 ml-3'}">
-      {#if aboutDoc && aboutDoc.about}
-        {@html aboutDoc.about}
+      {#if about}
+        {@html about}
       {:else}
         <i>{$_('dictionary.no_info_yet', { default: 'No information yet' })}</i>
       {/if}
