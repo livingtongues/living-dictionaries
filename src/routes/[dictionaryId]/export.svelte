@@ -10,6 +10,7 @@
   import ShowHide from '$svelteui/functions/ShowHide.svelte';
   import DownloadMedia from './export/_DownloadMedia.svelte';
   import Progress from './export/_Progress.svelte';
+  import { fetchSpeakers } from '$lib/helpers/fetchSpeakers';
 
   let includeImages = false;
   let includeAudio = false;
@@ -21,7 +22,8 @@
 
   onMount(async () => {
     const entries = await getCollection<IEntry>(`dictionaries/${$dictionary.id}/words`);
-    formattedEntries = await formatEntriesForCSV(entries, $dictionary);
+    const speakers = await fetchSpeakers(entries);
+    formattedEntries = await formatEntriesForCSV(entries, $dictionary, speakers);
     entriesWithImages = formattedEntries.filter((entry) => entry.impa);
     entriesWithAudio = formattedEntries.filter((entry) => entry.aupa);
     mounted = true;
@@ -42,16 +44,17 @@
     <i class="far fa-check" /> Data as CSV
   </div>
   <div
-    class="flex items-center mt-2 {entriesWithImages.length
-      ? ''
-      : 'opacity-50 cursor-not-allowed'}">
+    class="flex items-center mt-2 {entriesWithImages.length ? '' : 'opacity-50 cursor-not-allowed'}"
+  >
     <input
       disabled={!entriesWithImages.length}
       id="images"
       type="checkbox"
-      bind:checked={includeImages} />
+      bind:checked={includeImages}
+    />
     <label for="images" class="mx-2 block leading-5 text-gray-900">
-      Images ({entriesWithImages.length})</label>
+      Images ({entriesWithImages.length})</label
+    >
   </div>
   {#if !mounted}
     <p class="text-xs italic text-orange-400 p-2">Checking if images exist</p>
@@ -60,10 +63,12 @@
   {/if}
 
   <div
-    class="flex items-center mt-2 {entriesWithAudio.length ? '' : 'opacity-50 cursor-not-allowed'}">
+    class="flex items-center mt-2 {entriesWithAudio.length ? '' : 'opacity-50 cursor-not-allowed'}"
+  >
     <input id="audio" type="checkbox" bind:checked={includeAudio} />
     <label for="audio" class="mx-2 block leading-5 text-gray-900">
-      Audio ({entriesWithAudio.length})</label>
+      Audio ({entriesWithAudio.length})</label
+    >
   </div>
   {#if !mounted}
     <p class="text-xs italic text-orange-400 p-2">Checking if audio files exist</p>
@@ -91,7 +96,8 @@
         entriesWithImages={includeImages ? entriesWithImages : []}
         entriesWithAudio={includeAudio ? entriesWithAudio : []}
         on:completed={toggle}
-        let:progress>
+        let:progress
+      >
         <Progress {progress} />
         {#if progress < 1}
           <Button onclick={toggle} color="red">Cancel</Button>
@@ -113,7 +119,8 @@
       });
       downloadObjArrAsCSV(finalizedEntries, $dictionary.name);
     }}
-    form="primary">
+    form="primary"
+  >
     Download CSV
   </Button>
 {/if}
