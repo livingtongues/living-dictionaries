@@ -1,8 +1,7 @@
-import type { IDictionary, IEntry } from '$lib/interfaces';
+import type { IDictionary, IEntry, ISpeaker } from '$lib/interfaces';
 import { glossingLanguages } from './_glossing-languages-temp';
 import { semanticDomains } from '$lib/mappings/semantic-domains';
 import { partsOfSpeech } from '$lib/mappings/parts-of-speech';
-import { fetchSpeakers } from '$lib/helpers/fetchSpeakers';
 import { friendlyName } from '$lib/helpers/friendlyName';
 
 function turnArrayIntoPipedString(itemsFormatted, i, values, columnName, fn) {
@@ -20,9 +19,10 @@ function turnArrayIntoPipedString(itemsFormatted, i, values, columnName, fn) {
   }
 }
 
-export async function formatEntriesForCSV(
+export function formatEntriesForCSV(
   data: IEntry[],
-  { name: dictionaryName, glossLanguages }: IDictionary
+  { name: dictionaryName, glossLanguages }: IDictionary,
+  speakers: ISpeaker[]
 ) {
   //Getting the total number of semantic domains by entry if they have at least one
   let totalSDN = 0;
@@ -37,8 +37,6 @@ export async function formatEntriesForCSV(
     ',': ' -',
     '"': "'",
   };
-
-  const speakers = await fetchSpeakers(data);
 
   const headers = {
     id: 'Entry id',
@@ -63,7 +61,7 @@ export async function formatEntriesForCSV(
 
   //Assigning gloss languages as gloss headers
   glossLanguages.forEach((bcp) => {
-    Object.assign(headers, JSON.parse(`{ "gl${bcp}": "${glossingLanguages[bcp]} Gloss" }`));
+    headers[`gl${bcp}`] = `${glossingLanguages[bcp]} Gloss`;
   });
 
   //Assigning vernacular and gloss languages as example sentence headers
