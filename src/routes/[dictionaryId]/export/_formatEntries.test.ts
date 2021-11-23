@@ -1,6 +1,15 @@
 import type { IDictionary, IEntry, ISpeaker } from '$lib/interfaces';
 import { formatEntriesForCSV } from './_formatEntries';
 
+test('Arabic example to demonstrate separate file snapshots.', () => {
+  const entriesArray: IEntry[] = [
+    { id: '12ar', lx: 'banana', gl: { es: 'platano' } },
+    { id: '34qw', lx: 'tree', gl: { es: 'arbol' } },
+  ];
+  const dictionary: IDictionary = { name: 'test', glossLanguages: ['ar', 'en'], entryCount: 0 };
+  const speakers: ISpeaker[] = [{ displayName: 'John Smith', id: '123' }];
+  expect(formatEntriesForCSV(entriesArray, dictionary, speakers)).toMatchSnapshot();
+});
 test('formatEntriesForCSV prepares ________', () => {
   const entriesArray: IEntry[] = [
     { id: '12ar', lx: 'banana', gl: { es: 'platano' } },
