@@ -89,8 +89,8 @@ export const deleteFromIndex = functions.firestore
 
 // Video
 
-export const uploadToYouTube = functions.firestore
-  .document('dictionaries/{dictionaryId}/words/{entryId}/videos/{videoId')
-  .onCreate(async (snapshot, context) => {
-    await (await import('./video/uploadToYouTube')).uploadToYouTube(snapshot, context);
-  });
+// export const uploadToYouTube = functions.firestore
+//   .document('dictionaries/{dictionaryId}/words/{entryId}/videos/{videoId')
+//   .onCreate(async (snapshot, context) => {
+//     await (await import('./video/uploadToYouTube')).uploadToYouTube(snapshot, context);
+//   });
