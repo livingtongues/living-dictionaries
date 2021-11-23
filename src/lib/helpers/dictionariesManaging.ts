@@ -1,6 +1,6 @@
-import { deleteDocument, set, update } from '$sveltefire/firestore';
+import { deleteDocument, set, update } from '$sveltefire/firestorelite';
+import { arrayRemove, arrayUnion, serverTimestamp } from 'firebase/firestore/lite';
 import type { IUser, IManager } from '$lib/interfaces';
-import { arrayRemove, arrayUnion, serverTimestamp } from 'firebase/firestore';
 
 export async function addDictionaryManagePermission(userBeingEdited: IUser, dictionaryId: string) {
   const manager: IManager = {

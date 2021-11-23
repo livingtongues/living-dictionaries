@@ -3,31 +3,24 @@
   import Button from '$svelteui/ui/Button.svelte';
   import { _ } from 'svelte-i18n';
   import EditFieldModal from '../modals/EditFieldModal.svelte';
-  import { getFirestore, addDoc, collection, serverTimestamp } from '@firebase/firestore/lite';
-  // import type { IEntry } from '$lib/interfaces';
+  import type { IEntry } from '$lib/interfaces';
   import { page } from '$app/stores';
   import { goto } from '$app/navigation';
-  import { getUid } from '$sveltefire/firestore';
+  import { add } from '$sveltefire/firestorelite';
 
   async function addNewEntry(lx: string) {
     if (!lx) {
       return alert(`Missing: ${$_('entry.lx', { default: 'Lexeme/Word/Phrase' })}`);
     }
     try {
-      const data = {
-        lx,
-        gl: {},
-        ua: serverTimestamp(),
-        ca: serverTimestamp(),
-        ub: getUid(),
-        cb: getUid(),
-      };
-      const firestore = getFirestore();
-      const entryDoc = await addDoc(
-        collection(firestore, `dictionaries/${$page.params.dictionaryId}/words`),
-        data
+      const entryDoc = await add<IEntry>(
+        `dictionaries/${$page.params.dictionaryId}/words`,
+        {
+          lx,
+          gl: {},
+        },
+        true
       );
-      console.log({ entryDoc });
       goto(`/${$page.params.dictionaryId}/entry/${entryDoc.id}`);
     } catch (err) {
       console.error(err);
@@ -54,6 +47,7 @@
       display={$_('entry.lx', { default: 'Lexeme/Word/Phrase' })}
       on:valueupdate={(e) => addNewEntry(e.detail.newValue)}
       on:close={toggle}
-      adding />
+      adding
+    />
   {/if}
 </ShowHide>

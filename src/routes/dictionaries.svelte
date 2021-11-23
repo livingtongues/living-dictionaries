@@ -25,8 +25,9 @@
   import Button from '$svelteui/ui/Button.svelte';
   import ResponsiveTable from '$lib/components/ui/ResponsiveTable.svelte';
   import Header from '$lib/components/shell/Header.svelte';
-  import { orderBy, where } from 'firebase/firestore';
+
   import Collection from '$sveltefire/components/Collection.svelte';
+  import { orderBy, where } from 'firebase/firestore';
 
   let queryConstraints = [orderBy('name'), where('public', '==', true)];
   $: if ($admin) {
@@ -47,12 +48,14 @@
     path="dictionaries"
     startWith={fetchedDictionaries}
     {queryConstraints}
-    let:data={dictionaries}>
+    let:data={dictionaries}
+  >
     <div>
       <Button
         form="primary"
         color="black"
-        onclick={() => exportDictionariesAsCSV(dictionaries, 'living-dictionaries-list')}>
+        onclick={() => exportDictionariesAsCSV(dictionaries, 'living-dictionaries-list')}
+      >
         <i class="fas fa-download mr-1" />
         {$_('misc.download', { default: 'Download' })}
         (.csv)

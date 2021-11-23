@@ -1,6 +1,6 @@
 <script lang="ts">
   import { admin } from '$lib/stores';
-  import { update } from '$sveltefire/firestore';
+  import { update } from '$sveltefire/firestorelite';
   import type { IUser } from '$lib/interfaces';
   import { printDate } from '$lib/helpers/time';
   export let user: IUser;
@@ -24,7 +24,8 @@
         addMessage="Add"
         on:itemclicked={(e) => window.open(`/${e.detail.value}`)}
         on:itemremoved={(e) => removeDictionaryManagePermission(user, e.detail.value)}
-        on:additem={toggle} />
+        on:additem={toggle}
+      />
       {#if show}
         {#await import('./_SelectDictionaryModal.svelte') then { default: SelectDictionaryModal }}
           <SelectDictionaryModal {user} on:close={toggle} />
@@ -50,7 +51,8 @@
               unsubscribe: null,
             });
           }
-        }}>{printDate(user.unsubscribe.toDate())}</button>
+        }}>{printDate(user.unsubscribe.toDate())}</button
+      >
     {:else}
       <button
         type="button"
@@ -59,7 +61,8 @@
           await update(`users/${user.uid}`, {
             unsubscribe: new Date(),
           });
-        }}>Mark Unsubscribed</button>
+        }}>Mark Unsubscribed</button
+      >
     {/if}
   </td>
 </tr>

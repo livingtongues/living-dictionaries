@@ -2,7 +2,7 @@
   import { _ } from 'svelte-i18n';
   import { getStores } from '$app/stores';
   import { admin } from '$lib/stores';
-  import { dev } from '$app/env';
+  import { dev } from '$sveltefire/config';
   import { clickOutside } from '$svelteui/actions/clickOutside';
   import Avatar from '$svelteui/shell/Avatar.svelte';
   import ShowHide from '$svelteui/functions/ShowHide.svelte';
@@ -34,7 +34,8 @@
           <a href="/account"> {$_('account.account_settings', { default: 'Account Settings' })} </a>
           {#if userStore}
             <button on:click={() => userStore.signOut(session)}
-              >{$_('account.log_out', { default: 'Log Out' })}</button>
+              >{$_('account.log_out', { default: 'Log Out' })}</button
+            >
           {/if}
           {#if dev}
             <button
@@ -47,7 +48,8 @@
                 )({
                   role: roleNumber,
                 });
-              }}>
+              }}
+            >
               Set Admin Role Level (dev only)
             </button>
           {/if}

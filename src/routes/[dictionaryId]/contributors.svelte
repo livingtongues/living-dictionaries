@@ -14,6 +14,7 @@
   import { _ } from 'svelte-i18n';
   import { isManager, isContributor, dictionary, admin } from '$lib/stores';
   import Collection from '$sveltefire/components/Collection.svelte';
+  import { where } from 'firebase/firestore';
 
   function invite(role: 'manager' | 'contributor' = 'contributor') {
     const input = prompt(`${$_('contact.email', { default: 'Email' })}?`);
@@ -23,12 +24,11 @@
     }
   }
 
-  import { add, deleteDocument, update } from '$sveltefire/firestore';
+  import { add, deleteDocument, update } from '$sveltefire/firestorelite';
   import type { IInvite, IWriteInCollaborator, IContributor, IManager } from '$lib/interfaces';
   import Button from '$svelteui/ui/Button.svelte';
   import ShowHide from '$svelteui/functions/ShowHide.svelte';
   import { user } from '$sveltefire/user';
-  import { where } from 'firebase/firestore';
 
   let managerType: IManager[];
   let contributorType: IContributor[];
@@ -76,7 +76,8 @@
     >{$_('contributors.manager_contributor_distinction', {
       default:
         'Note: Dictionary managers may add, edit or delete content. Contributors are project collaborators who can also add and edit, but cannot delete any content.',
-    })}</i>
+    })}</i
+  >
 </p>
 
 <h3 class="font-semibold text-lg mb-1 mt-3">
@@ -99,14 +100,16 @@
       path={`dictionaries/${dictionaryId}/invites`}
       queryConstraints={[where('role', '==', 'manager'), where('status', 'in', ['queued', 'sent'])]}
       startWith={inviteType}
-      let:data>
+      let:data
+    >
       {#each data as invite}
         <div class="py-3 flex flex-wrap items-center justify-between">
           <div class="text-sm leading-5 font-medium text-gray-900">
             <i
               >{$_('contributors.invitation_sent', {
                 default: 'Invitation sent',
-              })}:</i>
+              })}:</i
+            >
             {invite.targetEmail}
           </div>
           {#if $admin}
@@ -121,7 +124,8 @@
                 }
               }}
               >{$_('misc.delete', { default: 'Delete' })}
-              <i class="fas fa-times" /><i class="fas fa-key mx-1" /></Button>
+              <i class="fas fa-times" /><i class="fas fa-key mx-1" /></Button
+            >
           {/if}
         </div>
       {/each}
@@ -143,7 +147,8 @@
   <Collection
     path={`dictionaries/${dictionaryId}/contributors`}
     startWith={contributorType}
-    let:data>
+    let:data
+  >
     {#each data as contributor}
       <div class="py-3">
         <div class="text-sm leading-5 font-medium text-gray-900">
@@ -160,14 +165,16 @@
         where('status', 'in', ['queued', 'sent']),
       ]}
       startWith={inviteType}
-      let:data>
+      let:data
+    >
       {#each data as invite}
         <div class="py-3 flex flex-wrap items-center justify-between">
           <div class="text-sm leading-5 font-medium text-gray-900">
             <i
               >{$_('contributors.invitation_sent', {
                 default: 'Invitation sent',
-              })}:</i>
+              })}:</i
+            >
             {invite.targetEmail}
           </div>
           {#if $admin}
@@ -182,7 +189,8 @@
                 }
               }}
               >{$_('misc.delete', { default: 'Delete' })}
-              <i class="fas fa-times" /><i class="fas fa-key ml-1" /></Button>
+              <i class="fas fa-times" /><i class="fas fa-key ml-1" /></Button
+            >
           {/if}
         </div>
       {/each}
@@ -191,7 +199,8 @@
   <Collection
     path={`dictionaries/${dictionaryId}/writeInCollaborators`}
     startWith={writeInCollaboratorType}
-    let:data>
+    let:data
+  >
     {#each data as collaborator}
       <div class="py-3 flex flex-wrap items-center justify-between">
         <div class="text-sm leading-5 font-medium text-gray-900">
@@ -209,7 +218,8 @@
               }
             }}
             >{$_('misc.delete', { default: 'Delete' })}
-            <i class="fas fa-times" /></Button>
+            <i class="fas fa-times" /></Button
+          >
         {/if}
       </div>
     {/each}
