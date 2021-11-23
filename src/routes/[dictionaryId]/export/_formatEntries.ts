@@ -54,8 +54,7 @@ export function formatEntriesForCSV(
   //Assigning semantic domains as headers
   if (totalSDN > 0) {
     for (let index = 0; index < totalSDN; index++) {
-      // headers[`sd${index + 1}`] = `Semantic domain ${index + 1}`;
-      Object.assign(headers, JSON.parse(`{"sd${index + 1}": "Semantic domain ${index + 1}"}`));
+      headers[`sd${index + 1}`] = `Semantic domain ${index + 1}`;
     }
   }
 
@@ -135,35 +134,25 @@ export function formatEntriesForCSV(
     turnArrayIntoPipedString(itemsFormatted, i, entry.sr, 'sr', (el) => el);
 
     //Assigning semantic domains
-    if (entry.sdn) {
-      for (let index = 0; index < totalSDN; index++) {
-        itemsFormatted[i][`sd${index + 1}`] = '';
-        if (entry.sdn[index]) {
-          const matchingDomain = semanticDomains.find((sd) => sd.key === entry.sdn[index]);
-          if (matchingDomain) {
-            itemsFormatted[i][`sd${index + 1}`] = matchingDomain.name.replace(
-              /[,"\r\n]/g,
-              (m) => replacementChars[m]
-            );
-          }
+    for (let index = 0; index < totalSDN; index++) {
+      itemsFormatted[i][`sd${index + 1}`] = '';
+      if (entry.sdn && entry.sdn[index]) {
+        const matchingDomain = semanticDomains.find((sd) => sd.key === entry.sdn[index]);
+        if (matchingDomain) {
+          itemsFormatted[i][`sd${index + 1}`] = matchingDomain.name.replace(
+            /[,"\r\n]/g,
+            (m) => replacementChars[m]
+          );
         }
       }
-    } else {
-      for (let index = 0; index < totalSDN; index++) {
-        Object.assign(
-          itemsFormatted[i],
-          JSON.parse(`{
-            "sd${index + 1}": ""
-          }`)
-        );
-      }
     }
+
     //Assigning glosses
     glossLanguages.forEach((bcp) => {
       const cleanEntry = entry.gl[bcp]
         ? entry.gl[bcp].replace(/[,"\r\n]/g, (m) => replacementChars[m])
         : '';
-      Object.assign(itemsFormatted[i], JSON.parse(`{"gl${bcp}": "${cleanEntry}"}`));
+      itemsFormatted[i][`gl${bcp}`] = cleanEntry;
     });
     //Assigning example sentences
     for (let j = 0; j <= glossLanguages.length; j++) {

@@ -12,7 +12,7 @@ test('Arabic example to demonstrate separate file snapshots.', () => {
 });
 test('formatEntriesForCSV prepares ________', () => {
   const entriesArray: IEntry[] = [
-    { id: '12ar', lx: 'banana', gl: { es: 'platano' } },
+    { id: '12ar', lx: 'banana', gl: { es: 'platano' }, sdn: ['1', '2.1'] },
     { id: '34qw', lx: 'tree', gl: { es: 'arbol' } },
   ];
   const dictionary: IDictionary = { name: 'test', glossLanguages: ['en', 'es'], entryCount: 0 };
@@ -37,6 +37,8 @@ test('formatEntriesForCSV prepares ________', () => {
         "ph": "Phonetic (IPA)",
         "ps": "Parts of speech",
         "psab": "Parts of speech abbreviation",
+        "sd1": "Semantic domain 1",
+        "sd2": "Semantic domain 2",
         "sr": "Source(s)",
         "xsen": "Example sentence in English",
         "xses": "Example sentence in Spanish",
@@ -60,6 +62,8 @@ test('formatEntriesForCSV prepares ________', () => {
         "ph": "",
         "ps": "",
         "psab": "",
+        "sd1": "Universe and the natural world",
+        "sd2": "Body parts",
         "sr": "",
         "xsen": "",
         "xses": "",
@@ -83,6 +87,8 @@ test('formatEntriesForCSV prepares ________', () => {
         "ph": "",
         "ps": "",
         "psab": "",
+        "sd1": "",
+        "sd2": "",
         "sr": "",
         "xsen": "",
         "xses": "",
