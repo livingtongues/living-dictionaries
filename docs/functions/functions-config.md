@@ -1,7 +1,6 @@
 # Firebase Environment Configuration (Secrets) 
 
-See: https://firebase.google.com/docs/functions/config-env
-[Firebase CLI](https://firebase.google.com/docs/cli)
+See [Environment configuration](https://firebase.google.com/docs/functions/config-env) and [Firebase CLI](https://firebase.google.com/docs/cli)
 
 ## How to set
 - `firebase login` with a user that has access to the desired Firebase project
