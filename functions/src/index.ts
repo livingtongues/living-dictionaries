@@ -98,3 +98,9 @@ export const deleteFromIndex = functions.firestore
 //   .onCreate(async (snapshot, context) => {
 //     await (await import('./video/uploadToYouTube')).uploadToYouTube(snapshot, context);
 //   });
+
+export const test = functions.https.onRequest(async (req, res) => {
+  console.log('This is just a simple test');
+  // Send back a message that we've successfully written the message
+  res.json({ result: `Hello World` });
+});
