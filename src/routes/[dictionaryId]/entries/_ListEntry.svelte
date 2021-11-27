@@ -1,6 +1,7 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
   import Audio from './_Audio.svelte';
+  import Video from './_Video.svelte';
   import Image from '$lib/components/image/Image.svelte';
   import AddImage from './_AddImage.svelte';
   import { page } from '$app/stores';
@@ -19,6 +20,7 @@
   {#if entry.sf || canEdit}
     <Audio class="bg-gray-100" {entry} minimal={true} />
   {/if}
+  <Video class="bg-gray-100" {entry} minimal={true} />
   <a
     sveltekit:prefetch
     href={'/' + $page.params.dictionaryId + '/entry/' + entry.id}
