@@ -6,49 +6,48 @@
     minimal = false;
 
   let playing = false;
-  /* function initVideo(sf) {
-    const convertedPath = sf.path.replace(/\//g, '%2F');
-    const url = `https://firebasestorage.googleapis.com/v0/b/${firebaseConfig.storageBucket}/o/${convertedPath}?alt=media`;
-    const audio = new Audio(url);
-    audio.play();
+  function initVideo() {
     playing = true;
-    audio.addEventListener('ended', () => {
+    console.log('Playing video...');
+    setTimeout(() => {
       playing = false;
-    });
-    // TODO: unsubscribe listener
-  } */
+    }, 2000);
+  }
 
   let openVideoModal = false;
 </script>
 
-<div
-  class="{$$props.class} hover:bg-gray-200 flex flex-col items-center
+{#if entry.vf}
+  <div
+    class="{$$props.class} hover:bg-gray-200 flex flex-col items-center
     justify-center cursor-pointer p-1 select-none"
-  use:longpress={800}
-  on:click={() => {
-    if ($canEdit) {
-      openVideoModal = true;
-    } else {
-      //initVideo(entry.sf);
-    }
-  }}
-  on:longpress={() => console.log('init Video')}>
-  {#if playing}
-    <i class="fas fa-video fa-lg mt-1" />
-  {:else}<i class="far fa-video fa-lg mt-1" />{/if}
-  <div class="text-gray-600 text-sm mt-1">
-    Watch
-    {#if !minimal && $canEdit}
-      + Edit video
-    {/if}
-    <!-- {#if !minimal && entry.sf.speakerName}
-        to
-        <b>{entry.sf.speakerName}</b>
-      {/if} -->
-    <!-- {#if entry.sf.sp}
-        {#await getSpeakerName(entry.sf.sp) then speaker}
-            Speaker: {speaker && speaker.displayName}
-        {/await}
-      {/if} -->
+    use:longpress={800}
+    on:click={() => {
+      if ($canEdit) {
+        openVideoModal = true;
+      } else {
+        initVideo(); //initVideo(entry.sf);
+      }
+    }}
+    on:longpress={() => initVideo()}>
+    {#if playing}
+      <i class="fas fa-film-alt fa-lg mt-1" />
+    {:else}<i class="far fa-film-alt fa-lg mt-1" />{/if}
+    <div class="text-gray-600 text-sm mt-1">
+      Watch
+      {#if !minimal && $canEdit}
+        + Edit video
+      {/if}
+    </div>
   </div>
-</div>
+{:else if $canEdit}
+  <div
+    class="{$$props.class} hover:bg-gray-300 flex flex-col items-center
+justify-center cursor-pointer p-2 text-lg"
+    on:click={() => (openVideoModal = true)}>
+    <i class="far fa-video-plus my-1 mx-2 text-blue-800" />
+    {#if !minimal}
+      <div class="text-blue-800 text-xs">Add Video</div>
+    {/if}
+  </div>
+{/if}
