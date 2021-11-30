@@ -51,3 +51,13 @@ justify-center cursor-pointer p-2 text-lg"
     {/if}
   </div>
 {/if}
+
+{#if openVideoModal}
+  {#await import('$lib/components/video/EditVideo.svelte') then EditVideo}
+    <EditVideo.default
+      {entry}
+      on:close={() => {
+        openVideoModal = null;
+      }} />
+  {/await}
+{/if}
