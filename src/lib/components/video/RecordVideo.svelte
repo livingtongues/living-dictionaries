@@ -2,7 +2,7 @@
   import { _ } from 'svelte-i18n';
   import Button from '$svelteui/ui/Button.svelte';
 
-  export let audioBlob = null;
+  export let videoBlob = null;
   export let permissionGranted = false;
   let permissionDenied = false;
 
@@ -12,20 +12,24 @@
     RecordRTC = (await import('recordrtc')).default;
     // Could also use `await loadScriptOnce('https://cdnjs.cloudflare.com/ajax/libs/RecordRTC/5.5.6/RecordRTC.js');` in context module block
   });
-
-  // import type { StereoAudioRecorder } from 'recordrtc';
-  // let recorder: StereoAudioRecorder = null;
   let recorder = null;
   let stream = null;
+  let videoSource = null;
+  let recording = false;
+  let recordedVideo = false;
+  $: console.log('gen blob', videoBlob);
 
   async function checkAudioPermissions() {
     try {
       stream = await navigator.mediaDevices.getUserMedia({
         audio: true,
-        video: false,
+        video: true,
       });
+      if (videoSource) {
+        videoSource.srcObject = stream;
+      }
       permissionGranted = true;
-      setTimeout(turnOffMic, 60);
+      setTimeout(turnOffAllDevices, 60);
     } catch (err) {
       alert(`${$_('misc.error', { default: 'Error' })}: ${err}`);
     }
@@ -36,32 +40,32 @@
 
   async function record() {
     try {
-      audioBlob = null;
-
+      recordedVideo = false;
+      videoBlob = null;
+      recording = true;
       stream = await navigator.mediaDevices.getUserMedia({
         audio: true,
-        video: false,
+        video: true,
       });
-
+      videoSource.srcObject = stream;
       const options = {
-        type: 'audio',
-        mimeType: 'audio/wav',
-        // bufferSize: 16384
-        // the range is 22050 to 96000.
-        sampleRate: 48000,
-        // let us force 16khz recording:
-        // desiblueSampRate: 16000,
-        // numberOfAudioChannels: 2;
+        type: 'video',
+        mimeType: 'video/webm', // vp8, vp9, h264, mkv, opus/vorbis
+        audioBitsPerSecond: 256 * 8 * 1024,
+        videoBitsPerSecond: 256 * 8 * 1024,
+        bitsPerSecond: 256 * 8 * 1024, // if this is provided, skip above two
+        checkForInactiveTracks: true,
+        timeSlice: 1000, // concatenate intervals based blobs
       };
 
-      const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+      /* const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
       if (isSafari) {
         options.sampleRate = 44100;
-      }
+      } */
 
-      recorder = new RecordRTC.StereoAudioRecorder(stream, options);
+      recorder = new RecordRTC.MediaStreamRecorder(stream, options);
       recorder.record();
-
+      videoSource.play();
       interval = setInterval(() => {
         recordingTime += 1;
       }, 1000);
@@ -72,32 +76,45 @@
 
   async function stop() {
     if (recorder) {
+      recording = false;
       recorder.stop(
         (blob) => {
-          turnOffMic();
-          audioBlob = blob;
+          turnOffAllDevices();
+          videoBlob = blob;
           // checkBlobForUpload(blob, lexeme);
         },
         (err) => {
-          turnOffMic();
+          turnOffAllDevices();
           alert(`${$_('misc.error', { default: 'Error' })}: ${err}`);
         }
       );
     }
     clearInterval(interval);
     recordingTime = 0;
+    recordedVideo = true;
   }
 
-  function turnOffMic() {
+  function turnOffAllDevices() {
     if (stream) {
       stream.getAudioTracks().forEach((track) => track.stop());
+      stream.getVideoTracks().forEach((track) => track.stop());
     }
     stream = null;
     recorder = null;
   }
 </script>
 
-{#if !audioBlob}
+{#if videoBlob}
+  <!-- TODO how video elements should be handled in svelte -->
+  <video
+    controls
+    autoplay
+    playsinline
+    src={URL.createObjectURL(videoBlob)}
+    class={recordedVideo ? 'visible w-full' : 'invisible w-0'} />
+{/if}
+<video bind:this={videoSource} class={recording ? 'visible w-full' : 'invisible w-0'} />
+{#if !videoBlob}
   {#if !permissionGranted}
     {#if permissionDenied && RecordRTC}
       <div>
@@ -122,7 +139,7 @@
     {:else}
       <Button onclick={checkAudioPermissions} class="w-full">
         <i class="far fa-microphone-alt" />
-        {$_('audio.prepare_to_record', { default: 'Prepare to Record with Microphone' })}
+        Prepare to Record with Microphone & Camera
       </Button>
     {/if}
   {:else if !recorder}
@@ -138,9 +155,9 @@
       {$_('audio.stop_recording', { default: 'Stop Recording' })}
     </Button>
   {/if}
-
-  <!-- {:else}
-  <div class="flex justify-center">
-    <audio src={URL.createObjectURL(audioBlob)} controls />
-  </div> -->
+{:else}
+  <div class="flex justify-between pt-2">
+    <Button onclick={record} color="red">Record Again</Button>
+    <Button color="green">Upload</Button>
+  </div>
 {/if}

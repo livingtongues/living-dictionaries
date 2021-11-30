@@ -5,9 +5,19 @@
   const close = () => dispatch('close');
   import Modal from '$lib/components/ui/Modal.svelte';
   import Button from '$svelteui/ui/Button.svelte';
+  import RecordVideo from '$lib/components/video/RecordVideo.svelte';
   import { admin } from '$lib/stores';
   import type { IEntry } from '$lib/interfaces';
   export let entry: IEntry;
+
+  let readyToRecord: boolean;
+  let file;
+  let videoBlob;
+
+  $: if (entry.vf) {
+    file = undefined;
+    videoBlob = undefined;
+  }
 </script>
 
 <Modal on:close>
@@ -15,13 +25,24 @@
 
   <div class="mt-2">
     <div class="mb-3">
-      {#if entry}
+      {#if entry.vf}
         {entry.id}
       {/if}
     </div>
 
-    {#if entry.sf}
+    {#if entry.vf}
       <div class="px-1">Video</div>
+    {:else}
+      <div class="flex flex-col sm:flex-row">
+        <div class="{readyToRecord ? 'w-full' : 'sm:w-1/2 sm:px-1'} mb-2 sm:mb-0">
+          <RecordVideo bind:videoBlob bind:permissionGranted={readyToRecord} />
+        </div>
+        <!-- {#if !readyToRecord}
+          <div class="sm:w-1/2 sm:px-1">
+            <SelectAudio bind:file />
+          </div>
+        {/if} -->
+      </div>
     {/if}
   </div>
 
