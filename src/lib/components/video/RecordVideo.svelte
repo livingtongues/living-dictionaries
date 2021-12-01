@@ -105,7 +105,7 @@
 </script>
 
 {#if videoBlob}
-  <!-- TODO how video elements should be handled in svelte -->
+  <!-- svelte-ignore a11y-media-has-caption -->
   <video
     controls
     autoplay
@@ -113,6 +113,7 @@
     src={URL.createObjectURL(videoBlob)}
     class={recordedVideo ? 'visible w-full' : 'invisible w-0'} />
 {/if}
+<!-- svelte-ignore a11y-media-has-caption -->
 <video bind:this={videoSource} class={recording ? 'visible w-full' : 'invisible w-0'} />
 {#if !videoBlob}
   {#if !permissionGranted}
