@@ -80,7 +80,6 @@
       recording = false;
       recorder.stop(
         (blob) => {
-          console.dir(blob);
           turnOffAllDevices();
           videoBlob = blob;
           // checkBlobForUpload(blob, lexeme);

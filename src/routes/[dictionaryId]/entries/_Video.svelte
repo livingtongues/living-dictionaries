@@ -8,7 +8,6 @@
   let playing = false;
   function initVideo() {
     playing = true;
-    console.log('Playing video...');
     setTimeout(() => {
       playing = false;
     }, 2000);

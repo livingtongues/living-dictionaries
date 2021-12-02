@@ -21,7 +21,6 @@
     file = undefined;
     videoBlob = undefined;
   }
-  $: console.log('videoblob', videoBlob);
 </script>
 
 <Modal on:close>
