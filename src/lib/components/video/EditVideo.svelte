@@ -6,6 +6,7 @@
   import Modal from '$lib/components/ui/Modal.svelte';
   import Button from '$svelteui/ui/Button.svelte';
   import RecordVideo from '$lib/components/video/RecordVideo.svelte';
+  import { firebaseConfig } from '$sveltefire/config';
   import { admin } from '$lib/stores';
   import type { IEntry } from '$lib/interfaces';
   export let entry: IEntry;
@@ -27,14 +28,22 @@
   <span slot="heading"> <i class="far fa-video-plus text-sm" /> {entry.lx} </span>
 
   <div class="mt-2">
-    <div class="mb-3">
+    <!-- <div class="mb-3">
       {#if entry.vf}
         {entry.id}
       {/if}
-    </div>
-
+    </div> -->
     {#if entry.vf}
-      <div class="px-1">Video</div>
+      <div class="px-1">
+        <!-- svelte-ignore a11y-media-has-caption -->
+        <video
+          controls
+          autoplay
+          playsinline
+          src={`https://firebasestorage.googleapis.com/v0/b/${
+            firebaseConfig.storageBucket
+          }/o/${entry.vf.path.replace(/\//g, '%2F')}?alt=media`} />
+      </div>
     {:else}
       <div class="flex flex-col sm:flex-row">
         <div class="{readyToRecord ? 'w-full' : 'sm:w-1/2 sm:px-1'} mb-2 sm:mb-0">
