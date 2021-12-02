@@ -51,7 +51,7 @@
       videoSource.srcObject = stream;
       const options = {
         type: 'video',
-        mimeType: 'video/mp4', // vp8, vp9, h264, mkv, opus/vorbis
+        mimeType: 'video/webm;codecs=vp8', // vp8, vp9, h264, mkv, opus/vorbis
         audioBitsPerSecond: 256 * 8 * 1024,
         videoBitsPerSecond: 256 * 8 * 1024,
         bitsPerSecond: 256 * 8 * 1024, // if this is provided, skip above two
@@ -80,6 +80,7 @@
       recording = false;
       recorder.stop(
         (blob) => {
+          console.dir(blob);
           turnOffAllDevices();
           videoBlob = blob;
           // checkBlobForUpload(blob, lexeme);

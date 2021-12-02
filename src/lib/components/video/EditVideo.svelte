@@ -20,7 +20,7 @@
     file = undefined;
     videoBlob = undefined;
   }
-  //$: uploadVideoRequest;
+  $: console.log('videoblob', videoBlob);
 </script>
 
 <Modal on:close>
