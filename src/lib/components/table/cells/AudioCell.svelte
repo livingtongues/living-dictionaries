@@ -35,6 +35,7 @@
       }}
       on:longpress={() => initAudio(entry.sf)}>
       <i class="{playing ? 'fas' : 'far'} fa-ear" />
+      <!-- change to fa-volume-up -->
     </div>
   {:else if canEdit}
     <div
