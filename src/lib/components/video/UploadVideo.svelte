@@ -1,7 +1,6 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
-  import type { IAudio, IEntry } from '$lib/interfaces';
-  export let file: File, entry: IEntry, speakerId: string;
+  import type { IVideo, IEntry } from '$lib/interfaces';
   import { dictionary } from '$lib/stores';
   import { user } from '$sveltefire/user';
 
@@ -13,6 +12,7 @@
   });
   $: percentage = Math.floor($progress * 100);
 
+  export let file: File, entry: IEntry;
   let error;
   let success: boolean;
 
@@ -29,8 +29,8 @@
     // const _lexeme = lexeme.replace(/\s+/g, '_');
     const fileTypeSuffix = file.type.split('/')[1];
 
-    // const storagePath = `audio/${_dictName}_${dictionary.id}/{_lexeme}_${entryId}_${new Date().getTime()}.${fileTypeSuffix}`;
-    const storagePath = `audio/${$dictionary.id}/${
+    // const storagePath = `video/${_dictName}_${dictionary.id}/{_lexeme}_${entryId}_${new Date().getTime()}.${fileTypeSuffix}`;
+    const storagePath = `video/${$dictionary.id}/${
       entry.id
     }_${new Date().getTime()}.${fileTypeSuffix}`;
 
@@ -38,8 +38,8 @@
 
     // https://firebase.google.com/docs/storage/web/upload-files
     const storage = getStorage();
-    const audioRef = ref(storage, storagePath);
-    const uploadTask = uploadBytesResumable(audioRef, file, { customMetadata });
+    const videoRef = ref(storage, storagePath);
+    const uploadTask = uploadBytesResumable(videoRef, file, { customMetadata });
     uploadTask.on(
       'state_changed',
       (snapshot) => {
@@ -58,34 +58,17 @@
       (err) => {
         alert(`${$_('misc.error', { default: 'Error' })}: ${err}`);
         error = err;
-        // A full list of error codes is available at
-        // https://firebase.google.com/docs/storage/web/handle-errors
-        // switch (error.code) {
-        //     case 'storage/unauthorized':
-        //         // User doesn't have permission to access the object
-        //         break;
-
-        //     case 'storage/canceled':
-        //         // User canceled the upload
-        //         break;
-
-        //     case 'storage/unknown':
-        //         // Unknown error occurred, inspect error.serverResponse
-        //         break;
-        // }
       },
       async () => {
         try {
-          const sf: IAudio = {
+          const vf: IVideo = {
             path: storagePath,
             ts: serverTimestamp(),
             ab: $user.uid,
-            sp: speakerId,
           };
 
-          await update(`dictionaries/${$dictionary.id}/words/${entry.id}`, { sf }, true);
+          await update(`dictionaries/${$dictionary.id}/words/${entry.id}`, { vf }, true);
 
-          // TODO: this.speakerService.addDictionaryToSpeaker(speakerId, dictionaryId);
           success = true;
         } catch (err) {
           alert(`${$_('misc.error', { default: 'Error' })}: ${err}`);

@@ -11,6 +11,8 @@
   export let entry: IEntry;
 
   let readyToRecord: boolean;
+  let uploadVideoRequest = false;
+  const uploadVideo = () => (uploadVideoRequest = true);
   let file;
   let videoBlob;
 
@@ -18,6 +20,7 @@
     file = undefined;
     videoBlob = undefined;
   }
+  //$: uploadVideoRequest;
 </script>
 
 <Modal on:close>
@@ -35,14 +38,19 @@
     {:else}
       <div class="flex flex-col sm:flex-row">
         <div class="{readyToRecord ? 'w-full' : 'sm:w-1/2 sm:px-1'} mb-2 sm:mb-0">
-          <RecordVideo bind:videoBlob bind:permissionGranted={readyToRecord} />
+          <RecordVideo {uploadVideo} bind:videoBlob bind:permissionGranted={readyToRecord} />
         </div>
-        <!-- {#if !readyToRecord}
-          <div class="sm:w-1/2 sm:px-1">
-            <SelectAudio bind:file />
-          </div>
-        {/if} -->
       </div>
+    {/if}
+    {#if videoBlob && uploadVideoRequest}
+      {#await import('$lib/components/video/UploadVideo.svelte') then { default: UploadVideo }}
+        <UploadVideo
+          file={videoBlob}
+          {entry}
+          on:close={() => {
+            uploadVideoRequest = false;
+          }} />
+      {/await}
     {/if}
   </div>
 

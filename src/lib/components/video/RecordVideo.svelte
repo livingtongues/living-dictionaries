@@ -4,6 +4,7 @@
 
   export let videoBlob = null;
   export let permissionGranted = false;
+  export let uploadVideo = () => {};
   let permissionDenied = false;
 
   let RecordRTC: typeof import('recordrtc');
@@ -17,7 +18,7 @@
   let videoSource = null;
   let recording = false;
   let recordedVideo = false;
-  $: console.log('gen blob', videoBlob);
+  $: videoBlob;
 
   async function checkAudioPermissions() {
     try {
@@ -50,7 +51,7 @@
       videoSource.srcObject = stream;
       const options = {
         type: 'video',
-        mimeType: 'video/webm', // vp8, vp9, h264, mkv, opus/vorbis
+        mimeType: 'video/mp4', // vp8, vp9, h264, mkv, opus/vorbis
         audioBitsPerSecond: 256 * 8 * 1024,
         videoBitsPerSecond: 256 * 8 * 1024,
         bitsPerSecond: 256 * 8 * 1024, // if this is provided, skip above two
@@ -159,6 +160,6 @@
 {:else}
   <div class="flex justify-between pt-2">
     <Button onclick={record} color="red">Record Again</Button>
-    <Button color="green">Upload</Button>
+    <Button onclick={uploadVideo} color="green">Upload</Button>
   </div>
 {/if}
