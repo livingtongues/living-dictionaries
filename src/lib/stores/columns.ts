@@ -28,6 +28,10 @@ const defaultColumns: IColumn[] = [
     width: 31, // 50? // ImageCell
   },
   {
+    field: 'videoFile',
+    width: 31, // 50? // VideoCell
+  },
+  {
     field: 'gloss',
     width: 250,
   },
