@@ -51,8 +51,10 @@
 <div class="flex items-center" style="direction: ltr;">
   <Button class="rounded-play mr-2" form="primary" onclick={startStop}>
     {#if !playing}
+      <!-- <i class="far fa-volume-up fa-lg" /> -->
       <i class="far fa-ear fa-lg" />
     {:else}
+      <!-- <i class="fas fa-volume-up fa-lg" /> -->
       <i class="fas fa-ear fa-lg" />
     {/if}
   </Button>
