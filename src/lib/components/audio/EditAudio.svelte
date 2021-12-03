@@ -64,6 +64,7 @@
 
 <Modal on:close>
   <span slot="heading"> <i class="far fa-ear text-sm" /> {entry.lx} </span>
+  <!-- <i class="far fa-volume-up text-sm" /> -->
 
   <div class="mt-2">
     <div class="mb-3">
