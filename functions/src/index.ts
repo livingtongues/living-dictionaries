@@ -89,15 +89,19 @@ export const deleteFromIndex = functions.firestore
 
 // Video
 
-// export const uploadToYouTube = functions
-//   .runWith({
-//     timeoutSeconds: 540,
-//     memory: '4GB',
-//   })
-//   .firestore.document('dictionaries/{dictionaryId}/words/{entryId}/videos/{videoId')
-//   .onCreate(async (snapshot, context) => {
-//     await (await import('./video/uploadToYouTube')).uploadToYouTube(snapshot, context);
-//   });
+/* export const uploadToYouTube = functions
+  .runWith({
+    timeoutSeconds: 540,
+    memory: '4GB',
+  })
+  .firestore.document('dictionaries/{dictionaryId}/words/{entryId}/videos/{videoId')
+  .onCreate(async (snapshot, context) => {
+    await (await import('./video/uploadToYouTube')).uploadToYouTube(snapshot, context);
+  }); */
+
+export const latestYoutubeVideo = functions.https.onRequest(async (req, res) => {
+  await (await import('./video/uploadToYouTube')).latestYoutubeVideo(req, res);
+});
 
 export const test = functions.https.onRequest(async (req, res) => {
   console.log('This is just a simple test');
