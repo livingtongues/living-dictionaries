@@ -5,6 +5,7 @@
   import SelectPOS from './cells/SelectPOS.svelte';
   import SelectSpeakerCell from './cells/SelectSpeakerCell.svelte';
   import AudioCell from './cells/AudioCell.svelte';
+  import VideoCell from './cells/VideoCell.svelte';
   import Image from '$lib/components/image/Image.svelte';
 
   import type { IColumn, IEntry } from '$lib/interfaces';
@@ -42,6 +43,8 @@
     {#if entry.pf}
       <Image {canEdit} {entry} square={60} />
     {/if}
+  {:else if column.field === 'videoFile'}
+    <VideoCell {canEdit} {entry} />
   {:else if column.field === 'speaker'}
     <SelectSpeakerCell {canEdit} {entry} />
   {:else if column.field === 'ps'}
@@ -59,8 +62,7 @@
         entry._highlightResult.gl[column.field] &&
         entry._highlightResult.gl[column.field].value) ||
         ''}
-      on:valueupdate={saveUpdateToFirestore}
-    />
+      on:valueupdate={saveUpdateToFirestore} />
   {:else if column.exampleSentence === true}
     <Textbox
       {canEdit}
@@ -72,8 +74,7 @@
         entry._highlightResult.xs[column.field] &&
         entry._highlightResult.xs[column.field].value) ||
         ''}
-      on:valueupdate={saveUpdateToFirestore}
-    />
+      on:valueupdate={saveUpdateToFirestore} />
   {:else}
     <Textbox
       {canEdit}
@@ -84,7 +85,6 @@
         entry._highlightResult[column.field] &&
         entry._highlightResult[column.field].value) ||
         ''}
-      on:valueupdate={saveUpdateToFirestore}
-    />
+      on:valueupdate={saveUpdateToFirestore} />
   {/if}
 </div>
