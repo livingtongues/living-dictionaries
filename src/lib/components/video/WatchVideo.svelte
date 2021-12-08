@@ -24,7 +24,7 @@
 </script>
 
 <Modal on:close>
-  <span slot="heading"> <i class="far fa-video-plus text-sm" /> {entry.lx} </span>
+  <span slot="heading"> <i class="far fa-film-alt text-sm" /> {entry.lx} </span>
 
   <div class="mt-2">
     <!-- <div class="mb-3">
