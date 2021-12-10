@@ -20,7 +20,9 @@
   {#if entry.sf || canEdit}
     <Audio class="bg-gray-100" {entry} minimal={true} />
   {/if}
-  <Video class="bg-gray-100" {entry} minimal={true} />
+  {#if entry.vf || canEdit}
+    <Video class="bg-gray-100" {entry} minimal={true} />
+  {/if}
   <a
     sveltekit:prefetch
     href={'/' + $page.params.dictionaryId + '/entry/' + entry.id}
