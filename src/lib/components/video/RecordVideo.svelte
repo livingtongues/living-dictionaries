@@ -20,6 +20,10 @@
   let recordedVideo = false;
   $: videoBlob;
 
+  if (navigator.userAgent.indexOf('Firefox') != -1) {
+    console.log('firefox browser');
+  }
+
   async function checkAudioPermissions() {
     try {
       stream = await navigator.mediaDevices.getUserMedia({
@@ -51,18 +55,17 @@
       videoSource.srcObject = stream;
       const options = {
         type: 'video',
-        mimeType: 'video/webm;codecs=vp8', // vp8, vp9, h264, mkv, opus/vorbis
+        mimeType: 'video/webm;codecs=h264', // vp8, vp9, h264, mkv, opus/vorbis
         audioBitsPerSecond: 256 * 8 * 1024,
         videoBitsPerSecond: 256 * 8 * 1024,
         bitsPerSecond: 256 * 8 * 1024, // if this is provided, skip above two
         checkForInactiveTracks: true,
         timeSlice: 1000, // concatenate intervals based blobs
       };
-
-      /* const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
-      if (isSafari) {
-        options.sampleRate = 44100;
-      } */
+      //Only Firefox supports codecs=h264, other browsers support codecs=vp8. However I assigned h264 as the default because firefox crashes if is not established since the beginning.
+      if (navigator.userAgent.indexOf('Firefox') == -1) {
+        options.mimeType = 'video/webm;codecs=vp8';
+      }
 
       recorder = new RecordRTC.MediaStreamRecorder(stream, options);
       recorder.record();
