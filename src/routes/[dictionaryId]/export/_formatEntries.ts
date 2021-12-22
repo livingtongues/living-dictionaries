@@ -13,9 +13,9 @@ function turnArrayIntoPipedString(itemsFormatted, i, values, columnName, fn) {
     //In case some strings contain commas
     stringValue += list.map((el) => el.replace(/,/g, ' -'));
     stringValue = stringValue.replace(/,/g, ' | ');
-    Object.assign(itemsFormatted[i], JSON.parse(`{"${columnName}": "${stringValue}"}`));
+    itemsFormatted[i][columnName] = stringValue;
   } else {
-    Object.assign(itemsFormatted[i], JSON.parse(`{ "${columnName}": "" }`));
+    itemsFormatted[i][columnName] = '';
   }
 }
 
@@ -64,12 +64,9 @@ export function formatEntriesForCSV(
   });
 
   //Assigning vernacular and gloss languages as example sentence headers
-  Object.assign(headers, JSON.parse(`{"xsvn": "Example sentence in ${dictionaryName}"}`));
+  headers['xsvn'] = `Example sentence in ${dictionaryName}`;
   glossLanguages.forEach((bcp) => {
-    Object.assign(
-      headers,
-      JSON.parse(`{"xs${bcp}": "Example sentence in ${glossingLanguages[bcp]}"}`)
-    );
+    headers[`xs${bcp}`] = `Example sentence in ${glossingLanguages[bcp]}`;
   });
 
   //Assigning audio metadata as headers
@@ -82,9 +79,7 @@ export function formatEntriesForCSV(
   });
 
   //Assigning images metadata as headers
-  Object.assign(headers, {
-    imFriendlyName: 'Image filename',
-  });
+  headers['imFriendlyName'] = 'Image filename';
 
   const itemsFormatted = [];
   data.forEach((entry, i) => {
@@ -158,31 +153,16 @@ export function formatEntriesForCSV(
     for (let j = 0; j <= glossLanguages.length; j++) {
       if (entry.xs) {
         if (j === glossLanguages.length) {
-          Object.assign(
-            itemsFormatted[i],
-            JSON.parse(`{
-              "xs${glossLanguages[j] ? glossLanguages[j] : 'vn'}": "${
-              entry.xs['vn'] ? entry.xs['vn'].replace(/[,"\r\n]/g, (m) => replacementChars[m]) : ''
-            }"
-            }`)
-          );
+          itemsFormatted[i][`xs${glossLanguages[j] ? glossLanguages[j] : 'vn'}`] = `${
+            entry.xs['vn'] ? entry.xs['vn'].replace(/[,"\r\n]/g, (m) => replacementChars[m]) : ''
+          }`;
         } else {
-          Object.assign(
-            itemsFormatted[i],
-            JSON.parse(`{
-              "xs${glossLanguages[j] ? glossLanguages[j] : 'vn'}": "${
-              entry.xs[glossLanguages[j]] ? entry.xs[glossLanguages[j]] : ''
-            }"
-            }`)
-          );
+          itemsFormatted[i][`xs${glossLanguages[j] ? glossLanguages[j] : 'vn'}`] = `${
+            entry.xs[glossLanguages[j]] ? entry.xs[glossLanguages[j]] : ''
+          }`;
         }
       } else {
-        Object.assign(
-          itemsFormatted[i],
-          JSON.parse(`{
-            "xs${glossLanguages[j] ? glossLanguages[j] : 'vn'}": ""
-          }`)
-        );
+        itemsFormatted[i][`xs${glossLanguages[j] ? glossLanguages[j] : 'vn'}`] = '';
       }
     }
     //Audio metadata
@@ -211,14 +191,10 @@ export function formatEntriesForCSV(
         auge: '',
       });
     }
-
     if (entry.pf && entry.pf.path) {
-      Object.assign(itemsFormatted[i], {
-        impa: entry.pf.path,
-        imFriendlyName: friendlyName(entry, entry.pf.path),
-      });
+      itemsFormatted[i]['imFriendlyName'] = friendlyName(entry, entry.pf.path);
     } else {
-      Object.assign(itemsFormatted[i], { imFriendlyName: '' });
+      itemsFormatted[i]['imFriendlyName'] = '';
     }
     i++;
   });
