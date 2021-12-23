@@ -71,15 +71,15 @@ export function formatEntriesForCSV(
 
   //Assigning audio metadata as headers
   Object.assign(headers, {
-    auFriendlyName: 'Audio filename',
-    ausn: 'Speaker name',
-    aubp: 'Speaker birthplace',
-    aude: 'Speaker decade',
-    auge: 'Speaker gender',
+    sfFriendlyName: 'Audio filename',
+    sfsn: 'Speaker name',
+    sfbp: 'Speaker birthplace',
+    sfde: 'Speaker decade',
+    sfge: 'Speaker gender',
   });
 
   //Assigning images metadata as headers
-  headers['imFriendlyName'] = 'Image filename';
+  headers['pfFriendlyName'] = 'Image filename';
 
   const itemsFormatted = [];
   data.forEach((entry, i) => {
@@ -175,26 +175,26 @@ export function formatEntriesForCSV(
       const speakerDecade = speaker?.decade || '';
       const speakerGender = speaker?.gender || '';
       Object.assign(itemsFormatted[i], {
-        aupa: entry.sf.path,
-        auFriendlyName: friendlyName(entry, entry.sf.path),
-        ausn: speakerName,
-        aubp: speakerBP,
-        aude: speakerDecade,
-        auge: speakerGender,
+        sfpa: entry.sf.path,
+        sfFriendlyName: friendlyName(entry, entry.sf.path),
+        sfsn: speakerName,
+        sfbp: speakerBP,
+        sfde: speakerDecade,
+        sfge: speakerGender,
       });
     } else {
       Object.assign(itemsFormatted[i], {
-        auFriendlyName: '',
-        ausn: '',
-        aubp: '',
-        aude: '',
-        auge: '',
+        sfFriendlyName: '',
+        sfsn: '',
+        sfbp: '',
+        sfde: '',
+        sfge: '',
       });
     }
     if (entry.pf && entry.pf.path) {
-      itemsFormatted[i]['imFriendlyName'] = friendlyName(entry, entry.pf.path);
+      itemsFormatted[i]['pfFriendlyName'] = friendlyName(entry, entry.pf.path);
     } else {
-      itemsFormatted[i]['imFriendlyName'] = '';
+      itemsFormatted[i]['pfFriendlyName'] = '';
     }
     i++;
   });
