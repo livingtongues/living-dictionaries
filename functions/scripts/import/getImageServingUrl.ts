@@ -4,7 +4,9 @@ const processImageUrl = `https://${p}-photo.appspot.com/urlfull`;
 
 export const getImageServingUrl = async (imageStoragePath: string, environment: string) => {
   try {
-    const storagePath = `${processImageUrl}/talking-dictionaries-${environment}.appspot.com/${imageStoragePath}`;
+    const storagePath = `${processImageUrl}/talking-dictionaries-${
+      environment == 'prod' ? 'alpha' : 'dev'
+    }.appspot.com/${imageStoragePath}`;
     const imageServingUrl = await fetchAsText(storagePath);
     return imageServingUrl.data.replace('http://lh3.googleusercontent.com/', '');
   } catch (error) {
