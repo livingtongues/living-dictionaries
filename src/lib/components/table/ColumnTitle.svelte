@@ -7,6 +7,7 @@
 
 <span class:flex={!verbose}>
   {#if column.field === 'soundFile'}
+    <!-- <i class="far fa-volume-up fa-fw mx-auto" /> -->
     <i class="far fa-ear fa-fw mx-auto" />
     {#if verbose}{$_('entry.audio', { default: 'Audio' })}{/if}
   {:else if column.field === 'photoFile'}
