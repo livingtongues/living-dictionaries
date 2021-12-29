@@ -1,0 +1,5 @@
+# Ignore all but example directory - https://stackoverflow.com/questions/5241644/using-gitignore-to-ignore-everything-but-specific-directories
+
+/*
+!.gitignore
+!example/
