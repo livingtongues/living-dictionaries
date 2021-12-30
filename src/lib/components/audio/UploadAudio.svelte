@@ -29,8 +29,8 @@
     // const _lexeme = lexeme.replace(/\s+/g, '_');
     const fileTypeSuffix = file.type.split('/')[1];
 
-    // const storagePath = `audio/${_dictName}_${dictionary.id}/{_lexeme}_${entryId}_${new Date().getTime()}.${fileTypeSuffix}`;
-    const storagePath = `audio/${$dictionary.id}/${
+    // const storagePath = `${_dictName}_${dictionary.id}/audio/{_lexeme}_${entryId}_${new Date().getTime()}.${fileTypeSuffix}`;
+    const storagePath = `${$dictionary.id}/audio/${
       entry.id
     }_${new Date().getTime()}.${fileTypeSuffix}`;
 
@@ -99,15 +99,13 @@
 {#if error}
   <span
     class="text-xs font-semibold inline-block py-1 px-2 uppercase rounded-full
-    text-red-600 bg-red-200"
-  >
+    text-red-600 bg-red-200">
     {$_('misc.error', { default: 'Error' })}
   </span>
 {:else if success}
   <span
     class="text-xs font-semibold inline-block py-1 px-2 uppercase rounded-full
-    text-green-600 bg-green-200"
-  >
+    text-green-600 bg-green-200">
     <i class="far fa-check" />
     {$_('upload.success', { default: 'Success' })}
   </span>
@@ -117,8 +115,7 @@
       <div>
         <span
           class="text-xs font-semibold inline-block py-1 px-2 uppercase
-          rounded-full text-blue-600 bg-blue-200"
-        >
+          rounded-full text-blue-600 bg-blue-200">
           {$_('upload.uploading', { default: 'Uploading' })}
         </span>
       </div>
@@ -132,8 +129,7 @@
       <div
         style="width:{percentage}%"
         class="shadow-none flex flex-col text-center whitespace-nowrap
-        text-white justify-center bg-blue-500"
-      />
+        text-white justify-center bg-blue-500" />
     </div>
   </div>
 {/if}
