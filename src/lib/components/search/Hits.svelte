@@ -8,6 +8,7 @@
   import { mergeBy } from '$lib/helpers/array';
   import type { IEntry } from '$lib/interfaces';
   import type { InstantSearch } from 'instantsearch.js';
+  import { dev } from '$sveltefire/config';
 
   export let search: InstantSearch;
 
@@ -35,15 +36,29 @@
 
 {#if $canEdit}
   {#await import('$sveltefire/components/Collection.svelte') then { default: Collection }}
-    <Collection
-      path={`dictionaries/${$dictionary.id}/words`}
-      queryConstraints={[
-        where('ub', '==', $user.uid),
-        where('ua', '>', minutesAgoTimestamp(10)),
-        orderBy('ua', 'desc'),
-        limit(4),
-      ]}
-      startWith={recentlyUpdatedEntries}
-      on:data={(e) => (recentlyUpdatedEntries = e.detail.data)} />
+    {#if dev}
+      <Collection
+        path={`dictionaries/${$dictionary.id}/words`}
+        queryConstraints={[
+          where('ua', '>', minutesAgoTimestamp(60)),
+          orderBy('ua', 'desc'),
+          limit(10),
+        ]}
+        startWith={recentlyUpdatedEntries}
+        on:data={(e) => (recentlyUpdatedEntries = e.detail.data)}
+      />
+    {:else}
+      <Collection
+        path={`dictionaries/${$dictionary.id}/words`}
+        queryConstraints={[
+          where('ub', '==', $user.uid),
+          where('ua', '>', minutesAgoTimestamp(10)),
+          orderBy('ua', 'desc'),
+          limit(4),
+        ]}
+        startWith={recentlyUpdatedEntries}
+        on:data={(e) => (recentlyUpdatedEntries = e.detail.data)}
+      />
+    {/if}
   {/await}
 {/if}
