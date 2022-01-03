@@ -7,7 +7,7 @@
   import { longpress } from '$svelteui/actions/longpress';
   import { firebaseConfig } from '$sveltefire/config';
 
-  let playing;
+  let playing = false;
 
   function initAudio(sf) {
     const convertedPath = sf.path.replace(/\//g, '%2F');
@@ -49,8 +49,10 @@
     }}
     on:longpress={() => initAudio(entry.sf)}>
     {#if playing}
+      <!-- <i class="fas fa-volume-up fa-lg mt-1" /> -->
       <i class="fas fa-ear fa-lg mt-1" />
-    {:else}<i class="far fa-ear fa-lg mt-1" />{/if}
+    {:else}<i
+        class="far fa-ear fa-lg mt-1" /><!-- <i class="far fa-volume-up fa-lg mt-1" /> -->{/if}
     <div class="text-gray-600 text-sm mt-1">
       {$_('audio.listen', { default: 'Listen' })}
       {#if !minimal && $canEdit}

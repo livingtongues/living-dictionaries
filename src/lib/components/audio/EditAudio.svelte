@@ -9,13 +9,16 @@
   import SelectAudio from '$lib/components/audio/SelectAudio.svelte';
   import RecordAudio from '$lib/components/audio/RecordAudio.svelte';
   import { dictionary, admin } from '$lib/stores';
+  import Button from '$svelteui/ui/Button.svelte';
+
   import { deleteAudio } from '$lib/helpers/delete';
   import { firebaseConfig } from '$sveltefire/config';
-  import Button from '$svelteui/ui/Button.svelte';
-  import { update } from '$sveltefire/firestore';
+  import { update } from '$sveltefire/firestorelite';
+
   import Collection from '$sveltefire/components/Collection.svelte';
-  import type { IEntry, ISpeaker } from '$lib/interfaces';
   import { where } from 'firebase/firestore';
+
+  import type { IEntry, ISpeaker } from '$lib/interfaces';
   export let entry: IEntry;
   let readyToRecord: boolean;
   let speakerId: string;
@@ -61,6 +64,7 @@
 
 <Modal on:close>
   <span slot="heading"> <i class="far fa-ear text-sm" /> {entry.lx} </span>
+  <!-- <i class="far fa-volume-up text-sm" /> -->
 
   <div class="mt-2">
     <div class="mb-3">

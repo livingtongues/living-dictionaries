@@ -29,7 +29,7 @@
     // const _lexeme = this.entry.lx.replace(/[^a-z0-9+]+/gi, '_');
     const fileTypeSuffix = file.name.match(/\.[0-9a-z]+$/i)[0];
 
-    const storagePath = `images/${$dictionary.id}/${
+    const storagePath = `${$dictionary.id}/images/${
       entry.id
     }_${new Date().getTime()}${fileTypeSuffix}`;
 
@@ -85,9 +85,9 @@
     );
   }
 
-  import { update } from '$sveltefire/firestore';
-  import { dev } from '$app/env';
-  import { serverTimestamp } from 'firebase/firestore';
+  import { update } from '$sveltefire/firestorelite';
+  import { dev } from '$sveltefire/config';
+  import { serverTimestamp } from 'firebase/firestore/lite';
   import { user } from '$sveltefire/user';
   import { processImageUrl } from './processImageUrl';
 

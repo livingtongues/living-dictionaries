@@ -22,7 +22,5 @@ const firebaseConfigProd = {
 };
 // functionsURL: 'https://us-central1-talking-dictionaries-alpha.cloudfunctions.net',
 
-export const firebaseConfig =
-  import.meta.env.VITE_project === 'talking-dictionaries-alpha'
-    ? firebaseConfigProd
-    : firebaseConfigDev;
+export const dev = import.meta.env.VITE_project !== 'talking-dictionaries-alpha';
+export const firebaseConfig = dev ? firebaseConfigDev : firebaseConfigProd;
