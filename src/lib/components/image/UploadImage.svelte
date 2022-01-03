@@ -29,7 +29,7 @@
     // const _lexeme = this.entry.lx.replace(/[^a-z0-9+]+/gi, '_');
     const fileTypeSuffix = file.name.match(/\.[0-9a-z]+$/i)[0];
 
-    const storagePath = `images/${$dictionary.id}/${
+    const storagePath = `${$dictionary.id}/images/${
       entry.id
     }_${new Date().getTime()}${fileTypeSuffix}`;
 
@@ -123,8 +123,7 @@
 
 <div
   class="w-full h-full relative flex flex-col items-center justify-center
-  overflow-hidden"
->
+  overflow-hidden">
   {#if error}
     <div class="w-12 text-red-600 text-center">
       <i class="far fa-times" />
@@ -138,8 +137,7 @@
     {:else}
       <div
         class="text-dark-shadow text-white z-10 font-semibold w-12 text-center
-        font-mono"
-      >
+        font-mono">
         {percentage}%
       </div>
     {/if}

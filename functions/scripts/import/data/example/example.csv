@@ -1,0 +1,9 @@
+lexeme,phonetic,localOrthography,morphology,interlinearization,en_gloss,es_gloss,partOfSpeech,,dialect,semanticDomain,,semanticDomain2,,semanticDomain_custom,notes,soundFile,speakerName,speakerAge,speakerGender,speakerHometown,photoFile,vernacular_exampleSentence,en_exampleSentence,#N/A
+(word/phrase),,,,,English,Spanish,abbrev.,,,key,,key,,"(try not to use, separate multiples with a |)",,,,,,,,,English,Spanish
+voiture,vwatyʁ,,,,car,auto,n,noun,Modern Parisian French,5.15,Transportation,5,Daily life,vehicle|cars,small automobile,helloworld.mp3,Celine Dorion,43,f,"Paris, France",mountain.jpg,Je conduis ma voiture,I drive my car,Conduzco mi auto
+arbre,aʁbʁ,,,,tree,árbol,n,noun,Modern Parisian French,1.4,"Plants, trees and other vegetation",1.2,"Earth, geology and landscape",,generic term for all kinds of trees,missing.mp3,Celine Dorion,43,f,"Paris, France",,L'arbre nous donne de l'ombre,The tree gives us shade,El árbol nos da sombra
+tube,tyb,,,,tube,tubo,n,noun,Modern Parisian French,5.9,Tools and weapons,,,plumbing,a cylindrical device for liquids,,,,,,missing.jpg,L'eau passe à travers les tubes ,The water goes through the tubes ,El agua pasa a través de los tubos 
+voiture,vwɑtYʁ,,,,car,auto,n,noun,Quebec French,5.15,Transportation,,,vehicle,small automobile,,,,,,,Je conduis ma voiture,I drive my car,Conduzco mi auto
+neutre,nøʏ̯tʁ̥,,,,neutral,neutro,adj,adjective,Quebec French,,,,,,,,,,,,,Ma chambre est peinte d'une couleur neutre.,My room is painted with a neutral color.,Mi habitación está pintada con un color neutro.
+fêter ,fɛɪ̯te,,,,to celebrate,celebrar,v,verb,Quebec French,,,,,,to have a party,,,,,,,On va vraiment fêter à soir,We will really party tonight,Vamos a celebrar esta noche
+njakulaba,,,n-ja-ku-lab-a,1SG-Fut-2SG-see-Fin.V,I will see you,Voy a verte,vp,verb phrase,Central Luganda,,,,,,,,,,,,,,,
