@@ -26,7 +26,7 @@
     "help_us_launch_more": "Ajude-nos a lançar mais Dicionários Vivos",
     "with_your_help": "Com a sua ajuda poderemos continuar a melhorar o nosso software e torná-lo disponível para qualquer comunidade que pretenda criar o seu Dicionário Vivo. Doe hoje e tenha um impacto!",
     "translators": "Tradutores",
-    "interns": "Estagiários"
+    "interns": "Estagiários."
   },
   "contributors": {
     "invite_contributors": "Convidar Contribuintes",
@@ -103,7 +103,7 @@
     "contributors": "Contribuintes",
     "grammar": "Gramática ",
     "entries": "Inscrições",
-    "youtube_terms": "Termos do YouTube.",
+    "youtube_terms": "TERMOS DO YOUTUBE.",
     "google_terms": "Termos do Google."
   },
   "entry": {
@@ -185,7 +185,9 @@
     "edit": "Editar",
     "invalid": "Inválido",
     "next": "A seguir",
-    "export": "Exportar"
+    "export": "Exportar",
+    "images": "Imagens",
+    "reset": "Redefinir"
   },
   "settings": {
     "community_permission": "A comunidade falante permite que esta língua esteja on-line?",
@@ -223,5 +225,13 @@
     "accept_invitation": "Aceitar Convite",
     "invited_by": "Convidado por",
     "role": "Função "
+  },
+  "export": {
+    "csv_data": "Dados como CSV.",
+    "checking_images": "Verificar se existem arquivos de imagem",
+    "no_images": "Não há arquivos de imagem",
+    "checking_audios": "Verificar se existem arquivos de áudio",
+    "no_audios": "Não há arquivos de áudio",
+    "download_csv": "Baixe o CSV."
   }
 }

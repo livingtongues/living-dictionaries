@@ -185,7 +185,9 @@
     "edit": "编辑",
     "invalid": "无效的",
     "next": "下一个",
-    "export": "出口"
+    "export": "出口",
+    "images": "图片",
+    "reset": "重启"
   },
   "settings": {
     "community_permission": "此语言的语言社区允许这种语言通过网络传播吗？",
@@ -223,5 +225,13 @@
     "accept_invitation": "接受邀请",
     "invited_by": "邀请人",
     "role": "角色"
+  },
+  "export": {
+    "csv_data": "数据作为CSV.",
+    "checking_images": "检查是否存在图像文件",
+    "no_images": "没有图像文件",
+    "checking_audios": "检查音频文件是否存在",
+    "no_audios": "没有音频文件",
+    "download_csv": "下载CSV."
   }
 }
