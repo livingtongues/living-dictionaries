@@ -29,8 +29,8 @@
     // const _lexeme = lexeme.replace(/\s+/g, '_');
     const fileTypeSuffix = file.type.split('/')[1];
 
-    // const storagePath = `audio/${_dictName}_${dictionary.id}/{_lexeme}_${entryId}_${new Date().getTime()}.${fileTypeSuffix}`;
-    const storagePath = `audio/${$dictionary.id}/${
+    // const storagePath = `${_dictName}_${dictionary.id}/audio/{_lexeme}_${entryId}_${new Date().getTime()}.${fileTypeSuffix}`;
+    const storagePath = `${$dictionary.id}/audio/${
       entry.id
     }_${new Date().getTime()}.${fileTypeSuffix}`;
 
