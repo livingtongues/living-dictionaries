@@ -78,7 +78,7 @@
   </div>
 
   <div class="modal-footer">
-    {#if entry.sf}
+    {#if entry.vf}
       {#if $admin > 1}
         {#await import('$svelteui/data/JSON.svelte') then { default: JSON }}
           <JSON obj={entry} />
