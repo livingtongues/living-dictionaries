@@ -185,7 +185,9 @@
     "edit": "Modifier",
     "invalid": "Non valide",
     "next": "Suivant",
-    "export": "Exporter"
+    "export": "Exporter",
+    "images": "Images",
+    "reset": "Réinitialiser"
   },
   "settings": {
     "community_permission": "La communauté linguistique permet-elle à cette langue d'être en ligne ?",
@@ -223,5 +225,13 @@
     "accept_invitation": "Accepter l'invitation",
     "invited_by": "Invité par",
     "role": "Rôle"
+  },
+  "export": {
+    "csv_data": "Données comme CSV",
+    "checking_images": "Vérification si des fichiers image existent",
+    "no_images": "Il n'y a pas de fichiers image",
+    "checking_audios": "Vérification si des fichiers audio existent",
+    "no_audios": "Il n'y a pas de fichiers audio",
+    "download_csv": "Télécharger csv"
   }
 }
