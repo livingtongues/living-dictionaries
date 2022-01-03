@@ -52,8 +52,8 @@ justify-center cursor-pointer p-2 text-lg"
 {/if}
 
 {#if openVideoModal}
-  {#await import('$lib/components/video/WatchVideo.svelte') then WatchVideo}
-    <WatchVideo.default
+  {#await import('$lib/components/video/EditVideo.svelte') then EditVideo}
+    <EditVideo.default
       {entry}
       on:close={() => {
         openVideoModal = null;
