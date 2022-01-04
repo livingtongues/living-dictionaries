@@ -24,3 +24,13 @@ export async function deleteAudio(entry: IEntry) {
     alert(`${$_('misc.error', { default: 'Error' })}: ${err}`);
   }
 }
+
+export async function deleteVideo(entry: IEntry) {
+  const $_ = get(_);
+  try {
+    const $dictionary = get(dictionary);
+    await update(`dictionaries/${$dictionary.id}/words/${entry.id}`, { vf: null }, true);
+  } catch (err) {
+    alert(`${$_('misc.error', { default: 'Error' })}: ${err}`);
+  }
+}

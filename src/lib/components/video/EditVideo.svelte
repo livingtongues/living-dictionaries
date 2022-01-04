@@ -6,6 +6,7 @@
   import Modal from '$lib/components/ui/Modal.svelte';
   import Button from '$svelteui/ui/Button.svelte';
   import RecordVideo from '$lib/components/video/RecordVideo.svelte';
+  import { deleteVideo } from '$lib/helpers/delete';
   import { firebaseConfig } from '$sveltefire/config';
   import { admin } from '$lib/stores';
   import type { IEntry } from '$lib/interfaces';
@@ -85,6 +86,28 @@
           <div class="w-1" />
         {/await}
       {/if}
+
+      <Button
+        href={`https://firebasestorage.googleapis.com/v0/b/${
+          firebaseConfig.storageBucket
+        }/o/${entry.vf.path.replace(/\//g, '%2F')}?alt=media`}
+        target="_blank">
+        <i class="fas fa-download" />
+        <span class="hidden sm:inline"
+          >{$_('misc.download', {
+            default: 'Download',
+          })}</span>
+      </Button>
+      <div class="w-1" />
+
+      <Button onclick={() => deleteVideo(entry)} color="red">
+        <i class="far fa-trash-alt" />&nbsp;
+        <span class="hidden sm:inline"
+          >{$_('misc.delete', {
+            default: 'Delete',
+          })}</span>
+      </Button>
+      <div class="w-1" />
     {/if}
     <Button onclick={close} color="black">
       {$_('misc.close', { default: 'Close' })}
