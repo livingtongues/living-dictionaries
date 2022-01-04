@@ -39,6 +39,7 @@
     admin,
   } from '$lib/stores';
   import Audio from '../entries/_Audio.svelte';
+  import Video from '../entries/_Video.svelte';
   import AddImage from '../entries/_AddImage.svelte';
   import EntryField from './_EntryField.svelte';
   import EntryPartOfSpeech from './_EntryPartOfSpeech.svelte';
@@ -112,19 +113,16 @@
 <Doc
   path={`dictionaries/${dictionaryId}/words/${entry.id}`}
   startWith={entry}
-  on:data={(e) => (entry = e.detail.data)}
-/>
+  on:data={(e) => (entry = e.detail.data)} />
 
 <div
   class="flex justify-between items-center mb-3 md:top-12 sticky top-0 z-30
-  bg-white pt-1 -mt-1"
->
+  bg-white pt-1 -mt-1">
   <Button
     class="-ml-2 !px-2"
     color="black"
     form="simple"
-    href="/{$dictionary.id}/entries/list{$algoliaQueryParams}"
-  >
+    href="/{$dictionary.id}/entries/list{$algoliaQueryParams}">
     <i class="fas fa-arrow-left rtl-x-flip" />
     {$_('misc.back', { default: 'Back' })}
   </Button>
@@ -152,8 +150,7 @@
       field="lx"
       canEdit={$canEdit}
       display={$_('entry.lx', { default: 'Lexeme/Word/Phrase' })}
-      on:valueupdate={saveUpdateToFirestore}
-    />
+      on:valueupdate={saveUpdateToFirestore} />
   </div>
 
   <div class="md:w-1/3 flex flex-col md:flex-col-reverse justify-end mt-2">
@@ -167,6 +164,10 @@
           {$_('entry.upload_photo', { default: 'Upload Photo' })}
         </div>
       </AddImage>
+    {/if}
+
+    {#if entry.vf || canEdit}
+      <Video {entry} class="h-20 mb-2 rounded-md bg-gray-100 px-3" />
     {/if}
 
     {#if entry.sf || canEdit}
@@ -183,8 +184,7 @@
         field="lx"
         canEdit={$canEdit}
         display={$_('entry.lx', { default: 'Lexeme/Word/Phrase' })}
-        on:valueupdate={saveUpdateToFirestore}
-      />
+        on:valueupdate={saveUpdateToFirestore} />
     </div>
 
     {#if $dictionary.alternateOrthographies}
@@ -194,8 +194,7 @@
           field={index === 0 ? 'lo' : `lo${index + 1}`}
           canEdit={$canEdit}
           display={orthography}
-          on:valueupdate={saveUpdateToFirestore}
-        />
+          on:valueupdate={saveUpdateToFirestore} />
       {/each}
     {/if}
 
@@ -205,8 +204,7 @@
         {field}
         canEdit={$canEdit}
         display={$_(`entry.${field}`)}
-        on:valueupdate={saveUpdateToFirestore}
-      />
+        on:valueupdate={saveUpdateToFirestore} />
     {/each}
 
     {#each [...glossLanguages] as bcp}
@@ -217,8 +215,7 @@
         display={`${$_(`gl.${bcp}`)} ${$_('entry.gloss', {
           default: 'Gloss',
         })}`}
-        on:valueupdate={saveUpdateToFirestore}
-      />
+        on:valueupdate={saveUpdateToFirestore} />
     {/each}
 
     {#if entry.de}
@@ -228,16 +225,14 @@
         field="de"
         canEdit={$canEdit}
         display="Definition (deprecated)"
-        on:valueupdate={saveUpdateToFirestore}
-      />
+        on:valueupdate={saveUpdateToFirestore} />
     {/if}
 
     <EntryPartOfSpeech
       value={entry.ps}
       canEdit={$canEdit}
       display={$_('entry.ps', { default: 'Part of Speech' })}
-      on:valueupdate={saveUpdateToFirestore}
-    />
+      on:valueupdate={saveUpdateToFirestore} />
 
     <EntrySemanticDomains canEdit={$canEdit} {entry} on:valueupdate={saveUpdateToFirestore} />
 
@@ -247,8 +242,7 @@
         {field}
         canEdit={$canEdit}
         display={$_(`entry.${field}`)}
-        on:valueupdate={saveUpdateToFirestore}
-      />
+        on:valueupdate={saveUpdateToFirestore} />
     {/each}
 
     {#if (entry.sr && entry.sr.length) || canEdit}
@@ -260,8 +254,7 @@
           promptMessage={$_('entry.sr')}
           addMessage={$_('misc.add', { default: 'Add' })}
           on:valueupdated={(e) =>
-            saveUpdateToFirestore({ detail: { field: 'sr', newValue: e.detail } })}
-        />
+            saveUpdateToFirestore({ detail: { field: 'sr', newValue: e.detail } })} />
         <div class="border-dashed border-b-2  pb-1 mb-2" />
       </div>
     {/if}
@@ -273,8 +266,7 @@
         field="xv"
         canEdit={$canEdit}
         display={$_('entry.example_sentence', { default: 'Example Sentence' })}
-        on:valueupdate={saveUpdateToFirestore}
-      />
+        on:valueupdate={saveUpdateToFirestore} />
     {/if}
 
     <EntryField
@@ -282,8 +274,7 @@
       field="xs.vn"
       canEdit={$canEdit}
       display={$_('entry.example_sentence', { default: 'Example Sentence' })}
-      on:valueupdate={saveUpdateToFirestore}
-    />
+      on:valueupdate={saveUpdateToFirestore} />
 
     {#each [...glossLanguages] as bcp}
       <EntryField
@@ -293,8 +284,7 @@
         display={`${$_(`gl.${bcp}`)} ${$_('entry.example_sentence', {
           default: 'Example Sentence',
         })}`}
-        on:valueupdate={saveUpdateToFirestore}
-      />
+        on:valueupdate={saveUpdateToFirestore} />
     {/each}
 
     <!-- <div class="order-1 mb-4" /> -->
