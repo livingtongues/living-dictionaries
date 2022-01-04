@@ -11,6 +11,7 @@
   import { admin } from '$lib/stores';
   import type { IEntry } from '$lib/interfaces';
   import SelectVideo from './SelectVideo.svelte';
+  import PasteVideoLink from './PasteVideoLink.svelte';
   export let entry: IEntry;
 
   let readyToRecord: boolean;
@@ -62,6 +63,10 @@
         {#if !readyToRecord}
           <div class="sm:w-1/2 sm:px-1">
             <SelectVideo bind:file />
+          </div>
+          <div class="sm:w-1/2 sm:px-1">
+            <!-- TODO create another component instead of a button -->
+            <PasteVideoLink>Paste the link of your video</PasteVideoLink>
           </div>
         {/if}
       </div>
