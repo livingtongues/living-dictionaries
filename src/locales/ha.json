@@ -44,7 +44,7 @@
     "invite_manager": "Gayyaci Manager",
     "write_in_contributor": "Rubuta a bada gudummawa",
     "invitation_sent": "gayyata aika",
-    "manager_contributor_distinction": "SAURARA: Kifi na iya ƙarawa, shirya ko share abubuwan da ke ciki. Masu ba da gudummawar aikin suna aiki da aikin waɗanda za su iya ƙarawa da shirya, amma ba za su iya share kowane abun ciki ba."
+    "manager_contributor_distinction": "SAURARA: Kifi na iya ƙarawa, shirya ko share abubuwan da ke ciki. Masu ba da gudummawa suna aiki da aikin aikin waɗanda za su iya ƙarawa da shirya, amma ba za su iya share kowane abun ciki ba."
   },
   "account": {
     "account_settings": "account Saituna",
@@ -185,7 +185,9 @@
     "edit": "Shirya",
     "invalid": "mara inganci",
     "next": "Daga nan",
-    "export": "Fitad da kaya"
+    "export": "Fitad da kaya",
+    "images": "Images",
+    "reset": "Sake saita"
   },
   "settings": {
     "community_permission": "Shin magana al'umma damar wannan harshe ya zama online?",
@@ -223,5 +225,13 @@
     "accept_invitation": "yarda da Gayyata",
     "invited_by": "gayyace ta",
     "role": "Aikin"
+  },
+  "export": {
+    "csv_data": "Bayani a matsayin CSV",
+    "checking_images": "Duba idan fayilolin hoto sun wanzu",
+    "no_images": "Babu fayilolin hoto",
+    "checking_audios": "Dubawa idan fayilolin sauti sun wanzu",
+    "no_audios": "Babu fayilolin mai jiwuwa",
+    "download_csv": "Sauke CSV"
   }
 }

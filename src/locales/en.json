@@ -185,7 +185,9 @@
     "edit": "Edit",
     "invalid": "Invalid",
     "next": "Next",
-    "export": "Export"
+    "export": "Export",
+    "images": "Images",
+    "reset": "Reset"
   },
   "settings": {
     "community_permission": "Does the speech community allow this language to be online?",
@@ -223,5 +225,13 @@
     "accept_invitation": "Accept Invitation",
     "invited_by": "Invited by",
     "role": "Role"
+  },
+  "export": {
+    "csv_data": "Data as CSV",
+    "checking_images": "Checking if image files exist",
+    "no_images": "There are no image files",
+    "checking_audios": "Checking if audio files exist",
+    "no_audios": "There are no audio files",
+    "download_csv": "Download CSV"
   }
 }

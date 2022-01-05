@@ -44,7 +44,7 @@
     "invite_manager": "دعوة مدير",
     "write_in_contributor": "الكتابة في مساهم",
     "invitation_sent": "دعوة التي وجهت",
-    "manager_contributor_distinction": "ملاحظة: قد يضيف مديرو القاموس أو تحرير المحتوى أو حذفه. المساهمون هم متعاونون المشروع الذين يمكنهم أيضا إضافة وتحرير، ولكن لا يمكن حذف أي محتوى."
+    "manager_contributor_distinction": "ملاحظة: قد يضيف مديري القاموس أو تحرير المحتوى أو حذفه. المساهمون هم متعاونون المشروع الذين يمكنهم أيضا إضافة وتحرير، ولكن لا يمكن حذف أي محتوى."
   },
   "account": {
     "account_settings": "إعدادات الحساب",
@@ -103,7 +103,7 @@
     "contributors": "المساهمون",
     "grammar": "القواعد",
     "entries": "المُدخلات",
-    "youtube_terms": "شروط YouTube.",
+    "youtube_terms": "مصطلحات يوتيوب",
     "google_terms": "مصطلحات جوجل"
   },
   "entry": {
@@ -185,7 +185,9 @@
     "edit": "يحرر",
     "invalid": "غير صالح",
     "next": "التالي",
-    "export": "يصدر"
+    "export": "يصدر",
+    "images": "صور",
+    "reset": "إعادة ضبط"
   },
   "settings": {
     "community_permission": "هل يسمح المجتمع اللغوي بأن تكون هذه اللغة على الانترنت؟",
@@ -223,5 +225,13 @@
     "accept_invitation": "قبول دعوة",
     "invited_by": "بدعوة من",
     "role": "دور"
+  },
+  "export": {
+    "csv_data": "البيانات CSV.",
+    "checking_images": "التحقق من وجود ملفات الصور",
+    "no_images": "لا توجد ملفات صور",
+    "checking_audios": "التحقق من وجود ملفات الصوت",
+    "no_audios": "لا توجد ملفات صوتية",
+    "download_csv": "تحميل CSV."
   }
 }
