@@ -104,7 +104,7 @@
     "grammar": "דקדוק",
     "entries": "ערכים",
     "youtube_terms": "תנאי YouTube.",
-    "google_terms": "תנאי גוגל"
+    "google_terms": "תנאי Google."
   },
   "entry": {
     "view_entries": "צפייה בערכים",
@@ -185,7 +185,9 @@
     "edit": "לַעֲרוֹך",
     "invalid": "לא תקף",
     "next": "הַבָּא",
-    "export": "יְצוּא"
+    "export": "יְצוּא",
+    "images": "תמונות",
+    "reset": "אִתחוּל"
   },
   "settings": {
     "community_permission": "האם הקהילה דוברת השפה מאשרת את קיומה באינטרנט (בממשק זה)?",
@@ -223,5 +225,13 @@
     "accept_invitation": "קבל הזמנה",
     "invited_by": "הוזמן על ידי",
     "role": "תַפְקִיד"
+  },
+  "export": {
+    "csv_data": "נתונים כמו CSV.",
+    "checking_images": "בדיקת אם קובצי תמונה קיימים",
+    "no_images": "אין קבצי תמונה",
+    "checking_audios": "בדיקת אם קיימות קבצי שמע",
+    "no_audios": "אין קבצי שמע",
+    "download_csv": "הורד CSV."
   }
 }

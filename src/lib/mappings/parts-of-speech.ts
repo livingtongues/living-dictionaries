@@ -88,6 +88,7 @@ export const partsOfSpeech: IPartOfSpeech[] = [
   { enAbbrev: 'reflpro', enName: 'reflexive pronoun' },
   { enAbbrev: 'relpro', enName: 'relative pronoun' },
   { enAbbrev: 'vd', enName: 'ditransitive verb' },
+  { enAbbrev: 'va', enName: 'ambitransitive' },
   { unofficial: true, enAbbrev: 'interr.pro', enName: 'interrogative pronoun' },
   { unofficial: true, enAbbrev: 'cop', enName: 'copula' },
   { unofficial: true, enAbbrev: 'imp.verb', enName: 'imperative verb' },

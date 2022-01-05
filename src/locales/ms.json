@@ -25,7 +25,8 @@
     "two_decades_experience": "Dengan pengalaman hampir dua dekad dalam kerja lapangan, para penyelidik Institut Living Tongues bagi Bahasa Terancam mempunyai kemahiran dan kaedah yang sedia ada bagi membantu masyarakat mendokumen, melindungi dan mempromosikan bahasa mereka.",
     "help_us_launch_more": "Bantu Kami Melancarkan Lebih Banyak Kamus Hidup",
     "with_your_help": "Dengan bantuan anda, kami dapat terus memperbaiki perisian kami dan membuatnya tersedia kepada mana-mana masyarakat yang ingin mencipta Kamus Hidup mereka sendiri. Derma dan buat kesan sekarang!",
-    "translators": "Penterjemah"
+    "translators": "Penterjemah",
+    "interns": "Pelatih"
   },
   "contributors": {
     "invite_contributors": "Undang Penyumbang",
@@ -184,7 +185,9 @@
     "edit": "Edit",
     "invalid": "Tidak sah",
     "next": "Berikut",
-    "export": "Eksport"
+    "export": "Eksport",
+    "images": "Imej",
+    "reset": "Reset semula"
   },
   "settings": {
     "community_permission": "Adakah masyarakat penutur membenarkan bahasa ini berada dalam talian?",
@@ -222,5 +225,13 @@
     "accept_invitation": "Terima undangan",
     "invited_by": "Diundang oleh",
     "role": "Peranan"
+  },
+  "export": {
+    "csv_data": "Data sebagai csv.",
+    "checking_images": "Memeriksa jika fail imej wujud",
+    "no_images": "Tiada fail imej",
+    "checking_audios": "Memeriksa jika fail audio wujud",
+    "no_audios": "Tiada fail audio",
+    "download_csv": "Muat turun CSV."
   }
 }
