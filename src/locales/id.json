@@ -185,7 +185,9 @@
     "edit": "Menyunting",
     "invalid": "Tidak Valid",
     "next": "Selanjutnya",
-    "export": "Ekspor"
+    "export": "Ekspor",
+    "images": "Gambar-gambar",
+    "reset": "Mengatur ulang"
   },
   "settings": {
     "community_permission": "Apakah komunitas penutur bahasa mengijinkan bahasa ini online?",
@@ -223,5 +225,13 @@
     "accept_invitation": "Menerima Undangan",
     "invited_by": "Diundang oleh",
     "role": "Peran"
+  },
+  "export": {
+    "csv_data": "Data sebagai CSV.",
+    "checking_images": "Memeriksa apakah ada file gambar",
+    "no_images": "Tidak ada file gambar",
+    "checking_audios": "Memeriksa apakah file audio ada",
+    "no_audios": "Tidak ada file audio",
+    "download_csv": "Unduh CSV."
   }
 }

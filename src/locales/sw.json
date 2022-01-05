@@ -26,7 +26,7 @@
     "help_us_launch_more": "Tusaidie Kuzindua Kamusi Hai Nyingi Zaidi",
     "with_your_help": "Kwa msaada wako, tunaweza kuendelea kuboresha programu yetu na kuifanya ipatikane kwa jamii yoyote inayopenda kuunda Kamusi Hai. Changia leo ili ulete mabadiliko!",
     "translators": "Watafsiri",
-    "interns": "Interns"
+    "interns": "Interns."
   },
   "contributors": {
     "invite_contributors": "Wakaribishe Wachangiaji",
@@ -104,7 +104,7 @@
     "grammar": "Sarufi",
     "entries": "Maingizo",
     "youtube_terms": "Maneno ya YouTube.",
-    "google_terms": "Google Masharti."
+    "google_terms": "Masharti ya Google."
   },
   "entry": {
     "view_entries": "Tazama Maingizo",
@@ -185,7 +185,9 @@
     "edit": "Hariri",
     "invalid": "Halali",
     "next": "Ifuatayo",
-    "export": "Export"
+    "export": "Export.",
+    "images": "Picha",
+    "reset": "Rekebisha"
   },
   "settings": {
     "community_permission": "Je, jamii ya wazungumzaji inaruhusu lugha hii kuwekwa mtandaoni?",
@@ -223,5 +225,13 @@
     "accept_invitation": "Kubali Mwaliko",
     "invited_by": "Umealikwa na",
     "role": "Wajibu"
+  },
+  "export": {
+    "csv_data": "Takwimu kama CSV.",
+    "checking_images": "Kuangalia ikiwa faili za picha zipo",
+    "no_images": "Hakuna faili za picha",
+    "checking_audios": "Kuangalia ikiwa faili za sauti zipo",
+    "no_audios": "Hakuna faili za sauti",
+    "download_csv": "Pakua CSV."
   }
 }
