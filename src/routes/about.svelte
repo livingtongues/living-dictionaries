@@ -178,28 +178,56 @@
   </h3>
   <ul class="mb-3">
     <li>
-      {$_('gl.as', { default: 'Assamese' })}: Palash Nath, Luke Horo
+      <b>{$_('gl.as', { default: 'Assamese' })}</b>: Palash Nath, Luke Horo, Kapil Medhi, Dr. Seuji
+      Sharma, Dr. Gitanjali Bezbaruah, Biren Baruah, Khagendra Nath Medhi, Pranab Sharma, Dhanmani
+      Baishya Student, Chan Mohammad Ali, Rahul Choudhary
     </li>
-    <li>{$_('gl.bn', { default: 'Bangla' })}: Sumedha Sengupta, Prof. Arun Ghosh</li>
-    <li>{$_('gl.fr', { default: 'French' })}: Anna Luisa Daigneault</li>
     <li>
-      {$_('gl.he', { default: 'Hebrew' })}: Dana Melaver, Daniel Bögre Udell
+      <span class="font-semibold">{$_('gl.bn', { default: 'Bangla' })}</span>: Sumedha Sengupta,
+      Prof. Arun Ghosh
     </li>
-    <li>{$_('gl.sw', { default: 'KiSwahili' })}: Michael Karani</li>
-    <li>{$_('gl.hi', { default: 'Hindi' })}: Luke Horo, Bikram Jora, Prof. K.V. Subbarao</li>
-    <li>{$_('gl.or', { default: 'Oriya' })}: Anup Kumar Kujur, Panchanan Mohanty</li>
-    <li>{$_('gl.pt', { default: 'Portuguese' })}: Crisofia Langa da Camara</li>
-    <li>{$_('gl.ru', { default: 'Russian' })}: Denis Tokmashev</li>
-    <li>{$_('gl.sn', { default: 'Shona' })}: Reggemore Marongedze</li>
     <li>
-      {$_('gl.es', { default: 'Spanish' })}: Anna Luisa Daigneault, Amanda Chao Benbassat, Mónica
-      Bonilla Parra
+      <span class="font-semibold">{$_('gl.fr', { default: 'French' })}</span>: Anna Luisa Daigneault
     </li>
-    <li>{$_('gl.ms', { default: 'Malay' })}: Nur Hidayah Binte Sunaryo</li>
-    <li>{$_('gl.zu', { default: 'Zulu' })}: Mthulisi Ncube</li>
-    <li>{$_('gl.it', { default: 'Italian' })}: Iara Mantenuto</li>
-    <li>{$_('gl.cmn', { default: 'Mandarin' })}: Peng Dong</li>
-    <li>{$_('gl.tzm', { default: 'Tamazight' })}: Radia Sami</li>
+    <li>
+      <span class="font-semibold">{$_('gl.he', { default: 'Hebrew' })}</span>: Dana Melaver, Daniel
+      Bögre Udell
+    </li>
+    <li>
+      <span class="font-semibold">{$_('gl.sw', { default: 'KiSwahili' })}</span>: Michael Karani
+    </li>
+    <li>
+      <span class="font-semibold">{$_('gl.hi', { default: 'Hindi' })}</span>: Luke Horo, Bikram
+      Jora, Prof. K.V. Subbarao
+    </li>
+    <li>
+      <span class="font-semibold">{$_('gl.or', { default: 'Oriya' })}</span>: Anup Kumar Kujur,
+      Panchanan Mohanty
+    </li>
+    <li>
+      <span class="font-semibold">{$_('gl.pt', { default: 'Portuguese' })}</span>: Crisofia Langa da
+      Camara
+    </li>
+    <li>
+      <span class="font-semibold">{$_('gl.ru', { default: 'Russian' })}</span>: Denis Tokmashev
+    </li>
+    <li>
+      <span class="font-semibold">{$_('gl.sn', { default: 'Shona' })}</span>: Reggemore Marongedze
+    </li>
+    <li>
+      <span class="font-semibold">{$_('gl.es', { default: 'Spanish' })}</span>: Anna Luisa
+      Daigneault, Amanda Chao Benbassat, Mónica Bonilla Parra
+    </li>
+    <li>
+      <span class="font-semibold">{$_('gl.ms', { default: 'Malay' })}</span>: Nur Hidayah Binte
+      Sunaryo
+    </li>
+    <li><span class="font-semibold">{$_('gl.zu', { default: 'Zulu' })}</span>: Mthulisi Ncube</li>
+    <li>
+      <span class="font-semibold">{$_('gl.it', { default: 'Italian' })}</span>: Iara Mantenuto
+    </li>
+    <li><span class="font-semibold">{$_('gl.cmn', { default: 'Mandarin' })}</span>: Peng Dong</li>
+    <li><span class="font-semibold">{$_('gl.tzm', { default: 'Tamazight' })}</span>: Radia Sami</li>
   </ul>
 
   <h3
