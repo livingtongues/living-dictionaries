@@ -64,11 +64,45 @@
   <span slot="heading"> <i class="far fa-film-alt text-sm" /> {entry.lx} </span>
 
   <div class="mt-2">
-    <!-- <div class="mb-3">
-      {#if entry.vf}
-        {entry.id}
+    <div class="mb-3">
+      <!-- Not sure how to handle this -->
+      {#if !entry.vf && !speakerId}
+        <div class="sm:w-1/2 sm:px-1">
+          <!-- TODO create another component instead of a button -->
+          <PasteVideoLink>Paste the link of your video</PasteVideoLink>
+        </div>
       {/if}
-    </div> -->
+      {#if !speakerId}
+        <div class="text-sm font-medium leading-5 text-gray-600 mt-4">
+          {$_('audio.select_speaker', { default: 'Select Speaker' })}
+          <!-- {#if !entry.vf}to record audio{/if} -->
+        </div>
+      {/if}
+      <div class="mt-1 flex rounded-md shadow-sm">
+        <label
+          for="speaker"
+          class="inline-flex items-center px-3 ltr:rounded-l-md rtl:rounded-r-md border
+            border-gray-300 bg-gray-50 text-gray-500">
+          {$_('entry.speaker', { default: 'Speaker' })}
+        </label>
+        <select
+          bind:value={speakerId}
+          id="speaker"
+          class="block w-full pl-3 !rounded-none ltr:!rounded-r-md rtl:!rounded-l-md form-input">
+          <option />
+          {#each speakers as speaker}
+            <option value={speaker.id}>
+              {speaker.displayName}
+            </option>
+          {/each}
+          <option value="AddSpeaker">
+            +
+            {$_('misc.add', { default: 'Add' })}
+          </option>
+        </select>
+      </div>
+    </div>
+
     {#if entry.vf}
       <div class="px-1">
         {#if $canEdit}
@@ -103,7 +137,7 @@
             uploadVideoRequest = false;
           }} />
       {/await}
-    {:else}
+    {:else if speakerId}
       <div class="flex flex-col sm:flex-row">
         <div class="{readyToRecord ? 'w-full' : 'sm:w-1/2 sm:px-1'} mb-2 sm:mb-0">
           <RecordVideo {uploadVideo} bind:videoBlob bind:permissionGranted={readyToRecord} />
@@ -111,10 +145,6 @@
         {#if !readyToRecord}
           <div class="sm:w-1/2 sm:px-1">
             <SelectVideo bind:file />
-          </div>
-          <div class="sm:w-1/2 sm:px-1">
-            <!-- TODO create another component instead of a button -->
-            <PasteVideoLink>Paste the link of your video</PasteVideoLink>
           </div>
         {/if}
       </div>
