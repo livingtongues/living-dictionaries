@@ -26,12 +26,12 @@
 <style>
   label {
     @apply flex justify-center px-3 py-2 border font-medium
-  cursor-pointer focus:outline-none border-red-300
-  focus:ring focus:ring-red-300 active:bg-red-200 transition ease-in-out
-  duration-150 rounded hover:bg-red-100 text-red-700;
+  cursor-pointer focus:outline-none border-purple-300
+  focus:ring focus:ring-purple-300 active:bg-purple-200 transition ease-in-out
+  duration-150 rounded hover:bg-purple-100 text-purple-700;
   }
 
   /* .dragging {
-    @apply bg-red-200 border-red-300 text-red-800 border-dashed;
+    @apply bg-purple-200 border-purple-300 text-purple-800 border-dashed;
   } */
 </style>

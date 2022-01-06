@@ -61,13 +61,16 @@
   queryConstraints={[where('contributingTo', 'array-contains', $dictionary.id)]} />
 
 <Modal on:close>
-  <span slot="heading"> <i class="far fa-film-alt text-sm" /> {entry.lx} </span>
+  <div slot="heading" class="flex justify-between mr-6">
+    <span> <i class="far fa-film-alt text-sm" /> {entry.lx} </span>
+    <span> <i class="fas fa-info-circle" /> </span>
+  </div>
 
   <div class="mt-2">
     <div class="mb-3">
       <!-- Not sure how to handle this -->
       {#if !entry.vf && !speakerId}
-        <div class="sm:w-1/2 sm:px-1">
+        <div class="sm:w-1/2 sm:px-1 contents">
           <!-- TODO create another component instead of a button -->
           <PasteVideoLink>Paste the link of your video</PasteVideoLink>
         </div>
