@@ -63,7 +63,8 @@
 <Modal on:close>
   <div slot="heading" class="flex justify-between mr-6">
     <span> <i class="far fa-film-alt text-sm" /> {entry.lx} </span>
-    <span> <i class="fas fa-info-circle" /> </span>
+    <Button form="text" type="button" size="sm" onclick={() => alert('This will be the text info')}
+      ><span> <i class="fas fa-info-circle" /> </span></Button>
   </div>
 
   <div class="mt-2">
