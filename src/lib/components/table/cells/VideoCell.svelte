@@ -40,8 +40,8 @@
     </div>
   {/if}
   {#if show}
-    {#await import('$lib/components/video/EditVideo.svelte') then { default: EditVideo }}
-      <EditVideo {entry} on:close={toggle} />
+    {#await import('$lib/components/video/ViewVideo.svelte') then { default: ViewVideo }}
+      <ViewVideo {entry} on:close={toggle} />
     {/await}
   {/if}
 </ShowHide>

@@ -6,17 +6,45 @@
   import Modal from '$lib/components/ui/Modal.svelte';
   import Button from '$svelteui/ui/Button.svelte';
   import RecordVideo from '$lib/components/video/RecordVideo.svelte';
-  import { deleteVideo } from '$lib/helpers/delete';
-  import { firebaseConfig } from '$sveltefire/config';
-  import { admin } from '$lib/stores';
-  import type { IEntry } from '$lib/interfaces';
+  import Collection from '$sveltefire/components/Collection.svelte';
   import SelectVideo from './SelectVideo.svelte';
   import PasteVideoLink from './PasteVideoLink.svelte';
+  import { deleteVideo } from '$lib/helpers/delete';
+  import { update } from '$sveltefire/firestorelite';
+  import { firebaseConfig } from '$sveltefire/config';
+  import { dictionary, admin, canEdit } from '$lib/stores';
+  import type { IEntry, ISpeaker } from '$lib/interfaces';
+  import { where } from 'firebase/firestore';
   export let entry: IEntry;
 
   let readyToRecord: boolean;
+  let speakerId: string;
+  let showAddSpeakerModal = false;
+  let speakers: ISpeaker[] = [];
   let uploadVideoRequest = false;
   const uploadVideo = () => (uploadVideoRequest = true);
+
+  if (entry && entry.vf && entry.vf.sp) {
+    speakerId = entry.vf.sp;
+  }
+
+  $: {
+    if (speakerId === 'AddSpeaker') {
+      showAddSpeakerModal = true;
+      if (entry && entry.vf && entry.vf.sp) {
+        speakerId = entry.vf.sp;
+      } else {
+        speakerId = '';
+      }
+    } else if (speakerId && entry && entry.vf && speakerId != entry.vf.sp) {
+      updateSpeaker();
+    }
+  }
+
+  async function updateSpeaker() {
+    await update(`dictionaries/${$dictionary.id}/words/${entry.id}`, { 'vf.sp': speakerId });
+  }
+
   let file;
   let videoBlob;
 
@@ -25,6 +53,12 @@
     videoBlob = undefined;
   }
 </script>
+
+<Collection
+  path="speakers"
+  startWith={speakers}
+  on:data={(e) => (speakers = e.detail.data)}
+  queryConstraints={[where('contributingTo', 'array-contains', $dictionary.id)]} />
 
 <Modal on:close>
   <span slot="heading"> <i class="far fa-film-alt text-sm" /> {entry.lx} </span>
@@ -37,14 +71,28 @@
     </div> -->
     {#if entry.vf}
       <div class="px-1">
-        <!-- svelte-ignore a11y-media-has-caption -->
-        <video
-          controls
-          autoplay
-          playsinline
-          src={`https://firebasestorage.googleapis.com/v0/b/${
-            firebaseConfig.storageBucket
-          }/o/${entry.vf.path.replace(/\//g, '%2F')}?alt=media`} />
+        {#if $canEdit}
+          <video
+            controls
+            autoplay
+            playsinline
+            src={`https://firebasestorage.googleapis.com/v0/b/${
+              firebaseConfig.storageBucket
+            }/o/${entry.vf.path.replace(/\//g, '%2F')}?alt=media`}>
+            <track kind="captions" />
+          </video>
+        {:else}
+          <video
+            controls
+            controlslist="nodownload"
+            autoplay
+            playsinline
+            src={`https://firebasestorage.googleapis.com/v0/b/${
+              firebaseConfig.storageBucket
+            }/o/${entry.vf.path.replace(/\//g, '%2F')}?alt=media`}>
+            <track kind="captions" />
+          </video>
+        {/if}
       </div>
     {:else if file}
       {#await import('$lib/components/video/UploadVideo.svelte') then { default: UploadVideo }}
@@ -84,7 +132,7 @@
   </div>
 
   <div class="modal-footer">
-    {#if entry.vf}
+    {#if entry.vf && $canEdit}
       {#if $admin > 1}
         {#await import('$svelteui/data/JSON.svelte') then { default: JSON }}
           <JSON obj={entry} />

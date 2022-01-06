@@ -22,18 +22,19 @@
     justify-center cursor-pointer p-1 select-none"
     use:longpress={800}
     on:click={() => {
-      if ($canEdit) {
+      /* if ($canEdit) {
         openVideoModal = true;
       } else {
         initVideo(); //initVideo(entry.sf);
-      }
+      } */
+      openVideoModal = true;
     }}
     on:longpress={() => initVideo()}>
     {#if playing}
       <i class="fas fa-film-alt fa-lg mt-1" />
     {:else}<i class="far fa-film-alt fa-lg mt-1" />{/if}
     <div class="text-gray-600 text-sm mt-1">
-      Watch
+      View
       {#if !minimal && $canEdit}
         + Edit video
       {/if}
@@ -52,8 +53,8 @@ justify-center cursor-pointer p-2 text-lg"
 {/if}
 
 {#if openVideoModal}
-  {#await import('$lib/components/video/EditVideo.svelte') then EditVideo}
-    <EditVideo.default
+  {#await import('$lib/components/video/ViewVideo.svelte') then ViewVideo}
+    <ViewVideo.default
       {entry}
       on:close={() => {
         openVideoModal = null;
