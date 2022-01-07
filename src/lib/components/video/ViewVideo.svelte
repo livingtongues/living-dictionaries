@@ -69,42 +69,44 @@
 
   <div class="mt-2">
     <div class="mb-3">
-      <!-- Not sure how to handle this -->
-      {#if !entry.vf && !speakerId}
-        <div class="sm:w-1/2 sm:px-1 contents">
-          <!-- TODO create another component instead of a button -->
-          <PasteVideoLink>Paste the link of your video</PasteVideoLink>
-        </div>
-      {/if}
-      {#if !speakerId}
-        <div class="text-sm font-medium leading-5 text-gray-600 mt-4">
-          {$_('audio.select_speaker', { default: 'Select Speaker' })}
-          <!-- {#if !entry.vf}to record audio{/if} -->
-        </div>
-      {/if}
-      <div class="mt-1 flex rounded-md shadow-sm">
-        <label
-          for="speaker"
-          class="inline-flex items-center px-3 ltr:rounded-l-md rtl:rounded-r-md border
+      {#if $canEdit}
+        <!-- Not sure how to handle this -->
+        {#if !entry.vf && !speakerId}
+          <div class="sm:w-1/2 sm:px-1 contents">
+            <!-- TODO create another component instead of a button -->
+            <PasteVideoLink {entry}>Paste the link of your video</PasteVideoLink>
+          </div>
+        {/if}
+        {#if !speakerId}
+          <div class="text-sm font-medium leading-5 text-gray-600 mt-4">
+            {$_('audio.select_speaker', { default: 'Select Speaker' })}
+            <!-- {#if !entry.vf}to record audio{/if} -->
+          </div>
+        {/if}
+        <div class="mt-1 flex rounded-md shadow-sm">
+          <label
+            for="speaker"
+            class="inline-flex items-center px-3 ltr:rounded-l-md rtl:rounded-r-md border
             border-gray-300 bg-gray-50 text-gray-500">
-          {$_('entry.speaker', { default: 'Speaker' })}
-        </label>
-        <select
-          bind:value={speakerId}
-          id="speaker"
-          class="block w-full pl-3 !rounded-none ltr:!rounded-r-md rtl:!rounded-l-md form-input">
-          <option />
-          {#each speakers as speaker}
-            <option value={speaker.id}>
-              {speaker.displayName}
+            {$_('entry.speaker', { default: 'Speaker' })}
+          </label>
+          <select
+            bind:value={speakerId}
+            id="speaker"
+            class="block w-full pl-3 !rounded-none ltr:!rounded-r-md rtl:!rounded-l-md form-input">
+            <option />
+            {#each speakers as speaker}
+              <option value={speaker.id}>
+                {speaker.displayName}
+              </option>
+            {/each}
+            <option value="AddSpeaker">
+              +
+              {$_('misc.add', { default: 'Add' })}
             </option>
-          {/each}
-          <option value="AddSpeaker">
-            +
-            {$_('misc.add', { default: 'Add' })}
-          </option>
-        </select>
-      </div>
+          </select>
+        </div>
+      {/if}
     </div>
 
     {#if entry.vf}
