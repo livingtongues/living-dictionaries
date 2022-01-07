@@ -7,6 +7,7 @@
   // https://github.com/firebase/firebaseui-web/blob/master/LANGUAGES.md
   if (localizedAbbrev === 'he') localizedAbbrev = 'iw';
   if (localizedAbbrev === 'ms') localizedAbbrev = 'en'; // Malay is not yet available
+  if (localizedAbbrev === 'as') localizedAbbrev = 'en'; // Assamese is not yet available
 
   import Modal from '$lib/components/ui/Modal.svelte';
   export let context: 'force' = undefined;
