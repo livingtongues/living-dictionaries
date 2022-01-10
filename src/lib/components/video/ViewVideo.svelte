@@ -15,6 +15,7 @@
   import { dictionary, admin, canEdit } from '$lib/stores';
   import type { IEntry, ISpeaker } from '$lib/interfaces';
   import { where } from 'firebase/firestore';
+  import { external } from 'jszip';
   export let entry: IEntry;
 
   let readyToRecord: boolean;
@@ -22,6 +23,7 @@
   let showAddSpeakerModal = false;
   let speakers: ISpeaker[] = [];
   let uploadVideoRequest = false;
+  let hasVideoLink = false;
   const uploadVideo = () => (uploadVideoRequest = true);
 
   if (entry && entry.vf && entry.vf.sp) {
@@ -112,15 +114,29 @@
     {#if entry.vf}
       <div class="px-1">
         {#if $canEdit}
-          <video
-            controls
-            autoplay
-            playsinline
-            src={`https://firebasestorage.googleapis.com/v0/b/${
-              firebaseConfig.storageBucket
-            }/o/${entry.vf.path.replace(/\//g, '%2F')}?alt=media`}>
-            <track kind="captions" />
-          </video>
+          {#if !entry.vf.externalId}
+            <video
+              controls
+              autoplay
+              playsinline
+              src={`https://firebasestorage.googleapis.com/v0/b/${
+                firebaseConfig.storageBucket
+              }/o/${entry.vf.path.replace(/\//g, '%2F')}?alt=media`}>
+              <track kind="captions" />
+            </video>
+          {:else}
+            <section>
+              <iframe
+                id="player"
+                type="text/html"
+                width="456"
+                height="342"
+                src={`https://www.youtube.com/embed/${entry.vf.externalId}`}
+                title="YouTube video player"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowfullscreen />
+            </section>
+          {/if}
         {:else}
           <video
             controls
@@ -175,27 +191,29 @@
           <div class="w-1" />
         {/await}
       {/if}
-
-      <Button
-        href={`https://firebasestorage.googleapis.com/v0/b/${
-          firebaseConfig.storageBucket
-        }/o/${entry.vf.path.replace(/\//g, '%2F')}?alt=media`}
-        target="_blank">
-        <i class="fas fa-download" />
-        <span class="hidden sm:inline"
-          >{$_('misc.download', {
-            default: 'Download',
-          })}</span>
-      </Button>
+      {#if !entry.vf.externalId}
+        <Button
+          href={`https://firebasestorage.googleapis.com/v0/b/${
+            firebaseConfig.storageBucket
+          }/o/${entry.vf.path.replace(/\//g, '%2F')}?alt=media`}
+          target="_blank">
+          <i class="fas fa-download" />
+          <span class="hidden sm:inline"
+            >{$_('misc.download', {
+              default: 'Download',
+            })}</span>
+        </Button>
+      {/if}
       <div class="w-1" />
-
-      <Button onclick={() => deleteVideo(entry)} color="red">
-        <i class="far fa-trash-alt" />&nbsp;
-        <span class="hidden sm:inline"
-          >{$_('misc.delete', {
-            default: 'Delete',
-          })}</span>
-      </Button>
+      {#if !entry.vf.externalId}
+        <Button onclick={() => deleteVideo(entry)} color="red">
+          <i class="far fa-trash-alt" />&nbsp;
+          <span class="hidden sm:inline"
+            >{$_('misc.delete', {
+              default: 'Delete',
+            })}</span>
+        </Button>
+      {/if}
       <div class="w-1" />
     {/if}
     <Button onclick={close} color="black">

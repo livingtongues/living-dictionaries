@@ -1,11 +1,22 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
+  import { update } from '$sveltefire/firestorelite';
+  import type { IEntry } from '$lib/interfaces';
+  import { dictionary } from '$lib/stores';
+  export let entry: IEntry;
   //TODO dragging is not needed I guess
   let dragging = false;
   //export let file: File;
-  function handleLink() {
+  async function handleLink() {
     const videoURL = prompt('Please paste your video URL');
-    console.log(videoURL);
+    if (videoURL) {
+      const videoId = videoURL.substring(videoURL.indexOf('=') + 1);
+      await update(
+        `dictionaries/${$dictionary.id}/words/${entry.id}`,
+        { vf: { externalId: videoId } },
+        true
+      );
+    }
   }
 </script>
 
