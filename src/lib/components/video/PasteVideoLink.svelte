@@ -4,8 +4,7 @@
   import type { IEntry } from '$lib/interfaces';
   import { dictionary } from '$lib/stores';
   export let entry: IEntry;
-  //TODO dragging is not needed I guess
-  let dragging = false;
+
   //export let file: File;
   async function handleLink() {
     const videoURL = prompt('Please paste your video URL');
@@ -29,9 +28,7 @@
     }} />
 
   <i class="far fa-link" />&nbsp;
-  {dragging
-    ? $_('upload.drop_to_upload', { default: 'Drop to Upload' })
-    : $_('', { default: 'Paste Video Link' })}
+  {$_('', { default: 'Paste Video Link' })}
 </label>
 
 <style>

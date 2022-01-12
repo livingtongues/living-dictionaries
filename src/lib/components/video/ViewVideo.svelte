@@ -221,3 +221,16 @@
     </Button>
   </div>
 </Modal>
+
+{#if showAddSpeakerModal}
+  <!-- it's likely I need to move the addSpeaker component outside the Audio folder -->
+  {#await import('$lib/components/audio/AddSpeaker.svelte') then { default: AddSpeaker }}
+    <AddSpeaker
+      on:close={() => {
+        showAddSpeakerModal = false;
+      }}
+      on:newSpeaker={(event) => {
+        speakerId = event.detail.id;
+      }} />
+  {/await}
+{/if}
