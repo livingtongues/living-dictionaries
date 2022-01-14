@@ -19,7 +19,7 @@
   }
 </script>
 
-<label on:mousedown={handleLink}>
+<label class="mb-4" on:mousedown={handleLink}>
   <input
     type="url"
     class="hidden"
