@@ -89,6 +89,14 @@
         {/if}
         {#if recordOrUploadVideo}
           {#if !speakerId}
+            <button
+              type="button"
+              class="flex flex-start items-center px-2 py-2 -mx-1 rounded hover:bg-gray-200"
+              on:click={() => (recordOrUploadVideo = false)}>
+              <i class="far fa-chevron-left rtl-x-flip" />
+              <div class="w-1" />
+              {$_('misc.back', { default: 'Back' })}
+            </button>
             <div class="text-sm font-medium leading-5 text-gray-600 mt-4">
               {$_('audio.select_speaker', { default: 'Select Speaker' })}
               <!-- {#if !entry.vf}to record audio{/if} -->
