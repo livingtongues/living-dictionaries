@@ -12,7 +12,7 @@
       const videoId = videoURL.substring(videoURL.indexOf('=') + 1);
       await update(
         `dictionaries/${$dictionary.id}/words/${entry.id}`,
-        { vf: { externalId: videoId } },
+        { vf: { path: videoURL, externalId: videoId } },
         true
       );
     }
