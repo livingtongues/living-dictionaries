@@ -89,11 +89,15 @@
           </div>
         {/if}
         {#if recordOrUploadVideo}
-          {#if !speakerId}
+          {#if !entry.vf}
             <button
               type="button"
               class="flex flex-start items-center px-2 py-2 -mx-1 rounded hover:bg-gray-200"
-              on:click={() => (recordOrUploadVideo = false)}>
+              on:click={() => {
+                // We must avoid it stores any data if users change their mind at any time before upload or record a video
+                recordOrUploadVideo = false;
+                speakerId = '';
+              }}>
               <i class="far fa-chevron-left rtl-x-flip" />
               <div class="w-1" />
               {$_('misc.back', { default: 'Back' })}
