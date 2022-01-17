@@ -194,7 +194,7 @@
 </Modal>
 
 {#if showAddSpeakerModal}
-  {#await import('$lib/components/audio/AddSpeaker.svelte') then { default: AddSpeaker }}
+  {#await import('$lib/components/media/AddSpeaker.svelte') then { default: AddSpeaker }}
     <AddSpeaker
       on:close={() => {
         showAddSpeakerModal = false;
