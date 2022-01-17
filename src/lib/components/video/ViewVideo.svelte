@@ -78,6 +78,7 @@
             <PasteVideoLink {entry}>Paste the link of your video</PasteVideoLink>
           </div>
           <div class="sm:w-1/2 sm:px-1 contents">
+            <!--Maybe I should change this to a normal button-->
             <Button
               class="container"
               form="outline"
