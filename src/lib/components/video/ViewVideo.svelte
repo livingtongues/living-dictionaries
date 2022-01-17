@@ -148,12 +148,12 @@
               <track kind="captions" />
             </video>
           {:else}
-            <section>
+            <section class="flex justify-center">
               <iframe
                 id="player"
                 type="text/html"
-                width="456"
-                height="342"
+                width={window.innerWidth >= 540 ? '456' : window.innerWidth >= 425 ? '342' : '247'}
+                height={window.innerWidth >= 540 ? '342' : window.innerWidth >= 425 ? '256' : '200'}
                 src={`https://www.youtube.com/embed/${entry.vf.externalId}`}
                 title="YouTube video player"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
