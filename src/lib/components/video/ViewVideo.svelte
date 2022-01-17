@@ -228,15 +228,13 @@
         </Button>
       {/if}
       <div class="w-1" />
-      {#if !entry.vf.externalId}
-        <Button onclick={() => deleteVideo(entry)} color="red">
-          <i class="far fa-trash-alt" />&nbsp;
-          <span class="hidden sm:inline"
-            >{$_('misc.delete', {
-              default: 'Delete',
-            })}</span>
-        </Button>
-      {/if}
+      <Button onclick={() => deleteVideo(entry)} color="red">
+        <i class="far fa-trash-alt" />&nbsp;
+        <span class="hidden sm:inline"
+          >{$_('misc.delete', {
+            default: 'Delete',
+          })}</span>
+      </Button>
       <div class="w-1" />
     {/if}
     <Button onclick={close} color="black">
@@ -246,7 +244,6 @@
 </Modal>
 
 {#if showAddSpeakerModal}
-  <!-- it's likely I need to move the addSpeaker component outside the Audio folder -->
   {#await import('$lib/components/media/AddSpeaker.svelte') then { default: AddSpeaker }}
     <AddSpeaker
       on:close={() => {
