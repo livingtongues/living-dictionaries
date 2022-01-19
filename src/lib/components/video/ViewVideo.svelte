@@ -9,6 +9,7 @@
   import Collection from '$sveltefire/components/Collection.svelte';
   import SelectVideo from './SelectVideo.svelte';
   import PasteVideoLink from './PasteVideoLink.svelte';
+  import VideoIFrame from './_VideoIFrame.svelte';
   import { deleteVideo } from '$lib/helpers/delete';
   import { update } from '$sveltefire/firestorelite';
   import { firebaseConfig } from '$sveltefire/config';
@@ -148,17 +149,7 @@
               <track kind="captions" />
             </video>
           {:else}
-            <section class="flex justify-center">
-              <iframe
-                id="player"
-                type="text/html"
-                width={window.innerWidth >= 540 ? '456' : window.innerWidth >= 425 ? '342' : '247'}
-                height={window.innerWidth >= 540 ? '342' : window.innerWidth >= 425 ? '256' : '200'}
-                src={`https://www.youtube.com/embed/${entry.vf.externalId}`}
-                title="YouTube video player"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowfullscreen />
-            </section>
+            <VideoIFrame videoFile={entry.vf} />
           {/if}
         {:else}
           <video

@@ -6,10 +6,26 @@
   export let entry: IEntry;
 
   //export let file: File;
+  const com = /.com/;
+  const https = /https:\/\//;
+  function whereSource(path: string): string {
+    return path.substring(path.match(https)[0].length, path.match(com).index);
+  }
+  //TODO separate the update step
   async function handleLink() {
     const videoURL = prompt('Please paste your video URL');
+    //TODO validate the videoURL
+    // Check where the link comes from
     if (videoURL) {
-      const videoId = videoURL.substring(videoURL.indexOf('=') + 1);
+      const source = whereSource(videoURL);
+      let videoId = '';
+      // Currently we only accept Vimeo and YouTube video sources
+      if (source === 'www.youtube') {
+        videoId = videoURL.substring(videoURL.indexOf('=') + 1);
+      } else if (source === 'vimeo') {
+        videoId = videoURL.substring(videoURL.match(/https:\/\/vimeo.com\//)[0].length);
+      }
+
       await update(
         `dictionaries/${$dictionary.id}/words/${entry.id}`,
         { vf: { path: videoURL, externalId: videoId } },
