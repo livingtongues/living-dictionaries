@@ -19,7 +19,7 @@
 {#if entry.vf}
   <div
     class="{$$props.class} hover:bg-gray-200 flex flex-col items-center
-    justify-center cursor-pointer p-1 select-none"
+    justify-center cursor-pointer p-3 select-none"
     use:longpress={800}
     on:click={() => {
       /* if ($canEdit) {
