@@ -5,16 +5,22 @@
   import { dictionary } from '$lib/stores';
   export let entry: IEntry;
 
-  //export let file: File;
   const com = /.com/;
   const https = /https:\/\//;
   function whereSource(path: string): string {
     return path.substring(path.match(https)[0].length, path.match(com).index);
   }
-  //TODO separate the update step
+  //TODO separate the update step -ask Jacob-
   async function handleLink() {
-    const videoURL = prompt('Please paste your video URL');
-    //TODO validate the videoURL
+    const prompted = prompt('Please paste your video URL');
+    // Validate videoURL
+    let videoURL: string;
+    if (prompted.search(https) >= 0 && prompted.search(com) >= 0) {
+      videoURL = prompted;
+    } else {
+      //TODO translate this message
+      alert('This is not a valid URL');
+    }
     // Check where the link comes from
     if (videoURL) {
       const source = whereSource(videoURL);
