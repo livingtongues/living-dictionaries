@@ -171,17 +171,23 @@
           {:else}
             <VideoIFrame videoFile={entry.vf} />
           {/if}
-        {:else}
-          <video
-            controls
-            controlslist="nodownload"
-            autoplay
-            playsinline
-            src={`https://firebasestorage.googleapis.com/v0/b/${
-              firebaseConfig.storageBucket
-            }/o/${entry.vf.path.replace(/\//g, '%2F')}?alt=media`}>
-            <track kind="captions" />
-          </video>
+        {/if}
+        <!-- I believe I need to be very specific in this case: when users are not able to edit -->
+        {#if !$canEdit}
+          {#if !entry.vf.externalId}
+            <video
+              controls
+              controlslist="nodownload"
+              autoplay
+              playsinline
+              src={`https://firebasestorage.googleapis.com/v0/b/${
+                firebaseConfig.storageBucket
+              }/o/${entry.vf.path.replace(/\//g, '%2F')}?alt=media`}>
+              <track kind="captions" />
+            </video>
+          {:else}
+            <VideoIFrame videoFile={entry.vf} />
+          {/if}
         {/if}
       </div>
     {:else if file}
