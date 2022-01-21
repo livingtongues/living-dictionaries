@@ -84,7 +84,6 @@
               ><i class="far fa-link" /> Paste video URL</Button>
           </div>
           <div class="sm:w-1/2 sm:px-1 contents">
-            <!--Maybe I should change this to a normal button-->
             <Button
               class="container"
               form="outline"
