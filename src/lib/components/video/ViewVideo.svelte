@@ -8,7 +8,7 @@
   import RecordVideo from '$lib/components/video/RecordVideo.svelte';
   import Collection from '$sveltefire/components/Collection.svelte';
   import SelectVideo from './SelectVideo.svelte';
-  import PasteVideoLink from './PasteVideoLink.svelte';
+  import PasteVideoLink from './_PasteVideoLink.svelte';
   import VideoIFrame from './_VideoIFrame.svelte';
   import { deleteVideo } from '$lib/helpers/delete';
   import { update } from '$sveltefire/firestorelite';
