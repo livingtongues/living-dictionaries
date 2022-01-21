@@ -9,7 +9,7 @@
     target: '_blank' = undefined,
     size: 'sm' | 'md' | 'lg' = 'md',
     form: 'outline' | 'primary' | 'simple' | 'link' | 'menu' | 'text' = 'outline',
-    color: 'red' | 'orange' | 'green' | 'black' | 'white' = undefined,
+    color: 'red' | 'orange' | 'green' | 'black' | 'purple' | 'white' = undefined,
     disabled = false,
     active = false;
 
@@ -119,6 +119,9 @@
   }
   .black {
     @apply focus:ring-gray-500 text-gray-800 hover:bg-gray-900 border-gray-500;
+  }
+  .purple {
+    @apply focus:ring-purple-500 text-purple-800 hover:bg-purple-900 border-purple-500;
   }
   .primary {
     @apply text-white bg-primary-600 hover:bg-primary-700 border-none;
