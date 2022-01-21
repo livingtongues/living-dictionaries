@@ -16,7 +16,6 @@
   import { dictionary, admin, canEdit } from '$lib/stores';
   import type { IEntry, ISpeaker } from '$lib/interfaces';
   import { where } from 'firebase/firestore';
-  import { external } from 'jszip';
   export let entry: IEntry;
 
   let readyToRecord: boolean;
@@ -24,7 +23,7 @@
   let showAddSpeakerModal = false;
   let speakers: ISpeaker[] = [];
   let uploadVideoRequest = false;
-  let recordOrUploadVideo = false;
+  let uploadVideoOption: string;
   const uploadVideo = () => (uploadVideoRequest = true);
 
   if (entry && entry.vf && entry.vf.sp) {
@@ -74,9 +73,15 @@
     <div class="mb-3">
       {#if $canEdit}
         <!-- Not sure how to handle this -->
-        {#if !entry.vf && !speakerId && !recordOrUploadVideo}
-          <div class="sm:w-1/2 sm:px-1 contents mb-4">
-            <PasteVideoLink {entry}>Paste the link of your video</PasteVideoLink>
+        {#if !entry.vf && !speakerId && !uploadVideoOption}
+          <div class="sm:w-1/2 sm:px-1 contents">
+            <Button
+              class="container mb-4"
+              form="outline"
+              color="purple"
+              type="button"
+              onclick={() => (uploadVideoOption = 'external')}
+              ><i class="far fa-link" /> Paste video URL</Button>
           </div>
           <div class="sm:w-1/2 sm:px-1 contents">
             <!--Maybe I should change this to a normal button-->
@@ -85,18 +90,18 @@
               form="outline"
               color="green"
               type="button"
-              onclick={() => (recordOrUploadVideo = true)}
+              onclick={() => (uploadVideoOption = 'internal')}
               ><i class="far fa-box-open" /> Record or upload a video</Button>
           </div>
         {/if}
-        {#if recordOrUploadVideo}
+        {#if uploadVideoOption === 'internal'}
           {#if !entry.vf}
             <button
               type="button"
               class="flex flex-start items-center px-2 py-2 -mx-1 rounded hover:bg-gray-200"
               on:click={() => {
                 // We must avoid it stores any data if users change their mind at any time before upload or record a video
-                recordOrUploadVideo = false;
+                uploadVideoOption = null;
                 speakerId = '';
               }}>
               <i class="far fa-chevron-left rtl-x-flip" />
@@ -131,6 +136,22 @@
               </option>
             </select>
           </div>
+        {/if}
+      {/if}
+      {#if uploadVideoOption === 'external'}
+        {#if !entry.vf}
+          <button
+            type="button"
+            class="flex flex-start items-center px-2 py-2 -mx-1 rounded hover:bg-gray-200"
+            on:click={() => {
+              // We must avoid it stores any data if users change their mind at any time before upload or record a video
+              uploadVideoOption = null;
+            }}>
+            <i class="far fa-chevron-left rtl-x-flip" />
+            <div class="w-1" />
+            {$_('misc.back', { default: 'Back' })}
+          </button>
+          <PasteVideoLink {entry} />
         {/if}
       {/if}
     </div>
