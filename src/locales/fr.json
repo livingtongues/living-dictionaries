@@ -187,7 +187,9 @@
     "next": "Suivant",
     "export": "Exporter",
     "images": "Images",
-    "reset": "Réinitialiser"
+    "reset": "Réinitialiser",
+    "invalid_url": "Ce n'est pas une URL valide",
+    "upload": "Télécharger"
   },
   "settings": {
     "community_permission": "La communauté linguistique permet-elle à cette langue d'être en ligne ?",
@@ -233,5 +235,14 @@
     "checking_audios": "Vérification si des fichiers audio existent",
     "no_audios": "Il n'y a pas de fichiers audio",
     "download_csv": "Télécharger csv"
+  },
+  "video": {
+    "video_url": "URL de la vidéo",
+    "video_credit": "Crédit vidéo",
+    "prepare_to_record_video": "Préparez-vous à enregistrer avec microphone et appareil photo",
+    "delete_record_again": "Supprimer et enregistrer à nouveau",
+    "video_info": "Vous trouverez deux façons d'afficher vos vidéos dans un dictionnaire vivant: 1) Vous pouvez enregistrer vos vidéos ici ou télécharger vos vidéos précédemment enregistrées sur notre plate-forme. Avantages: Facile et idéal pour des enregistrements rapides. Inconvénients: Vous ne pouvez télécharger une vidéo que jusqu'à 100 Mo afin de ne pas être une résolution inférieure et faible. 2) Avez-vous vos vidéos sur un service d'hébergement spécialisé dans le stockage vidéo et relier l'URL à notre site. Avantages: Facile (tant que vos vidéos sont déjà téléchargées sur cette plate-forme), vos vidéos peuvent avoir la résolution et la longueur souhaitées. Inconvénients: Si vous voulez enregistrer quelque chose d'inattendu ou très simple, cela pourrait être trop d'effort pour le faire de cette façon, et vous voudrez peut-être hiérarchiser la méthode 1.",
+    "paste_video_url": "Coller URL vidéo",
+    "record_upload_video": "Enregistrer ou télécharger une vidéo"
   }
 }

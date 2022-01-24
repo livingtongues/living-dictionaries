@@ -65,8 +65,17 @@
 <Modal on:close>
   <div slot="heading" class="flex justify-between mr-6">
     <span> <i class="far fa-film-alt text-sm" /> {entry.lx} </span>
-    <Button form="text" type="button" size="sm" onclick={() => alert('This will be the text info')}
-      ><span> <i class="fas fa-info-circle" /> </span></Button>
+    <Button
+      form="text"
+      type="button"
+      size="sm"
+      onclick={() =>
+        alert(
+          $_('video.video_info', {
+            default:
+              'There are two ways to have your videos displayed in a Living Dictionary: 1) You can record your videos right here, or upload your previously recorded videos to our platform. Advantages: easy and great for quick recordings. Disadvantages: You can only upload a video up to 100MB so it must only be short and low resolution. 2) Have your videos on a hosting service that specializes in video storage and link the URL to our site. Advantages: easy (as long as your videos are already uploaded on that platform), your videos can have the resolution and length you want. Disadvantages: if you want to record something unexpected or very simple, it might be too much effort to do it that way, and you may want to prioritize method 1.',
+          })
+        )}><span> <i class="fas fa-info-circle" /> </span></Button>
   </div>
 
   <div class="mt-2">
@@ -80,7 +89,8 @@
               color="purple"
               type="button"
               onclick={() => (uploadVideoOption = 'external')}
-              ><i class="far fa-link" /> Paste video URL</Button>
+              ><i class="far fa-link" />
+              {$_('video.paste_video_url', { default: 'Paste video URL' })}</Button>
           </div>
           <div class="sm:w-1/2 sm:px-1 contents">
             <Button
@@ -89,7 +99,8 @@
               color="green"
               type="button"
               onclick={() => (uploadVideoOption = 'internal')}
-              ><i class="far fa-box-open" /> Record or upload a video</Button>
+              ><i class="far fa-box-open" />
+              {$_('video.record_upload_video', { default: 'Record or upload a video' })}</Button>
           </div>
         {/if}
         {#if uploadVideoOption === 'internal'}

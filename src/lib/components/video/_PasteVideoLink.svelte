@@ -21,8 +21,7 @@
     if (URLPrompted.search(https) >= 0 && URLPrompted.search(com) >= 0) {
       validVideoURL = URLPrompted.trim();
     } else {
-      //TODO translate this message
-      alert('This is not a valid URL');
+      alert($_('misc.invalid_url', { default: 'This is not a valid URL' }));
     }
     // Check where the link comes from
     if (validVideoURL) {
@@ -46,7 +45,7 @@
 
 <form on:submit|preventDefault={handleInput}>
   <label for="vURL" class="block text-sm font-medium leading-5 text-gray-700 mt-4">
-    Video URL
+    {$_('video.video_url', { default: 'Video URL' })}
   </label>
   <div class="mt-1 rounded-md shadow-sm">
     <input
@@ -58,7 +57,7 @@
   </div>
 
   <label for="vc" class="block text-sm font-medium leading-5 text-gray-700 mt-4">
-    Video credit
+    {$_('video.video_credit', { default: 'Video credit' })}
   </label>
   <div class="mt-1 rounded-md shadow-sm">
     <input id="vc" type="text" bind:value={videoCredit} class="form-input block w-full" />

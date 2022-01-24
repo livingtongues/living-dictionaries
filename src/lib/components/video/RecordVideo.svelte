@@ -144,7 +144,9 @@
     {:else}
       <Button onclick={checkAudioPermissions} class="w-full">
         <i class="far fa-microphone-alt" />
-        Prepare to Record with Microphone & Camera
+        {$_('video.prepare_to_record_video', {
+          default: 'Prepare to Record with Microphone & Camera',
+        })}
       </Button>
     {/if}
   {:else if !recorder}
@@ -162,7 +164,8 @@
   {/if}
 {:else}
   <div class="flex justify-between pt-2">
-    <Button onclick={record} color="red">Record Again</Button>
-    <Button onclick={uploadVideo} color="green">Upload</Button>
+    <Button onclick={record} color="red"
+      >{$_('video.delete_record_again', { default: 'Delete and record again' })}</Button>
+    <Button onclick={uploadVideo} color="green">{$_('misc.upload', { default: 'Upload' })}</Button>
   </div>
 {/if}
