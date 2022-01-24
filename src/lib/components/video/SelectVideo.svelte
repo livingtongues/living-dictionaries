@@ -12,10 +12,10 @@
     if (fileToCheck.type.split('/')[0] !== 'video') {
       return alert(`${$_('upload.error', { default: 'Unsupported File Type' })}`);
     }
-    // Must be smaller than ?MB, http://www.unitconversion.org/data-storage/megabytes-to-bytes-conversion.html
+    // Must be smaller than 100MB, http://www.unitconversion.org/data-storage/megabytes-to-bytes-conversion.html
     if (fileToCheck.size > 104857600) {
       return alert(
-        `${$_('upload.file_must_be_smaller', { default: 'File must be smaller than' })} ?MB`
+        `${$_('upload.file_must_be_smaller', { default: 'File must be smaller than' })} 100MB`
       );
     }
 

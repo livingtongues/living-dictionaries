@@ -72,7 +72,6 @@
   <div class="mt-2">
     <div class="mb-3">
       {#if $canEdit}
-        <!-- Not sure how to handle this -->
         {#if !entry.vf && !speakerId && !uploadVideoOption}
           <div class="sm:w-1/2 sm:px-1 contents">
             <Button
@@ -101,6 +100,7 @@
               on:click={() => {
                 // We must avoid it stores any data if users change their mind at any time before upload or record a video
                 uploadVideoOption = null;
+                videoBlob = null;
                 speakerId = '';
               }}>
               <i class="far fa-chevron-left rtl-x-flip" />
@@ -123,16 +123,20 @@
               bind:value={speakerId}
               id="speaker"
               class="block w-full pl-3 !rounded-none ltr:!rounded-r-md rtl:!rounded-l-md form-input">
-              <option />
+              {#if !videoBlob}
+                <option />
+              {/if}
               {#each speakers as speaker}
                 <option value={speaker.id}>
                   {speaker.displayName}
                 </option>
               {/each}
-              <option value="AddSpeaker">
-                +
-                {$_('misc.add', { default: 'Add' })}
-              </option>
+              {#if !videoBlob}
+                <option value="AddSpeaker">
+                  +
+                  {$_('misc.add', { default: 'Add' })}
+                </option>
+              {/if}
             </select>
           </div>
         {/if}
@@ -195,6 +199,7 @@
         <UploadVideo
           {file}
           {entry}
+          {speakerId}
           on:close={() => {
             uploadVideoRequest = false;
           }} />
@@ -216,6 +221,7 @@
         <UploadVideo
           file={videoBlob}
           {entry}
+          {speakerId}
           on:close={() => {
             uploadVideoRequest = false;
           }} />

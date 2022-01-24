@@ -12,7 +12,7 @@
   });
   $: percentage = Math.floor($progress * 100);
 
-  export let file: File, entry: IEntry;
+  export let file: File, entry: IEntry, speakerId: string;
   let error;
   let success: boolean;
 
@@ -65,6 +65,7 @@
             path: storagePath,
             ts: serverTimestamp(),
             ab: $user.uid,
+            sp: speakerId,
           };
 
           await update(`dictionaries/${$dictionary.id}/words/${entry.id}`, { vf }, true);
