@@ -219,7 +219,8 @@
     "drop_to_upload": "Jatuhkan untuk Muat Naik",
     "select_audio_file": "Pilih Fail Audio",
     "success": "Berjaya",
-    "uploading": "Memuat naik"
+    "uploading": "Memuat naik",
+    "select_video_file": "Pilih fail video"
   },
   "invite": {
     "invitation_claimed": "Undangan diisytiharkan",
@@ -243,6 +244,9 @@
     "delete_record_again": "Padam dan rekod lagi",
     "video_info": "Terdapat dua cara untuk mempunyai video anda yang dipaparkan dalam kamus hidup: 1) Anda boleh merakam video anda di sini, atau memuat naik video yang dirakam sebelum ini ke platform kami. Kelebihan: Mudah dan hebat untuk rakaman cepat. Kelemahan: Anda hanya boleh memuat naik video sehingga 100MB jadi ia hanya perlu resolusi pendek dan rendah. 2) Dapatkan video anda pada perkhidmatan hosting yang mengkhususkan diri dalam penyimpanan video dan menghubungkan URL ke laman web kami. Kelebihan: Mudah (selagi video anda telah dimuat naik pada platform itu), video anda boleh mempunyai resolusi dan panjang yang anda mahukan. Kelemahan: Jika anda ingin merakam sesuatu yang tidak dijangka atau sangat mudah, ia mungkin terlalu banyak usaha untuk melakukannya dengan cara itu, dan anda mungkin ingin mengutamakan kaedah 1.",
     "paste_video_url": "Tampal URL VIDEO",
-    "record_upload_video": "Rekod atau muat naik video"
+    "record_upload_video": "Rekod atau muat naik video",
+    "view": "Pandangan",
+    "edit_video": "Edit video",
+    "add_video": "Tambah video"
   }
 }

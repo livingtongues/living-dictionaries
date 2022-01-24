@@ -41,7 +41,7 @@
   <i class="far fa-upload" />&nbsp;
   {dragging
     ? $_('upload.drop_to_upload', { default: 'Drop to Upload' })
-    : $_('', { default: 'Select Video File' })}
+    : $_('upload.select_video_file', { default: 'Select Video File' })}
 </label>
 
 <style>

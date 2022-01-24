@@ -219,7 +219,8 @@
     "drop_to_upload": "dondosha upakie",
     "select_audio_file": "Chagua sauti",
     "success": "Mafanikio",
-    "uploading": "Kupakia"
+    "uploading": "Kupakia",
+    "select_video_file": "Chagua faili ya video."
   },
   "invite": {
     "invitation_claimed": "Mwaliko umekubaliwa",
@@ -243,6 +244,9 @@
     "delete_record_again": "Futa na rekodi tena",
     "video_info": "Kuna njia mbili za kuwa na video zako zilizoonyeshwa katika kamusi ya maisha: 1) Unaweza kurekodi video zako hapa, au kupakia video zako zilizorekodi hapo awali kwenye jukwaa letu. Faida: Rahisi na nzuri kwa rekodi ya haraka. Hasara: Unaweza tu kupakia video hadi 100MB hivyo lazima iwe tu ufupi na chini ya azimio. 2) Kuwa na video zako kwenye huduma ya kuhudumia ambayo inalenga katika kuhifadhi video na kuunganisha URL kwenye tovuti yetu. Faida: Rahisi (kwa muda mrefu kama video zako tayari zimepakiwa kwenye jukwaa hilo), video zako zinaweza kuwa na azimio na urefu unayotaka. Hasara: Ikiwa unataka kurekodi kitu kisichotarajiwa au rahisi sana, inaweza kuwa jitihada nyingi za kufanya hivyo kwa njia hiyo, na unaweza kutaka kipaumbele njia ya 1.",
     "paste_video_url": "Weka URL ya Video.",
-    "record_upload_video": "Rekodi au kupakia video."
+    "record_upload_video": "Rekodi au kupakia video.",
+    "view": "Tazama",
+    "edit_video": "Hariri Video.",
+    "add_video": "Ongeza Video."
   }
 }

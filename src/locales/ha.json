@@ -219,7 +219,8 @@
     "drop_to_upload": "Sauke zuwa Upload",
     "select_audio_file": "Zabi Audio fayil",
     "success": "Success",
-    "uploading": "Ana aikawa"
+    "uploading": "Ana aikawa",
+    "select_video_file": "Zaɓi fayil ɗin bidiyo"
   },
   "invite": {
     "invitation_claimed": "gayyata da'awa",
@@ -243,6 +244,9 @@
     "delete_record_again": "Share da sake yin rikodin",
     "video_info": "Akwai hanyoyi guda biyu don sanya bidiyonku da aka nuna a cikin yanayin rayuwa: 1) Kuna iya yin rikodin bidiyonku a nan, ko loda bidiyon da aka rubuta a baya ga dandamalinmu. Abvantbuwan amfãni: Mai sauƙin kai da yawa don rikodin sauri. Rashin daidaituwa: Zaka iya shigar da bidiyo kawai zuwa 100MB don dole ne kawai ya zama gajeru da ƙarancin ƙuduri. 2) Shin bidiyon ku akan sabis ɗin kuɗaɗe da ƙwarewa ne a cikin ajiya na bidiyo kuma danganta URL ɗin zuwa shafinmu. Abvantbuwan amfãni: Mai sauƙin (Muddin an riga an ɗora ku akan wannan dandamali na iya samun ƙuduri da tsawon lokacin da kake so. Rashin daidaito: Idan kana son yin rikodin wani abu wanda ba a zata ba ko mai sauqi qwarai, yana iya zama ƙoƙari da yawa don yin hakan ta wannan hanyar, kuma kuna iya son fifikon hanyar 1.",
     "paste_video_url": "Manna bidiyo",
-    "record_upload_video": "Yi rikodin ko loda bidiyo"
+    "record_upload_video": "Yi rikodin ko loda bidiyo",
+    "view": "Duba",
+    "edit_video": "Shirya bidiyo",
+    "add_video": "Ƙara bidiyo"
   }
 }
