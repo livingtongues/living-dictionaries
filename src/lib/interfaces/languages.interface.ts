@@ -9,7 +9,8 @@ export enum ReadyLocales {
   pt = 'Portuguese',
   id = 'Bahasa Indonesia',
   ms = 'Malay',
-  bn = 'বাংলা', // Bengali
+  bn = 'বাংলা', // Bengali,
+  as = 'Assamese / অসমীয়া',
 }
 
 // Admin only
