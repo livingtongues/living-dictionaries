@@ -65,7 +65,7 @@
             path: storagePath,
             ts: serverTimestamp(),
             ab: $user.uid,
-            sp: speakerId,
+            vsp: speakerId,
           };
 
           await update(`dictionaries/${$dictionary.id}/words/${entry.id}`, { vf }, true);

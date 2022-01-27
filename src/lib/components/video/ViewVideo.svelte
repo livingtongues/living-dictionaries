@@ -26,25 +26,25 @@
   let uploadVideoOption: string;
   const uploadVideo = () => (uploadVideoRequest = true);
 
-  if (entry && entry.vf && entry.vf.sp) {
-    speakerId = entry.vf.sp;
+  if (entry && entry.vf && entry.vf.vsp) {
+    speakerId = entry.vf.vsp;
   }
 
   $: {
     if (speakerId === 'AddSpeaker') {
       showAddSpeakerModal = true;
-      if (entry && entry.vf && entry.vf.sp) {
-        speakerId = entry.vf.sp;
+      if (entry && entry.vf && entry.vf.vsp) {
+        speakerId = entry.vf.vsp;
       } else {
         speakerId = '';
       }
-    } else if (speakerId && entry && entry.vf && speakerId != entry.vf.sp) {
+    } else if (speakerId && entry && entry.vf && speakerId != entry.vf.vsp) {
       updateSpeaker();
     }
   }
 
   async function updateSpeaker() {
-    await update(`dictionaries/${$dictionary.id}/words/${entry.id}`, { 'vf.sp': speakerId });
+    await update(`dictionaries/${$dictionary.id}/words/${entry.id}`, { 'vf.vsp': speakerId });
   }
 
   let file;
