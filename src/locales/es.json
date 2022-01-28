@@ -241,7 +241,7 @@
     "video_url": "URL de video",
     "video_credit": "Crédito del video para",
     "prepare_to_record_video": "Prepárese para grabar con el micrófono y la cámara",
-    "delete_record_again": "Eliminar y grabar de nuevo",
+    "delete_record": "Eliminar grabación",
     "video_info": "Hay dos formas en que se pueden mostar tus videos en un Diccionario Vivo: 1) Puedes grabar tus videos aquí o cargar tus videos previamente grabados en nuestra plataforma. Ventajas: fácil e ideal para grabaciones rápidas. Desventajas: sólo puedes cargar videos de hasta 100 MB, así que sólo pueden ser cortos y de baja resolución. 2) Tener almacenados tus videos en un servicio especializado y vincular la URL a nuestro sitio. Ventajas: fácil (siempre y cuando tus videos ya estén cargados en esa plataforma), tus videos pueden tener la resolución y tamaño que desees. Desventajas: si deseas grabar algo inesperado o muy simple, esto implicaría mucho esfuerzo, y en ese caso, es posible que desees priorizar el método 1.",
     "paste_video_url": "Pega la URL del video ",
     "record_upload_video": "Graba o carga un video",

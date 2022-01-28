@@ -113,6 +113,7 @@
                 uploadVideoOption = null;
                 videoBlob = null;
                 speakerId = '';
+                readyToRecord = false;
               }}>
               <i class="far fa-chevron-left rtl-x-flip" />
               <div class="w-1" />

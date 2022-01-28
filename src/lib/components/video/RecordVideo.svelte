@@ -1,6 +1,7 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
   import Button from '$svelteui/ui/Button.svelte';
+  import { onDestroy, onMount } from 'svelte';
 
   export let videoBlob = null;
   export let permissionGranted = false;
@@ -8,7 +9,6 @@
   let permissionDenied = false;
 
   let RecordRTC: typeof import('recordrtc');
-  import { onDestroy, onMount } from 'svelte';
   onMount(async () => {
     RecordRTC = (await import('recordrtc')).default;
     // Could also use `await loadScriptOnce('https://cdnjs.cloudflare.com/ajax/libs/RecordRTC/5.5.6/RecordRTC.js');` in context module block
@@ -107,6 +107,12 @@
     recorder = null;
   }
 
+  function deleteVideo() {
+    videoBlob = null;
+    stream = null;
+    recorder = null;
+  }
+
   onDestroy(() => turnOffAllDevices());
 </script>
 
@@ -166,8 +172,8 @@
   {/if}
 {:else}
   <div class="flex justify-between pt-2">
-    <Button onclick={record} color="red"
-      >{$_('video.delete_record_again', { default: 'Delete and record again' })}</Button>
+    <Button onclick={deleteVideo} color="red"
+      >{$_('video.delete_record', { default: 'Delete Record' })}</Button>
     <Button onclick={uploadVideo} color="green">{$_('misc.upload', { default: 'Upload' })}</Button>
   </div>
 {/if}

@@ -241,7 +241,7 @@
     "video_url": "URL Video",
     "video_credit": "Kredit Video",
     "prepare_to_record_video": "Bersiaplah untuk merekam dengan mikrofon & kamera",
-    "delete_record_again": "Hapus dan rekam lagi",
+    "delete_record": "Hapus catatan",
     "video_info": "Ada dua cara untuk menampilkan video Anda dalam kamus hidup: 1) Anda dapat merekam video Anda di sini, atau mengunggah video yang Anda rekam sebelumnya ke platform kami. Keuntungan: Mudah dan bagus untuk rekaman cepat. Kekurangan: Anda hanya dapat mengunggah video hingga 100MB sehingga hanya perlu resolusi singkat dan rendah. 2) Miliki video Anda pada layanan hosting yang berspesialisasi dalam penyimpanan video dan tautkan URL ke situs kami. Keuntungan: Mudah (selama video Anda sudah diunggah di platform itu), video Anda dapat memiliki resolusi dan panjang yang Anda inginkan. Kekurangan: Jika Anda ingin merekam sesuatu yang tidak terduga atau sangat sederhana, mungkin terlalu banyak upaya untuk melakukannya dengan cara itu, dan Anda mungkin ingin memprioritaskan metode 1.",
     "paste_video_url": "Tempel URL Video",
     "record_upload_video": "Rekam atau unggah video",

@@ -241,7 +241,7 @@
     "video_url": "URL do vídeo",
     "video_credit": "Crédito de vídeo",
     "prepare_to_record_video": "Prepare-se para gravar com microfone e câmera",
-    "delete_record_again": "Excluir e gravar novamente",
+    "delete_record": "Apagar registro",
     "video_info": "Existem duas maneiras de ter seus vídeos exibidos em um Dicionário Vivo: 1) Você pode gravar seus vídeos aqui mesmo ou carregar seus vídeos gravados anteriormente para nossa plataforma. Vantagens: fácil e ótimo para gravações rápidas. Desvantagens: Você só pode enviar um vídeo até 100MB, portanto, ele deve ser de resolução curta e baixa. 2) Tenha seus vídeos em um serviço de hospedagem que se especializa em armazenamento de vídeo e vincule o URL ao nosso site. Vantagens: fácil (desde que seus vídeos jáem enviados nessa plataforma), seus vídeos podem ter a resolução e o tamanho desejado. Desvantagens: Se você quiser gravar algo inesperado ou muito simples, pode ser muito esforço para fazer assim, e você pode priorizar o método 1.",
     "paste_video_url": "Colar o URL de vídeo.",
     "record_upload_video": "Gravar ou fazer upload de um vídeo",
