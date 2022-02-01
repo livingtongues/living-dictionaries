@@ -60,7 +60,8 @@
   path="speakers"
   startWith={speakers}
   on:data={(e) => (speakers = e.detail.data)}
-  queryConstraints={[where('contributingTo', 'array-contains', $dictionary.id)]} />
+  queryConstraints={[where('contributingTo', 'array-contains', $dictionary.id)]}
+/>
 
 <Modal on:close>
   <div slot="heading" class="flex justify-between mr-6">
@@ -75,7 +76,8 @@
             default:
               'There are two ways to have your videos displayed in a Living Dictionary: 1) You can record your videos right here, or upload your previously recorded videos to our platform. Advantages: easy and great for quick recordings. Disadvantages: You can only upload a video up to 100MB so it must only be short and low resolution. 2) Have your videos on a hosting service that specializes in video storage and link the URL to our site. Advantages: easy (as long as your videos are already uploaded on that platform), your videos can have the resolution and length you want. Disadvantages: if you want to record something unexpected or very simple, it might be too much effort to do it that way, and you may want to prioritize method 1.',
           })
-        )}><span> <i class="fas fa-info-circle" /> </span></Button>
+        )}><span> <i class="fas fa-info-circle" /> </span></Button
+    >
   </div>
 
   <div class="mt-2">
@@ -86,11 +88,11 @@
             <Button
               class="container mb-4"
               form="outline"
-              color="purple"
               type="button"
               onclick={() => (uploadVideoOption = 'external')}
               ><i class="far fa-link" />
-              {$_('video.paste_video_url', { default: 'Paste video URL' })}</Button>
+              {$_('video.paste_video_url', { default: 'Paste video URL' })}</Button
+            >
           </div>
           <div class="sm:w-1/2 sm:px-1 contents">
             <Button
@@ -100,7 +102,8 @@
               type="button"
               onclick={() => (uploadVideoOption = 'internal')}
               ><i class="far fa-box-open" />
-              {$_('video.record_upload_video', { default: 'Record or upload a video' })}</Button>
+              {$_('video.record_upload_video', { default: 'Record or upload a video' })}</Button
+            >
           </div>
         {/if}
         {#if uploadVideoOption === 'internal'}
@@ -114,7 +117,8 @@
                 videoBlob = null;
                 speakerId = '';
                 readyToRecord = false;
-              }}>
+              }}
+            >
               <i class="far fa-chevron-left rtl-x-flip" />
               <div class="w-1" />
               {$_('misc.back', { default: 'Back' })}
@@ -128,13 +132,15 @@
             <label
               for="speaker"
               class="inline-flex items-center px-3 ltr:rounded-l-md rtl:rounded-r-md border
-            border-gray-300 bg-gray-50 text-gray-500">
+            border-gray-300 bg-gray-50 text-gray-500"
+            >
               {$_('entry.speaker', { default: 'Speaker' })}
             </label>
             <select
               bind:value={speakerId}
               id="speaker"
-              class="block w-full pl-3 !rounded-none ltr:!rounded-r-md rtl:!rounded-l-md form-input">
+              class="block w-full pl-3 !rounded-none ltr:!rounded-r-md rtl:!rounded-l-md form-input"
+            >
               {#if !videoBlob}
                 <option />
               {/if}
@@ -161,7 +167,8 @@
             on:click={() => {
               // We must avoid it stores any data if users change their mind at any time before upload or record a video
               uploadVideoOption = null;
-            }}>
+            }}
+          >
             <i class="far fa-chevron-left rtl-x-flip" />
             <div class="w-1" />
             {$_('misc.back', { default: 'Back' })}
@@ -181,7 +188,8 @@
               playsinline
               src={`https://firebasestorage.googleapis.com/v0/b/${
                 firebaseConfig.storageBucket
-              }/o/${entry.vf.path.replace(/\//g, '%2F')}?alt=media`}>
+              }/o/${entry.vf.path.replace(/\//g, '%2F')}?alt=media`}
+            >
               <track kind="captions" />
             </video>
           {:else}
@@ -198,7 +206,8 @@
               playsinline
               src={`https://firebasestorage.googleapis.com/v0/b/${
                 firebaseConfig.storageBucket
-              }/o/${entry.vf.path.replace(/\//g, '%2F')}?alt=media`}>
+              }/o/${entry.vf.path.replace(/\//g, '%2F')}?alt=media`}
+            >
               <track kind="captions" />
             </video>
           {:else}
@@ -214,7 +223,8 @@
           {speakerId}
           on:close={() => {
             uploadVideoRequest = false;
-          }} />
+          }}
+        />
       {/await}
     {:else if speakerId}
       <div class="flex flex-col sm:flex-row">
@@ -236,7 +246,8 @@
           {speakerId}
           on:close={() => {
             uploadVideoRequest = false;
-          }} />
+          }}
+        />
       {/await}
     {/if}
   </div>
@@ -254,12 +265,14 @@
           href={`https://firebasestorage.googleapis.com/v0/b/${
             firebaseConfig.storageBucket
           }/o/${entry.vf.path.replace(/\//g, '%2F')}?alt=media`}
-          target="_blank">
+          target="_blank"
+        >
           <i class="fas fa-download" />
           <span class="hidden sm:inline"
             >{$_('misc.download', {
               default: 'Download',
-            })}</span>
+            })}</span
+          >
         </Button>
       {/if}
       <div class="w-1" />
@@ -268,7 +281,8 @@
         <span class="hidden sm:inline"
           >{$_('misc.delete', {
             default: 'Delete',
-          })}</span>
+          })}</span
+        >
       </Button>
       <div class="w-1" />
     {/if}
@@ -286,6 +300,7 @@
       }}
       on:newSpeaker={(event) => {
         speakerId = event.detail.id;
-      }} />
+      }}
+    />
   {/await}
 {/if}

@@ -9,7 +9,7 @@
     target: '_blank' = undefined,
     size: 'sm' | 'md' | 'lg' = 'md',
     form: 'outline' | 'primary' | 'simple' | 'link' | 'menu' | 'text' = 'outline',
-    color: 'red' | 'orange' | 'green' | 'black' | 'purple' | 'white' = undefined,
+    color: 'red' | 'orange' | 'green' | 'black' | 'white' = undefined,
     disabled = false,
     active = false;
 
@@ -36,18 +36,22 @@
       {href}
       target="_blank"
       rel="noopener"
-      class="{$$props.class} {form} {size} {color} text-center inline-block">
+      class="{$$props.class} {form} {size} {color} text-center inline-block"
+    >
       <slot />
       {#if form !== 'text' && form !== 'link'}
         <svg
           xmlns="http://www.w3.org/2000/svg"
           class="h-4 w-4 inline"
           viewBox="0 0 20 20"
-          fill="currentColor">
+          fill="currentColor"
+        >
           <path
-            d="M11 3a1 1 0 100 2h2.586l-6.293 6.293a1 1 0 101.414 1.414L15 6.414V9a1 1 0 102 0V4a1 1 0 00-1-1h-5z" />
+            d="M11 3a1 1 0 100 2h2.586l-6.293 6.293a1 1 0 101.414 1.414L15 6.414V9a1 1 0 102 0V4a1 1 0 00-1-1h-5z"
+          />
           <path
-            d="M5 5a2 2 0 00-2 2v8a2 2 0 002 2h8a2 2 0 002-2v-3a1 1 0 10-2 0v3H5V7h3a1 1 0 000-2H5z" />
+            d="M5 5a2 2 0 00-2 2v8a2 2 0 002 2h8a2 2 0 002-2v-3a1 1 0 10-2 0v3H5V7h3a1 1 0 000-2H5z"
+          />
         </svg>
       {/if}
     </a>
@@ -56,7 +60,8 @@
       {href}
       sveltekit:prefetch
       class:active
-      class="{$$props.class} {form} {size} {color} text-center inline-block">
+      class="{$$props.class} {form} {size} {color} text-center inline-block"
+    >
       <slot />
     </a>
   {/if}
@@ -67,19 +72,22 @@
     class="{$$props.class} {form} {size} {color} text-center inline-block"
     {type}
     on:click={runWithSpinner}
-    disabled={disable}>
+    disabled={disable}
+  >
     <slot />
     {#if loading}
       <svg
         class="animate-spin ml-1 -mr-1 h-5 w-5 inline"
         xmlns="http://www.w3.org/2000/svg"
         fill="none"
-        viewBox="0 0 24 24">
+        viewBox="0 0 24 24"
+      >
         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
         <path
           class="opacity-75"
           fill="currentColor"
-          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+        />
       </svg>
     {/if}
   </button>
@@ -119,9 +127,6 @@
   }
   .black {
     @apply focus:ring-gray-500 text-gray-800 hover:bg-gray-900 border-gray-500;
-  }
-  .purple {
-    @apply focus:ring-purple-500 text-purple-800 hover:bg-purple-900 border-purple-500;
   }
   .primary {
     @apply text-white bg-primary-600 hover:bg-primary-700 border-none;
