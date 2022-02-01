@@ -3,7 +3,7 @@ import type { ISpeaker, IEntry } from '$lib/interfaces';
 
 export async function fetchSpeakers(data: IEntry[]) {
   const speakersIds = [];
-  const speakers: ISpeaker[] = [];
+  const speakers = [];
   data.forEach((entry) => {
     entry.sf && !speakersIds.includes(entry.sf.sp) ? speakersIds.push(entry.sf.sp) : '';
   });
