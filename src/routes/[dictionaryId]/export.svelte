@@ -24,8 +24,8 @@
     const entries = await getCollection<IEntry>(`dictionaries/${$dictionary.id}/words`);
     const speakers = await fetchSpeakers(entries);
     formattedEntries = await formatEntriesForCSV(entries, $dictionary, speakers);
-    entriesWithImages = formattedEntries.filter((entry) => entry.impa);
-    entriesWithAudio = formattedEntries.filter((entry) => entry.aupa);
+    entriesWithImages = formattedEntries.filter((entry) => entry.pfpa);
+    entriesWithAudio = formattedEntries.filter((entry) => entry.sfpa);
     mounted = true;
   });
 </script>
@@ -118,8 +118,8 @@
     onclick={() => {
       const finalizedEntries = formattedEntries.map((entry) => {
         const newEntry = { ...entry };
-        delete newEntry.impa;
-        delete newEntry.aupa;
+        delete newEntry.pfpa;
+        delete newEntry.sfpa;
         return newEntry;
       });
       downloadObjArrAsCSV(finalizedEntries, $dictionary.name);

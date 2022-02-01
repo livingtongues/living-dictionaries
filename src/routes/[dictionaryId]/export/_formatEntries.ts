@@ -192,6 +192,7 @@ export function formatEntriesForCSV(
       });
     }
     if (entry.pf && entry.pf.path) {
+      itemsFormatted[i]['pfpa'] = entry.pf.path;
       itemsFormatted[i]['pfFriendlyName'] = friendlyName(entry, entry.pf.path);
     } else {
       itemsFormatted[i]['pfFriendlyName'] = '';
