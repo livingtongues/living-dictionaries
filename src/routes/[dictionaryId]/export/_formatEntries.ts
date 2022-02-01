@@ -2,6 +2,7 @@ import type { IDictionary, IEntry, ISpeaker } from '$lib/interfaces';
 import { glossingLanguages } from './_glossing-languages-temp';
 import { semanticDomains } from '$lib/mappings/semantic-domains';
 import { partsOfSpeech } from '$lib/mappings/parts-of-speech';
+import { fetchSpeakers } from '$lib/helpers/fetchSpeakers';
 import { friendlyName } from '$lib/helpers/friendlyName';
 
 function turnArrayIntoPipedString(itemsFormatted, i, values, columnName, fn) {
@@ -13,13 +14,13 @@ function turnArrayIntoPipedString(itemsFormatted, i, values, columnName, fn) {
     //In case some strings contain commas
     stringValue += list.map((el) => el.replace(/,/g, ' -'));
     stringValue = stringValue.replace(/,/g, ' | ');
-    itemsFormatted[i][columnName] = stringValue;
+    Object.assign(itemsFormatted[i], JSON.parse(`{"${columnName}": "${stringValue}"}`));
   } else {
-    itemsFormatted[i][columnName] = '';
+    Object.assign(itemsFormatted[i], JSON.parse(`{ "${columnName}": "" }`));
   }
 }
 
-export function formatEntriesForCSV(
+export async function formatEntriesForCSV(
   data: IEntry[],
   { name: dictionaryName, glossLanguages }: IDictionary,
   speakers: ISpeaker[]
@@ -54,32 +55,37 @@ export function formatEntriesForCSV(
   //Assigning semantic domains as headers
   if (totalSDN > 0) {
     for (let index = 0; index < totalSDN; index++) {
-      headers[`sd${index + 1}`] = `Semantic domain ${index + 1}`;
+      Object.assign(headers, JSON.parse(`{"sd${index + 1}": "Semantic domain ${index + 1}"}`));
     }
   }
 
   //Assigning gloss languages as gloss headers
   glossLanguages.forEach((bcp) => {
-    headers[`gl${bcp}`] = `${glossingLanguages[bcp]} Gloss`;
+    Object.assign(headers, JSON.parse(`{ "gl${bcp}": "${glossingLanguages[bcp]} Gloss" }`));
   });
 
   //Assigning vernacular and gloss languages as example sentence headers
-  headers['xsvn'] = `Example sentence in ${dictionaryName}`;
+  Object.assign(headers, JSON.parse(`{"xsvn": "Example sentence in ${dictionaryName}"}`));
   glossLanguages.forEach((bcp) => {
-    headers[`xs${bcp}`] = `Example sentence in ${glossingLanguages[bcp]}`;
+    Object.assign(
+      headers,
+      JSON.parse(`{"xs${bcp}": "Example sentence in ${glossingLanguages[bcp]}"}`)
+    );
   });
 
   //Assigning audio metadata as headers
   Object.assign(headers, {
-    sfFriendlyName: 'Audio filename',
-    sfsn: 'Speaker name',
-    sfbp: 'Speaker birthplace',
-    sfde: 'Speaker decade',
-    sfge: 'Speaker gender',
+    auFriendlyName: 'Audio filename',
+    ausn: 'Speaker name',
+    aubp: 'Speaker birthplace',
+    aude: 'Speaker decade',
+    auge: 'Speaker gender',
   });
 
   //Assigning images metadata as headers
-  headers['pfFriendlyName'] = 'Image filename';
+  Object.assign(headers, {
+    imFriendlyName: 'Image filename',
+  });
 
   const itemsFormatted = [];
   data.forEach((entry, i) => {
@@ -129,40 +135,65 @@ export function formatEntriesForCSV(
     turnArrayIntoPipedString(itemsFormatted, i, entry.sr, 'sr', (el) => el);
 
     //Assigning semantic domains
-    for (let index = 0; index < totalSDN; index++) {
-      itemsFormatted[i][`sd${index + 1}`] = '';
-      if (entry.sdn && entry.sdn[index]) {
-        const matchingDomain = semanticDomains.find((sd) => sd.key === entry.sdn[index]);
-        if (matchingDomain) {
-          itemsFormatted[i][`sd${index + 1}`] = matchingDomain.name.replace(
-            /[,"\r\n]/g,
-            (m) => replacementChars[m]
-          );
+    if (entry.sdn) {
+      for (let index = 0; index < totalSDN; index++) {
+        itemsFormatted[i][`sd${index + 1}`] = '';
+        if (entry.sdn[index]) {
+          const matchingDomain = semanticDomains.find((sd) => sd.key === entry.sdn[index]);
+          if (matchingDomain) {
+            itemsFormatted[i][`sd${index + 1}`] = matchingDomain.name.replace(
+              /[,"\r\n]/g,
+              (m) => replacementChars[m]
+            );
+          }
         }
       }
+    } else {
+      for (let index = 0; index < totalSDN; index++) {
+        Object.assign(
+          itemsFormatted[i],
+          JSON.parse(`{
+            "sd${index + 1}": ""
+          }`)
+        );
+      }
     }
-
     //Assigning glosses
     glossLanguages.forEach((bcp) => {
       const cleanEntry = entry.gl[bcp]
         ? entry.gl[bcp].replace(/[,"\r\n]/g, (m) => replacementChars[m])
         : '';
-      itemsFormatted[i][`gl${bcp}`] = cleanEntry;
+      Object.assign(itemsFormatted[i], JSON.parse(`{"gl${bcp}": "${cleanEntry}"}`));
     });
     //Assigning example sentences
     for (let j = 0; j <= glossLanguages.length; j++) {
       if (entry.xs) {
         if (j === glossLanguages.length) {
-          itemsFormatted[i][`xs${glossLanguages[j] ? glossLanguages[j] : 'vn'}`] = `${
-            entry.xs['vn'] ? entry.xs['vn'].replace(/[,"\r\n]/g, (m) => replacementChars[m]) : ''
-          }`;
+          Object.assign(
+            itemsFormatted[i],
+            JSON.parse(`{
+              "xs${glossLanguages[j] ? glossLanguages[j] : 'vn'}": "${
+              entry.xs['vn'] ? entry.xs['vn'].replace(/[,"\r\n]/g, (m) => replacementChars[m]) : ''
+            }"
+            }`)
+          );
         } else {
-          itemsFormatted[i][`xs${glossLanguages[j] ? glossLanguages[j] : 'vn'}`] = `${
-            entry.xs[glossLanguages[j]] ? entry.xs[glossLanguages[j]] : ''
-          }`;
+          Object.assign(
+            itemsFormatted[i],
+            JSON.parse(`{
+              "xs${glossLanguages[j] ? glossLanguages[j] : 'vn'}": "${
+              entry.xs[glossLanguages[j]] ? entry.xs[glossLanguages[j]] : ''
+            }"
+            }`)
+          );
         }
       } else {
-        itemsFormatted[i][`xs${glossLanguages[j] ? glossLanguages[j] : 'vn'}`] = '';
+        Object.assign(
+          itemsFormatted[i],
+          JSON.parse(`{
+            "xs${glossLanguages[j] ? glossLanguages[j] : 'vn'}": ""
+          }`)
+        );
       }
     }
     //Audio metadata
@@ -175,27 +206,28 @@ export function formatEntriesForCSV(
       const speakerDecade = speaker?.decade || '';
       const speakerGender = speaker?.gender || '';
       Object.assign(itemsFormatted[i], {
-        sfpa: entry.sf.path,
-        sfFriendlyName: friendlyName(entry, entry.sf.path),
-        sfsn: speakerName,
-        sfbp: speakerBP,
-        sfde: speakerDecade,
-        sfge: speakerGender,
+        aupa: entry.sf.path,
+        auFriendlyName: friendlyName(entry, entry.sf.path),
+        ausn: speakerName,
+        aubp: speakerBP,
+        aude: speakerDecade,
+        auge: speakerGender,
       });
     } else {
       Object.assign(itemsFormatted[i], {
-        sfFriendlyName: '',
-        sfsn: '',
-        sfbp: '',
-        sfde: '',
-        sfge: '',
+        auFriendlyName: '',
+        ausn: '',
+        aubp: '',
+        aude: '',
+        auge: '',
       });
     }
+
     if (entry.pf && entry.pf.path) {
       itemsFormatted[i]['pfpa'] = entry.pf.path;
       itemsFormatted[i]['pfFriendlyName'] = friendlyName(entry, entry.pf.path);
     } else {
-      itemsFormatted[i]['pfFriendlyName'] = '';
+      Object.assign(itemsFormatted[i], { imFriendlyName: '' });
     }
     i++;
   });
