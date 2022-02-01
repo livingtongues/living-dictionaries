@@ -99,12 +99,12 @@ export const deleteFromIndex = functions.firestore
     await (await import('./video/uploadToYouTube')).uploadToYouTube(snapshot, context);
   }); */
 
-export const latestYoutubeVideo = functions.https.onRequest(async (req, res) => {
-  await (await import('./video/uploadToYouTube')).latestYoutubeVideo(req, res);
-});
+// export const latestYoutubeVideo = functions.https.onRequest(async (req, res) => {
+//   await (await import('./video/uploadToYouTube')).latestYoutubeVideo(req, res);
+// });
 
-export const test = functions.https.onRequest(async (req, res) => {
-  console.log('This is just a simple test');
-  // Send back a message that we've successfully written the message
-  res.json({ result: `Hello World` });
-});
+// export const test = functions.https.onRequest(async (req, res) => {
+//   console.log('This is just a simple test');
+//   // Send back a message that we've successfully written the message
+//   res.json({ result: `Hello World` });
+// });
