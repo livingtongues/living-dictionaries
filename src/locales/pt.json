@@ -187,7 +187,10 @@
     "next": "A seguir",
     "export": "Exportar",
     "images": "Imagens",
-    "reset": "Redefinir"
+    "reset": "Redefinir",
+    "invalid_url": "Este não é um URL válido",
+    "upload": "Envio",
+    "downloading": "Baixando"
   },
   "settings": {
     "community_permission": "A comunidade falante permite que esta língua esteja on-line?",
@@ -217,7 +220,8 @@
     "drop_to_upload": "Cancelar o carregamento",
     "select_audio_file": "Seleccione o ficheiro do Áudio",
     "success": "Sucesso",
-    "uploading": "A Enviar"
+    "uploading": "A Enviar",
+    "select_video_file": "Selecione o arquivo de vídeo"
   },
   "invite": {
     "invitation_claimed": "Convite reclamado",
@@ -233,5 +237,17 @@
     "checking_audios": "Verificar se existem arquivos de áudio",
     "no_audios": "Não há arquivos de áudio",
     "download_csv": "Baixe o CSV."
+  },
+  "video": {
+    "video_url": "URL do vídeo",
+    "video_credit": "Crédito de vídeo",
+    "prepare_to_record_video": "Prepare-se para gravar com microfone e câmera",
+    "delete_record": "Apagar registro",
+    "video_info": "Existem duas maneiras de ter seus vídeos exibidos em um Dicionário Vivo: 1) Você pode gravar seus vídeos aqui mesmo ou carregar seus vídeos gravados anteriormente para nossa plataforma. Vantagens: fácil e ótimo para gravações rápidas. Desvantagens: Você só pode enviar um vídeo até 100MB, portanto, ele deve ser de resolução curta e baixa. 2) Tenha seus vídeos em um serviço de hospedagem que se especializa em armazenamento de vídeo e vincule o URL ao nosso site. Vantagens: fácil (desde que seus vídeos jáem enviados nessa plataforma), seus vídeos podem ter a resolução e o tamanho desejado. Desvantagens: Se você quiser gravar algo inesperado ou muito simples, pode ser muito esforço para fazer assim, e você pode priorizar o método 1.",
+    "paste_video_url": "Colar o URL de vídeo.",
+    "record_upload_video": "Gravar ou fazer upload de um vídeo",
+    "view": "Visualizar",
+    "edit_video": "Editar vídeo",
+    "add_video": "Adicionar vídeo"
   }
 }
