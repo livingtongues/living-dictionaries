@@ -5,8 +5,7 @@ on: deployment_status
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-  DEPLOY_URL: https://living-dictionaries.vercel.app/
-  # Going to be https://livingdictionaries.app/
+  DEPLOY_URL: https://livingdictionaries.app/
 
 jobs:
   build-publish-audit:
