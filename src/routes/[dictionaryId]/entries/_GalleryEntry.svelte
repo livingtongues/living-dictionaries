@@ -28,7 +28,7 @@
 <style>
   .card-content-wrapper {
     background: #f3f3f3;
-    padding: 20px 20px 20px 10px;
+    padding: 10px;
   }
 
   .card-content-wrapper > p {
