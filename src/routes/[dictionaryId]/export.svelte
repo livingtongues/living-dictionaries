@@ -10,7 +10,6 @@
   import ShowHide from '$svelteui/functions/ShowHide.svelte';
   import DownloadMedia from './export/_DownloadMedia.svelte';
   import Progress from './export/_Progress.svelte';
-  import { fetchSpeakers } from '$lib/helpers/fetchSpeakers';
 
   let includeImages = false;
   let includeAudio = false;
@@ -22,8 +21,7 @@
 
   onMount(async () => {
     const entries = await getCollection<IEntry>(`dictionaries/${$dictionary.id}/words`);
-    const speakers = await fetchSpeakers(entries);
-    formattedEntries = await formatEntriesForCSV(entries, $dictionary, speakers);
+    formattedEntries = await formatEntriesForCSV(entries, $dictionary);
     entriesWithImages = formattedEntries.filter((entry) => entry.impa);
     entriesWithAudio = formattedEntries.filter((entry) => entry.aupa);
     mounted = true;
@@ -41,8 +39,7 @@
 
 <div class="mb-6">
   <div>
-    <i class="far fa-check" />
-    {$_('export.csv_data', { default: 'Data as CSV' })}
+    <i class="far fa-check" /> Data as CSV
   </div>
   <div
     class="flex items-center mt-2 {entriesWithImages.length
@@ -54,32 +51,24 @@
       type="checkbox"
       bind:checked={includeImages} />
     <label for="images" class="mx-2 block leading-5 text-gray-900">
-      {$_('misc.images', { default: 'Images' })} ({entriesWithImages.length})</label>
+      Images ({entriesWithImages.length})</label>
   </div>
   {#if !mounted}
-    <p class="text-xs italic text-orange-400 p-2">
-      {$_('export.checking_images', { default: 'Checking if image files exist' })}
-    </p>
+    <p class="text-xs italic text-orange-400 p-2">Checking if images exist</p>
   {:else if !entriesWithImages.length}
-    <p class="text-sm text-red-700 p-3">
-      {$_('export.no_images', { default: 'There are no image files' })}
-    </p>
+    <p class="text-sm text-red-700 p-3">There are no images</p>
   {/if}
 
   <div
     class="flex items-center mt-2 {entriesWithAudio.length ? '' : 'opacity-50 cursor-not-allowed'}">
     <input id="audio" type="checkbox" bind:checked={includeAudio} />
     <label for="audio" class="mx-2 block leading-5 text-gray-900">
-      {$_('entry.audio', { default: 'Audio' })} ({entriesWithAudio.length})</label>
+      Audio ({entriesWithAudio.length})</label>
   </div>
   {#if !mounted}
-    <p class="text-xs italic text-orange-400 p-2">
-      {$_('export.checking_audios', { default: 'Checking if audio files exist' })}
-    </p>
+    <p class="text-xs italic text-orange-400 p-2">Checking if audio files exist</p>
   {:else if !entriesWithAudio.length}
-    <p class="text-sm text-red-700 p-3">
-      {$_('export.no_audios', { default: 'There are no audio files' })}
-    </p>
+    <p class="text-sm text-red-700 p-3">There are no audio files</p>
   {/if}
 </div>
 
@@ -87,12 +76,12 @@
   <ShowHide let:show let:toggle>
     {#if !show}
       <Button onclick={toggle} form="primary">
-        {$_('export.download_csv', { default: 'Download CSV' })}
+        Download CSV
         {#if includeImages}
-          + {$_('misc.images', { default: 'Images' })}
+          + Images
         {/if}
         {#if includeAudio}
-          + {$_('entry.audio', { default: 'Audio' })}
+          + Audio
         {/if}
       </Button>
     {:else}
@@ -105,9 +94,9 @@
         let:progress>
         <Progress {progress} />
         {#if progress < 1}
-          <Button onclick={toggle} color="red">{$_('misc.cancel', { default: 'Cancel' })}</Button>
+          <Button onclick={toggle} color="red">Cancel</Button>
         {:else}
-          <Button onclick={toggle}>{$_('misc.reset', { default: 'Reset' })}</Button>
+          <Button onclick={toggle}>Reset</Button>
         {/if}
       </DownloadMedia>
     {/if}
@@ -125,6 +114,6 @@
       downloadObjArrAsCSV(finalizedEntries, $dictionary.name);
     }}
     form="primary">
-    {$_('export.download_csv', { default: 'Download CSV' })}
+    Download CSV
   </Button>
 {/if}
