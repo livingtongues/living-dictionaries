@@ -18,10 +18,7 @@
   class="flex rounded shadow my-1 overflow-hidden items-stretch border-green-300"
   style="margin-right: 2px;">
   {#if entry.sf || canEdit}
-    <Audio class="bg-gray-100" {entry} minimal={true} />
-  {/if}
-  {#if entry.vf || canEdit}
-    <Video class="bg-gray-100" {entry} minimal={true} />
+    <Audio class="bg-gray-100" {entry} minimal />
   {/if}
   <a
     sveltekit:prefetch
@@ -64,6 +61,9 @@
       {/if}
     </div>
   </a>
+  {#if entry.vf || canEdit}
+    <Video class="bg-gray-100 border-r-2" {entry} minimal />
+  {/if}
   {#if entry.pf}
     <div class="media-block bg-gray-300 relative">
       <Image square={128} {entry} {canEdit} />
