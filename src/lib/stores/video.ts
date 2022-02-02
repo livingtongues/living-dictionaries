@@ -9,7 +9,7 @@ export const videoAccess = derived([admin, dictionary], ([$admin, $dictionary]) 
     return true;
   }
   if ($dictionary) {
-    return !!dictionariesTestingVideo.includes($dictionary.id);
+    return dictionariesTestingVideo.includes($dictionary.id);
   } else {
     return false;
   }
