@@ -81,7 +81,7 @@
   "lint-staged": {
     "*.+(ts|svelte)": "eslint --fix",
     "**/*.+(ts|svelte|json)": [
-      "prettier --ignore-path .gitignore --write --plugin-search-dir=. ."
+      "prettier --write"
     ]
   }
 }
