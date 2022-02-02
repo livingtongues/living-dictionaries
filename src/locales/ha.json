@@ -189,7 +189,8 @@
     "images": "Images",
     "reset": "Sake saita",
     "invalid_url": "Wannan ba ingantacciyar URL bane",
-    "upload": "Kazo"
+    "upload": "Kazo",
+    "downloading": "Sauke tare"
   },
   "settings": {
     "community_permission": "Shin magana al'umma damar wannan harshe ya zama online?",

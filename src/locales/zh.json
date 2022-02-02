@@ -189,7 +189,8 @@
     "images": "图片",
     "reset": "重启",
     "invalid_url": "这不是一个有效的URL",
-    "upload": "上传"
+    "upload": "上传",
+    "downloading": "下载"
   },
   "settings": {
     "community_permission": "此语言的语言社区允许这种语言通过网络传播吗？",

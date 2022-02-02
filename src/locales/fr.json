@@ -189,7 +189,8 @@
     "images": "Images",
     "reset": "Réinitialiser",
     "invalid_url": "Ce n'est pas une URL valide",
-    "upload": "Télécharger"
+    "upload": "Télécharger",
+    "downloading": "Téléchargement"
   },
   "settings": {
     "community_permission": "La communauté linguistique permet-elle à cette langue d'être en ligne ?",

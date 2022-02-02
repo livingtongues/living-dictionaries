@@ -23,44 +23,44 @@
     for (const entry of entriesWithImages) {
       if (destroyed) return;
       try {
-        const response = await fetch(getStorageDownloadUrl(entry.impa));
+        const response = await fetch(getStorageDownloadUrl(entry.pfpa));
         if (response.ok) {
           const blob = await response.blob();
-          zip.folder(`${dictionary.id}_Images/`).file(entry.imFriendlyName, blob, { binary: true });
+          zip.folder(`${dictionary.id}_Images/`).file(entry.pfFriendlyName, blob, { binary: true });
         } else {
           errors = [
             ...errors,
-            `Entry: ${entry.lx}, Id: ${entry.id}, File: ${entry.impa}, Error: ${response.statusText}`,
+            `Entry: ${entry.lx}, Id: ${entry.id}, File: ${entry.pfpa}, Error: ${response.statusText}`,
           ];
         }
       } catch (e) {
-        errors = [...errors, `Entry: ${entry.id}, File: ${entry.impa}, ${e}`];
+        errors = [...errors, `Entry: ${entry.id}, File: ${entry.pfpa}, ${e}`];
       }
       fetched++;
     }
     for (const entry of entriesWithAudio) {
       if (destroyed) return;
       try {
-        const response = await fetch(getStorageDownloadUrl(entry.aupa));
+        const response = await fetch(getStorageDownloadUrl(entry.sfpa));
         if (response.ok) {
           const blob = await response.blob();
-          zip.folder(`${dictionary.id}_Audio/`).file(entry.auFriendlyName, blob, { binary: true });
+          zip.folder(`${dictionary.id}_Audio/`).file(entry.sfFriendlyName, blob, { binary: true });
         } else {
           errors = [
             ...errors,
-            `Entry: ${entry.lx}, Id: ${entry.id}, File: ${entry.aupa}, Error: ${response.status} ${response.statusText}`,
+            `Entry: ${entry.lx}, Id: ${entry.id}, File: ${entry.sfpa}, Error: ${response.status} ${response.statusText}`,
           ];
         }
       } catch (e) {
-        errors = [...errors, `Entry: ${entry.id}, File: ${entry.aupa}, ${e}`];
+        errors = [...errors, `Entry: ${entry.id}, File: ${entry.sfpa}, ${e}`];
       }
       fetched++;
     }
 
     const finalizedEntries = formattedEntries.map((entry) => {
       const newEntry = { ...entry };
-      delete newEntry.impa;
-      delete newEntry.aupa;
+      delete newEntry.pfpa;
+      delete newEntry.sfpa;
       return newEntry;
     });
     const CSVBlob = fileAsBlob(finalizedEntries);

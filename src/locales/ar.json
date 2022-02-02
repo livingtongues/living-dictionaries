@@ -189,7 +189,8 @@
     "images": "صور",
     "reset": "إعادة ضبط",
     "invalid_url": "هذا ليس عنوان URL صالح",
-    "upload": "تحميل"
+    "upload": "تحميل",
+    "downloading": "جارى التحميل"
   },
   "settings": {
     "community_permission": "هل يسمح المجتمع اللغوي بأن تكون هذه اللغة على الانترنت؟",

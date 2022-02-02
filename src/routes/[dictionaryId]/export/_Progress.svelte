@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { _ } from 'svelte-i18n';
   import { tweened } from 'svelte/motion';
   import { cubicOut } from 'svelte/easing';
 
@@ -18,9 +19,9 @@
     <div>
       <span
         class="text-xs font-semibold inline-block py-1 px-2 uppercase
-        rounded-full text-blue-600 bg-blue-200">
-        <!-- {$_('upload.uploading', { default: 'Uploading' })} -->
-        Downloading
+        rounded-full text-blue-600 bg-blue-200"
+      >
+        {$_('misc.downloading', { default: 'Downloading' })}
       </span>
     </div>
     <div class="text-right">
@@ -33,6 +34,7 @@
     <div
       style="width:{percentage}%"
       class="shadow-none flex flex-col text-center whitespace-nowrap
-      text-white justify-center bg-blue-500" />
+      text-white justify-center bg-blue-500"
+    />
   </div>
 </div>

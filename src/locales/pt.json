@@ -189,7 +189,8 @@
     "images": "Imagens",
     "reset": "Redefinir",
     "invalid_url": "Este não é um URL válido",
-    "upload": "Envio"
+    "upload": "Envio",
+    "downloading": "Baixando"
   },
   "settings": {
     "community_permission": "A comunidade falante permite que esta língua esteja on-line?",
