@@ -3,6 +3,7 @@
   import Image from '$lib/components/image/Image.svelte';
   export let entry: IEntry;
   export let canEdit = false;
+  import { dictionary } from '$lib/stores';
 </script>
 
 <div class="flex flex-col relative rounded" style="max-width: 500px; max-height: 500px;">
@@ -14,13 +15,24 @@
       <p class="font-semibold absolute top-0 left-0">
         {@html entry._highlightResult ? entry._highlightResult.lx.value : entry.lx}
       </p>
-      <p class="absolute bottom-0 left-0 text-xs">
-        {@html entry._highlightResult
-          ? entry._highlightResult.gl.en.value
-          : entry.gl && entry.gl.en
-          ? entry.gl.en
-          : ''}
-      </p>
+      <!--Simple solution until we really work on implementing this feature-->
+      {#if $dictionary.id === 'iquito' || $dictionary.id === 'muniche'}
+        <p class="absolute bottom-0 left-0 text-xs">
+          {@html entry._highlightResult
+            ? entry._highlightResult.gl.es.value
+            : entry.gl && entry.gl.es
+            ? entry.gl.es
+            : ''}
+        </p>
+      {:else}
+        <p class="absolute bottom-0 left-0 text-xs">
+          {@html entry._highlightResult
+            ? entry._highlightResult.gl.en.value
+            : entry.gl && entry.gl.en
+            ? entry.gl.en
+            : ''}
+        </p>
+      {/if}
     </div>
   </div>
 </div>
