@@ -8,6 +8,7 @@
   import type { IEntry } from '$lib/interfaces';
   import { printGlosses } from '$lib/helpers/glosses';
   import { minutesAgo } from '$lib/helpers/time';
+  import { videoAccess } from '$lib/stores';
   export let entry: IEntry;
   export let canEdit = false;
 </script>
@@ -61,7 +62,7 @@
       {/if}
     </div>
   </a>
-  {#if entry.vf || canEdit}
+  {#if entry.vf || ($videoAccess && canEdit)}
     <Video class="bg-gray-100 border-r-2" {entry} minimal />
   {/if}
   {#if entry.pf}

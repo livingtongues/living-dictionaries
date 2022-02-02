@@ -37,6 +37,7 @@
     isContributor,
     canEdit,
     admin,
+    videoAccess,
   } from '$lib/stores';
   import Audio from '../entries/_Audio.svelte';
   import Video from '../entries/_Video.svelte';
@@ -166,7 +167,7 @@
       </AddImage>
     {/if}
 
-    {#if entry.vf || canEdit}
+    {#if entry.vf || ($videoAccess && canEdit)}
       <Video {entry} class="h-20 mb-2 rounded-md bg-gray-100 px-3" />
     {/if}
 

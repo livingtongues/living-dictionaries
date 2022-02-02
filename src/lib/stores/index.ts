@@ -5,6 +5,7 @@ import { myDictionaries } from './dictionaries';
 import { dictionary, entries } from './dictionary';
 import { columns, preferredColumns } from './columns';
 import { algoliaQueryParams } from './search';
+import { videoAccess } from './video';
 
 export {
   admin,
@@ -17,4 +18,5 @@ export {
   columns,
   preferredColumns,
   algoliaQueryParams,
+  videoAccess,
 };
