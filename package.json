@@ -6,11 +6,16 @@
     "build": "svelte-kit build",
     "build:prod": "cross-env VITE_project=talking-dictionaries-alpha svelte-kit build",
     "preview": "svelte-kit preview --open --host --port 3040",
-    "lint": "prettier --check --plugin-search-dir=. . && eslint --ignore-path .gitignore .",
-    "format": "prettier --write --plugin-search-dir=. .",
+    "lint": "prettier --ignore-path .gitignore --check --plugin-search-dir=. . && eslint --ignore-path .gitignore .",
+    "format": "prettier --ignore-path .gitignore --write --plugin-search-dir=. .",
     "validate": "svelte-check --threshold warning --diagnostic-sources js,svelte",
     "test": "jest",
     "update-locales": "node --loader ts-node/esm scripts/update-locales.ts"
+  },
+  "prettier": {
+    "singleQuote": true,
+    "printWidth": 100,
+    "bracketSameLine": true
   },
   "devDependencies": {
     "@sentry/browser": "^6.15.0",
@@ -76,7 +81,7 @@
   "lint-staged": {
     "*.+(ts|svelte)": "eslint --fix",
     "**/*.+(ts|svelte|json)": [
-      "prettier --write"
+      "prettier --ignore-path .gitignore --write --plugin-search-dir=. ."
     ]
   }
 }
