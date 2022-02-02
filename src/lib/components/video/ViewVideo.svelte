@@ -65,17 +65,6 @@
 <Modal on:close>
   <div slot="heading" class="flex justify-between mr-6">
     <span> <i class="far fa-film-alt text-sm" /> {entry.lx} </span>
-    <Button
-      form="text"
-      type="button"
-      size="sm"
-      onclick={() =>
-        alert(
-          $_('video.video_info', {
-            default:
-              'There are two ways to have your videos displayed in a Living Dictionary: 1) You can record your videos right here, or upload your previously recorded videos to our platform. Advantages: easy and great for quick recordings. Disadvantages: You can only upload a video up to 100MB so it must only be short and low resolution. 2) Have your videos on a hosting service that specializes in video storage and link the URL to our site. Advantages: easy (as long as your videos are already uploaded on that platform), your videos can have the resolution and length you want. Disadvantages: if you want to record something unexpected or very simple, it might be too much effort to do it that way, and you may want to prioritize method 1.',
-          })
-        )}><span> <i class="fas fa-info-circle" /> </span></Button>
   </div>
 
   <div class="mt-2">
