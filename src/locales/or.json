@@ -189,7 +189,8 @@
     "images": "ପ୍ରତିଛବିଗୁଡିକ",
     "reset": "ପୁନ et ସେଟ୍ କରନ୍ତୁ |",
     "invalid_url": "ଏହା ଏକ ବ valid ଧ URL ନୁହେଁ |",
-    "upload": "ଅପଲୋଡ୍ କରନ୍ତୁ |"
+    "upload": "ଅପଲୋଡ୍ କରନ୍ତୁ |",
+    "downloading": "ଡାଉନଲୋଡ୍ କରିବା"
   },
   "settings": {
     "community_permission": "ବକ୍ତବ୍ୟ ସମ୍ପ୍ରଦାୟ ଏହି ଭାଷା ଅନଲାଇନ୍ ଅନୁମତି କରେ?",

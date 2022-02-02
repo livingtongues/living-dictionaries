@@ -189,7 +189,8 @@
     "images": "Images",
     "reset": "Reset",
     "invalid_url": "This is not a valid URL",
-    "upload": "Upload"
+    "upload": "Upload",
+    "downloading": "Downloading"
   },
   "settings": {
     "community_permission": "Does the speech community allow this language to be online?",

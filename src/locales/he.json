@@ -189,7 +189,8 @@
     "images": "תמונות",
     "reset": "אִתחוּל",
     "invalid_url": "זה לא כתובת אתר חוקית",
-    "upload": "העלה"
+    "upload": "העלה",
+    "downloading": "הורדה"
   },
   "settings": {
     "community_permission": "האם הקהילה דוברת השפה מאשרת את קיומה באינטרנט (בממשק זה)?",

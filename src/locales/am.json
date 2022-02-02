@@ -189,7 +189,8 @@
     "images": "ምስሎች",
     "reset": "ዳግም አስጀምር",
     "invalid_url": "ይህ ትክክለኛ ዩ.አር.ኤል. አይደለም",
-    "upload": "ይስቀሉ"
+    "upload": "ይስቀሉ",
+    "downloading": "ማውረድ"
   },
   "settings": {
     "community_permission": "የንግግር ማህበረሰብ በዚህ ቋንቋ መስመር ላይ መሆን ያስችላቸዋል?",
