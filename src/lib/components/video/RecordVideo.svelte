@@ -2,10 +2,11 @@
   import { _ } from 'svelte-i18n';
   import Button from '$svelteui/ui/Button.svelte';
   import { onDestroy, onMount } from 'svelte';
+  import ShowHide from '$svelteui/functions/ShowHide.svelte';
 
-  export let videoBlob = null;
-  export let permissionGranted = false;
-  export let uploadVideo = () => {};
+  let videoBlob: Blob = null;
+
+  let permissionGranted = false;
   let permissionDenied = false;
 
   let RecordRTC: typeof import('recordrtc');
@@ -18,7 +19,6 @@
   let videoSource = null;
   let recording = false;
   let recordedVideo = false;
-  $: videoBlob;
 
   if (navigator.userAgent.indexOf('Firefox') != -1) {
     console.log('firefox browser');
@@ -116,18 +116,9 @@
   onDestroy(() => turnOffAllDevices());
 </script>
 
-{#if videoBlob}
-  <!-- svelte-ignore a11y-media-has-caption -->
-  <video
-    controls
-    autoplay
-    playsinline
-    src={URL.createObjectURL(videoBlob)}
-    class={recordedVideo ? 'visible w-full' : 'invisible w-0'} />
-{/if}
-<!-- svelte-ignore a11y-media-has-caption -->
-<video bind:this={videoSource} class={recording ? 'visible w-full' : 'invisible w-0'} />
 {#if !videoBlob}
+  <!-- svelte-ignore a11y-media-has-caption -->
+  <video bind:this={videoSource} class={recording ? 'visible w-full' : 'invisible w-0'} />
   {#if !permissionGranted}
     {#if permissionDenied && RecordRTC}
       <div>
@@ -171,9 +162,23 @@
     </Button>
   {/if}
 {:else}
-  <div class="flex justify-between pt-2">
-    <Button onclick={deleteVideo} color="red"
-      >{$_('video.delete_record', { default: 'Delete Record' })}</Button>
-    <Button onclick={uploadVideo} color="green">{$_('misc.upload', { default: 'Upload' })}</Button>
-  </div>
+  <!-- svelte-ignore a11y-media-has-caption -->
+  <video
+    controls
+    autoplay
+    playsinline
+    src={URL.createObjectURL(videoBlob)}
+    class={recordedVideo ? 'visible w-full' : 'invisible w-0'} />
+
+  <ShowHide let:show let:toggle>
+    {#if !show}
+      <div class="flex justify-between pt-2">
+        <Button onclick={deleteVideo} color="red"
+          >{$_('misc.delete', { default: 'Delete' })}</Button>
+        <Button onclick={toggle} color="green">{$_('misc.upload', { default: 'Upload' })}</Button>
+      </div>
+    {:else}
+      <slot {videoBlob} />
+    {/if}
+  </ShowHide>
 {/if}

@@ -1,70 +1,48 @@
 <script lang="ts">
-  import Button from '$svelteui/ui/Button.svelte';
   import { _ } from 'svelte-i18n';
-  import { update } from '$sveltefire/firestorelite';
-  import type { IEntry } from '$lib/interfaces';
-  import { dictionary } from '$lib/stores';
-  export let entry: IEntry;
+  import Button from '$svelteui/ui/Button.svelte';
+  let url: string;
 
-  let URLPrompted: string;
-  let videoCredit = '';
-  const com = /.com/;
-  const https = /https:\/\//;
-  function whereSource(path: string): string {
-    return path.substring(path.match(https)[0].length, path.match(com).index);
-  }
-  //TODO separate the update step -ask Jacob-
-  async function handleInput() {
-    // Validation
-    let validVideoURL: string;
-    videoCredit = videoCredit.trim();
-    if (URLPrompted.search(https) >= 0 && URLPrompted.search(com) >= 0) {
-      validVideoURL = URLPrompted.trim();
-    } else {
+  import { createEventDispatcher } from 'svelte';
+  import { parseVideoId } from './parseVideoId';
+  const dispatch =
+    createEventDispatcher<{ update: { videoId: string; type: 'vimeo' | 'youtube' } }>();
+
+  function handle() {
+    const detail = parseVideoId(url);
+    if (!detail) {
       alert($_('misc.invalid_url', { default: 'This is not a valid URL' }));
+      url = '';
+      return;
     }
-    // Check where the link comes from
-    if (validVideoURL) {
-      const source = whereSource(validVideoURL);
-      let videoId = '';
-      // Currently we only accept Vimeo and YouTube video sources
-      if (source === 'www.youtube') {
-        videoId = validVideoURL.substring(validVideoURL.indexOf('=') + 1);
-      } else if (source === 'vimeo') {
-        videoId = validVideoURL.substring(validVideoURL.match(/https:\/\/vimeo.com\//)[0].length);
-      }
-
-      await update(
-        `dictionaries/${$dictionary.id}/words/${entry.id}`,
-        { vf: { path: validVideoURL, externalId: videoId, vc: videoCredit } },
-        true
-      );
-    }
+    dispatch('update', detail);
   }
 </script>
 
-<form on:submit|preventDefault={handleInput}>
-  <label for="vURL" class="block text-sm font-medium leading-5 text-gray-700 mt-4">
+<form class="mb-4" on:submit|preventDefault={handle}>
+  <label for="vURL" class="block text-sm font-medium leading-5 text-gray-700 mb-2">
+    <i class="far fa-link" />
     {$_('video.video_url', { default: 'Video URL' })}
   </label>
-  <div class="mt-1 rounded-md shadow-sm">
-    <input
-      id="vURL"
-      type="text"
-      required
-      bind:value={URLPrompted}
-      class="form-input block w-full" />
+  <div class="flex">
+    <div class="rounded-md shadow-sm flex-grow">
+      <input
+        id="vURL"
+        type="url"
+        placeholder="Paste YouTube or Vimeo link"
+        required
+        bind:value={url}
+        class="form-input block w-full" />
+    </div>
+    <div class="w-1" />
+    <Button type="submit" form={url ? 'primary' : 'outline'}>
+      {$_('misc.add', { default: 'Add' })}
+    </Button>
   </div>
-
-  <label for="vc" class="block text-sm font-medium leading-5 text-gray-700 mt-4">
+  <!-- <label for="vc" class="block text-sm font-medium leading-5 text-gray-700 mt-4">
     {$_('video.video_credit', { default: 'Video credit' })}
   </label>
   <div class="mt-1 rounded-md shadow-sm">
     <input id="vc" type="text" bind:value={videoCredit} class="form-input block w-full" />
-  </div>
-  <div class="modal-footer space-x-1">
-    <Button type="submit" form="primary">
-      {$_('misc.save', { default: 'Save' })}
-    </Button>
-  </div>
+  </div> -->
 </form>

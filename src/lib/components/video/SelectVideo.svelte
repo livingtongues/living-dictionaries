@@ -1,9 +1,9 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
   let dragging = false;
-  export let file: File;
+  let file: File;
 
-  async function handleVideo(files: FileList) {
+  function checkVideo(files: FileList) {
     dragging = false;
 
     const fileToCheck = files.item(0);
@@ -20,34 +20,37 @@
     }
 
     file = fileToCheck;
-    console.log('file', file);
   }
 </script>
 
-<label
-  class:dragging
-  on:drop|preventDefault={(e) => handleVideo(e.dataTransfer.files)}
-  on:dragover|preventDefault={() => (dragging = true)}
-  on:dragleave|preventDefault={() => (dragging = false)}>
-  <input
-    type="file"
-    accept="video/*"
-    class="hidden"
-    on:input={(e) => {
-      // @ts-ignore
-      handleVideo(e.target.files);
-    }} />
+{#if file}
+  <slot {file} />
+{:else}
+  <label
+    class:dragging
+    on:drop|preventDefault={(e) => checkVideo(e.dataTransfer.files)}
+    on:dragover|preventDefault={() => (dragging = true)}
+    on:dragleave|preventDefault={() => (dragging = false)}>
+    <input
+      type="file"
+      accept="video/*"
+      class="hidden"
+      on:input={(e) => {
+        // @ts-ignore
+        checkVideo(e.target.files);
+      }} />
 
-  <div>
-    <i class="far fa-upload" />&nbsp;
-    {dragging
-      ? $_('upload.drop_to_upload', { default: 'Drop to Upload' })
-      : $_('upload.select_video_file', { default: 'Select Video File' })}
-  </div>
-  <div class="text-xs">
-    {$_('upload.file_must_be_smaller', { default: 'File must be smaller than' })} 100MB
-  </div>
-</label>
+    <div>
+      <i class="far fa-upload" />&nbsp;
+      {dragging
+        ? $_('upload.drop_to_upload', { default: 'Drop to Upload' })
+        : $_('upload.select_video_file', { default: 'Select Video File' })}
+    </div>
+    <div class="text-xs">
+      {$_('upload.file_must_be_smaller', { default: 'File must be smaller than' })} 100MB
+    </div>
+  </label>
+{/if}
 
 <style>
   label {
