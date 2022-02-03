@@ -39,8 +39,9 @@
         });
       })
       .reduce((acc, dictionary) => {
-        return acc[0]?.id === dictionary.id ? [...acc] : [...acc, dictionary];
+        return acc.find((e) => e.id === dictionary.id) ? [...acc] : [...acc, dictionary];
       }, []);
+    console.log('fd:', filteredDictionaries);
   }
 
   let searchBlurTimeout;
