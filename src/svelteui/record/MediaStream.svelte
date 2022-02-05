@@ -58,12 +58,12 @@
     }
   }
 
-  async function chooseMicrophone(microphone: MediaDeviceInfo) {
-    selectedMicrophone.set(microphone);
+  async function chooseMicrophone(microphoneId: string) {
+    selectedMicrophone.set(microphones.find((m) => m.deviceId === microphoneId));
     stream = await requestStream();
   }
-  async function chooseCamera(camera: MediaDeviceInfo) {
-    selectedCamera.set(camera);
+  async function chooseCamera(cameraId: string) {
+    selectedCamera.set(cameras.find((c) => c.deviceId === cameraId));
     stream = await requestStream();
   }
 
