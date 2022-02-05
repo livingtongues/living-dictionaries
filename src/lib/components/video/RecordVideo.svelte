@@ -17,35 +17,6 @@
     let:chooseCamera
     let:selectedMicrophone
     let:selectedCamera>
-    {#if microphones.length > 1 && selectedMicrophone}
-      <select
-        class="p-1 text-sm max-w-full mb-1"
-        value={selectedMicrophone.deviceId}
-        on:change={(e) =>
-          //@ts-ignore
-          chooseMicrophone(e.target.value)}>
-        {#each microphones as microphone}
-          <option value={microphone.deviceId}>
-            {microphone.label}
-          </option>
-        {/each}
-      </select>
-    {/if}
-    {#if cameras.length > 1 && selectedCamera}
-      <select
-        class="p-1 text-sm max-w-full mb-1"
-        value={selectedCamera.deviceId}
-        on:change={(e) =>
-          //@ts-ignore
-          chooseCamera(e.target.value)}>
-        {#each cameras as camera}
-          <option value={camera.deviceId}>
-            {camera.label}
-          </option>
-        {/each}
-      </select>
-    {/if}
-
     <!-- svelte-ignore a11y-media-has-caption -->
     <video muted volume={0} use:srcObject={stream} autoplay playsinline />
 
@@ -67,6 +38,35 @@
         <Button onclick={start} color="red" class="w-full h-24 mt-1">
           {$_('audio.tap_to_record', { default: 'Tap to Record' })}
         </Button>
+
+        {#if microphones.length > 1 && selectedMicrophone}
+          <select
+            class="p-1 text-sm max-w-full mt-1"
+            value={selectedMicrophone.deviceId}
+            on:change={(e) =>
+              //@ts-ignore
+              chooseMicrophone(e.target.value)}>
+            {#each microphones as microphone}
+              <option value={microphone.deviceId}>
+                {microphone.label}
+              </option>
+            {/each}
+          </select>
+        {/if}
+        {#if cameras.length > 1 && selectedCamera}
+          <select
+            class="p-1 text-sm max-w-full mt-1"
+            value={selectedCamera.deviceId}
+            on:change={(e) =>
+              //@ts-ignore
+              chooseCamera(e.target.value)}>
+            {#each cameras as camera}
+              <option value={camera.deviceId}>
+                {camera.label}
+              </option>
+            {/each}
+          </select>
+        {/if}
       {/if}
 
       {#if state === 'recording' || state === 'paused'}
