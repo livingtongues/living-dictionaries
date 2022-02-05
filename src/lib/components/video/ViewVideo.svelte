@@ -70,8 +70,12 @@
                   }
                 }} />
 
-              <Button class="mb-4" form="primary" type="button" onclick={toggle}
-                >Record Video (Jacob TODO: just show "Prepare to Record" button)</Button>
+              <Button onclick={toggle} class="mb-4 w-full" form="primary" type="button">
+                <i class="far fa-microphone-alt" />
+                {$_('video.prepare_to_record_video', {
+                  default: 'Prepare to Record with Microphone & Camera',
+                })}
+              </Button>
 
               <SelectVideo let:file>
                 {#await import('$lib/components/video/UploadVideo.svelte') then { default: UploadVideo }}
