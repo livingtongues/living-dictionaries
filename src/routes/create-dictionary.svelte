@@ -10,6 +10,7 @@
   import { docExists, setOnline, updateOnline } from '$sveltefire/lite';
   import { GeoPoint, serverTimestamp } from 'firebase/firestore/lite';
   import { debounce } from '$lib/helpers/debounce';
+  import { addDictionaryManagePermission } from '$lib/helpers/dictionariesManaging';
 
   let modal: 'auth' | 'coordinates' = null;
   let submitting = false;
@@ -95,6 +96,7 @@
         //@ts-ignore
         termsAgreement: serverTimestamp(),
       });
+      addDictionaryManagePermission($user, url);
       window.location.replace(`/${url}/entries/list`);
     } catch (err) {
       alert(`${$_('misc.error', { default: 'Error' })}: ${err}`);
