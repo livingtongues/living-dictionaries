@@ -96,6 +96,8 @@
         //@ts-ignore
         termsAgreement: serverTimestamp(),
       });
+      // This handles User data
+      // WARNING: If we are going to make a delete dictionary option available to users, we must delete the corresponding management data in the user interface
       addDictionaryManagePermission($user, url);
       window.location.replace(`/${url}/entries/list`);
     } catch (err) {
