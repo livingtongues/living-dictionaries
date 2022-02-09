@@ -8,6 +8,8 @@
   import Button from '$svelteui/ui/Button.svelte';
   import BadgeArrayEmit from '$svelteui/data/BadgeArrayEmit.svelte';
   import { createEventDispatcher } from 'svelte';
+  import Collection from '$sveltefire/components/Collection.svelte';
+  import RolesManagment from './_RolesManagment.svelte';
 
   const dispatch = createEventDispatcher<{
     addalternatename: string;
@@ -32,6 +34,17 @@
   <td class="italic">
     <DictionaryFieldEdit field={'name'} value={dictionary.name} dictionaryId={dictionary.id} />
   </td>
+  <td
+    ><Collection path={`dictionaries/${dictionary.id}/managers`} startWith={[]} let:data>
+      <RolesManagment {data} dictionary={dictionary.id} />
+    </Collection></td>
+  <td
+    ><Collection
+      path={`dictionaries/${dictionary.id}/writeInCollaborators`}
+      startWith={[]}
+      let:data>
+      <RolesManagment {data} dictionary={dictionary.id} />
+    </Collection></td>
   <td>
     <DictionaryFieldEdit
       field={'iso6393'}
