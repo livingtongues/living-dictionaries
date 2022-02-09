@@ -8,7 +8,7 @@
   import Button from '$svelteui/ui/Button.svelte';
   import type { IDictionary, IManager, IUser } from '$lib/interfaces';
   import { docExists, setOnline, updateOnline } from '$sveltefire/lite';
-  import { GeoPoint, serverTimestamp } from 'firebase/firestore/lite';
+  import { arrayUnion, GeoPoint, serverTimestamp } from 'firebase/firestore/lite';
   import { debounce } from '$lib/helpers/debounce';
   import { addDictionaryManagePermission } from '$lib/helpers/dictionariesManaging';
 
@@ -93,7 +93,7 @@
       });
       await updateOnline<IUser>(`users/${$user.uid}`, {
         //@ts-ignore
-        managing: arrayUnion(dictionaryId),
+        managing: arrayUnion(url),
         // WARNING: If we are going to make a delete dictionary option available to users, we must delete the corresponding management data in the user interface
         //@ts-ignore
         termsAgreement: serverTimestamp(),
