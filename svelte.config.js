@@ -24,6 +24,7 @@ const config = {
 				alias: {
 					$svelteui: path.resolve('./src/svelteui'),
 					$sveltefire: path.resolve('./src/sveltefire'),
+					$sveltefirets: path.resolve('./src/sveltefirets'),
 				}
 			},
 		},
