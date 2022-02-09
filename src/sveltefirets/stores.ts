@@ -1,8 +1,7 @@
-import { browser } from '$app/env';
+import { writable } from 'svelte/store';
 import { onSnapshot, query } from 'firebase/firestore';
 import type { CollectionReference, DocumentReference, QueryConstraint } from 'firebase/firestore';
-import { writable } from 'svelte/store';
-import { db } from '.';
+
 import { colRef, docRef } from './firestore';
 import { startTrace, stopTrace } from './perf';
 
@@ -12,12 +11,11 @@ export function docStore<T>(
 ) {
   const { startWith, log, traceId, maxWait, once } = opts;
 
-  if (!browser) {
+  if (typeof window === 'undefined') {
     const store = writable<T>(startWith);
     const { subscribe } = store;
     return {
       subscribe,
-      db: undefined,
       ref: undefined,
       get loading() {
         return false;
@@ -100,7 +98,6 @@ export function docStore<T>(
 
   return {
     subscribe,
-    db,
     ref,
     get loading() {
       return _loading;
@@ -114,22 +111,27 @@ export function docStore<T>(
 export function collectionStore<T>(
   path: CollectionReference<T> | string,
   queryConstraints: QueryConstraint[] = [],
-  opts: { log?: boolean; traceId?: string; startWith?: T[]; maxWait?: number; once?: boolean } = {
+  opts: {
+    log?: boolean;
+    traceId?: string;
+    startWith?: T[];
+    maxWait?: number;
+    once?: boolean;
+    refField?: string;
+  } = {
     maxWait: 10000,
   }
 ) {
   const { startWith, log, traceId, maxWait, once, idField, refField } = {
     idField: 'id',
-    refField: 'ref',
     ...opts,
   };
 
-  if (!browser) {
+  if (typeof window === 'undefined') {
     const store = writable(startWith);
     const { subscribe } = store;
     return {
       subscribe,
-      db: undefined,
       ref: undefined,
       get loading() {
         return false;
@@ -213,7 +215,6 @@ export function collectionStore<T>(
 
   return {
     subscribe,
-    db,
     ref,
     get loading() {
       return _loading;
