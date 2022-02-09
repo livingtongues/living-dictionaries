@@ -25,8 +25,6 @@
     "paths": {
       "$lib/*": ["src/lib/*"],
       "$svelteui/*": ["src/svelteui/*"],
-      "$sveltefire": ["src/sveltefire"],
-      "$sveltefire/*": ["src/sveltefire/*"],
       "$sveltefirets": ["src/sveltefirets"],
       "$sveltefirets/*": ["src/sveltefirets/*"]
     }
