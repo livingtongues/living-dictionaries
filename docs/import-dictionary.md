@@ -1,5 +1,7 @@
 # How to import a Dictionary from our Google Sheets template v4
 
+**Requires** `functions/.env` file that's not checked into GitHub
+
 - Create a new folder in `functions/scripts/import/data` right next to the `example` folder and name it using the dictionary ID of your intended upload. We'll use `kalinago` as an demo in these instructions. Do note that the `example` folder will stay checked in to git but your data won't be because we don't want it in our repo.
 - Download the CSV from Google Sheets online and place it into your newly created folder. Name it using the dictionary ID, `kalinago.csv` for example.
 - If you have media, please include any images and audio files that are referenced from the csv file into `images` and `audio` subfolders.
