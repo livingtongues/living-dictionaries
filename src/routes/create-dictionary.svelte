@@ -8,7 +8,7 @@
   import Button from '$svelteui/ui/Button.svelte';
   import type { IDictionary, IManager, IUser } from '$lib/interfaces';
   import { docExists, setOnline, updateOnline } from '$sveltefire/lite';
-  import { GeoPoint, serverTimestamp } from 'firebase/firestore/lite';
+  import { arrayUnion, GeoPoint, serverTimestamp } from 'firebase/firestore/lite';
   import { debounce } from '$lib/helpers/debounce';
 
   let modal: 'auth' | 'coordinates' = null;
@@ -86,12 +86,14 @@
         glottocode: glottocode.trim(),
       };
       await setOnline<IDictionary>(`dictionaries/${url}`, dictionaryData);
-      const manager = {
+      await setOnline<IManager>(`dictionaries/${url}/managers/${$user.uid}`, {
         id: $user.uid,
         name: $user.displayName,
-      };
-      await setOnline<IManager>(`dictionaries/${url}/managers/${$user.uid}`, manager);
+      });
       await updateOnline<IUser>(`users/${$user.uid}`, {
+        //@ts-ignore
+        managing: arrayUnion(url),
+        // WARNING: If we are going to make a delete dictionary option available to users, we must delete the corresponding management data in the user interface
         //@ts-ignore
         termsAgreement: serverTimestamp(),
       });
