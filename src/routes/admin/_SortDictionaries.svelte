@@ -4,6 +4,8 @@
   enum DictionaryFields {
     public = 'Public',
     name = 'Dictionary Name',
+    managers = 'Managers',
+    collaborators = 'Collaborators',
     iso6393 = 'ISO 639-3',
     glottocode = 'Glottocode',
     coordinates = 'Coordinates',
