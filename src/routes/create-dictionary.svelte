@@ -10,6 +10,7 @@
   import { docExists, setOnline, updateOnline } from '$sveltefire/lite';
   import { arrayUnion, GeoPoint, serverTimestamp } from 'firebase/firestore/lite';
   import { debounce } from '$lib/helpers/debounce';
+  import { deleteObjectEmptyFields } from '$lib/helpers/delete';
 
   let modal: 'auth' | 'coordinates' = null;
   let submitting = false;
@@ -73,7 +74,6 @@
     }
     try {
       submitting = true;
-      // TODO: don't add fields that are empty
       const dictionaryData = {
         name: name.trim().replace(/^./, name[0].toUpperCase()),
         glossLanguages,
@@ -85,6 +85,9 @@
         iso6393: iso6393.trim(),
         glottocode: glottocode.trim(),
       };
+      // Deleting empty fields
+      deleteObjectEmptyFields(dictionaryData);
+
       await setOnline<IDictionary>(`dictionaries/${url}`, dictionaryData);
       await setOnline<IManager>(`dictionaries/${url}/managers/${$user.uid}`, {
         id: $user.uid,
