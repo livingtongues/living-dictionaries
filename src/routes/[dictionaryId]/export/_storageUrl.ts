@@ -1,4 +1,4 @@
-import { firebaseConfig } from '$sveltefire/config';
+import { firebaseConfig } from '$sveltefirets';
 
 export function getStorageDownloadUrl(path: string) {
   const convertedPath = path.replace(/\//g, '%2F');

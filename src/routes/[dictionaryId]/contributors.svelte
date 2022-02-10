@@ -12,9 +12,12 @@
 <script lang="ts">
   export let dictionaryId: string;
   import { _ } from 'svelte-i18n';
-  import { isManager, isContributor, dictionary, admin } from '$lib/stores';
-  import Collection from '$sveltefire/components/Collection.svelte';
+  import { addOnline, deleteDocumentOnline, updateOnline, Collection } from '$sveltefirets';
   import { where } from 'firebase/firestore';
+  import { isManager, isContributor, dictionary, admin, user } from '$lib/stores';
+  import type { IInvite, IWriteInCollaborator, IContributor, IManager } from '$lib/interfaces';
+  import Button from '$svelteui/ui/Button.svelte';
+  import ShowHide from '$svelteui/functions/ShowHide.svelte';
 
   function invite(role: 'manager' | 'contributor' = 'contributor') {
     const input = prompt(`${$_('contact.email', { default: 'Email' })}?`);
@@ -23,12 +26,6 @@
       isEmail ? saveInvite(input, role) : alert($_('misc.invalid', { default: 'Invalid Email' }));
     }
   }
-
-  import { add, deleteDocument, update } from '$sveltefire/firestorelite';
-  import type { IInvite, IWriteInCollaborator, IContributor, IManager } from '$lib/interfaces';
-  import Button from '$svelteui/ui/Button.svelte';
-  import ShowHide from '$svelteui/functions/ShowHide.svelte';
-  import { user } from '$sveltefire/user';
 
   let managerType: IManager[];
   let contributorType: IContributor[];
@@ -45,7 +42,7 @@
         role,
         status: 'queued',
       };
-      await add(`dictionaries/${dictionaryId}/invites`, invite, true);
+      await addOnline(`dictionaries/${dictionaryId}/invites`, invite);
     } catch (err) {
       alert(`${$_('misc.error', { default: 'Error' })}: ${err}`);
       console.error(err);
@@ -55,7 +52,7 @@
   function writeIn() {
     const name = prompt(`${$_('speakers.name', { default: 'Name' })}?`);
     if (name) {
-      add(`dictionaries/${dictionaryId}/writeInCollaborators`, { name }, true);
+      addOnline(`dictionaries/${dictionaryId}/writeInCollaborators`, { name });
     }
   }
 </script>
@@ -118,7 +115,7 @@
               size="sm"
               on:click={() => {
                 if (confirm($_('misc.delete', { default: 'Delete' }))) {
-                  update(`dictionaries/${dictionaryId}/invites/${invite.id}`, {
+                  updateOnline(`dictionaries/${dictionaryId}/invites/${invite.id}`, {
                     status: 'cancelled',
                   });
                 }
@@ -183,7 +180,7 @@
               size="sm"
               onclick={() => {
                 if (confirm($_('misc.delete', { default: 'Delete' }))) {
-                  update(`dictionaries/${dictionaryId}/invites/${invite.id}`, {
+                  updateOnline(`dictionaries/${dictionaryId}/invites/${invite.id}`, {
                     status: 'cancelled',
                   });
                 }
@@ -212,7 +209,7 @@
             size="sm"
             onclick={() => {
               if (confirm($_('misc.delete', { default: 'Delete' }))) {
-                deleteDocument(
+                deleteDocumentOnline(
                   `dictionaries/${dictionaryId}/writeInCollaborators/${collaborator.id}`
                 );
               }

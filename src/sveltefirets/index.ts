@@ -29,3 +29,6 @@ export { default as FirebaseUiAuth } from './components/FirebaseUiAuth.svelte';
 export { collectionStore, docStore } from './stores';
 export { authState, createUserStore, logOut } from './user';
 export { updateUserData } from './updateUserData';
+
+// Helpers
+export { loadScriptOnce, loadStylesOnce } from './loader';

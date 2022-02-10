@@ -1,6 +1,6 @@
 <script lang="ts">
   import ShowHide from '$svelteui/functions/ShowHide.svelte';
-  import { firebaseConfig } from '$sveltefire/config';
+  import { firebaseConfig } from '$sveltefirets';
   import { longpress } from '$svelteui/actions/longpress';
   import type { IEntry } from '$lib/interfaces';
   export let entry: IEntry,
@@ -33,7 +33,8 @@
           initAudio(entry.sf);
         }
       }}
-      on:longpress={() => initAudio(entry.sf)}>
+      on:longpress={() => initAudio(entry.sf)}
+    >
       <i class="{playing ? 'fas' : 'far'} fa-ear" />
       <!-- change to fa-volume-up -->
     </div>
@@ -41,7 +42,8 @@
     <div
       class="hover:bg-gray-200 flex flex-col items-center justify-center
   cursor-pointer h-full select-none text-sm"
-      on:click={toggle}>
+      on:click={toggle}
+    >
       <i class="far fa-microphone text-blue-800" />
     </div>
   {/if}

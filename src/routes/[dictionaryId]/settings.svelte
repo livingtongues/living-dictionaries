@@ -3,7 +3,7 @@
   import { dictionary } from '$lib/stores';
   import Button from '$svelteui/ui/Button.svelte';
   import ShowHide from '$svelteui/functions/ShowHide.svelte';
-  import { update } from '$sveltefire/firestorelite';
+  import { updateOnline } from '$sveltefirets';
 
   let name = $dictionary.name;
   let publicDictionary = $dictionary.public;
@@ -11,7 +11,7 @@
   async function saveName() {
     try {
       name = name.trim().replace(/^./, name[0].toUpperCase());
-      await update(`dictionaries/${$dictionary.id}`, { name });
+      await updateOnline(`dictionaries/${$dictionary.id}`, { name });
       $dictionary.name = name;
       location.reload();
     } catch (err) {
@@ -29,7 +29,7 @@
           })}`
         );
       }
-      await update(`dictionaries/${$dictionary.id}`, { public: publicDictionary });
+      await updateOnline(`dictionaries/${$dictionary.id}`, { public: publicDictionary });
       $dictionary.public = publicDictionary;
     } catch (err) {
       publicDictionary = $dictionary.public;

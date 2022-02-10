@@ -1,11 +1,11 @@
 <script context="module" lang="ts">
   import type { IEntry } from '$lib/interfaces';
-  import { fetchDoc } from '$sveltefire/REST';
+  import { getDocument, deleteDocumentOnline, setOnline, updateOnline, Doc } from '$sveltefirets';
 
   import type { Load } from '@sveltejs/kit';
   export const load: Load = async ({ page: { params } }) => {
     try {
-      const entry = await fetchDoc<IEntry>(
+      const entry = await getDocument<IEntry>(
         `dictionaries/${params.dictionaryId}/words/${params.entryId}`
       );
       if (entry) {
@@ -25,7 +25,6 @@
 </script>
 
 <script lang="ts">
-  import { deleteDocument, set, update } from '$sveltefire/firestorelite';
   import { serverTimestamp } from 'firebase/firestore/lite';
   import { _ } from 'svelte-i18n';
   export let entry: IEntry, dictionaryId: string;
@@ -37,6 +36,7 @@
     isContributor,
     canEdit,
     admin,
+    user,
   } from '$lib/stores';
   import Audio from '../entries/_Audio.svelte';
   import AddImage from '../entries/_AddImage.svelte';
@@ -69,32 +69,30 @@
         const timeStampRemovedEntry = { ...entry };
         delete timeStampRemovedEntry.ca; // needed b/c error when entry is received by firestore and set by firestore/lite
         delete timeStampRemovedEntry.ua;
-        await set<IEntry>(`dictionaries/${$dictionary.id}/deletedEntries/${entry.id}`, {
+        await setOnline<IEntry>(`dictionaries/${$dictionary.id}/deletedEntries/${entry.id}`, {
           ...timeStampRemovedEntry,
           // @ts-ignore
           deletedAt: serverTimestamp(),
         });
-        await deleteDocument(`dictionaries/${$dictionary.id}/words/${entry.id}`);
+        await deleteDocumentOnline(`dictionaries/${$dictionary.id}/words/${entry.id}`);
       } catch (err) {
         alert(`${$_('misc.error', { default: 'Error' })}: ${err}`);
       }
     }
   }
 
-  import Doc from '$sveltefire/components/Doc.svelte';
   import Button from '$svelteui/ui/Button.svelte';
-  import { user } from '$sveltefire/user';
   import { printGlosses } from '$lib/helpers/glosses';
   async function saveUpdateToFirestore(e: {
     detail: { field: string; newValue: string | string[] };
   }) {
     try {
-      await update(
+      await updateOnline(
         `dictionaries/${$dictionary.id}/words/${entry.id}`,
         {
           [e.detail.field]: e.detail.newValue,
         },
-        true
+        { abbreviate: true }
       );
     } catch (err) {
       alert(`${$_('misc.error', { default: 'Error' })}: ${err}`);

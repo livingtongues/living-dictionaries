@@ -3,7 +3,7 @@
   import User from './User.svelte';
   import ShowHide from '$svelteui/functions/ShowHide.svelte';
   import Button from '$svelteui/ui/Button.svelte';
-  import { dev } from '$sveltefire/config';
+  import { firebaseConfig } from '$sveltefirets';
 </script>
 
 <header>
@@ -24,7 +24,7 @@
           style="height: 30px; width: 30px; filter: invert(100%);"
         />
         {$_('misc.LD', { default: 'Living Dictionaries' })}
-        {#if dev}
+        {#if firebaseConfig.projectId === 'talking-dictionaries-dev'}
           <span class="ml-1 text-xs opacity-50">(dev)</span>
         {/if}
       </a>

@@ -12,10 +12,8 @@
   import Button from '$svelteui/ui/Button.svelte';
 
   import { deleteAudio } from '$lib/helpers/delete';
-  import { firebaseConfig } from '$sveltefire/config';
-  import { update } from '$sveltefire/firestorelite';
+  import { Collection, updateOnline, firebaseConfig } from '$sveltefirets';
 
-  import Collection from '$sveltefire/components/Collection.svelte';
   import { where } from 'firebase/firestore';
 
   import type { IEntry, ISpeaker } from '$lib/interfaces';
@@ -44,7 +42,7 @@
   }
 
   async function updateSpeaker() {
-    await update(`dictionaries/${$dictionary.id}/words/${entry.id}`, { 'sf.sp': speakerId });
+    await updateOnline(`dictionaries/${$dictionary.id}/words/${entry.id}`, { 'sf.sp': speakerId }); // Dot notation: https://firebase.google.com/docs/firestore/manage-data/add-data#update_fields_in_nested_objects
   }
 
   let file;
@@ -60,7 +58,8 @@
   path="speakers"
   startWith={speakers}
   on:data={(e) => (speakers = e.detail.data)}
-  queryConstraints={[where('contributingTo', 'array-contains', $dictionary.id)]} />
+  queryConstraints={[where('contributingTo', 'array-contains', $dictionary.id)]}
+/>
 
 <Modal on:close>
   <span slot="heading"> <i class="far fa-ear text-sm" /> {entry.lx} </span>
@@ -82,13 +81,15 @@
           <label
             for="speaker"
             class="inline-flex items-center px-3 ltr:rounded-l-md rtl:rounded-r-md border
-            border-gray-300 bg-gray-50 text-gray-500">
+            border-gray-300 bg-gray-50 text-gray-500"
+          >
             {$_('entry.speaker', { default: 'Speaker' })}
           </label>
           <select
             bind:value={speakerId}
             id="speaker"
-            class="block w-full pl-3 !rounded-none ltr:!rounded-r-md rtl:!rounded-l-md form-input">
+            class="block w-full pl-3 !rounded-none ltr:!rounded-r-md rtl:!rounded-l-md form-input"
+          >
             <option />
             {#each speakers as speaker}
               <option value={speaker.id}>
@@ -109,7 +110,8 @@
         <Waveform
           audioUrl={`https://firebasestorage.googleapis.com/v0/b/${
             firebaseConfig.storageBucket
-          }/o/${entry.sf.path.replace(/\//g, '%2F')}?alt=media`} />
+          }/o/${entry.sf.path.replace(/\//g, '%2F')}?alt=media`}
+        />
       </div>
     {:else if speakerId}
       {#if file}
@@ -123,7 +125,8 @@
               {speakerId}
               on:close={() => {
                 showUploadAudio = false;
-              }} />
+              }}
+            />
           {/await}
         {/if}
       {:else if audioBlob}
@@ -137,7 +140,8 @@
               {speakerId}
               on:close={() => {
                 showUploadAudio = false;
-              }} />
+              }}
+            />
           {/await}
         {/if}
       {:else}
@@ -168,12 +172,14 @@
         href={`https://firebasestorage.googleapis.com/v0/b/${
           firebaseConfig.storageBucket
         }/o/${entry.sf.path.replace(/\//g, '%2F')}?alt=media`}
-        target="_blank">
+        target="_blank"
+      >
         <i class="fas fa-download" />
         <span class="hidden sm:inline"
           >{$_('misc.download', {
             default: 'Download',
-          })}</span>
+          })}</span
+        >
       </Button>
       <div class="w-1" />
 
@@ -182,7 +188,8 @@
         <span class="hidden sm:inline"
           >{$_('misc.delete', {
             default: 'Delete',
-          })}</span>
+          })}</span
+        >
       </Button>
       <div class="w-1" />
     {/if}
@@ -201,6 +208,7 @@
       }}
       on:newSpeaker={(event) => {
         speakerId = event.detail.id;
-      }} />
+      }}
+    />
   {/await}
 {/if}
