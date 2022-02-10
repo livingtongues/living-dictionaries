@@ -15,15 +15,15 @@
   let updatedValue;
 
   import { dictionary } from '$lib/stores';
-  import { update } from '$sveltefire/firestorelite';
+  import { updateOnline } from '$sveltefirets';
   async function saveUpdateToFirestore(e) {
     try {
-      await update<IEntry>(
+      await updateOnline<IEntry>(
         `dictionaries/${$dictionary.id}/words/${entry.id}`,
         {
           [e.detail.field]: e.detail.newValue,
         },
-        true
+        { abbreviate: true }
       );
     } catch (err) {
       alert(`${$_('misc.error', { default: 'Error' })}: ${err}`);
@@ -35,7 +35,8 @@
   class:sompeng={column.display === 'Sompeng-Mardir'}
   class="{updatedValue !== undefined
     ? 'bg-green-100 border-green-400 border'
-    : ''} h-full w-full inline-block">
+    : ''} h-full w-full inline-block"
+>
   {#if column.field === 'soundFile'}
     <AudioCell {canEdit} {entry} />
   {:else if column.field === 'photoFile'}

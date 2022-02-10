@@ -1,12 +1,14 @@
 <script context="module" lang="ts">
-  import { fetchDictionaries } from '$lib/helpers/fetchDictionaries';
-  import { browser } from '$app/env';
-
+  import { getCollection, Collection } from '$sveltefirets';
+  import { orderBy, where } from 'firebase/firestore';
   import type { Load } from '@sveltejs/kit';
   export const load: Load = async () => {
     try {
-      const fetchedDictionaries = browser ? [] : await fetchDictionaries();
-      return { props: { fetchedDictionaries } };
+      const publicDictionaries = await getCollection<IDictionary>('dictionaries', [
+        orderBy('name'),
+        where('public', '==', true),
+      ]);
+      return { props: { publicDictionaries } };
     } catch (error) {
       return {
         error, // status: res.status,
@@ -18,16 +20,13 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
   import type { IDictionary } from '$lib/interfaces';
-  export let fetchedDictionaries: IDictionary[] = [];
+  export let publicDictionaries: IDictionary[] = [];
   import { admin } from '$lib/stores';
   import View from '$lib/components/ui/View.svelte';
   import { exportDictionariesAsCSV } from '$lib/export/csv';
   import Button from '$svelteui/ui/Button.svelte';
   import ResponsiveTable from '$lib/components/ui/ResponsiveTable.svelte';
   import Header from '$lib/components/shell/Header.svelte';
-
-  import Collection from '$sveltefire/components/Collection.svelte';
-  import { orderBy, where } from 'firebase/firestore';
 
   let queryConstraints = [orderBy('name'), where('public', '==', true)];
   $: if ($admin) {
@@ -46,7 +45,7 @@
 <View padding={true}>
   <Collection
     path="dictionaries"
-    startWith={fetchedDictionaries}
+    startWith={publicDictionaries}
     {queryConstraints}
     let:data={dictionaries}
   >

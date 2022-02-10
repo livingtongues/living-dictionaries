@@ -19,7 +19,7 @@
 
   import { dictionary, canEdit } from '$lib/stores';
   import ListEntry from './_ListEntry.svelte';
-  import Doc from '$sveltefire/components/Doc.svelte';
+  import { Doc } from '$sveltefirets';
 </script>
 
 <svelte:head>
@@ -32,7 +32,8 @@
       <Doc
         path="dictionaries/{$dictionary.id}/words/{algoliaEntry.id}"
         startWith={algoliaEntry}
-        let:data={entry}>
+        let:data={entry}
+      >
         <ListEntry {entry} canEdit={$canEdit} />
       </Doc>
     {/each}

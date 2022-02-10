@@ -8,5 +8,3 @@ if (envFirebaseConfigValue.projectId) {
 } else {
   throw Error('VITE_FIREBASE_CONFIG is not set.');
 }
-
-export const dev = import.meta.env.VITE_project !== 'talking-dictionaries-alpha';

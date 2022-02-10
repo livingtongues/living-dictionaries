@@ -13,12 +13,12 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
   import type { IInvite, IContributor, IManager, IUser } from '$lib/interfaces';
-  import { isManager, isContributor } from '$lib/stores';
+  import { isManager, isContributor, user } from '$lib/stores';
 
   export let inviteId: string, dictionaryId: string;
   let inviteType: IInvite;
 
-  import { set, update } from '$sveltefire/firestorelite';
+  import { Doc, setOnline, updateOnline } from '$sveltefirets';
   import { serverTimestamp } from 'firebase/firestore/lite';
 
   async function acceptInvite(role: 'manager' | 'contributor') {
@@ -29,19 +29,22 @@
       };
 
       if (role === 'manager') {
-        await set<IManager>(`dictionaries/${dictionaryId}/managers/${$user.uid}`, contributor);
+        await setOnline<IManager>(
+          `dictionaries/${dictionaryId}/managers/${$user.uid}`,
+          contributor
+        );
       } else {
-        await set<IContributor>(
+        await setOnline<IContributor>(
           `dictionaries/${dictionaryId}/contributors/${$user.uid}`,
           contributor
         );
       }
 
-      await update<IInvite>(`dictionaries/${dictionaryId}/invites/${inviteId}`, {
+      await updateOnline<IInvite>(`dictionaries/${dictionaryId}/invites/${inviteId}`, {
         status: 'claimed',
       });
 
-      await update<IUser>(`users/${$user.uid}`, {
+      await updateOnline<IUser>(`users/${$user.uid}`, {
         // @ts-ignore
         termsAgreement: serverTimestamp(),
       });
@@ -51,8 +54,6 @@
   }
 
   import Button from '$svelteui/ui/Button.svelte';
-  import Doc from '$sveltefire/components/Doc.svelte';
-  import { user } from '$sveltefire/user';
   import ShowHide from '$svelteui/functions/ShowHide.svelte';
 </script>
 
