@@ -3,14 +3,14 @@ import { arrayRemove, arrayUnion, serverTimestamp } from 'firebase/firestore/lit
 import type { IUser, IManager } from '$lib/interfaces';
 
 export async function addDictionaryManagePermission(userBeingEdited: IUser, dictionaryId: string) {
-  const manager: IManager = {
+  await setOnline<IManager>(`dictionaries/${dictionaryId}/managers/${userBeingEdited.uid}`, {
     id: userBeingEdited.uid,
     name: userBeingEdited.displayName,
-  };
-
-  await setOnline(`dictionaries/${dictionaryId}/managers/${userBeingEdited.uid}`, manager);
-  await updateOnline(`users/${userBeingEdited.uid}`, {
+  });
+  await updateOnline<IUser>(`users/${userBeingEdited.uid}`, {
+    //@ts-ignore
     managing: arrayUnion(dictionaryId),
+    //@ts-ignore
     termsAgreement: serverTimestamp(),
   });
 }
