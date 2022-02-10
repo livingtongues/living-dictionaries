@@ -10,10 +10,10 @@
   import { getApp } from 'firebase/app';
   // import type { FirebaseOptions } from 'firebase/app';
   import { loadScriptOnce, loadStylesOnce } from '../loader';
-  import type { LanguageCodes } from './languageCodes.type';
+  import type { LanguageCode } from './languageCodes';
 
   // export let firebaseConfig: FirebaseOptions;  // If needing to pass the config into this component manually
-  export let languageCode: LanguageCodes = 'en';
+  export let languageCode: LanguageCode = 'en';
   export let tosUrl: firebaseui.auth.Config['tosUrl'] = undefined; // '.../terms' | () => window.location.assign("your-terms-url");
   export let privacyPolicyUrl: firebaseui.auth.Config['privacyPolicyUrl'] = undefined;
 
