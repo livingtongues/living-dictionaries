@@ -24,11 +24,3 @@ export async function deleteAudio(entry: IEntry) {
     alert(`${$_('misc.error', { default: 'Error' })}: ${err}`);
   }
 }
-
-export function deleteObjectEmptyFields(ObjData: any) {
-  for (const key in ObjData) {
-    if (ObjData[key] === '' || ObjData[key] === undefined || ObjData[key] === null) {
-      delete ObjData[key];
-    }
-  }
-}
