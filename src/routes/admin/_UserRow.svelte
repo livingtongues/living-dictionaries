@@ -1,6 +1,6 @@
 <script lang="ts">
   import { admin } from '$lib/stores';
-  import { update } from '$sveltefire/firestorelite';
+  import { updateOnline } from '$sveltefirets';
   import type { IUser } from '$lib/interfaces';
   import { printDate } from '$lib/helpers/time';
   export let user: IUser;
@@ -47,7 +47,7 @@
         class="hover:underline text-red-600"
         on:click={async () => {
           if (confirm('Re-subscribe user?')) {
-            await update(`users/${user.uid}`, {
+            await updateOnline(`users/${user.uid}`, {
               unsubscribe: null,
             });
           }
@@ -58,7 +58,7 @@
         type="button"
         class="text-xs hover:underline text-gray-700"
         on:click={async () => {
-          await update(`users/${user.uid}`, {
+          await updateOnline(`users/${user.uid}`, {
             unsubscribe: new Date(),
           });
         }}>Mark Unsubscribed</button
