@@ -27,7 +27,8 @@
         if (confirm("Flip this dictionary's visibility?")) {
           dispatch('toggleprivacy');
         }
-      }}>
+      }}
+    >
       {dictionary.public ? 'Public' : 'Private'}
     </Button>
   </td>
@@ -36,26 +37,31 @@
   </td>
   <td
     ><Collection path={`dictionaries/${dictionary.id}/managers`} startWith={[]} let:data>
-      <RolesManagment {data} dictionary={dictionary.id} />
-    </Collection></td>
+      <RolesManagment {data} dictionary={dictionary.id} userRole="manager" />
+    </Collection></td
+  >
   <td
     ><Collection
       path={`dictionaries/${dictionary.id}/writeInCollaborators`}
       startWith={[]}
-      let:data>
-      <RolesManagment {data} dictionary={dictionary.id} />
-    </Collection></td>
+      let:data
+    >
+      <RolesManagment {data} dictionary={dictionary.id} userRole="collab" />
+    </Collection></td
+  >
   <td>
     <DictionaryFieldEdit
       field={'iso6393'}
       value={dictionary.iso6393}
-      dictionaryId={dictionary.id} />
+      dictionaryId={dictionary.id}
+    />
   </td>
   <td>
     <DictionaryFieldEdit
       field={'glottocode'}
       value={dictionary.glottocode}
-      dictionaryId={dictionary.id} />
+      dictionaryId={dictionary.id}
+    />
   </td>
   <td>
     <ShowHide let:show let:toggle>
@@ -78,7 +84,8 @@
     <DictionaryFieldEdit
       field={'location'}
       value={dictionary.location}
-      dictionaryId={dictionary.id} />
+      dictionaryId={dictionary.id}
+    />
   </td>
   <td>
     {dictionary.entryCount || ''}
@@ -97,7 +104,8 @@
           dispatch('addalternatename', name);
         }
       }}
-      on:itemremoved={(e) => dispatch('removealternatename', e.detail.value)} />
+      on:itemremoved={(e) => dispatch('removealternatename', e.detail.value)}
+    />
   </td>
   <td>
     {dictionary.alternateOrthographies || ''}
