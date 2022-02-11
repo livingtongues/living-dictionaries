@@ -2,12 +2,17 @@
   import BadgeArrayEmit from '$svelteui/data/BadgeArrayEmit.svelte';
   import ShowHide from '$svelteui/functions/ShowHide.svelte';
   import { removeDictionaryManagePermission } from '$lib/helpers/dictionariesManaging';
+  import { fetchUser } from '$lib/helpers/fetchUser';
+  import type { IDictionary } from '$lib/interfaces';
   export let data: any;
   export let dictionary: string;
   let data_strings: string[];
   $: data_strings = data.map((e) => e.name);
-  async function remove(id, dictionary) {
-    removeDictionaryManagePermission(id, dictionary);
+  async function remove(id: string, dictionary: string) {
+    const user = await fetchUser(id);
+    if (user) {
+      removeDictionaryManagePermission(user, dictionary);
+    }
   }
 </script>
 
