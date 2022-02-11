@@ -1,4 +1,4 @@
-import { deleteDocument, set, update } from '$sveltefire/firestorelite';
+import { deleteDocument, set, update, getDocument } from '$sveltefire/firestorelite';
 import { arrayRemove, arrayUnion, serverTimestamp } from 'firebase/firestore/lite';
 import type { IUser, IManager, IWriteInCollaborator } from '$lib/interfaces';
 
@@ -41,14 +41,16 @@ export async function addDictionaryCollaboratorPermission(
 }
 
 export async function removeDictionaryCollaboratorPermission(
-  userBeingEdited: IUser,
+  collaboratorId: string,
   dictionaryId: string
 ) {
+  const collaborator: IWriteInCollaborator = await getDocument(
+    `dictionaries/${dictionaryId}/writeInCollaborators/${collaboratorId}`
+  );
   if (
-    confirm(`Are you sure you want to remove ${userBeingEdited.displayName} from ${dictionaryId}?`)
+    collaborator &&
+    confirm(`Are you sure you want to remove ${collaborator.name} from ${dictionaryId}?`)
   ) {
-    await deleteDocument(
-      `dictionaries/${dictionaryId}/writeInCollaborators/${userBeingEdited.uid}`
-    );
+    await deleteDocument(`dictionaries/${dictionaryId}/writeInCollaborators/${collaboratorId}`);
   }
 }

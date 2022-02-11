@@ -1,17 +1,24 @@
 <script lang="ts">
   import BadgeArrayEmit from '$svelteui/data/BadgeArrayEmit.svelte';
   import ShowHide from '$svelteui/functions/ShowHide.svelte';
-  import { removeDictionaryManagePermission } from '$lib/helpers/dictionariesManaging';
+  import {
+    removeDictionaryManagePermission,
+    removeDictionaryCollaboratorPermission,
+  } from '$lib/helpers/dictionariesManaging';
   import { fetchUser } from '$lib/helpers/fetchUser';
-  import type { IDictionary } from '$lib/interfaces';
   export let data: any;
   export let dictionary: string;
+  export let userRole: string;
   let data_strings: string[];
   $: data_strings = data.map((e) => e.name);
-  async function remove(id: string, dictionary: string) {
-    const user = await fetchUser(id);
-    if (user) {
+  async function remove(id: string, dictionary: string, role: string) {
+    //TODO test if exceptions exist. Is it possible a user doesn't exist?
+    if (role === 'manager') {
+      const user = await fetchUser(id);
       removeDictionaryManagePermission(user, dictionary);
+    }
+    if (role === 'collab') {
+      removeDictionaryCollaboratorPermission(id, dictionary);
     }
   }
 </script>
@@ -24,7 +31,7 @@
         canEdit
         addMessage="Add"
         on:itemclicked={(e) => console.log('clicked:', data[e.detail.index].id)}
-        on:itemremoved={(e) => remove(data[e.detail.index].id, dictionary)}
+        on:itemremoved={(e) => remove(data[e.detail.index].id, dictionary, userRole)}
         on:additem={toggle}
       />
       {#if show}
