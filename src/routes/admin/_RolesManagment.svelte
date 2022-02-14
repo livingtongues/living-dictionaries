@@ -2,8 +2,9 @@
   import BadgeArrayEmit from '$svelteui/data/BadgeArrayEmit.svelte';
   import ShowHide from '$svelteui/functions/ShowHide.svelte';
   import {
-    removeDictionaryManagePermission,
+    removeDictionaryManagerPermission,
     removeDictionaryCollaboratorPermission,
+    removeDictionaryContributorPermission,
   } from '$lib/helpers/dictionariesManaging';
   import { fetchUser } from '$lib/helpers/fetchUser';
   export let data: any;
@@ -12,13 +13,15 @@
   let data_strings: string[];
   $: data_strings = data.map((e) => e.name);
   async function remove(id: string, dictionary: string, role: string) {
-    //TODO test if exceptions exist. Is it possible a user doesn't exist?
     if (role === 'manager') {
       const user = await fetchUser(id);
-      removeDictionaryManagePermission(user, dictionary);
+      removeDictionaryManagerPermission(user, dictionary);
     }
     if (role === 'collab') {
       removeDictionaryCollaboratorPermission(id, dictionary);
+    }
+    if (role === 'contributor') {
+      removeDictionaryContributorPermission(id, dictionary);
     }
   }
 </script>
