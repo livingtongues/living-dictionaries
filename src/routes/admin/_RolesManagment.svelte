@@ -3,8 +3,9 @@
   import ShowHide from '$svelteui/functions/ShowHide.svelte';
   import {
     removeDictionaryManagerPermission,
-    removeDictionaryCollaboratorPermission,
     removeDictionaryContributorPermission,
+    removeDictionaryCollaboratorPermission,
+    addDictionaryManagerPermission,
   } from '$lib/helpers/dictionariesManaging';
   import { fetchUser } from '$lib/helpers/fetchUser';
   export let data: any;
@@ -28,6 +29,16 @@
       alert(`Error: ${err}`);
     }
   }
+  async function save(id: string, dictionary: string, role: string) {
+    try {
+      if (role === 'manager') {
+        const user = await fetchUser(id);
+        addDictionaryManagerPermission(user, dictionary);
+      }
+    } catch (err) {
+      alert(`Error: ${err}`);
+    }
+  }
 </script>
 
 <div class="py-3">
@@ -41,6 +52,7 @@
         on:itemremoved={(e) => remove(data[e.detail.index].id, dictionary, userRole)}
         on:additem={toggle}
       />
+      <button>Invite button here</button>
       {#if show}
         <!-- {#await import('./_SelectDictionaryModal.svelte') then { default: SelectDictionaryModal }}
           <SelectDictionaryModal {user} on:close={toggle} />
