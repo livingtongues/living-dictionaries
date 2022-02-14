@@ -46,7 +46,7 @@ export async function removeDictionaryContributorPermission(
   contributorId: string,
   dictionaryId: string
 ) {
-  const contributor: IWriteInCollaborator = await getDocument(
+  const contributor: IContributor = await getDocument(
     `dictionaries/${dictionaryId}/contributors/${contributorId}`
   );
   if (
