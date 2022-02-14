@@ -1,8 +1,8 @@
 import { deleteDocument, set, update, getDocument } from '$sveltefire/firestorelite';
 import { arrayRemove, arrayUnion, serverTimestamp } from 'firebase/firestore/lite';
-import type { IUser, IManager, IWriteInCollaborator } from '$lib/interfaces';
+import type { IUser, IManager, IWriteInCollaborator, IContributor } from '$lib/interfaces';
 
-export async function addDictionaryManagePermission(userBeingEdited: IUser, dictionaryId: string) {
+export async function addDictionaryManagerPermission(userBeingEdited: IUser, dictionaryId: string) {
   const manager: IManager = {
     id: userBeingEdited.uid,
     name: userBeingEdited.displayName,
@@ -15,12 +15,14 @@ export async function addDictionaryManagePermission(userBeingEdited: IUser, dict
   });
 }
 
-export async function removeDictionaryManagePermission(
+export async function removeDictionaryManagerPermission(
   userBeingEdited: IUser,
   dictionaryId: string
 ) {
   if (
-    confirm(`Are you sure you want to remove ${userBeingEdited.displayName} from ${dictionaryId}?`)
+    confirm(
+      `Are you sure you want to remove ${userBeingEdited.displayName} as manager from ${dictionaryId}?`
+    )
   ) {
     await deleteDocument(`dictionaries/${dictionaryId}/managers/${userBeingEdited.uid}`);
     await update(`users/${userBeingEdited.uid}`, {
@@ -28,8 +30,35 @@ export async function removeDictionaryManagePermission(
     });
   }
 }
+/* export async function addDictionaryContributorPermission(
+  userBeingEdited: IUser,
+  dictionaryId: string
+) {
+  const contributor: IContributor = {
+    id: userBeingEdited.uid,
+    name: userBeingEdited.displayName,
+  };
 
-export async function addDictionaryCollaboratorPermission(
+  await set(`dictionaries/${dictionaryId}/contributors/${userBeingEdited.uid}`, contributor);
+} */
+
+export async function removeDictionaryContributorPermission(
+  contributorId: string,
+  dictionaryId: string
+) {
+  const contributor: IWriteInCollaborator = await getDocument(
+    `dictionaries/${dictionaryId}/contributors/${contributorId}`
+  );
+  if (
+    confirm(
+      `Are you sure you want to remove ${contributor.name} as contributor from ${dictionaryId}?`
+    )
+  ) {
+    await deleteDocument(`dictionaries/${dictionaryId}/contributors/${contributorId}`);
+  }
+}
+
+/* export async function addDictionaryCollaboratorPermission(
   userBeingEdited: IUser,
   dictionaryId: string
 ) {
@@ -38,7 +67,7 @@ export async function addDictionaryCollaboratorPermission(
     name: userBeingEdited.displayName,
   };
   await set(`dictionaries/${dictionaryId}/writeInCollaborators/${userBeingEdited.uid}`, collab);
-}
+} */
 
 export async function removeDictionaryCollaboratorPermission(
   collaboratorId: string,
@@ -49,7 +78,9 @@ export async function removeDictionaryCollaboratorPermission(
   );
   if (
     collaborator &&
-    confirm(`Are you sure you want to remove ${collaborator.name} from ${dictionaryId}?`)
+    confirm(
+      `Are you sure you want to remove ${collaborator.name} as write-in collaborator from ${dictionaryId}?`
+    )
   ) {
     await deleteDocument(`dictionaries/${dictionaryId}/writeInCollaborators/${collaboratorId}`);
   }

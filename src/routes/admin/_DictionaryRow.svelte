@@ -38,8 +38,13 @@
   <td
     ><Collection path={`dictionaries/${dictionary.id}/managers`} startWith={[]} let:data>
       <RolesManagment {data} dictionary={dictionary.id} userRole="manager" />
-    </Collection></td
-  >
+    </Collection>
+  </td>
+  <td
+    ><Collection path={`dictionaries/${dictionary.id}/contributors`} startWith={[]} let:data>
+      <RolesManagment {data} dictionary={dictionary.id} userRole="contributor" />
+    </Collection>
+  </td>
   <td
     ><Collection
       path={`dictionaries/${dictionary.id}/writeInCollaborators`}
@@ -47,8 +52,8 @@
       let:data
     >
       <RolesManagment {data} dictionary={dictionary.id} userRole="collab" />
-    </Collection></td
-  >
+    </Collection>
+  </td>
   <td>
     <DictionaryFieldEdit
       field={'iso6393'}
