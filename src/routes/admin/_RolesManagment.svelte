@@ -13,15 +13,19 @@
   let data_strings: string[];
   $: data_strings = data.map((e) => e.name);
   async function remove(id: string, dictionary: string, role: string) {
-    if (role === 'manager') {
-      const user = await fetchUser(id);
-      removeDictionaryManagerPermission(user, dictionary);
-    }
-    if (role === 'collab') {
-      removeDictionaryCollaboratorPermission(id, dictionary);
-    }
-    if (role === 'contributor') {
-      removeDictionaryContributorPermission(id, dictionary);
+    try {
+      if (role === 'manager') {
+        const user = await fetchUser(id);
+        removeDictionaryManagerPermission(user, dictionary);
+      }
+      if (role === 'collab') {
+        removeDictionaryCollaboratorPermission(id, dictionary);
+      }
+      if (role === 'contributor') {
+        removeDictionaryContributorPermission(id, dictionary);
+      }
+    } catch (err) {
+      alert(`Error: ${err}`);
     }
   }
 </script>
