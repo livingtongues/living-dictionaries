@@ -3,7 +3,7 @@
   import { createEventDispatcher } from 'svelte';
   const dispatch = createEventDispatcher();
   const close = () => dispatch('close');
-  import { addDictionaryManagePermission } from '$lib/helpers/dictionariesManaging';
+  import { addDictionaryManagerPermission } from '$lib/helpers/dictionariesManaging';
   import type { IDictionary, IUser } from '$lib/interfaces';
   import Button from '$svelteui/ui/Button.svelte';
   import Collection from '$sveltefire/components/Collection.svelte';
@@ -17,7 +17,7 @@
   async function save(id) {
     if (dictionaryIds.includes(id)) {
       try {
-        addDictionaryManagePermission(user, id);
+        addDictionaryManagerPermission(user, id);
         close();
       } catch (err) {
         alert(`Error: ${err}`);
@@ -33,7 +33,8 @@
   startWith={dictionariesType}
   on:data={(e) => {
     dictionaryIds = e.detail.data.map((d) => d.id);
-  }} />
+  }}
+/>
 
 <Modal on:close>
   <span slot="heading">
