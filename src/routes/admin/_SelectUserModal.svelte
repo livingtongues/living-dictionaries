@@ -11,10 +11,9 @@
   export let dictionaryID: string;
 
   let usersType: IUser[];
-  let users = [];
   let userEmail = '';
 
-  async function save(email: string) {
+  async function save(users: IUser[], email: string) {
     // TODO prevent when user email doesn't exist
     try {
       const user = users.find((user) => email === user.email);
@@ -26,31 +25,25 @@
   }
 </script>
 
-<Collection
-  path="users"
-  startWith={usersType}
-  on:data={(e) => {
-    users = e.detail.data;
-  }}
-/>
+<Collection path="users" startWith={usersType} let:data={users}>
+  <Modal on:close>
+    <span slot="heading"> Select User ID to let manage </span>
 
-<Modal on:close>
-  <span slot="heading"> Select User ID to let manage </span>
+    {#if users.length}
+      <input type="text" bind:value={userEmail} list="ids" placeholder="Search by ID" />
+      <datalist id="ids">
+        {#each users as user}
+          <option>{user.email}</option>
+        {/each}
+      </datalist>
+    {:else}Loading users...{/if}
 
-  {#if users.length}
-    <input type="text" bind:value={userEmail} list="ids" placeholder="Search by ID" />
-    <datalist id="ids">
-      {#each users as user}
-        <option>{user.email}</option>
-      {/each}
-    </datalist>
-  {:else}Loading users...{/if}
-
-  <div class="modal-footer space-x-1">
-    <Button onclick={close} color="black">Cancel</Button>
-    <Button onclick={() => save(userEmail)} color="green" form="primary">Save</Button>
-  </div>
-</Modal>
+    <div class="modal-footer space-x-1">
+      <Button onclick={close} color="black">Cancel</Button>
+      <Button onclick={() => save(users, userEmail)} color="green" form="primary">Save</Button>
+    </div>
+  </Modal>
+</Collection>
 
 <style>
   input {
