@@ -12,7 +12,7 @@
   export let maxWait = 10000;
   export let once = false;
 
-  $: opts = {
+  const opts = {
     startWith,
     traceId,
     log,
