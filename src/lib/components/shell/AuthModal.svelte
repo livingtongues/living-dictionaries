@@ -1,13 +1,17 @@
 <script lang="ts">
-  import FirebaseUiAuth from '$sveltefire/components/FirebaseUiAuth.svelte';
-  import { updateUserData } from '$sveltefire/helpers/updateUserData';
+  import { FirebaseUiAuth, updateUserData } from '$sveltefirets';
+  import type { LanguageCode } from '$sveltefirets/components/languageCodes';
+  import { languagesWithTranslations } from '$sveltefirets/components/languageCodes';
   import { _, locale } from 'svelte-i18n';
 
-  let localizedAbbrev = $locale.substring(0, 2);
-  // https://github.com/firebase/firebaseui-web/blob/master/LANGUAGES.md
-  if (localizedAbbrev === 'he') localizedAbbrev = 'iw';
-  if (localizedAbbrev === 'ms') localizedAbbrev = 'en'; // Malay is not yet available
-  if (localizedAbbrev === 'as') localizedAbbrev = 'en'; // Assamese is not yet available
+  let languageCode: LanguageCode = 'en';
+
+  let localeAbbrev = $locale.substring(0, 2);
+  if (localeAbbrev === 'he') localeAbbrev = 'iw';
+  if (!Object.values(languagesWithTranslations).includes(localeAbbrev)) {
+    localeAbbrev = 'en'; // Malay 'ms' and Assamese 'as' not yet available
+  }
+  languageCode = localeAbbrev as LanguageCode;
 
   import Modal from '$lib/components/ui/Modal.svelte';
   export let context: 'force' = undefined;
@@ -24,7 +28,8 @@
   {/if}
   <FirebaseUiAuth
     tosUrl="https://livingdictionaries.app/terms"
-    {localizedAbbrev}
+    {languageCode}
     on:close
-    on:updateuserdata={(e) => updateUserData(e.detail.user, e.detail.isNewUser)} />
+    on:updateuserdata={(e) => updateUserData(e.detail.user, e.detail.isNewUser)}
+  />
 </Modal>

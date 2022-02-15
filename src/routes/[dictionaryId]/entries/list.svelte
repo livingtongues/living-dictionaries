@@ -19,7 +19,7 @@
 
   import { dictionary, canEdit } from '$lib/stores';
   import ListEntry from './_ListEntry.svelte';
-  import Doc from '$sveltefire/components/Doc.svelte';
+  import { Doc } from '$sveltefirets';
 </script>
 
 <svelte:head>

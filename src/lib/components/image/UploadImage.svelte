@@ -2,7 +2,7 @@
   import { _ } from 'svelte-i18n';
   import type { IEntry, IPhoto } from '$lib/interfaces';
   export let file: File, entry: IEntry;
-  import { dictionary } from '$lib/stores';
+  import { dictionary, user } from '$lib/stores';
 
   import { tweened } from 'svelte/motion';
   import { cubicOut } from 'svelte/easing';
@@ -85,17 +85,13 @@
     );
   }
 
-  import { update } from '$sveltefire/firestorelite';
-  import { dev } from '$sveltefire/config';
+  import { updateOnline, firebaseConfig } from '$sveltefirets';
   import { serverTimestamp } from 'firebase/firestore/lite';
-  import { user } from '$sveltefire/user';
   import { processImageUrl } from './processImageUrl';
 
   async function savePhoto(storagePath: string) {
     try {
-      const imageProcessingUrl = `${processImageUrl}/talking-dictionaries-${
-        dev ? 'dev' : 'alpha'
-      }.appspot.com/${storagePath}`;
+      const imageProcessingUrl = `${processImageUrl}/${firebaseConfig.storageBucket}/${storagePath}`;
 
       const result = await fetch(imageProcessingUrl);
       const url = await result.text();
@@ -108,7 +104,11 @@
         cr: $user.displayName,
         ab: $user.uid,
       };
-      await update(`dictionaries/${$dictionary.id}/words/${entry.id}`, { pf }, true);
+      await updateOnline<IEntry>(
+        `dictionaries/${$dictionary.id}/words/${entry.id}`,
+        { pf },
+        { abbreviate: true }
+      );
       success = true;
     } catch (err) {
       error = err;
@@ -123,7 +123,8 @@
 
 <div
   class="w-full h-full relative flex flex-col items-center justify-center
-  overflow-hidden">
+  overflow-hidden"
+>
   {#if error}
     <div class="w-12 text-red-600 text-center">
       <i class="far fa-times" />
@@ -137,7 +138,8 @@
     {:else}
       <div
         class="text-dark-shadow text-white z-10 font-semibold w-12 text-center
-        font-mono">
+        font-mono"
+      >
         {percentage}%
       </div>
     {/if}

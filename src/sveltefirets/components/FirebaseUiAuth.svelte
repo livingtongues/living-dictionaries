@@ -1,22 +1,32 @@
 <script context="module" lang="ts">
   let ui: firebaseui.auth.AuthUI;
   declare const firebaseui: typeof import('./firebaseui');
-  declare global {
-    interface Window {
-      firebase: any;
-    }
-  }
+  declare const firebase: typeof import('firebase/compat').default;
 </script>
 
 <script lang="ts">
   import type { User } from 'firebase/auth';
   import { onMount, createEventDispatcher } from 'svelte';
-  import { loadScriptOnce, loadStylesOnce } from '../helpers/loader';
-  import { firebaseConfig } from '../config';
+  import { getApp } from 'firebase/app';
+  // import type { FirebaseOptions } from 'firebase/app';
+  import { loadScriptOnce, loadStylesOnce } from '../loader';
+  import type { LanguageCode } from './languageCodes';
 
-  export let localizedAbbrev = 'en';
+  // export let firebaseConfig: FirebaseOptions;  // If needing to pass the config into this component manually
+  export let languageCode: LanguageCode = 'en';
   export let tosUrl: firebaseui.auth.Config['tosUrl'] = undefined; // '.../terms' | () => window.location.assign("your-terms-url");
   export let privacyPolicyUrl: firebaseui.auth.Config['privacyPolicyUrl'] = undefined;
+
+  export let signInWith: {
+    google?: boolean;
+    facebook?: boolean;
+    twitter?: boolean;
+    github?: boolean;
+    emailPassword?: boolean;
+    emailPasswordless?: boolean;
+    phone?: boolean;
+    anonymous?: boolean;
+  } = { google: true, emailPasswordless: true };
 
   const dispatch = createEventDispatcher<{
     close: string | null;
@@ -26,21 +36,21 @@
   let container: HTMLDivElement;
 
   onMount(async () => {
-    await loadScriptOnce('https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js');
-    await loadScriptOnce('https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js');
-    if (window && window.firebase && window.firebase.apps && window.firebase.apps.length === 0) {
-      window.firebase.initializeApp(firebaseConfig);
+    await loadScriptOnce('https://www.gstatic.com/firebasejs/9.5.0/firebase-app-compat.js');
+    await loadScriptOnce('https://www.gstatic.com/firebasejs/9.5.0/firebase-auth-compat.js');
+    if (firebase && firebase.apps && firebase.apps.length === 0) {
+      const firebaseApp = getApp();
+      firebase.initializeApp(firebaseApp.options);
+      // firebase.initializeApp(firebaseConfig);
     }
-
-    if (localizedAbbrev === 'iw' || localizedAbbrev === 'ar') {
-      await loadStylesOnce('https://www.gstatic.com/firebasejs/ui/4.7.1/firebase-ui-auth-rtl.css');
+    if (languageCode === 'iw' || languageCode === 'ar') {
+      await loadStylesOnce('https://www.gstatic.com/firebasejs/ui/6.0.0/firebase-ui-auth-rtl.css');
     } else {
-      await loadStylesOnce('https://www.gstatic.com/firebasejs/ui/4.8.1/firebase-ui-auth.css');
+      await loadStylesOnce('https://www.gstatic.com/firebasejs/ui/6.0.0/firebase-ui-auth.css');
     }
     await loadScriptOnce(
-      `https://www.gstatic.com/firebasejs/ui/4.7.1/firebase-ui-auth__${localizedAbbrev}.js`
+      `https://www.gstatic.com/firebasejs/ui/6.0.0/firebase-ui-auth__${languageCode}.js`
     );
-
     initAuthUi();
   });
 
@@ -75,12 +85,18 @@
       signInFlow: 'popup',
       // signInSuccessUrl: "<url-to-redirect-to-on-success>",
       signInOptions: [
-        window.firebase.auth.GoogleAuthProvider.PROVIDER_ID,
-        // firebase.auth.FacebookAuthProvider.PROVIDER_ID,
-        // firebase.auth.TwitterAuthProvider.PROVIDER_ID,
-        window.firebase.auth.EmailAuthProvider.PROVIDER_ID,
-        // firebase.auth.PhoneAuthProvider.PROVIDER_ID // add Flag CSS back if using phone auth
-        // firebaseui.auth.AnonymousAuthProvider.PROVIDER_ID
+        signInWith.google && firebase.auth.GoogleAuthProvider.PROVIDER_ID,
+        signInWith.facebook && firebase.auth.FacebookAuthProvider.PROVIDER_ID,
+        signInWith.twitter && firebase.auth.TwitterAuthProvider.PROVIDER_ID,
+        signInWith.github && firebase.auth.GithubAuthProvider.PROVIDER_ID,
+        signInWith.emailPassword && firebase.auth.EmailAuthProvider.PROVIDER_ID,
+        signInWith.emailPasswordless && {
+          provider: firebase.auth.EmailAuthProvider.PROVIDER_ID,
+          signInMethod: firebase.auth.EmailAuthProvider.EMAIL_LINK_SIGN_IN_METHOD,
+          forceSameDevice: false,
+        },
+        signInWith.phone && firebase.auth.PhoneAuthProvider.PROVIDER_ID,
+        signInWith.anonymous && firebaseui.auth.AnonymousAuthProvider.PROVIDER_ID,
       ],
     };
 
@@ -91,7 +107,7 @@
       ui.reset();
       ui.start(container, uiConfig);
     } else {
-      ui = new firebaseui.auth.AuthUI(window.firebase.auth());
+      ui = new firebaseui.auth.AuthUI(firebase.auth());
       ui.start(container, uiConfig);
     }
   }
@@ -103,6 +119,8 @@
 </script>
 
 {#if loading}
-  <div>Loading...</div>
+  <slot>
+    <div>Loading...</div>
+  </slot>
 {/if}
 <div bind:this={container} />
