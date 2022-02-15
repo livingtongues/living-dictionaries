@@ -30,17 +30,12 @@ export async function removeDictionaryManagerPermission(
     });
   }
 }
-/* export async function addDictionaryContributorPermission(
-  userBeingEdited: IUser,
+export async function addDictionaryContributorPermission(
+  contributor: IContributor,
   dictionaryId: string
 ) {
-  const contributor: IContributor = {
-    id: userBeingEdited.uid,
-    name: userBeingEdited.displayName,
-  };
-
-  await set(`dictionaries/${dictionaryId}/contributors/${userBeingEdited.uid}`, contributor);
-} */
+  await set(`dictionaries/${dictionaryId}/contributors/${contributor.id}`, contributor);
+}
 
 export async function removeDictionaryContributorPermission(
   contributorId: string,
@@ -58,16 +53,15 @@ export async function removeDictionaryContributorPermission(
   }
 }
 
-/* export async function addDictionaryCollaboratorPermission(
-  userBeingEdited: IUser,
+export async function addDictionaryCollaboratorPermission(
+  writeInCollaborator: IWriteInCollaborator,
   dictionaryId: string
 ) {
-  const collab: IWriteInCollaborator = {
-    id: userBeingEdited.uid,
-    name: userBeingEdited.displayName,
-  };
-  await set(`dictionaries/${dictionaryId}/writeInCollaborators/${userBeingEdited.uid}`, collab);
-} */
+  await set(
+    `dictionaries/${dictionaryId}/writeInCollaborators/${writeInCollaborator.id}`,
+    writeInCollaborator
+  );
+}
 
 export async function removeDictionaryCollaboratorPermission(
   collaboratorId: string,
