@@ -2,8 +2,7 @@
   import { _ } from 'svelte-i18n';
   import type { IAudio, IEntry } from '$lib/interfaces';
   export let file: File, entry: IEntry, speakerId: string;
-  import { dictionary } from '$lib/stores';
-  import { user } from '$sveltefire/user';
+  import { dictionary, user } from '$lib/stores';
 
   import { tweened } from 'svelte/motion';
   import { cubicOut } from 'svelte/easing';
@@ -20,7 +19,7 @@
     startUpload();
   }
 
-  import { update } from '$sveltefire/firestorelite';
+  import { updateOnline } from '$sveltefirets';
   import { serverTimestamp } from 'firebase/firestore/lite';
   import { getStorage, ref, uploadBytesResumable } from 'firebase/storage';
 
@@ -83,7 +82,11 @@
             sp: speakerId,
           };
 
-          await update(`dictionaries/${$dictionary.id}/words/${entry.id}`, { sf }, true);
+          await updateOnline<IEntry>(
+            `dictionaries/${$dictionary.id}/words/${entry.id}`,
+            { sf },
+            { abbreviate: true }
+          );
 
           // TODO: this.speakerService.addDictionaryToSpeaker(speakerId, dictionaryId);
           success = true;
@@ -99,13 +102,15 @@
 {#if error}
   <span
     class="text-xs font-semibold inline-block py-1 px-2 uppercase rounded-full
-    text-red-600 bg-red-200">
+    text-red-600 bg-red-200"
+  >
     {$_('misc.error', { default: 'Error' })}
   </span>
 {:else if success}
   <span
     class="text-xs font-semibold inline-block py-1 px-2 uppercase rounded-full
-    text-green-600 bg-green-200">
+    text-green-600 bg-green-200"
+  >
     <i class="far fa-check" />
     {$_('upload.success', { default: 'Success' })}
   </span>
@@ -115,7 +120,8 @@
       <div>
         <span
           class="text-xs font-semibold inline-block py-1 px-2 uppercase
-          rounded-full text-blue-600 bg-blue-200">
+          rounded-full text-blue-600 bg-blue-200"
+        >
           {$_('upload.uploading', { default: 'Uploading' })}
         </span>
       </div>
@@ -129,7 +135,8 @@
       <div
         style="width:{percentage}%"
         class="shadow-none flex flex-col text-center whitespace-nowrap
-        text-white justify-center bg-blue-500" />
+        text-white justify-center bg-blue-500"
+      />
     </div>
   </div>
 {/if}

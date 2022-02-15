@@ -1,5 +1,5 @@
 <script lang="ts">
-  import Doc from '$sveltefire/components/Doc.svelte';
+  import { Doc } from '$sveltefirets';
   import type { IAbout, IDictionary } from '$lib/interfaces';
 
   import { _ } from 'svelte-i18n';
@@ -42,7 +42,8 @@
   {#if dictionary.entryCount}
     <span
       class="mb-2 mr-2 inline-flex items-center px-2 py-1 rounded-full
-        text-xs font-medium leading-4 bg-gray-200 text-gray-800">
+        text-xs font-medium leading-4 bg-gray-200 text-gray-800"
+    >
       {$_('dictionary.entries', { default: 'Entries' })}:&nbsp;
       <b>{dictionary.entryCount}</b>
     </span>
@@ -52,7 +53,8 @@
     <span
       style="direction: ltr"
       class="mb-2 mr-2 inline-flex items-center px-2 py-1 rounded-full
-        text-xs font-medium leading-4 bg-gray-200 text-gray-800">
+        text-xs font-medium leading-4 bg-gray-200 text-gray-800"
+    >
       ISO 639-3:&nbsp; <b>{dictionary.iso6393}</b>
     </span>
   {/if}
@@ -60,7 +62,8 @@
     <span
       style="direction: ltr"
       class="mb-2 mr-2 inline-flex items-center px-2 py-1 rounded-full
-        text-xs font-medium leading-4 bg-gray-200 text-gray-800">
+        text-xs font-medium leading-4 bg-gray-200 text-gray-800"
+    >
       Glottocode:&nbsp; <b>{dictionary.glottocode}</b>
     </span>
   {/if}
@@ -70,10 +73,14 @@
       {$_('home.open_dictionary', { default: 'Open Dictionary' })}
     </Button>
   {:else}
-    <Doc path={`dictionaries/${dictionary.id}/info/about`} startWith={aboutType} let:data>
+    <Doc
+      path={`dictionaries/${dictionary.id}/info/about`}
+      startWith={aboutType}
+      let:data={{ about }}
+    >
       <div class="mb-2 text-sm inline-children-elements">
-        {@html truncateString(data.about, 200)}
-        {#if data.about.length > 200}
+        {@html truncateString(about, 200)}
+        {#if about.length > 200}
           <a class="hover:underline" href={dictionary.id + '/about'} sveltekit:prefetch>
             {$_('home.read_more', { default: 'Read More' })}
           </a>

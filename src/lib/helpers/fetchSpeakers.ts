@@ -1,4 +1,4 @@
-import { getDocument } from '$sveltefire/firestore';
+import { getDocument } from '$sveltefirets';
 import type { ISpeaker, IEntry } from '$lib/interfaces';
 
 export async function fetchSpeakers(data: IEntry[]) {

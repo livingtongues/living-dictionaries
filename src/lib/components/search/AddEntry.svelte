@@ -6,20 +6,20 @@
   import type { IEntry } from '$lib/interfaces';
   import { page } from '$app/stores';
   import { goto } from '$app/navigation';
-  import { add } from '$sveltefire/firestorelite';
+  import { addOnline } from '$sveltefirets';
 
   async function addNewEntry(lx: string) {
     if (!lx) {
       return alert(`Missing: ${$_('entry.lx', { default: 'Lexeme/Word/Phrase' })}`);
     }
     try {
-      const entryDoc = await add<IEntry>(
+      const entryDoc = await addOnline<IEntry>(
         `dictionaries/${$page.params.dictionaryId}/words`,
         {
           lx,
           gl: {},
         },
-        true
+        { abbreviate: true }
       );
       goto(`/${$page.params.dictionaryId}/entry/${entryDoc.id}`);
     } catch (err) {

@@ -1,8 +1,8 @@
 import { derived } from 'svelte/store';
 import type { Readable } from 'svelte/store';
-import { user } from '$sveltefire/user';
+import { user } from './user';
 import { dictionary } from './dictionary';
-import { docExists } from '$sveltefire/firestore';
+import { docExists } from '$sveltefirets';
 
 export const isManager: Readable<boolean> = derived(
   [user, dictionary],

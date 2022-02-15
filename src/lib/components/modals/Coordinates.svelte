@@ -120,7 +120,7 @@
 
   import { createEventDispatcher } from 'svelte';
   import Button from '$svelteui/ui/Button.svelte';
-  import { loadScriptOnce, loadStylesOnce } from '$sveltefire/helpers/loader';
+  import { loadScriptOnce, loadStylesOnce } from '$sveltefirets';
   const dispatch = createEventDispatcher<{
     save: { lat: number; lng: number; dictionary: Partial<IDictionary> };
     remove: { dictionary: Partial<IDictionary> };
@@ -153,7 +153,8 @@
         <div class="relative">
           <div
             class="absolute inset-y-0 flex items-center text-sm text-gray-500
-            uppercase left-0 pl-2 pointer-events-none">
+            uppercase left-0 pl-2 pointer-events-none"
+          >
             Lat
           </div>
           <input
@@ -164,14 +165,16 @@
             min="-90"
             bind:value={lat}
             class="w-32 pl-10 pr-3 py-2 form-input"
-            placeholder={$_('dictionary.latitude', { default: 'Latitude' })} />
+            placeholder={$_('dictionary.latitude', { default: 'Latitude' })}
+          />
         </div>
         <div class="w-1" />
 
         <div class="relative">
           <div
             class="absolute inset-y-0 flex items-center text-sm text-gray-500
-            uppercase left-0 pl-2 pointer-events-none">
+            uppercase left-0 pl-2 pointer-events-none"
+          >
             Lng
           </div>
           <input
@@ -182,7 +185,8 @@
             min="-180"
             bind:value={lng}
             class="w-32 md:w-36 pl-10 pr-3 py-2 form-input"
-            placeholder={$_('dictionary.longitude', { default: 'Longitude' })} />
+            placeholder={$_('dictionary.longitude', { default: 'Longitude' })}
+          />
         </div>
       </div>
     </div>
@@ -192,7 +196,8 @@
         on:click={toggleStyle}
         type="button"
         class="px-2 py-1 absolute rounded shadow bg-white"
-        style="bottom: 40px; left: 8px; z-index: 1;">
+        style="bottom: 40px; left: 8px; z-index: 1;"
+      >
         <i class="far fa-globe-asia" />
       </button>
     </div>

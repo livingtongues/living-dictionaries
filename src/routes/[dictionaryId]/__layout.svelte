@@ -1,11 +1,11 @@
 <script context="module" lang="ts">
   import type { IDictionary } from '$lib/interfaces';
-  import { fetchDoc } from '$sveltefire/REST';
+  import { getDocument } from '$sveltefirets';
 
   import type { Load } from '@sveltejs/kit';
   export const load: Load = async ({ page: { params } }) => {
     try {
-      const dictionary = await fetchDoc<IDictionary>(`dictionaries/${params.dictionaryId}`);
+      const dictionary = await getDocument<IDictionary>(`dictionaries/${params.dictionaryId}`);
       if (dictionary) {
         return { props: { dictionary } };
       } else {
@@ -43,11 +43,13 @@
 <Header>
   <div
     slot="left"
-    class="font-semibold sm:text-xl overflow-x-auto md:overflow-hidden md:overflow-ellipsis">
+    class="font-semibold sm:text-xl overflow-x-auto md:overflow-hidden md:overflow-ellipsis"
+  >
     <a
       class="p-3 hover:text-black hidden md:inline"
       href="/"
-      on:click={() => ($algoliaQueryParams = '')}>
+      on:click={() => ($algoliaQueryParams = '')}
+    >
       <i class="fas fa-home" />
     </a>
     <div class="w-2 hidden md:inline" />
@@ -66,7 +68,8 @@
   <div
     class="menu {menuOpen
       ? 'translate-x-0'
-      : 'ltr:-translate-x-full rtl:translate-x-full'} ltr:left-0 rtl:right-0">
+      : 'ltr:-translate-x-full rtl:translate-x-full'} ltr:left-0 rtl:right-0"
+  >
     <SideMenu bind:menuOpen />
     <button class="close-menu" on:click={() => (menuOpen = false)}>
       <i class="far fa-times fa-lg fa-fw" />

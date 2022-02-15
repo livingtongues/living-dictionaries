@@ -1,11 +1,10 @@
 import { derived } from 'svelte/store';
 import type { Readable } from 'svelte/store';
-import { user } from '$sveltefire/user';
+import { user } from './user';
 import type { IUser, IDictionary } from '$lib/interfaces';
 import { browser } from '$app/env';
-import { db } from '$sveltefire';
+import { db, getDocument } from '$sveltefirets';
 import { collectionGroup, getDocs, query, where } from 'firebase/firestore';
-import { getDocument } from '$sveltefire/firestore';
 
 const key = 'my_dictionaries';
 export const myDictionaries = derived<Readable<IUser>, IDictionary[]>(

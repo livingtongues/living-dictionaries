@@ -3,11 +3,11 @@
   import BadgeArray from '$svelteui/data/BadgeArray.svelte';
   import MultiSelect from '$lib/components/ui/MultiSelect.svelte';
   import { glossingLanguages } from '$lib/mappings/glossing-languages';
-  import { user } from '$sveltefire/user';
+  import { user } from '$lib/stores';
   import Header from '$lib/components/shell/Header.svelte';
   import Button from '$svelteui/ui/Button.svelte';
   import type { IDictionary, IManager, IUser } from '$lib/interfaces';
-  import { docExists, setOnline, updateOnline } from '$sveltefire/lite';
+  import { docExists, setOnline, updateOnline } from '$sveltefirets';
   import { arrayUnion, GeoPoint, serverTimestamp } from 'firebase/firestore/lite';
   import { debounce } from '$lib/helpers/debounce';
   import { pruneObject } from '$lib/helpers/prune';
