@@ -3,12 +3,16 @@
   import { createEventDispatcher } from 'svelte';
   const dispatch = createEventDispatcher();
   const close = () => dispatch('close');
-  import { addDictionaryManagerPermission } from '$lib/helpers/dictionariesManaging';
+  import {
+    addDictionaryManagerPermission,
+    addDictionaryContributorPermission,
+  } from '$lib/helpers/dictionariesManaging';
   import type { IUser } from '$lib/interfaces';
   import Button from '$svelteui/ui/Button.svelte';
   import Collection from '$sveltefire/components/Collection.svelte';
 
   export let dictionaryID: string;
+  export let userRole: string;
 
   let usersType: IUser[];
   let userEmail = '';
@@ -17,7 +21,12 @@
     // TODO prevent when user email doesn't exist
     try {
       const user = users.find((user) => email === user.email);
-      addDictionaryManagerPermission(user, dictionaryID);
+      if (userRole === 'manager') {
+        addDictionaryManagerPermission(user, dictionaryID);
+      }
+      if (userRole === 'contributor') {
+        addDictionaryContributorPermission(user, dictionaryID);
+      }
       close();
     } catch (err) {
       alert(`Error: ${err}`);

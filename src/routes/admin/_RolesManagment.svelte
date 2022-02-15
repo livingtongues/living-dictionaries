@@ -51,7 +51,7 @@
       <button>Invite button here</button>
       {#if show}
         {#await import('./_SelectUserModal.svelte') then { default: SelectUserModal }}
-          <SelectUserModal dictionaryID={dictionary} on:close={toggle} />
+          <SelectUserModal dictionaryID={dictionary} {userRole} on:close={toggle} />
         {/await}
       {/if}
     </ShowHide>

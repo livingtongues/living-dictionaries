@@ -31,9 +31,13 @@ export async function removeDictionaryManagerPermission(
   }
 }
 export async function addDictionaryContributorPermission(
-  contributor: IContributor,
+  userBeingEdited: IUser,
   dictionaryId: string
 ) {
+  const contributor: IContributor = {
+    id: userBeingEdited.uid,
+    name: userBeingEdited.displayName,
+  };
   await set(`dictionaries/${dictionaryId}/contributors/${contributor.id}`, contributor);
 }
 
