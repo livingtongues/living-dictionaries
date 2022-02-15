@@ -1,3 +1,4 @@
+import { user } from './user';
 import { admin } from './admin';
 import { isManager, isContributor, canEdit } from './editing';
 
@@ -8,6 +9,7 @@ import { algoliaQueryParams } from './search';
 import { videoAccess } from './video';
 
 export {
+  user,
   admin,
   isManager,
   isContributor,

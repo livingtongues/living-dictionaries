@@ -29,14 +29,18 @@
 
   let filteredDictionaries: IDictionary[] = [];
   $: {
-    filteredDictionaries = dictionaries.filter((dictionary) => {
-      return Object.keys(dictionary).some((k) => {
-        return (
-          typeof dictionary[k] === 'string' &&
-          dictionary[k].toLowerCase().includes(searchString.toLowerCase())
-        );
-      });
-    });
+    filteredDictionaries = dictionaries
+      .filter((dictionary) => {
+        return Object.keys(dictionary).some((k) => {
+          return (
+            typeof dictionary[k] === 'string' &&
+            dictionary[k].toLowerCase().includes(searchString.toLowerCase())
+          );
+        });
+      })
+      .reduce((acc, dictionary) => {
+        return acc.find((e) => e.id === dictionary.id) ? [...acc] : [...acc, dictionary];
+      }, []);
   }
 
   let searchBlurTimeout;

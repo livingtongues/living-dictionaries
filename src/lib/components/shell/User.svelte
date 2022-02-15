@@ -1,15 +1,14 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
   import { getStores } from '$app/stores';
-  import { admin } from '$lib/stores';
-  import { dev } from '$sveltefire/config';
+  import { admin, user as userStore } from '$lib/stores';
+  import { firebaseConfig, logOut } from '$sveltefirets';
   import { clickOutside } from '$svelteui/actions/clickOutside';
   import Avatar from '$svelteui/shell/Avatar.svelte';
   import ShowHide from '$svelteui/functions/ShowHide.svelte';
   import Menu from '$svelteui/shell/Menu.svelte';
   import Button from '$svelteui/ui/Button.svelte';
   import type { IUser } from '$lib/interfaces';
-  import { user as userStore } from '$sveltefire/user';
 
   $: user = $userStore || ($session && ($session.user as IUser)) || null;
   const { session } = getStores();
@@ -33,11 +32,9 @@
           {/if}
           <a href="/account"> {$_('account.account_settings', { default: 'Account Settings' })} </a>
           {#if userStore}
-            <button on:click={() => userStore.signOut(session)}
-              >{$_('account.log_out', { default: 'Log Out' })}</button
-            >
+            <button on:click={logOut}>{$_('account.log_out', { default: 'Log Out' })}</button>
           {/if}
-          {#if dev}
+          {#if firebaseConfig.projectId === 'talking-dictionaries-dev'}
             <button
               on:click={async () => {
                 const roleNumber = +prompt('Enter 0, 1, or 2');
@@ -48,8 +45,7 @@
                 )({
                   role: roleNumber,
                 });
-              }}
-            >
+              }}>
               Set Admin Role Level (dev only)
             </button>
           {/if}

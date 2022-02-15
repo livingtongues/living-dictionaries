@@ -16,15 +16,15 @@
   let updatedValue;
 
   import { dictionary } from '$lib/stores';
-  import { update } from '$sveltefire/firestorelite';
+  import { updateOnline } from '$sveltefirets';
   async function saveUpdateToFirestore(e) {
     try {
-      await update<IEntry>(
+      await updateOnline<IEntry>(
         `dictionaries/${$dictionary.id}/words/${entry.id}`,
         {
           [e.detail.field]: e.detail.newValue,
         },
-        true
+        { abbreviate: true }
       );
     } catch (err) {
       alert(`${$_('misc.error', { default: 'Error' })}: ${err}`);

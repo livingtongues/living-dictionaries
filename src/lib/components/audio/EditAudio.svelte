@@ -12,11 +12,10 @@
   import Button from '$svelteui/ui/Button.svelte';
 
   import { deleteAudio } from '$lib/helpers/delete';
-  import { firebaseConfig } from '$sveltefire/config';
 
   import type { IEntry } from '$lib/interfaces';
   import SelectSpeaker from '$lib/components/media/SelectSpeaker.svelte';
-  import { update } from '$sveltefire/firestorelite';
+  import { updateOnline, firebaseConfig } from '$sveltefirets';
 
   export let entry: IEntry;
 
@@ -51,9 +50,13 @@
       let:speakerId
       on:update={async ({ detail }) => {
         if (entry.sf && detail.speakerId != entry.sf.sp) {
-          await update(`dictionaries/${$dictionary.id}/words/${entry.id}`, {
-            'sf.sp': detail.speakerId,
-          });
+          await updateOnline(
+            `dictionaries/${$dictionary.id}/words/${entry.id}`,
+            {
+              'sf.sp': detail.speakerId,
+            },
+            { abbreviate: true }
+          );
         }
       }}>
       {#if entry.sf}

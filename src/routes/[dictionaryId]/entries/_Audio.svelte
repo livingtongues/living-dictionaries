@@ -5,7 +5,7 @@
     minimal = false;
   import { canEdit } from '$lib/stores';
   import { longpress } from '$svelteui/actions/longpress';
-  import { firebaseConfig } from '$sveltefire/config';
+  import { firebaseConfig } from '$sveltefirets';
   import ShowHide from '$svelteui/functions/ShowHide.svelte';
 
   let playing = false;

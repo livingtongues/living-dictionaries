@@ -29,6 +29,6 @@ Beginning developers, here are some general [development environment setup tips]
 Install dependencies with `npm install` and then run `npm run dev` to automatically open on [localhost:3051](http://localhost:3051). The app will hot reload as you make changes.
 
 Note that you will need to ask for our dev Mapbox and Firebase API keys or bring your own by adding `VITE_mapboxAccessToken=...` and
-`VITE_FirebaseDevApiKey=...` to a `.env.local` file on the root level.
+`VITE_FIREBASE_CONFIG=...` to a `.env.local` file on the root level.
 
 \*_Note that on localhost you will not see the live (prod) site's data, but rather the data from the dev database, which allows us to develop and make changes freely without worrying about deleting or corrupting important data._

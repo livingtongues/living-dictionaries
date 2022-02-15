@@ -4,7 +4,7 @@
   import { createEventDispatcher } from 'svelte';
   import { dictionary } from '$lib/stores';
   import Button from '$svelteui/ui/Button.svelte';
-  import { add } from '$sveltefire/firestorelite';
+  import { addOnline } from '$sveltefirets';
   import type { ISpeaker } from '$lib/interfaces';
 
   const dispatch = createEventDispatcher();
@@ -25,7 +25,7 @@
       contributingTo: [$dictionary.id],
     };
 
-    const { id } = await add<ISpeaker>('speakers', speaker);
+    const { id } = await addOnline<ISpeaker>('speakers', speaker);
     dispatch('newSpeaker', { id });
   }
 </script>

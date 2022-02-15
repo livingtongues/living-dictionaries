@@ -1,6 +1,6 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
-  import Collection from '$sveltefire/components/Collection.svelte';
+  import { Collection } from '$sveltefirets';
   import { where } from 'firebase/firestore';
 
   export let dictionaryId: string, initialSpeakerId: string;

@@ -6,7 +6,7 @@
   import { addDictionaryManagePermission } from '$lib/helpers/dictionariesManaging';
   import type { IDictionary, IUser } from '$lib/interfaces';
   import Button from '$svelteui/ui/Button.svelte';
-  import Collection from '$sveltefire/components/Collection.svelte';
+  import { Collection } from '$sveltefirets';
 
   export let user: IUser;
 

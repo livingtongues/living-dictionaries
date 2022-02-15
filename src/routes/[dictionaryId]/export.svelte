@@ -5,7 +5,7 @@
   import Button from '$svelteui/ui/Button.svelte';
   import { formatEntriesForCSV } from './export/_formatEntries';
   import type { IEntry } from '$lib/interfaces';
-  import { getCollection } from '$sveltefire/firestore';
+  import { getCollection } from '$sveltefirets';
   import { downloadObjArrAsCSV } from '$lib/export/csv';
   import ShowHide from '$svelteui/functions/ShowHide.svelte';
   import DownloadMedia from './export/_DownloadMedia.svelte';
@@ -20,7 +20,7 @@
   onMount(async () => {
     const entries = await getCollection<IEntry>(`dictionaries/${$dictionary.id}/words`);
     const speakers = await fetchSpeakers(entries);
-    formattedEntries = await formatEntriesForCSV(entries, $dictionary, speakers);
+    formattedEntries = formatEntriesForCSV(entries, $dictionary, speakers);
     entriesWithImages = formattedEntries.filter((entry) => entry.pfpa);
     entriesWithAudio = formattedEntries.filter((entry) => entry.sfpa);
     mounted = true;
@@ -42,17 +42,16 @@
     {$_('export.csv_data', { default: 'Data as CSV' })}
   </div>
   <div
-    class="flex items-center mt-2 {entriesWithImages.length ? '' : 'opacity-50 cursor-not-allowed'}"
-  >
+    class="flex items-center mt-2 {entriesWithImages.length
+      ? ''
+      : 'opacity-50 cursor-not-allowed'}">
     <input
       disabled={!entriesWithImages.length}
       id="images"
       type="checkbox"
-      bind:checked={includeImages}
-    />
+      bind:checked={includeImages} />
     <label for="images" class="mx-2 block leading-5 text-gray-900">
-      {$_('misc.images', { default: 'Images' })} ({entriesWithImages.length})</label
-    >
+      {$_('misc.images', { default: 'Images' })} ({entriesWithImages.length})</label>
   </div>
   {#if !mounted}
     <p class="text-xs italic text-orange-400 p-2">
@@ -65,12 +64,10 @@
   {/if}
 
   <div
-    class="flex items-center mt-2 {entriesWithAudio.length ? '' : 'opacity-50 cursor-not-allowed'}"
-  >
+    class="flex items-center mt-2 {entriesWithAudio.length ? '' : 'opacity-50 cursor-not-allowed'}">
     <input id="audio" type="checkbox" bind:checked={includeAudio} />
     <label for="audio" class="mx-2 block leading-5 text-gray-900">
-      {$_('entry.audio', { default: 'Audio' })} ({entriesWithAudio.length})</label
-    >
+      {$_('entry.audio', { default: 'Audio' })} ({entriesWithAudio.length})</label>
   </div>
   {#if !mounted}
     <p class="text-xs italic text-orange-400 p-2">
@@ -102,8 +99,7 @@
         entriesWithImages={includeImages ? entriesWithImages : []}
         entriesWithAudio={includeAudio ? entriesWithAudio : []}
         on:completed={toggle}
-        let:progress
-      >
+        let:progress>
         <Progress {progress} />
         {#if progress < 1}
           <Button onclick={toggle} color="red">{$_('misc.cancel', { default: 'Cancel' })}</Button>
@@ -125,8 +121,7 @@
       });
       downloadObjArrAsCSV(finalizedEntries, $dictionary.name);
     }}
-    form="primary"
-  >
+    form="primary">
     {$_('export.download_csv', { default: 'Download CSV' })}
   </Button>
 {/if}

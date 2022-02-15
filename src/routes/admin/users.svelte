@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { IUser } from '$lib/interfaces';
-  import Collection from '$sveltefire/components/Collection.svelte';
+  import { Collection } from '$sveltefirets';
   import UserRow from './_UserRow.svelte';
   import Filter from './_Filter.svelte';
   import { exportUsersAsCSV } from '$lib/export/csv';

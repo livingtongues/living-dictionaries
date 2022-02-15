@@ -12,14 +12,14 @@ class FB {
   private _db: Firestore;
 
   private constructor() {
+    console.log('initing firebase');
+    if (getApps().length) {
+      this._firebaseApp = getApp();
+    } else {
+      this._firebaseApp = initializeApp(firebaseConfig);
+    }
+    this._db = getFirestore();
     if (browser) {
-      console.log('initing firebase');
-      if (getApps().length) {
-        this._firebaseApp = getApp();
-      } else {
-        this._firebaseApp = initializeApp(firebaseConfig);
-      }
-      this._db = getFirestore();
       enableIndexedDbPersistence(this._db).catch((err) => {
         if (err.code == 'failed-precondition') {
           console.warn(

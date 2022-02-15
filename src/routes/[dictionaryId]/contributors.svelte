@@ -12,9 +12,12 @@
 <script lang="ts">
   export let dictionaryId: string;
   import { _ } from 'svelte-i18n';
-  import { isManager, isContributor, dictionary, admin } from '$lib/stores';
-  import Collection from '$sveltefire/components/Collection.svelte';
+  import { addOnline, deleteDocumentOnline, updateOnline, Collection } from '$sveltefirets';
   import { where } from 'firebase/firestore';
+  import { isManager, isContributor, dictionary, admin, user } from '$lib/stores';
+  import type { IInvite, IWriteInCollaborator, IContributor, IManager } from '$lib/interfaces';
+  import Button from '$svelteui/ui/Button.svelte';
+  import ShowHide from '$svelteui/functions/ShowHide.svelte';
 
   function invite(role: 'manager' | 'contributor' = 'contributor') {
     const input = prompt(`${$_('contact.email', { default: 'Email' })}?`);
@@ -23,12 +26,6 @@
       isEmail ? saveInvite(input, role) : alert($_('misc.invalid', { default: 'Invalid Email' }));
     }
   }
-
-  import { add, deleteDocument, update } from '$sveltefire/firestorelite';
-  import type { IInvite, IWriteInCollaborator, IContributor, IManager } from '$lib/interfaces';
-  import Button from '$svelteui/ui/Button.svelte';
-  import ShowHide from '$svelteui/functions/ShowHide.svelte';
-  import { user } from '$sveltefire/user';
 
   let managerType: IManager[];
   let contributorType: IContributor[];
@@ -45,7 +42,7 @@
         role,
         status: 'queued',
       };
-      await add(`dictionaries/${dictionaryId}/invites`, invite, true);
+      await addOnline(`dictionaries/${dictionaryId}/invites`, invite);
     } catch (err) {
       alert(`${$_('misc.error', { default: 'Error' })}: ${err}`);
       console.error(err);
@@ -55,7 +52,7 @@
   function writeIn() {
     const name = prompt(`${$_('speakers.name', { default: 'Name' })}?`);
     if (name) {
-      add(`dictionaries/${dictionaryId}/writeInCollaborators`, { name }, true);
+      addOnline(`dictionaries/${dictionaryId}/writeInCollaborators`, { name });
     }
   }
 </script>
@@ -76,8 +73,7 @@
     >{$_('contributors.manager_contributor_distinction', {
       default:
         'Note: Dictionary managers may add, edit or delete content. Contributors are project collaborators who can also add and edit, but cannot delete any content.',
-    })}</i
-  >
+    })}</i>
 </p>
 
 <h3 class="font-semibold text-lg mb-1 mt-3">
@@ -100,16 +96,14 @@
       path={`dictionaries/${dictionaryId}/invites`}
       queryConstraints={[where('role', '==', 'manager'), where('status', 'in', ['queued', 'sent'])]}
       startWith={inviteType}
-      let:data
-    >
+      let:data>
       {#each data as invite}
         <div class="py-3 flex flex-wrap items-center justify-between">
           <div class="text-sm leading-5 font-medium text-gray-900">
             <i
               >{$_('contributors.invitation_sent', {
                 default: 'Invitation sent',
-              })}:</i
-            >
+              })}:</i>
             {invite.targetEmail}
           </div>
           {#if $admin}
@@ -118,14 +112,13 @@
               size="sm"
               on:click={() => {
                 if (confirm($_('misc.delete', { default: 'Delete' }))) {
-                  update(`dictionaries/${dictionaryId}/invites/${invite.id}`, {
+                  updateOnline(`dictionaries/${dictionaryId}/invites/${invite.id}`, {
                     status: 'cancelled',
                   });
                 }
               }}
               >{$_('misc.delete', { default: 'Delete' })}
-              <i class="fas fa-times" /><i class="fas fa-key mx-1" /></Button
-            >
+              <i class="fas fa-times" /><i class="fas fa-key mx-1" /></Button>
           {/if}
         </div>
       {/each}
@@ -147,8 +140,7 @@
   <Collection
     path={`dictionaries/${dictionaryId}/contributors`}
     startWith={contributorType}
-    let:data
-  >
+    let:data>
     {#each data as contributor}
       <div class="py-3">
         <div class="text-sm leading-5 font-medium text-gray-900">
@@ -165,16 +157,14 @@
         where('status', 'in', ['queued', 'sent']),
       ]}
       startWith={inviteType}
-      let:data
-    >
+      let:data>
       {#each data as invite}
         <div class="py-3 flex flex-wrap items-center justify-between">
           <div class="text-sm leading-5 font-medium text-gray-900">
             <i
               >{$_('contributors.invitation_sent', {
                 default: 'Invitation sent',
-              })}:</i
-            >
+              })}:</i>
             {invite.targetEmail}
           </div>
           {#if $admin}
@@ -183,14 +173,13 @@
               size="sm"
               onclick={() => {
                 if (confirm($_('misc.delete', { default: 'Delete' }))) {
-                  update(`dictionaries/${dictionaryId}/invites/${invite.id}`, {
+                  updateOnline(`dictionaries/${dictionaryId}/invites/${invite.id}`, {
                     status: 'cancelled',
                   });
                 }
               }}
               >{$_('misc.delete', { default: 'Delete' })}
-              <i class="fas fa-times" /><i class="fas fa-key ml-1" /></Button
-            >
+              <i class="fas fa-times" /><i class="fas fa-key ml-1" /></Button>
           {/if}
         </div>
       {/each}
@@ -199,8 +188,7 @@
   <Collection
     path={`dictionaries/${dictionaryId}/writeInCollaborators`}
     startWith={writeInCollaboratorType}
-    let:data
-  >
+    let:data>
     {#each data as collaborator}
       <div class="py-3 flex flex-wrap items-center justify-between">
         <div class="text-sm leading-5 font-medium text-gray-900">
@@ -212,14 +200,13 @@
             size="sm"
             onclick={() => {
               if (confirm($_('misc.delete', { default: 'Delete' }))) {
-                deleteDocument(
+                deleteDocumentOnline(
                   `dictionaries/${dictionaryId}/writeInCollaborators/${collaborator.id}`
                 );
               }
             }}
             >{$_('misc.delete', { default: 'Delete' })}
-            <i class="fas fa-times" /></Button
-          >
+            <i class="fas fa-times" /></Button>
         {/if}
       </div>
     {/each}
