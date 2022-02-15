@@ -1,8 +1,7 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
   import type { IVideo, IEntry } from '$lib/interfaces';
-  import { dictionary } from '$lib/stores';
-  import { user } from '$sveltefire/user';
+  import { dictionary, user } from '$lib/stores';
 
   import { tweened } from 'svelte/motion';
   import { cubicOut } from 'svelte/easing';
@@ -20,7 +19,7 @@
     startUpload();
   }
 
-  import { update } from '$sveltefire/firestorelite';
+  import { updateOnline } from '$sveltefirets';
   import { serverTimestamp } from 'firebase/firestore/lite';
   import { getStorage, ref, uploadBytesResumable } from 'firebase/storage';
 
@@ -68,7 +67,11 @@
             sp: speakerId,
           };
 
-          await update(`dictionaries/${$dictionary.id}/words/${entry.id}`, { vf }, true);
+          await updateOnline(
+            `dictionaries/${$dictionary.id}/words/${entry.id}`,
+            { vf },
+            { abbreviate: true }
+          );
 
           success = true;
         } catch (err) {

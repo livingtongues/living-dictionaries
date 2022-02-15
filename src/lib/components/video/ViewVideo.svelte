@@ -11,8 +11,7 @@
   import VideoIFrame from './VideoIFrame.svelte';
   import { deleteVideo } from '$lib/helpers/delete';
   import SelectSpeaker from '$lib/components/media/SelectSpeaker.svelte';
-  import { update } from '$sveltefire/firestorelite';
-  import { firebaseConfig } from '$sveltefire/config';
+  import { updateOnline, firebaseConfig } from '$sveltefirets';
   import { dictionary, admin, canEdit } from '$lib/stores';
   import type { IEntry } from '$lib/interfaces';
   import ShowHide from '$svelteui/functions/ShowHide.svelte';
@@ -30,9 +29,13 @@
         let:speakerId
         on:update={async ({ detail }) => {
           if (entry.vf && detail.speakerId != entry.vf.sp) {
-            await update(`dictionaries/${$dictionary.id}/words/${entry.id}`, {
-              'vf.sp': detail.speakerId,
-            });
+            await updateOnline(
+              `dictionaries/${$dictionary.id}/words/${entry.id}`,
+              {
+                'vf.sp': detail.speakerId,
+              },
+              { abbreviate: true }
+            );
           }
         }}>
         {#if entry.vf}
@@ -56,16 +59,16 @@
               <PasteVideoLink
                 on:update={async ({ detail }) => {
                   if (detail.type === 'youtube') {
-                    await update(
+                    await updateOnline(
                       `dictionaries/${$dictionary.id}/words/${entry.id}`,
                       { vf: { youtubeId: detail.videoId } },
-                      true
+                      { abbreviate: true }
                     );
                   } else if (detail.type === 'vimeo') {
-                    await update(
+                    await updateOnline(
                       `dictionaries/${$dictionary.id}/words/${entry.id}`,
                       { vf: { vimeoId: detail.videoId } },
-                      true
+                      { abbreviate: true }
                     );
                   }
                 }} />
