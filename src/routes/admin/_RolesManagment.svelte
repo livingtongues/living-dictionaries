@@ -1,11 +1,12 @@
 <script lang="ts">
+  import { _ } from 'svelte-i18n';
   import BadgeArrayEmit from '$svelteui/data/BadgeArrayEmit.svelte';
   import ShowHide from '$svelteui/functions/ShowHide.svelte';
   import {
     removeDictionaryManagerPermission,
     removeDictionaryContributorPermission,
     removeDictionaryCollaboratorPermission,
-    addDictionaryManagerPermission,
+    addDictionaryCollaboratorPermission,
   } from '$lib/helpers/dictionariesManaging';
   import { fetchUser } from '$lib/helpers/fetchUser';
   export let data: any;
@@ -29,15 +30,10 @@
       alert(`Error: ${err}`);
     }
   }
-  async function save(id: string, dictionary: string, role: string) {
-    try {
-      if (role === 'manager') {
-        const user = await fetchUser(id);
-        addDictionaryManagerPermission(user, dictionary);
-      }
-    } catch (err) {
-      alert(`Error: ${err}`);
-    }
+
+  async function save() {
+    const name = prompt(`${$_('speakers.name', { default: 'Name' })}?`);
+    addDictionaryCollaboratorPermission(name, dictionary);
   }
 </script>
 
@@ -50,7 +46,7 @@
         addMessage="Add"
         on:itemclicked={(e) => console.log('clicked:', data[e.detail.index].id)}
         on:itemremoved={(e) => remove(data[e.detail.index].id, dictionary, userRole)}
-        on:additem={toggle}
+        on:additem={userRole === 'collab' ? save : toggle}
       />
       <button>Invite button here</button>
       {#if show}

@@ -15,6 +15,7 @@
   import { isManager, isContributor, dictionary, admin } from '$lib/stores';
   import Collection from '$sveltefire/components/Collection.svelte';
   import { where } from 'firebase/firestore';
+  import { addDictionaryCollaboratorPermission } from '$lib/helpers/dictionariesManaging';
 
   function invite(role: 'manager' | 'contributor' = 'contributor') {
     const input = prompt(`${$_('contact.email', { default: 'Email' })}?`);
@@ -54,9 +55,7 @@
 
   function writeIn() {
     const name = prompt(`${$_('speakers.name', { default: 'Name' })}?`);
-    if (name) {
-      add(`dictionaries/${dictionaryId}/writeInCollaborators`, { name }, true);
-    }
+    addDictionaryCollaboratorPermission(name, dictionaryId);
   }
 </script>
 
