@@ -6,9 +6,9 @@
     removeDictionaryManagerPermission,
     removeDictionaryContributorPermission,
     removeDictionaryCollaboratorPermission,
-    addDictionaryCollaboratorPermission,
   } from '$lib/helpers/dictionariesManaging';
   import { fetchUser } from '$lib/helpers/fetchUser';
+  import { addOnline } from '$sveltefirets';
   export let data: any;
   export let dictionary: string;
   export let userRole: string;
@@ -33,7 +33,9 @@
 
   async function save() {
     const name = prompt(`${$_('speakers.name', { default: 'Name' })}?`);
-    addDictionaryCollaboratorPermission(name, dictionary);
+    if (name) {
+      addOnline(`dictionaries/${dictionary}/writeInCollaborators`, { name });
+    }
   }
 </script>
 
@@ -46,8 +48,7 @@
         addMessage="Add"
         on:itemclicked={(e) => console.log('clicked:', data[e.detail.index].id)}
         on:itemremoved={(e) => remove(data[e.detail.index].id, dictionary, userRole)}
-        on:additem={userRole === 'collab' ? save : toggle}
-      />
+        on:additem={userRole === 'collab' ? save : toggle} />
       <button>Invite button here</button>
       {#if show}
         {#await import('./_SelectUserModal.svelte') then { default: SelectUserModal }}
