@@ -1,5 +1,5 @@
 <script lang="ts">
-  import Doc from '$sveltefire/components/Doc.svelte';
+  import { Doc } from '$sveltefirets';
   import type { IAbout, IDictionary } from '$lib/interfaces';
 
   import { _ } from 'svelte-i18n';
@@ -70,10 +70,13 @@
       {$_('home.open_dictionary', { default: 'Open Dictionary' })}
     </Button>
   {:else}
-    <Doc path={`dictionaries/${dictionary.id}/info/about`} startWith={aboutType} let:data>
+    <Doc
+      path={`dictionaries/${dictionary.id}/info/about`}
+      startWith={aboutType}
+      let:data={{ about }}>
       <div class="mb-2 text-sm inline-children-elements">
-        {@html truncateString(data.about, 200)}
-        {#if data.about.length > 200}
+        {@html truncateString(about, 200)}
+        {#if about.length > 200}
           <a class="hover:underline" href={dictionary.id + '/about'} sveltekit:prefetch>
             {$_('home.read_more', { default: 'Read More' })}
           </a>

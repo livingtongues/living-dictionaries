@@ -10,7 +10,7 @@
   import { _ } from 'svelte-i18n';
   import Button from '$svelteui/ui/Button.svelte';
   import { onMount } from 'svelte';
-  import { dev } from '$sveltefire/config';
+  import { firebaseConfig } from '$sveltefirets';
   import ShowHide from '$svelteui/functions/ShowHide.svelte';
 
   export let status;
@@ -64,7 +64,7 @@
     {error.message}
   </p>
 
-  {#if dev && error.stack}
+  {#if firebaseConfig.projectId === 'talking-dictionaries-dev' && error.stack}
     <div class="w-full overflow-x-auto">
       <pre>{error.stack}</pre>
     </div>

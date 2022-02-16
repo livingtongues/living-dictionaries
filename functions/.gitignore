@@ -9,3 +9,5 @@ node_modules/
 service-account*
 sheets-viewer-SA.json
 logs
+
+.env

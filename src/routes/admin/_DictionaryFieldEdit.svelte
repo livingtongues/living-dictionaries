@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { update } from '$sveltefire/firestorelite';
+  import { updateOnline } from '$sveltefirets';
   export let field;
   export let value;
   export let dictionaryId;
@@ -14,7 +14,7 @@
 
   async function save() {
     try {
-      await update(`dictionaries/${dictionaryId}`, { [field]: value });
+      await updateOnline(`dictionaries/${dictionaryId}`, { [field]: value });
       unsaved = false;
     } catch (err) {
       alert(err);

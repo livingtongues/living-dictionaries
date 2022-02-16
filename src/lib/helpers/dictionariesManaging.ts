@@ -1,16 +1,22 @@
-import { deleteDocument, set, update, getDocument, add } from '$sveltefire/firestorelite';
+import {
+  deleteDocument,
+  deleteDocumentOnline,
+  getDocument,
+  setOnline,
+  updateOnline,
+} from '$sveltefirets';
 import { arrayRemove, arrayUnion, serverTimestamp } from 'firebase/firestore/lite';
 import type { IUser, IManager, IWriteInCollaborator, IContributor } from '$lib/interfaces';
 
-export async function addDictionaryManagerPermission(userBeingEdited: IUser, dictionaryId: string) {
-  const manager: IManager = {
+export async function addDictionaryManagePermission(userBeingEdited: IUser, dictionaryId: string) {
+  await setOnline<IManager>(`dictionaries/${dictionaryId}/managers/${userBeingEdited.uid}`, {
     id: userBeingEdited.uid,
     name: userBeingEdited.displayName,
-  };
-
-  await set(`dictionaries/${dictionaryId}/managers/${userBeingEdited.uid}`, manager);
-  await update(`users/${userBeingEdited.uid}`, {
+  });
+  await updateOnline<IUser>(`users/${userBeingEdited.uid}`, {
+    //@ts-ignore
     managing: arrayUnion(dictionaryId),
+    //@ts-ignore
     termsAgreement: serverTimestamp(),
   });
 }
@@ -24,8 +30,8 @@ export async function removeDictionaryManagerPermission(
       `Are you sure you want to remove ${userBeingEdited.displayName} as manager from ${dictionaryId}?`
     )
   ) {
-    await deleteDocument(`dictionaries/${dictionaryId}/managers/${userBeingEdited.uid}`);
-    await update(`users/${userBeingEdited.uid}`, {
+    await deleteDocumentOnline(`dictionaries/${dictionaryId}/managers/${userBeingEdited.uid}`);
+    await updateOnline(`users/${userBeingEdited.uid}`, {
       managing: arrayRemove(dictionaryId),
     });
   }
@@ -38,7 +44,7 @@ export async function addDictionaryContributorPermission(
     id: userBeingEdited.uid,
     name: userBeingEdited.displayName,
   };
-  await set(`dictionaries/${dictionaryId}/contributors/${contributor.id}`, contributor);
+  await setOnline(`dictionaries/${dictionaryId}/contributors/${contributor.id}`, contributor);
 }
 
 export async function removeDictionaryContributorPermission(
@@ -54,12 +60,6 @@ export async function removeDictionaryContributorPermission(
     )
   ) {
     await deleteDocument(`dictionaries/${dictionaryId}/contributors/${contributorId}`);
-  }
-}
-
-export async function addDictionaryCollaboratorPermission(name: string, dictionaryId: string) {
-  if (name) {
-    add(`dictionaries/${dictionaryId}/writeInCollaborators`, { name }, true);
   }
 }
 

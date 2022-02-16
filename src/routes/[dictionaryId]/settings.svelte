@@ -3,7 +3,7 @@
   import { dictionary } from '$lib/stores';
   import Button from '$svelteui/ui/Button.svelte';
   import ShowHide from '$svelteui/functions/ShowHide.svelte';
-  import { update } from '$sveltefire/firestorelite';
+  import { updateOnline } from '$sveltefirets';
 
   let name = $dictionary.name;
   let publicDictionary = $dictionary.public;
@@ -11,7 +11,7 @@
   async function saveName() {
     try {
       name = name.trim().replace(/^./, name[0].toUpperCase());
-      await update(`dictionaries/${$dictionary.id}`, { name });
+      await updateOnline(`dictionaries/${$dictionary.id}`, { name });
       $dictionary.name = name;
       location.reload();
     } catch (err) {
@@ -29,7 +29,7 @@
           })}`
         );
       }
-      await update(`dictionaries/${$dictionary.id}`, { public: publicDictionary });
+      await updateOnline(`dictionaries/${$dictionary.id}`, { public: publicDictionary });
       $dictionary.public = publicDictionary;
     } catch (err) {
       publicDictionary = $dictionary.public;
@@ -68,16 +68,14 @@
           sm:text-sm sm:leading-5 transition ease-in-out duration-150"
         placeholder={$_('settings.dict_name', {
           default: 'Dictionary Name',
-        })}
-      />
+        })} />
     </div>
     <button
       type="submit"
       class="-ml-px relative flex items-center px-3 py-2 ltr:rounded-r-md rtl:rounded-l-md border
         border-gray-300 text-sm leading-5 bg-gray-50 text-gray-900
         focus:outline-none focus:shadow-outline-blue focus:border-blue-300
-        focus:z-10 transition ease-in-out duration-150"
-    >
+        focus:z-10 transition ease-in-out duration-150">
       {$_('misc.save', { default: 'Save' })}
       <!-- <span class="hidden sm:inline">Name</span> -->
     </button>

@@ -1,11 +1,11 @@
 <script context="module" lang="ts">
   import type { IDictionary } from '$lib/interfaces';
-  import { fetchDoc } from '$sveltefire/REST';
+  import { getDocument } from '$sveltefirets';
 
   import type { Load } from '@sveltejs/kit';
   export const load: Load = async ({ page: { params } }) => {
     try {
-      const dictionary = await fetchDoc<IDictionary>(`dictionaries/${params.dictionaryId}`);
+      const dictionary = await getDocument<IDictionary>(`dictionaries/${params.dictionaryId}`);
       if (dictionary) {
         return { props: { dictionary } };
       } else {
