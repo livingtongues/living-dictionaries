@@ -3,12 +3,11 @@
   // import { connectHits } from 'instantsearch.js/es/connectors';
   import { connectHits } from 'instantsearch.js/cjs/connectors/index.js';
   import { limit, orderBy, where, Timestamp } from 'firebase/firestore';
-  import { user } from '$sveltefire/user';
-  import { canEdit, dictionary } from '$lib/stores';
+  import { canEdit, dictionary, user } from '$lib/stores';
   import { mergeBy } from '$lib/helpers/array';
   import type { IEntry } from '$lib/interfaces';
   import type { InstantSearch } from 'instantsearch.js';
-  import { dev } from '$sveltefire/config';
+  import { firebaseConfig } from '$sveltefirets';
 
   export let search: InstantSearch;
 
@@ -35,8 +34,8 @@
 <slot {entries}>Loading...</slot>
 
 {#if $canEdit}
-  {#await import('$sveltefire/components/Collection.svelte') then { default: Collection }}
-    {#if dev}
+  {#await import('$sveltefirets/components/Collection.svelte') then { default: Collection }}
+    {#if firebaseConfig.projectId === 'talking-dictionaries-dev'}
       <Collection
         path={`dictionaries/${$dictionary.id}/words`}
         queryConstraints={[
@@ -45,8 +44,7 @@
           limit(10),
         ]}
         startWith={recentlyUpdatedEntries}
-        on:data={(e) => (recentlyUpdatedEntries = e.detail.data)}
-      />
+        on:data={(e) => (recentlyUpdatedEntries = e.detail.data)} />
     {:else}
       <Collection
         path={`dictionaries/${$dictionary.id}/words`}
@@ -57,8 +55,7 @@
           limit(4),
         ]}
         startWith={recentlyUpdatedEntries}
-        on:data={(e) => (recentlyUpdatedEntries = e.detail.data)}
-      />
+        on:data={(e) => (recentlyUpdatedEntries = e.detail.data)} />
     {/if}
   {/await}
 {/if}

@@ -2,7 +2,7 @@
   import { _ } from 'svelte-i18n';
   import type { IEntry, IPhoto } from '$lib/interfaces';
   export let file: File, entry: IEntry;
-  import { dictionary } from '$lib/stores';
+  import { dictionary, user } from '$lib/stores';
 
   import { tweened } from 'svelte/motion';
   import { cubicOut } from 'svelte/easing';
@@ -85,17 +85,13 @@
     );
   }
 
-  import { update } from '$sveltefire/firestorelite';
-  import { dev } from '$sveltefire/config';
+  import { updateOnline, firebaseConfig } from '$sveltefirets';
   import { serverTimestamp } from 'firebase/firestore/lite';
-  import { user } from '$sveltefire/user';
   import { processImageUrl } from './processImageUrl';
 
   async function savePhoto(storagePath: string) {
     try {
-      const imageProcessingUrl = `${processImageUrl}/talking-dictionaries-${
-        dev ? 'dev' : 'alpha'
-      }.appspot.com/${storagePath}`;
+      const imageProcessingUrl = `${processImageUrl}/${firebaseConfig.storageBucket}/${storagePath}`;
 
       const result = await fetch(imageProcessingUrl);
       const url = await result.text();
@@ -108,7 +104,11 @@
         cr: $user.displayName,
         ab: $user.uid,
       };
-      await update(`dictionaries/${$dictionary.id}/words/${entry.id}`, { pf }, true);
+      await updateOnline<IEntry>(
+        `dictionaries/${$dictionary.id}/words/${entry.id}`,
+        { pf },
+        { abbreviate: true }
+      );
       success = true;
     } catch (err) {
       error = err;

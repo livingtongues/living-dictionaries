@@ -1,11 +1,11 @@
 <script context="module" lang="ts">
-  import { fetchDoc } from '$sveltefire/REST';
+  import { getDocument } from '$sveltefirets';
 
   import type { Load } from '@sveltejs/kit';
   export const load: Load = async ({ page: { params } }) => {
     const dictionaryId = params.dictionaryId;
     try {
-      const aboutDoc = await fetchDoc<IAbout>(`dictionaries/${dictionaryId}/info/about`);
+      const aboutDoc = await getDocument<IAbout>(`dictionaries/${dictionaryId}/info/about`);
       if (aboutDoc && aboutDoc.about) {
         return { props: { about: aboutDoc.about, dictionaryId } };
       } else return { props: { about: null, dictionaryId } };
@@ -22,12 +22,12 @@
   export let about = '',
     dictionaryId: string;
   import Button from '$svelteui/ui/Button.svelte';
-  import { set } from '$sveltefire/firestorelite';
+  import { setOnline } from '$sveltefirets';
   import type { IAbout } from '$lib/interfaces';
 
   async function save() {
     try {
-      await set<IAbout>(`dictionaries/${dictionaryId}/info/about`, { about });
+      await setOnline<IAbout>(`dictionaries/${dictionaryId}/info/about`, { about });
       window.location.replace(`/${dictionaryId}/about`);
     } catch (err) {
       alert(err);
@@ -52,15 +52,12 @@
   {#if $isManager}
     {#if editing}
       <Button class="mb-2" onclick={() => (editing = false)}
-        >{$_('misc.cancel', { default: 'Cancel' })}</Button
-      >
+        >{$_('misc.cancel', { default: 'Cancel' })}</Button>
       <Button class="mb-2" form="primary" onclick={save}
-        >{$_('misc.save', { default: 'Save' })}</Button
-      >
+        >{$_('misc.save', { default: 'Save' })}</Button>
     {:else}
       <Button class="mb-2" onclick={() => (editing = true)}
-        >{$_('misc.edit', { default: 'Edit' })}</Button
-      >
+        >{$_('misc.edit', { default: 'Edit' })}</Button>
     {/if}
   {/if}
 

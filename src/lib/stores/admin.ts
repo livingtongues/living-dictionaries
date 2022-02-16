@@ -1,5 +1,5 @@
 import type { IUser } from '$lib/interfaces';
-import { user } from '$sveltefire/user';
+import { user } from './user';
 import { derived } from 'svelte/store';
 
 export const admin = derived(user, ($user: IUser) => {

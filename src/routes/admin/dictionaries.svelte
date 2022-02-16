@@ -1,8 +1,7 @@
 <script lang="ts">
   import type { IDictionary } from '$lib/interfaces';
   import ResponsiveTable from '$lib/components/ui/ResponsiveTable.svelte';
-  import Collection from '$sveltefire/components/Collection.svelte';
-  import { update } from '$sveltefire/firestorelite';
+  import { Collection, updateOnline } from '$sveltefirets';
   import { arrayRemove, arrayUnion, deleteField, GeoPoint } from 'firebase/firestore/lite';
   import { exportDictionariesAsCSV } from '$lib/export/csv';
   import Filter from './_Filter.svelte';
@@ -22,14 +21,12 @@
   <Filter
     items={dictionaries}
     let:filteredItems={filteredDictionaries}
-    placeholder="Search dictionaries"
-  >
+    placeholder="Search dictionaries">
     <div slot="right">
       <Button
         form="primary"
         color="black"
-        onclick={() => exportDictionariesAsCSV(filteredDictionaries, 'living-dictionaries-list')}
-      >
+        onclick={() => exportDictionariesAsCSV(filteredDictionaries, 'living-dictionaries-list')}>
         <i class="fas fa-download mr-1" />
         Download {filteredDictionaries.length} Dictionaries as CSV
       </Button>
@@ -41,10 +38,7 @@
             {dictionary}
             on:toggleprivacy={() => {
               try {
-                console.log({
-                  public: !dictionary.public,
-                });
-                update(`dictionaries/${dictionary.id}`, {
+                updateOnline(`dictionaries/${dictionary.id}`, {
                   public: !dictionary.public,
                 });
               } catch (err) {
@@ -53,7 +47,7 @@
             }}
             on:addalternatename={(event) => {
               try {
-                update(`dictionaries/${dictionary.id}`, {
+                updateOnline(`dictionaries/${dictionary.id}`, {
                   alternateNames: arrayUnion(event.detail),
                 });
               } catch (err) {
@@ -62,7 +56,7 @@
             }}
             on:removealternatename={(event) => {
               try {
-                update(`dictionaries/${dictionary.id}`, {
+                updateOnline(`dictionaries/${dictionary.id}`, {
                   alternateNames: arrayRemove(event.detail),
                 });
               } catch (err) {
@@ -72,21 +66,22 @@
             on:save={(event) => {
               try {
                 const location = new GeoPoint(event.detail.lat, event.detail.lng);
-                update(`dictionaries/${event.detail.dictionary.id}`, { coordinates: location });
+                updateOnline(`dictionaries/${event.detail.dictionary.id}`, {
+                  coordinates: location,
+                });
               } catch (err) {
                 alert(err);
               }
             }}
             on:remove={(event) => {
               try {
-                update(`dictionaries/${event.detail.dictionary.id}`, {
+                updateOnline(`dictionaries/${event.detail.dictionary.id}`, {
                   coordinates: deleteField(),
                 });
               } catch (err) {
                 alert(err);
               }
-            }}
-          />
+            }} />
         {/each}
       </SortDictionaries>
     </ResponsiveTable>

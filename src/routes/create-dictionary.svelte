@@ -3,13 +3,14 @@
   import BadgeArray from '$svelteui/data/BadgeArray.svelte';
   import MultiSelect from '$lib/components/ui/MultiSelect.svelte';
   import { glossingLanguages } from '$lib/mappings/glossing-languages';
-  import { user } from '$sveltefire/user';
+  import { user } from '$lib/stores';
   import Header from '$lib/components/shell/Header.svelte';
   import Button from '$svelteui/ui/Button.svelte';
   import type { IDictionary, IManager, IUser } from '$lib/interfaces';
-  import { docExists, setOnline, updateOnline } from '$sveltefire/lite';
-  import { GeoPoint, serverTimestamp } from 'firebase/firestore/lite';
+  import { docExists, setOnline, updateOnline } from '$sveltefirets';
+  import { arrayUnion, GeoPoint, serverTimestamp } from 'firebase/firestore/lite';
   import { debounce } from '$lib/helpers/debounce';
+  import { pruneObject } from '$lib/helpers/prune';
 
   let modal: 'auth' | 'coordinates' = null;
   let submitting = false;
@@ -29,7 +30,7 @@
   $: {
     url = url
       .trim()
-      .substr(0, 25) // Max 25 characters
+      .slice(0, 25) // Max 25 characters
       .trim()
       .replace(/\s+/g, '-') // Replace string-medial spaces with hyphens
       .replace(/[';,!@#$%^&*()]/g, '') // Remove special characters
@@ -73,8 +74,7 @@
     }
     try {
       submitting = true;
-      // TODO: don't add fields that are empty
-      const dictionaryData = {
+      const dictionaryData: IDictionary = {
         name: name.trim().replace(/^./, name[0].toUpperCase()),
         glossLanguages,
         public: publicDictionary,
@@ -85,13 +85,16 @@
         iso6393: iso6393.trim(),
         glottocode: glottocode.trim(),
       };
-      await setOnline<IDictionary>(`dictionaries/${url}`, dictionaryData);
-      const manager = {
+
+      await setOnline<IDictionary>(`dictionaries/${url}`, pruneObject(dictionaryData));
+      await setOnline<IManager>(`dictionaries/${url}/managers/${$user.uid}`, {
         id: $user.uid,
         name: $user.displayName,
-      };
-      await setOnline<IManager>(`dictionaries/${url}/managers/${$user.uid}`, manager);
+      });
       await updateOnline<IUser>(`users/${$user.uid}`, {
+        //@ts-ignore
+        managing: arrayUnion(url),
+        // WARNING: If we are going to make a delete dictionary option available to users, we must delete the corresponding management data in the user interface
         //@ts-ignore
         termsAgreement: serverTimestamp(),
       });

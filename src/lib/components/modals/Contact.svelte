@@ -2,8 +2,8 @@
   import { _ } from 'svelte-i18n';
   import Modal from '$lib/components/ui/Modal.svelte';
   import Button from '$svelteui/ui/Button.svelte';
-  import { user } from '$sveltefire/user';
-  import { firebaseApp } from '$sveltefire';
+  import { user } from '$lib/stores';
+  import { firebaseApp } from '$sveltefirets';
   import { getFunctions, httpsCallable } from 'firebase/functions';
 
   import { createEventDispatcher } from 'svelte';

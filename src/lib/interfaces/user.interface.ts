@@ -11,7 +11,7 @@ interface User {
   lastVisit?: Timestamp & FieldValue;
 
   roles?: IRoles;
-  managing?: string[]; // | firebase.firestore.FieldValue; // dictionary Ids
+  managing?: string[]; // | FieldValue; // dictionary Ids
   contributing?: string[]; // dictionary Ids
   // starred?: string[]; // in future save dictionary Ids to user that they star, to allow them quick access back to those dictionaries
   termsAgreement?: Timestamp & FieldValue;

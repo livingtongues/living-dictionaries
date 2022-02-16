@@ -12,10 +12,8 @@
   import Button from '$svelteui/ui/Button.svelte';
 
   import { deleteAudio } from '$lib/helpers/delete';
-  import { firebaseConfig } from '$sveltefire/config';
-  import { update } from '$sveltefire/firestorelite';
+  import { Collection, updateOnline, firebaseConfig } from '$sveltefirets';
 
-  import Collection from '$sveltefire/components/Collection.svelte';
   import { where } from 'firebase/firestore';
 
   import type { IEntry, ISpeaker } from '$lib/interfaces';
@@ -44,7 +42,7 @@
   }
 
   async function updateSpeaker() {
-    await update(`dictionaries/${$dictionary.id}/words/${entry.id}`, { 'sf.sp': speakerId });
+    await updateOnline(`dictionaries/${$dictionary.id}/words/${entry.id}`, { 'sf.sp': speakerId }); // Dot notation: https://firebase.google.com/docs/firestore/manage-data/add-data#update_fields_in_nested_objects
   }
 
   let file;

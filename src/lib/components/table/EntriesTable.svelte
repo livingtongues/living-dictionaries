@@ -39,7 +39,7 @@
       {/each}
     </tr>
     {#if $canEdit}
-      {#await import('$sveltefire/components/Doc.svelte') then { default: Doc }}
+      {#await import('$sveltefirets/components/Doc.svelte') then { default: Doc }}
         {#each entries as algoliaEntry (algoliaEntry.id)}
           <Doc
             path="dictionaries/{$dictionary.id}/words/{algoliaEntry.id}"

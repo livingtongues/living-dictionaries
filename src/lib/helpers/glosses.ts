@@ -15,3 +15,13 @@ export function printGlosses(obj) {
     return [obj[keys[0]]];
   }
 }
+
+export function showEntryGlossLanguages(
+  entryGlosses: { [key: string]: string },
+  dictionaryLanguages: string[]
+) {
+  if (entryGlosses) {
+    return [...new Set([...dictionaryLanguages, ...Object.keys(entryGlosses)])];
+  }
+  return [...new Set(dictionaryLanguages)];
+}

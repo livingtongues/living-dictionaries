@@ -5,7 +5,7 @@
   import Button from '$svelteui/ui/Button.svelte';
   import { formatEntriesForCSV } from './export/_formatEntries';
   import type { IEntry } from '$lib/interfaces';
-  import { getCollection } from '$sveltefire/firestore';
+  import { getCollection } from '$sveltefirets';
   import { downloadObjArrAsCSV } from '$lib/export/csv';
   import ShowHide from '$svelteui/functions/ShowHide.svelte';
   import DownloadMedia from './export/_DownloadMedia.svelte';
@@ -20,7 +20,7 @@
   onMount(async () => {
     const entries = await getCollection<IEntry>(`dictionaries/${$dictionary.id}/words`);
     const speakers = await fetchSpeakers(entries);
-    formattedEntries = await formatEntriesForCSV(entries, $dictionary, speakers);
+    formattedEntries = formatEntriesForCSV(entries, $dictionary, speakers);
     entriesWithImages = formattedEntries.filter((entry) => entry.pfpa);
     entriesWithAudio = formattedEntries.filter((entry) => entry.sfpa);
     mounted = true;

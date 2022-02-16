@@ -120,7 +120,7 @@
 
   import { createEventDispatcher } from 'svelte';
   import Button from '$svelteui/ui/Button.svelte';
-  import { loadScriptOnce, loadStylesOnce } from '$sveltefire/helpers/loader';
+  import { loadScriptOnce, loadStylesOnce } from '$sveltefirets';
   const dispatch = createEventDispatcher<{
     save: { lat: number; lng: number; dictionary: Partial<IDictionary> };
     remove: { dictionary: Partial<IDictionary> };

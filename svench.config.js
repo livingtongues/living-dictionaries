@@ -10,7 +10,7 @@ export default {
         $app: path.resolve(__dirname, '.svelte-kit/dev/runtime/app'),
         $lib: path.resolve(__dirname, 'src/lib'),
         $svelteui: path.resolve(__dirname, 'src/svelteui'),
-        $sveltefire: path.resolve(__dirname, 'src/sveltefire'),
+        $sveltefirets: path.resolve(__dirname, 'src/sveltefirets'),
       }
     }
   }

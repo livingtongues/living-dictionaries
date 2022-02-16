@@ -1,12 +1,12 @@
 <script context="module" lang="ts">
-  import { fetchDoc } from '$sveltefire/REST';
+  import { setOnline, getDocument } from '$sveltefirets';
   import type { IGrammar } from '$lib/interfaces';
 
   import type { Load } from '@sveltejs/kit';
   export const load: Load = async ({ page: { params } }) => {
     const dictionaryId = params.dictionaryId;
     try {
-      const grammarDoc = await fetchDoc<IGrammar>(`dictionaries/${dictionaryId}/info/grammar`);
+      const grammarDoc = await getDocument<IGrammar>(`dictionaries/${dictionaryId}/info/grammar`);
       if (grammarDoc && grammarDoc.grammar) {
         return { props: { grammar: grammarDoc.grammar, dictionaryId } };
       } else return { props: { grammar: null, dictionaryId } };
@@ -23,11 +23,10 @@
   export let grammar = '',
     dictionaryId: string;
   import Button from '$svelteui/ui/Button.svelte';
-  import { set } from '$sveltefire/firestorelite';
 
   async function save() {
     try {
-      await set<IGrammar>(`dictionaries/${dictionaryId}/info/grammar`, { grammar });
+      await setOnline<IGrammar>(`dictionaries/${dictionaryId}/info/grammar`, { grammar });
       window.location.replace(`/${dictionaryId}/grammar`);
     } catch (err) {
       alert(err);
@@ -52,15 +51,12 @@
   {#if $isManager}
     {#if editing}
       <Button class="mb-2" onclick={() => (editing = false)}
-        >{$_('misc.cancel', { default: 'Cancel' })}</Button
-      >
+        >{$_('misc.cancel', { default: 'Cancel' })}</Button>
       <Button class="mb-2" form="primary" onclick={save}
-        >{$_('misc.save', { default: 'Save' })}</Button
-      >
+        >{$_('misc.save', { default: 'Save' })}</Button>
     {:else}
       <Button class="mb-2" onclick={() => (editing = true)}
-        >{$_('misc.edit', { default: 'Edit' })}</Button
-      >
+        >{$_('misc.edit', { default: 'Edit' })}</Button>
     {/if}
   {/if}
 
