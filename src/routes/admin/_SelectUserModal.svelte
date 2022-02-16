@@ -36,11 +36,13 @@
 
 <Collection path="users" startWith={usersType} let:data={users}>
   <Modal on:close>
-    <span slot="heading"> Select User ID to let manage </span>
+    <span slot="heading">
+      Select user email to let {userRole === 'manager' ? 'manage' : 'contribute'}
+    </span>
 
     {#if users.length}
-      <input type="text" bind:value={userEmail} list="ids" placeholder="Search by ID" />
-      <datalist id="ids">
+      <input type="text" bind:value={userEmail} list="emails" placeholder="Search by email" />
+      <datalist id="emails">
         {#each users as user}
           <option>{user.email}</option>
         {/each}
