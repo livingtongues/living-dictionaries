@@ -18,14 +18,17 @@
   let userEmail = '';
 
   async function save(users: IUser[], email: string) {
-    // TODO prevent when user email doesn't exist
     try {
       const user = users.find((user) => email === user.email);
-      if (userRole === 'manager') {
-        addDictionaryManagerPermission(user, dictionaryID);
-      }
-      if (userRole === 'contributor') {
-        addDictionaryContributorPermission(user, dictionaryID);
+      if (user) {
+        if (userRole === 'manager') {
+          addDictionaryManagerPermission(user, dictionaryID);
+        }
+        if (userRole === 'contributor') {
+          addDictionaryContributorPermission(user, dictionaryID);
+        }
+      } else {
+        alert('Sorry! That email does not belong to any user');
       }
       close();
     } catch (err) {
