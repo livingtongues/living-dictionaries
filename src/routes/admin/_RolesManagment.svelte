@@ -7,8 +7,8 @@
     removeDictionaryContributorPermission,
     removeDictionaryCollaboratorPermission,
   } from '$lib/helpers/dictionariesManaging';
-  import { fetchUser } from '$lib/helpers/fetchUser';
-  import { addOnline } from '$sveltefirets';
+  import type { IUser } from '$lib/interfaces';
+  import { addOnline, getDocument } from '$sveltefirets';
   export let data: any;
   export let dictionary: string;
   export let userRole: string;
@@ -17,7 +17,7 @@
   async function remove(id: string, dictionary: string, role: string) {
     try {
       if (role === 'manager') {
-        const user = await fetchUser(id);
+        const user = await getDocument<IUser>(`users/${id}`);
         removeDictionaryManagerPermission(user, dictionary);
       }
       if (role === 'collab') {
