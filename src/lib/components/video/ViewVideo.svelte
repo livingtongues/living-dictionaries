@@ -5,7 +5,7 @@
   const close = () => dispatch('close');
   import Modal from '$lib/components/ui/Modal.svelte';
   import Button from '$svelteui/ui/Button.svelte';
-  // import RecordVideo from '$lib/components/video/RecordVideo.svelte';
+  import RecordVideo from '$lib/components/video/RecordVideo.svelte';
   import SelectVideo from './SelectVideo.svelte';
   import PasteVideoLink from './PasteVideoLink.svelte';
   import VideoIFrame from './VideoIFrame.svelte';
@@ -86,11 +86,11 @@
                 {/await}
               </SelectVideo>
             {:else}
-              <!-- <RecordVideo let:videoBlob>
+              <RecordVideo let:videoBlob>
                 {#await import('$lib/components/video/UploadVideo.svelte') then { default: UploadVideo }}
                   <UploadVideo file={videoBlob} {entry} {speakerId} />
                 {/await}
-              </RecordVideo> -->
+              </RecordVideo>
             {/if}
           </ShowHide>
         {/if}
