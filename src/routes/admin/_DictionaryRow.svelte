@@ -10,6 +10,7 @@
   import { createEventDispatcher } from 'svelte';
   import { Collection } from '$sveltefirets';
   import RolesManagment from './_RolesManagment.svelte';
+  import IntersectionObserver from '$lib/components/ui/IntersectionObserver.svelte';
 
   const dispatch = createEventDispatcher<{
     addalternatename: string;
@@ -39,33 +40,41 @@
   <td>
     {dictionary.entryCount || ''}
   </td>
-  <td
-    ><Collection
-      path={`dictionaries/${dictionary.id}/managers`}
-      startWith={helperType}
-      let:data={managers}>
-      <RolesManagment helpers={managers} dictionaryId={dictionary.id} role="manager" />
-    </Collection>
-  </td>
-  <td
-    ><Collection
-      path={`dictionaries/${dictionary.id}/contributors`}
-      startWith={helperType}
-      let:data={contributors}>
-      <RolesManagment helpers={contributors} dictionaryId={dictionary.id} role="contributor" />
-    </Collection>
-  </td>
-  <td
-    ><Collection
-      path={`dictionaries/${dictionary.id}/writeInCollaborators`}
-      startWith={helperType}
-      let:data={writeInCollaborators}>
-      <RolesManagment
-        helpers={writeInCollaborators}
-        dictionaryId={dictionary.id}
-        role="writeInCollaborator" />
-    </Collection>
-  </td>
+  <IntersectionObserver let:intersecting once>
+    {#if intersecting}
+      <td
+        ><Collection
+          path={`dictionaries/${dictionary.id}/managers`}
+          startWith={helperType}
+          let:data={managers}>
+          <RolesManagment helpers={managers} dictionaryId={dictionary.id} role="manager" />
+        </Collection>
+      </td>
+      <td
+        ><Collection
+          path={`dictionaries/${dictionary.id}/contributors`}
+          startWith={helperType}
+          let:data={contributors}>
+          <RolesManagment helpers={contributors} dictionaryId={dictionary.id} role="contributor" />
+        </Collection>
+      </td>
+      <td
+        ><Collection
+          path={`dictionaries/${dictionary.id}/writeInCollaborators`}
+          startWith={helperType}
+          let:data={writeInCollaborators}>
+          <RolesManagment
+            helpers={writeInCollaborators}
+            dictionaryId={dictionary.id}
+            role="writeInCollaborator" />
+        </Collection>
+      </td>
+    {:else}
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    {/if}
+  </IntersectionObserver>
   <td>
     <DictionaryFieldEdit
       field={'iso6393'}
