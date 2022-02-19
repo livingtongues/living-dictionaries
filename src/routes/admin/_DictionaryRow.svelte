@@ -8,7 +8,7 @@
   import Button from '$svelteui/ui/Button.svelte';
   import BadgeArrayEmit from '$svelteui/data/BadgeArrayEmit.svelte';
   import { createEventDispatcher } from 'svelte';
-  import Collection from '$sveltefire/components/Collection.svelte';
+  import { Collection } from '$sveltefirets';
   import RolesManagment from './_RolesManagment.svelte';
 
   const dispatch = createEventDispatcher<{
