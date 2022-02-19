@@ -11,7 +11,7 @@
   let state: State;
 
   onMount(async () => {
-    RecordRTC = (await import('recordrtc')).default;
+    RecordRTC = (await import('recordrtc')).default; // Will cause issues w/ making the window object exist and other SSR problems if imported server side
   });
 
   $: if (RecordRTC) {
