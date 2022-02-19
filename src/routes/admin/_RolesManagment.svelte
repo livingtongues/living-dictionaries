@@ -37,24 +37,18 @@
   }
 </script>
 
-<div class="py-3">
-  <div class="text-sm leading-5 font-medium text-gray-900">
-    <ShowHide let:show let:toggle={toggleSelectUserModal}>
-      <BadgeArrayEmit
-        strings={helpers.map((h) => h.name)}
-        canEdit
-        addMessage="Add"
-        on:itemclicked={(e) => alert(helpers[e.detail.index].id)}
-        on:itemremoved={(e) => remove(helpers[e.detail.index], dictionary.id, role)}
-        on:additem={role === 'writeInCollaborator'
-          ? addWriteInCollaborator
-          : toggleSelectUserModal} />
+<ShowHide let:show let:toggle={toggleSelectUserModal}>
+  <BadgeArrayEmit
+    strings={helpers.map((h) => h.name)}
+    canEdit
+    addMessage="Add"
+    on:itemclicked={(e) => alert(helpers[e.detail.index].id)}
+    on:itemremoved={(e) => remove(helpers[e.detail.index], dictionary.id, role)}
+    on:additem={role === 'writeInCollaborator' ? addWriteInCollaborator : toggleSelectUserModal} />
 
-      {#if show && role !== 'writeInCollaborator'}
-        {#await import('./_SelectUserModal.svelte') then { default: SelectUserModal }}
-          <SelectUserModal {dictionary} {role} on:close={toggleSelectUserModal} />
-        {/await}
-      {/if}
-    </ShowHide>
-  </div>
-</div>
+  {#if show && role !== 'writeInCollaborator'}
+    {#await import('./_SelectUserModal.svelte') then { default: SelectUserModal }}
+      <SelectUserModal {dictionary} {role} on:close={toggleSelectUserModal} />
+    {/await}
+  {/if}
+</ShowHide>

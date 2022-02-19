@@ -3,19 +3,27 @@
   import { createEventDispatcher } from 'svelte';
   const dispatch = createEventDispatcher();
   const close = () => dispatch('close');
-  import { addDictionaryManager } from '$lib/helpers/dictionariesManaging';
+  import {
+    addDictionaryContributor,
+    addDictionaryManager,
+  } from '$lib/helpers/dictionariesManaging';
   import type { IDictionary, IUser } from '$lib/interfaces';
   import Button from '$svelteui/ui/Button.svelte';
   import { Collection } from '$sveltefirets';
   import Filter from './_Filter.svelte';
 
   export let user: IUser;
+  export let role: 'manager' | 'contributor';
 
   let dictionariesType: IDictionary[];
 
   async function add(dictionaryId: string) {
     try {
-      addDictionaryManager({ id: user.uid, name: user.displayName }, dictionaryId);
+      if (role === 'manager') {
+        addDictionaryManager({ id: user.uid, name: user.displayName }, dictionaryId);
+      } else {
+        addDictionaryContributor({ id: user.uid, name: user.displayName }, dictionaryId);
+      }
       close();
     } catch (err) {
       alert(`Error: ${err}`);
@@ -25,7 +33,7 @@
 
 <Modal on:close>
   <span slot="heading">
-    Select Dictionary to let {user.displayName} manage
+    Select Dictionary to let {user.displayName} be a {role}
   </span>
   <Collection path="dictionaries" startWith={dictionariesType} let:data={dictionaries}>
     <Filter
