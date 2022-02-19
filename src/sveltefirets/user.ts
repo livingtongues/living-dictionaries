@@ -24,6 +24,7 @@ export function createUserStore<T>({ userKey = 'firebase_user', log = false }) {
   const { subscribe, set } = writable<T>(null);
   let unsub: Unsubscriber;
 
+  console.log(window);
   if (typeof window !== 'undefined') {
     let cached = null;
     cached = JSON.parse(localStorage.getItem(userKey));
