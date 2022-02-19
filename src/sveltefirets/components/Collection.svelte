@@ -3,6 +3,7 @@
   import type { Unsubscriber } from 'svelte/store';
   import type { CollectionReference, QueryConstraint } from 'firebase/firestore';
   import { collectionStore } from '../stores';
+  import { browser } from '$app/env';
 
   export let path: CollectionReference<T> | string;
   export let queryConstraints: QueryConstraint[] = []; // usage example: [where('role', '==', 'contributor'), orderBy("name")];
@@ -34,7 +35,7 @@
 
   // Props changed
   $: {
-    if (typeof window !== 'undefined') {
+    if (browser) {
       if (unsub) {
         unsub();
         store = collectionStore(path, queryConstraints, opts);

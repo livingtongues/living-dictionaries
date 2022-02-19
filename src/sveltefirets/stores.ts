@@ -4,6 +4,7 @@ import type { CollectionReference, DocumentReference, QueryConstraint } from 'fi
 
 import { colRef, docRef } from './firestore';
 import { startTrace, stopTrace } from './perf';
+import { browser } from '$app/env';
 
 export function docStore<T>(
   path: DocumentReference<T> | string,
@@ -11,7 +12,7 @@ export function docStore<T>(
 ) {
   const { startWith, log, traceId, maxWait, once } = opts;
 
-  if (typeof window === 'undefined') {
+  if (!browser) {
     const store = writable<T>(startWith);
     const { subscribe } = store;
     return {
@@ -127,7 +128,7 @@ export function collectionStore<T>(
     ...opts,
   };
 
-  if (typeof window === 'undefined') {
+  if (!browser) {
     const store = writable(startWith);
     const { subscribe } = store;
     return {

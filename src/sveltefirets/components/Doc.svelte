@@ -3,6 +3,7 @@
   import type { Unsubscriber } from 'svelte/store';
   import type { DocumentReference } from 'firebase/firestore';
   import { docStore } from '../stores';
+  import { browser } from '$app/env';
 
   export let path: DocumentReference<T> | string;
   export let log = false;
@@ -31,7 +32,7 @@
 
   // Props changed
   $: {
-    if (typeof window !== 'undefined') {
+    if (browser) {
       if (unsub) {
         // Unsub and create new store
         unsub();

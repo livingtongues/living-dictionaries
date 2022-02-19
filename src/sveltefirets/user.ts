@@ -8,9 +8,10 @@ import { docStore } from './stores';
 import type { IBaseUser } from './interfaces';
 import { setCookie } from './helpers/cookies';
 import { firebaseApp } from './init';
+import { browser } from '$app/env';
 
 export const authState = writable<User>(null, (set) => {
-  if (typeof window !== 'undefined') {
+  if (browser) {
     const auth = getAuth(firebaseApp);
     onAuthStateChanged(
       auth,
@@ -24,8 +25,7 @@ export function createUserStore<T>({ userKey = 'firebase_user', log = false }) {
   const { subscribe, set } = writable<T>(null);
   let unsub: Unsubscriber;
 
-  console.log(window);
-  if (typeof window !== 'undefined') {
+  if (browser) {
     let cached = null;
     cached = JSON.parse(localStorage.getItem(userKey));
     set(cached);
