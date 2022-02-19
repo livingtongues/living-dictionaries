@@ -9,7 +9,7 @@
   } from '$lib/helpers/dictionariesManaging';
   import type { IUser } from '$lib/interfaces';
   import Button from '$svelteui/ui/Button.svelte';
-  import Collection from '$sveltefire/components/Collection.svelte';
+  import { Collection } from '$sveltefirets';
   import Filter from './_Filter.svelte';
 
   export let dictionaryId: string;
