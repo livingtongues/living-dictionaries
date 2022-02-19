@@ -36,6 +36,9 @@
   <td class="italic">
     <DictionaryFieldEdit field={'name'} value={dictionary.name} dictionaryId={dictionary.id} />
   </td>
+  <td>
+    {dictionary.entryCount || ''}
+  </td>
   <td
     ><Collection
       path={`dictionaries/${dictionary.id}/managers`}
@@ -97,9 +100,6 @@
       field={'location'}
       value={dictionary.location}
       dictionaryId={dictionary.id} />
-  </td>
-  <td>
-    {dictionary.entryCount || ''}
   </td>
   <td>
     <BadgeArrayEmit addMessage="Add" strings={dictionary.glossLanguages} />
