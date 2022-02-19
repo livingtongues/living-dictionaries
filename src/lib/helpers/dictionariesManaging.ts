@@ -16,7 +16,7 @@ export async function removeDictionaryManager(user: IUser, dictionaryId: string)
   }
 }
 
-export async function addDictionaryContributorPermission(user: IUser, dictionaryId: string) {
+export async function addDictionaryContributor(user: IUser, dictionaryId: string) {
   const contributor: IHelper = {
     id: user.uid,
     name: user.displayName,
@@ -24,10 +24,7 @@ export async function addDictionaryContributorPermission(user: IUser, dictionary
   await setOnline(`dictionaries/${dictionaryId}/contributors/${contributor.id}`, contributor);
 }
 
-export async function removeDictionaryContributorPermission(
-  contributor: IHelper,
-  dictionaryId: string
-) {
+export async function removeDictionaryContributor(contributor: IHelper, dictionaryId: string) {
   if (
     confirm(
       `Are you sure you want to remove ${contributor.name} as contributor from ${dictionaryId}?`
@@ -37,10 +34,7 @@ export async function removeDictionaryContributorPermission(
   }
 }
 
-export async function removeDictionaryCollaboratorPermission(
-  collaborator: IHelper,
-  dictionaryId: string
-) {
+export async function removeDictionaryCollaborator(collaborator: IHelper, dictionaryId: string) {
   if (
     confirm(
       `Are you sure you want to remove ${collaborator.name} as write-in collaborator from ${dictionaryId}?`

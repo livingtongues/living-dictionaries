@@ -5,7 +5,7 @@
   const close = () => dispatch('close');
   import {
     addDictionaryManager,
-    addDictionaryContributorPermission,
+    addDictionaryContributor,
   } from '$lib/helpers/dictionariesManaging';
   import type { IUser } from '$lib/interfaces';
   import Button from '$svelteui/ui/Button.svelte';
@@ -24,7 +24,7 @@
         addDictionaryManager({ id: user.uid, name: user.displayName }, dictionaryId);
       }
       if (role === 'contributor') {
-        addDictionaryContributorPermission(user, dictionaryId);
+        addDictionaryContributor(user, dictionaryId);
       }
       close();
     } catch (err) {

@@ -4,7 +4,7 @@
   import type { IUser } from '$lib/interfaces';
   import { printDate } from '$lib/helpers/time';
   export let user: IUser;
-  import { removeDictionaryManagePermission } from '$lib/helpers/dictionariesManaging';
+  import { removeDictionaryManager } from '$lib/helpers/dictionariesManaging';
   import ShowHide from '$svelteui/functions/ShowHide.svelte';
   import BadgeArrayEmit from '$svelteui/data/BadgeArrayEmit.svelte';
 </script>
@@ -23,7 +23,7 @@
         canEdit
         addMessage="Add"
         on:itemclicked={(e) => window.open(`/${e.detail.value}`)}
-        on:itemremoved={(e) => removeDictionaryManagePermission(user, e.detail.value)}
+        on:itemremoved={(e) => removeDictionaryManager(user, e.detail.value)}
         on:additem={toggle} />
       {#if show}
         {#await import('./_SelectDictionaryModal.svelte') then { default: SelectDictionaryModal }}
