@@ -47,14 +47,12 @@
     path="dictionaries"
     startWith={publicDictionaries}
     {queryConstraints}
-    let:data={dictionaries}
-  >
+    let:data={dictionaries}>
     <div>
       <Button
         form="primary"
         color="black"
-        onclick={() => exportDictionariesAsCSV(dictionaries, 'living-dictionaries-list')}
-      >
+        onclick={() => exportDictionariesAsCSV(dictionaries, 'living-dictionaries-list')}>
         <i class="fas fa-download mr-1" />
         {$_('misc.download', { default: 'Download' })}
         (.csv)
