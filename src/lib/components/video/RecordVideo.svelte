@@ -127,8 +127,3 @@
     {/if}
   </ShowHide>
 {/if}
-
-<!-- Deal with after initial admin testing: Only Firefox supports codecs=h264, other browsers support codecs=vp8. However I assigned h264 as the default because firefox crashes if is not established since the beginning.
-if (navigator.userAgent.indexOf('Firefox') == -1) {
- options.mimeType = 'video/webm;codecs=vp8';
-} -->
