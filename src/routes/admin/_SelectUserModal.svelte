@@ -7,12 +7,14 @@
     addDictionaryManager,
     addDictionaryContributor,
   } from '$lib/helpers/dictionariesManaging';
-  import type { IUser } from '$lib/interfaces';
+  import type { IDictionary, IUser } from '$lib/interfaces';
   import Button from '$svelteui/ui/Button.svelte';
   import { Collection } from '$sveltefirets';
   import Filter from './_Filter.svelte';
+  import { inviteHelper } from '$lib/helpers/inviteHelper';
+  import { orderBy } from 'firebase/firestore';
 
-  export let dictionaryId: string;
+  export let dictionary: IDictionary;
   export let role: 'manager' | 'contributor';
 
   let usersType: IUser[];
@@ -20,10 +22,10 @@
   async function add(user: IUser) {
     try {
       if (role === 'manager') {
-        addDictionaryManager({ id: user.uid, name: user.displayName }, dictionaryId);
+        addDictionaryManager({ id: user.uid, name: user.displayName }, dictionary.id);
       }
       if (role === 'contributor') {
-        addDictionaryContributor(user, dictionaryId);
+        addDictionaryContributor({ id: user.uid, name: user.displayName }, dictionary.id);
       }
       close();
     } catch (err) {
@@ -34,10 +36,18 @@
 
 <Modal on:close>
   <span slot="heading"> Select a user to add {role} role to</span>
-  <Collection path="users" startWith={usersType} let:data={users}>
+  <Collection
+    path="users"
+    startWith={usersType}
+    let:data={users}
+    queryConstraints={[orderBy('displayName')]}>
     <Filter items={users} let:filteredItems={filteredUsers} placeholder="Search names and emails">
       {#each filteredUsers as user}
-        <Button onclick={() => add(user)} color="green" form="primary">{user.displayName}</Button>
+        <Button onclick={() => add(user)} color="green" form="simple" class="w-full !text-left"
+          >{user.displayName} <small>({user.email})</small></Button>
+      {:else}
+        <Button size="sm" onclick={() => inviteHelper('manager', dictionary)}
+          >Invite New User</Button>
       {/each}
 
       <div class="modal-footer space-x-1">

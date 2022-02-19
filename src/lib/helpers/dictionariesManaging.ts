@@ -1,27 +1,24 @@
 import { deleteDocument, deleteDocumentOnline, setOnline } from '$sveltefirets';
-import type { IUser, IHelper } from '$lib/interfaces';
+import type { IHelper } from '$lib/interfaces';
 
-export async function addDictionaryManager(helper: IHelper, dictionaryId: string) {
-  await setOnline<IHelper>(`dictionaries/${dictionaryId}/managers/${helper.id}`, {
-    id: helper.id,
-    name: helper.name,
+export async function addDictionaryManager(manager: IHelper, dictionaryId: string) {
+  await setOnline<IHelper>(`dictionaries/${dictionaryId}/managers/${manager.id}`, {
+    id: manager.id,
+    name: manager.name,
   });
 }
 
-export async function removeDictionaryManager(user: IUser, dictionaryId: string) {
-  if (
-    confirm(`Are you sure you want to remove ${user.displayName} as manager from ${dictionaryId}?`)
-  ) {
-    await deleteDocumentOnline(`dictionaries/${dictionaryId}/managers/${user.uid}`);
+export async function removeDictionaryManager(manager: IHelper, dictionaryId: string) {
+  if (confirm(`Are you sure you want to remove ${manager.name} as manager from ${dictionaryId}?`)) {
+    await deleteDocumentOnline(`dictionaries/${dictionaryId}/managers/${manager.id}`);
   }
 }
 
-export async function addDictionaryContributor(user: IUser, dictionaryId: string) {
-  const contributor: IHelper = {
-    id: user.uid,
-    name: user.displayName,
-  };
-  await setOnline(`dictionaries/${dictionaryId}/contributors/${contributor.id}`, contributor);
+export async function addDictionaryContributor(contributor: IHelper, dictionaryId: string) {
+  await setOnline<IHelper>(`dictionaries/${dictionaryId}/contributors/${contributor.id}`, {
+    id: contributor.id,
+    name: contributor.name,
+  });
 }
 
 export async function removeDictionaryContributor(contributor: IHelper, dictionaryId: string) {

@@ -25,7 +25,7 @@
 
 <Modal on:close>
   <span slot="heading">
-    Select Dictionary ID to let {user.displayName} manage
+    Select Dictionary to let {user.displayName} manage
   </span>
   <Collection path="dictionaries" startWith={dictionariesType} let:data={dictionaries}>
     <Filter
@@ -33,8 +33,11 @@
       let:filteredItems={filteredDictionaries}
       placeholder="Search dictionaries">
       {#each filteredDictionaries as dictionary}
-        <Button onclick={() => add(dictionary.id)} color="green" form="primary"
-          >{dictionary.name}</Button>
+        <Button
+          onclick={() => add(dictionary.id)}
+          color="green"
+          form="simple"
+          class="w-full !text-left">{dictionary.name} <small>({dictionary.id})</small></Button>
       {/each}
 
       <div class="modal-footer space-x-1">
