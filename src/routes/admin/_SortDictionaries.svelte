@@ -91,8 +91,7 @@
   <th
     class="cursor-pointer"
     on:click={() => setSortSettings(field.key)}
-    title="Click to sort asc/desc"
-  >
+    title="Click to sort asc/desc">
     {field.value}
     {#if sortKey === field.key}
       {#if sortDescending}

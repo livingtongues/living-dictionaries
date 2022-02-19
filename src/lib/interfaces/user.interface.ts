@@ -11,8 +11,8 @@ interface User {
   lastVisit?: Timestamp & FieldValue;
 
   roles?: IRoles;
-  managing?: string[]; // | FieldValue; // dictionary Ids
-  contributing?: string[]; // dictionary Ids
+  managing?: string[]; // dictionary Ids - can be deprected because $myDictionaries uses a collectionGroup query instead
+  contributing?: string[]; // dictionary Ids - can be deprected because $myDictionaries uses a collectionGroup query instead
   // starred?: string[]; // in future save dictionary Ids to user that they star, to allow them quick access back to those dictionaries
   termsAgreement?: Timestamp & FieldValue;
   unsubscribe?: Timestamp & FieldValue;

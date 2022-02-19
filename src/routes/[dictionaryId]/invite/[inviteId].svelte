@@ -12,7 +12,7 @@
 
 <script lang="ts">
   import { _ } from 'svelte-i18n';
-  import type { IInvite, IContributor, IManager, IUser } from '$lib/interfaces';
+  import type { IInvite, IHelper, IUser } from '$lib/interfaces';
   import { isManager, isContributor, user } from '$lib/stores';
 
   export let inviteId: string, dictionaryId: string;
@@ -23,22 +23,15 @@
 
   async function acceptInvite(role: 'manager' | 'contributor') {
     try {
-      const contributor: IContributor | IManager = {
+      const contributor: IHelper = {
         id: $user.uid,
         name: $user.displayName,
       };
 
-      if (role === 'manager') {
-        await setOnline<IManager>(
-          `dictionaries/${dictionaryId}/managers/${$user.uid}`,
-          contributor
-        );
-      } else {
-        await setOnline<IContributor>(
-          `dictionaries/${dictionaryId}/contributors/${$user.uid}`,
-          contributor
-        );
-      }
+      const collectionPath = `dictionaries/${dictionaryId}/${
+        role === 'manager' ? 'managers' : 'contributors'
+      }/${$user.uid}`;
+      await setOnline<IHelper>(collectionPath, contributor);
 
       await updateOnline<IInvite>(`dictionaries/${dictionaryId}/invites/${inviteId}`, {
         status: 'claimed',

@@ -1,61 +1,65 @@
 <script lang="ts">
-  import { _ } from 'svelte-i18n';
   import BadgeArrayEmit from '$svelteui/data/BadgeArrayEmit.svelte';
   import ShowHide from '$svelteui/functions/ShowHide.svelte';
   import {
-    removeDictionaryManagerPermission,
+    removeDictionaryManager,
     removeDictionaryContributorPermission,
     removeDictionaryCollaboratorPermission,
   } from '$lib/helpers/dictionariesManaging';
-  import type { IUser } from '$lib/interfaces';
-  import { addOnline, getDocument } from '$sveltefirets';
-  export let data: any;
-  export let dictionary: string;
-  export let userRole: string;
-  let data_strings: string[];
-  $: data_strings = data.map((e) => e.name);
-  async function remove(id: string, dictionary: string, role: string) {
+  import { addOnline } from '$sveltefirets';
+  import type { IHelper } from '$lib/interfaces';
+
+  export let helpers: IHelper[] = [];
+  export let dictionaryId: string;
+  export let role: 'manager' | 'contributor' | 'writeInCollaborator';
+
+  async function remove(
+    helper: IHelper,
+    dictionaryId: string,
+    role: 'manager' | 'contributor' | 'writeInCollaborator'
+  ) {
     try {
       if (role === 'manager') {
-        const user = await getDocument<IUser>(`users/${id}`);
-        removeDictionaryManagerPermission(user, dictionary);
+        removeDictionaryManager(helper, dictionaryId);
       }
-      if (role === 'collab') {
-        removeDictionaryCollaboratorPermission(id, dictionary);
+      if (role === 'writeInCollaborator') {
+        removeDictionaryCollaboratorPermission(helper, dictionaryId);
       }
       if (role === 'contributor') {
-        removeDictionaryContributorPermission(id, dictionary);
+        removeDictionaryContributorPermission(helper, dictionaryId);
       }
     } catch (err) {
       alert(`Error: ${err}`);
     }
   }
 
-  async function save() {
-    const name = prompt(`${$_('speakers.name', { default: 'Name' })}?`);
+  async function addWriteInCollaborator() {
+    const name = prompt('Name?');
     if (name) {
-      addOnline(`dictionaries/${dictionary}/writeInCollaborators`, { name });
+      addOnline(`dictionaries/${dictionaryId}/writeInCollaborators`, { name });
     }
   }
 </script>
 
 <div class="py-3">
   <div class="text-sm leading-5 font-medium text-gray-900">
-    <ShowHide let:show let:toggle>
+    <ShowHide let:show let:toggle={toggleSelectUserModal}>
       <BadgeArrayEmit
-        strings={data_strings}
+        strings={helpers.map((h) => h.name)}
         canEdit
         addMessage="Add"
-        on:itemclicked={(e) => console.log('clicked:', data[e.detail.index].id)}
-        on:itemremoved={(e) => remove(data[e.detail.index].id, dictionary, userRole)}
-        on:additem={userRole === 'collab' ? save : toggle} />
+        on:itemremoved={(e) => remove(helpers[e.detail.index], dictionaryId, role)}
+        on:additem={role === 'writeInCollaborator'
+          ? addWriteInCollaborator
+          : toggleSelectUserModal} />
+
       <button>Invite button here</button>
-      {#if show}
+
+      {#if show && role !== 'writeInCollaborator'}
         {#await import('./_SelectUserModal.svelte') then { default: SelectUserModal }}
-          <SelectUserModal dictionaryID={dictionary} {userRole} on:close={toggle} />
+          <SelectUserModal {dictionaryId} {role} on:close={toggleSelectUserModal} />
         {/await}
       {/if}
     </ShowHide>
   </div>
-  <!-- <div class="text-sm leading-5 text-gray-500" /> -->
 </div>
