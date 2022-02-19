@@ -12,40 +12,16 @@
 <script lang="ts">
   export let dictionaryId: string;
   import { _ } from 'svelte-i18n';
-  import { addOnline, add, deleteDocumentOnline, updateOnline, Collection } from '$sveltefirets';
+  import { add, deleteDocumentOnline, updateOnline, Collection } from '$sveltefirets';
   import { where } from 'firebase/firestore';
   import { isManager, isContributor, dictionary, admin, user } from '$lib/stores';
   import type { IInvite, IHelper } from '$lib/interfaces';
   import Button from '$svelteui/ui/Button.svelte';
   import ShowHide from '$svelteui/functions/ShowHide.svelte';
-
-  function invite(role: 'manager' | 'contributor' = 'contributor') {
-    const input = prompt(`${$_('contact.email', { default: 'Email' })}?`);
-    if (input) {
-      const isEmail = /^\S+@\S+\.\S+$/.test(input);
-      isEmail ? saveInvite(input, role) : alert($_('misc.invalid', { default: 'Invalid Email' }));
-    }
-  }
+  import { inviteHelper } from '$lib/helpers/inviteHelper';
 
   let helperType: IHelper[];
   let inviteType: IInvite[];
-
-  async function saveInvite(targetEmail: string, role: 'manager' | 'contributor') {
-    try {
-      const invite: IInvite = {
-        inviterEmail: $user.email,
-        inviterName: $user.displayName,
-        dictionaryName: $dictionary.name,
-        targetEmail,
-        role,
-        status: 'queued',
-      };
-      await addOnline(`dictionaries/${dictionaryId}/invites`, invite);
-    } catch (err) {
-      alert(`${$_('misc.error', { default: 'Error' })}: ${err}`);
-      console.error(err);
-    }
-  }
 
   function writeIn() {
     const name = prompt(`${$_('speakers.name', { default: 'Name' })}?`);
@@ -127,7 +103,7 @@
   {/if}
 </div>
 {#if $isManager}
-  <Button onclick={() => invite('manager')} form="primary">
+  <Button onclick={() => inviteHelper('manager', $dictionary)} form="primary">
     <i class="far fa-envelope" />
     {$_('contributors.invite_manager', { default: 'Invite a Manager' })}
   </Button>
@@ -224,7 +200,7 @@
   </div> -->
 
 {#if $isManager}
-  <Button onclick={() => invite('contributor')} form="primary">
+  <Button onclick={() => inviteHelper('contributor', $dictionary)} form="primary">
     <i class="far fa-envelope" />
     {$_('contributors.invite_contributors', {
       default: 'Invite Contributors',

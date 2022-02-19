@@ -40,41 +40,42 @@
   <td>
     {dictionary.entryCount || ''}
   </td>
-  <IntersectionObserver let:intersecting once>
-    {#if intersecting}
-      <td
-        ><Collection
+  <td>
+    <IntersectionObserver let:intersecting once>
+      {#if intersecting}
+        <Collection
           path={`dictionaries/${dictionary.id}/managers`}
           startWith={helperType}
           let:data={managers}>
-          <RolesManagment helpers={managers} dictionaryId={dictionary.id} role="manager" />
+          <RolesManagment helpers={managers} {dictionary} role="manager" />
         </Collection>
-      </td>
-      <td
-        ><Collection
+      {/if}
+    </IntersectionObserver>
+  </td>
+  <td>
+    <IntersectionObserver let:intersecting once>
+      {#if intersecting}
+        <Collection
           path={`dictionaries/${dictionary.id}/contributors`}
           startWith={helperType}
           let:data={contributors}>
-          <RolesManagment helpers={contributors} dictionaryId={dictionary.id} role="contributor" />
+          <RolesManagment helpers={contributors} {dictionary} role="contributor" />
         </Collection>
-      </td>
-      <td
-        ><Collection
+      {/if}
+    </IntersectionObserver>
+  </td>
+  <td>
+    <IntersectionObserver let:intersecting once>
+      {#if intersecting}
+        <Collection
           path={`dictionaries/${dictionary.id}/writeInCollaborators`}
           startWith={helperType}
           let:data={writeInCollaborators}>
-          <RolesManagment
-            helpers={writeInCollaborators}
-            dictionaryId={dictionary.id}
-            role="writeInCollaborator" />
+          <RolesManagment helpers={writeInCollaborators} {dictionary} role="writeInCollaborator" />
         </Collection>
-      </td>
-    {:else}
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-    {/if}
-  </IntersectionObserver>
+      {/if}
+    </IntersectionObserver>
+  </td>
   <td>
     <DictionaryFieldEdit
       field={'iso6393'}

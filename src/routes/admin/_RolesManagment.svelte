@@ -7,10 +7,10 @@
     removeDictionaryCollaborator,
   } from '$lib/helpers/dictionariesManaging';
   import { addOnline } from '$sveltefirets';
-  import type { HelperRoles, IHelper } from '$lib/interfaces';
+  import type { HelperRoles, IDictionary, IHelper } from '$lib/interfaces';
 
   export let helpers: IHelper[] = [];
-  export let dictionaryId: string;
+  export let dictionary: IDictionary;
   export let role: HelperRoles;
 
   async function remove(helper: IHelper, dictionaryId: string, role: HelperRoles) {
@@ -32,7 +32,7 @@
   async function addWriteInCollaborator() {
     const name = prompt('Name?');
     if (name) {
-      addOnline(`dictionaries/${dictionaryId}/writeInCollaborators`, { name });
+      addOnline(`dictionaries/${dictionary.id}/writeInCollaborators`, { name });
     }
   }
 </script>
@@ -44,16 +44,15 @@
         strings={helpers.map((h) => h.name)}
         canEdit
         addMessage="Add"
-        on:itemremoved={(e) => remove(helpers[e.detail.index], dictionaryId, role)}
+        on:itemclicked={(e) => alert(helpers[e.detail.index].id)}
+        on:itemremoved={(e) => remove(helpers[e.detail.index], dictionary.id, role)}
         on:additem={role === 'writeInCollaborator'
           ? addWriteInCollaborator
           : toggleSelectUserModal} />
 
-      <button>Invite button here</button>
-
       {#if show && role !== 'writeInCollaborator'}
         {#await import('./_SelectUserModal.svelte') then { default: SelectUserModal }}
-          <SelectUserModal {dictionaryId} {role} on:close={toggleSelectUserModal} />
+          <SelectUserModal {dictionary} {role} on:close={toggleSelectUserModal} />
         {/await}
       {/if}
     </ShowHide>

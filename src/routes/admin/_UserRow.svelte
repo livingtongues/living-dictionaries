@@ -23,7 +23,8 @@
         canEdit
         addMessage="Add"
         on:itemclicked={(e) => window.open(`/${e.detail.value}`)}
-        on:itemremoved={(e) => removeDictionaryManager(user, e.detail.value)}
+        on:itemremoved={(e) =>
+          removeDictionaryManager({ id: user.uid, name: user.displayName }, e.detail.value)}
         on:additem={toggle} />
       {#if show}
         {#await import('./_SelectDictionaryModal.svelte') then { default: SelectDictionaryModal }}
