@@ -27,11 +27,10 @@
 
     const { id } = await addOnline<ISpeaker>('speakers', speaker);
     dispatch('newSpeaker', { id });
-    close();
   }
 </script>
 
-<Modal on:close={close}>
+<Modal on:close>
   <span slot="heading"
     >{$_('speakers.add_new_speaker', {
       default: 'Add New Speaker',
@@ -48,8 +47,7 @@
         type="text"
         required
         bind:value={displayName}
-        class="form-input block w-full"
-      />
+        class="form-input block w-full" />
     </div>
 
     <label for="birthplace" class="block text-sm font-medium leading-5 text-gray-700 mt-4">
@@ -61,8 +59,7 @@
         type="text"
         required
         bind:value={birthplace}
-        class="form-input block w-full"
-      />
+        class="form-input block w-full" />
     </div>
 
     <label for="age" class="block text-sm font-medium leading-5 text-gray-700 mt-4">
