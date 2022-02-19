@@ -1,6 +1,7 @@
 import type { IGloss } from './gloss.interface';
 import type { IAudio } from './audio.interface';
 import type { IPhoto } from './photo.interface';
+import type { IVideo } from './video.interface';
 import type { IExampleSentence } from './exampe-sentence.interface';
 // import type { Hit } from 'instantsearch.js';
 import type { FieldValue, Timestamp } from 'firebase/firestore';
@@ -39,7 +40,7 @@ export interface IEntry extends IFirestoreMetaDataAbbreviated, LDAlgoliaFields, 
   xs?: IExampleSentence; // example sentences - new format which allows us to bring in example sentences from multiple languages (vernacular and gloss languages)
   sf?: IAudio; // sound file
   pf?: IPhoto; // photo file
-
+  vf?: IVideo; // video file
   // IDs
   ii?: string; // importId which can be used to show all entries from a particular import
   ei?: string; // Elicitation Id for Munda languages or Swadesh Composite number list from Comparalex

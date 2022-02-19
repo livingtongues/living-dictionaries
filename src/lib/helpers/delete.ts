@@ -34,6 +34,20 @@ export async function deleteAudio(entry: IEntry) {
   }
 }
 
+export async function deleteVideo(entry: IEntry) {
+  const $_ = get(_);
+  try {
+    const $dictionary = get(dictionary);
+    await updateOnline(
+      `dictionaries/${$dictionary.id}/words/${entry.id}`,
+      { vf: null },
+      { abbreviate: true }
+    );
+  } catch (err) {
+    alert(`${$_('misc.error', { default: 'Error' })}: ${err}`);
+  }
+}
+
 import { goto } from '$app/navigation';
 export async function deleteEntry(entry: IEntry, dictionaryId: string, algoliaQueryParams: string) {
   const $_ = get(_);
