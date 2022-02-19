@@ -35,14 +35,18 @@
   class:sompeng={column.display === 'Sompeng-Mardir'}
   class="{updatedValue !== undefined
     ? 'bg-green-100 border-green-400 border'
-    : ''} h-full w-full inline-block"
->
+    : ''} h-full w-full inline-block">
   {#if column.field === 'soundFile'}
     <AudioCell {canEdit} {entry} />
   {:else if column.field === 'photoFile'}
     {#if entry.pf}
       <Image {canEdit} {entry} square={60} />
     {/if}
+    <!-- // TODO: add videos to columns -->
+    <!-- {:else if column.field === 'videoFile'}
+    {#if entry.vf}
+      <VideoCell {canEdit} {entry} />
+    {/if} -->
   {:else if column.field === 'speaker'}
     <SelectSpeakerCell {canEdit} {entry} />
   {:else if column.field === 'ps'}
@@ -60,8 +64,7 @@
         entry._highlightResult.gl[column.field] &&
         entry._highlightResult.gl[column.field].value) ||
         ''}
-      on:valueupdate={saveUpdateToFirestore}
-    />
+      on:valueupdate={saveUpdateToFirestore} />
   {:else if column.exampleSentence === true}
     <Textbox
       {canEdit}
@@ -73,8 +76,7 @@
         entry._highlightResult.xs[column.field] &&
         entry._highlightResult.xs[column.field].value) ||
         ''}
-      on:valueupdate={saveUpdateToFirestore}
-    />
+      on:valueupdate={saveUpdateToFirestore} />
   {:else}
     <Textbox
       {canEdit}
@@ -85,7 +87,6 @@
         entry._highlightResult[column.field] &&
         entry._highlightResult[column.field].value) ||
         ''}
-      on:valueupdate={saveUpdateToFirestore}
-    />
+      on:valueupdate={saveUpdateToFirestore} />
   {/if}
 </div>

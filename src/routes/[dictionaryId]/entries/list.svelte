@@ -33,7 +33,7 @@
         path="dictionaries/{$dictionary.id}/words/{algoliaEntry.id}"
         startWith={algoliaEntry}
         let:data={entry}>
-        <ListEntry {entry} canEdit={$canEdit} />
+        <ListEntry {entry} videoAccess={$dictionary.videoAccess} canEdit={$canEdit} />
       </Doc>
     {/each}
   {:else}

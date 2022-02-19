@@ -21,14 +21,12 @@
   <Filter
     items={dictionaries}
     let:filteredItems={filteredDictionaries}
-    placeholder="Search dictionaries"
-  >
+    placeholder="Search dictionaries">
     <div slot="right">
       <Button
         form="primary"
         color="black"
-        onclick={() => exportDictionariesAsCSV(filteredDictionaries, 'living-dictionaries-list')}
-      >
+        onclick={() => exportDictionariesAsCSV(filteredDictionaries, 'living-dictionaries-list')}>
         <i class="fas fa-download mr-1" />
         Download {filteredDictionaries.length} Dictionaries as CSV
       </Button>
@@ -42,6 +40,15 @@
               try {
                 updateOnline(`dictionaries/${dictionary.id}`, {
                   public: !dictionary.public,
+                });
+              } catch (err) {
+                alert(err);
+              }
+            }}
+            on:togglevideoaccess={() => {
+              try {
+                updateOnline(`dictionaries/${dictionary.id}`, {
+                  videoAccess: !dictionary.videoAccess,
                 });
               } catch (err) {
                 alert(err);
@@ -83,8 +90,7 @@
               } catch (err) {
                 alert(err);
               }
-            }}
-          />
+            }} />
         {/each}
       </SortDictionaries>
     </ResponsiveTable>
