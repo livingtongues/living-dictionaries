@@ -34,8 +34,8 @@ justify-center cursor-pointer p-2 text-lg"
   {/if}
 
   {#if show}
-    <!-- {#await import('$lib/components/video/ViewVideo.svelte') then { default: ViewVideo }}
+    {#await import('$lib/components/video/ViewVideo.svelte') then { default: ViewVideo }}
       <ViewVideo {entry} on:close={toggle} />
-    {/await} -->
+    {/await}
   {/if}
 </ShowHide>
