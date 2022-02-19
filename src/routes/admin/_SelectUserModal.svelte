@@ -10,16 +10,15 @@
   import type { IUser } from '$lib/interfaces';
   import Button from '$svelteui/ui/Button.svelte';
   import Collection from '$sveltefire/components/Collection.svelte';
+  import Filter from './_Filter.svelte';
 
   export let dictionaryId: string;
   export let role: 'manager' | 'contributor';
 
   let usersType: IUser[];
-  let userEmail = '';
 
-  async function save(users: IUser[], email: string) {
+  async function add(user: IUser) {
     try {
-      const user = users.find((user) => email === user.email);
       if (role === 'manager') {
         addDictionaryManager({ id: user.uid, name: user.displayName }, dictionaryId);
       }
@@ -33,30 +32,17 @@
   }
 </script>
 
-<Collection path="users" startWith={usersType} let:data={users}>
-  <Modal on:close>
-    <span slot="heading"> Select User ID to let manage </span>
+<Modal on:close>
+  <span slot="heading"> Select a user to add {role} role to</span>
+  <Collection path="users" startWith={usersType} let:data={users}>
+    <Filter items={users} let:filteredItems={filteredUsers} placeholder="Search names and emails">
+      {#each filteredUsers as user}
+        <Button onclick={() => add(user)} color="green" form="primary">{user.displayName}</Button>
+      {/each}
 
-    {#if users.length}
-      <input type="text" bind:value={userEmail} list="ids" placeholder="Search by ID" />
-      <datalist id="ids">
-        {#each users as user}
-          <option>{user.email}</option>
-        {/each}
-      </datalist>
-    {:else}Loading users...{/if}
-
-    <div class="modal-footer space-x-1">
-      <Button onclick={close} color="black">Cancel</Button>
-      <Button onclick={() => save(users, userEmail)} color="green" form="primary">Save</Button>
-    </div>
-  </Modal>
-</Collection>
-
-<style>
-  input {
-    @apply w-full px-3 py-2 border border-gray-300
-      rounded placeholder-gray-500 focus:outline-none
-      focus:ring-primary-300 focus:border-primary-300;
-  }
-</style>
+      <div class="modal-footer space-x-1">
+        <Button onclick={close} color="black">Cancel</Button>
+      </div>
+    </Filter>
+  </Collection>
+</Modal>
