@@ -81,15 +81,15 @@
               </Button>
 
               <SelectVideo let:file>
-                {#await import('$lib/components/video/UploadVideo.svelte') then { default: UploadVideo }}
+                <!-- {#await import('$lib/components/video/UploadVideo.svelte') then { default: UploadVideo }}
                   <UploadVideo {file} {entry} {speakerId} />
-                {/await}
+                {/await} -->
               </SelectVideo>
             {:else}
               <RecordVideo let:videoBlob>
-                {#await import('$lib/components/video/UploadVideo.svelte') then { default: UploadVideo }}
+                <!-- {#await import('$lib/components/video/UploadVideo.svelte') then { default: UploadVideo }}
                   <UploadVideo file={videoBlob} {entry} {speakerId} />
-                {/await}
+                {/await} -->
               </RecordVideo>
             {/if}
           </ShowHide>
