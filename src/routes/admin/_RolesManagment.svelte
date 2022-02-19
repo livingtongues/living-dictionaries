@@ -3,30 +3,26 @@
   import ShowHide from '$svelteui/functions/ShowHide.svelte';
   import {
     removeDictionaryManager,
-    removeDictionaryContributorPermission,
-    removeDictionaryCollaboratorPermission,
+    removeDictionaryContributor,
+    removeDictionaryCollaborator,
   } from '$lib/helpers/dictionariesManaging';
   import { addOnline } from '$sveltefirets';
-  import type { IHelper } from '$lib/interfaces';
+  import type { HelperRoles, IHelper } from '$lib/interfaces';
 
   export let helpers: IHelper[] = [];
   export let dictionaryId: string;
-  export let role: 'manager' | 'contributor' | 'writeInCollaborator';
+  export let role: HelperRoles;
 
-  async function remove(
-    helper: IHelper,
-    dictionaryId: string,
-    role: 'manager' | 'contributor' | 'writeInCollaborator'
-  ) {
+  async function remove(helper: IHelper, dictionaryId: string, role: HelperRoles) {
     try {
       if (role === 'manager') {
         removeDictionaryManager(helper, dictionaryId);
       }
       if (role === 'writeInCollaborator') {
-        removeDictionaryCollaboratorPermission(helper, dictionaryId);
+        removeDictionaryCollaborator(helper, dictionaryId);
       }
       if (role === 'contributor') {
-        removeDictionaryContributorPermission(helper, dictionaryId);
+        removeDictionaryContributor(helper, dictionaryId);
       }
     } catch (err) {
       alert(`Error: ${err}`);

@@ -14,7 +14,7 @@ import type { IInvite } from './invite.interface';
 import type { IDictionarySettings } from './dictionary-settings.interface';
 import type { IPartOfSpeech } from './part-of-speech.interface';
 import type { IColumn } from './column.interface';
-import type { IHelper } from './helper.interface';
+import type { HelperRoles, IHelper } from './helper.interface';
 import type { IFirestoreMetaData } from './firestore-metadata.interface';
 
 export type {
@@ -36,6 +36,7 @@ export type {
   ISpeaker,
   IUser,
   IHelper,
+  HelperRoles,
   IPartOfSpeech,
   IColumn,
   IFirestoreMetaData,
