@@ -7,58 +7,39 @@
   import type { IDictionary, IUser } from '$lib/interfaces';
   import Button from '$svelteui/ui/Button.svelte';
   import { Collection } from '$sveltefirets';
+  import Filter from './_Filter.svelte';
 
   export let user: IUser;
 
   let dictionariesType: IDictionary[];
-  let dictionaryIds = [];
-  let dictionaryId = '';
 
-  async function save(dictionaryId: string) {
-    if (dictionaryIds.includes(dictionaryId)) {
-      try {
-        addDictionaryManager({ id: user.uid, name: user.displayName }, dictionaryId);
-        close();
-      } catch (err) {
-        alert(`Error: ${err}`);
-      }
-    } else {
-      alert('Dictionary ID not found');
+  async function add(dictionaryId: string) {
+    try {
+      addDictionaryManager({ id: user.uid, name: user.displayName }, dictionaryId);
+      close();
+    } catch (err) {
+      alert(`Error: ${err}`);
     }
   }
 </script>
-
-<Collection
-  path="dictionaries"
-  startWith={dictionariesType}
-  on:data={(e) => {
-    dictionaryIds = e.detail.data.map((d) => d.id);
-  }} />
 
 <Modal on:close>
   <span slot="heading">
     Select Dictionary ID to let {user.displayName} manage
   </span>
-
-  {#if dictionaryIds.length}
-    <input type="text" bind:value={dictionaryId} list="ids" placeholder="Search by ID" />
-    <datalist id="ids">
-      {#each dictionaryIds as id}
-        <option>{id}</option>
+  <Collection path="dictionaries" startWith={dictionariesType} let:data={dictionaries}>
+    <Filter
+      items={dictionaries}
+      let:filteredItems={filteredDictionaries}
+      placeholder="Search dictionaries">
+      {#each filteredDictionaries as dictionary}
+        <Button onclick={() => add(dictionary.id)} color="green" form="primary"
+          >{dictionary.name}</Button>
       {/each}
-    </datalist>
-  {:else}Loading dictionaries...{/if}
 
-  <div class="modal-footer space-x-1">
-    <Button onclick={close} color="black">Cancel</Button>
-    <Button onclick={() => save(dictionaryId)} color="green" form="primary">Save</Button>
-  </div>
+      <div class="modal-footer space-x-1">
+        <Button onclick={close} color="black">Cancel</Button>
+      </div>
+    </Filter>
+  </Collection>
 </Modal>
-
-<style>
-  input {
-    @apply w-full px-3 py-2 border border-gray-300
-      rounded placeholder-gray-500 focus:outline-none
-      focus:ring-primary-300 focus:border-primary-300;
-  }
-</style>
