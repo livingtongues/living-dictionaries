@@ -15,6 +15,8 @@ export interface IDictionary extends IFirestoreMetaData {
   copyright?: string; // Allow custom copyright in case "Copyright _______ community" isn't appropriate for dictionary (eg. Tehuelche)
   alternateOrthographies?: string[]; // Alternate Orthography titles (first item corresponds to entry.lo, then entry.lo2, entry.lo3) - used to be called Local Orthography but that is a misnomer it's turning out
 
+  videoAccess?: boolean;
+
   // tdv1 (old Talking Dictionaries platform at Swarthmore)
   publishYear?: number;
   population?: number;
