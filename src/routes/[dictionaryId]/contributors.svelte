@@ -15,7 +15,7 @@
   import { addOnline, add, deleteDocumentOnline, updateOnline, Collection } from '$sveltefirets';
   import { where } from 'firebase/firestore';
   import { isManager, isContributor, dictionary, admin, user } from '$lib/stores';
-  import type { IInvite, IWriteInCollaborator, IContributor, IManager } from '$lib/interfaces';
+  import type { IInvite, IHelper } from '$lib/interfaces';
   import Button from '$svelteui/ui/Button.svelte';
   import ShowHide from '$svelteui/functions/ShowHide.svelte';
 
@@ -27,10 +27,8 @@
     }
   }
 
-  let managerType: IManager[];
-  let contributorType: IContributor[];
+  let helperType: IHelper[];
   let inviteType: IInvite[];
-  let writeInCollaboratorType: IWriteInCollaborator[];
 
   async function saveInvite(targetEmail: string, role: 'manager' | 'contributor') {
     try {
@@ -81,8 +79,11 @@
 </h3>
 
 <div class="divide-y divide-gray-200">
-  <Collection path={`dictionaries/${dictionaryId}/managers`} startWith={managerType} let:data>
-    {#each data as manager}
+  <Collection
+    path={`dictionaries/${dictionaryId}/managers`}
+    startWith={helperType}
+    let:data={managers}>
+    {#each managers as manager}
       <div class="py-3">
         <div class="text-sm leading-5 font-medium text-gray-900">
           {manager.name}
@@ -96,8 +97,8 @@
       path={`dictionaries/${dictionaryId}/invites`}
       queryConstraints={[where('role', '==', 'manager'), where('status', 'in', ['queued', 'sent'])]}
       startWith={inviteType}
-      let:data>
-      {#each data as invite}
+      let:data={invites}>
+      {#each invites as invite}
         <div class="py-3 flex flex-wrap items-center justify-between">
           <div class="text-sm leading-5 font-medium text-gray-900">
             <i
@@ -139,9 +140,9 @@
 <div class="divide-y divide-gray-200">
   <Collection
     path={`dictionaries/${dictionaryId}/contributors`}
-    startWith={contributorType}
-    let:data>
-    {#each data as contributor}
+    startWith={helperType}
+    let:data={contributors}>
+    {#each contributors as contributor}
       <div class="py-3">
         <div class="text-sm leading-5 font-medium text-gray-900">
           {contributor.name}
@@ -157,8 +158,8 @@
         where('status', 'in', ['queued', 'sent']),
       ]}
       startWith={inviteType}
-      let:data>
-      {#each data as invite}
+      let:data={invites}>
+      {#each invites as invite}
         <div class="py-3 flex flex-wrap items-center justify-between">
           <div class="text-sm leading-5 font-medium text-gray-900">
             <i
@@ -187,9 +188,9 @@
   {/if}
   <Collection
     path={`dictionaries/${dictionaryId}/writeInCollaborators`}
-    startWith={writeInCollaboratorType}
-    let:data>
-    {#each data as collaborator}
+    startWith={helperType}
+    let:data={writeInCollaborators}>
+    {#each writeInCollaborators as collaborator}
       <div class="py-3 flex flex-wrap items-center justify-between">
         <div class="text-sm leading-5 font-medium text-gray-900">
           {collaborator.name}

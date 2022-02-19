@@ -3,7 +3,7 @@
   import { createEventDispatcher } from 'svelte';
   const dispatch = createEventDispatcher();
   const close = () => dispatch('close');
-  import { addDictionaryManagerPermission } from '$lib/helpers/dictionariesManaging';
+  import { addDictionaryManager } from '$lib/helpers/dictionariesManaging';
   import type { IDictionary, IUser } from '$lib/interfaces';
   import Button from '$svelteui/ui/Button.svelte';
   import { Collection } from '$sveltefirets';
@@ -12,12 +12,12 @@
 
   let dictionariesType: IDictionary[];
   let dictionaryIds = [];
-  let dictionaryID = '';
+  let dictionaryId = '';
 
-  async function save(id) {
-    if (dictionaryIds.includes(id)) {
+  async function save(dictionaryId: string) {
+    if (dictionaryIds.includes(dictionaryId)) {
       try {
-        addDictionaryManagerPermission(user, id);
+        addDictionaryManager({ id: user.uid, name: user.displayName }, dictionaryId);
         close();
       } catch (err) {
         alert(`Error: ${err}`);
@@ -41,7 +41,7 @@
   </span>
 
   {#if dictionaryIds.length}
-    <input type="text" bind:value={dictionaryID} list="ids" placeholder="Search by ID" />
+    <input type="text" bind:value={dictionaryId} list="ids" placeholder="Search by ID" />
     <datalist id="ids">
       {#each dictionaryIds as id}
         <option>{id}</option>
@@ -51,7 +51,7 @@
 
   <div class="modal-footer space-x-1">
     <Button onclick={close} color="black">Cancel</Button>
-    <Button onclick={() => save(dictionaryID)} color="green" form="primary">Save</Button>
+    <Button onclick={() => save(dictionaryId)} color="green" form="primary">Save</Button>
   </div>
 </Modal>
 

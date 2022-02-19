@@ -6,22 +6,19 @@ import type { IGlossLanguages, IGlossLanguage } from './gloss-language.interface
 import type { IGloss } from './gloss.interface';
 import type { IExampleSentence } from './exampe-sentence.interface';
 import type { IImport } from './import.interface';
-import type { IManager } from './manager.interface';
 import type { IPhoto } from './photo.interface';
 import type { ISemanticDomain } from './semantic-domain.interface';
 import type { ISpeaker } from './speaker.interface';
 import type { IUser } from './user.interface';
-import type { IWriteInCollaborator } from './write-in-collaborator.interface';
-import type { IContributor } from './contributor.interface';
 import type { IInvite } from './invite.interface';
 import type { IDictionarySettings } from './dictionary-settings.interface';
 import type { IPartOfSpeech } from './part-of-speech.interface';
 import type { IColumn } from './column.interface';
+import type { IHelper } from './helper.interface';
 import type { IFirestoreMetaData } from './firestore-metadata.interface';
 
 export type {
   IAudio,
-  IContributor,
   IDialect,
   IDictionarySettings,
   IDictionary,
@@ -34,12 +31,11 @@ export type {
   IGloss,
   IImport,
   IInvite,
-  IManager,
   IPhoto,
   ISemanticDomain,
   ISpeaker,
   IUser,
-  IWriteInCollaborator,
+  IHelper,
   IPartOfSpeech,
   IColumn,
   IFirestoreMetaData,

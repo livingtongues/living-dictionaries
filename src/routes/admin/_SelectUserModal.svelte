@@ -4,28 +4,27 @@
   const dispatch = createEventDispatcher();
   const close = () => dispatch('close');
   import {
-    addDictionaryManagerPermission,
+    addDictionaryManager,
     addDictionaryContributorPermission,
   } from '$lib/helpers/dictionariesManaging';
   import type { IUser } from '$lib/interfaces';
   import Button from '$svelteui/ui/Button.svelte';
   import Collection from '$sveltefire/components/Collection.svelte';
 
-  export let dictionaryID: string;
-  export let userRole: string;
+  export let dictionaryId: string;
+  export let role: 'manager' | 'contributor';
 
   let usersType: IUser[];
   let userEmail = '';
 
   async function save(users: IUser[], email: string) {
-    // TODO prevent when user email doesn't exist
     try {
       const user = users.find((user) => email === user.email);
-      if (userRole === 'manager') {
-        addDictionaryManagerPermission(user, dictionaryID);
+      if (role === 'manager') {
+        addDictionaryManager({ id: user.uid, name: user.displayName }, dictionaryId);
       }
-      if (userRole === 'contributor') {
-        addDictionaryContributorPermission(user, dictionaryID);
+      if (role === 'contributor') {
+        addDictionaryContributorPermission(user, dictionaryId);
       }
       close();
     } catch (err) {

@@ -1,6 +1,6 @@
 <script lang="ts">
   import { admin } from '$lib/stores';
-  import type { IDictionary } from '$lib/interfaces';
+  import type { IDictionary, IHelper } from '$lib/interfaces';
   import { printDate } from '$lib/helpers/time';
   export let dictionary: IDictionary;
   import ShowHide from '$svelteui/functions/ShowHide.svelte';
@@ -16,6 +16,8 @@
     removealternatename: string;
     toggleprivacy: boolean;
   }>();
+
+  let helperType: IHelper[];
 </script>
 
 <tr title={$admin > 1 && JSON.stringify(dictionary, null, 1)}>
@@ -27,8 +29,7 @@
         if (confirm("Flip this dictionary's visibility?")) {
           dispatch('toggleprivacy');
         }
-      }}
-    >
+      }}>
       {dictionary.public ? 'Public' : 'Private'}
     </Button>
   </td>
@@ -36,37 +37,43 @@
     <DictionaryFieldEdit field={'name'} value={dictionary.name} dictionaryId={dictionary.id} />
   </td>
   <td
-    ><Collection path={`dictionaries/${dictionary.id}/managers`} startWith={[]} let:data>
-      <RolesManagment {data} dictionary={dictionary.id} userRole="manager" />
+    ><Collection
+      path={`dictionaries/${dictionary.id}/managers`}
+      startWith={helperType}
+      let:data={managers}>
+      <RolesManagment helpers={managers} dictionaryId={dictionary.id} role="manager" />
     </Collection>
   </td>
   <td
-    ><Collection path={`dictionaries/${dictionary.id}/contributors`} startWith={[]} let:data>
-      <RolesManagment {data} dictionary={dictionary.id} userRole="contributor" />
+    ><Collection
+      path={`dictionaries/${dictionary.id}/contributors`}
+      startWith={helperType}
+      let:data={contributors}>
+      <RolesManagment helpers={contributors} dictionaryId={dictionary.id} role="contributor" />
     </Collection>
   </td>
   <td
     ><Collection
       path={`dictionaries/${dictionary.id}/writeInCollaborators`}
-      startWith={[]}
-      let:data
-    >
-      <RolesManagment {data} dictionary={dictionary.id} userRole="collab" />
+      startWith={helperType}
+      let:data={writeInCollaborators}>
+      <RolesManagment
+        helpers={writeInCollaborators}
+        dictionaryId={dictionary.id}
+        role="writeInCollaborator" />
     </Collection>
   </td>
   <td>
     <DictionaryFieldEdit
       field={'iso6393'}
       value={dictionary.iso6393}
-      dictionaryId={dictionary.id}
-    />
+      dictionaryId={dictionary.id} />
   </td>
   <td>
     <DictionaryFieldEdit
       field={'glottocode'}
       value={dictionary.glottocode}
-      dictionaryId={dictionary.id}
-    />
+      dictionaryId={dictionary.id} />
   </td>
   <td>
     <ShowHide let:show let:toggle>
@@ -89,8 +96,7 @@
     <DictionaryFieldEdit
       field={'location'}
       value={dictionary.location}
-      dictionaryId={dictionary.id}
-    />
+      dictionaryId={dictionary.id} />
   </td>
   <td>
     {dictionary.entryCount || ''}
@@ -109,8 +115,7 @@
           dispatch('addalternatename', name);
         }
       }}
-      on:itemremoved={(e) => dispatch('removealternatename', e.detail.value)}
-    />
+      on:itemremoved={(e) => dispatch('removealternatename', e.detail.value)} />
   </td>
   <td>
     {dictionary.alternateOrthographies || ''}
