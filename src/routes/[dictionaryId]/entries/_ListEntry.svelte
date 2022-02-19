@@ -1,14 +1,16 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
   import Audio from './_Audio.svelte';
+  import Video from './_Video.svelte';
   import Image from '$lib/components/image/Image.svelte';
   import AddImage from './_AddImage.svelte';
   import { page } from '$app/stores';
   import type { IEntry } from '$lib/interfaces';
   import { printGlosses } from '$lib/helpers/glosses';
   import { minutesAgo } from '$lib/helpers/time';
-  export let entry: IEntry;
-  export let canEdit = false;
+  export let entry: IEntry,
+    canEdit = false,
+    videoAccess = false;
 </script>
 
 <div
@@ -17,7 +19,7 @@
   class="flex rounded shadow my-1 overflow-hidden items-stretch border-green-300"
   style="margin-right: 2px;">
   {#if entry.sf || canEdit}
-    <Audio class="bg-gray-100" {entry} minimal={true} />
+    <Audio class="bg-gray-100" {entry} minimal />
   {/if}
   <a
     sveltekit:prefetch
@@ -60,6 +62,9 @@
       {/if}
     </div>
   </a>
+  {#if entry.vf || (videoAccess && canEdit)}
+    <Video class="bg-gray-100 border-r-2" {entry} minimal />
+  {/if}
   {#if entry.pf}
     <div class="media-block bg-gray-300 relative">
       <Image square={128} {entry} {canEdit} />
