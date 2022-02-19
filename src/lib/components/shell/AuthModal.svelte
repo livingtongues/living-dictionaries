@@ -30,6 +30,5 @@
     tosUrl="https://livingdictionaries.app/terms"
     {languageCode}
     on:close
-    on:updateuserdata={(e) => updateUserData(e.detail.user, e.detail.isNewUser)}
-  />
+    on:updateuserdata={(e) => updateUserData(e.detail.user, e.detail.isNewUser)} />
 </Modal>

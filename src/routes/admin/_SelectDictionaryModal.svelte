@@ -33,8 +33,7 @@
   startWith={dictionariesType}
   on:data={(e) => {
     dictionaryIds = e.detail.data.map((d) => d.id);
-  }}
-/>
+  }} />
 
 <Modal on:close>
   <span slot="heading">

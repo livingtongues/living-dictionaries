@@ -28,8 +28,7 @@
       <Button onclick={logOut}
         >{$_('account.log_out', {
           default: 'Log Out',
-        })}</Button
-      >
+        })}</Button>
     </div>
   {:else}Not signed in{/if}
 </View>

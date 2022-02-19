@@ -45,8 +45,7 @@
                 )({
                   role: roleNumber,
                 });
-              }}
-            >
+              }}>
               Set Admin Role Level (dev only)
             </button>
           {/if}

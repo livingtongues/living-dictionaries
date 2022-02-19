@@ -21,8 +21,7 @@
 <div
   class="shadow rounded flex-1 mb-1 border border-gray-400 whitespace-nowrap
     overflow-auto relative"
-  style="height: calc(100vh - 189px);"
->
+  style="height: calc(100vh - 189px);">
   <table class="relative">
     <tr class="text-left">
       {#each $columns as column, i}
@@ -34,8 +33,7 @@
             hover:bg-gray-200 active:bg-gray-300 text-xs font-semibold"
           style="{column.sticky
             ? 'left:' + getLeftValue(i) + 'px; --border-right-width: 3px;'
-            : ''} --col-width: {column.width}px;"
-        >
+            : ''} --col-width: {column.width}px;">
           <ColumnTitle {column} />
         </th>
       {/each}
@@ -47,8 +45,7 @@
             path="dictionaries/{$dictionary.id}/words/{algoliaEntry.id}"
             startWith={algoliaEntry}
             let:data={entry}
-            log
-          >
+            log>
             <tr class="row-hover">
               {#each $columns as column, i}
                 <td
@@ -58,8 +55,7 @@
                   class="{column.sticky ? 'sticky bg-white' : ''} h-0"
                   style="{column.sticky
                     ? 'left:' + getLeftValue(i) + 'px; --border-right-width: 3px;'
-                    : ''} --col-width: {column.width}px;"
-                >
+                    : ''} --col-width: {column.width}px;">
                   <Cell {column} {entry} canEdit={$canEdit} />
                 </td>
               {/each}
@@ -75,8 +71,7 @@
               class="{column.sticky ? 'sticky bg-white' : ''} h-0"
               style="{column.sticky
                 ? 'left:' + getLeftValue(i) + 'px; --border-right-width: 3px;'
-                : ''} --col-width: {column.width}px;"
-            >
+                : ''} --col-width: {column.width}px;">
               <Cell {column} {entry} canEdit={$canEdit} />
             </td>
           {/each}
@@ -92,8 +87,7 @@
       {selectedColumn}
       on:close={() => {
         selectedColumn = null;
-      }}
-    />
+      }} />
   {/await}
 {/if}
 

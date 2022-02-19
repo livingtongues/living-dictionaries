@@ -49,8 +49,7 @@
           <Doc
             path="dictionaries/{$dictionary.id}/words/{algoliaEntry.id}"
             startWith={algoliaEntry}
-            let:data={entry}
-          >
+            let:data={entry}>
             <GalleryEntry {entry} canEdit={$canEdit} />
           </Doc>
         {/if}

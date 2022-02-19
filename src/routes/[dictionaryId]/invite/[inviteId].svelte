@@ -61,8 +61,7 @@
   <Doc
     path={`dictionaries/${dictionaryId}/invites/${inviteId}`}
     let:data={invite}
-    startWith={inviteType}
-  >
+    startWith={inviteType}>
     {#if invite && invite.status === 'sent'}
       <p class="font-semibold mb-2">
         {$_('invite.invited_by', { default: 'Invited by' })}: {invite.inviterName}
@@ -86,8 +85,7 @@
           <Button form={'primary'} onclick={() => acceptInvite(invite.role)}
             >{$_('invite.accept_invitation', {
               default: 'Accept Invitation',
-            })}</Button
-          >
+            })}</Button>
 
           <div class="mt-2 text-sm text-gray-600">
             {$_('terms.agree_by_submit', {
