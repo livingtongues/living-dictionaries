@@ -14,7 +14,7 @@
   import { _ } from 'svelte-i18n';
   import { add, deleteDocumentOnline, updateOnline, Collection } from '$sveltefirets';
   import { where } from 'firebase/firestore';
-  import { isManager, isContributor, dictionary, admin, user } from '$lib/stores';
+  import { isManager, isContributor, dictionary, admin } from '$lib/stores';
   import type { IInvite, IHelper } from '$lib/interfaces';
   import Button from '$svelteui/ui/Button.svelte';
   import ShowHide from '$svelteui/functions/ShowHide.svelte';
@@ -161,7 +161,27 @@
         </div>
       {/each}
     </Collection>
+    <Button onclick={() => inviteHelper('contributor', $dictionary)} form="primary">
+      <i class="far fa-envelope" />
+      {$_('contributors.invite_contributors', {
+        default: 'Invite Contributors',
+      })}
+    </Button>
+  {:else if !$isContributor}
+    <ShowHide let:show let:toggle>
+      <Button onclick={toggle} form="primary">
+        {$_('contributors.request_access', { default: 'Request Access' })}
+      </Button>
+      {#if show}
+        {#await import('$lib/components/modals/Contact.svelte') then { default: Contact }}
+          <Contact on:close={toggle} />
+        {/await}
+      {/if}
+    </ShowHide>
   {/if}
+  <h3 class="font-semibold text-lg mb-1 mt-3">
+    {$_('contributors.other_contributors', { default: 'Other Contributors' })}
+  </h3>
   <Collection
     path={`dictionaries/${dictionaryId}/writeInCollaborators`}
     startWith={helperType}
@@ -200,29 +220,12 @@
   </div> -->
 
 {#if $isManager}
-  <Button onclick={() => inviteHelper('contributor', $dictionary)} form="primary">
-    <i class="far fa-envelope" />
-    {$_('contributors.invite_contributors', {
-      default: 'Invite Contributors',
-    })}
-  </Button>
   <Button onclick={writeIn} form="primary">
     <i class="far fa-pencil" />
     {$_('contributors.write_in_contributor', {
       default: 'Write in Contributor',
     })}
   </Button>
-{:else if !$isContributor}
-  <ShowHide let:show let:toggle>
-    <Button onclick={toggle} form="primary">
-      {$_('contributors.request_access', { default: 'Request Access' })}
-    </Button>
-    {#if show}
-      {#await import('$lib/components/modals/Contact.svelte') then { default: Contact }}
-        <Contact on:close={toggle} />
-      {/await}
-    {/if}
-  </ShowHide>
 {/if}
 
 <!-- Not using contributors.request_to_add_manager -->
