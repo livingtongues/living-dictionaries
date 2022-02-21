@@ -7,7 +7,7 @@
     entryCount = 'Entries',
     managers = 'Managers',
     contributors = 'Contributors',
-    collaborators = 'Write-in Collaborators',
+    collaborators = 'Other Contributors',
     iso6393 = 'ISO 639-3',
     glottocode = 'Glottocode',
     coordinates = 'Coordinates',
