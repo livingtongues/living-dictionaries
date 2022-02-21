@@ -1,6 +1,6 @@
 <script lang="ts">
   import { admin } from '$lib/stores';
-  import type { IDictionary } from '$lib/interfaces';
+  import type { IDictionary, IHelper } from '$lib/interfaces';
   import { printDate } from '$lib/helpers/time';
   export let dictionary: IDictionary;
   import ShowHide from '$svelteui/functions/ShowHide.svelte';
@@ -8,14 +8,17 @@
   import Button from '$svelteui/ui/Button.svelte';
   import BadgeArrayEmit from '$svelteui/data/BadgeArrayEmit.svelte';
   import { createEventDispatcher } from 'svelte';
-  import Collection from '$sveltefire/components/Collection.svelte';
+  import { Collection } from '$sveltefirets';
   import RolesManagment from './_RolesManagment.svelte';
+  import IntersectionObserver from '$lib/components/ui/IntersectionObserver.svelte';
 
   const dispatch = createEventDispatcher<{
     addalternatename: string;
     removealternatename: string;
     toggleprivacy: boolean;
   }>();
+
+  let helperType: IHelper[];
 </script>
 
 <tr title={$admin > 1 && JSON.stringify(dictionary, null, 1)}>
@@ -27,46 +30,63 @@
         if (confirm("Flip this dictionary's visibility?")) {
           dispatch('toggleprivacy');
         }
-      }}
-    >
+      }}>
       {dictionary.public ? 'Public' : 'Private'}
     </Button>
   </td>
   <td class="italic">
     <DictionaryFieldEdit field={'name'} value={dictionary.name} dictionaryId={dictionary.id} />
   </td>
-  <td
-    ><Collection path={`dictionaries/${dictionary.id}/managers`} startWith={[]} let:data>
-      <RolesManagment {data} dictionary={dictionary.id} userRole="manager" />
-    </Collection>
+  <td>
+    {dictionary.entryCount || ''}
   </td>
-  <td
-    ><Collection path={`dictionaries/${dictionary.id}/contributors`} startWith={[]} let:data>
-      <RolesManagment {data} dictionary={dictionary.id} userRole="contributor" />
-    </Collection>
+  <td>
+    <IntersectionObserver let:intersecting once>
+      {#if intersecting}
+        <Collection
+          path={`dictionaries/${dictionary.id}/managers`}
+          startWith={helperType}
+          let:data={managers}>
+          <RolesManagment helpers={managers} {dictionary} role="manager" />
+        </Collection>
+      {/if}
+    </IntersectionObserver>
   </td>
-  <td
-    ><Collection
-      path={`dictionaries/${dictionary.id}/writeInCollaborators`}
-      startWith={[]}
-      let:data
-    >
-      <RolesManagment {data} dictionary={dictionary.id} userRole="collab" />
-    </Collection>
+  <td>
+    <IntersectionObserver let:intersecting once>
+      {#if intersecting}
+        <Collection
+          path={`dictionaries/${dictionary.id}/contributors`}
+          startWith={helperType}
+          let:data={contributors}>
+          <RolesManagment helpers={contributors} {dictionary} role="contributor" />
+        </Collection>
+      {/if}
+    </IntersectionObserver>
+  </td>
+  <td>
+    <IntersectionObserver let:intersecting once>
+      {#if intersecting}
+        <Collection
+          path={`dictionaries/${dictionary.id}/writeInCollaborators`}
+          startWith={helperType}
+          let:data={writeInCollaborators}>
+          <RolesManagment helpers={writeInCollaborators} {dictionary} role="writeInCollaborator" />
+        </Collection>
+      {/if}
+    </IntersectionObserver>
   </td>
   <td>
     <DictionaryFieldEdit
       field={'iso6393'}
       value={dictionary.iso6393}
-      dictionaryId={dictionary.id}
-    />
+      dictionaryId={dictionary.id} />
   </td>
   <td>
     <DictionaryFieldEdit
       field={'glottocode'}
       value={dictionary.glottocode}
-      dictionaryId={dictionary.id}
-    />
+      dictionaryId={dictionary.id} />
   </td>
   <td>
     <ShowHide let:show let:toggle>
@@ -89,11 +109,7 @@
     <DictionaryFieldEdit
       field={'location'}
       value={dictionary.location}
-      dictionaryId={dictionary.id}
-    />
-  </td>
-  <td>
-    {dictionary.entryCount || ''}
+      dictionaryId={dictionary.id} />
   </td>
   <td>
     <BadgeArrayEmit addMessage="Add" strings={dictionary.glossLanguages} />
@@ -109,8 +125,7 @@
           dispatch('addalternatename', name);
         }
       }}
-      on:itemremoved={(e) => dispatch('removealternatename', e.detail.value)}
-    />
+      on:itemremoved={(e) => dispatch('removealternatename', e.detail.value)} />
   </td>
   <td>
     {dictionary.alternateOrthographies || ''}

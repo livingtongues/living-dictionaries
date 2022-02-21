@@ -1,16 +1,14 @@
 <script context="module" lang="ts">
-  import { fetchDictionaries } from '$lib/helpers/fetchDictionaries';
-  import { browser } from '$app/env';
+  import { getCollection } from '$sveltefirets';
+  import { orderBy, where } from 'firebase/firestore';
 
   import type { Load } from '@sveltejs/kit';
   export const load: Load = async () => {
     try {
-      const publicDictionaries = browser
-        ? await getCollection<IDictionary>('dictionaries', [
-            orderBy('name'),
-            where('public', '==', true),
-          ])
-        : await fetchDictionaries();
+      const publicDictionaries = await getCollection<IDictionary>('dictionaries', [
+        orderBy('name'),
+        where('public', '==', true),
+      ]);
       return { props: { publicDictionaries } };
     } catch (error) {
       return {
@@ -28,8 +26,6 @@
   import Mapbox from '$lib/components/home/Mapbox.svelte';
   import Search from '$lib/components/home/Search.svelte';
   import Header from '$lib/components/shell/Header.svelte';
-  import { getCollection } from '$sveltefire/firestore';
-  import { orderBy, where } from 'firebase/firestore';
 
   export let publicDictionaries: IDictionary[] = [];
   let privateDictionaries: IDictionary[] = [];
@@ -56,16 +52,14 @@
     <div class="sm:w-72 max-h-full" slot="sidebar">
       <Search
         dictionaries={[...publicDictionaries, ...privateDictionaries, ...$myDictionaries]}
-        bind:selectedDictionaryId
-      />
+        bind:selectedDictionaryId />
     </div>
     {#await import('$lib/components/home/Dictionaries.svelte') then { default: Dictionaries }}
       {#if privateDictionaries.length}
         <Dictionaries
           dictionaries={privateDictionaries}
           source="private"
-          bind:selectedDictionaryId
-        />
+          bind:selectedDictionaryId />
       {/if}
       <Dictionaries dictionaries={publicDictionaries} bind:selectedDictionaryId />
       {#if $myDictionaries.length}

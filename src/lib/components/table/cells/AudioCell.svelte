@@ -1,6 +1,6 @@
 <script lang="ts">
   import ShowHide from '$svelteui/functions/ShowHide.svelte';
-  import { firebaseConfig } from '$sveltefire/config';
+  import { firebaseConfig } from '$sveltefirets';
   import { longpress } from '$svelteui/actions/longpress';
   import type { IEntry } from '$lib/interfaces';
   export let entry: IEntry,

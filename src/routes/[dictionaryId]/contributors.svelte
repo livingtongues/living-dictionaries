@@ -12,50 +12,22 @@
 <script lang="ts">
   export let dictionaryId: string;
   import { _ } from 'svelte-i18n';
-  import { isManager, isContributor, dictionary, admin } from '$lib/stores';
-  import Collection from '$sveltefire/components/Collection.svelte';
+  import { add, deleteDocumentOnline, updateOnline, Collection } from '$sveltefirets';
   import { where } from 'firebase/firestore';
-  import { addDictionaryCollaboratorPermission } from '$lib/helpers/dictionariesManaging';
-
-  function invite(role: 'manager' | 'contributor' = 'contributor') {
-    const input = prompt(`${$_('contact.email', { default: 'Email' })}?`);
-    if (input) {
-      const isEmail = /^\S+@\S+\.\S+$/.test(input);
-      isEmail ? saveInvite(input, role) : alert($_('misc.invalid', { default: 'Invalid Email' }));
-    }
-  }
-
-  import { add, deleteDocument, update } from '$sveltefire/firestorelite';
-  import type { IInvite, IWriteInCollaborator, IContributor, IManager } from '$lib/interfaces';
+  import { isManager, isContributor, dictionary, admin, user } from '$lib/stores';
+  import type { IInvite, IHelper } from '$lib/interfaces';
   import Button from '$svelteui/ui/Button.svelte';
   import ShowHide from '$svelteui/functions/ShowHide.svelte';
-  import { user } from '$sveltefire/user';
+  import { inviteHelper } from '$lib/helpers/inviteHelper';
 
-  let managerType: IManager[];
-  let contributorType: IContributor[];
+  let helperType: IHelper[];
   let inviteType: IInvite[];
-  let writeInCollaboratorType: IWriteInCollaborator[];
-
-  async function saveInvite(targetEmail: string, role: 'manager' | 'contributor') {
-    try {
-      const invite: IInvite = {
-        inviterEmail: $user.email,
-        inviterName: $user.displayName,
-        dictionaryName: $dictionary.name,
-        targetEmail,
-        role,
-        status: 'queued',
-      };
-      await add(`dictionaries/${dictionaryId}/invites`, invite, true);
-    } catch (err) {
-      alert(`${$_('misc.error', { default: 'Error' })}: ${err}`);
-      console.error(err);
-    }
-  }
 
   function writeIn() {
     const name = prompt(`${$_('speakers.name', { default: 'Name' })}?`);
-    addDictionaryCollaboratorPermission(name, dictionaryId);
+    if (name) {
+      add(`dictionaries/${dictionaryId}/writeInCollaborators`, { name });
+    }
   }
 </script>
 
@@ -75,8 +47,7 @@
     >{$_('contributors.manager_contributor_distinction', {
       default:
         'Note: Dictionary managers may add, edit or delete content. Contributors are project collaborators who can also add and edit, but cannot delete any content.',
-    })}</i
-  >
+    })}</i>
 </p>
 
 <h3 class="font-semibold text-lg mb-1 mt-3">
@@ -84,8 +55,11 @@
 </h3>
 
 <div class="divide-y divide-gray-200">
-  <Collection path={`dictionaries/${dictionaryId}/managers`} startWith={managerType} let:data>
-    {#each data as manager}
+  <Collection
+    path={`dictionaries/${dictionaryId}/managers`}
+    startWith={helperType}
+    let:data={managers}>
+    {#each managers as manager}
       <div class="py-3">
         <div class="text-sm leading-5 font-medium text-gray-900">
           {manager.name}
@@ -99,16 +73,14 @@
       path={`dictionaries/${dictionaryId}/invites`}
       queryConstraints={[where('role', '==', 'manager'), where('status', 'in', ['queued', 'sent'])]}
       startWith={inviteType}
-      let:data
-    >
-      {#each data as invite}
+      let:data={invites}>
+      {#each invites as invite}
         <div class="py-3 flex flex-wrap items-center justify-between">
           <div class="text-sm leading-5 font-medium text-gray-900">
             <i
               >{$_('contributors.invitation_sent', {
                 default: 'Invitation sent',
-              })}:</i
-            >
+              })}:</i>
             {invite.targetEmail}
           </div>
           {#if $admin}
@@ -117,14 +89,13 @@
               size="sm"
               on:click={() => {
                 if (confirm($_('misc.delete', { default: 'Delete' }))) {
-                  update(`dictionaries/${dictionaryId}/invites/${invite.id}`, {
+                  updateOnline(`dictionaries/${dictionaryId}/invites/${invite.id}`, {
                     status: 'cancelled',
                   });
                 }
               }}
               >{$_('misc.delete', { default: 'Delete' })}
-              <i class="fas fa-times" /><i class="fas fa-key mx-1" /></Button
-            >
+              <i class="fas fa-times" /><i class="fas fa-key mx-1" /></Button>
           {/if}
         </div>
       {/each}
@@ -132,7 +103,7 @@
   {/if}
 </div>
 {#if $isManager}
-  <Button onclick={() => invite('manager')} form="primary">
+  <Button onclick={() => inviteHelper('manager', $dictionary)} form="primary">
     <i class="far fa-envelope" />
     {$_('contributors.invite_manager', { default: 'Invite a Manager' })}
   </Button>
@@ -145,10 +116,9 @@
 <div class="divide-y divide-gray-200">
   <Collection
     path={`dictionaries/${dictionaryId}/contributors`}
-    startWith={contributorType}
-    let:data
-  >
-    {#each data as contributor}
+    startWith={helperType}
+    let:data={contributors}>
+    {#each contributors as contributor}
       <div class="py-3">
         <div class="text-sm leading-5 font-medium text-gray-900">
           {contributor.name}
@@ -164,16 +134,14 @@
         where('status', 'in', ['queued', 'sent']),
       ]}
       startWith={inviteType}
-      let:data
-    >
-      {#each data as invite}
+      let:data={invites}>
+      {#each invites as invite}
         <div class="py-3 flex flex-wrap items-center justify-between">
           <div class="text-sm leading-5 font-medium text-gray-900">
             <i
               >{$_('contributors.invitation_sent', {
                 default: 'Invitation sent',
-              })}:</i
-            >
+              })}:</i>
             {invite.targetEmail}
           </div>
           {#if $admin}
@@ -182,14 +150,13 @@
               size="sm"
               onclick={() => {
                 if (confirm($_('misc.delete', { default: 'Delete' }))) {
-                  update(`dictionaries/${dictionaryId}/invites/${invite.id}`, {
+                  updateOnline(`dictionaries/${dictionaryId}/invites/${invite.id}`, {
                     status: 'cancelled',
                   });
                 }
               }}
               >{$_('misc.delete', { default: 'Delete' })}
-              <i class="fas fa-times" /><i class="fas fa-key ml-1" /></Button
-            >
+              <i class="fas fa-times" /><i class="fas fa-key ml-1" /></Button>
           {/if}
         </div>
       {/each}
@@ -197,10 +164,9 @@
   {/if}
   <Collection
     path={`dictionaries/${dictionaryId}/writeInCollaborators`}
-    startWith={writeInCollaboratorType}
-    let:data
-  >
-    {#each data as collaborator}
+    startWith={helperType}
+    let:data={writeInCollaborators}>
+    {#each writeInCollaborators as collaborator}
       <div class="py-3 flex flex-wrap items-center justify-between">
         <div class="text-sm leading-5 font-medium text-gray-900">
           {collaborator.name}
@@ -211,14 +177,13 @@
             size="sm"
             onclick={() => {
               if (confirm($_('misc.delete', { default: 'Delete' }))) {
-                deleteDocument(
+                deleteDocumentOnline(
                   `dictionaries/${dictionaryId}/writeInCollaborators/${collaborator.id}`
                 );
               }
             }}
             >{$_('misc.delete', { default: 'Delete' })}
-            <i class="fas fa-times" /></Button
-          >
+            <i class="fas fa-times" /></Button>
         {/if}
       </div>
     {/each}
@@ -235,7 +200,7 @@
   </div> -->
 
 {#if $isManager}
-  <Button onclick={() => invite('contributor')} form="primary">
+  <Button onclick={() => inviteHelper('contributor', $dictionary)} form="primary">
     <i class="far fa-envelope" />
     {$_('contributors.invite_contributors', {
       default: 'Invite Contributors',

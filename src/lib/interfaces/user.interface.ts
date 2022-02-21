@@ -11,8 +11,8 @@ interface User {
   lastVisit?: Timestamp & FieldValue;
 
   roles?: IRoles;
-  managing?: string[]; // | firebase.firestore.FieldValue; // dictionary Ids
-  contributing?: string[]; // dictionary Ids
+  managing?: string[]; // dictionary Ids - can be deprected because using a collectionGroup query of 'managers' instead
+  contributing?: string[]; // dictionary Ids - can be deprected because using a collectionGroup query 'contributors' instead
   // starred?: string[]; // in future save dictionary Ids to user that they star, to allow them quick access back to those dictionaries
   termsAgreement?: Timestamp & FieldValue;
   unsubscribe?: Timestamp & FieldValue;

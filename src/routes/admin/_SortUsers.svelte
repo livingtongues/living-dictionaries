@@ -4,7 +4,8 @@
   enum UserFields {
     displayName = 'Name',
     email = 'Email',
-    dictionariesManaging = 'Dictionaries Managing',
+    dictionariesManaging = 'Managing',
+    dictionariesContributing = 'Contributing To',
     lastVisit = 'Last Visit',
     createdAt = 'Created At',
     unsubscribe = 'Unsubscribed',
@@ -27,10 +28,6 @@
     let valueB: string | number;
     // prettier-ignore
     switch (sortKey) {
-      case 'dictionariesManaging':
-        valueA = a.managing && a.managing.length || 0;
-        valueB = b.managing && b.managing.length || 0;
-        break;
       case 'createdAt':
         valueA = a.createdAt && a.createdAt.seconds || 0;
         valueB = b.createdAt && b.createdAt.seconds || 0;

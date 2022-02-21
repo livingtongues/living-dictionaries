@@ -1,10 +1,9 @@
 import { fetchAsText } from 'fetch-as';
-const p = 'anet';
-const processImageUrl = `https://${p}-photo.appspot.com/urlfull`;
+import 'dotenv/config'; // see https://github.com/motdotla/dotenv#how-do-i-use-dotenv-with-import
 
 export const getImageServingUrl = async (imageStoragePath: string, environment: string) => {
   try {
-    const storagePath = `${processImageUrl}/talking-dictionaries-${
+    const storagePath = `${process.env.ProcessImageUrl}/talking-dictionaries-${
       environment == 'prod' ? 'alpha' : 'dev'
     }.appspot.com/${imageStoragePath}`;
     const imageServingUrl = await fetchAsText(storagePath);

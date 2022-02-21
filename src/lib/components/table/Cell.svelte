@@ -15,15 +15,15 @@
   let updatedValue;
 
   import { dictionary } from '$lib/stores';
-  import { update } from '$sveltefire/firestorelite';
+  import { updateOnline } from '$sveltefirets';
   async function saveUpdateToFirestore(e) {
     try {
-      await update<IEntry>(
+      await updateOnline<IEntry>(
         `dictionaries/${$dictionary.id}/words/${entry.id}`,
         {
           [e.detail.field]: e.detail.newValue,
         },
-        true
+        { abbreviate: true }
       );
     } catch (err) {
       alert(`${$_('misc.error', { default: 'Error' })}: ${err}`);
@@ -59,8 +59,7 @@
         entry._highlightResult.gl[column.field] &&
         entry._highlightResult.gl[column.field].value) ||
         ''}
-      on:valueupdate={saveUpdateToFirestore}
-    />
+      on:valueupdate={saveUpdateToFirestore} />
   {:else if column.exampleSentence === true}
     <Textbox
       {canEdit}
@@ -72,8 +71,7 @@
         entry._highlightResult.xs[column.field] &&
         entry._highlightResult.xs[column.field].value) ||
         ''}
-      on:valueupdate={saveUpdateToFirestore}
-    />
+      on:valueupdate={saveUpdateToFirestore} />
   {:else}
     <Textbox
       {canEdit}
@@ -84,7 +82,6 @@
         entry._highlightResult[column.field] &&
         entry._highlightResult[column.field].value) ||
         ''}
-      on:valueupdate={saveUpdateToFirestore}
-    />
+      on:valueupdate={saveUpdateToFirestore} />
   {/if}
 </div>

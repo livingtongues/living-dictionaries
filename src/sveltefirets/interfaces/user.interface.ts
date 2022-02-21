@@ -1,7 +1,7 @@
 import type { FieldValue, Timestamp } from 'firebase/firestore';
 import type { IFirestoreMetaData } from '.';
 
-export type IGenericUser = User & Omit<IFirestoreMetaData, 'id'>;
+export type IBaseUser = User & Omit<IFirestoreMetaData, 'id'>;
 
 interface User {
   uid?: string;

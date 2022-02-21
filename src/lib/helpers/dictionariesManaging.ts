@@ -1,81 +1,42 @@
-import { deleteDocument, set, update, getDocument, add } from '$sveltefire/firestorelite';
-import { arrayRemove, arrayUnion, serverTimestamp } from 'firebase/firestore/lite';
-import type { IUser, IManager, IWriteInCollaborator, IContributor } from '$lib/interfaces';
+import { deleteDocument, deleteDocumentOnline, setOnline } from '$sveltefirets';
+import type { IHelper } from '$lib/interfaces';
 
-export async function addDictionaryManagerPermission(userBeingEdited: IUser, dictionaryId: string) {
-  const manager: IManager = {
-    id: userBeingEdited.uid,
-    name: userBeingEdited.displayName,
-  };
-
-  await set(`dictionaries/${dictionaryId}/managers/${userBeingEdited.uid}`, manager);
-  await update(`users/${userBeingEdited.uid}`, {
-    managing: arrayUnion(dictionaryId),
-    termsAgreement: serverTimestamp(),
+export async function addDictionaryManager(manager: IHelper, dictionaryId: string) {
+  await setOnline<IHelper>(`dictionaries/${dictionaryId}/managers/${manager.id}`, {
+    id: manager.id,
+    name: manager.name,
   });
 }
 
-export async function removeDictionaryManagerPermission(
-  userBeingEdited: IUser,
-  dictionaryId: string
-) {
-  if (
-    confirm(
-      `Are you sure you want to remove ${userBeingEdited.displayName} as manager from ${dictionaryId}?`
-    )
-  ) {
-    await deleteDocument(`dictionaries/${dictionaryId}/managers/${userBeingEdited.uid}`);
-    await update(`users/${userBeingEdited.uid}`, {
-      managing: arrayRemove(dictionaryId),
-    });
+export async function removeDictionaryManager(manager: IHelper, dictionaryId: string) {
+  if (confirm(`Are you sure you want to remove ${manager.name} as manager from ${dictionaryId}?`)) {
+    await deleteDocumentOnline(`dictionaries/${dictionaryId}/managers/${manager.id}`);
   }
 }
-export async function addDictionaryContributorPermission(
-  userBeingEdited: IUser,
-  dictionaryId: string
-) {
-  const contributor: IContributor = {
-    id: userBeingEdited.uid,
-    name: userBeingEdited.displayName,
-  };
-  await set(`dictionaries/${dictionaryId}/contributors/${contributor.id}`, contributor);
+
+export async function addDictionaryContributor(contributor: IHelper, dictionaryId: string) {
+  await setOnline<IHelper>(`dictionaries/${dictionaryId}/contributors/${contributor.id}`, {
+    id: contributor.id,
+    name: contributor.name,
+  });
 }
 
-export async function removeDictionaryContributorPermission(
-  contributorId: string,
-  dictionaryId: string
-) {
-  const contributor: IContributor = await getDocument(
-    `dictionaries/${dictionaryId}/contributors/${contributorId}`
-  );
+export async function removeDictionaryContributor(contributor: IHelper, dictionaryId: string) {
   if (
     confirm(
       `Are you sure you want to remove ${contributor.name} as contributor from ${dictionaryId}?`
     )
   ) {
-    await deleteDocument(`dictionaries/${dictionaryId}/contributors/${contributorId}`);
+    await deleteDocument(`dictionaries/${dictionaryId}/contributors/${contributor.id}`);
   }
 }
 
-export async function addDictionaryCollaboratorPermission(name: string, dictionaryId: string) {
-  if (name) {
-    add(`dictionaries/${dictionaryId}/writeInCollaborators`, { name }, true);
-  }
-}
-
-export async function removeDictionaryCollaboratorPermission(
-  collaboratorId: string,
-  dictionaryId: string
-) {
-  const collaborator: IWriteInCollaborator = await getDocument(
-    `dictionaries/${dictionaryId}/writeInCollaborators/${collaboratorId}`
-  );
+export async function removeDictionaryCollaborator(collaborator: IHelper, dictionaryId: string) {
   if (
-    collaborator &&
     confirm(
       `Are you sure you want to remove ${collaborator.name} as write-in collaborator from ${dictionaryId}?`
     )
   ) {
-    await deleteDocument(`dictionaries/${dictionaryId}/writeInCollaborators/${collaboratorId}`);
+    await deleteDocument(`dictionaries/${dictionaryId}/writeInCollaborators/${collaborator.id}`);
   }
 }
