@@ -4,31 +4,28 @@
   const dispatch = createEventDispatcher();
   const close = () => dispatch('close');
   import {
-    addDictionaryManagerPermission,
-    addDictionaryContributorPermission,
+    addDictionaryManager,
+    addDictionaryContributor,
   } from '$lib/helpers/dictionariesManaging';
-  import type { IUser } from '$lib/interfaces';
+  import type { IDictionary, IUser } from '$lib/interfaces';
   import Button from '$svelteui/ui/Button.svelte';
-  import Collection from '$sveltefire/components/Collection.svelte';
+  import { Collection } from '$sveltefirets';
+  import Filter from './_Filter.svelte';
+  import { inviteHelper } from '$lib/helpers/inviteHelper';
+  import { orderBy } from 'firebase/firestore';
 
-  export let dictionaryID: string;
-  export let userRole: string;
+  export let dictionary: IDictionary;
+  export let role: 'manager' | 'contributor';
 
   let usersType: IUser[];
-  let userEmail = '';
 
-  async function save(users: IUser[], email: string) {
+  async function add(user: IUser) {
     try {
-      const user = users.find((user) => email === user.email);
-      if (user) {
-        if (userRole === 'manager') {
-          addDictionaryManagerPermission(user, dictionaryID);
-        }
-        if (userRole === 'contributor') {
-          addDictionaryContributorPermission(user, dictionaryID);
-        }
-      } else {
-        alert('Sorry! That email does not belong to any user');
+      if (role === 'manager') {
+        addDictionaryManager({ id: user.uid, name: user.displayName }, dictionary.id);
+      }
+      if (role === 'contributor') {
+        addDictionaryContributor({ id: user.uid, name: user.displayName }, dictionary.id);
       }
       close();
     } catch (err) {
@@ -37,32 +34,25 @@
   }
 </script>
 
-<Collection path="users" startWith={usersType} let:data={users}>
-  <Modal on:close>
-    <span slot="heading">
-      Select user email to let {userRole === 'manager' ? 'manage' : 'contribute'}
-    </span>
+<Modal on:close>
+  <span slot="heading"> Select a user to add {role} role to</span>
+  <Collection
+    path="users"
+    startWith={usersType}
+    let:data={users}
+    queryConstraints={[orderBy('displayName')]}>
+    <Filter items={users} let:filteredItems={filteredUsers} placeholder="Search names and emails">
+      {#each filteredUsers as user}
+        <Button onclick={() => add(user)} color="green" form="simple" class="w-full !text-left"
+          >{user.displayName} <small>({user.email})</small></Button>
+      {:else}
+        <Button size="sm" onclick={() => inviteHelper('manager', dictionary)}
+          >Invite New User</Button>
+      {/each}
 
-    {#if users.length}
-      <input type="text" bind:value={userEmail} list="emails" placeholder="Search by email" />
-      <datalist id="emails">
-        {#each users as user}
-          <option>{user.email}</option>
-        {/each}
-      </datalist>
-    {:else}Loading users...{/if}
-
-    <div class="modal-footer space-x-1">
-      <Button onclick={close} color="black">Cancel</Button>
-      <Button onclick={() => save(users, userEmail)} color="green" form="primary">Save</Button>
-    </div>
-  </Modal>
-</Collection>
-
-<style>
-  input {
-    @apply w-full px-3 py-2 border border-gray-300
-      rounded placeholder-gray-500 focus:outline-none
-      focus:ring-primary-300 focus:border-primary-300;
-  }
-</style>
+      <div class="modal-footer space-x-1">
+        <Button onclick={close} color="black">Cancel</Button>
+      </div>
+    </Filter>
+  </Collection>
+</Modal>

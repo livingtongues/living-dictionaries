@@ -4,6 +4,7 @@
   enum DictionaryFields {
     public = 'Public',
     name = 'Dictionary Name',
+    entryCount = 'Entries',
     managers = 'Managers',
     contributors = 'Contributors',
     collaborators = 'Write-in Collaborators',
@@ -11,7 +12,6 @@
     glottocode = 'Glottocode',
     coordinates = 'Coordinates',
     location = 'Location',
-    entryCount = 'Entries',
     glossLanguages = 'Gloss Languages',
     alternateNames = 'Alternate Names',
     alternateOrthographies = 'Alternate Orthographies',
@@ -91,8 +91,7 @@
   <th
     class="cursor-pointer"
     on:click={() => setSortSettings(field.key)}
-    title="Click to sort asc/desc"
-  >
+    title="Click to sort asc/desc">
     {field.value}
     {#if sortKey === field.key}
       {#if sortDescending}

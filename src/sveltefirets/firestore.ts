@@ -1,34 +1,34 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 // Inspired by https://fireship.io/lessons/firestore-advanced-usage-angularfire/
-import { get } from 'svelte/store';
-import { user } from '$sveltefire/user';
 import {
-  getFirestore,
-  addDoc,
-  collection,
-  deleteDoc,
-  doc,
-  getDoc,
-  getDocs,
-  query,
-  serverTimestamp,
-  setDoc,
-  updateDoc,
   CollectionReference,
   DocumentReference,
   QueryConstraint,
-} from 'firebase/firestore/lite';
-import type { IUser } from '$lib/interfaces';
+  collection,
+  doc,
+  getDocs,
+  getDoc,
+  query,
+  addDoc,
+  setDoc,
+  deleteDoc,
+  updateDoc,
+  serverTimestamp,
+} from 'firebase/firestore';
+
+import { get } from 'svelte/store';
+import { db } from './init';
+import { authState } from './user';
 
 export const getUid = () => {
-  const u = get(user) as IUser;
-  return (u && u.uid) || 'anonymous'; // useful if allowing support messages to be saved by non-logged-in users
+  const u = get(authState);
+  return (u && u.uid) || 'anonymous'; // 'anonymous' allows support messages to be saved by non-logged-in users
 };
 
 type CollectionPredicate<T> = string | CollectionReference<T>;
 type DocPredicate<T> = string | DocumentReference<T>;
 
 export function colRef<T>(ref: CollectionPredicate<T>): CollectionReference<T> {
-  const db = getFirestore();
   return typeof ref === 'string' ? (collection(db, ref) as CollectionReference<T>) : ref;
 }
 
@@ -41,11 +41,6 @@ export function docRef<T>(ref: DocPredicate<T>): DocumentReference<T> {
   } else {
     return ref;
   }
-}
-
-export async function getDocument<T>(ref: DocPredicate<T>): Promise<T> {
-  const docSnap = await getDoc(docRef(ref));
-  return docSnap.exists() ? { ...(docSnap.data() as T), id: docSnap.id } : null;
 }
 
 export async function getCollection<T>(
@@ -61,56 +56,63 @@ export async function getCollection<T>(
   }));
 }
 
+export async function getDocument<T>(ref: DocPredicate<T>): Promise<T> {
+  const docSnap = await getDoc(docRef(ref));
+  return docSnap.exists() ? { ...(docSnap.data() as T), id: docSnap.id } : null;
+}
+
 export function add<T>(
   ref: CollectionPredicate<T>,
   data: T,
-  abbreviateMetadata = false
+  opts: {
+    abbreviate?: boolean;
+  } = {}
 ): Promise<DocumentReference<T>> {
-  // @ts-ignore
   return addDoc(colRef(ref), {
     ...data,
-    [abbreviateMetadata ? 'ua' : 'updatedAt']: serverTimestamp(),
-    [abbreviateMetadata ? 'ca' : 'createdAt']: serverTimestamp(),
-    [abbreviateMetadata ? 'ub' : 'updatedBy']: getUid(),
-    [abbreviateMetadata ? 'cb' : 'createdBy']: getUid(),
+    [opts.abbreviate ? 'ca' : 'createdAt']: serverTimestamp(),
+    [opts.abbreviate ? 'cb' : 'createdBy']: getUid(),
+    [opts.abbreviate ? 'ua' : 'updatedAt']: serverTimestamp(),
+    [opts.abbreviate ? 'ub' : 'updatedBy']: getUid(),
   });
 }
 
 export async function set<T>(
   ref: DocPredicate<T>,
   data: T,
-  abbreviateMetadata = false,
-  merge = false
+  opts: {
+    abbreviate?: boolean;
+    merge?: boolean;
+  } = {}
 ): Promise<void> {
   const snap = await getDocument(ref);
   return await (snap
     ? update(ref, data)
     : setDoc(
         docRef(ref),
-        // @ts-ignore
         {
           ...data,
-          [abbreviateMetadata ? 'ua' : 'updatedAt']: serverTimestamp(),
-          [abbreviateMetadata ? 'ca' : 'createdAt']: serverTimestamp(),
-          [abbreviateMetadata ? 'ub' : 'updatedBy']: getUid(),
-          [abbreviateMetadata ? 'cb' : 'createdBy']: getUid(),
+          [opts.abbreviate ? 'ca' : 'createdAt']: serverTimestamp(),
+          [opts.abbreviate ? 'cb' : 'createdBy']: getUid(),
+          [opts.abbreviate ? 'ua' : 'updatedAt']: serverTimestamp(),
+          [opts.abbreviate ? 'ub' : 'updatedBy']: getUid(),
         },
-        { merge }
+        { merge: opts.merge }
       ));
 } // could split apart into set and upsert if desired, https://stackoverflow.com/questions/46597327/difference-between-set-with-merge-true-and-update
 
-export function update<T>(
+export async function update<T>(
   ref: DocPredicate<T>,
   data: Partial<T>,
-  abbreviateMetadata = false
+  opts: {
+    abbreviate?: boolean;
+  } = {}
 ): Promise<void> {
   // @ts-ignore
   return updateDoc(docRef(ref), {
     ...data,
-    [abbreviateMetadata ? 'ua' : 'updatedAt']: serverTimestamp(),
-    [abbreviateMetadata ? 'ub' : 'updatedBy']: getUid(),
-  }).catch((err) => {
-    alert(err);
+    [opts.abbreviate ? 'ua' : 'updatedAt']: serverTimestamp(),
+    [opts.abbreviate ? 'ub' : 'updatedBy']: getUid(),
   });
 }
 

@@ -12,36 +12,32 @@
 
 <script lang="ts">
   import { _ } from 'svelte-i18n';
-  import type { IInvite, IContributor, IManager, IUser } from '$lib/interfaces';
-  import { isManager, isContributor } from '$lib/stores';
+  import type { IInvite, IHelper, IUser } from '$lib/interfaces';
+  import { isManager, isContributor, user } from '$lib/stores';
 
   export let inviteId: string, dictionaryId: string;
   let inviteType: IInvite;
 
-  import { set, update } from '$sveltefire/firestorelite';
+  import { Doc, setOnline, updateOnline } from '$sveltefirets';
   import { serverTimestamp } from 'firebase/firestore/lite';
 
   async function acceptInvite(role: 'manager' | 'contributor') {
     try {
-      const contributor: IContributor | IManager = {
+      const contributor: IHelper = {
         id: $user.uid,
         name: $user.displayName,
       };
 
-      if (role === 'manager') {
-        await set<IManager>(`dictionaries/${dictionaryId}/managers/${$user.uid}`, contributor);
-      } else {
-        await set<IContributor>(
-          `dictionaries/${dictionaryId}/contributors/${$user.uid}`,
-          contributor
-        );
-      }
+      const collectionPath = `dictionaries/${dictionaryId}/${
+        role === 'manager' ? 'managers' : 'contributors'
+      }/${$user.uid}`;
+      await setOnline<IHelper>(collectionPath, contributor);
 
-      await update<IInvite>(`dictionaries/${dictionaryId}/invites/${inviteId}`, {
+      await updateOnline<IInvite>(`dictionaries/${dictionaryId}/invites/${inviteId}`, {
         status: 'claimed',
       });
 
-      await update<IUser>(`users/${$user.uid}`, {
+      await updateOnline<IUser>(`users/${$user.uid}`, {
         // @ts-ignore
         termsAgreement: serverTimestamp(),
       });
@@ -51,8 +47,6 @@
   }
 
   import Button from '$svelteui/ui/Button.svelte';
-  import Doc from '$sveltefire/components/Doc.svelte';
-  import { user } from '$sveltefire/user';
   import ShowHide from '$svelteui/functions/ShowHide.svelte';
 </script>
 
@@ -60,8 +54,7 @@
   <Doc
     path={`dictionaries/${dictionaryId}/invites/${inviteId}`}
     let:data={invite}
-    startWith={inviteType}
-  >
+    startWith={inviteType}>
     {#if invite && invite.status === 'sent'}
       <p class="font-semibold mb-2">
         {$_('invite.invited_by', { default: 'Invited by' })}: {invite.inviterName}
@@ -85,8 +78,7 @@
           <Button form={'primary'} onclick={() => acceptInvite(invite.role)}
             >{$_('invite.accept_invitation', {
               default: 'Accept Invitation',
-            })}</Button
-          >
+            })}</Button>
 
           <div class="mt-2 text-sm text-gray-600">
             {$_('terms.agree_by_submit', {

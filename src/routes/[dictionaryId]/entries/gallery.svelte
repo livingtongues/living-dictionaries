@@ -38,7 +38,7 @@
 
   import { dictionary, canEdit } from '$lib/stores';
   import GalleryEntry from './_GalleryEntry.svelte';
-  import Doc from '$sveltefire/components/Doc.svelte';
+  import { Doc } from '$sveltefirets';
 </script>
 
 <Hits {search} let:entries>
