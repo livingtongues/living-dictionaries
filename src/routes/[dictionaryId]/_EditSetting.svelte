@@ -2,7 +2,6 @@
   import { _ } from 'svelte-i18n';
   import type { IDictionary } from '$lib/interfaces';
   import { updateOnline } from '$sveltefirets';
-  import { attr } from 'svelte/internal';
 
   export let attribute: string;
   export let attributeType: 'name' | 'iso6393' | 'glottocode';
@@ -50,9 +49,7 @@
           border-gray-300 ltr:rounded-l-md rtl:rounded-r-md text-gray-900 placeholder-gray-400
           focus:outline-none focus:shadow-outline-blue focus:border-blue-300
           sm:text-sm sm:leading-5 transition ease-in-out duration-150"
-        placeholder={$_('settings.dict_name', {
-          default: 'Dictionary Name',
-        })} />
+        placeholder={`Dictionary ${attributeType}`} />
     </div>
     <button
       type="submit"

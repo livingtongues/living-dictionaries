@@ -42,6 +42,18 @@
   dictionary={$dictionary}
   display={$_('settings.edit_dict_name', { default: 'Edit Dictionary Name' })} />
 
+<EditSetting
+  attribute={$dictionary.iso6393}
+  attributeType="iso6393"
+  dictionary={$dictionary}
+  display="Edit Dictionary iso6393" />
+
+<EditSetting
+  attribute={$dictionary.glottocode}
+  attributeType="glottocode"
+  dictionary={$dictionary}
+  display="Edit Dictionary glottocode" />
+
 <div class="mt-6 flex items-center">
   <input id="public" type="checkbox" bind:checked={publicDictionary} on:change={togglePublic} />
   <label for="public" class="mx-2 block leading-5 text-gray-900">
