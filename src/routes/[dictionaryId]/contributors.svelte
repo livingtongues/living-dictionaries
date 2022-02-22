@@ -108,11 +108,10 @@
     {$_('contributors.invite_manager', { default: 'Invite a Manager' })}
   </Button>
 {/if}
-
+<hr style="margin: 20px 0;" />
 <h3 class="font-semibold text-lg mb-1 mt-3">
   {$_('dictionary.contributors', { default: 'Contributors' })}
 </h3>
-
 <div class="divide-y divide-gray-200">
   <Collection
     path={`dictionaries/${dictionaryId}/contributors`}
@@ -179,9 +178,12 @@
       {/if}
     </ShowHide>
   {/if}
-  <h3 class="font-semibold text-lg mb-1 mt-3">
-    {$_('contributors.other_contributors', { default: 'Other Contributors' })}
-  </h3>
+</div>
+<hr style="margin: 20px 0;" />
+<h3 class="font-semibold text-lg mb-1 mt-3">
+  {$_('contributors.other_contributors', { default: 'Other Contributors' })}
+</h3>
+<div class="divide-y divide-gray-200">
   <Collection
     path={`dictionaries/${dictionaryId}/writeInCollaborators`}
     startWith={helperType}
