@@ -51,8 +51,7 @@
   <Button
     href="https://docs.google.com/document/d/1MZGkBbnCiAch3tWjBOHRYPpjX1MVd7f6x5uVuwbxM-Q/edit?usp=sharing"
     target="_blank"
-    class="w-full"
-  >
+    class="w-full">
     <i class="far fa-question-circle" />
     <span class="ml-1">
       FAQ
@@ -76,8 +75,7 @@
           class="form-input bg-white w-full"
           placeholder={$_('contact.enter_message', {
             default: 'Enter your message',
-          }) + '...'}
-        />
+          }) + '...'} />
         <div class="flex text-xs">
           <div class="text-gray-500 ml-auto">{message.length}/1000</div>
         </div>
@@ -96,8 +94,7 @@
             bind:value={email}
             class="form-input bg-white w-full"
             placeholder={$_('contact.email', { default: 'Email' })}
-            style="direction: ltr"
-          />
+            style="direction: ltr" />
         </div>
       {/if}
 

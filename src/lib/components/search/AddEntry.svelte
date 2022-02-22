@@ -47,7 +47,6 @@
       display={$_('entry.lx', { default: 'Lexeme/Word/Phrase' })}
       on:valueupdate={(e) => addNewEntry(e.detail.newValue)}
       on:close={toggle}
-      adding
-    />
+      adding />
   {/if}
 </ShowHide>

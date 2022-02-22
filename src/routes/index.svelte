@@ -52,16 +52,14 @@
     <div class="sm:w-72 max-h-full" slot="sidebar">
       <Search
         dictionaries={[...publicDictionaries, ...privateDictionaries, ...$myDictionaries]}
-        bind:selectedDictionaryId
-      />
+        bind:selectedDictionaryId />
     </div>
     {#await import('$lib/components/home/Dictionaries.svelte') then { default: Dictionaries }}
       {#if privateDictionaries.length}
         <Dictionaries
           dictionaries={privateDictionaries}
           source="private"
-          bind:selectedDictionaryId
-        />
+          bind:selectedDictionaryId />
       {/if}
       <Dictionaries dictionaries={publicDictionaries} bind:selectedDictionaryId />
       {#if $myDictionaries.length}
