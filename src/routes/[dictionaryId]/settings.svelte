@@ -1,24 +1,13 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
   import { dictionary } from '$lib/stores';
+  import { updateOnline } from '$sveltefirets';
   import Button from '$svelteui/ui/Button.svelte';
   import ShowHide from '$svelteui/functions/ShowHide.svelte';
-  import { updateOnline } from '$sveltefirets';
+  import EditSetting from './_EditSetting.svelte';
 
   let name = $dictionary.name;
   let publicDictionary = $dictionary.public;
-
-  async function saveName() {
-    try {
-      name = name.trim().replace(/^./, name[0].toUpperCase());
-      await updateOnline(`dictionaries/${$dictionary.id}`, { name });
-      $dictionary.name = name;
-      location.reload();
-    } catch (err) {
-      name = $dictionary.name;
-      alert(`${$_('misc.error', { default: 'Error' })}: ${err}`);
-    }
-  }
 
   async function togglePublic() {
     try {
@@ -47,40 +36,11 @@
 
 <h3 class="text-xl font-semibold">{$_('misc.settings', { default: 'Settings' })}</h3>
 
-<form class="mt-4" on:submit|preventDefault={saveName}>
-  <label for="name" class="block text-xs leading-5 text-gray-700 mb-1">
-    {$_('settings.edit_dict_name', { default: 'Edit Dictionary Name' })}
-  </label>
-  <div class="flex flex-grow rounded-md shadow-sm">
-    <div class="flex-grow focus-within:z-10">
-      <input
-        id="name"
-        type="text"
-        autocomplete="off"
-        autocorrect="off"
-        spellcheck={false}
-        minlength="2"
-        required
-        bind:value={name}
-        class="appearance-none rounded-none block w-full px-3 py-2 border
-          border-gray-300 ltr:rounded-l-md rtl:rounded-r-md text-gray-900 placeholder-gray-400
-          focus:outline-none focus:shadow-outline-blue focus:border-blue-300
-          sm:text-sm sm:leading-5 transition ease-in-out duration-150"
-        placeholder={$_('settings.dict_name', {
-          default: 'Dictionary Name',
-        })} />
-    </div>
-    <button
-      type="submit"
-      class="-ml-px relative flex items-center px-3 py-2 ltr:rounded-r-md rtl:rounded-l-md border
-        border-gray-300 text-sm leading-5 bg-gray-50 text-gray-900
-        focus:outline-none focus:shadow-outline-blue focus:border-blue-300
-        focus:z-10 transition ease-in-out duration-150">
-      {$_('misc.save', { default: 'Save' })}
-      <!-- <span class="hidden sm:inline">Name</span> -->
-    </button>
-  </div>
-</form>
+<EditSetting
+  attribute={name}
+  attributeType="name"
+  dictionary={$dictionary}
+  display={$_('settings.edit_dict_name', { default: 'Edit Dictionary Name' })} />
 
 <div class="mt-6 flex items-center">
   <input id="public" type="checkbox" bind:checked={publicDictionary} on:change={togglePublic} />
