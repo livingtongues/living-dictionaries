@@ -44,8 +44,7 @@
           limit(10),
         ]}
         startWith={recentlyUpdatedEntries}
-        on:data={(e) => (recentlyUpdatedEntries = e.detail.data)}
-      />
+        on:data={(e) => (recentlyUpdatedEntries = e.detail.data)} />
     {:else}
       <Collection
         path={`dictionaries/${$dictionary.id}/words`}
@@ -56,8 +55,7 @@
           limit(4),
         ]}
         startWith={recentlyUpdatedEntries}
-        on:data={(e) => (recentlyUpdatedEntries = e.detail.data)}
-      />
+        on:data={(e) => (recentlyUpdatedEntries = e.detail.data)} />
     {/if}
   {/await}
 {/if}

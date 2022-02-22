@@ -47,14 +47,12 @@
         initAudio(entry.sf);
       }
     }}
-    on:longpress={() => initAudio(entry.sf)}
-  >
+    on:longpress={() => initAudio(entry.sf)}>
     {#if playing}
       <!-- <i class="fas fa-volume-up fa-lg mt-1" /> -->
       <i class="fas fa-ear fa-lg mt-1" />
     {:else}<i
-        class="far fa-ear fa-lg mt-1"
-      /><!-- <i class="far fa-volume-up fa-lg mt-1" /> -->{/if}
+        class="far fa-ear fa-lg mt-1" /><!-- <i class="far fa-volume-up fa-lg mt-1" /> -->{/if}
     <div class="text-gray-600 text-sm mt-1">
       {$_('audio.listen', { default: 'Listen' })}
       {#if !minimal && $canEdit}
@@ -76,8 +74,7 @@
   <div
     class="{$$props.class} hover:bg-gray-300 flex flex-col items-center
     justify-center cursor-pointer p-2 text-lg"
-    on:click={() => (openAudioModal = true)}
-  >
+    on:click={() => (openAudioModal = true)}>
     <i class="far fa-microphone my-1 mx-2 text-blue-800" />
     {#if !minimal}
       <div class="text-blue-800 text-xs">
@@ -93,7 +90,6 @@
       {entry}
       on:close={() => {
         openAudioModal = null;
-      }}
-    />
+      }} />
   {/await}
 {/if}

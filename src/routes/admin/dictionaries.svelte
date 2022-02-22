@@ -21,14 +21,12 @@
   <Filter
     items={dictionaries}
     let:filteredItems={filteredDictionaries}
-    placeholder="Search dictionaries"
-  >
+    placeholder="Search dictionaries">
     <div slot="right">
       <Button
         form="primary"
         color="black"
-        onclick={() => exportDictionariesAsCSV(filteredDictionaries, 'living-dictionaries-list')}
-      >
+        onclick={() => exportDictionariesAsCSV(filteredDictionaries, 'living-dictionaries-list')}>
         <i class="fas fa-download mr-1" />
         Download {filteredDictionaries.length} Dictionaries as CSV
       </Button>
@@ -83,8 +81,7 @@
               } catch (err) {
                 alert(err);
               }
-            }}
-          />
+            }} />
         {/each}
       </SortDictionaries>
     </ResponsiveTable>

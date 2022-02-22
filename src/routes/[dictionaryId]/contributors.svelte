@@ -12,47 +12,21 @@
 <script lang="ts">
   export let dictionaryId: string;
   import { _ } from 'svelte-i18n';
-  import { addOnline, deleteDocumentOnline, updateOnline, Collection } from '$sveltefirets';
+  import { add, deleteDocumentOnline, updateOnline, Collection } from '$sveltefirets';
   import { where } from 'firebase/firestore';
-  import { isManager, isContributor, dictionary, admin, user } from '$lib/stores';
-  import type { IInvite, IWriteInCollaborator, IContributor, IManager } from '$lib/interfaces';
+  import { isManager, isContributor, dictionary, admin } from '$lib/stores';
+  import type { IInvite, IHelper } from '$lib/interfaces';
   import Button from '$svelteui/ui/Button.svelte';
   import ShowHide from '$svelteui/functions/ShowHide.svelte';
+  import { inviteHelper } from '$lib/helpers/inviteHelper';
 
-  function invite(role: 'manager' | 'contributor' = 'contributor') {
-    const input = prompt(`${$_('contact.email', { default: 'Email' })}?`);
-    if (input) {
-      const isEmail = /^\S+@\S+\.\S+$/.test(input);
-      isEmail ? saveInvite(input, role) : alert($_('misc.invalid', { default: 'Invalid Email' }));
-    }
-  }
-
-  let managerType: IManager[];
-  let contributorType: IContributor[];
+  let helperType: IHelper[];
   let inviteType: IInvite[];
-  let writeInCollaboratorType: IWriteInCollaborator[];
-
-  async function saveInvite(targetEmail: string, role: 'manager' | 'contributor') {
-    try {
-      const invite: IInvite = {
-        inviterEmail: $user.email,
-        inviterName: $user.displayName,
-        dictionaryName: $dictionary.name,
-        targetEmail,
-        role,
-        status: 'queued',
-      };
-      await addOnline(`dictionaries/${dictionaryId}/invites`, invite);
-    } catch (err) {
-      alert(`${$_('misc.error', { default: 'Error' })}: ${err}`);
-      console.error(err);
-    }
-  }
 
   function writeIn() {
     const name = prompt(`${$_('speakers.name', { default: 'Name' })}?`);
     if (name) {
-      addOnline(`dictionaries/${dictionaryId}/writeInCollaborators`, { name });
+      add(`dictionaries/${dictionaryId}/writeInCollaborators`, { name });
     }
   }
 </script>
@@ -73,8 +47,7 @@
     >{$_('contributors.manager_contributor_distinction', {
       default:
         'Note: Dictionary managers may add, edit or delete content. Contributors are project collaborators who can also add and edit, but cannot delete any content.',
-    })}</i
-  >
+    })}</i>
 </p>
 
 <h3 class="font-semibold text-lg mb-1 mt-3">
@@ -82,8 +55,11 @@
 </h3>
 
 <div class="divide-y divide-gray-200">
-  <Collection path={`dictionaries/${dictionaryId}/managers`} startWith={managerType} let:data>
-    {#each data as manager}
+  <Collection
+    path={`dictionaries/${dictionaryId}/managers`}
+    startWith={helperType}
+    let:data={managers}>
+    {#each managers as manager}
       <div class="py-3">
         <div class="text-sm leading-5 font-medium text-gray-900">
           {manager.name}
@@ -97,16 +73,14 @@
       path={`dictionaries/${dictionaryId}/invites`}
       queryConstraints={[where('role', '==', 'manager'), where('status', 'in', ['queued', 'sent'])]}
       startWith={inviteType}
-      let:data
-    >
-      {#each data as invite}
+      let:data={invites}>
+      {#each invites as invite}
         <div class="py-3 flex flex-wrap items-center justify-between">
           <div class="text-sm leading-5 font-medium text-gray-900">
             <i
               >{$_('contributors.invitation_sent', {
                 default: 'Invitation sent',
-              })}:</i
-            >
+              })}:</i>
             {invite.targetEmail}
           </div>
           {#if $admin}
@@ -121,8 +95,7 @@
                 }
               }}
               >{$_('misc.delete', { default: 'Delete' })}
-              <i class="fas fa-times" /><i class="fas fa-key mx-1" /></Button
-            >
+              <i class="fas fa-times" /><i class="fas fa-key mx-1" /></Button>
           {/if}
         </div>
       {/each}
@@ -130,23 +103,21 @@
   {/if}
 </div>
 {#if $isManager}
-  <Button onclick={() => invite('manager')} form="primary">
+  <Button onclick={() => inviteHelper('manager', $dictionary)} form="primary">
     <i class="far fa-envelope" />
     {$_('contributors.invite_manager', { default: 'Invite a Manager' })}
   </Button>
 {/if}
-
+<hr style="margin: 20px 0;" />
 <h3 class="font-semibold text-lg mb-1 mt-3">
   {$_('dictionary.contributors', { default: 'Contributors' })}
 </h3>
-
 <div class="divide-y divide-gray-200">
   <Collection
     path={`dictionaries/${dictionaryId}/contributors`}
-    startWith={contributorType}
-    let:data
-  >
-    {#each data as contributor}
+    startWith={helperType}
+    let:data={contributors}>
+    {#each contributors as contributor}
       <div class="py-3">
         <div class="text-sm leading-5 font-medium text-gray-900">
           {contributor.name}
@@ -162,16 +133,14 @@
         where('status', 'in', ['queued', 'sent']),
       ]}
       startWith={inviteType}
-      let:data
-    >
-      {#each data as invite}
+      let:data={invites}>
+      {#each invites as invite}
         <div class="py-3 flex flex-wrap items-center justify-between">
           <div class="text-sm leading-5 font-medium text-gray-900">
             <i
               >{$_('contributors.invitation_sent', {
                 default: 'Invitation sent',
-              })}:</i
-            >
+              })}:</i>
             {invite.targetEmail}
           </div>
           {#if $admin}
@@ -186,19 +155,40 @@
                 }
               }}
               >{$_('misc.delete', { default: 'Delete' })}
-              <i class="fas fa-times" /><i class="fas fa-key ml-1" /></Button
-            >
+              <i class="fas fa-times" /><i class="fas fa-key ml-1" /></Button>
           {/if}
         </div>
       {/each}
     </Collection>
+    <Button onclick={() => inviteHelper('contributor', $dictionary)} form="primary">
+      <i class="far fa-envelope" />
+      {$_('contributors.invite_contributors', {
+        default: 'Invite Contributors',
+      })}
+    </Button>
+  {:else if !$isContributor}
+    <ShowHide let:show let:toggle>
+      <Button onclick={toggle} form="primary">
+        {$_('contributors.request_access', { default: 'Request Access' })}
+      </Button>
+      {#if show}
+        {#await import('$lib/components/modals/Contact.svelte') then { default: Contact }}
+          <Contact on:close={toggle} />
+        {/await}
+      {/if}
+    </ShowHide>
   {/if}
+</div>
+<hr style="margin: 20px 0;" />
+<h3 class="font-semibold text-lg mb-1 mt-3">
+  {$_('contributors.other_contributors', { default: 'Other Contributors' })}
+</h3>
+<div class="divide-y divide-gray-200">
   <Collection
     path={`dictionaries/${dictionaryId}/writeInCollaborators`}
-    startWith={writeInCollaboratorType}
-    let:data
-  >
-    {#each data as collaborator}
+    startWith={helperType}
+    let:data={writeInCollaborators}>
+    {#each writeInCollaborators as collaborator}
       <div class="py-3 flex flex-wrap items-center justify-between">
         <div class="text-sm leading-5 font-medium text-gray-900">
           {collaborator.name}
@@ -215,8 +205,7 @@
               }
             }}
             >{$_('misc.delete', { default: 'Delete' })}
-            <i class="fas fa-times" /></Button
-          >
+            <i class="fas fa-times" /></Button>
         {/if}
       </div>
     {/each}
@@ -233,29 +222,12 @@
   </div> -->
 
 {#if $isManager}
-  <Button onclick={() => invite('contributor')} form="primary">
-    <i class="far fa-envelope" />
-    {$_('contributors.invite_contributors', {
-      default: 'Invite Contributors',
-    })}
-  </Button>
   <Button onclick={writeIn} form="primary">
     <i class="far fa-pencil" />
     {$_('contributors.write_in_contributor', {
       default: 'Write in Contributor',
     })}
   </Button>
-{:else if !$isContributor}
-  <ShowHide let:show let:toggle>
-    <Button onclick={toggle} form="primary">
-      {$_('contributors.request_access', { default: 'Request Access' })}
-    </Button>
-    {#if show}
-      {#await import('$lib/components/modals/Contact.svelte') then { default: Contact }}
-        <Contact on:close={toggle} />
-      {/await}
-    {/if}
-  </ShowHide>
 {/if}
 
 <!-- Not using contributors.request_to_add_manager -->

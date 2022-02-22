@@ -8,7 +8,7 @@
   export let right = 0;
 
   let intersecting = false;
-  let container;
+  let container: HTMLDivElement;
 
   let interval;
 

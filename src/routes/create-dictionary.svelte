@@ -6,7 +6,7 @@
   import { user } from '$lib/stores';
   import Header from '$lib/components/shell/Header.svelte';
   import Button from '$svelteui/ui/Button.svelte';
-  import type { IDictionary, IManager, IUser } from '$lib/interfaces';
+  import type { IDictionary, IHelper, IUser } from '$lib/interfaces';
   import { docExists, setOnline, updateOnline } from '$sveltefirets';
   import { arrayUnion, GeoPoint, serverTimestamp } from 'firebase/firestore/lite';
   import { debounce } from '$lib/helpers/debounce';
@@ -87,14 +87,11 @@
       };
 
       await setOnline<IDictionary>(`dictionaries/${url}`, pruneObject(dictionaryData));
-      await setOnline<IManager>(`dictionaries/${url}/managers/${$user.uid}`, {
+      await setOnline<IHelper>(`dictionaries/${url}/managers/${$user.uid}`, {
         id: $user.uid,
         name: $user.displayName,
       });
       await updateOnline<IUser>(`users/${$user.uid}`, {
-        //@ts-ignore
-        managing: arrayUnion(url),
-        // WARNING: If we are going to make a delete dictionary option available to users, we must delete the corresponding management data in the user interface
         //@ts-ignore
         termsAgreement: serverTimestamp(),
       });
@@ -126,8 +123,7 @@
 <Header
   >{$_('create.create_new_dictionary', {
     default: 'Create New Dictionary',
-  })}</Header
->
+  })}</Header>
 
 <form class="flex" on:submit|preventDefault={createNewDictionary}>
   <div class="flex flex-col justify-center p-4 max-w-md mx-auto">
@@ -147,8 +143,7 @@
           minlength="3"
           required
           bind:value={name}
-          class="form-input w-full"
-        />
+          class="form-input w-full" />
       </div>
       <div class="text-xs text-gray-600 mt-1">
         {$_('create.name_clarification', {
@@ -165,8 +160,7 @@
       <div class="mt-1 flex rounded-md shadow-sm" style="direction: ltr">
         <span
           class="inline-flex items-center px-2 rounded-l-md border border-r-0
-            border-gray-300 bg-gray-50 text-gray-500 text-sm"
-        >
+            border-gray-300 bg-gray-50 text-gray-500 text-sm">
           livingdictionaries.app/
         </span>
         <input
@@ -180,8 +174,7 @@
           spellcheck={false}
           class="form-input flex-1 block w-full px-2 sm:px-3 py-2 rounded-none
             rounded-r-md sm:text-sm sm:leading-5"
-          placeholder="url"
-        />
+          placeholder="url" />
       </div>
       <div class="text-xs text-gray-600 mt-1">
         {$_('create.only_letters_numbers', {
@@ -207,8 +200,7 @@
       <div class="mt-1 rounded-md shadow-sm" style="direction: ltr">
         <MultiSelect
           bind:value={glossLanguages}
-          placeholder={$_('create.languages', { default: 'Language(s)' })}
-        >
+          placeholder={$_('create.languages', { default: 'Language(s)' })}>
           {#each Object.keys(glossingLanguages) as bcp}
             <option value={bcp}>
               {glossingLanguages[bcp].vernacularName || $_('gl.' + bcp)}
@@ -261,8 +253,7 @@
         promptMessage={$_('create.enter_alternate_name', {
           default: 'Enter Alternate Name',
         })}
-        addMessage={$_('misc.add', { default: 'Add' })}
-      />
+        addMessage={$_('misc.add', { default: 'Add' })} />
     </div>
     <div class="mt-6 flex">
       <div class="w-1/2">
@@ -271,8 +262,7 @@
           <a
             href="https://en.wikipedia.org/wiki/ISO_639-3"
             target="_blank"
-            class="text-gray-600 hover:text-gray:800"
-          >
+            class="text-gray-600 hover:text-gray:800">
             <i class="far fa-info-circle" />
           </a>
         </label>
@@ -286,8 +276,7 @@
             minlength="3"
             maxlength="3"
             bind:value={iso6393}
-            class="form-input w-full"
-          />
+            class="form-input w-full" />
         </div>
       </div>
       <div class="w-1" />
@@ -297,8 +286,7 @@
           <a
             href="https://en.wikipedia.org/wiki/Glottolog"
             target="_blank"
-            class="text-gray-600 hover:text-gray:800"
-          >
+            class="text-gray-600 hover:text-gray:800">
             <i class="far fa-info-circle" />
           </a>
         </label>
@@ -311,8 +299,7 @@
             spellcheck={false}
             minlength="3"
             bind:value={glottocode}
-            class="form-input w-full"
-          />
+            class="form-input w-full" />
         </div>
       </div>
     </div>
@@ -335,8 +322,7 @@
               publicDictionary = false;
             }
           }, 5);
-        }}
-      />
+        }} />
       <label for="public" class="mx-2 block text-sm leading-5 text-gray-900">
         {$_('create.visible_to_public', { default: 'Visible to Public' })}
         <small class="text-gray-600">
@@ -379,8 +365,7 @@
       }}
       on:remove={() => {
         (lat = null), (lng = null);
-      }}
-    />
+      }} />
   {/await}
 {/if}
 
@@ -390,7 +375,6 @@
       context="force"
       on:close={() => {
         modal = null;
-      }}
-    />
+      }} />
   {/await}
 {/if}
