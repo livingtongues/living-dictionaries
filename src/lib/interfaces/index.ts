@@ -1,5 +1,5 @@
 import type { IAudio } from './audio.interface';
-import type { IVideo } from './video.interface';
+import type { IVideo, IVideoCustomMetadata } from './video.interface';
 import type { IDialect } from './dialect.interface';
 import type { IAbout, IDictionary, IGrammar } from './dictionary.interface';
 import type { IEntry } from './entry.interface';
@@ -23,6 +23,7 @@ import type { IFirestoreMetaData } from './firestore-metadata.interface';
 export type {
   IAudio,
   IVideo,
+  IVideoCustomMetadata,
   IContributor,
   IDialect,
   IDictionarySettings,
