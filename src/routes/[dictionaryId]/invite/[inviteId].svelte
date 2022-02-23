@@ -45,7 +45,6 @@
       });
 
       await updateOnline<IUser>(`users/${$user.uid}`, {
-        // @ts-ignore
         termsAgreement: serverTimestamp(),
       });
     } catch (err) {

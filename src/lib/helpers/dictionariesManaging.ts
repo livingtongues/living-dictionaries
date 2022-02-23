@@ -8,9 +8,7 @@ export async function addDictionaryManagePermission(userBeingEdited: IUser, dict
     name: userBeingEdited.displayName,
   });
   await updateOnline<IUser>(`users/${userBeingEdited.uid}`, {
-    //@ts-ignore
     managing: arrayUnion(dictionaryId),
-    //@ts-ignore
     termsAgreement: serverTimestamp(),
   });
 }
@@ -23,7 +21,7 @@ export async function removeDictionaryManagePermission(
     confirm(`Are you sure you want to remove ${userBeingEdited.displayName} from ${dictionaryId}?`)
   ) {
     await deleteDocumentOnline(`dictionaries/${dictionaryId}/managers/${userBeingEdited.uid}`);
-    await updateOnline(`users/${userBeingEdited.uid}`, {
+    await updateOnline<IUser>(`users/${userBeingEdited.uid}`, {
       managing: arrayRemove(dictionaryId),
     });
   }
