@@ -8,14 +8,14 @@ interface User {
   email?: string;
   displayName?: string;
   photoURL?: string;
-  lastVisit?: Timestamp & FieldValue;
+  lastVisit?: Timestamp;
 
   roles?: IRoles;
-  managing?: string[]; // | FieldValue; // dictionary Ids
+  managing?: string[]; // dictionary Ids
   contributing?: string[]; // dictionary Ids
   // starred?: string[]; // in future save dictionary Ids to user that they star, to allow them quick access back to those dictionaries
-  termsAgreement?: Timestamp & FieldValue;
-  unsubscribe?: Timestamp & FieldValue;
+  termsAgreement?: Timestamp;
+  unsubscribe?: Timestamp;
 }
 
 export interface IRoles {
