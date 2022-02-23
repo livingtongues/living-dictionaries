@@ -42,7 +42,8 @@
         autocomplete="off"
         autocorrect="off"
         spellcheck={false}
-        minlength="2"
+        minlength={attributeType === 'name' ? 2 : 0}
+        maxlength="30"
         required
         bind:value={attribute}
         class="appearance-none rounded-none block w-full px-3 py-2 border
