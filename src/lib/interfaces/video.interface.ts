@@ -7,3 +7,9 @@ export interface IVideo {
   youtubeId?: string;
   vimeoId?: string;
 }
+
+export interface IVideoCustomMetadata {
+  uploadedByUid: string;
+  uploadedByName: string;
+  deleted?: string; // Date.now().toString();
+}

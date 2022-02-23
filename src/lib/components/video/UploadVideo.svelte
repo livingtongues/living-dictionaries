@@ -1,6 +1,6 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
-  import type { IVideo, IEntry } from '$lib/interfaces';
+  import type { IVideo, IEntry, IVideoCustomMetadata } from '$lib/interfaces';
   import { dictionary, user } from '$lib/stores';
 
   import { tweened } from 'svelte/motion';
@@ -24,16 +24,16 @@
   import { getStorage, ref, uploadBytesResumable } from 'firebase/storage';
 
   async function startUpload() {
-    // const _dictName = dictionary.name.replace(/\s+/g, '_');
-    // const _lexeme = lexeme.replace(/\s+/g, '_');
-    const fileTypeSuffix = file.type.split('/')[1];
+    const fileTypeSuffix = file.type.split('/')[1].split(';')[0]; // turns 'video/webm;codecs=vp8,opus' to 'webm' and 'video/mp4' to 'mp4'
 
-    // const storagePath = `${_dictName}_${dictionary.id}/videos/{_lexeme}_${entryId}_${new Date().getTime()}.${fileTypeSuffix}`;
     const storagePath = `${$dictionary.id}/videos/${
       entry.id
     }_${new Date().getTime()}.${fileTypeSuffix}`;
 
-    const customMetadata = { uploadedBy: $user.displayName };
+    const customMetadata: IVideoCustomMetadata & { [key: string]: string } = {
+      uploadedByUid: $user.uid,
+      uploadedByName: $user.displayName,
+    };
 
     // https://firebase.google.com/docs/storage/web/upload-files
     const storage = getStorage();
