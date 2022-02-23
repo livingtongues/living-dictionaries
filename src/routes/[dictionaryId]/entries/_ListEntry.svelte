@@ -62,7 +62,7 @@
       {/if}
     </div>
   </a>
-  {#if entry.vf || (videoAccess && canEdit)}
+  {#if (entry.vfs && entry.vfs[0]) || (videoAccess && canEdit)}
     <Video class="bg-gray-100 border-r-2" {entry} minimal />
   {/if}
   {#if entry.pf}

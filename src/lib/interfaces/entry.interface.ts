@@ -38,11 +38,17 @@ export interface IEntry extends IFirestoreMetaDataAbbreviated, LDAlgoliaFields, 
   // Usage
   xv?: string; // example vernacular - used for old dictionary imports
   xs?: IExampleSentence; // example sentences - new format which allows us to bring in example sentences from multiple languages (vernacular and gloss languages)
+
   sf?: IAudio; // sound file - TODO: deprecate this and move to using array of audio files
   // sfs?: IAudio[]; // sound files
+  // deletedSfs?: IAudio[];
+
   pf?: IPhoto; // photo file - TODO: deprecate this and move to using array of photo files
   // pfs?: IPhoto[]; // photo files
+  // deletedPfs?: IPhoto[];
+
   vfs?: IVideo[]; // video files
+  deletedVfs?: IVideo[];
 
   // IDs
   ii?: string; // importId which can be used to show all entries from a particular import

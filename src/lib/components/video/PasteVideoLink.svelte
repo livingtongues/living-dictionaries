@@ -39,10 +39,5 @@
       {$_('misc.add', { default: 'Add' })}
     </Button>
   </div>
-  <!-- <label for="vc" class="block text-sm font-medium leading-5 text-gray-700 mt-4">
-    {$_('video.video_credit', { default: 'Video credit' })}
-  </label>
-  <div class="mt-1 rounded-md shadow-sm">
-    <input id="vc" type="text" bind:value={videoCredit} class="form-input block w-full" />
-  </div> -->
+  <!-- {$_('video.video_credit', { default: 'Video credit' })} -->
 </form>

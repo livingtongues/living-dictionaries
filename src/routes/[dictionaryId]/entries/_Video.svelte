@@ -8,7 +8,7 @@
 </script>
 
 <ShowHide let:show let:toggle>
-  {#if entry.vf}
+  {#if entry.vfs && entry.vfs[0]}
     <div
       class="{$$props.class} hover:bg-gray-200 flex flex-col items-center
     justify-center cursor-pointer p-3 select-none"
