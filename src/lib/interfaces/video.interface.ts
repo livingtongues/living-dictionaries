@@ -1,5 +1,5 @@
 export interface IVideo {
-  path: string; // Firebase Storage location
+  path?: string; // Firebase Storage location
   // length?: number; // Length in milliseconds
   ts?: Date; // timestamp
   ab?: string; // added by uid

@@ -1,7 +1,11 @@
 <script lang="ts">
+  import { onDestroy, onMount } from 'svelte';
   import { _ } from 'svelte-i18n';
   import type { IVideo, IEntry, IVideoCustomMetadata } from '$lib/interfaces';
   import { dictionary, user } from '$lib/stores';
+  import { getStorage, ref, uploadBytesResumable } from 'firebase/storage';
+  import type { UploadTask, TaskState, StorageError } from 'firebase/storage';
+  import { addVideo } from '$lib/helpers/media/update';
 
   import { tweened } from 'svelte/motion';
   import { cubicOut } from 'svelte/easing';
@@ -12,18 +16,16 @@
   $: percentage = Math.floor($progress * 100);
 
   export let file: File | Blob, entry: IEntry, speakerId: string;
-  let error;
+  let error: StorageError;
   let success: boolean;
 
-  if (file && entry) {
-    startUpload();
-  }
+  let uploadTask: UploadTask;
+  let taskState: TaskState;
+  $: console.log({ taskState });
 
-  import { updateOnline } from '$sveltefirets';
-  import { getStorage, ref, uploadBytesResumable } from 'firebase/storage';
-  import { arrayUnion } from 'firebase/firestore';
+  onMount(async () => {
+    if (!file || !entry) return;
 
-  async function startUpload() {
     const fileTypeSuffix = file.type.split('/')[1].split(';')[0]; // turns 'video/webm;codecs=vp8,opus' to 'webm' and 'video/mp4' to 'mp4'
 
     const storagePath = `${$dictionary.id}/videos/${
@@ -38,21 +40,13 @@
     // https://firebase.google.com/docs/storage/web/upload-files
     const storage = getStorage();
     const videoRef = ref(storage, storagePath);
-    const uploadTask = uploadBytesResumable(videoRef, file, { customMetadata });
+    uploadTask = uploadBytesResumable(videoRef, file, { customMetadata });
     uploadTask.on(
       'state_changed',
       (snapshot) => {
         const progressAmount = snapshot.bytesTransferred / snapshot.totalBytes;
-        console.log('Upload is ' + progressAmount * 100 + '% done');
         progress.set(progressAmount);
-        switch (snapshot.state) {
-          case 'paused':
-            console.log('Upload is paused');
-            break;
-          case 'running':
-            console.log('Upload is running');
-            break;
-        }
+        taskState = snapshot.state;
       },
       (err) => {
         alert(`${$_('misc.error', { default: 'Error' })}: ${err}`);
@@ -62,15 +56,11 @@
         try {
           const videoFile: IVideo = {
             path: storagePath,
-            ts: new Date(),
+            ts: new Date(), // consider baking into addVideo function
             ab: $user.uid,
             sp: speakerId,
           };
-          await updateOnline(
-            `dictionaries/${$dictionary.id}/words/${entry.id}`,
-            { vfs: arrayUnion(videoFile) },
-            { abbreviate: true }
-          );
+          await addVideo(entry, videoFile);
 
           success = true;
         } catch (err) {
@@ -79,7 +69,12 @@
         }
       }
     );
-  }
+  });
+
+  onDestroy(() => {
+    if (taskState === 'paused') uploadTask.resume();
+    if (taskState === 'running') uploadTask && uploadTask.cancel();
+  });
 </script>
 
 {#if error}
