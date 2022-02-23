@@ -2,15 +2,15 @@ import { dictionary } from '$lib/stores';
 import { get } from 'svelte/store';
 import { _ } from 'svelte-i18n';
 
-import type { IEntry } from '$lib/interfaces';
+import type { IEntry, IVideo } from '$lib/interfaces';
 import { updateOnline, deleteDocumentOnline, setOnline } from '$sveltefirets';
-import { serverTimestamp } from 'firebase/firestore/lite';
+import { serverTimestamp, arrayRemove } from 'firebase/firestore/lite';
 
 export async function deleteImage(entry: IEntry) {
   const $_ = get(_);
   try {
     const $dictionary = get(dictionary);
-    await updateOnline(
+    await updateOnline<IEntry>(
       `dictionaries/${$dictionary.id}/words/${entry.id}`,
       { pf: null },
       { abbreviate: true }
@@ -24,7 +24,7 @@ export async function deleteAudio(entry: IEntry) {
   const $_ = get(_);
   try {
     const $dictionary = get(dictionary);
-    await updateOnline(
+    await updateOnline<IEntry>(
       `dictionaries/${$dictionary.id}/words/${entry.id}`,
       { sf: null },
       { abbreviate: true }
@@ -34,13 +34,17 @@ export async function deleteAudio(entry: IEntry) {
   }
 }
 
-export async function deleteVideo(entry: IEntry) {
+export async function deleteVideo(entry: IEntry, video: IVideo) {
   const $_ = get(_);
   try {
     const $dictionary = get(dictionary);
-    await updateOnline(
+    const deletedVideo: IVideo = {
+      ...video,
+      deleted: new Date(),
+    };
+    await updateOnline<IEntry>(
       `dictionaries/${$dictionary.id}/words/${entry.id}`,
-      { vf: null },
+      { vfs: arrayRemove(video), deletedVfs: arrayUnion(deletedVideo) },
       { abbreviate: true }
     );
   } catch (err) {
@@ -49,6 +53,7 @@ export async function deleteVideo(entry: IEntry) {
 }
 
 import { goto } from '$app/navigation';
+import { arrayUnion } from 'firebase/firestore';
 export async function deleteEntry(entry: IEntry, dictionaryId: string, algoliaQueryParams: string) {
   const $_ = get(_);
   if (
@@ -65,7 +70,6 @@ export async function deleteEntry(entry: IEntry, dictionaryId: string, algoliaQu
       delete timeStampRemovedEntry.ua;
       await setOnline<IEntry>(`dictionaries/${dictionaryId}/deletedEntries/${entry.id}`, {
         ...timeStampRemovedEntry,
-        // @ts-ignore
         deletedAt: serverTimestamp(),
       });
       await deleteDocumentOnline(`dictionaries/${dictionaryId}/words/${entry.id}`);

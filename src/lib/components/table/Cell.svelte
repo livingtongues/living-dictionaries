@@ -44,7 +44,7 @@
     {/if}
     <!-- // TODO: add videos to columns -->
     <!-- {:else if column.field === 'videoFile'}
-    {#if entry.vf}
+    {#if entry.vfs}
       <VideoCell {canEdit} {entry} />
     {/if} -->
   {:else if column.field === 'speaker'}

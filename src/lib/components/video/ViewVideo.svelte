@@ -16,6 +16,8 @@
   import type { IEntry } from '$lib/interfaces';
   import ShowHide from '$svelteui/functions/ShowHide.svelte';
   export let entry: IEntry;
+
+  $: firstVf = entry.vfs && entry.vfs[0]; // only using until we support displaying multiple videos
 </script>
 
 <Modal on:close>
@@ -25,10 +27,10 @@
     {#if $canEdit}
       <SelectSpeaker
         dictionaryId={$dictionary.id}
-        initialSpeakerId={(entry.vf && entry.vf.sp) || null}
+        initialSpeakerId={firstVf.sp || null}
         let:speakerId
         on:update={async ({ detail }) => {
-          if (entry.vf && detail.speakerId != entry.vf.sp) {
+          if (firstVf && detail.speakerId != firstVf.sp) {
             await updateOnline(
               `dictionaries/${$dictionary.id}/words/${entry.id}`,
               {
@@ -38,8 +40,8 @@
             );
           }
         }}>
-        {#if entry.vf}
-          {#if !entry.vf.youtubeId && !entry.vf.vimeoId}
+        {#if firstVf}
+          {#if !firstVf.youtubeId && !firstVf.vimeoId}
             <video
               controls
               controlslist={$canEdit ? null : 'nodownload'}
@@ -47,11 +49,11 @@
               playsinline
               src={`https://firebasestorage.googleapis.com/v0/b/${
                 firebaseConfig.storageBucket
-              }/o/${entry.vf.path.replace(/\//g, '%2F')}?alt=media`}>
+              }/o/${firstVf.path.replace(/\//g, '%2F')}?alt=media`}>
               <track kind="captions" />
             </video>
           {:else}
-            <VideoIFrame videoFile={entry.vf} />
+            <VideoIFrame videoFile={firstVf} />
           {/if}
         {:else if speakerId}
           <ShowHide let:show let:toggle>
@@ -99,18 +101,18 @@
   </div>
 
   <div class="modal-footer">
-    {#if entry.vf && $canEdit}
+    {#if firstVf && $canEdit}
       {#if $admin > 1}
         {#await import('$svelteui/data/JSON.svelte') then { default: JSON }}
           <JSON obj={entry} />
           <div class="w-1" />
         {/await}
       {/if}
-      {#if !entry.vf.youtubeId && !entry.vf.vimeoId}
+      {#if !firstVf.youtubeId && !firstVf.vimeoId}
         <Button
           href={`https://firebasestorage.googleapis.com/v0/b/${
             firebaseConfig.storageBucket
-          }/o/${entry.vf.path.replace(/\//g, '%2F')}?alt=media`}
+          }/o/${firstVf.path.replace(/\//g, '%2F')}?alt=media`}
           target="_blank">
           <i class="fas fa-download" />
           <span class="hidden sm:inline"
@@ -120,7 +122,7 @@
         </Button>
         <div class="w-1" />
       {/if}
-      <Button onclick={() => deleteVideo(entry)} color="red">
+      <Button onclick={() => deleteVideo(entry, firstVf)} color="red">
         <i class="far fa-trash-alt" />&nbsp;
         <span class="hidden sm:inline"
           >{$_('misc.delete', {

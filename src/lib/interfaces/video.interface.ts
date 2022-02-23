@@ -1,15 +1,16 @@
 export interface IVideo {
   path: string; // Firebase Storage location
-  ts?: any; // timestamp
+  // length?: number; // Length in milliseconds
+  ts?: Date; // timestamp
   ab?: string; // added by uid
   sp?: string; // id of speaker
-  vc?: string; // credit (e.g. institution, etc... someone or group in addition to the speaker)
   youtubeId?: string;
   vimeoId?: string;
+  deleted?: Date;
 }
 
 export interface IVideoCustomMetadata {
   uploadedByUid: string;
   uploadedByName: string;
-  deleted?: string; // Date.now().toString();
+  // deleted?: string; // Date.now().toString();
 }

@@ -20,8 +20,8 @@
   }
 
   import { updateOnline } from '$sveltefirets';
-  import { serverTimestamp } from 'firebase/firestore/lite';
   import { getStorage, ref, uploadBytesResumable } from 'firebase/storage';
+  import { arrayUnion } from 'firebase/firestore';
 
   async function startUpload() {
     const fileTypeSuffix = file.type.split('/')[1].split(';')[0]; // turns 'video/webm;codecs=vp8,opus' to 'webm' and 'video/mp4' to 'mp4'
@@ -60,16 +60,15 @@
       },
       async () => {
         try {
-          const vf: IVideo = {
+          const videoFile: IVideo = {
             path: storagePath,
-            ts: serverTimestamp(),
+            ts: new Date(),
             ab: $user.uid,
             sp: speakerId,
           };
-
           await updateOnline(
             `dictionaries/${$dictionary.id}/words/${entry.id}`,
-            { vf },
+            { vfs: arrayUnion(videoFile) },
             { abbreviate: true }
           );
 
