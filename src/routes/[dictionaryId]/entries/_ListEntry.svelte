@@ -8,6 +8,7 @@
   import type { IEntry } from '$lib/interfaces';
   import { printGlosses } from '$lib/helpers/glosses';
   import { minutesAgo } from '$lib/helpers/time';
+  import ShowHide from '$svelteui/functions/ShowHide.svelte';
   export let entry: IEntry,
     canEdit = false,
     videoAccess = false;
@@ -62,8 +63,23 @@
       {/if}
     </div>
   </a>
-  {#if (entry.vfs && entry.vfs[0]) || (videoAccess && canEdit)}
-    <Video class="bg-gray-100 border-r-2" {entry} minimal />
+  {#if entry.vfs && entry.vfs[0]}
+    <Video class="bg-gray-100 border-r-2" {entry} video={entry.vfs[0]} minimal />
+  {:else if videoAccess && canEdit}
+    <ShowHide let:show let:toggle>
+      <div
+        class="media-block bg-gray-100 border-r-2 hover:bg-gray-300 flex flex-col items-center
+        justify-center cursor-pointer p-2 text-lg"
+        on:click={toggle}>
+        <i class="far fa-video-plus my-1 mx-2 text-blue-800" />
+        <!-- {$_('video.add_video', { default: 'Add Video' })} -->
+      </div>
+      {#if show}
+        {#await import('$lib/components/video/AddVideo.svelte') then { default: AddVideo }}
+          <AddVideo {entry} on:close={toggle} />
+        {/await}
+      {/if}
+    </ShowHide>
   {/if}
   {#if entry.pf}
     <div class="media-block bg-gray-300 relative">

@@ -3,7 +3,8 @@
   import { Collection } from '$sveltefirets';
   import { where } from 'firebase/firestore';
 
-  export let dictionaryId: string, initialSpeakerId: string;
+  export let dictionaryId: string,
+    initialSpeakerId: string = undefined;
   const addSpeaker = 'AddSpeaker';
   $: speakerId = initialSpeakerId;
 
