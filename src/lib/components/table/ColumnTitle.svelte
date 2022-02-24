@@ -13,6 +13,10 @@
   {:else if column.field === 'photoFile'}
     <i class="far fa-image fa-fw mx-auto" />
     {#if verbose}{$_('entry.image', { default: 'Image' })}{/if}
+    <!-- // TODO: add videos to columns -->
+    <!-- {:else if column.field === 'videoFile'}
+    <i class="far fa-film-alt fa-fw mx-auto" />
+    {#if verbose}video{/if} -->
   {:else if column.field === 'checked'}
     ✓
   {:else if column.gloss === true || column.exampleSentence === true || column.orthography === true}

@@ -27,6 +27,11 @@ const defaultColumns: IColumn[] = [
     field: 'photoFile',
     width: 31, // 50? // ImageCell
   },
+  // TODO: add videos to columns
+  // {
+  //   field: 'videoFile',
+  //   width: 31, // 50? // VideoCell
+  // },
   {
     field: 'gloss',
     width: 250,

@@ -42,6 +42,11 @@
     {#if entry.pf}
       <Image {canEdit} {entry} square={60} />
     {/if}
+    <!-- // TODO: add videos to columns -->
+    <!-- {:else if column.field === 'videoFile'}
+    {#if entry.vfs}
+      <VideoCell {canEdit} {entry} />
+    {/if} -->
   {:else if column.field === 'speaker'}
     <SelectSpeakerCell {canEdit} {entry} />
   {:else if column.field === 'ps'}
