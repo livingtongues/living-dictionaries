@@ -13,7 +13,7 @@
 
 {#if entry.vfs && entry.vfs[0]}
   <div class="w-full overflow-hidden rounded relative mb-2">
-    <Video class="bg-gray-100 border-r-2" {entry} video={entry.vfs[0]} minimal />
+    <Video class="bg-gray-100 border-r-2" {entry} video={entry.vfs[0]} {canEdit} />
   </div>
 {:else if canEdit}
   <ShowHide let:show let:toggle>

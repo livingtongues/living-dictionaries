@@ -4,7 +4,7 @@ import { _ } from 'svelte-i18n';
 
 import type { IEntry, IVideo } from '$lib/interfaces';
 import { updateOnline, deleteDocumentOnline, setOnline } from '$sveltefirets';
-import { serverTimestamp, arrayRemove } from 'firebase/firestore/lite';
+import { serverTimestamp, arrayUnion, arrayRemove } from 'firebase/firestore/lite';
 
 export async function deleteImage(entry: IEntry) {
   const $_ = get(_);
@@ -40,7 +40,7 @@ export async function deleteVideo(entry: IEntry, video: IVideo) {
     const $dictionary = get(dictionary);
     const deletedVideo: IVideo = {
       ...video,
-      deleted: new Date(),
+      deleted: Date.now(),
     };
     await updateOnline<IEntry>(
       `dictionaries/${$dictionary.id}/words/${entry.id}`,
@@ -53,7 +53,6 @@ export async function deleteVideo(entry: IEntry, video: IVideo) {
 }
 
 import { goto } from '$app/navigation';
-import { arrayUnion } from 'firebase/firestore';
 export async function deleteEntry(entry: IEntry, dictionaryId: string, algoliaQueryParams: string) {
   const $_ = get(_);
   if (

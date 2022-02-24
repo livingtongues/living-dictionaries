@@ -2,7 +2,9 @@
   import { _ } from 'svelte-i18n';
   import type { IEntry, IVideo } from '$lib/interfaces';
   import ShowHide from '$svelteui/functions/ShowHide.svelte';
-  export let entry: IEntry, video: IVideo;
+  export let entry: IEntry,
+    video: IVideo,
+    canEdit = false;
 </script>
 
 <ShowHide let:show let:toggle>
@@ -16,7 +18,7 @@
     </div>
     {#if show}
       {#await import('$lib/components/video/PlayVideo.svelte') then { default: PlayVideo }}
-        <PlayVideo {entry} {video} on:close={toggle} />
+        <PlayVideo {entry} {video} {canEdit} on:close={toggle} />
       {/await}
     {/if}
   </div>
