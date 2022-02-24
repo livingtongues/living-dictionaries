@@ -6,7 +6,7 @@
   import { user } from '$lib/stores';
   import Header from '$lib/components/shell/Header.svelte';
   import Button from '$svelteui/ui/Button.svelte';
-  import type { IDictionary, IManager, IUser } from '$lib/interfaces';
+  import type { IDictionary, IHelper, IUser } from '$lib/interfaces';
   import { docExists, setOnline, updateOnline } from '$sveltefirets';
   import { arrayUnion, GeoPoint, serverTimestamp } from 'firebase/firestore/lite';
   import { debounce } from '$lib/helpers/debounce';
@@ -87,7 +87,7 @@
       };
 
       await setOnline<IDictionary>(`dictionaries/${url}`, pruneObject(dictionaryData));
-      await setOnline<IManager>(`dictionaries/${url}/managers/${$user.uid}`, {
+      await setOnline<IHelper>(`dictionaries/${url}/managers/${$user.uid}`, {
         id: $user.uid,
         name: $user.displayName,
       });

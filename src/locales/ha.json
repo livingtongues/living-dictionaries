@@ -44,7 +44,8 @@
     "invite_manager": "Gayyaci Manager",
     "write_in_contributor": "Rubuta a bada gudummawa",
     "invitation_sent": "gayyata aika",
-    "manager_contributor_distinction": "SAURARA: Kifi na iya ƙarawa, shirya ko share abubuwan da ke ciki. Masu ba da gudummawa suna aiki da aikin aikin waɗanda za su iya ƙarawa da shirya, amma ba za su iya share kowane abun ciki ba."
+    "manager_contributor_distinction": "SAURARA: Kifi na iya ƙarawa, shirya ko share abubuwan da ke ciki. Masu ba da gudummawa suna aiki da aikin aikin waɗanda za su iya ƙarawa da shirya, amma ba za su iya share kowane abun ciki ba.",
+    "other_contributors": "Sauran Masu Ba da gudummawa"
   },
   "account": {
     "account_settings": "account Saituna",
@@ -189,8 +190,8 @@
     "images": "Images",
     "reset": "Sake saita",
     "invalid_url": "Wannan ba ingantacciyar URL bane",
-    "upload": "Kazo",
-    "downloading": "Sauke tare"
+    "downloading": "Sauke tare",
+    "upload": "Kazo"
   },
   "settings": {
     "community_permission": "Shin magana al'umma damar wannan harshe ya zama online?",
@@ -242,7 +243,6 @@
     "video_url": "URL ɗin bidiyo",
     "video_credit": "Bashin bidiyo",
     "prepare_to_record_video": "Shirya yin rikodi da makirufo da kyamara",
-    "delete_record": "Share rikodin",
     "video_info": "Akwai hanyoyi guda biyu don sanya bidiyonku da aka nuna a cikin yanayin rayuwa: 1) Kuna iya yin rikodin bidiyonku a nan, ko loda bidiyon da aka rubuta a baya ga dandamalinmu. Abvantbuwan amfãni: Mai sauƙin kai da yawa don rikodin sauri. Rashin daidaituwa: Zaka iya shigar da bidiyo kawai zuwa 100MB don dole ne kawai ya zama gajeru da ƙarancin ƙuduri. 2) Shin bidiyon ku akan sabis ɗin kuɗaɗe da ƙwarewa ne a cikin ajiya na bidiyo kuma danganta URL ɗin zuwa shafinmu. Abvantbuwan amfãni: Mai sauƙin (Muddin an riga an ɗora ku akan wannan dandamali na iya samun ƙuduri da tsawon lokacin da kake so. Rashin daidaito: Idan kana son yin rikodin wani abu wanda ba a zata ba ko mai sauqi qwarai, yana iya zama ƙoƙari da yawa don yin hakan ta wannan hanyar, kuma kuna iya son fifikon hanyar 1.",
     "paste_video_url": "Manna bidiyo",
     "record_upload_video": "Yi rikodin ko loda bidiyo",

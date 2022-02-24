@@ -3,10 +3,9 @@
   import { updateOnline } from '$sveltefirets';
   import type { IUser } from '$lib/interfaces';
   import { printDate } from '$lib/helpers/time';
+  import DictionariesHelping from './_DictionariesHelping.svelte';
+  import IntersectionObserver from '$lib/components/ui/IntersectionObserver.svelte';
   export let user: IUser;
-  import { removeDictionaryManagePermission } from '$lib/helpers/dictionariesManaging';
-  import ShowHide from '$svelteui/functions/ShowHide.svelte';
-  import BadgeArrayEmit from '$svelteui/data/BadgeArrayEmit.svelte';
 </script>
 
 <tr title={$admin > 1 && JSON.stringify(user, null, 1)}>
@@ -17,21 +16,17 @@
     {user.email}
   </td>
   <td>
-    <ShowHide let:show let:toggle>
-      <BadgeArrayEmit
-        strings={user.managing}
-        canEdit
-        addMessage="Add"
-        on:itemclicked={(e) => window.open(`/${e.detail.value}`)}
-        on:itemremoved={(e) => removeDictionaryManagePermission(user, e.detail.value)}
-        on:additem={toggle} />
-      {#if show}
-        {#await import('./_SelectDictionaryModal.svelte') then { default: SelectDictionaryModal }}
-          <SelectDictionaryModal {user} on:close={toggle} />
-        {/await}
+    <IntersectionObserver let:intersecting once>
+      {#if intersecting}
+        <DictionariesHelping role="manager" {user} />
       {/if}
-    </ShowHide>
-  </td>
+    </IntersectionObserver></td>
+  <td>
+    <IntersectionObserver let:intersecting once>
+      {#if intersecting}
+        <DictionariesHelping role="contributor" {user} />
+      {/if}
+    </IntersectionObserver></td>
   <td class="whitespace-nowrap">
     {#if user.lastVisit}{printDate(user.lastVisit.toDate())}{/if}
   </td>
