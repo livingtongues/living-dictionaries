@@ -22,7 +22,7 @@ test('Example to demonstrate separate file snapshots.', () => {
   ];
   const dictionary: IDictionary = { name: 'test', glossLanguages: ['ar', 'en'], entryCount: 0 };
   const speakers: ISpeaker[] = [{ displayName: 'John Smith', id: '123' }];
-  expect(formatEntriesForCSV(entriesArray, dictionary, speakers)).toMatchSnapshot(`
+  expect(formatEntriesForCSV(entriesArray, dictionary, speakers)).toMatchInlineSnapshot(`
     Array [
       Object {
         "di": "Dialect for this entry",
@@ -58,6 +58,7 @@ test('Example to demonstrate separate file snapshots.', () => {
         "mr": "",
         "nt": "This is an example of a note - here we can write whatever we want.",
         "pfFriendlyName": "12ar_platano.com",
+        "pfpa": "https://example.com",
         "ph": "banana",
         "ps": "1",
         "psab": "",

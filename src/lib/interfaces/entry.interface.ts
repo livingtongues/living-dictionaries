@@ -1,11 +1,12 @@
 import type { IGloss } from './gloss.interface';
 import type { IAudio } from './audio.interface';
 import type { IPhoto } from './photo.interface';
+import type { IVideo } from './video.interface';
 import type { IExampleSentence } from './exampe-sentence.interface';
 // import type { Hit } from 'instantsearch.js';
-import type { FieldValue, Timestamp } from 'firebase/firestore';
+import type { Timestamp } from 'firebase/firestore';
 
-import type { IFirestoreMetaDataAbbreviated } from './firestore-metadata.interface';
+import type { IFirestoreMetaDataAbbreviated } from '.';
 // TODO remove deprecated fields
 export interface IEntry extends IFirestoreMetaDataAbbreviated, LDAlgoliaFields, DeprecatedFields {
   // Partial<Hit>
@@ -37,14 +38,23 @@ export interface IEntry extends IFirestoreMetaDataAbbreviated, LDAlgoliaFields, 
   // Usage
   xv?: string; // example vernacular - used for old dictionary imports
   xs?: IExampleSentence; // example sentences - new format which allows us to bring in example sentences from multiple languages (vernacular and gloss languages)
-  sf?: IAudio; // sound file
-  pf?: IPhoto; // photo file
+
+  sf?: IAudio; // sound file - TODO: deprecate this and move to using array of audio files
+  // sfs?: IAudio[]; // sound files
+  // deletedSfs?: IAudio[];
+
+  pf?: IPhoto; // photo file - TODO: deprecate this and move to using array of photo files
+  // pfs?: IPhoto[]; // photo files
+  // deletedPfs?: IPhoto[];
+
+  vfs?: IVideo[]; // video files
+  deletedVfs?: IVideo[];
 
   // IDs
   ii?: string; // importId which can be used to show all entries from a particular import
   ei?: string; // Elicitation Id for Munda languages or Swadesh Composite number list from Comparalex
 
-  deletedAt?: Timestamp & FieldValue; // whether this entry has been deleted
+  deletedAt?: Timestamp; // whether this entry has been deleted
 }
 
 // TODO:
@@ -74,6 +84,6 @@ interface LDAlgoliaFields {
 interface DeprecatedFields {
   createdBy?: string;
   updatedBy?: string;
-  createdAt?: Timestamp & FieldValue;
-  updatedAt?: Timestamp & FieldValue;
+  createdAt?: Timestamp;
+  updatedAt?: Timestamp;
 }

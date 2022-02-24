@@ -92,7 +92,8 @@
         name: $user.displayName,
       });
       await updateOnline<IUser>(`users/${$user.uid}`, {
-        //@ts-ignore
+        managing: arrayUnion(url),
+        // WARNING: If we are going to make a delete dictionary option available to users, we must delete the corresponding management data in the user interface
         termsAgreement: serverTimestamp(),
       });
       window.location.replace(`/${url}/entries/list`);

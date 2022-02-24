@@ -79,7 +79,7 @@ const denoteVisitOnce = (() => {
       denoted = true;
       try {
         const db = getFirestore();
-        await updateDoc(doc(db, 'users', user.uid), { lastVisit: serverTimestamp() });
+        await updateDoc<IBaseUser>(doc(db, 'users', user.uid), { lastVisit: serverTimestamp() });
       } catch (err) {
         console.error(err);
       }
