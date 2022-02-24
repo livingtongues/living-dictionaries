@@ -8,6 +8,7 @@
   import Video from '../entries/_Video.svelte';
 
   export let entry: IEntry,
+    videoAccess = false,
     canEdit = false;
 </script>
 
@@ -15,7 +16,7 @@
   <div class="w-full overflow-hidden rounded relative mb-2">
     <Video class="bg-gray-100 border-r-2" {entry} video={entry.vfs[0]} {canEdit} />
   </div>
-{:else if canEdit}
+{:else if videoAccess && canEdit}
   <ShowHide let:show let:toggle>
     <div
       class="rounded bg-gray-100 border-r-2 hover:bg-gray-300 flex flex-col items-center

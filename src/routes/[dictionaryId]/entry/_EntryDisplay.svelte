@@ -8,6 +8,7 @@
   import EntryMedia from './_EntryMedia.svelte';
 
   export let entry: IEntry,
+    videoAccess = false,
     canEdit = false,
     alternateOrthographies = [],
     glossingLanguages = ['en'];
@@ -29,7 +30,7 @@
   </div>
 
   <div class="md:w-1/3 flex flex-col md:flex-col-reverse justify-end mt-2">
-    <EntryMedia {entry} {canEdit} />
+    <EntryMedia {entry} {canEdit} {videoAccess} />
   </div>
 
   <div class="hidden md:block w-1" />
