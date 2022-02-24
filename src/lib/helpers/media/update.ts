@@ -1,15 +1,16 @@
 import type { IEntry, IVideo } from '$lib/interfaces';
-import { updateOnline } from '$sveltefirets';
+import { update } from '$sveltefirets';
 import { get } from 'svelte/store';
 import { dictionary } from '$lib/stores';
-import { arrayUnion } from 'firebase/firestore/lite';
+import { arrayUnion } from 'firebase/firestore';
 import { _ } from 'svelte-i18n';
 
 export async function addVideo(entry: IEntry, video: IVideo) {
   const $_ = get(_);
   try {
     const $dictionary = get(dictionary);
-    await updateOnline<IEntry>(
+    video.ts = Date.now();
+    await update<IEntry>(
       `dictionaries/${$dictionary.id}/words/${entry.id}`,
       { vfs: arrayUnion(video) },
       { abbreviate: true }

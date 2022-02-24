@@ -6,8 +6,9 @@
   // import { crossfade, scale } from 'svelte/transition';
   import { deleteVideo } from '$lib/helpers/delete';
 
-  export let entry: IEntry, video: IVideo;
-  let canEdit = false;
+  export let entry: IEntry,
+    video: IVideo,
+    canEdit = false;
 </script>
 
 <div

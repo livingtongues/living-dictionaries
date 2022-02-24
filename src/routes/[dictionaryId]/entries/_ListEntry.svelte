@@ -64,7 +64,7 @@
     </div>
   </a>
   {#if entry.vfs && entry.vfs[0]}
-    <Video class="bg-gray-100 border-r-2" {entry} video={entry.vfs[0]} minimal />
+    <Video class="bg-gray-100 border-r-2" {entry} video={entry.vfs[0]} {canEdit} />
   {:else if videoAccess && canEdit}
     <ShowHide let:show let:toggle>
       <div

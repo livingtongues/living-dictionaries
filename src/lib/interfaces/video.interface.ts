@@ -1,12 +1,14 @@
+import type { Timestamp } from 'firebase/firestore';
+
 export interface IVideo {
   path?: string; // Firebase Storage location
   // length?: number; // Length in milliseconds
-  ts?: Date; // timestamp
   ab?: string; // added by uid
   sp?: string; // id of speaker
   youtubeId?: string;
   vimeoId?: string;
-  deleted?: Date;
+  ts?: number; // timestamp in milliseconds
+  deleted?: number; // timestamp in milliseconds
 }
 
 export interface IVideoCustomMetadata {
