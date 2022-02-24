@@ -56,7 +56,6 @@
         try {
           const videoFile: IVideo = {
             path: storagePath,
-            ts: new Date(), // consider baking into addVideo function
             ab: $user.uid,
             sp: speakerId,
           };
