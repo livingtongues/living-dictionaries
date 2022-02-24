@@ -3,8 +3,9 @@ import { get } from 'svelte/store';
 import { _ } from 'svelte-i18n';
 
 import type { IEntry, IVideo } from '$lib/interfaces';
-import { updateOnline, deleteDocumentOnline, setOnline } from '$sveltefirets';
-import { serverTimestamp, arrayUnion, arrayRemove } from 'firebase/firestore/lite';
+import { updateOnline, deleteDocumentOnline, set } from '$sveltefirets';
+import { arrayUnion, arrayRemove } from 'firebase/firestore/lite';
+import { serverTimestamp } from 'firebase/firestore';
 
 export async function deleteImage(entry: IEntry) {
   const $_ = get(_);
@@ -64,13 +65,10 @@ export async function deleteEntry(entry: IEntry, dictionaryId: string, algoliaQu
   ) {
     try {
       goto(`/${dictionaryId}/entries/list${algoliaQueryParams}`);
-      const timeStampRemovedEntry = { ...entry };
-      delete timeStampRemovedEntry.ca; // needed b/c error when entry is received by firestore and set by firestore/lite
-      delete timeStampRemovedEntry.ua;
-      await setOnline<IEntry>(`dictionaries/${dictionaryId}/deletedEntries/${entry.id}`, {
-        ...timeStampRemovedEntry,
+      set<IEntry>(`dictionaries/${dictionaryId}/deletedEntries/${entry.id}`, {
+        ...entry,
         deletedAt: serverTimestamp(),
-      });
+      }); // using cache based set to avoid conflicts w/ serverTimestamps loaded in from firestore normal and sent out via firestore lite, not awaiting in case internet is flaky - can go on to the delete operation.
       await deleteDocumentOnline(`dictionaries/${dictionaryId}/words/${entry.id}`);
     } catch (err) {
       alert(`${$_('misc.error', { default: 'Error' })}: ${err}`);
