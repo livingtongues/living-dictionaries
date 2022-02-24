@@ -2,7 +2,6 @@
   import { _ } from 'svelte-i18n';
   import type { IEntry, IVideo } from '$lib/interfaces';
   import ShowHide from '$svelteui/functions/ShowHide.svelte';
-  import { firebaseConfig } from '$sveltefirets';
   export let entry: IEntry, video: IVideo;
 </script>
 
@@ -16,12 +15,9 @@
       {$_('video.view', { default: 'View' })}
     </div>
     {#if show}
-      <a
-        href={`https://firebasestorage.googleapis.com/v0/b/${
-          firebaseConfig.storageBucket
-        }/o/${video.path.replace(/\//g, '%2F')}?alt=media`}
-        target="_blank"
-        class="pointer">Open in new tab</a>
+      {#await import('$lib/components/video/PlayVideo.svelte') then { default: PlayVideo }}
+        <PlayVideo {entry} {video} on:close={toggle} />
+      {/await}
     {/if}
   </div>
 </ShowHide>
