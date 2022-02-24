@@ -1,4 +1,4 @@
-import type { FieldValue, Timestamp } from 'firebase/firestore';
+import type { Timestamp } from 'firebase/firestore';
 import type { IFirestoreMetaData } from '.';
 
 export type IUser = User & Omit<IFirestoreMetaData, 'id'>;
@@ -11,8 +11,8 @@ interface User {
   lastVisit?: Timestamp;
 
   roles?: IRoles;
-  managing?: string[]; // dictionary Ids
-  contributing?: string[]; // dictionary Ids
+  managing?: string[]; // dictionary Ids - can be deprected because using a collectionGroup query of 'managers' instead
+  contributing?: string[]; // dictionary Ids - can be deprected because using a collectionGroup query 'contributors' instead
   // starred?: string[]; // in future save dictionary Ids to user that they star, to allow them quick access back to those dictionaries
   termsAgreement?: Timestamp;
   unsubscribe?: Timestamp;
