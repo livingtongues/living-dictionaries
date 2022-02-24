@@ -88,6 +88,7 @@ bg-white pt-1 -mt-1">
 
   <EntryDisplay
     {entry}
+    videoAccess={$dictionary.videoAccess || $admin > 0}
     canEdit={$canEdit}
     glossingLanguages={showEntryGlossLanguages(entry.gl, $dictionary.glossLanguages)}
     alternateOrthographies={$dictionary.alternateOrthographies || []}
