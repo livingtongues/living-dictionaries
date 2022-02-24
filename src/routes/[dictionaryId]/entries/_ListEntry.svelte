@@ -72,7 +72,6 @@
         justify-center cursor-pointer p-2 text-lg"
         on:click={toggle}>
         <i class="far fa-video-plus my-1 mx-2 text-blue-800" />
-        <!-- {$_('video.add_video', { default: 'Add Video' })} -->
       </div>
       {#if show}
         {#await import('$lib/components/video/AddVideo.svelte') then { default: AddVideo }}

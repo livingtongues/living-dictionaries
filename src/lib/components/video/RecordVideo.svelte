@@ -1,11 +1,10 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
   import Button from '$svelteui/ui/Button.svelte';
-  import ShowHide from '$svelteui/functions/ShowHide.svelte';
   import MediaStream from '$svelteui/record/MediaStream.svelte';
   import Recorder from '$svelteui/record/Recorder.svelte';
   import { srcObject } from './srcObject';
-  let videoBlob: Blob = null;
+  let videoBlob: Blob;
 </script>
 
 {#if !videoBlob}
@@ -111,19 +110,9 @@
     <div slot="loading">Accessing Microphone and Camera <i class="far fa-spinner fa-pulse" /></div>
   </MediaStream>
 {:else}
-  <!-- svelte-ignore a11y-media-has-caption -->
-  <video controls autoplay playsinline src={URL.createObjectURL(videoBlob)} />
-
-  <ShowHide let:show let:toggle>
-    {#if !show}
-      <div class="flex justify-between pt-2">
-        <Button onclick={() => (videoBlob = null)} color="red"
-          >{$_('misc.delete', { default: 'Delete' })}</Button>
-        <Button onclick={toggle} color="green" form="primary"
-          ><i class="fas fa-upload" /> {$_('misc.save', { default: 'Save' })}</Button>
-      </div>
-    {:else}
-      <slot {videoBlob} />
-    {/if}
-  </ShowHide>
+  <slot
+    {videoBlob}
+    reset={() => {
+      videoBlob = undefined;
+    }} />
 {/if}
