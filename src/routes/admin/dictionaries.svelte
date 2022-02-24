@@ -33,7 +33,7 @@
     </div>
     <ResponsiveTable class="my-1">
       <SortDictionaries dictionaries={filteredDictionaries} let:sortedDictionaries>
-        {#each sortedDictionaries as dictionary}
+        {#each sortedDictionaries as dictionary (dictionary.id)}
           <DictionaryRow
             {dictionary}
             on:toggleprivacy={() => {
