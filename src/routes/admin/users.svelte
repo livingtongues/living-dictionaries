@@ -17,15 +17,14 @@
       <Button
         form="primary"
         color="black"
-        onclick={() => exportUsersAsCSV(filteredUsers, 'livingdictionary-users')}
-      >
+        onclick={() => exportUsersAsCSV(filteredUsers, 'livingdictionary-users')}>
         <i class="fas fa-download mr-1" />
         Download {filteredUsers.length} Users as CSV
       </Button>
     </div>
     <ResponsiveTable class="my-1">
       <SortUsers users={filteredUsers} let:sortedUsers>
-        {#each sortedUsers as user}
+        {#each sortedUsers as user (user.uid)}
           <UserRow {user} />
         {/each}
       </SortUsers>
