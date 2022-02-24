@@ -24,7 +24,7 @@
     </div>
     <ResponsiveTable class="my-1">
       <SortUsers users={filteredUsers} let:sortedUsers>
-        {#each sortedUsers as user}
+        {#each sortedUsers as user (user.uid)}
           <UserRow {user} />
         {/each}
       </SortUsers>

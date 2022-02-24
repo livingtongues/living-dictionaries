@@ -16,6 +16,7 @@
     addalternatename: string;
     removealternatename: string;
     toggleprivacy: boolean;
+    togglevideoaccess: boolean;
   }>();
 
   let helperType: IHelper[];
@@ -132,5 +133,15 @@
   </td>
   <td class="whitespace-nowrap">
     {#if dictionary.createdAt}{printDate(dictionary.createdAt.toDate())}{/if}
+  </td>
+  <td>
+    <Button
+      color={dictionary.videoAccess ? 'green' : 'orange'}
+      size="sm"
+      onclick={() => {
+        dispatch('togglevideoaccess');
+      }}>
+      {dictionary.videoAccess ? 'Can Record' : 'Give Access'}
+    </Button>
   </td>
 </tr>

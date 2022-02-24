@@ -7,7 +7,6 @@ export type { IBaseUser, IFirestoreMetaData, IFirestoreMetaDataAbbreviated } fro
 
 // Firestore Helpers
 export {
-  getUid,
   colRef,
   docRef,
   getCollection,
@@ -32,3 +31,4 @@ export { updateUserData } from './updateUserData';
 
 // Helpers
 export { loadScriptOnce, loadStylesOnce } from './loader';
+export { getUid } from './helpers/uid';

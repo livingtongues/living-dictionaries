@@ -1,9 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 // Inspired by https://fireship.io/lessons/firestore-advanced-usage-angularfire/
 import {
-  CollectionReference,
-  DocumentReference,
-  QueryConstraint,
   collection,
   doc,
   getDocs,
@@ -15,15 +12,17 @@ import {
   updateDoc,
   serverTimestamp,
 } from 'firebase/firestore';
+import type {
+  CollectionReference,
+  DocumentReference,
+  QueryConstraint,
+  PartialWithFieldValue,
+  WithFieldValue,
+  UpdateData,
+} from 'firebase/firestore';
 
-import { get } from 'svelte/store';
 import { db } from './init';
-import { authState } from './user';
-
-export const getUid = () => {
-  const u = get(authState);
-  return (u && u.uid) || 'anonymous'; // 'anonymous' allows support messages to be saved by non-logged-in users
-};
+import { getUid } from './helpers/uid';
 
 type CollectionPredicate<T> = string | CollectionReference<T>;
 type DocPredicate<T> = string | DocumentReference<T>;
@@ -63,57 +62,47 @@ export async function getDocument<T>(ref: DocPredicate<T>): Promise<T> {
 
 export function add<T>(
   ref: CollectionPredicate<T>,
-  data: T,
+  data: WithFieldValue<T>,
   opts: {
     abbreviate?: boolean;
   } = {}
 ): Promise<DocumentReference<T>> {
-  return addDoc(colRef(ref), {
-    ...data,
-    [opts.abbreviate ? 'ca' : 'createdAt']: serverTimestamp(),
-    [opts.abbreviate ? 'cb' : 'createdBy']: getUid(),
-    [opts.abbreviate ? 'ua' : 'updatedAt']: serverTimestamp(),
-    [opts.abbreviate ? 'ub' : 'updatedBy']: getUid(),
-  });
+  data[opts.abbreviate ? 'ca' : 'createdAt'] = serverTimestamp();
+  data[opts.abbreviate ? 'cb' : 'createdBy'] = getUid();
+  data[opts.abbreviate ? 'ua' : 'updatedAt'] = serverTimestamp();
+  data[opts.abbreviate ? 'ub' : 'updatedBy'] = getUid();
+  return addDoc(colRef(ref), data);
 }
 
 export async function set<T>(
   ref: DocPredicate<T>,
-  data: T,
+  data: PartialWithFieldValue<T>,
   opts: {
     abbreviate?: boolean;
     merge?: boolean;
   } = {}
 ): Promise<void> {
   const snap = await getDocument(ref);
-  return await (snap
-    ? update(ref, data)
-    : setDoc(
-        docRef(ref),
-        {
-          ...data,
-          [opts.abbreviate ? 'ca' : 'createdAt']: serverTimestamp(),
-          [opts.abbreviate ? 'cb' : 'createdBy']: getUid(),
-          [opts.abbreviate ? 'ua' : 'updatedAt']: serverTimestamp(),
-          [opts.abbreviate ? 'ub' : 'updatedBy']: getUid(),
-        },
-        { merge: opts.merge }
-      ));
+  if (snap) {
+    return await update(ref, data);
+  }
+  data[opts.abbreviate ? 'ca' : 'createdAt'] = serverTimestamp();
+  data[opts.abbreviate ? 'cb' : 'createdBy'] = getUid();
+  data[opts.abbreviate ? 'ua' : 'updatedAt'] = serverTimestamp();
+  data[opts.abbreviate ? 'ub' : 'updatedBy'] = getUid();
+  return await setDoc(docRef(ref), data, { merge: opts.merge });
 } // could split apart into set and upsert if desired, https://stackoverflow.com/questions/46597327/difference-between-set-with-merge-true-and-update
 
 export async function update<T>(
   ref: DocPredicate<T>,
-  data: Partial<T>,
+  data: PartialWithFieldValue<T>,
   opts: {
     abbreviate?: boolean;
   } = {}
 ): Promise<void> {
-  // @ts-ignore
-  return updateDoc(docRef(ref), {
-    ...data,
-    [opts.abbreviate ? 'ua' : 'updatedAt']: serverTimestamp(),
-    [opts.abbreviate ? 'ub' : 'updatedBy']: getUid(),
-  });
+  data[opts.abbreviate ? 'ua' : 'updatedAt'] = serverTimestamp();
+  data[opts.abbreviate ? 'ub' : 'updatedBy'] = getUid();
+  return updateDoc(docRef(ref), data as UpdateData<T>);
 }
 
 export function deleteDocument<T>(ref: DocPredicate<T>): Promise<void> {
