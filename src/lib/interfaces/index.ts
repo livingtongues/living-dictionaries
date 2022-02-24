@@ -1,4 +1,5 @@
 import type { IAudio } from './audio.interface';
+import type { IVideo, IVideoCustomMetadata } from './video.interface';
 import type { IDialect } from './dialect.interface';
 import type { IAbout, IDictionary, IGrammar } from './dictionary.interface';
 import type { IEntry } from './entry.interface';
@@ -14,11 +15,13 @@ import type { IInvite } from './invite.interface';
 import type { IDictionarySettings } from './dictionary-settings.interface';
 import type { IPartOfSpeech } from './part-of-speech.interface';
 import type { IColumn } from './column.interface';
+import type { IFirestoreMetaData, IFirestoreMetaDataAbbreviated } from '$sveltefirets';
 import type { HelperRoles, IHelper } from './helper.interface';
-import type { IFirestoreMetaData } from './firestore-metadata.interface';
 
 export type {
   IAudio,
+  IVideo,
+  IVideoCustomMetadata,
   IDialect,
   IDictionarySettings,
   IDictionary,
@@ -40,6 +43,7 @@ export type {
   IPartOfSpeech,
   IColumn,
   IFirestoreMetaData,
+  IFirestoreMetaDataAbbreviated,
 };
 
 import { ReadyLocales, UnpublishedLocales } from './languages.interface';

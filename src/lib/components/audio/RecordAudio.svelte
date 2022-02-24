@@ -109,8 +109,7 @@
 
       <div>
         <Button class="mt-1" size="sm" onclick={() => location.reload()}
-          >{$_('audio.reload', { default: 'Reload' })}</Button
-        >
+          >{$_('audio.reload', { default: 'Reload' })}</Button>
         <Button
           size="sm"
           class="mt-1"
@@ -118,8 +117,7 @@
           color="green"
           href="https://www.google.com/search?q=How+do+I+enable+microphone+access"
           target="_blank"
-          rel="noopener">{$_('audio.learn_more', { default: 'Learn More' })}</Button
-        >
+          rel="noopener">{$_('audio.learn_more', { default: 'Learn More' })}</Button>
       </div>
     {:else}
       <Button onclick={checkAudioPermissions} class="w-full">

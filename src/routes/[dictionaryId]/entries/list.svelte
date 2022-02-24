@@ -17,7 +17,7 @@
     ]);
   });
 
-  import { dictionary, canEdit } from '$lib/stores';
+  import { dictionary, canEdit, admin } from '$lib/stores';
   import ListEntry from './_ListEntry.svelte';
   import { Doc } from '$sveltefirets';
 </script>
@@ -33,7 +33,7 @@
         path="dictionaries/{$dictionary.id}/words/{algoliaEntry.id}"
         startWith={algoliaEntry}
         let:data={entry}>
-        <ListEntry {entry} canEdit={$canEdit} />
+        <ListEntry {entry} videoAccess={$dictionary.videoAccess || $admin > 0} canEdit={$canEdit} />
       </Doc>
     {/each}
   {:else}
