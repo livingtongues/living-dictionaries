@@ -27,11 +27,10 @@
 
     const { id } = await addOnline<ISpeaker>('speakers', speaker);
     dispatch('newSpeaker', { id });
-    close();
   }
 </script>
 
-<Modal on:close={close}>
+<Modal on:close>
   <span slot="heading"
     >{$_('speakers.add_new_speaker', {
       default: 'Add New Speaker',

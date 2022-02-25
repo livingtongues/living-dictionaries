@@ -45,7 +45,7 @@
 
 <style>
   label {
-    @apply flex justify-center px-3 py-2 border font-medium
+    @apply flex justify-center items-center px-3 py-2 border font-medium
   cursor-pointer focus:outline-none border-green-300
   focus:ring focus:ring-green-300 active:bg-green-200 transition ease-in-out
   duration-150 rounded hover:bg-green-100 text-green-700;

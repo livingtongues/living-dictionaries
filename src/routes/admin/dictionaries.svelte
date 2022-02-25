@@ -33,13 +33,22 @@
     </div>
     <ResponsiveTable class="my-1">
       <SortDictionaries dictionaries={filteredDictionaries} let:sortedDictionaries>
-        {#each sortedDictionaries as dictionary}
+        {#each sortedDictionaries as dictionary (dictionary.id)}
           <DictionaryRow
             {dictionary}
             on:toggleprivacy={() => {
               try {
                 updateOnline(`dictionaries/${dictionary.id}`, {
                   public: !dictionary.public,
+                });
+              } catch (err) {
+                alert(err);
+              }
+            }}
+            on:togglevideoaccess={() => {
+              try {
+                updateOnline(`dictionaries/${dictionary.id}`, {
+                  videoAccess: !dictionary.videoAccess,
                 });
               } catch (err) {
                 alert(err);

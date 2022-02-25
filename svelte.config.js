@@ -16,6 +16,7 @@ const config = {
 		]
 	}),
 
+	// disableDependencyReinclusion: ['svench'],
 	kit: {
 		adapter: vercel(),
 		target: '#svelte',

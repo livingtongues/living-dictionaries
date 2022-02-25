@@ -63,7 +63,7 @@
     aria-labelledby="modal-headline"
     bind:this={modal}>
     <div class="p-4 sm:p-6 overflow-y-auto flex-1">
-      <div class="flex">
+      <div class="flex mb-4 sm:mb-6">
         <h3 class="text-lg leading-6 font-medium text-gray-900 flex-grow" id="modal-headline">
           <slot name="heading" />
         </h3>
@@ -93,6 +93,6 @@
   /* hacky but allows us to use portal and keep the footer inside the form element */
   :global(.modal-footer) {
     @apply -m-4 sm:-m-6 mt-4 sm:mt-6;
-    @apply bg-gray-50 px-4 py-3 sm:px-6 flex flex-wrap justify-end;
+    @apply bg-gray-100 px-4 py-3 sm:px-6 flex flex-wrap justify-end;
   }
 </style>
