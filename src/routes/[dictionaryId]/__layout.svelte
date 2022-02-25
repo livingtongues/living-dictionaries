@@ -75,7 +75,7 @@
   </div>
   <div class="hidden md:block w-3 flex-shrink-0" />
   <div class:hide-backdrop={!menuOpen} on:click={() => (menuOpen = false)} class="backdrop" />
-  <div class="flex-grow">
+  <div class="flex-grow" style="max-width:1024px">
     <slot />
   </div>
 </div>
