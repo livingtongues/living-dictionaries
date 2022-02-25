@@ -110,7 +110,7 @@
   }
 </script>
 
-<div class="multiselect w-full" class:readonly>
+<div class="multiselect w-full mr-2" class:readonly>
   <div class="tokens" class:showOptions on:click={handleTokenClick}>
     {#each Object.values(selected) as s}
       <div

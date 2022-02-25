@@ -4,6 +4,7 @@
   import { updateOnline } from '$sveltefirets';
   import { glossingLanguages } from '$lib/mappings/glossing-languages';
   import MultiSelect from '$lib/components/ui/MultiSelect.svelte';
+  import Button from '$svelteui/ui/Button.svelte';
 
   export let glossLanguages;
   export let dictionary: IDictionary;
@@ -49,15 +50,9 @@
           </option>
         {/each}
       </MultiSelect>
-      <button
-        type="submit"
-        class="-ml-px relative flex items-center px-3 py-2 ltr:rounded-r-md rtl:rounded-l-md border
-              border-gray-300 text-sm leading-5 bg-gray-50 text-gray-900
-              focus:outline-none focus:shadow-outline-blue focus:border-blue-300
-              focus:z-10 transition ease-in-out duration-150">
+      <Button type="submit" form="primary">
         {$_('misc.save', { default: 'Save' })}
-        <!-- <span class="hidden sm:inline">Name</span> -->
-      </button>
+      </Button>
     </div>
     <div class="text-xs text-gray-600 mt-1">
       {$_('create.gloss_dictionary_clarification', {
