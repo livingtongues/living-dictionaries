@@ -6,6 +6,7 @@
   import ShowHide from '$svelteui/functions/ShowHide.svelte';
   import EditString from './_EditString.svelte';
   import EditGlosses from './_EditGlosses.svelte';
+  import EditCoordinates from './_EditCoordinates.svelte';
 
   let name = $dictionary.name;
   let publicDictionary = $dictionary.public;
@@ -57,6 +58,8 @@
   display="Edit Dictionary glottocode" />
 
 <EditGlosses {glossLanguages} dictionary={$dictionary} />
+
+<EditCoordinates dictionary={$dictionary} />
 
 <div class="mt-6 flex items-center">
   <input id="public" type="checkbox" bind:checked={publicDictionary} on:change={togglePublic} />
