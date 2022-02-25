@@ -3,9 +3,11 @@
   import { fly } from 'svelte/transition';
   export let value = [];
   export let readonly = false;
+  export let preventDelete = false;
   export let placeholder = '';
 
   $: calculatedPlaceholder = value && value.length ? '' : placeholder;
+  $: allowDelete = !preventDelete && !readonly;
 
   let input,
     inputValue,
@@ -116,7 +118,7 @@
         text-sm font-medium leading-4 bg-blue-100 text-blue-800 mr-2 my-1"
         data-id={s.value}>
         <span>{s.name}</span>
-        {#if !readonly}
+        {#if allowDelete}
           <div
             class="token-remove cursor-pointer justify-center items-center flex
             bg-blue-300 hover:bg-blue-400 rounded-full h-4 w-4 ml-1"
