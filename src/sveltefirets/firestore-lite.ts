@@ -11,15 +11,15 @@ import {
   updateDoc,
   serverTimestamp,
 } from 'firebase/firestore/lite';
-import type { CollectionReference, DocumentReference } from 'firebase/firestore/lite';
+import type {
+  CollectionReference,
+  DocumentReference,
+  PartialWithFieldValue,
+  WithFieldValue,
+  UpdateData,
+} from 'firebase/firestore/lite';
 
-import { get } from 'svelte/store';
-import { authState } from './user';
-
-const getUid = () => {
-  const u = get(authState);
-  return (u && u.uid) || 'anonymous'; // 'anonymous' allows support messages to be saved by non-logged-in users
-};
+import { getUid } from './helpers/uid';
 
 type CollectionPredicate<T> = string | CollectionReference<T>;
 type DocPredicate<T> = string | DocumentReference<T>;
@@ -52,18 +52,16 @@ async function getDocument<T>(ref: DocPredicate<T>): Promise<T> {
  * Be sure to import firestore methods such as serverTimestamp() from firebase/firestore/lite otherwise you will receive errors */
 export function addOnline<T>(
   ref: CollectionPredicate<T>,
-  data: T,
+  data: WithFieldValue<T>,
   opts: {
     abbreviate?: boolean;
   } = {}
 ): Promise<DocumentReference<T>> {
-  return addDoc(colRef(ref), {
-    ...data,
-    [opts.abbreviate ? 'ca' : 'createdAt']: serverTimestamp(),
-    [opts.abbreviate ? 'cb' : 'createdBy']: getUid(),
-    [opts.abbreviate ? 'ua' : 'updatedAt']: serverTimestamp(),
-    [opts.abbreviate ? 'ub' : 'updatedBy']: getUid(),
-  });
+  data[opts.abbreviate ? 'ca' : 'createdAt'] = serverTimestamp();
+  data[opts.abbreviate ? 'cb' : 'createdBy'] = getUid();
+  data[opts.abbreviate ? 'ua' : 'updatedAt'] = serverTimestamp();
+  data[opts.abbreviate ? 'ub' : 'updatedBy'] = getUid();
+  return addDoc(colRef(ref), data);
 }
 
 /**
@@ -71,49 +69,48 @@ export function addOnline<T>(
  * Be sure to import firestore methods such as serverTimestamp() from firebase/firestore/lite otherwise you will receive errors */
 export async function setOnline<T>(
   ref: DocPredicate<T>,
-  data: T,
+  data: PartialWithFieldValue<T>,
   opts: {
     abbreviate?: boolean;
     merge?: boolean;
   } = {}
 ): Promise<void> {
   const snap = await getDocument(ref);
-  return await (snap
-    ? updateOnline(ref, data)
-    : setDoc(
-        docRef(ref),
-        {
-          ...data,
-          [opts.abbreviate ? 'ca' : 'createdAt']: serverTimestamp(),
-          [opts.abbreviate ? 'cb' : 'createdBy']: getUid(),
-          [opts.abbreviate ? 'ua' : 'updatedAt']: serverTimestamp(),
-          [opts.abbreviate ? 'ub' : 'updatedBy']: getUid(),
-        },
-        { merge: opts.merge }
-      ));
+  if (snap) {
+    return await updateOnline(ref, data);
+  }
+  data[opts.abbreviate ? 'ca' : 'createdAt'] = serverTimestamp();
+  data[opts.abbreviate ? 'cb' : 'createdBy'] = getUid();
+  data[opts.abbreviate ? 'ua' : 'updatedAt'] = serverTimestamp();
+  data[opts.abbreviate ? 'ub' : 'updatedBy'] = getUid();
+  return await setDoc(docRef(ref), data, { merge: opts.merge });
 } // could split apart into set and upsert if desired, https://stackoverflow.com/questions/46597327/difference-between-set-with-merge-true-and-update
 
 /**
  * Use when wanting to receive back promises that will resolve or error when internet is flaky, unlike regular firestore methods which won't resolve right away in these situations.
- * Be sure to import firestore methods such as serverTimestamp() from firebase/firestore/lite otherwise you will receive errors */
+ * Be sure to import firestore methods such as serverTimestamp() from firebase/firestore/lite otherwise you will receive errors. */
 export async function updateOnline<T>(
   ref: DocPredicate<T>,
-  data: Partial<T>,
+  data: PartialWithFieldValue<T>,
   opts: {
     abbreviate?: boolean;
   } = {}
 ): Promise<void> {
-  // @ts-ignore
-  return updateDoc(docRef(ref), {
-    ...data,
-    [opts.abbreviate ? 'ua' : 'updatedAt']: serverTimestamp(),
-    [opts.abbreviate ? 'ub' : 'updatedBy']: getUid(),
-  });
+  data[opts.abbreviate ? 'ua' : 'updatedAt'] = serverTimestamp();
+  data[opts.abbreviate ? 'ub' : 'updatedBy'] = getUid();
+  return updateDoc(docRef(ref), data as UpdateData<T>);
 }
 
 /**
  * Use when wanting to receive back promises that will resolve or error when internet is flaky, unlike regular firestore methods which won't resolve right away in these situations.
- * Be sure to import firestore methods such as serverTimestamp() from firebase/firestore/lite otherwise you will receive errors */
+ * Be sure to import firestore methods such as serverTimestamp() from firebase/firestore/lite otherwise you will receive errors. */
 export function deleteDocumentOnline<T>(ref: DocPredicate<T>): Promise<void> {
   return deleteDoc(docRef(ref));
 }
+
+/**
+ * Make all properties in T able to be a Firestore FieldValue - realized it is not needed as Firestore already has this type
+ */
+// type AllowFieldValue<T> = {
+//   [P in keyof T]: T[P] | FieldValue;
+// };

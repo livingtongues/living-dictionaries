@@ -16,6 +16,7 @@
     alternateNames = 'Alternate Names',
     alternateOrthographies = 'Alternate Orthographies',
     createdAt = 'Created At',
+    videoAccess = 'Video Access',
   }
 
   type SortFields = keyof typeof DictionaryFields;
@@ -38,6 +39,10 @@
       case 'public':
         valueA = a.public && a.public.toString() || '';
         valueB = b.public && b.public.toString() || '';
+        break;
+      case 'videoAccess':
+        valueA = a.videoAccess && a.videoAccess.toString() || '';
+        valueB = b.videoAccess && b.videoAccess.toString() || '';
         break;
       case 'entryCount':
         valueA = a.entryCount || 0;
