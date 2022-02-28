@@ -10,8 +10,6 @@
   let lng = dictionary.coordinates ? dictionary.coordinates.longitude : null;
   let modal: 'coordinates' = null;
 
-  $: console.log('dic', dictionary);
-
   async function save() {
     try {
       await updateOnline(`dictionaries/${dictionary.id}`, { coordinates: new GeoPoint(lat, lng) });
@@ -30,7 +28,7 @@
 <form class="mt-4" on:submit|preventDefault={save}>
   <div class="mt-6">
     <!-- svelte-ignore a11y-label-has-associated-control -->
-    <label class="block text-sm font-medium leading-5 text-gray-700">
+    <label class="block text-xs leading-5 text-gray-700">
       {$_('create.where_spoken', {
         default: 'Where is this language spoken?',
       })}*
