@@ -27,10 +27,10 @@
 
 <form class="mt-4" on:submit|preventDefault={save}>
   <div class="mt-6">
-    <label for="glosses" class="block text-sm font-medium leading-5 text-gray-700">
+    <label for="glosses" class="block text-xs leading-5 text-gray-700">
       {$_('create.gloss_dictionary_in', {
         default: 'Make dictionary available in...',
-      })}*
+      })}* - <b class="text-red-500">you won't be able to delete glosses later</b>
     </label>
 
     <div class="mt-1 rounded-md shadow-sm flex" style="direction: ltr">
