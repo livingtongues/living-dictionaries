@@ -6,9 +6,11 @@
   import Button from '$svelteui/ui/Button.svelte';
 
   export let dictionary: IDictionary;
-  let lat = dictionary.coordinates.latitude;
-  let lng = dictionary.coordinates.longitude;
+  let lat = dictionary.coordinates ? dictionary.coordinates.latitude : null;
+  let lng = dictionary.coordinates ? dictionary.coordinates.longitude : null;
   let modal: 'coordinates' = null;
+
+  $: console.log('dic', dictionary);
 
   async function save() {
     try {
@@ -20,9 +22,7 @@
 
   async function showCoordinatesComponent() {
     // @ts-ignore
-    dictionary.coordinates = dictionary.coordinates.latitude
-      ? { latitude: lat, longitude: lng }
-      : {};
+    dictionary.coordinates = { latitude: lat, longitude: lng };
     modal = 'coordinates';
   }
 </script>
@@ -63,6 +63,7 @@
       }}
       on:remove={() => {
         (lat = lat), (lng = lng);
-      }} />
+      }}
+      {dictionary} />
   {/await}
 {/if}
