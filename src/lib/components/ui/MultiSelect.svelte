@@ -44,7 +44,7 @@
   }
 
   function remove(value) {
-    if (!readonly) {
+    if (allowDelete) {
       const { [value]: val, ...rest } = selected;
       selected = rest;
     }
