@@ -177,6 +177,8 @@
             rounded-r-md sm:text-sm sm:leading-5"
           placeholder="url" />
       </div>
+      <b class="text-xs text-red-500"
+        >The URL name is permanent and cannot be changed in any way afterwards.</b>
       <div class="text-xs text-gray-600 mt-1">
         {$_('create.only_letters_numbers', {
           default: 'Only letters and numbers allowed (no spaces or special characters)',
@@ -195,7 +197,7 @@
       <label for="glosses" class="block text-sm font-medium leading-5 text-gray-700">
         {$_('create.gloss_dictionary_in', {
           default: 'Make dictionary available in...',
-        })}*
+        })}* - <span class="text-red-500">you won't be able to delete glosses later</span>
       </label>
 
       <div class="mt-1 rounded-md shadow-sm" style="direction: ltr">
@@ -275,7 +277,7 @@
             autocorrect="off"
             spellcheck={false}
             minlength="3"
-            maxlength="3"
+            maxlength="30"
             bind:value={iso6393}
             class="form-input w-full" />
         </div>
@@ -299,6 +301,7 @@
             autocorrect="off"
             spellcheck={false}
             minlength="3"
+            maxlength="30"
             bind:value={glottocode}
             class="form-input w-full" />
         </div>
