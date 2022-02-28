@@ -197,7 +197,9 @@
       <label for="glosses" class="block text-sm font-medium leading-5 text-gray-700">
         {$_('create.gloss_dictionary_in', {
           default: 'Make dictionary available in...',
-        })}* - <span class="text-red-500">you won't be able to delete glosses later</span>
+        })}* -
+        <span class="text-red-500"
+          >You can add more gloss languages later but you won't be able to delete them later</span>
       </label>
 
       <div class="mt-1 rounded-md shadow-sm" style="direction: ltr">
