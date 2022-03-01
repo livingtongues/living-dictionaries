@@ -92,7 +92,9 @@
     "alternate_names": "ተለዋጭ ስሞች",
     "visible_to_public": "በይፋ የሚታይ",
     "req_com_consent": "የማህበረሰብ ስምምነት ያስፈልገዋል",
-    "create_dictionary": "መዝገበቃላት ይፍጠሩ"
+    "create_dictionary": "መዝገበቃላት ይፍጠሩ",
+    "permanent_url_msg": "የዩ አር ኤል ስም ዘላቂ ነው በኋላ በኋላ ሊለወጥ አይችልም.",
+    "add_gloss_msg": "በኋላ ላይ ከቅንብሮች በታች ውስጥ የበለጠ የዊሪንግ ቋንቋዎችን ማከል ይችላሉ."
   },
   "dictionary": {
     "latitude": "አግዳሚ መሥመር",
@@ -198,7 +200,8 @@
     "edit_dict_name": "አርትዕ የመዝገበ-ቃላት ስም",
     "dict_name": "የመዝገበ-ቃላት ስም",
     "public_private_meaning": "የህዝብ ማለት ማንኛውም ማህበረሰብ ስምምነት ይጠይቃል ይህም የእርስዎን መዝገበ ማየት ይችላሉ. የግል መዝገበ ቃላት ብቻ ነው እርስዎን እና ተባባሪዎች የሚታዩ ናቸው.",
-    "optional_data_fields": "አስገዳጅ ያልሆነ የውሂብ መስኮች"
+    "optional_data_fields": "አስገዳጅ ያልሆነ የውሂብ መስኮች",
+    "unable-deleting-msg": "ማሳሰቢያ-በኋላ ላይ እነዚህን የጩኸት ቋንቋዎች መሰረዝ አይችሉም."
   },
   "speakers": {
     "add_new_speaker": "አዲስ ማጉያ ያክሉ",

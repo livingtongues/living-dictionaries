@@ -30,7 +30,7 @@
     <label for="glosses" class="block text-xs leading-5 text-gray-700">
       {$_('create.gloss_dictionary_in', {
         default: 'Make dictionary available in...',
-      })}* - <b class="text-red-500">you won't be able to delete glosses later</b>
+      })}*
     </label>
 
     <div class="mt-1 rounded-md shadow-sm flex" style="direction: ltr">
@@ -57,6 +57,9 @@
     <div class="text-xs text-gray-600 mt-1">
       {$_('create.gloss_dictionary_clarification', {
         default: 'Language(s) you want to translate entries into',
+      })}
+      {$_('settings.unable-deleting-msg', {
+        default: 'Note: you will not be able to delete these glossing languages later.',
       })}
     </div>
   </div>

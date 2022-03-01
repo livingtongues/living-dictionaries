@@ -92,7 +92,9 @@
     "alternate_names": "Nomes Alternativos ",
     "visible_to_public": "Visível para o Público",
     "req_com_consent": "Requer Consentimento da Comunidade",
-    "create_dictionary": "Criar Dicionário"
+    "create_dictionary": "Criar Dicionário",
+    "permanent_url_msg": "O nome do URL é permanente e não pode ser alterado mais tarde.",
+    "add_gloss_msg": "Você pode adicionar mais idiomas de brilho mais tarde em Configurações."
   },
   "dictionary": {
     "latitude": "Latitude",
@@ -198,7 +200,8 @@
     "edit_dict_name": "Editar o nome do Dicionário",
     "dict_name": "Nome do Dicionário",
     "public_private_meaning": "Público significa que qualquer um pode ver o seu Dicionário o qual requer consentimento da comunidade. Os Dicionários Privados são visíveis apenas para si e para os seus colaboradores.",
-    "optional_data_fields": "Campo de dados opcionais"
+    "optional_data_fields": "Campo de dados opcionais",
+    "unable-deleting-msg": "Nota: Você não poderá excluir esses idiomas de brilho mais tarde."
   },
   "speakers": {
     "add_new_speaker": "Adicionar um falante novo",
