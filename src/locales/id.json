@@ -92,7 +92,9 @@
     "alternate_names": "Nama alternatif",
     "visible_to_public": "Terlihat oleh umum",
     "req_com_consent": "Memerlukan Persetujuan Komunitas Bahasa",
-    "create_dictionary": "Membuat Kamus"
+    "create_dictionary": "Membuat Kamus",
+    "permanent_url_msg": "Nama URL permanen dan tidak dapat diubah nanti.",
+    "add_gloss_msg": "Anda dapat menambahkan lebih banyak bahasa glossing nanti di bawah pengaturan."
   },
   "dictionary": {
     "latitude": "Garis Lintang",
@@ -198,7 +200,8 @@
     "edit_dict_name": "Menyunting Nama Kamus",
     "dict_name": "Nama Kamus",
     "public_private_meaning": "Kamus yang bersifat umum berarti setiap orang dapat melihat kamus anda yang kemudian memerlukan surat persetujuan komunitas bahasa. Kamus yang bersifat pribadi hanya dapat dilihat oleh anda dan kolaborator anda.",
-    "optional_data_fields": "Opsional Bidang Data"
+    "optional_data_fields": "Opsional Bidang Data",
+    "unable-deleting-msg": "Catatan: Anda tidak akan dapat menghapus bahasa-bahasa yang mengkilap ini nanti."
   },
   "speakers": {
     "add_new_speaker": "Bidang Data Bersifat Pilihan ",

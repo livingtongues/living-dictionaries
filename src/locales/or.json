@@ -92,7 +92,9 @@
     "alternate_names": "ବୈକଳ୍ପିକ ନାମ",
     "visible_to_public": "ଜନସାଧାରଣ ଦୃଶ୍ୟଲବ୍ଧ",
     "req_com_consent": "ଆବଶ୍ୟକ ସମ୍ପ୍ରଦାୟ ସମ୍ମତି",
-    "create_dictionary": "Dictionary ସୃଷ୍ଟି"
+    "create_dictionary": "Dictionary ସୃଷ୍ଟି",
+    "permanent_url_msg": "URL ନାମ ସ୍ଥାୟୀ ଏବଂ ପରେ ପରିବର୍ତ୍ତନ କରାଯାଇପାରିବ ନାହିଁ |",
+    "add_gloss_msg": "ସେଟିଂସମୂହରେ ପରେ ଆପଣ ପରେ ଅଧିକ ଗ୍ଲୋସିଙ୍ଗ୍ ଭାଷା ଯୋଗ କରିପାରିବେ |"
   },
   "dictionary": {
     "latitude": "ଅକ୍ଷାଂଶ",
@@ -198,7 +200,8 @@
     "edit_dict_name": "ସମ୍ପାଦନ Dictionary ନାମ",
     "dict_name": "ଅଭିଧାନରେ ନାମ",
     "public_private_meaning": "ଜନସାଧାରଣ ଅର୍ଥ କେହି ସମ୍ପ୍ରଦାୟ ସମ୍ମତି ଆବଶ୍ୟକ ଯାହା ଆପଣଙ୍କର ଅଭିଧାନରେ ଦେଖିପାରିବେ। ବ୍ୟକ୍ତିଗତ ଅବିଧାନଗୁଡ଼ିକ କେବଳ ଆପଣ ଓ ଆପଣଙ୍କର ସହକର୍ମୀ ଦୃଶ୍ୟମାନ ଅଟେ।",
-    "optional_data_fields": "ବୈକଳ୍ପିକ ଡାଟା Fields"
+    "optional_data_fields": "ବୈକଳ୍ପିକ ଡାଟା Fields",
+    "unable-deleting-msg": "ଟିପନ୍ତୁ: ଆପଣ ଏହି ଗ୍ଲସ କରିବା ଭାଷାଗୁଡ଼ିକୁ ପରେ ବିଲୋପ କରିବାକୁ ସମର୍ଥ ହେବେ ନାହିଁ |"
   },
   "speakers": {
     "add_new_speaker": "ନୂତନ ବକ୍ତା ଯୋଡନ୍ତୁ",
