@@ -92,7 +92,9 @@
     "alternate_names": "Noms alternatifs de la langue",
     "visible_to_public": "Visible au public",
     "req_com_consent": "Cela nécessite le consentement de la communauté",
-    "create_dictionary": "Créer un dictionnaire"
+    "create_dictionary": "Créer un dictionnaire",
+    "permanent_url_msg": "Le nom de l'URL est permanent et ne peut pas être changé plus tard.",
+    "add_gloss_msg": "Vous pouvez ajouter plus de langages de glossing plus tard dans les paramètres."
   },
   "dictionary": {
     "latitude": "Latitude",
@@ -198,7 +200,8 @@
     "edit_dict_name": "Modifier le nom du dictionnaire",
     "dict_name": "Nom du dictionnaire",
     "public_private_meaning": "“Public\" signifie que tout le monde peut voir votre dictionnaire, ce qui nécessite le consentement de la communauté. Les dictionnaires privés ne sont visibles que pour vous et vos collaborateurs.",
-    "optional_data_fields": "Champs de données facultatifs"
+    "optional_data_fields": "Champs de données facultatifs",
+    "unable-deleting-msg": "Remarque: vous ne pourrez pas supprimer ces langages de glossage plus tard."
   },
   "speakers": {
     "add_new_speaker": "Ajouter un nouveau locuteur",
