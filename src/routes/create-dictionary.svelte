@@ -177,8 +177,7 @@
             rounded-r-md sm:text-sm sm:leading-5"
           placeholder="url" />
       </div>
-      <b class="text-xs text-red-500"
-        >The URL name is permanent and cannot be changed in any way afterwards.</b>
+      <b class="text-xs text-red-500">The URL name is permanent and cannot be changed later.</b>
       <div class="text-xs text-gray-600 mt-1">
         {$_('create.only_letters_numbers', {
           default: 'Only letters and numbers allowed (no spaces or special characters)',
@@ -197,9 +196,7 @@
       <label for="glosses" class="block text-sm font-medium leading-5 text-gray-700">
         {$_('create.gloss_dictionary_in', {
           default: 'Make dictionary available in...',
-        })}* -
-        <span class="text-red-500"
-          >You can add more gloss languages later but you won't be able to delete them later</span>
+        })}* - You can add more glossing languages later in under Settings.
       </label>
 
       <div class="mt-1 rounded-md shadow-sm" style="direction: ltr">
