@@ -177,11 +177,10 @@
             rounded-r-md sm:text-sm sm:leading-5"
           placeholder="url" />
       </div>
-      <b class="text-xs text-red-500"
-        >{$_('create.permanent_url_msg', {
-          default: 'The URL name is permanent and cannot be changed later.',
-        })}</b>
       <div class="text-xs text-gray-600 mt-1">
+        {$_('create.permanent_url_msg', {
+          default: 'The URL name is permanent and cannot be changed later.',
+        })}
         {$_('create.only_letters_numbers', {
           default: 'Only letters and numbers allowed (no spaces or special characters)',
         })}
