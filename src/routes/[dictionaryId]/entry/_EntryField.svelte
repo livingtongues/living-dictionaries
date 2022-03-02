@@ -23,7 +23,7 @@
         {#if value}
           <div dir="ltr">
             <!-- prettier-ignore -->
-            {#if field === 'ph'}[{/if}{value}{#if field === 'ph'}]{/if}
+            {#if field === 'ph'}[{/if}{@html value}{#if field === 'ph'}]{/if}
           </div>
         {:else}<i class="far fa-pencil text-gray-500 text-sm" />{/if}
       </div>

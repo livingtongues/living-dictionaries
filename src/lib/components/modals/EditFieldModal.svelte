@@ -33,19 +33,25 @@
 <Modal on:close>
   <span slot="heading">{display}</span>
   <form on:submit|preventDefault={save}>
-    <div>
-      <!-- <label for="email" class="block text-sm font-medium leading-5 text-gray-700">Email</label> -->
-      <div class="rounded-md shadow-sm">
-        <input
-          dir="ltr"
-          type="text"
-          required={field === 'lx'}
-          use:autofocus
-          bind:value
-          class:sompeng={display === 'Sompeng-Mardir'}
-          class="form-input block w-full" />
+    {#if field === 'gl.en' || field === 'in' || field === 'nt'}
+      {#await import('$lib/components/editor/ClassicCustomized.svelte') then { default: ClassicCustomized }}
+        <ClassicCustomized bind:html={value} />
+      {/await}
+    {:else}
+      <div>
+        <!-- <label for="email" class="block text-sm font-medium leading-5 text-gray-700">Email</label> -->
+        <div class="rounded-md shadow-sm">
+          <input
+            dir="ltr"
+            type="text"
+            required={field === 'lx'}
+            use:autofocus
+            bind:value
+            class:sompeng={display === 'Sompeng-Mardir'}
+            class="form-input block w-full" />
+        </div>
       </div>
-    </div>
+    {/if}
 
     <div class="modal-footer space-x-1">
       <Button onclick={close} form="simple" color="black">

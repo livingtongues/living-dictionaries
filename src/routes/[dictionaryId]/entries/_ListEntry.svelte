@@ -45,7 +45,7 @@
         {#if entry.ps}
           <i>{$_('psAbbrev.' + entry.ps, { default: entry.ps })},</i>
         {/if}
-        {printGlosses(entry.gl).join(', ')}
+        {@html printGlosses(entry.gl).join(', ')}
       </div>
       {#if entry.sd}
         <span class="px-2 py-1 leading-tight text-xs bg-gray-100 rounded ml-1">
