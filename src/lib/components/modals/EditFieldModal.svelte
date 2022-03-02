@@ -33,9 +33,10 @@
 <Modal on:close>
   <span slot="heading">{display}</span>
   <form on:submit|preventDefault={save}>
+    <!-- TODO fix for every different case -->
     {#if field === 'gl.en' || field === 'in' || field === 'nt'}
       {#await import('$lib/components/editor/ClassicCustomized.svelte') then { default: ClassicCustomized }}
-        <ClassicCustomized bind:html={value} />
+        <ClassicCustomized bind:html={value} englishGloss />
       {/await}
     {:else}
       <div>

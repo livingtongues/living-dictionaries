@@ -1,5 +1,6 @@
 <script lang="ts">
   export let html: string;
+  export let englishGloss = false;
   import CKEditor from './CKEditor.svelte';
   import { onMount } from 'svelte';
   let editor: any;
@@ -29,6 +30,15 @@
       'redo',
     ],
   };
+
+  //TODO make it for every other case and make it legible
+  if (englishGloss) {
+    editorConfig.toolbar = [
+      editorConfig.toolbar[editorConfig.toolbar.indexOf('bold')],
+      editorConfig.toolbar[editorConfig.toolbar.indexOf('italic')],
+      editorConfig.toolbar[editorConfig.toolbar.indexOf('link')],
+    ];
+  }
 
   let mounted = false;
   onMount(async () => {
