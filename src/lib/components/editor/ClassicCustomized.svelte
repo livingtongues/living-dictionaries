@@ -1,6 +1,6 @@
 <script lang="ts">
   export let html: string;
-  export let englishGloss = false;
+  export let limitedToolbar: string[] = [];
   import CKEditor from './CKEditor.svelte';
   import { onMount } from 'svelte';
   let editor: any;
@@ -31,13 +31,8 @@
     ],
   };
 
-  //TODO make it for every other case and make it legible
-  if (englishGloss) {
-    editorConfig.toolbar = [
-      editorConfig.toolbar[editorConfig.toolbar.indexOf('bold')],
-      editorConfig.toolbar[editorConfig.toolbar.indexOf('italic')],
-      editorConfig.toolbar[editorConfig.toolbar.indexOf('link')],
-    ];
+  if (limitedToolbar.length > 0) {
+    editorConfig.toolbar = limitedToolbar;
   }
 
   let mounted = false;

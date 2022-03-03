@@ -33,10 +33,19 @@
 <Modal on:close>
   <span slot="heading">{display}</span>
   <form on:submit|preventDefault={save}>
-    <!-- TODO fix for every different case -->
-    {#if field === 'gl.en' || field === 'in' || field === 'nt'}
+    {#if field === 'gl.en'}
       {#await import('$lib/components/editor/ClassicCustomized.svelte') then { default: ClassicCustomized }}
-        <ClassicCustomized bind:html={value} englishGloss />
+        <ClassicCustomized bind:html={value} limitedToolbar={['bold', 'italic', 'link']} />
+      {/await}
+    {:else if field === 'in'}
+      {#await import('$lib/components/editor/ClassicCustomized.svelte') then { default: ClassicCustomized }}
+        <ClassicCustomized
+          bind:html={value}
+          limitedToolbar={['bold', 'italic', 'smallCaps', 'link']} />
+      {/await}
+    {:else if field === 'nt'}
+      {#await import('$lib/components/editor/ClassicCustomized.svelte') then { default: ClassicCustomized }}
+        <ClassicCustomized bind:html={value} />
       {/await}
     {:else}
       <div>
