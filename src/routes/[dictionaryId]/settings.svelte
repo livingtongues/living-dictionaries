@@ -4,9 +4,9 @@
   import { update, updateOnline } from '$sveltefirets';
   import Button from '$svelteui/ui/Button.svelte';
   import ShowHide from '$svelteui/functions/ShowHide.svelte';
-  import EditString from './_EditString.svelte';
-  import EditGlosses from './_EditGlosses.svelte';
-  import EditCoordinates from './_EditCoordinates.svelte';
+  import EditString from '$lib/components/home/EditString.svelte';
+  import EditGlosses from '$lib/components/home/EditGlosses.svelte';
+  import EditCoordinates from '$lib/components/home/EditCoordinates.svelte';
   import { glossingLanguages } from '$lib/mappings/glossing-languages';
   import { arrayRemove, arrayUnion } from 'firebase/firestore';
   import type { IDictionary } from '$lib/interfaces';
@@ -55,6 +55,12 @@
       attributeType="glottocode"
       {dictionary}
       display="Glottocode" />
+
+    <EditString
+      attribute={dictionary.location}
+      attributeType="location"
+      {dictionary}
+      display="Location" />
 
     <EditGlosses
       {glossingLanguages}

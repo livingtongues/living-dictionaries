@@ -5,7 +5,7 @@
   import ShowHide from '$svelteui/functions/ShowHide.svelte';
   import BadgeArrayEmit from '$svelteui/data/BadgeArrayEmit.svelte';
   import Modal from '$lib/components/ui/Modal.svelte';
-  import Filter from '../admin/_Filter.svelte';
+  import Filter from '../../../routes/admin/_Filter.svelte';
 
   export let glossingLanguages: IGlossLanguages;
   export let dictionary: IDictionary;

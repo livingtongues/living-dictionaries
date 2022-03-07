@@ -5,7 +5,7 @@
   import Button from '$svelteui/ui/Button.svelte';
 
   export let attribute: string;
-  export let attributeType: 'name' | 'iso6393' | 'glottocode';
+  export let attributeType: 'name' | 'iso6393' | 'glottocode' | 'location';
   export let dictionary: IDictionary;
   export let display: string;
   async function save() {
