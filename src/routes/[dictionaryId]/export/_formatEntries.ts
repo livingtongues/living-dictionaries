@@ -38,6 +38,8 @@ export function formatEntriesForCSV(
     '"': "'",
   };
 
+  const regexForRichText = /<\w+>|<\/\w+>|<\w+ \w+='[a-z:\-/.]+(;*)'>|&nbsp;/g;
+
   const headers = {
     id: 'Entry id',
     lx: 'Lexeme/Word/Phrase',
@@ -91,10 +93,14 @@ export function formatEntriesForCSV(
       id: entry.id,
       lx: entry.lx.replace(/[,"\r\n]/g, (m) => replacementChars[m]),
       ph: entry.ph ? entry.ph.replace(/[,"\r\n]/g, (m) => replacementChars[m]) : '',
-      in: entry.in ? entry.in.replace(/[,"\r\n]/g, (m) => replacementChars[m]) : '',
+      in: entry.in
+        ? entry.in.replace(/[,"\r\n]/g, (m) => replacementChars[m]).replace(regexForRichText, ' ')
+        : '',
       mr: entry.mr ? entry.mr.replace(/[,"\r\n]/g, (m) => replacementChars[m]) : '',
       di: entry.di ? entry.di.replace(/[,"\r\n]/g, (m) => replacementChars[m]) : '',
-      nt: entry.nt ? entry.nt.replace(/[,"\r\n]/g, (m) => replacementChars[m]) : '',
+      nt: entry.nt
+        ? entry.nt.replace(/[,"\r\n]/g, (m) => replacementChars[m]).replace(regexForRichText, ' ')
+        : '',
       //xv: entry.xv,
     });
 
@@ -145,7 +151,9 @@ export function formatEntriesForCSV(
     //Assigning glosses
     glossLanguages.forEach((bcp) => {
       const cleanEntry = entry.gl[bcp]
-        ? entry.gl[bcp].replace(/[,"\r\n]/g, (m) => replacementChars[m])
+        ? entry.gl[bcp]
+            .replace(/[,"\r\n]/g, (m) => replacementChars[m])
+            .replace(regexForRichText, ' ')
         : '';
       itemsFormatted[i][`gl${bcp}`] = cleanEntry;
     });
