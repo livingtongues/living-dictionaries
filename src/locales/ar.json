@@ -92,7 +92,9 @@
     "alternate_names": "أسماء بديلة",
     "visible_to_public": "مرئية للعامة",
     "req_com_consent": "تتطلب/ يتطلب موافقة المجتمع",
-    "create_dictionary": "إنشاء قاموس"
+    "create_dictionary": "إنشاء قاموس",
+    "permanent_url_msg": "اسم عنوان URL دائم ولا يمكن تغييره لاحقا.",
+    "add_gloss_msg": "يمكنك إضافة المزيد من اللغات اللامع في وقت لاحق في الإعدادات."
   },
   "dictionary": {
     "latitude": "خط العرض",
@@ -198,7 +200,8 @@
     "edit_dict_name": "تحرير اسم القاموس",
     "dict_name": "اسم القاموس",
     "public_private_meaning": "عام يعني أنه يمكن لأي شخص رؤية القاموس الخاص بك الذي يتطلب موافقة المجتمع. تكون القواميس الخاصة مرئية فقط لك وللمتعاونين معك.",
-    "optional_data_fields": "حقول بيانات اختيارية"
+    "optional_data_fields": "حقول بيانات اختيارية",
+    "unable-deleting-msg": "ملاحظة: لن تتمكن من حذف هذه اللغات اللامع في وقت لاحق."
   },
   "speakers": {
     "add_new_speaker": "إضافة متحدث جديد",

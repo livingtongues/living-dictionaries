@@ -92,7 +92,9 @@
     "alternate_names": "Nama-nama Lain",
     "visible_to_public": "Dapat Dilihat oleh Umum",
     "req_com_consent": "Memerlukan Persetujuan Masyarakat",
-    "create_dictionary": "Cipta Kamus"
+    "create_dictionary": "Cipta Kamus",
+    "permanent_url_msg": "Nama URL kekal dan tidak boleh diubah kemudian.",
+    "add_gloss_msg": "Anda boleh menambah lebih banyak bahasa glossing di bawah tetapan."
   },
   "dictionary": {
     "latitude": "Latitud",
@@ -198,7 +200,8 @@
     "edit_dict_name": "Edit Nama Kamus",
     "dict_name": "Nama Kamus",
     "public_private_meaning": "Umum bermakna sesiapa sahaja boleh melihat kamus anda. Pilihan ini memerlukan persetujuan masyarakat. Kamus peribadi hanya dapat dilihat oleh anda dan rakan usaha sama anda.",
-    "optional_data_fields": "Bidang Data Tidak Wajib"
+    "optional_data_fields": "Bidang Data Tidak Wajib",
+    "unable-deleting-msg": "Nota: Anda tidak akan dapat memadamkan bahasa-bahasa yang glossing kemudian."
   },
   "speakers": {
     "add_new_speaker": "Tambah Penutur Baharu",
@@ -241,7 +244,7 @@
   },
   "video": {
     "video_url": "URL VIDEO",
-    "video_credit": "Video Credit.",
+    "video_credit": "Video Credit",
     "prepare_to_record_video": "Bersedia untuk merakam dengan mikrofon & kamera",
     "video_info": "Terdapat dua cara untuk mempunyai video anda yang dipaparkan dalam kamus hidup: 1) Anda boleh merakam video anda di sini, atau memuat naik video yang dirakam sebelum ini ke platform kami. Kelebihan: Mudah dan hebat untuk rakaman cepat. Kelemahan: Anda hanya boleh memuat naik video sehingga 100MB jadi ia hanya perlu resolusi pendek dan rendah. 2) Dapatkan video anda pada perkhidmatan hosting yang mengkhususkan diri dalam penyimpanan video dan menghubungkan URL ke laman web kami. Kelebihan: Mudah (selagi video anda telah dimuat naik pada platform itu), video anda boleh mempunyai resolusi dan panjang yang anda mahukan. Kelemahan: Jika anda ingin merakam sesuatu yang tidak dijangka atau sangat mudah, ia mungkin terlalu banyak usaha untuk melakukannya dengan cara itu, dan anda mungkin ingin mengutamakan kaedah 1.",
     "paste_video_url": "Tampal URL VIDEO",

@@ -92,7 +92,9 @@
     "alternate_names": "שמות חלופיים",
     "visible_to_public": "מילון ציבורי",
     "req_com_consent": "נדרשת הסכמה של הקהילה",
-    "create_dictionary": "יצירת מילון"
+    "create_dictionary": "יצירת מילון",
+    "permanent_url_msg": "שם האתר הוא קבוע ולא ניתן לשנות מאוחר יותר.",
+    "add_gloss_msg": "ניתן להוסיף שפות מבריק יותר בהמשך ההגדרות."
   },
   "dictionary": {
     "latitude": "קו רוחב",
@@ -198,7 +200,8 @@
     "edit_dict_name": "עריכת שם המילון",
     "dict_name": "שם המילון",
     "public_private_meaning": "פרסום המילון באופן ציבורי תלוי בהסכמת הקהילה דוברת השפה. מילונים פרטיים פתוחים אך ורק לך ולמשתפי הפעולה שלך.",
-    "optional_data_fields": "שדות מידע אופציונליים (לא חובה)"
+    "optional_data_fields": "שדות מידע אופציונליים (לא חובה)",
+    "unable-deleting-msg": "הערה: לא תוכל למחוק שפות מבריק מאוחר יותר."
   },
   "speakers": {
     "add_new_speaker": "הוספת דובר/ת",
