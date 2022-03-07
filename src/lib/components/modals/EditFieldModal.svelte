@@ -33,7 +33,7 @@
 <Modal on:close>
   <span slot="heading">{display}</span>
   <form on:submit|preventDefault={save}>
-    {#if field === 'gl.en'}
+    {#if field.startsWith('gl.')}
       {#await import('$lib/components/editor/ClassicCustomized.svelte') then { default: ClassicCustomized }}
         <ClassicCustomized bind:html={value} limitedToolbar={['bold', 'italic', 'link']} />
       {/await}
