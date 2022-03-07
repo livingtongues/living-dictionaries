@@ -92,7 +92,9 @@
     "alternate_names": "替代名称",
     "visible_to_public": "公开显示",
     "req_com_consent": "需要社区的同意",
-    "create_dictionary": "创建字典"
+    "create_dictionary": "创建字典",
+    "permanent_url_msg": "URL名称是永久性的，无法稍后更改。",
+    "add_gloss_msg": "您可以在“设置”下添加更多的光泽语言。"
   },
   "dictionary": {
     "latitude": "纬度",
@@ -198,7 +200,8 @@
     "edit_dict_name": "编辑字典名称",
     "dict_name": "字典名称",
     "public_private_meaning": "公共意味着任何人都可以看到你的字典所以需要社区的同意。私人字典则是只有你和你的合作者可见。",
-    "optional_data_fields": "可选的数据字段"
+    "optional_data_fields": "可选的数据字段",
+    "unable-deleting-msg": "注意：您将无法稍后删除这些光泽语言。"
   },
   "speakers": {
     "add_new_speaker": "添加新发言人",

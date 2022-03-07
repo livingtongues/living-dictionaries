@@ -3,8 +3,8 @@
   export let items: T[];
   export let placeholder = 'Search';
   let value = '';
-  $: filteredItems = items.filter((user) => {
-    const itemStr = JSON.stringify(user);
+  $: filteredItems = items.filter((item) => {
+    const itemStr = JSON.stringify(item);
     if (itemStr.toLowerCase().indexOf(value.toLowerCase()) !== -1) {
       return true;
     }

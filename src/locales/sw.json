@@ -92,7 +92,9 @@
     "alternate_names": "Majina mbadala",
     "visible_to_public": "Inaonekana kwa umma",
     "req_com_consent": "Inahitaji Ridhaa ya Jamii",
-    "create_dictionary": "Tengeneza Kamusi  "
+    "create_dictionary": "Tengeneza Kamusi  ",
+    "permanent_url_msg": "Jina la URL ni la kudumu na haliwezi kubadilishwa baadaye.",
+    "add_gloss_msg": "Unaweza kuongeza lugha zaidi za kutafakari baadaye chini ya mipangilio."
   },
   "dictionary": {
     "latitude": "Latitudo",
@@ -198,7 +200,8 @@
     "edit_dict_name": "Hariri jina la Kamusi",
     "dict_name": "Jina la Kamusi",
     "public_private_meaning": "Je, jamii ya wazungumzaji inaruhusu lugha hii kuwekwa mtandaoni? Umma inamaanisha mtu yeyote anaweza kuona kamusi yako, suala ambalo linahitaji idhini ya jamii. Kamusi binafsi zinaonekana kwako tu na washirika wako.",
-    "optional_data_fields": "Sehemu za Taarifa Mbadala"
+    "optional_data_fields": "Sehemu za Taarifa Mbadala",
+    "unable-deleting-msg": "Kumbuka: Huwezi kufuta lugha hizi za kutafakari baadaye."
   },
   "speakers": {
     "add_new_speaker": "Ongeza Mzungumzaji Mpya",
