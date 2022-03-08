@@ -86,7 +86,7 @@
         iso6393: iso6393.trim(),
         glottocode: glottocode.trim(),
       };
-
+      //TODO we need to fix the pruneObject function first!
       await setOnline<IDictionary>(`dictionaries/${url}`, pruneObject(dictionaryData));
       await setOnline<IHelper>(`dictionaries/${url}/managers/${$user.uid}`, {
         id: $user.uid,
