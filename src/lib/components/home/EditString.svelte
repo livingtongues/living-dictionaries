@@ -8,6 +8,7 @@
   export let attributeType: 'name' | 'iso6393' | 'glottocode' | 'location';
   export let dictionary: IDictionary;
   export let display: string;
+  export let creation = false;
   async function save() {
     try {
       attribute =
@@ -32,7 +33,7 @@
 
 <form class="mt-4" on:submit|preventDefault={save}>
   <label for={attribute} class="block text-xs leading-5 text-gray-700 mb-1">
-    {display}
+    {@html display}
   </label>
   <div class="flex flex-grow rounded-md shadow-sm">
     <div class="flex-grow focus-within:z-10">
@@ -52,8 +53,10 @@
           sm:text-sm sm:leading-5 transition ease-in-out duration-150"
         placeholder={`Dictionary ${attributeType}`} />
     </div>
-    <Button type="submit" form="primary">
-      {$_('misc.save', { default: 'Save' })}
-    </Button>
+    {#if !creation}
+      <Button type="submit" form="primary">
+        {$_('misc.save', { default: 'Save' })}
+      </Button>
+    {/if}
   </div>
 </form>

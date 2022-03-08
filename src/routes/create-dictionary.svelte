@@ -2,6 +2,7 @@
   import { _ } from 'svelte-i18n';
   import BadgeArray from '$svelteui/data/BadgeArray.svelte';
   import MultiSelect from '$lib/components/ui/MultiSelect.svelte';
+  import EditString from '$lib/components/home/EditString.svelte';
   import { glossingLanguages } from '$lib/mappings/glossing-languages';
   import { user } from '$lib/stores';
   import Header from '$lib/components/shell/Header.svelte';
@@ -129,23 +130,12 @@
 <form class="flex" on:submit|preventDefault={createNewDictionary}>
   <div class="flex flex-col justify-center p-4 max-w-md mx-auto">
     <div class="mt-6">
-      <label for="name" class="block text-xl font-medium leading-5 text-gray-700">
-        {$_('dictionary.name_of_language', { default: 'Name of Language' })}*
-      </label>
-      <div class="mt-2 rounded-md shadow-sm">
-        <!-- svelte-ignore a11y-autofocus -->
-        <input
-          id="name"
-          type="text"
-          autocomplete="off"
-          autocorrect="off"
-          spellcheck={false}
-          autofocus
-          minlength="3"
-          required
-          bind:value={name}
-          class="form-input w-full" />
-      </div>
+      <EditString
+        bind:attribute={name}
+        attributeType="name"
+        dictionary={null}
+        creation
+        display="{$_('dictionary.name_of_language', { default: 'Name of Language' })}*" />
       <div class="text-xs text-gray-600 mt-1">
         {$_('create.name_clarification', {
           default: 'This will be the name of the dictionary.',
@@ -258,50 +248,32 @@
     </div>
     <div class="mt-6 flex">
       <div class="w-1/2">
-        <label for="isocode" class="block text-sm font-medium leading-5 text-gray-700">
-          ISO 639-3
-          <a
+        <EditString
+          bind:attribute={iso6393}
+          attributeType="iso6393"
+          dictionary={null}
+          creation
+          display={`<b>ISO 639-3 <a
             href="https://en.wikipedia.org/wiki/ISO_639-3"
             target="_blank"
             class="text-gray-600 hover:text-gray:800">
             <i class="far fa-info-circle" />
-          </a>
-        </label>
-        <div class="mt-1 rounded-md shadow-sm">
-          <input
-            id="isocode"
-            type="text"
-            autocomplete="off"
-            autocorrect="off"
-            spellcheck={false}
-            minlength="3"
-            maxlength="3"
-            bind:value={iso6393}
-            class="form-input w-full" />
-        </div>
+          </a></b>`} />
       </div>
       <div class="w-1" />
       <div class="w-1/2">
-        <label for="glottocode" class="block text-sm font-medium leading-5 text-gray-700">
-          Glottocode
-          <a
-            href="https://en.wikipedia.org/wiki/Glottolog"
-            target="_blank"
-            class="text-gray-600 hover:text-gray:800">
-            <i class="far fa-info-circle" />
-          </a>
-        </label>
-        <div class="mt-1 rounded-md shadow-sm">
-          <input
-            id="glottocode"
-            type="text"
-            autocomplete="off"
-            autocorrect="off"
-            spellcheck={false}
-            minlength="3"
-            bind:value={glottocode}
-            class="form-input w-full" />
-        </div>
+        <EditString
+          bind:attribute={glottocode}
+          attributeType="glottocode"
+          dictionary={null}
+          creation
+          display={`<b>Glottocode
+            <a
+              href="https://en.wikipedia.org/wiki/Glottolog"
+              target="_blank"
+              class="text-gray-600 hover:text-gray:800">
+              <i class="far fa-info-circle" />
+            </a></b>`} />
       </div>
     </div>
 
