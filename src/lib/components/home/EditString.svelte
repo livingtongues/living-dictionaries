@@ -6,7 +6,7 @@
 
   export let attribute: string;
   export let attributeType: 'name' | 'iso6393' | 'glottocode' | 'location';
-  export let dictionary: IDictionary;
+  export let dictionary: IDictionary = null;
   export let display: string;
   export let creation = false;
   async function save() {

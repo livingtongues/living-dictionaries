@@ -3,6 +3,7 @@
   import BadgeArray from '$svelteui/data/BadgeArray.svelte';
   import MultiSelect from '$lib/components/ui/MultiSelect.svelte';
   import EditString from '$lib/components/home/EditString.svelte';
+  import EditCoordinates from '$lib/components/home/EditCoordinates.svelte';
   import { glossingLanguages } from '$lib/mappings/glossing-languages';
   import { user } from '$lib/stores';
   import Header from '$lib/components/shell/Header.svelte';
@@ -18,8 +19,8 @@
 
   let alternateNames = [];
   let glossLanguages = ['en'];
-  let lat = null;
-  let lng = null;
+  let lat = 0;
+  let lng = 0;
   let iso6393 = '';
   let glottocode = '';
   let publicDictionary = false;
@@ -86,7 +87,6 @@
         iso6393: iso6393.trim(),
         glottocode: glottocode.trim(),
       };
-      //TODO we need to fix the pruneObject function first!
       await setOnline<IDictionary>(`dictionaries/${url}`, pruneObject(dictionaryData));
       await setOnline<IHelper>(`dictionaries/${url}/managers/${$user.uid}`, {
         id: $user.uid,
@@ -112,6 +112,7 @@
   }
 
   let online = true;
+  $: console.log('lat', lat, 'lng', lng);
 </script>
 
 <svelte:window bind:online />
@@ -133,7 +134,6 @@
       <EditString
         bind:attribute={name}
         attributeType="name"
-        dictionary={null}
         creation
         display="{$_('dictionary.name_of_language', { default: 'Name of Language' })}*" />
       <div class="text-xs text-gray-600 mt-1">
@@ -212,8 +212,9 @@
       </div>
     </div>
 
-    <div class="mt-6">
-      <!-- svelte-ignore a11y-label-has-associated-control -->
+    <EditCoordinates bind:lat bind:lng />
+
+    <!-- <div class="mt-6">
       <label class="block text-sm font-medium leading-5 text-gray-700">
         {$_('create.where_spoken', {
           default: 'Where is this language spoken?',
@@ -232,7 +233,7 @@
           {$_('create.select_coordinates', { default: 'Select Coordinates' })}
         {/if}
       </Button>
-    </div>
+    </div> -->
 
     <div class="mt-6">
       <div class="text-sm font-medium leading-5 text-gray-700 mb-1">
@@ -251,7 +252,6 @@
         <EditString
           bind:attribute={iso6393}
           attributeType="iso6393"
-          dictionary={null}
           creation
           display={`<b>ISO 639-3 <a
             href="https://en.wikipedia.org/wiki/ISO_639-3"
@@ -265,7 +265,6 @@
         <EditString
           bind:attribute={glottocode}
           attributeType="glottocode"
-          dictionary={null}
           creation
           display={`<b>Glottocode
             <a
@@ -326,7 +325,7 @@
   </div>
 </form>
 
-{#if modal === 'coordinates'}
+<!-- {#if modal === 'coordinates'}
   {#await import('$lib/components/modals/Coordinates.svelte') then { default: Coordinates }}
     <Coordinates
       on:close={() => {
@@ -340,7 +339,7 @@
         (lat = null), (lng = null);
       }} />
   {/await}
-{/if}
+{/if} -->
 
 {#if modal === 'auth'}
   {#await import('$lib/components/shell/AuthModal.svelte') then { default: AuthModal }}

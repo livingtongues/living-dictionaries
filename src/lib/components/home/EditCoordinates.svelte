@@ -5,22 +5,30 @@
   import { GeoPoint } from 'firebase/firestore/lite';
   import Button from '$svelteui/ui/Button.svelte';
 
-  export let dictionary: IDictionary;
-  let lat = dictionary.coordinates ? dictionary.coordinates.latitude : null;
-  let lng = dictionary.coordinates ? dictionary.coordinates.longitude : null;
+  let coordinates;
+  export let dictionary: IDictionary = null;
+  export let lat = dictionary?.coordinates ? dictionary.coordinates.latitude : coordinates.lat;
+  export let lng = dictionary?.coordinates ? dictionary.coordinates.longitude : coordinates.lng;
   let modal: 'coordinates' = null;
-
+  $: console.log('lat', lat, 'lng', lng);
   async function save() {
-    try {
-      await updateOnline(`dictionaries/${dictionary.id}`, { coordinates: new GeoPoint(lat, lng) });
-    } catch (err) {
-      alert(`${$_('misc.error', { default: 'Error' })}: ${err}`);
+    if (dictionary) {
+      try {
+        await updateOnline(`dictionaries/${dictionary.id}`, {
+          coordinates: new GeoPoint(lat, lng),
+        });
+      } catch (err) {
+        alert(`${$_('misc.error', { default: 'Error' })}: ${err}`);
+      }
     }
   }
 
   async function showCoordinatesComponent() {
-    // @ts-ignore
-    dictionary.coordinates = { latitude: lat, longitude: lng };
+    if (dictionary) {
+      // @ts-ignore
+      dictionary.coordinates = { latitude: lat, longitude: lng };
+    }
+    coordinates = { latitude: lat, longitude: lng };
     modal = 'coordinates';
   }
 </script>
@@ -62,6 +70,6 @@
       on:remove={() => {
         (lat = lat), (lng = lng);
       }}
-      {dictionary} />
+      dictionary={dictionary ? dictionary : coordinates} />
   {/await}
 {/if}
