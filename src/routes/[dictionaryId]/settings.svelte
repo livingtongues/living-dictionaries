@@ -1,90 +1,121 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
-  import { dictionary } from '$lib/stores';
-  import { updateOnline } from '$sveltefirets';
+  import { admin, dictionary as dictionaryStore } from '$lib/stores';
+  import { update, updateOnline } from '$sveltefirets';
   import Button from '$svelteui/ui/Button.svelte';
   import ShowHide from '$svelteui/functions/ShowHide.svelte';
   import EditString from './_EditString.svelte';
   import EditGlosses from './_EditGlosses.svelte';
   import EditCoordinates from './_EditCoordinates.svelte';
+  import { glossingLanguages } from '$lib/mappings/glossing-languages';
+  import { arrayRemove, arrayUnion } from 'firebase/firestore';
+  import type { IDictionary } from '$lib/interfaces';
+  import Doc from '$sveltefirets/components/Doc.svelte';
 
-  let name = $dictionary.name;
-  let publicDictionary = $dictionary.public;
-  let glossLanguages = $dictionary.glossLanguages;
-
-  async function togglePublic() {
+  async function togglePublic(settingPublic: boolean) {
     try {
-      if (publicDictionary) {
-        publicDictionary = confirm(
+      if (settingPublic) {
+        const allowed = confirm(
           `${$_('settings.community_permission', {
             default: 'Does the speech community allow this language to be online?',
           })}`
         );
+        if (!allowed) return;
       }
-      await updateOnline(`dictionaries/${$dictionary.id}`, { public: publicDictionary });
-      $dictionary.public = publicDictionary;
+      await updateOnline<IDictionary>(`dictionaries/${$dictionaryStore.id}`, {
+        public: settingPublic,
+      });
     } catch (err) {
-      publicDictionary = $dictionary.public;
       alert(`${$_('misc.error', { default: 'Error' })}: ${err}`);
     }
   }
 </script>
 
+<Doc
+  path={`dictionaries/${$dictionaryStore.id}`}
+  startWith={$dictionaryStore}
+  let:data={dictionary}
+  on:data={(e) => dictionaryStore.set(e.detail.data)}>
+  <div style="max-width: 900px">
+    <h3 class="text-xl font-semibold">{$_('misc.settings', { default: 'Settings' })}</h3>
+    <EditString
+      attribute={dictionary.name}
+      attributeType="name"
+      {dictionary}
+      display={$_('settings.edit_dict_name', { default: 'Edit Dictionary Name' })} />
+
+    <EditString
+      attribute={dictionary.iso6393}
+      attributeType="iso6393"
+      {dictionary}
+      display="ISO 639-3" />
+
+    <EditString
+      attribute={dictionary.glottocode}
+      attributeType="glottocode"
+      {dictionary}
+      display="Glottocode" />
+
+    <EditGlosses
+      {glossingLanguages}
+      {dictionary}
+      on:add={(e) => {
+        update(`dictionaries/${dictionary.id}`, {
+          glossLanguages: arrayUnion(e.detail.languageId),
+        });
+      }}
+      on:remove={(e) => {
+        update(`dictionaries/${dictionary.id}`, {
+          glossLanguages: arrayRemove(e.detail.languageId),
+        });
+      }} />
+
+    <EditCoordinates {dictionary} />
+
+    <div class="mt-6 flex items-center">
+      <input
+        id="public"
+        type="checkbox"
+        checked={dictionary.public}
+        on:change={(e) => {
+          // @ts-ignore
+          togglePublic(e.target.checked);
+        }} />
+      <label for="public" class="mx-2 block leading-5 text-gray-900">
+        {$_('create.visible_to_public', { default: 'Visible to Public' })}
+      </label>
+    </div>
+    <div class="text-xs text-gray-600 mt-1 mb-6">
+      ({$_('settings.public_private_meaning', {
+        default:
+          'Public means anyone can see your dictionary which requires community consent. Private dictionaries are visible only to you and your collaborators.',
+      })})
+    </div>
+  </div>
+
+  <ShowHide let:show let:toggle>
+    <Button onclick={toggle} form="primary">
+      {$_('settings.optional_data_fields', { default: 'Optional Data Fields' })}:
+      {$_('header.contact_us', { default: 'Contact Us' })}
+    </Button>
+
+    {#if show}
+      {#await import('$lib/components/modals/Contact.svelte') then { default: Contact }}
+        <Contact on:close={toggle} />
+      {/await}
+    {/if}
+  </ShowHide>
+
+  {#if $admin > 1}
+    {#await import('$svelteui/data/JSON.svelte') then { default: JSON }}
+      <JSON obj={dictionary} />
+    {/await}
+  {/if}
+</Doc>
+
 <svelte:head>
   <title>
-    {$dictionary.name}
+    {$dictionaryStore.name}
     {$_('misc.settings', { default: 'Settings' })}
   </title>
 </svelte:head>
-
-<div style="max-width: 1024px">
-  <h3 class="text-xl font-semibold">{$_('misc.settings', { default: 'Settings' })}</h3>
-  <!--TODO can I make the attibuteType dynamic?-->
-  <EditString
-    attribute={name}
-    attributeType="name"
-    dictionary={$dictionary}
-    display={$_('settings.edit_dict_name', { default: 'Edit Dictionary Name' })} />
-
-  <EditString
-    attribute={$dictionary.iso6393}
-    attributeType="iso6393"
-    dictionary={$dictionary}
-    display="Edit Dictionary iso6393" />
-
-  <EditString
-    attribute={$dictionary.glottocode}
-    attributeType="glottocode"
-    dictionary={$dictionary}
-    display="Edit Dictionary glottocode" />
-
-  <EditGlosses {glossLanguages} dictionary={$dictionary} />
-
-  <EditCoordinates dictionary={$dictionary} />
-
-  <div class="mt-6 flex items-center">
-    <input id="public" type="checkbox" bind:checked={publicDictionary} on:change={togglePublic} />
-    <label for="public" class="mx-2 block leading-5 text-gray-900">
-      {$_('create.visible_to_public', { default: 'Visible to Public' })}
-    </label>
-  </div>
-  <div class="text-xs text-gray-600 mt-1 mb-6">
-    ({$_('settings.public_private_meaning', {
-      default:
-        'Public means anyone can see your dictionary which requires community consent. Private dictionaries are visible only to you and your collaborators.',
-    })})
-  </div>
-</div>
-
-<ShowHide let:show let:toggle>
-  <Button onclick={toggle} form="primary">
-    {$_('settings.optional_data_fields', { default: 'Optional Data Fields' })}:
-    {$_('header.contact_us', { default: 'Contact Us' })}
-  </Button>
-
-  {#if show}
-    {#await import('$lib/components/modals/Contact.svelte') then { default: Contact }}
-      <Contact on:close={toggle} />
-    {/await}
-  {/if}
-</ShowHide>

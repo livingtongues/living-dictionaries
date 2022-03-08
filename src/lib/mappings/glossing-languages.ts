@@ -7,6 +7,7 @@ import type { IGlossLanguages } from '$lib/interfaces';
 
 export const glossingLanguages: IGlossLanguages = {
   en: {
+    vernacularName: 'English',
     internalName: 'Keyboard_us',
   },
   ab: {

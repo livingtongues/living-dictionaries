@@ -21,7 +21,6 @@
       if (attributeType === 'name') {
         dictionary.name = attribute;
       }
-      location.reload();
     } catch (err) {
       if (attributeType === 'name') {
         attribute = dictionary.name;
