@@ -10,7 +10,7 @@
   export let lat = dictionary?.coordinates ? dictionary.coordinates.latitude : coordinates.lat;
   export let lng = dictionary?.coordinates ? dictionary.coordinates.longitude : coordinates.lng;
   let modal: 'coordinates' = null;
-  $: console.log('lat', lat, 'lng', lng);
+
   async function save() {
     if (dictionary) {
       try {

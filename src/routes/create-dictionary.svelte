@@ -14,7 +14,7 @@
   import { debounce } from '$lib/helpers/debounce';
   import { pruneObject } from '$lib/helpers/prune';
 
-  let modal: 'auth' | 'coordinates' = null;
+  let modal: 'auth' = null;
   let submitting = false;
 
   let alternateNames = [];
@@ -104,15 +104,7 @@
     submitting = false;
   }
 
-  let dictionary: Partial<IDictionary>;
-  async function showCoordinatesComponent() {
-    // @ts-ignore
-    dictionary = lat ? { coordinates: { latitude: lat, longitude: lng } } : {};
-    modal = 'coordinates';
-  }
-
   let online = true;
-  $: console.log('lat', lat, 'lng', lng);
 </script>
 
 <svelte:window bind:online />
@@ -214,27 +206,6 @@
 
     <EditCoordinates bind:lat bind:lng />
 
-    <!-- <div class="mt-6">
-      <label class="block text-sm font-medium leading-5 text-gray-700">
-        {$_('create.where_spoken', {
-          default: 'Where is this language spoken?',
-        })}*
-      </label>
-    </div>
-    <div class="mt-1">
-      <Button onclick={() => showCoordinatesComponent()}>
-        {#if lat && lng}
-          {lat}°
-          {lat < 0 ? 'S' : 'N'},
-          {lng}°
-          {lng < 0 ? 'W' : 'E'}
-        {:else}
-          <i class="fas fa-globe-americas mr-1" />
-          {$_('create.select_coordinates', { default: 'Select Coordinates' })}
-        {/if}
-      </Button>
-    </div> -->
-
     <div class="mt-6">
       <div class="text-sm font-medium leading-5 text-gray-700 mb-1">
         {$_('create.alternate_names', { default: 'Alternate Names' })}
@@ -324,22 +295,6 @@
     </div>
   </div>
 </form>
-
-<!-- {#if modal === 'coordinates'}
-  {#await import('$lib/components/modals/Coordinates.svelte') then { default: Coordinates }}
-    <Coordinates
-      on:close={() => {
-        modal = null;
-      }}
-      {dictionary}
-      on:save={(event) => {
-        (lat = event.detail.lat), (lng = event.detail.lng);
-      }}
-      on:remove={() => {
-        (lat = null), (lng = null);
-      }} />
-  {/await}
-{/if} -->
 
 {#if modal === 'auth'}
   {#await import('$lib/components/shell/AuthModal.svelte') then { default: AuthModal }}
