@@ -68,7 +68,8 @@
         save();
       }}
       on:remove={() => {
-        (lat = lat), (lng = lng);
+        (lat = 0), (lng = 0);
+        save();
       }}
       dictionary={dictionary ? dictionary : coordinates} />
   {/await}
