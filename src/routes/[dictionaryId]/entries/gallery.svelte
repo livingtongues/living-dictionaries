@@ -50,7 +50,10 @@
             path="dictionaries/{$dictionary.id}/words/{algoliaEntry.id}"
             startWith={algoliaEntry}
             let:data={entry}>
-            <GalleryEntry {entry} canEdit={$canEdit} />
+            <GalleryEntry
+              {entry}
+              canEdit={$canEdit}
+              maxSizeImage={entries.length <= 2 ? true : false} />
           </Doc>
         {/if}
       {/each}
