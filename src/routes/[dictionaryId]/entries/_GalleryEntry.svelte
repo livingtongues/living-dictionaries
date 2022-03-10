@@ -3,16 +3,11 @@
   import Image from '$lib/components/image/Image.svelte';
   export let entry: IEntry;
   export let canEdit = false;
-  export let maxSizeImage = false;
   import { dictionary } from '$lib/stores';
   let innerWidth: number;
 </script>
 
-<svelte:window bind:innerWidth />
-
-<div
-  class={`flex flex-col relative rounded ${maxSizeImage && innerWidth >= 1280 ? 'mb-16' : ''}`}
-  style="max-width: 500px; max-height: 500px;">
+<div class="flex flex-col relative rounded max-w-[500px]">
   <div class="bg-gray-300 shadow">
     <div class="aspect-square overflow-hidden">
       <Image square={480} {entry} {canEdit} />
