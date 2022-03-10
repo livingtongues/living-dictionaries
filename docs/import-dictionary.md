@@ -9,6 +9,7 @@
 - Start by running `npm run importDictionary -- --id kalinago --dry` but use your appropriate dictionary id instead. This will emulate (dry run) an import to dev environment to let you inspect the log and see if there are any missing files
 - Check the console log or the outputted log file found in `functions/scripts/logs` - it will be the newest one as they are saved by datestamp.
 - Rerun your script with the `--dry` option: `npm run importDictionary -- --id kalinago` and inspect the dev-imported dictionary on localhost (or any deployed dev url) to make sure all is good - Note that because we don't have Algolia indexing the dev database currently, I added some code that let's dev show the 10 most recent entries from Firestore, but that's all you'll get for now until we make further changes - and only 10 from the last 60 minutes (see `Hits.svelte`). 
+- Before moving on to prod, delete all media that has been imported to dev DB.
 - If all looks good then run `npm run importDictionary -- --id kalinago --environment prod` to push the data live
 - Look through the imported dictionary and then tell Anna to look at it and make it public if everyone is happy with it.
 
