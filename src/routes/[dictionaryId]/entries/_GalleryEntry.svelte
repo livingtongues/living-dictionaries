@@ -4,7 +4,6 @@
   export let entry: IEntry;
   export let canEdit = false;
   import { dictionary } from '$lib/stores';
-  let innerWidth: number;
 </script>
 
 <div class="flex flex-col relative rounded max-w-[500px]">
