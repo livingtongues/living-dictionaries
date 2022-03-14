@@ -198,9 +198,7 @@
       <label for="glosses" class="block text-sm font-medium leading-5 text-gray-700">
         {$_('create.gloss_dictionary_in', {
           default: 'Make dictionary available in...',
-        })}* - {$_('create.add_gloss_msg', {
-          default: 'You can add more glossing languages later in under Settings',
-        })}
+        })}*
       </label>
 
       <div class="mt-1 rounded-md shadow-sm" style="direction: ltr">
