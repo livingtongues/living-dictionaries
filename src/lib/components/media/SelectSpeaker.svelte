@@ -61,7 +61,7 @@
   {#await import('$lib/components/media/AddSpeaker.svelte') then { default: AddSpeaker }}
     <AddSpeaker
       on:close={() => {
-        speakerId === null;
+        speakerId = null;
       }}
       on:newSpeaker={(event) => {
         speakerId = event.detail.id;
