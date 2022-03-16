@@ -7,6 +7,8 @@
     initialSpeakerId: string = undefined;
   const addSpeaker = 'AddSpeaker';
   $: speakerId = initialSpeakerId;
+  $: console.log(speakerId);
+  $: speakerId === addSpeaker ? '' : speakerId;
 
   import type { ISpeaker } from '$lib/interfaces';
   let speakers: ISpeaker[] = [];
@@ -61,7 +63,7 @@
   {#await import('$lib/components/media/AddSpeaker.svelte') then { default: AddSpeaker }}
     <AddSpeaker
       on:close={() => {
-        speakerId = null;
+        speakerId = '';
       }}
       on:newSpeaker={(event) => {
         speakerId = event.detail.id;
