@@ -7,8 +7,6 @@
     initialSpeakerId: string = undefined;
   const addSpeaker = 'AddSpeaker';
   $: speakerId = initialSpeakerId;
-  $: console.log(speakerId);
-  $: speakerId === addSpeaker ? '' : speakerId;
 
   import type { ISpeaker } from '$lib/interfaces';
   let speakers: ISpeaker[] = [];
