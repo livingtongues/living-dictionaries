@@ -12,11 +12,11 @@
 <script lang="ts">
   export let dictionaryId: string;
   import { _ } from 'svelte-i18n';
-  import { add, deleteDocumentOnline, updateOnline, Collection } from '$sveltefirets';
-  import { where } from 'firebase/firestore';
+  import { add, Collection } from '$sveltefirets';
   import { isManager, isContributor, dictionary, admin } from '$lib/stores';
   import type { IInvite, IHelper } from '$lib/interfaces';
   import Button from '$svelteui/ui/Button.svelte';
+  import DisplayInvitations from '$lib/components/admin/DisplayInvitations.svelte';
   import ShowHide from '$svelteui/functions/ShowHide.svelte';
   import { inviteHelper } from '$lib/helpers/inviteHelper';
 
@@ -69,37 +69,7 @@
     {/each}
   </Collection>
   {#if $isManager}
-    <Collection
-      path={`dictionaries/${dictionaryId}/invites`}
-      queryConstraints={[where('role', '==', 'manager'), where('status', 'in', ['queued', 'sent'])]}
-      startWith={inviteType}
-      let:data={invites}>
-      {#each invites as invite}
-        <div class="py-3 flex flex-wrap items-center justify-between">
-          <div class="text-sm leading-5 font-medium text-gray-900">
-            <i
-              >{$_('contributors.invitation_sent', {
-                default: 'Invitation sent',
-              })}:</i>
-            {invite.targetEmail}
-          </div>
-          {#if $admin}
-            <Button
-              color="red"
-              size="sm"
-              onclick={() => {
-                if (confirm($_('misc.delete', { default: 'Delete' }))) {
-                  updateOnline(`dictionaries/${dictionaryId}/invites/${invite.id}`, {
-                    status: 'cancelled',
-                  });
-                }
-              }}
-              >{$_('misc.delete', { default: 'Delete' })}
-              <i class="fas fa-times" /><i class="fas fa-key mx-1" /></Button>
-          {/if}
-        </div>
-      {/each}
-    </Collection>
+    <DisplayInvitations {dictionaryId} role="manager" />
   {/if}
 </div>
 {#if $isManager}
@@ -126,40 +96,7 @@
     {/each}
   </Collection>
   {#if $isManager}
-    <Collection
-      path={`dictionaries/${dictionaryId}/invites`}
-      queryConstraints={[
-        where('role', '==', 'contributor'),
-        where('status', 'in', ['queued', 'sent']),
-      ]}
-      startWith={inviteType}
-      let:data={invites}>
-      {#each invites as invite}
-        <div class="py-3 flex flex-wrap items-center justify-between">
-          <div class="text-sm leading-5 font-medium text-gray-900">
-            <i
-              >{$_('contributors.invitation_sent', {
-                default: 'Invitation sent',
-              })}:</i>
-            {invite.targetEmail}
-          </div>
-          {#if $admin}
-            <Button
-              color="red"
-              size="sm"
-              onclick={() => {
-                if (confirm($_('misc.delete', { default: 'Delete' }))) {
-                  updateOnline(`dictionaries/${dictionaryId}/invites/${invite.id}`, {
-                    status: 'cancelled',
-                  });
-                }
-              }}
-              >{$_('misc.delete', { default: 'Delete' })}
-              <i class="fas fa-times" /><i class="fas fa-key ml-1" /></Button>
-          {/if}
-        </div>
-      {/each}
-    </Collection>
+    <DisplayInvitations {dictionaryId} role="contributor" />
     <Button onclick={() => inviteHelper('contributor', $dictionary)} form="primary">
       <i class="far fa-envelope" />
       {$_('contributors.invite_contributors', {
@@ -184,32 +121,7 @@
   {$_('contributors.other_contributors', { default: 'Other Contributors' })}
 </h3>
 <div class="divide-y divide-gray-200">
-  <Collection
-    path={`dictionaries/${dictionaryId}/writeInCollaborators`}
-    startWith={helperType}
-    let:data={writeInCollaborators}>
-    {#each writeInCollaborators as collaborator}
-      <div class="py-3 flex flex-wrap items-center justify-between">
-        <div class="text-sm leading-5 font-medium text-gray-900">
-          {collaborator.name}
-        </div>
-        {#if $isManager}
-          <Button
-            color="red"
-            size="sm"
-            onclick={() => {
-              if (confirm($_('misc.delete', { default: 'Delete' }))) {
-                deleteDocumentOnline(
-                  `dictionaries/${dictionaryId}/writeInCollaborators/${collaborator.id}`
-                );
-              }
-            }}
-            >{$_('misc.delete', { default: 'Delete' })}
-            <i class="fas fa-times" /></Button>
-        {/if}
-      </div>
-    {/each}
-  </Collection>
+  <DisplayInvitations {dictionaryId} role="writeInCollaborator" />
 </div>
 
 <!-- <div class="text-gray-600 my-1 text-sm">
