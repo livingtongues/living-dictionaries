@@ -87,7 +87,7 @@
             <Button
               color="red"
               size="sm"
-              on:click={() => {
+              onclick={() => {
                 if (confirm($_('misc.delete', { default: 'Delete' }))) {
                   updateOnline(`dictionaries/${dictionaryId}/invites/${invite.id}`, {
                     status: 'cancelled',
