@@ -9,10 +9,10 @@
   import Button from '$svelteui/ui/Button.svelte';
   import BadgeArrayEmit from '$svelteui/data/BadgeArrayEmit.svelte';
   import { createEventDispatcher } from 'svelte';
-  import { Collection, updateOnline } from '$sveltefirets';
-  import { where } from 'firebase/firestore';
+  import { Collection } from '$sveltefirets';
   import RolesManagment from './_RolesManagment.svelte';
   import IntersectionObserver from '$lib/components/ui/IntersectionObserver.svelte';
+  import DisplayInvitations from '$lib/components/admin/DisplayInvitations.svelte';
 
   const dispatch = createEventDispatcher<{
     addalternatename: string;
@@ -22,7 +22,6 @@
   }>();
 
   let helperType: IHelper[];
-  let inviteType: IInvite[];
 </script>
 
 <tr title={$admin > 1 && JSON.stringify(dictionary, null, 1)}>
@@ -53,38 +52,7 @@
           let:data={managers}>
           <RolesManagment helpers={managers} {dictionary} role="manager" />
         </Collection>
-        <Collection
-          path={`dictionaries/${dictionary.id}/invites`}
-          queryConstraints={[
-            where('role', '==', 'manager'),
-            where('status', 'in', ['queued', 'sent']),
-          ]}
-          startWith={inviteType}
-          let:data={invites}>
-          <div class="py-3 flex flex-wrap items-center justify-between">
-            <div class="text-sm leading-5 font-medium text-gray-900">
-              <i
-                >{$_('contributors.invitation_sent', {
-                  default: 'Invitation sent',
-                })}:</i>
-            </div>
-            {#each invites as invite}
-              {invite.targetEmail}
-              <Button
-                color="red"
-                size="sm"
-                onclick={() => {
-                  if (confirm($_('misc.delete', { default: 'Delete' }))) {
-                    updateOnline(`dictionaries/${dictionary.id}/invites/${invite.id}`, {
-                      status: 'cancelled',
-                    });
-                  }
-                }}
-                >{$_('misc.delete', { default: 'Delete' })}
-                <i class="fas fa-times" /><i class="fas fa-key mx-1" /></Button>
-            {/each}
-          </div>
-        </Collection>
+        <DisplayInvitations dictionaryId={dictionary.id} role="manager" adminPanel />
       {/if}
     </IntersectionObserver>
   </td>
@@ -97,6 +65,7 @@
           let:data={contributors}>
           <RolesManagment helpers={contributors} {dictionary} role="contributor" />
         </Collection>
+        <DisplayInvitations dictionaryId={dictionary.id} role="contributor" adminPanel />
       {/if}
     </IntersectionObserver>
   </td>
