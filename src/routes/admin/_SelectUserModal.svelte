@@ -46,8 +46,7 @@
         <Button onclick={() => add(user)} color="green" form="simple" class="w-full !text-left"
           >{user.displayName} <small>({user.email})</small></Button>
       {:else}
-        <Button size="sm" onclick={() => inviteHelper('manager', dictionary)}
-          >Invite New User</Button>
+        <Button size="sm" onclick={() => inviteHelper(role, dictionary)}>Invite New User</Button>
       {/each}
 
       <div class="modal-footer space-x-1">
