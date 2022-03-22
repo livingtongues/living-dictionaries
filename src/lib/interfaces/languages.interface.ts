@@ -11,13 +11,13 @@ export enum ReadyLocales {
   ms = 'Malay',
   bn = 'বাংলা', // Bengali,
   as = 'Assamese / অসমীয়া',
+  hi = 'हिन्दी',
 }
 
 // Admin only
 export enum UnpublishedLocales {
   ha = 'Harshen Hausa / هَرْشَن هَوْسَ',
   ar = 'العَرَبِيَّة‎',
-  hi = 'हिन्दी',
   zh = '官话',
   am = 'አማርኛ',
   or = 'ଓଡ଼ିଆ',

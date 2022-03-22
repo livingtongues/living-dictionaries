@@ -247,10 +247,15 @@
     "video_credit": "Video Credit",
     "prepare_to_record_video": "Bersedia untuk merakam dengan mikrofon & kamera",
     "video_info": "Terdapat dua cara untuk mempunyai video anda yang dipaparkan dalam kamus hidup: 1) Anda boleh merakam video anda di sini, atau memuat naik video yang dirakam sebelum ini ke platform kami. Kelebihan: Mudah dan hebat untuk rakaman cepat. Kelemahan: Anda hanya boleh memuat naik video sehingga 100MB jadi ia hanya perlu resolusi pendek dan rendah. 2) Dapatkan video anda pada perkhidmatan hosting yang mengkhususkan diri dalam penyimpanan video dan menghubungkan URL ke laman web kami. Kelebihan: Mudah (selagi video anda telah dimuat naik pada platform itu), video anda boleh mempunyai resolusi dan panjang yang anda mahukan. Kelemahan: Jika anda ingin merakam sesuatu yang tidak dijangka atau sangat mudah, ia mungkin terlalu banyak usaha untuk melakukannya dengan cara itu, dan anda mungkin ingin mengutamakan kaedah 1.",
-    "paste_video_url": "Tampal URL VIDEO",
+    "paste_video_url": "Paste youtube atau pautan vimeo",
     "record_upload_video": "Rekod atau muat naik video",
     "view": "Pandangan",
     "edit_video": "Edit video",
-    "add_video": "Tambah video"
+    "add_video": "Tambah video",
+    "accesing": "Mengakses mikrofon dan kamera",
+    "pause": "Jeda",
+    "unpause": "Hampir tidak",
+    "previously_dismissed_msg": "Sekiranya anda sebelum ini menolak permintaan penyemak imbas, sila tambah semula dan klik 'Ya' apabila penyemak imbas anda meminta kebenaran.",
+    "permission_denied": "Kebenaran untuk mengakses media ditolak."
   }
 }
