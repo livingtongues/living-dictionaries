@@ -247,10 +247,15 @@
     "video_credit": "Bashin bidiyo",
     "prepare_to_record_video": "Shirya yin rikodi da makirufo da kyamara",
     "video_info": "Akwai hanyoyi guda biyu don sanya bidiyonku da aka nuna a cikin yanayin rayuwa: 1) Kuna iya yin rikodin bidiyonku a nan, ko loda bidiyon da aka rubuta a baya ga dandamalinmu. Abvantbuwan amfãni: Mai sauƙin kai da yawa don rikodin sauri. Rashin daidaituwa: Zaka iya shigar da bidiyo kawai zuwa 100MB don dole ne kawai ya zama gajeru da ƙarancin ƙuduri. 2) Shin bidiyon ku akan sabis ɗin kuɗaɗe da ƙwarewa ne a cikin ajiya na bidiyo kuma danganta URL ɗin zuwa shafinmu. Abvantbuwan amfãni: Mai sauƙin (Muddin an riga an ɗora ku akan wannan dandamali na iya samun ƙuduri da tsawon lokacin da kake so. Rashin daidaito: Idan kana son yin rikodin wani abu wanda ba a zata ba ko mai sauqi qwarai, yana iya zama ƙoƙari da yawa don yin hakan ta wannan hanyar, kuma kuna iya son fifikon hanyar 1.",
-    "paste_video_url": "Manna bidiyo",
+    "paste_video_url": "Manna YouTube ko VimEO",
     "record_upload_video": "Yi rikodin ko loda bidiyo",
     "view": "Duba",
     "edit_video": "Shirya bidiyo",
-    "add_video": "Ƙara bidiyo"
+    "add_video": "Ƙara bidiyo",
+    "accesing": "Samun damar makirufo da kyamara",
+    "pause": "Ɗan hutu",
+    "unpause": "M",
+    "previously_dismissed_msg": "Idan kun riga kun kori buƙatun mai binciken, da fatan za a sake maimaita kuma danna 'Ee' lokacin da mai bincikenku ya nemi izini.",
+    "permission_denied": "An hana izinin shiga kafofin watsa labarai."
   }
 }
