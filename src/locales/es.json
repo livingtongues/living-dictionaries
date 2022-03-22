@@ -247,10 +247,15 @@
     "video_credit": "Crédito del video para",
     "prepare_to_record_video": "Prepárese para grabar con el micrófono y la cámara",
     "video_info": "Hay dos formas en que se pueden mostar tus videos en un Diccionario Vivo: 1) Puedes grabar tus videos aquí o cargar tus videos previamente grabados en nuestra plataforma. Ventajas: fácil e ideal para grabaciones rápidas. Desventajas: sólo puedes cargar videos de hasta 100 MB, así que sólo pueden ser cortos y de baja resolución. 2) Tener almacenados tus videos en un servicio especializado y vincular la URL a nuestro sitio. Ventajas: fácil (siempre y cuando tus videos ya estén cargados en esa plataforma), tus videos pueden tener la resolución y tamaño que desees. Desventajas: si deseas grabar algo inesperado o muy simple, esto implicaría mucho esfuerzo, y en ese caso, es posible que desees priorizar el método 1.",
-    "paste_video_url": "Pega la URL del video ",
+    "paste_video_url": "Pega el link de YouTube o Vimeo",
     "record_upload_video": "Graba o carga un video",
     "view": "Ver",
     "edit_video": "Editar video",
-    "add_video": "Añadir video"
+    "add_video": "Añadir video",
+    "accesing": "Accesando al micrófono y la cámara.",
+    "pause": "Pausar",
+    "unpause": "Despausar",
+    "previously_dismissed_msg": "Si previamente le negó la petición al navegador, por favor refresque y acepte cuando el navegador le pida permiso.",
+    "permission_denied": "El permiso para acceder a los medios fue denegado."
   }
 }

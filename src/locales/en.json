@@ -247,10 +247,15 @@
     "video_credit": "Video credit",
     "prepare_to_record_video": "Prepare to Record with Microphone & Camera",
     "video_info": "There are two ways to have your videos displayed in a Living Dictionary: 1) You can record your videos right here, or upload your previously recorded videos to our platform. Advantages: easy and great for quick recordings. Disadvantages: You can only upload a video up to 100MB so it must only be short and low resolution. 2) Have your videos on a hosting service that specializes in video storage and link the URL to our site. Advantages: easy (as long as your videos are already uploaded on that platform), your videos can have the resolution and length you want. Disadvantages: if you want to record something unexpected or very simple, it might be too much effort to do it that way, and you may want to prioritize method 1.",
-    "paste_video_url": "Paste video URL",
+    "paste_video_url": "Paste YouTube or Vimeo link",
     "record_upload_video": "Record or upload a video",
     "view": "View",
     "edit_video": "Edit Video",
-    "add_video": "Add Video"
+    "add_video": "Add Video",
+    "accesing": "Accessing Microphone and Camera",
+    "pause": "Pause",
+    "unpause": "Unpause",
+    "previously_dismissed_msg": "If you previously dismissed the browser's request, please reload and click 'Yes' when your browser asks for permission.",
+    "permission_denied": "Permission to access media was denied."
   }
 }
