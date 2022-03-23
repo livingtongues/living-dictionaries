@@ -24,7 +24,7 @@
           <div dir="ltr">
             {#if value.indexOf('<i>') > -1}
               <!-- prettier-ignore -->
-              {#if field === 'ph'}[{/if}{value}{#if field === 'ph'}]{/if}
+              {#if field === 'ph'}[{/if}{@html value}{#if field === 'ph'}]{/if}
             {:else}
               <!-- prettier-ignore -->
               {#if field === 'ph'}[{/if}{value}{#if field === 'ph'}]{/if}
