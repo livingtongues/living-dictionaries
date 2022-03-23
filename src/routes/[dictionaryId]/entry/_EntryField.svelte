@@ -22,8 +22,13 @@
         class="{field === 'lx' ? 'font-bold text-4xl' : 'border-b-2'} border-dashed pb-1 mb-2">
         {#if value}
           <div dir="ltr">
-            <!-- prettier-ignore -->
-            {#if field === 'ph'}[{/if}{value}{#if field === 'ph'}]{/if}
+            {#if value.indexOf('<i>') > -1}
+              <!-- prettier-ignore -->
+              {#if field === 'ph'}[{/if}{value}{#if field === 'ph'}]{/if}
+            {:else}
+              <!-- prettier-ignore -->
+              {#if field === 'ph'}[{/if}{value}{#if field === 'ph'}]{/if}
+            {/if}
           </div>
         {:else}<i class="far fa-pencil text-gray-500 text-sm" />{/if}
       </div>
