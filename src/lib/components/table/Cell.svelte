@@ -6,29 +6,14 @@
   import SelectSpeakerCell from './cells/SelectSpeakerCell.svelte';
   import AudioCell from './cells/AudioCell.svelte';
   import Image from '$lib/components/image/Image.svelte';
-
+  import { saveUpdateToFirestore } from '$lib/helpers/entry/update';
+  import { dictionary } from '$lib/stores';
   import type { IColumn, IEntry } from '$lib/interfaces';
   export let column: IColumn,
     entry: IEntry,
     canEdit = false;
 
   let updatedValue;
-
-  import { dictionary } from '$lib/stores';
-  import { updateOnline } from '$sveltefirets';
-  async function saveUpdateToFirestore(e) {
-    try {
-      await updateOnline<IEntry>(
-        `dictionaries/${$dictionary.id}/words/${entry.id}`,
-        {
-          [e.detail.field]: e.detail.newValue,
-        },
-        { abbreviate: true }
-      );
-    } catch (err) {
-      alert(`${$_('misc.error', { default: 'Error' })}: ${err}`);
-    }
-  }
 </script>
 
 <div
@@ -50,9 +35,15 @@
   {:else if column.field === 'speaker'}
     <SelectSpeakerCell {canEdit} {entry} />
   {:else if column.field === 'ps'}
-    <SelectPOS {canEdit} value={entry.ps} on:valueupdate={saveUpdateToFirestore} />
+    <SelectPOS
+      {canEdit}
+      value={entry.ps}
+      on:valueupdate={(e) => saveUpdateToFirestore(e, entry.id, $dictionary.id)} />
   {:else if column.field === 'sdn'}
-    <SemanticDomains {canEdit} {entry} on:valueupdate={saveUpdateToFirestore} />
+    <SemanticDomains
+      {canEdit}
+      {entry}
+      on:valueupdate={(e) => saveUpdateToFirestore(e, entry.id, $dictionary.id)} />
   {:else if column.gloss === true}
     <Textbox
       {canEdit}
@@ -64,7 +55,7 @@
         entry._highlightResult.gl[column.field] &&
         entry._highlightResult.gl[column.field].value) ||
         ''}
-      on:valueupdate={saveUpdateToFirestore} />
+      on:valueupdate={(e) => saveUpdateToFirestore(e, entry.id, $dictionary.id)} />
   {:else if column.exampleSentence === true}
     <Textbox
       {canEdit}
@@ -76,7 +67,7 @@
         entry._highlightResult.xs[column.field] &&
         entry._highlightResult.xs[column.field].value) ||
         ''}
-      on:valueupdate={saveUpdateToFirestore} />
+      on:valueupdate={(e) => saveUpdateToFirestore(e, entry.id, $dictionary.id)} />
   {:else}
     <Textbox
       {canEdit}
@@ -87,6 +78,6 @@
         entry._highlightResult[column.field] &&
         entry._highlightResult[column.field].value) ||
         ''}
-      on:valueupdate={saveUpdateToFirestore} />
+      on:valueupdate={(e) => saveUpdateToFirestore(e, entry.id, $dictionary.id)} />
   {/if}
 </div>
