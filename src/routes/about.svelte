@@ -180,7 +180,7 @@
     <li>
       <b>{$_('gl.as', { default: 'Assamese' })}</b>: Palash Nath, Luke Horo, Kapil Medhi, Dr. Seuji
       Sharma, Dr. Gitanjali Bezbaruah, Biren Baruah, Khagendra Nath Medhi, Pranab Sharma, Dhanmani
-      Baishya Student, Chan Mohammad Ali, Rahul Choudhary
+      Baishya, Chan Mohammad Ali, Rahul Choudhary
     </li>
     <li>
       <b>{$_('gl.bn', { default: 'Bangla' })}</b>: Sumedha Sengupta, Prof. Arun Ghosh
@@ -195,7 +195,8 @@
       <b>{$_('gl.sw', { default: 'KiSwahili' })}</b>: Michael Karani
     </li>
     <li>
-      <b>{$_('gl.hi', { default: 'Hindi' })}</b>: Luke Horo, Bikram Jora, Prof. K.V. Subbarao
+      <b>{$_('gl.hi', { default: 'Hindi' })}</b>: Ashwini Parmar, Luke Horo, Bikram Jora, Prof. K.V.
+      Subbarao
     </li>
     <li>
       <b>{$_('gl.or', { default: 'Oriya' })}</b>: Anup Kumar Kujur, Panchanan Mohanty
@@ -220,7 +221,7 @@
     <li>
       <b>{$_('gl.it', { default: 'Italian' })}</b>: Iara Mantenuto
     </li>
-    <li><b>{$_('gl.cmn', { default: 'Mandarin' })}</b>: Peng Dong</li>
+    <li><b>{$_('gl.cmn', { default: 'Mandarin' })}</b>: Peng Dong, Joy Wu</li>
     <li><b>{$_('gl.tzm', { default: 'Tamazight' })}</b>: Radia Sami</li>
   </ul>
 
