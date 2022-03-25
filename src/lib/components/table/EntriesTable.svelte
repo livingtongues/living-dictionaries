@@ -55,7 +55,7 @@
                   class="{column.sticky ? 'sticky bg-white' : ''} h-0"
                   style="{column.sticky
                     ? 'left:' + getLeftValue(i) + 'px; --border-right-width: 3px;'
-                    : ''} --col-width: {column.width}px;">
+                    : ''} --col-width: {entry.sr ? 'auto' : `${column.width}px`};">
                   <Cell {column} {entry} canEdit={$canEdit} />
                 </td>
               {/each}
@@ -71,7 +71,7 @@
               class="{column.sticky ? 'sticky bg-white' : ''} h-0"
               style="{column.sticky
                 ? 'left:' + getLeftValue(i) + 'px; --border-right-width: 3px;'
-                : ''} --col-width: {column.width}px;">
+                : ''} --col-width: {entry.sr ? 'auto' : `${column.width}px`};">
               <Cell {column} {entry} canEdit={$canEdit} />
             </td>
           {/each}
