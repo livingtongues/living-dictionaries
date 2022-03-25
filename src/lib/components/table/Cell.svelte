@@ -4,8 +4,8 @@
   import SemanticDomains from './cells/SemanticDomains.svelte';
   import SelectPOS from './cells/SelectPOS.svelte';
   import SelectSpeakerCell from './cells/SelectSpeakerCell.svelte';
+  import SelectSource from './cells/SelectSource.svelte';
   import AudioCell from './cells/AudioCell.svelte';
-  import BadgeArray from '$svelteui/data/BadgeArray.svelte';
   import Image from '$lib/components/image/Image.svelte';
   import { saveUpdateToFirestore } from '$lib/helpers/entry/update';
   import { dictionary } from '$lib/stores';
@@ -15,10 +15,6 @@
     canEdit = false;
 
   let updatedValue;
-  import { createEventDispatcher } from 'svelte';
-  const dispatch = createEventDispatcher<{
-    valueupdate: { field: string; newValue: string[] }; // an array of strings for the sr field, but the valueupdate events being passed upwards are mostly strings
-  }>();
 </script>
 
 <div
@@ -50,13 +46,10 @@
       {entry}
       on:valueupdate={(e) => saveUpdateToFirestore(e, entry.id, $dictionary.id)} />
   {:else if column.field === 'sr'}
-    <!--TODO it doesn't work. A possible solution is to make it a child -->
-    <BadgeArray
-      strings={entry.sr || []}
+    <SelectSource
       {canEdit}
-      promptMessage={$_('entry.sr')}
-      addMessage={$_('misc.add', { default: 'Add' })}
-      on:valueupdated={(e) => dispatch('valueupdate', { field: 'sr', newValue: e.detail })} />
+      value={entry.sr}
+      on:valueupdate={(e) => saveUpdateToFirestore(e, entry.id, $dictionary.id)} />
   {:else if column.gloss === true}
     <Textbox
       {canEdit}
