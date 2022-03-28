@@ -12,6 +12,8 @@
   export let entry: IEntry,
     canEdit = false,
     videoAccess = false;
+
+  $: glosses = printGlosses(entry.gl).join(', ');
 </script>
 
 <div
@@ -45,7 +47,11 @@
         {#if entry.ps}
           <i>{$_('psAbbrev.' + entry.ps, { default: entry.ps })},</i>
         {/if}
-        {printGlosses(entry.gl).join(', ')}
+        {#if glosses.indexOf('<i>') > -1}
+          {@html glosses}
+        {:else}
+          {glosses}
+        {/if}
       </div>
       {#if entry.sd}
         <span class="px-2 py-1 leading-tight text-xs bg-gray-100 rounded ml-1">
