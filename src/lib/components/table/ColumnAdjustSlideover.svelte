@@ -92,14 +92,16 @@
                 {:else}<i class="far fa-eye" />{/if}
               </button>
             </div>
-
-            <input
-              class="w-full"
-              type="range"
-              on:input={showWidth}
-              bind:value={column.width}
-              min="31"
-              max="400" />
+            <!-- Source range input shouldn't be here because we need to show complete sources and they can be very long -->
+            {#if column.field != 'sr'}
+              <input
+                class="w-full"
+                type="range"
+                on:input={showWidth}
+                bind:value={column.width}
+                min="31"
+                max="400" />
+            {/if}
           </div>
         </div>
         {#if selectedColumn === column}
