@@ -4,6 +4,7 @@
     htmlValue: string,
     field: string,
     canEdit = false;
+  export let display: string;
 
   let edit = false;
 </script>
@@ -26,6 +27,7 @@
     <EditFieldModal.default
       on:valueupdate
       value={updatedValue !== undefined ? updatedValue : value}
+      {display}
       {field}
       on:close={() => {
         edit = false;
