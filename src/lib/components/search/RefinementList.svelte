@@ -88,6 +88,7 @@
       toggleShowMore();
     }
   }
+  $: console.log(filteredItems);
 </script>
 
 {#if items.length > 0 && items.length <= maxInitialItems && !value}
