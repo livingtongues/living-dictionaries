@@ -15,7 +15,6 @@
     canEdit = false;
 
   let updatedValue;
-  $: console.log(column);
 </script>
 
 <div
