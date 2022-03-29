@@ -8,7 +8,7 @@
   import { onMount } from 'svelte';
 
   export let search: InstantSearch,
-    attribute: 'ps' | 'sdn' | 'sf.speakerName' | '' = '',
+    attribute: 'ps' | 'sdn' | 'di' | 'sf.speakerName' | '' = '',
     label = '';
 
   let value = '';
