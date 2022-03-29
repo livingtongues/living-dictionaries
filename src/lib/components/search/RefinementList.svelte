@@ -30,6 +30,7 @@
     const customRefinementList = connectRefinementList((params) => {
       ({ items, refine, searchForItems, isShowingMore, canToggleShowMore, toggleShowMore } =
         params);
+      console.log('params', params);
       if (!params.isFromSearch && value) {
         value = ''; // not sure why this was in instantsearch docs
       }
@@ -50,6 +51,7 @@
   }
   function translateItems() {
     items = items.map((item) => {
+      console.log('item', item);
       if (attribute === 'ps') {
         if (item.value) {
           item.translatedLabel = $_('ps.' + item.label, {
@@ -88,7 +90,6 @@
       toggleShowMore();
     }
   }
-  $: console.log(filteredItems);
 </script>
 
 {#if items.length > 0 && items.length <= maxInitialItems && !value}
@@ -106,6 +107,9 @@
     on:input={filterList} />
 </div>
 
+{#if attribute === 'di'}
+  Hello - {items}
+{/if}
 <ul>
   {#each filteredItems as item, i (item)}
     {#if i < maxInitialItems || isShowingMore}
