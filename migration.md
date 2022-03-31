@@ -2,13 +2,15 @@
 - convert to pnpm
 - convert to windicss
 - remove svench
-- use svelte-pieces
-- add types package
+- use svelte-pieces instead of $svelteui
+- use types package
 - deploy @ld/components
 - add kitbook
 - update vercel for main site
-
--- later --
-
-- add scripts package
-- move functions
+- add scripts package and move update-locales from site package
+- restore functions
+- lowercase clickOutside from svelte-pieces
+- remap path MediaStream and Recorder components
+- Button.svelte form="primary" to form="filled"
+- double check scrollbar stuff in global.css
+- update $page.host error
