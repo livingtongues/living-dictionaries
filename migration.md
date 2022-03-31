@@ -1,7 +1,5 @@
-- move site
-- convert to pnpm
-- convert to windicss
-- remove svench
+- deal with postinstall hook error `pnpm i`
+- convert site windicss
 - use svelte-pieces instead of $svelteui
 - use types package
 - deploy @ld/components
@@ -14,3 +12,4 @@
 - Button.svelte form="primary" to form="filled"
 - double check scrollbar stuff in global.css
 - update $page.host error
+- update eslint config
