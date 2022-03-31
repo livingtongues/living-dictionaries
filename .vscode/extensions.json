@@ -4,30 +4,25 @@
     "svelte.svelte-vscode",
     "fivethree.vscode-svelte-snippets",
     // Styles
-    "csstools.postcss",
-    "bradlc.vscode-tailwindcss",
+    "antfu.iconify",
+    "voorjaar.windicss-intellisense",
     // Code quality
     "dbaeumer.vscode-eslint",
     "esbenp.prettier-vscode",
     // Git
     "eamodio.gitlens",
     "github.vscode-pull-request-github",
-    "cschleiden.vscode-github-actions",
+    // "cschleiden.vscode-github-actions",
     // i18n
     "lokalise.i18n-ally",
     // ---- You should definitely install the ones above, the ones below are recommended
     // Efficiency
     "usernamehw.errorlens",
-    "wallabyjs.quokka-vscode",
-    "wallabyjs.wallaby-vscode",
-    // Jest - Single Test Runner, used for E2E
-    "firsttris.vscode-jest-runner",
-    // ---- 2 more of Jacob's Recommendations
+    "yzhang.markdown-all-in-one",
+    // Jacob's Recommendations
     // "aaron-bond.better-comments",
     // "vscode-icons-team.vscode-icons",
-    // ----Useful in some cases
-    // "jsayol.firebase-explorer", or "toba.vsfire",
-    // "chflick.firecode" // (Firestore rules)
-    // "janne252.fontawesome-autocomplete", // clashes w/ Tailwindcss extension and doesn't work
+    // "wallabyjs.quokka-vscode",
+    // "wallabyjs.wallaby-vscode",
   ]
 }
