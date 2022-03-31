@@ -1,29 +1,37 @@
 import preprocess from 'svelte-preprocess';
-import vercel from '@sveltejs/adapter-vercel';
+import adapter from '@sveltejs/adapter-auto';
 import path from 'path';
+
+import { windi } from "svelte-windicss-preprocess";
 
 /** @type {import('@sveltejs/kit').Config} */
 const config = {
-	preprocess: preprocess({
-		defaults: {
-			sourceMap: true,
-			style: 'postcss',
-		},
-		postcss: true,
-		replace: [
-			// this will allow us to use as import.meta.env.VERCEL_ANALYTICS_ID
-			['import.meta.env.VERCEL_ANALYTICS_ID', JSON.stringify(process.env.VERCEL_ANALYTICS_ID)]
-		]
-	}),
+	preprocess: [
+		preprocess({
+			replace: [
+				// this will allow us to use as import.meta.env.VERCEL_ANALYTICS_ID
+				['import.meta.env.VERCEL_ANALYTICS_ID', JSON.stringify(process.env.VERCEL_ANALYTICS_ID)]
+			]
+		}),
+		windi({
+			configPath: './windi.config.js',
+			experimental: {
+				icons: {
+					prefix: 'i-',
+					extraProperties: {
+						'display': 'inline-block',
+						'vertical-align': 'middle',
+					}
+				}
+			}
+		}),
+	],
 
-	// disableDependencyReinclusion: ['svench'],
 	kit: {
-		adapter: vercel(),
-		target: '#svelte',
+		adapter: adapter(),
 		vite: {
 			resolve: {
 				alias: {
-					$svelteui: path.resolve('./src/svelteui'),
 					$sveltefirets: path.resolve('./src/sveltefirets'),
 				}
 			},

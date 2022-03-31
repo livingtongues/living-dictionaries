@@ -1,5 +1,5 @@
 {
-  "name": "components",
+  "name": "@ld/components",
   "version": "0.0.1",
   "scripts": {
     "dev": "svelte-kit dev",
@@ -7,17 +7,25 @@
     "package": "svelte-kit package",
     "preview": "svelte-kit preview",
     "prepare": "svelte-kit sync",
-    "check": "svelte-check --tsconfig ./tsconfig.json",
-    "check:watch": "svelte-check --tsconfig ./tsconfig.json --watch"
+    "check": "svelte-check --tsconfig ./tsconfig.json --threshold warning --diagnostic-sources js,svelte",
+    "check:watch": "svelte-check --tsconfig ./tsconfig.json --threshold warning --diagnostic-sources js,svelte --watch"
   },
   "devDependencies": {
     "@sveltejs/adapter-auto": "next",
     "@sveltejs/kit": "next",
+    "@types/recordrtc": "^5.6.8",
+    "mdsvex": "^0.10.5",
+    "recordrtc": "^5.6.2",
     "svelte": "^3.44.0",
     "svelte-check": "^2.2.6",
+    "svelte-pieces": "^1.0.5",
     "svelte-preprocess": "^4.10.1",
+    "svelte-store-router": "^2.0.10",
+    "svelte-windicss-preprocess": "~4.1.0",
     "tslib": "^2.3.1",
-    "typescript": "~4.6.2"
+    "typescript": "~4.6.2",
+    "vitest": "^0.6.1",
+    "windicss": "^3.5.1"
   },
   "type": "module"
 }

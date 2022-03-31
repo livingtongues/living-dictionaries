@@ -19,7 +19,7 @@
     "copyAlgoliaIndexSettings": "tsc && node lib/functions/scripts/algolia/copyAlgoliaIndexSettings.js"
   },
   "engines": {
-    "node": "14"
+    "node": "16"
   },
   "main": "lib/functions/src/index.js",
   "dependencies": {

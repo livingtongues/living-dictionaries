@@ -61,3 +61,13 @@
     {/await}
   {/if}
 {/if}
+
+<style windi:preflights:global windi:safelist:global global>
+input[type='checkbox'] {
+  @apply focus:ring-primary-500 h-4 w-4 text-primary-600 border-gray-300 rounded;
+}
+
+  .form-input {
+    @apply border-gray-300 rounded-md focus:border-primary-300 focus:ring focus:ring-primary-200 focus:ring-opacity-50;
+  }
+</style>

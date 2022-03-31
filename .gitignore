@@ -3,4 +3,4 @@ node_modules
 
 *.local
 
-.vscode/settings.json
+# .vscode/settings.json
