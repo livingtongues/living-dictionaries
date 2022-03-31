@@ -58,7 +58,6 @@
     "svelte-i18n": "^3.3.13",
     "svelte-jester": "^2.1.5",
     "svelte-preprocess": "^4.9.8",
-    "svench": "^0.2.0-29",
     "tailwindcss": "^2.2.19",
     "tailwindcss-dir": "^4.0.0",
     "ts-jest": "^27.0.7",
