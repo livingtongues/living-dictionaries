@@ -1,6 +1,6 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
-  import Button from '$svelteui/ui/Button.svelte';
+  import Button from 'svelte-pieces/ui/Button.svelte';
   import { parseVideoId } from './parseVideoId';
   import { createEventDispatcher } from 'svelte';
   const dispatch =

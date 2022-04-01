@@ -39,7 +39,7 @@
     "simple-git-hooks": "^2.7.0",
     "svelte": "^3.44.0",
     "svelte-check": "^2.2.10",
-    "svelte-pieces": "^1.0.5",
+    "svelte-pieces": "^1.0.6",
     "svelte-i18n": "^3.3.13",
     "svelte-preprocess": "^4.10.1",
     "svelte-windicss-preprocess": "~4.1.0",

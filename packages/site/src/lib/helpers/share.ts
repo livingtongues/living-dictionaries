@@ -1,4 +1,4 @@
-import type { IEntry } from '$lib/interfaces';
+import type { IEntry } from '@ld/types';
 import { get } from 'svelte/store';
 import { _ } from 'svelte-i18n';
 

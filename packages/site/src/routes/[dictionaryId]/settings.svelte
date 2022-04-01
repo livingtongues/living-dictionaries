@@ -2,14 +2,14 @@
   import { _ } from 'svelte-i18n';
   import { admin, dictionary as dictionaryStore } from '$lib/stores';
   import { update, updateOnline } from '$sveltefirets';
-  import Button from '$svelteui/ui/Button.svelte';
-  import ShowHide from '$svelteui/functions/ShowHide.svelte';
+  import Button from 'svelte-pieces/ui/Button.svelte';
+  import ShowHide from 'svelte-pieces/functions/ShowHide.svelte';
   import EditString from './_EditString.svelte';
   import EditGlosses from './_EditGlosses.svelte';
   import EditCoordinates from './_EditCoordinates.svelte';
   import { glossingLanguages } from '$lib/mappings/glossing-languages';
   import { arrayRemove, arrayUnion } from 'firebase/firestore';
-  import type { IDictionary } from '$lib/interfaces';
+  import type { IDictionary } from '@ld/types';
   import Doc from '$sveltefirets/components/Doc.svelte';
 
   async function togglePublic(settingPublic: boolean) {
@@ -107,7 +107,7 @@
   </ShowHide>
 
   {#if $admin > 1}
-    {#await import('$svelteui/data/JSON.svelte') then { default: JSON }}
+    {#await import('svelte-pieces/data/JSON.svelte') then { default: JSON }}
       <JSON obj={dictionary} />
     {/await}
   {/if}

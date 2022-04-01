@@ -7,8 +7,8 @@
 
   import MultiSelect from '$lib/components/ui/MultiSelect.svelte';
   import { semanticDomains } from '$lib/mappings/semantic-domains';
-  import type { IEntry } from '$lib/interfaces';
-  import Button from '$svelteui/ui/Button.svelte';
+  import type { IEntry } from '@ld/types';
+  import Button from 'svelte-pieces/ui/Button.svelte';
   export let entry: IEntry;
   let domains = entry.sdn || [];
   let removedDeprecated = false;

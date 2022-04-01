@@ -1,5 +1,5 @@
 <script context="module" lang="ts">
-  import type { IEntry } from '$lib/interfaces';
+  import type { IEntry } from '@ld/types';
   import { getDocument, Doc } from '$sveltefirets';
 
   import type { Load } from '@sveltejs/kit';
@@ -38,7 +38,7 @@
     user,
   } from '$lib/stores';
   import { share } from '$lib/helpers/share';
-  import Button from '$svelteui/ui/Button.svelte';
+  import Button from 'svelte-pieces/ui/Button.svelte';
   import { deleteEntry } from '$lib/helpers/delete';
   import { saveUpdateToFirestore } from '$lib/helpers/entry/update';
   import EntryMeta from './_EntryMeta.svelte';
@@ -64,7 +64,7 @@ bg-white pt-1 -mt-1">
 
     <div>
       {#if $admin > 1}
-        {#await import('$svelteui/data/JSON.svelte') then { default: JSON }}
+        {#await import('svelte-pieces/data/JSON.svelte') then { default: JSON }}
           <JSON obj={entry} />
         {/await}
       {/if}

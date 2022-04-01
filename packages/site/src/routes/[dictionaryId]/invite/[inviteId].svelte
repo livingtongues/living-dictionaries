@@ -12,7 +12,7 @@
 
 <script lang="ts">
   import { _ } from 'svelte-i18n';
-  import type { IInvite, IHelper, IUser } from '$lib/interfaces';
+  import type { IInvite, IHelper, IUser } from '@ld/types';
   import { isManager, isContributor, user } from '$lib/stores';
 
   export let inviteId: string, dictionaryId: string;
@@ -45,8 +45,8 @@
     }
   }
 
-  import Button from '$svelteui/ui/Button.svelte';
-  import ShowHide from '$svelteui/functions/ShowHide.svelte';
+  import Button from 'svelte-pieces/ui/Button.svelte';
+  import ShowHide from 'svelte-pieces/functions/ShowHide.svelte';
 </script>
 
 <div>

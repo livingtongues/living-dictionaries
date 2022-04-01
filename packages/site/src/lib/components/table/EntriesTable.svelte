@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { IColumn, IEntry } from '$lib/interfaces';
+  import type { IColumn, IEntry } from '@ld/types';
   export let entries: IEntry[] = [];
   import ColumnTitle from './ColumnTitle.svelte';
 

@@ -1,6 +1,6 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
-  import type { IDictionary } from '$lib/interfaces';
+  import type { IDictionary } from '@ld/types';
   export let dictionaries: IDictionary[] = [];
   import { admin } from '$lib/stores';
 
@@ -9,7 +9,7 @@
 
   import { getContext } from 'svelte';
   import { contextKey } from '$lib/components/home/key';
-  import Button from '$svelteui/ui/Button.svelte';
+  import Button from 'svelte-pieces/ui/Button.svelte';
   const { getMap } = getContext(contextKey);
 
   // export let defaultZoom;

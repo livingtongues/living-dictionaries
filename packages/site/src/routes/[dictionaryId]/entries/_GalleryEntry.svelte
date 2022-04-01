@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { IEntry } from '$lib/interfaces';
+  import type { IEntry } from '@ld/types';
   import Image from '$lib/components/image/Image.svelte';
   export let entry: IEntry;
   export let canEdit = false;

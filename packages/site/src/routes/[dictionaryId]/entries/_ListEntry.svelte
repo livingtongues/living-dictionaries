@@ -5,10 +5,10 @@
   import Image from '$lib/components/image/Image.svelte';
   import AddImage from './_AddImage.svelte';
   import { page } from '$app/stores';
-  import type { IEntry } from '$lib/interfaces';
+  import type { IEntry } from '@ld/types';
   import { printGlosses } from '$lib/helpers/glosses';
   import { minutesAgo } from '$lib/helpers/time';
-  import ShowHide from '$svelteui/functions/ShowHide.svelte';
+  import ShowHide from 'svelte-pieces/functions/ShowHide.svelte';
   export let entry: IEntry,
     canEdit = false,
     videoAccess = false;

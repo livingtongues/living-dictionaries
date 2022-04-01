@@ -21,9 +21,9 @@
 
   export let about = '',
     dictionaryId: string;
-  import Button from '$svelteui/ui/Button.svelte';
+  import Button from 'svelte-pieces/ui/Button.svelte';
   import { setOnline } from '$sveltefirets';
-  import type { IAbout } from '$lib/interfaces';
+  import type { IAbout } from '@ld/types';
 
   async function save() {
     try {

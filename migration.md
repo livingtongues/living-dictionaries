@@ -1,9 +1,8 @@
-- use svelte-pieces instead of $svelteui
+- check for errors
 - convert site windicss
-- use types package
-- deploy @ld/components
-- add kitbook
 - update vercel for main site
+- test and merge to main
+- deploy @ld/components
 - add scripts package and move update-locales from site package
 - restore functions
 - lowercase clickOutside from svelte-pieces

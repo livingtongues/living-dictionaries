@@ -1,6 +1,6 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
-  import type { IEntry } from '$lib/interfaces';
+  import type { IEntry } from '@ld/types';
   export let entry: IEntry,
     canEdit = false,
     square: number = undefined,

@@ -4,10 +4,10 @@
     removeDictionaryManager,
   } from '$lib/helpers/dictionariesManaging';
 
-  import type { IUser } from '$lib/interfaces';
+  import type { IUser } from '@ld/types';
   import { db } from '$sveltefirets';
-  import BadgeArrayEmit from '$svelteui/data/BadgeArrayEmit.svelte';
-  import ShowHide from '$svelteui/functions/ShowHide.svelte';
+  import BadgeArrayEmit from 'svelte-pieces/data/BadgeArrayEmit.svelte';
+  import ShowHide from 'svelte-pieces/functions/ShowHide.svelte';
   import { collectionGroup, onSnapshot, query, Unsubscribe, where } from 'firebase/firestore';
   import { onDestroy, onMount } from 'svelte';
 

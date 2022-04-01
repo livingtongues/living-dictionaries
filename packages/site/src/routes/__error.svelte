@@ -8,10 +8,10 @@
 
 <script lang="ts">
   import { _ } from 'svelte-i18n';
-  import Button from '$svelteui/ui/Button.svelte';
+  import Button from 'svelte-pieces/ui/Button.svelte';
   import { onMount } from 'svelte';
   import { firebaseConfig } from '$sveltefirets';
-  import ShowHide from '$svelteui/functions/ShowHide.svelte';
+  import ShowHide from 'svelte-pieces/functions/ShowHide.svelte';
 
   export let status;
   export let error;

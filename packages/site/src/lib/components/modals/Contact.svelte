@@ -1,7 +1,7 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
   import Modal from '$lib/components/ui/Modal.svelte';
-  import Button from '$svelteui/ui/Button.svelte';
+  import Button from 'svelte-pieces/ui/Button.svelte';
   import { user } from '$lib/stores';
   import { firebaseApp } from '$sveltefirets';
   import { getFunctions, httpsCallable } from 'firebase/functions';

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { portal } from '$svelteui/actions/portal';
+  import { portal } from 'svelte-pieces/actions/portal';
   import { createEventDispatcher, onDestroy, onMount } from 'svelte';
   import { fade } from 'svelte/transition';
 

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { IColumn } from '$lib/interfaces';
+  import type { IColumn } from '@ld/types';
   export let column: IColumn,
     verbose = false;
   import { _ } from 'svelte-i18n';

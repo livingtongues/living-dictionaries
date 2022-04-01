@@ -1,6 +1,6 @@
 <script context="module" lang="ts">
   import { setOnline, getDocument } from '$sveltefirets';
-  import type { IGrammar } from '$lib/interfaces';
+  import type { IGrammar } from '@ld/types';
 
   import type { Load } from '@sveltejs/kit';
   export const load: Load = async ({ page: { params } }) => {
@@ -22,7 +22,7 @@
 
   export let grammar = '',
     dictionaryId: string;
-  import Button from '$svelteui/ui/Button.svelte';
+  import Button from 'svelte-pieces/ui/Button.svelte';
 
   async function save() {
     try {

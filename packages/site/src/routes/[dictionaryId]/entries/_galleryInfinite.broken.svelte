@@ -43,7 +43,7 @@
 
   import Image from '$lib/components/image/Image.svelte';
   import { canEdit } from '$lib/stores';
-  import type { IEntry } from '$lib/interfaces';
+  import type { IEntry } from '@ld/types';
   let hitsType: IEntry;
 </script>
 
@@ -51,7 +51,7 @@
   {entries}
   <div class="grid">
     {#each entries as entry}
-      {#await import('$svelteui/data/JSON.svelte') then { default: JSON }}
+      {#await import('svelte-pieces/data/JSON.svelte') then { default: JSON }}
         <JSON obj={entry} />
       {/await}
       {#if entry.pf}

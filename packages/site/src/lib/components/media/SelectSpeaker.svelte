@@ -8,7 +8,7 @@
   const addSpeaker = 'AddSpeaker';
   $: speakerId = initialSpeakerId;
 
-  import type { ISpeaker } from '$lib/interfaces';
+  import type { ISpeaker } from '@ld/types';
   let speakers: ISpeaker[] = [];
 
   import { createEventDispatcher } from 'svelte';

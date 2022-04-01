@@ -5,7 +5,7 @@
 
   import Modal from '$lib/components/ui/Modal.svelte';
   import { startCoordinates } from '$lib/components/home/map.class';
-  import type { IDictionary } from '$lib/interfaces';
+  import type { IDictionary } from '@ld/types';
   let map: mapboxgl.Map;
   let marker: mapboxgl.Marker;
 
@@ -119,7 +119,7 @@
   }
 
   import { createEventDispatcher } from 'svelte';
-  import Button from '$svelteui/ui/Button.svelte';
+  import Button from 'svelte-pieces/ui/Button.svelte';
   import { loadScriptOnce, loadStylesOnce } from '$sveltefirets';
   const dispatch = createEventDispatcher<{
     save: { lat: number; lng: number; dictionary: Partial<IDictionary> };

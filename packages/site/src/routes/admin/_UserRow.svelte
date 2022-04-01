@@ -1,7 +1,7 @@
 <script lang="ts">
   import { admin } from '$lib/stores';
   import { updateOnline } from '$sveltefirets';
-  import type { IUser } from '$lib/interfaces';
+  import type { IUser } from '@ld/types';
   import { printDate } from '$lib/helpers/time';
   import DictionariesHelping from './_DictionariesHelping.svelte';
   import IntersectionObserver from '$lib/components/ui/IntersectionObserver.svelte';

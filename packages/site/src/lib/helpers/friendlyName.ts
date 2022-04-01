@@ -1,4 +1,4 @@
-import type { IEntry } from '$lib/interfaces';
+import type { IEntry } from '@ld/types';
 
 export function friendlyName(entry: Partial<IEntry>, path: string) {
   const fileTypeSuffix = path.split('.').pop();

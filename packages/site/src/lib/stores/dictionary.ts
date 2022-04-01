@@ -1,5 +1,5 @@
 import { writable } from 'svelte/store';
-import type { IDictionary, IEntry } from '$lib/interfaces';
+import type { IDictionary, IEntry } from '@ld/types';
 
 export const dictionary = writable<IDictionary>({
   id: '',

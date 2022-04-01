@@ -1,10 +1,10 @@
 <script lang="ts">
-  import type { IUser } from '$lib/interfaces';
+  import type { IUser } from '@ld/types';
   import { Collection } from '$sveltefirets';
   import UserRow from './_UserRow.svelte';
   import Filter from './_Filter.svelte';
   import { exportUsersAsCSV } from '$lib/export/csv';
-  import Button from '$svelteui/ui/Button.svelte';
+  import Button from 'svelte-pieces/ui/Button.svelte';
   import ResponsiveTable from '$lib/components/ui/ResponsiveTable.svelte';
   import SortUsers from './_SortUsers.svelte';
 

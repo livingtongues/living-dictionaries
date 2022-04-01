@@ -1,9 +1,9 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
-  import type { IDictionary, IGlossLanguages } from '$lib/interfaces';
-  import Button from '$svelteui/ui/Button.svelte';
-  import ShowHide from '$svelteui/functions/ShowHide.svelte';
-  import BadgeArrayEmit from '$svelteui/data/BadgeArrayEmit.svelte';
+  import type { IDictionary, IGlossLanguages } from '@ld/types';
+  import Button from 'svelte-pieces/ui/Button.svelte';
+  import ShowHide from 'svelte-pieces/functions/ShowHide.svelte';
+  import BadgeArrayEmit from 'svelte-pieces/data/BadgeArrayEmit.svelte';
   import Modal from '$lib/components/ui/Modal.svelte';
   import Filter from '../admin/_Filter.svelte';
 

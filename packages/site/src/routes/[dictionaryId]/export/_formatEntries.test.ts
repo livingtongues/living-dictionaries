@@ -1,4 +1,4 @@
-import type { IDictionary, IEntry, ISpeaker } from '$lib/interfaces';
+import type { IDictionary, IEntry, ISpeaker } from '@ld/types';
 import { formatEntriesForCSV } from './_formatEntries';
 
 test('Example to demonstrate separate file snapshots.', () => {

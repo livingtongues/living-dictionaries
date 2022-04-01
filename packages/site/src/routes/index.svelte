@@ -20,7 +20,7 @@
 
 <script lang="ts">
   import { _ } from 'svelte-i18n';
-  import type { IDictionary } from '$lib/interfaces';
+  import type { IDictionary } from '@ld/types';
   import { admin, myDictionaries } from '$lib/stores';
 
   import Mapbox from '$lib/components/home/Mapbox.svelte';

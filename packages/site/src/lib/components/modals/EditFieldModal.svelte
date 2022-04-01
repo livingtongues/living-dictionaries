@@ -2,7 +2,7 @@
   import { _ } from 'svelte-i18n';
   import Modal from '$lib/components/ui/Modal.svelte';
   import { createEventDispatcher } from 'svelte';
-  import Button from '$svelteui/ui/Button.svelte';
+  import Button from 'svelte-pieces/ui/Button.svelte';
   const dispatch = createEventDispatcher<{
     close: boolean;
     valueupdate: { field: string; newValue: string };

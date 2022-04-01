@@ -1,15 +1,15 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
   import Modal from '$lib/components/ui/Modal.svelte';
-  import Button from '$svelteui/ui/Button.svelte';
+  import Button from 'svelte-pieces/ui/Button.svelte';
   import RecordVideo from '$lib/components/video/RecordVideo.svelte';
   import SelectVideo from './SelectVideo.svelte';
   import PasteVideoLink from './PasteVideoLink.svelte';
   import VideoIFrame from './VideoIFrame.svelte';
   import SelectSpeaker from '$lib/components/media/SelectSpeaker.svelte';
   import { dictionary } from '$lib/stores';
-  import type { IEntry, IVideo } from '$lib/interfaces';
-  import ShowHide from '$svelteui/functions/ShowHide.svelte';
+  import type { IEntry, IVideo } from '@ld/types';
+  import ShowHide from 'svelte-pieces/functions/ShowHide.svelte';
   import { addVideo } from '$lib/helpers/media/update';
 
   import { createEventDispatcher } from 'svelte';

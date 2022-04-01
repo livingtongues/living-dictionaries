@@ -1,6 +1,6 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
-  import type { IAudio, IEntry } from '$lib/interfaces';
+  import type { IAudio, IEntry } from '@ld/types';
   export let file: File, entry: IEntry, speakerId: string;
   import { dictionary, user } from '$lib/stores';
 

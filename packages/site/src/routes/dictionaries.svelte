@@ -19,12 +19,12 @@
 
 <script lang="ts">
   import { _ } from 'svelte-i18n';
-  import type { IDictionary } from '$lib/interfaces';
+  import type { IDictionary } from '@ld/types';
   export let publicDictionaries: IDictionary[] = [];
   import { admin } from '$lib/stores';
   import View from '$lib/components/ui/View.svelte';
   import { exportDictionariesAsCSV } from '$lib/export/csv';
-  import Button from '$svelteui/ui/Button.svelte';
+  import Button from 'svelte-pieces/ui/Button.svelte';
   import ResponsiveTable from '$lib/components/ui/ResponsiveTable.svelte';
   import Header from '$lib/components/shell/Header.svelte';
 
