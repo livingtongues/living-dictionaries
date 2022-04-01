@@ -8,7 +8,7 @@ import mdsvexConfig from './mdsvex.config.js';
 
 /** @type {import('@sveltejs/kit').Config} */
 const config = {
-  extensions: [...mdsvexConfig.extensions],
+  extensions: ['.svelte', ...mdsvexConfig.extensions],
   preprocess: [
     preprocess(),
     mdsvex(mdsvexConfig),

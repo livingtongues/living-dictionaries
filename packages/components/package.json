@@ -1,6 +1,14 @@
 {
   "name": "@ld/components",
   "version": "0.0.1",
+  "description": "Language documentation components for use in livingdictionaries.app",
+  "type": "module",
+  "svelte": "src/lib/index.ts",
+  "main": "src/lib/index.ts",
+  "publishConfig": {
+    "main": "index.js",
+    "typings": "index.d.ts"
+  },
   "scripts": {
     "dev": "svelte-kit dev",
     "build": "svelte-kit build",
@@ -8,9 +16,12 @@
     "preview": "svelte-kit preview",
     "prepare": "svelte-kit sync",
     "check": "svelte-check --tsconfig ./tsconfig.json --threshold warning --diagnostic-sources js,svelte",
-    "check:watch": "svelte-check --tsconfig ./tsconfig.json --threshold warning --diagnostic-sources js,svelte --watch"
+    "check:watch": "svelte-check --tsconfig ./tsconfig.json --threshold warning --diagnostic-sources js,svelte --watch",
+    "release": "npm run package && cd package && npm publish",
+    "test": "vitest -u"
   },
   "devDependencies": {
+    "@ld/types": "workspace:^0.0.1",
     "@sveltejs/adapter-auto": "next",
     "@sveltejs/kit": "next",
     "@types/recordrtc": "^5.6.8",
@@ -18,7 +29,7 @@
     "recordrtc": "^5.6.2",
     "svelte": "^3.44.0",
     "svelte-check": "^2.2.6",
-    "svelte-pieces": "^1.0.5",
+    "svelte-pieces": "^1.0.6",
     "svelte-preprocess": "^4.10.1",
     "svelte-store-router": "^2.0.10",
     "svelte-windicss-preprocess": "~4.1.0",
@@ -27,5 +38,14 @@
     "vitest": "^0.6.1",
     "windicss": "^3.5.1"
   },
-  "type": "module"
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/livingtongues/living-dictionaries.git"
+  },
+  "author": "Living Tongues",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/livingtongues/living-dictionaries/issues"
+  },
+  "homepage": "https://github.com/livingtongues/living-dictionaries#readme"
 }

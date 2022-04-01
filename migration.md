@@ -1,6 +1,5 @@
-- deal with postinstall hook error `pnpm i`
-- convert site windicss
 - use svelte-pieces instead of $svelteui
+- convert site windicss
 - use types package
 - deploy @ld/components
 - add kitbook
