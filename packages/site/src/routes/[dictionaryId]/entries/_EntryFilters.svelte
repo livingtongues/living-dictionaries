@@ -5,7 +5,7 @@
   import ToggleRefinement from '$lib/components/search/ToggleRefinement.svelte';
   import ClearRefinements from '$lib/components/search/ClearRefinements.svelte';
   import type { InstantSearch } from 'instantsearch.js';
-  import Button from '$svelteui/ui/Button.svelte';
+  import Button from 'svelte-pieces/ui/Button.svelte';
   export let showMobileFilters = false,
     search: InstantSearch;
 </script>

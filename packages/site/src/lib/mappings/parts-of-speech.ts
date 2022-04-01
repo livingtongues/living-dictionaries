@@ -1,4 +1,4 @@
-import type { IPartOfSpeech } from '$lib/interfaces';
+import type { IPartOfSpeech } from '@ld/types';
 
 export const partsOfSpeech: IPartOfSpeech[] = [
   { enAbbrev: 'n', enName: 'noun' },

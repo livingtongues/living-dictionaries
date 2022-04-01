@@ -1,9 +1,9 @@
 <script lang="ts">
   import { Doc } from '$sveltefirets';
-  import type { IAbout, IDictionary } from '$lib/interfaces';
+  import type { IAbout, IDictionary } from '@ld/types';
 
   import { _ } from 'svelte-i18n';
-  import Button from '$svelteui/ui/Button.svelte';
+  import Button from 'svelte-pieces/ui/Button.svelte';
   export let dictionary: IDictionary;
   let aboutType: IAbout;
 

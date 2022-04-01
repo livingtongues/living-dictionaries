@@ -2,12 +2,12 @@
   import { onMount } from 'svelte';
   import { _ } from 'svelte-i18n';
   import { dictionary } from '$lib/stores';
-  import Button from '$svelteui/ui/Button.svelte';
+  import Button from 'svelte-pieces/ui/Button.svelte';
   import { formatEntriesForCSV } from './export/_formatEntries';
-  import type { IEntry } from '$lib/interfaces';
+  import type { IEntry } from '@ld/types';
   import { getCollection } from '$sveltefirets';
   import { downloadObjArrAsCSV } from '$lib/export/csv';
-  import ShowHide from '$svelteui/functions/ShowHide.svelte';
+  import ShowHide from 'svelte-pieces/functions/ShowHide.svelte';
   import DownloadMedia from './export/_DownloadMedia.svelte';
   import Progress from './export/_Progress.svelte';
   import { fetchSpeakers } from '$lib/helpers/fetchSpeakers';

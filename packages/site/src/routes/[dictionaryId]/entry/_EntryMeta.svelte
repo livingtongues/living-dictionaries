@@ -1,7 +1,7 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
   import { printGlosses } from '$lib/helpers/glosses';
-  import type { IDictionary, IEntry } from '$lib/interfaces';
+  import type { IDictionary, IEntry } from '@ld/types';
 
   export let entry: IEntry, dictionary: IDictionary;
   let shareImage = '';

@@ -1,5 +1,5 @@
 <script context="module" lang="ts">
-  import type { IDictionary } from '$lib/interfaces';
+  import type { IDictionary } from '@ld/types';
   import { getDocument } from '$sveltefirets';
 
   import type { Load } from '@sveltejs/kit';

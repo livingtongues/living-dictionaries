@@ -1,8 +1,8 @@
 <script lang="ts">
-  import ShowHide from '$svelteui/functions/ShowHide.svelte';
+  import ShowHide from 'svelte-pieces/functions/ShowHide.svelte';
   import { firebaseConfig } from '$sveltefirets';
-  import { longpress } from '$svelteui/actions/longpress';
-  import type { IEntry } from '$lib/interfaces';
+  import { longpress } from 'svelte-pieces/actions/longpress';
+  import type { IEntry } from '@ld/types';
   export let entry: IEntry,
     canEdit = false;
 

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { IUser } from '$lib/interfaces';
+  import type { IUser } from '@ld/types';
   export let users: IUser[] = [];
   enum UserFields {
     displayName = 'Name',

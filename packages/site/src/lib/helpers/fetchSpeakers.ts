@@ -1,5 +1,5 @@
 import { getDocument } from '$sveltefirets';
-import type { ISpeaker, IEntry } from '$lib/interfaces';
+import type { ISpeaker, IEntry } from '@ld/types';
 
 export async function fetchSpeakers(data: IEntry[]) {
   const speakersIds = [];

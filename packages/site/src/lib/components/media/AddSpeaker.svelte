@@ -3,9 +3,9 @@
   import Modal from '$lib/components/ui/Modal.svelte';
   import { createEventDispatcher } from 'svelte';
   import { dictionary } from '$lib/stores';
-  import Button from '$svelteui/ui/Button.svelte';
+  import Button from 'svelte-pieces/ui/Button.svelte';
   import { addOnline } from '$sveltefirets';
-  import type { ISpeaker } from '$lib/interfaces';
+  import type { ISpeaker } from '@ld/types';
 
   const dispatch = createEventDispatcher();
   const close = () => dispatch('close');

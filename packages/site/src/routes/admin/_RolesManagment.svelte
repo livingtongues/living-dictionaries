@@ -1,13 +1,13 @@
 <script lang="ts">
-  import BadgeArrayEmit from '$svelteui/data/BadgeArrayEmit.svelte';
-  import ShowHide from '$svelteui/functions/ShowHide.svelte';
+  import BadgeArrayEmit from 'svelte-pieces/data/BadgeArrayEmit.svelte';
+  import ShowHide from 'svelte-pieces/functions/ShowHide.svelte';
   import {
     removeDictionaryManager,
     removeDictionaryContributor,
     removeDictionaryCollaborator,
   } from '$lib/helpers/dictionariesManaging';
   import { addOnline } from '$sveltefirets';
-  import type { HelperRoles, IDictionary, IHelper } from '$lib/interfaces';
+  import type { HelperRoles, IDictionary, IHelper } from '@ld/types';
 
   export let helpers: IHelper[] = [];
   export let dictionary: IDictionary;

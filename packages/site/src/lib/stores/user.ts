@@ -1,4 +1,4 @@
-import type { IUser } from '$lib/interfaces/user.interface';
+import type { IUser } from '@ld/types/user.interface';
 import { firebaseConfig, createUserStore } from '$sveltefirets';
 
 export const user = createUserStore<IUser>({

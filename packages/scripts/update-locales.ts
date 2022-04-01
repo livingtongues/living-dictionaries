@@ -2,9 +2,7 @@ import fetch from 'node-fetch';
 import csv from 'csvtojson';
 import dot from 'dot-object';
 import { promises as fs } from 'fs';
-// import { ReadyLocales, UnpublishedLocales, IGlossLanguage } from '$lib/interfaces';
-import { ReadyLocales, UnpublishedLocales } from '../src/lib/interfaces/languages.interface.js';
-import type { IGlossLanguage } from '../src/lib/interfaces/gloss-language.interface.js';
+import { ReadyLocales, UnpublishedLocales, type IGlossLanguage } from '@ld/types';
 const languages = [...Object.keys(ReadyLocales), ...Object.keys(UnpublishedLocales)];
 
 export async function generateFilesFromSpreadsheet() {

@@ -1,12 +1,12 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
-  import BadgeArray from '$svelteui/data/BadgeArray.svelte';
+  import BadgeArray from 'svelte-pieces/data/BadgeArray.svelte';
   import MultiSelect from '$lib/components/ui/MultiSelect.svelte';
   import { glossingLanguages } from '$lib/mappings/glossing-languages';
   import { user } from '$lib/stores';
   import Header from '$lib/components/shell/Header.svelte';
-  import Button from '$svelteui/ui/Button.svelte';
-  import type { IDictionary, IHelper, IUser } from '$lib/interfaces';
+  import Button from 'svelte-pieces/ui/Button.svelte';
+  import type { IDictionary, IHelper, IUser } from '@ld/types';
   import { docExists, setOnline, updateOnline } from '$sveltefirets';
   import { arrayUnion, GeoPoint, serverTimestamp } from 'firebase/firestore/lite';
   import { debounce } from '$lib/helpers/debounce';

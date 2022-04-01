@@ -1,6 +1,6 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
-  import type { IEntry, IPhoto } from '$lib/interfaces';
+  import type { IEntry, IPhoto } from '@ld/types';
   export let file: File, entry: IEntry;
   import { dictionary, user } from '$lib/stores';
 

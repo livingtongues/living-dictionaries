@@ -1,10 +1,10 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
-  import type { IEntry } from '$lib/interfaces';
+  import type { IEntry } from '@ld/types';
   import Audio from '../entries/_Audio.svelte';
   import AddImage from '../entries/_AddImage.svelte';
   import Image from '$lib/components/image/Image.svelte';
-  import ShowHide from '$svelteui/functions/ShowHide.svelte';
+  import ShowHide from 'svelte-pieces/functions/ShowHide.svelte';
   import Video from '../entries/_Video.svelte';
 
   export let entry: IEntry,

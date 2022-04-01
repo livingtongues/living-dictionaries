@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { IDictionary } from '$lib/interfaces';
+  import type { IDictionary } from '@ld/types';
   export let dictionaries: IDictionary[] = [];
   enum DictionaryFields {
     public = 'Public',

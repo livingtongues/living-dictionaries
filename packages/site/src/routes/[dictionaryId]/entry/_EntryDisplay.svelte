@@ -1,10 +1,10 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
-  import type { IEntry } from '$lib/interfaces';
+  import type { IEntry } from '@ld/types';
   import EntryField from './_EntryField.svelte';
   import EntryPartOfSpeech from './_EntryPartOfSpeech.svelte';
   import EntrySemanticDomains from './_EntrySemanticDomains.svelte';
-  import BadgeArray from '$svelteui/data/BadgeArray.svelte';
+  import BadgeArray from 'svelte-pieces/data/BadgeArray.svelte';
   import EntryMedia from './_EntryMedia.svelte';
 
   export let entry: IEntry,

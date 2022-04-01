@@ -1,5 +1,5 @@
 import { deleteDocument, deleteDocumentOnline, setOnline } from '$sveltefirets';
-import type { IHelper } from '$lib/interfaces';
+import type { IHelper } from '@ld/types';
 
 export async function addDictionaryManager(manager: IHelper, dictionaryId: string) {
   await setOnline<IHelper>(`dictionaries/${dictionaryId}/managers/${manager.id}`, {

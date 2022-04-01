@@ -7,8 +7,8 @@
     addDictionaryContributor,
     addDictionaryManager,
   } from '$lib/helpers/dictionariesManaging';
-  import type { IDictionary, IUser } from '$lib/interfaces';
-  import Button from '$svelteui/ui/Button.svelte';
+  import type { IDictionary, IUser } from '@ld/types';
+  import Button from 'svelte-pieces/ui/Button.svelte';
   import { Collection } from '$sveltefirets';
   import Filter from './_Filter.svelte';
 

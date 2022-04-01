@@ -15,9 +15,9 @@
   import { add, deleteDocumentOnline, updateOnline, Collection } from '$sveltefirets';
   import { where } from 'firebase/firestore';
   import { isManager, isContributor, dictionary, admin } from '$lib/stores';
-  import type { IInvite, IHelper } from '$lib/interfaces';
-  import Button from '$svelteui/ui/Button.svelte';
-  import ShowHide from '$svelteui/functions/ShowHide.svelte';
+  import type { IInvite, IHelper } from '@ld/types';
+  import Button from 'svelte-pieces/ui/Button.svelte';
+  import ShowHide from 'svelte-pieces/functions/ShowHide.svelte';
   import { inviteHelper } from '$lib/helpers/inviteHelper';
 
   let helperType: IHelper[];

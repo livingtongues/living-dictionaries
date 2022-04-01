@@ -9,11 +9,11 @@
   import SelectAudio from '$lib/components/audio/SelectAudio.svelte';
   import RecordAudio from '$lib/components/audio/RecordAudio.svelte';
   import { dictionary, admin } from '$lib/stores';
-  import Button from '$svelteui/ui/Button.svelte';
+  import Button from 'svelte-pieces/ui/Button.svelte';
 
   import { deleteAudio } from '$lib/helpers/delete';
 
-  import type { IEntry } from '$lib/interfaces';
+  import type { IEntry } from '@ld/types';
   import SelectSpeaker from '$lib/components/media/SelectSpeaker.svelte';
   import { updateOnline, firebaseConfig } from '$sveltefirets';
 
@@ -112,7 +112,7 @@
   <div class="modal-footer">
     {#if entry.sf}
       {#if $admin > 1}
-        {#await import('$svelteui/data/JSON.svelte') then { default: JSON }}
+        {#await import('svelte-pieces/data/JSON.svelte') then { default: JSON }}
           <JSON obj={entry} />
           <div class="w-1" />
         {/await}

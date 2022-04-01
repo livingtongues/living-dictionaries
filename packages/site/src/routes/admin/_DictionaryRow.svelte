@@ -1,12 +1,12 @@
 <script lang="ts">
   import { admin } from '$lib/stores';
-  import type { IDictionary, IHelper } from '$lib/interfaces';
+  import type { IDictionary, IHelper } from '@ld/types';
   import { printDate } from '$lib/helpers/time';
   export let dictionary: IDictionary;
-  import ShowHide from '$svelteui/functions/ShowHide.svelte';
+  import ShowHide from 'svelte-pieces/functions/ShowHide.svelte';
   import DictionaryFieldEdit from './_DictionaryFieldEdit.svelte';
-  import Button from '$svelteui/ui/Button.svelte';
-  import BadgeArrayEmit from '$svelteui/data/BadgeArrayEmit.svelte';
+  import Button from 'svelte-pieces/ui/Button.svelte';
+  import BadgeArrayEmit from 'svelte-pieces/data/BadgeArrayEmit.svelte';
   import { createEventDispatcher } from 'svelte';
   import { Collection } from '$sveltefirets';
   import RolesManagment from './_RolesManagment.svelte';

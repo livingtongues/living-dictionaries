@@ -1,4 +1,4 @@
-import type { IUser } from '$lib/interfaces';
+import type { IUser } from '@ld/types';
 import { user } from './user';
 import { derived } from 'svelte/store';
 

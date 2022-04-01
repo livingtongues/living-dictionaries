@@ -3,12 +3,12 @@
   import { getStores } from '$app/stores';
   import { admin, user as userStore } from '$lib/stores';
   import { firebaseConfig, logOut } from '$sveltefirets';
-  import { clickOutside } from '$svelteui/actions/clickOutside';
-  import Avatar from '$svelteui/shell/Avatar.svelte';
-  import ShowHide from '$svelteui/functions/ShowHide.svelte';
-  import Menu from '$svelteui/shell/Menu.svelte';
-  import Button from '$svelteui/ui/Button.svelte';
-  import type { IUser } from '$lib/interfaces';
+  import { clickOutside } from 'svelte-pieces/actions/clickOutside';
+  import Avatar from 'svelte-pieces/shell/Avatar.svelte';
+  import ShowHide from 'svelte-pieces/functions/ShowHide.svelte';
+  import Menu from 'svelte-pieces/shell/Menu.svelte';
+  import Button from 'svelte-pieces/ui/Button.svelte';
+  import type { IUser } from '@ld/types';
 
   $: user = $userStore || ($session && ($session.user as IUser)) || null;
   const { session } = getStores();

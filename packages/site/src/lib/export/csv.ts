@@ -1,4 +1,4 @@
-import type { IDictionary, IUser } from '$lib/interfaces';
+import type { IDictionary, IUser } from '@ld/types';
 
 export function convertToCSV(objArray) {
   const array = typeof objArray != 'object' ? JSON.parse(objArray) : objArray;

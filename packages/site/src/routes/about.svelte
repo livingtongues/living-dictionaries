@@ -2,7 +2,7 @@
   import { _ } from 'svelte-i18n';
   import View from '$lib/components/ui/View.svelte';
   import Header from '$lib/components/shell/Header.svelte';
-  import Button from '$svelteui/ui/Button.svelte';
+  import Button from 'svelte-pieces/ui/Button.svelte';
 </script>
 
 <svelte:head>

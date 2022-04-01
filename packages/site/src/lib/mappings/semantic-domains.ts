@@ -1,4 +1,4 @@
-import type { ISemanticDomain } from '$lib/interfaces';
+import type { ISemanticDomain } from '@ld/types';
 
 export const semanticDomains: ISemanticDomain[] = [
   { key: '1', name: 'Universe and the natural world' },

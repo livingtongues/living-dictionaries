@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onDestroy, onMount } from 'svelte';
   import { _ } from 'svelte-i18n';
-  import type { IVideo, IEntry, IVideoCustomMetadata } from '$lib/interfaces';
+  import type { IVideo, IEntry, IVideoCustomMetadata } from '@ld/types';
   import { dictionary, user } from '$lib/stores';
   import { getStorage, ref, uploadBytesResumable } from 'firebase/storage';
   import type { UploadTask, TaskState, StorageError } from 'firebase/storage';

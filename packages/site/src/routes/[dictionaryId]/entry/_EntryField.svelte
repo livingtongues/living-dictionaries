@@ -1,5 +1,5 @@
 <script lang="ts">
-  import ShowHide from '$svelteui/functions/ShowHide.svelte';
+  import ShowHide from 'svelte-pieces/functions/ShowHide.svelte';
   export let value: string,
     field: string = undefined,
     display: string,

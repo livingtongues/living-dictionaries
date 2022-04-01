@@ -1,8 +1,8 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
   import User from './User.svelte';
-  import ShowHide from '$svelteui/functions/ShowHide.svelte';
-  import Button from '$svelteui/ui/Button.svelte';
+  import ShowHide from 'svelte-pieces/functions/ShowHide.svelte';
+  import Button from 'svelte-pieces/ui/Button.svelte';
   import { firebaseConfig } from '$sveltefirets';
 </script>
 

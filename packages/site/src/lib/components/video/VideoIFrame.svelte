@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { IVideo } from '$lib/interfaces';
+  import type { IVideo } from '@ld/types';
   export let video: IVideo;
 
   let screenWidth: number;

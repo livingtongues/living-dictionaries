@@ -1,7 +1,7 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
-  import type { IEntry, IVideo } from '$lib/interfaces';
-  import ShowHide from '$svelteui/functions/ShowHide.svelte';
+  import type { IEntry, IVideo } from '@ld/types';
+  import ShowHide from 'svelte-pieces/functions/ShowHide.svelte';
   export let entry: IEntry,
     video: IVideo,
     canEdit = false;

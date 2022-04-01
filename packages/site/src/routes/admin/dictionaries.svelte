@@ -1,11 +1,11 @@
 <script lang="ts">
-  import type { IDictionary } from '$lib/interfaces';
+  import type { IDictionary } from '@ld/types';
   import ResponsiveTable from '$lib/components/ui/ResponsiveTable.svelte';
   import { Collection, updateOnline } from '$sveltefirets';
   import { arrayRemove, arrayUnion, deleteField, GeoPoint } from 'firebase/firestore/lite';
   import { exportDictionariesAsCSV } from '$lib/export/csv';
   import Filter from './_Filter.svelte';
-  import Button from '$svelteui/ui/Button.svelte';
+  import Button from 'svelte-pieces/ui/Button.svelte';
   import DictionaryRow from './_DictionaryRow.svelte';
   import SortDictionaries from './_SortDictionaries.svelte';
 

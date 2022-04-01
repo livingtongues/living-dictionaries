@@ -1,4 +1,4 @@
-import type { IDictionary } from '$lib/interfaces';
+import type { IDictionary } from '@ld/types';
 
 export interface IGeometry {
   type: string;
