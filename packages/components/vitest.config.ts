@@ -1,9 +1,12 @@
-import { configDefaults, defineConfig } from 'vitest/config';
+import { defineConfig } from 'vitest/config';
+// import { svelte } from '@sveltejs/vite-plugin-svelte';
 
 export default defineConfig({
+  // plugins: [
+  //   svelte({ hot: !process.env.VITEST }),
+  // ],
   test: {
     globals: true,
-    includeSource: ['src/lib/helpers/**/*.ts'],
-    exclude: [...configDefaults.exclude, '**/tests/**'],
+    includeSource: ['src/**/*.ts'],
   },
 });

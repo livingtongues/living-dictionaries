@@ -11,8 +11,7 @@
     "titleBar.activeForeground": "#e7e7e7",
     "titleBar.inactiveForeground": "#e7e7e799"
   },
-  "debug.allowBreakpointsEverywhere": true,
-  // "debug.javascript.usePreview": false,
+  // "debug.allowBreakpointsEverywhere": true,
   "i18n-ally.localesPaths": [
     "src/locales"
   ],
@@ -20,7 +19,6 @@
   "i18n-ally.sourceLanguage": "en",
   "css.lint.unknownAtRules": "ignore",
   "editor.defaultFormatter": "esbenp.prettier-vscode",
-  "editor.formatOnSave": true,
   "editor.codeActionsOnSave": {
     "source.fixAll.eslint": true
   },
@@ -28,4 +26,7 @@
     "javascript",
     "svelte"
   ],
+  "files.associations": {
+    "*.svx": "svelte"
+  },
 }
