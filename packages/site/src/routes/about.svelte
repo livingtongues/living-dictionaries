@@ -256,7 +256,7 @@
     })}
   </p>
   <Button
-    form="primary"
+    form="filled"
     class="w-full my-3"
     target="_blank"
     href="https://www.flipcause.com/secure/cause_pdetails/NTQ3NDQ"

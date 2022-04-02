@@ -83,7 +83,7 @@
 {#if includeImages || includeAudio}
   <ShowHide let:show let:toggle>
     {#if !show}
-      <Button onclick={toggle} form="primary">
+      <Button onclick={toggle} form="filled">
         {$_('export.download_csv', { default: 'Download CSV' })}
         {#if includeImages}
           + {$_('misc.images', { default: 'Images' })}
@@ -121,7 +121,7 @@
       });
       downloadObjArrAsCSV(finalizedEntries, $dictionary.name);
     }}
-    form="primary">
+    form="filled">
     {$_('export.download_csv', { default: 'Download CSV' })}
   </Button>
 {/if}

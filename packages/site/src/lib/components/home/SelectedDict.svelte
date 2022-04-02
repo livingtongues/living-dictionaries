@@ -66,7 +66,7 @@
   {/if}
 
   {#if dictionary.type === 'tdv1'}
-    <Button target="_blank" class="mt-1 w-full" form="primary" color="black" href={dictionary.url}>
+    <Button target="_blank" class="mt-1 w-full" form="filled" color="black" href={dictionary.url}>
       {$_('home.open_dictionary', { default: 'Open Dictionary' })}
     </Button>
   {:else}
@@ -83,7 +83,7 @@
         {/if}
       </div>
     </Doc>
-    <Button class="mt-1 w-full" form="primary" color="black" href={dictionary.id}>
+    <Button class="mt-1 w-full" form="filled" color="black" href={dictionary.id}>
       {$_('home.open_dictionary', { default: 'Open Dictionary' })}
       <i class="far fa-chevron-right rtl-x-flip" />
     </Button>

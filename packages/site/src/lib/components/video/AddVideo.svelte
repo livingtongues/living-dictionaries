@@ -31,7 +31,7 @@
           {$_('misc.cancel', { default: 'Cancel' })}
         </Button>
         <div class="w-1" />
-        <Button onclick={async () => await addVideo(entry, video)} form="primary">
+        <Button onclick={async () => await addVideo(entry, video)} form="filled">
           {$_('misc.save', { default: 'Save' })}
         </Button>
       </div>
@@ -73,7 +73,7 @@
                       default: 'Delete',
                     })}</Button>
                   <div class="w-1" />
-                  <Button onclick={toggle} color="green" form="primary"
+                  <Button onclick={toggle} color="green" form="filled"
                     ><i class="fas fa-upload" /> {$_('misc.upload', { default: 'Upload' })}</Button>
                 </div>
               {:else}

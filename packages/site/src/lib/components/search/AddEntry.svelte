@@ -34,7 +34,7 @@
 <svelte:window bind:online />
 
 <ShowHide let:show let:toggle>
-  <Button form="primary" onclick={toggle} disabled={!online}>
+  <Button form="filled" onclick={toggle} disabled={!online}>
     <i class="far fa-plus" />
     {#if !online}
       Return online to

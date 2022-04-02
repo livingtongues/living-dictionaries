@@ -201,7 +201,7 @@
       <Button onclick={remove} form="simple" color="red">
         {$_('misc.remove', { default: 'Remove' })}
       </Button>
-      <Button type="submit" form="primary">
+      <Button type="submit" form="filled">
         {$_('misc.save', { default: 'Save' })}
       </Button>
     </div>

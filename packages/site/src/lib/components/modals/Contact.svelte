@@ -99,7 +99,7 @@
       {/if}
 
       <div class="mt-5">
-        <Button disabled={sending} loading={sending} form="primary" type="submit">
+        <Button disabled={sending} loading={sending} form="filled" type="submit">
           {$_('contact.send_message', { default: 'Send Message' })}
         </Button>
         <Button disabled={sending} onclick={close} form="simple" color="black">

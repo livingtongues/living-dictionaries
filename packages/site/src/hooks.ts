@@ -1,28 +1,28 @@
 import { getCookie } from '$lib/helpers/cookies';
 import type { Handle, GetSession } from '@sveltejs/kit';
 
-export const handle: Handle = async ({ request, resolve }) => {
+export const handle: Handle = async ({ event, resolve }) => {
   let user = null;
   try {
-    user = JSON.parse(getCookie('user', request.headers.cookie) || null);
+    user = JSON.parse(getCookie('user', event.request.headers.get('cookie')) || null);
   } catch (err) {
     console.log(err);
   }
-  request.locals.user = user;
-  request.locals.chosenLocale = getCookie('locale', request.headers.cookie) || null;
+  event.locals.user = user;
+  event.locals.chosenLocale = getCookie('locale', event.request.headers.get('cookie')) || null;
 
-  const response = await resolve(request);
+  const response = await resolve(event);
   return response;
 };
 
-export const getSession: GetSession = (request) => {
+export const getSession: GetSession = (event) => {
   let acceptedLanguage = 'en';
-  if (request.headers['accept-language']) {
-    acceptedLanguage = request.headers['accept-language'].split(',')[0].trim();
+  if (event.request.headers['accept-language']) {
+    acceptedLanguage = event.request.headers['accept-language'].split(',')[0].trim();
   }
   return {
-    user: request.locals.user,
+    user: event.locals.user,
     acceptedLanguage,
-    chosenLocale: request.locals.chosenLocale,
+    chosenLocale: event.locals.chosenLocale,
   };
 };

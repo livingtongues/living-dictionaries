@@ -24,7 +24,7 @@
     placeholder="Search dictionaries">
     <div slot="right">
       <Button
-        form="primary"
+        form="filled"
         color="black"
         onclick={() => exportDictionariesAsCSV(filteredDictionaries, 'living-dictionaries-list')}>
         <i class="fas fa-download mr-1" />

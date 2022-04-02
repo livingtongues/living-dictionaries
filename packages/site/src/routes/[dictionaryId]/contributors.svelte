@@ -103,7 +103,7 @@
   {/if}
 </div>
 {#if $isManager}
-  <Button onclick={() => inviteHelper('manager', $dictionary)} form="primary">
+  <Button onclick={() => inviteHelper('manager', $dictionary)} form="filled">
     <i class="far fa-envelope" />
     {$_('contributors.invite_manager', { default: 'Invite a Manager' })}
   </Button>
@@ -160,7 +160,7 @@
         </div>
       {/each}
     </Collection>
-    <Button onclick={() => inviteHelper('contributor', $dictionary)} form="primary">
+    <Button onclick={() => inviteHelper('contributor', $dictionary)} form="filled">
       <i class="far fa-envelope" />
       {$_('contributors.invite_contributors', {
         default: 'Invite Contributors',
@@ -168,7 +168,7 @@
     </Button>
   {:else if !$isContributor}
     <ShowHide let:show let:toggle>
-      <Button onclick={toggle} form="primary">
+      <Button onclick={toggle} form="filled">
         {$_('contributors.request_access', { default: 'Request Access' })}
       </Button>
       {#if show}
@@ -222,7 +222,7 @@
   </div> -->
 
 {#if $isManager}
-  <Button onclick={writeIn} form="primary">
+  <Button onclick={writeIn} form="filled">
     <i class="far fa-pencil" />
     {$_('contributors.write_in_contributor', {
       default: 'Write in Contributor',

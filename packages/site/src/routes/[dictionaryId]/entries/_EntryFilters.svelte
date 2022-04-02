@@ -24,7 +24,7 @@
       {$_('entry.filters', { default: 'Filters' })}
     </h2>
     <ClearRefinements {search} />
-    <Button onclick={() => (showMobileFilters = false)} size="sm" form="primary" class="md:hidden">
+    <Button onclick={() => (showMobileFilters = false)} size="sm" form="filled" class="md:hidden">
       {$_('entry.view_entries', { default: 'View Entries' })}
     </Button>
   </header>
@@ -43,7 +43,7 @@
       label={$_('entry.speaker', { default: 'Speaker' })} />
     <hr />
 
-    {#if !$page.path.includes('gallery')}
+    {#if !$page.url.pathname.includes('gallery')}
       <ToggleRefinement
         {search}
         attribute="hasImage"

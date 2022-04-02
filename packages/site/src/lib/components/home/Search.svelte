@@ -188,7 +188,7 @@
         {/if}
       {/if}
       {#if !(searchFocused && filteredDictionaries.length > 3)}
-        <Button href="/create-dictionary" class="mt-2" color="black" form="primary">
+        <Button href="/create-dictionary" class="mt-2" color="black" form="filled">
           <i class="far fa-plus" />
           {$_('create.create_new_dictionary', {
             default: 'Create New Dictionary',

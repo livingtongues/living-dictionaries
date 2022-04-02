@@ -73,7 +73,7 @@
         {$_('misc.cancel', { default: 'Cancel' })}
       </Button>
 
-      <Button type="submit" form="primary">
+      <Button type="submit" form="filled">
         {$_('misc.save', { default: 'Save' })}
       </Button>
     </div>

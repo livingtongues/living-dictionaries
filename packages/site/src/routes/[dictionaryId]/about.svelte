@@ -53,7 +53,7 @@
     {#if editing}
       <Button class="mb-2" onclick={() => (editing = false)}
         >{$_('misc.cancel', { default: 'Cancel' })}</Button>
-      <Button class="mb-2" form="primary" onclick={save}
+      <Button class="mb-2" form="filled" onclick={save}
         >{$_('misc.save', { default: 'Save' })}</Button>
     {:else}
       <Button class="mb-2" onclick={() => (editing = true)}

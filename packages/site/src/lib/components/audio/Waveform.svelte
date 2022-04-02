@@ -49,7 +49,7 @@
 </script>
 
 <div class="flex items-center" style="direction: ltr;">
-  <Button class="rounded-play mr-2" form="primary" onclick={startStop}>
+  <Button class="rounded-play mr-2" form="filled" onclick={startStop}>
     {#if !playing}
       <!-- <i class="far fa-volume-up fa-lg" /> -->
       <i class="far fa-ear fa-lg" />

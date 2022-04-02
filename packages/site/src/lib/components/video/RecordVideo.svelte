@@ -90,7 +90,7 @@
       </div>
       <Button
         class="mt-2"
-        form="primary"
+        form="filled"
         href="https://www.google.com/search?q=How+do+I+enable+microphone+access"
         target="_blank"
         rel="noopener">{$_('audio.learn_more', { default: 'Learn More' })}</Button>
@@ -102,7 +102,7 @@
         browser asks for permission.
       </div>
       <div>
-        <Button form="primary" class="mt-2" onclick={() => location.reload()}
+        <Button form="filled" class="mt-2" onclick={() => location.reload()}
           >{$_('audio.reload', { default: 'Reload' })}</Button>
       </div>
     </div>

@@ -52,12 +52,12 @@
         {$_('misc.cancel', { default: 'Cancel' })}
       </Button>
       {#if adding}
-        <Button type="submit" form="primary">
+        <Button type="submit" form="filled">
           {$_('misc.next', { default: 'Next' })}
           <i class="far fa-chevron-right rtl-x-flip" />
         </Button>
       {:else}
-        <Button type="submit" form="primary">
+        <Button type="submit" form="filled">
           {$_('misc.save', { default: 'Save' })}
         </Button>
       {/if}

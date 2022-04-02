@@ -339,7 +339,7 @@
     </div>
 
     <div class="mt-6">
-      <Button type="submit" class="w-full" form="primary" disabled={!online} loading={submitting}>
+      <Button type="submit" class="w-full" form="filled" disabled={!online} loading={submitting}>
         {#if !online}
           Return online to
         {/if}

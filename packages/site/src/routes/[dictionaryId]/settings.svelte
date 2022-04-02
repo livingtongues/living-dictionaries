@@ -94,7 +94,7 @@
   </div>
 
   <ShowHide let:show let:toggle>
-    <Button onclick={toggle} form="primary">
+    <Button onclick={toggle} form="filled">
       {$_('settings.optional_data_fields', { default: 'Optional Data Fields' })}:
       {$_('header.contact_us', { default: 'Contact Us' })}
     </Button>
