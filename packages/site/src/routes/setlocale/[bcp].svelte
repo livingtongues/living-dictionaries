@@ -1,7 +1,6 @@
 <script context="module" lang="ts">
   import type { Load } from '@sveltejs/kit';
-  export const load: Load = async ({ page: { params } }) => {
-    console.log({ params });
+  export const load: Load = async ({ params }) => {
     return { props: { bcp: params.bcp } };
   };
 </script>

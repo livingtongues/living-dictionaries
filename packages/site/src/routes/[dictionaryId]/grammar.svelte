@@ -3,7 +3,7 @@
   import type { IGrammar } from '@ld/types';
 
   import type { Load } from '@sveltejs/kit';
-  export const load: Load = async ({ page: { params } }) => {
+  export const load: Load = async ({ params }) => {
     const dictionaryId = params.dictionaryId;
     try {
       const grammarDoc = await getDocument<IGrammar>(`dictionaries/${dictionaryId}/info/grammar`);

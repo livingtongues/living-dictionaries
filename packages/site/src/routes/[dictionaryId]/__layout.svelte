@@ -3,7 +3,7 @@
   import { getDocument } from '$sveltefirets';
 
   import type { Load } from '@sveltejs/kit';
-  export const load: Load = async ({ page: { params } }) => {
+  export const load: Load = async ({ params }) => {
     try {
       const dictionary = await getDocument<IDictionary>(`dictionaries/${params.dictionaryId}`);
       if (dictionary) {
