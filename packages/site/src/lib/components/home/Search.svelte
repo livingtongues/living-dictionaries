@@ -196,34 +196,34 @@
         {/if}
       {/if}
       {#if !(searchFocused && filteredDictionaries.length > 3)}
-        <div class="mt-2">
-          <Button href="/create-dictionary" color="black" form="filled">
-            <i class="far fa-plus" />
-            {$_('create.create_new_dictionary', {
-              default: 'Create New Dictionary',
-            })}
-          </Button>
-        </div>
+        <Button href="/create-dictionary" class="mt-2" color="black" form="filled">
+          <i class="far fa-plus" />
+          {$_('create.create_new_dictionary', {
+            default: 'Create New Dictionary',
+          })}
+        </Button>
         <div class="w-2 sm:hidden" />
 
-        <div
+        <Button
+          href="/dictionaries"
+          color="black"
+          form="simple"
           class="mt-2 opacity-75 focus:opacity-100
-        sm:opacity-100 bg-white sm:bg-transparent">
-          <Button href="/dictionaries" color="black" form="simple">
-            <i class="far fa-list" />
-            {$_('home.list_of_dictionaries', { default: 'List of Dictionaries' })}
-          </Button>
-        </div>
+      sm:opacity-100 bg-white sm:bg-transparent">
+          <i class="far fa-list" />
+          {$_('home.list_of_dictionaries', { default: 'List of Dictionaries' })}
+        </Button>
         <div class="w-2 sm:hidden" />
 
-        <div
+        <Button
+          href="/about"
+          color="black"
+          form="simple"
           class="mt-2 opacity-75 focus:opacity-100
-        sm:opacity-100 bg-white sm:bg-transparent">
-          <Button href="/about" color="black" form="simple">
-            <i class="far fa-info-circle" />
-            <span class="ml-1">{$_('header.about', { default: 'About' })}</span>
-          </Button>
-        </div>
+      sm:opacity-100 bg-white sm:bg-transparent !sm:hidden">
+          <i class="far fa-info-circle" />
+          <span class="ml-1">{$_('header.about', { default: 'About' })}</span>
+        </Button>
       {/if}
     </div>
   {:else}
@@ -242,3 +242,6 @@
     </div>
   {/if}
 </div>
+
+<style windi:global>
+</style>

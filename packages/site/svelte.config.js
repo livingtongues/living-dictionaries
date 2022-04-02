@@ -2,6 +2,7 @@ import preprocess from 'svelte-preprocess';
 import adapter from '@sveltejs/adapter-auto';
 import path from 'path';
 
+import deepWind from "svelte-deep-wind-preprocess";
 import { windi } from "svelte-windicss-preprocess";
 
 /** @type {import('@sveltejs/kit').Config} */
@@ -13,6 +14,7 @@ const config = {
 				['import.meta.env.VERCEL_ANALYTICS_ID', JSON.stringify(process.env.VERCEL_ANALYTICS_ID)]
 			]
 		}),
+		deepWind(),
 		windi({
 			configPath: './windi.config.js',
 			experimental: {

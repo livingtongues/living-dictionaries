@@ -11,6 +11,7 @@
     "update-locales": "node --loader ts-node/esm scripts/update-locales.ts"
   },
   "devDependencies": {
+    "svelte-deep-wind-preprocess": "workspace:^0.0.1",
     "@ld/components": "workspace:^0.0.1",
     "@ld/types": "workspace:^0.0.1",
     "@sentry/browser": "^6.18.2",

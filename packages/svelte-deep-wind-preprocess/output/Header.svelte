@@ -32,7 +32,7 @@
   <div class="w-1 flex-grow" />
 
   <Button
-    class="hidden md:inline"
+    class="deep_hidden_md-inline"
     form="text"
     href="https://www.flipcause.com/secure/cause_pdetails/NTQ3NDQ"
     target="_blank">
@@ -42,7 +42,7 @@
         default: 'Donate',
       })}</span>
   </Button>
-  <Button href="/about" form="text" class="hidden lg:inline">
+  <Button href="/about" form="text" class="deep_hidden_lg-inline">
     <i class="far fa-info-circle" />
     <span class="ml-1 hidden lg:inline">{$_('header.about', { default: 'About' })}</span>
   </Button>
@@ -50,7 +50,7 @@
     form="text"
     href="https://docs.google.com/document/d/1MZGkBbnCiAch3tWjBOHRYPpjX1MVd7f6x5uVuwbxM-Q/edit?usp=sharing"
     target="_blank"
-    class="p-3 text-gray-600 hover:text-black hidden lg:block">
+    class="deep_p-3_text-gray-600_hover-text-black_hidden_lg-block">
     <i class="far fa-question-circle" />
     <span class="ml-1">
       FAQ
@@ -94,7 +94,7 @@
   <User />
 </header>
 
-<style>
+<style> :global(.deep_hidden_md-inline) { @apply hidden md:inline; } :global(.deep_hidden_lg-inline) { @apply hidden lg:inline; } :global(.deep_p-3_text-gray-600_hover-text-black_hidden_lg-block) { @apply p-3 text-gray-600 hover:text-black hidden lg:block; }
   header {
     @apply fixed top-0 left-0 right-0 flex items-center bg-white h-12 z-2 whitespace-nowrap;
   }

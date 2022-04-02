@@ -55,7 +55,7 @@
   </ShowHide>
 {:else}
   <ShowHide let:show let:toggle>
-    <Button form="text" class="print:hidden" onclick={toggle}>
+    <Button form="text" onclick={toggle}>
       <i class="far fa-sign-in" />
       <span class="ml-1 hidden sm:inline">
         {$_('header.login', { default: 'Log In' })}
