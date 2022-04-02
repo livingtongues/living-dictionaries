@@ -1,5 +1,7 @@
+- update packages
 - check for errors
 - convert site windicss
+  - dropdown menu classes in user.svelte
 - update vercel for main site
 - test and merge to main
 - deploy @ld/components
