@@ -63,6 +63,38 @@
 {/if}
 
 <style windi:preflights:global windi:safelist:global global>
+  /* Temporary workaround until forms plugin bug in https://github.com/windicss/windicss/issues/457 is fixed */
+  [type='text'],
+  [type='email'],
+  [type='url'],
+  [type='password'],
+  [type='number'],
+  [type='date'],
+  [type='datetime-local'],
+  [type='month'],
+  [type='search'],
+  [type='tel'],
+  [type='time'],
+  [type='week'],
+  [multiple],
+  textarea,
+  select {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background-color: #fff;
+    border-color: #6b7280;
+    border-width: 1px;
+    border-radius: 0px;
+    padding-top: 0.5rem;
+    padding-right: 0.75rem;
+    padding-bottom: 0.5rem;
+    padding-left: 0.75rem;
+    font-size: 1rem;
+    line-height: 1.5rem;
+  }
+  /* End workaround */
+
   input[type='checkbox'] {
     @apply focus:ring-primary-500 h-4 w-4 text-primary-600 border-gray-300 rounded;
   }

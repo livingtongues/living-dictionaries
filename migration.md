@@ -1,5 +1,6 @@
 - convert site windicss
   - dropdown menu classes in user.svelte
+  - update Button component to allow injected styles to compensate for loss of injecting classes
 - check for errors
 - update vercel for main site
 - test and merge to main
