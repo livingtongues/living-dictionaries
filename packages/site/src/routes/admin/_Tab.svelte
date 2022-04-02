@@ -6,7 +6,7 @@
 <a
   sveltekit:prefetch
   href={`/admin/${link}`}
-  class={$page.path.match(/(\w+)$/)[0] === link ? 'active' : 'inactive'}>
+  class={$page.url.pathname.match(/(\w+)$/)[0] === link ? 'active' : 'inactive'}>
   {link}
 </a>
 

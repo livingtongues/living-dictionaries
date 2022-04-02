@@ -3,7 +3,7 @@
   import { browser } from '$app/env';
 
   import type { Load } from '@sveltejs/kit';
-  export const load: Load = async ({ page: { path, params }, session }) => {
+  export const load: Load = async ({params, url: {pathname}, session}) => {
     if (browser) {
       await loadLocaleOnClient();
     } else {
@@ -12,7 +12,7 @@
     return {
       props: {
         params,
-        path,
+        path: pathname,
       },
     };
   };
@@ -55,7 +55,7 @@
     <NProgress />
   {/await}
 
-  {#if $page.host.includes('livingdictionaries.app')}
+  {#if $page.url.host.includes('livingdictionaries.app')}
     {#await import('$lib/components/shell/LogRocket.svelte') then { default: LogRocket }}
       <LogRocket />
     {/await}

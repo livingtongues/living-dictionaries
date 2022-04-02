@@ -50,7 +50,7 @@
     let:data={dictionaries}>
     <div>
       <Button
-        form="primary"
+        form="filled"
         color="black"
         onclick={() => exportDictionariesAsCSV(dictionaries, 'living-dictionaries-list')}>
         <i class="fas fa-download mr-1" />

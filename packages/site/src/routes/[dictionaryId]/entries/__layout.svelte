@@ -26,7 +26,7 @@
           <a
             sveltekit:prefetch
             href={'/' + $page.params.dictionaryId + '/entries/list'}
-            class="{$page.path.includes('list') ? 'bg-white shadow' : 'hover:bg-gray-100'}
+            class="{$page.url.pathname.includes('list') ? 'bg-white shadow' : 'hover:bg-gray-100'}
                 px-2 py-1 rounded">
             <i class="far fa-list" />
             <span class="hidden md:inline">
@@ -37,7 +37,7 @@
           <a
             sveltekit:prefetch
             href={'/' + $page.params.dictionaryId + '/entries/table'}
-            class="{$page.path.includes('table') ? 'bg-white shadow' : 'hover:bg-gray-100'}
+            class="{$page.url.pathname.includes('table') ? 'bg-white shadow' : 'hover:bg-gray-100'}
             px-2 py-1 rounded">
             <i class="fal fa-table" />
             <span class="hidden md:inline">
@@ -48,7 +48,7 @@
           <a
             sveltekit:prefetch
             href={'/' + $page.params.dictionaryId + '/entries/gallery'}
-            class="{$page.path.includes('gallery') ? 'bg-white shadow' : 'hover:bg-gray-100'}
+            class="{$page.url.pathname.includes('gallery') ? 'bg-white shadow' : 'hover:bg-gray-100'}
                 px-2 py-1 rounded">
             <i class="fal fa-image" />
             <span class="hidden md:inline">

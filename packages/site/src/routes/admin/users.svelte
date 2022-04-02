@@ -15,7 +15,7 @@
   <Filter items={users} let:filteredItems={filteredUsers} placeholder="Search names and emails">
     <div slot="right">
       <Button
-        form="primary"
+        form="filled"
         color="black"
         onclick={() => exportUsersAsCSV(filteredUsers, 'livingdictionary-users')}>
         <i class="fas fa-download mr-1" />

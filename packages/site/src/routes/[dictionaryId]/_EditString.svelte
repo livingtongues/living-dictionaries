@@ -52,7 +52,7 @@
           sm:text-sm sm:leading-5 transition ease-in-out duration-150"
         placeholder={`Dictionary ${attributeType}`} />
     </div>
-    <Button type="submit" form="primary">
+    <Button type="submit" form="filled">
       {$_('misc.save', { default: 'Save' })}
     </Button>
   </div>

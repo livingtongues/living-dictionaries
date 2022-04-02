@@ -49,7 +49,7 @@
   </p>
 
   <ShowHide let:show let:toggle>
-    <Button form="primary" onclick={toggle}>Contact Us</Button>
+    <Button form="filled" onclick={toggle}>Contact Us</Button>
     {#if show}
       {#await import('$lib/components/modals/Contact.svelte') then { default: Contact }}
         <Contact on:close={toggle} />

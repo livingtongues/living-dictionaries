@@ -79,7 +79,7 @@ bg-white pt-1 -mt-1">
           <i class="fas fa-trash ml-1" />
         </Button>
       {/if}
-      <Button form="primary" onclick={() => share($dictionary.id, entry)}>
+      <Button form="filled" onclick={() => share($dictionary.id, entry)}>
         <span>{$_('misc.share', { default: 'Share' })}</span>
         <i class="fas fa-share-square ml-1" />
       </Button>

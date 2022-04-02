@@ -1,7 +1,7 @@
 <script lang="ts">
   export let menuOpen: boolean;
   import { _ } from 'svelte-i18n';
-  import { dictionary, isManager, admin } from '$lib/stores';
+  import { dictionary, isManager } from '$lib/stores';
   import { page } from '$app/stores';
 </script>
 
@@ -20,7 +20,7 @@
   </a> -->
   <a
     sveltekit:prefetch
-    class:active={$page.path.match(/entry|entries/)}
+    class:active={$page.url.pathname.match(/entry|entries/)}
     href={`/${$dictionary.id}/entries/list`}>
     <i class="far fa-list fa-fw" />
     <span class="font-medium mx-2">
@@ -36,7 +36,7 @@
   <a
     sveltekit:prefetch
     href={'/' + $dictionary.id + '/about'}
-    class:active={$page.path.includes('about')}>
+    class:active={$page.url.pathname.includes('about')}>
     <i class="far fa-info-circle fa-fw" />
     <span class="font-medium mx-2">
       {$_('header.about', { default: 'About' })}
@@ -45,7 +45,7 @@
   <a
     sveltekit:prefetch
     href={'/' + $dictionary.id + '/contributors'}
-    class:active={$page.path.includes('contributors')}>
+    class:active={$page.url.pathname.includes('contributors')}>
     <i class="far fa-users fa-fw" />
     <span class="font-medium mx-2">
       {$_('dictionary.contributors', { default: 'Contributors' })}
@@ -54,7 +54,7 @@
   <a
     sveltekit:prefetch
     href={'/' + $dictionary.id + '/grammar'}
-    class:active={$page.path.includes('grammar')}>
+    class:active={$page.url.pathname.includes('grammar')}>
     <i class="far fa-edit fa-fw" />
     <span class="font-medium mx-2">
       {$_('dictionary.grammar', { default: 'Grammar' })}
@@ -64,7 +64,7 @@
     <a
       sveltekit:prefetch
       href={'/' + $dictionary.id + '/settings'}
-      class:active={$page.path.includes('settings')}>
+      class:active={$page.url.pathname.includes('settings')}>
       <i class="far fa-cog fa-fw" />
       <span class="font-medium mx-2">
         {$_('misc.settings', { default: 'Settings' })}
@@ -75,7 +75,7 @@
     <a
       sveltekit:prefetch
       href={'/' + $dictionary.id + '/export'}
-      class:active={$page.path.includes('export')}>
+      class:active={$page.url.pathname.includes('export')}>
       <i class="far fa-download" />
       <span class="font-medium mx-2">
         {$_('misc.export', { default: 'Export' })}
