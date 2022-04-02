@@ -35,7 +35,7 @@
     "svelte-windicss-preprocess": "~4.1.0",
     "tslib": "^2.3.1",
     "typescript": "~4.6.2",
-    "vitest": "^0.6.1",
+    "vitest": "^0.8.2",
     "windicss": "^3.5.1"
   },
   "repository": {
