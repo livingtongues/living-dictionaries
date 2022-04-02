@@ -3,7 +3,7 @@
   import { getStores } from '$app/stores';
   import { admin, user as userStore } from '$lib/stores';
   import { firebaseConfig, logOut } from '$sveltefirets';
-  import { clickOutside } from 'svelte-pieces/actions/clickOutside';
+  import { clickoutside } from 'svelte-pieces';
   import Avatar from 'svelte-pieces/shell/Avatar.svelte';
   import ShowHide from 'svelte-pieces/functions/ShowHide.svelte';
   import Menu from 'svelte-pieces/shell/Menu.svelte';
@@ -16,7 +16,7 @@
 
 {#if user}
   <ShowHide let:show let:toggle let:set>
-    <div class="relative flex-shrink-0" use:clickOutside on:clickOutside={() => set(false)}>
+    <div class="relative flex-shrink-0" use:clickoutside on:clickoutside={() => set(false)}>
       <button class="px-3 py-1" type="button" on:click={toggle}>
         <Avatar {user} />
       </button>
