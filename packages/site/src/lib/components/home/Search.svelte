@@ -71,14 +71,21 @@
   }
 
   let showAllMyDictionaries = false;
+
+  $: active = searchString || searchFocused || currentDictionary;
 </script>
 
 <!-- To Consider: for longer dictionaries on mobile, if we want to make the map still show when showing dictionary details, we need to add a media query (less than md) which sets this div's max-height: 75vh and adds overflow-y-auto -->
+
 <div
-  class="{!(searchString || searchFocused || currentDictionary)
-    ? 'absolute sm:relative w-full sm:flex z-10 max-h-full'
-    : 'h-full'}
-  flex flex-col sm:h-full sm:border-r border-gray-200">
+  class:h-full={active}
+  class:absolute={!active}
+  class:sm:relative={!active}
+  class:w-full={!active}
+  class:sm:flex={!active}
+  class:z-10={!active}
+  class:max-h-full={!active}
+  class="flex flex-col sm:h-full sm:border-r border-gray-200">
   {#if !currentDictionary}
     <div class="relative text-xl px-2 mt-2 sm:mb-2">
       <div
@@ -107,8 +114,9 @@
     </div>
 
     <div
-      class="{!(searchString || searchFocused || currentDictionary) && 'hidden sm:flex'}
-      overflow-y-auto flex flex-col flex-1"
+      class:hidden={!active}
+      class:sm:flex={!active}
+      class="overflow-y-auto flex flex-col flex-1"
       in:fly={{ y: -15, duration: 150 }}
       on:click={keepSearchOpen}>
       {#if searchString}
@@ -188,34 +196,34 @@
         {/if}
       {/if}
       {#if !(searchFocused && filteredDictionaries.length > 3)}
-        <Button href="/create-dictionary" class="mt-2" color="black" form="filled">
-          <i class="far fa-plus" />
-          {$_('create.create_new_dictionary', {
-            default: 'Create New Dictionary',
-          })}
-        </Button>
+        <div class="mt-2">
+          <Button href="/create-dictionary" color="black" form="filled">
+            <i class="far fa-plus" />
+            {$_('create.create_new_dictionary', {
+              default: 'Create New Dictionary',
+            })}
+          </Button>
+        </div>
         <div class="w-2 sm:hidden" />
 
-        <Button
-          href="/dictionaries"
-          color="black"
-          form="simple"
+        <div
           class="mt-2 opacity-75 focus:opacity-100
-      sm:opacity-100 bg-white sm:bg-transparent">
-          <i class="far fa-list" />
-          {$_('home.list_of_dictionaries', { default: 'List of Dictionaries' })}
-        </Button>
+        sm:opacity-100 bg-white sm:bg-transparent">
+          <Button href="/dictionaries" color="black" form="simple">
+            <i class="far fa-list" />
+            {$_('home.list_of_dictionaries', { default: 'List of Dictionaries' })}
+          </Button>
+        </div>
         <div class="w-2 sm:hidden" />
 
-        <Button
-          href="/about"
-          color="black"
-          form="simple"
+        <div
           class="mt-2 opacity-75 focus:opacity-100
-      sm:opacity-100 bg-white sm:bg-transparent sm:hidden">
-          <i class="far fa-info-circle" />
-          <span class="ml-1">{$_('header.about', { default: 'About' })}</span>
-        </Button>
+        sm:opacity-100 bg-white sm:bg-transparent">
+          <Button href="/about" color="black" form="simple">
+            <i class="far fa-info-circle" />
+            <span class="ml-1">{$_('header.about', { default: 'About' })}</span>
+          </Button>
+        </div>
       {/if}
     </div>
   {:else}
