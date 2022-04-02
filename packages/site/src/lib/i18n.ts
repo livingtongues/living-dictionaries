@@ -6,7 +6,6 @@ const INIT_OPTIONS = {
   fallbackLocale: 'en',
   initialLocale: null,
   loadingDelay: 200,
-  formats: {},
   warnOnMissingMessages: true,
 };
 

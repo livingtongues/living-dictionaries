@@ -1,6 +1,6 @@
 <script context="module" lang="ts">
   import type { Load } from '@sveltejs/kit';
-  export const load: Load = async ({ page: { params } }) => {
+  export const load: Load = async ({ params }) => {
     return {
       props: {
         inviteId: params.inviteId,
@@ -74,7 +74,7 @@
             <i class="fas fa-chevron-right rtl-x-flip" />
           </Button>
         {:else}
-          <Button form={'primary'} onclick={() => acceptInvite(invite.role)}
+          <Button form="filled" onclick={() => acceptInvite(invite.role)}
             >{$_('invite.accept_invitation', {
               default: 'Accept Invitation',
             })}</Button>

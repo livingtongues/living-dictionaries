@@ -1,12 +1,12 @@
 <script context="module" lang="ts">
   import type { Load } from '@sveltejs/kit';
-  export const load: Load = async ({ page: { params } }) => {
+  export const load: Load = async ({ params }) => {
     return { status: 307, redirect: `/${params.dictionaryId}/entries/list` };
   };
 </script>
 
 <script lang="ts">
-  import { dictionary, entries, admin } from '$lib/stores';
+  import { dictionary } from '$lib/stores';
 
   function downloadObjectAsJson(exportObj, exportName) {
     var dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(exportObj));

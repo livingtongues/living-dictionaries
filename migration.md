@@ -1,10 +1,10 @@
-- update packages
-- check for errors
 - convert site windicss
   - dropdown menu classes in user.svelte
+- check for errors
 - update vercel for main site
 - test and merge to main
 - deploy @ld/components
+
 - add scripts package and move update-locales from site package
 - restore functions
 - lowercase clickOutside from svelte-pieces
@@ -12,3 +12,4 @@
 - Button.svelte form="primary" to form="filled"
 - double check scrollbar stuff in global.css
 - update eslint config
+- replace font-awesome
