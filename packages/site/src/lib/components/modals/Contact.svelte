@@ -48,16 +48,17 @@
   <span slot="heading">
     {$_('header.contact_us', { default: 'Contact Us' })}
   </span>
-  <Button
-    href="https://docs.google.com/document/d/1MZGkBbnCiAch3tWjBOHRYPpjX1MVd7f6x5uVuwbxM-Q/edit?usp=sharing"
-    target="_blank"
-    class="w-full">
-    <i class="far fa-question-circle" />
-    <span class="ml-1">
-      FAQ
-      <!-- {$_('header.faq', { default: 'FAQ' })} -->
-    </span>
-  </Button>
+  <div class="flex flex-col">
+    <Button
+      href="https://docs.google.com/document/d/1MZGkBbnCiAch3tWjBOHRYPpjX1MVd7f6x5uVuwbxM-Q/edit?usp=sharing"
+      target="_blank">
+      <i class="far fa-question-circle" />
+      <span class="ml-1">
+        FAQ
+        <!-- {$_('header.faq', { default: 'FAQ' })} -->
+      </span>
+    </Button>
+  </div>
 
   {#if !status}
     <form on:submit|preventDefault={send}>
