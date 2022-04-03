@@ -1,5 +1,6 @@
-import MagicString from 'magic-string'
-import { parse, walk } from 'svelte/compiler'
+import MagicString from 'magic-string';
+import { parse, walk } from 'svelte/compiler';
+
 const deepName = (classes) => 'deep_' + classes.replace(/\s+/g, '_').replace(/:/g, '-');
 
 /**
@@ -8,8 +9,15 @@ const deepName = (classes) => 'deep_' + classes.replace(/\s+/g, '_').replace(/:/
 export default () => {
   return {
     markup({ content, filename }) {
-      const s = new MagicString(content)
-      const ast = parse(content)
+      const s = new MagicString(content);
+      const scriptIsFirst = /^<script/;
+      if (!scriptIsFirst.test(content)) { return { code: content } }
+      const scriptBlocksAtBeginning = /^<script[\s\S]*<\/script>\s*/gm;
+      const match = scriptBlocksAtBeginning.exec(content);
+      const scriptEndIndex = match[0].length;
+
+      const strippedContent = content.slice(scriptEndIndex).replace(/@apply .*/g, '');
+      const ast = parse(strippedContent);
       const deepClasses = new Set();
 
       walk(ast.html, {
@@ -19,23 +27,21 @@ export default () => {
             if (clsAttr) {
               const { raw: classesStr, start, end } = clsAttr.value[0];
               deepClasses.add(classesStr);
-              s.overwrite(start, end, deepName(classesStr))
+              s.overwrite(start + scriptEndIndex, end + scriptEndIndex, deepName(classesStr))
             }
           }
         }
       })
 
       if (deepClasses.size > 0) {
+        let deepStyles = '';
+        for (const cls of deepClasses) {
+          deepStyles = deepStyles + ` :global(.${deepName(cls)}) { @apply ${cls}; }`;
+        }
         if (ast.css == null) {
-          s.append('<style>');
-          for (const cls of deepClasses) {
-            s.append(` :global(.${deepName(cls)}) { @apply ${cls}; }`);
-          }
-          s.append('</style>');
+          s.append('<style>' + deepStyles + '</style>');
         } else {
-          for (const cls of deepClasses) {
-            s.appendLeft(ast.css.content.start, ` :global(.${deepName(cls)}) { @apply ${cls}; }`);
-          }
+          s.appendLeft(ast.css.content.start + scriptEndIndex, deepStyles);
         }
       }
 
