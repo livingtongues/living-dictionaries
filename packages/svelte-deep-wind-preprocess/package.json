@@ -1,18 +1,27 @@
 {
   "name": "svelte-deep-wind-preprocess",
   "version": "0.0.1",
+  "description": "Pass scoped Windicss classes to child Svelte components",
   "type": "module",
   "main": "index.js",
   "scripts": {
     "test": "vitest -u",
-    "test:ui": "vitest --ui",
     "test:run": "vitest run"
   },
   "devDependencies": {
-    "@vitest/ui": "latest",
     "magic-string": "^0.26.1",
     "svelte": "^3.46.6",
     "vite": "latest",
     "vitest": "latest"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/livingtongues/living-dictionaries.git"
+  },
+  "author": "Living Tongues",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/livingtongues/living-dictionaries/issues"
+  },
+  "homepage": "https://github.com/livingtongues/living-dictionaries/packages/svelte-deep-wind-preprocess#readme"
 }

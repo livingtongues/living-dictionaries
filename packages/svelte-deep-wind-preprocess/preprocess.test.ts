@@ -2,7 +2,27 @@ import fs from 'fs';
 import { preprocess } from 'svelte/compiler';
 import svelteDeepWind from './index.js';
 
-test('Preprocessor handles file with @apply and colons in style tag', async () => {
+test('Preprocessor handles ! in Component class names by escaping it in deep name', async () => {
+  const result = await preprocess(
+    `<script>
+    import Button from './Button.svelte';
+  </script>
+  <Button class="!text-yellow-500 text-lg">
+  Yellow
+</Button>`,
+    [svelteDeepWind()]
+  );
+  expect(result.code).toMatchInlineSnapshot(`
+    "<script>
+        import Button from './Button.svelte';
+      </script>
+      <Button class=\\"deep_\\\\!text-yellow-500_text-lg\\">
+      Yellow
+    </Button><style> :global(.deep_\\\\!text-yellow-500_text-lg) { @apply !text-yellow-500 text-lg; }</style>"
+  `);
+});
+
+test('Preprocessor handles @apply and colons in style tag', async () => {
   const result = await preprocess(
     `<script>
     import Button from './Button.svelte';
@@ -38,7 +58,7 @@ test('Preprocessor handles file with @apply and colons in style tag', async () =
   `);
 });
 
-test('Preprocessor handles file with existing style tag', async () => {
+test('Preprocessor handles existing style tag', async () => {
   const inputFile = fs.readFileSync('./input/ButtonParent.svelte', 'utf-8');
   const result = await preprocess(inputFile, [svelteDeepWind()]);
   expect(result.code).toMatchInlineSnapshot(`
@@ -73,7 +93,7 @@ test('Preprocessor handles file with existing style tag', async () => {
   `);
 });
 
-test('Preprocessor handles file without a style tag', async () => {
+test('Preprocessor handles no style tag', async () => {
   const result = await preprocess(
     `<script>
     import Button from './Button.svelte';
@@ -93,7 +113,7 @@ test('Preprocessor handles file without a style tag', async () => {
   `);
 });
 
-test('Preprocessor handles file without component classes', async () => {
+test('Preprocessor handles no component classes', async () => {
   const result = await preprocess(
     `<div class="decoy">
   Decoy
@@ -130,14 +150,13 @@ test('Preprocessor skips a file if not starting with script block', async () => 
 });
 
 test('Preprocessor handles file with Typescript', async () => {
-  const inputFile = fs.readFileSync('./input/Header.svelte', 'utf-8');
+  const inputFile = fs.readFileSync('./input/HasTypescript.svelte', 'utf-8');
   const result = await preprocess(inputFile, [svelteDeepWind()]);
-  fs.writeFileSync('./output/Header.svelte', result.code, 'utf-8');
+  fs.writeFileSync('./output/HasTypescript.svelte', result.code, 'utf-8');
 });
 
 test('Preprocessor handles file with Typescript and @apply classes in style block', async () => {
   const inputFile = fs.readFileSync('./input/__layout.svelte', 'utf-8');
   const result = await preprocess(inputFile, [svelteDeepWind()]);
-  fs.writeFileSync('./output/__layout.svelte', result.code, 'utf-8');
   expect(result.code).toEqual(inputFile);
 });

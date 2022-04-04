@@ -1,7 +1,7 @@
 import MagicString from 'magic-string';
 import { parse, walk } from 'svelte/compiler';
 
-const deepName = (classes) => 'deep_' + classes.replace(/\s+/g, '_').replace(/:/g, '-');
+const deepName = (classes) => 'deep_' + classes.replace(/\s+/g, '_').replace(/:/g, '-').replace(/!/g, '\\!');
 
 /**
  * @returns {import('svelte/types/compiler/preprocess').PreprocessorGroup}

@@ -32,7 +32,7 @@
   <div class="w-1 flex-grow" />
 
   <Button
-    class="hidden md:inline"
+    class="!hidden !md:inline"
     form="text"
     href="https://www.flipcause.com/secure/cause_pdetails/NTQ3NDQ"
     target="_blank">
@@ -42,7 +42,7 @@
         default: 'Donate',
       })}</span>
   </Button>
-  <Button href="/about" form="text" class="hidden lg:inline">
+  <Button href="/about" form="text" class="!hidden !lg:inline">
     <i class="far fa-info-circle" />
     <span class="ml-1 hidden lg:inline">{$_('header.about', { default: 'About' })}</span>
   </Button>
