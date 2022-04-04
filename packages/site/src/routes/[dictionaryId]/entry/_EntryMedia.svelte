@@ -48,5 +48,5 @@
 {/if}
 
 {#if entry.sf || canEdit}
-  <Audio {entry} class="h-20 mb-2 rounded-md bg-gray-100 px-3" />
+  <Audio {entry} class="h-20 mb-2 rounded-md bg-gray-100 !px-3" />
 {/if}

@@ -10,14 +10,17 @@ export default () => {
   return {
     markup({ content, filename }) {
       const s = new MagicString(content);
+
       const scriptIsFirst = /^<script/;
       if (!scriptIsFirst.test(content)) { return { code: content } }
+      
       const scriptBlocksAtBeginning = /^<script[\s\S]*<\/script>\s*/gm;
       const match = scriptBlocksAtBeginning.exec(content);
       const scriptEndIndex = match[0].length;
 
-      const strippedContent = content.slice(scriptEndIndex).replace(/@apply .*/g, '');
-      const ast = parse(strippedContent);
+      const noScriptnoApplyContent = content.slice(scriptEndIndex).replace(/@apply [\s\S]+?[^}]+/g, '');
+      const ast = parse(noScriptnoApplyContent);
+
       const deepClasses = new Set();
 
       walk(ast.html, {
