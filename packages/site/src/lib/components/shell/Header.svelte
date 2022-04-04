@@ -32,7 +32,7 @@
   <div class="w-1 flex-grow" />
 
   <Button
-    class="hidden md:inline"
+    class="!hidden !md:inline"
     form="text"
     href="https://www.flipcause.com/secure/cause_pdetails/NTQ3NDQ"
     target="_blank">
@@ -42,7 +42,7 @@
         default: 'Donate',
       })}</span>
   </Button>
-  <Button href="/about" form="text" class="hidden lg:inline">
+  <Button href="/about" form="text" class="!hidden !lg:inline">
     <i class="far fa-info-circle" />
     <span class="ml-1 hidden lg:inline">{$_('header.about', { default: 'About' })}</span>
   </Button>
@@ -50,7 +50,7 @@
     form="text"
     href="https://docs.google.com/document/d/1MZGkBbnCiAch3tWjBOHRYPpjX1MVd7f6x5uVuwbxM-Q/edit?usp=sharing"
     target="_blank"
-    class="p-3 text-gray-600 hover:text-black hidden lg:block">
+    class="!p-3 text-gray-600 hover:text-black !hidden !lg:block">
     <i class="far fa-question-circle" />
     <span class="ml-1">
       FAQ

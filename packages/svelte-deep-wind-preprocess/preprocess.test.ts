@@ -2,6 +2,35 @@ import fs from 'fs';
 import { preprocess } from 'svelte/compiler';
 import svelteDeepWind from './index.js';
 
+test('Preprocessor handles line breaks @apply style lines', async () => {
+  const result = await preprocess(
+    `<script></script>
+    <style>
+    :global(.sv-menu button) {
+      @apply text-left px-4 py-2 text-sm text-gray-700 
+      hover:bg-gray-100 transition ease-in-out duration-150;
+    }
+    .sv-menu {
+      @apply py-1 rounded-md bg-white flex flex-col;
+    }
+  </style>`,
+    [svelteDeepWind()]
+  );
+  expect(result.code).toMatchInlineSnapshot(`
+    "<script></script>
+        <style>
+        :global(.sv-menu button) {
+          @apply text-left px-4 py-2 text-sm text-gray-700 
+          hover:bg-gray-100 transition ease-in-out duration-150;
+        }
+        .sv-menu {
+          @apply py-1 rounded-md bg-white flex flex-col;
+        }
+      </style>"
+  `);
+});
+
+
 test('Preprocessor handles ! in Component class names by escaping it in deep name', async () => {
   const result = await preprocess(
     `<script>
