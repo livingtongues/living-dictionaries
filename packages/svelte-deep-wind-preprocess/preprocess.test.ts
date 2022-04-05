@@ -7,28 +7,28 @@ test('Preprocessor allows rtl classes to be passed down to child component', asy
     `<Menu {portal} class="right-2 rtl:left-2 ltr:right-[4px] top-11">
       <div class="ltr:mt-2">Hello</div>
     </Menu>`,
-    [svelteDeepWind()]
+    [svelteDeepWind({ rtl: true })]
   );
   expect(result.code).toMatchInlineSnapshot(`
     "<Menu {portal} class=\\"deep_right-2_rtl-left-2_ltr-right-[4px]_top-11\\">
           <div class=\\"ltr_mt-2\\">Hello</div>
         </Menu><style> :global(.deep_right-2_rtl-left-2_ltr-right-\\\\[4px\\\\]_top-11) { @apply right-2 top-11; } :global([dir=rtl] .deep_right-2_rtl-left-2_ltr-right-\\\\[4px\\\\]_top-11) { @apply left-2; } :global([dir=ltr] .deep_right-2_rtl-left-2_ltr-right-\\\\[4px\\\\]_top-11) { @apply right-[4px]; } :global([dir=rtl] .rtl_left-2) { @apply left-2; } :global([dir=ltr] .ltr_right-\\\\[4px\\\\]) { @apply right-[4px]; } :global([dir=ltr] .ltr_mt-2) { @apply mt-2; }</style>"
   `);
-})
+});
 
 test('Preprocessor makes rtl and ltr classes global to keep Svelte compiler from stripping out', async () => {
   const result = await preprocess(
     `<div class="ltr:ml-2">LTR</div>
     <div class="ltr:mt-2">LTR</div>
     <div class="rtl:mr-2 ltr:sm:mt-[4px]">RTL</div>`,
-    [svelteDeepWind()]
+    [svelteDeepWind({ rtl: true })]
   );
   expect(result.code).toMatchInlineSnapshot(`
     "<div class=\\"ltr_ml-2\\">LTR</div>
         <div class=\\"ltr_mt-2\\">LTR</div>
         <div class=\\"rtl_mr-2 ltr_sm:mt-[4px]\\">RTL</div><style> :global([dir=rtl] .rtl_mr-2) { @apply mr-2; } :global([dir=ltr] .ltr_ml-2) { @apply ml-2; } :global([dir=ltr] .ltr_mt-2) { @apply mt-2; } :global([dir=ltr] .ltr_sm\\\\:mt-\\\\[4px\\\\]) { @apply sm:mt-[4px]; }</style>"
   `);
-})
+});
 
 test('Preprocessor handles line breaks @apply style lines', async () => {
   const result = await preprocess(
@@ -55,7 +55,6 @@ test('Preprocessor handles line breaks @apply style lines', async () => {
       </style>"
   `);
 });
-
 
 test('Preprocessor handles ! in Component class names by escaping it in deep name', async () => {
   const result = await preprocess(
