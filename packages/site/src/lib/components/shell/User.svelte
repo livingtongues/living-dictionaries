@@ -21,7 +21,7 @@
         <Avatar {user} />
       </button>
       {#if show}
-        <Menu class="ltr:right-2 rtl:left-2 top-11">
+        <Menu portalTarget="#direction" class="right-2 rtl:left-2 top-11">
           <div class="px-4 py-2 text-xs font-semibold text-gray-600">{user.displayName}</div>
           <div class="px-4 py-2 -mt-3 text-xs text-gray-600 border-b">{user.email}</div>
           {#if $admin}
