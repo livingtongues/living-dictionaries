@@ -1,6 +1,6 @@
 {
   "name": "svelte-deep-wind-preprocess",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Pass scoped Windicss classes to child Svelte components",
   "keywords": [
     "svelte",
