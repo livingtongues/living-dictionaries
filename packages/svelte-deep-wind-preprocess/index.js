@@ -7,8 +7,10 @@ const escapeDisallowedCharacters = (className) => className.replace(classNameEsc
 
 /**
  * @returns {import('svelte/types/compiler/preprocess').PreprocessorGroup}
+ * @param {Object} options Preprocessor options
+ * @param {boolean} options.rtl Support Right-To-Left languages using rtl: and ltr: prefixes
  */
-export default () => {
+export default ({ rtl } = { rtl: false }) => {
   return {
     markup({ content, filename }) {
       const s = new MagicString(content);
@@ -40,18 +42,6 @@ export default () => {
         }
       })
 
-      // capture rtl: and ltr: classes
-      const rtlMatches = noTSnoApplyContent.matchAll(/rtl:[a-z0-9:()[\]-]+/g)
-      const ltrMatches = noTSnoApplyContent.matchAll(/ltr:[a-z0-9:()[\]-]+/g)
-      const rtlClasses = new Set();
-      const ltrClasses = new Set();
-      for (const match of rtlMatches) {
-        rtlClasses.add(match[0]);
-      }
-      for (const match of ltrMatches) {
-        ltrClasses.add(match[0]);
-      }
-
       let addedStyles = '';
       for (const clsGroup of deepClasses) {
         const clsName = `.${escapeDisallowedCharacters(deepName(clsGroup))}`;
@@ -61,21 +51,36 @@ export default () => {
         });
         addedStyles = addedStyles + ` :global(${clsName}) { @apply ${normalClasses.join(" ")}; }`;
 
-        const rtlClArr = classes.filter((c) => c.indexOf("rtl") !== -1);
-        const ltrClArr = classes.filter((c) => c.indexOf("ltr") !== -1);
-        if (rtlClArr.length) {
-          addedStyles = addedStyles + ` :global([dir=rtl] ${clsName}) { @apply ${rtlClArr.join(" ").replace('rtl:', '')}; }`;
-        }
-        if (ltrClArr.length) {
-          addedStyles = addedStyles + ` :global([dir=ltr] ${clsName}) { @apply ${ltrClArr.join(" ").replace('ltr:', '')}; }`;
+        if (rtl) {
+          const rtlClArr = classes.filter((c) => c.indexOf("rtl") !== -1);
+          const ltrClArr = classes.filter((c) => c.indexOf("ltr") !== -1);
+          if (rtlClArr.length) {
+            addedStyles = addedStyles + ` :global([dir=rtl] ${clsName}) { @apply ${rtlClArr.join(" ").replace('rtl:', '')}; }`;
+          }
+          if (ltrClArr.length) {
+            addedStyles = addedStyles + ` :global([dir=ltr] ${clsName}) { @apply ${ltrClArr.join(" ").replace('ltr:', '')}; }`;
+          }
         }
       }
 
-      for (const cls of rtlClasses) {
-        addedStyles = addedStyles + ` :global([dir=rtl] .${escapeDisallowedCharacters(cls.replace(/rtl:/, 'rtl_'))}) { @apply ${cls.replace('rtl:', '')}; }`;
-      }
-      for (const cls of ltrClasses) {
-        addedStyles = addedStyles + ` :global([dir=ltr] .${escapeDisallowedCharacters(cls.replace(/ltr:/, 'ltr_'))}) { @apply ${cls.replace('ltr:', '')}; }`;
+      if (rtl) {
+        // capture rtl: and ltr: classes
+        const rtlMatches = noTSnoApplyContent.matchAll(/rtl:[a-z0-9:()[\]-]+/g)
+        const ltrMatches = noTSnoApplyContent.matchAll(/ltr:[a-z0-9:()[\]-]+/g)
+        const rtlClasses = new Set();
+        const ltrClasses = new Set();
+        for (const match of rtlMatches) {
+          rtlClasses.add(match[0]);
+        }
+        for (const match of ltrMatches) {
+          ltrClasses.add(match[0]);
+        }
+        for (const cls of rtlClasses) {
+          addedStyles = addedStyles + ` :global([dir=rtl] .${escapeDisallowedCharacters(cls.replace(/rtl:/, 'rtl_'))}) { @apply ${cls.replace('rtl:', '')}; }`;
+        }
+        for (const cls of ltrClasses) {
+          addedStyles = addedStyles + ` :global([dir=ltr] .${escapeDisallowedCharacters(cls.replace(/ltr:/, 'ltr_'))}) { @apply ${cls.replace('ltr:', '')}; }`;
+        }
       }
 
       if (addedStyles) {
