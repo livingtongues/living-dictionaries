@@ -2,10 +2,37 @@ import fs from 'fs';
 import { preprocess } from 'svelte/compiler';
 import svelteDeepWind from './index.js';
 
+test('Preprocessor allows rtl classes to be passed down to child component', async () => {
+  const result = await preprocess(
+    `<Menu {portal} class="right-2 rtl:left-2 top-11">
+      <div class="ltr:mt-2">Hello</div>
+    </Menu>`,
+    [svelteDeepWind()]
+  );
+  expect(result.code).toMatchInlineSnapshot(`
+    "<Menu {portal} class=\\"deep_right-2_rtl-left-2_top-11\\">
+          <div class=\\"ltr:mt-2\\">Hello</div>
+        </Menu><style> :global(.deep_right-2_rtl-left-2_top-11) { @apply right-2 rtl:left-2 top-11; }</style>"
+  `);
+})
+
+test('Preprocessor makes rtl and ltr classes global to keep Svelte compiler from stripping out', async () => {
+  const result = await preprocess(
+    `<div class="ltr:ml-2">LTR</div>
+    <div class="ltr:mt-2">LTR</div>
+    <div class="rtl:mr-2 ltr:sm:mt-[4px]">RTL</div>`,
+    [svelteDeepWind()]
+  );
+  expect(result.code).toMatchInlineSnapshot(`
+    "<div class=\\"ltr:ml-2\\">LTR</div>
+        <div class=\\"ltr:mt-2\\">LTR</div>
+        <div class=\\"rtl:mr-2 ltr:sm:mt-[4px]\\">RTL</div>"
+  `);
+})
+
 test('Preprocessor handles line breaks @apply style lines', async () => {
   const result = await preprocess(
-    `<script></script>
-    <style>
+    `<style>
     :global(.sv-menu button) {
       @apply text-left px-4 py-2 text-sm text-gray-700 
       hover:bg-gray-100 transition ease-in-out duration-150;
@@ -17,8 +44,7 @@ test('Preprocessor handles line breaks @apply style lines', async () => {
     [svelteDeepWind()]
   );
   expect(result.code).toMatchInlineSnapshot(`
-    "<script></script>
-        <style>
+    "<style>
         :global(.sv-menu button) {
           @apply text-left px-4 py-2 text-sm text-gray-700 
           hover:bg-gray-100 transition ease-in-out duration-150;
@@ -45,7 +71,7 @@ test('Preprocessor handles ! in Component class names by escaping it in deep nam
     "<script>
         import Button from './Button.svelte';
       </script>
-      <Button class=\\"deep_\\\\!text-yellow-500_text-lg\\">
+      <Button class=\\"deep_!text-yellow-500_text-lg\\">
       Yellow
     </Button><style> :global(.deep_\\\\!text-yellow-500_text-lg) { @apply !text-yellow-500 text-lg; }</style>"
   `);
@@ -156,10 +182,10 @@ test('Preprocessor handles no component classes', async () => {
   `);
 });
 
-test('Preprocessor skips a file if not starting with script block', async () => {
+test('Preprocessor skips a file if has Typescript and is not starting with script block', async () => {
   const result = await preprocess(
     `<!-- Comment --> 
-    <script>
+    <script lang="ts">
     import Button from './Button.svelte';
   </script>
   <Button class="text-yellow-500">
@@ -169,7 +195,7 @@ test('Preprocessor skips a file if not starting with script block', async () => 
   );
   expect(result.code).toMatchInlineSnapshot(`
     "<!-- Comment --> 
-        <script>
+        <script lang=\\"ts\\">
         import Button from './Button.svelte';
       </script>
       <Button class=\\"text-yellow-500\\">
