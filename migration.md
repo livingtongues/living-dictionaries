@@ -1,16 +1,23 @@
-- convert site windicss
-  - dropdown menu classes in user.svelte
-  - update Button component to allow injected styles to compensate for loss of injecting classes
-- check for errors
-- update vercel for main site
-- test and merge to main
-- deploy @ld/components
+# Windi + Kitbook Migration
 
+## To Launch
+- convert site windicss
+  - review class="{condition ? '' : ''}" situations as windi doesn't parse those
+  - review slideovers
+- check for errors
+- double check scrollbar stuff in global.css
+- Get Diego up to speed, test, and merge to main
+- update vercel for main site
+- deploy @ld/components to vercel
+
+## After Launch
 - add scripts package and move update-locales from site package
 - restore functions
-- lowercase clickOutside from svelte-pieces
 - remap path MediaStream and Recorder components
-- Button.svelte form="primary" to form="filled"
-- double check scrollbar stuff in global.css
 - update eslint config
+- switch to svelte-pieces modal and note that doesn't have mb-4 sm:mb-6 on body and needs noscroll = true input
 - replace font-awesome
+- update Button component to allow injected styles
+
+## Notes
+*Used `<[A-Z]([^>]|[\s\n])+?class="` to find Button classes (though causes catastrophic backtracking and will crash VSCode eventually)*
