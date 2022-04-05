@@ -8,15 +8,18 @@
 
   export let search: InstantSearch;
 
-  let query = '';
+  let query = null;
   let isSearchStalled = false;
 
   let refine: (arg0: string) => any = (query?) => {}; // stub function until received from instantsearch;
-  $: refine(query);
 
   onMount(() => {
     const customSearchBox = connectSearchBox((params) => {
-      ({ query, refine, isSearchStalled } = params);
+      ({ refine, isSearchStalled } = params);
+      const { query: currentQuery } = params;
+      if (query === null) {
+        query = currentQuery;
+      }
     });
 
     search.addWidgets([customSearchBox({})]);
@@ -36,6 +39,7 @@
     <input
       type="search"
       bind:value={query}
+      on:input={(e) => refine(e.target.value)}
       placeholder={$_('entry.search_entries', { default: 'Search Entries' })}
       class="form-input text-sm w-full pl-10 pr-3 py-2 !rounded-none ltr:!rounded-l-md rtl:!rounded-r-md md:!rounded-r-md md:!rounded-l-md" />
   </div>
