@@ -31,6 +31,8 @@ export interface IEntry extends IFirestoreMetaDataAbbreviated, LDAlgoliaFields, 
   de?: string; // definition english, only in Bahasa Lani (jaRhn6MAZim4Blvr1iEv) deprecated by Greg
 
   // Language & entry metadata
+  nc?: string; // noun class
+  va?: string; // variant
   di?: string; // dialect for this entry
   nt?: string; // notes
   sr?: string[]; // Source(s)
@@ -38,8 +40,6 @@ export interface IEntry extends IFirestoreMetaDataAbbreviated, LDAlgoliaFields, 
   // Usage
   xv?: string; // example vernacular - used for old dictionary imports
   xs?: IExampleSentence; // example sentences - new format which allows us to bring in example sentences from multiple languages (vernacular and gloss languages)
-  va?: string; // variant
-  nc?: string; // noun class
 
   sf?: IAudio; // sound file - TODO: deprecate this and move to using array of audio files
   // sfs?: IAudio[]; // sound files
