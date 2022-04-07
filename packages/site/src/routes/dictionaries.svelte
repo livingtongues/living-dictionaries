@@ -22,7 +22,6 @@
   import type { IDictionary } from '@ld/types';
   export let publicDictionaries: IDictionary[] = [];
   import { admin } from '$lib/stores';
-  import View from '$lib/components/ui/View.svelte';
   import { exportDictionariesAsCSV } from '$lib/export/csv';
   import Button from 'svelte-pieces/ui/Button.svelte';
   import ResponsiveTable from '$lib/components/ui/ResponsiveTable.svelte';
@@ -42,7 +41,7 @@
 
 <Header>{$_('home.list_of_dictionaries', { default: 'List of Dictionaries' })}</Header>
 
-<View padding={true}>
+<div class="p-3">
   <Collection
     path="dictionaries"
     startWith={publicDictionaries}
@@ -122,4 +121,4 @@
       {/each}
     </ResponsiveTable>
   </Collection>
-</View>
+</div>
