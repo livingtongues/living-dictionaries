@@ -16,15 +16,14 @@
   on:click={() => (showMobileFilters = false)} />
 
 <section
-  class="{showMobileFilters
-    ? 'translate-x-0'
-    : 'ltr:translate-x-full rtl:-translate-x-full'} menu ltr:right-0 rtl:left-0">
+  class:!translate-x-0={showMobileFilters}
+  class="ltr:!translate-x-full rtl:!-translate-x-full ltr:right-0 rtl:left-0 overflow-y-auto w-64 md:w-52 inset-y-0 flex z-50 md:z-auto fixed md:sticky md:top-24 self-start flex-shrink-0 flex-col p-4 md:p-0 bg-white shadow-lg md:shadow-none transform transition-transform ease-in-out duration-300 md:max-h-[calc(100vh-107px)] md:!transform-none">
   <header class="flex items-center justify-between space-x-3">
     <h2 class="text-lg leading-7 font-medium text-gray-900">
       {$_('entry.filters', { default: 'Filters' })}
     </h2>
     <ClearRefinements {search} />
-    <Button onclick={() => (showMobileFilters = false)} size="sm" form="filled" class="md:hidden">
+    <Button onclick={() => (showMobileFilters = false)} size="sm" form="filled" class="!md:hidden">
       {$_('entry.view_entries', { default: 'View Entries' })}
     </Button>
   </header>
@@ -149,25 +148,6 @@
       })} />
 {/if} -->
 <style>
-  .menu {
-    @apply overflow-y-auto w-64 md:w-52 
-    inset-y-0  
-    flex 
-    z-50 md:z-auto
-    fixed md:sticky md:top-24 
-    self-start flex-shrink-0 flex-col p-4 md:p-0
-    bg-white shadow-lg md:shadow-none 
-    transform transition-transform ease-in-out duration-300 
-    md:max-h-[calc(100vh-107px)];
-    /* md:!transform-none - won't work until https://github.com/tailwindlabs/tailwindcss/issues/4823 is fixed, see temp solution below */
-  }
-
-  @media (min-width: 768px) {
-    .menu {
-      transform: none !important;
-    }
-  }
-
   .backdrop {
     @apply fixed inset-0 bg-gray-900 bg-opacity-25 z-40 transition-opacity duration-300;
   }
@@ -175,3 +155,4 @@
     @apply opacity-0 pointer-events-none;
   }
 </style>
+

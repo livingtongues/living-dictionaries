@@ -64,9 +64,8 @@
 
 <div class="flex px-3">
   <div
-    class="menu {menuOpen
-      ? 'translate-x-0'
-      : 'ltr:-translate-x-full rtl:translate-x-full'} ltr:left-0 rtl:right-0">
+    class:!translate-x-0={menuOpen}
+    class="menu ltr:!-translate-x-full rtl:!translate-x-full ltr:left-0 rtl:right-0 md:!transform-none">
     <SideMenu bind:menuOpen />
     <button class="close-menu" on:click={() => (menuOpen = false)}>
       <i class="far fa-times fa-lg fa-fw" />
@@ -92,13 +91,6 @@
     shadow-lg md:shadow-none 
     border-r border-l md:border-none 
     transform transition duration-300 ease-in-out;
-    /* md:!transform-none - won't work until https://github.com/tailwindlabs/tailwindcss/issues/4823 is fixed, see temp solution below */
-  }
-
-  @media (min-width: 768px) {
-    .menu {
-      transform: none !important;
-    }
   }
 
   .backdrop {
