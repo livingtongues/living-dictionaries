@@ -92,7 +92,7 @@
 
     <EntrySemanticDomains {canEdit} {entry} on:valueupdate />
 
-    {#each ['mr', 'in', 'di', 'nt'] as field}
+    {#each ['nc', 'va', 'mr', 'in', 'di', 'nt'] as field}
       <EntryField
         value={entry[field]}
         {field}
