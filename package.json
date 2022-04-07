@@ -9,9 +9,9 @@
 		"site": "pnpm dev --filter=site",
 		"site:build": "pnpm build --filter=site",
 		"site:test": "pnpm test --filter=site",
-		"components": "pnpm dev --filter=components",
-		"components:build": "pnpm build --filter=components",
-		"components:test": "pnpm test --filter=components",
+		"parts": "pnpm dev --filter=parts",
+		"parts:build": "pnpm build --filter=parts",
+		"parts:test": "pnpm test --filter=parts",
 		"check-packages": "pnpm update --interactive --recursive --latest"
 	},
 	"devDependencies": {

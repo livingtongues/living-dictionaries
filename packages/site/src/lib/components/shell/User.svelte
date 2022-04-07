@@ -3,12 +3,27 @@
   import { getStores } from '$app/stores';
   import { admin, user as userStore } from '$lib/stores';
   import { firebaseConfig, logOut } from '$sveltefirets';
-  import { clickoutside } from 'svelte-pieces';
   import Avatar from 'svelte-pieces/shell/Avatar.svelte';
   import ShowHide from 'svelte-pieces/functions/ShowHide.svelte';
   import Menu from 'svelte-pieces/shell/Menu.svelte';
   import Button from 'svelte-pieces/ui/Button.svelte';
   import type { IUser } from '@ld/types';
+
+  // Deep import not working, so copying function here temporarily
+  // import { clickoutside } from 'svelte-pieces/actions/clickoutside.js';
+  function clickoutside(node) {
+    const handleClick = (event) => {
+      if (node && !node.contains(event.target) && !event.defaultPrevented) {
+        node.dispatchEvent(new CustomEvent('clickoutside'));
+      }
+    };
+    document.addEventListener('click', handleClick, true);
+    return {
+      destroy() {
+        document.removeEventListener('click', handleClick, true);
+      },
+    };
+  }
 
   $: user = $userStore || ($session && ($session.user as IUser)) || null;
   const { session } = getStores();
