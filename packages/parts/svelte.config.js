@@ -2,6 +2,7 @@ import adapter from '@sveltejs/adapter-auto';
 import preprocess from 'svelte-preprocess';
 import path from 'path';
 
+import deepWind from "svelte-deep-wind-preprocess";
 import { windi } from "svelte-windicss-preprocess";
 import { mdsvex } from 'mdsvex';
 import mdsvexConfig from './mdsvex.config.js';
