@@ -1,0 +1,9 @@
+{
+  "name": "@ld/types",
+  "version": "0.0.1",
+  "description": "Types for Living Dictionaries",
+  "main": "index.ts",
+  "devDependencies": {
+    "firebase": "^9.6.8"
+  }
+}

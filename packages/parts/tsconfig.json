@@ -1,0 +1,30 @@
+{
+	"extends": "./.svelte-kit/tsconfig.json",
+	"compilerOptions": {
+		"paths": {
+			"$lib": [
+				"src/lib"
+			],
+			"$lib/*": [
+				"src/lib/*"
+			],
+			"@ld/parts": [
+				"src/lib"
+			],
+			"@ld/parts/*": [
+				"src/lib/*"
+			],
+			"$kitbook": [
+				"src/kitbook"
+			],
+			"$kitbook/*": [
+				"src/kitbook/*"
+			]
+		},
+		"types": [
+			"youtube",
+			"vitest/globals",
+			"vitest/importMeta"
+		]
+	}
+}

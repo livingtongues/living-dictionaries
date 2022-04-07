@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="utf-8" />
+	<link rel='icon' type='image/png' href='/icons/favicon-32x32_adjusted.png'>
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<meta name='theme-color' content='#333333'>
+	<link rel='manifest' href='/manifest.json'>
+	<title>Living Dictionaries</title>
+	<!-- <script src='https://js.sentry-cdn.com/b344dd4315d54249afd9c03762aec0c9.min.js' crossorigin="anonymous"
+		data-lazy="no"></script> -->
+
+	%svelte.head%
+
+	<script src="https://kit.fontawesome.com/b5a05fc445.js" crossorigin="anonymous"></script>
+</head>
+
+<body class="text-gray-800 antialiased" style="padding-top: 3rem;">
+	<div id="svelte">%svelte.body%</div>
+
+	<style>
+		.antialiased {
+			-webkit-font-smoothing: antialiased;
+			-moz-osx-font-smoothing: grayscale;
+		}
+
+		.text-gray-800 {
+			--tw-text-opacity: 1;
+			color: rgba(31, 41, 55, var(--tw-text-opacity));
+		}
+	</style>
+</body>
+
+</html>
