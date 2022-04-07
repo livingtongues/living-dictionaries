@@ -2,7 +2,7 @@
   "name": "site",
   "version": "0.0.1",
   "scripts": {
-    "dev": "svelte-kit dev --host --port 3041 --open",
+    "dev": "svelte-kit dev --host --port 3041",
     "build": "svelte-kit build",
     "preview": "svelte-kit preview --open --host --port 3040",
     "check": "svelte-check --tsconfig ./tsconfig.json --threshold warning --diagnostic-sources js,svelte",
