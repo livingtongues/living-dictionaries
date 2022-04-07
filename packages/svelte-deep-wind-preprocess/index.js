@@ -99,3 +99,5 @@ export default ({ rtl } = { rtl: false }) => {
     }
   }
 }
+
+export { default as logFile } from './logFile';
