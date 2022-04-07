@@ -1,7 +1,7 @@
 {
-  "name": "@ld/components",
+  "name": "@ld/parts",
   "version": "0.0.1",
-  "description": "Language documentation components for use in livingdictionaries.app",
+  "description": "Language documentation components and helpers for use in livingdictionaries.app",
   "type": "module",
   "svelte": "src/lib/index.ts",
   "main": "src/lib/index.ts",
