@@ -38,6 +38,8 @@ export interface IEntry extends IFirestoreMetaDataAbbreviated, LDAlgoliaFields, 
   // Usage
   xv?: string; // example vernacular - used for old dictionary imports
   xs?: IExampleSentence; // example sentences - new format which allows us to bring in example sentences from multiple languages (vernacular and gloss languages)
+  va?: string; // variant
+  nc?: string; // noun class
 
   sf?: IAudio; // sound file - TODO: deprecate this and move to using array of audio files
   // sfs?: IAudio[]; // sound files
