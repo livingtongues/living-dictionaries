@@ -12,6 +12,7 @@ const config = {
   preprocess: [
     preprocess(),
     mdsvex(mdsvexConfig),
+    deepWind({ rtl: true, globalPrefix: true }),
     windi({
       // configPath: './windi.config.js',
       experimental: {
