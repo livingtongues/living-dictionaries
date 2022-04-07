@@ -1,6 +1,5 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
-  import View from '$lib/components/ui/View.svelte';
   import Header from '$lib/components/shell/Header.svelte';
   import Button from 'svelte-pieces/ui/Button.svelte';
 </script>
@@ -15,7 +14,7 @@
   {$_('about.about_LD', { default: 'About Living Dictionaries' })}
 </Header>
 
-<View maxWidth={true} padding={true}>
+<div class="max-w-screen-md mx-auto p-3">
   <h3
     class="mb-6 text-3xl leading-8 font-bold tracking-tight text-gray-900
     sm:text-4xl sm:leading-10">
@@ -263,7 +262,7 @@
     rel="noopener">
     {$_('header.donate', { default: 'Donate' })}
   </Button>
-</View>
+</div>
 
 <!-- Used to have TOU link here -->
 <style>

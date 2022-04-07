@@ -1,6 +1,5 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
-  import View from '$lib/components/ui/View.svelte';
   import Header from '$lib/components/shell/Header.svelte';
 </script>
 
@@ -12,7 +11,7 @@
   {$_('dictionary.terms_of_use', { default: 'Terms of Use' })}
 </Header>
 
-<View maxWidth={true} padding={true}>
+<div class="max-w-screen-md mx-auto p-3">
   <div class="prose max-w-none">
     <h2 class="uppercase">{$_('terms.agreement_to_terms', { default: 'Agreement to Terms' })}</h2>
     <div style="direction: ltr">
@@ -814,4 +813,4 @@
       <p>Last Updated: April 30, 2019</p>
     </div>
   </div>
-</View>
+</div>
