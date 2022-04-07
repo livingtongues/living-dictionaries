@@ -5,6 +5,7 @@ import forms from 'windicss/plugin/forms';
 // import typography from 'windicss/plugin/typography'; // causes occasional call stack size exceeded build bug
 
 export default defineConfig({
+  safelist: ['space-x-1, space-x-3'],
   theme: {
     extend: {
       colors: {
