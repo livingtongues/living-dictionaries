@@ -17,7 +17,7 @@
     <svelte:fragment slot="footer"><slot name="footer" /></svelte:fragment>
   </Sidebar>
 
-  <div class="tw-prose max-w-full md:max-w-[90ch] p-3 pb-16">
+  <div class="tw-prose max-w-full md:max-w-[90ch] w-full p-3 pb-16">
     <slot />
   </div>
 </div>
