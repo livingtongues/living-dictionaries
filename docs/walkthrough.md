@@ -102,14 +102,7 @@ Unfinished notes below
 - Wallaby
 - Use Quokka for a testing playground
 
-## Svench
-
-If you've ever built a component with many different possible states and want to be able to make changes w/o breaking anything, then a visual mocking tool based off various states or "stories" is really nice. Unit testing won't tell you if your CSS layout is broken in many of your views because of that last change you made. Storybook is the industry standard here, but can be quite slow to start up, so we're going to use Svench, an alternative option developed by Rixo for the Svelte community. To get started:
-
-- `npm i -D svench vite @sveltejs/vite-plugin-svelte`
-- I need to import Tailwind styles on startup so I can add `import './global.css';` to a .svench.js file. If you do your style import in your index.html file, you can do that by adding an index.svench file.
-- For SvelteKit, at the moment we need to add a `svench.config.js` file to tell the Vite server that Svench runs how to resolve our aliases.
-- Run `npx svench` and then create a `Button.svench` file right next to your `Button.svelte` component
+## Kitbook
 
 ## Making a change
 

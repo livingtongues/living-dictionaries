@@ -1,14 +1,6 @@
 .DS_Store
 node_modules
-/.svelte-kit
-*.local
-/.svench
-.vercel_build_output
-.vscode/settings.json
 
-# Firebase
-.firebase/
-firebase-debug.log
-*.log
-firestore.indexes.json
-firestore.rules
+*.local
+
+# .vscode/settings.json

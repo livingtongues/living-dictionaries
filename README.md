@@ -1,12 +1,12 @@
 # [Living Dictionaries](https://livingdictionaries.app/)
 
-A mobile-first community focused web app built by [Living Tongues Institute for Endangered Languages](https://livingtongues.org/).
+A mobile-first community focused dictionary-building web app built by [Living Tongues Institute for Endangered Languages](https://livingtongues.org/).
 
 ## Tech stack
 
 [<img src="https://img.shields.io/badge/SvelteJS-3-orange.svg"></a>](https://svelte.dev/)
 [<img src="https://img.shields.io/badge/SvelteKit-@next-orange.svg"></a>](https://kit.svelte.dev/)
-[<img src="https://img.shields.io/badge/TailwindCSS-2-blue.svg"></a>](https://tailwindcss.com/)
+[<img src="https://img.shields.io/badge/Windicss-3-blue.svg"></a>](https://windicss.org/)
 [<img src="https://img.shields.io/badge/Firebase-9-orange.svg"></a>](https://firebase.google.com/)
 [<img src="https://img.shields.io/badge/Vercel-SSR-black.svg"></a>](https://vercel.com/)
 [<img src="https://img.shields.io/badge/Algolia-Instantsearch.js-blue.svg"></a>](https://www.algolia.com/)
@@ -26,7 +26,8 @@ Beginning developers, here are some general [development environment setup tips]
 
 ## Developing
 
-Install dependencies with `npm install` and then run `npm run dev` to automatically open on [localhost:3051](http://localhost:3051). The app will hot reload as you make changes.
+- Install the recommended VSCode extensions.
+- This monorepo uses [pnpm](https://pnpm.io/). Install globaly using `npm install -g pnpm` if you don't have it yet. Then install dependencies with `pnpm i` and run `pnpm site` or `pnpm components` depending on which you are working on. Each command will start up a Vite dev server which will give you a link to open on localhost. Changes will hot reload almost instantly (consider using auto-save if you want to). ~~Run `pnpm dev` to run both at the same time.~~
 
 Note that you will need to ask for our dev Mapbox and Firebase API keys or bring your own by adding `VITE_mapboxAccessToken=...` and
 `VITE_FIREBASE_CONFIG=...` to a `.env.local` file on the root level.
