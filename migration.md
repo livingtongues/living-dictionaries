@@ -1,14 +1,16 @@
 # Windi + Kitbook Migration
 
 ## To Launch
-- rename to parts
+- check for build errors
 - convert site windicss
   - review class="{condition ? '' : ''}" situations as windi doesn't parse those
-    - entry filters
-  - review slideovers
-- check for errors
-- double check scrollbar stuff in global.css
+    - slideovers
+      - entry filters
+    - space-x-1 and space-x-3
 - Get Diego up to speed, test, and merge to main
+
+- double check scrollbar stuff in global.css
+- update vercel components root to parts
 - update vercel for main site
 - deploy @ld/parts to vercel
 

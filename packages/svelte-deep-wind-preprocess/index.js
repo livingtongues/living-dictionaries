@@ -100,4 +100,4 @@ export default ({ rtl } = { rtl: false }) => {
   }
 }
 
-export { default as logFile } from './logFile';
+// export { default as logFile } from './logFile';
