@@ -31,6 +31,7 @@ const config = {
     vite: {
       resolve: {
 				alias: {
+          '@ld/parts': path.resolve('./src/lib'),
 					$kitbook: path.resolve('./src/kitbook'),
 				},
 			},
