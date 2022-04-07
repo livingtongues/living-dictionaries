@@ -20,7 +20,7 @@
   <h3>{name}</h3>
 {/if}
 
-<div class="not-prose border-gray-300 border">
+<div class="{$$props.class} not-prose border-gray-300 border">
   <!-- Move into floatable window -->
   {#if knobs}
     <Knobs {restoreState} id={name.replace(' ', '_')} {knobs} />
