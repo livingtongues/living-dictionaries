@@ -8,6 +8,12 @@
 			"$lib/*": [
 				"src/lib/*"
 			],
+			"@ld/parts": [
+				"src/lib"
+			],
+			"@ld/parts/*": [
+				"src/lib/*"
+			],
 			"$kitbook": [
 				"src/kitbook"
 			],

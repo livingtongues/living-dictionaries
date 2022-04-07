@@ -30,6 +30,7 @@ importers:
       '@sveltejs/adapter-auto': next
       '@sveltejs/kit': next
       '@types/recordrtc': ^5.6.8
+      '@types/youtube': ^0.0.46
       mdsvex: ^0.10.5
       recordrtc: ^5.6.2
       svelte: ^3.44.0
@@ -47,6 +48,7 @@ importers:
       '@sveltejs/adapter-auto': 1.0.0-next.34
       '@sveltejs/kit': 1.0.0-next.308_svelte@3.46.5
       '@types/recordrtc': 5.6.8
+      '@types/youtube': 0.0.46
       mdsvex: 0.10.5_svelte@3.46.5
       recordrtc: 5.6.2
       svelte: 3.46.5
@@ -2581,6 +2583,10 @@ packages:
     resolution: {integrity: sha512-T8Yc9wt/5LbJyCaLiHPReJa0kApcIgJ7Bn735GjItUfh08Z1pJvu8QZqb9s+mMvKV6WUQRV7K2R46YbjMXTTJw==}
     dependencies:
       '@types/yargs-parser': 21.0.0
+    dev: true
+
+  /@types/youtube/0.0.46:
+    resolution: {integrity: sha512-Yf1Y4bDj/QIn8v+zdy0l7+OW6s1uoUvzVn5cGqPNCsL4iUW4gYUlIdQIRtH9NOHVgwZNLbVeeRDEn6N4RMq6Nw==}
     dev: true
 
   /@typescript-eslint/eslint-plugin/5.17.0_6da5f837f6da21a8347f2aaca31a901b:
