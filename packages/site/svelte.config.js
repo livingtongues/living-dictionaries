@@ -14,7 +14,7 @@ const config = {
 				['import.meta.env.VERCEL_ANALYTICS_ID', JSON.stringify(process.env.VERCEL_ANALYTICS_ID)]
 			]
 		}),
-		deepWind({ rtl: true, globalPrefix: true }),
+		deepWind({ rtl: true }),
 		windi({
 			configPath: './windi.config.js',
 			experimental: {

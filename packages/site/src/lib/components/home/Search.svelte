@@ -90,8 +90,8 @@
     <div class="relative text-xl px-2 mt-2 sm:mb-2">
       <div
         class="absolute inset-y-0 left-0 pl-5 flex items-center
-        pointer-events-none">
-        <i class="far fa-search text-gray-500" />
+        pointer-events-none text-gray-500">
+        <span class="i-carbon-search" />
       </div>
       <input
         type="text"
@@ -108,7 +108,7 @@
           on:click={() => (searchString = '')}
           class="absolute inset-y-0 right-0 px-4 flex items-center
           focus:outline-none">
-          <i class="far fa-times text-gray-400" />
+          <span class="i-la-times text-gray-400" />
         </button>
       {/if}
     </div>
