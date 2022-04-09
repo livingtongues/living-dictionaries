@@ -9,10 +9,10 @@ export const adminRecipients = (() => {
       'jacob@livingtongues.org',
       'annaluisa@livingtongues.org',
       'livingtongues@gmail.com',
-      'asilenbept@gmail.com',
+      'diego@livingtongues.org',
     ];
   } else {
     //talking-dictionaries-dev
-    return ['jacob@livingtongues.org', 'asilenbept@gmail.com'];
+    return ['jacob@livingtongues.org', 'diego@livingtongues.org'];
   }
 })();
