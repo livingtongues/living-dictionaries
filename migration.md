@@ -1,16 +1,17 @@
 # Windi + Kitbook Migration
 
 ## To Launch
-- check for build errors
-- test
-- merge to main
-- update vercel for main site
-- deploy @ld/parts to vercel
-
+- test on vercel temp project
+- merge to main & update vercel for main site
+- test live
+- delete vercel temp project
 
 ## After Launch
+- update github actions
 - fix logout bug
 - double check scrollbar stuff in global.css
+- add git diff HEAD^ HEAD --quiet . to parts vercel project
+- remove VITE_project and VITE_FirebaseDevApiKey env variable from vercel
 - add scripts package and move update-locales from site package
 - restore functions
 - remap path MediaStream and Recorder components

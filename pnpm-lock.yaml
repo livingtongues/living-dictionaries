@@ -35,7 +35,7 @@ importers:
       recordrtc: ^5.6.2
       svelte: ^3.44.0
       svelte-check: ^2.2.6
-      svelte-deep-wind-preprocess: ^0.0.6
+      svelte-deep-wind-preprocess: ^0.0.7
       svelte-pieces: ^1.0.8
       svelte-preprocess: ^4.10.1
       svelte-store-router: ^2.0.10
@@ -47,14 +47,14 @@ importers:
     devDependencies:
       '@ld/types': link:../types
       '@sveltejs/adapter-auto': 1.0.0-next.34
-      '@sveltejs/kit': 1.0.0-next.308_svelte@3.46.6
+      '@sveltejs/kit': 1.0.0-next.310_svelte@3.46.6
       '@types/recordrtc': 5.6.8
       '@types/youtube': 0.0.46
       mdsvex: 0.10.5_svelte@3.46.6
       recordrtc: 5.6.2
       svelte: 3.46.6
       svelte-check: 2.4.6_svelte@3.46.6
-      svelte-deep-wind-preprocess: 0.0.6
+      svelte-deep-wind-preprocess: 0.0.7
       svelte-pieces: 1.0.8_svelte@3.46.6+typescript@4.6.3
       svelte-preprocess: 4.10.4_svelte@3.46.6+typescript@4.6.3
       svelte-store-router: 2.0.10_svelte@3.46.6
@@ -104,7 +104,7 @@ importers:
       simple-git-hooks: ^2.7.0
       svelte: ^3.44.0
       svelte-check: ^2.2.10
-      svelte-deep-wind-preprocess: ^0.0.6
+      svelte-deep-wind-preprocess: ^0.0.7
       svelte-i18n: ^3.3.13
       svelte-pieces: ^1.0.8
       svelte-preprocess: ^4.10.1
@@ -144,7 +144,7 @@ importers:
       simple-git-hooks: 2.7.0
       svelte: 3.46.5
       svelte-check: 2.4.6_svelte@3.46.5
-      svelte-deep-wind-preprocess: 0.0.6
+      svelte-deep-wind-preprocess: 0.0.7
       svelte-i18n: 3.3.13_svelte@3.46.5
       svelte-pieces: 1.0.8_svelte@3.46.5+typescript@4.6.3
       svelte-preprocess: 4.10.4_svelte@3.46.5+typescript@4.6.3
@@ -1072,8 +1072,8 @@ packages:
       - supports-color
     dev: true
 
-  /@sveltejs/kit/1.0.0-next.308_svelte@3.46.6:
-    resolution: {integrity: sha512-/ORLef5kZEMTUgUkdSQ5Lsn3IKBRNYmLdJ26JjtSa03nPKsybvSMiGIho9WS6ESBw3+XaYF91TqksTyr/gTeoA==}
+  /@sveltejs/kit/1.0.0-next.310_svelte@3.46.6:
+    resolution: {integrity: sha512-pTyMyaoyHS+V5cQZIQMfQXmLkhw1VaRwT9avOSgwDc0QBpnNw2LdzwoPYsUr96ca5B6cfT3SMUNolxErTNHmPQ==}
     engines: {node: '>=14.13'}
     hasBin: true
     peerDependencies:
@@ -3488,8 +3488,8 @@ packages:
       - sugarss
     dev: true
 
-  /svelte-deep-wind-preprocess/0.0.6:
-    resolution: {integrity: sha512-f/JphAvEfujLb/0ziJMWggtZlWYEhT4EuSVDtZd8Ste5xPyF9QzNeOpAi4LxpavJW4iFXmYlkyRForCT52dpgw==}
+  /svelte-deep-wind-preprocess/0.0.7:
+    resolution: {integrity: sha512-xdrUO82kA+2eZKfwZuAYDzeGhfSuOzj/34zgyGNC/Om1dm8nJusiA4Db1YqtQ8qMkZRnXCEOc9UoWXqt+I5xOQ==}
     dev: true
 
   /svelte-hmr/0.14.11_svelte@3.46.5:
