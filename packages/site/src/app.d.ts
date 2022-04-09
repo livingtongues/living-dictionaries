@@ -28,7 +28,6 @@ declare namespace svelte.JSX {
 }
 
 interface ImportMetaEnv {
-  VITE_project: 'talking-dictionaries-dev' | 'talking-dictionaries-alpha'; // 'development' | 'production';
   VITE_mapboxAccessToken: string;
   VITE_ProcessImageUrl: string;
   VITE_FIREBASE_CONFIG: string; // prod is added to Vercel env variables
