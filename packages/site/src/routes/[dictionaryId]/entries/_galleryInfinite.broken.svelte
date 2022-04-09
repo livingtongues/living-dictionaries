@@ -5,15 +5,13 @@
   const search: InstantSearch = getContext('search');
 
   import InfiniteHits from '$lib/components/search/InfiniteHits.svelte';
-  import IntersectionObserver from '$lib/components/ui/IntersectionObserver.svelte';
+  // import IntersectionObserver from '$lib/components/ui/IntersectionObserver.svelte';
 
-  // import { connectToggleRefinement } from 'instantsearch.js/es/connectors';
-  import { connectToggleRefinement } from 'instantsearch.js/cjs/connectors/index.js';
-  // import { configure } from 'instantsearch.js/es/widgets/index.js';
-  import { configure } from 'instantsearch.js/cjs/widgets/index.js';
+  import { connectToggleRefinement } from 'instantsearch.js/es/connectors';
+  import { configure } from 'instantsearch.js/es/widgets/index.js';
   import { onMount, onDestroy } from 'svelte';
 
-  let refine;
+  let refine: (value?: { isRefined: boolean }) => void;
   onMount(() => {
     const customToggleRefinement = connectToggleRefinement((params) => {
       ({ refine } = params);

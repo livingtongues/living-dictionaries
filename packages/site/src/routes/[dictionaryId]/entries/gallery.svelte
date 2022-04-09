@@ -6,10 +6,8 @@
   import Hits from '$lib/components/search/Hits.svelte';
   import Pagination from '$lib/components/search/Pagination.svelte';
 
-  // import { configure } from 'instantsearch.js/es/widgets/index.js';
-  import { configure } from 'instantsearch.js/cjs/widgets/index.js';
-  // import { connectToggleRefinement } from 'instantsearch.js/es/connectors';
-  import { connectToggleRefinement } from 'instantsearch.js/cjs/connectors/index.js';
+  import { configure } from 'instantsearch.js/es/widgets/index.js';
+  import { connectToggleRefinement } from 'instantsearch.js/es/connectors';
   import { onMount } from 'svelte';
 
   onMount(() => {

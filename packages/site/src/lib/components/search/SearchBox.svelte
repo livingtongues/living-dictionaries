@@ -2,8 +2,7 @@
   import { _ } from 'svelte-i18n';
 
   import type { InstantSearch } from 'instantsearch.js';
-  // import { connectSearchBox } from 'instantsearch.js/es/connectors';
-  import { connectSearchBox } from 'instantsearch.js/cjs/connectors/index.js';
+  import { connectSearchBox } from 'instantsearch.js/es/connectors';
   import { onMount } from 'svelte';
 
   export let search: InstantSearch;

@@ -1,7 +1,6 @@
 <script lang="ts">
   import type { InstantSearch } from 'instantsearch.js';
-  // import { connectInfiniteHits } from 'instantsearch.js/es/connectors';
-  import { connectInfiniteHits } from 'instantsearch.js/cjs/connectors/index.js';
+  import { connectInfiniteHits } from 'instantsearch.js/es/connectors';
   import { onMount } from 'svelte';
 
   // import instantsearch from 'instantsearch.js';

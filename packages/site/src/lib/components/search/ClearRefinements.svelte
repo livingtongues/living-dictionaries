@@ -1,7 +1,6 @@
 <script lang="ts">
   import type { InstantSearch } from 'instantsearch.js';
-  // import { connectClearRefinements } from 'instantsearch.js/es/connectors';
-  import { connectClearRefinements } from 'instantsearch.js/cjs/connectors/index.js';
+  import { connectClearRefinements } from 'instantsearch.js/es/connectors';
   import { onMount } from 'svelte';
 
   export let search: InstantSearch;

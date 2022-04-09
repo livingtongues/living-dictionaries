@@ -2,8 +2,7 @@
   import { _, locale } from 'svelte-i18n';
 
   import type { InstantSearch } from 'instantsearch.js';
-  // import { connectRefinementList } from 'instantsearch.js/es/connectors';
-  import { connectRefinementList } from 'instantsearch.js/cjs/connectors/index.js';
+  import { connectRefinementList } from 'instantsearch.js/es/connectors';
   import type { RefinementListItem } from 'instantsearch.js/es/connectors/refinement-list/connectRefinementList';
   import { onMount } from 'svelte';
 

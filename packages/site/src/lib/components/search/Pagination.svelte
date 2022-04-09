@@ -1,7 +1,6 @@
 <script lang="ts">
   import type { InstantSearch } from 'instantsearch.js';
-  // import { connectPagination } from 'instantsearch.js/es/connectors';
-  import { connectPagination } from 'instantsearch.js/cjs/connectors/index.js';
+  import { connectPagination } from 'instantsearch.js/es/connectors';
   import { onMount } from 'svelte';
   import { canEdit } from '$lib/stores';
   import { _ } from 'svelte-i18n';

@@ -1,7 +1,6 @@
 <script lang="ts">
   import type { InstantSearch } from 'instantsearch.js';
-  // import { connectSortBy } from 'instantsearch.js/es/connectors';
-  import { connectSortBy } from 'instantsearch.js/cjs/connectors/index.js';
+  import { connectSortBy } from 'instantsearch.js/es/connectors';
   import type { SortByItem } from 'instantsearch.js/es/connectors/sort-by/connectSortBy';
   import { onMount } from 'svelte';
 

@@ -1,8 +1,7 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
   import type { InstantSearch } from 'instantsearch.js';
-  // import { connectStats } from 'instantsearch.js/es/connectors';
-  import { connectStats } from 'instantsearch.js/cjs/connectors/index.js';
+  import { connectStats } from 'instantsearch.js/es/connectors';
   import { onMount } from 'svelte';
 
   export let search: InstantSearch;
