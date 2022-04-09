@@ -1,0 +1,64 @@
+{
+  "name": "site",
+  "version": "0.0.1",
+  "scripts": {
+    "dev": "svelte-kit dev --host --port 3041",
+    "build": "svelte-kit build",
+    "preview": "svelte-kit preview --open --host --port 3040",
+    "check": "svelte-check --tsconfig ./tsconfig.json --threshold warning --diagnostic-sources js,svelte",
+    "check:watch": "svelte-check --tsconfig ./tsconfig.json --threshold warning --diagnostic-sources js,svelte --watch",
+    "test": "vitest -u",
+    "update-locales": "node --loader ts-node/esm scripts/update-locales.ts"
+  },
+  "devDependencies": {
+    "@ld/parts": "workspace:^0.0.1",
+    "@ld/types": "workspace:^0.0.1",
+    "@sentry/browser": "^6.18.2",
+    "@sveltejs/adapter-auto": "1.0.0-next.34",
+    "@sveltejs/kit": "1.0.0-next.304",
+    "@testing-library/jest-dom": "^5.15.0",
+    "@testing-library/svelte": "^3.0.3",
+    "@types/d3-dsv": "^3.0.0",
+    "@types/file-saver": "^2.0.4",
+    "@types/mapbox-gl": "^2.4.2",
+    "@types/recordrtc": "^5.6.8",
+    "algoliasearch": "^4.11.0",
+    "ckeditor5-build-classic-with-alignment-underline-smallcaps": "^1.0.0",
+    "csvtojson": "^2.0.10",
+    "d3-dsv": "^3.0.1",
+    "dot-object": "^2.1.4",
+    "file-saver": "^2.0.5",
+    "firebase": "^9.6.8",
+    "instantsearch.js": "^4.33.2",
+    "jszip": "^3.7.1",
+    "logrocket": "^2.1.2",
+    "mapbox-gl": "^2.6.1",
+    "node-fetch": "^3.1.0",
+    "nprogress": "^0.2.0",
+    "recordrtc": "^5.6.2",
+    "simple-git-hooks": "^2.7.0",
+    "svelte": "^3.44.0",
+    "svelte-check": "^2.2.10",
+    "svelte-i18n": "^3.3.13",
+    "svelte-pieces": "^1.0.8",
+    "svelte-preprocess": "^4.10.1",
+    "svelte-deep-wind-preprocess": "^0.0.7",
+    "svelte-windicss-preprocess": "~4.1.0",
+    "tslib": "^2.3.1",
+    "typescript": "~4.6.2",
+    "vitest": "^0.8.2",
+    "wavesurfer.js": "^5.2.0",
+    "web-vitals": "^2.1.2",
+    "windicss": "^3.5.1"
+  },
+  "type": "module",
+  "simple-git-hooks": {
+    "pre-commit": "npx lint-staged"
+  },
+  "lint-staged": {
+    "*.+(ts|svelte)": "eslint --fix",
+    "**/*.+(ts|svelte|json)": [
+      "prettier --write"
+    ]
+  }
+}

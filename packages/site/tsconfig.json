@@ -1,0 +1,28 @@
+{
+  "extends": "./.svelte-kit/tsconfig.json",
+  "compilerOptions": {
+    "lib": [
+      "es2020",
+      "WebWorker",
+      "DOM"
+    ],
+    "paths": {
+      "$lib": [
+        "src/lib"
+      ],
+      "$lib/*": [
+        "src/lib/*"
+      ],
+      "$sveltefirets": [
+        "src/sveltefirets"
+      ],
+      "$sveltefirets/*": [
+        "src/sveltefirets/*"
+      ]
+    },
+    "types": [
+      "vitest/globals",
+      "vitest/importMeta"
+    ]
+  },
+}
