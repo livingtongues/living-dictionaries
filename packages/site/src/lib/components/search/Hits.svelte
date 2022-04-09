@@ -1,7 +1,6 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  // import { connectHits } from 'instantsearch.js/es/connectors';
-  import { connectHits } from 'instantsearch.js/cjs/connectors/index.js';
+  import { connectHits } from 'instantsearch.js/es/connectors';
   import { limit, orderBy, where, Timestamp } from 'firebase/firestore';
   import { canEdit, dictionary, user } from '$lib/stores';
   import { mergeBy } from '$lib/helpers/array';

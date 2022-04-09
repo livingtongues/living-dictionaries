@@ -5,18 +5,12 @@
   // import algoliasearch from 'algoliasearch/lite'; /// <reference types="algoliasearch" /> TODO
   import algoliasearch from 'algoliasearch';
   import instantsearch from 'instantsearch.js';
-  // import { configure } from 'instantsearch.js/es/widgets/index.js';
-  import { configure } from 'instantsearch.js/cjs/widgets/index.js';
-  // import {
-  //   connectSearchBox,
-  //   connectInfiniteHits,
-  //   connectToggleRefinement,
-  // } from 'instantsearch.js/es/connectors';
+  import { configure } from 'instantsearch.js/es/widgets/index.js';
   import {
     connectSearchBox,
     connectInfiniteHits,
     connectToggleRefinement,
-  } from 'instantsearch.js/cjs/connectors/index.js';
+  } from 'instantsearch.js/es/connectors';
   import { algoliaQueryParams } from '$lib/stores';
 
   const searchClient = algoliasearch(

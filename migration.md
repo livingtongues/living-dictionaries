@@ -10,7 +10,6 @@
 - update github actions
 - fix logout bug
 - double check scrollbar stuff in global.css
-- add git diff HEAD^ HEAD --quiet . to parts vercel project
 - remove VITE_project and VITE_FirebaseDevApiKey env variable from vercel
 - add scripts package and move update-locales from site package
 - restore functions

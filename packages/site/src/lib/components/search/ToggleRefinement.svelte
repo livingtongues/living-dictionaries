@@ -1,8 +1,7 @@
 <script lang="ts">
   import type { InstantSearch } from 'instantsearch.js';
   import type { ToggleRefinementRenderState } from 'instantsearch.js/es/connectors/toggle-refinement/connectToggleRefinement';
-  // import { connectToggleRefinement } from 'instantsearch.js/es/connectors';
-  import { connectToggleRefinement } from 'instantsearch.js/cjs/connectors/index.js';
+  import { connectToggleRefinement } from 'instantsearch.js/es/connectors';
   import { onMount } from 'svelte';
 
   export let search: InstantSearch,
