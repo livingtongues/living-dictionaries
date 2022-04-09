@@ -1,7 +1,7 @@
 # Windi + Kitbook Migration
 
 ## To Launch
-- test on vercel temp project
+- test
 - merge to main & update vercel for main site
 - test live
 - delete vercel temp project
