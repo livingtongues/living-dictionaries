@@ -1,12 +1,12 @@
 # Windi + Kitbook Migration
 
 ## To Launch
-- test
-- merge to main & update vercel for main site
+- update vercel for main site
 - test live
 - delete vercel temp project
 
 ## After Launch
+- space under images in table on mobile
 - update github actions
 - fix logout bug
 - double check scrollbar stuff in global.css
