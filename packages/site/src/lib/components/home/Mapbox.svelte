@@ -27,7 +27,7 @@
     // await new Promise((resolve) => setTimeout(resolve, 500));
     const mapboxModule = await import('mapbox-gl');
     mapbox = mapboxModule.default;
-    mapbox.accessToken = import.meta.env.VITE_mapboxAccessToken;
+    mapbox.accessToken = import.meta.env.VITE_mapboxAccessToken as string;
 
     const link = document.createElement('link');
     link.rel = 'stylesheet';

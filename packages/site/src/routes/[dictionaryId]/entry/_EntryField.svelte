@@ -19,7 +19,10 @@
       {/if}
       <div
         class:sompeng={display === 'Sompeng-Mardir'}
-        class="{field === 'lx' ? 'font-bold text-4xl' : 'border-b-2'} border-dashed pb-1 mb-2">
+        class:font-bold={field === 'lx'}
+        class:text-4xl={field === 'lx'}
+        class:border-b-2={field !== 'lx'}
+        class="border-dashed pb-1 mb-2">
         {#if value}
           <div dir="ltr">
             {#if value.indexOf('<i>') > -1}

@@ -62,7 +62,7 @@
 
     await loadStylesOnce('https://api.mapbox.com/mapbox-gl-js/v1.8.1/mapbox-gl.css');
 
-    mapboxgl.accessToken = import.meta.env.VITE_mapboxAccessToken;
+    mapboxgl.accessToken = import.meta.env.VITE_mapboxAccessToken as string;
 
     map = new mapboxgl.Map({
       container: 'map',
@@ -95,7 +95,7 @@
         //@ts-ignore
         new MapboxGeocoder({
           accessToken: mapboxgl.accessToken,
-          mapboxgl: mapboxgl,
+          mapboxgl,
           getItemValue: setMarkerOnSearchedCoordinates,
           placeholder: $_('about.search'),
         })

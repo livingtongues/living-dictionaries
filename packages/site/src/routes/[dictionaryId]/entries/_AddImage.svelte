@@ -35,9 +35,8 @@
 <div class="{$$props.class} hover:bg-gray-300 flex flex-col">
   {#if !file}
     <label
-      class="{dragging
-        ? 'bg-blue-200 border-blue-300 text-blue-700'
-        : 'text-gray-600 border-transparent'}
+      class:dragging
+      class="text-gray-600 border-transparent
       h-full flex flex-col items-center justify-center border-2 border-dashed
       cursor-pointer"
       title="Add Photo to Entry"
@@ -67,3 +66,9 @@
     {/await}
   {/if}
 </div>
+
+<style>
+  .dragging {
+    @apply bg-blue-200 !border-blue-300 !text-blue-700;
+  }
+</style>

@@ -95,7 +95,8 @@
 {/if}
 
 <div
-  class="{items.length > maxInitialItems || value ? '' : 'hidden'} mt-1 mb-2 relative rounded-md
+  class:hidden={!(items.length > maxInitialItems || value)}
+  class="mt-1 mb-2 relative rounded-md
     shadow-sm">
   <input
     type="search"
