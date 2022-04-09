@@ -19,6 +19,7 @@
   import Button from 'svelte-pieces/ui/Button.svelte';
   import ShowHide from 'svelte-pieces/functions/ShowHide.svelte';
   import { inviteHelper } from '$lib/helpers/inviteHelper';
+  import { Invitation } from '@ld/parts';
 
   let helperType: IHelper[];
   let inviteType: IInvite[];
@@ -64,7 +65,6 @@
         <div class="text-sm leading-5 font-medium text-gray-900">
           {manager.name}
         </div>
-        <!-- <div class="text-sm leading-5 text-gray-500" /> -->
       </div>
     {/each}
   </Collection>
@@ -75,28 +75,19 @@
       startWith={inviteType}
       let:data={invites}>
       {#each invites as invite}
-        <div class="py-3 flex flex-wrap items-center justify-between">
-          <div class="text-sm leading-5 font-medium text-gray-900">
-            <i
+        <div class="my-1">
+          <Invitation
+            admin={$admin}
+            {invite}
+            on:delete={() =>
+              updateOnline(`dictionaries/${dictionaryId}/invites/${invite.id}`, {
+                status: 'cancelled',
+              })}>
+            <i slot="prefix"
               >{$_('contributors.invitation_sent', {
                 default: 'Invitation sent',
               })}:</i>
-            {invite.targetEmail}
-          </div>
-          {#if $admin}
-            <Button
-              color="red"
-              size="sm"
-              onclick={() => {
-                if (confirm($_('misc.delete', { default: 'Delete' }))) {
-                  updateOnline(`dictionaries/${dictionaryId}/invites/${invite.id}`, {
-                    status: 'cancelled',
-                  });
-                }
-              }}
-              >{$_('misc.delete', { default: 'Delete' })}
-              <i class="fas fa-times" /><i class="fas fa-key mx-1" /></Button>
-          {/if}
+          </Invitation>
         </div>
       {/each}
     </Collection>
@@ -135,28 +126,19 @@
       startWith={inviteType}
       let:data={invites}>
       {#each invites as invite}
-        <div class="py-3 flex flex-wrap items-center justify-between">
-          <div class="text-sm leading-5 font-medium text-gray-900">
-            <i
+        <div class="my-1">
+          <Invitation
+            admin={$admin}
+            {invite}
+            on:delete={() =>
+              updateOnline(`dictionaries/${dictionaryId}/invites/${invite.id}`, {
+                status: 'cancelled',
+              })}>
+            <i slot="prefix"
               >{$_('contributors.invitation_sent', {
                 default: 'Invitation sent',
               })}:</i>
-            {invite.targetEmail}
-          </div>
-          {#if $admin}
-            <Button
-              color="red"
-              size="sm"
-              onclick={() => {
-                if (confirm($_('misc.delete', { default: 'Delete' }))) {
-                  updateOnline(`dictionaries/${dictionaryId}/invites/${invite.id}`, {
-                    status: 'cancelled',
-                  });
-                }
-              }}
-              >{$_('misc.delete', { default: 'Delete' })}
-              <i class="fas fa-times" /><i class="fas fa-key ml-1" /></Button>
-          {/if}
+          </Invitation>
         </div>
       {/each}
     </Collection>
