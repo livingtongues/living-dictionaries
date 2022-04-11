@@ -1,6 +1,6 @@
 <script lang="ts">
   import { admin } from '$lib/stores';
-  import type { IDictionary, IHelper } from '@ld/types';
+  import type { IDictionary, IHelper, IInvite } from '@ld/types';
   import { printDate } from '$lib/helpers/time';
   export let dictionary: IDictionary;
   import ShowHide from 'svelte-pieces/functions/ShowHide.svelte';
@@ -8,7 +8,10 @@
   import Button from 'svelte-pieces/ui/Button.svelte';
   import BadgeArrayEmit from 'svelte-pieces/data/BadgeArrayEmit.svelte';
   import { createEventDispatcher } from 'svelte';
-  import { Collection } from '$sveltefirets';
+  import { Collection, updateOnline } from '$sveltefirets';
+  import { where } from 'firebase/firestore';
+  import { Invitation } from '@ld/parts';
+
   import RolesManagment from './_RolesManagment.svelte';
   import IntersectionObserver from '$lib/components/ui/IntersectionObserver.svelte';
 
@@ -20,6 +23,7 @@
   }>();
 
   let helperType: IHelper[];
+  let inviteType: IInvite[];
 </script>
 
 <tr title={$admin > 1 && JSON.stringify(dictionary, null, 1)}>
@@ -50,6 +54,28 @@
           let:data={managers}>
           <RolesManagment helpers={managers} {dictionary} role="manager" />
         </Collection>
+        <Collection
+          path={`dictionaries/${dictionary.id}/invites`}
+          queryConstraints={[
+            where('role', '==', 'manager'),
+            where('status', 'in', ['queued', 'sent']),
+          ]}
+          startWith={inviteType}
+          let:data={invites}>
+          {#each invites as invite}
+            <div class="my-1">
+              <Invitation
+                admin
+                {invite}
+                on:delete={() =>
+                  updateOnline(`dictionaries/${dictionary.id}/invites/${invite.id}`, {
+                    status: 'cancelled',
+                  })}>
+                <span class="i-mdi-email-send" slot="prefix" />
+              </Invitation>
+            </div>
+          {/each}
+        </Collection>
       {/if}
     </IntersectionObserver>
   </td>
@@ -61,6 +87,28 @@
           startWith={helperType}
           let:data={contributors}>
           <RolesManagment helpers={contributors} {dictionary} role="contributor" />
+        </Collection>
+        <Collection
+          path={`dictionaries/${dictionary.id}/invites`}
+          queryConstraints={[
+            where('role', '==', 'contributor'),
+            where('status', 'in', ['queued', 'sent']),
+          ]}
+          startWith={inviteType}
+          let:data={invites}>
+          {#each invites as invite}
+            <div class="my-1">
+              <Invitation
+                admin
+                {invite}
+                on:delete={() =>
+                  updateOnline(`dictionaries/${dictionary.id}/invites/${invite.id}`, {
+                    status: 'cancelled',
+                  })}>
+                <span class="i-mdi-email-send" slot="prefix" />
+              </Invitation>
+            </div>
+          {/each}
         </Collection>
       {/if}
     </IntersectionObserver>
