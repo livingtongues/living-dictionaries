@@ -8,7 +8,7 @@
   import { db } from '$sveltefirets';
   import BadgeArrayEmit from 'svelte-pieces/data/BadgeArrayEmit.svelte';
   import ShowHide from 'svelte-pieces/functions/ShowHide.svelte';
-  import { collectionGroup, onSnapshot, query, Unsubscribe, where } from 'firebase/firestore';
+  import { collectionGroup, onSnapshot, query, type Unsubscribe, where } from 'firebase/firestore';
   import { onDestroy, onMount } from 'svelte';
 
   export let user: IUser;
