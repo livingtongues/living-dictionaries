@@ -2,7 +2,7 @@
   import { onMount } from 'svelte';
   import mapboxgl from 'mapbox-gl';
 
-  import Modal from '$lib/components/ui/Modal.svelte';
+  import { Modal } from 'svelte-pieces';
   import { startCoordinates } from './map.class';
   import type { IDictionary } from '@ld/types';
   let map: mapboxgl.Map;
