@@ -1,1 +1,10 @@
 # Map
+<script>
+  import Story from '$kitbook/stories/Story.svelte';
+  import EditCoordinates from '$lib/settings/EditCoordinates.svelte';
+  const mockDictionary = {name: "Test", glossLanguages: ['en'], entryCount: 0}
+</script>
+
+<Story name="Coordinates">
+  <EditCoordinates dictionary={mockDictionary} />
+</Story>
