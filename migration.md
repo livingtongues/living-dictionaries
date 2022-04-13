@@ -1,13 +1,13 @@
 # Windi + Kitbook Migration
 
+- add scripts package and move update-locales from site package
 - bring in PRs and review recent changes
+- restore functions
 - set admin context on a global level and in kitbook add Context component
 - fix logout bug
 - space under images in table on mobile
 - update github actions
 - remap path MediaStream and Recorder components
-- add scripts package and move update-locales from site package
-- restore functions
 - double check scrollbar stuff in global.css
 - update eslint config
 - switch to svelte-pieces modal and note that doesn't have mb-4 sm:mb-6 on body and needs noscroll = true input
