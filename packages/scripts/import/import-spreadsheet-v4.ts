@@ -1,14 +1,15 @@
-// import * as csv from 'csvtojson';
-const csv = require('csvtojson');
-import { db, timestamp, environment } from '../config';
-import type { IEntry } from '../../../src/lib/interfaces';
-import { uploadAudioFile, uploadImageFile } from './import-media';
+import type { IEntry } from '@ld/types';
+import { db, timestamp, environment } from '../config.js';
+import { uploadAudioFile, uploadImageFile } from './import-media.js';
+import { readFileSync } from 'fs';
+import { parseCSVFrom } from './parse-csv.js';
 
 export async function importFromSpreadsheet(dictionaryId: string, dry = false) {
   const dateStamp = Date.now();
 
-  const json = await loadJSONfromCSV(dictionaryId);
-  const entries = await importEntriesToFirebase(dictionaryId, json, dateStamp, dry);
+  const file = readFileSync(`./import/data/${dictionaryId}/${dictionaryId}.csv`, 'utf8');
+  const rows = parseCSVFrom(file);
+  const entries = await importEntriesToFirebase(dictionaryId, rows, dateStamp, dry);
 
   console.log(
     `Finished ${dry ? 'emulating' : 'importing'} ${entries.length} entries to ${
@@ -17,10 +18,6 @@ export async function importFromSpreadsheet(dictionaryId: string, dry = false) {
   );
   console.log('');
   return entries;
-}
-
-export async function loadJSONfromCSV(dictionaryId: string) {
-  return await csv().fromFile(`./scripts/import/data/${dictionaryId}/${dictionaryId}.csv`);
 }
 
 export function convertJsonRowToEntryFormat(row: any, dateStamp: number): IEntry {
@@ -98,7 +95,7 @@ export function parseSourceFromNotes(notes: string): { notes: string; source?: s
 
 export async function importEntriesToFirebase(
   dictionaryId: string,
-  json: any[],
+  rows: any[],
   dateStamp: number,
   dry = false
 ) {
@@ -108,7 +105,7 @@ export async function importEntriesToFirebase(
   let batch = db.batch();
   const colRef = db.collection(`dictionaries/${dictionaryId}/words`);
 
-  for (const row of json) {
+  for (const row of rows) {
     if (!row.lexeme || row.lexeme === '(word/phrase)') {
       continue;
     }

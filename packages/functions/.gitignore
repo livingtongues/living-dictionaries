@@ -3,11 +3,3 @@ lib/**/*
 
 # TypeScript v1 declaration files
 typings/
-
-node_modules/
-
-service-account*
-sheets-viewer-SA.json
-logs
-
-.env

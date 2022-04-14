@@ -23,13 +23,13 @@ const iterateThroughDictionaries = async () => {
 };
 // iterateThroughDictionaries();
 
-import { prepareDataForIndex } from '../../src/algolia/prepareDataForIndex';
-import { IEntry } from '../../../src/lib/interfaces';
+import { prepareDataForIndex } from './prepareDataForIndex';
+import { IEntry } from '@ld/types';
 
-async function indexDictionary(dictionaryId) {
+async function indexDictionary(dictionaryId: string) {
   const entriesSnapshot = await db.collection(`dictionaries/${dictionaryId}/words`).get();
   const entryPromises = entriesSnapshot.docs.map(async (doc) => {
-    const entry = await prepareDataForIndex(doc.data() as IEntry, dictionaryId);
+    const entry = await prepareDataForIndex(doc.data() as IEntry, dictionaryId, db);
     return { ...entry, objectID: doc.id };
   });
 
