@@ -47,10 +47,11 @@
       </div>
     </div>
 
-    <div class="modal-footer space-x-1">
+    <div class="modal-footer">
       <Button onclick={close} form="simple" color="black">
         {$_('misc.cancel', { default: 'Cancel' })}
       </Button>
+      <div class="w-1"></div>
       {#if adding}
         <Button type="submit" form="filled">
           {$_('misc.next', { default: 'Next' })}
