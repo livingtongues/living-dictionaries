@@ -7,7 +7,7 @@ program
   .option('--dry', 'Only log values, do not upload data and media')
   .parse(process.argv);
 
-import { importFromSpreadsheet } from './import-spreadsheet-v4';
+import { importFromSpreadsheet } from './import-spreadsheet-v4.js';
 
 const dictionaryId = program.opts().id;
 const dry = program.opts().dry;

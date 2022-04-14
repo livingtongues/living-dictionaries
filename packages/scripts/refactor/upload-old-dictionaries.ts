@@ -1,4 +1,4 @@
-import { IDictionary } from '../../../src/lib/interfaces';
+import { IDictionary } from '@ld/types';
 import { db, firebase } from '../config';
 import { tdLocations } from './tdv1-dictionaries';
 (() => {
