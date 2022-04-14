@@ -1,13 +1,16 @@
 import {
-  convertJsonToEntries,
-  loadJSONfromCSV,
+  convertJsonRowToEntryFormat,
   parseSourceFromNotes,
 } from './import-spreadsheet-v4';
+import { readFileSync } from 'fs';
+import { parseCSVFrom } from './parse-csv.js';
 
 test.skip('Import and convert 200 entries', async () => {
   const dateStamp = Date.now();
-  const json = await loadJSONfromCSV('CHANGE');
-  const entries = convertJsonToEntries(json, dateStamp);
+  const dictionaryId = 'CHANGE';
+  const file = readFileSync(`./import/data/${dictionaryId}/${dictionaryId}.csv`, 'utf8');
+  const rows = parseCSVFrom(file);
+  const entries = rows.map((row: any) => convertJsonRowToEntryFormat(row, dateStamp));
   expect(entries.length).toBe(200);
   // expect(entries[0]).toStrictEqual({"ca": {}, "gl": {"en": "one", "es": "uno"}, "ii": "v4-1617811194070", "lx": "iin", "ps": "no", "sdn": ["7.1"], "ua": {}});
   // expect(entries[0]).toStrictEqual({"di": "Tegüima", "gl": {"en": "Yours", "es": "Suyo"}, "lx": "Are", "sr": ["Page 48 Opata-Spanish Dictionary"], "ps": "pro"});
