@@ -1,8 +1,8 @@
-import { IPhoto } from '../../../src/lib/interfaces';
-import { environment, storage, timestamp } from '../config';
-import { getImageServingUrl } from './getImageServingUrl';
 import { join } from 'path';
 import * as fs from 'fs';
+import { IPhoto } from '@ld/types';
+import { environment, storage, timestamp } from '../config.js';
+import { getImageServingUrl } from './getImageServingUrl.js';
 
 const fileBucket = `talking-dictionaries-${environment == 'prod' ? 'alpha' : 'dev'}.appspot.com`;
 
