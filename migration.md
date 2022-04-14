@@ -1,7 +1,8 @@
 # Windi + Kitbook Migration
 
-- add scripts package and move update-locales from site package
 - bring in PRs and review recent changes
+- wire up update-locales script
+- use node-fetch instead of fetch-as
 - restore functions
 - set admin context on a global level and in kitbook add Context component
 - fix logout bug
