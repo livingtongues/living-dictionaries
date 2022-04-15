@@ -55,7 +55,7 @@
       {canEdit}
       field={`gl.${column.field}`}
       value={entry.gl && entry.gl[column.field]}
-      display={column.display}
+      display={$_(`gl.${column.field}`, {default: 'Gloss'})}
       {updatedValue}
       htmlValue={(entry._highlightResult &&
         entry._highlightResult.gl &&
@@ -68,7 +68,9 @@
       {canEdit}
       field={`xs.${column.field}`}
       value={entry.xs && entry.xs[column.field]}
-      display={column.display}
+      display={`${column.field !== 'xv' ? $_(`gl.${column.field}`) : ''} ${$_('entry.example_sentence', {
+        default: 'Example Sentence',
+      })}`}
       {updatedValue}
       htmlValue={(entry._highlightResult &&
         entry._highlightResult.xs &&
@@ -81,7 +83,7 @@
       {canEdit}
       field={column.field}
       value={entry[column.field]}
-      display={column.display}
+      display={$_(`entry.${column.field}`)}
       {updatedValue}
       htmlValue={(entry._highlightResult &&
         entry._highlightResult[column.field] &&
