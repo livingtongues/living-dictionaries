@@ -18,7 +18,6 @@ const defaultColumns: IColumn[] = [
     field: 'lx', // lexeme
     width: 170,
     sticky: true,
-    display: 'Lexeme',
   },
   {
     field: 'soundFile',
@@ -56,7 +55,6 @@ const defaultColumns: IColumn[] = [
   {
     field: 'ph', // phonetic
     width: 170,
-    display: 'Phonetic',
   },
   {
     field: 'speaker',
@@ -65,22 +63,18 @@ const defaultColumns: IColumn[] = [
   {
     field: 'di', // dialect
     width: 130,
-    display: 'Dialect',
   },
   {
     field: 'in', // interlinearization
     width: 150,
-    display: 'Interlinearization',
   },
   {
     field: 'mr', // morphology
     width: 150,
-    display: 'Morphology',
   },
   {
     field: 'nt', // notes
     width: 300,
-    display: 'Notes',
   },
   {
     field: 'example_sentence',
