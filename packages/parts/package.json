@@ -49,5 +49,8 @@
   "bugs": {
     "url": "https://github.com/livingtongues/living-dictionaries/issues"
   },
-  "homepage": "https://github.com/livingtongues/living-dictionaries#readme"
+  "homepage": "https://github.com/livingtongues/living-dictionaries#readme",
+  "dependencies": {
+    "mapbox-gl": "^2.6.1"
+  }
 }

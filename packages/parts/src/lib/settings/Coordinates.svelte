@@ -31,13 +31,26 @@
       // record to the 3rd decimal point (111 meters) (4th decimal would be handheld GPS accuracy) // https://gis.stackexchange.com/questions/8650/measuring-accuracy-of-latitude-and-longitude, https://gisjames.wordpress.com/2016/04/27/deciding-how-many-decimal-places-to-include-when-reporting-latitude-and-longitude/
 
       marker = new mapboxgl.Marker().setLngLat([lng, lat]).addTo(map);
+      console.log("marker", marker)
       map.flyTo({
         center: [lng, lat],
       });
     }
   }
 
-  onMount(async () => {
+  onMount(() => {
+    mapboxgl.accessToken = import.meta.env.VITE_mapboxAccessToken as string;
+    map = new mapboxgl.Map({
+      container: 'map',
+      style: 'mapbox://styles/mapbox/streets-v11?optimize=true', // outdoors-v9
+      center,
+      zoom,
+    });
+    console.log("map", map)
+    //setMarker(0, 0);
+  })
+
+  /* onMount(async () => {
     if (dictionary.coordinates) {
       lng = dictionary.coordinates.longitude;
       lat = dictionary.coordinates.latitude;
@@ -61,7 +74,7 @@
 
     //await loadStylesOnce('https://api.mapbox.com/mapbox-gl-js/v1.8.1/mapbox-gl.css');
 
-    mapboxgl.accessToken = import.meta.env.VITE_mapboxAccessToken as string;
+    //mapboxgl.accessToken = import.meta.env.VITE_mapboxAccessToken as string;
 
     map = new mapboxgl.Map({
       container: 'map',
@@ -69,16 +82,15 @@
       center,
       zoom,
     });
-
     setMarker(lng, lat);
 
     map.on('click', (event) => {
       setMarker(event.lngLat.lng, event.lngLat.lat);
-      // const coordinates = [event.lngLat.lng, event.lngLat.lat];
-      // const newMarker = new GeoJson(coordinates, { message: "test message" });
+      const coordinates = [event.lngLat.lng, event.lngLat.lat];
+      const newMarker = new GeoJson(coordinates, { message: "test message" });
     });
 
-    /* map.on('load', async () => {
+    map.on('load', async () => {
       function setMarkerOnSearchedCoordinates(item) {
         setMarker(item.geometry.coordinates[0], item.geometry.coordinates[1]);
         return item.place_name;
@@ -101,24 +113,25 @@
       );
 
       map.addControl(new mapboxgl.NavigationControl());
-    }); */
+    });
 
     return () => {
       map.remove();
     };
-  });
+  }); */
 
   function toggleStyle() {
-    const style = map.getStyle();
+    /* const style = map.getStyle();
     if (style.name === 'Mapbox Streets') {
       map.setStyle('mapbox://styles/mapbox/satellite-streets-v11?optimize=true');
     } else {
       map.setStyle('mapbox://styles/mapbox/streets-v11?optimize=true'); // style.name === "Mapbox Satellite Streets"
-    }
+    } */
   }
 
   import { createEventDispatcher } from 'svelte';
   import Button from 'svelte-pieces/ui/Button.svelte';
+  // I believe I need loadStylesOnce in order to read the necessary styles
   //import { loadScriptOnce, loadStylesOnce } from '$sveltefirets';
   const dispatch = createEventDispatcher<{
     save: { lat: number; lng: number; dictionary: Partial<IDictionary> };
@@ -126,18 +139,18 @@
     close: boolean;
   }>();
   async function save() {
-    dispatch('save', {
+    /* dispatch('save', {
       lat,
       lng,
       dictionary,
     });
-    dispatch('close');
+    dispatch('close'); */
   }
   async function remove() {
-    dispatch('remove', {
+    /* dispatch('remove', {
       dictionary,
     });
-    dispatch('close');
+    dispatch('close'); */
   }
 </script>
 
