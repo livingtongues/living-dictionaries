@@ -10,11 +10,11 @@
   type T = $$Generic;
   export let input: T = undefined;
   $: knobs = input && parseInput<T>(input);
-</script>
 
-<!-- <button on:click={() => ($route.query.sort = 'name')}>sort by name</button>
-<button on:click={() => ($route.fragment.modal = true)}>open modal window</button>
-<textarea placeholder="fragment.search" bind:value={$route.fragment.search} /> -->
+  function set(field: string, value: any) {
+    $knobs[field] = value;
+  }
+</script>
 
 {#if name !== 'default'}
   <h3>{name}</h3>
@@ -27,7 +27,7 @@
   {/if}
 
   <div style="height: {height ? `${height}px` : 'unset'}; width: {width ? `${width}px` : 'unset'}">
-    <slot output={$knobs} />
+    <slot {set} output={$knobs} />
   </div>
 </div>
 
