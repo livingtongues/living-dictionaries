@@ -1,17 +1,19 @@
 <script lang="ts">
-  import { _ } from 'svelte-i18n';
+  import type { Readable } from 'svelte/store';
+  export let t: Readable<any> = undefined;
+
   import { onMount } from 'svelte';
   import mapboxgl from 'mapbox-gl';
+  import Modal from 'svelte-pieces/ui/Modal.svelte';
+  import Button from 'svelte-pieces/ui/Button.svelte';
+  import { loadScriptOnce, loadStylesOnce } from './loader'; //pull from sveltefirets once that library is published
 
-  import Modal from '$lib/components/ui/Modal.svelte';
-  import { startCoordinates } from '$lib/components/home/map.class';
-  import type { IDictionary } from '@ld/types';
+  import { startCoordinates } from './map.class';
   let map: mapboxgl.Map;
   let marker: mapboxgl.Marker;
 
-  export let dictionary: Partial<IDictionary> = {};
-  let lng: number;
-  let lat: number;
+  export let lng: number;
+  export let lat: number;
   let center: [number, number];
   let zoom = 2;
 
@@ -19,7 +21,7 @@
     setMarker(lng, lat);
   }
 
-  function setMarker(longitude, latitude) {
+  function setMarker(longitude: number, latitude: number) {
     if (map && longitude && latitude) {
       if (longitude < -180 || longitude > 180 || latitude < -90 || latitude > 90) {
         return;
@@ -39,13 +41,10 @@
   }
 
   onMount(async () => {
-    if (dictionary.coordinates) {
-      lng = dictionary.coordinates.longitude;
-      lat = dictionary.coordinates.latitude;
+    if (lng && lat) {
       center = [lng, lat];
       zoom = 6;
     } else {
-      // @ts-ignore
       center = startCoordinates.DC;
       zoom = 4;
       if (navigator.geolocation) {
@@ -97,7 +96,7 @@
           accessToken: mapboxgl.accessToken,
           mapboxgl,
           getItemValue: setMarkerOnSearchedCoordinates,
-          placeholder: $_('about.search'),
+          placeholder: t ? $t('about.search') : 'Search',
         })
       );
 
@@ -119,35 +118,29 @@
   }
 
   import { createEventDispatcher } from 'svelte';
-  import Button from 'svelte-pieces/ui/Button.svelte';
-  import { loadScriptOnce, loadStylesOnce } from '$sveltefirets';
   const dispatch = createEventDispatcher<{
-    save: { lat: number; lng: number; dictionary: Partial<IDictionary> };
-    remove: { dictionary: Partial<IDictionary> };
+    update: { lat: number; lng: number };
+    remove: boolean;
     close: boolean;
   }>();
-  async function save() {
-    dispatch('save', {
+  async function update() {
+    dispatch('update', {
       lat,
       lng,
-      dictionary,
     });
     dispatch('close');
   }
   async function remove() {
-    dispatch('remove', {
-      dictionary,
-    });
+    dispatch('remove');
     dispatch('close');
   }
 </script>
 
-<Modal on:close>
+<Modal on:close noscroll>
   <span slot="heading">
-    {$_('create.select_coordinates', { default: 'Select Coordinates' })}
-    {#if dictionary && dictionary.name}- {dictionary.name}{/if}
+    {t ? $t('create.select_coordinates') : 'Select Coordinates'}
   </span>
-  <form on:submit|preventDefault={save}>
+  <form on:submit|preventDefault={update}>
     <div class="flex flex-wrap items-center mb-2">
       <div class="flex flex-grow">
         <div class="relative">
@@ -164,7 +157,7 @@
             min="-90"
             bind:value={lat}
             class="w-32 pl-10 pr-3 py-2 form-input"
-            placeholder={$_('dictionary.latitude', { default: 'Latitude' })} />
+            placeholder={t ? $t('dictionary.latitude') : 'Latitude'} />
         </div>
         <div class="w-1" />
 
@@ -182,7 +175,7 @@
             min="-180"
             bind:value={lng}
             class="w-32 md:w-36 pl-10 pr-3 py-2 form-input"
-            placeholder={$_('dictionary.longitude', { default: 'Longitude' })} />
+            placeholder={t ? $t('dictionary.longitude') : 'Longitude'} />
         </div>
       </div>
     </div>
@@ -197,12 +190,12 @@
       </button>
     </div>
 
-    <div class="modal-footer space-x-1">
+    <div class="modal-footer">
       <Button onclick={remove} form="simple" color="red">
-        {$_('misc.remove', { default: 'Remove' })}
+        {t ? $t('misc.remove') : 'Remove'}
       </Button>
       <Button type="submit" form="filled">
-        {$_('misc.save', { default: 'Save' })}
+        {t ? $t('misc.save') : 'Save'}
       </Button>
     </div>
   </form>
