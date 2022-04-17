@@ -37,6 +37,7 @@ const config = {
 					$sveltefirets: path.resolve('./src/sveltefirets'),
 				}
 			},
+      envDir: '../../',
 		},
 
 	}
