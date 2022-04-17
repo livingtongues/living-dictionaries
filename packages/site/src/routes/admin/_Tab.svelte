@@ -12,7 +12,7 @@
 
 <style>
   .active {
-    @apply border-primary-500 text-primary-600 focus:text-primary-800 focus:border-primary-700;
+    @apply border-blue-500 text-blue-600 focus:text-blue-800 focus:border-blue-700;
   }
   .inactive {
     @apply border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 focus:text-gray-700 focus:border-gray-300;
