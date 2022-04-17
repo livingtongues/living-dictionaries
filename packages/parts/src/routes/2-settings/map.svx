@@ -1,1 +1,89 @@
+<script>
+  import Story from '$kitbook/stories/Story.svelte';
+  import CoordinatesModal from '$lib/maps/CoordinatesModal.svelte';
+  import LatLngDisplay from '$lib/maps/LatLngDisplay.svelte';
+  import EditableCoordinatesField from '$lib/settings/EditableCoordinatesField.svelte';
+  import ShowHide from 'svelte-pieces/functions/ShowHide.svelte';
+  import Button from 'svelte-pieces/ui/Button.svelte';
+</script>
+
+<!-- prettier-ignore -->
 # Map
+
+## Edit Coordinates Field
+
+<Story name="With coordinates" input={{ lat: 42, lng: 42 }} let:output={{ lat, lng }} let:set>
+  <EditableCoordinatesField
+    {lng}
+    {lat}
+    on:update={(event) => {
+      set('lat', event.detail.lat);
+      set('lng', event.detail.lng);
+    }}
+    on:remove={() => {
+      set('lat', 0);
+      set('lng', 0);
+    }} />
+</Story>
+
+<Story name="Without coordinates">
+  <EditableCoordinatesField
+    lng={undefined}
+    lat={undefined}
+    on:update={(event) => alert(`set: ${event.detail.lat}, ${event.detail.lng}`)}
+    on:remove={() => {
+      alert('removed coordinates');
+    }} />
+</Story>
+
+## Coordinates Modal
+
+<Story
+  name="Passing Coordinates In"
+  input={{ lat: '-90-90;0', lng: '-180-180;0' }}
+  let:output={{ lat, lng }}
+  let:set>
+  <ShowHide let:show let:toggle>
+    <Button onclick={toggle}
+      >Modify Coordinates:
+      <LatLngDisplay lat={+lat} lng={+lng} /></Button>
+    {#if show}
+      <CoordinatesModal
+        lng={+lng}
+        lat={+lat}
+        on:update={(event) => {
+          set('lat', event.detail.lat);
+          set('lng', event.detail.lng);
+        }}
+        on:remove={() => {
+          set('lat', 0);
+          set('lng', 0);
+        }}
+        on:close={toggle} />
+    {/if}
+  </ShowHide>
+</Story>
+
+<Story name="Passing Undefined">
+  <ShowHide let:show let:toggle>
+    <Button onclick={toggle}>Add Coordinates</Button>
+    {#if show}
+      <CoordinatesModal
+        lng={undefined}
+        lat={undefined}
+        on:update={(event) => alert(`set: ${event.detail.lat}, ${event.detail.lng}`)}
+        on:close={toggle} />
+    {/if}
+  </ShowHide>
+</Story>
+
+## Lat Lng display
+
+<Story input={{ lat: '-90-90;55', lng: '-180-180;93' }} let:output={{ lat, lng }}>
+  <LatLngDisplay lat={+lat} lng={+lng} />
+</Story>
+
+<Story name="undefined coordinates">
+  <LatLngDisplay lat={undefined} lng={undefined} />
+</Story>
+(should be blank and without error)

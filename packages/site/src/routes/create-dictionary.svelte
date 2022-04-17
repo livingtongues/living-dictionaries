@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { _ } from 'svelte-i18n';
+  import { t } from 'svelte-i18n';
   import BadgeArray from 'svelte-pieces/data/BadgeArray.svelte';
   import MultiSelect from '$lib/components/ui/MultiSelect.svelte';
   import { glossingLanguages } from '$lib/mappings/glossing-languages';
@@ -11,8 +11,9 @@
   import { arrayUnion, GeoPoint, serverTimestamp } from 'firebase/firestore/lite';
   import { debounce } from '$lib/helpers/debounce';
   import { pruneObject } from '$lib/helpers/prune';
+  import { EditableCoordinatesField } from '@ld/parts';
 
-  let modal: 'auth' | 'coordinates' = null;
+  let modal: 'auth' = null;
   let submitting = false;
 
   let alternateNames = [];
@@ -53,21 +54,21 @@
     if (await docExists(`dictionaries/${url}`)) {
       urlAlreadyExists = true;
       return alert(
-        $_('create.choose_different_url', {
+        $t('create.choose_different_url', {
           default: 'Choose a different URL.',
         })
       );
     }
     if (glossLanguages.length === 0) {
       return alert(
-        $_('create.at_least_one_lang', {
+        $t('create.at_least_one_lang', {
           default: 'Choose at least 1 language to make the dictionary available in.',
         })
       );
     }
     if (!lat || !lng) {
       return alert(
-        $_('create.select_coordinates', {
+        $t('create.select_coordinates', {
           default: 'Choose a location on the map where this language is spoken.',
         })
       );
@@ -98,16 +99,9 @@
       });
       window.location.replace(`/${url}/entries/list`);
     } catch (err) {
-      alert(`${$_('misc.error', { default: 'Error' })}: ${err}`);
+      alert(`${$t('misc.error', { default: 'Error' })}: ${err}`);
     }
     submitting = false;
-  }
-
-  let dictionary: Partial<IDictionary>;
-  async function showCoordinatesComponent() {
-    // @ts-ignore
-    dictionary = lat ? { coordinates: { latitude: lat, longitude: lng } } : {};
-    modal = 'coordinates';
   }
 
   let online = true;
@@ -117,12 +111,12 @@
 
 <svelte:head>
   <title>
-    {$_('create.create_new_dictionary', { default: 'Create New Dictionary' })}
+    {$t('create.create_new_dictionary', { default: 'Create New Dictionary' })}
   </title>
 </svelte:head>
 
 <Header
-  >{$_('create.create_new_dictionary', {
+  >{$t('create.create_new_dictionary', {
     default: 'Create New Dictionary',
   })}</Header>
 
@@ -130,7 +124,7 @@
   <div class="flex flex-col justify-center p-4 max-w-md mx-auto">
     <div class="mt-6">
       <label for="name" class="block text-xl font-medium leading-5 text-gray-700">
-        {$_('dictionary.name_of_language', { default: 'Name of Language' })}*
+        {$t('dictionary.name_of_language', { default: 'Name of Language' })}*
       </label>
       <div class="mt-2 rounded-md shadow-sm">
         <!-- svelte-ignore a11y-autofocus -->
@@ -147,7 +141,7 @@
           class="form-input w-full" />
       </div>
       <div class="text-xs text-gray-600 mt-1">
-        {$_('create.name_clarification', {
+        {$t('create.name_clarification', {
           default: 'This will be the name of the dictionary.',
         })}
       </div>
@@ -178,16 +172,16 @@
           placeholder="url" />
       </div>
       <div class="text-xs text-gray-600 mt-1">
-        {$_('create.permanent_url_msg', {
+        {$t('create.permanent_url_msg', {
           default: 'The URL name is permanent and cannot be changed later.',
         })}
-        {$_('create.only_letters_numbers', {
+        {$t('create.only_letters_numbers', {
           default: 'Only letters and numbers allowed (no spaces or special characters)',
         })}
       </div>
       {#if urlAlreadyExists}
         <div class="text-xs text-red-600 mt-1">
-          {$_('create.choose_different_url', {
+          {$t('create.choose_different_url', {
             default: 'Choose a different URL',
           })}
         </div>
@@ -196,7 +190,7 @@
 
     <div class="mt-6">
       <label for="glosses" class="block text-sm font-medium leading-5 text-gray-700">
-        {$_('create.gloss_dictionary_in', {
+        {$t('create.gloss_dictionary_in', {
           default: 'Make dictionary available in...',
         })}*
       </label>
@@ -204,60 +198,50 @@
       <div class="mt-1 rounded-md shadow-sm" style="direction: ltr">
         <MultiSelect
           bind:value={glossLanguages}
-          placeholder={$_('create.languages', { default: 'Language(s)' })}>
+          placeholder={$t('create.languages', { default: 'Language(s)' })}>
           {#each Object.keys(glossingLanguages) as bcp}
             <option value={bcp}>
-              {glossingLanguages[bcp].vernacularName || $_('gl.' + bcp)}
+              {glossingLanguages[bcp].vernacularName || $t('gl.' + bcp)}
               {#if glossingLanguages[bcp].vernacularAlternate}
                 {glossingLanguages[bcp].vernacularAlternate}
               {/if}
               {#if glossingLanguages[bcp].vernacularName}
-                <small>({$_('gl.' + bcp)})</small>
+                <small>({$t('gl.' + bcp)})</small>
               {/if}
             </option>
           {/each}
         </MultiSelect>
       </div>
       <div class="text-xs text-gray-600 mt-1">
-        {$_('create.gloss_dictionary_clarification', {
+        {$t('create.gloss_dictionary_clarification', {
           default: 'Language(s) you want to translate entries into',
         })}
       </div>
     </div>
 
     <div class="mt-6">
-      <!-- svelte-ignore a11y-label-has-associated-control -->
-      <label class="block text-sm font-medium leading-5 text-gray-700">
-        {$_('create.where_spoken', {
-          default: 'Where is this language spoken?',
-        })}*
-      </label>
-    </div>
-    <div class="mt-1">
-      <Button onclick={() => showCoordinatesComponent()}>
-        {#if lat && lng}
-          {lat}°
-          {lat < 0 ? 'S' : 'N'},
-          {lng}°
-          {lng < 0 ? 'W' : 'E'}
-        {:else}
-          <i class="fas fa-globe-americas mr-1" />
-          {$_('create.select_coordinates', { default: 'Select Coordinates' })}
-        {/if}
-      </Button>
+      <EditableCoordinatesField
+        {lng}
+        {lat}
+        on:update={(event) => {
+          (lat = event.detail.lat), (lng = event.detail.lng);
+        }}
+        on:remove={() => {
+          (lat = null), (lng = null);
+        }} />
     </div>
 
     <div class="mt-6">
       <div class="text-sm font-medium leading-5 text-gray-700 mb-1">
-        {$_('create.alternate_names', { default: 'Alternate Names' })}
+        {$t('create.alternate_names', { default: 'Alternate Names' })}
       </div>
       <BadgeArray
         bind:strings={alternateNames}
         canEdit
-        promptMessage={$_('create.enter_alternate_name', {
+        promptMessage={$t('create.enter_alternate_name', {
           default: 'Enter Alternate Name',
         })}
-        addMessage={$_('misc.add', { default: 'Add' })} />
+        addMessage={$t('misc.add', { default: 'Add' })} />
     </div>
     <div class="mt-6 flex">
       <div class="w-1/2">
@@ -318,7 +302,7 @@
           setTimeout(() => {
             if (publicDictionary) {
               publicDictionary = confirm(
-                `${$_('create.speech_community_permission', {
+                `${$t('create.speech_community_permission', {
                   default:
                     "Does the speech community allow this language to be online? Select 'OK' if they have given you permission.",
                 })}`
@@ -329,9 +313,9 @@
           }, 5);
         }} />
       <label for="public" class="mx-2 block text-sm leading-5 text-gray-900">
-        {$_('create.visible_to_public', { default: 'Visible to Public' })}
+        {$t('create.visible_to_public', { default: 'Visible to Public' })}
         <small class="text-gray-600">
-          ({$_('create.req_com_consent', {
+          ({$t('create.req_com_consent', {
             default: 'Requires Community Consent',
           })})
         </small>
@@ -343,36 +327,20 @@
         {#if !online}
           Return online to
         {/if}
-        {$_('create.create_dictionary', { default: 'Create Dictionary' })}
+        {$t('create.create_dictionary', { default: 'Create Dictionary' })}
       </Button>
 
       <div class="mt-2 text-sm text-gray-600">
-        {$_('terms.agree_by_submit', {
+        {$t('terms.agree_by_submit', {
           default: 'By submitting this form, you agree to our',
         })}
         <a href="/terms" class="underline" target="_blank"
-          >{$_('dictionary.terms_of_use', { default: 'Terms of Use' })}</a
+          >{$t('dictionary.terms_of_use', { default: 'Terms of Use' })}</a
         >.
       </div>
     </div>
   </div>
 </form>
-
-{#if modal === 'coordinates'}
-  {#await import('$lib/components/modals/Coordinates.svelte') then { default: Coordinates }}
-    <Coordinates
-      on:close={() => {
-        modal = null;
-      }}
-      {dictionary}
-      on:save={(event) => {
-        (lat = event.detail.lat), (lng = event.detail.lng);
-      }}
-      on:remove={() => {
-        (lat = null), (lng = null);
-      }} />
-  {/await}
-{/if}
 
 {#if modal === 'auth'}
   {#await import('$lib/components/shell/AuthModal.svelte') then { default: AuthModal }}
