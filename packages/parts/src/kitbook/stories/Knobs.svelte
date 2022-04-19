@@ -34,6 +34,10 @@
           bind:value={$knobs[name]}
           {...props}
           on:input={(e) => ($route.query[`${id}__${name}`] = e.currentTarget.value)} />
+        <span class="text-xs">
+          {$knobs[name]} (min: {props.min}, max:
+          {props.max})
+        </span>
       {:else if type === 'number'}
         <input
           type="number"

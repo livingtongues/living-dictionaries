@@ -11,7 +11,7 @@
 - remap path MediaStream and Recorder components
 - double check scrollbar stuff in global.css
 - update eslint config
-- switch to svelte-pieces modal and note that doesn't have mb-4 sm:mb-6 on body and needs noscroll = true input
+- switch to svelte-pieces modal and note that doesn't have mb-4 sm:mb-6 on body and needs noscroll = true input, doesn't need spacer between footer buttons
 - update Button component to allow injected styles
 - use 1 slideover component for EntryFilters and SideMenu in __layout
 - wean off font-awesome
