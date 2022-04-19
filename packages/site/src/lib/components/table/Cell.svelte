@@ -83,7 +83,7 @@
       {canEdit}
       field={column.field}
       value={entry[column.field]}
-      display={$_(`entry.${column.field}`)}
+      display={$_(`entry.${column.field}`, {default: 'Edit'})}
       {updatedValue}
       htmlValue={(entry._highlightResult &&
         entry._highlightResult[column.field] &&
