@@ -6,11 +6,11 @@
   import ShowHide from 'svelte-pieces/functions/ShowHide.svelte';
   import EditString from './_EditString.svelte';
   import EditGlosses from './_EditGlosses.svelte';
-  import EditCoordinates from './_EditCoordinates.svelte';
   import { glossingLanguages } from '$lib/mappings/glossing-languages';
-  import { arrayRemove, arrayUnion } from 'firebase/firestore';
+  import { arrayRemove, arrayUnion, GeoPoint } from 'firebase/firestore';
   import type { IDictionary } from '@ld/types';
   import Doc from '$sveltefirets/components/Doc.svelte';
+  import EditableCoordinatesField from '@ld/parts/src/lib/settings/EditableCoordinatesField.svelte';
 
   async function togglePublic(settingPublic: boolean) {
     try {
@@ -70,7 +70,18 @@
         });
       }} />
 
-    <EditCoordinates {dictionary} />
+    <div class="mt-6" />
+    <EditableCoordinatesField
+      lng={dictionary.coordinates ? dictionary.coordinates.longitude : undefined}
+      lat={dictionary.coordinates ? dictionary.coordinates.latitude : undefined}
+      on:update={(event) => {
+        update(`dictionaries/${dictionary.id}`, {
+          coordinates: new GeoPoint(event.detail.lat, event.detail.lng),
+        });
+      }}
+      on:remove={() => {
+        update(`dictionaries/${dictionary.id}`, { coordinates: null });
+      }} />
 
     <div class="mt-6 flex items-center">
       <input
