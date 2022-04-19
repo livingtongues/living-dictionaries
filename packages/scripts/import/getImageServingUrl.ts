@@ -1,15 +1,18 @@
-import { fetchAsText } from 'fetch-as';
+import fetch from 'node-fetch';
+
 import 'dotenv/config'; // see https://github.com/motdotla/dotenv#how-do-i-use-dotenv-with-import
 
 export const getImageServingUrl = async (imageStoragePath: string, environment: string) => {
   try {
-    const storagePath = `${process.env.ProcessImageUrl}/talking-dictionaries-${
+    const imageServingUrlEndpoint = `${process.env.ProcessImageUrl}/talking-dictionaries-${
       environment == 'prod' ? 'alpha' : 'dev'
     }.appspot.com/${imageStoragePath}`;
-    const imageServingUrl = await fetchAsText(storagePath);
-    return imageServingUrl.data.replace('http://lh3.googleusercontent.com/', '');
+    const res = await fetch(imageServingUrlEndpoint);
+    const imageServingUrl = await res.text();
+    return imageServingUrl.replace('http://lh3.googleusercontent.com/', '');
   } catch (error) {
     console.log(`Error getting serving url for ${imageStoragePath} on ${environment}`);
+    // @ts-ignore
     throw new Error(error);
   }
 };

@@ -1,9 +1,7 @@
-import * as admin from 'firebase-admin';
-admin.initializeApp();
+import { IEntry } from '@ld/types';
+import type admin from 'firebase-admin';
 
-import { IEntry } from '../../../src/lib/interfaces';
-
-export async function prepareDataForIndex(dbEntry: IEntry, dictionaryId: string) {
+export async function prepareDataForIndex(dbEntry: IEntry, dictionaryId: string, db: admin.firestore.Firestore) {
   const entry: IEntry = dbEntry;
   delete entry.id;
   entry.dictId = dictionaryId;
@@ -28,12 +26,12 @@ export async function prepareDataForIndex(dbEntry: IEntry, dictionaryId: string)
       cleanSf.speakerName = entry.sf.speakerName;
     } else if (entry.sf.sp) {
       entry.hasSpeaker = true;
-      const speakerSnap = await admin.firestore().doc(`speakers/${entry.sf.sp}`).get();
+      const speakerSnap = await db.doc(`speakers/${entry.sf.sp}`).get();
       const speaker = speakerSnap.data();
       if (speaker && speaker.displayName) {
         cleanSf.speakerName = speaker.displayName;
       } else {
-        const userSnap = await admin.firestore().doc(`users/${entry.sf.sp}`).get();
+        const userSnap = await db.doc(`users/${entry.sf.sp}`).get();
         const user = userSnap.data();
         if (user && user.displayName) {
           cleanSf.speakerName = user.displayName;
