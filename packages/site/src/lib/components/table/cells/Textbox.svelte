@@ -3,7 +3,8 @@
     updatedValue: string,
     htmlValue: string,
     field: string,
-    canEdit = false;
+    canEdit = false,
+    display: string;
 
   let edit = false;
 </script>
@@ -22,10 +23,11 @@
 </div>
 
 {#if edit}
-  {#await import('$lib/components/modals/EditFieldModal.svelte') then EditFieldModal}
-    <EditFieldModal.default
+  {#await import('$lib/components/modals/EditFieldModal.svelte') then { default: EditFieldModal }}
+    <EditFieldModal
       on:valueupdate
       value={updatedValue !== undefined ? updatedValue : value}
+      {display}
       {field}
       on:close={() => {
         edit = false;
