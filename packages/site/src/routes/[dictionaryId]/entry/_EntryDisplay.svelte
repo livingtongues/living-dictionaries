@@ -6,6 +6,7 @@
   import EntrySemanticDomains from './_EntrySemanticDomains.svelte';
   import BadgeArray from 'svelte-pieces/data/BadgeArray.svelte';
   import EntryMedia from './_EntryMedia.svelte';
+  import { dictionary } from '$lib/stores';
 
   export let entry: IEntry,
     videoAccess = false,
@@ -91,6 +92,21 @@
       on:valueupdate />
 
     <EntrySemanticDomains {canEdit} {entry} on:valueupdate />
+
+    {#if $dictionary.id === 'babanki'}
+        <EntryField
+          value={entry['nc']}
+          field='nc'
+          {canEdit}
+          display={$_(`entry.nc`, {default: 'Noun Class'})}
+          on:valueupdate />
+        <EntryField
+          value={entry['va']}
+          field='va'
+          {canEdit}
+          display={$_(`entry.va`, {default: 'Variant'})}
+          on:valueupdate />
+    {/if}
 
     {#each ['mr', 'in', 'di', 'nt'] as field}
       <EntryField
