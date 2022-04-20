@@ -221,6 +221,7 @@
 
     <div class="mt-6">
       <EditableCoordinatesField
+      {t}
         {lng}
         {lat}
         on:update={(event) => {
