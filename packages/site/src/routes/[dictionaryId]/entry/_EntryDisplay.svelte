@@ -93,15 +93,19 @@
 
     <EntrySemanticDomains {canEdit} {entry} on:valueupdate />
 
-    {#if $dictionary.id === ''} <!--TODO Waiting to know which dictionary should have these fields -->
-      {#each ['nc', 'va'] as field}
+    {#if $dictionary.id === 'babanki'}
         <EntryField
-          value={entry[field]}
-          {field}
+          value={entry['nc']}
+          field='nc'
           {canEdit}
-          display={$_(`entry.${field}`)}
+          display={$_(`entry.nc`, {default: 'Noun Class'})}
           on:valueupdate />
-      {/each} 
+        <EntryField
+          value={entry['va']}
+          field='va'
+          {canEdit}
+          display={$_(`entry.va`, {default: 'Variant'})}
+          on:valueupdate />
     {/if}
 
     {#each ['mr', 'in', 'di', 'nt'] as field}
