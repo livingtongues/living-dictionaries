@@ -1,0 +1,16 @@
+<script lang="ts">
+  import Story from '$kitbook/stories/Story.svelte';
+  import EditableGlossesField from '$lib/settings/EditableGlossesField.svelte';
+</script>
+
+# Edit Gloss Languages
+
+<Story input={{ canRemove: false }} let:output={{ canRemove }}>
+  {canRemove}
+  <!-- <EditableGlossesField glossLanguages={['en', 'es']} glossingLanguages={[{internalName: 'foo'}]} on:add={(e) => console.log(e.detail.languageId)} /> -->
+</Story>
+
+<!-- prettier-ignore -->
+
+- Make removing not possible in certain situations 
+- Make a minimum of 1 language
