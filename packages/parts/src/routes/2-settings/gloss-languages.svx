@@ -6,12 +6,13 @@
 </script>
 
 # Edit Gloss Languages
-
-<Story name="Empty glosses">
+<Story name="Allow removing">
   <EditableGlossesField 
-    glosses={[]} 
+    admin 
+    glosses={['es', 'en']} 
     glossingLanguages={glossingLanguages} 
-    on:add={(e) => alert(`Add a new Id: ${e.detail.languageId}`)} />
+    on:add={(e) => alert(`Add a new Id: ${e.detail.languageId}`)} 
+    on:remove={e => alert(`Remove Id: ${e.detail.languageId}`)} />
 </Story>
 
 <Story name="Removing not possible">
@@ -21,13 +22,11 @@
      on:add={(e) => alert(`Add a new Id: ${e.detail.languageId}`)} />
 </Story>
 
-<Story name="Allow removing">
+<Story name="Empty glosses">
   <EditableGlossesField 
-    admin 
-    glosses={['es', 'en']} 
+    glosses={[]} 
     glossingLanguages={glossingLanguages} 
-    on:add={(e) => alert(`Add a new Id: ${e.detail.languageId}`)} 
-    on:remove={e => alert(`Remove Id: ${e.detail.languageId}`)} />
+    on:add={(e) => alert(`Add a new Id: ${e.detail.languageId}`)} />
 </Story>
 
 <!-- prettier-ignore -->
