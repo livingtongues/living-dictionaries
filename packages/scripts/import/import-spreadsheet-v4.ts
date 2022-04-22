@@ -28,6 +28,8 @@ export function convertJsonRowToEntryFormat(row: any, dateStamp: number): IEntry
   Boolean(row.interlinearization) && (entry.in = row.interlinearization);
   Boolean(row.partOfSpeech) && (entry.ps = row.partOfSpeech);
   Boolean(row.dialect) && (entry.di = row.dialect);
+  Boolean(row.variant) && (entry.va = row.variant);
+  Boolean(row.nounClass) && (entry.nc = row.nounClass);
   if (row.semanticDomain || row.semanticDomain2) {
     entry.sdn = [];
     Boolean(row.semanticDomain) && entry.sdn.push(row.semanticDomain.toString());
