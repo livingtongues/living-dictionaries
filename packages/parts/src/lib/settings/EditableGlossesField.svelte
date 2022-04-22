@@ -10,15 +10,15 @@
   import Filter from '../helpers/Filter.svelte';
   export let admin = false;
   export let glossingLanguages: IGlossLanguages;
-  export let glossLanguages: string[];
+  export let glosses: string[];
 
-  $: activeGlossingBcps = glossLanguages.map((bcp) => t ? $t('gl.' + bcp) : bcp);
+  $: activeGlossingBcps = glosses.map((bcp) => t ? $t('gl.' + bcp) : glossingLanguages[bcp].vernacularName);
   $: remainingGlossingLanguagesAsArray = Object.entries(glossingLanguages)
     .map((e) => ({
       bcp: e[0],
       ...e[1],
     }))
-    .filter((e) => !glossLanguages.includes(e.bcp));
+    .filter((e) => !glosses.includes(e.bcp));
 
   import { createEventDispatcher } from 'svelte';
   const dispatch = createEventDispatcher<{
@@ -42,10 +42,10 @@
           if (
             confirm('Remove as admin? Know that regular editors get a message saying "Contact Us"')
           ) {
-            dispatch('remove', { languageId: glossLanguages[e.detail.index] });
+            dispatch('remove', { languageId: glosses[e.detail.index] });
           }
         } else {
-          alert($t('header.contact_us', { default: 'Contact Us' }));
+          alert(t ? $t('header.contact_us') : 'Contact Us');
         }
       }}
       on:additem={toggle} />
