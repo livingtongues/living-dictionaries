@@ -12,7 +12,7 @@
   export let glossingLanguages: IGlossLanguages;
   export let glossLanguages: string[];
 
-  $: activeGlossingBcps = glossLanguages.map((bcp) => $t('gl.' + bcp));
+  $: activeGlossingBcps = glossLanguages.map((bcp) => t ? $t('gl.' + bcp) : bcp);
   $: remainingGlossingLanguagesAsArray = Object.entries(glossingLanguages)
     .map((e) => ({
       bcp: e[0],
@@ -36,7 +36,7 @@
     <BadgeArrayEmit
       strings={activeGlossingBcps}
       canEdit
-      addMessage={$t('misc.add', { default: 'Add' })}
+      addMessage={t ? $t('misc.add', { default: 'Add' }) : 'Add'}
       on:itemremoved={(e) => {
         if (admin) {
           if (
