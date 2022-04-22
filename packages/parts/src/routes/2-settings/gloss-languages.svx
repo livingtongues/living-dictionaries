@@ -5,9 +5,8 @@
 
 # Edit Gloss Languages
 
-<Story input={{ canRemove: false }} let:output={{ canRemove }}>
-  {canRemove}
-  <!-- <EditableGlossesField glossLanguages={['en', 'es']} glossingLanguages={[{internalName: 'foo'}]} on:add={(e) => console.log(e.detail.languageId)} /> -->
+<Story name="glosses field">
+  <EditableGlossesField glossLanguages={['es']} glossingLanguages={{en: {vernacularName: 'English'}}} on:add={(e) => console.log(e.detail.languageId)} />
 </Story>
 
 <!-- prettier-ignore -->
