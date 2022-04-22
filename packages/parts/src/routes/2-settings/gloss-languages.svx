@@ -1,12 +1,33 @@
 <script lang="ts">
   import Story from '$kitbook/stories/Story.svelte';
   import EditableGlossesField from '$lib/settings/EditableGlossesField.svelte';
+  // Right now I duplicated the mappings file glossing-languages.ts
+  import { glossingLanguages } from '$lib/glosses/glossing-languages';
 </script>
 
 # Edit Gloss Languages
 
-<Story name="glosses field">
-  <EditableGlossesField glossLanguages={['es']} glossingLanguages={{en: {vernacularName: 'English'}}} on:add={(e) => console.log(e.detail.languageId)} />
+<Story name="Empty glosses">
+  <EditableGlossesField 
+    glosses={[]} 
+    glossingLanguages={glossingLanguages} 
+    on:add={(e) => alert(`Add a new Id: ${e.detail.languageId}`)} />
+</Story>
+
+<Story name="Removing not possible">
+  <EditableGlossesField 
+    glosses={['es', 'en']} 
+    glossingLanguages={glossingLanguages}
+     on:add={(e) => alert(`Add a new Id: ${e.detail.languageId}`)} />
+</Story>
+
+<Story name="Allow removing">
+  <EditableGlossesField 
+    admin 
+    glosses={['es', 'en']} 
+    glossingLanguages={glossingLanguages} 
+    on:add={(e) => alert(`Add a new Id: ${e.detail.languageId}`)} 
+    on:remove={e => alert(`Remove Id: ${e.detail.languageId}`)} />
 </Story>
 
 <!-- prettier-ignore -->
