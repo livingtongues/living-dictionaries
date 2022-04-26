@@ -1,7 +1,6 @@
 <script lang="ts">
   import Story from '$kitbook/stories/Story.svelte';
   import EditableGlossesField from '$lib/settings/EditableGlossesField.svelte';
-  // Right now I duplicated the mappings file glossing-languages.ts
   import { glossingLanguages } from '$lib/glosses/glossing-languages';
 </script>
 
@@ -9,23 +8,23 @@
 <Story name="Allow removing">
   <EditableGlossesField 
     admin 
-    glosses={['es', 'en']} 
-    glossingLanguages={glossingLanguages} 
+    selectedLanguages={['es', 'en']} 
+    availableLanguages={glossingLanguages} 
     on:add={(e) => alert(`Add a new Id: ${e.detail.languageId}`)} 
     on:remove={e => alert(`Remove Id: ${e.detail.languageId}`)} />
 </Story>
 
 <Story name="Removing not possible">
   <EditableGlossesField 
-    glosses={['es', 'en']} 
-    glossingLanguages={glossingLanguages}
+    selectedLanguages={['es', 'en']} 
+    availableLanguages={glossingLanguages}
      on:add={(e) => alert(`Add a new Id: ${e.detail.languageId}`)} />
 </Story>
 
 <Story name="Empty glosses">
   <EditableGlossesField 
-    glosses={[]} 
-    glossingLanguages={glossingLanguages} 
+    selectedLanguages={[]} 
+    availableLanguages={glossingLanguages} 
     on:add={(e) => alert(`Add a new Id: ${e.detail.languageId}`)} />
 </Story>
 

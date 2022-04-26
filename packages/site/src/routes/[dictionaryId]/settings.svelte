@@ -5,12 +5,10 @@
   import Button from 'svelte-pieces/ui/Button.svelte';
   import ShowHide from 'svelte-pieces/functions/ShowHide.svelte';
   import EditString from './_EditString.svelte';
-  import EditGlosses from './_EditGlosses.svelte';
-  import { glossingLanguages } from '$lib/mappings/glossing-languages';
   import { arrayRemove, arrayUnion, GeoPoint } from 'firebase/firestore';
   import type { IDictionary } from '@ld/types';
   import Doc from '$sveltefirets/components/Doc.svelte';
-  import EditableCoordinatesField from '@ld/parts/src/lib/settings/EditableCoordinatesField.svelte';
+  import { EditableCoordinatesField, EditableGlossesField, glossingLanguages } from '@ld/parts';
 
   async function togglePublic(settingPublic: boolean) {
     try {
@@ -56,9 +54,10 @@
       {dictionary}
       display="Glottocode" />
 
-    <EditGlosses
-      {glossingLanguages}
-      {dictionary}
+    <EditableGlossesField
+      admin={$admin}
+      availableLanguages={glossingLanguages}
+      selectedLanguages={dictionary.glossLanguages}
       on:add={(e) => {
         update(`dictionaries/${dictionary.id}`, {
           glossLanguages: arrayUnion(e.detail.languageId),
@@ -72,7 +71,7 @@
 
     <div class="mt-6" />
     <EditableCoordinatesField
-    {t}
+      {t}
       lng={dictionary.coordinates ? dictionary.coordinates.longitude : undefined}
       lat={dictionary.coordinates ? dictionary.coordinates.latitude : undefined}
       on:update={(event) => {

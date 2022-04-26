@@ -8,17 +8,20 @@
   import BadgeArrayEmit from 'svelte-pieces/data/BadgeArrayEmit.svelte';
   import Modal from 'svelte-pieces/ui/Modal.svelte';
   import Filter from '../helpers/Filter.svelte';
-  export let admin = false;
-  export let glossingLanguages: IGlossLanguages;
-  export let glosses: string[];
 
-  $: activeGlossingBcps = glosses.map((bcp) => t ? $t('gl.' + bcp) : glossingLanguages[bcp].vernacularName);
-  $: remainingGlossingLanguagesAsArray = Object.entries(glossingLanguages)
+  export let admin: number | boolean = false;
+  export let availableLanguages: IGlossLanguages;
+  export let selectedLanguages: string[];
+
+  $: activeGlossingBcps = selectedLanguages.map((bcp) =>
+    t ? $t('gl.' + bcp) : availableLanguages[bcp].vernacularName
+  );
+  $: remainingGlossingLanguagesAsArray = Object.entries(availableLanguages)
     .map((e) => ({
       bcp: e[0],
       ...e[1],
     }))
-    .filter((e) => !glosses.includes(e.bcp));
+    .filter((e) => !selectedLanguages.includes(e.bcp));
 
   import { createEventDispatcher } from 'svelte';
   const dispatch = createEventDispatcher<{
@@ -42,7 +45,7 @@
           if (
             confirm('Remove as admin? Know that regular editors get a message saying "Contact Us"')
           ) {
-            dispatch('remove', { languageId: glosses[e.detail.index] });
+            dispatch('remove', { languageId: selectedLanguages[e.detail.index] });
           }
         } else {
           alert(t ? $t('header.contact_us') : 'Contact Us');

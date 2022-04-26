@@ -1,4 +1,4 @@
-import { glossingLanguages } from '$lib/mappings/glossing-languages';
+import { glossingLanguages } from '@ld/parts';
 import { _ } from 'svelte-i18n';
 import { get } from 'svelte/store';
 
