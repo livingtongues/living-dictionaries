@@ -1,8 +1,6 @@
 <script lang="ts">
   import { t } from 'svelte-i18n';
   import BadgeArray from 'svelte-pieces/data/BadgeArray.svelte';
-  import MultiSelect from '$lib/components/ui/MultiSelect.svelte';
-  import { glossingLanguages } from '$lib/mappings/glossing-languages';
   import { user } from '$lib/stores';
   import Header from '$lib/components/shell/Header.svelte';
   import Button from 'svelte-pieces/ui/Button.svelte';
@@ -11,13 +9,13 @@
   import { arrayUnion, GeoPoint, serverTimestamp } from 'firebase/firestore/lite';
   import { debounce } from '$lib/helpers/debounce';
   import { pruneObject } from '$lib/helpers/prune';
-  import { EditableCoordinatesField } from '@ld/parts';
+  import { EditableCoordinatesField, EditableGlossesField, glossingLanguages } from '@ld/parts';
 
   let modal: 'auth' = null;
   let submitting = false;
 
   let alternateNames = [];
-  let glossLanguages = ['en'];
+  let glossLanguages = new Set(['en']);
   let lat = null;
   let lng = null;
   let iso6393 = '';
@@ -59,7 +57,7 @@
         })
       );
     }
-    if (glossLanguages.length === 0) {
+    if (glossLanguages.size > 0) {
       return alert(
         $t('create.at_least_one_lang', {
           default: 'Choose at least 1 language to make the dictionary available in.',
@@ -77,7 +75,7 @@
       submitting = true;
       const dictionaryData: IDictionary = {
         name: name.trim().replace(/^./, name[0].toUpperCase()),
-        glossLanguages,
+        glossLanguages: Array.from(glossLanguages),
         public: publicDictionary,
         alternateNames,
         coordinates: new GeoPoint(lat, lng),
@@ -188,40 +186,17 @@
       {/if}
     </div>
 
-    <div class="mt-6">
-      <label for="glosses" class="block text-sm font-medium leading-5 text-gray-700">
-        {$t('create.gloss_dictionary_in', {
-          default: 'Make dictionary available in...',
-        })}*
-      </label>
-
-      <div class="mt-1 rounded-md shadow-sm" style="direction: ltr">
-        <MultiSelect
-          bind:value={glossLanguages}
-          placeholder={$t('create.languages', { default: 'Language(s)' })}>
-          {#each Object.keys(glossingLanguages) as bcp}
-            <option value={bcp}>
-              {glossingLanguages[bcp].vernacularName || $t('gl.' + bcp)}
-              {#if glossingLanguages[bcp].vernacularAlternate}
-                {glossingLanguages[bcp].vernacularAlternate}
-              {/if}
-              {#if glossingLanguages[bcp].vernacularName}
-                <small>({$t('gl.' + bcp)})</small>
-              {/if}
-            </option>
-          {/each}
-        </MultiSelect>
-      </div>
-      <div class="text-xs text-gray-600 mt-1">
-        {$t('create.gloss_dictionary_clarification', {
-          default: 'Language(s) you want to translate entries into',
-        })}
-      </div>
-    </div>
+    <div class="mt-6" />
+    <EditableGlossesField
+      availableLanguages={glossingLanguages}
+      selectedLanguages={Array.from(glossLanguages)}
+      on:add={(e) => glossLanguages.add(e.detail.languageId)}
+      on:remove={(e) => glossLanguages.delete(e.detail.languageId)} />
+    <!-- placeholder={$t('create.languages', { default: 'Language(s)' })} -->
 
     <div class="mt-6">
       <EditableCoordinatesField
-      {t}
+        {t}
         {lng}
         {lat}
         on:update={(event) => {
