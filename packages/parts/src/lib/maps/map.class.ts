@@ -29,7 +29,9 @@ export class FeatureCollection {
   constructor(public features: Array<GeoJson>) {}
 }
 
-export const startCoordinates = {
+export const startCoordinates: {
+  [city: string]: [number, number];
+} = {
   DC: [-77.04, 38.907],
   USA: [-95, 38.907],
   Japan: [135.753847, 34.986406],

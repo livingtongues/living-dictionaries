@@ -4,6 +4,6 @@
   "description": "Types for Living Dictionaries",
   "main": "index.ts",
   "devDependencies": {
-    "firebase": "^9.6.8"
+    "firebase": "^9.6.11"
   }
 }

@@ -72,19 +72,19 @@
                 alert(err);
               }
             }}
-            on:save={(event) => {
+            on:updatecoordinates={({ detail: { lat, lng } }) => {
               try {
-                const location = new GeoPoint(event.detail.lat, event.detail.lng);
-                updateOnline(`dictionaries/${event.detail.dictionary.id}`, {
+                const location = new GeoPoint(lat, lng);
+                updateOnline(`dictionaries/${dictionary.id}`, {
                   coordinates: location,
                 });
               } catch (err) {
                 alert(err);
               }
             }}
-            on:remove={(event) => {
+            on:removecoordinates={() => {
               try {
-                updateOnline(`dictionaries/${event.detail.dictionary.id}`, {
+                updateOnline(`dictionaries/${dictionary.id}`, {
                   coordinates: deleteField(),
                 });
               } catch (err) {
