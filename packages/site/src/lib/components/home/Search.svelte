@@ -242,6 +242,3 @@
     </div>
   {/if}
 </div>
-
-<style windi:global>
-</style>

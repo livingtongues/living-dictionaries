@@ -40,6 +40,7 @@ const config = {
       define: {
         'import.meta.vitest': false,
       },
+      envDir: '../../',
     }
   },
 };

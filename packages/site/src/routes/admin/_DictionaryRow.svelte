@@ -10,7 +10,7 @@
   import { createEventDispatcher } from 'svelte';
   import { Collection, updateOnline } from '$sveltefirets';
   import { where } from 'firebase/firestore';
-  import { Invitation } from '@ld/parts';
+  import { Invitation, LatLngDisplay } from '@ld/parts';
 
   import RolesManagment from './_RolesManagment.svelte';
   import IntersectionObserver from '$lib/components/ui/IntersectionObserver.svelte';
@@ -20,6 +20,8 @@
     removealternatename: string;
     toggleprivacy: boolean;
     togglevideoaccess: boolean;
+    updatecoordinates: { lat: number; lng: number };
+    removecoordinates: boolean;
   }>();
 
   let helperType: IHelper[];
@@ -141,15 +143,21 @@
     <ShowHide let:show let:toggle>
       <Button size="sm" form="simple" onclick={toggle}>
         {#if dictionary.coordinates}
-          {dictionary.coordinates.latitude}°
-          {dictionary.coordinates.latitude < 0 ? 'S' : 'N'},
-          {dictionary.coordinates.longitude}°
-          {dictionary.coordinates.longitude < 0 ? 'W' : 'E'}
+          <LatLngDisplay
+            lat={dictionary.coordinates.latitude}
+            lng={dictionary.coordinates.longitude} />
         {:else}<b>Add</b>{/if}
       </Button>
       {#if show}
-        {#await import('$lib/components/modals/Coordinates.svelte') then { default: Coordinates }}
-          <Coordinates on:close={toggle} {dictionary} on:save on:remove />
+        {#await import('@ld/parts/src/lib/maps/CoordinatesModal.svelte') then { default: CoordinatesModal }}
+          <CoordinatesModal
+            lng={dictionary.coordinates ? dictionary.coordinates.longitude : undefined}
+            lat={dictionary.coordinates ? dictionary.coordinates.latitude : undefined}
+            on:update={({ detail: { lat, lng } }) => {
+              dispatch('updatecoordinates', { lat, lng });
+            }}
+            on:remove={() => dispatch('removecoordinates')}
+            on:close={toggle} />
         {/await}
       {/if}
     </ShowHide>

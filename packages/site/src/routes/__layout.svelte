@@ -96,10 +96,10 @@
   /* End workaround */
 
   input[type='checkbox'] {
-    @apply focus:ring-primary-500 h-4 w-4 text-primary-600 border-gray-300 rounded;
+    @apply focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300 rounded;
   }
 
   .form-input {
-    @apply border-gray-300 rounded-md focus:border-primary-300 focus:ring focus:ring-primary-200 focus:ring-opacity-50;
+    @apply border-gray-300 rounded-md focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50;
   }
 </style>
