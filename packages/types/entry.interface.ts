@@ -31,6 +31,8 @@ export interface IEntry extends IFirestoreMetaDataAbbreviated, LDAlgoliaFields, 
   de?: string; // definition english, only in Bahasa Lani (jaRhn6MAZim4Blvr1iEv) deprecated by Greg
 
   // Language & entry metadata
+  nc?: string; // noun class
+  va?: string; // variant
   di?: string; // dialect for this entry
   nt?: string; // notes
   sr?: string[]; // Source(s)
