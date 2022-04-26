@@ -23,6 +23,8 @@
     }))
     .filter((e) => !selectedLanguages.includes(e.bcp));
 
+  $: console.log(remainingGlossingLanguagesAsArray)
+
   import { createEventDispatcher } from 'svelte';
   const dispatch = createEventDispatcher<{
     add: { languageId: string };
