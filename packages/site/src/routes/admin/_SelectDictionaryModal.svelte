@@ -10,7 +10,7 @@
   import type { IDictionary, IUser } from '@ld/types';
   import Button from 'svelte-pieces/ui/Button.svelte';
   import { Collection } from '$sveltefirets';
-  import Filter from './_Filter.svelte';
+  import Filter from '@ld/parts/src/lib/helpers/Filter.svelte';
 
   export let user: IUser;
   export let role: 'manager' | 'contributor';
