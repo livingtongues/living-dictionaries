@@ -93,8 +93,8 @@
     "visible_to_public": "Visible au public",
     "req_com_consent": "Cela nécessite le consentement de la communauté",
     "create_dictionary": "Créer un dictionnaire",
-    "permanent_url_msg": "Le nom de l'URL est permanent et ne peut pas être changé plus tard.",
-    "add_gloss_msg": "Vous pouvez ajouter plus de langages de glossing plus tard dans les paramètres."
+    "permanent_url_msg": "Le nom de l'URL est permanent et ne peut pas être modifié plus tard.",
+    "add_gloss_msg": "Vous pouvez ajouter plus de langues de brillance plus tard dans les paramètres sous."
   },
   "dictionary": {
     "latitude": "Latitude",
@@ -143,7 +143,9 @@
     "link_copied": "Lien copié",
     "copy_and_share": "Copier et partager",
     "sr": "Source",
-    "example_sentence": "exemple de phrase"
+    "example_sentence": "exemple de phrase",
+    "nc": "Classe de nom",
+    "va": "Une variante"
   },
   "error": {
     "run_into_error": "Nous sommes désolés, il y a une erreur.",
@@ -201,7 +203,7 @@
     "dict_name": "Nom du dictionnaire",
     "public_private_meaning": "“Public\" signifie que tout le monde peut voir votre dictionnaire, ce qui nécessite le consentement de la communauté. Les dictionnaires privés ne sont visibles que pour vous et vos collaborateurs.",
     "optional_data_fields": "Champs de données facultatifs",
-    "unable-deleting-msg": "Remarque: vous ne pourrez pas supprimer ces langages de glossing plus tard."
+    "unable-deleting-msg": "Remarque: vous ne pourrez pas supprimer ces langues de brillance plus tard."
   },
   "speakers": {
     "add_new_speaker": "Ajouter un nouveau locuteur",
@@ -225,7 +227,7 @@
     "select_audio_file": "Sélectionnez un fichier audio",
     "success": "Réussite",
     "uploading": "Téléchargement en cours",
-    "select_video_file": "Sélectionnez le fichier vidéo"
+    "select_video_file": "Sélectionner le fichier vidéo"
   },
   "invite": {
     "invitation_claimed": "Invitation acceptée",
@@ -236,26 +238,26 @@
   },
   "export": {
     "csv_data": "Données comme CSV",
-    "checking_images": "Vérification si des fichiers image existent",
-    "no_images": "Il n'y a pas de fichiers image",
+    "checking_images": "Vérifier si des fichiers d'image existent",
+    "no_images": "Il n'y a pas de fichiers d'image",
     "checking_audios": "Vérification si des fichiers audio existent",
     "no_audios": "Il n'y a pas de fichiers audio",
-    "download_csv": "Télécharger csv"
+    "download_csv": "Télécharger CSV"
   },
   "video": {
     "video_url": "URL de la vidéo",
     "video_credit": "Crédit vidéo",
-    "prepare_to_record_video": "Préparez-vous à enregistrer avec microphone et appareil photo",
-    "video_info": "Vous trouverez deux façons d'afficher vos vidéos dans un dictionnaire vivant: 1) Vous pouvez enregistrer vos vidéos ici ou télécharger vos vidéos précédemment enregistrées sur notre plate-forme. Avantages: Facile et idéal pour des enregistrements rapides. Inconvénients: Vous ne pouvez télécharger une vidéo que jusqu'à 100 Mo afin de ne pas être une résolution inférieure et faible. 2) Avez-vous vos vidéos sur un service d'hébergement spécialisé dans le stockage vidéo et relier l'URL à notre site. Avantages: Facile (tant que vos vidéos sont déjà téléchargées sur cette plate-forme), vos vidéos peuvent avoir la résolution et la longueur souhaitées. Inconvénients: Si vous voulez enregistrer quelque chose d'inattendu ou très simple, cela pourrait être trop d'effort pour le faire de cette façon, et vous voudrez peut-être hiérarchiser la méthode 1.",
-    "paste_video_url": "Coller Youtube ou Vimeo Link",
+    "prepare_to_record_video": "Préparez-vous à enregistrer avec le microphone et la caméra",
+    "video_info": "Il existe deux façons d'afficher vos vidéos dans un dictionnaire de vie: 1) Vous pouvez enregistrer vos vidéos ici, ou télécharger vos vidéos précédemment enregistrées sur notre plateforme. Avantages: Facile et idéal pour les enregistrements rapides. Inconvénients: vous ne pouvez télécharger qu'une vidéo jusqu'à 100 Mo afin qu'elle ne soit que courte et faible résolution. 2) Ayez vos vidéos sur un service d'hébergement spécialisé dans le stockage vidéo et liez l'URL à notre site. Avantages: facile (tant que vos vidéos sont déjà téléchargées sur cette plate-forme), vos vidéos peuvent avoir la résolution et la longueur que vous souhaitez. Inconvénients: si vous voulez enregistrer quelque chose d'inattendu ou très simple, cela pourrait être trop d'efforts pour le faire de cette façon, et vous voudrez peut-être prioriser la méthode 1.",
+    "paste_video_url": "Coller le lien YouTube ou Vimeo",
     "record_upload_video": "Enregistrer ou télécharger une vidéo",
     "view": "Voir",
     "edit_video": "Éditer vidéo",
     "add_video": "Ajouter une vidéo",
-    "accesing": "Accès au microphone et à la caméra",
+    "accesing": "Accéder au microphone et à la caméra",
     "pause": "Pause",
-    "unpause": "Décause",
-    "previously_dismissed_msg": "Si vous avez précédemment rejeté la demande du navigateur, veuillez recharger et cliquer sur «Oui» lorsque votre navigateur demande la permission.",
-    "permission_denied": "La permission d'accéder aux médias a été refusée."
+    "unpause": "Inquiet",
+    "previously_dismissed_msg": "Si vous avez précédemment rejeté la demande du navigateur, veuillez recharger et cliquer sur «oui» lorsque votre navigateur demande l'autorisation.",
+    "permission_denied": "L'autorisation d'accéder aux médias a été refusée."
   }
 }

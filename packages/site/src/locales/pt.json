@@ -26,7 +26,7 @@
     "help_us_launch_more": "Ajude-nos a lançar mais Dicionários Vivos",
     "with_your_help": "Com a sua ajuda poderemos continuar a melhorar o nosso software e torná-lo disponível para qualquer comunidade que pretenda criar o seu Dicionário Vivo. Doe hoje e tenha um impacto!",
     "translators": "Tradutores",
-    "interns": "Estagiários."
+    "interns": "Estagiários"
   },
   "contributors": {
     "invite_contributors": "Convidar Contribuintes",
@@ -94,7 +94,7 @@
     "req_com_consent": "Requer Consentimento da Comunidade",
     "create_dictionary": "Criar Dicionário",
     "permanent_url_msg": "O nome do URL é permanente e não pode ser alterado mais tarde.",
-    "add_gloss_msg": "Você pode adicionar mais idiomas de brilho mais tarde em Configurações."
+    "add_gloss_msg": "Você pode adicionar mais linguagens de brilho posteriormente em configurações."
   },
   "dictionary": {
     "latitude": "Latitude",
@@ -106,8 +106,8 @@
     "contributors": "Contribuintes",
     "grammar": "Gramática ",
     "entries": "Inscrições",
-    "youtube_terms": "TERMOS DO YOUTUBE.",
-    "google_terms": "Termos do Google."
+    "youtube_terms": "Termos do YouTube",
+    "google_terms": "Termos do Google"
   },
   "entry": {
     "view_entries": "Ver Entradas",
@@ -143,7 +143,9 @@
     "link_copied": "Link copiado",
     "copy_and_share": "Copiar e partilhar",
     "sr": "Fonte",
-    "example_sentence": "Exemplo frase"
+    "example_sentence": "Exemplo frase",
+    "nc": "Classe substantiva",
+    "va": "Variante"
   },
   "error": {
     "run_into_error": "Lamentamos, tivemos um erro.",
@@ -201,7 +203,7 @@
     "dict_name": "Nome do Dicionário",
     "public_private_meaning": "Público significa que qualquer um pode ver o seu Dicionário o qual requer consentimento da comunidade. Os Dicionários Privados são visíveis apenas para si e para os seus colaboradores.",
     "optional_data_fields": "Campo de dados opcionais",
-    "unable-deleting-msg": "Nota: Você não poderá excluir esses idiomas de brilho mais tarde."
+    "unable-deleting-msg": "Nota: Você não poderá excluir esses idiomas de brilho posteriormente."
   },
   "speakers": {
     "add_new_speaker": "Adicionar um falante novo",
@@ -235,27 +237,27 @@
     "role": "Função "
   },
   "export": {
-    "csv_data": "Dados como CSV.",
-    "checking_images": "Verificar se existem arquivos de imagem",
+    "csv_data": "Dados como CSV",
+    "checking_images": "Verificando se existem arquivos de imagem",
     "no_images": "Não há arquivos de imagem",
-    "checking_audios": "Verificar se existem arquivos de áudio",
+    "checking_audios": "Verificando se houver arquivos de áudio",
     "no_audios": "Não há arquivos de áudio",
-    "download_csv": "Baixe o CSV."
+    "download_csv": "Baixe CSV"
   },
   "video": {
     "video_url": "URL do vídeo",
-    "video_credit": "Crédito de vídeo",
-    "prepare_to_record_video": "Prepare-se para gravar com microfone e câmera",
-    "video_info": "Existem duas maneiras de ter seus vídeos exibidos em um Dicionário Vivo: 1) Você pode gravar seus vídeos aqui mesmo ou carregar seus vídeos gravados anteriormente para nossa plataforma. Vantagens: fácil e ótimo para gravações rápidas. Desvantagens: Você só pode enviar um vídeo até 100MB, portanto, ele deve ser de resolução curta e baixa. 2) Tenha seus vídeos em um serviço de hospedagem que se especializa em armazenamento de vídeo e vincule o URL ao nosso site. Vantagens: fácil (desde que seus vídeos jáem enviados nessa plataforma), seus vídeos podem ter a resolução e o tamanho desejado. Desvantagens: Se você quiser gravar algo inesperado ou muito simples, pode ser muito esforço para fazer assim, e você pode priorizar o método 1.",
-    "paste_video_url": "Colar YouTube ou Vimeo Link",
+    "video_credit": "Crédito em vídeo",
+    "prepare_to_record_video": "Prepare -se para gravar com microfone e câmera",
+    "video_info": "Existem duas maneiras de exibir seus vídeos em um dicionário vivo: 1) Você pode gravar seus vídeos aqui ou fazer upload de seus vídeos gravados anteriormente em nossa plataforma. Vantagens: fácil e ótimo para gravações rápidas. Desvantagens: você só pode fazer upload de um vídeo até 100 MB para que ele seja apenas uma resolução curta e baixa. 2) Tenha seus vídeos em um serviço de hospedagem especializado em armazenamento de vídeo e vincule o URL ao nosso site. Vantagens: Fácil (desde que seus vídeos já estejam carregados nessa plataforma), seus vídeos podem ter a resolução e o comprimento que você deseja. Desvantagens: se você deseja gravar algo inesperado ou muito simples, pode ser muito esforço para fazê -lo dessa maneira, e você pode priorizar o método 1.",
+    "paste_video_url": "Colar YouTube ou Link Vimeo",
     "record_upload_video": "Gravar ou fazer upload de um vídeo",
     "view": "Visualizar",
     "edit_video": "Editar vídeo",
     "add_video": "Adicionar vídeo",
     "accesing": "Acessando microfone e câmera",
     "pause": "Pausa",
-    "unpause": "Paixão",
-    "previously_dismissed_msg": "Se você desgastou anteriormente a solicitação do navegador, recarregue e clique em \"Sim\" quando seu navegador solicitar permissão.",
-    "permission_denied": "Permissão para acessar a mídia foi negada."
+    "unpause": "Não musa",
+    "previously_dismissed_msg": "Se você descartou anteriormente a solicitação do navegador, recarregue e clique em 'Sim' quando seu navegador solicitar permissão.",
+    "permission_denied": "A permissão para acessar a mídia foi negada."
   }
 }

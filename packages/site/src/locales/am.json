@@ -143,7 +143,9 @@
     "link_copied": "አገናኝ ተቀድቷል",
     "copy_and_share": "ቅዳ እና ያጋሩ",
     "sr": "ምንጭ",
-    "example_sentence": "ምሳሌ አረፍተነገር"
+    "example_sentence": "ምሳሌ አረፍተነገር",
+    "nc": "ስም",
+    "va": "ልዩነቶች"
   },
   "error": {
     "run_into_error": "እናዝናለን, አንድ ስህተት ወደ አልቆብናል ነን.",

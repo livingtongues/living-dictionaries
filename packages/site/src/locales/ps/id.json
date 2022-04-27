@@ -82,11 +82,11 @@
     "def": "artikel definit",
     "indf": "artikel indefinit",
     "indfpro": "pronomina indefinit",
-    "pers": "Pronoun Pribadi.",
-    "poss": "Pronoun posesif",
+    "pers": "kata ganti pribadi",
+    "poss": "kata ganti posesif",
     "reflpro": "kata ganti yang mencerminkan",
-    "relpro": "Relatif Pronoun.",
+    "relpro": "kata ganti relatif",
     "vd": "kata kerja ditransitif",
-    "va": "ambitransitif"
+    "va": "Ambitransitif"
   }
 }

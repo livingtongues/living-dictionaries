@@ -143,7 +143,9 @@
     "link_copied": "Enlace copiado",
     "copy_and_share": "Copiar y compartir",
     "sr": "Fuente",
-    "example_sentence": "Oración de ejemplo"
+    "example_sentence": "Oración de ejemplo",
+    "nc": "Clase sustantiva",
+    "va": "Variante"
   },
   "error": {
     "run_into_error": "Lo sentimos, hay un error.",
@@ -256,6 +258,6 @@
     "pause": "Pausar",
     "unpause": "Despausar",
     "previously_dismissed_msg": "Si previamente le negó la petición al navegador, por favor refresque y acepte cuando el navegador le pida permiso.",
-    "permission_denied": "El permiso para acceder a los medios fue denegado."
+    "permission_denied": "Se denegó el permiso para acceder a los medios."
   }
 }
