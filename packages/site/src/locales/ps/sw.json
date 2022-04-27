@@ -82,11 +82,11 @@
     "def": "Kibainishi bayana",
     "indf": "Kibainishi fiche",
     "indfpro": "Kiwakilishi jumla",
-    "pers": "Promoun binafsi.",
-    "poss": "Promoun Persussive.",
-    "reflpro": "tamko la kutafakari",
-    "relpro": "Promoun jamaa",
-    "vd": "kitenzi cha ditransitive.",
-    "va": "ambitransitive."
+    "pers": "Pronoun ya kibinafsi",
+    "poss": "Pronoun ya kumiliki",
+    "reflpro": "Matamshi ya Reflexive",
+    "relpro": "Pronoun ya jamaa",
+    "vd": "kitenzi cha ditransitive",
+    "va": "Ambitransitive"
   }
 }

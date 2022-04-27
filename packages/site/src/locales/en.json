@@ -143,7 +143,9 @@
     "link_copied": "Link copied",
     "copy_and_share": "Copy and share",
     "sr": "Source",
-    "example_sentence": "Example Sentence"
+    "example_sentence": "Example Sentence",
+    "nc": "Noun Class",
+    "va": "Variant"
   },
   "error": {
     "run_into_error": "We're sorry, we've run into an error.",
