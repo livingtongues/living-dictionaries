@@ -6,7 +6,7 @@
 </script>
 
 # Edit Gloss Languages
-<Story name="Allow removing">
+<!-- <Story name="Editable">
   <EditableGlossesField 
     admin 
     {selectedLanguages} 
@@ -14,15 +14,30 @@
     on:add={(e) => selectedLanguages = [...selectedLanguages, e.detail.languageId]} 
     on:remove={e => {
       selectedLanguages.splice(selectedLanguages.indexOf(e.detail.languageId), 1);
-      selectedLanguages = selectedLanguages
+      selectedLanguages = selectedLanguages;
+    }} />
+</Story> -->
+
+<Story name="Removing not possible when there's only one language">
+  <EditableGlossesField 
+    admin
+    {selectedLanguages} 
+    availableLanguages={glossingLanguages}
+    on:add={(e) => selectedLanguages = [...selectedLanguages, e.detail.languageId]}
+    on:remove={(e) => {
+      if (selectedLanguages.length > 1) {
+        selectedLanguages.splice(selectedLanguages.indexOf(e.detail.languageId), 1);
+        selectedLanguages = selectedLanguages;
+      } else {
+        alert("You need at least one language")
+      }
     }} />
 </Story>
 
-<Story name="Removing not possible">
+<Story name="Not editable">
   <EditableGlossesField 
-    selectedLanguages={['es', 'en']} 
-    availableLanguages={glossingLanguages}
-     on:add={(e) => alert(`Add a new Id: ${e.detail.languageId}`)} />
+    selectedLanguages={['en']} 
+    availableLanguages={glossingLanguages} />
 </Story>
 
 <Story name="Empty glosses">
@@ -31,8 +46,3 @@
     availableLanguages={glossingLanguages} 
     on:add={(e) => alert(`Add a new Id: ${e.detail.languageId}`)} />
 </Story>
-
-<!-- prettier-ignore -->
-
-- Make removing not possible in certain situations 
-- Make a minimum of 1 language
