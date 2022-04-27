@@ -7,8 +7,7 @@
     "preview": "svelte-kit preview --open --host --port 3040",
     "check": "svelte-check --tsconfig ./tsconfig.json --threshold warning --diagnostic-sources js,svelte",
     "check:watch": "svelte-check --tsconfig ./tsconfig.json --threshold warning --diagnostic-sources js,svelte --watch",
-    "test": "vitest -u",
-    "update-locales": "node --loader ts-node/esm scripts/update-locales.ts"
+    "test": "vitest -u"
   },
   "devDependencies": {
     "@ld/parts": "workspace:^0.0.1",

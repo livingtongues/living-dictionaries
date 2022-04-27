@@ -1,4 +1,4 @@
-import { db } from './config';
+import { db } from '../config';
 
 // deleteDocRecursively(`dictionaries/sipu`);
 // copyDoc(`dictionaries/sipu`, `dictionaries/conestoga_language`, {}, true);
