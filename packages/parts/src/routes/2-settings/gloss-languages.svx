@@ -1,17 +1,21 @@
-<script lang="ts">
+<script>
   import Story from '$kitbook/stories/Story.svelte';
   import EditableGlossesField from '$lib/settings/EditableGlossesField.svelte';
   import { glossingLanguages } from '$lib/glosses/glossing-languages';
+  let selectedLanguages = ['es', 'en']
 </script>
 
 # Edit Gloss Languages
 <Story name="Allow removing">
   <EditableGlossesField 
     admin 
-    selectedLanguages={['es', 'en']} 
+    {selectedLanguages} 
     availableLanguages={glossingLanguages} 
-    on:add={(e) => alert(`Add a new Id: ${e.detail.languageId}`)} 
-    on:remove={e => alert(`Remove Id: ${e.detail.languageId}`)} />
+    on:add={(e) => selectedLanguages = [...selectedLanguages, e.detail.languageId]} 
+    on:remove={e => {
+      selectedLanguages.splice(selectedLanguages.indexOf(e.detail.languageId), 1);
+      selectedLanguages = selectedLanguages
+    }} />
 </Story>
 
 <Story name="Removing not possible">
