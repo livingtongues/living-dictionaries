@@ -57,7 +57,7 @@
         })
       );
     }
-    if (glossLanguages.size > 0) {
+    if (glossLanguages.size <= 0) {
       return alert(
         $t('create.at_least_one_lang', {
           default: 'Choose at least 1 language to make the dictionary available in.',
