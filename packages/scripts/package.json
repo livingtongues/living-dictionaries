@@ -3,6 +3,7 @@
   "version": "0.0.1",
   "type": "module",
   "scripts": {
+    "updateLocales": "ts-node locales/update-locales.ts",
     "importDictionary": "ts-node import/import.ts",
     "addDictionariesToIndex:dev": "ts-node algolia/addDictionariesToIndex.ts dev",
     "addDictionariesToIndex:prod": "ts-node algolia/addDictionariesToIndex.js prod",
