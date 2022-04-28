@@ -56,6 +56,7 @@
 
     <div class="mt-6" />
     <EditableGlossesField
+      {t}
       minimum={1}
       availableLanguages={glossingLanguages}
       selectedLanguages={dictionary.glossLanguages}
