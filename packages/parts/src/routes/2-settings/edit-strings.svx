@@ -7,5 +7,9 @@
 # Edit Strings
 
 <Story input={{attribute: '', attributeType: type, display: ''}} let:output={{attribute, attributeType, display}}>
-  <EditableStringField {attribute} {attributeType} {display}></EditableStringField>
+  <EditableStringField 
+    {attribute} 
+    {attributeType}
+    {display} 
+    on:save={(e) => alert(`${e.detail.attribute} will be saved`)} />
 </Story>

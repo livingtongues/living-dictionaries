@@ -4,35 +4,19 @@
   //import type { IDictionary } from '@ld/types';
   //import { updateOnline } from '$sveltefirets';
   import Button from 'svelte-pieces/ui/Button.svelte';
-
+  
   export let attribute: string;
   export let attributeType: 'name' | 'iso6393' | 'glottocode' | 'location';
   //export let dictionary: IDictionary;
   export let display: string;
   export let required = false;
-  async function save() {
-    /* try {
-      attribute =
-        attributeType === 'name'
-          ? attribute.trim().replace(/^./, attribute[0].toUpperCase())
-          : attribute.trim();
-      await updateOnline(
-        `dictionaries/${dictionary.id}`,
-        JSON.parse(`{"${attributeType}": "${attribute}"}`)
-      );
-      if (attributeType === 'name') {
-        dictionary.name = attribute;
-      }
-    } catch (err) {
-      if (attributeType === 'name') {
-        attribute = dictionary.name;
-      }
-      alert(t ? `${$t('misc.error')}: ${err}` : `Error ${err}`);
-    } */
-  }
+  import { createEventDispatcher } from 'svelte';
+  const dispatch = createEventDispatcher<{
+    save: {attribute: string}
+  }>()
 </script>
 
-<form class="mt-4" on:submit|preventDefault={save}>
+<form class="mt-4" on:submit|preventDefault={() => dispatch('save', {attribute})}>
   <label for={attribute} class="block text-xs leading-5 text-gray-700 mb-1">
     {display}
   </label>
