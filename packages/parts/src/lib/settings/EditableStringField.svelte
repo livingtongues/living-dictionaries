@@ -1,16 +1,14 @@
 <script lang="ts">
   import type { Readable } from 'svelte/store';
   export let t: Readable<any> = undefined;
-  //import type { IDictionary } from '@ld/types';
-  //import { updateOnline } from '$sveltefirets';
   import Button from 'svelte-pieces/ui/Button.svelte';
   
   export let attribute: string;
   export let attributeType: 'name' | 'iso6393' | 'glottocode' | 'location';
-  //export let dictionary: IDictionary;
   export let display: string;
   export let required = false;
   import { createEventDispatcher } from 'svelte';
+  //TODO create a function that cleans and validates the data.
   const dispatch = createEventDispatcher<{
     save: {attribute: string}
   }>()

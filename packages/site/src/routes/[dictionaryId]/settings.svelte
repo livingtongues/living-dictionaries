@@ -4,7 +4,7 @@
   import { update, updateOnline } from '$sveltefirets';
   import Button from 'svelte-pieces/ui/Button.svelte';
   import ShowHide from 'svelte-pieces/functions/ShowHide.svelte';
-  import EditString from './_EditString.svelte';
+  import EditableStringsField from '@ld/parts/src/lib/settings/EditableStringField.svelte'
   import EditGlosses from './_EditGlosses.svelte';
   import { glossingLanguages } from '$lib/mappings/glossing-languages';
   import { arrayRemove, arrayUnion, GeoPoint } from 'firebase/firestore';
@@ -38,13 +38,20 @@
   on:data={(e) => dictionaryStore.set(e.detail.data)}>
   <div style="max-width: 900px">
     <h3 class="text-xl font-semibold">{$t('misc.settings', { default: 'Settings' })}</h3>
-    <EditString
-      attribute={dictionary.name}
-      attributeType="name"
-      {dictionary}
-      display={$t('settings.edit_dict_name', { default: 'Edit Dictionary Name' })} />
 
-    <EditString
+    <EditableStringsField 
+      required  
+      attribute={dictionary.name} 
+      attributeType="name" 
+      display={$t('settings.edit_dict_name', { default: 'Edit Dictionary Name' })}
+      on:save={async (e) => {
+        await updateOnline(
+          `dictionaries/${dictionary.id}`,
+          {name: e.detail.attribute}
+        )
+      }} />
+
+    <!-- <EditString
       attribute={dictionary.iso6393}
       attributeType="iso6393"
       {dictionary}
@@ -54,7 +61,7 @@
       attribute={dictionary.glottocode}
       attributeType="glottocode"
       {dictionary}
-      display="Glottocode" />
+      display="Glottocode" /> -->
 
     <EditGlosses
       {glossingLanguages}
