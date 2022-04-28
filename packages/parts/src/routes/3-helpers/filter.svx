@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
   import Story from "$kitbook/stories/Story.svelte";
   import Filter from "$lib/helpers/Filter.svelte";
 </script>
