@@ -6,31 +6,15 @@
 </script>
 
 # Edit Gloss Languages
-<!-- <Story name="Editable">
-  <EditableGlossesField 
-    admin 
-    {selectedLanguages} 
-    availableLanguages={glossingLanguages} 
-    on:add={(e) => selectedLanguages = [...selectedLanguages, e.detail.languageId]} 
-    on:remove={e => {
-      selectedLanguages.splice(selectedLanguages.indexOf(e.detail.languageId), 1);
-      selectedLanguages = selectedLanguages;
-    }} />
-</Story> -->
-
-<Story name="Removing not possible when there's only one language">
+<Story>
   <EditableGlossesField 
     admin
     {selectedLanguages} 
     availableLanguages={glossingLanguages}
     on:add={(e) => selectedLanguages = [...selectedLanguages, e.detail.languageId]}
     on:remove={(e) => {
-      if (selectedLanguages.length > 1) {
-        selectedLanguages.splice(selectedLanguages.indexOf(e.detail.languageId), 1);
-        selectedLanguages = selectedLanguages;
-      } else {
-        alert("You need at least one language")
-      }
+      selectedLanguages.splice(selectedLanguages.indexOf(e.detail.languageId), 1);
+      selectedLanguages = selectedLanguages;
     }} />
 </Story>
 

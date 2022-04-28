@@ -37,6 +37,7 @@
 
   <ShowHide let:show let:toggle>
     <BadgeArrayEmit
+      minimum={1}
       strings={activeGlossingBcps}
       canEdit
       addMessage={t ? $t('misc.add', { default: 'Add' }) : 'Add'}
