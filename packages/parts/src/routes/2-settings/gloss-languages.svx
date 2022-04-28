@@ -1,4 +1,4 @@
-<script lang ts>
+<script lang="ts">
   import Story from '$kitbook/stories/Story.svelte';
   import EditableGlossesField from '$lib/settings/EditableGlossesField.svelte';
   import { glossingLanguages } from '$lib/glosses/glossing-languages';
