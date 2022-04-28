@@ -2,47 +2,56 @@
   import Story from '$kitbook/stories/Story.svelte';
   import EditableGlossesField from '$lib/settings/EditableGlossesField.svelte';
   import { glossingLanguages } from '$lib/glosses/glossing-languages';
-  let selectedLanguages = ['es', 'en']
+  let selectedLanguages = ['en', 'de', 'fr'];
 </script>
 
+<!-- prettier-ignore -->
 # Edit Gloss Languages
-<!-- <Story name="Editable">
-  <EditableGlossesField 
-    admin 
-    {selectedLanguages} 
-    availableLanguages={glossingLanguages} 
-    on:add={(e) => selectedLanguages = [...selectedLanguages, e.detail.languageId]} 
-    on:remove={e => {
-      selectedLanguages.splice(selectedLanguages.indexOf(e.detail.languageId), 1);
+
+There must always be at least one glossing language (or however many the
+`minimum` prop is set to) for the remove "x" buttons to show.
+
+<Story input={{ minimum: 1 }} let:output={{ minimum }}>
+  <EditableGlossesField
+    {minimum}
+    {selectedLanguages}
+    availableLanguages={glossingLanguages}
+    on:add={(e) => (selectedLanguages = [...selectedLanguages, e.detail.languageId])}
+    on:itemremoved={(e) => {
+      selectedLanguages.splice(e.detail.index, 1);
       selectedLanguages = selectedLanguages;
     }} />
-</Story> -->
+</Story>
 
-<Story name="Removing not possible when there's only one language">
-  <EditableGlossesField 
-    admin
-    {selectedLanguages} 
+<Story name="Minimum reached">
+  <EditableGlossesField selectedLanguages={['en']} availableLanguages={glossingLanguages} />
+</Story>
+
+In contexts like the settings page, we only want admins to be able to remove, for all others we can display a message asking to Contact Us. Toggle the admin status and remove languages to test.
+
+<Story name="Only Admin Can Remove" input={{ admin: true }} let:output={{ admin }}>
+  <EditableGlossesField
+    {selectedLanguages}
     availableLanguages={glossingLanguages}
-    on:add={(e) => selectedLanguages = [...selectedLanguages, e.detail.languageId]}
-    on:remove={(e) => {
-      if (selectedLanguages.length > 1) {
-        selectedLanguages.splice(selectedLanguages.indexOf(e.detail.languageId), 1);
-        selectedLanguages = selectedLanguages;
+    on:add={(e) => (selectedLanguages = [...selectedLanguages, e.detail.languageId])}
+    on:itemremoved={(e) => {
+      if (admin) {
+        if (
+          confirm('Remove as admin? Know that regular editors get a message saying "Contact Us"')
+        ) {
+          selectedLanguages.splice(e.detail.index, 1);
+          selectedLanguages = selectedLanguages;
+        }
       } else {
-        alert("You need at least one language")
+        alert('Contact Us');
+        // in page use: alert(t ? $t('header.contact_us') : 'Contact Us');
       }
     }} />
 </Story>
 
-<Story name="Not editable">
-  <EditableGlossesField 
-    selectedLanguages={['en']} 
-    availableLanguages={glossingLanguages} />
-</Story>
-
-<Story name="Empty glosses">
-  <EditableGlossesField 
-    selectedLanguages={[]} 
-    availableLanguages={glossingLanguages} 
+<Story name="No languages">
+  <EditableGlossesField
+    selectedLanguages={[]}
+    availableLanguages={glossingLanguages}
     on:add={(e) => alert(`Add a new Id: ${e.detail.languageId}`)} />
 </Story>
