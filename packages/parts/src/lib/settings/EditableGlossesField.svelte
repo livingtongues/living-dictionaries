@@ -27,7 +27,7 @@
   import { createEventDispatcher } from 'svelte';
   const dispatch = createEventDispatcher<{
     add: { languageId: string };
-    itemremoved: { value: string; index: number; };
+    remove: { languageId: string; index: number };
   }>();
 </script>
 
@@ -41,7 +41,12 @@
     {minimum}
     canEdit
     addMessage={t ? $t('misc.add', { default: 'Add' }) : 'Add'}
-    on:itemremoved
+    on:itemremoved={(e) => {
+      dispatch('remove', {
+        languageId: selectedLanguages[e.detail.index],
+        index: e.detail.index,
+      });
+    }}
     on:additem={toggle} />
   {#if show}
     <Modal on:close={toggle}>

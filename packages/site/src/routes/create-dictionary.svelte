@@ -196,7 +196,7 @@
         glossLanguages.add(e.detail.languageId);
         glossLanguages = glossLanguages;
       }}
-      on:itemremoved={(e) => {
+      on:remove={(e) => {
         glossLanguages.delete(e.detail.languageId);
         glossLanguages = glossLanguages;
       }} />
