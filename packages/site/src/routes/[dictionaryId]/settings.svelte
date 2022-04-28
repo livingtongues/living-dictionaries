@@ -65,7 +65,7 @@
           glossLanguages: arrayUnion(e.detail.languageId),
         });
       }}
-      on:itemremoved={(e) => {
+      on:remove={(e) => {
         if (admin) {
           if (
             confirm('Remove as admin? Know that regular editors get a message saying "Contact Us"')

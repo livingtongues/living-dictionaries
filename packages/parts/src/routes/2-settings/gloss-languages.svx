@@ -1,7 +1,8 @@
-<script lang=ts>
+<script lang ts>
   import Story from '$kitbook/stories/Story.svelte';
   import EditableGlossesField from '$lib/settings/EditableGlossesField.svelte';
   import { glossingLanguages } from '$lib/glosses/glossing-languages';
+  import Set from 'svelte-pieces/functions/Set.svelte';
   let selectedLanguages = ['en', 'de', 'fr'];
 </script>
 
@@ -17,7 +18,7 @@ There must always be at least one glossing language (or however many the
     {selectedLanguages}
     availableLanguages={glossingLanguages}
     on:add={(e) => (selectedLanguages = [...selectedLanguages, e.detail.languageId])}
-    on:itemremoved={(e) => {
+    on:remove={(e) => {
       selectedLanguages.splice(e.detail.index, 1);
       selectedLanguages = selectedLanguages;
     }} />
@@ -27,26 +28,28 @@ There must always be at least one glossing language (or however many the
   <EditableGlossesField selectedLanguages={['en']} availableLanguages={glossingLanguages} />
 </Story>
 
-In contexts like the settings page, we only want admins to be able to remove, for all others we can display a message asking to Contact Us. Toggle the admin status and remove languages to test.
+In contexts like the settings page, we only want admins to be able to remove, for all others we can
+display a message asking to Contact Us. Toggle the admin status and remove languages to test.
 
 <Story name="Only Admin Can Remove" input={{ admin: true }} let:output={{ admin }}>
-  <EditableGlossesField
-    {selectedLanguages}
-    availableLanguages={glossingLanguages}
-    on:add={(e) => (selectedLanguages = [...selectedLanguages, e.detail.languageId])}
-    on:itemremoved={(e) => {
-      if (admin) {
-        if (
-          confirm('Remove as admin? Know that regular editors get a message saying "Contact Us"')
-        ) {
-          selectedLanguages.splice(e.detail.index, 1);
-          selectedLanguages = selectedLanguages;
+  <Set input={['en', 'he']} let:value={scopedLanguages} let:add let:remove>
+    <EditableGlossesField
+      selectedLanguages={scopedLanguages}
+      availableLanguages={glossingLanguages}
+      on:add={(e) => add(e.detail.languageId)}
+      on:remove={(e) => {
+        if (admin) {
+          if (
+            confirm('Remove as admin? Know that regular editors get a message saying "Contact Us"')
+          ) {
+            remove(e.detail.languageId);
+          }
+        } else {
+          alert('Contact Us');
+          // in page use: alert(t ? $t('header.contact_us') : 'Contact Us');
         }
-      } else {
-        alert('Contact Us');
-        // in page use: alert(t ? $t('header.contact_us') : 'Contact Us');
-      }
-    }} />
+      }} />
+  </Set>
 </Story>
 
 <Story name="No languages">
