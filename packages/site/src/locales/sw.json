@@ -203,7 +203,7 @@
     "dict_name": "Jina la Kamusi",
     "public_private_meaning": "Je, jamii ya wazungumzaji inaruhusu lugha hii kuwekwa mtandaoni? Umma inamaanisha mtu yeyote anaweza kuona kamusi yako, suala ambalo linahitaji idhini ya jamii. Kamusi binafsi zinaonekana kwako tu na washirika wako.",
     "optional_data_fields": "Sehemu za Taarifa Mbadala",
-    "unable-deleting-msg": "Kumbuka: Hautaweza kufuta lugha hizi za glossing baadaye."
+    "unable_deleting": "Kumbuka: Hautaweza kufuta lugha hizi za glossing baadaye."
   },
   "speakers": {
     "add_new_speaker": "Ongeza Mzungumzaji Mpya",
