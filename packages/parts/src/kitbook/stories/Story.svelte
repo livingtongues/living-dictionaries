@@ -16,17 +16,21 @@
   }
 </script>
 
-{#if name !== 'default'}
-  <h3>{name}</h3>
-{/if}
+<div class="{$$props.class} not-prose bg-white rounded-lg shadow-inner mb-6 overflow-hidden border">
+  <div class="bg-gray-200">
+    {#if name !== 'default'}
+      <h3 class="p-2 text-lg font-semibold">{name}</h3>
+    {/if}
 
-<div class="{$$props.class} not-prose border-gray-300 border">
-  <!-- Move into floatable window -->
-  {#if knobs}
-    <Knobs {restoreState} id={name.replace(' ', '_')} {knobs} />
-  {/if}
+    <!-- Move into floatable window -->
+    {#if knobs}
+      <Knobs {restoreState} id={name.replace(' ', '_')} {knobs} />
+    {/if}
+  </div>
 
-  <div style="height: {height ? `${height}px` : 'unset'}; width: {width ? `${width}px` : 'unset'}">
+  <div
+    class="p-1"
+    style="height: {height ? `${height}px` : 'unset'}; width: {width ? `${width}px` : 'unset'}">
     <slot {set} output={$knobs} />
   </div>
 </div>
