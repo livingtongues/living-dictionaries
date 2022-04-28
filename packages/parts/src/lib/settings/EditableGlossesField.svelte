@@ -61,7 +61,7 @@
             color="green"
             form="simple"
             class="w-full !text-left">
-            {language.vernacularName || (t && $t('gl.' + language.bcp))}
+            {language.vernacularName || (t ? $t('gl.' + language.bcp) : language.bcp)}
             {#if language.vernacularAlternate}
               {language.vernacularAlternate}
             {/if}
