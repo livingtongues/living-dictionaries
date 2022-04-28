@@ -188,17 +188,18 @@
 
     <div class="mt-6" />
     <EditableGlossesField
-      admin
+      minimum={1}
       availableLanguages={glossingLanguages}
       selectedLanguages={Array.from(glossLanguages)}
       on:add={(e) => {
-        glossLanguages.add(e.detail.languageId)
-        glossLanguages = glossLanguages
+        glossLanguages.add(e.detail.languageId);
+        glossLanguages = glossLanguages;
       }}
-      on:remove={(e) => {
+      on:itemremoved={(e) => {
         glossLanguages.delete(e.detail.languageId);
-        glossLanguages = glossLanguages
+        glossLanguages = glossLanguages;
       }} />
+    <!-- not used in web app presently -->
     <!-- placeholder={$t('create.languages', { default: 'Language(s)' })} -->
 
     <div class="mt-6">

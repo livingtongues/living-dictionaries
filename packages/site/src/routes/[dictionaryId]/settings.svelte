@@ -54,8 +54,9 @@
       {dictionary}
       display="Glottocode" />
 
+    <div class="mt-6" />
     <EditableGlossesField
-      admin={$admin}
+      minimum={1}
       availableLanguages={glossingLanguages}
       selectedLanguages={dictionary.glossLanguages}
       on:add={(e) => {
@@ -63,10 +64,18 @@
           glossLanguages: arrayUnion(e.detail.languageId),
         });
       }}
-      on:remove={(e) => {
-        update(`dictionaries/${dictionary.id}`, {
-          glossLanguages: arrayRemove(e.detail.languageId),
-        });
+      on:itemremoved={(e) => {
+        if (admin) {
+          if (
+            confirm('Remove as admin? Know that regular editors get a message saying "Contact Us"')
+          ) {
+            update(`dictionaries/${dictionary.id}`, {
+              glossLanguages: arrayRemove(e.detail.languageId),
+            });
+          }
+        } else {
+          alert(t ? $t('header.contact_us') : 'Contact Us');
+        }
       }} />
 
     <div class="mt-6" />
