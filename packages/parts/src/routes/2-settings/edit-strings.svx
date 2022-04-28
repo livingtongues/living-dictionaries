@@ -1,0 +1,11 @@
+<script lang="ts">
+  import Story from '$kitbook/stories/Story.svelte';
+  import EditableStringField from '$lib/settings/EditableStringField.svelte';
+  let type: 'name' | 'iso6393' | 'glottocode' | 'location' = 'name';
+</script>
+
+# Edit Strings
+
+<Story input={{attribute: '', attributeType: type, display: ''}} let:output={{attribute, attributeType, display}}>
+  <EditableStringField {attribute} {attributeType} {display}></EditableStringField>
+</Story>

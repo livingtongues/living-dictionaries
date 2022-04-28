@@ -1,15 +1,17 @@
 <script lang="ts">
-  import { _ } from 'svelte-i18n';
-  import type { IDictionary } from '@ld/types';
-  import { updateOnline } from '$sveltefirets';
+  import type { Readable } from 'svelte/store';
+  export let t: Readable<any> = undefined;
+  //import type { IDictionary } from '@ld/types';
+  //import { updateOnline } from '$sveltefirets';
   import Button from 'svelte-pieces/ui/Button.svelte';
 
   export let attribute: string;
-  export let attributeType: 'name' | 'iso6393' | 'glottocode';
-  export let dictionary: IDictionary;
+  export let attributeType: 'name' | 'iso6393' | 'glottocode' | 'location';
+  //export let dictionary: IDictionary;
   export let display: string;
+  export let required = false;
   async function save() {
-    try {
+    /* try {
       attribute =
         attributeType === 'name'
           ? attribute.trim().replace(/^./, attribute[0].toUpperCase())
@@ -25,8 +27,8 @@
       if (attributeType === 'name') {
         attribute = dictionary.name;
       }
-      alert(`${$_('misc.error', { default: 'Error' })}: ${err}`);
-    }
+      alert(t ? `${$t('misc.error')}: ${err}` : `Error ${err}`);
+    } */
   }
 </script>
 
@@ -44,7 +46,7 @@
         spellcheck={false}
         minlength={attributeType === 'name' ? 2 : 0}
         maxlength="30"
-        required
+        required={required}
         bind:value={attribute}
         class="appearance-none rounded-none block w-full px-3 py-2 border
           border-gray-300 ltr:rounded-l-md rtl:rounded-r-md text-gray-900 placeholder-gray-400
@@ -53,7 +55,7 @@
         placeholder={`Dictionary ${attributeType}`} />
     </div>
     <Button type="submit" form="filled">
-      {$_('misc.save', { default: 'Save' })}
+      {t ? $t('misc.save') : 'Save'}
     </Button>
   </div>
 </form>
