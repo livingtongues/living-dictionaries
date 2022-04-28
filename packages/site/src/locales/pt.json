@@ -203,7 +203,7 @@
     "dict_name": "Nome do Dicionário",
     "public_private_meaning": "Público significa que qualquer um pode ver o seu Dicionário o qual requer consentimento da comunidade. Os Dicionários Privados são visíveis apenas para si e para os seus colaboradores.",
     "optional_data_fields": "Campo de dados opcionais",
-    "unable-deleting-msg": "Nota: Você não poderá excluir esses idiomas de brilho posteriormente."
+    "unable_deleting": "Nota: Você não poderá excluir esses idiomas de brilho posteriormente."
   },
   "speakers": {
     "add_new_speaker": "Adicionar um falante novo",

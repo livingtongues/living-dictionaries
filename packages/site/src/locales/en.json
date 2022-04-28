@@ -203,7 +203,7 @@
     "dict_name": "Dictionary Name",
     "public_private_meaning": "Public means anyone can see your dictionary which requires community consent. Private dictionaries are visible only to you and your collaborators.",
     "optional_data_fields": "Optional Data Fields",
-    "unable-deleting-msg": "Note: you will not be able to delete these glossing languages later."
+    "unable_deleting": "Note: you will not be able to delete these glossing languages later."
   },
   "speakers": {
     "add_new_speaker": "Add New Speaker",

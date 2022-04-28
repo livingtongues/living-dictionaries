@@ -90,7 +90,7 @@
     {$_('create.gloss_dictionary_clarification', {
       default: 'Language(s) you want to translate entries into',
     })}
-    {$_('settings.unable-deleting-msg', {
+    {$_('settings.unable_deleting', {
       default: 'Note: you will not be able to delete these glossing languages later.',
     })}
   </div>
