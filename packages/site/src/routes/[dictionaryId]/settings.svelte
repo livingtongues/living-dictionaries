@@ -5,12 +5,11 @@
   import Button from 'svelte-pieces/ui/Button.svelte';
   import ShowHide from 'svelte-pieces/functions/ShowHide.svelte';
   import EditableStringsField from '@ld/parts/src/lib/settings/EditableStringField.svelte'
-  import EditGlosses from './_EditGlosses.svelte';
-  import { glossingLanguages } from '$lib/mappings/glossing-languages';
+  //import { glossingLanguages } from '$lib/mappings/glossing-languages';
   import { arrayRemove, arrayUnion, GeoPoint } from 'firebase/firestore';
   import type { IDictionary } from '@ld/types';
   import Doc from '$sveltefirets/components/Doc.svelte';
-  import EditableCoordinatesField from '@ld/parts/src/lib/settings/EditableCoordinatesField.svelte';
+  import { EditableCoordinatesField, EditableGlossesField, glossingLanguages } from '@ld/parts';
 
   async function togglePublic(settingPublic: boolean) {
     try {
@@ -63,23 +62,34 @@
       {dictionary}
       display="Glottocode" /> -->
 
-    <EditGlosses
-      {glossingLanguages}
-      {dictionary}
+    <div class="mt-6" />
+    <EditableGlossesField
+      {t}
+      minimum={1}
+      availableLanguages={glossingLanguages}
+      selectedLanguages={dictionary.glossLanguages}
       on:add={(e) => {
         update(`dictionaries/${dictionary.id}`, {
           glossLanguages: arrayUnion(e.detail.languageId),
         });
       }}
       on:remove={(e) => {
-        update(`dictionaries/${dictionary.id}`, {
-          glossLanguages: arrayRemove(e.detail.languageId),
-        });
+        if (admin) {
+          if (
+            confirm('Remove as admin? Know that regular editors get a message saying "Contact Us"')
+          ) {
+            update(`dictionaries/${dictionary.id}`, {
+              glossLanguages: arrayRemove(e.detail.languageId),
+            });
+          }
+        } else {
+          alert(t ? $t('header.contact_us') : 'Contact Us');
+        }
       }} />
 
     <div class="mt-6" />
     <EditableCoordinatesField
-    {t}
+      {t}
       lng={dictionary.coordinates ? dictionary.coordinates.longitude : undefined}
       lat={dictionary.coordinates ? dictionary.coordinates.latitude : undefined}
       on:update={(event) => {

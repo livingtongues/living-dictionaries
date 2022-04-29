@@ -32,6 +32,7 @@ export async function generateFilesFromSpreadsheet() {
     const translations_gl = await generateTranslationsFromSpreadsheet(rows_gl, { prefix: 'gl' });
     await writeLocaleFiles(translations_gl, localesDir + '/gl');
     const glossingLanguages = await generateGlossingLanguages(rows_gl);
+    // TODO: out of date - needs to update TS file in parts
     await fs.writeFile(
       `../site/src/lib/mappings/glossing-languages-list.json`,
       JSON.stringify(glossingLanguages, null, 2) + '\r\n'

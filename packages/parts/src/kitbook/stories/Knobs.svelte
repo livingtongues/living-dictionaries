@@ -19,10 +19,10 @@
   });
 </script>
 
-<div class="bg-gray-200 p-2 border-b border-gray-300">
+<div class="p-2">
   {#each knobs.fields as { type, name, label, ...props } (name)}
     <label class="block my-1 mx-2" for="">
-      <span class="inline-block mr-2 font-semibold">{label || name}</span>
+      <span class="inline-block mr-2 text-sm font-semibold">{label || name}</span>
       {#if type === 'text' || type === 'string'}
         <input
           bind:value={$knobs[name]}
