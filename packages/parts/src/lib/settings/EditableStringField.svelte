@@ -2,13 +2,14 @@
   import type { Readable } from 'svelte/store';
   export let t: Readable<any> = undefined;
   import Button from 'svelte-pieces/ui/Button.svelte';
-  
-  export let attribute: string;
-  export let attributeType: 'name' | 'iso6393' | 'glottocode' | 'location';
-  export let display: string;
-  export let required = false;
+
+  export let attribute:string,
+    display: string,
+    required = false,
+    minLength = 0,
+    maxlength = 30;
   import { createEventDispatcher } from 'svelte';
-  //TODO create a function that cleans and validates the data.
+  //TODO create a function that cleans and validates the data. Maybe not necessary
   const dispatch = createEventDispatcher<{
     save: {attribute: string}
   }>()
@@ -26,15 +27,15 @@
         autocomplete="off"
         autocorrect="off"
         spellcheck={false}
-        minlength={attributeType === 'name' ? 2 : 0}
-        maxlength="30"
-        required={required}
+        {minLength}
+        {maxlength}
+        {required}
         bind:value={attribute}
         class="appearance-none rounded-none block w-full px-3 py-2 border
           border-gray-300 ltr:rounded-l-md rtl:rounded-r-md text-gray-900 placeholder-gray-400
           focus:outline-none focus:shadow-outline-blue focus:border-blue-300
           sm:text-sm sm:leading-5 transition ease-in-out duration-150"
-        placeholder={`Dictionary ${attributeType}`} />
+        placeholder={`Dictionary ${attribute}`} />
     </div>
     <Button type="submit" form="filled">
       {t ? $t('misc.save') : 'Save'}

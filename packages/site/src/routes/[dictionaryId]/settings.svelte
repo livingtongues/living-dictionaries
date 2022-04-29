@@ -28,6 +28,21 @@
       alert(`${$t('misc.error', { default: 'Error' })}: ${err}`);
     }
   }
+
+  async function save(e, dictionaryId: string, attributetype: string) { // How should I handle events with typescript?
+    try {
+      let attribute = e.detail.attribute
+      attribute = attributetype === 'name'
+        ? attribute.trim().replace(/^./, attribute[0].toUpperCase())
+        : attribute.trim();
+      await updateOnline(
+        `dictionaries/${dictionaryId}`,
+        JSON.parse(`{"${attributetype}": "${attribute}"}`)
+      );
+    } catch (err) {
+      alert(`${$t('misc.error', { default: 'Error' })}: ${err}`);
+    }
+  }
 </script>
 
 <Doc
@@ -40,23 +55,17 @@
 
     <EditableStringsField 
       required  
-      attribute={dictionary.name} 
-      attributeType="name" 
+      attribute={dictionary.name}
+      minLength={2}  
       display={$t('settings.edit_dict_name', { default: 'Edit Dictionary Name' })}
-      on:save={async (e) => {
-        await updateOnline(
-          `dictionaries/${dictionary.id}`,
-          {name: e.detail.attribute}
-        )
-      }} />
+      on:save={(e) => save(e, dictionary.id, "name")} />
+
+    <EditableStringsField
+      attribute={dictionary.iso6393}
+      display="ISO 639-3" 
+      on:save={(e) => save(e, dictionary.id, "iso6393")} />
 
     <!-- <EditString
-      attribute={dictionary.iso6393}
-      attributeType="iso6393"
-      {dictionary}
-      display="ISO 639-3" />
-
-    <EditString
       attribute={dictionary.glottocode}
       attributeType="glottocode"
       {dictionary}
