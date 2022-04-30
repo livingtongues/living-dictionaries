@@ -8,21 +8,32 @@
   import { arrayRemove, arrayUnion, GeoPoint } from 'firebase/firestore';
   import type { IDictionary } from '@ld/types';
   import Doc from '$sveltefirets/components/Doc.svelte';
-  import { EditableCoordinatesField, EditableGlossesField, glossingLanguages } from '@ld/parts';
+  import {
+    EditableCoordinatesField,
+    EditableGlossesField,
+    PublicCheckbox,
+    glossingLanguages,
+  } from '@ld/parts';
 
   async function togglePublic(settingPublic: boolean) {
     try {
-      if (settingPublic) {
-        const allowed = confirm(
-          `${$t('settings.community_permission', {
-            default: 'Does the speech community allow this language to be online?',
-          })}`
-        );
-        if (!allowed) return;
-      }
       await updateOnline<IDictionary>(`dictionaries/${$dictionaryStore.id}`, {
         public: settingPublic,
       });
+      setTimeout(async () => {
+        if (
+          settingPublic &&
+          !confirm(
+            `${$t('settings.community_permission', {
+              default: 'Does the speech community allow this language to be online?',
+            })}`
+          )
+        ) {
+          await updateOnline<IDictionary>(`dictionaries/${$dictionaryStore.id}`, {
+            public: false,
+          });
+        }
+      }, 5);
     } catch (err) {
       alert(`${$t('misc.error', { default: 'Error' })}: ${err}`);
     }
@@ -108,48 +119,33 @@
       }} />
     <div class="mb-5" />
 
-    <div class="flex items-center">
-      <input
-        id="public"
-        type="checkbox"
-        checked={dictionary.public}
-        on:change={(e) => {
-          // @ts-ignore
-          togglePublic(e.target.checked);
-        }} />
-      <label for="public" class="mx-2 block text-sm font-medium text-gray-700">
-        {$t('create.visible_to_public', { default: 'Visible to Public' })}
-      </label>
-    </div>
-    <div class="text-xs text-gray-600 mt-1 mb-6">
-      ({$t('settings.public_private_meaning', {
-        default:
-          'Public means anyone can see your dictionary which requires community consent. Private dictionaries are visible only to you and your collaborators.',
-      })})
-    </div>
-  </div>
+    <PublicCheckbox
+      {t}
+      checked={dictionary.public}
+      on:changed={({ detail: { checked } }) => togglePublic(checked)} />
+    <div class="mb-5" />
 
-  <ShowHide let:show let:toggle>
-    <Button onclick={toggle}>
-      {$t('settings.optional_data_fields', { default: 'Optional Data Fields' })}:
-      {$t('header.contact_us', { default: 'Contact Us' })}
-    </Button>
+    <ShowHide let:show let:toggle>
+      <Button onclick={toggle}>
+        {$t('settings.optional_data_fields', { default: 'Optional Data Fields' })}:
+        {$t('header.contact_us', { default: 'Contact Us' })}
+      </Button>
 
-    {#if show}
-      {#await import('$lib/components/modals/Contact.svelte') then { default: Contact }}
-        <Contact on:close={toggle} />
+      {#if show}
+        {#await import('$lib/components/modals/Contact.svelte') then { default: Contact }}
+          <Contact on:close={toggle} />
+        {/await}
+      {/if}
+    </ShowHide>
+
+    {#if $admin > 1}
+      {#await import('svelte-pieces/data/JSON.svelte') then { default: JSON }}
+        <div class="mt-5">
+          <JSON obj={dictionary} />
+        </div>
       {/await}
     {/if}
-  </ShowHide>
-
-  {#if $admin > 1}
-    {#await import('svelte-pieces/data/JSON.svelte') then { default: JSON }}
-      <div class="mt-5">
-        <JSON obj={dictionary} />
-      </div>
-    {/await}
-  {/if}
-</Doc>
+  </div></Doc>
 
 <svelte:head>
   <title>

@@ -9,7 +9,12 @@
   import { arrayUnion, GeoPoint, serverTimestamp } from 'firebase/firestore/lite';
   import { debounce } from '$lib/helpers/debounce';
   import { pruneObject } from '$lib/helpers/prune';
-  import { EditableCoordinatesField, EditableGlossesField, glossingLanguages } from '@ld/parts';
+  import {
+    EditableCoordinatesField,
+    EditableGlossesField,
+    PublicCheckbox,
+    glossingLanguages,
+  } from '@ld/parts';
 
   let modal: 'auth' = null;
   let submitting = false;
@@ -278,34 +283,25 @@
       </div>
     </div>
 
-    <div class="mt-6 flex items-center">
-      <input
-        id="public"
-        type="checkbox"
-        bind:checked={publicDictionary}
-        on:change={() => {
-          setTimeout(() => {
-            if (publicDictionary) {
-              publicDictionary = confirm(
-                `${$t('create.speech_community_permission', {
-                  default:
-                    "Does the speech community allow this language to be online? Select 'OK' if they have given you permission.",
-                })}`
-              );
-            } else {
-              publicDictionary = false;
-            }
-          }, 5);
-        }} />
-      <label for="public" class="mx-2 block text-sm leading-5 text-gray-900">
-        {$t('create.visible_to_public', { default: 'Visible to Public' })}
-        <small class="text-gray-600">
-          ({$t('create.req_com_consent', {
-            default: 'Requires Community Consent',
-          })})
-        </small>
-      </label>
-    </div>
+    <div class="mt-6" />
+    <PublicCheckbox
+      {t}
+      checked={publicDictionary}
+      on:changed={({ detail: { checked } }) => {
+        publicDictionary = checked;
+        setTimeout(() => {
+          if (
+            checked &&
+            !confirm(
+              `${$t('settings.community_permission', {
+                default: 'Does the speech community allow this language to be online?',
+              })}`
+            )
+          ) {
+            publicDictionary = false;
+          }
+        }, 5);
+      }} />
 
     <div class="mt-6">
       <Button type="submit" class="w-full" form="filled" disabled={!online} loading={submitting}>
