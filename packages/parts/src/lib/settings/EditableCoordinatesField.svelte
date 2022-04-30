@@ -8,7 +8,7 @@
   export let lng: number, lat: number;
 </script>
 
-<div class="block text-sm font-medium leading-5 text-gray-700">
+<div class="text-sm font-medium text-gray-700">
   {t ? $t('create.where_spoken') : 'Where is this language spoken?'}*
 </div>
 <div class="mt-1">
