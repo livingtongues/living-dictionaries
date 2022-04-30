@@ -1,7 +1,6 @@
 # Windi + Kitbook Migration
 
 - bring in PRs and review recent changes
-- wire up update-locales script
 - use node-fetch instead of fetch-as
 - restore functions
 - set admin context on a global level and in kitbook add Context component
@@ -16,6 +15,7 @@
 - use 1 slideover component for EntryFilters and SideMenu in __layout
 - wean off font-awesome
 - consider prefix for svelte-pieces components or learn how not to preprocess again
+- decide on font-semibold (600) or font-medium (500) - both look the same usually
 
 ## Notes
 *Used `<[A-Z]([^>]|[\s\n])+?class="` to find Button classes (though causes catastrophic backtracking and will crash VSCode eventually)*

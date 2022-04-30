@@ -35,7 +35,7 @@
 
 <svelte:head>
   <title>
-    {dictionary && dictionary.name}
+    {$dictionaryStore.name}
     {$_('misc.LD_singular', { default: 'Living Dictionary' })}
   </title>
 </svelte:head>
@@ -54,10 +54,10 @@
 
     <button class="p-3 md:hidden" on:click={() => (menuOpen = !menuOpen)}>
       <i class="far fa-bars" />&nbsp;
-      {dictionary && dictionary.name}
+      {$dictionaryStore.name}
     </button>
     <a class="hover:text-black hidden md:inline" href="/{dictionary.id}">
-      {dictionary && dictionary.name}
+      {$dictionaryStore.name}
     </a>
   </div>
 </Header>
