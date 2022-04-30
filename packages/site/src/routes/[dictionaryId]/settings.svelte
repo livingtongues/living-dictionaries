@@ -35,26 +35,29 @@
   let:data={dictionary}
   on:data={(e) => dictionaryStore.set(e.detail.data)}>
   <div style="max-width: 900px">
-    <h3 class="text-xl font-semibold">{$t('misc.settings', { default: 'Settings' })}</h3>
+    <h3 class="text-xl font-semibold mb-4">{$t('misc.settings', { default: 'Settings' })}</h3>
+
     <EditString
       attribute={dictionary.name}
       attributeType="name"
       {dictionary}
       display={$t('settings.edit_dict_name', { default: 'Edit Dictionary Name' })} />
+    <div class="mb-5" />
 
     <EditString
       attribute={dictionary.iso6393}
       attributeType="iso6393"
       {dictionary}
       display="ISO 639-3" />
+    <div class="mb-5" />
 
     <EditString
       attribute={dictionary.glottocode}
       attributeType="glottocode"
       {dictionary}
       display="Glottocode" />
+    <div class="mb-5" />
 
-    <div class="mt-6" />
     <EditableGlossesField
       {t}
       minimum={1}
@@ -78,22 +81,23 @@
           alert(t ? $t('header.contact_us') : 'Contact Us');
         }
       }} />
+    <div class="mb-5" />
 
-    <div class="mt-6" />
     <EditableCoordinatesField
       {t}
       lng={dictionary.coordinates ? dictionary.coordinates.longitude : undefined}
       lat={dictionary.coordinates ? dictionary.coordinates.latitude : undefined}
-      on:update={(event) => {
+      on:update={(e) => {
         update(`dictionaries/${dictionary.id}`, {
-          coordinates: new GeoPoint(event.detail.lat, event.detail.lng),
+          coordinates: new GeoPoint(e.detail.lat, e.detail.lng),
         });
       }}
       on:remove={() => {
         update(`dictionaries/${dictionary.id}`, { coordinates: null });
       }} />
+    <div class="mb-5" />
 
-    <div class="mt-6 flex items-center">
+    <div class="flex items-center">
       <input
         id="public"
         type="checkbox"
@@ -102,7 +106,7 @@
           // @ts-ignore
           togglePublic(e.target.checked);
         }} />
-      <label for="public" class="mx-2 block leading-5 text-gray-900">
+      <label for="public" class="mx-2 block text-sm font-medium text-gray-700">
         {$t('create.visible_to_public', { default: 'Visible to Public' })}
       </label>
     </div>
@@ -115,7 +119,7 @@
   </div>
 
   <ShowHide let:show let:toggle>
-    <Button onclick={toggle} form="filled">
+    <Button onclick={toggle}>
       {$t('settings.optional_data_fields', { default: 'Optional Data Fields' })}:
       {$t('header.contact_us', { default: 'Contact Us' })}
     </Button>
@@ -129,7 +133,9 @@
 
   {#if $admin > 1}
     {#await import('svelte-pieces/data/JSON.svelte') then { default: JSON }}
-      <JSON obj={dictionary} />
+      <div class="mt-5">
+        <JSON obj={dictionary} />
+      </div>
     {/await}
   {/if}
 </Doc>

@@ -30,30 +30,28 @@
   }
 </script>
 
-<form class="mt-4" on:submit|preventDefault={save}>
-  <label for={attribute} class="block text-xs leading-5 text-gray-700 mb-1">
-    {display}
-  </label>
-  <div class="flex flex-grow rounded-md shadow-sm">
-    <div class="flex-grow focus-within:z-10">
-      <input
-        id={attribute}
-        type="text"
-        autocomplete="off"
-        autocorrect="off"
-        spellcheck={false}
-        minlength={attributeType === 'name' ? 2 : 0}
-        maxlength="30"
-        required
-        bind:value={attribute}
-        class="appearance-none rounded-none block w-full px-3 py-2 border
+<label for={attribute} class="text-sm font-medium text-gray-700 mb-2">
+  {display}
+</label>
+<div class="flex flex-grow rounded-md shadow-sm">
+  <div class="flex-grow focus-within:z-10">
+    <input
+      id={attribute}
+      type="text"
+      autocomplete="off"
+      autocorrect="off"
+      spellcheck={false}
+      minlength={attributeType === 'name' ? 2 : 0}
+      maxlength="30"
+      required
+      bind:value={attribute}
+      class="appearance-none rounded-none block w-full px-3 py-2 border
           border-gray-300 ltr:rounded-l-md rtl:rounded-r-md text-gray-900 placeholder-gray-400
           focus:outline-none focus:shadow-outline-blue focus:border-blue-300
           sm:text-sm sm:leading-5 transition ease-in-out duration-150"
-        placeholder={`Dictionary ${attributeType}`} />
-    </div>
-    <Button type="submit" form="filled">
-      {$_('misc.save', { default: 'Save' })}
-    </Button>
+      placeholder={`Dictionary ${attributeType}`} />
   </div>
-</form>
+  <Button onclick={save}>
+    {$_('misc.save', { default: 'Save' })}
+  </Button>
+</div>
