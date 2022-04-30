@@ -5,7 +5,7 @@
   export let action = () => {};
   export let wrap = false,
     attribute: string,
-    display: string;
+    display: string = undefined;
 </script>
 
 {#if wrap}

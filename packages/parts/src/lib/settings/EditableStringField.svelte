@@ -4,7 +4,7 @@
   import FormWrapper from '../helpers/FormWrapper.svelte';
 
   export let attribute:string,
-    display: string,
+    display: string = undefined,
     required = false,
     wrap = true,
     minLength = 0,

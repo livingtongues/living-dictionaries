@@ -121,12 +121,14 @@
 <form class="flex" on:submit|preventDefault={createNewDictionary}>
   <div class="flex flex-col justify-center p-4 max-w-md mx-auto">
     <div class="mt-6">
+      <label for="name" class="block text-xl font-medium mb-2 leading-5 text-gray-700">
+        {$t('dictionary.name_of_language', { default: 'Name of Language' })}*
+      </label>
       <EditableStringField
         wrap={false}
         required
         bind:attribute={name}
-        minLength={2} 
-        display="{$t('dictionary.name_of_language', { default: 'Name of Language' })}*"
+        minLength={2}
         />
       <div class="text-xs text-gray-600 mt-1">
         {$t('create.name_clarification', {
