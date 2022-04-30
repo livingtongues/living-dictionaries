@@ -1,6 +1,7 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
   import Button from 'svelte-pieces/ui/Button.svelte';
+  import Form from 'svelte-pieces/data/Form.svelte';
 
   export let id: 'name' | 'iso6393' | 'glottocode';
   export let display: string;
@@ -12,7 +13,7 @@
   export let save: (value: string) => Promise<void>;
 </script>
 
-<form on:submit|preventDefault={async () => save(value.trim())}>
+<Form let:loading onsubmit={async () => save(value.trim())}>
   <label for={id} class="text-sm font-medium text-gray-700 mb-2">
     {display}
   </label>
@@ -30,8 +31,8 @@
       class="form-input w-full"
       placeholder={`Enter ${id}`} />
     <div class="w-1" />
-    <Button type="submit">
+    <Button {loading} type="submit">
       {$_('misc.save', { default: 'Save' })}
     </Button>
   </div>
-</form>
+</Form>
