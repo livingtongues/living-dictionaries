@@ -64,12 +64,19 @@
       attribute={dictionary.iso6393}
       display="ISO 639-3" 
       on:save={(e) => save(e, dictionary.id, "iso6393")} />
-
-    <!-- <EditString
+    
+    <EditableStringField
+      {t}
       attribute={dictionary.glottocode}
-      attributeType="glottocode"
-      {dictionary}
-      display="Glottocode" /> -->
+      display="Glottocode" 
+      on:save={(e) => save(e, dictionary.id, "glottocode")} />
+
+      <EditableStringField 
+      {t}
+      required  
+      attribute={dictionary.location}  
+      display={$t('dictionary.location', { default: 'Location' })}
+      on:save={(e) => save(e, dictionary.id, "location")} />
 
     <div class="mt-6" />
     <EditableGlossesField
