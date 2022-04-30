@@ -34,27 +34,38 @@
   startWith={$dictionaryStore}
   let:data={dictionary}
   on:data={(e) => dictionaryStore.set(e.detail.data)}>
-  <div style="max-width: 900px">
+  <div style="max-width: 700px">
     <h3 class="text-xl font-semibold mb-4">{$t('misc.settings', { default: 'Settings' })}</h3>
 
     <EditString
-      attribute={dictionary.name}
-      attributeType="name"
-      {dictionary}
+      value={dictionary.name}
+      minlength={2}
+      required={true}
+      id="name"
+      save={async (name) =>
+        await updateOnline(`dictionaries/${$dictionaryStore.id}`, {
+          name,
+        })}
       display={$t('settings.edit_dict_name', { default: 'Edit Dictionary Name' })} />
     <div class="mb-5" />
 
     <EditString
-      attribute={dictionary.iso6393}
-      attributeType="iso6393"
-      {dictionary}
+      value={dictionary.iso6393}
+      id="iso6393"
+      save={async (iso6393) =>
+        await updateOnline(`dictionaries/${$dictionaryStore.id}`, {
+          iso6393,
+        })}
       display="ISO 639-3" />
     <div class="mb-5" />
 
     <EditString
-      attribute={dictionary.glottocode}
-      attributeType="glottocode"
-      {dictionary}
+      value={dictionary.glottocode}
+      id="glottocode"
+      save={async (glottocode) =>
+        await updateOnline(`dictionaries/${$dictionaryStore.id}`, {
+          glottocode,
+        })}
       display="Glottocode" />
     <div class="mb-5" />
 

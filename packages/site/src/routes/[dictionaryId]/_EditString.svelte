@@ -1,57 +1,37 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
-  import type { IDictionary } from '@ld/types';
-  import { updateOnline } from '$sveltefirets';
   import Button from 'svelte-pieces/ui/Button.svelte';
 
-  export let attribute: string;
-  export let attributeType: 'name' | 'iso6393' | 'glottocode';
-  export let dictionary: IDictionary;
+  export let id: 'name' | 'iso6393' | 'glottocode';
   export let display: string;
-  async function save() {
-    try {
-      attribute =
-        attributeType === 'name'
-          ? attribute.trim().replace(/^./, attribute[0].toUpperCase())
-          : attribute.trim();
-      await updateOnline(
-        `dictionaries/${dictionary.id}`,
-        JSON.parse(`{"${attributeType}": "${attribute}"}`)
-      );
-      if (attributeType === 'name') {
-        dictionary.name = attribute;
-      }
-    } catch (err) {
-      if (attributeType === 'name') {
-        attribute = dictionary.name;
-      }
-      alert(`${$_('misc.error', { default: 'Error' })}: ${err}`);
-    }
-  }
+  export let value: string;
+  export let minlength = 0;
+  export let maxlength = 30;
+  export let required = false;
+
+  export let save: (value: string) => Promise<void>;
 </script>
 
-<label for={attribute} class="text-sm font-medium text-gray-700 mb-2">
-  {display}
-</label>
-<div class="flex flex-grow rounded-md shadow-sm">
-  <div class="flex-grow focus-within:z-10">
+<form on:submit|preventDefault={async () => save(value.trim())}>
+  <label for={id} class="text-sm font-medium text-gray-700 mb-2">
+    {display}
+  </label>
+  <div class="flex">
     <input
-      id={attribute}
+      {id}
       type="text"
       autocomplete="off"
       autocorrect="off"
       spellcheck={false}
-      minlength={attributeType === 'name' ? 2 : 0}
-      maxlength="30"
-      required
-      bind:value={attribute}
-      class="appearance-none rounded-none block w-full px-3 py-2 border
-          border-gray-300 ltr:rounded-l-md rtl:rounded-r-md text-gray-900 placeholder-gray-400
-          focus:outline-none focus:shadow-outline-blue focus:border-blue-300
-          sm:text-sm sm:leading-5 transition ease-in-out duration-150"
-      placeholder={`Dictionary ${attributeType}`} />
+      {minlength}
+      {maxlength}
+      {required}
+      bind:value
+      class="form-input w-full"
+      placeholder={`Enter ${id}`} />
+    <div class="w-1" />
+    <Button type="submit">
+      {$_('misc.save', { default: 'Save' })}
+    </Button>
   </div>
-  <Button onclick={save}>
-    {$_('misc.save', { default: 'Save' })}
-  </Button>
-</div>
+</form>
