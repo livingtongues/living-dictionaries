@@ -9,7 +9,7 @@
   import { arrayUnion, GeoPoint, serverTimestamp } from 'firebase/firestore/lite';
   import { debounce } from '$lib/helpers/debounce';
   import { pruneObject } from '$lib/helpers/prune';
-  import { EditableCoordinatesField, EditableGlossesField, glossingLanguages } from '@ld/parts';
+  import { EditableStringField, EditableCoordinatesField, EditableGlossesField, glossingLanguages } from '@ld/parts';
 
   let modal: 'auth' = null;
   let submitting = false;
@@ -121,23 +121,13 @@
 <form class="flex" on:submit|preventDefault={createNewDictionary}>
   <div class="flex flex-col justify-center p-4 max-w-md mx-auto">
     <div class="mt-6">
-      <label for="name" class="block text-xl font-medium leading-5 text-gray-700">
-        {$t('dictionary.name_of_language', { default: 'Name of Language' })}*
-      </label>
-      <div class="mt-2 rounded-md shadow-sm">
-        <!-- svelte-ignore a11y-autofocus -->
-        <input
-          id="name"
-          type="text"
-          autocomplete="off"
-          autocorrect="off"
-          spellcheck={false}
-          autofocus
-          minlength="3"
-          required
-          bind:value={name}
-          class="form-input w-full" />
-      </div>
+      <EditableStringField
+        wrap={false}
+        required
+        bind:attribute={name}
+        minLength={2} 
+        display="{$t('dictionary.name_of_language', { default: 'Name of Language' })}*"
+        />
       <div class="text-xs text-gray-600 mt-1">
         {$t('create.name_clarification', {
           default: 'This will be the name of the dictionary.',

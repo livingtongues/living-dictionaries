@@ -4,12 +4,10 @@
   import { update, updateOnline } from '$sveltefirets';
   import Button from 'svelte-pieces/ui/Button.svelte';
   import ShowHide from 'svelte-pieces/functions/ShowHide.svelte';
-  import EditableStringsField from '@ld/parts/src/lib/settings/EditableStringField.svelte'
-  //import { glossingLanguages } from '$lib/mappings/glossing-languages';
   import { arrayRemove, arrayUnion, GeoPoint } from 'firebase/firestore';
   import type { IDictionary } from '@ld/types';
   import Doc from '$sveltefirets/components/Doc.svelte';
-  import { EditableCoordinatesField, EditableGlossesField, glossingLanguages } from '@ld/parts';
+  import { EditableStringField, EditableCoordinatesField, EditableGlossesField, glossingLanguages } from '@ld/parts';
 
   async function togglePublic(settingPublic: boolean) {
     try {
@@ -53,14 +51,16 @@
   <div style="max-width: 900px">
     <h3 class="text-xl font-semibold">{$t('misc.settings', { default: 'Settings' })}</h3>
 
-    <EditableStringsField 
+    <EditableStringField 
+      {t}
       required  
       attribute={dictionary.name}
       minLength={2}  
       display={$t('settings.edit_dict_name', { default: 'Edit Dictionary Name' })}
       on:save={(e) => save(e, dictionary.id, "name")} />
 
-    <EditableStringsField
+    <EditableStringField
+      {t}
       attribute={dictionary.iso6393}
       display="ISO 639-3" 
       on:save={(e) => save(e, dictionary.id, "iso6393")} />
