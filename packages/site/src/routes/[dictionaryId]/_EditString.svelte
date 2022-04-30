@@ -31,7 +31,7 @@
       class="form-input w-full"
       placeholder={`Enter ${id}`} />
     <div class="w-1" />
-    <Button {loading} type="submit">
+    <Button class="flex-shrink-0" {loading} type="submit">
       {$_('misc.save', { default: 'Save' })}
     </Button>
   </div>
