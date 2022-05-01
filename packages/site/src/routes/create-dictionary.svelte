@@ -69,13 +69,6 @@
         })
       );
     }
-    if (!lat || !lng) {
-      return alert(
-        $t('create.select_coordinates', {
-          default: 'Choose a location on the map where this language is spoken.',
-        })
-      );
-    }
     try {
       submitting = true;
       const dictionaryData: IDictionary = {
