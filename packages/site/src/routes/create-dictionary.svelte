@@ -62,13 +62,6 @@
         })
       );
     }
-    if (glossLanguages.size <= 0) {
-      return alert(
-        $t('create.at_least_one_lang', {
-          default: 'Choose at least 1 language to make the dictionary available in.',
-        })
-      );
-    }
     try {
       submitting = true;
       const dictionaryData: IDictionary = {
@@ -76,7 +69,7 @@
         glossLanguages: Array.from(glossLanguages),
         public: publicDictionary,
         alternateNames,
-        coordinates: new GeoPoint(lat, lng),
+        coordinates: lat ? new GeoPoint(lat, lng) : null,
         entryCount: 0,
         createdBy: $user.uid,
         iso6393: iso6393.trim(),
