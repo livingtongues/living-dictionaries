@@ -17,23 +17,26 @@
 
   async function togglePublic(settingPublic: boolean) {
     try {
-      await updateOnline<IDictionary>(`dictionaries/${$dictionaryStore.id}`, {
-        public: settingPublic,
-      });
-      setTimeout(async () => {
+      if (!settingPublic) {
+        await updateOnline<IDictionary>(`dictionaries/${$dictionaryStore.id}`, {
+          public: false,
+        });
+      } else if ($admin) {
+        await updateOnline<IDictionary>(`dictionaries/${$dictionaryStore.id}`, {
+          public: true,
+        });
+      } else {
         if (
-          settingPublic &&
-          !confirm(
+          confirm(
             `${$t('settings.community_permission', {
               default: 'Does the speech community allow this language to be online?',
             })}`
           )
         ) {
-          await updateOnline<IDictionary>(`dictionaries/${$dictionaryStore.id}`, {
-            public: false,
-          });
+          alert(t ? $t('header.contact_us') : 'Contact Us');
         }
-      }, 5);
+        location.reload();
+      }
     } catch (err) {
       alert(`${$t('misc.error', { default: 'Error' })}: ${err}`);
     }
