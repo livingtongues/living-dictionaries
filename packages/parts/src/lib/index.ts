@@ -9,5 +9,6 @@ export { default as LatLngDisplay } from './maps/LatLngDisplay.svelte';
 
 export { default as EditableCoordinatesField } from './settings/EditableCoordinatesField.svelte';
 export { default as EditableGlossesField } from './settings/EditableGlossesField.svelte';
+export { default as PublicCheckbox } from './settings/PublicCheckbox.svelte';
 
 export { glossingLanguages } from './glosses/glossing-languages';

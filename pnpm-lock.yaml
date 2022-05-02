@@ -38,7 +38,7 @@ importers:
       svelte: ^3.47.0
       svelte-check: ^2.7.0
       svelte-deep-wind-preprocess: ^0.0.7
-      svelte-pieces: 1.0.14
+      svelte-pieces: 1.0.15
       svelte-preprocess: ^4.10.6
       svelte-store-router: ^2.0.10
       svelte-windicss-preprocess: ~4.1.0
@@ -59,7 +59,7 @@ importers:
       svelte: 3.47.0
       svelte-check: 2.7.0_svelte@3.47.0
       svelte-deep-wind-preprocess: 0.0.7
-      svelte-pieces: 1.0.14_svelte@3.47.0+typescript@4.6.3
+      svelte-pieces: 1.0.15_svelte@3.47.0+typescript@4.6.3
       svelte-preprocess: 4.10.6_svelte@3.47.0+typescript@4.6.3
       svelte-store-router: 2.0.10_svelte@3.47.0
       svelte-windicss-preprocess: 4.1.7
@@ -130,7 +130,7 @@ importers:
       svelte-check: ^2.7.0
       svelte-deep-wind-preprocess: ^0.0.7
       svelte-i18n: ^3.3.13
-      svelte-pieces: 1.0.14
+      svelte-pieces: 1.0.15
       svelte-preprocess: ^4.10.6
       svelte-windicss-preprocess: ~4.1.0
       tslib: ^2.3.1
@@ -170,7 +170,7 @@ importers:
       svelte-check: 2.7.0_svelte@3.47.0
       svelte-deep-wind-preprocess: 0.0.7
       svelte-i18n: 3.3.13_svelte@3.47.0
-      svelte-pieces: 1.0.14_svelte@3.47.0+typescript@4.6.3
+      svelte-pieces: 1.0.15_svelte@3.47.0+typescript@4.6.3
       svelte-preprocess: 4.10.6_svelte@3.47.0+typescript@4.6.3
       svelte-windicss-preprocess: 4.1.7
       tslib: 2.3.1
@@ -4335,8 +4335,8 @@ packages:
       tiny-glob: 0.2.9
     dev: true
 
-  /svelte-pieces/1.0.14_svelte@3.47.0+typescript@4.6.3:
-    resolution: {integrity: sha512-p3oEj/LSTRbu+o+WWcfE+a5SXXoxy+Lp5BAr10SBexg1V+r4Yse7i8CuV1pWeLqm+QrIhEpIPMX5dlsF69qQgQ==}
+  /svelte-pieces/1.0.15_svelte@3.47.0+typescript@4.6.3:
+    resolution: {integrity: sha512-Y1A3lz9C/xfzvfwSFJCHhIWgVuDkeUCjCY3Jp1OWKDiMa4eOtsf/IovaqDzQE8WoaEUy/fG4ofND9hEcAOkKXw==}
     peerDependencies:
       svelte: ^3.46.4
       typescript: ^4.0.0

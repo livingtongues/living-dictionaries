@@ -33,7 +33,7 @@
     "svelte": "^3.47.0",
     "svelte-check": "^2.7.0",
     "svelte-deep-wind-preprocess": "^0.0.7",
-    "svelte-pieces": "1.0.14",
+    "svelte-pieces": "1.0.15",
     "svelte-preprocess": "^4.10.6",
     "svelte-store-router": "^2.0.10",
     "svelte-windicss-preprocess": "~4.1.0",

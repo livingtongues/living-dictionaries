@@ -9,7 +9,12 @@
   import { arrayUnion, GeoPoint, serverTimestamp } from 'firebase/firestore/lite';
   import { debounce } from '$lib/helpers/debounce';
   import { pruneObject } from '$lib/helpers/prune';
-  import { EditableCoordinatesField, EditableGlossesField, glossingLanguages } from '@ld/parts';
+  import {
+    EditableCoordinatesField,
+    EditableGlossesField,
+    PublicCheckbox,
+    glossingLanguages,
+  } from '@ld/parts';
 
   let modal: 'auth' = null;
   let submitting = false;
@@ -20,7 +25,7 @@
   let lng = null;
   let iso6393 = '';
   let glottocode = '';
-  let publicDictionary = false;
+  // let publicDictionary = false;
 
   let name = '';
   $: url = name;
@@ -57,28 +62,14 @@
         })
       );
     }
-    if (glossLanguages.size <= 0) {
-      return alert(
-        $t('create.at_least_one_lang', {
-          default: 'Choose at least 1 language to make the dictionary available in.',
-        })
-      );
-    }
-    if (!lat || !lng) {
-      return alert(
-        $t('create.select_coordinates', {
-          default: 'Choose a location on the map where this language is spoken.',
-        })
-      );
-    }
     try {
       submitting = true;
       const dictionaryData: IDictionary = {
         name: name.trim().replace(/^./, name[0].toUpperCase()),
         glossLanguages: Array.from(glossLanguages),
-        public: publicDictionary,
+        // public: publicDictionary,
         alternateNames,
-        coordinates: new GeoPoint(lat, lng),
+        coordinates: lat ? new GeoPoint(lat, lng) : null,
         entryCount: 0,
         createdBy: $user.uid,
         iso6393: iso6393.trim(),
@@ -278,34 +269,25 @@
       </div>
     </div>
 
-    <div class="mt-6 flex items-center">
-      <input
-        id="public"
-        type="checkbox"
-        bind:checked={publicDictionary}
-        on:change={() => {
-          setTimeout(() => {
-            if (publicDictionary) {
-              publicDictionary = confirm(
-                `${$t('create.speech_community_permission', {
-                  default:
-                    "Does the speech community allow this language to be online? Select 'OK' if they have given you permission.",
-                })}`
-              );
-            } else {
-              publicDictionary = false;
-            }
-          }, 5);
-        }} />
-      <label for="public" class="mx-2 block text-sm leading-5 text-gray-900">
-        {$t('create.visible_to_public', { default: 'Visible to Public' })}
-        <small class="text-gray-600">
-          ({$t('create.req_com_consent', {
-            default: 'Requires Community Consent',
-          })})
-        </small>
-      </label>
-    </div>
+    <!-- <div class="mt-6" />
+    <PublicCheckbox
+      {t}
+      checked={publicDictionary}
+      on:changed={({ detail: { checked } }) => {
+        publicDictionary = checked;
+        setTimeout(() => {
+          if (
+            checked &&
+            !confirm(
+              `${$t('settings.community_permission', {
+                default: 'Does the speech community allow this language to be online?',
+              })}`
+            )
+          ) {
+            publicDictionary = false;
+          }
+        }, 5);
+      }} /> -->
 
     <div class="mt-6">
       <Button type="submit" class="w-full" form="filled" disabled={!online} loading={submitting}>
