@@ -25,7 +25,7 @@
   let lng = null;
   let iso6393 = '';
   let glottocode = '';
-  let publicDictionary = false;
+  // let publicDictionary = false;
 
   let name = '';
   $: url = name;
@@ -67,7 +67,7 @@
       const dictionaryData: IDictionary = {
         name: name.trim().replace(/^./, name[0].toUpperCase()),
         glossLanguages: Array.from(glossLanguages),
-        public: publicDictionary,
+        // public: publicDictionary,
         alternateNames,
         coordinates: lat ? new GeoPoint(lat, lng) : null,
         entryCount: 0,
@@ -269,7 +269,7 @@
       </div>
     </div>
 
-    <div class="mt-6" />
+    <!-- <div class="mt-6" />
     <PublicCheckbox
       {t}
       checked={publicDictionary}
@@ -287,7 +287,7 @@
             publicDictionary = false;
           }
         }, 5);
-      }} />
+      }} /> -->
 
     <div class="mt-6">
       <Button type="submit" class="w-full" form="filled" disabled={!online} loading={submitting}>
