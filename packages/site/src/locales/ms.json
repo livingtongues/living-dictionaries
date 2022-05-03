@@ -203,7 +203,7 @@
     "dict_name": "Nama Kamus",
     "public_private_meaning": "Umum bermakna sesiapa sahaja boleh melihat kamus anda. Pilihan ini memerlukan persetujuan masyarakat. Kamus peribadi hanya dapat dilihat oleh anda dan rakan usaha sama anda.",
     "optional_data_fields": "Bidang Data Tidak Wajib",
-    "unable_deleting": "Nota: Anda tidak akan dapat memadam bahasa glossing ini kemudian."
+    "unable_to_delete": "Nota: Anda tidak akan dapat memadam bahasa glossing ini kemudian."
   },
   "speakers": {
     "add_new_speaker": "Tambah Penutur Baharu",
