@@ -139,7 +139,7 @@
     <div class="mb-5" />
 
     <ShowHide let:show let:toggle>
-      <Button onclick={toggle}>
+      <Button onclick={toggle} class=mb-5>
         {$t('settings.optional_data_fields', { default: 'Optional Data Fields' })}:
         {$t('header.contact_us', { default: 'Contact Us' })}
       </Button>
