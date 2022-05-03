@@ -13,6 +13,7 @@
     EditableGlossesField,
     PublicCheckbox,
     glossingLanguages,
+    EditableAlternateNames
   } from '@ld/parts';
 
   async function togglePublic(settingPublic: boolean) {
@@ -115,6 +116,15 @@
         } else {
           alert(t ? $t('header.contact_us') : 'Contact Us');
         }
+      }} />
+    <div class="mb-5" />
+
+    <EditableAlternateNames 
+      alternateNames={dictionary.alternateNames} 
+      on:update={(e) => {
+        update(`dictionaries/${dictionary.id}`, {
+          alternateNames: e.detail.alternateNames,
+        });
       }} />
     <div class="mb-5" />
 

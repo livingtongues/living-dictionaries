@@ -11,7 +11,7 @@
   import {
     EditableCoordinatesField,
     EditableGlossesField,
-    PublicCheckbox,
+    EditableAlternateNames,
     glossingLanguages,
   } from '@ld/parts';
 
@@ -192,6 +192,10 @@
       }} />
     <!-- not used in web app presently -->
     <!-- placeholder={$t('create.languages', { default: 'Language(s)' })} -->
+
+    <EditableAlternateNames
+      {alternateNames}
+      on:update={((e) => alternateNames = e.detail.alternateNames)} />
 
     <div class="mt-6">
       <EditableCoordinatesField

@@ -8,12 +8,6 @@
   const dispatch = createEventDispatcher<{
     update: { alternateNames: string[] };
   }>()
-
-  async function update() {
-    dispatch('update', {
-      alternateNames
-    });
-  }
 </script>
 
 <div class="mt-6">
@@ -24,5 +18,6 @@
     strings={alternateNames}
     canEdit
     promptMessage={t ? $t('create.enter_alternate_name') : 'Enter Alternate Name'}
-    addMessage={t ? $t('misc.add') : 'Add'} />
+    addMessage={t ? $t('misc.add') : 'Add'}
+    on:valueupdated={e => dispatch('update', {alternateNames: e.detail})} />
 </div>
