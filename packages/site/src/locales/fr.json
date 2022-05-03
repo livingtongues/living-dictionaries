@@ -203,7 +203,7 @@
     "dict_name": "Nom du dictionnaire",
     "public_private_meaning": "“Public\" signifie que tout le monde peut voir votre dictionnaire, ce qui nécessite le consentement de la communauté. Les dictionnaires privés ne sont visibles que pour vous et vos collaborateurs.",
     "optional_data_fields": "Champs de données facultatifs",
-    "unable_deleting": "Remarque: vous ne pourrez pas supprimer ces langues de brillance plus tard."
+    "unable_to_delete": "Remarque: vous ne pourrez pas supprimer ces langues de brillance plus tard."
   },
   "speakers": {
     "add_new_speaker": "Ajouter un nouveau locuteur",

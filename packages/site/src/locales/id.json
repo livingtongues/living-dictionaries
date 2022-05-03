@@ -203,7 +203,7 @@
     "dict_name": "Nama Kamus",
     "public_private_meaning": "Kamus yang bersifat umum berarti setiap orang dapat melihat kamus anda yang kemudian memerlukan surat persetujuan komunitas bahasa. Kamus yang bersifat pribadi hanya dapat dilihat oleh anda dan kolaborator anda.",
     "optional_data_fields": "Opsional Bidang Data",
-    "unable_deleting": "CATATAN: Anda tidak akan dapat menghapus bahasa -bahasa yang memoles ini nanti."
+    "unable_to_delete": "CATATAN: Anda tidak akan dapat menghapus bahasa -bahasa yang memoles ini nanti."
   },
   "speakers": {
     "add_new_speaker": "Bidang Data Bersifat Pilihan ",
