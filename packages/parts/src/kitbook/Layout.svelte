@@ -7,7 +7,7 @@
   export let githubURL: string = undefined;
 </script>
 
-<div class="flex min-h-[100vh]">
+<div class="flex min-h-[100vh] bg-gray-100">
   <Sidebar {folder} {activeURL} {githubURL}>
     <svelte:fragment slot="header"><slot name="header" /></svelte:fragment>
     <svelte:fragment slot="index"

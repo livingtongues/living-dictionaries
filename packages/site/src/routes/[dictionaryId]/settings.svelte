@@ -5,26 +5,38 @@
   import Button from 'svelte-pieces/ui/Button.svelte';
   import ShowHide from 'svelte-pieces/functions/ShowHide.svelte';
   import EditString from './_EditString.svelte';
-  import EditGlosses from './_EditGlosses.svelte';
-  import { glossingLanguages } from '$lib/mappings/glossing-languages';
   import { arrayRemove, arrayUnion, GeoPoint } from 'firebase/firestore';
   import type { IDictionary } from '@ld/types';
   import Doc from '$sveltefirets/components/Doc.svelte';
-  import EditableCoordinatesField from '@ld/parts/src/lib/settings/EditableCoordinatesField.svelte';
+  import {
+    EditableCoordinatesField,
+    EditableGlossesField,
+    PublicCheckbox,
+    glossingLanguages,
+  } from '@ld/parts';
 
   async function togglePublic(settingPublic: boolean) {
     try {
-      if (settingPublic) {
-        const allowed = confirm(
-          `${$t('settings.community_permission', {
-            default: 'Does the speech community allow this language to be online?',
-          })}`
-        );
-        if (!allowed) return;
+      if (!settingPublic) {
+        await updateOnline<IDictionary>(`dictionaries/${$dictionaryStore.id}`, {
+          public: false,
+        });
+      } else if ($admin) {
+        await updateOnline<IDictionary>(`dictionaries/${$dictionaryStore.id}`, {
+          public: true,
+        });
+      } else {
+        if (
+          confirm(
+            `${$t('settings.community_permission', {
+              default: 'Does the speech community allow this language to be online?',
+            })}`
+          )
+        ) {
+          alert(t ? $t('header.contact_us') : 'Contact Us');
+        }
+        location.reload();
       }
-      await updateOnline<IDictionary>(`dictionaries/${$dictionaryStore.id}`, {
-        public: settingPublic,
-      });
     } catch (err) {
       alert(`${$t('misc.error', { default: 'Error' })}: ${err}`);
     }
@@ -36,94 +48,107 @@
   startWith={$dictionaryStore}
   let:data={dictionary}
   on:data={(e) => dictionaryStore.set(e.detail.data)}>
-  <div style="max-width: 900px">
-    <h3 class="text-xl font-semibold">{$t('misc.settings', { default: 'Settings' })}</h3>
+  <div style="max-width: 700px">
+    <h3 class="text-xl font-semibold mb-4">{$t('misc.settings', { default: 'Settings' })}</h3>
+
     <EditString
-      attribute={dictionary.name}
-      attributeType="name"
-      {dictionary}
+      value={dictionary.name}
+      minlength={2}
+      required={true}
+      id="name"
+      save={async (name) =>
+        await updateOnline(`dictionaries/${$dictionaryStore.id}`, {
+          name,
+        })}
       display={$t('settings.edit_dict_name', { default: 'Edit Dictionary Name' })} />
+    <div class="mb-5" />
 
     <EditString
-      attribute={dictionary.iso6393}
-      attributeType="iso6393"
-      {dictionary}
+      value={dictionary.iso6393}
+      id="iso6393"
+      save={async (iso6393) =>
+        await updateOnline(`dictionaries/${$dictionaryStore.id}`, {
+          iso6393,
+        })}
       display="ISO 639-3" />
+    <div class="mb-5" />
 
     <EditString
-      attribute={dictionary.glottocode}
-      attributeType="glottocode"
-      {dictionary}
+      value={dictionary.glottocode}
+      id="glottocode"
+      save={async (glottocode) =>
+        await updateOnline(`dictionaries/${$dictionaryStore.id}`, {
+          glottocode,
+        })}
       display="Glottocode" />
+    <div class="mb-5" />
 
-    <EditGlosses
-      {glossingLanguages}
-      {dictionary}
+    <EditableGlossesField
+      {t}
+      minimum={1}
+      availableLanguages={glossingLanguages}
+      selectedLanguages={dictionary.glossLanguages}
       on:add={(e) => {
         update(`dictionaries/${dictionary.id}`, {
           glossLanguages: arrayUnion(e.detail.languageId),
         });
       }}
       on:remove={(e) => {
-        update(`dictionaries/${dictionary.id}`, {
-          glossLanguages: arrayRemove(e.detail.languageId),
-        });
+        if (admin) {
+          if (
+            confirm('Remove as admin? Know that regular editors get a message saying "Contact Us"')
+          ) {
+            update(`dictionaries/${dictionary.id}`, {
+              glossLanguages: arrayRemove(e.detail.languageId),
+            });
+          }
+        } else {
+          alert(t ? $t('header.contact_us') : 'Contact Us');
+        }
       }} />
+    <div class="mb-5" />
 
-    <div class="mt-6" />
     <EditableCoordinatesField
-    {t}
+      {t}
       lng={dictionary.coordinates ? dictionary.coordinates.longitude : undefined}
       lat={dictionary.coordinates ? dictionary.coordinates.latitude : undefined}
-      on:update={(event) => {
+      on:update={(e) => {
         update(`dictionaries/${dictionary.id}`, {
-          coordinates: new GeoPoint(event.detail.lat, event.detail.lng),
+          coordinates: new GeoPoint(e.detail.lat, e.detail.lng),
         });
       }}
       on:remove={() => {
         update(`dictionaries/${dictionary.id}`, { coordinates: null });
       }} />
+    <div class="mb-5" />
 
-    <div class="mt-6 flex items-center">
-      <input
-        id="public"
-        type="checkbox"
-        checked={dictionary.public}
-        on:change={(e) => {
-          // @ts-ignore
-          togglePublic(e.target.checked);
-        }} />
-      <label for="public" class="mx-2 block leading-5 text-gray-900">
-        {$t('create.visible_to_public', { default: 'Visible to Public' })}
-      </label>
-    </div>
-    <div class="text-xs text-gray-600 mt-1 mb-6">
-      ({$t('settings.public_private_meaning', {
-        default:
-          'Public means anyone can see your dictionary which requires community consent. Private dictionaries are visible only to you and your collaborators.',
-      })})
-    </div>
-  </div>
+    <PublicCheckbox
+      {t}
+      checked={dictionary.public}
+      on:changed={({ detail: { checked } }) => togglePublic(checked)} />
+    <div class="mb-5" />
 
-  <ShowHide let:show let:toggle>
-    <Button onclick={toggle} form="filled">
-      {$t('settings.optional_data_fields', { default: 'Optional Data Fields' })}:
-      {$t('header.contact_us', { default: 'Contact Us' })}
-    </Button>
+    <ShowHide let:show let:toggle>
+      <Button onclick={toggle}>
+        {$t('settings.optional_data_fields', { default: 'Optional Data Fields' })}:
+        {$t('header.contact_us', { default: 'Contact Us' })}
+      </Button>
 
-    {#if show}
-      {#await import('$lib/components/modals/Contact.svelte') then { default: Contact }}
-        <Contact on:close={toggle} />
+      {#if show}
+        {#await import('$lib/components/modals/Contact.svelte') then { default: Contact }}
+          <Contact on:close={toggle} />
+        {/await}
+      {/if}
+    </ShowHide>
+
+    {#if $admin > 1}
+      {#await import('svelte-pieces/data/JSON.svelte') then { default: JSON }}
+        <div class="mt-5">
+          <JSON obj={dictionary} />
+        </div>
       {/await}
     {/if}
-  </ShowHide>
-
-  {#if $admin > 1}
-    {#await import('svelte-pieces/data/JSON.svelte') then { default: JSON }}
-      <JSON obj={dictionary} />
-    {/await}
-  {/if}
-</Doc>
+  </div></Doc>
 
 <svelte:head>
   <title>
