@@ -3,7 +3,7 @@
   import Button from 'svelte-pieces/ui/Button.svelte';
   import Form from 'svelte-pieces/data/Form.svelte';
 
-  export let id: 'name' | 'iso6393' | 'glottocode';
+  export let id: 'name' | 'iso6393' | 'glottocode' | 'location';
   export let display: string;
   export let value: string;
   export let minlength = 0;
