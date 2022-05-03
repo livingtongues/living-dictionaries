@@ -25,7 +25,7 @@
     "two_decades_experience": "凭借近二十年的实地考察经验，濒危语言振兴协会的研究人员拥有足够的技术和方法来帮助社区记录，保护和促进他们的语言。",
     "help_us_launch_more": "帮助我们推出更多的活字典",
     "with_your_help": "有了您的帮助，我们可以继续改善我们的软件, 使得任何社会群体都可以使用我们的软件并创造他们自己的活字典。今天就献出一份爱心，增添一分影响吧！",
-    "translators": "译者",
+    "translators": "翻译人员",
     "interns": "实习生"
   },
   "contributors": {
@@ -93,7 +93,7 @@
     "visible_to_public": "对所有人可见",
     "req_com_consent": "需要社区的同意",
     "create_dictionary": "创建字典",
-    "permanent_url_msg": "URL名称是永久性的，无法稍后更改。",
+    "permanent_url_msg": "URL名称是永久的，以后不能更改。",
     "add_gloss_msg": "您可以在“设置”下添加更多语言标注"
   },
   "dictionary": {
@@ -107,7 +107,7 @@
     "grammar": "语法",
     "entries": "词条",
     "youtube_terms": "YouTube条款",
-    "google_terms": "谷歌条款"
+    "google_terms": "Google条款"
   },
   "entry": {
     "view_entries": "查看词条",
@@ -142,8 +142,10 @@
     "does_not_exist": "没有",
     "link_copied": "复制链接",
     "copy_and_share": "复制并共享",
-    "sr": "资源",
-    "example_sentence": "例句"
+    "sr": "来源",
+    "example_sentence": "例句",
+    "nc": "名词课",
+    "va": "变体"
   },
   "error": {
     "run_into_error": "很抱歉，我们遇到了一个错误。",
@@ -190,7 +192,7 @@
     "next": "下一个",
     "export": "出口",
     "images": "图片",
-    "reset": "重置",
+    "reset": "重启",
     "invalid_url": "无效网址",
     "downloading": "下载中",
     "upload": "上传"
@@ -201,7 +203,7 @@
     "dict_name": "字典名称",
     "public_private_meaning": "公共意味着任何人都可以看到你的字典所以需要社区的同意。私人字典则是只有你和你的合作者可见。",
     "optional_data_fields": "可选的数据字段",
-    "unable-deleting-msg": "注意：您将无法删除这些语言标注"
+    "unable_to_delete": "注意：您将无法删除这些语言标注"
   },
   "speakers": {
     "add_new_speaker": "添加新的母语者",
@@ -236,16 +238,16 @@
   },
   "export": {
     "csv_data": "CSV格式数据",
-    "checking_images": "检查是否存在图像文件",
+    "checking_images": "检查图像文件是否存在",
     "no_images": "没有图像文件",
     "checking_audios": "检查是否存在音频文件",
     "no_audios": "没有音频文件",
-    "download_csv": "下载CSV."
+    "download_csv": "下载CSV"
   },
   "video": {
     "video_url": "视频网址",
     "video_credit": "视频来自",
-    "prepare_to_record_video": "准备使用麦克风和相机录制",
+    "prepare_to_record_video": "准备用麦克风和相机记录",
     "video_info": "SKIP THIS",
     "paste_video_url": "粘贴YouTube或Vimeo链接",
     "record_upload_video": "录制或上传视频",
@@ -255,7 +257,7 @@
     "accesing": "访问麦克风和相机",
     "pause": "暂停",
     "unpause": "播放",
-    "previously_dismissed_msg": "如果您之前驳回了浏览器的请求，请重新加载并在浏览器询问权限时单击“是”。",
+    "previously_dismissed_msg": "如果您以前驳回了浏览器的请求，请重新加载并在浏览器要求许可时单击“是”。",
     "permission_denied": "访问媒体的许可受限"
   }
 }
