@@ -1,8 +1,6 @@
 <script lang="ts">
   import { t } from 'svelte-i18n';
   import BadgeArray from 'svelte-pieces/data/BadgeArray.svelte';
-  import MultiSelect from '$lib/components/ui/MultiSelect.svelte';
-  import { glossingLanguages } from '$lib/mappings/glossing-languages';
   import { user } from '$lib/stores';
   import Header from '$lib/components/shell/Header.svelte';
   import Button from 'svelte-pieces/ui/Button.svelte';
@@ -11,18 +9,23 @@
   import { arrayUnion, GeoPoint, serverTimestamp } from 'firebase/firestore/lite';
   import { debounce } from '$lib/helpers/debounce';
   import { pruneObject } from '$lib/helpers/prune';
-  import { EditableCoordinatesField } from '@ld/parts';
+  import {
+    EditableCoordinatesField,
+    EditableGlossesField,
+    PublicCheckbox,
+    glossingLanguages,
+  } from '@ld/parts';
 
   let modal: 'auth' = null;
   let submitting = false;
 
   let alternateNames = [];
-  let glossLanguages = ['en'];
+  let glossLanguages = new Set(['en']);
   let lat = null;
   let lng = null;
   let iso6393 = '';
   let glottocode = '';
-  let publicDictionary = false;
+  // let publicDictionary = false;
 
   let name = '';
   $: url = name;
@@ -59,28 +62,14 @@
         })
       );
     }
-    if (glossLanguages.length === 0) {
-      return alert(
-        $t('create.at_least_one_lang', {
-          default: 'Choose at least 1 language to make the dictionary available in.',
-        })
-      );
-    }
-    if (!lat || !lng) {
-      return alert(
-        $t('create.select_coordinates', {
-          default: 'Choose a location on the map where this language is spoken.',
-        })
-      );
-    }
     try {
       submitting = true;
       const dictionaryData: IDictionary = {
         name: name.trim().replace(/^./, name[0].toUpperCase()),
-        glossLanguages,
-        public: publicDictionary,
+        glossLanguages: Array.from(glossLanguages),
+        // public: publicDictionary,
         alternateNames,
-        coordinates: new GeoPoint(lat, lng),
+        coordinates: lat ? new GeoPoint(lat, lng) : null,
         entryCount: 0,
         createdBy: $user.uid,
         iso6393: iso6393.trim(),
@@ -188,40 +177,26 @@
       {/if}
     </div>
 
-    <div class="mt-6">
-      <label for="glosses" class="block text-sm font-medium leading-5 text-gray-700">
-        {$t('create.gloss_dictionary_in', {
-          default: 'Make dictionary available in...',
-        })}*
-      </label>
-
-      <div class="mt-1 rounded-md shadow-sm" style="direction: ltr">
-        <MultiSelect
-          bind:value={glossLanguages}
-          placeholder={$t('create.languages', { default: 'Language(s)' })}>
-          {#each Object.keys(glossingLanguages) as bcp}
-            <option value={bcp}>
-              {glossingLanguages[bcp].vernacularName || $t('gl.' + bcp)}
-              {#if glossingLanguages[bcp].vernacularAlternate}
-                {glossingLanguages[bcp].vernacularAlternate}
-              {/if}
-              {#if glossingLanguages[bcp].vernacularName}
-                <small>({$t('gl.' + bcp)})</small>
-              {/if}
-            </option>
-          {/each}
-        </MultiSelect>
-      </div>
-      <div class="text-xs text-gray-600 mt-1">
-        {$t('create.gloss_dictionary_clarification', {
-          default: 'Language(s) you want to translate entries into',
-        })}
-      </div>
-    </div>
+    <div class="mt-6" />
+    <EditableGlossesField
+      {t}
+      minimum={1}
+      availableLanguages={glossingLanguages}
+      selectedLanguages={Array.from(glossLanguages)}
+      on:add={(e) => {
+        glossLanguages.add(e.detail.languageId);
+        glossLanguages = glossLanguages;
+      }}
+      on:remove={(e) => {
+        glossLanguages.delete(e.detail.languageId);
+        glossLanguages = glossLanguages;
+      }} />
+    <!-- not used in web app presently -->
+    <!-- placeholder={$t('create.languages', { default: 'Language(s)' })} -->
 
     <div class="mt-6">
       <EditableCoordinatesField
-      {t}
+        {t}
         {lng}
         {lat}
         on:update={(event) => {
@@ -294,34 +269,25 @@
       </div>
     </div>
 
-    <div class="mt-6 flex items-center">
-      <input
-        id="public"
-        type="checkbox"
-        bind:checked={publicDictionary}
-        on:change={() => {
-          setTimeout(() => {
-            if (publicDictionary) {
-              publicDictionary = confirm(
-                `${$t('create.speech_community_permission', {
-                  default:
-                    "Does the speech community allow this language to be online? Select 'OK' if they have given you permission.",
-                })}`
-              );
-            } else {
-              publicDictionary = false;
-            }
-          }, 5);
-        }} />
-      <label for="public" class="mx-2 block text-sm leading-5 text-gray-900">
-        {$t('create.visible_to_public', { default: 'Visible to Public' })}
-        <small class="text-gray-600">
-          ({$t('create.req_com_consent', {
-            default: 'Requires Community Consent',
-          })})
-        </small>
-      </label>
-    </div>
+    <!-- <div class="mt-6" />
+    <PublicCheckbox
+      {t}
+      checked={publicDictionary}
+      on:changed={({ detail: { checked } }) => {
+        publicDictionary = checked;
+        setTimeout(() => {
+          if (
+            checked &&
+            !confirm(
+              `${$t('settings.community_permission', {
+                default: 'Does the speech community allow this language to be online?',
+              })}`
+            )
+          ) {
+            publicDictionary = false;
+          }
+        }, 5);
+      }} /> -->
 
     <div class="mt-6">
       <Button type="submit" class="w-full" form="filled" disabled={!online} loading={submitting}>
