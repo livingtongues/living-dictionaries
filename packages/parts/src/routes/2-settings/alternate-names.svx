@@ -1,0 +1,13 @@
+<script lang="ts">
+  import Story from '$kitbook/stories/Story.svelte';
+  import EditableAlternateNames from '$lib/settings/EditableAlternateNames.svelte';
+  import Set from 'svelte-pieces/functions/Set.svelte';
+</script>
+
+# Edit Alternate Names
+
+<Story>
+  <Set input={['test']} let:value={alternateNames}>
+    <EditableAlternateNames {alternateNames}  />
+  </Set>
+</Story>

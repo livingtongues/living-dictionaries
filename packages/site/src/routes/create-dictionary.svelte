@@ -1,6 +1,5 @@
 <script lang="ts">
   import { t } from 'svelte-i18n';
-  import BadgeArray from 'svelte-pieces/data/BadgeArray.svelte';
   import { user } from '$lib/stores';
   import Header from '$lib/components/shell/Header.svelte';
   import Button from 'svelte-pieces/ui/Button.svelte';
@@ -207,18 +206,6 @@
         }} />
     </div>
 
-    <div class="mt-6">
-      <div class="text-sm font-medium leading-5 text-gray-700 mb-1">
-        {$t('create.alternate_names', { default: 'Alternate Names' })}
-      </div>
-      <BadgeArray
-        bind:strings={alternateNames}
-        canEdit
-        promptMessage={$t('create.enter_alternate_name', {
-          default: 'Enter Alternate Name',
-        })}
-        addMessage={$t('misc.add', { default: 'Add' })} />
-    </div>
     <div class="mt-6 flex">
       <div class="w-1/2">
         <label for="isocode" class="block text-sm font-medium leading-5 text-gray-700">
