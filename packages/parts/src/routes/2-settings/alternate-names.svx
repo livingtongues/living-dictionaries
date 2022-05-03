@@ -7,7 +7,16 @@
 # Edit Alternate Names
 
 <Story>
-  <Set input={['test']} let:value={alternateNames}>
+  <Set input={['Native language']} let:value={alternateNames}>
     <EditableAlternateNames {alternateNames}  />
+  </Set>
+</Story>
+
+There's the possibility to decide what to do when adding or removing alternate names.
+
+<Story name="Handle update">
+  <Set input={['Lengua materna']} let:value={alternateNames}>
+    <EditableAlternateNames {alternateNames} 
+    on:update={e => alert(`This is the actual state of the array: ${e.detail.alternateNames}`)} />
   </Set>
 </Story>
