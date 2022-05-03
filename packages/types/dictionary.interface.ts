@@ -1,4 +1,4 @@
-import type { GeoPoint } from 'firebase/firestore';
+import type { GeoPoint, Timestamp } from 'firebase/firestore';
 import type { IFirestoreMetaData } from '.';
 
 export interface IDictionary extends IFirestoreMetaData {
@@ -16,6 +16,11 @@ export interface IDictionary extends IFirestoreMetaData {
   alternateOrthographies?: string[]; // Alternate Orthography titles (first item corresponds to entry.lo, then entry.lo2, entry.lo3) - used to be called Local Orthography but that is a misnomer it's turning out
 
   videoAccess?: boolean;
+
+  languageUsedByCommunity?: Timestamp; // a date is better than true as it gives us more information
+  communityPermission?: Timestamp | false; // date will be if "Yes", false will be if "No", and don't set property if "I don't know" - can use if (communityPermission === false) to distinguish between false and undefined - requires making sure falses don't get stripped out by the trimming function
+  authorConnection?: string;
+  conLangDescription?: string;
 
   // tdv1 (old Talking Dictionaries platform at Swarthmore)
   publishYear?: number;

@@ -1,5 +1,5 @@
 export interface IExampleSentence {
-    vn?: string; // vernacular
+    // vn?: string; // vernacular
     [bcp: string]: string; // example sentences in glossing languages
 }
 
