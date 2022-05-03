@@ -1,0 +1,31 @@
+{
+  "name": "@ld/functions",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "serve": "npm run build && firebase emulators:start --only functions",
+    "shell": "npm run build && firebase functions:shell",
+    "start": "npm run shell",
+    "deploy": "firebase deploy --only functions",
+    "deploy:dev": "firebase deploy --only functions -P default",
+    "deploy:specific": "firebase deploy --only functions:inviteContributor -P production",
+    "logs": "firebase functions:log",
+    "test": "vitest -u"
+  },
+  "engines": {
+    "node": "14"
+  },
+  "main": "lib/index.js",
+  "dependencies": {
+    "@sendgrid/mail": "^7.6.2",
+    "firebase-admin": "^10.0.2",
+    "firebase-functions": "^3.18.0"
+  },
+  "devDependencies": {
+    "@ld/types": "workspace:^0.0.1",
+    "firebase-functions-test": "^0.2.0",
+    "typescript": "^4.5.4",
+    "vitest": "^0.10.0"
+  },
+  "private": true
+}
