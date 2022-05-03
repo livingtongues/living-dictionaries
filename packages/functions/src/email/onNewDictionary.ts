@@ -4,13 +4,14 @@ admin.initializeApp();
 
 // Learned from https://fireship.io/lessons/sendgrid-transactional-email-guide/
 import * as sgMail from '@sendgrid/mail';
-import { IDictionary, IUser } from '../../../src/lib/interfaces';
+import { IDictionary, IUser } from '@ld/types';
 const sg_api_key = functions.config().sendgrid.key;
 // Set by running `firebase functions:config:set sendgrid.key="your_key"` // see https://fireship.io/lessons/sendgrid-transactional-email-guide/
 // read with firebase functions:config:get
 sgMail.setApiKey(sg_api_key);
 
 import { adminRecipients } from './adminRecipients';
+import { notifyAdminsOnNewDictionary } from './composeMessages';
 
 export default async (
   snapshot: functions.firestore.DocumentSnapshot,
@@ -49,35 +50,7 @@ export default async (
           enableText: false,
         },
       },
-      text: `Hey Admins,
-
-${user.displayName} created a new Living Dictionary for ${dictionary.name}. Here's the details:
-
-URL: https://livingdictionaries.app/${dictionaryId} 
-
-Glossing languages: ${dictionary.glossLanguages}
-Alternate names: ${dictionary.alternateNames ? dictionary.alternateNames : ''}
-Alternate orthographies: ${
-        dictionary.alternateOrthographies ? dictionary.alternateOrthographies : ''
-      }
-Coordinates: ${
-        dictionary.coordinates
-          ? 'lat: ' + dictionary.coordinates.latitude + ', lon: ' + dictionary.coordinates.longitude
-          : ''
-      }
-Location: ${dictionary.location ? dictionary.location : ''}
-Public: ${dictionary.public ? 'yes' : 'no'}
-ISO 639-3: ${dictionary.iso6393 ? dictionary.iso6393 : ''}
-Glottocode: ${dictionary.glottocode ? dictionary.glottocode : ''}
-
-We sent ${user.displayName} an automatic dictionary-info email to ${
-        user.email
-      }, but you can also get in touch with them if needed.
-
-Thanks,
-Our automatic Firebase Cloud Function
-
-https://livingdictionaries.app`,
+      text: notifyAdminsOnNewDictionary(dictionary, dictionaryId, user),
     };
     const adminReply = await sgMail.send(adminMsg);
     console.log(adminReply);

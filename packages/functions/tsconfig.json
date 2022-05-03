@@ -1,17 +1,22 @@
 {
   "compilerOptions": {
-    "module": "commonjs",
+    "moduleResolution": "node",
+    "module": "es2020",
+    "target": "es2017",
     "noImplicitReturns": true,
     // "noUnusedLocals": true,
     "outDir": "lib",
     "sourceMap": true,
     "strict": true,
-    "strictNullChecks": false,
-    "target": "es2017",
     "resolveJsonModule": true,
-    "esModuleInterop": true
+    "esModuleInterop": true,
+    "types": [
+      "vitest/globals",
+      "vitest/importMeta"
+    ]
   },
   "compileOnSave": true,
-  "include": ["src"],
-  "exclude": ["src/import/**/*", "scripts/import/old/**/*"]
+  "include": [
+    "src"
+  ]
 }
