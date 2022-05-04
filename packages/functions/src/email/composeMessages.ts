@@ -21,10 +21,10 @@ export function notifyAdminsOnNewDictionary(dictionary: IDictionary, dictionaryI
   ISO 639-3: ${dictionary.iso6393 ? dictionary.iso6393 : ''}
   Glottocode: ${dictionary.glottocode ? dictionary.glottocode : ''}
 
-  Language Used By a Community: ${!!dictionary.languageUsedByCommunity}
-  Community Permission: ${dictionary.communityPermission === undefined ? "I don't know" : !!dictionary.communityPermission}
-  Author's Connection: ${dictionary.authorConnection}
-  ConLang Description: ${dictionary.conLangDescription}
+  Language Used By a Community: ${dictionary.languageUsedByCommunity}
+  Community Permission: ${dictionary.communityPermission}
+  Author's Connection: "${dictionary.authorConnection}"
+  ConLang Description: "${dictionary.conLangDescription}"
   
   We sent ${user.displayName} an automatic dictionary-info email to ${
     user.email
