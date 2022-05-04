@@ -10,8 +10,8 @@ const sg_api_key = functions.config().sendgrid.key;
 // read with firebase functions:config:get
 sgMail.setApiKey(sg_api_key);
 
-import { adminRecipients } from './adminRecipients';
-import { notifyAdminsOnNewDictionary } from './composeMessages';
+import { adminRecipients } from './adminRecipients.js';
+import { notifyAdminsOnNewDictionary } from './composeMessages.js';
 
 export default async (
   snapshot: functions.firestore.DocumentSnapshot,
