@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { IEntry } from '@ld/types';
+  import type { IEntry } from '@living-dictionaries/types';
   export let entry: IEntry,
     canEdit = false;
 </script>

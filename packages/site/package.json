@@ -12,7 +12,7 @@
   },
   "devDependencies": {
     "@ld/parts": "workspace:^0.0.1",
-    "@ld/types": "workspace:^0.0.1",
+    "@living-dictionaries/types": "workspace:^0.0.1",
     "@sentry/browser": "^6.18.2",
     "@sveltejs/adapter-auto": "1.0.0-next.40",
     "@sveltejs/kit": "1.0.0-next.323",

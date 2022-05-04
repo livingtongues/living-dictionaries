@@ -41,7 +41,7 @@
 
   import Image from '$lib/components/image/Image.svelte';
   import { canEdit } from '$lib/stores';
-  import type { IEntry } from '@ld/types';
+  import type { IEntry } from '@living-dictionaries/types';
   let hitsType: IEntry;
 </script>
 

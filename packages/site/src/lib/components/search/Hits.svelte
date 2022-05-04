@@ -4,7 +4,7 @@
   import { limit, orderBy, where, Timestamp } from 'firebase/firestore';
   import { canEdit, dictionary, user } from '$lib/stores';
   import { mergeBy } from '$lib/helpers/array';
-  import type { IEntry } from '@ld/types';
+  import type { IEntry } from '@living-dictionaries/types';
   import type { InstantSearch } from 'instantsearch.js';
   import { firebaseConfig } from '$sveltefirets';
 

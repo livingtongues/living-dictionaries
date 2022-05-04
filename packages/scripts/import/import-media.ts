@@ -3,7 +3,7 @@ import { fileURLToPath } from 'url';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 import * as fs from 'fs';
-import { IPhoto } from '@ld/types';
+import { IPhoto } from '@living-dictionaries/types';
 import { environment, storage, timestamp } from '../config.js';
 import { getImageServingUrl } from './getImageServingUrl.js';
 

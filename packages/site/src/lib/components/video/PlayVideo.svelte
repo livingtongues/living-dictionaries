@@ -1,6 +1,6 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
-  import type { IEntry, IVideo } from '@ld/types';
+  import type { IEntry, IVideo } from '@living-dictionaries/types';
   import { firebaseConfig } from '$sveltefirets';
   import VideoIFrame from './VideoIFrame.svelte';
   // import { crossfade, scale } from 'svelte/transition';

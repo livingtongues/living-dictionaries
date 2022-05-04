@@ -1,4 +1,4 @@
-import type { IEntry, IVideo } from '@ld/types';
+import type { IEntry, IVideo } from '@living-dictionaries/types';
 import { update } from '$sveltefirets';
 import { get } from 'svelte/store';
 import { dictionary } from '$lib/stores';

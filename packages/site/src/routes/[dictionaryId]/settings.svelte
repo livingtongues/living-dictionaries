@@ -6,7 +6,7 @@
   import ShowHide from 'svelte-pieces/functions/ShowHide.svelte';
   import EditString from './_EditString.svelte';
   import { arrayRemove, arrayUnion, GeoPoint } from 'firebase/firestore';
-  import type { IDictionary } from '@ld/types';
+  import type { IDictionary } from '@living-dictionaries/types';
   import Doc from '$sveltefirets/components/Doc.svelte';
   import {
     EditableCoordinatesField,

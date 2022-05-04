@@ -4,7 +4,7 @@ admin.initializeApp();
 
 // Learned from https://fireship.io/lessons/sendgrid-transactional-email-guide/
 import * as sgMail from '@sendgrid/mail';
-import { IDictionary, IUser } from '@ld/types';
+import { IDictionary, IUser } from '@living-dictionaries/types';
 const sg_api_key = functions.config().sendgrid.key;
 // Set by running `firebase functions:config:set sendgrid.key="your_key"` // see https://fireship.io/lessons/sendgrid-transactional-email-guide/
 // read with firebase functions:config:get

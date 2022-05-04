@@ -1,4 +1,4 @@
-import { IDictionary, IUser } from '@ld/types';
+import { IDictionary, IUser } from '@living-dictionaries/types';
 
 export function notifyAdminsOnNewDictionary(dictionary: IDictionary, dictionaryId: string, user: IUser) {
   return `Hey Admins,
