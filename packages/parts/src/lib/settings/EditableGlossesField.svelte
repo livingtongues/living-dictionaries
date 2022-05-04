@@ -88,6 +88,6 @@
     ? $t('create.gloss_dictionary_clarification')
     : 'Language(s) you want to translate entries into'}
   {t
-    ? $t('settings.unable-deleting-msg')
+    ? $t('settings.unable_to_delete')
     : 'Note: you will not be able to delete these glossing languages later.'}
 </div>
