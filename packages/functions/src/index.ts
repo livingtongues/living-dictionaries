@@ -33,7 +33,7 @@ import * as functions from 'firebase-functions';
 export const onNewDictionary = functions.firestore
   .document('dictionaries/{dictionaryId}')
   .onCreate(async (snapshot, context) => {
-    await (await import('./email/onNewDictionary')).default(snapshot, context);
+    await (await import('./email/onNewDictionary.js')).default(snapshot, context);
   });
 
 // Aggregation
