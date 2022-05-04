@@ -17,8 +17,8 @@ export interface IDictionary extends IFirestoreMetaData {
 
   videoAccess?: boolean;
 
-  languageUsedByCommunity?: Timestamp; // a date is better than true as it gives us more information
-  communityPermission?: Timestamp | false; // date will be if "Yes", false will be if "No", and don't set property if "I don't know" - can use if (communityPermission === false) to distinguish between false and undefined - requires making sure falses don't get stripped out by the trimming function
+  languageUsedByCommunity?: boolean;
+  communityPermission?: 'yes' | 'no' | 'unknown'; // date will be if "Yes", false will be if "No", and don't set property if "I don't know" - can use if (communityPermission === false) to distinguish between false and undefined - requires making sure falses don't get stripped out by the trimming function
   authorConnection?: string;
   conLangDescription?: string;
 

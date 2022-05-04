@@ -12,7 +12,7 @@
     "test": "vitest -u"
   },
   "devDependencies": {
-    "@living-dictionaries/types": "workspace:^0.0.1",
+    "@living-dictionaries/types": "workspace:^1.0.0",
     "@types/node": "^17.0.23",
     "algoliasearch": "^4.11.0",
     "commander": "^9.2.0",
