@@ -7,8 +7,8 @@
     "shell": "npm run build && firebase functions:shell",
     "start": "npm run shell",
     "deploy": "firebase deploy --only functions",
-    "deploy:dev": "firebase deploy --only functions -P default",
-    "deploy:specific": "firebase deploy --only functions:inviteContributor -P production",
+    "deploy:specific": "firebase deploy --only functions:onNewDictionary -P default",
+    "deploy:specific:prod": "firebase deploy --only functions:onNewDictionary -P production",
     "logs": "firebase functions:log",
     "test": "vitest -u"
   },
@@ -22,7 +22,7 @@
     "firebase-functions": "^3.18.0"
   },
   "devDependencies": {
-    "@ld/types": "workspace:^0.0.1",
+    "@ld/types": "^0.0.1",
     "firebase-functions-test": "^0.2.0",
     "typescript": "^4.5.4",
     "vitest": "^0.10.0"
