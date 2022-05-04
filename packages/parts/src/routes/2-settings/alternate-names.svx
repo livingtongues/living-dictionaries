@@ -9,12 +9,12 @@
 
 Listen to the `update` event when adding or removing alternate names.
 
-<Story>
-  <Set input={['Lengua materna']} let:value={alternateNames} let:update>
+<Set input={['Lengua materna']} let:value={alternateNames} let:update>
+  <Story>
     <EditableAlternateNames {alternateNames} on:update={(e) => update(e.detail.alternateNames)} />
-    <div>
-      Array state:
-      <pre>{alternateNames}</pre>
-    </div>
-  </Set>
-</Story>
+  </Story>
+  <div>
+    Array state:
+    <pre>{alternateNames}</pre>
+  </div>
+</Set>
