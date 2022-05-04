@@ -4,19 +4,17 @@
   import Set from 'svelte-pieces/functions/Set.svelte';
 </script>
 
+<!-- prettier-ignore -->
 # Edit Alternate Names
 
+Listen to the `update` event when adding or removing alternate names.
+
 <Story>
-  <Set input={['Native language']} let:value={alternateNames}>
-    <EditableAlternateNames {alternateNames}  />
-  </Set>
-</Story>
-
-There's the possibility to decide what to do when adding or removing alternate names.
-
-<Story name="Handle update">
-  <Set input={['Lengua materna']} let:value={alternateNames}>
-    <EditableAlternateNames {alternateNames} 
-    on:update={e => alert(`This is the actual state of the array: ${e.detail.alternateNames}`)} />
+  <Set input={['Lengua materna']} let:value={alternateNames} let:update>
+    <EditableAlternateNames {alternateNames} on:update={(e) => update(e.detail.alternateNames)} />
+    <div>
+      Current array state:
+      <pre>{alternateNames}</pre>
+    </div>
   </Set>
 </Story>
