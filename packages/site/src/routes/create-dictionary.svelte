@@ -193,9 +193,11 @@
     <!-- not used in web app presently -->
     <!-- placeholder={$t('create.languages', { default: 'Language(s)' })} -->
 
+    <div class="mt-6" />
     <EditableAlternateNames
+      {t}
       {alternateNames}
-      on:update={((e) => alternateNames = e.detail.alternateNames)} />
+      on:update={(e) => (alternateNames = e.detail.alternateNames)} />
 
     <div class="mt-6">
       <EditableCoordinatesField

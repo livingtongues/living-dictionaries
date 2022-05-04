@@ -13,7 +13,7 @@
     EditableGlossesField,
     PublicCheckbox,
     glossingLanguages,
-    EditableAlternateNames
+    EditableAlternateNames,
   } from '@ld/parts';
 
   async function togglePublic(settingPublic: boolean) {
@@ -119,8 +119,9 @@
       }} />
     <div class="mb-5" />
 
-    <EditableAlternateNames 
-      alternateNames={dictionary.alternateNames} 
+    <EditableAlternateNames
+      {t}
+      alternateNames={dictionary.alternateNames}
       on:update={(e) => {
         update(`dictionaries/${dictionary.id}`, {
           alternateNames: e.detail.alternateNames,
@@ -149,7 +150,7 @@
     <div class="mb-5" />
 
     <ShowHide let:show let:toggle>
-      <Button onclick={toggle} class=mb-5>
+      <Button onclick={toggle} class="mb-5">
         {$t('settings.optional_data_fields', { default: 'Optional Data Fields' })}:
         {$t('header.contact_us', { default: 'Contact Us' })}
       </Button>
