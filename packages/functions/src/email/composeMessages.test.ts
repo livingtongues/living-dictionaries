@@ -7,9 +7,9 @@ test('composeAdminNotice returns', () => {
     name: 'Test-Dictionary',
     entryCount: 0,
     alternateNames: ['foo', 'bar'],
-    // @ts-ignore
-    languageUsedByCommunity: true, // false
-    // communityPermission: true, // false // undefined
+    languageUsedByCommunity: true,
+    communityPermission: 'yes', // 'no' | 'unknown'
+    authorConnection: 'Something about how I know this community and more...',
 
     // @ts-ignore
     coordinates: {
@@ -39,9 +39,9 @@ test('composeAdminNotice returns', () => {
       Glottocode: 
     
       Language Used By a Community: true
-      Community Permission: I don't know
-      Author's Connection: undefined
-      ConLang Description: undefined
+      Community Permission: yes
+      Author's Connection: \\"Something about how I know this community and more...\\"
+      ConLang Description: \\"undefined\\"
       
       We sent James Johnson an automatic dictionary-info email to jamesj@gmail.com, but you can also get in touch with them if needed.
       
