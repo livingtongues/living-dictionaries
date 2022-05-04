@@ -13,7 +13,7 @@ Listen to the `update` event when adding or removing alternate names.
   <Set input={['Lengua materna']} let:value={alternateNames} let:update>
     <EditableAlternateNames {alternateNames} on:update={(e) => update(e.detail.alternateNames)} />
     <div>
-      Current array state:
+      Array state:
       <pre>{alternateNames}</pre>
     </div>
   </Set>
