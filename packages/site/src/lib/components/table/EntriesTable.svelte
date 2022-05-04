@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { IColumn, IEntry } from '@ld/types';
+  import type { IColumn, IEntry } from '@living-dictionaries/types';
   export let entries: IEntry[] = [];
   import ColumnTitle from './ColumnTitle.svelte';
 

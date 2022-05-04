@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { IColumn } from '@ld/types';
+  import type { IColumn } from '@living-dictionaries/types';
   export let column: IColumn,
     verbose = false;
   import { _ } from 'svelte-i18n';

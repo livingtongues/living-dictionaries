@@ -1,4 +1,4 @@
-import type { ISemanticDomain } from '@ld/types';
+import type { ISemanticDomain } from '@living-dictionaries/types';
 
 export const semanticDomains: ISemanticDomain[] = [
   { key: '1', name: 'Universe and the natural world' },

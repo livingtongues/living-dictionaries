@@ -1,4 +1,4 @@
-import type { IEntry } from '@ld/types';
+import type { IEntry } from '@living-dictionaries/types';
 import { get } from 'svelte/store';
 import { _ } from 'svelte-i18n';
 

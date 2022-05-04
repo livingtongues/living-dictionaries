@@ -23,7 +23,7 @@
     dictionaryId: string;
   import Button from 'svelte-pieces/ui/Button.svelte';
   import { setOnline } from '$sveltefirets';
-  import type { IAbout } from '@ld/types';
+  import type { IAbout } from '@living-dictionaries/types';
 
   async function save() {
     try {

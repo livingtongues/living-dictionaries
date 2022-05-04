@@ -1,6 +1,6 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
-  import type { IEntry, IPhoto } from '@ld/types';
+  import type { IEntry, IPhoto } from '@living-dictionaries/types';
   export let file: File, entry: IEntry;
   import { dictionary, user } from '$lib/stores';
 

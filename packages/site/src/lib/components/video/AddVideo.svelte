@@ -8,7 +8,7 @@
   import VideoIFrame from './VideoIFrame.svelte';
   import SelectSpeaker from '$lib/components/media/SelectSpeaker.svelte';
   import { dictionary } from '$lib/stores';
-  import type { IEntry, IVideo } from '@ld/types';
+  import type { IEntry, IVideo } from '@living-dictionaries/types';
   import ShowHide from 'svelte-pieces/functions/ShowHide.svelte';
   import { addVideo } from '$lib/helpers/media/update';
 

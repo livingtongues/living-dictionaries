@@ -1,5 +1,5 @@
 import { getDocument } from '$sveltefirets';
-import type { ISpeaker, IEntry } from '@ld/types';
+import type { ISpeaker, IEntry } from '@living-dictionaries/types';
 
 export async function fetchSpeakers(data: IEntry[]) {
   const speakersIds = [];

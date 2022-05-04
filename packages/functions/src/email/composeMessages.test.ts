@@ -1,4 +1,4 @@
-import { IDictionary, IUser } from '@ld/types';
+import { IDictionary, IUser } from '@living-dictionaries/types';
 import { notifyAdminsOnNewDictionary } from './composeMessages';
 
 test('composeAdminNotice returns', () => {

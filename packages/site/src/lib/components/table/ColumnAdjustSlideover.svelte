@@ -3,7 +3,7 @@
 
   import Slideover from '$lib/components/ui/Slideover.svelte';
   import { preferredColumns } from '$lib/stores';
-  import type { IColumn } from '@ld/types';
+  import type { IColumn } from '@living-dictionaries/types';
 
   export let selectedColumn: IColumn;
   let selectedColumnElement: HTMLElement;

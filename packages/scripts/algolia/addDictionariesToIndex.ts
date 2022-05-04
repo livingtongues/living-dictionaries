@@ -24,7 +24,7 @@ const iterateThroughDictionaries = async () => {
 // iterateThroughDictionaries();
 
 import { prepareDataForIndex } from './prepareDataForIndex';
-import { IEntry } from '@ld/types';
+import { IEntry } from '@living-dictionaries/types';
 
 async function indexDictionary(dictionaryId: string) {
   const entriesSnapshot = await db.collection(`dictionaries/${dictionaryId}/words`).get();
