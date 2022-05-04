@@ -14,7 +14,7 @@
 
   let modal: 'auth' = null;
 
-  let name = 'Foo';
+  let name = '';
   let glossLanguages = new Set(['en']);
   let alternateNames = [];
   let lat = null;
