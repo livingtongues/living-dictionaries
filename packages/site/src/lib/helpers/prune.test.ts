@@ -22,14 +22,14 @@ test('pruneObject removes empty string, empty array, null, false, and undefined 
       },
     })
   ).toMatchInlineSnapshot(`
-    Object {
+    {
       "id": "1234",
-      "myArrayWithStuff": Array [
+      "myArrayWithStuff": [
         "test",
       ],
-      "nested": Object {
+      "nested": {
         "name": "test",
-        "withStuff": Array [
+        "withStuff": [
           "hello",
           "world",
         ],

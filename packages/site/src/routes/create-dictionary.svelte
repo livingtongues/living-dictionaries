@@ -1,33 +1,31 @@
 <script lang="ts">
   import { t } from 'svelte-i18n';
   import BadgeArray from 'svelte-pieces/data/BadgeArray.svelte';
+  import Form from 'svelte-pieces/data/Form.svelte';
+  import Button from 'svelte-pieces/ui/Button.svelte';
   import { user } from '$lib/stores';
   import Header from '$lib/components/shell/Header.svelte';
-  import Button from 'svelte-pieces/ui/Button.svelte';
   import type { IDictionary, IHelper, IUser } from '@living-dictionaries/types';
-  import { docExists, setOnline, updateOnline } from '$sveltefirets';
+  import { docExists, firebaseConfig, setOnline, updateOnline } from '$sveltefirets';
   import { arrayUnion, GeoPoint, serverTimestamp } from 'firebase/firestore/lite';
   import { debounce } from '$lib/helpers/debounce';
   import { pruneObject } from '$lib/helpers/prune';
-  import {
-    EditableCoordinatesField,
-    EditableGlossesField,
-    PublicCheckbox,
-    glossingLanguages,
-  } from '@ld/parts';
+  import { EditableCoordinatesField, EditableGlossesField, glossingLanguages } from '@ld/parts';
 
   let modal: 'auth' = null;
-  let submitting = false;
 
-  let alternateNames = [];
+  let name = 'Foo';
   let glossLanguages = new Set(['en']);
+  let alternateNames = [];
   let lat = null;
   let lng = null;
   let iso6393 = '';
   let glottocode = '';
-  // let publicDictionary = false;
+  let languageUsedByCommunity: boolean;
+  let communityPermission: 'yes' | 'no' | 'unknown';
+  let authorConnection = '';
+  let conLangDescription = '';
 
-  let name = '';
   $: url = name;
 
   let urlAlreadyExists = false;
@@ -63,34 +61,43 @@
       );
     }
     try {
-      submitting = true;
-      const dictionaryData: IDictionary = {
+      const dictionary: IDictionary = {
         name: name.trim().replace(/^./, name[0].toUpperCase()),
         glossLanguages: Array.from(glossLanguages),
-        // public: publicDictionary,
         alternateNames,
         coordinates: lat ? new GeoPoint(lat, lng) : null,
         entryCount: 0,
-        createdBy: $user.uid,
         iso6393: iso6393.trim(),
         glottocode: glottocode.trim(),
+        languageUsedByCommunity,
+        communityPermission,
+        authorConnection,
+        conLangDescription,
       };
-      //TODO we need to fix the pruneObject function first!
-      await setOnline<IDictionary>(`dictionaries/${url}`, pruneObject(dictionaryData));
+      const prunedDictionary = pruneObject(dictionary);
+      if (firebaseConfig.projectId === 'talking-dictionaries-dev') {
+        console.log(prunedDictionary);
+        if (
+          !confirm(
+            'Dictionary value logged to console because in dev mode. Do you still want to create this dictionary?'
+          )
+        )
+          return;
+      }
+
+      await setOnline<IDictionary>(`dictionaries/${url}`, dictionary);
       await setOnline<IHelper>(`dictionaries/${url}/managers/${$user.uid}`, {
         id: $user.uid,
         name: $user.displayName,
       });
       await updateOnline<IUser>(`users/${$user.uid}`, {
         managing: arrayUnion(url),
-        // WARNING: If we are going to make a delete dictionary option available to users, we must delete the corresponding management data in the user interface
         termsAgreement: serverTimestamp(),
       });
       window.location.replace(`/${url}/entries/list`);
     } catch (err) {
       alert(`${$t('misc.error', { default: 'Error' })}: ${err}`);
     }
-    submitting = false;
   }
 
   let online = true;
@@ -109,36 +116,35 @@
     default: 'Create New Dictionary',
   })}</Header>
 
-<form class="flex" on:submit|preventDefault={createNewDictionary}>
-  <div class="flex flex-col justify-center p-4 max-w-md mx-auto">
-    <div class="mt-6">
-      <label for="name" class="block text-xl font-medium leading-5 text-gray-700">
-        {$t('dictionary.name_of_language', { default: 'Name of Language' })}*
-      </label>
-      <div class="mt-2 rounded-md shadow-sm">
-        <!-- svelte-ignore a11y-autofocus -->
-        <input
-          id="name"
-          type="text"
-          autocomplete="off"
-          autocorrect="off"
-          spellcheck={false}
-          autofocus
-          minlength="3"
-          required
-          bind:value={name}
-          class="form-input w-full" />
-      </div>
-      <div class="text-xs text-gray-600 mt-1">
-        {$t('create.name_clarification', {
-          default: 'This will be the name of the dictionary.',
-        })}
-      </div>
+<Form let:loading onsubmit={createNewDictionary}>
+  <div class="flex-col justify-center p-4 max-w-md mx-auto">
+    <label for="name" class="block text-xl font-medium text-gray-700">
+      {$t('dictionary.name_of_language', { default: 'Name of Language' })}*
+    </label>
+    <div class="mt-2 rounded-md shadow-sm">
+      <!-- svelte-ignore a11y-autofocus -->
+      <input
+        id="name"
+        type="text"
+        autocomplete="off"
+        autocorrect="off"
+        spellcheck={false}
+        autofocus
+        minlength="3"
+        required
+        bind:value={name}
+        class="form-input w-full" />
     </div>
+    <div class="text-xs text-gray-600 mt-1">
+      {$t('create.name_clarification', {
+        default: 'This will be the name of the dictionary.',
+      })}
+    </div>
+    <div class="mb-6" />
 
-    <div class="mt-6 opacity-10" class:opacity-10={name.length < 3}>
+    {#if name.length > 2}
       <div class="flex justify-between items-center" style="direction: ltr">
-        <label for="url" class="text-sm font-medium leading-5 text-gray-700"> URL </label>
+        <label for="url" class="text-sm font-medium  text-gray-700"> URL </label>
       </div>
 
       <div class="mt-1 flex rounded-md shadow-sm" style="direction: ltr">
@@ -157,7 +163,7 @@
           autocorrect="off"
           spellcheck={false}
           class="form-input flex-1 block w-full px-2 sm:px-3 py-2 rounded-none
-            rounded-r-md sm:text-sm sm:leading-5"
+            rounded-r-md sm:text-sm border"
           placeholder="url" />
       </div>
       <div class="text-xs text-gray-600 mt-1">
@@ -175,26 +181,25 @@
           })}
         </div>
       {/if}
-    </div>
+      <div class="mb-6" />
 
-    <div class="mt-6" />
-    <EditableGlossesField
-      {t}
-      minimum={1}
-      availableLanguages={glossingLanguages}
-      selectedLanguages={Array.from(glossLanguages)}
-      on:add={(e) => {
-        glossLanguages.add(e.detail.languageId);
-        glossLanguages = glossLanguages;
-      }}
-      on:remove={(e) => {
-        glossLanguages.delete(e.detail.languageId);
-        glossLanguages = glossLanguages;
-      }} />
-    <!-- not used in web app presently -->
-    <!-- placeholder={$t('create.languages', { default: 'Language(s)' })} -->
+      <EditableGlossesField
+        {t}
+        minimum={1}
+        availableLanguages={glossingLanguages}
+        selectedLanguages={Array.from(glossLanguages)}
+        on:add={(e) => {
+          glossLanguages.add(e.detail.languageId);
+          glossLanguages = glossLanguages;
+        }}
+        on:remove={(e) => {
+          glossLanguages.delete(e.detail.languageId);
+          glossLanguages = glossLanguages;
+        }} />
+      <!-- not used in web app presently -->
+      <!-- placeholder={$t('create.languages', { default: 'Language(s)' })} -->
+      <div class="mb-6" />
 
-    <div class="mt-6">
       <EditableCoordinatesField
         {t}
         {lng}
@@ -205,10 +210,9 @@
         on:remove={() => {
           (lat = null), (lng = null);
         }} />
-    </div>
+      <div class="mb-6" />
 
-    <div class="mt-6">
-      <div class="text-sm font-medium leading-5 text-gray-700 mb-1">
+      <div class="text-sm font-medium  text-gray-700 mb-1">
         {$t('create.alternate_names', { default: 'Alternate Names' })}
       </div>
       <BadgeArray
@@ -218,79 +222,158 @@
           default: 'Enter Alternate Name',
         })}
         addMessage={$t('misc.add', { default: 'Add' })} />
-    </div>
-    <div class="mt-6 flex">
-      <div class="w-1/2">
-        <label for="isocode" class="block text-sm font-medium leading-5 text-gray-700">
-          ISO 639-3
-          <a
-            href="https://en.wikipedia.org/wiki/ISO_639-3"
-            target="_blank"
-            class="text-gray-600 hover:text-gray:800">
-            <i class="far fa-info-circle" />
-          </a>
-        </label>
-        <div class="mt-1 rounded-md shadow-sm">
-          <input
-            id="isocode"
-            type="text"
-            autocomplete="off"
-            autocorrect="off"
-            spellcheck={false}
-            minlength="3"
-            maxlength="30"
-            bind:value={iso6393}
-            class="form-input w-full" />
+      <div class="mb-6" />
+
+      <div class="flex">
+        <div class="w-1/2">
+          <label for="isocode" class="block text-sm font-medium  text-gray-700">
+            ISO 639-3
+            <a
+              href="https://en.wikipedia.org/wiki/ISO_639-3"
+              target="_blank"
+              class="text-gray-600 hover:text-gray:800">
+              <i class="far fa-info-circle" />
+            </a>
+          </label>
+          <div class="mt-1 rounded-md shadow-sm">
+            <input
+              id="isocode"
+              type="text"
+              autocomplete="off"
+              autocorrect="off"
+              spellcheck={false}
+              minlength="3"
+              maxlength="30"
+              bind:value={iso6393}
+              class="form-input w-full" />
+          </div>
+        </div>
+        <div class="w-1" />
+        <div class="w-1/2">
+          <label for="glottocode" class="block text-sm font-medium  text-gray-700">
+            Glottocode
+            <a
+              href="https://en.wikipedia.org/wiki/Glottolog"
+              target="_blank"
+              class="text-gray-600 hover:text-gray:800">
+              <i class="far fa-info-circle" />
+            </a>
+          </label>
+          <div class="mt-1 rounded-md shadow-sm">
+            <input
+              id="glottocode"
+              type="text"
+              autocomplete="off"
+              autocorrect="off"
+              spellcheck={false}
+              minlength="3"
+              maxlength="30"
+              bind:value={glottocode}
+              class="form-input w-full" />
+          </div>
         </div>
       </div>
-      <div class="w-1" />
-      <div class="w-1/2">
-        <label for="glottocode" class="block text-sm font-medium leading-5 text-gray-700">
-          Glottocode
-          <a
-            href="https://en.wikipedia.org/wiki/Glottolog"
-            target="_blank"
-            class="text-gray-600 hover:text-gray:800">
-            <i class="far fa-info-circle" />
-          </a>
-        </label>
-        <div class="mt-1 rounded-md shadow-sm">
-          <input
-            id="glottocode"
-            type="text"
-            autocomplete="off"
-            autocorrect="off"
-            spellcheck={false}
-            minlength="3"
-            maxlength="30"
-            bind:value={glottocode}
-            class="form-input w-full" />
-        </div>
+      <div class="mb-6" />
+
+      <div class="mb-2 text-sm font-medium text-gray-700">
+        Is this dictionary for a language that is spoken or signed by a specific human community?
+        <!-- {t ? $t('create.language_used_by_community') : 'Is this dictionary for a language that is spoken or signed by a specific human community?'} -->
       </div>
-    </div>
 
-    <!-- <div class="mt-6" />
-    <PublicCheckbox
-      {t}
-      checked={publicDictionary}
-      on:changed={({ detail: { checked } }) => {
-        publicDictionary = checked;
-        setTimeout(() => {
-          if (
-            checked &&
-            !confirm(
-              `${$t('settings.community_permission', {
-                default: 'Does the speech community allow this language to be online?',
-              })}`
-            )
-          ) {
-            publicDictionary = false;
-          }
-        }, 5);
-      }} /> -->
+      <label class="block">
+        <input
+          type="radio"
+          name="languageUsedByCommunity"
+          bind:group={languageUsedByCommunity}
+          value={true}
+          required />
+        Yes
+      </label>
 
-    <div class="mt-6">
-      <Button type="submit" class="w-full" form="filled" disabled={!online} loading={submitting}>
+      <label class="block">
+        <input
+          type="radio"
+          name="languageUsedByCommunity"
+          bind:group={languageUsedByCommunity}
+          value={false} />
+        No
+      </label>
+      <div class="mb-6" />
+
+      <div class="mb-2 text-sm font-medium text-gray-700">
+        Has the language community given you permission to make this dictionary?
+        <!-- {t ? $t('create.community_permission') : 'Has the language community given you permission to make this dictionary?'} -->
+        <!-- Similar to create.speech_community_permission but not the same -->
+      </div>
+      <label class="block">
+        <input
+          type="radio"
+          name="communityPermission"
+          bind:group={communityPermission}
+          value={'yes'}
+          required />
+        Yes
+      </label>
+
+      <label class="block">
+        <input
+          type="radio"
+          name="communityPermission"
+          bind:group={communityPermission}
+          value={'no'} />
+        No
+      </label>
+
+      <label class="block">
+        <input
+          type="radio"
+          name="communityPermission"
+          bind:group={communityPermission}
+          value={'unknown'} />
+        I don’t know
+      </label>
+      <div class="mb-6" />
+
+      <label class="block mb-2 text-sm font-medium text-gray-700" for="authorConnection">
+        Please briefly describe how you know this language and why you are creating a Living
+        Dictionary for it. Are you part of the community that will be using this Living Dictionary?
+        If not, how do you know the community?
+        <!-- {t ? $t('create.author_connection') : 'Please briefly describe how you know this language and why you are creating a Living
+      Dictionary for it. Are you part of the community that will be using this Living Dictionary? If
+      not, how do you know the community?'} -->
+      </label>
+      <textarea
+        name="authorConnection"
+        required
+        rows="5"
+        minlength="100"
+        maxlength="2500"
+        bind:value={authorConnection}
+        class="form-input w-full" />
+      <div class="flex text-xs">
+        <div class="text-gray-500 ml-auto">{authorConnection.length}/2500</div>
+      </div>
+      <div class="mb-6" />
+
+      <label class="block mb-2 text-sm font-medium text-gray-700" for="conLangDescription">
+        Is this dictionary for a constructed language (a language invented by humans in recent
+        years, for a book or a movie)? If yes, please briefly describe.
+        <!-- {t ? $t('create.con_lang_description') : 'Is this dictionary for a constructed language (a language invented by humans in recent years,
+      for a book or a movie)? If yes, please briefly describe.'} -->
+      </label>
+      <textarea
+        name="conLangDescription"
+        rows="3"
+        minlength="40"
+        maxlength="1000"
+        bind:value={conLangDescription}
+        class="form-input w-full" />
+      <div class="flex text-xs">
+        <div class="text-gray-500 ml-auto">{conLangDescription.length}/1000</div>
+      </div>
+      <div class="mb-6" />
+
+      <Button type="submit" class="w-full" form="filled" disabled={!online} {loading}>
         {#if !online}
           Return online to
         {/if}
@@ -305,9 +388,10 @@
           >{$t('dictionary.terms_of_use', { default: 'Terms of Use' })}</a
         >.
       </div>
-    </div>
+      <div class="mb-6" />
+    {/if}
   </div>
-</form>
+</Form>
 
 {#if modal === 'auth'}
   {#await import('$lib/components/shell/AuthModal.svelte') then { default: AuthModal }}
