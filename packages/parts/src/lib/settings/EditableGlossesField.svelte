@@ -31,9 +31,9 @@
   }>();
 </script>
 
-<label for="glosses" class="block text-sm font-medium text-gray-700 mb-1">
+<div class="text-sm font-medium text-gray-700 mb-1">
   {t ? $t('create.gloss_dictionary_in') : 'Make dictionary available in...'}
-</label>
+</div>
 
 <ShowHide let:show let:toggle>
   <BadgeArrayEmit
