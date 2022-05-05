@@ -110,6 +110,9 @@ import { where } from 'firebase/firestore';
       on:remove={async (e) => {
         let glossesInWords = [];
         try {
+          // This works but I think it's undesirable because it will take longer times if a dictionary has multiple glossed words in a language
+          // Instead we could implement a DB filter function that tells us if at least one word in the dictionary is using this gloss
+          // Or we could implement a new boolean field inside the gloses object that tells us if the gloss has been used by a word (true) or not (false) 
           glossesInWords = await getCollection(`dictionaries/${dictionary.id}/words`, [
             where(`gl.${e.detail.languageId}`, '>', '')
           ]);
