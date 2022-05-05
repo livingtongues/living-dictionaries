@@ -42,6 +42,9 @@
       alert(`${$t('misc.error', { default: 'Error' })}: ${err}`);
     }
   }
+
+import {getCollection} from '$sveltefirets'
+import { where } from 'firebase/firestore';
 </script>
 
 <Doc
@@ -104,8 +107,16 @@
           glossLanguages: arrayUnion(e.detail.languageId),
         });
       }}
-      on:remove={(e) => {
-        if (admin) {
+      on:remove={async (e) => {
+        let glossesInWords = [];
+        try {
+          glossesInWords = await getCollection(`dictionaries/${dictionary.id}/words`, [
+            where(`gl.${e.detail.languageId}`, '>', '')
+          ]);
+        } catch (err) {
+          return { status: 500, err };
+        }
+        if ($admin && glossesInWords.length == 0) {
           if (
             confirm('Remove as admin? Know that regular editors get a message saying "Contact Us"')
           ) {
