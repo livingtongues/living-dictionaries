@@ -31,7 +31,7 @@
   </div>
 {/if}
 
-<div class="flex rounded-md shadow-sm mb-1">
+<div class="flex rounded-md shadow-sm mb-2">
   <label
     for="speaker"
     class="inline-flex items-center px-3 ltr:rounded-l-md rtl:rounded-r-md border
@@ -62,10 +62,9 @@
   </select>
 </div>
 
-<div class="flex justify-between mb-4">
+<div class="mb-4">
   <p><b>Birthplace:</b> {currentSpeaker?.birthplace.charAt(0).toUpperCase() + currentSpeaker?.birthplace.slice(1)}</p>
   <p><b>Gender:</b> {currentSpeaker?.gender == 'f' ? 'Female' : 'Male'}</p>
-  <p><b>Decade:</b> {currentSpeaker?.decade}</p>
 </div>
 
 {#if speakerId === addSpeaker}
