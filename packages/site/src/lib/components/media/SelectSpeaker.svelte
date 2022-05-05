@@ -7,6 +7,7 @@
     initialSpeakerId: string = undefined;
   const addSpeaker = 'AddSpeaker';
   $: speakerId = initialSpeakerId;
+  let currentSpeaker: ISpeaker;
 
   import type { ISpeaker } from '@ld/types';
   let speakers: ISpeaker[] = [];
@@ -18,7 +19,10 @@
 <Collection
   path="speakers"
   startWith={speakers}
-  on:data={(e) => (speakers = e.detail.data)}
+  on:data={(e) => {
+    speakers = e.detail.data; 
+    currentSpeaker = speakers.find((e) => e.id == speakerId);
+  }}
   queryConstraints={[where('contributingTo', 'array-contains', dictionaryId)]} />
 
 {#if !speakerId}
@@ -27,7 +31,7 @@
   </div>
 {/if}
 
-<div class="flex rounded-md shadow-sm mb-4">
+<div class="flex rounded-md shadow-sm mb-1">
   <label
     for="speaker"
     class="inline-flex items-center px-3 ltr:rounded-l-md rtl:rounded-r-md border
@@ -41,6 +45,7 @@
       if (speakerId && speakerId !== addSpeaker) {
         dispatch('update', { speakerId });
       }
+      currentSpeaker = speakers.find((e) => e.id == speakerId);
     }}
     id="speaker"
     class="block w-full pl-3 !rounded-none ltr:!rounded-r-md rtl:!rounded-l-md form-input">
@@ -55,6 +60,12 @@
       {$_('misc.add', { default: 'Add' })}
     </option>
   </select>
+</div>
+
+<div class="flex justify-between mb-4">
+  <p><b>Birthplace:</b> {currentSpeaker?.birthplace.charAt(0).toUpperCase() + currentSpeaker?.birthplace.slice(1)}</p>
+  <p><b>Gender:</b> {currentSpeaker?.gender == 'f' ? 'Female' : 'Male'}</p>
+  <p><b>Decade:</b> {currentSpeaker?.decade}</p>
 </div>
 
 {#if speakerId === addSpeaker}
