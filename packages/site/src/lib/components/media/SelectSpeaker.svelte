@@ -62,10 +62,16 @@
   </select>
 </div>
 
-<div class="mb-4">
-  <p><b>Birthplace:</b> {currentSpeaker?.birthplace.charAt(0).toUpperCase() + currentSpeaker?.birthplace.slice(1)}</p>
-  <p><b>Gender:</b> {currentSpeaker?.gender == 'f' ? 'Female' : 'Male'}</p>
-</div>
+{#if currentSpeaker?.birthplace || currentSpeaker?.gender}
+  <div class="mb-4">
+    {#if currentSpeaker.birthplace}
+      <p><b>Birthplace:</b> {currentSpeaker.birthplace.charAt(0).toUpperCase() + currentSpeaker.birthplace.slice(1)}</p>
+    {/if}
+    {#if currentSpeaker.gender}
+      <p><b>Gender:</b> {currentSpeaker.gender == 'f' ? 'Female' : currentSpeaker.gender == 'm' ? 'Male' : 'Other'}</p>
+    {/if}
+  </div>
+{/if}
 
 {#if speakerId === addSpeaker}
   {#await import('$lib/components/media/AddSpeaker.svelte') then { default: AddSpeaker }}
