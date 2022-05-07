@@ -105,32 +105,32 @@
         });
       }}
       on:remove={async (e) => {
-        let entriesUsingGlossLanguage = [];
         try {
-          // This works but I think it's undesirable because it will take longer times if a dictionary has multiple glossed words in a language
-          // Instead we could implement a DB filter function that tells us if at least one word in the dictionary is using this gloss
-          // Or we could implement a new boolean field inside the gloses object that tells us if the gloss has been used by a word (true) or not (false) 
-          entriesUsingGlossLanguage = await getCollection(`dictionaries/${dictionary.id}/words`, [
-            where(`gl.${e.detail.languageId}`, '>', ''),
-            limit(1),
-          ]);
-        } catch (err) {
-          return { console.log(err) };
-        }
-        if (entriesUsingGlossLanguage.length == 0) {
-          update(`dictionaries/${dictionary.id}`, {
-            glossLanguages: arrayRemove(e.detail.languageId),
-          });
-        } else if ($admin) {
-          if (
-            confirm('Remove as admin even though this glossing language is in use already? Know that regular editors get a message saying "Contact Us"')
-          ) {
+          // we could implement a DB filter function that tells us if at least one word in the dictionary is using this gloss
+          // Or we could implement a new boolean field inside the gloses object that tells us if the gloss has been used by a word (true) or not (false)
+          const entriesUsingGlossLanguage = await getCollection(
+            `dictionaries/${dictionary.id}/words`,
+            [where(`gl.${e.detail.languageId}`, '>', ''), limit(1)]
+          );
+          if (entriesUsingGlossLanguage.length == 0) {
             update(`dictionaries/${dictionary.id}`, {
               glossLanguages: arrayRemove(e.detail.languageId),
             });
+          } else if ($admin) {
+            if (
+              confirm(
+                'Remove as admin even though this glossing language is in use already? Know that regular editors get a message saying "Contact Us"'
+              )
+            ) {
+              update(`dictionaries/${dictionary.id}`, {
+                glossLanguages: arrayRemove(e.detail.languageId),
+              });
+            }
+          } else {
+            alert(t ? $t('header.contact_us') : 'Contact Us');
           }
-        } else {
-          alert(t ? $t('header.contact_us') : 'Contact Us');
+        } catch (err) {
+          return console.log(err);
         }
       }} />
     <div class="mb-5" />
