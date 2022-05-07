@@ -5,7 +5,7 @@
   import { dictionary } from '$lib/stores';
   import Button from 'svelte-pieces/ui/Button.svelte';
   import { addOnline } from '$sveltefirets';
-  import type { ISpeaker } from '@ld/types';
+  import type { ISpeaker } from '@living-dictionaries/types';
 
   const dispatch = createEventDispatcher();
   const close = () => dispatch('close');

@@ -1,6 +1,6 @@
 <script lang="ts">
   import Button from 'svelte-pieces/ui/Button.svelte';
-  import type { IInvite } from '@ld/types';
+  import type { IInvite } from '@living-dictionaries/types';
   export let invite: Partial<IInvite>;
   export let admin: number | boolean = false;
 

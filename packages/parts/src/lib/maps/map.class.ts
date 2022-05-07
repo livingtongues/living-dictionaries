@@ -1,4 +1,4 @@
-import type { IDictionary } from '@ld/types';
+import type { IDictionary } from '@living-dictionaries/types';
 
 export interface IGeometry {
   type: string;

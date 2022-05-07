@@ -4,7 +4,7 @@
     removeDictionaryManager,
   } from '$lib/helpers/dictionariesManaging';
 
-  import type { IUser } from '@ld/types';
+  import type { IUser } from '@living-dictionaries/types';
   import { db } from '$sveltefirets';
   import BadgeArrayEmit from 'svelte-pieces/data/BadgeArrayEmit.svelte';
   import ShowHide from 'svelte-pieces/functions/ShowHide.svelte';

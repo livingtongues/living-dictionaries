@@ -1,5 +1,5 @@
 /// <reference types="@sveltejs/kit" />
-import type { IUser } from '@ld/types';
+import type { IUser } from '@living-dictionaries/types';
 
 // See https://kit.svelte.dev/docs/types#the-app-namespace
 // for information about these interfaces

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { IDictionary } from '@ld/types';
+  import type { IDictionary } from '@living-dictionaries/types';
   import ResponsiveTable from '$lib/components/ui/ResponsiveTable.svelte';
   import { Collection, updateOnline } from '$sveltefirets';
   import { arrayRemove, arrayUnion, deleteField, GeoPoint } from 'firebase/firestore/lite';

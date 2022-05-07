@@ -7,7 +7,7 @@
     removeDictionaryCollaborator,
   } from '$lib/helpers/dictionariesManaging';
   import { addOnline } from '$sveltefirets';
-  import type { HelperRoles, IDictionary, IHelper } from '@ld/types';
+  import type { HelperRoles, IDictionary, IHelper } from '@living-dictionaries/types';
 
   export let helpers: IHelper[] = [];
   export let dictionary: IDictionary;

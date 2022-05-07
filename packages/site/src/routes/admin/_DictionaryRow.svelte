@@ -1,6 +1,6 @@
 <script lang="ts">
   import { admin } from '$lib/stores';
-  import type { IDictionary, IHelper, IInvite } from '@ld/types';
+  import type { IDictionary, IHelper, IInvite } from '@living-dictionaries/types';
   import { printDate } from '$lib/helpers/time';
   export let dictionary: IDictionary;
   import ShowHide from 'svelte-pieces/functions/ShowHide.svelte';

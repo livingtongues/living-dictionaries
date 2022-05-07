@@ -5,7 +5,7 @@
   import Image from '$lib/components/image/Image.svelte';
   import AddImage from './_AddImage.svelte';
   import { page } from '$app/stores';
-  import type { IEntry } from '@ld/types';
+  import type { IEntry } from '@living-dictionaries/types';
   import { printGlosses } from '$lib/helpers/glosses';
   import { minutesAgo } from '$lib/helpers/time';
   import ShowHide from 'svelte-pieces/functions/ShowHide.svelte';

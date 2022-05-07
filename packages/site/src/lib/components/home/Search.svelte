@@ -1,6 +1,6 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
-  import type { IDictionary } from '@ld/types';
+  import type { IDictionary } from '@living-dictionaries/types';
   export let dictionaries: IDictionary[] = [];
   import { admin } from '$lib/stores';
 

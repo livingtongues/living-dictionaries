@@ -13,7 +13,7 @@
 
   import { deleteAudio } from '$lib/helpers/delete';
 
-  import type { IEntry } from '@ld/types';
+  import type { IEntry } from '@living-dictionaries/types';
   import SelectSpeaker from '$lib/components/media/SelectSpeaker.svelte';
   import { updateOnline, firebaseConfig } from '$sveltefirets';
 

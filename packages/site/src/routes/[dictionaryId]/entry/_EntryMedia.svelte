@@ -1,6 +1,6 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
-  import type { IEntry } from '@ld/types';
+  import type { IEntry } from '@living-dictionaries/types';
   import Audio from '../entries/_Audio.svelte';
   import AddImage from '../entries/_AddImage.svelte';
   import Image from '$lib/components/image/Image.svelte';

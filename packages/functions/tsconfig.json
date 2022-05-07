@@ -1,17 +1,25 @@
 {
   "compilerOptions": {
+    // "moduleResolution": "node",
+    // "module": "es2020",
+    // "target": "es2017",
     "module": "commonjs",
+    // swap out above if changing to esm
     "noImplicitReturns": true,
     // "noUnusedLocals": true,
     "outDir": "lib",
     "sourceMap": true,
     "strict": true,
-    "strictNullChecks": false,
-    "target": "es2017",
     "resolveJsonModule": true,
-    "esModuleInterop": true
+    "esModuleInterop": true,
+    "types": [
+      "vitest/globals",
+      "vitest/importMeta"
+    ]
   },
   "compileOnSave": true,
-  "include": ["src"],
-  "exclude": ["src/import/**/*", "scripts/import/old/**/*"]
+  "include": [
+    "src"
+  ],
+  // "exclude": ["./**/*test.ts"]
 }

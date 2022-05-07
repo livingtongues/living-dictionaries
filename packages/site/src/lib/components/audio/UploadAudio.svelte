@@ -1,6 +1,6 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
-  import type { IAudio, IEntry } from '@ld/types';
+  import type { IAudio, IEntry } from '@living-dictionaries/types';
   export let file: File, entry: IEntry, speakerId: string;
   import { dictionary, user } from '$lib/stores';
 

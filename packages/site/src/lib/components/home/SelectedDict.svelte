@@ -1,6 +1,6 @@
 <script lang="ts">
   import { Doc } from '$sveltefirets';
-  import type { IAbout, IDictionary } from '@ld/types';
+  import type { IAbout, IDictionary } from '@living-dictionaries/types';
 
   import { _ } from 'svelte-i18n';
   import Button from 'svelte-pieces/ui/Button.svelte';
