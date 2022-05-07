@@ -26,7 +26,7 @@
     "help_us_launch_more": "Tusaidie Kuzindua Kamusi Hai Nyingi Zaidi",
     "with_your_help": "Kwa msaada wako, tunaweza kuendelea kuboresha programu yetu na kuifanya ipatikane kwa jamii yoyote inayopenda kuunda Kamusi Hai. Changia leo ili ulete mabadiliko!",
     "translators": "Watafsiri",
-    "interns": "Interns."
+    "interns": "Wanafunzi wa ndani"
   },
   "contributors": {
     "invite_contributors": "Wakaribishe Wachangiaji",
@@ -94,7 +94,7 @@
     "req_com_consent": "Inahitaji Ridhaa ya Jamii",
     "create_dictionary": "Tengeneza Kamusi  ",
     "permanent_url_msg": "Jina la URL ni la kudumu na haliwezi kubadilishwa baadaye.",
-    "add_gloss_msg": "Unaweza kuongeza lugha zaidi za kutafakari baadaye chini ya mipangilio."
+    "add_gloss_msg": "Unaweza kuongeza lugha zaidi ya glossing baadaye katika Mipangilio."
   },
   "dictionary": {
     "latitude": "Latitudo",
@@ -106,8 +106,8 @@
     "contributors": "Wachangiaji",
     "grammar": "Sarufi",
     "entries": "Maingizo",
-    "youtube_terms": "Maneno ya YouTube.",
-    "google_terms": "Masharti ya Google."
+    "youtube_terms": "Masharti ya YouTube",
+    "google_terms": "Masharti ya Google"
   },
   "entry": {
     "view_entries": "Tazama Maingizo",
@@ -143,7 +143,9 @@
     "link_copied": "Kiungo kimenakiliwa",
     "copy_and_share": "Nakili na ushiriki",
     "sr": "Chanzo",
-    "example_sentence": "Sentensi ya mfano"
+    "example_sentence": "Sentensi ya mfano",
+    "nc": "Darasa la nomino",
+    "va": "Lahaja"
   },
   "error": {
     "run_into_error": "Samahani, tumepata hitilafu.",
@@ -188,12 +190,12 @@
     "edit": "Hariri",
     "invalid": "Halali",
     "next": "Ifuatayo",
-    "export": "Export.",
+    "export": "Kuuza nje",
     "images": "Picha",
-    "reset": "Rekebisha",
+    "reset": "Weka upya",
     "invalid_url": "Hii sio URL halali",
     "downloading": "Kupakua",
-    "upload": "Upload."
+    "upload": "Pakia"
   },
   "settings": {
     "community_permission": "Je, jamii ya wazungumzaji inaruhusu lugha hii kuwekwa mtandaoni?",
@@ -201,7 +203,7 @@
     "dict_name": "Jina la Kamusi",
     "public_private_meaning": "Je, jamii ya wazungumzaji inaruhusu lugha hii kuwekwa mtandaoni? Umma inamaanisha mtu yeyote anaweza kuona kamusi yako, suala ambalo linahitaji idhini ya jamii. Kamusi binafsi zinaonekana kwako tu na washirika wako.",
     "optional_data_fields": "Sehemu za Taarifa Mbadala",
-    "unable-deleting-msg": "Kumbuka: Huwezi kufuta lugha hizi za kutafakari baadaye."
+    "unable_to_delete": "Kumbuka: Hautaweza kufuta lugha hizi za glossing baadaye."
   },
   "speakers": {
     "add_new_speaker": "Ongeza Mzungumzaji Mpya",
@@ -225,7 +227,7 @@
     "select_audio_file": "Chagua sauti",
     "success": "Mafanikio",
     "uploading": "Kupakia",
-    "select_video_file": "Chagua faili ya video."
+    "select_video_file": "Chagua faili ya video"
   },
   "invite": {
     "invitation_claimed": "Mwaliko umekubaliwa",
@@ -235,27 +237,27 @@
     "role": "Wajibu"
   },
   "export": {
-    "csv_data": "Takwimu kama CSV.",
+    "csv_data": "Takwimu kama CSV",
     "checking_images": "Kuangalia ikiwa faili za picha zipo",
     "no_images": "Hakuna faili za picha",
     "checking_audios": "Kuangalia ikiwa faili za sauti zipo",
     "no_audios": "Hakuna faili za sauti",
-    "download_csv": "Pakua CSV."
+    "download_csv": "Pakua CSV"
   },
   "video": {
-    "video_url": "URL ya video.",
-    "video_credit": "Video ya mkopo",
+    "video_url": "URL ya video",
+    "video_credit": "Mkopo wa video",
     "prepare_to_record_video": "Jitayarishe kurekodi na kipaza sauti na kamera",
-    "video_info": "Kuna njia mbili za kuwa na video zako zilizoonyeshwa katika kamusi ya maisha: 1) Unaweza kurekodi video zako hapa, au kupakia video zako zilizorekodi hapo awali kwenye jukwaa letu. Faida: Rahisi na nzuri kwa rekodi ya haraka. Hasara: Unaweza tu kupakia video hadi 100MB hivyo lazima iwe tu ufupi na chini ya azimio. 2) Kuwa na video zako kwenye huduma ya kuhudumia ambayo inalenga katika kuhifadhi video na kuunganisha URL kwenye tovuti yetu. Faida: Rahisi (kwa muda mrefu kama video zako tayari zimepakiwa kwenye jukwaa hilo), video zako zinaweza kuwa na azimio na urefu unayotaka. Hasara: Ikiwa unataka kurekodi kitu kisichotarajiwa au rahisi sana, inaweza kuwa jitihada nyingi za kufanya hivyo kwa njia hiyo, na unaweza kutaka kipaumbele njia ya 1.",
-    "paste_video_url": "Weka YouTube au Vimeo Link.",
-    "record_upload_video": "Rekodi au kupakia video.",
-    "view": "Tazama",
-    "edit_video": "Hariri Video.",
-    "add_video": "Ongeza Video.",
-    "accesing": "Kufikia kipaza sauti na kamera.",
-    "pause": "Pause.",
+    "video_info": "Kuna njia mbili za video zako zionyeshwa kwenye kamusi ya kuishi: 1) Unaweza kurekodi video zako hapa, au kupakia video zako zilizorekodiwa hapo awali kwenye jukwaa letu. Manufaa: Rahisi na nzuri kwa rekodi za haraka. Hasara: Unaweza tu kupakia video hadi 100MB kwa hivyo lazima iwe fupi na ya chini tu. 2) Kuwa na video zako kwenye huduma ya mwenyeji ambayo inataalam katika uhifadhi wa video na unganisha URL kwenye wavuti yetu. Manufaa: Rahisi (mradi video zako tayari zimepakiwa kwenye jukwaa hilo), video zako zinaweza kuwa na azimio na urefu unaotaka. Hasara: Ikiwa unataka kurekodi kitu kisichotarajiwa au rahisi sana, inaweza kuwa juhudi nyingi kuifanya kwa njia hiyo, na unaweza kutaka kuweka kipaumbele njia 1.",
+    "paste_video_url": "Bandika YouTube au Vimeo Kiungo",
+    "record_upload_video": "Rekodi au pakia video",
+    "view": "Mtazamo",
+    "edit_video": "Hariri video",
+    "add_video": "Ongeza video",
+    "accesing": "Kupata kipaza sauti na kamera",
+    "pause": "Sitisha",
     "unpause": "Bila sababu",
-    "previously_dismissed_msg": "Ikiwa hapo awali ulifukuza ombi la kivinjari, tafadhali rejesha upya na bofya 'Ndiyo' wakati kivinjari chako kinaomba ruhusa.",
-    "permission_denied": "Ruhusa ya kufikia vyombo vya habari ilikataliwa."
+    "previously_dismissed_msg": "Ikiwa hapo awali ulitupilia mbali ombi la kivinjari, tafadhali pakia tena na ubonyeze 'Ndio' wakati kivinjari chako kinauliza ruhusa.",
+    "permission_denied": "Ruhusa ya kupata media ilikataliwa."
   }
 }

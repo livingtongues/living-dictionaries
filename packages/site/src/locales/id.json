@@ -26,7 +26,7 @@
     "help_us_launch_more": "Bantu Kami Meluncurkan Lebih Banyak Lagi Kamus Hidup",
     "with_your_help": "Dengan bantuan anda, kami dapat terus meningkatkan kualitas perangkat lunak kami dan membuatnya tersedia bagi setiap komunitas bahasa apapun atau masyakarat luas yang ingin membuat Kamus Hidup mereka sendiri. Berdonasilah hari ini dan berdampak!",
     "translators": "Penerjemah",
-    "interns": "Magang."
+    "interns": "Magang"
   },
   "contributors": {
     "invite_contributors": "Undang Kontributor",
@@ -93,8 +93,8 @@
     "visible_to_public": "Terlihat oleh umum",
     "req_com_consent": "Memerlukan Persetujuan Komunitas Bahasa",
     "create_dictionary": "Membuat Kamus",
-    "permanent_url_msg": "Nama URL permanen dan tidak dapat diubah nanti.",
-    "add_gloss_msg": "Anda dapat menambahkan lebih banyak bahasa glossing nanti di bawah pengaturan."
+    "permanent_url_msg": "Nama URL bersifat permanen dan tidak dapat diubah nanti.",
+    "add_gloss_msg": "Anda dapat menambahkan lebih banyak bahasa yang meluncur nanti di bawah pengaturan."
   },
   "dictionary": {
     "latitude": "Garis Lintang",
@@ -106,8 +106,8 @@
     "contributors": "Kontributor",
     "grammar": "Tata Bahasa",
     "entries": "Entri",
-    "youtube_terms": "Syarat YouTube",
-    "google_terms": "Syarat google."
+    "youtube_terms": "Istilah youtube",
+    "google_terms": "Istilah google"
   },
   "entry": {
     "view_entries": "Lihat Entri",
@@ -143,7 +143,9 @@
     "link_copied": "Tautan disalin",
     "copy_and_share": "Menyalin dan Menempel",
     "sr": "Sumber",
-    "example_sentence": "Contoh Kalimat"
+    "example_sentence": "Contoh Kalimat",
+    "nc": "Kelas kata benda",
+    "va": "Varian"
   },
   "error": {
     "run_into_error": "Maaf, sistem kami mengalami masalah",
@@ -191,8 +193,8 @@
     "export": "Ekspor",
     "images": "Gambar-gambar",
     "reset": "Mengatur ulang",
-    "invalid_url": "Ini bukan URL yang valid",
-    "downloading": "Unduh.",
+    "invalid_url": "Ini bukan url yang valid",
+    "downloading": "Mengunduh",
     "upload": "Mengunggah"
   },
   "settings": {
@@ -201,7 +203,7 @@
     "dict_name": "Nama Kamus",
     "public_private_meaning": "Kamus yang bersifat umum berarti setiap orang dapat melihat kamus anda yang kemudian memerlukan surat persetujuan komunitas bahasa. Kamus yang bersifat pribadi hanya dapat dilihat oleh anda dan kolaborator anda.",
     "optional_data_fields": "Opsional Bidang Data",
-    "unable-deleting-msg": "Catatan: Anda tidak akan dapat menghapus bahasa-bahasa yang mengkilap ini nanti."
+    "unable_to_delete": "CATATAN: Anda tidak akan dapat menghapus bahasa -bahasa yang memoles ini nanti."
   },
   "speakers": {
     "add_new_speaker": "Bidang Data Bersifat Pilihan ",
@@ -225,7 +227,7 @@
     "select_audio_file": "Pilih File Audio",
     "success": "Berhasil",
     "uploading": "Mengunggah",
-    "select_video_file": "Pilih File Video"
+    "select_video_file": "Pilih file video"
   },
   "invite": {
     "invitation_claimed": "Undangan diklaim",
@@ -235,27 +237,27 @@
     "role": "Peran"
   },
   "export": {
-    "csv_data": "Data sebagai CSV.",
+    "csv_data": "Data sebagai CSV",
     "checking_images": "Memeriksa apakah ada file gambar",
     "no_images": "Tidak ada file gambar",
-    "checking_audios": "Memeriksa apakah file audio ada",
+    "checking_audios": "Memeriksa apakah ada file audio",
     "no_audios": "Tidak ada file audio",
-    "download_csv": "Unduh CSV."
+    "download_csv": "Unduh CSV"
   },
   "video": {
-    "video_url": "URL Video",
-    "video_credit": "Kredit Video",
+    "video_url": "URL video",
+    "video_credit": "Kredit video",
     "prepare_to_record_video": "Bersiaplah untuk merekam dengan mikrofon & kamera",
-    "video_info": "Ada dua cara untuk menampilkan video Anda dalam kamus hidup: 1) Anda dapat merekam video Anda di sini, atau mengunggah video yang Anda rekam sebelumnya ke platform kami. Keuntungan: Mudah dan bagus untuk rekaman cepat. Kekurangan: Anda hanya dapat mengunggah video hingga 100MB sehingga hanya perlu resolusi singkat dan rendah. 2) Miliki video Anda pada layanan hosting yang berspesialisasi dalam penyimpanan video dan tautkan URL ke situs kami. Keuntungan: Mudah (selama video Anda sudah diunggah di platform itu), video Anda dapat memiliki resolusi dan panjang yang Anda inginkan. Kekurangan: Jika Anda ingin merekam sesuatu yang tidak terduga atau sangat sederhana, mungkin terlalu banyak upaya untuk melakukannya dengan cara itu, dan Anda mungkin ingin memprioritaskan metode 1.",
-    "paste_video_url": "Tempel tautan YouTube atau Vimeo",
-    "record_upload_video": "Rekam atau unggah video",
+    "video_info": "Ada dua cara untuk menampilkan video Anda di Kamus Hidup: 1) Anda dapat merekam video Anda di sini, atau mengunggah video yang Anda rekam sebelumnya ke platform kami. Keuntungan: Mudah dan bagus untuk rekaman cepat. Kekurangan: Anda hanya dapat mengunggah video hingga 100MB sehingga hanya resolusi pendek dan rendah. 2) Miliki video Anda di layanan hosting yang berspesialisasi dalam penyimpanan video dan menautkan URL ke situs kami. Keuntungan: Mudah (selama video Anda sudah diunggah pada platform itu), video Anda dapat memiliki resolusi dan panjang yang Anda inginkan. Kekurangan: Jika Anda ingin merekam sesuatu yang tidak terduga atau sangat sederhana, mungkin terlalu banyak upaya untuk melakukannya seperti itu, dan Anda mungkin ingin memprioritaskan metode 1.",
+    "paste_video_url": "Tempelkan tautan YouTube atau Vimeo",
+    "record_upload_video": "Merekam atau mengunggah video",
     "view": "Melihat",
     "edit_video": "Edit Video",
-    "add_video": "Tambahkan Video",
+    "add_video": "Tambahkan video",
     "accesing": "Mengakses mikrofon dan kamera",
     "pause": "Berhenti sebentar",
-    "unpause": "Unpuse.",
-    "previously_dismissed_msg": "Jika Anda sebelumnya menolak permintaan browser, silakan isi ulang dan klik 'Ya' ketika browser Anda meminta izin.",
+    "unpause": "Unkausa",
+    "previously_dismissed_msg": "Jika Anda sebelumnya menolak permintaan browser, silakan muat ulang dan klik 'Ya' ketika browser Anda meminta izin.",
     "permission_denied": "Izin untuk mengakses media ditolak."
   }
 }
