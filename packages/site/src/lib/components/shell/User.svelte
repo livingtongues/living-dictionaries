@@ -7,7 +7,7 @@
   import ShowHide from 'svelte-pieces/functions/ShowHide.svelte';
   import Menu from 'svelte-pieces/shell/Menu.svelte';
   import Button from 'svelte-pieces/ui/Button.svelte';
-  import type { IUser } from '@ld/types';
+  import type { IUser } from '@living-dictionaries/types';
 
   // Deep import not working, so copying function here temporarily
   // import { clickoutside } from 'svelte-pieces/actions/clickoutside.js';

@@ -2,6 +2,7 @@
   import { _ } from 'svelte-i18n';
   import Modal from '$lib/components/ui/Modal.svelte';
   import Button from 'svelte-pieces/ui/Button.svelte';
+  import Form from 'svelte-pieces/data/Form.svelte';
   import { user } from '$lib/stores';
   import { firebaseApp } from '$sveltefirets';
   import { getFunctions, httpsCallable } from 'firebase/functions';
@@ -17,14 +18,9 @@
   let message = '';
   let email = '';
 
-  let sending = false;
   let status: 'success' | 'fail';
 
   async function send() {
-    if (sending) {
-      return;
-    }
-    sending = true;
     try {
       const data = {
         message,
@@ -40,7 +36,6 @@
       status = 'fail';
       alert(`${$_('misc.error', { default: 'Error' })}: ${err}`);
     }
-    sending = false;
   }
 </script>
 
@@ -48,7 +43,7 @@
   <span slot="heading">
     {$_('header.contact_us', { default: 'Contact Us' })}
   </span>
-  <div class="flex flex-col">
+  <div class="flex flex-col mb-5">
     <Button
       href="https://docs.google.com/document/d/1MZGkBbnCiAch3tWjBOHRYPpjX1MVd7f6x5uVuwbxM-Q/edit?usp=sharing"
       target="_blank">
@@ -61,25 +56,24 @@
   </div>
 
   {#if !status}
-    <form on:submit|preventDefault={send}>
-      <div class="mt-3">
-        <label class="block uppercase text-gray-700 text-xs font-bold mb-2" for="message">
-          {$_('contact.what_is_your_question', {
-            default: 'What is your question or comment?',
-          })}
-        </label>
-        <textarea
-          required
-          rows="4"
-          maxlength="1000"
-          bind:value={message}
-          class="form-input bg-white w-full"
-          placeholder={$_('contact.enter_message', {
-            default: 'Enter your message',
-          }) + '...'} />
-        <div class="flex text-xs">
-          <div class="text-gray-500 ml-auto">{message.length}/1000</div>
-        </div>
+    <Form let:loading onsubmit={send}>
+      <label class="block text-gray-700 text-sm font-bold mb-2" for="message">
+        {$_('contact.what_is_your_question', {
+          default: 'What is your question or comment?',
+        })}
+      </label>
+      <textarea
+        name="message"
+        required
+        rows="4"
+        maxlength="1000"
+        bind:value={message}
+        class="form-input bg-white w-full"
+        placeholder={$_('contact.enter_message', {
+          default: 'Enter your message',
+        }) + '...'} />
+      <div class="flex text-xs">
+        <div class="text-gray-500 ml-auto">{message.length}/1000</div>
       </div>
 
       {#if !$user}
@@ -100,14 +94,14 @@
       {/if}
 
       <div class="mt-5">
-        <Button disabled={sending} loading={sending} form="filled" type="submit">
+        <Button {loading} form="filled" type="submit">
           {$_('contact.send_message', { default: 'Send Message' })}
         </Button>
-        <Button disabled={sending} onclick={close} form="simple" color="black">
+        <Button disabled={loading} onclick={close} form="simple" color="black">
           {$_('misc.cancel', { default: 'Cancel' })}
         </Button>
       </div>
-    </form>
+    </Form>
   {:else if status == 'success'}
     <h4 class="text-lg mt-3 mb-4">
       <i class="fas fa-check" />

@@ -9,7 +9,7 @@
   import Image from '$lib/components/image/Image.svelte';
   import { saveUpdateToFirestore } from '$lib/helpers/entry/update';
   import { dictionary } from '$lib/stores';
-  import type { IColumn, IEntry } from '@ld/types';
+  import type { IColumn, IEntry } from '@living-dictionaries/types';
   export let column: IColumn,
     entry: IEntry,
     canEdit = false;

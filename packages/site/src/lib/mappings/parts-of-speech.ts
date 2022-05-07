@@ -1,4 +1,4 @@
-import type { IPartOfSpeech } from '@ld/types';
+import type { IPartOfSpeech } from '@living-dictionaries/types';
 
 export const partsOfSpeech: IPartOfSpeech[] = [
   { enAbbrev: 'n', enName: 'noun' },

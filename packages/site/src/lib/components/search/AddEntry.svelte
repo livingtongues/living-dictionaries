@@ -3,7 +3,7 @@
   import Button from 'svelte-pieces/ui/Button.svelte';
   import { _ } from 'svelte-i18n';
   import EditFieldModal from '../modals/EditFieldModal.svelte';
-  import type { IEntry } from '@ld/types';
+  import type { IEntry } from '@living-dictionaries/types';
   import { page } from '$app/stores';
   import { goto } from '$app/navigation';
   import { addOnline } from '$sveltefirets';

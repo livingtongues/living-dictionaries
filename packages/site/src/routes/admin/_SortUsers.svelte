@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { IUser } from '@ld/types';
+  import type { IUser } from '@living-dictionaries/types';
   export let users: IUser[] = [];
   enum UserFields {
     displayName = 'Name',

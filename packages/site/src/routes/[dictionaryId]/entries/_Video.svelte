@@ -1,6 +1,6 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
-  import type { IEntry, IVideo } from '@ld/types';
+  import type { IEntry, IVideo } from '@living-dictionaries/types';
   import ShowHide from 'svelte-pieces/functions/ShowHide.svelte';
   export let entry: IEntry,
     video: IVideo,

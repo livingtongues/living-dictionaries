@@ -7,7 +7,7 @@
     addDictionaryManager,
     addDictionaryContributor,
   } from '$lib/helpers/dictionariesManaging';
-  import type { IDictionary, IUser } from '@ld/types';
+  import type { IDictionary, IUser } from '@living-dictionaries/types';
   import Button from 'svelte-pieces/ui/Button.svelte';
   import { Collection } from '$sveltefirets';
   import Filter from '@ld/parts/src/lib/helpers/Filter.svelte';

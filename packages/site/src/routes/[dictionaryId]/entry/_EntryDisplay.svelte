@@ -1,6 +1,6 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
-  import type { IEntry } from '@ld/types';
+  import type { IEntry } from '@living-dictionaries/types';
   import EntryField from './_EntryField.svelte';
   import EntryPartOfSpeech from './_EntryPartOfSpeech.svelte';
   import EntrySemanticDomains from './_EntrySemanticDomains.svelte';
