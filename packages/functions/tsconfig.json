@@ -1,6 +1,10 @@
 {
   "compilerOptions": {
+    // "moduleResolution": "node",
+    // "module": "es2020",
+    // "target": "es2017",
     "module": "commonjs",
+    // swap out above if changing to esm
     "noImplicitReturns": true,
     // "noUnusedLocals": true,
     "outDir": "lib",
