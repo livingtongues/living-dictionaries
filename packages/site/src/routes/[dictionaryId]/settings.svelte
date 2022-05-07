@@ -1,11 +1,11 @@
 <script lang="ts">
   import { t } from 'svelte-i18n';
   import { admin, dictionary as dictionaryStore } from '$lib/stores';
-  import { update, updateOnline } from '$sveltefirets';
+  import { update, updateOnline, getCollection } from '$sveltefirets';
   import Button from 'svelte-pieces/ui/Button.svelte';
   import ShowHide from 'svelte-pieces/functions/ShowHide.svelte';
   import EditString from './_EditString.svelte';
-  import { arrayRemove, arrayUnion, GeoPoint } from 'firebase/firestore';
+  import { arrayRemove, arrayUnion, GeoPoint, where, limit } from 'firebase/firestore';
   import type { IDictionary } from '@ld/types';
   import Doc from '$sveltefirets/components/Doc.svelte';
   import {
@@ -42,9 +42,6 @@
       alert(`${$t('misc.error', { default: 'Error' })}: ${err}`);
     }
   }
-
-import {getCollection} from '$sveltefirets'
-import { where } from 'firebase/firestore';
 </script>
 
 <Doc
@@ -108,20 +105,25 @@ import { where } from 'firebase/firestore';
         });
       }}
       on:remove={async (e) => {
-        let glossesInWords = [];
+        let entriesUsingGlossLanguage = [];
         try {
           // This works but I think it's undesirable because it will take longer times if a dictionary has multiple glossed words in a language
           // Instead we could implement a DB filter function that tells us if at least one word in the dictionary is using this gloss
           // Or we could implement a new boolean field inside the gloses object that tells us if the gloss has been used by a word (true) or not (false) 
-          glossesInWords = await getCollection(`dictionaries/${dictionary.id}/words`, [
-            where(`gl.${e.detail.languageId}`, '>', '')
+          entriesUsingGlossLanguage = await getCollection(`dictionaries/${dictionary.id}/words`, [
+            where(`gl.${e.detail.languageId}`, '>', ''),
+            limit(1),
           ]);
         } catch (err) {
-          return { status: 500, err };
+          return { console.log(err) };
         }
-        if ($admin && glossesInWords.length == 0) {
+        if (entriesUsingGlossLanguage.length == 0) {
+          update(`dictionaries/${dictionary.id}`, {
+            glossLanguages: arrayRemove(e.detail.languageId),
+          });
+        } else if ($admin) {
           if (
-            confirm('Remove as admin? Know that regular editors get a message saying "Contact Us"')
+            confirm('Remove as admin even though this glossing language is in use already? Know that regular editors get a message saying "Contact Us"')
           ) {
             update(`dictionaries/${dictionary.id}`, {
               glossLanguages: arrayRemove(e.detail.languageId),
