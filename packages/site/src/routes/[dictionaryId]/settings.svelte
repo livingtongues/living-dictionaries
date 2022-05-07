@@ -13,6 +13,7 @@
     EditableGlossesField,
     PublicCheckbox,
     glossingLanguages,
+    EditableAlternateNames,
   } from '@ld/parts';
 
   async function togglePublic(settingPublic: boolean) {
@@ -54,7 +55,7 @@
     <EditString
       value={dictionary.name}
       minlength={2}
-      required={true}
+      required
       id="name"
       save={async (name) =>
         await updateOnline(`dictionaries/${$dictionaryStore.id}`, {
@@ -83,6 +84,16 @@
       display="Glottocode" />
     <div class="mb-5" />
 
+    <EditString
+      value={dictionary.location}
+      id="location"
+      save={async (location) =>
+        await updateOnline(`dictionaries/${$dictionaryStore.id}`, {
+          location,
+        })}
+      display={$t('dictionary.location', { default: 'Location' })} />
+    <div class="mb-5" />
+
     <EditableGlossesField
       {t}
       minimum={1}
@@ -108,6 +119,16 @@
       }} />
     <div class="mb-5" />
 
+    <EditableAlternateNames
+      {t}
+      alternateNames={dictionary.alternateNames}
+      on:update={(e) => {
+        update(`dictionaries/${dictionary.id}`, {
+          alternateNames: e.detail.alternateNames,
+        });
+      }} />
+    <div class="mb-5" />
+
     <EditableCoordinatesField
       {t}
       lng={dictionary.coordinates ? dictionary.coordinates.longitude : undefined}
@@ -129,7 +150,7 @@
     <div class="mb-5" />
 
     <ShowHide let:show let:toggle>
-      <Button onclick={toggle}>
+      <Button onclick={toggle} class="mb-5">
         {$t('settings.optional_data_fields', { default: 'Optional Data Fields' })}:
         {$t('header.contact_us', { default: 'Contact Us' })}
       </Button>

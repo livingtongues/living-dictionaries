@@ -143,7 +143,9 @@
     "link_copied": "Link copied",
     "copy_and_share": "Copy and share",
     "sr": "Source",
-    "example_sentence": "Example Sentence"
+    "example_sentence": "Example Sentence",
+    "nc": "Noun Class",
+    "va": "Variant"
   },
   "error": {
     "run_into_error": "We're sorry, we've run into an error.",
@@ -201,7 +203,7 @@
     "dict_name": "Dictionary Name",
     "public_private_meaning": "Public means anyone can see your dictionary which requires community consent. Private dictionaries are visible only to you and your collaborators.",
     "optional_data_fields": "Optional Data Fields",
-    "unable-deleting-msg": "Note: you will not be able to delete these glossing languages later."
+    "unable_to_delete": "Note: you will not be able to delete these glossing languages later."
   },
   "speakers": {
     "add_new_speaker": "Add New Speaker",

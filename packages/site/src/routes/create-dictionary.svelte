@@ -10,7 +10,12 @@
   import { arrayUnion, GeoPoint, serverTimestamp } from 'firebase/firestore/lite';
   import { debounce } from '$lib/helpers/debounce';
   import { pruneObject } from '$lib/helpers/prune';
-  import { EditableCoordinatesField, EditableGlossesField, glossingLanguages } from '@ld/parts';
+  import {
+    EditableCoordinatesField,
+    EditableGlossesField,
+    EditableAlternateNames,
+    glossingLanguages,
+  } from '@ld/parts';
 
   let modal: 'auth' = null;
 
@@ -200,6 +205,12 @@
       <!-- placeholder={$t('create.languages', { default: 'Language(s)' })} -->
       <div class="mb-6" />
 
+      <EditableAlternateNames
+        {t}
+        {alternateNames}
+        on:update={(e) => (alternateNames = e.detail.alternateNames)} />
+      <div class="mb-6" />
+
       <EditableCoordinatesField
         {t}
         {lng}
@@ -210,18 +221,6 @@
         on:remove={() => {
           (lat = null), (lng = null);
         }} />
-      <div class="mb-6" />
-
-      <div class="text-sm font-medium  text-gray-700 mb-1">
-        {$t('create.alternate_names', { default: 'Alternate Names' })}
-      </div>
-      <BadgeArray
-        bind:strings={alternateNames}
-        canEdit
-        promptMessage={$t('create.enter_alternate_name', {
-          default: 'Enter Alternate Name',
-        })}
-        addMessage={$t('misc.add', { default: 'Add' })} />
       <div class="mb-6" />
 
       <div class="flex">
