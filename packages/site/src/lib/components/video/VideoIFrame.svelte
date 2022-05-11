@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { IVideo } from '@ld/types';
+  import type { IVideo } from '@living-dictionaries/types';
   export let video: IVideo;
 
   let screenWidth: number;

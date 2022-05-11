@@ -1,4 +1,4 @@
-import type { IEntry } from '@ld/types';
+import type { IEntry } from '@living-dictionaries/types';
 
 export function friendlyName(entry: Partial<IEntry>, path: string) {
   const fileTypeSuffix = path.split('.').pop();

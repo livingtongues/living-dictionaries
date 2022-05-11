@@ -1,4 +1,4 @@
-import type { IDictionary, IUser } from '@ld/types';
+import type { IDictionary, IUser } from '@living-dictionaries/types';
 
 export function convertToCSV(objArray) {
   const array = typeof objArray != 'object' ? JSON.parse(objArray) : objArray;

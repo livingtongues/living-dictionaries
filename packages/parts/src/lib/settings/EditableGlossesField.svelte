@@ -2,7 +2,7 @@
   import type { Readable } from 'svelte/store';
   export let t: Readable<any> = undefined;
 
-  import type { IGlossLanguages } from '@ld/types';
+  import type { IGlossLanguages } from '@living-dictionaries/types';
   import Button from 'svelte-pieces/ui/Button.svelte';
   import ShowHide from 'svelte-pieces/functions/ShowHide.svelte';
   import BadgeArrayEmit from 'svelte-pieces/data/BadgeArrayEmit.svelte';

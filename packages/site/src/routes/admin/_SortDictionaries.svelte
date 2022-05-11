@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { IDictionary } from '@ld/types';
+  import type { IDictionary } from '@living-dictionaries/types';
   export let dictionaries: IDictionary[] = [];
   enum DictionaryFields {
     public = 'Public',

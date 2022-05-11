@@ -12,7 +12,7 @@
 
 <script lang="ts">
   import { _ } from 'svelte-i18n';
-  import type { IInvite, IHelper, IUser } from '@ld/types';
+  import type { IInvite, IHelper, IUser } from '@living-dictionaries/types';
   import { isManager, isContributor, user } from '$lib/stores';
 
   export let inviteId: string, dictionaryId: string;

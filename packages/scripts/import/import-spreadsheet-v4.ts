@@ -1,4 +1,4 @@
-import type { IEntry } from '@ld/types';
+import type { IEntry } from '@living-dictionaries/types';
 import { db, timestamp, environment } from '../config.js';
 import { uploadAudioFile, uploadImageFile } from './import-media.js';
 import { readFileSync } from 'fs';
