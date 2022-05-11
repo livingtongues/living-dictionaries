@@ -8,7 +8,7 @@
   const addSpeaker = 'AddSpeaker';
   $: speakerId = initialSpeakerId;
 
-  import type { ISpeaker } from '@ld/types';
+  import type { ISpeaker } from '@living-dictionaries/types';
   let speakers: ISpeaker[] = [];
 
   import { createEventDispatcher } from 'svelte';

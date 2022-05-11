@@ -1,4 +1,4 @@
-import type { IDictionary, IEntry, ISpeaker } from '@ld/types';
+import type { IDictionary, IEntry, ISpeaker } from '@living-dictionaries/types';
 import { formatEntriesForCSV } from './_formatEntries';
 
 test('Example to demonstrate separate file snapshots.', () => {

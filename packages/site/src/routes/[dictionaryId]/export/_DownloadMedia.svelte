@@ -1,7 +1,7 @@
 <script lang="ts">
   import JSZip from 'jszip';
   import { fileAsBlob } from '$lib/export/csv';
-  import type { IDictionary } from '@ld/types';
+  import type { IDictionary } from '@living-dictionaries/types';
   import { createEventDispatcher, onDestroy, onMount } from 'svelte';
   import { getStorageDownloadUrl } from './_storageUrl';
 

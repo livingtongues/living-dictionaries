@@ -1,4 +1,4 @@
-import { IEntry } from '@ld/types';
+import { IEntry } from '@living-dictionaries/types';
 import type admin from 'firebase-admin';
 
 export async function prepareDataForIndex(dbEntry: IEntry, dictionaryId: string, db: admin.firestore.Firestore) {

@@ -1,5 +1,5 @@
 import { writable, derived } from 'svelte/store';
-import type { IColumn } from '@ld/types';
+import type { IColumn } from '@living-dictionaries/types';
 import { vernacularName } from '$lib/helpers/vernacularName';
 import { dictionary } from './dictionary';
 import { get } from 'svelte/store';

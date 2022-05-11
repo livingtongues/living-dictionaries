@@ -2,7 +2,7 @@
   import ShowHide from 'svelte-pieces/functions/ShowHide.svelte';
   import { firebaseConfig } from '$sveltefirets';
   import { longpress } from 'svelte-pieces/actions/longpress';
-  import type { IEntry } from '@ld/types';
+  import type { IEntry } from '@living-dictionaries/types';
   export let entry: IEntry,
     canEdit = false;
 

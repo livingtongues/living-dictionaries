@@ -1,4 +1,4 @@
-import type { IUser } from '@ld/types';
+import type { IUser } from '@living-dictionaries/types';
 import { user } from './user';
 import { derived } from 'svelte/store';
 

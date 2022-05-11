@@ -1,5 +1,5 @@
 <script context="module" lang="ts">
-  import type { IEntry } from '@ld/types';
+  import type { IEntry } from '@living-dictionaries/types';
   import { getDocument, Doc } from '$sveltefirets';
 
   import type { Load } from '@sveltejs/kit';

@@ -1,5 +1,5 @@
 import { writable } from 'svelte/store';
-import type { IDictionary, IEntry } from '@ld/types';
+import type { IDictionary, IEntry } from '@living-dictionaries/types';
 
 export const dictionary = writable<IDictionary>({
   id: '',
