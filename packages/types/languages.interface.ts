@@ -12,13 +12,13 @@ export enum ReadyLocales {
   bn = 'বাংলা', // Bengali,
   as = 'Assamese / অসমীয়া',
   hi = 'हिन्दी',
+  zh = '官话',
 }
 
 // Admin only
 export enum UnpublishedLocales {
   ha = 'Harshen Hausa / هَرْشَن هَوْسَ',
   ar = 'العَرَبِيَّة‎',
-  zh = '官话',
   am = 'አማርኛ',
   or = 'ଓଡ଼ିଆ',
   // it = 'Italiano', // change to how they spell it

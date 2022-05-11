@@ -94,7 +94,11 @@
     "req_com_consent": "Se requiere la aprobación de la comunidad",
     "create_dictionary": "Crear un diccionario",
     "permanent_url_msg": "El nombre de la URL es permanente y no se podrá cambiar más adelante.",
-    "add_gloss_msg": "Podrá agregar más glosas en Configuración"
+    "add_gloss_msg": "Podrá agregar más glosas en Configuración",
+    "question_1": "¿Es este diccionario para un idioma, oral o de señas, de una comunidad humana específica?",
+    "question_2": "¿La comunidad que habla este idioma le ha dado permiso para hacer este diccionario?",
+    "question_3": "Por favor describa brevemente cómo conoce este idioma y por qué está creando un diccionario vivo para ello. ¿Eres parte de la comunidad que usará este diccionario vivo? Si no, ¿cómo conoces a la comunidad?",
+    "question_4": "¿Es este diccionario de un idioma artificial (un idioma inventado por humanos en los últimos años, o para un libro o una película)? En caso afirmativo, describa brevemente."
   },
   "dictionary": {
     "latitude": "Latitud",
@@ -170,7 +174,8 @@
     "open_dictionary": "Abrir el diccionario",
     "my_dictionaries": "Mis diccionarios",
     "public_dictionaries": "Diccionarios públicos",
-    "read_more": "Leer más"
+    "read_more": "Leer más",
+    "tutorials_link": "Tutoriales"
   },
   "misc": {
     "settings": "Configuración",
@@ -258,6 +263,6 @@
     "pause": "Pausar",
     "unpause": "Despausar",
     "previously_dismissed_msg": "Si previamente le negó la petición al navegador, por favor refresque y acepte cuando el navegador le pida permiso.",
-    "permission_denied": "Se denegó el permiso para acceder a los medios."
+    "permission_denied": "Permiso para acceder a los archivos media denegado"
   }
 }
