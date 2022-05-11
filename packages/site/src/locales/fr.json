@@ -94,7 +94,11 @@
     "req_com_consent": "Cela nécessite le consentement de la communauté",
     "create_dictionary": "Créer un dictionnaire",
     "permanent_url_msg": "Le nom de l'URL est permanent et ne peut pas être modifié plus tard.",
-    "add_gloss_msg": "Vous pouvez ajouter plus de langues de brillance plus tard dans les paramètres sous."
+    "add_gloss_msg": "Vous pouvez ajouter plus de langues de brillance plus tard dans les paramètres sous.",
+    "question_1": "Est-ce que ce dictionnaire pour une langue parlée ou signée par une communauté humaine spécifique?",
+    "question_2": "La communauté linguistique vous a-t-elle autorisée à faire ce dictionnaire?",
+    "question_3": "Veuillez décrire brièvement comment vous connaissez cette langue et pourquoi vous créez un dictionnaire vivant pour cela. Faites-vous partie de la communauté qui utilisera ce dictionnaire vivant? Sinon, comment connaissez-vous la communauté?",
+    "question_4": "Ce dictionnaire est-il pour une langue construite (une langue inventée par les humains ces dernières années, pour un livre ou un film)? Si oui, veuillez décrire brièvement."
   },
   "dictionary": {
     "latitude": "Latitude",
@@ -170,7 +174,8 @@
     "open_dictionary": "Ouvrir le dictionnaire",
     "my_dictionaries": "Mes dictionnaires",
     "public_dictionaries": "Dictionnaires publics",
-    "read_more": "Lire la suite"
+    "read_more": "Lire la suite",
+    "tutorials_link": "Tutoriels"
   },
   "misc": {
     "settings": "Configuration",

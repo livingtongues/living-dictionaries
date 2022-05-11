@@ -94,7 +94,11 @@
     "req_com_consent": "Memerlukan Persetujuan Komunitas Bahasa",
     "create_dictionary": "Membuat Kamus",
     "permanent_url_msg": "Nama URL bersifat permanen dan tidak dapat diubah nanti.",
-    "add_gloss_msg": "Anda dapat menambahkan lebih banyak bahasa yang meluncur nanti di bawah pengaturan."
+    "add_gloss_msg": "Anda dapat menambahkan lebih banyak bahasa yang meluncur nanti di bawah pengaturan.",
+    "question_1": "Apakah kamus ini untuk bahasa yang diucapkan atau ditandatangani oleh komunitas manusia tertentu?",
+    "question_2": "Apakah komunitas bahasa memberi Anda izin untuk membuat kamus ini?",
+    "question_3": "Jelaskan secara singkat bagaimana Anda mengetahui bahasa ini dan mengapa Anda membuat kamus hidup untuk itu. Apakah Anda bagian dari komunitas yang akan menggunakan Kamus Hidup ini? Jika tidak, bagaimana Anda mengenal komunitas?",
+    "question_4": "Apakah kamus ini untuk bahasa yang dibangun (bahasa yang diciptakan oleh manusia dalam beberapa tahun terakhir, untuk buku atau film)? Jika ya, jelaskan secara singkat."
   },
   "dictionary": {
     "latitude": "Garis Lintang",
@@ -170,7 +174,8 @@
     "open_dictionary": "Buka Kamus",
     "my_dictionaries": "Kamus Saya",
     "public_dictionaries": "Kamus Umum",
-    "read_more": "Baca Lebih Lengkap"
+    "read_more": "Baca Lebih Lengkap",
+    "tutorials_link": "Tutorial"
   },
   "misc": {
     "settings": "Pengaturan",
