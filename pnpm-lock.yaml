@@ -51,7 +51,7 @@ importers:
 
   packages/parts:
     specifiers:
-      '@living-dictionaries/types': workspace:^1.0.0
+      '@living-dictionaries/types': ^1.0.0
       '@sveltejs/adapter-auto': ^1.0.0-next.40
       '@sveltejs/kit': ^1.0.0-next.323
       '@types/mapbox-gl': ^2.7.0
