@@ -95,10 +95,10 @@
     "create_dictionary": "ƙirƙiri Dictionary",
     "permanent_url_msg": "Sunan URL na dindindin kuma ba za'a iya canza shi daga baya ba.",
     "add_gloss_msg": "Zaka iya ƙara yaruka masu haskakawa daga baya a ƙarƙashin saiti.",
-    "question_1": "Shin wannanamus ɗin ne don yaren da aka faɗi ko takamaiman al'ummomin ɗan adam?",
-    "question_2": "Shin al'ummar da aka ba ku izinin yin wannan ƙamus?",
-    "question_3": "Da fatan za a bayyana yadda kuka san wannan yare kuma me yasa kuke ƙirƙirar ƙamus ɗin rayuwa don hakan. Shin kun kasance wani ɓangare na al'umma waɗanda za su yi amfani da wannan ƙamus ɗin rayuwa? Idan ba haka ba, ta yaya kuka san al'umma?",
-    "question_4": "Shin wannan ƙamus na harshe ne wanda aka gina (harshe da aka kirkira ta ɗan adam a cikin 'yan shekarun nan, na wani fim ko fim)? Idan eh, da fatan za a bayyana a taƙaice."
+    "language_used_by_community": "Shin wannanamus ɗin ne don yaren da aka faɗi ko takamaiman al'ummomin ɗan adam?",
+    "community_permission": "Shin al'ummar da aka ba ku izinin yin wannan ƙamus?",
+    "author_connection": "Da fatan za a bayyana yadda kuka san wannan yare kuma me yasa kuke ƙirƙirar ƙamus ɗin rayuwa don hakan. Shin kun kasance wani ɓangare na al'umma waɗanda za su yi amfani da wannan ƙamus ɗin rayuwa? Idan ba haka ba, ta yaya kuka san al'umma?",
+    "con_lang_description": "Shin wannan ƙamus na harshe ne wanda aka gina (harshe da aka kirkira ta ɗan adam a cikin 'yan shekarun nan, na wani fim ko fim)? Idan eh, da fatan za a bayyana a taƙaice."
   },
   "dictionary": {
     "latitude": "Latitude",

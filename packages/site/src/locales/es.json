@@ -95,10 +95,10 @@
     "create_dictionary": "Crear un diccionario",
     "permanent_url_msg": "El nombre de la URL es permanente y no se podrá cambiar más adelante.",
     "add_gloss_msg": "Podrá agregar más glosas en Configuración",
-    "question_1": "¿Es este diccionario para un idioma, oral o de señas, de una comunidad humana específica?",
-    "question_2": "¿La comunidad que habla este idioma le ha dado permiso para hacer este diccionario?",
-    "question_3": "Por favor describa brevemente cómo conoce este idioma y por qué está creando un diccionario vivo para ello. ¿Eres parte de la comunidad que usará este diccionario vivo? Si no, ¿cómo conoces a la comunidad?",
-    "question_4": "¿Es este diccionario de un idioma artificial (un idioma inventado por humanos en los últimos años, o para un libro o una película)? En caso afirmativo, describa brevemente."
+    "language_used_by_community": "¿Es este diccionario para un idioma, oral o de señas, de una comunidad humana específica?",
+    "community_permission": "¿La comunidad que habla este idioma le ha dado permiso para hacer este diccionario?",
+    "author_connection": "Por favor describa brevemente cómo conoce este idioma y por qué está creando un diccionario vivo para ello. ¿Eres parte de la comunidad que usará este diccionario vivo? Si no, ¿cómo conoces a la comunidad?",
+    "con_lang_description": "¿Es este diccionario de un idioma artificial (un idioma inventado por humanos en los últimos años, o para un libro o una película)? En caso afirmativo, describa brevemente."
   },
   "dictionary": {
     "latitude": "Latitud",
@@ -251,7 +251,7 @@
   },
   "video": {
     "video_url": "URL de video",
-    "video_credit": "Crédito del video para",
+    "video_credit": "Crédito del video",
     "prepare_to_record_video": "Prepárese para grabar con el micrófono y la cámara",
     "video_info": "Hay dos formas en que se pueden mostar tus videos en un Diccionario Vivo: 1) Puedes grabar tus videos aquí o cargar tus videos previamente grabados en nuestra plataforma. Ventajas: fácil e ideal para grabaciones rápidas. Desventajas: sólo puedes cargar videos de hasta 100 MB, así que sólo pueden ser cortos y de baja resolución. 2) Tener almacenados tus videos en un servicio especializado y vincular la URL a nuestro sitio. Ventajas: fácil (siempre y cuando tus videos ya estén cargados en esa plataforma), tus videos pueden tener la resolución y tamaño que desees. Desventajas: si deseas grabar algo inesperado o muy simple, esto implicaría mucho esfuerzo, y en ese caso, es posible que desees priorizar el método 1.",
     "paste_video_url": "Pega el link de YouTube o Vimeo",
