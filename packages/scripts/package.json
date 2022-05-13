@@ -1,7 +1,8 @@
 {
-  "name": "@ld/scripts",
+  "name": "@living-dictionaries/scripts",
   "version": "0.0.1",
   "type": "module",
+  "main": "index.ts",
   "scripts": {
     "updateLocales": "ts-node locales/update-locales.ts",
     "importDictionary": "ts-node import/import.ts",
