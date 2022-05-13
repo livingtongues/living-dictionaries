@@ -98,7 +98,8 @@
     "language_used_by_community": "Apakah kamus ini untuk bahasa yang diucapkan atau ditandatangani oleh komunitas manusia tertentu?",
     "community_permission": "Apakah komunitas bahasa memberi Anda izin untuk membuat kamus ini?",
     "author_connection": "Jelaskan secara singkat bagaimana Anda mengetahui bahasa ini dan mengapa Anda membuat kamus hidup untuk itu. Apakah Anda bagian dari komunitas yang akan menggunakan Kamus Hidup ini? Jika tidak, bagaimana Anda mengenal komunitas?",
-    "con_lang_description": "Apakah kamus ini untuk bahasa yang dibangun (bahasa yang diciptakan oleh manusia dalam beberapa tahun terakhir, untuk buku atau film)? Jika ya, jelaskan secara singkat."
+    "con_lang_description": "Apakah kamus ini untuk bahasa yang dibangun (bahasa yang diciptakan oleh manusia dalam beberapa tahun terakhir, untuk buku atau film)? Jika ya, jelaskan secara singkat.",
+    "uncertainty": "aku tidak tahu"
   },
   "dictionary": {
     "latitude": "Garis Lintang",
@@ -200,7 +201,9 @@
     "reset": "Mengatur ulang",
     "invalid_url": "Ini bukan url yang valid",
     "downloading": "Mengunduh",
-    "upload": "Mengunggah"
+    "upload": "Mengunggah",
+    "assertion": "Ya",
+    "negation": "Tidak"
   },
   "settings": {
     "community_permission": "Apakah komunitas penutur bahasa mengijinkan bahasa ini online?",

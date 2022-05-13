@@ -285,7 +285,7 @@
           bind:group={languageUsedByCommunity}
           value={true}
           required />
-        Yes
+          {t ? $t('misc.assertion') : 'Yes'}
       </label>
 
       <label class="block">
@@ -294,7 +294,7 @@
           name="languageUsedByCommunity"
           bind:group={languageUsedByCommunity}
           value={false} />
-        No
+          {t ? $t('misc.negation') : 'No'}
       </label>
       <div class="mb-6" />
 
@@ -309,7 +309,7 @@
           bind:group={communityPermission}
           value={'yes'}
           required />
-        Yes
+        {t ? $t('misc.assertion') : 'Yes'}
       </label>
 
       <label class="block">
@@ -318,7 +318,7 @@
           name="communityPermission"
           bind:group={communityPermission}
           value={'no'} />
-        No
+          {t ? $t('misc.negation') : 'No'}
       </label>
 
       <label class="block">
@@ -327,7 +327,7 @@
           name="communityPermission"
           bind:group={communityPermission}
           value={'unknown'} />
-        I don’t know
+          {t ? $t('create.uncertainty') : 'I don’t know'}
       </label>
       <div class="mb-6" />
 
