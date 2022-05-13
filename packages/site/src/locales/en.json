@@ -95,10 +95,11 @@
     "create_dictionary": "Create Dictionary",
     "permanent_url_msg": "The URL name is permanent and cannot be changed later.",
     "add_gloss_msg": "You can add more glossing languages later in under Settings.",
-    "question_1": "Is this dictionary for a language that is spoken or signed by a specific human community?",
-    "question_2": "Has the language community given you permission to make this dictionary?",
-    "question_3": "Please briefly describe how you know this language and why you are creating a Living Dictionary for it. Are you part of the community that will be using this Living Dictionary? If not, how do you know the community?",
-    "question_4": "Is this dictionary for a constructed language (a language invented by humans in recent years, for a book or a movie)? If yes, please briefly describe."
+    "language_used_by_community": "Is this dictionary for a language that is spoken or signed by a specific human community?",
+    "community_permission": "Has the language community given you permission to make this dictionary?",
+    "author_connection": "Please briefly describe how you know this language and why you are creating a Living Dictionary for it. Are you part of the community that will be using this Living Dictionary? If not, how do you know the community?",
+    "con_lang_description": "Is this dictionary for a constructed language (a language invented by humans in recent years, for a book or a movie)? If yes, please briefly describe.",
+    "uncertainty": "I don't know"
   },
   "dictionary": {
     "latitude": "Latitude",
@@ -200,7 +201,9 @@
     "reset": "Reset",
     "invalid_url": "This is not a valid URL",
     "downloading": "Downloading",
-    "upload": "Upload"
+    "upload": "Upload",
+    "assertion": "yes",
+    "negation": "no"
   },
   "settings": {
     "community_permission": "Does the speech community allow this language to be online?",
