@@ -1,21 +1,14 @@
 <script lang="ts" context="module">
-  import { parseModulesIntoFolders, type Folder } from '$kitbook/sidebar/pages';
+  import { Layout } from 'kitbook';
   const modules = import.meta.glob('./**/*.{md,svx}');
 
   import type { Load } from '@sveltejs/kit';
-  export const load: Load = async () => {
-    return { props: { folder: parseModulesIntoFolders(modules) } };
+  export const load: Load = () => {
+    return { stuff: { kitbook: { modules } } };
   };
 </script>
 
-<script lang="ts">
-  import Layout from '$kitbook/Layout.svelte';
-  import { page } from '$app/stores';
-  export let folder: Folder;
-</script>
-
-<Layout {folder} activeURL={$page.url.pathname} githubURL="https://github.com/livingtongues/living-dictionaries">
-  <svelte:fragment slot="index"><span class="i-ic-round-home mr-1" /> <span class="text-xs">Living Dictionaries Docs</span></svelte:fragment>
+<Layout title="Living Dictionaries Docs" githubURL="https://github.com/livingtongues/living-dictionaries/tree/main/packages/parts">
   <slot />
 </Layout>
 

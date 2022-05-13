@@ -1,5 +1,5 @@
 # Living Dictionaries Component Kitbook
 
-Run `pnpm components` to start developing or visit _____ to view deployed kitbook.
+Run `pnpm parts` to start developing or view the deployed [Living Dictionaries Kitbook](https://ld-parts.vercel.app/).
 
-Read the Kitbook docs at: ________ (coming).
+Read the [Kitbook docs](https://kitbook.vercel.app/).
