@@ -3,7 +3,7 @@
   import Button from 'svelte-pieces/ui/Button.svelte';
   import Form from 'svelte-pieces/data/Form.svelte';
 
-  export let id: 'name' | 'iso6393' | 'glottocode' | 'location';
+  export let id: string;
   export let display: string;
   export let value: string;
   export let minlength = 0;
@@ -29,7 +29,7 @@
       {required}
       bind:value
       class="form-input w-full"
-      placeholder={`Enter ${id}`} />
+      placeholder={display} />
     <div class="w-1" />
     <Button class="flex-shrink-0" {loading} type="submit">
       {$_('misc.save', { default: 'Save' })}
