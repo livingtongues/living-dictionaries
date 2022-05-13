@@ -1,5 +1,5 @@
 <script lang="ts">
-  import Story from '$kitbook/stories/Story.svelte';
+  import { Story } from 'kitbook';
   import { MediaStream, Recorder } from '$lib';
   import { srcObject, Button } from 'svelte-pieces';
   import type { Options } from 'recordrtc';

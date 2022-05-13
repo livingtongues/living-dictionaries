@@ -1,5 +1,5 @@
 <script>
-  import Story from '$kitbook/stories/Story.svelte';
+  import { Story } from 'kitbook';
   import Invitation from '$lib/contributors/Invitation.svelte';
 </script>
 
@@ -9,7 +9,7 @@
 - "Invited:" can be replaced using the `prefix` slot
 - Hover over email to see email of the inviter
 
-<Story input={{ targetEmail: 'john@gmail.com', admin: false }} let:output={{ targetEmail, admin }}>
+<Story knobs={{ targetEmail: 'john@gmail.com', admin: false }} let:props={{ targetEmail, admin }}>
   {#each [{ targetEmail, inviterEmail: 'jimcousin@gmail.com', id: 'randomid1234' }, { targetEmail: 'jimbob@gmail.com', inviterEmail: 'jimcousin@gmail.com', id: 'randomid1234' }] as invite}
     <div class="my-1">
       <Invitation {admin} {invite} on:delete={(e) => alert(`Deleted invite from ${invite.id}`)} />

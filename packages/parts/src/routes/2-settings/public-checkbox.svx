@@ -1,15 +1,15 @@
 <script>
-  import Story from '$kitbook/stories/Story.svelte';
+  import { Story } from 'kitbook';
   import PublicCheckbox from '$lib/settings/PublicCheckbox.svelte';
 </script>
 
 # Public checkbox
 
-<Story input={{ checked: true }} let:output={{ checked }} let:set>
+<Story knobs={{ checked: true }} let:props={{ checked }} let:set>
   <PublicCheckbox {checked} on:changed={({ detail: { checked } }) => set('checked', checked)} />
 </Story>
 
-<Story name="Change can be reversed" input={{ checked: true }} let:output={{ checked }} let:set>
+<Story name="Change can be reversed" knobs={{ checked: true }} let:props={{ checked }} let:set>
   <PublicCheckbox
     {checked}
     on:changed={({ detail: { checked } }) => {
