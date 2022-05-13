@@ -38,6 +38,10 @@
       label={$_('entry.sdn', { default: 'Semantic Domains' })} />
     <RefinementList
       {search}
+      attribute="di"
+      label={$_('entry.di', { default: 'Dialect' })} />
+    <RefinementList
+      {search}
       attribute="sf.speakerName"
       label={$_('entry.speaker', { default: 'Speaker' })} />
     <hr />

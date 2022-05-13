@@ -21,12 +21,13 @@
     "test": "vitest -u"
   },
   "devDependencies": {
-    "@living-dictionaries/types": "workspace:^1.0.0",
+    "@living-dictionaries/types": "^1.0.0",
     "@sveltejs/adapter-auto": "^1.0.0-next.40",
     "@sveltejs/kit": "^1.0.0-next.323",
     "@types/mapbox-gl": "^2.7.0",
     "@types/recordrtc": "^5.6.8",
     "@types/youtube": "^0.0.46",
+    "kitbook": "^0.0.11",
     "mapbox-gl": "^2.8.1",
     "mdsvex": "^0.10.5",
     "recordrtc": "^5.6.2",
