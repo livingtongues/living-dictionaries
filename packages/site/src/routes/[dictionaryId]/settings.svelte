@@ -1,12 +1,12 @@
 <script lang="ts">
   import { t } from 'svelte-i18n';
   import { admin, dictionary as dictionaryStore } from '$lib/stores';
-  import { update, updateOnline } from '$sveltefirets';
+  import { update, updateOnline, getCollection } from '$sveltefirets';
   import Button from 'svelte-pieces/ui/Button.svelte';
   import ShowHide from 'svelte-pieces/functions/ShowHide.svelte';
   import EditString from './_EditString.svelte';
-  import { arrayRemove, arrayUnion, GeoPoint } from 'firebase/firestore';
-  import type { IDictionary } from '@living-dictionaries/types';
+  import { arrayRemove, arrayUnion, GeoPoint, where, limit } from 'firebase/firestore';
+  import type { IDictionary } from '@ld/types';
   import Doc from '$sveltefirets/components/Doc.svelte';
   import {
     EditableCoordinatesField,
@@ -104,17 +104,33 @@
           glossLanguages: arrayUnion(e.detail.languageId),
         });
       }}
-      on:remove={(e) => {
-        if (admin) {
-          if (
-            confirm('Remove as admin? Know that regular editors get a message saying "Contact Us"')
-          ) {
+      on:remove={async (e) => {
+        try {
+          // we could implement a DB filter function that tells us if at least one word in the dictionary is using this gloss
+          // Or we could implement a new boolean field inside the gloses object that tells us if the gloss has been used by a word (true) or not (false)
+          const entriesUsingGlossLanguage = await getCollection(
+            `dictionaries/${dictionary.id}/words`,
+            [where(`gl.${e.detail.languageId}`, '>', ''), limit(1)]
+          );
+          if (entriesUsingGlossLanguage.length == 0) {
             update(`dictionaries/${dictionary.id}`, {
               glossLanguages: arrayRemove(e.detail.languageId),
             });
+          } else if ($admin) {
+            if (
+              confirm(
+                'Remove as admin even though this glossing language is in use already? Know that regular editors get a message saying "Contact Us"'
+              )
+            ) {
+              update(`dictionaries/${dictionary.id}`, {
+                glossLanguages: arrayRemove(e.detail.languageId),
+              });
+            }
+          } else {
+            alert(t ? $t('header.contact_us') : 'Contact Us');
           }
-        } else {
-          alert(t ? $t('header.contact_us') : 'Contact Us');
+        } catch (err) {
+          return console.log(err);
         }
       }} />
     <div class="mb-5" />
