@@ -27,6 +27,7 @@ importers:
   packages/functions:
     specifiers:
       '@firebase/testing': ^0.20.11
+      '@living-dictionaries/scripts': ^0.0.1
       '@living-dictionaries/types': ^1.0.0
       algoliasearch: ^4.13.0
       fetch-as: ^1.1.0
@@ -43,6 +44,7 @@ importers:
       firebase-tools: 10.8.0
     devDependencies:
       '@firebase/testing': 0.20.11
+      '@living-dictionaries/scripts': link:../scripts
       '@living-dictionaries/types': link:../types
       fetch-as: 1.1.0
       firebase-functions-test: 0.2.3_cclg2dmadcapyu3vgiax7pnudu
@@ -51,12 +53,13 @@ importers:
 
   packages/parts:
     specifiers:
-      '@living-dictionaries/types': workspace:^1.0.0
+      '@living-dictionaries/types': ^1.0.0
       '@sveltejs/adapter-auto': ^1.0.0-next.40
       '@sveltejs/kit': ^1.0.0-next.323
       '@types/mapbox-gl': ^2.7.0
       '@types/recordrtc': ^5.6.8
       '@types/youtube': ^0.0.46
+      kitbook: ^0.0.11
       mapbox-gl: ^2.8.1
       mdsvex: ^0.10.5
       recordrtc: ^5.6.2
@@ -78,6 +81,7 @@ importers:
       '@types/mapbox-gl': 2.7.0
       '@types/recordrtc': 5.6.8
       '@types/youtube': 0.0.46
+      kitbook: 0.0.11_svelte@3.47.0
       mapbox-gl: 2.8.1
       mdsvex: 0.10.5_svelte@3.47.0
       recordrtc: 5.6.2
@@ -95,7 +99,7 @@ importers:
 
   packages/scripts:
     specifiers:
-      '@living-dictionaries/types': workspace:^1.0.0
+      '@living-dictionaries/types': ^1.0.0
       '@types/node': ^17.0.23
       algoliasearch: ^4.11.0
       commander: ^9.2.0
@@ -146,6 +150,7 @@ importers:
       instantsearch.js: ^4.33.2
       jszip: ^3.7.1
       logrocket: ^2.1.2
+      magic-string: ^0.26.2
       mapbox-gl: ^2.8.1
       nprogress: ^0.2.0
       recordrtc: ^5.6.2
@@ -185,6 +190,7 @@ importers:
       instantsearch.js: 4.40.2_algoliasearch@4.13.0
       jszip: 3.8.0
       logrocket: 2.2.1
+      magic-string: 0.26.2
       mapbox-gl: 2.8.1
       nprogress: 0.2.0
       recordrtc: 5.6.2
@@ -1623,7 +1629,7 @@ packages:
       '@rollup/pluginutils': 4.2.1
       debug: 4.3.4
       kleur: 4.1.4
-      magic-string: 0.26.1
+      magic-string: 0.26.2
       svelte: 3.47.0
       svelte-hmr: 0.14.11_svelte@3.47.0
       vite: 2.9.6
@@ -5178,6 +5184,14 @@ packages:
       json-buffer: 3.0.0
     dev: false
 
+  /kitbook/0.0.11_svelte@3.47.0:
+    resolution: {integrity: sha512-9+74CeDkW+zw++y5d7xqZFsqV6P28ZqeOzZHaYyiPBkncDCpNhaukSOE6j4ZwxQPHPW0U/Gj8o3pbjhvEk/CCQ==}
+    dependencies:
+      svelte-store-router: 2.0.10_svelte@3.47.0
+    transitivePeerDependencies:
+      - svelte
+    dev: true
+
   /kleur/4.1.4:
     resolution: {integrity: sha512-8QADVssbrFjivHWQU7KkMgptGTl6WAcSdlbBPY4uNF+mWr6DGcKrvY2w4FQJoXch7+fKMjj0dRrL75vk3k23OA==}
     engines: {node: '>=6'}
@@ -5390,8 +5404,8 @@ packages:
       sourcemap-codec: 1.4.8
     dev: true
 
-  /magic-string/0.26.1:
-    resolution: {integrity: sha512-ndThHmvgtieXe8J/VGPjG+Apu7v7ItcD5mhEIvOscWjPF/ccOiLxHaSuCAS2G+3x4GKsAbT8u7zdyamupui8Tg==}
+  /magic-string/0.26.2:
+    resolution: {integrity: sha512-NzzlXpclt5zAbmo6h6jNc8zl2gNRGHvmsZW4IvZhTC4W7k4OlLP+S5YLussa/r3ixNT66KOQfNORlXHSOy/X4A==}
     engines: {node: '>=12'}
     dependencies:
       sourcemap-codec: 1.4.8

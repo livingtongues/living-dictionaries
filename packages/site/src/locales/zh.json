@@ -94,7 +94,12 @@
     "req_com_consent": "需要社区的同意",
     "create_dictionary": "创建字典",
     "permanent_url_msg": "URL名称是永久的，以后不能更改。",
-    "add_gloss_msg": "您可以在“设置”下添加更多语言标注"
+    "add_gloss_msg": "您可以在“设置”下添加更多语言标注",
+    "language_used_by_community": "这本针对特定人类社区使用或签名的语言的词典吗？",
+    "community_permission": "语言社区是否允许您制作此词典？",
+    "author_connection": "请简要描述您如何知道这种语言以及为什么要为此创建活着的词典。您是否是将使用此Live词典的社区的一部分？如果没有，您怎么知道社区？",
+    "con_lang_description": "这本针对构造语言的字典（近年来人类发明的语言，一本书还是电影）？如果是，请简要描述。",
+    "uncertainty": "我不知道"
   },
   "dictionary": {
     "latitude": "纬度",
@@ -170,7 +175,8 @@
     "open_dictionary": "打开字典",
     "my_dictionaries": "我的字典",
     "public_dictionaries": "公共字典",
-    "read_more": "阅读更多"
+    "read_more": "阅读更多",
+    "tutorials_link": "教程"
   },
   "misc": {
     "settings": "设置",
@@ -195,7 +201,9 @@
     "reset": "重启",
     "invalid_url": "无效网址",
     "downloading": "下载中",
-    "upload": "上传"
+    "upload": "上传",
+    "assertion": "是的",
+    "negation": "不"
   },
   "settings": {
     "community_permission": "此语言的语言社区允许这种语言通过网络传播吗？",
@@ -248,7 +256,7 @@
     "video_url": "视频网址",
     "video_credit": "视频来自",
     "prepare_to_record_video": "准备用麦克风和相机记录",
-    "video_info": "SKIP THIS",
+    "video_info": "There are two ways to have your videos displayed in a Living Dictionary: 1) You can record your videos right here, or upload your previously recorded videos to our platform. Advantages: easy and great for quick recordings. Disadvantages: You can only upload a video up to 100MB so it must only be short and low resolution. 2) Have your videos on a hosting service that specializes in video storage and link the URL to our site. Advantages: easy (as long as your videos are already uploaded on that platform), your videos can have the resolution and length you want. Disadvantages: if you want to record something unexpected or very simple, it might be too much effort to do it that way, and you may want to prioritize method 1.",
     "paste_video_url": "粘贴YouTube或Vimeo链接",
     "record_upload_video": "录制或上传视频",
     "view": "查看",

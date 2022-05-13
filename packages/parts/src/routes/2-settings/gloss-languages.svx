@@ -1,5 +1,5 @@
 <script lang="ts">
-  import Story from '$kitbook/stories/Story.svelte';
+  import { Story } from 'kitbook';
   import EditableGlossesField from '$lib/settings/EditableGlossesField.svelte';
   import { glossingLanguages } from '$lib/glosses/glossing-languages';
   import Set from 'svelte-pieces/functions/Set.svelte';
@@ -13,7 +13,7 @@
 There must always be at least one glossing language (or however many the
 `minimum` prop is set to) for the remove "x" buttons to show.
 
-<Story input={{ minimum: 1 }} let:output={{ minimum }}>
+<Story knobs={{ minimum: 1 }} let:props={{ minimum }}>
   <EditableGlossesField
     {minimum}
     {selectedLanguages}
