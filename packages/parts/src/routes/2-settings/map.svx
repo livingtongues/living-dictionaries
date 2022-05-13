@@ -1,5 +1,5 @@
 <script>
-  import Story from '$kitbook/stories/Story.svelte';
+  import { Story } from 'kitbook';
   import CoordinatesModal from '$lib/maps/CoordinatesModal.svelte';
   import LatLngDisplay from '$lib/maps/LatLngDisplay.svelte';
   import EditableCoordinatesField from '$lib/settings/EditableCoordinatesField.svelte';
@@ -12,7 +12,7 @@
 
 ## Edit Coordinates Field
 
-<Story name="With coordinates" input={{ lat: 42, lng: 42 }} let:output={{ lat, lng }} let:set>
+<Story name="With coordinates" knobs={{ lat: 42, lng: 42 }} let:props={{ lat, lng }} let:set>
   <EditableCoordinatesField
     {lng}
     {lat}
@@ -40,8 +40,8 @@
 
 <Story
   name="Passing Coordinates In"
-  input={{ lat: '-90-90;7', lng: '-180-180;1' }}
-  let:output={{ lat, lng }}
+  knobs={{ lat: '-90-90;7', lng: '-180-180;1' }}
+  let:props={{ lat, lng }}
   let:set>
   <ShowHide let:show let:toggle>
     <Button onclick={toggle}
@@ -79,7 +79,7 @@
 
 ## Lat Lng display
 
-<Story input={{ lat: '-90-90;55', lng: '-180-180;93' }} let:output={{ lat, lng }}>
+<Story knobs={{ lat: '-90-90;55', lng: '-180-180;93' }} let:props={{ lat, lng }}>
   <LatLngDisplay lat={+lat} lng={+lng} />
 </Story>
 

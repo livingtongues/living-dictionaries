@@ -23,6 +23,7 @@
   },
   "devDependencies": {
     "@living-dictionaries/types": "^1.0.0",
+    "@living-dictionaries/scripts": "^0.0.1",
     "@firebase/testing": "^0.20.11",
     "fetch-as": "^1.1.0",
     "firebase-functions-test": "^0.2.0",

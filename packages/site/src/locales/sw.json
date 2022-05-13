@@ -94,7 +94,12 @@
     "req_com_consent": "Inahitaji Ridhaa ya Jamii",
     "create_dictionary": "Tengeneza Kamusi  ",
     "permanent_url_msg": "Jina la URL ni la kudumu na haliwezi kubadilishwa baadaye.",
-    "add_gloss_msg": "Unaweza kuongeza lugha zaidi ya glossing baadaye katika Mipangilio."
+    "add_gloss_msg": "Unaweza kuongeza lugha zaidi ya glossing baadaye katika Mipangilio.",
+    "language_used_by_community": "Je! Hii ni kamusi ya lugha ambayo inazungumzwa au kusainiwa na jamii maalum ya wanadamu?",
+    "community_permission": "Je! Jumuiya ya lugha imekupa ruhusa ya kufanya kamusi hii?",
+    "author_connection": "Tafadhali eleza kwa kifupi jinsi unavyojua lugha hii na kwa nini unaunda kamusi ya kuishi kwa hiyo. Je! Wewe ni sehemu ya jamii ambayo itakuwa inatumia kamusi hii hai? Ikiwa sivyo, unajuaje jamii?",
+    "con_lang_description": "Je! Hii ni kamusi ya lugha iliyojengwa (lugha iliyoundwa na wanadamu katika miaka ya hivi karibuni, kwa kitabu au sinema)? Ikiwa ndio, tafadhali eleza kwa kifupi.",
+    "uncertainty": "Sijui"
   },
   "dictionary": {
     "latitude": "Latitudo",
@@ -170,7 +175,8 @@
     "open_dictionary": "Fungua Kamusi",
     "my_dictionaries": "Kamusi Zangu",
     "public_dictionaries": "Kamusi za Umma",
-    "read_more": "Soma Zaidi"
+    "read_more": "Soma Zaidi",
+    "tutorials_link": "Mafundisho"
   },
   "misc": {
     "settings": "Mipangilio  ",
@@ -195,7 +201,9 @@
     "reset": "Weka upya",
     "invalid_url": "Hii sio URL halali",
     "downloading": "Kupakua",
-    "upload": "Pakia"
+    "upload": "Pakia",
+    "assertion": "Ndio",
+    "negation": "Hapana"
   },
   "settings": {
     "community_permission": "Je, jamii ya wazungumzaji inaruhusu lugha hii kuwekwa mtandaoni?",
