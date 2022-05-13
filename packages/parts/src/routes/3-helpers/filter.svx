@@ -1,5 +1,5 @@
 <script lang="ts">
-  import Story from "$kitbook/stories/Story.svelte";
+  import { Story } from 'kitbook';
   import Filter from "$lib/helpers/Filter.svelte";
 </script>
 
@@ -13,7 +13,7 @@
   </Filter>
 </Story>
 
-<Story name="Dynamic placeholder" input={{dynamicPlaceholder: 'Search People'}} let:output={{dynamicPlaceholder}}>
+<Story name="Dynamic placeholder" knobs={{dynamicPlaceholder: 'Search People'}} let:props={{dynamicPlaceholder}}>
   <Filter items={['Thomas Jefferson', 'George Washington']} placeholder={dynamicPlaceholder} let:filteredItems={items}>
     {#each items as item}
       <p>{item}</p>
