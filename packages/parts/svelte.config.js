@@ -34,7 +34,6 @@ const config = {
       resolve: {
 				alias: {
           '@ld/parts': path.resolve('./src/lib'),
-					$kitbook: path.resolve('./src/kitbook'),
 				},
 			},
       define: {
