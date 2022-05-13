@@ -98,7 +98,8 @@
     "language_used_by_community": "¿Es este diccionario para un idioma, oral o de señas, de una comunidad humana específica?",
     "community_permission": "¿La comunidad que habla este idioma le ha dado permiso para hacer este diccionario?",
     "author_connection": "Por favor describa brevemente cómo conoce este idioma y por qué está creando un diccionario vivo para ello. ¿Eres parte de la comunidad que usará este diccionario vivo? Si no, ¿cómo conoces a la comunidad?",
-    "con_lang_description": "¿Es este diccionario de un idioma artificial (un idioma inventado por humanos en los últimos años, o para un libro o una película)? En caso afirmativo, describa brevemente."
+    "con_lang_description": "¿Es este diccionario de un idioma artificial (un idioma inventado por humanos en los últimos años, o para un libro o una película)? En caso afirmativo, describa brevemente.",
+    "uncertainty": "No sé"
   },
   "dictionary": {
     "latitude": "Latitud",
@@ -200,7 +201,9 @@
     "reset": "Reiniciar",
     "invalid_url": "Esta no es una URL válida",
     "downloading": "Descargando",
-    "upload": "Subir"
+    "upload": "Subir",
+    "assertion": "sí",
+    "negation": "no"
   },
   "settings": {
     "community_permission": "¿Permite la comunidad lingüística que este idioma esté en línea?",
