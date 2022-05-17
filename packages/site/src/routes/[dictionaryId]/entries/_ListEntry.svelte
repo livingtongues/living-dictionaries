@@ -110,54 +110,49 @@
   <div
     dir="ltr"
     class:border-b-2={entry.ua && entry.ua.toMillis && entry.ua.toMillis() > minutesAgo(5)}
-    class="flex rounded shadow my-1 overflow-hidden items-stretch border-green-300 expand-element"
+    class="rounded shadow my-1 expand-element text-white"
     style="margin-right: 2px;">
-    <a
-      sveltekit:prefetch
-      href={'/' + $page.params.dictionaryId + '/entry/' + entry.id}
-      class="p-2 flex-grow flex flex-col justify-between">
-      <div>
-        <span class="font-semibold text-gray-900 mr-1">{entry.lx}</span>
-        {#if entry.ph}
-          <span class="mr-1 hidden sm:inline">[{entry.ph}]</span>
-        {/if}
+    <div class="p-2">
+      <span class="font-semibold mr-1">{entry.lx}</span>
+      {#if entry.ph}
+        <span class="mr-1 hidden sm:inline">[{entry.ph}]</span>
+      {/if}
 
-        {#if entry.lo}<i class="mr-1">{entry.lo}</i>{/if}
-        {#if entry.lo2}<i class="mr-1" class:sompeng={$page.params.dictionaryId === 'sora'}
-            >{entry.lo2}</i
-          >{/if}
-        {#if entry.lo3}<i class="mr-1">{entry.lo3}</i>{/if}
-        {#if entry.lo4}<i class="mr-1">{entry.lo4}</i>{/if}
-        {#if entry.lo5}<i class="mr-1">{entry.lo5}</i>{/if}
-      </div>
+      {#if entry.lo}<i class="mr-1">{entry.lo}</i>{/if}
+      {#if entry.lo2}<i class="mr-1" class:sompeng={$page.params.dictionaryId === 'sora'}
+          >{entry.lo2}</i
+        >{/if}
+      {#if entry.lo3}<i class="mr-1">{entry.lo3}</i>{/if}
+      {#if entry.lo4}<i class="mr-1">{entry.lo4}</i>{/if}
+      {#if entry.lo5}<i class="mr-1">{entry.lo5}</i>{/if}
       {#if entry.di}<i class="mr-1">Dialect: {entry.di}</i>{/if}
-      <div class="flex flex-wrap items-center justify-end -mb-1">
-        <div class="text-xs text-gray-600 mr-auto mb-1">
-          {#if entry.ps}
-            <i>{$_('psAbbrev.' + entry.ps, { default: entry.ps })},</i>
-          {/if}
-          {#if glosses.indexOf('<i>') > -1}
-            {@html glosses}
-          {:else}
-            {glosses}
-          {/if}
-        </div>
-        {#if entry.sd}
-          <span class="px-2 py-1 leading-tight text-xs bg-gray-100 rounded ml-1">
-            <i>{entry.sd}</i>
-          </span>
+    </div>
+    <div class="">
+      <div class="text-xs mb-1 p-2">
+        {#if entry.ps}
+          <i>{$_('psAbbrev.' + entry.ps, { default: entry.ps })},</i>
         {/if}
-        {#if entry.sdn && entry.sdn.length}
-          {#each entry.sdn as domain}
-            <span
-              class="px-2 py-1 leading-tight text-xs bg-gray-100 rounded ml-1
-          mb-1">
-              {$_('sd.' + domain, { default: domain })}
-            </span>
-          {/each}
+        {#if glosses.indexOf('<i>') > -1}
+          {@html glosses}
+        {:else}
+          {glosses}
         {/if}
       </div>
-    </a>
+      {#if entry.sd}
+        <span class="px-2 py-1 leading-tight text-xs bg-gray-900 rounded ml-1">
+          <i>{entry.sd}</i>
+        </span>
+      {/if}
+      {#if entry.sdn && entry.sdn.length}
+        {#each entry.sdn as domain}
+          <span
+            class="px-2 py-1 leading-tight text-xs bg-gray-100 rounded ml-2
+        mb-1">
+            <span class="text-gray-700">{$_('sd.' + domain, { default: domain })}</span>
+          </span>
+        {/each}
+      {/if}
+    </div>
   </div>
 {/if}
 
@@ -167,7 +162,6 @@
     width: 64px;
     min-height: 64px;
   }
-
   .expand-element {
     height: 200px;
     border-radius: 6px;
