@@ -171,10 +171,12 @@
   .expand-element {
     height: 200px;
     border-radius: 6px;
+    margin-top: -74px !important;
     padding: 5px 0;
     position: absolute;
     z-index: 1;
-    left: 15%;
+    left: 20%;
     background-color: gray;
+    pointer-events: none;
   }
 </style>
