@@ -110,15 +110,12 @@
   <div
     dir="ltr"
     class:border-b-2={entry.ua && entry.ua.toMillis && entry.ua.toMillis() > minutesAgo(5)}
-    class={`flex rounded shadow my-1 overflow-hidden items-stretch border-green-300 ${show ? 'expand-element' : ''}`}
+    class="flex rounded shadow my-1 overflow-hidden items-stretch border-green-300 expand-element"
     style="margin-right: 2px;">
-    {#if entry.sf || canEdit}
-      <Audio class="bg-gray-100" {entry} minimal />
-    {/if}
     <a
       sveltekit:prefetch
       href={'/' + $page.params.dictionaryId + '/entry/' + entry.id}
-      class="p-2 flex-grow flex flex-col justify-between hover:bg-gray-200 ">
+      class="p-2 flex-grow flex flex-col justify-between">
       <div>
         <span class="font-semibold text-gray-900 mr-1">{entry.lx}</span>
         {#if entry.ph}
@@ -132,8 +129,8 @@
         {#if entry.lo3}<i class="mr-1">{entry.lo3}</i>{/if}
         {#if entry.lo4}<i class="mr-1">{entry.lo4}</i>{/if}
         {#if entry.lo5}<i class="mr-1">{entry.lo5}</i>{/if}
-        {#if entry.di}<i class="mr-1">Dialect: {entry.di}</i>{/if}
       </div>
+      {#if entry.di}<i class="mr-1">Dialect: {entry.di}</i>{/if}
       <div class="flex flex-wrap items-center justify-end -mb-1">
         <div class="text-xs text-gray-600 mr-auto mb-1">
           {#if entry.ps}
@@ -161,34 +158,6 @@
         {/if}
       </div>
     </a>
-    {#if entry.vfs && entry.vfs[0]}
-      <Video class="bg-gray-100 border-r-2" {entry} video={entry.vfs[0]} {canEdit} />
-    {:else if videoAccess && canEdit}
-      <ShowHide let:show let:toggle>
-        <div
-          class="media-block bg-gray-100 border-r-2 hover:bg-gray-300 flex flex-col items-center
-          justify-center cursor-pointer p-2 text-lg"
-          on:click={toggle}>
-          <i class="far fa-video-plus my-1 mx-2 text-blue-800" />
-        </div>
-        {#if show}
-          {#await import('$lib/components/video/AddVideo.svelte') then { default: AddVideo }}
-            <AddVideo {entry} on:close={toggle} />
-          {/await}
-        {/if}
-      </ShowHide>
-    {/if}
-    {#if entry.pf}
-      <div class="media-block bg-gray-300 relative">
-        <Image square={128} {entry} {canEdit} />
-      </div>
-    {:else if canEdit}
-      <AddImage {entry} class="w-12 bg-gray-100">
-        <div class="text-xs" slot="text">
-          {$_('entry.photo', { default: 'Photo' })}
-        </div>
-      </AddImage>
-    {/if}
   </div>
 {/if}
 
@@ -205,6 +174,7 @@
     padding: 5px 0;
     position: absolute;
     z-index: 1;
-    right: 25%;
+    left: 15%;
+    background-color: gray;
   }
 </style>
