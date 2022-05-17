@@ -9,6 +9,8 @@
   import { printGlosses } from '$lib/helpers/glosses';
   import { minutesAgo } from '$lib/helpers/time';
   import ShowHide from 'svelte-pieces/functions/ShowHide.svelte';
+  import { showEntryGlossLanguages } from '$lib/helpers/glosses';
+  import {dictionary} from '$lib/stores'
   export let entry: IEntry,
     canEdit = false,
     videoAccess = false;
@@ -114,21 +116,14 @@
     style="margin-right: 2px;">
     <div class="p-2">
       <span class="font-semibold mr-1">{entry.lx}</span>
-      {#if entry.ph}
-        <span class="mr-1 hidden sm:inline">[{entry.ph}]</span>
-      {/if}
-
-      {#if entry.lo}<i class="mr-1">{entry.lo}</i>{/if}
-      {#if entry.lo2}<i class="mr-1" class:sompeng={$page.params.dictionaryId === 'sora'}
+      {#if entry.lo}<p><i class="mr-1">{entry.lo}</i></p>{/if}
+      {#if entry.lo2}<p><i class="mr-1" class:sompeng={$page.params.dictionaryId === 'sora'}
           >{entry.lo2}</i
-        >{/if}
-      {#if entry.lo3}<i class="mr-1">{entry.lo3}</i>{/if}
-      {#if entry.lo4}<i class="mr-1">{entry.lo4}</i>{/if}
-      {#if entry.lo5}<i class="mr-1">{entry.lo5}</i>{/if}
-      {#if entry.di}<i class="mr-1">Dialect: {entry.di}</i>{/if}
-    </div>
-    <div class="">
-      <div class="text-xs mb-1 p-2">
+        ></p>{/if}
+      {#if entry.lo3}<p><i class="mr-1">{entry.lo3}</i></p>{/if}
+      {#if entry.lo4}<p><i class="mr-1">{entry.lo4}</i></p>{/if}
+      {#if entry.lo5}<p><i class="mr-1">{entry.lo5}</i></p>{/if}
+      <div class="mb-1">
         {#if entry.ps}
           <i>{$_('psAbbrev.' + entry.ps, { default: entry.ps })},</i>
         {/if}
@@ -138,15 +133,24 @@
           {glosses}
         {/if}
       </div>
+      {#if entry.di}<p><i class="mr-1">Dialect: {entry.di}</i></p>{/if}
+      {#if entry.xs && entry.xs.vn}<p>{$_('entry.example_sentence', { default: 'Example Sentence' })}: {entry.xs.vn}</p>{/if}
+      {#if entry.xs}{#each showEntryGlossLanguages(entry.gl, $dictionary.glossLanguages) as bcp}
+        <p>{$_(`gl.${bcp}`)} {$_('entry.example_sentence', {
+          default: 'Example Sentence',
+        })}: {entry.xs[bcp]}</p>
+      {/each}{/if}
+    </div>
+    <div class="mb-2 mr-1">
       {#if entry.sd}
-        <span class="px-2 py-1 leading-tight text-xs bg-gray-900 rounded ml-1">
+        <span class="px-2 py-1 leading-tight text-xs bg-gray-900 rounded">
           <i>{entry.sd}</i>
         </span>
       {/if}
       {#if entry.sdn && entry.sdn.length}
         {#each entry.sdn as domain}
           <span
-            class="px-2 py-1 leading-tight text-xs bg-gray-100 rounded ml-2
+            class="px-2 py-1 leading-tight text-xs bg-gray-100 rounded ml-1
         mb-1">
             <span class="text-gray-700">{$_('sd.' + domain, { default: domain })}</span>
           </span>
@@ -163,7 +167,7 @@
     min-height: 64px;
   }
   .expand-element {
-    height: 200px;
+    height: auto;
     border-radius: 6px;
     margin-top: -74px !important;
     padding: 5px 0;
