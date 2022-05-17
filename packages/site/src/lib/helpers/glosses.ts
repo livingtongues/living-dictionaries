@@ -8,7 +8,7 @@ export function printGlosses(obj) {
   if (keys.length > 1) {
     return keys.map((bcp) => {
       if (obj[bcp]) {
-        return `${$_('gl.' + bcp)}: ${obj[bcp]}`;
+        return `${obj[bcp]}`;
       }
     });
   } else {
