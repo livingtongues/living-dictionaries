@@ -7,12 +7,8 @@
   import { longpress } from 'svelte-pieces/actions/longpress';
   import { firebaseConfig } from '$sveltefirets';
   import ShowHide from 'svelte-pieces/functions/ShowHide.svelte';
-  import type { ISpeaker } from '@living-dictionaries/types';
-  import { fetchSpeaker } from '$lib/helpers/fetchSpeakers';
-  import { onMount } from 'svelte';
 
   let playing = false;
-  let speaker: ISpeaker;
 
   function initAudio(sf) {
     const convertedPath = sf.path.replace(/\//g, '%2F');
@@ -34,9 +30,6 @@
   //   console.log(speaker);
   //   return speaker;
   // }
-  onMount(async () => {
-    speaker = await fetchSpeaker(entry.sf.sp)
-  })
 </script>
 
 <ShowHide let:show let:toggle>
@@ -61,7 +54,7 @@
       {:else}<i
           class="far fa-ear fa-lg mt-1" /><!-- <i class="far fa-volume-up fa-lg mt-1" /> -->{/if}
       <div class="text-gray-600 text-sm mt-1">
-        {#if speaker}{speaker?.birthplace}{:else}{$_('audio.listen', { default: 'Listen' })}{/if}
+        {$_('audio.listen', { default: 'Listen' })}
         {#if !minimal && $canEdit}
           +
           {$_('audio.edit_audio', { default: 'Edit Audio' })}
