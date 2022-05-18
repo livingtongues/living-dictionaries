@@ -49,6 +49,7 @@
       {#if entry.lo3}<i class="mr-1">{entry.lo3}</i>{/if}
       {#if entry.lo4}<i class="mr-1">{entry.lo4}</i>{/if}
       {#if entry.lo5}<i class="mr-1">{entry.lo5}</i>{/if}
+      {#if entry.di}<i class="mr-1">Dialect: {entry.di}</i>{/if}
     </div>
     <div class="flex flex-wrap items-center justify-end -mb-1">
       <div class="text-xs text-gray-600 mr-auto mb-1">
@@ -60,6 +61,13 @@
         {:else}
           {glosses}
         {/if}
+        <br>
+        {#if entry.xs && entry.xs.vn}<span class="font-semibold">{$_('entry.example_sentence', { default: 'Example Sentence' })}</span>: {entry.xs.vn}{/if}
+        {#if entry.xs}{#each showEntryGlossLanguages(entry.gl, $dictionary.glossLanguages) as bcp}
+        <span class="font-semibold">{$_(`gl.${bcp}`)} {$_('entry.example_sentence', {
+            default: 'Example Sentence',
+          })}</span>: {entry.xs[bcp]}
+        {/each}{/if}
       </div>
       {#if entry.sd}
         <span class="px-2 py-1 leading-tight text-xs bg-gray-100 rounded ml-1">
