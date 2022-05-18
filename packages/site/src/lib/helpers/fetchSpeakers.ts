@@ -12,8 +12,3 @@ export async function fetchSpeakers(data: IEntry[]) {
   }
   return speakers;
 }
-
-export async function fetchSpeaker(speakerId: string) {
-  const speaker = await getDocument<ISpeaker>(`speakers/${speakerId}`);
-  return speaker;
-}
