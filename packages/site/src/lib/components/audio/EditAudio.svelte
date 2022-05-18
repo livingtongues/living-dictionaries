@@ -17,7 +17,8 @@
   import SelectSpeaker from '$lib/components/media/SelectSpeaker.svelte';
   import { updateOnline, firebaseConfig } from '$sveltefirets';
 
-  export let entry: IEntry;
+  export let entry: IEntry,
+    canEdit = false;
 
   let readyToRecord: boolean;
   let showUploadAudio = true;
@@ -109,40 +110,42 @@
     </SelectSpeaker>
   {/if}
 
-  <div class="modal-footer">
-    {#if entry.sf}
-      {#if $admin > 1}
-        {#await import('svelte-pieces/data/JSON.svelte') then { default: JSON }}
-          <JSON obj={entry} />
-          <div class="w-1" />
-        {/await}
+  {#if canEdit}
+    <div class="modal-footer">
+      {#if entry.sf}
+        {#if $admin > 1}
+          {#await import('svelte-pieces/data/JSON.svelte') then { default: JSON }}
+            <JSON obj={entry} />
+            <div class="w-1" />
+          {/await}
+        {/if}
+
+        <Button
+          href={`https://firebasestorage.googleapis.com/v0/b/${
+            firebaseConfig.storageBucket
+          }/o/${entry.sf.path.replace(/\//g, '%2F')}?alt=media`}
+          target="_blank">
+          <i class="fas fa-download" />
+          <span class="hidden sm:inline"
+            >{$_('misc.download', {
+              default: 'Download',
+            })}</span>
+        </Button>
+        <div class="w-1" />
+
+        <Button onclick={() => deleteAudio(entry)} color="red">
+          <i class="far fa-trash-alt" />&nbsp;
+          <span class="hidden sm:inline"
+            >{$_('misc.delete', {
+              default: 'Delete',
+            })}</span>
+        </Button>
+        <div class="w-1" />
       {/if}
 
-      <Button
-        href={`https://firebasestorage.googleapis.com/v0/b/${
-          firebaseConfig.storageBucket
-        }/o/${entry.sf.path.replace(/\//g, '%2F')}?alt=media`}
-        target="_blank">
-        <i class="fas fa-download" />
-        <span class="hidden sm:inline"
-          >{$_('misc.download', {
-            default: 'Download',
-          })}</span>
+      <Button onclick={close} color="black">
+        {$_('misc.close', { default: 'Close' })}
       </Button>
-      <div class="w-1" />
-
-      <Button onclick={() => deleteAudio(entry)} color="red">
-        <i class="far fa-trash-alt" />&nbsp;
-        <span class="hidden sm:inline"
-          >{$_('misc.delete', {
-            default: 'Delete',
-          })}</span>
-      </Button>
-      <div class="w-1" />
-    {/if}
-
-    <Button onclick={close} color="black">
-      {$_('misc.close', { default: 'Close' })}
-    </Button>
-  </div>
+    </div>
+  {/if}
 </Modal>
