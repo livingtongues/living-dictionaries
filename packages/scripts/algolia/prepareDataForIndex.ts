@@ -1,7 +1,11 @@
 import { IEntry } from '@living-dictionaries/types';
 import type admin from 'firebase-admin';
 
-export async function prepareDataForIndex(dbEntry: IEntry, dictionaryId: string, db: admin.firestore.Firestore) {
+export async function prepareDataForIndex(
+  dbEntry: IEntry,
+  dictionaryId: string,
+  db: admin.firestore.Firestore
+) {
   const entry: IEntry = dbEntry;
   delete entry.id;
   entry.dictId = dictionaryId;
@@ -30,11 +34,13 @@ export async function prepareDataForIndex(dbEntry: IEntry, dictionaryId: string,
       const speaker = speakerSnap.data();
       if (speaker && speaker.displayName) {
         cleanSf.speakerName = speaker.displayName;
+        cleanSf.hometown = speaker.birthplace;
       } else {
         const userSnap = await db.doc(`users/${entry.sf.sp}`).get();
         const user = userSnap.data();
         if (user && user.displayName) {
           cleanSf.speakerName = user.displayName;
+          cleanSf.hometown = user.birthplace;
         }
       }
     } else {
