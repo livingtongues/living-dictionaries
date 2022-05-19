@@ -7,6 +7,7 @@
   import { longpress } from 'svelte-pieces/actions/longpress';
   import { firebaseConfig } from '$sveltefirets';
   import ShowHide from 'svelte-pieces/functions/ShowHide.svelte';
+  import HandleClick from './HandleClick.svelte'
 
   let playing = false;
 
@@ -36,40 +37,37 @@
   {#if entry.sf}
     <!-- preventDefault -->
     <!-- https://svelte.dev/tutorial/adding-parameters-to-actions -->
-    <div
-      class="{$$props.class} hover:bg-gray-200 flex flex-col items-center
-    justify-center cursor-pointer p-1 select-none"
-      use:longpress={800}
-      on:click={() => {
-        if ($canEdit) {
-          toggle();
-        } else {
-          initAudio(entry.sf);
-        }
-      }}
-      on:longpress={() => initAudio(entry.sf)}>
-      {#if playing}
-        <!-- <i class="fas fa-volume-up fa-lg mt-1" /> -->
-        <i class="fas fa-ear fa-lg mt-1" />
-      {:else}<i
-          class="far fa-ear fa-lg mt-1" /><!-- <i class="far fa-volume-up fa-lg mt-1" /> -->{/if}
-      <div class="text-gray-600 text-sm mt-1">
-        {$_('audio.listen', { default: 'Listen' })}
-        {#if !minimal && $canEdit}
-          +
-          {$_('audio.edit_audio', { default: 'Edit Audio' })}
-        {/if}
-        <!-- {#if !minimal && entry.sf.speakerName}
-        to
-        <b>{entry.sf.speakerName}</b>
-      {/if} -->
-        <!-- {#if entry.sf.sp}
-        {#await getSpeakerName(entry.sf.sp) then speaker}
-            Speaker: {speaker && speaker.displayName}
-        {/await}
-      {/if} -->
+    <HandleClick
+      on:sglclick={toggle}
+      on:dblclick={() => initAudio(entry.sf)}
+      delay={300}>
+      <div
+        class="{$$props.class} hover:bg-gray-200 flex flex-col items-center
+      justify-center cursor-pointer p-1 select-none"
+        >
+        {#if playing}
+          <!-- <i class="fas fa-volume-up fa-lg mt-1" /> -->
+          <i class="fas fa-ear fa-lg mt-1" />
+        {:else}<i
+            class="far fa-ear fa-lg mt-1" /><!-- <i class="far fa-volume-up fa-lg mt-1" /> -->{/if}
+        <div class="text-gray-600 text-sm mt-1">
+          {$_('audio.listen', { default: 'Listen' })}
+          {#if !minimal && $canEdit}
+            +
+            {$_('audio.edit_audio', { default: 'Edit Audio' })}
+          {/if}
+          <!-- {#if !minimal && entry.sf.speakerName}
+          to
+          <b>{entry.sf.speakerName}</b>
+        {/if} -->
+          <!-- {#if entry.sf.sp}
+          {#await getSpeakerName(entry.sf.sp) then speaker}
+              Speaker: {speaker && speaker.displayName}
+          {/await}
+        {/if} -->
+        </div>
       </div>
-    </div>
+    </HandleClick>
   {:else if $canEdit}
     <div
       class="{$$props.class} hover:bg-gray-300 flex flex-col items-center
@@ -86,7 +84,7 @@
 
   {#if show}
     {#await import('$lib/components/audio/EditAudio.svelte') then { default: EditAudio }}
-      <EditAudio {entry} on:close={toggle} />
+      <EditAudio {entry} canEdit={$canEdit} on:close={toggle} />
     {/await}
   {/if}
 </ShowHide>
