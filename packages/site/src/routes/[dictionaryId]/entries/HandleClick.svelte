@@ -1,9 +1,8 @@
-<script>
+<script lang="ts">
   import { createEventDispatcher } from 'svelte';
   const dispatch = createEventDispatcher();
 
   let waiting = false;
-  let clickType = '';
   let timeout = null;
   export let delay = 600;
 

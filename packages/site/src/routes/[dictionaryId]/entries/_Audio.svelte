@@ -4,7 +4,7 @@
   export let entry: IEntry,
     minimal = false;
   import { canEdit } from '$lib/stores';
-  import { longpress } from 'svelte-pieces/actions/longpress';
+  //import { longpress } from 'svelte-pieces/actions/longpress'; I wasn't longer able to implement the longpress action. I changed the longpress functionality to the double click event
   import { firebaseConfig } from '$sveltefirets';
   import ShowHide from 'svelte-pieces/functions/ShowHide.svelte';
   import HandleClick from './HandleClick.svelte'
