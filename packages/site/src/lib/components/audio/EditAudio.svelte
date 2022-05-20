@@ -10,6 +10,7 @@
   import RecordAudio from '$lib/components/audio/RecordAudio.svelte';
   import { dictionary, admin } from '$lib/stores';
   import Button from 'svelte-pieces/ui/Button.svelte';
+  import { capitalize } from '$lib/helpers/capitalize';
 
   import { deleteAudio } from '$lib/helpers/delete';
 
@@ -30,6 +31,8 @@
     file = undefined;
     audioBlob = undefined;
   }
+
+
 </script>
 
 <Modal on:close>
@@ -39,7 +42,7 @@
     <div class="mb-4">
       <p>{$_('entry.speaker', { default: 'Speaker' })}:
       {entry.sf.speakerName}</p>
-      <p>Birthplace: Russia</p>
+      {#if entry.sf.birthplace}<p>{$_('speakers.birthplace', { default: 'Birthplace' })}: {capitalize(entry.sf.birthplace)}</p>{/if}
     </div>
     <Waveform
       audioUrl={`https://firebasestorage.googleapis.com/v0/b/${
