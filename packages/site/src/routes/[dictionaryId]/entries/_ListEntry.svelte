@@ -15,7 +15,7 @@
     canEdit = false,
     videoAccess = false;
 
-  $: glosses = printGlosses(entry.gl).join(', ');
+  $: glosses = $dictionary.id === 'babanki' ? printGlosses(entry.gl, true).join(', ') : printGlosses(entry.gl).join(', ');
   
   // Personal proposal
   /* let show = false;
