@@ -9,11 +9,13 @@
   import { printGlosses } from '$lib/helpers/glosses';
   import { minutesAgo } from '$lib/helpers/time';
   import ShowHide from 'svelte-pieces/functions/ShowHide.svelte';
+  import { showEntryGlossLanguages } from '$lib/helpers/glosses';
+  import {dictionary} from '$lib/stores'
   export let entry: IEntry,
     canEdit = false,
     videoAccess = false;
 
-  $: glosses = printGlosses(entry.gl).join(', ');
+  $: glosses = $dictionary.id === 'jewish-neo-aramaic' ? printGlosses(entry.gl, true).join(', ') : printGlosses(entry.gl).join(', ');
 </script>
 
 <div
@@ -27,7 +29,7 @@
   <a
     sveltekit:prefetch
     href={'/' + $page.params.dictionaryId + '/entry/' + entry.id}
-    class="p-2 flex-grow flex flex-col justify-between hover:bg-gray-200 ">
+    class="p-2 text-lg flex-grow flex flex-col justify-between hover:bg-gray-200 ">
     <div>
       <span class="font-semibold text-gray-900 mr-1">{entry.lx}</span>
       {#if entry.ph}
@@ -41,6 +43,7 @@
       {#if entry.lo3}<i class="mr-1">{entry.lo3}</i>{/if}
       {#if entry.lo4}<i class="mr-1">{entry.lo4}</i>{/if}
       {#if entry.lo5}<i class="mr-1">{entry.lo5}</i>{/if}
+      
     </div>
     <div class="flex flex-wrap items-center justify-end -mb-1">
       <div class="text-xs text-gray-600 mr-auto mb-1">
@@ -52,12 +55,27 @@
         {:else}
           {glosses}
         {/if}
+        {#if $dictionary.id === 'jewish-neo-aramaic'}
+          {#if entry.di}<p class="text-xs"><i class="mr-1">Dialect: {entry.di}</i></p>{/if}
+          {#if entry.xs && entry.xs.vn}<p><span class="font-semibold">{$_('entry.example_sentence', { default: 'Example Sentence' })}:</span> {entry.xs.vn}</p>{/if}
+          {#if entry.xs}
+            {#each showEntryGlossLanguages(entry.gl, $dictionary.glossLanguages) as bcp}
+              {#if entry.xs[bcp]}
+              <p><span class="font-semibold">{$_(`gl.${bcp}`)} {$_('entry.example_sentence', {
+                  default: 'Example Sentence',
+                })}:</span> {entry.xs[bcp]}</p>
+              {/if}
+            {/each}
+          {/if}
+        {/if}
       </div>
+    
       {#if entry.sd}
         <span class="px-2 py-1 leading-tight text-xs bg-gray-100 rounded ml-1">
           <i>{entry.sd}</i>
         </span>
       {/if}
+      
       {#if entry.sdn && entry.sdn.length}
         {#each entry.sdn as domain}
           <span
