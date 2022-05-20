@@ -58,9 +58,8 @@
       {$_('misc.add', { default: 'Add' })}
     </option>
   </select>
-  <!-- {#if entry.sf.birthplace}<p>{$_('speakers.birthplace', { default: 'Birthplace' })}: {capitalize(entry.sf.birthplace)}</p>{/if} -->
 </div>
-{#if speakerBirthplace}<p class="mb-4">{$_('speakers.birthplace', { default: 'Birthplace' })}: {speakerBirthplace}</p>{/if}
+{#if speakerBirthplace}<p class=mb-4>{$_('speakers.birthplace', { default: 'Birthplace' })}: {capitalize(speakerBirthplace)}</p>{/if}
 
 {#if speakerId === addSpeaker}
   {#await import('$lib/components/media/AddSpeaker.svelte') then { default: AddSpeaker }}
