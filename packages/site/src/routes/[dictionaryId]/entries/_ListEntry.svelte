@@ -15,7 +15,7 @@
     canEdit = false,
     videoAccess = false;
 
-  $: glosses = $dictionary.id === 'babanki' ? printGlosses(entry.gl, true).join(', ') : printGlosses(entry.gl).join(', ');
+  $: glosses = $dictionary.id === 'jewish-neo-aramaic' ? printGlosses(entry.gl, true).join(', ') : printGlosses(entry.gl).join(', ');
 </script>
 
 <div
@@ -45,7 +45,6 @@
       {#if entry.lo5}<i class="mr-1">{entry.lo5}</i>{/if}
       
     </div>
-    {#if entry.di}<p class="text-xs"><i class="mr-1">Dialect: {entry.di}</i></p>{/if}
     <div class="flex flex-wrap items-center justify-end -mb-1">
       <div class="text-xs text-gray-600 mr-auto mb-1">
         {#if entry.ps}
@@ -56,13 +55,19 @@
         {:else}
           {glosses}
         {/if}
-        <br>
-        {#if entry.xs && entry.xs.vn}<p class="font-semibold">{$_('entry.example_sentence', { default: 'Example Sentence' })}: {entry.xs.vn}</p>{/if}
-        {#if entry.xs}{#each showEntryGlossLanguages(entry.gl, $dictionary.glossLanguages) as bcp}
-        <p class="font-semibold">{$_(`gl.${bcp}`)} {$_('entry.example_sentence', {
-            default: 'Example Sentence',
-          })}: {entry.xs[bcp]}</p>
-        {/each}{/if}
+        {#if $dictionary.id === 'jewish-neo-aramaic'}
+          {#if entry.di}<p class="text-xs"><i class="mr-1">Dialect: {entry.di}</i></p>{/if}
+          {#if entry.xs && entry.xs.vn}<p><span class="font-semibold">{$_('entry.example_sentence', { default: 'Example Sentence' })}:</span> {entry.xs.vn}</p>{/if}
+          {#if entry.xs}
+            {#each showEntryGlossLanguages(entry.gl, $dictionary.glossLanguages) as bcp}
+              {#if entry.xs[bcp]}
+              <p><span class="font-semibold">{$_(`gl.${bcp}`)} {$_('entry.example_sentence', {
+                  default: 'Example Sentence',
+                })}:</span> {entry.xs[bcp]}</p>
+              {/if}
+            {/each}
+          {/if}
+        {/if}
       </div>
     
       {#if entry.sd}
