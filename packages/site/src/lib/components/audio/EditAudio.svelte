@@ -37,8 +37,9 @@
 
   {#if entry.sf && entry.sf.speakerName}
     <div class="mb-4">
-      {$_('entry.speaker', { default: 'Speaker' })}:
-      {entry.sf.speakerName}
+      <p>{$_('entry.speaker', { default: 'Speaker' })}:
+      {entry.sf.speakerName}</p>
+      <p>Birthplace: Russia</p>
     </div>
     <Waveform
       audioUrl={`https://firebasestorage.googleapis.com/v0/b/${

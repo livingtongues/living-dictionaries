@@ -34,13 +34,13 @@ export async function prepareDataForIndex(
       const speaker = speakerSnap.data();
       if (speaker && speaker.displayName) {
         cleanSf.speakerName = speaker.displayName;
-        cleanSf.hometown = speaker.birthplace;
+        cleanSf.birthplace = speaker.birthplace;
       } else {
         const userSnap = await db.doc(`users/${entry.sf.sp}`).get();
         const user = userSnap.data();
         if (user && user.displayName) {
           cleanSf.speakerName = user.displayName;
-          cleanSf.hometown = user.birthplace;
+          cleanSf.birthplace = user.birthplace;
         }
       }
     } else {
