@@ -515,7 +515,7 @@ export const glossingLanguages: IGlossLanguages = {
     vernacularAlternate: 'Wandala',
   },
   cmn: {
-    vernacularName: '官话',
+    vernacularName: '中文',
     internalName: 'Keyboard_chinese',
     showKeyboard: true,
   },

@@ -3,6 +3,7 @@ export enum ReadyLocales {
   en = 'English',
   es = 'Español',
   fr = 'Français',
+  zh = '中文',
   sw = 'Kiswahili',
   ru = 'русский',
   he = 'עברית',
@@ -12,7 +13,6 @@ export enum ReadyLocales {
   bn = 'বাংলা', // Bengali,
   as = 'Assamese / অসমীয়া',
   hi = 'हिन्दी',
-  zh = '官话',
 }
 
 // Admin only
