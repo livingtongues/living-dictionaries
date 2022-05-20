@@ -84,7 +84,7 @@ const refactorGloss = async (
         entry.gl['fr'] = entry.gl[key];
         delete entry.gl[key];
       }
-      if (key === 'Mandarin 官话') {
+      if (key === 'Mandarin 中文') {
         entry.gl['cmn'] = entry.gl[key];
         delete entry.gl[key];
       }

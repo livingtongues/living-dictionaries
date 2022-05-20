@@ -12,7 +12,7 @@ export enum ReadyLocales {
   bn = 'বাংলা', // Bengali,
   as = 'Assamese / অসমীয়া',
   hi = 'हिन्दी',
-  zh = '官话',
+  zh = '中文',
 }
 
 // Admin only
