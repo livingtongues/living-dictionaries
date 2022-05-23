@@ -41,9 +41,9 @@
           <PasteVideoLink
             on:update={async ({ detail }) => {
               if (detail.type === 'youtube') {
-                video = { sp: speakerId, youtubeId: detail.videoId };
+                video = { sp: speakerId, youtubeId: detail.videoId, startAt: detail.startAt };
               } else if (detail.type === 'vimeo') {
-                video = { sp: speakerId, vimeoId: detail.videoId };
+                video = { sp: speakerId, vimeoId: detail.videoId, startAt: detail.startAt };
               }
             }} />
 
