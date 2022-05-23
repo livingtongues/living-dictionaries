@@ -9,6 +9,7 @@ export interface IVideo {
   vimeoId?: string;
   ts?: number; // timestamp in milliseconds
   deleted?: number; // timestamp in milliseconds
+  startAt?: string;
 }
 
 export interface IVideoCustomMetadata {

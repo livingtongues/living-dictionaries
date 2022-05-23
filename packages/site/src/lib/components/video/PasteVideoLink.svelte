@@ -4,7 +4,7 @@
   import { parseVideoId } from './parseVideoId';
   import { createEventDispatcher } from 'svelte';
   const dispatch =
-    createEventDispatcher<{ update: { videoId: string; type: 'vimeo' | 'youtube' } }>();
+    createEventDispatcher<{ update: { videoId: string; type: 'vimeo' | 'youtube', startAt: string } }>();
 
   let url: string;
 
