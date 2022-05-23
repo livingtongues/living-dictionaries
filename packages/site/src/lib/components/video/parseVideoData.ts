@@ -1,4 +1,4 @@
-export function parseVideoId(url: string): {
+export function parseVideoData(url: string): {
   videoId: string;
   type: 'vimeo' | 'youtube';
   startAt: string;
