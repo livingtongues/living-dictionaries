@@ -1,7 +1,7 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
   import Button from 'svelte-pieces/ui/Button.svelte';
-  import { parseVideoId } from './parseVideoId';
+  import { parseVideoData } from './parseVideoData';
   import { createEventDispatcher } from 'svelte';
   const dispatch =
     createEventDispatcher<{ update: { videoId: string; type: 'vimeo' | 'youtube', startAt: string } }>();
@@ -9,7 +9,7 @@
   let url: string;
 
   function handle() {
-    const detail = parseVideoId(url);
+    const detail = parseVideoData(url);
     if (!detail) {
       alert($_('misc.invalid_url', { default: 'This is not a valid URL' }));
       url = '';
