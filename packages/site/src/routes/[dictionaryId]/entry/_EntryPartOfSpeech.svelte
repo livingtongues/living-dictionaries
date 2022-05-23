@@ -6,7 +6,7 @@
 </script>
 
 {#if value || canEdit}
-  <div class="md:mx-1 md:px-2 rounded" class:order-2={!value}>
+  <div class="md:mx-1 md:px-1 rounded" class:order-2={!value}>
     <div class="text-xs text-gray-500 mt-1">{display}</div>
     <div class="border-b-2 border-dashed pb-1 mb-2">
       {#if canEdit}
