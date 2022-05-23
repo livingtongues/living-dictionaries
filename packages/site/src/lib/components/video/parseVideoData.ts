@@ -4,7 +4,7 @@ export function parseVideoData(url: string): {
   startAt: string;
 } {
   const videoIdParseRegex =
-    /(http:|https:|)\/\/(player.|www.)?(vimeo\.com|youtu(be\.com|\.be|be\.googleapis\.com))\/(video\/|embed\/|watch\?v=|v\/)?([A-Za-z0-9._%-]*)(&\S+)?(\?t=[0-9]+|#t=[0-9]+)?/;
+    /(http:|https:|)\/\/(player.|www.)?(vimeo\.com|youtu(be\.com|\.be|be\.googleapis\.com))\/(video\/|embed\/|watch\?v=|v\/)?([A-Za-z0-9._%-]*)?([?&#]t=[0-9]+)?/;
   const match = url.match(videoIdParseRegex);
 
   if (match) {
@@ -12,8 +12,8 @@ export function parseVideoData(url: string): {
       return {
         videoId: match[6],
         type: 'youtube',
-        startAt: match[8]
-          .toString()
+        startAt: match[7]
+          ?.toString()
           .match(/[0-9]+/)
           .toString(),
       };
@@ -21,8 +21,8 @@ export function parseVideoData(url: string): {
       return {
         videoId: match[6],
         type: 'vimeo',
-        startAt: match[8]
-          .toString()
+        startAt: match[7]
+          ?.toString()
           .match(/[0-9]+/)
           .toString(),
       };
