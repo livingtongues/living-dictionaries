@@ -14,6 +14,9 @@ test('parseVideoData properly parses YouTube Ids, even w/ query params like time
   expect(parseVideoData(`http://www.youtube.com/watch?v=${id}&t=2113s`)).toEqual(expectedWithStart);
   expect(parseVideoData(`http://youtu.be/watch?v=${id}`)).toEqual(expectedWithoutStart);
   expect(parseVideoData(`https://youtube.googleapis.com/v/${id}`)).toEqual(expectedWithoutStart);
+  expect(parseVideoData(`http://www.youtube.com/watch?v=${id}&t=sahda`)).toEqual(
+    expectedWithoutStart
+  );
 });
 
 test('parseVideoData properly parses Vimeo Ids, including relative urls', () => {
@@ -29,6 +32,7 @@ test('parseVideoData properly parses Vimeo Ids, including relative urls', () => 
   expect(parseVideoData(`http://player.vimeo.com/video/${id}`)).toEqual(expectedWithoutStart);
   expect(parseVideoData(`//player.vimeo.com/video/${id}`)).toEqual(expectedWithoutStart);
   expect(parseVideoData(`http://player.vimeo.com/video/${id}#t=64`)).toEqual(expectedWithStart);
+  expect(parseVideoData(`http://player.vimeo.com/video/${id}&t=64`)).toEqual(expectedWithStart);
 });
 
 test('parseVideoData handles returns null for invalid URL', () => {
