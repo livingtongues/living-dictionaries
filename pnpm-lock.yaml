@@ -59,7 +59,7 @@ importers:
       '@types/mapbox-gl': ^2.7.0
       '@types/recordrtc': ^5.6.8
       '@types/youtube': ^0.0.46
-      kitbook: ^0.0.11
+      kitbook: ^0.0.13
       mapbox-gl: ^2.8.1
       mdsvex: ^0.10.5
       recordrtc: ^5.6.2
@@ -81,7 +81,7 @@ importers:
       '@types/mapbox-gl': 2.7.0
       '@types/recordrtc': 5.6.8
       '@types/youtube': 0.0.46
-      kitbook: 0.0.11_svelte@3.47.0
+      kitbook: 0.0.13_svelte@3.47.0
       mapbox-gl: 2.8.1
       mdsvex: 0.10.5_svelte@3.47.0
       recordrtc: 5.6.2
@@ -5184,8 +5184,8 @@ packages:
       json-buffer: 3.0.0
     dev: false
 
-  /kitbook/0.0.11_svelte@3.47.0:
-    resolution: {integrity: sha512-9+74CeDkW+zw++y5d7xqZFsqV6P28ZqeOzZHaYyiPBkncDCpNhaukSOE6j4ZwxQPHPW0U/Gj8o3pbjhvEk/CCQ==}
+  /kitbook/0.0.13_svelte@3.47.0:
+    resolution: {integrity: sha512-YH44XRDHrXua/s+B4vKzg4QIOBVn+I9ozYIyhEasHt2XQIE5tsuM0ng9YpJrTu95uV53Zc5wRpV9QMt39ASSLA==}
     dependencies:
       svelte-store-router: 2.0.10_svelte@3.47.0
     transitivePeerDependencies:
