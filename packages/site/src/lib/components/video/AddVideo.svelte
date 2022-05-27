@@ -39,12 +39,8 @@
       <ShowHide let:show={record} let:toggle>
         {#if !record}
           <PasteVideoLink
-            on:update={async ({ detail }) => {
-              if (detail.type === 'youtube') {
-                video = { sp: speakerId, youtubeId: detail.videoId, startAt: detail.startAt };
-              } else if (detail.type === 'vimeo') {
-                video = { sp: speakerId, vimeoId: detail.videoId, startAt: detail.startAt };
-              }
+            on:update={({ detail }) => {
+              video = { sp: speakerId, ...detail };
             }} />
 
           <SelectVideo let:file>
