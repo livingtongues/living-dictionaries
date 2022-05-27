@@ -5,6 +5,7 @@
   import VideoIFrame from './VideoIFrame.svelte';
   // import { crossfade, scale } from 'svelte/transition';
   import { deleteVideo } from '$lib/helpers/delete';
+  import DeleteButton from '../media/DeleteButton.svelte';
 
   export let entry: IEntry,
     video: IVideo,
@@ -41,16 +42,7 @@
     {/if}
     <!-- <img class="object-contain max-h-full" alt="Image of {entry.lx}" {src} /> -->
     {#if canEdit}
-      <div
-        class="font-semibold text-white py-2 px-1 flex justify-end">
-        <button
-          type="button"
-          on:click|stopPropagation={() => deleteVideo(entry, video)}
-          class="px-3 py-2 rounded bg-red-500 transition-all hover:bg-red-600 transform hover:scale-105">
-          <i class="far fa-trash-alt" />
-          {$_('misc.delete', { default: 'Delete' })}
-        </button>
-      </div>
+      <DeleteButton action={() => deleteVideo(entry, video)} />
     {/if}
   </div>
 </div>

@@ -1,6 +1,7 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
   import type { IEntry } from '@living-dictionaries/types';
+  import DeleteButton from '../media/DeleteButton.svelte';
   export let entry: IEntry,
     canEdit = false,
     square: number = undefined,
@@ -72,17 +73,7 @@
       </div>
       <img class="object-contain max-h-full" alt="Image of {entry.lx}" {src} />
       {#if canEdit}
-        <div
-          class="font-semibold text-red-500 p-4 flex justify-between
-            items-center absolute bottom-0 inset-x-0 bg-opacity-25 bg-black">
-          <button
-            type="button"
-            on:click|stopPropagation={() => deleteImage(entry)}
-            class="ml-auto px-3 py-2">
-            <i class="far fa-trash-alt" />
-            {$_('misc.delete', { default: 'Delete' })}
-          </button>
-        </div>
+        <DeleteButton action={() => deleteImage(entry)} />
       {/if}
     </div>
   </div>
