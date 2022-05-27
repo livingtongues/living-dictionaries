@@ -42,12 +42,11 @@
     <!-- <img class="object-contain max-h-full" alt="Image of {entry.lx}" {src} /> -->
     {#if canEdit}
       <div
-        class="font-semibold text-red-500 p-4 flex justify-between
-            items-center absolute bottom-0 inset-x-0 bg-opacity-25 bg-black">
+        class="font-semibold text-white py-2 px-1 flex justify-end">
         <button
           type="button"
           on:click|stopPropagation={() => deleteVideo(entry, video)}
-          class="ml-auto px-3 py-2">
+          class="px-3 py-2 rounded bg-red-500 transition-all hover:bg-red-600 transform hover:scale-105">
           <i class="far fa-trash-alt" />
           {$_('misc.delete', { default: 'Delete' })}
         </button>
