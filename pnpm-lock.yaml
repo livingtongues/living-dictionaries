@@ -13,6 +13,7 @@ importers:
       prettier-plugin-svelte: ^2.5.0
       svelte: ^3.47.0
       typescript: ~4.6.2
+      vitest: ^0.10.0
     devDependencies:
       '@typescript-eslint/eslint-plugin': 5.17.0_nws7qn7w3iq2qnd7fkwkgguqdm
       '@typescript-eslint/parser': 5.17.0_hrkuebk64jiu2ut2d2sm4oylnu
@@ -23,6 +24,7 @@ importers:
       prettier-plugin-svelte: 2.6.0_p3hrmmq3wrlgh6o2sq2erhffii
       svelte: 3.47.0
       typescript: 4.6.3
+      vitest: 0.10.0
 
   packages/functions:
     specifiers:
@@ -2639,7 +2641,7 @@ packages:
     dev: false
 
   /check-error/1.0.2:
-    resolution: {integrity: sha1-V00xLt2Iu13YkS6Sht1sCu1KrII=}
+    resolution: {integrity: sha512-BrgHpW9NURQgzoNyjfq0Wu6VFO6D7IZEmJNdtgNqpzGG8RuNFHt2jQxWlAs4HMe119chBnv+34syEZtc6IhLtA==}
     dev: true
 
   /chokidar/3.5.3:

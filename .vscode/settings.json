@@ -23,5 +23,6 @@
   "eslint.validate": ["javascript", "svelte"],
   "files.associations": {
     "*.svx": "svelte"
-  }
+  },
+  "vitest.enable": true,
 }
