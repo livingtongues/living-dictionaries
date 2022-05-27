@@ -13,8 +13,7 @@ export function parseVideoData(url: string): IVideo {
       data.vimeoId = match[6];
     }
     if (match[7]) {
-      data.startAt = +match[7]
-        .match(/[0-9]+/)[0];
+      data.startAt = +match[7].match(/[0-9]+/)[0];
     }
     return data;
   }
