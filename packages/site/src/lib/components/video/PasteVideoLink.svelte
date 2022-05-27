@@ -3,19 +3,19 @@
   import Button from 'svelte-pieces/ui/Button.svelte';
   import { parseVideoData } from './parseVideoData';
   import { createEventDispatcher } from 'svelte';
-  const dispatch =
-    createEventDispatcher<{ update: { videoId: string; type: 'vimeo' | 'youtube', startAt: string } }>();
+  import type { IVideo } from '@living-dictionaries/types';
+  const dispatch = createEventDispatcher<{ update: IVideo }>();
 
   let url: string;
 
   function handle() {
-    const detail = parseVideoData(url);
-    if (!detail) {
+    const videoData = parseVideoData(url);
+    if (!videoData) {
       alert($_('misc.invalid_url', { default: 'This is not a valid URL' }));
       url = '';
       return;
     }
-    dispatch('update', detail);
+    dispatch('update', videoData);
   }
 </script>
 
@@ -35,7 +35,7 @@
         class="form-input block w-full" />
     </div>
     <div class="w-1" />
-    <Button type="submit" form={url ? 'primary' : 'outline'}>
+    <Button type="submit" form={url ? 'filled' : 'outline'}>
       {$_('misc.add', { default: 'Add' })}
     </Button>
   </div>
