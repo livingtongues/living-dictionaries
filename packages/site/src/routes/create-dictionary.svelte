@@ -15,7 +15,7 @@
     EditableGlossesField,
     EditableAlternateNames,
     glossingLanguages,
-  } from '@ld/parts';
+  } from '@living-dictionaries/parts';
 
   let modal: 'auth' = null;
 

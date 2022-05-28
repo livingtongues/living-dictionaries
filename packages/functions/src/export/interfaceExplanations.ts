@@ -1,4 +1,4 @@
-import { ISemanticDomain } from '../../../src/lib/interfaces';
+import { ISemanticDomain } from '@living-dictionaries/parts';
 
 export const semanticDomains: ISemanticDomain[] = [
   { key: '1', name: 'Universe and the natural world' },
