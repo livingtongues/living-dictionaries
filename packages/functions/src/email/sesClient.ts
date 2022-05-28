@@ -9,7 +9,7 @@ const secretAccessKey = functions.config().aws.smtp_secret_access_key;
 // read with firebase functions:config:get
 // remove with firebase functions:config:unset aws.smtp_secret_access_key
 
-const REGION = 'us-east-2';
+const REGION = 'us-west-2';
 const sesClient = new SESClient({
   region: REGION,
   credentials: { accessKeyId: 'AKIAVLAFQGODQFD5DDC2', secretAccessKey },
