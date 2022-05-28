@@ -3,10 +3,10 @@ import { db } from '../config';
 
 import { sesClient } from './sesClient';
 import { SendEmailCommand, SendEmailCommandInput } from '@aws-sdk/client-ses';
+import { adminRecipients } from './adminRecipients';
 
 import { IDictionary, IUser } from '@living-dictionaries/types';
 
-import { adminRecipients } from './adminRecipients';
 import { notifyAdminsOnNewDictionary } from './composeMessages';
 // import newDictionaryWelcomeHtml from './html/newDictionary';
 

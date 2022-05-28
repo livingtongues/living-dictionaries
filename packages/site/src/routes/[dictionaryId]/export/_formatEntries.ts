@@ -1,7 +1,6 @@
 import type { IDictionary, IEntry, ISpeaker } from '@living-dictionaries/types';
 import { glossingLanguages } from './_glossing-languages-temp';
-import { semanticDomains } from '$lib/mappings/semantic-domains';
-import { partsOfSpeech } from '$lib/mappings/parts-of-speech';
+import { semanticDomains, partsOfSpeech } from '@living-dictionaries/parts';
 import { friendlyName } from '$lib/helpers/friendlyName';
 
 function turnArrayIntoPipedString(itemsFormatted, i, values, columnName, fn) {

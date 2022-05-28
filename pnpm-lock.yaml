@@ -31,7 +31,6 @@ importers:
       '@aws-sdk/client-ses': ^3.100.0
       '@firebase/testing': ^0.20.11
       '@living-dictionaries/parts': ^0.0.1
-      '@living-dictionaries/scripts': ^0.0.1
       '@living-dictionaries/types': ^1.0.0
       algoliasearch: ^4.13.0
       fetch-as: ^1.1.0
@@ -50,7 +49,6 @@ importers:
     devDependencies:
       '@firebase/testing': 0.20.11
       '@living-dictionaries/parts': link:../parts
-      '@living-dictionaries/scripts': link:../scripts
       '@living-dictionaries/types': link:../types
       fetch-as: 1.1.0
       firebase-functions-test: 0.2.3_uq5dbo2wohrea53vz6iuq3msri
@@ -69,6 +67,7 @@ importers:
       mapbox-gl: ^2.8.1
       mdsvex: ^0.10.5
       recordrtc: ^5.6.2
+      replace-in-file: ^6.3.2
       svelte: ^3.47.0
       svelte-check: ^2.7.0
       svelte-deep-wind-preprocess: ^0.0.7
@@ -76,6 +75,7 @@ importers:
       svelte-preprocess: ^4.10.6
       svelte-store-router: ^2.0.10
       svelte-windicss-preprocess: ~4.1.0
+      svelte2tsx: ^0.5.10
       tslib: ^2.3.1
       typescript: ~4.6.2
       vitest: ^0.10.0
@@ -91,6 +91,7 @@ importers:
       mapbox-gl: 2.8.1
       mdsvex: 0.10.5_svelte@3.47.0
       recordrtc: 5.6.2
+      replace-in-file: 6.3.3
       svelte: 3.47.0
       svelte-check: 2.7.0_svelte@3.47.0
       svelte-deep-wind-preprocess: 0.0.7
@@ -98,6 +99,7 @@ importers:
       svelte-preprocess: 4.10.6_ucc3fdkrl6lb7lhnlfimbouujy
       svelte-store-router: 2.0.10_svelte@3.47.0
       svelte-windicss-preprocess: 4.1.7
+      svelte2tsx: 0.5.10_ucc3fdkrl6lb7lhnlfimbouujy
       tslib: 2.3.1
       typescript: 4.6.3
       vitest: 0.10.0
@@ -105,6 +107,7 @@ importers:
 
   packages/scripts:
     specifiers:
+      '@living-dictionaries/functions': workspace:^0.0.1
       '@living-dictionaries/types': ^1.0.0
       '@types/node': ^17.0.23
       algoliasearch: ^4.11.0
@@ -119,6 +122,7 @@ importers:
       typescript: ~4.6.2
       vitest: ^0.10.0
     devDependencies:
+      '@living-dictionaries/functions': link:../functions
       '@living-dictionaries/types': link:../types
       '@types/node': 17.0.23
       algoliasearch: 4.13.0
@@ -3743,6 +3747,10 @@ packages:
       mimic-response: 1.0.1
     dev: false
 
+  /dedent-js/1.0.1:
+    resolution: {integrity: sha512-OUepMozQULMLUmhxS95Vudo0jb0UchLimi3+pQ2plj61Fcy8axbP9hbiD4Sz6DPqn6XG3kfmziVfQ1rSys5AJQ==}
+    dev: true
+
   /deep-eql/3.0.1:
     resolution: {integrity: sha512-+QeIQyN5ZuO+3Uk5DYh6/1eKO0m0YmJFGNmFHGACpf1ClL1nmlV/p4gNgbl2pJGxgXb4faqo6UE+M5ACEMyVcw==}
     engines: {node: '>=0.12'}
@@ -6044,6 +6052,12 @@ packages:
       get-func-name: 2.0.0
     dev: true
 
+  /lower-case/2.0.2:
+    resolution: {integrity: sha512-7fm3l3NAF9WfN6W3JOmf5drwpVqX78JtoGJ3A6W0a6ZnldM41w2fV5D490psKFTpMds8TJse/eHLFFsNHHjHgg==}
+    dependencies:
+      tslib: 2.3.1
+    dev: true
+
   /lowercase-keys/1.0.1:
     resolution: {integrity: sha512-G2Lj61tXDnVFFOi8VZds+SoQjtQC3dgokKdDG2mTm1tx4m50NUHBOZSBwQQHyy0V12A0JTG4icfZQH+xPyh8VA==}
     engines: {node: '>=0.10.0'}
@@ -6437,6 +6451,13 @@ packages:
     resolution: {integrity: sha512-1nh45deeb5olNY7eX82BkPO7SSxR5SSYJiPTrTdFUVYwAl8CKMA5N9PjTYkHiRjisVcxcQ1HXdLhx2qxxJzLNQ==}
     dev: false
 
+  /no-case/3.0.4:
+    resolution: {integrity: sha512-fgAN3jGAh+RoxUGZHTSOLJIqUc2wmoBwGR4tbpNAKmmovFoWq0OdRkb0VkldReO2a2iBT/OEulG9XSUc10r3zg==}
+    dependencies:
+      lower-case: 2.0.2
+      tslib: 2.3.1
+    dev: true
+
   /node-domexception/1.0.0:
     resolution: {integrity: sha512-/jKZoMpw0F8GRwl4/eLROPA3cfcXtLApP0QzLmUT/HuPCZWyB7IY9ZrMeKw2O/nFIqPQB3PVM9aYm0F312AXDQ==}
     engines: {node: '>=10.5.0'}
@@ -6730,6 +6751,13 @@ packages:
     resolution: {integrity: sha512-CiyeOxFT/JZyN5m0z9PfXw4SCBJ6Sygz1Dpl0wqjlhDEGGBP1GnsUVEL0p63hoG1fcj3fHynXi9NYO4nWOL+qQ==}
     engines: {node: '>= 0.8'}
     dev: false
+
+  /pascal-case/3.1.2:
+    resolution: {integrity: sha512-uWlGT3YSnK9x3BQJaOdcZwrnV6hPpd8jFH1/ucpiLRPh/2zCVJKS19E4GvYHvaCcACn3foXZ0cLB9Wrx1KGe5g==}
+    dependencies:
+      no-case: 3.0.4
+      tslib: 2.3.1
+    dev: true
 
   /path-is-absolute/1.0.1:
     resolution: {integrity: sha1-F0uSaHNVNP+8es5r9TpanhtcX18=}
@@ -7145,6 +7173,16 @@ packages:
     dependencies:
       rc: 1.2.8
     dev: false
+
+  /replace-in-file/6.3.3:
+    resolution: {integrity: sha512-MpuzdotQ91e9bFO/GOmVeYWLGM1/sS+7mImx9uynGsgILt8l7P/gsDLsMnm9zV1McLK68xolpcvQ4GLrrc02cg==}
+    engines: {node: '>=10'}
+    hasBin: true
+    dependencies:
+      chalk: 4.1.2
+      glob: 7.2.0
+      yargs: 17.5.1
+    dev: true
 
   /request/2.88.2:
     resolution: {integrity: sha512-MsvtOrfG9ZcrOwAW+Qi+F6HbD0CWXEh9ou77uOb7FM2WPhwT7smM833PzanhJLsgXjN89Ir6V2PczXNnMpwKhw==}
@@ -7900,6 +7938,18 @@ packages:
     engines: {node: '>= 8'}
     dev: true
 
+  /svelte2tsx/0.5.10_ucc3fdkrl6lb7lhnlfimbouujy:
+    resolution: {integrity: sha512-nokQ0HTTWMcNX6tLrDLiOmJCuqjKZU9nCZ6/mVuCL3nusXdbp+9nv69VG2pCy7uQC66kV4Ls+j0WfvvJuGVnkg==}
+    peerDependencies:
+      svelte: ^3.24
+      typescript: ^4.1.2
+    dependencies:
+      dedent-js: 1.0.1
+      pascal-case: 3.1.2
+      svelte: 3.47.0
+      typescript: 4.6.3
+    dev: true
+
   /table/6.8.0:
     resolution: {integrity: sha512-s/fitrbVeEyHKFa7mFdkuQMWlH1Wgw/yEXMt5xACT4ZpzWFluehAxRtUUQKPuWhaLAWhFcVx6w3oC8VKaUfPGA==}
     engines: {node: '>=10.0.0'}
@@ -8632,6 +8682,11 @@ packages:
     resolution: {integrity: sha512-y11nGElTIV+CT3Zv9t7VKl+Q3hTQoT9a1Qzezhhl6Rp21gJ/IVTW7Z3y9EWXhuUBC2Shnf+DX0antecpAwSP8w==}
     engines: {node: '>=10'}
 
+  /yargs-parser/21.0.1:
+    resolution: {integrity: sha512-9BK1jFpLzJROCI5TzwZL/TU4gqjK5xiHV/RfWLOahrjAko/e4DJkRDZQXfvqAsiZzzYhgAzbgz6lg48jcm4GLg==}
+    engines: {node: '>=12'}
+    dev: true
+
   /yargs/16.2.0:
     resolution: {integrity: sha512-D1mvvtDG0L5ft/jGWkLpG1+m0eQxOfaBvTNELraWj22wSVUMWxZUvYgJYcKh6jGGIkJFhH4IZPQhR4TKpc8mBw==}
     engines: {node: '>=10'}
@@ -8643,6 +8698,19 @@ packages:
       string-width: 4.2.3
       y18n: 5.0.8
       yargs-parser: 20.2.9
+
+  /yargs/17.5.1:
+    resolution: {integrity: sha512-t6YAJcxDkNX7NFYiVtKvWUz8l+PaKTLiL63mJYWR2GnHq2gjEWISzsLp9wg3aY36dY1j+gfIEL3pIF+XlJJfbA==}
+    engines: {node: '>=12'}
+    dependencies:
+      cliui: 7.0.4
+      escalade: 3.1.1
+      get-caller-file: 2.0.5
+      require-directory: 2.1.1
+      string-width: 4.2.3
+      y18n: 5.0.8
+      yargs-parser: 21.0.1
+    dev: true
 
   /yn/3.1.1:
     resolution: {integrity: sha512-Ux4ygGWsu2c7isFWe8Yu1YluJmqVhxqK2cLXNQA5AcC3QfbGNpM7fu0Y8b/z16pXLnFxZYvWhd3fhBY9DLmC6Q==}

@@ -11,7 +11,8 @@ admin.initializeApp();
 const projectId = functions.config().project?.key;
 
 import { IDictionary, IEntry } from '@living-dictionaries/types';
-import { entryInterface, partsOfSpeech, semanticDomains } from './interfaceExplanations';
+import { entryInterface } from './interfaceExplanations';
+import { partsOfSpeech, semanticDomains } from '@living-dictionaries/parts';
 
 export default async (
   request: functions.https.Request,

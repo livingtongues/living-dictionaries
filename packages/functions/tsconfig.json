@@ -18,7 +18,9 @@
   },
   "compileOnSave": true,
   "include": [
-    "src"
+    "src/algolia",
+    "src/email",
+    "src/index.ts"
   ],
   // "exclude": ["./**/*test.ts"]
 }

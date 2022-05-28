@@ -1,12 +1,8 @@
 import * as functions from 'firebase-functions';
+import { db } from '../config';
 
-// Learned from https://fireship.io/lessons/sendgrid-transactional-email-guide/
-import * as sgMail from '@sendgrid/mail';
-const sg_api_key = functions.config().sendgrid.key;
-// Set by running `firebase functions:config:set sendgrid.key="your_key"` // see https://fireship.io/lessons/sendgrid-transactional-email-guide/
-// read with firebase functions:config:get
-sgMail.setApiKey(sg_api_key);
-
+import { sesClient } from './sesClient';
+import { SendEmailCommand, SendEmailCommandInput } from '@aws-sdk/client-ses';
 import { adminRecipients } from './adminRecipients';
 
 export default async (
@@ -25,8 +21,8 @@ export default async (
         // name: user.displayName,
       },
     };
-    const reply = await sgMail.send(msg);
-    console.log(reply);
+    // const reply = await sgMail.send(msg);
+    // console.log(reply);
 
     const adminMsg = {
       from: 'jacob@livingtongues.org',
@@ -47,8 +43,8 @@ export default async (
     
     https://livingdictionaries.app`,
     };
-    const adminReply = await sgMail.send(adminMsg);
-    console.log(adminReply);
+    // const adminReply = await sgMail.send(adminMsg);
+    // console.log(adminReply);
   }
   return { success: true };
 };
