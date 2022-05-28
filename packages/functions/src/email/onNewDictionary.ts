@@ -1,17 +1,14 @@
 import * as functions from 'firebase-functions';
-import * as admin from 'firebase-admin';
-admin.initializeApp();
+import { db } from '../config';
 
-// Learned from https://fireship.io/lessons/sendgrid-transactional-email-guide/
-import * as sgMail from '@sendgrid/mail';
+import { sesClient } from './sesClient';
+import { SendEmailCommand, SendEmailCommandInput } from '@aws-sdk/client-ses';
+
 import { IDictionary, IUser } from '@living-dictionaries/types';
-const sg_api_key = functions.config().sendgrid.key;
-// Set by running `firebase functions:config:set sendgrid.key="your_key"` // see https://fireship.io/lessons/sendgrid-transactional-email-guide/
-// read with firebase functions:config:get
-sgMail.setApiKey(sg_api_key);
 
 import { adminRecipients } from './adminRecipients';
 import { notifyAdminsOnNewDictionary } from './composeMessages';
+// import newDictionaryWelcomeHtml from './html/newDictionary';
 
 export default async (
   snapshot: functions.firestore.DocumentSnapshot,
@@ -20,41 +17,70 @@ export default async (
   const dictionary = snapshot.data() as IDictionary;
   const dictionaryId = context.params.dictionaryId;
 
-  const userSnap = await admin
-    .firestore()
-    .doc(`users/${dictionary && dictionary.createdBy}`)
-    .get();
+  const userSnap = await db.doc(`users/${dictionary && dictionary.createdBy}`).get();
   const user = userSnap.data() as IUser;
 
-  if (dictionary && user) {
-    const msg = {
-      from: 'annaluisa@livingtongues.org',
-      to: user.email,
-      templateId: 'd-06857893fe684cd68ff11aec2fe7e36d', // "Created Dictionary"
-      dynamic_template_data: {
-        subject: 'New Living Dictionary Created',
-        dictionaryName: dictionary.name,
-        dictionaryId,
+  if (dictionary && user?.email) {
+    const userMsg: SendEmailCommandInput = {
+      Source: 'annaluisa@livingtongues.org',
+      Destination: {
+        ToAddresses: [user.email],
       },
-    };
-    const reply = await sgMail.send(msg);
-    console.log(reply);
+      // ReplyToAddresses: [data.email],
+      Message: {
+        Subject: {
+          Charset: 'UTF-8',
+          Data: 'New Living Dictionary Created',
+        },
+        Body: {
+          // import from SendGrid:
+          // templateId: 'd-06857893fe684cd68ff11aec2fe7e36d', // "Created Dictionary"
+          // subject: 'New Living Dictionary Created',
+          // dictionaryName: dictionary.name,
+          // dictionaryId,
 
-    const adminMsg = {
-      from: 'jacob@livingtongues.org',
-      to: adminRecipients,
-      subject: `Living Dictionary created: ${dictionary.name}`,
-      trackingSettings: {
-        clickTracking: {
-          enable: false,
-          enableText: false,
+          // Html: {
+          //   Charset: 'UTF-8',
+          //   Data: newDictionaryWelcomeHtml,
+          // },
+
+          Text: {
+            Charset: 'UTF-8',
+            Data: `Hello there`,
+          },
         },
       },
-      text: notifyAdminsOnNewDictionary(dictionary, dictionaryId, user),
     };
-    const adminReply = await sgMail.send(adminMsg);
-    console.log(adminReply);
-  }
 
+    const adminMsg: SendEmailCommandInput = {
+      Source: 'jacob@livingtongues.org',
+      Destination: {
+        ToAddresses: adminRecipients,
+      },
+      Message: {
+        Subject: {
+          Charset: 'UTF-8',
+          Data: `Living Dictionary created: ${dictionary.name}`,
+        },
+        Body: {
+          Text: {
+            Charset: 'UTF-8',
+            Data: notifyAdminsOnNewDictionary(dictionary, dictionaryId, user),
+          },
+        },
+      },
+    };
+
+    try {
+      const reply = await sesClient.send(new SendEmailCommand(userMsg));
+      console.log('Success', reply);
+      const adminReply = await sesClient.send(new SendEmailCommand(adminMsg));
+      console.log('Success', adminReply);
+      return { success: true };
+    } catch (err) {
+      console.log('Error', err);
+      return { success: false };
+    }
+  }
   return { success: true };
 };
