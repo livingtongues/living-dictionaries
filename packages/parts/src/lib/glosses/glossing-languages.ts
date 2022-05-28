@@ -5,6 +5,7 @@
 
 import type { IGlossLanguages } from '@living-dictionaries/types';
 
+// Every time glossing-languages-list.json is updated, the changes need copied into here:
 export const glossingLanguages: IGlossLanguages = {
   en: {
     vernacularName: 'English',
