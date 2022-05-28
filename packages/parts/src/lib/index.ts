@@ -13,3 +13,5 @@ export { default as EditableAlternateNames } from './settings/EditableAlternateN
 export { default as PublicCheckbox } from './settings/PublicCheckbox.svelte';
 
 export { glossingLanguages } from './glosses/glossing-languages';
+export { semanticDomains } from './mappings/semantic-domains';
+export { partsOfSpeech } from './mappings/parts-of-speech';
