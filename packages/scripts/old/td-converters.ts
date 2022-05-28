@@ -1,4 +1,4 @@
-import { partsOfSpeech } from '../../../src/lib/mappings/parts-of-speech';
+import { partsOfSpeech } from '@living-dictionaries/parts';
 
 /**
  * Convert old Living Dictionary fields to match CSV template fields in preparation for data processing and upload to Firestore
