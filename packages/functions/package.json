@@ -8,8 +8,8 @@
     "shell": "npm run build && firebase functions:shell",
     "start": "npm run shell",
     "deploy": "firebase deploy --only functions",
-    "deploy:specific": "firebase deploy --only functions:supportEmail -P default",
-    "deploy:specific:prod": "firebase deploy --only functions:onNewDictionary -P production",
+    "deploy:specific": "firebase deploy --only functions:inviteContributor,functions:onNewUser,functions:onNewDictionary -P default",
+    "deploy:specific:prod": "firebase deploy --only functions:supportEmail,functions:inviteContributor,functions:onNewUser,functions:onNewDictionary -P production",
     "logs": "firebase functions:log",
     "test": "vitest -u"
   },

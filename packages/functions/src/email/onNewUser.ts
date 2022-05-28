@@ -1,50 +1,70 @@
 import * as functions from 'firebase-functions';
-import { db } from '../config';
 
 import { sesClient } from './sesClient';
 import { SendEmailCommand, SendEmailCommandInput } from '@aws-sdk/client-ses';
 import { adminRecipients } from './adminRecipients';
+import newUserWelcome from './html/newUserWelcome';
 
 export default async (
   snapshot: functions.firestore.DocumentSnapshot,
   context: functions.EventContext
 ) => {
   const user = snapshot.data();
-
-  if (user) {
-    const msg = {
-      from: 'annaluisa@livingtongues.org',
-      to: user.email,
-      templateId: 'd-7f80bcac817b46b7852caedd55786cce', // "Automatic Welcome"
-      dynamic_template_data: {
-        subject: 'Thank you for creating an account!',
-        // name: user.displayName,
-      },
-    };
-    // const reply = await sgMail.send(msg);
-    // console.log(reply);
-
-    const adminMsg = {
-      from: 'jacob@livingtongues.org',
-      to: adminRecipients,
-      subject: `New Living Dictionaries user: ${user.displayName}`,
-      trackingSettings: {
-        clickTracking: {
-          enable: false,
-          enableText: false,
+  try {
+    if (user) {
+      const userMsg: SendEmailCommandInput = {
+        Source: 'annaluisa@livingtongues.org',
+        Destination: {
+          ToAddresses: [user.email],
         },
-      },
-      text: `Hey Admins,
-    
-    ${user.displayName} has just created a Living Dictionaries account, and we sent an automatic welcome email to ${user.email}
-    
-    Thanks,
-    Our automatic Firebase Cloud Function
-    
-    https://livingdictionaries.app`,
-    };
-    // const adminReply = await sgMail.send(adminMsg);
-    // console.log(adminReply);
+        Message: {
+          Subject: {
+            Charset: 'UTF-8',
+            Data: 'Thank you for creating a Living Dictionaries account!',
+          },
+          Body: {
+            Html: {
+              Charset: 'UTF-8',
+              Data: newUserWelcome,
+            },
+          },
+        },
+      };
+      const reply = await sesClient.send(new SendEmailCommand(userMsg));
+      console.log(reply);
+
+      const adminMsg: SendEmailCommandInput = {
+        Source: 'jacob@livingtongues.org',
+        Destination: {
+          ToAddresses: adminRecipients,
+        },
+        Message: {
+          Subject: {
+            Charset: 'UTF-8',
+            Data: `New Living Dictionaries user: ${user.displayName}`,
+          },
+          Body: {
+            Text: {
+              Charset: 'UTF-8',
+              Data: `Hey Admins,
+
+${user.displayName} has just created a Living Dictionaries account, and we sent an automatic welcome email to ${user.email}
+
+Thanks,
+Our automatic Firebase Cloud Function
+
+https://livingdictionaries.app`,
+            },
+          },
+        },
+      };
+      const adminReply = await sesClient.send(new SendEmailCommand(adminMsg));
+      console.log(adminReply);
+    }
+
+    return { success: true };
+  } catch (err) {
+    console.log('Error', err);
+    return { success: false };
   }
-  return { success: true };
 };

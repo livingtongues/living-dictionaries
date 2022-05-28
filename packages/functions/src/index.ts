@@ -18,23 +18,23 @@ export const supportEmail = functions.https.onCall(async (data, context) => {
   return (await import('./email/supportEmail')).default(data, context);
 });
 
-// export const inviteContributor = functions.firestore
-//   .document('dictionaries/{dictionaryId}/invites/{inviteId}')
-//   .onCreate(async (snapshot, context) => {
-//     await (await import('./email/inviteContributor')).default(snapshot, context);
-//   });
+export const inviteContributor = functions.firestore
+  .document('dictionaries/{dictionaryId}/invites/{inviteId}')
+  .onCreate(async (snapshot, context) => {
+    await (await import('./email/inviteContributor')).default(snapshot, context);
+  });
 
-// export const onNewUser = functions.firestore
-//   .document('users/{userId}')
-//   .onCreate(async (snapshot, context) => {
-//     await (await import('./email/onNewUser')).default(snapshot, context);
-//   });
+export const onNewUser = functions.firestore
+  .document('users/{userId}')
+  .onCreate(async (snapshot, context) => {
+    await (await import('./email/onNewUser')).default(snapshot, context);
+  });
 
-// export const onNewDictionary = functions.firestore
-//   .document('dictionaries/{dictionaryId}')
-//   .onCreate(async (snapshot, context) => {
-//     await (await import('./email/onNewDictionary')).default(snapshot, context);
-//   });
+export const onNewDictionary = functions.firestore
+  .document('dictionaries/{dictionaryId}')
+  .onCreate(async (snapshot, context) => {
+    await (await import('./email/onNewDictionary')).default(snapshot, context);
+  });
 
 // // Aggregation
 // export const increaseEntryCount = functions.firestore
