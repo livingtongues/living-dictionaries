@@ -10,7 +10,7 @@ import * as admin from 'firebase-admin';
 admin.initializeApp();
 const projectId = functions.config().project?.key;
 
-import { IDictionary, IEntry } from '../../../src/lib/interfaces';
+import { IDictionary, IEntry } from '@living-dictionaries/types';
 import { entryInterface, partsOfSpeech, semanticDomains } from './interfaceExplanations';
 
 export default async (

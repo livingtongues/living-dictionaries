@@ -19,7 +19,7 @@
   import Button from 'svelte-pieces/ui/Button.svelte';
   import ShowHide from 'svelte-pieces/functions/ShowHide.svelte';
   import { inviteHelper } from '$lib/helpers/inviteHelper';
-  import { Invitation } from '@ld/parts';
+  import { Invitation } from '@living-dictionaries/parts';
 
   let helperType: IHelper[];
   let inviteType: IInvite[];
