@@ -1,17 +1,11 @@
 import * as functions from 'firebase-functions';
-import * as admin from 'firebase-admin';
-admin.initializeApp();
+import { db } from '../config';
 
-// Learned from https://fireship.io/lessons/sendgrid-transactional-email-guide/
-import * as sgMail from '@sendgrid/mail';
-import { IInvite } from '../../../src/lib/interfaces';
-
-const sg_api_key = functions.config().sendgrid.key;
-// Set by running `firebase functions:config:set sendgrid.key="your_key"` // see https://fireship.io/lessons/sendgrid-transactional-email-guide/
-// read with firebase functions:config:get
-sgMail.setApiKey(sg_api_key);
-
+import { sesClient } from './sesClient';
+import { SendEmailCommand, SendEmailCommandInput } from '@aws-sdk/client-ses';
 import { adminRecipients } from './adminRecipients';
+
+import { IInvite } from '@living-dictionaries/types';
 
 export default async (
   snapshot: functions.firestore.DocumentSnapshot,
@@ -47,10 +41,10 @@ Living Tongues Institute for Endangered Languages
 https://livingtongues.org (Living Tongues Homepage)
 https://livingdictionaries.app (Living Dictionaries website)`,
     };
-    const reply = await sgMail.send(msg);
-    console.log(reply);
+    // const reply = await sgMail.send(msg);
+    // console.log(reply);
 
-    const inviteRef = admin.firestore().doc(`dictionaries/${dictionaryId}/invites/${inviteId}`);
+    const inviteRef = db.doc(`dictionaries/${dictionaryId}/invites/${inviteId}`);
     await inviteRef.update({
       status: 'sent',
     });
@@ -80,8 +74,8 @@ Our automatic Firebase Cloud Function
 
 https://livingdictionaries.app`,
       };
-      const adminReply = await sgMail.send(adminMsg);
-      console.log(adminReply);
+      // const adminReply = await sgMail.send(adminMsg);
+      // console.log(adminReply);
     }
   }
 

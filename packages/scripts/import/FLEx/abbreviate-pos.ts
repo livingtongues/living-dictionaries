@@ -1,4 +1,4 @@
-import { partsOfSpeech } from '../../../../src/lib/mappings/parts-of-speech';
+// import { partsOfSpeech } from '@living-dictionaries/parts';
 
 // export interface IMatchResult {
 //     matchedPOS?: string;
