@@ -1,0 +1,1 @@
+export default 'hello new dictionary';
