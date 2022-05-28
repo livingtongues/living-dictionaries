@@ -8,7 +8,7 @@ export const adminRecipients = (() => {
     return [
       'jacob@livingtongues.org',
       'annaluisa@livingtongues.org',
-      'livingtongues@gmail.com',
+      'livingtongues@gmail.com', // Greg
       'diego@livingtongues.org',
     ];
   } else {

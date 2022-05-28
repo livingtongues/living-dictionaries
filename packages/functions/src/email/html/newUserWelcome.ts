@@ -1,8 +1,7 @@
-export default function (dictionaryName: string, dictionaryId: string) {
-  return `<html lang="en">
+export default `<html lang="en">
 
 <head>
-  <title>New Living Dictionary Created</title>
+  <title>Thank you for creating a Living Dictionaries account!</title>
 
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -124,8 +123,7 @@ export default function (dictionaryName: string, dictionaryId: string) {
   <!-- HIDDEN PREHEADER TEXT -->
   <div
     style="display: none; font-size: 1px; color: #fefefe; line-height: 1px; font-family: Helvetica, Arial, sans-serif; max-height: 0px; max-width: 0px; opacity: 0; overflow: hidden;">
-    Nice work on creating the ${dictionaryName} Living Dictionary. Here's some convenient information that will help
-    you build your dictionary.
+    We're excited to have you on board and thought we'd provide you with some useful links for reference.
   </div>
 
   <table border="0" cellpadding="0" cellspacing="0" width="100%">
@@ -141,7 +139,7 @@ export default function (dictionaryName: string, dictionaryId: string) {
             <td align="center" valign="top"
               style="padding: 12px 0; font-family: Helvetica, Arial, sans-serif; font-size: 20px" class="logo">
               <a target="_blank"
-                href="https://livingdictionaries.app/?utm_source=function&amputm_medium=email&amputm_campaign=LDCreated"
+                href="https://livingdictionaries.app/?utm_source=function&amputm_medium=email&amputm_campaign=welcome"
                 style="color: white; text-decoration: none;">
                 Living Dictionaries
               </a>
@@ -171,7 +169,7 @@ export default function (dictionaryName: string, dictionaryId: string) {
                 <tr>
                   <td align="center" class="padding"
                     style="font-size: 28px; font-family: Helvetica, Arial, sans-serif; color: #333333; padding-top: 25px;">
-                    Living Dictionary Created
+                    Welcome!
                   </td>
                 </tr>
               </table>
@@ -188,39 +186,33 @@ export default function (dictionaryName: string, dictionaryId: string) {
                   <td align="left"
                     style="padding: 20px 0 0; font-size: 16px; line-height: 25px; font-family: Helvetica, Arial, sans-serif; color: #666666;"
                     class="padding">
-                    Great! You've just created a new dictionary titled
+                    Hello and welcome to the Living Dictionaries community.<br /><br />
+
+                      If you want to visit the Living Dictionaries website anytime, here is the link:
                     <a style="color: #546e7a" target="_blank"
-                      href="https://livingdictionaries.app/${dictionaryId}/?utm_source=function&amputm_medium=email&amputm_campaign=LDCreated">${dictionaryName}</a>.
-                    To conveniently return to your dictionary, add a bookmark to
-                    <strong>livingdictionaries.app/${dictionaryId}</strong><br /><br />
+                      href="https://livingdictionaries.app/?utm_source=function&amputm_medium=email&amputm_campaign=welcome">livingdictionaries.app</a><br /><br />
 
-                      If you ever have any questions or comments, feel free to reply to this email or or use the "Contact Us" button from within the web app.
+We recommend bookmarking that link so you can easily return to it any time and continue working on your Living Dictionary project. The website works on desktop as well as any mobile device. We recommend using Chrome as a browser.<br /><br />
+
+We continue to improve the site and roll out new features as they are completed. The site interface is available in over 13 languages (button to switch is in the upper right corner) and we continue to add new languages. We will also publish tutorials on how to use the website, so stay tuned!<br /><br />
+
+
+Visit the Living Tongues website to learn more about the background and usefulness of Living Dictionaries:
+                    <a style="color: #546e7a" target="_blank"
+                      href="https://livingtongues.org/">https://livingtongues.org/</a><br /><br />
+
+If you have any questions about building your Living Dictionary, please email Anna Luisa Daigneault at <a
+                      style="color: #546e7a"
+                      href="mailto:annaluisa@livingtongues.org">annaluisa@livingtongues.org</a> or just reply to this email.<br /><br />
+
+On behalf of everyone at Living Tongues Institute for Endangered Languages, thank you for registering and we look forward to seeing your Living Dictionary come to life.<br /><br />
+
+Best wishes,<br />
+The Living Tongues team
+
                   </td>
                 </tr>
 
-                <!--CTA Button-->
-                <tr>
-                  <td align="center">
-                    <table width="100%" border="0" cellspacing="0" cellpadding="0">
-                      <tr>
-                        <td align="center" style="padding: 20px 0 0;" class="padding">
-                          <table border="0" cellspacing="0" cellpadding="0" class="mobile-button-container">
-                            <tr>
-                              <td align="center" style="border-radius: 3px;" bgcolor="#546e7a">
-                                <a target="_blank"
-                                  href="https://livingdictionaries.app/${dictionaryId}/?utm_source=function&amputm_medium=email&amputm_campaign=LDCreated"
-                                  style="font-size: 16px; font-family: Helvetica, Arial, sans-serif; color: #ffffff; text-decoration: none; border-radius: 3px; padding: 15px 25px; border: 1px solid #546e7a; display: inline-block;"
-                                  class="mobile-button">
-                                  Open Dictionary
-                                </a>
-                              </td>
-                            </tr>
-                          </table>
-                        </td>
-                      </tr>
-                    </table>
-                  </td>
-                </tr>
               </table>
             </td>
           </tr>
@@ -292,5 +284,4 @@ export default function (dictionaryName: string, dictionaryId: string) {
   </table>
 </body>
 
-</html>`;
-}
+</html>`

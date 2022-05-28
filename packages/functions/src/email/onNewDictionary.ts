@@ -8,7 +8,7 @@ import { adminRecipients } from './adminRecipients';
 import { IDictionary, IUser } from '@living-dictionaries/types';
 
 import { notifyAdminsOnNewDictionary } from './composeMessages';
-// import newDictionaryWelcomeHtml from './html/newDictionary';
+import newDictionary from './html/newDictionary';
 
 export default async (
   snapshot: functions.firestore.DocumentSnapshot,
@@ -26,27 +26,15 @@ export default async (
       Destination: {
         ToAddresses: [user.email],
       },
-      // ReplyToAddresses: [data.email],
       Message: {
         Subject: {
           Charset: 'UTF-8',
           Data: 'New Living Dictionary Created',
         },
         Body: {
-          // import from SendGrid:
-          // templateId: 'd-06857893fe684cd68ff11aec2fe7e36d', // "Created Dictionary"
-          // subject: 'New Living Dictionary Created',
-          // dictionaryName: dictionary.name,
-          // dictionaryId,
-
-          // Html: {
-          //   Charset: 'UTF-8',
-          //   Data: newDictionaryWelcomeHtml,
-          // },
-
-          Text: {
+          Html: {
             Charset: 'UTF-8',
-            Data: `Hello there`,
+            Data: newDictionary(dictionary.name, dictionaryId),
           },
         },
       },
