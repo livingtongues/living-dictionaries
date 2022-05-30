@@ -5,12 +5,12 @@
   "type": "module",
   "main": "index.ts",
   "scripts": {
-    "updateLocales": "ts-node locales/update-locales.ts",
-    "importDictionary": "ts-node import/import.ts",
-    "addDictionariesToIndex:dev": "ts-node algolia/addDictionariesToIndex.ts dev",
-    "addDictionariesToIndex:prod": "ts-node algolia/addDictionariesToIndex.js prod",
-    "copyAlgoliaIndexRecords": "ts-node algolia/copyAlgoliaIndexRecords.js",
-    "copyAlgoliaIndexSettings": "ts-node algolia/copyAlgoliaIndexSettings.js",
+    "updateLocales": "esno locales/update-locales.ts",
+    "importDictionary": "esno import/import.ts",
+    "addDictionariesToIndex:dev": "esno algolia/addDictionariesToIndex.ts dev",
+    "addDictionariesToIndex:prod": "esno algolia/addDictionariesToIndex.js prod",
+    "copyAlgoliaIndexRecords": "esno algolia/copyAlgoliaIndexRecords.js",
+    "copyAlgoliaIndexSettings": "esno algolia/copyAlgoliaIndexSettings.js",
     "test": "vitest -u"
   },
   "devDependencies": {
@@ -23,9 +23,9 @@
     "csvtojson": "^2.0.10",
     "dot-object": "^2.1.4",
     "dotenv": "^16.0.0",
+    "esno": "^0.16.3",
     "firebase-admin": "^10.0.2",
     "node-fetch": "^3.1.0",
-    "ts-node": "^10.7.0",
     "typescript": "~4.6.2",
     "vitest": "^0.10.0"
   },
