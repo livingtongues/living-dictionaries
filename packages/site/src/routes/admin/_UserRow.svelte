@@ -16,12 +16,14 @@
     {user.email}
   </td>
   <td>
+    <div style="width: 200px;" />
     <IntersectionObserver let:intersecting once>
       {#if intersecting}
         <DictionariesHelping role="manager" {user} />
       {/if}
     </IntersectionObserver></td>
   <td>
+    <div style="width: 200px;" />
     <IntersectionObserver let:intersecting once>
       {#if intersecting}
         <DictionariesHelping role="contributor" {user} />

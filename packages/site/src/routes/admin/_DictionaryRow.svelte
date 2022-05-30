@@ -29,6 +29,9 @@
 </script>
 
 <tr title={$admin > 1 && JSON.stringify(dictionary, null, 1)}>
+  <td class="italic">
+    <DictionaryFieldEdit field={'name'} value={dictionary.name} dictionaryId={dictionary.id} />
+  </td>
   <td>
     <Button
       color={dictionary.public ? 'green' : 'orange'}
@@ -41,13 +44,11 @@
       {dictionary.public ? 'Public' : 'Private'}
     </Button>
   </td>
-  <td class="italic">
-    <DictionaryFieldEdit field={'name'} value={dictionary.name} dictionaryId={dictionary.id} />
-  </td>
   <td>
     {dictionary.entryCount || ''}
   </td>
   <td>
+    <div style="width: 300px;" />
     <IntersectionObserver let:intersecting once>
       {#if intersecting}
         <Collection
@@ -82,6 +83,7 @@
     </IntersectionObserver>
   </td>
   <td>
+    <div style="width: 300px;" />
     <IntersectionObserver let:intersecting once>
       {#if intersecting}
         <Collection
@@ -116,6 +118,7 @@
     </IntersectionObserver>
   </td>
   <td>
+    <div style="width: 300px;" />
     <IntersectionObserver let:intersecting once>
       {#if intersecting}
         <Collection
@@ -172,6 +175,7 @@
     <BadgeArrayEmit addMessage="Add" strings={dictionary.glossLanguages} />
   </td>
   <td>
+    <div style="width: 300px;" />
     <BadgeArrayEmit
       canEdit
       addMessage={'Add'}
@@ -200,4 +204,12 @@
       {dictionary.videoAccess ? 'Can Record' : 'Give Access'}
     </Button>
   </td>
+  <td>{dictionary.languageUsedByCommunity !== undefined ? dictionary.languageUsedByCommunity : ''}</td>
+  <td>{dictionary.communityPermission ? dictionary.communityPermission : ''}</td>
+
+  <td
+    ><div style="width: 300px;" />
+    {dictionary.authorConnection ? dictionary.authorConnection : ''}</td>
+  <td>
+    <div style="width: 300px;" />{dictionary.conLangDescription ? dictionary.conLangDescription : ''}</td>
 </tr>

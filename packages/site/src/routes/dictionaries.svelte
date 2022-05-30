@@ -24,7 +24,7 @@
   import { admin } from '$lib/stores';
   import { exportDictionariesAsCSV } from '$lib/export/csv';
   import Button from 'svelte-pieces/ui/Button.svelte';
-  import ResponsiveTable from '$lib/components/ui/ResponsiveTable.svelte';
+  import ResponsiveTable from 'svelte-pieces/ui/ResponsiveTable.svelte';
   import Header from '$lib/components/shell/Header.svelte';
 
   let queryConstraints = [orderBy('name'), where('public', '==', true)];
@@ -41,7 +41,7 @@
 
 <Header>{$_('home.list_of_dictionaries', { default: 'List of Dictionaries' })}</Header>
 
-<div class="p-3">
+<div class="p-3 sticky top-0 relative z-2 h-screen flex flex-col bg-white">
   <Collection
     path="dictionaries"
     startWith={publicDictionaries}
@@ -64,7 +64,7 @@
         </Button>
       {/if}
     </div>
-    <ResponsiveTable class="my-1">
+    <ResponsiveTable stickyColumn stickyHeading class="my-1">
       <thead>
         <th>
           {$_('dictionary.name_of_language', { default: 'Name of Language' })}
@@ -122,3 +122,9 @@
     </ResponsiveTable>
   </Collection>
 </div>
+
+<style>
+  thead th {
+    @apply text-xs font-semibold text-gray-600 uppercase tracking-wider;
+  }
+</style>
