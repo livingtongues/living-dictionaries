@@ -2,8 +2,8 @@
   import type { IDictionary } from '@living-dictionaries/types';
   export let dictionaries: IDictionary[] = [];
   enum DictionaryFields {
-    public = 'Public',
     name = 'Dictionary Name',
+    public = 'Public',
     entryCount = 'Entries',
     managers = 'Managers',
     contributors = 'Contributors',
@@ -17,6 +17,10 @@
     alternateOrthographies = 'Alternate Orthographies',
     createdAt = 'Created At',
     videoAccess = 'Video Access',
+    languageUsedByCommunity = 'Language Used by Community',
+    communityPermission = 'Community Permission',
+    authorConnection = 'Author Connection',
+    conLangDescription = 'Conlang Description',
   }
 
   type SortFields = keyof typeof DictionaryFields;
@@ -37,6 +41,10 @@
     // prettier-ignore
     switch (sortKey) {
       case 'public':
+        valueA = a.public && a.public.toString() || '';
+        valueB = b.public && b.public.toString() || '';
+        break;
+      case 'languageUsedByCommunity': // should add a test and try to combine these first two cases with the default case, boolean and strings should be able to be handled in one case
         valueA = a.public && a.public.toString() || '';
         valueB = b.public && b.public.toString() || '';
         break;
@@ -92,20 +100,28 @@
   }
 </script>
 
-{#each userFields as field}
-  <th
-    class="cursor-pointer"
-    on:click={() => setSortSettings(field.key)}
-    title="Click to sort asc/desc">
-    {field.value}
-    {#if sortKey === field.key}
-      {#if sortDescending}
-        <i class="fas fa-sort-amount-down" />
-      {:else}
-        <i class="fas fa-sort-amount-up" />
+<thead>
+  {#each userFields as field}
+    <th
+      class="cursor-pointer"
+      on:click={() => setSortSettings(field.key)}
+      title="Click to sort asc/desc">
+      {field.value}
+      {#if sortKey === field.key}
+        {#if sortDescending}
+          <i class="fas fa-sort-amount-down" />
+        {:else}
+          <i class="fas fa-sort-amount-up" />
+        {/if}
       {/if}
-    {/if}
-  </th>
-{/each}
+    </th>
+  {/each}
+</thead>
 
 <slot {sortedDictionaries} />
+
+<style>
+  th {
+    @apply text-xs font-semibold text-gray-600 uppercase tracking-wider !py-1;
+  }
+</style>
