@@ -1,8 +1,7 @@
 import * as functions from 'firebase-functions';
 import { db } from '../config';
 
-import { sesClient } from './sesClient';
-import { SendEmailCommand, SendEmailCommandInput } from '@aws-sdk/client-ses';
+import { mailersend, Recipient, EmailParams } from 'mailersend';
 import { adminRecipients } from './adminRecipients';
 
 import { IInvite } from '@living-dictionaries/types';
@@ -21,21 +20,20 @@ export default async (
         ? 'manager'
         : 'contributor, which allows you to add and edit entries';
     if (invite) {
-      const userMsg: SendEmailCommandInput = {
-        Source: 'annaluisa@livingtongues.org',
-        Destination: {
-          ToAddresses: [invite.targetEmail],
-        },
-        ReplyToAddresses: [invite.inviterEmail],
-        Message: {
-          Subject: {
-            Charset: 'UTF-8',
-            Data: `${invite.inviterName} has invited you to contribute to the ${invite.dictionaryName} Living Dictionary`,
-          },
-          Body: {
-            Text: {
-              Charset: 'UTF-8',
-              Data: `Hello,
+
+      const recipients = [
+        // new Recipient("your@client.com", "Your Client")
+        new Recipient(invite.targetEmail)
+      ];
+      
+      const emailParams = new EmailParams()
+            .setFrom("annaluisa@livingtongues.org")
+            .setFromName("Anna Luisa Daigneault")
+            .setRecipients(recipients)
+            .setReplyTo(invite.inviterEmail)
+            .setReplyToName(invite.inviterEmail)
+            .setSubject(`${invite.inviterName} has invited you to contribute to the ${invite.dictionaryName} Living Dictionary`)
+            .setHtml(`Hello,
 
 ${invite.inviterName} has invited you to work on the ${invite.dictionaryName} Living Dictionary as a ${roleMessage}. If you would like to help with this dictionary, then open this link: https://livingdictionaries.app/${dictionaryId}/invite/${inviteId} to  access the dictionary.
 
@@ -45,12 +43,9 @@ Thank you,
 Living Tongues Institute for Endangered Languages
 
 https://livingtongues.org (Living Tongues Homepage)
-https://livingdictionaries.app (Living Dictionaries website)`,
-            },
-          },
-        },
-      };
-      const reply = await sesClient.send(new SendEmailCommand(userMsg));
+https://livingdictionaries.app (Living Dictionaries website)`);
+      
+      const reply = await mailersend.send(emailParams);
       console.log(reply);
 
       const inviteRef = db.doc(`dictionaries/${dictionaryId}/invites/${inviteId}`);
