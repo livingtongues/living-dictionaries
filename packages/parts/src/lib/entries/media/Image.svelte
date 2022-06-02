@@ -1,21 +1,25 @@
 <script lang="ts">
-  import { _ } from 'svelte-i18n';
-  import type { IEntry } from '@living-dictionaries/types';
-  export let entry: IEntry,
+  import type { Readable } from 'svelte/store';
+  export let t: Readable<any> = undefined;
+
+  export let lexeme: string,
+    // glosses = undefined,
+    gcs: string,
     canEdit = false,
     square: number = undefined,
     width: number = undefined,
     height: number = undefined;
+
   import { crossfade, scale } from 'svelte/transition';
   const [send, receive] = crossfade({
     duration: 200,
     fallback: scale,
   });
-  let w;
+  let w: number;
   let loading = false;
   let viewing = false;
 
-  $: src = `https://lh3.googleusercontent.com/${entry.pf.gcs}=w${w >= 768 ? w - 24 : w}`;
+  $: src = `https://lh3.googleusercontent.com/${gcs}=w${w >= 768 ? w - 24 : w}`;
 
   function load() {
     const timeout = setTimeout(() => (loading = true), 100);
@@ -29,27 +33,34 @@
 
     img.src = src;
   }
+  const key = {};
 
-  import { deleteImage } from '$lib/helpers/delete';
+  import { createEventDispatcher } from 'svelte';
+  import Button from 'svelte-pieces/ui/Button.svelte';
+  const dispatch = createEventDispatcher<{
+    delete: boolean;
+  }>();
 </script>
 
 {#if !viewing}
-  <img
-    class="h-full w-full object-cover cursor-pointer"
-    on:click={load}
-    in:receive|local={{ key: entry.id }}
-    out:send|local={{ key: entry.id }}
-    alt=""
-    src="https://lh3.googleusercontent.com/{entry.pf.gcs}={square
-      ? `s${square}-p`
-      : width
-      ? `w${width}`
-      : height
-      ? `h${height}`
-      : 's0'}" />
-  {#if loading}
-    <i class="far fa-spinner fa-pulse absolute bottom-3 right-3 text-white" />
-  {/if}
+  <div class="h-full w-full relative">
+    <img
+      class="h-full w-full object-cover cursor-pointer"
+      on:click={load}
+      in:receive|local={{ key }}
+      out:send|local={{ key }}
+      alt=""
+      src="https://lh3.googleusercontent.com/{gcs}={square
+        ? `s${square}-p`
+        : width
+        ? `w${width}`
+        : height
+        ? `h${height}`
+        : 's0'}" />
+    {#if loading}
+      <span class="i-gg-spinner animate-spin absolute bottom-1 right-1 text-white" />
+    {/if}
+  </div>
 {/if}
 
 <div class="fixed left-0 right-0 top-0" style="height: 1px;" bind:clientWidth={w} />
@@ -60,28 +71,32 @@
       viewing = false;
     }}
     class="fixed inset-0 md:p-3 flex flex-col items-center justify-center"
-    in:receive={{ key: entry.id }}
-    out:send={{ key: entry.id }}
+    in:receive={{ key }}
+    out:send={{ key }}
     style="background: rgba(0, 0, 0, 0.85); z-index: 51; will-change: transform;">
     <div class="h-full flex flex-col justify-center">
       <div
         class="font-semibold text-white p-4 flex justify-between items-center
           absolute top-0 inset-x-0 bg-opacity-25 bg-black">
-        <span on:click|stopPropagation>{entry.lx}</span>
-        <i class="far fa-times p-3 cursor-pointer" />
+        <span on:click|stopPropagation>{lexeme}</span>
+        <span class="i-fa-solid-times p-3 cursor-pointer" />
       </div>
-      <img class="object-contain max-h-full" alt="Image of {entry.lx}" {src} />
+      <img class="object-contain max-h-full" alt="Image of {lexeme}" {src} />
       {#if canEdit}
         <div
-          class="font-semibold text-red-500 p-4 flex justify-between
+          class="p-4 flex justify-between
             items-center absolute bottom-0 inset-x-0 bg-opacity-25 bg-black">
-          <button
-            type="button"
-            on:click|stopPropagation={() => deleteImage(entry)}
-            class="ml-auto px-3 py-2">
-            <i class="far fa-trash-alt" />
-            {$_('misc.delete', { default: 'Delete' })}
-          </button>
+          <Button
+          class="ml-auto"
+            color="red"
+            form="filled"
+            onclick={(e) => {
+              e.stopPropagation();
+              dispatch('delete');
+            }}>
+            <span class="i-fa-trash-o" style="margin: -1px 0 2px;" />
+            {t ? $t('misc.delete') : 'Delete'}
+          </Button>
         </div>
       {/if}
     </div>
