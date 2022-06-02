@@ -35,8 +35,8 @@
   }
   const key = {};
 
-  import { createEventDispatcher } from 'svelte';
   import Button from 'svelte-pieces/ui/Button.svelte';
+  import { createEventDispatcher } from 'svelte';
   const dispatch = createEventDispatcher<{
     delete: boolean;
   }>();
