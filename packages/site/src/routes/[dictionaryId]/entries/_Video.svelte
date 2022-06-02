@@ -20,7 +20,7 @@
       {$t('video.view', { default: 'View' })}
     </div>
     {#if show}
-      {#await import('$lib/components/video/PlayVideo.svelte') then { default: PlayVideo }}
+      {#await import('@ld/parts/src/lib/entries/video/PlayVideo.svelte') then { default: PlayVideo }}
         <PlayVideo
           {t}
           {entry}

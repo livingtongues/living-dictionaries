@@ -13,11 +13,13 @@
   import Button from 'svelte-pieces/ui/Button.svelte';
   import { createEventDispatcher } from 'svelte';
   const dispatch = createEventDispatcher<{
+    close: boolean;
     delete: boolean;
   }>();
 </script>
 
 <div
+  on:click={() => dispatch('close')}
   class="fixed inset-0 md:p-3 flex flex-col items-center justify-center"
   style="background: rgba(0, 0, 0, 0.85); z-index: 51; will-change: transform;">
   <div class="h-full flex flex-col justify-center">
@@ -25,7 +27,7 @@
       class="font-semibold text-white p-4 flex justify-between items-center
           absolute top-0 inset-x-0 bg-opacity-25 bg-black">
       <span on:click|stopPropagation>{entry.lx}</span>
-      <i class="far fa-times p-3 cursor-pointer" />
+      <span class="i-fa-solid-times p-3 cursor-pointer" />
     </div>
     {#if video}
       {#if !video.youtubeId && !video.vimeoId}
@@ -33,9 +35,10 @@
           controls
           autoplay
           playsinline
-          src={`https://firebasestorage.googleapis.com/v0/b/${
-            storageBucket
-          }/o/${video.path.replace(/\//g, '%2F')}?alt=media`}>
+          src={`https://firebasestorage.googleapis.com/v0/b/${storageBucket}/o/${video.path.replace(
+            /\//g,
+            '%2F'
+          )}?alt=media`}>
           <track kind="captions" />
         </video>
       {:else}
