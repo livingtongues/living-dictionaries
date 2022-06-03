@@ -1,11 +1,12 @@
 <script lang="ts">
-  import { _ } from 'svelte-i18n';
+  import { t } from 'svelte-i18n';
   import type { IEntry } from '@living-dictionaries/types';
   import Audio from '../entries/_Audio.svelte';
   import AddImage from '../entries/_AddImage.svelte';
-  import Image from '$lib/components/image/Image.svelte';
+  import { Image } from '@ld/parts';
   import ShowHide from 'svelte-pieces/functions/ShowHide.svelte';
   import Video from '../entries/_Video.svelte';
+  import { deleteImage } from '$lib/helpers/delete';
 
   export let entry: IEntry,
     videoAccess = false,
@@ -24,7 +25,7 @@
       on:click={toggle}>
       <i class="far fa-video-plus my-1 mx-2" />
       <span class="text-xs">
-        {$_('video.add_video', { default: 'Add Video' })}
+        {$t('video.add_video', { default: 'Add Video' })}
       </span>
     </div>
     {#if show}
@@ -37,12 +38,18 @@
 
 {#if entry.pf}
   <div class="w-full overflow-hidden rounded relative mb-2" style="height: 25vh;">
-    <Image width={400} {entry} {canEdit} />
+    <Image
+      {t}
+      width={400}
+      lexeme={entry.lx}
+      gcs={entry.pf.gcs}
+      {canEdit}
+      on:delete={() => deleteImage(entry)} />
   </div>
 {:else if canEdit}
   <AddImage {entry} class="rounded-md h-20 bg-gray-100 mb-2">
     <div class="text-xs" slot="text">
-      {$_('entry.upload_photo', { default: 'Upload Photo' })}
+      {$t('entry.upload_photo', { default: 'Upload Photo' })}
     </div>
   </AddImage>
 {/if}
