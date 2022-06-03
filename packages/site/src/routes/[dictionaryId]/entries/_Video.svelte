@@ -19,17 +19,17 @@
     <div class="text-gray-600 text-sm mt-1">
       {$t('video.view', { default: 'View' })}
     </div>
-    {#if show}
-      {#await import('@ld/parts/src/lib/entries/video/PlayVideo.svelte') then { default: PlayVideo }}
-        <PlayVideo
-          {t}
-          {entry}
-          {video}
-          storageBucket={firebaseConfig.storageBucket}
-          {canEdit}
-          on:close={toggle}
-          on:delete={() => deleteVideo(entry, video)} />
-      {/await}
-    {/if}
   </div>
+  {#if show}
+    {#await import('@ld/parts/src/lib/entries/video/PlayVideo.svelte') then { default: PlayVideo }}
+      <PlayVideo
+        {t}
+        {entry}
+        {video}
+        storageBucket={firebaseConfig.storageBucket}
+        {canEdit}
+        on:close={toggle}
+        on:delete={() => deleteVideo(entry, video)} />
+    {/await}
+  {/if}
 </ShowHide>
