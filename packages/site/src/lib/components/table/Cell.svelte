@@ -1,13 +1,14 @@
 <script lang="ts">
-  import { _ } from 'svelte-i18n';
+  import { t } from 'svelte-i18n';
   import Textbox from './cells/Textbox.svelte';
   import SemanticDomains from './cells/SemanticDomains.svelte';
   import SelectPOS from './cells/SelectPOS.svelte';
   import SelectSpeakerCell from './cells/SelectSpeakerCell.svelte';
   import SelectSource from './cells/SelectSource.svelte';
   import AudioCell from './cells/AudioCell.svelte';
-  import Image from '$lib/components/image/Image.svelte';
+  import { Image } from '@ld/parts';
   import { saveUpdateToFirestore } from '$lib/helpers/entry/update';
+  import { deleteImage } from '$lib/helpers/delete';
   import { dictionary } from '$lib/stores';
   import type { IColumn, IEntry } from '@living-dictionaries/types';
   export let column: IColumn,
@@ -26,7 +27,13 @@
     <AudioCell {canEdit} {entry} />
   {:else if column.field === 'photoFile'}
     {#if entry.pf}
-      <Image {canEdit} {entry} square={60} />
+      <Image
+        {t}
+        {canEdit}
+        lexeme={entry.lx}
+        gcs={entry.pf.gcs}
+        square={60}
+        on:delete={() => deleteImage(entry)} />
     {/if}
     <!-- // TODO: add videos to columns -->
     <!-- {:else if column.field === 'videoFile'}
@@ -55,7 +62,7 @@
       {canEdit}
       field={`gl.${column.field}`}
       value={entry.gl && entry.gl[column.field]}
-      display={$_(`gl.${column.field}`, {default: 'Gloss'})}
+      display={$t(`gl.${column.field}`, { default: 'Gloss' })}
       {updatedValue}
       htmlValue={(entry._highlightResult &&
         entry._highlightResult.gl &&
@@ -68,9 +75,12 @@
       {canEdit}
       field={`xs.${column.field}`}
       value={entry.xs && entry.xs[column.field]}
-      display={`${column.field !== 'xv' ? $_(`gl.${column.field}`) : ''} ${$_('entry.example_sentence', {
-        default: 'Example Sentence',
-      })}`}
+      display={`${column.field !== 'xv' ? $t(`gl.${column.field}`) : ''} ${$t(
+        'entry.example_sentence',
+        {
+          default: 'Example Sentence',
+        }
+      )}`}
       {updatedValue}
       htmlValue={(entry._highlightResult &&
         entry._highlightResult.xs &&
@@ -83,7 +93,7 @@
       {canEdit}
       field={column.field}
       value={entry[column.field]}
-      display={$_(`entry.${column.field}`, {default: 'Edit'})}
+      display={$t(`entry.${column.field}`, { default: 'Edit' })}
       {updatedValue}
       htmlValue={(entry._highlightResult &&
         entry._highlightResult[column.field] &&

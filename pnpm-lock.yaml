@@ -56,12 +56,13 @@ importers:
   packages/parts:
     specifiers:
       '@living-dictionaries/types': ^1.0.0
-      '@sveltejs/adapter-auto': ^1.0.0-next.40
-      '@sveltejs/kit': ^1.0.0-next.323
+      '@sveltejs/adapter-auto': 1.0.0-next.41
+      '@sveltejs/kit': 1.0.0-next.330
+      '@sveltejs/vite-plugin-svelte': 1.0.0-next.45
       '@types/mapbox-gl': ^2.7.0
       '@types/recordrtc': ^5.6.8
       '@types/youtube': ^0.0.46
-      kitbook: ^0.0.13
+      kitbook: ^0.0.14
       mapbox-gl: ^2.8.1
       mdsvex: ^0.10.5
       recordrtc: ^5.6.2
@@ -78,12 +79,13 @@ importers:
       windicss: ^3.5.1
     devDependencies:
       '@living-dictionaries/types': link:../types
-      '@sveltejs/adapter-auto': 1.0.0-next.40
-      '@sveltejs/kit': 1.0.0-next.323_svelte@3.47.0
+      '@sveltejs/adapter-auto': 1.0.0-next.41
+      '@sveltejs/kit': 1.0.0-next.330_svelte@3.47.0
+      '@sveltejs/vite-plugin-svelte': 1.0.0-next.45_svelte@3.47.0
       '@types/mapbox-gl': 2.7.0
       '@types/recordrtc': 5.6.8
       '@types/youtube': 0.0.46
-      kitbook: 0.0.13_svelte@3.47.0
+      kitbook: 0.0.14_svelte@3.47.0
       mapbox-gl: 2.8.1
       mdsvex: 0.10.5_svelte@3.47.0
       recordrtc: 5.6.2
@@ -134,8 +136,9 @@ importers:
       '@ld/parts': workspace:^0.0.1
       '@living-dictionaries/types': workspace:^1.0.0
       '@sentry/browser': ^6.18.2
-      '@sveltejs/adapter-auto': 1.0.0-next.40
-      '@sveltejs/kit': 1.0.0-next.323
+      '@sveltejs/adapter-auto': 1.0.0-next.41
+      '@sveltejs/kit': 1.0.0-next.330
+      '@sveltejs/vite-plugin-svelte': 1.0.0-next.45
       '@testing-library/jest-dom': ^5.15.0
       '@testing-library/svelte': ^3.0.3
       '@types/d3-dsv': ^3.0.0
@@ -174,8 +177,9 @@ importers:
       '@ld/parts': link:../parts
       '@living-dictionaries/types': link:../types
       '@sentry/browser': 6.19.3
-      '@sveltejs/adapter-auto': 1.0.0-next.40
-      '@sveltejs/kit': 1.0.0-next.323_svelte@3.47.0
+      '@sveltejs/adapter-auto': 1.0.0-next.41
+      '@sveltejs/kit': 1.0.0-next.330_svelte@3.47.0
+      '@sveltejs/vite-plugin-svelte': 1.0.0-next.45_svelte@3.47.0
       '@testing-library/jest-dom': 5.16.3
       '@testing-library/svelte': 3.1.0_svelte@3.47.0
       '@types/d3-dsv': 3.0.0
@@ -1568,11 +1572,11 @@ packages:
     engines: {node: '>=6'}
     dev: false
 
-  /@sveltejs/adapter-auto/1.0.0-next.40:
-    resolution: {integrity: sha512-TT6YJUF3asJ/2RbviEpcDJQ/TixPcvmH0L2266fGNT7+KfAf9wbbVdegPWRODk2E2hTN0X+h5YS9l+lap+BK9w==}
+  /@sveltejs/adapter-auto/1.0.0-next.41:
+    resolution: {integrity: sha512-CbC2YIgsUaxyMyOiUNYyWeJOgoYGdXkEUXT4t+dLr1lDOtf0TL2ws1rdM5C7iKoCXtUFbf3J58f6JxZ85ggWVg==}
     dependencies:
       '@sveltejs/adapter-cloudflare': 1.0.0-next.19
-      '@sveltejs/adapter-netlify': 1.0.0-next.56
+      '@sveltejs/adapter-netlify': 1.0.0-next.57
       '@sveltejs/adapter-vercel': 1.0.0-next.50
     dev: true
 
@@ -1583,8 +1587,8 @@ packages:
       worktop: 0.8.0-next.13
     dev: true
 
-  /@sveltejs/adapter-netlify/1.0.0-next.56:
-    resolution: {integrity: sha512-fM3aBHsr7syCGfIJcuB1mEoZwynqyOxVijvmyrd9OWHi6MP3bXSP+GhKDMtDpQRwejJJiwuZNTx2PUbV3uirvA==}
+  /@sveltejs/adapter-netlify/1.0.0-next.57:
+    resolution: {integrity: sha512-rqvOr488+7NGkEHw/D6v1Y8Fg0MbiUP/YI1uSYjKy+tA8/4FOdBgU8Nk8daPTxWEU+CpsgzvA4X8IVonuML9SA==}
     dependencies:
       '@iarna/toml': 2.2.5
       esbuild: 0.14.38
@@ -1597,14 +1601,14 @@ packages:
       esbuild: 0.14.38
     dev: true
 
-  /@sveltejs/kit/1.0.0-next.323_svelte@3.47.0:
-    resolution: {integrity: sha512-5JVBfXZqVcWhsvtxdwtFPEzLNM8FmttNNyN0h5P25KLryF3BeOg5OicRK3t7qNBmWTTNovDgChb/gWmne5Oicg==}
+  /@sveltejs/kit/1.0.0-next.330_svelte@3.47.0:
+    resolution: {integrity: sha512-Wb95D5tOF8BViZuikqzZLAcupdS7TpXtadNPgpEOxKowmkrW8xjRrrfVdPIkNOLqAP1V+gKInmQ/gFYmnv5EjA==}
     engines: {node: '>=14.13'}
     hasBin: true
     peerDependencies:
       svelte: ^3.44.0
     dependencies:
-      '@sveltejs/vite-plugin-svelte': 1.0.0-next.42_svelte@3.47.0+vite@2.9.6
+      '@sveltejs/vite-plugin-svelte': 1.0.0-next.45_svelte@3.47.0+vite@2.9.6
       chokidar: 3.5.3
       sade: 1.8.1
       svelte: 3.47.0
@@ -1617,8 +1621,8 @@ packages:
       - supports-color
     dev: true
 
-  /@sveltejs/vite-plugin-svelte/1.0.0-next.42_svelte@3.47.0+vite@2.9.6:
-    resolution: {integrity: sha512-I8ILzfjVQuOkl6eDHif6/QJhOEBnsA40u6/0RDWK0mujwOr+MfWCWEZEnrTKqa6YIVMO+uktfoknu61chbAIeg==}
+  /@sveltejs/vite-plugin-svelte/1.0.0-next.45_svelte@3.47.0:
+    resolution: {integrity: sha512-WLschM2qpa4lSpKR4zTVDJ2AW48u3Gjs3BX5s6aZvLRC3bjBjKcOcGmOG9pLu07C869wdMwZFZ+GroVcx7ZKpw==}
     engines: {node: ^14.13.1 || >= 16}
     peerDependencies:
       diff-match-patch: ^1.0.5
@@ -1630,6 +1634,29 @@ packages:
     dependencies:
       '@rollup/pluginutils': 4.2.1
       debug: 4.3.4
+      deepmerge: 4.2.2
+      kleur: 4.1.4
+      magic-string: 0.26.2
+      svelte: 3.47.0
+      svelte-hmr: 0.14.11_svelte@3.47.0
+    transitivePeerDependencies:
+      - supports-color
+    dev: true
+
+  /@sveltejs/vite-plugin-svelte/1.0.0-next.45_svelte@3.47.0+vite@2.9.6:
+    resolution: {integrity: sha512-WLschM2qpa4lSpKR4zTVDJ2AW48u3Gjs3BX5s6aZvLRC3bjBjKcOcGmOG9pLu07C869wdMwZFZ+GroVcx7ZKpw==}
+    engines: {node: ^14.13.1 || >= 16}
+    peerDependencies:
+      diff-match-patch: ^1.0.5
+      svelte: ^3.44.0
+      vite: ^2.9.0
+    peerDependenciesMeta:
+      diff-match-patch:
+        optional: true
+    dependencies:
+      '@rollup/pluginutils': 4.2.1
+      debug: 4.3.4
+      deepmerge: 4.2.2
       kleur: 4.1.4
       magic-string: 0.26.2
       svelte: 3.47.0
@@ -5186,8 +5213,8 @@ packages:
       json-buffer: 3.0.0
     dev: false
 
-  /kitbook/0.0.13_svelte@3.47.0:
-    resolution: {integrity: sha512-YH44XRDHrXua/s+B4vKzg4QIOBVn+I9ozYIyhEasHt2XQIE5tsuM0ng9YpJrTu95uV53Zc5wRpV9QMt39ASSLA==}
+  /kitbook/0.0.14_svelte@3.47.0:
+    resolution: {integrity: sha512-kIpr6KtHPvHLdU4pHgLbRMZDP76xYZ6XTEPFQW593QZ85UCk3tdz7n7IKyE7gvrfPPQEN+o8J6SKV3g6j3FrRA==}
     dependencies:
       svelte-store-router: 2.0.10_svelte@3.47.0
     transitivePeerDependencies:

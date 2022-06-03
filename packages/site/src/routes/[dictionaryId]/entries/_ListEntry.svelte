@@ -1,21 +1,25 @@
 <script lang="ts">
-  import { _ } from 'svelte-i18n';
+  import { t } from 'svelte-i18n';
   import Audio from './_Audio.svelte';
   import Video from './_Video.svelte';
-  import Image from '$lib/components/image/Image.svelte';
+  import { Image } from '@ld/parts';
   import AddImage from './_AddImage.svelte';
   import { page } from '$app/stores';
   import type { IEntry } from '@living-dictionaries/types';
   import { printGlosses } from '$lib/helpers/glosses';
   import { minutesAgo } from '$lib/helpers/time';
+  import { deleteImage } from '$lib/helpers/delete';
   import ShowHide from 'svelte-pieces/functions/ShowHide.svelte';
   import { showEntryGlossLanguages } from '$lib/helpers/glosses';
-  import {dictionary} from '$lib/stores'
+  import { dictionary } from '$lib/stores';
   export let entry: IEntry,
     canEdit = false,
     videoAccess = false;
 
-  $: glosses = $dictionary.id === 'jewish-neo-aramaic' ? printGlosses(entry.gl, true).join(', ') : printGlosses(entry.gl).join(', ');
+  $: glosses =
+    $dictionary.id === 'jewish-neo-aramaic'
+      ? printGlosses(entry.gl, true).join(', ')
+      : printGlosses(entry.gl).join(', ');
 </script>
 
 <div
@@ -43,12 +47,11 @@
       {#if entry.lo3}<i class="mr-1">{entry.lo3}</i>{/if}
       {#if entry.lo4}<i class="mr-1">{entry.lo4}</i>{/if}
       {#if entry.lo5}<i class="mr-1">{entry.lo5}</i>{/if}
-      
     </div>
     <div class="flex flex-wrap items-center justify-end -mb-1">
       <div class="text-xs text-gray-600 mr-auto mb-1">
         {#if entry.ps}
-          <i>{$_('psAbbrev.' + entry.ps, { default: entry.ps })},</i>
+          <i>{$t('psAbbrev.' + entry.ps, { default: entry.ps })},</i>
         {/if}
         {#if glosses.indexOf('<i>') > -1}
           {@html glosses}
@@ -57,31 +60,40 @@
         {/if}
         {#if $dictionary.id === 'jewish-neo-aramaic'}
           {#if entry.di}<p class="text-xs"><i class="mr-1">Dialect: {entry.di}</i></p>{/if}
-          {#if entry.xs && entry.xs.vn}<p><span class="font-semibold">{$_('entry.example_sentence', { default: 'Example Sentence' })}:</span> {entry.xs.vn}</p>{/if}
+          {#if entry.xs && entry.xs.vn}<p>
+              <span class="font-semibold"
+                >{$t('entry.example_sentence', { default: 'Example Sentence' })}:</span>
+              {entry.xs.vn}
+            </p>{/if}
           {#if entry.xs}
             {#each showEntryGlossLanguages(entry.gl, $dictionary.glossLanguages) as bcp}
               {#if entry.xs[bcp]}
-              <p><span class="font-semibold">{$_(`gl.${bcp}`)} {$_('entry.example_sentence', {
-                  default: 'Example Sentence',
-                })}:</span> {entry.xs[bcp]}</p>
+                <p>
+                  <span class="font-semibold"
+                    >{$t(`gl.${bcp}`)}
+                    {$t('entry.example_sentence', {
+                      default: 'Example Sentence',
+                    })}:</span>
+                  {entry.xs[bcp]}
+                </p>
               {/if}
             {/each}
           {/if}
         {/if}
       </div>
-    
+
       {#if entry.sd}
         <span class="px-2 py-1 leading-tight text-xs bg-gray-100 rounded ml-1">
           <i>{entry.sd}</i>
         </span>
       {/if}
-      
+
       {#if entry.sdn && entry.sdn.length}
         {#each entry.sdn as domain}
           <span
             class="px-2 py-1 leading-tight text-xs bg-gray-100 rounded ml-1
         mb-1">
-            {$_('sd.' + domain, { default: domain })}
+            {$t('sd.' + domain, { default: domain })}
           </span>
         {/each}
       {/if}
@@ -106,12 +118,18 @@
   {/if}
   {#if entry.pf}
     <div class="media-block bg-gray-300 relative">
-      <Image square={128} {entry} {canEdit} />
+      <Image
+        {t}
+        square={128}
+        lexeme={entry.lx}
+        gcs={entry.pf.gcs}
+        {canEdit}
+        on:delete={() => deleteImage(entry)} />
     </div>
   {:else if canEdit}
     <AddImage {entry} class="w-12 bg-gray-100">
       <div class="text-xs" slot="text">
-        {$_('entry.photo', { default: 'Photo' })}
+        {$t('entry.photo', { default: 'Photo' })}
       </div>
     </AddImage>
   {/if}

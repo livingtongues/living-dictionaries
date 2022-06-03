@@ -39,7 +39,7 @@
     refine({ isRefined: true });
   });
 
-  import Image from '$lib/components/image/Image.svelte';
+  import { Image } from '@ld/parts';
   import { canEdit } from '$lib/stores';
   import type { IEntry } from '@living-dictionaries/types';
   let hitsType: IEntry;
@@ -56,7 +56,8 @@
         <div
           class="bg-gray-300 shadow relative rounded overflow-hidden"
           style="max-width: 500px; max-height: 500px;">
-          <Image square={480} {entry} canEdit={$canEdit} />
+          <Image square={480} lexeme={entry.lx} gcs={entry.pf.gcs} canEdit={$canEdit} />
+          <!-- Not catching delete event -->
           <div
             class="text-dark-shadow text-white font-semibold p-2 absolute top-0
               left-0">
