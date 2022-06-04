@@ -1,18 +1,17 @@
 /// <reference types="@sveltejs/kit" />
-import type { IUser } from '@living-dictionaries/types';
 
 // See https://kit.svelte.dev/docs/types#the-app-namespace
 // for information about these interfaces
 declare namespace App {
 	interface Locals {
-    user: IUser;
+    user: import('@living-dictionaries/types').IUser;
     chosenLocale: string;
 	}
   
 	// interface Platform {}
   
   interface Session {
-    user: IUser;
+    user: import('@living-dictionaries/types').IUser;
     acceptedLanguage: string;
     chosenLocale: string;
   }
