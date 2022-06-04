@@ -64,20 +64,28 @@
   }
 </script>
 
-{#each userFields as field}
-  <th
-    class="cursor-pointer"
-    on:click={() => setSortSettings(field.key)}
-    title="Click to sort asc/desc">
-    {field.value}
-    {#if sortKey === field.key}
-      {#if sortDescending}
-        <i class="fas fa-sort-amount-down" />
-      {:else}
-        <i class="fas fa-sort-amount-up" />
+<thead>
+  {#each userFields as field}
+    <th
+      class="cursor-pointer"
+      on:click={() => setSortSettings(field.key)}
+      title="Click to sort asc/desc">
+      {field.value}
+      {#if sortKey === field.key}
+        {#if sortDescending}
+          <i class="fas fa-sort-amount-down" />
+        {:else}
+          <i class="fas fa-sort-amount-up" />
+        {/if}
       {/if}
-    {/if}
-  </th>
-{/each}
+    </th>
+  {/each}
+</thead>
 
 <slot {sortedUsers} />
+
+<style>
+  th {
+    @apply text-xs font-semibold text-gray-600 uppercase tracking-wider !py-1;
+  }
+</style>

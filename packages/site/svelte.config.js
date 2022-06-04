@@ -7,6 +7,10 @@ import { windi } from "svelte-windicss-preprocess";
 
 /** @type {import('@sveltejs/kit').Config} */
 const config = {
+	experimental: {
+		inspector: true
+	},
+
 	preprocess: [
 		preprocess({
 			replace: [
@@ -37,7 +41,7 @@ const config = {
 					$sveltefirets: path.resolve('./src/sveltefirets'),
 				}
 			},
-      envDir: '../../',
+			envDir: '../../',
 		},
 
 	}
