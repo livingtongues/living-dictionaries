@@ -1,4 +1,4 @@
-import type { GeoPoint, Timestamp } from 'firebase/firestore';
+import type { GeoPoint } from 'firebase/firestore';
 import type { IFirestoreMetaData } from '.';
 
 export interface IDictionary extends IFirestoreMetaData {
@@ -18,7 +18,7 @@ export interface IDictionary extends IFirestoreMetaData {
   videoAccess?: boolean;
 
   languageUsedByCommunity?: boolean;
-  communityPermission?: 'yes' | 'no' | 'unknown'; // date will be if "Yes", false will be if "No", and don't set property if "I don't know" - can use if (communityPermission === false) to distinguish between false and undefined - requires making sure falses don't get stripped out by the trimming function
+  communityPermission?: 'yes' | 'no' | 'unknown';
   authorConnection?: string;
   conLangDescription?: string;
 

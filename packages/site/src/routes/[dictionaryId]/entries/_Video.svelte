@@ -1,7 +1,10 @@
 <script lang="ts">
-  import { _ } from 'svelte-i18n';
+  import { t } from 'svelte-i18n';
   import type { IEntry, IVideo } from '@living-dictionaries/types';
   import ShowHide from 'svelte-pieces/functions/ShowHide.svelte';
+  import { deleteVideo } from '$lib/helpers/delete';
+  import { firebaseConfig } from '$sveltefirets';
+
   export let entry: IEntry,
     video: IVideo,
     canEdit = false;
@@ -14,12 +17,19 @@
     on:click={toggle}>
     <i class="far fa-film-alt fa-lg mt-1" />
     <div class="text-gray-600 text-sm mt-1">
-      {$_('video.view', { default: 'View' })}
+      {$t('video.view', { default: 'View' })}
     </div>
-    {#if show}
-      {#await import('$lib/components/video/PlayVideo.svelte') then { default: PlayVideo }}
-        <PlayVideo {entry} {video} {canEdit} on:close={toggle} />
-      {/await}
-    {/if}
   </div>
+  {#if show}
+    {#await import('@ld/parts/src/lib/entries/video/PlayVideo.svelte') then { default: PlayVideo }}
+      <PlayVideo
+        {t}
+        {entry}
+        {video}
+        storageBucket={firebaseConfig.storageBucket}
+        {canEdit}
+        on:close={toggle}
+        on:delete={() => deleteVideo(entry, video)} />
+    {/await}
+  {/if}
 </ShowHide>
