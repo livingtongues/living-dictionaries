@@ -8,7 +8,7 @@ import { windi } from "svelte-windicss-preprocess";
 /** @type {import('@sveltejs/kit').Config} */
 const config = {
 	experimental: {
-		inspector: true
+		inspector: true // use by pressing Ctrl + Shift and hovering over the component
 	},
 
 	preprocess: [
