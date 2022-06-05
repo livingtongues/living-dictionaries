@@ -63,13 +63,13 @@
 
   <div class="flex">
     {#if editing}
-      <div class="max-w-screen-md prose prose-lg">
+      <div class="max-w-screen-md tw-prose prose-lg">
         {#await import('$lib/components/editor/ClassicCustomized.svelte') then { default: ClassicCustomized }}
           <ClassicCustomized bind:html={about} />
         {/await}
       </div>
     {/if}
-    <div class="prose prose-lg max-w-screen-md {editing && 'hidden md:block mt-14 ml-3'}">
+    <div class="tw-prose prose-lg max-w-screen-md {editing && 'hidden md:block mt-14 ml-3'}">
       {#if about}
         {@html about}
       {:else}
