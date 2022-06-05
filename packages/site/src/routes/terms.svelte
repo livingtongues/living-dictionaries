@@ -12,7 +12,7 @@
 </Header>
 
 <div class="max-w-screen-md mx-auto p-3">
-  <div class="prose max-w-none">
+  <div class="tw-prose max-w-none">
     <h2 class="uppercase">{$_('terms.agreement_to_terms', { default: 'Agreement to Terms' })}</h2>
     <div style="direction: ltr">
       <p>
