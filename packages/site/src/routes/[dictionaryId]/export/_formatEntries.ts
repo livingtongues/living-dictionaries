@@ -3,6 +3,7 @@ import { glossingLanguages } from './_glossing-languages-temp';
 import { semanticDomains } from '$lib/mappings/semantic-domains';
 import { partsOfSpeech } from '$lib/mappings/parts-of-speech';
 import { friendlyName } from '$lib/helpers/friendlyName';
+import { replaceHTMLTags } from '$lib/export/replaceHTMLTags';
 
 function turnArrayIntoPipedString(itemsFormatted, i, values, columnName, fn) {
   if (values) {
@@ -94,7 +95,9 @@ export function formatEntriesForCSV(
       in: entry.in ? entry.in.replace(/[,"\r\n]/g, (m) => replacementChars[m]) : '',
       mr: entry.mr ? entry.mr.replace(/[,"\r\n]/g, (m) => replacementChars[m]) : '',
       di: entry.di ? entry.di.replace(/[,"\r\n]/g, (m) => replacementChars[m]) : '',
-      nt: entry.nt ? entry.nt.replace(/[,"\r\n]/g, (m) => replacementChars[m]) : '',
+      nt: entry.nt
+        ? replaceHTMLTags(entry.nt.replace(/[,"\r\n]/g, (m) => replacementChars[m]))
+        : '',
       //xv: entry.xv,
     });
 
@@ -145,7 +148,7 @@ export function formatEntriesForCSV(
     //Assigning glosses
     glossLanguages.forEach((bcp) => {
       const cleanEntry = entry.gl[bcp]
-        ? entry.gl[bcp].replace(/[,"\r\n]/g, (m) => replacementChars[m])
+        ? replaceHTMLTags(entry.gl[bcp].replace(/[,"\r\n]/g, (m) => replacementChars[m]))
         : '';
       itemsFormatted[i][`gl${bcp}`] = cleanEntry;
     });
