@@ -25,12 +25,14 @@
         class="border-dashed pb-1 mb-2">
         {#if value}
           <div dir="ltr">
-            {#if value.indexOf('<i>') > -1}
-              <!-- prettier-ignore -->
-              {#if field === 'ph'}[{/if}{@html value}{#if field === 'ph'}]{/if}
+            {#if field === 'nt' || value.indexOf('<i>') > -1}
+              <span class="tw-prose">
+                {@html value}
+              </span>
+            {:else if field === 'ph'}
+              [{value}]
             {:else}
-              <!-- prettier-ignore -->
-              {#if field === 'ph'}[{/if}{value}{#if field === 'ph'}]{/if}
+              {value}
             {/if}
           </div>
         {:else}<i class="far fa-pencil text-gray-500 text-sm" />{/if}

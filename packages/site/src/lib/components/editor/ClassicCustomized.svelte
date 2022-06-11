@@ -4,7 +4,7 @@
   import { onMount } from 'svelte';
   let editor: any;
 
-  let editorConfig = {
+  export let editorConfig: Record<string, any> = {
     // TODO: figure out which plugins to remove related to photos to speed up
     // removePlugins: ['MediaEmbed'],
     // Available plugins for ClassicEditor: Essentials, CKFinderUploadAdapter, Autoformat, Bold, Italic, BlockQuote, CKFinder, EasyImage, Heading, Image, ImageCaption, ImageStyle, ImageToolbar, ImageUpload, Link, List, MediaEmbed, Paragraph, PasteFromOffice, Table, TableToolbar, ++ Alignment
