@@ -1,9 +1,11 @@
 <script context="module" lang="ts">
   import { loadLocaleOnClient, loadLocaleOnServer } from '$lib/i18n';
   import { browser } from '$app/env';
-
+  import { setConfig } from 'sveltefirets';
+  import { firebaseConfig } from '$lib/firebaseConfig';
   import type { Load } from '@sveltejs/kit';
   export const load: Load = async ({ params, url: { pathname }, session }) => {
+    setConfig(firebaseConfig);
     if (browser) {
       await loadLocaleOnClient();
     } else {

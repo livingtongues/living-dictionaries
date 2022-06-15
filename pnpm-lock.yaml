@@ -167,6 +167,7 @@ importers:
       svelte-pieces: 1.0.22
       svelte-preprocess: ^4.10.7
       svelte-windicss-preprocess: ~4.1.0
+      sveltefirets: ^0.0.26
       tslib: ^2.3.1
       typescript: ~4.7.3
       vitest: ^0.15.1
@@ -208,6 +209,7 @@ importers:
       svelte-pieces: 1.0.22_svelte@3.48.0
       svelte-preprocess: 4.10.7_dg7s4kx4gpzom5ifrkhkr632g4
       svelte-windicss-preprocess: 4.1.7
+      sveltefirets: 0.0.26
       tslib: 2.3.1
       typescript: 4.7.3
       vitest: 0.15.1
@@ -7562,6 +7564,16 @@ packages:
   /svelte/3.48.0:
     resolution: {integrity: sha512-fN2YRm/bGumvjUpu6yI3BpvZnpIm9I6A7HR4oUNYd7ggYyIwSA/BX7DJ+UXXffLp6XNcUijyLvttbPVCYa/3xQ==}
     engines: {node: '>= 8'}
+    dev: true
+
+  /sveltefirets/0.0.26:
+    resolution: {integrity: sha512-5KmC7L1WlwoRhZpMdK2MQ6q8Mo+VPiJGbr8+sLs/VTcwHa9TGi0r7GEMG7M0WfWH2XgAXK2oLNnDz95Ivc8Sug==}
+    dependencies:
+      firebase: 9.8.3
+    transitivePeerDependencies:
+      - bufferutil
+      - encoding
+      - utf-8-validate
     dev: true
 
   /table/6.8.0:
