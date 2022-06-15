@@ -2,6 +2,7 @@
   import { _ } from 'svelte-i18n';
   import { Collection } from '$sveltefirets';
   import { where } from 'firebase/firestore';
+  import { capitalize } from '$lib/helpers/capitalize';
 
   export let dictionaryId: string,
     initialSpeakerId: string = undefined;
@@ -10,9 +11,11 @@
 
   import type { ISpeaker } from '@living-dictionaries/types';
   let speakers: ISpeaker[] = [];
+  let speakerBirthplace: string;
 
   import { createEventDispatcher } from 'svelte';
   const dispatch = createEventDispatcher<{ update: { speakerId: string } }>();
+  $: speakerBirthplace = speakers.find((speaker) => speaker.id === speakerId)?.birthplace
 </script>
 
 <Collection
@@ -56,6 +59,7 @@
     </option>
   </select>
 </div>
+{#if speakerBirthplace}<p class=mb-4>{$_('speakers.birthplace', { default: 'Birthplace' })}: {capitalize(speakerBirthplace)}</p>{/if}
 
 {#if speakerId === addSpeaker}
   {#await import('$lib/components/media/AddSpeaker.svelte') then { default: AddSpeaker }}

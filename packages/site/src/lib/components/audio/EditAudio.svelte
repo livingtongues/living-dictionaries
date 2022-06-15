@@ -10,6 +10,7 @@
   import RecordAudio from '$lib/components/audio/RecordAudio.svelte';
   import { dictionary, admin } from '$lib/stores';
   import Button from 'svelte-pieces/ui/Button.svelte';
+  import { capitalize } from '$lib/helpers/capitalize';
 
   import { deleteAudio } from '$lib/helpers/delete';
 
@@ -17,7 +18,8 @@
   import SelectSpeaker from '$lib/components/media/SelectSpeaker.svelte';
   import { updateOnline, firebaseConfig } from '$sveltefirets';
 
-  export let entry: IEntry;
+  export let entry: IEntry,
+    canEdit = false;
 
   let readyToRecord: boolean;
   let showUploadAudio = true;
@@ -29,6 +31,8 @@
     file = undefined;
     audioBlob = undefined;
   }
+
+
 </script>
 
 <Modal on:close>
@@ -36,8 +40,9 @@
 
   {#if entry.sf && entry.sf.speakerName}
     <div class="mb-4">
-      {$_('entry.speaker', { default: 'Speaker' })}:
-      {entry.sf.speakerName}
+      <p>{$_('entry.speaker', { default: 'Speaker' })}:
+      {entry.sf.speakerName}</p>
+      {#if entry.sf.birthplace}<p>{$_('speakers.birthplace', { default: 'Birthplace' })}: {capitalize(entry.sf.birthplace)}</p>{/if}
     </div>
     <Waveform
       audioUrl={`https://firebasestorage.googleapis.com/v0/b/${
@@ -109,40 +114,42 @@
     </SelectSpeaker>
   {/if}
 
-  <div class="modal-footer">
-    {#if entry.sf}
-      {#if $admin > 1}
-        {#await import('svelte-pieces/data/JSON.svelte') then { default: JSON }}
-          <JSON obj={entry} />
-          <div class="w-1" />
-        {/await}
+  {#if canEdit}
+    <div class="modal-footer">
+      {#if entry.sf}
+        {#if $admin > 1}
+          {#await import('svelte-pieces/data/JSON.svelte') then { default: JSON }}
+            <JSON obj={entry} />
+            <div class="w-1" />
+          {/await}
+        {/if}
+
+        <Button
+          href={`https://firebasestorage.googleapis.com/v0/b/${
+            firebaseConfig.storageBucket
+          }/o/${entry.sf.path.replace(/\//g, '%2F')}?alt=media`}
+          target="_blank">
+          <i class="fas fa-download" />
+          <span class="hidden sm:inline"
+            >{$_('misc.download', {
+              default: 'Download',
+            })}</span>
+        </Button>
+        <div class="w-1" />
+
+        <Button onclick={() => deleteAudio(entry)} color="red">
+          <i class="far fa-trash-alt" />&nbsp;
+          <span class="hidden sm:inline"
+            >{$_('misc.delete', {
+              default: 'Delete',
+            })}</span>
+        </Button>
+        <div class="w-1" />
       {/if}
 
-      <Button
-        href={`https://firebasestorage.googleapis.com/v0/b/${
-          firebaseConfig.storageBucket
-        }/o/${entry.sf.path.replace(/\//g, '%2F')}?alt=media`}
-        target="_blank">
-        <i class="fas fa-download" />
-        <span class="hidden sm:inline"
-          >{$_('misc.download', {
-            default: 'Download',
-          })}</span>
+      <Button onclick={close} color="black">
+        {$_('misc.close', { default: 'Close' })}
       </Button>
-      <div class="w-1" />
-
-      <Button onclick={() => deleteAudio(entry)} color="red">
-        <i class="far fa-trash-alt" />&nbsp;
-        <span class="hidden sm:inline"
-          >{$_('misc.delete', {
-            default: 'Delete',
-          })}</span>
-      </Button>
-      <div class="w-1" />
-    {/if}
-
-    <Button onclick={close} color="black">
-      {$_('misc.close', { default: 'Close' })}
-    </Button>
-  </div>
+    </div>
+  {/if}
 </Modal>
