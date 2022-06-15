@@ -40,10 +40,6 @@
 </svelte:head>
 
 <p class="mb-2">
-  {$_('contributors.ld_produced_by', {
-    default:
-      'This Living Dictionary was produced at Living Tongues Institute for Endangered Languages under the direction of the following people.',
-  })}
   <i
     >{$_('contributors.manager_contributor_distinction', {
       default:
