@@ -15,8 +15,10 @@
   let decade = 4;
   let gender: ISpeaker['gender'] = 'm';
   let agreeToBeOnline = true;
+  let saving = false
 
   async function addSpeaker() {
+    saving = true
     const speaker = {
       displayName: displayName.trim(),
       birthplace: birthplace.trim(),
@@ -24,9 +26,9 @@
       gender,
       contributingTo: [$dictionary.id],
     };
-
     const { id } = await addOnline<ISpeaker>('speakers', speaker);
     dispatch('newSpeaker', { id });
+    saving = false
   }
 </script>
 
@@ -131,7 +133,7 @@
       <Button onclick={close} form="simple" color="black">
         {$_('misc.cancel', { default: 'Cancel' })}
       </Button>
-      <Button type="submit" form="filled">
+      <Button type="submit" form="filled" disabled={saving}>
         {$_('misc.save', { default: 'Save' })}
       </Button>
     </div>
