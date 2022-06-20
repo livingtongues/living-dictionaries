@@ -8,7 +8,7 @@
   import Button from 'svelte-pieces/ui/Button.svelte';
   import BadgeArrayEmit from 'svelte-pieces/data/BadgeArrayEmit.svelte';
   import { createEventDispatcher } from 'svelte';
-  import { Collection, updateOnline } from '$sveltefirets';
+  import { Collection, updateOnline } from 'sveltefirets';
   import { where } from 'firebase/firestore';
   import { Invitation, LatLngDisplay } from '@ld/parts';
 

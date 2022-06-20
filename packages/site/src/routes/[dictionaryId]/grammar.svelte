@@ -1,5 +1,5 @@
 <script context="module" lang="ts">
-  import { setOnline, getDocument } from '$sveltefirets';
+  import { setOnline, getDocument } from 'sveltefirets';
   import type { IGrammar } from '@living-dictionaries/types';
 
   import type { Load } from '@sveltejs/kit';

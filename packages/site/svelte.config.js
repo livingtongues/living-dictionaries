@@ -1,6 +1,5 @@
 import preprocess from 'svelte-preprocess';
 import adapter from '@sveltejs/adapter-auto';
-import path from 'path';
 
 import deepWind from "svelte-deep-wind-preprocess";
 import { windi } from "svelte-windicss-preprocess";
@@ -36,11 +35,6 @@ const config = {
 	kit: {
 		adapter: adapter(),
 		vite: {
-			resolve: {
-				alias: {
-					$sveltefirets: path.resolve('./src/sveltefirets'),
-				}
-			},
 			envDir: '../../',
 		},
 

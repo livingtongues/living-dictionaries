@@ -5,7 +5,7 @@
   import Button from 'svelte-pieces/ui/Button.svelte';
   import { formatEntriesForCSV } from './export/_formatEntries';
   import type { IEntry } from '@living-dictionaries/types';
-  import { getCollection } from '$sveltefirets';
+  import { getCollection } from 'sveltefirets';
   import { downloadObjArrAsCSV } from '$lib/export/csv';
   import ShowHide from 'svelte-pieces/functions/ShowHide.svelte';
   import DownloadMedia from './export/_DownloadMedia.svelte';

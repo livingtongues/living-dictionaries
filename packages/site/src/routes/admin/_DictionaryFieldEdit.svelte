@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { updateOnline } from '$sveltefirets';
+  import { updateOnline } from 'sveltefirets';
   export let field;
   export let value;
   export let dictionaryId;
