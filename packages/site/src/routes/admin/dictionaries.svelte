@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { IDictionary } from '@living-dictionaries/types';
   import ResponsiveTable from 'svelte-pieces/ui/ResponsiveTable.svelte';
-  import { Collection, updateOnline } from '$sveltefirets';
+  import { Collection, updateOnline } from 'sveltefirets';
   import { arrayRemove, arrayUnion, deleteField, GeoPoint } from 'firebase/firestore/lite';
   import { exportDictionariesAsCSV } from '$lib/export/csv';
   import Filter from '@ld/parts/src/lib/helpers/Filter.svelte';

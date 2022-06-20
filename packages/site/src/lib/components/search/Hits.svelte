@@ -6,7 +6,7 @@
   import { mergeBy } from '$lib/helpers/array';
   import type { IEntry } from '@living-dictionaries/types';
   import type { InstantSearch } from 'instantsearch.js';
-  import { firebaseConfig } from '$sveltefirets';
+  import { firebaseConfig } from '$lib/firebaseConfig';
 
   export let search: InstantSearch;
 
@@ -33,7 +33,7 @@
 <slot {entries}>Loading...</slot>
 
 {#if $canEdit}
-  {#await import('$sveltefirets/components/Collection.svelte') then { default: Collection }}
+  {#await import('sveltefirets') then { Collection }}
     {#if firebaseConfig.projectId === 'talking-dictionaries-dev'}
       <Collection
         path={`dictionaries/${$dictionary.id}/words`}

@@ -2,7 +2,8 @@
   import { _ } from 'svelte-i18n';
   import { getStores } from '$app/stores';
   import { admin, user as userStore } from '$lib/stores';
-  import { firebaseConfig, logOut } from '$sveltefirets';
+  import { logOut } from 'sveltefirets';
+  import { firebaseConfig } from '$lib/firebaseConfig';
   import Avatar from 'svelte-pieces/shell/Avatar.svelte';
   import ShowHide from 'svelte-pieces/functions/ShowHide.svelte';
   import Menu from 'svelte-pieces/shell/Menu.svelte';

@@ -1,4 +1,4 @@
-import { getDocument } from '$sveltefirets';
+import { getDocument } from 'sveltefirets';
 import type { ISpeaker, IEntry } from '@living-dictionaries/types';
 
 export async function fetchSpeakers(data: IEntry[]) {

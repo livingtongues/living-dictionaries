@@ -4,7 +4,7 @@
   import { createEventDispatcher } from 'svelte';
   import { dictionary } from '$lib/stores';
   import Button from 'svelte-pieces/ui/Button.svelte';
-  import { addOnline } from '$sveltefirets';
+  import { addOnline } from 'sveltefirets';
   import type { ISpeaker } from '@living-dictionaries/types';
 
   const dispatch = createEventDispatcher();
