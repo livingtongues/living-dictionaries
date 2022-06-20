@@ -1,5 +1,5 @@
 import type { IDictionary, IInvite } from '@living-dictionaries/types';
-import { addOnline } from '$sveltefirets';
+import { addOnline } from 'sveltefirets';
 import { get } from 'svelte/store';
 import { _ } from 'svelte-i18n';
 import { user } from '$lib/stores';

@@ -1,6 +1,6 @@
 <script context="module" lang="ts">
   import type { IEntry } from '@living-dictionaries/types';
-  import { getDocument, Doc } from '$sveltefirets';
+  import { getDocument, Doc } from 'sveltefirets';
 
   import type { Load } from '@sveltejs/kit';
   export const load: Load = async ({ params }) => {
