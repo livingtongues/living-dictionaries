@@ -3,7 +3,7 @@ import { get } from 'svelte/store';
 import { _ } from 'svelte-i18n';
 
 import type { IEntry, IVideo } from '@living-dictionaries/types';
-import { updateOnline, deleteDocumentOnline, set } from '$sveltefirets';
+import { updateOnline, deleteDocumentOnline, set } from 'sveltefirets';
 import { arrayUnion, arrayRemove } from 'firebase/firestore/lite';
 import { serverTimestamp } from 'firebase/firestore';
 

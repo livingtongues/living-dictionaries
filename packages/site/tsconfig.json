@@ -16,20 +16,6 @@
     "skipLibCheck": true,
     "sourceMap": true,
     "target": "es2020",
-    "paths": {
-      "$lib": [
-        "src/lib"
-      ],
-      "$lib/*": [
-        "src/lib/*"
-      ],
-      "$sveltefirets": [
-        "src/sveltefirets"
-      ],
-      "$sveltefirets/*": [
-        "src/sveltefirets/*"
-      ]
-    },
     "types": [
       "vitest/globals",
       "vitest/importMeta"

@@ -19,7 +19,7 @@
     startUpload();
   }
 
-  import { updateOnline } from '$sveltefirets';
+  import { updateOnline } from 'sveltefirets';
   import { serverTimestamp } from 'firebase/firestore/lite';
   import { getStorage, ref, uploadBytesResumable } from 'firebase/storage';
 

@@ -18,7 +18,7 @@
   export let inviteId: string, dictionaryId: string;
   let inviteType: IInvite;
 
-  import { Doc, setOnline, updateOnline } from '$sveltefirets';
+  import { Doc, setOnline, updateOnline } from 'sveltefirets';
   import { serverTimestamp } from 'firebase/firestore/lite';
 
   async function acceptInvite(role: 'manager' | 'contributor') {
