@@ -69,6 +69,7 @@
 			center: [lng, lat]
 		});
 		marker.on('dragend', () => {
+      // @ts-ignore I'm ignoring next line due to ._container is a private Popup property and it's not declared in the class, but mapbox doesn't bring us a method where we can get the text of a popup
 			currentMarker = parseInt(marker.getPopup()._container.innerText.replace('\nx', '')) - 1;
 			console.log(marker.getPopup());
 		});
