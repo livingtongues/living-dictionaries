@@ -2,7 +2,6 @@
   import { onMount } from 'svelte';
   import mapboxgl from 'mapbox-gl';
   import Modal from 'svelte-pieces/ui/Modal.svelte';
-  import Button from 'svelte-pieces/ui/Button.svelte';
   import { loadStylesOnce } from './loader';
 
   let map: mapboxgl.Map;
@@ -56,7 +55,6 @@
   function addNewMarker(longitude: number, latitude: number) {
     convertCoordinates(longitude, latitude);
 		const marker = new mapboxgl.Marker(markersConfig).setLngLat([lng, lat]).addTo(map);
-		//TODO make a conditional that prevents to add a new one if it is in the exact same coordinates and is not draggable
 		markers.push(marker);
 
 		const popup = new mapboxgl.Popup({ closeOnClick: false })
