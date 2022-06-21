@@ -55,6 +55,7 @@
   </div>
 
   <div
+    style="width:700px; height:600px"
     transition:fade={{ duration: 200 }}
     class="{$$props.class} bg-white rounded-lg overflow-hidden shadow-xl transform
     transition-all sm:max-w-lg w-full max-h-full flex flex-col"

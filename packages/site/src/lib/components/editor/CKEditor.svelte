@@ -38,3 +38,16 @@
 <div class="tw-prose">
   <div bind:this={editorElement} contenteditable bind:innerHTML={value} />
 </div>
+
+<style global>
+  /*Textbox*/
+  .ck-editor__editable {
+      min-height: 800px;
+      max-height: 800px;
+      min-width: 860px;
+  }
+  /*Toolbar*/
+  .ck-editor__top {
+      min-width: 860px;
+  }
+</style>
