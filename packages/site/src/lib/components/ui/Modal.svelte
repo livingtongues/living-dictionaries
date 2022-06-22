@@ -97,7 +97,7 @@
     @apply bg-gray-100 px-4 py-3 sm:px-6 flex flex-wrap justify-end;
   }
   .heritable-size {
-    min-height: 350px
+    min-height: 25vw;
   }
   .inherit {
     min-height: inherit;
