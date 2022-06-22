@@ -155,7 +155,7 @@
             onclick={() => (value = italicizeSelection(inputEl))}
             ><i>Italicize</i> selection</Button>
           {#if value.indexOf('<i>') > -1}
-            <div class="tw-prose mt-2 p-1 shadow bg-gray-200 inherit">
+            <div class="tw-prose mt-2 p-1 shadow bg-gray-200">
               {@html value}
             </div>
           {/if}
