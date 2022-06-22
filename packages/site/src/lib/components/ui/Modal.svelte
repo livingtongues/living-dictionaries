@@ -2,6 +2,7 @@
   import { portal } from 'svelte-pieces/actions/portal';
   import { createEventDispatcher, onDestroy, onMount } from 'svelte';
   import { fade } from 'svelte/transition';
+  export let heritableSize = false
 
   const dispatch = createEventDispatcher();
   const close = () => dispatch('close');
@@ -55,15 +56,14 @@
   </div>
 
   <div
-    style="width:700px; height:600px"
     transition:fade={{ duration: 200 }}
     class="{$$props.class} bg-white rounded-lg overflow-hidden shadow-xl transform
-    transition-all sm:max-w-lg w-full max-h-full flex flex-col"
+    transition-all sm:max-w-lg w-full max-h-full flex flex-col {heritableSize ? 'heritable-size' : ''}"
     role="dialog"
     aria-modal="true"
     aria-labelledby="modal-headline"
     bind:this={modal}>
-    <div class="p-4 sm:p-6 overflow-y-auto flex-1">
+    <div class="p-4 sm:p-6 overflow-y-auto flex-1 inherit">
       <div class="flex mb-4 sm:mb-6">
         <h3 class="text-lg leading-6 font-medium text-gray-900 flex-grow" id="modal-headline">
           <slot name="heading" />
@@ -83,7 +83,7 @@
           </svg>
         </button>
       </div>
-      <div class="mt-2">
+      <div class="mt-2 inherit">
         <slot />
       </div>
     </div>
@@ -95,5 +95,11 @@
   :global(.modal-footer) {
     @apply -m-4 sm:-m-6 mt-4 sm:mt-6;
     @apply bg-gray-100 px-4 py-3 sm:px-6 flex flex-wrap justify-end;
+  }
+  .heritable-size {
+    min-height: 350px
+  }
+  .inherit {
+    min-height: inherit;
   }
 </style>

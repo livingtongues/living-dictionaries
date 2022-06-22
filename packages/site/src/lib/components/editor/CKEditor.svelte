@@ -35,19 +35,21 @@
   });
 </script>
 
-<div class="tw-prose">
+<div class="tw-prose inherit">
   <div bind:this={editorElement} contenteditable bind:innerHTML={value} />
 </div>
 
-<style global>
-  /*Textbox*/
-  .ck-editor__editable {
-      min-height: 800px;
-      max-height: 800px;
-      min-width: 860px;
+<style>
+  :global(.ck-editor__editable) {
+    min-height: inherit;
   }
-  /*Toolbar*/
-  .ck-editor__top {
-      min-width: 860px;
+  :global(.ck-editor__main) {
+    min-height: inherit;
+  }
+  :global(.ck-editor) {
+    min-height: inherit;
+  }
+  .inherit {
+    min-height: inherit;
   }
 </style>

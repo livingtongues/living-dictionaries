@@ -117,11 +117,11 @@
   }
 </script>
 
-<Modal on:close>
+<Modal heritableSize={field === 'nt' ? true : false} on:close>
   <span slot="heading">{display}</span>
-  <form on:submit|preventDefault={save}>
-    <div>
-      <div class="rounded-md shadow-sm">
+  <form class="inherit" on:submit|preventDefault={save}>
+    <div class="inherit">
+      <div class="rounded-md shadow-sm inherit">
         {#if field === 'nt'}
           {#await import('$lib/components/editor/ClassicCustomized.svelte') then { default: ClassicCustomized }}
             <ClassicCustomized {editorConfig} bind:html={value} />
@@ -155,7 +155,7 @@
             onclick={() => (value = italicizeSelection(inputEl))}
             ><i>Italicize</i> selection</Button>
           {#if value.indexOf('<i>') > -1}
-            <div class="tw-prose mt-2 p-1 shadow bg-gray-200">
+            <div class="tw-prose mt-2 p-1 shadow bg-gray-200 inherit">
               {@html value}
             </div>
           {/if}
@@ -181,3 +181,9 @@
     </div>
   </form>
 </Modal>
+
+<style>
+  .inherit {
+    min-height: inherit;
+  }
+</style>
