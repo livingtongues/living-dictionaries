@@ -1,5 +1,7 @@
 import { getCookie } from '$lib/helpers/cookies';
 import type { Handle, GetSession } from '@sveltejs/kit';
+import { setConfig } from 'sveltefirets';
+import { firebaseConfig } from '$lib/firebaseConfig';
 
 export const handle: Handle = async ({ event, resolve }) => {
   let user = null;
@@ -11,6 +13,8 @@ export const handle: Handle = async ({ event, resolve }) => {
   event.locals.user = user;
   event.locals.chosenLocale = getCookie('locale', event.request.headers.get('cookie')) || null;
 
+  setConfig(firebaseConfig);
+  
   const response = await resolve(event);
   return response;
 };

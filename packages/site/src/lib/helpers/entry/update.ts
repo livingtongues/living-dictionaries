@@ -1,4 +1,4 @@
-import { update } from '$sveltefirets';
+import { update } from 'sveltefirets';
 import { get } from 'svelte/store';
 import { _ } from 'svelte-i18n';
 
