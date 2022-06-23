@@ -12,7 +12,7 @@
 <script lang="ts">
   export let dictionaryId: string;
   import { _ } from 'svelte-i18n';
-  import { add, deleteDocumentOnline, updateOnline, Collection } from '$sveltefirets';
+  import { add, deleteDocumentOnline, updateOnline, Collection } from 'sveltefirets';
   import { where } from 'firebase/firestore';
   import { isManager, isContributor, dictionary, admin } from '$lib/stores';
   import type { IInvite, IHelper } from '@living-dictionaries/types';

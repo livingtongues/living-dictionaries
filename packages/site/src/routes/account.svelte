@@ -3,7 +3,7 @@
   import { user } from '$lib/stores';
   import Header from '$lib/components/shell/Header.svelte';
   import Button from 'svelte-pieces/ui/Button.svelte';
-  import { logOut } from '$sveltefirets';
+  import { logOut } from 'sveltefirets';
 </script>
 
 <svelte:head>

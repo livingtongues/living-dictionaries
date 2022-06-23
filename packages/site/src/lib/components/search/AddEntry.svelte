@@ -6,7 +6,7 @@
   import type { IEntry } from '@living-dictionaries/types';
   import { page } from '$app/stores';
   import { goto } from '$app/navigation';
-  import { addOnline } from '$sveltefirets';
+  import { addOnline } from 'sveltefirets';
 
   async function addNewEntry(lx: string) {
     if (!lx) {

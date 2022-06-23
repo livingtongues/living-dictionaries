@@ -3,7 +3,7 @@
   import type { IEntry, IVideo } from '@living-dictionaries/types';
   import ShowHide from 'svelte-pieces/functions/ShowHide.svelte';
   import { deleteVideo } from '$lib/helpers/delete';
-  import { firebaseConfig } from '$sveltefirets';
+  import { firebaseConfig } from '$lib/firebaseConfig';
 
   export let entry: IEntry,
     video: IVideo,

@@ -15,7 +15,8 @@
 
   import type { IEntry } from '@living-dictionaries/types';
   import SelectSpeaker from '$lib/components/media/SelectSpeaker.svelte';
-  import { updateOnline, firebaseConfig } from '$sveltefirets';
+  import { updateOnline } from 'sveltefirets';
+  import { firebaseConfig } from '$lib/firebaseConfig';
 
   export let entry: IEntry;
 

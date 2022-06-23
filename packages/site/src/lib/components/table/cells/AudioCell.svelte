@@ -1,6 +1,6 @@
 <script lang="ts">
   import ShowHide from 'svelte-pieces/functions/ShowHide.svelte';
-  import { firebaseConfig } from '$sveltefirets';
+  import { firebaseConfig } from '$lib/firebaseConfig';
   import { longpress } from 'svelte-pieces/actions/longpress';
   import type { IEntry } from '@living-dictionaries/types';
   export let entry: IEntry,
