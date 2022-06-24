@@ -30,6 +30,7 @@ export function convertJsonRowToEntryFormat(row: any, dateStamp: number): IEntry
   Boolean(row.dialect) && (entry.di = row.dialect);
   Boolean(row.variant) && (entry.va = row.variant);
   Boolean(row.nounClass) && (entry.nc = row.nounClass);
+  Boolean(row.source) && (entry.sr = row.source);
   if (row.semanticDomain || row.semanticDomain2) {
     entry.sdn = [];
     Boolean(row.semanticDomain) && entry.sdn.push(row.semanticDomain.toString());
@@ -120,6 +121,12 @@ export async function importEntriesToFirebase(
 
     const entryId = colRef.doc().id;
     const entry = convertJsonRowToEntryFormat(row, dateStamp);
+
+    if (row.source) {
+      if (row.source.includes('|')) {
+        entry.sr = row.source.split('|');
+      }
+    }
 
     if (row.photoFile) {
       const pf = await uploadImageFile(row.photoFile, entryId, dictionaryId, dry);
