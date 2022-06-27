@@ -106,6 +106,8 @@ export async function importEntriesToFirebase(
   let batchCount = 0;
   let batch = db.batch();
   const colRef = db.collection(`dictionaries/${dictionaryId}/words`);
+  let speakerRef;
+  let speakerId;
 
   for (const row of rows) {
     if (!row.lexeme || row.lexeme === '(word/phrase)') {
@@ -127,6 +129,19 @@ export async function importEntriesToFirebase(
     }
 
     if (row.soundFile) {
+      //TODO we need to discuss what field should be consider as a right conditional. Should we create and updatedAt and createdBy too?
+      if (row.speakerName) {
+        speakerRef = db.collection('speakers');
+        speakerId = speakerRef.doc().id;
+        batch.create(speakerRef.doc(speakerId), {
+          displayName: row.speakerName,
+          birthplace: row.speakerHometown,
+          decade: parseInt(row.speakerAge),
+          gender: row.speakerGender,
+          contributingTo: [dictionaryId],
+          createdAt: timestamp,
+        });
+      }
       const audioFilePath = await uploadAudioFile(row.soundFile, entryId, dictionaryId, dry);
       if (audioFilePath) {
         entry.sf = {
