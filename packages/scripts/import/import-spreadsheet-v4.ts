@@ -4,6 +4,8 @@ import { uploadAudioFile, uploadImageFile } from './import-media.js';
 import { readFileSync } from 'fs';
 import { parseCSVFrom } from './parse-csv.js';
 
+const developerInCharge = 'qkTzJXH24Xfc57cZJRityS6OTn52';
+
 export async function importFromSpreadsheet(dictionaryId: string, dry = false) {
   const dateStamp = Date.now();
 
@@ -129,7 +131,7 @@ export async function importEntriesToFirebase(
     }
 
     if (row.soundFile) {
-      //TODO we need to discuss what field should be consider as a right conditional. Should we create and updatedAt and createdBy too?
+      //TODO we need to discuss what field should be consider as a right conditional.
       if (row.speakerName) {
         speakerRef = db.collection('speakers');
         speakerId = speakerRef.doc().id;
@@ -140,6 +142,9 @@ export async function importEntriesToFirebase(
           gender: row.speakerGender,
           contributingTo: [dictionaryId],
           createdAt: timestamp,
+          createdBy: developerInCharge,
+          updatedAt: timestamp,
+          updatedBy: developerInCharge,
         });
       }
       const audioFilePath = await uploadAudioFile(row.soundFile, entryId, dictionaryId, dry);
