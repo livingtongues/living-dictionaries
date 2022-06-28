@@ -122,7 +122,7 @@
     "lx": "Lexeme / Word / kalma",
     "ei": "ID",
     "mr": "ilimin halittar jiki",
-    "gloss": "mai sheki",
+    "gloss (obsolete)": "mai sheki",
     "alternateOrthographies": "Alternate Orthographies",
     "signed_in_as_manager": "Ka dole ne a sanya hannu a matsayin manajan wannan kamus yi canje-canje.",
     "delete_entry": "Delete shigarwa?",
@@ -150,7 +150,9 @@
     "sr": "Mafari",
     "example_sentence": "Talata jumla",
     "nc": "Kalmanci aji",
-    "va": "Ƙjici"
+    "va": "Ƙjici",
+    "gloss": "juyawa",
+    "plural_form": "Tsari"
   },
   "error": {
     "run_into_error": "Muna yi hakuri, mun gudu a cikin wani kuskure.",
