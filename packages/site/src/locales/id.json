@@ -122,7 +122,7 @@
     "lx": "Leksem/Kata/Frase",
     "ei": "ID",
     "mr": "Morfologi",
-    "gloss": "Glos",
+    "gloss (obsolete)": "Glos",
     "alternateOrthographies": "Alternatif Ortografi",
     "signed_in_as_manager": "Anda harus masuk sebagai pengelola kamus ini untuk membuat perubahan",
     "delete_entry": "Hapus entri?",
@@ -150,7 +150,9 @@
     "sr": "Sumber",
     "example_sentence": "Contoh Kalimat",
     "nc": "Kelas kata benda",
-    "va": "Varian"
+    "va": "Varian",
+    "gloss": "terjemahan",
+    "plural_form": "Bentuk jamak"
   },
   "error": {
     "run_into_error": "Maaf, sistem kami mengalami masalah",

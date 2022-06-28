@@ -122,7 +122,7 @@
     "lx": "Lexeme / ቃል / ሐረግ",
     "ei": "መታወቂያ",
     "mr": "ሞርፎሎጂ",
-    "gloss": "ወዝ",
+    "gloss (obsolete)": "ወዝ",
     "alternateOrthographies": "ተለዋጭ Orthographies",
     "signed_in_as_manager": "እንድታደርገው ለውጦች ይህን መዝገበ አስተዳዳሪ ሆነው መግባት አለብዎት.",
     "delete_entry": "ሰርዝ ግቤት?",
@@ -150,7 +150,9 @@
     "sr": "ምንጭ",
     "example_sentence": "ምሳሌ አረፍተነገር",
     "nc": "ስም",
-    "va": "ልዩነቶች"
+    "va": "ልዩነቶች",
+    "gloss": "ትርጉም",
+    "plural_form": "ብዙ ቁጥር"
   },
   "error": {
     "run_into_error": "እናዝናለን, አንድ ስህተት ወደ አልቆብናል ነን.",

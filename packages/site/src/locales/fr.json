@@ -122,7 +122,7 @@
     "lx": "Lexème / mot / phrase",
     "ei": "ID",
     "mr": "Morphologie",
-    "gloss": "Glose",
+    "gloss (obsolete)": "glose",
     "alternateOrthographies": "Orthographies alternatives",
     "signed_in_as_manager": "Vous devez être manager de ce dictionnaire pour y apporter des modifications.",
     "delete_entry": "Supprimer l'entrée ?",
@@ -150,7 +150,9 @@
     "sr": "Source",
     "example_sentence": "exemple de phrase",
     "nc": "Classe de nom",
-    "va": "Une variante"
+    "va": "Une variante",
+    "gloss": "Traduction",
+    "plural_form": "Forme pluriel"
   },
   "error": {
     "run_into_error": "Nous sommes désolés, il y a une erreur.",

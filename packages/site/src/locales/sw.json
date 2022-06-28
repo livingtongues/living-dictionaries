@@ -122,7 +122,7 @@
     "lx": "kipashio/neno/kirai",
     "ei": "ID",
     "mr": "Mofolojia",
-    "gloss": "ufasiri",
+    "gloss (obsolete)": "ufasiri",
     "alternateOrthographies": "Othografia Mbadala",
     "signed_in_as_manager": "Lazima uingie katika akaunti kama msimamizi wa kamusi hii ili ufanye mabadiliko.",
     "delete_entry": "Futa ingizo",
@@ -150,7 +150,9 @@
     "sr": "Chanzo",
     "example_sentence": "Sentensi ya mfano",
     "nc": "Darasa la nomino",
-    "va": "Lahaja"
+    "va": "Lahaja",
+    "gloss": "tafsiri",
+    "plural_form": "Fomu ya wingi"
   },
   "error": {
     "run_into_error": "Samahani, tumepata hitilafu.",
