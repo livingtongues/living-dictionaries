@@ -152,7 +152,7 @@
     "nc": "Kelas kata nama",
     "va": "Pelbagai",
     "gloss": "terjemahan",
-    "plural_form": "Bentuk jamak"
+    "plf": "Bentuk jamak"
   },
   "error": {
     "run_into_error": "Maaf, kami telah menghadapi masalah.",
