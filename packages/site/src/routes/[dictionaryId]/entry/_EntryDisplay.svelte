@@ -108,7 +108,7 @@
           on:valueupdate />
     {/if}
 
-    {#each ['mr', 'in', 'di', 'nt'] as field}
+    {#each ['mr', 'in', 'di', 'plf', 'nt'] as field}
       <EntryField
         value={entry[field]}
         {field}
