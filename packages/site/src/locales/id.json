@@ -152,7 +152,7 @@
     "nc": "Kelas kata benda",
     "va": "Varian",
     "gloss": "terjemahan",
-    "plural_form": "Bentuk jamak"
+    "plf": "Bentuk jamak"
   },
   "error": {
     "run_into_error": "Maaf, sistem kami mengalami masalah",
