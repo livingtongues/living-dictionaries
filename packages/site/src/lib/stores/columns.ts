@@ -73,6 +73,10 @@ const defaultColumns: IColumn[] = [
     width: 150,
   },
   {
+    field: 'plf', // plural form
+    width: 150,
+  },
+  {
     field: 'nt', // notes
     width: 300,
   },
