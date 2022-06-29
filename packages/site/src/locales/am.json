@@ -122,7 +122,7 @@
     "lx": "Lexeme / ቃል / ሐረግ",
     "ei": "መታወቂያ",
     "mr": "ሞርፎሎጂ",
-    "gloss": "ወዝ",
+    "gloss (obsolete)": "ወዝ",
     "alternateOrthographies": "ተለዋጭ Orthographies",
     "signed_in_as_manager": "እንድታደርገው ለውጦች ይህን መዝገበ አስተዳዳሪ ሆነው መግባት አለብዎት.",
     "delete_entry": "ሰርዝ ግቤት?",
@@ -150,7 +150,9 @@
     "sr": "ምንጭ",
     "example_sentence": "ምሳሌ አረፍተነገር",
     "nc": "ስም",
-    "va": "ልዩነቶች"
+    "va": "ልዩነቶች",
+    "gloss": "ትርጉም",
+    "plf": "ብዙ ቁጥር"
   },
   "error": {
     "run_into_error": "እናዝናለን, አንድ ስህተት ወደ አልቆብናል ነን.",
@@ -250,7 +252,8 @@
     "no_images": "የምስል ፋይሎች የሉም",
     "checking_audios": "የድምፅ ፋይሎች ካሉ ያረጋግጡ",
     "no_audios": "ምንም የኦዲዮ ፋይሎች የሉም",
-    "download_csv": "CSV ን ያውርዱ"
+    "download_csv": "CSV ን ያውርዱ",
+    "availability": "ወደ ውጭ መላክ የሚገኘው ለመዝገበ-ቃላት አስተዳዳሪዎች ብቻ ነው"
   },
   "video": {
     "video_url": "ቪዲዮ ዩ.አር.ኤል.",
