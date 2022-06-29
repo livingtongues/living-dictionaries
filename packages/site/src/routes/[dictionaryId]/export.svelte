@@ -35,52 +35,51 @@
 </svelte:head>
 
 <h3 class="text-xl font-semibold mb-4">{$_('misc.export', { default: 'export' })}</h3>
-
-<div class="mb-6">
-  <div>
-    <i class="far fa-check" />
-    {$_('export.csv_data', { default: 'Data as CSV' })}
-  </div>
-  <div
-    class="flex items-center mt-2 {entriesWithImages.length
-      ? ''
-      : 'opacity-50 cursor-not-allowed'}">
-    <input
-      disabled={!entriesWithImages.length}
-      id="images"
-      type="checkbox"
-      bind:checked={includeImages} />
-    <label for="images" class="mx-2 block leading-5 text-gray-900">
-      {$_('misc.images', { default: 'Images' })} ({entriesWithImages.length})</label>
-  </div>
-  {#if !mounted}
-    <p class="text-xs italic text-orange-400 p-2">
-      {$_('export.checking_images', { default: 'Checking if image files exist' })}
-    </p>
-  {:else if !entriesWithImages.length}
-    <p class="text-sm text-red-700 p-3">
-      {$_('export.no_images', { default: 'There are no image files' })}
-    </p>
-  {/if}
-
-  <div
-    class="flex items-center mt-2 {entriesWithAudio.length ? '' : 'opacity-50 cursor-not-allowed'}">
-    <input id="audio" type="checkbox" bind:checked={includeAudio} />
-    <label for="audio" class="mx-2 block leading-5 text-gray-900">
-      {$_('entry.audio', { default: 'Audio' })} ({entriesWithAudio.length})</label>
-  </div>
-  {#if !mounted}
-    <p class="text-xs italic text-orange-400 p-2">
-      {$_('export.checking_audios', { default: 'Checking if audio files exist' })}
-    </p>
-  {:else if !entriesWithAudio.length}
-    <p class="text-sm text-red-700 p-3">
-      {$_('export.no_audios', { default: 'There are no audio files' })}
-    </p>
-  {/if}
-</div>
-
 {#if $isManager}
+  <div class="mb-6">
+    <div>
+      <i class="far fa-check" />
+      {$_('export.csv_data', { default: 'Data as CSV' })}
+    </div>
+    <div
+      class="flex items-center mt-2 {entriesWithImages.length
+        ? ''
+        : 'opacity-50 cursor-not-allowed'}">
+      <input
+        disabled={!entriesWithImages.length}
+        id="images"
+        type="checkbox"
+        bind:checked={includeImages} />
+      <label for="images" class="mx-2 block leading-5 text-gray-900">
+        {$_('misc.images', { default: 'Images' })} ({entriesWithImages.length})</label>
+    </div>
+    {#if !mounted}
+      <p class="text-xs italic text-orange-400 p-2">
+        {$_('export.checking_images', { default: 'Checking if image files exist' })}
+      </p>
+    {:else if !entriesWithImages.length}
+      <p class="text-sm text-red-700 p-3">
+        {$_('export.no_images', { default: 'There are no image files' })}
+      </p>
+    {/if}
+
+    <div
+      class="flex items-center mt-2 {entriesWithAudio.length ? '' : 'opacity-50 cursor-not-allowed'}">
+      <input id="audio" type="checkbox" bind:checked={includeAudio} />
+      <label for="audio" class="mx-2 block leading-5 text-gray-900">
+        {$_('entry.audio', { default: 'Audio' })} ({entriesWithAudio.length})</label>
+    </div>
+    {#if !mounted}
+      <p class="text-xs italic text-orange-400 p-2">
+        {$_('export.checking_audios', { default: 'Checking if audio files exist' })}
+      </p>
+    {:else if !entriesWithAudio.length}
+      <p class="text-sm text-red-700 p-3">
+        {$_('export.no_audios', { default: 'There are no audio files' })}
+      </p>
+    {/if}
+  </div>
+
   {#if includeImages || includeAudio}
     <ShowHide let:show let:toggle>
       {#if !show}
@@ -127,16 +126,5 @@
     </Button>
   {/if}
 {:else}
-  <ShowHide let:show let:toggle>
-    <Button onclick={toggle} class="mb-5">
-      {$_('export.export_request', { default: 'Do you want to export this dictionary?' })}
-      {$_('header.contact_us', { default: 'Contact Us' })}
-    </Button>
-
-    {#if show}
-      {#await import('$lib/components/modals/Contact.svelte') then { default: Contact }}
-        <Contact on:close={toggle} />
-      {/await}
-    {/if}
-  </ShowHide>
+<p>{$_('export.availability', { default: 'Export is only available to dictionary managers' })}</p>
 {/if}
