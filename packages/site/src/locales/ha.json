@@ -252,7 +252,8 @@
     "no_images": "Babu fayilolin hoto",
     "checking_audios": "Dubawa idan fayilolin sauti sun wanzu",
     "no_audios": "Babu fayilolin mai jiwuwa",
-    "download_csv": "Sauke CSV"
+    "download_csv": "Sauke CSV",
+    "availability": "Ana samun fitarwa kawai don manajan kamawa"
   },
   "video": {
     "video_url": "URL ɗin bidiyo",

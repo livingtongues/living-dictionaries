@@ -252,7 +252,8 @@
     "no_images": "Hakuna faili za picha",
     "checking_audios": "Kuangalia ikiwa faili za sauti zipo",
     "no_audios": "Hakuna faili za sauti",
-    "download_csv": "Pakua CSV"
+    "download_csv": "Pakua CSV",
+    "availability": "Usafirishaji unapatikana tu kwa wasimamizi wa kamusi"
   },
   "video": {
     "video_url": "URL ya video",

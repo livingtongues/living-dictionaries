@@ -252,7 +252,8 @@
     "no_images": "Нет файлов изображений",
     "checking_audios": "Проверка, существует ли аудиофайлы",
     "no_audios": "Нет аудиофайлов",
-    "download_csv": "Скачать CSV"
+    "download_csv": "Скачать CSV",
+    "availability": "Экспорт доступен только руководителям словарей"
   },
   "video": {
     "video_url": "Видео URL",

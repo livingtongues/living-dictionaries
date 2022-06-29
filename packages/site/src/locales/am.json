@@ -252,7 +252,8 @@
     "no_images": "የምስል ፋይሎች የሉም",
     "checking_audios": "የድምፅ ፋይሎች ካሉ ያረጋግጡ",
     "no_audios": "ምንም የኦዲዮ ፋይሎች የሉም",
-    "download_csv": "CSV ን ያውርዱ"
+    "download_csv": "CSV ን ያውርዱ",
+    "availability": "ወደ ውጭ መላክ የሚገኘው ለመዝገበ-ቃላት አስተዳዳሪዎች ብቻ ነው"
   },
   "video": {
     "video_url": "ቪዲዮ ዩ.አር.ኤል.",
