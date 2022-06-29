@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { _ } from 'svelte-i18n';
-  import { dictionary } from '$lib/stores';
+  import { dictionary, isManager } from '$lib/stores';
   import Button from 'svelte-pieces/ui/Button.svelte';
   import { formatEntriesForCSV } from './export/_formatEntries';
   import type { IEntry } from '@living-dictionaries/types';
@@ -80,48 +80,63 @@
   {/if}
 </div>
 
-{#if includeImages || includeAudio}
+{#if $isManager}
+  {#if includeImages || includeAudio}
+    <ShowHide let:show let:toggle>
+      {#if !show}
+        <Button onclick={toggle} form="filled">
+          {$_('export.download_csv', { default: 'Download CSV' })}
+          {#if includeImages}
+            + {$_('misc.images', { default: 'Images' })}
+          {/if}
+          {#if includeAudio}
+            + {$_('entry.audio', { default: 'Audio' })}
+          {/if}
+        </Button>
+      {:else}
+        <DownloadMedia
+          dictionary={$dictionary}
+          {formattedEntries}
+          entriesWithImages={includeImages ? entriesWithImages : []}
+          entriesWithAudio={includeAudio ? entriesWithAudio : []}
+          on:completed={toggle}
+          let:progress>
+          <Progress {progress} />
+          {#if progress < 1}
+            <Button onclick={toggle} color="red">{$_('misc.cancel', { default: 'Cancel' })}</Button>
+          {:else}
+            <Button onclick={toggle}>{$_('misc.reset', { default: 'Reset' })}</Button>
+          {/if}
+        </DownloadMedia>
+      {/if}
+    </ShowHide>
+  {:else}
+    <Button
+      disabled={!formattedEntries.length}
+      onclick={() => {
+        const finalizedEntries = formattedEntries.map((entry) => {
+          const newEntry = { ...entry };
+          delete newEntry.pfpa;
+          delete newEntry.sfpa;
+          return newEntry;
+        });
+        downloadObjArrAsCSV(finalizedEntries, $dictionary.name);
+      }}
+      form="filled">
+      {$_('export.download_csv', { default: 'Download CSV' })}
+    </Button>
+  {/if}
+{:else}
   <ShowHide let:show let:toggle>
-    {#if !show}
-      <Button onclick={toggle} form="filled">
-        {$_('export.download_csv', { default: 'Download CSV' })}
-        {#if includeImages}
-          + {$_('misc.images', { default: 'Images' })}
-        {/if}
-        {#if includeAudio}
-          + {$_('entry.audio', { default: 'Audio' })}
-        {/if}
-      </Button>
-    {:else}
-      <DownloadMedia
-        dictionary={$dictionary}
-        {formattedEntries}
-        entriesWithImages={includeImages ? entriesWithImages : []}
-        entriesWithAudio={includeAudio ? entriesWithAudio : []}
-        on:completed={toggle}
-        let:progress>
-        <Progress {progress} />
-        {#if progress < 1}
-          <Button onclick={toggle} color="red">{$_('misc.cancel', { default: 'Cancel' })}</Button>
-        {:else}
-          <Button onclick={toggle}>{$_('misc.reset', { default: 'Reset' })}</Button>
-        {/if}
-      </DownloadMedia>
+    <Button onclick={toggle} class="mb-5">
+      {$_('export.export_request', { default: 'Do you want to export this dictionary?' })}
+      {$_('header.contact_us', { default: 'Contact Us' })}
+    </Button>
+
+    {#if show}
+      {#await import('$lib/components/modals/Contact.svelte') then { default: Contact }}
+        <Contact on:close={toggle} />
+      {/await}
     {/if}
   </ShowHide>
-{:else}
-  <Button
-    disabled={!formattedEntries.length}
-    onclick={() => {
-      const finalizedEntries = formattedEntries.map((entry) => {
-        const newEntry = { ...entry };
-        delete newEntry.pfpa;
-        delete newEntry.sfpa;
-        return newEntry;
-      });
-      downloadObjArrAsCSV(finalizedEntries, $dictionary.name);
-    }}
-    form="filled">
-    {$_('export.download_csv', { default: 'Download CSV' })}
-  </Button>
 {/if}
