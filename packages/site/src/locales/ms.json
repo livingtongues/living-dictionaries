@@ -252,7 +252,8 @@
     "no_images": "Tidak ada fail gambar",
     "checking_audios": "Memeriksa jika fail audio wujud",
     "no_audios": "Tidak ada fail audio",
-    "download_csv": "Muat turun CSV"
+    "download_csv": "Muat turun CSV",
+    "availability": "Eksport hanya tersedia untuk pengurus kamus"
   },
   "video": {
     "video_url": "URL Video",

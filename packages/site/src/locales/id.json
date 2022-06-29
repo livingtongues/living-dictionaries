@@ -252,7 +252,8 @@
     "no_images": "Tidak ada file gambar",
     "checking_audios": "Memeriksa apakah ada file audio",
     "no_audios": "Tidak ada file audio",
-    "download_csv": "Unduh CSV"
+    "download_csv": "Unduh CSV",
+    "availability": "Ekspor hanya tersedia untuk manajer kamus"
   },
   "video": {
     "video_url": "URL video",

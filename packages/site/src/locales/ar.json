@@ -252,7 +252,8 @@
     "no_images": "لا توجد ملفات صور",
     "checking_audios": "التحقق من وجود ملفات صوتية",
     "no_audios": "لا توجد ملفات صوتية",
-    "download_csv": "تنزيل CSV"
+    "download_csv": "تنزيل CSV",
+    "availability": "التصدير متاح فقط لمديري القاموس"
   },
   "video": {
     "video_url": "رابط الفيديو",

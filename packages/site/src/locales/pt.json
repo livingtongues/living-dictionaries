@@ -252,7 +252,8 @@
     "no_images": "Não há arquivos de imagem",
     "checking_audios": "Verificando se houver arquivos de áudio",
     "no_audios": "Não há arquivos de áudio",
-    "download_csv": "Baixe CSV"
+    "download_csv": "Baixe CSV",
+    "availability": "A exportação está disponível apenas para gerentes de dicionário"
   },
   "video": {
     "video_url": "URL do vídeo",

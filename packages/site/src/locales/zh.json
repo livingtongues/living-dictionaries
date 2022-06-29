@@ -252,7 +252,8 @@
     "no_images": "没有图像文件",
     "checking_audios": "检查是否存在音频文件",
     "no_audios": "没有音频文件",
-    "download_csv": "下载CSV"
+    "download_csv": "下载CSV",
+    "availability": "出口仅适用于字典经理"
   },
   "video": {
     "video_url": "视频网址",

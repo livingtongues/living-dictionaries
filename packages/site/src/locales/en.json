@@ -252,7 +252,8 @@
     "no_images": "There are no image files",
     "checking_audios": "Checking if audio files exist",
     "no_audios": "There are no audio files",
-    "download_csv": "Download CSV"
+    "download_csv": "Download CSV",
+    "availability": "Export is only available to dictionary managers"
   },
   "video": {
     "video_url": "Video URL",
