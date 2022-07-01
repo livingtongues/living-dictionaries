@@ -71,7 +71,12 @@
                 </td>
               {/each}
               {#if $dictionary.id === 'babanki'}
-                <td>
+                <td
+                  class:bg-green-100={entry.ua &&
+                    entry.ua.toMillis &&
+                    entry.ua.toMillis() > minutesAgo(5)}
+                  class="h-0"
+                  style="--col-width: 'auto';">
                   <Cell column={{
                     field: 'va', 
                     width: 150,
@@ -94,6 +99,16 @@
               <Cell {column} {entry} canEdit={$canEdit} />
             </td>
           {/each}
+          {#if $dictionary.id === 'babanki'}
+            <td
+              class="h-0"
+              style="--col-width: 'auto';">
+              <Cell column={{
+                field: 'va', 
+                width: 150,
+              }} {entry} canEdit={$canEdit} />
+            </td>
+          {/if}
         </tr>
       {/each}
     {/if}
