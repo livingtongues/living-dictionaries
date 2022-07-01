@@ -1,5 +1,5 @@
 <script context="module" lang="ts">
-  import { getDocument } from '$sveltefirets';
+  import { getDocument, setOnline } from 'sveltefirets';
 
   import type { Load } from '@sveltejs/kit';
   export const load: Load = async ({ params }) => {
@@ -22,7 +22,6 @@
   export let about = '',
     dictionaryId: string;
   import Button from 'svelte-pieces/ui/Button.svelte';
-  import { setOnline } from '$sveltefirets';
   import type { IAbout } from '@living-dictionaries/types';
 
   async function save() {

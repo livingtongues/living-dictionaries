@@ -85,7 +85,8 @@
     );
   }
 
-  import { updateOnline, firebaseConfig } from '$sveltefirets';
+  import { firebaseConfig } from '$lib/firebaseConfig';
+  import { updateOnline} from 'sveltefirets';
   import { serverTimestamp } from 'firebase/firestore/lite';
   import { processImageUrl } from './processImageUrl';
 

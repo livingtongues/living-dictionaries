@@ -9,7 +9,7 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
   import { onMount } from 'svelte';
-  import { firebaseConfig } from '$sveltefirets';
+  import { firebaseConfig } from '$lib/firebaseConfig';
   import Button from 'svelte-pieces/ui/Button.svelte';
   import ShowHide from 'svelte-pieces/functions/ShowHide.svelte';
 

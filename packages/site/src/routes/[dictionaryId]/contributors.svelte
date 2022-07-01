@@ -12,14 +12,14 @@
 <script lang="ts">
   export let dictionaryId: string;
   import { _ } from 'svelte-i18n';
-  import { add, deleteDocumentOnline, updateOnline, Collection } from '$sveltefirets';
+  import { add, deleteDocumentOnline, updateOnline, Collection } from 'sveltefirets';
   import { where } from 'firebase/firestore';
   import { isManager, isContributor, dictionary, admin } from '$lib/stores';
   import type { IInvite, IHelper } from '@living-dictionaries/types';
   import Button from 'svelte-pieces/ui/Button.svelte';
   import ShowHide from 'svelte-pieces/functions/ShowHide.svelte';
   import { inviteHelper } from '$lib/helpers/inviteHelper';
-  import { Invitation } from '@living-dictionaries/parts';
+  import { Invitation } from '@ld/parts';
 
   let helperType: IHelper[];
   let inviteType: IInvite[];

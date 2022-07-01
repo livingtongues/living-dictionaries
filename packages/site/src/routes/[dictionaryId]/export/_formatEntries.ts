@@ -1,6 +1,6 @@
 import type { IDictionary, IEntry, ISpeaker } from '@living-dictionaries/types';
 import { glossingLanguages } from './_glossing-languages-temp';
-import { semanticDomains, partsOfSpeech } from '@living-dictionaries/parts';
+import { semanticDomains, partsOfSpeech } from '@ld/parts';
 import { friendlyName } from '$lib/helpers/friendlyName';
 import { replaceHTMLTags } from '$lib/export/replaceHTMLTags';
 
