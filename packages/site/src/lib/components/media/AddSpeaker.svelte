@@ -3,8 +3,9 @@
   import Modal from '$lib/components/ui/Modal.svelte';
   import { createEventDispatcher } from 'svelte';
   import { dictionary } from '$lib/stores';
+  import Form from 'svelte-pieces/data/Form.svelte';
   import Button from 'svelte-pieces/ui/Button.svelte';
-  import { addOnline } from '$sveltefirets';
+  import { addOnline } from 'sveltefirets';
   import type { ISpeaker } from '@living-dictionaries/types';
 
   const dispatch = createEventDispatcher();
@@ -37,7 +38,7 @@
     })}
   </span>
 
-  <form on:submit|preventDefault={addSpeaker}>
+  <Form let:loading onsubmit={addSpeaker}>
     <label for="name" class="block text-sm font-medium leading-5 text-gray-700 mt-4">
       {$_('speakers.name', { default: 'Name' })}
     </label>
@@ -131,9 +132,9 @@
       <Button onclick={close} form="simple" color="black">
         {$_('misc.cancel', { default: 'Cancel' })}
       </Button>
-      <Button type="submit" form="filled">
+      <Button type="submit" form="filled" {loading}>
         {$_('misc.save', { default: 'Save' })}
       </Button>
     </div>
-  </form>
+  </Form>
 </Modal>

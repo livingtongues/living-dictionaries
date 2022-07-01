@@ -5,7 +5,7 @@
   } from '$lib/helpers/dictionariesManaging';
 
   import type { IUser } from '@living-dictionaries/types';
-  import { db } from '$sveltefirets';
+  import { getDb } from 'sveltefirets';
   import BadgeArrayEmit from 'svelte-pieces/data/BadgeArrayEmit.svelte';
   import ShowHide from 'svelte-pieces/functions/ShowHide.svelte';
   import { collectionGroup, onSnapshot, query, type Unsubscribe, where } from 'firebase/firestore';
@@ -18,7 +18,7 @@
 
   onMount(() => {
     const q = query(
-      collectionGroup(db, role === 'manager' ? 'managers' : 'contributors'),
+      collectionGroup(getDb(), role === 'manager' ? 'managers' : 'contributors'),
       where('id', '==', user.uid)
     );
     unsubscribe = onSnapshot(q, (snapshot) => {

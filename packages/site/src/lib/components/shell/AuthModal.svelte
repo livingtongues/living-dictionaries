@@ -1,7 +1,10 @@
 <script lang="ts">
-  import { FirebaseUiAuth, updateUserData } from '$sveltefirets';
-  import type { LanguageCode } from '$sveltefirets/components/languageCodes';
-  import { languagesWithTranslations } from '$sveltefirets/components/languageCodes';
+  import {
+    FirebaseUiAuth,
+    saveUserData,
+    type LanguageCode,
+    languagesWithTranslations,
+  } from 'sveltefirets';
   import { _, locale } from 'svelte-i18n';
 
   let languageCode: LanguageCode = 'en';
@@ -13,8 +16,13 @@
   }
   languageCode = localeAbbrev as LanguageCode;
 
-  import Modal from '$lib/components/ui/Modal.svelte';
+  import Modal from 'svelte-pieces/ui/Modal.svelte';
   export let context: 'force' = undefined;
+
+  import { createEventDispatcher } from 'svelte';
+  const dispatch = createEventDispatcher<{
+    close: boolean;
+  }>();
 </script>
 
 <Modal on:close>
@@ -27,8 +35,10 @@
     </h4>
   {/if}
   <FirebaseUiAuth
+    continueUrl="/account"
+    signInWith={{ google: true, emailPasswordless: true }}
     tosUrl="https://livingdictionaries.app/terms"
     {languageCode}
-    on:close
-    on:updateuserdata={(e) => updateUserData(e.detail.user, e.detail.isNewUser)} />
+    on:success={() => dispatch('close')}
+    on:authresult={(e) => saveUserData(e.detail)} />
 </Modal>

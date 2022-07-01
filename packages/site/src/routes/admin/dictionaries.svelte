@@ -1,10 +1,10 @@
 <script lang="ts">
   import type { IDictionary } from '@living-dictionaries/types';
   import ResponsiveTable from 'svelte-pieces/ui/ResponsiveTable.svelte';
-  import { Collection, updateOnline } from '$sveltefirets';
+  import { Collection, updateOnline } from 'sveltefirets';
   import { arrayRemove, arrayUnion, deleteField, GeoPoint } from 'firebase/firestore/lite';
   import { exportDictionariesAsCSV } from '$lib/export/csv';
-  import Filter from '@living-dictionaries/parts/src/lib/helpers/Filter.svelte';
+  import Filter from '@ld/parts/src/lib/helpers/Filter.svelte';
   import Button from 'svelte-pieces/ui/Button.svelte';
   import DictionaryRow from './_DictionaryRow.svelte';
   import SortDictionaries from './_SortDictionaries.svelte';

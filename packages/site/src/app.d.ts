@@ -7,9 +7,7 @@ declare namespace App {
     user: import('@living-dictionaries/types').IUser;
     chosenLocale: string;
 	}
-  
 	// interface Platform {}
-  
   interface Session {
     user: import('@living-dictionaries/types').IUser;
     acceptedLanguage: string;
@@ -28,6 +26,6 @@ declare namespace svelte.JSX {
 
 interface ImportMetaEnv {
   VITE_mapboxAccessToken: string;
-  VITE_ProcessImageUrl: string;
+  VITE_ProcessImageUrl: string; // added to Vercel env variables
   VITE_FIREBASE_CONFIG: string; // prod is added to Vercel env variables
 }

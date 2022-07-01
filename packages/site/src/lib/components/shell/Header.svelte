@@ -3,7 +3,7 @@
   import User from './User.svelte';
   import ShowHide from 'svelte-pieces/functions/ShowHide.svelte';
   import Button from 'svelte-pieces/ui/Button.svelte';
-  import { firebaseConfig } from '$sveltefirets';
+  import { firebaseConfig } from '$lib/firebaseConfig';
 </script>
 
 <header>

@@ -1,12 +1,12 @@
 <script lang="ts">
   import { t } from 'svelte-i18n';
-  import BadgeArray from 'svelte-pieces/data/BadgeArray.svelte';
   import Form from 'svelte-pieces/data/Form.svelte';
   import Button from 'svelte-pieces/ui/Button.svelte';
   import { user } from '$lib/stores';
   import Header from '$lib/components/shell/Header.svelte';
   import type { IDictionary, IHelper, IUser } from '@living-dictionaries/types';
-  import { docExists, firebaseConfig, setOnline, updateOnline } from '$sveltefirets';
+  import { docExists, setOnline, updateOnline } from 'sveltefirets';
+  import { firebaseConfig } from '$lib/firebaseConfig';
   import { arrayUnion, GeoPoint, serverTimestamp } from 'firebase/firestore/lite';
   import { debounce } from '$lib/helpers/debounce';
   import { pruneObject } from '$lib/helpers/prune';
@@ -15,7 +15,7 @@
     EditableGlossesField,
     EditableAlternateNames,
     glossingLanguages,
-  } from '@living-dictionaries/parts';
+  } from '@ld/parts';
 
   let modal: 'auth' = null;
 

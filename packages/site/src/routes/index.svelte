@@ -1,5 +1,5 @@
 <script context="module" lang="ts">
-  import { getCollection } from '$sveltefirets';
+  import { getCollection } from 'sveltefirets';
   import { orderBy, where } from 'firebase/firestore';
 
   import type { Load } from '@sveltejs/kit';

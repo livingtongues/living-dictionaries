@@ -122,7 +122,7 @@
     "lx": "kipashio/neno/kirai",
     "ei": "ID",
     "mr": "Mofolojia",
-    "gloss": "ufasiri",
+    "gloss (obsolete)": "ufasiri",
     "alternateOrthographies": "Othografia Mbadala",
     "signed_in_as_manager": "Lazima uingie katika akaunti kama msimamizi wa kamusi hii ili ufanye mabadiliko.",
     "delete_entry": "Futa ingizo",
@@ -150,7 +150,9 @@
     "sr": "Chanzo",
     "example_sentence": "Sentensi ya mfano",
     "nc": "Darasa la nomino",
-    "va": "Lahaja"
+    "va": "Lahaja",
+    "gloss": "tafsiri",
+    "plf": "Fomu ya wingi"
   },
   "error": {
     "run_into_error": "Samahani, tumepata hitilafu.",
@@ -250,7 +252,8 @@
     "no_images": "Hakuna faili za picha",
     "checking_audios": "Kuangalia ikiwa faili za sauti zipo",
     "no_audios": "Hakuna faili za sauti",
-    "download_csv": "Pakua CSV"
+    "download_csv": "Pakua CSV",
+    "availability": "Usafirishaji unapatikana tu kwa wasimamizi wa kamusi"
   },
   "video": {
     "video_url": "URL ya video",

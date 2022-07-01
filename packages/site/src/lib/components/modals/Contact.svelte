@@ -4,7 +4,7 @@
   import Button from 'svelte-pieces/ui/Button.svelte';
   import Form from 'svelte-pieces/data/Form.svelte';
   import { user } from '$lib/stores';
-  import { firebaseApp } from '$sveltefirets';
+  import { getFirebaseApp } from 'sveltefirets';
   import { getFunctions, httpsCallable } from 'firebase/functions';
 
   import { createEventDispatcher } from 'svelte';
@@ -29,7 +29,7 @@
         url: window.location.href,
       };
 
-      const functions = getFunctions(firebaseApp);
+      const functions = getFunctions(getFirebaseApp());
       await httpsCallable(functions, 'supportEmail')(data);
       status = 'success';
     } catch (err) {

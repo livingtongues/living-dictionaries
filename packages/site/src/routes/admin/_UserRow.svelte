@@ -1,6 +1,6 @@
 <script lang="ts">
   import { admin } from '$lib/stores';
-  import { updateOnline } from '$sveltefirets';
+  import { updateOnline } from 'sveltefirets';
   import type { IUser } from '@living-dictionaries/types';
   import { printDate } from '$lib/helpers/time';
   import DictionariesHelping from './_DictionariesHelping.svelte';
