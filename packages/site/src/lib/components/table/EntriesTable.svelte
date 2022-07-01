@@ -71,10 +71,7 @@
                 </td>
               {/each}
               {#if $dictionary.id === 'babanki'}
-                <td
-                  class:bg-green-100={entry.ua &&
-                    entry.ua.toMillis &&
-                    entry.ua.toMillis() > minutesAgo(5)} >
+                <td>
                   <Cell column={{
                     field: 'va', 
                     width: 150,
