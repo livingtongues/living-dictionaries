@@ -35,7 +35,13 @@
           style="{column.sticky
             ? 'left:' + getLeftValue(i) + 'px; --border-right-width: 3px;'
             : ''} --col-width: {column.width}px;">
-          <ColumnTitle {column} />
+          {#if $dictionary.id != 'babanki'}
+            {#if column.field != 'na' && column.field != 'va'}                   
+              <ColumnTitle {column} />
+            {/if}
+          {:else}
+            <ColumnTitle {column} />
+          {/if}
         </th>
       {/each}
     </tr>
@@ -57,7 +63,7 @@
                   style="{column.sticky
                     ? 'left:' + getLeftValue(i) + 'px; --border-right-width: 3px;'
                     : ''} --col-width: {entry.sr ? 'auto' : `${column.width}px`};">
-                  {#if $dictionary.id != 'Babanki'}
+                  {#if $dictionary.id != 'babanki'}
                     {#if column.field != 'na' && column.field != 'va'}                   
                       <Cell {column} {entry} canEdit={$canEdit} />
                     {/if}
