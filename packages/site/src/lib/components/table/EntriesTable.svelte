@@ -57,7 +57,13 @@
                   style="{column.sticky
                     ? 'left:' + getLeftValue(i) + 'px; --border-right-width: 3px;'
                     : ''} --col-width: {entry.sr ? 'auto' : `${column.width}px`};">
-                  <Cell {column} {entry} canEdit={$canEdit} />
+                  {#if $dictionary.id != 'Babanki'}
+                    {#if column.field != 'na' && column.field != 'va'}                   
+                      <Cell {column} {entry} canEdit={$canEdit} />
+                    {/if}
+                  {:else}
+                    <Cell {column} {entry} canEdit={$canEdit} />
+                  {/if}
                 </td>
               {/each}
             </tr>

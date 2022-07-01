@@ -53,6 +53,14 @@ const defaultColumns: IColumn[] = [
     width: 137, // SelectPOS
   },
   {
+    field: 'nc', // nounClass (Only used in Babanki)
+    width: 150, // SelectPOS
+  },
+  {
+    field: 'va', // variant (Only used in Babanki)
+    width: 150, // SelectPOS
+  },
+  {
     field: 'ph', // phonetic
     width: 170,
   },
