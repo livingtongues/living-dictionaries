@@ -4,6 +4,7 @@
   import Header from '$lib/components/shell/Header.svelte';
   import Button from 'svelte-pieces/ui/Button.svelte';
   import { logOut } from 'sveltefirets';
+  import ShowHide from 'svelte-pieces/functions/ShowHide.svelte';
 </script>
 
 <svelte:head>
@@ -27,5 +28,14 @@
           default: 'Log Out',
         })}</Button>
     </div>
-  {:else}Not signed in{/if}
+  {:else}
+    Not logged in
+    <ShowHide let:show let:toggle>
+      {#if !show}
+        {#await import('$lib/components/shell/AuthModal.svelte') then { default: AuthModal }}
+          <AuthModal on:close={toggle} />
+        {/await}
+      {/if}
+    </ShowHide>
+  {/if}
 </div>
