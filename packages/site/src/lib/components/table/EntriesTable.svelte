@@ -35,15 +35,15 @@
           style="{column.sticky
             ? 'left:' + getLeftValue(i) + 'px; --border-right-width: 3px;'
             : ''} --col-width: {column.width}px;">
-          {#if $dictionary.id != 'babanki'}
-            {#if column.field != 'na' && column.field != 'va'}                   
-              <ColumnTitle {column} />
-            {/if}
-          {:else}
-            <ColumnTitle {column} />
-          {/if}
+          <ColumnTitle {column} />
         </th>
       {/each}
+      <th
+        on:click={() => {
+          selectedColumn = {field: 'va', width: 150};
+        }}>
+        <ColumnTitle column={{field: 'va', width: 150}} />
+      </th>
     </tr>
     {#if $canEdit}
       {#await import('sveltefirets/client/components/Doc.svelte') then { default: Doc }}
@@ -63,15 +63,20 @@
                   style="{column.sticky
                     ? 'left:' + getLeftValue(i) + 'px; --border-right-width: 3px;'
                     : ''} --col-width: {entry.sr ? 'auto' : `${column.width}px`};">
-                  {#if $dictionary.id != 'babanki'}
-                    {#if column.field != 'na' && column.field != 'va'}                   
-                      <Cell {column} {entry} canEdit={$canEdit} />
-                    {/if}
-                  {:else}
-                    <Cell {column} {entry} canEdit={$canEdit} />
-                  {/if}
+                  <Cell {column} {entry} canEdit={$canEdit} />
                 </td>
               {/each}
+              {#if $dictionary.id === 'babanki'}
+                <td
+                  class:bg-green-100={entry.ua &&
+                    entry.ua.toMillis &&
+                    entry.ua.toMillis() > minutesAgo(5)} >
+                  <Cell column={{
+                    field: 'va', 
+                    width: 150,
+                  }} {entry} canEdit={$canEdit} />
+                </td>
+              {/if}
             </tr>
           </Doc>
         {/each}
