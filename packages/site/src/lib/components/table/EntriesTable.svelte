@@ -38,12 +38,16 @@
           <ColumnTitle {column} />
         </th>
       {/each}
-      <th
-        on:click={() => {
-          selectedColumn = {field: 'va', width: 150};
-        }}>
-        <ColumnTitle column={{field: 'va', width: 150}} />
-      </th>
+      {#if $dictionary.id === 'babanki'}
+        <th
+          on:click={() => {
+            selectedColumn = {field: 'va', width: 150};
+          }}
+          class="cursor-pointer bg-gray-100 top-0 sticky
+          hover:bg-gray-200 active:bg-gray-300 text-xs font-semibold">
+          <ColumnTitle column={{field: 'va', width: 150}} />
+        </th>
+      {/if}
     </tr>
     {#if $canEdit}
       {#await import('sveltefirets/client/components/Doc.svelte') then { default: Doc }}
