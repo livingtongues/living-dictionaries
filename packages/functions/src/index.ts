@@ -4,14 +4,16 @@
 // This should be the only import in index.ts beside function imports
 import * as functions from 'firebase-functions';
 
+// TODO: restore
 // export const updateDevAdminRole = functions.https.onCall(async (data, context) => {
-//   return (await import('./updateDevAdminRole')).default(data, context);
-// });
-
+  //   return (await import('./updateDevAdminRole')).default(data, context);
+  // });
+  
 // // Export
 // export const exportSemanticDomainOfDictionary = functions.https.onRequest(async (req, res) => {
 //   await (await import('./export/semanticDomainOfDictionary')).default(req, res);
 // });
+// TODO: end restore
 
 // Email
 export const supportEmail = functions.https.onCall(async (data, context) => {
@@ -36,6 +38,7 @@ export const onNewDictionary = functions.firestore
     await (await import('./email/onNewDictionary')).default(snapshot, context);
   });
 
+// TODO: restore
 // // Aggregation
 // export const increaseEntryCount = functions.firestore
 //   .document('dictionaries/{dictionaryId}/words/{wordId}')
@@ -86,6 +89,7 @@ export const onNewDictionary = functions.firestore
 //   .onDelete(async (snapshot, context) => {
 //     await (await import('./algolia/modifyIndex')).deleteFromIndex(snapshot, context);
 //   });
+// TODO: end restore
 
 // Video
 

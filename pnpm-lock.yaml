@@ -33,11 +33,11 @@ importers:
       '@living-dictionaries/types': ^1.0.0
       '@types/node': ^17.0.43
       algoliasearch: ^4.13.0
-      fetch-as: ^1.1.0
       firebase-admin: ^10.3.0
       firebase-functions: ^3.21.0
       firebase-functions-test: ^0.2.0
       firebase-tools: ^10.8.0
+      node-fetch: ^3.2.6
       typescript: ^4.7.3
       vitest: ^0.15.1
     dependencies:
@@ -50,8 +50,8 @@ importers:
       '@living-dictionaries/parts': link:../parts
       '@living-dictionaries/types': link:../types
       '@types/node': 17.0.43
-      fetch-as: 1.1.0
       firebase-functions-test: 0.2.3_rtfpucclwbeaszyiagdmvsrrda
+      node-fetch: 3.2.6
       typescript: 4.7.3
       vitest: 0.15.1
 
@@ -110,6 +110,7 @@ importers:
   packages/scripts:
     specifiers:
       '@living-dictionaries/functions': workspace:^0.0.1
+      '@living-dictionaries/parts': workspace:^0.0.1
       '@living-dictionaries/types': ^1.0.0
       '@types/node': ^17.0.43
       algoliasearch: ^4.11.0
@@ -125,6 +126,7 @@ importers:
       vitest: ^0.15.1
     devDependencies:
       '@living-dictionaries/functions': link:../functions
+      '@living-dictionaries/parts': link:../parts
       '@living-dictionaries/types': link:../types
       '@types/node': 17.0.43
       algoliasearch: 4.13.0
@@ -4245,16 +4247,6 @@ packages:
     resolution: {integrity: sha512-OP2IUU6HeYKJi3i0z4A19kHMQoLVs4Hc+DPqqxI2h/DPZHTm/vjsfC6P0b4jCMy14XizLBqvndQ+UilD7707Jw==}
     dev: false
 
-  /fetch-as/1.1.0:
-    resolution: {integrity: sha512-6Ig1PmcInVE4v6b63IJxa9XIlOQip+NsNGA+ocEChcDpY8f3iM5X6Lglx2jW8+Cx1zH6FoiZ2xicjkHRnLzgnw==}
-    engines: {node: '>= 8.9.0', npm: '>= 5.5.1'}
-    deprecated: No longer maintained. Moved to https://npm.im/@reallyland/node_mod.
-    dependencies:
-      node-fetch: 2.6.7
-    transitivePeerDependencies:
-      - encoding
-    dev: true
-
   /fetch-blob/3.1.5:
     resolution: {integrity: sha512-N64ZpKqoLejlrwkIAnb9iLSA3Vx/kjgzpcDhygcqJ2KKjky8nCgUQ+dzXtbrLaWZGZNmNfQTsiQ0weZ1svglHg==}
     engines: {node: ^12.20 || >= 14.13}
@@ -6249,6 +6241,15 @@ packages:
 
   /node-fetch/3.2.3:
     resolution: {integrity: sha512-AXP18u4pidSZ1xYXRDPY/8jdv3RAozIt/WLNR/MBGZAz+xjtlr90RvCnsvHQRiXyWliZF/CpytExp32UU67/SA==}
+    engines: {node: ^12.20.0 || ^14.13.1 || >=16.0.0}
+    dependencies:
+      data-uri-to-buffer: 4.0.0
+      fetch-blob: 3.1.5
+      formdata-polyfill: 4.0.10
+    dev: true
+
+  /node-fetch/3.2.6:
+    resolution: {integrity: sha512-LAy/HZnLADOVkVPubaxHDft29booGglPFDr2Hw0J1AercRh01UiVFm++KMDnJeH9sHgNB4hsXPii7Sgym/sTbw==}
     engines: {node: ^12.20.0 || ^14.13.1 || >=16.0.0}
     dependencies:
       data-uri-to-buffer: 4.0.0
