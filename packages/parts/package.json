@@ -1,18 +1,14 @@
 {
-  "name": "@ld/parts",
+  "name": "@living-dictionaries/parts",
   "version": "0.0.1",
   "description": "Language documentation components and helpers for use in livingdictionaries.app",
   "type": "module",
   "svelte": "src/lib/index.ts",
   "main": "src/lib/index.ts",
-  "publishConfig": {
-    "main": "index.js",
-    "typings": "index.d.ts"
-  },
   "scripts": {
     "dev": "svelte-kit dev --port 3042",
     "build": "svelte-kit build",
-    "package": "svelte-kit package",
+    "package": "svelte-kit package && node update-packaged-index-path.js",
     "preview": "svelte-kit preview",
     "prepare": "svelte-kit sync",
     "check": "svelte-check --tsconfig ./tsconfig.json --threshold warning --diagnostic-sources js,svelte",
@@ -32,6 +28,7 @@
     "mapbox-gl": "^2.8.1",
     "mdsvex": "^0.10.6",
     "recordrtc": "^5.6.2",
+    "replace-in-file": "^6.3.2",
     "svelte": "^3.48.0",
     "svelte-check": "^2.7.2",
     "svelte-deep-wind-preprocess": "^0.0.7",
@@ -39,6 +36,7 @@
     "svelte-preprocess": "^4.10.7",
     "svelte-store-router": "^2.0.10",
     "svelte-windicss-preprocess": "~4.1.0",
+    "svelte2tsx": "^0.5.10",
     "tslib": "^2.3.1",
     "typescript": "~4.7.3",
     "vitest": "^0.15.1",
@@ -48,8 +46,7 @@
     "type": "git",
     "url": "git+https://github.com/livingtongues/living-dictionaries.git"
   },
-  "author": "Living Tongues",
-  "license": "MIT",
+  "author": "Living Tongues Institute for Endangered Languages",
   "bugs": {
     "url": "https://github.com/livingtongues/living-dictionaries/issues"
   },

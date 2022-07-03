@@ -1,7 +1,7 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
   import Button from 'svelte-pieces/ui/Button.svelte';
-  import { MediaStream, Recorder } from '@ld/parts';
+  import { MediaStream, Recorder } from '@living-dictionaries/parts';
   import { srcObject } from './srcObject';
   let videoBlob: Blob;
 </script>

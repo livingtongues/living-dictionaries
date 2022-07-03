@@ -23,7 +23,7 @@ const iterateThroughDictionaries = async () => {
 };
 // iterateThroughDictionaries();
 
-import { prepareDataForIndex } from './prepareDataForIndex';
+import { prepareDataForIndex } from '@living-dictionaries/functions/src/algolia/prepareDataForIndex';
 import { IEntry } from '@living-dictionaries/types';
 
 async function indexDictionary(dictionaryId: string) {

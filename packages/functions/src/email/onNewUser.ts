@@ -1,54 +1,63 @@
 import * as functions from 'firebase-functions';
 
-// Learned from https://fireship.io/lessons/sendgrid-transactional-email-guide/
-import * as sgMail from '@sendgrid/mail';
-const sg_api_key = functions.config().sendgrid.key;
-// Set by running `firebase functions:config:set sendgrid.key="your_key"` // see https://fireship.io/lessons/sendgrid-transactional-email-guide/
-// read with firebase functions:config:get
-sgMail.setApiKey(sg_api_key);
+import { adminRecipients } from './recipients';
+import { MailChannelsSendBody } from './mail-channels.interface';
+import { sendEmail } from './mailChannels';
 
-import { adminRecipients } from './adminRecipients';
+import newUserWelcome from './html/newUserWelcome';
 
 export default async (
   snapshot: functions.firestore.DocumentSnapshot,
   context: functions.EventContext
 ) => {
   const user = snapshot.data();
-
-  if (user) {
-    const msg = {
-      from: 'annaluisa@livingtongues.org',
-      to: user.email,
-      templateId: 'd-7f80bcac817b46b7852caedd55786cce', // "Automatic Welcome"
-      dynamic_template_data: {
-        subject: 'Thank you for creating an account!',
-        // name: user.displayName,
-      },
-    };
-    const reply = await sgMail.send(msg);
-    console.log(reply);
-
-    const adminMsg = {
-      from: 'jacob@livingtongues.org',
-      to: adminRecipients,
-      subject: `New Living Dictionaries user: ${user.displayName}`,
-      trackingSettings: {
-        clickTracking: {
-          enable: false,
-          enableText: false,
+  try {
+    if (user) {
+      const userMsg: MailChannelsSendBody = {
+        personalizations: [{ to: [{ email: user.email }] }],
+        from: {
+          email: 'annaluisa@livingtongues.org',
+          name: 'Anna Luisa Daigneault',
         },
-      },
-      text: `Hey Admins,
-    
-    ${user.displayName} has just created a Living Dictionaries account, and we sent an automatic welcome email to ${user.email}
-    
-    Thanks,
-    Our automatic Firebase Cloud Function
-    
-    https://livingdictionaries.app`,
-    };
-    const adminReply = await sgMail.send(adminMsg);
-    console.log(adminReply);
+        subject: 'Thank you for creating a Living Dictionaries account!',
+        content: [
+          {
+            type: 'text/html',
+            value: newUserWelcome,
+          },
+        ],
+      };
+      const reply = await sendEmail(userMsg);
+      console.log(reply);
+
+      const adminMsg: MailChannelsSendBody = {
+        personalizations: [{ to: adminRecipients }],
+        from: {
+          email: 'jacob@livingtongues.org',
+        },
+
+        subject: `New Living Dictionaries user: ${user.displayName}`,
+        content: [
+          {
+            type: 'text/plain',
+            value: `Hey Admins,
+
+${user.displayName} has just created a Living Dictionaries account, and we sent an automatic welcome email to ${user.email}
+
+Thanks,
+Our automatic Firebase Cloud Function
+
+https://livingdictionaries.app`,
+          },
+        ],
+      };
+      const adminReply = await sendEmail(adminMsg);
+      console.log(adminReply);
+    }
+
+    return { success: true };
+  } catch (err) {
+    console.log('Error', err);
+    return { success: false };
   }
-  return { success: true };
 };
