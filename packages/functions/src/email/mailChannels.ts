@@ -1,6 +1,7 @@
 import * as functions from 'firebase-functions';
 import type { MailChannelsSendBody } from './mail-channels.interface';
-import fetch from 'node-fetch';
+import fetch from 'node-fetch'; // node-fetch is ESM only, so must import dynamically to use in commonjs or use v2: https://github.com/node-fetch/node-fetch#commonjs
+
 
 const api_key = functions.config().mailchannels.api_key;
 // Set by running `firebase functions:config:set mailchannels.api_key="your_key"`
