@@ -6,7 +6,7 @@
   export let value = '',
     canEdit = false;
 
-  import { partsOfSpeech } from '@ld/parts';
+  import { partsOfSpeech } from '@living-dictionaries/parts';
 
   $: writeInPOS = value && !partsOfSpeech.find((part) => part.enAbbrev === value);
 

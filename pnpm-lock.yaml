@@ -29,7 +29,7 @@ importers:
   packages/functions:
     specifiers:
       '@firebase/testing': ^0.20.11
-      '@ld/parts': ^0.0.1
+      '@living-dictionaries/parts': ^0.0.1
       '@living-dictionaries/scripts': ^0.0.1
       '@living-dictionaries/types': ^1.0.0
       '@types/node': ^17.0.43
@@ -48,7 +48,7 @@ importers:
       firebase-tools: 10.8.0
     devDependencies:
       '@firebase/testing': 0.20.11
-      '@ld/parts': link:../parts
+      '@living-dictionaries/parts': link:../parts
       '@living-dictionaries/scripts': link:../scripts
       '@living-dictionaries/types': link:../types
       '@types/node': 17.0.43
@@ -143,7 +143,7 @@ importers:
 
   packages/site:
     specifiers:
-      '@ld/parts': workspace:^0.0.1
+      '@living-dictionaries/parts': workspace:^0.0.1
       '@living-dictionaries/types': workspace:^1.0.0
       '@sentry/browser': ^6.18.2
       '@sveltejs/adapter-auto': 1.0.0-next.50
@@ -185,7 +185,7 @@ importers:
       web-vitals: ^2.1.2
       windicss: ^3.5.4
     devDependencies:
-      '@ld/parts': link:../parts
+      '@living-dictionaries/parts': link:../parts
       '@living-dictionaries/types': link:../types
       '@sentry/browser': 6.19.3
       '@sveltejs/adapter-auto': 1.0.0-next.50
