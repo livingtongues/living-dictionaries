@@ -1,5 +1,5 @@
 import { db } from '../config';
-import { IDictionary } from '../../../src/lib/interfaces';
+import { IDictionary } from '@living-dictionaries/types';
 /**
  * Create new empty dictionary in Firestore
  */

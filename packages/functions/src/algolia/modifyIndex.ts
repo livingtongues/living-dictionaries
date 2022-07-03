@@ -11,7 +11,7 @@ const client = algoliasearch(APP_ID, ADMIN_KEY);
 const prodIndex = client.initIndex('entries_prod');
 const devIndex = client.initIndex('entries_dev');
 
-import { prepareDataForIndex } from '@living-dictionaries/scripts';
+import { prepareDataForIndex } from './prepareDataForIndex';
 import { IEntry } from '@living-dictionaries/types';
 
 export const addToIndex = async (
