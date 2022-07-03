@@ -1,1 +1,0 @@
-Change engine to Node 16 before deploying and then back to Node 14 before committing to repo because SvelteKit needs to remain at Node 14 for the moment.
