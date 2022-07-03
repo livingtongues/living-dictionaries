@@ -1,9 +1,9 @@
 import * as functions from 'firebase-functions';
 import { db } from '../config';
 
-import { sesClient } from './sesClient';
-import { SendEmailCommand, SendEmailCommandInput } from '@aws-sdk/client-ses';
-import { adminRecipients } from './adminRecipients';
+import { adminRecipients } from './recipients';
+import { MailChannelsSendBody } from './mail-channels.interface';
+import { sendEmail } from './mailChannels';
 
 import { IDictionary, IUser } from '@living-dictionaries/types';
 
@@ -21,48 +21,39 @@ export default async (
   const user = userSnap.data() as IUser;
 
   if (dictionary && user?.email) {
-    const userMsg: SendEmailCommandInput = {
-      Source: 'annaluisa@livingtongues.org',
-      Destination: {
-        ToAddresses: [user.email],
+    const userMsg: MailChannelsSendBody = {
+      personalizations: [{ to: [{ email: user.email }] }],
+      from: {
+        email: 'annaluisa@livingtongues.org',
+        name: 'Anna Luisa Daigneault',
       },
-      Message: {
-        Subject: {
-          Charset: 'UTF-8',
-          Data: 'New Living Dictionary Created',
+      subject: 'New Living Dictionary Created',
+      content: [
+        {
+          type: 'text/html',
+          value: newDictionary(dictionary.name, dictionaryId),
         },
-        Body: {
-          Html: {
-            Charset: 'UTF-8',
-            Data: newDictionary(dictionary.name, dictionaryId),
-          },
-        },
-      },
+      ],
     };
 
-    const adminMsg: SendEmailCommandInput = {
-      Source: 'jacob@livingtongues.org',
-      Destination: {
-        ToAddresses: adminRecipients,
+    const adminMsg: MailChannelsSendBody = {
+      personalizations: [{ to: adminRecipients }],
+      from: {
+        email: 'jacob@livingtongues.org',
       },
-      Message: {
-        Subject: {
-          Charset: 'UTF-8',
-          Data: `Living Dictionary created: ${dictionary.name}`,
+      subject: `Living Dictionary created: ${dictionary.name}`,
+      content: [
+        {
+          type: 'text/plain',
+          value: notifyAdminsOnNewDictionary(dictionary, dictionaryId, user),
         },
-        Body: {
-          Text: {
-            Charset: 'UTF-8',
-            Data: notifyAdminsOnNewDictionary(dictionary, dictionaryId, user),
-          },
-        },
-      },
+      ],
     };
 
     try {
-      const reply = await sesClient.send(new SendEmailCommand(userMsg));
+      const reply = await sendEmail(userMsg);
       console.log('Success', reply);
-      const adminReply = await sesClient.send(new SendEmailCommand(adminMsg));
+      const adminReply = await sendEmail(adminMsg);
       console.log('Success', adminReply);
       return { success: true };
     } catch (err) {

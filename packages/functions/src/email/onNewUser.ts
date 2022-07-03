@@ -1,8 +1,9 @@
 import * as functions from 'firebase-functions';
 
-import { sesClient } from './sesClient';
-import { SendEmailCommand, SendEmailCommandInput } from '@aws-sdk/client-ses';
-import { adminRecipients } from './adminRecipients';
+import { adminRecipients } from './recipients';
+import { MailChannelsSendBody } from './mail-channels.interface';
+import { sendEmail } from './mailChannels';
+
 import newUserWelcome from './html/newUserWelcome';
 
 export default async (
@@ -12,41 +13,34 @@ export default async (
   const user = snapshot.data();
   try {
     if (user) {
-      const userMsg: SendEmailCommandInput = {
-        Source: 'annaluisa@livingtongues.org',
-        Destination: {
-          ToAddresses: [user.email],
+      const userMsg: MailChannelsSendBody = {
+        personalizations: [{ to: [{ email: user.email }] }],
+        from: {
+          email: 'annaluisa@livingtongues.org',
+          name: 'Anna Luisa Daigneault',
         },
-        Message: {
-          Subject: {
-            Charset: 'UTF-8',
-            Data: 'Thank you for creating a Living Dictionaries account!',
+        subject: 'Thank you for creating a Living Dictionaries account!',
+        content: [
+          {
+            type: 'text/html',
+            value: newUserWelcome,
           },
-          Body: {
-            Html: {
-              Charset: 'UTF-8',
-              Data: newUserWelcome,
-            },
-          },
-        },
+        ],
       };
-      const reply = await sesClient.send(new SendEmailCommand(userMsg));
+      const reply = await sendEmail(userMsg);
       console.log(reply);
 
-      const adminMsg: SendEmailCommandInput = {
-        Source: 'jacob@livingtongues.org',
-        Destination: {
-          ToAddresses: adminRecipients,
+      const adminMsg: MailChannelsSendBody = {
+        personalizations: [{ to: adminRecipients }],
+        from: {
+          email: 'jacob@livingtongues.org',
         },
-        Message: {
-          Subject: {
-            Charset: 'UTF-8',
-            Data: `New Living Dictionaries user: ${user.displayName}`,
-          },
-          Body: {
-            Text: {
-              Charset: 'UTF-8',
-              Data: `Hey Admins,
+
+        subject: `New Living Dictionaries user: ${user.displayName}`,
+        content: [
+          {
+            type: 'text/plain',
+            value: `Hey Admins,
 
 ${user.displayName} has just created a Living Dictionaries account, and we sent an automatic welcome email to ${user.email}
 
@@ -54,11 +48,10 @@ Thanks,
 Our automatic Firebase Cloud Function
 
 https://livingdictionaries.app`,
-            },
           },
-        },
+        ],
       };
-      const adminReply = await sesClient.send(new SendEmailCommand(adminMsg));
+      const adminReply = await sendEmail(adminMsg);
       console.log(adminReply);
     }
 

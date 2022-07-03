@@ -1,8 +1,9 @@
 import * as functions from 'firebase-functions';
 import { db } from '../config';
 
-import { mailersend, Recipient, EmailParams } from 'mailersend';
-import { adminRecipients } from './adminRecipients';
+import { adminRecipients } from './recipients';
+import { MailChannelsSendBody } from './mail-channels.interface';
+import { sendEmail } from './mailChannels';
 
 import { IInvite } from '@living-dictionaries/types';
 
@@ -15,25 +16,24 @@ export default async (
   const inviteId = context.params.inviteId;
 
   try {
-    const roleMessage =
-      invite.role === 'manager'
-        ? 'manager'
-        : 'contributor, which allows you to add and edit entries';
     if (invite) {
+      const roleMessage =
+        invite.role === 'manager'
+          ? 'manager'
+          : 'contributor, which allows you to add and edit entries';
 
-      const recipients = [
-        // new Recipient("your@client.com", "Your Client")
-        new Recipient(invite.targetEmail)
-      ];
-      
-      const emailParams = new EmailParams()
-            .setFrom("annaluisa@livingtongues.org")
-            .setFromName("Anna Luisa Daigneault")
-            .setRecipients(recipients)
-            .setReplyTo(invite.inviterEmail)
-            .setReplyToName(invite.inviterEmail)
-            .setSubject(`${invite.inviterName} has invited you to contribute to the ${invite.dictionaryName} Living Dictionary`)
-            .setHtml(`Hello,
+      const userMsg: MailChannelsSendBody = {
+        personalizations: [{ to: [{ email: invite.targetEmail }] }],
+        from: {
+          email: 'annaluisa@livingtongues.org',
+          name: 'Anna Luisa Daigneault',
+        },
+        reply_to: { email: invite.inviterEmail },
+        subject: `${invite.inviterName} has invited you to contribute to the ${invite.dictionaryName} Living Dictionary`,
+        content: [
+          {
+            type: 'text/plain',
+            value: `Hello,
 
 ${invite.inviterName} has invited you to work on the ${invite.dictionaryName} Living Dictionary as a ${roleMessage}. If you would like to help with this dictionary, then open this link: https://livingdictionaries.app/${dictionaryId}/invite/${inviteId} to  access the dictionary.
 
@@ -43,9 +43,12 @@ Thank you,
 Living Tongues Institute for Endangered Languages
 
 https://livingtongues.org (Living Tongues Homepage)
-https://livingdictionaries.app (Living Dictionaries website)`);
-      
-      const reply = await mailersend.send(emailParams);
+https://livingdictionaries.app (Living Dictionaries website)`,
+          },
+        ],
+      };
+
+      const reply = await sendEmail(userMsg);
       console.log(reply);
 
       const inviteRef = db.doc(`dictionaries/${dictionaryId}/invites/${inviteId}`);
@@ -53,22 +56,18 @@ https://livingdictionaries.app (Living Dictionaries website)`);
         status: 'sent',
       });
 
-      if (!adminRecipients.includes(invite.inviterEmail)) {
-        const adminMsg: SendEmailCommandInput = {
-          Source: 'jacob@livingtongues.org',
-          Destination: {
-            ToAddresses: adminRecipients,
+      if (!adminRecipients.find((r) => r.email === invite.inviterEmail)) {
+        const adminMsg: MailChannelsSendBody = {
+          personalizations: [{ to: adminRecipients }],
+          from: {
+            email: 'jacob@livingtongues.org',
           },
-          ReplyToAddresses: [invite.inviterEmail],
-          Message: {
-            Subject: {
-              Charset: 'UTF-8',
-              Data: `${invite.inviterName} has invited ${invite.targetEmail} to contribute to the ${invite.dictionaryName} Living Dictionary`,
-            },
-            Body: {
-              Text: {
-                Charset: 'UTF-8',
-                Data: `Hello Admins,
+          reply_to: { email: invite.inviterEmail },
+          subject: `${invite.inviterName} has invited ${invite.targetEmail} to contribute to the ${invite.dictionaryName} Living Dictionary`,
+          content: [
+            {
+              type: 'text/plain',
+              value: `Hello Admins,
 
 ${invite.inviterName} has invited ${invite.targetEmail} to work on the ${invite.dictionaryName} Living Dictionary as a ${roleMessage}.
 
@@ -80,11 +79,10 @@ Thanks,
 Our automatic Firebase Cloud Function
 
 https://livingdictionaries.app`,
-              },
             },
-          },
+          ],
         };
-        const adminReply = await sesClient.send(new SendEmailCommand(adminMsg));
+        const adminReply = await sendEmail(adminMsg);
         console.log(adminReply);
       }
     }
