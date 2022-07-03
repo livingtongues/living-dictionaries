@@ -5,6 +5,7 @@
   "type": "module",
   "main": "index.ts",
   "scripts": {
+    "sendEmail": "esno sendEmail.ts",
     "updateLocales": "esno locales/update-locales.ts",
     "importDictionary": "esno import/import.ts",
     "addDictionariesToIndex:dev": "esno algolia/addDictionariesToIndex.ts dev",
@@ -16,7 +17,7 @@
   "devDependencies": {
     "@living-dictionaries/functions": "workspace:^0.0.1",
     "@living-dictionaries/types": "^1.0.0",
-    "@types/node": "^17.0.23",
+    "@types/node": "^17.0.43",
     "algoliasearch": "^4.11.0",
     "commander": "^9.2.0",
     "csv-parse": "^5.0.4",

@@ -32,13 +32,13 @@ importers:
       '@ld/parts': ^0.0.1
       '@living-dictionaries/scripts': ^0.0.1
       '@living-dictionaries/types': ^1.0.0
+      '@types/node': ^17.0.43
       algoliasearch: ^4.13.0
       fetch-as: ^1.1.0
       firebase-admin: ^10.3.0
       firebase-functions: ^3.21.0
       firebase-functions-test: ^0.2.0
       firebase-tools: ^10.8.0
-      mailersend: ^1.3.2
       typescript: ^4.7.3
       vitest: ^0.15.1
     dependencies:
@@ -46,12 +46,12 @@ importers:
       firebase-admin: 10.3.0
       firebase-functions: 3.21.2_firebase-admin@10.3.0
       firebase-tools: 10.8.0
-      mailersend: 1.3.2
     devDependencies:
       '@firebase/testing': 0.20.11
       '@ld/parts': link:../parts
       '@living-dictionaries/scripts': link:../scripts
       '@living-dictionaries/types': link:../types
+      '@types/node': 17.0.43
       fetch-as: 1.1.0
       firebase-functions-test: 0.2.3_rtfpucclwbeaszyiagdmvsrrda
       typescript: 4.7.3
@@ -113,7 +113,7 @@ importers:
     specifiers:
       '@living-dictionaries/functions': workspace:^0.0.1
       '@living-dictionaries/types': ^1.0.0
-      '@types/node': ^17.0.23
+      '@types/node': ^17.0.43
       algoliasearch: ^4.11.0
       commander: ^9.2.0
       csv-parse: ^5.0.4
@@ -128,7 +128,7 @@ importers:
     devDependencies:
       '@living-dictionaries/functions': link:../functions
       '@living-dictionaries/types': link:../types
-      '@types/node': 17.0.23
+      '@types/node': 17.0.43
       algoliasearch: 4.13.0
       commander: 9.2.0
       csv-parse: 5.0.4
@@ -1314,7 +1314,7 @@ packages:
     engines: {node: ^8.13.0 || >=10.10.0}
     dependencies:
       '@grpc/proto-loader': 0.6.9
-      '@types/node': 17.0.24
+      '@types/node': 17.0.43
 
   /@grpc/grpc-js/1.6.7:
     resolution: {integrity: sha512-eBM03pu9hd3VqDQG+kHahiG1x80RGkkqqRb1Pchcwqej/KkAH95gAvKs6laqaHCycYaPK+TKuNQnOz9UXYA8qw==}
@@ -1814,7 +1814,7 @@ packages:
   /@types/duplexify/3.6.1:
     resolution: {integrity: sha512-n0zoEj/fMdMOvqbHxmqnza/kXyoGgJmEpsXjpP+gEqE1Ye4yNqc7xWipKnUoMpWhMuzJQSfK2gMrwlElly7OGQ==}
     dependencies:
-      '@types/node': 17.0.24
+      '@types/node': 17.0.43
     dev: false
 
   /@types/express-serve-static-core/4.17.29:
@@ -1908,9 +1908,7 @@ packages:
 
   /@types/node/17.0.23:
     resolution: {integrity: sha512-UxDxWn7dl97rKVeVS61vErvw086aCYhDLyvRQZ5Rk65rZKepaFdm53GeqXaKBuOhED4e9uWq34IC3TdSdJJ2Gw==}
-
-  /@types/node/17.0.24:
-    resolution: {integrity: sha512-aveCYRQbgTH9Pssp1voEP7HiuWlD2jW2BO56w+bVrJn04i61yh6mRfoKO6hEYQD9vF+W8Chkwc6j1M36uPkx4g==}
+    dev: true
 
   /@types/node/17.0.43:
     resolution: {integrity: sha512-jnUpgw8fL9kP2iszfIDyBQtw5Mf4/XSqy0Loc1J9pI14ejL83XcCEvSf50Gs/4ET0I9VCCDoOfufQysj0S66xA==}
@@ -5414,15 +5412,6 @@ packages:
       whatwg-fetch: 2.0.4
     dev: true
 
-  /isomorphic-unfetch/3.1.0:
-    resolution: {integrity: sha512-geDJjpoZ8N0kWexiwkX8F9NkTsXhetLPVbZFQ+JTW239QNOwvB0gniuR1Wc6f0AMTn7/mFGyXvHTifrCp/GH8Q==}
-    dependencies:
-      node-fetch: 2.6.7
-      unfetch: 4.2.0
-    transitivePeerDependencies:
-      - encoding
-    dev: false
-
   /isstream/0.1.2:
     resolution: {integrity: sha1-R+Y/evVa+m+S4VAOaQ64uFKcCZo=}
 
@@ -5860,14 +5849,6 @@ packages:
     dependencies:
       sourcemap-codec: 1.4.8
     dev: true
-
-  /mailersend/1.3.2:
-    resolution: {integrity: sha512-F0X32q9UJBNopB0ZYJWL+DSeOjJulzRY3n2y2+raj09kGd056U8z26zfl5clPl4YpHt26JEoaJ4rrJ9cww5FRQ==}
-    dependencies:
-      isomorphic-unfetch: 3.1.0
-    transitivePeerDependencies:
-      - encoding
-    dev: false
 
   /make-dir/3.1.0:
     resolution: {integrity: sha512-g3FeP20LNwhALb/6Cz6Dd4F2ngze0jz7tbzrD2wAV+o9FeNHe4rL+yK2md0J/fiSf1sa1ADhXqi5+oVwOM/eGw==}
@@ -6811,7 +6792,7 @@ packages:
       '@protobufjs/pool': 1.1.0
       '@protobufjs/utf8': 1.1.0
       '@types/long': 4.0.1
-      '@types/node': 17.0.23
+      '@types/node': 17.0.43
       long: 4.0.0
 
   /protobufjs/6.11.3:
@@ -8122,10 +8103,6 @@ packages:
     engines: {node: '>=4.2.0'}
     hasBin: true
     dev: true
-
-  /unfetch/4.2.0:
-    resolution: {integrity: sha512-F9p7yYCn6cIW9El1zi0HI6vqpeIvBsr3dSuRO6Xuppb1u5rXpCPmMvLSyECLhybr9isec8Ohl0hPekMVrEinDA==}
-    dev: false
 
   /unique-filename/1.1.1:
     resolution: {integrity: sha512-Vmp0jIp2ln35UTXuryvjzkjGdRyf9b2lTXuSYUiPmzRcl3FDtYqAwOnTJkAngD9SWhnoJzDbTKwaOrZ+STtxNQ==}
