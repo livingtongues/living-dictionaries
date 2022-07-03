@@ -1,5 +1,6 @@
 import * as functions from 'firebase-functions';
 import type { MailChannelsSendBody } from './mail-channels.interface';
+import fetch from 'node-fetch';
 
 const api_key = functions.config().mailchannels.api_key;
 // Set by running `firebase functions:config:set mailchannels.api_key="your_key"`
