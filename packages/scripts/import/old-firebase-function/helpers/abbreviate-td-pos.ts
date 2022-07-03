@@ -1,4 +1,4 @@
-// import { partsOfSpeech } from '@ld/parts';
+// import { partsOfSpeech } from '@living-dictionaries/parts';
 
 export interface IMatchResult {
   matchedPOS?: string;
