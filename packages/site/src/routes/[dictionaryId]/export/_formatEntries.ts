@@ -44,6 +44,7 @@ export function formatEntriesForCSV(
     lx: 'Lexeme/Word/Phrase',
     ph: 'Phonetic (IPA)',
     in: 'Interlinearization',
+    nc: 'Noun class',
     mr: 'Morphology',
     di: 'Dialect for this entry',
     nt: 'Notes',
@@ -51,6 +52,10 @@ export function formatEntriesForCSV(
     ps: 'Parts of speech',
     sr: 'Source(s)',
   };
+  //Assigning variant as header (only for Babanki)
+  if (dictionaryName === 'Babanki') {
+    Object.assign(headers, { va: 'variant' });
+  }
 
   //Assigning semantic domains as headers
   if (totalSDN > 0) {
@@ -78,7 +83,6 @@ export function formatEntriesForCSV(
     sfde: 'Speaker decade',
     sfge: 'Speaker gender',
   });
-
   //Assigning images metadata as headers
   headers['pfFriendlyName'] = 'Image filename';
 
@@ -93,6 +97,7 @@ export function formatEntriesForCSV(
       lx: entry.lx.replace(/[,"\r\n]/g, (m) => replacementChars[m]),
       ph: entry.ph ? entry.ph.replace(/[,"\r\n]/g, (m) => replacementChars[m]) : '',
       in: entry.in ? entry.in.replace(/[,"\r\n]/g, (m) => replacementChars[m]) : '',
+      nc: entry.nc ? entry.nc.replace(/[,"\r\n]/g, (m) => replacementChars[m]) : '',
       mr: entry.mr ? entry.mr.replace(/[,"\r\n]/g, (m) => replacementChars[m]) : '',
       di: entry.di ? entry.di.replace(/[,"\r\n]/g, (m) => replacementChars[m]) : '',
       nt: entry.nt
@@ -127,9 +132,13 @@ export function formatEntriesForCSV(
         ps: '',
       });
     }
-
     //Assigning sources
     turnArrayIntoPipedString(itemsFormatted, i, entry.sr, 'sr', (el) => el);
+
+    //Assigning variant (only for Babanki)
+    if (dictionaryName === 'Babanki') {
+      itemsFormatted[i]['va'] = entry?.va;
+    }
 
     //Assigning semantic domains
     for (let index = 0; index < totalSDN; index++) {
