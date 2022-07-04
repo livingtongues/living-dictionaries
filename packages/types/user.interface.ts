@@ -1,5 +1,5 @@
 import type { Timestamp } from 'firebase/firestore';
-import type { IFirestoreMetaData } from '.';
+import type { IFirestoreMetaData } from 'sveltefirets';
 
 export type IUser = User & Omit<IFirestoreMetaData, 'id'>;
 

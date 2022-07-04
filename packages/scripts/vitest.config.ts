@@ -3,6 +3,6 @@ import { defineConfig } from 'vitest/config';
 export default defineConfig({
   test: {
     globals: true,
-    includeSource: ['./import/parse-csv.ts'],
+    includeSource: ['./import/**/*.ts'],
   },
 });
