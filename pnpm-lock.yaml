@@ -220,8 +220,10 @@ importers:
   packages/types:
     specifiers:
       firebase: ^9.8.3
+      sveltefirets: ^0.0.27
     devDependencies:
       firebase: 9.8.3
+      sveltefirets: 0.0.27
 
 packages:
 

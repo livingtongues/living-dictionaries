@@ -56,9 +56,7 @@ export function convertJsonRowToEntryFormat(row: Record<string, string>, dateSta
   }
 
   entry.ii = `v4-${dateStamp}`;
-  // @ts-ignore
   entry.ca = timestamp;
-  // @ts-ignore
   entry.ua = timestamp;
 
   return entry;
