@@ -122,7 +122,7 @@
     "lx": "词位/字/短语",
     "ei": "ID",
     "mr": "构词学",
-    "gloss": "注释",
+    "gloss (obsolete)": "注释",
     "alternateOrthographies": "其他拼写法",
     "signed_in_as_manager": "您必须用管理员身份登录本字典来进行更改。",
     "delete_entry": "删除词条？",
@@ -147,10 +147,12 @@
     "does_not_exist": "没有",
     "link_copied": "复制链接",
     "copy_and_share": "复制并共享",
-    "sr": "来源",
+    "sr": "资源",
     "example_sentence": "例句",
     "nc": "名词课",
-    "va": "变体"
+    "va": "变体",
+    "gloss": "翻译",
+    "plf": "复数形式"
   },
   "error": {
     "run_into_error": "很抱歉，我们遇到了一个错误。",
@@ -198,7 +200,7 @@
     "next": "下一个",
     "export": "出口",
     "images": "图片",
-    "reset": "重启",
+    "reset": "重置",
     "invalid_url": "无效网址",
     "downloading": "下载中",
     "upload": "上传",
@@ -250,7 +252,8 @@
     "no_images": "没有图像文件",
     "checking_audios": "检查是否存在音频文件",
     "no_audios": "没有音频文件",
-    "download_csv": "下载CSV"
+    "download_csv": "下载CSV",
+    "availability": "出口仅适用于字典经理"
   },
   "video": {
     "video_url": "视频网址",

@@ -36,8 +36,10 @@ const config = {
 		adapter: adapter(),
 		vite: {
 			envDir: '../../',
+			build: {
+				target: 'es2015'
+			},
 		},
-
 	}
 };
 
