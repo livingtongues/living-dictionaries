@@ -1,6 +1,6 @@
 import type { IEntry } from '@living-dictionaries/types';
 
-export function convertJsonRowToEntryFormat(row: Record<string, string>, dateStamp: number): IEntry {
+export function convertJsonRowToEntryFormat(row: Record<string, string>, dateStamp: number, timestamp: FirebaseFirestore.FieldValue): IEntry {
   const entry: IEntry = { lx: row.lexeme, gl: {}, xs: {} };
 
   Boolean(row.phonetic) && (entry.ph = row.phonetic);
