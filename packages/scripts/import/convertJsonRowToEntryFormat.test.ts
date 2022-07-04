@@ -7,8 +7,14 @@ test('convertJsonRowToEntryFormat properly converts entries', async () => {
   const dictionaryId = 'example';
   const file = readFileSync(`./import/data/${dictionaryId}/${dictionaryId}.csv`, 'utf8');
   const rows = parseCSVFrom(file);
-  const entries = rows.map((row: any) => convertJsonRowToEntryFormat(row, dateStamp, dateStamp as unknown as FirebaseFirestore.FieldValue));
-  
+  const entries = rows.map((row: any) =>
+    convertJsonRowToEntryFormat(
+      row,
+      dateStamp,
+      dateStamp as unknown as FirebaseFirestore.FieldValue
+    )
+  );
+
   // remove header row w/ splice
   expect(entries.splice(1)).toMatchInlineSnapshot(`
     [
@@ -145,9 +151,9 @@ test('convertJsonRowToEntryFormat properly converts entries', async () => {
         "ph": "fɛɪ̯te",
         "ps": "v",
         "sr": [
-          "test source ",
-          " with multiples sources, test ",
-          " https://example.com",
+          "test source",
+          "with multiples sources, test",
+          "https://example.com",
         ],
         "ua": 10101010,
         "xs": {
@@ -173,5 +179,3 @@ test('convertJsonRowToEntryFormat properly converts entries', async () => {
     ]
   `);
 });
-
-

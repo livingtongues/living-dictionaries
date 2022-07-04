@@ -188,7 +188,7 @@ if (import.meta.vitest) {
           "semanticDomain2": "",
           "semanticDomain_custom": "",
           "soundFile": "0006-feter.mp3",
-          "source": "test source | with multiples sources, test | https://example.com",
+          "source": "test source|with multiples sources, test|https://example.com",
           "speakerAge": "31",
           "speakerGender": "m",
           "speakerHometown": "Montreal, Canada",
