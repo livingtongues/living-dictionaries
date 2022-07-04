@@ -20,7 +20,7 @@ export async function importFromSpreadsheet(dictionaryId: string, dry = false) {
   return entries;
 }
 
-export function convertJsonRowToEntryFormat(row: any, dateStamp: number): IEntry {
+export function convertJsonRowToEntryFormat(row: Record<string, string>, dateStamp: number): IEntry {
   const entry: IEntry = { lx: row.lexeme, gl: {}, xs: {} };
 
   Boolean(row.phonetic) && (entry.ph = row.phonetic);
