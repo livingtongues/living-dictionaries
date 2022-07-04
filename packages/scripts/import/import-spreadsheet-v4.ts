@@ -36,7 +36,7 @@ export function convertJsonRowToEntryFormat(row: Record<string, string>, dateSta
     Boolean(row.semanticDomain) && entry.sdn.push(row.semanticDomain.toString());
     Boolean(row.semanticDomain2) && entry.sdn.push(row.semanticDomain2.toString());
   }
-  Boolean(row.semanticDomain_custom) && (entry.sd = row.semanticDomain_custom);
+  Boolean(row.semanticDomain_custom) && (entry.sd = [row.semanticDomain_custom]);
   Boolean(row.ID) && (entry.ei = row.ID);
 
   Boolean(row.localOrthography) && (entry.lo = row.localOrthography);
