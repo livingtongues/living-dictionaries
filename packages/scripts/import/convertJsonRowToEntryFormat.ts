@@ -1,4 +1,5 @@
 import type { IEntry } from '@living-dictionaries/types';
+import type { Timestamp } from 'firebase/firestore';
 
 export function convertJsonRowToEntryFormat(row: Record<string, string>, dateStamp: number, timestamp: FirebaseFirestore.FieldValue): IEntry {
   const entry: IEntry = { lx: row.lexeme, gl: {}, xs: {} };
@@ -56,8 +57,8 @@ export function convertJsonRowToEntryFormat(row: Record<string, string>, dateSta
   }
 
   entry.ii = `v4-${dateStamp}`;
-  entry.ca = timestamp;
-  entry.ua = timestamp;
+  entry.ca = timestamp as Timestamp;
+  entry.ua = timestamp as Timestamp;
 
   return entry;
 }

@@ -41,7 +41,6 @@ export type {
   HelperRoles,
   IPartOfSpeech,
   IColumn,
-  IFirestoreMetaDataAbbreviated,
 };
 
 import { ReadyLocales, UnpublishedLocales } from './languages.interface';
