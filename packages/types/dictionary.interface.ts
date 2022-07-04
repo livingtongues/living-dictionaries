@@ -1,5 +1,5 @@
 import type { GeoPoint } from 'firebase/firestore';
-import type { IFirestoreMetaData } from '.';
+import type { IFirestoreMetaData } from 'sveltefirets';
 
 export interface IDictionary extends IFirestoreMetaData {
   // allContribute?: boolean; // deprecated
