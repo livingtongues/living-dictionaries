@@ -45,7 +45,7 @@ export async function importEntriesToFirebase(
     }
 
     const entryId = colRef.doc().id;
-    const entry = convertJsonRowToEntryFormat(row, dateStamp);
+    const entry = convertJsonRowToEntryFormat(row, dateStamp, timestamp);
 
     if (row.photoFile) {
       const pf = await uploadImageFile(row.photoFile, entryId, dictionaryId, dry);
