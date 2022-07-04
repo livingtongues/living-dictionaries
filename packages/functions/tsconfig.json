@@ -1,17 +1,16 @@
 {
   "compilerOptions": {
-    // "moduleResolution": "node",
+    // "moduleResolution": "node", // turn on if changing to esm
     // "module": "es2020",
-    // "target": "es2017",
-    "module": "commonjs",
-    // swap out above if changing to esm
+    "module": "commonjs", // use 'es2020' if changing to esm
     "noImplicitReturns": true,
-    // "noUnusedLocals": true,
+    // "noUnusedLocals": true, // turned off
     "outDir": "lib",
     "sourceMap": true,
-    "strict": true,
+    // "strict": true, // turned off
     "resolveJsonModule": true,
     "esModuleInterop": true,
+    "target": "es2017",
     "types": [
       "vitest/globals",
       "vitest/importMeta"
@@ -19,7 +18,9 @@
   },
   "compileOnSave": true,
   "include": [
-    "src"
+    "src/algolia",
+    "src/email",
+    "src/index.ts"
   ],
   // "exclude": ["./**/*test.ts"]
 }

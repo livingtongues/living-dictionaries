@@ -1,4 +1,4 @@
-import { glossingLanguages } from '@ld/parts';
+import { glossingLanguages } from '@living-dictionaries/parts';
 import { _ } from 'svelte-i18n';
 import { get } from 'svelte/store';
 

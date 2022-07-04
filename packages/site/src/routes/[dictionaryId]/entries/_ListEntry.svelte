@@ -2,7 +2,7 @@
   import { t } from 'svelte-i18n';
   import Audio from './_Audio.svelte';
   import Video from './_Video.svelte';
-  import { Image } from '@ld/parts';
+  import { Image } from '@living-dictionaries/parts';
   import AddImage from './_AddImage.svelte';
   import { page } from '$app/stores';
   import type { IEntry } from '@living-dictionaries/types';
