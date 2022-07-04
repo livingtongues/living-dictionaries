@@ -1,5 +1,6 @@
 import { readFileSync } from 'fs';
 import { parse } from 'csv-parse/sync';
+
 export function parseCSVFrom(file: string): any[] {
   return parse(file, {
     columns: true,
