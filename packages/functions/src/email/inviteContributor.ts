@@ -25,8 +25,8 @@ export default async (
       const userMsg: MailChannelsSendBody = {
         personalizations: [{ to: [{ email: invite.targetEmail }] }],
         from: {
-          email: 'annaluisa@livingtongues.org',
-          name: 'Anna Luisa Daigneault',
+          email: 'diego@livingtongues.org',
+          // name: 'Anna Luisa Daigneault',
         },
         reply_to: { email: invite.inviterEmail },
         subject: `${invite.inviterName} has invited you to contribute to the ${invite.dictionaryName} Living Dictionary`,
