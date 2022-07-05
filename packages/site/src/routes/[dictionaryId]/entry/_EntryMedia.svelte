@@ -3,7 +3,7 @@
   import type { IEntry } from '@living-dictionaries/types';
   import Audio from '../entries/_Audio.svelte';
   import AddImage from '../entries/_AddImage.svelte';
-  import { Image } from '@ld/parts';
+  import { Image } from '@living-dictionaries/parts';
   import ShowHide from 'svelte-pieces/functions/ShowHide.svelte';
   import Video from '../entries/_Video.svelte';
   import { deleteImage } from '$lib/helpers/delete';

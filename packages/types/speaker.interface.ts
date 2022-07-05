@@ -1,4 +1,4 @@
-import type { IFirestoreMetaData } from '.';
+import type { IFirestoreMetaData } from 'sveltefirets';
 
 export interface ISpeaker extends IFirestoreMetaData {
   displayName: string;

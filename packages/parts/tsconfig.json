@@ -20,10 +20,10 @@
 			"$lib/*": [
 				"src/lib/*"
 			],
-			"@ld/parts": [
+			"@living-dictionaries/parts": [
 				"src/lib"
 			],
-			"@ld/parts/*": [
+			"@living-dictionaries/parts/*": [
 				"src/lib/*"
 			]
 		},

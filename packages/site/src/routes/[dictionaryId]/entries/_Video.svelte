@@ -21,7 +21,7 @@
     </div>
   </div>
   {#if show}
-    {#await import('@ld/parts/src/lib/entries/video/PlayVideo.svelte') then { default: PlayVideo }}
+    {#await import('@living-dictionaries/parts/src/lib/entries/video/PlayVideo.svelte') then { default: PlayVideo }}
       <PlayVideo
         {t}
         {entry}

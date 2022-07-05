@@ -1,13 +1,15 @@
 {
-  "name": "@ld/functions",
+  "name": "@living-dictionaries/functions",
+  "version": "0.0.1",
   "scripts": {
     "build": "tsc",
+    "build:watch": "tsc --watch",
     "serve": "npm run build && firebase emulators:start --only functions",
     "shell": "npm run build && firebase functions:shell",
     "start": "npm run shell",
     "deploy": "firebase deploy --only functions",
-    "deploy:specific": "firebase deploy --only functions:onNewDictionary -P default",
-    "deploy:specific:prod": "firebase deploy --only functions:onNewDictionary -P production",
+    "deploy:specific": "firebase deploy --only functions:supportEmail,functions:inviteContributor,functions:onNewUser,functions:onNewDictionary -P default",
+    "deploy:specific:prod": "firebase deploy --only functions:supportEmail,functions:inviteContributor,functions:onNewUser,functions:onNewDictionary -P production",
     "logs": "firebase functions:log",
     "test": "vitest -u"
   },
@@ -18,15 +20,16 @@
   "dependencies": {
     "algoliasearch": "^4.13.0",
     "firebase-admin": "^10.3.0",
-    "firebase-functions": "^3.18.0",
+    "firebase-functions": "^3.21.0",
     "firebase-tools": "^10.8.0"
   },
   "devDependencies": {
     "@firebase/testing": "^0.20.11",
-    "@living-dictionaries/scripts": "^0.0.1",
+    "@living-dictionaries/parts": "^0.0.1",
     "@living-dictionaries/types": "^1.0.0",
-    "fetch-as": "^1.1.0",
+    "@types/node": "^17.0.43",
     "firebase-functions-test": "^0.2.0",
+    "node-fetch": "^2.6.7",
     "typescript": "^4.7.3",
     "vitest": "^0.15.1"
   },
