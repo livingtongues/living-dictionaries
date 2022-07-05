@@ -6,7 +6,7 @@ import type { IExampleSentence } from './exampe-sentence.interface';
 // import type { Hit } from 'instantsearch.js';
 import type { Timestamp } from 'firebase/firestore';
 
-import type { IFirestoreMetaDataAbbreviated } from '.';
+import type { IFirestoreMetaDataAbbreviated } from 'sveltefirets';
 // TODO remove deprecated fields
 export interface IEntry extends IFirestoreMetaDataAbbreviated, LDAlgoliaFields, DeprecatedFields {
   // Partial<Hit>
