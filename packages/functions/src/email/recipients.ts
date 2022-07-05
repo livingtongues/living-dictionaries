@@ -9,7 +9,7 @@ export const adminRecipients: Address[] = (() => {
   if (projectId === 'talking-dictionaries-alpha') {
     return [
       { email: 'livingtongues@gmail.com' }, // Greg
-      { email: 'annaluisa@livingtongues.org' },
+      // { email: 'annaluisa@livingtongues.org' },
       { email: 'jacob@livingtongues.org' },
       { email: 'diego@livingtongues.org' },
     ];
@@ -22,7 +22,7 @@ export const adminRecipients: Address[] = (() => {
 export const supportMessageRecipients: Address[] = (() => {
   if (projectId === 'talking-dictionaries-alpha') {
     return [
-      { email: 'annaluisa@livingtongues.org' },
+      // { email: 'annaluisa@livingtongues.org' },
       { email: 'jacob@livingtongues.org' },
       { email: 'diego@livingtongues.org' },
     ];

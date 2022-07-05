@@ -24,8 +24,8 @@ export default async (
     const userMsg: MailChannelsSendBody = {
       personalizations: [{ to: [{ email: user.email }] }],
       from: {
-        email: 'annaluisa@livingtongues.org',
-        name: 'Anna Luisa Daigneault',
+        email: 'diego@livingtongues.org',
+        // name: 'Anna Luisa Daigneault',
       },
       subject: 'New Living Dictionary Created',
       content: [

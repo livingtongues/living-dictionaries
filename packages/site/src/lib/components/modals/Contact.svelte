@@ -120,8 +120,8 @@
       {$_('contact.message_failed', {
         default: 'Message send failed. Check your internet connection or email us:',
       })}
-      <a class="underline ml-1" href="mailto:annaluisa@livingtongues.org">
-        annaluisa@livingtongues.org
+      <a class="underline ml-1" href="mailto:diego@livingtongues.org">
+        diego@livingtongues.org
       </a>
     </h4>
   {/if}
