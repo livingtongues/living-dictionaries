@@ -39,7 +39,7 @@
     refine({ isRefined: true });
   });
 
-  import { Image } from '@ld/parts';
+  import { Image } from '@living-dictionaries/parts';
   import { canEdit } from '$lib/stores';
   import type { IEntry } from '@living-dictionaries/types';
   let hitsType: IEntry;

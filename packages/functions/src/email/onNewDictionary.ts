@@ -1,17 +1,14 @@
 import * as functions from 'firebase-functions';
-import * as admin from 'firebase-admin';
-admin.initializeApp();
+import { db } from '../config';
 
-// Learned from https://fireship.io/lessons/sendgrid-transactional-email-guide/
-import * as sgMail from '@sendgrid/mail';
+import { adminRecipients } from './recipients';
+import { MailChannelsSendBody } from './mail-channels.interface';
+import { sendEmail } from './mailChannels';
+
 import { IDictionary, IUser } from '@living-dictionaries/types';
-const sg_api_key = functions.config().sendgrid.key;
-// Set by running `firebase functions:config:set sendgrid.key="your_key"` // see https://fireship.io/lessons/sendgrid-transactional-email-guide/
-// read with firebase functions:config:get
-sgMail.setApiKey(sg_api_key);
 
-import { adminRecipients } from './adminRecipients';
 import { notifyAdminsOnNewDictionary } from './composeMessages';
+import newDictionary from './html/newDictionary';
 
 export default async (
   snapshot: functions.firestore.DocumentSnapshot,
@@ -20,41 +17,49 @@ export default async (
   const dictionary = snapshot.data() as IDictionary;
   const dictionaryId = context.params.dictionaryId;
 
-  const userSnap = await admin
-    .firestore()
-    .doc(`users/${dictionary && dictionary.createdBy}`)
-    .get();
+  const userSnap = await db.doc(`users/${dictionary && dictionary.createdBy}`).get();
   const user = userSnap.data() as IUser;
 
-  if (dictionary && user) {
-    const msg = {
-      from: 'annaluisa@livingtongues.org',
-      to: user.email,
-      templateId: 'd-06857893fe684cd68ff11aec2fe7e36d', // "Created Dictionary"
-      dynamic_template_data: {
-        subject: 'New Living Dictionary Created',
-        dictionaryName: dictionary.name,
-        dictionaryId,
+  if (dictionary && user?.email) {
+    const userMsg: MailChannelsSendBody = {
+      personalizations: [{ to: [{ email: user.email }] }],
+      from: {
+        email: 'diego@livingtongues.org',
+        // name: 'Anna Luisa Daigneault',
       },
-    };
-    const reply = await sgMail.send(msg);
-    console.log(reply);
-
-    const adminMsg = {
-      from: 'jacob@livingtongues.org',
-      to: adminRecipients,
-      subject: `Living Dictionary created: ${dictionary.name}`,
-      trackingSettings: {
-        clickTracking: {
-          enable: false,
-          enableText: false,
+      subject: 'New Living Dictionary Created',
+      content: [
+        {
+          type: 'text/html',
+          value: newDictionary(dictionary.name, dictionaryId),
         },
-      },
-      text: notifyAdminsOnNewDictionary(dictionary, dictionaryId, user),
+      ],
     };
-    const adminReply = await sgMail.send(adminMsg);
-    console.log(adminReply);
-  }
 
+    const adminMsg: MailChannelsSendBody = {
+      personalizations: [{ to: adminRecipients }],
+      from: {
+        email: 'jacob@livingtongues.org',
+      },
+      subject: `Living Dictionary created: ${dictionary.name}`,
+      content: [
+        {
+          type: 'text/plain',
+          value: notifyAdminsOnNewDictionary(dictionary, dictionaryId, user),
+        },
+      ],
+    };
+
+    try {
+      const reply = await sendEmail(userMsg);
+      console.log('Success', reply);
+      const adminReply = await sendEmail(adminMsg);
+      console.log('Success', adminReply);
+      return { success: true };
+    } catch (err) {
+      console.log('Error', err);
+      return { success: false };
+    }
+  }
   return { success: true };
 };

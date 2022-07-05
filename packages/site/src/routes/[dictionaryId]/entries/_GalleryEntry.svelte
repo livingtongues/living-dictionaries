@@ -1,7 +1,7 @@
 <script lang="ts">
   import { t } from 'svelte-i18n';
   import type { IEntry } from '@living-dictionaries/types';
-  import { Image } from '@ld/parts';
+  import { Image } from '@living-dictionaries/parts';
   export let entry: IEntry;
   export let canEdit = false;
   import { dictionary } from '$lib/stores';

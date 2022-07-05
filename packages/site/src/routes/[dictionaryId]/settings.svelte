@@ -13,7 +13,7 @@
     PublicCheckbox,
     glossingLanguages,
     EditableAlternateNames,
-  } from '@ld/parts';
+  } from '@living-dictionaries/parts';
 
   async function togglePublic(settingPublic: boolean) {
     try {

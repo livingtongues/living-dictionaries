@@ -9,7 +9,7 @@
   const { getMap } = getContext(contextKey);
   const map = getMap();
 
-  import { DictionaryGeoJsonCollection } from '@ld/parts/src/lib/maps/map.class';
+  import { DictionaryGeoJsonCollection } from '@living-dictionaries/parts/src/lib/maps/map.class';
   let dictionaryLocations = new DictionaryGeoJsonCollection(dictionaries);
 
   // map.loadImage("/icons/favicon-32x32.png", function(error, image) {

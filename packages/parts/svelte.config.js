@@ -37,7 +37,7 @@ const config = {
     vite: {
       resolve: {
 				alias: {
-          '@ld/parts': path.resolve('./src/lib'),
+          '@living-dictionaries/parts': path.resolve('./src/lib'),
 				},
 			},
       define: {
