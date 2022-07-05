@@ -1,4 +1,5 @@
-import type { IFirestoreMetaData } from '.';
+import type { IFirestoreMetaData } from 'sveltefirets';
+
 export interface IImport extends IFirestoreMetaData {
     path?: string; // Firebase storage path
     createdByName?: string;
