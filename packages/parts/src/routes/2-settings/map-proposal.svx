@@ -5,11 +5,11 @@
   import Button from 'svelte-pieces/ui/Button.svelte';
 </script>
 
-<Story name="Mapbox proposal">
+<Story knobs={{scale: 1.0, draggable: true}} let:props={{scale, draggable}} name="Mapbox proposal">
   <ShowHide let:show let:toggle>
     <Button onclick={toggle}>Add Coordinates</Button>
     {#if show}
-    <MultipleMarkers on:close={toggle} />
+    <MultipleMarkers markersConfig={{ color: '#0d8529', scale, draggable }} on:close={toggle} />
     {/if}
   </ShowHide>
 </Story>
