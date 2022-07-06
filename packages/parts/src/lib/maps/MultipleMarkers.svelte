@@ -10,12 +10,15 @@
   let marker: mapboxgl.Marker;
   let lng: number;
   let lat: number;
-  //TODO make this a prop
-  const markersConfig = { color: '#0d8529', scale: 1.2, draggable: true };
+
+  export let allowPopUp = false;
+  export let markersConfig:mapboxgl.MarkerOptions;
   let multipleMarkers = false;
 
   $: if (multipleMarkers) {
-    marker.remove()
+    if (marker) {
+      marker.remove()
+    }
   } else {
     markers.forEach(marker => marker.remove()); 
     markers = []
@@ -57,20 +60,21 @@
 		const marker = new mapboxgl.Marker(markersConfig).setLngLat([lng, lat]).addTo(map);
 		markers.push(marker);
 
-		const popup = new mapboxgl.Popup({ closeOnClick: false })
-			.setLngLat(marker.getLngLat())
-			.setText(markers.length.toString())
-			.addTo(map);
-		marker.setPopup(popup);
-
-		map.flyTo({
-			center: [lng, lat]
-		});
-		marker.on('dragend', () => {
-      // @ts-ignore I'm ignoring next line due to ._container is a private Popup property and it's not declared in the class, but mapbox doesn't bring us a method where we can get the text of a popup
-			currentMarker = parseInt(marker.getPopup()._container.innerText.replace('\nx', '')) - 1;
-			console.log(marker.getPopup());
-		});
+    if (allowPopUp) {
+      const popup = new mapboxgl.Popup({ closeOnClick: false })
+        .setLngLat(marker.getLngLat())
+        .setText(markers.length.toString())
+        .addTo(map);
+      marker.setPopup(popup);
+  
+      map.flyTo({
+        center: [lng, lat]
+      });
+      marker.on('dragend', () => {
+        // @ts-ignore I'm ignoring next line due to ._container is a private Popup property and it's not declared in the class, but mapbox doesn't bring us a method where we can get the text of a popup
+        currentMarker = parseInt(marker.getPopup()._container.innerText.replace('\nx', '')) - 1;
+      });
+    }
 		console.log('marker created', markers);
 	}
 
