@@ -67,29 +67,29 @@ export const onNewDictionary = functions.firestore
 //   .https.onCall(async (data, context) => {
 //     return (await import('./deletion/recursiveDelete')).default(data, context);
 //   });
-
-// // Import
-// // export { processImport } from './import/importing';
-
-// // Algolia Search Indexing
-// export const addToIndex = functions.firestore
-//   .document('dictionaries/{dictionaryId}/words/{wordId}')
-//   .onCreate(async (snapshot, context) => {
-//     await (await import('./algolia/modifyIndex')).addToIndex(snapshot, context);
-//   });
-
-// export const updateIndex = functions.firestore
-//   .document('dictionaries/{dictionaryId}/words/{wordId}')
-//   .onUpdate(async (change, context) => {
-//     await (await import('./algolia/modifyIndex')).updateIndex(change, context);
-//   });
-
-// export const deleteFromIndex = functions.firestore
-//   .document('dictionaries/{dictionaryId}/words/{wordId}')
-//   .onDelete(async (snapshot, context) => {
-//     await (await import('./algolia/modifyIndex')).deleteFromIndex(snapshot, context);
-//   });
 // TODO: end restore
+
+// Import
+// export { processImport } from './import/importing';
+
+// Algolia Search Indexing
+export const addToIndex = functions.firestore
+  .document('dictionaries/{dictionaryId}/words/{wordId}')
+  .onCreate(async (snapshot, context) => {
+    await (await import('./algolia/modifyIndex')).addToIndex(snapshot, context);
+  });
+
+export const updateIndex = functions.firestore
+  .document('dictionaries/{dictionaryId}/words/{wordId}')
+  .onUpdate(async (change, context) => {
+    await (await import('./algolia/modifyIndex')).updateIndex(change, context);
+  });
+
+export const deleteFromIndex = functions.firestore
+  .document('dictionaries/{dictionaryId}/words/{wordId}')
+  .onDelete(async (snapshot, context) => {
+    await (await import('./algolia/modifyIndex')).deleteFromIndex(snapshot, context);
+  });
 
 // Video
 
