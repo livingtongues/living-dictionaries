@@ -62,7 +62,7 @@ export async function prepareDataForIndex(
     entry.hasPartOfSpeech = false;
   }
 
-  if (entry.plf) {
+  if (entry.pl) {
     entry.hasPluralForm = true;
   } else {
     entry.hasPluralForm = false;

@@ -16,7 +16,7 @@ export function convertJsonRowToEntryFormat(
   Boolean(row.variant) && (entry.va = row.variant);
   Boolean(row.nounClass) && (entry.nc = row.nounClass);
   Boolean(row.source) && (entry.sr = row.source.split('|'));
-  Boolean(row.pluralForm) && (entry.plf = row.pluralForm);
+  Boolean(row.pluralForm) && (entry.pl = row.pluralForm);
   if (row.semanticDomain || row.semanticDomain2) {
     entry.sdn = [];
     Boolean(row.semanticDomain) && entry.sdn.push(row.semanticDomain.toString());
