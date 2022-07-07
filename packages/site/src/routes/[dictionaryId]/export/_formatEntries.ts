@@ -44,7 +44,7 @@ export function formatEntriesForCSV(
     ph: 'Phonetic (IPA)',
     in: 'Interlinearization',
     mr: 'Morphology',
-    plf: 'Plural form',
+    pl: 'Plural form',
     di: 'Dialect for this entry',
     nt: 'Notes',
     psab: 'Parts of speech abbreviation',
@@ -94,7 +94,7 @@ export function formatEntriesForCSV(
       ph: entry.ph ? entry.ph.replace(/[,"\r\n]/g, (m) => replacementChars[m]) : '',
       in: entry.in ? entry.in.replace(/[,"\r\n]/g, (m) => replacementChars[m]) : '',
       mr: entry.mr ? entry.mr.replace(/[,"\r\n]/g, (m) => replacementChars[m]) : '',
-      plf: entry.plf ? entry.plf.replace(/[,"\r\n]/g, (m) => replacementChars[m]) : '',
+      pl: entry.pl ? entry.pl.replace(/[,"\r\n]/g, (m) => replacementChars[m]) : '',
       di: entry.di ? entry.di.replace(/[,"\r\n]/g, (m) => replacementChars[m]) : '',
       nt: entry.nt
         ? replaceHTMLTags(entry.nt.replace(/[,"\r\n]/g, (m) => replacementChars[m]))

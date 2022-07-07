@@ -32,7 +32,7 @@ export interface IEntry extends IFirestoreMetaDataAbbreviated, LDAlgoliaFields, 
 
   // Language & entry metadata
   nc?: string; // noun class
-  plf?: string; // plural form
+  pl?: string; // plural form
   va?: string; // variant
   di?: string; // dialect for this entry
   nt?: string; // notes

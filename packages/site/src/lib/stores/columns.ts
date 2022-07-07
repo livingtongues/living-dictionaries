@@ -73,7 +73,7 @@ const defaultColumns: IColumn[] = [
     width: 150,
   },
   {
-    field: 'plf', // plural form
+    field: 'pl', // plural form
     width: 150,
   },
   {

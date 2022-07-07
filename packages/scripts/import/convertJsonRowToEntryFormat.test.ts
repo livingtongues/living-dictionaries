@@ -78,7 +78,7 @@ test('convertJsonRowToEntryFormat properly converts entries', async () => {
         "lx": "tube",
         "nt": "a cylindrical device for liquids",
         "ph": "tyb",
-        "plf": "tubes",
+        "pl": "tubes",
         "ps": "n",
         "sd": [
           "plumbing",
