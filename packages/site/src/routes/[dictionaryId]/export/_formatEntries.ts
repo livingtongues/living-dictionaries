@@ -25,13 +25,7 @@ export function formatEntriesForCSV(
   speakers: ISpeaker[]
 ) {
   //Getting the total number of semantic domains by entry if they have at least one
-  let totalSDN = 0;
-  const filterSDN = data.filter((entry) => (entry.sdn ? entry.sdn.length : ''));
-  if (filterSDN.length > 0) {
-    totalSDN = filterSDN
-      .map((entry) => entry.sdn.length)
-      .reduce((maxLength, sdnLength) => Math.max(maxLength, sdnLength));
-  }
+  const totalSDN = Math.max(...data.map((entry) => entry.sdn?.length || 0));
 
   const replacementChars = {
     ',': ' -',
@@ -53,7 +47,7 @@ export function formatEntriesForCSV(
   };
   //Assigning variant as header (only for Babanki)
   if (dictionaryName === 'Babanki') {
-    Object.assign(headers, { va: 'variant' });
+    headers.va = 'variant';
   }
 
   //Assigning semantic domains as headers
@@ -82,6 +76,7 @@ export function formatEntriesForCSV(
     sfde: 'Speaker decade',
     sfge: 'Speaker gender',
   });
+
   //Assigning images metadata as headers
   headers['pfFriendlyName'] = 'Image filename';
 
@@ -131,6 +126,7 @@ export function formatEntriesForCSV(
         ps: '',
       });
     }
+
     //Assigning sources
     turnArrayIntoPipedString(itemsFormatted, i, entry.sr, 'sr', (el) => el);
 
@@ -160,6 +156,7 @@ export function formatEntriesForCSV(
         : '';
       itemsFormatted[i][`gl${bcp}`] = cleanEntry;
     });
+
     //Assigning example sentences
     for (let j = 0; j <= glossLanguages.length; j++) {
       if (entry.xs) {
@@ -176,6 +173,7 @@ export function formatEntriesForCSV(
         itemsFormatted[i][`xs${glossLanguages[j] ? glossLanguages[j] : 'vn'}`] = '';
       }
     }
+
     //Audio metadata
     if (entry.sf && entry.sf.path) {
       const speaker = speakers.find((speaker) => speaker?.id === entry.sf.sp);
@@ -202,6 +200,7 @@ export function formatEntriesForCSV(
         sfge: '',
       });
     }
+
     if (entry.pf && entry.pf.path) {
       itemsFormatted[i]['pfpa'] = entry.pf.path;
       itemsFormatted[i]['pfFriendlyName'] = friendlyName(entry, entry.pf.path);
