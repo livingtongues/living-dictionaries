@@ -116,11 +116,12 @@
     </div>
   {:else if status == 'fail'}
     <h4 class="text-xl mt-1 mb-4">
-      {$_('contact.message_sent', {
+      <!-- TODO: add to i18n dictionary -->
+      {$_('contact.message_failed', {
         default: 'Message send failed. Check your internet connection or email us:',
       })}
-      <a class="underline ml-1" href="mailto:annaluisa@livingtongues.org">
-        annaluisa@livingtongues.org
+      <a class="underline ml-1" href="mailto:diego@livingtongues.org">
+        diego@livingtongues.org
       </a>
     </h4>
   {/if}

@@ -1,7 +1,11 @@
 import { IEntry } from '@living-dictionaries/types';
 import type admin from 'firebase-admin';
 
-export async function prepareDataForIndex(dbEntry: IEntry, dictionaryId: string, db: admin.firestore.Firestore) {
+export async function prepareDataForIndex(
+  dbEntry: IEntry,
+  dictionaryId: string,
+  db: admin.firestore.Firestore
+) {
   const entry: IEntry = dbEntry;
   delete entry.id;
   entry.dictId = dictionaryId;
@@ -56,6 +60,12 @@ export async function prepareDataForIndex(dbEntry: IEntry, dictionaryId: string,
     entry.hasPartOfSpeech = true;
   } else {
     entry.hasPartOfSpeech = false;
+  }
+
+  if (entry.pl) {
+    entry.hasPluralForm = true;
+  } else {
+    entry.hasPluralForm = false;
   }
 
   if (entry.createdBy) {

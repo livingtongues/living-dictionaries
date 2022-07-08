@@ -6,7 +6,7 @@
   import SelectSpeakerCell from './cells/SelectSpeakerCell.svelte';
   import SelectSource from './cells/SelectSource.svelte';
   import AudioCell from './cells/AudioCell.svelte';
-  import { Image } from '@ld/parts';
+  import { Image } from '@living-dictionaries/parts';
   import { saveUpdateToFirestore } from '$lib/helpers/entry/update';
   import { deleteImage } from '$lib/helpers/delete';
   import { dictionary } from '$lib/stores';

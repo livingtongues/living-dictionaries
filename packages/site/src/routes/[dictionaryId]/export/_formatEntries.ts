@@ -1,7 +1,6 @@
 import type { IDictionary, IEntry, ISpeaker } from '@living-dictionaries/types';
 import { glossingLanguages } from './_glossing-languages-temp';
-import { semanticDomains } from '$lib/mappings/semantic-domains';
-import { partsOfSpeech } from '$lib/mappings/parts-of-speech';
+import { semanticDomains, partsOfSpeech } from '@living-dictionaries/parts';
 import { friendlyName } from '$lib/helpers/friendlyName';
 import { replaceHTMLTags } from '$lib/export/replaceHTMLTags';
 
@@ -45,6 +44,7 @@ export function formatEntriesForCSV(
     ph: 'Phonetic (IPA)',
     in: 'Interlinearization',
     mr: 'Morphology',
+    pl: 'Plural form',
     di: 'Dialect for this entry',
     nt: 'Notes',
     psab: 'Parts of speech abbreviation',
@@ -94,6 +94,7 @@ export function formatEntriesForCSV(
       ph: entry.ph ? entry.ph.replace(/[,"\r\n]/g, (m) => replacementChars[m]) : '',
       in: entry.in ? entry.in.replace(/[,"\r\n]/g, (m) => replacementChars[m]) : '',
       mr: entry.mr ? entry.mr.replace(/[,"\r\n]/g, (m) => replacementChars[m]) : '',
+      pl: entry.pl ? entry.pl.replace(/[,"\r\n]/g, (m) => replacementChars[m]) : '',
       di: entry.di ? entry.di.replace(/[,"\r\n]/g, (m) => replacementChars[m]) : '',
       nt: entry.nt
         ? replaceHTMLTags(entry.nt.replace(/[,"\r\n]/g, (m) => replacementChars[m]))

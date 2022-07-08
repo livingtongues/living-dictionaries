@@ -6,7 +6,7 @@ import type { IExampleSentence } from './exampe-sentence.interface';
 // import type { Hit } from 'instantsearch.js';
 import type { Timestamp } from 'firebase/firestore';
 
-import type { IFirestoreMetaDataAbbreviated } from '.';
+import type { IFirestoreMetaDataAbbreviated } from 'sveltefirets';
 // TODO remove deprecated fields
 export interface IEntry extends IFirestoreMetaDataAbbreviated, LDAlgoliaFields, DeprecatedFields {
   // Partial<Hit>
@@ -32,6 +32,7 @@ export interface IEntry extends IFirestoreMetaDataAbbreviated, LDAlgoliaFields, 
 
   // Language & entry metadata
   nc?: string; // noun class
+  pl?: string; // plural form
   va?: string; // variant
   di?: string; // dialect for this entry
   nt?: string; // notes
@@ -81,6 +82,7 @@ interface LDAlgoliaFields {
   hasSpeaker?: boolean;
   hasSemanticDomain?: boolean;
   hasPartOfSpeech?: boolean;
+  hasPluralForm?: boolean;
 }
 
 interface DeprecatedFields {

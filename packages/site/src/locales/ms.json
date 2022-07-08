@@ -122,7 +122,7 @@
     "lx": "Leksem/Perkataan/Frasa",
     "ei": "ID",
     "mr": "Morfologi",
-    "gloss": "Glos",
+    "gloss (obsolete)": "Glos",
     "alternateOrthographies": "Ortografi Alternatif",
     "signed_in_as_manager": "Anda harus log masuk sebagai pengurus kamus ini untuk membuat perubahan.",
     "delete_entry": "Padam entri?",
@@ -150,7 +150,9 @@
     "sr": "Sumber",
     "example_sentence": "Ayat contoh",
     "nc": "Kelas kata nama",
-    "va": "Pelbagai"
+    "va": "Pelbagai",
+    "gloss": "terjemahan",
+    "pl": "Bentuk jamak"
   },
   "error": {
     "run_into_error": "Maaf, kami telah menghadapi masalah.",
@@ -250,7 +252,8 @@
     "no_images": "Tidak ada fail gambar",
     "checking_audios": "Memeriksa jika fail audio wujud",
     "no_audios": "Tidak ada fail audio",
-    "download_csv": "Muat turun CSV"
+    "download_csv": "Muat turun CSV",
+    "availability": "Eksport hanya tersedia untuk pengurus kamus"
   },
   "video": {
     "video_url": "URL Video",
