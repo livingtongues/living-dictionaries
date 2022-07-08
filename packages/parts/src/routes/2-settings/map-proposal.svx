@@ -9,7 +9,6 @@
 # Mapbox proposal for multiple markers
 
 We can allow the normal single marker behaviour we already have on our site, but also with an additional use of multi-markers.
-We also can change some configuration of the pins for more specifical uses when using mult-markers, like `scale`, if the pins are `draggable` and the `color` of pins.
 
 <Story name="Mapbox proposal">
   <ShowHide let:show let:toggle>
@@ -20,11 +19,13 @@ We also can change some configuration of the pins for more specifical uses when 
   </ShowHide>
 </Story>
 
+We also can change some configuration of the pins for more specifical uses when using mult-markers, like `scale`, if the pins are `draggable` and the `color` of pins.
+
 <Story knobs={{scale: 1.0, draggable: true, color: '#0d8529'}} let:props={{scale, draggable, color}} name="Mapbox proposal">
   <ShowHide let:show let:toggle>
     <Button onclick={toggle}>Add Coordinates</Button>
     {#if show}
-    <MultipleMarkers multipleMarkers markersConfig={{ color, scale, draggable }} on:close={toggle} />
+    <MultipleMarkers onlyMultiMarkers markersConfig={{ color, scale, draggable }} on:close={toggle} />
     {/if}
   </ShowHide>
 </Story>
