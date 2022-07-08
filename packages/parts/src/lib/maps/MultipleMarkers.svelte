@@ -11,7 +11,8 @@
   let lng: number;
   let lat: number;
 
-  export let allowPopUp = false;
+  export let allowPopup = false;
+  export let allowText = false;
   export let markersConfig:mapboxgl.MarkerOptions;
   export let multipleMarkers = false;
   export let onlyMultiMarkers = false;
@@ -65,7 +66,7 @@
 		const marker = new mapboxgl.Marker(markersConfig).setLngLat([lng, lat]).addTo(map);
 		markers.push(marker);
 
-    if (allowPopUp) {
+    if (allowPopup) {
       const popup = new mapboxgl.Popup({ closeOnClick: false })
         .setLngLat(marker.getLngLat())
         .setText(markers.length.toString())
@@ -106,6 +107,13 @@
       <div class="mb-2">
         <input id="multiple-markers" type="checkbox" bind:checked={multipleMarkers} placeholder="Multiple markers" />
         <label for="multiple-markers" class="text-sm font-medium text-gray-700">Multiple markers</label>
+      </div>
+    {/if}
+    <!--TODO this text functionality in popups-->
+    {#if allowPopup && allowText}
+      <div class="mb-2">
+        <input id="multiple-markers" type="text" placeholder="Multiple markers" />
+        <label for="multiple-markers" class="text-sm font-medium text-gray-700">Text in markers</label>
       </div>
     {/if}
     <div id="map" class="relative w-full" style="height: 50vh;">
