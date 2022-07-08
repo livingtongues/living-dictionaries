@@ -14,6 +14,11 @@
   export let allowPopUp = false;
   export let markersConfig:mapboxgl.MarkerOptions;
   export let multipleMarkers = false;
+  export let onlyMultiMarkers = false;
+
+  if (onlyMultiMarkers) {
+    multipleMarkers = true;
+  }
 
   $: if (multipleMarkers) {
     if (marker) {
@@ -97,10 +102,12 @@
 </script>
 <Modal on:close noscroll>
   <form>
-    <div class="mb-2">
-      <input id="multiple-markers" type="checkbox" bind:checked={multipleMarkers} placeholder="Multiple markers" />
-      <label for="multiple-markers" class="text-sm font-medium text-gray-700">Multiple markers</label>
-    </div>
+    {#if !onlyMultiMarkers}   
+      <div class="mb-2">
+        <input id="multiple-markers" type="checkbox" bind:checked={multipleMarkers} placeholder="Multiple markers" />
+        <label for="multiple-markers" class="text-sm font-medium text-gray-700">Multiple markers</label>
+      </div>
+    {/if}
     <div id="map" class="relative w-full" style="height: 50vh;">
       <button
         on:click={toggleStyle}
