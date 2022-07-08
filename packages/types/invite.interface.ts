@@ -1,4 +1,5 @@
-import type { IFirestoreMetaData } from '.';
+import type { IFirestoreMetaData } from 'sveltefirets';
+
 export interface IInvite extends IFirestoreMetaData {
     inviterEmail: string;
     inviterName: string;

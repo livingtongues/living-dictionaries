@@ -1,6 +1,6 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
-  import { getStores } from '$app/stores';
+  import { session } from '$app/stores';
   import { admin, user as userStore } from '$lib/stores';
   import { logOut } from 'sveltefirets';
   import { firebaseConfig } from '$lib/firebaseConfig';
@@ -8,7 +8,6 @@
   import ShowHide from 'svelte-pieces/functions/ShowHide.svelte';
   import Menu from 'svelte-pieces/shell/Menu.svelte';
   import Button from 'svelte-pieces/ui/Button.svelte';
-  import type { IUser } from '@living-dictionaries/types';
 
   // Deep import not working, so copying function here temporarily
   // import { clickoutside } from 'svelte-pieces/actions/clickoutside.js';
@@ -26,8 +25,12 @@
     };
   }
 
-  $: user = $userStore || ($session && ($session.user as IUser)) || null;
-  const { session } = getStores();
+  $: user = $userStore || ($session && $session.user) || null;
+
+  import { browser } from '$app/env';
+  $: if (browser && $userStore && $session) {
+    $session.user = null; // so that page will properly reflect log out status and not fall back to session user from cookies
+  }
 </script>
 
 {#if user}

@@ -122,7 +122,7 @@
     "lx": "Lexeme/Word/Phrase",
     "ei": "ID",
     "mr": "Morphology",
-    "gloss": "Gloss",
+    "gloss (obsolete)": "Gloss",
     "alternateOrthographies": "Alternate Orthographies",
     "signed_in_as_manager": "You must be signed in as a manager of this dictionary to make changes.",
     "delete_entry": "Delete entry?",
@@ -150,7 +150,9 @@
     "sr": "Source",
     "example_sentence": "Example Sentence",
     "nc": "Noun Class",
-    "va": "Variant"
+    "va": "Variant",
+    "gloss": "translation",
+    "pl": "Plural form"
   },
   "error": {
     "run_into_error": "We're sorry, we've run into an error.",
@@ -250,7 +252,8 @@
     "no_images": "There are no image files",
     "checking_audios": "Checking if audio files exist",
     "no_audios": "There are no audio files",
-    "download_csv": "Download CSV"
+    "download_csv": "Download CSV",
+    "availability": "Export is only available to dictionary managers"
   },
   "video": {
     "video_url": "Video URL",
