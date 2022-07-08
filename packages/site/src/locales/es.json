@@ -152,7 +152,7 @@
     "nc": "Clase sustantiva",
     "va": "Variante",
     "gloss": "traducción",
-    "plf": "Forma plural"
+    "pl": "Forma plural"
   },
   "error": {
     "run_into_error": "Lo sentimos, hay un error.",

@@ -152,7 +152,7 @@
     "nc": "Noun Class",
     "va": "Variant",
     "gloss": "translation",
-    "plf": "Plural form"
+    "pl": "Plural form"
   },
   "error": {
     "run_into_error": "We're sorry, we've run into an error.",

@@ -137,6 +137,7 @@
             class:sompeng={display === 'Sompeng-Mardir'}
             class="form-input block w-full" />
         {/if}
+
         {#if field === 'in'}
           <div class="mt-3 text-sm hidden md:block">
           </div>
@@ -181,3 +182,9 @@
     </div>
   </form>
 </Modal>
+
+<style global>
+  .ck-editor__editable_inline {
+    @apply md:min-h-50vh;
+  }
+</style>

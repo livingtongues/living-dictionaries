@@ -1,7 +1,11 @@
 import type { IEntry } from '@living-dictionaries/types';
 import type { Timestamp } from 'firebase/firestore';
 
-export function convertJsonRowToEntryFormat(row: Record<string, string>, dateStamp: number, timestamp: FirebaseFirestore.FieldValue): IEntry {
+export function convertJsonRowToEntryFormat(
+  row: Record<string, string>,
+  dateStamp: number,
+  timestamp: FirebaseFirestore.FieldValue
+): IEntry {
   const entry: IEntry = { lx: row.lexeme, gl: {}, xs: {} };
 
   Boolean(row.phonetic) && (entry.ph = row.phonetic);
@@ -12,6 +16,7 @@ export function convertJsonRowToEntryFormat(row: Record<string, string>, dateSta
   Boolean(row.variant) && (entry.va = row.variant);
   Boolean(row.nounClass) && (entry.nc = row.nounClass);
   Boolean(row.source) && (entry.sr = row.source.split('|'));
+  Boolean(row.pluralForm) && (entry.pl = row.pluralForm);
   if (row.semanticDomain || row.semanticDomain2) {
     entry.sdn = [];
     Boolean(row.semanticDomain) && entry.sdn.push(row.semanticDomain.toString());
