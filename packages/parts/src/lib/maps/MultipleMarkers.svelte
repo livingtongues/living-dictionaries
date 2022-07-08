@@ -13,7 +13,7 @@
 
   export let allowPopUp = false;
   export let markersConfig:mapboxgl.MarkerOptions;
-  let multipleMarkers = false;
+  export let multipleMarkers = false;
 
   $: if (multipleMarkers) {
     if (marker) {
