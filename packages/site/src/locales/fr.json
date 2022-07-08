@@ -152,7 +152,7 @@
     "nc": "Classe de nom",
     "va": "Une variante",
     "gloss": "Traduction",
-    "plf": "Forme pluriel"
+    "pl": "Forme pluriel"
   },
   "error": {
     "run_into_error": "Nous sommes désolés, il y a une erreur.",

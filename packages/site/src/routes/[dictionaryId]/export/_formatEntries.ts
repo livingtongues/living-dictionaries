@@ -39,6 +39,7 @@ export function formatEntriesForCSV(
     in: 'Interlinearization',
     nc: 'Noun class',
     mr: 'Morphology',
+    pl: 'Plural form',
     di: 'Dialect for this entry',
     nt: 'Notes',
     psab: 'Parts of speech abbreviation',
@@ -93,6 +94,7 @@ export function formatEntriesForCSV(
       in: entry.in ? entry.in.replace(/[,"\r\n]/g, (m) => replacementChars[m]) : '',
       nc: entry.nc ? entry.nc.replace(/[,"\r\n]/g, (m) => replacementChars[m]) : '',
       mr: entry.mr ? entry.mr.replace(/[,"\r\n]/g, (m) => replacementChars[m]) : '',
+      pl: entry.pl ? entry.pl.replace(/[,"\r\n]/g, (m) => replacementChars[m]) : '',
       di: entry.di ? entry.di.replace(/[,"\r\n]/g, (m) => replacementChars[m]) : '',
       nt: entry.nt
         ? replaceHTMLTags(entry.nt.replace(/[,"\r\n]/g, (m) => replacementChars[m]))
