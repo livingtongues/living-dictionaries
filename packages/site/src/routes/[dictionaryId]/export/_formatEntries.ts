@@ -24,8 +24,8 @@ export function formatEntriesForCSV(
   { name: dictionaryName, glossLanguages }: IDictionary,
   speakers: ISpeaker[]
 ) {
-  //Getting the total number of semantic domains by entry if they have at least one
-  const totalSDN = Math.max(...data.map((entry) => entry.sdn?.length || 0));
+  //Get max number of semantic domains used by a single entry
+  const maxSDN = Math.max(...data.map((entry) => entry.sdn?.length || 0));
 
   const replacementChars = {
     ',': ' -',
@@ -51,8 +51,8 @@ export function formatEntriesForCSV(
   }
 
   //Assigning semantic domains as headers
-  if (totalSDN > 0) {
-    for (let index = 0; index < totalSDN; index++) {
+  if (maxSDN > 0) {
+    for (let index = 0; index < maxSDN; index++) {
       headers[`sd${index + 1}`] = `Semantic domain ${index + 1}`;
     }
   }
@@ -136,7 +136,7 @@ export function formatEntriesForCSV(
     }
 
     //Assigning semantic domains
-    for (let index = 0; index < totalSDN; index++) {
+    for (let index = 0; index < maxSDN; index++) {
       itemsFormatted[i][`sd${index + 1}`] = '';
       if (entry.sdn && entry.sdn[index]) {
         const matchingDomain = semanticDomains.find((sd) => sd.key === entry.sdn[index]);
