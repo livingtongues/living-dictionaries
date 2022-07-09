@@ -22,9 +22,9 @@ test('Example to demonstrate separate file snapshots.', () => {
   ];
   const dictionary: IDictionary = { name: 'test', glossLanguages: ['ar', 'en'], entryCount: 0 };
   const speakers: ISpeaker[] = [{ displayName: 'John Smith', id: '123' }];
-  expect(formatEntriesForCSV(entriesArray, dictionary, speakers)).toMatchInlineSnapshot(`
-    Array [
-      Object {
+  expect(formatEntriesForCSV(entriesArray, dictionary, speakers, [], [])).toMatchInlineSnapshot(`
+    [
+      {
         "di": "Dialect for this entry",
         "glar": "Arabic Gloss",
         "glen": "English Gloss",
@@ -32,9 +32,11 @@ test('Example to demonstrate separate file snapshots.', () => {
         "in": "Interlinearization",
         "lx": "Lexeme/Word/Phrase",
         "mr": "Morphology",
+        "nc": "Noun class",
         "nt": "Notes",
         "pfFriendlyName": "Image filename",
         "ph": "Phonetic (IPA)",
+        "pl": "Plural form",
         "ps": "Parts of speech",
         "psab": "Parts of speech abbreviation",
         "sd1": "Semantic domain 1",
@@ -48,7 +50,7 @@ test('Example to demonstrate separate file snapshots.', () => {
         "xsen": "Example sentence in English",
         "xsvn": "Example sentence in test",
       },
-      Object {
+      {
         "di": "dialect x",
         "glar": "",
         "glen": "",
@@ -56,10 +58,12 @@ test('Example to demonstrate separate file snapshots.', () => {
         "in": "",
         "lx": "banana",
         "mr": "",
+        "nc": "",
         "nt": "This is an example of a note - here we can write whatever we want.",
         "pfFriendlyName": "12ar_platano.com",
         "pfpa": "https://example.com",
         "ph": "banana",
+        "pl": "",
         "ps": "1",
         "psab": "",
         "sd1": "",
@@ -74,7 +78,7 @@ test('Example to demonstrate separate file snapshots.', () => {
         "xsen": "This is a banana",
         "xsvn": "",
       },
-      Object {
+      {
         "di": "",
         "glar": "",
         "glen": "",
@@ -82,9 +86,11 @@ test('Example to demonstrate separate file snapshots.', () => {
         "in": "",
         "lx": "tree",
         "mr": "",
+        "nc": "",
         "nt": "",
         "pfFriendlyName": "",
         "ph": "",
+        "pl": "",
         "ps": "",
         "psab": "",
         "sd1": "",
