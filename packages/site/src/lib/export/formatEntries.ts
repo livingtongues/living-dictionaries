@@ -7,7 +7,7 @@ import type {
 } from '@living-dictionaries/types';
 import { glossingLanguages } from './glossing-languages-temp'; // todo - import from actual json file
 import { friendlyName } from './friendlyName';
-import { replaceHTMLTags } from './replaceHTMLTags';
+import { stripHTMLTags } from './stripHTMLTags';
 
 enum EntryCSVFieldsEnum {
   id = 'Entry Id',
@@ -91,7 +91,7 @@ export function formatEntriesForCSV(
       mr: entry.mr || '',
       pl: entry.pl || '',
       di: entry.di || '',
-      nt: replaceHTMLTags(entry.nt),
+      nt: stripHTMLTags(entry.nt),
       sr: entry.sr ? typeof entry.sr === 'string' ? entry.sr : entry.sr.join(' | ') : '', // some dictionaries (e.g. Kalanga) have sources that are strings and not arrays
       psab: '',
       ps: '',
@@ -145,7 +145,7 @@ export function formatEntriesForCSV(
 
     // glosses
     glossLanguages.forEach((bcp) => {
-      const cleanEntry = entry.gl[bcp] ? replaceHTMLTags(entry.gl[bcp]) : '';
+      const cleanEntry = stripHTMLTags(entry.gl[bcp]);
       formattedEntry[`gl${bcp}`] = cleanEntry;
     });
 
