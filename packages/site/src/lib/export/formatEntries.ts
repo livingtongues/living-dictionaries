@@ -79,18 +79,15 @@ export function formatEntriesForCSV(
   }
 
   const formattedEntries: IEntryForCSV[] = entries.map((entry) => {
-    // Replace null values with empty string
-    Object.keys(entry).forEach((key) => (!entry[key] ? (entry[key] = '') : entry[key]));
-
     const formattedEntry = {
       id: entry.id,
       lx: entry.lx,
-      ph: entry.ph || '',
-      in: entry.in || '',
-      nc: entry.nc || '',
-      mr: entry.mr || '',
-      pl: entry.pl || '',
-      di: entry.di || '',
+      ph: entry.ph,
+      in: entry.in,
+      nc: entry.nc,
+      mr: entry.mr,
+      pl: entry.pl,
+      di: entry.di,
       nt: stripHTMLTags(entry.nt),
       sr: entry.sr ? typeof entry.sr === 'string' ? entry.sr : entry.sr.join(' | ') : '', // some dictionaries (e.g. Kalanga) have sources that are strings and not arrays
       psab: '',
@@ -117,13 +114,13 @@ export function formatEntriesForCSV(
     // Media
     if (entry.sf?.path) {
       const speaker = speakers.find((speaker) => speaker?.id === entry.sf.sp);
-      const speakerName = speaker?.displayName || entry.sf.speakerName || '';
+      const speakerName = speaker?.displayName || entry.sf.speakerName;
       formattedEntry.sfpa = entry.sf.path;
       formattedEntry.sfFriendlyName = friendlyName(entry, entry.sf.path);
       formattedEntry.sfsn = speakerName;
-      formattedEntry.sfbp = speaker?.birthplace || '';
-      formattedEntry.sfde = speaker?.decade?.toString() || ''; // test both string and number
-      formattedEntry.sfge = speaker?.gender || '';
+      formattedEntry.sfbp = speaker?.birthplace;
+      formattedEntry.sfde = speaker?.decade?.toString();
+      formattedEntry.sfge = speaker?.gender;
     }
     if (entry.pf?.path) {
       formattedEntry.pfpa = entry.pf.path;
@@ -150,14 +147,14 @@ export function formatEntriesForCSV(
     });
 
     // Vernacular and gloss language example sentences
-    formattedEntry.xsvn = entry.xs?.vn || '';
+    formattedEntry.xsvn = entry.xs?.vn;
     glossLanguages.forEach((bcp) => {
-      formattedEntry[`xs${bcp}`] = entry.xs?.[bcp] || '';
+      formattedEntry[`xs${bcp}`] = entry.xs?.[bcp];
     });
 
     // Dictionary specific
     if (dictionaryName === 'Babanki') {
-      formattedEntry.va = entry.va || '';
+      formattedEntry.va = entry.va;
     }
 
     return formattedEntry;
