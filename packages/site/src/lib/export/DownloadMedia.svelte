@@ -3,7 +3,7 @@
   import { fileAsBlob } from '$lib/export/csv';
   import type { IDictionary } from '@living-dictionaries/types';
   import { createEventDispatcher, onDestroy, onMount } from 'svelte';
-  import { getStorageDownloadUrl } from './_storageUrl';
+  import { getStorageDownloadUrl } from './storageUrl';
 
   export let dictionary: IDictionary;
   export let formattedEntries: any[];

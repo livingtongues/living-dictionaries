@@ -3,12 +3,12 @@
   import { _ } from 'svelte-i18n';
   import { dictionary, isManager } from '$lib/stores';
   import Button from 'svelte-pieces/ui/Button.svelte';
-  import { formatEntriesForCSV } from './export/_formatEntries';
+  import { formatEntriesForCSV } from '$lib/export/formatEntries';
   import type { IEntry } from '@living-dictionaries/types';
   import { getCollection } from 'sveltefirets';
   import { downloadObjArrAsCSV } from '$lib/export/csv';
   import ShowHide from 'svelte-pieces/functions/ShowHide.svelte';
-  import DownloadMedia from './export/_DownloadMedia.svelte';
+  import DownloadMedia from '../../lib/export/DownloadMedia.svelte';
   import Progress from './export/_Progress.svelte';
   import { fetchSpeakers } from '$lib/helpers/fetchSpeakers';
   let includeImages = false;
