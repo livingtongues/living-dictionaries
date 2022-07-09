@@ -10,7 +10,7 @@
   import { downloadBlob, arrayToCSVBlob } from '$lib/export/csv';
   import ShowHide from 'svelte-pieces/functions/ShowHide.svelte';
   import DownloadMedia from '../../lib/export/DownloadMedia.svelte';
-  import Progress from './export/_Progress.svelte';
+  import Progress from '$lib/export/Progress.svelte';
   import { fetchSpeakers } from '$lib/helpers/fetchSpeakers';
 
   let includeImages = false;
