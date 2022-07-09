@@ -15,17 +15,16 @@ function objectsToCSV(arr: Record<string, string>[]) {
     .join('\n');
 }
 
-export function fileAsBlob(itemsFormatted: Record<string, string | any>[]) {
+export function arrayToCSVBlob(itemsFormatted: Record<string, string | any>[]) {
   const csv = objectsToCSV(itemsFormatted);
   const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
   return blob;
 }
 
-export function downloadObjArrAsCSV(itemsFormatted: Record<string, string | any>[], title: string) {
-  const blob = fileAsBlob(itemsFormatted);
+export function downloadBlob(blob: Blob, title: string, extension: string) {
   const d = new Date();
   const date = d.getMonth() + 1 + '_' + d.getDate() + '_' + d.getFullYear();
-  const exportedFilename = title + '_' + date + '.csv' || 'export.csv';
+  const exportedFilename = title + '_' + date + extension;
 
   const link = document.createElement('a');
   if (link.download !== undefined) {
@@ -38,10 +37,12 @@ export function downloadObjArrAsCSV(itemsFormatted: Record<string, string | any>
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+  } else {
+    alert('This browser does not support HTML5 downloads - please use a newer browser');
   }
 }
 
-export function exportDictionariesAsCSV(data: IDictionary[], title: string) {
+export function exportDictionariesAsCSV(dictionaries: IDictionary[], title: string) {
   const headers = {
     name: 'Dictionary Name',
     url: 'URL',
@@ -53,15 +54,14 @@ export function exportDictionariesAsCSV(data: IDictionary[], title: string) {
     thumbnail: 'Thumbnail',
   };
 
-  const itemsFormatted = [];
-  data.forEach((dictionary) => {
+  const formattedDictionaries = dictionaries.map((dictionary) => {
     let cleanedLocation = '';
     if (dictionary.location) {
       const location = dictionary.location + '';
       cleanedLocation = location.replace(/,/g, '_');
     }
 
-    itemsFormatted.push({
+    return {
       name: dictionary.name.replace(/,/g, '_'),
       url: dictionary.url,
       iso6393: dictionary.iso6393 || '',
@@ -70,27 +70,26 @@ export function exportDictionariesAsCSV(data: IDictionary[], title: string) {
       latitude: (dictionary.coordinates && dictionary.coordinates.latitude) || '',
       longitude: (dictionary.coordinates && dictionary.coordinates.longitude) || '',
       thumbnail: dictionary.thumbnail || '',
-    });
+    };
   });
 
-  itemsFormatted.unshift(headers);
-  downloadObjArrAsCSV(itemsFormatted, title);
+  const blob = arrayToCSVBlob([headers, ...formattedDictionaries]);
+  downloadBlob(blob, title, '.csv');
 }
 
-export function exportUsersAsCSV(data: IUser[], title: string) {
+export function exportUsersAsCSV(users: IUser[], title: string) {
   const headers = {
     displayName: 'Name',
     email: 'Email',
   };
 
-  const itemsFormatted = [];
-  data.forEach((user) => {
-    itemsFormatted.push({
+  const formattedUsers = users.map((user) => {
+    return {
       displayName: user.displayName && user.displayName.replace(/,/, ''),
       email: user.email,
-    });
+    };
   });
 
-  itemsFormatted.unshift(headers);
-  downloadObjArrAsCSV(itemsFormatted, title);
+  const blob = arrayToCSVBlob([headers, ...formattedUsers]);
+  downloadBlob(blob, title, '.csv');
 }
