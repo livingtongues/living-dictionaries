@@ -16,6 +16,9 @@
       return $columns[index - 1].width;
     }
   }
+
+  $: adjustedColumns =
+    $dictionary.id === 'babanki' ? [...$columns, { field: 'va', width: 150 }] : $columns;
 </script>
 
 <div
@@ -24,7 +27,7 @@
   style="height: calc(100vh - 189px);">
   <table class="relative">
     <tr class="text-left">
-      {#each $columns as column, i}
+      {#each adjustedColumns as column, i}
         <th
           on:click={() => {
             selectedColumn = column;
@@ -38,16 +41,6 @@
           <ColumnTitle {column} />
         </th>
       {/each}
-      {#if $dictionary.id === 'babanki'}
-        <th
-          on:click={() => {
-            selectedColumn = {field: 'va', width: 150};
-          }}
-          class="cursor-pointer bg-gray-100 top-0 sticky
-          hover:bg-gray-200 active:bg-gray-300 text-xs font-semibold">
-          <ColumnTitle column={{field: 'va', width: 150}} />
-        </th>
-      {/if}
     </tr>
     {#if $canEdit}
       {#await import('sveltefirets/client/components/Doc.svelte') then { default: Doc }}
@@ -58,7 +51,7 @@
             let:data={entry}
             log>
             <tr class="row-hover">
-              {#each $columns as column, i}
+              {#each adjustedColumns as column, i}
                 <td
                   class:bg-green-100={entry.ua &&
                     entry.ua.toMillis &&
@@ -70,19 +63,6 @@
                   <Cell {column} {entry} canEdit={$canEdit} />
                 </td>
               {/each}
-              {#if $dictionary.id === 'babanki'}
-                <td
-                  class:bg-green-100={entry.ua &&
-                    entry.ua.toMillis &&
-                    entry.ua.toMillis() > minutesAgo(5)}
-                  class="h-0"
-                  style="--col-width: 'auto';">
-                  <Cell column={{
-                    field: 'va', 
-                    width: 150,
-                  }} {entry} canEdit={$canEdit} />
-                </td>
-              {/if}
             </tr>
           </Doc>
         {/each}
@@ -90,7 +70,7 @@
     {:else}
       {#each entries as entry (entry.id)}
         <tr class="row-hover">
-          {#each $columns as column, i}
+          {#each adjustedColumns as column, i}
             <td
               class="{column.sticky ? 'sticky bg-white' : ''} h-0"
               style="{column.sticky
@@ -99,16 +79,6 @@
               <Cell {column} {entry} canEdit={$canEdit} />
             </td>
           {/each}
-          {#if $dictionary.id === 'babanki'}
-            <td
-              class="h-0"
-              style="--col-width: 'auto';">
-              <Cell column={{
-                field: 'va', 
-                width: 150,
-              }} {entry} canEdit={$canEdit} />
-            </td>
-          {/if}
         </tr>
       {/each}
     {/if}
