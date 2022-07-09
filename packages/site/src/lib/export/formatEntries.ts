@@ -1,6 +1,11 @@
-import type { IDictionary, IEntry, ISpeaker } from '@living-dictionaries/types';
+import type {
+  IDictionary,
+  IEntry,
+  IPartOfSpeech,
+  ISemanticDomain,
+  ISpeaker,
+} from '@living-dictionaries/types';
 import { glossingLanguages } from './glossing-languages-temp';
-import { semanticDomains, partsOfSpeech } from '@living-dictionaries/parts';
 import { friendlyName } from './friendlyName';
 import { replaceHTMLTags } from './replaceHTMLTags';
 
@@ -22,7 +27,9 @@ function turnArrayIntoPipedString(itemsFormatted, i, values, columnName, fn) {
 export function formatEntriesForCSV(
   data: IEntry[],
   { name: dictionaryName, glossLanguages }: IDictionary,
-  speakers: ISpeaker[]
+  speakers: ISpeaker[],
+  semanticDomains: ISemanticDomain[],
+  partsOfSpeech: IPartOfSpeech[]
 ) {
   //Get max number of semantic domains used by a single entry
   const maxSDN = Math.max(...data.map((entry) => entry.sdn?.length || 0));

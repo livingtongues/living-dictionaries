@@ -4,6 +4,7 @@
   import { dictionary, isManager } from '$lib/stores';
   import Button from 'svelte-pieces/ui/Button.svelte';
   import { formatEntriesForCSV } from '$lib/export/formatEntries';
+  import { semanticDomains, partsOfSpeech } from '@living-dictionaries/parts';
   import type { IEntry } from '@living-dictionaries/types';
   import { getCollection } from 'sveltefirets';
   import { downloadObjArrAsCSV } from '$lib/export/csv';
@@ -20,7 +21,13 @@
   onMount(async () => {
     const entries = await getCollection<IEntry>(`dictionaries/${$dictionary.id}/words`);
     const speakers = await fetchSpeakers(entries);
-    formattedEntries = formatEntriesForCSV(entries, $dictionary, speakers);
+    formattedEntries = formatEntriesForCSV(
+      entries,
+      $dictionary,
+      speakers,
+      semanticDomains,
+      partsOfSpeech
+    );
     entriesWithImages = formattedEntries.filter((entry) => entry.pfpa);
     entriesWithAudio = formattedEntries.filter((entry) => entry.sfpa);
     mounted = true;
@@ -64,7 +71,9 @@
     {/if}
 
     <div
-      class="flex items-center mt-2 {entriesWithAudio.length ? '' : 'opacity-50 cursor-not-allowed'}">
+      class="flex items-center mt-2 {entriesWithAudio.length
+        ? ''
+        : 'opacity-50 cursor-not-allowed'}">
       <input id="audio" type="checkbox" bind:checked={includeAudio} />
       <label for="audio" class="mx-2 block leading-5 text-gray-900">
         {$_('entry.audio', { default: 'Audio' })} ({entriesWithAudio.length})</label>
@@ -126,5 +135,5 @@
     </Button>
   {/if}
 {:else}
-<p>{$_('export.availability', { default: 'Export is only available to dictionary managers' })}</p>
+  <p>{$_('export.availability', { default: 'Export is only available to dictionary managers' })}</p>
 {/if}
