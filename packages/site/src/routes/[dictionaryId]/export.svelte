@@ -7,7 +7,7 @@
   import { semanticDomains, partsOfSpeech } from '@living-dictionaries/parts';
   import type { IEntry } from '@living-dictionaries/types';
   import { getCollection } from 'sveltefirets';
-  import { downloadObjArrAsCSV } from '$lib/export/csv';
+  import { downloadBlob, arrayToCSVBlob } from '$lib/export/csv';
   import ShowHide from 'svelte-pieces/functions/ShowHide.svelte';
   import DownloadMedia from '../../lib/export/DownloadMedia.svelte';
   import Progress from './export/_Progress.svelte';
@@ -131,7 +131,8 @@
     <Button
       loading={!finalizedEntries.length}
       onclick={() => {
-        downloadObjArrAsCSV(finalizedEntries, $dictionary.name);
+        const blob = arrayToCSVBlob(finalizedEntries);
+        downloadBlob(blob, $dictionary.id, '.csv');
       }}
       form="filled">
       {$_('export.download_csv', { default: 'Download CSV' })}
