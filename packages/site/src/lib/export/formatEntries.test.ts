@@ -69,7 +69,7 @@ test('formatEntriesForCSV basic example to smoke test', () => {
         "lx": "xiangjiao",
         "mr": "bar",
         "nc": "5",
-        "nt": "This is an example of a note - here we can write whatever we want.",
+        "nt": "This is an example of a note, here we can write whatever we want.",
         "pfFriendlyName": "12345qwerty_platano.mp3",
         "pfpa": "https://database.com/image.mp3",
         "ph": "xiangjiao",
