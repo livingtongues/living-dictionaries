@@ -1,13 +1,13 @@
 import type { IDictionary, IUser } from '@living-dictionaries/types';
 
-function objectsToCSV(arr: Record<string, string>[]) {
-  const array = [Object.keys(arr[0]), ...arr];
+function objectsToCSV(array: Record<string, any>[]) {
   return array
     .map((row) => {
       return Object.values(row)
         .map((value) => {
           if (value === null || value === undefined) return '';
-          if (value.includes(',') || value.includes('"')) return `"${value.replace(/"/g, '""')}"`;
+          if (isNaN(value) && (value.includes(',') || value.includes('"')))
+            return `"${value.replace(/"/g, '""')}"`;
           return value;
         })
         .toString();
@@ -15,7 +15,7 @@ function objectsToCSV(arr: Record<string, string>[]) {
     .join('\n');
 }
 
-export function arrayToCSVBlob(itemsFormatted: Record<string, string | any>[]) {
+export function arrayToCSVBlob(itemsFormatted: Record<string, any>[]) {
   const csv = objectsToCSV(itemsFormatted);
   const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
   return blob;
