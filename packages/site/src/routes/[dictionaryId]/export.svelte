@@ -3,7 +3,7 @@
   import { _ } from 'svelte-i18n';
   import { dictionary, isManager } from '$lib/stores';
   import Button from 'svelte-pieces/ui/Button.svelte';
-  import { formatEntriesForCSV } from '$lib/export/formatEntries';
+  import { formatEntriesForCSV, type IEntryForCSV } from '$lib/export/formatEntries';
   import { semanticDomains, partsOfSpeech } from '@living-dictionaries/parts';
   import type { IEntry } from '@living-dictionaries/types';
   import { getCollection } from 'sveltefirets';
@@ -12,12 +12,15 @@
   import DownloadMedia from '../../lib/export/DownloadMedia.svelte';
   import Progress from './export/_Progress.svelte';
   import { fetchSpeakers } from '$lib/helpers/fetchSpeakers';
+
   let includeImages = false;
   let includeAudio = false;
-  let formattedEntries: any[] = [];
-  let entriesWithImages: any[] = [];
-  let entriesWithAudio: any[] = [];
+  let formattedEntries: IEntryForCSV[] = [];
+  let entriesWithImages: IEntryForCSV[] = [];
+  let entriesWithAudio: IEntryForCSV[] = [];
+  let finalizedEntries: IEntryForCSV[] = [];
   let mounted = false;
+
   onMount(async () => {
     const entries = await getCollection<IEntry>(`dictionaries/${$dictionary.id}/words`);
     const speakers = await fetchSpeakers(entries);
@@ -30,6 +33,12 @@
     );
     entriesWithImages = formattedEntries.filter((entry) => entry.pfpa);
     entriesWithAudio = formattedEntries.filter((entry) => entry.sfpa);
+    finalizedEntries = formattedEntries.map((entry) => {
+      const newEntry = { ...entry };
+      delete newEntry.pfpa;
+      delete newEntry.sfpa;
+      return newEntry;
+    });
     mounted = true;
   });
 </script>
@@ -104,7 +113,7 @@
       {:else}
         <DownloadMedia
           dictionary={$dictionary}
-          {formattedEntries}
+          {finalizedEntries}
           entriesWithImages={includeImages ? entriesWithImages : []}
           entriesWithAudio={includeAudio ? entriesWithAudio : []}
           on:completed={toggle}
@@ -120,14 +129,8 @@
     </ShowHide>
   {:else}
     <Button
-      disabled={!formattedEntries.length}
+      loading={!finalizedEntries.length}
       onclick={() => {
-        const finalizedEntries = formattedEntries.map((entry) => {
-          const newEntry = { ...entry };
-          delete newEntry.pfpa;
-          delete newEntry.sfpa;
-          return newEntry;
-        });
         downloadObjArrAsCSV(finalizedEntries, $dictionary.name);
       }}
       form="filled">

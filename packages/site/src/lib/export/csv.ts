@@ -1,38 +1,27 @@
 import type { IDictionary, IUser } from '@living-dictionaries/types';
 
-export function convertToCSV(objArray) {
-  const array = typeof objArray != 'object' ? JSON.parse(objArray) : objArray;
-  let str = '';
-
-  for (let i = 0; i < array.length; i++) {
-    let line = '';
-    for (const index in array[i]) {
-      if (line != '') line += ',';
-
-      line += array[i][index];
-    }
-
-    str += line + '\r\n';
-  }
-
-  return str;
+function objectsToCSV(arr: Record<string, string>[]) {
+  const array = [Object.keys(arr[0]), ...arr];
+  return array
+    .map((row) => {
+      return Object.values(row)
+        .map((value) => {
+          if (value === null || value === undefined) return '';
+          if (value.includes(',') || value.includes('"')) return `"${value.replace(/"/g, '""')}"`;
+          return value;
+        })
+        .toString();
+    })
+    .join('\n');
 }
 
-export function fileAsBlob(itemsFormatted) {
-  function replacer(_, value: any) {
-    // Filtering out properties
-    if (value === undefined || value === null) {
-      return '';
-    }
-    return value;
-  }
-  const jsonObject = JSON.stringify(itemsFormatted, replacer);
-  const csv = convertToCSV(jsonObject);
+export function fileAsBlob(itemsFormatted: Record<string, string | any>[]) {
+  const csv = objectsToCSV(itemsFormatted);
   const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
   return blob;
 }
 
-export function downloadObjArrAsCSV(itemsFormatted: Record<string, unknown>[], title: string) {
+export function downloadObjArrAsCSV(itemsFormatted: Record<string, string | any>[], title: string) {
   const blob = fileAsBlob(itemsFormatted);
   const d = new Date();
   const date = d.getMonth() + 1 + '_' + d.getDate() + '_' + d.getFullYear();
