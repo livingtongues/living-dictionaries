@@ -1,5 +1,5 @@
 import type { IDictionary, IEntry, ISpeaker } from '@living-dictionaries/types';
-import { formatEntriesForCSV } from './_formatEntries';
+import { formatEntriesForCSV } from './formatEntries';
 
 test('Example to demonstrate separate file snapshots.', () => {
   const entriesArray: IEntry[] = [
