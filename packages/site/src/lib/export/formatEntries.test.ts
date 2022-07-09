@@ -1,7 +1,7 @@
 import type { IDictionary, IEntry, ISpeaker } from '@living-dictionaries/types';
 import { formatEntriesForCSV } from './formatEntries';
 
-test('Example to demonstrate separate file snapshots.', () => {
+test('formatEntriesForCSV basic example to smoke test', () => {
   const entriesArray: IEntry[] = [
     {
       id: '12ar',
@@ -22,88 +22,5 @@ test('Example to demonstrate separate file snapshots.', () => {
   ];
   const dictionary: IDictionary = { name: 'test', glossLanguages: ['ar', 'en'], entryCount: 0 };
   const speakers: ISpeaker[] = [{ displayName: 'John Smith', id: '123' }];
-  expect(formatEntriesForCSV(entriesArray, dictionary, speakers, [], [])).toMatchInlineSnapshot(`
-    [
-      {
-        "di": "Dialect for this entry",
-        "glar": "Arabic Gloss",
-        "glen": "English Gloss",
-        "id": "Entry id",
-        "in": "Interlinearization",
-        "lx": "Lexeme/Word/Phrase",
-        "mr": "Morphology",
-        "nc": "Noun class",
-        "nt": "Notes",
-        "pfFriendlyName": "Image filename",
-        "ph": "Phonetic (IPA)",
-        "pl": "Plural form",
-        "ps": "Parts of speech",
-        "psab": "Parts of speech abbreviation",
-        "sd1": "Semantic domain 1",
-        "sfFriendlyName": "Audio filename",
-        "sfbp": "Speaker birthplace",
-        "sfde": "Speaker decade",
-        "sfge": "Speaker gender",
-        "sfsn": "Speaker name",
-        "sr": "Source(s)",
-        "xsar": "Example sentence in Arabic",
-        "xsen": "Example sentence in English",
-        "xsvn": "Example sentence in test",
-      },
-      {
-        "di": "dialect x",
-        "glar": "",
-        "glen": "",
-        "id": "12ar",
-        "in": "",
-        "lx": "banana",
-        "mr": "",
-        "nc": "",
-        "nt": "This is an example of a note - here we can write whatever we want.",
-        "pfFriendlyName": "12ar_platano.com",
-        "pfpa": "https://example.com",
-        "ph": "banana",
-        "pl": "",
-        "ps": "1",
-        "psab": "",
-        "sd1": "",
-        "sfFriendlyName": "12ar_platano.com",
-        "sfbp": "",
-        "sfde": "",
-        "sfge": "",
-        "sfpa": "https://example.com",
-        "sfsn": "",
-        "sr": "A book | www.mybook.com",
-        "xsar": "",
-        "xsen": "This is a banana",
-        "xsvn": "",
-      },
-      {
-        "di": "",
-        "glar": "",
-        "glen": "",
-        "id": "34qw",
-        "in": "",
-        "lx": "tree",
-        "mr": "",
-        "nc": "",
-        "nt": "",
-        "pfFriendlyName": "",
-        "ph": "",
-        "pl": "",
-        "ps": "",
-        "psab": "",
-        "sd1": "",
-        "sfFriendlyName": "",
-        "sfbp": "",
-        "sfde": "",
-        "sfge": "",
-        "sfsn": "",
-        "sr": "",
-        "xsar": "",
-        "xsen": "",
-        "xsvn": "",
-      },
-    ]
-  `);
+  expect(formatEntriesForCSV(entriesArray, dictionary, speakers, [], [])).toMatchSnapshot();
 });
