@@ -92,19 +92,4 @@ interface DeprecatedFields {
   updatedAt?: Timestamp;
 }
 
-export enum EntryCSVFields {
-  lx = 'Lexeme/Word/Phrase',
-  ph = 'Phonetic (IPA)',
-  in = 'Interlinearization',
-  nc = 'Noun class',
-  mr = 'Morphology',
-  di = 'Dialect',
-  nt = 'Notes',
-  psab = 'Part of Speech abbreviation',
-  ps = 'Part of Speech',
-  sr = 'Source(s)',
-  id = 'Entry Id',
-}
-
-export type EntryForCSV = keyof typeof EntryCSVFields;
 

@@ -3,10 +3,10 @@
 exports[`formatEntriesForCSV basic example to smoke test 1`] = `
 [
   {
-    "di": "Dialect for this entry",
+    "di": "Dialect",
     "glar": "Arabic Gloss",
     "glen": "English Gloss",
-    "id": "Entry id",
+    "id": "Entry Id",
     "in": "Interlinearization",
     "lx": "Lexeme/Word/Phrase",
     "mr": "Morphology",
@@ -14,9 +14,8 @@ exports[`formatEntriesForCSV basic example to smoke test 1`] = `
     "nt": "Notes",
     "pfFriendlyName": "Image filename",
     "ph": "Phonetic (IPA)",
-    "pl": "Plural form",
-    "ps": "Parts of speech",
-    "psab": "Parts of speech abbreviation",
+    "ps": "Part of Speech",
+    "psab": "Part of Speech abbreviation",
     "sd1": "Semantic domain 1",
     "sfFriendlyName": "Audio filename",
     "sfbp": "Speaker birthplace",

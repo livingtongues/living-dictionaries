@@ -2,7 +2,7 @@ import type { IAudio } from './audio.interface';
 import type { IVideo, IVideoCustomMetadata } from './video.interface';
 import type { IDialect } from './dialect.interface';
 import type { IAbout, IDictionary, IGrammar } from './dictionary.interface';
-import type { EntryForCSV, IEntry } from './entry.interface';
+import type { IEntry } from './entry.interface';
 import type { IGlossLanguages, IGlossLanguage } from './gloss-language.interface';
 import type { IGloss } from './gloss.interface';
 import type { IExampleSentence } from './exampe-sentence.interface';
@@ -27,7 +27,6 @@ export type {
   IAbout,
   IGrammar,
   IEntry,
-  EntryForCSV,
   IExampleSentence,
   IGlossLanguages,
   IGlossLanguage,
@@ -45,5 +44,4 @@ export type {
 };
 
 import { ReadyLocales, UnpublishedLocales } from './languages.interface';
-import { EntryCSVFields } from './entry.interface';
-export { ReadyLocales, UnpublishedLocales, EntryCSVFields };
+export { ReadyLocales, UnpublishedLocales };

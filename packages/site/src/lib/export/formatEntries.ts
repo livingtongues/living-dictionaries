@@ -24,41 +24,51 @@ function turnArrayIntoPipedString(itemsFormatted, i, values, columnName, fn) {
   }
 }
 
+const replacementChars = {
+  ',': ' -',
+  '"': "'",
+};
+
+enum EntryCSVFieldsEnum {
+  lx = 'Lexeme/Word/Phrase',
+  ph = 'Phonetic (IPA)',
+  in = 'Interlinearization',
+  nc = 'Noun class',
+  mr = 'Morphology',
+  di = 'Dialect',
+  nt = 'Notes',
+  psab = 'Part of Speech abbreviation',
+  ps = 'Part of Speech',
+  sr = 'Source(s)',
+  id = 'Entry Id',
+}
+type EntryForCSVKeys = keyof typeof EntryCSVFieldsEnum;
+type EntryForCSV = {
+  [key in EntryForCSVKeys]: string;
+};
+interface IEntryForCSV extends EntryForCSV {
+  va?: string; // optional for Babanki
+}
+
 export function formatEntriesForCSV(
-  data: IEntry[],
+  entries: IEntry[],
   { name: dictionaryName, glossLanguages }: IDictionary,
   speakers: ISpeaker[],
   semanticDomains: ISemanticDomain[],
   partsOfSpeech: IPartOfSpeech[]
 ) {
-  //Get max number of semantic domains used by a single entry
-  const maxSDN = Math.max(...data.map((entry) => entry.sdn?.length || 0));
+  
+  const headers = {} as IEntryForCSV;
+  for (const key of Object.keys(EntryCSVFieldsEnum)) {
+    headers[key] = EntryCSVFieldsEnum[key];
+  }
 
-  const replacementChars = {
-    ',': ' -',
-    '"': "'",
-  };
-
-  const headers = {
-    id: 'Entry id',
-    lx: 'Lexeme/Word/Phrase',
-    ph: 'Phonetic (IPA)',
-    in: 'Interlinearization',
-    nc: 'Noun class',
-    mr: 'Morphology',
-    pl: 'Plural form',
-    di: 'Dialect for this entry',
-    nt: 'Notes',
-    psab: 'Parts of speech abbreviation',
-    ps: 'Parts of speech',
-    sr: 'Source(s)',
-  };
-  //Assigning variant as header (only for Babanki)
   if (dictionaryName === 'Babanki') {
     headers.va = 'variant';
   }
-
-  //Assigning semantic domains as headers
+  
+  // Assign max number of semantic domains used by a single entry
+  const maxSDN = Math.max(...entries.map((entry) => entry.sdn?.length || 0));
   if (maxSDN > 0) {
     for (let index = 0; index < maxSDN; index++) {
       headers[`sd${index + 1}`] = `Semantic domain ${index + 1}`;
@@ -89,7 +99,7 @@ export function formatEntriesForCSV(
   headers['pfFriendlyName'] = 'Image filename';
 
   const itemsFormatted = [];
-  data.forEach((entry, i) => {
+  entries.forEach((entry, i) => {
     // Replace null values with empty string
     const entryKeys = Object.keys(entry);
     entryKeys.forEach((key) => (!entry[key] ? (entry[key] = '') : entry[key]));
