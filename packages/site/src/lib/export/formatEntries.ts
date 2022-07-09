@@ -5,7 +5,7 @@ import type {
   ISemanticDomain,
   ISpeaker,
 } from '@living-dictionaries/types';
-import { glossingLanguages } from './glossing-languages-temp';
+import { glossingLanguages } from './glossing-languages-temp'; // todo - import from actual json file
 import { friendlyName } from './friendlyName';
 import { replaceHTMLTags } from './replaceHTMLTags';
 
@@ -33,7 +33,7 @@ type EntryForCSVKeys = keyof typeof EntryCSVFieldsEnum;
 type EntryForCSV = {
   [key in EntryForCSVKeys]?: string;
 };
-interface IEntryForCSV extends EntryForCSV {
+export interface IEntryForCSV extends EntryForCSV {
   xsvn?: string;
   va?: string; // optional for Babanki
   sfpa?: string; // for downloading file, not exported in CSV

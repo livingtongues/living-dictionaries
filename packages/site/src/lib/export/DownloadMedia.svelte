@@ -4,11 +4,12 @@
   import type { IDictionary } from '@living-dictionaries/types';
   import { createEventDispatcher, onDestroy, onMount } from 'svelte';
   import { getStorageDownloadUrl } from './storageUrl';
+  import type { IEntryForCSV } from './formatEntries';
 
   export let dictionary: IDictionary;
-  export let formattedEntries: any[];
-  export let entriesWithImages: any[] = [];
-  export let entriesWithAudio: any[] = [];
+  export let finalizedEntries: IEntryForCSV[];
+  export let entriesWithImages: IEntryForCSV[] = [];
+  export let entriesWithAudio: IEntryForCSV[] = [];
 
   const dispatch = createEventDispatcher<{ completed: null }>();
 
@@ -57,12 +58,6 @@
       fetched++;
     }
 
-    const finalizedEntries = formattedEntries.map((entry) => {
-      const newEntry = { ...entry };
-      delete newEntry.pfpa;
-      delete newEntry.sfpa;
-      return newEntry;
-    });
     const CSVBlob = fileAsBlob(finalizedEntries);
     zip.file(`${dictionary.id}.csv`, CSVBlob);
 
