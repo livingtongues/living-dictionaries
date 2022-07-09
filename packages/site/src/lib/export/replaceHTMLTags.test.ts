@@ -23,3 +23,15 @@ test('real rich text example', () =>
       "<p><strong>I</strong> <i>just</i> <u>want</u> <span style='font-variant:small-caps;'>to</span> <a href='https://example.com'>test</a></p>"
     )
   ).toBe('I just want to test'));
+
+test('does not remove commas', () => {
+  expect(replaceHTMLTags('Something normal, with a comma')).toMatchInlineSnapshot(
+    '"Something normal, with a comma"'
+  );
+});
+
+test('returns empty string when undefined', () => {
+  expect(replaceHTMLTags(undefined)).toMatchInlineSnapshot(
+    '""'
+  );
+});

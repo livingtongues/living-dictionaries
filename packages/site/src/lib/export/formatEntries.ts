@@ -9,21 +9,6 @@ import { glossingLanguages } from './glossing-languages-temp';
 import { friendlyName } from './friendlyName';
 import { replaceHTMLTags } from './replaceHTMLTags';
 
-function turnArrayIntoPipedString(sources: string | string[]) {
-  if (sources) {
-    // There are some dictionaries (e.g. Kalanga) that have strings as sources instead of arrays
-    const sourceArr = typeof sources === 'string' ? [sources] : sources;
-    //In case some strings contain commas
-    return sourceArr.map((el) => el.replace(/,/g, ' -')).join(' | ');
-  }
-  return '';
-}
-
-const replacementChars = {
-  ',': ' -',
-  '"': "'",
-};
-
 enum EntryCSVFieldsEnum {
   id = 'Entry Id',
   lx = 'Lexeme/Word/Phrase',
@@ -99,17 +84,15 @@ export function formatEntriesForCSV(
 
     const formattedEntry = {
       id: entry.id,
-      lx: entry.lx.replace(/[,"\r\n]/g, (m) => replacementChars[m]),
-      ph: entry.ph?.replace(/[,"\r\n]/g, (m) => replacementChars[m]) || '',
-      in: entry.in?.replace(/[,"\r\n]/g, (m) => replacementChars[m]) || '',
-      nc: entry.nc?.replace(/[,"\r\n]/g, (m) => replacementChars[m]) || '',
-      mr: entry.mr?.replace(/[,"\r\n]/g, (m) => replacementChars[m]) || '',
-      pl: entry.pl?.replace(/[,"\r\n]/g, (m) => replacementChars[m]) || '',
-      di: entry.di?.replace(/[,"\r\n]/g, (m) => replacementChars[m]) || '',
-      nt: entry.nt
-        ? replaceHTMLTags(entry.nt.replace(/[,"\r\n]/g, (m) => replacementChars[m]))
-        : '',
-      sr: turnArrayIntoPipedString(entry.sr) || '',
+      lx: entry.lx,
+      ph: entry.ph || '',
+      in: entry.in || '',
+      nc: entry.nc || '',
+      mr: entry.mr || '',
+      pl: entry.pl || '',
+      di: entry.di || '',
+      nt: replaceHTMLTags(entry.nt),
+      sr: entry.sr ? typeof entry.sr === 'string' ? entry.sr : entry.sr.join(' | ') : '', // some dictionaries (e.g. Kalanga) have sources that are strings and not arrays
       psab: '',
       ps: '',
       sfFriendlyName: '',
@@ -137,9 +120,8 @@ export function formatEntriesForCSV(
       const speakerName = speaker?.displayName || entry.sf.speakerName || '';
       formattedEntry.sfpa = entry.sf.path;
       formattedEntry.sfFriendlyName = friendlyName(entry, entry.sf.path);
-      formattedEntry.sfsn = speakerName.replace(/[,"\r\n]/g, (m) => replacementChars[m]);
-      formattedEntry.sfbp =
-        speaker?.birthplace?.replace(/[,"\r\n]/g, (m) => replacementChars[m]) || '';
+      formattedEntry.sfsn = speakerName;
+      formattedEntry.sfbp = speaker?.birthplace || '';
       formattedEntry.sfde = speaker?.decade?.toString() || ''; // test both string and number
       formattedEntry.sfge = speaker?.gender || '';
     }
@@ -156,27 +138,21 @@ export function formatEntriesForCSV(
       if (entry.sdn && entry.sdn[index]) {
         const matchingDomain = semanticDomains.find((sd) => sd.key === entry.sdn[index]);
         if (matchingDomain) {
-          formattedEntry[`sd${index + 1}`] = matchingDomain.name.replace(
-            /[,"\r\n]/g,
-            (m) => replacementChars[m]
-          );
+          formattedEntry[`sd${index + 1}`] = matchingDomain.name;
         }
       }
     }
 
     // glosses
     glossLanguages.forEach((bcp) => {
-      const cleanEntry = entry.gl[bcp]
-        ? replaceHTMLTags(entry.gl[bcp].replace(/[,"\r\n]/g, (m) => replacementChars[m]))
-        : '';
+      const cleanEntry = entry.gl[bcp] ? replaceHTMLTags(entry.gl[bcp]) : '';
       formattedEntry[`gl${bcp}`] = cleanEntry;
     });
 
     // Vernacular and gloss language example sentences
     formattedEntry.xsvn = entry.xs?.vn || '';
     glossLanguages.forEach((bcp) => {
-      formattedEntry[`xs${bcp}`] =
-        entry.xs?.[bcp]?.replace(/[,"\r\n]/g, (m) => replacementChars[m]) || '';
+      formattedEntry[`xs${bcp}`] = entry.xs?.[bcp] || '';
     });
 
     // Dictionary specific
