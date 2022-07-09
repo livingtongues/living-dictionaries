@@ -40,6 +40,12 @@ enum EntryCSVFieldsEnum {
   psab = 'Part of Speech abbreviation',
   ps = 'Part of Speech',
   sr = 'Source(s)',
+  sfFriendlyName = 'Audio filename',
+  sfsn = 'Speaker name',
+  sfbp = 'Speaker birthplace',
+  sfde = 'Speaker decade',
+  sfge = 'Speaker gender',
+  pfFriendlyName = 'Image filename',
   id = 'Entry Id',
 }
 type EntryForCSVKeys = keyof typeof EntryCSVFieldsEnum;
@@ -47,6 +53,7 @@ type EntryForCSV = {
   [key in EntryForCSVKeys]: string;
 };
 interface IEntryForCSV extends EntryForCSV {
+  xsvn: string;
   va?: string; // optional for Babanki
 }
 
@@ -57,7 +64,6 @@ export function formatEntriesForCSV(
   semanticDomains: ISemanticDomain[],
   partsOfSpeech: IPartOfSpeech[]
 ) {
-  
   const headers = {} as IEntryForCSV;
   for (const key of Object.keys(EntryCSVFieldsEnum)) {
     headers[key] = EntryCSVFieldsEnum[key];
@@ -66,7 +72,7 @@ export function formatEntriesForCSV(
   if (dictionaryName === 'Babanki') {
     headers.va = 'variant';
   }
-  
+
   // Assign max number of semantic domains used by a single entry
   const maxSDN = Math.max(...entries.map((entry) => entry.sdn?.length || 0));
   if (maxSDN > 0) {
@@ -75,28 +81,16 @@ export function formatEntriesForCSV(
     }
   }
 
-  //Assigning gloss languages as gloss headers
+  //Assign gloss languages as gloss headers
   glossLanguages.forEach((bcp) => {
     headers[`gl${bcp}`] = `${glossingLanguages[bcp]} Gloss`;
   });
 
-  //Assigning vernacular and gloss languages as example sentence headers
-  headers['xsvn'] = `Example sentence in ${dictionaryName}`;
+  //Assign vernacular and gloss languages as example sentence headers
+  headers.xsvn = `Example sentence in ${dictionaryName}`;
   glossLanguages.forEach((bcp) => {
     headers[`xs${bcp}`] = `Example sentence in ${glossingLanguages[bcp]}`;
   });
-
-  //Assigning audio metadata as headers
-  Object.assign(headers, {
-    sfFriendlyName: 'Audio filename',
-    sfsn: 'Speaker name',
-    sfbp: 'Speaker birthplace',
-    sfde: 'Speaker decade',
-    sfge: 'Speaker gender',
-  });
-
-  //Assigning images metadata as headers
-  headers['pfFriendlyName'] = 'Image filename';
 
   const itemsFormatted = [];
   entries.forEach((entry, i) => {
@@ -119,7 +113,7 @@ export function formatEntriesForCSV(
       //xv: entry.xv,
     });
 
-    //Assigning parts of speech (abbreviation & name)
+    //Assign parts of speech (abbreviation & name)
     if (entry.ps) {
       const pos = partsOfSpeech.find((ps) => ps.enAbbrev === entry.ps)?.enName;
       if (!pos) {
@@ -146,15 +140,15 @@ export function formatEntriesForCSV(
       });
     }
 
-    //Assigning sources
+    //Assign sources
     turnArrayIntoPipedString(itemsFormatted, i, entry.sr, 'sr', (el) => el);
 
-    //Assigning variant (only for Babanki)
+    //Assign variant (only for Babanki)
     if (dictionaryName === 'Babanki') {
       itemsFormatted[i]['va'] = entry?.va;
     }
 
-    //Assigning semantic domains
+    //Assign semantic domains
     for (let index = 0; index < maxSDN; index++) {
       itemsFormatted[i][`sd${index + 1}`] = '';
       if (entry.sdn && entry.sdn[index]) {
@@ -168,7 +162,7 @@ export function formatEntriesForCSV(
       }
     }
 
-    //Assigning glosses
+    //Assign glosses
     glossLanguages.forEach((bcp) => {
       const cleanEntry = entry.gl[bcp]
         ? replaceHTMLTags(entry.gl[bcp].replace(/[,"\r\n]/g, (m) => replacementChars[m]))
@@ -176,7 +170,7 @@ export function formatEntriesForCSV(
       itemsFormatted[i][`gl${bcp}`] = cleanEntry;
     });
 
-    //Assigning example sentences
+    //Assign example sentences
     for (let j = 0; j <= glossLanguages.length; j++) {
       if (entry.xs) {
         if (j === glossLanguages.length) {
