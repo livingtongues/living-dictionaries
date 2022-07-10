@@ -11,12 +11,7 @@ const config = {
 	},
 
 	preprocess: [
-		preprocess({
-			replace: [
-				// this will allow us to use as import.meta.env.VERCEL_ANALYTICS_ID
-				['import.meta.env.VERCEL_ANALYTICS_ID', JSON.stringify(process.env.VERCEL_ANALYTICS_ID)]
-			]
-		}),
+		preprocess(),
 		deepWind({ rtl: true }),
 		windi({
 			configPath: './windi.config.js',
@@ -38,6 +33,9 @@ const config = {
 			envDir: '../../',
 			build: {
 				target: 'es2015'
+			},
+			define: {
+				'import.meta.env.VERCEL_ANALYTICS_ID': JSON.stringify(process.env.VERCEL_ANALYTICS_ID),
 			},
 		},
 	}
