@@ -42,7 +42,7 @@ export interface IEntryForCSV extends EntryForCSV {
 
 export function formatEntriesForCSV(
   entries: IEntry[],
-  { name: dictionaryName, glossLanguages }: IDictionary,
+  { name: dictionaryName, id: dictionaryId, glossLanguages }: IDictionary,
   speakers: ISpeaker[],
   semanticDomains: ISemanticDomain[],
   partsOfSpeech: IPartOfSpeech[]
@@ -74,7 +74,7 @@ export function formatEntriesForCSV(
   });
 
   // Dictionary specific
-  if (dictionaryName === 'Babanki') {
+  if (dictionaryId === 'babanki') {
     headers.va = 'variant';
   }
 
@@ -153,7 +153,7 @@ export function formatEntriesForCSV(
     });
 
     // Dictionary specific
-    if (dictionaryName === 'Babanki') {
+    if (dictionaryId === 'babanki') {
       formattedEntry.va = entry.va;
     }
 

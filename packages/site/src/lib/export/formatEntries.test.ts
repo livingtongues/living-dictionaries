@@ -31,7 +31,7 @@ test('formatEntriesForCSV basic example to smoke test', () => {
     },
     { id: '34qw', lx: 'tree', gl: { es: 'arbol' } },
   ];
-  const dictionary: IDictionary = { name: 'test', glossLanguages: ['ar', 'en'], entryCount: 0 };
+  const dictionary: IDictionary = { name: 'TestLang', id: 'test', glossLanguages: ['ar', 'en'], entryCount: 0 };
   const speakers: ISpeaker[] = [
     {
       displayName: 'John Smith',
@@ -72,7 +72,7 @@ test('formatEntriesForCSV basic example to smoke test', () => {
           "sr": "Source(s)",
           "xsar": "Example sentence in Arabic",
           "xsen": "Example sentence in English",
-          "xsvn": "Example sentence in test",
+          "xsvn": "Example sentence in TestLang",
         },
         {
           "di": "dialect x",
