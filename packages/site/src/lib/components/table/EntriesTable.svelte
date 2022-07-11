@@ -16,6 +16,9 @@
       return $columns[index - 1].width;
     }
   }
+
+  $: adjustedColumns =
+    $dictionary.id === 'babanki' ? [...$columns, { field: 'va', width: 150 }] : $columns;
 </script>
 
 <div
@@ -24,7 +27,7 @@
   style="height: calc(100vh - 189px);">
   <table class="relative">
     <tr class="text-left">
-      {#each $columns as column, i}
+      {#each adjustedColumns as column, i}
         <th
           on:click={() => {
             selectedColumn = column;
@@ -48,7 +51,7 @@
             let:data={entry}
             log>
             <tr class="row-hover">
-              {#each $columns as column, i}
+              {#each adjustedColumns as column, i}
                 <td
                   class:bg-green-100={entry.ua &&
                     entry.ua.toMillis &&
@@ -67,7 +70,7 @@
     {:else}
       {#each entries as entry (entry.id)}
         <tr class="row-hover">
-          {#each $columns as column, i}
+          {#each adjustedColumns as column, i}
             <td
               class="{column.sticky ? 'sticky bg-white' : ''} h-0"
               style="{column.sticky

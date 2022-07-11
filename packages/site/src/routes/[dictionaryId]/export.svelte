@@ -3,26 +3,42 @@
   import { _ } from 'svelte-i18n';
   import { dictionary, isManager } from '$lib/stores';
   import Button from 'svelte-pieces/ui/Button.svelte';
-  import { formatEntriesForCSV } from './export/_formatEntries';
+  import { formatEntriesForCSV, type IEntryForCSV } from '$lib/export/formatEntries';
+  import { semanticDomains, partsOfSpeech } from '@living-dictionaries/parts';
   import type { IEntry } from '@living-dictionaries/types';
   import { getCollection } from 'sveltefirets';
-  import { downloadObjArrAsCSV } from '$lib/export/csv';
+  import { downloadBlob, arrayToCSVBlob } from '$lib/export/csv';
   import ShowHide from 'svelte-pieces/functions/ShowHide.svelte';
-  import DownloadMedia from './export/_DownloadMedia.svelte';
-  import Progress from './export/_Progress.svelte';
+  import DownloadMedia from '../../lib/export/DownloadMedia.svelte';
+  import Progress from '$lib/export/Progress.svelte';
   import { fetchSpeakers } from '$lib/helpers/fetchSpeakers';
+
   let includeImages = false;
   let includeAudio = false;
-  let formattedEntries: any[] = [];
-  let entriesWithImages: any[] = [];
-  let entriesWithAudio: any[] = [];
+  let formattedEntries: IEntryForCSV[] = [];
+  let entriesWithImages: IEntryForCSV[] = [];
+  let entriesWithAudio: IEntryForCSV[] = [];
+  let finalizedEntries: IEntryForCSV[] = [];
   let mounted = false;
+
   onMount(async () => {
     const entries = await getCollection<IEntry>(`dictionaries/${$dictionary.id}/words`);
     const speakers = await fetchSpeakers(entries);
-    formattedEntries = formatEntriesForCSV(entries, $dictionary, speakers);
+    formattedEntries = formatEntriesForCSV(
+      entries,
+      $dictionary,
+      speakers,
+      semanticDomains,
+      partsOfSpeech
+    );
     entriesWithImages = formattedEntries.filter((entry) => entry.pfpa);
     entriesWithAudio = formattedEntries.filter((entry) => entry.sfpa);
+    finalizedEntries = formattedEntries.map((entry) => {
+      const newEntry = { ...entry };
+      delete newEntry.pfpa;
+      delete newEntry.sfpa;
+      return newEntry;
+    });
     mounted = true;
   });
 </script>
@@ -64,7 +80,9 @@
     {/if}
 
     <div
-      class="flex items-center mt-2 {entriesWithAudio.length ? '' : 'opacity-50 cursor-not-allowed'}">
+      class="flex items-center mt-2 {entriesWithAudio.length
+        ? ''
+        : 'opacity-50 cursor-not-allowed'}">
       <input id="audio" type="checkbox" bind:checked={includeAudio} />
       <label for="audio" class="mx-2 block leading-5 text-gray-900">
         {$_('entry.audio', { default: 'Audio' })} ({entriesWithAudio.length})</label>
@@ -95,7 +113,7 @@
       {:else}
         <DownloadMedia
           dictionary={$dictionary}
-          {formattedEntries}
+          {finalizedEntries}
           entriesWithImages={includeImages ? entriesWithImages : []}
           entriesWithAudio={includeAudio ? entriesWithAudio : []}
           on:completed={toggle}
@@ -111,20 +129,15 @@
     </ShowHide>
   {:else}
     <Button
-      disabled={!formattedEntries.length}
+      loading={!finalizedEntries.length}
       onclick={() => {
-        const finalizedEntries = formattedEntries.map((entry) => {
-          const newEntry = { ...entry };
-          delete newEntry.pfpa;
-          delete newEntry.sfpa;
-          return newEntry;
-        });
-        downloadObjArrAsCSV(finalizedEntries, $dictionary.name);
+        const blob = arrayToCSVBlob(finalizedEntries);
+        downloadBlob(blob, $dictionary.id, '.csv');
       }}
       form="filled">
       {$_('export.download_csv', { default: 'Download CSV' })}
     </Button>
   {/if}
 {:else}
-<p>{$_('export.availability', { default: 'Export is only available to dictionary managers' })}</p>
+  <p>{$_('export.availability', { default: 'Export is only available to dictionary managers' })}</p>
 {/if}
