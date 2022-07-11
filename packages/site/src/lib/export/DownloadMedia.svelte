@@ -1,14 +1,15 @@
 <script lang="ts">
   import JSZip from 'jszip';
-  import { fileAsBlob } from '$lib/export/csv';
+  import { arrayToCSVBlob, downloadBlob } from './csv';
   import type { IDictionary } from '@living-dictionaries/types';
   import { createEventDispatcher, onDestroy, onMount } from 'svelte';
-  import { getStorageDownloadUrl } from './_storageUrl';
+  import { getStorageDownloadUrl } from './storageUrl';
+  import type { IEntryForCSV } from './formatEntries';
 
   export let dictionary: IDictionary;
-  export let formattedEntries: any[];
-  export let entriesWithImages: any[] = [];
-  export let entriesWithAudio: any[] = [];
+  export let finalizedEntries: IEntryForCSV[];
+  export let entriesWithImages: IEntryForCSV[] = [];
+  export let entriesWithAudio: IEntryForCSV[] = [];
 
   const dispatch = createEventDispatcher<{ completed: null }>();
 
@@ -57,21 +58,12 @@
       fetched++;
     }
 
-    const finalizedEntries = formattedEntries.map((entry) => {
-      const newEntry = { ...entry };
-      delete newEntry.pfpa;
-      delete newEntry.sfpa;
-      return newEntry;
-    });
-    const CSVBlob = fileAsBlob(finalizedEntries);
+    const CSVBlob = arrayToCSVBlob(finalizedEntries);
     zip.file(`${dictionary.id}.csv`, CSVBlob);
 
-    const { saveAs } = await import('file-saver');
     const blob = await zip.generateAsync({ type: 'blob' });
-    const d = new Date();
-    const date = d.getMonth() + 1 + '_' + d.getDate() + '_' + d.getFullYear();
     if (destroyed) return;
-    saveAs(blob, `${dictionary.id}_${date}.zip`);
+    downloadBlob(blob, dictionary.id, '.zip');
     if (!errors.length) {
       dispatch('completed');
     }

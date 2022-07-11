@@ -53,6 +53,10 @@ const defaultColumns: IColumn[] = [
     width: 137, // SelectPOS
   },
   {
+    field: 'nc', // nounClass
+    width: 150,
+  },
+  {
     field: 'ph', // phonetic
     width: 170,
   },
