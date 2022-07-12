@@ -94,13 +94,6 @@
     <EntrySemanticDomains {canEdit} {entry} on:valueupdate />
 
     {#if $dictionary.id === 'babanki'}
-        <!--TODO pull changes when update-nounclass-and-variant-fields-2 PR is ready-->
-        <EntryField
-          value={entry['nc']}
-          field='nc'
-          {canEdit}
-          display={$_(`entry.nc`, {default: 'Noun Class'})}
-          on:valueupdate />
         <EntryField
           value={entry['va']}
           field='va'
@@ -109,8 +102,7 @@
           on:valueupdate />
     {/if}
     
-    <!--TODO sort this way: ['pl', 'nc', 'mr', 'in', 'di', 'nt']-->
-    {#each ['mr', 'in', 'di', 'pl', 'nt'] as field}
+    {#each ['pl', 'nc', 'mr', 'in', 'di', 'nt'] as field}
       <EntryField
         value={entry[field]}
         {field}
