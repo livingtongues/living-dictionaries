@@ -82,6 +82,7 @@ interface LDAlgoliaFields {
   hasSpeaker?: boolean;
   hasSemanticDomain?: boolean;
   hasPartOfSpeech?: boolean;
+  hasNounClass?: boolean;
   hasPluralForm?: boolean;
 }
 
@@ -91,5 +92,3 @@ interface DeprecatedFields {
   createdAt?: Timestamp;
   updatedAt?: Timestamp;
 }
-
-

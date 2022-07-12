@@ -74,6 +74,14 @@
         $_('entry.speaker', { default: 'Speaker' })} />
     <ToggleRefinement
       {search}
+      attribute="hasNounClass"
+      label={$_('entry.has_exists', {
+        default: 'Has',
+      }) +
+        ' ' +
+        $_('entry.nc', { default: 'Noun Class' })} />
+    <ToggleRefinement
+      {search}
       attribute="hasPluralForm"
       label={$_('entry.has_exists', {
         default: 'Has',
