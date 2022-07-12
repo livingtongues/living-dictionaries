@@ -21,6 +21,7 @@ function fetchWords(dictionaryId: string, db: FirebaseFirestore.Firestore) {
       snapshot.forEach(async (word) => {
         // await turnSDintoArray(dictionaryId, word.id, word.data(), db);
         // await refactorGloss(dictionaryId, word.id, word.data(), db);
+        // await notesToPluralForm(dictionaryId, word.id, word.data(), db);
       });
     });
 }
@@ -94,4 +95,23 @@ const refactorGloss = async (
   } catch (err) {
     throw err;
   }
+};
+
+const notesToPluralForm = async (
+  dictionaryId: string,
+  wordId: string,
+  data: any,
+  db: FirebaseFirestore.Firestore
+) => {
+  const entry = data;
+  if (entry.nt && entry.nt.startsWith('Plural form:')) {
+    entry.pl = entry.nt.replace('Plural form: ', '');
+    delete entry.nt;
+  }
+  try {
+    await db.collection(`dictionaries/${dictionaryId}/words`).doc(wordId).set(data);
+  } catch (err) {
+    throw err;
+  }
+  return true;
 };
