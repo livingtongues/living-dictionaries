@@ -79,6 +79,8 @@
               {/if}
             {/each}
           {/if}
+        {:else if $dictionary.id === 'babanki'}
+          {#if entry.pl}<p>{entry.pl}</p>{/if}
         {/if}
       </div>
 
