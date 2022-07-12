@@ -95,20 +95,14 @@
 
     {#if $dictionary.id === 'babanki'}
         <EntryField
-          value={entry['nc']}
-          field='nc'
-          {canEdit}
-          display={$_(`entry.nc`, {default: 'Noun Class'})}
-          on:valueupdate />
-        <EntryField
           value={entry['va']}
           field='va'
           {canEdit}
           display={$_(`entry.va`, {default: 'Variant'})}
           on:valueupdate />
     {/if}
-
-    {#each ['mr', 'in', 'di', 'pl', 'nt'] as field}
+    
+    {#each ['pl', 'nc', 'mr', 'in', 'di', 'nt'] as field}
       <EntryField
         value={entry[field]}
         {field}
