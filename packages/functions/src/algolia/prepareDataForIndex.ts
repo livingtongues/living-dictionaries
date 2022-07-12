@@ -62,6 +62,12 @@ export async function prepareDataForIndex(
     entry.hasPartOfSpeech = false;
   }
 
+  if (entry.nc) {
+    entry.hasNounClass = true;
+  } else {
+    entry.hasNounClass = false;
+  }
+
   if (entry.pl) {
     entry.hasPluralForm = true;
   } else {
