@@ -6,7 +6,7 @@ import type { Metric } from 'web-vitals';
 let isRegistered = false;
 
 export type AnalyticsOptions = {
-  params: Record<string, string>;
+  params: { [s: string]: any } | ArrayLike<any>;
   path: string;
   analyticsId: string;
   debug?: true;
@@ -59,14 +59,13 @@ function sendToAnalytics(metric: Metric, options: AnalyticsOptions) {
 
 export function measureWebVitals(options: AnalyticsOptions): void {
   // Only register listeners once
-  if (isRegistered) {
-    return;
-  }
+  if (isRegistered) return;
   isRegistered = true;
 
   try {
     const script = document.createElement('script');
-    script.src = 'https://unpkg.com/web-vitals/dist/web-vitals.iife.js';
+    // script.src = 'https://unpkg.com/web-vitals/dist/web-vitals.iife.js';
+    script.src = 'https://unpkg.com/web-vitals@2.1.4/dist/web-vitals.iife.js';
     script.onload = function () {
       // Using CDN as described in https://github.com/GoogleChrome/web-vitals
       // because of ES module import problem

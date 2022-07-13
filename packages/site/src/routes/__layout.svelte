@@ -4,19 +4,14 @@
   import { setConfig } from 'sveltefirets';
   import { firebaseConfig } from '$lib/firebaseConfig';
   import type { Load } from '@sveltejs/kit';
-  export const load: Load = async ({ params, url: { pathname }, session }) => {
+  export const load: Load = async ({ session }) => {
     setConfig(firebaseConfig);
     if (browser) {
       await loadLocaleOnClient();
     } else {
       await loadLocaleOnServer(session.chosenLocale, session.acceptedLanguage);
     }
-    return {
-      props: {
-        params,
-        path: pathname,
-      },
-    };
+    return {};
   };
 </script>
 
@@ -27,13 +22,11 @@
   import { page } from '$app/stores';
 
   let analyticsId = import.meta.env.VERCEL_ANALYTICS_ID as string;
-  export let path: string;
-  export let params: Record<string, string>;
 
   onMount(async () => {
     if (analyticsId) {
       const { measureWebVitals } = await import('$lib/webvitals');
-      measureWebVitals({ path, params, analyticsId });
+      measureWebVitals({ path: $page.url.pathname, params: $page.params, analyticsId });
     }
 
     const { init } = await import('@sentry/browser');

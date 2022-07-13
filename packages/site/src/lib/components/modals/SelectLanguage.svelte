@@ -23,7 +23,7 @@
         <Button
           class="mr-1 mb-1 !normal-case"
           color="black"
-          form={$locale.includes(bcp) ? 'primary' : 'simple'}
+          form={$locale.includes(bcp) ? 'filled' : 'simple'}
           onclick={() => setLocale(bcp)}>
           {ReadyLocales[bcp]}
         </Button>
@@ -31,7 +31,7 @@
         <Button
           class="mr-1 mb-1 !normal-case"
           color="black"
-          form={$locale.includes(bcp) ? 'primary' : 'simple'}
+          form={$locale.includes(bcp) ? 'filled' : 'simple'}
           onclick={() => setLocale(bcp)}>
           {UnpublishedLocales[bcp]}
           <i class="far fa-key" />
