@@ -33,13 +33,13 @@ export interface IEntry extends IFirestoreMetaDataAbbreviated, LDAlgoliaFields, 
   // Language & entry metadata
   nc?: string; // noun class
   pl?: string; // plural form
-  va?: string; // variant
+  va?: string; // variant (currently babanki only)
   di?: string; // dialect for this entry
   nt?: string; // notes
   sr?: string[]; // Source(s)
 
   // Usage
-  xv?: string; // example vernacular - used for old dictionary imports
+  xv?: string; // example vernacular - used for old dictionary imports (deprecated)
   xs?: IExampleSentence; // example sentences - new format which allows us to bring in example sentences from multiple languages (vernacular and gloss languages)
 
   sf?: IAudio; // sound file - TODO: deprecate this and move to using array of audio files
@@ -82,6 +82,7 @@ interface LDAlgoliaFields {
   hasSpeaker?: boolean;
   hasSemanticDomain?: boolean;
   hasPartOfSpeech?: boolean;
+  hasNounClass?: boolean;
   hasPluralForm?: boolean;
 }
 
