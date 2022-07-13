@@ -10,6 +10,7 @@
   let marker: mapboxgl.Marker;
   let lng: number;
   let lat: number;
+  let markerText: string;
 
   export let allowPopup = false;
   export let allowText = false;
@@ -69,7 +70,7 @@
     if (allowPopup) {
       const popup = new mapboxgl.Popup({ closeOnClick: false })
         .setLngLat(marker.getLngLat())
-        .setText(markers.length.toString())
+        .setText(allowText ? markerText : markers.length.toString())
         .addTo(map);
       marker.setPopup(popup);
   
@@ -78,7 +79,7 @@
       });
       marker.on('dragend', () => {
         // @ts-ignore I'm ignoring next line due to ._container is a private Popup property and it's not declared in the class, but mapbox doesn't bring us a method where we can get the text of a popup
-        currentMarker = parseInt(marker.getPopup()._container.innerText.replace('\nx', '')) - 1;
+        currentMarker = markerText ? markerText : parseInt(marker.getPopup()._container.innerText.replace('\nx', '')) - 1;
       });
     }
 		console.log('marker created', markers);
@@ -112,7 +113,7 @@
     <!--TODO this text functionality in popups-->
     {#if allowPopup && allowText}
       <div class="mb-2">
-        <input id="multiple-markers" type="text" placeholder="Multiple markers" />
+        <input id="multiple-markers" type="text" placeholder="Multiple markers" bind:value={markerText} />
         <label for="multiple-markers" class="text-sm font-medium text-gray-700">Text in markers</label>
       </div>
     {/if}
