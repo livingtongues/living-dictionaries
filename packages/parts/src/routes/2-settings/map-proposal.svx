@@ -8,6 +8,8 @@
 <!-- prettier-ignore -->
 # Mapbox proposal for multiple markers
 
+**In this proposal deletion of multi-markers works as stack data structures work (FILO): The first marker is the last to be deleted. Except for markers with default popups, please read the description to know how to delete those ones.**
+
 We can allow the normal single marker behaviour we already have on our site, but also with an additional use of multi-markers.
 
 <Story name="Toggle single to multi">

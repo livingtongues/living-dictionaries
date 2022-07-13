@@ -107,7 +107,7 @@
 
   function removeMarker() {
 		//TODO show a confirm alert if they want to remove a fixed marker
-    if (allowPopup) {
+    if (allowPopup && !allowText) {
       if (!markers[currentMarker].isDraggable()) {
         alert("You can't delete pinned markers");
         return false;
