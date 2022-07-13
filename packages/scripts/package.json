@@ -5,6 +5,7 @@
   "type": "module",
   "main": "index.ts",
   "scripts": {
+    "entryRefactor": "esno refactor/entry-refactor.ts",
     "sendEmail": "esno sendEmail.ts",
     "updateLocales": "esno locales/update-locales.ts",
     "importDictionary": "esno import/import.ts",
