@@ -3,6 +3,8 @@
   import mapboxgl from 'mapbox-gl';
   import Modal from 'svelte-pieces/ui/Modal.svelte';
   import { loadStylesOnce } from './loader';
+  import Button from 'svelte-pieces/ui/Button.svelte';
+  import type { Readable } from 'svelte/store';
 
   let map: mapboxgl.Map;
   let currentMarker: number;
@@ -12,6 +14,7 @@
   let lat: number;
   let markerText: string;
 
+  export let t: Readable<any> = undefined;
   export let allowPopup = false;
   export let allowText = false;
   export let markersConfig:mapboxgl.MarkerOptions;
@@ -101,6 +104,22 @@
       map.setStyle('mapbox://styles/mapbox/streets-v11?optimize=true'); // style.name === "Mapbox Satellite Streets"
     }
   }
+
+  function removeMarker() {
+		//TODO show a confirm alert if they want to remove a fixed marker
+    if (allowPopup) {
+      if (!markers[currentMarker].isDraggable()) {
+        alert("You can't delete pinned markers");
+        return false;
+      }
+      markers[currentMarker].remove();
+      markers.splice(currentMarker, 1);
+      markers.forEach((marker, index) => marker.getPopup().setText((index + 1).toString()));
+    } else {
+      let markerToDelete = markers.pop();
+      markerToDelete.remove();
+    }
+	}
 </script>
 <Modal on:close noscroll>
   <form>
@@ -117,7 +136,7 @@
         <label for="multiple-markers" class="text-sm font-medium text-gray-700">Text in markers</label>
       </div>
     {/if}
-    <div id="map" class="relative w-full" style="height: 50vh;">
+    <div id="map" class="relative w-full mb-2" style="height: 50vh;">
       <button
         on:click={toggleStyle}
         type="button"
@@ -126,5 +145,13 @@
         <i class="far fa-globe-asia" />
       </button>
     </div>
+    {#if multipleMarkers}
+      <Button
+        color="red"
+        form="filled"
+        onclick={removeMarker}>
+        {t ? $t('misc.delete') : 'Delete Pin'}
+      </Button>
+    {/if}
   </form>
 </Modal>
