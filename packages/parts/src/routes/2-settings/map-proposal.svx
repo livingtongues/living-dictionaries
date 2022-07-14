@@ -3,6 +3,8 @@
   import MultipleMarkers from '$lib/maps/MultipleMarkers.svelte';
   import ShowHide from 'svelte-pieces/functions/ShowHide.svelte';
   import Button from 'svelte-pieces/ui/Button.svelte';
+
+  let defaultMarkersConfig = {scale: 1.0, draggable: true, color: '#3c9cb4'};
 </script>
 
 <!-- prettier-ignore -->
@@ -12,18 +14,18 @@
 
 We can allow the normal single marker behaviour we already have on our site, but also with an additional use of multi-markers.
 
-<Story name="Toggle single to multi">
+<Story name="Toggle single to multi-markers">
   <ShowHide let:show let:toggle>
     <Button onclick={toggle}>Add Coordinates</Button>
     {#if show}
-    <MultipleMarkers markersConfig={{scale: 1.0, draggable: true, color: '#359cd0'}} on:close={toggle} />
+    <MultipleMarkers markersConfig={defaultMarkersConfig} on:close={toggle} />
     {/if}
   </ShowHide>
 </Story>
 
 We also can change some configuration of the pins for more specifical uses when using mult-markers, like `scale`, if the pins are `draggable` and the `color` of pins.
 
-<Story knobs={{scale: 1.0, draggable: true, color: '#0d8529'}} let:props={{scale, draggable, color}} name="Config markers">
+<Story knobs={defaultMarkersConfig} let:props={{scale, draggable, color}} name="Config markers">
   <ShowHide let:show let:toggle>
     <Button onclick={toggle}>Add Coordinates</Button>
     {#if show}
@@ -34,20 +36,28 @@ We also can change some configuration of the pins for more specifical uses when 
 
 ## Markers with Popups
 
+Popups help us for two main reasons, first we can know the order in which we create markers, this could be especially useful when using layers (next section).
+The second reason is that we can track the markers, that means we can select certain marker and delete it without having to delete the last one as we should do in the other examples.
+I haven't found a way to track a marker without a popup. I don't know if I missed something in the mapbox docs or they just don't give us that functionality.
+
+To delete a marker with a default popup, first of all you need to grab the marker you wish to delete, so click the delet button and they will automatically reorder numerically.
+
 <Story name="Default popups">
   <ShowHide let:show let:toggle>
     <Button onclick={toggle}>Add Coordinates</Button>
     {#if show}
-    <MultipleMarkers onlyMultiMarkers allowPopup markersConfig={{scale: 1.0, draggable: true, color: '#359cd0'}} on:close={toggle} />
+    <MultipleMarkers onlyMultiMarkers allowPopup markersConfig={defaultMarkersConfig} on:close={toggle} />
     {/if}
   </ShowHide>
 </Story>
 
-<Story name="Popups with customize text">
+We can also allow to add customizable text in the popups. However I don't have a clear idea yet on how to implement this.
+
+<Story name="Popups with customizable text">
   <ShowHide let:show let:toggle>
     <Button onclick={toggle}>Add Coordinates</Button>
     {#if show}
-    <MultipleMarkers onlyMultiMarkers allowPopup allowText markersConfig={{scale: 1.0, draggable: true, color: '#359cd0'}} on:close={toggle} />
+    <MultipleMarkers onlyMultiMarkers allowPopup allowText markersConfig={defaultMarkersConfig} on:close={toggle} />
     {/if}
   </ShowHide>
 </Story>
