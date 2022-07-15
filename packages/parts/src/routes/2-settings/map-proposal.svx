@@ -61,3 +61,14 @@ We can also allow to add customizable text in the popups. However I don't have a
     {/if}
   </ShowHide>
 </Story>
+
+## Markers with Layers
+
+<Story name="Layer with intuitive markers">
+  <ShowHide let:show let:toggle>
+    <Button onclick={toggle}>Add Coordinates</Button>
+    {#if show}
+    <MultipleMarkers allowLayer onlyMultiMarkers allowPopup markersConfig={defaultMarkersConfig} on:close={toggle} />
+    {/if}
+  </ShowHide>
+</Story>

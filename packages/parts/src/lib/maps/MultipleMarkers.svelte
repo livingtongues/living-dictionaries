@@ -4,6 +4,7 @@
   import Modal from 'svelte-pieces/ui/Modal.svelte';
   import { loadStylesOnce } from './loader';
   import Button from 'svelte-pieces/ui/Button.svelte';
+  import { createLayer } from './layer';
   import type { Readable } from 'svelte/store';
 
   let map: mapboxgl.Map;
@@ -13,10 +14,12 @@
   let lng: number;
   let lat: number;
   let markerText: string;
+  let layer: mapboxgl.CustomLayerInterface;
 
   export let t: Readable<any> = undefined;
   export let allowPopup = false;
   export let allowText = false;
+  export let allowLayer = false;
   export let markersConfig:mapboxgl.MarkerOptions;
   export let multipleMarkers = false;
   export let onlyMultiMarkers = false;
@@ -120,6 +123,13 @@
       markerToDelete.remove();
     }
 	}
+
+  function removeLayer() {
+    if (layer) {
+      map.removeLayer(layer.id)
+      layer = null;
+    }
+  }
 </script>
 <Modal on:close noscroll>
   <form>
@@ -146,12 +156,28 @@
       </button>
     </div>
     {#if multipleMarkers}
-      <Button
-        color="red"
-        form="filled"
-        onclick={removeMarker}>
-        {t ? $t('misc.delete') : 'Delete Pin'}
-      </Button>
+      <div class="flex justify-between">
+        <Button
+          color="red"
+          form="filled"
+          onclick={removeMarker}>
+          {t ? $t('misc.delete') : 'Delete Pin'}
+        </Button>
+        {#if allowLayer}
+            {#if layer}
+              <Button color="red" onclick={removeLayer}>
+                {t ? $t('') : 'Remove Layer'}
+              </Button>
+            {:else}
+              <Button color="primary" onclick={() => {
+                layer = createLayer(markers);
+                map.addLayer(layer);
+              }}>
+                {t ? $t('') : 'Create Layer'}
+              </Button>
+            {/if}
+        {/if}
+      </div>
     {/if}
   </form>
 </Modal>
