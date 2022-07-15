@@ -20,6 +20,7 @@
   export let allowPopup = false;
   export let allowText = false;
   export let allowLayer = false;
+  export let intuitiveMarkers = true
   export let markersConfig:mapboxgl.MarkerOptions;
   export let multipleMarkers = false;
   export let onlyMultiMarkers = false;
@@ -124,6 +125,11 @@
     }
 	}
 
+  function setLayer() {
+    layer = createLayer(markers, intuitiveMarkers);
+    map.addLayer(layer);
+  }
+
   function removeLayer() {
     if (layer) {
       map.removeLayer(layer.id)
@@ -164,18 +170,15 @@
           {t ? $t('misc.delete') : 'Delete Pin'}
         </Button>
         {#if allowLayer}
-            {#if layer}
-              <Button color="red" onclick={removeLayer}>
-                {t ? $t('') : 'Remove Layer'}
-              </Button>
-            {:else}
-              <Button color="primary" onclick={() => {
-                layer = createLayer(markers);
-                map.addLayer(layer);
-              }}>
-                {t ? $t('') : 'Create Layer'}
-              </Button>
-            {/if}
+          {#if layer}
+            <Button color="red" onclick={removeLayer}>
+              {t ? $t('') : 'Remove Layer'}
+            </Button>
+          {:else}
+            <Button color="primary" onclick={setLayer}>
+              {t ? $t('') : 'Create Layer'}
+            </Button>
+          {/if}
         {/if}
       </div>
     {/if}
