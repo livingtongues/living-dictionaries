@@ -68,7 +68,7 @@ We can also allow to add customizable text in the popups. However I don't have a
   <ShowHide let:show let:toggle>
     <Button onclick={toggle}>Add Coordinates</Button>
     {#if show}
-    <MultipleMarkers allowLayer onlyMultiMarkers allowPopup markersConfig={defaultMarkersConfig} on:close={toggle} />
+    <MultipleMarkers onlyMultiMarkers allowPopup markersConfig={defaultMarkersConfig} on:close={toggle} />
     {/if}
   </ShowHide>
 </Story>
@@ -77,7 +77,7 @@ We can also allow to add customizable text in the popups. However I don't have a
   <ShowHide let:show let:toggle>
     <Button onclick={toggle}>Add Coordinates</Button>
     {#if show}
-    <MultipleMarkers allowLayer intuitiveMarkers={false} onlyMultiMarkers allowPopup markersConfig={defaultMarkersConfig} on:close={toggle} />
+    <MultipleMarkers intuitiveMarkers={false} onlyMultiMarkers allowPopup markersConfig={defaultMarkersConfig} on:close={toggle} />
     {/if}
   </ShowHide>
 </Story>

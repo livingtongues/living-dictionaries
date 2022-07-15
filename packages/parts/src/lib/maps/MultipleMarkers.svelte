@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import mapboxgl from 'mapbox-gl';
+  import mapboxgl, { Marker } from 'mapbox-gl';
   import Modal from 'svelte-pieces/ui/Modal.svelte';
   import { loadStylesOnce } from './loader';
   import Button from 'svelte-pieces/ui/Button.svelte';
@@ -19,7 +19,6 @@
   export let t: Readable<any> = undefined;
   export let allowPopup = false;
   export let allowText = false;
-  export let allowLayer = false;
   export let intuitiveMarkers = true
   export let markersConfig:mapboxgl.MarkerOptions;
   export let multipleMarkers = false;
@@ -72,7 +71,7 @@
   function addNewMarker(longitude: number, latitude: number) {
     convertCoordinates(longitude, latitude);
 		const marker = new mapboxgl.Marker(markersConfig).setLngLat([lng, lat]).addTo(map);
-		markers.push(marker);
+		markers = [...markers, marker];
 
     if (allowPopup) {
       const popup = new mapboxgl.Popup({ closeOnClick: false })
@@ -116,11 +115,14 @@
         alert("You can't delete pinned markers");
         return false;
       }
+      //TODO is there a way to delete something from an array with destructuring and have the same functionalty here?
       markers[currentMarker].remove();
+      markers = markers;
       markers.splice(currentMarker, 1);
       markers.forEach((marker, index) => marker.getPopup().setText((index + 1).toString()));
     } else {
       let markerToDelete = markers.pop();
+      markers = markers;
       markerToDelete.remove();
     }
 	}
@@ -161,15 +163,17 @@
         <i class="far fa-globe-asia" />
       </button>
     </div>
-    {#if multipleMarkers}
+    {#if markers.length > 0}
       <div class="flex justify-between">
-        <Button
-          color="red"
-          form="filled"
-          onclick={removeMarker}>
-          {t ? $t('misc.delete') : 'Delete Pin'}
-        </Button>
-        {#if allowLayer}
+        {#if markers.length > 0}      
+          <Button
+            color="red"
+            form="filled"
+            onclick={removeMarker}>
+            {t ? $t('misc.delete') : 'Delete Pin'}
+          </Button>
+        {/if}
+        {#if markers.length > 2}
           {#if layer}
             <Button color="red" onclick={removeLayer}>
               {t ? $t('') : 'Remove Layer'}
