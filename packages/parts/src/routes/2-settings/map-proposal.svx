@@ -10,7 +10,7 @@
 <!-- prettier-ignore -->
 # Mapbox proposal for multiple markers
 
-**In this proposal deletion of multi-markers works as stack data structures work (FILO): The first marker is the last to be deleted. Except for markers with default popups, please read the description to know how to delete those ones.**
+**In this proposal, deletion of multi-markers works as stack data structures work (FILO): The first marker is the last to be deleted. Except for markers with default popups, please read the description to know how to delete those ones.**
 
 We can allow the normal single marker behaviour we already have on our site, but also with an additional use of multi-markers.
 
@@ -37,10 +37,12 @@ We also can change some configuration of the pins for more specifical uses when 
 ## Markers with Popups
 
 Popups help us for two main reasons, first we can know the order in which we create markers, this could be especially useful when using layers (next section).
-The second reason is that we can track the markers, that means we can select certain marker and delete it without having to delete the last one as we should do in the other examples.
+The second reason is that we can track the markers, this means we can select certain marker and delete it without having to delete the last one as we should do in the other examples.
 I haven't found a way to track a marker without a popup. I don't know if I missed something in the mapbox docs or they just don't give us that functionality.
 
-To delete a marker with a default popup, first of all you need to grab the marker you wish to delete, so click the delet button and they will automatically reorder numerically.
+[Mapbox docs](https://docs.mapbox.com/mapbox-gl-js/api/markers/#marker)
+
+To delete a marker with a default popup, first of all, you need to grab the marker you wish to delete, so click the delete button and they will automatically reorder numerically.
 
 <Story name="Default popups">
   <ShowHide let:show let:toggle>
@@ -51,7 +53,7 @@ To delete a marker with a default popup, first of all you need to grab the marke
   </ShowHide>
 </Story>
 
-We can also allow to add customizable text in the popups. However I don't have a clear idea yet on how to implement this.
+We can also allow to add customizable text in the popups. However I don't have a clear idea in which cases we should implement this yet.
 
 <Story name="Popups with customizable text">
   <ShowHide let:show let:toggle>
@@ -64,14 +66,14 @@ We can also allow to add customizable text in the popups. However I don't have a
 
 ## Layers
 
-To use layers, you need to add three or more markers, after that an add layer button will appear in the bottom right corner of the modal: _"add layer"_.
+To use layers, you need to add three or more markers, after that, an add layer button will appear in the bottom right corner of the modal: _"add layer"_.
 Mapbox internally uses the WebGL library to render their layers.
 > WebGL is a rasterization engine, it draws points, lines, and triangles based on code you supply.
 
 So the polygons you will create are based in triangles.
 You can learn more about WebGL here: https://webglfundamentals.org and here: https://developer.mozilla.org/en-US/docs/Web/API/WebGL_API
 
-We can order the markers in two different ways in order to create polygons, I consider the first one more intuitive than the other.
+We can order the markers in two different ways in order to create polygons, I consider the first one is more intuitive than the other.
 
 Here the triangle edges will be created with the last two vertices (the markers act as vertices) and the third vertex will always be the first one. 
 Example: if you add five markers, the last triangle will be formed by the edges of the following vertices: **1, 4 and 5**.

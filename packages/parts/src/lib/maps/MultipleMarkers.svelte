@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import mapboxgl, { Marker } from 'mapbox-gl';
+  import mapboxgl from 'mapbox-gl';
   import Modal from 'svelte-pieces/ui/Modal.svelte';
   import { loadStylesOnce } from './loader';
   import Button from 'svelte-pieces/ui/Button.svelte';
@@ -13,7 +13,7 @@
   let marker: mapboxgl.Marker;
   let lng: number;
   let lat: number;
-  let markerText: string;
+  let markerText: string = "Default text";
   let layer: mapboxgl.CustomLayerInterface;
 
   export let t: Readable<any> = undefined;
@@ -43,7 +43,7 @@
     map = new mapboxgl.Map({
           container: 'map',
           style: 'mapbox://styles/mapbox/streets-v11?optimize=true', // style URL
-          center: [-94.5, 88], // starting position [lng, lat]
+          center: [-104.5, 34], // starting position [lng, lat]
           zoom: 3 // starting zoom
         });
         map.on('click', (event) => {
@@ -85,7 +85,7 @@
       });
       marker.on('dragend', () => {
         // @ts-ignore I'm ignoring next line due to ._container is a private Popup property and it's not declared in the class, but mapbox doesn't bring us a method where we can get the text of a popup
-        currentMarker = markerText ? markerText : parseInt(marker.getPopup()._container.innerText.replace('\nx', '')) - 1;
+        currentMarker = allowText ? markerText : parseInt(marker.getPopup()._container.innerText.replace('\nx', '')) - 1;
       });
     }
 		console.log('marker created', markers);
@@ -148,8 +148,8 @@
     {/if}
     {#if allowPopup && allowText}
       <div class="mb-2">
-        <input id="multiple-markers" type="text" placeholder="Multiple markers" bind:value={markerText} />
-        <label for="multiple-markers" class="text-sm font-medium text-gray-700">Text in markers</label>
+        <input id="multiple-markers" type="text" placeholder="Text in markers" bind:value={markerText} />
+        <!-- <label for="multiple-markers" class="text-sm font-medium text-gray-700">Text in markers</label> -->
       </div>
     {/if}
     <div id="map" class="relative w-full mb-2" style="height: 50vh;">
