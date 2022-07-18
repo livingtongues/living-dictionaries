@@ -64,6 +64,20 @@ We can also allow to add customizable text in the popups. However I don't have a
 
 ## Layers
 
+To use layers, you need to add three or more markers, after that an add layer button will appear in the bottom right corner of the modal: _"add layer"_.
+Mapbox internally uses the WebGL library to render their layers.
+> WebGL is a rasterization engine, it draws points, lines, and triangles based on code you supply.
+
+So the polygons you will create are based in triangles.
+You can learn more about WebGL here: https://webglfundamentals.org and here: https://developer.mozilla.org/en-US/docs/Web/API/WebGL_API
+
+We can order the markers in two different ways in order to create polygons, I consider the first one more intuitive than the other.
+
+Here the triangle edges will be created with the last two vertices (the markers act as vertices) and the third vertex will always be the first one. 
+Example: if you add five markers, the last triangle will be formed by the edges of the following vertices: **1, 4 and 5**.
+This is more complex to understand but easier to do. Simply place the markers covering the area you want to display, 
+as if you wanted a child to draw a polygon following the path of the points (in this case the points would be the markers).
+
 <Story name="Layer with intuitive markers">
   <ShowHide let:show let:toggle>
     <Button onclick={toggle}>Add Coordinates</Button>
@@ -72,6 +86,13 @@ We can also allow to add customizable text in the popups. However I don't have a
     {/if}
   </ShowHide>
 </Story>
+
+If you do the same with this other way of creating the triangles, you'll see a strange behavior, 
+that's because in this way the edges of the triangles will always be created following the last three vertices.
+Example: if you add five markers again, the last triangle will be created by the vertices **3, 4 and 5**.
+
+Anyway you can also create polygons like you did before.
+The only difference is that you need to rearrange your markers as if you were knitting: crossing the markers.
 
 <Story name="Layer with no intuitive markers">
   <ShowHide let:show let:toggle>

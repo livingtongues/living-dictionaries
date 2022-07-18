@@ -115,7 +115,6 @@
         alert("You can't delete pinned markers");
         return false;
       }
-      //TODO is there a way to delete something from an array with destructuring and have the same functionalty here?
       markers[currentMarker].remove();
       markers = markers;
       markers.splice(currentMarker, 1);
@@ -147,7 +146,6 @@
         <label for="multiple-markers" class="text-sm font-medium text-gray-700">Multiple markers</label>
       </div>
     {/if}
-    <!--TODO this text functionality in popups-->
     {#if allowPopup && allowText}
       <div class="mb-2">
         <input id="multiple-markers" type="text" placeholder="Multiple markers" bind:value={markerText} />
