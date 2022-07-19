@@ -137,6 +137,28 @@
       layer = null;
     }
   }
+
+  function save() {
+    alert("The data should be saved")
+  }
+
+  /* import { createEventDispatcher } from 'svelte';
+  const dispatch = createEventDispatcher<{
+    update: { lat: number; lng: number };
+    remove: boolean;
+    close: boolean;
+  }>();
+  async function update() {
+    dispatch('update', {
+      lat,
+      lng,
+    });
+    dispatch('close');
+  }
+  async function remove() {
+    dispatch('remove');
+    dispatch('close');
+  } */
 </script>
 <Modal on:close noscroll>
   <form>
@@ -152,7 +174,7 @@
         <!-- <label for="multiple-markers" class="text-sm font-medium text-gray-700">Text in markers</label> -->
       </div>
     {/if}
-    <div id="map" class="relative w-full mb-2" style="height: 50vh;">
+    <div id="map" class="relative w-full" style="height: 50vh;">
       <button
         on:click={toggleStyle}
         type="button"
@@ -161,28 +183,36 @@
         <i class="far fa-globe-asia" />
       </button>
     </div>
-    {#if markers.length > 0}
-      <div class="flex justify-between">
-        {#if markers.length > 0}      
+    <div class="modal-footer flex {markers.length > 0 ? 'justify-between' : 'justify-end'}">
+      {#if markers.length > 0}
+        <div>    
           <Button
             color="red"
             form="filled"
             onclick={removeMarker}>
             {t ? $t('misc.delete') : 'Delete Pin'}
           </Button>
-        {/if}
-        {#if markers.length > 2}
-          {#if layer}
-            <Button color="red" onclick={removeLayer}>
-              {t ? $t('') : 'Remove Layer'}
-            </Button>
-          {:else}
-            <Button color="primary" onclick={setLayer}>
-              {t ? $t('') : 'Create Layer'}
-            </Button>
-          {/if}
-        {/if}
+            {#if markers.length > 2}
+              {#if layer}
+                <Button color="red" onclick={removeLayer}>
+                  {t ? $t('') : 'Remove Layer'}
+                </Button>
+              {:else}
+                <Button color="primary" onclick={setLayer}>
+                  {t ? $t('') : 'Create Layer'}
+                </Button>
+              {/if}
+            {/if}
+        </div>
+      {/if}
+      <div>
+        <Button form="simple" color="red">
+          {t ? $t('misc.remove') : 'Remove'}
+        </Button>
+        <Button type="submit" form="filled">
+          {t ? $t('misc.save') : 'Save'}
+        </Button>
       </div>
-    {/if}
+    </div>
   </form>
 </Modal>
