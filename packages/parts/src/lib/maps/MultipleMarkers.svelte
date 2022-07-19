@@ -137,11 +137,7 @@
       layer = null;
     }
   }
-
-  function save() {
-    alert("The data should be saved")
-  }
-
+  
   import { createEventDispatcher } from 'svelte';
   const dispatch = createEventDispatcher<{
     //TODO should be an array of {lat, lng} and maybe a new boolean field for Layers?
