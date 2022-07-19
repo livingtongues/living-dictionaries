@@ -59,7 +59,7 @@
           {glosses}
         {/if}
         {#if $dictionary.id === 'jewish-neo-aramaic'}
-          {#if entry.di}<p class="text-xs"><i class="mr-1">Dialect: {entry.di}</i></p>{/if}
+          {#if entry.di}<p class="text-xs"><i class="mr-1">{$t('entry.di', { default: 'Dialect' })}: {entry.di}</i></p>{/if}
           {#if entry.xs && entry.xs.vn}<p>
               <span class="font-semibold"
                 >{$t('entry.example_sentence', { default: 'Example Sentence' })}:</span>
@@ -80,7 +80,7 @@
             {/each}
           {/if}
         {:else if $dictionary.id === 'babanki'}
-          {#if entry.pl}<p>{entry.pl}</p>{/if}
+          {#if entry.pl}<p class="text-xs">{$t('entry.pl', { default: 'Plural form' })}: {entry.pl}</p>{/if}
         {/if}
       </div>
 
