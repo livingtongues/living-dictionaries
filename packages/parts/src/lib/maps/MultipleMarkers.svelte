@@ -142,26 +142,24 @@
     alert("The data should be saved")
   }
 
-  /* import { createEventDispatcher } from 'svelte';
+  import { createEventDispatcher } from 'svelte';
   const dispatch = createEventDispatcher<{
-    update: { lat: number; lng: number };
+    //TODO should be an array of {lat, lng} and maybe a new boolean field for Layers?
+    update: [];
     remove: boolean;
     close: boolean;
   }>();
   async function update() {
-    dispatch('update', {
-      lat,
-      lng,
-    });
+    dispatch('update', []);
     dispatch('close');
   }
   async function remove() {
     dispatch('remove');
     dispatch('close');
-  } */
+  }
 </script>
 <Modal on:close noscroll>
-  <form>
+  <form on:submit|preventDefault={update}>
     {#if !onlyMultiMarkers}   
       <div class="mb-2">
         <input id="multiple-markers" type="checkbox" bind:checked={multipleMarkers} placeholder="Multiple markers" />
@@ -206,7 +204,7 @@
         </div>
       {/if}
       <div>
-        <Button form="simple" color="red">
+        <Button onclick={remove} form="simple" color="red">
           {t ? $t('misc.remove') : 'Remove'}
         </Button>
         <Button type="submit" form="filled">
