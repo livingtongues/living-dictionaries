@@ -1,5 +1,6 @@
 <script lang="ts">
-  import entryFields from '../../lib/export/entryFields.json'
+  import entryFields from '../../lib/export/entryFields.json';
+  import { semanticDomains, partsOfSpeech } from '@living-dictionaries/parts';
   import type { IEntry } from '@living-dictionaries/types';
   const entries: IEntry[] = [
     //...add a couple sample entry objects for mocking
@@ -23,7 +24,7 @@
       pf: { gcs: 'banana', path: 'https://api.time.com/wp-content/uploads/2019/11/gettyimages-459761948.jpg' },
       xv: '',
     },
-    { id: '34qw', lx: 'tree', gl: { es: 'arbol' } },
+    { id: '34qw', lx: 'tree', gl: { es: 'arbol' }, pf: { gcs: 'Ktt_Jvk55Mp1cHJ6_zXeHU6dEJOjh8p5bk3rvK5kzXVgwB8GDXCSOPipNTveouELfx9_Rh4IllVvS3BLFBTc', path: 'https://lh3.googleusercontent.com/Ktt_Jvk55Mp1cHJ6_zXeHU6dEJOjh8p5bk3rvK5kzXVgwB8GDXCSOPipNTveouELfx9_Rh4IllVvS3BLFBTc=w1055', source: 'local_import' }, },
   ];
 </script>
 
@@ -37,18 +38,51 @@
 
   {#if entry.pf}
     <img src={entry.pf.path} alt={entry.pf.gcs} width=350 height=350 />
+    {#if entry.pf.source}
+
+      **Image Source:** {entry.pf.source}
+      
+    {/if}
+  {/if}
+
+  {#if entry.gl}
+    {#each Object.entries(entry.gl) as gloss}
+
+      _**{gloss[0]}:** {gloss[1]}_
+
+    {/each}
   {/if}
 
   {#each Object.entries(entry) as field}
-
     {#if typeof(field[1]) !== 'object'}
-      {#if field[1]}
+      {#if field[1] && field[0] !== "lx"}
 
         **{entryFields[field[0]]}:** {field[1]}
 
       {/if}
     {/if}
-
   {/each}
+
+  {#if entry.sdn}
+
+    **Semantic domains:**
+
+    {#each entry.sdn as semanticDomain}
+
+      {semanticDomains.find((sd) => sd.key === semanticDomain).name}
+
+    {/each}
+  {/if}
+
+  <!-- {#if entry.sf}
+    {#if entry.sf.source}
+
+    **Audio Source:** {entry.sf.source}
+
+    {/if}
+
+    **Audio Path:** {entry.sf.path}
+
+  {/if} -->
 
 {/each}
