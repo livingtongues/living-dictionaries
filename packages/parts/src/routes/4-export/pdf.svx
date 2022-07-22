@@ -1,0 +1,52 @@
+<script lang="ts">
+  import type { IEntry } from '@living-dictionaries/types';
+import { null_to_empty } from 'svelte/internal';
+  const entries: IEntry[] = [
+    //...add a couple sample entry objects for mocking
+    {
+      id: '12345qwerty',
+      lx: 'xiangjiao',
+      lo: 'کیلا',
+      in: 'n',
+      mr: 'bar',
+      nc: '5',
+      ph: 'xiangjiao',
+      gl: { es: 'platano', ar: 'foo', en: 'banana' },
+      ps: 'n',
+      pl: 'shuang xiangjiao',
+      sdn: ['2.1', '2.2', '2.3'],
+      di: 'dialect x',
+      nt: 'This is an example of a note, here we can write whatever we want.',
+      sr: ['A book', 'www.mybook.com'],
+      xs: { en: 'This is a banana', vn: '我很喜歡吃香蕉' },
+      sf: { path: 'https://database.com/sound.mp3', sp: '123' },
+      pf: { gcs: 'banana', path: 'https://api.time.com/wp-content/uploads/2019/11/gettyimages-459761948.jpg' },
+      xv: '',
+    },
+    { id: '34qw', lx: 'tree', gl: { es: 'arbol' } },
+  ];
+</script>
+
+<!-- prettier-ignore -->
+# Birhor
+
+*Desired metadata...*
+
+{#each entries as entry}
+  ## {entry.lx}
+
+  {#if entry.pf}
+    <img src={entry.pf.path} alt={entry.pf.gcs} width=350 height=350 />
+  {/if}
+
+  {#each Object.entries(entry) as field}
+
+    {#if typeof(field[1]) !== 'object'}
+
+      {field[1]}
+      
+    {/if}
+
+  {/each}
+
+{/each}
