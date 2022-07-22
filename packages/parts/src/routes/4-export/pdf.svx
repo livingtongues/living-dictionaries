@@ -1,6 +1,6 @@
 <script lang="ts">
+  import entryFields from '../../lib/export/entryFields.json'
   import type { IEntry } from '@living-dictionaries/types';
-import { null_to_empty } from 'svelte/internal';
   const entries: IEntry[] = [
     //...add a couple sample entry objects for mocking
     {
@@ -42,9 +42,11 @@ import { null_to_empty } from 'svelte/internal';
   {#each Object.entries(entry) as field}
 
     {#if typeof(field[1]) !== 'object'}
+      {#if field[1]}
 
-      {field[1]}
-      
+        **{entryFields[field[0]]}:** {field[1]}
+
+      {/if}
     {/if}
 
   {/each}
