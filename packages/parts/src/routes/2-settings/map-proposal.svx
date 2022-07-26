@@ -34,6 +34,15 @@ We also can change some configuration of the pins for more specifical uses when 
   </ShowHide>
 </Story>
 
+<Story name="Special config markers">
+  <ShowHide let:show let:toggle>
+    <Button onclick={toggle}>Add Coordinates</Button>
+    {#if show}
+    <MultipleMarkers specialConfig onlyMultiMarkers markersConfig={defaultMarkersConfig} on:close={toggle} />
+    {/if}
+  </ShowHide>
+</Story>
+
 ## Markers with Popups
 
 Popups help us for two main reasons, first we can know the order in which we create markers, this could be especially useful when using layers (next section).
