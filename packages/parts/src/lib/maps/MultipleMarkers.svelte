@@ -228,7 +228,7 @@
         {/if}
         <div>
           <input id="default-config" type="checkbox" bind:checked={defaultConfig} />
-          <label for="default-config" class="text-sm font-medium text-gray-700">Default config</label>
+          <label for="default-config" class="text-sm font-medium text-gray-700">Default Markers</label>
         </div>
       </div>
     {/if}
