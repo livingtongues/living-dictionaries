@@ -8,13 +8,14 @@
   import type { Readable } from 'svelte/store';
 
   let map: mapboxgl.Map;
-  let currentMarker: number;
+  let currentMarker: mapboxgl.Marker;
   let markers: mapboxgl.Marker[] = [];
   let marker: mapboxgl.Marker;
   let lng: number;
   let lat: number;
   let markerText: string = "Default text";
   let layer: mapboxgl.CustomLayerInterface;
+  let conuterMarkerId = 0;
 
   export let t: Readable<any> = undefined;
   export let allowPopup = false;
@@ -36,6 +37,26 @@
     markers.forEach(marker => marker.remove()); 
     markers = []
   } 
+
+  let pin;
+  $: if (currentMarker) {
+    if (!pin) {
+      pin = trackSelectedPin();
+      pin.style.outlineColor = 'red';
+      pin.style.outlineStyle = 'solid';
+    } else {
+     let oldPin = pin
+     pin = trackSelectedPin();
+     oldPin.style.outlineColor = null;
+     oldPin.style.outlineStyle = null;
+     pin.style.outlineColor = 'red';
+     pin.style.outlineStyle = 'solid'
+   }
+  }
+
+  function trackSelectedPin() {
+    return markers.find((marker) => marker.getElement().id === currentMarker.getElement().id).getElement();
+  }
 
   onMount(async () => {
     await loadStylesOnce('https://api.mapbox.com/mapbox-gl-js/v1.8.1/mapbox-gl.css');
@@ -79,16 +100,18 @@
         .setText(allowText ? markerText : markers.length.toString())
         .addTo(map);
       marker.setPopup(popup);
-  
-      map.flyTo({
-        center: [lng, lat]
-      });
-      marker.on('dragend', () => {
-        // @ts-ignore I'm ignoring next line due to ._container is a private Popup property and it's not declared in the class, but mapbox doesn't bring us a method where we can get the text of a popup
-        currentMarker = allowText ? markerText : parseInt(marker.getPopup()._container.innerText.replace('\nx', '')) - 1;
-      });
     }
+  
+    map.flyTo({
+      center: [lng, lat]
+    });
+    marker.on('dragstart', () => {
+      currentMarker = marker;
+    });
+    
+    marker.getElement().setAttribute('id', conuterMarkerId.toString());
 		console.log('marker created', markers);
+    conuterMarkerId++;
 	}
 
   function setSingleMarker(longitude: number, latitude: number) {
@@ -110,21 +133,23 @@
 
   function removeMarker() {
 		//TODO show a confirm alert if they want to remove a fixed marker
-    if (allowPopup && !allowText) {
-      if (!markers[currentMarker].isDraggable()) {
-        alert("You can't delete pinned markers");
-        return false;
-      }
-      markers[currentMarker].remove();
-      markers = markers;
-      markers.splice(currentMarker, 1);
-      markers.forEach((marker, index) => marker.getPopup().setText((index + 1).toString()));
-    } else {
-      let markerToDelete = markers.pop();
-      markers = markers;
-      markerToDelete.remove();
+
+    if (!currentMarker.isDraggable()) {
+      alert("You can't delete pinned markers");
+      return false;
     }
-	}
+    currentMarker.remove();
+    markers.splice(markers.indexOf(currentMarker), 1);
+    if (allowPopup && !allowText) {
+      let index = 1;
+      markers.forEach((marker) => {
+        marker.getPopup().setText((index).toString())
+        index++;
+      });
+    }
+    currentMarker =  null;
+    }
+	
 
   function setLayer() {
     layer = createLayer(markers, intuitiveMarkers);
@@ -179,24 +204,26 @@
     </div>
     <div class="modal-footer flex {markers.length > 0 ? 'justify-between' : 'justify-end'}">
       {#if markers.length > 0}
-        <div>    
-          <Button
-            color="red"
-            form="filled"
-            onclick={removeMarker}>
-            {t ? $t('misc.delete') : 'Delete Pin'}
-          </Button>
-            {#if markers.length > 2}
-              {#if layer}
-                <Button color="red" onclick={removeLayer}>
-                  {t ? $t('') : 'Remove Layer'}
-                </Button>
-              {:else}
-                <Button color="primary" onclick={setLayer}>
-                  {t ? $t('') : 'Create Layer'}
-                </Button>
-              {/if}
+        <div>
+          {#if currentMarker}    
+            <Button
+              color="red"
+              form="filled"
+              onclick={removeMarker}>
+              {t ? $t('misc.delete') : 'Delete Pin'}
+            </Button>
+          {/if}
+          {#if markers.length > 2}
+            {#if layer}
+              <Button color="red" onclick={removeLayer}>
+                {t ? $t('') : 'Remove Layer'}
+              </Button>
+            {:else}
+              <Button color="primary" onclick={setLayer}>
+                {t ? $t('') : 'Create Layer'}
+              </Button>
             {/if}
+          {/if}
         </div>
       {/if}
       <div>
