@@ -17,11 +17,12 @@
   let layer: mapboxgl.CustomLayerInterface;
   let conuterMarkerId = 0;
 
+  export let markersConfig:mapboxgl.MarkerOptions;
+  //export let specialMarkerConfig:mapboxgl.MarkerOptions = undefined; 
   export let t: Readable<any> = undefined;
   export let allowPopup = false;
   export let allowText = false;
   export let intuitiveMarkers = true
-  export let markersConfig:mapboxgl.MarkerOptions;
   export let multipleMarkers = false;
   export let onlyMultiMarkers = false;
 
@@ -38,6 +39,7 @@
     markers = []
   } 
 
+  // This is to point to the pin that one can remove after grabbing it.
   let pin;
   $: if (currentMarker) {
     if (!pin) {
@@ -133,7 +135,6 @@
 
   function removeMarker() {
 		//TODO show a confirm alert if they want to remove a fixed marker
-
     if (!currentMarker.isDraggable()) {
       alert("You can't delete pinned markers");
       return false;
