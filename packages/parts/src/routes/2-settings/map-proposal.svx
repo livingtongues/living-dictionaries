@@ -34,6 +34,10 @@ We also can change some configuration of the pins for more specifical uses when 
   </ShowHide>
 </Story>
 
+The last example showed you how to configure the markers, all of them, but we can also configure specific markers if we find a situation where we need to. 
+For example if we wanted to differentiate one special marker or even many special markers; to do so, just deactivate the defalut config checkmark and at least select a new color and size (scale).
+You can check it again to return to our default markers.
+
 <Story name="Special config markers">
   <ShowHide let:show let:toggle>
     <Button onclick={toggle}>Add Coordinates</Button>
