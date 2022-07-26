@@ -16,10 +16,29 @@
   let markerText: string = "Default text";
   let layer: mapboxgl.CustomLayerInterface;
   let conuterMarkerId = 0;
+  
+  // Special marker attributes
+  let markerColor:string;
+  let markerScale:number;
+  let markerDraggable = false;
+  let specialMarkerConfig:mapboxgl.MarkerOptions; 
+  let defaultConfig = true;
+
+
+  $: if (markerColor && markerScale && typeof(markerDraggable) === 'boolean') {
+      specialMarkerConfig = {
+        color: markerColor,
+        scale: markerScale,
+        draggable: markerDraggable
+      }
+    } 
+  $: if (defaultConfig) {
+       specialMarkerConfig=null, markerColor=null, markerScale=null, markerDraggable=false;
+     }
 
   export let markersConfig:mapboxgl.MarkerOptions;
-  //export let specialMarkerConfig:mapboxgl.MarkerOptions = undefined; 
   export let t: Readable<any> = undefined;
+  export let specialConfig = false;
   export let allowPopup = false;
   export let allowText = false;
   export let intuitiveMarkers = true
@@ -93,7 +112,8 @@
 
   function addNewMarker(longitude: number, latitude: number) {
     convertCoordinates(longitude, latitude);
-		const marker = new mapboxgl.Marker(markersConfig).setLngLat([lng, lat]).addTo(map);
+		const marker = specialMarkerConfig ? new mapboxgl.Marker(specialMarkerConfig) : new mapboxgl.Marker(markersConfig);
+    marker.setLngLat([lng, lat]).addTo(map);
 		markers = [...markers, marker];
 
     if (allowPopup) {
@@ -192,6 +212,24 @@
       <div class="mb-2">
         <input id="multiple-markers" type="text" placeholder="Text in markers" bind:value={markerText} />
         <!-- <label for="multiple-markers" class="text-sm font-medium text-gray-700">Text in markers</label> -->
+      </div>
+    {/if}
+    {#if specialConfig}
+      <div class="mb-2 flex justify-between">
+        {#if !defaultConfig}
+          <div>
+            <label for="marker-color" class="text-sm font-medium text-gray-700">Color</label>
+            <input id="marker-color" type="color" bind:value={markerColor} />
+            <label for="marker-color" class="text-sm font-medium text-gray-700">Size</label>
+            <input id="marker-color" type="number" bind:value={markerScale} class="w-16" />
+            <label for="marker-color" class="text-sm font-medium text-gray-700">Draggable</label>
+            <input id="marker-color" type="checkbox" bind:checked={markerDraggable} />
+          </div>
+        {/if}
+        <div>
+          <input id="default-config" type="checkbox" bind:checked={defaultConfig} />
+          <label for="default-config" class="text-sm font-medium text-gray-700">Default config</label>
+        </div>
       </div>
     {/if}
     <div id="map" class="relative w-full" style="height: 50vh;">
