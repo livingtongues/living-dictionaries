@@ -10,7 +10,7 @@
 <!-- prettier-ignore -->
 # Mapbox proposal for multiple markers
 
-**In this proposal, deletion of multi-markers works as stack data structures work (FILO): The first marker is the last to be deleted. Except for markers with default popups, please read the description to know how to delete those ones.**
+**To delete a marker you only need to grab the marker you wish to delete, so click the delete button and that's it. Markers with default popups will automatically reorder numerically.**
 
 We can allow the normal single marker behaviour we already have on our site, but also with an additional use of multi-markers.
 
@@ -41,8 +41,6 @@ The second reason is that we can track the markers, this means we can select cer
 I haven't found a way to track a marker without a popup. I don't know if I missed something in the mapbox docs or they just don't give us that functionality.
 
 [Mapbox docs](https://docs.mapbox.com/mapbox-gl-js/api/markers/#marker)
-
-To delete a marker with a default popup, first of all, you need to grab the marker you wish to delete, so click the delete button and they will automatically reorder numerically.
 
 <Story name="Default popups">
   <ShowHide let:show let:toggle>
