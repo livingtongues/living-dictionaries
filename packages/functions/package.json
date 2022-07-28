@@ -31,7 +31,7 @@
     "firebase-functions-test": "^0.2.0",
     "node-fetch": "^2.6.7",
     "typescript": "^4.7.3",
-    "vitest": "^0.15.1"
+    "vitest": "^0.19.1"
   },
   "private": true
 }

@@ -1,4 +1,5 @@
 <script lang="ts">
+  // learning from https://github.com/pngwn/peng-move/blob/main/src/lib/Animal.svelte
   import { spring } from 'svelte/motion';
   export let gcs: string;
   export let length: number;
