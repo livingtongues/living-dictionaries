@@ -10,7 +10,9 @@
 <!-- prettier-ignore -->
 # Mapbox proposal for multiple markers
 
-**To delete a marker you only need to grab the marker you wish to delete, so click the delete button and that's it. Markers with default popups will automatically reorder numerically.**
+**To delete a draggable marker you only need to grab the marker you wish to delete, so click the delete button and that's it. Markers with default popups will automatically reorder numerically.**
+
+**To delete non-dragabble markers (pinned) you need to right-click the pinned marker to select it. You should also confirm if you are sure about this action in this case.**
 
 **Another thing that is very important to consider is that changes that one can make inside the modal element are modifications that any user can make, 
 while changes outside of the modal are technical changes the users can't alter.**

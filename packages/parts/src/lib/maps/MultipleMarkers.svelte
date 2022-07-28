@@ -134,6 +134,14 @@
     marker.getElement().setAttribute('id', conuterMarkerId.toString());
 		console.log('marker created', markers);
     conuterMarkerId++;
+
+    if (!marker.isDraggable()) {
+      marker.getElement().addEventListener('contextmenu', () => 
+        { 
+            currentMarker = marker;
+        }
+      ); 
+    }
 	}
 
   function setSingleMarker(longitude: number, latitude: number) {
@@ -154,10 +162,10 @@
   }
 
   function removeMarker() {
-		//TODO show a confirm alert if they want to remove a fixed marker
     if (!currentMarker.isDraggable()) {
-      alert("You can't delete pinned markers");
-      return false;
+      if (!confirm("Are you sure you want to remove a pinned marker?")) {
+        return false;
+      }
     }
     currentMarker.remove();
     markers.splice(markers.indexOf(currentMarker), 1);
@@ -249,7 +257,7 @@
               color="red"
               form="filled"
               onclick={removeMarker}>
-              {t ? $t('misc.delete') : 'Delete Pin'}
+              {t ? $t('misc.delete') : 'Delete Marker'}
             </Button>
           {/if}
           {#if markers.length > 2}
