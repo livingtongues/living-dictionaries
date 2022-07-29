@@ -4,7 +4,7 @@ export function createLayer(
   markers: mapboxgl.Marker[],
   markersIntuitive = true
 ): mapboxgl.CustomLayerInterface {
-  let layerCoordinates = [];
+  const layerCoordinates = [];
   return {
     id: 'highlight',
     type: 'custom',

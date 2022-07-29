@@ -13,7 +13,7 @@
   let marker: mapboxgl.Marker;
   let lng: number;
   let lat: number;
-  let markerText: string = "Default text";
+  let markerText = "Default text";
   let layer: mapboxgl.CustomLayerInterface;
   let conuterMarkerId = 0;
   
