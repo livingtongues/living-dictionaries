@@ -6,7 +6,7 @@
   import mapboxgl from 'mapbox-gl';
   import Modal from 'svelte-pieces/ui/Modal.svelte';
   import Button from 'svelte-pieces/ui/Button.svelte';
-  import { loadScriptOnce, loadStylesOnce } from './loader'; //pull from sveltefirets once that library is published
+  import { loadScriptOnce, loadStylesOnce } from 'sveltefirets/client/loader';
 
   import { startCoordinates } from './map.class';
   let map: mapboxgl.Map;
