@@ -2,6 +2,16 @@
   import entryFields from '../../lib/export/entryFields.json';
   import { semanticDomains, partsOfSpeech } from '@living-dictionaries/parts';
   import type { IEntry } from '@living-dictionaries/types';
+  //TODO complete the fields object but also add every field in the entry interface to the entryFields.json
+  const fields = {
+    id: true,
+    lx: true,
+    lo: true,
+    lo2: true,
+    lo3: true,
+    lo4: true,
+    lo5: true,
+  }
   const entries: IEntry[] = [
     //...add a couple sample entry objects for mocking
     {
@@ -26,12 +36,17 @@
     },
     { id: '34qw', lx: 'tree', gl: { es: 'arbol' }, pf: { gcs: 'Ktt_Jvk55Mp1cHJ6_zXeHU6dEJOjh8p5bk3rvK5kzXVgwB8GDXCSOPipNTveouELfx9_Rh4IllVvS3BLFBTc', path: 'https://lh3.googleusercontent.com/Ktt_Jvk55Mp1cHJ6_zXeHU6dEJOjh8p5bk3rvK5kzXVgwB8GDXCSOPipNTveouELfx9_Rh4IllVvS3BLFBTc=w1055', source: 'local_import' }, },
   ];
+
+  $: console.log("fields", fields)
 </script>
 
 <!-- prettier-ignore -->
 # Birhor
 
-*Desired metadata...*
+{#each Object.keys(entryFields) as field}
+  <input id={field} type="checkbox" bind:checked={fields[field]} />
+  <label for={field} class="text-sm font-medium text-gray-700">{entryFields[field]}</label>
+{/each}
 
 {#each entries as entry}
   ## {entry.lx}
