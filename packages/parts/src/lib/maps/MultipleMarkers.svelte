@@ -2,7 +2,7 @@
   import { onMount } from 'svelte';
   import mapboxgl from 'mapbox-gl';
   import Modal from 'svelte-pieces/ui/Modal.svelte';
-  import { loadStylesOnce } from './loader';
+  import { loadStylesOnce } from 'sveltefirets/client/loader';
   import Button from 'svelte-pieces/ui/Button.svelte';
   import { createLayer } from './layer';
   import type { Readable } from 'svelte/store';

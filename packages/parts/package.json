@@ -30,6 +30,7 @@
     "recordrtc": "^5.6.2",
     "replace-in-file": "^6.3.2",
     "svelte": "^3.48.0",
+    "sveltefirets": "^0.0.27",
     "svelte-check": "^2.8.0",
     "svelte-deep-wind-preprocess": "^0.0.8",
     "svelte-pieces": "1.0.22",
