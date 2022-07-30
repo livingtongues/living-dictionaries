@@ -3,8 +3,12 @@
   import Map from '$lib/maps/mapbox/map/Map.svelte';
 </script>
 
-<Story height={300}>
+<Story height={400}>
   <Map />
+</Story>
+
+<Story name="globe" height={400}>
+  <Map options={{ projection: { name: 'globe' } }} />
 </Story>
 
 <!-- <style>

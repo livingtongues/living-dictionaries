@@ -4,17 +4,18 @@
   import { contextKey } from '../contextKey';
   import action from './map-action';
   import { EventQueue } from '../queue';
+  import type { LngLatLike, MapboxOptions } from 'mapbox-gl';
 
-  export let map = null;
-  export let version = 'v2.3.1';
-  export let center = [0, 0];
-  export let zoom = 9;
+  export let map: mapboxgl.Map = null;
+  export let version = 'v2.9.2';
+  export let center: LngLatLike = [-95, 38.907]; // USA
+  export let zoom = 2;
   export let zoomRate = 1;
   export let wheelZoomRate = 1;
-  export let options = {};
+  export let options: Partial<MapboxOptions> = {};
   export let accessToken = import.meta.env.VITE_mapboxAccessToken as string;
-  export let customStylesheetUrl = false;
-  export let style = 'mapbox://styles/mapbox/streets-v11';
+  export let customStylesheetUrl: string = undefined;
+  export let style = 'mapbox://styles/mapbox/streets-v11?optimize=true'; // light-v8, light-v9, light-v10, dark-v10, satellite-v9, streets-v11
 
   const dispatch = createEventDispatcher();
 
@@ -23,8 +24,8 @@
     getMapbox: () => mapbox,
   });
 
-  let container;
-  let mapbox;
+  let container: HTMLElement;
+  let mapbox: typeof import('mapbox-gl');
 
   const optionsWithDefaults = Object.assign(
     {
