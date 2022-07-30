@@ -3,6 +3,7 @@
   import Map from '$lib/maps/mapbox/map/Map.svelte';
   import Marker from '$lib/maps/mapbox/map/Marker.svelte';
   import Set from 'svelte-pieces/functions/Set.svelte';
+  import Popup from '$lib/maps/mapbox/map/Popup.svelte';
 </script>
 
 <!-- prettier-ignore -->
@@ -21,11 +22,15 @@ From https://github.com/beyonk-adventures/svelte-mapbox
           <Marker
             on:dragend={(e) => {
               remove(point);
-              add({ lng: e.detail.lng, lat: e.detail.lat })
+              add({ lng: e.detail.lng, lat: e.detail.lat });
             }}
             lng={point.lng}
-            lat={point.lat}>
-            <div slot="popup">Remove</div>
+            lat={point.lat}
+            let:marker
+            let:open>
+            <Popup {marker} {open}>
+              <div>Remove</div>
+            </Popup>
           </Marker>
         {/each}
       </Map>
