@@ -1,0 +1,22 @@
+<script lang="ts">
+  import { Story } from 'kitbook';
+  import Map from '$lib/maps/mapbox/map/Map.svelte';
+  import Marker from '$lib/maps/mapbox/map/Marker.svelte';
+</script>
+
+<!-- prettier-ignore -->
+# Mapbox 
+
+From https://github.com/beyonk-adventures/svelte-mapbox
+
+<Story name="Multiple Markers" knobs={{ lng: -95, lat: 39 }} let:props={{ lng, lat }} let:set height={400}>
+  <Map
+    on:click={(e) => {
+      set('lng', e.detail.lng);
+      set('lat', e.detail.lat);
+    }}>
+    <Marker {lng} {lat} />
+  </Map>
+</Story>
+
+
