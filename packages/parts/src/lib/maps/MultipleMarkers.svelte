@@ -13,35 +13,37 @@
   let marker: mapboxgl.Marker;
   let lng: number;
   let lat: number;
-  let markerText = "Default text";
+  let markerText = 'Default text';
   let layer: mapboxgl.CustomLayerInterface;
   let conuterMarkerId = 0;
-  
+
   // Special marker attributes
-  let markerColor:string;
-  let markerScale:number;
+  let markerColor: string;
+  let markerScale: number;
   let markerDraggable = false;
-  let specialMarkerConfig:mapboxgl.MarkerOptions; 
+  let specialMarkerConfig: mapboxgl.MarkerOptions;
   let defaultConfig = true;
 
-
-  $: if (markerColor && markerScale && typeof(markerDraggable) === 'boolean') {
-      specialMarkerConfig = {
-        color: markerColor,
-        scale: markerScale,
-        draggable: markerDraggable
-      }
-    } 
+  $: if (markerColor && markerScale && typeof markerDraggable === 'boolean') {
+    specialMarkerConfig = {
+      color: markerColor,
+      scale: markerScale,
+      draggable: markerDraggable,
+    };
+  }
   $: if (defaultConfig) {
-       specialMarkerConfig=null, markerColor=null, markerScale=null, markerDraggable=false;
-     }
+    (specialMarkerConfig = null),
+      (markerColor = null),
+      (markerScale = null),
+      (markerDraggable = false);
+  }
 
-  export let markersConfig:mapboxgl.MarkerOptions;
+  export let markersConfig: mapboxgl.MarkerOptions;
   export let t: Readable<any> = undefined;
   export let specialConfig = false;
   export let allowPopup = false;
   export let allowText = false;
-  export let intuitiveMarkers = true
+  export let intuitiveMarkers = true;
   export let multipleMarkers = false;
   export let onlyMultiMarkers = false;
 
@@ -51,12 +53,12 @@
 
   $: if (multipleMarkers) {
     if (marker) {
-      marker.remove()
+      marker.remove();
     }
   } else {
-    markers.forEach(marker => marker.remove()); 
-    markers = []
-  } 
+    markers.forEach((marker) => marker.remove());
+    markers = [];
+  }
 
   // This is to point to the pin that one can remove after grabbing it.
   let pin;
@@ -66,36 +68,38 @@
       pin.style.outlineColor = 'red';
       pin.style.outlineStyle = 'solid';
     } else {
-     let oldPin = pin
-     pin = trackSelectedPin();
-     oldPin.style.outlineColor = null;
-     oldPin.style.outlineStyle = null;
-     pin.style.outlineColor = 'red';
-     pin.style.outlineStyle = 'solid'
-   }
+      let oldPin = pin;
+      pin = trackSelectedPin();
+      oldPin.style.outlineColor = null;
+      oldPin.style.outlineStyle = null;
+      pin.style.outlineColor = 'red';
+      pin.style.outlineStyle = 'solid';
+    }
   }
 
   function trackSelectedPin() {
-    return markers.find((marker) => marker.getElement().id === currentMarker.getElement().id).getElement();
+    return markers
+      .find((marker) => marker.getElement().id === currentMarker.getElement().id)
+      .getElement();
   }
 
   onMount(async () => {
     await loadStylesOnce('https://api.mapbox.com/mapbox-gl-js/v1.8.1/mapbox-gl.css');
     mapboxgl.accessToken = import.meta.env.VITE_mapboxAccessToken as string;
     map = new mapboxgl.Map({
-          container: 'map',
-          style: 'mapbox://styles/mapbox/streets-v11?optimize=true', // style URL
-          center: [-104.5, 34], // starting position [lng, lat]
-          zoom: 3 // starting zoom
-        });
-        map.on('click', (event) => {
-          if (multipleMarkers) {
-            addNewMarker(event.lngLat.lng, event.lngLat.lat);
-          } else {
-            setSingleMarker(event.lngLat.lng, event.lngLat.lat);
-          }
-        });
-  })
+      container: 'map',
+      style: 'mapbox://styles/mapbox/streets-v11?optimize=true', // style URL
+      center: [-104.5, 34], // starting position [lng, lat]
+      zoom: 3, // starting zoom
+    });
+    map.on('click', (event) => {
+      if (multipleMarkers) {
+        addNewMarker(event.lngLat.lng, event.lngLat.lat);
+      } else {
+        setSingleMarker(event.lngLat.lng, event.lngLat.lat);
+      }
+    });
+  });
 
   function convertCoordinates(longitude: number, latitude: number) {
     if (map && longitude && latitude) {
@@ -112,9 +116,11 @@
 
   function addNewMarker(longitude: number, latitude: number) {
     convertCoordinates(longitude, latitude);
-		const marker = specialMarkerConfig ? new mapboxgl.Marker(specialMarkerConfig) : new mapboxgl.Marker(markersConfig);
+    const marker = specialMarkerConfig
+      ? new mapboxgl.Marker(specialMarkerConfig)
+      : new mapboxgl.Marker(markersConfig);
     marker.setLngLat([lng, lat]).addTo(map);
-		markers = [...markers, marker];
+    markers = [...markers, marker];
 
     if (allowPopup) {
       const popup = new mapboxgl.Popup({ closeOnClick: false })
@@ -123,26 +129,24 @@
         .addTo(map);
       marker.setPopup(popup);
     }
-  
+
     map.flyTo({
-      center: [lng, lat]
+      center: [lng, lat],
     });
     marker.on('dragstart', () => {
       currentMarker = marker;
     });
-    
+
     marker.getElement().setAttribute('id', conuterMarkerId.toString());
-		console.log('marker created', markers);
+    console.log('marker created', markers);
     conuterMarkerId++;
 
     if (!marker.isDraggable()) {
-      marker.getElement().addEventListener('contextmenu', () => 
-        { 
-            currentMarker = marker;
-        }
-      ); 
+      marker.getElement().addEventListener('contextmenu', () => {
+        currentMarker = marker;
+      });
     }
-	}
+  }
 
   function setSingleMarker(longitude: number, latitude: number) {
     convertCoordinates(longitude, latitude);
@@ -163,7 +167,7 @@
 
   function removeMarker() {
     if (!currentMarker.isDraggable()) {
-      if (!confirm("Are you sure you want to remove a pinned marker?")) {
+      if (!confirm('Are you sure you want to remove a pinned marker?')) {
         return false;
       }
     }
@@ -172,13 +176,12 @@
     if (allowPopup && !allowText) {
       let index = 1;
       markers.forEach((marker) => {
-        marker.getPopup().setText((index).toString())
+        marker.getPopup().setText(index.toString());
         index++;
       });
     }
-    currentMarker =  null;
-    }
-	
+    currentMarker = null;
+  }
 
   function setLayer() {
     layer = createLayer(markers, intuitiveMarkers);
@@ -187,11 +190,11 @@
 
   function removeLayer() {
     if (layer) {
-      map.removeLayer(layer.id)
+      map.removeLayer(layer.id);
       layer = null;
     }
   }
-  
+
   import { createEventDispatcher } from 'svelte';
   const dispatch = createEventDispatcher<{
     //TODO should be an array of {lat, lng} and maybe a new boolean field for Layers?
@@ -208,17 +211,27 @@
     dispatch('close');
   }
 </script>
+
 <Modal on:close noscroll>
   <form on:submit|preventDefault={update}>
-    {#if !onlyMultiMarkers}   
+    {#if !onlyMultiMarkers}
       <div class="mb-2">
-        <input id="multiple-markers" type="checkbox" bind:checked={multipleMarkers} placeholder="Multiple markers" />
-        <label for="multiple-markers" class="text-sm font-medium text-gray-700">Multiple markers</label>
+        <input
+          id="multiple-markers"
+          type="checkbox"
+          bind:checked={multipleMarkers}
+          placeholder="Multiple markers" />
+        <label for="multiple-markers" class="text-sm font-medium text-gray-700"
+          >Multiple markers</label>
       </div>
     {/if}
     {#if allowPopup && allowText}
       <div class="mb-2">
-        <input id="multiple-markers" type="text" placeholder="Text in markers" bind:value={markerText} />
+        <input
+          id="multiple-markers"
+          type="text"
+          placeholder="Text in markers"
+          bind:value={markerText} />
         <!-- <label for="multiple-markers" class="text-sm font-medium text-gray-700">Text in markers</label> -->
       </div>
     {/if}
@@ -236,7 +249,8 @@
         {/if}
         <div>
           <input id="default-config" type="checkbox" bind:checked={defaultConfig} />
-          <label for="default-config" class="text-sm font-medium text-gray-700">Default Markers</label>
+          <label for="default-config" class="text-sm font-medium text-gray-700"
+            >Default Markers</label>
         </div>
       </div>
     {/if}
@@ -252,11 +266,8 @@
     <div class="modal-footer flex {markers.length > 0 ? 'justify-between' : 'justify-end'}">
       {#if markers.length > 0}
         <div>
-          {#if currentMarker}    
-            <Button
-              color="red"
-              form="filled"
-              onclick={removeMarker}>
+          {#if currentMarker}
+            <Button color="red" form="filled" onclick={removeMarker}>
               {t ? $t('misc.delete') : 'Delete Marker'}
             </Button>
           {/if}
