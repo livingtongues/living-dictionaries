@@ -165,7 +165,7 @@ export const importSpreadsheetToFirebase = async (
  * Use like this: `${dictionaryId}/audio/import_${importId}/${sanitizeFileName(filePath)}`
  */
 const sanitizeFileName = (fileName: string): string => {
-  return fileName.replace(/[^a-z0-9_\.+]+/gi, '-');
+  return fileName.replace(/[^a-z0-9_.+]+/gi, '-');
 };
 
 const appendDateBeforeExtension = (fileName: string): string => {

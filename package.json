@@ -13,6 +13,9 @@
 		"parts:build": "pnpm --filter=parts build",
 		"parts:test": "pnpm --filter=parts test",
 		"both": "pnpm --filter=./packages/** dev",
+		"lint": "eslint .",
+		"format-check": "prettier --check --plugin-search-dir=. .",
+		"format": "prettier --write --plugin-search-dir=. .",
 		"check-packages": "pnpm update --interactive --recursive --latest"
 	},
 	"devDependencies": {
