@@ -1,6 +1,5 @@
 <script lang="ts">
   import { Story } from 'kitbook';
-  // import Mapbox from '$lib/maps/Mapbox.svelte';
   import Map from '$lib/maps/mapbox/map/Map.svelte';
 </script>
 

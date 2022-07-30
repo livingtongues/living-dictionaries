@@ -1,6 +1,6 @@
 <script lang="ts">
   import { getContext, onMount } from 'svelte';
-  import { contextKey } from '../mapbox';
+  import { contextKey } from '../contextKey';
   import { bindEvents } from '../event-bindings';
 
   const { getMap, getMapbox } = getContext(contextKey);

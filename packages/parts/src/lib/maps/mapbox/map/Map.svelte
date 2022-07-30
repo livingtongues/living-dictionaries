@@ -1,9 +1,9 @@
 <script lang="ts">
   // from https://github.com/beyonk-adventures/svelte-mapbox
   import { setContext, onDestroy, createEventDispatcher } from 'svelte';
-  import { contextKey } from '../mapbox.js';
-  import action from './map-action.js';
-  import { EventQueue } from '../queue.js';
+  import { contextKey } from '../contextKey';
+  import action from './map-action';
+  import { EventQueue } from '../queue';
 
   export let map = null;
   export let version = 'v2.3.1';
