@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount, getContext } from 'svelte';
   import { contextKey } from '../contextKey';
-  import type { Map } from 'mapbox-gl';
+  import type { Map, Marker } from 'mapbox-gl';
 
   const { getMap, getMapbox } = getContext(contextKey);
   const map: Map = getMap();
@@ -11,24 +11,24 @@
     return Math.round(Math.random() * 255);
   }
 
-  function move(lng, lat) {
+  function move(lng: number, lat: number) {
     marker.setLngLat({ lng, lat });
   }
 
-  export let lat;
-  export let lng;
+  export let lat: number;
+  export let lng: number;
   export let label = 'Marker';
   export let popupClassName = 'beyonk-mapbox-popup';
   export let markerOffset = [0, 0];
   export let popupOffset = 10;
   export let color = randomColour();
-  export let popup = true;
+  export let popup = false;
   export let popupOptions = {};
   export let markerOptions = {};
 
-  let marker;
-  let element;
-  let elementPopup;
+  let marker: Marker;
+  let element: HTMLDivElement;
+  let elementPopup: HTMLDivElement;
 
   $: marker && move(lng, lat);
 
