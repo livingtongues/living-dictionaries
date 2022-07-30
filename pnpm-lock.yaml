@@ -61,6 +61,7 @@ importers:
       '@sveltejs/adapter-auto': 1.0.0-next.50
       '@sveltejs/kit': 1.0.0-next.350
       '@sveltejs/vite-plugin-svelte': 1.0.0-next.49
+      '@types/mapbox__mapbox-gl-geocoder': ^4.7.2
       '@types/mapbox-gl': ^2.7.4
       '@types/recordrtc': ^5.6.8
       '@types/youtube': ^0.0.46
@@ -87,6 +88,7 @@ importers:
       '@sveltejs/adapter-auto': 1.0.0-next.50
       '@sveltejs/kit': 1.0.0-next.350_svelte@3.48.0
       '@sveltejs/vite-plugin-svelte': 1.0.0-next.49_svelte@3.48.0
+      '@types/mapbox__mapbox-gl-geocoder': 4.7.2
       '@types/mapbox-gl': 2.7.4
       '@types/recordrtc': 5.6.8
       '@types/youtube': 0.0.46
@@ -1909,6 +1911,13 @@ packages:
     resolution: {integrity: sha512-usTVCWYhmLt+teQ5U3HhSBZIIHFLp6fQXH/1QOnd4xnDtvNTUWo8n6UyRA4kUj84CGpHSBFeF/MNcBdGB1pwog==}
     dependencies:
       '@types/geojson': 7946.0.8
+    dev: true
+
+  /@types/mapbox__mapbox-gl-geocoder/4.7.2:
+    resolution: {integrity: sha512-/Bz3Ko7+3yGQFH9Byv9xQB2TRfc08r7Hpu2g70c9qEUnEa31SKAwiAo6XCQEnPJZAeozXmSN84cMKZWP9FMVZA==}
+    dependencies:
+      '@types/geojson': 7946.0.8
+      '@types/mapbox-gl': 2.7.4
     dev: true
 
   /@types/mime/1.3.2:

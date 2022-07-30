@@ -1,4 +1,4 @@
-import { load } from '../asset-loader.js';
+import { loadScriptOnce, loadStylesOnce } from '../asset-loader';
 import { bindEvents } from '../event-bindings.js';
 import type { Map, MapboxOptions } from 'mapbox-gl';
 
@@ -8,30 +8,15 @@ export default function action(
 ) {
   let map: Map;
 
-  const resources = [
-    {
-      type: 'script',
-      attr: 'src',
-      value: `//api.mapbox.com/mapbox-gl-js/${options.version}/mapbox-gl.js`,
-      id: 'byk-gl-js',
-    },
-    {
-      type: 'link',
-      attr: 'href',
-      value: `//api.mapbox.com/mapbox-gl-js/${options.version}/mapbox-gl.css`,
-      id: 'byk-gl-css',
-    },
-  ];
-
   const customStylesheetUrl = options.customStylesheetUrl;
-  if (customStylesheetUrl) {
-    resources.push({ type: 'link', attr: 'href', value: customStylesheetUrl, id: 'byk-mcsu-css' });
-  }
 
   let unbind = () => {};
-  load(resources, () => {
+  (async () => {
+    await loadScriptOnce(`//api.mapbox.com/mapbox-gl-js/${options.version}/mapbox-gl.js`);
+    await loadStylesOnce(`//api.mapbox.com/mapbox-gl-js/${options.version}/mapbox-gl.css`);
+    customStylesheetUrl && (await loadStylesOnce(customStylesheetUrl));
     unbind = init({ ...options, container: node }, node);
-  });
+  })();
 
   return {
     destroy() {
