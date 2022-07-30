@@ -1,7 +1,6 @@
 <script lang="ts">
   import { getContext, onDestroy, onMount } from 'svelte';
   import { contextKey } from '../contextKey';
-  import { bindEvents } from '../event-bindings';
   import type { Map } from 'mapbox-gl';
 
   const { getMap, getMapbox } = getContext(contextKey);
@@ -11,34 +10,32 @@
   export let position: 'top-left' | 'top-right' | 'bottom-right' | 'bottom-left' = 'top-right';
   export let options = {};
 
-  let dispatcher: HTMLDivElement;
-
-  const handlers = {
-    error: (el, ev) => {
-      return ['error', ev];
-    },
-    geolocate: (el, ev) => {
-      return ['geolocate', ev];
-    },
-    outofmaxbounds: (el, ev) => {
-      return ['outofmaxbounds', ev];
-    },
-    trackuserlocationend: (el, ev) => {
-      return ['trackuserlocationend', ev];
-    },
-    trackuserlocationstart: (el, ev) => {
-      return ['trackuserlocationstart', ev];
-    },
-  };
+  import { createEventDispatcher } from 'svelte';
+  const dispatch = createEventDispatcher<{
+    geolocate: any;
+    outofmaxbounds: any;
+    trackuserlocationstart: any;
+    trackuserlocationend: any;
+    error: any;
+  }>();
 
   const geolocate = new mapbox.GeolocateControl(options);
   map.addControl(geolocate, position);
 
   onMount(() => {
-    return bindEvents(geolocate, handlers, mapbox, dispatcher);
+    geolocate.on('geolocate', (e) => dispatch('geolocate', e));
+    geolocate.on('outofmaxbounds', (e) => dispatch('outofmaxbounds', e));
+    geolocate.on('trackuserlocationstart', (e) => dispatch('trackuserlocationstart', e));
+    geolocate.on('trackuserlocationend', (e) => dispatch('trackuserlocationend', e));
+    geolocate.on('error', (e) => dispatch('error', e));
   });
 
   onDestroy(() => {
+    geolocate?.off('geolocate', (e) => dispatch('geolocate', e));
+    geolocate?.off('outofmaxbounds', (e) => dispatch('outofmaxbounds', e));
+    geolocate?.off('trackuserlocationstart', (e) => dispatch('trackuserlocationstart', e));
+    geolocate?.off('trackuserlocationend', (e) => dispatch('trackuserlocationend', e));
+    geolocate?.off('error', (e) => dispatch('error', e));
     map?.removeControl(geolocate);
   });
 
@@ -46,17 +43,3 @@
     geolocate.trigger();
   }
 </script>
-
-<div
-  bind:this={dispatcher}
-  on:error
-  on:geolocate
-  on:outofmaxbounds
-  on:trackuserlocationend
-  on:trackuserlocationstart />
-
-<style>
-  div {
-    display: none;
-  }
-</style>

@@ -1,10 +1,11 @@
 <script lang="ts">
   import { onMount, getContext } from 'svelte';
   import { contextKey } from '../contextKey';
+  import type { Map } from 'mapbox-gl';
 
   const { getMap, getMapbox } = getContext(contextKey);
-  const map = getMap();
-  const mapbox = getMapbox();
+  const map: Map = getMap();
+  const mapbox: typeof import('mapbox-gl') = getMapbox();
 
   function randomColour() {
     return Math.round(Math.random() * 255);

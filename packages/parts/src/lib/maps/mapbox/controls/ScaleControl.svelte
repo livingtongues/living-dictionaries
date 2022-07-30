@@ -1,22 +1,21 @@
 <script lang="ts">
   import { getContext } from 'svelte';
   import { contextKey } from '../contextKey';
+  import type { Map } from 'mapbox-gl';
 
   const { getMap, getMapbox } = getContext(contextKey);
-  const map = getMap();
-  const mapbox = getMapbox();
+  const map: Map = getMap();
+  const mapbox: typeof import('mapbox-gl') = getMapbox();
 
-  export let position = 'bottom-right';
+  export let position: 'top-left' | 'top-right' | 'bottom-right' | 'bottom-left' = 'bottom-right';
+  export let maxWidth = 80;
+  export let unit = 'metric';
   export let options = {};
 
-  const optionsWithDefaults = Object.assign(
-    {
-      maxWidth: 80,
-      unit: 'metric',
-    },
-    options
-  );
-
-  const scale = new mapbox.ScaleControl(optionsWithDefaults);
+  const scale = new mapbox.ScaleControl({
+    ...options,
+    maxWidth,
+    unit,
+  });
   map.addControl(scale, position);
 </script>
