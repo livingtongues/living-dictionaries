@@ -1,8 +1,12 @@
 import { load } from '../asset-loader.js';
 import { bindEvents } from '../event-bindings.js';
+import type { Map, MapboxOptions } from 'mapbox-gl';
 
-export default function action(node: HTMLDivElement, options: any = {}) {
-  let map;
+export default function action(
+  node: HTMLDivElement,
+  options: { version?: string; customStylesheetUrl?: string } & MapboxOptions
+) {
+  let map: Map;
 
   const resources = [
     {
@@ -37,7 +41,7 @@ export default function action(node: HTMLDivElement, options: any = {}) {
   };
 }
 
-function init(options, node: HTMLDivElement) {
+function init(options: MapboxOptions, node: HTMLDivElement) {
   window.mapboxgl.accessToken = options.accessToken;
   const el = new window.mapboxgl.Map(options);
 
