@@ -10,3 +10,7 @@ declare namespace App {
     kitbook: import('kitbook').KitbookStuff;
   }
 }
+
+interface ImportMetaEnv {
+  VITE_mapboxAccessToken: string;
+}
