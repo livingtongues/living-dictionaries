@@ -3,11 +3,8 @@
   import { getContext, onDestroy, onMount } from 'svelte';
   import { contextKey } from '../contextKey';
   import { loadScriptOnce, loadStylesOnce } from '../asset-loader';
-  import { bindEvents } from '../event-bindings';
   import type { Map } from 'mapbox-gl';
-  import type { Result } from '@mapbox/mapbox-gl-geocoder';
-  import { createEventDispatcher } from 'svelte';
-  const dispatch = createEventDispatcher<{ result: { result: Result } }>();
+  import type { Result, Results } from '@mapbox/mapbox-gl-geocoder';
 
   const { getMap, getMapbox } = getContext(contextKey);
   const map: Map = getMap();
@@ -31,31 +28,16 @@
   export let value = null;
   export let customStylesheetUrl: string = undefined;
 
-  let dispatcher: HTMLDivElement;
-
-  const handlers = {
-    results: (el, ev) => {
-      return ['results', ev];
-    },
-    result: (el, ev) => {
-      return ['result', ev];
-    },
-    loading: (el, ev) => {
-      return ['loading', ev];
-    },
-    error: (el, ev) => {
-      return ['error', ev];
-    },
-    clear: (el, ev) => {
-      return ['clear', ev];
-    },
-    load: (el) => {
-      return ['ready', { geocoder: el }];
-    },
-  };
+  import { createEventDispatcher } from 'svelte';
+  const dispatch = createEventDispatcher<{
+    clear: null;
+    loading: any;
+    result: Result;
+    results: Results;
+    error: string;
+  }>();
 
   let geocoder: MapboxGeocoder;
-  let unbind = () => {};
   onMount(async () => {
     await loadScriptOnce(
       `//api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/${version}/mapbox-gl-geocoder.min.js`
@@ -69,28 +51,32 @@
       // @ts-ignore - types are not yet updated to 5.0.0
       enableGeolocation: true,
       accessToken: mapbox.accessToken,
-      mapboxgl: map,
+      // marker: false,
+      mapboxgl: mapbox as unknown as Map, // types are wrong in say it should be map
       types: types.join(','),
       placeholder,
     });
     map.addControl(geocoder, position);
+
     if (value) {
       geocoder.setInput(value);
     }
 
-    unbind = bindEvents(geocoder, handlers, mapbox, dispatcher);
+    geocoder.on('clear', () => dispatch('clear'));
+    geocoder.on('loading', ({ query }) => dispatch('loading', query));
+    geocoder.on('results', (e) => dispatch('results', e));
+    geocoder.on('result', ({ result }) => dispatch('result', result));
+    geocoder.on('error', ({ error }) => dispatch('error', error));
   });
 
   onDestroy(() => {
+    geocoder?.off('clear', () => dispatch('clear'));
+    geocoder?.off('loading', ({ query }) => dispatch('loading', query));
+    geocoder?.off('results', ({ results }) => dispatch('results', results));
+    geocoder?.off('result', ({ result }) => dispatch('result', result));
+    geocoder?.off('error', ({ error }) => dispatch('error', error));
     map?.removeControl(geocoder);
-    unbind();
   });
 </script>
 
-<div bind:this={dispatcher} on:results on:result on:loading on:error on:clear on:load />
-
-<style>
-  div {
-    display: none;
-  }
-</style>
+<slot {geocoder} />
