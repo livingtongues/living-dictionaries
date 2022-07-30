@@ -4,6 +4,7 @@
   import NavigationControl from '$lib/maps/mapbox/controls/NavigationControl.svelte';
   import GeolocateControl from '$lib/maps/mapbox/controls/GeolocateControl.svelte';
   import Geocoder from '$lib/maps/mapbox/geocoder/Geocoder.svelte';
+  import ScaleControl from '$lib/maps/mapbox/controls/ScaleControl.svelte';
 </script>
 
 <!-- prettier-ignore -->
@@ -11,8 +12,13 @@
 
 From https://github.com/beyonk-adventures/svelte-mapbox
 
-<Story name="Geocoder" knobs={{ showControls: true }} let:props={{ showControls }} height={400}>
-  <Map on:click={(e) => console.log({ lng: e.detail.lng, lat: e.detail.lat })}>
+<Story name="Everything" knobs={{ showControls: true }} let:props={{ showControls }} height={400}>
+  <Map
+    on:dragend={(e) => console.log(e.detail)}
+    on:moveend={(e) => console.log(e.detail)}
+    on:click={(e) => console.log({ lng: e.detail.lng, lat: e.detail.lat })}
+    on:zoomend={(e) => console.log(e.detail)}
+    on:error={(e) => console.log(e.detail)}>
     {#if showControls}
       <Geocoder
         placeholder={'Search Places'}
@@ -21,8 +27,14 @@ From https://github.com/beyonk-adventures/svelte-mapbox
         on:result={(e) => console.log(e.detail)}
         on:results={(e) => console.log(e.detail)}
         on:error={(e) => console.log(e.detail)} />
-      <!-- <NavigationControl />
-      <GeolocateControl /> -->
+      <NavigationControl />
+      <GeolocateControl
+        on:geolocate={(e) => console.log(e.detail)}
+        on:outofmaxbounds={(e) => console.log(e.detail)}
+        on:trackuserlocationstart={(e) => console.log(e.detail)}
+        on:trackuserlocationend={(e) => console.log(e.detail)}
+        on:error={(e) => console.log(e.detail)} />
+      <ScaleControl />
     {/if}
   </Map>
 </Story>
