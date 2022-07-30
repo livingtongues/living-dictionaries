@@ -45,7 +45,7 @@ const iterateThroughDictionaries = async () => {
   // let allUnmatchedPOS = new Set<string>();
 
   for (const language of languages) {
-    let dictionaryId = language;
+    const dictionaryId = language;
     const dateStamp = Date.now();
     // if (environment === 'dev') {
     //     dictionaryId = dictionaryId + '-' + dateStamp;
@@ -57,7 +57,9 @@ const iterateThroughDictionaries = async () => {
     }); // 'a' to append, 'w' to write over file contents
     const logStdout = process.stdout;
     console.log = function () {
+      // eslint-disable-next-line prefer-rest-params
       logFile.write(util.format.apply(null, arguments) + '\n');
+      // eslint-disable-next-line prefer-rest-params
       logStdout.write(util.format.apply(null, arguments) + '\n');
     };
     await importOldTalkingDictionary(dictionaryId, language, dateStamp, dryRun);

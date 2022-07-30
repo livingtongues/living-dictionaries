@@ -21,7 +21,9 @@ async function importFromSpreadsheet() {
   }); // 'a' to append, 'w' to write over file contents
   const logStdout = process.stdout;
   console.log = function () {
+    // eslint-disable-next-line prefer-rest-params
     logFile.write(util.format.apply(null, arguments) + '\n');
+    // eslint-disable-next-line prefer-rest-params
     logStdout.write(util.format.apply(null, arguments) + '\n');
   };
 
@@ -30,7 +32,7 @@ async function importFromSpreadsheet() {
     // const dataFileName = await unzipArchive(language, dictionaryId, 'spreadsheet');
     // console.log('returned: ', dataFileName);
     // let jsonData = await convertXlsxToJson(dataFileName);
-    let jsonData = await csv().fromFile(`ready-data/${language}.csv`);
+    const jsonData = await csv().fromFile(`ready-data/${language}.csv`);
 
     // @ts-ignore
     if (environment === 'dev') {

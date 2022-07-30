@@ -3,7 +3,7 @@ module.exports = {
 	parser: '@typescript-eslint/parser',
 	extends: ['eslint:recommended', 'plugin:@typescript-eslint/recommended', 'prettier'],
 	plugins: ['svelte3', '@typescript-eslint'],
-	ignorePatterns: ['*.cjs', 'packages/**/package/**/*', 'packages/functions/lib/**/*', 'packages/functions/scripts/import/old/**/*'],
+	ignorePatterns: ['*.cjs', 'packages/**/package/**/*', 'packages/functions/lib/**/*'],
 	overrides: [{ files: ['*.svelte', '*.svx'], processor: 'svelte3/svelte3' }],
 	settings: {
 		'svelte3/typescript': () => require('typescript'),
@@ -13,7 +13,7 @@ module.exports = {
 	},
 	parserOptions: {
 		sourceType: 'module',
-		ecmaVersion: 2019
+		ecmaVersion: 2020
 	},
 	rules: {
 		'@typescript-eslint/no-var-requires': 'off',
