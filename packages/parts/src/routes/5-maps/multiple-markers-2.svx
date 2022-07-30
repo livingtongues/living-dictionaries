@@ -2,6 +2,7 @@
   import { Story } from 'kitbook';
   import Map from '$lib/maps/mapbox/map/Map.svelte';
   import Marker from '$lib/maps/mapbox/map/Marker.svelte';
+  import Set from 'svelte-pieces/functions/Set.svelte';
 </script>
 
 <!-- prettier-ignore -->
@@ -9,14 +10,26 @@
 
 From https://github.com/beyonk-adventures/svelte-mapbox
 
-<Story name="Multiple Markers" knobs={{ lng: -95, lat: 39 }} let:props={{ lng, lat }} let:set height={400}>
-  <Map
-    on:click={(e) => {
-      set('lng', e.detail.lng);
-      set('lat', e.detail.lat);
-    }}>
-    <Marker {lng} {lat} />
-  </Map>
+<Story name="Multiple Markers">
+  <Set input={[{ lng: -95, lat: 39 }]} let:value={points} let:add let:remove>
+    <div style="height: 350px;">
+      <Map
+        on:click={({ detail: { lng, lat } }) => {
+          add({ lng, lat });
+        }}>
+        {#each points as point (point)}
+          <Marker
+            on:dragend={(e) => {
+              remove(point);
+              add({ lng: e.detail.lng, lat: e.detail.lat })
+            }}
+            lng={point.lng}
+            lat={point.lat}>
+            <div slot="popup">Remove</div>
+          </Marker>
+        {/each}
+      </Map>
+    </div>
+    <pre>{JSON.stringify(points, null, 2)}</pre>
+  </Set>
 </Story>
-
-
