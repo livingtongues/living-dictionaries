@@ -8,7 +8,7 @@
 </script>
 
 <!-- prettier-ignore -->
-# Mapbox proposal for multiple markers
+# Multiple markers
 
 **To delete a draggable marker you only need to grab the marker you wish to delete, so click the delete button and that's it. Markers with default popups will automatically reorder numerically.**
 
