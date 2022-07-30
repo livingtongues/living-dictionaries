@@ -12,7 +12,7 @@
 From https://github.com/beyonk-adventures/svelte-mapbox
 
 <Story name="Geocoder" knobs={{ showControls: true }} let:props={{ showControls }} height={400}>
-  <Map>
+  <Map on:click={(e) => console.log({ lng: e.detail.lng, lat: e.detail.lat })}>
     {#if showControls}
       <Geocoder
         placeholder={'Search Places'}
@@ -21,8 +21,8 @@ From https://github.com/beyonk-adventures/svelte-mapbox
         on:result={(e) => console.log(e.detail)}
         on:results={(e) => console.log(e.detail)}
         on:error={(e) => console.log(e.detail)} />
-      <NavigationControl />
-      <GeolocateControl />
+      <!-- <NavigationControl />
+      <GeolocateControl /> -->
     {/if}
   </Map>
 </Story>
