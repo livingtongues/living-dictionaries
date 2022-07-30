@@ -6,6 +6,7 @@
   import Geocoder from '$lib/maps/mapbox/geocoder/Geocoder.svelte';
   import ScaleControl from '$lib/maps/mapbox/controls/ScaleControl.svelte';
   import Marker from '$lib/maps/mapbox/map/Marker.svelte';
+import ToggleStyle from '$lib/maps/mapbox/controls/ToggleStyle.svelte';
 </script>
 
 <!-- prettier-ignore -->
@@ -46,6 +47,7 @@ From https://github.com/beyonk-adventures/svelte-mapbox
         on:trackuserlocationend={(e) => console.log(e.detail)}
         on:error={(e) => console.log(e.detail)} />
       <ScaleControl />
+      <ToggleStyle />
     {/if}
   </Map>
 </Story>
