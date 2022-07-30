@@ -6,12 +6,15 @@
   import Geocoder from '$lib/maps/mapbox/geocoder/Geocoder.svelte';
 </script>
 
-# Mapbox From https://github.com/beyonk-adventures/svelte-mapbox
+<!-- prettier-ignore -->
+# Mapbox 
 
-<Story name="Geocoder" knobs={{ show: true }} let:props={{show}} height={400}>
+From https://github.com/beyonk-adventures/svelte-mapbox
+
+<Story name="Geocoder" knobs={{ showControls: true }} let:props={{ showControls }} height={400}>
   <Map>
-    {#if show}
-      <Geocoder />
+    {#if showControls}
+      <Geocoder on:result={(e) => console.log(e.detail.result)} />
       <NavigationControl />
       <GeolocateControl />
     {/if}
@@ -21,9 +24,3 @@
 <Story name="globe" height={400}>
   <Map options={{ projection: { name: 'globe' } }} />
 </Story>
-
-<!-- <style>
-  :global(.mapboxgl-map) {
-    height: 200px;
-  }
-</style> -->
