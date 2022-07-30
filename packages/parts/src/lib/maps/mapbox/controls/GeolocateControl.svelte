@@ -1,16 +1,17 @@
 <script lang="ts">
-  import { getContext, onMount } from 'svelte';
+  import { getContext, onDestroy, onMount } from 'svelte';
   import { contextKey } from '../contextKey';
   import { bindEvents } from '../event-bindings';
+  import type { Map } from 'mapbox-gl';
 
   const { getMap, getMapbox } = getContext(contextKey);
-  const map = getMap();
-  const mapbox = getMapbox();
+  const map: Map = getMap();
+  const mapbox: typeof import('mapbox-gl') = getMapbox();
 
-  export let position = 'top-left';
+  export let position: 'top-left' | 'top-right' | 'bottom-right' | 'bottom-left' = 'top-right';
   export let options = {};
 
-  let dispatcher;
+  let dispatcher: HTMLDivElement;
 
   const handlers = {
     error: (el, ev) => {
@@ -35,6 +36,10 @@
 
   onMount(() => {
     return bindEvents(geolocate, handlers, mapbox, dispatcher);
+  });
+
+  onDestroy(() => {
+    map?.removeControl(geolocate);
   });
 
   export function trigger() {
