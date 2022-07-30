@@ -1,10 +1,21 @@
 <script lang="ts">
   import { Story } from 'kitbook';
   import Map from '$lib/maps/mapbox/map/Map.svelte';
+  import NavigationControl from '$lib/maps/mapbox/controls/NavigationControl.svelte';
+  import GeolocateControl from '$lib/maps/mapbox/controls/GeolocateControl.svelte';
+  import Geocoder from '$lib/maps/mapbox/geocoder/Geocoder.svelte';
 </script>
 
-<Story height={400}>
-  <Map />
+# Mapbox From https://github.com/beyonk-adventures/svelte-mapbox
+
+<Story name="Geocoder" knobs={{ show: true }} let:props={{show}} height={400}>
+  <Map>
+    {#if show}
+      <Geocoder />
+      <NavigationControl />
+      <GeolocateControl />
+    {/if}
+  </Map>
 </Story>
 
 <Story name="globe" height={400}>

@@ -1,14 +1,19 @@
 <script lang="ts">
-  import { getContext } from 'svelte';
+  import { getContext, onDestroy } from 'svelte';
   import { contextKey } from '../contextKey';
+  import type { Map } from 'mapbox-gl';
 
   const { getMap, getMapbox } = getContext(contextKey);
-  const map = getMap();
-  const mapbox = getMapbox();
+  const map: Map = getMap();
+  const mapbox: typeof import('mapbox-gl') = getMapbox();
 
-  export let position = 'top-right';
+  export let position: 'top-left' | 'top-right' | 'bottom-right' | 'bottom-left' = 'top-right';
   export let options = {};
 
   const nav = new mapbox.NavigationControl(options);
   map.addControl(nav, position);
+
+  onDestroy(() => {
+    map?.removeControl(nav);
+  });
 </script>

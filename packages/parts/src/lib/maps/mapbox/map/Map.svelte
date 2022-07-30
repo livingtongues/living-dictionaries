@@ -4,9 +4,9 @@
   import { contextKey } from '../contextKey';
   import action from './map-action';
   import { EventQueue } from '../queue';
-  import type { LngLatLike, MapboxOptions } from 'mapbox-gl';
+  import type { LngLatLike, MapboxOptions, Map } from 'mapbox-gl';
 
-  export let map: mapboxgl.Map = null;
+  export let map: Map = null;
   export let version = 'v2.9.2';
   export let center: LngLatLike = [-95, 38.907]; // USA
   export let zoom = 2;
@@ -27,21 +27,19 @@
   let container: HTMLElement;
   let mapbox: typeof import('mapbox-gl');
 
-  const optionsWithDefaults = Object.assign(
-    {
-      accessToken,
-      container,
-      style,
-      center,
-      zoom,
-      zoomRate,
-      wheelZoomRate,
-      version,
-      customStylesheetUrl,
-      map,
-    },
-    options
-  );
+  const optionsWithDefaults = {
+    ...options,
+    accessToken,
+    container,
+    style,
+    center,
+    zoom,
+    zoomRate,
+    wheelZoomRate,
+    version,
+    customStylesheetUrl,
+    map,
+  };
 
   const queue = new EventQueue();
 
