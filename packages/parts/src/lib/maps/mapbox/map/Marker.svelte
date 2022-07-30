@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount, getContext, createEventDispatcher } from 'svelte';
   import { contextKey } from '../contextKey';
-  import type { LngLat, Map, Marker } from 'mapbox-gl';
+  import type { LngLat, Map, Marker, MarkerOptions } from 'mapbox-gl';
 
   const { getMap, getMapbox } = getContext(contextKey);
   const map: Map = getMap();
@@ -13,58 +13,43 @@
 
   export let lat: number;
   export let lng: number;
-  export let label = 'Marker';
-  export let popupClassName = 'beyonk-mapbox-popup';
   export let markerOffset: [number, number] = [0, 0];
-  export let popupOffset = 10;
   export let color = randomColour();
-  export let popup = true;
-  export let popupOptions = {};
-  export let markerOptions = {};
+  export let options: MarkerOptions = {};
   export let draggable = true;
+  export let open = false;
 
   let marker: Marker;
-  let element: HTMLDivElement; // if main slot used
-  let elementPopup: HTMLDivElement; // if popup slot used
+  let element: HTMLDivElement;
+  let markerEl;
 
   $: marker?.setLngLat({ lng, lat });
 
   const dispatch = createEventDispatcher<{ dragend: LngLat }>();
 
+  function handleClick(e) {
+    e.stopPropagation();
+    open = !open;
+    console.log({open});
+  }
+
   onMount(() => {
-    const customMarker = element.hasChildNodes();
+    const customMarker = element.hasChildNodes(); // if pin slot used
     const elementOrColor: { element } | { color } = customMarker ? { element } : { color };
     marker = new mapbox.Marker({
       ...elementOrColor,
-      ...markerOptions,
+      ...options,
       offset: markerOffset,
       draggable,
     });
 
-    marker.getElement().addEventListener('click', (e) => {
-      console.log('clicked!');
-      // e.stopPropagation();
-    });
-
-    if (popup) {
-      const popupEl = new mapbox.Popup({
-        ...popupOptions,
-        offset: popupOffset,
-        className: popupClassName,
-      });
-      if (elementPopup.hasChildNodes()) {
-        popupEl.setDOMContent(elementPopup);
-      } else {
-        popupEl.setText(label);
-      }
-
-      marker.setPopup(popupEl);
-    }
+    markerEl = marker.getElement().addEventListener('click', handleClick);
 
     marker.setLngLat({ lng, lat }).addTo(map);
     marker.on('dragend', () => dispatch('dragend', marker.getLngLat()));
 
     return () => {
+      // markerEl.removeEventListener('click', handleClick);
       marker.off('dragend', () => dispatch('dragend', marker.getLngLat()));
       marker.remove();
     };
@@ -76,9 +61,9 @@
 </script>
 
 <div bind:this={element}>
-  <slot />
+  <slot name="pin" {marker} />
 </div>
 
-<div class="popup" bind:this={elementPopup}>
-  <slot name="popup" />
-</div>
+{#if marker}
+  <slot {marker} {open} />
+{/if}
