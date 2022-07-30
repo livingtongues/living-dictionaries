@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { getContext } from 'svelte';
+  import { getContext, onDestroy } from 'svelte';
   import { contextKey } from '../contextKey';
   import type { Map } from 'mapbox-gl';
 
@@ -18,4 +18,8 @@
     unit,
   });
   map.addControl(scale, position);
+
+  onDestroy(() => {
+    map?.removeControl(scale);
+  });
 </script>
