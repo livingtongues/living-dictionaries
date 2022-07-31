@@ -7,6 +7,7 @@
   const { getMapbox } = getContext(contextKey);
   const mapbox: typeof import('mapbox-gl') = getMapbox();
 
+  export let closeButton = false;
   export let closeOnClick = true;
   export let closeOnMove = true;
   export let options: PopupOptions = {};
@@ -22,6 +23,7 @@
   onMount(() => {
     popup = new mapbox.Popup({
       ...options,
+      closeButton,
       closeOnClick,
       closeOnMove,
       offset,
@@ -50,3 +52,14 @@
 <div bind:this={container}>
   <slot />
 </div>
+
+<style global>
+  div .mapboxgl-popup-close-button {
+    font-size: 30px;
+    top: 2px;
+    right: 2px;
+  }
+  div .mapboxgl-popup-content {
+    padding: 12px;
+  }
+</style>
