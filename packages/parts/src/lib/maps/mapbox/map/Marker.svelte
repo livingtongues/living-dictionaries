@@ -1,3 +1,17 @@
+<script lang="ts" context="module">
+  const markers = new Set<Marker>();
+
+  function closeOtherPopups(currentMarker: Marker) {
+    markers.forEach((marker) => {
+      if (marker === currentMarker) return;
+      const popup = marker.getPopup();
+      if (popup?.isOpen()) {
+        marker.togglePopup();
+      }
+    });
+  }
+</script>
+
 <script lang="ts">
   import { onMount, getContext, createEventDispatcher } from 'svelte';
   import { contextKey } from '../contextKey';
@@ -20,7 +34,7 @@
 
   let marker: Marker;
   let element: HTMLDivElement;
-  let markerEl;
+  let markerEl: HTMLElement;
 
   $: marker?.setLngLat({ lng, lat });
 
@@ -28,32 +42,35 @@
 
   function handleClick(e) {
     e.stopPropagation();
+    closeOtherPopups(marker);
     marker.togglePopup();
-    // open = !open;
-    // console.log({ open });
   }
 
   function handleDragEnd() {
-    // markerEl.removeEventListener('click', handleClick);
+    markerEl.removeEventListener('click', handleClick);
     dispatch('dragend', marker.getLngLat());
   }
 
   onMount(() => {
     const customMarker = element.hasChildNodes(); // if pin slot used
     const elementOrColor: { element } | { color } = customMarker ? { element } : { color };
+
     marker = new mapbox.Marker({
       ...elementOrColor,
       ...options,
       offset: markerOffset,
       draggable,
     });
+    markers.add(marker);
 
-    markerEl = marker.getElement().addEventListener('click', handleClick);
+    markerEl = marker.getElement();
+    markerEl.addEventListener('click', handleClick);
 
     marker.setLngLat({ lng, lat }).addTo(map);
     marker.on('dragend', handleDragEnd);
 
     return () => {
+      markers;
       marker.off('dragend', handleDragEnd);
       marker.remove();
     };
