@@ -26,9 +26,8 @@ From https://github.com/beyonk-adventures/svelte-mapbox
             }}
             lng={point.lng}
             lat={point.lat}
-            let:marker
-            let:open>
-            <Popup {marker} {open}>
+            let:marker>
+            <Popup {marker}>
               <div>Remove</div>
             </Popup>
           </Marker>
