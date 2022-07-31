@@ -17,7 +17,6 @@
   export let color = randomColour();
   export let options: MarkerOptions = {};
   export let draggable = true;
-  export let open = false;
 
   let marker: Marker;
   let element: HTMLDivElement;
@@ -29,8 +28,14 @@
 
   function handleClick(e) {
     e.stopPropagation();
-    open = !open;
-    console.log({open});
+    marker.togglePopup();
+    // open = !open;
+    // console.log({ open });
+  }
+
+  function handleDragEnd() {
+    // markerEl.removeEventListener('click', handleClick);
+    dispatch('dragend', marker.getLngLat());
   }
 
   onMount(() => {
@@ -46,18 +51,13 @@
     markerEl = marker.getElement().addEventListener('click', handleClick);
 
     marker.setLngLat({ lng, lat }).addTo(map);
-    marker.on('dragend', () => dispatch('dragend', marker.getLngLat()));
+    marker.on('dragend', handleDragEnd);
 
     return () => {
-      // markerEl.removeEventListener('click', handleClick);
-      marker.off('dragend', () => dispatch('dragend', marker.getLngLat()));
+      marker.off('dragend', handleDragEnd);
       marker.remove();
     };
   });
-
-  export function getMarker() {
-    return marker;
-  }
 </script>
 
 <div bind:this={element}>
@@ -65,5 +65,5 @@
 </div>
 
 {#if marker}
-  <slot {marker} {open} />
+  <slot {marker} />
 {/if}
