@@ -4,6 +4,7 @@
   import Marker from '$lib/maps/mapbox/map/Marker.svelte';
   import Set from 'svelte-pieces/functions/Set.svelte';
   import Popup from '$lib/maps/mapbox/map/Popup.svelte';
+  import Button from 'svelte-pieces/ui/Button.svelte';
 </script>
 
 <!-- prettier-ignore -->
@@ -12,7 +13,14 @@
 From https://github.com/beyonk-adventures/svelte-mapbox
 
 <Story knobs={{ openFirst: false }} let:props={{ openFirst }} name="Multiple Markers">
-  <Set input={[{ lng: -95, lat: 39 }, { lng: -100, lat: 35 }]} let:value={points} let:add let:remove>
+  <Set
+    input={[
+      { lng: -95, lat: 39 },
+      { lng: -100, lat: 35 },
+    ]}
+    let:value={points}
+    let:add
+    let:remove>
     <div style="height: 350px;">
       <Map
         on:click={({ detail: { lng, lat } }) => {
@@ -28,7 +36,8 @@ From https://github.com/beyonk-adventures/svelte-mapbox
             lat={point.lat}
             let:marker>
             <Popup {marker} open={index === 0 && openFirst}>
-              <div>Remove</div>
+              <Button form="simple" size="sm" color="red" onclick={() => remove(point)}
+                ><span class="i-fa-trash-o" /></Button>
             </Popup>
           </Marker>
         {/each}
