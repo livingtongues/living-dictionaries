@@ -11,14 +11,14 @@
 
 From https://github.com/beyonk-adventures/svelte-mapbox
 
-<Story name="Multiple Markers">
-  <Set input={[{ lng: -95, lat: 39 }]} let:value={points} let:add let:remove>
+<Story knobs={{ openFirst: false }} let:props={{ openFirst }} name="Multiple Markers">
+  <Set input={[{ lng: -95, lat: 39 }, { lng: -100, lat: 35 }]} let:value={points} let:add let:remove>
     <div style="height: 350px;">
       <Map
         on:click={({ detail: { lng, lat } }) => {
           add({ lng, lat });
         }}>
-        {#each points as point (point)}
+        {#each points as point, index (point)}
           <Marker
             on:dragend={(e) => {
               remove(point);
@@ -27,7 +27,7 @@ From https://github.com/beyonk-adventures/svelte-mapbox
             lng={point.lng}
             lat={point.lat}
             let:marker>
-            <Popup {marker}>
+            <Popup {marker} open={index === 0 && openFirst}>
               <div>Remove</div>
             </Popup>
           </Marker>

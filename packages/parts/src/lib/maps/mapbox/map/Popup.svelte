@@ -1,4 +1,5 @@
 <script lang="ts">
+  // from https://gitlab.com/jailbreak/svelte-mapbox-gl/-/blob/master/src/Popup.svelte
   import { onMount, getContext } from 'svelte';
   import { contextKey } from '../contextKey';
   import type { Popup, PopupOptions, Marker } from 'mapbox-gl';
@@ -12,7 +13,8 @@
   export let offset = 15;
   export let label = 'Marker';
   export let marker: Marker;
-  // export let startOpen = false;
+  export let open = false;
+  // make my own close button
 
   let popup: Popup;
   let container: HTMLDivElement;
@@ -37,6 +39,12 @@
       marker.setPopup(null);
     };
   });
+
+  $: if (popup) {
+    if (open !== popup.isOpen()) {
+      marker.togglePopup();
+    }
+  }
 </script>
 
 <div bind:this={container}>
