@@ -75,6 +75,7 @@
     map?.remove && map.remove();
   });
 
+  // use via https://svelte.dev/tutorial/component-this
   export function fitBounds(bbox, data = {}) {
     queue.send('fitBounds', [bbox, data]);
   }
@@ -93,10 +94,6 @@
 
   export function setZoom(value, data = {}) {
     queue.send('setZoom', [value, data]);
-  }
-
-  export function addControl(control, position = 'top-right') {
-    queue.send('addControl', [control, position]);
   }
 
   export function getMap() {
