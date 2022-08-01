@@ -1,5 +1,5 @@
 <script lang="ts">
-  // from https://gitlab.com/jailbreak/svelte-mapbox-gl/-/blob/master/src/Popup.svelte
+  // from https://gitlab.com/jailbreak/svelte-mapbox-gl
   import { onMount, getContext } from 'svelte';
   import { contextKey } from '../contextKey';
   import type { Popup, PopupOptions, Marker } from 'mapbox-gl';
@@ -54,11 +54,11 @@
 </div>
 
 <style global>
-  div .mapboxgl-popup-close-button {
+  /* div .mapboxgl-popup-close-button {
     font-size: 30px;
     top: 2px;
     right: 2px;
-  }
+  } */
   div .mapboxgl-popup-content {
     padding: 12px;
   }
