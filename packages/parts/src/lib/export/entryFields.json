@@ -7,6 +7,7 @@
   "lo4": "Local Orthography 4",
   "lo5": "Local Orthography 5",
   "ph": "Phonetic",
+  "gl": "Glosses",
   "in": "Interlinearization",
   "mr": "Morphology",
   "ps": "Part of Speech",
@@ -17,5 +18,9 @@
   "di": "Dialect",
   "nt": "Notes",
   "sr": "Sources",
-  "xv": "Example Vernacular"
+  "xv": "Example Vernacular",
+  "xs": "Example Sentences",
+  "sf": "Sound File",
+  "pf": "Photo File",
+  "vfs": "Video Files"
 }
