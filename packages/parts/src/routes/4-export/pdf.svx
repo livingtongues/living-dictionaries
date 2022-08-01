@@ -2,8 +2,8 @@
   import entryFields from '../../lib/export/entryFields.json';
   import { semanticDomains, partsOfSpeech } from '@living-dictionaries/parts';
   import type { IEntry } from '@living-dictionaries/types';
-  //TODO complete the fields object but also add every field in the entry interface to the entryFields.json
-  const fields = {
+
+  let fields = {
     id: true,
     lx: true,
     lo: true,
@@ -11,7 +11,33 @@
     lo3: true,
     lo4: true,
     lo5: true,
+    ph: true,
+    gl: true,
+    in: true,
+    mr: true,
+    ps: true,
+    sd: true,
+    nc: true,
+    pl: true,
+    va: true,
+    di: true,
+    nt: true,
+    sr: true,
+    xv: true,
+    xs: true,
+    sf: true,
+    pf: true,
+    vfs: true,
   }
+
+  let selectAll = true;
+
+  function toggleAll() {
+    Object.keys(fields).forEach(field => {
+      fields[field] = selectAll;
+    });
+  }
+
   const entries: IEntry[] = [
     //...add a couple sample entry objects for mocking
     {
@@ -37,15 +63,20 @@
     { id: '34qw', lx: 'tree', gl: { es: 'arbol' }, pf: { gcs: 'Ktt_Jvk55Mp1cHJ6_zXeHU6dEJOjh8p5bk3rvK5kzXVgwB8GDXCSOPipNTveouELfx9_Rh4IllVvS3BLFBTc', path: 'https://lh3.googleusercontent.com/Ktt_Jvk55Mp1cHJ6_zXeHU6dEJOjh8p5bk3rvK5kzXVgwB8GDXCSOPipNTveouELfx9_Rh4IllVvS3BLFBTc=w1055', source: 'local_import' }, },
   ];
 
-  $: console.log("fields", fields)
+  $: console.log("Fields:", fields)
 </script>
 
 <!-- prettier-ignore -->
 # Birhor
 
+### Select entry fields to export
+<div class="mb-3">
+  <input id="select-all" type="checkbox" bind:checked={selectAll} on:change={toggleAll} />
+  <label for="select-all" class="text-sm font-medium text-gray-700 mr-4">Select/Deselect All</label>
+</div>
 {#each Object.keys(entryFields) as field}
   <input id={field} type="checkbox" bind:checked={fields[field]} />
-  <label for={field} class="text-sm font-medium text-gray-700">{entryFields[field]}</label>
+  <label for={field} class="text-sm font-medium text-gray-700 mr-4">{entryFields[field]}</label>
 {/each}
 
 {#each entries as entry}
@@ -60,7 +91,7 @@
     {/if}
   {/if}
 
-  {#if entry.gl}
+  {#if entry.gl && fields['gl']}
     {#each Object.entries(entry.gl) as gloss}
 
       _**{gloss[0]}:** {gloss[1]}_
@@ -70,7 +101,7 @@
 
   {#each Object.entries(entry) as field}
     {#if typeof(field[1]) !== 'object'}
-      {#if field[1] && field[0] !== "lx"}
+      {#if field[1] && field[0] !== "lx" && fields[field[0]]}
 
         **{entryFields[field[0]]}:** {field[1]}
 
@@ -78,7 +109,7 @@
     {/if}
   {/each}
 
-  {#if entry.sdn}
+  {#if entry.sdn && fields['sd']}
 
     **Semantic domains:**
 
