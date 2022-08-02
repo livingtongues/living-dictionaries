@@ -6,7 +6,7 @@
   import Geocoder from '$lib/maps/mapbox/geocoder/Geocoder.svelte';
   import ScaleControl from '$lib/maps/mapbox/controls/ScaleControl.svelte';
   import Marker from '$lib/maps/mapbox/map/Marker.svelte';
-import ToggleStyle from '$lib/maps/mapbox/controls/ToggleStyle.svelte';
+  import ToggleStyle from '$lib/maps/mapbox/controls/ToggleStyle.svelte';
 </script>
 
 <!-- prettier-ignore -->
@@ -14,7 +14,12 @@ import ToggleStyle from '$lib/maps/mapbox/controls/ToggleStyle.svelte';
 
 From https://github.com/beyonk-adventures/svelte-mapbox
 
-<Story name="Set Marker" knobs={{ lng: -95, lat: 39 }} let:props={{ lng, lat }} let:set height={400}>
+<Story
+  name="Set Marker"
+  knobs={{ lng: -95, lat: 39 }}
+  let:props={{ lng, lat }}
+  let:set
+  height={400}>
   <Map
     on:click={(e) => {
       set('lng', e.detail.lng);

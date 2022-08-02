@@ -1,10 +1,11 @@
 <script lang="ts">
   // https://www.npmjs.com/package/@mapbox/mapbox-gl-geocoder
-  import { getContext, onDestroy, onMount } from 'svelte';
+  import { getContext, onDestroy, onMount, createEventDispatcher } from 'svelte';
   import { contextKey } from '../contextKey';
   import { loadScriptOnce, loadStylesOnce } from '../asset-loader';
   import type { Map } from 'mapbox-gl';
   import type { Result, Results } from '@mapbox/mapbox-gl-geocoder';
+  import { bindEvents } from '../event-bindings';
 
   const { getMap, getMapbox } = getContext(contextKey);
   const map: Map = getMap();
@@ -28,7 +29,6 @@
   export let value = null;
   export let customStylesheetUrl: string = undefined;
 
-  import { createEventDispatcher } from 'svelte';
   const dispatch = createEventDispatcher<{
     clear: null;
     loading: any;
@@ -36,6 +36,14 @@
     results: Results;
     error: string;
   }>();
+  const handlers: Record<string, any> = {
+    clear: () => dispatch('clear'),
+    loading: ({ query }) => dispatch('loading', query),
+    results: (e: Results) => dispatch('results', e),
+    result: (e: Record<'result', Result>) => dispatch('result', e.result),
+    error: ({ error }) => dispatch('error', error),
+  };
+  let unbind = () => {};
 
   let geocoder: MapboxGeocoder;
   onMount(async () => {
@@ -62,19 +70,11 @@
       geocoder.setInput(value);
     }
 
-    geocoder.on('clear', () => dispatch('clear'));
-    geocoder.on('loading', ({ query }) => dispatch('loading', query));
-    geocoder.on('results', (e) => dispatch('results', e));
-    geocoder.on('result', ({ result }) => dispatch('result', result));
-    geocoder.on('error', ({ error }) => dispatch('error', error));
+    unbind = bindEvents(geocoder, handlers);
   });
 
   onDestroy(() => {
-    geocoder?.off('clear', () => dispatch('clear'));
-    geocoder?.off('loading', ({ query }) => dispatch('loading', query));
-    geocoder?.off('results', ({ results }) => dispatch('results', results));
-    geocoder?.off('result', ({ result }) => dispatch('result', result));
-    geocoder?.off('error', ({ error }) => dispatch('error', error));
+    unbind();
     map?.removeControl(geocoder);
   });
 </script>

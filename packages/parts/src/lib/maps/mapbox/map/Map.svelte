@@ -5,6 +5,7 @@
   import { loadScriptOnce, loadStylesOnce } from '../asset-loader';
   import { EventQueue } from '../queue';
   import type { LngLatLike, MapboxOptions, Map, LngLat, ErrorEvent, EventData } from 'mapbox-gl';
+  import { bindEvents } from '../event-bindings';
 
   export let map: Map = null;
   export let version = 'v2.9.2';
@@ -16,15 +17,6 @@
   export let zoom = 2;
   export let style = 'mapbox://styles/mapbox/streets-v11?optimize=true'; // light-v8, light-v9, light-v10, dark-v10, satellite-v9, streets-v11
 
-  const dispatch = createEventDispatcher<{
-    ready: null;
-    dragend: LngLat;
-    moveend: LngLat;
-    click: LngLat;
-    zoomend: number;
-    error: ErrorEvent & EventData;
-  }>();
-
   setContext(contextKey, {
     getMap: () => map,
     getMapbox: () => mapbox,
@@ -34,6 +26,27 @@
   let mapbox: typeof import('mapbox-gl');
   const queue = new EventQueue();
   let ready = false;
+
+  const dispatch = createEventDispatcher<{
+    ready: null;
+    dragend: LngLat;
+    moveend: LngLat;
+    click: LngLat;
+    zoomend: number;
+    error: ErrorEvent & EventData;
+  }>();
+
+  // More events at https://docs.mapbox.com/mapbox-gl-js/api/map/#map-events
+  const handlers: Record<string, any> = {
+    dragend: () => dispatch('dragend', map.getCenter()),
+    moveend: () => dispatch('moveend', map.getCenter()),
+    click: ({ lngLat }) => dispatch('click', lngLat),
+    zoomend: () => dispatch('zoomend', map.getZoom()),
+    error: (e: ErrorEvent & EventData) => dispatch('error', e),
+    load: () => dispatch('ready') && (ready = true),
+    // drag: () => dispatch('drag', map.getCenter()),
+  };
+  let unbind = () => {};
 
   onMount(async () => {
     await loadScriptOnce(`//api.mapbox.com/mapbox-gl-js/${version}/mapbox-gl.js`);
@@ -49,26 +62,13 @@
       zoom,
     });
     mapbox = window.mapboxgl;
-
-    // More events at https://docs.mapbox.com/mapbox-gl-js/api/map/#map-events
-    // map.on('drag', () => dispatch('drag', map.getCenter()))
-    map.on('dragend', () => dispatch('dragend', map.getCenter()));
-    map.on('moveend', () => dispatch('moveend', map.getCenter()));
-    map.on('click', ({ lngLat }) => dispatch('click', lngLat));
-    map.on('zoomend', () => dispatch('zoomend', map.getZoom()));
-    map.on('error', (e) => dispatch('error', e));
-
     queue.start(map);
-    dispatch('ready');
-    ready = true;
+
+    unbind = bindEvents(map, handlers);
   });
 
   onDestroy(async () => {
-    map?.off('dragend', () => dispatch('dragend', map.getCenter()));
-    map?.off('moveend', () => dispatch('moveend', map.getCenter()));
-    map?.off('click', ({ lngLat }) => dispatch('click', lngLat));
-    map?.off('zoomend', () => dispatch('zoomend', map.getZoom()));
-    map?.off('error', (e) => dispatch('error', e));
+    unbind();
 
     queue.stop();
     await tick(); // allow controls to remove themselves from the map
