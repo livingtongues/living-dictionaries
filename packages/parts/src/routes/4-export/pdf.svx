@@ -81,7 +81,7 @@
   <input id="select-all" type="checkbox" bind:checked={selectAll} on:change={toggleAll} />
   <label for="select-all" class="text-sm font-medium text-gray-700 mr-4">Select/Deselect All</label>
   <input id="mirror-toggle" type="checkbox" bind:checked={mirror} on:change={mirrorToggle} />
-  <label for="mirror-toggle" class="text-sm font-medium text-gray-700">Mirror toggle</label>
+  <label for="mirror-toggle" class="text-sm font-medium text-gray-700">Mirror Toggling</label>
 </div>
 {#each Object.keys(entryFields) as field}
   <input id={field} type="checkbox" bind:checked={fields[field]} />
@@ -112,13 +112,19 @@
 
   {#each Object.entries(entry) as field}
     {#if typeof(field[1]) !== 'object'}
-      {#if field[1] && field[0] !== "lx" && fields[field[0]]}
+      {#if field[1] && field[0] !== "lx" && field[0] !== "ps" && fields[field[0]]}
 
         **{entryFields[field[0]]}:** {field[1]}
 
       {/if}
     {/if}
   {/each}
+
+  {#if entry.ps && fields['ps']}
+
+    **Part of Speech:** {partsOfSpeech.find(pos => pos.enAbbrev === entry.ps).enName}
+
+  {/if}
 
   {#if entry.sdn && fields['sd']}
 
