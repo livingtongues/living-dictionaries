@@ -4,7 +4,7 @@
   import type { IEntry } from '@living-dictionaries/types';
 
   let fields = {
-    id: true,
+    id: false,
     lx: true,
     lo: true,
     lo2: true,
@@ -17,9 +17,9 @@
     mr: true,
     ps: true,
     sd: true,
-    nc: true,
-    pl: true,
-    va: true,
+    nc: false,
+    pl: false,
+    va: false,
     di: true,
     nt: true,
     sr: true,
@@ -27,14 +27,21 @@
     xs: true,
     sf: true,
     pf: true,
-    vfs: true,
+    vfs: false,
   }
 
   let selectAll = true;
+  let mirror = false;
 
   function toggleAll() {
     Object.keys(fields).forEach(field => {
       fields[field] = selectAll;
+    });
+  }
+
+  function mirrorToggle() {
+    Object.keys(fields).forEach(field => {
+      fields[field] = !fields[field];
     });
   }
 
@@ -73,6 +80,8 @@
 <div class="mb-3">
   <input id="select-all" type="checkbox" bind:checked={selectAll} on:change={toggleAll} />
   <label for="select-all" class="text-sm font-medium text-gray-700 mr-4">Select/Deselect All</label>
+  <input id="mirror-toggle" type="checkbox" bind:checked={mirror} on:change={mirrorToggle} />
+  <label for="mirror-toggle" class="text-sm font-medium text-gray-700">Mirror toggle</label>
 </div>
 {#each Object.keys(entryFields) as field}
   <input id={field} type="checkbox" bind:checked={fields[field]} />
@@ -80,9 +89,11 @@
 {/each}
 
 {#each entries as entry}
-  ## {entry.lx}
+  {#if fields['lx']}
+    ## {entry.lx}
+  {/if}
 
-  {#if entry.pf}
+  {#if entry.pf && fields['pf']}
     <img src={entry.pf.path} alt={entry.pf.gcs} width=350 height=350 />
     {#if entry.pf.source}
 
@@ -120,15 +131,20 @@
     {/each}
   {/if}
 
-  <!-- {#if entry.sf}
+  {#if entry.sf && fields['sf']}
     {#if entry.sf.source}
 
     **Audio Source:** {entry.sf.source}
 
     {/if}
+    {#if entry.sf.speakerName}
+
+    **Audio Speakername:** {entry.sf.speakerName}
+
+    {/if}
 
     **Audio Path:** {entry.sf.path}
 
-  {/if} -->
+  {/if}
 
 {/each}
