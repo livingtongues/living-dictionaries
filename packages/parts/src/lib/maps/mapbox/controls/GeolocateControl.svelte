@@ -1,10 +1,10 @@
 <script lang="ts">
   import { getContext, onMount, createEventDispatcher } from 'svelte';
-  import { contextKey } from '../contextKey';
+  import { mapKey } from '../context';
   import type { Map } from 'mapbox-gl';
   import { bindEvents } from '../event-bindings';
 
-  const { getMap, getMapbox } = getContext(contextKey);
+  const { getMap, getMapbox } = getContext(mapKey);
   const map: Map = getMap();
   const mapbox: typeof import('mapbox-gl') = getMapbox();
 

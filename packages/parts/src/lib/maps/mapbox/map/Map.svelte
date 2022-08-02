@@ -1,7 +1,7 @@
 <script lang="ts">
   // from https://github.com/beyonk-adventures/svelte-mapbox
   import { setContext, onDestroy, createEventDispatcher, onMount, tick } from 'svelte';
-  import { contextKey } from '../contextKey';
+  import { mapKey } from '../context';
   import { loadScriptOnce, loadStylesOnce } from '../asset-loader';
   import { EventQueue } from '../queue';
   import type { LngLatLike, MapboxOptions, Map, LngLat, ErrorEvent, EventData } from 'mapbox-gl';
@@ -17,7 +17,7 @@
   export let zoom = 2;
   export let style = 'mapbox://styles/mapbox/streets-v11?optimize=true'; // light-v8, light-v9, light-v10, dark-v10, satellite-v9, streets-v11
 
-  setContext(contextKey, {
+  setContext(mapKey, {
     getMap: () => map,
     getMapbox: () => mapbox,
   });

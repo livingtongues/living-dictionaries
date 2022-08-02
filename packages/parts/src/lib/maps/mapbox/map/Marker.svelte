@@ -14,10 +14,10 @@
 
 <script lang="ts">
   import { onMount, getContext, createEventDispatcher } from 'svelte';
-  import { contextKey } from '../contextKey';
+  import { mapKey } from '../context';
   import type { LngLat, Map, Marker, MarkerOptions } from 'mapbox-gl';
 
-  const { getMap, getMapbox } = getContext(contextKey);
+  const { getMap, getMapbox } = getContext(mapKey);
   const map: Map = getMap();
   const mapbox: typeof import('mapbox-gl') = getMapbox();
 
