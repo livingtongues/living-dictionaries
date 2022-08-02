@@ -1,9 +1,9 @@
 <script lang="ts">
   import { getContext, onDestroy } from 'svelte';
-  import { contextKey } from '../contextKey';
+  import { mapKey } from '../context';
   import type { Map } from 'mapbox-gl';
 
-  const { getMap, getMapbox } = getContext(contextKey);
+  const { getMap, getMapbox } = getContext(mapKey);
   const map: Map = getMap();
   const mapbox: typeof import('mapbox-gl') = getMapbox();
 

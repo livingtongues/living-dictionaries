@@ -1,9 +1,9 @@
 <script lang="ts">
   import { getContext } from 'svelte';
-  import { contextKey } from '../contextKey';
+  import { mapKey } from '../context';
   import type { Map } from 'mapbox-gl';
 
-  const { getMap } = getContext(contextKey);
+  const { getMap } = getContext(mapKey);
   const map: Map = getMap();
 
   const supportedLanguages = [

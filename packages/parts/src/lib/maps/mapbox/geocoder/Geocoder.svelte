@@ -1,13 +1,13 @@
 <script lang="ts">
   // https://www.npmjs.com/package/@mapbox/mapbox-gl-geocoder
   import { getContext, onDestroy, onMount, createEventDispatcher } from 'svelte';
-  import { contextKey } from '../contextKey';
+  import { mapKey } from '../context';
   import { loadScriptOnce, loadStylesOnce } from '../asset-loader';
   import type { Map } from 'mapbox-gl';
   import type { Result, Results } from '@mapbox/mapbox-gl-geocoder';
   import { bindEvents } from '../event-bindings';
 
-  const { getMap, getMapbox } = getContext(contextKey);
+  const { getMap, getMapbox } = getContext(mapKey);
   const map: Map = getMap();
   const mapbox: typeof import('mapbox-gl') = getMapbox();
 
