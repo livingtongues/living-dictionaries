@@ -13,18 +13,20 @@
 <!-- prettier-ignore -->
 # Multiple Markers 
 
-Once three markers exist an updating filled region will automatically be drawn if turned on.
+In this example, if `autoDrawShape` is true and three markers exist, an updating filled region will automatically be drawn if coordinates are passed to a `GeoJSONSource` for use in a fill `Layer`.
 
 With help from https://github.com/beyonk-adventures/svelte-mapbox
 
 <Story
   knobs={{ openFirst: false, autoDrawShape: true }}
   let:props={{ openFirst, autoDrawShape }}
-  name="Multiple Markers">
+  name="Draw Polygon">
   <Set
     input={[
-      { lng: -95, lat: 39 },
-      { lng: -100, lat: 35 },
+      { lng: -95, lat: 44 },
+      { lng: -105, lat: 35 },
+      { lng: -105, lat: 42 },
+      { lng: -96, lat: 37 },
     ]}
     let:value={points}
     let:add
@@ -32,6 +34,7 @@ With help from https://github.com/beyonk-adventures/svelte-mapbox
     <div style="height: 350px;">
       <Map
         let:map
+        zoom={3}
         on:click={({ detail: { lng, lat } }) => {
           add({ lng, lat });
         }}>
@@ -51,7 +54,6 @@ With help from https://github.com/beyonk-adventures/svelte-mapbox
           </Marker>
         {/each}
         {#if autoDrawShape && points.length > 2}
-          {alert('drawing')}
           <GeoJSONSource
             id="selection"
             data={{
