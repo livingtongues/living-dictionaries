@@ -1,4 +1,5 @@
-export function polygonFromCoordinates(
+// from https://cs.stackexchange.com/questions/52606/sort-a-list-of-points-to-form-a-non-self-intersecting-polygon/52627
+export function nonSelfIntersectingPolygonFromCoordinates(
   points: {
     lng: number;
     lat: number;
@@ -11,7 +12,7 @@ export function polygonFromCoordinates(
 if (import.meta.vitest) {
   test('polygonFromCoordinates', () => {
     expect(
-      polygonFromCoordinates([
+      nonSelfIntersectingPolygonFromCoordinates([
         { lng: 0, lat: 1 },
         { lng: 1, lat: 0 },
         { lng: 0, lat: 0 },
