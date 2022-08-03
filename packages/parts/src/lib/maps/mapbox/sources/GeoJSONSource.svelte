@@ -5,7 +5,7 @@
 
   // Cf https://docs.mapbox.com/mapbox-gl-js/style-spec/sources/#geojson
   export let id: string;
-  export let data; // URL or inline data
+  export let data; // URL or inline data - use https://docs.mapbox.com/mapbox-gl-js/assets/ne_50m_urban_areas.geojson as an example
   export let options: Partial<GeoJSONSourceRaw> = {};
 
   const { getMap } = getContext(mapKey);
