@@ -4,6 +4,7 @@
   import GeoJSONSource from '$lib/maps/mapbox/sources/GeoJSONSource.svelte';
   import Layer from '$lib/maps/mapbox/map/Layer.svelte';
 
+  // from https://docs.mapbox.com/mapbox-gl-js/example/geojson-polygon/
   const maineOutline = [
     [
       [-67.13734, 45.13745],
