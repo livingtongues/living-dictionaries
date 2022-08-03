@@ -7,7 +7,7 @@
   import Button from 'svelte-pieces/ui/Button.svelte';
   import GeoJSONSource from '$lib/maps/mapbox/sources/GeoJSONSource.svelte';
   import Layer from '$lib/maps/mapbox/map/Layer.svelte';
-  import { polygonFromCoordinates } from '$lib/maps/mapbox/sources/polygonFromCoordinates';
+  import { nonSelfIntersectingPolygonFromCoordinates } from '$lib/maps/mapbox/sources/polygonFromCoordinates';
 </script>
 
 <!-- prettier-ignore -->
@@ -59,7 +59,7 @@ With help from https://github.com/beyonk-adventures/svelte-mapbox
               type: 'Feature',
               geometry: {
                 type: 'Polygon',
-                coordinates: polygonFromCoordinates(points),
+                coordinates: nonSelfIntersectingPolygonFromCoordinates(points),
               },
               properties: undefined,
             }}>
