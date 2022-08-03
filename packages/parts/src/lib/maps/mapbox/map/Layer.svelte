@@ -9,7 +9,7 @@
   const { getSourceId, addChildLayer } = getContext(sourceKey);
   const sourceId = getSourceId() as string;
 
-  export let id = sourceId;
+  export let id: string;
   // see https://docs.mapbox.com/mapbox-gl-js/style-spec/layers
   export let options: Partial<AnyLayer> = {
     type: 'fill',
@@ -24,7 +24,7 @@
 
   function addLayer() {
     map.addLayer(
-      // @ts-ignore - CustomLayerInterface throws of types here
+      // @ts-ignore - CustomLayerInterface throws off types here
       { ...(options as AnyLayer), id, source: sourceId, },
       beforeLayerId
     );

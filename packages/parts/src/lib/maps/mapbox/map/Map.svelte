@@ -109,7 +109,7 @@
 
 <div bind:this={container}>
   {#if ready}
-    <slot />
+    <slot {map} />
   {/if}
 </div>
 

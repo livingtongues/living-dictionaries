@@ -8,7 +8,7 @@
 </script>
 
 <!-- prettier-ignore -->
-# Mapbox 
+# Multiple Markers 
 
 From https://github.com/beyonk-adventures/svelte-mapbox
 
