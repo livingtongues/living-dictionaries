@@ -63,11 +63,74 @@
       nt: 'This is an example of a note, here we can write whatever we want.',
       sr: ['A book', 'www.mybook.com'],
       xs: { en: 'This is a banana', vn: '我很喜歡吃香蕉' },
-      sf: { path: 'https://database.com/sound.mp3', sp: '123' },
+      sf: { path: 'https://database.com/sound.mp3', sp: 'Diego' },
       pf: { gcs: 'banana', path: 'https://api.time.com/wp-content/uploads/2019/11/gettyimages-459761948.jpg' },
       xv: '',
     },
     { id: '34qw', lx: 'tree', gl: { es: 'arbol' }, pf: { gcs: 'Ktt_Jvk55Mp1cHJ6_zXeHU6dEJOjh8p5bk3rvK5kzXVgwB8GDXCSOPipNTveouELfx9_Rh4IllVvS3BLFBTc', path: 'https://lh3.googleusercontent.com/Ktt_Jvk55Mp1cHJ6_zXeHU6dEJOjh8p5bk3rvK5kzXVgwB8GDXCSOPipNTveouELfx9_Rh4IllVvS3BLFBTc=w1055', source: 'local_import' }, },
+    {
+      ph: "tato",
+      di: "",
+      lo: "",
+      
+      nt: "",
+      xv: "",
+      ps: "n",
+      sdn: [
+        "1.2"
+      ],
+      lx: "тато",
+      sf: {
+        path: "audio/bezhta/0860Y6h3Nnl63tiD6UWX_1591201519424.wav",
+        ab: "uwNgSHCEeRaJAUPsmZok1uMRXzO2",
+        sp: "uwNgSHCEeRaJAUPsmZok1uMRXzO2",
+        ts: {
+          seconds: 1591201520,
+          nanoseconds: 613000000
+        }
+      },
+      updatedBy: "uwNgSHCEeRaJAUPsmZok1uMRXzO2",
+      gl: {
+        en: "mud",
+        ru: "грязь"
+      },
+      id: "0860Y6h3Nnl63tiD6UWX",
+      createdBy: "uwNgSHCEeRaJAUPsmZok1uMRXzO2",
+      in: ""
+    },
+    {
+      "nt": "akateko_Juan-Diego-Mat-as_07Aug2014-1349_mother-8217-s-mother.wav recorded directly on 07Aug2014-1349 by Juan Diego Matías; ",
+      "sdn": [
+          "2.6"
+      ],
+      "ps": "inal.n",
+      "xs": {
+          "vernacular": "abuela materna"
+      },
+      "lx": "chikay",
+      "gl": {
+          "en": "mother's mother"
+      },
+      "di": "término de parentesco",
+      "ub": "9yznFRnjuNOcdZf8ZGW16xDLkFh1",
+      "pf": {
+          "path": "akateko/images/local_import/DSC09955-1581896570388.JPG",
+          "source": "local_import",
+          "gcs": "lwNfI3yEZ2ZOLwFXl_zxW8DPcjpbUvAGZL0aacvYRbw8JpMsFVlq5-y63CwDYd_cSwrFlYX2_O6I7jqwPGxV4A\n"
+      },
+      "createdBy": "OTD",
+      "ph": "ʧ͡i.kaj",
+      "sf": {
+          "path": "akateko/audio/local_import/akateko-Juan-Diego-Mat-as-07Aug2014-1349-mother-8217-s-mother-1581896570161.mp3",
+          "speakerName": "Juan Diego Matías",
+          "source": "local_import",
+          "ts": {
+              "seconds": 1581896609,
+              "nanoseconds": 800000000
+          }
+      },
+      "id": "A9L0NWFc7xiLrWWqrmNh"
+    }
   ];
 
   $: console.log("Fields:", fields)
@@ -94,12 +157,14 @@
   {/if}
 
   {#if entry.pf && fields['pf']}
-    <img src={entry.pf.path} alt={entry.pf.gcs} width=350 height=350 />
-    {#if entry.pf.source}
+    <div class="flex justify-between">
+      <img src={entry.pf.path} alt={entry.pf.gcs} width=350 height=350 />
+      {#if entry.pf.source}
 
-      **Image Source:** {entry.pf.source}
-      
-    {/if}
+        **Image Source:** {entry.pf.source}
+        
+      {/if}
+    </div>
   {/if}
 
   {#if entry.gl && fields['gl']}
@@ -127,14 +192,15 @@
   {/if}
 
   {#if entry.sdn && fields['sd']}
+    <div>
+      <strong>Semantic domains:</strong>
 
-    **Semantic domains:**
+      {#each entry.sdn as semanticDomain, index}
 
-    {#each entry.sdn as semanticDomain}
+        <span>{semanticDomains.find((sd) => sd.key === semanticDomain).name}{entry.sdn.length-1 === index  ? '' : ', '}</span>
 
-      {semanticDomains.find((sd) => sd.key === semanticDomain).name}
-
-    {/each}
+      {/each}
+    </div>
   {/if}
 
   {#if entry.sf && fields['sf']}
