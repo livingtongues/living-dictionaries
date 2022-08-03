@@ -11,7 +11,7 @@
 </script>
 
 <!-- prettier-ignore -->
-# Multiple Markers 
+# Create Polygon from Multiple Markers 
 
 In this example, if `autoDrawShape` is true and three markers exist, an updating filled region will automatically be drawn if coordinates are passed to a `GeoJSONSource` for use in a fill `Layer`.
 
@@ -33,7 +33,6 @@ With help from https://github.com/beyonk-adventures/svelte-mapbox
     let:remove>
     <div style="height: 350px;">
       <Map
-        let:map
         zoom={3}
         on:click={({ detail: { lng, lat } }) => {
           add({ lng, lat });
@@ -72,10 +71,7 @@ With help from https://github.com/beyonk-adventures/svelte-mapbox
                   'fill-color': '#0080ff',
                   'fill-opacity': 0.5,
                 },
-              }}
-              on:click={() => alert('Fill clicked')}
-              on:mouseenter={() => (map.getCanvas().style.cursor = 'pointer')}
-              on:mouseleave={() => (map.getCanvas().style.cursor = '')} />
+              }} />
           </GeoJSONSource>
         {/if}
       </Map>
