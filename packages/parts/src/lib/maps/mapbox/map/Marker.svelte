@@ -27,7 +27,6 @@
 
   export let lat: number;
   export let lng: number;
-  export let markerOffset: [number, number] = [0, 0];
   export let color = randomColour();
   export let options: MarkerOptions = {};
   export let draggable = true;
@@ -58,7 +57,6 @@
     marker = new mapbox.Marker({
       ...elementOrColor,
       ...options,
-      offset: markerOffset,
       draggable,
     });
     markers.add(marker);

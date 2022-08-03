@@ -5,14 +5,22 @@
   import Set from 'svelte-pieces/functions/Set.svelte';
   import Popup from '$lib/maps/mapbox/map/Popup.svelte';
   import Button from 'svelte-pieces/ui/Button.svelte';
+  import GeoJSONSource from '$lib/maps/mapbox/sources/GeoJSONSource.svelte';
+  import Layer from '$lib/maps/mapbox/map/Layer.svelte';
+  import { polygonFromCoordinates } from '$lib/maps/mapbox/sources/polygonFromCoordinates';
 </script>
 
 <!-- prettier-ignore -->
 # Multiple Markers 
 
-From https://github.com/beyonk-adventures/svelte-mapbox
+Once three markers exist an updating filled region will automatically be drawn if turned on.
 
-<Story knobs={{ openFirst: false }} let:props={{ openFirst }} name="Multiple Markers">
+With help from https://github.com/beyonk-adventures/svelte-mapbox
+
+<Story
+  knobs={{ openFirst: false, autoDrawShape: true }}
+  let:props={{ openFirst, autoDrawShape }}
+  name="Multiple Markers">
   <Set
     input={[
       { lng: -95, lat: 39 },
@@ -23,6 +31,7 @@ From https://github.com/beyonk-adventures/svelte-mapbox
     let:remove>
     <div style="height: 350px;">
       <Map
+        let:map
         on:click={({ detail: { lng, lat } }) => {
           add({ lng, lat });
         }}>
@@ -41,6 +50,32 @@ From https://github.com/beyonk-adventures/svelte-mapbox
             </Popup>
           </Marker>
         {/each}
+        {#if autoDrawShape && points.length > 2}
+          {alert('drawing')}
+          <GeoJSONSource
+            id="selection"
+            data={{
+              type: 'Feature',
+              geometry: {
+                type: 'Polygon',
+                coordinates: polygonFromCoordinates(points),
+              },
+              properties: undefined,
+            }}>
+            <Layer
+              id="selectionFill"
+              options={{
+                type: 'fill',
+                paint: {
+                  'fill-color': '#0080ff',
+                  'fill-opacity': 0.5,
+                },
+              }}
+              on:click={() => alert('Fill clicked')}
+              on:mouseenter={() => (map.getCanvas().style.cursor = 'pointer')}
+              on:mouseleave={() => (map.getCanvas().style.cursor = '')} />
+          </GeoJSONSource>
+        {/if}
       </Map>
     </div>
     <pre>{JSON.stringify(points, null, 2)}</pre>
