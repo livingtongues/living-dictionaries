@@ -2,7 +2,7 @@
   // from https://gitlab.com/jailbreak/svelte-mapbox-gl
   import { createEventDispatcher, getContext, onDestroy } from 'svelte';
   import { mapKey, sourceKey } from '../context';
-  import type { Map, AnyLayer, MapLayerEventType } from 'mapbox-gl';
+  import type { Map, AnyLayer, MapLayerMouseEvent, MapLayerTouchEvent, MapLayerEventType } from 'mapbox-gl';
 
   const { getMap } = getContext(mapKey);
   const map: Map = getMap();
@@ -25,7 +25,7 @@
   function addLayer() {
     map.addLayer(
       // @ts-ignore - CustomLayerInterface throws off types here
-      { ...(options as AnyLayer), id, source: sourceId, },
+      { ...(options as AnyLayer), id, source: sourceId },
       beforeLayerId
     );
   }
@@ -66,7 +66,7 @@
       // Forward events related to this layer.
       for (const eventName of eventNames) {
         const eventHandler = (event) => {
-          dispatch(eventName, event);
+          dispatch(eventName as keyof MapLayerEventType, event);
         };
         map.on(eventName as keyof MapLayerEventType, id, eventHandler);
         eventHandlers[eventName] = eventHandler;
@@ -90,8 +90,22 @@
     }
   });
 
-  const dispatch = createEventDispatcher();
   // Cf https://docs.mapbox.com/mapbox-gl-js/api/#map#on
+  const dispatch = createEventDispatcher<{
+    click: MapLayerMouseEvent;
+    dblclick: MapLayerMouseEvent;
+    mousedown: MapLayerMouseEvent;
+    mouseup: MapLayerMouseEvent;
+    mousemove: MapLayerMouseEvent;
+    mouseenter: MapLayerMouseEvent;
+    mouseleave: MapLayerMouseEvent;
+    mouseover: MapLayerMouseEvent;
+    mouseout: MapLayerMouseEvent;
+    contextmenu: MapLayerMouseEvent;
+    touchstart: MapLayerTouchEvent;
+    touchend: MapLayerTouchEvent;
+    touchcancel: MapLayerTouchEvent;
+  }>();
   const eventNames = [
     'click',
     'dblclick',
