@@ -5,15 +5,15 @@
   import { onMount, createEventDispatcher } from 'svelte';
   import Modal from 'svelte-pieces/ui/Modal.svelte';
   import Button from 'svelte-pieces/ui/Button.svelte';
-  import { startCoordinates } from './map.class';
   import Map from './mapbox/map/Map.svelte';
   import Geocoder from './mapbox/geocoder/Geocoder.svelte';
   import Marker from './mapbox/map/Marker.svelte';
   import ToggleStyle from './mapbox/controls/ToggleStyle.svelte';
+  import { getTimeZoneLongitude } from './getTimeZoneLongitude';
 
   export let lng: number;
   export let lat: number;
-  let center: [number, number] = lng && lat ? [lng, lat] : startCoordinates.DC;
+  let center: [number, number] = lng && lat ? [lng, lat] : [getTimeZoneLongitude(), 10];
   let zoom = lng && lat ? 6 : 2;
 
   function setMarker(longitude: number, latitude: number) {

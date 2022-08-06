@@ -1,7 +1,7 @@
 <script lang="ts">
   import GeoJSONSource from '@living-dictionaries/parts/src/lib/maps/mapbox/sources/GeoJSONSource.svelte';
   import Layer from '@living-dictionaries/parts/src/lib/maps/mapbox/map/Layer.svelte';
-  import { dictionaryGeoJsonCollection } from '@living-dictionaries/parts/src/lib/maps/map.class';
+  import { dictionaryGeoJsonCollection } from '@living-dictionaries/parts/src/lib/maps/dictionaryGeoJsonCollection';
   import type { IDictionary } from '@living-dictionaries/types';
   import { getContext } from 'svelte';
   import { mapKey } from '@living-dictionaries/parts/src/lib/maps/mapbox/context';

@@ -1,14 +1,15 @@
 import type { IDictionary } from '@living-dictionaries/types';
 import type { GeoJSONSourceOptions } from 'mapbox-gl';
 
-export const startCoordinates: {
-  [city: string]: [number, number];
-} = {
-  DC: [-77.04, 38.907],
-  USA: [-95, 38.907],
-  Japan: [135.753847, 34.986406],
-  CentralAmerica: [-80, 5],
-};
+// leaving for reference
+// const startCoordinates: {
+//   [city: string]: [number, number];
+// } = {
+//   DC: [-77.04, 38.907],
+//   USA: [-95, 38.907],
+//   Japan: [135.753847, 34.986406],
+//   CentralAmerica: [-80, 5],
+// };
 
 export function dictionaryGeoJsonCollection(dictionaries: IDictionary[]): GeoJSONSourceOptions['data'] {
   return {
