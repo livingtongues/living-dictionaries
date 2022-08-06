@@ -15,7 +15,7 @@
   export let options: Partial<MapboxOptions> = {};
   export let center: LngLatLike = [-95, 38.907]; // USA
   export let zoom = 2;
-  export let style = 'mapbox://styles/mapbox/streets-v11?optimize=true'; // light-v8, light-v9, light-v10, dark-v10, satellite-v9, streets-v11
+  export let style = 'mapbox://styles/mapbox/streets-v11?optimize=true'; //'Mapbox Streets' // light-v8, light-v9, light-v10, dark-v10, satellite-v9, streets-v11
 
   setContext(mapKey, {
     getMap: () => map,
@@ -110,6 +110,10 @@
 <div bind:this={container}>
   {#if ready}
     <slot {map} />
+  {:else}
+    <div class="w-full h-full bg-gray-100 flex items-center justify-center">
+      <span class="i-fa-solid-globe-asia text-6xl text-gray-300 animate-pulse" />
+    </div>
   {/if}
 </div>
 
