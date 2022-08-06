@@ -26,6 +26,7 @@
   import Map from '@living-dictionaries/parts/src/lib/maps/mapbox/map/Map.svelte';
   import ToggleStyle from '@living-dictionaries/parts/src/lib/maps/mapbox/controls/ToggleStyle.svelte';
   import NavigationControl from '@living-dictionaries/parts/src/lib/maps/mapbox/controls/NavigationControl.svelte';
+  import CustomControl from '@living-dictionaries/parts/src/lib/maps/mapbox/controls/CustomControl.svelte';
   import { getTimeZoneLongitude } from '@living-dictionaries/parts/src/lib/maps/getTimeZoneLongitude';
   import DictionaryPoints from '$lib/components/home/DictionaryPoints.svelte';
   import Search from '$lib/components/home/Search.svelte';
@@ -36,6 +37,7 @@
   let selectedDictionaryId: string;
 
   import { onMount } from 'svelte';
+  import ShowHide from 'svelte-pieces/functions/ShowHide.svelte';
   onMount(async () => {
     if ($admin) {
       privateDictionaries = await getCollection<IDictionary>('dictionaries', [
@@ -71,11 +73,19 @@
       bind:this={mapComponent}
       center={[getTimeZoneLongitude() || -80, 10]}
       style="mapbox://styles/mapbox/light-v10?optimize=true">
-      {#if privateDictionaries.length}
-        <DictionaryPoints
-          dictionaries={privateDictionaries}
-          type="private"
-          bind:selectedDictionaryId />
+      {#if $admin}
+        <ShowHide let:show={hide} let:toggle>
+          <CustomControl position="bottom-right">
+            <button class="whitespace-nowrap w-full px-2" on:click={toggle}>Toggle Private</button>
+          </CustomControl>
+
+          {#if !hide && privateDictionaries.length}
+            <DictionaryPoints
+              dictionaries={privateDictionaries}
+              type="private"
+              bind:selectedDictionaryId />
+          {/if}
+        </ShowHide>
       {/if}
       <DictionaryPoints dictionaries={publicDictionaries} bind:selectedDictionaryId />
       {#if $myDictionaries.length}
