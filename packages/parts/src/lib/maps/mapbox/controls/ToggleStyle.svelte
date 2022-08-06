@@ -1,17 +1,24 @@
 <script lang="ts">
-  import { getContext } from 'svelte';
+  import { getContext, onMount } from 'svelte';
   import { mapKey } from '../context';
-  import type { Map } from 'mapbox-gl';
+  import type { Map, Style } from 'mapbox-gl';
 
   const { getMap } = getContext(mapKey);
   const map: Map = getMap();
 
+  export let alternateStyle = 'mapbox://styles/mapbox/satellite-streets-v11?optimize=true'; // 'Mapbox Satellite Streets'
+  let initialStyle: Style;
+
+  onMount(() => {
+    initialStyle = map.getStyle();
+  });
+
   function toggleStyle() {
     const style = map.getStyle();
-    if (style.name === 'Mapbox Streets') {
-      map.setStyle('mapbox://styles/mapbox/satellite-streets-v11?optimize=true');
+    if (style.name === initialStyle.name) {
+      map.setStyle(alternateStyle);
     } else {
-      map.setStyle('mapbox://styles/mapbox/streets-v11?optimize=true'); // style.name === "Mapbox Satellite Streets"
+      map.setStyle(initialStyle);
     }
   }
 </script>
