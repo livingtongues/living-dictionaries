@@ -2,7 +2,7 @@
   // https://www.npmjs.com/package/@mapbox/mapbox-gl-geocoder
   import { getContext, onDestroy, onMount, createEventDispatcher } from 'svelte';
   import { mapKey } from '../context';
-  import { loadScriptOnce, loadStylesOnce } from '../asset-loader';
+  import { loadScriptOnce, loadStylesOnce } from 'sveltefirets';
   import type { Map } from 'mapbox-gl';
   import type { Result, Results, GeocoderOptions } from '@mapbox/mapbox-gl-geocoder';
   import { bindEvents } from '../event-bindings';
