@@ -171,7 +171,6 @@ importers:
       instantsearch.js: ^4.33.2
       jszip: ^3.7.1
       logrocket: ^2.1.2
-      mapbox-gl: ^2.9.2
       nprogress: ^0.2.0
       recordrtc: ^5.6.2
       simple-git-hooks: ^2.7.0
@@ -212,7 +211,6 @@ importers:
       instantsearch.js: 4.40.2_algoliasearch@4.13.0
       jszip: 3.8.0
       logrocket: 2.2.1
-      mapbox-gl: 2.9.2
       nprogress: 0.2.0
       recordrtc: 5.6.2
       simple-git-hooks: 2.7.0

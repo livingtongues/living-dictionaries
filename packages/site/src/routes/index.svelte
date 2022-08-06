@@ -23,7 +23,11 @@
   import type { IDictionary } from '@living-dictionaries/types';
   import { admin, myDictionaries } from '$lib/stores';
 
-  import Mapbox from '$lib/components/home/Mapbox.svelte';
+  import Map from '@living-dictionaries/parts/src/lib/maps/mapbox/map/Map.svelte';
+  import ToggleStyle from '@living-dictionaries/parts/src/lib/maps/mapbox/controls/ToggleStyle.svelte';
+  import NavigationControl from '@living-dictionaries/parts/src/lib/maps/mapbox/controls/NavigationControl.svelte';
+  import { getTimeZoneLongitude } from '@living-dictionaries/parts/src/lib/maps/getTimeZoneLongitude';
+  import DictionaryPoints from '$lib/components/home/Dictionaries.svelte';
   import Search from '$lib/components/home/Search.svelte';
   import Header from '$lib/components/shell/Header.svelte';
 
@@ -39,6 +43,8 @@
       ]);
     }
   });
+
+  let mapComponent: Map;
 </script>
 
 <svelte:head>
@@ -47,30 +53,39 @@
 
 <Header />
 
-<main>
-  <Mapbox>
-    <div class="sm:w-72 max-h-full" slot="sidebar">
-      <Search
-        dictionaries={[...publicDictionaries, ...privateDictionaries, ...$myDictionaries]}
-        bind:selectedDictionaryId />
-    </div>
-    {#await import('$lib/components/home/Dictionaries.svelte') then { default: Dictionaries }}
+<main
+  class="top-12 fixed bottom-0 right-0 left-0 flex flex-col sm:flex-row border-t border-gray-200">
+  <div class="sm:w-72 max-h-full">
+    <Search
+      dictionaries={[...publicDictionaries, ...privateDictionaries, ...$myDictionaries]}
+      bind:selectedDictionaryId
+      on:selectedDictionary={({ detail: { coordinates } }) => {
+        if (coordinates) {
+          mapComponent.setZoom(7);
+          mapComponent.setCenter([coordinates.longitude, coordinates.latitude]);
+        }
+      }} />
+  </div>
+  <div class="relative flex-1">
+    <Map
+      bind:this={mapComponent}
+      center={[getTimeZoneLongitude() || -80, 10]}
+      style="mapbox://styles/mapbox/light-v10?optimize=true">
       {#if privateDictionaries.length}
-        <Dictionaries
+        <DictionaryPoints
           dictionaries={privateDictionaries}
-          source="private"
+          type="private"
           bind:selectedDictionaryId />
       {/if}
-      <Dictionaries dictionaries={publicDictionaries} bind:selectedDictionaryId />
+      <DictionaryPoints dictionaries={publicDictionaries} bind:selectedDictionaryId />
       {#if $myDictionaries.length}
-        <Dictionaries dictionaries={$myDictionaries} source="personal" bind:selectedDictionaryId />
+        <DictionaryPoints
+          dictionaries={$myDictionaries}
+          type="personal"
+          bind:selectedDictionaryId />
       {/if}
-    {/await}
-  </Mapbox>
+      <NavigationControl position="bottom-right" showCompass={false} />
+      <ToggleStyle />
+    </Map>
+  </div>
 </main>
-
-<style>
-  main {
-    @apply top-12 fixed bottom-0 right-0 left-0 flex flex-col sm:flex-row border-t border-gray-200;
-  }
-</style>

@@ -1,33 +1,5 @@
 import type { IDictionary } from '@living-dictionaries/types';
-
-export interface IGeometry {
-  type: string;
-  coordinates: number[];
-}
-
-export interface IGeoJson {
-  type: string;
-  geometry: IGeometry;
-  properties?: any;
-  $key?: string;
-}
-
-export class GeoJson implements IGeoJson {
-  type = 'Feature';
-  geometry: IGeometry;
-
-  constructor(coordinates, public properties?) {
-    this.geometry = {
-      type: 'Point',
-      coordinates: coordinates,
-    };
-  }
-}
-
-export class FeatureCollection {
-  type = 'FeatureCollection';
-  constructor(public features: Array<GeoJson>) {}
-}
+import type { GeoJSONSourceOptions } from 'mapbox-gl';
 
 export const startCoordinates: {
   [city: string]: [number, number];
@@ -38,27 +10,25 @@ export const startCoordinates: {
   CentralAmerica: [-80, 5],
 };
 
-export class DictionaryGeoJsonCollection {
-  type = 'FeatureCollection';
-  features = [];
-  constructor(dictionaries: Array<IDictionary>) {
-    dictionaries.forEach((dictionary) => {
-      if (dictionary.coordinates) {
-        const feature: IGeoJson = {
+export function dictionaryGeoJsonCollection(dictionaries: IDictionary[]): GeoJSONSourceOptions['data'] {
+  return {
+    type: 'FeatureCollection',
+    features: dictionaries
+      .filter((dict) => dict.coordinates)
+      .map((dict) => {
+        return {
           type: 'Feature',
           geometry: {
             type: 'Point',
-            coordinates: [dictionary.coordinates.longitude, dictionary.coordinates.latitude],
+            coordinates: [dict.coordinates.longitude, dict.coordinates.latitude],
           },
           properties: {
-            name: dictionary.name,
-            id: dictionary.id,
-            // icon: dictionary.public ? 'logo' : 'library-15', // only new Living Dictionaries have public attribute
-            // thumbnail: dictionary.thumbnail,
+            name: dict.name,
+            id: dict.id,
+            // icon: dict.public ? 'logo' : 'library-15', // only new Living Dictionaries have public attribute
+            // thumbnail: dict.thumbnail,
           },
         };
-        this.features.push(feature);
-      }
-    });
-  }
+      }),
+  };
 }
