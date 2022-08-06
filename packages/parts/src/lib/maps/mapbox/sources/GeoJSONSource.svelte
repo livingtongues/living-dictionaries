@@ -20,13 +20,15 @@
       layerIds.push(id);
     },
   });
-
+  
+  let source: GeoJSONSource;
   function addSource() {
     map.addSource(id, {
       ...options,
       type: 'geojson',
       data,
     });
+    source = map.getSource(id) as GeoJSONSource;
   }
 
   function handleStyledata() {
@@ -34,9 +36,9 @@
       addSource();
     }
   }
-
+  
   $: {
-    const source = map.getSource(id) as GeoJSONSource;
+    source = map.getSource(id) as GeoJSONSource;
     if (source) {
       source.setData(data);
     } else {
@@ -64,4 +66,4 @@
   });
 </script>
 
-<slot />
+<slot {source} />
