@@ -11,10 +11,8 @@
   export let showCompass = true;
   export let showZoom = true;
   export let visualizePitch = true;
-  export let options = {};
 
   const nav = new mapbox.NavigationControl({
-    ...options,
     showCompass,
     showZoom,
     visualizePitch,
