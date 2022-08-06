@@ -27,7 +27,7 @@
   import ToggleStyle from '@living-dictionaries/parts/src/lib/maps/mapbox/controls/ToggleStyle.svelte';
   import NavigationControl from '@living-dictionaries/parts/src/lib/maps/mapbox/controls/NavigationControl.svelte';
   import { getTimeZoneLongitude } from '@living-dictionaries/parts/src/lib/maps/getTimeZoneLongitude';
-  import DictionaryPoints from '$lib/components/home/Dictionaries.svelte';
+  import DictionaryPoints from '$lib/components/home/DictionaryPoints.svelte';
   import Search from '$lib/components/home/Search.svelte';
   import Header from '$lib/components/shell/Header.svelte';
 
