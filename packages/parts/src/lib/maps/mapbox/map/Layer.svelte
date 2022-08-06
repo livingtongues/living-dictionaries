@@ -24,6 +24,7 @@
       'fill-opacity': 0.4,
     },
   };
+  $: console.log({options})
   export let minzoom: number = undefined; // 0-24
   export let maxzoom: number = undefined; // 0-24
   export let beforeLayerId: string = undefined; // see https://docs.mapbox.com/mapbox-gl-js/example/geojson-layer-in-stack/ to create a FindFirstSymbolLayer component.
