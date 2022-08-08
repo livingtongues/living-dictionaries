@@ -40,7 +40,7 @@
     "svelte-check": "^2.8.0",
     "svelte-deep-wind-preprocess": "^0.0.8",
     "svelte-i18n": "^3.3.13",
-    "svelte-pieces": "1.0.22",
+    "svelte-pieces": "1.0.37",
     "svelte-preprocess": "^4.10.7",
     "svelte-windicss-preprocess": "~4.1.0",
     "sveltefirets": "^0.0.28",

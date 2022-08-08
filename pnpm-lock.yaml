@@ -61,11 +61,11 @@ importers:
       '@sveltejs/adapter-auto': 1.0.0-next.50
       '@sveltejs/kit': 1.0.0-next.350
       '@sveltejs/vite-plugin-svelte': 1.0.0-next.49
-      '@types/mapbox__mapbox-gl-geocoder': ^4.7.2
       '@types/mapbox-gl': ^2.7.4
+      '@types/mapbox__mapbox-gl-geocoder': ^4.7.2
       '@types/recordrtc': ^5.6.8
       '@types/youtube': ^0.0.46
-      kitbook: ^0.0.16
+      kitbook: ^0.0.19
       mapbox-gl: ^2.9.2
       mdsvex: ^0.10.6
       recordrtc: ^5.6.2
@@ -73,7 +73,7 @@ importers:
       svelte: ^3.49.0
       svelte-check: ^2.8.0
       svelte-deep-wind-preprocess: ^0.0.8
-      svelte-pieces: 1.0.22
+      svelte-pieces: 1.0.37
       svelte-preprocess: ^4.10.7
       svelte-store-router: ^2.0.10
       svelte-windicss-preprocess: ~4.1.0
@@ -88,11 +88,11 @@ importers:
       '@sveltejs/adapter-auto': 1.0.0-next.50
       '@sveltejs/kit': 1.0.0-next.350_svelte@3.49.0
       '@sveltejs/vite-plugin-svelte': 1.0.0-next.49_svelte@3.49.0
-      '@types/mapbox__mapbox-gl-geocoder': 4.7.2
       '@types/mapbox-gl': 2.7.4
+      '@types/mapbox__mapbox-gl-geocoder': 4.7.2
       '@types/recordrtc': 5.6.8
       '@types/youtube': 0.0.46
-      kitbook: 0.0.16_svelte@3.49.0
+      kitbook: 0.0.19_svelte@3.49.0
       mapbox-gl: 2.9.2
       mdsvex: 0.10.6_svelte@3.49.0
       recordrtc: 5.6.2
@@ -100,7 +100,7 @@ importers:
       svelte: 3.49.0
       svelte-check: 2.8.0_svelte@3.49.0
       svelte-deep-wind-preprocess: 0.0.8
-      svelte-pieces: 1.0.22_svelte@3.49.0
+      svelte-pieces: 1.0.37_svelte@3.49.0
       svelte-preprocess: 4.10.7_uslzfc62di2n2otc2tvfklnwji
       svelte-store-router: 2.0.10_svelte@3.49.0
       svelte-windicss-preprocess: 4.1.7
@@ -178,7 +178,7 @@ importers:
       svelte-check: ^2.8.0
       svelte-deep-wind-preprocess: ^0.0.8
       svelte-i18n: ^3.3.13
-      svelte-pieces: 1.0.22
+      svelte-pieces: 1.0.37
       svelte-preprocess: ^4.10.7
       svelte-windicss-preprocess: ~4.1.0
       sveltefirets: ^0.0.28
@@ -218,7 +218,7 @@ importers:
       svelte-check: 2.8.0_svelte@3.49.0
       svelte-deep-wind-preprocess: 0.0.8
       svelte-i18n: 3.3.13_svelte@3.49.0
-      svelte-pieces: 1.0.22_svelte@3.49.0
+      svelte-pieces: 1.0.37_svelte@3.49.0
       svelte-preprocess: 4.10.7_uslzfc62di2n2otc2tvfklnwji
       svelte-windicss-preprocess: 4.1.7
       sveltefirets: 0.0.28
@@ -5924,11 +5924,14 @@ packages:
       json-buffer: 3.0.0
     dev: false
 
-  /kitbook/0.0.16_svelte@3.49.0:
-    resolution: {integrity: sha512-agopbOHrMv5OQig0riZsQfRnKfBsoaS5Q9h+mN8mzqMYFkPkysjbBIhQ11OGV/E0pbmzViClIu3i/lg1VM7tqw==}
+  /kitbook/0.0.19_svelte@3.49.0:
+    resolution: {integrity: sha512-uEBaH8L51wTwlg2g1lyRYdblOMSiiYy32TV/OVYZiY9NaFYdg9wpjrcooDulBmtNLP+A52P3nMAyHm2ezcfNtg==}
     dependencies:
-      svelte-pieces: 1.0.35_svelte@3.49.0
-      svelte-store-router: 2.0.10_svelte@3.49.0
+      magic-string: 0.26.2
+      prism-svelte: 0.5.0
+      prismjs: 1.28.0
+      svelte-pieces: 1.0.37_svelte@3.49.0
+      unist-util-visit: 4.1.0
     transitivePeerDependencies:
       - svelte
     dev: true
@@ -7047,6 +7050,10 @@ packages:
     resolution: {integrity: sha512-yABh19CYbM24V7aS7TuPYRNMqthxwbvx6FF/Rw920YbyBWO3tnyPIqRMgHuSVsLmuHkkBS1Akyof463FVdkeDQ==}
     dev: true
 
+  /prism-svelte/0.5.0:
+    resolution: {integrity: sha512-db91Bf3pRGKDPz1lAqLFSJXeW13mulUJxhycysFpfXV5MIK7RgWWK2E5aPAa71s8TCzQUXxF5JOV42/iOs6QkA==}
+    dev: true
+
   /prismjs/1.28.0:
     resolution: {integrity: sha512-8aaXdYvl1F7iC7Xm1spqSaY/OJBpYW3v+KJ+F17iYxvdc8sfjW194COK5wVhMZX45tGteiBQgdvD/nhxcRwylw==}
     engines: {node: '>=6'}
@@ -8076,19 +8083,8 @@ packages:
       tiny-glob: 0.2.9
     dev: true
 
-  /svelte-pieces/1.0.22_svelte@3.49.0:
-    resolution: {integrity: sha512-Fpz4lXoL8pkqxRlpTA6Wod4E0H009m/Pu21xoutmi/WS8czqMZs7/ISsCeP9t7nw0Af82FE/31AMcztFCvQjzg==}
-    peerDependencies:
-      svelte: ^3.46.4
-    dependencies:
-      fast-xml-parser: 3.21.1
-      he: 1.2.0
-      svelte: 3.49.0
-      yootils: 0.3.1
-    dev: true
-
-  /svelte-pieces/1.0.35_svelte@3.49.0:
-    resolution: {integrity: sha512-Cro6osbpS5r3kthnwmxnKjGeCVLULN0OYTJKSmMzVJv2RHPsbI1Rb+/S6hqzScddl1Kx0b79qfvzN+ZbADPXAA==}
+  /svelte-pieces/1.0.37_svelte@3.49.0:
+    resolution: {integrity: sha512-BpD469oWmawJo8nQGvtivnzrNY3VUR61/IlpFG9TiryaP4HK1HDLD9DEyRXLsrZWaPbBQs8vSCywTJ1kTsMrlw==}
     peerDependencies:
       svelte: ^3.46.4
     dependencies:
@@ -8493,10 +8489,29 @@ packages:
     dependencies:
       crypto-random-string: 2.0.0
 
+  /unist-util-is/5.1.1:
+    resolution: {integrity: sha512-F5CZ68eYzuSvJjGhCLPL3cYx45IxkqXSetCcRgUXtbcm50X2L9oOWQlfUfDdAf+6Pd27YDblBfdtmsThXmwpbQ==}
+    dev: true
+
   /unist-util-stringify-position/2.0.3:
     resolution: {integrity: sha512-3faScn5I+hy9VleOq/qNbAd6pAx7iH5jYBMS9I1HgQVijz/4mv5Bvw5iw1sC/90CODiKo81G/ps8AJrISn687g==}
     dependencies:
       '@types/unist': 2.0.6
+    dev: true
+
+  /unist-util-visit-parents/5.1.0:
+    resolution: {integrity: sha512-y+QVLcY5eR/YVpqDsLf/xh9R3Q2Y4HxkZTp7ViLDU6WtJCEcPmRzW1gpdWDCDIqIlhuPDXOgttqPlykrHYDekg==}
+    dependencies:
+      '@types/unist': 2.0.6
+      unist-util-is: 5.1.1
+    dev: true
+
+  /unist-util-visit/4.1.0:
+    resolution: {integrity: sha512-n7lyhFKJfVZ9MnKtqbsqkQEk5P1KShj0+//V7mAcoI6bpbUjh3C/OG8HVD+pBihfh6Ovl01m8dkcv9HNqYajmQ==}
+    dependencies:
+      '@types/unist': 2.0.6
+      unist-util-is: 5.1.1
+      unist-util-visit-parents: 5.1.0
     dev: true
 
   /universal-analytics/0.5.3:
@@ -8978,10 +8993,6 @@ packages:
     resolution: {integrity: sha512-rVksvsnNCdJ/ohGc6xgPwyN8eheCxsiLM8mxuE/t/mOVqJewPuO1miLpTHQiRgTKCLexL4MeAFVagts7HmNZ2Q==}
     engines: {node: '>=10'}
     optional: true
-
-  /yootils/0.3.1:
-    resolution: {integrity: sha512-A7AMeJfGefk317I/3tBoUYRcDcNavKEkpiPN/nQsBz/viI2GvT7BtrqdPD6rGqBFN8Ax7v4obf+Cl32JF9DDVw==}
-    dev: true
 
   /zip-stream/4.1.0:
     resolution: {integrity: sha512-zshzwQW7gG7hjpBlgeQP9RuyPGNxvJdzR8SUM3QhxCnLjWN2E7j3dOvpeDcQoETfHx0urRS7EtmVToql7YpU4A==}
