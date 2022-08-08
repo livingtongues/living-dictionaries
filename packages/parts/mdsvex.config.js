@@ -1,8 +1,9 @@
 import { defineMDSveXConfig as defineConfig } from 'mdsvex';
+import { codePreview } from 'kitbook';
 
 const config = defineConfig({
   extensions: ['.md', '.svx'],
-  remarkPlugins: [],
+  remarkPlugins: [codePreview],
   rehypePlugins: [],
 });
 
