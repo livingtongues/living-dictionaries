@@ -1,27 +1,35 @@
 <script lang="ts">
   import type { IEntry } from "@living-dictionaries/types";
+import { setRTLTextPlugin } from "mapbox-gl";
 
   export let entries: IEntry[];
   //TODO import dictionary data
 </script>
 
-<div class="grid grid-cols-2 gap-4">
+<div class="grid grid-cols-2 gap-4 break-words">
   {#each entries as entry}
     <div>
       <strong>{entry.lx}</strong>
       {entry.ph ? `/${entry.ph}/` : ''}
       {#each Object.entries(entry.gl) as gloss, index}
-        {index < Object.entries(entry.gl).length ? `${gloss[1]} ` : gloss[1]}
+        <strong>{index < Object.entries(entry.gl).length-1 ? `${gloss[1]} - ` : gloss[1]}</strong>
       {/each}
+      <strong><i>{entry.ps ? entry.ps : ''}</i></strong>
       {entry.xv ? entry.xv : ''}
       {#if entry.xs}      
         {#each Object.entries(entry.xs) as sentence, index}
-          {index < Object.entries(entry.xs).length ? `${sentence[1]} ` : sentence[1]}
+          {index < Object.entries(entry.xs).length-1 ? `${sentence[1]}, ` : `${sentence[1]};`}
         {/each}
       {/if}
       {#if entry.pf}
         <img width="280" src={entry.pf.path} alt={entry.lx} />
-        More image info
+        <i>{entry.pf.path};</i>
+        <i>{entry.pf.source ? `${entry.pf.source};` : ''}</i>
+      {/if}
+      {#if entry.sr}
+        {#each entry.sr as source, index}
+          <i>{index < entry.sr.length-1 ? `${source}, ` : `${source};`}</i>
+        {/each}
       {/if}
     </div>
   {/each}
