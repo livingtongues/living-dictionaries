@@ -39,6 +39,7 @@ With help from https://github.com/beyonk-adventures/svelte-mapbox
         }}>
         {#each points as point, index (point)}
           <Marker
+            draggable
             on:dragend={(e) => {
               remove(point);
               add({ lng: e.detail.lng, lat: e.detail.lat });
