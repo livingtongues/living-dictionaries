@@ -43,6 +43,109 @@ if (import.meta.vitest) {
   });
 }
 
+if (import.meta.vitest) {
+  test('Deeper polygonFromCoordinates test', () => {
+    expect(
+      nonSelfIntersectingPolygonFromCoordinates([
+        {
+          lng: -95,
+          lat: 44,
+        },
+        {
+          lng: -105,
+          lat: 35,
+        },
+        {
+          lng: -105,
+          lat: 42,
+        },
+        {
+          lng: -96,
+          lat: 37,
+        },
+        {
+          lng: -99.91155986691973,
+          lat: 34.45282591700905,
+        },
+      ])
+    ).toMatchInlineSnapshot(`
+      [
+        [
+          [
+            -99.91155986691973,
+            34.45282591700905,
+          ],
+          [
+            -105,
+            35,
+          ],
+          [
+            -105,
+            42,
+          ],
+          [
+            -95,
+            44,
+          ],
+          [
+            -96,
+            37,
+          ],
+        ],
+      ]
+    `);
+    expect(
+      nonSelfIntersectingPolygonFromCoordinates([
+        {
+          lng: -95,
+          lat: 44,
+        },
+        {
+          lng: -105,
+          lat: 35,
+        },
+        {
+          lng: -105,
+          lat: 42,
+        },
+        {
+          lng: -96,
+          lat: 37,
+        },
+        {
+          lng: -100.5332443118098,
+          lat: 36.26045081995481,
+        },
+      ])
+    ).toMatchInlineSnapshot(`
+      [
+        [
+          [
+            -105,
+            35,
+          ],
+          [
+            -105,
+            42,
+          ],
+          [
+            -95,
+            44,
+          ],
+          [
+            -100.5332443118098,
+            36.26045081995481,
+          ],
+          [
+            -96,
+            37,
+          ],
+        ],
+      ]
+    `);
+  });
+}
+
 interface Point {
   x: number;
   y: number;
@@ -51,14 +154,8 @@ interface Point {
 function sortPoints(points: Point[]) {
   points = points.splice(0);
   const p0: Point = { x: 0, y: 0 };
-  p0.y = Math.min.apply(
-    null,
-    points.map((p) => p.y)
-  );
-  p0.x = Math.max.apply(
-    null,
-    points.filter((p) => p.y == p0.y).map((p) => p.x)
-  );
+  p0.y = Math.min(...points.map((p) => p.y));
+  p0.x = Math.max(...points.filter((p) => p.y == p0.y).map((p) => p.x));
   points.sort((a, b) => angleCompare(p0, a, b));
   return points;
 }
