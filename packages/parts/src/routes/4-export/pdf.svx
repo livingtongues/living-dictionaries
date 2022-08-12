@@ -1,7 +1,9 @@
-<script>
+<script lang="ts">
   import HtmlTemplate from "$lib/export/HTMLTemplate.svelte";
   import HtmlTemplate2 from "$lib/export/HTMLTemplate2.svelte";
   import HtmlTemplate3 from "$lib/export/HTMLTemplate3.svelte";
+import CoordinatesModal from "$lib/maps/CoordinatesModal.svelte";
+  import { Story } from 'kitbook';
 
   const entries = [
     //...add a couple sample entry objects for mocking
@@ -161,8 +163,38 @@
       id: "wAcMha8FGpnOL13MsyfT"
     }
   ];
+
+  const selectedFields = {
+    id: false,
+    lx: true,
+    lo: true,
+    lo2: true,
+    lo3: true,
+    lo4: true,
+    lo5: true,
+    ph: true,
+    gl: true,
+    in: true,
+    mr: true,
+    ps: true,
+    sd: true,
+    nc: false,
+    pl: false,
+    va: false,
+    di: true,
+    nt: true,
+    sr: true,
+    xv: true,
+    xs: true,
+    sf: true,
+    pf: true,
+    vfs: false,
+  }
 </script>
 
 <!-- <HtmlTemplate {entries} /> -->
 <!-- <HtmlTemplate2 {entries} /> -->
-<HtmlTemplate3 {entries} />
+
+<Story name="Select Fields" knobs={{...selectedFields}} let:props={selectedFields}>
+  <HtmlTemplate3 {selectedFields} {entries} />
+</Story>

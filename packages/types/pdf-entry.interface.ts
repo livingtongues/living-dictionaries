@@ -24,3 +24,9 @@ enum EntryPDFFieldsEnum {
   pf = 'Photo File',
   vfs = 'Video Files',
 }
+type EntryForPDFKeys = keyof typeof EntryPDFFieldsEnum;
+export type EntryForPDF = {
+  [key in EntryForPDFKeys]?: string;
+};
+
+//TODO Can we make a enum with boolean values?
