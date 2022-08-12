@@ -1,12 +1,11 @@
 <script lang="ts">
   import type { IEntry } from "@living-dictionaries/types";
-import { setRTLTextPlugin } from "mapbox-gl";
 
   export let entries: IEntry[];
   //TODO import dictionary data
 </script>
 
-<div class="test">
+<div class="container">
   {#each entries as entry}
     <div>
       <strong>{entry.lx}</strong>
@@ -36,11 +35,9 @@ import { setRTLTextPlugin } from "mapbox-gl";
 </div>
 
 <style>
-  .test {
-    display: flex;
-    flex-wrap: wrap;
-  }
-  .test div {
-    flex: 1 1 200px;
+  .container {
+    column-count: 2;
+    column-gap: 20px;
+    word-break: break-all;
   }
 </style>
