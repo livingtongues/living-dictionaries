@@ -47,14 +47,27 @@
 
   export let entries: IEntry[];
 
+  //This is just an example on how it can be done.
+  import toPDF from './pdf.example'
+  let element:HTMLElement;
+  function toHTML() {
+    const {pathname: root} = new URL('../src', import.meta.url)
+    //console.log(element.outerHTML);
+    const html = element.outerHTML;
+    //TODO the pdf code should be executed on the backend for it to work.
+    toPDF(html, './test.pdf');
+  }
+
   $: console.log("Fields:", fields)
 </script>
 
 <!-- prettier-ignore -->
 # Birhor
 
+<button class="px-6 py-2 bg-gray-500 font-medium text-sm hover:bg-gray-600 text-gray-100 rounded" on:click={toHTML} type="button">To HTML</button>
+
 ### Select entry fields to export
-<div class="mb-3">
+<div bind:this={element} class="mb-3">
   <input id="select-all" type="checkbox" bind:checked={selectAll} on:change={toggleAll} />
   <label for="select-all" class="text-sm font-medium text-gray-700 mr-4">Select/Deselect All</label>
   <input id="mirror-toggle" type="checkbox" bind:checked={mirror} on:change={mirrorToggle} />

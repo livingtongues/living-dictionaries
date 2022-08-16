@@ -2,7 +2,6 @@
   import HtmlTemplate from "$lib/export/HTMLTemplate.svelte";
   import HtmlTemplate2 from "$lib/export/HTMLTemplate2.svelte";
   import HtmlTemplate3 from "$lib/export/HTMLTemplate3.svelte";
-import CoordinatesModal from "$lib/maps/CoordinatesModal.svelte";
   import { Story } from 'kitbook';
 
   const entries = [
@@ -192,9 +191,9 @@ import CoordinatesModal from "$lib/maps/CoordinatesModal.svelte";
   }
 </script>
 
-<!-- <HtmlTemplate {entries} /> -->
+<HtmlTemplate {entries} />
 <!-- <HtmlTemplate2 {entries} /> -->
 
-<Story name="Select Fields" knobs={{...selectedFields}} let:props={selectedFields}>
+<!-- <Story name="Select Fields" knobs={{...selectedFields}} let:props={selectedFields}>
   <HtmlTemplate3 {selectedFields} {entries} />
-</Story>
+</Story> -->
