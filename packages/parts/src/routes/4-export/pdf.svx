@@ -165,7 +165,6 @@
 
   const selectedFields = {
     id: false,
-    lx: true,
     lo: true,
     lo2: true,
     lo3: true,
