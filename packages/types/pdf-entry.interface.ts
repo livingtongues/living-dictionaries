@@ -1,4 +1,4 @@
-enum EntryPDFFieldsEnum {
+export enum EntryPDFFieldsEnum {
   id = 'Id',
   lx = 'Lexeme',
   lo = 'Local Orthography',
@@ -25,7 +25,7 @@ enum EntryPDFFieldsEnum {
   vfs = 'Video Files',
 }
 type EntryForPDFKeys = keyof typeof EntryPDFFieldsEnum;
-export type EntryForPDF = {
+export type IEntryForPDF = {
   [key in EntryForPDFKeys]?: string;
 };
 

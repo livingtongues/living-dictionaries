@@ -1,4 +1,4 @@
-import pdf from 'html-pdf';
+/* import pdf from 'html-pdf';
 
 const options = { format: 'Letter' };
 
@@ -7,4 +7,4 @@ export default function toPDF(html, file) {
     if (err) return console.log(err);
     console.log(res);
   });
-}
+} */

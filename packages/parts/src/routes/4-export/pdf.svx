@@ -191,9 +191,9 @@
   }
 </script>
 
-<HtmlTemplate {entries} />
+<!-- <HtmlTemplate {entries} /> -->
 <!-- <HtmlTemplate2 {entries} /> -->
 
-<!-- <Story name="Select Fields" knobs={{...selectedFields}} let:props={selectedFields}>
+<Story name="Select Fields" knobs={{...selectedFields}} let:props={selectedFields}>
   <HtmlTemplate3 {selectedFields} {entries} />
-</Story> -->
+</Story>

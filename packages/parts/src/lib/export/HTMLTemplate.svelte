@@ -48,14 +48,13 @@
   export let entries: IEntry[];
 
   //This is just an example on how it can be done.
-  import toPDF from './pdf.example'
+  //import toPDF from './pdf.example'
   let element:HTMLElement;
   function toHTML() {
     const {pathname: root} = new URL('../src', import.meta.url)
-    //console.log(element.outerHTML);
     const html = element.outerHTML;
     //TODO the pdf code should be executed on the backend for it to work.
-    toPDF(html, './test.pdf');
+    //toPDF(html, './test.pdf');
   }
 
   $: console.log("Fields:", fields)
