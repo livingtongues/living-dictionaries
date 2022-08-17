@@ -2,12 +2,14 @@
   import type { IEntry, IEntryForPDF } from '@living-dictionaries/types';
   import { EntryPDFFieldsEnum } from '@living-dictionaries/types';
   import { semanticDomains } from '@living-dictionaries/parts';
+  import Button from 'svelte-pieces/ui/Button.svelte';
 
   export let entries: IEntry[];
   export let selectedFields;
+  let element: HTMLElement;
 </script>
 
-<div class="container">
+<div bind:this={element} style="column-count: 2; column-gap: 20px; word-break: break-word;">
   {#each entries as entry}
     <div>
       <!--Essential Fields-->
@@ -59,10 +61,4 @@
   {/each}
 </div>
 
-<style>
-  .container {
-    column-count: 2;
-    column-gap: 20px;
-    word-break: break-word;
-  }
-</style>
+<Button onclick={() => console.log(element.outerHTML)}>Test HTML</Button>
