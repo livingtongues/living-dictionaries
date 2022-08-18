@@ -2,6 +2,7 @@
   import HtmlTemplate from "$lib/export/HTMLTemplate.svelte";
   import HtmlTemplate2 from "$lib/export/HTMLTemplate2.svelte";
   import HtmlTemplate3 from "$lib/export/HTMLTemplate3.svelte";
+  import HtmlTemplate4 from "$lib/export/HTMLTemplate4.svelte";
   import { Story } from 'kitbook';
 
   const entries = [
@@ -194,5 +195,6 @@
 <!-- <HtmlTemplate2 {entries} /> -->
 
 <Story name="Select Fields" knobs={{...selectedFields}} let:props={selectedFields}>
-  <HtmlTemplate3 {selectedFields} {entries} />
+  <!-- <HtmlTemplate3 {selectedFields} {entries} /> -->
+  <HtmlTemplate4 {selectedFields} {entries} />
 </Story>
