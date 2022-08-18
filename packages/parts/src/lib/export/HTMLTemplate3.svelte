@@ -9,7 +9,7 @@
   let element: HTMLElement;
 </script>
 
-<div bind:this={element} style="column-count: 2; column-gap: 20px; word-break: break-word;">
+<div bind:this={element} style="column-count: 2; column-gap: 20px; word-break: break-word; margin: 5rem;">
   {#each entries as entry}
     <div>
       <!--Essential Fields-->
