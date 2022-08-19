@@ -8,7 +8,7 @@
   let element: HTMLElement;
 </script>
 
-<div bind:this={element} style="display: table; clear: both; word-break: break-word; margin: 4rem;">
+<div bind:this={element} style="display: table; clear: both; word-break: break-word; margin: 5rem;">
   {#each entries as entry, index}
     {#if index % 2 === 0}
       <div style="float: left; width:50%;">
