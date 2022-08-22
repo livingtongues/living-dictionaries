@@ -158,32 +158,60 @@
       ],
       sd: null,
       id: "wAcMha8FGpnOL13MsyfT"
+    },
+    {
+      lx: "surdaənsoloso'ji",
+      sf: {
+        sc: "local_import",
+        speakerName: "Somari Sabar",
+        path: "sora/audio/local_import/Sora_big_dog_female_pl_PSI_160-1589122747233.wav"
+      },
+      lo2: "𑃐𑃥𑃝𑃢 𑃢𑃙𑃐𑃦𑃘𑃦𑃐𑃦-𑃠𑃤",
+      gl: {
+        or: "ବଡ ମାଇ କୁକୁର ଗୁଡିକ",
+        hi: "बड़ी कुत्तीयां",
+        as: "ডাঙৰ মাইকী কুকুৰ কেইজনী",
+        en: "big female dogs"
+      },
+      lo: "চুড়া আ্নচ'ল'চঃজি",
+      di: "West Bengal Sabar",
+      ph: "suɽa ənsolosoʔdʒi",
+      sdn: [
+        "1",
+        "1.5",
+        "7.2"
+      ],
+      in: "big female dog-PL",
+      ps: "ap",
+      mr: "suɽa ənsolo soʔ-dʒi",
+      ii: "v3-1589122736839",
+      id: "qd0HhcZKxqPX1x1MXKvw"
     }
   ];
 
   const selectedFields = {
+    lo: true,
+    lo2: true,
+    lo3: true,
+    lo4: true,
+    lo5: true,
     ph: true,
     gl: true,
     ps: true,
     xv: true,
     xs: true,
     pf: true,
-    sr: true,
-    sd: true,
+    sr: false,
+    sd: false,
     id: false,
-    lo: true,
-    lo2: true,
-    lo3: true,
-    lo4: true,
-    lo5: true,
-    in: true,
-    mr: true,
+    in: false,
+    mr: false,
     nc: false,
     pl: false,
     va: false,
-    di: true,
-    nt: true,
-    sf: true,
+    di: false,
+    nt: false,
+    sf: false,
     vfs: false,
   }
 </script>
