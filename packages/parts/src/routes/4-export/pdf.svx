@@ -214,6 +214,37 @@
       ub: "T4qikh1eTafizvpmHNcG29uRQ2j1",
       ii: "v4-1646842787283",
       id: "NExkGez4TRBhxuv7rMzX"
+    },
+    {
+      gl: {
+        or: "Mankada",
+        en: "Rhesus monkey"
+      },
+      nt: "Parlakhemundi: Animals 232 to 258 #",
+      sf: {
+        ts: {
+          seconds: 1580860148,
+          nanoseconds: 537000000
+        },
+        speakerName: "Budura Raspeda",
+        source: "local_import",
+        path: "gta/audio/local_import/Gta-Pkd-Dec13-An-rhesus-monkey-1580860134632.mp3"
+      },
+      pf: {
+        path: "https://lh3.googleusercontent.com/RFMsChWMpLTc-0Oo8srvCtHr40UTMQz-mcuqNkcVanRagRQLd_s7iZqTbTE74EHdjh1TGTjDo8YvcVkePgmN8Q=w920",
+        source: "local_import",
+        gcs: "RFMsChWMpLTc-0Oo8srvCtHr40UTMQz-mcuqNkcVanRagRQLd_s7iZqTbTE74EHdjh1TGTjDo8YvcVkePgmN8Q"
+      },
+      sdn: [
+        "1.5"
+      ],
+      lx: "geseʔ",
+      sd: null,
+      createdBy: "OTD",
+      xs: {
+        vernacular: "Photo by John Connell, September 9 2007 CC BY-NC-SA 2.0 https://www.flickr.com/photos/soutra/1351155387"
+      },
+      id: "cY1McfcmkJyv6EqHeynb"
     }
   ];
 
