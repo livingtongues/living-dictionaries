@@ -2,6 +2,17 @@
   import TwoColumnsLayout from '$lib/export/TwoColumnsLayout.svelte';
   import { Story } from 'kitbook';
 
+  let gender: 'm' | 'f' | 'o' = 'f'
+  const speakers = [
+    {
+      birthplace:"russia",
+      contributingTo: ["bezhta"],
+      decade: 4,
+      displayName:"zaira",
+      gender: gender,
+      uid: "uwNgSHCEeRaJAUPsmZok1uMRXzO2",
+    }
+  ]
   const entries = [
     //...add a couple sample entry objects for mocking
     {
@@ -20,7 +31,7 @@
       nt: 'This is an example of a note, here we can write whatever we want.',
       sr: ['A book', 'www.mybook.com'],
       xs: { en: 'This is a banana', vn: '我很喜歡吃香蕉' },
-      sf: { path: 'https://database.com/sound.mp3', sp: 'Diego' },
+      sf: { path: 'https://database.com/sound.mp3' },
       pf: { gcs: 'banana', path: 'https://api.time.com/wp-content/uploads/2019/11/gettyimages-459761948.jpg' },
       xv: '',
     },
@@ -220,5 +231,5 @@
 <!-- <HtmlTemplate2 {entries} /> -->
 
 <Story name="Select Fields" knobs={{...selectedFields}} let:props={selectedFields}>
-  <TwoColumnsLayout {selectedFields} {entries} />
+  <TwoColumnsLayout {selectedFields} {speakers} {entries} />
 </Story>

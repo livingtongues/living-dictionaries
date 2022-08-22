@@ -1,10 +1,17 @@
 <script lang="ts">
-  import type { IEntry, IEntryForPDF } from '@living-dictionaries/types';
+  import type { IEntry, ISpeaker, IEntryForPDF } from '@living-dictionaries/types';
   import { EntryPDFFieldsEnum } from '@living-dictionaries/types';
   import { semanticDomains } from '@living-dictionaries/parts';
 
   export let entry: IEntry;
+  export let speakers: ISpeaker[];
   export let selectedFields;
+
+  let speaker:ISpeaker;
+  function findSpeaker(speakerId: string) {
+    speaker = speakers.find((speaker) => speaker.uid === speakerId)
+  }
+  $: entry.sf.sp ? findSpeaker(entry.sf.sp) : '';
 </script>
 
 <div style="max-width:450px;margin:auto;">
@@ -34,6 +41,17 @@
         <img style="width:450px;" src={entry.pf.path} alt={entry.lx} />
         <p><i>{entry.pf.path}</i></p>
         <p><i>{entry.pf.source ? `${entry.pf.source}` : ''}</i></p>
+      </div>
+    {/if}
+    {#if entry.sf && selectedFields.sf}
+      <div style="font-size: 0.8em;">
+        <strong>Audio data:</strong>
+        <p>{entry.sf.path}</p>
+        {#if entry.sf.sp}
+          <p><strong>Speaker:</strong> {speaker?.displayName} ({speaker?.gender}) ({speaker?.decade}° decade)</p>
+        {:else if entry.sf.speakerName}
+          <p><strong>Speaker:</strong> {entry.sf.speakerName}</p>
+        {/if}
       </div>
     {/if}
     {#if entry.sr && selectedFields.sr}
