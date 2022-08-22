@@ -1,10 +1,11 @@
 <script lang="ts">
-  import type { IEntry } from '@living-dictionaries/types';
+  import type { IEntry, ISpeaker } from '@living-dictionaries/types';
   import Button from 'svelte-pieces/ui/Button.svelte';
   import HTMLTemplate4 from './HTMLTemplate4.svelte';
 
   export let entries: IEntry[];
   export let selectedFields;
+  export let speakers: ISpeaker[];
   let element: HTMLElement;
 </script>
 
@@ -12,12 +13,12 @@
   {#each entries as entry, index}
     {#if index % 2 === 0}
       <div style="float: left; width:50%;">
-        <HTMLTemplate4 {selectedFields} {entry} />
+        <HTMLTemplate4 {selectedFields} {speakers} {entry} />
       </div>
     {/if}
     {#if index % 2 === 1}
       <div style="float: right; width:50%;">
-        <HTMLTemplate4 {selectedFields} {entry} />
+        <HTMLTemplate4 {selectedFields} {speakers} {entry} />
       </div>
     {/if}
   {/each}
