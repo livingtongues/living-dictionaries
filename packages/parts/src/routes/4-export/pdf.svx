@@ -197,6 +197,23 @@
       mr: "suɽa ənsolo soʔ-dʒi",
       ii: "v3-1589122736839",
       id: "qd0HhcZKxqPX1x1MXKvw"
+    },
+    {
+      lx: "aben bar hoɽ kʰatir",
+      ph: "aben bar hoɽ kʰatir",
+      sdn: [],
+      lo: "अबेन बार होड़ खातिर",
+      gl: {
+        hi: "तुमदोनों के लिए",
+        en: "for you both"
+      },
+      sf: {
+        speakerName: "Kaushila Birhor",
+        path: "birhor/audio/NExkGez4TRBhxuv7rMzX_1646843775362.wav",
+      },
+      ub: "T4qikh1eTafizvpmHNcG29uRQ2j1",
+      ii: "v4-1646842787283",
+      id: "NExkGez4TRBhxuv7rMzX"
     }
   ];
 

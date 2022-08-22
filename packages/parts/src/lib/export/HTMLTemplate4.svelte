@@ -11,7 +11,7 @@
   function findSpeaker(speakerId: string) {
     speaker = speakers.find((speaker) => speaker.uid === speakerId)
   }
-  $: entry.sf.sp ? findSpeaker(entry.sf.sp) : '';
+  $: entry?.sf?.sp ? findSpeaker(entry.sf.sp) : '';
 </script>
 
 <div style="max-width:450px;margin:auto;">
@@ -44,7 +44,7 @@
       </div>
     {/if}
     {#if entry.sf && selectedFields.sf}
-      <div style="font-size: 0.8em;">
+      <div>
         <strong>Audio data:</strong>
         <p>{entry.sf.path}</p>
         {#if entry.sf.sp}
