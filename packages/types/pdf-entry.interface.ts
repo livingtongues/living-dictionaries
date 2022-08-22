@@ -24,14 +24,8 @@
   pf = 'Photo File',
   vfs = 'Video Files',
 } */
-// Local othrographies could be dynamic instead
 export enum EntryPDFFieldsEnum {
   id = 'Id',
-  lo = 'Local Orthography',
-  lo2 = 'Local Orthography 2',
-  lo3 = 'Local Orthography 3',
-  lo4 = 'Local Orthography 4',
-  lo5 = 'Local Orthography 5',
   in = 'Interlinearization',
   mr = 'Morphology',
   nc = 'Noun Class',

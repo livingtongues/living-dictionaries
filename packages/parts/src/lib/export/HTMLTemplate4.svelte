@@ -7,12 +7,15 @@
   export let selectedFields;
 </script>
 
-<!--TODO add a max with for columns-->
 <div style="max-width:450px;margin:auto;">
   <!--Essential Fields-->
   <div>
-    <!--It might be necessary to style elements inline to eventually use the html-pdf library-->
     <strong style="font-size: 1.4em;">{entry.lx}</strong>
+    {#each ['lo', 'lo2', 'lo3', 'lo4', 'lo5'] as lo}
+      {#if entry[lo] && selectedFields[lo]}
+        <strong>{entry[lo]}</strong>{' '}
+      {/if}
+    {/each}
     {entry.ph && selectedFields.ph ? `/${entry.ph}/` : ''}
     {#if entry.gl && selectedFields.gl}
       {#each Object.entries(entry.gl) as gloss, index}
@@ -20,7 +23,7 @@
       {/each}
     {/if}
     <i>{entry.ps && selectedFields.ps ? entry.ps : ''}</i>
-    {entry.xv && selectedFields.xv ? entry.xv : ''}
+    <strong>{entry.xv && selectedFields.xv ? entry.xv : ''}</strong>
     {#if entry.xs && selectedFields.xs}      
       {#each Object.entries(entry.xs) as sentence, index}
       {sentence[1]}{index < Object.entries(entry.xs).length-1 ? ', ' : ''}
