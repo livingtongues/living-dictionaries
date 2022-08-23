@@ -6,6 +6,7 @@
   export let entry: IEntry;
   export let speakers: ISpeaker[];
   export let selectedFields: ISelectedFields;
+  export let imageSize: number;
 
   let speaker:ISpeaker;
   function findSpeaker(speakerId: string) {
@@ -38,7 +39,7 @@
     {/if}
     {#if entry.pf && selectedFields.pf}
       <div style="font-size: 0.8em;">
-        <img style="width:230px; display: block; margin: 0 auto;" src={entry.pf.path} alt={entry.lx} />
+        <img style={`width:${imageSize}%; display: block; margin: 0 auto;`} src={entry.pf.path} alt={entry.lx} />
         <p><i>{entry.pf.path}</i></p>
         <p><i>{entry.pf.source ? `${entry.pf.source}` : ''}</i></p>
       </div>
