@@ -278,6 +278,10 @@
 <!-- <HtmlTemplate {entries} /> -->
 <!-- <HtmlTemplate2 {entries} /> -->
 
+<Story name="Select Fields" knobs={{fontSize: 2, imageSize: 80}} let:props={{fontSize, imageSize}}>
+  <TwoColumnsLayout {selectedFields} {speakers} {entries} {fontSize} {imageSize} />
+</Story>
+
 <Story name="Select Fields" knobs={{...selectedFields}} let:props={selectedFields}>
   <TwoColumnsLayout {selectedFields} {speakers} {entries} />
 </Story>
