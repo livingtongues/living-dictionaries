@@ -213,7 +213,9 @@
       },
       ub: "T4qikh1eTafizvpmHNcG29uRQ2j1",
       ii: "v4-1646842787283",
-      id: "NExkGez4TRBhxuv7rMzX"
+      id: "NExkGez4TRBhxuv7rMzX",
+      nc: "6/12",
+      pl: "aben bar hoɽ kʰatu"
     },
     {
       gl: {
@@ -278,7 +280,7 @@
 <!-- <HtmlTemplate {entries} /> -->
 <!-- <HtmlTemplate2 {entries} /> -->
 
-<Story name="Select Fields" knobs={{fontSize: 2, imageSize: 80}} let:props={{fontSize, imageSize}}>
+<Story name="Configure font and image sizes" knobs={{fontSize: 2, imageSize: 80}} let:props={{fontSize, imageSize}}>
   <TwoColumnsLayout {selectedFields} {speakers} {entries} {fontSize} {imageSize} />
 </Story>
 
