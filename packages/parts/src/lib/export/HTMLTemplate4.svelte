@@ -1,11 +1,11 @@
 <script lang="ts">
-  import type { IEntry, ISpeaker, IEntryForPDF } from '@living-dictionaries/types';
+  import type { IEntry, ISpeaker, ISelectedFields, IEntryForPDF } from '@living-dictionaries/types';
   import { EntryPDFFieldsEnum } from '@living-dictionaries/types';
   import { semanticDomains } from '@living-dictionaries/parts';
 
   export let entry: IEntry;
   export let speakers: ISpeaker[];
-  export let selectedFields;
+  export let selectedFields: ISelectedFields;
 
   let speaker:ISpeaker;
   function findSpeaker(speakerId: string) {
