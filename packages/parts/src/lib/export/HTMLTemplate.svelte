@@ -1,148 +1,79 @@
 <script lang="ts">
-  import entryFields from './entryFields.json';
-  import { semanticDomains, partsOfSpeech } from '@living-dictionaries/parts';
-  import type { IEntry } from '@living-dictionaries/types';
+  import type { IEntry, ISpeaker, ISelectedFields, IEntryForPDF } from '@living-dictionaries/types';
+  import { EntryPDFFieldsEnum } from '@living-dictionaries/types';
+  import { semanticDomains } from '@living-dictionaries/parts';
 
-  let fields = {
-    id: false,
-    lx: true,
-    lo: true,
-    lo2: true,
-    lo3: true,
-    lo4: true,
-    lo5: true,
-    ph: true,
-    gl: true,
-    in: true,
-    mr: true,
-    ps: true,
-    sd: true,
-    nc: false,
-    pl: false,
-    va: false,
-    di: true,
-    nt: true,
-    sr: true,
-    xv: true,
-    xs: true,
-    sf: true,
-    pf: true,
-    vfs: false,
+  export let entry: IEntry;
+  export let speakers: ISpeaker[];
+  export let selectedFields: ISelectedFields;
+  export let imageSize: number;
+
+  let speaker:ISpeaker;
+  function findSpeaker(speakerId: string) {
+    speaker = speakers.find((speaker) => speaker.uid === speakerId)
   }
-
-  let selectAll = true;
-  let mirror = false;
-
-  function toggleAll() {
-    Object.keys(fields).forEach(field => {
-      fields[field] = selectAll;
-    });
-  }
-
-  function mirrorToggle() {
-    Object.keys(fields).forEach(field => {
-      fields[field] = !fields[field];
-    });
-  }
-
-  export let entries: IEntry[];
-
-  //This is just an example on how it can be done.
-  //import toPDF from './pdf.example'
-  let element:HTMLElement;
-  function toHTML() {
-    const {pathname: root} = new URL('../src', import.meta.url)
-    const html = element.outerHTML;
-    //TODO the pdf code should be executed on the backend for it to work.
-    //toPDF(html, './test.pdf');
-  }
-
-  $: console.log("Fields:", fields)
+  $: entry?.sf?.sp ? findSpeaker(entry.sf.sp) : '';
 </script>
 
-<!-- prettier-ignore -->
-# Birhor
-
-<button class="px-6 py-2 bg-gray-500 font-medium text-sm hover:bg-gray-600 text-gray-100 rounded" on:click={toHTML} type="button">To HTML</button>
-
-### Select entry fields to export
-<div bind:this={element} class="mb-3">
-  <input id="select-all" type="checkbox" bind:checked={selectAll} on:change={toggleAll} />
-  <label for="select-all" class="text-sm font-medium text-gray-700 mr-4">Select/Deselect All</label>
-  <input id="mirror-toggle" type="checkbox" bind:checked={mirror} on:change={mirrorToggle} />
-  <label for="mirror-toggle" class="text-sm font-medium text-gray-700">Mirror Toggling</label>
-</div>
-{#each Object.keys(entryFields) as field}
-  <input id={field} type="checkbox" bind:checked={fields[field]} />
-  <label for={field} class="text-sm font-medium text-gray-700 mr-4">{entryFields[field]}</label>
-{/each}
-
-{#each entries as entry}
-  {#if fields['lx']}
-    ## {entry.lx}
-  {/if}
-
-  {#if entry.pf && fields['pf']}
-    <div class="flex justify-between">
-      <img src={entry.pf.path} alt={entry.pf.gcs} width=350 height=350 />
-      {#if entry.pf.source}
-
-        **Image Source:** {entry.pf.source}
-        
+<div style="max-width:450px;margin:auto;">
+  <!--Essential Fields-->
+  <div>
+    <strong style="font-size: 1.4em;">{entry.lx}</strong>
+    {#each ['lo', 'lo2', 'lo3', 'lo4', 'lo5'] as lo}
+      {#if entry[lo] && selectedFields[lo]}
+        <strong>{entry[lo]}</strong>{' '}
       {/if}
-    </div>
-  {/if}
-
-  {#if entry.gl && fields['gl']}
-    {#each Object.entries(entry.gl) as gloss}
-
-      _**{gloss[0]}:** {gloss[1]}_
-
     {/each}
-  {/if}
-
-  {#each Object.entries(entry) as field}
-    {#if typeof(field[1]) !== 'object'}
-      {#if field[1] && field[0] !== "lx" && field[0] !== "ps" && fields[field[0]]}
-
-        **{entryFields[field[0]]}:** {field[1]}
-
-      {/if}
-    {/if}
-  {/each}
-
-  {#if entry.ps && fields['ps']}
-
-    **Part of Speech:** {partsOfSpeech.find(pos => pos.enAbbrev === entry.ps).enName}
-
-  {/if}
-
-  {#if entry.sdn && fields['sd']}
-    <div>
-      <strong>Semantic domains:</strong>
-
-      {#each entry.sdn as semanticDomain, index}
-
-        <span>{semanticDomains.find((sd) => sd.key === semanticDomain).name}{entry.sdn.length-1 === index  ? '' : ', '}</span>
-
+    {entry.ph && selectedFields.ph ? `/${entry.ph}/` : ''}
+    {#if entry.gl && selectedFields.gl}
+      {#each Object.entries(entry.gl) as gloss, index}
+        {gloss[1]}{index < Object.entries(entry.gl).length-1 ? ' - ' : ''}
       {/each}
-    </div>
-  {/if}
-
-  {#if entry.sf && fields['sf']}
-    {#if entry.sf.source}
-
-    **Audio Source:** {entry.sf.source}
-
     {/if}
-    {#if entry.sf.speakerName}
-
-    **Audio Speakername:** {entry.sf.speakerName}
-
+    <i>{entry.ps && selectedFields.ps ? entry.ps : ''}</i>
+    <strong>{entry.xv && selectedFields.xv ? entry.xv : ''}</strong>
+    {#if entry.xs && selectedFields.xs}      
+      {#each Object.entries(entry.xs) as sentence, index}
+      {sentence[1]}{index < Object.entries(entry.xs).length-1 ? ', ' : ''}
+      {/each}
     {/if}
-
-    **Audio Path:** {entry.sf.path}
-
-  {/if}
-
-{/each}
+    {#if entry.pf && selectedFields.pf}
+      <div style="font-size: 0.8em;">
+        <img style={`width:${imageSize}%; display: block; margin: 0 auto;`} src={entry.pf.path} alt={entry.lx} />
+        <p><i>{entry.pf.path}</i></p>
+      </div>
+    {/if}
+    {#if entry.sr && selectedFields.sr}
+      <i><strong>Source(s): </strong></i>
+      {#each entry.sr as source, index}
+        <i>{index < entry.sr.length-1 ? `${source}, ` : `${source}`}</i>
+      {/each}
+    {/if}
+    {#if entry.sf && selectedFields.sf}
+      <div>
+        <strong>Audio data:</strong>
+        <p>{entry.sf.path}</p>
+        {#if entry.sf.sp}
+          <p><strong>Speaker:</strong> {speaker?.displayName} ({speaker?.gender}) ({speaker?.decade*10}-{(speaker?.decade+0.9)*10} years old)</p>
+        {:else if entry.sf.speakerName}
+          <p><strong>Speaker:</strong> {entry.sf.speakerName}</p>
+        {/if}
+      </div>
+    {/if}
+  </div>
+  <!-- The remaining fields -->
+  <div>
+    {#if entry.sdn && selectedFields.sd}
+      <strong>Semantic Domains: </strong>
+      {#each entry.sdn as key, index}
+      {semanticDomains.find(sd => sd.key === key).name}{index < entry.sdn.length-1 ? ', ' : ''}
+      {/each}
+    {/if}
+    {#each Object.keys(EntryPDFFieldsEnum) as key}
+      {#if entry[key] && selectedFields[key]}
+        <p><u>{EntryPDFFieldsEnum[key]}</u>: {entry[key]}</p>
+      {/if}
+    {/each}
+  </div>
+</div>
+      
