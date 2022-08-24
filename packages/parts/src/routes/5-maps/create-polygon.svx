@@ -2,7 +2,7 @@
   import { Story } from 'kitbook';
   import Map from '$lib/maps/mapbox/map/Map.svelte';
   import Marker from '$lib/maps/mapbox/map/Marker.svelte';
-  import Set from 'svelte-pieces/functions/Set.svelte';
+  import ReactiveSet from 'svelte-pieces/functions/ReactiveSet.svelte';
   import Popup from '$lib/maps/mapbox/map/Popup.svelte';
   import Button from 'svelte-pieces/ui/Button.svelte';
   import GeoJSONSource from '$lib/maps/mapbox/sources/GeoJSONSource.svelte';
@@ -21,7 +21,7 @@ With help from https://github.com/beyonk-adventures/svelte-mapbox
   knobs={{ openFirst: false, autoDrawShape: true }}
   let:props={{ openFirst, autoDrawShape }}
   name="Draw Polygon">
-  <Set
+  <ReactiveSet
     input={[
       { lng: -95, lat: 44 },
       { lng: -105, lat: 35 },
@@ -78,5 +78,5 @@ With help from https://github.com/beyonk-adventures/svelte-mapbox
       </Map>
     </div>
     <pre>{JSON.stringify(points, null, 2)}</pre>
-  </Set>
+  </ReactiveSet>
 </Story>
