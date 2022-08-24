@@ -65,7 +65,7 @@ importers:
       '@types/mapbox__mapbox-gl-geocoder': ^4.7.2
       '@types/recordrtc': ^5.6.8
       '@types/youtube': ^0.0.46
-      kitbook: ^0.0.19
+      kitbook: ^0.0.16
       mapbox-gl: ^2.9.2
       mdsvex: ^0.10.6
       recordrtc: ^5.6.2
@@ -92,7 +92,7 @@ importers:
       '@types/mapbox__mapbox-gl-geocoder': 4.7.2
       '@types/recordrtc': 5.6.8
       '@types/youtube': 0.0.46
-      kitbook: 0.0.19_svelte@3.49.0
+      kitbook: 0.0.16_svelte@3.49.0
       mapbox-gl: 2.9.2
       mdsvex: 0.10.6_svelte@3.49.0
       recordrtc: 5.6.2
@@ -2287,8 +2287,10 @@ packages:
     dev: false
     optional: true
 
-  /ajv-formats/2.1.1:
+  /ajv-formats/2.1.1_ajv@8.11.0:
     resolution: {integrity: sha512-Wx0Kx52hxE7C18hkMEggYlEifqWZtYaRgouJor+WMdPnQyEK13vgEWyVNup7SoeeoLMsr4kf5h6dOW11I15MUA==}
+    peerDependencies:
+      ajv: ^8.0.0
     peerDependenciesMeta:
       ajv:
         optional: true
@@ -4422,7 +4424,7 @@ packages:
     dependencies:
       '@apidevtools/json-schema-ref-parser': 9.0.9
       ajv: 8.11.0
-      ajv-formats: 2.1.1
+      ajv-formats: 2.1.1_ajv@8.11.0
       body-parser: 1.20.0
       content-type: 1.0.4
       deep-freeze: 0.0.1
@@ -5924,14 +5926,11 @@ packages:
       json-buffer: 3.0.0
     dev: false
 
-  /kitbook/0.0.19_svelte@3.49.0:
-    resolution: {integrity: sha512-uEBaH8L51wTwlg2g1lyRYdblOMSiiYy32TV/OVYZiY9NaFYdg9wpjrcooDulBmtNLP+A52P3nMAyHm2ezcfNtg==}
+  /kitbook/0.0.16_svelte@3.49.0:
+    resolution: {integrity: sha512-agopbOHrMv5OQig0riZsQfRnKfBsoaS5Q9h+mN8mzqMYFkPkysjbBIhQ11OGV/E0pbmzViClIu3i/lg1VM7tqw==}
     dependencies:
-      magic-string: 0.26.2
-      prism-svelte: 0.5.0
-      prismjs: 1.28.0
       svelte-pieces: 1.0.37_svelte@3.49.0
-      unist-util-visit: 4.1.0
+      svelte-store-router: 2.0.10_svelte@3.49.0
     transitivePeerDependencies:
       - svelte
     dev: true
@@ -7048,10 +7047,6 @@ packages:
 
   /prism-svelte/0.4.7:
     resolution: {integrity: sha512-yABh19CYbM24V7aS7TuPYRNMqthxwbvx6FF/Rw920YbyBWO3tnyPIqRMgHuSVsLmuHkkBS1Akyof463FVdkeDQ==}
-    dev: true
-
-  /prism-svelte/0.5.0:
-    resolution: {integrity: sha512-db91Bf3pRGKDPz1lAqLFSJXeW13mulUJxhycysFpfXV5MIK7RgWWK2E5aPAa71s8TCzQUXxF5JOV42/iOs6QkA==}
     dev: true
 
   /prismjs/1.28.0:
@@ -8489,29 +8484,10 @@ packages:
     dependencies:
       crypto-random-string: 2.0.0
 
-  /unist-util-is/5.1.1:
-    resolution: {integrity: sha512-F5CZ68eYzuSvJjGhCLPL3cYx45IxkqXSetCcRgUXtbcm50X2L9oOWQlfUfDdAf+6Pd27YDblBfdtmsThXmwpbQ==}
-    dev: true
-
   /unist-util-stringify-position/2.0.3:
     resolution: {integrity: sha512-3faScn5I+hy9VleOq/qNbAd6pAx7iH5jYBMS9I1HgQVijz/4mv5Bvw5iw1sC/90CODiKo81G/ps8AJrISn687g==}
     dependencies:
       '@types/unist': 2.0.6
-    dev: true
-
-  /unist-util-visit-parents/5.1.0:
-    resolution: {integrity: sha512-y+QVLcY5eR/YVpqDsLf/xh9R3Q2Y4HxkZTp7ViLDU6WtJCEcPmRzW1gpdWDCDIqIlhuPDXOgttqPlykrHYDekg==}
-    dependencies:
-      '@types/unist': 2.0.6
-      unist-util-is: 5.1.1
-    dev: true
-
-  /unist-util-visit/4.1.0:
-    resolution: {integrity: sha512-n7lyhFKJfVZ9MnKtqbsqkQEk5P1KShj0+//V7mAcoI6bpbUjh3C/OG8HVD+pBihfh6Ovl01m8dkcv9HNqYajmQ==}
-    dependencies:
-      '@types/unist': 2.0.6
-      unist-util-is: 5.1.1
-      unist-util-visit-parents: 5.1.0
     dev: true
 
   /universal-analytics/0.5.3:
