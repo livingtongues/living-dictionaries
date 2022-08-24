@@ -41,10 +41,8 @@ if (import.meta.vitest) {
       ]
     `);
   });
-}
 
-if (import.meta.vitest) {
-  test('Deeper polygonFromCoordinates test', () => {
+  test('more complicated polygonFromCoordinates test', () => {
     expect(
       nonSelfIntersectingPolygonFromCoordinates([
         {
