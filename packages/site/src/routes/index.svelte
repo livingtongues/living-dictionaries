@@ -22,7 +22,8 @@
   import { _ } from 'svelte-i18n';
   import type { IDictionary } from '@living-dictionaries/types';
   import { admin, myDictionaries } from '$lib/stores';
-
+  
+  import ShowHide from 'svelte-pieces/functions/ShowHide.svelte';
   import Map from '@living-dictionaries/parts/src/lib/maps/mapbox/map/Map.svelte';
   import ToggleStyle from '@living-dictionaries/parts/src/lib/maps/mapbox/controls/ToggleStyle.svelte';
   import NavigationControl from '@living-dictionaries/parts/src/lib/maps/mapbox/controls/NavigationControl.svelte';
@@ -36,15 +37,17 @@
   let privateDictionaries: IDictionary[] = [];
   let selectedDictionaryId: string;
 
-  import { onMount } from 'svelte';
-  import ShowHide from 'svelte-pieces/functions/ShowHide.svelte';
-  onMount(async () => {
-    if ($admin) {
-      privateDictionaries = await getCollection<IDictionary>('dictionaries', [
-        where('public', '!=', true),
-      ]);
+
+  import { browser } from '$app/env';
+  $: {
+    if (browser && $admin) {
+      getCollection<IDictionary>('dictionaries', [where('public', '!=', true)]).then(
+        (docs) => (privateDictionaries = docs)
+      );
+    } else {
+      privateDictionaries = [];
     }
-  });
+  }
 
   let mapComponent: Map;
 </script>
