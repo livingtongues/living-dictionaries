@@ -21,13 +21,9 @@
   const map: Map = getMap();
   const mapbox: typeof import('mapbox-gl') = getMapbox();
 
-  function randomColour() {
-    return Math.round(Math.random() * 255);
-  }
-
   export let lat: number;
   export let lng: number;
-  export let color = randomColour();
+  export let color = 'black';
   export let options: MarkerOptions = {};
   export let draggable = false;
 
@@ -47,7 +43,9 @@
 
   function handleDragEnd() {
     markerEl.removeEventListener('click', handleClick);
-    dispatch('dragend', marker.getLngLat());
+    const coordinates = marker.getLngLat();
+    dispatch('dragend', coordinates);
+    ({ lat, lng } = coordinates);
   }
 
   onMount(() => {
@@ -76,9 +74,9 @@
 </script>
 
 <div bind:this={element}>
-  <slot name="pin" {marker} />
+  <slot name="pin" {marker} {lat} {lng} />
 </div>
 
 {#if marker}
-  <slot {marker} />
+  <slot {marker} {lat} {lng} />
 {/if}
