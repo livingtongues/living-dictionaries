@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { IEntry, ISpeaker, ISelectedFields } from '@living-dictionaries/types';
   import Button from 'svelte-pieces/ui/Button.svelte';
-  import HTMLTemplate4 from './HTMLTemplate4.svelte';
+  import HTMLTemplate4 from './HTMLTemplate.svelte';
 
   export let entries: IEntry[];
   export let selectedFields: ISelectedFields;

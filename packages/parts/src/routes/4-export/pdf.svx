@@ -277,10 +277,7 @@
   }
 </script>
 
-<!-- <HtmlTemplate {entries} /> -->
-<!-- <HtmlTemplate2 {entries} /> -->
-
-<Story name="Configure font and image sizes" knobs={{fontSize: 2, imageSize: 80}} let:props={{fontSize, imageSize}}>
+<Story name="Configure font and image sizes" knobs={{fontSize: 1.5, imageSize: 80}} let:props={{fontSize, imageSize}}>
   <TwoColumnsLayout {selectedFields} {speakers} {entries} {fontSize} {imageSize} />
 </Story>
 
