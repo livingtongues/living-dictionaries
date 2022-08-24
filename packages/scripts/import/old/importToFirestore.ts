@@ -61,7 +61,7 @@ async function importToFirestore() {
         continue;
       }
 
-      let entry = data[i];
+      const entry = data[i];
       entry.lx = entry.lang || '';
       delete entry.lang;
       entry.ph = entry.ipa || '';
@@ -161,6 +161,7 @@ const uploadAudioFile = (audioFileName, lexeme, entryId) => {
 };
 
 const uploadImageFile = async (entry, entryId) => {
+  // eslint-disable-next-line no-useless-catch
   try {
     const pictureFileName = entry.image;
     const lexeme = entry.lx;

@@ -1,0 +1,82 @@
+<script lang="ts">
+  import { Story } from 'kitbook';
+  import Map from '$lib/maps/mapbox/map/Map.svelte';
+  import Marker from '$lib/maps/mapbox/map/Marker.svelte';
+  import ReactiveSet from 'svelte-pieces/functions/ReactiveSet.svelte';
+  import Popup from '$lib/maps/mapbox/map/Popup.svelte';
+  import Button from 'svelte-pieces/ui/Button.svelte';
+  import GeoJSONSource from '$lib/maps/mapbox/sources/GeoJSONSource.svelte';
+  import Layer from '$lib/maps/mapbox/map/Layer.svelte';
+  import { nonSelfIntersectingPolygonFromCoordinates } from '$lib/maps/mapbox/sources/polygonFromCoordinates';
+</script>
+
+<!-- prettier-ignore -->
+# Create Polygon from Multiple Markers 
+
+In this example, if `autoDrawShape` is true and three markers exist, an updating filled region will automatically be drawn if coordinates are passed to a `GeoJSONSource` for use in a fill `Layer`.
+
+With help from https://github.com/beyonk-adventures/svelte-mapbox
+
+<Story
+  knobs={{ openFirst: false, autoDrawShape: true }}
+  let:props={{ openFirst, autoDrawShape }}
+  name="Draw Polygon">
+  <ReactiveSet
+    input={[
+      { lng: -95, lat: 44 },
+      { lng: -105, lat: 35 },
+      { lng: -105, lat: 42 },
+      { lng: -96, lat: 37 },
+    ]}
+    let:value={points}
+    let:add
+    let:remove>
+    <div style="height: 350px;">
+      <Map
+        zoom={3}
+        on:click={({ detail: { lng, lat } }) => {
+          add({ lng, lat });
+        }}>
+        {#each points as point, index (point)}
+          <Marker
+            draggable
+            on:dragend={(e) => {
+              remove(point);
+              add({ lng: e.detail.lng, lat: e.detail.lat });
+            }}
+            lng={point.lng}
+            lat={point.lat}
+            let:marker>
+            <Popup {marker} open={index === 0 && openFirst}>
+              <Button form="simple" size="sm" color="red" onclick={() => remove(point)}
+                ><span class="i-fa-trash-o" /></Button>
+            </Popup>
+          </Marker>
+        {/each}
+        {#if autoDrawShape && points.length > 2}
+          <GeoJSONSource
+            id="selection"
+            data={{
+              type: 'Feature',
+              geometry: {
+                type: 'Polygon',
+                coordinates: nonSelfIntersectingPolygonFromCoordinates(points),
+              },
+              properties: undefined,
+            }}>
+            <Layer
+              id="selectionFill"
+              options={{
+                type: 'fill',
+                paint: {
+                  'fill-color': '#0080ff',
+                  'fill-opacity': 0.5,
+                },
+              }} />
+          </GeoJSONSource>
+        {/if}
+      </Map>
+    </div>
+    <pre>{JSON.stringify(points, null, 2)}</pre>
+  </ReactiveSet>
+</Story>

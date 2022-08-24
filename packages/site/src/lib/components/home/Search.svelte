@@ -7,12 +7,9 @@
   import { fly } from 'svelte/transition';
   import { myDictionaries } from '$lib/stores';
 
-  import { getContext } from 'svelte';
-  import { contextKey } from '$lib/components/home/key';
   import Button from 'svelte-pieces/ui/Button.svelte';
-  const { getMap } = getContext(contextKey);
+  import { createEventDispatcher } from 'svelte';
 
-  // export let defaultZoom;
   export let selectedDictionaryId: string;
   let currentDictionary: IDictionary;
 
@@ -54,20 +51,15 @@
     clearTimeout(searchBlurTimeout);
   }
 
+  const dispatch = createEventDispatcher<{ selectedDictionary: IDictionary }>();
   function setCurrentDictionary(dictionary: IDictionary) {
     selectedDictionaryId = dictionary.id;
+    dispatch('selectedDictionary', dictionary);
     searchString = '';
-    if (dictionary.coordinates) {
-      const map = getMap();
-      map.setZoom(7);
-      map.setCenter([dictionary.coordinates.longitude, dictionary.coordinates.latitude]);
-    }
   }
 
   function clearDictionary() {
     selectedDictionaryId = null;
-    // const map = getMap();
-    // map.setZoom(defaultZoom);
   }
 
   let showAllMyDictionaries = false;
