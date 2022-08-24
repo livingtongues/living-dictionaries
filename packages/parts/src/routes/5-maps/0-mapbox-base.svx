@@ -1,0 +1,62 @@
+<script lang="ts">
+  import { Story } from 'kitbook';
+  import Map from '$lib/maps/mapbox/map/Map.svelte';
+  import NavigationControl from '$lib/maps/mapbox/controls/NavigationControl.svelte';
+  import GeolocateControl from '$lib/maps/mapbox/controls/GeolocateControl.svelte';
+  import Geocoder from '$lib/maps/mapbox/geocoder/Geocoder.svelte';
+  import ScaleControl from '$lib/maps/mapbox/controls/ScaleControl.svelte';
+  import Marker from '$lib/maps/mapbox/map/Marker.svelte';
+  import ToggleStyle from '$lib/maps/mapbox/controls/ToggleStyle.svelte';
+</script>
+
+<!-- prettier-ignore -->
+# Mapbox 
+
+From https://github.com/beyonk-adventures/svelte-mapbox
+
+<Story
+  name="Set Marker"
+  knobs={{ lng: -95, lat: 39 }}
+  let:props={{ lng, lat }}
+  let:set
+  height={400}>
+  <Map
+    on:click={(e) => {
+      set('lng', e.detail.lng);
+      set('lat', e.detail.lat);
+    }}>
+    <Marker {lng} {lat} />
+  </Map>
+</Story>
+
+<Story name="Everything" knobs={{ showControls: true }} let:props={{ showControls }} height={400}>
+  <Map
+    on:dragend={(e) => console.log(e.detail)}
+    on:moveend={(e) => console.log(e.detail)}
+    on:click={(e) => console.log({ lng: e.detail.lng, lat: e.detail.lat })}
+    on:zoomend={(e) => console.log(e.detail)}
+    on:error={(e) => console.log(e.detail)}>
+    {#if showControls}
+      <Geocoder
+        placeholder={'Search Places'}
+        on:clear={() => console.log('cleared')}
+        on:loading={(e) => console.log(e.detail)}
+        on:result={(e) => console.log(e.detail)}
+        on:results={(e) => console.log(e.detail)}
+        on:error={(e) => console.log(e.detail)} />
+      <NavigationControl />
+      <GeolocateControl
+        on:geolocate={(e) => console.log(e.detail)}
+        on:outofmaxbounds={(e) => console.log(e.detail)}
+        on:trackuserlocationstart={(e) => console.log(e.detail)}
+        on:trackuserlocationend={(e) => console.log(e.detail)}
+        on:error={(e) => console.log(e.detail)} />
+      <ScaleControl />
+      <ToggleStyle />
+    {/if}
+  </Map>
+</Story>
+
+<Story name="globe" height={400}>
+  <Map options={{ projection: { name: 'globe' } }} />
+</Story>

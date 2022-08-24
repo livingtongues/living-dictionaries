@@ -26,7 +26,7 @@ export const deleteDuplicateEntries = (data: any[]) => {
         }
     }
 
-    for (var i = data.length - 1; i >= 0; i--) {
+    for (let i = data.length - 1; i >= 0; i--) {
         const entry = data[i];
         const nextEntry = data[i + 1];
         if (entry.lang) {

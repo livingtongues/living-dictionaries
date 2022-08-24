@@ -2,7 +2,7 @@
   import { Story } from 'kitbook';
   import EditableGlossesField from '$lib/settings/EditableGlossesField.svelte';
   import { glossingLanguages } from '$lib/glosses/glossing-languages';
-  import Set from 'svelte-pieces/functions/Set.svelte';
+  import ReactiveSet from 'svelte-pieces/functions/ReactiveSet.svelte';
   let selectedLanguages = ['en', 'de', 'fr'];
   let admin = true;
 </script>
@@ -37,7 +37,7 @@ display a message asking to Contact Us. Toggle the admin status and remove langu
     <span class="inline-block mr-2 text-sm font-semibold">Admin</span>
     <input type="checkbox" bind:checked={admin} />
   </label>
-  <Set input={['en', 'he']} let:value={scopedLanguages} let:add let:remove>
+  <ReactiveSet input={['en', 'he']} let:value={scopedLanguages} let:add let:remove>
     <EditableGlossesField
       selectedLanguages={scopedLanguages}
       availableLanguages={glossingLanguages}
@@ -55,7 +55,7 @@ display a message asking to Contact Us. Toggle the admin status and remove langu
           // in page use: alert(t ? $t('header.contact_us') : 'Contact Us');
         }
       }} />
-  </Set>
+  </ReactiveSet>
 </Story>
 
 <Story name="No languages">
