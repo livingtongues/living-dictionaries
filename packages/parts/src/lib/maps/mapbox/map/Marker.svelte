@@ -29,7 +29,7 @@
   export let lng: number;
   export let color = randomColour();
   export let options: MarkerOptions = {};
-  export let draggable = true;
+  export let draggable = false;
 
   let marker: Marker;
   let element: HTMLDivElement;
