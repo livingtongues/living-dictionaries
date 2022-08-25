@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { IEntry, ISpeaker, ISelectedFields } from '@living-dictionaries/types';
   import Button from 'svelte-pieces/ui/Button.svelte';
-  import HTMLTemplate4 from './HTMLTemplate.svelte';
+  import HTMLTemplate from './HTMLTemplate.svelte';
 
   export let entries: IEntry[];
   export let selectedFields: ISelectedFields;
@@ -16,12 +16,12 @@
   {#each entries as entry, index}
     {#if index % 2 === 0}
       <div style="float: left; width:50%;">
-        <HTMLTemplate4 {selectedFields} {speakers} {entry} {imageSize} />
+        <HTMLTemplate {selectedFields} {speakers} {entry} {imageSize} />
       </div>
     {/if}
     {#if index % 2 === 1}
       <div style="float: right; width:50%;">
-        <HTMLTemplate4 {selectedFields} {speakers} {entry} {imageSize} />
+        <HTMLTemplate {selectedFields} {speakers} {entry} {imageSize} />
       </div>
     {/if}
   {/each}
