@@ -8,6 +8,8 @@
   import GeoJSONSource from '$lib/maps/mapbox/sources/GeoJSONSource.svelte';
   import Layer from '$lib/maps/mapbox/map/Layer.svelte';
   import { nonSelfIntersectingPolygonFromCoordinates } from '$lib/maps/mapbox/sources/polygonFromCoordinates';
+  import MapboxStatic from '$lib/maps/mapbox/static/MapboxStatic.svelte';
+  import { convertPointsIntoRegion } from '$lib/maps/mapbox/static/shapeGeoJson';
 </script>
 
 <!-- prettier-ignore -->
@@ -20,7 +22,7 @@ With help from https://github.com/beyonk-adventures/svelte-mapbox
 <Story
   knobs={{ openFirst: false, autoDrawShape: true }}
   let:props={{ openFirst, autoDrawShape }}
-  name="Draw Polygon">
+  name="Draw Polygon with Updating Static Map">
   <ReactiveSet
     input={[
       { lng: -95, lat: 44 },
@@ -31,7 +33,7 @@ With help from https://github.com/beyonk-adventures/svelte-mapbox
     let:value={points}
     let:add
     let:remove>
-    <div style="height: 350px;">
+    <div class="mb-4" style="height: 350px;">
       <Map
         zoom={3}
         on:click={({ detail: { lng, lat } }) => {
@@ -77,6 +79,17 @@ With help from https://github.com/beyonk-adventures/svelte-mapbox
         {/if}
       </Map>
     </div>
+
+    <MapboxStatic
+      areas={[
+        {
+          type: 'region',
+          coordinates: convertPointsIntoRegion(points),
+        },
+      ]}
+      width={200}
+      height={200} />
+
     <pre>{JSON.stringify(points, null, 2)}</pre>
   </ReactiveSet>
 </Story>

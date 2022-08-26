@@ -1,5 +1,20 @@
 import type { IArea, IPoint, IRegion } from '@living-dictionaries/types';
+import { sortPoints } from '../sources/polygonFromCoordinates';
 // http://geojson.io/ to create GeoJSON easily
+
+export function convertPointsIntoRegion(
+  points: {
+    lng: number;
+    lat: number;
+  }[]
+) {
+  const sortedPoints = sortPoints(points.map((p) => ({ x: p.lng, y: p.lat })));
+
+  const pointsWithFirstAddedToEnd = [...sortedPoints, sortedPoints[0]];
+  return pointsWithFirstAddedToEnd.map((p) => {
+    return { longitude: p.x, latitude: p.y };
+  });
+}
 
 function getPointFeature(point: IPoint) {
   const coordinates = [point.coordinates.longitude, point.coordinates.latitude];
