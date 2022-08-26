@@ -116,7 +116,11 @@
           on:result={handleGeocoderResult}
           on:error={(e) => console.log(e.detail)} />
         {#if lng && lat}
-          <Marker {lng} {lat} />
+          <Marker
+            draggable
+            on:dragend={({ detail }) => setMarker(detail.lng, detail.lat)}
+            {lng}
+            {lat} />
         {/if}
         <ToggleStyle />
       </Map>
