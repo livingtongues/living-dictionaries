@@ -9,7 +9,7 @@
   import Geocoder from './mapbox/geocoder/Geocoder.svelte';
   import Marker from './mapbox/map/Marker.svelte';
   import ToggleStyle from './mapbox/controls/ToggleStyle.svelte';
-  import { getTimeZoneLongitude } from './getTimeZoneLongitude';
+  import { getTimeZoneLongitude } from './utils/getTimeZoneLongitude';
 
   export let lng: number;
   export let lat: number;
