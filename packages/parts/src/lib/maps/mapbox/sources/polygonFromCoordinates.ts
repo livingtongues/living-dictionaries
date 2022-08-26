@@ -149,7 +149,7 @@ interface Point {
   y: number;
 }
 
-function sortPoints(points: Point[]) {
+export function sortPoints(points: Point[]) {
   points = points.splice(0);
   const p0: Point = { x: 0, y: 0 };
   p0.y = Math.min(...points.map((p) => p.y));
