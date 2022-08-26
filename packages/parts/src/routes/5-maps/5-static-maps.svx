@@ -1,0 +1,13 @@
+<script lang="ts">
+  import MapboxStatic from '$lib/maps/mapbox/static/MapboxStatic.svelte';
+  import { Story } from 'kitbook';
+</script>
+
+<!-- prettier-ignore -->
+# Static Maps
+
+Copy paste width/height changes to avoid thousands of needless image requests to the API
+
+<Story name="Static Map" knobs={{width: 525, height: 300}} let:props={{width, height}}>
+  <MapboxStatic areas={[]} {width} {height} />
+</Story>
