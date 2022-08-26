@@ -12,7 +12,6 @@
   export let style = 'streets-v11';
 
   $: geoJson = shapeGeoJson(areas);
-
   $: src = `https://api.mapbox.com/styles/v1/mapbox/${style}/static/geojson(${encodeURIComponent(
     JSON.stringify(geoJson)
   )})/auto/${width}x${height}@2x?logo=false&access_token=${accessToken}`;
@@ -33,6 +32,3 @@
     Error {error}
   {/await}
 {/if}
-<pre>
-  {JSON.stringify(geoJson, null, 2)}
-</pre>

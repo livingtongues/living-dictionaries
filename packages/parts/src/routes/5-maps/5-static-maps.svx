@@ -12,6 +12,7 @@ Copy paste width/height changes to avoid thousands of needless image requests to
   <MapboxStatic
     areas={[
       { type: 'point', coordinates: { longitude: -122, latitude: 40 } },
+      { type: 'point', coordinates: { longitude: -119, latitude: 41 } },
       {
         type: 'region',
         coordinates: [
