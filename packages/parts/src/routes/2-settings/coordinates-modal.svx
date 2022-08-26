@@ -10,7 +10,23 @@
 <!-- prettier-ignore -->
 # Coordinates Modal
 
+We record points to the 4th decimal point: handheld GPS accuracy.
+
+The 3rd decimal point is what we used previously for saving geopoints: 111 meters and is currently what we use for displaying static maps.
+
+For more info: https://gis.stackexchange.com/questions/8650/measuring-accuracy-of-latitude-and-longitude and https://gisjames.wordpress.com/2016/04/27/deciding-how-many-decimal-places-to-include-when-reporting-latitude-and-longitude/
+
 ## Edit Coordinates Field
+
+<Story name="Without coordinates">
+  <EditableCoordinatesField
+    lng={undefined}
+    lat={undefined}
+    on:update={(event) => alert(`set: ${event.detail.lat}, ${event.detail.lng}`)}
+    on:remove={() => {
+      alert('removed coordinates');
+    }} />
+</Story>
 
 <Story name="With coordinates" knobs={{ lat: 42, lng: 42 }} let:props={{ lat, lng }} let:set>
   <EditableCoordinatesField
@@ -26,15 +42,6 @@
     }} />
 </Story>
 
-<Story name="Without coordinates">
-  <EditableCoordinatesField
-    lng={undefined}
-    lat={undefined}
-    on:update={(event) => alert(`set: ${event.detail.lat}, ${event.detail.lng}`)}
-    on:remove={() => {
-      alert('removed coordinates');
-    }} />
-</Story>
 
 ## Coordinates Modal
 
