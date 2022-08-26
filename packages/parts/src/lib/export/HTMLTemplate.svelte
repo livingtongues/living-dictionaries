@@ -2,6 +2,7 @@
   import type { IEntry, ISpeaker, ISelectedFields, IEntryForPDF } from '@living-dictionaries/types';
   import { EntryPDFFieldsEnum } from '@living-dictionaries/types';
   import { semanticDomains } from '@living-dictionaries/parts';
+  import QrCode from '$lib/QrCode.svelte';
 
   export let entry: IEntry;
   export let speakers: ISpeaker[];
@@ -39,8 +40,8 @@
     {/if}
     {#if entry.pf && selectedFields.pf}
       <div style="font-size: 0.8em;">
-        <img style={`width:${imageSize}%; display: block; margin: 0 auto;`} src={entry.pf.path} alt={entry.lx} />
-        <p><i>{entry.pf.path}</i></p>
+        <img style={`width:${imageSize}%;margin-bottom:5px`} src={entry.pf.path} alt={entry.lx} />
+        <QrCode pixelsPerModule={2} value={entry.pf.path} />
       </div>
     {/if}
     {#if entry.sr && selectedFields.sr}
@@ -52,7 +53,7 @@
     {#if entry.sf && selectedFields.sf}
       <div>
         <i>Audio data:</i>
-        <p>{entry.sf.path}</p>
+        <QrCode pixelsPerModule={2} value={entry.sf.path} />
         {#if entry.sf.sp}
           <p><i>Speaker:</i> {speaker?.displayName} ({speaker?.gender}) ({speaker?.decade*10}-{(speaker?.decade+0.9)*10} years old)</p>
         {:else if entry.sf.speakerName}
