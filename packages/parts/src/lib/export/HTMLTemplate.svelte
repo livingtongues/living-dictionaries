@@ -44,19 +44,19 @@
       </div>
     {/if}
     {#if entry.sr && selectedFields.sr}
-      <i><strong>Source(s): </strong></i>
+      <i><i>Source(s): </i></i>
       {#each entry.sr as source, index}
         <i>{index < entry.sr.length-1 ? `${source}, ` : `${source}`}</i>
       {/each}
     {/if}
     {#if entry.sf && selectedFields.sf}
       <div>
-        <strong>Audio data:</strong>
+        <i>Audio data:</i>
         <p>{entry.sf.path}</p>
         {#if entry.sf.sp}
-          <p><strong>Speaker:</strong> {speaker?.displayName} ({speaker?.gender}) ({speaker?.decade*10}-{(speaker?.decade+0.9)*10} years old)</p>
+          <p><i>Speaker:</i> {speaker?.displayName} ({speaker?.gender}) ({speaker?.decade*10}-{(speaker?.decade+0.9)*10} years old)</p>
         {:else if entry.sf.speakerName}
-          <p><strong>Speaker:</strong> {entry.sf.speakerName}</p>
+          <p><i>Speaker:</i> {entry.sf.speakerName}</p>
         {/if}
       </div>
     {/if}
@@ -64,14 +64,14 @@
   <!-- The remaining fields -->
   <div>
     {#if entry.sdn && selectedFields.sd}
-      <strong>Semantic Domains: </strong>
+      <i>Semantic Domains: </i>
       {#each entry.sdn as key, index}
       {semanticDomains.find(sd => sd.key === key).name}{index < entry.sdn.length-1 ? ', ' : ''}
       {/each}
     {/if}
     {#each Object.keys(EntryPDFFieldsEnum) as key}
       {#if entry[key] && selectedFields[key]}
-        <p><u>{EntryPDFFieldsEnum[key]}</u>: {entry[key]}</p>
+        <p><i>{EntryPDFFieldsEnum[key]}</i>: {entry[key]}</p>
       {/if}
     {/each}
   </div>
