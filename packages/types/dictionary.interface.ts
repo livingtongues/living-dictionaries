@@ -46,16 +46,16 @@ export interface IGrammar extends IFirestoreMetaData {
 
 export type IArea = (IPoint | IRegion);
 
-interface IPoint {
+export interface IPoint {
   type: 'point';
-  coordinates: GeoPoint;
+  coordinates: Partial<GeoPoint>;
   label?: string;
   color?: string;
 }
 
-interface IRegion {
+export interface IRegion {
   type: 'region'
-  coordinates: GeoPoint[];
+  coordinates: Partial<GeoPoint>[];
   label?: string;
   color?: string;
 }
