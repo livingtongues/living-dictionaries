@@ -16,11 +16,15 @@ export function convertPointsIntoRegion(
   });
 }
 
-function getPointFeature(point: IPoint) {
-  const coordinates = [point.coordinates.longitude, point.coordinates.latitude];
+function getPointFeature(point: IPoint, primary = false) {
+  const coordinates = [
+    +point.coordinates.longitude.toFixed(3),
+    +point.coordinates.latitude.toFixed(3),
+  ];
+  const properties = primary ? { 'marker-color': '#578da5', 'marker-symbol': 'star' } : {};
   return {
     type: 'Feature',
-    properties: {},
+    properties,
     geometry: {
       type: 'Point',
       coordinates,
@@ -29,14 +33,25 @@ function getPointFeature(point: IPoint) {
 }
 
 function getPolygonFeature(region: IRegion) {
-  const coordinates = [region.coordinates.map(({ longitude, latitude }) => [longitude, latitude])];
+  const coordinates = [
+    region.coordinates.map(({ longitude, latitude }) => [
+      +longitude.toFixed(3),
+      +latitude.toFixed(3),
+    ]),
+  ];
   return {
     type: 'Feature',
+    properties: {
+      // stroke: '#555555',
+      // 'stroke-width': 2
+      // 'stroke-opacity': 1,
+      // fill: '#ca2b2b',
+      // 'fill-opacity': 0.5,
+    },
     geometry: {
       type: 'Polygon',
       coordinates,
     },
-    properties: {},
   };
 }
 
@@ -47,9 +62,10 @@ export function shapeGeoJson(areas: IArea[]) {
       features.push(getPolygonFeature(area));
     }
   }
-  for (const area of areas) {
+  for (const [index, area] of areas.entries()) {
+    const primary = index === 0;
     if (area.type === 'point') {
-      features.push(getPointFeature(area)); // add later so pins show on top of regions
+      features.push(getPointFeature(area, primary)); // add later so pins show on top of regions
     }
   }
   return {
@@ -62,7 +78,8 @@ if (import.meta.vitest) {
   test('shapeGeoJson', () => {
     expect(
       shapeGeoJson([
-        { type: 'point', coordinates: { longitude: 126, latitude: 40 } },
+        { type: 'point', coordinates: { longitude: 126.123456789, latitude: 40.123456789 } },
+        { type: 'point', coordinates: { longitude: 127.123456789, latitude: 41.123456789 } },
         {
           type: 'region',
           coordinates: [
@@ -82,24 +99,24 @@ if (import.meta.vitest) {
               "coordinates": [
                 [
                   [
-                    -126.91406249999999,
-                    40.97989806962013,
+                    -126.914,
+                    40.98,
                   ],
                   [
-                    -118.828125,
-                    36.03133177633187,
+                    -118.828,
+                    36.031,
                   ],
                   [
-                    -115.6640625,
-                    38.8225909761771,
+                    -115.664,
+                    38.823,
                   ],
                   [
-                    -116.01562499999999,
-                    42.8115217450979,
+                    -116.016,
+                    42.812,
                   ],
                   [
-                    -126.91406249999999,
-                    40.97989806962013,
+                    -126.914,
+                    40.98,
                   ],
                 ],
               ],
@@ -111,8 +128,22 @@ if (import.meta.vitest) {
           {
             "geometry": {
               "coordinates": [
-                126,
-                40,
+                126.123,
+                40.123,
+              ],
+              "type": "Point",
+            },
+            "properties": {
+              "marker-color": "#578da5",
+              "marker-symbol": "star",
+            },
+            "type": "Feature",
+          },
+          {
+            "geometry": {
+              "coordinates": [
+                127.123,
+                41.123,
               ],
               "type": "Point",
             },

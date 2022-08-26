@@ -21,13 +21,8 @@
     if (longitude < -180 || longitude > 180 || latitude < -90 || latitude > 90) {
       return;
     }
-    lng = Math.floor(longitude * 10000) / 10000;
-    lat = Math.floor(latitude * 10000) / 10000;
-    // record to the 4th decimal point as handheld GPS accuracy (3rd decimal point is what we used previously: 111 meters) // https://gis.stackexchange.com/questions/8650/measuring-accuracy-of-latitude-and-longitude, https://gisjames.wordpress.com/2016/04/27/deciding-how-many-decimal-places-to-include-when-reporting-latitude-and-longitude/
-
-    // map.flyTo({
-    //   center: [lng, lat],
-    // });
+    lng = +longitude.toFixed(4);
+    lat = +latitude.toFixed(4);
   }
 
   function handleGeocoderResult({ detail }) {
