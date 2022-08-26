@@ -17,4 +17,4 @@ export { glossingLanguages } from './glosses/glossing-languages';
 export { semanticDomains } from './mappings/semantic-domains';
 export { partsOfSpeech } from './mappings/parts-of-speech';
 
-export { getTimeZoneLongitude } from './maps/getTimeZoneLongitude';
+export { getTimeZoneLongitude } from './maps/utils/getTimeZoneLongitude';

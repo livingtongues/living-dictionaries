@@ -1,5 +1,5 @@
 import type { IArea, IPoint, IRegion } from '@living-dictionaries/types';
-import { sortPoints } from '../sources/polygonFromCoordinates';
+import { sortPoints } from '../../utils/polygonFromCoordinates';
 // http://geojson.io/ to create GeoJSON easily
 
 export function convertPointsIntoRegion(

@@ -7,7 +7,7 @@
   import Button from 'svelte-pieces/ui/Button.svelte';
   import GeoJSONSource from '$lib/maps/mapbox/sources/GeoJSONSource.svelte';
   import Layer from '$lib/maps/mapbox/map/Layer.svelte';
-  import { nonSelfIntersectingPolygonFromCoordinates } from '$lib/maps/mapbox/sources/polygonFromCoordinates';
+  import { nonSelfIntersectingPolygonFromCoordinates } from '$lib/maps/utils/polygonFromCoordinates';
   import MapboxStatic from '$lib/maps/mapbox/static/MapboxStatic.svelte';
   import { convertPointsIntoRegion } from '$lib/maps/mapbox/static/shapeGeoJson';
 </script>
