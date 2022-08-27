@@ -27,3 +27,7 @@ Copy paste width/height changes to avoid thousands of needless image requests to
     {width}
     {height} />
 </Story>
+
+<Story name="handles undefined area">
+  <MapboxStatic areas={[undefined]} />
+</Story>
