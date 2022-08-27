@@ -4,16 +4,15 @@ import { sortPoints } from '../../utils/polygonFromCoordinates';
 
 export function convertPointsIntoRegion(
   points: {
-    lng: number;
-    lat: number;
+    longitude: number;
+    latitude: number;
   }[]
 ) {
-  const sortedPoints = sortPoints(points.map((p) => ({ x: p.lng, y: p.lat })));
-
-  const pointsWithFirstAddedToEnd = [...sortedPoints, sortedPoints[0]];
-  return pointsWithFirstAddedToEnd.map((p) => {
-    return { longitude: p.x, latitude: p.y };
-  });
+  const sorted = sortPoints(
+    points.map(({ longitude, latitude }) => ({ lng: longitude, lat: latitude }))
+  );
+  const sortedLooped = [...sorted, sorted[0]];
+  return sortedLooped.map(({ lng, lat }) => ({ longitude: lng, latitude: lat }));
 }
 
 function getPointFeature(point: IPoint, primary = false) {

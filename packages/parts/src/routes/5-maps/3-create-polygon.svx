@@ -7,7 +7,7 @@
   import Button from 'svelte-pieces/ui/Button.svelte';
   import GeoJSONSource from '$lib/maps/mapbox/sources/GeoJSONSource.svelte';
   import Layer from '$lib/maps/mapbox/map/Layer.svelte';
-  import { nonSelfIntersectingPolygonFromCoordinates } from '$lib/maps/utils/polygonFromCoordinates';
+  import { polygonFeatureCoordinates } from '$lib/maps/utils/polygonFromCoordinates';
   import MapboxStatic from '$lib/maps/mapbox/static/MapboxStatic.svelte';
   import { convertPointsIntoRegion } from '$lib/maps/mapbox/static/shapeGeoJson';
 </script>
@@ -25,10 +25,10 @@ With help from https://github.com/beyonk-adventures/svelte-mapbox
   name="Draw Polygon with Updating Static Map">
   <ReactiveSet
     input={[
-      { lng: -95, lat: 44 },
-      { lng: -105, lat: 35 },
-      { lng: -105, lat: 42 },
-      { lng: -96, lat: 37 },
+      { longitude: -95, latitude: 44 },
+      { longitude: -105, latitude: 35 },
+      { longitude: -105, latitude: 42 },
+      { longitude: -96, latitude: 37 },
     ]}
     let:value={points}
     let:add
@@ -37,17 +37,17 @@ With help from https://github.com/beyonk-adventures/svelte-mapbox
       <Map
         zoom={3}
         on:click={({ detail: { lng, lat } }) => {
-          add({ lng, lat });
+          add({ longitude: lng, latitude: lat });
         }}>
         {#each points as point, index (point)}
           <Marker
             draggable
-            on:dragend={(e) => {
+            on:dragend={({ detail: { lng, lat } }) => {
               remove(point);
-              add({ lng: e.detail.lng, lat: e.detail.lat });
+              add({ longitude: lng, latitude: lat });
             }}
-            lng={point.lng}
-            lat={point.lat}
+            lng={point.longitude}
+            lat={point.latitude}
             let:marker>
             <Popup {marker} open={index === 0 && openFirst}>
               <Button form="simple" size="sm" color="red" onclick={() => remove(point)}
@@ -62,7 +62,7 @@ With help from https://github.com/beyonk-adventures/svelte-mapbox
               type: 'Feature',
               geometry: {
                 type: 'Polygon',
-                coordinates: nonSelfIntersectingPolygonFromCoordinates(points),
+                coordinates: polygonFeatureCoordinates(points),
               },
               properties: undefined,
             }}>
@@ -73,6 +73,15 @@ With help from https://github.com/beyonk-adventures/svelte-mapbox
                 paint: {
                   'fill-color': '#0080ff',
                   'fill-opacity': 0.5,
+                },
+              }} />
+            <Layer
+              id="selectionOutline"
+              options={{
+                type: 'line',
+                paint: {
+                  'line-color': '#555555',
+                  'line-width': 1,
                 },
               }} />
           </GeoJSONSource>
