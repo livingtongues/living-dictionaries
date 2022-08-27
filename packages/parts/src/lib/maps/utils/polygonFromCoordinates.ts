@@ -4,6 +4,16 @@ interface Point {
   lat: number;
 }
 
+export function polygonFeatureCoordinates(
+  points: { latitude?: number; longitude?: number }[]
+): number[][][] {
+  const sorted = sortPoints(
+    points.map(({ latitude, longitude }) => ({ lng: longitude, lat: latitude }))
+  );
+  const sortedLooped = [...sorted, sorted[0]];
+  return [sortedLooped.map(({ lng, lat }) => [lng, lat])];
+}
+
 export function sortPoints(points: Point[]) {
   points = points.splice(0);
   const p0: Point = { lng: 0, lat: 0 };
