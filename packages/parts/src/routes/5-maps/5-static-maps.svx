@@ -8,7 +8,7 @@
 
 Copy paste width/height changes to avoid thousands of needless image requests to the API
 
-<Story name="Static Map" knobs={{ width: 525, height: 300 }} let:props={{ width, height }}>
+<Story name="Points and Region" knobs={{ width: 525, height: 300 }} let:props={{ width, height }}>
   <MapboxStatic
     areas={[
       { type: 'point', coordinates: { longitude: -122, latitude: 40 } },
@@ -26,6 +26,10 @@ Copy paste width/height changes to avoid thousands of needless image requests to
     ]}
     {width}
     {height} />
+</Story>
+
+<Story name="Single Point">
+  <MapboxStatic areas={[{ type: 'point', coordinates: { longitude: -122, latitude: 40 } }]} />
 </Story>
 
 <Story name="handles undefined area">

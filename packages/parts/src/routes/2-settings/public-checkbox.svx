@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
   import { Story } from 'kitbook';
   import PublicCheckbox from '$lib/settings/PublicCheckbox.svelte';
 </script>

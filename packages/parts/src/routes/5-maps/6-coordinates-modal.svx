@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
   import { Story } from 'kitbook';
   import CoordinatesModal from '$lib/maps/CoordinatesModal.svelte';
   import LatLngDisplay from '$lib/maps/LatLngDisplay.svelte';
