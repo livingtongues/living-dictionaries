@@ -6,16 +6,30 @@
   import { shapeGeoJson } from './shapeGeoJson';
 
   export let areas: IArea[];
-  export let width = 500;
-  export let height = 300;
+  export let width = 300;
+  export let height = 200;
   export let accessToken = import.meta.env.VITE_mapboxAccessToken as string;
   export let style = 'streets-v11';
   export let highDef = true;
+  export let singlePointZoom = 3;
 
   $: geoJson = shapeGeoJson(areas);
-  $: src = `https://api.mapbox.com/styles/v1/mapbox/${style}/static/geojson(${encodeURIComponent(
+  $: autoUrl = `https://api.mapbox.com/styles/v1/mapbox/${style}/static/geojson(${encodeURIComponent(
     JSON.stringify(geoJson)
   )})/auto/${width}x${height}${highDef ? '@2x' : ''}?logo=false&access_token=${accessToken}`;
+
+  $: singlePointUrl =
+    areas?.length === 1 &&
+    areas[0]?.type === 'point' &&
+    `https://api.mapbox.com/styles/v1/mapbox/${style}/static/geojson(${encodeURIComponent(
+      JSON.stringify(geoJson)
+    )})/${areas[0].coordinates.longitude},${
+      areas[0].coordinates.latitude
+    },${singlePointZoom}/${width}x${height}${
+      highDef ? '@2x' : ''
+    }?logo=false&access_token=${accessToken}`;
+
+  $: src = singlePointUrl || autoUrl;
 </script>
 
 {#if src}
