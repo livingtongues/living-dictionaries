@@ -11,7 +11,8 @@ export interface IDictionary extends IFirestoreMetaData {
   glottocode?: string;
   
   coordinates?: GeoPoint; // primary coordinate when displayed w/ many other dictionaries
-  areas?: IArea[]; // other coordinate points and regions where language spoken
+  points?: IPoint[]; // other coordinate points where language spoken
+  regions?: IRegion[]; // regions where language spoken
 
   public?: boolean;
   entryCount: number; // number | FieldValue;
