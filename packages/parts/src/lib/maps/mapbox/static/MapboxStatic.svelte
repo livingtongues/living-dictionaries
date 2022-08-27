@@ -10,11 +10,12 @@
   export let height = 300;
   export let accessToken = import.meta.env.VITE_mapboxAccessToken as string;
   export let style = 'streets-v11';
+  export let highDef = true;
 
   $: geoJson = shapeGeoJson(areas);
   $: src = `https://api.mapbox.com/styles/v1/mapbox/${style}/static/geojson(${encodeURIComponent(
     JSON.stringify(geoJson)
-  )})/auto/${width}x${height}@2x?logo=false&access_token=${accessToken}`;
+  )})/auto/${width}x${height}${highDef ? '@2x' : ''}?logo=false&access_token=${accessToken}`;
 </script>
 
 {#if src}
