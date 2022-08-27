@@ -1,0 +1,46 @@
+<script>
+  import { Story } from 'kitbook';
+  import RegionModal from '$lib/maps/RegionModal.svelte';
+  import ShowHide from 'svelte-pieces/functions/ShowHide.svelte';
+  import Button from 'svelte-pieces/ui/Button.svelte';
+</script>
+
+<!-- prettier-ignore -->
+# Region Modal
+
+<Story
+  name="Passing Coordinates In"
+  knobs={{ lat: '-90-90;7', lng: '-180-180;1' }}
+  let:props={{ lat, lng }}
+  let:set>
+  <ShowHide let:show let:toggle>
+    <Button onclick={toggle}><span class="i-mdi-map-marker-path mr-1" /> Modify Region</Button>
+    {#if show}
+      <RegionModal
+        lng={+lng}
+        lat={+lat}
+        on:update={(event) => {
+          set('lat', event.detail.lat);
+          set('lng', event.detail.lng);
+        }}
+        on:remove={() => {
+          set('lat', 0);
+          set('lng', 0);
+        }}
+        on:close={toggle} />
+    {/if}
+  </ShowHide>
+</Story>
+
+<Story name="Passing Undefined">
+  <ShowHide let:show let:toggle>
+    <Button onclick={toggle}><span class="i-mdi-map-marker-path mr-1" /> Select Region</Button>
+    {#if show}
+      <RegionModal
+        lng={undefined}
+        lat={undefined}
+        on:update={(event) => alert(`set: ${event.detail.lat}, ${event.detail.lng}`)}
+        on:close={toggle} />
+    {/if}
+  </ShowHide>
+</Story>

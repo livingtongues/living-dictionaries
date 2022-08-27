@@ -1,0 +1,31 @@
+<script>
+  import { Story } from 'kitbook';
+  import EditableCoordinatesField from '$lib/settings/EditableCoordinatesField.svelte';
+</script>
+
+<!-- prettier-ignore -->
+# Areas Where Language Spoken
+
+<Story name="Without coordinates">
+  <EditableCoordinatesField
+    lng={undefined}
+    lat={undefined}
+    on:update={(event) => alert(`set: ${event.detail.lat}, ${event.detail.lng}`)}
+    on:remove={() => {
+      alert('removed coordinates');
+    }} />
+</Story>
+
+<Story name="With coordinates" knobs={{ lat: 42, lng: 42 }} let:props={{ lat, lng }} let:set>
+  <EditableCoordinatesField
+    {lng}
+    {lat}
+    on:update={(event) => {
+      set('lat', event.detail.lat);
+      set('lng', event.detail.lng);
+    }}
+    on:remove={() => {
+      set('lat', 0);
+      set('lng', 0);
+    }} />
+</Story>
