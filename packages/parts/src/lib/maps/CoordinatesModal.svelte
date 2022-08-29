@@ -9,11 +9,13 @@
   import Geocoder from './mapbox/geocoder/Geocoder.svelte';
   import Marker from './mapbox/map/Marker.svelte';
   import ToggleStyle from './mapbox/controls/ToggleStyle.svelte';
-  import { getTimeZoneLongitude } from './utils/getTimeZoneLongitude';
 
   export let lng: number;
   export let lat: number;
-  let center: [number, number] = lng && lat ? [lng, lat] : [getTimeZoneLongitude(), 10];
+
+  let centerLng = lng;
+  let centerLat = lat;
+
   let zoom = lng && lat ? 6 : 2;
 
   function setMarker(longitude: number, latitude: number) {
@@ -36,7 +38,8 @@
   onMount(async () => {
     if (!(lng && lat) && navigator.geolocation) {
       navigator.geolocation.getCurrentPosition((position) => {
-        center = [position.coords.longitude, position.coords.latitude];
+        centerLng = position.coords.longitude;
+        centerLat = position.coords.latitude;
       });
     }
   });
@@ -104,7 +107,11 @@
     </div>
 
     <form on:submit={(e) => e.preventDefault()} style="height: 50vh;">
-      <Map {center} {zoom} on:click={({ detail }) => setMarker(detail.lng, detail.lat)}>
+      <Map
+        lng={centerLng}
+        lat={centerLat}
+        {zoom}
+        on:click={({ detail }) => setMarker(detail.lng, detail.lat)}>
         <Geocoder
           options={{ marker: false }}
           placeholder={t ? $t('about.search') : 'Search'}
