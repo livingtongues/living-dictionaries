@@ -4,75 +4,111 @@
 
   import Button from 'svelte-pieces/ui/Button.svelte';
   import ShowHide from 'svelte-pieces/functions/ShowHide.svelte';
-  import LatLngDisplay from '../maps/LatLngDisplay.svelte';
-  import type { IArea, IDictionary } from '@living-dictionaries/types';
-  import MapboxStatic from '$lib/maps/mapbox/static/MapboxStatic.svelte';
+  import type { IDictionary } from '@living-dictionaries/types';
+  import Map from '$lib/maps/mapbox/map/Map.svelte';
+  import Marker from '$lib/maps/mapbox/map/Marker.svelte';
+  import Popup from '$lib/maps/mapbox/map/Popup.svelte';
+  import GeoJSONSource from '$lib/maps/mapbox/sources/GeoJSONSource.svelte';
+  import { polygonFeatureCoordinates } from '$lib/maps/utils/polygonFromCoordinates';
+  import Layer from '$lib/maps/mapbox/map/Layer.svelte';
   export let dictionary: IDictionary;
-
-  let areas: IArea[] = [];
-  $: areas = (() => {
-    const a = [];
-    if (dictionary.coordinates) {
-      a.push({
-        type: 'point',
-        coordinates: {
-          longitude: dictionary.coordinates.longitude,
-          latitude: dictionary.coordinates.latitude,
-        },
-      });
-    }
-    if (dictionary.points) {
-      a.push(...dictionary.points);
-    }
-    if (dictionary.regions) {
-      a.push(...dictionary.regions);
-    }
-    console.log(a);
-    return a;
-  })();
 </script>
 
 <div class="text-sm font-medium text-gray-700 mb-2">
   {t ? $t('create.where_spoken') : 'Where is this language spoken?'}*
 </div>
-{#if dictionary.coordinates}
-  <MapboxStatic {areas} />
 
-  <div class="mt-1">
-    <ShowHide let:show let:toggle>
-      <Button onclick={toggle}>
-        <span class="i-ic-sharp-star mr-1" style="margin-top: -3px" />
-        <LatLngDisplay
-          lng={dictionary.coordinates.longitude}
-          lat={dictionary.coordinates.latitude} />
-      </Button>
-      {#if show}
-        {#await import('../maps/CoordinatesModal.svelte') then { default: CoordinatesModal }}
-          <CoordinatesModal
-            {t}
-            lng={dictionary.coordinates.longitude}
-            lat={dictionary.coordinates.latitude}
-            on:update
-            on:remove
-            on:close={toggle} />
-        {/await}
+<div class="h-200px">
+  <Map lng={dictionary.coordinates?.longitude} lat={dictionary.coordinates?.latitude} let:map>
+    {#if dictionary.coordinates}
+      <Marker
+        lat={dictionary.coordinates.latitude}
+        lng={dictionary.coordinates.longitude}
+        let:marker
+        color="blue">
+        <Popup {marker}>
+          <ShowHide let:show let:toggle>
+            <Button form="simple" size="sm" onclick={toggle}>
+              <span class="i-octicon-pencil" />
+            </Button>
+            {#if show}
+              {#await import('../maps/CoordinatesModal.svelte') then { default: CoordinatesModal }}
+                <CoordinatesModal
+                  {t}
+                  lng={dictionary.coordinates.longitude}
+                  lat={dictionary.coordinates.latitude}
+                  on:update
+                  on:remove
+                  on:close={toggle} />
+              {/await}
+            {/if}
+          </ShowHide>
+        </Popup>
+      </Marker>
+    {/if}
+
+    {#if dictionary.points}
+        {#each dictionary.points as point}
+          <Marker lat={point.coordinates.latitude} lng={point.coordinates.longitude} let:marker>
+            <Popup {marker}>
+              <ShowHide let:show let:toggle>
+                <Button form="simple" size="sm" onclick={toggle}>
+                  <span class="i-octicon-pencil" />
+                </Button>
+                {#if show}
+                  {#await import('../maps/CoordinatesModal.svelte') then { default: CoordinatesModal }}
+                    <CoordinatesModal
+                      {t}
+                      lng={point.coordinates.longitude}
+                      lat={point.coordinates.latitude}
+                      on:update
+                      on:remove
+                      on:close={toggle} />
+                  {/await}
+                {/if}
+              </ShowHide>
+            </Popup>
+          </Marker>
+        {/each}
       {/if}
-    </ShowHide>
-  </div>
-  <div class="mt-1">
-    <ShowHide let:show let:toggle>
-      <Button onclick={toggle} color="black" size="sm">
-        <span class="i-mdi-map-marker-path mr-1" style="margin-top: -2px;" />
-        {t ? $t('create.select_region') : 'Select Region'}
-      </Button>
-      {#if show}
-        {#await import('../maps/RegionModal.svelte') then { default: RegionModal }}
-          <RegionModal {t} region={null} on:update on:remove on:close={toggle} />
-        {/await}
+      {#if dictionary.regions}
+        {#each dictionary.regions as region}
+          <GeoJSONSource
+            id="selection"
+            data={{
+              type: 'Feature',
+              geometry: {
+                type: 'Polygon',
+                coordinates: polygonFeatureCoordinates(region.coordinates),
+              },
+              properties: undefined,
+            }}>
+            <Layer
+              id="selectionFill"
+              options={{
+                type: 'fill',
+                paint: {
+                  'fill-color': '#0080ff',
+                  'fill-opacity': 0.5,
+                },
+              }}
+              on:click={() => alert('clicked')}
+              on:mouseenter={() => (map.getCanvas().style.cursor = 'pointer')}
+              on:mouseleave={() => (map.getCanvas().style.cursor = '')} />
+            <Layer
+              id="selectionOutline"
+              options={{
+                type: 'line',
+                paint: {
+                  'line-color': '#555555',
+                  'line-width': 1,
+                },
+              }} />
+          </GeoJSONSource>
+        {/each}
       {/if}
-    </ShowHide>
-  </div>
-{/if}
+  </Map>
+</div>
 
 <div class="mt-1">
   <ShowHide let:show let:toggle>
@@ -89,4 +125,18 @@
       {/await}
     {/if}
   </ShowHide>
+
+  {#if dictionary.coordinates}
+    <ShowHide let:show let:toggle>
+      <Button onclick={toggle} color="black" size="sm">
+        <span class="i-mdi-map-marker-path mr-1" style="margin-top: -2px;" />
+        {t ? $t('create.select_region') : 'Select Region'}
+      </Button>
+      {#if show}
+        {#await import('../maps/RegionModal.svelte') then { default: RegionModal }}
+          <RegionModal {t} region={null} on:update on:remove on:close={toggle} />
+        {/await}
+      {/if}
+    </ShowHide>
+  {/if}
 </div>
