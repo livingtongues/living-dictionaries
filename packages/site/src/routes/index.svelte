@@ -22,7 +22,7 @@
   import { _ } from 'svelte-i18n';
   import type { IDictionary } from '@living-dictionaries/types';
   import { admin, myDictionaries } from '$lib/stores';
-  
+
   import ShowHide from 'svelte-pieces/functions/ShowHide.svelte';
   import Map from '@living-dictionaries/parts/src/lib/maps/mapbox/map/Map.svelte';
   import ToggleStyle from '@living-dictionaries/parts/src/lib/maps/mapbox/controls/ToggleStyle.svelte';
@@ -36,7 +36,6 @@
   export let publicDictionaries: IDictionary[] = [];
   let privateDictionaries: IDictionary[] = [];
   let selectedDictionaryId: string;
-
 
   import { browser } from '$app/env';
   $: {
@@ -72,10 +71,7 @@
       }} />
   </div>
   <div class="relative flex-1">
-    <Map
-      bind:this={mapComponent}
-      center={[getTimeZoneLongitude() || -80, 10]}
-      style="mapbox://styles/mapbox/light-v10?optimize=true">
+    <Map bind:this={mapComponent} style="mapbox://styles/mapbox/light-v10?optimize=true">
       {#if $admin}
         <ShowHide let:show={hide} let:toggle>
           <CustomControl position="bottom-right">

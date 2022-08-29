@@ -4,6 +4,7 @@ interface Point {
   lat: number;
 }
 
+/** Will add loop back to first point so don't duplicate first point to last before sending points in, as the point ordering probably will change */
 export function polygonFeatureCoordinates(
   points: { latitude?: number; longitude?: number }[]
 ): number[][][] {

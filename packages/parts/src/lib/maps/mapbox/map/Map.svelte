@@ -6,16 +6,18 @@
   import { EventQueue } from '../queue';
   import type { LngLatLike, MapboxOptions, Map, LngLat, ErrorEvent, EventData } from 'mapbox-gl';
   import { bindEvents } from '../event-bindings';
+  import { getTimeZoneLongitude } from '../../utils/getTimeZoneLongitude';
 
   export let map: Map = null;
   export let version = 'v2.9.2';
   export let customStylesheetUrl: string = undefined;
   export let accessToken = import.meta.env.VITE_mapboxAccessToken as string;
-
   export let options: Partial<MapboxOptions> = {};
-  export let center: LngLatLike = [-95, 38.907]; // USA
   export let zoom = 2;
   export let style = 'mapbox://styles/mapbox/streets-v11?optimize=true'; //'Mapbox Streets' // light-v8, light-v9, light-v10, dark-v10, satellite-v9, streets-v11
+  export let lng: number = undefined;
+  export let lat: number = undefined;
+  let center: LngLatLike = lng && lat ? [lng, lat] : [getTimeZoneLongitude() || -80, 10];
 
   setContext(mapKey, {
     getMap: () => map,

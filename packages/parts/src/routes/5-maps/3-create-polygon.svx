@@ -34,7 +34,7 @@ With help from https://github.com/beyonk-adventures/svelte-mapbox
     let:add
     let:remove>
     <div class="mb-4" style="height: 350px;">
-      <Map
+      <Map lng={-95} lat={44}
         zoom={3}
         on:click={({ detail: { lng, lat } }) => {
           add({ longitude: lng, latitude: lat });

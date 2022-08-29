@@ -9,7 +9,6 @@
   import Geocoder from './mapbox/geocoder/Geocoder.svelte';
   import Marker from './mapbox/map/Marker.svelte';
   import ToggleStyle from './mapbox/controls/ToggleStyle.svelte';
-  import { getTimeZoneLongitude } from './utils/getTimeZoneLongitude';
   import type { IRegion } from '@living-dictionaries/types';
   import GeoJSONSource from './mapbox/sources/GeoJSONSource.svelte';
   import { polygonFeatureCoordinates } from './utils/polygonFromCoordinates';
@@ -19,24 +18,25 @@
   import Popup from './mapbox/map/Popup.svelte';
 
   export let region: IRegion;
+  let zoom = region ? 4 : 2;
 
-  // let center: [number, number] = lng && lat ? [lng, lat] : [getTimeZoneLongitude(), 10];
-  let center: [number, number] = [getTimeZoneLongitude(), 10];
-  // let zoom = lng && lat ? 6 : 2;
-  let zoom = 2;
+  // TODO: find center point of a region
+  let centerLng;
+  let centerLat;
 
-  function handleGeocoderResult({ detail }) {
+  function handleGeocoderResult({ detail }, add) {
     if (detail?.user_coordinates?.[0]) {
-      // points.add({ longitude: detail.user_coordinates[0], latitude: detail.user_coordinates[1] });
+      add({ longitude: detail.user_coordinates[0], latitude: detail.user_coordinates[1] });
     } else {
-      // points.add({ longitude: detail.center[0], latitude: detail.center[1] });
+      add({ longitude: detail.center[0], latitude: detail.center[1] });
     }
   }
 
   onMount(async () => {
     if (!region && navigator.geolocation) {
       navigator.geolocation.getCurrentPosition((position) => {
-        center = [position.coords.longitude, position.coords.latitude];
+        centerLng = position.coords.longitude;
+        centerLat = position.coords.latitude;
       });
     }
   });
@@ -64,13 +64,14 @@
     <form on:submit|preventDefault={() => update(points)}>
       <form on:submit={(e) => e.preventDefault()} style="height: 50vh;">
         <Map
-          {center}
+          lng={centerLng}
+          lat={centerLat}
           {zoom}
           on:click={({ detail: { lng, lat } }) => add({ longitude: lng, latitude: lat })}>
           <Geocoder
             options={{ marker: false }}
             placeholder={t ? $t('about.search') : 'Search'}
-            on:result={handleGeocoderResult}
+            on:result={(e) => handleGeocoderResult(e, add)}
             on:error={(e) => console.log(e.detail)} />
           {#each Array.from(points) as point (point)}
             <Marker
