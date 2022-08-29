@@ -17,12 +17,22 @@
   import ReactiveSet from 'svelte-pieces/functions/ReactiveSet.svelte';
   import Popup from './mapbox/map/Popup.svelte';
 
+  import { points } from '@turf/helpers';
+  import center from '@turf/center';
+
   export let region: IRegion;
   let zoom = region ? 4 : 2;
 
-  // TODO: find center point of a region
-  let centerLng;
-  let centerLat;
+  let centerLng: number;
+  let centerLat: number;
+
+  if (region) {
+    const features = points(
+      region.coordinates.map(({ longitude, latitude }) => [longitude, latitude])
+    );
+    const c = center(features);
+    if (c?.geometry?.coordinates) [centerLng, centerLat] = c.geometry.coordinates;
+  }
 
   function handleGeocoderResult({ detail }, add) {
     if (detail?.user_coordinates?.[0]) {
