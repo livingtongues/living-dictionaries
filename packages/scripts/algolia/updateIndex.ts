@@ -10,21 +10,15 @@ const index = client.initIndex(
   projectId === 'talking-dictionaries-dev' ? 'entries_dev' : 'entries_prod'
 );
 
-import fs from 'fs';
-const iterateThroughDictionaries = async (fieldToIndex: string, dry = false) => {
-  // FIRST TRY
-  /* const dictionariesSnapshot = await db.collection(`dictionaries`).get();
-  const dictionaryIds = dictionariesSnapshot.docs.map((doc) => doc.id);
-  //process.stdout.write(dictionaryIds + '\n');
-
-  for (const dictionaryId of dictionaryIds) {
-    const wordsRef = db.collection(`dictionaries/${dictionaryId}/words`);
-    const selected = await wordsRef.where(fieldToIndex, '!=', null).get();
-    selected.forEach((doc) => console.log(doc.data()));
-  } */
+const updateIndexByField = async (fieldToIndex: string, dry = false) => {
   const querySnapshot = await db.collectionGroup('words').where(fieldToIndex, '!=', null).get();
-  querySnapshot.forEach((doc) => {
-    console.log(doc.data());
-  });
+  if (dry) {
+    querySnapshot.forEach((doc) => {
+      console.log(doc.data());
+    });
+  } else {
+    //TODO index entries. Do I need the dictionary ID?
+  }
 };
-iterateThroughDictionaries('nc', true);
+//TODO is it fine this way or would it be better to execute this via a command as we do when import dictionaries?
+updateIndexByField('nc', true);
