@@ -11,6 +11,7 @@
     "importDictionary": "esno import/import.ts",
     "addDictionariesToIndex:dev": "esno algolia/addDictionariesToIndex.ts dev",
     "addDictionariesToIndex:prod": "esno algolia/addDictionariesToIndex.js prod",
+    "updateIndex": "esno algolia/updateIndex.ts",
     "copyAlgoliaIndexRecords": "esno algolia/copyAlgoliaIndexRecords.js",
     "copyAlgoliaIndexSettings": "esno algolia/copyAlgoliaIndexSettings.js",
     "test": "vitest -u"
