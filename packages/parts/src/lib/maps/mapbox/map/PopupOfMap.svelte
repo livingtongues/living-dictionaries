@@ -1,34 +1,31 @@
 <script lang="ts">
   // from https://gitlab.com/jailbreak/svelte-mapbox-gl
   import { onMount, getContext } from 'svelte';
-  import { mapKey, markerKey } from '../context';
-  import type { Popup, PopupOptions, Marker } from 'mapbox-gl';
+  import { mapKey } from '../context';
+  import type { Popup, PopupOptions, Map } from 'mapbox-gl';
 
-  const { getMapbox } = getContext(mapKey);
+  const { getMap, getMapbox } = getContext(mapKey);
+  const map: Map = getMap();
   const mapbox: typeof import('mapbox-gl') = getMapbox();
 
-  const {getMarker} = getContext(markerKey);
-  const marker: Marker = getMarker();
-
   export let closeButton = false;
-  export let closeOnClick = true;
-  export let closeOnMove = true;
   export let options: PopupOptions = {};
-  export let offset = 15;
-  export let label = 'Marker';
-  export let open = false;
-  // make my own close button
+  export let label = 'Popup';
+  export let open = true;
+  export let lng: number;
+  export let lat: number;
 
   let popup: Popup;
   let container: HTMLDivElement;
+
+  $: popup?.setLngLat({ lng, lat });
 
   onMount(() => {
     popup = new mapbox.Popup({
       ...options,
       closeButton,
-      closeOnClick,
-      closeOnMove,
-      offset,
+      closeOnClick: false,
+      closeOnMove: false,
     });
 
     if (container.hasChildNodes()) {
@@ -37,16 +34,15 @@
       popup.setText(label);
     }
 
-    marker.setPopup(popup);
-
     return () => {
-      marker.setPopup(null);
     };
   });
 
   $: if (popup) {
-    if (open !== popup.isOpen()) {
-      marker.togglePopup();
+    if (open) {
+      popup.addTo(map);
+    } else {
+      popup.remove();
     }
   }
 </script>
@@ -56,11 +52,6 @@
 </div>
 
 <style global>
-  /* div .mapboxgl-popup-close-button {
-    font-size: 30px;
-    top: 2px;
-    right: 2px;
-  } */
   div .mapboxgl-popup-content {
     padding: 12px;
   }

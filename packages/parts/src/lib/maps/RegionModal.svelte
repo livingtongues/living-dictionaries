@@ -91,9 +91,8 @@
                 add({ longitude: lng, latitude: lat });
               }}
               lng={point.longitude}
-              lat={point.latitude}
-              let:marker>
-              <Popup {marker}>
+              lat={point.latitude}>
+              <Popup>
                 <Button form="simple" size="sm" color="red" onclick={() => remove(point)}
                   ><span class="i-fa-trash-o" /></Button>
               </Popup>

@@ -13,13 +13,17 @@
 </script>
 
 <script lang="ts">
-  import { onMount, getContext, createEventDispatcher } from 'svelte';
-  import { mapKey } from '../context';
+  import { onMount, getContext, createEventDispatcher, setContext } from 'svelte';
+  import { mapKey, markerKey } from '../context';
   import type { LngLat, Map, Marker, MarkerOptions } from 'mapbox-gl';
 
   const { getMap, getMapbox } = getContext(mapKey);
   const map: Map = getMap();
   const mapbox: typeof import('mapbox-gl') = getMapbox();
+
+  setContext(markerKey, {
+    getMarker: () => marker,
+  });
 
   export let lat: number;
   export let lng: number;
@@ -60,13 +64,12 @@
     markers.add(marker);
 
     markerEl = marker.getElement();
-    markerEl.addEventListener('click', handleClick);
-
-    marker.setLngLat({ lng, lat }).addTo(map);
+    markerEl.addEventListener('click', handleClick); // addEventListener to element instead of using marker on 'click' to be able to call stopPropagation first, otherwise map click will also fire
     marker.on('dragend', handleDragEnd);
+    marker.setLngLat({ lng, lat }).addTo(map);
 
     return () => {
-      markers;
+      markerEl.removeEventListener('click', handleClick);
       marker.off('dragend', handleDragEnd);
       marker.remove();
     };

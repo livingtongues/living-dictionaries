@@ -24,9 +24,8 @@
       <Marker
         lat={dictionary.coordinates.latitude}
         lng={dictionary.coordinates.longitude}
-        let:marker
         color="blue">
-        <Popup {marker}>
+        <Popup>
           <ShowHide let:show let:toggle>
             <Button form="simple" size="sm" onclick={toggle}>
               <span class="i-octicon-pencil" />
@@ -48,65 +47,65 @@
     {/if}
 
     {#if dictionary.points}
-        {#each dictionary.points as point}
-          <Marker lat={point.coordinates.latitude} lng={point.coordinates.longitude} let:marker>
-            <Popup {marker}>
-              <ShowHide let:show let:toggle>
-                <Button form="simple" size="sm" onclick={toggle}>
-                  <span class="i-octicon-pencil" />
-                </Button>
-                {#if show}
-                  {#await import('../maps/CoordinatesModal.svelte') then { default: CoordinatesModal }}
-                    <CoordinatesModal
-                      {t}
-                      lng={point.coordinates.longitude}
-                      lat={point.coordinates.latitude}
-                      on:update
-                      on:remove
-                      on:close={toggle} />
-                  {/await}
-                {/if}
-              </ShowHide>
-            </Popup>
-          </Marker>
-        {/each}
-      {/if}
-      {#if dictionary.regions}
-        {#each dictionary.regions as region}
-          <GeoJSONSource
-            id="selection"
-            data={{
-              type: 'Feature',
-              geometry: {
-                type: 'Polygon',
-                coordinates: polygonFeatureCoordinates(region.coordinates),
+      {#each dictionary.points as point}
+        <Marker lat={point.coordinates.latitude} lng={point.coordinates.longitude}>
+          <Popup>
+            <ShowHide let:show let:toggle>
+              <Button form="simple" size="sm" onclick={toggle}>
+                <span class="i-octicon-pencil" />
+              </Button>
+              {#if show}
+                {#await import('../maps/CoordinatesModal.svelte') then { default: CoordinatesModal }}
+                  <CoordinatesModal
+                    {t}
+                    lng={point.coordinates.longitude}
+                    lat={point.coordinates.latitude}
+                    on:update
+                    on:remove
+                    on:close={toggle} />
+                {/await}
+              {/if}
+            </ShowHide>
+          </Popup>
+        </Marker>
+      {/each}
+    {/if}
+    {#if dictionary.regions}
+      {#each dictionary.regions as region}
+        <GeoJSONSource
+          id="selection"
+          data={{
+            type: 'Feature',
+            geometry: {
+              type: 'Polygon',
+              coordinates: polygonFeatureCoordinates(region.coordinates),
+            },
+            properties: undefined,
+          }}>
+          <Layer
+            id="selectionFill"
+            options={{
+              type: 'fill',
+              paint: {
+                'fill-color': '#0080ff',
+                'fill-opacity': 0.5,
               },
-              properties: undefined,
-            }}>
-            <Layer
-              id="selectionFill"
-              options={{
-                type: 'fill',
-                paint: {
-                  'fill-color': '#0080ff',
-                  'fill-opacity': 0.5,
-                },
-              }}
-              on:click={() => alert('clicked')}
-              on:mouseenter={() => (map.getCanvas().style.cursor = 'pointer')}
-              on:mouseleave={() => (map.getCanvas().style.cursor = '')} />
-            <Layer
-              id="selectionOutline"
-              options={{
-                type: 'line',
-                paint: {
-                  'line-color': '#555555',
-                  'line-width': 1,
-                },
-              }} />
-          </GeoJSONSource>
-        {/each}
-      {/if}
+            }}
+            on:click={() => alert('region clicked')}
+            on:mouseenter={() => (map.getCanvas().style.cursor = 'pointer')}
+            on:mouseleave={() => (map.getCanvas().style.cursor = '')} />
+          <Layer
+            id="selectionOutline"
+            options={{
+              type: 'line',
+              paint: {
+                'line-color': '#555555',
+                'line-width': 1,
+              },
+            }} />
+        </GeoJSONSource>
+      {/each}
+    {/if}
   </Map>
 </div>
 
