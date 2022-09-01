@@ -9,6 +9,8 @@
   const mapbox: typeof import('mapbox-gl') = getMapbox();
 
   export let closeButton = false;
+  export let closeOnClick = true;
+  export let closeOnMove = true;
   export let options: PopupOptions = {};
   export let label = 'Popup';
   export let open = true;
@@ -24,8 +26,8 @@
     popup = new mapbox.Popup({
       ...options,
       closeButton,
-      closeOnClick: false,
-      closeOnMove: false,
+      closeOnClick,
+      closeOnMove,
     });
 
     if (container.hasChildNodes()) {

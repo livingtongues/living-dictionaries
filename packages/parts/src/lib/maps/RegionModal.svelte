@@ -131,6 +131,9 @@
       </form>
 
       <div class="modal-footer">
+        <Button onclick={() => dispatch('close')} form="simple" color="black">
+          {t ? $t('misc.cancel') : 'Cancel'}
+        </Button>
         <Button onclick={removeRegion} form="simple" color="red">
           {t ? $t('misc.remove') : 'Remove'}
         </Button>

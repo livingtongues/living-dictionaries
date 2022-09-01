@@ -1,7 +1,4 @@
 <script lang="ts">
-  import type { Readable } from 'svelte/store';
-  export let t: Readable<any> = undefined;
-
   import ShowHide from 'svelte-pieces/functions/ShowHide.svelte';
   import GeoJSONSource from '../sources/GeoJSONSource.svelte';
   import Layer from './Layer.svelte';
@@ -13,7 +10,6 @@
   import { mapKey } from '../context';
   import { points } from '@turf/helpers';
   import center from '@turf/center';
-  import Button from 'svelte-pieces/ui/Button.svelte';
 
   const { getMap } = getContext(mapKey);
   const map: Map = getMap();
@@ -61,21 +57,7 @@
   </GeoJSONSource>
   {#if show}
     <PopupOfMap lng={rCenter[0]} lat={rCenter[1]}>
-      <ShowHide let:show={showModal} let:toggle={toggleModal}>
-        <Button form="simple" size="sm" onclick={toggleModal}>
-          <span class="i-octicon-pencil" />
-        </Button>
-        {#if showModal}
-          {#await import('../../../maps/RegionModal.svelte') then { default: RegionModal }}
-            <RegionModal
-              {t}
-              {region}
-              on:update
-              on:remove
-              on:close={toggleModal} />
-          {/await}
-        {/if}
-      </ShowHide>
+      <slot />
     </PopupOfMap>
   {/if}
 </ShowHide>
