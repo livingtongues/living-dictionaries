@@ -45,7 +45,6 @@
   <WhereSpoken dictionary={dictWithRegion} />
 </Story>
 
-- add popup for region to edit
 - todo: make geojson ids and layerIds automatic to enable easy looping
 
 <Story name="With main coordinates">

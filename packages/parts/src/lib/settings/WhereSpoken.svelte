@@ -8,9 +8,7 @@
   import Map from '$lib/maps/mapbox/map/Map.svelte';
   import Marker from '$lib/maps/mapbox/map/Marker.svelte';
   import Popup from '$lib/maps/mapbox/map/Popup.svelte';
-  import GeoJSONSource from '$lib/maps/mapbox/sources/GeoJSONSource.svelte';
-  import { polygonFeatureCoordinates } from '$lib/maps/utils/polygonFromCoordinates';
-  import Layer from '$lib/maps/mapbox/map/Layer.svelte';
+import Region from '$lib/maps/mapbox/map/Region.svelte';
   export let dictionary: IDictionary;
 </script>
 
@@ -19,7 +17,7 @@
 </div>
 
 <div class="h-200px">
-  <Map lng={dictionary.coordinates?.longitude} lat={dictionary.coordinates?.latitude} let:map>
+  <Map lng={dictionary.coordinates?.longitude} lat={dictionary.coordinates?.latitude}>
     {#if dictionary.coordinates}
       <Marker
         lat={dictionary.coordinates.latitude}
@@ -72,38 +70,7 @@
     {/if}
     {#if dictionary.regions}
       {#each dictionary.regions as region}
-        <GeoJSONSource
-          id="selection"
-          data={{
-            type: 'Feature',
-            geometry: {
-              type: 'Polygon',
-              coordinates: polygonFeatureCoordinates(region.coordinates),
-            },
-            properties: undefined,
-          }}>
-          <Layer
-            id="selectionFill"
-            options={{
-              type: 'fill',
-              paint: {
-                'fill-color': '#0080ff',
-                'fill-opacity': 0.5,
-              },
-            }}
-            on:click={() => alert('region clicked')}
-            on:mouseenter={() => (map.getCanvas().style.cursor = 'pointer')}
-            on:mouseleave={() => (map.getCanvas().style.cursor = '')} />
-          <Layer
-            id="selectionOutline"
-            options={{
-              type: 'line',
-              paint: {
-                'line-color': '#555555',
-                'line-width': 1,
-              },
-            }} />
-        </GeoJSONSource>
+        <Region {region} />
       {/each}
     {/if}
   </Map>
