@@ -33,35 +33,25 @@ export enum EntryPDFFieldsEnum {
   va = 'Variant',
   di = 'Dialect',
   nt = 'Notes',
+  lo = '',
+  lo2 = '',
+  lo3 = '',
+  lo4 = '',
+  lo5 = '',
+  ph = '',
+  gl = '',
+  ps = '',
+  xv = '',
+  xs = '',
+  pf = '',
+  sr = '',
+  sd = '',
+  sf = '',
+  vfs = '',
 }
 type EntryForPDFKeys = keyof typeof EntryPDFFieldsEnum;
-export type IEntryForPDF = {
-  [key in EntryForPDFKeys]?: string;
+export type ISelectedFields = {
+  [key in EntryForPDFKeys]?: boolean;
 };
 
 //TODO Can we make a enum with boolean values?
-export interface ISelectedFields {
-  lo: boolean;
-  lo2: boolean;
-  lo3: boolean;
-  lo4: boolean;
-  lo5: boolean;
-  ph: boolean;
-  gl: boolean;
-  ps: boolean;
-  xv: boolean;
-  xs: boolean;
-  pf: boolean;
-  sr: boolean;
-  sd: boolean;
-  id: boolean;
-  in: boolean;
-  mr: boolean;
-  nc: boolean;
-  pl: boolean;
-  va: boolean;
-  di: boolean;
-  nt: boolean;
-  sf: boolean;
-  vfs: boolean;
-}
