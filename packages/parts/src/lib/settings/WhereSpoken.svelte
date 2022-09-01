@@ -5,10 +5,12 @@
   import Button from 'svelte-pieces/ui/Button.svelte';
   import ShowHide from 'svelte-pieces/functions/ShowHide.svelte';
   import type { IDictionary } from '@living-dictionaries/types';
-  import Map from '$lib/maps/mapbox/map/Map.svelte';
-  import Marker from '$lib/maps/mapbox/map/Marker.svelte';
-  import Popup from '$lib/maps/mapbox/map/Popup.svelte';
-  import Region from '$lib/maps/mapbox/map/Region.svelte';
+  import Map from '../maps/mapbox/map/Map.svelte';
+  import Marker from '../maps/mapbox/map/Marker.svelte';
+  import Popup from '../maps/mapbox/map/Popup.svelte';
+  import Region from '../maps/mapbox/map/Region.svelte';
+  import CoordinatesModal from '../maps/CoordinatesModal.svelte';
+  import RegionModal from '../maps/RegionModal.svelte';
   export let dictionary: IDictionary;
 </script>
 
@@ -29,15 +31,13 @@
               <span class="i-octicon-pencil" />
             </Button>
             {#if show}
-              {#await import('../maps/CoordinatesModal.svelte') then { default: CoordinatesModal }}
-                <CoordinatesModal
-                  {t}
-                  lng={dictionary.coordinates.longitude}
-                  lat={dictionary.coordinates.latitude}
-                  on:update
-                  on:remove
-                  on:close={toggle} />
-              {/await}
+              <CoordinatesModal
+                {t}
+                lng={dictionary.coordinates.longitude}
+                lat={dictionary.coordinates.latitude}
+                on:update
+                on:remove
+                on:close={toggle} />
             {/if}
           </ShowHide>
         </Popup>
@@ -53,15 +53,13 @@
                 <span class="i-octicon-pencil" />
               </Button>
               {#if show}
-                {#await import('../maps/CoordinatesModal.svelte') then { default: CoordinatesModal }}
-                  <CoordinatesModal
-                    {t}
-                    lng={point.coordinates.longitude}
-                    lat={point.coordinates.latitude}
-                    on:update
-                    on:remove
-                    on:close={toggle} />
-                {/await}
+                <CoordinatesModal
+                  {t}
+                  lng={point.coordinates.longitude}
+                  lat={point.coordinates.latitude}
+                  on:update
+                  on:remove
+                  on:close={toggle} />
               {/if}
             </ShowHide>
           </Popup>
@@ -70,7 +68,16 @@
     {/if}
     {#if dictionary.regions}
       {#each dictionary.regions as region}
-        <Region {region} />
+        <Region {region}>
+          <ShowHide let:show let:toggle>
+            <Button form="simple" size="sm" onclick={toggle}>
+              <span class="i-octicon-pencil" />
+            </Button>
+            {#if show}
+              <RegionModal {t} {region} on:update on:remove on:close={toggle} />
+            {/if}
+          </ShowHide>
+        </Region>
       {/each}
     {/if}
   </Map>
@@ -86,9 +93,7 @@
       {t ? $t('create.select_coordinates') : 'Select Coordinates'}
     </Button>
     {#if show}
-      {#await import('../maps/CoordinatesModal.svelte') then { default: CoordinatesModal }}
-        <CoordinatesModal {t} lng={null} lat={null} on:update on:remove on:close={toggle} />
-      {/await}
+      <CoordinatesModal {t} lng={null} lat={null} on:update on:close={toggle} />
     {/if}
   </ShowHide>
 
@@ -99,9 +104,7 @@
         {t ? $t('create.select_region') : 'Select Region'}
       </Button>
       {#if show}
-        {#await import('../maps/RegionModal.svelte') then { default: RegionModal }}
-          <RegionModal {t} region={null} on:update on:remove on:close={toggle} />
-        {/await}
+        <RegionModal {t} region={null} on:update on:close={toggle} />
       {/if}
     </ShowHide>
   {/if}
