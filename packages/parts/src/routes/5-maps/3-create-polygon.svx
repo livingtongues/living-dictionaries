@@ -58,7 +58,6 @@ With help from https://github.com/beyonk-adventures/svelte-mapbox
         {/each}
         {#if autoDrawShape && points.length > 2}
           <GeoJSONSource
-            id="selection"
             data={{
               type: 'Feature',
               geometry: {
@@ -68,7 +67,6 @@ With help from https://github.com/beyonk-adventures/svelte-mapbox
               properties: undefined,
             }}>
             <Layer
-              id="selectionFill"
               options={{
                 type: 'fill',
                 paint: {
@@ -77,7 +75,6 @@ With help from https://github.com/beyonk-adventures/svelte-mapbox
                 },
               }} />
             <Layer
-              id="selectionOutline"
               options={{
                 type: 'line',
                 paint: {

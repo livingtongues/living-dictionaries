@@ -3,21 +3,7 @@
   import Map from '$lib/maps/mapbox/map/Map.svelte';
   import GeoJSONSource from '$lib/maps/mapbox/sources/GeoJSONSource.svelte';
   import Layer from '$lib/maps/mapbox/map/Layer.svelte';
-
-  function handleClusterClick(event, map) {
-    const { point } = event.detail;
-    const features = map.queryRenderedFeatures(point, {
-      layers: ['clusters'],
-    });
-    const clusterId = features[0].properties.cluster_id;
-    map.getSource('earthquakes').getClusterExpansionZoom(clusterId, (err, zoom) => {
-      if (err) return;
-      map.easeTo({
-        center: features[0].geometry.coordinates,
-        zoom: zoom,
-      });
-    });
-  }
+  const clustersId = 'clusters';
 </script>
 
 <!-- prettier-ignore -->
@@ -28,11 +14,11 @@ From https://gitlab.com/jailbreak/svelte-mapbox-gl
 <Story name="earthquake clusters" height={350}>
   <Map let:map>
     <GeoJSONSource
-      id="earthquakes"
       data="https://docs.mapbox.com/mapbox-gl-js/assets/earthquakes.geojson"
-      options={{ cluster: true, clusterMaxZoom: 14, clusterRadius: 50 }}>
+      options={{ cluster: true, clusterMaxZoom: 14, clusterRadius: 50 }}
+      let:source>
       <Layer
-        id="clusters"
+        id={clustersId}
         options={{
           type: 'circle',
           filter: ['has', 'point_count'],
@@ -49,11 +35,23 @@ From https://gitlab.com/jailbreak/svelte-mapbox-gl
             'circle-radius': ['step', ['get', 'point_count'], 20, 100, 30, 750, 40],
           },
         }}
-        on:click={(e) => handleClusterClick(e, map)}
+        on:click={({ detail }) => {
+          const features = map.queryRenderedFeatures(detail.point, {
+            layers: [clustersId],
+          });
+          const clusterId = features[0].properties.cluster_id;
+          source.getClusterExpansionZoom(clusterId, (err, zoom) => {
+            if (err) return;
+            map.easeTo({
+              // @ts-ignore
+              center: features[0].geometry.coordinates,
+              zoom: zoom,
+            });
+          });
+        }}
         on:mouseenter={() => (map.getCanvas().style.cursor = 'pointer')}
         on:mouseleave={() => (map.getCanvas().style.cursor = '')} />
       <Layer
-        id="cluster-count"
         options={{
           type: 'symbol',
           filter: ['has', 'point_count'],
@@ -64,7 +62,6 @@ From https://gitlab.com/jailbreak/svelte-mapbox-gl
           },
         }} />
       <Layer
-        id="unclustered-point"
         options={{
           type: 'circle',
           filter: ['!', ['has', 'point_count']],

@@ -2,6 +2,7 @@
   // from https://gitlab.com/jailbreak/svelte-mapbox-gl
   import { createEventDispatcher, getContext, onDestroy } from 'svelte';
   import { mapKey, sourceKey } from '../context';
+  import { randomId } from '../../utils/randomId';
   import type {
     Map,
     AnyLayer,
@@ -15,7 +16,7 @@
   const { getSourceId, addChildLayer } = getContext(sourceKey);
   const sourceId = getSourceId() as string;
 
-  export let id: string;
+  export let id = randomId();
   // see https://docs.mapbox.com/mapbox-gl-js/style-spec/layers
   export let options: Partial<AnyLayer> = {
     type: 'fill',

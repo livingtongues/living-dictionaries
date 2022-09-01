@@ -100,7 +100,6 @@
           {/each}
           {#if size > 2}
             <GeoJSONSource
-              id="region"
               data={{
                 type: 'Feature',
                 geometry: {
@@ -110,7 +109,6 @@
                 properties: undefined,
               }}>
               <Layer
-                id="regionFill"
                 options={{
                   type: 'fill',
                   paint: {
@@ -119,7 +117,6 @@
                   },
                 }} />
               <Layer
-                id="regionOutline"
                 options={{
                   type: 'line',
                   paint: {
