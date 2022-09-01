@@ -8,7 +8,7 @@
   import Map from '$lib/maps/mapbox/map/Map.svelte';
   import Marker from '$lib/maps/mapbox/map/Marker.svelte';
   import Popup from '$lib/maps/mapbox/map/Popup.svelte';
-import Region from '$lib/maps/mapbox/map/Region.svelte';
+  import Region from '$lib/maps/mapbox/map/Region.svelte';
   export let dictionary: IDictionary;
 </script>
 

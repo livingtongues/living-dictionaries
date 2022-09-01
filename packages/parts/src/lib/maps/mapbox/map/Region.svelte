@@ -31,7 +31,6 @@
 
 <ShowHide let:show let:toggle>
   <GeoJSONSource
-    id="selection"
     data={{
       type: 'Feature',
       geometry: {
@@ -41,7 +40,6 @@
       properties: undefined,
     }}>
     <Layer
-      id="selectionFill"
       options={{
         type: 'fill',
         paint: {
@@ -53,7 +51,6 @@
       on:mouseenter={() => (map.getCanvas().style.cursor = 'pointer')}
       on:mouseleave={() => (map.getCanvas().style.cursor = '')} />
     <Layer
-      id="selectionOutline"
       options={{
         type: 'line',
         paint: {

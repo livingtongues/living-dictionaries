@@ -1,10 +1,11 @@
 <script lang="ts">
   import { getContext, setContext, onDestroy } from 'svelte';
   import { mapKey, sourceKey } from '../context';
+  import { randomId } from '../../utils/randomId';
   import type { Map, GeoJSONSourceRaw, GeoJSONSource, GeoJSONSourceOptions } from 'mapbox-gl';
 
   // Cf https://docs.mapbox.com/mapbox-gl-js/style-spec/sources/#geojson
-  export let id: string;
+  export let id = randomId();
   export let data: GeoJSONSourceOptions['data']; // URL or inline data
   export let options: Partial<GeoJSONSourceRaw> = {};
 
@@ -20,7 +21,7 @@
       layerIds.push(id);
     },
   });
-  
+
   let source: GeoJSONSource;
   function addSource() {
     map.addSource(id, {
@@ -36,7 +37,7 @@
       addSource();
     }
   }
-  
+
   $: {
     source = map.getSource(id) as GeoJSONSource;
     if (source) {
