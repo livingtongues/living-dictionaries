@@ -17,7 +17,9 @@
   export let style = 'mapbox://styles/mapbox/streets-v11?optimize=true'; //'Mapbox Streets' // light-v8, light-v9, light-v10, dark-v10, satellite-v9, streets-v11
   export let lng: number = undefined;
   export let lat: number = undefined;
-  let center: LngLatLike = lng && lat ? [lng, lat] : [getTimeZoneLongitude() || -80, 10];
+
+  let center: LngLatLike;
+  $: center = lng && lat ? [lng, lat] : [getTimeZoneLongitude() || -80, 10];
 
   setContext(mapKey, {
     getMap: () => map,
@@ -107,6 +109,7 @@
   }
 
   $: zoom && setZoom(zoom);
+  $: center && setCenter(center);
 </script>
 
 <div bind:this={container}>
