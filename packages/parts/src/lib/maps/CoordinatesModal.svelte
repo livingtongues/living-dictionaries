@@ -12,6 +12,7 @@
 
   export let lng: number;
   export let lat: number;
+  export let canRemove = true;
 
   let centerLng = lng;
   let centerLat = lat;
@@ -132,9 +133,11 @@
       <Button onclick={() => dispatch('close')} form="simple" color="black">
         {t ? $t('misc.cancel') : 'Cancel'}
       </Button>
-      <Button onclick={remove} form="simple" color="red">
-        {t ? $t('misc.remove') : 'Remove'}
-      </Button>
+      {#if canRemove}
+        <Button onclick={remove} form="simple" color="red">
+          {t ? $t('misc.remove') : 'Remove'}
+        </Button>
+      {/if}
       <Button type="submit" form="filled">
         {t ? $t('misc.save') : 'Save'}
       </Button>

@@ -52,12 +52,12 @@
   });
 
   const dispatch = createEventDispatcher<{
-    update: { coordinates: IRegion['coordinates'] };
+    update: IRegion;
     remove: boolean;
     close: boolean;
   }>();
   async function update(coordinates: IRegion['coordinates']) {
-    dispatch('update', { coordinates });
+    dispatch('update', { type: 'region', coordinates });
     dispatch('close');
   }
   async function removeRegion() {
