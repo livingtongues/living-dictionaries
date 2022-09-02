@@ -16,13 +16,9 @@
 
   export let region: IRegion;
 
-  $: rCenter = (() => {
-    const features = points(
-      region.coordinates.map(({ longitude, latitude }) => [longitude, latitude])
-    );
-    const c = center(features);
-    if (c?.geometry?.coordinates) return c.geometry.coordinates;
-  })();
+  $: coordinatesArray =
+    region?.coordinates.map(({ longitude, latitude }) => [longitude, latitude]) || [];
+  $: [lng, lat] = center(points(coordinatesArray)).geometry.coordinates;
 </script>
 
 <ShowHide let:show let:toggle>
@@ -56,7 +52,7 @@
       }} />
   </GeoJSONSource>
   {#if show}
-    <PopupOfMap lng={rCenter[0]} lat={rCenter[1]}>
+    <PopupOfMap {lng} {lat}>
       <slot />
     </PopupOfMap>
   {/if}

@@ -4,13 +4,24 @@
 
   import Button from 'svelte-pieces/ui/Button.svelte';
   import ShowHide from 'svelte-pieces/functions/ShowHide.svelte';
-  import type { IDictionary } from '@living-dictionaries/types';
+  import type { IDictionary, IPoint, IRegion } from '@living-dictionaries/types';
   import Map from '../maps/mapbox/map/Map.svelte';
   import Marker from '../maps/mapbox/map/Marker.svelte';
   import Popup from '../maps/mapbox/map/Popup.svelte';
   import Region from '../maps/mapbox/map/Region.svelte';
   import CoordinatesModal from '../maps/CoordinatesModal.svelte';
   import RegionModal from '../maps/RegionModal.svelte';
+
+  import { createEventDispatcher } from 'svelte';
+  const dispatch = createEventDispatcher<{
+    removeCoordinates: boolean;
+    updateCoordinates: { longitude: number; latitude: number };
+    updatePoints: IPoint[];
+    addPoint: IPoint;
+    updateRegions: IRegion[];
+    addRegion: IRegion;
+  }>();
+
   export let dictionary: IDictionary;
 </script>
 
@@ -35,8 +46,10 @@
                 {t}
                 lng={dictionary.coordinates.longitude}
                 lat={dictionary.coordinates.latitude}
-                on:update
-                on:remove
+                canRemove={!dictionary.points?.length && !dictionary.regions?.length}
+                on:update={({ detail }) =>
+                  dispatch('updateCoordinates', { longitude: detail.lng, latitude: detail.lat })}
+                on:remove={() => dispatch('removeCoordinates')}
                 on:close={toggle} />
             {/if}
           </ShowHide>
@@ -45,7 +58,7 @@
     {/if}
 
     {#if dictionary.points}
-      {#each dictionary.points as point}
+      {#each dictionary.points as point, index}
         <Marker lat={point.coordinates.latitude} lng={point.coordinates.longitude}>
           <Popup>
             <ShowHide let:show let:toggle>
@@ -57,8 +70,15 @@
                   {t}
                   lng={point.coordinates.longitude}
                   lat={point.coordinates.latitude}
-                  on:update
-                  on:remove
+                  on:update={({ detail }) => {
+                    const points = dictionary.points;
+                    points[index] = {
+                      type: 'point',
+                      coordinates: { longitude: detail.lng, latitude: detail.lat },
+                    };
+                    dispatch('updatePoints', points);
+                  }}
+                  on:remove={() => dispatch('updatePoints', dictionary.points.splice(index, 1))}
                   on:close={toggle} />
               {/if}
             </ShowHide>
@@ -66,15 +86,25 @@
         </Marker>
       {/each}
     {/if}
+
     {#if dictionary.regions}
-      {#each dictionary.regions as region}
+      {#each dictionary.regions as region, index}
         <Region {region}>
           <ShowHide let:show let:toggle>
             <Button form="simple" size="sm" onclick={toggle}>
               <span class="i-octicon-pencil" />
             </Button>
             {#if show}
-              <RegionModal {t} {region} on:update on:remove on:close={toggle} />
+              <RegionModal
+                {t}
+                {region}
+                on:update={({ detail }) => {
+                  const regions = dictionary.regions;
+                  regions[index] = detail;
+                  dispatch('updateRegions', regions);
+                }}
+                on:remove={() => dispatch('updateRegions', dictionary.regions.splice(index, 1))}
+                on:close={toggle} />
             {/if}
           </ShowHide>
         </Region>
@@ -93,7 +123,21 @@
       {t ? $t('create.select_coordinates') : 'Select Coordinates'}
     </Button>
     {#if show}
-      <CoordinatesModal {t} lng={null} lat={null} on:update on:close={toggle} />
+      <CoordinatesModal
+        {t}
+        lng={null}
+        lat={null}
+        on:update={({ detail }) => {
+          if (dictionary.coordinates) {
+            dispatch('addPoint', {
+              type: 'point',
+              coordinates: { longitude: detail.lng, latitude: detail.lat },
+            });
+          } else {
+            dispatch('updateCoordinates', { longitude: detail.lng, latitude: detail.lat });
+          }
+        }}
+        on:close={toggle} />
     {/if}
   </ShowHide>
 
@@ -104,7 +148,13 @@
         {t ? $t('create.select_region') : 'Select Region'}
       </Button>
       {#if show}
-        <RegionModal {t} region={null} on:update on:close={toggle} />
+        <RegionModal
+          {t}
+          region={null}
+          on:update={({ detail }) => {
+            dispatch('addRegion', detail);
+          }}
+          on:close={toggle} />
       {/if}
     </ShowHide>
   {/if}

@@ -49,14 +49,19 @@ export type IArea = (IPoint | IRegion);
 
 export interface IPoint {
   type: 'point';
-  coordinates: Partial<GeoPoint>;
+  coordinates: LngLatFull;
   label?: string;
   color?: string;
 }
 
 export interface IRegion {
   type: 'region'
-  coordinates: Partial<GeoPoint>[];
+  coordinates: LngLatFull[];
   label?: string;
   color?: string;
+}
+
+interface LngLatFull {
+  longitude: number;
+  latitude: number;
 }
