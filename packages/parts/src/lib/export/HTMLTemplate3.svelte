@@ -31,7 +31,7 @@
         {/if}
         {#if entry.pf && selectedFields.pf}
           <div style="font-size: 0.8em;">
-            <img width="280" style="width: -moz-available; width: -webkit-fill-available;" src={entry.pf.path} alt={entry.lx} />
+            <img style="width:100%;margin-bottom:5px;" src={entry.pf.path} alt={entry.lx} />
             <p><i>{entry.pf.path}</i></p>
             <p><i>{entry.pf.source ? `${entry.pf.source}` : ''}</i></p>
           </div>
@@ -52,7 +52,7 @@
           {/each}
         {/if}
         {#each Object.keys(EntryPDFFieldsEnum) as key}
-          {#if entry[key] && selectedFields[key]}
+          {#if entry[key] && selectedFields[key] && EntryPDFFieldsEnum[key]}
             <p><strong>{EntryPDFFieldsEnum[key]}</strong>: {entry[key]}</p>
           {/if}
         {/each}
@@ -62,3 +62,12 @@
 </div>
 
 <Button onclick={() => console.log(element.outerHTML)}>Test HTML</Button>
+
+<style>
+  count::before {
+  counter-increment: section;
+  content: "\A I am flag " counter(section) ".\A ";
+  font-weight: bold;
+  white-space: pre;
+}
+</style>
