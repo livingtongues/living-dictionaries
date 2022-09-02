@@ -28,7 +28,7 @@
 </div>
 
 {#if dictionary.coordinates}
-  <div class="h-200px">
+  <div class="h-240px">
     <Map lng={dictionary.coordinates.longitude} lat={dictionary.coordinates.latitude}>
       <Marker
         lat={dictionary.coordinates.latitude}
