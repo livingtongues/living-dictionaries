@@ -3,19 +3,19 @@
   import type { IDictionary } from '@living-dictionaries/types';
   import WhereSpoken from '$lib/settings/WhereSpoken.svelte';
 
-  let dictWithMain: IDictionary = {
+  let dictWithMain: Partial<IDictionary> = {
     coordinates: { longitude: 20, latitude: 20 },
-  } as IDictionary;
+  };
 
-  const dictWithMultiplePoints: IDictionary = {
+  const dictWithMultiplePoints: Partial<IDictionary> = {
     coordinates: { longitude: 20, latitude: 20 },
     points: [
       { type: 'point', coordinates: { longitude: 24, latitude: 24 } },
       { type: 'point', coordinates: { longitude: 6, latitude: 24 } },
     ],
-  } as IDictionary;
+  };
 
-  const dictWithRegion: IDictionary = {
+  const dictWithRegion: Partial<IDictionary> = {
     coordinates: { longitude: -120, latitude: 40 },
     points: [
       { type: 'point', coordinates: { longitude: -113, latitude: 44 } },
@@ -33,16 +33,36 @@
         ],
       },
     ],
-  } as IDictionary;
+  };
 
-  const dictWithout: IDictionary = {} as IDictionary;
+  let dictWithout: Partial<IDictionary> = {};
 </script>
 
 <!-- prettier-ignore -->
 # Areas Where Language Spoken
 
 <Story name="Without coordinates">
-  <WhereSpoken dictionary={dictWithout} />
+  <WhereSpoken
+    dictionary={dictWithout}
+    on:updateCoordinates={({ detail }) => {
+      dictWithout = {
+        ...dictWithout,
+        coordinates: { longitude: detail.longitude, latitude: detail.latitude },
+      };
+    }}
+    on:removeCoordinates={() => (dictWithout = {})}
+    on:updatePoints={({ detail }) => {
+      dictWithout = {
+        ...dictWithout,
+        points: detail,
+      };
+    }}
+    on:updateRegions={({ detail }) => {
+      dictWithout = {
+        ...dictWithout,
+        regions: detail,
+      };
+    }} />
 </Story>
 
 <Story name="With main coordinates">

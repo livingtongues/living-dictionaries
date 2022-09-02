@@ -9,8 +9,8 @@ export interface IDictionary extends IFirestoreMetaData {
   location?: string;
   iso6393?: string;
   glottocode?: string;
-  
-  coordinates?: GeoPoint; // primary coordinate when displayed w/ many other dictionaries
+
+  coordinates?: GeoPoint | LngLatFull; // primary coordinate when displayed w/ many other dictionaries
   points?: IPoint[]; // other coordinate points where language spoken
   regions?: IRegion[]; // regions where language spoken
 
@@ -45,7 +45,7 @@ export interface IGrammar extends IFirestoreMetaData {
   grammar: string;
 }
 
-export type IArea = (IPoint | IRegion);
+export type IArea = IPoint | IRegion;
 
 export interface IPoint {
   type: 'point';
@@ -55,7 +55,7 @@ export interface IPoint {
 }
 
 export interface IRegion {
-  type: 'region'
+  type: 'region';
   coordinates: LngLatFull[];
   label?: string;
   color?: string;
