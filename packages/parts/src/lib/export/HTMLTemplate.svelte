@@ -41,7 +41,6 @@
     {#if entry.pf && selectedFields.pf}
       <div style="font-size: 0.8em;">
         <img style={`width:${imageSize}%;margin-bottom:5px`} src={entry.pf.path} alt={entry.lx} />
-        <QrCode pixelsPerModule={2} value={entry.pf.path} />
       </div>
     {/if}
     {#if entry.sr && selectedFields.sr}
@@ -52,8 +51,6 @@
     {/if}
     {#if entry.sf && selectedFields.sf}
       <div>
-        <i>Audio data:</i>
-        <QrCode pixelsPerModule={2} value={entry.sf.path} />
         {#if entry.sf.sp}
           <p><i>Speaker:</i> {speaker?.displayName} ({speaker?.gender}) ({speaker?.decade*10}-{(speaker?.decade+0.9)*10} years old)</p>
         {:else if entry.sf.speakerName}
@@ -71,10 +68,11 @@
       {/each}
     {/if}
     {#each Object.keys(EntryPDFFieldsEnum) as key}
-      {#if entry[key] && selectedFields[key]}
+      {#if entry[key] && selectedFields[key] && EntryPDFFieldsEnum[key]}
         <p><i>{EntryPDFFieldsEnum[key]}</i>: {entry[key]}</p>
       {/if}
     {/each}
   </div>
+  <QrCode pixelsPerModule={2} value={`https://livingdictionaries.app/${dictionary}/words/${entry.id}`} />
 </div>
       

@@ -53,5 +53,3 @@ type EntryForPDFKeys = keyof typeof EntryPDFFieldsEnum;
 export type ISelectedFields = {
   [key in EntryForPDFKeys]?: boolean;
 };
-
-//TODO Can we make a enum with boolean values?
