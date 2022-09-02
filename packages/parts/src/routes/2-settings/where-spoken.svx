@@ -65,6 +65,8 @@
     }} />
 </Story>
 
+For simplicity, only the above example will update upon changes being made.
+
 <Story name="With main coordinates">
   <WhereSpoken
     dictionary={dictWithMain}
