@@ -22,7 +22,7 @@ const updateIndexByField = async (fieldToIndex: string, dry = true) => {
     });
   } else {
     const entryPromises = querySnapshot.docs.map(async (doc) => {
-      const entry = await prepareDataForIndex(doc.data() as IEntry, doc.ref.parent.parent.id, db);
+      const entry = await prepareDataForIndex(doc.data() as IEntry, doc.ref.parent.parent.id, db); // dictionary/words/entry-123 -> doc.ref: entry-123, doc.ref.parent: words, doc.ref.parent.parent: dictionary
       return { ...entry, objectID: doc.id };
     });
     const entries = await Promise.all(entryPromises);
