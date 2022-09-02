@@ -4,11 +4,11 @@
   import WhereSpoken from '$lib/settings/WhereSpoken.svelte';
 
   let dictWithMain: IDictionary = {
-    coordinates: { latitude: 20, longitude: 20 },
+    coordinates: { longitude: 20, latitude: 20 },
   } as IDictionary;
 
   const dictWithMultiplePoints: IDictionary = {
-    coordinates: { latitude: 20, longitude: 20 },
+    coordinates: { longitude: 20, latitude: 20 },
     points: [
       { type: 'point', coordinates: { longitude: 24, latitude: 24 } },
       { type: 'point', coordinates: { longitude: 6, latitude: 24 } },
@@ -16,7 +16,11 @@
   } as IDictionary;
 
   const dictWithRegion: IDictionary = {
-    coordinates: { latitude: 40, longitude: -120 },
+    coordinates: { longitude: -120, latitude: 40 },
+    points: [
+      { type: 'point', coordinates: { longitude: -113, latitude: 44 } },
+      { type: 'point', coordinates: { longitude: 6, latitude: 24 } },
+    ],
     regions: [
       {
         type: 'region',
@@ -37,12 +41,8 @@
 <!-- prettier-ignore -->
 # Areas Where Language Spoken
 
-<Story name="With multiple points">
-  <WhereSpoken dictionary={dictWithMultiplePoints} />
-</Story>
-
-<Story name="With region">
-  <WhereSpoken dictionary={dictWithRegion} />
+<Story name="Without coordinates">
+  <WhereSpoken dictionary={dictWithout} />
 </Story>
 
 <Story name="With main coordinates">
@@ -54,8 +54,10 @@
     }} />
 </Story>
 
-<Story name="Without coordinates">
-  <WhereSpoken dictionary={dictWithout} />
+<Story name="With multiple points">
+  <WhereSpoken dictionary={dictWithMultiplePoints} />
 </Story>
 
-- todo: emit updates/removals properly
+<Story name="With region">
+  <WhereSpoken dictionary={dictWithRegion} />
+</Story>
