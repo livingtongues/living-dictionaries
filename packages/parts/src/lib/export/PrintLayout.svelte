@@ -11,9 +11,13 @@
 
   export let fontSize:number = 1;
   let element: HTMLElement;
+  let y;
+  $: console.log("outer width:", y);
 </script>
 
-<div bind:this={element} style={`column-count: 2; column-gap: 50px; word-break: break-word; margin: 5rem; font-size:${fontSize}rem`}>
+<svelte:window bind:outerWidth={y}/>
+
+<div bind:this={element} class="test" style={`column-gap: 50px; word-break: break-word; margin: 5rem; font-size:${fontSize}rem`}>
   {#each entries as entry}
       <div>
         <HTMLTemplate {selectedFields} {speakers} {entry} {imageSize} {dictionaryId} />
@@ -22,3 +26,15 @@
 </div>
 
 <Button onclick={() => console.log(element.outerHTML)}>Test HTML</Button>
+
+<style>
+  /* style sheet for "A4" printing */
+  @media print {
+    .test {
+      column-count: 4;
+    }
+  }
+  .test {
+    column-count: 2;
+  }
+</style>

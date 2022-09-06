@@ -1,8 +1,8 @@
 <script lang="ts">
   import type { IEntry, ISpeaker, ISelectedFields, IEntryForPDF } from '@living-dictionaries/types';
   import { EntryPDFFieldsEnum } from '@living-dictionaries/types';
-  import { semanticDomains } from '@living-dictionaries/parts';
-  import QrCode from '$lib/QrCode.svelte';
+  //import { semanticDomains } from '@living-dictionaries/parts';
+  import QrCode from '../QrCode.svelte';
 
   export let entry:IEntry;
   export let speakers:ISpeaker[];
@@ -30,7 +30,8 @@
     {entry.ph && selectedFields.ph ? `/${entry.ph}/` : ''}
     {#if entry.gl && selectedFields.gl}
       {#each Object.entries(entry.gl) as gloss, index}
-        {gloss[1]}{index < Object.entries(entry.gl).length-1 ? ' - ' : ''}
+        <!-- TODO add @HTML for all required fields -->
+        {@html gloss[1]}{index < Object.entries(entry.gl).length-1 ? ' - ' : ''}
       {/each}
     {/if}
     <i>{entry.ps && selectedFields.ps ? entry.ps : ''}</i>
@@ -46,7 +47,7 @@
       </div>
     {/if}
     {#if entry.sr && selectedFields.sr}
-      <i><i>Source(s): </i></i>
+      <i>Source(s): </i>
       {#each entry.sr as source, index}
         <i>{index < entry.sr.length-1 ? `${source}, ` : `${source}`}</i>
       {/each}
@@ -63,12 +64,12 @@
   </div>
   <!-- The remaining fields -->
   <div>
-    {#if entry.sdn && selectedFields.sd}
+    <!-- {#if entry.sdn && selectedFields.sd}
       <i>Semantic Domains: </i>
       {#each entry.sdn as key, index}
       {semanticDomains.find(sd => sd.key === key).name}{index < entry.sdn.length-1 ? ', ' : ''}
       {/each}
-    {/if}
+    {/if} -->
     {#each Object.keys(EntryPDFFieldsEnum) as key}
       {#if entry[key] && selectedFields[key] && EntryPDFFieldsEnum[key]}
         <p><i>{EntryPDFFieldsEnum[key]}</i>: {entry[key]}</p>
