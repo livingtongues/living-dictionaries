@@ -3,9 +3,10 @@
   import Button from 'svelte-pieces/ui/Button.svelte';
   import HTMLTemplate from './HTMLTemplate.svelte';
 
-  export let entries: IEntry[];
-  export let selectedFields: ISelectedFields;
-  export let speakers: ISpeaker[];
+  export let dictionaryId:string; 
+  export let entries:IEntry[];
+  export let selectedFields:ISelectedFields;
+  export let speakers:ISpeaker[];
   export let imageSize = 100;
 
   export let fontSize:number = 1;
@@ -15,7 +16,7 @@
 <div bind:this={element} style={`column-count: 2; column-gap: 50px; word-break: break-word; margin: 5rem; font-size:${fontSize}rem`}>
   {#each entries as entry}
       <div>
-        <HTMLTemplate {selectedFields} {speakers} {entry} {imageSize} />
+        <HTMLTemplate {selectedFields} {speakers} {entry} {imageSize} {dictionaryId} />
       </div>
   {/each}
 </div>

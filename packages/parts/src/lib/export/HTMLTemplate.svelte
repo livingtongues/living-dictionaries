@@ -4,10 +4,12 @@
   import { semanticDomains } from '@living-dictionaries/parts';
   import QrCode from '$lib/QrCode.svelte';
 
-  export let entry: IEntry;
-  export let speakers: ISpeaker[];
-  export let selectedFields: ISelectedFields;
-  export let imageSize: number;
+  export let entry:IEntry;
+  export let speakers:ISpeaker[];
+  export let selectedFields:ISelectedFields;
+  export let imageSize:number;
+  //TODO It's very likely I should change the way we handle the dictionary Id in real entries.
+  export let dictionaryId:string;
 
   let speaker:ISpeaker;
   function findSpeaker(speakerId: string) {
@@ -73,6 +75,6 @@
       {/if}
     {/each}
   </div>
-  <!-- <QrCode pixelsPerModule={2} value={`https://livingdictionaries.app/${dictionary}/words/${entry.id}`} /> -->
+  <QrCode pixelsPerModule={2} value={`https://livingdictionaries.app/${dictionaryId}/entry/${entry.id}`} />
 </div>
       
