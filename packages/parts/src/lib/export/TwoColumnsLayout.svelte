@@ -12,18 +12,11 @@
   let element: HTMLElement;
 </script>
 
-<div bind:this={element} style={`display: table; clear: both; word-break: break-word;font-size:${fontSize}rem`}>
-  {#each entries as entry, index}
-    {#if index % 2 === 0}
-      <div style="float: left; width:50%;">
+<div bind:this={element} style={`column-count: 2; column-gap: 50px; word-break: break-word; margin: 5rem; font-size:${fontSize}rem`}>
+  {#each entries as entry}
+      <div>
         <HTMLTemplate {selectedFields} {speakers} {entry} {imageSize} />
       </div>
-    {/if}
-    {#if index % 2 === 1}
-      <div style="float: right; width:50%;">
-        <HTMLTemplate {selectedFields} {speakers} {entry} {imageSize} />
-      </div>
-    {/if}
   {/each}
 </div>
 

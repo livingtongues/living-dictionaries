@@ -73,6 +73,6 @@
       {/if}
     {/each}
   </div>
-  <QrCode pixelsPerModule={2} value={`https://livingdictionaries.app/${dictionary}/words/${entry.id}`} />
+  <!-- <QrCode pixelsPerModule={2} value={`https://livingdictionaries.app/${dictionary}/words/${entry.id}`} /> -->
 </div>
       
