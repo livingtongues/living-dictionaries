@@ -695,9 +695,9 @@
 
 <!-- <HtmlTemplate3 {entries} {selectedFields} /> -->
 
-<!-- <Story name="Configure font and image sizes" knobs={{fontSize: 1.5, imageSize: 80}} let:props={{fontSize, imageSize}}>
+<Story name="Configure font and image sizes" knobs={{fontSize: 1.5, imageSize: 80}} let:props={{fontSize, imageSize}}>
   <TwoColumnsLayout {selectedFields} {speakers} {entries} {fontSize} {imageSize} />
-</Story>-->
+</Story>
 
 <Story name="Select Fields" knobs={{...selectedFields}} let:props={selectedFields}>
   <TwoColumnsLayout {selectedFields} {speakers} {entries} />
