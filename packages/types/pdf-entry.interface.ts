@@ -48,6 +48,7 @@ export enum EntryPDFFieldsEnum {
   sd = '',
   sf = '',
   vfs = '',
+  qr = '',
 }
 type EntryForPDFKeys = keyof typeof EntryPDFFieldsEnum;
 export type ISelectedFields = {

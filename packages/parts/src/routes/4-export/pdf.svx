@@ -690,6 +690,7 @@
     nt: false,
     sf: false,
     vfs: false,
+    qr: false,
   }
 </script>
 

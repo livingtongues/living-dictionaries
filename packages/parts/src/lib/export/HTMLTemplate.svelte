@@ -75,6 +75,8 @@
       {/if}
     {/each}
   </div>
-  <QrCode pixelsPerModule={2} value={`https://livingdictionaries.app/${dictionaryId}/entry/${entry.id}`} />
+  {#if selectedFields.qr}
+    <QrCode pixelsPerModule={2} value={`https://livingdictionaries.app/${dictionaryId}/entry/${entry.id}`} />
+  {/if}
 </div>
       
