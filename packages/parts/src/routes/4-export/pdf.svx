@@ -1,9 +1,9 @@
 <script lang="ts">
   import TwoColumnsLayout from '$lib/export/TwoColumnsLayout.svelte';
-  import HtmlTemplate3 from '$lib/export/HTMLTemplate3.svelte';
   import { Story } from 'kitbook';
 
-  let gender: 'm' | 'f' | 'o' = 'f'
+  let gender: 'm' | 'f' | 'o' = 'f';
+  const dictionaryId = "bezhta";
   const speakers = [
     {
       birthplace:"russia",
@@ -696,9 +696,9 @@
 <!-- <HtmlTemplate3 {entries} {selectedFields} /> -->
 
 <Story name="Configure font and image sizes" knobs={{fontSize: 1.5, imageSize: 80}} let:props={{fontSize, imageSize}}>
-  <TwoColumnsLayout {selectedFields} {speakers} {entries} {fontSize} {imageSize} />
+  <TwoColumnsLayout {selectedFields} {speakers} {entries} {fontSize} {imageSize} {dictionaryId} />
 </Story>
 
 <Story name="Select Fields" knobs={{...selectedFields}} let:props={selectedFields}>
-  <TwoColumnsLayout {selectedFields} {speakers} {entries} />
+  <TwoColumnsLayout {selectedFields} {speakers} {entries} {dictionaryId} />
 </Story>
