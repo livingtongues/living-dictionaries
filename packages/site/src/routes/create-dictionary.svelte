@@ -22,8 +22,8 @@
   let name = '';
   let glossLanguages = new Set(['en']);
   let alternateNames = [];
-  let lat = null;
-  let lng = null;
+  let latitude = null;
+  let longitude = null;
   let points: IPoint[] = [];
   let regions: IRegion[] = [];
   let iso6393 = '';
@@ -72,7 +72,7 @@
         name: name.trim().replace(/^./, name[0].toUpperCase()),
         glossLanguages: Array.from(glossLanguages),
         alternateNames,
-        coordinates: lat ? new GeoPoint(lat, lng) : null,
+        coordinates: latitude ? new GeoPoint(latitude, longitude) : null,
         points,
         regions,
         entryCount: 0,
@@ -217,11 +217,11 @@
 
       <WhereSpoken
         {t}
-        dictionary={{ coordinates: { latitude: lat, longitude: lng }, points, regions }}
+        dictionary={{ coordinates: { latitude, longitude }, points, regions }}
         on:updateCoordinates={({ detail }) => {
-          (lat = detail.latitude), (lng = detail.longitude);
+          (latitude = detail.latitude), (longitude = detail.longitude);
         }}
-        on:removeCoordinates={() => ((lat = null), (lng = null))}
+        on:removeCoordinates={() => ((latitude = null), (longitude = null))}
         on:updatePoints={({ detail }) => (points = detail)}
         on:updateRegions={({ detail }) => (regions = detail)} />
       <div class="mb-6" />
