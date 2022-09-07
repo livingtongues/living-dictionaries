@@ -3,7 +3,7 @@
   import { EntryPDFFieldsEnum } from '@living-dictionaries/types';
   //TODO how to use Image?
   //import { Image } from '../entries/media/Image.svelte';
-  //import { semanticDomains } from '@living-dictionaries/parts';
+  import { semanticDomains } from '../mappings/semantic-domains';
   import QrCode from '../QrCode.svelte';
 
   export let entry:IEntry;
@@ -67,12 +67,12 @@
   </div>
   <!-- The remaining fields -->
   <div>
-    <!-- {#if entry.sdn && selectedFields.sd}
+    {#if entry.sdn && selectedFields.sd}
       <i>Semantic Domains: </i>
       {#each entry.sdn as key, index}
       {semanticDomains.find(sd => sd.key === key).name}{index < entry.sdn.length-1 ? ', ' : ''}
       {/each}
-    {/if} -->
+    {/if}
     {#each Object.keys(EntryPDFFieldsEnum) as key}
       {#if entry[key] && selectedFields[key] && EntryPDFFieldsEnum[key]}
         <p><i>{EntryPDFFieldsEnum[key]}</i>: {entry[key]}</p>
