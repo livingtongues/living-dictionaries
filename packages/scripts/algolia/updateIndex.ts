@@ -2,7 +2,8 @@ import { projectId, db } from '../config';
 import algoliasearch from 'algoliasearch';
 
 import algoliaKeys from './algolia-admin-key.json';
-import { prepareDataForIndex } from '@living-dictionaries/functions/src/algolia/prepareDataForIndex';
+// import { prepareDataForIndex } from '@living-dictionaries/functions/src/algolia/prepareDataForIndex';
+import * as prepare from '@living-dictionaries/functions/src/algolia/prepareDataForIndex';
 import { IEntry } from '@living-dictionaries/types';
 const ADMIN_KEY = algoliaKeys.adminKey;
 
@@ -22,6 +23,9 @@ const updateIndexByField = async (fieldToIndex: string, dry = true) => {
     });
   } else {
     const entryPromises = querySnapshot.docs.map(async (doc) => {
+      // @ts-ignore
+      const prepareDataForIndex = prepare.default
+        .prepareDataForIndex as typeof import('@living-dictionaries/functions/src/algolia/prepareDataForIndex').prepareDataForIndex; // awkward import b/c file is declared to be commonjs by its local tsconfig
       const entry = await prepareDataForIndex(doc.data() as IEntry, doc.ref.parent.parent.id, db); // dictionary/words/entry-123 -> doc.ref: entry-123, doc.ref.parent: words, doc.ref.parent.parent: dictionary
       return { ...entry, objectID: doc.id };
     });
@@ -34,12 +38,11 @@ const updateIndexByField = async (fieldToIndex: string, dry = true) => {
     index
       .saveObjects(entries)
       .then(({ objectIDs }) => {
-        console.log('Entries indexed: ', objectIDs.length);
+        console.log(`Entries indexed: ${objectIDs.length}`);
       })
       .catch((err) => {
         console.log(err);
       });
   }
 };
-//TODO is it fine this way or would it be better to execute this via a command as we do when import dictionaries?
-updateIndexByField('nc', false);
+updateIndexByField('nc', true);
