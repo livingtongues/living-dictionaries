@@ -40,7 +40,7 @@
         },
       }}
       on:click={toggle}
-      on:mouseenter={() => (map.getCanvas().style.cursor = 'pointer')}
+      on:mouseenter={() => $$slots.default && (map.getCanvas().style.cursor = 'pointer')}
       on:mouseleave={() => (map.getCanvas().style.cursor = '')} />
     <Layer
       options={{
@@ -51,7 +51,7 @@
         },
       }} />
   </GeoJSONSource>
-  {#if show}
+  {#if $$slots.default && show}
     <PopupOfMap {lng} {lat}>
       <slot />
     </PopupOfMap>
