@@ -10,7 +10,6 @@
   export let speakers:ISpeaker[];
   export let selectedFields:ISelectedFields;
   export let imageSize:number;
-  //TODO It's very likely I should change the way we handle the dictionary Id in real entries.
   export let dictionaryId:string;
 
   let speaker:ISpeaker;
