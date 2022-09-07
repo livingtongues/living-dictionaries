@@ -4,15 +4,17 @@
   import { dictionaryGeoJsonCollection } from '@living-dictionaries/parts/src/lib/maps/utils/dictionaryGeoJsonCollection';
   import type { IDictionary } from '@living-dictionaries/types';
   import { getContext } from 'svelte';
-  import { mapKey } from '@living-dictionaries/parts/src/lib/maps/mapbox/context';
-  import type { Map } from 'mapbox-gl';
+  import {
+    mapKey,
+    type MapKeyContext,
+  } from '@living-dictionaries/parts/src/lib/maps/mapbox/context';
 
   export let dictionaries: IDictionary[] = [],
     selectedDictionaryId: string = undefined,
     type: 'public' | 'private' | 'personal' = 'public';
 
-  const { getMap } = getContext(mapKey);
-  const map: Map = getMap();
+  const { getMap } = getContext<MapKeyContext>(mapKey);
+  const map = getMap();
 
   let clustersId = `${type}_clusters`;
 

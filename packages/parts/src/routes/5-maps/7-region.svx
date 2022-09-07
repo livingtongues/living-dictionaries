@@ -1,6 +1,5 @@
 <script lang="ts">
   import { Story } from 'kitbook';
-  import ShowHide from 'svelte-pieces/functions/ShowHide.svelte';
   import Button from 'svelte-pieces/ui/Button.svelte';
   import type { IRegion } from '@living-dictionaries/types';
   import Region from '$lib/maps/mapbox/map/Region.svelte';

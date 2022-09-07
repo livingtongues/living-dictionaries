@@ -21,7 +21,6 @@
     "@testing-library/svelte": "^3.0.3",
     "@types/d3-dsv": "^3.0.0",
     "@types/file-saver": "^2.0.4",
-    "@types/mapbox-gl": "^2.7.4",
     "@types/recordrtc": "^5.6.8",
     "algoliasearch": "^4.11.0",
     "ckeditor5-build-classic-with-alignment-underline-smallcaps": "^1.0.0",
