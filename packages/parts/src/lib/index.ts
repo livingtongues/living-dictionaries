@@ -7,7 +7,7 @@ export { default as Filter } from './helpers/Filter.svelte';
 
 export { default as LatLngDisplay } from './maps/LatLngDisplay.svelte';
 
-export { default as EditableCoordinatesField } from './settings/EditableCoordinatesField.svelte';
+export { default as WhereSpoken } from './settings/WhereSpoken.svelte';
 export { default as EditableGlossesField } from './settings/EditableGlossesField.svelte';
 export { default as EditableAlternateNames } from './settings/EditableAlternateNames.svelte';
 export { default as PublicCheckbox } from './settings/PublicCheckbox.svelte';
