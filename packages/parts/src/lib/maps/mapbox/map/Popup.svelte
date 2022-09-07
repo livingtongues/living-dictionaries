@@ -4,11 +4,11 @@
   import { mapKey, markerKey } from '../context';
   import type { Popup, PopupOptions, Marker } from 'mapbox-gl';
 
-  const { getMapbox } = getContext(mapKey);
-  const mapbox: typeof import('mapbox-gl') = getMapbox();
+  const { getMapbox } = getContext<{ getMapbox: () => typeof import('mapbox-gl') }>(mapKey);
+  const mapbox = getMapbox();
 
-  const {getMarker} = getContext(markerKey);
-  const marker: Marker = getMarker();
+  const { getMarker } = getContext<{ getMarker: () => Marker }>(markerKey);
+  const marker = getMarker();
 
   export let closeButton = false;
   export let closeOnClick = true;

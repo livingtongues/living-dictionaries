@@ -6,13 +6,12 @@
   import { polygonFeatureCoordinates } from '../../utils/polygonFromCoordinates';
   import type { IRegion } from '@living-dictionaries/types';
   import { getContext } from 'svelte';
-  import type { Map } from 'mapbox-gl';
-  import { mapKey } from '../context';
+  import { mapKey, type MapKeyContext } from '../context';
   import { points } from '@turf/helpers';
   import center from '@turf/center';
 
-  const { getMap } = getContext(mapKey);
-  const map: Map = getMap();
+  const { getMap } = getContext<MapKeyContext>(mapKey);
+  const map = getMap();
 
   export let region: IRegion;
 

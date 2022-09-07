@@ -1,21 +1,21 @@
 <script lang="ts">
   import { getContext, setContext, onDestroy } from 'svelte';
-  import { mapKey, sourceKey } from '../context';
+  import { mapKey, sourceKey, type MapKeyContext, type SourceKeyContext } from '../context';
   import { randomId } from '../../utils/randomId';
-  import type { Map, GeoJSONSourceRaw, GeoJSONSource, GeoJSONSourceOptions } from 'mapbox-gl';
+  import type { GeoJSONSourceRaw, GeoJSONSource, GeoJSONSourceOptions } from 'mapbox-gl';
 
   // Cf https://docs.mapbox.com/mapbox-gl-js/style-spec/sources/#geojson
   export let id = randomId();
   export let data: GeoJSONSourceOptions['data']; // URL or inline data
   export let options: Partial<GeoJSONSourceRaw> = {};
 
-  const { getMap } = getContext(mapKey);
-  const map: Map = getMap();
+    const { getMap } = getContext<MapKeyContext>(mapKey);
+  const map = getMap();
 
   // Remember ID of all <Layer> children, in order to remove them in onDestroy, before removing the source.
   const layerIds = [];
 
-  setContext(sourceKey, {
+  setContext<SourceKeyContext>(sourceKey, {
     getSourceId: () => id,
     addChildLayer: (id: string) => {
       layerIds.push(id);
