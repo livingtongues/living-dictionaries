@@ -1,6 +1,8 @@
 <script lang="ts">
   import type { IEntry, ISpeaker, ISelectedFields, IEntryForPDF } from '@living-dictionaries/types';
   import { EntryPDFFieldsEnum } from '@living-dictionaries/types';
+  //TODO how to use Image?
+  //import { Image } from '../entries/media/Image.svelte';
   //import { semanticDomains } from '@living-dictionaries/parts';
   import QrCode from '../QrCode.svelte';
 
@@ -13,7 +15,7 @@
 
   let speaker:ISpeaker;
   function findSpeaker(speakerId: string) {
-    speaker = speakers.find((speaker) => speaker.uid === speakerId)
+    speaker = speakers.find((speaker) => speaker?.uid === speakerId)
   }
   $: entry?.sf?.sp ? findSpeaker(entry.sf.sp) : '';
 </script>
@@ -43,7 +45,8 @@
     {/if}
     {#if entry.pf && selectedFields.pf}
       <div style="font-size: 0.8em;">
-        <img style={`width:${imageSize}%;margin-bottom:5px`} src={entry.pf.path} alt={entry.lx} />
+        <img style={`width:${imageSize}%;margin-bottom:5px`} src={`https://lh3.googleusercontent.com/${entry.pf.gcs}`} alt={entry.lx} />
+        <!-- <Image square={imageSize} gcs={entry.pf.gcs} lexeme={entry.lx} /> -->
       </div>
     {/if}
     {#if entry.sr && selectedFields.sr}
