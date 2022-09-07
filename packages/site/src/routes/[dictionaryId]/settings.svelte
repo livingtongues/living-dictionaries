@@ -6,9 +6,9 @@
   import ShowHide from 'svelte-pieces/functions/ShowHide.svelte';
   import EditString from './_EditString.svelte';
   import { arrayRemove, arrayUnion, GeoPoint, where, limit } from 'firebase/firestore';
-  import type { IDictionary } from '@living-dictionaries/types';
+  import type { IDictionary, IPoint, IRegion } from '@living-dictionaries/types';
   import {
-    EditableCoordinatesField,
+    WhereSpoken,
     EditableGlossesField,
     PublicCheckbox,
     glossingLanguages,
@@ -40,6 +40,18 @@
     } catch (err) {
       alert(`${$t('misc.error', { default: 'Error' })}: ${err}`);
     }
+  }
+
+  function updatePoints(points: IPoint[], dictionaryId: string) {
+    update<IDictionary>(`dictionaries/${dictionaryId}`, {
+      points,
+    });
+  }
+
+  function updateRegions(regions: IRegion[], dictionaryId: string) {
+    update<IDictionary>(`dictionaries/${dictionaryId}`, {
+      regions,
+    });
   }
 </script>
 
@@ -144,18 +156,17 @@
       }} />
     <div class="mb-5" />
 
-    <EditableCoordinatesField
+    <WhereSpoken
       {t}
-      lng={dictionary.coordinates ? dictionary.coordinates.longitude : undefined}
-      lat={dictionary.coordinates ? dictionary.coordinates.latitude : undefined}
-      on:update={(e) => {
+      {dictionary}
+      on:updateCoordinates={({ detail }) => {
         update(`dictionaries/${dictionary.id}`, {
-          coordinates: new GeoPoint(e.detail.lat, e.detail.lng),
+          coordinates: new GeoPoint(detail.latitude, detail.longitude),
         });
       }}
-      on:remove={() => {
-        update(`dictionaries/${dictionary.id}`, { coordinates: null });
-      }} />
+      on:removeCoordinates={() => update(`dictionaries/${dictionary.id}`, { coordinates: null })}
+      on:updatePoints={({ detail }) => updatePoints(detail, dictionary.id)}
+      on:updateRegions={({ detail }) => updateRegions(detail, dictionary.id)} />
     <div class="mb-5" />
 
     <PublicCheckbox
