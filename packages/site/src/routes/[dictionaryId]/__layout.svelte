@@ -45,15 +45,15 @@
     slot="left"
     class="font-semibold sm:text-xl overflow-x-auto md:overflow-hidden md:overflow-ellipsis">
     <a
-      class="p-3 hover:text-black hidden md:inline"
+      class="p-3 hover:text-black hidden md:inline print:hidden"
       href="/"
       on:click={() => ($algoliaQueryParams = '')}>
       <i class="fas fa-home" />
     </a>
     <div class="w-2 hidden md:inline" />
 
-    <button class="p-3 md:hidden" on:click={() => (menuOpen = !menuOpen)}>
-      <i class="far fa-bars" />&nbsp;
+    <button class="p-3 md:hidden print:p-0" on:click={() => (menuOpen = !menuOpen)}>
+      <i class="far fa-bars print:hidden" />
       {$dictionaryStore.name}
     </button>
     <a class="hover:text-black hidden md:inline" href="/{dictionary.id}">
@@ -62,17 +62,17 @@
   </div>
 </Header>
 
-<div class="flex px-3">
+<div class="flex px-3 print:px-0">
   <div
     class:!translate-x-0={menuOpen}
-    class="menu ltr:!-translate-x-full rtl:!translate-x-full ltr:left-0 rtl:right-0 md:!transform-none">
+    class="menu ltr:!-translate-x-full rtl:!translate-x-full ltr:left-0 rtl:right-0 md:!transform-none print:hidden">
     <SideMenu bind:menuOpen />
     <button class="close-menu" on:click={() => (menuOpen = false)}>
       <i class="far fa-times fa-lg fa-fw" />
       {$_('misc.close', { default: 'Close' })}
     </button>
   </div>
-  <div class="hidden md:block w-3 flex-shrink-0" />
+  <div class="hidden md:block w-3 flex-shrink-0 print:hidden" />
   <div class:hide-backdrop={!menuOpen} on:click={() => (menuOpen = false)} class="backdrop" />
   <div class="flex-grow">
     <slot />
