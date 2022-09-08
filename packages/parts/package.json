@@ -16,13 +16,15 @@
     "release": "npm run package && cd package && npm publish",
     "test": "vitest -u"
   },
+  "dependencies": {
+    "@turf/center": "^6.5.0",
+    "@turf/helpers": "^6.5.0"
+  },
   "devDependencies": {
     "@living-dictionaries/types": "^1.0.0",
     "@sveltejs/adapter-auto": "1.0.0-next.50",
     "@sveltejs/kit": "1.0.0-next.350",
     "@sveltejs/vite-plugin-svelte": "1.0.0-next.49",
-    "@turf/center": "^6.5.0",
-    "@turf/helpers": "^6.5.0",
     "@types/mapbox-gl": "^2.7.4",
     "@types/mapbox__mapbox-gl-geocoder": "^4.7.2",
     "@types/recordrtc": "^5.6.8",

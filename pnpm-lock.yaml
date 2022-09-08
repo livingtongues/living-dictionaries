@@ -84,13 +84,14 @@ importers:
       typescript: ~4.7.4
       vitest: ^0.21.0
       windicss: ^3.5.6
+    dependencies:
+      '@turf/center': 6.5.0
+      '@turf/helpers': 6.5.0
     devDependencies:
       '@living-dictionaries/types': link:../types
       '@sveltejs/adapter-auto': 1.0.0-next.50
       '@sveltejs/kit': 1.0.0-next.350_svelte@3.49.0
       '@sveltejs/vite-plugin-svelte': 1.0.0-next.49_svelte@3.49.0
-      '@turf/center': 6.5.0
-      '@turf/helpers': 6.5.0
       '@types/mapbox-gl': 2.7.4
       '@types/mapbox__mapbox-gl-geocoder': 4.7.2
       '@types/recordrtc': 5.6.8
@@ -1826,24 +1827,22 @@ packages:
     dependencies:
       '@turf/helpers': 6.5.0
       '@turf/meta': 6.5.0
-    dev: true
 
   /@turf/center/6.5.0:
     resolution: {integrity: sha512-T8KtMTfSATWcAX088rEDKjyvQCBkUsLnK/Txb6/8WUXIeOZyHu42G7MkdkHRoHtwieLdduDdmPLFyTdG5/e7ZQ==}
     dependencies:
       '@turf/bbox': 6.5.0
       '@turf/helpers': 6.5.0
-    dev: true
+    dev: false
 
   /@turf/helpers/6.5.0:
     resolution: {integrity: sha512-VbI1dV5bLFzohYYdgqwikdMVpe7pJ9X3E+dlr425wa2/sMJqYDhTO++ec38/pcPvPE6oD9WEEeU3Xu3gza+VPw==}
-    dev: true
+    dev: false
 
   /@turf/meta/6.5.0:
     resolution: {integrity: sha512-RrArvtsV0vdsCBegoBtOalgdSOfkBrTJ07VkpiCnq/491W67hnMWmDu7e6Ztw0C3WldRYTXkg3SumfdzZxLBHA==}
     dependencies:
       '@turf/helpers': 6.5.0
-    dev: true
 
   /@types/aria-query/4.2.2:
     resolution: {integrity: sha512-HnYpAE1Y6kRyKM/XkEuiRQhTHvkzMBurTHnpFLYLBGPIylZNPs9jJcuOOYWxPLJCSEtmZT0Y8rHDokKN7rRTig==}
