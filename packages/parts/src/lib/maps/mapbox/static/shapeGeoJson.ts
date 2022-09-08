@@ -1,4 +1,4 @@
-import type { IArea, IPoint, IRegion } from '@living-dictionaries/types';
+import type { IPoint, IRegion } from '@living-dictionaries/types';
 import { sortPoints } from '../../utils/polygonFromCoordinates';
 // http://geojson.io/ to create GeoJSON easily
 
@@ -54,18 +54,14 @@ function getPolygonFeature(region: IRegion) {
   };
 }
 
-export function shapeGeoJson(areas: IArea[]) {
+export function shapeGeoJson(points: IPoint[], regions: IRegion[]) {
   const features = [];
-  for (const area of areas) {
-    if (area?.type === 'region') {
-      features.push(getPolygonFeature(area));
-    }
+  for (const region of regions) {
+    features.push(getPolygonFeature(region));
   }
-  for (const [index, area] of areas.entries()) {
+  for (const [index, point] of points.entries()) {
     const primary = index === 0;
-    if (area?.type === 'point') {
-      features.push(getPointFeature(area, primary)); // add later so pins show on top of regions
-    }
+    features.push(getPointFeature(point, primary)); // add later so pins show on top of regions
   }
   return {
     type: 'FeatureCollection',
@@ -76,20 +72,23 @@ export function shapeGeoJson(areas: IArea[]) {
 if (import.meta.vitest) {
   test('shapeGeoJson', () => {
     expect(
-      shapeGeoJson([
-        { type: 'point', coordinates: { longitude: 126.123456789, latitude: 40.123456789 } },
-        { type: 'point', coordinates: { longitude: 127.123456789, latitude: 41.123456789 } },
-        {
-          type: 'region',
-          coordinates: [
-            { longitude: -126.91406249999999, latitude: 40.97989806962013 },
-            { longitude: -118.828125, latitude: 36.03133177633187 },
-            { longitude: -115.6640625, latitude: 38.8225909761771 },
-            { longitude: -116.01562499999999, latitude: 42.8115217450979 },
-            { longitude: -126.91406249999999, latitude: 40.97989806962013 },
-          ],
-        },
-      ])
+      shapeGeoJson(
+        [
+          { coordinates: { longitude: 126.123456789, latitude: 40.123456789 } },
+          { coordinates: { longitude: 127.123456789, latitude: 41.123456789 } },
+        ],
+        [
+          {
+            coordinates: [
+              { longitude: -126.91406249999999, latitude: 40.97989806962013 },
+              { longitude: -118.828125, latitude: 36.03133177633187 },
+              { longitude: -115.6640625, latitude: 38.8225909761771 },
+              { longitude: -116.01562499999999, latitude: 42.8115217450979 },
+              { longitude: -126.91406249999999, latitude: 40.97989806962013 },
+            ],
+          },
+        ]
+      )
     ).toMatchInlineSnapshot(`
       {
         "features": [

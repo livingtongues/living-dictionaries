@@ -88,9 +88,8 @@ With help from https://github.com/beyonk-adventures/svelte-mapbox
     </div>
 
     <MapboxStatic
-      areas={[
+      regions={[
         {
-          type: 'region',
           coordinates: convertPointsIntoRegion(points),
         },
       ]}
