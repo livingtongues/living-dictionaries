@@ -5,6 +5,7 @@
   import Button from 'svelte-pieces/ui/Button.svelte';
   import ShowHide from 'svelte-pieces/functions/ShowHide.svelte';
   import type { IDictionary, IPoint, IRegion } from '@living-dictionaries/types';
+  import type { LngLat } from 'mapbox-gl';
   import Map from '../maps/mapbox/map/Map.svelte';
   import Marker from '../maps/mapbox/map/Marker.svelte';
   import Popup from '../maps/mapbox/map/Popup.svelte';
@@ -22,7 +23,7 @@
 
   export let dictionary: Partial<IDictionary>;
 
-  function updatePoints({ detail }: { detail: { lng: number; lat: number } }) {
+  function addCoordinates({ detail }: { detail: { lng: number; lat: number } }) {
     if (dictionary.coordinates) {
       const point = {
         coordinates: { longitude: detail.lng, latitude: detail.lat },
@@ -33,6 +34,8 @@
       dispatch('updateCoordinates', { longitude: detail.lng, latitude: detail.lat });
     }
   }
+
+  let mapClickCoordinates: LngLat;
 </script>
 
 <div class="text-sm font-medium text-gray-700 mb-2">
@@ -41,7 +44,18 @@
 
 {#if dictionary.coordinates}
   <div class="h-240px">
-    <Map lng={dictionary.coordinates.longitude} lat={dictionary.coordinates.latitude}>
+    <Map
+      lng={dictionary.coordinates.longitude}
+      lat={dictionary.coordinates.latitude}
+      on:click={({ detail }) => (mapClickCoordinates = detail)}>
+      {#if mapClickCoordinates}
+        <CoordinatesModal
+          {t}
+          lng={+mapClickCoordinates.lng.toFixed(4)}
+          lat={+mapClickCoordinates.lat.toFixed(4)}
+          on:update={addCoordinates}
+          on:close={() => (mapClickCoordinates = null)} />
+      {/if}
       <Marker
         lat={dictionary.coordinates.latitude}
         lng={dictionary.coordinates.longitude}
@@ -140,7 +154,7 @@
       {t ? $t('create.select_coordinates') : 'Select Coordinates'}
     </Button>
     {#if show}
-      <CoordinatesModal {t} lng={null} lat={null} on:update={updatePoints} on:close={toggle} />
+      <CoordinatesModal {t} lng={null} lat={null} on:update={addCoordinates} on:close={toggle} />
     {/if}
   </ShowHide>
 
