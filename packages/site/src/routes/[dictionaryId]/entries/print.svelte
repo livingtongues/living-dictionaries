@@ -17,6 +17,8 @@
   });
 
   import { dictionary } from '$lib/stores';
+
+  let columnWidth = 250;
 </script>
 
 <svelte:head>
@@ -24,8 +26,21 @@
 </svelte:head>
 
 <Hits {search} let:entries>
-  {#each entries as entry (entry.id)}
-    <div>{entry.lx}</div>
-  {/each}
+  <div class="print-columns" style="--column-width: {columnWidth / 16}em;">
+    {#each entries as entry (entry.id)}
+      <div>{entry.lx}</div>
+      <div class="italic text-sm mb-1 ml-1">{entry.gl?.en}</div>
+    {/each}
+  </div>
 </Hits>
 <Pagination {search} />
+
+<style global>
+  @media print {
+    .print-columns {
+      column-width: var(--column-width);
+      /* column-gap: 2em; << default is 1em */
+      /* column-count: 2; << hard-coded columns method, not using */
+    }
+  }
+</style>
