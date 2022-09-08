@@ -70,11 +70,11 @@
     <div class="my-2">
       <div class="mb-3">
         <label class="font-medium text-gray-700" for="fontSize">Font size</label>
-        <input class="form-input w-12" id="fontSize" type="number" bind:value={fontSize} />
+        <input class="form-input w-17" id="fontSize" type="number" min="0.1" step="0.1" bind:value={fontSize} />
       </div>
       <div class="mb-3">
         <label class="font-medium text-gray-700" for="imageSize">Image Size</label>
-        <input class="form-input w-17" id="imageSize" type="number" bind:value={imageSize} /><span class="font-medium text-gray-700">%</span>
+        <input class="form-input w-17" id="imageSize" type="number" min="1" max="100" bind:value={imageSize} /><span class="font-medium text-gray-700">%</span>
       </div>
       <div>
         {#each Object.entries(selectedFields) as field}
