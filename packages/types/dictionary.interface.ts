@@ -45,17 +45,13 @@ export interface IGrammar extends IFirestoreMetaData {
   grammar: string;
 }
 
-export type IArea = IPoint | IRegion;
-
 export interface IPoint {
-  type: 'point';
   coordinates: LngLatFull;
   label?: string;
   color?: string;
 }
 
 export interface IRegion {
-  type: 'region';
   coordinates: LngLatFull[];
   label?: string;
   color?: string;

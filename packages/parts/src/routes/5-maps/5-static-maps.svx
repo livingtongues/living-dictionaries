@@ -10,11 +10,12 @@ Copy paste width/height changes to avoid thousands of needless image requests to
 
 <Story name="Points and Region" knobs={{ width: 525, height: 300 }} let:props={{ width, height }}>
   <MapboxStatic
-    areas={[
-      { type: 'point', coordinates: { longitude: -122, latitude: 40 } },
-      { type: 'point', coordinates: { longitude: -119, latitude: 41 } },
+    points={[
+      { coordinates: { longitude: -122, latitude: 40 } },
+      { coordinates: { longitude: -119, latitude: 41 } },
+    ]}
+    regions={[
       {
-        type: 'region',
         coordinates: [
           { longitude: -123.91406249999999, latitude: 40.97989806962013 },
           { longitude: -118.828125, latitude: 36.03133177633187 },
@@ -29,9 +30,7 @@ Copy paste width/height changes to avoid thousands of needless image requests to
 </Story>
 
 <Story name="Single Point">
-  <MapboxStatic areas={[{ type: 'point', coordinates: { longitude: -122, latitude: 40 } }]} />
+  <MapboxStatic points={[{ coordinates: { longitude: -122, latitude: 40 } }]} />
 </Story>
 
-<Story name="handles undefined area">
-  <MapboxStatic areas={[undefined]} />
-</Story>
+

@@ -57,7 +57,7 @@
     close: boolean;
   }>();
   async function update(coordinates: IRegion['coordinates']) {
-    dispatch('update', { type: 'region', coordinates });
+    dispatch('update', { coordinates });
     dispatch('close');
   }
   async function removeRegion() {

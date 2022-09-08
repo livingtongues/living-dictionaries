@@ -1,7 +1,7 @@
 import type { IAudio } from './audio.interface';
 import type { IVideo, IVideoCustomMetadata } from './video.interface';
 import type { IDialect } from './dialect.interface';
-import type { IAbout, IArea, IDictionary, IGrammar, IPoint, IRegion } from './dictionary.interface';
+import type { IAbout, IDictionary, IGrammar, IPoint, IRegion } from './dictionary.interface';
 import type { IEntry } from './entry.interface';
 import type { IGlossLanguages, IGlossLanguage } from './gloss-language.interface';
 import type { IGloss } from './gloss.interface';
@@ -41,7 +41,7 @@ export type {
   HelperRoles,
   IPartOfSpeech,
   IColumn,
-  IArea, IPoint, IRegion,
+  IPoint, IRegion,
 };
 
 import { ReadyLocales, UnpublishedLocales } from './languages.interface';

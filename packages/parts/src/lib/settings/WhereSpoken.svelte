@@ -21,6 +21,18 @@
   }>();
 
   export let dictionary: Partial<IDictionary>;
+
+  function updatePoints({ detail }: { detail: { lng: number; lat: number } }) {
+    if (dictionary.coordinates) {
+      const point = {
+        coordinates: { longitude: detail.lng, latitude: detail.lat },
+      };
+      const points = (dictionary.points && [...dictionary.points, point]) || [point];
+      dispatch('updatePoints', points);
+    } else {
+      dispatch('updateCoordinates', { longitude: detail.lng, latitude: detail.lat });
+    }
+  }
 </script>
 
 <div class="text-sm font-medium text-gray-700 mb-2">
@@ -70,7 +82,6 @@
                     on:update={({ detail }) => {
                       const points = dictionary.points;
                       points[index] = {
-                        type: 'point',
                         coordinates: { longitude: detail.lng, latitude: detail.lat },
                       };
                       dispatch('updatePoints', points);
@@ -129,24 +140,7 @@
       {t ? $t('create.select_coordinates') : 'Select Coordinates'}
     </Button>
     {#if show}
-      <CoordinatesModal
-        {t}
-        lng={null}
-        lat={null}
-        on:update={({ detail }) => {
-          if (dictionary.coordinates) {
-            const point = {
-              type: 'point',
-              coordinates: { longitude: detail.lng, latitude: detail.lat },
-            };
-            const points = (dictionary.points && [...dictionary.points, point]) || [point];
-            //@ts-ignore
-            dispatch('updatePoints', points);
-          } else {
-            dispatch('updateCoordinates', { longitude: detail.lng, latitude: detail.lat });
-          }
-        }}
-        on:close={toggle} />
+      <CoordinatesModal {t} lng={null} lat={null} on:update={updatePoints} on:close={toggle} />
     {/if}
   </ShowHide>
 
