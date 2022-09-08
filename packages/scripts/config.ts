@@ -13,7 +13,7 @@ export const projectId =
 
 // import serviceAccountDev from './service-account-dev.json';
 // import serviceAccountProd from './service-account-prod.json';
-import { serviceAccountDev, serviceAccountProd} from './service-accounts.js';
+import { serviceAccountDev, serviceAccountProd } from './service-accounts.js';
 const serviceAccount = environment === 'dev' ? serviceAccountDev : serviceAccountProd;
 
 admin.initializeApp({
