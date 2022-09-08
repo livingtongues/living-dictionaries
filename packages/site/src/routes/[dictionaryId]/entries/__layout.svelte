@@ -16,10 +16,10 @@
     <div class="relative pb-3 flex-grow">
       <div
         class="flex mb-1 items-center sticky top-0 md:top-12 pt-2 md:pt-0 pb-1
-            bg-white z-20">
+            bg-white z-20 print:hidden">
         <SearchBox {search} on:showFilterMenu={() => (showMobileFilters = true)} />
 
-        <div class="w-2 md:w-1" />
+        <div class="h-1 w-1" />
         <div
           class="flex md:p-1 border bg-gray-200 rounded-md text-gray-600
               font-medium text-xl md:text-sm">
@@ -55,12 +55,22 @@
               {$_('entry.gallery', { default: 'Gallery' })}
             </span>
           </a>
+          <a
+            sveltekit:prefetch
+            href={'/' + $page.params.dictionaryId + '/entries/print'}
+            class="{$page.url.pathname.includes('print') ? 'bg-white shadow' : 'hover:bg-gray-100'}
+                px-2 py-1 rounded">
+            <span class="i-fa-print" style="margin-top: -4px;" />
+            <span class="hidden md:inline">
+              {$_('entry.print', { default: 'Print' })}
+            </span>
+          </a>
         </div>
       </div>
 
       <div class="flex">
         <div class="flex-grow w-0 relative">
-          <div class="flex justify-between">
+          <div class="flex justify-between print:hidden">
             <div class="italic text-xs text-gray-500 mb-1">
               <Stats {search} />
             </div>
@@ -68,7 +78,7 @@
           </div>
           <slot />
         </div>
-        <div class="hidden md:block w-3 flex-shrink-0" />
+        <div class="hidden md:block w-3 flex-shrink-0 print:hidden" />
         <EntryFilters {search} bind:showMobileFilters />
       </div>
     </div>
