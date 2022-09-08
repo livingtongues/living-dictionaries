@@ -19,7 +19,7 @@
             bg-white z-20">
         <SearchBox {search} on:showFilterMenu={() => (showMobileFilters = true)} />
 
-        <div class="w-2 md:w-1" />
+        <div class="h-1 w-1" />
         <div
           class="flex md:p-1 border bg-gray-200 rounded-md text-gray-600
               font-medium text-xl md:text-sm">
@@ -53,6 +53,16 @@
             <i class="fal fa-image" />
             <span class="hidden md:inline">
               {$_('entry.gallery', { default: 'Gallery' })}
+            </span>
+          </a>
+          <a
+            sveltekit:prefetch
+            href={'/' + $page.params.dictionaryId + '/entries/print'}
+            class="{$page.url.pathname.includes('print') ? 'bg-white shadow' : 'hover:bg-gray-100'}
+                px-2 py-1 rounded">
+            <span class="i-fa-print" style="margin-top: -4px;" />
+            <span class="hidden md:inline">
+              {$_('entry.print', { default: 'Print' })}
             </span>
           </a>
         </div>
