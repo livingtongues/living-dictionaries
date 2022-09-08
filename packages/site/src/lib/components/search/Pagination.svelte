@@ -22,7 +22,7 @@
   });
 </script>
 
-<nav class="sticky md:bottom-0 bg-white pt-2 pb-1 flex items-center">
+<nav class="sticky md:bottom-0 bg-white pt-2 pb-1 flex items-center print:hidden">
   {#if !isFirstPage}
     <button
       type="button"
