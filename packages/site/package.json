@@ -19,6 +19,8 @@
     "@sveltejs/vite-plugin-svelte": "1.0.0-next.49",
     "@testing-library/jest-dom": "^5.15.0",
     "@testing-library/svelte": "^3.0.3",
+    "@turf/center": "^6.5.0",
+    "@turf/helpers": "^6.5.0",
     "@types/d3-dsv": "^3.0.0",
     "@types/file-saver": "^2.0.4",
     "@types/recordrtc": "^5.6.8",
