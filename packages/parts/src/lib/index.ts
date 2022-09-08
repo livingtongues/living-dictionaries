@@ -7,7 +7,7 @@ export { default as Filter } from './helpers/Filter.svelte';
 
 export { default as LatLngDisplay } from './maps/LatLngDisplay.svelte';
 
-export { default as PrintLayout } from './export/PrintLayout.svelte';
+export { default as HTMLTemplate } from './export/HTMLTemplate.svelte';
 
 export { default as EditableCoordinatesField } from './settings/EditableCoordinatesField.svelte';
 export { default as EditableGlossesField } from './settings/EditableGlossesField.svelte';

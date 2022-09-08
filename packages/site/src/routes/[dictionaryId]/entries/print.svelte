@@ -5,6 +5,9 @@
 
   import Hits from '$lib/components/search/Hits.svelte';
   import Pagination from '$lib/components/search/Pagination.svelte';
+  import { HTMLTemplate, dictionaryFields } from '@living-dictionaries/parts';
+  import type { ISpeaker } from '@living-dictionaries/types';
+  import { dictionary, isManager } from '$lib/stores';
 
   import { configure } from 'instantsearch.js/es/widgets/index.js';
   import { onMount } from 'svelte';
@@ -15,11 +18,41 @@
       }),
     ]);
   });
+  let speakers:ISpeaker[];
 
-  import { dictionary } from '$lib/stores';
 
   let columnWidth = 250;
   $: columnWidthEm = columnWidth / 16;
+
+  let fontSize = 1;
+  let imageSize = 100;
+  //TODO fix to not show the ones that aren't in the dictionary
+  const selectedFields = {
+    lo: true,
+    lo2: true,
+    lo3: true,
+    lo4: true,
+    lo5: true,
+    ph: true,
+    gl: true,
+    ps: true,
+    xv: true,
+    xs: true,
+    pf: true,
+    sr: false,
+    sd: false,
+    id: false,
+    in: false,
+    mr: false,
+    nc: false,
+    pl: false,
+    va: false,
+    di: false,
+    nt: false,
+    sf: false,
+    vfs: false,
+    qr: false,
+  };
 </script>
 
 <svelte:head>
@@ -34,11 +67,29 @@
       style="width: {columnWidthEm}em">
       Minimum column width: {columnWidth}px
     </div>
+    <div class="my-2">
+      <div class="mb-3">
+        <label class="font-medium text-gray-700" for="fontSize">Font size</label>
+        <input class="form-input w-12" id="fontSize" type="number" bind:value={fontSize} />
+      </div>
+      <div class="mb-3">
+        <label class="font-medium text-gray-700" for="imageSize">Image Size</label>
+        <input class="form-input w-17" id="imageSize" type="number" bind:value={imageSize} /><span class="font-medium text-gray-700">%</span>
+      </div>
+      <div>
+        {#each Object.entries(selectedFields) as field}
+          {' • '}
+          <input id={field[0]} type="checkbox" bind:checked={selectedFields[field[0]]} />  
+          <label class="text-sm font-medium text-gray-700" for={field[0]}>{dictionaryFields[field[0]]}</label>
+        {/each}
+      </div>
+    </div>
+    <hr />
   </div>
   <div class="print-columns" style="--column-width: {columnWidthEm}em;">
     {#each entries as entry (entry.id)}
-      <div>{entry.lx}</div>
-      <div class="italic text-sm mb-1 ml-1">{entry.gl?.en}</div>
+    <!--TODO how to get speakers?-->
+      <HTMLTemplate {fontSize} {imageSize} {entry} {selectedFields} {speakers} dictionaryId={$dictionary.id} />
     {/each}
   </div>
 </Hits>
