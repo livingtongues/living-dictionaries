@@ -78,9 +78,11 @@
       </div>
       <div>
         {#each Object.entries(selectedFields) as field}
-          {' • '}
-          <input id={field[0]} type="checkbox" bind:checked={selectedFields[field[0]]} />  
-          <label class="text-sm font-medium text-gray-700" for={field[0]}>{dictionaryFields[field[0]]}</label>
+          {#if entries.find((entry) => entry[field[0]]) || field[0] === 'qr'}
+            {' • '}
+            <input id={field[0]} type="checkbox" bind:checked={selectedFields[field[0]]} />  
+            <label class="text-sm font-medium text-gray-700" for={field[0]}>{dictionaryFields[field[0]]}</label>
+          {/if}
         {/each}
       </div>
     </div>
