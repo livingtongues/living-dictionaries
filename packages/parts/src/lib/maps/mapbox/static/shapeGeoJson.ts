@@ -32,8 +32,9 @@ function getPointFeature(point: IPoint, primary = false) {
 }
 
 function getPolygonFeature(region: IRegion) {
+  const looped = [...region.coordinates, region.coordinates[0]];
   const coordinates = [
-    region.coordinates.map(({ longitude, latitude }) => [
+    looped.map(({ longitude, latitude }) => [
       +longitude.toFixed(3),
       +latitude.toFixed(3),
     ]),
@@ -59,9 +60,10 @@ export function shapeGeoJson(points: IPoint[], regions: IRegion[]) {
   for (const region of regions) {
     features.push(getPolygonFeature(region));
   }
+  // add points afterwards so pins show on top of regions
   for (const [index, point] of points.entries()) {
     const primary = index === 0;
-    features.push(getPointFeature(point, primary)); // add later so pins show on top of regions
+    features.push(getPointFeature(point, primary)); 
   }
   return {
     type: 'FeatureCollection',
@@ -84,7 +86,6 @@ if (import.meta.vitest) {
               { longitude: -118.828125, latitude: 36.03133177633187 },
               { longitude: -115.6640625, latitude: 38.8225909761771 },
               { longitude: -116.01562499999999, latitude: 42.8115217450979 },
-              { longitude: -126.91406249999999, latitude: 40.97989806962013 },
             ],
           },
         ]
