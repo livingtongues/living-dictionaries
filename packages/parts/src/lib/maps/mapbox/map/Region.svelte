@@ -14,6 +14,7 @@
   const map = getMap();
 
   export let region: IRegion;
+  export let color: string = undefined;
 
   $: coordinatesArray =
     region?.coordinates.map(({ longitude, latitude }) => [longitude, latitude]) || [];
@@ -34,7 +35,7 @@
       options={{
         type: 'fill',
         paint: {
-          'fill-color': '#0080ff',
+          'fill-color': color || region.color || '#0080ff',
           'fill-opacity': 0.5,
         },
       }}
