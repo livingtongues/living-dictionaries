@@ -1,0 +1,45 @@
+<script lang="ts">
+  import { Story } from 'kitbook';
+  import Map from '$lib/maps/mapbox/map/Map.svelte';
+  import Marker from '$lib/maps/mapbox/map/Marker.svelte';
+  import Popup from '$lib/maps/mapbox/map/Popup.svelte';
+  import PopupOfMap from '$lib/maps/mapbox/map/PopupOfMap.svelte';
+</script>
+
+<!-- prettier-ignore -->
+# Popups
+
+<Story
+  name="Popup - Child of Marker"
+  knobs={{ lng: -95, lat: 39 }}
+  let:props={{ lng, lat }}
+  let:set
+  height={400}>
+  <Map
+    {lng}
+    {lat}
+    on:click={(e) => {
+      set('lng', e.detail.lng);
+      set('lat', e.detail.lat);
+    }}>
+    <Marker {lng} {lat}>
+      <Popup offset={25} open={true}>
+        <div>Hello</div>
+      </Popup>
+    </Marker>
+  </Map>
+</Story>
+
+Sometimes you need a Popup that isn't a child of a Marker, but just has coordinates passed in:
+
+<Story
+  name="PopupOfMap"
+  knobs={{ lng: -119, lat: 45, open: true }}
+  let:props={{ lng, lat, open }}
+  height={400}>
+  <Map lng={-119} lat={45}>
+    <PopupOfMap {lng} {lat} {open}>
+      <div>Hello</div>
+    </PopupOfMap>
+  </Map>
+</Story>

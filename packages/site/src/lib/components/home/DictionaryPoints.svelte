@@ -1,20 +1,21 @@
 <script lang="ts">
   import GeoJSONSource from '@living-dictionaries/parts/src/lib/maps/mapbox/sources/GeoJSONSource.svelte';
   import Layer from '@living-dictionaries/parts/src/lib/maps/mapbox/map/Layer.svelte';
-  import { dictionaryGeoJsonCollection } from '@living-dictionaries/parts/src/lib/maps/dictionaryGeoJsonCollection';
+  import { dictionaryGeoJsonCollection } from '@living-dictionaries/parts/src/lib/maps/utils/dictionaryGeoJsonCollection';
   import type { IDictionary } from '@living-dictionaries/types';
   import { getContext } from 'svelte';
-  import { mapKey } from '@living-dictionaries/parts/src/lib/maps/mapbox/context';
-  import type { Map } from 'mapbox-gl';
+  import {
+    mapKey,
+    type MapKeyContext,
+  } from '@living-dictionaries/parts/src/lib/maps/mapbox/context';
 
   export let dictionaries: IDictionary[] = [],
     selectedDictionaryId: string = undefined,
     type: 'public' | 'private' | 'personal' = 'public';
 
-  const { getMap } = getContext(mapKey);
-  const map: Map = getMap();
+  const { getMap } = getContext<MapKeyContext>(mapKey);
+  const map = getMap();
 
-  let sourceId = `${type}_dictionaries`;
   let clustersId = `${type}_clusters`;
 
   // map.loadImage("/icons/favicon-32x32.png", function(error, image) {
@@ -24,7 +25,6 @@
 </script>
 
 <GeoJSONSource
-  id={sourceId}
   data={dictionaryGeoJsonCollection(dictionaries)}
   options={{ cluster: true, clusterMaxZoom: 6, clusterRadius: 28 }}
   let:source>
@@ -57,7 +57,6 @@
       const clusterId = features[0].properties.cluster_id;
       source.getClusterExpansionZoom(clusterId, (err, zoom) => {
         if (err) return;
-
         map.easeTo({
           // @ts-ignore
           center: features[0].geometry.coordinates,
@@ -68,7 +67,6 @@
     on:mouseenter={() => (map.getCanvas().style.cursor = 'pointer')}
     on:mouseleave={() => (map.getCanvas().style.cursor = '')} />
   <Layer
-    id="{type}_cluster-count"
     options={{
       type: 'symbol',
       filter: ['has', 'point_count'],
@@ -83,7 +81,6 @@
       },
     }} />
   <Layer
-    id="{type}_unclustered-point"
     options={{
       type: 'symbol',
       filter: ['!', ['has', 'point_count']],

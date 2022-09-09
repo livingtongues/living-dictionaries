@@ -1,0 +1,53 @@
+<script lang="ts">
+  import { Story } from 'kitbook';
+  import RegionModal from '$lib/maps/RegionModal.svelte';
+  import ShowHide from 'svelte-pieces/functions/ShowHide.svelte';
+  import Button from 'svelte-pieces/ui/Button.svelte';
+  import type { IRegion } from '@living-dictionaries/types';
+  import MapboxStatic from '$lib/maps/mapbox/static/MapboxStatic.svelte';
+
+  let region: IRegion = {
+    coordinates: [
+      { longitude: -123.91406249999999, latitude: 40.97989806962013 },
+      { longitude: -118.828125, latitude: 36.03133177633187 },
+      { longitude: -115.6640625, latitude: 38.8225909761771 },
+      { longitude: -116.01562499999999, latitude: 42.8115217450979 },
+    ],
+  };
+</script>
+
+<!-- prettier-ignore -->
+# Region Modal
+
+<Story name="Has Region">
+  <ShowHide let:show let:toggle>
+    <Button onclick={toggle} class="mb-1"
+      ><span class="i-mdi-map-marker-path mr-1" /> {region ? 'Modify' : 'Select'} Region</Button>
+    {#if region}
+      <MapboxStatic regions={[region]} width={200} height={130} highDef={false} />
+    {/if}
+    {#if show}
+      <RegionModal
+        {region}
+        on:update={({ detail }) => {
+          region = { coordinates: [...detail.coordinates, detail.coordinates[0]] };
+        }}
+        on:remove={() => {
+          region = null;
+        }}
+        on:close={toggle} />
+    {/if}
+  </ShowHide>
+</Story>
+
+<Story name="No Region">
+  <ShowHide let:show let:toggle>
+    <Button onclick={toggle}><span class="i-mdi-map-marker-path mr-1" /> Select Region</Button>
+    {#if show}
+      <RegionModal
+        region={undefined}
+        on:update={({ detail }) => alert(JSON.stringify(detail.coordinates))}
+        on:close={toggle} />
+    {/if}
+  </ShowHide>
+</Story>

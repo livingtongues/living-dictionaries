@@ -99,7 +99,8 @@
     "community_permission": "Je! Jumuiya ya lugha imekupa ruhusa ya kufanya kamusi hii?",
     "author_connection": "Tafadhali eleza kwa kifupi jinsi unavyojua lugha hii na kwa nini unaunda kamusi ya kuishi kwa hiyo. Je! Wewe ni sehemu ya jamii ambayo itakuwa inatumia kamusi hii hai? Ikiwa sivyo, unajuaje jamii?",
     "con_lang_description": "Je! Hii ni kamusi ya lugha iliyojengwa (lugha iliyoundwa na wanadamu katika miaka ya hivi karibuni, kwa kitabu au sinema)? Ikiwa ndio, tafadhali eleza kwa kifupi.",
-    "uncertainty": "Sijui"
+    "uncertainty": "Sijui",
+    "select_region": "Chagua mkoa"
   },
   "dictionary": {
     "latitude": "Latitudo",

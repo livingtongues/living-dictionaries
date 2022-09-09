@@ -99,7 +99,8 @@
     "community_permission": "Has the language community given you permission to make this dictionary?",
     "author_connection": "Please briefly describe how you know this language and why you are creating a Living Dictionary for it. Are you part of the community that will be using this Living Dictionary? If not, how do you know the community?",
     "con_lang_description": "Is this dictionary for a constructed language (a language invented by humans in recent years, for a book or a movie)? If yes, please briefly describe.",
-    "uncertainty": "I don't know"
+    "uncertainty": "I don't know",
+    "select_region": "Select Region"
   },
   "dictionary": {
     "latitude": "Latitude",
