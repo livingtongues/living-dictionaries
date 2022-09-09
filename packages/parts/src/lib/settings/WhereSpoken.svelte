@@ -163,8 +163,7 @@
     <ShowHide let:show let:toggle>
       <Button onclick={toggle} color="black" size="sm">
         <span class="i-mdi-map-marker-path mr-1" style="margin-top: -2px;" />
-        Select Region
-        <!-- {t ? $t('create.select_region') : 'Select Region'} -->
+        {t ? $t('create.select_region') : 'Select Region'}
       </Button>
       {#if show}
         <RegionModal
