@@ -11,6 +11,8 @@ Markers can be `draggable` (red marker) and update their position if changed ext
 
 <Story name="Marker" knobs={{ lng: -95, lat: 39 }} let:props={{ lng, lat }} let:set height={400}>
   <Map
+    {lng}
+    {lat}
     on:click={(e) => {
       set('lng', e.detail.lng);
       set('lat', e.detail.lat);
@@ -23,9 +25,11 @@ Markers can be `draggable` (red marker) and update their position if changed ext
 Custom elements can be used as markers
 
 <Story name="Custom element" height={400}>
-  <Map>
+  <Map lng={-119} lat={45}>
     <Marker draggable lng={-119} lat={45} let:lat let:lng>
-      <div slot="pin" class="bg-white text-black p-2 shadow rounded">I'm a draggable marker ({lat.toFixed()}, {lng.toFixed()})</div>
+      <div slot="pin" class="bg-white text-black p-2 shadow rounded">
+        I'm a draggable marker ({lat.toFixed()}, {lng.toFixed()})
+      </div>
     </Marker>
   </Map>
 </Story>

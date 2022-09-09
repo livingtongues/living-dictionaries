@@ -9,7 +9,11 @@ export interface IDictionary extends IFirestoreMetaData {
   location?: string;
   iso6393?: string;
   glottocode?: string;
-  coordinates?: GeoPoint;
+
+  coordinates?: GeoPoint | LngLatFull; // primary coordinate when displayed w/ many other dictionaries
+  points?: IPoint[]; // other coordinate points where language spoken
+  regions?: IRegion[]; // regions where language spoken
+
   public?: boolean;
   entryCount: number; // number | FieldValue;
   copyright?: string; // Allow custom copyright in case "Copyright _______ community" isn't appropriate for dictionary (eg. Tehuelche)
@@ -39,4 +43,21 @@ export interface IAbout extends IFirestoreMetaData {
 
 export interface IGrammar extends IFirestoreMetaData {
   grammar: string;
+}
+
+export interface IPoint {
+  coordinates: LngLatFull;
+  label?: string;
+  color?: string;
+}
+
+export interface IRegion {
+  coordinates: LngLatFull[];
+  label?: string;
+  color?: string;
+}
+
+interface LngLatFull {
+  longitude: number;
+  latitude: number;
 }

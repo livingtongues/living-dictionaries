@@ -99,7 +99,8 @@
     "community_permission": "Shin al'ummar da aka ba ku izinin yin wannan ƙamus?",
     "author_connection": "Da fatan za a bayyana yadda kuka san wannan yare kuma me yasa kuke ƙirƙirar ƙamus ɗin rayuwa don hakan. Shin kun kasance wani ɓangare na al'umma waɗanda za su yi amfani da wannan ƙamus ɗin rayuwa? Idan ba haka ba, ta yaya kuka san al'umma?",
     "con_lang_description": "Shin wannan ƙamus na harshe ne wanda aka gina (harshe da aka kirkira ta ɗan adam a cikin 'yan shekarun nan, na wani fim ko fim)? Idan eh, da fatan za a bayyana a taƙaice.",
-    "uncertainty": "Ban sani ba"
+    "uncertainty": "Ban sani ba",
+    "select_region": "Zaɓi yanki"
   },
   "dictionary": {
     "latitude": "Latitude",
