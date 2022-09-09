@@ -5,6 +5,7 @@
 
   import Hits from '$lib/components/search/Hits.svelte';
   import Pagination from '$lib/components/search/Pagination.svelte';
+  import Button from 'svelte-pieces/ui/Button.svelte';
   import { HTMLTemplate, dictionaryFields } from '@living-dictionaries/parts';
   import type { ISpeaker } from '@living-dictionaries/types';
   import { dictionary, isManager } from '$lib/stores';
@@ -26,7 +27,7 @@
 
   let fontSize = 1;
   let imageSize = 100;
-  //TODO fix to not show the ones that aren't in the dictionary
+
   const selectedFields = {
     lo: true,
     lo2: true,
@@ -59,6 +60,7 @@
   <title>{$dictionary.name}</title>
 </svelte:head>
 
+<Button class="fixed right-2 sm:right-60" form="filled" onclick={() => window.print()}><span class="i-fa-file-pdf-o" /> Print</Button>
 <Hits {search} let:entries>
   <div class="print:hidden">
     <input type="range" min="150" max="800" bind:value={columnWidth} />
@@ -79,9 +81,11 @@
       <div>
         {#each Object.entries(selectedFields) as field}
           {#if entries.find((entry) => entry[field[0]]) || field[0] === 'qr'}
-            {' • '}
-            <input id={field[0]} type="checkbox" bind:checked={selectedFields[field[0]]} />  
-            <label class="text-sm font-medium text-gray-700" for={field[0]}>{dictionaryFields[field[0]]}</label>
+            <span title={field[0] === 'qr' ? 'QR codes might take a bit longer to appear' : ''}>
+              {' • '}
+              <input id={field[0]} type="checkbox" bind:checked={selectedFields[field[0]]} />  
+              <label class="text-sm font-medium text-gray-700" for={field[0]}>{dictionaryFields[field[0]]}</label>
+            </span>
           {/if}
         {/each}
       </div>
