@@ -14,6 +14,7 @@
       { longitude: -115.6640625, latitude: 38.8225909761771 },
       { longitude: -116.01562499999999, latitude: 42.8115217450979 },
     ],
+    color: 'red', // overridden by color passed into region
   };
 
   const features = points(
@@ -25,9 +26,9 @@
 <!-- prettier-ignore -->
 # Region
 
-<Story height={400}>
+<Story knobs={{color: '#38c73a'}} let:props={{color}} height={400}>
   <Map {lng} {lat} zoom={4}>
-    <Region {region} />
+    <Region {region} color={color} />
   </Map>
 </Story>
 
