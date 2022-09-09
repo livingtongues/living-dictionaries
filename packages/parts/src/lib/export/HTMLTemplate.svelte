@@ -46,7 +46,7 @@
     {#if entry.pf && selectedFields.pf}
       <!--TODO how to avoid images duplication? -->
       <img class="print:hidden" style="width:20%;margin-bottom:5px" src={`https://lh3.googleusercontent.com/${entry.pf.gcs}`} alt={entry.lx} />
-      <img class="hidden print:inline" style="width:{imageSize}%;margin-bottom:5px" src={`https://lh3.googleusercontent.com/${entry.pf.gcs}`} alt={entry.lx} />
+      <img class="hidden print:block" style="width:{imageSize}%;margin-bottom:5px" src={`https://lh3.googleusercontent.com/${entry.pf.gcs}`} alt={entry.lx} />
         <!-- <Image square={imageSize} gcs={entry.pf.gcs} lexeme={entry.lx} /> -->
     {/if}
     {#if entry.sr && selectedFields.sr}
