@@ -99,7 +99,8 @@
     "community_permission": "Adakah komuniti bahasa memberi anda kebenaran untuk membuat kamus ini?",
     "author_connection": "Sila terangkan secara ringkas bagaimana anda mengetahui bahasa ini dan mengapa anda mencipta kamus hidup untuknya. Adakah anda sebahagian daripada komuniti yang akan menggunakan kamus hidup ini? Jika tidak, bagaimana anda tahu komuniti?",
     "con_lang_description": "Adakah kamus ini untuk bahasa yang dibina (bahasa yang dicipta oleh manusia dalam beberapa tahun kebelakangan, untuk buku atau filem)? Jika ya, sila terangkan secara ringkas.",
-    "uncertainty": "Saya tidak tahu"
+    "uncertainty": "Saya tidak tahu",
+    "select_region": "Pilih Wilayah"
   },
   "dictionary": {
     "latitude": "Latitud",
