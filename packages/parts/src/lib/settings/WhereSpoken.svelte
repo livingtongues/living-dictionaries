@@ -20,11 +20,12 @@
     updatePoints: IPoint[];
     updateRegions: IRegion[];
   }>();
-
+  
   export let dictionary: Partial<IDictionary>;
+    $: hasCoordinates = dictionary.coordinates?.latitude;
 
   function addCoordinates({ detail }: { detail: { lng: number; lat: number } }) {
-    if (dictionary.coordinates) {
+    if (hasCoordinates) {
       const point = {
         coordinates: { longitude: detail.lng, latitude: detail.lat },
       };
@@ -42,7 +43,7 @@
   {t ? $t('create.where_spoken') : 'Where is this language spoken?'}*
 </div>
 
-{#if dictionary.coordinates}
+{#if hasCoordinates}
   <div class="h-240px">
     <Map
       lng={dictionary.coordinates.longitude}
@@ -148,8 +149,8 @@
   <ShowHide let:show let:toggle>
     <Button
       onclick={toggle}
-      color={dictionary.coordinates ? 'black' : 'primary'}
-      size={dictionary.coordinates ? 'sm' : 'md'}>
+      color={hasCoordinates ? 'black' : 'primary'}
+      size={hasCoordinates ? 'sm' : 'md'}>
       <span class="i-mdi-map-marker-plus mr-1" style="margin-top: -3px;" />
       {t ? $t('create.select_coordinates') : 'Select Coordinates'}
     </Button>
@@ -158,7 +159,7 @@
     {/if}
   </ShowHide>
 
-  {#if dictionary.coordinates}
+  {#if hasCoordinates}
     <ShowHide let:show let:toggle>
       <Button onclick={toggle} color="black" size="sm">
         <span class="i-mdi-map-marker-path mr-1" style="margin-top: -2px;" />
