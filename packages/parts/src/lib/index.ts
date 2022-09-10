@@ -9,7 +9,7 @@ export { default as LatLngDisplay } from './maps/LatLngDisplay.svelte';
 
 export { default as HTMLTemplate } from './export/HTMLTemplate.svelte';
 
-export { default as EditableCoordinatesField } from './settings/EditableCoordinatesField.svelte';
+export { default as WhereSpoken } from './settings/WhereSpoken.svelte';
 export { default as EditableGlossesField } from './settings/EditableGlossesField.svelte';
 export { default as EditableAlternateNames } from './settings/EditableAlternateNames.svelte';
 export { default as PublicCheckbox } from './settings/PublicCheckbox.svelte';
@@ -20,4 +20,4 @@ export { semanticDomains } from './mappings/semantic-domains';
 export { partsOfSpeech } from './mappings/parts-of-speech';
 export { dictionaryFields } from './mappings/dictionary-fields';
 
-export { getTimeZoneLongitude } from './maps/getTimeZoneLongitude';
+export { getTimeZoneLongitude } from './maps/utils/getTimeZoneLongitude';

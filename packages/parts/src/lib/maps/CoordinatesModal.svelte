@@ -9,11 +9,14 @@
   import Geocoder from './mapbox/geocoder/Geocoder.svelte';
   import Marker from './mapbox/map/Marker.svelte';
   import ToggleStyle from './mapbox/controls/ToggleStyle.svelte';
-  import { getTimeZoneLongitude } from './getTimeZoneLongitude';
 
   export let lng: number;
   export let lat: number;
-  let center: [number, number] = lng && lat ? [lng, lat] : [getTimeZoneLongitude(), 10];
+  export let canRemove = true;
+
+  let centerLng = lng;
+  let centerLat = lat;
+
   let zoom = lng && lat ? 6 : 2;
 
   function setMarker(longitude: number, latitude: number) {
@@ -21,13 +24,8 @@
     if (longitude < -180 || longitude > 180 || latitude < -90 || latitude > 90) {
       return;
     }
-    lng = Math.floor(longitude * 10000) / 10000;
-    lat = Math.floor(latitude * 10000) / 10000;
-    // record to the 4th decimal point as handheld GPS accuracy (3rd decimal point is what we used previously: 111 meters) // https://gis.stackexchange.com/questions/8650/measuring-accuracy-of-latitude-and-longitude, https://gisjames.wordpress.com/2016/04/27/deciding-how-many-decimal-places-to-include-when-reporting-latitude-and-longitude/
-
-    // map.flyTo({
-    //   center: [lng, lat],
-    // });
+    lng = +longitude.toFixed(4);
+    lat = +latitude.toFixed(4);
   }
 
   function handleGeocoderResult({ detail }) {
@@ -41,7 +39,8 @@
   onMount(async () => {
     if (!(lng && lat) && navigator.geolocation) {
       navigator.geolocation.getCurrentPosition((position) => {
-        center = [position.coords.longitude, position.coords.latitude];
+        centerLng = position.coords.longitude;
+        centerLat = position.coords.latitude;
       });
     }
   });
@@ -109,23 +108,36 @@
     </div>
 
     <form on:submit={(e) => e.preventDefault()} style="height: 50vh;">
-      <Map {center} {zoom} on:click={({ detail }) => setMarker(detail.lng, detail.lat)}>
+      <Map
+        lng={centerLng}
+        lat={centerLat}
+        {zoom}
+        on:click={({ detail }) => setMarker(detail.lng, detail.lat)}>
         <Geocoder
           options={{ marker: false }}
           placeholder={t ? $t('about.search') : 'Search'}
           on:result={handleGeocoderResult}
           on:error={(e) => console.log(e.detail)} />
         {#if lng && lat}
-          <Marker {lng} {lat} />
+          <Marker
+            draggable
+            on:dragend={({ detail }) => setMarker(detail.lng, detail.lat)}
+            {lng}
+            {lat} />
         {/if}
         <ToggleStyle />
       </Map>
     </form>
 
     <div class="modal-footer">
-      <Button onclick={remove} form="simple" color="red">
-        {t ? $t('misc.remove') : 'Remove'}
+      <Button onclick={() => dispatch('close')} form="simple" color="black">
+        {t ? $t('misc.cancel') : 'Cancel'}
       </Button>
+      {#if canRemove}
+        <Button onclick={remove} form="simple" color="red">
+          {t ? $t('misc.remove') : 'Remove'}
+        </Button>
+      {/if}
       <Button type="submit" form="filled">
         {t ? $t('misc.save') : 'Save'}
       </Button>

@@ -1,21 +1,21 @@
 <script lang="ts">
   // from https://gitlab.com/jailbreak/svelte-mapbox-gl
   import { createEventDispatcher, getContext, onDestroy } from 'svelte';
-  import { mapKey, sourceKey } from '../context';
+  import { mapKey, sourceKey, type MapKeyContext, type SourceKeyContext } from '../context';
+  import { randomId } from '../../utils/randomId';
   import type {
-    Map,
     AnyLayer,
     MapLayerMouseEvent,
     MapLayerTouchEvent,
     MapLayerEventType,
   } from 'mapbox-gl';
 
-  const { getMap } = getContext(mapKey);
-  const map: Map = getMap();
-  const { getSourceId, addChildLayer } = getContext(sourceKey);
-  const sourceId = getSourceId() as string;
+  const { getMap } = getContext<MapKeyContext>(mapKey);
+  const map = getMap();
+  const { getSourceId, addChildLayer } = getContext<SourceKeyContext>(sourceKey);
+  const sourceId = getSourceId();
 
-  export let id: string;
+  export let id = randomId();
   // see https://docs.mapbox.com/mapbox-gl-js/style-spec/layers
   export let options: Partial<AnyLayer> = {
     type: 'fill',
