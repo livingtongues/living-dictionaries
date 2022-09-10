@@ -1,0 +1,17 @@
+<script lang="ts">
+  import Keyman from '$lib/entries/keyboards/Keyman.svelte';
+  import { Story } from 'kitbook';
+
+	let languages = ['am', 'en', 'ar', 'as'];
+
+</script>
+
+<!-- prettier-ignore -->
+# Keyman Keyboard
+
+[KeymanWeb docs](https://keyman.com/developer/keymanweb/)
+
+<Story>
+	<Keyman />
+	<!-- <Keyman {languages} currentLanguage="as" bind:value /> -->
+</Story>
