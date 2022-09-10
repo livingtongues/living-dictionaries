@@ -46,6 +46,13 @@
     <i class="far fa-info-circle" />
     <span class="ml-1 hidden lg:inline">{$_('header.about', { default: 'About' })}</span>
   </Button>
+  <Button href="/tutorials" form="text" class="!hidden !md:inline">
+    <span class="i-fluent-learning-app-24-regular -mt-2px" />
+    <span class="ml-1 hidden lg:inline"
+      >{$_('header.tutorials', {
+        default: 'Tutorials',
+      })}</span>
+  </Button>
   <Button
     form="text"
     href="https://docs.google.com/document/d/1MZGkBbnCiAch3tWjBOHRYPpjX1MVd7f6x5uVuwbxM-Q/edit?usp=sharing"
@@ -66,7 +73,7 @@
       <span class="lg:hidden">
         <i class="far fa-question-circle" />
       </span>
-      <span class="ml-1 hidden sm:inline">
+      <span class="ml-1 hidden lg:inline">
         {$_('header.contact_us', { default: 'Contact Us' })}
       </span>
     </Button>
