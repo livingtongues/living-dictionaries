@@ -41,9 +41,15 @@
 
 <Modal on:close class="bg-gray-100">
   <span slot="heading">
-    {$_('header.contact_us', { default: 'Contact Us' })}
+    <i class="far fa-question-circle" />
   </span>
   <div class="flex flex-col mb-5">
+    <Button href="/tutorials" class="mb-2">
+      <span class="i-fluent-learning-app-24-regular -mt-2px" />
+      {$_('header.tutorials', {
+        default: 'Tutorials',
+      })}
+    </Button>
     <Button
       href="https://docs.google.com/document/d/1MZGkBbnCiAch3tWjBOHRYPpjX1MVd7f6x5uVuwbxM-Q/edit?usp=sharing"
       target="_blank">
@@ -54,6 +60,13 @@
       </span>
     </Button>
   </div>
+
+  <hr class="my-5" />
+
+  <h2 class="text-xl mb-3">
+    <i class="far fa-comment" />
+    {$_('header.contact_us', { default: 'Contact Us' })}
+  </h2>
 
   {#if !status}
     <Form let:loading onsubmit={send}>
