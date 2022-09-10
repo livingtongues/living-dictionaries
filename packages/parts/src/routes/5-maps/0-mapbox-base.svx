@@ -21,6 +21,8 @@ From https://github.com/beyonk-adventures/svelte-mapbox
   let:set
   height={400}>
   <Map
+    {lng}
+    {lat}
     on:click={(e) => {
       set('lng', e.detail.lng);
       set('lat', e.detail.lat);

@@ -1,0 +1,43 @@
+<script lang="ts">
+  import { Story } from 'kitbook';
+  import Button from 'svelte-pieces/ui/Button.svelte';
+  import type { IRegion } from '@living-dictionaries/types';
+  import Region from '$lib/maps/mapbox/map/Region.svelte';
+  import Map from '$lib/maps/mapbox/map/Map.svelte';
+  import { points } from '@turf/helpers';
+  import center from '@turf/center';
+
+  let region: IRegion = {
+    coordinates: [
+      { longitude: -123.91406249999999, latitude: 40.97989806962013 },
+      { longitude: -118.828125, latitude: 36.03133177633187 },
+      { longitude: -115.6640625, latitude: 38.8225909761771 },
+      { longitude: -116.01562499999999, latitude: 42.8115217450979 },
+    ],
+    color: 'red', // overridden by color passed into region
+  };
+
+  const features = points(
+    region.coordinates.map(({ longitude, latitude }) => [longitude, latitude])
+  );
+  const [lng, lat] = center(features).geometry.coordinates;
+</script>
+
+<!-- prettier-ignore -->
+# Region
+
+<Story knobs={{color: '#38c73a'}} let:props={{color}} height={400}>
+  <Map {lng} {lat} zoom={4}>
+    <Region {region} color={color} />
+  </Map>
+</Story>
+
+When the `Region` component has content in the default slot, the cursor will change to pointer on region hover and a popup with default slot content will show when region is clicked.
+
+<Story name="With button" height={400}>
+  <Map {lng} {lat} zoom={4}>
+    <Region {region}>
+      <Button onclick={() => alert('clicked')}>Click</Button>
+    </Region>
+  </Map>
+</Story>

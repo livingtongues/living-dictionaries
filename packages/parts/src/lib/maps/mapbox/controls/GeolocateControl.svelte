@@ -1,12 +1,11 @@
 <script lang="ts">
   import { getContext, onMount, createEventDispatcher } from 'svelte';
-  import { mapKey } from '../context';
-  import type { Map } from 'mapbox-gl';
+  import { mapKey, type MapKeyContext } from '../context';
   import { bindEvents } from '../event-bindings';
 
-  const { getMap, getMapbox } = getContext(mapKey);
-  const map: Map = getMap();
-  const mapbox: typeof import('mapbox-gl') = getMapbox();
+  const { getMap, getMapbox } = getContext<MapKeyContext>(mapKey);
+  const map = getMap();
+  const mapbox = getMapbox();
 
   export let position: 'top-left' | 'top-right' | 'bottom-right' | 'bottom-left' = 'top-right';
   export let options = {};
