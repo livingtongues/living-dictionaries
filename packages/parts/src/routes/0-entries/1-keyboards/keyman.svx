@@ -1,9 +1,12 @@
 <script lang="ts">
+  import Input from '$lib/entries/keyboards/keyman/Input.svelte';
   import Keyman from '$lib/entries/keyboards/keyman/Keyman.svelte';
+  import Textarea from '$lib/entries/keyboards/keyman/Textarea.svelte';
   import { Story } from 'kitbook';
 
   let value = '';
   let paragraph = '';
+  // let languages = ['am', 'en', 'ar', 'as'];
 </script>
 
 <!-- prettier-ignore -->
@@ -13,17 +16,16 @@
 - [KeymanWeb API](https://help.keyman.com/DEVELOPER/engine/web/15.0/reference/)
 - [Angular Setup](https://medium.com/@jwbowdoin/setup-on-screen-keyboards-in-over-1-000-languages-using-keyman-11-in-an-angular-7-web-app-3c3eb846585c)
 
-<Story name="input" height={400}>
+<Story name="input">
   <Keyman>
-    <!-- <input type="text" bind:value /> -->
-    <!-- <div>{value}</div> -->
+    <div>Value: {value}</div>
+    <Input bcp="am" bind:value />
   </Keyman>
-  <!-- <Keyman {languages} currentLanguage="as" bind:value /> -->
 </Story>
 
-<!-- <Story name="textarea">
+<Story name="textarea">
   <Keyman>
-    <textarea type="text" bind:value={paragraph} />
+    <Textarea bcp="as" bind:value={paragraph} />
     <pre class="pl-3">{paragraph}</pre>
   </Keyman>
-</Story> -->
+</Story>
