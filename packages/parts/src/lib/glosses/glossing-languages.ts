@@ -1,7 +1,7 @@
 // BCP 47 language codes are used to identify correct Keyman keyboards for language inputs
 // Codes pulled from: http://www.iana.org/assignments/language-subtag-registry/language-subtag-registry
-// internalName pulled from: https://keyman.com > search for keyboard, select one with desktop and mobile web if possible, then copy Keyboard ID and add 'Keyboard_' to the beginning
-// Latin script options: Keyboard_european, Keyboard_sil_euro_latin, Keyboard_basic_kbdus, Keyboard_us
+// internalName pulled from: https://keyman.com/keyboards > search for keyboard, select one with desktop and mobile web if possible, then copy Keyboard ID. Alternatively, all keyboards available can be seen at https://keyman.com/developer/keymanweb/keyboards
+// Latin script options: european, sil_euro_latin, basic_kbdus, us
 
 import type { IGlossLanguages } from '@living-dictionaries/types';
 
@@ -9,7 +9,7 @@ import type { IGlossLanguages } from '@living-dictionaries/types';
 export const glossingLanguages: IGlossLanguages = {
   en: {
     vernacularName: 'English',
-    internalName: 'Keyboard_us',
+    internalName: 'us',
   },
   ab: {
     vernacularName: 'аҧсуа бызшәа',
@@ -25,7 +25,7 @@ export const glossingLanguages: IGlossLanguages = {
     vernacularAlternate: 'Afaraf',
   },
   af: {
-    internalName: 'Keyboard_european',
+    internalName: 'european',
   },
   ak: {
     vernacularName: 'Akan',
@@ -39,12 +39,12 @@ export const glossingLanguages: IGlossLanguages = {
   am: {
     vernacularName: 'አማርኛ',
     vernacularAlternate: 'Amarəñña',
-    internalName: 'Keyboard_gff_amharic',
+    internalName: 'gff_amharic',
     showKeyboard: true,
   },
   ar: {
     vernacularName: 'العَرَبِيَّة‎',
-    internalName: 'Keyboard_sil_arabic_phonetic',
+    internalName: 'sil_arabic_phonetic',
     showKeyboard: true,
   },
   hy: {
@@ -53,7 +53,7 @@ export const glossingLanguages: IGlossLanguages = {
   as: {
     vernacularName: 'অসমীয়া',
     vernacularAlternate: 'Asamiya',
-    internalName: 'Keyboard_isis_bangla',
+    internalName: 'isis_bangla',
     showKeyboard: true,
   },
   av: {
@@ -62,7 +62,7 @@ export const glossingLanguages: IGlossLanguages = {
   },
   ay: {
     vernacularName: 'Aymar aru',
-    internalName: 'Keyboard_european2',
+    internalName: 'european2',
   },
   az: {
     vernacularName: 'Azərbaycan dili/Aзәрбајҹан дили',
@@ -103,7 +103,7 @@ export const glossingLanguages: IGlossLanguages = {
   bn: {
     vernacularName: 'বাংলা',
     vernacularAlternate: 'Bangla',
-    internalName: 'Keyboard_bengali',
+    internalName: 'bengali',
     showKeyboard: true,
   },
   bew: {
@@ -131,12 +131,12 @@ export const glossingLanguages: IGlossLanguages = {
   my: {
     vernacularName: 'မြန်မာစာ',
     vernacularAlternate: 'mranmabhasa',
-    internalName: 'Keyboard_burmese02',
+    internalName: 'burmese02',
     showKeyboard: true,
   },
   yue: {
     vernacularName: '广东话',
-    internalName: 'Keyboard_chinese',
+    internalName: 'chinese',
     useKeyboard: 'cmn',
     showKeyboard: true,
   },
@@ -181,7 +181,7 @@ export const glossingLanguages: IGlossLanguages = {
   },
   nl: {
     vernacularName: 'Nederlands',
-    internalName: 'Keyboard_dutch',
+    internalName: 'dutch',
     showKeyboard: true,
   },
   dyu: {
@@ -223,7 +223,7 @@ export const glossingLanguages: IGlossLanguages = {
   },
   fr: {
     vernacularName: 'français',
-    internalName: 'Keyboard_french',
+    internalName: 'french',
     showKeyboard: true,
   },
   fry: {
@@ -248,12 +248,12 @@ export const glossingLanguages: IGlossLanguages = {
   ka: {
     vernacularName: 'ქართული',
     vernacularAlternate: 'Kartuli',
-    internalName: 'Keyboard_georgian',
+    internalName: 'georgian',
     showKeyboard: true,
   },
   de: {
     vernacularName: 'Deutsch',
-    internalName: 'Keyboard_european',
+    internalName: 'european',
   },
   gjn: {
     vernacularName: 'Ngbanyito',
@@ -270,7 +270,7 @@ export const glossingLanguages: IGlossLanguages = {
   gn: {
     vernacularName: 'Guaraní',
     vernacularAlternate: 'avañe’ẽ',
-    internalName: 'Keyboard_european',
+    internalName: 'european',
   },
   pov: {
     vernacularName: 'Crioulo',
@@ -281,7 +281,7 @@ export const glossingLanguages: IGlossLanguages = {
   ha: {
     vernacularName: 'Harshen',
     vernacularAlternate: 'هَرْشَن هَوْسَ',
-    internalName: 'Keyboard_naijanfd10',
+    internalName: 'naijanfd10',
     showKeyboard: true,
   },
   he: {
@@ -293,7 +293,7 @@ export const glossingLanguages: IGlossLanguages = {
   hi: {
     vernacularName: 'हिन्दी',
     vernacularAlternate: 'Hindī',
-    internalName: 'Keyboard_dev_inscript',
+    internalName: 'dev_inscript',
     showKeyboard: true,
   },
   ho: {
@@ -316,7 +316,7 @@ export const glossingLanguages: IGlossLanguages = {
   },
   ig: {
     vernacularName: 'Asụsụ Igbo',
-    internalName: 'Keyboard_naijanfd10',
+    internalName: 'naijanfd10',
     showKeyboard: true,
   },
   ilo: {
@@ -325,7 +325,7 @@ export const glossingLanguages: IGlossLanguages = {
   },
   id: {
     vernacularName: 'Bahasa Indonesia',
-    internalName: 'Keyboard_basic_kbdus',
+    internalName: 'basic_kbdus',
   },
   gle: {
     vernacularName: 'Gaeilge',
@@ -336,7 +336,7 @@ export const glossingLanguages: IGlossLanguages = {
   ja: {
     vernacularName: '日本語',
     vernacularAlternate: 'Nihongo',
-    internalName: 'Keyboard_japanese',
+    internalName: 'japanese',
     showKeyboard: true,
   },
   jav: {
@@ -388,7 +388,7 @@ export const glossingLanguages: IGlossLanguages = {
   km: {
     vernacularName: 'ភាសាខ្មែរ',
     vernacularAlternate: 'Cambodian',
-    internalName: 'Keyboard_khmer10',
+    internalName: 'khmer10',
     showKeyboard: true,
   },
   khw: {
@@ -454,7 +454,7 @@ export const glossingLanguages: IGlossLanguages = {
   lo: {
     vernacularName: 'ພາສາລາວ',
     vernacularAlternate: 'phasa lao',
-    internalName: 'Keyboard_lao_2008_basic',
+    internalName: 'lao_2008_basic',
     showKeyboard: true,
   },
   lv: {
@@ -517,7 +517,7 @@ export const glossingLanguages: IGlossLanguages = {
   },
   cmn: {
     vernacularName: '中文',
-    internalName: 'Keyboard_chinese',
+    internalName: 'chinese',
     showKeyboard: true,
   },
   mnk: {
@@ -537,7 +537,7 @@ export const glossingLanguages: IGlossLanguages = {
   mr: {
     vernacularName: 'मराठी',
     vernacularAlternate: 'Marāṭhī',
-    internalName: 'Keyboard_marathi',
+    internalName: 'marathi',
     showKeyboard: true,
   },
   mah: {
@@ -577,7 +577,7 @@ export const glossingLanguages: IGlossLanguages = {
   ne: {
     vernacularName: 'नेपाली/खस कुरा',
     vernacularAlternate: 'Gorkhali, Khas-Kura',
-    internalName: 'Keyboard_dev_inscript',
+    internalName: 'dev_inscript',
     useKeyboard: 'hi',
     showKeyboard: true,
   },
@@ -618,7 +618,7 @@ export const glossingLanguages: IGlossLanguages = {
   or: {
     vernacularName: 'ଓଡ଼ିଆ',
     vernacularAlternate: 'Oṛiā, Odia',
-    internalName: 'Keyboard_isis_oriya',
+    internalName: 'isis_oriya',
     showKeyboard: true,
   },
   om: {
@@ -640,7 +640,7 @@ export const glossingLanguages: IGlossLanguages = {
   fa: {
     vernacularName: 'فارسی',
     vernacularAlternate: 'Farsi',
-    internalName: 'Keyboard_dari_clra',
+    internalName: 'dari_clra',
     showKeyboard: true,
   },
   pis: {
@@ -654,7 +654,7 @@ export const glossingLanguages: IGlossLanguages = {
   },
   pt: {
     vernacularName: 'português',
-    internalName: 'Keyboard_portuguese',
+    internalName: 'portuguese',
     showKeyboard: true,
   },
   fuc: {
@@ -666,12 +666,12 @@ export const glossingLanguages: IGlossLanguages = {
   pa: {
     vernacularName: 'ਪੰਜਾਬੀ',
     vernacularAlternate: 'پن٘جابی',
-    internalName: 'Keyboard_isis_gurmukhi',
+    internalName: 'isis_gurmukhi',
     showKeyboard: true,
   },
   qu: {
     vernacularName: 'Runa Simi',
-    internalName: 'Keyboard_european',
+    internalName: 'european',
   },
   rki: {
     vernacularName: ' ra.hkuing bhasa',
@@ -686,7 +686,7 @@ export const glossingLanguages: IGlossLanguages = {
   ru: {
     vernacularName: 'русский',
     vernacularAlternate: 'язык',
-    internalName: 'Keyboard_russian',
+    internalName: 'russian',
     showKeyboard: true,
   },
   sbl: {
@@ -725,7 +725,7 @@ export const glossingLanguages: IGlossLanguages = {
   },
   sn: {
     vernacularName: 'Shona',
-    internalName: 'Keyboard_us',
+    internalName: 'us',
   },
   jiv: {
     vernacularAlternate: 'Jivaro',
@@ -767,7 +767,7 @@ export const glossingLanguages: IGlossLanguages = {
   es: {
     vernacularName: 'español',
     vernacularAlternate: 'castellano',
-    internalName: 'Keyboard_spanish',
+    internalName: 'spanish',
     showKeyboard: true,
   },
   srn: {
@@ -778,7 +778,7 @@ export const glossingLanguages: IGlossLanguages = {
   },
   sw: {
     vernacularName: 'Kiswahili',
-    internalName: 'Keyboard_basic_kbdus',
+    internalName: 'basic_kbdus',
   },
   ss: {
     vernacularName: 'siSwati',
@@ -788,7 +788,7 @@ export const glossingLanguages: IGlossLanguages = {
   },
   tl: {
     vernacularName: 'Wikang Tagalog',
-    internalName: 'Keyboard_basic_kbdus',
+    internalName: 'basic_kbdus',
   },
   tg: {
     vernacularName: 'Тоҷики',
@@ -799,7 +799,7 @@ export const glossingLanguages: IGlossLanguages = {
   },
   ta: {
     vernacularName: 'தமிழ்',
-    internalName: 'Keyboard_tamil',
+    internalName: 'tamil',
     showKeyboard: true,
   },
   tsg: {
@@ -807,7 +807,7 @@ export const glossingLanguages: IGlossLanguages = {
   },
   te: {
     vernacularName: 'తెలుగు',
-    internalName: 'Keyboard_telugu',
+    internalName: 'telugu',
     showKeyboard: true,
   },
   tem: {
@@ -820,13 +820,13 @@ export const glossingLanguages: IGlossLanguages = {
   th: {
     vernacularName: 'ภาษาไทย',
     vernacularAlternate: 'Phasa Thai',
-    internalName: 'Keyboard_thai_kedmanee',
+    internalName: 'thai_kedmanee',
     showKeyboard: true,
   },
   bo: {
     vernacularName: 'ལྷ་སའི་སྐད་',
     vernacularAlternate: 'བོད་སྐད',
-    internalName: 'Keyboard_basic_kbdtiprd',
+    internalName: 'basic_kbdtiprd',
     useKeyboard: 'bo-Tibt-CN',
     showKeyboard: true,
   },
@@ -843,7 +843,7 @@ export const glossingLanguages: IGlossLanguages = {
   },
   tpi: {
     vernacularName: 'Pijin',
-    internalName: 'Keyboard_european',
+    internalName: 'european',
   },
   toi: {
     vernacularName: 'Chitonga',
@@ -883,7 +883,7 @@ export const glossingLanguages: IGlossLanguages = {
   umb: {},
   ur: {
     vernacularName: 'اُردُو',
-    internalName: 'Keyboard_kbdurdu',
+    internalName: 'kbdurdu',
     showKeyboard: true,
   },
   ug: {
@@ -898,7 +898,7 @@ export const glossingLanguages: IGlossLanguages = {
   },
   vi: {
     vernacularName: 'tiếng Việt',
-    internalName: 'Keyboard_vietnamese',
+    internalName: 'vietnamese',
     showKeyboard: true,
   },
   war: {
@@ -913,7 +913,7 @@ export const glossingLanguages: IGlossLanguages = {
   },
   wuu: {
     vernacularName: '吴语',
-    internalName: 'Keyboard_chinese',
+    internalName: 'chinese',
     useKeyboard: 'cmn',
     showKeyboard: true,
   },
@@ -934,7 +934,7 @@ export const glossingLanguages: IGlossLanguages = {
   },
   yo: {
     vernacularName: 'Èdè Yorùbá',
-    internalName: 'Keyboard_yorubadot',
+    internalName: 'yorubadot',
     showKeyboard: true,
   },
   dje: {
