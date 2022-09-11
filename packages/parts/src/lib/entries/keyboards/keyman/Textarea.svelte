@@ -7,16 +7,17 @@
   export let bcp: string;
   export let value: string;
   export let showKeyboard = true;
+  export let rows = 4;
 
   const { getKeyman } = getContext<keymanKeyContext>(keymanKey);
   const kmw = getKeyman();
-
   let el: HTMLTextAreaElement;
-  onMount(async () => {
-    const internalName = glossingLanguages[bcp] && glossingLanguages[bcp].internalName;
-    const keyboard = (internalName && `${internalName}@${bcp}`) || `@${bcp}`;
 
-    await kmw.addKeyboards(keyboard);
+  $: internalName = glossingLanguages[bcp] && glossingLanguages[bcp].internalName;
+  $: keyboardId = (internalName && `${internalName}@${bcp}`) || `@${bcp}`;
+
+  onMount(async () => {
+    await kmw.addKeyboards(keyboardId);
     if (internalName) {
       kmw.attachToControl(el);
       kmw.setKeyboardForControl(el, internalName, bcp);
@@ -24,12 +25,24 @@
   });
 </script>
 
-<textarea
-  type="text"
-  bind:this={el}
-  class="border shadow px-3 py-1 block mr-1"
-  bind:value
-  class:kmw-disabled={!showKeyboard} />
-<button type="button" on:click={() => (showKeyboard = !showKeyboard)}
-  >Toggle <i class="far fa-keyboard" />
-</button>
+<div class="flex w-full relative">
+  <textarea
+    {rows}
+    type="text"
+    bind:this={el}
+    class="border shadow px-3 py-1 w-full"
+    bind:value
+    class:kmw-disabled={!showKeyboard} />
+
+  <button
+    class="absolute right-0 bottom-0 hover:text-black py-2 px-3 flex"
+    type="button"
+    on:click={() => (showKeyboard = !showKeyboard)}
+    title={showKeyboard ? 'Keyboard active' : 'Keyboard inactive'}>
+    {#if showKeyboard}
+      <span class="i-mdi-keyboard" />
+    {:else}
+      <span class="i-mdi-keyboard-outline" />
+    {/if}
+  </button>
+</div>
