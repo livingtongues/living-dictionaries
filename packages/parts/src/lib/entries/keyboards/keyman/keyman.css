@@ -5,12 +5,12 @@
   border-color: rgb(68, 68, 68) !important;
 }
 
-.kmw-is-desktop .kmw-keyboard-chinese,
+/* .kmw-is-desktop .kmw-keyboard-chinese,
 .kmw-is-desktop .kmw-keyboard-japanese,
 .kmw-is-desktop .kmw-keyboard-european {
   visibility: hidden;
   margin-top: 5px;
-}
+} */
 
 /* old below */
 

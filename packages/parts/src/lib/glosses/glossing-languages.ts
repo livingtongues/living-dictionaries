@@ -137,7 +137,7 @@ export const glossingLanguages: IGlossLanguages = {
   yue: {
     vernacularName: '广东话',
     internalName: 'chinese',
-    useKeyboard: 'cmn',
+    useKeyboard: 'cmn-hans',
     showKeyboard: true,
   },
   ca: {
@@ -182,7 +182,6 @@ export const glossingLanguages: IGlossLanguages = {
   nl: {
     vernacularName: 'Nederlands',
     internalName: 'dutch',
-    showKeyboard: true,
   },
   dyu: {
     vernacularName: 'Julakan',
@@ -518,6 +517,7 @@ export const glossingLanguages: IGlossLanguages = {
   cmn: {
     vernacularName: '中文',
     internalName: 'chinese',
+    useKeyboard: 'cmn-hans',
     showKeyboard: true,
   },
   mnk: {
@@ -827,7 +827,7 @@ export const glossingLanguages: IGlossLanguages = {
     vernacularName: 'ལྷ་སའི་སྐད་',
     vernacularAlternate: 'བོད་སྐད',
     internalName: 'basic_kbdtiprd',
-    useKeyboard: 'bo-Tibt-CN',
+    useKeyboard: 'bo-tibt-cn',
     showKeyboard: true,
   },
   tvo: {},
@@ -914,7 +914,7 @@ export const glossingLanguages: IGlossLanguages = {
   wuu: {
     vernacularName: '吴语',
     internalName: 'chinese',
-    useKeyboard: 'cmn',
+    useKeyboard: 'cmn-hans',
     showKeyboard: true,
   },
   xho: {

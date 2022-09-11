@@ -7,6 +7,6 @@ export interface IGlossLanguage {
   vernacularName?: string;
   vernacularAlternate?: string;
   internalName?: string; // InternalName in Keyman
-  useKeyboard?: string; // allow keyboard sharing
+  useKeyboard?: string; // allow to use keyboard listed under a different or more specific bcp47 code
   showKeyboard?: boolean; // for Keyman
 }

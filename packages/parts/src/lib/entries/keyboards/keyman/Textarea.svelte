@@ -1,11 +1,12 @@
 <script lang="ts">
   // https://help.keyman.com/DEVELOPER/engine/web/15.0/reference/
-  import { getContext, onMount } from 'svelte';
+  import { getContext } from 'svelte';
   import { glossingLanguages } from '../../../glosses/glossing-languages';
   import { keymanKey, type keymanKeyContext } from './context';
 
   export let bcp: string;
   export let value: string;
+  export let placeholder = '';
   export let showKeyboard = true;
   export let rows = 4;
 
@@ -13,22 +14,25 @@
   const kmw = getKeyman();
   let el: HTMLTextAreaElement;
 
-  $: internalName = glossingLanguages[bcp] && glossingLanguages[bcp].internalName;
-  $: keyboardId = (internalName && `${internalName}@${bcp}`) || `@${bcp}`;
+  $: glossLanguage = glossingLanguages[bcp];
+  $: internalName = glossLanguage?.internalName;
+  $: keyboardBcp = glossLanguage?.useKeyboard ? glossLanguage.useKeyboard : bcp;
+  $: keyboardId = `${internalName}@${keyboardBcp}`;
 
-  onMount(async () => {
-    await kmw.addKeyboards(keyboardId);
-    if (internalName) {
+  $: if (showKeyboard && internalName) {
+    (async () => {
+      await kmw.addKeyboards(keyboardId);
       kmw.attachToControl(el);
-      kmw.setKeyboardForControl(el, internalName, bcp);
-    }
-  });
+      kmw.setKeyboardForControl(el, internalName, keyboardBcp);
+    })();
+  }
 </script>
 
 <div class="flex w-full relative">
   <textarea
-    {rows}
     type="text"
+    {rows}
+    {placeholder}
     bind:this={el}
     class="border shadow px-3 py-1 w-full"
     bind:value
