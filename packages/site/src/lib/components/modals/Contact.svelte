@@ -15,6 +15,12 @@
     dispatch('close');
   }
 
+  function delayReference(url:string) {
+    setTimeout(() => {
+      window.location.href = url;
+    }, 1)
+  }
+
   let message = '';
   let email = '';
 
@@ -44,7 +50,7 @@
     <i class="far fa-question-circle" />
   </span>
   <div class="flex flex-col mb-5">
-    <Button href="/tutorials" class="mb-2">
+    <Button onclick={() => delayReference('/tutorials')} class="mb-2">
       <span class="i-fluent-learning-app-24-regular -mt-2px" />
       {$_('header.tutorials', {
         default: 'Tutorials',
