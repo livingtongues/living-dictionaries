@@ -60,7 +60,7 @@
 </svelte:head>
 
 <button 
-  class="print:hidden fixed right-2 sm:right-60 px-6 py-2 bg-blue-500 font-medium text-sm hover:bg-blue-600 text-gray-100 rounded" 
+  class="print:hidden fixed right-2 sm:right-60 px-6 py-2 bg-blue-500 font-medium text-sm hover:bg-blue-600 outline-none text-gray-100 rounded" 
   type="button" 
   on:click={() => window.print()}>
   <span class="i-fa-file-pdf-o" /> Print
