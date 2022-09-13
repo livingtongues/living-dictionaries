@@ -60,7 +60,7 @@ https://livingdictionaries.app (Living Dictionaries website)`,
         const adminMsg: MailChannelsSendBody = {
           personalizations: [{ to: adminRecipients }],
           from: {
-            email: 'jacob@livingtongues.org',
+            email: 'annaluisa@livingtongues.org',
           },
           reply_to: { email: invite.inviterEmail },
           subject: `${invite.inviterName} has invited ${invite.targetEmail} to contribute to the ${invite.dictionaryName} Living Dictionary`,

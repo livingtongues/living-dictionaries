@@ -99,7 +99,8 @@
     "community_permission": "语言社区是否允许您制作此词典？",
     "author_connection": "请简要描述您如何知道这种语言以及为什么要为此创建活着的词典。您是否是将使用此Live词典的社区的一部分？如果没有，您怎么知道社区？",
     "con_lang_description": "这本针对构造语言的字典（近年来人类发明的语言，一本书还是电影）？如果是，请简要描述。",
-    "uncertainty": "我不知道"
+    "uncertainty": "我不知道",
+    "select_region": "选择区域"
   },
   "dictionary": {
     "latitude": "纬度",
@@ -167,7 +168,8 @@
     "login": "登录",
     "donate": "捐赠",
     "about": "关于",
-    "faq": "常问问题"
+    "faq": "常问问题",
+    "tutorials": "教程"
   },
   "home": {
     "list_of_dictionaries": "字典列表",

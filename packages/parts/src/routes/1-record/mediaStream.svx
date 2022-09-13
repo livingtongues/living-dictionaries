@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
   import { Story } from 'kitbook';
   import { MediaStream } from '$lib';
   import { srcObject, Button } from 'svelte-pieces';
