@@ -11,6 +11,7 @@
   export let selectedFields:ISelectedFields;
   export let imageSize = 100;
   export let fontSize = 1;
+  export let headwordSize = 4;
   export let dictionaryId:string;
 
   let speaker:ISpeaker;
@@ -23,7 +24,7 @@
 <div style={`font-size: ${fontSize}em;`}>
   <!--Essential Fields-->
   <div>
-    <strong style="font-size: 1.4em;">{entry.lx}</strong>
+    <strong style="font-size: 1.{headwordSize}em;">{entry.lx}</strong>
     {#each ['lo', 'lo2', 'lo3', 'lo4', 'lo5'] as lo}
       {#if entry[lo] && selectedFields[lo]}
         <strong>{entry[lo]}</strong>{' '}
@@ -49,10 +50,14 @@
         <!-- <Image square={imageSize} gcs={entry.pf.gcs} lexeme={entry.lx} /> -->
     {/if}
     {#if entry.sr && selectedFields.sr}
-      <i>Source(s): </i>
-      {#each entry.sr as source, index}
-        <i>{index < entry.sr.length-1 ? `${source}, ` : `${source}`}</i>
-      {/each}
+      <div>
+        {#if !selectedFields.hideLabels}
+          <i>Source(s): </i>
+        {/if}
+        {#each entry.sr as source, index}
+          <i>{index < entry.sr.length-1 ? `${source}, ` : `${source}`}</i>
+        {/each}
+      </div>
     {/if}
     {#if entry.sf && selectedFields.sf}
       <div>

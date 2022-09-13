@@ -24,6 +24,7 @@
   let columnWidth = 250;
   $: columnWidthEm = columnWidth / 16;
 
+  let headwordSize = 4;
   let fontSize = 1;
   let imageSize = 100;
 
@@ -76,6 +77,10 @@
     </div>
     <div class="my-2">
       <div class="mb-3">
+        <label class="font-medium text-gray-700" for="headwordSize">Headword size</label>
+        <input class="form-input w-17" id="headwordSize" type="number" min="0" max="9" bind:value={headwordSize} />
+      </div>
+      <div class="mb-3">
         <label class="font-medium text-gray-700" for="fontSize">Font size</label>
         <input class="form-input w-17" id="fontSize" type="number" min="0.1" step="0.1" bind:value={fontSize} />
       </div>
@@ -99,7 +104,7 @@
   </div>
   <div class="print-columns" style="--column-width: {columnWidthEm}em;">
     {#each entries as entry (entry.id)}
-      <HTMLTemplate {fontSize} {imageSize} {entry} {selectedFields} {speakers} dictionaryId={$dictionary.id} />
+      <HTMLTemplate {headwordSize} {fontSize} {imageSize} {entry} {selectedFields} {speakers} dictionaryId={$dictionary.id} />
     {/each}
   </div>
 </Hits>
