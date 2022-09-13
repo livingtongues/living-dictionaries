@@ -6,6 +6,7 @@
   import { user } from '$lib/stores';
   import { getFirebaseApp } from 'sveltefirets';
   import { getFunctions, httpsCallable } from 'firebase/functions';
+  import { goto } from '$app/navigation'
 
   import { createEventDispatcher } from 'svelte';
 
@@ -13,12 +14,6 @@
 
   function close() {
     dispatch('close');
-  }
-
-  function delayReference(url:string) {
-    setTimeout(() => {
-      window.location.href = url;
-    }, 1)
   }
 
   let message = '';
@@ -50,7 +45,7 @@
     <i class="far fa-question-circle" />
   </span>
   <div class="flex flex-col mb-5">
-    <Button onclick={() => delayReference('/tutorials')} class="mb-2">
+    <Button onclick={() => { goto('/tutorials'); close();}} class="mb-2">
       <span class="i-fluent-learning-app-24-regular -mt-2px" />
       {$_('header.tutorials', {
         default: 'Tutorials',
