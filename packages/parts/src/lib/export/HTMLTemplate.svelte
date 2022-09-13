@@ -57,9 +57,7 @@
     {/if}
     {#if entry.sf && selectedFields.sf}
       <div>
-        {#if entry.sf.sp}
-          <p><i>Speaker:</i> {speaker?.displayName} ({speaker?.gender}) ({speaker?.decade*10}-{(speaker?.decade+0.9)*10} years old)</p>
-        {:else if entry.sf.speakerName}
+        {#if entry.sf.speakerName}
           <p><i>Speaker:</i> {entry.sf.speakerName}</p>
         {/if}
       </div>
