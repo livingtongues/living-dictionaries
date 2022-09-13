@@ -5,7 +5,6 @@
 
   import Hits from '$lib/components/search/Hits.svelte';
   import Pagination from '$lib/components/search/Pagination.svelte';
-  import Button from 'svelte-pieces/ui/Button.svelte';
   import { HTMLTemplate, dictionaryFields } from '@living-dictionaries/parts';
   import type { ISpeaker } from '@living-dictionaries/types';
   import { dictionary, isManager } from '$lib/stores';
@@ -60,7 +59,12 @@
   <title>{$dictionary.name}</title>
 </svelte:head>
 
-<Button class="fixed right-2 sm:right-60" form="filled" onclick={() => window.print()}><span class="i-fa-file-pdf-o" /> Print</Button>
+<button 
+  class="print:hidden fixed right-2 sm:right-60 px-6 py-2 bg-blue-500 font-medium text-sm hover:bg-blue-600 text-gray-100 rounded" 
+  type="button" 
+  on:click={() => window.print()}>
+  <span class="i-fa-file-pdf-o" /> Print
+</button>
 <Hits {search} let:entries>
   <div class="print:hidden">
     <input type="range" min="150" max="800" bind:value={columnWidth} />
