@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { IEntry, ISpeaker, ISelectedFields, IEntryForPDF } from '@living-dictionaries/types';
+  import type { IEntry, ISpeaker, ISelectedFields } from '@living-dictionaries/types';
   import { EntryPDFFieldsEnum } from '@living-dictionaries/types';
   //TODO how to use Image?
   //import { Image } from '../entries/media/Image.svelte';

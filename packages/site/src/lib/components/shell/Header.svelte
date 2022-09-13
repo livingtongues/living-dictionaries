@@ -6,7 +6,7 @@
   import { firebaseConfig } from '$lib/firebaseConfig';
 </script>
 
-<header>
+<header class="print:hidden">
   {#if $$slots.default}
     <Button form="text" href="/"><i class="fas fa-home" /></Button>
     <div class="text-lg font-semibold p-3 overflow-x-auto md:overflow-hidden md:overflow-ellipsis">
