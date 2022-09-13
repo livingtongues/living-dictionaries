@@ -4,14 +4,14 @@
   import Button from 'svelte-pieces/ui/Button.svelte';
   import { user } from '$lib/stores';
   import Header from '$lib/components/shell/Header.svelte';
-  import type { IDictionary, IHelper, IUser } from '@living-dictionaries/types';
+  import type { IDictionary, IHelper, IPoint, IRegion, IUser } from '@living-dictionaries/types';
   import { docExists, setOnline, updateOnline } from 'sveltefirets';
   import { firebaseConfig } from '$lib/firebaseConfig';
   import { arrayUnion, GeoPoint, serverTimestamp } from 'firebase/firestore/lite';
   import { debounce } from '$lib/helpers/debounce';
   import { pruneObject } from '$lib/helpers/prune';
   import {
-    EditableCoordinatesField,
+    WhereSpoken,
     EditableGlossesField,
     EditableAlternateNames,
     glossingLanguages,
@@ -22,8 +22,10 @@
   let name = '';
   let glossLanguages = new Set(['en']);
   let alternateNames = [];
-  let lat = null;
-  let lng = null;
+  let latitude = null;
+  let longitude = null;
+  let points: IPoint[] = [];
+  let regions: IRegion[] = [];
   let iso6393 = '';
   let glottocode = '';
   let languageUsedByCommunity: boolean;
@@ -70,7 +72,9 @@
         name: name.trim().replace(/^./, name[0].toUpperCase()),
         glossLanguages: Array.from(glossLanguages),
         alternateNames,
-        coordinates: lat ? new GeoPoint(lat, lng) : null,
+        coordinates: latitude ? new GeoPoint(latitude, longitude) : null,
+        points,
+        regions,
         entryCount: 0,
         iso6393: iso6393.trim(),
         glottocode: glottocode.trim(),
@@ -211,16 +215,15 @@
         on:update={(e) => (alternateNames = e.detail.alternateNames)} />
       <div class="mb-6" />
 
-      <EditableCoordinatesField
+      <WhereSpoken
         {t}
-        {lng}
-        {lat}
-        on:update={(event) => {
-          (lat = event.detail.lat), (lng = event.detail.lng);
+        dictionary={{ coordinates: { latitude, longitude }, points, regions }}
+        on:updateCoordinates={({ detail }) => {
+          (latitude = detail.latitude), (longitude = detail.longitude);
         }}
-        on:remove={() => {
-          (lat = null), (lng = null);
-        }} />
+        on:removeCoordinates={() => ((latitude = null), (longitude = null))}
+        on:updatePoints={({ detail }) => (points = detail)}
+        on:updateRegions={({ detail }) => (regions = detail)} />
       <div class="mb-6" />
 
       <div class="flex">
@@ -275,7 +278,9 @@
       <div class="mb-6" />
 
       <div class="mb-2 text-sm font-medium text-gray-700">
-        {t ? $t('create.language_used_by_community') : 'Is this dictionary for a language that is spoken or signed by a specific human community?'}
+        {t
+          ? $t('create.language_used_by_community')
+          : 'Is this dictionary for a language that is spoken or signed by a specific human community?'}
       </div>
 
       <label class="block">
@@ -285,7 +290,7 @@
           bind:group={languageUsedByCommunity}
           value={true}
           required />
-          {t ? $t('misc.assertion') : 'Yes'}
+        {t ? $t('misc.assertion') : 'Yes'}
       </label>
 
       <label class="block">
@@ -294,12 +299,14 @@
           name="languageUsedByCommunity"
           bind:group={languageUsedByCommunity}
           value={false} />
-          {t ? $t('misc.negation') : 'No'}
+        {t ? $t('misc.negation') : 'No'}
       </label>
       <div class="mb-6" />
 
       <div class="mb-2 text-sm font-medium text-gray-700">
-        {t ? $t('create.community_permission') : 'Has the language community given you permission to make this dictionary?'}
+        {t
+          ? $t('create.community_permission')
+          : 'Has the language community given you permission to make this dictionary?'}
         <!-- Similar to create.speech_community_permission but not the same -->
       </div>
       <label class="block">
@@ -318,7 +325,7 @@
           name="communityPermission"
           bind:group={communityPermission}
           value={'no'} />
-          {t ? $t('misc.negation') : 'No'}
+        {t ? $t('misc.negation') : 'No'}
       </label>
 
       <label class="block">
@@ -327,12 +334,14 @@
           name="communityPermission"
           bind:group={communityPermission}
           value={'unknown'} />
-          {t ? $t('create.uncertainty') : 'I don’t know'}
+        {t ? $t('create.uncertainty') : 'I don’t know'}
       </label>
       <div class="mb-6" />
 
       <label class="block mb-2 text-sm font-medium text-gray-700" for="authorConnection">
-        {t ? $t('create.author_connection') : `Please briefly describe how you know this language and why you are creating a Living
+        {t
+          ? $t('create.author_connection')
+          : `Please briefly describe how you know this language and why you are creating a Living
       Dictionary for it. Are you part of the community that will be using this Living Dictionary? If
       not, how do you know the community?`}
       </label>
@@ -350,7 +359,9 @@
       <div class="mb-6" />
 
       <label class="block mb-2 text-sm font-medium text-gray-700" for="conLangDescription">
-        {t ? $t('create.con_lang_description') : `Is this dictionary for a constructed language (a language invented by humans in recent years,
+        {t
+          ? $t('create.con_lang_description')
+          : `Is this dictionary for a constructed language (a language invented by humans in recent years,
       for a book or a movie)? If yes, please briefly describe.`}
       </label>
       <textarea

@@ -38,9 +38,8 @@ From https://gitlab.com/jailbreak/svelte-mapbox-gl
 
 <Story knobs={{ outlineMaine: true }} let:props={{ outlineMaine }}>
   <div style="height: 350px;">
-    <Map center={[-68.137343, 45.137451]} zoom={5} let:map>
+    <Map lng={-68.13} lat={45.13} zoom={5} let:map>
       <GeoJSONSource
-        id="maine"
         data={{
           type: 'Feature',
           geometry: {
@@ -50,7 +49,6 @@ From https://gitlab.com/jailbreak/svelte-mapbox-gl
           properties: undefined,
         }}>
         <Layer
-          id="maineFill"
           options={{
             type: 'fill',
             paint: {
@@ -64,7 +62,6 @@ From https://gitlab.com/jailbreak/svelte-mapbox-gl
           on:mouseleave={() => (map.getCanvas().style.cursor = '')} />
         {#if outlineMaine}
           <Layer
-            id="maineOutline"
             options={{
               type: 'line',
               paint: {

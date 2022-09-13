@@ -1,10 +1,10 @@
 <script lang="ts">
   import { getContext, onMount } from 'svelte';
-  import { mapKey } from '../context';
-  import type { Map, Style } from 'mapbox-gl';
+  import { mapKey, type MapKeyContext } from '../context';
+  import type { Style } from 'mapbox-gl';
 
-  const { getMap } = getContext(mapKey);
-  const map: Map = getMap();
+  const { getMap } = getContext<MapKeyContext>(mapKey);
+  const map = getMap();
 
   export let alternateStyle = 'mapbox://styles/mapbox/satellite-streets-v11?optimize=true'; // 'Mapbox Satellite Streets'
   let initialStyle: Style;

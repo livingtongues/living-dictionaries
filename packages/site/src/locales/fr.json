@@ -99,7 +99,8 @@
     "community_permission": "La communauté linguistique vous a-t-elle autorisée à faire ce dictionnaire?",
     "author_connection": "Veuillez décrire brièvement comment vous connaissez cette langue et pourquoi vous créez un dictionnaire vivant pour cela. Faites-vous partie de la communauté qui utilisera ce dictionnaire vivant? Sinon, comment connaissez-vous la communauté?",
     "con_lang_description": "Ce dictionnaire est-il pour une langue construite (une langue inventée par les humains ces dernières années, pour un livre ou un film)? Si oui, veuillez décrire brièvement.",
-    "uncertainty": "je ne sais pas"
+    "uncertainty": "je ne sais pas",
+    "select_region": "Choisissez une région"
   },
   "dictionary": {
     "latitude": "Latitude",
@@ -167,7 +168,8 @@
     "login": "Se connecter",
     "donate": "Faire un don",
     "about": "À propos",
-    "faq": "Questions fréquentes"
+    "faq": "Questions fréquentes",
+    "tutorials": "Tutoriels"
   },
   "home": {
     "list_of_dictionaries": "Liste de dictionnaires",

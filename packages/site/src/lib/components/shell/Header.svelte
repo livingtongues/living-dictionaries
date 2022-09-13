@@ -6,7 +6,7 @@
   import { firebaseConfig } from '$lib/firebaseConfig';
 </script>
 
-<header class="fixed top-0 left-0 right-0 flex items-center bg-white h-12 z-2 whitespace-nowrap">
+<header>
   {#if $$slots.default}
     <Button form="text" href="/"><i class="fas fa-home" /></Button>
     <div class="text-lg font-semibold p-3 overflow-x-auto md:overflow-hidden md:overflow-ellipsis">
@@ -46,6 +46,13 @@
     <Button href="/about" form="text" class="!hidden !lg:inline">
       <i class="far fa-info-circle" />
       <span class="ml-1 hidden lg:inline">{$_('header.about', { default: 'About' })}</span>
+    </Button>
+    <Button href="/tutorials" form="text" class="!hidden !md:inline">
+      <span class="i-fluent-learning-app-24-regular -mt-2px" />
+      <span class="ml-1 hidden lg:inline"
+        >{$_('header.tutorials', {
+          default: 'Tutorials',
+        })}</span>
     </Button>
     <Button
       form="text"
@@ -95,3 +102,9 @@
     <User />
   </div>
 </header>
+
+<style>
+  header {
+    @apply fixed top-0 left-0 right-0 flex items-center bg-white h-12 z-2 whitespace-nowrap;
+  }
+</style>

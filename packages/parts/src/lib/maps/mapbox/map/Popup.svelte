@@ -1,11 +1,14 @@
 <script lang="ts">
   // from https://gitlab.com/jailbreak/svelte-mapbox-gl
   import { onMount, getContext } from 'svelte';
-  import { mapKey } from '../context';
+  import { mapKey, markerKey } from '../context';
   import type { Popup, PopupOptions, Marker } from 'mapbox-gl';
 
-  const { getMapbox } = getContext(mapKey);
-  const mapbox: typeof import('mapbox-gl') = getMapbox();
+  const { getMapbox } = getContext<{ getMapbox: () => typeof import('mapbox-gl') }>(mapKey);
+  const mapbox = getMapbox();
+
+  const { getMarker } = getContext<{ getMarker: () => Marker }>(markerKey);
+  const marker = getMarker();
 
   export let closeButton = false;
   export let closeOnClick = true;
@@ -13,7 +16,6 @@
   export let options: PopupOptions = {};
   export let offset = 15;
   export let label = 'Marker';
-  export let marker: Marker;
   export let open = false;
   // make my own close button
 
