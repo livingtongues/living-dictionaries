@@ -42,9 +42,9 @@ export type {
   HelperRoles,
   IPartOfSpeech,
   IColumn,
-  ISelectedFields,
   IPoint,
   IRegion,
+  ISelectedFields,
 };
 
 import { ReadyLocales, UnpublishedLocales } from './languages.interface';
