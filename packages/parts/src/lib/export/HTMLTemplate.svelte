@@ -32,7 +32,6 @@
     {entry.ph && selectedFields.ph ? `/${entry.ph}/` : ''}
     {#if entry.gl && selectedFields.gl}
       {#each Object.entries(entry.gl) as gloss, index}
-        <!-- TODO add @HTML for all required fields -->
         {@html gloss[1]}{index < Object.entries(entry.gl).length-1 ? ' - ' : ''}
       {/each}
     {/if}
@@ -58,7 +57,7 @@
     {#if entry.sf && selectedFields.sf}
       <div>
         {#if entry.sf.speakerName}
-          <p><i>Speaker:</i> {entry.sf.speakerName}</p>
+          <p><i>{!selectedFields.hideLabels ? 'Speaker:' : ''}</i> {entry.sf.speakerName}</p>
         {/if}
       </div>
     {/if}
@@ -73,11 +72,15 @@
     {/if}
     {#each Object.keys(EntryPDFFieldsEnum) as key}
       {#if entry[key] && selectedFields[key] && EntryPDFFieldsEnum[key]}
-        <p><i>{EntryPDFFieldsEnum[key]}</i>: {entry[key]}</p>
+        <p>
+          {#if !selectedFields.hideLabels}
+          <i>{EntryPDFFieldsEnum[key]}</i>:{' '}
+          {/if}
+          {@html entry[key]}</p>
       {/if}
     {/each}
   </div>
-  {#if selectedFields.qr}
+  {#if selectedFields.qrCode}
     <QrCode pixelsPerModule={2} value={`https://livingdictionaries.app/${dictionaryId}/entry/${entry.id}`} />
   {/if}
 </div>

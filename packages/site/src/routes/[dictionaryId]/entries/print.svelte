@@ -51,7 +51,8 @@
     nt: false,
     sf: false,
     vfs: false,
-    qr: false,
+    qrCode: false,
+    hideLabels: false
   };
 </script>
 
@@ -84,8 +85,8 @@
       </div>
       <div>
         {#each Object.entries(selectedFields) as field}
-          {#if entries.find((entry) => entry[field[0]]) || field[0] === 'qr'}
-            <span title={field[0] === 'qr' ? 'QR codes might take a bit longer to appear' : ''}>
+          {#if entries.find((entry) => entry[field[0]]) || field[0] === 'qrCode' || field[0] === 'hideLabels'}
+            <span title={field[0] === 'qrCode' ? 'QR codes might take a bit longer to appear' : ''}>
               {' • '}
               <input id={field[0]} type="checkbox" bind:checked={selectedFields[field[0]]} />  
               <label class="text-sm font-medium text-gray-700" for={field[0]}>{dictionaryFields[field[0]]}</label>
@@ -98,7 +99,6 @@
   </div>
   <div class="print-columns" style="--column-width: {columnWidthEm}em;">
     {#each entries as entry (entry.id)}
-    <!--TODO how to get speakers?-->
       <HTMLTemplate {fontSize} {imageSize} {entry} {selectedFields} {speakers} dictionaryId={$dictionary.id} />
     {/each}
   </div>

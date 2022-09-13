@@ -23,5 +23,6 @@ export const dictionaryFields = {
   sf: 'Audio Speaker Name',
   pf: 'Photo File',
   vfs: 'Video Speaker name',
-  qr: 'QR Code',
+  qrCode: 'QR Code',
+  hideLabels: 'Hide All Labels',
 };
