@@ -102,7 +102,13 @@
     </div>
     <hr />
   </div>
-  <div class="print-columns max-w-[50%] print:max-w-[100%]" style="--column-width: {columnWidthEm}em;">
+  <!-- Wait for Jacob's feedback, because this is not an optimal solution -->
+  <div class="print:hidden" style="column-count:{Math.floor(708/columnWidth)}; column-gap: 50px; word-break: break-word; margin: 5rem;">
+    {#each entries as entry (entry.id)}
+      <HTMLTemplate {headwordSize} {fontSize} {imageSize} {entry} {selectedFields} {speakers} dictionaryId={$dictionary.id} />
+    {/each}
+  </div>
+  <div class="hidden print:block print-columns max-w-[50%] print:max-w-[100%]" style="--column-width: {columnWidthEm}em;">
     {#each entries as entry (entry.id)}
       <HTMLTemplate {headwordSize} {fontSize} {imageSize} {entry} {selectedFields} {speakers} dictionaryId={$dictionary.id} />
     {/each}
