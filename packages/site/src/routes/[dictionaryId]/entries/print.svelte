@@ -62,13 +62,13 @@
 </svelte:head>
 
 <button 
-  class="print:hidden fixed right-2 sm:right-60 px-6 py-2 bg-blue-500 font-medium text-sm hover:bg-blue-600 outline-none text-gray-100 rounded" 
+  class="print:hidden fixed z-2 right-2 md:right-60 px-6 py-2 bg-blue-500 font-medium text-sm hover:bg-blue-600 outline-none text-gray-100 rounded" 
   type="button" 
   on:click={() => window.print()}>
   <span class="i-fa-file-pdf-o" /> Print
 </button>
 <Hits {search} let:entries>
-  <div class="print:hidden">
+  <div class="print:hidden bg-light-100 fixed z-1 md:top-22 top-8 p-4 rounded-lg dynamic-width">
     <input type="range" min="150" max="800" bind:value={columnWidth} />
     <div
       class="bg-red-50 p-1 border-red-400 border-t border-l border-r overflow-hidden"
@@ -103,7 +103,7 @@
     <hr />
   </div>
   <!-- Wait for Jacob's feedback, because this is not an optimal solution -->
-  <div class="print:hidden" style="column-count:{Math.floor(708/columnWidth)}; column-gap: 50px; word-break: break-word; margin: 5rem;">
+  <div class="print:hidden mt-80 px-2" style="column-count:{Math.floor(708/columnWidth)}; column-gap: 50px; word-break: break-word;">
     {#each entries as entry (entry.id)}
       <HTMLTemplate {headwordSize} {fontSize} {imageSize} {entry} {selectedFields} {speakers} dictionaryId={$dictionary.id} />
     {/each}
@@ -117,6 +117,14 @@
 <Pagination {search} />
 
 <style global>
+  .dynamic-width {
+    width: calc(100% - 445px);
+  }
+  @media screen and (max-width: 768px) {
+    .dynamic-width {
+      width: 100%;
+    }
+  }
   @media print {
     .print-columns {
       column-width: var(--column-width);
