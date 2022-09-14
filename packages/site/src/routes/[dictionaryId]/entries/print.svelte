@@ -55,6 +55,21 @@
     qrCode: false,
     hideLabels: false
   };
+
+  let selectAll = true;
+  let mirror = false;
+
+  function toggleAll() {
+    Object.keys(selectedFields).forEach(field => {
+      selectedFields[field] = selectAll;
+    });
+  }
+
+  function mirrorToggle() {
+    Object.keys(selectedFields).forEach(field => {
+      selectedFields[field] = !selectedFields[field];
+    });
+  }
 </script>
 
 <svelte:head>
@@ -76,17 +91,25 @@
       Minimum column width: {columnWidth}px
     </div>
     <div class="my-2">
-      <div class="mb-3">
-        <label class="font-medium text-gray-700" for="headwordSize">Headword size</label>
-        <input class="form-input w-17" id="headwordSize" type="number" min="1" max="10" bind:value={headwordSize} />
+      <div class="flex">
+        <div class="mb-3 mr-2">
+          <label class="font-medium text-gray-700" for="headwordSize">Headword size</label>
+          <input class="form-input w-17" id="headwordSize" type="number" min="1" max="10" bind:value={headwordSize} />
+        </div>
+        <div class="mb-3 mr-2">
+          <label class="font-medium text-gray-700" for="fontSize">Font size</label>
+          <input class="form-input w-17" id="fontSize" type="number" min="0.1" step="0.1" bind:value={fontSize} />
+        </div>
+        <div class="mb-3">
+          <label class="font-medium text-gray-700" for="imageSize">Image Size</label>
+          <input class="form-input w-17" id="imageSize" type="number" min="1" max="100" bind:value={imageSize} /><span class="font-medium text-gray-700">%</span>
+        </div>
       </div>
       <div class="mb-3">
-        <label class="font-medium text-gray-700" for="fontSize">Font size</label>
-        <input class="form-input w-17" id="fontSize" type="number" min="0.1" step="0.1" bind:value={fontSize} />
-      </div>
-      <div class="mb-3">
-        <label class="font-medium text-gray-700" for="imageSize">Image Size</label>
-        <input class="form-input w-17" id="imageSize" type="number" min="1" max="100" bind:value={imageSize} /><span class="font-medium text-gray-700">%</span>
+        <input id="select-all" type="checkbox" bind:checked={selectAll} on:change={toggleAll} />
+        <label for="select-all" class="text-sm font-medium text-gray-700 mr-4">Select/Deselect All</label>
+        <input id="mirror-toggle" type="checkbox" bind:checked={mirror} on:change={mirrorToggle} />
+        <label for="mirror-toggle" class="text-sm font-medium text-gray-700">Mirror toggle</label>
       </div>
       <div>
         {#each Object.entries(selectedFields) as field}
