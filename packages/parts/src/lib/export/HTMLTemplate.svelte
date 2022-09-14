@@ -11,7 +11,7 @@
   export let selectedFields:ISelectedFields;
   export let imageSize = 100;
   export let fontSize = 1;
-  export let headwordSize = 4;
+  export let headwordSize = 5;
   export let dictionaryId:string;
 
   let speaker:ISpeaker;
@@ -24,7 +24,7 @@
 <div style={`font-size: ${fontSize}em;`}>
   <!--Essential Fields-->
   <div>
-    <strong style="font-size: 1.{headwordSize}em;">{entry.lx}</strong>
+    <strong style="font-size: 1.{headwordSize-1}em;">{entry.lx}</strong>
     {#each ['lo', 'lo2', 'lo3', 'lo4', 'lo5'] as lo}
       {#if entry[lo] && selectedFields[lo]}
         <strong>{entry[lo]}</strong>{' '}
@@ -44,9 +44,7 @@
       {/each}
     {/if}
     {#if entry.pf && selectedFields.pf}
-      <!--TODO how to avoid images duplication? -->
-      <img class="print:hidden" style="width:20%;margin-bottom:5px" src={`https://lh3.googleusercontent.com/${entry.pf.gcs}`} alt={entry.lx} />
-      <img class="hidden print:block" style="width:{imageSize}%;margin-bottom:5px" src={`https://lh3.googleusercontent.com/${entry.pf.gcs}`} alt={entry.lx} />
+      <img class="print:block" style="width:{imageSize}%;margin-bottom:5px" src={`https://lh3.googleusercontent.com/${entry.pf.gcs}`} alt={entry.lx} />
         <!-- <Image square={imageSize} gcs={entry.pf.gcs} lexeme={entry.lx} /> -->
     {/if}
     {#if entry.sr && selectedFields.sr}

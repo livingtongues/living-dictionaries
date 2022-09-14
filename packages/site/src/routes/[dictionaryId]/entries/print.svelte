@@ -24,7 +24,7 @@
   let columnWidth = 250;
   $: columnWidthEm = columnWidth / 16;
 
-  let headwordSize = 4;
+  let headwordSize = 5;
   let fontSize = 1;
   let imageSize = 100;
 
@@ -35,16 +35,15 @@
     lo4: true,
     lo5: true,
     ph: true,
-    gl: true,
     ps: true,
+    gl: true,
     xv: true,
     xs: true,
-    pf: true,
     sr: false,
     sd: false,
     id: false,
-    in: false,
     mr: false,
+    in: false,
     nc: false,
     pl: false,
     va: false,
@@ -52,6 +51,7 @@
     nt: false,
     sf: false,
     vfs: false,
+    pf: true,
     qrCode: false,
     hideLabels: false
   };
@@ -78,7 +78,7 @@
     <div class="my-2">
       <div class="mb-3">
         <label class="font-medium text-gray-700" for="headwordSize">Headword size</label>
-        <input class="form-input w-17" id="headwordSize" type="number" min="0" max="9" bind:value={headwordSize} />
+        <input class="form-input w-17" id="headwordSize" type="number" min="1" max="10" bind:value={headwordSize} />
       </div>
       <div class="mb-3">
         <label class="font-medium text-gray-700" for="fontSize">Font size</label>
@@ -102,7 +102,7 @@
     </div>
     <hr />
   </div>
-  <div class="print-columns" style="--column-width: {columnWidthEm}em;">
+  <div class="print-columns max-w-[50%] print:max-w-[100%]" style="--column-width: {columnWidthEm}em;">
     {#each entries as entry (entry.id)}
       <HTMLTemplate {headwordSize} {fontSize} {imageSize} {entry} {selectedFields} {speakers} dictionaryId={$dictionary.id} />
     {/each}
