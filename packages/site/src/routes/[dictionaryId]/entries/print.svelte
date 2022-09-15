@@ -77,7 +77,7 @@
 </svelte:head>
 
 <Hits {search} let:entries>
-  <div class="print:hidden bg-light-100 fixed z-1 md:top-22 top-8 p-4 pt-6 rounded-lg max-h-65 overflow-x-scroll dynamic-width">
+  <div class="print:hidden bg-light-100 fixed z-1 md:top-22 top-8 p-4 md:pt-4 pt-20 rounded-lg max-h-74 overflow-x-scroll dynamic-width">
     <input type="range" min="150" max="800" bind:value={columnWidth} />
     <div
       class="bg-red-50 p-1 border-red-400 border-t border-l border-r overflow-hidden"
