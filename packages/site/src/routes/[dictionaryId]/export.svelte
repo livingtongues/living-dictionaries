@@ -141,3 +141,7 @@
 {:else}
   <p>{$_('export.availability', { default: 'Export is only available to dictionary managers' })}</p>
 {/if}
+
+<div class="mt-5">
+  <Button form="filled" href="entries/print">{$_('export.download_pdf', {default: 'Download PDF' })}</Button>
+</div>
