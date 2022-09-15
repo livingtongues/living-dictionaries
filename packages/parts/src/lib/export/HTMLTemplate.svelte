@@ -31,22 +31,19 @@
       {/if}
     {/each}
     {entry.ph && selectedFields.ph ? `/${entry.ph}/` : ''}
+    <i>{entry.ps && selectedFields.ps ? entry.ps : ''}</i>
     {#if entry.gl && selectedFields.gl}
       {#each Object.entries(entry.gl) as gloss, index}
         {@html gloss[1]}{index < Object.entries(entry.gl).length-1 ? ' - ' : ''}
       {/each}
     {/if}
-    <i>{entry.ps && selectedFields.ps ? entry.ps : ''}</i>
     <strong>{entry.xv && selectedFields.xv ? entry.xv : ''}</strong>
     {#if entry.xs && selectedFields.xs}      
       {#each Object.entries(entry.xs) as sentence, index}
       {sentence[1]}{index < Object.entries(entry.xs).length-1 ? ', ' : ''}
       {/each}
     {/if}
-    {#if entry.pf && selectedFields.pf}
-      <img class="print:block" style="width:{imageSize}%;margin-bottom:5px" src={`https://lh3.googleusercontent.com/${entry.pf.gcs}`} alt={entry.lx} />
-        <!-- <Image square={imageSize} gcs={entry.pf.gcs} lexeme={entry.lx} /> -->
-    {/if}
+    <!-- The remaining fields -->
     {#if entry.sr && selectedFields.sr}
       <div>
         {#if !selectedFields.hideLabels}
@@ -57,6 +54,23 @@
         {/each}
       </div>
     {/if}
+    <div>
+      {#if entry.sdn && selectedFields.sd}
+        <i>Semantic Domains: </i>
+        {#each entry.sdn as key, index}
+        {semanticDomains.find(sd => sd.key === key).name}{index < entry.sdn.length-1 ? ', ' : ''}
+        {/each}
+      {/if}
+      {#each Object.keys(EntryPDFFieldsEnum) as key}
+        {#if entry[key] && selectedFields[key] && EntryPDFFieldsEnum[key]}
+          <p>
+            {#if !selectedFields.hideLabels}
+            <i>{EntryPDFFieldsEnum[key]}</i>:{' '}
+            {/if}
+            {@html entry[key]}</p>
+        {/if}
+      {/each}
+    </div>
     {#if entry.sf && selectedFields.sf}
       <div>
         {#if entry.sf.speakerName}
@@ -64,25 +78,11 @@
         {/if}
       </div>
     {/if}
-  </div>
-  <!-- The remaining fields -->
-  <div>
-    {#if entry.sdn && selectedFields.sd}
-      <i>Semantic Domains: </i>
-      {#each entry.sdn as key, index}
-      {semanticDomains.find(sd => sd.key === key).name}{index < entry.sdn.length-1 ? ', ' : ''}
-      {/each}
-    {/if}
-    {#each Object.keys(EntryPDFFieldsEnum) as key}
-      {#if entry[key] && selectedFields[key] && EntryPDFFieldsEnum[key]}
-        <p>
-          {#if !selectedFields.hideLabels}
-          <i>{EntryPDFFieldsEnum[key]}</i>:{' '}
-          {/if}
-          {@html entry[key]}</p>
-      {/if}
-    {/each}
-  </div>
+  </div> 
+  {#if entry.pf && selectedFields.pf}
+    <img class="print:block" style="width:{imageSize}%;margin-bottom:5px" src={`https://lh3.googleusercontent.com/${entry.pf.gcs}`} alt={entry.lx} />
+      <!-- <Image square={imageSize} gcs={entry.pf.gcs} lexeme={entry.lx} /> -->
+  {/if}
   {#if selectedFields.qrCode}
     <QrCode pixelsPerModule={2} value={`https://livingdictionaries.app/${dictionaryId}/entry/${entry.id}`} />
   {/if}
