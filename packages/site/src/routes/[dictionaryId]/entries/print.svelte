@@ -5,6 +5,7 @@
 
   import Hits from '$lib/components/search/Hits.svelte';
   import Pagination from '$lib/components/search/Pagination.svelte';
+  import Button from 'svelte-pieces/ui/Button.svelte';
   import { HTMLTemplate, dictionaryFields } from '@living-dictionaries/parts';
   import type { ISpeaker } from '@living-dictionaries/types';
   import { dictionary, isManager } from '$lib/stores';
@@ -57,7 +58,6 @@
   };
 
   let selectAll = true;
-  let mirror = false;
 
   function toggleAll() {
     Object.keys(selectedFields).forEach(field => {
@@ -76,14 +76,8 @@
   <title>{$dictionary.name}</title>
 </svelte:head>
 
-<button 
-  class="print:hidden fixed z-2 right-2 md:right-60 px-6 py-2 bg-blue-500 font-medium text-sm hover:bg-blue-600 outline-none text-gray-100 rounded" 
-  type="button" 
-  on:click={() => window.print()}>
-  <span class="i-fa-file-pdf-o" /> Print
-</button>
 <Hits {search} let:entries>
-  <div class="print:hidden bg-light-100 fixed z-1 md:top-22 top-8 p-4 rounded-lg dynamic-width">
+  <div class="print:hidden bg-light-100 fixed z-1 md:top-22 top-8 p-4 pt-6 rounded-lg max-h-65 overflow-x-scroll dynamic-width">
     <input type="range" min="150" max="800" bind:value={columnWidth} />
     <div
       class="bg-red-50 p-1 border-red-400 border-t border-l border-r overflow-hidden"
@@ -106,10 +100,24 @@
         </div>
       </div>
       <div class="mb-3">
-        <input id="select-all" type="checkbox" bind:checked={selectAll} on:change={toggleAll} />
-        <label for="select-all" class="text-sm font-medium text-gray-700 mr-4">Select/Deselect All</label>
-        <input id="mirror-toggle" type="checkbox" bind:checked={mirror} on:change={mirrorToggle} />
-        <label for="mirror-toggle" class="text-sm font-medium text-gray-700">Mirror toggle</label>
+        <Button 
+          form="filled"
+          type="button" 
+          onclick={toggleAll}>
+          Select all
+        </Button>
+        <Button 
+          form="filled"
+          type="button" 
+          onclick={mirrorToggle}>
+          Mirror toggle
+        </Button>
+        <Button 
+          form="filled"
+          type="button" 
+          onclick={() => window.print()}>
+          <span class="i-fa-file-pdf-o" /> Print
+        </Button>
       </div>
       <div>
         {#each Object.entries(selectedFields) as field}
@@ -126,7 +134,7 @@
     <hr />
   </div>
   <!-- Wait for Jacob's feedback, because this is not an optimal solution -->
-  <div class="print:hidden mt-80 px-2" style="column-count:{Math.floor(708/columnWidth)}; column-gap: 50px; word-break: break-word;">
+  <div class="print:hidden mt-60 px-2" style="column-count:{Math.floor(708/columnWidth)}; column-gap: 50px; word-break: break-word;">
     {#each entries as entry (entry.id)}
       <HTMLTemplate {headwordSize} {fontSize} {imageSize} {entry} {selectedFields} {speakers} dictionaryId={$dictionary.id} />
     {/each}
