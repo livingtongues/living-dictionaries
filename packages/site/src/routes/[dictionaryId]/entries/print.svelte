@@ -99,25 +99,29 @@
           <input class="form-input w-17" id="imageSize" type="number" min="1" max="100" bind:value={imageSize} /><span class="font-medium text-gray-700">%</span>
         </div>
       </div>
-      <div class="mb-3">
-        <Button 
-          form="filled"
-          type="button" 
-          onclick={toggleAll}>
-          Select all
-        </Button>
-        <Button 
-          form="filled"
-          type="button" 
-          onclick={mirrorToggle}>
-          Mirror toggle
-        </Button>
-        <Button 
-          form="filled"
-          type="button" 
-          onclick={() => window.print()}>
-          <span class="i-fa-file-pdf-o" /> Print
-        </Button>
+      <div class="mb-3 md:flex md:justify-between">
+        <span>
+          <Button 
+            form="filled"
+            type="button" 
+            onclick={toggleAll}>
+            Select all
+          </Button>
+          <Button 
+            form="filled"
+            type="button" 
+            onclick={mirrorToggle}>
+            Mirror toggle
+          </Button>
+        </span>
+        <span>
+          <Button 
+            form="filled"
+            type="button" 
+            onclick={() => window.print()}>
+            <span class="i-fa-file-pdf-o" /> Print
+          </Button>
+        </span>
       </div>
       <div>
         {#each Object.entries(selectedFields) as field}
