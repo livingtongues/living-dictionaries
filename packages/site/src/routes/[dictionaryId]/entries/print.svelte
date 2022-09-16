@@ -1,5 +1,6 @@
 <script lang="ts">
   import { getContext } from 'svelte';
+  import { configure } from 'instantsearch.js/es/widgets/index.js';
   import type { InstantSearch } from 'instantsearch.js';
   const search: InstantSearch = getContext('search');
 
@@ -9,24 +10,22 @@
   import { HTMLTemplate, dictionaryFields } from '@living-dictionaries/parts';
   // import type { ISpeaker } from '@living-dictionaries/types';
   import { dictionary, isManager } from '$lib/stores';
+  import { browser } from '$app/env';
 
-  import { configure } from 'instantsearch.js/es/widgets/index.js';
-  import { onMount } from 'svelte';
-  onMount(() => {
+  let hitsPerPage = 30;
+  $: if (browser) {
     search.addWidgets([
       configure({
-        hitsPerPage: 300,
+        hitsPerPage,
       }),
     ]);
-  });
-  // let speakers: ISpeaker[];
-
-  let columnWidth = 250;
-  $: columnWidthEm = columnWidth / 16;
+  }
 
   let headwordSize = 5;
   let fontSize = 1;
   let imagePercent = 100;
+  let columnWidth = 250;
+  $: columnWidthEm = columnWidth / 16;
 
   const selectedFields = {
     lo: true,
@@ -56,13 +55,7 @@
     hideLabels: false,
   };
 
-  // let selectAll = true;
-
-  // function toggleAll() {
-  //   Object.keys(selectedFields).forEach((field) => {
-  //     selectedFields[field] = selectAll;
-  //   });
-  // }
+  // let speakers: ISpeaker[];
 </script>
 
 <svelte:head>
@@ -76,6 +69,17 @@
         <span class="i-fa-print -mt-1" /> Print
       </Button>
 
+      <div class="mb-1 mr-2">
+        <label class="font-medium text-gray-700" for="maxEntries">Max Entries</label>
+        <input
+          class="form-input text-sm w-17"
+          id="maxEntries"
+          type="number"
+          min="1"
+          max={$isManager ? 1000 : 300}
+          bind:value={hitsPerPage} />
+          <!-- Algolia hard max per page is 1000 -->
+      </div>
       <div class="mb-1 mr-2">
         <label class="font-medium text-gray-700" for="headwordSize">Headword size</label>
         <input
@@ -124,7 +128,7 @@
     </div>
   </div>
   <div class="print-columns" style="--column-width: {columnWidthEm}em;">
-    {#each entries as entry (entry.id)}
+    {#each entries as entry, index (entry.id)}
       <HTMLTemplate
         {headwordSize}
         {fontSize}
