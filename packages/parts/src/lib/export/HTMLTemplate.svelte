@@ -7,14 +7,14 @@
   import QrCode from '../QrCode.svelte';
 
   export let entry: IEntry;
-  export let speakers: ISpeaker[];
+  // export let speakers: ISpeaker[];
   export let selectedFields: ISelectedFields;
-  export let imageSize = 100;
+  export let imagePercent = 100;
   export let fontSize = 1;
   export let headwordSize = 5;
   export let dictionaryId: string;
 
-  $: speaker = entry.sf?.sp ? speakers.find((s) => s.uid === entry.sf.sp) : null;
+  // $: speaker = entry.sf?.sp ? speakers.find((s) => s.uid === entry.sf.sp) : null;
 </script>
 
 <div style={`font-size: ${fontSize}em;`}>
@@ -79,16 +79,19 @@
     {/if}
   </div>
   {#if entry.pf && selectedFields.pf}
+    <!-- max-height keeps tall images from spilling onto 2nd page when printing single column w/ images at 100% width; -->
     <img
-      class="print:block"
-      style="width:{imageSize}%;margin-bottom:5px"
+      class="block"
+      style="width:{imagePercent}%; margin-bottom:5px; max-height: 100vh;"
       src={`https://lh3.googleusercontent.com/${entry.pf.gcs}`}
       alt={entry.lx} />
     <!-- <Image square={imageSize} gcs={entry.pf.gcs} lexeme={entry.lx} /> -->
   {/if}
   {#if selectedFields.qrCode}
-    <QrCode
-      pixelsPerModule={2}
-      value={`https://livingdictionaries.app/${dictionaryId}/entry/${entry.id}`} />
+    {#await new Promise((r) => setTimeout(() => r(true), 1)) then value}
+      <QrCode
+        pixelsPerModule={2}
+        value={`livingdictionaries.app/${dictionaryId}/entry/${entry.id}`} />
+    {/await}
   {/if}
 </div>
