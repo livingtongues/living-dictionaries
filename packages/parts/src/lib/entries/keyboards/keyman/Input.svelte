@@ -23,6 +23,7 @@
       await kmw.addKeyboards(keyboardId);
       kmw.attachToControl(el);
       kmw.setKeyboardForControl(el, internalName, keyboardBcp);
+      el.focus();
     })();
   }
 </script>
@@ -35,15 +36,17 @@
     bind:value
     class:kmw-disabled={!showKeyboard} />
 
-  <button
-    class="absolute right-0 top-0 bottom-0 hover:text-black px-3 flex items-center"
-    type="button"
-    on:click={() => (showKeyboard = !showKeyboard)}
-    title={showKeyboard ? 'Keyboard active' : 'Keyboard inactive'}>
-    {#if showKeyboard}
-      <span class="i-mdi-keyboard" />
-    {:else}
-      <span class="i-mdi-keyboard-outline" />
-    {/if}
-  </button>
+  {#if glossLanguage?.showKeyboard}
+    <button
+      class="absolute right-0 top-0 bottom-0 hover:text-black px-3 flex items-center"
+      type="button"
+      on:click={() => (showKeyboard = !showKeyboard)}
+      title={showKeyboard ? 'Keyboard active' : 'Keyboard inactive'}>
+      {#if showKeyboard}
+        <span class="i-mdi-keyboard" />
+      {:else}
+        <span class="i-mdi-keyboard-outline" />
+      {/if}
+    </button>
+  {/if}
 </div>

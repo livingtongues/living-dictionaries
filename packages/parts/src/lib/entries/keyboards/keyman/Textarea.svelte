@@ -7,7 +7,7 @@
   export let bcp: string;
   export let value: string;
   export let placeholder = '';
-  export let showKeyboard = true;
+  export let showKeyboard = false;
   export let rows = 4;
 
   const { getKeyman } = getContext<keymanKeyContext>(keymanKey);
@@ -24,6 +24,7 @@
       await kmw.addKeyboards(keyboardId);
       kmw.attachToControl(el);
       kmw.setKeyboardForControl(el, internalName, keyboardBcp);
+      el.focus();
     })();
   }
 </script>
@@ -38,15 +39,17 @@
     bind:value
     class:kmw-disabled={!showKeyboard} />
 
-  <button
-    class="absolute right-0 bottom-0 hover:text-black py-2 px-3 flex"
-    type="button"
-    on:click={() => (showKeyboard = !showKeyboard)}
-    title={showKeyboard ? 'Keyboard active' : 'Keyboard inactive'}>
-    {#if showKeyboard}
-      <span class="i-mdi-keyboard" />
-    {:else}
-      <span class="i-mdi-keyboard-outline" />
-    {/if}
-  </button>
+  {#if glossLanguage?.showKeyboard}
+    <button
+      class="absolute right-0 bottom-0 hover:text-black py-2 px-3 flex"
+      type="button"
+      on:click={() => (showKeyboard = !showKeyboard)}
+      title={showKeyboard ? 'Keyboard active' : 'Keyboard inactive'}>
+      {#if showKeyboard}
+        <span class="i-mdi-keyboard" />
+      {:else}
+        <span class="i-mdi-keyboard-outline" />
+      {/if}
+    </button>
+  {/if}
 </div>
