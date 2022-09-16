@@ -20,9 +20,9 @@ export const dictionaryFields = {
   sr: 'Source(s)',
   xv: 'Example Vernacular',
   xs: 'Example Sentences',
-  sf: 'Audio Speaker Name',
-  pf: 'Photo File',
-  vfs: 'Video Speaker name',
+  sf: 'Audio Speaker',
+  pf: 'Photo',
+  vfs: 'Video Speaker',
   qrCode: 'QR Code',
-  hideLabels: 'Hide All Labels',
+  hideLabels: 'Hide Labels',
 };
