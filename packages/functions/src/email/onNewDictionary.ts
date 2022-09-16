@@ -39,7 +39,7 @@ export default async (
     const adminMsg: MailChannelsSendBody = {
       personalizations: [{ to: adminRecipients }],
       from: {
-        email: 'jacob@livingtongues.org',
+        email: 'annaluisa@livingtongues.org',
       },
       subject: `Living Dictionary created: ${dictionary.name}`,
       content: [
