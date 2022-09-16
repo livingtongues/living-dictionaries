@@ -41,7 +41,7 @@
 
   {#if glossLanguage?.showKeyboard}
     <button
-      class="absolute right-0 bottom-0 hover:text-black py-2 px-3 flex"
+      class="absolute right-2px bottom-2px bg-white hover:text-black p-2 flex"
       type="button"
       on:click={() => (showKeyboard = !showKeyboard)}
       title={showKeyboard ? 'Keyboard active' : 'Keyboard inactive'}>

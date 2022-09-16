@@ -52,10 +52,8 @@
 }
 
 .keymanweb-input {
-  color: unset !important;
-  overflow: unset !important;
+  /* color: unset !important; */
   font-size: 1rem !important;
-  top: 7px !important;
 }
 
 .keymanweb-input:focus {
