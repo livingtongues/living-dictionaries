@@ -1,5 +1,5 @@
 <script lang="ts">
-  import Modal from '$lib/components/ui/Modal.svelte';
+  import Modal from 'svelte-pieces/ui/Modal.svelte';
   import { createEventDispatcher } from 'svelte';
   const dispatch = createEventDispatcher();
   const close = () => dispatch('close');
