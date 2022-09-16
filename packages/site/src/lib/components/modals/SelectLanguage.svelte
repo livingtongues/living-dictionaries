@@ -1,6 +1,6 @@
 <script lang="ts">
   import { _, locale, locales } from 'svelte-i18n';
-  import Modal from '$lib/components/ui/Modal.svelte';
+  import Modal from 'svelte-pieces/ui/Modal.svelte';
   import { setCookie } from '$lib/helpers/cookies';
   import { ReadyLocales, UnpublishedLocales } from '@living-dictionaries/types';
   import Button from 'svelte-pieces/ui/Button.svelte';
