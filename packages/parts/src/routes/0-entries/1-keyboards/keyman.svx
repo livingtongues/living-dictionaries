@@ -16,7 +16,7 @@
 
 <Story
   name="input"
-  knobs={{ bcp: 'am', showKeyboard: true }}
+  knobs={{ bcp: 'am', showKeyboard: false }}
   let:props={{ bcp, showKeyboard }}
   let:set>
   Set different bpc47 codes to see different keyboards:
@@ -27,17 +27,20 @@
         >{glossingLanguages[language].vernacularName} ({language})</Button>
     {/if}
   {/each}
+  <div>Value: {value}</div>
   <Keyman>
-    <div>Value: {value}</div>
     <Input {bcp} {showKeyboard} bind:value />
   </Keyman>
+  Has no keyboard:
+  <Button form="menu" size="sm" onclick={() => set('bcp', 'en')} active={'en' === bcp}
+    >English (en)</Button>
 </Story>
 
-<Story name="textarea">
+<Story name="Assamese textarea">
   <Keyman>
     <Textarea bcp="as" bind:value={paragraph} />
-    <pre class="pl-3">{paragraph}</pre>
   </Keyman>
+  <pre class="pl-3">{paragraph}</pre>
 </Story>
 
 <!-- prettier-ignore -->
