@@ -168,7 +168,8 @@
     "login": "Sign In",
     "donate": "Donate",
     "about": "About",
-    "faq": "FAQ"
+    "faq": "FAQ",
+    "tutorials": "Tutorials"
   },
   "home": {
     "list_of_dictionaries": "List of Dictionaries",

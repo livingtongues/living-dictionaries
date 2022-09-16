@@ -168,7 +168,8 @@
     "login": "登录",
     "donate": "捐赠",
     "about": "关于",
-    "faq": "常问问题"
+    "faq": "常问问题",
+    "tutorials": "教程"
   },
   "home": {
     "list_of_dictionaries": "字典列表",

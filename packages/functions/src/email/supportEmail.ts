@@ -7,7 +7,7 @@ import { sendEmail } from './mailChannels';
 export default async (data: any, context: functions.https.CallableContext) => {
   const msg: MailChannelsSendBody = {
     personalizations: [{ to: supportMessageRecipients }],
-    from: { email: 'jacob@livingtongues.org' },
+    from: { email: 'annaluisa@livingtongues.org' },
     reply_to: { email: data.email },
     subject: 'Living Dictionaries Support Request',
     content: [
