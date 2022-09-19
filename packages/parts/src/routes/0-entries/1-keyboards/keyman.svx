@@ -1,7 +1,7 @@
 <script lang="ts">
   import { glossingLanguages } from '$lib';
 
-  import Input from '$lib/entries/keyboards/keyman/Input.svelte';
+  import InputWrapper from '$lib/entries/keyboards/keyman/InputWrapper.svelte';
   import Keyman from '$lib/entries/keyboards/keyman/Keyman.svelte';
   import Textarea from '$lib/entries/keyboards/keyman/Textarea.svelte';
   import { Story } from 'kitbook';
@@ -29,18 +29,20 @@
   {/each}
   <div>Value: {value}</div>
   <Keyman>
-    <Input {bcp} {showKeyboard} bind:value />
+    <InputWrapper {bcp} {showKeyboard} bind:value />
   </Keyman>
   Has no keyboard:
   <Button form="menu" size="sm" onclick={() => set('bcp', 'en')} active={'en' === bcp}
     >English (en)</Button>
 </Story>
 
+An input can be placed in the default slot and Keyman will attach to the first child element if it is an input:
+
 <Story name="Assamese - slotted input">
   <Keyman>
-    <Input bcp="as">
+    <InputWrapper bcp="as">
       <input type="text" bind:value class="form-input block w-full" />
-    </Input>
+    </InputWrapper>
   </Keyman>
   <div>Value: {value}</div>
 </Story>

@@ -4,6 +4,8 @@
 
   import { createEventDispatcher } from 'svelte';
   import Button from 'svelte-pieces/ui/Button.svelte';
+  import Keyman from './keyboards/keyman/Keyman.svelte';
+  import InputWrapper from './keyboards/keyman/InputWrapper.svelte';
   const dispatch = createEventDispatcher<{
     close: boolean;
     valueupdate: { field: string; newValue: string };
@@ -124,6 +126,20 @@
       {#await import('../editor/ClassicCustomized.svelte') then { default: ClassicCustomized }}
         <ClassicCustomized {editorConfig} bind:html={value} />
       {/await}
+    {:else if field.startsWith('gl')}
+      <Keyman>
+        <InputWrapper bcp={field.split('.')[1]}>
+          <input
+            bind:this={inputEl}
+            dir="ltr"
+            type="text"
+            required={field === 'lx'}
+            use:autofocus
+            bind:value
+            class:sompeng={display === 'Sompeng-Mardir'}
+            class="form-input block w-full" />
+        </InputWrapper>
+      </Keyman>
     {:else}
       <input
         bind:this={inputEl}
@@ -132,7 +148,6 @@
         required={field === 'lx'}
         use:autofocus
         bind:value
-        class:sompeng={display === 'Sompeng-Mardir'}
         class="form-input block w-full" />
     {/if}
 
@@ -145,6 +160,7 @@
         onclick={() => (value = smallCapsSelection(inputEl))}
         >Toggle sᴍᴀʟʟCᴀᴘs for selection</Button>
     {/if}
+
     {#if field.startsWith('gl')}
       <Button
         class="mt-1"

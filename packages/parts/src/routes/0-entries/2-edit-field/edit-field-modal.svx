@@ -2,13 +2,9 @@
   import EditField from '$lib/entries/EditField.svelte';
   import EditFieldModal from '$lib/entries/EditFieldModal.svelte';
 
-  import Input from '$lib/entries/keyboards/keyman/Input.svelte';
-  import Keyman from '$lib/entries/keyboards/keyman/Keyman.svelte';
   import { Story } from 'kitbook';
   import ShowHide from 'svelte-pieces/functions/ShowHide.svelte';
   import Button from 'svelte-pieces/ui/Button.svelte';
-
-  let value = '';
 </script>
 
 <!-- prettier-ignore -->
@@ -19,7 +15,7 @@
 </Story>
 
 <Story name="gloss language with keyboard">
-  <EditField t={undefined} value="should have keyboard icon" field="gl" />
+  <EditField t={undefined} value="should have keyboard icon" field="gl.as" />
 </Story>
 
 <!-- <Story name="Sompeng-Mardir">
@@ -27,7 +23,7 @@
 </Story> -->
 
 <Story name="italicized gloss">
-  <EditField t={undefined} value="red <i>tomato</i>" field="gl" />
+  <EditField t={undefined} value="red <i>tomato</i>" field="gl.as" />
 </Story>
 
 <Story name="interlinear">
@@ -47,24 +43,3 @@
   </ShowHide>
 </Story>
 
-<!-- <Story
-  name="input"
-  knobs={{ bcp: 'am', showKeyboard: false }}
-  let:props={{ bcp, showKeyboard }}
-  let:set>
-  Set different bpc47 codes to see different keyboards:
-
-  {#each Object.keys(glossingLanguages) as language}
-    {#if glossingLanguages[language].showKeyboard}
-      <Button form="menu" size="sm" onclick={() => set('bcp', language)} active={language === bcp}
-        >{glossingLanguages[language].vernacularName} ({language})</Button>
-    {/if}
-  {/each}
-  <div>Value: {value}</div>
-  <Keyman>
-    <Input {bcp} {showKeyboard} bind:value />
-  </Keyman>
-  Has no keyboard:
-  <Button form="menu" size="sm" onclick={() => set('bcp', 'en')} active={'en' === bcp}
-    >English (en)</Button>
-</Story> -->

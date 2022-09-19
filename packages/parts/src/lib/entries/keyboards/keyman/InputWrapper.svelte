@@ -1,6 +1,6 @@
 <script lang="ts">
   // https://help.keyman.com/DEVELOPER/engine/web/15.0/reference/
-  import { getContext } from 'svelte';
+  import { getContext, onMount } from 'svelte';
   import { glossingLanguages } from '../../../glosses/glossing-languages';
   import { keymanKey, type keymanKeyContext } from './context';
 
@@ -12,6 +12,11 @@
   const { getKeyman } = getContext<keymanKeyContext>(keymanKey);
   const kmw = getKeyman();
   let wrapperEl: HTMLDivElement;
+  let inputEl: HTMLInputElement;
+
+  onMount(() => {
+    inputEl = wrapperEl.firstElementChild as HTMLInputElement;
+  });
 
   $: glossLanguage = glossingLanguages[bcp];
   $: internalName = glossLanguage?.internalName;
@@ -21,7 +26,6 @@
   $: if (showKeyboard && internalName) {
     (async () => {
       await kmw.addKeyboards(keyboardId);
-      const inputEl = wrapperEl.firstElementChild as HTMLInputElement;
       if (inputEl) {
         kmw.attachToControl(inputEl);
         kmw.setKeyboardForControl(inputEl, internalName, keyboardBcp);
@@ -29,16 +33,18 @@
       }
     })();
   }
+
+  $: if (showKeyboard) {
+    inputEl?.classList.remove('kmw-disabled');
+  } else {
+    inputEl?.classList.add('kmw-disabled');
+  }
 </script>
 
 <div class="flex w-full relative">
   <div bind:this={wrapperEl} class="w-full">
     <slot>
-      <input
-        {placeholder}
-        class="border shadow px-3 pl-1 pr-9 w-full"
-        bind:value
-        class:kmw-disabled={!showKeyboard} />
+      <input {placeholder} class="border shadow px-3 pl-1 pr-9 w-full" bind:value />
     </slot>
   </div>
 
