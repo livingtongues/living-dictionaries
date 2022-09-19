@@ -137,7 +137,7 @@
             use:autofocus
             bind:value
             class:sompeng={display === 'Sompeng-Mardir'}
-            class="form-input block w-full" />
+            class="form-input block w-full pr-9" />
         </InputWrapper>
       </Keyman>
     {:else}
