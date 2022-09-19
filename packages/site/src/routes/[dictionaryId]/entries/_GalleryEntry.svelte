@@ -21,13 +21,13 @@
     </div>
     <div class="card-content-wrapper">
       <p class="font-semibold absolute top-0 left-0">
-        {@html entry._highlightResult ? entry._highlightResult.lx.value : entry.lx}
+        {@html entry._highlightResult ? entry._highlightResult?.lx?.value : entry.lx}
       </p>
       <!--Simple solution until we really work on implementing this feature-->
       {#if $dictionary.id === 'iquito' || $dictionary.id === 'muniche'}
         <p class="absolute bottom-0 left-0 text-xs">
           {@html entry._highlightResult
-            ? entry._highlightResult.gl.es.value
+            ? entry._highlightResult?.gl?.es?.value
             : entry.gl && entry.gl.es
             ? entry.gl.es
             : ''}
@@ -35,7 +35,7 @@
       {:else}
         <p class="absolute bottom-0 left-0 text-xs">
           {@html entry._highlightResult
-            ? entry._highlightResult.gl.en.value
+            ? entry._highlightResult?.gl?.en?.value
             : entry.gl && entry.gl.en
             ? entry.gl.en
             : ''}
