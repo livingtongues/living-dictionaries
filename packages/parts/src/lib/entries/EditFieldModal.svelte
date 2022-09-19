@@ -10,7 +10,7 @@
   export let adding = false;
 </script>
 
-<Modal on:close>
+<Modal noscroll on:close>
   <span slot="heading">{display}</span>
   <EditField on:close on:valueupdate {t} {value} {field} {display} {adding} />
 </Modal>
