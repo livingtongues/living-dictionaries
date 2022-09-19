@@ -36,6 +36,15 @@
     >English (en)</Button>
 </Story>
 
+<Story name="Assamese - slotted input">
+  <Keyman>
+    <Input bcp="as">
+      <input type="text" bind:value class="form-input block w-full" />
+    </Input>
+  </Keyman>
+  <div>Value: {value}</div>
+</Story>
+
 <Story name="Assamese textarea">
   <Keyman>
     <Textarea bcp="as" bind:value={paragraph} />
