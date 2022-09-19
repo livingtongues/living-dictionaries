@@ -1,5 +1,7 @@
 <script lang="ts">
-  import { _ } from 'svelte-i18n';
+  import type { Readable } from 'svelte/store';
+  export let t: Readable<any> = undefined;
+
   import Modal from 'svelte-pieces/ui/Modal.svelte';
   import { createEventDispatcher } from 'svelte';
   import Button from 'svelte-pieces/ui/Button.svelte';
@@ -123,7 +125,7 @@
     <div>
       <div class="rounded-md shadow-sm">
         {#if field === 'nt'}
-          {#await import('@living-dictionaries/parts/src/lib/editor/ClassicCustomized.svelte') then { default: ClassicCustomized }}
+          {#await import('../editor/ClassicCustomized.svelte') then { default: ClassicCustomized }}
             <ClassicCustomized {editorConfig} bind:html={value} />
           {/await}
         {:else}
@@ -165,17 +167,17 @@
 
     <div class="modal-footer">
       <Button onclick={close} form="simple" color="black">
-        {$_('misc.cancel', { default: 'Cancel' })}
+        {t ? $t('misc.cancel') : 'Cancel'}
       </Button>
       <div class="w-1" />
       {#if adding}
         <Button type="submit" form="filled">
-          {$_('misc.next', { default: 'Next' })}
+          {t ? $t('misc.next') : 'Next'}
           <i class="far fa-chevron-right rtl-x-flip" />
         </Button>
       {:else}
         <Button type="submit" form="filled">
-          {$_('misc.save', { default: 'Save' })}
+          {t ? $t('misc.save') : 'Save'}
         </Button>
       {/if}
     </div>
