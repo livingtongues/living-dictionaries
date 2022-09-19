@@ -8,10 +8,10 @@
     valueupdate: { field: string; newValue: string };
   }>();
 
-  export let value = '',
-    field: string,
-    display = $_('misc.edit', { default: 'Edit' }),
-    adding = false;
+  export let value = '';
+  export let field: string;
+  export let display: string;
+  export let adding = false;
 
   function close() {
     dispatch('close');
@@ -123,7 +123,7 @@
     <div>
       <div class="rounded-md shadow-sm">
         {#if field === 'nt'}
-          {#await import('$lib/components/editor/ClassicCustomized.svelte') then { default: ClassicCustomized }}
+          {#await import('@living-dictionaries/parts/src/lib/editor/ClassicCustomized.svelte') then { default: ClassicCustomized }}
             <ClassicCustomized {editorConfig} bind:html={value} />
           {/await}
         {:else}
@@ -139,8 +139,7 @@
         {/if}
 
         {#if field === 'in'}
-          <div class="mt-3 text-sm hidden md:block">
-          </div>
+          <div class="mt-3 text-sm hidden md:block" />
           <Button
             class="mt-1"
             size="sm"

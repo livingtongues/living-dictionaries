@@ -63,7 +63,7 @@
   <div class="flex">
     {#if editing}
       <div class="max-w-screen-md tw-prose prose-lg">
-        {#await import('$lib/components/editor/ClassicCustomized.svelte') then { default: ClassicCustomized }}
+        {#await import('@living-dictionaries/parts/src/lib/editor/ClassicCustomized.svelte') then { default: ClassicCustomized }}
           <ClassicCustomized bind:html={about} />
         {/await}
       </div>
