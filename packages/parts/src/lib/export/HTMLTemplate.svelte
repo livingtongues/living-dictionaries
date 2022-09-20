@@ -45,9 +45,13 @@
         {#if !selectedFields.hideLabels}
           <i>Source(s): </i>
         {/if}
-        {#each entry.sr as source, index}
-          <i>{index < entry.sr.length - 1 ? `${source}, ` : `${source}`}</i>
-        {/each}
+        {#if typeof entry.sr === 'string'}
+          <i>{entry.sr}</i>
+        {:else}
+          {#each entry.sr as source, index}
+            <i>{index < entry.sr.length - 1 ? `${source}, ` : `${source}`}</i>
+          {/each}
+        {/if}
       </div>
     {/if}
     <div>
