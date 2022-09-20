@@ -2,6 +2,7 @@
   import { _ } from 'svelte-i18n';
   import { getContext } from 'svelte';
   import { configure } from 'instantsearch.js/es/widgets/index.js';
+  import { preferredSettings } from '$lib/stores';
   import type { InstantSearch } from 'instantsearch.js';
   const search: InstantSearch = getContext('search');
 
@@ -22,13 +23,13 @@
     ]);
   }
 
-  let headwordSize = 5;
-  let fontSize = 1;
-  let imagePercent = 100;
-  let columnWidth = 250;
+  let headwordSize = $preferredSettings?.headwordSize ? $preferredSettings?.headwordSize : 5;
+  let fontSize = $preferredSettings?.fontSize ? $preferredSettings?.fontSize : 1;
+  let imagePercent = $preferredSettings?.imagePercent ? $preferredSettings?.imagePercent : 100;
+  let columnWidth = $preferredSettings?.minCloumnWidth ? $preferredSettings?.minCloumnWidth : 250;
   $: columnWidthEm = columnWidth / 16;
 
-  const selectedFields = {
+  const selectedFields = $preferredSettings?.selectedFields ? $preferredSettings?.selectedFields :  {
     lo: true,
     lo2: true,
     lo3: true,
@@ -57,6 +58,13 @@
   };
 
   // let speakers: ISpeaker[];
+  $: $preferredSettings = {
+    selectedFields,
+    headwordSize,
+    fontSize,
+    imagePercent,
+    minCloumnWidth: columnWidth
+  }
 </script>
 
 <svelte:head>
