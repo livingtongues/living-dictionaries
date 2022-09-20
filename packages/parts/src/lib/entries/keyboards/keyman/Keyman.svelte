@@ -16,13 +16,13 @@
     // @ts-ignore;
     kmw = keyman;
     await kmw.init({
-      attachType: 'manual', // auto
+      attachType: 'manual',
     });
     loaded = true;
 
-    if (!kmw.util.isTouchDevice()) {
-      document.body.classList.add('kmw-is-desktop');
-    }
+    // if (!kmw.util.isTouchDevice()) {
+    //   document.body.classList.add('kmw-is-desktop');
+    // }
   });
 </script>
 

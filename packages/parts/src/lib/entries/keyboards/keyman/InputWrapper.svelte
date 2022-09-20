@@ -16,6 +16,9 @@
 
   onMount(() => {
     inputEl = wrapperEl.firstElementChild as HTMLInputElement;
+    return () => {
+      kmw.detachFromControl(inputEl);
+    };
   });
 
   $: glossLanguage = glossingLanguages[bcp];
