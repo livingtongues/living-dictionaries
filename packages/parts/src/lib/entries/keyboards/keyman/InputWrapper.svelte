@@ -8,6 +8,7 @@
   export let value: string = undefined;
   export let placeholder = '';
   export let showKeyboard = false;
+  export let fixed = false;
 
   const { getKeyman } = getContext<keymanKeyContext>(keymanKey);
   const kmw = getKeyman();
@@ -16,7 +17,13 @@
 
   onMount(() => {
     inputEl = wrapperEl.firstElementChild as HTMLInputElement;
+    const root = document.documentElement;
+    if (fixed) {
+      root.style.setProperty('--kmw-osk-pos', 'fixed');
+    }
+    
     return () => {
+      root.style.setProperty('--kmw-osk-pos', 'absolute');
       kmw.detachFromControl(inputEl);
     };
   });

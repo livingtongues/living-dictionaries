@@ -128,7 +128,7 @@
       {/await}
     {:else if field.startsWith('gl') || field.startsWith('xs')}
       <Keyman>
-        <InputWrapper bcp={field.split('.')[1]}>
+        <InputWrapper fixed bcp={field.split('.')[1]}>
           <input
             bind:this={inputEl}
             dir="ltr"
