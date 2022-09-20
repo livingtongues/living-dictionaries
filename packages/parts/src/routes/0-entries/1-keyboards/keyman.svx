@@ -1,0 +1,60 @@
+<script lang="ts">
+  import { glossingLanguages } from '$lib';
+
+  import InputWrapper from '$lib/entries/keyboards/keyman/InputWrapper.svelte';
+  import Keyman from '$lib/entries/keyboards/keyman/Keyman.svelte';
+  import Textarea from '$lib/entries/keyboards/keyman/Textarea.svelte';
+  import { Story } from 'kitbook';
+  import Button from 'svelte-pieces/ui/Button.svelte';
+
+  let value = '';
+  let paragraph = '';
+</script>
+
+<!-- prettier-ignore -->
+# Keyman Keyboard
+
+<Story
+  name="input"
+  knobs={{ bcp: 'am', showKeyboard: false }}
+  let:props={{ bcp, showKeyboard }}
+  let:set>
+  Set different bpc47 codes to see different keyboards:
+
+  {#each Object.keys(glossingLanguages) as language}
+    {#if glossingLanguages[language].showKeyboard}
+      <Button form="menu" size="sm" onclick={() => set('bcp', language)} active={language === bcp}
+        >{glossingLanguages[language].vernacularName} ({language})</Button>
+    {/if}
+  {/each}
+  <div>Value: {value}</div>
+  <Keyman>
+    <InputWrapper {bcp} {showKeyboard} bind:value />
+  </Keyman>
+  Has no keyboard:
+  <Button form="menu" size="sm" onclick={() => set('bcp', 'en')} active={'en' === bcp}
+    >English (en)</Button>
+</Story>
+
+An input can be placed in the default slot and Keyman will attach to the first child element if it is an input:
+
+<Story name="Assamese - slotted input">
+  <Keyman>
+    <InputWrapper bcp="as">
+      <input type="text" bind:value class="form-input block w-full" />
+    </InputWrapper>
+  </Keyman>
+  <div>Value: {value}</div>
+</Story>
+
+<Story name="Assamese textarea">
+  <Keyman>
+    <Textarea bcp="as" bind:value={paragraph} />
+  </Keyman>
+  <pre class="pl-3">{paragraph}</pre>
+</Story>
+
+<!-- prettier-ignore -->
+- [KeymanWeb docs](https://keyman.com/developer/keymanweb/)
+- [KeymanWeb API](https://help.keyman.com/DEVELOPER/engine/web/15.0/reference/)
+- [Angular Setup](https://medium.com/@jwbowdoin/setup-on-screen-keyboards-in-over-1-000-languages-using-keyman-11-in-an-angular-7-web-app-3c3eb846585c)
