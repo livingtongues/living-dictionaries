@@ -126,7 +126,7 @@
       {#await import('../editor/ClassicCustomized.svelte') then { default: ClassicCustomized }}
         <ClassicCustomized {editorConfig} bind:html={value} />
       {/await}
-    {:else if field.startsWith('gl')}
+    {:else if field.startsWith('gl') || field.startsWith('xs')}
       <Keyman>
         <InputWrapper bcp={field.split('.')[1]}>
           <input
