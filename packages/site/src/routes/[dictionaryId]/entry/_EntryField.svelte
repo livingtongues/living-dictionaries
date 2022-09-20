@@ -39,7 +39,7 @@
       </div>
     </div>
     {#if show}
-      {#await import('$lib/components/modals/EditFieldModal.svelte') then { default: EditFieldModal }}
+      {#await import('@living-dictionaries/parts/src/lib/entries/EditFieldModal.svelte') then { default: EditFieldModal }}
         <EditFieldModal on:valueupdate {value} {field} {display} on:close={toggle} />
       {/await}
     {/if}

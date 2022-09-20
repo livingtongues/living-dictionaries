@@ -6,7 +6,7 @@
   "svelte": "src/lib/index.ts",
   "main": "src/lib/index.ts",
   "scripts": {
-    "dev": "svelte-kit dev --port 3042",
+    "dev": "svelte-kit dev --port 3042 --host",
     "build": "svelte-kit build",
     "package": "svelte-kit package && node update-packaged-index-path.js",
     "preview": "svelte-kit preview",
@@ -15,6 +15,9 @@
     "check:watch": "svelte-check --tsconfig ./tsconfig.json --threshold warning --diagnostic-sources js,svelte --watch",
     "release": "npm run package && cd package && npm publish",
     "test": "vitest -u"
+  },
+  "dependencies": {
+    "ckeditor5-build-classic-with-alignment-underline-smallcaps": "^1.0.0"
   },
   "devDependencies": {
     "@living-dictionaries/types": "^1.0.0",
