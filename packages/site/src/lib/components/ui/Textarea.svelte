@@ -12,7 +12,7 @@
     target.style.height = +target.scrollHeight + 'px';
   }
 
-  function autoresize(el) {
+  function autoresize(el: HTMLTextAreaElement) {
     resize({ target: el });
     el.addEventListener('input', resize);
 

@@ -1,17 +1,20 @@
 <script lang="ts">
-  import { _ } from 'svelte-i18n';
-  import Modal from '$lib/components/ui/Modal.svelte';
+  import type { Readable } from 'svelte/store';
+  export let t: Readable<any> = undefined;
+
   import { createEventDispatcher } from 'svelte';
   import Button from 'svelte-pieces/ui/Button.svelte';
+  import Keyman from './keyboards/keyman/Keyman.svelte';
+  import InputWrapper from './keyboards/keyman/InputWrapper.svelte';
   const dispatch = createEventDispatcher<{
     close: boolean;
     valueupdate: { field: string; newValue: string };
   }>();
 
-  export let value = '',
-    field: string,
-    display = $_('misc.edit', { default: 'Edit' }),
-    adding = false;
+  export let value = '';
+  export let field: string;
+  export let display: string = undefined; // used only for Sompeng-Mardir now that Modal is separate
+  export let adding = false;
 
   function close() {
     dispatch('close');
@@ -117,16 +120,15 @@
   }
 </script>
 
-<Modal on:close>
-  <span slot="heading">{display}</span>
-  <form on:submit|preventDefault={save}>
-    <div>
-      <div class="rounded-md shadow-sm">
-        {#if field === 'nt'}
-          {#await import('$lib/components/editor/ClassicCustomized.svelte') then { default: ClassicCustomized }}
-            <ClassicCustomized {editorConfig} bind:html={value} />
-          {/await}
-        {:else}
+<form on:submit|preventDefault={save}>
+  <div class="rounded-md shadow-sm">
+    {#if field === 'nt'}
+      {#await import('../editor/ClassicCustomized.svelte') then { default: ClassicCustomized }}
+        <ClassicCustomized {editorConfig} bind:html={value} />
+      {/await}
+    {:else if field.startsWith('gl') || field.startsWith('xs')}
+      <Keyman>
+        <InputWrapper fixed bcp={field.split('.')[1]}>
           <input
             bind:this={inputEl}
             dir="ltr"
@@ -135,53 +137,61 @@
             use:autofocus
             bind:value
             class:sompeng={display === 'Sompeng-Mardir'}
-            class="form-input block w-full" />
-        {/if}
+            class="form-input block w-full pr-9" />
+        </InputWrapper>
+      </Keyman>
+    {:else}
+      <input
+        bind:this={inputEl}
+        dir="ltr"
+        type="text"
+        required={field === 'lx'}
+        use:autofocus
+        bind:value
+        class="form-input block w-full" />
+    {/if}
 
-        {#if field === 'in'}
-          <div class="mt-3 text-sm hidden md:block">
-          </div>
-          <Button
-            class="mt-1"
-            size="sm"
-            form="simple"
-            onclick={() => (value = smallCapsSelection(inputEl))}
-            >Toggle sᴍᴀʟʟCᴀᴘs for selection</Button>
-        {/if}
-        {#if field.startsWith('gl')}
-          <Button
-            class="mt-1"
-            size="sm"
-            form="simple"
-            onclick={() => (value = italicizeSelection(inputEl))}
-            ><i>Italicize</i> selection</Button>
-          {#if value.indexOf('<i>') > -1}
-            <div class="tw-prose mt-2 p-1 shadow bg-gray-200">
-              {@html value}
-            </div>
-          {/if}
-        {/if}
-      </div>
-    </div>
+    {#if field === 'in'}
+      <div class="mt-3 text-sm hidden md:block" />
+      <Button
+        class="mt-1"
+        size="sm"
+        form="simple"
+        onclick={() => (value = smallCapsSelection(inputEl))}
+        >Toggle sᴍᴀʟʟCᴀᴘs for selection</Button>
+    {/if}
 
-    <div class="modal-footer">
-      <Button onclick={close} form="simple" color="black">
-        {$_('misc.cancel', { default: 'Cancel' })}
-      </Button>
-      <div class="w-1" />
-      {#if adding}
-        <Button type="submit" form="filled">
-          {$_('misc.next', { default: 'Next' })}
-          <i class="far fa-chevron-right rtl-x-flip" />
-        </Button>
-      {:else}
-        <Button type="submit" form="filled">
-          {$_('misc.save', { default: 'Save' })}
-        </Button>
+    {#if field.startsWith('gl')}
+      <Button
+        class="mt-1"
+        size="sm"
+        form="simple"
+        onclick={() => (value = italicizeSelection(inputEl))}><i>Italicize</i> selection</Button>
+      {#if value.indexOf('<i>') > -1}
+        <div class="tw-prose mt-2 p-1 shadow bg-gray-200">
+          {@html value}
+        </div>
       {/if}
-    </div>
-  </form>
-</Modal>
+    {/if}
+  </div>
+
+  <div class="modal-footer">
+    <Button onclick={close} form="simple" color="black">
+      {t ? $t('misc.cancel') : 'Cancel'}
+    </Button>
+    <div class="w-1" />
+    {#if adding}
+      <Button type="submit" form="filled">
+        {t ? $t('misc.next') : 'Next'}
+        <i class="far fa-chevron-right rtl-x-flip" />
+      </Button>
+    {:else}
+      <Button type="submit" form="filled">
+        {t ? $t('misc.save') : 'Save'}
+      </Button>
+    {/if}
+  </div>
+</form>
 
 <style global>
   .ck-editor__editable_inline {

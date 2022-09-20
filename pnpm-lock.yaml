@@ -67,6 +67,7 @@ importers:
       '@types/mapbox__mapbox-gl-geocoder': ^4.7.2
       '@types/recordrtc': ^5.6.8
       '@types/youtube': ^0.0.46
+      ckeditor5-build-classic-with-alignment-underline-smallcaps: ^1.0.0
       kitbook: ^0.0.16
       mdsvex: ^0.10.6
       recordrtc: ^5.6.2
@@ -84,6 +85,8 @@ importers:
       typescript: ~4.7.4
       vitest: ^0.21.0
       windicss: ^3.5.6
+    dependencies:
+      ckeditor5-build-classic-with-alignment-underline-smallcaps: 1.0.0
     devDependencies:
       '@living-dictionaries/types': link:../types
       '@sveltejs/adapter-auto': 1.0.0-next.50
@@ -165,7 +168,6 @@ importers:
       '@types/file-saver': ^2.0.4
       '@types/recordrtc': ^5.6.8
       algoliasearch: ^4.11.0
-      ckeditor5-build-classic-with-alignment-underline-smallcaps: ^1.0.0
       csvtojson: ^2.0.10
       d3-dsv: ^3.0.1
       dot-object: ^2.1.4
@@ -206,7 +208,6 @@ importers:
       '@types/file-saver': 2.0.5
       '@types/recordrtc': 5.6.8
       algoliasearch: 4.13.0
-      ckeditor5-build-classic-with-alignment-underline-smallcaps: 1.0.0
       csvtojson: 2.0.10
       d3-dsv: 3.0.1
       dot-object: 2.1.4
@@ -2897,7 +2898,7 @@ packages:
   /ckeditor5-build-classic-with-alignment-underline-smallcaps/1.0.0:
     resolution: {integrity: sha512-25alYsrhgTsg51MkgGjfFk+aFbBVVEEA2dDOfoAc9rv4r30bNVN0DbKCLyRLiNJnEZrLIEASf7VOq8JmNa4TZg==}
     engines: {node: '>=6.9.0', npm: '>=3.0.0'}
-    dev: true
+    dev: false
 
   /classnames/2.3.1:
     resolution: {integrity: sha512-OlQdbZ7gLfGarSqxesMesDa5uz7KFbID8Kpq/SxIoNGDqY8lSYs0D+hhtBXhcdB3rcbXArFr7vlHheLk1voeNA==}
