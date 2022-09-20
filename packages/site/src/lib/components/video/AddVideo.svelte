@@ -1,6 +1,6 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
-  import Modal from '$lib/components/ui/Modal.svelte';
+  import Modal from 'svelte-pieces/ui/Modal.svelte';
   import Button from 'svelte-pieces/ui/Button.svelte';
   import RecordVideo from '$lib/components/video/RecordVideo.svelte';
   import SelectVideo from './SelectVideo.svelte';

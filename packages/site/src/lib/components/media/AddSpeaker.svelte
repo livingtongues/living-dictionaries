@@ -1,6 +1,6 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
-  import Modal from '$lib/components/ui/Modal.svelte';
+  import Modal from 'svelte-pieces/ui/Modal.svelte';
   import { createEventDispatcher } from 'svelte';
   import { dictionary } from '$lib/stores';
   import Form from 'svelte-pieces/data/Form.svelte';
