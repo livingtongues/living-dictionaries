@@ -1,58 +1,54 @@
-.kmw-title-bar,
-.desktop .kmw-osk-inner-frame,
-.kmw-footer {
-  background-color: rgb(68, 68, 68) !important;
-  border-color: rgb(68, 68, 68) !important;
-}
-
-/* .kmw-is-desktop .kmw-keyboard-chinese,
-.kmw-is-desktop .kmw-keyboard-japanese,
-.kmw-is-desktop .kmw-keyboard-european {
+/* .desktop .kmw-keyboard-chinese,
+.desktop .kmw-keyboard-japanese,
+.desktop .kmw-keyboard-european {
   visibility: hidden;
   margin-top: 5px;
 } */
 
-/* old below */
-
-.kmw-is-desktop .kmw-osk-inner-frame {
-  border: solid 1px rgb(68, 68, 68);
-  background-color: rgb(68, 68, 68);
-  /* border-radius: 2px; */
-  top: 5px;
+.desktop .kmw-osk-inner-frame {
+  border: solid 1px rgb(68, 68, 68) !important;
+  background-color: rgb(68, 68, 68) !important;
+  border-radius: 5px;
+  top: 3px;
   position: absolute;
 }
 
-.kmw-is-desktop .kmw-footer {
+/* .desktop .kmw-footer {
+  display: none;
+} */
+
+.desktop .kmw-footer-caption {
   display: none;
 }
 
-.kmw-is-desktop .kmw-title-bar > * {
+.desktop .kmw-title-bar > * {
   display: none;
 }
 
-.kmw-is-desktop .kmw-title-bar {
+.desktop .kmw-title-bar {
+  /* height: 6px; */
+  /* background-color: rgb(68, 68, 68) !important; */
   width: 1px;
   visibility: hidden;
 }
 
-.kmw-is-desktop .kmw-key-layer-group {
+.desktop .kmw-key-layer-group {
   z-index: 10001;
 }
 
-.kmw-is-desktop .kmw-key:hover {
+.desktop .kmw-key:hover {
   background: #dcdcdc;
 }
 
-.kmw-is-desktop .kmw-osk-static {
+.desktop .kmw-osk-static {
   border: none !important;
 }
 
-.kmw-is-desktop #Help_Keyboard_chinese > div {
+.desktop #Help_Keyboard_chinese > div {
   border-color: rgb(84, 110, 122) !important;
 }
 
 .keymanweb-input {
-  /* color: unset !important; */
   font-size: 1rem !important;
 }
 
