@@ -2,32 +2,33 @@
   import { _ } from 'svelte-i18n';
   import { getContext } from 'svelte';
   import { configure } from 'instantsearch.js/es/widgets/index.js';
-  import { preferredSettings } from '$lib/stores';
+  // import { preferredSettings } from '$lib/stores';
   import type { InstantSearch } from 'instantsearch.js';
   const search: InstantSearch = getContext('search');
 
   import Hits from '$lib/components/search/Hits.svelte';
   import Pagination from '$lib/components/search/Pagination.svelte';
   import Button from 'svelte-pieces/ui/Button.svelte';
+  import { createPersistedStore } from 'svelte-pieces/stores/persisted';
   import { HTMLTemplate, dictionaryFields } from '@living-dictionaries/parts';
   import { dictionary, isManager } from '$lib/stores';
   import { browser } from '$app/env';
 
-  let hitsPerPage = 50;
+  let hitsPerPage = createPersistedStore<number>('printHitsPerPage', 50);
   $: if (browser) {
     search.addWidgets([
       configure({
-        hitsPerPage,
+        hitsPerPage: $hitsPerPage,
       }),
     ]);
   }
 
-  let headwordSize = 12;
-  let fontSize = 12;
-  let imagePercent = 50;
-  let columnCount = 2;
+  let headwordSize = createPersistedStore<number>('printHeadwordSize', 12);
+  let fontSize = createPersistedStore<number>('printFontSize', 12);
+  let imagePercent = createPersistedStore<number>('printImagePercent', 50);
+  let columnCount = createPersistedStore<number>('printColumnCount', 2);
 
-  const selectedFields = $preferredSettings?.selectedFields ? $preferredSettings?.selectedFields :  {
+  const selectedFields = {
     lo: true,
     lo2: true,
     lo3: true,
@@ -75,7 +76,7 @@
           type="number"
           min="1"
           max={$isManager ? 1000 : 300}
-          bind:value={hitsPerPage} />
+          bind:value={$hitsPerPage} />
         <!-- Algolia hard max per page is 1000 -->
       </div>
       <div class="mb-1 mr-2">
@@ -86,7 +87,7 @@
           type="number"
           min="1"
           max="10"
-          bind:value={columnCount} />
+          bind:value={$columnCount} />
       </div>
       <div class="mb-1 mr-2">
         <label class="font-medium text-gray-700" for="headwordSize">Headword size (pt)</label>
@@ -96,7 +97,7 @@
           type="number"
           min="6"
           max="30"
-          bind:value={headwordSize} />
+          bind:value={$headwordSize} />
       </div>
       <div class="mb-1 mr-2">
         <label class="font-medium text-gray-700" for="fontSize">Font size (pt)</label>
@@ -106,7 +107,7 @@
           type="number"
           min="6"
           max="24"
-          bind:value={fontSize} />
+          bind:value={$fontSize} />
       </div>
       <div class="mb-1 mr-2">
         <label class="font-medium text-gray-700" for="imageSize">Images:</label>
@@ -116,14 +117,14 @@
           type="number"
           min="1"
           max="100"
-          bind:value={imagePercent} /><span class="font-medium text-gray-700">%</span>
+          bind:value={$imagePercent} /><span class="font-medium text-gray-700">%</span>
       </div>
       {#each Object.entries(selectedFields) as field}
         {#if entries.find((entry) => entry[field[0]]) || field[0] === 'qrCode' || field[0] === 'hideLabels'}
           <div class="flex items-center mr-3 mb-1">
             <input id={field[0]} type="checkbox" bind:checked={selectedFields[field[0]]} />
             <label class="ml-1 text-sm text-gray-700" for={field[0]}
-              >{$_(`entry.${[field[0]]}`, {default: dictionaryFields[field[0]]})}</label>
+              >{$_(`entry.${[field[0]]}`, { default: dictionaryFields[field[0]] })}</label>
           </div>
         {/if}
       {/each}
@@ -135,14 +136,12 @@
     {$_('misc.LD_singular', { default: 'Living Dictionary' })}
   </div>
 
-  <div
-    class="print-columns"
-    style="--column-count: {columnCount}">
+  <div class="print-columns" style="--column-count: {$columnCount}">
     {#each entries as entry (entry.id)}
       <HTMLTemplate
-        {headwordSize}
-        {fontSize}
-        {imagePercent}
+        headwordSize={$headwordSize}
+        fontSize={$fontSize}
+        imagePercent={$imagePercent}
         {entry}
         {selectedFields}
         dictionaryId={$dictionary.id} />
