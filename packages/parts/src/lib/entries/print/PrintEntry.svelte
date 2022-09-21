@@ -1,7 +1,9 @@
 <script lang="ts">
+  import type { Readable } from 'svelte/store';
+  export let t: Readable<any> = undefined;
+
   import type { IEntry, ISpeaker, IPrintFields } from '@living-dictionaries/types';
   import { EntryPDFFieldsEnum } from '@living-dictionaries/types';
-  import { semanticDomains } from '../../mappings/semantic-domains';
   import QrCode from '../../QrCode.svelte';
 
   export let entry: IEntry;
@@ -59,10 +61,8 @@
     <div>
       {#if entry.sdn && selectedFields.sdn}
         <span class="italic text-[80%]">Semantic Domains: </span>
-        {#each entry.sdn as key, index}
-          {semanticDomains.find((sd) => sd.key === key).name}{index < entry.sdn.length - 1
-            ? ', '
-            : ''}
+        {#each entry.sdn as domain}
+          {t ? $t('sd.' + domain) : domain}
         {/each}
       {/if}
       {#each Object.keys(EntryPDFFieldsEnum) as key}

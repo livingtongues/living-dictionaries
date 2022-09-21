@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { _ } from 'svelte-i18n';
+  import { t } from 'svelte-i18n';
   import { getContext } from 'svelte';
   import { configure } from 'instantsearch.js/es/widgets/index.js';
   import type { InstantSearch } from 'instantsearch.js';
@@ -102,7 +102,7 @@
         <!-- {#if entries.find((entry) => entry[field])} -->
         <div class="flex items-center mr-3 mb-1">
           <input id={field} type="checkbox" bind:checked={$preferredPrintFields[field]} />
-          <label class="ml-1 text-sm text-gray-700" for={field}>{$_(`entry.${[field]}`)}</label>
+          <label class="ml-1 text-sm text-gray-700" for={field}>{$t(`entry.${[field]}`)}</label>
         </div>
         <!-- {/if} -->
       {/each}
@@ -111,12 +111,13 @@
 
   <div class="hidden print:block text-lg mb-5">
     {$dictionary.name}
-    {$_('misc.LD_singular', { default: 'Living Dictionary' })}
+    {$t('misc.LD_singular', { default: 'Living Dictionary' })}
   </div>
 
   <div class="print-columns" style="--column-count: {$columnCount}">
     {#each entries as entry (entry.id)}
       <PrintEntry
+        {t}
         headwordSize={$headwordSize}
         fontSize={$fontSize}
         imagePercent={$imagePercent}
@@ -131,7 +132,7 @@
   <div class="mt-5 text-xs" style="direction: ltr;">
     {new Date().getFullYear()}.
     {$dictionary.name}
-    <span>{$_('misc.LD_singular', { default: 'Living Dictionary' })}.</span>
+    <span>{$t('misc.LD_singular', { default: 'Living Dictionary' })}.</span>
     Living Tongues Institute for Endangered Languages. https://livingdictionaries.app/{$dictionary.id}
   </div>
 </Hits>
