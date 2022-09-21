@@ -138,6 +138,7 @@
     /* column-width: var(--column-width); */
     /* column-gap: 2em; << default is 1em */
     column-count: var(--column-count);
+    overflow-wrap: break-word;
   }
   /* https://medium.com/@Idan_Co/the-ultimate-print-html-template-with-header-footer-568f415f6d2a */
 </style>
