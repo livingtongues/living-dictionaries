@@ -2,7 +2,7 @@
   import { _ } from 'svelte-i18n';
   import { getContext } from 'svelte';
   import { configure } from 'instantsearch.js/es/widgets/index.js';
-  import { printFields } from '$lib/stores';
+  import { preferredPrintFields } from '$lib/stores';
   import type { InstantSearch } from 'instantsearch.js';
   const search: InstantSearch = getContext('search');
 
@@ -93,11 +93,11 @@
           max="100"
           bind:value={$imagePercent} /><span class="font-medium text-gray-700">%</span>
       </div>
-      {#each Object.keys(printFields) as field}
+      {#each Object.keys($preferredPrintFields) as field}
         <!-- Todo: need a separate function to handle when to show what checkbox - for example, don't show "Labels" if no fields that are labeled are showing -->
         <!-- {#if entries.find((entry) => entry[field])} -->
         <div class="flex items-center mr-3 mb-1">
-          <input id={field} type="checkbox" bind:checked={printFields[field]} />
+          <input id={field} type="checkbox" bind:checked={$preferredPrintFields[field]} />
           <label class="ml-1 text-sm text-gray-700" for={field}>{$_(`entry.${[field]}`)}</label>
         </div>
         <!-- {/if} -->
@@ -119,7 +119,7 @@
         {entry}
         showQrCode={$showQrCode}
         showLabels={$showLabels}
-        selectedFields={$printFields}
+        selectedFields={$preferredPrintFields}
         dictionaryId={$dictionary.id} />
     {/each}
   </div>
