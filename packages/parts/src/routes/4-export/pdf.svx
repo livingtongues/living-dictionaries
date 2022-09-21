@@ -1,5 +1,5 @@
 <script lang="ts">
-  import PrintLayout from '$lib/export/PrintLayout.svelte';
+  import HTMLTemplate from '../../lib/export/HTMLTemplate.svelte';
   import { Story } from 'kitbook';
 
   let gender: 'm' | 'f' | 'o' = 'f';
@@ -258,16 +258,14 @@
     lo4: true,
     lo5: true,
     ph: true,
-    gl: true,
     ps: true,
+    gl: true,
     xv: true,
     xs: true,
-    pf: true,
     sr: false,
     sd: false,
-    id: false,
-    in: false,
     mr: false,
+    in: false,
     nc: false,
     pl: false,
     va: false,
@@ -275,16 +273,23 @@
     nt: false,
     sf: false,
     vfs: false,
-    qr: false,
+    pf: true,
+    qrCode: false,
+    id: false,
+    hideLabels: false,
   }
 </script>
 
 <!-- <HtmlTemplate3 {entries} {selectedFields} /> -->
 
-<Story name="Configure font and image sizes" knobs={{fontSize: 1.5, imageSize: 80}} let:props={{fontSize, imageSize}}>
-  <PrintLayout {selectedFields} {speakers} {entries} {fontSize} {imageSize} {dictionaryId} />
+<Story name="Configure font and image sizes" knobs={{headwordSize: 1.5, fontSize: 1, imagePercent: 80}} let:props={{headwordSize, fontSize, imagePercent}}>
+  {#each entries as entry}  
+    <HTMLTemplate {selectedFields} {entry} {headwordSize} {fontSize} {imagePercent} {dictionaryId} />
+  {/each}
 </Story>
 
 <Story name="Select Fields" knobs={{...selectedFields}} let:props={selectedFields}>
-  <PrintLayout {selectedFields} {speakers} {entries} {dictionaryId} />
+  {#each entries as entry}  
+    <HTMLTemplate {selectedFields} {entry} {dictionaryId} />
+  {/each}
 </Story>
