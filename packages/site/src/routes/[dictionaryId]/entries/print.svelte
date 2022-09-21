@@ -9,7 +9,7 @@
   import Pagination from '$lib/components/search/Pagination.svelte';
   import Button from 'svelte-pieces/ui/Button.svelte';
   import { createPersistedStore } from 'svelte-pieces/stores/persisted';
-  import { HTMLTemplate, defaultPrintFields } from '@living-dictionaries/parts';
+  import { PrintEntry, defaultPrintFields } from '@living-dictionaries/parts';
   import { dictionary, isManager } from '$lib/stores';
   import { browser } from '$app/env';
   import type { IPrintFields } from '@living-dictionaries/types';
@@ -116,7 +116,7 @@
 
   <div class="print-columns" style="--column-count: {$columnCount}">
     {#each entries as entry (entry.id)}
-      <HTMLTemplate
+      <PrintEntry
         headwordSize={$headwordSize}
         fontSize={$fontSize}
         imagePercent={$imagePercent}

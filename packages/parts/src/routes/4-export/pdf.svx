@@ -1,5 +1,5 @@
 <script lang="ts">
-  import HTMLTemplate from '../../lib/export/HTMLTemplate.svelte';
+  import PrintEntry from '$lib/entries/print/PrintEntry.svelte';
   import { Story } from 'kitbook';
   import { defaultPrintFields as printFields } from '$lib/entries/print/printFields';
   import { entries } from './_mock-data';
@@ -11,7 +11,7 @@
   knobs={{ headwordSize: 1.5, fontSize: 1, imagePercent: 80 }}
   let:props={{ headwordSize, fontSize, imagePercent }}>
   {#each entries as entry}
-    <HTMLTemplate
+    <PrintEntry
       selectedFields={printFields}
       {entry}
       {headwordSize}
@@ -23,6 +23,6 @@
 
 <Story name="Select Fields" knobs={{ ...printFields }} let:props={printFields}>
   {#each entries as entry}
-    <HTMLTemplate selectedFields={printFields} {entry} {dictionaryId} />
+    <PrintEntry selectedFields={printFields} {entry} {dictionaryId} />
   {/each}
 </Story>

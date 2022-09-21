@@ -1,8 +1,8 @@
 <script lang="ts">
   import type { IEntry, ISpeaker, IPrintFields } from '@living-dictionaries/types';
   import { EntryPDFFieldsEnum } from '@living-dictionaries/types';
-  import { semanticDomains } from '../mappings/semantic-domains';
-  import QrCode from '../QrCode.svelte';
+  import { semanticDomains } from '../../mappings/semantic-domains';
+  import QrCode from '../../QrCode.svelte';
 
   export let entry: IEntry;
   // export let speakers: ISpeaker[];
