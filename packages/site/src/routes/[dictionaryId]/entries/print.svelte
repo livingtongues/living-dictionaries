@@ -2,7 +2,7 @@
   import { _ } from 'svelte-i18n';
   import { getContext } from 'svelte';
   import { configure } from 'instantsearch.js/es/widgets/index.js';
-  // import { preferredSettings } from '$lib/stores';
+  import { printFields } from '$lib/stores';
   import type { InstantSearch } from 'instantsearch.js';
   const search: InstantSearch = getContext('search');
 
@@ -10,7 +10,7 @@
   import Pagination from '$lib/components/search/Pagination.svelte';
   import Button from 'svelte-pieces/ui/Button.svelte';
   import { createPersistedStore } from 'svelte-pieces/stores/persisted';
-  import { HTMLTemplate, dictionaryFields } from '@living-dictionaries/parts';
+  import { HTMLTemplate } from '@living-dictionaries/parts';
   import { dictionary, isManager } from '$lib/stores';
   import { browser } from '$app/env';
 
@@ -27,34 +27,8 @@
   let fontSize = createPersistedStore<number>('printFontSize', 12);
   let imagePercent = createPersistedStore<number>('printImagePercent', 50);
   let columnCount = createPersistedStore<number>('printColumnCount', 2);
-
-  const selectedFields = {
-    lo: true,
-    lo2: true,
-    lo3: true,
-    lo4: true,
-    lo5: true,
-    ph: true,
-    ps: true,
-    gl: true,
-    xv: true,
-    xs: true,
-    sr: false,
-    sd: false,
-    mr: false,
-    in: false,
-    nc: false,
-    pl: false,
-    va: false,
-    di: false,
-    nt: false,
-    sf: false,
-    vfs: false,
-    pf: true,
-    qrCode: false,
-    id: false,
-    hideLabels: false,
-  };
+  let showLabels = createPersistedStore<boolean>('printShowLabels', true);
+  let showQrCode = createPersistedStore<boolean>('printShowLabels', false);
 </script>
 
 <svelte:head>
@@ -119,14 +93,14 @@
           max="100"
           bind:value={$imagePercent} /><span class="font-medium text-gray-700">%</span>
       </div>
-      {#each Object.entries(selectedFields) as field}
-        {#if entries.find((entry) => entry[field[0]]) || field[0] === 'qrCode' || field[0] === 'hideLabels'}
-          <div class="flex items-center mr-3 mb-1">
-            <input id={field[0]} type="checkbox" bind:checked={selectedFields[field[0]]} />
-            <label class="ml-1 text-sm text-gray-700" for={field[0]}
-              >{$_(`entry.${[field[0]]}`, { default: dictionaryFields[field[0]] })}</label>
-          </div>
-        {/if}
+      {#each Object.keys(printFields) as field}
+        <!-- Todo: need a separate function to handle when to show what checkbox - for example, don't show "Labels" if no fields that are labeled are showing -->
+        <!-- {#if entries.find((entry) => entry[field])} -->
+        <div class="flex items-center mr-3 mb-1">
+          <input id={field} type="checkbox" bind:checked={printFields[field]} />
+          <label class="ml-1 text-sm text-gray-700" for={field}>{$_(`entry.${[field]}`)}</label>
+        </div>
+        <!-- {/if} -->
       {/each}
     </div>
   </div>
@@ -143,7 +117,9 @@
         fontSize={$fontSize}
         imagePercent={$imagePercent}
         {entry}
-        {selectedFields}
+        showQrCode={$showQrCode}
+        showLabels={$showLabels}
+        selectedFields={$printFields}
         dictionaryId={$dictionary.id} />
     {/each}
   </div>

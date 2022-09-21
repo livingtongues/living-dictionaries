@@ -16,7 +16,7 @@ import type { IDictionarySettings } from './dictionary-settings.interface';
 import type { IPartOfSpeech } from './part-of-speech.interface';
 import type { IColumn } from './column.interface';
 import type { HelperRoles, IHelper } from './helper.interface';
-import type { ISelectedFields, IPrintSettings } from './pdf-entry.interface';
+import type { IPrintFields } from './pdf-entry.interface';
 
 export type {
   IAudio,
@@ -44,8 +44,7 @@ export type {
   IColumn,
   IPoint,
   IRegion,
-  ISelectedFields,
-  IPrintSettings,
+  IPrintFields,
 };
 
 import { ReadyLocales, UnpublishedLocales } from './languages.interface';
