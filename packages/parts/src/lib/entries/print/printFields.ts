@@ -1,0 +1,26 @@
+import type { IPrintFields } from "@living-dictionaries/types";
+
+export const defaultPrintFields: IPrintFields = {
+  lo: true,
+  lo2: true,
+  lo3: true,
+  lo4: true,
+  lo5: true,
+  ph: true,
+  ps: true,
+  gloss: true,
+  xv: true,
+  xs: true,
+  sr: false,
+  sdn: false,
+  mr: false,
+  in: false,
+  nc: false,
+  pl: false,
+  va: false,
+  di: false,
+  nt: false,
+  image: false,
+  speaker: false,
+  id: false,
+};

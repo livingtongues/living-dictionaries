@@ -1,17 +1,18 @@
-import { writable, derived } from 'svelte/store';
-import type { IPrintSettings } from '@living-dictionaries/types';
-import { browser } from '$app/env';
+import { writable } from 'svelte/store';
+import type { IPrintFields } from '@living-dictionaries/types';
+// import { browser } from '$app/env';
+import { defaultPrintFields } from '@living-dictionaries/parts';
 
-let defaultSettings: IPrintSettings;
-let cachedSettings: IPrintSettings;
-if (browser) {
-  cachedSettings = JSON.parse(localStorage.getItem('TestSettings'));
-}
+export const printFields = writable<IPrintFields>(defaultPrintFields);
+// let cachedSettings: IPrintSettings;
+// if (browser) {
+//   cachedSettings = JSON.parse(localStorage.getItem('TestSettings'));
+// }
 
-export const preferredSettings = writable(cachedSettings || defaultSettings);
+// export const preferredSettings = writable(cachedSettings || defaultPrintF);
 
-if (browser) {
-  preferredSettings.subscribe((selectedSettings) =>
-    localStorage.setItem('TestSettings', JSON.stringify(selectedSettings))
-  );
-}
+// if (browser) {
+//   preferredSettings.subscribe((selectedSettings) =>
+//     localStorage.setItem('TestSettings', JSON.stringify(selectedSettings))
+//   );
+// }
