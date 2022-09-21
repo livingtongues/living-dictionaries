@@ -7,7 +7,7 @@ export { default as Filter } from './helpers/Filter.svelte';
 
 export { default as LatLngDisplay } from './maps/LatLngDisplay.svelte';
 
-export { default as HTMLTemplate } from './export/HTMLTemplate.svelte';
+export { default as PrintEntry } from './entries/print/PrintEntry.svelte';
 export { defaultPrintFields } from './entries/print/printFields';
 
 export { default as WhereSpoken } from './settings/WhereSpoken.svelte';
