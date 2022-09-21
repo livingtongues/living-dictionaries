@@ -1,18 +1,18 @@
 import { writable } from 'svelte/store';
 import type { IPrintFields } from '@living-dictionaries/types';
-// import { browser } from '$app/env';
+import { browser } from '$app/env';
 import { defaultPrintFields } from '@living-dictionaries/parts';
 
-export const printFields = writable<IPrintFields>(defaultPrintFields);
-// let cachedSettings: IPrintSettings;
-// if (browser) {
-//   cachedSettings = JSON.parse(localStorage.getItem('TestSettings'));
-// }
+let cachedPrintFields: IPrintFields;
+const printFieldsCacheKey = 'print_fields_9.21.2022'; // rename when updating print fields
+if (browser) {
+  cachedPrintFields = JSON.parse(localStorage.getItem(printFieldsCacheKey));
+}
 
-// export const preferredSettings = writable(cachedSettings || defaultPrintF);
+export const preferredPrintFields = writable(cachedPrintFields || defaultPrintFields);
 
-// if (browser) {
-//   preferredSettings.subscribe((selectedSettings) =>
-//     localStorage.setItem('TestSettings', JSON.stringify(selectedSettings))
-//   );
-// }
+if (browser) {
+  preferredPrintFields.subscribe((selectedPrintFields) =>
+    localStorage.setItem(printFieldsCacheKey, JSON.stringify(selectedPrintFields))
+  );
+}

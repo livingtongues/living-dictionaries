@@ -21,11 +21,13 @@
   <!--Essential Fields-->
   <div>
     <b style="font-size: {headwordSize}pt;">{entry.lx}</b>
-    {#each ['lo', 'lo2', 'lo3', 'lo4', 'lo5'] as lo}
-      {#if entry[lo] && selectedFields[lo]}
-        <b>{entry[lo]}</b>{' '}
-      {/if}
-    {/each}
+    {#if selectedFields.alternateOrthographies}
+      {#each ['lo', 'lo2', 'lo3', 'lo4', 'lo5'] as lo}
+        {#if entry[lo]}
+          <b>{entry[lo]}</b>{' '}
+        {/if}
+      {/each}
+    {/if}
     {entry.ph && selectedFields.ph ? `/${entry.ph}/` : ''}
     <i>{entry.ps && selectedFields.ps ? entry.ps : ''}</i>
     {#if entry.gl && selectedFields.gloss}
@@ -33,8 +35,8 @@
         {@html gloss[1]}{index < Object.entries(entry.gl).length - 1 ? ' - ' : ''}
       {/each}
     {/if}
-    <b>{entry.xv && selectedFields.xv ? entry.xv : ''}</b>
-    {#if entry.xs && selectedFields.xs}
+    <b>{entry.xv && selectedFields.example_sentence ? entry.xv : ''}</b>
+    {#if entry.xs && selectedFields.example_sentence}
       {#each Object.entries(entry.xs) as sentence, index}
         {sentence[1]}{index < Object.entries(entry.xs).length - 1 ? ', ' : ''}
       {/each}
