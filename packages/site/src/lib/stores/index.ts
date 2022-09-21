@@ -6,7 +6,6 @@ import { myDictionaries } from './dictionaries';
 import { dictionary, entries } from './dictionary';
 import { columns, preferredColumns } from './columns';
 import { algoliaQueryParams } from './search';
-import { preferredPrintFields } from './print';
 
 export {
   user,
@@ -20,5 +19,4 @@ export {
   columns,
   preferredColumns,
   algoliaQueryParams,
-  preferredPrintFields,
 };

@@ -2,7 +2,6 @@
   import { _ } from 'svelte-i18n';
   import { getContext } from 'svelte';
   import { configure } from 'instantsearch.js/es/widgets/index.js';
-  import { preferredPrintFields } from '$lib/stores';
   import type { InstantSearch } from 'instantsearch.js';
   const search: InstantSearch = getContext('search');
 
@@ -10,11 +9,12 @@
   import Pagination from '$lib/components/search/Pagination.svelte';
   import Button from 'svelte-pieces/ui/Button.svelte';
   import { createPersistedStore } from 'svelte-pieces/stores/persisted';
-  import { HTMLTemplate } from '@living-dictionaries/parts';
+  import { HTMLTemplate, defaultPrintFields } from '@living-dictionaries/parts';
   import { dictionary, isManager } from '$lib/stores';
   import { browser } from '$app/env';
+  import type { IPrintFields } from '@living-dictionaries/types';
 
-  let hitsPerPage = createPersistedStore<number>('printHitsPerPage', 50);
+  const hitsPerPage = createPersistedStore<number>('printHitsPerPage', 50);
   $: if (browser) {
     search.addWidgets([
       configure({
@@ -23,12 +23,16 @@
     ]);
   }
 
-  let headwordSize = createPersistedStore<number>('printHeadwordSize', 12);
-  let fontSize = createPersistedStore<number>('printFontSize', 12);
-  let imagePercent = createPersistedStore<number>('printImagePercent', 50);
-  let columnCount = createPersistedStore<number>('printColumnCount', 2);
-  let showLabels = createPersistedStore<boolean>('printShowLabels', true);
-  let showQrCode = createPersistedStore<boolean>('printShowLabels', false);
+  const preferredPrintFields = createPersistedStore<IPrintFields>(
+    'printFields_9.21.2022',
+    defaultPrintFields
+  );
+  const headwordSize = createPersistedStore<number>('printHeadwordSize', 12);
+  const fontSize = createPersistedStore<number>('printFontSize', 12);
+  const imagePercent = createPersistedStore<number>('printImagePercent', 50);
+  const columnCount = createPersistedStore<number>('printColumnCount', 2);
+  const showLabels = createPersistedStore<boolean>('printShowLabels', true);
+  const showQrCode = createPersistedStore<boolean>('printShowLabels', false);
 </script>
 
 <svelte:head>
