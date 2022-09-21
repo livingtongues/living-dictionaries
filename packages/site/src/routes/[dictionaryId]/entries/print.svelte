@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { _ } from 'svelte-i18n';
   import { getContext } from 'svelte';
   import { configure } from 'instantsearch.js/es/widgets/index.js';
   import type { InstantSearch } from 'instantsearch.js';
@@ -12,7 +13,7 @@
   import { dictionary, isManager } from '$lib/stores';
   import { browser } from '$app/env';
 
-  let hitsPerPage = 30;
+  let hitsPerPage = 300;
   $: if (browser) {
     search.addWidgets([
       configure({
@@ -21,11 +22,12 @@
     ]);
   }
 
-  let headwordSize = 5;
+  let headwordSize = 1;
   let fontSize = 1;
-  let imagePercent = 100;
+  let imagePercent = 50;
   let columnWidth = 250;
   $: columnWidthEm = columnWidth / 16;
+  let columnCount = 2;
 
   const selectedFields = {
     lo: true,
@@ -78,7 +80,17 @@
           min="1"
           max={$isManager ? 1000 : 300}
           bind:value={hitsPerPage} />
-          <!-- Algolia hard max per page is 1000 -->
+        <!-- Algolia hard max per page is 1000 -->
+      </div>
+      <div class="mb-1 mr-2">
+        <label class="font-medium text-gray-700" for="columnCount">Column count</label>
+        <input
+          class="form-input text-sm w-17"
+          id="columnCount"
+          type="number"
+          min="1"
+          max="10"
+          bind:value={columnCount} />
       </div>
       <div class="mb-1 mr-2">
         <label class="font-medium text-gray-700" for="headwordSize">Headword size</label>
@@ -127,24 +139,65 @@
       Minimum column width: {columnWidth}px
     </div>
   </div>
-  <div class="print-columns" style="--column-width: {columnWidthEm}em;">
-    {#each entries as entry, index (entry.id)}
-      <HTMLTemplate
-        {headwordSize}
-        {fontSize}
-        {imagePercent}
-        {entry}
-        {selectedFields}
-        dictionaryId={$dictionary.id} />
-    {/each}
-  </div>
+
+  <table class="w-full">
+    <thead
+      ><tr
+        ><td class="text-lg">
+          <!-- <div class="print:h-40px w-full" /> -->
+          {$dictionary.name}
+          {$_('misc.LD_singular', { default: 'Living Dictionary' })}
+        </td></tr
+      ></thead>
+    <tbody
+      ><tr
+        ><td>
+          <div
+            class="print-columns w-full"
+            style="--column-width: {columnWidthEm}em; --column-count: {columnCount}">
+            {#each entries as entry (entry.id)}
+              <HTMLTemplate
+                {headwordSize}
+                {fontSize}
+                {imagePercent}
+                {entry}
+                {selectedFields}
+                dictionaryId={$dictionary.id} />
+            {/each}
+          </div>
+        </td></tr
+      ></tbody>
+    <tfoot
+      ><tr
+        ><td>
+          <!-- <div class="print:h-40px w-full" /> -->
+          {new Date().getFullYear()}.
+          {$dictionary.name}
+          <span>{$_('misc.LD_singular', { default: 'Living Dictionary' })}.</span>
+          Living Tongues Institute for Endangered Languages. https://livingdictionaries.app/{$dictionary.id}
+        </td></tr
+      ></tfoot>
+  </table>
+
+  <!-- <div class="hidden print:block print:fixed print:top-0 h-40px text-lg">
+    {$dictionary.name}
+    {$_('misc.LD_singular', { default: 'Living Dictionary' })}
+  </div> -->
+
+  <!-- <div class="print:fixed print:bottom-0 text-xs" style="direction: ltr;">
+    {new Date().getFullYear()}.
+    {$dictionary.name}
+    <span>{$_('misc.LD_singular', { default: 'Living Dictionary' })}.</span>
+    Living Tongues Institute for Endangered Languages. https://livingdictionaries.app/{$dictionary.id}
+  </div> -->
 </Hits>
 <Pagination {search} />
 
-<style>
+<style global>
   .print-columns {
-    column-width: var(--column-width);
+    /* column-width: var(--column-width); */
     /* column-gap: 2em; << default is 1em */
-    /* column-count: 2; << hard-coded columns method, not using */
+    column-count: var(--column-count);
   }
+  /* https://medium.com/@Idan_Co/the-ultimate-print-html-template-with-header-footer-568f415f6d2a */
 </style>
