@@ -9,18 +9,18 @@
   export let entry: IEntry;
   // export let speakers: ISpeaker[];
   export let selectedFields: ISelectedFields;
-  export let imagePercent = 100;
-  export let fontSize = 1;
-  export let headwordSize = 5;
+  export let imagePercent = 50;
+  export let fontSize = 12;
+  export let headwordSize = 12;
   export let dictionaryId: string;
 
   // $: speaker = entry.sf?.sp ? speakers.find((s) => s.uid === entry.sf.sp) : null;
 </script>
 
-<div style={`font-size: ${fontSize}em;`}>
+<div style={`font-size: ${fontSize}pt;`}>
   <!--Essential Fields-->
   <div>
-    <b style="font-size: 1.{headwordSize - 1}em;">{entry.lx}</b>
+    <b style="font-size: {headwordSize}pt;">{entry.lx}</b>
     {#each ['lo', 'lo2', 'lo3', 'lo4', 'lo5'] as lo}
       {#if entry[lo] && selectedFields[lo]}
         <b>{entry[lo]}</b>{' '}
@@ -52,7 +52,7 @@
     {/if}
     <div>
       {#if entry.sdn && selectedFields.sd}
-        <i>Semantic Domains: </i>
+        <span class="italic text-[80%]">Semantic Domains: </span>
         {#each entry.sdn as key, index}
           {semanticDomains.find((sd) => sd.key === key).name}{index < entry.sdn.length - 1
             ? ', '
@@ -81,8 +81,8 @@
   {#if entry.pf && selectedFields.pf}
     <!-- max-height keeps tall images from spilling onto 2nd page when printing single column w/ images at 100% width; -->
     <img
-      class="block"
-      style="width:{imagePercent}%; margin-bottom:5px; max-height: 100vh;"
+      class="block mb-1 mt-1px"
+      style="width:{imagePercent}%; max-height: 100vh;"
       src={`https://lh3.googleusercontent.com/${entry.pf.gcs}`}
       alt={entry.lx} />
     <!-- <Image square={imageSize} gcs={entry.pf.gcs} lexeme={entry.lx} /> -->
