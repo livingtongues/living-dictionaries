@@ -2,6 +2,7 @@
   import { _ } from 'svelte-i18n';
   import { getContext } from 'svelte';
   import { configure } from 'instantsearch.js/es/widgets/index.js';
+  import { preferredSettings } from '$lib/stores';
   import type { InstantSearch } from 'instantsearch.js';
   const search: InstantSearch = getContext('search');
 
@@ -26,7 +27,7 @@
   let imagePercent = 50;
   let columnCount = 2;
 
-  const selectedFields = {
+  const selectedFields = $preferredSettings?.selectedFields ? $preferredSettings?.selectedFields :  {
     lo: true,
     lo2: true,
     lo3: true,
@@ -122,7 +123,7 @@
           <div class="flex items-center mr-3 mb-1">
             <input id={field[0]} type="checkbox" bind:checked={selectedFields[field[0]]} />
             <label class="ml-1 text-sm text-gray-700" for={field[0]}
-              >{dictionaryFields[field[0]]}</label>
+              >{$_(`entry.${[field[0]]}`, {default: dictionaryFields[field[0]]})}</label>
           </div>
         {/if}
       {/each}

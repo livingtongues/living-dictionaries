@@ -29,3 +29,12 @@ type EntryForPDFKeys = keyof typeof EntryPDFFieldsEnum;
 export type ISelectedFields = {
   [key in EntryForPDFKeys]?: boolean;
 };
+
+export interface IPrintSettings {
+  selectedFields: ISelectedFields;
+  headwordSize: number;
+  fontSize: number;
+  imagePercent: number;
+  minCloumnWidth: number;
+  //maxEntries: number
+}

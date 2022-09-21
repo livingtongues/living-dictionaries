@@ -1,8 +1,6 @@
 <script lang="ts">
   import type { IEntry, ISpeaker, ISelectedFields } from '@living-dictionaries/types';
   import { EntryPDFFieldsEnum } from '@living-dictionaries/types';
-  //TODO how to use Image?
-  //import { Image } from '../entries/media/Image.svelte';
   import { semanticDomains } from '../mappings/semantic-domains';
   import QrCode from '../QrCode.svelte';
 
@@ -45,9 +43,13 @@
         {#if !selectedFields.hideLabels}
           <i>Source(s): </i>
         {/if}
-        {#each entry.sr as source, index}
-          <i>{index < entry.sr.length - 1 ? `${source}, ` : `${source}`}</i>
-        {/each}
+        {#if typeof entry.sr === 'string'}
+          <i>{entry.sr}</i>
+        {:else}
+          {#each entry.sr as source, index}
+            <i>{index < entry.sr.length - 1 ? `${source}, ` : `${source}`}</i>
+          {/each}
+        {/if}
       </div>
     {/if}
     <div>
@@ -85,7 +87,6 @@
       style="width:{imagePercent}%; max-height: 100vh;"
       src={`https://lh3.googleusercontent.com/${entry.pf.gcs}`}
       alt={entry.lx} />
-    <!-- <Image square={imageSize} gcs={entry.pf.gcs} lexeme={entry.lx} /> -->
   {/if}
   {#if selectedFields.qrCode}
     {#await new Promise((r) => setTimeout(() => r(true), 1)) then value}
