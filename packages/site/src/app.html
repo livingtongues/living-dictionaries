@@ -53,7 +53,7 @@
 	<link href="%sveltekit.assets%/tw-prose.css" rel="stylesheet" />
 </head>
 
-<body class="text-gray-800 antialiased" style="padding-top: 3rem;">
+<body class="text-gray-800 antialiased">
 	<div>%sveltekit.body%</div>
 
 	<style>
@@ -64,6 +64,12 @@
 
 		.text-gray-800 {
 			color: rgba(31, 41, 55, 1);
+		}
+
+		@media screen {
+			body {
+				padding-top: 3rem;
+			}
 		}
 	</style>
 </body>

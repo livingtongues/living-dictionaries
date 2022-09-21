@@ -9,11 +9,10 @@
   import Pagination from '$lib/components/search/Pagination.svelte';
   import Button from 'svelte-pieces/ui/Button.svelte';
   import { HTMLTemplate, dictionaryFields } from '@living-dictionaries/parts';
-  // import type { ISpeaker } from '@living-dictionaries/types';
   import { dictionary, isManager } from '$lib/stores';
   import { browser } from '$app/env';
 
-  let hitsPerPage = 300;
+  let hitsPerPage = 50;
   $: if (browser) {
     search.addWidgets([
       configure({
@@ -22,11 +21,9 @@
     ]);
   }
 
-  let headwordSize = 1;
-  let fontSize = 1;
+  let headwordSize = 12;
+  let fontSize = 12;
   let imagePercent = 50;
-  let columnWidth = 250;
-  $: columnWidthEm = columnWidth / 16;
   let columnCount = 2;
 
   const selectedFields = {
@@ -56,8 +53,6 @@
     id: false,
     hideLabels: false,
   };
-
-  // let speakers: ISpeaker[];
 </script>
 
 <svelte:head>
@@ -93,23 +88,23 @@
           bind:value={columnCount} />
       </div>
       <div class="mb-1 mr-2">
-        <label class="font-medium text-gray-700" for="headwordSize">Headword size</label>
+        <label class="font-medium text-gray-700" for="headwordSize">Headword size (pt)</label>
         <input
           class="form-input text-sm w-17"
           id="headwordSize"
           type="number"
-          min="1"
-          max="10"
+          min="6"
+          max="30"
           bind:value={headwordSize} />
       </div>
       <div class="mb-1 mr-2">
-        <label class="font-medium text-gray-700" for="fontSize">Font size</label>
+        <label class="font-medium text-gray-700" for="fontSize">Font size (pt)</label>
         <input
           class="form-input text-sm w-15"
           id="fontSize"
           type="number"
-          min="0.1"
-          step="0.1"
+          min="6"
+          max="24"
           bind:value={fontSize} />
       </div>
       <div class="mb-1 mr-2">
@@ -132,68 +127,37 @@
         {/if}
       {/each}
     </div>
-    <div
-      class="bg-red-50 p-1 border-red-400 border-t border-l border-r overflow-hidden"
-      style="width: {columnWidthEm}em; max-width: 100%;">
-      <input type="range" min="150" max="800" bind:value={columnWidth} /><br />
-      Minimum column width: {columnWidth}px
-    </div>
   </div>
 
-  <table class="w-full">
-    <thead
-      ><tr
-        ><td class="text-lg">
-          <!-- <div class="print:h-40px w-full" /> -->
-          {$dictionary.name}
-          {$_('misc.LD_singular', { default: 'Living Dictionary' })}
-        </td></tr
-      ></thead>
-    <tbody
-      ><tr
-        ><td>
-          <div
-            class="print-columns w-full"
-            style="--column-width: {columnWidthEm}em; --column-count: {columnCount}">
-            {#each entries as entry (entry.id)}
-              <HTMLTemplate
-                {headwordSize}
-                {fontSize}
-                {imagePercent}
-                {entry}
-                {selectedFields}
-                dictionaryId={$dictionary.id} />
-            {/each}
-          </div>
-        </td></tr
-      ></tbody>
-    <tfoot
-      ><tr
-        ><td>
-          <!-- <div class="print:h-40px w-full" /> -->
-          {new Date().getFullYear()}.
-          {$dictionary.name}
-          <span>{$_('misc.LD_singular', { default: 'Living Dictionary' })}.</span>
-          Living Tongues Institute for Endangered Languages. https://livingdictionaries.app/{$dictionary.id}
-        </td></tr
-      ></tfoot>
-  </table>
-
-  <!-- <div class="hidden print:block print:fixed print:top-0 h-40px text-lg">
+  <div class="hidden print:block text-lg mb-5">
     {$dictionary.name}
     {$_('misc.LD_singular', { default: 'Living Dictionary' })}
-  </div> -->
+  </div>
 
-  <!-- <div class="print:fixed print:bottom-0 text-xs" style="direction: ltr;">
+  <div
+    class="print-columns"
+    style="--column-count: {columnCount}">
+    {#each entries as entry (entry.id)}
+      <HTMLTemplate
+        {headwordSize}
+        {fontSize}
+        {imagePercent}
+        {entry}
+        {selectedFields}
+        dictionaryId={$dictionary.id} />
+    {/each}
+  </div>
+
+  <div class="mt-5 text-xs" style="direction: ltr;">
     {new Date().getFullYear()}.
     {$dictionary.name}
     <span>{$_('misc.LD_singular', { default: 'Living Dictionary' })}.</span>
     Living Tongues Institute for Endangered Languages. https://livingdictionaries.app/{$dictionary.id}
-  </div> -->
+  </div>
 </Hits>
 <Pagination {search} />
 
-<style global>
+<style>
   .print-columns {
     /* column-width: var(--column-width); */
     /* column-gap: 2em; << default is 1em */

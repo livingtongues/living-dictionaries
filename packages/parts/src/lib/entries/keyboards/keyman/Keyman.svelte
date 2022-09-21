@@ -19,10 +19,6 @@
       attachType: 'manual',
     });
     loaded = true;
-
-    // if (!kmw.util.isTouchDevice()) {
-    //   document.body.classList.add('kmw-is-desktop');
-    // }
   });
 </script>
 
