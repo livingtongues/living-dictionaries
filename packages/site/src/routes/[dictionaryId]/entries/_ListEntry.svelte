@@ -79,7 +79,7 @@
               {/if}
             {/each}
           {/if}
-        {:else if $dictionary.id === 'babanki' || $dictionary.id === 'sengwer'}
+        {:else if $dictionary.id === 'babanki'}
           {#if entry.pl}<p class="text-xs">{$t('entry.pl', { default: 'Plural form' })}: {entry.pl}</p>{/if}
         {/if}
       </div>
