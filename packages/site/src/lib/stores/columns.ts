@@ -95,7 +95,7 @@ const defaultColumns: IColumn[] = [
 ];
 
 let cachedColumns: IColumn[] = [];
-const tableCacheKey = 'table_columns_20.9.2022';
+const tableCacheKey = 'table_columns_4.7.2021';
 if (browser) {
   cachedColumns = JSON.parse(localStorage.getItem(tableCacheKey));
 }
