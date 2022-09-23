@@ -1,5 +1,4 @@
 export enum EntryPDFFieldsEnum {
-  // If initialized with value then the value will be the field label // too cryptic - only found this out by breaking things from adding labels for all fields
   id = 'Id',
   in = 'Interlinearization',
   mr = 'Morphology',
@@ -8,15 +7,15 @@ export enum EntryPDFFieldsEnum {
   va = 'Variant',
   di = 'Dialect',
   nt = 'Notes',
-  alternateOrthographies = '',
-  ph = '',
-  gloss = '',
-  ps = '',
-  example_sentence = '',
-  image = '',
-  speaker = '',
-  sr = '',
-  sdn = '', // sd
+  alternateOrthographies = 'Alternate Orthographies',
+  ph = 'Phonetic',
+  gloss = 'Glosses',
+  ps = 'Part of Speech',
+  example_sentence = 'Example Sentences',
+  image = 'Image',
+  speaker = 'Speaker',
+  sr = 'Source',
+  sdn = 'Semantic Domains',
 }
 type PrintFieldKeys = keyof typeof EntryPDFFieldsEnum;
 export type IPrintFields = {
