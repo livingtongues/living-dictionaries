@@ -1,11 +1,5 @@
-<script lang="ts" context="module">
+<script lang="ts">
   import { Layout } from 'kitbook';
-  const modules = import.meta.glob('./**/*.{md,svx}');
-
-  import type { Load } from '@sveltejs/kit';
-  export const load: Load = () => {
-    return { stuff: { kitbook: { modules } } };
-  };
 </script>
 
 <Layout title="Living Dictionaries Docs" githubURL="https://github.com/livingtongues/living-dictionaries/tree/main/packages/parts">

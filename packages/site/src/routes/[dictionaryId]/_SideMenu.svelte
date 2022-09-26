@@ -14,12 +14,12 @@
   </h5>
 </div>
 <div on:click={() => (menuOpen = false)}>
-  <!-- <a sveltekit:prefetch href={'/' + $dictionary.id}>
+  <!-- <a data-sveltekit-prefetch href={'/' + $dictionary.id}>
     <i class="far fa-th-large fa-fw text-lg" />
     <span class="font-medium mx-2">{$_('dictionary.overview', { default: 'Overview' })}</span>
   </a> -->
   <a
-    sveltekit:prefetch
+    data-sveltekit-prefetch
     class:active={$page.url.pathname.match(/entry|entries/)}
     href={`/${$dictionary.id}/entries/list`}>
     <i class="far fa-list fa-fw" />
@@ -34,7 +34,7 @@
     </span>
   </a>
   <a
-    sveltekit:prefetch
+    data-sveltekit-prefetch
     href={'/' + $dictionary.id + '/about'}
     class:active={$page.url.pathname.includes('about')}>
     <i class="far fa-info-circle fa-fw" />
@@ -43,7 +43,7 @@
     </span>
   </a>
   <a
-    sveltekit:prefetch
+    data-sveltekit-prefetch
     href={'/' + $dictionary.id + '/contributors'}
     class:active={$page.url.pathname.includes('contributors')}>
     <i class="far fa-users fa-fw" />
@@ -52,7 +52,7 @@
     </span>
   </a>
   <a
-    sveltekit:prefetch
+    data-sveltekit-prefetch
     href={'/' + $dictionary.id + '/grammar'}
     class:active={$page.url.pathname.includes('grammar')}>
     <i class="far fa-edit fa-fw" />
@@ -62,7 +62,7 @@
   </a>
   {#if $isManager}
     <a
-      sveltekit:prefetch
+      data-sveltekit-prefetch
       href={'/' + $dictionary.id + '/settings'}
       class:active={$page.url.pathname.includes('settings')}>
       <i class="far fa-cog fa-fw" />
@@ -73,7 +73,7 @@
   {/if}
   {#if $isManager}
     <a
-      sveltekit:prefetch
+      data-sveltekit-prefetch
       href={'/' + $dictionary.id + '/export'}
       class:active={$page.url.pathname.includes('export')}>
       <i class="far fa-download" />

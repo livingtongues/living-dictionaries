@@ -44,7 +44,7 @@
     selectedDictionary = null;
   }
 
-  import { browser } from '$app/env';
+  import { browser } from '$app/environment';
   $: {
     if (browser && $admin) {
       getCollection<IDictionary>('dictionaries', [where('public', '!=', true)]).then(

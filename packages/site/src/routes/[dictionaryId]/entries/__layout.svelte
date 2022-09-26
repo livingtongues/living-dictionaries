@@ -6,7 +6,7 @@
   import EntryFilters from './_EntryFilters.svelte';
 
   import { page } from '$app/stores';
-  import { browser } from '$app/env';
+  import { browser } from '$app/environment';
 
   let showMobileFilters = false;
 </script>
@@ -24,7 +24,7 @@
           class="flex md:p-1 border bg-gray-200 rounded-md text-gray-600
               font-medium text-xl md:text-sm">
           <a
-            sveltekit:prefetch
+            data-sveltekit-prefetch
             href={'/' + $page.params.dictionaryId + '/entries/list'}
             class="{$page.url.pathname.includes('list') ? 'bg-white shadow' : 'hover:bg-gray-100'}
                 px-2 py-1 rounded">
@@ -35,7 +35,7 @@
           </a>
           <div class="hidden md:block w-1" />
           <a
-            sveltekit:prefetch
+            data-sveltekit-prefetch
             href={'/' + $page.params.dictionaryId + '/entries/table'}
             class="{$page.url.pathname.includes('table') ? 'bg-white shadow' : 'hover:bg-gray-100'}
             px-2 py-1 rounded">
@@ -46,7 +46,7 @@
           </a>
           <div class="hidden md:block w-1" />
           <a
-            sveltekit:prefetch
+            data-sveltekit-prefetch
             href={'/' + $page.params.dictionaryId + '/entries/gallery'}
             class="{$page.url.pathname.includes('gallery') ? 'bg-white shadow' : 'hover:bg-gray-100'}
                 px-2 py-1 rounded">
@@ -56,7 +56,7 @@
             </span>
           </a>
           <a
-            sveltekit:prefetch
+            data-sveltekit-prefetch
             href={'/' + $page.params.dictionaryId + '/entries/print'}
             class="{$page.url.pathname.includes('print') ? 'bg-white shadow' : 'hover:bg-gray-100'}
                 px-2 py-1 rounded">

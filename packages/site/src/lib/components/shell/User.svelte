@@ -27,7 +27,7 @@
 
   $: user = $userStore || ($session && $session.user) || null;
 
-  import { browser } from '$app/env';
+  import { browser } from '$app/environment';
   $: if (browser && $userStore && $session) {
     $session.user = null; // so that page will properly reflect log out status and not fall back to session user from cookies
   }
