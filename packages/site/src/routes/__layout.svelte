@@ -1,6 +1,6 @@
 <script context="module" lang="ts">
   import { loadLocaleOnClient, loadLocaleOnServer } from '$lib/i18n';
-  import { browser } from '$app/env';
+  import { browser } from '$app/environment';
   import { setConfig } from 'sveltefirets';
   import { firebaseConfig } from '$lib/firebaseConfig';
   import type { Load } from '@sveltejs/kit';

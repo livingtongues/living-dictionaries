@@ -11,7 +11,7 @@
   import { createPersistedStore } from 'svelte-pieces/stores/persisted';
   import { PrintEntry, defaultPrintFields } from '@living-dictionaries/parts';
   import { dictionary, isManager } from '$lib/stores';
-  import { browser } from '$app/env';
+  import { browser } from '$app/environment';
   import type { IPrintFields } from '@living-dictionaries/types';
 
   const hitsPerPage = createPersistedStore<number>('printHitsPerPage', 50);

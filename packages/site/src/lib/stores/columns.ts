@@ -4,7 +4,7 @@ import { vernacularName } from '$lib/helpers/vernacularName';
 import { dictionary } from './dictionary';
 import { get } from 'svelte/store';
 import { _ } from 'svelte-i18n';
-import { browser } from '$app/env';
+import { browser } from '$app/environment';
 
 const defaultColumns: IColumn[] = [
   // field must match those used for i18n

@@ -2,7 +2,7 @@
   import PrintEntry from '$lib/entries/print/PrintEntry.svelte';
   import { Story } from 'kitbook';
   import { defaultPrintFields as printFields } from '$lib/entries/print/printFields';
-  import { entries } from './_mock-data';
+  import { entries } from './mock-data';
   const dictionaryId = 'bezhta';
 </script>
 
