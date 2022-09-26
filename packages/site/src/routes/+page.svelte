@@ -1,24 +1,7 @@
-<script context="module" lang="ts">
-  import { getCollection } from 'sveltefirets';
-  import { orderBy, where } from 'firebase/firestore';
-
-  import type { Load } from '@sveltejs/kit';
-  export const load: Load = async () => {
-    try {
-      const publicDictionaries = await getCollection<IDictionary>('dictionaries', [
-        orderBy('name'),
-        where('public', '==', true),
-      ]);
-      return { props: { publicDictionaries } };
-    } catch (error) {
-      return {
-        error, // status: res.status,
-      };
-    }
-  };
-</script>
-
 <script lang="ts">
+  import { getCollection } from 'sveltefirets';
+  import { where } from 'firebase/firestore';
+
   import { _ } from 'svelte-i18n';
   import type { IDictionary } from '@living-dictionaries/types';
   import { admin, myDictionaries } from '$lib/stores';
@@ -33,7 +16,9 @@
   import Search from '$lib/components/home/Search.svelte';
   import Header from '$lib/components/shell/Header.svelte';
 
-  export let publicDictionaries: IDictionary[] = [];
+  import type { PageData } from './$types';
+  export let data: PageData;
+  $: publicDictionaries = data.publicDictionaries || [];
   let privateDictionaries: IDictionary[] = [];
   let selectedDictionaryId: string;
   let selectedDictionary: IDictionary;

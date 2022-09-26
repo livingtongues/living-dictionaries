@@ -2,16 +2,17 @@
   // from https://github.com/beyonk-adventures/svelte-mapbox
   import { setContext, onDestroy, createEventDispatcher, onMount, tick } from 'svelte';
   import { mapKey } from '../context';
-  import { loadScriptOnce, loadStylesOnce } from 'sveltefirets/client/loader';
+  import { loadScriptOnce, loadStylesOnce } from 'sveltefirets/helpers/loader';
   import { EventQueue } from '../queue';
   import type { LngLatLike, MapboxOptions, Map, LngLat, ErrorEvent, EventData } from 'mapbox-gl';
   import { bindEvents } from '../event-bindings';
   import { getTimeZoneLongitude } from '../../utils/getTimeZoneLongitude';
+  import { PUBLIC_mapboxAccessToken } from '$env/static/public';
 
   export let map: Map = null;
   export let version = 'v2.9.2';
   export let customStylesheetUrl: string = undefined;
-  export let accessToken = import.meta.env.VITE_mapboxAccessToken as string;
+  export let accessToken = PUBLIC_mapboxAccessToken;
   export let options: Partial<MapboxOptions> = {};
   export let zoom = 2;
   export let style = 'mapbox://styles/mapbox/streets-v11?optimize=true'; //'Mapbox Streets' // light-v8, light-v9, light-v10, dark-v10, satellite-v9, streets-v11

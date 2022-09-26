@@ -1,16 +1,4 @@
-<script context="module" lang="ts">
-  import type { Load } from '@sveltejs/kit';
-  export const load: Load = async ({ params }) => {
-    return {
-      props: {
-        dictionaryId: params.dictionaryId,
-      },
-    };
-  };
-</script>
-
 <script lang="ts">
-  export let dictionaryId: string;
   import { _ } from 'svelte-i18n';
   import { add, deleteDocumentOnline, updateOnline, Collection } from 'sveltefirets';
   import { where } from 'firebase/firestore';
@@ -27,7 +15,7 @@
   function writeIn() {
     const name = prompt(`${$_('speakers.name', { default: 'Name' })}?`);
     if (name) {
-      add(`dictionaries/${dictionaryId}/writeInCollaborators`, { name });
+      add(`dictionaries/${$dictionary.id}/writeInCollaborators`, { name });
     }
   }
 </script>
@@ -53,7 +41,7 @@
 
 <div class="divide-y divide-gray-200">
   <Collection
-    path={`dictionaries/${dictionaryId}/managers`}
+    path={`dictionaries/${$dictionary.id}/managers`}
     startWith={helperType}
     let:data={managers}>
     {#each managers as manager}
@@ -66,7 +54,7 @@
   </Collection>
   {#if $isManager}
     <Collection
-      path={`dictionaries/${dictionaryId}/invites`}
+      path={`dictionaries/${$dictionary.id}/invites`}
       queryConstraints={[where('role', '==', 'manager'), where('status', 'in', ['queued', 'sent'])]}
       startWith={inviteType}
       let:data={invites}>
@@ -76,7 +64,7 @@
             admin={$admin}
             {invite}
             on:delete={() =>
-              updateOnline(`dictionaries/${dictionaryId}/invites/${invite.id}`, {
+              updateOnline(`dictionaries/${$dictionary.id}/invites/${invite.id}`, {
                 status: 'cancelled',
               })}>
             <i slot="prefix"
@@ -101,7 +89,7 @@
 </h3>
 <div class="divide-y divide-gray-200">
   <Collection
-    path={`dictionaries/${dictionaryId}/contributors`}
+    path={`dictionaries/${$dictionary.id}/contributors`}
     startWith={helperType}
     let:data={contributors}>
     {#each contributors as contributor}
@@ -114,7 +102,7 @@
   </Collection>
   {#if $isManager}
     <Collection
-      path={`dictionaries/${dictionaryId}/invites`}
+      path={`dictionaries/${$dictionary.id}/invites`}
       queryConstraints={[
         where('role', '==', 'contributor'),
         where('status', 'in', ['queued', 'sent']),
@@ -127,7 +115,7 @@
             admin={$admin}
             {invite}
             on:delete={() =>
-              updateOnline(`dictionaries/${dictionaryId}/invites/${invite.id}`, {
+              updateOnline(`dictionaries/${$dictionary.id}/invites/${invite.id}`, {
                 status: 'cancelled',
               })}>
             <i slot="prefix"
@@ -163,7 +151,7 @@
 </h3>
 <div class="divide-y divide-gray-200">
   <Collection
-    path={`dictionaries/${dictionaryId}/writeInCollaborators`}
+    path={`dictionaries/${$dictionary.id}/writeInCollaborators`}
     startWith={helperType}
     let:data={writeInCollaborators}>
     {#each writeInCollaborators as collaborator}
@@ -178,7 +166,7 @@
             onclick={() => {
               if (confirm($_('misc.delete', { default: 'Delete' }))) {
                 deleteDocumentOnline(
-                  `dictionaries/${dictionaryId}/writeInCollaborators/${collaborator.id}`
+                  `dictionaries/${$dictionary.id}/writeInCollaborators/${collaborator.id}`
                 );
               }
             }}
@@ -212,7 +200,7 @@
 
 <hr class="my-3" />
 
-{#if dictionaryId != 'onondaga'}
+{#if $dictionary.id != 'onondaga'}
   <h3 class="font-semibold mb-1 mt-3">
     {$_('contributors.LD_team', { default: 'Living Dictionaries Team' })}
   </h3>

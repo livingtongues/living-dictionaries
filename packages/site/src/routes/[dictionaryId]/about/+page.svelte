@@ -1,33 +1,18 @@
-<script context="module" lang="ts">
-  import { getDocument, setOnline } from 'sveltefirets';
-
-  import type { Load } from '@sveltejs/kit';
-  export const load: Load = async ({ params }) => {
-    const dictionaryId = params.dictionaryId;
-    try {
-      const aboutDoc = await getDocument<IAbout>(`dictionaries/${dictionaryId}/info/about`);
-      if (aboutDoc && aboutDoc.about) {
-        return { props: { about: aboutDoc.about, dictionaryId } };
-      } else return { props: { about: null, dictionaryId } };
-    } catch (err) {
-      return { props: { aboutDoc: null, dictionaryId } };
-    }
-  };
-</script>
-
 <script lang="ts">
   import { _ } from 'svelte-i18n';
   import { dictionary, isManager } from '$lib/stores';
-
-  export let about = '',
-    dictionaryId: string;
+  import { setOnline } from 'sveltefirets';
   import Button from 'svelte-pieces/ui/Button.svelte';
   import type { IAbout } from '@living-dictionaries/types';
 
+  import type { PageData } from './$types';
+  export let data: PageData;
+  let about = data.about || '';
+
   async function save() {
     try {
-      await setOnline<IAbout>(`dictionaries/${dictionaryId}/info/about`, { about });
-      window.location.replace(`/${dictionaryId}/about`);
+      await setOnline<IAbout>(`dictionaries/${$dictionary.id}/info/about`, { about });
+      window.location.replace(`/${$dictionary.id}/about`);
     } catch (err) {
       alert(err);
     }

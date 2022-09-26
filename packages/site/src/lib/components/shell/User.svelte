@@ -1,9 +1,8 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
-  import { session } from '$app/stores';
+  import { page } from '$app/stores';
   import { admin, user as userStore } from '$lib/stores';
-  import { logOut } from 'sveltefirets';
-  import { firebaseConfig } from '$lib/firebaseConfig';
+  import { logOut, firebaseConfig } from 'sveltefirets';
   import Avatar from 'svelte-pieces/shell/Avatar.svelte';
   import ShowHide from 'svelte-pieces/functions/ShowHide.svelte';
   import Menu from 'svelte-pieces/shell/Menu.svelte';
@@ -25,11 +24,13 @@
     };
   }
 
-  $: user = $userStore || ($session && $session.user) || null;
+  let userStoreInited = false;
+  $: user = $userStore || (!userStoreInited && $page.data?.user) || null;
+
 
   import { browser } from '$app/environment';
-  $: if (browser && $userStore && $session) {
-    $session.user = null; // so that page will properly reflect log out status and not fall back to session user from cookies
+  $: if (browser && $userStore) {
+    userStoreInited = true; // so that page will properly reflect logged out status and not fall back to user loaded from cookies
   }
 </script>
 

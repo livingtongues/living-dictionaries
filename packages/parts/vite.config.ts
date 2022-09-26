@@ -5,7 +5,7 @@ import path from 'path';
 /** @type {import('vite').UserConfig} */
 const config = {
   plugins: [sveltekit()],
-  envDir: '../../',
+  // envDir: '../../',
   resolve: {
     alias: {
       '@living-dictionaries/parts': path.resolve('./src/lib'),

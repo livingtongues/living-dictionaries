@@ -17,7 +17,7 @@
   });
 
   import { dictionary, canEdit, admin } from '$lib/stores';
-  import ListEntry from './_ListEntry.svelte';
+  import ListEntry from '../_ListEntry.svelte';
   import { Doc } from 'sveltefirets';
 </script>
 

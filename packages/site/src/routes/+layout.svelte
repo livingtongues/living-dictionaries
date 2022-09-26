@@ -1,21 +1,5 @@
-<script context="module" lang="ts">
-  import { loadLocaleOnClient, loadLocaleOnServer } from '$lib/i18n';
-  import { browser } from '$app/environment';
-  import { setConfig } from 'sveltefirets';
-  import { firebaseConfig } from '$lib/firebaseConfig';
-  import type { Load } from '@sveltejs/kit';
-  export const load: Load = async ({ session }) => {
-    setConfig(firebaseConfig);
-    if (browser) {
-      await loadLocaleOnClient();
-    } else {
-      await loadLocaleOnServer(session.chosenLocale, session.acceptedLanguage);
-    }
-    return {};
-  };
-</script>
-
 <script lang="ts">
+  import { browser } from '$app/environment';
   import '../global.css';
   import { _ } from 'svelte-i18n';
   import { onMount } from 'svelte';

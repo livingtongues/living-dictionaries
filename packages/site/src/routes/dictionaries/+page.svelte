@@ -1,31 +1,16 @@
-<script context="module" lang="ts">
-  import { getCollection, Collection } from 'sveltefirets';
-  import { orderBy, where } from 'firebase/firestore';
-  import type { Load } from '@sveltejs/kit';
-  export const load: Load = async () => {
-    try {
-      const publicDictionaries = await getCollection<IDictionary>('dictionaries', [
-        orderBy('name'),
-        where('public', '==', true),
-      ]);
-      return { props: { publicDictionaries } };
-    } catch (error) {
-      return {
-        error, // status: res.status,
-      };
-    }
-  };
-</script>
-
 <script lang="ts">
   import { _ } from 'svelte-i18n';
-  import type { IDictionary } from '@living-dictionaries/types';
-  export let publicDictionaries: IDictionary[] = [];
+  import { Collection } from 'sveltefirets';
+  import { orderBy, where } from 'firebase/firestore';
   import { admin } from '$lib/stores';
   import { exportDictionariesAsCSV } from '$lib/export/csv';
   import Button from 'svelte-pieces/ui/Button.svelte';
   import ResponsiveTable from 'svelte-pieces/ui/ResponsiveTable.svelte';
   import Header from '$lib/components/shell/Header.svelte';
+  
+  import type { PageData } from './$types';
+  export let data: PageData;
+  $: publicDictionaries = data.publicDictionaries || [];
 
   let queryConstraints = [orderBy('name'), where('public', '==', true)];
   $: if ($admin) {

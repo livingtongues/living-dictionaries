@@ -1,21 +1,10 @@
-<script context="module" lang="ts">
-  import type { Load } from '@sveltejs/kit';
-  export const load: Load = async ({ params }) => {
-    return {
-      props: {
-        inviteId: params.inviteId,
-        dictionaryId: params.dictionaryId,
-      },
-    };
-  };
-</script>
-
 <script lang="ts">
   import { _ } from 'svelte-i18n';
   import type { IInvite, IHelper, IUser } from '@living-dictionaries/types';
-  import { isManager, isContributor, user } from '$lib/stores';
+  import { isManager, isContributor, user, dictionary } from '$lib/stores';
 
-  export let inviteId: string, dictionaryId: string;
+  import type { PageData } from './$types';
+  export let data: PageData;
   let inviteType: IInvite;
 
   import { Doc, setOnline, updateOnline } from 'sveltefirets';
@@ -28,12 +17,12 @@
         name: $user.displayName,
       };
 
-      const collectionPath = `dictionaries/${dictionaryId}/${
+      const collectionPath = `dictionaries/${$dictionary.id}/${
         role === 'manager' ? 'managers' : 'contributors'
       }/${$user.uid}`;
       await setOnline<IHelper>(collectionPath, contributor);
 
-      await updateOnline<IInvite>(`dictionaries/${dictionaryId}/invites/${inviteId}`, {
+      await updateOnline<IInvite>(`dictionaries/${$dictionary.id}/invites/${data.inviteId}`, {
         status: 'claimed',
       });
 
@@ -51,7 +40,7 @@
 
 <div>
   <Doc
-    path={`dictionaries/${dictionaryId}/invites/${inviteId}`}
+    path={`dictionaries/${$dictionary.id}/invites/${data.inviteId}`}
     let:data={invite}
     startWith={inviteType}>
     {#if invite && invite.status === 'sent'}
@@ -66,7 +55,7 @@
           <p class="mb-2">
             You are already a {invite.role}.
           </p>
-          <Button href={`/${dictionaryId}/entries/list`}>
+          <Button href={`/${$dictionary.id}/entries/list`}>
             {$_('dictionary.entries', {
               default: 'Entries',
             })}
@@ -117,7 +106,7 @@
           })}
       </p>
 
-      <Button href={`/${dictionaryId}/entries/list`}>
+      <Button href={`/${$dictionary.id}/entries/list`}>
         {$_('dictionary.entries', {
           default: 'Entries',
         })}
