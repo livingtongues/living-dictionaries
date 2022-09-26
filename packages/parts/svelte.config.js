@@ -1,6 +1,5 @@
 import adapter from '@sveltejs/adapter-auto';
 import preprocess from 'svelte-preprocess';
-import path from 'path';
 
 import deepWind from "svelte-deep-wind-preprocess";
 import { windi } from "svelte-windicss-preprocess";
@@ -9,9 +8,9 @@ import mdsvexConfig from './mdsvex.config.js';
 
 /** @type {import('@sveltejs/kit').Config} */
 const config = {
-  experimental: {
-    inspector: true
-  },
+  // experimental: {
+  //   inspector: true
+  // },
 
   extensions: ['.svelte', ...mdsvexConfig.extensions],
   preprocess: [
@@ -34,17 +33,6 @@ const config = {
 
   kit: {
     adapter: adapter(),
-    vite: {
-      resolve: {
-				alias: {
-          '@living-dictionaries/parts': path.resolve('./src/lib'),
-				},
-			},
-      define: {
-        'import.meta.vitest': false,
-      },
-      envDir: '../../',
-    }
   },
 };
 
