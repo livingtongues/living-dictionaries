@@ -29,6 +29,14 @@
     frameborder="0"
     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
     allowfullscreen />
+
+    <iframe
+    class="video mb-3"
+    src="https://www.youtube.com/embed/4PRGtToFhgo"
+    title="Tutorial 2 - How to Add and Edit Entries in a Living Dictionary"
+    frameborder="0"
+    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+    allowfullscreen />
 </div>
 
 <style>
