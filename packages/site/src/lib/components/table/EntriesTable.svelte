@@ -43,7 +43,7 @@
       {/each}
     </tr>
     {#if $canEdit}
-      {#await import('sveltefirets/client/components/Doc.svelte') then { default: Doc }}
+      {#await import('sveltefirets/firestore/Doc.svelte') then { default: Doc }}
         {#each entries as algoliaEntry (algoliaEntry.id)}
           <Doc
             path="dictionaries/{$dictionary.id}/words/{algoliaEntry.id}"
