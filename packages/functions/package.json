@@ -20,18 +20,18 @@
   "dependencies": {
     "algoliasearch": "^4.13.0",
     "firebase-admin": "^10.3.0",
-    "firebase-functions": "^3.21.0",
+    "firebase-functions": "^3.24.0",
     "firebase-tools": "^10.8.0"
   },
   "devDependencies": {
     "@firebase/testing": "^0.20.11",
     "@living-dictionaries/parts": "^0.0.1",
     "@living-dictionaries/types": "^1.0.0",
-    "@types/node": "^17.0.43",
+    "@types/node": "^18.7.21",
     "firebase-functions-test": "^0.2.0",
     "node-fetch": "^2.6.7",
-    "typescript": "^4.7.4",
-    "vitest": "^0.21.0"
+    "typescript": "^4.8.3",
+    "vitest": "^0.23.4"
   },
   "private": true
 }

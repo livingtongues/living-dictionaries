@@ -1,19 +1,15 @@
-/// <reference types="@sveltejs/kit" />
-
-// See https://kit.svelte.dev/docs/types#the-app-namespace
+// See https://kit.svelte.dev/docs/types#app
 // for information about these interfaces
+// and what to do when importing types
 declare namespace App {
-	interface Locals {
-    user: import('@living-dictionaries/types').IUser;
-    chosenLocale: string;
-	}
+	// interface Locals {}
+
+	// interface PageData {}
+  // user: import('@living-dictionaries/types').IUser;
+
+	// interface Error {}
+
 	// interface Platform {}
-  interface Session {
-    user: import('@living-dictionaries/types').IUser;
-    acceptedLanguage: string;
-    chosenLocale: string;
-  }
-	// interface Stuff {}
 }
 
 declare namespace svelte.JSX {
@@ -25,7 +21,6 @@ declare namespace svelte.JSX {
 }
 
 interface ImportMetaEnv {
-  VITE_mapboxAccessToken: string;
-  VITE_ProcessImageUrl: string; // added to Vercel env variables
-  VITE_FIREBASE_CONFIG: string; // prod is added to Vercel env variables
+  PUBLIC_mapboxAccessToken: string;
+  PUBLIC_ProcessImageUrl: string; // added to Vercel env variables
 }

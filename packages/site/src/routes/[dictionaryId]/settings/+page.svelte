@@ -4,7 +4,7 @@
   import { update, updateOnline, getCollection, Doc } from 'sveltefirets';
   import Button from 'svelte-pieces/ui/Button.svelte';
   import ShowHide from 'svelte-pieces/functions/ShowHide.svelte';
-  import EditString from './_EditString.svelte';
+  import EditString from '../_EditString.svelte';
   import { arrayRemove, arrayUnion, GeoPoint, where, limit } from 'firebase/firestore';
   import type { IDictionary, IPoint, IRegion } from '@living-dictionaries/types';
   import {

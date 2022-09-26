@@ -1,33 +1,18 @@
-<script context="module" lang="ts">
-  import { setOnline, getDocument } from 'sveltefirets';
-  import type { IGrammar } from '@living-dictionaries/types';
-
-  import type { Load } from '@sveltejs/kit';
-  export const load: Load = async ({ params }) => {
-    const dictionaryId = params.dictionaryId;
-    try {
-      const grammarDoc = await getDocument<IGrammar>(`dictionaries/${dictionaryId}/info/grammar`);
-      if (grammarDoc && grammarDoc.grammar) {
-        return { props: { grammar: grammarDoc.grammar, dictionaryId } };
-      } else return { props: { grammar: null, dictionaryId } };
-    } catch (err) {
-      return { props: { grammar: null, dictionaryId } };
-    }
-  };
-</script>
-
 <script lang="ts">
   import { _ } from 'svelte-i18n';
   import { dictionary, isManager } from '$lib/stores';
+  import { setOnline } from 'sveltefirets';
+  import type { IGrammar } from '@living-dictionaries/types';
 
-  export let grammar = '',
-    dictionaryId: string;
+  import type { PageData } from './$types';
+  export let data: PageData;
+  let grammar = data.grammar || '';
   import Button from 'svelte-pieces/ui/Button.svelte';
 
   async function save() {
     try {
-      await setOnline<IGrammar>(`dictionaries/${dictionaryId}/info/grammar`, { grammar });
-      window.location.replace(`/${dictionaryId}/grammar`);
+      await setOnline<IGrammar>(`dictionaries/${$dictionary.id}/info/grammar`, { grammar });
+      window.location.replace(`/${$dictionary.id}/grammar`);
     } catch (err) {
       alert(err);
     }

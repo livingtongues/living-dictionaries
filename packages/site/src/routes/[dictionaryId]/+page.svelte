@@ -1,22 +1,14 @@
-<script context="module" lang="ts">
-  import type { Load } from '@sveltejs/kit';
-  export const load: Load = async ({ params }) => {
-    return { status: 307, redirect: `/${params.dictionaryId}/entries/list` };
-  };
-</script>
-
 <script lang="ts">
   import { dictionary } from '$lib/stores';
-
-  function downloadObjectAsJson(exportObj, exportName) {
-    var dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(exportObj));
-    var downloadAnchorNode = document.createElement('a');
-    downloadAnchorNode.setAttribute('href', dataStr);
-    downloadAnchorNode.setAttribute('download', exportName + '.json');
-    document.body.appendChild(downloadAnchorNode); // required for firefox
-    downloadAnchorNode.click();
-    downloadAnchorNode.remove();
-  }
+  // function downloadObjectAsJson(exportObj, exportName) {
+  //   var dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(exportObj));
+  //   var downloadAnchorNode = document.createElement('a');
+  //   downloadAnchorNode.setAttribute('href', dataStr);
+  //   downloadAnchorNode.setAttribute('download', exportName + '.json');
+  //   document.body.appendChild(downloadAnchorNode); // required for firefox
+  //   downloadAnchorNode.click();
+  //   downloadAnchorNode.remove();
+  // }
 </script>
 
 <div>

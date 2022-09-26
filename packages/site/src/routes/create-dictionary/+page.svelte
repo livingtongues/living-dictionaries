@@ -5,8 +5,7 @@
   import { user } from '$lib/stores';
   import Header from '$lib/components/shell/Header.svelte';
   import type { IDictionary, IHelper, IPoint, IRegion, IUser } from '@living-dictionaries/types';
-  import { docExists, setOnline, updateOnline } from 'sveltefirets';
-  import { firebaseConfig } from '$lib/firebaseConfig';
+  import { docExists, setOnline, updateOnline, firebaseConfig } from 'sveltefirets';
   import { arrayUnion, GeoPoint, serverTimestamp } from 'firebase/firestore/lite';
   import { debounce } from '$lib/helpers/debounce';
   import { pruneObject } from '$lib/helpers/prune';

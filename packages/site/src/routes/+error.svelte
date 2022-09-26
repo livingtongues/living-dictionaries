@@ -1,24 +1,15 @@
-<script context="module" lang="ts">
-  export function load({ error, status }) {
-    return {
-      props: { error, status },
-    };
-  }
-</script>
 
 <script lang="ts">
   import { _ } from 'svelte-i18n';
   import { onMount } from 'svelte';
-  import { firebaseConfig } from '$lib/firebaseConfig';
+  import { firebaseConfig } from 'sveltefirets';
   import Button from 'svelte-pieces/ui/Button.svelte';
   import ShowHide from 'svelte-pieces/functions/ShowHide.svelte';
-
-  export let status;
-  export let error;
+  import { page } from '$app/stores';
 
   onMount(async () => {
     const Sentry = await import('@sentry/browser');
-    const eventId = Sentry.captureException(error);
+    const eventId = Sentry.captureException($page.error);
     console.log('sent error', eventId);
     // https://docs.sentry.io/enriching-error-data/user-feedback
     // Sentry.showReportDialog({ eventId });
@@ -26,7 +17,7 @@
 </script>
 
 <svelte:head>
-  <title>{$_('misc.error', { default: 'Error' })}: {status}</title>
+  <title>{$_('misc.error', { default: 'Error' })}: {$page.status}</title>
 </svelte:head>
 
 <div class="p-4 bg-white relative z-20">
@@ -59,14 +50,14 @@
 
   <p class="text-gray-600 text-sm mt-6">
     {$_('misc.error', { default: 'Error' })}:
-    {status}
+    {$page.status}
     -
-    {error.message}
+    {$page.error.message}
   </p>
 
-  {#if firebaseConfig.projectId === 'talking-dictionaries-dev' && error.stack}
+  {#if firebaseConfig.projectId === 'talking-dictionaries-dev' && $page.error.message}
     <div class="w-full overflow-x-auto">
-      <pre>{error.stack}</pre>
+      <pre>{$page.error}</pre>
     </div>
   {/if}
 </div>

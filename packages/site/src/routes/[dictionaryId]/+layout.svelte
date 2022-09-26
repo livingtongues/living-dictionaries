@@ -1,33 +1,14 @@
-<script context="module" lang="ts">
-  import type { IDictionary } from '@living-dictionaries/types';
-  import { getDocument } from 'sveltefirets';
-
-  import type { Load } from '@sveltejs/kit';
-  export const load: Load = async ({ params }) => {
-    try {
-      const dictionary = await getDocument<IDictionary>(`dictionaries/${params.dictionaryId}`);
-      if (dictionary) {
-        return { props: { dictionary } };
-      } else {
-        return { status: 301, redirect: '/' };
-      }
-    } catch (error) {
-      return { status: 500, error };
-    }
-  };
-</script>
-
 <script lang="ts">
   import { _ } from 'svelte-i18n';
-
   import SideMenu from './_SideMenu.svelte';
-
-  export let dictionary: IDictionary;
   import { dictionary as dictionaryStore, algoliaQueryParams } from '$lib/stores';
   import Header from '$lib/components/shell/Header.svelte';
+  
+  import type { LayoutData } from './$types';
+  export let data: LayoutData;
 
-  if (dictionary) {
-    dictionaryStore.set(dictionary);
+  if (data.dictionary) {
+    dictionaryStore.set(data.dictionary);
   }
 
   let menuOpen = false;
@@ -56,7 +37,7 @@
       <i class="far fa-bars print:hidden" />
       {$dictionaryStore.name}
     </button>
-    <a class="hover:text-black hidden md:inline" href="/{dictionary.id}">
+    <a class="hover:text-black hidden md:inline" href="/{$dictionaryStore.id}">
       {$dictionaryStore.name}
     </a>
   </div>
