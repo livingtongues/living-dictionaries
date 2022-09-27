@@ -19,13 +19,13 @@
 		"check-packages": "pnpm update --interactive --recursive --latest"
 	},
 	"devDependencies": {
-		"@typescript-eslint/eslint-plugin": "^5.28.0",
-		"@typescript-eslint/parser": "^5.28.0",
+		"@typescript-eslint/eslint-plugin": "^5.38.1",
+		"@typescript-eslint/parser": "^5.38.1",
 		"eslint": "^7.32.0",
 		"eslint-config-prettier": "^8.3.0",
 		"eslint-plugin-svelte3": "^3.2.1",
 		"prettier": "^2.7.1",
-		"prettier-plugin-svelte": "^2.7.0",
+		"prettier-plugin-svelte": "^2.7.1",
 		"svelte": "^3.50.1",
 		"typescript": "~4.8.3",
 		"vitest": "^0.23.4"
