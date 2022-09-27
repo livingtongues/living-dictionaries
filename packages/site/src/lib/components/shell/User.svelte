@@ -31,6 +31,7 @@
   import { browser } from '$app/environment';
   $: if (browser && $userStore) {
     userStoreInited = true; // so that page will properly reflect logged out status and not fall back to user loaded from cookies
+    // alternatively after logging out (and thus clearing user cookie), could run invalidate() which would cause $page.data.user to be null achieving the desired result
   }
 </script>
 

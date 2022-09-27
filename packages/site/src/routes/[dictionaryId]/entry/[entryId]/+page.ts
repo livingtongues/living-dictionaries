@@ -4,7 +4,8 @@ import type { IEntry } from '@living-dictionaries/types';
 import { getDocument } from 'sveltefirets';
 
 import type { PageLoad } from './$types';
-export const load: PageLoad = async ({ params }) => {
+export const load: PageLoad = async ({ params, parent }) => {
+  await parent();
   try {
     const entry = await getDocument<IEntry>(
       `dictionaries/${params.dictionaryId}/words/${params.entryId}`

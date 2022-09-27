@@ -10,6 +10,7 @@ export const load: LayoutServerLoad = async ({ cookies, request }) => {
 
   const chosenLocale = cookies.get('locale') || null;
 
+  // perhaps could still run in hooks.server.ts
   await loadLocaleOnServer(chosenLocale, acceptedLanguage);
 
   let user: IUser = null;

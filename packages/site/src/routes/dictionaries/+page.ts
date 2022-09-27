@@ -5,7 +5,8 @@ import { getCollection } from 'sveltefirets';
 import { orderBy, where } from 'firebase/firestore';
 
 import type { PageLoad } from './$types';
-export const load: PageLoad = async () => {
+export const load: PageLoad = async ({ parent }) => {
+  await parent();
   try {
     const publicDictionaries = await getCollection<IDictionary>('dictionaries', [
       orderBy('name'),
