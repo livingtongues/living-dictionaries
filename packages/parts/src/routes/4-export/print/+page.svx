@@ -2,11 +2,9 @@
   import PrintEntry from '$lib/entries/print/PrintEntry.svelte';
   import { Story } from 'kitbook';
   import { defaultPrintFields as printFields } from '$lib/entries/print/printFields';
-  import { entries } from './mock-data';
-  import { entriesWithSemanticDomains } from './mock-data-w-sd';
+  import { configureSizesFields, semanticDomainsField, speakerField } from './printFieldsForTesting';
+  import { entries, entriesWithSemanticDomains, entriesWithSoundFiles } from './mock-data';
   const dictionaryId = 'bezhta';
-
-  $: printFields.image = true;
 </script>
 
 <Story
@@ -15,7 +13,7 @@
   let:props={{ headwordSize, fontSize, imagePercent }}>
   {#each entries as entry}
     <PrintEntry
-      selectedFields={printFields}
+      selectedFields={configureSizesFields}
       {entry}
       {headwordSize}
       {fontSize}
@@ -58,7 +56,13 @@
 
 <Story name="Semantic Domains Field">
   {#each entriesWithSemanticDomains as entry}
-    <PrintEntry selectedFields={printFields} {entry} {dictionaryId} />
+    <PrintEntry selectedFields={semanticDomainsField} {entry} {dictionaryId} />
+  {/each}
+</Story>
+
+<Story name="Speaker Field">
+  {#each entriesWithSoundFiles as entry}
+    <PrintEntry selectedFields={speakerField} {entry} {dictionaryId} />
   {/each}
 </Story>
 
