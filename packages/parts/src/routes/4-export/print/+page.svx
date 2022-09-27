@@ -3,6 +3,7 @@
   import { Story } from 'kitbook';
   import { defaultPrintFields as printFields } from '$lib/entries/print/printFields';
   import { entries } from './mock-data';
+  import { entriesWithSemanticDomains } from './mock-data-w-sd';
   const dictionaryId = 'bezhta';
 
   $: printFields.image = true;
@@ -54,6 +55,13 @@
     <PrintEntry selectedFields={printFields} {entry} {dictionaryId} />
   {/each}
 </Story>
+
+<Story name="Semantic Domains Field">
+  {#each entriesWithSemanticDomains as entry}
+    <PrintEntry selectedFields={printFields} {entry} {dictionaryId} />
+  {/each}
+</Story>
+
 
 <style>
   .print-columns {
