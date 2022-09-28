@@ -11,9 +11,26 @@
     WhereSpoken,
     EditableGlossesField,
     PublicCheckbox,
+    PrintAccessCheckbox,
     glossingLanguages,
     EditableAlternateNames,
   } from '@living-dictionaries/parts';
+
+  async function togglePrintAccess(settingPrintAccess: boolean) {
+    try {
+      if (settingPrintAccess) {
+        await updateOnline<IDictionary>(`dictionaries/${$dictionaryStore.id}`, {
+          printAccess: true,
+        });
+      } else {
+        await updateOnline<IDictionary>(`dictionaries/${$dictionaryStore.id}`, {
+          printAccess: false,
+        });
+      }
+    } catch (err) {
+      alert(`${$t('misc.error', { default: 'Error' })}: ${err}`);
+    }
+  }
 
   async function togglePublic(settingPublic: boolean) {
     try {
@@ -167,6 +184,12 @@
       on:removeCoordinates={() => update(`dictionaries/${dictionary.id}`, { coordinates: null })}
       on:updatePoints={({ detail }) => updatePoints(detail, dictionary.id)}
       on:updateRegions={({ detail }) => updateRegions(detail, dictionary.id)} />
+    <div class="mb-5" />
+
+    <PrintAccessCheckbox
+      {t}
+      checked={dictionary.printAccess}
+      on:changed={({ detail: { checked } }) => togglePrintAccess(checked)} />
     <div class="mb-5" />
 
     <PublicCheckbox

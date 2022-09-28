@@ -4,6 +4,7 @@
   import SearchBox from '$lib/components/search/SearchBox.svelte';
   import Stats from '$lib/components/search/Stats.svelte';
   import EntryFilters from './_EntryFilters.svelte';
+  import { dictionary } from '$lib/stores';
 
   import { page } from '$app/stores';
   import { browser } from '$app/environment';
@@ -55,16 +56,18 @@
               {$_('entry.gallery', { default: 'Gallery' })}
             </span>
           </a>
-          <a
-            data-sveltekit-prefetch
-            href={'/' + $page.params.dictionaryId + '/entries/print'}
-            class="{$page.url.pathname.includes('print') ? 'bg-white shadow' : 'hover:bg-gray-100'}
-                px-2 py-1 rounded">
-            <span class="i-fa-print" style="margin-top: -4px;" />
-            <span class="hidden md:inline">
-              {$_('entry.print', { default: 'Print' })}
-            </span>
-          </a>
+          {#if $dictionary.printAccess}
+            <a
+              data-sveltekit-prefetch
+              href={'/' + $page.params.dictionaryId + '/entries/print'}
+              class="{$page.url.pathname.includes('print') ? 'bg-white shadow' : 'hover:bg-gray-100'}
+                  px-2 py-1 rounded">
+              <span class="i-fa-print" style="margin-top: -4px;" />
+              <span class="hidden md:inline">
+                {$_('entry.print', { default: 'Print' })}
+              </span>
+            </a>
+          {/if}
         </div>
       </div>
 
