@@ -61,7 +61,7 @@
         <span class="italic text-[80%]">Semantic Domains: </span>
         {#each entry.sdn as key, index}
           {semanticDomains.find((sd) => sd.key === key).name}{index < entry.sdn.length - 1
-            ? ', '
+            ? '; '
             : ''}
         {/each}
       {/if}
