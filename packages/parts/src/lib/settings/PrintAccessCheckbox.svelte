@@ -20,13 +20,13 @@
       dispatch('changed', { checked: e.target.checked });
     }} />
   <label for="public" class="mx-2 block text-sm font-medium text-gray-700">
-    <!-- {t ? $t('create.print_access') : 'Public Access to Print View'} -->
-    Public Access to Print View
+    <!-- {t ? $t('create.print_access') : 'Allow Viewers to Print Dictionary'} -->
+    Allow Viewers to Print Dictionary
   </label>
 </div>
 <div class="text-xs text-gray-600 mt-1">
   <!-- ({t
     ? $t('settings.print_access_meaning')
-    : 'Public access to print view means everybody can print the entries of the dictionary.'}) -->
-    Public access to print view means everybody can print the entries of the dictionary.
+    : 'This gives the public the ability to download and print this Living Dictionary as a .PDF'}) -->
+    This gives the public the ability to download and print this Living Dictionary as a .PDF
 </div>
