@@ -14,6 +14,7 @@ export { default as WhereSpoken } from './settings/WhereSpoken.svelte';
 export { default as EditableGlossesField } from './settings/EditableGlossesField.svelte';
 export { default as EditableAlternateNames } from './settings/EditableAlternateNames.svelte';
 export { default as PublicCheckbox } from './settings/PublicCheckbox.svelte';
+export { default as PrintAccessCheckbox } from './settings/PrintAccessCheckbox.svelte';
 export { default as Image } from './entries/media/Image.svelte';
 
 export { glossingLanguages } from './glosses/glossing-languages';
