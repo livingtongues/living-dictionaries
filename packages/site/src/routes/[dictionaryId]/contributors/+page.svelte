@@ -8,14 +8,30 @@
   import ShowHide from 'svelte-pieces/functions/ShowHide.svelte';
   import { inviteHelper } from '$lib/helpers/inviteHelper';
   import { Invitation } from '@living-dictionaries/parts';
+  import { setOnline } from 'sveltefirets';
+  import type { ICitation } from '@living-dictionaries/types';
+
+  import type { PageData } from './$types';
+  export let data: PageData;
+  let citation = data.citation || '';
 
   let helperType: IHelper[];
   let inviteType: IInvite[];
+
+  $: citation ? citation.trim() : '';
 
   function writeIn() {
     const name = prompt(`${$_('speakers.name', { default: 'Name' })}?`);
     if (name) {
       add(`dictionaries/${$dictionary.id}/writeInCollaborators`, { name });
+    }
+  }
+
+  async function save() {
+    try {
+      await setOnline<ICitation>(`dictionaries/${$dictionary.id}/info/citation`, { citation });
+    } catch (err) {
+      alert(err);
     }
   }
 </script>
@@ -254,7 +270,16 @@
   {$_('contributors.how_to_cite_academics', { default: 'How to Cite' })}
 </h3>
 
-<div class="mb-3" style="direction: ltr;">
+<textarea
+  name="conLangDescription"
+  rows="3"
+  bind:value={citation}
+  class="form-input w-full"
+/>
+<Button class="mb-2" form="filled" size="sm" onclick={save}>Save names</Button>
+
+<div class="mb-12" style="direction: ltr;">
+  {citation ? citation + ' ' : ''}
   {new Date().getFullYear()}.
   {$dictionary.name}
   <span>{$_('misc.LD_singular', { default: 'Living Dictionary' })}.</span>
