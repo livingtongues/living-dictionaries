@@ -46,6 +46,10 @@ export interface IGrammar extends IFirestoreMetaData {
   grammar: string;
 }
 
+export interface ICitation extends IFirestoreMetaData {
+  citation: string;
+}
+
 export interface IPoint {
   coordinates: LngLatFull;
   label?: string;
