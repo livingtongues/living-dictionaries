@@ -269,14 +269,21 @@
 <h3 class="font-semibold">
   {$_('contributors.how_to_cite_academics', { default: 'How to Cite' })}
 </h3>
-
-<textarea
-  name="conLangDescription"
-  rows="3"
-  bind:value={citation}
-  class="form-input w-full"
-/>
-<Button class="mb-2" form="filled" size="sm" onclick={save}>Save names</Button>
+{#if $isManager}
+  <div>
+    <!-- TODO add this text in i18n spreadsheet -->
+    <p>In the field below, please add the authors of this dictionary. Their names will be added to the beginning of the citation.</p>
+    <textarea
+      name="conLangDescription"
+      rows="3"
+      bind:value={citation}
+      class="form-input w-full"
+    />
+    <Button class="mb-2" form="filled" size="sm" onclick={save}>
+      {$_('misc.save', { default: 'Save' })}
+    </Button>
+  </div>
+{/if}
 
 <div class="mb-12" style="direction: ltr;">
   {citation ? citation + ' ' : ''}
