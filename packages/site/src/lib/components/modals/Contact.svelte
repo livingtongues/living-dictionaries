@@ -4,9 +4,7 @@
   import Button from 'svelte-pieces/ui/Button.svelte';
   import Form from 'svelte-pieces/data/Form.svelte';
   import { user } from '$lib/stores';
-  import { getFirebaseApp } from 'sveltefirets';
-  import { getFunctions, httpsCallable } from 'firebase/functions';
-  import { goto } from '$app/navigation'
+  import { goto } from '$app/navigation';
 
   import { createEventDispatcher } from 'svelte';
 
@@ -29,9 +27,8 @@
         name: ($user && $user.displayName) || 'Anonymous',
         url: window.location.href,
       };
-
-      const functions = getFunctions(getFirebaseApp());
-      await httpsCallable(functions, 'supportEmail')(data);
+      const { getFunctions, httpsCallable } = await import('firebase/functions');
+      await httpsCallable(getFunctions(), 'supportEmail')(data);
       status = 'success';
     } catch (err) {
       status = 'fail';
@@ -45,7 +42,12 @@
     <i class="far fa-question-circle" />
   </span>
   <div class="flex flex-col mb-5">
-    <Button onclick={() => { goto('/tutorials'); close();}} class="mb-2">
+    <Button
+      onclick={() => {
+        goto('/tutorials');
+        close();
+      }}
+      class="mb-2">
       <span class="i-fluent-learning-app-24-regular -mt-2px" />
       {$_('header.tutorials', {
         default: 'Tutorials',
