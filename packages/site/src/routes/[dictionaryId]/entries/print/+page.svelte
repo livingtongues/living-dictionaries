@@ -10,7 +10,7 @@
   import Button from 'svelte-pieces/ui/Button.svelte';
   import { createPersistedStore } from 'svelte-pieces/stores/persisted';
   import { PrintEntry, defaultPrintFields } from '@living-dictionaries/parts';
-  import { dictionary, isManager } from '$lib/stores';
+  import { dictionary, isManager, canEdit } from '$lib/stores';
   import { browser } from '$app/environment';
   import type { IPrintFields } from '@living-dictionaries/types';
 
@@ -39,7 +39,7 @@
   <title>{$dictionary.name}</title>
 </svelte:head>
 
-{#if $dictionary.printAccess}
+{#if $dictionary.printAccess || $canEdit}
   <Hits {search} let:entries>
     <div class="print:hidden bg-white md:sticky z-1 md:top-22 py-3">
       <div class="flex flex-wrap mb-1">
@@ -138,7 +138,7 @@
   </Hits>
   <Pagination {search} />
 {:else}
-  <p>{$_('export.print_availability', { default: 'Print view is only available to dictionary managers' })}</p>
+  <p>{$_('export.print_availability', { default: 'Print view is only available to dictionary managers and contributors' })}</p>
 {/if}
 
 <style>
