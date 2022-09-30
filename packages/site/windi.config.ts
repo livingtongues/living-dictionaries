@@ -4,14 +4,16 @@ import { defineConfig } from 'windicss/helpers';
 // import typography from 'windicss/plugin/typography'; // causes occasional call stack size exceeded build bug
 
 export default defineConfig({
-  safelist: ['space-x-1, space-x-3'],
+  // safelist: ['space-x-1, space-x-3'],
   theme: {
-    screens: {
-      print: { raw: 'print' },
+    extend: {
+      screens: {
+        print: { raw: 'print' },
+      },
     },
   },
-  plugins: [
-    // forms,
-    // typography,
-  ]
+  // plugins: [
+  // forms,
+  // typography,
+  // ]
 });
