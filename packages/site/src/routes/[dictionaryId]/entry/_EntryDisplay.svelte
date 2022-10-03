@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { _ } from 'svelte-i18n';
+  import { t } from 'svelte-i18n';
   import type { IEntry } from '@living-dictionaries/types';
   import EntryField from './_EntryField.svelte';
   import EntryPartOfSpeech from './_EntryPartOfSpeech.svelte';
@@ -23,10 +23,11 @@
 <div class="flex flex-col md:flex-row-reverse mb-3">
   <div class="md:hidden" dir="ltr">
     <EntryField
+      {t}
       value={entry.lx}
       field="lx"
       {canEdit}
-      display={$_('entry.lx', { default: 'Lexeme/Word/Phrase' })}
+      display={$t('entry.lx', { default: 'Lexeme/Word/Phrase' })}
       on:valueupdate />
   </div>
 
@@ -39,15 +40,17 @@
   <div class="md:w-2/3 flex flex-col">
     <div class="hidden md:block">
       <EntryField
+        {t}
         value={entry.lx}
         field="lx"
         {canEdit}
-        display={$_('entry.lx', { default: 'Lexeme/Word/Phrase' })}
+        display={$t('entry.lx', { default: 'Lexeme/Word/Phrase' })}
         on:valueupdate />
     </div>
 
     {#each alternateOrthographies as orthography, index}
       <EntryField
+        {t}
         value={entry[index === 0 ? 'lo' : `lo${index + 1}`]}
         field={index === 0 ? 'lo' : `lo${index + 1}`}
         {canEdit}
@@ -57,19 +60,21 @@
 
     {#each ['ph'] as field}
       <EntryField
+        {t}
         value={entry[field]}
         {field}
         {canEdit}
-        display={$_(`entry.${field}`)}
+        display={$t(`entry.${field}`)}
         on:valueupdate />
     {/each}
 
     {#each glossingLanguages as bcp}
       <EntryField
+        {t}
         value={entry.gl[bcp]}
         field={`gl.${bcp}`}
         {canEdit}
-        display={`${$_(`gl.${bcp}`)} ${$_('entry.gloss', {
+        display={`${$t(`gl.${bcp}`)} ${$t('entry.gloss', {
           default: 'Gloss',
         })}`}
         on:valueupdate />
@@ -78,6 +83,7 @@
     {#if entry.de}
       <!-- Only in Bahasa Lani (id: jaRhn6MAZim4Blvr1iEv) -->
       <EntryField
+        {t}
         value={entry.de}
         field="de"
         {canEdit}
@@ -88,37 +94,39 @@
     <EntryPartOfSpeech
       value={entry.ps}
       {canEdit}
-      display={$_('entry.ps', { default: 'Part of Speech' })}
+      display={$t('entry.ps', { default: 'Part of Speech' })}
       on:valueupdate />
 
     <EntrySemanticDomains {canEdit} {entry} on:valueupdate />
 
     {#if $dictionary.id === 'babanki'}
         <EntryField
+          {t}
           value={entry['va']}
           field='va'
           {canEdit}
-          display={$_(`entry.va`, {default: 'Variant'})}
+          display={$t(`entry.va`, {default: 'Variant'})}
           on:valueupdate />
     {/if}
     
     {#each ['pl', 'nc', 'mr', 'in', 'di', 'nt'] as field}
       <EntryField
+        {t}
         value={entry[field]}
         {field}
         {canEdit}
-        display={$_(`entry.${field}`)}
+        display={$t(`entry.${field}`)}
         on:valueupdate />
     {/each}
 
     {#if (entry.sr && entry.sr.length) || canEdit}
       <div class="md:px-2" class:order-2={!(entry.sr && entry.sr.length)}>
-        <div class="rounded text-xs text-gray-500 mt-1 mb-2">{$_('entry.sr')}</div>
+        <div class="rounded text-xs text-gray-500 mt-1 mb-2">{$t('entry.sr')}</div>
         <BadgeArray
           strings={entry.sr || []}
           {canEdit}
-          promptMessage={$_('entry.sr')}
-          addMessage={$_('misc.add', { default: 'Add' })}
+          promptMessage={$t('entry.sr')}
+          addMessage={$t('misc.add', { default: 'Add' })}
           on:valueupdated={(e) => dispatch('valueupdate', { field: 'sr', newValue: e.detail })} />
         <div class="border-dashed border-b-2  pb-1 mb-2" />
       </div>
@@ -127,26 +135,29 @@
     {#if entry.xv}
       <!-- used for old dictionary imports, needs refactored into entry.xs -->
       <EntryField
+        {t}
         value={entry.xv}
         field="xv"
         {canEdit}
-        display={$_('entry.example_sentence', { default: 'Example Sentence' })}
+        display={$t('entry.example_sentence', { default: 'Example Sentence' })}
         on:valueupdate />
     {/if}
 
     <EntryField
+      {t}
       value={entry.xs && entry.xs.vn}
       field="xs.vn"
       {canEdit}
-      display={$_('entry.example_sentence', { default: 'Example Sentence' })}
+      display={$t('entry.example_sentence', { default: 'Example Sentence' })}
       on:valueupdate />
 
     {#each glossingLanguages as bcp}
       <EntryField
+        {t}
         value={entry.xs && entry.xs[bcp]}
         field={`xs.${bcp}`}
         {canEdit}
-        display={`${$_(`gl.${bcp}`)} ${$_('entry.example_sentence', {
+        display={`${$t(`gl.${bcp}`)} ${$t('entry.example_sentence', {
           default: 'Example Sentence',
         })}`}
         on:valueupdate />
