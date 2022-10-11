@@ -44,7 +44,7 @@
     <div class="print:hidden bg-white md:sticky z-1 md:top-22 py-3">
       <div class="flex flex-wrap mb-1">
         <Button class="mb-1 mr-2" form="filled" type="button" onclick={() => window.print()}>
-          <span class="i-fa-print -mt-1" /> Print
+          <span class="i-fa-print -mt-1" /> {$_('entry.print', { default: 'Print' })}
         </Button>
 
         <div class="mb-1 mr-2">
