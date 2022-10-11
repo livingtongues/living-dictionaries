@@ -3,7 +3,16 @@
   import { Story } from 'kitbook';
   import { defaultPrintFields as printFields } from '$lib/entries/print/printFields';
   import { configureSizesFields, semanticDomainsField, speakerField } from './printFieldsForTesting';
-  import { entries, entriesWithSemanticDomains, entriesWithSoundFiles } from './mock-data';
+  import { 
+    entries, 
+    entriesWithSemanticDomains, 
+    entriesWithSoundFiles, 
+    entriesWithAlternateOrthographies,
+    entriesWithPhonetics, 
+    entriesWithPartsOfSpeech, 
+    entriesWithGlosses,
+    entriesWithExampleSentences,
+   } from './mock-data';
   const dictionaryId = 'bezhta';
 </script>
 
@@ -16,6 +25,36 @@
 <Story name="Speaker Field">
   {#each entriesWithSoundFiles as entry}
     <PrintEntry selectedFields={speakerField} {entry} {dictionaryId} />
+  {/each}
+</Story>
+
+<Story name="Alternate Orthographies Field">
+  {#each entriesWithAlternateOrthographies as entry}
+    <PrintEntry selectedFields={printFields} {entry} {dictionaryId} headwordSize={18} />
+  {/each}
+</Story>
+
+<Story name="Phonetics Field">
+  {#each entriesWithPhonetics as entry}
+    <PrintEntry selectedFields={printFields} {entry} {dictionaryId} headwordSize={18} />
+  {/each}
+</Story>
+
+<Story name="Parts of Speech Field">
+  {#each entriesWithPartsOfSpeech as entry}
+    <PrintEntry selectedFields={printFields} {entry} {dictionaryId} headwordSize={18} />
+  {/each}
+</Story>
+
+<Story name="Glosses Field">
+  {#each entriesWithGlosses as entry}
+    <PrintEntry selectedFields={printFields} {entry} {dictionaryId} headwordSize={18} />
+  {/each}
+</Story>
+
+<Story name="Example Sentences Field">
+  {#each entriesWithExampleSentences as entry}
+    <PrintEntry selectedFields={printFields} {entry} {dictionaryId} headwordSize={18} />
   {/each}
 </Story>
 
