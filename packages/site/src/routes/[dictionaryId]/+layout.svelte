@@ -62,7 +62,7 @@
 
 <style>
   .menu {
-    @apply overflow-y-auto h-full 
+    --at-apply: overflow-y-auto h-full 
     flex flex-col flex-shrink-0 
     z-50 md:z-0 md:top-12
     fixed md:sticky 
@@ -75,13 +75,13 @@
   }
 
   .backdrop {
-    @apply fixed inset-0 bg-gray-900 bg-opacity-25 z-40 transition-opacity duration-300;
+    --at-apply: fixed inset-0 bg-gray-900 bg-opacity-25 z-40 transition-opacity duration-300;
   }
   .hide-backdrop {
-    @apply opacity-0 pointer-events-none;
+    --at-apply: opacity-0 pointer-events-none;
   }
   .close-menu {
-    @apply p-3 md:hidden text-sm font-medium text-gray-700 border-t flex justify-start items-center;
+    --at-apply: p-3 md:hidden text-sm font-medium text-gray-700 border-t flex justify-start items-center;
   }
 
   @font-face {

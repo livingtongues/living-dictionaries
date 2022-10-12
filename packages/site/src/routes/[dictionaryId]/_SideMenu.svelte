@@ -98,13 +98,13 @@
 
 <style>
   a:not(.link) {
-    @apply text-gray-600 hover:bg-gray-200 px-3 py-2 flex items-center md:rounded-lg mb-2;
+    --at-apply: text-gray-600 hover:bg-gray-200 px-3 py-2 flex items-center md:rounded-lg mb-2;
   }
   .active {
-    @apply bg-gray-200 text-gray-900;
+    --at-apply: bg-gray-200 text-gray-900;
   }
   .link {
-    @apply block text-sm pl-3 font-medium text-gray-700 hover:underline py-1;
+    --at-apply: block text-sm pl-3 font-medium text-gray-700 hover:underline py-1;
     font-size: 0.78em;
   }
 </style>

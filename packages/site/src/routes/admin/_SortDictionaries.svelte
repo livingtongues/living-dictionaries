@@ -122,6 +122,6 @@
 
 <style>
   th {
-    @apply text-xs font-semibold text-gray-600 uppercase tracking-wider !py-1;
+    --at-apply: text-xs font-semibold text-gray-600 uppercase tracking-wider !py-1;
   }
 </style>

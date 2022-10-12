@@ -24,7 +24,7 @@
 
 <style>
   input {
-    @apply flex-grow appearance-none block px-3 py-2 border
+    --at-apply: flex-grow appearance-none block px-3 py-2 border
         border-gray-300 rounded text-gray-900 placeholder-gray-500
         focus:outline-none focus:ring-blue-300 focus:border-blue-300;
   }

@@ -27,6 +27,6 @@
 
 <style>
   nav {
-    @apply -mb-px flex overflow-x-auto;
+    --at-apply: -mb-px flex overflow-x-auto;
   }
 </style>
