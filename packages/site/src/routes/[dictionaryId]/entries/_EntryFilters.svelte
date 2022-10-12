@@ -170,10 +170,10 @@
 
 <style>
   .backdrop {
-    @apply fixed inset-0 bg-gray-900 bg-opacity-25 z-40 transition-opacity duration-300;
+    --at-apply: fixed inset-0 bg-gray-900 bg-opacity-25 z-40 transition-opacity duration-300;
   }
   .hide-backdrop {
-    @apply opacity-0 pointer-events-none;
+    --at-apply: opacity-0 pointer-events-none;
   }
 </style>
 
