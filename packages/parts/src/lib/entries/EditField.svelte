@@ -193,8 +193,8 @@
   </div>
 </form>
 
-<style global>
-  .ck-editor__editable_inline {
+<style>
+  :global(.ck-editor__editable_inline) {
     @apply md:min-h-50vh;
   }
 </style>
