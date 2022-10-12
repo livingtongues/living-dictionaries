@@ -1,18 +1,23 @@
 import preprocess from 'svelte-preprocess';
 import adapter from '@sveltejs/adapter-auto';
 
+import UnoCSS from 'temp-s-p-u';
+
 /** @type {import('@sveltejs/kit').Config} */
 const config = {
-	// experimental: {
-	// 	inspector: true // use by pressing Ctrl + Shift and hovering over the component
-	// },
-
 	preprocess: [
 		preprocess(),
+		UnoCSS(),
 	],
 
 	kit: {
 		adapter: adapter(),
+	},
+
+	vitePlugin: {
+		experimental: {
+			inspector: true
+		}
 	}
 };
 

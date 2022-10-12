@@ -10,6 +10,7 @@
     "test": "vitest -u"
   },
   "devDependencies": {
+    "@iconify/json": "^2.1.115",
     "@living-dictionaries/parts": "workspace:^0.0.1",
     "@living-dictionaries/types": "workspace:^1.0.0",
     "@sentry/browser": "^6.18.2",
@@ -22,6 +23,7 @@
     "@types/d3-dsv": "^3.0.0",
     "@types/file-saver": "^2.0.4",
     "@types/recordrtc": "^5.6.8",
+    "@unocss/preset-icons": "^0.45.29",
     "algoliasearch": "^4.11.0",
     "csvtojson": "^2.0.10",
     "d3-dsv": "^3.0.1",
@@ -36,19 +38,18 @@
     "simple-git-hooks": "^2.8.0",
     "svelte": "^3.50.1",
     "svelte-check": "^2.9.1",
-    "svelte-deep-wind-preprocess": "^0.0.8",
     "svelte-i18n": "^3.3.13",
-    "svelte-pieces": "1.0.44-beta.1",
+    "svelte-pieces": "1.0.44",
     "svelte-preprocess": "^4.10.7",
     "sveltefirets": "^0.0.31",
+    "temp-s-p-u": "^0.0.4",
     "tslib": "^2.4.0",
     "typescript": "~4.8.4",
+    "unocss": "^0.45.29",
     "vite": "^3.1.4",
-    "vite-plugin-windicss": "^1.8.8",
     "vitest": "^0.23.4",
     "wavesurfer.js": "^5.2.0",
-    "web-vitals": "^2.1.2",
-    "windicss": "^3.5.6"
+    "web-vitals": "^2.1.2"
   },
   "type": "module",
   "simple-git-hooks": {

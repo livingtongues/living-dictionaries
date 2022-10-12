@@ -1,7 +1,8 @@
 <script lang="ts">
+  import './forms.css';
+  import './global.css';
+
   import { browser } from '$app/environment';
-  import 'virtual:windi.css';
-  import '../global.css';
   import { _ } from 'svelte-i18n';
   import { onMount } from 'svelte';
   import { page } from '$app/stores';
@@ -41,3 +42,5 @@
     {/await}
   {/if}
 {/if}
+
+<style uno:preflights global></style>
