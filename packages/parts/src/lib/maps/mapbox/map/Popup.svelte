@@ -55,13 +55,13 @@
   <slot />
 </div>
 
-<style global>
+<style>
   /* div .mapboxgl-popup-close-button {
     font-size: 30px;
     top: 2px;
     right: 2px;
   } */
-  div .mapboxgl-popup-content {
+  :global(div .mapboxgl-popup-content) {
     padding: 12px;
   }
 </style>
