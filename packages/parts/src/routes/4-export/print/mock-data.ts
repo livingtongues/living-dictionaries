@@ -303,3 +303,113 @@ export const entriesWithSemanticDomains = [
     sdn: [],
   },
 ];
+
+export const entriesWithAlternateOrthographies = [
+  {
+    id: 'altOrth5',
+    lx: 'Hello',
+    gl: null,
+    lo: 'Nnọọ',
+    lo2: 'Привет',
+    lo3: 'سلام',
+    lo4: 'नमस्ते',
+    lo5: 'שלום',
+  },
+  {
+    id: 'altOrth3',
+    lx: 'Bye',
+    gl: null,
+    lo: 'さよなら',
+    lo2: '안녕',
+    lo3: 'αντίο',
+  },
+];
+
+export const entriesWithPhonetics = [
+  {
+    id: 'phonetics',
+    lx: 'Giraffe',
+    gl: null,
+    ph: 'dʒɚˈɹæf',
+  },
+  {
+    id: 'noPhonetics',
+    lx: 'Quiet',
+    gl: null,
+  },
+];
+
+export const entriesWithPartsOfSpeech = [
+  {
+    id: 'PoS',
+    lx: 'Parts of speech',
+    gl: null,
+    ps: 'np',
+  },
+  {
+    id: 'PoSpref',
+    lx: 'un-',
+    gl: null,
+    ps: 'pref',
+  },
+];
+
+export const entriesWithGlosses = [
+  {
+    id: 'multipleGlosses',
+    lx: 'Hello World',
+    gl: {
+      es: 'Hola mundo',
+      fr: 'Bonjour le monde',
+      it: 'Ciao mondo',
+      pt: 'Olá Mundo',
+      de: 'Hallo Welt',
+    },
+  },
+  {
+    id: 'fewGlosses',
+    lx: 'Excuse me',
+    gl: { sv: 'Ursäkta mig', no: 'unnskyld meg', da: 'undskyld mig' },
+  },
+  {
+    id: 'oneGloss',
+    lx: 'Happy',
+    gl: { fi: 'Onnellinen' },
+  },
+];
+
+export const entriesWithExampleSentences = [
+  {
+    id: 'multipleExampleSentences',
+    lx: 'Fear',
+    gl: null,
+    xs: {
+      es: 'Un hombre que huye de su miedo puede encontrar que solamente ha tomado un atajo para encontrarlo.',
+      fr: "Un homme qui fuit sa peur peut s'apercevoir qu'il n'a pris qu'un raccourci pour y faire face.",
+      it: 'Un uomo che fugge dalla sua paura può scoprire di aver preso solo una scorciatoia per affrontarla.',
+      pt: 'Um homem que foge de seu medo pode descobrir que apenas tomou um atalho para enfrentá-lo.',
+      de: 'Ein Mann, der vor seiner Angst flieht, kann feststellen, dass er nur eine Abkürzung genommen hat, um ihr zu begegnen.',
+      vn: 'A man that flies from his fear may find that he has only taken a short cut to meet it.',
+    },
+  },
+  {
+    id: 'fewExampleSentences',
+    lx: 'Life',
+    gl: null,
+    xs: {
+      sv: 'Ditt livs form ligger i dina händer att bryta.',
+      no: 'Formen i livet ditt er i dine hender for å bryte.',
+      da: 'Dit livs form er i dine hænder for at bryde.',
+      vn: 'The mold of your life is in your hands to break.',
+    },
+  },
+  {
+    id: 'oneExampleSentence',
+    lx: 'Gratitude',
+    gl: null,
+    xs: {
+      fi: 'todistaa, että vaikka mieli ja voima olivat menneet, kiitollisuus ja molemminpuolinen hellyys elivät edelleen ihmisten sydämessä.',
+      vn: 'to witness that even when mind and strength had gone, gratitude and a mutual tenderness still lived on in the heart of men.',
+    },
+  },
+];

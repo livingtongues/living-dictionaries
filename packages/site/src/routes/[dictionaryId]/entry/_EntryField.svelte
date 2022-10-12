@@ -1,5 +1,7 @@
 <script lang="ts">
   import ShowHide from 'svelte-pieces/functions/ShowHide.svelte';
+  import type { Readable } from 'svelte/store';
+  export let t: Readable<any> = undefined;
   export let value: string,
     field: string = undefined,
     display: string,
@@ -40,7 +42,7 @@
     </div>
     {#if show}
       {#await import('@living-dictionaries/parts/src/lib/entries/EditFieldModal.svelte') then { default: EditFieldModal }}
-        <EditFieldModal on:valueupdate {value} {field} {display} on:close={toggle} />
+        <EditFieldModal on:valueupdate {t} {value} {field} {display} on:close={toggle} />
       {/await}
     {/if}
   </ShowHide>
