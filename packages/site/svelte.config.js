@@ -7,7 +7,7 @@ import UnoCSS from 'temp-s-p-u';
 const config = {
 	preprocess: [
 		preprocess(),
-		UnoCSS(),
+    UnoCSS({ options: { classPrefix: 'ld-' } }),
 	],
 
 	kit: {
