@@ -69,6 +69,6 @@
 
 <style>
   .dragging {
-    --at-apply: bg-blue-200 !border-blue-300 !text-blue-700;
+    --at-apply: bg-blue-200 border-blue-300 text-blue-700;
   }
 </style>
