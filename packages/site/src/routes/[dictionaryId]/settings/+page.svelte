@@ -186,11 +186,13 @@
       on:updateRegions={({ detail }) => updateRegions(detail, dictionary.id)} />
     <div class="mb-5" />
 
-    <PrintAccessCheckbox
-      {t}
-      checked={dictionary.printAccess}
-      on:changed={({ detail: { checked } }) => togglePrintAccess(checked)} />
-    <div class="mb-5" />
+    {#if $admin}
+      <PrintAccessCheckbox
+        {t}
+        checked={dictionary.printAccess}
+        on:changed={({ detail: { checked } }) => togglePrintAccess(checked)} />
+      <div class="mb-5" />
+    {/if}
 
     <PublicCheckbox
       {t}

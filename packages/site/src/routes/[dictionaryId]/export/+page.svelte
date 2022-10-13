@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { _ } from 'svelte-i18n';
-  import { dictionary, isManager } from '$lib/stores';
+  import { admin, dictionary, isManager } from '$lib/stores';
   import Button from 'svelte-pieces/ui/Button.svelte';
   import { formatEntriesForCSV, type IEntryForCSV } from '$lib/export/formatEntries';
   import { semanticDomains, partsOfSpeech } from '@living-dictionaries/parts';
@@ -142,6 +142,9 @@
   <p>{$_('export.availability', { default: 'Export is only available to dictionary managers' })}</p>
 {/if}
 
-<div class="mt-5">
-  <Button form="filled" href="entries/print">{$_('export.download_pdf', {default: 'Download PDF' })}</Button>
-</div>
+{#if $admin}
+  <div class="mt-5">
+    <Button form="filled" href="entries/print"
+      >{$_('export.download_pdf', { default: 'Download PDF' })}</Button>
+  </div>
+{/if}

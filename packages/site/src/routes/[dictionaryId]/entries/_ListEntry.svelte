@@ -20,8 +20,6 @@
     $dictionary.id === 'jewish-neo-aramaic'
       ? printGlosses(entry.gl, true).join(', ')
       : printGlosses(entry.gl).join(', ');
-
-  $: console.log(entry)
 </script>
 
 <div

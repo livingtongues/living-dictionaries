@@ -11,7 +11,6 @@
     search: InstantSearch;
 </script>
 
-<!-- Odd error on hidden class not working, placing uno-wa75fd will break if hashing ever changes -->
 <ResponsiveSlideover
   side={$_('direction') === 'rtl' ? 'left' : 'right'}
   showWidth={'md'}
