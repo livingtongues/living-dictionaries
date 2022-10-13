@@ -1,7 +1,14 @@
 import type { IAudio } from './audio.interface';
 import type { IVideo, IVideoCustomMetadata } from './video.interface';
 import type { IDialect } from './dialect.interface';
-import type { IAbout, IDictionary, IGrammar, IPoint, IRegion } from './dictionary.interface';
+import type {
+  IAbout,
+  IDictionary,
+  IGrammar,
+  IPoint,
+  IRegion,
+  ICitation,
+} from './dictionary.interface';
 import type { IEntry } from './entry.interface';
 import type { IGlossLanguages, IGlossLanguage } from './gloss-language.interface';
 import type { IGloss } from './gloss.interface';
@@ -16,6 +23,7 @@ import type { IDictionarySettings } from './dictionary-settings.interface';
 import type { IPartOfSpeech } from './part-of-speech.interface';
 import type { IColumn } from './column.interface';
 import type { HelperRoles, IHelper } from './helper.interface';
+import type { IPrintFields } from './pdf-entry.interface';
 
 export type {
   IAudio,
@@ -26,6 +34,7 @@ export type {
   IDictionary,
   IAbout,
   IGrammar,
+  ICitation,
   IEntry,
   IExampleSentence,
   IGlossLanguages,
@@ -41,8 +50,11 @@ export type {
   HelperRoles,
   IPartOfSpeech,
   IColumn,
-  IPoint, IRegion,
+  IPoint,
+  IRegion,
+  IPrintFields,
 };
 
 import { ReadyLocales, UnpublishedLocales } from './languages.interface';
-export { ReadyLocales, UnpublishedLocales };
+import { EntryPDFFieldsEnum } from './pdf-entry.interface';
+export { ReadyLocales, UnpublishedLocales, EntryPDFFieldsEnum };

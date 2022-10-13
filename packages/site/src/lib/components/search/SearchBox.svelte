@@ -40,7 +40,7 @@
       bind:value={query}
       on:input={(e) => refine(e.target.value)}
       placeholder={$_('entry.search_entries', { default: 'Search Entries' })}
-      class="form-input text-sm w-full pl-10 pr-3 py-2 !rounded-none ltr:!rounded-l-md rtl:!rounded-r-md md:!rounded-r-md md:!rounded-l-md" />
+      class="form-input text-sm w-full pl-10 pr-3 py-2 rounded-none ltr:!rounded-l-md rtl:!rounded-r-md md:!rounded-r-md md:!rounded-l-md" />
   </div>
   <button
     type="button"

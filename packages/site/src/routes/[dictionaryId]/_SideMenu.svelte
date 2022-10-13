@@ -9,17 +9,17 @@
   <a href="/" class="block p-3 text-lg font-semibold mb-3 border-b">
     {$_('misc.LD', { default: 'Living Dictionaries' })}
   </a>
-  <h5 class="text-xs font-semibold uppercase tracking-wide mx-3 mb-2">
+  <h5 class="font-semibold uppercase tracking-wide mx-3 mb-2">
     {$dictionary.name}
   </h5>
 </div>
 <div on:click={() => (menuOpen = false)}>
-  <!-- <a sveltekit:prefetch href={'/' + $dictionary.id}>
+  <!-- <a data-sveltekit-prefetch href={'/' + $dictionary.id}>
     <i class="far fa-th-large fa-fw text-lg" />
     <span class="font-medium mx-2">{$_('dictionary.overview', { default: 'Overview' })}</span>
   </a> -->
   <a
-    sveltekit:prefetch
+    data-sveltekit-prefetch
     class:active={$page.url.pathname.match(/entry|entries/)}
     href={`/${$dictionary.id}/entries/list`}>
     <i class="far fa-list fa-fw" />
@@ -34,7 +34,7 @@
     </span>
   </a>
   <a
-    sveltekit:prefetch
+    data-sveltekit-prefetch
     href={'/' + $dictionary.id + '/about'}
     class:active={$page.url.pathname.includes('about')}>
     <i class="far fa-info-circle fa-fw" />
@@ -43,7 +43,7 @@
     </span>
   </a>
   <a
-    sveltekit:prefetch
+    data-sveltekit-prefetch
     href={'/' + $dictionary.id + '/contributors'}
     class:active={$page.url.pathname.includes('contributors')}>
     <i class="far fa-users fa-fw" />
@@ -52,7 +52,7 @@
     </span>
   </a>
   <a
-    sveltekit:prefetch
+    data-sveltekit-prefetch
     href={'/' + $dictionary.id + '/grammar'}
     class:active={$page.url.pathname.includes('grammar')}>
     <i class="far fa-edit fa-fw" />
@@ -62,7 +62,7 @@
   </a>
   {#if $isManager}
     <a
-      sveltekit:prefetch
+      data-sveltekit-prefetch
       href={'/' + $dictionary.id + '/settings'}
       class:active={$page.url.pathname.includes('settings')}>
       <i class="far fa-cog fa-fw" />
@@ -73,7 +73,7 @@
   {/if}
   {#if $isManager}
     <a
-      sveltekit:prefetch
+      data-sveltekit-prefetch
       href={'/' + $dictionary.id + '/export'}
       class:active={$page.url.pathname.includes('export')}>
       <i class="far fa-download" />
@@ -98,13 +98,13 @@
 
 <style>
   a:not(.link) {
-    @apply text-gray-600 hover:bg-gray-200 px-3 py-2 flex items-center md:rounded-lg mb-2;
+    --at-apply: text-gray-600 hover:bg-gray-200 px-3 py-2 flex items-center md:rounded-lg mb-2;
   }
   .active {
-    @apply bg-gray-200 text-gray-900;
+    --at-apply: bg-gray-200 text-gray-900;
   }
   .link {
-    @apply block text-sm pl-3 font-medium text-gray-700 hover:underline py-1;
+    --at-apply: block text-sm pl-3 font-medium text-gray-700 hover:underline py-1;
     font-size: 0.78em;
   }
 </style>

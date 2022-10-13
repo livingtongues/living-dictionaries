@@ -10,8 +10,16 @@
 </script>
 
 <BadgeArray
+  class="remove-button-mb"
   strings={value || []}
   {canEdit}
   promptMessage={$_('entry.sr')}
   addMessage={$_('misc.add', { default: 'Add' })}
   on:valueupdated={(e) => dispatch('valueupdate', { field: 'sr', newValue: e.detail })} />
+
+<style>
+  /* TODO: svelte-pieces needs updated to not always add margin around all sides of Add button */
+  :global(.remove-button-mb button) {
+    margin-bottom: 0 !important;
+  }
+</style>
