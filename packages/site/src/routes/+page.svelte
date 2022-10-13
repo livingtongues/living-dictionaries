@@ -65,7 +65,7 @@
   </div>
   <div class="relative flex-1">
     <Map bind:this={mapComponent} style="mapbox://styles/mapbox/light-v10?optimize=true">
-      {#if selectedDictionary}
+      {#if selectedDictionary?.coordinates?.latitude}
         {#await import('@living-dictionaries/parts/src/lib/maps/mapbox/map/Marker.svelte') then { default: Marker }}
           <Marker
             lat={selectedDictionary.coordinates.latitude}
