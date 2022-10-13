@@ -54,7 +54,7 @@
       class="h-full md:h-unset flex flex-col flex-shrink-0 md:top-12 md:sticky md:w-44 lg:w-48 print:hidden">
       <SideMenu bind:menuOpen />
       <hr class="md:hidden" />
-      <Button form="menu" class="text-left md:hidden" on:click={() => (menuOpen = false)}>
+      <Button form="menu" class="text-left !md:hidden" on:click={() => (menuOpen = false)}>
         <i class="far fa-times fa-lg fa-fw" />
         {$_('misc.close', { default: 'Close' })}
       </Button>
