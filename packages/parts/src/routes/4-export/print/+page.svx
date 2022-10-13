@@ -1,0 +1,114 @@
+<script lang="ts">
+  import PrintEntry from '$lib/entries/print/PrintEntry.svelte';
+  import { Story } from 'kitbook';
+  import { defaultPrintFields as printFields } from '$lib/entries/print/printFields';
+  import { configureSizesFields, semanticDomainsField, speakerField } from './printFieldsForTesting';
+  import { 
+    entries, 
+    entriesWithSemanticDomains, 
+    entriesWithSoundFiles, 
+    entriesWithAlternateOrthographies,
+    entriesWithPhonetics, 
+    entriesWithPartsOfSpeech, 
+    entriesWithGlosses,
+    entriesWithExampleSentences,
+   } from './mock-data';
+  const dictionaryId = 'bezhta';
+</script>
+
+<Story name="Semantic Domains Field">
+  {#each entriesWithSemanticDomains as entry}
+    <PrintEntry selectedFields={semanticDomainsField} {entry} {dictionaryId} />
+  {/each}
+</Story>
+
+<Story name="Speaker Field">
+  {#each entriesWithSoundFiles as entry}
+    <PrintEntry selectedFields={speakerField} {entry} {dictionaryId} />
+  {/each}
+</Story>
+
+<Story name="Alternate Orthographies Field">
+  {#each entriesWithAlternateOrthographies as entry}
+    <PrintEntry selectedFields={printFields} {entry} {dictionaryId} headwordSize={18} />
+  {/each}
+</Story>
+
+<Story name="Phonetics Field">
+  {#each entriesWithPhonetics as entry}
+    <PrintEntry selectedFields={printFields} {entry} {dictionaryId} headwordSize={18} />
+  {/each}
+</Story>
+
+<Story name="Parts of Speech Field">
+  {#each entriesWithPartsOfSpeech as entry}
+    <PrintEntry selectedFields={printFields} {entry} {dictionaryId} headwordSize={18} />
+  {/each}
+</Story>
+
+<Story name="Glosses Field">
+  {#each entriesWithGlosses as entry}
+    <PrintEntry selectedFields={printFields} {entry} {dictionaryId} headwordSize={18} />
+  {/each}
+</Story>
+
+<Story name="Example Sentences Field">
+  {#each entriesWithExampleSentences as entry}
+    <PrintEntry selectedFields={printFields} {entry} {dictionaryId} headwordSize={18} />
+  {/each}
+</Story>
+
+<Story
+  name="Configure font and image sizes"
+  knobs={{ headwordSize: 1.5, fontSize: 1, imagePercent: 5 }}
+  let:props={{ headwordSize, fontSize, imagePercent }}>
+  {#each entries as entry}
+    <PrintEntry
+      selectedFields={configureSizesFields}
+      {entry}
+      {headwordSize}
+      {fontSize}
+      {imagePercent}
+      {dictionaryId} />
+  {/each}
+</Story>
+
+<Story
+  name="Configure columns"
+  knobs={{ columnCount: 2 }}
+  let:props={{ columnCount }}>
+  <div class="print-columns" style="--column-count: {columnCount}">
+    {#each entries as entry}
+      <PrintEntry
+        selectedFields={printFields}
+        {entry}
+        {dictionaryId} />
+    {/each}
+  </div>
+</Story>
+
+<Story
+  name="Configure maximum entries"
+  knobs={{ maxEntries: 2 }}
+  let:props={{ maxEntries }}>
+  {#each entries.slice(0, maxEntries) as entry}
+    <PrintEntry
+      selectedFields={printFields}
+      {entry}
+      {dictionaryId} />
+  {/each}
+</Story>
+
+<Story name="Select Fields" knobs={{ ...printFields }} let:props={printFields}>
+  {#each entries as entry}
+    <PrintEntry selectedFields={printFields} {entry} {dictionaryId} />
+  {/each}
+</Story>
+
+<style>
+  .print-columns {
+    column-count: var(--column-count);
+    overflow-wrap: break-word;
+  }
+  /* https://medium.com/@Idan_Co/the-ultimate-print-html-template-with-header-footer-568f415f6d2a */
+</style>

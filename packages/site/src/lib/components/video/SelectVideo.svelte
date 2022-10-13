@@ -54,13 +54,13 @@
 
 <style>
   label {
-    @apply flex flex-col justify-center px-3 py-2 border font-medium
+    --at-apply: flex flex-col justify-center px-3 py-2 border font-medium
   cursor-pointer focus:outline-none border-green-300
   focus:ring focus:ring-green-300 active:bg-green-200 transition ease-in-out
   duration-150 rounded hover:bg-green-100 text-green-700;
   }
 
   .dragging {
-    @apply bg-green-200 border-green-300 text-green-800 border-dashed;
+    --at-apply: bg-green-200 border-green-300 text-green-800 border-dashed;
   }
 </style>

@@ -106,9 +106,10 @@
     </div>
 
     <div
+      class:flex={active}
       class:hidden={!active}
       class:sm:flex={!active}
-      class="overflow-y-auto flex flex-col flex-1"
+      class="overflow-y-auto flex-col flex-1"
       in:fly={{ y: -15, duration: 150 }}
       on:click={keepSearchOpen}>
       {#if searchString}

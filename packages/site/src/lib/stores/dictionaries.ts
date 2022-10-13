@@ -2,7 +2,7 @@ import { derived } from 'svelte/store';
 import type { Readable } from 'svelte/store';
 import { user } from './user';
 import type { IUser, IDictionary } from '@living-dictionaries/types';
-import { browser } from '$app/env';
+import { browser } from '$app/environment';
 import { getDb, getDocument } from 'sveltefirets';
 import { collectionGroup, getDocs, query, where } from 'firebase/firestore';
 

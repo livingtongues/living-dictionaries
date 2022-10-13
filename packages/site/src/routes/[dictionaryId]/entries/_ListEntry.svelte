@@ -31,7 +31,7 @@
     <Audio class="bg-gray-100" {entry} minimal />
   {/if}
   <a
-    sveltekit:prefetch
+    data-sveltekit-prefetch
     href={'/' + $page.params.dictionaryId + '/entry/' + entry.id}
     class="p-2 text-lg flex-grow flex flex-col justify-between hover:bg-gray-200 ">
     <div>

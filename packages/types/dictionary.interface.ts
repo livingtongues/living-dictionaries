@@ -15,6 +15,7 @@ export interface IDictionary extends IFirestoreMetaData {
   regions?: IRegion[]; // regions where language spoken
 
   public?: boolean;
+  printAccess?: boolean;
   entryCount: number; // number | FieldValue;
   copyright?: string; // Allow custom copyright in case "Copyright _______ community" isn't appropriate for dictionary (eg. Tehuelche)
   alternateOrthographies?: string[]; // Alternate Orthography titles (first item corresponds to entry.lo, then entry.lo2, entry.lo3) - used to be called Local Orthography but that is a misnomer it's turning out
@@ -43,6 +44,10 @@ export interface IAbout extends IFirestoreMetaData {
 
 export interface IGrammar extends IFirestoreMetaData {
   grammar: string;
+}
+
+export interface ICitation extends IFirestoreMetaData {
+  citation: string;
 }
 
 export interface IPoint {

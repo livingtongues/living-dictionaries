@@ -4,12 +4,13 @@
 
   import type { IPoint, IRegion } from '@living-dictionaries/types';
   import { shapeGeoJson } from './shapeGeoJson';
+  import { PUBLIC_mapboxAccessToken } from '$env/static/public';
 
   export let points: IPoint[] = [];
   export let regions: IRegion[] = [];
   export let width = 300;
   export let height = 200;
-  export let accessToken = import.meta.env.VITE_mapboxAccessToken as string;
+  export let accessToken = PUBLIC_mapboxAccessToken;
   export let style = 'streets-v11';
   export let highDef = true;
   export let singlePointZoom = 3;

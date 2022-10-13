@@ -54,8 +54,8 @@
   <slot />
 </div>
 
-<style global>
-  div .mapboxgl-popup-content {
+<style>
+  :global(div .mapboxgl-popup-content) {
     padding: 12px;
   }
 </style>

@@ -4,12 +4,12 @@ import { vernacularName } from '$lib/helpers/vernacularName';
 import { dictionary } from './dictionary';
 import { get } from 'svelte/store';
 import { _ } from 'svelte-i18n';
-import { browser } from '$app/env';
+import { browser } from '$app/environment';
 
 const defaultColumns: IColumn[] = [
-  // Keys match those use for i18n
+  // field must match those used for i18n
   // {
-  //   field: "checked",
+  //   field: 'lx', // connects to entry.lx in i18n keys
   //   width: 25,
   //   hidden: true,
   //   sticky: true,
@@ -95,12 +95,11 @@ const defaultColumns: IColumn[] = [
 ];
 
 let cachedColumns: IColumn[] = [];
-const tableCacheKey = 'table_columns_4.7.2021';
+const tableCacheKey = 'table_columns_20.9.2022'; // IMPORTANT: rename when adding more columns to invalidate the user's cache
 if (browser) {
   cachedColumns = JSON.parse(localStorage.getItem(tableCacheKey));
 }
 
-// IMPORTANT: rename tableCacheKey when adding more columns to invalidate the user's cache which will not include the new column
 export const preferredColumns = writable(cachedColumns || defaultColumns);
 
 if (browser) {
