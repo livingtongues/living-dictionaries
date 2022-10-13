@@ -18,6 +18,12 @@ const config = {
   kit: {
     adapter: adapter(),
   },
+
+  vitePlugin: {
+		experimental: {
+			inspector: true
+		}
+	}
 };
 
 export default config;

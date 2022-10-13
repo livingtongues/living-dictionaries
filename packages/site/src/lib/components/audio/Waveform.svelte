@@ -66,7 +66,7 @@
 <!-- Interesting option I didn't use: https://css-tricks.com/making-an-audio-waveform-visualizer-with-vanilla-javascript/ -->
 <style>
   :global(.rounded-play) {
-    --at-apply: !rounded-full w-12 h-12 flex-grow-0 flex
+    --at-apply: rounded-full w-12 h-12 flex-grow-0 flex
       items-center justify-center font-medium;
   }
 </style>

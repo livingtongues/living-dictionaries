@@ -8,7 +8,7 @@
   <slot />
 </Layout>
 
-<style global>
+<style uno:preflights global>
   /* Temporary workaround until forms plugin bug in https://github.com/windicss/windicss/issues/457 is fixed */
   [type='text'],
   [type='email'],
