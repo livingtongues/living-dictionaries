@@ -23,5 +23,6 @@
   "files.associations": {
     "*.svx": "svelte"
   },
+  "unocss.root": "packages/site",
   "vitest.enable": true,
 }
