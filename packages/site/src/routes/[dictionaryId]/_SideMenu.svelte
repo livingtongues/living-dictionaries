@@ -9,7 +9,7 @@
   <a href="/" class="block p-3 text-lg font-semibold mb-3 border-b">
     {$_('misc.LD', { default: 'Living Dictionaries' })}
   </a>
-  <h5 class="text-xs font-semibold uppercase tracking-wide mx-3 mb-2">
+  <h5 class="font-semibold uppercase tracking-wide mx-3 mb-2">
     {$dictionary.name}
   </h5>
 </div>
