@@ -1,12 +1,7 @@
 export enum EntryPDFFieldsEnum {
-  id = 'Id',
-  in = 'Interlinearization',
-  mr = 'Morphology',
-  nc = 'Noun Class',
-  pl = 'Plural Form',
-  va = 'Variant',
-  di = 'Dialect',
-  nt = 'Notes',
+  // lx always shows
+
+  // custom display
   alternateOrthographies = 'Alternate Orthographies',
   ph = 'Phonetic',
   gloss = 'Glosses',
@@ -16,6 +11,16 @@ export enum EntryPDFFieldsEnum {
   speaker = 'Speaker',
   sr = 'Source',
   sdn = 'Semantic Domains',
+
+  // display with label
+  in = 'Interlinearization',
+  mr = 'Morphology',
+  nc = 'Noun Class',
+  pl = 'Plural Form',
+  va = 'Variant',
+  di = 'Dialect',
+  nt = 'Notes',
+  id = 'Id',
 }
 export type PrintFieldKeys = keyof typeof EntryPDFFieldsEnum;
 export type IPrintFields = {

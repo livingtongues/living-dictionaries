@@ -15,9 +15,15 @@
   const dictionaryId = 'bezhta';
 </script>
 
-<Story name="Semantic Domains Field">
+<Story knobs={{ ...printFields }} let:props={printFields}>
+  {#each entries as entry}
+    <PrintEntry selectedFields={printFields} {entry} {dictionaryId} showLabels />
+  {/each}
+</Story>
+
+<Story name="Semantic Domains Field" knobs={{ showLabels: true }} let:props={{ showLabels }}>
   {#each entriesWithSemanticDomains as entry}
-    <PrintEntry selectedFields={{ sdn: true }} {entry} {dictionaryId} />
+    <PrintEntry selectedFields={{ sdn: true, id: true }} {entry} {dictionaryId} {showLabels} />
   {/each}
 </Story>
 
@@ -79,18 +85,6 @@
       <PrintEntry selectedFields={printFields} {entry} {dictionaryId} />
     {/each}
   </div>
-</Story>
-
-<Story name="Configure maximum entries" knobs={{ maxEntries: 2 }} let:props={{ maxEntries }}>
-  {#each entries.slice(0, maxEntries) as entry}
-    <PrintEntry selectedFields={printFields} {entry} {dictionaryId} />
-  {/each}
-</Story>
-
-<Story name="Select Fields" knobs={{ ...printFields }} let:props={printFields}>
-  {#each entries as entry}
-    <PrintEntry selectedFields={printFields} {entry} {dictionaryId} />
-  {/each}
 </Story>
 
 <style>

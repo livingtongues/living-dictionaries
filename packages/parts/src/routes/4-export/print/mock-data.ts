@@ -14,7 +14,6 @@ export const speakers: ISpeaker[] = [
 ];
 
 export const entries: IEntry[] = [
-  //...add a couple sample entry objects for mocking
   {
     id: '12345qwerty',
     lx: 'xiangjiao',
@@ -31,7 +30,7 @@ export const entries: IEntry[] = [
     nt: 'This is an example of a note, here we can write whatever we want.',
     sr: ['A book', 'www.mybook.com'],
     xs: { en: 'This is a banana', vn: '我很喜歡吃香蕉' },
-    sf: { path: 'https://database.com/sound.mp3' },
+    sf: { path: 'https://database.com/sound.mp3', speakerName: 'Bob Smith' },
     pf: {
       gcs: 'banana',
       path: 'https://api.time.com/wp-content/uploads/2019/11/gettyimages-459761948.jpg',
