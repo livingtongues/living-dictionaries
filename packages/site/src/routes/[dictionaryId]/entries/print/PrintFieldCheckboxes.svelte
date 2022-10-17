@@ -5,6 +5,7 @@
   export let preferredPrintFields: Readable<IPrintFields>;
   export let entries: IEntry[];
   export let showLabels: Readable<boolean>;
+  export let showQrCode: Readable<boolean>;
 
   $: fieldsThatExist = Object.keys($preferredPrintFields).filter((field) =>
     entries.find((entry) => entry[field])
@@ -29,4 +30,9 @@
     <input id="showLabels" type="checkbox" bind:checked={$showLabels} />
     <label class="ml-1 text-sm text-gray-700" for="showLabels">Show Labels</label>
   </div>
-{/if}
+  {/if}
+  
+  <div class="flex items-center mr-3 mb-1">
+    <input id="showLabels" type="checkbox" bind:checked={$showQrCode} />
+    <label class="ml-1 text-sm text-gray-700" for="showLabels">Show QR Code</label>
+  </div>
