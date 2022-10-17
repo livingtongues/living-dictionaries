@@ -1,6 +1,8 @@
+import type { IEntry, ISpeaker } from "@living-dictionaries/types";
+
 const gender: 'm' | 'f' | 'o' = 'f';
 
-export const speakers = [
+export const speakers: ISpeaker[] = [
   {
     birthplace: 'russia',
     contributingTo: ['bezhta'],
@@ -10,7 +12,8 @@ export const speakers = [
     uid: 'uwNgSHCEeRaJAUPsmZok1uMRXzO2',
   },
 ];
-export const entries = [
+
+export const entries: IEntry[] = [
   //...add a couple sample entry objects for mocking
   {
     id: '12345qwerty',
@@ -243,21 +246,7 @@ export const entries = [
   },
 ];
 
-export const entriesWithSoundFiles = [
-  {
-    id: '1',
-    lx: 'Without speaker',
-    gl: null,
-  },
-  {
-    id: '2',
-    lx: 'With speaker',
-    gl: null,
-    speaker: 'Anonymus',
-  },
-];
-
-export const entriesWithSemanticDomains = [
+export const entriesWithSemanticDomains: IEntry[] = [
   {
     id: '1',
     lx: 'One semantic domain',
@@ -304,7 +293,7 @@ export const entriesWithSemanticDomains = [
   },
 ];
 
-export const entriesWithAlternateOrthographies = [
+export const entriesWithAlternateOrthographies: IEntry[] = [
   {
     id: 'altOrth5',
     lx: 'Hello',
@@ -325,7 +314,7 @@ export const entriesWithAlternateOrthographies = [
   },
 ];
 
-export const entriesWithPhonetics = [
+export const entriesWithPhonetics: IEntry[] = [
   {
     id: 'phonetics',
     lx: 'Giraffe',
@@ -339,7 +328,7 @@ export const entriesWithPhonetics = [
   },
 ];
 
-export const entriesWithPartsOfSpeech = [
+export const entriesWithPartsOfSpeech: IEntry[] = [
   {
     id: 'PoS',
     lx: 'Parts of speech',
@@ -354,7 +343,7 @@ export const entriesWithPartsOfSpeech = [
   },
 ];
 
-export const entriesWithGlosses = [
+export const entriesWithGlosses: IEntry[] = [
   {
     id: 'multipleGlosses',
     lx: 'Hello World',
@@ -378,7 +367,7 @@ export const entriesWithGlosses = [
   },
 ];
 
-export const entriesWithExampleSentences = [
+export const entriesWithExampleSentences: IEntry[] = [
   {
     id: 'multipleExampleSentences',
     lx: 'Fear',
