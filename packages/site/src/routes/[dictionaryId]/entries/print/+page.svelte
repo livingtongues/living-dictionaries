@@ -136,7 +136,7 @@
       Living Tongues Institute for Endangered Languages. https://livingdictionaries.app/{$dictionary.id}
     </div>
   </Hits>
-  <Pagination {search} />
+  <Pagination showAdd={false} {search} />
 {:else}
   <p>{$_('export.print_availability', { default: 'Print view is only available to dictionary managers and contributors' })}</p>
 {/if}
