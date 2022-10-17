@@ -13,6 +13,7 @@
   import { dictionary, isManager, canEdit } from '$lib/stores';
   import { browser } from '$app/environment';
   import type { IPrintFields } from '@living-dictionaries/types';
+  import PrintFieldCheckboxes from './PrintFieldCheckboxes.svelte';
 
   const hitsPerPage = createPersistedStore<number>('printHitsPerPage', 50);
   $: if (browser) {
@@ -24,7 +25,7 @@
   }
 
   const preferredPrintFields = createPersistedStore<IPrintFields>(
-    'printFields_9.21.2022',
+    'printFields_10.17.2022',
     defaultPrintFields
   );
   const headwordSize = createPersistedStore<number>('printHeadwordSize', 12);
@@ -32,7 +33,7 @@
   const imagePercent = createPersistedStore<number>('printImagePercent', 50);
   const columnCount = createPersistedStore<number>('printColumnCount', 2);
   const showLabels = createPersistedStore<boolean>('printShowLabels', true);
-  const showQrCode = createPersistedStore<boolean>('printShowLabels', false);
+  const showQrCode = createPersistedStore<boolean>('showQrCode', false);
 </script>
 
 <svelte:head>
@@ -44,7 +45,8 @@
     <div class="print:hidden bg-white md:sticky z-1 md:top-22 py-3">
       <div class="flex flex-wrap mb-1">
         <Button class="mb-1 mr-2" form="filled" type="button" onclick={() => window.print()}>
-          <span class="i-fa-print -mt-1" /> {$_('entry.print', { default: 'Print' })}
+          <span class="i-fa-print -mt-1" />
+          {$_('entry.print', { default: 'Print' })}
         </Button>
 
         <div class="mb-1 mr-2">
@@ -98,15 +100,7 @@
             max="100"
             bind:value={$imagePercent} /><span class="font-medium text-gray-700">%</span>
         </div>
-        {#each Object.keys($preferredPrintFields) as field}
-          <!-- Todo: need a separate function to handle when to show what checkbox - for example, don't show "Labels" if no fields that are labeled are showing -->
-          <!-- {#if entries.find((entry) => entry[field])} -->
-          <div class="flex items-center mr-3 mb-1">
-            <input id={field} type="checkbox" bind:checked={$preferredPrintFields[field]} />
-            <label class="ml-1 text-sm text-gray-700" for={field}>{$_(`entry.${[field]}`)}</label>
-          </div>
-          <!-- {/if} -->
-        {/each}
+        <PrintFieldCheckboxes {entries} {preferredPrintFields} {showLabels} />
       </div>
     </div>
 
@@ -138,7 +132,11 @@
   </Hits>
   <Pagination showAdd={false} {search} />
 {:else}
-  <p>{$_('export.print_availability', { default: 'Print view is only available to dictionary managers and contributors' })}</p>
+  <p>
+    {$_('export.print_availability', {
+      default: 'Print view is only available to dictionary managers and contributors',
+    })}
+  </p>
 {/if}
 
 <style>
