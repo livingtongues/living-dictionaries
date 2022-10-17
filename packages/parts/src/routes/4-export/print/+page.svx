@@ -2,31 +2,24 @@
   import PrintEntry from '$lib/entries/print/PrintEntry.svelte';
   import { Story } from 'kitbook';
   import { defaultPrintFields as printFields } from '$lib/entries/print/printFields';
-  import { configureSizesFields, semanticDomainsField, speakerField } from './printFieldsForTesting';
-  import { 
-    entries, 
-    entriesWithSemanticDomains, 
-    // entriesWithSoundFiles, 
+  import {
+    entries,
+    entriesWithSemanticDomains,
+    // entriesWithSoundFiles,
     entriesWithAlternateOrthographies,
-    entriesWithPhonetics, 
-    entriesWithPartsOfSpeech, 
+    entriesWithPhonetics,
+    entriesWithPartsOfSpeech,
     entriesWithGlosses,
     entriesWithExampleSentences,
-   } from './mock-data';
+  } from './mock-data';
   const dictionaryId = 'bezhta';
 </script>
 
 <Story name="Semantic Domains Field">
   {#each entriesWithSemanticDomains as entry}
-    <PrintEntry selectedFields={semanticDomainsField} {entry} {dictionaryId} />
+    <PrintEntry selectedFields={{ sdn: true }} {entry} {dictionaryId} />
   {/each}
 </Story>
-
-<!-- <Story name="Speaker Field">
-  {#each entriesWithSoundFiles as entry}
-    <PrintEntry selectedFields={speakerField} {entry} {dictionaryId} />
-  {/each}
-</Story> -->
 
 <Story name="Alternate Orthographies Field">
   {#each entriesWithAlternateOrthographies as entry}
@@ -64,7 +57,14 @@
   let:props={{ headwordSize, fontSize, imagePercent }}>
   {#each entries as entry}
     <PrintEntry
-      selectedFields={configureSizesFields}
+      selectedFields={[
+        'alternateOrthographies',
+        'ph',
+        'ps',
+        'gloss',
+        'example_sentence',
+        'image',
+      ].reduce((a, v) => ({ ...a, [v]: true }), {})}
       {entry}
       {headwordSize}
       {fontSize}
@@ -73,29 +73,17 @@
   {/each}
 </Story>
 
-<Story
-  name="Configure columns"
-  knobs={{ columnCount: 2 }}
-  let:props={{ columnCount }}>
+<Story name="Configure columns" knobs={{ columnCount: 2 }} let:props={{ columnCount }}>
   <div class="print-columns" style="--column-count: {columnCount}">
     {#each entries as entry}
-      <PrintEntry
-        selectedFields={printFields}
-        {entry}
-        {dictionaryId} />
+      <PrintEntry selectedFields={printFields} {entry} {dictionaryId} />
     {/each}
   </div>
 </Story>
 
-<Story
-  name="Configure maximum entries"
-  knobs={{ maxEntries: 2 }}
-  let:props={{ maxEntries }}>
+<Story name="Configure maximum entries" knobs={{ maxEntries: 2 }} let:props={{ maxEntries }}>
   {#each entries.slice(0, maxEntries) as entry}
-    <PrintEntry
-      selectedFields={printFields}
-      {entry}
-      {dictionaryId} />
+    <PrintEntry selectedFields={printFields} {entry} {dictionaryId} />
   {/each}
 </Story>
 

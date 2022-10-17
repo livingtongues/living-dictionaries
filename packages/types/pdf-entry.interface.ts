@@ -17,9 +17,7 @@ export enum EntryPDFFieldsEnum {
   sr = 'Source',
   sdn = 'Semantic Domains',
 }
-type PrintFieldKeys = keyof typeof EntryPDFFieldsEnum;
+export type PrintFieldKeys = keyof typeof EntryPDFFieldsEnum;
 export type IPrintFields = {
-  [key in PrintFieldKeys]: boolean;
+  [key in PrintFieldKeys]?: boolean;
 };
-
-// export defaultPrintFields
