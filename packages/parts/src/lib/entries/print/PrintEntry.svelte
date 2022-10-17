@@ -18,7 +18,6 @@
 </script>
 
 <div style="font-size: {fontSize}pt;">
-  
   <!--Essential Fields-->
   <b style="font-size: {headwordSize}pt;">{entry.lx}</b>
   {#if selectedFields.alternateOrthographies}
@@ -41,7 +40,7 @@
       {sentence[1]}{index < Object.entries(entry.xs).length - 1 ? ', ' : ''}
     {/each}
   {/if}
-  
+
   <!-- Remaining Fields -->
   {#if entry.sr && selectedFields.sr}
     <div>
@@ -58,16 +57,22 @@
     </div>
   {/if}
   <div>
-    {#if entry.sdn && selectedFields.sdn}
-      <span class="italic text-[80%]">Semantic Domains: </span>
-      {#each entry.sdn as key, index}
-        {semanticDomains.find((sd) => sd.key === key).name}{index < entry.sdn.length - 1
-          ? '; '
-          : ''}
-      {/each}
+    {#if selectedFields.sdn}
+      {#if entry.sdn || entry.sd}
+        <span class="italic text-[80%]">Semantic Domains: </span>
+        {#if entry.sdn}
+          {#each entry.sdn as key, index}
+            {semanticDomains.find((sd) => sd.key === key).name}{index < entry.sdn.length - 1
+              ? '; '
+              : ''}
+          {/each}
+        {/if}
+        {#if entry.sdn}
+          {entry.sd}
+        {/if}
+      {/if}
     {/if}
-    {#each Object.keys(EntryPDFFieldsEnum) as key}
-      <!-- <b>{key}</b> -->
+    {#each ['in', 'mr', 'nc', 'pl', 'va', 'di', 'nt', 'id'] as key}
       {#if entry[key] && selectedFields[key] && EntryPDFFieldsEnum[key]}
         <p>
           {#if showLabels}
