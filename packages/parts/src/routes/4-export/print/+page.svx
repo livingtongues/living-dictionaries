@@ -6,7 +6,7 @@
   import { 
     entries, 
     entriesWithSemanticDomains, 
-    entriesWithSoundFiles, 
+    // entriesWithSoundFiles, 
     entriesWithAlternateOrthographies,
     entriesWithPhonetics, 
     entriesWithPartsOfSpeech, 
@@ -22,11 +22,11 @@
   {/each}
 </Story>
 
-<Story name="Speaker Field">
+<!-- <Story name="Speaker Field">
   {#each entriesWithSoundFiles as entry}
     <PrintEntry selectedFields={speakerField} {entry} {dictionaryId} />
   {/each}
-</Story>
+</Story> -->
 
 <Story name="Alternate Orthographies Field">
   {#each entriesWithAlternateOrthographies as entry}
@@ -60,7 +60,7 @@
 
 <Story
   name="Configure font and image sizes"
-  knobs={{ headwordSize: 1.5, fontSize: 1, imagePercent: 5 }}
+  knobs={{ headwordSize: 12, fontSize: 12, imagePercent: 50 }}
   let:props={{ headwordSize, fontSize, imagePercent }}>
   {#each entries as entry}
     <PrintEntry
