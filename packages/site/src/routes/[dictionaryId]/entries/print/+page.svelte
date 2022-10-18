@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { _ } from 'svelte-i18n';
+  import { t } from 'svelte-i18n';
   import { getContext } from 'svelte';
   import { configure } from 'instantsearch.js/es/widgets/index.js';
   import type { InstantSearch } from 'instantsearch.js';
@@ -46,7 +46,7 @@
       <div class="flex flex-wrap mb-1">
         <Button class="mb-1 mr-2" form="filled" type="button" onclick={() => window.print()}>
           <span class="i-fa-print -mt-1" />
-          {$_('entry.print', { default: 'Print' })}
+          {$t('entry.print', { default: 'Print' })}
         </Button>
 
         <div class="mb-1 mr-2">
@@ -61,7 +61,7 @@
           <!-- Algolia hard max per page is 1000 -->
         </div>
         <div class="mb-1 mr-2">
-          <label class="font-medium text-gray-700" for="columnCount">Column count</label>
+          <label class="font-medium text-gray-700" for="columnCount">Columns</label>
           <input
             class="form-input text-sm w-17"
             id="columnCount"
@@ -106,12 +106,13 @@
 
     <div class="hidden print:block text-lg mb-5">
       {$dictionary.name}
-      {$_('misc.LD_singular', { default: 'Living Dictionary' })}
+      {$t('misc.LD_singular', { default: 'Living Dictionary' })}
     </div>
 
     <div class="print-columns" style="--column-count: {$columnCount}">
       {#each entries as entry (entry.id)}
         <PrintEntry
+          {t}
           headwordSize={$headwordSize}
           fontSize={$fontSize}
           imagePercent={$imagePercent}
@@ -126,14 +127,14 @@
     <div class="mt-5 text-xs" style="direction: ltr;">
       {new Date().getFullYear()}.
       {$dictionary.name}
-      <span>{$_('misc.LD_singular', { default: 'Living Dictionary' })}.</span>
+      <span>{$t('misc.LD_singular', { default: 'Living Dictionary' })}.</span>
       Living Tongues Institute for Endangered Languages. https://livingdictionaries.app/{$dictionary.id}
     </div>
   </Hits>
   <Pagination showAdd={false} {search} />
 {:else}
   <p>
-    {$_('export.print_availability', {
+    {$t('export.print_availability', {
       default: 'Print view is only available to dictionary managers and contributors',
     })}
   </p>
