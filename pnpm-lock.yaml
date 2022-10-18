@@ -86,6 +86,7 @@ importers:
       unocss: ^0.45.29
       vite: ^3.1.8
       vitest: ^0.24.3
+      xss: ^1.0.14
     dependencies:
       ckeditor5-build-classic-with-alignment-underline-smallcaps: 1.0.0
     devDependencies:
@@ -117,6 +118,7 @@ importers:
       unocss: 0.45.29_vite@3.1.8
       vite: 3.1.8
       vitest: 0.24.3
+      xss: 1.0.14
 
   packages/scripts:
     specifiers:
@@ -196,6 +198,7 @@ importers:
       vitest: ^0.24.3
       wavesurfer.js: ^5.2.0
       web-vitals: ^2.1.2
+      xss: ^1.0.14
     devDependencies:
       '@iconify/json': 2.1.121
       '@living-dictionaries/parts': link:../parts
@@ -237,6 +240,7 @@ importers:
       vitest: 0.24.3
       wavesurfer.js: 5.2.0
       web-vitals: 2.1.4
+      xss: 1.0.14
 
   packages/types:
     specifiers:
@@ -3202,6 +3206,10 @@ packages:
     dependencies:
       delayed-stream: 1.0.0
 
+  /commander/2.20.3:
+    resolution: {integrity: sha512-GpVkmM8vF2vQUkj2LvZmD35JxeJOLCwJ9cUkugyk2nuhbv3+mJvpLYYt+0+USMxE+oj+ey/lJEnhZw75x/OMcQ==}
+    dev: true
+
   /commander/4.1.1:
     resolution: {integrity: sha512-NOKm8xhkzAjzFx8B2v5OAHT+u5pRQc2UCa2Vq9jYL/31o2wi9mxBA7LIFs3sV5VSC49z6pEhfbMULvShKj26WA==}
     engines: {node: '>= 6'}
@@ -3388,6 +3396,10 @@ packages:
       inherits: 2.0.4
       source-map: 0.6.1
       source-map-resolve: 0.6.0
+    dev: true
+
+  /cssfilter/0.0.10:
+    resolution: {integrity: sha512-FAaLDaplstoRsDR8XGYH51znUN0UY7nMc6Z9/fvE8EXGwvJE9hu7W2vHwx1+bd6gCYnln9nLbzxFTrcO9YQDZw==}
     dev: true
 
   /csv-parse/5.0.4:
@@ -8591,6 +8603,15 @@ packages:
   /xregexp/2.0.0:
     resolution: {integrity: sha1-UqY+VsoLhKfzpfPWGHLxJq16WUM=}
     dev: false
+
+  /xss/1.0.14:
+    resolution: {integrity: sha512-og7TEJhXvn1a7kzZGQ7ETjdQVS2UfZyTlsEdDOqvQF7GoxNfY+0YLCzBy1kPdsDDx4QuNAonQPddpsn6Xl/7sw==}
+    engines: {node: '>= 0.10.0'}
+    hasBin: true
+    dependencies:
+      commander: 2.20.3
+      cssfilter: 0.0.10
+    dev: true
 
   /y18n/5.0.8:
     resolution: {integrity: sha512-0pfFzegeDWJHJIAmTLRP2DwHjdF5s7jo9tuztdQxAhINCdvS+3nGINqPd00AphqJR/0LhANUS6/+7SCb98YOfA==}

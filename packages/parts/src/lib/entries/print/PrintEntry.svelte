@@ -6,6 +6,7 @@
   import { StandardPrintFields } from '@living-dictionaries/types';
   import { semanticDomains } from '../../mappings/semantic-domains';
   import QrCode from '../../QrCode.svelte';
+  import sanitize from 'xss';
 
   export let entry: IEntry;
   // export let speakers: ISpeaker[];
@@ -34,7 +35,7 @@
   <i>{entry.ps && selectedFields.ps ? entry.ps : ''}</i>
   {#if entry.gl && selectedFields.gloss}
     {#each Object.entries(entry.gl) as gloss, index}
-      {@html gloss[1]}{index < Object.entries(entry.gl).length - 1 ? ' - ' : ''}
+      {@html sanitize(gloss[1])}{index < Object.entries(entry.gl).length - 1 ? ' - ' : ''}
     {/each}
   {/if}
   <b>{entry.xv && selectedFields.example_sentence ? entry.xv : ''}</b>
@@ -48,7 +49,7 @@
   {#if entry.sr && selectedFields.sr}
     <div>
       {#if showLabels}
-        <i>Source: </i>
+        <span class="italic text-[80%]">{t ? $t('entry.sr') : 'Source'}: </span>
       {/if}
       {#if typeof entry.sr === 'string'}
         <i>{entry.sr}</i>
@@ -85,16 +86,21 @@
             <span class="italic text-[80%]"
               >{t ? $t(`entry.${key}`) : StandardPrintFields[key]}:</span>
           {/if}
-          {@html entry[key]}
+          {#if (key === 'nt')}
+            {@html sanitize(entry[key])}
+          {:else}
+            {entry[key]}
+          {/if}
         </p>
       {/if}
     {/each}
   </div>
-  {#if entry.sf && selectedFields.speaker}
+  {#if entry.sf?.speakerName && selectedFields.speaker}
     <div>
-      {#if entry.sf.speakerName}
-        <p><i>{showLabels ? 'Speaker:' : ''}</i> {entry.sf.speakerName}</p>
+      {#if showLabels}
+        <span class="italic text-[80%]">{t ? $t('entry.speaker') : 'Speaker'}: </span>
       {/if}
+      {entry.sf.speakerName}
     </div>
   {/if}
 </div>
