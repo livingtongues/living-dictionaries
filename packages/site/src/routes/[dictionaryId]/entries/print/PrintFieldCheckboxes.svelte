@@ -9,9 +9,18 @@
   export let showLabels: Readable<boolean>;
   export let showQrCode: Readable<boolean>;
 
-  $: fieldsThatExist = Object.keys($preferredPrintFields).filter((field) =>
-    entries.find((entry) => entry[field])
-  );
+  $: fieldsThatExist = Object.keys($preferredPrintFields).filter((field) => {
+    if (field === 'gloss') return true;
+    return entries.find((entry) => {
+      if (field === 'alternateOrthographies')
+        return entry.lo || entry.lo2 || entry.lo3 || entry.lo4 || entry.lo5;
+      if (field === 'example_sentence') return entry.xv || entry.xs;
+      if (field === 'sdn') return entry.sdn?.length || entry.sd;
+      if (field === 'image') return entry.pf?.gcs;
+      if (field === 'speaker') return entry.sf?.sp || entry.sf?.speakerName;
+      return entry[field];
+    });
+  });
   $: activeFields = Object.keys($preferredPrintFields).filter(
     (field) => $preferredPrintFields[field]
   );
