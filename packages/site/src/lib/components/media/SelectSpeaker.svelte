@@ -14,7 +14,6 @@
 
   import { createEventDispatcher } from 'svelte';
   const dispatch = createEventDispatcher<{ update: { speakerId: string } }>();
-  //let focus = true;
   onMount(() => {
     const speakerElement = document.getElementById("speaker");
     if (!speakerId) {
