@@ -75,7 +75,7 @@ importers:
       replace-in-file: ^6.3.5
       svelte: ^3.50.1
       svelte-check: ^2.9.1
-      svelte-pieces: 1.0.45
+      svelte-pieces: 1.0.47
       svelte-preprocess: ^4.10.7
       svelte-store-router: ^2.0.10
       svelte2tsx: ^0.5.19
@@ -106,7 +106,7 @@ importers:
       replace-in-file: 6.3.5
       svelte: 3.50.1
       svelte-check: 2.9.1_svelte@3.50.1
-      svelte-pieces: 1.0.45_svelte@3.50.1
+      svelte-pieces: 1.0.47_svelte@3.50.1
       svelte-preprocess: 4.10.7_qy6w2iv5hnh55blsjuu7uihyzm
       svelte-store-router: 2.0.10_svelte@3.50.1
       svelte2tsx: 0.5.19_qy6w2iv5hnh55blsjuu7uihyzm
@@ -185,7 +185,7 @@ importers:
       svelte: ^3.50.1
       svelte-check: ^2.9.1
       svelte-i18n: ^3.3.13
-      svelte-pieces: 1.0.45
+      svelte-pieces: 1.0.47
       svelte-preprocess: ^4.10.7
       sveltefirets: ^0.0.31
       temp-s-p-u: ^0.0.5
@@ -226,7 +226,7 @@ importers:
       svelte: 3.50.1
       svelte-check: 2.9.1_svelte@3.50.1
       svelte-i18n: 3.3.13_svelte@3.50.1
-      svelte-pieces: 1.0.45_svelte@3.50.1
+      svelte-pieces: 1.0.47_svelte@3.50.1
       svelte-preprocess: 4.10.7_qy6w2iv5hnh55blsjuu7uihyzm
       sveltefirets: 0.0.31
       temp-s-p-u: 0.0.5_vite@3.1.4
@@ -5707,7 +5707,7 @@ packages:
       prettier-plugin-svelte: 2.7.1_nk6d2fkgcllkkdynqbuearcure
       prism-svelte: 0.5.0
       prismjs: 1.29.0
-      svelte-pieces: 1.0.45_svelte@3.50.1
+      svelte-pieces: 1.0.47_svelte@3.50.1
       unist-util-visit: 4.1.1
     transitivePeerDependencies:
       - svelte
@@ -7784,8 +7784,8 @@ packages:
       tiny-glob: 0.2.9
     dev: true
 
-  /svelte-pieces/1.0.45_svelte@3.50.1:
-    resolution: {integrity: sha512-jNMkdrgU9JElu8P2/ar5Ho6fxdbxYLJQHQ2CxKWBhA0twRSXiQfjnNm/jh9Vq7FZjLZLhiy6CMAJ39zWp0k9pA==}
+  /svelte-pieces/1.0.47_svelte@3.50.1:
+    resolution: {integrity: sha512-LzF0/M7Qer3V5oiTTcNNG46b1H1pfOddLK3JtbsdBLCmScn2BPqPVKW4UX6X3MwtLh6j7P5KbL0kPdWf9rtVjw==}
     peerDependencies:
       svelte: ^3.46.4
     dependencies:
