@@ -89,10 +89,10 @@
 <a href="/terms" target="_blank" class="link">
   {$_('dictionary.terms_of_use', { default: 'Terms of Use' })}
 </a>
-<a href="https://www.youtube.com/static?template=terms" target="_blank" class="link">
+<a href="https://www.youtube.com/static?template=terms" target="_blank" rel="noopener noreferrer" class="link">
   {$_('dictionary.youtube_terms', { default: 'YouTube terms' })}
 </a>
-<a href="https://policies.google.com/privacy" target="_blank" class="link mb-3">
+<a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer" class="link mb-3">
   {$_('dictionary.google_terms', { default: 'Google terms' })}
 </a>
 
