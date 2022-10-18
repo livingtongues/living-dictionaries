@@ -40,7 +40,7 @@
 </script>
 
 <Hits {search} let:entries>
-  <div class="grid">
+  <div class="gallery">
     {#if $canEdit}
       {#each entries as algoliaEntry (algoliaEntry.id)}
         {#if algoliaEntry.pf}
@@ -70,7 +70,7 @@
     background: rgba(0, 0, 0, 1);
   }
 
-  .grid {
+  .gallery {
     display: grid;
     gap: 0.5rem;
 
