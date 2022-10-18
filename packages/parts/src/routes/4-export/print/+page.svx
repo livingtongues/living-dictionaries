@@ -13,12 +13,16 @@
     entriesWithExampleSentences,
   } from './mock-data';
   const dictionaryId = 'bezhta';
+
+  let showAllFields = Object.fromEntries(Object.keys(printFields).map((key) => [key, true]))
 </script>
 
-<Story knobs={{ ...printFields }} let:props={printFields}>
-  {#each entries as entry}
+<!-- <Story knobs={{ ...printFields }} let:props={printFields}> -->
+<Story knobs={{ ...showAllFields }} let:props={showAllFields}>
+  <PrintEntry selectedFields={showAllFields} entry={entries[0]} {dictionaryId} showLabels />
+  <!-- {#each entries as entry}
     <PrintEntry selectedFields={printFields} {entry} {dictionaryId} showLabels />
-  {/each}
+  {/each} -->
 </Story>
 
 <Story name="Semantic Domains Field" knobs={{ showLabels: true }} let:props={{ showLabels }}>

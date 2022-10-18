@@ -1,14 +1,14 @@
 export enum CustomPrintFields {
-  // lx always shows
-  alternateOrthographies = 'Alternate Orthographies',
-  ph = 'Phonetic',
-  gloss = 'Glosses',
-  ps = 'Part of Speech',
-  example_sentence = 'Example Sentences',
-  image = 'Image',
-  speaker = 'Speaker',
-  sr = 'Source',
-  sdn = 'Semantic Domains',
+  // lx always shows and is not toggleable
+  gloss = 'Glosses', // always show toggle
+  alternateOrthographies = 'Alternate Orthographies', // lo, lo2, lo3, lo4, lo5
+  ph = 'Phonetic', // same as entry field
+  ps = 'Part of Speech', // same as entry field
+  example_sentence = 'Example Sentences', // xv or xs
+  sdn = 'Semantic Domains', // sdn || sd
+  image = 'Image', // pf.gcs
+  speaker = 'Speaker', // sf.sp or sf.speakerName
+  sr = 'Source', // same as entry field
 }
 
 // displayed with labels, no custom logic
