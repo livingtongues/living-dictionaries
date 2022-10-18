@@ -2,6 +2,7 @@
   import { _ } from 'svelte-i18n';
   import { Collection } from 'sveltefirets';
   import { where } from 'firebase/firestore';
+  import { onMount } from 'svelte'
 
   export let dictionaryId: string,
     initialSpeakerId: string = undefined;
@@ -13,6 +14,13 @@
 
   import { createEventDispatcher } from 'svelte';
   const dispatch = createEventDispatcher<{ update: { speakerId: string } }>();
+  //let focus = true;
+  onMount(() => {
+    const speakerElement = document.getElementById("speaker");
+    if (!speakerId) {
+      speakerElement.focus()
+    }
+  })
 </script>
 
 <Collection
@@ -55,6 +63,14 @@
       {$_('misc.add', { default: 'Add' })}
     </option>
   </select>
+  <svg
+    class="dropdown-arrow absolute right-6 gray-color"
+    xmlns="http://www.w3.org/2000/svg"
+    width="18"
+    height="18"
+    viewBox="0 0 18 18">
+    <path d="M5 8l4 4 4-4z" />
+  </svg>
 </div>
 
 {#if speakerId === addSpeaker}
@@ -70,3 +86,9 @@
 {/if}
 
 <slot {speakerId} />
+
+<style>
+  .gray-color {
+    filter: invert(50%);
+  }
+</style>
