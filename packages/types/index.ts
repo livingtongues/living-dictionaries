@@ -57,5 +57,5 @@ export type {
 };
 
 import { ReadyLocales, UnpublishedLocales } from './languages.interface';
-import { EntryPDFFieldsEnum } from './pdf-entry.interface';
-export { ReadyLocales, UnpublishedLocales, EntryPDFFieldsEnum };
+import { CustomPrintFields, StandardPrintFields } from './pdf-entry.interface';
+export { ReadyLocales, UnpublishedLocales, CustomPrintFields, StandardPrintFields };

@@ -1,6 +1,9 @@
 <script lang="ts">
+  import type { Readable } from 'svelte/store';
+  export let t: Readable<any> = undefined;
+
   import type { IEntry, ISpeaker, IPrintFields } from '@living-dictionaries/types';
-  import { EntryPDFFieldsEnum } from '@living-dictionaries/types';
+  import { StandardPrintFields } from '@living-dictionaries/types';
   import { semanticDomains } from '../../mappings/semantic-domains';
   import QrCode from '../../QrCode.svelte';
 
@@ -58,8 +61,11 @@
   {/if}
   <div>
     {#if selectedFields.sdn}
-      {#if entry.sdn || entry.sd}
-        <span class="italic text-[80%]">Semantic Domains: </span>
+      {#if entry.sdn?.length || entry.sd}
+        {#if showLabels}
+          <span class="italic text-[80%]">{t ? $t('entry.sdn') : 'Semantic Domains'}: </span>
+        {/if}
+
         {#if entry.sdn}
           {#each entry.sdn as key, index}
             {semanticDomains.find((sd) => sd.key === key).name}{index < entry.sdn.length - 1
@@ -67,16 +73,17 @@
               : ''}
           {/each}
         {/if}
-        {#if entry.sdn}
+        {#if entry.sd}
           {entry.sd}
         {/if}
       {/if}
     {/if}
-    {#each ['in', 'mr', 'nc', 'pl', 'va', 'di', 'nt', 'id'] as key}
-      {#if entry[key] && selectedFields[key] && EntryPDFFieldsEnum[key]}
+    {#each Object.keys(StandardPrintFields) as key}
+      {#if entry[key] && selectedFields[key]}
         <p>
           {#if showLabels}
-            <i>{EntryPDFFieldsEnum[key]}</i>:{' '}
+            <span class="italic text-[80%]"
+              >{t ? $t(`entry.${key}`) : StandardPrintFields[key]}:</span>
           {/if}
           {@html entry[key]}
         </p>

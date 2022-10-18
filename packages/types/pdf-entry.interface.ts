@@ -1,7 +1,5 @@
-export enum EntryPDFFieldsEnum {
+export enum CustomPrintFields {
   // lx always shows
-
-  // custom display
   alternateOrthographies = 'Alternate Orthographies',
   ph = 'Phonetic',
   gloss = 'Glosses',
@@ -11,8 +9,10 @@ export enum EntryPDFFieldsEnum {
   speaker = 'Speaker',
   sr = 'Source',
   sdn = 'Semantic Domains',
+}
 
-  // display with label
+// displayed with labels, no custom logic
+export enum StandardPrintFields {
   in = 'Interlinearization',
   mr = 'Morphology',
   nc = 'Noun Class',
@@ -22,7 +22,8 @@ export enum EntryPDFFieldsEnum {
   nt = 'Notes',
   id = 'Id',
 }
-export type PrintFieldKeys = keyof typeof EntryPDFFieldsEnum;
+
+type PrintFieldKeys = keyof typeof CustomPrintFields | keyof typeof StandardPrintFields;
 export type IPrintFields = {
   [key in PrintFieldKeys]?: boolean;
 };
