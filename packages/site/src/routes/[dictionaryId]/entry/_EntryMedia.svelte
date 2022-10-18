@@ -19,7 +19,7 @@
   </div>
 {:else if videoAccess && canEdit}
   <ShowHide let:show let:toggle>
-    <div
+    <button type="button"
       class="rounded bg-gray-100 border-r-2 hover:bg-gray-300 flex flex-col items-center
         justify-center cursor-pointer p-6"
       on:click={toggle}>
@@ -27,7 +27,7 @@
       <span class="text-xs">
         {$t('video.add_video', { default: 'Add Video' })}
       </span>
-    </div>
+    </button>
     {#if show}
       {#await import('$lib/components/video/AddVideo.svelte') then { default: AddVideo }}
         <AddVideo {entry} on:close={toggle} />
