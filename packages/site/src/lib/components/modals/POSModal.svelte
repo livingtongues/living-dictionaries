@@ -32,6 +32,7 @@
 
   <form on:submit|preventDefault={save}>
     <MultiSelect bind:value={poss} placeholder={$_('entry.ps', { default: 'Part of Speech' })}>
+      <option />
       {#each partsOfSpeech as pos}
         <option value={pos.enAbbrev}>
           {$_('ps.' + pos.enAbbrev, { default: pos.enAbbrev })}
