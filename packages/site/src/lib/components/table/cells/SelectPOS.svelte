@@ -1,25 +1,14 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
 
-  import { createEventDispatcher } from 'svelte';
-  const dispatch = createEventDispatcher();
-  export let value = '',
-    canEdit = false;
+  /* export let value = '',
+    canEdit = false; */
 
-  import { partsOfSpeech } from '@living-dictionaries/parts';
-
-  $: writeInPOS = value && !partsOfSpeech.find((part) => part.enAbbrev === value);
-
-  function onChange(event) {
-    dispatch('valueupdate', {
-      field: 'ps',
-      newValue: event.target.value,
-    });
-  }
+  /* $: writeInPOS = value && !partsOfSpeech.find((part) => part.enAbbrev === value); */
 </script>
 
 <!-- svelte-ignore a11y-no-onchange -->
-<select class="h-full p-0 border-none" on:change={onChange} bind:value>
+<!-- <select class="h-full p-0 border-none" on:change={onChange} bind:value>
   <option />
 
   {#if writeInPOS}
@@ -37,12 +26,5 @@
       {/if}
     </option>
   {/each}
-</select>
+</select> -->
 
-<style>
-  select {
-    appearance: auto;
-    background: transparent;
-    width: 100%;
-  }
-</style>
