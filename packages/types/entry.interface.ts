@@ -25,7 +25,7 @@ export interface IEntry extends IFirestoreMetaDataAbbreviated, LDAlgoliaFields, 
   gl: IGloss; // glosses
   in?: string; // interlinearization
   mr?: string; // morphology
-  ps?: string; // part of speech
+  ps?: string[]; // part of speech
   sd?: string[]; // semantic domain strings, only using for custom semantic domains brought in from imports
   sdn?: string[]; // semantic domain number, simplified system modeled after SemDom (eg. 2.1.2.3)
   de?: string; // definition english, only in Bahasa Lani (jaRhn6MAZim4Blvr1iEv) deprecated by Greg
