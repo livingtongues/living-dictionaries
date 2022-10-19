@@ -19,12 +19,6 @@
       {$_('entry.ps', { default: 'Part of Speech' })}
     </div>
     <div class="flex flex-wrap whitespace-nowrap border-b-2 border-dashed mb-2">
-      {#if entry.ps && !entry.ps.length}
-        <span class="px-2 py-1 leading-tight text-xs bg-blue-100 rounded mb-1">
-          <i>{entry.ps}</i>
-        </span>
-        <div class="w-1" />
-      {/if}
       {#if entry.ps && entry.ps.length}
         {#each entry.ps as pos}
           <span class="px-2 py-1 leading-tight text-xs bg-blue-100 rounded mb-1">
