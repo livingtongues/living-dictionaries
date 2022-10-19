@@ -92,9 +92,8 @@
     {/if}
 
     <EntryPartOfSpeech
-      value={entry.ps}
+      {entry}
       {canEdit}
-      display={$t('entry.ps', { default: 'Part of Speech' })}
       on:valueupdate />
 
     <EntrySemanticDomains {canEdit} {entry} on:valueupdate />
