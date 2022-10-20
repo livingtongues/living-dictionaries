@@ -14,18 +14,11 @@
 </Header>
 
 <div class="max-w-screen-md mx-auto p-3">
+  <h2 class="font-semibold">English tutorials</h2>
   <iframe
     class="video mb-3"
     src="https://www.youtube.com/embed/d8neBgRsTrI"
     title="Tutorial 1 - How to create an account and a new Living Dictionary"
-    frameborder="0"
-    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-    allowfullscreen />
-    
-    <iframe
-    class="video mb-3"
-    src="https://www.youtube.com/embed/Mm2-LwKySn8"
-    title="Seminario 1 - Como iniciar una cuenta y crear un Diccionario Vivo"
     frameborder="0"
     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
     allowfullscreen />
@@ -34,6 +27,25 @@
     class="video mb-3"
     src="https://www.youtube.com/embed/4PRGtToFhgo"
     title="Tutorial 2 - How to Add and Edit Entries in a Living Dictionary"
+    frameborder="0"
+    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+    allowfullscreen />
+</div>
+
+<div class="max-w-screen-md mx-auto p-3">
+  <h2 class="font-semibold">Tutoriales en español</h2>
+  <iframe
+    class="video mb-3"
+    src="https://www.youtube.com/embed/Mm2-LwKySn8"
+    title="Seminario 1 - Como iniciar una cuenta y crear un Diccionario Vivo"
+    frameborder="0"
+    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+    allowfullscreen />
+
+  <iframe
+    class="video mb-3"
+    src="https://www.youtube.com/embed/opQtwmxEFGc"
+    title="Seminario 2 - Como agregar y editar entradas en un Diccionario Vivo"
     frameborder="0"
     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
     allowfullscreen />
