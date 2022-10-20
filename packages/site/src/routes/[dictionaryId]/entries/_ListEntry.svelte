@@ -36,11 +36,11 @@
     class="p-2 text-lg flex-grow flex flex-col justify-between hover:bg-gray-200 ">
     <div>
       <span class="font-semibold text-gray-900 mr-1">{entry.lx}</span>
-      {#if entry.ph}
+      {#if entry.ph && $dictionary.id != 'itonama'}
         <span class="mr-1 hidden sm:inline">[{entry.ph}]</span>
       {/if}
 
-      {#if entry.lo}<i class="mr-1">{entry.lo}</i>{/if}
+      {#if entry.lo && $dictionary.id != 'itonama'}<i class="mr-1">{entry.lo}</i>{/if}
       {#if entry.lo2}<i class="mr-1" class:sompeng={$page.params.dictionaryId === 'sora'}
           >{entry.lo2}</i
         >{/if}
