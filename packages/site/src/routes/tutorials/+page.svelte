@@ -14,7 +14,7 @@
 </Header>
 
 <div class="max-w-screen-md mx-auto p-3">
-  <h2>English tutorials</h2>
+  <h2 class="font-semibold">English tutorials</h2>
   <iframe
     class="video mb-3"
     src="https://www.youtube.com/embed/d8neBgRsTrI"
@@ -33,7 +33,7 @@
 </div>
 
 <div class="max-w-screen-md mx-auto p-3">
-  <h2>Tutoriales en español</h2>
+  <h2 class="font-semibold">Tutoriales en español</h2>
   <iframe
     class="video mb-3"
     src="https://www.youtube.com/embed/Mm2-LwKySn8"
