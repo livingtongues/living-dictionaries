@@ -76,6 +76,7 @@
 <slot {speakerId} />
 
 <style>
+  /*I'm doing this because it seems unocss doesn't have this class. Right now some parent element has an appearance:none style*/
   #speaker {
     appearance: auto;
   }
