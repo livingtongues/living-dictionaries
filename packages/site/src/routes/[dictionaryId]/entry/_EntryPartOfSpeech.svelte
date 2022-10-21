@@ -19,7 +19,10 @@
       {$_('entry.ps', { default: 'Part of Speech' })}
     </div>
     <div class="flex flex-wrap whitespace-nowrap border-b-2 border-dashed mb-2">
-      {#if entry.ps && entry.ps.length}
+      {#if entry.ps && typeof(entry.ps) === 'string'}
+        {$_('ps.' + entry.ps, { default: entry.ps })}
+      {/if}
+      {#if entry.ps && entry.ps.length && typeof(entry.ps) !== 'string'}
         {#each entry.ps as pos}
           <span class="px-2 py-1 leading-tight text-xs bg-blue-100 rounded mb-1">
             {$_('ps.' + pos, { default: pos })}
