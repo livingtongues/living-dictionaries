@@ -15,10 +15,7 @@
   import { createEventDispatcher } from 'svelte';
   const dispatch = createEventDispatcher<{ update: { speakerId: string } }>();
   onMount(() => {
-    const speakerElement = document.getElementById("speaker");
-    if (!speakerId) {
-      speakerElement.focus()
-    }
+    document.getElementById("speaker").focus();
   })
 </script>
 
@@ -62,14 +59,6 @@
       {$_('misc.add', { default: 'Add' })}
     </option>
   </select>
-  <svg
-    class="dropdown-arrow absolute right-6 gray-color"
-    xmlns="http://www.w3.org/2000/svg"
-    width="18"
-    height="18"
-    viewBox="0 0 18 18">
-    <path d="M5 8l4 4 4-4z" />
-  </svg>
 </div>
 
 {#if speakerId === addSpeaker}
@@ -87,7 +76,16 @@
 <slot {speakerId} />
 
 <style>
-  .gray-color {
-    filter: invert(50%);
+  #speaker {
+    appearance: auto;
   }
+  #speaker:hover {
+    outline-color: blue;
+  }
+  /*This is only for Mozilla browser*/
+  @media all and (min--moz-device-pixel-ratio:0) {
+  #speaker:hover{
+    outline-style: solid;
+  }
+}  
 </style>
