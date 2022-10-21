@@ -85,7 +85,7 @@
   /*This is only for Mozilla browser*/
   @media all and (min--moz-device-pixel-ratio:0) {
   #speaker:hover{
-    outline-style: solid;
+    outline: 1px solid #3088fa;
   }
 }  
 </style>
