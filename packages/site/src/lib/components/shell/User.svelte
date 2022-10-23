@@ -2,7 +2,7 @@
   import { _ } from 'svelte-i18n';
   import { page } from '$app/stores';
   import { admin, user as userStore } from '$lib/stores';
-  import { logOut, firebaseConfig } from 'sveltefirets';
+  import { logOut, firebaseConfig, authState } from 'sveltefirets';
   import Avatar from 'svelte-pieces/shell/Avatar.svelte';
   import ShowHide from 'svelte-pieces/functions/ShowHide.svelte';
   import Menu from 'svelte-pieces/shell/Menu.svelte';
@@ -24,15 +24,9 @@
     };
   }
 
-  let userStoreInited = false;
-  $: user = $userStore || (!userStoreInited && $page.data?.user) || null;
-
-
-  import { browser } from '$app/environment';
-  $: if (browser && $userStore) {
-    userStoreInited = true; // so that page will properly reflect logged out status and not fall back to user loaded from cookies
-    // alternatively after logging out (and thus clearing user cookie), could run invalidate() which would cause $page.data.user to be null achieving the desired result
-  }
+  // @ts-ignore
+  $: user = $userStore || ($authState === undefined && $page.data?.user) || null;
+  // only use page data set from the cookie before authState has been inited so that when a user logs out, the user value here doesn't fall back to the page data  value initially set by the cookie. Even though the cookie is cleared on logout, the page data is not updated.
 </script>
 
 {#if user}
