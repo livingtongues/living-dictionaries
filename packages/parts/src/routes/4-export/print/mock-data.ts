@@ -30,7 +30,7 @@ export const entries: IEntry[] = [
     sd: ['Plants'],
     sdn: ['2.1', '2.2', '2.3'],
     di: 'West Zimbizi',
-    nt: `This is an example of a note, here we can write whatever we want. Content will be sanitized. <img src=x" onerror="alert('XSS Attack')">`,
+    nt: `This is an example of a note, here we can write whatever we want. <img src=x" onerror="alert('XSS Attack')">`, // will be sanitized
     sr: ['A book', 'www.mybook.com'],
     xs: { en: 'This is a banana', vn: '我很喜歡吃香蕉' },
     sf: { path: 'https://database.com/sound.mp3', speakerName: 'Bob Smith' },
