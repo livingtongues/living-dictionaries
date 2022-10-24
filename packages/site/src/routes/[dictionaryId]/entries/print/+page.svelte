@@ -54,7 +54,7 @@
         </Button>
 
         <div class="mb-1 mr-2">
-          <label class="font-medium text-gray-700" for="maxEntries">Max Entries</label>
+          <label class="font-medium text-gray-700" for="maxEntries">{$t('print.max_entries', { default: 'Max entries' })}</label>
           <input
             class="form-input text-sm w-17"
             id="maxEntries"
@@ -65,7 +65,7 @@
           <!-- Algolia hard max per page is 1000 -->
         </div>
         <div class="mb-1 mr-2">
-          <label class="font-medium text-gray-700" for="columnCount">Columns</label>
+          <label class="font-medium text-gray-700" for="columnCount">{$t('print.columns', { default: 'Columns' })}</label>
           <input
             class="form-input text-sm w-17"
             id="columnCount"
@@ -75,7 +75,7 @@
             bind:value={$columnCount} />
         </div>
         <div class="mb-1 mr-2">
-          <label class="font-medium text-gray-700" for="headwordSize">Headword size (pt)</label>
+          <label class="font-medium text-gray-700" for="headwordSize">{$t('print.headword_size', { default: 'Headword size' })} (pt)</label>
           <input
             class="form-input text-sm w-17"
             id="headwordSize"
@@ -85,7 +85,7 @@
             bind:value={$headwordSize} />
         </div>
         <div class="mb-1 mr-2">
-          <label class="font-medium text-gray-700" for="fontSize">Font size (pt)</label>
+          <label class="font-medium text-gray-700" for="fontSize">{$t('print.font_size', { default: 'Font size' })} (pt)</label>
           <input
             class="form-input text-sm w-15"
             id="fontSize"
@@ -95,7 +95,7 @@
             bind:value={$fontSize} />
         </div>
         <div class="mb-1 mr-2">
-          <label class="font-medium text-gray-700" for="imageSize">Images:</label>
+          <label class="font-medium text-gray-700" for="imageSize">{$t('misc.images', { default: 'Images' })}:</label>
           <input
             class="form-input text-sm w-17"
             id="imageSize"
