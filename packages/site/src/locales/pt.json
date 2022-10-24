@@ -45,7 +45,8 @@
     "write_in_contributor": "Escrever em Contribuinte ",
     "invitation_sent": "Convite enviado",
     "manager_contributor_distinction": "Nota: gestores dicionário pode adicionar, editar ou conteúdo de exclusão. Contribuintes são colaboradores do projeto que também pode adicionar e editar, mas não pode excluir qualquer conteúdo.",
-    "other_contributors": "Outros colaboradores"
+    "other_contributors": "Outros colaboradores",
+    "how_to_cite_instructions": "Adicione os autores deste dicionário para mostrar seus nomes na citação"
   },
   "account": {
     "account_settings": "Definições da conta",
@@ -74,7 +75,8 @@
     "email": "Email",
     "send_message": "Enviar Mensagem",
     "message_sent": "Mensagem enviada. Nós responderemos o mais rápido possível.",
-    "what_is_your_question": "Qual é a sua pergunta ou comentário?"
+    "what_is_your_question": "Qual é a sua pergunta ou comentário?",
+    "message_failed": "Mensagem Enviar falha. Verifique sua conexão com a Internet ou envie um email:"
   },
   "create": {
     "select_coordinates": "Seleccione coordenadas",
@@ -100,7 +102,8 @@
     "author_connection": "Descreva brevemente como você conhece esse idioma e por que está criando um dicionário vivo para ele. Você faz parte da comunidade que usará este dicionário vivo? Caso contrário, como você conhece a comunidade?",
     "con_lang_description": "Este dicionário é para uma linguagem construída (um idioma inventado por seres humanos nos últimos anos, para um livro ou um filme)? Se sim, descreva brevemente.",
     "uncertainty": "Não sei",
-    "select_region": "Selecione a região"
+    "select_region": "Selecione a região",
+    "secondary_coordinates": "Coordenadas secundárias"
   },
   "dictionary": {
     "latitude": "Latitude",
@@ -153,7 +156,9 @@
     "nc": "Classe substantiva",
     "va": "Variante",
     "gloss": "tradução",
-    "pl": "Forma plural"
+    "pl": "Forma plural",
+    "print": "Imprimir",
+    "id": "EU IRIA"
   },
   "error": {
     "run_into_error": "Lamentamos, tivemos um erro.",
@@ -255,7 +260,8 @@
     "checking_audios": "Verificando se houver arquivos de áudio",
     "no_audios": "Não há arquivos de áudio",
     "download_csv": "Baixe CSV",
-    "availability": "A exportação está disponível apenas para gerentes de dicionário"
+    "availability": "A exportação está disponível apenas para gerentes de dicionário",
+    "download_pdf": "baixar PDF"
   },
   "video": {
     "video_url": "URL do vídeo",
@@ -272,5 +278,14 @@
     "unpause": "Não musa",
     "previously_dismissed_msg": "Se você descartou anteriormente a solicitação do navegador, recarregue e clique em 'Sim' quando seu navegador solicitar permissão.",
     "permission_denied": "A permissão para acessar a mídia foi negada."
+  },
+  "print": {
+    "qrCode": "Mostrar código QR",
+    "labels": "Rótulos",
+    "availability": "A exibição de impressão está disponível apenas para gerentes e colaboradores de dicionários",
+    "max_entries": "Entradas máximas",
+    "columns": "Colunas",
+    "headword_size": "Tamanho da palavra da cabeça",
+    "font_size": "Tamanho da fonte"
   }
 }
