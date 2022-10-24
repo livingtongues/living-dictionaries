@@ -28,9 +28,7 @@
         }
       }}>
       <label for="names" class="block text-sm font-medium leading-5 text-gray-700 mt-4">
-        Add the authors of this dictionary to show their names in the citation
-        <!-- TODO add this text in i18n spreadsheet -->
-        <!-- {$_('__.__', { default: '' })} -->
+        {$_('contributors.how_to_cite_instructions', { default: 'Add the authors of this dictionary to show their names in the citation' })}
       </label>
       <div class="mt-1 rounded-md shadow-sm">
         <input
