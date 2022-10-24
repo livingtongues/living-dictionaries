@@ -4,8 +4,7 @@
   import SearchBox from '$lib/components/search/SearchBox.svelte';
   import Stats from '$lib/components/search/Stats.svelte';
   import EntryFilters from './_EntryFilters.svelte';
-  import { admin } from '$lib/stores';
-  // import { dictionary, canEdit } from '$lib/stores';
+  import { dictionary, canEdit } from '$lib/stores';
 
   import { page } from '$app/stores';
   import { browser } from '$app/environment';
@@ -57,8 +56,7 @@
               {$_('entry.gallery', { default: 'Gallery' })}
             </span>
           </a>
-          {#if $admin}
-          <!-- {#if $dictionary.printAccess || $canEdit} -->
+          {#if $dictionary.printAccess || $canEdit}
             <a
               data-sveltekit-prefetch
               href={'/' + $page.params.dictionaryId + '/entries/print'}
