@@ -14,6 +14,7 @@
   import { browser } from '$app/environment';
   import type { IPrintFields } from '@living-dictionaries/types';
   import PrintFieldCheckboxes from './PrintFieldCheckboxes.svelte';
+  import { Doc } from 'sveltefirets';
 
   const hitsPerPage = createPersistedStore<number>('printHitsPerPage', 50);
   $: if (browser) {
@@ -34,6 +35,9 @@
   const columnCount = createPersistedStore<number>('printColumnCount', 2);
   const showLabels = createPersistedStore<boolean>('printShowLabels', true);
   const showQrCode = createPersistedStore<boolean>('showQrCode', false);
+
+  import type { ICitation } from '@living-dictionaries/types';
+  let citationType: ICitation = { citation: '' };
 </script>
 
 <svelte:head>
@@ -104,31 +108,43 @@
       </div>
     </div>
 
-    <div class="hidden print:block text-lg mb-5">
+    <div class="hidden print:block text-2xl mb-5">
       {$dictionary.name}
       {$t('misc.LD_singular', { default: 'Living Dictionary' })}
     </div>
 
-    <div class="print-columns" style="--column-count: {$columnCount}">
-      {#each entries as entry (entry.id)}
-        <PrintEntry
-          {t}
-          headwordSize={$headwordSize}
-          fontSize={$fontSize}
-          imagePercent={$imagePercent}
-          {entry}
-          showQrCode={$showQrCode}
-          showLabels={$showLabels}
-          selectedFields={$preferredPrintFields}
-          dictionaryId={$dictionary.id} />
-      {/each}
-    </div>
-
-    <div class="mt-5 text-xs" style="direction: ltr;">
-      {new Date().getFullYear()}.
-      {$dictionary.name}
-      <span>{$t('misc.LD_singular', { default: 'Living Dictionary' })}.</span>
-      Living Tongues Institute for Endangered Languages. https://livingdictionaries.app/{$dictionary.id}
+    <div class="flex overflow-x-hidden">
+      <div class="print-columns pr-4 print:pr-9 max-w-full" style="--column-count: {$columnCount}">
+        {#each entries as entry (entry.id)}
+          <PrintEntry
+            {t}
+            headwordSize={$headwordSize}
+            fontSize={$fontSize}
+            imagePercent={$imagePercent}
+            {entry}
+            showQrCode={$showQrCode}
+            showLabels={$showLabels}
+            selectedFields={$preferredPrintFields}
+            dictionaryId={$dictionary.id} />
+        {/each}
+      </div>
+      <Doc
+        path={`dictionaries/${$dictionary.id}/info/citation`}
+        startWith={citationType}
+        let:data={citation}>
+        {#if entries?.length}
+          <div
+            dir="ltr"
+            class="text-xs print:fixed print:text-center right-0 top-0 bottom-0"
+            style="writing-mode: tb;">
+            {citation?.citation ? citation.citation + ' ' : ''}
+            {new Date().getFullYear()}.
+            {$dictionary.name}
+            <span>{$t('misc.LD_singular', { default: 'Living Dictionary' })}.</span>
+            Living Tongues Institute for Endangered Languages. https://livingdictionaries.app/{$dictionary.id}
+          </div>
+        {/if}
+      </Doc>
     </div>
   </Hits>
   <Pagination showAdd={false} {search} />
