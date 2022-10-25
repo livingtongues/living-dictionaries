@@ -45,7 +45,8 @@
     "write_in_contributor": "Écrire le nom d'un contributeur",
     "invitation_sent": "Invitation envoyée",
     "manager_contributor_distinction": "Nota bene: les \"gérants\" de dictionnaires peuvent ajouter, modifier ou supprimer du contenu. Les \"collaborateurs\" sont des participants de projet qui peuvent également ajouter et modifier du contenu, mais ne peuvent pas le supprimer.",
-    "other_contributors": "Autres contributeurs"
+    "other_contributors": "Autres contributeurs",
+    "how_to_cite_instructions": "Ajoutez les auteurs de ce dictionnaire pour montrer leurs noms dans la citation"
   },
   "account": {
     "account_settings": "Paramètres",
@@ -74,7 +75,8 @@
     "email": "Adresse de courriel",
     "send_message": "Envoyer le message",
     "message_sent": "Message envoyé. Nous vous répondrons sous peu.",
-    "what_is_your_question": "Quelle est votre question ou votre commentaire ?"
+    "what_is_your_question": "Quelle est votre question ou votre commentaire ?",
+    "message_failed": "Message Envoi a échoué. Vérifiez votre connexion Internet ou envoyez-nous un e-mail:"
   },
   "create": {
     "select_coordinates": "Sélectionnez les coordonnées",
@@ -100,7 +102,8 @@
     "author_connection": "Veuillez décrire brièvement comment vous connaissez cette langue et pourquoi vous créez un dictionnaire vivant pour cela. Faites-vous partie de la communauté qui utilisera ce dictionnaire vivant? Sinon, comment connaissez-vous la communauté?",
     "con_lang_description": "Ce dictionnaire est-il pour une langue construite (une langue inventée par les humains ces dernières années, pour un livre ou un film)? Si oui, veuillez décrire brièvement.",
     "uncertainty": "je ne sais pas",
-    "select_region": "Choisissez une région"
+    "select_region": "Choisissez une région",
+    "secondary_coordinates": "Coordonnées secondaires"
   },
   "dictionary": {
     "latitude": "Latitude",
@@ -153,7 +156,9 @@
     "nc": "Classe de nom",
     "va": "Une variante",
     "gloss": "Traduction",
-    "pl": "Forme pluriel"
+    "pl": "Forme pluriel",
+    "print": "Imprimer",
+    "id": "IDENTIFIANT"
   },
   "error": {
     "run_into_error": "Nous sommes désolés, il y a une erreur.",
@@ -255,7 +260,8 @@
     "checking_audios": "Vérification si des fichiers audio existent",
     "no_audios": "Il n'y a pas de fichiers audio",
     "download_csv": "Télécharger CSV",
-    "availability": "L'exportation est uniquement disponible pour les gestionnaires de dictionnaire"
+    "availability": "L'exportation est uniquement disponible pour les gestionnaires de dictionnaire",
+    "download_pdf": "Télécharger le PDF"
   },
   "video": {
     "video_url": "URL de la vidéo",
@@ -272,5 +278,14 @@
     "unpause": "Inquiet",
     "previously_dismissed_msg": "Si vous avez précédemment rejeté la demande du navigateur, veuillez recharger et cliquer sur «oui» lorsque votre navigateur demande l'autorisation.",
     "permission_denied": "L'autorisation d'accéder aux médias a été refusée."
+  },
+  "print": {
+    "qrCode": "Afficher le code QR",
+    "labels": "Étiquettes",
+    "availability": "La vue imprimée n'est disponible que pour les gestionnaires et les contributeurs de dictionnaire",
+    "max_entries": "Entrées maximales",
+    "columns": "Colonnes",
+    "headword_size": "Taille de mot de tête",
+    "font_size": "Taille de police"
   }
 }

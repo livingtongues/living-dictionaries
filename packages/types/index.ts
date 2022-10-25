@@ -23,7 +23,7 @@ import type { IDictionarySettings } from './dictionary-settings.interface';
 import type { IPartOfSpeech } from './part-of-speech.interface';
 import type { IColumn } from './column.interface';
 import type { HelperRoles, IHelper } from './helper.interface';
-import type { IPrintFields } from './pdf-entry.interface';
+import type { IPrintFields } from './print-entry.interface';
 
 export type {
   IAudio,
@@ -56,5 +56,5 @@ export type {
 };
 
 import { ReadyLocales, UnpublishedLocales } from './languages.interface';
-import { EntryPDFFieldsEnum } from './pdf-entry.interface';
-export { ReadyLocales, UnpublishedLocales, EntryPDFFieldsEnum };
+import { CustomPrintFields, StandardPrintFields } from './print-entry.interface';
+export { ReadyLocales, UnpublishedLocales, CustomPrintFields, StandardPrintFields };

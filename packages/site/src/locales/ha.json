@@ -45,7 +45,8 @@
     "write_in_contributor": "Rubuta a bada gudummawa",
     "invitation_sent": "gayyata aika",
     "manager_contributor_distinction": "SAURARA: Kifi na iya ƙarawa, shirya ko share abubuwan da ke ciki. Masu ba da gudummawa suna aiki da aikin aikin waɗanda za su iya ƙarawa da shirya, amma ba za su iya share kowane abun ciki ba.",
-    "other_contributors": "Sauran Masu Ba da gudummawa"
+    "other_contributors": "Sauran Masu Ba da gudummawa",
+    "how_to_cite_instructions": "Sanya marubutan wannan kamus don nuna sunayensu a cikin ƙididdigar"
   },
   "account": {
     "account_settings": "account Saituna",
@@ -74,7 +75,8 @@
     "email": "email",
     "send_message": "aika sako",
     "message_sent": "Saƙon aika. Za mu amsa da zaran mun iya.",
-    "what_is_your_question": "Mene ne tambaya ko comment?"
+    "what_is_your_question": "Mene ne tambaya ko comment?",
+    "message_failed": "Sakon Sakon Sako ya kasa. Duba haɗin intanet ɗinka ko Imel na Amurka:"
   },
   "create": {
     "select_coordinates": "Zabi tsarawa",
@@ -100,7 +102,8 @@
     "author_connection": "Da fatan za a bayyana yadda kuka san wannan yare kuma me yasa kuke ƙirƙirar ƙamus ɗin rayuwa don hakan. Shin kun kasance wani ɓangare na al'umma waɗanda za su yi amfani da wannan ƙamus ɗin rayuwa? Idan ba haka ba, ta yaya kuka san al'umma?",
     "con_lang_description": "Shin wannan ƙamus na harshe ne wanda aka gina (harshe da aka kirkira ta ɗan adam a cikin 'yan shekarun nan, na wani fim ko fim)? Idan eh, da fatan za a bayyana a taƙaice.",
     "uncertainty": "Ban sani ba",
-    "select_region": "Zaɓi yanki"
+    "select_region": "Zaɓi yanki",
+    "secondary_coordinates": "Sakandare sakandare"
   },
   "dictionary": {
     "latitude": "Latitude",
@@ -153,7 +156,9 @@
     "nc": "Kalmanci aji",
     "va": "Ƙjici",
     "gloss": "juyawa",
-    "pl": "Tsari"
+    "pl": "Tsari",
+    "print": "Buga",
+    "id": "ID"
   },
   "error": {
     "run_into_error": "Muna yi hakuri, mun gudu a cikin wani kuskure.",
@@ -255,7 +260,8 @@
     "checking_audios": "Dubawa idan fayilolin sauti sun wanzu",
     "no_audios": "Babu fayilolin mai jiwuwa",
     "download_csv": "Sauke CSV",
-    "availability": "Ana samun fitarwa kawai don manajan kamawa"
+    "availability": "Ana samun fitarwa kawai don manajan kamawa",
+    "download_pdf": "Download PDF"
   },
   "video": {
     "video_url": "URL ɗin bidiyo",
@@ -272,5 +278,14 @@
     "unpause": "M",
     "previously_dismissed_msg": "Idan kun riga kun kori buƙatun mai binciken, da fatan za a sake maimaita kuma danna 'Ee' lokacin da mai bincikenku ya nemi izini.",
     "permission_denied": "An hana izinin shiga kafofin watsa labarai."
+  },
+  "print": {
+    "qrCode": "Nuna lambar QR",
+    "labels": "Labels",
+    "availability": "Duba Buga ana samun kawai don manajan kamawa da masu ba da gudummawa",
+    "max_entries": "Max shigarwar",
+    "columns": "Ginshiƙai",
+    "headword_size": "Girman taken",
+    "font_size": "Girman font"
   }
 }

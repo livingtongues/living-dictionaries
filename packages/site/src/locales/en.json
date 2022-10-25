@@ -45,7 +45,8 @@
     "write_in_contributor": "Write in Contributor",
     "invitation_sent": "Invitation sent",
     "manager_contributor_distinction": "Note: Dictionary managers may add, edit or delete content. Contributors are project collaborators who can also add and edit, but cannot delete any content.",
-    "other_contributors": "Other Contributors"
+    "other_contributors": "Other Contributors",
+    "how_to_cite_instructions": "Add the authors of this dictionary to show their names in the citation"
   },
   "account": {
     "account_settings": "Account Settings",
@@ -74,7 +75,8 @@
     "email": "Email",
     "send_message": "Send Message",
     "message_sent": "Message sent. We will reply as soon as we can.",
-    "what_is_your_question": "What is your question or comment?"
+    "what_is_your_question": "What is your question or comment?",
+    "message_failed": "Message send failed. Check your internet connection or email us:"
   },
   "create": {
     "select_coordinates": "Select Coordinates",
@@ -100,7 +102,8 @@
     "author_connection": "Please briefly describe how you know this language and why you are creating a Living Dictionary for it. Are you part of the community that will be using this Living Dictionary? If not, how do you know the community?",
     "con_lang_description": "Is this dictionary for a constructed language (a language invented by humans in recent years, for a book or a movie)? If yes, please briefly describe.",
     "uncertainty": "I don't know",
-    "select_region": "Select Region"
+    "select_region": "Select Region",
+    "secondary_coordinates": "Secondary Coordinates"
   },
   "dictionary": {
     "latitude": "Latitude",
@@ -153,7 +156,9 @@
     "nc": "Noun Class",
     "va": "Variant",
     "gloss": "translation",
-    "pl": "Plural form"
+    "pl": "Plural form",
+    "print": "Print",
+    "id": "ID"
   },
   "error": {
     "run_into_error": "We're sorry, we've run into an error.",
@@ -255,7 +260,8 @@
     "checking_audios": "Checking if audio files exist",
     "no_audios": "There are no audio files",
     "download_csv": "Download CSV",
-    "availability": "Export is only available to dictionary managers"
+    "availability": "Export is only available to dictionary managers",
+    "download_pdf": "Download PDF"
   },
   "video": {
     "video_url": "Video URL",
@@ -272,5 +278,14 @@
     "unpause": "Unpause",
     "previously_dismissed_msg": "If you previously dismissed the browser's request, please reload and click 'Yes' when your browser asks for permission.",
     "permission_denied": "Permission to access media was denied."
+  },
+  "print": {
+    "qrCode": "Show QR Code",
+    "labels": "Labels",
+    "availability": "Print view is only available to dictionary managers and contributors",
+    "max_entries": "Max entries",
+    "columns": "Columns",
+    "headword_size": "Headword size",
+    "font_size": "Font size"
   }
 }
