@@ -1,6 +1,7 @@
 <script lang="ts">
   import type { Readable } from 'svelte/store';
   export let t: Readable<any> = undefined;
+  console.log(t);
 
   export let checked: boolean;
 
@@ -28,5 +29,5 @@
   <!-- ({t
     ? $t('settings.print_access_meaning')
     : 'This gives the public the ability to download and print this Living Dictionary as a .PDF'}) -->
-    This gives the public the ability to download and print this Living Dictionary as a .PDF
+  This gives the public the ability to download and print this Living Dictionary as a .PDF
 </div>

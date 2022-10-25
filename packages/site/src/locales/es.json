@@ -45,7 +45,8 @@
     "write_in_contributor": "Escribir el nombre de un colaborador",
     "invitation_sent": "Invitación enviada",
     "manager_contributor_distinction": "Nota: Los \"administradores\" de diccionarios pueden añadir, editar o eliminar datos. \"Colaboradores\" también pueden añadir y editar, pero no pueden eliminar datos.",
-    "other_contributors": "Otros colaboradores"
+    "other_contributors": "Otros colaboradores",
+    "how_to_cite_instructions": "Agregue los autores de este diccionario para mostrar sus nombres en la cita"
   },
   "account": {
     "account_settings": "Configuración",
@@ -74,7 +75,8 @@
     "email": "Correo electrónico",
     "send_message": "Enviar el mensaje",
     "message_sent": "Mensaje enviado. Responderemos lo antes posible.",
-    "what_is_your_question": "¿Cuál es su pregunta o comentario?"
+    "what_is_your_question": "¿Cuál es su pregunta o comentario?",
+    "message_failed": "Mensaje de envío falló. Consulte su conexión a internet o envíenos un correo electrónico:"
   },
   "create": {
     "select_coordinates": "Seleccione las coordenadas GPS",
@@ -100,7 +102,8 @@
     "author_connection": "Por favor describa brevemente cómo conoce este idioma y por qué está creando un diccionario vivo para ello. ¿Eres parte de la comunidad que usará este diccionario vivo? Si no, ¿cómo conoces a la comunidad?",
     "con_lang_description": "¿Es este diccionario de un idioma artificial (un idioma inventado por humanos en los últimos años, o para un libro o una película)? En caso afirmativo, describa brevemente.",
     "uncertainty": "No sé",
-    "select_region": "Seleccione región"
+    "select_region": "Seleccione región",
+    "secondary_coordinates": "Coordenadas secundarias"
   },
   "dictionary": {
     "latitude": "Latitud",
@@ -153,7 +156,9 @@
     "nc": "Clase sustantiva",
     "va": "Variante",
     "gloss": "traducción",
-    "pl": "Forma plural"
+    "pl": "Forma plural",
+    "print": "Imprimir",
+    "id": "ID"
   },
   "error": {
     "run_into_error": "Lo sentimos, hay un error.",
@@ -255,7 +260,8 @@
     "checking_audios": "Comprobando si existen archivos de audio",
     "no_audios": "No hay archivos de audio",
     "download_csv": "Descargar CSV",
-    "availability": "Exportar sólo está disponible para los administradores del diccionario"
+    "availability": "Exportar sólo está disponible para los administradores del diccionario",
+    "download_pdf": "Descargar PDF"
   },
   "video": {
     "video_url": "URL de video",
@@ -269,8 +275,17 @@
     "add_video": "Añadir video",
     "accesing": "Accesando al micrófono y la cámara.",
     "pause": "Pausar",
-    "unpause": "Despausar",
+    "unpause": "Quitar pausa",
     "previously_dismissed_msg": "Si previamente le negó la petición al navegador, por favor refresque y acepte cuando el navegador le pida permiso.",
     "permission_denied": "Permiso para acceder a los archivos media denegado"
+  },
+  "print": {
+    "qrCode": "Mostrar código QR",
+    "labels": "Ocultar etiquetas",
+    "availability": "La vista de impresión sólo está disponible para administradores y colaboradores del diccionario",
+    "max_entries": "Entradas máximas",
+    "columns": "Columnas",
+    "headword_size": "Tamaño de la palabra principal",
+    "font_size": "Tamaño de la fuente"
   }
 }

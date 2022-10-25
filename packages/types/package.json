@@ -5,8 +5,8 @@
   "type": "module",
   "main": "index.ts",
   "devDependencies": {
-    "firebase": "^9.10.0",
-    "sveltefirets": "^0.0.31"
+    "firebase": "^9.12.1",
+    "sveltefirets": "^0.0.32"
   },
   "repository": {
     "type": "git",

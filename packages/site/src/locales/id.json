@@ -45,7 +45,8 @@
     "write_in_contributor": "Tulis di bagian Kontributor",
     "invitation_sent": "Undangan terkirim",
     "manager_contributor_distinction": "Catatan: Pengelola kamus boleh menambahkan, menyunting atau menghapus konten. Kontributor adalah kolaborator proyek yang dapat menambahkan dan mengedit konten, namun tidak dapat menghapus konten apapun.",
-    "other_contributors": "Kontributor lainnya"
+    "other_contributors": "Kontributor lainnya",
+    "how_to_cite_instructions": "Tambahkan penulis kamus ini untuk menunjukkan nama mereka dalam kutipan"
   },
   "account": {
     "account_settings": "Pengaturan Akun",
@@ -74,7 +75,8 @@
     "email": "Email",
     "send_message": "Mengirim Pesan",
     "message_sent": "Pesan terkirim. Kami akan membalas pesan Anda secepat mungkin",
-    "what_is_your_question": "Apa pertanyaan atau komentar anda?"
+    "what_is_your_question": "Apa pertanyaan atau komentar anda?",
+    "message_failed": "Kirim pesan gagal. Periksa koneksi internet Anda atau email kami:"
   },
   "create": {
     "select_coordinates": "Pilih Koordinat",
@@ -100,7 +102,8 @@
     "author_connection": "Jelaskan secara singkat bagaimana Anda mengetahui bahasa ini dan mengapa Anda membuat kamus hidup untuk itu. Apakah Anda bagian dari komunitas yang akan menggunakan Kamus Hidup ini? Jika tidak, bagaimana Anda mengenal komunitas?",
     "con_lang_description": "Apakah kamus ini untuk bahasa yang dibangun (bahasa yang diciptakan oleh manusia dalam beberapa tahun terakhir, untuk buku atau film)? Jika ya, jelaskan secara singkat.",
     "uncertainty": "aku tidak tahu",
-    "select_region": "Pilih wilayah"
+    "select_region": "Pilih wilayah",
+    "secondary_coordinates": "Koordinat sekunder"
   },
   "dictionary": {
     "latitude": "Garis Lintang",
@@ -153,7 +156,9 @@
     "nc": "Kelas kata benda",
     "va": "Varian",
     "gloss": "terjemahan",
-    "pl": "Bentuk jamak"
+    "pl": "Bentuk jamak",
+    "print": "Mencetak",
+    "id": "PENGENAL"
   },
   "error": {
     "run_into_error": "Maaf, sistem kami mengalami masalah",
@@ -255,7 +260,8 @@
     "checking_audios": "Memeriksa apakah ada file audio",
     "no_audios": "Tidak ada file audio",
     "download_csv": "Unduh CSV",
-    "availability": "Ekspor hanya tersedia untuk manajer kamus"
+    "availability": "Ekspor hanya tersedia untuk manajer kamus",
+    "download_pdf": "Unduh PDF"
   },
   "video": {
     "video_url": "URL video",
@@ -272,5 +278,14 @@
     "unpause": "Unkausa",
     "previously_dismissed_msg": "Jika Anda sebelumnya menolak permintaan browser, silakan muat ulang dan klik 'Ya' ketika browser Anda meminta izin.",
     "permission_denied": "Izin untuk mengakses media ditolak."
+  },
+  "print": {
+    "qrCode": "Tunjukkan kode QR",
+    "labels": "Label",
+    "availability": "Tampilan cetak hanya tersedia untuk manajer dan kontributor kamus",
+    "max_entries": "Entri Max",
+    "columns": "Kolom",
+    "headword_size": "Ukuran kata kepala",
+    "font_size": "Ukuran huruf"
   }
 }

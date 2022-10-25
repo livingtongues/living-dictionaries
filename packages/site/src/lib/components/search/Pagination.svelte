@@ -6,6 +6,7 @@
   import { _ } from 'svelte-i18n';
 
   export let search: InstantSearch;
+  export let showAdd = true;
   let pages: number[] = [];
   let currentRefinement: number;
   let nbPages: number;
@@ -82,7 +83,7 @@
 
   <div class="flex-grow" />
 
-  {#if $canEdit}
+  {#if $canEdit && showAdd}
     <span class="px-3 md:px-0 fixed md:sticky bottom-3 ltr:right-0 rtl:left-0 z-10">
       {#await import('./AddEntry.svelte') then { default: AddEntry }}
         <AddEntry />

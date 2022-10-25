@@ -45,7 +45,8 @@
     "write_in_contributor": "写作贡献者",
     "invitation_sent": "邀请已发送",
     "manager_contributor_distinction": "注意：字典管理员可以添加，编辑或删除内容。贡献者是项目协作者，也可以添加和编辑，但无法删除任何内容。",
-    "other_contributors": "其他贡献者"
+    "other_contributors": "其他贡献者",
+    "how_to_cite_instructions": "添加本字典的作者以在引文中显示其名字"
   },
   "account": {
     "account_settings": "帐号设定",
@@ -74,7 +75,8 @@
     "email": "电子邮件",
     "send_message": "发信息",
     "message_sent": "邮件已发送。我们将尽快进行答复。",
-    "what_is_your_question": "您有什么问题或评论？"
+    "what_is_your_question": "您有什么问题或评论？",
+    "message_failed": "消息发送失败。检查您的互联网连接或给我们发送电子邮件："
   },
   "create": {
     "select_coordinates": "选择坐标",
@@ -100,7 +102,8 @@
     "author_connection": "请简要描述您如何知道这种语言以及为什么要为此创建活着的词典。您是否是将使用此Live词典的社区的一部分？如果没有，您怎么知道社区？",
     "con_lang_description": "这本针对构造语言的字典（近年来人类发明的语言，一本书还是电影）？如果是，请简要描述。",
     "uncertainty": "我不知道",
-    "select_region": "选择区域"
+    "select_region": "选择区域",
+    "secondary_coordinates": "次要坐标"
   },
   "dictionary": {
     "latitude": "纬度",
@@ -153,7 +156,9 @@
     "nc": "名词课",
     "va": "变体",
     "gloss": "翻译",
-    "pl": "复数形式"
+    "pl": "复数形式",
+    "print": "打印",
+    "id": "ID"
   },
   "error": {
     "run_into_error": "很抱歉，我们遇到了一个错误。",
@@ -255,7 +260,8 @@
     "checking_audios": "检查是否存在音频文件",
     "no_audios": "没有音频文件",
     "download_csv": "下载CSV",
-    "availability": "出口仅适用于字典经理"
+    "availability": "出口仅适用于字典经理",
+    "download_pdf": "下载PDF"
   },
   "video": {
     "video_url": "视频网址",
@@ -272,5 +278,14 @@
     "unpause": "播放",
     "previously_dismissed_msg": "如果您以前驳回了浏览器的请求，请重新加载并在浏览器要求许可时单击“是”。",
     "permission_denied": "访问媒体的许可受限"
+  },
+  "print": {
+    "qrCode": "显示QR码",
+    "labels": "标签",
+    "availability": "印刷视图仅适用于字典经理和贡献者",
+    "max_entries": "最大条目",
+    "columns": "列",
+    "headword_size": "头词大小",
+    "font_size": "字体大小"
   }
 }
