@@ -1,6 +1,8 @@
+import type { IEntry, ISpeaker } from "@living-dictionaries/types";
+
 const gender: 'm' | 'f' | 'o' = 'f';
 
-export const speakers = [
+export const speakers: ISpeaker[] = [
   {
     birthplace: 'russia',
     contributingTo: ['bezhta'],
@@ -10,28 +12,30 @@ export const speakers = [
     uid: 'uwNgSHCEeRaJAUPsmZok1uMRXzO2',
   },
 ];
-export const entries = [
-  //...add a couple sample entry objects for mocking
+
+export const entries: IEntry[] = [
   {
     id: '12345qwerty',
     lx: 'xiangjiao',
+    gl: { es: 'platano', ar: `<img src="x" onerror="alert('XSS attack')">`, en: 'banana' },
     lo: 'کیلا',
+    lo2: 'یaلا',
+    lo3: 'check_lo3',
     in: 'n',
     mr: 'bar',
     nc: '5',
     ph: 'xiangjiao',
-    gl: { es: 'platano', ar: 'foo', en: 'banana' },
     ps: 'n',
     pl: 'shuang xiangjiao',
+    sd: ['Plants'],
     sdn: ['2.1', '2.2', '2.3'],
-    di: 'dialect x',
-    nt: 'This is an example of a note, here we can write whatever we want.',
+    di: 'West Zimbizi',
+    nt: `This is an example of a note, here we can write whatever we want. <img src=x" onerror="alert('XSS Attack')">`, // will be sanitized
     sr: ['A book', 'www.mybook.com'],
     xs: { en: 'This is a banana', vn: '我很喜歡吃香蕉' },
-    sf: { path: 'https://database.com/sound.mp3' },
+    sf: { path: 'https://database.com/sound.mp3', speakerName: 'Bob Smith' },
     pf: {
-      gcs: 'banana',
-      path: 'https://api.time.com/wp-content/uploads/2019/11/gettyimages-459761948.jpg',
+      gcs: 'Ktt_Jvk55Mp1cHJ6_zXeHU6dEJOjh8p5bk3rvK5kzXVgwB8GDXCSOPipNTveouELfx9_Rh4IllVvS3BLFBTc',
     },
     xv: '',
   },
@@ -41,7 +45,6 @@ export const entries = [
     gl: { es: 'arbol' },
     pf: {
       gcs: 'Ktt_Jvk55Mp1cHJ6_zXeHU6dEJOjh8p5bk3rvK5kzXVgwB8GDXCSOPipNTveouELfx9_Rh4IllVvS3BLFBTc',
-      path: 'https://lh3.googleusercontent.com/Ktt_Jvk55Mp1cHJ6_zXeHU6dEJOjh8p5bk3rvK5kzXVgwB8GDXCSOPipNTveouELfx9_Rh4IllVvS3BLFBTc=w1055',
       source: 'local_import',
     },
   },
@@ -87,7 +90,6 @@ export const entries = [
     di: 'término de parentesco',
     ub: '9yznFRnjuNOcdZf8ZGW16xDLkFh1',
     pf: {
-      path: 'https://lh3.googleusercontent.com/lwNfI3yEZ2ZOLwFXl_zxW8DPcjpbUvAGZL0aacvYRbw8JpMsFVlq5-y63CwDYd_cSwrFlYX2_O6I7jqwPGxV4A=s128-p',
       source: 'local_import',
       gcs: 'lwNfI3yEZ2ZOLwFXl_zxW8DPcjpbUvAGZL0aacvYRbw8JpMsFVlq5-y63CwDYd_cSwrFlYX2_O6I7jqwPGxV4A\n',
     },
@@ -227,7 +229,6 @@ export const entries = [
       path: 'gta/audio/local_import/Gta-Pkd-Dec13-An-rhesus-monkey-1580860134632.mp3',
     },
     pf: {
-      path: 'https://lh3.googleusercontent.com/RFMsChWMpLTc-0Oo8srvCtHr40UTMQz-mcuqNkcVanRagRQLd_s7iZqTbTE74EHdjh1TGTjDo8YvcVkePgmN8Q=w920',
       source: 'local_import',
       gcs: 'RFMsChWMpLTc-0Oo8srvCtHr40UTMQz-mcuqNkcVanRagRQLd_s7iZqTbTE74EHdjh1TGTjDo8YvcVkePgmN8Q',
     },
@@ -243,21 +244,7 @@ export const entries = [
   },
 ];
 
-export const entriesWithSoundFiles = [
-  {
-    id: '1',
-    lx: 'Without speaker',
-    gl: null,
-  },
-  {
-    id: '2',
-    lx: 'With speaker',
-    gl: null,
-    speaker: 'Anonymus',
-  },
-];
-
-export const entriesWithSemanticDomains = [
+export const entriesWithSemanticDomains: IEntry[] = [
   {
     id: '1',
     lx: 'One semantic domain',
@@ -304,7 +291,7 @@ export const entriesWithSemanticDomains = [
   },
 ];
 
-export const entriesWithAlternateOrthographies = [
+export const entriesWithAlternateOrthographies: IEntry[] = [
   {
     id: 'altOrth5',
     lx: 'Hello',
@@ -325,7 +312,7 @@ export const entriesWithAlternateOrthographies = [
   },
 ];
 
-export const entriesWithPhonetics = [
+export const entriesWithPhonetics: IEntry[] = [
   {
     id: 'phonetics',
     lx: 'Giraffe',
@@ -339,7 +326,7 @@ export const entriesWithPhonetics = [
   },
 ];
 
-export const entriesWithPartsOfSpeech = [
+export const entriesWithPartsOfSpeech: IEntry[] = [
   {
     id: 'PoS',
     lx: 'Parts of speech',
@@ -354,7 +341,7 @@ export const entriesWithPartsOfSpeech = [
   },
 ];
 
-export const entriesWithGlosses = [
+export const entriesWithGlosses: IEntry[] = [
   {
     id: 'multipleGlosses',
     lx: 'Hello World',
@@ -378,7 +365,7 @@ export const entriesWithGlosses = [
   },
 ];
 
-export const entriesWithExampleSentences = [
+export const entriesWithExampleSentences: IEntry[] = [
   {
     id: 'multipleExampleSentences',
     lx: 'Fear',

@@ -25,4 +25,7 @@
   },
   "unocss.root": "packages/site",
   "vitest.enable": true,
+  "svelte.plugin.svelte.compilerWarnings": {
+    "a11y-click-events-have-key-events": "ignore"
+  },
 }

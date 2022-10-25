@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { _ } from 'svelte-i18n';
+  import { t } from 'svelte-i18n';
   import { getContext } from 'svelte';
   import { configure } from 'instantsearch.js/es/widgets/index.js';
   import type { InstantSearch } from 'instantsearch.js';
@@ -13,6 +13,8 @@
   import { dictionary, isManager, canEdit } from '$lib/stores';
   import { browser } from '$app/environment';
   import type { IPrintFields } from '@living-dictionaries/types';
+  import PrintFieldCheckboxes from './PrintFieldCheckboxes.svelte';
+  import { Doc } from 'sveltefirets';
 
   const hitsPerPage = createPersistedStore<number>('printHitsPerPage', 50);
   $: if (browser) {
@@ -24,7 +26,7 @@
   }
 
   const preferredPrintFields = createPersistedStore<IPrintFields>(
-    'printFields_9.21.2022',
+    'printFields_10.18.2022',
     defaultPrintFields
   );
   const headwordSize = createPersistedStore<number>('printHeadwordSize', 12);
@@ -32,7 +34,10 @@
   const imagePercent = createPersistedStore<number>('printImagePercent', 50);
   const columnCount = createPersistedStore<number>('printColumnCount', 2);
   const showLabels = createPersistedStore<boolean>('printShowLabels', true);
-  const showQrCode = createPersistedStore<boolean>('printShowLabels', false);
+  const showQrCode = createPersistedStore<boolean>('showQrCode', false);
+
+  import type { ICitation } from '@living-dictionaries/types';
+  let citationType: ICitation = { citation: '' };
 </script>
 
 <svelte:head>
@@ -44,11 +49,12 @@
     <div class="print:hidden bg-white md:sticky z-1 md:top-22 py-3">
       <div class="flex flex-wrap mb-1">
         <Button class="mb-1 mr-2" form="filled" type="button" onclick={() => window.print()}>
-          <span class="i-fa-print -mt-1" /> {$_('entry.print', { default: 'Print' })}
+          <span class="i-fa-print -mt-1" />
+          {$t('entry.print', { default: 'Print' })}
         </Button>
 
         <div class="mb-1 mr-2">
-          <label class="font-medium text-gray-700" for="maxEntries">Max Entries</label>
+          <label class="font-medium text-gray-700" for="maxEntries">{$t('print.max_entries', { default: 'Max entries' })}</label>
           <input
             class="form-input text-sm w-17"
             id="maxEntries"
@@ -59,7 +65,7 @@
           <!-- Algolia hard max per page is 1000 -->
         </div>
         <div class="mb-1 mr-2">
-          <label class="font-medium text-gray-700" for="columnCount">Column count</label>
+          <label class="font-medium text-gray-700" for="columnCount">{$t('print.columns', { default: 'Columns' })}</label>
           <input
             class="form-input text-sm w-17"
             id="columnCount"
@@ -69,7 +75,7 @@
             bind:value={$columnCount} />
         </div>
         <div class="mb-1 mr-2">
-          <label class="font-medium text-gray-700" for="headwordSize">Headword size (pt)</label>
+          <label class="font-medium text-gray-700" for="headwordSize">{$t('print.headword_size', { default: 'Headword size' })} (pt)</label>
           <input
             class="form-input text-sm w-17"
             id="headwordSize"
@@ -79,7 +85,7 @@
             bind:value={$headwordSize} />
         </div>
         <div class="mb-1 mr-2">
-          <label class="font-medium text-gray-700" for="fontSize">Font size (pt)</label>
+          <label class="font-medium text-gray-700" for="fontSize">{$t('print.font_size', { default: 'Font size' })} (pt)</label>
           <input
             class="form-input text-sm w-15"
             id="fontSize"
@@ -89,7 +95,7 @@
             bind:value={$fontSize} />
         </div>
         <div class="mb-1 mr-2">
-          <label class="font-medium text-gray-700" for="imageSize">Images:</label>
+          <label class="font-medium text-gray-700" for="imageSize">{$t('misc.images', { default: 'Images' })}:</label>
           <input
             class="form-input text-sm w-17"
             id="imageSize"
@@ -98,47 +104,56 @@
             max="100"
             bind:value={$imagePercent} /><span class="font-medium text-gray-700">%</span>
         </div>
-        {#each Object.keys($preferredPrintFields) as field}
-          <!-- Todo: need a separate function to handle when to show what checkbox - for example, don't show "Labels" if no fields that are labeled are showing -->
-          <!-- {#if entries.find((entry) => entry[field])} -->
-          <div class="flex items-center mr-3 mb-1">
-            <input id={field} type="checkbox" bind:checked={$preferredPrintFields[field]} />
-            <label class="ml-1 text-sm text-gray-700" for={field}>{$_(`entry.${[field]}`)}</label>
-          </div>
-          <!-- {/if} -->
-        {/each}
+        <PrintFieldCheckboxes {entries} {preferredPrintFields} {showLabels} {showQrCode} />
       </div>
     </div>
 
-    <div class="hidden print:block text-lg mb-5">
+    <div class="hidden print:block text-2xl mb-5">
       {$dictionary.name}
-      {$_('misc.LD_singular', { default: 'Living Dictionary' })}
+      {$t('misc.LD_singular', { default: 'Living Dictionary' })}
     </div>
 
-    <div class="print-columns" style="--column-count: {$columnCount}">
-      {#each entries as entry (entry.id)}
-        <PrintEntry
-          headwordSize={$headwordSize}
-          fontSize={$fontSize}
-          imagePercent={$imagePercent}
-          {entry}
-          showQrCode={$showQrCode}
-          showLabels={$showLabels}
-          selectedFields={$preferredPrintFields}
-          dictionaryId={$dictionary.id} />
-      {/each}
-    </div>
-
-    <div class="mt-5 text-xs" style="direction: ltr;">
-      {new Date().getFullYear()}.
-      {$dictionary.name}
-      <span>{$_('misc.LD_singular', { default: 'Living Dictionary' })}.</span>
-      Living Tongues Institute for Endangered Languages. https://livingdictionaries.app/{$dictionary.id}
+    <div class="flex overflow-x-hidden">
+      <div class="print-columns pr-4 print:pr-9 max-w-full" style="--column-count: {$columnCount}">
+        {#each entries as entry (entry.id)}
+          <PrintEntry
+            {t}
+            headwordSize={$headwordSize}
+            fontSize={$fontSize}
+            imagePercent={$imagePercent}
+            {entry}
+            showQrCode={$showQrCode}
+            showLabels={$showLabels}
+            selectedFields={$preferredPrintFields}
+            dictionaryId={$dictionary.id} />
+        {/each}
+      </div>
+      <Doc
+        path={`dictionaries/${$dictionary.id}/info/citation`}
+        startWith={citationType}
+        let:data={citation}>
+        {#if entries?.length}
+          <div
+            dir="ltr"
+            class="text-xs print:fixed print:text-center right-0 top-0 bottom-0"
+            style="writing-mode: tb;">
+            {citation?.citation ? citation.citation + ' ' : ''}
+            {new Date().getFullYear()}.
+            {$dictionary.name}
+            <span>{$t('misc.LD_singular', { default: 'Living Dictionary' })}.</span>
+            Living Tongues Institute for Endangered Languages. https://livingdictionaries.app/{$dictionary.id}
+          </div>
+        {/if}
+      </Doc>
     </div>
   </Hits>
-  <Pagination {search} />
+  <Pagination showAdd={false} {search} />
 {:else}
-  <p>{$_('export.print_availability', { default: 'Print view is only available to dictionary managers and contributors' })}</p>
+  <p>
+    {$t('export.print_availability', {
+      default: 'Print view is only available to dictionary managers and contributors',
+    })}
+  </p>
 {/if}
 
 <style>
