@@ -104,7 +104,7 @@
     <a
       class="block mt-3 md:mb-3 ml-auto"
       href="https://www.algolia.com/?utm_source=instantsearch.js&utm_medium=website&utm_content=livingdictionaries.app&utm_campaign=poweredby"
-      target="_blank">
+      target="_blank" rel="noopener noreferrer">
       <img
         class="w-full"
         style="max-width: 145px;"

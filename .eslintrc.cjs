@@ -7,9 +7,6 @@ module.exports = {
 	overrides: [{ files: ['*.svelte', '*.svx'], processor: 'svelte3/svelte3' }],
 	settings: {
 		'svelte3/typescript': () => require('typescript'),
-		// ignore style tags in Svelte because of Tailwind CSS
-		// See https://github.com/sveltejs/eslint-plugin-svelte3/issues/70
-		'svelte3/ignore-styles': () => true
 	},
 	parserOptions: {
 		sourceType: 'module',
@@ -23,6 +20,7 @@ module.exports = {
 		'@typescript-eslint/explicit-module-boundary-types': 'off',
 		'@typescript-eslint/ban-ts-comment': 'off',
 		'no-undef': 'off',
+		'a11y-click-events-have-key-events': 'off',
 	},
 	env: {
 		browser: true,
