@@ -11,6 +11,15 @@
   import type { IEntry } from '@living-dictionaries/types';
   export let entry: IEntry;
   let poss = entry.ps || [];
+  // This is temporal to handle also strings POS, once the DB refactorization has done, we can remove it.
+  let posAsString: string;
+  let firstTimeLoad = true
+  $: if (entry.ps && typeof(entry.ps) === 'string' && firstTimeLoad) {
+    posAsString = entry.ps;
+    let selectedPOS =  partsOfSpeech.find(pos => pos.enAbbrev === posAsString);
+    poss = [selectedPOS.enAbbrev];
+    firstTimeLoad = false;
+  }
 
   function save() {
     dispatch('valueupdate', {
