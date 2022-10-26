@@ -2,7 +2,7 @@
   import { t } from 'svelte-i18n';
   import Textbox from './cells/Textbox.svelte';
   import SemanticDomains from './cells/SemanticDomains.svelte';
-  import SelectPOS from './cells/SelectPOS.svelte';
+  import PartsOfSpeech from './cells/PartsOfSpeech.svelte';
   import SelectSpeakerCell from './cells/SelectSpeakerCell.svelte';
   import SelectSource from './cells/SelectSource.svelte';
   import AudioCell from './cells/AudioCell.svelte';
@@ -22,7 +22,7 @@
   class:sompeng={column.display === 'Sompeng-Mardir'}
   class="{updatedValue !== undefined
     ? 'bg-green-100 border-green-400 border'
-    : ''} h-full w-full inline-block">
+    : ''} h-full w-full inline-block overflow-x-auto">
   {#if column.field === 'soundFile'}
     <AudioCell {canEdit} {entry} />
   {:else if column.field === 'photoFile'}
@@ -43,10 +43,10 @@
   {:else if column.field === 'speaker'}
     <SelectSpeakerCell {canEdit} {entry} />
   {:else if column.field === 'ps'}
-    <SelectPOS
-      {canEdit}
-      value={entry.ps}
-      on:valueupdate={(e) => saveUpdateToFirestore(e, entry.id, $dictionary.id)} />
+  <PartsOfSpeech
+    {canEdit}
+    {entry}
+    on:valueupdate={(e) => saveUpdateToFirestore(e, entry.id, $dictionary.id)} />
   {:else if column.field === 'sdn'}
     <SemanticDomains
       {canEdit}
