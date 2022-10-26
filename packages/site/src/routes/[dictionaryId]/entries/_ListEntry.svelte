@@ -51,7 +51,14 @@
     <div class="flex flex-wrap items-center justify-end -mb-1">
       <div class="text-xs text-gray-600 mr-auto mb-1">
         {#if entry.ps}
-          <i>{$t('psAbbrev.' + entry.ps, { default: entry.ps })},</i>
+        <!-- This is temporal to handle also strings POS, once the DB refactorization has done, we can remove it. -->
+          {#if typeof(entry.ps) === 'string'}
+            <i>{$t('psAbbrev.' + entry.ps, { default: entry.ps })},</i>
+          {:else}
+            {#each entry.ps as pos}
+              <i>{$t('psAbbrev.' + pos, { default: pos })}, </i>
+            {/each}
+          {/if}
         {/if}
         {#if glosses.indexOf('<i>') > -1}
           {@html glosses}
