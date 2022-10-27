@@ -86,7 +86,6 @@ With help from https://github.com/beyonk-adventures/svelte-mapbox
         {/if}
       </Map>
     </div>
-
     <MapboxStatic
       regions={[
         {
@@ -95,7 +94,6 @@ With help from https://github.com/beyonk-adventures/svelte-mapbox
       ]}
       width={200}
       height={200} />
-
     <pre>{JSON.stringify(points, null, 2)}</pre>
   </ReactiveSet>
 </Story>
