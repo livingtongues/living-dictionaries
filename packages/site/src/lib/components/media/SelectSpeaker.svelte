@@ -2,7 +2,6 @@
   import { _ } from 'svelte-i18n';
   import { Collection } from 'sveltefirets';
   import { where } from 'firebase/firestore';
-  import { onMount } from 'svelte'
 
   export let dictionaryId: string,
     initialSpeakerId: string = undefined;
@@ -14,9 +13,10 @@
 
   import { createEventDispatcher } from 'svelte';
   const dispatch = createEventDispatcher<{ update: { speakerId: string } }>();
-  onMount(() => {
-    document.getElementById("speaker").focus();
-  })
+
+  function autofocus(node: HTMLSelectElement) {
+    setTimeout(() => node.focus(), 15);
+  }
 </script>
 
 <Collection
@@ -39,6 +39,7 @@
     {$_('entry.speaker', { default: 'Speaker' })}
   </label>
   <select
+    use:autofocus
     bind:value={speakerId}
     on:change={() => {
       console.log({ speakerId });
