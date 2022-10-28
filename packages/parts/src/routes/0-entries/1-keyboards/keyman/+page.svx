@@ -20,7 +20,6 @@
   let:props={{ bcp, showKeyboard }}
   let:set>
   Set different bpc47 codes to see different keyboards:
-
   {#each Object.keys(glossingLanguages) as language}
     {#if glossingLanguages[language].showKeyboard}
       <Button form="menu" size="sm" onclick={() => set('bcp', language)} active={language === bcp}
