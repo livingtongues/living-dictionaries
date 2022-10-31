@@ -13,7 +13,7 @@
   export let entry: IEntry;
   let poss = entry.ps || [];
   // This is temporal to handle also strings POS, once the DB refactorization has done, we can remove it.
-  import { mayanPOS } from './mayan-parts-of-speech'
+  import { mayanPOS, mayanDictionaries } from './mayan-parts-of-speech'
   let posAsString: string;
   let firstTimeLoad = true
   $: if (entry.ps && typeof(entry.ps) === 'string' && firstTimeLoad) {
@@ -44,7 +44,7 @@
   <form on:submit|preventDefault={save}>
     <MultiSelect bind:value={poss} placeholder={$_('entry.ps', { default: 'Part of Speech' })}>
       <option />
-      {#if $dictionary.id === 'akateko'}
+      {#if mayanDictionaries.includes($dictionary.id)}
         {#each mayanPOS as pos}
           <option value={pos}>
             {pos}
