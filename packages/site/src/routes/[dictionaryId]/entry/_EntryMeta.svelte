@@ -25,7 +25,7 @@
 
   <meta property="og:title" content={title} />
   <meta property="og:description" content={description} />
-  <meta name="og:image" content={shareImage} />
+  <meta name="image" property="og:image" content={shareImage} />
   <meta property="og:url" content={url} />
   <meta property="og:site_name" content={$_('misc.LD', { default: 'Living Dictionaries' })} />
 
