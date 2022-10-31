@@ -5,6 +5,7 @@
   import Button from 'svelte-pieces/ui/Button.svelte';
   import { createEventDispatcher } from 'svelte';
   import { partsOfSpeech } from '@living-dictionaries/parts';
+  import { dictionary } from '$lib/stores';
 
   const dispatch = createEventDispatcher();
   const close = () => dispatch('close');
@@ -12,6 +13,7 @@
   export let entry: IEntry;
   let poss = entry.ps || [];
   // This is temporal to handle also strings POS, once the DB refactorization has done, we can remove it.
+  import { mayanPOS } from './mayan-parts-of-speech'
   let posAsString: string;
   let firstTimeLoad = true
   $: if (entry.ps && typeof(entry.ps) === 'string' && firstTimeLoad) {
@@ -42,6 +44,13 @@
   <form on:submit|preventDefault={save}>
     <MultiSelect bind:value={poss} placeholder={$_('entry.ps', { default: 'Part of Speech' })}>
       <option />
+      {#if $dictionary.id === 'akateko'}
+        {#each mayanPOS as pos}
+          <option value={pos}>
+            {pos}
+          </option>
+        {/each}
+      {/if}
       {#each partsOfSpeech as pos}
         <option value={pos.enAbbrev}>
           {$_('ps.' + pos.enAbbrev, { default: pos.enAbbrev })}
