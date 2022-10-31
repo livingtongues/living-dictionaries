@@ -2,7 +2,6 @@
   import { _ } from 'svelte-i18n';
   import { Collection } from 'sveltefirets';
   import { where } from 'firebase/firestore';
-  import { onMount } from 'svelte'
 
   export let dictionaryId: string,
     initialSpeakerId: string = undefined;
@@ -14,9 +13,10 @@
 
   import { createEventDispatcher } from 'svelte';
   const dispatch = createEventDispatcher<{ update: { speakerId: string } }>();
-  onMount(() => {
-    document.getElementById("speaker").focus();
-  })
+  
+  function autofocus(node: HTMLSelectElement) {
+    setTimeout(() => node.focus(), 5);
+  }
 </script>
 
 <Collection
@@ -46,7 +46,7 @@
         dispatch('update', { speakerId });
       }
     }}
-    id="speaker"
+    use:autofocus
     class="block w-full pl-3 !rounded-none ltr:!rounded-r-md rtl:!rounded-l-md form-input">
     <option />
     {#each speakers as speaker}
@@ -74,19 +74,3 @@
 {/if}
 
 <slot {speakerId} />
-
-<style>
-  /*I'm doing this because it seems unocss doesn't have this class. Right now some parent element has an appearance:none style*/
-  #speaker {
-    appearance: auto;
-  }
-  #speaker:hover {
-    outline-color: blue;
-  }
-  /*This is only for Mozilla browser*/
-  @media all and (min--moz-device-pixel-ratio:0) {
-  #speaker:hover{
-    outline: 1px solid #3088fa;
-  }
-}  
-</style>
