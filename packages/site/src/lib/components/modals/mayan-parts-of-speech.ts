@@ -11,4 +11,32 @@ export const mayanPOS = [
   'adverbio de negación',
   'adverbios de cantidad',
   'sustantivo complejo',
+  //TODO to review
+  'término de parentesco',
+  'número',
+  'tiempo',
+  'marcador de tiempo',
+  'marcador de cantidad',
+  'derivación posicional',
+];
+
+export const mayanDictionaries = [
+  'achi',
+  'akateko',
+  'chalchiteko',
+  'chorti',
+  'chuj',
+  'itza',
+  'ixil',
+  'kaqchikel',
+  'kiche',
+  'mopan',
+  'poqomam',
+  'poqomchi',
+  'qeqchi',
+  'sakapulteko',
+  'tektiteko',
+  'qanjobal',
+  'tzutujil',
+  'uspanteko',
 ];
