@@ -49,7 +49,7 @@
   </td>
   <td>
     <div style="width: 300px;" />
-    <IntersectionObserverShared let:intersecting once>
+    <IntersectionObserverShared bottom={2000} let:intersecting once>
       {#if intersecting}
         <Collection
           path={`dictionaries/${dictionary.id}/managers`}
@@ -84,7 +84,7 @@
   </td>
   <td>
     <div style="width: 300px;" />
-    <IntersectionObserverShared let:intersecting once>
+    <IntersectionObserverShared bottom={2000} let:intersecting once>
       {#if intersecting}
         <Collection
           path={`dictionaries/${dictionary.id}/contributors`}
@@ -119,7 +119,7 @@
   </td>
   <td>
     <div style="width: 300px;" />
-    <IntersectionObserverShared let:intersecting once>
+    <IntersectionObserverShared bottom={2000} let:intersecting once>
       {#if intersecting}
         <Collection
           path={`dictionaries/${dictionary.id}/writeInCollaborators`}
