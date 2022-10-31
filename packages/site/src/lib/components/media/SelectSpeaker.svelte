@@ -47,7 +47,7 @@
       }
     }}
     use:autofocus
-    class="block w-full pl-3 !rounded-none ltr:!rounded-r-md rtl:!rounded-l-md form-input">
+    class="block w-full pl-3 !rounded-none ltr:!rounded-r-md rtl:!rounded-l-md form-input hover:outline-blue-600">
     <option />
     {#each speakers as speaker}
       <option value={speaker.id}>
