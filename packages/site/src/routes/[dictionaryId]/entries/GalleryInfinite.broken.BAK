@@ -5,7 +5,6 @@
   const search: InstantSearch = getContext('search');
 
   import InfiniteHits from '$lib/components/search/InfiniteHits.svelte';
-  // import IntersectionObserver from '$lib/components/ui/IntersectionObserver.svelte';
 
   import { connectToggleRefinement } from 'instantsearch.js/es/connectors';
   import { configure } from 'instantsearch.js/es/widgets/index.js';

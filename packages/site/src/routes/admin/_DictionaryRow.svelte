@@ -13,7 +13,7 @@
   import { Invitation, LatLngDisplay } from '@living-dictionaries/parts';
 
   import RolesManagment from './_RolesManagment.svelte';
-  import IntersectionObserver from '$lib/components/ui/IntersectionObserver.svelte';
+  import IntersectionObserverShared from 'svelte-pieces/functions/IntersectionObserverShared.svelte';
 
   const dispatch = createEventDispatcher<{
     addalternatename: string;
@@ -49,7 +49,7 @@
   </td>
   <td>
     <div style="width: 300px;" />
-    <IntersectionObserver let:intersecting once>
+    <IntersectionObserverShared let:intersecting once>
       {#if intersecting}
         <Collection
           path={`dictionaries/${dictionary.id}/managers`}
@@ -80,11 +80,11 @@
           {/each}
         </Collection>
       {/if}
-    </IntersectionObserver>
+    </IntersectionObserverShared>
   </td>
   <td>
     <div style="width: 300px;" />
-    <IntersectionObserver let:intersecting once>
+    <IntersectionObserverShared let:intersecting once>
       {#if intersecting}
         <Collection
           path={`dictionaries/${dictionary.id}/contributors`}
@@ -115,11 +115,11 @@
           {/each}
         </Collection>
       {/if}
-    </IntersectionObserver>
+    </IntersectionObserverShared>
   </td>
   <td>
     <div style="width: 300px;" />
-    <IntersectionObserver let:intersecting once>
+    <IntersectionObserverShared let:intersecting once>
       {#if intersecting}
         <Collection
           path={`dictionaries/${dictionary.id}/writeInCollaborators`}
@@ -128,7 +128,7 @@
           <RolesManagment helpers={writeInCollaborators} {dictionary} role="writeInCollaborator" />
         </Collection>
       {/if}
-    </IntersectionObserver>
+    </IntersectionObserverShared>
   </td>
   <td>
     <DictionaryFieldEdit

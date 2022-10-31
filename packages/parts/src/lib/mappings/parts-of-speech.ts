@@ -89,13 +89,11 @@ export const partsOfSpeech: IPartOfSpeech[] = [
   { enAbbrev: 'relpro', enName: 'relative pronoun' },
   { enAbbrev: 'vd', enName: 'ditransitive verb' },
   { enAbbrev: 'va', enName: 'ambitransitive' },
+  // { unofficial: true, enAbbrev: 'interr.pro', enName: 'interrogative pronoun' },
+  // { unofficial: true, enAbbrev: 'cop', enName: 'copula' },
+  // { unofficial: true, enAbbrev: 'imp.verb', enName: 'imperative verb' },
+  // { unofficial: true, enAbbrev: 'phr.v', enName: 'phrasal verb' },
+  // { unofficial: true, enAbbrev: 'inal.n', enName: 'inalienable noun' },
+  // { unofficial: true, enAbbrev: 'rel.n', enName: 'relational noun' },
+  // { unofficial: true, enAbbrev: 'v.n', enName: 'verbal noun' },
 ];
-/* 
-  { unofficial: true, enAbbrev: 'interr.pro', enName: 'interrogative pronoun' },
-  { unofficial: true, enAbbrev: 'cop', enName: 'copula' },
-  { unofficial: true, enAbbrev: 'imp.verb', enName: 'imperative verb' },
-  { unofficial: true, enAbbrev: 'phr.v', enName: 'phrasal verb' },
-  { unofficial: true, enAbbrev: 'inal.n', enName: 'inalienable noun' },
-  { unofficial: true, enAbbrev: 'rel.n', enName: 'relational noun' },
-  { unofficial: true, enAbbrev: 'v.n', enName: 'verbal noun' },
- */
