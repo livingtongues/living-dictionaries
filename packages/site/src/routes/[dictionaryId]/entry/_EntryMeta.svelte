@@ -10,7 +10,7 @@
   $: description = printGlosses(entry.gl).join(', ');
   $: url = `https://livingdictionaries.app/${dictionary.id}/entry/${entry.id}`;
   $: if (entry.pf && entry.pf.gcs) {
-    shareImage = `https://lh3.googleusercontent.com/${entry.pf.gcs}=w1200`;
+    shareImage = `https://lh3.googleusercontent.com/${entry.pf.gcs}`;
   } else {
     shareImage =
       'https://i2.wp.com/livingtongues.org/wp-content/uploads/2015/03/LT-logo-1.png?w=987&ssl=1';
@@ -25,7 +25,7 @@
 
   <meta property="og:title" content={title} />
   <meta property="og:description" content={description} />
-  <meta name="image" property="og:image" content={shareImage} />
+  <meta property="og:image" content={shareImage} />
   <meta property="og:url" content={url} />
   <meta property="og:site_name" content={$_('misc.LD', { default: 'Living Dictionaries' })} />
 
