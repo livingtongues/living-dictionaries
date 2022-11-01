@@ -15,6 +15,7 @@
     glossingLanguages = ['en'];
 
   import { createEventDispatcher } from 'svelte';
+    import EntryDialect from './_EntryDialect.svelte';
   const dispatch = createEventDispatcher<{
     valueupdate: { field: string; newValue: string[] }; // an array of strings for the sr field, but the valueupdate events being passed upwards are mostly strings
   }>();
@@ -108,8 +109,10 @@
           display={$t(`entry.va`, {default: 'Variant'})}
           on:valueupdate />
     {/if}
+
+    <EntryDialect {canEdit} {entry} on:valueupdate />
     
-    {#each ['pl', 'nc', 'mr', 'in', 'di', 'nt'] as field}
+    {#each ['pl', 'nc', 'mr', 'in', 'nt'] as field}
       <EntryField
         {t}
         value={entry[field]}
