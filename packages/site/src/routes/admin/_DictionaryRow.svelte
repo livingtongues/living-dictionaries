@@ -28,7 +28,7 @@
   let inviteType: IInvite[];
 </script>
 
-<tr title={$admin > 1 && JSON.stringify(dictionary, null, 1)}>
+<tr>
   <td class="italic">
     <DictionaryFieldEdit field={'name'} value={dictionary.name} dictionaryId={dictionary.id} />
   </td>
@@ -45,7 +45,9 @@
     </Button>
   </td>
   <td>
-    {dictionary.entryCount || ''}
+    <Button href="/{dictionary.id}">
+      {dictionary.entryCount || '?'}
+    </Button>
   </td>
   <td>
     <div style="width: 300px;" />
@@ -204,12 +206,17 @@
       {dictionary.videoAccess ? 'Can Record' : 'Give Access'}
     </Button>
   </td>
-  <td>{dictionary.languageUsedByCommunity !== undefined ? dictionary.languageUsedByCommunity : ''}</td>
+  <td
+    >{dictionary.languageUsedByCommunity !== undefined
+      ? dictionary.languageUsedByCommunity
+      : ''}</td>
   <td>{dictionary.communityPermission ? dictionary.communityPermission : ''}</td>
 
   <td
     ><div style="width: 300px;" />
     {dictionary.authorConnection ? dictionary.authorConnection : ''}</td>
   <td>
-    <div style="width: 300px;" />{dictionary.conLangDescription ? dictionary.conLangDescription : ''}</td>
+    <div style="width: 300px;" />
+    {dictionary.conLangDescription ? dictionary.conLangDescription : ''}</td>
+  <td class="cursor-pointer" title={$admin > 1 && JSON.stringify(dictionary, null, 1)}>data</td>
 </tr>
