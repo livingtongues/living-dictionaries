@@ -10,6 +10,7 @@
   $: description = printGlosses(entry.gl).join(', ');
   $: url = `https://livingdictionaries.app/${dictionary.id}/entry/${entry.id}`;
   $: if (entry.pf && entry.pf.gcs) {
+    //The image only works without specifying the width
     shareImage = `https://lh3.googleusercontent.com/${entry.pf.gcs}`;
   } else {
     shareImage =
@@ -33,6 +34,6 @@
   <meta property="twitter:url" content={url} />
   <meta property="twitter:title" content={title} />
   <meta property="twitter:description" content={description} />
-  <meta name="twitter:image" content={shareImage} />
+  <meta property="twitter:image" content={shareImage} />
   <meta name="twitter:image:alt" content={title} />
 </svelte:head>
