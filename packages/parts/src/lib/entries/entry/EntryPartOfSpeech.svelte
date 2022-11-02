@@ -28,7 +28,6 @@
     };
   }>();
   function update(newValue: string[]) {
-    console.log({ newValue });
     dispatch('valueupdate', {
       field: 'ps',
       newValue,
