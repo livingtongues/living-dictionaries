@@ -97,3 +97,46 @@ export const partsOfSpeech: IPartOfSpeech[] = [
   // { unofficial: true, enAbbrev: 'rel.n', enName: 'relational noun' },
   // { unofficial: true, enAbbrev: 'v.n', enName: 'verbal noun' },
 ];
+
+export const mayanPOS = [
+  'sustantivo generalmente no poseido',
+  'adverbio de tiempo',
+  'sustantivo siempre poseido',
+  'sustantivo de sustantivo',
+  'sustantivo nunca poseido',
+  'adverbio de cantidad',
+  'adverbio de lugar',
+  'sustantivo compuesto',
+  'sustantivo poseido',
+  'adverbio de negación',
+  'adverbios de cantidad',
+  'sustantivo complejo',
+  //TODO to review
+  'término de parentesco',
+  'número',
+  'tiempo',
+  'marcador de tiempo',
+  'marcador de cantidad',
+  'derivación posicional',
+];
+
+export const mayanDictionaries = [
+  'achi',
+  'akateko',
+  'chalchiteko',
+  'chorti',
+  'chuj',
+  'itza',
+  'ixil',
+  'kaqchikel',
+  'kiche',
+  'mopan',
+  'poqomam',
+  'poqomchi',
+  'qeqchi',
+  'sakapulteko',
+  'tektiteko',
+  'qanjobal',
+  'tzutujil',
+  'uspanteko',
+];
