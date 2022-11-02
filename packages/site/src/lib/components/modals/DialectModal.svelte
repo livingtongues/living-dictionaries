@@ -8,7 +8,6 @@
   import type { IEntry } from '@living-dictionaries/types';
   import Modal from 'svelte-pieces/ui/Modal.svelte';
   import Button from 'svelte-pieces/ui/Button.svelte';
-  import MultiSelect from '$lib/components/ui/MultiSelect.svelte';
   export let entry: IEntry,
     adding = false,
     search: InstantSearch,
@@ -60,15 +59,7 @@
 
   <form on:submit|preventDefault={save}>
     {#if items.length}
-      multiselect
-      <!-- <MultiSelect bind:value={items} placeholder={$t('entry.di', { default: 'Dialect' })}>
-        <option />
-        {#each items as dialect}
-          <option value={dialect}>
-            {dialect}
-          </option>
-        {/each}
-      </MultiSelect> -->
+      Select
     {:else}
       <div class="rounded-md shadow-sm">
         <input
