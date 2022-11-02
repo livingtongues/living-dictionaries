@@ -4,8 +4,10 @@
   import EntryField from './_EntryField.svelte';
   import EntryPartOfSpeech from './_EntryPartOfSpeech.svelte';
   import EntrySemanticDomains from './_EntrySemanticDomains.svelte';
+  import EntryDialect from './_EntryDialect.svelte';
   import BadgeArray from 'svelte-pieces/data/BadgeArray.svelte';
   import EntryMedia from './_EntryMedia.svelte';
+  import InstantSearch from '$lib/components/search/InstantSearch.svelte';
   import { dictionary } from '$lib/stores';
 
   export let entry: IEntry,
@@ -15,7 +17,6 @@
     glossingLanguages = ['en'];
 
   import { createEventDispatcher } from 'svelte';
-    import EntryDialect from './_EntryDialect.svelte';
   const dispatch = createEventDispatcher<{
     valueupdate: { field: string; newValue: string[] }; // an array of strings for the sr field, but the valueupdate events being passed upwards are mostly strings
   }>();
@@ -110,7 +111,9 @@
           on:valueupdate />
     {/if}
 
-    <EntryDialect {canEdit} {entry} on:valueupdate />
+    <InstantSearch dictionaryId={$dictionary.id} let:search>
+      <EntryDialect {search} {canEdit} {entry} on:valueupdate />
+    </InstantSearch>
     
     {#each ['pl', 'nc', 'mr', 'in', 'nt'] as field}
       <EntryField
