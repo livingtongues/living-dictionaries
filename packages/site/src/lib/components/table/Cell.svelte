@@ -2,7 +2,7 @@
   import { t } from 'svelte-i18n';
   import Textbox from './cells/Textbox.svelte';
   import SemanticDomains from './cells/SemanticDomains.svelte';
-  import PartsOfSpeech from './cells/PartsOfSpeech.svelte';
+  import EntryPartOfSpeech from '@living-dictionaries/parts/src/lib/entries/entry/EntryPartOfSpeech.svelte';
   import SelectSpeakerCell from './cells/SelectSpeakerCell.svelte';
   import SelectSource from './cells/SelectSource.svelte';
   import AudioCell from './cells/AudioCell.svelte';
@@ -43,9 +43,10 @@
   {:else if column.field === 'speaker'}
     <SelectSpeakerCell {canEdit} {entry} />
   {:else if column.field === 'ps'}
-  <PartsOfSpeech
+  <EntryPartOfSpeech
+    {t}
     {canEdit}
-    {entry}
+    value={entry.ps}
     on:valueupdate={(e) => saveUpdateToFirestore(e, entry.id, $dictionary.id)} />
   {:else if column.field === 'sdn'}
     <SemanticDomains

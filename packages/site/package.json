@@ -39,7 +39,7 @@
     "svelte": "^3.52.0",
     "svelte-check": "^2.9.2",
     "svelte-i18n": "^3.3.13",
-    "svelte-pieces": "1.0.51",
+    "svelte-pieces": "1.0.53",
     "svelte-preprocess": "^4.10.7",
     "sveltefirets": "^0.0.32",
     "temp-s-p-u": "^0.0.7",
