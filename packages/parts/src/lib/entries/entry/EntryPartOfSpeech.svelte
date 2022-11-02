@@ -12,6 +12,7 @@
   export let canEdit = false;
   export let dictionaryId: string = undefined;
 
+  // TODO: remove once strings POS are refactored out
   $: currentParts = (() => {
     if (typeof value === 'string') {
       return [value];
