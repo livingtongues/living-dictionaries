@@ -8,6 +8,7 @@
   import type { IEntry } from '@living-dictionaries/types';
   import Modal from 'svelte-pieces/ui/Modal.svelte';
   import Button from 'svelte-pieces/ui/Button.svelte';
+  import DataList from 'svelte-pieces/ui/DataList.svelte';
   export let entry: IEntry,
     adding = false,
     search: InstantSearch,
@@ -59,16 +60,24 @@
 
   <form on:submit|preventDefault={save}>
     {#if items.length}
-      Select
+      <DataList
+        type="search"
+        class="form-input w-full leading-none"
+        resetOnSelect
+        allowAny>
+        {#each items as dialect}
+          <option>{dialect.value}</option>
+        {/each}
+      </DataList>
     {:else}
       <div class="rounded-md shadow-sm">
         <input
-            bind:this={inputEl}
-            dir="ltr"
-            type="text"
-            use:autofocus
-            bind:value
-            class="form-input block w-full" />
+          bind:this={inputEl}
+          dir="ltr"
+          type="text"
+          use:autofocus
+          bind:value
+          class="form-input block w-full" />
       </div>
     {/if}
   
