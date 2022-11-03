@@ -4,7 +4,7 @@
   import { printDate } from '$lib/helpers/time';
   export let dictionary: IDictionary;
   import ShowHide from 'svelte-pieces/functions/ShowHide.svelte';
-  import DictionaryFieldEdit from './_DictionaryFieldEdit.svelte';
+  import DictionaryFieldEdit from './DictionaryFieldEdit.svelte';
   import Button from 'svelte-pieces/ui/Button.svelte';
   import BadgeArrayEmit from 'svelte-pieces/data/BadgeArrayEmit.svelte';
   import { createEventDispatcher } from 'svelte';
@@ -12,7 +12,7 @@
   import { where } from 'firebase/firestore';
   import { Invitation, LatLngDisplay } from '@living-dictionaries/parts';
 
-  import RolesManagment from './_RolesManagment.svelte';
+  import RolesManagment from './RolesManagment.svelte';
   import IntersectionObserverShared from 'svelte-pieces/functions/IntersectionObserverShared.svelte';
 
   const dispatch = createEventDispatcher<{

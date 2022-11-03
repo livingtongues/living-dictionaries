@@ -1,11 +1,11 @@
 <script lang="ts">
   import { t } from 'svelte-i18n';
   import type { IEntry } from '@living-dictionaries/types';
-  import EntryField from './_EntryField.svelte';
+  import EntryField from './EntryField.svelte';
   import EntryPartOfSpeech from '@living-dictionaries/parts/src/lib/entries/entry/EntryPartOfSpeech.svelte';
-  import EntrySemanticDomains from './_EntrySemanticDomains.svelte';
+  import EntrySemanticDomains from './EntrySemanticDomains.svelte';
   import BadgeArray from 'svelte-pieces/data/BadgeArray.svelte';
-  import EntryMedia from './_EntryMedia.svelte';
+  import EntryMedia from './EntryMedia.svelte';
   import { dictionary } from '$lib/stores';
 
   export let entry: IEntry,
