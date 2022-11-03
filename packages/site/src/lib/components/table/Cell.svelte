@@ -22,7 +22,7 @@
   class:sompeng={column.display === 'Sompeng-Mardir'}
   class="{updatedValue !== undefined
     ? 'bg-green-100 border-green-400 border'
-    : ''} h-full w-full inline-block overflow-x-auto">
+    : ''} h-full w-full inline-block">
   {#if column.field === 'soundFile'}
     <AudioCell {canEdit} {entry} />
   {:else if column.field === 'photoFile'}
@@ -43,11 +43,11 @@
   {:else if column.field === 'speaker'}
     <SelectSpeakerCell {canEdit} {entry} />
   {:else if column.field === 'ps'}
-  <EntryPartOfSpeech
-    {t}
-    {canEdit}
-    value={entry.ps}
-    on:valueupdate={(e) => saveUpdateToFirestore(e, entry.id, $dictionary.id)} />
+    <EntryPartOfSpeech
+      {t}
+      {canEdit}
+      value={entry.ps}
+      on:valueupdate={(e) => saveUpdateToFirestore(e, entry.id, $dictionary.id)} />
   {:else if column.field === 'sdn'}
     <SemanticDomains
       {canEdit}
@@ -103,3 +103,18 @@
       on:valueupdate={(e) => saveUpdateToFirestore(e, entry.id, $dictionary.id)} />
   {/if}
 </div>
+
+<style>
+  /* Firefox */
+  /* .hide-scrollbar {
+    scrollbar-width: none; 
+  } */
+  /* Safari and Chrome */
+  /* .hide-scrollbar::-webkit-scrollbar {
+    display: none; 
+  } */
+
+  div :global(button) {
+    margin-bottom: 0px !important;
+  }
+</style>
