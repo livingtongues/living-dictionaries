@@ -1,11 +1,11 @@
 <script lang="ts">
   import { t } from 'svelte-i18n';
   import type { IEntry } from '@living-dictionaries/types';
-  import Audio from '../entries/_Audio.svelte';
-  import AddImage from '../entries/_AddImage.svelte';
+  import Audio from '../entries/Audio.svelte';
+  import AddImage from '../entries/AddImage.svelte';
   import { Image } from '@living-dictionaries/parts';
   import ShowHide from 'svelte-pieces/functions/ShowHide.svelte';
-  import Video from '../entries/_Video.svelte';
+  import Video from '../entries/Video.svelte';
   import { deleteImage } from '$lib/helpers/delete';
 
   export let entry: IEntry,

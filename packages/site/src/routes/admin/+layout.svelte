@@ -1,7 +1,7 @@
 <script lang="ts">
   import Header from '$lib/components/shell/Header.svelte';
   import AdminGuard from '$lib/components/ui/AdminGuard.svelte';
-  import Tab from './_Tab.svelte';
+  import Tab from './Tab.svelte';
   const tabs = ['users', 'dictionaries'];
 </script>
 
