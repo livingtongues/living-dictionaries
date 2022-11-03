@@ -1,12 +1,12 @@
 <script lang="ts">
   import type { IUser } from '@living-dictionaries/types';
   import { Collection } from 'sveltefirets';
-  import UserRow from '../_UserRow.svelte';
+  import UserRow from '../UserRow.svelte';
   import Filter from '@living-dictionaries/parts/src/lib/helpers/Filter.svelte';
   import { exportUsersAsCSV } from '$lib/export/csv';
   import Button from 'svelte-pieces/ui/Button.svelte';
   import ResponsiveTable from 'svelte-pieces/ui/ResponsiveTable.svelte';
-  import SortUsers from '../_SortUsers.svelte';
+  import SortUsers from '../SortUsers.svelte';
 
   let usersType: IUser[] = [];
 </script>

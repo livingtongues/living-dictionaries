@@ -3,7 +3,7 @@
   import { updateOnline } from 'sveltefirets';
   import type { IUser } from '@living-dictionaries/types';
   import { printDate } from '$lib/helpers/time';
-  import DictionariesHelping from './_DictionariesHelping.svelte';
+  import DictionariesHelping from './DictionariesHelping.svelte';
   import IntersectionObserverShared from 'svelte-pieces/functions/IntersectionObserverShared.svelte';
   export let user: IUser;
 </script>
