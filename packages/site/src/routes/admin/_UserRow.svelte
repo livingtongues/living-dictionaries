@@ -4,7 +4,7 @@
   import type { IUser } from '@living-dictionaries/types';
   import { printDate } from '$lib/helpers/time';
   import DictionariesHelping from './_DictionariesHelping.svelte';
-  import IntersectionObserver from '$lib/components/ui/IntersectionObserver.svelte';
+  import IntersectionObserverShared from 'svelte-pieces/functions/IntersectionObserverShared.svelte';
   export let user: IUser;
 </script>
 
@@ -17,18 +17,18 @@
   </td>
   <td>
     <div style="width: 200px;" />
-    <IntersectionObserver let:intersecting once>
+    <IntersectionObserverShared bottom={2000} let:intersecting once>
       {#if intersecting}
         <DictionariesHelping role="manager" {user} />
       {/if}
-    </IntersectionObserver></td>
+    </IntersectionObserverShared></td>
   <td>
     <div style="width: 200px;" />
-    <IntersectionObserver let:intersecting once>
+    <IntersectionObserverShared bottom={2000} let:intersecting once>
       {#if intersecting}
         <DictionariesHelping role="contributor" {user} />
       {/if}
-    </IntersectionObserver></td>
+    </IntersectionObserverShared></td>
   <td class="whitespace-nowrap">
     {#if user.lastVisit}{printDate(user.lastVisit.toDate())}{/if}
   </td>

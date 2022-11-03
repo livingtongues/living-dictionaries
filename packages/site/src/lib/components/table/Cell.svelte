@@ -2,7 +2,7 @@
   import { t } from 'svelte-i18n';
   import Textbox from './cells/Textbox.svelte';
   import SemanticDomains from './cells/SemanticDomains.svelte';
-  import SelectPOS from './cells/SelectPOS.svelte';
+  import EntryPartOfSpeech from '@living-dictionaries/parts/src/lib/entries/entry/EntryPartOfSpeech.svelte';
   import SelectSpeakerCell from './cells/SelectSpeakerCell.svelte';
   import SelectSource from './cells/SelectSource.svelte';
   import AudioCell from './cells/AudioCell.svelte';
@@ -43,7 +43,8 @@
   {:else if column.field === 'speaker'}
     <SelectSpeakerCell {canEdit} {entry} />
   {:else if column.field === 'ps'}
-    <SelectPOS
+    <EntryPartOfSpeech
+      {t}
       {canEdit}
       value={entry.ps}
       on:valueupdate={(e) => saveUpdateToFirestore(e, entry.id, $dictionary.id)} />
@@ -102,3 +103,18 @@
       on:valueupdate={(e) => saveUpdateToFirestore(e, entry.id, $dictionary.id)} />
   {/if}
 </div>
+
+<style>
+  /* Firefox */
+  /* .hide-scrollbar {
+    scrollbar-width: none; 
+  } */
+  /* Safari and Chrome */
+  /* .hide-scrollbar::-webkit-scrollbar {
+    display: none; 
+  } */
+
+  div :global(button) {
+    margin-bottom: 0px !important;
+  }
+</style>
