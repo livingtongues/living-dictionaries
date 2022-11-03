@@ -74,7 +74,7 @@
           </td>
           <td class="underline">
             {#if dictionary.url}
-              <a href={dictionary.url} target="_blank">{dictionary.url}</a>
+              <a href={dictionary.url} target="_blank" rel="noreferrer">{dictionary.url}</a>
             {:else}
               <a href={`/${dictionary.id}`}>https://livingdictionaries.app/{dictionary.id}</a>
             {/if}

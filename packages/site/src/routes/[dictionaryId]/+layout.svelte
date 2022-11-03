@@ -1,6 +1,6 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
-  import SideMenu from './_SideMenu.svelte';
+  import SideMenu from './SideMenu.svelte';
   import { dictionary as dictionaryStore, algoliaQueryParams } from '$lib/stores';
   import Header from '$lib/components/shell/Header.svelte';
   import ResponsiveSlideover from 'svelte-pieces/ui/ResponsiveSlideover.svelte';

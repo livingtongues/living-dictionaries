@@ -232,6 +232,7 @@
             <a
               href="https://en.wikipedia.org/wiki/ISO_639-3"
               target="_blank"
+              rel="noreferrer"
               class="text-gray-600 hover:text-gray:800">
               <i class="far fa-info-circle" />
             </a>
@@ -256,6 +257,7 @@
             <a
               href="https://en.wikipedia.org/wiki/Glottolog"
               target="_blank"
+              rel="noreferrer"
               class="text-gray-600 hover:text-gray:800">
               <i class="far fa-info-circle" />
             </a>
