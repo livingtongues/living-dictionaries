@@ -20,7 +20,8 @@ async function entryRefactor() {
         .get()
         .then((snapshot) => {
           snapshot.forEach((dictionary) => {
-            console.log('--------------------Refactoring: ', dictionary.id);
+            console.log('--------------------Refactoring: ');
+            console.log(dictionary.id);
             fetchEntries(dictionary.id);
           });
         });
@@ -38,7 +39,8 @@ function fetchEntries(dictionaryId: string) {
         const entry: IEntry = { id: snap.id, ...(snap.data() as IEntry) };
         // await turnSDintoArray(dictionaryId, entry);
         // await refactorGloss(dictionaryId, entry);
-        await notesToPluralForm(dictionaryId, entry);
+        // await notesToPluralForm(dictionaryId, entry);
+        await turnPOSintoArray(dictionaryId, entry);
       });
     });
 }
@@ -54,6 +56,25 @@ const turnSDintoArray = async (dictionaryId: string, entry: IEntry) => {
     console.log('it is an array - do nothing');
   } else {
     delete entry.sd;
+  }
+  if (!live) return;
+  await db.collection(`dictionaries/${dictionaryId}/words`).doc(entry.id).set(entry);
+  return true;
+};
+
+const turnPOSintoArray = async (dictionaryId: string, entry: IEntry) => {
+  if (entry.ps && typeof entry.ps === 'string') {
+    console.log('entry ps before:');
+    console.log(entry.ps);
+    const emptyArray: string[] = [];
+    emptyArray.push(entry.ps);
+    entry.ps = emptyArray;
+    console.log('entry ps after:');
+    console.log(entry.ps);
+  } else if (entry.ps && entry.ps instanceof Array) {
+    console.log('it is an array - do nothing');
+  } else {
+    delete entry.ps;
   }
   if (!live) return;
   await db.collection(`dictionaries/${dictionaryId}/words`).doc(entry.id).set(entry);
