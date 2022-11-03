@@ -20,19 +20,19 @@
     "@living-dictionaries/functions": "workspace:^0.0.1",
     "@living-dictionaries/parts": "workspace:^0.0.1",
     "@living-dictionaries/types": "^1.0.0",
-    "@types/node": "^18.8.5",
+    "@types/node": "^18.11.8",
     "algoliasearch": "^4.11.0",
     "commander": "^9.4.0",
     "csv-parse": "^5.3.0",
     "csvtojson": "^2.0.10",
     "dot-object": "^2.1.4",
     "dotenv": "^16.0.2",
-    "firebase": "^9.12.1",
+    "firebase": "^9.13.0",
     "firebase-admin": "^10.3.0",
     "node-fetch": "^3.1.0",
-    "tsx": "^3.10.4",
+    "tsx": "^3.11.0",
     "typescript": "~4.8.4",
-    "vitest": "^0.24.3"
+    "vitest": "^0.24.4"
   },
   "repository": {
     "type": "git",
