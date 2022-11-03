@@ -39,6 +39,7 @@
     {$_('entry.speaker', { default: 'Speaker' })}
   </label>
   <select
+    use:autofocus
     bind:value={speakerId}
     on:change={() => {
       console.log({ speakerId });
