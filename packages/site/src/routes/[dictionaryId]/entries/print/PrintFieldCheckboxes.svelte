@@ -40,11 +40,11 @@
 {#if showingFieldsWithLabels}
   <div class="flex items-center mr-3 mb-1">
     <input id="showLabels" type="checkbox" bind:checked={$showLabels} />
-    <label class="ml-1 text-sm text-gray-700" for="showLabels">Show Labels</label>
+    <label class="ml-1 text-sm text-gray-700" for="showLabels">{$_('print.labels', { default: 'Show Labels' })}</label>
   </div>
 {/if}
 
 <div class="flex items-center mr-3 mb-1">
   <input id="showLabels" type="checkbox" bind:checked={$showQrCode} />
-  <label class="ml-1 text-sm text-gray-700" for="showLabels">Show QR Code</label>
+  <label class="ml-1 text-sm text-gray-700" for="showLabels">{$_('print.qr_code', { default: 'Show QR Code' })}</label>
 </div>
