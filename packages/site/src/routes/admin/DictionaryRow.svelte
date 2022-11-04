@@ -4,7 +4,7 @@
   import { printDate } from '$lib/helpers/time';
   export let dictionary: IDictionary;
   import ShowHide from 'svelte-pieces/functions/ShowHide.svelte';
-  import DictionaryFieldEdit from './_DictionaryFieldEdit.svelte';
+  import DictionaryFieldEdit from './DictionaryFieldEdit.svelte';
   import Button from 'svelte-pieces/ui/Button.svelte';
   import BadgeArrayEmit from 'svelte-pieces/data/BadgeArrayEmit.svelte';
   import { createEventDispatcher } from 'svelte';
@@ -12,8 +12,8 @@
   import { where } from 'firebase/firestore';
   import { Invitation, LatLngDisplay } from '@living-dictionaries/parts';
 
-  import RolesManagment from './_RolesManagment.svelte';
-  import IntersectionObserver from '$lib/components/ui/IntersectionObserver.svelte';
+  import RolesManagment from './RolesManagment.svelte';
+  import IntersectionObserverShared from 'svelte-pieces/functions/IntersectionObserverShared.svelte';
 
   const dispatch = createEventDispatcher<{
     addalternatename: string;
@@ -28,7 +28,7 @@
   let inviteType: IInvite[];
 </script>
 
-<tr title={$admin > 1 && JSON.stringify(dictionary, null, 1)}>
+<tr>
   <td class="italic">
     <DictionaryFieldEdit field={'name'} value={dictionary.name} dictionaryId={dictionary.id} />
   </td>
@@ -45,11 +45,13 @@
     </Button>
   </td>
   <td>
-    {dictionary.entryCount || ''}
+    <Button href="/{dictionary.id}">
+      {dictionary.entryCount || '?'}
+    </Button>
   </td>
   <td>
     <div style="width: 300px;" />
-    <IntersectionObserver let:intersecting once>
+    <IntersectionObserverShared bottom={2000} let:intersecting once>
       {#if intersecting}
         <Collection
           path={`dictionaries/${dictionary.id}/managers`}
@@ -80,11 +82,11 @@
           {/each}
         </Collection>
       {/if}
-    </IntersectionObserver>
+    </IntersectionObserverShared>
   </td>
   <td>
     <div style="width: 300px;" />
-    <IntersectionObserver let:intersecting once>
+    <IntersectionObserverShared bottom={2000} let:intersecting once>
       {#if intersecting}
         <Collection
           path={`dictionaries/${dictionary.id}/contributors`}
@@ -115,11 +117,11 @@
           {/each}
         </Collection>
       {/if}
-    </IntersectionObserver>
+    </IntersectionObserverShared>
   </td>
   <td>
     <div style="width: 300px;" />
-    <IntersectionObserver let:intersecting once>
+    <IntersectionObserverShared bottom={2000} let:intersecting once>
       {#if intersecting}
         <Collection
           path={`dictionaries/${dictionary.id}/writeInCollaborators`}
@@ -128,7 +130,7 @@
           <RolesManagment helpers={writeInCollaborators} {dictionary} role="writeInCollaborator" />
         </Collection>
       {/if}
-    </IntersectionObserver>
+    </IntersectionObserverShared>
   </td>
   <td>
     <DictionaryFieldEdit
@@ -204,12 +206,17 @@
       {dictionary.videoAccess ? 'Can Record' : 'Give Access'}
     </Button>
   </td>
-  <td>{dictionary.languageUsedByCommunity !== undefined ? dictionary.languageUsedByCommunity : ''}</td>
+  <td
+    >{dictionary.languageUsedByCommunity !== undefined
+      ? dictionary.languageUsedByCommunity
+      : ''}</td>
   <td>{dictionary.communityPermission ? dictionary.communityPermission : ''}</td>
 
   <td
     ><div style="width: 300px;" />
     {dictionary.authorConnection ? dictionary.authorConnection : ''}</td>
   <td>
-    <div style="width: 300px;" />{dictionary.conLangDescription ? dictionary.conLangDescription : ''}</td>
+    <div style="width: 300px;" />
+    {dictionary.conLangDescription ? dictionary.conLangDescription : ''}</td>
+  <td class="cursor-pointer" title={$admin > 1 && JSON.stringify(dictionary, null, 1)}>data</td>
 </tr>

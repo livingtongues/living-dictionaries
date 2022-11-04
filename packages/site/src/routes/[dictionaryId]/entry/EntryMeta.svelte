@@ -10,7 +10,8 @@
   $: description = printGlosses(entry.gl).join(', ');
   $: url = `https://livingdictionaries.app/${dictionary.id}/entry/${entry.id}`;
   $: if (entry.pf && entry.pf.gcs) {
-    shareImage = `https://lh3.googleusercontent.com/${entry.pf.gcs}=w1200`;
+    //The image only works without specifying the width
+    shareImage = `https://lh3.googleusercontent.com/${entry.pf.gcs}`;
   } else {
     shareImage =
       'https://i2.wp.com/livingtongues.org/wp-content/uploads/2015/03/LT-logo-1.png?w=987&ssl=1';
