@@ -4,7 +4,7 @@
   import EntryField from './EntryField.svelte';
   import EntryPartOfSpeech from '@living-dictionaries/parts/src/lib/entries/entry/EntryPartOfSpeech.svelte';
   import EntrySemanticDomains from './EntrySemanticDomains.svelte';
-  import EntryDialect from './_EntryDialect.svelte';
+  import EntryDialect from './EntryDialect.svelte';
   import BadgeArray from 'svelte-pieces/data/BadgeArray.svelte';
   import EntryMedia from './EntryMedia.svelte';
   import InstantSearch from '$lib/components/search/InstantSearch.svelte';
