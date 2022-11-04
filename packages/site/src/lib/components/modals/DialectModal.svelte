@@ -14,6 +14,16 @@
     search: InstantSearch,
     attribute: 'di';
 
+  import { createEventDispatcher } from 'svelte';
+  const dispatch = createEventDispatcher<{
+    close: boolean;
+    valueupdate: {
+      field: string;
+      newValue: string;
+    };
+  }>();
+  const close = () => dispatch('close');
+
   interface IRefinementItem extends RefinementListItem {
     translatedLabel?: string;
   }
@@ -36,11 +46,11 @@
   });
 
   function save() {
-    // dispatch('valueupdate', {
-    //   field,
-    //   newValue: value.trim(),
-    // });
-    // close();
+    dispatch('valueupdate', {
+      field: 'di',
+      newValue: value.trim(),
+    });
+    close();
   }
 
   function autofocus(node: HTMLInputElement) {
@@ -48,7 +58,6 @@
   }
 
   let inputEl: HTMLInputElement;
-  $: console.log("items:", items)
 </script>
 
 <Modal on:close>
@@ -63,8 +72,10 @@
       <DataList
         type="search"
         class="form-input w-full leading-none"
-        resetOnSelect
-        allowAny>
+        allowAny
+        on:selected={(e) => {
+            value = e.detail.display;
+          }}>
         {#each items as dialect}
           <option>{dialect.value}</option>
         {/each}
