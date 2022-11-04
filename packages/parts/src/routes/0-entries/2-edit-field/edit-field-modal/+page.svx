@@ -11,34 +11,34 @@
 # Edit Field Modal
 
 <Story name="lexeme">
-  <EditField t={undefined} value="banana" field="lx" />
+  <EditField value="banana" field="lx" />
 </Story>
 
 <Story name="gloss language with keyboard">
-  <EditField t={undefined} value="should have keyboard icon" field="gl.as" />
+  <EditField value="should have keyboard icon" field="gl.as" />
 </Story>
 
 <!-- <Story name="Sompeng-Mardir">
-  <EditField t={undefined} display="Sompeng-Mardir" value="Sompeng" field="gl" />
+  <EditField display="Sompeng-Mardir" value="Sompeng" field="gl" />
 </Story> -->
 
 <Story name="italicized gloss">
-  <EditField t={undefined} value="red <i>tomato</i>" field="gl.as" />
+  <EditField value="red <i>tomato</i>" field="gl.as" />
 </Story>
 
 <Story name="interlinear">
-  <EditField t={undefined} value="3p.sɢ.ind" field="in" />
+  <EditField value="3p.sɢ.ind" field="in" />
 </Story>
 
 <Story name="notes">
-  <EditField t={undefined} value="hello" field="nt" />
+  <EditField value="hello" field="nt" />
 </Story>
 
 <Story name="modal">
   <ShowHide let:show let:toggle>
     <Button onclick={toggle}>Show Modal</Button>
     {#if show}
-      <EditFieldModal on:close={toggle} t={undefined} display="Keyman test" value="hello" field="gl" />
+      <EditFieldModal on:close={toggle} display="Keyman test" value="hello" field="gl" />
     {/if}
   </ShowHide>
 </Story>

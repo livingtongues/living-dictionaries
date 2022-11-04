@@ -1,12 +1,12 @@
 <script lang="ts">
   import { t } from 'svelte-i18n';
   import type { IEntry } from '@living-dictionaries/types';
-  import EntryField from './_EntryField.svelte';
-  import EntryPartOfSpeech from './_EntryPartOfSpeech.svelte';
-  import EntrySemanticDomains from './_EntrySemanticDomains.svelte';
+  import EntryField from './EntryField.svelte';
+  import EntryPartOfSpeech from '@living-dictionaries/parts/src/lib/entries/entry/EntryPartOfSpeech.svelte';
+  import EntrySemanticDomains from './EntrySemanticDomains.svelte';
   import EntryDialect from './_EntryDialect.svelte';
   import BadgeArray from 'svelte-pieces/data/BadgeArray.svelte';
-  import EntryMedia from './_EntryMedia.svelte';
+  import EntryMedia from './EntryMedia.svelte';
   import InstantSearch from '$lib/components/search/InstantSearch.svelte';
   import { dictionary } from '$lib/stores';
 
@@ -60,15 +60,7 @@
         on:valueupdate />
     {/each}
 
-    {#each ['ph'] as field}
-      <EntryField
-        {t}
-        value={entry[field]}
-        {field}
-        {canEdit}
-        display={$t(`entry.${field}`)}
-        on:valueupdate />
-    {/each}
+    <EntryField {t} value={entry.ph} field="ph" {canEdit} display={$t('entry.ph')} on:valueupdate />
 
     {#each glossingLanguages as bcp}
       <EntryField
@@ -93,22 +85,24 @@
         on:valueupdate />
     {/if}
 
-    <EntryPartOfSpeech
-      value={entry.ps}
-      {canEdit}
-      display={$t('entry.ps', { default: 'Part of Speech' })}
-      on:valueupdate />
+    {#if entry.ps?.length || canEdit}
+      <div class="md:px-2" class:order-2={!entry.ps?.length}>
+        <div class="rounded text-xs text-gray-500 mt-1 mb-2">{$t('entry.ps')}</div>
+        <EntryPartOfSpeech {t} value={entry.ps} {canEdit} on:valueupdate />
+        <div class="border-b-2 pb-1 mb-2" />
+      </div>
+    {/if}
 
     <EntrySemanticDomains {canEdit} {entry} on:valueupdate />
 
     {#if $dictionary.id === 'babanki'}
-        <EntryField
-          {t}
-          value={entry['va']}
-          field='va'
-          {canEdit}
-          display={$t(`entry.va`, {default: 'Variant'})}
-          on:valueupdate />
+      <EntryField
+        {t}
+        value={entry['va']}
+        field="va"
+        {canEdit}
+        display={$t(`entry.va`, { default: 'Variant' })}
+        on:valueupdate />
     {/if}
 
     <InstantSearch dictionaryId={$dictionary.id} let:search>
@@ -125,8 +119,8 @@
         on:valueupdate />
     {/each}
 
-    {#if (entry.sr && entry.sr.length) || canEdit}
-      <div class="md:px-2" class:order-2={!(entry.sr && entry.sr.length)}>
+    {#if entry.sr?.length || canEdit}
+      <div class="md:px-2" class:order-2={!entry.sr?.length}>
         <div class="rounded text-xs text-gray-500 mt-1 mb-2">{$t('entry.sr')}</div>
         <BadgeArray
           strings={entry.sr || []}
@@ -134,7 +128,7 @@
           promptMessage={$t('entry.sr')}
           addMessage={$t('misc.add', { default: 'Add' })}
           on:valueupdated={(e) => dispatch('valueupdate', { field: 'sr', newValue: e.detail })} />
-        <div class="border-dashed border-b-2  pb-1 mb-2" />
+        <div class="border-b-2 pb-1 mb-2" />
       </div>
     {/if}
 

@@ -20,7 +20,7 @@
     <div class="text-xs text-gray-500 my-1">
       {$_('entry.sdn', { default: 'Semantic Domain' })}
     </div>
-    <div class="flex flex-wrap whitespace-nowrap border-b-2 border-dashed mb-2">
+    <div class="flex flex-wrap whitespace-nowrap border-b-2 mb-2">
       {#if entry.sd}
         <span class="px-2 py-1 leading-tight text-xs bg-blue-100 rounded mb-1">
           <i>{entry.sd}</i>

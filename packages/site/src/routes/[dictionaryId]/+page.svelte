@@ -16,7 +16,8 @@
   <a
     href="https://talking-dictionaries-prod.web.app/{$dictionary.id}"
     class="underline"
-    target="_blank">
+    target="_blank"
+    rel="noreferrer">
     old site
   </a>
   until we have feature parity on the new site you're using here.

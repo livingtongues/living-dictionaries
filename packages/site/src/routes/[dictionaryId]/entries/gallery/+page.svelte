@@ -35,7 +35,7 @@
   });
 
   import { dictionary, canEdit } from '$lib/stores';
-  import GalleryEntry from '../_GalleryEntry.svelte';
+  import GalleryEntry from '../GalleryEntry.svelte';
   import { Doc } from 'sveltefirets';
 </script>
 

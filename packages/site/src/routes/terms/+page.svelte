@@ -477,7 +477,7 @@
         We care about data privacy and security. Please review our <a
           class="underline"
           href="https://livingtongues.org/privacy-policy/"
-          rel="noopener"
+          rel="noopener noreferrer"
           target="_blank">Privacy Policy</a
         >. By using the Site, you agree to be bound by our Privacy Policy, which is incorporated
         into these Terms of Use. Please be advised the Site is hosted in the United States. If you

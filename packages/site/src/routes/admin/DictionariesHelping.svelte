@@ -46,7 +46,7 @@
     }}
     on:additem={toggle} />
   {#if show}
-    {#await import('./_SelectDictionaryModal.svelte') then { default: SelectDictionaryModal }}
+    {#await import('./SelectDictionaryModal.svelte') then { default: SelectDictionaryModal }}
       <SelectDictionaryModal {role} {user} on:close={toggle} />
     {/await}
   {/if}

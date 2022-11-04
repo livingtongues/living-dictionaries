@@ -3,7 +3,7 @@
   import InstantSearch from '$lib/components/search/InstantSearch.svelte';
   import SearchBox from '$lib/components/search/SearchBox.svelte';
   import Stats from '$lib/components/search/Stats.svelte';
-  import EntryFilters from './_EntryFilters.svelte';
+  import EntryFilters from './EntryFilters.svelte';
   import { dictionary, canEdit } from '$lib/stores';
 
   import { page } from '$app/stores';
