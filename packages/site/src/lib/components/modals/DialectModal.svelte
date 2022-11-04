@@ -68,6 +68,11 @@
     </DataList>
   
     <div class="modal-footer">
+      {#if value}       
+        <Button onclick={() => {value = ''; save()} } form="simple" color="red">
+          {t ? $t('misc.remove') : 'Remove'}
+        </Button>
+      {/if}
       <Button onclick={close} form="simple" color="black">
         {t ? $t('misc.cancel') : 'Cancel'}
       </Button>
