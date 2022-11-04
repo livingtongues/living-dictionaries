@@ -184,8 +184,7 @@
     "open_dictionary": "Open Dictionary",
     "my_dictionaries": "My Dictionaries",
     "public_dictionaries": "Public Dictionaries",
-    "read_more": "Read More",
-    "tutorials_link": "Tutorials"
+    "read_more": "Read More"
   },
   "misc": {
     "settings": "Settings",
@@ -212,7 +211,8 @@
     "downloading": "Downloading",
     "upload": "Upload",
     "assertion": "yes",
-    "negation": "no"
+    "negation": "no",
+    "clean": "Clean"
   },
   "settings": {
     "community_permission": "Does the speech community allow this language to be online?",
@@ -280,8 +280,8 @@
     "permission_denied": "Permission to access media was denied."
   },
   "print": {
-    "qrCode": "Show QR Code",
-    "labels": "Labels",
+    "qr_code": "Show QR Code",
+    "labels": "Show Labels",
     "availability": "Print view is only available to dictionary managers and contributors",
     "max_entries": "Max entries",
     "columns": "Columns",

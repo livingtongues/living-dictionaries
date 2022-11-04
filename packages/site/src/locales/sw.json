@@ -184,8 +184,7 @@
     "open_dictionary": "Fungua Kamusi",
     "my_dictionaries": "Kamusi Zangu",
     "public_dictionaries": "Kamusi za Umma",
-    "read_more": "Soma Zaidi",
-    "tutorials_link": "Mafundisho"
+    "read_more": "Soma Zaidi"
   },
   "misc": {
     "settings": "Mipangilio  ",
@@ -212,7 +211,8 @@
     "downloading": "Kupakua",
     "upload": "Pakia",
     "assertion": "Ndio",
-    "negation": "Hapana"
+    "negation": "Hapana",
+    "clean": "Safi"
   },
   "settings": {
     "community_permission": "Je, jamii ya wazungumzaji inaruhusu lugha hii kuwekwa mtandaoni?",
@@ -280,8 +280,8 @@
     "permission_denied": "Ruhusa ya kupata media ilikataliwa."
   },
   "print": {
-    "qrCode": "Onyesha nambari ya QR",
-    "labels": "Lebo",
+    "qr_code": "Onyesha nambari ya QR",
+    "labels": "Onyesha lebo",
     "availability": "Mtazamo wa kuchapisha unapatikana tu kwa wasimamizi wa kamusi na wachangiaji",
     "max_entries": "Max",
     "columns": "Nguzo",
