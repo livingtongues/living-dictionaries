@@ -184,8 +184,7 @@
     "open_dictionary": "ଖୋଲନ୍ତୁ Dictionary",
     "my_dictionaries": "ମୋ ଅବିଧାନଗୁଡ଼ିକ",
     "public_dictionaries": "ଜନସାଧାରଣ ଅବିଧାନଗୁଡ଼ିକ",
-    "read_more": "ଅଧିକ ପଢ",
-    "tutorials_link": "ଟ୍ୟୁଟୋରିଆଲ୍"
+    "read_more": "ଅଧିକ ପଢ"
   },
   "misc": {
     "settings": "ସେଟିଂସମୂହ",
@@ -212,7 +211,8 @@
     "downloading": "ଡାଉନଲୋଡ୍ କରିବା",
     "upload": "ଅପଲୋଡ୍ କରନ୍ତୁ |",
     "assertion": "ହଁ",
-    "negation": "ନା"
+    "negation": "ନା",
+    "clean": "ପରିଷ୍କାର"
   },
   "settings": {
     "community_permission": "ବକ୍ତବ୍ୟ ସମ୍ପ୍ରଦାୟ ଏହି ଭାଷା ଅନଲାଇନ୍ ଅନୁମତି କରେ?",
@@ -280,8 +280,8 @@
     "permission_denied": "ଏଥିସାକୁ ପ୍ରବେଶ କରିବାକୁ ଅନୁମତି ପ୍ରତ୍ୟାଖ୍ୟାନ କରାଯାଇଥିଲା |"
   },
   "print": {
-    "qrCode": "QR କୋଡ୍ ଦେଖାନ୍ତୁ |",
-    "labels": "ଲେବଲ୍ |",
+    "qr_code": "QR କୋଡ୍ ଦେଖାନ୍ତୁ |",
+    "labels": "ଲେବଲ୍ ଦେଖାନ୍ତୁ |",
     "availability": "ପ୍ରିଣ୍ଟ୍ ଭ୍ୟୁ କେବଳ ଅଭିଧାନ ପରିଚାଳକ ଏବଂ ଅବଦାନ ପାଇଁ ଉପଲବ୍ଧ |",
     "max_entries": "ସର୍ବାଧିକ ଏଣ୍ଟ୍ରିଗୁଡିକ |",
     "columns": "ସ୍ତମ୍ଭ",

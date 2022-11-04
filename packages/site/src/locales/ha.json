@@ -184,8 +184,7 @@
     "open_dictionary": "Open Dictionary",
     "my_dictionaries": "My Dictionaries",
     "public_dictionaries": "jama'a Dictionaries",
-    "read_more": "Kara karantawa",
-    "tutorials_link": "Koyawa"
+    "read_more": "Kara karantawa"
   },
   "misc": {
     "settings": "Saituna",
@@ -212,7 +211,8 @@
     "downloading": "Sauke tare",
     "upload": "Kazo",
     "assertion": "i",
-    "negation": "a'a"
+    "negation": "a'a",
+    "clean": "Tsabtace"
   },
   "settings": {
     "community_permission": "Shin magana al'umma damar wannan harshe ya zama online?",
@@ -280,8 +280,8 @@
     "permission_denied": "An hana izinin shiga kafofin watsa labarai."
   },
   "print": {
-    "qrCode": "Nuna lambar QR",
-    "labels": "Labels",
+    "qr_code": "Nuna lambar QR",
+    "labels": "Nuna lakabi",
     "availability": "Duba Buga ana samun kawai don manajan kamawa da masu ba da gudummawa",
     "max_entries": "Max shigarwar",
     "columns": "Ginshiƙai",

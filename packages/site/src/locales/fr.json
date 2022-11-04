@@ -184,8 +184,7 @@
     "open_dictionary": "Ouvrir le dictionnaire",
     "my_dictionaries": "Mes dictionnaires",
     "public_dictionaries": "Dictionnaires publics",
-    "read_more": "Lire la suite",
-    "tutorials_link": "Tutoriels"
+    "read_more": "Lire la suite"
   },
   "misc": {
     "settings": "Configuration",
@@ -212,7 +211,8 @@
     "downloading": "Téléchargement",
     "upload": "Télécharger",
     "assertion": "oui",
-    "negation": "non"
+    "negation": "non",
+    "clean": "Nettoyer"
   },
   "settings": {
     "community_permission": "La communauté linguistique permet-elle à cette langue d'être en ligne ?",
@@ -280,8 +280,8 @@
     "permission_denied": "L'autorisation d'accéder aux médias a été refusée."
   },
   "print": {
-    "qrCode": "Afficher le code QR",
-    "labels": "Étiquettes",
+    "qr_code": "Afficher le code QR",
+    "labels": "Montrer les étiquettes",
     "availability": "La vue imprimée n'est disponible que pour les gestionnaires et les contributeurs de dictionnaire",
     "max_entries": "Entrées maximales",
     "columns": "Colonnes",
