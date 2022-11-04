@@ -5,11 +5,10 @@
   import type { InstantSearch } from 'instantsearch.js';
   import type { Readable } from 'svelte/store';
   export let t: Readable<any> = undefined;
-  import type { IEntry } from '@living-dictionaries/types';
   import Modal from 'svelte-pieces/ui/Modal.svelte';
   import Button from 'svelte-pieces/ui/Button.svelte';
   import DataList from 'svelte-pieces/ui/DataList.svelte';
-  export let entry: IEntry,
+  export let value: string,
     adding = false,
     search: InstantSearch,
     attribute: 'di';
@@ -24,13 +23,7 @@
   }>();
   const close = () => dispatch('close');
 
-  interface IRefinementItem extends RefinementListItem {
-    translatedLabel?: string;
-  }
-
-  //TODO maybe I only need the value and not the entry
-  let value = entry.di;
-  let items: IRefinementItem[] = [];
+  let items: RefinementListItem[] = [];
 
   onMount(async () => {
     const customRefinementList = connectRefinementList((params) => {
@@ -47,17 +40,11 @@
 
   function save() {
     dispatch('valueupdate', {
-      field: 'di',
+      field: attribute,
       newValue: value.trim(),
     });
     close();
   }
-
-  function autofocus(node: HTMLInputElement) {
-    setTimeout(() => node.focus(), 5);
-  }
-
-  let inputEl: HTMLInputElement;
 </script>
 
 <Modal on:close>
