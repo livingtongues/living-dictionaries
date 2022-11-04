@@ -33,7 +33,7 @@
           {search}
           attribute="di"
           on:valueupdate
-          {entry}
+          value={entry.di}
           on:close={toggle} />
       {/await}
     {/if}
