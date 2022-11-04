@@ -184,8 +184,7 @@
     "open_dictionary": "Buka Kamus",
     "my_dictionaries": "Kamus Saya",
     "public_dictionaries": "Kamus Umum",
-    "read_more": "Baca Lebih Lanjut",
-    "tutorials_link": "Tutorial"
+    "read_more": "Baca Lebih Lanjut"
   },
   "misc": {
     "settings": "Tetapan",
@@ -212,7 +211,8 @@
     "downloading": "Memuat turun",
     "upload": "Muat naik",
     "assertion": "Ya",
-    "negation": "tidak"
+    "negation": "tidak",
+    "clean": "Bersih"
   },
   "settings": {
     "community_permission": "Adakah masyarakat penutur membenarkan bahasa ini berada dalam talian?",
@@ -280,8 +280,8 @@
     "permission_denied": "Kebenaran untuk mengakses media ditolak."
   },
   "print": {
-    "qrCode": "Tunjukkan kod QR",
-    "labels": "Label",
+    "qr_code": "Tunjukkan kod QR",
+    "labels": "Tunjukkan label",
     "availability": "Paparan Cetak hanya tersedia untuk pengurus dan penyumbang kamus",
     "max_entries": "Penyertaan maks",
     "columns": "Lajur",

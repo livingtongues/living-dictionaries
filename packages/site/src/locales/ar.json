@@ -184,8 +184,7 @@
     "open_dictionary": "القاموس المفتوح",
     "my_dictionaries": "قواميسي ",
     "public_dictionaries": "القواميس العامة ",
-    "read_more": "قراءة المزيد",
-    "tutorials_link": "دروس"
+    "read_more": "قراءة المزيد"
   },
   "misc": {
     "settings": "الإعدادات",
@@ -212,7 +211,8 @@
     "downloading": "جارى التحميل",
     "upload": "تحميل",
     "assertion": "نعم",
-    "negation": "رقم"
+    "negation": "رقم",
+    "clean": "ينظف"
   },
   "settings": {
     "community_permission": "هل يسمح المجتمع اللغوي بأن تكون هذه اللغة على الانترنت؟",
@@ -280,8 +280,8 @@
     "permission_denied": "تم رفض إذن للوصول إلى الوسائط."
   },
   "print": {
-    "qrCode": "عرض رمز الاستجابة السريعة",
-    "labels": "ملصقات",
+    "qr_code": "عرض رمز الاستجابة السريعة",
+    "labels": "عرض التصنيفات",
     "availability": "عرض الطباعة متاح فقط لمديري القاموس والمساهمين",
     "max_entries": "إدخالات ماكس",
     "columns": "الأعمدة",
