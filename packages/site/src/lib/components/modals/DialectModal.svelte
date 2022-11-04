@@ -68,29 +68,17 @@
   </span>
 
   <form on:submit|preventDefault={save}>
-    {#if items.length}
-      <DataList
-        type="search"
-        class="form-input w-full leading-none"
-        allowAny
-        on:selected={(e) => {
-            value = e.detail.display;
-          }}>
-        {#each items as dialect}
-          <option>{dialect.value}</option>
-        {/each}
-      </DataList>
-    {:else}
-      <div class="rounded-md shadow-sm">
-        <input
-          bind:this={inputEl}
-          dir="ltr"
-          type="text"
-          use:autofocus
-          bind:value
-          class="form-input block w-full" />
-      </div>
-    {/if}
+    <DataList
+      type="search"
+      class="form-input w-full leading-none"
+      allowAny
+      on:selected={(e) => {
+          value = e.detail.display;
+        }}>
+      {#each items as dialect}
+        <option>{dialect.value}</option>
+      {/each}
+    </DataList>
   
     <div class="modal-footer">
       <Button onclick={close} form="simple" color="black">
