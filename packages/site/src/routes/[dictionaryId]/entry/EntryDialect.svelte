@@ -2,10 +2,8 @@
   import { _ } from 'svelte-i18n';
   import ShowHide from 'svelte-pieces/functions/ShowHide.svelte';
   import type { IEntry } from '@living-dictionaries/types';
-  import type { InstantSearch } from 'instantsearch.js'
   export let entry: IEntry,
-    canEdit = false,
-    search: InstantSearch;
+    canEdit = false;
   let value = entry.di;
 </script>
 
@@ -30,7 +28,6 @@
       {#await import('$lib/components/modals/DialectModal.svelte') then DialectModal}
         <DialectModal.default
           t={_}
-          {search}
           attribute="di"
           on:valueupdate
           value={entry.di}
