@@ -7,9 +7,7 @@
   import EntryDialect from './EntryDialect.svelte';
   import BadgeArray from 'svelte-pieces/data/BadgeArray.svelte';
   import EntryMedia from './EntryMedia.svelte';
-  import InstantSearch from '$lib/components/search/InstantSearch.svelte';
   import { dictionary } from '$lib/stores';
-  import { browser } from '$app/environment';
 
   export let entry: IEntry,
     videoAccess = false,
@@ -106,11 +104,7 @@
         on:valueupdate />
     {/if}
 
-    {#if browser}  
-      <InstantSearch dictionaryId={$dictionary.id} let:search>
-        <EntryDialect {search} {canEdit} {entry} on:valueupdate />
-      </InstantSearch>
-    {/if}
+    <EntryDialect {canEdit} {entry} on:valueupdate />
     
     {#each ['pl', 'nc', 'mr', 'in', 'nt'] as field}
       <EntryField
