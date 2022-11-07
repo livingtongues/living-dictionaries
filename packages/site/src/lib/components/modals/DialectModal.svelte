@@ -24,7 +24,6 @@
         customRefinementList({
           attribute,
           limit: 70,
-          showMoreLimit: 20,
         }),
       ]);
       firstTime = false;
