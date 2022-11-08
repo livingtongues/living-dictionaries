@@ -1,7 +1,5 @@
 <script lang="ts">
-  import type { RefinementListItem } from 'instantsearch.js/es/connectors/refinement-list/connectRefinementList';
-  import { connectRefinementList } from 'instantsearch.js/es/connectors';
-  import type { InstantSearch as ISearch} from 'instantsearch.js';
+  import { onMount } from 'svelte';
   import InstantSearch from '$lib/components/search/InstantSearch.svelte';
   import type { Readable } from 'svelte/store';
   export let t: Readable<any> = undefined;
@@ -14,20 +12,30 @@
     adding = false,
     attribute: 'di';
 
-  let firstTime = true,
-    internalSearch: ISearch;
-  $: if (internalSearch && firstTime) {
-      const customRefinementList = connectRefinementList((params) => {
-        ({ items } = params);
-      });
-      internalSearch.addWidgets([
-        customRefinementList({
-          attribute,
-          limit: 70,
-        }),
-      ]);
-      firstTime = false;
-    }
+  //TODO avoid any type
+  let data: any;
+  //TODO try catch
+  const getData = async () => {
+    const response = await fetch('https://XCVBAYSYXD.algolia.net/1/indexes/entries_prod/facets/di/query', {
+      method: 'POST',
+      headers: {
+        'X-Algolia-Application-Id': 'XCVBAYSYXD', // App ID
+        'X-Algolia-API-Key': 'e6d98efb32d3dc2435dce7b97ea87c3e' // Public API key
+      },
+      body: JSON.stringify({
+        "facetFilters": [
+            [
+                `dictId:${$dictionary.id}`
+            ]
+        ]
+      })
+    });
+   return await response.json();
+  };
+
+  onMount(async () => {
+    data = await getData();
+  });
 
   import { createEventDispatcher } from 'svelte';
   const dispatch = createEventDispatcher<{
@@ -38,8 +46,6 @@
     };
   }>();
   const close = () => dispatch('close');
-
-  let items: RefinementListItem[] = [];
 
   function save() {
     dispatch('valueupdate', {
@@ -59,7 +65,7 @@
         })}
       </span>
     
-      <form on:submit|preventDefault={save} on:input={() => {internalSearch = search}}>
+      <form on:submit|preventDefault={save}>
         <DataList
           type="search"
           class="form-input w-full leading-none"
@@ -67,9 +73,11 @@
           on:selected={(e) => {
               value = e.detail.display;
             }}>
-          {#each items as dialect}
-            <option>{dialect.value}</option>
-          {/each}
+          {#if data}
+            {#each data.facetHits as dialect}
+              <option>{dialect.value}</option>
+            {/each}
+          {/if}
         </DataList>
       
         <div class="modal-footer">
