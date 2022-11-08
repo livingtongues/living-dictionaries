@@ -14,23 +14,26 @@
 
   //TODO avoid any type
   let data: any;
-  //TODO try catch
   const getData = async () => {
-    const response = await fetch('https://XCVBAYSYXD.algolia.net/1/indexes/entries_prod/facets/di/query', {
-      method: 'POST',
-      headers: {
-        'X-Algolia-Application-Id': 'XCVBAYSYXD', // App ID
-        'X-Algolia-API-Key': 'e6d98efb32d3dc2435dce7b97ea87c3e' // Public API key
-      },
-      body: JSON.stringify({
-        "facetFilters": [
-            [
-                `dictId:${$dictionary.id}`
-            ]
-        ]
-      })
-    });
-   return await response.json();
+    try {
+      const response = await fetch('https://XCVBAYSYXD.algolia.net/1/indexes/entries_prod/facets/di/query', {
+        method: 'POST',
+        headers: {
+          'X-Algolia-Application-Id': 'XCVBAYSYXD', // App ID
+          'X-Algolia-API-Key': 'e6d98efb32d3dc2435dce7b97ea87c3e' // Public API key
+        },
+        body: JSON.stringify({
+          "facetFilters": [
+              [
+                  `dictId:${$dictionary.id}`
+              ]
+          ]
+        })
+      });
+     return await response.json();
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   onMount(async () => {
