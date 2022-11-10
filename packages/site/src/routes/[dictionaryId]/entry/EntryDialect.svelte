@@ -5,6 +5,9 @@
   export let entry: IEntry,
     canEdit = false;
   let value = entry.di;
+  $: if (value) {
+    value = entry.di;
+  }
 </script>
 
 {#if value || canEdit}
