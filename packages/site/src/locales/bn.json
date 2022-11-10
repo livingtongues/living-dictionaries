@@ -184,8 +184,7 @@
     "open_dictionary": "অভিধান খুলুন",
     "my_dictionaries": "আমার অভিধানগুলি ",
     "public_dictionaries": "জন অভিধানগুলি",
-    "read_more": "আরো পড়ুন",
-    "tutorials_link": "টিউটোরিয়াল"
+    "read_more": "আরো পড়ুন"
   },
   "misc": {
     "settings": "সেটিংস",
@@ -212,7 +211,8 @@
     "downloading": "ডাউনলোড করা",
     "upload": "আপলোড",
     "assertion": "হ্যাঁ",
-    "negation": "না"
+    "negation": "না",
+    "clean": "পরিষ্কার"
   },
   "settings": {
     "community_permission": "বক্তৃতা সম্প্রদায় কী এই ভাষাটিকে অনলাইনে থাকতে দেয়?",
@@ -280,8 +280,8 @@
     "permission_denied": "মিডিয়া অ্যাক্সেস করার অনুমতি অস্বীকার করা হয়েছিল।"
   },
   "print": {
-    "qrCode": "কিউআর কোড দেখান",
-    "labels": "লেবেল",
+    "qr_code": "কিউআর কোড দেখান",
+    "labels": "লেবেল দেখান",
     "availability": "প্রিন্ট ভিউ কেবল অভিধান পরিচালক এবং অবদানকারীদের জন্য উপলব্ধ",
     "max_entries": "সর্বাধিক এন্ট্রি",
     "columns": "কলাম",

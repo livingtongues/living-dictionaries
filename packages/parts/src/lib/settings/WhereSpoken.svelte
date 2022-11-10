@@ -152,7 +152,11 @@
       color={hasCoordinates ? 'black' : 'primary'}
       size={hasCoordinates ? 'sm' : 'md'}>
       <span class="i-mdi-map-marker-plus mr-1" style="margin-top: -3px;" />
-      {t ? $t('create.select_coordinates') : 'Select Coordinates'}
+      {#if hasCoordinates}
+        {t ? $t('create.secondary_coordinates') : 'Secondary Coordinates'}
+      {:else}
+        {t ? $t('create.select_coordinates') : 'Select Coordinates'}
+      {/if}
     </Button>
     {#if show}
       <CoordinatesModal {t} lng={null} lat={null} on:update={addCoordinates} on:close={toggle} />
