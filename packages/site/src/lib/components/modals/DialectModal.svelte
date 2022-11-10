@@ -25,7 +25,8 @@
               [
                   `dictId:${$dictionary.id}`
               ]
-          ]
+          ],
+          "maxFacetHits": 20
         })
       });
      return await response.json();
