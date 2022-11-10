@@ -184,8 +184,7 @@
     "open_dictionary": "Buka Kamus",
     "my_dictionaries": "Kamus Saya",
     "public_dictionaries": "Kamus Umum",
-    "read_more": "Baca Lebih Lengkap",
-    "tutorials_link": "Tutorial"
+    "read_more": "Baca Lebih Lengkap"
   },
   "misc": {
     "settings": "Pengaturan",
@@ -212,7 +211,8 @@
     "downloading": "Mengunduh",
     "upload": "Mengunggah",
     "assertion": "Ya",
-    "negation": "Tidak"
+    "negation": "Tidak",
+    "clean": "Membersihkan"
   },
   "settings": {
     "community_permission": "Apakah komunitas penutur bahasa mengijinkan bahasa ini online?",
@@ -280,8 +280,8 @@
     "permission_denied": "Izin untuk mengakses media ditolak."
   },
   "print": {
-    "qrCode": "Tunjukkan kode QR",
-    "labels": "Label",
+    "qr_code": "Tunjukkan kode QR",
+    "labels": "Tunjukkan label",
     "availability": "Tampilan cetak hanya tersedia untuk manajer dan kontributor kamus",
     "max_entries": "Entri Max",
     "columns": "Kolom",

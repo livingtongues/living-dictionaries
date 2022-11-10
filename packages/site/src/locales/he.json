@@ -184,8 +184,7 @@
     "open_dictionary": "מילון פתוח",
     "my_dictionaries": "המילונים שלי",
     "public_dictionaries": "מילונים ציבוריים",
-    "read_more": "לקריאה נוספת",
-    "tutorials_link": "הדרכות"
+    "read_more": "לקריאה נוספת"
   },
   "misc": {
     "settings": "הגדרות",
@@ -212,7 +211,8 @@
     "downloading": "הורדה",
     "upload": "העלה",
     "assertion": "כן",
-    "negation": "לא"
+    "negation": "לא",
+    "clean": "לְנַקוֹת"
   },
   "settings": {
     "community_permission": "האם הקהילה דוברת השפה מאשרת את קיומה באינטרנט (בממשק זה)?",
@@ -280,8 +280,8 @@
     "permission_denied": "ההרשאה לגישה לתקשורת נדחתה."
   },
   "print": {
-    "qrCode": "הצג קוד QR",
-    "labels": "תוויות",
+    "qr_code": "הצג קוד QR",
+    "labels": "הצג תוויות",
     "availability": "תצוגת הדפסה זמינה רק למנהלי מילון ותורמים",
     "max_entries": "רשומות מקסימאליות",
     "columns": "עמודות",
