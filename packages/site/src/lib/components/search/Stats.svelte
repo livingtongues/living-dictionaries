@@ -23,9 +23,3 @@
   {nbHits}
   {#if nbHits}({processingTimeMS}ms){/if}
 </div>
-
-{#if browser && nbHits === 0}
-  <div class="bg-yellow-200 border border-yellow-300 rounded p-3 my-2">
-    Our search is not working at the moment. We are working to resolve the issue as soon as possible.
-  </div>
-{/if}
