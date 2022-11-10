@@ -14,35 +14,28 @@ async function entryRefactor() {
   try {
     if (dictionaryId) {
       console.log(`---Refactoring: ${dictionaryId}`);
-      fetchEntries(dictionaryId);
+      await fetchEntries(dictionaryId);
     } else {
-      db.collection('dictionaries')
-        .get()
-        .then((snapshot) => {
-          snapshot.forEach((dictionary) => {
-            console.log('--------------------Refactoring: ');
-            console.log(dictionary.id);
-            fetchEntries(dictionary.id);
-          });
-        });
+      const snapshot = await db.collection('dictionaries').get()
+      for (const dictionarySnap of snapshot.docs) {
+        console.log(`---Refactoring: ${dictionarySnap.id}`);
+        await fetchEntries(dictionarySnap.id);
+      }
     }
   } catch (error) {
     console.log('Refactor failed!', error);
   }
 }
 
-function fetchEntries(dictionaryId: string) {
-  db.collection(`dictionaries/${dictionaryId}/words`)
-    .get()
-    .then((snapshot) => {
-      snapshot.forEach(async (snap) => {
-        const entry: IEntry = { id: snap.id, ...(snap.data() as IEntry) };
-        // await turnSDintoArray(dictionaryId, entry);
-        // await refactorGloss(dictionaryId, entry);
-        // await notesToPluralForm(dictionaryId, entry);
-        await turnPOSintoArray(dictionaryId, entry);
-      });
-    });
+async function fetchEntries(dictionaryId: string) {
+  const snapshot = await db.collection(`dictionaries/${dictionaryId}/words`).get()
+  for (const snap of snapshot.docs) {
+    const entry: IEntry = { id: snap.id, ...(snap.data() as IEntry) };
+    // await turnSDintoArray(dictionaryId, entry);
+    // await refactorGloss(dictionaryId, entry);
+    // await notesToPluralForm(dictionaryId, entry);
+    await turnPOSintoArray(dictionaryId, entry);
+  }
 }
 
 const turnSDintoArray = async (dictionaryId: string, entry: IEntry) => {
@@ -62,23 +55,20 @@ const turnSDintoArray = async (dictionaryId: string, entry: IEntry) => {
   return true;
 };
 
+let count = 1;
 const turnPOSintoArray = async (dictionaryId: string, entry: IEntry) => {
-  if (entry.ps && typeof entry.ps === 'string') {
-    console.log('entry ps before:');
-    console.log(entry.ps);
-    const emptyArray: string[] = [];
-    emptyArray.push(entry.ps);
-    entry.ps = emptyArray;
-    console.log('entry ps after:');
-    console.log(entry.ps);
-  } else if (entry.ps && entry.ps instanceof Array) {
-    console.log('it is an array - do nothing');
-  } else {
-    delete entry.ps;
+  if (count < 70000) {
+    if (entry.ps && typeof entry.ps === 'string') {
+      console.log(`${count}:${dictionaryId}:${entry.id}`);
+      console.log(entry.ps);
+      entry.ps = [entry.ps];
+      console.log(entry.ps);
+      count++;
+      if (live) await db.collection(`dictionaries/${dictionaryId}/words`).doc(entry.id).set(entry);
+    } else if (entry.ps && entry.ps instanceof Array) {
+      console.log(`${dictionaryId}:${entry.id} is already an array`);
+    }
   }
-  if (!live) return;
-  await db.collection(`dictionaries/${dictionaryId}/words`).doc(entry.id).set(entry);
-  return true;
 };
 
 const refactorGloss = async (dictionaryId: string, entry: IEntry) => {
@@ -114,10 +104,6 @@ const refactorGloss = async (dictionaryId: string, entry: IEntry) => {
   return console.log(`${entry.id}: `, entry.gl);
 };
 
-// `pnpm entryRefactor --id babanki` to log refactor in dev
-// `pnpm entryRefactor --id babanki --live` to do refactor in dev
-// `pnpm entryRefactor --id babanki -e prod` to log refactor in prod
-// `pnpm entryRefactor --id babanki --live -e prod` to do refactor in prod
 const notesToPluralForm = async (dictionaryId: string, entry: IEntry) => {
   const ntBefore = entry.nt;
   if (entry.nt && entry.nt.startsWith('Plural form:')) {
@@ -131,3 +117,15 @@ const notesToPluralForm = async (dictionaryId: string, entry: IEntry) => {
 };
 
 entryRefactor();
+
+// Single Dictionary
+// `pnpm entryRefactor --id babanki` to log refactor in dev
+// `pnpm entryRefactor --id babanki --live` to do refactor in dev
+// `pnpm entryRefactor --id babanki -e prod` to log refactor in prod
+// `pnpm entryRefactor --id babanki --live -e prod` to do refactor in prod
+
+// All dictionaries
+// `pnpm entryRefactor` to log refactor in dev
+// `pnpm entryRefactor --live` to do refactor in dev
+// `pnpm entryRefactor -e prod` to log refactor in prod
+// `pnpm entryRefactor --live -e prod` to do refactor in prod
