@@ -18,8 +18,12 @@ async function entryRefactor() {
     } else {
       const snapshot = await db.collection('dictionaries').get()
       for (const dictionarySnap of snapshot.docs) {
-        console.log(`---Refactoring: ${dictionarySnap.id}`);
-        await fetchEntries(dictionarySnap.id);
+        // If setting limits on refactoring, you can skip dictionaries beginning with letters that have already been processed:
+        const done = /^[abcdefghijklmn].*/
+        if (!done.test(dictionarySnap.id.toLowerCase())) {
+          console.log(`---Refactoring: ${dictionarySnap.id}`);
+          await fetchEntries(dictionarySnap.id);
+        }
       }
     }
   } catch (error) {
@@ -35,7 +39,7 @@ async function fetchEntries(dictionaryId: string) {
     // await turnSDintoArray(dictionaryId, entry);
     // await refactorGloss(dictionaryId, entry);
     // await notesToPluralForm(dictionaryId, entry);
-    await turnPOSintoArray(dictionaryId, entry);
+    turnPOSintoArray(dictionaryId, entry); // not awaiting so operations can run in parallel otherwise the function errors after about 1400 iterations
   }
 }
 
@@ -58,17 +62,15 @@ const turnSDintoArray = async (dictionaryId: string, entry: IEntry) => {
 
 let count = 1;
 const turnPOSintoArray = async (dictionaryId: string, entry: IEntry) => {
-  if (count < 70000) {
-    if (entry.ps && typeof entry.ps === 'string') {
-      console.log(`${count}:${dictionaryId}:${entry.id}`);
-      console.log(entry.ps);
-      entry.ps = [entry.ps];
-      console.log(entry.ps);
-      count++;
-      if (live) await db.collection(`dictionaries/${dictionaryId}/words`).doc(entry.id).set(entry);
-    } else if (entry.ps && entry.ps instanceof Array) {
-      console.log(`${dictionaryId}:${entry.id} is already an array`);
-    }
+  if (entry.ps && typeof entry.ps === 'string') {
+    console.log(`${count}:${dictionaryId}:${entry.id}`);
+    console.log(entry.ps);
+    entry.ps = [entry.ps];
+    console.log(entry.ps);
+    count++;
+    if (live) await db.collection(`dictionaries/${dictionaryId}/words`).doc(entry.id).set(entry);
+    // } else if (entry.ps && entry.ps instanceof Array) {
+    //   console.log(`${dictionaryId}:${entry.id} is already an array`);
   }
 };
 
