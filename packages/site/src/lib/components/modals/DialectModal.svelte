@@ -36,7 +36,6 @@
 
   onMount(async () => {
     data = await getData();
-    console.log("Data:", data)
   });
 
   import { createEventDispatcher } from 'svelte';
