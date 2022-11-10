@@ -69,9 +69,7 @@
             }}>
             {#if mayanDictionaries.includes(dictionaryId)}
               {#each mayanPOS as pos}
-                <option data-value={pos}>
-                  {pos}
-                </option>
+                <option data-value={pos}>{pos}</option>
               {/each}
             {/if}
             {#each partsOfSpeech as pos}
