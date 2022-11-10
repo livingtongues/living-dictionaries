@@ -3,7 +3,6 @@
   import type { InstantSearch } from 'instantsearch.js';
   import { connectStats } from 'instantsearch.js/es/connectors';
   import { onMount } from 'svelte';
-  import { browser } from '$app/environment';
 
   export let search: InstantSearch;
   let processingTimeMS: number;
