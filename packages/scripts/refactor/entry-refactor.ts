@@ -23,7 +23,8 @@ async function entryRefactor() {
       }
     }
   } catch (error) {
-    console.log('Refactor failed!', error);
+    console.log('Refactor failed!');
+    console.log(error);
   }
 }
 
