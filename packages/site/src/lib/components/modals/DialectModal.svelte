@@ -7,7 +7,6 @@
   import DataList from 'svelte-pieces/ui/DataList.svelte';
   import { dictionary } from '$lib/stores';
   export let value: string,
-    adding = false,
     attribute: 'di';
 
   //TODO avoid any type when correct response is ready
@@ -90,16 +89,9 @@
         {t ? $t('misc.cancel') : 'Cancel'}
       </Button>
       <div class="w-1" />
-      {#if adding}
-        <Button type="submit" form="filled">
-          {t ? $t('misc.next') : 'Next'}
-          <i class="far fa-chevron-right rtl-x-flip" />
-        </Button>
-      {:else}
-        <Button type="submit" form="filled">
-          {t ? $t('misc.save') : 'Save'}
-        </Button>
-      {/if}
+      <Button type="submit" form="filled">
+        {t ? $t('misc.save') : 'Save'}
+      </Button>
     </div>
   </form>
 </Modal>
