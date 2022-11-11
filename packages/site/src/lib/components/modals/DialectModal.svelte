@@ -10,7 +10,9 @@
     attribute: 'di';
 
 interface IAlgoliaFacetsQuery {
-  facetHits: any[];
+  facetHits: {
+    value: string;
+  }[];
   exhaustiveFacetsCount: boolean;
   processingTimeMS: number;
 }
