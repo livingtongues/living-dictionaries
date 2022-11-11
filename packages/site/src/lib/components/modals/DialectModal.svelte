@@ -6,11 +6,16 @@
   import Button from 'svelte-pieces/ui/Button.svelte';
   import DataList from 'svelte-pieces/ui/DataList.svelte';
   import { dictionary } from '$lib/stores';
-  import type { IAlgoliaDialect } from '@living-dictionaries/types';
   export let value: string,
     attribute: 'di';
 
-  let data: IAlgoliaDialect;
+interface IAlgoliaFacetsQuery {
+  facetHits: any[];
+  exhaustiveFacetsCount: boolean;
+  processingTimeMS: number;
+}
+
+  let data: IAlgoliaFacetsQuery;
   const getData = async () => {
     try {
       const response = await fetch('https://XCVBAYSYXD.algolia.net/1/indexes/entries_prod/facets/di/query', {
