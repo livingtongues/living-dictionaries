@@ -4,10 +4,8 @@
   import type { IEntry } from '@living-dictionaries/types';
   export let entry: IEntry,
     canEdit = false;
-  let value = entry.di;
-  $: if (value) {
-    value = entry.di;
-  }
+  let value: string;
+  $: value = entry.di;
 </script>
 
 {#if value || canEdit}
