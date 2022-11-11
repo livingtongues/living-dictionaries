@@ -72,11 +72,13 @@ interface IAlgoliaFacetsQuery {
 
   <form on:submit|preventDefault={save}>
     <Button onclick={() => {
-      value = prompt('Add the new dialect');
+      value = prompt($t('entry.di', {
+      default: 'Dialect',
+    }));
       if (value) {
         save();
       }
-    }} class="mr-1 mb-1" color="orange" size="sm"><span class="i-fa-solid-plus" /> Add</Button>
+    }} class="mr-1 mb-1" color="orange" size="sm"><span class="i-fa-solid-plus" /> {$t('misc.add', {default: 'Add'})}</Button>
     {#if data}    
       {#each data.facetHits as dialect}
         <Button onclick={() => {
