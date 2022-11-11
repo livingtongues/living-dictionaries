@@ -1,6 +1,6 @@
 import type { IAudio } from './audio.interface';
 import type { IVideo, IVideoCustomMetadata } from './video.interface';
-import type { IDialect, IAlgoliaDialect } from './dialect.interface';
+import type { IDialect } from './dialect.interface';
 import type {
   IAbout,
   IDictionary,
@@ -30,7 +30,6 @@ export type {
   IVideo,
   IVideoCustomMetadata,
   IDialect,
-  IAlgoliaDialect,
   IDictionarySettings,
   IDictionary,
   IAbout,
