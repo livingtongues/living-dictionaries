@@ -4,7 +4,6 @@
   export let t: Readable<any> = undefined;
   import Modal from 'svelte-pieces/ui/Modal.svelte';
   import Button from 'svelte-pieces/ui/Button.svelte';
-  import DataList from 'svelte-pieces/ui/DataList.svelte';
   import { dictionary } from '$lib/stores';
   export let value: string,
     attribute: 'di';
@@ -72,19 +71,18 @@ interface IAlgoliaFacetsQuery {
   </span>
 
   <form on:submit|preventDefault={save}>
-    <DataList
-      type="search"
-      class="form-input w-full leading-none"
-      allowAny
-      on:selected={(e) => {
-          value = e.detail.display;
-        }}>
-      {#if data}
-        {#each data.facetHits as dialect}
-          <option>{dialect.value}</option>
-        {/each}
-      {/if}
-    </DataList>
+    <Button onclick={() => {
+      value = prompt('Add the new dialect');
+      save();
+    }} class="mr-1 mb-1" color="orange" size="sm">Add</Button>
+    {#if data}    
+      {#each data.facetHits as dialect}
+        <Button onclick={() => {
+          value = dialect.value;
+          save();
+        }} class="mr-1 mb-1" form={value === dialect.value ? 'filled' : 'simple'} size="sm">{dialect.value}</Button>
+      {/each}
+    {/if}
   
     <div class="modal-footer">
       {#if value}       
@@ -96,9 +94,6 @@ interface IAlgoliaFacetsQuery {
         {t ? $t('misc.cancel') : 'Cancel'}
       </Button>
       <div class="w-1" />
-      <Button type="submit" form="filled">
-        {t ? $t('misc.save') : 'Save'}
-      </Button>
     </div>
   </form>
 </Modal>
