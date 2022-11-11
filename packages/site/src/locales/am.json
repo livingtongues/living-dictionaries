@@ -184,8 +184,7 @@
     "open_dictionary": "ክፈት መዝገበ",
     "my_dictionaries": "የእኔ መዝገበ",
     "public_dictionaries": "የህዝብ መዝገበ",
-    "read_more": "ተጨማሪ ያንብቡ",
-    "tutorials_link": "ማጠናከሪያዎች"
+    "read_more": "ተጨማሪ ያንብቡ"
   },
   "misc": {
     "settings": "ቅንብሮች",
@@ -212,7 +211,8 @@
     "downloading": "ማውረድ",
     "upload": "ይስቀሉ",
     "assertion": "አዎ",
-    "negation": "አይ"
+    "negation": "አይ",
+    "clean": "ንፁህ"
   },
   "settings": {
     "community_permission": "የንግግር ማህበረሰብ በዚህ ቋንቋ መስመር ላይ መሆን ያስችላቸዋል?",
@@ -280,8 +280,8 @@
     "permission_denied": "የሚዲያ መረጃን ለመድረስ ፈቃድ ተከልክሏል."
   },
   "print": {
-    "qrCode": "QR ኮድ አሳይ",
-    "labels": "መለያዎች",
+    "qr_code": "QR ኮድ አሳይ",
+    "labels": "መለያዎችን አሳይ",
     "availability": "የህትመት እይታ ለመዝገበ-ቃላት አስተዳዳሪዎች እና አስተዋጽኦዎች ብቻ የሚገኙ ናቸው",
     "max_entries": "ከፍተኛ ግቤቶች",
     "columns": "አምዶች",

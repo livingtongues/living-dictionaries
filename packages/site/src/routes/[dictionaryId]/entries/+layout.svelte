@@ -49,7 +49,9 @@
           <a
             data-sveltekit-prefetch
             href={'/' + $page.params.dictionaryId + '/entries/gallery'}
-            class="{$page.url.pathname.includes('gallery') ? 'bg-white shadow' : 'hover:bg-gray-100'}
+            class="{$page.url.pathname.includes('gallery')
+              ? 'bg-white shadow'
+              : 'hover:bg-gray-100'}
                 px-2 py-1 rounded">
             <i class="fal fa-image" />
             <span class="hidden md:inline">
@@ -60,7 +62,9 @@
             <a
               data-sveltekit-prefetch
               href={'/' + $page.params.dictionaryId + '/entries/print'}
-              class="{$page.url.pathname.includes('print') ? 'bg-white shadow' : 'hover:bg-gray-100'}
+              class="{$page.url.pathname.includes('print')
+                ? 'bg-white shadow'
+                : 'hover:bg-gray-100'}
                   px-2 py-1 rounded">
               <span class="i-fa-print" style="margin-top: -4px;" />
               <span class="hidden md:inline">
@@ -73,12 +77,7 @@
 
       <div class="flex">
         <div class="flex-grow w-0 relative">
-          <div class="flex justify-between print:hidden">
-            <div class="italic text-xs text-gray-500 mb-1">
-              <Stats {search} />
-            </div>
-            <!-- <SortBy {search} /> -->
-          </div>
+          <Stats {search} />
           <slot />
         </div>
         <div class="hidden md:block w-3 flex-shrink-0 print:hidden" />

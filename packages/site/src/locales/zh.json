@@ -184,8 +184,7 @@
     "open_dictionary": "打开字典",
     "my_dictionaries": "我的字典",
     "public_dictionaries": "公共字典",
-    "read_more": "阅读更多",
-    "tutorials_link": "教程"
+    "read_more": "阅读更多"
   },
   "misc": {
     "settings": "设置",
@@ -212,7 +211,8 @@
     "downloading": "下载中",
     "upload": "上传",
     "assertion": "是的",
-    "negation": "不"
+    "negation": "不",
+    "clean": "干净的"
   },
   "settings": {
     "community_permission": "此语言的语言社区允许这种语言通过网络传播吗？",
@@ -280,8 +280,8 @@
     "permission_denied": "访问媒体的许可受限"
   },
   "print": {
-    "qrCode": "显示QR码",
-    "labels": "标签",
+    "qr_code": "显示QR码",
+    "labels": "显示标签",
     "availability": "印刷视图仅适用于字典经理和贡献者",
     "max_entries": "最大条目",
     "columns": "列",
