@@ -17,6 +17,8 @@
   });
 </script>
 
-{$_('dictionary.entries', { default: 'Entries' })}:
-{nbHits}
-{#if nbHits}({processingTimeMS}ms){/if}
+<div class="print:hidden italic text-xs text-gray-500 mb-1">
+  {$_('dictionary.entries', { default: 'Entries' })}:
+  {nbHits}
+  {#if nbHits}({processingTimeMS}ms){/if}
+</div>
