@@ -73,14 +73,16 @@ interface IAlgoliaFacetsQuery {
   <form on:submit|preventDefault={save}>
     <Button onclick={() => {
       value = prompt('Add the new dialect');
-      save();
-    }} class="mr-1 mb-1" color="orange" size="sm">Add</Button>
+      if (value) {
+        save();
+      }
+    }} class="mr-1 mb-1" color="orange" size="sm"><span class="i-fa-solid-plus" /> Add</Button>
     {#if data}    
       {#each data.facetHits as dialect}
         <Button onclick={() => {
           value = dialect.value;
           save();
-        }} class="mr-1 mb-1" form={value === dialect.value ? 'filled' : 'simple'} size="sm">{dialect.value}</Button>
+        }} class="mr-1 mb-1 opacity-100" disabled={value === dialect.value} form={value === dialect.value ? 'filled' : 'simple'} size="sm">{dialect.value}</Button>
       {/each}
     {/if}
   
