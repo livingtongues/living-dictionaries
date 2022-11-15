@@ -2,7 +2,7 @@
   import type { Readable } from 'svelte/store';
   export let t: Readable<any> = undefined;
 
-  import { createEventDispatcher } from 'svelte';
+  import { createEventDispatcher, getContext } from 'svelte';
   import Button from 'svelte-pieces/ui/Button.svelte';
   import Keyman from './keyboards/keyman/Keyman.svelte';
   import InputWrapper from './keyboards/keyman/InputWrapper.svelte';
@@ -15,6 +15,8 @@
   export let field: string;
   export let display: string = undefined; // used only for Sompeng-Mardir now that Modal is separate
   export let adding = false;
+
+  const glosses:string[] = getContext('glosses');
 
   function close() {
     dispatch('close');

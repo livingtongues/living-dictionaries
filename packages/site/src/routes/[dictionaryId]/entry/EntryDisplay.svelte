@@ -7,12 +7,15 @@
   import BadgeArray from 'svelte-pieces/data/BadgeArray.svelte';
   import EntryMedia from './EntryMedia.svelte';
   import { dictionary } from '$lib/stores';
+  import { setContext } from 'svelte';
 
   export let entry: IEntry,
     videoAccess = false,
     canEdit = false,
     alternateOrthographies = [],
     glossingLanguages = ['en'];
+
+  setContext<string[]>('glosses', glossingLanguages);
 
   import { createEventDispatcher } from 'svelte';
   const dispatch = createEventDispatcher<{
@@ -39,6 +42,7 @@
 
   <div class="md:w-2/3 flex flex-col">
     <div class="hidden md:block">
+      <!-- TODO add glossing languages -->
       <EntryField
         {t}
         value={entry.lx}
