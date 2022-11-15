@@ -42,7 +42,6 @@
 
   <div class="md:w-2/3 flex flex-col">
     <div class="hidden md:block">
-      <!-- TODO add glossing languages -->
       <EntryField
         {t}
         value={entry.lx}
