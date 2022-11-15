@@ -9,7 +9,6 @@
 
   let value = '';
   let paragraph = '';
-  console.log(glossingLanguages)
 </script>
 
 <!-- prettier-ignore -->
