@@ -18,7 +18,10 @@
   export let adding = false;
 
   const glosses:string[] = getContext('glosses');
-  const filteredGlosses = glosses.map(bcp => glossingLanguages[bcp]);
+  let filteredGlosses = {};
+  glosses.forEach(bcp => {
+    filteredGlosses[bcp] = glossingLanguages[bcp];
+  });
 
   function close() {
     dispatch('close');
@@ -106,6 +109,7 @@
   };
 
   let inputEl: HTMLInputElement;
+  let bcp:string;
 
   function smallCapsSelection(el: HTMLInputElement) {
     const { selectionStart, selectionEnd } = el;
@@ -144,6 +148,26 @@
             class="form-input block w-full pr-9" />
         </InputWrapper>
       </Keyman>
+    {:else if field === 'lx'}
+    {#each Object.keys(filteredGlosses) as language}
+      {#if filteredGlosses[language].showKeyboard}
+      <Button form="menu" size="sm" onclick={() => {bcp = language}} active={language === bcp}
+        >{filteredGlosses[language].vernacularName} ({language})</Button>
+      {/if}
+    {/each}
+    <Keyman>
+      <InputWrapper fixed {bcp}>
+        <input
+          bind:this={inputEl}
+          dir="ltr"
+          type="text"
+          required={field === 'lx'}
+          use:autofocus
+          bind:value
+          class:sompeng={display === 'Sompeng-Mardir'}
+          class="form-input block w-full pr-9" />
+      </InputWrapper>
+    </Keyman>
     {:else}
       <input
         bind:this={inputEl}
