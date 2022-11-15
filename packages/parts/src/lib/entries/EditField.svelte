@@ -3,6 +3,7 @@
   export let t: Readable<any> = undefined;
 
   import { createEventDispatcher, getContext } from 'svelte';
+  import { glossingLanguages } from '../glosses/glossing-languages';
   import Button from 'svelte-pieces/ui/Button.svelte';
   import Keyman from './keyboards/keyman/Keyman.svelte';
   import InputWrapper from './keyboards/keyman/InputWrapper.svelte';
@@ -17,6 +18,7 @@
   export let adding = false;
 
   const glosses:string[] = getContext('glosses');
+  const filteredGlosses = glosses.map(bcp => glossingLanguages[bcp]);
 
   function close() {
     dispatch('close');
