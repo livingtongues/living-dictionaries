@@ -12,6 +12,7 @@
   import Region from '../maps/mapbox/map/Region.svelte';
   import CoordinatesModal from '../maps/CoordinatesModal.svelte';
   import RegionModal from '../maps/RegionModal.svelte';
+  import NavigationControl from '../maps/mapbox/controls/NavigationControl.svelte';
 
   import { createEventDispatcher } from 'svelte';
   const dispatch = createEventDispatcher<{
@@ -49,6 +50,7 @@
       lng={dictionary.coordinates.longitude}
       lat={dictionary.coordinates.latitude}
       on:click={({ detail }) => (mapClickCoordinates = detail)}>
+      <NavigationControl />
       {#if mapClickCoordinates}
         <CoordinatesModal
           {t}
@@ -110,6 +112,7 @@
                 {/if}
               </ShowHide>
             </Popup>
+            <NavigationControl />
           </Marker>
         {/each}
       {/if}
