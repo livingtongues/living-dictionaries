@@ -4,6 +4,7 @@
   import SemanticDomains from './cells/SemanticDomains.svelte';
   import EntryPartOfSpeech from '@living-dictionaries/parts/src/lib/entries/entry/EntryPartOfSpeech.svelte';
   import SelectSpeakerCell from './cells/SelectSpeakerCell.svelte';
+  import DialectCell from './cells/DialectCell.svelte';
   import SelectSource from './cells/SelectSource.svelte';
   import AudioCell from './cells/AudioCell.svelte';
   import { Image } from '@living-dictionaries/parts';
@@ -52,6 +53,11 @@
     <SemanticDomains
       {canEdit}
       {entry}
+      on:valueupdate={(e) => saveUpdateToFirestore(e, entry.id, $dictionary.id)} />
+  {:else if column.field === 'di'}
+    <DialectCell
+      {canEdit}
+      value={entry.di}
       on:valueupdate={(e) => saveUpdateToFirestore(e, entry.id, $dictionary.id)} />
   {:else if column.field === 'sr'}
     <SelectSource

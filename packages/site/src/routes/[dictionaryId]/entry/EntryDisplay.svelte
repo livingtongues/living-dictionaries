@@ -4,6 +4,7 @@
   import EntryField from './EntryField.svelte';
   import EntryPartOfSpeech from '@living-dictionaries/parts/src/lib/entries/entry/EntryPartOfSpeech.svelte';
   import EntrySemanticDomains from './EntrySemanticDomains.svelte';
+  import EntryDialect from './EntryDialect.svelte';
   import BadgeArray from 'svelte-pieces/data/BadgeArray.svelte';
   import EntryMedia from './EntryMedia.svelte';
   import { dictionary } from '$lib/stores';
@@ -103,7 +104,9 @@
         on:valueupdate />
     {/if}
 
-    {#each ['pl', 'nc', 'mr', 'in', 'di', 'nt'] as field}
+    <EntryDialect {canEdit} {entry} on:valueupdate />
+    
+    {#each ['pl', 'nc', 'mr', 'in', 'nt'] as field}
       <EntryField
         {t}
         value={entry[field]}
