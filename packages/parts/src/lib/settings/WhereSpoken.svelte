@@ -114,7 +114,6 @@
                 {/if}
               </ShowHide>
             </Popup>
-            <NavigationControl />
           </Marker>
         {/each}
       {/if}
