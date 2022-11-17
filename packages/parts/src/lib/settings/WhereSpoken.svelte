@@ -95,6 +95,7 @@
                 {#if show}
                   <CoordinatesModal
                     {t}
+                    {dictionary}
                     lng={point.coordinates.longitude}
                     lat={point.coordinates.latitude}
                     on:update={({ detail }) => {
@@ -163,7 +164,7 @@
       {/if}
     </Button>
     {#if show}
-      <CoordinatesModal {t} lng={null} lat={null} on:update={addCoordinates} on:close={toggle} />
+      <CoordinatesModal {t} {dictionary} lng={null} lat={null} on:update={addCoordinates} on:close={toggle} />
     {/if}
   </ShowHide>
 
