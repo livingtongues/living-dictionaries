@@ -26,13 +26,8 @@
       </div>
     </div>
     {#if show}
-      {#await import('$lib/components/modals/DialectModal.svelte') then DialectModal}
-        <DialectModal.default
-          t={_}
-          attribute="di"
-          on:valueupdate
-          value={entry.di}
-          on:close={toggle} />
+      {#await import('$lib/components/modals/DialectModal.svelte') then { default: DialectModal }}
+        <DialectModal on:valueupdate value={entry.di} on:close={toggle} />
       {/await}
     {/if}
   </ShowHide>
