@@ -22,7 +22,7 @@
     updateRegions: IRegion[];
   }>();
   
-  export let dictionary: Partial<IDictionary>;
+  export let dictionary: IDictionary;
     $: hasCoordinates = dictionary.coordinates?.latitude;
 
   function addCoordinates({ detail }: { detail: { lng: number; lat: number } }) {
@@ -54,6 +54,7 @@
       {#if mapClickCoordinates}
         <CoordinatesModal
           {t}
+          {dictionary}
           lng={+mapClickCoordinates.lng.toFixed(4)}
           lat={+mapClickCoordinates.lat.toFixed(4)}
           on:update={addCoordinates}
