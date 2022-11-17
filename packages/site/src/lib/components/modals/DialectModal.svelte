@@ -62,11 +62,20 @@
     <span class="i-gg-spinner animate-spin mb-3 block" />
   {:then { facetHits }}
     {#each facetHits as dialect}
-      <Button
-        onclick={() => save(dialect.value)}
-        class="mr-1 mb-1 opacity-100"
-        form={value === dialect.value ? 'filled' : 'simple'}
-        size="sm">{dialect.value}</Button>
+    <Button
+      onclick={() => save(dialect.value)}
+      form={value === dialect.value ? 'filled' : 'simple'}
+      class="mr-1 mb-1"
+      size="sm">
+      {dialect.value}
+      {#if value === dialect.value}
+        <button on:click|stopPropagation={() => save(null)} type="button" class="badge-x ml-1 rounded-4 hover:bg-blue-900 p-1">
+          <svg class="h-2 w-2" stroke="currentColor" fill="none" viewBox="0 0 8 8">
+            <path stroke-linecap="round" stroke-width="1.5" d="M1 1l6 6m0-6L1 7" />
+          </svg>
+        </button>
+      {/if}
+    </Button>
     {/each}
   {:catch error}
     <div class="text-red-500 mb-3">
@@ -92,12 +101,6 @@
   </div>
 
   <div class="modal-footer">
-    {#if value}
-      <Button onclick={() => save(null)} form="simple" color="red">
-        {t ? $t('misc.remove') : 'Remove'}
-      </Button>
-      <div class="w-1" />
-    {/if}
     <Button onclick={close} form="simple" color="black">
       {t ? $t('misc.cancel') : 'Cancel'}
     </Button>
