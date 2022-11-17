@@ -1,9 +1,7 @@
 <script lang="ts">
-  import { _ } from 'svelte-i18n';
-
   export let value: string,
     canEdit = false;
-    let edit = false;
+  let edit = false;
 </script>
 
 <div
@@ -19,10 +17,8 @@
 </div>
 
 {#if edit}
-  {#await import('$lib/components/modals/DialectModal.svelte') then DialectModal}
-    <DialectModal.default
-      t={_}
-      attribute="di"
+  {#await import('$lib/components/modals/DialectModal.svelte') then { default: DialectModal }}
+    <DialectModal
       on:valueupdate
       {value}
       on:close={() => {
