@@ -22,7 +22,7 @@
     updateRegions: IRegion[];
   }>();
   
-  export let dictionary: IDictionary;
+  export let dictionary: Partial<IDictionary>;
     $: hasCoordinates = dictionary.coordinates?.latitude;
 
   function addCoordinates({ detail }: { detail: { lng: number; lat: number } }) {

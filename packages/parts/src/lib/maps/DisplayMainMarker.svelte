@@ -4,7 +4,7 @@
   import type { IDictionary } from '@living-dictionaries/types';
   import { dictionaryGeoJsonCollection } from './utils/dictionaryGeoJsonCollection';
 
-  export let dictionary: IDictionary;
+  export let dictionary: Partial<IDictionary>;
 </script>
 
 <GeoJSONSource

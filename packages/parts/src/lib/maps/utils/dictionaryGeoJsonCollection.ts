@@ -11,7 +11,9 @@ import type { GeoJSONSourceOptions } from 'mapbox-gl';
 //   CentralAmerica: [-80, 5],
 // };
 
-export function dictionaryGeoJsonCollection(dictionaries: IDictionary[]): GeoJSONSourceOptions['data'] {
+export function dictionaryGeoJsonCollection(
+  dictionaries: IDictionary[] | Partial<IDictionary>[]
+): GeoJSONSourceOptions['data'] {
   return {
     type: 'FeatureCollection',
     features: dictionaries
