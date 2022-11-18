@@ -10,7 +10,7 @@
   import Marker from './mapbox/map/Marker.svelte';
   import ToggleStyle from './mapbox/controls/ToggleStyle.svelte';
   import NavigationControl from '../maps/mapbox/controls/NavigationControl.svelte';
-  import DisplayMainCoordinate from './DisplayMainCoordinate.svelte';
+  import DisplayMainMarker from './DisplayMainMarker.svelte';
   import type { IDictionary } from '@living-dictionaries/types';
 
   export let lng: number;
@@ -117,7 +117,7 @@
         lat={centerLat}
         {zoom}
         on:click={({ detail }) => setMarker(detail.lng, detail.lat)}>
-        {#if dictionary}<DisplayMainCoordinate {dictionary} />{/if}
+        {#if dictionary}<DisplayMainMarker {dictionary} />{/if}
         <NavigationControl />
         <Geocoder
           options={{ marker: false }}
