@@ -103,7 +103,9 @@
     "con_lang_description": "Je! Hii ni kamusi ya lugha iliyojengwa (lugha iliyoundwa na wanadamu katika miaka ya hivi karibuni, kwa kitabu au sinema)? Ikiwa ndio, tafadhali eleza kwa kifupi.",
     "uncertainty": "Sijui",
     "select_region": "Chagua mkoa",
-    "secondary_coordinates": "Kuratibu za sekondari"
+    "secondary_coordinates": "Kuratibu za sekondari",
+    "map_instructions": "Bonyeza kwenye ramani ili kuongeza kuratibu za sekondari.",
+    "print_access": "Ruhusu watazamaji kuchapisha kamusi"
   },
   "dictionary": {
     "latitude": "Latitudo",
@@ -220,7 +222,8 @@
     "dict_name": "Jina la Kamusi",
     "public_private_meaning": "Je, jamii ya wazungumzaji inaruhusu lugha hii kuwekwa mtandaoni? Umma inamaanisha mtu yeyote anaweza kuona kamusi yako, suala ambalo linahitaji idhini ya jamii. Kamusi binafsi zinaonekana kwako tu na washirika wako.",
     "optional_data_fields": "Sehemu za Taarifa Mbadala",
-    "unable_to_delete": "Kumbuka: Hautaweza kufuta lugha hizi za glossing baadaye."
+    "unable_to_delete": "Kumbuka: Hautaweza kufuta lugha hizi za glossing baadaye.",
+    "print_access_meaning": "Hii inatoa umma uwezo wa kupakua na kuchapisha kamusi hii hai kama .pdf"
   },
   "speakers": {
     "add_new_speaker": "Ongeza Mzungumzaji Mpya",
