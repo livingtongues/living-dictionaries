@@ -128,6 +128,7 @@
               {#if show}
                 <RegionModal
                   {t}
+                  {dictionary}
                   {region}
                   on:update={({ detail }) => {
                     const regions = dictionary.regions;
@@ -163,7 +164,7 @@
       {/if}
     </Button>
     {#if show}
-      <CoordinatesModal {t} {dictionary} lng={null} lat={null} on:update={addCoordinates} on:close={toggle} />
+      <CoordinatesModal dictionary={hasCoordinates ? dictionary : null} {t} lng={null} lat={null} on:update={addCoordinates} on:close={toggle} />
     {/if}
   </ShowHide>
 
@@ -176,6 +177,7 @@
       {#if show}
         <RegionModal
           {t}
+          {dictionary}
           region={null}
           on:update={({ detail }) => {
             const regions = (dictionary.regions && [...dictionary.regions, detail]) || [detail];

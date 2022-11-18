@@ -10,15 +10,13 @@
   import Marker from './mapbox/map/Marker.svelte';
   import ToggleStyle from './mapbox/controls/ToggleStyle.svelte';
   import NavigationControl from '../maps/mapbox/controls/NavigationControl.svelte';
-  import GeoJSONSource from './mapbox/sources/GeoJSONSource.svelte';
-  import Layer from './mapbox/map/Layer.svelte';
+  import DisplayMainCoordinate from './DisplayMainCoordinate.svelte';
   import type { IDictionary } from '@living-dictionaries/types';
-  import { dictionaryGeoJsonCollection } from './utils/dictionaryGeoJsonCollection';
 
   export let lng: number;
   export let lat: number;
   export let canRemove = true;
-  export let dictionary: IDictionary = null;
+  export let dictionary: IDictionary = undefined;
 
   let centerLng = lng;
   let centerLat = lat;
@@ -119,19 +117,7 @@
         lat={centerLat}
         {zoom}
         on:click={({ detail }) => setMarker(detail.lng, detail.lat)}>
-        {#if dictionary}   
-          <GeoJSONSource
-            data={dictionaryGeoJsonCollection([dictionary])}>
-            <Layer 
-              options={{
-                type: 'circle',
-                paint: {
-                  'circle-color': 'blue',
-                  'circle-radius': 14,
-                }
-              }} />
-          </GeoJSONSource>
-        {/if}
+        {#if dictionary}<DisplayMainCoordinate {dictionary} />{/if}
         <NavigationControl />
         <Geocoder
           options={{ marker: false }}
