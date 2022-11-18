@@ -44,6 +44,7 @@
   {t ? $t('create.where_spoken') : 'Where is this language spoken?'}*
 </div>
 
+<div class="text-xs text-gray-600 mt-1">{t ? $t('create.map_instructions') : 'Click on the map to add secondary coordinates.'}</div>
 {#if hasCoordinates}
   <div class="h-240px">
     <Map
@@ -149,7 +150,6 @@
     </Map>
   </div>
 {/if}
-
 <div class="mt-1">
   <ShowHide let:show let:toggle>
     <Button

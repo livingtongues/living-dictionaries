@@ -103,7 +103,9 @@
     "con_lang_description": "Shin wannan ƙamus na harshe ne wanda aka gina (harshe da aka kirkira ta ɗan adam a cikin 'yan shekarun nan, na wani fim ko fim)? Idan eh, da fatan za a bayyana a taƙaice.",
     "uncertainty": "Ban sani ba",
     "select_region": "Zaɓi yanki",
-    "secondary_coordinates": "Sakandare sakandare"
+    "secondary_coordinates": "Sakandare sakandare",
+    "map_instructions": "Latsa Taswirar don Addara Sakandare.",
+    "print_access": "Bada masu kallo don buga ƙamus"
   },
   "dictionary": {
     "latitude": "Latitude",
@@ -220,7 +222,8 @@
     "dict_name": "Dictionary Name",
     "public_private_meaning": "Jama'a nufin kowa zai iya gani da ƙamus da bukatar al'umma yarda. Private kamus ne bayyane ne kawai zuwa gare ku, kuma ku hadin gwiwar.",
     "optional_data_fields": "ZABI Data Fields",
-    "unable_to_delete": "SAURARA: Ba za ku iya share waɗannan harsunan walƙiya daga baya ba."
+    "unable_to_delete": "SAURARA: Ba za ku iya share waɗannan harsunan walƙiya daga baya ba.",
+    "print_access_meaning": "Wannan yana bawa jama'a damar saukar da buga wannan ƙamus na rayuwa a matsayin .pdf"
   },
   "speakers": {
     "add_new_speaker": "Add New Majalisa",
