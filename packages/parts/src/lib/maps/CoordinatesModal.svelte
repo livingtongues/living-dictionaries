@@ -16,7 +16,7 @@
   export let lng: number;
   export let lat: number;
   export let canRemove = true;
-  export let dictionary: IDictionary = undefined;
+  export let dictionary: IDictionary | Partial<IDictionary> = undefined;
 
   let centerLng = lng;
   let centerLat = lat;

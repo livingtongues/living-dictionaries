@@ -22,7 +22,7 @@
   import { points } from '@turf/helpers';
   import center from '@turf/center';
 
-  export let dictionary: IDictionary = undefined;
+  export let dictionary: IDictionary | Partial<IDictionary> = undefined;
 
   export let region: IRegion;
   let zoom = region ? 4 : 2;
