@@ -16,9 +16,13 @@
   import { randomColor } from './utils/randomColor';
   import ReactiveSet from 'svelte-pieces/functions/ReactiveSet.svelte';
   import Popup from './mapbox/map/Popup.svelte';
+  import DisplayMainCoordinate from './DisplayMainCoordinate.svelte';
+  import type { IDictionary } from '@living-dictionaries/types';
 
   import { points } from '@turf/helpers';
   import center from '@turf/center';
+
+  export let dictionary: IDictionary = undefined;
 
   export let region: IRegion;
   let zoom = region ? 4 : 2;
@@ -78,6 +82,7 @@
           lat={centerLat}
           {zoom}
           on:click={({ detail: { lng, lat } }) => add({ longitude: lng, latitude: lat })}>
+          {#if dictionary}<DisplayMainCoordinate {dictionary} />{/if}
           <Geocoder
             options={{ marker: false }}
             placeholder={t ? $t('about.search') : 'Search'}
