@@ -14,21 +14,25 @@
   export let gcsPath: string = undefined;
   $: src = gcsPath ? `https://lh3.googleusercontent.com/${gcsPath}=w${width}-h${height}-c` : null;
 
-  const MAX_TITLE_LENGTH = 80;
+  const MAX_TITLE_LENGTH = 70;
   const PADDING = 16;
 
   $: globeSize = src ? 100 : 200;
 </script>
 
+<!-- https://cssgradient.io/ is helpful with making gradients -->
 <div
   style="
         display: flex;
+        background-color: #6f8d9b;
         background-image: linear-gradient(to bottom, #6f8d9b, #546e7a);
         color: white;
         height: 100%;
         width: 100%;
         padding: {PADDING}px;
         position: relative;
+        font-size: 16px;
+        font-weight: 400;
         line-height: 1.2;
     ">
   {#if src}
@@ -48,11 +52,12 @@
         <SvgGlobe placeLatitude={lat} placeLongitude={lng} size={globeSize} />
       </div>
     {/if}
-    <div style="display: flex; font-size: {title.length > MAX_TITLE_LENGTH / 2 ? 2 : 4}rem;">
+    <div style="display: flex; font-size: {(title.length > MAX_TITLE_LENGTH / 2 ? 2 : 4) * 16}px;">
       {title.slice(0, MAX_TITLE_LENGTH)}{title.length > MAX_TITLE_LENGTH ? '...' : ''}
     </div>
     <div
-      style="display: flex; font-size: 1.5rem; margin-top: 10px; color: #ededed; padding-right: {PADDING + globeSize}px;">
+      style="display: flex; font-size: 1.5em; margin-top: 10px; color: #ededed; padding-right: {PADDING +
+        globeSize}px;">
       {description}
     </div>
     <div style="display: flex; align-items: center; position: absolute; bottom: 0; left: 0;">
@@ -60,7 +65,7 @@
         style="height: 20px; width: 20px; margin-right: 5px;"
         alt="Living Dictionaries"
         src="https://livingdictionaries.app/images/LD_logo_white.svg" />
-      <span class="font-size: 16px;"> {dictionaryName} Living Dictionary </span>
+      <span style="font-size: 16px;"> {dictionaryName} Living Dictionary </span>
     </div>
   </div>
 </div>
