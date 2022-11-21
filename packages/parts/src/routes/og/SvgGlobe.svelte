@@ -1,8 +1,8 @@
 <script lang="ts">
   import { geoPath, geoOrthographic, geoGraticule10 } from 'd3-geo';
-  import { feature } from 'topojson';
+  import { feature } from 'topojson-client';
   import world from './land-110m.json';
-
+  
   export let fill = '#6f8d9b';
   export let showGraticule = false;
   export let label: string = undefined;

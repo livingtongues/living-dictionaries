@@ -87,7 +87,7 @@ importers:
       svelte2tsx: ^0.5.20
       sveltefirets: ^0.0.32
       temp-s-p-u: ^0.0.7
-      topojson: ^3.0.2
+      topojson-client: ^3.1.0
       tslib: ^2.4.0
       typescript: ~4.8.4
       unocss: ^0.46.2
@@ -126,7 +126,7 @@ importers:
       svelte2tsx: 0.5.20_besnmoibwkhwtentvwuriss7pa
       sveltefirets: 0.0.32
       temp-s-p-u: 0.0.7_vite@3.2.2
-      topojson: 3.0.2
+      topojson-client: 3.1.0
       tslib: 2.4.0
       typescript: 4.8.4
       unocss: 0.46.2_vite@3.2.2
@@ -8522,36 +8522,11 @@ packages:
     resolution: {integrity: sha512-o5sSPKEkg/DIQNmH43V0/uerLrpzVedkUh8tGNvaeXpfpuwjKenlSox/2O/BTlZUtEe+JG7s5YhEz608PlAHRA==}
     engines: {node: '>=0.6'}
 
-  /topojson-client/3.0.0:
-    resolution: {integrity: sha512-2phZ98wg/iKvsWxbB6JQcq0/N0f+sRx8ZogdvjCg+CjaJdmV0knP0OQwK5XbgnytAPx5lPZk41kiWpgH2w9FHg==}
+  /topojson-client/3.1.0:
+    resolution: {integrity: sha512-605uxS6bcYxGXw9qi62XyrV6Q3xwbndjachmNxu8HWTtVPxZfEJN9fd/SZS1Q54Sn2y0TMyMxFj/cJINqGHrKw==}
     hasBin: true
     dependencies:
       commander: 2.20.3
-    dev: true
-
-  /topojson-server/3.0.0:
-    resolution: {integrity: sha512-UhhwQk4e2+lwhAVYkja3J5nQHQmKwORDuIQPkMnFFZFcLqWKLQWI3u7fZWtNIXTElBjTYdBUL1kzi1+oS/qDQw==}
-    hasBin: true
-    dependencies:
-      commander: 2.20.3
-    dev: true
-
-  /topojson-simplify/3.0.2:
-    resolution: {integrity: sha512-gyYSVRt4jO/0RJXKZQPzTDQRWV+D/nOfiljNUv0HBXslFLtq3yxRHrl7jbrjdbda5Ytdr7M8BZUI4OxU7tnbRQ==}
-    hasBin: true
-    dependencies:
-      commander: 2.20.3
-      topojson-client: 3.0.0
-    dev: true
-
-  /topojson/3.0.2:
-    resolution: {integrity: sha512-u3zeuL6WEVL0dmsRn7uHZKc4Ao4gpW3sORUv+N3ezLTvY3JdCuyg0hvpWiIfFw8p/JwVN++SvAsFgcFEeR15rQ==}
-    deprecated: Use topojson-client, topojson-server or topojson-simplify directly.
-    hasBin: true
-    dependencies:
-      topojson-client: 3.0.0
-      topojson-server: 3.0.0
-      topojson-simplify: 3.0.2
     dev: true
 
   /totalist/3.0.0:
