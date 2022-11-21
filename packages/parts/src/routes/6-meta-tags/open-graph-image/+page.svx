@@ -1,27 +1,30 @@
 <script>
+  import { dev } from '$app/environment';
   import { Story } from 'kitbook';
   import { onMount } from 'svelte';
-  import OpenGraphImage from '../../og/OpenGraphImage.svelte';
+  import { compressToEncodedURIComponent as encode } from 'lz-string';
 
-  let timestamp = 0;
+  let version = 2; // after updating svelte-kit version can set this automatically
   onMount(() => {
-    const interval = setInterval(() => (timestamp = new Date().getTime()), 500);
-    return () => {
-      clearInterval(interval);
-    };
+    if (dev) {
+      const interval = setInterval(() => (version = new Date().getTime()), 5000);
+      return () => {
+        clearInterval(interval);
+      };
+    }
   });
 </script>
 
 <Story
   knobs={{
-    width: 600,
-    height: 300,
+    width: 1200,
+    height: 600,
     title: 'húdié 蝴蝶 עִבְרִית',
-    description: 'butterfly', // Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industrys standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.
+    description: 'butterfly',
     dictionaryName: 'Fuliolo',
     lat: 10,
     lng: 35,
-    showImage: false,
+    showImage: true,
     gcsPath:
       'LGuBKhg7vuv5-aJcOdnb_ucOXLSCIR1Kjxrh70xRlaIHqWo-mWqfWUcH3Xznz63QsFZmkeVmoNN0PEXzSc0Jh4g',
   }}
@@ -36,30 +39,77 @@
     lat,
     lng,
   }}>
-    <img
+  <img
     alt=""
     style="max-width: 100%;"
-    src="/og?w={width * 2}&h={height *
-        2}&ti={title}&desc={description}&dict={dictionaryName}{showImage &&
-          '&gcsPath=' + gcsPath}&ts={timestamp}" />
-    <div class="mt-1" style="height: {height}px; width: {width}px;">
-    <OpenGraphImage
-      {width}
-      {height}
-      {title}
-      {description}
-      {dictionaryName}
-      gcsPath={showImage && gcsPath}
-      {lat}
-      {lng} />
-  </div>
+    src="/og?props={encode(
+      JSON.stringify({
+        width,
+        height,
+        title,
+        description,
+        dictionaryName,
+        lng,
+        lat,
+        gcsPath: showImage ? gcsPath : '',
+      })
+    )}&v={version}" />
+  <img
+    alt=""
+    style="max-width: 100%;"
+    src="/og?props={encode(
+      JSON.stringify({
+        width,
+        height,
+        title,
+        description,
+        dictionaryName,
+        lng,
+        lat,
+      })
+    )}&v={version}" />
+  <img
+    alt=""
+    style="max-width: 100%;"
+    src="/og?props={encode(
+      JSON.stringify({
+        width,
+        height,
+        title: 'This is an example where the lexeme is an entire sentence!',
+        description: 'So you can see how the font got a little bit smaller to allow for larger entries. This one also has USA coordinates.',
+        dictionaryName,
+        lng: -95,
+        lat: 40,
+      })
+    )}&v={version}" />
+  <img
+    alt=""
+    style="max-width: 100%;"
+    src="/og?props={encode(
+      JSON.stringify({
+        width,
+        height,
+        title,
+        description: 'Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industrys standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.',
+        dictionaryName,
+        lng,
+        lat,
+      })
+    )}&v={version}" />
 </Story>
 
 For comparison, Stackblitz's open graph images are 1200x800 and GitHub's are 1200x600.
 
 <!-- prettier-ignore -->
-Docs: 
+Docs & Prior Art: 
 - [Create dynamic social card images with Svelte
 components](https://geoffrich.net/posts/svelte-social-image/) 
 - https://vercel.com/docs/concepts/functions/edge-functions/og-image-generation 
 - https://og-playground.vercel.app/
+- https://github.com/etherCorps/sveltekit-og
+
+<style>
+  img {
+    margin-bottom: 10px;
+  }
+</style>

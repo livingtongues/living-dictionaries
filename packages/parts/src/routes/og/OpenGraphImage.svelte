@@ -14,10 +14,10 @@
   export let gcsPath: string = undefined;
   $: src = gcsPath ? `https://lh3.googleusercontent.com/${gcsPath}=w${width}-h${height}-c` : null;
 
-  const MAX_TITLE_LENGTH = 70;
-  const PADDING = 16;
+  const MAX_TITLE_LENGTH = 90;
+  const PADDING = 32;
 
-  $: globeSize = src ? 100 : 200;
+  $: globeSize = src ? 200 : 400;
 </script>
 
 <!-- https://cssgradient.io/ is helpful with making gradients -->
@@ -29,45 +29,47 @@
         color: white;
         height: 100%;
         width: 100%;
-        padding: {PADDING}px;
         position: relative;
-        font-size: 16px;
-        font-weight: 400;
-        line-height: 1.2;
+        padding: {PADDING}px;
+        {src ? 'text-shadow: 2px 2px 3px hsla(0, 0%, 0%, 40%);' : ''}
     ">
   {#if src}
     <img style="position: absolute; top:0; left:0; right: 0; bottom: 0;" alt="" {src} />
-    <div
-      style="
-        display: flex;
-        background-image: linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,0) 15%, rgba(0,0,0,0) 85%, rgba(0,0,0,1) 100%);
-        height: 100%;
-        width: 100%;
-        position: absolute; top:0; left:0; right: 0; bottom: 0;
-    " />
   {/if}
-  <div style="display: flex; flex-direction: column; position: relative; width: 100%;">
+  <div
+    style="
+          display: flex; 
+          flex-direction: column; 
+          position: relative; 
+          width: 100%;
+          height: 100%;
+          font-weight: 400;
+       ">
     {#if lat && lng}
       <div style="display: flex; position: absolute; bottom: 0; right: 0;">
         <SvgGlobe placeLatitude={lat} placeLongitude={lng} size={globeSize} />
       </div>
     {/if}
-    <div style="display: flex; font-size: {(title.length > MAX_TITLE_LENGTH / 2 ? 2 : 4) * 16}px;">
+    <div
+      style="text-shadow: 2px 2px 3px hsla(0, 0%, 0%, 40%); font-size: {(title.length >
+      MAX_TITLE_LENGTH / 2
+        ? 3
+        : 4) * 20}px;">
       {title.slice(0, MAX_TITLE_LENGTH)}{title.length > MAX_TITLE_LENGTH ? '...' : ''}
     </div>
     <div
-      style="display: flex; font-size: 1.5em; margin-top: 10px; color: #ededed; padding-right: {PADDING +
+      style="overflow: hidden; flex-grow: 1; font-size: 30px; margin-top: 10px; margin-bottom: 20px; padding-right: {PADDING +
         globeSize}px;">
       {description}
     </div>
-    <div style="display: flex; align-items: center; position: absolute; bottom: 0; left: 0;">
+    <div
+      style="display: flex; align-items: center; font-size: 40px; padding-right: {PADDING +
+        globeSize}px;">
       <img
-        style="height: 20px; width: 20px; margin-right: 5px;"
+        style="height: 40px; width: 40px; margin-right: 10px;"
         alt="Living Dictionaries"
         src="https://livingdictionaries.app/images/LD_logo_white.svg" />
-      <span style="font-size: 16px;"> {dictionaryName} Living Dictionary </span>
+      <span>{dictionaryName} Living Dictionary </span>
     </div>
   </div>
 </div>
-
-<!-- hsla(198, 14%, 20%, 1) -->

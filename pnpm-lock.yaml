@@ -73,6 +73,7 @@ importers:
       ckeditor5-build-classic-with-alignment-underline-smallcaps: ^1.0.0
       d3-geo: ^3.0.1
       kitbook: ^0.0.24
+      lz-string: ^1.4.4
       mdsvex: ^0.10.6
       recordrtc: ^5.6.2
       replace-in-file: ^6.3.5
@@ -111,6 +112,7 @@ importers:
       '@unocss/preset-icons': 0.46.1
       d3-geo: 3.0.1
       kitbook: 0.0.24_svelte@3.52.0
+      lz-string: 1.4.4
       mdsvex: 0.10.6_svelte@3.52.0
       recordrtc: 5.6.2
       replace-in-file: 6.3.5
@@ -6436,7 +6438,7 @@ packages:
     dev: false
 
   /lz-string/1.4.4:
-    resolution: {integrity: sha1-wNjq82BZ9wV5bh40SBHPTEmNOiY=}
+    resolution: {integrity: sha512-0ckx7ZHRPqb0oUm8zNr+90mtf9DQB60H1wMCjBtfi62Kl3a7JbHob6gA2bC+xRvZoOL+1hzUK8jeuEIQE8svEQ==}
     hasBin: true
     dev: true
 
