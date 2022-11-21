@@ -1,0 +1,16 @@
+<script>
+  import { Story } from 'kitbook';
+  import SvgGlobe from '../../og/SvgGlobe.svelte';
+</script>
+
+<Story
+  name="globe"
+  knobs={{ placeLatitude: '-90-90;10', placeLongitude: '-180-180;0', size: '100-600;400' }}
+  let:props={{ placeLatitude, placeLongitude, size }}>
+  <SvgGlobe placeLatitude={+placeLatitude} placeLongitude={+placeLongitude} size={+size} />
+</Story>
+
+<!-- prettier-ignore -->
+- map data from https://github.com/topojson/world-atlas
+- [D3 Rotating Globe with Location Marker](https://bl.ocks.org/atanumallick/8d18989cd538c72ae1ead1c3b18d7b54)
+- https://observablehq.com/@d3/world-map-svg?collection=@d3/d3-geo
