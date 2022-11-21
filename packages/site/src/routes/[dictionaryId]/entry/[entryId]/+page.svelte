@@ -14,10 +14,11 @@
   import Button from 'svelte-pieces/ui/Button.svelte';
   import { deleteEntry } from '$lib/helpers/delete';
   import { saveUpdateToFirestore } from '$lib/helpers/entry/update';
-  import EntryMeta from './EntryMeta.svelte';
+  import SeoMetaTags from '$lib/components/SeoMetaTags.svelte';
+  import { printGlosses } from '$lib/helpers/glosses';
   import { showEntryGlossLanguages } from '$lib/helpers/glosses';
   import EntryDisplay from './EntryDisplay.svelte';
-  
+
   import type { PageData } from './$types';
   export let data: PageData;
 </script>
@@ -70,5 +71,12 @@ bg-white pt-1 -mt-1">
     alternateOrthographies={$dictionary.alternateOrthographies || []}
     on:valueupdate={(e) => saveUpdateToFirestore(e, entry.id, $dictionary.id)} />
 
-  <EntryMeta {entry} dictionary={$dictionary} />
+  <SeoMetaTags
+    title={entry.lx}
+    description={printGlosses(entry.gl).join(', ')}
+    dictionaryName={$dictionary.name}
+    lat={$dictionary.coordinates?.latitude}
+    lng={$dictionary.coordinates?.longitude}
+    url="https://livingdictionaries.app/{$dictionary.id}/entry/{entry.id}"
+    gcsPath={entry.pf?.gcs?.replace('\n', '')} />
 </Doc>
