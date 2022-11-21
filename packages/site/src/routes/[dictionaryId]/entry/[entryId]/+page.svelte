@@ -14,9 +14,9 @@
   import Button from 'svelte-pieces/ui/Button.svelte';
   import { deleteEntry } from '$lib/helpers/delete';
   import { saveUpdateToFirestore } from '$lib/helpers/entry/update';
-  import EntryMeta from '../EntryMeta.svelte';
+  import EntryMeta from './EntryMeta.svelte';
   import { showEntryGlossLanguages } from '$lib/helpers/glosses';
-  import EntryDisplay from '../EntryDisplay.svelte';
+  import EntryDisplay from './EntryDisplay.svelte';
   
   import type { PageData } from './$types';
   export let data: PageData;
