@@ -1,6 +1,7 @@
 <script lang="ts">
   import { page } from '$app/stores';
-  import { compressToEncodedURIComponent as encode } from 'lz-string';
+  import LZString from 'lz-string';
+  const { compressToEncodedURIComponent: encode } = LZString;
 
   const SITE_NAME = 'Living Dictionaries';
   export let title = SITE_NAME;
