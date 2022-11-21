@@ -10,7 +10,6 @@ import type { SvelteComponent } from 'svelte';
 // based on what text is contained in the props, load fonts accordingly
 
 const getPng = withCache(async (html: string, height: number, width: number) => {
-	console.log(html.slice(0,30));
 	const markup = toReactNode(html);
 	const svg = await satori(markup, {
 		fonts: [
@@ -20,7 +19,7 @@ const getPng = withCache(async (html: string, height: number, width: number) => 
 				style: 'normal'
 			},
 		],
-		debug: true,
+		// debug: true,
 		height,
 		width,
 		loadAdditionalAsset: (...args: string[]) => loadDynamicAsset(...args),
@@ -116,10 +115,21 @@ const loadDynamicAsset = withCache(
 function withCache(fn: Function) {
 	const cache = new Map();
 	return async (...args: string[]) => {
-		const key = args.join('|');
+		const key = hash(args.join());
 		if (cache.has(key)) return cache.get(key);
 		const result = await fn(...args);
 		cache.set(key, result);
 		return result;
 	};
+}
+
+function hash(str: string) {
+  let i; let l
+  let hval = 0x811C9DC5
+
+  for (i = 0, l = str.length; i < l; i++) {
+    hval ^= str.charCodeAt(i)
+    hval += (hval << 1) + (hval << 4) + (hval << 7) + (hval << 8) + (hval << 24)
+  }
+  return (`00000${(hval >>> 0).toString(36)}`).slice(-6)
 }
