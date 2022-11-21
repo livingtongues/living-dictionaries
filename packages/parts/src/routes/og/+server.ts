@@ -16,5 +16,5 @@ export const GET: RequestHandler = async ({ url }) => {
   const dictionaryName = query.get('dict') ?? '';
   const gcsPath = query.get('gcsPath') ?? '';
 
-  return componentToPng(Image, { title, description, dictionaryName, gcsPath }, +height, +width);
+  return componentToPng(Image, { title, description, dictionaryName, gcsPath, height: +height, width: +width }, +height, +width);
 };

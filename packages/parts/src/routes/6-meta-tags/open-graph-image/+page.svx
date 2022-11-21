@@ -1,21 +1,29 @@
 <script>
   import { Story } from 'kitbook';
+  import { onMount } from 'svelte';
   import OpenGraphImage from '../../og/OpenGraphImage.svelte';
+
+  let timestamp = 0;
+  onMount(() => {
+    const interval = setInterval(() => (timestamp = new Date().getTime()), 500);
+    return () => {
+      clearInterval(interval);
+    };
+  });
 </script>
 
 <Story
   knobs={{
     width: 600,
     height: 300,
-    title: 'húdié 蝴蝶',
+    title: 'húdié 蝴蝶 עִבְרִית',
     description: 'butterfly', // Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industrys standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.
     dictionaryName: 'Fuliolo',
     lat: 10,
     lng: 35,
-    showImage: true,
+    showImage: false,
     gcsPath:
       'LGuBKhg7vuv5-aJcOdnb_ucOXLSCIR1Kjxrh70xRlaIHqWo-mWqfWUcH3Xznz63QsFZmkeVmoNN0PEXzSc0Jh4g',
-    live: true,
   }}
   let:props={{
     width,
@@ -23,30 +31,28 @@
     title,
     description,
     dictionaryName,
-    live,
     showImage,
     gcsPath,
     lat,
     lng,
   }}>
-  {#if live}
-    <div class="mb-2" style="height: {height}px; width: {width}px;">
-      <OpenGraphImage
-        {width}
-        {height}
-        {title}
-        {description}
-        {dictionaryName}
-        gcsPath={showImage && gcsPath}
-        {lat}
-        {lng} />
-    </div>
-  {:else}
     <img
-      alt=""
-      src="/og?w={width}&h={height}&ti={title}&desc={description}&dict={dictionaryName}{showImage &&
-        '&gcsPath=' + gcsPath}" />
-  {/if}
+    alt=""
+    style="max-width: 100%;"
+    src="/og?w={width * 2}&h={height *
+        2}&ti={title}&desc={description}&dict={dictionaryName}{showImage &&
+          '&gcsPath=' + gcsPath}&ts={timestamp}" />
+    <div class="mt-1" style="height: {height}px; width: {width}px;">
+    <OpenGraphImage
+      {width}
+      {height}
+      {title}
+      {description}
+      {dictionaryName}
+      gcsPath={showImage && gcsPath}
+      {lat}
+      {lng} />
+  </div>
 </Story>
 
 For comparison, Stackblitz's open graph images are 1200x800 and GitHub's are 1200x600.
