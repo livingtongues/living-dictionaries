@@ -1,8 +1,7 @@
 import type { RequestHandler } from './$types';
 import { componentToPng } from './componentToPng';
-import {
-  decompressFromEncodedURIComponent as decode,
-} from 'lz-string';
+import LZString from 'lz-string';
+const { decompressFromEncodedURIComponent: decode } = LZString;
 import Image from './OpenGraphImage.svelte';
 
 const HEIGHT = 600;
