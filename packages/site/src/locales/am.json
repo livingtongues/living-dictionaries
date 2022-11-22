@@ -105,7 +105,8 @@
     "select_region": "ክልል ይምረጡ",
     "secondary_coordinates": "የሁለተኛ ደረጃ መጋጠሚያዎች",
     "map_instructions": "የሁለተኛ ደረጃ መጋጠሚያዎችን ለማከል ካርታው ላይ ጠቅ ያድርጉ.",
-    "print_access": "ተመልካቾች መዝገበ-ቃላትን እንዲያትሙ ይፍቀዱ"
+    "print_access": "ተመልካቾች መዝገበ-ቃላትን እንዲያትሙ ይፍቀዱ",
+    "primary_coordinate": "የመጀመሪያ ደረጃ አስተባባሪ"
   },
   "dictionary": {
     "latitude": "አግዳሚ መሥመር",

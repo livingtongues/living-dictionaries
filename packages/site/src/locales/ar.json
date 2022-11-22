@@ -105,7 +105,8 @@
     "select_region": "اختر المنطقة",
     "secondary_coordinates": "إحداثيات ثانوية",
     "map_instructions": "انقر على الخريطة لإضافة إحداثيات ثانوية.",
-    "print_access": "السماح للمشاهدين بطباعة القاموس"
+    "print_access": "السماح للمشاهدين بطباعة القاموس",
+    "primary_coordinate": "الإحداثيات الأولية"
   },
   "dictionary": {
     "latitude": "خط العرض",

@@ -105,7 +105,8 @@
     "select_region": "Выберите регион",
     "secondary_coordinates": "Вторичные координаты",
     "map_instructions": "Нажмите на карту, чтобы добавить вторичные координаты.",
-    "print_access": "Позвольте зрителям печатать словарь"
+    "print_access": "Позвольте зрителям печатать словарь",
+    "primary_coordinate": "Первичная координата"
   },
   "dictionary": {
     "latitude": "Широта",

@@ -105,7 +105,8 @@
     "select_region": "Zaɓi yanki",
     "secondary_coordinates": "Sakandare sakandare",
     "map_instructions": "Latsa Taswirar don Addara Sakandare.",
-    "print_access": "Bada masu kallo don buga ƙamus"
+    "print_access": "Bada masu kallo don buga ƙamus",
+    "primary_coordinate": "Na farko daidaitawa"
   },
   "dictionary": {
     "latitude": "Latitude",
