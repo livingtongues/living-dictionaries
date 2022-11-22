@@ -1,23 +1,49 @@
-import { _ } from 'svelte-i18n';
-import { get } from 'svelte/store';
+import type { IGloss } from '@living-dictionaries/types';
 
-export function printGlosses(obj, shorten = false) {
-  const $_ = get(_);
-  Object.keys(obj).forEach((key) => !obj[key] && delete obj[key]);
-  const keys = Object.keys(obj).sort();
-  if (keys.length > 1) {
-    return keys.map((bcp) => {
-      if (obj[bcp]) {
-        if (shorten) {
-          return `${obj[bcp]}`;
-        } else {
-          return `${$_('gl.' + bcp)}: ${obj[bcp]}`;
-        }
-      }
+export function printGlosses(glosses: IGloss, t: (id: string) => string, shorten = false) {
+  return Object.keys(glosses)
+    .filter(bcp => glosses[bcp])
+    .sort() // sort by dictionary's gloss language order in the future
+    .map((bcp) => {
+      const gloss = glosses[bcp]
+      if (shorten) return gloss;
+      return `${t('gl.' + bcp)}: ${gloss}`;
     });
-  } else {
-    return [obj[keys[0]]];
-  }
+}
+
+if (import.meta.vitest) {
+  const t = (id) => id === 'gl.en' ? 'English' : 'Spanish';
+  test('printGlosses', () => {
+    const gloss = {
+      en: 'apple',
+      es: 'arbol',
+      scientific: '<i>Neolamarckia cadamba</i>',
+      empty: '',
+      null: null,
+    }
+    expect(printGlosses(gloss, t, true)).toMatchInlineSnapshot(`
+      [
+        "apple",
+        "arbol",
+        "<i>Neolamarckia cadamba</i>",
+      ]
+    `);
+
+    expect(printGlosses(gloss, t)).toMatchInlineSnapshot(`
+    [
+      "English: apple",
+      "Spanish: arbol",
+      "Spanish: <i>Neolamarckia cadamba</i>",
+    ]
+    `);
+
+    expect(printGlosses(gloss, t, true)
+      .join(', ')
+      .replace(/<\/?i>/g, ''))
+      .toMatchInlineSnapshot('"apple, arbol, Neolamarckia cadamba"');
+
+    expect(printGlosses({}, t)).toMatchInlineSnapshot('[]');
+  })
 }
 
 export function showEntryGlossLanguages(

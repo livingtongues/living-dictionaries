@@ -4,6 +4,7 @@
   import { setOnline } from 'sveltefirets';
   import Button from 'svelte-pieces/ui/Button.svelte';
   import type { IAbout } from '@living-dictionaries/types';
+  import sanitize from 'xss';
 
   import type { PageData } from './$types';
   export let data: PageData;
@@ -55,7 +56,7 @@
     {/if}
     <div class="tw-prose prose-lg max-w-screen-md {editing && 'hidden md:block mt-14 ml-3'}">
       {#if about}
-        {@html about}
+        {@html sanitize(about)}
       {:else}
         <i>{$_('dictionary.no_info_yet', { default: 'No information yet' })}</i>
       {/if}
