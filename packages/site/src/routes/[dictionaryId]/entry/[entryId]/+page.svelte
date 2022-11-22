@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { _ } from 'svelte-i18n';
+  import { t } from 'svelte-i18n';
   import { Doc } from 'sveltefirets';
   import {
     dictionary,
@@ -36,7 +36,7 @@ bg-white pt-1 -mt-1">
       form="simple"
       href="/{$dictionary.id}/entries/list{$algoliaQueryParams}">
       <i class="fas fa-arrow-left rtl-x-flip" />
-      {$_('misc.back', { default: 'Back' })}
+      {$t('misc.back', { default: 'Back' })}
     </Button>
 
     <div>
@@ -51,13 +51,13 @@ bg-white pt-1 -mt-1">
           form="simple"
           onclick={() => deleteEntry(entry, $dictionary.id, $algoliaQueryParams)}>
           <span class="hidden md:inline">
-            {$_('misc.delete', { default: 'Delete' })}
+            {$t('misc.delete', { default: 'Delete' })}
           </span>
           <i class="fas fa-trash ml-1" />
         </Button>
       {/if}
       <Button form="filled" onclick={() => share($dictionary.id, entry)}>
-        <span>{$_('misc.share', { default: 'Share' })}</span>
+        <span>{$t('misc.share', { default: 'Share' })}</span>
         <i class="fas fa-share-square ml-1" />
       </Button>
     </div>
@@ -73,7 +73,9 @@ bg-white pt-1 -mt-1">
 
   <SeoMetaTags
     title={entry.lx}
-    description={printGlosses(entry.gl).join(', ')}
+    description={printGlosses(entry.gl, $t, true)
+      .join(', ')
+      .replace(/<\/?i>/g, '')}
     dictionaryName={$dictionary.name}
     lat={$dictionary.coordinates?.latitude}
     lng={$dictionary.coordinates?.longitude}

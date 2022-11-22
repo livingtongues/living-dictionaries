@@ -12,14 +12,13 @@
   import ShowHide from 'svelte-pieces/functions/ShowHide.svelte';
   import { showEntryGlossLanguages } from '$lib/helpers/glosses';
   import { dictionary } from '$lib/stores';
+  import sanitize from 'xss';
+
   export let entry: IEntry,
     canEdit = false,
     videoAccess = false;
 
-  $: glosses =
-    $dictionary.id === 'jewish-neo-aramaic'
-      ? printGlosses(entry.gl, true).join(', ')
-      : printGlosses(entry.gl).join(', ');
+  $: glosses = printGlosses(entry.gl, $t, $dictionary.id === 'jewish-neo-aramaic').join(', ')
 </script>
 
 <div
@@ -61,7 +60,7 @@
           {/if}
         {/if}
         {#if glosses.indexOf('<i>') > -1}
-          {@html glosses}
+          {@html sanitize(glosses)}
         {:else}
           {glosses}
         {/if}

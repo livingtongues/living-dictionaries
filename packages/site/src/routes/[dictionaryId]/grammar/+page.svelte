@@ -3,6 +3,7 @@
   import { dictionary, isManager } from '$lib/stores';
   import { setOnline } from 'sveltefirets';
   import type { IGrammar } from '@living-dictionaries/types';
+  import sanitize from 'xss';
 
   import type { PageData } from './$types';
   export let data: PageData;
@@ -55,7 +56,7 @@
     {/if}
     <div class="tw-prose prose-lg max-w-screen-md {editing && 'hidden md:block mt-14 ml-3'}">
       {#if grammar}
-        {@html grammar}
+        {@html sanitize(grammar)}
       {:else}
         <i>{$_('dictionary.no_info_yet', { default: 'No information yet' })}</i>
       {/if}
