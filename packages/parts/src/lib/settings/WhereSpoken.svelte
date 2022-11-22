@@ -21,9 +21,9 @@
     updatePoints: IPoint[];
     updateRegions: IRegion[];
   }>();
-  
+
   export let dictionary: Partial<IDictionary>;
-    $: hasCoordinates = dictionary.coordinates?.latitude;
+  $: hasCoordinates = dictionary.coordinates?.latitude;
 
   function addCoordinates({ detail }: { detail: { lng: number; lat: number } }) {
     if (hasCoordinates) {
@@ -44,7 +44,9 @@
   {t ? $t('create.where_spoken') : 'Where is this language spoken?'}*
 </div>
 
-<div class="text-xs text-gray-600 mt-1">{t ? $t('create.map_instructions') : 'Click on the map to add secondary coordinates.'}</div>
+<div class="text-xs text-gray-600 mb-2">
+  {t ? $t('create.map_instructions') : 'Click on the map to add secondary coordinates.'}
+</div>
 {#if hasCoordinates}
   <div class="h-240px">
     <Map
@@ -55,11 +57,17 @@
       {#if mapClickCoordinates}
         <CoordinatesModal
           {t}
-          {dictionary}
           lng={+mapClickCoordinates.lng.toFixed(4)}
           lat={+mapClickCoordinates.lat.toFixed(4)}
           on:update={addCoordinates}
-          on:close={() => (mapClickCoordinates = null)} />
+          on:close={() => (mapClickCoordinates = null)}>
+          <Marker
+            lng={dictionary.coordinates.longitude}
+            lat={dictionary.coordinates.latitude}
+            color="blue">
+            <Popup offset={30} open={true}>Primary coordinate</Popup>
+          </Marker>
+        </CoordinatesModal>
       {/if}
       <Marker
         lat={dictionary.coordinates.latitude}
@@ -96,7 +104,6 @@
                 {#if show}
                   <CoordinatesModal
                     {t}
-                    {dictionary}
                     lng={point.coordinates.longitude}
                     lat={point.coordinates.latitude}
                     on:update={({ detail }) => {
@@ -111,7 +118,14 @@
                       points.splice(index, 1);
                       dispatch('updatePoints', points);
                     }}
-                    on:close={toggle} />
+                    on:close={toggle}>
+                    <Marker
+                      lng={dictionary.coordinates.longitude}
+                      lat={dictionary.coordinates.latitude}
+                      color="blue">
+                      <Popup offset={30}>Primary coordinate</Popup>
+                    </Marker>
+                  </CoordinatesModal>
                 {/if}
               </ShowHide>
             </Popup>
@@ -129,7 +143,6 @@
               {#if show}
                 <RegionModal
                   {t}
-                  {dictionary}
                   {region}
                   on:update={({ detail }) => {
                     const regions = dictionary.regions;
@@ -141,7 +154,14 @@
                     regions.splice(index, 1);
                     dispatch('updateRegions', regions);
                   }}
-                  on:close={toggle} />
+                  on:close={toggle}>
+                  <Marker
+                    lng={dictionary.coordinates.longitude}
+                    lat={dictionary.coordinates.latitude}
+                    color="blue">
+                    <Popup offset={30}>Primary coordinate</Popup>
+                  </Marker>
+                </RegionModal>
               {/if}
             </ShowHide>
           </Region>
@@ -164,7 +184,16 @@
       {/if}
     </Button>
     {#if show}
-      <CoordinatesModal dictionary={hasCoordinates ? dictionary : null} {t} lng={null} lat={null} on:update={addCoordinates} on:close={toggle} />
+      <CoordinatesModal {t} lng={null} lat={null} on:update={addCoordinates} on:close={toggle}>
+        {#if hasCoordinates}
+          <Marker
+            lng={dictionary.coordinates.longitude}
+            lat={dictionary.coordinates.latitude}
+            color="blue">
+            <Popup offset={30} open>Primary coordinate</Popup>
+          </Marker>
+        {/if}
+      </CoordinatesModal>
     {/if}
   </ShowHide>
 
@@ -177,13 +206,19 @@
       {#if show}
         <RegionModal
           {t}
-          {dictionary}
           region={null}
           on:update={({ detail }) => {
             const regions = (dictionary.regions && [...dictionary.regions, detail]) || [detail];
             dispatch('updateRegions', regions);
           }}
-          on:close={toggle} />
+          on:close={toggle}>
+          <Marker
+            lng={dictionary.coordinates.longitude}
+            lat={dictionary.coordinates.latitude}
+            color="blue">
+            <Popup offset={30} open>Primary coordinate</Popup>
+          </Marker>
+        </RegionModal>
       {/if}
     </ShowHide>
   {/if}
