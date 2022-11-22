@@ -9,6 +9,7 @@
   import Geocoder from './mapbox/geocoder/Geocoder.svelte';
   import Marker from './mapbox/map/Marker.svelte';
   import ToggleStyle from './mapbox/controls/ToggleStyle.svelte';
+  import NavigationControl from './mapbox/controls/NavigationControl.svelte';
   import type { IRegion } from '@living-dictionaries/types';
   import GeoJSONSource from './mapbox/sources/GeoJSONSource.svelte';
   import { polygonFeatureCoordinates } from './utils/polygonFromCoordinates';
@@ -78,6 +79,8 @@
           lat={centerLat}
           {zoom}
           on:click={({ detail: { lng, lat } }) => add({ longitude: lng, latitude: lat })}>
+          <slot />
+          <NavigationControl />
           <Geocoder
             options={{ marker: false }}
             placeholder={t ? $t('about.search') : 'Search'}
