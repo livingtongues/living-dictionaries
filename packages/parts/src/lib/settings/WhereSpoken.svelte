@@ -170,6 +170,7 @@
     </Map>
   </div>
 {/if}
+
 <div class="mt-1">
   <ShowHide let:show let:toggle>
     <Button
