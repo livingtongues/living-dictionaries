@@ -9,6 +9,7 @@
   import Geocoder from './mapbox/geocoder/Geocoder.svelte';
   import Marker from './mapbox/map/Marker.svelte';
   import ToggleStyle from './mapbox/controls/ToggleStyle.svelte';
+  import NavigationControl from './mapbox/controls/NavigationControl.svelte';
   import type { IRegion } from '@living-dictionaries/types';
   import GeoJSONSource from './mapbox/sources/GeoJSONSource.svelte';
   import { polygonFeatureCoordinates } from './utils/polygonFromCoordinates';
@@ -16,13 +17,9 @@
   import { randomColor } from './utils/randomColor';
   import ReactiveSet from 'svelte-pieces/functions/ReactiveSet.svelte';
   import Popup from './mapbox/map/Popup.svelte';
-  import DisplayMainMarker from './DisplayMainMarker.svelte';
-  import type { IDictionary } from '@living-dictionaries/types';
 
   import { points } from '@turf/helpers';
   import center from '@turf/center';
-
-  export let dictionary: IDictionary | Partial<IDictionary> = undefined;
 
   export let region: IRegion;
   let zoom = region ? 4 : 2;
@@ -82,7 +79,8 @@
           lat={centerLat}
           {zoom}
           on:click={({ detail: { lng, lat } }) => add({ longitude: lng, latitude: lat })}>
-          {#if dictionary}<DisplayMainMarker {dictionary} />{/if}
+          <slot />
+          <NavigationControl />
           <Geocoder
             options={{ marker: false }}
             placeholder={t ? $t('about.search') : 'Search'}
