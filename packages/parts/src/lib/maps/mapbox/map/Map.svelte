@@ -7,6 +7,7 @@
   import type { LngLatLike, MapboxOptions, Map, LngLat, ErrorEvent, EventData } from 'mapbox-gl';
   import { bindEvents } from '../event-bindings';
   import { getTimeZoneLongitude } from '../../utils/getTimeZoneLongitude';
+  import { ADDED_FEATURE_ID_PREFIX } from '../../utils/randomId';
   import { PUBLIC_mapboxAccessToken } from '$env/static/public';
 
   export let map: Map = null;
@@ -45,7 +46,14 @@
   const handlers: Record<string, any> = {
     dragend: () => dispatch('dragend', map.getCenter()),
     moveend: () => dispatch('moveend', map.getCenter()),
-    click: ({ lngLat }) => dispatch('click', lngLat),
+    click: (e) => {
+      if (
+        map
+          .queryRenderedFeatures(e.point)
+          .filter((f) => f.source.startsWith(ADDED_FEATURE_ID_PREFIX)).length === 0
+      )
+        dispatch('click', e.lngLat);
+    },
     zoomend: () => dispatch('zoomend', map.getZoom()),
     error: (e: ErrorEvent & EventData) => dispatch('error', e),
     load: () => dispatch('ready') && (ready = true),
