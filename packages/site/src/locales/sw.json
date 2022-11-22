@@ -105,7 +105,8 @@
     "select_region": "Chagua mkoa",
     "secondary_coordinates": "Kuratibu za sekondari",
     "map_instructions": "Bonyeza kwenye ramani ili kuongeza kuratibu za sekondari.",
-    "print_access": "Ruhusu watazamaji kuchapisha kamusi"
+    "print_access": "Ruhusu watazamaji kuchapisha kamusi",
+    "primary_coordinate": "Kuratibu za msingi"
   },
   "dictionary": {
     "latitude": "Latitudo",

@@ -105,7 +105,8 @@
     "select_region": "Seleccione región",
     "secondary_coordinates": "Coordenadas secundarias",
     "map_instructions": "Haga clic en el mapa para agregar coordenadas secundarias.",
-    "print_access": "Permitir a los espectadores imprimir el diccionario"
+    "print_access": "Permitir a los espectadores imprimir el diccionario",
+    "primary_coordinate": "Coordenada principal"
   },
   "dictionary": {
     "latitude": "Latitud",

@@ -105,7 +105,8 @@
     "select_region": "Select Region",
     "secondary_coordinates": "Secondary Coordinates",
     "map_instructions": "Click on the map to add secondary coordinates.",
-    "print_access": "Allow Viewers to Print Dictionary"
+    "print_access": "Allow Viewers to Print Dictionary",
+    "primary_coordinate": "Primary coordinate"
   },
   "dictionary": {
     "latitude": "Latitude",

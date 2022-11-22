@@ -65,7 +65,7 @@
             lng={dictionary.coordinates.longitude}
             lat={dictionary.coordinates.latitude}
             color="blue">
-            <Popup offset={30} open={true}>Primary coordinate</Popup>
+            <Popup offset={30} open>{t ? $t('create.primary_coordinate') : 'Primary coordinate'}</Popup>
           </Marker>
         </CoordinatesModal>
       {/if}
@@ -191,7 +191,7 @@
             lng={dictionary.coordinates.longitude}
             lat={dictionary.coordinates.latitude}
             color="blue">
-            <Popup offset={30} open>Primary coordinate</Popup>
+            <Popup offset={30} open>{t ? $t('create.map_instructions') : 'Click on the map to add secondary coordinates.'}</Popup>
           </Marker>
         {/if}
       </CoordinatesModal>
@@ -217,7 +217,7 @@
             lng={dictionary.coordinates.longitude}
             lat={dictionary.coordinates.latitude}
             color="blue">
-            <Popup offset={30} open>Primary coordinate</Popup>
+            <Popup offset={30} open>{t ? $t('create.map_instructions') : 'Click on the map to add secondary coordinates.'}</Popup>
           </Marker>
         </RegionModal>
       {/if}

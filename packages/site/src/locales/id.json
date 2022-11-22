@@ -105,7 +105,8 @@
     "select_region": "Pilih wilayah",
     "secondary_coordinates": "Koordinat sekunder",
     "map_instructions": "Klik pada peta untuk menambahkan koordinat sekunder.",
-    "print_access": "Izinkan pemirsa mencetak kamus"
+    "print_access": "Izinkan pemirsa mencetak kamus",
+    "primary_coordinate": "Koordinat primer"
   },
   "dictionary": {
     "latitude": "Garis Lintang",

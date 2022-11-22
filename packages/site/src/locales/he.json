@@ -105,7 +105,8 @@
     "select_region": "בחר אזור",
     "secondary_coordinates": "קואורדינטות משניות",
     "map_instructions": "לחץ על המפה כדי להוסיף קואורדינטות משניות.",
-    "print_access": "אפשר לצופים להדפיס מילון"
+    "print_access": "אפשר לצופים להדפיס מילון",
+    "primary_coordinate": "קואורדינטות ראשוניות"
   },
   "dictionary": {
     "latitude": "קו רוחב",

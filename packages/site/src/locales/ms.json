@@ -105,7 +105,8 @@
     "select_region": "Pilih Wilayah",
     "secondary_coordinates": "Koordinat sekunder",
     "map_instructions": "Klik pada peta untuk menambah koordinat sekunder.",
-    "print_access": "Benarkan penonton mencetak kamus"
+    "print_access": "Benarkan penonton mencetak kamus",
+    "primary_coordinate": "Koordinat utama"
   },
   "dictionary": {
     "latitude": "Latitud",

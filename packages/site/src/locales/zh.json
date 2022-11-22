@@ -105,7 +105,8 @@
     "select_region": "选择区域",
     "secondary_coordinates": "次要坐标",
     "map_instructions": "单击地图以添加辅助坐标。",
-    "print_access": "允许观众打印词典"
+    "print_access": "允许观众打印词典",
+    "primary_coordinate": "主坐标"
   },
   "dictionary": {
     "latitude": "纬度",
