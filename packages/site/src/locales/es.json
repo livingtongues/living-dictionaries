@@ -103,7 +103,10 @@
     "con_lang_description": "¿Es este diccionario de un idioma artificial (un idioma inventado por humanos en los últimos años, o para un libro o una película)? En caso afirmativo, describa brevemente.",
     "uncertainty": "No sé",
     "select_region": "Seleccione región",
-    "secondary_coordinates": "Coordenadas secundarias"
+    "secondary_coordinates": "Coordenadas secundarias",
+    "map_instructions": "Haga clic en el mapa para agregar coordenadas secundarias.",
+    "print_access": "Permitir a los espectadores imprimir el diccionario",
+    "primary_coordinate": "Coordenada principal"
   },
   "dictionary": {
     "latitude": "Latitud",
@@ -220,7 +223,8 @@
     "dict_name": "El nombre del diccionario",
     "public_private_meaning": "\"Público\" significa que cualquiera puede ver su diccionario, lo que requiere el consentimiento de la comunidad. Los diccionarios privados son visibles sólo para usted y sus colaboradores.",
     "optional_data_fields": "Campos de datos opcionales",
-    "unable_to_delete": "Nota: no podrá eliminar las glosas de estas lenguas más tarde"
+    "unable_to_delete": "Nota: no podrá eliminar las glosas de estas lenguas más tarde",
+    "print_access_meaning": "Esto le da al público la capacidad de descargar e imprimir este diccionario vivo como un .pdf"
   },
   "speakers": {
     "add_new_speaker": "Agregar un nuevo hablante",

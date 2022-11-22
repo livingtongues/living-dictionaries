@@ -103,7 +103,10 @@
     "con_lang_description": "Adakah kamus ini untuk bahasa yang dibina (bahasa yang dicipta oleh manusia dalam beberapa tahun kebelakangan, untuk buku atau filem)? Jika ya, sila terangkan secara ringkas.",
     "uncertainty": "Saya tidak tahu",
     "select_region": "Pilih Wilayah",
-    "secondary_coordinates": "Koordinat sekunder"
+    "secondary_coordinates": "Koordinat sekunder",
+    "map_instructions": "Klik pada peta untuk menambah koordinat sekunder.",
+    "print_access": "Benarkan penonton mencetak kamus",
+    "primary_coordinate": "Koordinat utama"
   },
   "dictionary": {
     "latitude": "Latitud",
@@ -220,7 +223,8 @@
     "dict_name": "Nama Kamus",
     "public_private_meaning": "Umum bermakna sesiapa sahaja boleh melihat kamus anda. Pilihan ini memerlukan persetujuan masyarakat. Kamus peribadi hanya dapat dilihat oleh anda dan rakan usaha sama anda.",
     "optional_data_fields": "Bidang Data Tidak Wajib",
-    "unable_to_delete": "Nota: Anda tidak akan dapat memadam bahasa glossing ini kemudian."
+    "unable_to_delete": "Nota: Anda tidak akan dapat memadam bahasa glossing ini kemudian.",
+    "print_access_meaning": "Ini memberi orang ramai keupayaan untuk memuat turun dan mencetak kamus hidup ini sebagai .pdf"
   },
   "speakers": {
     "add_new_speaker": "Tambah Penutur Baharu",

@@ -103,7 +103,10 @@
     "con_lang_description": "Apakah kamus ini untuk bahasa yang dibangun (bahasa yang diciptakan oleh manusia dalam beberapa tahun terakhir, untuk buku atau film)? Jika ya, jelaskan secara singkat.",
     "uncertainty": "aku tidak tahu",
     "select_region": "Pilih wilayah",
-    "secondary_coordinates": "Koordinat sekunder"
+    "secondary_coordinates": "Koordinat sekunder",
+    "map_instructions": "Klik pada peta untuk menambahkan koordinat sekunder.",
+    "print_access": "Izinkan pemirsa mencetak kamus",
+    "primary_coordinate": "Koordinat primer"
   },
   "dictionary": {
     "latitude": "Garis Lintang",
@@ -220,7 +223,8 @@
     "dict_name": "Nama Kamus",
     "public_private_meaning": "Kamus yang bersifat umum berarti setiap orang dapat melihat kamus anda yang kemudian memerlukan surat persetujuan komunitas bahasa. Kamus yang bersifat pribadi hanya dapat dilihat oleh anda dan kolaborator anda.",
     "optional_data_fields": "Opsional Bidang Data",
-    "unable_to_delete": "CATATAN: Anda tidak akan dapat menghapus bahasa -bahasa yang memoles ini nanti."
+    "unable_to_delete": "CATATAN: Anda tidak akan dapat menghapus bahasa -bahasa yang memoles ini nanti.",
+    "print_access_meaning": "Ini memberi publik kemampuan untuk mengunduh dan mencetak kamus hidup ini sebagai .pdf"
   },
   "speakers": {
     "add_new_speaker": "Bidang Data Bersifat Pilihan ",
