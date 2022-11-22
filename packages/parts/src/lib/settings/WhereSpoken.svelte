@@ -185,7 +185,7 @@
       {/if}
     </Button>
     {#if show}
-      <CoordinatesModal {t} lng={null} lat={null} on:update={addCoordinates} on:close={toggle}>
+      <CoordinatesModal {t} lng={dictionary?.coordinates?.longitude} lat={dictionary?.coordinates?.latitude} on:update={addCoordinates} on:close={toggle}>
         {#if hasCoordinates}
           <Marker
             lng={dictionary.coordinates.longitude}

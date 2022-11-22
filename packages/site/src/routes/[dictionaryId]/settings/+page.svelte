@@ -112,16 +112,6 @@
       display="Glottocode" />
     <div class="mb-5" />
 
-    <EditString
-      value={dictionary.location}
-      id="location"
-      save={async (location) =>
-        await updateOnline(`dictionaries/${$dictionaryStore.id}`, {
-          location,
-        })}
-      display={$t('dictionary.location', { default: 'Location' })} />
-    <div class="mb-5" />
-
     <EditableGlossesField
       {t}
       minimum={1}
@@ -184,6 +174,17 @@
       on:removeCoordinates={() => update(`dictionaries/${dictionary.id}`, { coordinates: null })}
       on:updatePoints={({ detail }) => updatePoints(detail, dictionary.id)}
       on:updateRegions={({ detail }) => updateRegions(detail, dictionary.id)} />
+    <div class="mb-5" />
+
+    <EditString
+      value={dictionary.location}
+      maxlength={100}
+      id="location"
+      save={async (location) =>
+        await updateOnline(`dictionaries/${$dictionaryStore.id}`, {
+          location,
+        })}
+      display={$t('dictionary.location', { default: 'Location' })} />
     <div class="mb-5" />
 
     <PrintAccessCheckbox
