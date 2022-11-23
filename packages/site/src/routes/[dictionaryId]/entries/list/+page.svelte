@@ -19,11 +19,8 @@
   import { dictionary, canEdit, admin } from '$lib/stores';
   import ListEntry from '../ListEntry.svelte';
   import { Doc } from 'sveltefirets';
+  import SeoMetaTags from '$lib/components/SeoMetaTags.svelte';
 </script>
-
-<svelte:head>
-  <title>{$dictionary.name}</title>
-</svelte:head>
 
 <Hits {search} let:entries>
   {#if $canEdit}
@@ -42,3 +39,5 @@
   {/if}
 </Hits>
 <Pagination {search} />
+
+<SeoMetaTags title="Entries" dictionaryName={$dictionary.name} />

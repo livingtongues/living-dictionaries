@@ -1,13 +1,8 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
   import Header from '$lib/components/shell/Header.svelte';
+  import SeoMetaTags from '$lib/components/SeoMetaTags.svelte';
 </script>
-
-<svelte:head>
-  <title>
-    {$_('header.tutorials', { default: 'Tutorials' })}
-  </title>
-</svelte:head>
 
 <Header>
   {$_('header.tutorials', { default: 'Tutorials' })}
@@ -23,7 +18,7 @@
     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
     allowfullscreen />
 
-    <iframe
+  <iframe
     class="video mb-3"
     src="https://www.youtube.com/embed/4PRGtToFhgo"
     title="Tutorial 2 - How to Add and Edit Entries in a Living Dictionary"
@@ -50,6 +45,8 @@
     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
     allowfullscreen />
 </div>
+
+<SeoMetaTags title={$_('header.tutorials', { default: 'Tutorials' })} />
 
 <style>
   .video {

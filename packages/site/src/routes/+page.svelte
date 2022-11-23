@@ -15,6 +15,7 @@
   import DictionaryPoints from '$lib/components/home/DictionaryPoints.svelte';
   import Search from '$lib/components/home/Search.svelte';
   import Header from '$lib/components/shell/Header.svelte';
+  import SeoMetaTags from '$lib/components/SeoMetaTags.svelte';
 
   import type { PageData } from './$types';
   export let data: PageData;
@@ -42,10 +43,6 @@
 
   let mapComponent: Map;
 </script>
-
-<svelte:head>
-  <title>{$_('misc.LD', { default: 'Living Dictionaries' })}</title>
-</svelte:head>
 
 <Header />
 
@@ -111,3 +108,6 @@
     </Map>
   </div>
 </main>
+
+<SeoMetaTags
+  title={$_('misc.LD', { default: 'Living Dictionaries' })} />

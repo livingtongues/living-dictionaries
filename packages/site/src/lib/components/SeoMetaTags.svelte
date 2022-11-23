@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { t } from 'svelte-i18n';
   import { page } from '$app/stores';
   import LZString from 'lz-string';
   const { compressToEncodedURIComponent: encode } = LZString;
@@ -7,7 +8,7 @@
   export let title = SITE_NAME;
   export let dictionaryName: string = undefined;
   $: textTitle = dictionaryName
-    ? `${title} | ${dictionaryName} Living Dictionary` // is a dictionary or entry page
+    ? `${title} | ${dictionaryName} ${$t('misc.LD_singular', { default: 'Living Dictionary' })}` // is a dictionary or entry page
     : title === SITE_NAME // has no title
     ? title
     : `${title} | ${SITE_NAME}`; // is a miscellaneous non-dictionary related page
@@ -42,7 +43,7 @@
       gcsPath,
     })
   );
-  $: imageUrl = dictionaryName ? `${IMAGE_API}?props=${props}&v=3` : DEFAULT_IMAGE;
+  $: imageUrl = gcsPath ? `${IMAGE_API}?props=${props}&v=3` : DEFAULT_IMAGE;
   $: imageWidth = dictionaryName ? width.toString() : '987';
   $: imageHeight = dictionaryName ? width.toString() : '299';
 </script>
