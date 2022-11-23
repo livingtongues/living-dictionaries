@@ -42,7 +42,7 @@
       gcsPath,
     })
   );
-  $: imageUrl = dictionaryName ? `${IMAGE_API}?props=${props}&v=2` : DEFAULT_IMAGE;
+  $: imageUrl = dictionaryName ? `${IMAGE_API}?props=${props}&v=3` : DEFAULT_IMAGE;
   $: imageWidth = dictionaryName ? width.toString() : '987';
   $: imageHeight = dictionaryName ? width.toString() : '299';
 </script>

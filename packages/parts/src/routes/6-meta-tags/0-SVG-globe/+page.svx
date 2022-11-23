@@ -5,9 +5,9 @@
 
 <Story
   name="globe"
-  knobs={{ placeLatitude: '-90-90;10', placeLongitude: '-180-180;0', size: '100-600;400' }}
-  let:props={{ placeLatitude, placeLongitude, size }}>
-  <SvgGlobe placeLatitude={+placeLatitude} placeLongitude={+placeLongitude} size={+size} />
+  knobs={{ placeLatitude: '-90-90;10', placeLongitude: '-180-180;0', size: '100-600;400', showGraticule: false }}
+  let:props={{ placeLatitude, placeLongitude, size, showGraticule }}>
+  <SvgGlobe placeLatitude={+placeLatitude} placeLongitude={+placeLongitude} size={+size} {showGraticule} />
 </Story>
 
 <!-- prettier-ignore -->

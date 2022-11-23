@@ -5,7 +5,7 @@
   import LZString from 'lz-string';
   const { compressToEncodedURIComponent: encode } = LZString;
 
-  let version = 2; // after updating svelte-kit version can set this automatically
+  let version = 4; // after updating svelte-kit version can set this automatically
   onMount(() => {
     if (dev) {
       const interval = setInterval(() => (version = new Date().getTime()), 5000);
@@ -103,7 +103,12 @@
 
 For comparison, Stackblitz's open graph images are 1200x800 and GitHub's are 1200x600.
 
-<!-- prettier-ignore -->Docs & Prior Art: - [Create dynamic social card images with Sveltecomponents](https://geoffrich.net/posts/svelte-social-image/) - https://vercel.com/docs/concepts/functions/edge-functions/og-image-generation - https://og-playground.vercel.app/- https://github.com/etherCorps/sveltekit-og
+<!-- prettier-ignore -->
+Docs & Prior Art: 
+- [Create dynamic social card images with Sveltecomponents](https://geoffrich.net/posts/svelte-social-image/) 
+- https://vercel.com/docs/concepts/functions/edge-functions/og-image-generation 
+- https://og-playground.vercel.app/
+- https://github.com/etherCorps/sveltekit-og
 
 <style>
   img {
