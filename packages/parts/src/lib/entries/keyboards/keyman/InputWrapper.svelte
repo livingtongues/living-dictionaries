@@ -15,6 +15,7 @@
   export let canChooseKeyboard = false;
   export let target: string | Element = undefined;
   export let show = false;
+  export let position: 'top' | 'bottom' = 'top';
 
   const { getKeyman } = getContext<keymanKeyContext>(keymanKey);
   const kmw = getKeyman();
@@ -27,9 +28,19 @@
       inputEl = wrapperEl.querySelector(target);
       if (!inputEl) {
         // wait for CKEditor to init so target element can be found
-        await new Promise((r) => setTimeout(r, 3000));
-        // @ts-ignore
-        inputEl = wrapperEl.querySelector(target);
+        await new Promise((resolve) => {
+          let attempts = 0;
+          const interval = setInterval(() => {
+            attempts++;
+            // @ts-ignore
+            inputEl = wrapperEl.querySelector(target);
+            console.log(attempts);
+            if (inputEl || attempts > 9) {
+              resolve;
+              clearInterval(interval);
+            }
+          }, 500);
+        });
       }
     }
 
@@ -74,12 +85,13 @@
 </script>
 
 <ShowHide let:show={showKeyboardOptions} let:toggle>
-  <div class="flex w-full relative" class:sompeng={currentBcp === 'srb-sora'}>
-    <div bind:this={wrapperEl} class="w-full">
-      <slot />
-    </div>
+  <div bind:this={wrapperEl} class="w-full relative" class:sompeng={currentBcp === 'srb-sora'}>
+    <slot />
 
-    <div class="absolute z-1 right-0.5 top-0.75 flex">
+    <div
+      class:top-0.75={position === 'top'}
+      class:bottom-0.75={position === 'bottom'}
+      class="absolute right-0.5 z-1 flex">
       {#if show && canChooseKeyboard}
         <button
           class="hover:text-black p-2 flex items-center bg-white rounded"
