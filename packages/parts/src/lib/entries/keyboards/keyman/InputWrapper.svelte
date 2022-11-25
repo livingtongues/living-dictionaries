@@ -17,10 +17,10 @@
   const { getKeyman } = getContext<keymanKeyContext>(keymanKey);
   const kmw = getKeyman();
   let wrapperEl: HTMLDivElement;
-  let inputEl: HTMLInputElement;
+  let inputEl: HTMLInputElement | HTMLTextAreaElement;
 
   onMount(() => {
-    inputEl = wrapperEl.firstElementChild as HTMLInputElement;
+    inputEl = wrapperEl.firstElementChild as HTMLInputElement | HTMLTextAreaElement;
     const root = document.documentElement;
     if (fixed) {
       root.style.setProperty('--kmw-osk-pos', 'fixed');
@@ -65,28 +65,30 @@
       </slot>
     </div>
 
-    {#if glossLanguage?.showKeyboard}
-      <button
-        class="absolute z-1 right-0.5 top-0.5 bottom-0.5 hover:text-black px-2 flex items-center bg-white rounded"
-        type="button"
-        on:click={() => (show = !show)}
-        title={show ? 'Keyboard active' : 'Keyboard inactive'}>
-        {#if show}
-          <span class="i-mdi-keyboard" />
-        {:else}
-          <span class="i-mdi-keyboard-off" />
-        {/if}
-      </button>
-    {/if}
-    {#if show && canChooseKeyboard}
-      <button
-        class="absolute z-1 right-8 top-0.5 bottom-0.5 hover:text-black px-2 flex items-center bg-white rounded"
-        type="button"
-        on:click={toggle}
-        title="Select Keyboard">
-        <span class="i-ph-globe" />
-      </button>
-    {/if}
+    <div class="absolute z-1 right-0.5 top-0.75 flex">
+      {#if show && canChooseKeyboard}
+        <button
+          class="hover:text-black p-2 flex items-center bg-white rounded"
+          type="button"
+          on:click={toggle}
+          title="Select Keyboard">
+          <span class="i-ph-globe" />
+        </button>
+      {/if}
+      {#if glossLanguage?.showKeyboard}
+        <button
+          class="hover:text-black p-2 flex items-center bg-white rounded"
+          type="button"
+          on:click={() => (show = !show)}
+          title={show ? 'Keyboard active' : 'Keyboard inactive'}>
+          {#if show}
+            <span class="i-mdi-keyboard" />
+          {:else}
+            <span class="i-mdi-keyboard-off-outline" />
+          {/if}
+        </button>
+      {/if}
+    </div>
   </div>
 
   {#if showKeyboardOptions}

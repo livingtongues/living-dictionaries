@@ -1,48 +1,62 @@
 <script lang="ts">
-  import { glossingLanguages } from '$lib';
-
   import InputWrapper from '$lib/entries/keyboards/keyman/InputWrapper.svelte';
   import Keyman from '$lib/entries/keyboards/keyman/Keyman.svelte';
-  import Textarea from '$lib/entries/keyboards/keyman/Textarea.svelte';
-  import { additionalKeyboards } from '$lib/glosses/glossing-languages';
   import { Story } from 'kitbook';
   import Button from 'svelte-pieces/ui/Button.svelte';
+  import Store from 'svelte-pieces/functions/Store.svelte';
+  import ClassicCustomized from '$lib/editor/ClassicCustomized.svelte';
 
   let value = '';
-  let paragraph = '';
+  let html = '';
 </script>
 
 <!-- prettier-ignore -->
 # Keyman Keyboard
 
-<Story name="input" knobs={{ bcp: 'am', show: false, canChooseKeyboard: true }} let:props={{ bcp, show, canChooseKeyboard }} let:set>
+Keyman will attach to the first child element it finds (it
+will only work if that element is an input or textarea).
+
+<Story
+  name="input"
+  knobs={{ bcp: 'am', show: false, canChooseKeyboard: true }}
+  let:props={{ bcp, show, canChooseKeyboard }}
+  let:set>
   <div>Value: {value}</div>
   <Keyman>
-    <InputWrapper {bcp} {show} {canChooseKeyboard} bind:value />
-  </Keyman>
-  Has no keyboard:
-  <Button form="menu" size="sm" onclick={() => set('bcp', 'en')} active={'en' === bcp}
-    >English (en)</Button>
-</Story>
-
-An input can be placed in the default slot and Keyman will attach to the first child element (it
-will only work if that element is an input or textarea):
-
-<Story name="Assamese - slotted input">
-  <Keyman>
-    <InputWrapper bcp="as">
+    <InputWrapper {bcp} {show} {canChooseKeyboard} bind:value>
       <input type="text" bind:value class="form-input block w-full" />
     </InputWrapper>
   </Keyman>
-  <div>Value: {value}</div>
+  <div class="mt-2">
+    Set to bcp without keyboard:
+    <Button form="menu" size="sm" onclick={() => set('bcp', 'en')} active={'en' === bcp}
+      >English (en)</Button>
+  </div>
 </Story>
 
 <Story name="Assamese textarea">
-  <Keyman>
-    <Textarea bcp="as" bind:value={paragraph} />
-  </Keyman>
-  <pre class="pl-3">{paragraph}</pre>
+  <Store startWith="গিক" let:set let:store={paragraph}>
+    <Keyman>
+      <InputWrapper bcp="as">
+        <textarea
+          class="form-input w-full"
+          value={paragraph}
+          on:input={(e) => set(e.target.value)}
+          rows="4" />
+      </InputWrapper>
+    </Keyman>
+    <pre class="pl-3">{paragraph}</pre>
+  </Store>
 </Story>
+
+<!-- <Story name="Assamese - rich text editor">
+  <Keyman>
+    <InputWrapper bcp="as">
+      <ClassicCustomized bind:html />
+    </InputWrapper>
+  </Keyman>
+  <pre class="pl-3">{html}</pre>
+</Story> -->
 
 <!-- prettier-ignore -->
 ## Notes
