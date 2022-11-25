@@ -1,13 +1,17 @@
 <script lang="ts">
   // https://help.keyman.com/DEVELOPER/engine/web/15.0/reference/
   import { getContext, onMount } from 'svelte';
+  import ShowHide from 'svelte-pieces/functions/ShowHide.svelte';
+  import Button from 'svelte-pieces/ui/Button.svelte';
+  import Modal from 'svelte-pieces/ui/Modal.svelte';
   import { additionalKeyboards, glossingLanguages } from '../../../glosses/glossing-languages';
   import { keymanKey, type keymanKeyContext } from './context';
 
   export let bcp: string;
+  export let canChooseKeyboard = false;
   export let value: string = undefined;
   export let placeholder = '';
-  export let showKeyboard = false;
+  export let show = false;
   export let fixed = false;
 
   const { getKeyman } = getContext<keymanKeyContext>(keymanKey);
@@ -28,12 +32,14 @@
     };
   });
 
-  $: glossLanguage = glossingLanguages[bcp] || additionalKeyboards[bcp];
+  let selectedBcp: string;
+  $: currentBcp = selectedBcp || bcp;
+  $: glossLanguage = glossingLanguages[currentBcp] || additionalKeyboards[currentBcp];
   $: internalName = glossLanguage?.internalName;
-  $: keyboardBcp = glossLanguage?.useKeyboard ? glossLanguage.useKeyboard : bcp;
+  $: keyboardBcp = glossLanguage?.useKeyboard ? glossLanguage.useKeyboard : currentBcp;
   $: keyboardId = `${internalName}@${keyboardBcp}`;
 
-  $: if (showKeyboard && internalName) {
+  $: if (show && internalName) {
     (async () => {
       await kmw.addKeyboards(keyboardId);
       if (inputEl) {
@@ -44,31 +50,60 @@
     })();
   }
 
-  $: if (showKeyboard) {
+  $: if (show) {
     inputEl?.classList.remove('kmw-disabled');
   } else {
     inputEl?.classList.add('kmw-disabled');
   }
 </script>
 
-<div class="flex w-full relative" class:sompeng={bcp === 'srb-sora'}>
-  <div bind:this={wrapperEl} class="w-full">
-    <slot>
-      <input {placeholder} class="border shadow px-3 pl-1 pr-9 w-full" bind:value />
-    </slot>
+<ShowHide let:show={showKeyboardOptions} let:toggle>
+  <div class="flex w-full relative" class:sompeng={currentBcp === 'srb-sora'}>
+    <div bind:this={wrapperEl} class="w-full">
+      <slot>
+        <input {placeholder} class="border shadow px-3 pl-1 pr-9 w-full" bind:value />
+      </slot>
+    </div>
+
+    {#if glossLanguage?.showKeyboard}
+      <button
+        class="absolute z-1 right-0.5 top-0.5 bottom-0.5 hover:text-black px-2 flex items-center bg-white rounded"
+        type="button"
+        on:click={() => (show = !show)}
+        title={show ? 'Keyboard active' : 'Keyboard inactive'}>
+        {#if show}
+          <span class="i-mdi-keyboard" />
+        {:else}
+          <span class="i-mdi-keyboard-off" />
+        {/if}
+      </button>
+    {/if}
+    {#if show && canChooseKeyboard}
+      <button
+        class="absolute z-1 right-8 top-0.5 bottom-0.5 hover:text-black px-2 flex items-center bg-white rounded"
+        type="button"
+        on:click={toggle}
+        title="Select Keyboard">
+        <span class="i-ph-globe" />
+      </button>
+    {/if}
   </div>
 
-  {#if glossLanguage?.showKeyboard}
-    <button
-      class="absolute z-1 right-2px top-2px bottom-2px hover:text-black px-2 flex items-center bg-white rounded"
-      type="button"
-      on:click={() => (showKeyboard = !showKeyboard)}
-      title={showKeyboard ? 'Keyboard active' : 'Keyboard inactive'}>
-      {#if showKeyboard}
-        <span class="i-mdi-keyboard" />
-      {:else}
-        <span class="i-mdi-keyboard-outline" />
-      {/if}
-    </button>
+  {#if showKeyboardOptions}
+    <Modal on:close={toggle} noscroll>
+      <span slot="heading"> Select Keyboard </span>
+      {#each [...Object.entries(glossingLanguages), ...Object.entries(additionalKeyboards)] as [_bcp, languageDefinition]}
+        {#if languageDefinition.showKeyboard}
+          <Button
+            form="menu"
+            size="sm"
+            onclick={() => {
+              toggle();
+              selectedBcp = _bcp;
+            }}
+            active={_bcp === bcp}>{languageDefinition.vernacularName} ({_bcp})</Button>
+        {/if}
+      {/each}
+    </Modal>
   {/if}
-</div>
+</ShowHide>
