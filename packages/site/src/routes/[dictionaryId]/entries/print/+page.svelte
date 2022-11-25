@@ -114,7 +114,7 @@
     </div>
 
     <div class="flex overflow-x-hidden">
-      <div class="print-columns pr-4 print:pr-9 max-w-full" style="--column-count: {$columnCount}">
+      <div class="print-columns pr-4 print:pr-9 max-w-full flex-grow" style="--column-count: {$columnCount}">
         {#each entries as entry (entry.id)}
           <PrintEntry
             {t}
@@ -136,7 +136,7 @@
           <div
             dir="ltr"
             class="text-xs print:fixed print:text-center right-0 top-0 bottom-0"
-            style="writing-mode: tb;">
+            style="writing-mode: tb; min-width: 0;">
             {citation?.citation ? citation.citation + ' ' : ''}
             {new Date().getFullYear()}.
             {$dictionary.name}
