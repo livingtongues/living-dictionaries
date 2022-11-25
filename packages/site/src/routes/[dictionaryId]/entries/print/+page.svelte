@@ -14,6 +14,7 @@
   import { browser } from '$app/environment';
   import type { IPrintFields } from '@living-dictionaries/types';
   import PrintFieldCheckboxes from './PrintFieldCheckboxes.svelte';
+  import CitationClipped from './CitationClipped.svelte';
   import { Doc } from 'sveltefirets';
 
   const hitsPerPage = createPersistedStore<number>('printHitsPerPage', 50);
@@ -133,16 +134,9 @@
         startWith={citationType}
         let:data={citation}>
         {#if entries?.length}
-          <div
-            dir="ltr"
-            class="text-xs print:fixed print:text-center right-0 top-0 bottom-0"
-            style="writing-mode: tb;">
-            {citation?.citation ? citation.citation + ' ' : ''}
-            {new Date().getFullYear()}.
-            {$dictionary.name}
-            <span>{$t('misc.LD_singular', { default: 'Living Dictionary' })}.</span>
-            Living Tongues Institute for Endangered Languages. https://livingdictionaries.app/{$dictionary.id}
-          </div>
+          <CitationClipped citation={citation?.citation ? citation.citation + ' ' : ''} citationText={
+            `${new Date().getFullYear()}. ${$dictionary.name} ${$t('misc.LD_singular', { default: 'Living Dictionary' })}. Living Tongues Institute for Endangered Languages. https://livingdictionaries.app/${$dictionary.id}.`
+          } />
         {/if}
       </Doc>
     </div>
