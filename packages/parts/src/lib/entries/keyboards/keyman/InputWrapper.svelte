@@ -1,6 +1,6 @@
 <script lang="ts">
   // https://help.keyman.com/DEVELOPER/engine/web/15.0/reference/
-  import { getContext, onMount } from 'svelte';
+  import { getContext, onMount, tick } from 'svelte';
   import ShowHide from 'svelte-pieces/functions/ShowHide.svelte';
   import Button from 'svelte-pieces/ui/Button.svelte';
   import Modal from 'svelte-pieces/ui/Modal.svelte';
@@ -73,6 +73,13 @@
         kmw.attachToControl(inputEl);
         kmw.setKeyboardForControl(inputEl, internalName, keyboardBcp);
         inputEl.focus();
+
+        if (currentBcp === 'srb-sora') {
+          await tick();
+          document.querySelector('.kmw-osk-frame')?.classList.add('sompeng');
+        } else {
+          document.querySelector('.kmw-osk-frame')?.classList.remove('sompeng');
+        }
       }
     })();
   }
@@ -119,7 +126,7 @@
 
   {#if showKeyboardOptions}
     <Modal on:close={toggle} noscroll>
-      <span slot="heading"> Select Keyboard </span>
+      <span slot="heading">Select Keyboard</span>
       {#each [...Object.entries(glossingLanguages), ...Object.entries(additionalKeyboards)] as [_bcp, languageDefinition]}
         {#if languageDefinition.showKeyboard}
           <Button
@@ -129,7 +136,7 @@
               toggle();
               selectedBcp = _bcp;
             }}
-            active={_bcp === bcp}>{languageDefinition.vernacularName} ({_bcp})</Button>
+            active={_bcp === bcp}>{languageDefinition.vernacularName}</Button>
         {/if}
       {/each}
     </Modal>
