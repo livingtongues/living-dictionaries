@@ -13,20 +13,19 @@
 <!-- prettier-ignore -->
 # Keyman Keyboard
 
-Keyman will attach to the first child element it finds (it
-will only work if that element is an input or textarea).
+Keyman will accept an element (documentQuerySelector usable string or element itself) and if none is given then it will attach to the first child element it finds inside its slot. The slot method is used in the first two examples, and the target method is used for the CKEditor example because it's input component is nested multiple layers deep. 
 
 <Story
-  name="input"
+  name="input - with option to change keyboard"
   knobs={{ bcp: 'am', show: false, canChooseKeyboard: true }}
   let:props={{ bcp, show, canChooseKeyboard }}
   let:set>
-  <div>Value: {value}</div>
   <Keyman>
-    <InputWrapper {bcp} {show} {canChooseKeyboard} bind:value>
+    <InputWrapper {bcp} {show} {canChooseKeyboard}>
       <input type="text" bind:value class="form-input block w-full" />
     </InputWrapper>
   </Keyman>
+  <div>{value}</div>
   <div class="mt-2">
     Set to bcp without keyboard:
     <Button form="menu" size="sm" onclick={() => set('bcp', 'en')} active={'en' === bcp}
@@ -34,7 +33,7 @@ will only work if that element is an input or textarea).
   </div>
 </Story>
 
-<Story name="Assamese textarea">
+<Story name="textarea - set to Assamese">
   <Store startWith="গিক" let:set let:store={paragraph}>
     <Keyman>
       <InputWrapper bcp="as">
@@ -49,14 +48,14 @@ will only work if that element is an input or textarea).
   </Store>
 </Story>
 
-<!-- <Story name="Assamese - rich text editor">
+<Story name="CKEditor - set to Assamese">
   <Keyman>
-    <InputWrapper bcp="as">
+    <InputWrapper bcp="as" target=".ck-editor__editable_inline">
       <ClassicCustomized bind:html />
     </InputWrapper>
   </Keyman>
   <pre class="pl-3">{html}</pre>
-</Story> -->
+</Story>
 
 <!-- prettier-ignore -->
 ## Notes
