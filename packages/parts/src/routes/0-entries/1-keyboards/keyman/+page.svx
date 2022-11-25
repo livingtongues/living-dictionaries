@@ -4,6 +4,7 @@
   import InputWrapper from '$lib/entries/keyboards/keyman/InputWrapper.svelte';
   import Keyman from '$lib/entries/keyboards/keyman/Keyman.svelte';
   import Textarea from '$lib/entries/keyboards/keyman/Textarea.svelte';
+  import { additionalKeyboards } from '$lib/glosses/glossing-languages';
   import { Story } from 'kitbook';
   import Button from 'svelte-pieces/ui/Button.svelte';
 
@@ -26,6 +27,18 @@
         >{glossingLanguages[language].vernacularName} ({language})</Button>
     {/if}
   {/each}
+  {#each Object.keys(additionalKeyboards) as language}
+    {#if additionalKeyboards[language].showKeyboard}
+      <Button
+        form="outline"
+        color="green"
+        size="sm"
+        onclick={() => set('bcp', language)}
+        active={language === bcp}
+        class="mr-1"
+        >{additionalKeyboards[language].vernacularName} ({language})</Button>
+    {/if}
+  {/each}
   <div>Value: {value}</div>
   <Keyman>
     <InputWrapper {bcp} {showKeyboard} bind:value />
@@ -35,7 +48,8 @@
     >English (en)</Button>
 </Story>
 
-An input can be placed in the default slot and Keyman will attach to the first child element if it is an input:
+An input can be placed in the default slot and Keyman will attach to the first child element if it
+is an input:
 
 <Story name="Assamese - slotted input">
   <Keyman>

@@ -1,7 +1,7 @@
 <script lang="ts">
   // https://help.keyman.com/DEVELOPER/engine/web/15.0/reference/
   import { getContext, onMount } from 'svelte';
-  import { glossingLanguages } from '../../../glosses/glossing-languages';
+  import { additionalKeyboards, glossingLanguages } from '../../../glosses/glossing-languages';
   import { keymanKey, type keymanKeyContext } from './context';
 
   export let bcp: string;
@@ -21,14 +21,14 @@
     if (fixed) {
       root.style.setProperty('--kmw-osk-pos', 'fixed');
     }
-    
+
     return () => {
       root.style.setProperty('--kmw-osk-pos', 'absolute');
       kmw.detachFromControl(inputEl);
     };
   });
 
-  $: glossLanguage = glossingLanguages[bcp];
+  $: glossLanguage = glossingLanguages[bcp] || additionalKeyboards[bcp];
   $: internalName = glossLanguage?.internalName;
   $: keyboardBcp = glossLanguage?.useKeyboard ? glossLanguage.useKeyboard : bcp;
   $: keyboardId = `${internalName}@${keyboardBcp}`;
