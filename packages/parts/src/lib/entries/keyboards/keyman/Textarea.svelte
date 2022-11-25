@@ -1,7 +1,7 @@
 <script lang="ts">
   // https://help.keyman.com/DEVELOPER/engine/web/15.0/reference/
   import { getContext } from 'svelte';
-  import { glossingLanguages } from '../../../glosses/glossing-languages';
+  import { additionalKeyboards, glossingLanguages } from '../../../glosses/glossing-languages';
   import { keymanKey, type keymanKeyContext } from './context';
 
   export let bcp: string;
@@ -14,7 +14,7 @@
   const kmw = getKeyman();
   let el: HTMLTextAreaElement;
 
-  $: glossLanguage = glossingLanguages[bcp];
+  $: glossLanguage = glossingLanguages[bcp] || additionalKeyboards[bcp];
   $: internalName = glossLanguage?.internalName;
   $: keyboardBcp = glossLanguage?.useKeyboard ? glossLanguage.useKeyboard : bcp;
   $: keyboardId = `${internalName}@${keyboardBcp}`;
