@@ -7,20 +7,36 @@
   import { additionalKeyboards, glossingLanguages } from '../../../glosses/glossing-languages';
   import { keymanKey, type keymanKeyContext } from './context';
 
+  /**
+   * When using keyboard inside a fixed context like a modal, set fixed to true to use fixed positioning instead of absolute positioning to keep keyboard with fixed input, otherwise it will match page scroll height
+   */
+  export let fixed = false;
   export let bcp: string;
   export let canChooseKeyboard = false;
-  export let value: string = undefined;
-  export let placeholder = '';
+  export let target: string | Element = undefined;
   export let show = false;
-  export let fixed = false;
 
   const { getKeyman } = getContext<keymanKeyContext>(keymanKey);
   const kmw = getKeyman();
   let wrapperEl: HTMLDivElement;
   let inputEl: HTMLInputElement | HTMLTextAreaElement;
 
-  onMount(() => {
-    inputEl = wrapperEl.firstElementChild as HTMLInputElement | HTMLTextAreaElement;
+  onMount(async () => {
+    if (target) {
+      // @ts-ignore
+      inputEl = wrapperEl.querySelector(target);
+      if (!inputEl) {
+        // wait for CKEditor to init so target element can be found
+        await new Promise((r) => setTimeout(r, 3000));
+        // @ts-ignore
+        inputEl = wrapperEl.querySelector(target);
+      }
+    }
+
+    if (!inputEl) {
+      inputEl = wrapperEl.firstElementChild as HTMLInputElement | HTMLTextAreaElement;
+    }
+
     const root = document.documentElement;
     if (fixed) {
       root.style.setProperty('--kmw-osk-pos', 'fixed');
@@ -60,9 +76,7 @@
 <ShowHide let:show={showKeyboardOptions} let:toggle>
   <div class="flex w-full relative" class:sompeng={currentBcp === 'srb-sora'}>
     <div bind:this={wrapperEl} class="w-full">
-      <slot>
-        <input {placeholder} class="border shadow px-3 pl-1 pr-9 w-full" bind:value />
-      </slot>
+      <slot />
     </div>
 
     <div class="absolute z-1 right-0.5 top-0.75 flex">
