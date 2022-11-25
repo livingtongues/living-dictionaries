@@ -35,8 +35,7 @@
         size="sm"
         onclick={() => set('bcp', language)}
         active={language === bcp}
-        class="mr-1"
-        >{additionalKeyboards[language].vernacularName} ({language})</Button>
+        class="mr-1">{additionalKeyboards[language].vernacularName} ({language})</Button>
     {/if}
   {/each}
   <div>Value: {value}</div>

@@ -51,7 +51,7 @@
   }
 </script>
 
-<div class="flex w-full relative">
+<div class="flex w-full relative" class:sompeng={bcp === 'srb-sora'}>
   <div bind:this={wrapperEl} class="w-full">
     <slot>
       <input {placeholder} class="border shadow px-3 pl-1 pr-9 w-full" bind:value />
