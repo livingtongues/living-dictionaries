@@ -15,40 +15,18 @@
 <!-- prettier-ignore -->
 # Keyman Keyboard
 
-<Story
-  name="input"
-  knobs={{ bcp: 'am', showKeyboard: false }}
-  let:props={{ bcp, showKeyboard }}
-  let:set>
-  Set different bpc47 codes to see different keyboards:
-  {#each Object.keys(glossingLanguages) as language}
-    {#if glossingLanguages[language].showKeyboard}
-      <Button form="menu" size="sm" onclick={() => set('bcp', language)} active={language === bcp}
-        >{glossingLanguages[language].vernacularName} ({language})</Button>
-    {/if}
-  {/each}
-  {#each Object.keys(additionalKeyboards) as language}
-    {#if additionalKeyboards[language].showKeyboard}
-      <Button
-        form="outline"
-        color="green"
-        size="sm"
-        onclick={() => set('bcp', language)}
-        active={language === bcp}
-        class="mr-1">{additionalKeyboards[language].vernacularName} ({language})</Button>
-    {/if}
-  {/each}
+<Story name="input" knobs={{ bcp: 'am', show: false, canChooseKeyboard: true }} let:props={{ bcp, show, canChooseKeyboard }} let:set>
   <div>Value: {value}</div>
   <Keyman>
-    <InputWrapper {bcp} {showKeyboard} bind:value />
+    <InputWrapper {bcp} {show} {canChooseKeyboard} bind:value />
   </Keyman>
   Has no keyboard:
   <Button form="menu" size="sm" onclick={() => set('bcp', 'en')} active={'en' === bcp}
     >English (en)</Button>
 </Story>
 
-An input can be placed in the default slot and Keyman will attach to the first child element if it
-is an input:
+An input can be placed in the default slot and Keyman will attach to the first child element (it
+will only work if that element is an input or textarea):
 
 <Story name="Assamese - slotted input">
   <Keyman>
@@ -67,6 +45,12 @@ is an input:
 </Story>
 
 <!-- prettier-ignore -->
+## Notes
+
+If ever needed, `InputWrapper` could be updated to allow passing in a targeted element.
+
+### Useful Links
+
 - [KeymanWeb docs](https://keyman.com/developer/keymanweb/)
 - [KeymanWeb API](https://help.keyman.com/DEVELOPER/engine/web/15.0/reference/)
 - [Angular Setup](https://medium.com/@jwbowdoin/setup-on-screen-keyboards-in-over-1-000-languages-using-keyman-11-in-an-angular-7-web-app-3c3eb846585c)

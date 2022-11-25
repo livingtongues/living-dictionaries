@@ -7,7 +7,7 @@
   export let bcp: string;
   export let value: string;
   export let placeholder = '';
-  export let showKeyboard = false;
+  export let show = false;
   export let rows = 4;
 
   const { getKeyman } = getContext<keymanKeyContext>(keymanKey);
@@ -19,7 +19,7 @@
   $: keyboardBcp = glossLanguage?.useKeyboard ? glossLanguage.useKeyboard : bcp;
   $: keyboardId = `${internalName}@${keyboardBcp}`;
 
-  $: if (showKeyboard && internalName) {
+  $: if (show && internalName) {
     (async () => {
       await kmw.addKeyboards(keyboardId);
       kmw.attachToControl(el);
@@ -37,15 +37,15 @@
     bind:this={el}
     class="border shadow px-3 py-1 w-full"
     bind:value
-    class:kmw-disabled={!showKeyboard} />
+    class:kmw-disabled={!show} />
 
   {#if glossLanguage?.showKeyboard}
     <button
       class="absolute right-2px bottom-2px bg-white hover:text-black p-2 flex"
       type="button"
-      on:click={() => (showKeyboard = !showKeyboard)}
-      title={showKeyboard ? 'Keyboard active' : 'Keyboard inactive'}>
-      {#if showKeyboard}
+      on:click={() => (show = !show)}
+      title={show ? 'Keyboard active' : 'Keyboard inactive'}>
+      {#if show}
         <span class="i-mdi-keyboard" />
       {:else}
         <span class="i-mdi-keyboard-outline" />
