@@ -3,7 +3,7 @@
   import Button from 'svelte-pieces/ui/Button.svelte';
   import vowelTrapezoid from './vowel-trapezoid.gif';
 
-  export let target: string | Element = undefined;
+  export let target: string | HTMLInputElement | HTMLTextAreaElement = undefined;
   let activeTable = 'consonants';
   let wrapperEl: HTMLDivElement;
   let inputEl: HTMLInputElement | HTMLTextAreaElement;
@@ -11,7 +11,11 @@
   onMount(() => {
     if (target) {
       // @ts-ignore
-      inputEl = document.querySelector(target);
+      if (typeof target === 'string') {
+        inputEl = document.querySelector(target);
+      } else {
+        inputEl = target;
+      }
     } else {
       inputEl = wrapperEl.firstElementChild as HTMLInputElement | HTMLTextAreaElement;
     }
@@ -704,7 +708,11 @@
         <td class="br1"><span class="ipa">↓</span></td>
         <td />
         <td />
-        <td rowspan="2" colspan="2" class="bl1 br1" style="width:100px;border-bottom:1px solid #aaa;">
+        <td
+          rowspan="2"
+          colspan="2"
+          class="bl1 br1"
+          style="width:100px;border-bottom:1px solid #aaa;">
           <span class="ipa">⁰</span>
           <span class="ipa">¹</span>
           <span class="ipa">²</span>
