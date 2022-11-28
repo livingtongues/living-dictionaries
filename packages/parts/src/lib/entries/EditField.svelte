@@ -21,6 +21,7 @@
   }
 
   function save() {
+    value = inputEl?.value || value; // IpaKeyboard modifies input's value from outside this component so the bound value here doesn't update. This is hacky and the alternative is to emit events from the IpaKeyboard rather than bind to any neighboring element. This makes the adding and backspacing functions potentially needing to be applied in every context where the IPA keyboard is used. Until we know more how the IPA keyboard will be used, this line here is sufficient.
     dispatch('valueupdate', {
       field,
       newValue: value.trim(),
@@ -149,6 +150,14 @@
         use:autofocus
         bind:value
         class="form-input block w-full" />
+    {/if}
+
+    {#if field === 'ph'}
+      {#await import('../entries/keyboards/ipa/IpaKeyboard.svelte') then { default: IpaKeyboard }}
+        <div class="mt-2">
+          <IpaKeyboard target={inputEl} />
+        </div>
+      {/await}
     {/if}
 
     {#if field === 'in'}
