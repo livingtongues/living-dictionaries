@@ -30,8 +30,8 @@
     "@types/node": "^18.11.8",
     "firebase-functions-test": "^0.2.0",
     "node-fetch": "^2.6.7",
-    "typescript": "^4.8.4",
-    "vitest": "^0.24.4"
+    "typescript": "^4.9.3",
+    "vitest": "^0.25.3"
   },
   "private": true
 }
