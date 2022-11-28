@@ -356,7 +356,7 @@
             <img
               width="320"
               height="224"
-              style="position:relative; margin-left: 5px;"
+              style="position:relative; margin-left: 5px; max-width: unset;"
               src={vowelTrapezoid}
               alt="" />
             <div style="position:absolute; top:-20px;">
