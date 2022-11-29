@@ -1,61 +1,98 @@
 <script lang="ts">
   import { onMount } from 'svelte';
+  import Button from 'svelte-pieces/ui/Button.svelte';
+  import vowelTrapezoid from './vowel-trapezoid.gif';
 
-  let componentInput = '';
-  let tableContainer;
+  export let target: string | HTMLInputElement | HTMLTextAreaElement = undefined;
   let activeTable = 'consonants';
+  let wrapperEl: HTMLDivElement;
+  let inputEl: HTMLInputElement | HTMLTextAreaElement;
 
   onMount(() => {
-    tableContainer.onclick = (e) => {
-      copyCell(e);
-    };
+    if (target) {
+      // @ts-ignore
+      if (typeof target === 'string') {
+        inputEl = document.querySelector(target);
+      } else {
+        inputEl = target;
+      }
+    } else {
+      inputEl = wrapperEl.firstElementChild as HTMLInputElement | HTMLTextAreaElement;
+    }
   });
 
-  function getEventTarget(e) {
-    e = e || window.event;
-    return e.target || e.srcElement;
-  }
-  function copyCell(e) {
-    var target = getEventTarget(e);
+  function addSelectedLetter(e) {
+    if (!inputEl) return;
+    const target = e.target as EventTarget & HTMLDivElement;
     if (target.tagName.toLowerCase() === 'span') {
-      var t = target.innerHTML;
-      if (/◌/.test(t) == true) {
-        t = t.replace(/◌/g, '');
-      }
-      componentInput += t;
+      const letter = target.innerHTML.replace(/◌/g, '');
+      const cursorPosition = inputEl.selectionEnd;
+      inputEl.value =
+        inputEl.value.substring(0, cursorPosition) +
+        letter +
+        inputEl.value.substring(cursorPosition);
+      inputEl.selectionEnd = cursorPosition + letter.length;
     }
   }
 
   function backSpace() {
-    componentInput = componentInput.slice(0, -1);
+    if (!inputEl) return;
+    const cursorPosition = inputEl.selectionEnd;
+    inputEl.value =
+      inputEl.value.substring(0, cursorPosition - 1) +
+      inputEl.value.substring(cursorPosition, inputEl.value.length);
+    setTimeout(() => (inputEl.selectionEnd = cursorPosition - 1), 50);
   }
 </script>
 
-<button on:click={backSpace}>Backspace</button>
-Exporting: {componentInput}
-
-<div>
-  <button class:active={activeTable === 'consonants'} on:click={() => (activeTable = 'consonants')}
-    >Consonants</button>
-  <button class:active={activeTable === 'vowels'} on:click={() => (activeTable = 'vowels')}
-    >Vowels</button>
-  <button class:active={activeTable === 'diacritics'} on:click={() => (activeTable = 'diacritics')}
-    >Diacritics</button>
-  <button class:active={activeTable === 'other'} on:click={() => (activeTable = 'other')}
-    >Suprasegmentals, Tone</button>
-  <button
-    class:active={activeTable === 'nonPulmonic'}
-    on:click={() => (activeTable = 'nonPulmonic')}>Non-pulmonic Consonants</button>
-  <button class:active={activeTable === 'affricates'} on:click={() => (activeTable = 'affricates')}
-    >Affricates</button>
-  <button
-    class:active={activeTable === 'coarticulated'}
-    on:click={() => (activeTable = 'coarticulated')}>Co-Articulated Consonants</button>
+<div bind:this={wrapperEl} class="w-full relative">
+  <slot />
 </div>
 
-<div bind:this={tableContainer}>
+<div class="flex overflow-x-auto md:flex-wrap whitespace-nowrap mb-1">
+  <Button form="menu" color="black" class="!pt-0 !pb-1 !px-2 !text-lg" onclick={backSpace}>
+    <span class="i-heroicons:backspace-20-solid" />
+  </Button>
+  <Button
+    form="menu"
+    size="sm"
+    active={activeTable === 'consonants'}
+    onclick={() => (activeTable = 'consonants')}>Consonants</Button>
+  <Button
+    form="menu"
+    size="sm"
+    active={activeTable === 'vowels'}
+    onclick={() => (activeTable = 'vowels')}>Vowels</Button>
+  <Button
+    form="menu"
+    size="sm"
+    active={activeTable === 'diacritics'}
+    onclick={() => (activeTable = 'diacritics')}>Diacritics</Button>
+  <Button
+    form="menu"
+    size="sm"
+    active={activeTable === 'other'}
+    onclick={() => (activeTable = 'other')}>Suprasegmentals, Tone</Button>
+  <Button
+    form="menu"
+    size="sm"
+    active={activeTable === 'nonPulmonic'}
+    onclick={() => (activeTable = 'nonPulmonic')}>Non-pulmonic Consonants</Button>
+  <Button
+    form="menu"
+    size="sm"
+    active={activeTable === 'affricates'}
+    onclick={() => (activeTable = 'affricates')}>Affricates</Button>
+  <Button
+    form="menu"
+    size="sm"
+    active={activeTable === 'coarticulated'}
+    onclick={() => (activeTable = 'coarticulated')}>Co-Articulated Consonants</Button>
+</div>
+
+<div class="overflow-x-auto" on:click={addSelectedLetter}>
   {#if activeTable === 'consonants'}
-    <table id="consonants" cellspacing="0">
+    <table cellspacing="0">
       <tr class="consonant-header">
         <td class="rowheader" style="font-size: 15px; padding: 5px"><b>Consonants</b></td>
         <td class="labial" title="Labial" colspan="2">Bilabial</td>
@@ -300,7 +337,7 @@ Exporting: {componentInput}
   {/if}
 
   {#if activeTable === 'vowels'}
-    <table id="vowels" cellspacing="0" style="border:1px solid #aaa;">
+    <table class="vowels" cellspacing="0" style="border:1px solid #aaa;">
       <tr class="vowelheader">
         <td style="font-size: 15px; padding: 3px"><b>Vowels</b></td>
         <td style="width: 85px">
@@ -312,21 +349,21 @@ Exporting: {componentInput}
         <td style="" title="Back vowel">Back</td>
       </tr>
       <tr>
-        <td class="rowheader" style="height:32px; text-align:right;" title="Close vowel"
+        <td class="rowheader" style="height:36.5px; text-align:right;" title="Close vowel"
           ><b>Close</b></td>
-        <td rowspan="7" colspan="5" style="font-size: 80%; padding: 5px 30px 0 17px;">
+        <td rowspan="7" colspan="5" style="font-size: 80%; padding: 15px 30px 15px 17px;">
           <div style="position:relative;">
             <img
               width="320"
-              height="196"
-              style="position:relative; top:0px;"
-              src="vowel_trapezoid.gif"
+              height="224"
+              style="position:relative; margin-left: 5px; max-width: unset;"
+              src={vowelTrapezoid}
               alt="" />
-            <div style="background:transparent; position:absolute; top:-20px; left:0px;">
+            <div style="position:absolute; top:-20px;">
               <table
-                style="position:relative; width:300px; height:224px; text-align:left; background:transparent; font-size:131%;">
+                style="position:relative; width:300px; height:224px; text-align:left; font-size:131%;">
                 <tr>
-                  <td id="vowel_ipa" style="vertical-align: top;">
+                  <td style="vertical-align: top;">
                     <div class="vowel_row">
                       <span style="left:-13px;"
                         ><span class="ipa" title="Close front unrounded vowel">i</span>•<span
@@ -433,130 +470,130 @@ Exporting: {componentInput}
         </td>
       </tr>
       <tr>
-        <td class="rowheader" style="height:32px;" title="Near-close vowel">Near-close</td>
+        <td class="rowheader" style="height:36.5px;" title="Near-close vowel">Near-close</td>
       </tr>
       <tr>
-        <td class="rowheader" style="height:32px;" title="Close-mid vowel">Close-mid</td>
+        <td class="rowheader" style="height:36.5px;" title="Close-mid vowel">Close-mid</td>
       </tr>
       <tr>
-        <td class="rowheader" style="height:32px;" title="Mid vowel"><b>Mid</b></td>
+        <td class="rowheader" style="height:36.5px;" title="Mid vowel"><b>Mid</b></td>
       </tr>
       <tr>
-        <td class="rowheader" style="height:32px;" title="Open-mid vowel">Open-mid</td>
+        <td class="rowheader" style="height:36.5px;" title="Open-mid vowel">Open-mid</td>
       </tr>
       <tr>
-        <td class="rowheader" style="height:32px;" title="Near-open vowel">Near-open</td>
+        <td class="rowheader" style="height:36.5px;" title="Near-open vowel">Near-open</td>
       </tr>
       <tr>
-        <td class="rowheader" style="height:32px;" title="Open vowel"><b>Open</b></td>
+        <td class="rowheader" style="height:36.5px;" title="Open vowel"><b>Open</b></td>
       </tr>
     </table>
   {/if}
 
   {#if activeTable === 'diacritics'}
-    <table id="diacritics" cellpadding="3" cellspacing="0" style="float:left;">
+    <table cellpadding="3" cellspacing="0" style="float:left;">
       <tr>
         <th colspan="4">Diacritics</th>
       </tr>
       <tr>
         <td class="rowheader">Aspirated</td>
-        <td id="006b" title="006B"><span class="ipa">◌ʰ</span></td>
+        <td><span class="ipa">◌ʰ</span></td>
         <td class="rowheader">Breathy</td>
-        <td id="0073" title="0073"><span class="ipa">◌̤</span></td>
+        <td class="br1"><span class="ipa">◌̤</span></td>
       </tr>
       <tr>
         <td class="rowheader">Labialised</td>
-        <td id="0074" title="0074"><span class="ipa">ʷ</span></td>
+        <td><span class="ipa">ʷ</span></td>
         <td class="rowheader">Dental</td>
-        <td id="0074" title="0074"><span class="ipa">◌̪</span></td>
+        <td class="br1"><span class="ipa">◌̪</span></td>
       </tr>
       <tr>
         <td class="rowheader">Palatalised</td>
-        <td id="0074" title="0074"><span class="ipa">ʲ</span></td>
+        <td><span class="ipa">ʲ</span></td>
         <td class="rowheader">Apical</td>
-        <td id="0074" title="0074"><span class="ipa">◌̺</span></td>
+        <td class="br1"><span class="ipa">◌̺</span></td>
       </tr>
       <tr>
         <td class="rowheader">Velarised</td>
-        <td id="006c" title="006C"><span class="ipa">ˠ</span></td>
+        <td><span class="ipa">ˠ</span></td>
         <td class="rowheader">Laminal</td>
-        <td id="0074" title="0074"><span class="ipa">◌̻</span></td>
+        <td class="br1"><span class="ipa">◌̻</span></td>
       </tr>
       <tr>
         <td class="rowheader">Pharyngealised</td>
-        <td id="0074" title="0074"><span class="ipa">ˤ</span></td>
+        <td><span class="ipa">ˤ</span></td>
         <td class="rowheader">Linguo-labial</td>
-        <td id="0074" title="0074"><span class="ipa">◌̼</span></td>
+        <td class="br1"><span class="ipa">◌̼</span></td>
       </tr>
       <tr>
         <td class="rowheader">Nasalised</td>
-        <td id="1ebd" title="1EBD"><span class="ipa">◌̃</span></td>
+        <td><span class="ipa">◌̃</span></td>
         <td class="rowheader">Double artic./<br />affricate</td>
-        <td id="006b" title="006B"><span class="ipa">◌͡◌</span></td>
+        <td class="br1"><span class="ipa">◌͡◌</span></td>
       </tr>
       <tr>
         <td class="rowheader">Pre/post <br />nasalised</td>
-        <td id="207f" title="207F"><span class="ipa">ⁿ</span></td>
+        <td><span class="ipa">ⁿ</span></td>
         <td class="rowheader">Lateral release</td>
-        <td id="0074" title="0074"><span class="ipa">ˡ</span></td>
+        <td class="br1"><span class="ipa">ˡ</span></td>
       </tr>
       <tr>
         <td class="rowheader">Centralised</td>
-        <td id="00eb" title="00EB"><span class="ipa">◌̈</span></td>
+        <td><span class="ipa">◌̈</span></td>
         <td class="rowheader">Mid centralised</td>
-        <td><span class="ipa">◌̽</span></td>
+        <td class="br1"><span class="ipa">◌̽</span></td>
       </tr>
       <tr>
         <td class="rowheader">Velar/<br />Pharyngealised</td>
-        <td id="026b" title="026B"><span class="ipa">ɫ</span></td>
+        <td><span class="ipa">ɫ</span></td>
         <td class="rowheader">Advanced</td>
-        <td id="0075" title="0075"><span class="ipa">◌̟</span></td>
+        <td class="br1"><span class="ipa">◌̟</span></td>
       </tr>
       <tr>
         <td class="rowheader">Rhoticity</td>
         <td><span class="ipa">◌˞</span></td>
         <td class="rowheader">Retracted</td>
-        <td id="0069" title="0069"><span class="ipa">◌̠</span></td>
+        <td class="br1"><span class="ipa">◌̠</span></td>
       </tr>
       <tr>
         <td class="rowheader">Ejective</td>
-        <td id="0074" title="0074"><span class="ipa">◌ʼ</span></td>
+        <td><span class="ipa">◌ʼ</span></td>
         <td class="rowheader">Raised</td>
-        <td><span class="ipa">◌̝</span></td>
+        <td class="br1"><span class="ipa">◌̝</span></td>
       </tr>
       <tr>
         <td class="rowheader">Unreleased</td>
-        <td id="0074" title="0074"><span class="ipa">◌̚</span></td>
+        <td><span class="ipa">◌̚</span></td>
         <td class="rowheader">Lowered</td>
-        <td><span class="ipa">◌̞</span></td>
+        <td class="br1"><span class="ipa">◌̞</span></td>
       </tr>
       <tr>
         <td class="rowheader">Syllabic</td>
-        <td id="006c" title="006C"><span class="ipa">◌̩</span></td>
+        <td><span class="ipa">◌̩</span></td>
         <td class="rowheader">+ATR</td>
-        <td><span class="ipa">◌̘</span></td>
+        <td class="br1"><span class="ipa">◌̘</span></td>
       </tr>
       <tr>
         <td class="rowheader">Non-syllabic</td>
-        <td id="0061" title="0061"><span class="ipa">◌̯</span></td>
+        <td><span class="ipa">◌̯</span></td>
         <td class="rowheader">-ATR</td>
-        <td><span class="ipa">◌̙</span></td>
+        <td class="br1"><span class="ipa">◌̙</span></td>
       </tr>
       <tr>
         <td class="rowheader">Creaky</td>
-        <td id="0061" title="0061"><span class="ipa">◌̰</span></td>
+        <td><span class="ipa">◌̰</span></td>
         <td class="rowheader">More rounded</td>
-        <td><span class="ipa">◌̹</span></td>
+        <td class="br1"><span class="ipa">◌̹</span></td>
       </tr>
       <tr>
         <td class="rowheader">Voiceless</td>
-        <td id="006e" title="006E"><span class="ipa">◌̥</span></td>
+        <td><span class="ipa">◌̥</span></td>
         <td class="rowheader">Less rounded</td>
-        <td><span class="ipa">◌̜</span></td>
+        <td class="br1 bb1"><span class="ipa">◌̜</span></td>
       </tr>
       <tr>
         <td class="rowheader">Voiced</td>
-        <td id="0073" title="0073"><span class="ipa">◌̬</span></td>
+        <td class="br1 bb1"><span class="ipa">◌̬</span></td>
         <td />
         <td />
       </tr>
@@ -564,7 +601,7 @@ Exporting: {componentInput}
   {/if}
 
   {#if activeTable === 'other'}
-    <table id="other" cellpadding="3" cellspacing="0" style="float:left;">
+    <table cellpadding="3" cellspacing="0" style="float:left;">
       <tr>
         <th class="align-middle" colspan="2" rowspan="1">Suprasegmentals</th>
         <th colspan="2" rowspan="1" style="line-height:100%">Diacritic<br />tone marks</th>
@@ -577,118 +614,121 @@ Exporting: {componentInput}
         <td class="rowheader">Extra high<br />tone</td>
         <td><span class="ipa">◌̋</span></td>
         <td class="rowheader">Extra low<br />tone</td>
-        <td id="02e9" title="02E9"><span class="ipa">˩</span></td>
+        <td class="br1"><span class="ipa">˩</span></td>
       </tr>
       <tr>
         <td class="rowheader">Half long</td>
         <td><span class="ipa">◌ˑ</span></td>
         <td class="rowheader">High tone</td>
-        <td id="00e9" title="00E9"><span class="ipa">◌́</span></td>
+        <td><span class="ipa">◌́</span></td>
         <td class="rowheader">Low tone</td>
-        <td id="02e8" title="02E8"><span class="ipa">˨</span></td>
+        <td class="br1"><span class="ipa">˨</span></td>
       </tr>
       <tr>
         <td class="rowheader">Extra long</td>
         <td><span class="ipa">ːː</span></td>
         <td class="rowheader">Mid tone</td>
-        <td id="0113" title="0113"><span class="ipa">◌̄</span></td>
+        <td><span class="ipa">◌̄</span></td>
         <td class="rowheader">Mid tone</td>
-        <td id="02e7" title="02E7"><span class="ipa">˧</span></td>
+        <td class="br1"><span class="ipa">˧</span></td>
       </tr>
       <tr>
         <td class="rowheader bdashed">Extra short</td>
-        <td id="0115" title="0115"><span class="ipa">◌̆</span></td>
+        <td><span class="ipa">◌̆</span></td>
         <td class="rowheader">Low tone</td>
-        <td id="00e8" title="00E8"><span class="ipa">◌̀</span></td>
+        <td><span class="ipa">◌̀</span></td>
         <td class="rowheader">High tone</td>
-        <td id="02e6" title="02E6"><span class="ipa">˦</span></td>
+        <td class="br1"><span class="ipa">˦</span></td>
       </tr>
       <tr>
         <td class="rowheader">Primary<br />stress</td>
-        <td id="02c8" title="02C8"><span class="ipa">ˈ</span></td>
+        <td><span class="ipa">ˈ</span></td>
         <td class="rowheader">Extra low<br />tone</td>
-        <td id="0205" title="0205"><span class="ipa">◌̏</span></td>
+        <td><span class="ipa">◌̏</span></td>
         <td class="rowheader">Extra high<br />tone</td>
-        <td id="02e5" title="02E5"><span class="ipa">˥</span></td>
+        <td class="br1"><span class="ipa">˥</span></td>
       </tr>
       <tr>
         <td class="rowheader bdashed">Secondary<br />stress</td>
-        <td id="02cc" title="02CC"><span class="ipa">ˌ</span></td>
+        <td><span class="ipa">ˌ</span></td>
         <td class="rowheader">Falling tone</td>
-        <td id="00ea" title="00EA"><span class="ipa">◌̂</span></td>
+        <td><span class="ipa">◌̂</span></td>
         <td class="rowheader">Rising tone</td>
-        <td id="02e9" title="02E9"><span class="ipa">˩˥</span></td>
+        <td class="br1"><span class="ipa">˩˥</span></td>
       </tr>
       <tr>
         <td class="rowheader">Syllable<br />break</td>
-        <td id="002e" title="002E"><span class="ipa">.</span></td>
+        <td><span class="ipa">.</span></td>
         <td class="rowheader bdashed">Rising tone</td>
-        <td id="011b" title="011B"><span class="ipa">◌̌</span></td>
+        <td class="bb1"><span class="ipa">◌̌</span></td>
         <td class="rowheader">Falling tone</td>
-        <td id="02e5" title="02E5"><span class="ipa">˥˩</span></td>
+        <td class="br1"><span class="ipa">˥˩</span></td>
       </tr>
       <tr>
         <td class="rowheader">Minor group:<br />foot</td>
-        <td id="007c" title="007C"><span class="ipa">|</span></td>
+        <td class="br1"><span class="ipa">|</span></td>
         <td />
         <td />
         <td class="rowheader">Low rising<br />tone</td>
-        <td id="02e9" title="02E9"><span class="ipa">˩˧</span></td>
+        <td class="br1"><span class="ipa">˩˧</span></td>
       </tr>
       <tr>
         <td class="rowheader">Major group</td>
-        <td id="2016" title="2016"><span class="ipa">‖</span></td>
+        <td class="br1"><span class="ipa">‖</span></td>
         <td />
         <td />
         <td class="rowheader">Low falling<br />tone</td>
-        <td id="02e7" title="02E7"><span class="ipa">˧˩</span></td>
+        <td class="br1"><span class="ipa">˧˩</span></td>
       </tr>
       <tr>
         <td class="rowheader bdashed">Linking -<br />no break</td>
-        <td id="203f" title="203F"><span class="ipa">‿</span></td>
+        <td class="br1"><span class="ipa">‿</span></td>
         <td />
         <td />
         <td class="rowheader">High falling<br />tone</td>
-        <td id="02e5" title="02E5"><span class="ipa">˥˧</span></td>
+        <td class="br1"><span class="ipa">˥˧</span></td>
       </tr>
       <tr>
         <td class="rowheader">Rising<br />intonation</td>
-        <td id="2197" title="2197"><span class="ipa">↗</span></td>
+        <td class="br1"><span class="ipa">↗</span></td>
         <td />
         <td />
         <td class="rowheader">High rising<br />tone</td>
-        <td id="02e7" title="02E7"><span class="ipa">˧˥</span></td>
+        <td class="br1"><span class="ipa">˧˥</span></td>
       </tr>
       <tr>
         <td class="rowheader bdashed">Falling<br />intonation</td>
-        <td id="2198" title="2198"><span class="ipa">↘</span></td>
+        <td class="br1"><span class="ipa">↘</span></td>
         <td />
         <td />
-        <td class="rowheader">superscripts</td>
-        <td />
+        <td colspan="2" class="rowheader" style="text-align: left">Superscripts</td>
       </tr>
       <tr>
         <td class="rowheader">Downstep</td>
-        <td id="2193" title="2193"><span class="ipa">↓</span></td>
+        <td class="br1"><span class="ipa">↓</span></td>
         <td />
         <td />
-        <td rowspan="2" colspan="2" style="width:100px;border-bottom:1px solid #aaa;">
-          <span id="2070" title="2070" class="ipa">⁰</span>
-          <span id="00b9" title="00B9" class="ipa">¹</span>
-          <span id="00b2" title="00B2" class="ipa">²</span>
-          <span id="00b3" title="00B3" class="ipa">³</span>
-          <span id="2074" title="2074" class="ipa">⁴</span>
-          <span id="2075" title="2075" class="ipa">⁵</span>
-          <span id="2076" title="2076" class="ipa">⁶</span>
-          <span id="2077" title="2077" class="ipa">⁷</span>
-          <span id="2078" title="2078" class="ipa">⁸</span>
-          <span id="2079" title="2079" class="ipa">⁹</span>
-          <span id="207b" title="207B" class="ipa">⁻</span>
+        <td
+          rowspan="2"
+          colspan="2"
+          class="bl1 br1"
+          style="width:100px;border-bottom:1px solid #aaa;">
+          <span class="ipa">⁰</span>
+          <span class="ipa">¹</span>
+          <span class="ipa">²</span>
+          <span class="ipa">³</span>
+          <span class="ipa">⁴</span>
+          <span class="ipa">⁵</span>
+          <span class="ipa">⁶</span>
+          <span class="ipa">⁷</span>
+          <span class="ipa">⁸</span>
+          <span class="ipa">⁹</span>
+          <span class="ipa">⁻</span>
         </td>
       </tr>
       <tr>
         <td class="rowheader">Upstep</td>
-        <td id="2191" title="2191"><span class="ipa">↑</span></td>
+        <td class="br1 bb1"><span class="ipa">↑</span></td>
         <td />
         <td />
       </tr>
@@ -696,7 +736,7 @@ Exporting: {componentInput}
   {/if}
 
   {#if activeTable === 'nonPulmonic'}
-    <table id="non_pulmonic_consonants" cellspacing="0" style="float: left;">
+    <table cellspacing="0" style="float: left;">
       <tr>
         <th colspan="8">Non-pulmonic consonants</th>
       </tr>
@@ -758,7 +798,7 @@ Exporting: {componentInput}
   {/if}
 
   {#if activeTable === 'affricates'}
-    <table id="affricates" cellspacing="0" style="float: left;">
+    <table cellspacing="0" style="float: left;">
       <tr>
         <th colspan="10">Affricates</th>
       </tr>
@@ -806,7 +846,7 @@ Exporting: {componentInput}
   {/if}
 
   {#if activeTable === 'coarticulated'}
-    <table id="coarticulated_consonants" cellspacing="0" width="225">
+    <table cellspacing="0" width="225">
       <tr>
         <th colspan="5">Co-articulated consonants</th>
       </tr>
@@ -832,30 +872,6 @@ Exporting: {componentInput}
 </div>
 
 <style>
-  button {
-    font-family: inherit;
-    font-size: 13px;
-    padding: 3px 6px;
-    margin: 0 0 4px 0;
-    box-sizing: border-box;
-    border: 1px solid #ccc;
-    border-radius: 2px;
-  }
-
-  button {
-    background-color: #f4f4f4;
-    outline: none;
-  }
-
-  button:active,
-  button.active {
-    background-color: #ddd;
-  }
-
-  button:focus {
-    border-color: #666;
-  }
-
   .b1 {
     border: 1px solid #aaa;
   }
@@ -933,12 +949,14 @@ Exporting: {componentInput}
     background-color: rgb(238, 238, 238);
     transform: scale(1.75, 1.75);
     line-height: 9px;
+    border-radius: 3px;
+    padding: 3px 5px 7px;
   }
-  #vowels .ipa {
+  .vowels .ipa {
     position: relative;
   }
   .vowel_row {
-    height: 32px;
+    height: 36.5px;
     width: 350px;
     position: relative;
   }
