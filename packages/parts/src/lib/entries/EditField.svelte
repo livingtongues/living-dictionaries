@@ -141,6 +141,20 @@
             class="form-input block w-full pr-9" />
         </InputWrapper>
       </Keyman>
+    {:else if field.startsWith('lo') || field === 'lx'}
+      <Keyman>
+        <InputWrapper fixed bcp="" show canChooseKeyboard>
+          <input
+            bind:this={inputEl}
+            dir="ltr"
+            type="text"
+            required={field === 'lx'}
+            use:autofocus
+            bind:value
+            class:sompeng={display === 'Sompeng-Mardir'}
+            class="form-input block w-full pr-9" />
+        </InputWrapper>
+      </Keyman>
     {:else}
       <input
         bind:this={inputEl}
