@@ -125,7 +125,11 @@
   <div class="rounded-md shadow-sm">
     {#if field === 'nt'}
       {#await import('../editor/ClassicCustomized.svelte') then { default: ClassicCustomized }}
-        <ClassicCustomized {editorConfig} bind:html={value} />
+      <Keyman>
+        <InputWrapper fixed target=".ck-content" bcp="" show canChooseKeyboard>
+          <ClassicCustomized {editorConfig} bind:html={value} />
+        </InputWrapper>
+      </Keyman>  
       {/await}
     {:else if field.startsWith('gl') || field.startsWith('xs')}
       <Keyman>
