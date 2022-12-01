@@ -99,7 +99,7 @@
       class:top-0.75={position === 'top'}
       class:bottom-0.75={position === 'bottom'}
       class="absolute right-0.5 z-1 flex">
-      {#if show && canChooseKeyboard}
+      {#if (show || !bcp) && canChooseKeyboard}
         <button
           class="hover:text-black p-2 flex items-center bg-white rounded"
           type="button"
@@ -135,6 +135,7 @@
             onclick={() => {
               toggle();
               selectedBcp = _bcp;
+              show = true;
             }}
             active={_bcp === bcp}>{languageDefinition.vernacularName}</Button>
         {/if}
