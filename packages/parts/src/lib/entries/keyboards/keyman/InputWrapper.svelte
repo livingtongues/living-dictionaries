@@ -11,7 +11,7 @@
    * When using keyboard inside a fixed context like a modal, set fixed to true to use fixed positioning instead of absolute positioning to keep keyboard with fixed input, otherwise it will match page scroll height
    */
   export let fixed = false;
-  export let bcp: string;
+  export let bcp: string = undefined;
   export let canChooseKeyboard = false;
   export let target: string | Element = undefined;
   export let show = false;
