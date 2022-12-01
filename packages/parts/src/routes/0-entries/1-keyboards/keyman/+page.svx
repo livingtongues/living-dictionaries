@@ -33,6 +33,14 @@ Keyman will accept an element (documentQuerySelector usable string or element it
   </div>
 </Story>
 
+<Story name="input - no language - can choose">
+  <Keyman>
+    <InputWrapper show canChooseKeyboard>
+      <input type="text" class="form-input block w-full" />
+    </InputWrapper>
+  </Keyman>
+</Story>
+
 <Story name="textarea - set to Assamese" knobs={{ buttonAtTop: true }} let:props={{ buttonAtTop }}>
   <div>
     <Store startWith="গিক" let:set let:store={paragraph}>
@@ -57,6 +65,17 @@ Keyman will accept an element (documentQuerySelector usable string or element it
   <div class="w-full">
     <Keyman>
       <InputWrapper bcp="as" target=".ck-editor__editable_inline" position="bottom">
+        <ClassicCustomized bind:html />
+      </InputWrapper>
+    </Keyman>
+    <pre class="pl-3">{html}</pre>
+  </div>
+</Story>
+
+<Story name="CKEditor - no language - can choose">
+  <div class="w-full">
+    <Keyman>
+      <InputWrapper show canChooseKeyboard target=".ck-editor__editable_inline" position="bottom">
         <ClassicCustomized bind:html />
       </InputWrapper>
     </Keyman>
