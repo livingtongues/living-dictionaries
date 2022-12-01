@@ -35,7 +35,7 @@ Keyman will accept an element (documentQuerySelector usable string or element it
 
 <Story name="input - no language - can choose">
   <Keyman>
-    <InputWrapper show canChooseKeyboard>
+    <InputWrapper canChooseKeyboard>
       <input type="text" class="form-input block w-full" />
     </InputWrapper>
   </Keyman>
@@ -75,7 +75,7 @@ Keyman will accept an element (documentQuerySelector usable string or element it
 <Story name="CKEditor - no language - can choose">
   <div class="w-full">
     <Keyman>
-      <InputWrapper show canChooseKeyboard target=".ck-editor__editable_inline" position="bottom">
+      <InputWrapper canChooseKeyboard target=".ck-editor__editable_inline" position="bottom">
         <ClassicCustomized bind:html />
       </InputWrapper>
     </Keyman>
