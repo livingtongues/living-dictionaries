@@ -11,7 +11,7 @@ export function convertJsonRowToEntryFormat(
   Boolean(row.phonetic) && (entry.ph = row.phonetic);
   Boolean(row.morphology) && (entry.mr = row.morphology);
   Boolean(row.interlinearization) && (entry.in = row.interlinearization);
-  Boolean(row.partOfSpeech) && (entry.ps = row.partOfSpeech);
+  Boolean(row.partOfSpeech) && (entry.ps = row.partOfSpeech.split(', '));
   Boolean(row.dialect) && (entry.di = row.dialect);
   Boolean(row.variant) && (entry.va = row.variant);
   Boolean(row.nounClass) && (entry.nc = row.nounClass);

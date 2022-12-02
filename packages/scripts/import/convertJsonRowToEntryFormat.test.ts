@@ -29,7 +29,9 @@ test('convertJsonRowToEntryFormat properly converts entries', async () => {
         "lx": "voiture",
         "nt": "small automobile",
         "ph": "vwatyʁ",
-        "ps": "n",
+        "ps": [
+          "n",
+        ],
         "sd": [
           "vehicle|cars",
         ],
@@ -55,7 +57,10 @@ test('convertJsonRowToEntryFormat properly converts entries', async () => {
         "lx": "arbre",
         "nt": "generic term for all kinds of trees",
         "ph": "aʁbʁ",
-        "ps": "n",
+        "ps": [
+          "n",
+          "adj",
+        ],
         "sdn": [
           "1.4",
           "1.2",
@@ -79,7 +84,9 @@ test('convertJsonRowToEntryFormat properly converts entries', async () => {
         "nt": "a cylindrical device for liquids",
         "ph": "tyb",
         "pl": "tubes",
-        "ps": "n",
+        "ps": [
+          "n",
+        ],
         "sd": [
           "plumbing",
         ],
@@ -104,7 +111,9 @@ test('convertJsonRowToEntryFormat properly converts entries', async () => {
         "lx": "voiture",
         "nt": "small automobile",
         "ph": "vwɑtYʁ",
-        "ps": "n",
+        "ps": [
+          "n",
+        ],
         "sd": [
           "vehicle",
         ],
@@ -131,7 +140,9 @@ test('convertJsonRowToEntryFormat properly converts entries', async () => {
         "ii": "v4-10101010",
         "lx": "neutre",
         "ph": "nøʏ̯tʁ̥",
-        "ps": "adj",
+        "ps": [
+          "adj",
+        ],
         "ua": 10101010,
         "xs": {
           "en": "My room is painted with a neutral color.",
@@ -150,7 +161,9 @@ test('convertJsonRowToEntryFormat properly converts entries', async () => {
         "lx": "fêter ",
         "nt": "to have a party",
         "ph": "fɛɪ̯te",
-        "ps": "v",
+        "ps": [
+          "v",
+        ],
         "sr": [
           "test source",
           "with multiples sources, test",
@@ -174,7 +187,9 @@ test('convertJsonRowToEntryFormat properly converts entries', async () => {
         "in": "1SG-Fut-2SG-see-Fin.V",
         "lx": "njakulaba",
         "mr": "n-ja-ku-lab-a",
-        "ps": "vp",
+        "ps": [
+          "vp",
+        ],
         "ua": 10101010,
       },
     ]

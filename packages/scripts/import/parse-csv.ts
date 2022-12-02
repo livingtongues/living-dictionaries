@@ -79,7 +79,7 @@ if (import.meta.vitest) {
           "localOrthography": "",
           "morphology": "",
           "notes": "generic term for all kinds of trees",
-          "partOfSpeech": "n",
+          "partOfSpeech": "n, adj",
           "phonetic": "aʁbʁ",
           "photoFile": "",
           "pluralForm": "",
