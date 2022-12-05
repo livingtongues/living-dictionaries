@@ -52,7 +52,7 @@ if (import.meta.vitest) {
           "localOrthography": "",
           "morphology": "",
           "notes": "small automobile",
-          "partOfSpeech": "n",
+          "partOfSpeech": "n,v",
           "phonetic": "vwatyʁ",
           "photoFile": "mountain.jpg",
           "pluralForm": "",
