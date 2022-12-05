@@ -31,6 +31,7 @@ test('convertJsonRowToEntryFormat properly converts entries', async () => {
         "ph": "vwatyʁ",
         "ps": [
           "n",
+          "v",
         ],
         "sd": [
           "vehicle|cars",
@@ -190,6 +191,16 @@ test('convertJsonRowToEntryFormat properly converts entries', async () => {
         "ps": [
           "vp",
         ],
+        "ua": 10101010,
+      },
+      {
+        "ca": 10101010,
+        "gl": {
+          "en": "bye",
+          "es": "adiós",
+        },
+        "ii": "v4-10101010",
+        "lx": "vale",
         "ua": 10101010,
       },
     ]
