@@ -15,25 +15,25 @@
   import type { IPrintFields } from '@living-dictionaries/types';
   import PrintFieldCheckboxes from './PrintFieldCheckboxes.svelte';
   import { Doc } from 'sveltefirets';
+  import { clipCitation } from './clipCitation';
 
-  //Possible solution
-  let citationElement: HTMLDivElement;
-  onMount(async () => {
-    await new Promise((resolve) => {
-      let attempts = 0;
-      const interval = setInterval(() => {
-        attempts++;
-        // @ts-ignore
-        citationElement = document.getElementById('print-citation');
-        console.log(attempts);
-        if (citationElement || attempts > 19) {
-          resolve;
-          clearInterval(interval);
-        }
-      }, 500);
-    });
-  })
-  $: console.log("citation element:", citationElement)
+  let citationElement: HTMLElement;
+  let citationClipped: string;
+  let firstTime = true;
+
+  $: if (citationElement && firstTime) {
+    setTimeout(() => {
+      // use date as parameter (everything before the date is part of the authors)
+      let citationText = citationElement.innerText.split(/(\d{4}\.)/gm);
+      // select only authors from the text content of the Element
+      let authors = citationText.shift().trim();
+      // select the rest 
+      let citationRest = citationText.join('');
+      citationClipped = clipCitation(authors, citationRest);
+      citationElement.innerText = citationClipped + ' et al., ' + citationRest;
+      firstTime = false;
+    }, 100)
+  }
 
   const hitsPerPage = createPersistedStore<number>('printHitsPerPage', 50);
   $: if (browser) {
@@ -153,11 +153,11 @@
         let:data={citation}>
         {#if entries?.length}
           <div
-            id="print-citation"
+            bind:this={citationElement}
             dir="ltr"
             class="text-xs print:fixed print:text-center right-0 top-0 bottom-0"
             style="writing-mode: tb; min-width: 0;">
-            {citation?.citation ? citation.citation + ' ' : ''}
+            {citation?.citation ? citation.citation : ''}
             {new Date().getFullYear()}.
             {$dictionary.name}
             <span>{$t('misc.LD_singular', { default: 'Living Dictionary' })}.</span>
