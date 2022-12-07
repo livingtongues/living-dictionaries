@@ -30,7 +30,7 @@
       // select the rest 
       let citationRest = citationText.join('');
       citationClipped = clipCitation(authors, citationRest);
-      citationElement.innerText = citationClipped + ' et al., ' + citationRest;
+      citationElement.innerText = citationClipped + ' ' + citationRest;
       firstTime = false;
     }, 100)
   }
