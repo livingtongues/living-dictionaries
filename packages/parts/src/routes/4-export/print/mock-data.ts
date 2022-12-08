@@ -1,4 +1,4 @@
-import type { IEntry, ISpeaker } from "@living-dictionaries/types";
+import type { IEntry, ISpeaker } from '@living-dictionaries/types';
 
 const gender: 'm' | 'f' | 'o' = 'f';
 
@@ -25,14 +25,19 @@ export const entries: IEntry[] = [
     mr: 'bar',
     nc: '5',
     ph: 'xiangjiao',
-    ps: 'n',
+    ps: ['n', 'adj'],
     pl: 'shuang xiangjiao',
     sd: ['Plants'],
     sdn: ['2.1', '2.2', '2.3'],
     di: 'West Zimbizi',
     nt: `This is an example of a note, here we can write whatever we want. <img src=x" onerror="alert('XSS Attack')">`, // will be sanitized
     sr: ['A book', 'www.mybook.com'],
-    xs: { en: 'This is a banana', vn: '我很喜歡吃香蕉' },
+    xs: {
+      en: 'This is a banana',
+      es: 'Esto es un plátano',
+      vn: '我很喜歡吃香蕉',
+      zu: 'ubhanana lo',
+    },
     sf: { path: 'https://database.com/sound.mp3', speakerName: 'Bob Smith' },
     pf: {
       gcs: 'Ktt_Jvk55Mp1cHJ6_zXeHU6dEJOjh8p5bk3rvK5kzXVgwB8GDXCSOPipNTveouELfx9_Rh4IllVvS3BLFBTc',

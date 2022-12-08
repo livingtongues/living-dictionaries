@@ -40,8 +40,9 @@
   {/if}
   <b>{entry.xv && selectedFields.example_sentence ? entry.xv : ''}</b>
   {#if entry.xs && selectedFields.example_sentence}
+    {entry.xs.vn ? entry.xs.vn : ''}{entry.xs.vn && Object.entries(entry.xs).length > 1 ? ', ' : ''}
     {#each Object.entries(entry.xs) as sentence, index}
-      {sentence[1]}{index < Object.entries(entry.xs).length - 1 ? ', ' : ''}
+      {entry.xs.vn === sentence[1] ? '' : sentence[1]}{!entry.xs.vn && index < Object.entries(entry.xs).length - 1 ? ', ' : entry.xs.vn !== sentence[1] && index < Object.entries(entry.xs).length - 2 ? ', ' : ''}
     {/each}
   {/if}
 
