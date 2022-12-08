@@ -32,7 +32,11 @@
     {/each}
   {/if}
   {entry.ph && selectedFields.ph ? `/${entry.ph}/` : ''}
-  <i>{entry.ps && selectedFields.ps ? entry.ps : ''}</i>
+  {#if entry.ps}
+    {#each entry.ps as pos, index}   
+    <i>{pos}</i>{index < entry.ps.length - 1 ? ', ' : ''}
+    {/each}
+  {/if}
   {#if entry.gl && selectedFields.gloss}
     {#each Object.entries(entry.gl) as gloss, index}
       {@html sanitize(gloss[1])}{index < Object.entries(entry.gl).length - 1 ? ' - ' : ''}
