@@ -10,7 +10,7 @@ export function parseCSVFrom(file: string): any[] {
 
 if (import.meta.vitest) {
   test('parseCSV logs out example.csv as array', async () => {
-    const file = readFileSync('./import/data/example/example.csv', 'utf8');
+    const file = readFileSync('./import/data/example-v4/example-v4.csv', 'utf8');
     expect(parseCSVFrom(file)).toMatchInlineSnapshot(`
       [
         {
@@ -227,6 +227,33 @@ if (import.meta.vitest) {
           "speakerGender": "m",
           "speakerHometown": "",
           "speakerName": "EB",
+          "vernacular_exampleSentence": "",
+        },
+        {
+          "": "",
+          "dialect": "",
+          "en_exampleSentence": "",
+          "en_gloss": "bye",
+          "es_exampleSentence": "",
+          "es_gloss": "adiós",
+          "interlinearization": "",
+          "lexeme": "vale",
+          "localOrthography": "",
+          "morphology": "",
+          "notes": "",
+          "partOfSpeech": "",
+          "phonetic": "",
+          "photoFile": "",
+          "pluralForm": "",
+          "semanticDomain": "",
+          "semanticDomain2": "",
+          "semanticDomain_custom": "",
+          "soundFile": "",
+          "source": "",
+          "speakerAge": "",
+          "speakerGender": "",
+          "speakerHometown": "",
+          "speakerName": "",
           "vernacular_exampleSentence": "",
         },
       ]
