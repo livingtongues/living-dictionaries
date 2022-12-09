@@ -11,7 +11,7 @@ export function convertJsonRowToEntryFormat(
   Boolean(row.phonetic) && (entry.ph = row.phonetic);
   Boolean(row.morphology) && (entry.mr = row.morphology);
   Boolean(row.interlinearization) && (entry.in = row.interlinearization);
-  Boolean(row.partOfSpeech) && (entry.ps = row.partOfSpeech.split(','));
+  Boolean(row.partOfSpeech) && (entry.ps = returnArrayFromCommaSeparatedItems(row.partOfSpeech));
   Boolean(row.dialect) && (entry.di = row.dialect);
   Boolean(row.variant) && (entry.va = row.variant);
   Boolean(row.nounClass) && (entry.nc = row.nounClass);
@@ -61,13 +61,27 @@ export function convertJsonRowToEntryFormat(
     delete entry.xs;
   }
 
-  if (entry.ps) {
-    entry.ps = entry.ps.map((pos) => pos.trim());
-  }
-
   entry.ii = `v4-${dateStamp}`;
   entry.ca = timestamp as Timestamp;
   entry.ua = timestamp as Timestamp;
 
   return entry;
+}
+
+function returnArrayFromCommaSeparatedItems(string: string): string[] {
+  return string?.split(',').map((item) => item.trim()) || [];
+}
+
+if (import.meta.vitest) {
+  describe('returnArrayFromCommaSeparatedItems', () => {
+    test('splits two comma separated items into an array', () => {
+      expect(returnArrayFromCommaSeparatedItems('n,v')).toStrictEqual(['n', 'v']);
+    });
+    test('handles unusual comma spacing', () => {
+      expect(returnArrayFromCommaSeparatedItems('n, v ,adj')).toStrictEqual(['n', 'v', 'adj']);
+    });
+    test('returns empty array from undefined', () => {
+      expect(returnArrayFromCommaSeparatedItems(undefined)).toStrictEqual([]);
+    });
+  });
 }
