@@ -32,12 +32,6 @@ export function convertJsonRowToEntryFormat(
   Boolean(row.localOrthography5) && (entry.lo5 = row.localOrthography5);
 
   Boolean(row.notes) && (entry.nt = row.notes);
-  // Notes parsing for Opata
-  // if (row.notes) {
-  //     const parsedNotes = parseSourceFromNotes(row.notes);
-  //     Boolean(parsedNotes.notes) && (entry.nt = parsedNotes.notes);
-  //     Boolean(parsedNotes.source) && (entry.sr = [parsedNotes.source]);
-  // }
 
   Object.keys(row).forEach((key) => {
     // gloss fields are labeled using bcp47 language codes followed by '_gloss' (e.g. es_gloss, tpi_gloss)
