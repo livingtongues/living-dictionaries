@@ -11,7 +11,7 @@ Please also provide applicable links using relative paths from root (e.g. `/apat
 
 #### Checklist before marking ready to merge
 Please keep it in draft mode until these are completed:
-- [ ] Equal time was spent cleaning the code as writing it
+- [ ] Equal time was spent cleaning the code as writing it (Boy Scout Rule)
   - [ ] Functions
     - [ ] Functions that don't belong in Svelte components are extracted out into `.ts` files
     - [ ] Functions are short and well named
