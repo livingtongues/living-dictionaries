@@ -212,7 +212,6 @@ importers:
       vitest: ^0.25.3
       wavesurfer.js: ^5.2.0
       web-vitals: ^2.1.2
-      xregexp: ^5.1.1
       xss: ^1.0.14
     devDependencies:
       '@iconify/json': 2.1.143
@@ -255,7 +254,6 @@ importers:
       vitest: 0.25.3
       wavesurfer.js: 5.2.0
       web-vitals: 2.1.4
-      xregexp: 5.1.1
       xss: 1.0.14
 
   packages/types:
@@ -9419,12 +9417,6 @@ packages:
   /xregexp/2.0.0:
     resolution: {integrity: sha512-xl/50/Cf32VsGq/1R8jJE5ajH1yMCQkpmoS10QbFZWl2Oor4H0Me64Pu2yxvsRWK3m6soJbmGfzSR7BYmDcWAA==}
     dev: false
-
-  /xregexp/5.1.1:
-    resolution: {integrity: sha512-fKXeVorD+CzWvFs7VBuKTYIW63YD1e1osxwQ8caZ6o1jg6pDAbABDG54LCIq0j5cy7PjRvGIq6sef9DYPXpncg==}
-    dependencies:
-      '@babel/runtime-corejs3': 7.17.8
-    dev: true
 
   /xss/1.0.14:
     resolution: {integrity: sha512-og7TEJhXvn1a7kzZGQ7ETjdQVS2UfZyTlsEdDOqvQF7GoxNfY+0YLCzBy1kPdsDDx4QuNAonQPddpsn6Xl/7sw==}
