@@ -4,7 +4,7 @@ import { parseCSVFrom } from './parse-csv.js';
 
 test('convertJsonRowToEntryFormat properly converts entries', async () => {
   const dateStamp = 10101010; // fake timestamp to keep test result from changing everytime it's run
-  const dictionaryId = 'example';
+  const dictionaryId = 'example-v4';
   const file = readFileSync(`./import/data/${dictionaryId}/${dictionaryId}.csv`, 'utf8');
   const rows = parseCSVFrom(file);
   const entries = rows.map((row: any) =>
