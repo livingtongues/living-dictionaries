@@ -1,11 +1,13 @@
 #### Relevant Issue
 (prepend "closes" if issue will be closed by PR)
 
+
 #### Summarize what changed in this PR (for developers)
 
 
 #### How can the changes be tested? 
 Please also provide applicable links using relative paths from root (e.g. `/apatani/entries`) and reviewers can just add that onto preview urls or localhost.
+
 
 #### Checklist before marking ready to merge
 Please keep it in draft mode until these are completed:
