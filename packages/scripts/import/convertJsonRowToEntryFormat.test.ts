@@ -3,20 +3,20 @@ import { readFileSync } from 'fs';
 import { parseCSVFrom } from './parse-csv.js';
 
 test('convertJsonRowToEntryFormat properly converts entries', async () => {
-  const dateStamp = 10101010; // fake timestamp to keep test result from changing everytime it's run
+  const fakeTimeStamp = 10101010;
   const dictionaryId = 'example-v4';
   const file = readFileSync(`./import/data/${dictionaryId}/${dictionaryId}.csv`, 'utf8');
   const rows = parseCSVFrom(file);
-  const entries = rows.map((row: any) =>
+  const rowsWithoutHeader = removeHeaderRow(rows)
+  const entries = rowsWithoutHeader.map((row) =>
     convertJsonRowToEntryFormat(
       row,
-      dateStamp,
-      dateStamp as unknown as FirebaseFirestore.FieldValue
+      fakeTimeStamp,
+      fakeTimeStamp as unknown as FirebaseFirestore.FieldValue
     )
   );
 
-  // remove header row w/ splice
-  expect(entries.splice(1)).toMatchInlineSnapshot(`
+  expect(entries).toMatchInlineSnapshot(`
     [
       {
         "ca": 10101010,
@@ -206,3 +206,7 @@ test('convertJsonRowToEntryFormat properly converts entries', async () => {
     ]
   `);
 });
+
+function removeHeaderRow(rows: any[]) {
+  return rows.splice(1);
+}
