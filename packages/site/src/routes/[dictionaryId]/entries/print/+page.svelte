@@ -15,7 +15,7 @@
   import type { IPrintFields } from '@living-dictionaries/types';
   import PrintFieldCheckboxes from './PrintFieldCheckboxes.svelte';
   import { Doc } from 'sveltefirets';
-  import { truncateAuthors } from './clipCitation';
+  import { truncateAuthors } from './truncateAuthorsors';
 
   const hitsPerPage = createPersistedStore<number>('printHitsPerPage', 50);
   $: if (browser) {
