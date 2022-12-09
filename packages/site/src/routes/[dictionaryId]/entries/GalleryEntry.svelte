@@ -19,41 +19,18 @@
         {canEdit}
         on:delete={() => deleteImage(entry)} />
     </div>
-    <a data-sveltekit-prefetch href={entry.id}>
-      <div class="card-content-wrapper">
-        <p class="font-semibold absolute top-0 left-0">
-          {@html entry._highlightResult ? entry._highlightResult?.lx?.value : entry.lx}
-        </p>
+    <a href={entry.id} style="background: #f3f3f3;" class="block p-[10px]">
+      <div class="font-semibold">
+        {@html entry._highlightResult?.lx?.value || entry.lx}
+      </div>
+      <div class="text-xs">
         <!--Simple solution until we really work on implementing this feature-->
         {#if $dictionary.id === 'iquito' || $dictionary.id === 'muniche'}
-          <p class="absolute bottom-0 left-0 text-xs">
-            {@html entry._highlightResult
-              ? entry._highlightResult?.gl?.es?.value
-              : entry.gl && entry.gl.es
-              ? entry.gl.es
-              : ''}
-          </p>
+          {@html entry._highlightResult?.gl?.es?.value || entry.gl?.es || ''}
         {:else}
-          <p class="absolute bottom-0 left-0 text-xs">
-            {@html entry._highlightResult
-              ? entry._highlightResult?.gl?.en?.value
-              : entry.gl && entry.gl.en
-              ? entry.gl.en
-              : ''}
-          </p>
+          {@html entry._highlightResult?.gl?.en?.value || entry.gl?.en || ''}
         {/if}
       </div>
     </a>
   </div>
 </div>
-
-<style>
-  .card-content-wrapper {
-    background: #f3f3f3;
-    padding: 10px;
-  }
-
-  .card-content-wrapper > p {
-    position: relative;
-  }
-</style>
