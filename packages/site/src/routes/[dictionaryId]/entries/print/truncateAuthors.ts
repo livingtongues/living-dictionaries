@@ -9,7 +9,7 @@ export function truncateAuthors(authorString: string): string {
     const authors = authorString.split(splitAuthorsRgx);
     for (const author of authors) {
       if (truncatedAuthors.length + author.length > maxLengthLookingGoodInLetter) {
-        truncatedAuthors += 'et al., ';
+        truncatedAuthors = addEtAlEnding(truncatedAuthors);
         break;
       }
       truncatedAuthors += author;
@@ -17,4 +17,8 @@ export function truncateAuthors(authorString: string): string {
     return truncatedAuthors;
   }
   return authorString + ', ';
+}
+
+function addEtAlEnding(authors: string): string {
+  return authors.trim().replace(/,$/, '') + ', et al., ';
 }
