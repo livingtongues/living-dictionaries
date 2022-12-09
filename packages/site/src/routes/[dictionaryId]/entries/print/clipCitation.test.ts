@@ -1,22 +1,29 @@
-import { clipCitation } from './clipCitation';
+import { truncateAuthors } from './clipCitation';
+
+// pulling examples from https://livingtongues.org/anderson-bibliography/
+// most styles guides only invert the last name to the front for the first author for alphabetical reasons, after that we can rely on commas, 'and', and '&' to split things.
 
 test('One author in citation', () =>
-  expect(clipCitation('Anderson G.')).toBe('Anderson G.'));
+  expect(truncateAuthors('Anderson, Gregory D. S.')).toMatchInlineSnapshot('"Anderson, Gregory D. S., "'));
 
 test('One author in citation with apostrophe in her/his name', () =>
-  expect(clipCitation("O'Neal S.")).toBe("O'Neal S."));
+  expect(truncateAuthors("O'Neal S.")).toMatchInlineSnapshot('"O\'Neal S., "'));
 
-test('Two authors in citation but still below the max size', () =>
-  expect(clipCitation('Derwing, T. M. & Rossiter, M. J.'))
-    .toBe('Derwing, T. M. & Rossiter, M. J.'));
+test('Two authors in citation below maxLengthLookingGoodInLetter', () =>
+  expect(truncateAuthors('Anderson, Gregory D. S. and Opino Gomango.'))
+    .toMatchInlineSnapshot('"Anderson, Gregory D. S. and Opino Gomango., "'));
 
-test('Authors in citation exceding max size', () =>
-  expect(clipCitation('Derwing T. Summo A. O. Davids M G. & Timmo E. R.'))
-    .toBe('Derwing T. et al.,'));
+test('Two authors in citation exceeding maxLengthLookingGoodInLetter', () =>
+  expect(truncateAuthors('Derwing, Travis, & James the Great Rossiter'))
+    .toMatchInlineSnapshot('"Derwing, Travis, & James the Great Rossiter, "'));
 
-test('Authors in citation exceding max size and first author with accent', () =>
-  expect(clipCitation('Córdova D. Summo A. O. Davids M G. & Timmo E. R.'))
-    .toBe('Córdova D. et al.,'));
+test('Authors in citation exceding maxLengthLookingGoodInLetter', () =>
+  expect(truncateAuthors('Derwing, T., A. O. Summo, M G. Davids, & E. R. Timmo'))
+    .toMatchInlineSnapshot('"Derwing, T., A. O. Summo, M G. Davids, et al., "'));
+
+test('Authors in citation exceding maxLengthLookingGoodInLetter', () =>
+  expect(truncateAuthors('Córdova D., A. O. Summo, M G. Davids, & Edward. R. Timmo'))
+    .toMatchInlineSnapshot('"Córdova D., A. O. Summo, M G. Davids, et al., "'));
 
 test('Handles undefined', () =>
-  expect(clipCitation(undefined)).toBe(''));
+  expect(truncateAuthors(undefined)).toMatchInlineSnapshot('""'));
