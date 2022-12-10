@@ -103,7 +103,10 @@
     "con_lang_description": "Este dicionário é para uma linguagem construída (um idioma inventado por seres humanos nos últimos anos, para um livro ou um filme)? Se sim, descreva brevemente.",
     "uncertainty": "Não sei",
     "select_region": "Selecione a região",
-    "secondary_coordinates": "Coordenadas secundárias"
+    "secondary_coordinates": "Coordenadas secundárias",
+    "map_instructions": "Clique no mapa para adicionar coordenadas secundárias.",
+    "print_access": "Permitir que os espectadores imprimam o dicionário",
+    "primary_coordinate": "Coordenada primária"
   },
   "dictionary": {
     "latitude": "Latitude",
@@ -220,7 +223,8 @@
     "dict_name": "Nome do Dicionário",
     "public_private_meaning": "Público significa que qualquer um pode ver o seu Dicionário o qual requer consentimento da comunidade. Os Dicionários Privados são visíveis apenas para si e para os seus colaboradores.",
     "optional_data_fields": "Campo de dados opcionais",
-    "unable_to_delete": "Nota: Você não poderá excluir esses idiomas de brilho posteriormente."
+    "unable_to_delete": "Nota: Você não poderá excluir esses idiomas de brilho posteriormente.",
+    "print_access_meaning": "Isso dá ao público a capacidade de baixar e imprimir este dicionário vivo como um .pdf"
   },
   "speakers": {
     "add_new_speaker": "Adicionar um falante novo",

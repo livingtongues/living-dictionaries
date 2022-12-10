@@ -35,6 +35,4 @@
   });
 </script>
 
-<div class="tw-prose">
-  <div bind:this={editorElement} contenteditable bind:innerHTML={value} />
-</div>
+<div bind:this={editorElement} contenteditable bind:innerHTML={value} />

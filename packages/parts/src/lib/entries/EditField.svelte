@@ -21,6 +21,7 @@
   }
 
   function save() {
+    value = inputEl?.value || value; // IpaKeyboard modifies input's value from outside this component so the bound value here doesn't update. This is hacky and the alternative is to emit events from the IpaKeyboard rather than bind to any neighboring element. This makes the adding and backspacing functions potentially needing to be applied in every context where the IPA keyboard is used. Until we know more how the IPA keyboard will be used, this line here is sufficient.
     dispatch('valueupdate', {
       field,
       newValue: value.trim(),
@@ -124,11 +125,29 @@
   <div class="rounded-md shadow-sm">
     {#if field === 'nt'}
       {#await import('../editor/ClassicCustomized.svelte') then { default: ClassicCustomized }}
-        <ClassicCustomized {editorConfig} bind:html={value} />
+      <Keyman>
+        <InputWrapper fixed target=".ck-editor__editable_inline" canChooseKeyboard position="bottom">
+          <ClassicCustomized {editorConfig} bind:html={value} />
+        </InputWrapper>
+      </Keyman>  
       {/await}
     {:else if field.startsWith('gl') || field.startsWith('xs')}
       <Keyman>
         <InputWrapper fixed bcp={field.split('.')[1]}>
+          <input
+            bind:this={inputEl}
+            dir="ltr"
+            type="text"
+            required={field === 'lx'}
+            use:autofocus
+            bind:value
+            class:sompeng={display === 'Sompeng-Mardir'}
+            class="form-input block w-full pr-9" />
+        </InputWrapper>
+      </Keyman>
+    {:else if field.startsWith('lo') || field === 'lx'}
+      <Keyman>
+        <InputWrapper fixed canChooseKeyboard>
           <input
             bind:this={inputEl}
             dir="ltr"
@@ -149,6 +168,14 @@
         use:autofocus
         bind:value
         class="form-input block w-full" />
+    {/if}
+
+    {#if field === 'ph'}
+      {#await import('../entries/keyboards/ipa/IpaKeyboard.svelte') then { default: IpaKeyboard }}
+        <div class="mt-2">
+          <IpaKeyboard target={inputEl} />
+        </div>
+      {/await}
     {/if}
 
     {#if field === 'in'}

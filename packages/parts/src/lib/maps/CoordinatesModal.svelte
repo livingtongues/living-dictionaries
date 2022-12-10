@@ -9,6 +9,7 @@
   import Geocoder from './mapbox/geocoder/Geocoder.svelte';
   import Marker from './mapbox/map/Marker.svelte';
   import ToggleStyle from './mapbox/controls/ToggleStyle.svelte';
+  import NavigationControl from './mapbox/controls/NavigationControl.svelte';
 
   export let lng: number;
   export let lat: number;
@@ -113,6 +114,8 @@
         lat={centerLat}
         {zoom}
         on:click={({ detail }) => setMarker(detail.lng, detail.lat)}>
+        <slot />
+        <NavigationControl />
         <Geocoder
           options={{ marker: false }}
           placeholder={t ? $t('about.search') : 'Search'}

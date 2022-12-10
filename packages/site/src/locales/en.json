@@ -103,7 +103,10 @@
     "con_lang_description": "Is this dictionary for a constructed language (a language invented by humans in recent years, for a book or a movie)? If yes, please briefly describe.",
     "uncertainty": "I don't know",
     "select_region": "Select Region",
-    "secondary_coordinates": "Secondary Coordinates"
+    "secondary_coordinates": "Secondary Coordinates",
+    "map_instructions": "Click on the map to add secondary coordinates.",
+    "print_access": "Allow Viewers to Print Dictionary",
+    "primary_coordinate": "Primary coordinate"
   },
   "dictionary": {
     "latitude": "Latitude",
@@ -220,7 +223,8 @@
     "dict_name": "Dictionary Name",
     "public_private_meaning": "Public means anyone can see your dictionary which requires community consent. Private dictionaries are visible only to you and your collaborators.",
     "optional_data_fields": "Optional Data Fields",
-    "unable_to_delete": "Note: you will not be able to delete these glossing languages later."
+    "unable_to_delete": "Note: you will not be able to delete these glossing languages later.",
+    "print_access_meaning": "This gives the public the ability to download and print this Living Dictionary as a .PDF"
   },
   "speakers": {
     "add_new_speaker": "Add New Speaker",
