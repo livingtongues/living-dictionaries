@@ -12,6 +12,7 @@
   import Region from '../maps/mapbox/map/Region.svelte';
   import CoordinatesModal from '../maps/CoordinatesModal.svelte';
   import RegionModal from '../maps/RegionModal.svelte';
+  import NavigationControl from '../maps/mapbox/controls/NavigationControl.svelte';
 
   import { createEventDispatcher } from 'svelte';
   const dispatch = createEventDispatcher<{
@@ -20,9 +21,9 @@
     updatePoints: IPoint[];
     updateRegions: IRegion[];
   }>();
-  
+
   export let dictionary: Partial<IDictionary>;
-    $: hasCoordinates = dictionary.coordinates?.latitude;
+  $: hasCoordinates = dictionary.coordinates?.latitude;
 
   function addCoordinates({ detail }: { detail: { lng: number; lat: number } }) {
     if (hasCoordinates) {
@@ -43,19 +44,30 @@
   {t ? $t('create.where_spoken') : 'Where is this language spoken?'}*
 </div>
 
+<div class="text-xs text-gray-600 mb-2">
+  {t ? $t('create.map_instructions') : 'Click on the map to add secondary coordinates.'}
+</div>
 {#if hasCoordinates}
   <div class="h-240px">
     <Map
       lng={dictionary.coordinates.longitude}
       lat={dictionary.coordinates.latitude}
       on:click={({ detail }) => (mapClickCoordinates = detail)}>
+      <NavigationControl />
       {#if mapClickCoordinates}
         <CoordinatesModal
           {t}
           lng={+mapClickCoordinates.lng.toFixed(4)}
           lat={+mapClickCoordinates.lat.toFixed(4)}
           on:update={addCoordinates}
-          on:close={() => (mapClickCoordinates = null)} />
+          on:close={() => (mapClickCoordinates = null)}>
+          <Marker
+            lng={dictionary.coordinates.longitude}
+            lat={dictionary.coordinates.latitude}
+            color="blue">
+            <Popup offset={30} open>{t ? $t('create.primary_coordinate') : 'Primary coordinate'}</Popup>
+          </Marker>
+        </CoordinatesModal>
       {/if}
       <Marker
         lat={dictionary.coordinates.latitude}
@@ -106,7 +118,14 @@
                       points.splice(index, 1);
                       dispatch('updatePoints', points);
                     }}
-                    on:close={toggle} />
+                    on:close={toggle}>
+                    <Marker
+                      lng={dictionary.coordinates.longitude}
+                      lat={dictionary.coordinates.latitude}
+                      color="blue">
+                      <Popup offset={30}>Primary coordinate</Popup>
+                    </Marker>
+                  </CoordinatesModal>
                 {/if}
               </ShowHide>
             </Popup>
@@ -135,7 +154,14 @@
                     regions.splice(index, 1);
                     dispatch('updateRegions', regions);
                   }}
-                  on:close={toggle} />
+                  on:close={toggle}>
+                  <Marker
+                    lng={dictionary.coordinates.longitude}
+                    lat={dictionary.coordinates.latitude}
+                    color="blue">
+                    <Popup offset={30}>Primary coordinate</Popup>
+                  </Marker>
+                </RegionModal>
               {/if}
             </ShowHide>
           </Region>
@@ -159,7 +185,16 @@
       {/if}
     </Button>
     {#if show}
-      <CoordinatesModal {t} lng={null} lat={null} on:update={addCoordinates} on:close={toggle} />
+      <CoordinatesModal {t} lng={dictionary?.coordinates?.longitude} lat={dictionary?.coordinates?.latitude} on:update={addCoordinates} on:close={toggle}>
+        {#if hasCoordinates}
+          <Marker
+            lng={dictionary.coordinates.longitude}
+            lat={dictionary.coordinates.latitude}
+            color="blue">
+            <Popup offset={30} open>{t ? $t('create.map_instructions') : 'Click on the map to add secondary coordinates.'}</Popup>
+          </Marker>
+        {/if}
+      </CoordinatesModal>
     {/if}
   </ShowHide>
 
@@ -177,7 +212,14 @@
             const regions = (dictionary.regions && [...dictionary.regions, detail]) || [detail];
             dispatch('updateRegions', regions);
           }}
-          on:close={toggle} />
+          on:close={toggle}>
+          <Marker
+            lng={dictionary.coordinates.longitude}
+            lat={dictionary.coordinates.latitude}
+            color="blue">
+            <Popup offset={30} open>{t ? $t('create.map_instructions') : 'Click on the map to add secondary coordinates.'}</Popup>
+          </Marker>
+        </RegionModal>
       {/if}
     </ShowHide>
   {/if}

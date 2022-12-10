@@ -103,7 +103,10 @@
     "con_lang_description": "这本针对构造语言的字典（近年来人类发明的语言，一本书还是电影）？如果是，请简要描述。",
     "uncertainty": "我不知道",
     "select_region": "选择区域",
-    "secondary_coordinates": "次要坐标"
+    "secondary_coordinates": "次要坐标",
+    "map_instructions": "单击地图以添加辅助坐标。",
+    "print_access": "允许观众打印词典",
+    "primary_coordinate": "主坐标"
   },
   "dictionary": {
     "latitude": "纬度",
@@ -220,7 +223,8 @@
     "dict_name": "字典名称",
     "public_private_meaning": "公共意味着任何人都可以看到你的字典所以需要社区的同意。私人字典则是只有你和你的合作者可见。",
     "optional_data_fields": "可选的数据字段",
-    "unable_to_delete": "注意：您将无法删除这些语言标注"
+    "unable_to_delete": "注意：您将无法删除这些语言标注",
+    "print_access_meaning": "这使公众能够下载和打印此Living词典为.pdf"
   },
   "speakers": {
     "add_new_speaker": "添加新的母语者",
