@@ -125,11 +125,29 @@
   <div class="rounded-md shadow-sm">
     {#if field === 'nt'}
       {#await import('../editor/ClassicCustomized.svelte') then { default: ClassicCustomized }}
-        <ClassicCustomized {editorConfig} bind:html={value} />
+      <Keyman>
+        <InputWrapper fixed target=".ck-editor__editable_inline" canChooseKeyboard position="bottom">
+          <ClassicCustomized {editorConfig} bind:html={value} />
+        </InputWrapper>
+      </Keyman>  
       {/await}
     {:else if field.startsWith('gl') || field.startsWith('xs')}
       <Keyman>
         <InputWrapper fixed bcp={field.split('.')[1]}>
+          <input
+            bind:this={inputEl}
+            dir="ltr"
+            type="text"
+            required={field === 'lx'}
+            use:autofocus
+            bind:value
+            class:sompeng={display === 'Sompeng-Mardir'}
+            class="form-input block w-full pr-9" />
+        </InputWrapper>
+      </Keyman>
+    {:else if field.startsWith('lo') || field === 'lx'}
+      <Keyman>
+        <InputWrapper fixed canChooseKeyboard>
           <input
             bind:this={inputEl}
             dir="ltr"

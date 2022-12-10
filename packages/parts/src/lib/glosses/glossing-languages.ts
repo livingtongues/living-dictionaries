@@ -944,3 +944,16 @@ export const glossingLanguages: IGlossLanguages = {
     vernacularName: 'isiZulu',
   },
 };
+
+export const additionalKeyboards: IGlossLanguages = {
+  'srb-sora': {
+    vernacularName: 'Sora',
+    internalName: 'basic_kbdsora',
+    showKeyboard: true,
+  },
+  'sat-olck': {
+    vernacularName: 'Santhali Ol Chiki',
+    internalName: 'basic_kbdolch',
+    showKeyboard: true,
+  },
+};
