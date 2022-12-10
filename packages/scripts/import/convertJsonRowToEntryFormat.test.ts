@@ -3,20 +3,20 @@ import { readFileSync } from 'fs';
 import { parseCSVFrom } from './parse-csv.js';
 
 test('convertJsonRowToEntryFormat properly converts entries', async () => {
-  const dateStamp = 10101010; // fake timestamp to keep test result from changing everytime it's run
-  const dictionaryId = 'example';
+  const fakeTimeStamp = 10101010;
+  const dictionaryId = 'example-v4';
   const file = readFileSync(`./import/data/${dictionaryId}/${dictionaryId}.csv`, 'utf8');
   const rows = parseCSVFrom(file);
-  const entries = rows.map((row: any) =>
+  const rowsWithoutHeader = removeHeaderRow(rows)
+  const entries = rowsWithoutHeader.map((row) =>
     convertJsonRowToEntryFormat(
       row,
-      dateStamp,
-      dateStamp as unknown as FirebaseFirestore.FieldValue
+      fakeTimeStamp,
+      fakeTimeStamp as unknown as FirebaseFirestore.FieldValue
     )
   );
 
-  // remove header row w/ splice
-  expect(entries.splice(1)).toMatchInlineSnapshot(`
+  expect(entries).toMatchInlineSnapshot(`
     [
       {
         "ca": 10101010,
@@ -29,7 +29,10 @@ test('convertJsonRowToEntryFormat properly converts entries', async () => {
         "lx": "voiture",
         "nt": "small automobile",
         "ph": "vwatyʁ",
-        "ps": "n",
+        "ps": [
+          "n",
+          "v",
+        ],
         "sd": [
           "vehicle|cars",
         ],
@@ -55,7 +58,10 @@ test('convertJsonRowToEntryFormat properly converts entries', async () => {
         "lx": "arbre",
         "nt": "generic term for all kinds of trees",
         "ph": "aʁbʁ",
-        "ps": "n",
+        "ps": [
+          "n",
+          "adj",
+        ],
         "sdn": [
           "1.4",
           "1.2",
@@ -79,7 +85,9 @@ test('convertJsonRowToEntryFormat properly converts entries', async () => {
         "nt": "a cylindrical device for liquids",
         "ph": "tyb",
         "pl": "tubes",
-        "ps": "n",
+        "ps": [
+          "n",
+        ],
         "sd": [
           "plumbing",
         ],
@@ -104,7 +112,9 @@ test('convertJsonRowToEntryFormat properly converts entries', async () => {
         "lx": "voiture",
         "nt": "small automobile",
         "ph": "vwɑtYʁ",
-        "ps": "n",
+        "ps": [
+          "n",
+        ],
         "sd": [
           "vehicle",
         ],
@@ -131,7 +141,9 @@ test('convertJsonRowToEntryFormat properly converts entries', async () => {
         "ii": "v4-10101010",
         "lx": "neutre",
         "ph": "nøʏ̯tʁ̥",
-        "ps": "adj",
+        "ps": [
+          "adj",
+        ],
         "ua": 10101010,
         "xs": {
           "en": "My room is painted with a neutral color.",
@@ -150,7 +162,9 @@ test('convertJsonRowToEntryFormat properly converts entries', async () => {
         "lx": "fêter ",
         "nt": "to have a party",
         "ph": "fɛɪ̯te",
-        "ps": "v",
+        "ps": [
+          "v",
+        ],
         "sr": [
           "test source",
           "with multiples sources, test",
@@ -174,9 +188,25 @@ test('convertJsonRowToEntryFormat properly converts entries', async () => {
         "in": "1SG-Fut-2SG-see-Fin.V",
         "lx": "njakulaba",
         "mr": "n-ja-ku-lab-a",
-        "ps": "vp",
+        "ps": [
+          "vp",
+        ],
+        "ua": 10101010,
+      },
+      {
+        "ca": 10101010,
+        "gl": {
+          "en": "bye",
+          "es": "adiós",
+        },
+        "ii": "v4-10101010",
+        "lx": "vale",
         "ua": 10101010,
       },
     ]
   `);
 });
+
+function removeHeaderRow(rows: any[]) {
+  return rows.splice(1);
+}
