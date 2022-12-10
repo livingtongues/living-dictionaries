@@ -126,7 +126,7 @@
     {#if field === 'nt'}
       {#await import('../editor/ClassicCustomized.svelte') then { default: ClassicCustomized }}
       <Keyman>
-        <InputWrapper fixed target=".ck-editor__editable_inline" canChooseKeyboard>
+        <InputWrapper fixed target=".ck-editor__editable_inline" canChooseKeyboard position="bottom">
           <ClassicCustomized {editorConfig} bind:html={value} />
         </InputWrapper>
       </Keyman>  
