@@ -1,6 +1,7 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
   import Header from '$lib/components/shell/Header.svelte';
+  import SeoMetaTags from '$lib/components/SeoMetaTags.svelte';
 </script>
 
 <svelte:head>
@@ -814,3 +815,8 @@
     </div>
   </div>
 </div>
+
+<SeoMetaTags
+  title={$_('dictionary.terms_of_use', { default: 'Terms of Use' })}
+  description={$_('', { default: 'Terms of Use for the Living Dictionaries platform. This page includes information about the terms, intellectual property rights, user representations, prohibited activities, user-generated contributions, and more.' })}
+  keywords="Terms of Use for the Living Dictionaries platform. This page includes information about the terms, intellectual property rights, user representations, prohibited activities, user-generated contributions, and more." />
