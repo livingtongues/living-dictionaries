@@ -2,6 +2,7 @@
   import { _ } from 'svelte-i18n';
   import Header from '$lib/components/shell/Header.svelte';
   import Button from 'svelte-pieces/ui/Button.svelte';
+  import SeoMetaTags from '$lib/components/SeoMetaTags.svelte';
 </script>
 
 <svelte:head>
@@ -263,6 +264,11 @@
     {$_('header.donate', { default: 'Donate' })}
   </Button>
 </div>
+
+<SeoMetaTags
+  title={$_('about.about_LD', { default: 'About Living Dictionaries' })}
+  description={$_('', { default: 'Living Dictionaries are mobile-friendly web tools that support endangered, under-represented and diasporic languages. Led by community activists around the globe, Living Dictionaries are collaborative multimedia projects that help languages survive for generations to come.' })}
+  keywords="Minority Languages, Indigenous Languages, Language Documentation, Dictionary, Minority Community, Language Analysis, Language Education, Endangered Languages, Language Revitalization, Linguistics, Word Lists, Linguistic Analysis, Dictionaries, Living Dictionaries, Living Tongues, Under-represented Languages, Tech Resources, Language Sustainability, Language Resources, Diaspora Languages, Elicitation, Language Archives, Ancient Languages, World Languages, Obscure Languages, Little Known languages, Digital Dictionary, Dictionary Software, Free Software, Online Dictionary Builder, Living Tongues Institute for Endangered Languages, Gregory D. S. Anderson" />
 
 <!-- Used to have TOU link here -->
 <style>
