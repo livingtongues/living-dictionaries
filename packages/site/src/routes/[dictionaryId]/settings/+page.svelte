@@ -15,6 +15,7 @@
     glossingLanguages,
     EditableAlternateNames,
   } from '@living-dictionaries/parts';
+  import SeoMetaTags from '$lib/components/SeoMetaTags.svelte';
 
   async function togglePrintAccess(settingPrintAccess: boolean) {
     try {
@@ -227,3 +228,9 @@
     {$t('misc.settings', { default: 'Settings' })}
   </title>
 </svelte:head>
+
+<SeoMetaTags
+  title={$t('misc.settings', { default: 'Settings' })}
+  dictionaryName={$dictionaryStore.name}
+  description={$t('', { default: "Under Settings, dictionary managers can edit the dictionary's parameters such as its name, ISO 639-3 Code, Glottocode, translation languages, alternate names, geo-coordinates, and other information. They can also toggle on or off the ability to make the dictionary public, and the ability to make the dictionary printable to viewers." })}
+  keywords="Settings, Parameters, ISO 639-3, Glottocde, glossing languages, alternate names, GPS, language medata, public dictionary, private dictionary, Endangered Languages, Language Documentation, Language Revitalization, Build a Dictionary, Online Dictionary, Digital Dictionary, Dictionary Software, Free Software, Online Dictionary Builder, Living Dictionaries, Living Dictionary, Edit a dictionary, Search a dictionary, Browse a dictionary, Explore a Dictionary" />

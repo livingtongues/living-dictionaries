@@ -9,6 +9,7 @@
   import { inviteHelper } from '$lib/helpers/inviteHelper';
   import { Invitation } from '@living-dictionaries/parts';
   import Citation from './Citation.svelte';
+  import SeoMetaTags from '$lib/components/SeoMetaTags.svelte';
 
   let helperType: IHelper[];
   let inviteType: IInvite[];
@@ -258,3 +259,9 @@
 <Citation isManager={$isManager} dictionary={$dictionary} />
 
 <div class="mb-12" />
+
+<SeoMetaTags
+  title={$_('dictionary.contributors', { default: 'Contributors' })}
+  dictionaryName={$dictionary.name}
+  description={$_('', { default: 'Learn about the people who are building and managing this Living Dictionary.' })}
+  keywords="Contributors, Managers, Writers, Editors, Dictionary builders, Endangered Languages, Language Documentation, Language Revitalization, Build a Dictionary, Online Dictionary, Digital Dictionary, Dictionary Software, Free Software, Online Dictionary Builder, Living Dictionaries, Living Dictionary, Edit a dictionary, Search a dictionary, Browse a dictionary, Explore a Dictionary, Print a dictionary" />
