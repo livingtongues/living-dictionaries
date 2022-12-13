@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { _ } from 'svelte-i18n';
+  // import { _ } from 'svelte-i18n';
   import { getContext } from 'svelte';
   import type { InstantSearch } from 'instantsearch.js';
   const search: InstantSearch = getContext('search');
@@ -20,7 +20,7 @@
   import { dictionary, canEdit, admin } from '$lib/stores';
   import ListEntry from '../ListEntry.svelte';
   import { Doc } from 'sveltefirets';
-  import SeoMetaTags from '$lib/components/SeoMetaTags.svelte';
+  // import SeoMetaTags from '$lib/components/SeoMetaTags.svelte';
 </script>
 
 <Hits {search} let:entries>
@@ -41,8 +41,8 @@
 </Hits>
 <Pagination {search} />
 
-<SeoMetaTags
+<!-- <SeoMetaTags
   title={$_('', { default: 'Entries List' })}
   dictionaryName={$dictionary.name}
   description={$_('', { default: 'The entries in this Living Dictionary are displayed in a comprehensive list that visitors can easily browse by using the page tabs at the bottom of the screen, or search by using the powerful search bar located at the top of the page. Visitors may also filter and display specific content from this Living Dictionary by activating filters for parts of speech, semantic domains, custom tags, speaker information and other metadata.' })}
-  keywords="Endangered Languages, Language Documentation, Language Revitalization, Build a Dictionary, Online Dictionary, Digital Dictionary, Dictionary Software, Free Software, Online Dictionary Builder, Living Dictionaries, Living Dictionary, Edit a dictionary, Search a dictionary, Browse a dictionary, Explore a Dictionary" />
+  keywords="Endangered Languages, Language Documentation, Language Revitalization, Build a Dictionary, Online Dictionary, Digital Dictionary, Dictionary Software, Free Software, Online Dictionary Builder, Living Dictionaries, Living Dictionary, Edit a dictionary, Search a dictionary, Browse a dictionary, Explore a Dictionary" /> -->

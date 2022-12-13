@@ -1,12 +1,12 @@
 <script lang="ts">
-  import { _ } from 'svelte-i18n';
+  // import { _ } from 'svelte-i18n';
   import { getContext } from 'svelte';
   import type { InstantSearch } from 'instantsearch.js';
   const search: InstantSearch = getContext('search');
 
   import Hits from '$lib/components/search/Hits.svelte';
   import Pagination from '$lib/components/search/Pagination.svelte';
-  import SeoMetaTags from '$lib/components/SeoMetaTags.svelte';
+  // import SeoMetaTags from '$lib/components/SeoMetaTags.svelte';
 
   import { configure } from 'instantsearch.js/es/widgets/index.js';
   import { connectToggleRefinement } from 'instantsearch.js/es/connectors';
@@ -65,11 +65,11 @@
 </Hits>
 <Pagination {search} />
 
-<SeoMetaTags 
+<!-- <SeoMetaTags 
   title={$_('', { default: 'Entries Gallery' })}
   dictionaryName={$dictionary.name}
   description={$_('', { default: 'The entries that are accompanied by images in this Living Dictionary are displayed in a beautiful Gallery that visitors can easily browse by using the page tabs at the bottom of the screen, or search by using the powerful search bar located at the top of the page. Visitors may also filter and display the visual contents of this Living Dictionary by activating filters for parts of speech, semantic domains, custom tags, speaker information and other metadata.' })}
-  keywords="Endangered Languages, Language Documentation, Language Revitalization, Build a Dictionary, Online Dictionary, Digital Dictionary, Dictionary Software, Free Software, Online Dictionary Builder, Living Dictionaries, Living Dictionary, Visual, Gallery, Images" />
+  keywords="Endangered Languages, Language Documentation, Language Revitalization, Build a Dictionary, Online Dictionary, Digital Dictionary, Dictionary Software, Free Software, Online Dictionary Builder, Living Dictionaries, Living Dictionary, Visual, Gallery, Images" /> -->
 
 <!-- Talking Dictionaries v1 example: http://talkingdictionary.swarthmore.edu/kapingamarangi/?images&gallery&page=1 -->
 <style>
