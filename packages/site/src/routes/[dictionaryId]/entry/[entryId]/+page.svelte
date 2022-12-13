@@ -74,7 +74,7 @@ bg-white pt-1 -mt-1">
 
   <SeoMetaTags
     title={entry.lx}
-    description={`${entry.lx} ${entry.ps ? entry.ps.join(', ') + '.' : ''} ${entry.ph ? '[' + entry.ph + ']' : ''}
+    description={`${entry.lx} ${entry.ps ? entry.ps.length > 1 ? entry.ps.join(', ') + '.' : entry.ps + '.' : ''} ${entry.ph ? '[' + entry.ph + ']' : ''}
     ${entry.di ? entry.di : ''}
     ${entry.lo ? entry.lo : ''} ${entry.lo2 ? entry.lo2 : ''} ${entry.lo3 ? entry.lo3 : ''}
     ${printGlosses(entry.gl, $t, true)
