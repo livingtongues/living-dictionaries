@@ -73,9 +73,13 @@ bg-white pt-1 -mt-1">
 
   <SeoMetaTags
     title={entry.lx}
-    description={printGlosses(entry.gl, $t, true)
+    description={`${entry.lx}
+    ${entry?.ps}
+    ${entry?.ph}
+    ${entry?.di}
+    ${printGlosses(entry.gl, $t, true)
       .join(', ')
-      .replace(/<\/?i>/g, '')}
+      .replace(/<\/?i>/g, '')}`}
     dictionaryName={$dictionary.name}
     lat={$dictionary.coordinates?.latitude}
     lng={$dictionary.coordinates?.longitude}
