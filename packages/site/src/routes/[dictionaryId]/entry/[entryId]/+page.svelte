@@ -80,7 +80,7 @@ bg-white pt-1 -mt-1">
     ${printGlosses(entry.gl, $t, true)
       .join(', ')
       .replace(/<\/?i>/g, '')}
-    ${entry.xs ? printExampleSentences(entry.xs, $t) : ''}`}
+    ${entry.xs ? printExampleSentences(entry.xs, $t) : ''}`.replace(/(?<!\w)\n/gm, '')}
     dictionaryName={$dictionary.name}
     lat={$dictionary.coordinates?.latitude}
     lng={$dictionary.coordinates?.longitude}
