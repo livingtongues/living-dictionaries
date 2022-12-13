@@ -16,6 +16,7 @@
   import { saveUpdateToFirestore } from '$lib/helpers/entry/update';
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte';
   import { printGlosses } from '$lib/helpers/glosses';
+  import { printExampleSentences } from '$lib/helpers/exampleSentences';
   import { showEntryGlossLanguages } from '$lib/helpers/glosses';
   import EntryDisplay from './EntryDisplay.svelte';
 
@@ -73,13 +74,13 @@ bg-white pt-1 -mt-1">
 
   <SeoMetaTags
     title={entry.lx}
-    description={`${entry.lx}
-    ${entry?.ps}
-    ${entry?.ph}
-    ${entry?.di}
+    description={`${entry.lx} ${entry.ps ? entry.ps : ''} ${entry.ph ? '/' + entry.ph + '/' : ''}
+    ${entry.di ? entry.di : ''}
+    ${entry.lo ? entry.lo : ''} ${entry.lo2 ? entry.lo2 : ''} ${entry.lo3 ? entry.lo3 : ''}
     ${printGlosses(entry.gl, $t, true)
       .join(', ')
-      .replace(/<\/?i>/g, '')}`}
+      .replace(/<\/?i>/g, '')}
+    ${entry.xs ? printExampleSentences(entry.xs, $t) : ''}`}
     dictionaryName={$dictionary.name}
     lat={$dictionary.coordinates?.latitude}
     lng={$dictionary.coordinates?.longitude}
