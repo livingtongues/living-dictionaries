@@ -78,7 +78,7 @@ bg-white pt-1 -mt-1">
     ${entry.ph ? '[' + entry.ph + ']' : ''} ${entry.ps ? entry.ps.length > 1 ? entry.ps.join(', ') + '.' : entry.ps + '.' : ''}
     ${printGlosses(entry.gl, $t)
       .join(', ')
-      .replace(/<\/?i>/g, '')}
+      .replace(/<\/?i>/g, '') + '.'}
     ${entry.di ? entry.di : ''}`.replace(/(?<!\w)\n/gm, '')}
     dictionaryName={$dictionary.name}
     lat={$dictionary.coordinates?.latitude}
