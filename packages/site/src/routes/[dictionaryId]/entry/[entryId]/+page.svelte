@@ -74,13 +74,12 @@ bg-white pt-1 -mt-1">
 
   <SeoMetaTags
     title={entry.lx}
-    description={`${entry.lx} ${entry.ps ? entry.ps.length > 1 ? entry.ps.join(', ') + '.' : entry.ps + '.' : ''} ${entry.ph ? '[' + entry.ph + ']' : ''}
-    ${entry.di ? entry.di : ''}
-    ${entry.lo ? entry.lo : ''} ${entry.lo2 ? entry.lo2 : ''} ${entry.lo3 ? entry.lo3 : ''}
-    ${printGlosses(entry.gl, $t, true)
+    description={`${entry.lo ? entry.lo : ''} ${entry.lo2 ? entry.lo2 : ''} ${entry.lo3 ? entry.lo3 : ''}
+    ${entry.ph ? '[' + entry.ph + ']' : ''} ${entry.ps ? entry.ps.length > 1 ? entry.ps.join(', ') + '.' : entry.ps + '.' : ''}
+    ${printGlosses(entry.gl, $t)
       .join(', ')
       .replace(/<\/?i>/g, '')}
-    ${entry.xs ? printExampleSentences(entry.xs, $t) : ''}`.replace(/(?<!\w)\n/gm, '')}
+    ${entry.di ? entry.di : ''}`.replace(/(?<!\w)\n/gm, '')}
     dictionaryName={$dictionary.name}
     lat={$dictionary.coordinates?.latitude}
     lng={$dictionary.coordinates?.longitude}
