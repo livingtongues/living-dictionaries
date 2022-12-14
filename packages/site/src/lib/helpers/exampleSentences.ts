@@ -25,16 +25,20 @@ if (import.meta.vitest) {
     expect(printExampleSentences(exampleSentence, t, true)).toMatchInlineSnapshot(`
       [
         "The dog is walking",
-        "El perro está caminando"
+        "El perro está caminando",
       ]
     `);
 
     expect(printExampleSentences(exampleSentence, t)).toMatchInlineSnapshot(`
       [
         "English: The dog is walking",
-        "Spanish: El perro está caminando"
+        "Spanish: El perro está caminando",
       ]
     `);
+
+    expect(printExampleSentences(exampleSentence, t, true).join(', ')).toMatchInlineSnapshot(
+      '"The dog is walking, El perro está caminando"'
+    );
 
     expect(printExampleSentences({}, t)).toMatchInlineSnapshot('[]');
   });
