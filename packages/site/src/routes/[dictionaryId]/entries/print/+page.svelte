@@ -15,6 +15,7 @@
   import type { IPrintFields } from '@living-dictionaries/types';
   import PrintFieldCheckboxes from './PrintFieldCheckboxes.svelte';
   import { Doc } from 'sveltefirets';
+  import { truncateAuthors } from './truncateAuthors';
 
   const hitsPerPage = createPersistedStore<number>('printHitsPerPage', 50);
   $: if (browser) {
@@ -137,7 +138,7 @@
             dir="ltr"
             class="text-xs print:fixed print:text-center right-0 top-0 bottom-0"
             style="writing-mode: tb; min-width: 0;">
-            {citation?.citation ? citation.citation + ' ' : ''}
+            {truncateAuthors(citation?.citation)}
             {new Date().getFullYear()}.
             {$dictionary.name}
             <span>{$t('misc.LD_singular', { default: 'Living Dictionary' })}.</span>
