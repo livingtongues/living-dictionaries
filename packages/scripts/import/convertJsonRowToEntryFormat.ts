@@ -11,7 +11,7 @@ export function convertJsonRowToEntryFormat(
   Boolean(row.phonetic) && (entry.ph = row.phonetic);
   Boolean(row.morphology) && (entry.mr = row.morphology);
   Boolean(row.interlinearization) && (entry.in = row.interlinearization);
-  Boolean(row.partOfSpeech) && (entry.ps = row.partOfSpeech);
+  Boolean(row.partOfSpeech) && (entry.ps = returnArrayFromCommaSeparatedItems(row.partOfSpeech));
   Boolean(row.dialect) && (entry.di = row.dialect);
   Boolean(row.variant) && (entry.va = row.variant);
   Boolean(row.nounClass) && (entry.nc = row.nounClass);
@@ -32,12 +32,6 @@ export function convertJsonRowToEntryFormat(
   Boolean(row.localOrthography5) && (entry.lo5 = row.localOrthography5);
 
   Boolean(row.notes) && (entry.nt = row.notes);
-  // Notes parsing for Opata
-  // if (row.notes) {
-  //     const parsedNotes = parseSourceFromNotes(row.notes);
-  //     Boolean(parsedNotes.notes) && (entry.nt = parsedNotes.notes);
-  //     Boolean(parsedNotes.source) && (entry.sr = [parsedNotes.source]);
-  // }
 
   Object.keys(row).forEach((key) => {
     // gloss fields are labeled using bcp47 language codes followed by '_gloss' (e.g. es_gloss, tpi_gloss)
@@ -66,4 +60,22 @@ export function convertJsonRowToEntryFormat(
   entry.ua = timestamp as Timestamp;
 
   return entry;
+}
+
+function returnArrayFromCommaSeparatedItems(string: string): string[] {
+  return string?.split(',').map((item) => item.trim()) || [];
+}
+
+if (import.meta.vitest) {
+  describe('returnArrayFromCommaSeparatedItems', () => {
+    test('splits two comma separated items into an array', () => {
+      expect(returnArrayFromCommaSeparatedItems('n,v')).toStrictEqual(['n', 'v']);
+    });
+    test('handles unusual comma spacing', () => {
+      expect(returnArrayFromCommaSeparatedItems('n, v ,adj')).toStrictEqual(['n', 'v', 'adj']);
+    });
+    test('returns empty array from undefined', () => {
+      expect(returnArrayFromCommaSeparatedItems(undefined)).toStrictEqual([]);
+    });
+  });
 }
