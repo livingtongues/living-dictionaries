@@ -33,6 +33,7 @@
     "instantsearch.js": "^4.33.2",
     "jszip": "^3.7.1",
     "logrocket": "^2.1.2",
+    "lz-string": "^1.4.4",
     "nprogress": "^0.2.0",
     "recordrtc": "^5.6.2",
     "simple-git-hooks": "^2.8.0",
