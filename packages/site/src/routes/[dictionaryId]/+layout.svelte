@@ -16,13 +16,6 @@
   let menuOpen = false;
 </script>
 
-<svelte:head>
-  <title>
-    {$dictionaryStore.name}
-    {$_('misc.LD_singular', { default: 'Living Dictionary' })}
-  </title>
-</svelte:head>
-
 <Header>
   <div
     slot="left"

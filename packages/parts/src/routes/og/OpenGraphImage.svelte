@@ -15,7 +15,8 @@
   $: src = gcsPath ? `https://lh3.googleusercontent.com/${gcsPath}=w${width}-h${height}-c` : null;
 
   const MAX_TITLE_LENGTH = 90;
-  const PADDING = 32;
+  const xPADDING = 48;
+  const yPADDING = 36;
 
   $: globeSize = src ? 200 : 400;
 </script>
@@ -30,7 +31,7 @@
         height: 100%;
         width: 100%;
         position: relative;
-        padding: {PADDING}px;
+        padding: {yPADDING}px {xPADDING}px;
         {src ? 'text-shadow: 2px 2px 3px hsla(0, 0%, 0%, 40%);' : ''}
     ">
   {#if src}
@@ -58,12 +59,12 @@
       {title.slice(0, MAX_TITLE_LENGTH)}{title.length > MAX_TITLE_LENGTH ? '...' : ''}
     </div>
     <div
-      style="overflow: hidden; flex-grow: 1; font-size: 30px; margin-top: 10px; margin-bottom: 20px; padding-right: {PADDING +
+      style="overflow: hidden; flex-grow: 1; font-size: 30px; margin-top: 10px; margin-bottom: 20px; padding-right: {xPADDING +
         globeSize}px;">
       {description}
     </div>
     <div
-      style="display: flex; align-items: center; font-size: 40px; padding-right: {PADDING +
+      style="display: flex; align-items: center; font-size: 40px; padding-right: {xPADDING +
         globeSize}px;">
       <img
         style="height: 40px; width: 40px; margin-right: 10px;"

@@ -15,6 +15,7 @@
     EditableAlternateNames,
     glossingLanguages,
   } from '@living-dictionaries/parts';
+  import SeoMetaTags from '$lib/components/SeoMetaTags.svelte';
 
   let modal: 'auth' = null;
 
@@ -406,3 +407,8 @@
       }} />
   {/await}
 {/if}
+
+<SeoMetaTags
+  title={$t('create.create_new_dictionary', { default: 'Create New Dictionary' })}
+  description={$t('', { default: 'Build a new Living Dictionary in a few short steps. Create a title and set the URL, and then configure the settings. Living Dictionaries are comprehensive, free, online technological tools integrating audio, images and video.' })}
+  keywords="Endangered Languages, Language Documentation, Language Revitalization, Build a Dictionary, Online Dictionary, Digital Dictionary, Dictionary Software, Free Software, Online Dictionary Builder, Living Dictionaries, Living Dictionary" />
