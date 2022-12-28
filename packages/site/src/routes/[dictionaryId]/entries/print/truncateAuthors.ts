@@ -1,14 +1,12 @@
-const splitFirstAuthorRgx = /(,|and|&)/g;
+const maxLengthLookingGoodInLetter = 43;
+const firstCommaAndTypeOfDividerRgx = /(,|and|&)/;
 
-export function truncateAuthors(authorString: string): string {
-  if (!authorString) return '';
+export function truncateAuthors(authors: string): string {
+  if (!authors) return '';
+  if (authors.length < maxLengthLookingGoodInLetter) return authors + ', ';
 
-  const maxLengthLookingGoodInLetter = 43;
-  if (authorString.length > maxLengthLookingGoodInLetter) {
-    const truncatedFirstAuthor = authorString.split(splitFirstAuthorRgx)[0];
-    return addEtAlEnding(truncatedFirstAuthor);
-  }
-  return authorString + ', ';
+  const truncatedFirstAuthor = authors.split(firstCommaAndTypeOfDividerRgx)[0];
+  return addEtAlEnding(truncatedFirstAuthor);
 }
 
 function addEtAlEnding(authors: string): string {
