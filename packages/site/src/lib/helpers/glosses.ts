@@ -1,6 +1,6 @@
 import type { IGloss } from '@living-dictionaries/types';
 
-export function printGlosses(glosses: IGloss, t: (id: string) => string, shorten = false) {
+export function printGlosses(glosses: IGloss, t: (id: string) => string, { shorten = false } = {}) {
   return Object.keys(glosses)
     .filter((bcp) => glosses[bcp])
     .sort() // sort by dictionary's gloss language order in the future
@@ -21,7 +21,7 @@ if (import.meta.vitest) {
       empty: '',
       null: null,
     };
-    expect(printGlosses(gloss, t, true)).toMatchInlineSnapshot(`
+    expect(printGlosses(gloss, t, { shorten: true })).toMatchInlineSnapshot(`
       [
         "apple",
         "arbol",
@@ -38,7 +38,7 @@ if (import.meta.vitest) {
     `);
 
     expect(
-      printGlosses(gloss, t, true)
+      printGlosses(gloss, t, { shorten: true })
         .join(', ')
         .replace(/<\/?i>/g, '') + '.'
     ).toMatchInlineSnapshot('"apple, arbol, Neolamarckia cadamba."');

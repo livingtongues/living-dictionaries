@@ -16,7 +16,6 @@
   import { saveUpdateToFirestore } from '$lib/helpers/entry/update';
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte';
   import { printGlosses } from '$lib/helpers/glosses';
-  import { printExampleSentences } from '$lib/helpers/exampleSentences';
   import { showEntryGlossLanguages } from '$lib/helpers/glosses';
   import EntryDisplay from './EntryDisplay.svelte';
 
