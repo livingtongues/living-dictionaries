@@ -3,7 +3,7 @@ import type { IExampleSentence } from '@living-dictionaries/types';
 export function printExampleSentences(
   exampleSentences: IExampleSentence,
   t: (id: string) => string,
-  shorten = false
+  { shorten = false } = {}
 ) {
   return Object.keys(exampleSentences)
     .filter((bcp) => exampleSentences[bcp])
@@ -22,7 +22,7 @@ if (import.meta.vitest) {
       en: 'The dog is walking',
       es: 'El perro está caminando',
     };
-    expect(printExampleSentences(exampleSentence, t, true)).toMatchInlineSnapshot(`
+    expect(printExampleSentences(exampleSentence, t, { shorten: true })).toMatchInlineSnapshot(`
       [
         "The dog is walking",
         "El perro está caminando",
@@ -36,7 +36,7 @@ if (import.meta.vitest) {
       ]
     `);
 
-    expect(printExampleSentences(exampleSentence, t, true).join(', ')).toMatchInlineSnapshot(
+    expect(printExampleSentences(exampleSentence, t, { shorten: true }).join(', ')).toMatchInlineSnapshot(
       '"The dog is walking, El perro está caminando"'
     );
 

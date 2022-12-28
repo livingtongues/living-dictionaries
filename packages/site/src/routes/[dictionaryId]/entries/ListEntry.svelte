@@ -18,7 +18,9 @@
     canEdit = false,
     videoAccess = false;
 
-  $: glosses = printGlosses(entry.gl, $t, $dictionary.id === 'jewish-neo-aramaic').join(', ')
+  $: glosses = printGlosses(entry.gl, $t, {
+    shorten: $dictionary.id === 'jewish-neo-aramaic',
+  }).join(', ');
 </script>
 
 <div
@@ -115,7 +117,8 @@
     <Video class="bg-gray-100 border-r-2" {entry} video={entry.vfs[0]} {canEdit} />
   {:else if videoAccess && canEdit}
     <ShowHide let:show let:toggle>
-      <button type="button"
+      <button
+        type="button"
         class="media-block bg-gray-100 border-r-2 hover:bg-gray-300 flex flex-col items-center
         justify-center cursor-pointer p-2 text-lg"
         on:click={toggle}>
