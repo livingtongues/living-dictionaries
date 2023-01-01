@@ -77,7 +77,7 @@
       <div class="mb-2 text-sm inline-children-elements">
         {@html truncateString(about, 200)}
         {#if about.length > 200}
-          <a class="hover:underline" href={dictionary.id + '/about'} data-sveltekit-prefetch>
+          <a class="hover:underline" href={dictionary.id + '/about'}>
             {$_('home.read_more', { default: 'Read More' })}
           </a>
         {/if}
