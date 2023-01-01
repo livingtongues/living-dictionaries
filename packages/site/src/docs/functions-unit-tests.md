@@ -10,9 +10,11 @@
 
 1. Create a new \*.test.ts file and add `/// <reference types="jest" />` to the top of the file to avoid type errors.
 2. To ensure everything is working, create a basic test like so:
-   test('foo', () => {
-   expect(true).toBe(true);
-   })
+```js
+test('foo', () => {
+  expect(true).toBe(true);
+})
+```
 3. Make changes to your \*.test.ts file and then run `npm t`. Alternatively run `npm run test:watch` to actively run tests while developing.
 
 See https://jestjs.io/docs/en/getting-started for tips

@@ -25,9 +25,11 @@ Demonstrates how to write Cloud Firestore + Cloud Functions **unit tests** and o
 ## Create New Jest Test
 
 1. To ensure everything is working, create a basic test like so:
-   test('foo', () => {
-   expect(true).toBe(true);
-   })
+```js
+test('foo', () => {
+  expect(true).toBe(true);
+})
+```
 2. Make changes to your \*.test.ts file and then run the appropriate testing command.
 
 See https://jestjs.io/docs/en/getting-started for tips
@@ -48,26 +50,25 @@ See https://jestjs.io/docs/en/getting-started for tips
 
 ## Connect emulator to frontend app
 
-```
+```js
 firebase.initializeApp(yourFirebaseConfig);
 
+if (location.hostname === "localhost") {
 
-  if (location.hostname === "localhost") {
+  firebase.firestore().settings({
+    host: "localhost:8080",
+    ssl: false
+  });
 
-    firebase.firestore().settings({
-      host: "localhost:8080",
-      ssl: false
-    });
-
-    firebase.functions().useFunctionsEmulator("http://localhost:5001");
-  }
+  firebase.functions().useFunctionsEmulator("http://localhost:5001");
+}
 ```
 
 ## Generate Fake Data Quickly
 
 Paste code into browser console to quickly create 100 fake documents.
 
-```
+```js
 (function () {
   const script = document.createElement('script');
   script.src =

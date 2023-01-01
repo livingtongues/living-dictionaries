@@ -33,21 +33,22 @@ A user searches for dog and they probably want just the entry, but they also mig
 ## Data models not being used because it restricts related-entries:
 
 1. Sub-entries nested in same document
-   Entry A = {
+2. 
+```js
+Entry A = {
    id: A
    lx: 'dog'
    subEntries: [
-   {
-   lx: 'dog'
-   "dog-tired"
-   }
+      {
+         lx: 'dog' "dog-tired"
+      }
    ]
-   }
-
-2. Sub-collections
+}
+```
+1. Sub-collections
    Entry A: "dog"
 
-- related-collection of entries (fetched by entries/${id}/related-entries)
+- related-collection of entries (fetched by `entries/${id}/related-entries`)
   - Entry example: "A dog runs in the park"
 
 Entry B: "park"
