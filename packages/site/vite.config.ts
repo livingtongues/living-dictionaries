@@ -2,12 +2,11 @@ import { sveltekit } from '@sveltejs/kit/vite';
 import type { UserConfig } from 'vite';
 // import { svelte } from '@sveltejs/vite-plugin-svelte';
 
-// keeps using localhost https://github.com/vitejs/vite/issues/9195
-import dns from 'dns';
-dns.setDefaultResultOrder('verbatim');
+import { kitbook } from 'kitbook/plugins/vite';
 
 const config: UserConfig = {
   plugins: [
+    kitbook(),
     sveltekit(),
   ],
 

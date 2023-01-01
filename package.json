@@ -12,6 +12,7 @@
 		"parts": "pnpm --filter=parts dev",
 		"parts:build": "pnpm --filter=parts build",
 		"parts:test": "pnpm --filter=parts test",
+		"kitbook": "pnpm --filter=site kitbook",
 		"both": "pnpm --filter=./packages/** dev",
 		"lint": "eslint .",
 		"format-check": "prettier --check --plugin-search-dir=. .",
