@@ -1,7 +1,6 @@
 <script lang="ts">
   import BadgeArray from 'svelte-pieces/data/BadgeArray.svelte';
-  import type { Readable } from 'svelte/store';
-  export let t: Readable<any> = undefined;
+  import { t } from 'svelte-i18n';
   export let alternateNames: string[];
 
   import { createEventDispatcher } from 'svelte';

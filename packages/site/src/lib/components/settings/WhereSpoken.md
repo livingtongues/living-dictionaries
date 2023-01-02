@@ -1,7 +1,7 @@
 <script lang="ts">
   import { Story } from 'kitbook';
   import type { IDictionary } from '@living-dictionaries/types';
-  import WhereSpoken from '$lib/settings/WhereSpoken.svelte';
+  import WhereSpoken from './WhereSpoken.svelte';
 
   let dictWithMain: Partial<IDictionary> = {
     coordinates: { longitude: 20, latitude: 20 },

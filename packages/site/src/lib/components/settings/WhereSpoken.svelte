@@ -1,18 +1,17 @@
 <script lang="ts">
-  import type { Readable } from 'svelte/store';
-  export let t: Readable<any> = undefined;
+  import { t } from 'svelte-i18n';
 
   import Button from 'svelte-pieces/ui/Button.svelte';
   import ShowHide from 'svelte-pieces/functions/ShowHide.svelte';
   import type { IDictionary, IPoint, IRegion } from '@living-dictionaries/types';
   import type { LngLat } from 'mapbox-gl';
-  import Map from '../maps/mapbox/map/Map.svelte';
-  import Marker from '../maps/mapbox/map/Marker.svelte';
-  import Popup from '../maps/mapbox/map/Popup.svelte';
-  import Region from '../maps/mapbox/map/Region.svelte';
-  import CoordinatesModal from '../maps/CoordinatesModal.svelte';
-  import RegionModal from '../maps/RegionModal.svelte';
-  import NavigationControl from '../maps/mapbox/controls/NavigationControl.svelte';
+  import Map from '@living-dictionaries/parts/src/lib/maps/mapbox/map/Map.svelte';
+  import Marker from '@living-dictionaries/parts/src/lib/maps/mapbox/map/Marker.svelte';
+  import Popup from '@living-dictionaries/parts/src/lib/maps/mapbox/map/Popup.svelte';
+  import Region from '@living-dictionaries/parts/src/lib/maps/mapbox/map/Region.svelte';
+  import CoordinatesModal from '@living-dictionaries/parts/src/lib/maps/CoordinatesModal.svelte';
+  import RegionModal from '@living-dictionaries/parts/src/lib/maps/RegionModal.svelte';
+  import NavigationControl from '@living-dictionaries/parts/src/lib/maps/mapbox/controls/NavigationControl.svelte';
 
   import { createEventDispatcher } from 'svelte';
   const dispatch = createEventDispatcher<{

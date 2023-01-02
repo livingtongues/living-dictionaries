@@ -25,6 +25,8 @@
     "@turf/helpers": "^6.5.0",
     "@types/d3-dsv": "^3.0.0",
     "@types/file-saver": "^2.0.4",
+    "@types/mapbox-gl": "^2.7.6",
+    "@types/mapbox__mapbox-gl-geocoder": "^4.7.3",
     "@types/recordrtc": "^5.6.8",
     "@unocss/preset-icons": "^0.46.5",
     "algoliasearch": "^4.11.0",
