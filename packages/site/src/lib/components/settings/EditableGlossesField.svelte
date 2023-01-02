@@ -1,13 +1,11 @@
 <script lang="ts">
-  import type { Readable } from 'svelte/store';
-  export let t: Readable<any> = undefined;
-
+  import { t } from 'svelte-i18n';
   import type { IGlossLanguages } from '@living-dictionaries/types';
   import Button from 'svelte-pieces/ui/Button.svelte';
   import ShowHide from 'svelte-pieces/functions/ShowHide.svelte';
   import BadgeArrayEmit from 'svelte-pieces/data/BadgeArrayEmit.svelte';
   import Modal from 'svelte-pieces/ui/Modal.svelte';
-  import Filter from '../helpers/Filter.svelte';
+  import Filter from '@living-dictionaries/parts/src/lib/helpers/Filter.svelte';
 
   export let availableLanguages: IGlossLanguages;
   export let selectedLanguages: string[];

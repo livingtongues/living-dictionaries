@@ -1,6 +1,6 @@
 <script lang="ts">
   import { Story } from 'kitbook';
-  import PublicCheckbox from '$lib/settings/PublicCheckbox.svelte';
+  import PublicCheckbox from './PublicCheckbox.svelte';
 </script>
 
 # Public checkbox

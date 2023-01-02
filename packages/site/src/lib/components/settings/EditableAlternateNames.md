@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { Story } from 'kitbook';
-  import EditableAlternateNames from '$lib/settings/EditableAlternateNames.svelte';
+  import { Story } from "kitbook";
+  import EditableAlternateNames from './EditableAlternateNames.svelte';
   import ReactiveSet from 'svelte-pieces/functions/ReactiveSet.svelte';
 </script>
 
@@ -9,12 +9,12 @@
 
 Listen to the `update` event when adding or removing alternate names.
 
-<ReactiveSet input={['Lengua materna']} let:value={alternateNames} let:update>
-  <Story>
+<Story>
+  <ReactiveSet input={['Lengua materna']} let:value={alternateNames} let:update>
     <EditableAlternateNames {alternateNames} on:update={(e) => update(e.detail.alternateNames)} />
-  </Story>
-  <div>
-    Array state:
-    <pre>{alternateNames}</pre>
-  </div>
-</ReactiveSet>
+    <div>
+      Array state:
+      <pre>{alternateNames}</pre>
+    </div>
+  </ReactiveSet>
+</Story>
