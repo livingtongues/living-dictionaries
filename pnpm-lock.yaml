@@ -194,7 +194,7 @@ importers:
       firebase: ^9.14.0
       instantsearch.js: ^4.33.2
       jszip: ^3.7.1
-      kitbook: 1.0.0-alpha.5
+      kitbook: 1.0.0-alpha.6
       logrocket: ^2.1.2
       lz-string: ^1.4.4
       nprogress: ^0.2.0
@@ -238,7 +238,7 @@ importers:
       firebase: 9.14.0
       instantsearch.js: 4.40.2_algoliasearch@4.13.0
       jszip: 3.8.0
-      kitbook: 1.0.0-alpha.5
+      kitbook: 1.0.0-alpha.6
       logrocket: 2.2.1
       lz-string: 1.4.4
       nprogress: 0.2.0
@@ -1624,17 +1624,18 @@ packages:
       - svelte
     dev: true
 
-  /@kitbook/rehype-display-link-titles/0.0.1:
-    resolution: {integrity: sha512-zuHRgfXgnwH15vGrMzDCAA72w4nUYidMQCSOPNHXmolgrfsw0ZnzpVs3qmPXwhej5swnsCHzr3W0l8HoA5BkyA==}
+  /@kitbook/rehype-display-link-titles/0.0.2:
+    resolution: {integrity: sha512-rMOVsSB+9Km2Z7GWNMDGBE3iA10xylPV2tN+0Iw61AC4MZX5Dv8tb8Na3LbhJ+NQzU+PqzZh0+Ou1dz9U4bh7w==}
     dependencies:
+      github-slugger: 2.0.0
       unist-util-visit: 4.1.1
     dev: true
 
-  /@kitbook/vite-plugin-kitbook/0.0.2_svelte@3.55.0:
-    resolution: {integrity: sha512-q9n/v5yR7OrdIhva5iU5qPntOOuWEPWDsKx1cRPLSA/C+iCxRkpq3RB1boi8Hepc8kgXAWXFczuBZKvI/c6E+Q==}
+  /@kitbook/vite-plugin-kitbook/0.0.3_svelte@3.55.0:
+    resolution: {integrity: sha512-JeIpBxu0TO+L3PxSd00AnQ/2tHMekx5K0otB/lLdmVnRJJJQ17oTP2wFfzVTNUON6RF9FyZd+yuH0mLywVXm3w==}
     dependencies:
       '@kitbook/mdsvex-shiki-twoslash': 0.0.3_svelte@3.55.0
-      '@kitbook/rehype-display-link-titles': 0.0.1
+      '@kitbook/rehype-display-link-titles': 0.0.2
       mdsvex: 0.10.6_svelte@3.55.0
       rehype-autolink-headings: 6.1.1
       rehype-slug: 5.1.0
@@ -6561,12 +6562,12 @@ packages:
       - svelte
     dev: true
 
-  /kitbook/1.0.0-alpha.5:
-    resolution: {integrity: sha512-LBO6mn+/jZB/IInr7mFMKETZZ6f30dNknsYd0tsGzbNe9L6bRXPShc4IBTVdAwOYFNCVUx2R5Aa/Ab6wM2VOvw==}
+  /kitbook/1.0.0-alpha.6:
+    resolution: {integrity: sha512-puFapy4L8Ksvm5OdkmYV9m3lxcg5ueiyTU3Qm3IUI3kTb1XhqsYivP3CXbSkH9Qf2ExsAJKhmz7jE81gCIMBlg==}
     dependencies:
       '@crownframework/svelte-error-boundary': 1.0.3
       '@kitbook/mdsvex-shiki-twoslash': 0.0.3_svelte@3.55.0
-      '@kitbook/vite-plugin-kitbook': 0.0.2_svelte@3.55.0
+      '@kitbook/vite-plugin-kitbook': 0.0.3_svelte@3.55.0
       lz-string: 1.4.4
       svelte: 3.55.0
       svelte-pieces: 1.0.55_svelte@3.55.0
@@ -6897,7 +6898,7 @@ packages:
     dependencies:
       '@types/unist': 2.0.6
       prism-svelte: 0.4.7
-      prismjs: 1.29.0
+      prismjs: 1.28.0
       svelte: 3.55.0
       vfile-message: 2.0.4
     dev: true
