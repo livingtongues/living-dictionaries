@@ -4,10 +4,6 @@
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte';
 </script>
 
-<svelte:head>
-  <title>{$_('dictionary.terms_of_use', { default: 'Terms of Use' })}</title>
-</svelte:head>
-
 <Header>
   {$_('dictionary.terms_of_use', { default: 'Terms of Use' })}
 </Header>
