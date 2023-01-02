@@ -4,7 +4,6 @@
 </script>
 
 <a
-  data-sveltekit-prefetch
   href={`/admin/${link}`}
   class={$page.url.pathname.match(/(\w+)$/)[0] === link ? 'active' : 'inactive'}>
   {link}
