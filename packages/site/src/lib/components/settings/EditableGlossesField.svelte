@@ -30,7 +30,7 @@
 </script>
 
 <div class="text-sm font-medium text-gray-700 mb-1">
-  {t ? $t('create.gloss_dictionary_in') : 'Make dictionary available in...'}
+  {$t('create.gloss_dictionary_in', { default: 'Make dictionary available in...' })}
 </div>
 
 <ShowHide let:show let:toggle>
@@ -49,12 +49,12 @@
   {#if show}
     <Modal on:close={toggle}>
       <span slot="heading">
-        {t ? $t('create.gloss_dictionary_in') : 'Make dictionary available in...'}
+        {$t('create.gloss_dictionary_in', { default: 'Make dictionary available in...' })}
       </span>
       <Filter
         items={remainingGlossingLanguagesAsArray}
         let:filteredItems={filteredLanguages}
-        placeholder={t ? $t('about.search') : 'Search'}>
+        placeholder={$t('about.search', { default: 'Search' })}>
         {#each filteredLanguages as language}
           <Button
             onclick={() => {
@@ -64,12 +64,12 @@
             color="green"
             form="simple"
             class="w-full !text-left">
-            {language.vernacularName || (t ? $t('gl.' + language.bcp) : language.bcp)}
+            {language.vernacularName || $t('gl.' + language.bcp, { default: language.bcp })}
             {#if language.vernacularAlternate}
               {language.vernacularAlternate}
             {/if}
             {#if language.vernacularName && t}
-              <small>({$t('gl.' + language.bcp)})</small>
+              <small>({$t('gl.' + language.bcp, { default: language.bcp })})</small>
             {/if}
           </Button>
         {/each}
@@ -82,10 +82,10 @@
 </ShowHide>
 
 <div class="text-xs text-gray-600 mt-1">
-  {t
-    ? $t('create.gloss_dictionary_clarification')
-    : 'Language(s) you want to translate entries into'}
-  {t
-    ? $t('settings.unable_to_delete')
-    : 'Note: you will not be able to delete these glossing languages later.'}
+  {$t('create.gloss_dictionary_clarification', {
+    default: 'Language(s) you want to translate entries into',
+  })}.
+  {$t('settings.unable_to_delete', {
+    default: 'Note: you will not be able to delete these glossing languages later.',
+  })}
 </div>
