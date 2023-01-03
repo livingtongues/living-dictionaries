@@ -196,7 +196,7 @@ importers:
       firebase: ^9.14.0
       instantsearch.js: ^4.33.2
       jszip: ^3.7.1
-      kitbook: 1.0.0-alpha.6
+      kitbook: 1.0.0-alpha.7
       logrocket: ^2.1.2
       lz-string: ^1.4.4
       nprogress: ^0.2.0
@@ -242,7 +242,7 @@ importers:
       firebase: 9.14.0
       instantsearch.js: 4.40.2_algoliasearch@4.13.0
       jszip: 3.8.0
-      kitbook: 1.0.0-alpha.6
+      kitbook: 1.0.0-alpha.7
       logrocket: 2.2.1
       lz-string: 1.4.4
       nprogress: 0.2.0
@@ -6401,8 +6401,8 @@ packages:
       - svelte
     dev: true
 
-  /kitbook/1.0.0-alpha.6:
-    resolution: {integrity: sha512-puFapy4L8Ksvm5OdkmYV9m3lxcg5ueiyTU3Qm3IUI3kTb1XhqsYivP3CXbSkH9Qf2ExsAJKhmz7jE81gCIMBlg==}
+  /kitbook/1.0.0-alpha.7:
+    resolution: {integrity: sha512-+YGppfETlluNenKUJyboyG7himw1aYRL0ka9uegHfVCDAEq+VhIL6xqqdcquk7L/GASYhiqNSkCzmjCOOYt2fg==}
     dependencies:
       '@crownframework/svelte-error-boundary': 1.0.3
       '@kitbook/mdsvex-shiki-twoslash': 0.0.3_svelte@3.55.0
