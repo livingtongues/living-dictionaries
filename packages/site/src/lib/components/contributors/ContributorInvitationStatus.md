@@ -1,6 +1,6 @@
 <script lang="ts">
   import { Story } from 'kitbook';
-  import Invitation from '$lib/contributors/Invitation.svelte';
+  import ContributorInvitationStatus from './ContributorInvitationStatus.svelte';
 </script>
 
 <!-- prettier-ignore -->
@@ -12,7 +12,7 @@
 <Story knobs={{ targetEmail: 'john@gmail.com', admin: false }} let:props={{ targetEmail, admin }}>
   {#each [{ targetEmail, inviterEmail: 'jimcousin@gmail.com', id: 'randomid1234' }, { targetEmail: 'jimbob@gmail.com', inviterEmail: 'jimcousin@gmail.com', id: 'randomid1234' }] as invite}
     <div class="my-1">
-      <Invitation {admin} {invite} on:delete={(e) => alert(`Deleted invite from ${invite.id}`)} />
+      <ContributorInvitationStatus {admin} {invite} on:delete={(e) => alert(`Deleted invite from ${invite.id}`)} />
     </div>
   {/each}
 </Story>

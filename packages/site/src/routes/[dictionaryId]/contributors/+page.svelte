@@ -7,7 +7,7 @@
   import Button from 'svelte-pieces/ui/Button.svelte';
   import ShowHide from 'svelte-pieces/functions/ShowHide.svelte';
   import { inviteHelper } from '$lib/helpers/inviteHelper';
-  import { Invitation } from '@living-dictionaries/parts';
+  import ContributorInvitationStatus from '$lib/components/contributors/ContributorInvitationStatus.svelte';
   import Citation from './Citation.svelte';
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte';
 
@@ -62,7 +62,7 @@
       let:data={invites}>
       {#each invites as invite}
         <div class="my-1">
-          <Invitation
+          <ContributorInvitationStatus
             admin={$admin}
             {invite}
             on:delete={() =>
@@ -73,7 +73,7 @@
               >{$_('contributors.invitation_sent', {
                 default: 'Invitation sent',
               })}:</i>
-          </Invitation>
+          </ContributorInvitationStatus>
         </div>
       {/each}
     </Collection>
@@ -113,7 +113,7 @@
       let:data={invites}>
       {#each invites as invite}
         <div class="my-1">
-          <Invitation
+          <ContributorInvitationStatus
             admin={$admin}
             {invite}
             on:delete={() =>
@@ -124,7 +124,7 @@
               >{$_('contributors.invitation_sent', {
                 default: 'Invitation sent',
               })}:</i>
-          </Invitation>
+          </ContributorInvitationStatus>
         </div>
       {/each}
     </Collection>
