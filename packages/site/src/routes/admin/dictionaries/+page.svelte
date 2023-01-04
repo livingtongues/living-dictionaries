@@ -4,7 +4,7 @@
   import { Collection, updateOnline } from 'sveltefirets';
   import { arrayRemove, arrayUnion, deleteField, GeoPoint } from 'firebase/firestore/lite';
   import { exportDictionariesAsCSV } from '$lib/export/csv';
-  import Filter from '@living-dictionaries/parts/src/lib/helpers/Filter.svelte';
+  import Filter from '$lib/components/Filter.svelte';
   import Button from 'svelte-pieces/ui/Button.svelte';
   import DictionaryRow from '../DictionaryRow.svelte';
   import SortDictionaries from '../SortDictionaries.svelte';

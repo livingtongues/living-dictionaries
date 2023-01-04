@@ -196,7 +196,7 @@ importers:
       firebase: ^9.14.0
       instantsearch.js: ^4.33.2
       jszip: ^3.7.1
-      kitbook: 1.0.0-alpha.7
+      kitbook: 1.0.0-alpha.8
       logrocket: ^2.1.2
       lz-string: ^1.4.4
       nprogress: ^0.2.0
@@ -242,7 +242,7 @@ importers:
       firebase: 9.14.0
       instantsearch.js: 4.40.2_algoliasearch@4.13.0
       jszip: 3.8.0
-      kitbook: 1.0.0-alpha.7
+      kitbook: 1.0.0-alpha.8
       logrocket: 2.2.1
       lz-string: 1.4.4
       nprogress: 0.2.0
@@ -422,10 +422,6 @@ packages:
     resolution: {integrity: sha512-ooWCrlZP11i8GImSjTHYHLkvFDP48nS4+204nGb1RiX/WXYHmJA2III9/e2DWVabCESdW7hBAEzHRqUn9OUVvQ==}
     engines: {node: '>=0.1.90'}
     dev: false
-
-  /@crownframework/svelte-error-boundary/1.0.3:
-    resolution: {integrity: sha512-ZtfYF9if48Ok8BTx/fn7bERJFKHKO6Ih5d/fkY6/pC3DQEnJq4vy6JOBFcisnpKYcZbjG5F/D4r06kqX7JKyqw==}
-    dev: true
 
   /@dabh/diagnostics/2.0.3:
     resolution: {integrity: sha512-hrlQOIi7hAfzsMqlGSFyVucrx38O+j6wiGOf//H2ecvIEqYN4ADBSS2iLMh5UFyDunCNniUIPk/q3riFv45xRA==}
@@ -6401,15 +6397,14 @@ packages:
       - svelte
     dev: true
 
-  /kitbook/1.0.0-alpha.7:
-    resolution: {integrity: sha512-+YGppfETlluNenKUJyboyG7himw1aYRL0ka9uegHfVCDAEq+VhIL6xqqdcquk7L/GASYhiqNSkCzmjCOOYt2fg==}
+  /kitbook/1.0.0-alpha.8:
+    resolution: {integrity: sha512-OZeeOTdMXPGLZmc9ESRHZIvuUMoNJRiQXfCbNksJEMHqgVTu0pWs8UuriRQRJ03r4EFQT8l5cvItRjl4vjRouw==}
     dependencies:
-      '@crownframework/svelte-error-boundary': 1.0.3
       '@kitbook/mdsvex-shiki-twoslash': 0.0.3_svelte@3.55.0
       '@kitbook/vite-plugin-kitbook': 0.0.3_svelte@3.55.0
       lz-string: 1.4.4
       svelte: 3.55.0
-      svelte-pieces: 1.0.55_svelte@3.55.0
+      svelte-pieces: 1.0.56_svelte@3.55.0
     transitivePeerDependencies:
       - supports-color
     dev: true
@@ -8550,8 +8545,8 @@ packages:
       svelte: 3.55.0
     dev: true
 
-  /svelte-pieces/1.0.55_svelte@3.55.0:
-    resolution: {integrity: sha512-AgBj5SlSLu/B8t80wR9id+1ZWAc8GMz5zZDXXhCKsMaKtM4hSNnpBLnlVIK244MGfuul9w3QWhuxxYZUmEWDIw==}
+  /svelte-pieces/1.0.56_svelte@3.55.0:
+    resolution: {integrity: sha512-u0l7N8hF21lNhYMLmOEbDQI4A6neVjfQi/zagyOO7qyAgfADSGGzXynwkH7FQCoxanG+jmVU7MrfMr/zIAZYMQ==}
     peerDependencies:
       svelte: ^3.46.4
     dependencies:

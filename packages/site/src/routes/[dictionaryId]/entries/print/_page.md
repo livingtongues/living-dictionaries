@@ -1,7 +1,7 @@
 <script lang="ts">
-  import PrintEntry from '$lib/entries/print/PrintEntry.svelte';
+  import PrintEntry from './PrintEntry.svelte';
   import { Story } from 'kitbook';
-  import { defaultPrintFields as printFields } from '$lib/entries/print/printFields';
+  import { defaultPrintFields as printFields } from './printFields';
   import {
     entries,
     entriesWithSemanticDomains,

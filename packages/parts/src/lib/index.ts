@@ -1,13 +1,7 @@
 export { default as MediaStream } from './record/MediaStream.svelte';
 export { default as Recorder } from './record/Recorder.svelte';
 
-export { default as Filter } from './helpers/Filter.svelte';
-
 export { default as LatLngDisplay } from './maps/LatLngDisplay.svelte';
-
-export { default as PrintEntry } from './entries/print/PrintEntry.svelte';
-export { defaultPrintFields } from './entries/print/printFields';
-
 export { default as Image } from './entries/media/Image.svelte';
 
 export { glossingLanguages } from './glosses/glossing-languages';

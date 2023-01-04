@@ -10,13 +10,15 @@
   import Button from 'svelte-pieces/ui/Button.svelte';
   // import SeoMetaTags from '$lib/components/SeoMetaTags.svelte';
   import { createPersistedStore } from 'svelte-pieces/stores/persisted';
-  import { PrintEntry, defaultPrintFields } from '@living-dictionaries/parts';
+  import { defaultPrintFields } from './printFields';
+  import PrintEntry from './PrintEntry.svelte';
   import { dictionary, isManager, canEdit } from '$lib/stores';
   import { browser } from '$app/environment';
   import type { IPrintFields } from '@living-dictionaries/types';
   import PrintFieldCheckboxes from './PrintFieldCheckboxes.svelte';
   import { Doc } from 'sveltefirets';
   import { truncateAuthors } from './truncateAuthors';
+  import type { ICitation } from '@living-dictionaries/types';
 
   const hitsPerPage = createPersistedStore<number>('printHitsPerPage', 50);
   $: if (browser) {
@@ -38,7 +40,6 @@
   const showLabels = createPersistedStore<boolean>('printShowLabels', true);
   const showQrCode = createPersistedStore<boolean>('showQrCode', false);
 
-  import type { ICitation } from '@living-dictionaries/types';
   let citationType: ICitation = { citation: '' };
 </script>
 
@@ -56,7 +57,8 @@
         </Button>
 
         <div class="mb-1 mr-2">
-          <label class="font-medium text-gray-700" for="maxEntries">{$t('print.max_entries', { default: 'Max entries' })}</label>
+          <label class="font-medium text-gray-700" for="maxEntries"
+            >{$t('print.max_entries', { default: 'Max entries' })}</label>
           <input
             class="form-input text-sm w-17"
             id="maxEntries"
@@ -67,7 +69,8 @@
           <!-- Algolia hard max per page is 1000 -->
         </div>
         <div class="mb-1 mr-2">
-          <label class="font-medium text-gray-700" for="columnCount">{$t('print.columns', { default: 'Columns' })}</label>
+          <label class="font-medium text-gray-700" for="columnCount"
+            >{$t('print.columns', { default: 'Columns' })}</label>
           <input
             class="form-input text-sm w-17"
             id="columnCount"
@@ -77,7 +80,8 @@
             bind:value={$columnCount} />
         </div>
         <div class="mb-1 mr-2">
-          <label class="font-medium text-gray-700" for="headwordSize">{$t('print.headword_size', { default: 'Headword size' })} (pt)</label>
+          <label class="font-medium text-gray-700" for="headwordSize"
+            >{$t('print.headword_size', { default: 'Headword size' })} (pt)</label>
           <input
             class="form-input text-sm w-17"
             id="headwordSize"
@@ -87,7 +91,8 @@
             bind:value={$headwordSize} />
         </div>
         <div class="mb-1 mr-2">
-          <label class="font-medium text-gray-700" for="fontSize">{$t('print.font_size', { default: 'Font size' })} (pt)</label>
+          <label class="font-medium text-gray-700" for="fontSize"
+            >{$t('print.font_size', { default: 'Font size' })} (pt)</label>
           <input
             class="form-input text-sm w-15"
             id="fontSize"
@@ -97,7 +102,8 @@
             bind:value={$fontSize} />
         </div>
         <div class="mb-1 mr-2">
-          <label class="font-medium text-gray-700" for="imageSize">{$t('misc.images', { default: 'Images' })}:</label>
+          <label class="font-medium text-gray-700" for="imageSize"
+            >{$t('misc.images', { default: 'Images' })}:</label>
           <input
             class="form-input text-sm w-17"
             id="imageSize"
@@ -116,10 +122,11 @@
     </div>
 
     <div class="flex overflow-x-hidden">
-      <div class="print-columns pr-4 print:pr-9 max-w-full flex-grow" style="--column-count: {$columnCount}">
+      <div
+        class="print-columns pr-4 print:pr-9 max-w-full flex-grow"
+        style="--column-count: {$columnCount}">
         {#each entries as entry (entry.id)}
           <PrintEntry
-            {t}
             headwordSize={$headwordSize}
             fontSize={$fontSize}
             imagePercent={$imagePercent}
@@ -163,7 +170,6 @@
   dictionaryName={$dictionary.name}
   description={$t('', { default: 'The entries in this Living Dictionary are displayed in a comprehensive, nicely designed list that can be exported into a PDF and printed on paper. Users can activate different parameters according to their printing needs. They may also filter and print specific content from this Living Dictionary by activating filters for parts of speech, semantic domains, custom tags, speaker information and other metadata.' })}
   keywords="Endangered Languages, Language Documentation, Language Revitalization, Build a Dictionary, Online Dictionary, Digital Dictionary, Dictionary Software, Free Software, Online Dictionary Builder, Living Dictionaries, Living Dictionary, Edit a dictionary, Search a dictionary, Browse a dictionary, Explore a Dictionary, Print a dictionary" /> -->
-
 <style>
   .print-columns {
     /* column-width: var(--column-width); */
