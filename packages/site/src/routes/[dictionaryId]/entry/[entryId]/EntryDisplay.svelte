@@ -2,7 +2,7 @@
   import { t } from 'svelte-i18n';
   import type { IEntry } from '@living-dictionaries/types';
   import EntryField from './EntryField.svelte';
-  import EntryPartOfSpeech from '@living-dictionaries/parts/src/lib/entries/entry/EntryPartOfSpeech.svelte';
+  import EntryPartOfSpeech from '$lib/components/entry/EntryPartOfSpeech.svelte';
   import EntrySemanticDomains from './EntrySemanticDomains.svelte';
   import EntryDialect from './EntryDialect.svelte';
   import BadgeArray from 'svelte-pieces/data/BadgeArray.svelte';

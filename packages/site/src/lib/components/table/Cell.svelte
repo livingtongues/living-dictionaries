@@ -2,7 +2,7 @@
   import { t } from 'svelte-i18n';
   import Textbox from './cells/Textbox.svelte';
   import SemanticDomains from './cells/SemanticDomains.svelte';
-  import EntryPartOfSpeech from '@living-dictionaries/parts/src/lib/entries/entry/EntryPartOfSpeech.svelte';
+  import EntryPartOfSpeech from '$lib/components/entry/EntryPartOfSpeech.svelte';
   import SelectSpeakerCell from './cells/SelectSpeakerCell.svelte';
   import DialectCell from './cells/DialectCell.svelte';
   import SelectSource from './cells/SelectSource.svelte';

@@ -1,5 +1,5 @@
 <script>
-  import EntryPartOfSpeech from '$lib/entries/entry/EntryPartOfSpeech.svelte';
+  import EntryPartOfSpeech from './EntryPartOfSpeech.svelte';
   import { Story } from 'kitbook';
 </script>
 
