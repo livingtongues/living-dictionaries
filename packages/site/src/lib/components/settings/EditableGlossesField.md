@@ -1,7 +1,7 @@
 <script lang="ts">
   import { Story } from 'kitbook';
   import EditableGlossesField from './EditableGlossesField.svelte';
-  import { glossingLanguages } from '@living-dictionaries/parts/src/lib/glosses/glossing-languages';
+  import { glossingLanguages } from '$lib/glosses/glossing-languages';
   import ReactiveSet from 'svelte-pieces/functions/ReactiveSet.svelte';
   let selectedLanguages = ['en', 'de', 'fr'];
   let admin = true;

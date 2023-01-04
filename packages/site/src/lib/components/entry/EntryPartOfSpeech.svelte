@@ -4,7 +4,7 @@
   import ReactiveSet from 'svelte-pieces/functions/ReactiveSet.svelte';
   import DataList from 'svelte-pieces/ui/DataList.svelte';
   import Modal from 'svelte-pieces/ui/Modal.svelte';
-  import { partsOfSpeech, mayanPOS, mayanDictionaries } from '@living-dictionaries/parts/src/lib/mappings/parts-of-speech';
+  import { partsOfSpeech, mayanPOS, mayanDictionaries } from '$lib/mappings/parts-of-speech';
 
   export let value: string[] | string;
   export let canEdit = false;

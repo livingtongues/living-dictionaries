@@ -1,5 +1,5 @@
 <script lang="ts">
-  import PlayVideo from '$lib/entries/video/PlayVideo.svelte';
+  import PlayVideo from './PlayVideo.svelte';
   import { Story } from 'kitbook';
   import ShowHide from 'svelte-pieces/functions/ShowHide.svelte';
   import Button from 'svelte-pieces/ui/Button.svelte';

@@ -1,7 +1,5 @@
 <script lang="ts">
-  import type { Readable } from 'svelte/store';
-  export let t: Readable<any> = undefined;
-
+  import { t } from 'svelte-i18n';
   import type { IEntry, IVideo } from '@living-dictionaries/types';
   import VideoIFrame from './VideoIFrame.svelte';
 

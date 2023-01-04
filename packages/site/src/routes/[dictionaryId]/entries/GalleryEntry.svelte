@@ -1,7 +1,6 @@
 <script lang="ts">
-  import { t } from 'svelte-i18n';
   import type { IEntry } from '@living-dictionaries/types';
-  import { Image } from '@living-dictionaries/parts';
+  import Image from '$lib/components/image/Image.svelte';
   export let entry: IEntry;
   export let canEdit = false;
   import { dictionary } from '$lib/stores';
@@ -12,7 +11,6 @@
   <div class="bg-gray-300 shadow">
     <div class="aspect-square overflow-hidden">
       <Image
-        {t}
         square={480}
         lexeme={entry.lx}
         gcs={entry.pf.gcs}

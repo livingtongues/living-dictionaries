@@ -1,6 +1,6 @@
 <script lang="ts">
   import { Story } from 'kitbook';
-  import { MediaStream } from '$lib';
+  import MediaStream from './MediaStream.svelte';
   import { srcObject, Button } from 'svelte-pieces';
 </script>
 

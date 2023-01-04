@@ -5,7 +5,7 @@
   import RecordVideo from '$lib/components/video/RecordVideo.svelte';
   import SelectVideo from './SelectVideo.svelte';
   import PasteVideoLink from './PasteVideoLink.svelte';
-  import VideoIFrame from '@living-dictionaries/parts/src/lib/entries/video/VideoIFrame.svelte';
+  import VideoIFrame from '$lib/components/video/VideoIFrame.svelte';
   import SelectSpeaker from '$lib/components/media/SelectSpeaker.svelte';
   import { dictionary } from '$lib/stores';
   import type { IEntry, IVideo } from '@living-dictionaries/types';

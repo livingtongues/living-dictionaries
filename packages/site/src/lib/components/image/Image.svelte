@@ -1,7 +1,6 @@
 <script lang="ts">
-  import type { Readable } from 'svelte/store';
-  export let t: Readable<any> = undefined;
-
+  import { t } from 'svelte-i18n';
+  
   export let lexeme: string,
     // glosses = undefined,
     gcs: string,

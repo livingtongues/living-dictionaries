@@ -1,6 +1,6 @@
 <script lang="ts">
-  import Image from '$lib/entries/media/Image.svelte';
-  import Image2 from '$lib/entries/media/Image2.svelte';
+  import Image from './Image.svelte';
+  import Image2 from './Image2.svelte';
   import { Story } from 'kitbook';
 </script>
 

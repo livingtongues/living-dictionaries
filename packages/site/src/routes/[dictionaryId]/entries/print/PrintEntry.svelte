@@ -1,7 +1,7 @@
 <script lang="ts">
   import { t } from 'svelte-i18n';
-  import { StandardPrintFields, type IEntry, type ISpeaker, type IPrintFields } from '@living-dictionaries/types';
-  import { semanticDomains } from '@living-dictionaries/parts';
+  import { StandardPrintFields, type IEntry, type IPrintFields } from '@living-dictionaries/types';
+  import { semanticDomains } from '$lib/mappings/semantic-domains';
   import QrCode from './QrCode.svelte';
   import sanitize from 'xss';
 

@@ -2,7 +2,7 @@
   import ShowHide from 'svelte-pieces/functions/ShowHide.svelte';
   import Button from 'svelte-pieces/ui/Button.svelte';
   import { t } from 'svelte-i18n';
-  import EditFieldModal from '@living-dictionaries/parts/src/lib/entries/EditFieldModal.svelte';
+  import EditFieldModal from '$lib/components/entry/EditFieldModal.svelte';
   import type { IEntry } from '@living-dictionaries/types';
   import { page } from '$app/stores';
   import { goto } from '$app/navigation';
@@ -43,7 +43,6 @@
   </Button>
   {#if show}
     <EditFieldModal
-      {t}
       field="lx"
       display={$t('entry.lx', { default: 'Lexeme/Word/Phrase' })}
       on:valueupdate={(e) => addNewEntry(e.detail.newValue)}

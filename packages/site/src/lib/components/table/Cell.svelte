@@ -7,7 +7,7 @@
   import DialectCell from './cells/DialectCell.svelte';
   import SelectSource from './cells/SelectSource.svelte';
   import AudioCell from './cells/AudioCell.svelte';
-  import { Image } from '@living-dictionaries/parts';
+  import Image from '$lib/components/image/Image.svelte';
   import { saveUpdateToFirestore } from '$lib/helpers/entry/update';
   import { deleteImage } from '$lib/helpers/delete';
   import { dictionary } from '$lib/stores';
@@ -29,7 +29,6 @@
   {:else if column.field === 'photoFile'}
     {#if entry.pf}
       <Image
-        {t}
         {canEdit}
         lexeme={entry.lx}
         gcs={entry.pf.gcs}
@@ -45,7 +44,6 @@
     <SelectSpeakerCell {canEdit} {entry} />
   {:else if column.field === 'ps'}
     <EntryPartOfSpeech
-      {t}
       {canEdit}
       value={entry.ps}
       on:valueupdate={(e) => saveUpdateToFirestore(e, entry.id, $dictionary.id)} />

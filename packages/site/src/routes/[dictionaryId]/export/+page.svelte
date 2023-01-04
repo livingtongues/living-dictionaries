@@ -4,7 +4,8 @@
   import { admin, dictionary, isManager } from '$lib/stores';
   import Button from 'svelte-pieces/ui/Button.svelte';
   import { formatEntriesForCSV, type IEntryForCSV } from '$lib/export/formatEntries';
-  import { semanticDomains, partsOfSpeech } from '@living-dictionaries/parts';
+  import { partsOfSpeech } from '$lib/mappings/parts-of-speech';
+  import { semanticDomains } from '$lib/mappings/semantic-domains';
   import type { IEntry } from '@living-dictionaries/types';
   import { getCollection } from 'sveltefirets';
   import { downloadBlob, arrayToCSVBlob } from '$lib/export/csv';

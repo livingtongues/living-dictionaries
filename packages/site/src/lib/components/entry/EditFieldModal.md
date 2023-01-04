@@ -1,6 +1,6 @@
 <script lang="ts">
-  import EditField from '$lib/entries/EditField.svelte';
-  import EditFieldModal from '$lib/entries/EditFieldModal.svelte';
+  import EditField from './EditField.svelte';
+  import EditFieldModal from './EditFieldModal.svelte';
 
   import { Story } from 'kitbook';
   import ShowHide from 'svelte-pieces/functions/ShowHide.svelte';

@@ -34,7 +34,7 @@ export async function generateFilesFromSpreadsheet() {
     const glossingLanguages = await generateGlossingLanguages(rows_gl);
     // TODO: out of date - needs to update TS file in parts
     await fs.writeFile(
-      `../parts/src/lib/glosses/glossing-languages-list.json`,
+      `../site/src/lib/glosses/glossing-languages-list.json`,
       JSON.stringify(glossingLanguages, null, 2) + '\r\n'
     );
     console.log('glossing-languages-list.json file written - if it has been updated, make sure to copy changes across into its sibling .ts file')

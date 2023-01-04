@@ -2,7 +2,7 @@
   import { t } from 'svelte-i18n';
   import Audio from './Audio.svelte';
   import Video from './Video.svelte';
-  import { Image } from '@living-dictionaries/parts';
+  import Image from '$lib/components/image/Image.svelte';
   import AddImage from './AddImage.svelte';
   import { page } from '$app/stores';
   import type { IEntry } from '@living-dictionaries/types';
@@ -133,7 +133,6 @@
   {#if entry.pf}
     <div class="media-block bg-gray-300 relative">
       <Image
-        {t}
         square={128}
         lexeme={entry.lx}
         gcs={entry.pf.gcs}
