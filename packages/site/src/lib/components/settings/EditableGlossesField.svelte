@@ -5,7 +5,7 @@
   import ShowHide from 'svelte-pieces/functions/ShowHide.svelte';
   import BadgeArrayEmit from 'svelte-pieces/data/BadgeArrayEmit.svelte';
   import Modal from 'svelte-pieces/ui/Modal.svelte';
-  import Filter from '@living-dictionaries/parts/src/lib/helpers/Filter.svelte';
+  import Filter from '$lib/components/Filter.svelte';
 
   export let availableLanguages: IGlossLanguages;
   export let selectedLanguages: string[];

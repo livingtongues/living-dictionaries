@@ -10,7 +10,7 @@
   import type { IDictionary, IUser } from '@living-dictionaries/types';
   import Button from 'svelte-pieces/ui/Button.svelte';
   import { Collection } from 'sveltefirets';
-  import Filter from '@living-dictionaries/parts/src/lib/helpers/Filter.svelte';
+  import Filter from '$lib/components/Filter.svelte';
 
   export let user: IUser;
   export let role: 'manager' | 'contributor';

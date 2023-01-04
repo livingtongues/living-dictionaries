@@ -1,6 +1,6 @@
 <script lang="ts">
   import { Story } from 'kitbook';
-  import Filter from "$lib/helpers/Filter.svelte";
+  import Filter from "./Filter.svelte";
 </script>
 
 # Filter

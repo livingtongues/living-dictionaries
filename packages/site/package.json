@@ -37,7 +37,7 @@
     "firebase": "^9.14.0",
     "instantsearch.js": "^4.33.2",
     "jszip": "^3.7.1",
-    "kitbook": "1.0.0-alpha.7",
+    "kitbook": "1.0.0-alpha.8",
     "logrocket": "^2.1.2",
     "lz-string": "^1.4.4",
     "nprogress": "^0.2.0",

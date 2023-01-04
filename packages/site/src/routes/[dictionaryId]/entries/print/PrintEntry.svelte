@@ -1,11 +1,8 @@
 <script lang="ts">
-  import type { Readable } from 'svelte/store';
-  export let t: Readable<any> = undefined;
-
-  import type { IEntry, ISpeaker, IPrintFields } from '@living-dictionaries/types';
-  import { StandardPrintFields } from '@living-dictionaries/types';
-  import { semanticDomains } from '../../mappings/semantic-domains';
-  import QrCode from '../../QrCode.svelte';
+  import { t } from 'svelte-i18n';
+  import { StandardPrintFields, type IEntry, type ISpeaker, type IPrintFields } from '@living-dictionaries/types';
+  import { semanticDomains } from '@living-dictionaries/parts';
+  import QrCode from './QrCode.svelte';
   import sanitize from 'xss';
 
   export let entry: IEntry;
@@ -86,7 +83,7 @@
             <span class="italic text-[80%]"
               >{t ? $t(`entry.${key}`) : StandardPrintFields[key]}:</span>
           {/if}
-          {#if (key === 'nt')}
+          {#if key === 'nt'}
             {@html sanitize(entry[key])}
           {:else}
             {entry[key]}
