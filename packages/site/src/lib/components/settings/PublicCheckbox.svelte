@@ -19,7 +19,7 @@
       dispatch('changed', { checked: e.target.checked });
     }} />
   <label for="public" class="mx-2 block text-sm font-medium text-gray-700">
-    {t ? $t('create.visible_to_public') : 'Visible to Public'}
+    {$t('create.visible_to_public', { default: 'Visible to Public' })}
   </label>
 </div>
 <div class="text-xs text-gray-600 mt-1">

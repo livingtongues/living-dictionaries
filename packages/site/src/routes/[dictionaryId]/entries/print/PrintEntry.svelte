@@ -46,7 +46,7 @@
   {#if entry.sr && selectedFields.sr}
     <div>
       {#if showLabels}
-        <span class="italic text-[80%]">{t ? $t('entry.sr') : 'Source'}: </span>
+        <span class="italic text-[80%]">{$t('entry.sr', { default: 'Source' })}: </span>
       {/if}
       {#if typeof entry.sr === 'string'}
         <i>{entry.sr}</i>
@@ -61,7 +61,7 @@
     {#if selectedFields.sdn}
       {#if entry.sdn?.length || entry.sd}
         {#if showLabels}
-          <span class="italic text-[80%]">{t ? $t('entry.sdn') : 'Semantic Domains'}: </span>
+          <span class="italic text-[80%]">{$t('entry.sdn', { default: 'Semantic Domains' })}: </span>
         {/if}
 
         {#if entry.sdn}
@@ -81,7 +81,7 @@
         <p>
           {#if showLabels}
             <span class="italic text-[80%]"
-              >{t ? $t(`entry.${key}`) : StandardPrintFields[key]}:</span>
+              >{$t(`entry.${key}`, { default: StandardPrintFields[key] })}:</span>
           {/if}
           {#if key === 'nt'}
             {@html sanitize(entry[key])}
@@ -95,7 +95,7 @@
   {#if entry.sf?.speakerName && selectedFields.speaker}
     <div>
       {#if showLabels}
-        <span class="italic text-[80%]">{t ? $t('entry.speaker') : 'Speaker'}: </span>
+        <span class="italic text-[80%]">{$t('entry.speaker', { default: 'Speaker' })}: </span>
       {/if}
       {entry.sf.speakerName}
     </div>

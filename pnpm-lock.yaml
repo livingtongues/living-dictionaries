@@ -75,7 +75,6 @@ importers:
       kitbook: ^0.0.24
       lz-string: ^1.4.4
       mdsvex: ^0.10.6
-      recordrtc: ^5.6.2
       replace-in-file: ^6.3.5
       satori: ^0.0.44
       satori-html: ^0.3.0
@@ -114,7 +113,6 @@ importers:
       kitbook: 0.0.24_svelte@3.55.0
       lz-string: 1.4.4
       mdsvex: 0.10.6_svelte@3.55.0
-      recordrtc: 5.6.2
       replace-in-file: 6.3.5
       satori: 0.0.44
       satori-html: 0.3.0

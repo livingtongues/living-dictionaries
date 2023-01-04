@@ -52,7 +52,7 @@ display a message asking to Contact Us. Toggle the admin status and remove langu
           }
         } else {
           alert('Contact Us');
-          // in page use: alert(t ? $t('header.contact_us') : 'Contact Us');
+          // in page use: alert($t('header.contact_us', { default: 'Contact Us' }));
         }
       }} />
   </ReactiveSet>

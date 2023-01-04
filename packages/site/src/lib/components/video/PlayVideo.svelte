@@ -57,7 +57,7 @@
             dispatch('delete');
           }}>
           <span class="i-fa-trash-o" style="margin: -1px 0 2px;" />
-          {t ? $t('misc.delete') : 'Delete'}
+          {$t('misc.delete', { default: 'Delete' })}
         </Button>
       </div>
     {/if}
