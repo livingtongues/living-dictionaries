@@ -40,11 +40,11 @@
 </script>
 
 <div class="text-sm font-medium text-gray-700 mb-2">
-  {t ? $t('create.where_spoken') : 'Where is this language spoken?'}*
+  {$t('create.where_spoken', { default: 'Where is this language spoken?' })}*
 </div>
 
 <div class="text-xs text-gray-600 mb-2">
-  {t ? $t('create.map_instructions') : 'Click on the map to add secondary coordinates.'}
+  {$t('create.map_instructions', { default: 'Click on the map to add secondary coordinates.' })}
 </div>
 {#if hasCoordinates}
   <div class="h-240px">
@@ -64,7 +64,7 @@
             lng={dictionary.coordinates.longitude}
             lat={dictionary.coordinates.latitude}
             color="blue">
-            <Popup offset={30} open>{t ? $t('create.primary_coordinate') : 'Primary coordinate'}</Popup>
+            <Popup offset={30} open>{$t('create.primary_coordinate', { default: 'Primary coordinate' })}</Popup>
           </Marker>
         </CoordinatesModal>
       {/if}
@@ -178,9 +178,9 @@
       size={hasCoordinates ? 'sm' : 'md'}>
       <span class="i-mdi-map-marker-plus mr-1" style="margin-top: -3px;" />
       {#if hasCoordinates}
-        {t ? $t('create.secondary_coordinates') : 'Secondary Coordinates'}
+      {$t('create.select_coordinates', { default: 'Select Coordinates' })}
       {:else}
-        {t ? $t('create.select_coordinates') : 'Select Coordinates'}
+        {$t('create.select_coordinates', { default: 'Select Coordinates' })}
       {/if}
     </Button>
     {#if show}
@@ -190,7 +190,7 @@
             lng={dictionary.coordinates.longitude}
             lat={dictionary.coordinates.latitude}
             color="blue">
-            <Popup offset={30} open>{t ? $t('create.map_instructions') : 'Click on the map to add secondary coordinates.'}</Popup>
+            <Popup offset={30} open>{$t('create.map_instructions', { default: 'Click on the map to add secondary coordinates.' })}</Popup>
           </Marker>
         {/if}
       </CoordinatesModal>
@@ -201,7 +201,7 @@
     <ShowHide let:show let:toggle>
       <Button onclick={toggle} color="black" size="sm">
         <span class="i-mdi-map-marker-path mr-1" style="margin-top: -2px;" />
-        {t ? $t('create.select_region') : 'Select Region'}
+        {$t('create.select_region', { default: 'Select Region' })}
       </Button>
       {#if show}
         <RegionModal
@@ -216,7 +216,7 @@
             lng={dictionary.coordinates.longitude}
             lat={dictionary.coordinates.latitude}
             color="blue">
-            <Popup offset={30} open>{t ? $t('create.map_instructions') : 'Click on the map to add secondary coordinates.'}</Popup>
+            <Popup offset={30} open>{$t('create.map_instructions', { default: 'Click on the map to add secondary coordinates.' })}</Popup>
           </Marker>
         </RegionModal>
       {/if}

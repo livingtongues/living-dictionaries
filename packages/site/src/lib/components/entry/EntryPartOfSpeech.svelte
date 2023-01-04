@@ -47,7 +47,7 @@
     <ShowHide let:show let:toggle>
       <BadgeArrayEmit
         strings={translateValues(editedParts)}
-        addMessage={t ? $t('misc.add', { default: 'Add' }) : 'Add'}
+        addMessage={$t('misc.add', { default: 'Add' })}
         canEdit
         on:itemremoved={(e) => {
           remove(editedParts[e.detail.index]);
@@ -56,7 +56,7 @@
       {#if show}
         <Modal noscroll on:close={toggle}>
           <span slot="heading"
-            >{t ? $t('entry.ps', { default: 'Part of Speech' }) : 'Part of Speech'}</span>
+            >{$t('entry.ps', { default: 'Part of Speech' })}</span>
           <DataList
             type="search"
             class="form-input w-full leading-none"
@@ -72,7 +72,7 @@
             {/if}
             {#each partsOfSpeech as pos}
               <option data-value={pos.enAbbrev}
-                >{t ? $t('ps.' + pos.enAbbrev, { default: pos.enAbbrev }) : pos.enName}</option>
+                >{$t('ps.' + pos.enAbbrev, { default: pos.enName })}</option>
             {/each}
           </DataList>
         </Modal>

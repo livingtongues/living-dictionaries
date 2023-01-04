@@ -123,11 +123,15 @@
   <div class="rounded-md shadow-sm">
     {#if field === 'nt'}
       {#await import('@living-dictionaries/parts/src/lib/editor/ClassicCustomized.svelte') then { default: ClassicCustomized }}
-      <Keyman>
-        <InputWrapper fixed target=".ck-editor__editable_inline" canChooseKeyboard position="bottom">
-          <ClassicCustomized {editorConfig} bind:html={value} />
-        </InputWrapper>
-      </Keyman>  
+        <Keyman>
+          <InputWrapper
+            fixed
+            target=".ck-editor__editable_inline"
+            canChooseKeyboard
+            position="bottom">
+            <ClassicCustomized {editorConfig} bind:html={value} />
+          </InputWrapper>
+        </Keyman>
       {/await}
     {:else if field.startsWith('gl') || field.startsWith('xs')}
       <Keyman>
@@ -202,17 +206,17 @@
 
   <div class="modal-footer">
     <Button onclick={close} form="simple" color="black">
-      {t ? $t('misc.cancel') : 'Cancel'}
+      {$t('misc.cancel', { default: 'Cancel' })}
     </Button>
     <div class="w-1" />
     {#if adding}
       <Button type="submit" form="filled">
-        {t ? $t('misc.next') : 'Next'}
+        {$t('misc.next', { default: 'Next' })}
         <i class="far fa-chevron-right rtl-x-flip" />
       </Button>
     {:else}
       <Button type="submit" form="filled">
-        {t ? $t('misc.save') : 'Save'}
+        {$t('misc.save', { default: 'Save' })}
       </Button>
     {/if}
   </div>

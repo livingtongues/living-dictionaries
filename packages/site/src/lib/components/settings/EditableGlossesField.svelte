@@ -13,7 +13,9 @@
   export let minimum = 1;
 
   $: activeGlossingBcps = Array.isArray(selectedLanguages)
-    ? selectedLanguages.map((bcp) => (t ? $t('gl.' + bcp) : availableLanguages[bcp].vernacularName))
+    ? selectedLanguages.map((bcp) =>
+        $t('gl.' + bcp, { default: availableLanguages[bcp].vernacularName })
+      )
     : [];
   $: remainingGlossingLanguagesAsArray = Object.entries(availableLanguages)
     .map((e) => ({
@@ -38,7 +40,7 @@
     strings={activeGlossingBcps}
     {minimum}
     canEdit
-    addMessage={t ? $t('misc.add', { default: 'Add' }) : 'Add'}
+    addMessage={$t('misc.add', { default: 'Add' })}
     on:itemremoved={(e) => {
       dispatch('remove', {
         languageId: selectedLanguages[e.detail.index],

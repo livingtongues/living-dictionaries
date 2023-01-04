@@ -10,11 +10,11 @@
 </script>
 
 <div class="text-sm font-medium text-gray-700 mb-1">
-  {t ? $t('create.alternate_names') : 'Alternate Names'}
+  {$t('create.alternate_names', { default: 'Alternate Names' })}
 </div>
 <BadgeArray
   strings={alternateNames}
   canEdit
-  promptMessage={t ? $t('create.enter_alternate_name') : 'Enter Alternate Name'}
-  addMessage={t ? $t('misc.add') : 'Add'}
+  promptMessage={$t('create.enter_alternate_name', { default: 'Enter Alternate Name' })}
+  addMessage={$t('misc.add', { default: 'Add' })}
   on:valueupdated={(e) => dispatch('update', { alternateNames: e.detail })} />

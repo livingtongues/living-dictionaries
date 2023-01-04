@@ -49,7 +49,7 @@
             })}`
           )
         ) {
-          alert(t ? $t('header.contact_us') : 'Contact Us');
+          alert($t('header.contact_us', { default: 'Contact Us' }));
         }
         location.reload();
       }
@@ -143,7 +143,7 @@
               });
             }
           } else {
-            alert(t ? $t('header.contact_us') : 'Contact Us');
+            alert($t('header.contact_us', { default: 'Contact Us' }));
           }
         } catch (err) {
           return console.log(err);
