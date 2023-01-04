@@ -23,7 +23,7 @@
 </div>
 
 {#if edit}
-  {#await import('@living-dictionaries/parts/src/lib/entries/EditFieldModal.svelte') then { default: EditFieldModal }}
+  {#await import('$lib/components/entry/EditFieldModal.svelte') then { default: EditFieldModal }}
     <EditFieldModal
       on:valueupdate
       value={updatedValue !== undefined ? updatedValue : value}

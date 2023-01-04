@@ -12,7 +12,7 @@
   import EditableAlternateNames from '$lib/components/settings/EditableAlternateNames.svelte';
   import PublicCheckbox from '$lib/components/settings/PublicCheckbox.svelte'; // only used here - perhaps colocate
   import PrintAccessCheckbox from '$lib/components/settings/PrintAccessCheckbox.svelte'; // only used here - perhaps colocate
-  import { glossingLanguages } from '@living-dictionaries/parts';
+  import { glossingLanguages } from '$lib/glosses/glossing-languages';
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte';
 
   async function togglePrintAccess(settingPrintAccess: boolean) {
@@ -184,7 +184,6 @@
     <div class="mb-5" />
 
     <PrintAccessCheckbox
-      {t}
       checked={dictionary.printAccess}
       on:changed={({ detail: { checked } }) => togglePrintAccess(checked)} />
     <div class="mb-5" />

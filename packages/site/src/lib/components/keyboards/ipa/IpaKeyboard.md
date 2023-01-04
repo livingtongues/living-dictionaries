@@ -1,5 +1,5 @@
 <script lang="ts">
-  import IpaKeyboard from '$lib/entries/keyboards/ipa/IpaKeyboard.svelte';
+  import IpaKeyboard from './IpaKeyboard.svelte';
   import { Story } from 'kitbook';
 </script>
 

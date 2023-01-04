@@ -1,10 +1,10 @@
 <script lang="ts">
-  import InputWrapper from '$lib/entries/keyboards/keyman/InputWrapper.svelte';
-  import Keyman from '$lib/entries/keyboards/keyman/Keyman.svelte';
+  import InputWrapper from './InputWrapper.svelte';
+  import Keyman from './Keyman.svelte';
   import { Story } from 'kitbook';
   import Button from 'svelte-pieces/ui/Button.svelte';
   import Store from 'svelte-pieces/functions/Store.svelte';
-  import ClassicCustomized from '$lib/editor/ClassicCustomized.svelte';
+  import ClassicCustomized from '@living-dictionaries/parts/src/lib/editor/ClassicCustomized.svelte';
 
   let value = '';
   let html = '';

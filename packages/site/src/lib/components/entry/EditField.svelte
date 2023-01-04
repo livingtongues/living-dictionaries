@@ -1,11 +1,9 @@
 <script lang="ts">
-  import type { Readable } from 'svelte/store';
-  export let t: Readable<any> = undefined;
-
+  import { t } from 'svelte-i18n';
   import { createEventDispatcher } from 'svelte';
   import Button from 'svelte-pieces/ui/Button.svelte';
-  import Keyman from './keyboards/keyman/Keyman.svelte';
-  import InputWrapper from './keyboards/keyman/InputWrapper.svelte';
+  import Keyman from '$lib/components/keyboards/keyman/Keyman.svelte';
+  import InputWrapper from '$lib/components/keyboards/keyman/InputWrapper.svelte';
   const dispatch = createEventDispatcher<{
     close: boolean;
     valueupdate: { field: string; newValue: string };
@@ -124,7 +122,7 @@
 <form on:submit|preventDefault={save}>
   <div class="rounded-md shadow-sm">
     {#if field === 'nt'}
-      {#await import('../editor/ClassicCustomized.svelte') then { default: ClassicCustomized }}
+      {#await import('@living-dictionaries/parts/src/lib/editor/ClassicCustomized.svelte') then { default: ClassicCustomized }}
       <Keyman>
         <InputWrapper fixed target=".ck-editor__editable_inline" canChooseKeyboard position="bottom">
           <ClassicCustomized {editorConfig} bind:html={value} />
@@ -171,7 +169,7 @@
     {/if}
 
     {#if field === 'ph'}
-      {#await import('../entries/keyboards/ipa/IpaKeyboard.svelte') then { default: IpaKeyboard }}
+      {#await import('$lib/components/keyboards/ipa/IpaKeyboard.svelte') then { default: IpaKeyboard }}
         <div class="mt-2">
           <IpaKeyboard target={inputEl} />
         </div>

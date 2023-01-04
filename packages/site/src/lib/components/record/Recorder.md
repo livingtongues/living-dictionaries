@@ -1,8 +1,9 @@
 <script lang="ts">
   import { Story } from 'kitbook';
-  import { MediaStream, Recorder } from '$lib';
   import { srcObject, Button } from 'svelte-pieces';
   import type { Options } from 'recordrtc';
+  import MediaStream from './MediaStream.svelte';
+  import Recorder from './Recorder.svelte';
 
   const options: Options = {
     type: 'video',
@@ -34,7 +35,7 @@
               const blob = await stop();
               console.log(blob);
             }}>Stop</Button>
-            <!-- Should the Blob be stored in the Recorder component so it can be passed down, or emitted so it can be listened for? -->
+          <!-- Should the Blob be stored in the Recorder component so it can be passed down, or emitted so it can be listened for? -->
           <Button
             onclick={() => {
               console.log(recorder.getState());

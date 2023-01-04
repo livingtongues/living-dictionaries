@@ -11,7 +11,6 @@
   {#if video.youtubeId}
     <iframe
       id="player"
-      type="text/html"
       width={screenWidth >= 540 ? '456' : screenWidth * 0.8444}
       height={screenWidth >= 540 ? '342' : screenWidth * 0.6333}
       src={`https://www.youtube.com/embed/${video.youtubeId}${video.startAt ? `?start=${video.startAt}` : ''}`}
@@ -22,7 +21,6 @@
   {#if video.vimeoId}
     <iframe
       id="player"
-      type="text/html"
       width={screenWidth >= 540 ? '456' : screenWidth * 0.8444}
       height={screenWidth >= 540 ? '342' : screenWidth * 0.6333}
       src={`https://player.vimeo.com/video/${video.vimeoId}${video.startAt ? `#t=${video.startAt}` : ''}`}
