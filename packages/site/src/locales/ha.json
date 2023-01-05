@@ -28,7 +28,14 @@
     "translators": "Maimaitawa",
     "interns": "Kulawa",
     "video_upload": "Bidiyo",
-    "export_data": "Fitar bayanarwa (CSV, PDF Tsarin PDF)"
+    "export_data": "Fitar bayanarwa (CSV, PDF Tsarin PDF)",
+    "import_export": "Shigo da / fitarwa (flayer, daidaitaccen tsari)",
+    "geo_tagging": "Gudun Gashi",
+    "flashcard_view": "Visearin FlashCard don xaliban harshe",
+    "peer_review": "Bita na sihiri",
+    "suggestions_from_users": "Shawarwari daga masu amfani",
+    "push_notifications": "Tura sanarwar ga masu ba da gudummawa",
+    "contributor_awards": "Adarfafa al'adun jama'a"
   },
   "contributors": {
     "invite_contributors": "Gayyato da gudummuwa",

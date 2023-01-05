@@ -28,7 +28,14 @@
     "translators": "المترجمون",
     "interns": "المتدربين",
     "video_upload": "تحميل الفيديو",
-    "export_data": "بيانات التصدير (تنسيقات CSV ، PDF)"
+    "export_data": "بيانات التصدير (تنسيقات CSV ، PDF)",
+    "import_export": "استيراد/تصدير (فليكس ، تنسيق قياسي)",
+    "geo_tagging": "إدخالات العلامات الجغرافية",
+    "flashcard_view": "عرض البطاقة الفلاش لمتعلمي اللغة",
+    "peer_review": "مراجعة الأقران للتهجئة",
+    "suggestions_from_users": "اقتراحات من المستخدمين",
+    "push_notifications": "دفع الإخطارات إلى المساهمين",
+    "contributor_awards": "جوائز المجتمع المساهم"
   },
   "contributors": {
     "invite_contributors": "دعوة المساهمين",

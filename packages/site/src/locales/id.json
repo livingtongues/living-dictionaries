@@ -28,7 +28,14 @@
     "translators": "Penerjemah",
     "interns": "Magang",
     "video_upload": "Unggahan video",
-    "export_data": "Ekspor Data (CSV, Format PDF)"
+    "export_data": "Ekspor Data (CSV, Format PDF)",
+    "import_export": "Impor/Ekspor (Format, Format Standar)",
+    "geo_tagging": "Entri geo-tagging",
+    "flashcard_view": "Tampilan Flashcard untuk Pembelajar Bahasa",
+    "peer_review": "Tinjauan Peer ejaan",
+    "suggestions_from_users": "Saran dari pengguna",
+    "push_notifications": "Pemberitahuan Dorong untuk Kontributor",
+    "contributor_awards": "Penghargaan Komunitas Kontributor"
   },
   "contributors": {
     "invite_contributors": "Undang Kontributor",

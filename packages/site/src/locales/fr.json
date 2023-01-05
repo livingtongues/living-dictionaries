@@ -28,7 +28,14 @@
     "translators": "Traducteurs",
     "interns": "Stagiaires",
     "video_upload": "Téléchargement vidéo",
-    "export_data": "Données d'exportation (formats CSV, PDF)"
+    "export_data": "Données d'exportation (formats CSV, PDF)",
+    "import_export": "Import / export (flex, format standard)",
+    "geo_tagging": "Entrées géosicolisées",
+    "flashcard_view": "Vue de cartes flash pour les apprenants en langue",
+    "peer_review": "Examen par les pairs des orthographes",
+    "suggestions_from_users": "Suggestions des utilisateurs",
+    "push_notifications": "Pousser les notifications aux contributeurs",
+    "contributor_awards": "Prix ​​de la communauté des contributeurs"
   },
   "contributors": {
     "invite_contributors": "Inviter des contributeurs",
