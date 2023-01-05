@@ -28,7 +28,14 @@
     "translators": "Penterjemah",
     "interns": "Pelatih",
     "video_upload": "Muat naik video",
-    "export_data": "Data Eksport (CSV, Format PDF)"
+    "export_data": "Data Eksport (CSV, Format PDF)",
+    "import_export": "Import/Eksport (Flex, Format Standard)",
+    "geo_tagging": "Penyertaan geo-tagging",
+    "flashcard_view": "Pandangan Flashcard untuk Pelajar Bahasa",
+    "peer_review": "Kajian rakan sebaya ejaan",
+    "suggestions_from_users": "Cadangan dari pengguna",
+    "push_notifications": "Pemberitahuan tolak kepada penyumbang",
+    "contributor_awards": "Anugerah Komuniti Penyumbang"
   },
   "contributors": {
     "invite_contributors": "Undang Penyumbang",

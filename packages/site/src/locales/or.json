@@ -28,7 +28,14 @@
     "translators": "ଅନୁବାଦକ",
     "interns": "ମଧ୍ୟବର୍ତ୍ତୀ",
     "video_upload": "ଭିଡିଓ ଅପଲୋଡ୍ |",
-    "export_data": "ରପ୍ତାନି କରନ୍ତୁ (CSV, PDF ଫର୍ମାଟ୍)"
+    "export_data": "ରପ୍ତାନି କରନ୍ତୁ (CSV, PDF ଫର୍ମାଟ୍)",
+    "import_export": "ଆମଦାନି / ରପ୍ତାନି (ଫ୍ଲେକ୍ସ, ମାନକ ଫର୍ମାଟ୍)",
+    "geo_tagging": "ଜିଓ-ଟ୍ୟାଗିଂ ଏଣ୍ଟ୍ରିଗୁଡିକ |",
+    "flashcard_view": "ଭାଷା ଶିକ୍ଷାର୍ଥୀମାନଙ୍କ ପାଇଁ ଫ୍ଲାସକାର୍ଡ ଦୃଶ୍ୟ |",
+    "peer_review": "ବନାନର ସାଥୀ ସମୀକ୍ଷା |",
+    "suggestions_from_users": "ଉପଯୋଗକର୍ତ୍ତାଗଣଙ୍କ ପରାମର୍ଶ |",
+    "push_notifications": "ଯୋଗଦାନକାରୀଙ୍କ ପୁସ୍ ବିଜ୍ଞପ୍ତିଗୁଡିକ |",
+    "contributor_awards": "ସହଯୋଗୀ କମ୍ୟୁନିଟି ପୁରସ୍କାର |"
   },
   "contributors": {
     "invite_contributors": "ଦାତାଗଣ ଆମନ୍ତ୍ରଣ",

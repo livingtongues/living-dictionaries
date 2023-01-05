@@ -28,7 +28,14 @@
     "translators": "ተርጓሚዎች",
     "interns": "ጣልቃ ገብነቶች",
     "video_upload": "የቪዲዮ ሰቀለው",
-    "export_data": "ውሂብ ወደ ውጭ የመላክ (CSV, PDF ቅርፀቶች)"
+    "export_data": "ውሂብ ወደ ውጭ የመላክ (CSV, PDF ቅርፀቶች)",
+    "import_export": "የማስመጣት / ላክዎች (Flex, መደበኛ ቅርጸት)",
+    "geo_tagging": "የጂዮ-መለያ ግቤቶች",
+    "flashcard_view": "ለቋንቋ ተማሪዎች የፍላሽካርድ እይታ",
+    "peer_review": "የእኩዮች አቻዎች ግምገማዎች",
+    "suggestions_from_users": "ከተጠቃሚዎች የተሰጡ አስተያየቶች",
+    "push_notifications": "ማሳወቂያዎችን ወደ አስተዋፅ shows ግፋ",
+    "contributor_awards": "አስተዋጽኦ ያለው ማህበረሰብ ሽልማት"
   },
   "contributors": {
     "invite_contributors": "አበርካቾች ይጋብዙ",

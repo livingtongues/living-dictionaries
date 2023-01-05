@@ -28,7 +28,14 @@
     "translators": "Переводчики",
     "interns": "Стажеры",
     "video_upload": "Загрузка видео",
-    "export_data": "Экспортные данные (CSV, форматы PDF)"
+    "export_data": "Экспортные данные (CSV, форматы PDF)",
+    "import_export": "Импорт/Экспорт (Flex, Standard Format)",
+    "geo_tagging": "Георажающие записи",
+    "flashcard_view": "Взгляд с карточкой для изучающих язык",
+    "peer_review": "Оценка написания писателей",
+    "suggestions_from_users": "Предложения от пользователей",
+    "push_notifications": "Продвигать уведомления о участниках",
+    "contributor_awards": "Награды сообщества участников"
   },
   "contributors": {
     "invite_contributors": "Пригласить соавторов",

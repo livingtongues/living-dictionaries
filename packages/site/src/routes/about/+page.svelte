@@ -85,16 +85,14 @@
     {$_('about.dev_roadmap', { default: 'Development Roadmap' })}
   </h4>
   <p>
-    Import/Export
-    <br />
-    <i>(FLEx, Standard Format)</i>
+    {$_('about.import_export', { default: 'Import/Export (FLEx, Standard Format)' })}
   </p>
-  <p>Geo-tagging Entries</p>
-  <p>Flashcard View for Language Learners</p>
-  <p>Peer Review of Spellings</p>
-  <p>Suggestions from Users</p>
-  <p>Push Notifications to Contributors</p>
-  <p>Contributor Community Awards</p>
+  <p>{$_( 'about.geo_tagging', { default:  'Geo-tagging Entries' })}</p>
+  <p>{$_( 'about.flashcard_view', { default:  'Flashcard View for Language Learners' })}</p>
+  <p>{$_( 'about.peer_review', { default:  'Peer Review of Spellings' })}</p>
+  <p>{$_( 'about.suggestions_from_users', { default:  'Suggestions from Users' })}</p>
+  <p>{$_( 'about.push_notifications', { default:  'Push Notifications to Contributors' })}</p>
+  <p>{$_( 'about.contributor_awards', { default:  'Contributor Community Awards' })}</p>
 
   <hr style="margin: 40px 0;" />
 

@@ -28,7 +28,14 @@
     "translators": "מתרגמים",
     "interns": "מתמחים",
     "video_upload": "העלאת וידאו",
-    "export_data": "ייצוא נתוני (CSV, פורמטים של PDF)"
+    "export_data": "ייצוא נתוני (CSV, פורמטים של PDF)",
+    "import_export": "יבוא/ייצוא (Flex, פורמט סטנדרטי)",
+    "geo_tagging": "ערכים לתיוג גיאוגרפי",
+    "flashcard_view": "תצוגת כרטיס פלאש ללומדי שפה",
+    "peer_review": "סקירת עמיתים של איות",
+    "suggestions_from_users": "הצעות ממשתמשים",
+    "push_notifications": "דחוף התראות לתורמים",
+    "contributor_awards": "פרסי קהילה תורמים"
   },
   "contributors": {
     "invite_contributors": "הזמנת מתנדבים",
