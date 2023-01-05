@@ -7,6 +7,9 @@ async function initFunction(): Promise<void> {
   await init({
     fallbackLocale: 'en',
     initialLocale: getLocaleFromNavigator(),
+    // handleMissingMessage: ({ locale, id, defaultValue }) => {
+    //   return defaultValue;
+    // }
   });
 }
 

@@ -34,7 +34,6 @@
             attempts++;
             // @ts-ignore
             inputEl = wrapperEl.querySelector(target);
-            console.log(attempts);
             if (inputEl || attempts > 9) {
               resolve;
               clearInterval(interval);
