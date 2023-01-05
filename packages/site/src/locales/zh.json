@@ -26,7 +26,9 @@
     "help_us_launch_more": "帮助我们推出更多的活字典",
     "with_your_help": "有了您的帮助，我们可以继续改善我们的软件, 使得任何社会群体都可以使用我们的软件并创造他们自己的活字典。今天就献出一份爱心，增添一分影响吧！",
     "translators": "翻译人员",
-    "interns": "实习生"
+    "interns": "实习生",
+    "video_upload": "视频上传",
+    "export_data": "导出数据（CSV，PDF格式）"
   },
   "contributors": {
     "invite_contributors": "邀请贡献者",
@@ -209,7 +211,7 @@
     "next": "下一个",
     "export": "出口",
     "images": "图片",
-    "reset": "重置",
+    "reset": "重启",
     "invalid_url": "无效网址",
     "downloading": "下载中",
     "upload": "上传",

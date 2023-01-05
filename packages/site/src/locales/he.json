@@ -26,7 +26,9 @@
     "help_us_launch_more": "עזרו לנו להשיק מילונים חיים",
     "with_your_help": "בזכותכם נוכל להמשיך לפתח את התוכנה שלנו ולאפשר לכל קהילה שברצונה ליצור מילון עבור שפתה. תרמו היום והשפיעו!",
     "translators": "מתרגמים",
-    "interns": "מתמחים"
+    "interns": "מתמחים",
+    "video_upload": "העלאת וידאו",
+    "export_data": "ייצוא נתוני (CSV, פורמטים של PDF)"
   },
   "contributors": {
     "invite_contributors": "הזמנת מתנדבים",

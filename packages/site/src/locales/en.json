@@ -26,7 +26,9 @@
     "help_us_launch_more": "Help Us Launch More Living Dictionaries",
     "with_your_help": "With your help, we can continue to improve our software and make it available for any community that wishes to create their own Living Dictionary. Donate today and make an impact!",
     "translators": "Translators",
-    "interns": "Interns"
+    "interns": "Interns",
+    "video_upload": "Video Upload",
+    "export_data": "Export Data (CSV, PDF formats)"
   },
   "contributors": {
     "invite_contributors": "Invite Contributors",
