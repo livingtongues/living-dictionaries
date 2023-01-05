@@ -72,6 +72,12 @@
   <p>
     {$_('about.import_data', { default: 'Import Data (CSV, JSON formats)' })}
   </p>
+  <p>
+    {$_('about.video_upload', { default: 'Video Upload' })}
+  </p>
+  <p>
+    {$_('about.export_data', { default: 'Export Data (CSV, PDF formats)' })}
+  </p>
 
   <h4
     class="text-2xl leading-8 font-bold text-gray-900 tracking-tight
@@ -89,7 +95,6 @@
   <p>Suggestions from Users</p>
   <p>Push Notifications to Contributors</p>
   <p>Contributor Community Awards</p>
-  <p>Video Upload</p>
 
   <hr style="margin: 40px 0;" />
 
