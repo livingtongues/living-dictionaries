@@ -4,7 +4,7 @@
   import { navigating } from '$app/stores';
 
   import { browser } from '$app/environment';
-  import { _ } from 'svelte-i18n';
+  import { t } from 'svelte-i18n';
   import LoadingIndicator from './LoadingIndicator.svelte';
 </script>
 
@@ -14,7 +14,7 @@
 
 <Preflights />
 
-<div id="direction" dir={$_('direction')}>
+<div id="direction" dir={$t('direction')}>
   <slot />
 </div>
 
