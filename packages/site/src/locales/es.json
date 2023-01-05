@@ -26,7 +26,9 @@
     "help_us_launch_more": "Ayúdenos a lanzar más Diccionarios Vivos",
     "with_your_help": "Con su ayuda, podemos seguir mejorando nuestro software y ponerlo a disposición de cualquier comunidad que desee crear su propio Diccionario Vivo. Por favor, haga una donación hoy.",
     "translators": "Traductores",
-    "interns": "Pasantes"
+    "interns": "Pasantes",
+    "video_upload": "Subir videos",
+    "export_data": "Exportar datos (en formatos CSV, PDF)"
   },
   "contributors": {
     "invite_contributors": "Invitar colaboradores",
@@ -213,7 +215,7 @@
     "invalid_url": "Esta no es una URL válida",
     "downloading": "Descargando",
     "upload": "Subir",
-    "assertion": "sí",
+    "assertion": "si",
     "negation": "no",
     "clean": "Limpiar"
   },
