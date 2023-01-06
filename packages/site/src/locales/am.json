@@ -26,7 +26,16 @@
     "help_us_launch_more": "እገዛ ከእኛ አስጀምር ተጨማሪ መዝገበ መኖር",
     "with_your_help": "በእርስዎ እገዛ አማካኝነት, እኛ ያለንን ሶፍትዌር ለማሻሻል እና የራሳቸውን ሕያው መዝገበ ለመፍጠር የሚፈልግ ማንኛውም ማህበረሰብ እንዲገኝ ማድረግ መቀጠል ይችላሉ. ዛሬ ለግስ እና ተፅዕኖ ለማድረግ!",
     "translators": "ተርጓሚዎች",
-    "interns": "ጣልቃ ገብነቶች"
+    "interns": "ጣልቃ ገብነቶች",
+    "video_upload": "የቪዲዮ ሰቀለው",
+    "export_data": "ውሂብ ወደ ውጭ የመላክ (CSV, PDF ቅርፀቶች)",
+    "import_export": "የማስመጣት / ላክዎች (Flex, መደበኛ ቅርጸት)",
+    "geo_tagging": "የጂዮ-መለያ ግቤቶች",
+    "flashcard_view": "ለቋንቋ ተማሪዎች የፍላሽካርድ እይታ",
+    "peer_review": "የእኩዮች አቻዎች ግምገማዎች",
+    "suggestions_from_users": "ከተጠቃሚዎች የተሰጡ አስተያየቶች",
+    "push_notifications": "ማሳወቂያዎችን ወደ አስተዋፅ shows ግፋ",
+    "contributor_awards": "አስተዋጽኦ ያለው ማህበረሰብ ሽልማት"
   },
   "contributors": {
     "invite_contributors": "አበርካቾች ይጋብዙ",

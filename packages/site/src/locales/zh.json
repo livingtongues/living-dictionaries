@@ -26,7 +26,16 @@
     "help_us_launch_more": "帮助我们推出更多的活字典",
     "with_your_help": "有了您的帮助，我们可以继续改善我们的软件, 使得任何社会群体都可以使用我们的软件并创造他们自己的活字典。今天就献出一份爱心，增添一分影响吧！",
     "translators": "翻译人员",
-    "interns": "实习生"
+    "interns": "实习生",
+    "video_upload": "视频上传",
+    "export_data": "导出数据（CSV，PDF格式）",
+    "import_export": "进出口（flex，标准格式）",
+    "geo_tagging": "地理标签条目",
+    "flashcard_view": "语言学习者的抽认卡视图",
+    "peer_review": "拼写的同行评审",
+    "suggestions_from_users": "用户的建议",
+    "push_notifications": "向贡献者推动通知",
+    "contributor_awards": "贡献者社区奖"
   },
   "contributors": {
     "invite_contributors": "邀请贡献者",
