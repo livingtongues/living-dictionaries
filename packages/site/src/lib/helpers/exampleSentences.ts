@@ -1,5 +1,7 @@
 import type { IExampleSentence } from '@living-dictionaries/types';
 
+//TODO refactor: checking if I really need the sortVernacularSentence fn
+
 export function printExampleSentences(
   exampleSentences: IExampleSentence,
   t: (id: string) => string,
