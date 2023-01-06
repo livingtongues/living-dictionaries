@@ -26,7 +26,16 @@
     "help_us_launch_more": "Tusaidie Kuzindua Kamusi Hai Nyingi Zaidi",
     "with_your_help": "Kwa msaada wako, tunaweza kuendelea kuboresha programu yetu na kuifanya ipatikane kwa jamii yoyote inayopenda kuunda Kamusi Hai. Changia leo ili ulete mabadiliko!",
     "translators": "Watafsiri",
-    "interns": "Wanafunzi wa ndani"
+    "interns": "Wanafunzi wa ndani",
+    "video_upload": "Upakiaji wa video",
+    "export_data": "Takwimu za kuuza nje (CSV, fomati za PDF)",
+    "import_export": "Kuagiza/kuuza nje (kubadilika, muundo wa kawaida)",
+    "geo_tagging": "Viingilio vya Geo-Tagging",
+    "flashcard_view": "Mtazamo wa Flashcard kwa wanafunzi wa lugha",
+    "peer_review": "Mapitio ya rika ya herufi",
+    "suggestions_from_users": "Mapendekezo kutoka kwa watumiaji",
+    "push_notifications": "Kushinikiza arifa kwa wachangiaji",
+    "contributor_awards": "Tuzo za Jumuiya ya Mchangiaji"
   },
   "contributors": {
     "invite_contributors": "Wakaribishe Wachangiaji",
