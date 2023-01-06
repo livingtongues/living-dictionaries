@@ -1,13 +1,12 @@
 <script lang="ts">
+  import SeoMetaTags from '$lib/components/SeoMetaTags.svelte';
   import Header from '$lib/components/shell/Header.svelte';
   import AdminGuard from '$lib/components/ui/AdminGuard.svelte';
   import Tab from './Tab.svelte';
   const tabs = ['users', 'dictionaries'];
 </script>
 
-<svelte:head>
-  <title>Admin Panel</title>
-</svelte:head>
+<SeoMetaTags title="Admin Panel" />
 
 <Header>Admin Panel</Header>
 

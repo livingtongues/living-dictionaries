@@ -5,6 +5,7 @@
   import Stats from '$lib/components/search/Stats.svelte';
   import EntryFilters from './EntryFilters.svelte';
   import { dictionary, canEdit } from '$lib/stores';
+  import SeoMetaTags from '$lib/components/SeoMetaTags.svelte';
 
   import { page } from '$app/stores';
   import { browser } from '$app/environment';
@@ -25,7 +26,6 @@
           class="flex md:p-1 border bg-gray-200 rounded-md text-gray-600
               font-medium text-xl md:text-sm">
           <a
-            data-sveltekit-prefetch
             href={'/' + $page.params.dictionaryId + '/entries/list'}
             class="{$page.url.pathname.includes('list') ? 'bg-white shadow' : 'hover:bg-gray-100'}
                 px-2 py-1 rounded">
@@ -36,7 +36,6 @@
           </a>
           <div class="hidden md:block w-1" />
           <a
-            data-sveltekit-prefetch
             href={'/' + $page.params.dictionaryId + '/entries/table'}
             class="{$page.url.pathname.includes('table') ? 'bg-white shadow' : 'hover:bg-gray-100'}
             px-2 py-1 rounded">
@@ -47,7 +46,6 @@
           </a>
           <div class="hidden md:block w-1" />
           <a
-            data-sveltekit-prefetch
             href={'/' + $page.params.dictionaryId + '/entries/gallery'}
             class="{$page.url.pathname.includes('gallery')
               ? 'bg-white shadow'
@@ -60,7 +58,6 @@
           </a>
           {#if $dictionary.printAccess || $canEdit}
             <a
-              data-sveltekit-prefetch
               href={'/' + $page.params.dictionaryId + '/entries/print'}
               class="{$page.url.pathname.includes('print')
                 ? 'bg-white shadow'
@@ -86,3 +83,10 @@
     </div>
   </InstantSearch>
 {/if}
+
+<!-- Workaround while we fix meta tags to correctly work in list, table, gallery and print pages -->
+<SeoMetaTags
+  title="Entries"
+  dictionaryName={$dictionary.name}
+  description={$_('', { default: 'The entries in this Living Dictionary are displayed in a comprehensive list that visitors can easily browse by using the page tabs at the bottom of the screen, or search by using the powerful search bar located at the top of the page. Visitors may also filter and display specific content from this Living Dictionary by activating filters for parts of speech, semantic domains, custom tags, speaker information and other metadata.' })}
+  keywords="Endangered Languages, Language Documentation, Language Revitalization, Build a Dictionary, Online Dictionary, Digital Dictionary, Dictionary Software, Free Software, Online Dictionary Builder, Living Dictionaries, Living Dictionary, Edit a dictionary, Search a dictionary, Browse a dictionary, Explore a Dictionary" />

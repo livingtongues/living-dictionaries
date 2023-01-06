@@ -7,7 +7,8 @@
   import Button from 'svelte-pieces/ui/Button.svelte';
   import ResponsiveTable from 'svelte-pieces/ui/ResponsiveTable.svelte';
   import Header from '$lib/components/shell/Header.svelte';
-  
+  import SeoMetaTags from '$lib/components/SeoMetaTags.svelte';
+
   import type { PageData } from './$types';
   export let data: PageData;
   $: publicDictionaries = data.publicDictionaries || [];
@@ -107,6 +108,11 @@
     </ResponsiveTable>
   </Collection>
 </div>
+
+<SeoMetaTags 
+  title={$_('home.list_of_dictionaries', { default: 'List of Dictionaries' })}
+  description={$_('', { default: 'A dynamically updated list of all the public dictionaries available on the Living Dictionaries platform. This list includes the names, URLs, GPS coordinates, ISO 639-3 Codes and Glottocodes associated with the Living Dictionaries. Living Dictionaries are language documentation tools that support endangered and under-represented languages.' })}
+  keywords="Minority Languages, Indigenous Languages, Language Documentation, Dictionary, Minority Community, Language Analysis, Language Education, Endangered Languages, Language Revitalization, Linguistics, Word Lists, Linguistic Analysis, Dictionaries, Living Dictionaries, Living Tongues, Under-represented Languages, Tech Resources, Language Sustainability, Language Resources, Diaspora Languages, Elicitation, Language Archives, Ancient Languages, World Languages, Obscure Languages, Little Known languages, Digital Dictionary, Dictionary Software, Free Software, Online Dictionary Builder" />
 
 <style>
   thead th {

@@ -27,7 +27,7 @@ const config: UserConfig = {
   test: {
     // plugins: [svelte({ hot: !process.env.VITEST })],
     globals: true,
-    // includeSource: ['src/**/*.ts'],
+    includeSource: ['src/**/*.ts'],
   },
 };
 

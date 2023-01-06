@@ -4,6 +4,8 @@
   import { setOnline } from 'sveltefirets';
   import Button from 'svelte-pieces/ui/Button.svelte';
   import type { IAbout } from '@living-dictionaries/types';
+  import sanitize from 'xss';
+  import SeoMetaTags from '$lib/components/SeoMetaTags.svelte';
 
   import type { PageData } from './$types';
   export let data: PageData;
@@ -55,13 +57,19 @@
     {/if}
     <div class="tw-prose prose-lg max-w-screen-md {editing && 'hidden md:block mt-14 ml-3'}">
       {#if about}
-        {@html about}
+        {@html sanitize(about)}
       {:else}
         <i>{$_('dictionary.no_info_yet', { default: 'No information yet' })}</i>
       {/if}
     </div>
   </div>
 </div>
+
+<SeoMetaTags
+  title={$_('header.about', { default: 'About' })}
+  dictionaryName={$dictionary.name}
+  description={$_('', { default: 'Learn about the background and creation of this Living Dictionary.' })}
+  keywords="About this dictionary, background, creation, Endangered Languages, Language Documentation, Language Revitalization, Build a Dictionary, Online Dictionary, Digital Dictionary, Dictionary Software, Free Software, Online Dictionary Builder, Living Dictionaries, Living Dictionary" />
 
 <style>
   :global(.about img) {
