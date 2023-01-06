@@ -169,7 +169,7 @@
     "va": "Variante",
     "gloss": "tradução",
     "pl": "Forma plural",
-    "print": "Impressão",
+    "print": "Imprimir",
     "id": "EU IRIA"
   },
   "error": {
@@ -221,10 +221,10 @@
     "reset": "Redefinir",
     "invalid_url": "Este não é um URL válido",
     "downloading": "Baixando",
-    "upload": "Carregar",
+    "upload": "Envio",
     "assertion": "sim",
     "negation": "não",
-    "clean": "Limpar \\ limpo"
+    "clean": "Limpar"
   },
   "settings": {
     "community_permission": "A comunidade falante permite que esta língua esteja on-line?",
@@ -283,7 +283,7 @@
     "video_info": "Existem duas maneiras de exibir seus vídeos em um dicionário vivo: 1) Você pode gravar seus vídeos aqui ou fazer upload de seus vídeos gravados anteriormente em nossa plataforma. Vantagens: fácil e ótimo para gravações rápidas. Desvantagens: você só pode fazer upload de um vídeo até 100 MB para que ele seja apenas uma resolução curta e baixa. 2) Tenha seus vídeos em um serviço de hospedagem especializado em armazenamento de vídeo e vincule o URL ao nosso site. Vantagens: Fácil (desde que seus vídeos já estejam carregados nessa plataforma), seus vídeos podem ter a resolução e o comprimento que você deseja. Desvantagens: se você deseja gravar algo inesperado ou muito simples, pode ser muito esforço para fazê -lo dessa maneira, e você pode priorizar o método 1.",
     "paste_video_url": "Colar YouTube ou Link Vimeo",
     "record_upload_video": "Gravar ou fazer upload de um vídeo",
-    "view": "Visualizar",
+    "view": "Visão",
     "edit_video": "Editar vídeo",
     "add_video": "Adicionar vídeo",
     "accesing": "Acessando microfone e câmera",
