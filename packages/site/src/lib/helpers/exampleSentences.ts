@@ -5,14 +5,14 @@ export function printExampleSentences(
   t: (id: string) => string,
   { shorten = false } = {}
 ) {
-  const sortedExampleSentences = Object.keys(exampleSentences)
+  return Object.keys(exampleSentences)
     .filter((bcp) => exampleSentences[bcp])
-    .sort((a, b) => sortAscendingWithVernacularFirst(a, b));
-  return sortedExampleSentences.map((bcp) => {
-    const exampleSentence = exampleSentences[bcp];
-    if (shorten) return exampleSentence;
-    return `${t('gl.' + bcp)}: ${exampleSentence}`;
-  });
+    .sort((a, b) => sortAscendingWithVernacularFirst(a, b))
+    .map((bcp) => {
+      const exampleSentence = exampleSentences[bcp];
+      if (shorten) return exampleSentence;
+      return `${t('gl.' + bcp)}: ${exampleSentence}`;
+    });
 }
 
 function sortAscendingWithVernacularFirst(a: string, b: string): number {
