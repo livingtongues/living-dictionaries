@@ -194,7 +194,7 @@ importers:
       firebase: ^9.14.0
       instantsearch.js: ^4.33.2
       jszip: ^3.7.1
-      kitbook: 1.0.0-alpha.10
+      kitbook: alpha
       logrocket: ^2.1.2
       lz-string: ^1.4.4
       recordrtc: ^5.6.2
@@ -202,7 +202,7 @@ importers:
       svelte: ^3.55.0
       svelte-check: ^3.0.1
       svelte-i18n: ^3.3.13
-      svelte-pieces: 1.0.56
+      svelte-pieces: 1.0.57
       svelte-preprocess: ^5.0.0
       sveltefirets: ^0.0.32
       temp-s-p-u: ^0.0.7
@@ -239,7 +239,7 @@ importers:
       firebase: 9.14.0
       instantsearch.js: 4.40.2_algoliasearch@4.13.0
       jszip: 3.8.0
-      kitbook: 1.0.0-alpha.10
+      kitbook: 1.0.0-alpha.17
       logrocket: 2.2.1
       lz-string: 1.4.4
       recordrtc: 5.6.2
@@ -247,7 +247,7 @@ importers:
       svelte: 3.55.0
       svelte-check: 3.0.1_svelte@3.55.0
       svelte-i18n: 3.3.13_svelte@3.55.0
-      svelte-pieces: 1.0.56_svelte@3.55.0
+      svelte-pieces: 1.0.57_svelte@3.55.0
       svelte-preprocess: 5.0.0_niwyv7xychq2ag6arq5eqxbomm
       sveltefirets: 0.0.32
       temp-s-p-u: 0.0.7_vite@4.0.3
@@ -6777,14 +6777,14 @@ packages:
       - svelte
     dev: true
 
-  /kitbook/1.0.0-alpha.10:
-    resolution: {integrity: sha512-LQKjeTCSdJJRz6sZ6CBO+w8qGCrCc4r1APCWylfkfyaUv7Cf4HbkpGc3F7+u6jdI3LyPdNClI2WBvRDJmFf44Q==}
+  /kitbook/1.0.0-alpha.17:
+    resolution: {integrity: sha512-DhAWOSVxXghO7/HTYG6GwZD8K/C26NLOVHgixpmiu9y5YxLIG/1Ztw00aBe/NgxzJ5een6OlZJ1TvcFJM8i4sA==}
     dependencies:
       '@kitbook/mdsvex-shiki-twoslash': 0.0.3_svelte@3.55.0
       '@kitbook/vite-plugin-kitbook': 0.0.3_svelte@3.55.0
       lz-string: 1.4.4
       svelte: 3.55.0
-      svelte-pieces: 1.0.56_svelte@3.55.0
+      svelte-pieces: 1.0.57_svelte@3.55.0
     transitivePeerDependencies:
       - supports-color
     dev: true
@@ -8968,6 +8968,16 @@ packages:
 
   /svelte-pieces/1.0.56_svelte@3.55.0:
     resolution: {integrity: sha512-u0l7N8hF21lNhYMLmOEbDQI4A6neVjfQi/zagyOO7qyAgfADSGGzXynwkH7FQCoxanG+jmVU7MrfMr/zIAZYMQ==}
+    peerDependencies:
+      svelte: ^3.46.4
+    dependencies:
+      fast-xml-parser: 3.21.1
+      he: 1.2.0
+      svelte: 3.55.0
+    dev: true
+
+  /svelte-pieces/1.0.57_svelte@3.55.0:
+    resolution: {integrity: sha512-VfGHofC3/afRY1BFzdFVDRyK+ipnwFB4hJLfM49/X/s3anXkWNrnTKdxhOedLjaII1AruHlxE++fY9dTwLNgFQ==}
     peerDependencies:
       svelte: ^3.46.4
     dependencies:

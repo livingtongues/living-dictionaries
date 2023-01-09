@@ -5,7 +5,7 @@
 
 # Filter
 
-<Story>
+<Story useSandbox={false}>
   <Filter items={['this', 'is', 'testing', 'with', 'words']} let:filteredItems={items}>
     {#each items as item}
       <p>{item}</p>

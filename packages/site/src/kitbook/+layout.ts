@@ -1,5 +1,6 @@
 import { layoutLoad } from 'kitbook';
-export const load = layoutLoad({ initFunction })
+import { pages } from './moduleImports';
+export const load = layoutLoad({ pages, initFunction })
 
 import { init, getLocaleFromNavigator } from 'svelte-i18n';
 async function initFunction(): Promise<void> {
@@ -12,4 +13,3 @@ async function initFunction(): Promise<void> {
     // }
   });
 }
-
