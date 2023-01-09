@@ -7,33 +7,23 @@ export function printExampleSentences(
   t: (id: string) => string,
   { shorten = false } = {}
 ) {
-  let exampleSentencesCopy = { ...exampleSentences };
-  exampleSentencesCopy = sortVernacularSentence(exampleSentencesCopy);
-  const sortedExampleSentences = Object.keys(exampleSentencesCopy)
-    .filter((bcp) => exampleSentencesCopy[bcp])
-    .sort((a, b) => {
-      if (a === b) return 0;
-      if (a === 'vn') return -1;
-      if (b === 'vn') return 1;
-
-      if (a < b) return -1;
-      if (a > b) return 1;
-      return 0;
-    });
+  const sortedExampleSentences = Object.keys(exampleSentences)
+    .filter((bcp) => exampleSentences[bcp])
+    .sort((a, b) => sortAscendingWithVernacularFirst(a, b));
   return sortedExampleSentences.map((bcp) => {
-    const exampleSentence = exampleSentencesCopy[bcp];
+    const exampleSentence = exampleSentences[bcp];
     if (shorten) return exampleSentence;
     return `${t('gl.' + bcp)}: ${exampleSentence}`;
   });
 }
 
-function sortVernacularSentence(exampleSentences: IExampleSentence) {
-  if (exampleSentences.vn) {
-    const vernacularSentence = { vn: exampleSentences.vn };
-    delete exampleSentences.vn;
-    exampleSentences = Object.assign(vernacularSentence, exampleSentences);
-  }
-  return exampleSentences;
+function sortAscendingWithVernacularFirst(a: string, b: string): number {
+  if (a === 'vn') return -1;
+  if (b === 'vn') return 1;
+
+  if (a < b) return -1;
+  if (a > b) return 1;
+  return 0;
 }
 
 if (import.meta.vitest) {
@@ -54,9 +44,9 @@ if (import.meta.vitest) {
   test('printExampleSentences', () => {
     const exampleSentence = {
       es: 'El perro está caminando',
+      en: 'The dog is walking',
       vn: '我很喜歡吃香蕉',
       de: 'der hund geht spazieren',
-      en: 'The dog is walking',
     };
     expect(printExampleSentences(exampleSentence, t, { shorten: true })).toMatchInlineSnapshot(`
       [
