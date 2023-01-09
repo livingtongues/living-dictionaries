@@ -1,6 +1,6 @@
 <script>import { Layout } from "kitbook";
 </script>
 
-<Layout title="Living Dictionaries" githubURL="https://github.com/livingtongues/living-dictionaries/tree/main/packages/site">
+<Layout expanded title="Kitbook" githubURL="https://github.com/jacob-8/kitbook/tree/main/packages/kitbook">
   <slot />
 </Layout>
