@@ -11,7 +11,7 @@ export function printExampleSentences(
   return sortedExampleSentences.map((bcp) => {
     const exampleSentence = exampleSentences[bcp];
     if (shorten) return exampleSentence;
-    return `${t('gl.' + bcp)}: ${exampleSentence}`;
+    return `${t('xs.' + bcp)}: ${exampleSentence}`;
   });
 }
 

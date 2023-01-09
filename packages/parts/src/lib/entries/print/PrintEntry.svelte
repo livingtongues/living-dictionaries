@@ -1,10 +1,12 @@
 <script lang="ts">
+  //TODO Do I also need to add printGlosses?
   import type { Readable } from 'svelte/store';
   export let t: Readable<any> = undefined;
 
   import type { IEntry, ISpeaker, IPrintFields } from '@living-dictionaries/types';
   import { StandardPrintFields } from '@living-dictionaries/types';
   import { semanticDomains } from '../../mappings/semantic-domains';
+  import { printExampleSentences } from './exampleSentences';
   import QrCode from '../../QrCode.svelte';
   import sanitize from 'xss';
 
@@ -44,10 +46,7 @@
   {/if}
   <b>{entry.xv && selectedFields.example_sentence ? entry.xv : ''}</b>
   {#if entry.xs && selectedFields.example_sentence}
-    {entry.xs.vn ? entry.xs.vn : ''}{entry.xs.vn && Object.entries(entry.xs).length > 1 ? ', ' : ''}
-    {#each Object.entries(entry.xs) as sentence, index}
-      {entry.xs.vn === sentence[1] ? '' : sentence[1]}{!entry.xs.vn && index < Object.entries(entry.xs).length - 1 ? ', ' : entry.xs.vn !== sentence[1] && index < Object.entries(entry.xs).length - 2 ? ', ' : ''}
-    {/each}
+    {printExampleSentences(entry.xs, (t ? $t(entry.xs) : () => ''), { shorten: true }).join(', ')}
   {/if}
 
   <!-- Remaining Fields -->
