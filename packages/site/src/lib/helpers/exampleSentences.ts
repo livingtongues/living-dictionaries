@@ -11,7 +11,7 @@ export function printExampleSentences(
     .map((bcp) => {
       const exampleSentence = exampleSentences[bcp];
       if (shorten) return exampleSentence;
-      return `${t('gl.' + bcp)}: ${exampleSentence}`;
+      return `${t('xs.' + bcp)}: ${exampleSentence}`;
     });
 }
 
@@ -27,13 +27,13 @@ function sortAscendingWithVernacularFirst(a: string, b: string): number {
 if (import.meta.vitest) {
   const t = (id) => {
     switch (id) {
-      case 'gl.de':
+      case 'xs.de':
         return 'German';
-      case 'gl.en':
+      case 'xs.en':
         return 'English';
-      case 'gl.es':
+      case 'xs.es':
         return 'Spanish';
-      case 'gl.vn':
+      case 'xs.vn':
         return 'Vernacular';
       default:
         return 'undefined';
