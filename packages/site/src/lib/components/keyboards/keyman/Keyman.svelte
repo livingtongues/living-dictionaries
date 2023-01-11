@@ -4,7 +4,7 @@
   import { onMount, setContext } from 'svelte';
   import { loadScriptOnce } from 'sveltefirets/helpers/loader';
   import { keymanKey, type keymanKeyContext } from './context';
-  export let version = '16.0.111'; // beta version; latest stable is '15.0.269' https://keyman.com/downloads/pre-release/
+  export let version = '16.0.114'; // beta version; latest stable is '15.0.269' https://keyman.com/downloads/pre-release/
   let loaded = false;
 
   let kmw: any;
