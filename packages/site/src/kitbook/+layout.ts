@@ -2,9 +2,9 @@ import { layoutLoad } from 'kitbook';
 import { pages } from './moduleImports';
 export const load = layoutLoad({ pages, initFunction })
 
-import { init, getLocaleFromNavigator } from 'svelte-i18n';
+import { init, register, getLocaleFromNavigator } from 'svelte-i18n';
 async function initFunction(): Promise<void> {
-  // register('en', () => import('./en.json'));
+  registerMessages('en');
   await init({
     fallbackLocale: 'en',
     initialLocale: getLocaleFromNavigator(),
@@ -12,4 +12,12 @@ async function initFunction(): Promise<void> {
     //   return defaultValue;
     // }
   });
+}
+
+function registerMessages(bcp: string) {
+  register(bcp, () => import(`../locales/${bcp}.json`));
+  register(bcp, () => import(`../locales/gl/${bcp}.json`)); // glossing languages
+  register(bcp, () => import(`../locales/ps/${bcp}.json`)); // parts of speech
+  register(bcp, () => import(`../locales/psAbbrev/${bcp}.json`));
+  register(bcp, () => import(`../locales/sd/${bcp}.json`)); // semantic domains
 }

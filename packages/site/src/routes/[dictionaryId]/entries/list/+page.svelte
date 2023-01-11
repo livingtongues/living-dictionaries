@@ -18,7 +18,7 @@
   });
 
   import { dictionary, canEdit, admin } from '$lib/stores';
-  import ListEntry from '../ListEntry.svelte';
+  import ListEntry from './ListEntry.svelte';
   import { Doc } from 'sveltefirets';
   // import SeoMetaTags from '$lib/components/SeoMetaTags.svelte';
 </script>

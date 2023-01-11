@@ -1,9 +1,9 @@
 <script lang="ts">
   import { t } from 'svelte-i18n';
-  import Audio from './Audio.svelte';
-  import Video from './Video.svelte';
+  import Audio from '../Audio.svelte';
+  import Video from '../Video.svelte';
   import Image from '$lib/components/image/Image.svelte';
-  import AddImage from './AddImage.svelte';
+  import AddImage from '../AddImage.svelte';
   import { page } from '$app/stores';
   import type { IEntry } from '@living-dictionaries/types';
   import { printGlosses } from '$lib/helpers/glosses';

@@ -4,10 +4,11 @@
   import { semanticDomains } from '$lib/mappings/semantic-domains';
   import QrCode from './QrCode.svelte';
   import sanitize from 'xss';
+  import { defaultPrintFields } from './printFields';
 
   export let entry: IEntry;
   // export let speakers: ISpeaker[];
-  export let selectedFields: IPrintFields;
+  export let selectedFields = defaultPrintFields;
   export let imagePercent = 50;
   export let fontSize = 12;
   export let headwordSize = 12;
@@ -32,7 +33,8 @@
   <i>{entry.ps && selectedFields.ps ? entry.ps : ''}</i>
   {#if entry.gl && selectedFields.gloss}
     {#each Object.entries(entry.gl) as gloss, index}
-      {@html sanitize(gloss[1])}{index < Object.entries(entry.gl).length - 1 ? ' - ' : ''}
+      <span>{@html sanitize(gloss[1])}</span>
+      {index < Object.entries(entry.gl).length - 1 ? ' - ' : ''}
     {/each}
   {/if}
   <b>{entry.xv && selectedFields.example_sentence ? entry.xv : ''}</b>
