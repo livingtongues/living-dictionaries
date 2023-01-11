@@ -48,11 +48,7 @@
         }
       }}
       on:longpress={() => initAudio(entry.sf)}>
-      {#if playing}
-        <!-- <i class="fas fa-volume-up fa-lg mt-1" /> -->
-        <i class="fas fa-ear fa-lg mt-1" />
-      {:else}<i
-          class="far fa-ear fa-lg mt-1" /><!-- <i class="far fa-volume-up fa-lg mt-1" /> -->{/if}
+      <span class:text-blue-700={playing} class="i-material-symbols-hearing text-2xl mt-1 " />
       <div class="text-gray-600 text-sm mt-1">
         {$_('audio.listen', { default: 'Listen' })}
         {#if !minimal && $canEdit}
