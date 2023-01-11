@@ -48,7 +48,7 @@
         }
       }}
       on:longpress={() => initAudio(entry.sf)}>
-      <span class:text-blue-700={playing} class="i-material-symbols-hearing text-2xl mt-1 " />
+      <span class:text-blue-700={playing} class="i-material-symbols-hearing text-2xl mt-1" />
       <div class="text-gray-600 text-sm mt-1">
         {$_('audio.listen', { default: 'Listen' })}
         {#if !minimal && $canEdit}
