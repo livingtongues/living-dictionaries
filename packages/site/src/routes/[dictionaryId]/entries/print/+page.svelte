@@ -43,10 +43,6 @@
   let citationType: ICitation = { citation: '' };
 </script>
 
-<svelte:head>
-  <title>{$dictionary.name}</title>
-</svelte:head>
-
 {#if $dictionary.printAccess || $canEdit}
   <Hits {search} let:entries>
     <div class="print:hidden bg-white md:sticky z-1 md:top-22 py-3">
