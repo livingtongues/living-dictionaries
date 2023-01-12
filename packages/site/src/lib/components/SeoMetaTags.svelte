@@ -4,6 +4,7 @@
   import LZString from 'lz-string';
   const { compressToEncodedURIComponent: encode } = LZString;
 
+  export let flipTitle = false;
   const SITE_NAME = 'Living Dictionaries';
   export let title = SITE_NAME;
   export let dictionaryName: string = undefined;
@@ -49,7 +50,7 @@
 </script>
 
 <svelte:head>
-  <title>{textTitle}</title>
+  <title>{flipTitle ? textTitle.split('|').reverse().join(' | ') : textTitle}</title>
 
   <meta name="description" content={description} />
   <meta name="keywords" content={keywords} />
