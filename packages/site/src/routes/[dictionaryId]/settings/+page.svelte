@@ -7,14 +7,12 @@
   import EditString from '../EditString.svelte';
   import { arrayRemove, arrayUnion, GeoPoint, where, limit } from 'firebase/firestore';
   import type { IDictionary, IPoint, IRegion } from '@living-dictionaries/types';
-  import {
-    WhereSpoken,
-    EditableGlossesField,
-    PublicCheckbox,
-    PrintAccessCheckbox,
-    glossingLanguages,
-    EditableAlternateNames,
-  } from '@living-dictionaries/parts';
+  import EditableGlossesField from '$lib/components/settings/EditableGlossesField.svelte';
+  import WhereSpoken from '$lib/components/settings/WhereSpoken.svelte';
+  import EditableAlternateNames from '$lib/components/settings/EditableAlternateNames.svelte';
+  import PublicCheckbox from '$lib/components/settings/PublicCheckbox.svelte'; // only used here - perhaps colocate
+  import PrintAccessCheckbox from '$lib/components/settings/PrintAccessCheckbox.svelte'; // only used here - perhaps colocate
+  import { glossingLanguages } from '$lib/glosses/glossing-languages';
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte';
 
   async function togglePrintAccess(settingPrintAccess: boolean) {
@@ -51,7 +49,7 @@
             })}`
           )
         ) {
-          alert(t ? $t('header.contact_us') : 'Contact Us');
+          alert($t('header.contact_us', { default: 'Contact Us' }));
         }
         location.reload();
       }
@@ -114,7 +112,6 @@
     <div class="mb-5" />
 
     <EditableGlossesField
-      {t}
       minimum={1}
       availableLanguages={glossingLanguages}
       selectedLanguages={dictionary.glossLanguages}
@@ -146,7 +143,7 @@
               });
             }
           } else {
-            alert(t ? $t('header.contact_us') : 'Contact Us');
+            alert($t('header.contact_us', { default: 'Contact Us' }));
           }
         } catch (err) {
           return console.log(err);
@@ -155,7 +152,6 @@
     <div class="mb-5" />
 
     <EditableAlternateNames
-      {t}
       alternateNames={dictionary.alternateNames}
       on:update={(e) => {
         update(`dictionaries/${dictionary.id}`, {
@@ -165,7 +161,6 @@
     <div class="mb-5" />
 
     <WhereSpoken
-      {t}
       {dictionary}
       on:updateCoordinates={({ detail }) => {
         update(`dictionaries/${dictionary.id}`, {
@@ -189,13 +184,11 @@
     <div class="mb-5" />
 
     <PrintAccessCheckbox
-      {t}
       checked={dictionary.printAccess}
       on:changed={({ detail: { checked } }) => togglePrintAccess(checked)} />
     <div class="mb-5" />
 
     <PublicCheckbox
-      {t}
       checked={dictionary.public}
       on:changed={({ detail: { checked } }) => togglePublic(checked)} />
     <div class="mb-5" />
@@ -232,5 +225,8 @@
 <SeoMetaTags
   title={$t('misc.settings', { default: 'Settings' })}
   dictionaryName={$dictionaryStore.name}
-  description={$t('', { default: "Under Settings, dictionary managers can edit the dictionary's parameters such as its name, ISO 639-3 Code, Glottocode, translation languages, alternate names, geo-coordinates, and other information. They can also toggle on or off the ability to make the dictionary public, and the ability to make the dictionary printable to viewers." })}
+  description={$t('', {
+    default:
+      "Under Settings, dictionary managers can edit the dictionary's parameters such as its name, ISO 639-3 Code, Glottocode, translation languages, alternate names, geo-coordinates, and other information. They can also toggle on or off the ability to make the dictionary public, and the ability to make the dictionary printable to viewers.",
+  })}
   keywords="Settings, Parameters, ISO 639-3, Glottocde, glossing languages, alternate names, GPS, language medata, public dictionary, private dictionary, Endangered Languages, Language Documentation, Language Revitalization, Build a Dictionary, Online Dictionary, Digital Dictionary, Dictionary Software, Free Software, Online Dictionary Builder, Living Dictionaries, Living Dictionary, Edit a dictionary, Search a dictionary, Browse a dictionary, Explore a Dictionary" />

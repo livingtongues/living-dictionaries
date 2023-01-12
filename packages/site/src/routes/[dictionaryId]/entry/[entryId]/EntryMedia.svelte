@@ -3,7 +3,7 @@
   import type { IEntry } from '@living-dictionaries/types';
   import Audio from '../../entries/Audio.svelte';
   import AddImage from '../../entries/AddImage.svelte';
-  import { Image } from '@living-dictionaries/parts';
+  import Image from '$lib/components/image/Image.svelte';
   import ShowHide from 'svelte-pieces/functions/ShowHide.svelte';
   import Video from '../../entries/Video.svelte';
   import { deleteImage } from '$lib/helpers/delete';
@@ -39,7 +39,6 @@
 {#if entry.pf}
   <div class="w-full overflow-hidden rounded relative mb-2" style="height: 25vh;">
     <Image
-      {t}
       width={400}
       lexeme={entry.lx}
       gcs={entry.pf.gcs}

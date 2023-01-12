@@ -9,12 +9,10 @@
   import { arrayUnion, GeoPoint, serverTimestamp } from 'firebase/firestore/lite';
   import { debounce } from '$lib/helpers/debounce';
   import { pruneObject } from '$lib/helpers/prune';
-  import {
-    WhereSpoken,
-    EditableGlossesField,
-    EditableAlternateNames,
-    glossingLanguages,
-  } from '@living-dictionaries/parts';
+  import EditableGlossesField from '$lib/components/settings/EditableGlossesField.svelte';
+  import WhereSpoken from '$lib/components/settings/WhereSpoken.svelte';
+  import EditableAlternateNames from '$lib/components/settings/EditableAlternateNames.svelte';
+  import { glossingLanguages } from '$lib/glosses/glossing-languages';
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte';
 
   let modal: 'auth' = null;
@@ -193,7 +191,6 @@
       <div class="mb-6" />
 
       <EditableGlossesField
-        {t}
         minimum={1}
         availableLanguages={glossingLanguages}
         selectedLanguages={Array.from(glossLanguages)}
@@ -210,13 +207,11 @@
       <div class="mb-6" />
 
       <EditableAlternateNames
-        {t}
         {alternateNames}
         on:update={(e) => (alternateNames = e.detail.alternateNames)} />
       <div class="mb-6" />
 
       <WhereSpoken
-        {t}
         dictionary={{ coordinates: { latitude, longitude }, points, regions }}
         on:updateCoordinates={({ detail }) => {
           (latitude = detail.latitude), (longitude = detail.longitude);
@@ -280,9 +275,10 @@
       <div class="mb-6" />
 
       <div class="mb-2 text-sm font-medium text-gray-700">
-        {t
-          ? $t('create.language_used_by_community')
-          : 'Is this dictionary for a language that is spoken or signed by a specific human community?'}
+        {$t('create.language_used_by_community', {
+          default:
+            'Is this dictionary for a language that is spoken or signed by a specific human community?',
+        })}
       </div>
 
       <label class="block">
@@ -292,7 +288,7 @@
           bind:group={languageUsedByCommunity}
           value={true}
           required />
-        {t ? $t('misc.assertion') : 'Yes'}
+        {$t('misc.assertion', { default: 'Yes' })}
       </label>
 
       <label class="block">
@@ -301,14 +297,14 @@
           name="languageUsedByCommunity"
           bind:group={languageUsedByCommunity}
           value={false} />
-        {t ? $t('misc.negation') : 'No'}
+        {$t('misc.negation', { default: 'No' })}
       </label>
       <div class="mb-6" />
 
       <div class="mb-2 text-sm font-medium text-gray-700">
-        {t
-          ? $t('create.community_permission')
-          : 'Has the language community given you permission to make this dictionary?'}
+        {$t('create.community_permission', {
+          default: 'Has the language community given you permission to make this dictionary?',
+        })}
         <!-- Similar to create.speech_community_permission but not the same -->
       </div>
       <label class="block">
@@ -318,7 +314,7 @@
           bind:group={communityPermission}
           value={'yes'}
           required />
-        {t ? $t('misc.assertion') : 'Yes'}
+        {$t('misc.assertion', { default: 'Yes' })}
       </label>
 
       <label class="block">
@@ -327,7 +323,7 @@
           name="communityPermission"
           bind:group={communityPermission}
           value={'no'} />
-        {t ? $t('misc.negation') : 'No'}
+        {$t('misc.negation', { default: 'No' })}
       </label>
 
       <label class="block">
@@ -336,16 +332,15 @@
           name="communityPermission"
           bind:group={communityPermission}
           value={'unknown'} />
-        {t ? $t('create.uncertainty') : 'I don’t know'}
+        {$t('create.uncertainty', { default: 'I don’t know' })}
       </label>
       <div class="mb-6" />
 
       <label class="block mb-2 text-sm font-medium text-gray-700" for="authorConnection">
-        {t
-          ? $t('create.author_connection')
-          : `Please briefly describe how you know this language and why you are creating a Living
-      Dictionary for it. Are you part of the community that will be using this Living Dictionary? If
-      not, how do you know the community?`}
+        {$t('create.author_connection', {
+          default:
+            'Please briefly describe how you know this language and why you are creating a Living Dictionary for it. Are you part of the community that will be using this Living Dictionary? If not, how do you know the community?',
+        })}
       </label>
       <textarea
         name="authorConnection"
@@ -361,10 +356,10 @@
       <div class="mb-6" />
 
       <label class="block mb-2 text-sm font-medium text-gray-700" for="conLangDescription">
-        {t
-          ? $t('create.con_lang_description')
-          : `Is this dictionary for a constructed language (a language invented by humans in recent years,
-      for a book or a movie)? If yes, please briefly describe.`}
+        {$t('create.con_lang_description', {
+          default:
+            'Is this dictionary for a constructed language (a language invented by humans in recent years, for a book or a movie)? If yes, please briefly describe.',
+        })}
       </label>
       <textarea
         name="conLangDescription"
@@ -410,5 +405,8 @@
 
 <SeoMetaTags
   title={$t('create.create_new_dictionary', { default: 'Create New Dictionary' })}
-  description={$t('', { default: 'Build a new Living Dictionary in a few short steps. Create a title and set the URL, and then configure the settings. Living Dictionaries are comprehensive, free, online technological tools integrating audio, images and video.' })}
+  description={$t('', {
+    default:
+      'Build a new Living Dictionary in a few short steps. Create a title and set the URL, and then configure the settings. Living Dictionaries are comprehensive, free, online technological tools integrating audio, images and video.',
+  })}
   keywords="Endangered Languages, Language Documentation, Language Revitalization, Build a Dictionary, Online Dictionary, Digital Dictionary, Dictionary Software, Free Software, Online Dictionary Builder, Living Dictionaries, Living Dictionary" />

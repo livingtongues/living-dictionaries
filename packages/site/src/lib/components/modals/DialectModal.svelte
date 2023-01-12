@@ -102,7 +102,7 @@
 
   <div class="modal-footer">
     <Button onclick={close} form="simple" color="black">
-      {t ? $t('misc.cancel') : 'Cancel'}
+      {$t('misc.cancel', { default: 'Cancel' })}
     </Button>
   </div>
 </Modal>

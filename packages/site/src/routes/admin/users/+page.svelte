@@ -2,7 +2,7 @@
   import type { IUser } from '@living-dictionaries/types';
   import { Collection } from 'sveltefirets';
   import UserRow from '../UserRow.svelte';
-  import Filter from '@living-dictionaries/parts/src/lib/helpers/Filter.svelte';
+  import Filter from '$lib/components/Filter.svelte';
   import { exportUsersAsCSV } from '$lib/export/csv';
   import Button from 'svelte-pieces/ui/Button.svelte';
   import ResponsiveTable from 'svelte-pieces/ui/ResponsiveTable.svelte';

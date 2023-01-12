@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { _ } from 'svelte-i18n';
+  import { t } from 'svelte-i18n';
   import User from './User.svelte';
   import ShowHide from 'svelte-pieces/functions/ShowHide.svelte';
   import Button from 'svelte-pieces/ui/Button.svelte';
@@ -22,7 +22,7 @@
           src="/images/LD_logo_white.svg"
           class="mr-2 ml-2"
           style="height: 30px; width: 30px; filter: invert(100%);" />
-        {$_('misc.LD', { default: 'Living Dictionaries' })}
+        {$t('misc.LD', { default: 'Living Dictionaries' })}
         {#if firebaseConfig.projectId === 'talking-dictionaries-dev'}
           <span class="ml-1 text-xs opacity-50">(dev)</span>
         {/if}
@@ -39,18 +39,18 @@
       target="_blank">
       <i class="far fa-donate" />
       <span class="ml-1 hidden lg:inline"
-        >{$_('header.donate', {
+        >{$t('header.donate', {
           default: 'Donate',
         })}</span>
     </Button>
     <Button href="/about" form="text" class="!hidden !lg:inline">
       <i class="far fa-info-circle" />
-      <span class="ml-1 hidden lg:inline">{$_('header.about', { default: 'About' })}</span>
+      <span class="ml-1 hidden lg:inline">{$t('header.about', { default: 'About' })}</span>
     </Button>
     <Button href="/tutorials" form="text" class="!hidden !md:inline">
       <span class="i-fluent-learning-app-24-regular -mt-2px" />
       <span class="ml-1 hidden lg:inline"
-        >{$_('header.tutorials', {
+        >{$t('header.tutorials', {
           default: 'Tutorials',
         })}</span>
     </Button>
@@ -62,7 +62,6 @@
       <i class="far fa-question-circle" />
       <span class="ml-1">
         FAQ
-        <!-- {$_('header.faq', { default: 'FAQ' })} -->
       </span>
     </Button>
 
@@ -75,7 +74,7 @@
           <i class="far fa-question-circle" />
         </span>
         <span class="ml-1 hidden sm:inline">
-          {$_('header.contact_us', { default: 'Contact Us' })}
+          {$t('header.contact_us', { default: 'Contact Us' })}
         </span>
       </Button>
       {#if show}
@@ -89,7 +88,7 @@
       <Button form="text" onclick={toggle}>
         <i class="far fa-language" />
         <span class="ml-1 hidden lg:inline">
-          {$_('header.language', { default: 'Language' })}
+          {$t('header.language', { default: 'Language' })}
         </span>
       </Button>
       {#if show}
