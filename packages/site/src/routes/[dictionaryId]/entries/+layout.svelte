@@ -4,7 +4,7 @@
   import SearchBox from '$lib/components/search/SearchBox.svelte';
   import Stats from '$lib/components/search/Stats.svelte';
   import EntryFilters from './EntryFilters.svelte';
-  import { dictionary, canEdit } from '$lib/stores';
+  import { dictionary, canEdit, admin } from '$lib/stores';
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte';
 
   import { page } from '$app/stores';
@@ -86,6 +86,7 @@
 
 <!-- Workaround while we fix meta tags to correctly work in list, table, gallery and print pages -->
 <SeoMetaTags
+  flipTitle={$admin ? true : false}
   title="Entries"
   dictionaryName={$dictionary.name}
   description={$_('', { default: 'The entries in this Living Dictionary are displayed in a comprehensive list that visitors can easily browse by using the page tabs at the bottom of the screen, or search by using the powerful search bar located at the top of the page. Visitors may also filter and display specific content from this Living Dictionary by activating filters for parts of speech, semantic domains, custom tags, speaker information and other metadata.' })}
