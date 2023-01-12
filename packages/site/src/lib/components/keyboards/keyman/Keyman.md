@@ -1,5 +1,4 @@
 <script lang="ts">
-  import InputWrapper from './InputWrapper.svelte';
   import Keyman from './Keyman.svelte';
   import { Story } from 'kitbook';
   import Button from 'svelte-pieces/ui/Button.svelte';
@@ -20,10 +19,8 @@ Keyman will accept an element (documentQuerySelector usable string or element it
   knobs={{ bcp: 'am', show: false, canChooseKeyboard: true }}
   let:props={{ bcp, show, canChooseKeyboard }}
   let:set>
-  <Keyman>
-    <InputWrapper {bcp} {show} {canChooseKeyboard}>
-      <input type="text" bind:value class="form-input block w-full" />
-    </InputWrapper>
+  <Keyman {bcp} {show} {canChooseKeyboard}>
+    <input type="text" bind:value class="form-input block w-full" />
   </Keyman>
   <div>{value}</div>
   <div class="mt-2">
@@ -34,27 +31,23 @@ Keyman will accept an element (documentQuerySelector usable string or element it
 </Story>
 
 <Story name="input - no language - can choose">
-  <Keyman>
-    <InputWrapper canChooseKeyboard>
-      <input type="text" class="form-input block w-full" />
-    </InputWrapper>
+  <Keyman canChooseKeyboard>
+    <input type="text" class="form-input block w-full" />
   </Keyman>
 </Story>
 
 <Story name="textarea - set to Assamese" knobs={{ buttonAtTop: true }} let:props={{ buttonAtTop }}>
   <div>
     <Store startWith="গিক" let:set let:store={paragraph}>
-      <Keyman>
-        <InputWrapper bcp="as" position={buttonAtTop ? 'top' : 'bottom'}>
-          <textarea
-            class="form-input w-full"
-            value={paragraph}
-            on:input={(e) => {
-              // @ts-ignore
-              set(e.target.value);
-            }}
-            rows="4" />
-        </InputWrapper>
+      <Keyman bcp="as" position={buttonAtTop ? 'top' : 'bottom'}>
+        <textarea
+          class="form-input w-full"
+          value={paragraph}
+          on:input={(e) => {
+            // @ts-ignore
+            set(e.target.value);
+          }}
+          rows="4" />
       </Keyman>
       <pre class="pl-3">{paragraph}</pre>
     </Store>
@@ -63,10 +56,8 @@ Keyman will accept an element (documentQuerySelector usable string or element it
 
 <Story name="CKEditor - set to Assamese">
   <div class="w-full">
-    <Keyman>
-      <InputWrapper bcp="as" target=".ck-editor__editable_inline" position="bottom">
-        <ClassicCustomized bind:html />
-      </InputWrapper>
+    <Keyman bcp="as" target=".ck-editor__editable_inline" position="bottom">
+      <ClassicCustomized bind:html />
     </Keyman>
     <pre class="pl-3">{html}</pre>
   </div>
@@ -74,20 +65,14 @@ Keyman will accept an element (documentQuerySelector usable string or element it
 
 <Story name="CKEditor - no language - can choose">
   <div class="w-full">
-    <Keyman>
-      <InputWrapper canChooseKeyboard target=".ck-editor__editable_inline" position="bottom">
-        <ClassicCustomized bind:html />
-      </InputWrapper>
+    <Keyman canChooseKeyboard target=".ck-editor__editable_inline" position="bottom">
+      <ClassicCustomized bind:html />
     </Keyman>
     <pre class="pl-3">{html}</pre>
   </div>
 </Story>
 
 <!-- prettier-ignore -->
-## Notes
-
-If ever needed, `InputWrapper` could be updated to allow passing in a targeted element.
-
 ### Useful Links
 
 - [KeymanWeb docs](https://keyman.com/developer/keymanweb/)
