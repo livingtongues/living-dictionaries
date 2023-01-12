@@ -33,6 +33,7 @@
   let mounted = false;
   onMount(async () => {
     editor = (await import('ckeditor5-build-classic-with-alignment-underline-smallcaps')).default;
+    // pull into own package together with https://github.com/jacob-8/ckeditor5-build-classic-alignment-and-smallCaps
     mounted = true;
   });
 </script>

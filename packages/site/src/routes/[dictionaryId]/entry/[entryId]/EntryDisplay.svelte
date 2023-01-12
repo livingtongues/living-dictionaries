@@ -2,7 +2,7 @@
   import { t } from 'svelte-i18n';
   import type { IEntry } from '@living-dictionaries/types';
   import EntryField from './EntryField.svelte';
-  import EntryPartOfSpeech from '@living-dictionaries/parts/src/lib/entries/entry/EntryPartOfSpeech.svelte';
+  import EntryPartOfSpeech from '$lib/components/entry/EntryPartOfSpeech.svelte';
   import EntrySemanticDomains from './EntrySemanticDomains.svelte';
   import EntryDialect from './EntryDialect.svelte';
   import BadgeArray from 'svelte-pieces/data/BadgeArray.svelte';
@@ -24,7 +24,6 @@
 <div class="flex flex-col md:flex-row-reverse mb-3">
   <div class="md:hidden" dir="ltr">
     <EntryField
-      {t}
       value={entry.lx}
       field="lx"
       {canEdit}
@@ -41,7 +40,6 @@
   <div class="md:w-2/3 flex flex-col">
     <div class="hidden md:block">
       <EntryField
-        {t}
         value={entry.lx}
         field="lx"
         {canEdit}
@@ -51,7 +49,6 @@
 
     {#each alternateOrthographies as orthography, index}
       <EntryField
-        {t}
         value={entry[index === 0 ? 'lo' : `lo${index + 1}`]}
         field={index === 0 ? 'lo' : `lo${index + 1}`}
         {canEdit}
@@ -59,11 +56,10 @@
         on:valueupdate />
     {/each}
 
-    <EntryField {t} value={entry.ph} field="ph" {canEdit} display={$t('entry.ph')} on:valueupdate />
+    <EntryField value={entry.ph} field="ph" {canEdit} display={$t('entry.ph')} on:valueupdate />
 
     {#each glossingLanguages as bcp}
       <EntryField
-        {t}
         value={entry.gl[bcp]}
         field={`gl.${bcp}`}
         {canEdit}
@@ -76,7 +72,6 @@
     {#if entry.de}
       <!-- Only in Bahasa Lani (id: jaRhn6MAZim4Blvr1iEv) -->
       <EntryField
-        {t}
         value={entry.de}
         field="de"
         {canEdit}
@@ -87,7 +82,7 @@
     {#if entry.ps?.length || canEdit}
       <div class="md:px-2" class:order-2={!entry.ps?.length}>
         <div class="rounded text-xs text-gray-500 mt-1 mb-2">{$t('entry.ps')}</div>
-        <EntryPartOfSpeech {t} value={entry.ps} {canEdit} on:valueupdate />
+        <EntryPartOfSpeech value={entry.ps} {canEdit} on:valueupdate />
         <div class="border-b-2 pb-1 mb-2" />
       </div>
     {/if}
@@ -96,7 +91,6 @@
 
     {#if $dictionary.id === 'babanki'}
       <EntryField
-        {t}
         value={entry['va']}
         field="va"
         {canEdit}
@@ -108,7 +102,6 @@
     
     {#each ['pl', 'nc', 'mr', 'in', 'nt'] as field}
       <EntryField
-        {t}
         value={entry[field]}
         {field}
         {canEdit}
@@ -132,7 +125,6 @@
     {#if entry.xv}
       <!-- used for old dictionary imports, needs refactored into entry.xs -->
       <EntryField
-        {t}
         value={entry.xv}
         field="xv"
         {canEdit}
@@ -141,7 +133,6 @@
     {/if}
 
     <EntryField
-      {t}
       value={entry.xs && entry.xs.vn}
       field="xs.vn"
       {canEdit}
@@ -150,7 +141,6 @@
 
     {#each glossingLanguages as bcp}
       <EntryField
-        {t}
         value={entry.xs && entry.xs[bcp]}
         field={`xs.${bcp}`}
         {canEdit}

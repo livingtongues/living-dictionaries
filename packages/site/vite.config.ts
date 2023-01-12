@@ -2,17 +2,20 @@ import { sveltekit } from '@sveltejs/kit/vite';
 import type { UserConfig } from 'vite';
 // import { svelte } from '@sveltejs/vite-plugin-svelte';
 
-// keeps using localhost https://github.com/vitejs/vite/issues/9195
-import dns from 'dns';
-dns.setDefaultResultOrder('verbatim');
+import { kitbook } from 'kitbook/plugins/vite';
+
+const isKitbookMode = process.env.npm_lifecycle_script?.includes('--mode kitbook');
 
 const config: UserConfig = {
   plugins: [
+    kitbook(),
     sveltekit(),
   ],
 
+  // TODO integrate into kitbook
+  cacheDir: isKitbookMode ? 'node_modules/.vite-kitbook' : 'node_modules/.vite',
   server: {
-    port: 3041,
+    port: isKitbookMode ? 4321 : 3041,
     strictPort: false,
   },
   // envDir: '../../',

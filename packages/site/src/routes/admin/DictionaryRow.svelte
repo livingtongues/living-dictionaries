@@ -10,7 +10,8 @@
   import { createEventDispatcher } from 'svelte';
   import { Collection, updateOnline } from 'sveltefirets';
   import { where } from 'firebase/firestore';
-  import { Invitation, LatLngDisplay } from '@living-dictionaries/parts';
+  import { LatLngDisplay } from '@living-dictionaries/parts';
+  import ContributorInvitationStatus from '$lib/components/contributors/ContributorInvitationStatus.svelte';
 
   import RolesManagment from './RolesManagment.svelte';
   import IntersectionObserverShared from 'svelte-pieces/functions/IntersectionObserverShared.svelte';
@@ -69,7 +70,7 @@
           let:data={invites}>
           {#each invites as invite}
             <div class="my-1">
-              <Invitation
+              <ContributorInvitationStatus
                 admin
                 {invite}
                 on:delete={() =>
@@ -77,7 +78,7 @@
                     status: 'cancelled',
                   })}>
                 <span class="i-mdi-email-send" slot="prefix" />
-              </Invitation>
+              </ContributorInvitationStatus>
             </div>
           {/each}
         </Collection>
@@ -104,7 +105,7 @@
           let:data={invites}>
           {#each invites as invite}
             <div class="my-1">
-              <Invitation
+              <ContributorInvitationStatus
                 admin
                 {invite}
                 on:delete={() =>
@@ -112,7 +113,7 @@
                     status: 'cancelled',
                   })}>
                 <span class="i-mdi-email-send" slot="prefix" />
-              </Invitation>
+              </ContributorInvitationStatus>
             </div>
           {/each}
         </Collection>

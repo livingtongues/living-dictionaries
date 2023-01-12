@@ -21,9 +21,8 @@
     </div>
   </div>
   {#if show}
-    {#await import('@living-dictionaries/parts/src/lib/entries/video/PlayVideo.svelte') then { default: PlayVideo }}
+    {#await import('$lib/components/video/PlayVideo.svelte') then { default: PlayVideo }}
       <PlayVideo
-        {t}
         {entry}
         {video}
         storageBucket={firebaseConfig.storageBucket}

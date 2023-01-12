@@ -49,14 +49,12 @@
 </script>
 
 <div class="flex items-center" style="direction: ltr;">
-  <Button class="rounded-play mr-2" form="filled" onclick={startStop}>
-    {#if !playing}
-      <!-- <i class="far fa-volume-up fa-lg" /> -->
-      <i class="far fa-ear fa-lg" />
-    {:else}
-      <!-- <i class="fas fa-volume-up fa-lg" /> -->
-      <i class="fas fa-ear fa-lg" />
-    {/if}
+  <Button
+    class="mr-2"
+    color={playing ? 'green' : 'primary'}
+    form="filled"
+    onclick={startStop}>
+    <span class="i-material-symbols-hearing my-1" style="width: 2em; height: 2em;" />
   </Button>
   <div class="flex-grow" bind:this={waveform} />
 </div>
@@ -64,9 +62,3 @@
 <!-- wavesurfer.playPause(); -->
 
 <!-- Interesting option I didn't use: https://css-tricks.com/making-an-audio-waveform-visualizer-with-vanilla-javascript/ -->
-<style>
-  :global(.rounded-play) {
-    --at-apply: rounded-full w-12 h-12 flex-grow-0 flex
-      items-center justify-center font-medium;
-  }
-</style>

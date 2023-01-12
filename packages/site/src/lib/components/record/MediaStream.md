@@ -1,0 +1,48 @@
+<script lang="ts">
+  import { Story } from 'kitbook';
+  import MediaStream from './MediaStream.svelte';
+  import { srcObject, Button } from 'svelte-pieces';
+</script>
+
+<Story name="Audio + Video List Devices">
+  <div>
+    <MediaStream
+      let:stream
+      let:microphones
+      let:cameras
+      let:chooseMicrophone
+      let:chooseCamera
+      let:selectedMicrophone
+      let:selectedCamera>
+      {#each microphones as microphone}
+        <div>
+          <Button
+            onclick={() => chooseMicrophone(microphone.deviceId)}
+            form={selectedMicrophone.deviceId === microphone.deviceId ? 'filled' : 'simple'}
+            >{microphone.label}</Button>
+        </div>
+      {/each}
+      {#each cameras as camera}
+        <div>
+          <Button
+            onclick={() => chooseCamera(camera.deviceId)}
+            form={selectedCamera.deviceId === camera.deviceId ? 'filled' : 'simple'}
+            >{camera.label}</Button>
+        </div>
+      {/each}
+      {#if stream}
+        <!-- svelte-ignore a11y-media-has-caption -->
+        <video muted volume={0} use:srcObject={stream} autoplay playsinline controls />
+      {/if}
+    </MediaStream>
+  </div>
+</Story>
+
+<Story name="Audio Only">
+  <MediaStream video={false} let:stream>
+    {#if stream}
+      <!-- svelte-ignore a11y-media-has-caption -->
+      <video muted volume={0} use:srcObject={stream} autoplay playsinline controls />
+    {/if}
+  </MediaStream>
+</Story>
