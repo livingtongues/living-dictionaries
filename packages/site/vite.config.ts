@@ -4,18 +4,14 @@ import type { UserConfig } from 'vite';
 
 import { kitbook } from 'kitbook/plugins/vite';
 
-const isKitbookMode = process.env.npm_lifecycle_script?.includes('--mode kitbook');
-
 const config: UserConfig = {
   plugins: [
     kitbook(),
     sveltekit(),
   ],
 
-  // TODO integrate into kitbook
-  cacheDir: isKitbookMode ? 'node_modules/.vite-kitbook' : 'node_modules/.vite',
   server: {
-    port: isKitbookMode ? 4321 : 3041,
+    port: 3041,
     strictPort: false,
   },
   // envDir: '../../',

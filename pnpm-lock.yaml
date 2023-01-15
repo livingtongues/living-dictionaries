@@ -194,7 +194,7 @@ importers:
       firebase: ^9.14.0
       instantsearch.js: ^4.33.2
       jszip: ^3.7.1
-      kitbook: ^1.0.0-alpha.18
+      kitbook: ^1.0.0-alpha.20
       logrocket: ^2.1.2
       lz-string: ^1.4.4
       recordrtc: ^5.6.2
@@ -239,7 +239,7 @@ importers:
       firebase: 9.14.0
       instantsearch.js: 4.40.2_algoliasearch@4.13.0
       jszip: 3.8.0
-      kitbook: 1.0.0-alpha.18
+      kitbook: 1.0.0-alpha.20
       logrocket: 2.2.1
       lz-string: 1.4.4
       recordrtc: 5.6.2
@@ -1814,8 +1814,8 @@ packages:
       unist-util-visit: 4.1.1
     dev: true
 
-  /@kitbook/vite-plugin-kitbook/0.0.4_svelte@3.55.0:
-    resolution: {integrity: sha512-wpMkHKBfKr4x0RglJAbT08mqdwAxRHQuBHAjUQJNDwrBnpdldGXxv84edjIelLHBvJwr2KyxXuJMNTlYJcnTfQ==}
+  /@kitbook/vite-plugin-kitbook/0.0.5_svelte@3.55.0:
+    resolution: {integrity: sha512-QqpuH8fEvy3Weum1hCDcJQRpn+6J6IAQ3EJWYNbaCw7ZP/KV+dBOQ9nBxkrgQHc841Z8XVWT3GL2OOpcrI84Qg==}
     dependencies:
       '@kitbook/mdsvex-shiki-twoslash': 0.0.3_svelte@3.55.0
       '@kitbook/rehype-display-link-titles': 0.0.3
@@ -2142,7 +2142,7 @@ packages:
     peerDependencies:
       '@sveltejs/kit': ^1.0.0
     dependencies:
-      '@sveltejs/kit': 1.0.1_svelte@3.55.0+vite@4.0.4
+      '@sveltejs/kit': 1.0.1_svelte@3.55.0+vite@4.0.3
       import-meta-resolve: 2.2.0
     dev: true
 
@@ -6777,11 +6777,11 @@ packages:
       - svelte
     dev: true
 
-  /kitbook/1.0.0-alpha.18:
-    resolution: {integrity: sha512-/ZYDHy34WB7muV0laOdbrA7GnRIX1TMC9BSJUrJe/bVGr8IayIsprq3BJmAF8IdwvekpJ6digOzZqVWOUzSo7g==}
+  /kitbook/1.0.0-alpha.20:
+    resolution: {integrity: sha512-8KImYGrlvfO2nGKTN9D/jVYSyB1gXCjpS8SEOP0mwl/NhqnQNfMT/dpKBZdCzF+SJthBQLqE7zGynD/esXuxzw==}
     dependencies:
       '@kitbook/mdsvex-shiki-twoslash': 0.0.3_svelte@3.55.0
-      '@kitbook/vite-plugin-kitbook': 0.0.4_svelte@3.55.0
+      '@kitbook/vite-plugin-kitbook': 0.0.5_svelte@3.55.0
       lz-string: 1.4.4
       svelte: 3.55.0
       svelte-pieces: 1.0.57_svelte@3.55.0
