@@ -2,17 +2,17 @@
   import { t } from 'svelte-i18n';
   import { page } from '$app/stores';
   import LZString from 'lz-string';
+  import { seoTitle } from './seo-title';
   const { compressToEncodedURIComponent: encode } = LZString;
 
-  export let flipTitle = false;
-  const SITE_NAME = 'Living Dictionaries';
-  export let title = SITE_NAME;
+  export let admin: number | boolean;
+  export let title: string;
   export let dictionaryName: string = undefined;
-  $: textTitle = dictionaryName
-    ? `${title} | ${dictionaryName} ${$t('misc.LD_singular', { default: 'Living Dictionary' })}` // is a dictionary or entry page
-    : title === SITE_NAME // has no title
-    ? title
-    : `${title} | ${SITE_NAME}`; // is a miscellaneous non-dictionary related page
+  
+  $: expandedDictionaryName = dictionaryName
+    ? `${dictionaryName} ${$t('misc.LD_singular', { default: 'Living Dictionary' })}`
+    : null;
+  $: textTitle = seoTitle({ title, dictionaryName: expandedDictionaryName, admin });
 
   export let description =
     'Language Documentation Web App - Speeding the availability of language resources for endangered languages. Using technology to shift how we think about endangered languages. Rather than perceiving them as being antiquated, difficult to learn and on the brink of vanishing, we see them as modern and easily accessible for learning online in text and audio formats.';
@@ -50,7 +50,7 @@
 </script>
 
 <svelte:head>
-  <title>{flipTitle ? textTitle.split('|').reverse().join(' | ') : textTitle}</title>
+  <title>{textTitle}</title>
 
   <meta name="description" content={description} />
   <meta name="keywords" content={keywords} />
