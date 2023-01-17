@@ -18,7 +18,7 @@
     canEdit = false,
     videoAccess = false;
 
-  $: glosses = printGlosses(entry.gl, $t, {
+  $: glosses = printGlosses(entry.gl, $dictionary.glossLanguages, $t, {
     shorten: $dictionary.id === 'jewish-neo-aramaic',
   }).join(', ');
 </script>
