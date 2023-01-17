@@ -5,7 +5,7 @@
   import { seoTitle } from './seo-title';
   const { compressToEncodedURIComponent: encode } = LZString;
 
-  export let admin: number | boolean;
+  export let admin: number | boolean = false;
   export let title: string;
   export let dictionaryName: string = undefined;
   
