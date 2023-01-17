@@ -15,41 +15,41 @@ export function printGlosses(
     });
 }
 
-// if (import.meta.vitest) {
-//   const t = (id) => (id === 'gl.en' ? 'English' : 'Spanish');
-//   test('printGlosses', () => {
-//     const gloss = {
-//       en: 'apple',
-//       es: 'arbol',
-//       scientific: '<i>Neolamarckia cadamba</i>',
-//       empty: '',
-//       null: null,
-//     };
-//     expect(printGlosses(gloss, t, { shorten: true })).toMatchInlineSnapshot(`
-//       [
-//         "apple",
-//         "arbol",
-//         "<i>Neolamarckia cadamba</i>",
-//       ]
-//     `);
+if (import.meta.vitest) {
+  const t = (id) => (id === 'gl.en' ? 'English' : 'Spanish');
+  test('printGlosses', () => {
+    const gloss = {
+      en: 'apple',
+      es: 'arbol',
+      scientific: '<i>Neolamarckia cadamba</i>',
+      empty: '',
+      null: null,
+    };
+    const glossOrderInDictionary = ['es', 'en'];
+    expect(printGlosses(gloss, glossOrderInDictionary, t, { shorten: true }))
+      .toMatchInlineSnapshot(`
+        [
+          "arbol",
+          "apple",
+        ]
+      `);
 
-//     expect(printGlosses(gloss, t)).toMatchInlineSnapshot(`
-//     [
-//       "English: apple",
-//       "Spanish: arbol",
-//       "Spanish: <i>Neolamarckia cadamba</i>",
-//     ]
-//     `);
+    expect(printGlosses(gloss, glossOrderInDictionary, t)).toMatchInlineSnapshot(`
+      [
+        "Spanish: arbol",
+        "English: apple",
+      ]
+    `);
 
-//     expect(
-//       printGlosses(gloss, t, { shorten: true })
-//         .join(', ')
-//         .replace(/<\/?i>/g, '') + '.'
-//     ).toMatchInlineSnapshot('"apple, arbol, Neolamarckia cadamba."');
+    expect(
+      printGlosses(gloss, glossOrderInDictionary, t, { shorten: true })
+        .join(', ')
+        .replace(/<\/?i>/g, '') + '.'
+    ).toMatchInlineSnapshot('"arbol, apple."');
 
-//     expect(printGlosses({}, t)).toMatchInlineSnapshot('[]');
-//   });
-// }
+    expect(printGlosses({}, glossOrderInDictionary, t)).toMatchInlineSnapshot('[]');
+  });
+}
 
 export function showEntryGlossLanguages(
   entryGlosses: { [key: string]: string },
