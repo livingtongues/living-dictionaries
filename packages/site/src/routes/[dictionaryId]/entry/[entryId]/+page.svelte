@@ -75,7 +75,7 @@ bg-white pt-1 -mt-1">
     title={entry.lx}
     description={`${entry.lo ? entry.lo : ''} ${entry.lo2 ? entry.lo2 : ''} ${entry.lo3 ? entry.lo3 : ''}
     ${entry.ph ? '[' + entry.ph + ']' : ''} ${entry.ps ? typeof entry.ps !=='string' && entry.ps.length > 1 ? entry.ps.join(', ') + '.' : entry.ps + '.' : ''}
-    ${printGlosses(entry.gl, $t)
+    ${printGlosses(entry.gl, $dictionary.glossLanguages, $t)
       .join(', ')
       .replace(/<\/?i>/g, '') + '.'}
     ${entry.di ? entry.di : ''}`.replace(/(?<!\w)\n/gm, '')}
