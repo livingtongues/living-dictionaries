@@ -6,38 +6,55 @@ export function printGlosses(
   t: (id: string) => string,
   { shorten = false } = {}
 ) {
-  return glossOrder
-    .filter((bcp) => glosses[bcp])
-    .map((bcp) => {
-      const gloss = glosses[bcp];
-      if (shorten) return gloss;
-      return `${t('gl.' + bcp)}: ${gloss}`;
-    });
+  const glossesMergedWithoutDuplicates = new Set([...glossOrder, ...Object.keys(glosses)]); //glossOrder must be in first place to sort correctly
+  const SortedGlossesArray = Array.from(glossesMergedWithoutDuplicates);
+  return SortedGlossesArray.filter((bcp) => glosses[bcp]).map((bcp) => {
+    const gloss = glosses[bcp];
+    if (shorten) return gloss;
+    return `${t('gl.' + bcp)}: ${gloss}`;
+  });
 }
 
 if (import.meta.vitest) {
-  const t = (id) => (id === 'gl.en' ? 'English' : 'Spanish');
+  const t = (id) => {
+    switch (id) {
+      case 'gl.de':
+        return 'German';
+      case 'gl.en':
+        return 'English';
+      case 'gl.es':
+        return 'Spanish';
+      default:
+        return 'other';
+    }
+  };
   test('printGlosses', () => {
     const gloss = {
       en: 'apple',
-      es: 'arbol',
+      es: 'manzana',
       scientific: '<i>Neolamarckia cadamba</i>',
       empty: '',
       null: null,
+      de: 'apfel',
     };
-    const glossOrderInDictionary = ['es', 'en'];
-    expect(printGlosses(gloss, glossOrderInDictionary, t, { shorten: true }))
-      .toMatchInlineSnapshot(`
-        [
-          "arbol",
-          "apple",
-        ]
-      `);
+    const glossOrderInDictionary = ['de', 'es', 'en'];
+    expect(printGlosses(gloss, glossOrderInDictionary, t, { shorten: true })).toMatchInlineSnapshot(
+      `
+      [
+        "apfel",
+        "manzana",
+        "apple",
+        "<i>Neolamarckia cadamba</i>",
+      ]
+    `
+    );
 
     expect(printGlosses(gloss, glossOrderInDictionary, t)).toMatchInlineSnapshot(`
       [
-        "Spanish: arbol",
+        "German: apfel",
+        "Spanish: manzana",
         "English: apple",
+        "other: <i>Neolamarckia cadamba</i>",
       ]
     `);
 
@@ -45,7 +62,7 @@ if (import.meta.vitest) {
       printGlosses(gloss, glossOrderInDictionary, t, { shorten: true })
         .join(', ')
         .replace(/<\/?i>/g, '') + '.'
-    ).toMatchInlineSnapshot('"arbol, apple."');
+    ).toMatchInlineSnapshot('"apfel, manzana, apple, Neolamarckia cadamba."');
 
     expect(printGlosses({}, glossOrderInDictionary, t)).toMatchInlineSnapshot('[]');
   });
