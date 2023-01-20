@@ -6,11 +6,10 @@
   import AddImage from '../AddImage.svelte';
   import { page } from '$app/stores';
   import type { IEntry } from '@living-dictionaries/types';
-  import { orderGlosses } from '$lib/helpers/glosses';
+  import { orderGlosses, orderEntryAndDictionaryGlossLanguages } from '$lib/helpers/glosses';
   import { minutesAgo } from '$lib/helpers/time';
   import { deleteImage } from '$lib/helpers/delete';
   import ShowHide from 'svelte-pieces/functions/ShowHide.svelte';
-  import { orderEntryAndDictionaryGlossLanguages } from '$lib/helpers/glosses';
   import { dictionary } from '$lib/stores';
   import sanitize from 'xss';
 

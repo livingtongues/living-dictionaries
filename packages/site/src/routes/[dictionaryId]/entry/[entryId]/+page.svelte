@@ -15,8 +15,7 @@
   import { deleteEntry } from '$lib/helpers/delete';
   import { saveUpdateToFirestore } from '$lib/helpers/entry/update';
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte';
-  import { orderGlosses } from '$lib/helpers/glosses';
-  import { orderEntryAndDictionaryGlossLanguages } from '$lib/helpers/glosses';
+  import { orderGlosses, orderEntryAndDictionaryGlossLanguages } from '$lib/helpers/glosses';
   import EntryDisplay from './EntryDisplay.svelte';
 
   import type { PageData } from './$types';
@@ -84,7 +83,12 @@ bg-white pt-1 -mt-1">
         : ''
     }
     ${
-      orderGlosses({ glosses: entry.gl, dictionaryGlossLanguages: $dictionary.glossLanguages, $t, label: true })
+      orderGlosses({
+        glosses: entry.gl,
+        dictionaryGlossLanguages: $dictionary.glossLanguages,
+        $t,
+        label: true,
+      })
         .join(', ')
         .replace(/<\/?i>/g, '') + '.'
     }
