@@ -15,8 +15,7 @@
   import { deleteEntry } from '$lib/helpers/delete';
   import { saveUpdateToFirestore } from '$lib/helpers/entry/update';
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte';
-  import { printGlosses } from '$lib/helpers/glosses';
-  import { showEntryGlossLanguages } from '$lib/helpers/glosses';
+  import { orderGlosses, orderEntryAndDictionaryGlossLanguages } from '$lib/helpers/glosses';
   import EntryDisplay from './EntryDisplay.svelte';
 
   import type { PageData } from './$types';
@@ -67,17 +66,32 @@ bg-white pt-1 -mt-1">
     {entry}
     videoAccess={$dictionary.videoAccess || $admin > 0}
     canEdit={$canEdit}
-    glossingLanguages={showEntryGlossLanguages(entry.gl, $dictionary.glossLanguages)}
+    glossingLanguages={orderEntryAndDictionaryGlossLanguages(entry.gl, $dictionary.glossLanguages)}
     alternateOrthographies={$dictionary.alternateOrthographies || []}
     on:valueupdate={(e) => saveUpdateToFirestore(e, entry.id, $dictionary.id)} />
 
   <SeoMetaTags
     title={entry.lx}
-    description={`${entry.lo ? entry.lo : ''} ${entry.lo2 ? entry.lo2 : ''} ${entry.lo3 ? entry.lo3 : ''}
-    ${entry.ph ? '[' + entry.ph + ']' : ''} ${entry.ps ? typeof entry.ps !=='string' && entry.ps.length > 1 ? entry.ps.join(', ') + '.' : entry.ps + '.' : ''}
-    ${printGlosses(entry.gl, $t)
-      .join(', ')
-      .replace(/<\/?i>/g, '') + '.'}
+    description={`${entry.lo ? entry.lo : ''} ${entry.lo2 ? entry.lo2 : ''} ${
+      entry.lo3 ? entry.lo3 : ''
+    }
+    ${entry.ph ? '[' + entry.ph + ']' : ''} ${
+      entry.ps
+        ? typeof entry.ps !== 'string' && entry.ps.length > 1
+          ? entry.ps.join(', ') + '.'
+          : entry.ps + '.'
+        : ''
+    }
+    ${
+      orderGlosses({
+        glosses: entry.gl,
+        dictionaryGlossLanguages: $dictionary.glossLanguages,
+        $t,
+        label: true,
+      })
+        .join(', ')
+        .replace(/<\/?i>/g, '') + '.'
+    }
     ${entry.di ? entry.di : ''}`.replace(/(?<!\w)\n/gm, '')}
     dictionaryName={$dictionary.name}
     lat={$dictionary.coordinates?.latitude}
