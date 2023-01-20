@@ -22,7 +22,6 @@ const config: UserConfig = {
     'import.meta.vitest': false,
     'import.meta.env.VERCEL_ANALYTICS_ID': JSON.stringify(process.env.VERCEL_ANALYTICS_ID),
   },
-  // @ts-ignore
   test: {
     // plugins: [svelte({ hot: !process.env.VITEST })],
     globals: true,

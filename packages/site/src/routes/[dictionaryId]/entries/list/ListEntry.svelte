@@ -6,11 +6,11 @@
   import AddImage from '../AddImage.svelte';
   import { page } from '$app/stores';
   import type { IEntry } from '@living-dictionaries/types';
-  import { printGlosses } from '$lib/helpers/glosses';
+  import { orderGlosses } from '$lib/helpers/glosses';
   import { minutesAgo } from '$lib/helpers/time';
   import { deleteImage } from '$lib/helpers/delete';
   import ShowHide from 'svelte-pieces/functions/ShowHide.svelte';
-  import { showEntryGlossLanguages } from '$lib/helpers/glosses';
+  import { orderEntryAndDictionaryGlossLanguages } from '$lib/helpers/glosses';
   import { dictionary } from '$lib/stores';
   import sanitize from 'xss';
 
@@ -18,8 +18,11 @@
     canEdit = false,
     videoAccess = false;
 
-  $: glosses = printGlosses(entry.gl, $dictionary.glossLanguages, $t, {
-    shorten: $dictionary.id === 'jewish-neo-aramaic',
+  $: glosses = orderGlosses({
+    glosses: entry.gl,
+    dictionaryGlossLanguages: $dictionary.glossLanguages,
+    $t,
+    label: $dictionary.id !== 'jewish-neo-aramaic',
   }).join(', ');
 </script>
 
@@ -75,7 +78,7 @@
               {entry.xs.vn}
             </p>{/if}
           {#if entry.xs}
-            {#each showEntryGlossLanguages(entry.gl, $dictionary.glossLanguages) as bcp}
+            {#each orderEntryAndDictionaryGlossLanguages(entry.gl, $dictionary.glossLanguages) as bcp}
               {#if entry.xs[bcp]}
                 <p>
                   <span class="font-semibold"
