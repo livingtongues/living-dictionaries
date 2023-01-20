@@ -1,4 +1,4 @@
-import { orderEntryAndDictionaryGlossLanguages, orderGlosses } from "./glosses";
+import { orderEntryAndDictionaryGlossLanguages, orderGlosses } from './glosses';
 
 describe('orderGlosses', () => {
   const $t = (id: string) => {
@@ -38,7 +38,8 @@ describe('orderGlosses', () => {
   });
 
   test('adds language label when label set to true', () => {
-    expect(orderGlosses({ glosses, dictionaryGlossLanguages, $t, label: true })).toMatchInlineSnapshot(`
+    expect(orderGlosses({ glosses, dictionaryGlossLanguages, $t, label: true }))
+      .toMatchInlineSnapshot(`
       [
         "German: apfel",
         "Spanish: manzana",
@@ -50,7 +51,7 @@ describe('orderGlosses', () => {
 
   test('handles an empty glosses object', () => {
     expect(orderGlosses({ glosses: {}, dictionaryGlossLanguages, $t })).toMatchInlineSnapshot('[]');
-  })
+  });
 
   test('example implementation with join and italics removal', () => {
     expect(
@@ -63,7 +64,8 @@ describe('orderGlosses', () => {
 
 describe('orderEntryAndDictionaryGlossLanguages', () => {
   test('places dictionary gloss languages first, then leftovers from gloss object but does not duplicate', () => {
-    expect(orderEntryAndDictionaryGlossLanguages({es: '', en: ''}, ['en', 'de'])).toMatchInlineSnapshot(`
+    expect(orderEntryAndDictionaryGlossLanguages({ es: '', en: '' }, ['en', 'de']))
+      .toMatchInlineSnapshot(`
       [
         "en",
         "de",
