@@ -30,9 +30,7 @@ export function seoDescription(
   dictionaryGlossLanguages: string[],
   $t: (key: string) => string
 ) {
-  const localOrthographies = `${entry.lo ? entry.lo + ' ' : ''} ${
-    entry.lo2 ? entry.lo2 + ' ' : ''
-  } ${entry.lo3 ? entry.lo3 + ' ' : ''}`.trim(); // what about lo4 and lo5?
+  const localOrthographies = showLocalOrthographies(entry).join(' ');
 
   const phonetic = entry.ph && `[${entry.ph}]`;
 
