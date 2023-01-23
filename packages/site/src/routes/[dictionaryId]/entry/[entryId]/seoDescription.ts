@@ -1,5 +1,5 @@
-import { orderGlosses } from "../../../../lib/helpers/glosses";
-import type { IEntry } from "@living-dictionaries/types";
+import { orderGlosses } from '../../../../lib/helpers/glosses';
+import type { IEntry } from '@living-dictionaries/types';
 
 // function previousMethod(entry: IEntry, dictionaryGlossLanguages: string[], $t: (key: string) => string) {
 //   return `${entry.lo ? entry.lo : ''} ${entry.lo2 ? entry.lo2 : ''} ${
@@ -25,28 +25,36 @@ import type { IEntry } from "@living-dictionaries/types";
 //   ${entry.di ? entry.di : ''}`.replace(/(?<!\w)\n/gm, '')
 // }
 
-export function seoDescription(entry: IEntry, dictionaryGlossLanguages: string[], $t: (key: string) => string) {
-  const localOrthographies = `${entry.lo ? entry.lo + ' ' : ''} ${entry.lo2 ? entry.lo2 + ' ' : ''} ${entry.lo3 ? entry.lo3 + ' ' : ''
-    }`.trim(); // what about lo4 and lo5?
+export function seoDescription(
+  entry: IEntry,
+  dictionaryGlossLanguages: string[],
+  $t: (key: string) => string
+) {
+  const localOrthographies = `${entry.lo ? entry.lo + ' ' : ''} ${
+    entry.lo2 ? entry.lo2 + ' ' : ''
+  } ${entry.lo3 ? entry.lo3 + ' ' : ''}`.trim(); // what about lo4 and lo5?
 
   const phonetic = entry.ph && `[${entry.ph}]`;
 
-  const partsOfSpeech = `${entry.ps
-    ? typeof entry.ps !== 'string' && entry.ps.length > 1
-      ? entry.ps.join(', ') + '.'
-      : entry.ps + '.'
-    : ''
-    }`;
+  const partsOfSpeech = `${
+    entry.ps
+      ? typeof entry.ps !== 'string' && entry.ps.length > 1
+        ? entry.ps.join(', ') + '.'
+        : entry.ps + '.'
+      : ''
+  }`;
 
-  const glosses = orderGlosses({
-    glosses: entry.gl,
-    dictionaryGlossLanguages,
-    $t,
-    label: true,
-  }).join(', ')
-    .replace(/<\/?i>/g, '') + '.'
+  const glosses =
+    orderGlosses({
+      glosses: entry.gl,
+      dictionaryGlossLanguages,
+      $t,
+      label: true,
+    })
+      .join(', ')
+      .replace(/<\/?i>/g, '') + '.';
 
-  const dialect = entry?.di?.replace(/(?<!\w)\n/gm, '')
+  const dialect = entry?.di?.replace(/(?<!\w)\n/gm, '');
 
   let description = '';
   for (const portion of [localOrthographies, phonetic, partsOfSpeech, glosses, dialect]) {
@@ -56,4 +64,10 @@ export function seoDescription(entry: IEntry, dictionaryGlossLanguages: string[]
   }
 
   return description.trim();
+}
+
+export function showLocalOrthographies(entry: IEntry) {
+  const localOrthographiesKeys = Object.keys(entry).filter((entry) => entry.startsWith('lo'));
+  const localOrthographies = localOrthographiesKeys.map((lo) => entry[lo]);
+  return localOrthographies;
 }
