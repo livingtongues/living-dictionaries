@@ -1,5 +1,5 @@
 import { orderEntryAndDictionaryGlossLanguages, orderGlosses } from './glosses';
-import { removeItalicTagsWithAPeriod } from '../../routes/[dictionaryId]/entry/[entryId]/seoDescription';
+import { removeItalicTagsWithAPeriod } from './entry/displayFields';
 
 describe('orderGlosses', () => {
   const $t = (id: string) => {
