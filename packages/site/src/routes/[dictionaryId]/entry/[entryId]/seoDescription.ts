@@ -60,7 +60,10 @@ export function seoDescription(
 
 //TODO these might be helper functions instead, since we can use them in print view and in other places.
 export function showLocalOrthographies(entry: IEntry) {
-  const localOrthographiesKeys = Object.keys(entry).filter((entry) => entry.startsWith('lo'));
+  const localOrthographiesRegex = /^(lo[2-5]*)$/gm; // exclusively matches: lo lo2 lo3 lo4 & lo5
+  const localOrthographiesKeys = Object.keys(entry).filter((entry) =>
+    entry.match(localOrthographiesRegex)
+  );
   const localOrthographies = localOrthographiesKeys.map((lo) => entry[lo]);
   return localOrthographies;
 }
