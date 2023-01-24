@@ -45,7 +45,7 @@ export function seoDescription(
     }).join(', ')
   );
 
-  const dialect = entry?.di?.replace(unnecessaryLineBreaksRegex, '');
+  const dialect = entry?.di;
 
   let description = '';
   for (const portion of [localOrthographies, phonetic, partsOfSpeech, glosses, dialect]) {
@@ -54,7 +54,7 @@ export function seoDescription(
     }
   }
 
-  return description.trim();
+  return description.trim().replace(unnecessaryLineBreaksRegex, '');
 }
 
 //TODO these might be helper functions instead, since we can use them in print view and in other places.
