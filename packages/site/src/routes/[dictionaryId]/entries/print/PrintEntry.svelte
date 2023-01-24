@@ -5,6 +5,7 @@
   import QrCode from './QrCode.svelte';
   import sanitize from 'xss';
   import { defaultPrintFields } from './printFields';
+  import { showLocalOrthographies, showPartsOfSpeech } from '$lib/helpers/entry/displayFields';
 
   export let entry: IEntry;
   // export let speakers: ISpeaker[];
@@ -23,14 +24,10 @@
   <!--Essential Fields-->
   <b style="font-size: {headwordSize}pt;">{entry.lx}</b>
   {#if selectedFields.alternateOrthographies}
-    {#each ['lo', 'lo2', 'lo3', 'lo4', 'lo5'] as lo}
-      {#if entry[lo]}
-        <b>{entry[lo]}</b>{' '}
-      {/if}
-    {/each}
+    <b>{showLocalOrthographies(entry).sort().join(' ')}</b>
   {/if}
   {entry.ph && selectedFields.ph ? `/${entry.ph}/` : ''}
-  <i>{entry.ps && selectedFields.ps ? entry.ps : ''}</i>
+  <i>{showPartsOfSpeech(entry.ps)}</i>
   {#if entry.gl && selectedFields.gloss}
     {#each Object.entries(entry.gl) as gloss, index}
       <span>{@html sanitize(gloss[1])}</span>
