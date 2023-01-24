@@ -54,7 +54,7 @@ export function seoDescription(
     }
   }
 
-  return description.trim().replace(unnecessaryLineBreaksRegex, '');
+  return description.replace(unnecessaryLineBreaksRegex, '').trim();
 }
 
 //TODO these might be helper functions instead, since we can use them in print view and in other places.
