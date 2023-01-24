@@ -37,7 +37,7 @@ describe('showPartsOfSpeech', () => {
     expect(showPartsOfSpeech(partsOfSpeech.emptyString)).toMatchInlineSnapshot('""');
     expect(showPartsOfSpeech(partsOfSpeech.arrayPOS1)).toMatchInlineSnapshot('"n, adj."');
     expect(showPartsOfSpeech(partsOfSpeech.arrayPOS2)).toMatchInlineSnapshot('"v."');
-    expect(showPartsOfSpeech(partsOfSpeech.emptyArray)).toMatchInlineSnapshot('"."');
+    expect(showPartsOfSpeech(partsOfSpeech.emptyArray)).toMatchInlineSnapshot('""');
     expect(showPartsOfSpeech(partsOfSpeech.null)).toMatchInlineSnapshot('""');
   });
 });
