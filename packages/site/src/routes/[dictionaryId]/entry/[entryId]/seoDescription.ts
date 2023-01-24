@@ -45,7 +45,7 @@ export function seoDescription(
     }).join(', ')
   );
 
-  const dialect = entry?.di;
+  const dialect = entry?.di?.replace(unecessaryLineBreaksRegex, '');
 
   let description = '';
   for (const portion of [localOrthographies, phonetic, partsOfSpeech, glosses, dialect]) {
@@ -84,4 +84,4 @@ export function removeItalicTagsWithAPeriod(str: string) {
   return '';
 }
 
-//export const
+export const unecessaryLineBreaksRegex = /(?<!\w)\n/gm;
