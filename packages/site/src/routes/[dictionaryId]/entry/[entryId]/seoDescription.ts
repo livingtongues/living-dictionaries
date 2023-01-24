@@ -34,13 +34,7 @@ export function seoDescription(
 
   const phonetic = entry.ph && `[${entry.ph}]`;
 
-  const partsOfSpeech = `${
-    entry.ps
-      ? typeof entry.ps !== 'string' && entry.ps.length > 1
-        ? entry.ps.join(', ') + '.'
-        : entry.ps + '.'
-      : ''
-  }`;
+  const partsOfSpeech = showPartsOfSpeech(entry.ps);
 
   const glosses =
     orderGlosses({
@@ -64,8 +58,19 @@ export function seoDescription(
   return description.trim();
 }
 
+//TODO these might be helper functions instead, since we can use them in print view and in other places.
 export function showLocalOrthographies(entry: IEntry) {
   const localOrthographiesKeys = Object.keys(entry).filter((entry) => entry.startsWith('lo'));
   const localOrthographies = localOrthographiesKeys.map((lo) => entry[lo]);
   return localOrthographies;
+}
+
+export function showPartsOfSpeech(pos: string | string[]) {
+  if (pos) {
+    if (typeof pos !== 'string' && pos.length > 1) {
+      return pos.join(', ') + '.';
+    }
+    return pos + '.';
+  }
+  return '';
 }
