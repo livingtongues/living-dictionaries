@@ -4,6 +4,7 @@ import {
   showLocalOrthographies,
   showPartsOfSpeech,
   removeItalicTagsWithAPeriod,
+  unnecessaryLineBreaksRegex,
 } from './seoDescription';
 import { entriesWithAlternateOrthographies } from '../../entries/print/mock-data';
 
@@ -71,6 +72,15 @@ describe('removeItalicTagsWithAPeriod', () => {
   test('Remove italic HTML tags from strings', () => {
     expect(removeItalicTagsWithAPeriod(sampleStr)).toMatchInlineSnapshot(
       '"This is just an example string."'
+    );
+  });
+});
+
+describe('unnecessaryLineBreaksRegex', () => {
+  const phrase = 'This is \nand \nexample \nphrase.';
+  test('Replace unnecessary line breaks in a phrase', () => {
+    expect(phrase.replace(unnecessaryLineBreaksRegex, '')).toMatchInlineSnapshot(
+      '"This is and example phrase."'
     );
   });
 });
