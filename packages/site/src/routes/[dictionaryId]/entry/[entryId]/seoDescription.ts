@@ -45,7 +45,7 @@ export function seoDescription(
     }).join(', ')
   );
 
-  const dialect = entry?.di?.replace(/(?<!\w)\n/gm, '');
+  const dialect = entry?.di;
 
   let description = '';
   for (const portion of [localOrthographies, phonetic, partsOfSpeech, glosses, dialect]) {
