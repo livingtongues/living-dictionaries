@@ -11,10 +11,10 @@ export function showLocalOrthographies(entry: IEntry) {
 
 export function showPartsOfSpeech(pos: string | string[]) {
   if (pos) {
-    if (typeof pos !== 'string' && pos.length > 1) {
+    if (typeof pos !== 'string' && pos.length > 0) {
       return pos.join(', ') + '.';
     }
-    return pos + '.';
+    if (typeof pos === 'string') return pos + '.';
   }
   return '';
 }
