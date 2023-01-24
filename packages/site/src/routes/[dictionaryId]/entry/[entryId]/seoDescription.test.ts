@@ -1,5 +1,10 @@
 import type { IEntry } from '@living-dictionaries/types';
-import { seoDescription, showLocalOrthographies, showPartsOfSpeech } from './seoDescription';
+import {
+  seoDescription,
+  showLocalOrthographies,
+  showPartsOfSpeech,
+  removeItalicTagsWithAPeriod,
+} from './seoDescription';
 import { entriesWithAlternateOrthographies } from '../../entries/print/mock-data';
 
 describe('seoDescription', () => {
@@ -29,12 +34,12 @@ describe('seoDescription', () => {
 describe('showLocalOrthographies', () => {
   const mockEntries: IEntry[] = entriesWithAlternateOrthographies;
 
-  test('showing some local orthographies', () => {
+  test('shows some local orthographies', () => {
     expect(showLocalOrthographies(mockEntries[1]).join(', ')).toMatchInlineSnapshot(
       '"さよなら, 안녕, αντίο"'
     );
   });
-  test('showing all local orthographies', () => {
+  test('shows all local orthographies', () => {
     expect(showLocalOrthographies(mockEntries[0]).join(', ')).toMatchInlineSnapshot(
       '"Nnọọ, Привет, سلام, नमस्ते, שלום"'
     );
@@ -51,12 +56,21 @@ describe('showPartsOfSpeech', () => {
     null: null,
   };
 
-  test('Showing parts of speech', () => {
+  test('Shows parts of speech', () => {
     expect(showPartsOfSpeech(partsOfSpeech.stringPOS)).toMatchInlineSnapshot('"n."');
     expect(showPartsOfSpeech(partsOfSpeech.emptyString)).toMatchInlineSnapshot('""');
     expect(showPartsOfSpeech(partsOfSpeech.arrayPOS1)).toMatchInlineSnapshot('"n, adj."');
     expect(showPartsOfSpeech(partsOfSpeech.arrayPOS2)).toMatchInlineSnapshot('"v."');
     expect(showPartsOfSpeech(partsOfSpeech.emptyArray)).toMatchInlineSnapshot('"."');
     expect(showPartsOfSpeech(partsOfSpeech.null)).toMatchInlineSnapshot('""');
+  });
+});
+
+describe('removeItalicTagsWithAPeriod', () => {
+  const sampleStr = 'This is just an <i>example</i> string';
+  test('Remove italic HTML tags from strings', () => {
+    expect(removeItalicTagsWithAPeriod(sampleStr)).toMatchInlineSnapshot(
+      '"This is just an example string."'
+    );
   });
 });

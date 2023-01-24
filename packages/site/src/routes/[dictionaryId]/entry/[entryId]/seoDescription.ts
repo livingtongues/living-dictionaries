@@ -36,15 +36,14 @@ export function seoDescription(
 
   const partsOfSpeech = showPartsOfSpeech(entry.ps);
 
-  const glosses =
+  const glosses = removeItalicTagsWithAPeriod(
     orderGlosses({
       glosses: entry.gl,
       dictionaryGlossLanguages,
       $t,
       label: true,
-    })
-      .join(', ')
-      .replace(/<\/?i>/g, '') + '.';
+    }).join(', ')
+  );
 
   const dialect = entry?.di?.replace(/(?<!\w)\n/gm, '');
 
@@ -77,3 +76,12 @@ export function showPartsOfSpeech(pos: string | string[]) {
   }
   return '';
 }
+
+export function removeItalicTagsWithAPeriod(str: string) {
+  if (str) {
+    return str.replace(/<\/?i>/g, '') + '.';
+  }
+  return '';
+}
+
+//export const
