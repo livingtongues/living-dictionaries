@@ -67,7 +67,7 @@ describe('showPartsOfSpeech', () => {
 });
 
 describe('removeItalicTagsWithAPeriod', () => {
-  const sampleStr = 'This is just an <i>example</i> string';
+  const sampleStr = 'This <i>is</i> just an <i>example</i> string';
   test('Remove italic HTML tags from strings', () => {
     expect(removeItalicTagsWithAPeriod(sampleStr)).toMatchInlineSnapshot(
       '"This is just an example string."'
