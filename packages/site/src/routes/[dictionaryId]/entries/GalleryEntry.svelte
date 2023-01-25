@@ -1,10 +1,12 @@
 <script lang="ts">
+  import { t } from 'svelte-i18n';
   import type { IEntry } from '@living-dictionaries/types';
   import Image from '$lib/components/image/Image.svelte';
   export let entry: IEntry;
   export let canEdit = false;
   import { dictionary } from '$lib/stores';
   import { deleteImage } from '$lib/helpers/delete';
+  import { orderGlosses } from '$lib/helpers/glosses';
 </script>
 
 <div class="flex flex-col relative rounded max-w-[500px]">
@@ -22,12 +24,11 @@
         {@html entry._highlightResult?.lx?.value || entry.lx}
       </div>
       <div class="text-xs">
-        <!--Simple solution until we really work on implementing this feature-->
-        {#if $dictionary.id === 'iquito' || $dictionary.id === 'muniche'}
-          {@html entry._highlightResult?.gl?.es?.value || entry.gl?.es || ''}
-        {:else}
-          {@html entry._highlightResult?.gl?.en?.value || entry.gl?.en || ''}
-        {/if}
+        {@html entry._highlightResult?.gl?.en?.value || orderGlosses({
+          glosses: entry.gl,
+          dictionaryGlossLanguages: $dictionary.glossLanguages,
+          $t,
+        }).join(', ') || ''}
       </div>
     </a>
   </div>
