@@ -28,7 +28,7 @@
           glosses: entry.gl,
           dictionaryGlossLanguages: $dictionary.glossLanguages,
           $t,
-        }).join(', ') || ''}
+        })[0] || ''}
       </div>
     </a>
   </div>

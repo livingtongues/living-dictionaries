@@ -62,6 +62,64 @@ describe('orderGlosses', () => {
   });
 });
 
+describe('orderGlosses with multiple examples', () => {
+  const $t = (id: string) => {
+    switch (id) {
+      case 'gl.de':
+        return 'German';
+      case 'gl.en':
+        return 'English';
+      case 'gl.es':
+        return 'Spanish';
+      default:
+        return 'other';
+    }
+  };
+  const entries = [
+    {
+      gl: {
+        en: 'apple',
+        es: 'manzana',
+        de: 'apfel',
+      },
+    },
+    {
+      gl: {
+        en: 'banana',
+        es: 'plátano',
+        de: '',
+      },
+    },
+    {
+      gl: {
+        en: '',
+        es: '',
+        de: '',
+      },
+    },
+  ];
+  const dictionaryGlossLanguages = ['de', 'es', 'en'];
+
+  test('displays always the first available gloss', () => {
+    expect(
+      entries.map(
+        (entry) =>
+          orderGlosses({
+            glosses: entry.gl,
+            dictionaryGlossLanguages,
+            $t,
+          })[0]
+      )
+    ).toMatchInlineSnapshot(`
+      [
+        "apfel",
+        "plátano",
+        undefined,
+      ]
+    `);
+  });
+});
+
 describe('orderEntryAndDictionaryGlossLanguages', () => {
   test('places dictionary gloss languages first, then leftovers from gloss object but does not duplicate', () => {
     expect(orderEntryAndDictionaryGlossLanguages({ es: '', en: '' }, ['en', 'de']))
