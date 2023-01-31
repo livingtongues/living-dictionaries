@@ -9,12 +9,12 @@ export function showLocalOrthographies(entry: IEntry) {
   return localOrthographies;
 }
 
-export function showPartsOfSpeech(pos: string | string[]) {
-  if (pos) {
-    if (typeof pos !== 'string' && pos.length > 0) {
-      return pos.join(', ') + '.';
+export function showPartsOfSpeech(partOfSpeech: string | string[]) {
+  if (partOfSpeech) {
+    if (typeof partOfSpeech !== 'string' && partOfSpeech.length > 0) {
+      return partOfSpeech.join(', ') + '.';
     }
-    if (typeof pos === 'string') return pos + '.';
+    if (typeof partOfSpeech === 'string') return partOfSpeech + '.';
   }
   return '';
 }

@@ -10,7 +10,8 @@
     "kitbook:preview": "vite preview --mode kitbook",
     "check": "svelte-check --tsconfig ./tsconfig.json --threshold warning --diagnostic-sources js,svelte",
     "check:watch": "svelte-check --tsconfig ./tsconfig.json --threshold warning --diagnostic-sources js,svelte --watch",
-    "test": "vitest -u"
+    "test": "vitest",
+    "test:ui": "vitest --ui"
   },
   "devDependencies": {
     "@iconify/json": "^2.2.2",
@@ -29,6 +30,7 @@
     "@types/mapbox__mapbox-gl-geocoder": "^4.7.3",
     "@types/recordrtc": "^5.6.10",
     "@unocss/preset-icons": "^0.48.0",
+    "@vitest/ui": "latest",
     "algoliasearch": "^4.11.0",
     "csvtojson": "^2.0.10",
     "d3-dsv": "^3.0.1",
