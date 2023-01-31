@@ -26,4 +26,3 @@ export function removeItalicTagsWithAPeriod(str: string) {
   return '';
 }
 
-export const unnecessaryLineBreaksRegex = /(?<!\w)\n/gm;
