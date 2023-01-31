@@ -23,22 +23,23 @@ describe('showLocalOrthographies', () => {
 });
 
 describe('showPartsOfSpeech', () => {
-  const partsOfSpeech = {
-    stringPOS: 'n',
-    arrayPOS1: ['n', 'adj'],
-    arrayPOS2: ['v'],
-    emptyArray: [],
-    emptyString: '',
-    null: null,
-  };
-
-  test('Shows parts of speech', () => {
-    expect(showPartsOfSpeech(partsOfSpeech.stringPOS)).toMatchInlineSnapshot('"n."');
-    expect(showPartsOfSpeech(partsOfSpeech.emptyString)).toMatchInlineSnapshot('""');
-    expect(showPartsOfSpeech(partsOfSpeech.arrayPOS1)).toMatchInlineSnapshot('"n, adj."');
-    expect(showPartsOfSpeech(partsOfSpeech.arrayPOS2)).toMatchInlineSnapshot('"v."');
-    expect(showPartsOfSpeech(partsOfSpeech.emptyArray)).toMatchInlineSnapshot('""');
-    expect(showPartsOfSpeech(partsOfSpeech.null)).toMatchInlineSnapshot('""');
+  test('handles a string', () => {
+    expect(showPartsOfSpeech('n')).toMatchInlineSnapshot('"n."');
+  });
+  test('handles empty string', () => {
+    expect(showPartsOfSpeech('')).toMatchInlineSnapshot('""');
+  });
+  test('places a period after item in an array', () => {
+    expect(showPartsOfSpeech(['v'])).toMatchInlineSnapshot('"v."');
+  });
+  test('places a period after each item in an array', () => {
+    expect(showPartsOfSpeech(['n', 'adj'])).toMatchInlineSnapshot('"n., adj."');
+  });
+  test('handles empty array', () => {
+    expect(showPartsOfSpeech([])).toMatchInlineSnapshot('""');
+  });
+  test('handles null', () => {
+    expect(showPartsOfSpeech(null)).toMatchInlineSnapshot('""');
   });
 });
 
