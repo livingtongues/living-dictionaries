@@ -33,7 +33,7 @@ describe('showPartsOfSpeech', () => {
     expect(showPartsOfSpeech(['v'])).toMatchInlineSnapshot('"v."');
   });
   test('places a period after each item in an array', () => {
-    expect(showPartsOfSpeech(['n', 'adj'])).toMatchInlineSnapshot('"n., adj."');
+    expect(showPartsOfSpeech(['n', 'adj', 'v'])).toMatchInlineSnapshot('"n., adj., v."');
   });
   test('handles empty array', () => {
     expect(showPartsOfSpeech([])).toMatchInlineSnapshot('""');
