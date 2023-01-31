@@ -1,12 +1,11 @@
 import type { IEntry } from '@living-dictionaries/types';
 
-export function showLocalOrthographies(entry: IEntry) {
-  const localOrthographiesRegex = /^(lo[2-5]*)$/gm; // exclusively matches: lo lo2 lo3 lo4 & lo5
-  const localOrthographiesKeys = Object.keys(entry).filter((entry) =>
-    entry.match(localOrthographiesRegex)
-  );
-  const localOrthographies = localOrthographiesKeys.map((lo) => entry[lo]);
-  return localOrthographies;
+export function getLocalOrthographies(entry: IEntry): string[] {
+  const possibleLocalOrthographyFields = ['lo', 'lo2', 'lo3', 'lo4', 'lo5'];
+  const localOrthographiesFieldsUsed = Object.keys(entry).filter((field) => {
+    if (possibleLocalOrthographyFields.includes(field)) return !!entry[field];
+  });
+  return localOrthographiesFieldsUsed.map((field) => entry[field]);
 }
 
 export function showPartsOfSpeech(partOfSpeech: string | string[]) {
@@ -25,4 +24,3 @@ export function removeItalicTagsWithAPeriod(str: string) {
   }
   return '';
 }
-

@@ -1,6 +1,6 @@
 import { orderGlosses } from '$lib/helpers/glosses';
 import {
-  showLocalOrthographies,
+  getLocalOrthographies,
   showPartsOfSpeech,
   removeItalicTagsWithAPeriod,
 } from '$lib/helpers/entry/displayFields';
@@ -11,7 +11,7 @@ export function seoDescription(
   dictionaryGlossLanguages: string[],
   $t: (key: string) => string
 ) {
-  const localOrthographies = showLocalOrthographies(entry).join(' ');
+  const localOrthographies = getLocalOrthographies(entry).join(' ');
 
   const phonetic = entry.ph && `[${entry.ph}]`;
 
