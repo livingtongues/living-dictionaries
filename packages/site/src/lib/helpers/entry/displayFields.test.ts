@@ -1,24 +1,44 @@
 import type { IEntry } from '@living-dictionaries/types';
 import {
-  showLocalOrthographies,
+  getLocalOrthographies,
   showPartsOfSpeech,
   removeItalicTagsWithAPeriod,
-  unnecessaryLineBreaksRegex,
 } from './displayFields';
-import { entriesWithAlternateOrthographies } from '../../../routes/[dictionaryId]/entries/print/mock-data';
 
-describe('showLocalOrthographies', () => {
-  const mockEntries: IEntry[] = entriesWithAlternateOrthographies;
-
-  test('shows some local orthographies', () => {
-    expect(showLocalOrthographies(mockEntries[1]).join(', ')).toMatchInlineSnapshot(
-      '"さよなら, 안녕, αντίο"'
-    );
+describe('getLocalOrthographies', () => {
+  test('returns array of local orthographies', () => {
+    const entryWith5LocalOrthographies: IEntry =
+    {
+      lx: 'Hello',
+      gl: null,
+      lo: 'Nnọọ',
+      lo2: 'Привет',
+      lo3: 'سلام',
+      lo4: 'नमस्ते',
+      lo5: 'שלום',
+    }
+    expect(getLocalOrthographies(entryWith5LocalOrthographies)).toEqual([
+      "Nnọọ",
+      "Привет",
+      "سلام",
+      "नमस्ते",
+      "שלום",
+    ]);
   });
-  test('shows all local orthographies', () => {
-    expect(showLocalOrthographies(mockEntries[0]).join(', ')).toMatchInlineSnapshot(
-      '"Nnọọ, Привет, سلام, नमस्ते, שלום"'
-    );
+  test('does not return field if field is empty or missing', () => {
+    const entryWith3LocalOrthographies: IEntry =
+    {
+      lx: 'Bye',
+      gl: null,
+      lo: 'さよなら',
+      lo2: '안녕',
+      lo3: '',
+      lo4: null,
+    }
+    expect(getLocalOrthographies(entryWith3LocalOrthographies)).toEqual([
+      "さよなら",
+      "안녕",
+    ]);
   });
 });
 
