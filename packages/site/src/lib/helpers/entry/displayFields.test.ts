@@ -3,12 +3,12 @@ import {
   getLocalOrthographies,
   showPartsOfSpeech,
   removeItalicTagsWithAPeriod,
+  showDescription,
 } from './displayFields';
 
 describe('getLocalOrthographies', () => {
   test('returns array of local orthographies', () => {
-    const entryWith5LocalOrthographies: IEntry =
-    {
+    const entryWith5LocalOrthographies: IEntry = {
       lx: 'Hello',
       gl: null,
       lo: 'Nnọọ',
@@ -16,29 +16,25 @@ describe('getLocalOrthographies', () => {
       lo3: 'سلام',
       lo4: 'नमस्ते',
       lo5: 'שלום',
-    }
+    };
     expect(getLocalOrthographies(entryWith5LocalOrthographies)).toEqual([
-      "Nnọọ",
-      "Привет",
-      "سلام",
-      "नमस्ते",
-      "שלום",
+      'Nnọọ',
+      'Привет',
+      'سلام',
+      'नमस्ते',
+      'שלום',
     ]);
   });
   test('does not return field if field is empty or missing', () => {
-    const entryWith3LocalOrthographies: IEntry =
-    {
+    const entryWith3LocalOrthographies: IEntry = {
       lx: 'Bye',
       gl: null,
       lo: 'さよなら',
       lo2: '안녕',
       lo3: '',
       lo4: null,
-    }
-    expect(getLocalOrthographies(entryWith3LocalOrthographies)).toEqual([
-      "さよなら",
-      "안녕",
-    ]);
+    };
+    expect(getLocalOrthographies(entryWith3LocalOrthographies)).toEqual(['さよなら', '안녕']);
   });
 });
 
@@ -65,10 +61,24 @@ describe('showPartsOfSpeech', () => {
 
 describe('removeItalicTagsWithAPeriod', () => {
   const sampleStr = 'This <i>is</i> just an <i>example</i> string';
-  test('Remove italic HTML tags from strings', () => {
+  test('Removes italic HTML tags from strings', () => {
     expect(removeItalicTagsWithAPeriod(sampleStr)).toMatchInlineSnapshot(
       '"This is just an example string."'
     );
   });
 });
 
+describe('showDescription', () => {
+  const fieldsToDisplay = [
+    '',
+    '[arsi]',
+    'n, adj.',
+    "Oriya: ক’লা মুখ'ৰ বান্দৰ, English: black faced monkey",
+    'Western',
+  ];
+  test('Shows a description', () => {
+    expect(showDescription(fieldsToDisplay)).toMatchInlineSnapshot(
+      '"[arsi] n, adj. Oriya: ক’লা মুখ\'ৰ বান্দৰ, English: black faced monkey Western"'
+    );
+  });
+});

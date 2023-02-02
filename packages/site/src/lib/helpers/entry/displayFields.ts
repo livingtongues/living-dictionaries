@@ -18,6 +18,16 @@ export function showPartsOfSpeech(partOfSpeech: string | string[]) {
   return '';
 }
 
+export function showDescription(fieldsToDisplay: string[]) {
+  let description = '';
+  for (const portion of fieldsToDisplay) {
+    if (portion) {
+      description += portion.trim() + ' ';
+    }
+  }
+  return description.trim();
+}
+
 export function removeItalicTagsWithAPeriod(str: string) {
   if (str) {
     return str.replace(/<\/?i>/g, '') + '.';
