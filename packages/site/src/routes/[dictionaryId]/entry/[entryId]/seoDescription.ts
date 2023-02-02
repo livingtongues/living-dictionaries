@@ -3,6 +3,7 @@ import {
   getLocalOrthographies,
   showPartsOfSpeech,
   removeItalicTagsWithAPeriod,
+  showDescription,
 } from '$lib/helpers/entry/displayFields';
 import type { IEntry } from '@living-dictionaries/types';
 
@@ -28,12 +29,13 @@ export function seoDescription(
 
   const dialect = entry?.di;
 
-  let description = '';
-  for (const portion of [localOrthographies, phonetic, partsOfSpeech, glosses, dialect]) {
-    if (portion) {
-      description += portion.trim() + ' ';
-    }
-  }
+  const description = showDescription([
+    localOrthographies,
+    phonetic,
+    partsOfSpeech,
+    glosses,
+    dialect,
+  ]);
 
   return removeLineBreaks(description);
 }
