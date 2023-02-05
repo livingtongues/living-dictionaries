@@ -2,6 +2,8 @@
   import { t } from 'svelte-i18n';
   import { StandardPrintFields, type IEntry } from '@living-dictionaries/types';
   import { semanticDomains } from '$lib/mappings/semantic-domains';
+  import { orderGlosses } from '$lib/helpers/glosses';
+  import { dictionary } from '$lib/stores';
   import QrCode from './QrCode.svelte';
   import sanitize from 'xss';
   import { defaultPrintFields } from './printFields';
@@ -30,10 +32,13 @@
   {entry.ph && selectedFields.ph ? `/${entry.ph}/` : ''}
   <i>{add_periods_and_comma_separate_parts_of_speech(entry.ps)}</i>
   {#if entry.gl && selectedFields.gloss}
-    {#each Object.entries(entry.gl) as gloss, index}
-      <span>{@html sanitize(gloss[1])}</span>
-      {index < Object.entries(entry.gl).length - 1 ? ' - ' : ''}
-    {/each}
+    <span>
+      {@html sanitize(orderGlosses({
+        glosses: entry.gl,
+        dictionaryGlossLanguages: $dictionary.glossLanguages,
+        $t,
+      }).join(' - '))}
+    </span>
   {/if}
   <b>{entry.xv && selectedFields.example_sentence ? entry.xv : ''}</b>
   {#if entry.xs && selectedFields.example_sentence}
