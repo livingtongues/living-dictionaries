@@ -1,5 +1,5 @@
 import type { IEntry } from '@living-dictionaries/types';
-import { seo_description } from './seoDescription';
+import { seo_description } from './seo_description';
 
 describe('seoDescription', () => {
   const $t = (id: string) => {
