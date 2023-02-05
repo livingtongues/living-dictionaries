@@ -5,7 +5,7 @@ import { remove_italic_tags } from '$lib/helpers/remove_italic_tags';
 import { get_local_orthographies } from '$lib/helpers/entry/get_local_orthagraphies';
 
 export function seo_description(
-  entry: IEntry,
+  entry: Partial<IEntry>,
   dictionary_gloss_languages: string[],
   $t: (key: string) => string
 ) {
@@ -27,9 +27,7 @@ export function seo_description(
   const items_for_description = [local_orthographies, phonetic, parts_of_speech, glosses, dialect];
   const items_with_values = items_for_description.filter(item => item);
   const trimmed_items = items_with_values.map(item => item.trim());
-  const description = trimmed_items.join(', ');
-
-  return description;
+  return trimmed_items.join(', ');
 }
 
 // why are there line breaks in the data? Is this needed?

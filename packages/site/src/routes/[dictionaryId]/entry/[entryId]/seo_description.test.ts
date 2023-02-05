@@ -1,7 +1,7 @@
 import type { IEntry } from '@living-dictionaries/types';
 import { seo_description } from './seo_description';
 
-describe('seoDescription', () => {
+describe('seo_description', () => {
   const $t = (id: string) => {
     switch (id) {
       case 'gl.en':
@@ -9,27 +9,26 @@ describe('seoDescription', () => {
       case 'gl.es':
         return 'Spanish';
       case 'gl.or':
-        return 'Assamese';
-      case 'gl.as':
         return 'Oriya';
+      case 'gl.as':
+        return 'Assamese';
       case 'gl.hi':
         return 'Hindi';
       case 'gl.fr':
-        return 'Oriya';
+        return 'French';
       case 'gl.de':
-        return 'Oriya';
+        return 'German';
       case 'gl.pt':
-        return 'Hindi';
+        return 'Portuguese';
       case 'gl.it':
-        return 'Oriya';
+        return 'Italian';
       default:
         return 'other';
     }
   };
 
-  test('Displays a basic entry', () => {
-    const entry: IEntry = {
-      lx: 'hi',
+  test('lexeme, english and spanish glosses', () => {
+    const entry: Partial<IEntry> = {
       gl: { en: 'hello', es: 'hola' },
     };
     const dictionary_gloss_languages = ['es'];
@@ -38,8 +37,7 @@ describe('seoDescription', () => {
   });
 
   test('Displays an entry with multiples glosses', () => {
-    const entry: IEntry = {
-      lx: 'hi',
+    const entry: Partial<IEntry> = {
       gl: {
         en: 'goats',
         es: 'cabras',
@@ -54,12 +52,11 @@ describe('seoDescription', () => {
     };
     const dictionary_gloss_languages = ['hi', 'or', 'as', 'en', 'fr', 'es', 'it', 'de', 'pt'];
     const result = seo_description(entry, dictionary_gloss_languages, $t);
-    expect(result).toMatchInlineSnapshot('"Hindi: बकरियाँ, Assamese: ଛେଳି ଗୁଡିକ, Oriya: ছাগল কেইতা, English: goats, Oriya: chèvres, Spanish: cabras, Oriya: capre, Oriya: Ziegen, Hindi: cabras"');
+    expect(result).toMatchInlineSnapshot('"Hindi: बकरियाँ, Oriya: ଛେଳି ଗୁଡିକ, Assamese: ছাগল কেইতা, English: goats, French: chèvres, Spanish: cabras, Italian: capre, German: Ziegen, Portuguese: cabras"');
   });
 
   test('Displays an entry with all local orthographies', () => {
-    const entry: IEntry = {
-      lx: 'test',
+    const entry: Partial<IEntry> = {
       lo: 'امتحان',
       lo2: 'Ölçek',
       lo3: 'परीक्षा',
@@ -72,8 +69,7 @@ describe('seoDescription', () => {
   });
 
   test('Displays a complex entry', () => {
-    const entry: IEntry = {
-      lx: 'arsi',
+    const entry: Partial<IEntry> = {
       lo: 'আৰচি',
       lo2: '𑃢𑃝𑃐𑃤',
       ph: 'arsi',
@@ -84,7 +80,7 @@ describe('seoDescription', () => {
     const dictionary_gloss_languages = ['as', 'en', 'or', 'hi'];
     const result = seo_description(entry, dictionary_gloss_languages, $t);
     expect(result).toMatchInlineSnapshot(
-      '"আৰচি, 𑃢𑃝𑃐𑃤, [arsi], n., adj., Oriya: ক’লা মুখ\'ৰ বান্দৰ, English: black faced monkey, Assamese: କଳା ମୁହାଁ ମାଙ୍କଡ, West Bengal Sabar"'
+      '"আৰচি, 𑃢𑃝𑃐𑃤, [arsi], n., adj., Assamese: ক’লা মুখ\'ৰ বান্দৰ, English: black faced monkey, Oriya: କଳା ମୁହାଁ ମାଙ୍କଡ, West Bengal Sabar"'
     );
   });
 });
