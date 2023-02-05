@@ -17,9 +17,9 @@
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte';
   import { order_entry_and_dictionary_gloss_languages } from '$lib/helpers/glosses';
   import EntryDisplay from './EntryDisplay.svelte';
-
   import type { PageData } from './$types';
-    import { seo_description } from './seoDescription';
+  import { seo_description } from './seo_description';
+
   export let data: PageData;
 </script>
 
@@ -67,7 +67,10 @@ bg-white pt-1 -mt-1">
     {entry}
     videoAccess={$dictionary.videoAccess || $admin > 0}
     canEdit={$canEdit}
-    glossingLanguages={order_entry_and_dictionary_gloss_languages(entry.gl, $dictionary.glossLanguages)}
+    glossingLanguages={order_entry_and_dictionary_gloss_languages(
+      entry.gl,
+      $dictionary.glossLanguages
+    )}
     alternateOrthographies={$dictionary.alternateOrthographies || []}
     on:valueupdate={(e) => saveUpdateToFirestore(e, entry.id, $dictionary.id)} />
 
