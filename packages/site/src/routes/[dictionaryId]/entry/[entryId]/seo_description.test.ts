@@ -27,7 +27,7 @@ describe('seo_description', () => {
     }
   };
 
-  test('lexeme, english and spanish glosses', () => {
+  test('prints simple labeled english and spanish glosses', () => {
     const entry: Partial<IEntry> = {
       gl: { en: 'hello', es: 'hola' },
     };
@@ -36,7 +36,7 @@ describe('seo_description', () => {
     expect(result).toMatchInlineSnapshot('"Spanish: hola, English: hello"');
   });
 
-  test('Displays an entry with multiples glosses', () => {
+  test('properly orders glosses according to dictionary gloss languages order', () => {
     const entry: Partial<IEntry> = {
       gl: {
         en: 'goats',
@@ -55,20 +55,21 @@ describe('seo_description', () => {
     expect(result).toMatchInlineSnapshot('"Hindi: बकरियाँ, Oriya: ଛେଳି ଗୁଡିକ, Assamese: ছাগল কেইতা, English: goats, French: chèvres, Spanish: cabras, Italian: capre, German: Ziegen, Portuguese: cabras"');
   });
 
-  test('Displays an entry with all local orthographies', () => {
+  test('places local orthographies first', () => {
     const entry: Partial<IEntry> = {
       lo: 'امتحان',
       lo2: 'Ölçek',
       lo3: 'परीक्षा',
       lo4: '시험',
       lo5: 'מִבְחָן',
-      gl: null,
+      gl: { en: 'test' },
     };
-    const result = seo_description(entry, [], $t);
-    expect(result).toMatchInlineSnapshot('"امتحان, Ölçek, परीक्षा, 시험, מִבְחָן"');
+    const no_dictionary_gloss_languages = [];
+    const result = seo_description(entry, no_dictionary_gloss_languages, $t);
+    expect(result).toMatchInlineSnapshot('"امتحان, Ölçek, परीक्षा, 시험, מִבְחָן, English: test"');
   });
 
-  test('Displays a complex entry', () => {
+  test('handles local orthagraphies, phonetic, glosses, parts of speech, and dialect', () => {
     const entry: Partial<IEntry> = {
       lo: 'আৰচি',
       lo2: '𑃢𑃝𑃐𑃤',
