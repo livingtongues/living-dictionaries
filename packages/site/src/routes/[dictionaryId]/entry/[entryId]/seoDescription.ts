@@ -3,7 +3,7 @@ import {
   getLocalOrthographies,
   showPartsOfSpeech,
   removeItalicTagsWithAPeriod,
-  showDescription,
+  commaSeparateItemsIntoString,
 } from '$lib/helpers/entry/displayFields';
 import type { IEntry } from '@living-dictionaries/types';
 
@@ -29,7 +29,7 @@ export function seoDescription(
 
   const dialect = entry?.di;
 
-  const description = showDescription([
+  const description = commaSeparateItemsIntoString([
     localOrthographies,
     phonetic,
     partsOfSpeech,
