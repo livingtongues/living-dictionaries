@@ -15,11 +15,11 @@
   import { deleteEntry } from '$lib/helpers/delete';
   import { saveUpdateToFirestore } from '$lib/helpers/entry/update';
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte';
-  import { orderEntryAndDictionaryGlossLanguages } from '$lib/helpers/glosses';
+  import { order_entry_and_dictionary_gloss_languages } from '$lib/helpers/glosses';
   import EntryDisplay from './EntryDisplay.svelte';
 
   import type { PageData } from './$types';
-    import { seoDescription } from './seoDescription';
+    import { seo_description } from './seoDescription';
   export let data: PageData;
 </script>
 
@@ -67,13 +67,13 @@ bg-white pt-1 -mt-1">
     {entry}
     videoAccess={$dictionary.videoAccess || $admin > 0}
     canEdit={$canEdit}
-    glossingLanguages={orderEntryAndDictionaryGlossLanguages(entry.gl, $dictionary.glossLanguages)}
+    glossingLanguages={order_entry_and_dictionary_gloss_languages(entry.gl, $dictionary.glossLanguages)}
     alternateOrthographies={$dictionary.alternateOrthographies || []}
     on:valueupdate={(e) => saveUpdateToFirestore(e, entry.id, $dictionary.id)} />
 
   <SeoMetaTags
     title={entry.lx}
-    description={seoDescription(entry, $dictionary.glossLanguages, $t)}
+    description={seo_description(entry, $dictionary.glossLanguages, $t)}
     dictionaryName={$dictionary.name}
     lat={$dictionary.coordinates?.latitude}
     lng={$dictionary.coordinates?.longitude}

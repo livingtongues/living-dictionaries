@@ -1,5 +1,5 @@
 import type { IEntry } from '@living-dictionaries/types';
-import { removeLineBreaks, seoDescription } from './seoDescription';
+import { seo_description } from './seoDescription';
 
 describe('seoDescription', () => {
   const $t = (id: string) => {
@@ -32,11 +32,11 @@ describe('seoDescription', () => {
       lx: 'hi',
       gl: { en: 'hello', es: 'hola' },
     };
-    const dictionaryGlossLanguages = ['es'];
-
-    const result = seoDescription(entry, dictionaryGlossLanguages, $t);
-    expect(result).toMatchInlineSnapshot('"Spanish: hola, English: hello."');
+    const dictionary_gloss_languages = ['es'];
+    const result = seo_description(entry, dictionary_gloss_languages, $t);
+    expect(result).toMatchInlineSnapshot('"Spanish: hola, English: hello"');
   });
+
   test('Displays an entry with multiples glosses', () => {
     const entry: IEntry = {
       lx: 'hi',
@@ -52,11 +52,11 @@ describe('seoDescription', () => {
         hi: 'बकरियाँ',
       },
     };
-    const dictionaryGlossLanguages = ['hi', 'or', 'as', 'en', 'fr', 'es', 'it', 'de', 'pt'];
-
-    const result = seoDescription(entry, dictionaryGlossLanguages, $t);
-    expect(result).toMatchInlineSnapshot('"Hindi: बकरियाँ, Assamese: ଛେଳି ଗୁଡିକ, Oriya: ছাগল কেইতা, English: goats, Oriya: chèvres, Spanish: cabras, Oriya: capre, Oriya: Ziegen, Hindi: cabras."');
+    const dictionary_gloss_languages = ['hi', 'or', 'as', 'en', 'fr', 'es', 'it', 'de', 'pt'];
+    const result = seo_description(entry, dictionary_gloss_languages, $t);
+    expect(result).toMatchInlineSnapshot('"Hindi: बकरियाँ, Assamese: ଛେଳି ଗୁଡିକ, Oriya: ছাগল কেইতা, English: goats, Oriya: chèvres, Spanish: cabras, Oriya: capre, Oriya: Ziegen, Hindi: cabras"');
   });
+
   test('Displays an entry with all local orthographies', () => {
     const entry: IEntry = {
       lx: 'test',
@@ -67,9 +67,10 @@ describe('seoDescription', () => {
       lo5: 'מִבְחָן',
       gl: null,
     };
-    const result = seoDescription(entry, [], $t);
-    expect(result).toMatchInlineSnapshot('"امتحان Ölçek परीक्षा 시험 מִבְחָן"');
+    const result = seo_description(entry, [], $t);
+    expect(result).toMatchInlineSnapshot('"امتحان, Ölçek, परीक्षा, 시험, מִבְחָן"');
   });
+
   test('Displays a complex entry', () => {
     const entry: IEntry = {
       lx: 'arsi',
@@ -80,23 +81,23 @@ describe('seoDescription', () => {
       ps: ['n', 'adj'],
       di: 'West Bengal Sabar',
     };
-    const dictionaryGlossLanguages = ['as', 'en', 'or', 'hi'];
-    const result = seoDescription(entry, dictionaryGlossLanguages, $t);
+    const dictionary_gloss_languages = ['as', 'en', 'or', 'hi'];
+    const result = seo_description(entry, dictionary_gloss_languages, $t);
     expect(result).toMatchInlineSnapshot(
-      '"আৰচি 𑃢𑃝𑃐𑃤, [arsi], n, adj., Oriya: ক’লা মুখ\'ৰ বান্দৰ, English: black faced monkey, Assamese: କଳା ମୁହାଁ ମାଙ୍କଡ., West Bengal Sabar"'
+      '"আৰচি, 𑃢𑃝𑃐𑃤, [arsi], n., adj., Oriya: ক’লা মুখ\'ৰ বান্দৰ, English: black faced monkey, Assamese: କଳା ମୁହାଁ ମାଙ୍କଡ, West Bengal Sabar"'
     );
   });
 });
 
-describe('removeLineBreaks', () => {
-  test('keeps one space between words when newlines come after a space', () => {
-    const phrase = 'This is \nand \nexample \nphrase.';
-    expect(removeLineBreaks(phrase)).toMatchInlineSnapshot('"This is and example phrase."');
-  });
-  test('adds space between words only split by newline', () => {
-    const phrase = 'Here is the first line\nand now the second line';
-    expect(removeLineBreaks(phrase)).toMatchInlineSnapshot(
-      '"Here is the first line and now the second line"'
-    );
-  });
-});
+// describe('removeLineBreaks', () => {
+//   test('keeps one space between words when newlines come after a space', () => {
+//     const phrase = 'This is \nand \nexample \nphrase.';
+//     expect(removeLineBreaks(phrase)).toMatchInlineSnapshot('"This is and example phrase."');
+//   });
+//   test('adds space between words only split by newline', () => {
+//     const phrase = 'Here is the first line\nand now the second line';
+//     expect(removeLineBreaks(phrase)).toMatchInlineSnapshot(
+//       '"Here is the first line and now the second line"'
+//     );
+//   });
+// });

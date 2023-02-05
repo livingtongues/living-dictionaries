@@ -5,7 +5,8 @@
   import QrCode from './QrCode.svelte';
   import sanitize from 'xss';
   import { defaultPrintFields } from './printFields';
-  import { getLocalOrthographies, showPartsOfSpeech } from '$lib/helpers/entry/displayFields';
+  import { add_periods_and_comma_separate_parts_of_speech } from '$lib/helpers/entry/add_periods_and_comma_separate_parts_of_speech';
+  import { get_local_orthographies } from '$lib/helpers/entry/get_local_orthagraphies';
 
   export let entry: IEntry;
   // export let speakers: ISpeaker[];
@@ -24,10 +25,10 @@
   <!--Essential Fields-->
   <b style="font-size: {headwordSize}pt;">{entry.lx}</b>
   {#if selectedFields.alternateOrthographies}
-    <b>{getLocalOrthographies(entry).sort().join(' ')}</b>
+    <b>{get_local_orthographies(entry).sort().join(' ')}</b>
   {/if}
   {entry.ph && selectedFields.ph ? `/${entry.ph}/` : ''}
-  <i>{showPartsOfSpeech(entry.ps)}</i>
+  <i>{add_periods_and_comma_separate_parts_of_speech(entry.ps)}</i>
   {#if entry.gl && selectedFields.gloss}
     {#each Object.entries(entry.gl) as gloss, index}
       <span>{@html sanitize(gloss[1])}</span>
@@ -60,7 +61,9 @@
     {#if selectedFields.sdn}
       {#if entry.sdn?.length || entry.sd}
         {#if showLabels}
-          <span class="italic text-[80%]">{$t('entry.sdn', { default: 'Semantic Domains' })}: </span>
+          <span class="italic text-[80%]"
+            >{$t('entry.sdn', { default: 'Semantic Domains' })}:
+          </span>
         {/if}
 
         {#if entry.sdn}
