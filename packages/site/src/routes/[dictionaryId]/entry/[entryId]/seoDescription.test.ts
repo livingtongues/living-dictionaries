@@ -83,7 +83,7 @@ describe('seoDescription', () => {
     const dictionaryGlossLanguages = ['as', 'en', 'or', 'hi'];
     const result = seoDescription(entry, dictionaryGlossLanguages, $t);
     expect(result).toMatchInlineSnapshot(
-      '"আৰচি 𑃢𑃝𑃐𑃤 [arsi] n, adj. Oriya: ক’লা মুখ\'ৰ বান্দৰ, English: black faced monkey, Assamese: କଳା ମୁହାଁ ମାଙ୍କଡ. West Bengal Sabar"'
+      '"আৰচি 𑃢𑃝𑃐𑃤, [arsi], n, adj., Oriya: ক’লা মুখ\'ৰ বান্দৰ, English: black faced monkey, Assamese: କଳା ମୁହାଁ ମାଙ୍କଡ., West Bengal Sabar"'
     );
   });
 });

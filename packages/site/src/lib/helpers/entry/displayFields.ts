@@ -18,14 +18,11 @@ export function showPartsOfSpeech(partOfSpeech: string | string[]) {
   return '';
 }
 
-export function showDescription(fieldsToDisplay: string[]) {
-  let description = '';
-  for (const portion of fieldsToDisplay) {
-    if (portion) {
-      description += portion.trim() + ' ';
-    }
-  }
-  return description.trim();
+export function commaSeparateItemsIntoString(sections: string[]): string {
+  return sections
+    .filter((section) => section)
+    .map((section) => section.trim())
+    .join(', ');
 }
 
 export function removeItalicTagsWithAPeriod(str: string) {

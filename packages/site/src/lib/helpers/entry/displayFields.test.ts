@@ -3,7 +3,7 @@ import {
   getLocalOrthographies,
   showPartsOfSpeech,
   removeItalicTagsWithAPeriod,
-  showDescription,
+  commaSeparateItemsIntoString,
 } from './displayFields';
 
 describe('getLocalOrthographies', () => {
@@ -68,17 +68,18 @@ describe('removeItalicTagsWithAPeriod', () => {
   });
 });
 
-describe('showDescription', () => {
-  const fieldsToDisplay = [
+describe('commaSeparateItemsIntoString', () => {
+  const sections = [
     '',
     '[arsi]',
-    'n, adj.',
+    null,
+    'n., adj.',
     "Oriya: ক’লা মুখ'ৰ বান্দৰ, English: black faced monkey",
     'Western',
   ];
-  test('Shows a description', () => {
-    expect(showDescription(fieldsToDisplay)).toMatchInlineSnapshot(
-      '"[arsi] n, adj. Oriya: ক’লা মুখ\'ৰ বান্দৰ, English: black faced monkey Western"'
+  test('ignores empty strings and places commas between the rest', () => {
+    expect(commaSeparateItemsIntoString(sections)).toMatchInlineSnapshot(
+      '"[arsi], n., adj., Oriya: ক’লা মুখ\'ৰ বান্দৰ, English: black faced monkey, Western"'
     );
   });
 });
