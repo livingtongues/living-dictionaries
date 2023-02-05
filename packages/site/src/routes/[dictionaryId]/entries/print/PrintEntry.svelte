@@ -2,7 +2,7 @@
   import { t } from 'svelte-i18n';
   import { StandardPrintFields, type IEntry } from '@living-dictionaries/types';
   import { semanticDomains } from '$lib/mappings/semantic-domains';
-  import { orderGlosses } from '$lib/helpers/glosses';
+  import { order_glosses } from '$lib/helpers/glosses';
   import { dictionary } from '$lib/stores';
   import QrCode from './QrCode.svelte';
   import sanitize from 'xss';
@@ -33,9 +33,9 @@
   <i>{add_periods_and_comma_separate_parts_of_speech(entry.ps)}</i>
   {#if entry.gl && selectedFields.gloss}
     <span>
-      {@html sanitize(orderGlosses({
+      {@html sanitize(order_glosses({
         glosses: entry.gl,
-        dictionaryGlossLanguages: $dictionary.glossLanguages,
+        dictionary_gloss_languages: $dictionary.glossLanguages,
         $t,
       }).join(' - '))}
     </span>
