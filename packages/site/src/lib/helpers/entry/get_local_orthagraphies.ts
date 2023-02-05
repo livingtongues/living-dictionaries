@@ -1,6 +1,6 @@
 import type { IEntry } from '@living-dictionaries/types';
 
-export function get_local_orthographies(entry: IEntry): string[] {
+export function get_local_orthographies(entry: Partial<IEntry>): string[] {
   const possible_local_orthography_fields = ['lo', 'lo2', 'lo3', 'lo4', 'lo5'];
   const local_orthographies_fields_used = Object.keys(entry).filter((field) => {
     if (possible_local_orthography_fields.includes(field)) return !!entry[field];
@@ -10,9 +10,7 @@ export function get_local_orthographies(entry: IEntry): string[] {
 
 describe('get_local_orthographies', () => {
   test('returns array of local orthographies', () => {
-    const entryWith5LocalOrthographies: IEntry = {
-      lx: 'Hello',
-      gl: null,
+    const entryWith5LocalOrthographies: Partial<IEntry> = {
       lo: 'Nnọọ',
       lo2: 'Привет',
       lo3: 'سلام',
@@ -28,9 +26,7 @@ describe('get_local_orthographies', () => {
     ]);
   });
   test('does not return field if field is empty or missing', () => {
-    const entryWith3LocalOrthographies: IEntry = {
-      lx: 'Bye',
-      gl: null,
+    const entryWith3LocalOrthographies: Partial<IEntry> = {
       lo: 'さよなら',
       lo2: '안녕',
       lo3: '',
