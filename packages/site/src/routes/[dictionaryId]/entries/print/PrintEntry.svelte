@@ -2,11 +2,13 @@
   import { t } from 'svelte-i18n';
   import { StandardPrintFields, type IEntry } from '@living-dictionaries/types';
   import { semanticDomains } from '$lib/mappings/semantic-domains';
-  import { orderGlosses } from '$lib/helpers/glosses';
+  import { order_glosses } from '$lib/helpers/glosses';
   import { dictionary } from '$lib/stores';
   import QrCode from './QrCode.svelte';
   import sanitize from 'xss';
   import { defaultPrintFields } from './printFields';
+  import { add_periods_and_comma_separate_parts_of_speech } from '$lib/helpers/entry/add_periods_and_comma_separate_parts_of_speech';
+  import { get_local_orthographies } from '$lib/helpers/entry/get_local_orthagraphies';
 
   export let entry: IEntry;
   // export let speakers: ISpeaker[];
@@ -25,19 +27,15 @@
   <!--Essential Fields-->
   <b style="font-size: {headwordSize}pt;">{entry.lx}</b>
   {#if selectedFields.alternateOrthographies}
-    {#each ['lo', 'lo2', 'lo3', 'lo4', 'lo5'] as lo}
-      {#if entry[lo]}
-        <b>{entry[lo]}</b>{' '}
-      {/if}
-    {/each}
+    <b>{get_local_orthographies(entry).sort().join(' ')}</b>
   {/if}
   {entry.ph && selectedFields.ph ? `/${entry.ph}/` : ''}
-  <i>{entry.ps && selectedFields.ps ? entry.ps : ''}</i>
+  <i>{add_periods_and_comma_separate_parts_of_speech(entry.ps)}</i>
   {#if entry.gl && selectedFields.gloss}
     <span>
-      {@html sanitize(orderGlosses({
+      {@html sanitize(order_glosses({
         glosses: entry.gl,
-        dictionaryGlossLanguages: $dictionary.glossLanguages,
+        dictionary_gloss_languages: $dictionary.glossLanguages,
         $t,
       }).join(' - '))}
     </span>
@@ -68,7 +66,9 @@
     {#if selectedFields.sdn}
       {#if entry.sdn?.length || entry.sd}
         {#if showLabels}
-          <span class="italic text-[80%]">{$t('entry.sdn', { default: 'Semantic Domains' })}: </span>
+          <span class="italic text-[80%]"
+            >{$t('entry.sdn', { default: 'Semantic Domains' })}:
+          </span>
         {/if}
 
         {#if entry.sdn}
