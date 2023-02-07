@@ -1,6 +1,7 @@
-import { orderEntryAndDictionaryGlossLanguages, orderGlosses } from './glosses';
+import { order_entry_and_dictionary_gloss_languages, order_glosses } from './glosses';
+import { remove_italic_tags } from './remove_italic_tags';
 
-describe('orderGlosses', () => {
+describe('order_glosses', () => {
   const $t = (id: string) => {
     switch (id) {
       case 'gl.de':
@@ -22,10 +23,10 @@ describe('orderGlosses', () => {
     null: null,
     de: 'apfel',
   };
-  const dictionaryGlossLanguages = ['de', 'es', 'en'];
+  const dictionary_gloss_languages = ['de', 'es', 'en'];
 
-  test('orders based on dictionaryGlossLanguages first', () => {
-    expect(orderGlosses({ glosses, dictionaryGlossLanguages, $t })).toMatchInlineSnapshot(
+  test('orders based on dictionary_gloss_languages first', () => {
+    expect(order_glosses({ glosses, dictionary_gloss_languages, $t })).toMatchInlineSnapshot(
       `
         [
           "apfel",
@@ -38,7 +39,7 @@ describe('orderGlosses', () => {
   });
 
   test('adds language label when label set to true', () => {
-    expect(orderGlosses({ glosses, dictionaryGlossLanguages, $t, label: true }))
+    expect(order_glosses({ glosses, dictionary_gloss_languages, $t, label: true }))
       .toMatchInlineSnapshot(`
       [
         "German: apfel",
@@ -50,21 +51,21 @@ describe('orderGlosses', () => {
   });
 
   test('handles an empty glosses object', () => {
-    expect(orderGlosses({ glosses: {}, dictionaryGlossLanguages, $t })).toMatchInlineSnapshot('[]');
+    expect(order_glosses({ glosses: {}, dictionary_gloss_languages, $t })).toMatchInlineSnapshot('[]');
   });
 
   test('example implementation with join and italics removal', () => {
     expect(
-      orderGlosses({ glosses, dictionaryGlossLanguages, $t })
-        .join(', ')
-        .replace(/<\/?i>/g, '') + '.'
-    ).toMatchInlineSnapshot('"apfel, manzana, apple, Neolamarckia cadamba."');
+      remove_italic_tags(
+        order_glosses({ glosses, dictionary_gloss_languages, $t }).join(', ')
+      )
+    ).toMatchInlineSnapshot('"apfel, manzana, apple, Neolamarckia cadamba"');
   });
 });
 
-describe('orderEntryAndDictionaryGlossLanguages', () => {
+describe('order_entry_and_dictionary_gloss_languages', () => {
   test('places dictionary gloss languages first, then leftovers from gloss object but does not duplicate', () => {
-    expect(orderEntryAndDictionaryGlossLanguages({ es: '', en: '' }, ['en', 'de']))
+    expect(order_entry_and_dictionary_gloss_languages({ es: '', en: '' }, ['en', 'de']))
       .toMatchInlineSnapshot(`
       [
         "en",

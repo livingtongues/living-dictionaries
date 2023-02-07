@@ -3,10 +3,7 @@
 // and what to do when importing types
 declare namespace App {
   // interface Locals {}
-
   // interface PageData {}
-  // kitbook: import('kitbook').KitbookStuff;
-
   // interface Error {}
   // interface Platform {}
 }
