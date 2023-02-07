@@ -14,7 +14,6 @@ const config: UserConfig = {
     port: 3041,
     strictPort: false,
   },
-  // envDir: '../../',
   build: {
     target: 'es2015',
   },

@@ -6,8 +6,8 @@
 		"dev:open": "pnpm --filter=site dev --open",
 		"build": "pnpm --filter=site build",
 		"preview": "pnpm --filter=site preview",
-		"test": "pnpm --filter=site... test",
-		"site:test": "pnpm --filter=site test",
+		"test": "pnpm --filter=site test",
+		"test:all": "pnpm --recursive --stream test -- --run",
 		"parts": "pnpm --filter=parts dev",
 		"parts:build": "pnpm --filter=parts build",
 		"parts:test": "pnpm --filter=parts test",
@@ -26,8 +26,8 @@
 		"eslint-plugin-svelte3": "^4.0.0",
 		"prettier": "^2.8.1",
 		"prettier-plugin-svelte": "^2.9.0",
-		"svelte": "^3.55.0",
+		"svelte": "^3.55.1",
 		"typescript": "~4.9.4",
-		"vitest": "^0.26.2"
+		"vitest": "^0.28.4"
 	}
 }
