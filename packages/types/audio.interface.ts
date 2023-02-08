@@ -1,16 +1,30 @@
-export interface IAudio {
-    path: string; // Firebase Storage location
-    // mt: string; // deprecated after updating storage security rules // media-token, add onto end of URL + path // WAS url
-    ts?: any; // timestamp // WAS uploadedAt
-    ab?: string; // added by uid // WAS uploadedBy
-    sp?: string; // id of speaker
-    playing?: boolean; // turned true when audio is being played
-    sc?: string; // source
-    source?: string; // deprecated
-
-    // for old Talking Dictionaries
-    speakerName?: string;
-    previousFileName?: string; // deprecated, put into metadata instead
+export interface ExpandedAudio {
+  fb_storage_path: string;
+  uid_added_by: string;
+  timestamp?: Date;
+  speaker_ids?: string[];
+  source?: string;
+  playing?: boolean; // true when audio is being played
 }
 
-// size?: number; // deprecating, it's in the metadata
+export interface DatabaseAudio extends Omit<IAudio, 'sp'> {
+  sp?: string[]; // id of speakers
+}
+
+export interface IAudio extends DeprecatedAudio {
+  path: string; // Firebase Storage location
+  ts?: any; // timestamp - need to determine type, had some trouble with Firestore Timestamps previously maybe? Might need to settle for a number timestamp
+  ab?: string; // added by uid
+  sp?: string; // id of speaker
+  sc?: string; // source
+}
+
+export interface DeprecatedAudio {
+  uploadedAt?: any;
+  uploadedBy?: string;
+  speakerName?: string; // for old Talking Dictionaries
+  source?: string;
+  previousFileName?: string; // put into metadata
+  size?: number; // put into metadata
+  mt: string; // media-token deprecated after updating storage security rules, add onto end of URL + path // WAS also url
+}
