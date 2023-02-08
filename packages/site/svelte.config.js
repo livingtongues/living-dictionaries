@@ -5,14 +5,14 @@ import UnoCSS from 'temp-s-p-u';
 
 /** @type {import('@sveltejs/kit').Config} */
 const config = {
-	preprocess: [
-		preprocess(),
+  preprocess: [
+    preprocess(),
     UnoCSS({ options: { classPrefix: 'ld-' } }),
-	],
+  ],
 
-	kit: {
-		adapter: adapter(),
-	},
+  kit: {
+    adapter: adapter(),
+  },
   
   onwarn: (warning, handler) => {
     if (warning.code.startsWith('a11y-')) {
@@ -21,13 +21,13 @@ const config = {
     handler(warning);
   },
 
-	vitePlugin: {
-		experimental: {
-			inspector: {
-				holdMode: true,
-			}
-		}
-	}
+  vitePlugin: {
+    experimental: {
+      inspector: {
+        holdMode: true,
+      }
+    }
+  }
 };
 
 import { augmentSvelteConfigForKitbook } from 'kitbook/plugins/vite'; 
