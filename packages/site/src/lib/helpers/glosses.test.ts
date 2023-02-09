@@ -1,4 +1,8 @@
-import { order_entry_and_dictionary_gloss_languages, order_glosses } from './glosses';
+import {
+  order_entry_and_dictionary_gloss_languages,
+  order_glosses,
+  get_first_sorted_gloss_safely,
+} from './glosses';
 import { remove_italic_tags } from './remove_italic_tags';
 
 describe('order_glosses', () => {
@@ -89,13 +93,15 @@ describe('orderGlosses with multiple examples', () => {
         return 'other';
     }
   };
-  const entries = [
+  const dictionary_gloss_languages = ['de', 'es', 'en'];
+  test.each([
     {
       gl: {
         en: 'apple',
         es: 'manzana',
         de: 'apfel',
       },
+      expected: 'apfel',
     },
     {
       gl: {
@@ -103,6 +109,7 @@ describe('orderGlosses with multiple examples', () => {
         es: 'plátano',
         de: '',
       },
+      expected: 'plátano',
     },
     {
       gl: {
@@ -110,26 +117,11 @@ describe('orderGlosses with multiple examples', () => {
         es: '',
         de: '',
       },
+      expected: '',
     },
-  ];
-  const dictionary_gloss_languages = ['de', 'es', 'en'];
-
-  test('displays always the first available gloss', () => {
-    expect(
-      entries.map(
-        (entry) =>
-          order_glosses({
-            glosses: entry.gl,
-            dictionary_gloss_languages,
-            $t,
-          })[0]
-      )
-    ).toMatchInlineSnapshot(`
-      [
-        "apfel",
-        "plátano",
-        undefined,
-      ]
-    `);
+  ])('displays always the first available gloss if it exists', ({ gl, expected }) => {
+    expect(get_first_sorted_gloss_safely({ glosses: gl, dictionary_gloss_languages, $t })).toBe(
+      expected
+    );
   });
 });

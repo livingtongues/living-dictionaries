@@ -6,7 +6,7 @@
   export let canEdit = false;
   import { dictionary } from '$lib/stores';
   import { deleteImage } from '$lib/helpers/delete';
-  import { orderGlosses } from '$lib/helpers/glosses';
+  import { get_first_sorted_gloss_safely} from '$lib/helpers/glosses';
 </script>
 
 <div class="flex flex-col relative rounded max-w-[500px]">
@@ -24,11 +24,11 @@
         {@html entry._highlightResult?.lx?.value || entry.lx}
       </div>
       <div class="text-xs">
-        {@html entry._highlightResult?.gl?.en?.value || orderGlosses({
+        {@html entry._highlightResult?.gl?.en?.value || get_first_sorted_gloss_safely({
           glosses: entry.gl,
-          dictionaryGlossLanguages: $dictionary.glossLanguages,
+          dictionary_gloss_languages: $dictionary.glossLanguages,
           $t,
-        })[0] || ''}
+        })}
       </div>
     </a>
   </div>
