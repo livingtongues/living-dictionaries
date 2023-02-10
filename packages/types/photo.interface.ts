@@ -4,7 +4,7 @@ export interface ExpandedPhoto {
   uid_added_by: string;
   timestamp?: Date;
   source?: string;
-  photographer_credit: string;
+  photographer_credit?: string;
 }
 
 export type DatabasePhoto = IPhoto;
@@ -21,6 +21,5 @@ export interface IPhoto extends DeprecatedPhoto {
 export interface DeprecatedPhoto {
   uploadedAt?: any;
   uploadedBy?: string;
-  id?: string;
   source?: string;
 }

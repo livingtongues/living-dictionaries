@@ -12,16 +12,19 @@ export interface DatabaseVideo extends Omit<IVideo, 'sp'> {
   sp?: string[]; // id of speakers
 }
 
-export interface IVideo {
+export interface IVideo extends DeprecatedVideo {
   path?: string; // Firebase Storage location
   // length?: number; // Length in milliseconds
   ab?: string; // added by uid
-  sp?: string; // id of speaker o
   youtubeId?: string;
   vimeoId?: string;
   ts?: number; // timestamp in milliseconds
   deleted?: number; // timestamp in milliseconds
   startAt?: number;
+}
+
+interface DeprecatedVideo {
+  sp?: string; // id of speaker
 }
 
 export interface IVideoCustomMetadata {

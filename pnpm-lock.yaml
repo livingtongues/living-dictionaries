@@ -13,7 +13,6 @@ importers:
       prettier-plugin-svelte: ^2.9.0
       svelte: ^3.55.1
       typescript: ~4.9.4
-      vitest: ^0.28.4
     devDependencies:
       '@typescript-eslint/eslint-plugin': 5.47.1_zl2l3xsn6elekauwv2pdno2thm
       '@typescript-eslint/parser': 5.47.1_v5bglvupnukcksncywgdzapdrq
@@ -24,7 +23,6 @@ importers:
       prettier-plugin-svelte: 2.9.0_4h247imu46srxjbpsfob5j3nnq
       svelte: 3.55.1
       typescript: 4.9.4
-      vitest: 0.28.4
 
   packages/functions:
     specifiers:
