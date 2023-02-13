@@ -943,6 +943,24 @@ export const glossingLanguages: IGlossLanguages = {
   zu: {
     vernacularName: 'isiZulu',
   },
+  tri: {
+    vernacularName: 'Tiriyó',
+    vernacularAlternate: 'Trió, Trio, Tarano',
+  },
+  hix: {
+    vernacularName: 'Hixkaryana',
+    vernacularAlternate: 'Hixkaryána',
+  },
+  waw: {
+    vernacularName: 'Waiwai',
+    vernacularAlternate: 'Wai Wai, Uaiuai, Uaieue, Ouayeone, Katawian, Karahawyana',
+  },
+  way: {
+    vernacularName: 'Wayana',
+  },
+  apy: {
+    vernacularName: 'Apalaí',
+  },
 };
 
 export const additionalKeyboards: IGlossLanguages = {
