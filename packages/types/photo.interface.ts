@@ -1,3 +1,6 @@
+// current interface used across the site that we will migrate from this to just ExpandedPhoto
+export type IPhoto = ExpandedPhoto & ActualDatabasePhoto;
+
 export interface ExpandedPhoto {
   fb_storage_path: string;
   specifiable_image_url?: string; // Google's Magic Image serving url reference which accepts requests for exact image size https://medium.com/google-cloud/uploading-resizing-and-serving-images-with-google-cloud-platform-ca9631a2c556
@@ -7,19 +10,19 @@ export interface ExpandedPhoto {
   photographer_credit?: string;
 }
 
-export type DatabasePhoto = IPhoto;
+export type ActualDatabasePhoto = GoalDatabasePhoto & DeprecatedPhoto;
 
-export interface IPhoto extends DeprecatedPhoto {
+export interface GoalDatabasePhoto {
   path?: string; // Firebase storage location
-  gcs: string; // Google's Magic Image serving url reference which accepts requests for exact image size https://medium.com/google-cloud/uploading-resizing-and-serving-images-with-google-cloud-platform-ca9631a2c556
-  ts?: any; // timestamp - need to determine type, had some trouble with Firestore Timestamps previously maybe? Might need to settle for a number timestamp
+  gcs?: string; // Google's Magic Image serving url reference which accepts requests for exact image size https://medium.com/google-cloud/uploading-resizing-and-serving-images-with-google-cloud-platform-ca9631a2c556
   ab?: string; // added by uid
+  ts?: any; // timestamp - need to determine type, had some trouble with Firestore Timestamps previously maybe? Might need to settle for a number timestamp
   cr?: string; // credit: photographer name
   sc?: string; // source
 }
 
-export interface DeprecatedPhoto {
-  uploadedAt?: any;
+interface DeprecatedPhoto {
   uploadedBy?: string;
+  uploadedAt?: any;
   source?: string;
 }

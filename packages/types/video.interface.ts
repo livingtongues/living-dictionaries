@@ -1,3 +1,6 @@
+// current interface used across the site that we will migrate from this to just ExpandedVideo
+export type IVideo = ExpandedVideo & ActualDatabaseVideo;
+
 export interface ExpandedVideo {
   fb_storage_path: string;
   uid_added_by: string;
@@ -8,24 +11,26 @@ export interface ExpandedVideo {
   vimeoId?: string;
 }
 
-export interface DatabaseVideo extends Omit<IVideo, 'sp'> {
-  sp?: string[]; // id of speakers
-}
+export type ActualDatabaseVideo = Omit<GoalDatabaseVideo, 'sp'> & DeprecatedVideo;
 
-export interface IVideo extends DeprecatedVideo {
+export interface GoalDatabaseVideo {
   path?: string; // Firebase Storage location
-  // length?: number; // Length in milliseconds
   ab?: string; // added by uid
+  ts?: number; // timestamp in milliseconds
+  sp?: string[]; // id of speakers
+  sc?: string; // source
   youtubeId?: string;
   vimeoId?: string;
-  ts?: number; // timestamp in milliseconds
   deleted?: number; // timestamp in milliseconds
   startAt?: number;
+  // length?: number; // Length in milliseconds
 }
 
 interface DeprecatedVideo {
   sp?: string; // id of speaker
 }
+
+///
 
 export interface IVideoCustomMetadata {
   uploadedByUid: string;
