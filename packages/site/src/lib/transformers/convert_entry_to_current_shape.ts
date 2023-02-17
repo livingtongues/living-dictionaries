@@ -17,6 +17,10 @@ export function convert_entry_to_current_shape(actual: ActualDatabaseEntry): Goa
       goal.sfs = [sound_file];
       continue;
     }
+    if (key === 'di' && typeof value === 'string') {
+      goal.di = [value]
+      continue;
+    }
 
     // Sense related fields
     if (['gl', 'sd', 'sdn', 'nc', 'de'].includes(key)) {

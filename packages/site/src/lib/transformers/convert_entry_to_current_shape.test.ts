@@ -12,6 +12,11 @@ describe('convert_entry_to_current_shape', () => {
     expect(convert_entry_to_current_shape(actual_database_entry)).toEqual(goal_database_entry);
   });
 
+  test('ensure dialect is an array', () => {
+    const some_dialect = 'west';
+    expect(convert_entry_to_current_shape({ di: some_dialect })).toEqual({ di: [some_dialect] });
+  });
+
   test('moves parts of speech arrays', () => {
     const ps = ['n', 'v'];
     expect(convert_entry_to_current_shape({ ps })).toEqual({ sn: [{ ps }] });
