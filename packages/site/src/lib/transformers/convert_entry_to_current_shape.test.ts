@@ -1,4 +1,7 @@
 import type { ActualDatabaseEntry, GoalDatabaseEntry } from "@living-dictionaries/types";
+import type { ActualDatabaseAudio } from "@living-dictionaries/types/audio.interface";
+import type { ActualDatabasePhoto } from "@living-dictionaries/types/photo.interface";
+import type { ActualDatabaseVideo } from "@living-dictionaries/types/video.interface";
 import type { Timestamp } from "firebase/firestore";
 import { convert_entry_to_current_shape } from "./convert_entry_to_current_shape";
 
@@ -56,9 +59,58 @@ describe('convert_entry_to_current_shape', () => {
     expect(convert_entry_to_current_shape(entry)).toEqual(expected);
   });
 
-  //TODO // sf
-  //TODO // pf
-  //TODO // vfs
+  test('sound file is placed into array', () => {
+    const sf: ActualDatabaseAudio = {
+      path: 'foo',
+      sp: 'x123',
+    }
+    const entry: ActualDatabaseEntry = { sf }
+    const expected: GoalDatabaseEntry = {
+      sfs: [{
+        path: 'foo',
+        sp: ['x123'],
+      }],
+    }
+    expect(convert_entry_to_current_shape(entry)).toEqual(expected);
+  });
+
+  test('photo file is placed into array in first sense', () => {
+    const pf: ActualDatabasePhoto = {
+      path: 'foo',
+      uploadedBy: 'x456',
+    }
+    const entry: ActualDatabaseEntry = { pf }
+    const expected: GoalDatabaseEntry = {
+      sn: [
+        {
+          pfs: [{
+            path: 'foo',
+            ab: 'x456',
+          }],
+        }
+      ]
+    }
+    expect(convert_entry_to_current_shape(entry)).toEqual(expected);
+  });
+
+  test('video file array is placed into first sense', () => {
+    const vfs: ActualDatabaseVideo[] = [{
+      path: 'foo',
+      sp: 'x123',
+    }]
+    const entry: ActualDatabaseEntry = { vfs }
+    const expected: GoalDatabaseEntry = {
+      sn: [
+        {
+          vfs: [{
+            path: 'foo',
+            sp: ['x123'],
+          }],
+        }
+      ]
+    }
+    expect(convert_entry_to_current_shape(entry)).toEqual(expected);
+  });
 
   test('deprecated metadata fields are renamed, preferring createdBy over ab', () => {
     const entry: ActualDatabaseEntry = {

@@ -2,11 +2,11 @@ import type { Timestamp } from 'firebase/firestore';
 import type { IFirestoreMetaData, IFirestoreMetaDataAbbreviated } from 'sveltefirets';
 import type { IGloss } from './gloss.interface';
 import type { IExampleSentence } from './exampe-sentence.interface';
-import type { DatabaseAudio, ExpandedAudio } from './audio.interface';
-import type { DatabasePhoto, ExpandedPhoto } from './photo.interface';
-import type { DatabaseVideo, ExpandedVideo } from './video.interface';
+import type { GoalDatabaseAudio, ActualDatabaseAudio, ExpandedAudio } from './audio.interface';
+import type { GoalDatabasePhoto, ActualDatabasePhoto, ExpandedPhoto } from './photo.interface';
+import type { GoalDatabaseVideo, ActualDatabaseVideo, ExpandedVideo } from './video.interface';
 
-// current interface used across the site that we will migrate from this to just exapndedEntry
+// current interface used across the site that we will migrate from this to just ExpandedEntry
 export type IEntry = ExpandedEntry & ActualDatabaseEntry & LDAlgoliaFields
 
 export interface ExpandedEntry extends IFirestoreMetaData {
@@ -49,17 +49,17 @@ export interface DatabaseSense {
   sd?: string[]; // semantic domain strings, only using for custom semantic domains brought in from imports
   sdn?: string[]; // semantic domain number, simplified system modeled after SemDom (eg. 2.1.2.3)
   xs?: IExampleSentence[];
-  pfs?: DatabasePhoto[];
-  deletedPfs?: DatabasePhoto[];
-  vfs?: DatabaseVideo[];
-  deletedVfs?: DatabaseVideo[];
+  pfs?: GoalDatabasePhoto[];
+  deletedPfs?: GoalDatabasePhoto[];
+  vfs?: GoalDatabaseVideo[];
+  deletedVfs?: GoalDatabaseVideo[];
   nc?: string; // noun_class
   de?: string; // definition_english, only in Bahasa Lani (jaRhn6MAZim4Blvr1iEv) deprecated by Greg
 }
 
 export type ActualDatabaseEntry = Omit<GoalDatabaseEntry, 'ps'> & DeprecatedEntry;
 
-export interface GoalDatabaseEntry extends IFirestoreMetaDataAbbreviated { 
+export interface GoalDatabaseEntry extends IFirestoreMetaDataAbbreviated {
   lx?: string; // lexeme
   lo1?: string; // local_orthography_2
   lo2?: string; // local_orthography_2
@@ -75,18 +75,19 @@ export interface GoalDatabaseEntry extends IFirestoreMetaDataAbbreviated {
   di?: string; // dialect
   nt?: string; // notes
   sr?: string[]; // sources
-  sfs?: DatabaseAudio[];
-  deletedSfs?: DatabaseAudio[];
+  sfs?: GoalDatabaseAudio[];
+  deletedSfs?: GoalDatabaseAudio[];
   ii?: string; // importId which can be used to show all entries from a particular import
   ei?: string; // Elicitation Id for Munda languages or Swadesh Composite number list from Comparalex
   deletedAt?: Timestamp;
 }
 
-interface DeprecatedEntry extends Omit<DatabaseSense, 'ps' | 'xs' | 'pfs' | 'deletedPfs'> {
+interface DeprecatedEntry extends Omit<DatabaseSense, 'ps' | 'xs' | 'pfs' | 'deletedPfs' | 'vfs'> {
   ps?: string | string[]; // parts_of_speech
   lo?: string; // local_orthography_1
-  sf?: DatabaseAudio; // sound file
-  pf?: DatabasePhoto; // photo file
+  sf?: ActualDatabaseAudio; // sound file
+  pf?: ActualDatabasePhoto; // photo file
+  vfs?: ActualDatabaseVideo[]; // video files
   xs?: IExampleSentence;
   xv?: string; // example vernacular - used for old dictionary imports (deprecated)
   ab?: string; // addedBy
@@ -99,7 +100,7 @@ interface DeprecatedEntry extends Omit<DatabaseSense, 'ps' | 'xs' | 'pfs' | 'del
 interface LDAlgoliaFields {
   dictId?: string; // dictionary Id entry belongs to, to filter search results by dictionary
   _highlightResult?: any;
-  
+
   hasImage?: boolean;
   hasAudio?: boolean;
   hasSpeaker?: boolean;

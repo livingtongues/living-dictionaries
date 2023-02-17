@@ -1,4 +1,8 @@
 import type { ActualDatabaseEntry, GoalDatabaseEntry, DatabaseSense } from "@living-dictionaries/types";
+import type { ActualDatabaseVideo } from "@living-dictionaries/types/video.interface";
+import { convert_photo_file_to_current_shape } from "./convert_photo_file_to_current_shape";
+import { convert_sound_file_to_current_shape } from "./convert_sound_file_to_current_shape";
+import { convert_video_file_to_current_shape } from "./convert_video_file_to_current_shape";
 
 export function convert_entry_to_current_shape(actual: ActualDatabaseEntry): GoalDatabaseEntry {
   const goal: GoalDatabaseEntry = {};
@@ -9,8 +13,8 @@ export function convert_entry_to_current_shape(actual: ActualDatabaseEntry): Goa
       continue;
     }
     if (key === 'sf') {
-      // TODO first convert to new format
-      goal.sfs = [value];
+      const sound_file = convert_sound_file_to_current_shape(value);
+      goal.sfs = [sound_file];
       continue;
     }
 
@@ -20,13 +24,14 @@ export function convert_entry_to_current_shape(actual: ActualDatabaseEntry): Goa
       continue;
     }
     if (key === 'vfs') {
-      // TODO first convert speakerId to string[]
-      first_sense_from_base.vfs = value;
+      const unconverted_video_files = value as ActualDatabaseVideo[];
+      const video_files = unconverted_video_files.map(convert_video_file_to_current_shape);
+      first_sense_from_base.vfs = video_files;
       continue;
     }
     if (key === 'pf') {
-      // TODO first convert to new format
-      first_sense_from_base.pfs = [value];
+      const photo_file = convert_photo_file_to_current_shape(value);
+      first_sense_from_base.pfs = [photo_file];
       continue;
     }
     if (key === 'ps') {
