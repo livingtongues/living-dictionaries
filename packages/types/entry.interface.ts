@@ -33,10 +33,10 @@ export interface ExpandedEntry extends IFirestoreMetaData {
 }
 
 export interface ExpandedSense {
-  glosses?: IGloss[];
-  parts_of_speech?: string[];
-  semantic_domains?: string[];
-  example_sentences: IExampleSentence[];
+  glosses?: IGloss;
+  parts_of_speech?: string[]; // translation to current language happens during expansion
+  semantic_domains?: string[]; // translation to current language happens during expansion
+  example_sentences?: IExampleSentence[];
   photo_files?: ExpandedPhoto[];
   video_files?: ExpandedVideo[];
   noun_class?: string;
@@ -57,7 +57,7 @@ export interface DatabaseSense {
   de?: string; // definition_english, only in Bahasa Lani (jaRhn6MAZim4Blvr1iEv) deprecated by Greg
 }
 
-export type ActualDatabaseEntry = Omit<GoalDatabaseEntry, 'ps'> & DeprecatedEntry;
+export type ActualDatabaseEntry = Omit<GoalDatabaseEntry, 'ps' | 'di'> & DeprecatedEntry;
 
 export interface GoalDatabaseEntry extends IFirestoreMetaDataAbbreviated {
   lx?: string; // lexeme
@@ -72,7 +72,7 @@ export interface GoalDatabaseEntry extends IFirestoreMetaDataAbbreviated {
   mr?: string; // morphology
   pl?: string; // plural_form
   va?: string; // variant (currently babanki only)
-  di?: string; // dialect
+  di?: string[]; // dialects
   nt?: string; // notes
   sr?: string[]; // sources
   sfs?: GoalDatabaseAudio[];
@@ -82,14 +82,19 @@ export interface GoalDatabaseEntry extends IFirestoreMetaDataAbbreviated {
   deletedAt?: Timestamp;
 }
 
-interface DeprecatedEntry extends Omit<DatabaseSense, 'ps' | 'xs' | 'pfs' | 'deletedPfs' | 'vfs'> {
-  ps?: string | string[]; // parts_of_speech
+interface DeprecatedEntry extends Omit<DatabaseSense, 'ps' | 'xs' | 'pfs' | 'deletedPfs' | 'vfs'> { // as deprecated fields are removed from the database we can continue to Omit them here until nothing more from DatabaseSense is left
   lo?: string; // local_orthography_1
-  sf?: ActualDatabaseAudio; // sound file
+  sf?: ActualDatabaseAudio; // turned into array at sfs
+  di?: string; // turned into array
+
+  // placed into first sense
+  ps?: string | string[]; // parts_of_speech
   pf?: ActualDatabasePhoto; // photo file
   vfs?: ActualDatabaseVideo[]; // video files
   xs?: IExampleSentence;
   xv?: string; // example vernacular - used for old dictionary imports (deprecated)
+  
+  // old metadata
   ab?: string; // addedBy
   createdBy?: string;
   updatedBy?: string;
