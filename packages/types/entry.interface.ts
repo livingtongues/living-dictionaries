@@ -18,6 +18,7 @@ export interface ExpandedEntry extends IFirestoreMetaData {
   local_orthagraphy_4?: string;
   local_orthagraphy_5?: string;
   phonetic?: string;
+  sound_files?: ExpandedAudio[];
   senses?: ExpandedSense[];
   interlinearization?: string;
   morphology?: string;
@@ -26,7 +27,6 @@ export interface ExpandedEntry extends IFirestoreMetaData {
   dialects?: string[];
   notes?: string;
   sources?: string[];
-  sound_files?: ExpandedAudio[];
   elicitation_id?: string;
   deletedAt?: Timestamp;
   // scientific_names?: string[]; // handle italics and non-italics portions of scientific names
@@ -67,6 +67,8 @@ export interface GoalDatabaseEntry extends IFirestoreMetaDataAbbreviated {
   lo4?: string; // local_orthography_4
   lo5?: string; // local_orthography_5
   ph?: string; // phonetic
+  sfs?: GoalDatabaseAudio[];
+  deletedSfs?: GoalDatabaseAudio[];
   sn?: DatabaseSense[];
   in?: string; // interlinearization
   mr?: string; // morphology
@@ -75,11 +77,9 @@ export interface GoalDatabaseEntry extends IFirestoreMetaDataAbbreviated {
   di?: string[]; // dialects
   nt?: string; // notes
   sr?: string[]; // sources
-  sfs?: GoalDatabaseAudio[];
-  deletedSfs?: GoalDatabaseAudio[];
-  ii?: string; // importId which can be used to show all entries from a particular import
   ei?: string; // Elicitation Id for Munda languages or Swadesh Composite number list from Comparalex
   deletedAt?: Timestamp;
+  ii?: string; // importId which can be used to show all entries from a particular import
 }
 
 interface DeprecatedEntry extends Omit<DatabaseSense, 'ps' | 'xs' | 'pfs' | 'deletedPfs' | 'vfs'> { // as deprecated fields are removed from the database we can continue to Omit them here until nothing more from DatabaseSense is left
