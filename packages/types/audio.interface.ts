@@ -4,7 +4,7 @@ export type IAudio = ExpandedAudio & ActualDatabaseAudio;
 export interface ExpandedAudio {
   fb_storage_path: string;
   uid_added_by?: string;
-  timestamp?: Date; // converted from number, Date, or Firestore Timestamp
+  timestamp?: Date;
   speaker_ids?: string[];
   source?: string;
   playing?: boolean; // true when audio is being played
@@ -16,9 +16,9 @@ export type ActualDatabaseAudio = Omit<GoalDatabaseAudio, 'sp'> & DeprecatedAudi
 export interface GoalDatabaseAudio {
   path: string; // Firebase Storage location
   ab?: string; // added by uid
-  ts?: any; // timestamp - need to determine type, had some trouble with Firestore Timestamps previously maybe? Might need to settle for a number timestamp
+  ts?: any; // timestamp // TODO need to determine type, had some trouble with Firestore Timestamps previously maybe? Might need to settle for a number timestamp
   sp?: string[]; // id of speakers
-  sc?: string; // source
+  sc?: string; // source // TODO fix inconsistency w/ sc vs sr
   speakerName?: string; // old Talking Dictionaries - can be deprecated if we create new speakers with IDs from these names
 }
 
