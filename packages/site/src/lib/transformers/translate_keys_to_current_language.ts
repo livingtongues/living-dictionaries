@@ -1,4 +1,4 @@
-import { register, init, waitLocale, locale, dictionary, t } from 'svelte-i18n';
+import { init, locale, dictionary, t, addMessages } from 'svelte-i18n';
 import { get } from 'svelte/store';
 
 export function translate_part_of_speech_to_current_language(part_of_speech_abbrev: string): string {
@@ -16,30 +16,27 @@ if (import.meta.vitest) {
 
     const part_of_speech_abbrev = 'n'
 
-    test('English', async () => {
+    test('English', () => {
       const english_value = 'noun';
 
-      register('en', () => Promise.resolve({ ps: { [part_of_speech_abbrev]: english_value } }));
+      addMessages('en', { ps: { [part_of_speech_abbrev]: english_value } });
       init({ fallbackLocale: 'en', initialLocale: 'en' });
-      await waitLocale('en');
 
       expect(translate_part_of_speech_to_current_language(part_of_speech_abbrev)).toBe(english_value);
     });
 
-    test('Spanish', async () => {
+    test('Spanish', () => {
       const spanish_value = 'sustantivo';
 
-      register('es', () => Promise.resolve({ ps: { [part_of_speech_abbrev]: spanish_value } }));
+      addMessages('es', { ps: { [part_of_speech_abbrev]: spanish_value } });
       init({ fallbackLocale: 'es', initialLocale: 'es' });
-      await waitLocale('es');
 
       expect(translate_part_of_speech_to_current_language(part_of_speech_abbrev)).toBe(spanish_value);
     });
 
-    test('part of speech not found in translations passes through', async () => {
-      register('en', () => Promise.resolve({}));
+    test('part of speech not found in translations passes through', () => {
+      addMessages('en', {});
       init({ fallbackLocale: 'en', initialLocale: 'en', warnOnMissingMessages: false });
-      await waitLocale('en');
 
       expect(translate_part_of_speech_to_current_language('intransitive-monkey')).toBe('intransitive-monkey');
     });
@@ -61,30 +58,27 @@ if (import.meta.vitest) {
 
     const sdn_key = '1.1';
 
-    test('English', async () => {
+    test('English', () => {
       const english_value = 'Sky, weather and climate';
 
-      register('en', () => Promise.resolve({ sd: { [sdn_key]: english_value } }));
+      addMessages('en', { sd: { [sdn_key]: english_value } });
       init({ fallbackLocale: 'en', initialLocale: 'en' });
-      await waitLocale('en');
 
       expect(translate_semantic_domain_keys_to_current_language(sdn_key)).toBe(english_value);
     });
 
-    test('Spanish', async () => {
+    test('Spanish', () => {
       const spanish_value = 'Cielo, tiempo y clima';
 
-      register('es', () => Promise.resolve({ sd: { [sdn_key]: spanish_value } }));
+      addMessages('es', { sd: { [sdn_key]: spanish_value } });
       init({ fallbackLocale: 'es', initialLocale: 'es' });
-      await waitLocale('es');
 
       expect(translate_semantic_domain_keys_to_current_language(sdn_key)).toBe(spanish_value);
     });
 
-    test('Semantic Domain Key not found in translations passes through', async () => {
-      register('en', () => Promise.resolve({}));
+    test('Semantic Domain Key not found in translations passes through', () => {
+      addMessages('en', {});
       init({ fallbackLocale: 'en', initialLocale: 'en', warnOnMissingMessages: false });
-      await waitLocale('en');
 
       expect(translate_semantic_domain_keys_to_current_language('Foo')).toBe('Foo');
     });
