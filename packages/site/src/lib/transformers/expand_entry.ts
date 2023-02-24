@@ -3,13 +3,14 @@ import type { ExpandedAudio, GoalDatabaseAudio } from "@living-dictionaries/type
 import type { ExpandedPhoto, GoalDatabasePhoto } from "@living-dictionaries/types/photo.interface";
 import type { ExpandedVideo, GoalDatabaseVideo } from "@living-dictionaries/types/video.interface";
 import { convert_timestamp_to_date_object } from "./timestamp_to_date";
+import { translate_part_of_speech_to_current_language, translate_semantic_domain_keys_to_current_language } from "./translate_keys_to_current_language";
 
 export function expand_entry(database_entry: GoalDatabaseEntry): ExpandedEntry {
   return {
     ...database_entry, // This can be removed if:
-      // 1) entire front-end uses expanded format
-      // 2) all fields are expanded or at least copied into expanded entry (including deprecated fields in sounds files like previousFileName) until completely refactored out of database
-      // Those may not happen for awhile or _ever_ because when condensing to save, translated fields (ps, sdn) should just be pulled from unexpanded entry (database_entry)
+    // 1) entire front-end uses expanded format
+    // 2) all fields are expanded or at least copied into expanded entry (including deprecated fields in sounds files like previousFileName) until completely refactored out of database
+    // Those may not happen for awhile or _ever_ because when condensing to save, translated fields (ps, sdn) should just be pulled from unexpanded entry (database_entry)
 
     id: database_entry.id,
     lexeme: database_entry.lx,
@@ -36,8 +37,8 @@ export function expand_entry(database_entry: GoalDatabaseEntry): ExpandedEntry {
 function expand_sense(sense: DatabaseSense): ExpandedSense {
   return {
     glosses: sense.gl,
-    parts_of_speech: sense.ps, // TODO: translate parts of speech
-    semantic_domains: [...sense.sd, ...sense.sdn], // TODO: translate semantic domains
+    parts_of_speech: sense.ps?.map(translate_part_of_speech_to_current_language),
+    semantic_domains: [...sense.sd, ...sense.sdn?.map(translate_semantic_domain_keys_to_current_language) || []],
     example_sentences: sense.xs,
     photo_files: sense.pfs?.map(expand_photo),
     video_files: sense.vfs?.map(expand_video),

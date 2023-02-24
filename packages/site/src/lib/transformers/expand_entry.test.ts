@@ -1,9 +1,27 @@
 import type { ExpandedEntry, GoalDatabaseEntry } from "@living-dictionaries/types";
 import { expand_entry } from "./expand_entry";
+import { init, locale, dictionary, addMessages } from 'svelte-i18n';
 
 describe('expand_entry', () => {
+  beforeEach(() => {
+    dictionary.set({});
+    locale.set(undefined);
+  });
+
   const now = new Date();
   test('returns an object with easily readable field names', () => {
+    const part_of_speech_abbrev = 'n';
+    const part_of_speech_english = 'noun';
+
+    const sdn_key = '1.1';
+    const sdn_english = 'Sky, weather and climate';
+
+    addMessages('en', {
+      ps: { [part_of_speech_abbrev]: part_of_speech_english },
+      sd: { [sdn_key]: sdn_english }
+    })
+    init({ fallbackLocale: 'en', initialLocale: 'en' });
+
     const database_entry: GoalDatabaseEntry = {
       id: '1',
       lx: 'house',
@@ -15,9 +33,9 @@ describe('expand_entry', () => {
       ph: 'a?u',
       sn: [{
         gl: { en: 'foo' },
-        ps: ['n'],
+        ps: [part_of_speech_abbrev],
         sd: ['earth'],
-        sdn: ['1.1'],
+        sdn: [sdn_key],
         xs: [{ en: 'baz', vn: 'foo' }],
         pfs: [{
           path: 'path',
@@ -66,10 +84,8 @@ describe('expand_entry', () => {
       phonetic: 'a?u',
       senses: [{
         glosses: { en: 'foo' },
-        // parts_of_speech: ['noun'], // TODO
-        parts_of_speech: ['n'],
-        // semantic_domains: ['earth', 'whatever 1.1 maps to'], // TODO
-        semantic_domains: ['earth', '1.1'],
+        parts_of_speech: [part_of_speech_english],
+        semantic_domains: ['earth', sdn_english],
         example_sentences: [{ en: 'baz', vn: 'foo' }],
         photo_files: [{
           fb_storage_path: 'path',
