@@ -13,21 +13,29 @@ describe('convert_entry_to_current_shape', () => {
   });
 
   test('ensure dialect is an array', () => {
-    const some_dialect = 'west';
-    expect(convert_entry_to_current_shape({ di: some_dialect })).toEqual({ di: [some_dialect] });
+    const dialect = 'west';
+    const expected: GoalDatabaseEntry = { di: [dialect] }
+
+    const dialect_string = dialect;
+    expect(convert_entry_to_current_shape({ di: dialect_string })).toEqual(expected);
+
+    const dialect_array = [dialect];
+    expect(convert_entry_to_current_shape({ di: dialect_array })).toEqual(expected);
   });
 
   test('moves parts of speech arrays', () => {
     const ps = ['n', 'v'];
-    expect(convert_entry_to_current_shape({ ps })).toEqual({ sn: [{ ps }] });
+    const expected: GoalDatabaseEntry = { sn: [{ ps }] }
+    expect(convert_entry_to_current_shape({ ps })).toEqual(expected);
   });
 
   test('converts lo to lo1', () => {
     const lo = 'foo';
-    expect(convert_entry_to_current_shape({ lo })).toEqual({ lo1: lo });
+    const expected: GoalDatabaseEntry = { lo1: lo }
+    expect(convert_entry_to_current_shape({ lo })).toEqual(expected);
   });
 
-  test('moves sense related fields into first sense', () => {
+  test('moves sense related fields into first sense (and converts necessary fields)', () => {
     const entry: ActualDatabaseEntry = {
       gl: { en: 'foo' },
       ps: 'n',
@@ -134,6 +142,27 @@ describe('convert_entry_to_current_shape', () => {
     expect(convert_entry_to_current_shape(entry)).toEqual(expected);
     expect(convert_entry_to_current_shape({ ab: 'adder' })).toEqual({ cb: 'adder' });
   })
+
+  test('only has base sense fields and no sense', () => {
+    const entry: ActualDatabaseEntry = {
+      gl: { en: 'only sense' },
+    }
+    const expected: GoalDatabaseEntry = {
+      sn: [{
+        gl: { en: 'only sense' },
+      }]
+    }
+    expect(convert_entry_to_current_shape(entry)).toEqual(expected);
+  });
+
+  test('no base sense fields and a sense', () => {
+    const entry: ActualDatabaseEntry = {
+      sn: [{
+        gl: { en: 'only sense' },
+      }]
+    }
+    expect(convert_entry_to_current_shape(entry)).toEqual(entry);
+  });
 
   // this condition should not exist in database
   test('pulls sense from base does not overwrite existing sense', () => {
