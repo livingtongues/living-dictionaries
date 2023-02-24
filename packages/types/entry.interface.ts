@@ -57,7 +57,7 @@ export interface DatabaseSense {
   de?: string; // definition_english, only in Bahasa Lani (jaRhn6MAZim4Blvr1iEv) deprecated by Greg
 }
 
-export type ActualDatabaseEntry = Omit<GoalDatabaseEntry, 'ps' | 'di'> & DeprecatedEntry;
+export type ActualDatabaseEntry = Omit<GoalDatabaseEntry, 'di'> & DeprecatedEntry;
 
 export interface GoalDatabaseEntry extends IFirestoreMetaDataAbbreviated {
   lx?: string; // lexeme
@@ -85,7 +85,7 @@ export interface GoalDatabaseEntry extends IFirestoreMetaDataAbbreviated {
 interface DeprecatedEntry extends Omit<DatabaseSense, 'ps' | 'xs' | 'pfs' | 'deletedPfs' | 'vfs'> { // as deprecated fields are removed from the database we can continue to Omit them here until nothing more from DatabaseSense is left
   lo?: string; // local_orthography_1
   sf?: ActualDatabaseAudio; // turned into array at sfs
-  di?: string; // turned into array
+  di?: string | string[]; // turned into array
 
   // placed into first sense
   ps?: string | string[]; // parts_of_speech
