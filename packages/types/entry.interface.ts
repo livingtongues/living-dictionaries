@@ -10,7 +10,6 @@ import type { GoalDatabaseVideo, ActualDatabaseVideo, ExpandedVideo } from './vi
 export type IEntry = ExpandedEntry & ActualDatabaseEntry & LDAlgoliaFields
 
 export interface ExpandedEntry extends IFirestoreMetaData {
-  id?: string;
   lexeme?: string;
   local_orthagraphy_1?: string;
   local_orthagraphy_2?: string;
@@ -29,7 +28,8 @@ export interface ExpandedEntry extends IFirestoreMetaData {
   sources?: string[];
   elicitation_id?: string;
   deletedAt?: Timestamp;
-  // scientific_names?: string[]; // handle italics and non-italics portions of scientific names
+  importId?: string; // TODO: expand this also
+  // scientific_names?: string[]; // TODO: add this, italic by default but they can use <i> and </i> to define where italics show
 }
 
 export interface ExpandedSense {
@@ -68,7 +68,7 @@ export interface GoalDatabaseEntry extends IFirestoreMetaDataAbbreviated {
   lo5?: string; // local_orthography_5
   ph?: string; // phonetic
   sfs?: GoalDatabaseAudio[];
-  deletedSfs?: GoalDatabaseAudio[];
+  deletedSfs?: GoalDatabaseAudio[]; // TODO copy across
   sn?: DatabaseSense[];
   in?: string; // interlinearization
   mr?: string; // morphology
