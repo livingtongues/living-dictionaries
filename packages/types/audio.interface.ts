@@ -18,7 +18,7 @@ export interface GoalDatabaseAudio {
   ab?: string; // added by uid
   ts?: any; // timestamp // TODO need to determine type, had some trouble with Firestore Timestamps previously maybe? Might need to settle for a number timestamp
   sp?: string[]; // id of speakers
-  sc?: string; // source // TODO fix inconsistency w/ sc vs sr
+  sc?: string; // source // TODO fix inconsistency w/ "sc" here vs "sr" in entry
   speakerName?: string; // old Talking Dictionaries - can be deprecated if we create new speakers with IDs from these names
 }
 

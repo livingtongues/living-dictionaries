@@ -6,7 +6,10 @@ import { convert_timestamp_to_date_object } from "./timestamp_to_date";
 
 export function expand_entry(database_entry: GoalDatabaseEntry): ExpandedEntry {
   return {
-    ...database_entry, // TODO: after entire front-end uses expanded format, it is no longer needed to copy GoalDatabaseEntry fields
+    ...database_entry, // This can be removed if:
+      // 1) entire front-end uses expanded format
+      // 2) all fields are expanded or at least copied into expanded entry (including deprecated fields in sounds files like previousFileName) until completely refactored out of database
+      // Those may not happen for awhile
 
     id: database_entry.id,
     lexeme: database_entry.lx,
