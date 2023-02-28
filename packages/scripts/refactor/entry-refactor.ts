@@ -16,10 +16,10 @@ async function entryRefactor() {
       console.log(`---Refactoring: ${dictionaryId}`);
       await fetchEntries(dictionaryId);
     } else {
-      const snapshot = await db.collection('dictionaries').get()
+      const snapshot = await db.collection('dictionaries').get();
       for (const dictionarySnap of snapshot.docs) {
         // If setting limits on refactoring, you can skip dictionaries beginning with letters that have already been processed:
-        const done = /^[abcdefghijklmn].*/
+        const done = /^[abcdefghijklmn].*/;
         if (!done.test(dictionarySnap.id.toLowerCase())) {
           console.log(`---Refactoring: ${dictionarySnap.id}`);
           await fetchEntries(dictionarySnap.id);
@@ -33,7 +33,7 @@ async function entryRefactor() {
 }
 
 async function fetchEntries(dictionaryId: string) {
-  const snapshot = await db.collection(`dictionaries/${dictionaryId}/words`).get()
+  const snapshot = await db.collection(`dictionaries/${dictionaryId}/words`).get();
   for (const snap of snapshot.docs) {
     const entry: IEntry = { id: snap.id, ...(snap.data() as IEntry) };
     // await turnSDintoArray(dictionaryId, entry);
@@ -42,6 +42,8 @@ async function fetchEntries(dictionaryId: string) {
     turnPOSintoArray(dictionaryId, entry); // not awaiting so operations can run in parallel otherwise the function errors after about 1400 iterations
   }
 }
+
+//TODO reverese_semantic_domains_in_db
 
 const turnSDintoArray = async (dictionaryId: string, entry: IEntry) => {
   if (entry.sd && typeof entry.sd === 'string') {
