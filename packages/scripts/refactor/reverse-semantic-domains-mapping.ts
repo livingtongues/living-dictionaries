@@ -12,9 +12,8 @@ function clean_semantic_domains(semantic_domains: string[]): string[] {
   const cleaned_semantic_domains = semantic_domains.map((sd) => {
     if (sd.includes('-')) {
       return sd.replace(/ -/g, ',');
-    } else {
-      return sd;
     }
+    return sd;
   });
   return cleaned_semantic_domains;
 }
