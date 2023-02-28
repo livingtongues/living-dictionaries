@@ -1,6 +1,6 @@
 import { semanticDomains } from '../../site/src/lib/mappings/semantic-domains';
 
-export function inverse_semantic_domains_mapping(semantic_domains: string[]): string[] {
+export function reverse_semantic_domains_mapping(semantic_domains: string[]): string[] {
   const cleaned_semantic_domains = clean_semantic_domains(semantic_domains);
   const sdn = cleaned_semantic_domains.map(
     (semantic_domain) => semanticDomains.find((sd) => sd.name === semantic_domain).key
@@ -57,6 +57,6 @@ if (import.meta.vitest) {
       expected: ['2.4', '1.2'],
     },
   ])('inverse semantic domains mapping', ({ sdn, expected }) => {
-    expect(inverse_semantic_domains_mapping(sdn)).toEqual(expected);
+    expect(reverse_semantic_domains_mapping(sdn)).toEqual(expected);
   });
 }
