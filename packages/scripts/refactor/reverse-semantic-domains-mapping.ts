@@ -2,10 +2,11 @@ import { semanticDomains } from '../../site/src/lib/mappings/semantic-domains';
 
 export function reverse_semantic_domains_mapping(semantic_domains: string[]): string[] {
   const cleaned_semantic_domains = clean_semantic_domains(semantic_domains);
-  const sdn = cleaned_semantic_domains.map(
-    (semantic_domain) => semanticDomains.find((sd) => sd.name === semantic_domain).key
-  );
-  return sdn;
+  const semantic_domain_number = cleaned_semantic_domains.map((semantic_domain) => {
+    const sdn = semanticDomains.find((sd) => sd.name === semantic_domain);
+    return sdn ? sdn.key : semantic_domain;
+  });
+  return semantic_domain_number;
 }
 
 function clean_semantic_domains(semantic_domains: string[]): string[] {
@@ -53,6 +54,10 @@ if (import.meta.vitest) {
     },
     {
       sdn: ['Health - well-being and sickness', 'Earth - geology and landscape'],
+      expected: ['2.4', '1.2'],
+    },
+    {
+      sdn: ['2.4', '1.2'],
       expected: ['2.4', '1.2'],
     },
   ])('inverse semantic domains mapping', ({ sdn, expected }) => {
