@@ -1,6 +1,5 @@
+import pytest
 from helpers import *  # pylint: disable=W0401,W0614
-# TODO improve tests
-
 
 def test_add_headers_to_set():
     new_set = set()
@@ -23,25 +22,25 @@ def test_replace_commas_inside_quotes_safely():
     assert text == '"just* a* comma" , "change my * for an *"'
 
 
-# TODO break in two loops
-def test_remove_extra_commas():
-    cleaned_entry = remove_extra_commas('\\lx,test,\\ph,,,,,\\ps')
-    assert cleaned_entry == '\\lx,test,\\ph,,\\ps'
-    cleaned_entry = remove_extra_commas('\\lx,test,,\\ph,,\\ps')
-    assert cleaned_entry == '\\lx,test,\\ph,,\\ps'
-    cleaned_entry = remove_extra_commas('\\lx,test,,,,,,,,,,\\ph,,\\ps')
-    assert cleaned_entry == '\\lx,test,\\ph,,\\ps'
-    cleaned_entry = remove_extra_commas('\\lx,test,,\\ph,,,\\ps')
-    assert cleaned_entry == '\\lx,test,\\ph,,\\ps'
-    cleaned_entry = remove_extra_commas('\\lx,test,,\\ph,tɛst,,\\ps')
-    assert cleaned_entry == '\\lx,test,\\ph,tɛst,\\ps'
-    cleaned_entry = remove_extra_commas('\\lx,test,,,\\ph,tɛst,,,\\ps')
-    assert cleaned_entry == '\\lx,test,\\ph,tɛst,\\ps'
+@pytest.mark.parametrize(
+        ('input_x', 'expected'),
+        (
+            ('\\lx,test,\\ph,,,,,\\ps', '\\lx,test,\\ph,,\\ps'),
+            ('\\lx,test,,\\ph,,\\ps', '\\lx,test,\\ph,,\\ps'),
+            ('\\lx,test,,,,,,,,,,\\ph,,\\ps', '\\lx,test,\\ph,,\\ps'),
+            ('\\lx,test,,\\ph,,,\\ps', '\\lx,test,\\ph,,\\ps'),
+            ('\\lx,test,,\\ph,tɛst,,\\ps', '\\lx,test,\\ph,tɛst,\\ps'),
+            ('\\lx,test,,,\\ph,tɛst,,,\\ps', '\\lx,test,\\ph,tɛst,\\ps')
+        )
+)
+def test_remove_extra_commas(input_x, expected):
+    cleaned_entry = remove_extra_commas(input_x)
+    assert cleaned_entry == expected
 
 
 def test_undo_comma_replacement():
-    cleaned_text = undo_comma_replacement('"brook&&& stream&&&* water"', '&&&')
-    assert cleaned_text == '"brook, stream,* water"'
+    cleaned_text = undo_comma_replacement('"brook&&& stream*&&& water"', '&&&')
+    assert cleaned_text == '"brook, stream*, water"'
 
 
 def test_turn_entry_into_dictionary():
@@ -62,6 +61,21 @@ def test_replace_multiple_text_fragments():
     Once upon a time a "Dino* Dinosaur* Rex" was tired and it says: "this life is awful* terrible and sad",
     '''
 
+def test_replace_multiple_text_fragments_to_remove_the_last_unwanted_comma():
+    full_entries_with_extra_commas_regex = '\\\\([^,])+,[^,\n]+(,,+)'
+    replaced_text = replace_multiple_text_fragments(
+        '\\lx,oso,,,\\gl,bear,,,', full_entries_with_extra_commas_regex)
+    assert replaced_text == '\\lx,oso,,\\gl,bear,,'
+
+
+def test_replace_multiple_text_fragments_with_replacement_only():
+    replaced_text = replace_multiple_text_fragments('hello world', 'o', '*')
+    assert replaced_text == 'hell* w*rld'
+
+@pytest.mark.xfail
+def test_replace_multiple_text_fragments_with_fragment_to_replace_only():
+    result = replace_multiple_text_fragments('hello world', 'o', fragment_to_replace='o')
+    assert result == "Test failed intentionally"
 
 def test_clean_entry():
     cleaned_entry = clean_entry(
