@@ -6,11 +6,13 @@ This script was created to help converting Standard Format Markers (SFM) files c
 
 The script was created with Python 3.10.2 and we encorage you to use a virtual environment before run it.
 
-1. (RECOMMENDED) The simple option is to use `venv` which is the native library to create a virtual environment. You can easily do that typing in your terminal:
+1. Go to packages/python-scripts/convert_sfm_to_csv.
+
+2. (RECOMMENDED) The simple option is to use `venv` which is the native library to create a virtual environment. You can easily do that typing in your terminal:
    `python -m venv myenv` myenv should be the name of your choice, so you can change it.
    then activate it typing: `source myenv/lib/activate`, or if you're using a windows terminal `myenv\Scripts\activate`. On Windows but using git bash should be `source myenv/Scripts/activate`
 
-2. After set your virtual environment and having activated it, you can install all the required libraries with `pip install -r requirements.txt`
+3. After set your virtual environment and having activated it, you can install all the required libraries with `pip install -r requirements.txt`
 
 Now you're able to run the python script.
 
