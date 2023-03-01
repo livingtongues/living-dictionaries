@@ -72,10 +72,11 @@ def test_replace_multiple_text_fragments_with_replacement_only():
     replaced_text = replace_multiple_text_fragments('hello world', 'o', '*')
     assert replaced_text == 'hell* w*rld'
 
-@pytest.mark.xfail
+
 def test_replace_multiple_text_fragments_with_fragment_to_replace_only():
-    result = replace_multiple_text_fragments('hello world', 'o', fragment_to_replace='o')
-    assert result == "Test failed intentionally"
+    with pytest.raises(ValueError, match="fragment_to_replace cannot be set alone"):
+        replace_multiple_text_fragments('hello world', 'o', fragment_to_replace='o')
+
 
 def test_clean_entry():
     cleaned_entry = clean_entry(
