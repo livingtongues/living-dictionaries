@@ -86,8 +86,7 @@ def replace_multiple_text_fragments(
                 temporal_replacement = fragment[0].replace(
                     fragment_to_replace, replacement)
             elif fragment_to_replace:
-                temporal_replacement = fragment[0].replace(
-                    fragment_to_replace, fragment[0][:-1])
+                raise ValueError("Fragment_to_replace cannot be set alone")
             elif replacement:
                 temporal_replacement = fragment[0].replace(
                     fragment[0], replacement)
