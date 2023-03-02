@@ -3,6 +3,7 @@ import { semanticDomains } from '../../site/src/lib/mappings/semantic-domains';
 export function reverse_semantic_domains_mapping(semantic_domains: string[]): string[] {
   const cleaned_semantic_domains = clean_semantic_domains(semantic_domains);
   const semantic_domain_number = cleaned_semantic_domains.map((semantic_domain) => {
+    semantic_domain = update_old_semantic_domains(semantic_domain);
     const sdn = semanticDomains.find((sd) => sd.name === semantic_domain);
     return sdn ? sdn.key : semantic_domain;
   });
@@ -17,6 +18,15 @@ function clean_semantic_domains(semantic_domains: string[]): string[] {
     return sd;
   });
   return cleaned_semantic_domains;
+}
+
+function update_old_semantic_domains(semantic_domain: string): string {
+  if (semantic_domain === 'States') {
+    return 'States and Characteristics';
+  } else if (semantic_domain === 'Physical Actions and States') {
+    return 'Physical Actions';
+  }
+  return semantic_domain;
 }
 
 if (import.meta.vitest) {
@@ -59,6 +69,10 @@ if (import.meta.vitest) {
     {
       sdn: ['2.4', '1.2'],
       expected: ['2.4', '1.2'],
+    },
+    {
+      sdn: ['States', 'Physical Actions and States'],
+      expected: ['6.5', '6'],
     },
   ])('inverse semantic domains mapping', ({ sdn, expected }) => {
     expect(reverse_semantic_domains_mapping(sdn)).toEqual(expected);
