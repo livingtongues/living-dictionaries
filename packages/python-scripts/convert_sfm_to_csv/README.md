@@ -14,11 +14,11 @@ The script was created with Python 3.10.2 and we encorage you to use a virtual e
 
 3. After set your virtual environment and having activated it, you can install all the required libraries with `pip install -r requirements.txt`
 
-Now you're able to run the python script.
+Now you're able to run the python script typing `python main.py`.
 
 # Developer Information
 
-To run test just type `pytest -vv`
+To run tests just type `pytest -vv`
 
 - I'm using type hints to easily understand what a function is asking and what is returning.
 - I'm also trying to simplify code by extracting functions and that these only do one thing.
