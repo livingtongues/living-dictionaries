@@ -1,4 +1,4 @@
-//TODO previously change L H characters for unidode accents
+//TODO previously change L H characters for unicode accents
 // \u030C = ˇ (hacek)
 // \u0300 = ` (Grave accent)
 // \u0301 = ´ (Acute accent)
@@ -29,3 +29,45 @@ function add_tones(word: string, accents: string) {
 }
 
 console.log(add_tones(phonetics, accents));
+
+if (import.meta.vitest) {
+  test.each([
+    {
+      word: 'abeto',
+      accents: '\u030C \u0302 \u0300',
+      expected: 'ǎbêtò',
+    },
+    {
+      word: 'kɔtɛchafɨ',
+      accents: '\u0300 \u0301 \u0302 \u030C',
+      expected: 'kɔ̀tɛ́châfɨ̌',
+    },
+    {
+      word: 'pə',
+      accents: '\u0302',
+      expected: 'pə̂',
+    },
+    {
+      word: 'pe-tɔ',
+      accents: '\u0300 \u0300',
+      expected: 'pè-tɔ̀',
+    },
+  ])('adds tones to vowels in different words', ({ word, accents, expected }) => {
+    expect(add_tones(word, accents)).toEqual(expected);
+  });
+
+  test.each([
+    {
+      word: 'soiloc',
+      accents: '\u0302 \u0301',
+      expected: 'sôilóc',
+    },
+    {
+      word: 'iɔtɛə',
+      accents: '\u0300 \u0301',
+      expected: 'ìɔtɛ́ə',
+    },
+  ])('adds tones to diphthongs in different words', ({ word, accents, expected }) => {
+    expect(add_tones(word, accents)).toEqual(expected);
+  });
+}
