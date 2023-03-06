@@ -7,7 +7,7 @@
 const phonetics = 'abero';
 const accents = '\u030C \u0302 \u0300';
 
-const kharia_vowels = new Set(['a', 'e', 'i', 'o', 'u', 'ɛ', 'ə', 'ɔ', 'ɨ']);
+const bum_vowels = new Set(['a', 'e', 'i', 'o', 'u', 'ɛ', 'ə', 'ɔ', 'ɨ']);
 
 function add_tones(word: string, accents: string) {
   let new_word = '';
@@ -17,7 +17,7 @@ function add_tones(word: string, accents: string) {
   //TODO compares someway number of vowels is equals to number of accents
   splitted_word.forEach((letter, letter_index) => {
     let new_letter;
-    if (kharia_vowels.has(letter) && !kharia_vowels.has(splitted_word[letter_index - 1])) {
+    if (bum_vowels.has(letter) && !bum_vowels.has(splitted_word[letter_index - 1])) {
       new_letter = `${letter}${splitted_accents[accent_index]}`;
       accent_index += 1;
     } else {
