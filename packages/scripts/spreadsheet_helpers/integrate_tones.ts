@@ -1,17 +1,23 @@
+import * as fs from 'fs';
+import { test_words } from './test_words';
+import { test_tones } from './test_tones';
 //TODO previously change L H characters for unicode accents
 // \u030C = ˇ (hacek)
 // \u0300 = ` (Grave accent)
 // \u0301 = ´ (Acute accent)
 // \u0302 = ˆ (Circumflex accent)
 
-const phonetics = 'abero';
-const accents = '\u030C \u0302 \u0300 \u0300';
+const phonetics = 'aber';
+const accents = '\u030C \u0302';
 
 const bum_vowels = new Set(['a', 'e', 'i', 'o', 'u', 'ɛ', 'ə', 'ɔ', 'ɨ']);
 
 function add_tones(word: string, accents: string) {
   let new_word = '';
   let accent_index = 0;
+  if (accents === '') {
+    return word;
+  }
   const splitted_accents = accents.split(' ');
   const splitted_word = word.split('');
   //TODO console errors instead of throwing them to continue script
@@ -35,7 +41,19 @@ function add_tones(word: string, accents: string) {
   return new_word;
 }
 
-console.log(add_tones(phonetics, accents));
+function integrate_tones_to_bum_phonetics(phonetics: string[], tones: string[]) {
+  const new_phonetics: string[] = [];
+  if (phonetics.length === tones.length) {
+    phonetics.forEach((word, i) => {
+      new_phonetics.push(add_tones(word, tones[i]));
+    });
+  } else {
+    throw new Error(`Tones and phonetics have to correspond to each other`);
+  }
+  console.log(new_phonetics);
+}
+
+integrate_tones_to_bum_phonetics(test_words, test_tones);
 
 if (import.meta.vitest) {
   test.each([
@@ -77,7 +95,7 @@ if (import.meta.vitest) {
   ])('adds tones to diphthongs in different words', ({ word, accents, expected }) => {
     expect(add_tones(word, accents)).toEqual(expected);
   });
-  //TODO but add message
+
   test('more accents than vowels', () => {
     const word = 'təst';
     const accents = '\u0302 \u0301';
@@ -88,5 +106,11 @@ if (import.meta.vitest) {
     const word = 'potɨ';
     const accents = '\u0300';
     expect(() => add_tones(word, accents)).toThrowError("There's not enough accents");
+  });
+
+  test('no accents', () => {
+    const word = 'potɨ';
+    const accents = '';
+    expect(add_tones(word, accents)).toEqual('potɨ');
   });
 }
