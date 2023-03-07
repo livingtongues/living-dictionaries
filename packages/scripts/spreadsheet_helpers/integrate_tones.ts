@@ -5,7 +5,7 @@
 // \u0302 = ˆ (Circumflex accent)
 
 const phonetics = 'abero';
-const accents = '\u030C \u0302 \u0300';
+const accents = '\u030C \u0302 \u0300 \u0300';
 
 const bum_vowels = new Set(['a', 'e', 'i', 'o', 'u', 'ɛ', 'ə', 'ɔ', 'ɨ']);
 
@@ -18,13 +18,20 @@ function add_tones(word: string, accents: string) {
   splitted_word.forEach((letter, letter_index) => {
     let new_letter;
     if (bum_vowels.has(letter) && !bum_vowels.has(splitted_word[letter_index - 1])) {
+      if (!splitted_accents[accent_index]) {
+        throw new Error(`There's not enough accents in word: ${word}`);
+      }
       new_letter = `${letter}${splitted_accents[accent_index]}`;
       accent_index += 1;
     } else {
       new_letter = letter;
     }
+
     new_word += new_letter;
   });
+  if (accent_index != splitted_accents.length) {
+    throw new Error(`There's more accents than vowels in word: ${word}`);
+  }
   return new_word;
 }
 
@@ -69,5 +76,17 @@ if (import.meta.vitest) {
     },
   ])('adds tones to diphthongs in different words', ({ word, accents, expected }) => {
     expect(add_tones(word, accents)).toEqual(expected);
+  });
+  //TODO but add message
+  test('more accents than vowels', () => {
+    const word = 'təst';
+    const accents = '\u0302 \u0301';
+    expect(() => add_tones(word, accents)).toThrowError("There's more accents than vowels");
+  });
+
+  test('more vowels than accents', () => {
+    const word = 'potɨ';
+    const accents = '\u0300';
+    expect(() => add_tones(word, accents)).toThrowError("There's not enough accents");
   });
 }
