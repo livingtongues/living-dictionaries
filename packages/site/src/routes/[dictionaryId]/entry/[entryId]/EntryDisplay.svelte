@@ -89,7 +89,7 @@
 
     <EntrySemanticDomains {canEdit} {entry} on:valueupdate />
 
-    {#if $dictionary.id === 'babanki'}
+    {#if  ['babanki', 'torwali'].includes($dictionary.id)}
       <EntryField
         value={entry['va']}
         field="va"
