@@ -18,7 +18,7 @@
   }
 
   $: adjustedColumns =
-    $dictionary.id === 'babanki' ? [...$columns, { field: 'va', width: 150 }] : $columns;
+  ['babanki', 'torwali'].includes($dictionary.id) ? [...$columns, { field: 'va', width: 150 }] : $columns;
 </script>
 
 <div
