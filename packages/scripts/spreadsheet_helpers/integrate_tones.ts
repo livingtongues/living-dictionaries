@@ -14,7 +14,7 @@ function add_tones(word: string, accents: string) {
   let accent_index = 0;
   const splitted_accents = accents.split(' ');
   const splitted_word = word.split('');
-  //TODO compares someway number of vowels is equals to number of accents
+  //TODO console errors instead of throwing them to continue script
   splitted_word.forEach((letter, letter_index) => {
     let new_letter;
     if (bum_vowels.has(letter) && !bum_vowels.has(splitted_word[letter_index - 1])) {
