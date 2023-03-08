@@ -29,10 +29,15 @@ function add_tones_to_word(word: string, accents: string): string {
   let accent_index = 0;
   const splitted_accents = accents.split(' ');
   const splitted_word = word.split('');
+  const number_of_vowels_in_word = count_vowels(word, bum_vowels);
   //TODO console errors instead of throwing them to continue script?
   splitted_word.forEach((letter, letter_index) => {
     let new_letter;
-    if (bum_vowels.has(letter) && !bum_vowels.has(splitted_word[letter_index - 1])) {
+    // Adds the tone to every vowel if the number of vowels in the word equals the total number of accents, if not only if the vowel has not another vowel before it: which means it's a diphthong
+    if (
+      (bum_vowels.has(letter) && number_of_vowels_in_word === splitted_accents.length) ||
+      (bum_vowels.has(letter) && !bum_vowels.has(splitted_word[letter_index - 1]))
+    ) {
       if (!splitted_accents[accent_index]) {
         throw new Error(`There's not enough accents in word: ${word}`);
       }
@@ -135,6 +140,12 @@ if (import.meta.vitest) {
       },
     ])('adds tones to diphthongs in different words', ({ word, accents, expected }) => {
       expect(add_tones_to_word(word, accents)).toEqual(expected);
+    });
+
+    test('add tones when number of vowels and tones are the same, even when the word has two vowels toghether: false diphthongs', () => {
+      const word = 'liɛnda';
+      const accents = '\u0301 \u0300 \u0300';
+      expect(add_tones_to_word(word, accents)).toEqual('líɛ̀ndà');
     });
 
     test('more accents than vowels', () => {
