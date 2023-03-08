@@ -1,14 +1,13 @@
 import * as fs from 'fs';
 import { test_words } from './test_words';
 import { test_tones } from './test_tones';
-//TODO previously change L H characters for unicode accents
+import { bum_phonetics } from './bum_phonetics';
+import { bum_tones } from './bum_tones';
+//TODO previously change L H LH and HL characters for unicode accents, check test_tones.ts example
 // \u030C = ˇ (hacek)
 // \u0300 = ` (Grave accent)
 // \u0301 = ´ (Acute accent)
 // \u0302 = ˆ (Circumflex accent)
-
-const phonetics = 'aber';
-const accents = '\u030C \u0302';
 
 const bum_vowels = new Set(['a', 'e', 'i', 'o', 'u', 'ɛ', 'ə', 'ɔ', 'ɨ']);
 
@@ -41,7 +40,11 @@ function add_tones(word: string, accents: string): string {
   return new_word;
 }
 
-function integrate_tones_to_bum_phonetics(phonetics: string[], tones: string[]): void {
+function integrate_tones_to_bum_phonetics(
+  phonetics: string[],
+  tones: string[],
+  path: string
+): void {
   const new_phonetics: string[] = [];
   if (phonetics.length !== tones.length) {
     throw new Error('Tones and phonetics have to correspond to each other');
@@ -49,7 +52,7 @@ function integrate_tones_to_bum_phonetics(phonetics: string[], tones: string[]):
   phonetics.forEach((word, i) => {
     new_phonetics.push(add_tones(word, tones[i]));
   });
-  fs.writeFile('./spreadsheet_helpers/test_result.txt', new_phonetics.join('\n'), (err) => {
+  fs.writeFile(path, new_phonetics.join('\n'), (err) => {
     if (err) {
       console.error(err);
       return;
@@ -58,7 +61,7 @@ function integrate_tones_to_bum_phonetics(phonetics: string[], tones: string[]):
   });
 }
 
-// integrate_tones_to_bum_phonetics(test_words, test_tones);
+integrate_tones_to_bum_phonetics(bum_phonetics, bum_tones, './spreadsheet_helpers/bum_result.txt');
 
 if (import.meta.vitest) {
   describe('add_tones', () => {
@@ -125,13 +128,21 @@ if (import.meta.vitest) {
     const created_contents = fs.readFileSync('./spreadsheet_helpers/test_result.txt', 'utf8');
     const expected_contents = `àbâ\nàbâh\nábâm\nàbâŋ\nabehi\nàbɛ̂n\nàbə̂h\nàbə̂h\nàbî\nábìn\nàbɔ̂ŋ\nabɔŋ\nábúk`;
     test('File written successfully', () => {
-      integrate_tones_to_bum_phonetics(test_words, test_tones);
+      integrate_tones_to_bum_phonetics(
+        test_words,
+        test_tones,
+        './spreadsheet_helpers/test_result.txt'
+      );
       expect(created_contents).toEqual(expected_contents);
     });
 
     test("Tones and phonetics don't match", () => {
       expect(() =>
-        integrate_tones_to_bum_phonetics(test_words, test_tones.slice(0, test_tones.length - 1))
+        integrate_tones_to_bum_phonetics(
+          test_words,
+          test_tones.slice(0, test_tones.length - 1),
+          './spreadsheet_helpers/test_result.txt'
+        )
       ).toThrowError('Tones and phonetics have to correspond to each other');
     });
   });
