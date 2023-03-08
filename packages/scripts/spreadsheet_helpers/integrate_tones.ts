@@ -11,6 +11,16 @@ import { bum_tones } from './bum_tones';
 
 const bum_vowels = new Set(['a', 'e', 'i', 'o', 'u', 'ɛ', 'ə', 'ɔ', 'ɨ']);
 
+function count_vowels(word: string, vowels: Set<string>): number {
+  let number_of_vowels = 0;
+  word.split('').forEach((letter) => {
+    if (vowels.has(letter)) {
+      number_of_vowels += 1;
+    }
+  });
+  return number_of_vowels;
+}
+
 function add_tones_to_word(word: string, accents: string): string {
   if (accents === '') {
     return word;
@@ -61,9 +71,31 @@ function integrate_tones_to_bum_phonetics(
   });
 }
 
-integrate_tones_to_bum_phonetics(bum_phonetics, bum_tones, './spreadsheet_helpers/bum_result.txt');
+// integrate_tones_to_bum_phonetics(bum_phonetics, bum_tones, './spreadsheet_helpers/bum_result.txt');
 
 if (import.meta.vitest) {
+  describe('count_vowels', () => {
+    test.each([
+      {
+        word: 'ts',
+        vowels: new Set(['a']),
+        expected: 0,
+      },
+      {
+        word: 'solo',
+        vowels: new Set(['o']),
+        expected: 2,
+      },
+      {
+        word: 'acento',
+        vowels: new Set(['a', 'e', 'o']),
+        expected: 3,
+      },
+    ])('counting vowels on different words', ({ word, vowels, expected }) => {
+      expect(count_vowels(word, vowels)).toEqual(expected);
+    });
+  });
+
   describe('add_tones_to_word', () => {
     test.each([
       {
