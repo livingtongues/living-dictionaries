@@ -11,12 +11,12 @@ import { bum_tones } from './bum_tones';
 
 const bum_vowels = new Set(['a', 'e', 'i', 'o', 'u', 'ɛ', 'ə', 'ɔ', 'ɨ']);
 
-function add_tones(word: string, accents: string): string {
-  let new_word = '';
-  let accent_index = 0;
+function add_tones_to_word(word: string, accents: string): string {
   if (accents === '') {
     return word;
   }
+  let new_word = '';
+  let accent_index = 0;
   const splitted_accents = accents.split(' ');
   const splitted_word = word.split('');
   //TODO console errors instead of throwing them to continue script?
@@ -50,7 +50,7 @@ function integrate_tones_to_bum_phonetics(
     throw new Error('Tones and phonetics have to correspond to each other');
   }
   phonetics.forEach((word, i) => {
-    new_phonetics.push(add_tones(word, tones[i]));
+    new_phonetics.push(add_tones_to_word(word, tones[i]));
   });
   fs.writeFile(path, new_phonetics.join('\n'), (err) => {
     if (err) {
@@ -64,7 +64,7 @@ function integrate_tones_to_bum_phonetics(
 integrate_tones_to_bum_phonetics(bum_phonetics, bum_tones, './spreadsheet_helpers/bum_result.txt');
 
 if (import.meta.vitest) {
-  describe('add_tones', () => {
+  describe('add_tones_to_word', () => {
     test.each([
       {
         word: 'abeto',
@@ -87,7 +87,7 @@ if (import.meta.vitest) {
         expected: 'pè-tɔ̀',
       },
     ])('adds tones to vowels in different words', ({ word, accents, expected }) => {
-      expect(add_tones(word, accents)).toEqual(expected);
+      expect(add_tones_to_word(word, accents)).toEqual(expected);
     });
 
     test.each([
@@ -102,25 +102,27 @@ if (import.meta.vitest) {
         expected: 'ìɔtɛ́ə',
       },
     ])('adds tones to diphthongs in different words', ({ word, accents, expected }) => {
-      expect(add_tones(word, accents)).toEqual(expected);
+      expect(add_tones_to_word(word, accents)).toEqual(expected);
     });
 
     test('more accents than vowels', () => {
       const word = 'təst';
       const accents = '\u0302 \u0301';
-      expect(() => add_tones(word, accents)).toThrowError("There's more accents than vowels");
+      expect(() => add_tones_to_word(word, accents)).toThrowError(
+        "There's more accents than vowels"
+      );
     });
 
     test('more vowels than accents', () => {
       const word = 'potɨ';
       const accents = '\u0300';
-      expect(() => add_tones(word, accents)).toThrowError("There's not enough accents");
+      expect(() => add_tones_to_word(word, accents)).toThrowError("There's not enough accents");
     });
 
     test('no accents at all', () => {
       const word = 'potɨ';
       const accents = '';
-      expect(add_tones(word, accents)).toEqual('potɨ');
+      expect(add_tones_to_word(word, accents)).toEqual('potɨ');
     });
   });
 
