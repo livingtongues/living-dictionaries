@@ -1,6 +1,4 @@
 import * as fs from 'fs';
-import { test_words } from './test_words';
-import { test_tones } from './test_tones';
 import { bum_phonetics } from './bum_phonetics';
 import { bum_tones } from './bum_tones';
 //TODO previously change L H LH and HL characters for unicode accents, check test_tones.ts example
@@ -74,4 +72,4 @@ export function integrate_tones_to_bum_phonetics(
   });
 }
 
-// integrate_tones_to_bum_phonetics(bum_phonetics, bum_tones, './spreadsheet_helpers/bum_result.txt');
+integrate_tones_to_bum_phonetics(bum_phonetics, bum_tones, './spreadsheet_helpers/bum_result.txt');
