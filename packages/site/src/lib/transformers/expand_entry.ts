@@ -10,7 +10,7 @@ export function expand_entry(database_entry: GoalDatabaseEntry): ExpandedEntry {
     ...database_entry, // This can be removed if:
     // 1) entire front-end uses expanded format
     // 2) all fields are expanded or at least copied into expanded entry (including deprecated fields in sounds files like previousFileName) until completely refactored out of database
-    // Those may not happen for awhile or _ever_ because when condensing to save, translated fields (ps, sdn) should just be pulled from unexpanded entry (database_entry)
+    // should still retain abbreviated translated fields (ps, sdn) as they lose their database value when expanded (because of translation into current language)
 
     id: database_entry.id,
     lexeme: database_entry.lx,
