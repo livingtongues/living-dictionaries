@@ -1,6 +1,3 @@
 export interface IExampleSentence {
-    // vn?: string; // vernacular
-    [bcp: string | 'vn']: string; // example sentences in glossing languages
+    [gloss_language_bcp: string | 'vn']: string;
 }
-
-// Can write an example sentence in the vernacular and in any of the glossing languages
