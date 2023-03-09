@@ -24,6 +24,7 @@ import type { IPartOfSpeech } from './part-of-speech.interface';
 import type { IColumn } from './column.interface';
 import type { HelperRoles, IHelper } from './helper.interface';
 import type { IPrintFields } from './print-entry.interface';
+import type { AlgoliaEntry } from './entry.algolia.interface';
 
 export type {
   IAudio,
@@ -57,6 +58,7 @@ export type {
   IPoint,
   IRegion,
   IPrintFields,
+  AlgoliaEntry,
 };
 
 import { ReadyLocales, UnpublishedLocales } from './languages.interface';
