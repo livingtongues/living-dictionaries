@@ -7,7 +7,8 @@ const devFirebaseConfig = {
     storageBucket: 'talking-dictionaries-dev.appspot.com',
 }
 
-const testFun = TestFunctions(devFirebaseConfig, 'service-account-dev.json');
+// const testFun = TestFunctions(devFirebaseConfig, 'service-account-dev.json');
+const testFun = TestFunctions();
 
 // const prodFirebaseConfig = {
 //     databaseURL: 'https://talking-dictionaries-alpha.firebaseio.com',
@@ -18,3 +19,5 @@ const testFun = TestFunctions(devFirebaseConfig, 'service-account-dev.json');
 // const testFun = TestFunctions(prodFirebaseConfig, 'service-account-prod.json');
 
 export { testFun };
+
+// Learn: https://firebase.google.com/docs/functions/unit-testing
