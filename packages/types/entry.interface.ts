@@ -1,77 +1,106 @@
-import type { IGloss } from './gloss.interface';
-import type { IAudio } from './audio.interface';
-import type { IPhoto } from './photo.interface';
-import type { IVideo } from './video.interface';
-import type { IExampleSentence } from './exampe-sentence.interface';
-// import type { Hit } from 'instantsearch.js';
 import type { Timestamp } from 'firebase/firestore';
+import type { IFirestoreMetaData, IFirestoreMetaDataAbbreviated } from 'sveltefirets';
+import type { IGloss } from './gloss.interface';
+import type { IExampleSentence } from './exampe-sentence.interface';
+import type { GoalDatabaseAudio, ActualDatabaseAudio, ExpandedAudio } from './audio.interface';
+import type { GoalDatabasePhoto, ActualDatabasePhoto, ExpandedPhoto } from './photo.interface';
+import type { GoalDatabaseVideo, ActualDatabaseVideo, ExpandedVideo } from './video.interface';
 
-import type { IFirestoreMetaDataAbbreviated } from 'sveltefirets';
-// TODO remove deprecated fields
-export interface IEntry extends IFirestoreMetaDataAbbreviated, LDAlgoliaFields, DeprecatedFields {
-  // Partial<Hit>
-  // Writing
-  lx: string; // lexeme
-  lo?: string; // Local Orthography
-  lo2?: string; // Local Orthography 2
-  lo3?: string; // Local Orthography 3
-  lo4?: string; // Local Orthography 4
-  lo5?: string; // Local Orthography 5
+// current interface used across the site that we will migrate from this to just ExpandedEntry
+export type IEntry = ExpandedEntry & ActualDatabaseEntry & LDAlgoliaFields
 
-  // Pronunciation
-  ph?: string; // phonetic
-
-  // Meaning & Morphology
-  gl: IGloss; // glosses
-  in?: string; // interlinearization
-  mr?: string; // morphology
-  ps?: string[]; // parts of speech
-  sd?: string[]; // semantic domain strings, only using for custom semantic domains brought in from imports
-  sdn?: string[]; // semantic domain number, simplified system modeled after SemDom (eg. 2.1.2.3)
-  de?: string; // definition english, only in Bahasa Lani (jaRhn6MAZim4Blvr1iEv) deprecated by Greg
-
-  // Language & entry metadata
-  nc?: string; // noun class
-  pl?: string; // plural form
-  va?: string; // variant (currently babanki only)
-  di?: string; // dialect for this entry
-  nt?: string; // notes
-  sr?: string[]; // Source(s)
-
-  // Usage
-  xv?: string; // example vernacular - used for old dictionary imports (deprecated)
-  xs?: IExampleSentence; // example sentences - new format which allows us to bring in example sentences from multiple languages (vernacular and gloss languages)
-
-  sf?: IAudio; // sound file - TODO: deprecate this and move to using array of audio files
-  // sfs?: IAudio[]; // sound files
-  // deletedSfs?: IAudio[];
-
-  pf?: IPhoto; // photo file - TODO: deprecate this and move to using array of photo files
-  // pfs?: IPhoto[]; // photo files
-  // deletedPfs?: IPhoto[];
-
-  vfs?: IVideo[]; // video files
-  deletedVfs?: IVideo[];
-
-  // IDs
-  ii?: string; // importId which can be used to show all entries from a particular import
-  ei?: string; // Elicitation Id for Munda languages or Swadesh Composite number list from Comparalex
-
-  deletedAt?: Timestamp; // whether this entry has been deleted
+export interface ExpandedEntry extends IFirestoreMetaData {
+  lexeme?: string;
+  local_orthagraphy_1?: string;
+  local_orthagraphy_2?: string;
+  local_orthagraphy_3?: string;
+  local_orthagraphy_4?: string;
+  local_orthagraphy_5?: string;
+  phonetic?: string;
+  sound_files?: ExpandedAudio[];
+  senses?: ExpandedSense[];
+  interlinearization?: string;
+  morphology?: string;
+  plural_form?: string;
+  variant?: string;
+  dialects?: string[];
+  notes?: string;
+  sources?: string[];
+  elicitation_id?: string;
+  deletedAt?: Timestamp;
+  importId?: string; // TODO: expand this also
+  // scientific_names?: string[]; // TODO: add this, italic by default but they can use <i> and </i> to define where italics show
 }
 
-// TODO:
-// Convert deprecated fields that the database needs searched for: dialect, ab, glosses
-// Add video object
-// Add image attribution field
+export interface ExpandedSense {
+  glosses?: IGloss;
+  parts_of_speech?: string[]; // translation to current language happens during expansion
+  semantic_domains?: string[]; // translation to current language happens during expansion
+  example_sentences?: IExampleSentence[];
+  photo_files?: ExpandedPhoto[];
+  video_files?: ExpandedVideo[];
+  noun_class?: string;
+  definition_english?: string;
+}
 
-// Custom fields? - by dictionary manager or us
-// 1. Dictionary manager creates custom field called "Culture"
-// Anyone editing entries can add data for the "Culture" field.
+export interface DatabaseSense {
+  gl?: IGloss;
+  ps?: string[]; // parts_of_speech
+  sd?: string[]; // semantic domain strings, only using for custom semantic domains brought in from imports
+  sdn?: string[]; // semantic domain number, simplified system modeled after SemDom (eg. 2.1.2.3)
+  xs?: IExampleSentence[];
+  pfs?: GoalDatabasePhoto[];
+  deletedPfs?: GoalDatabasePhoto[];
+  vfs?: GoalDatabaseVideo[];
+  deletedVfs?: GoalDatabaseVideo[];
+  nc?: string; // noun_class
+  de?: string; // definition_english, only in Bahasa Lani (jaRhn6MAZim4Blvr1iEv) deprecated by Greg
+}
 
-// Future?
-// link entries - "this entry is used in ______"
-// or just a "related entries" section fueled by a search for the lexeme
+export type ActualDatabaseEntry = Omit<GoalDatabaseEntry, 'di'> & DeprecatedEntry;
+
+export interface GoalDatabaseEntry extends IFirestoreMetaDataAbbreviated {
+  lx?: string; // lexeme
+  lo1?: string; // local_orthography_2
+  lo2?: string; // local_orthography_2
+  lo3?: string; // local_orthography_3
+  lo4?: string; // local_orthography_4
+  lo5?: string; // local_orthography_5
+  ph?: string; // phonetic
+  sfs?: GoalDatabaseAudio[];
+  deletedSfs?: GoalDatabaseAudio[]; // TODO copy across
+  sn?: DatabaseSense[];
+  in?: string; // interlinearization
+  mr?: string; // morphology
+  pl?: string; // plural_form
+  va?: string; // variant (currently babanki only)
+  di?: string[]; // dialects
+  nt?: string; // notes
+  sr?: string[]; // sources
+  ei?: string; // Elicitation Id for Munda languages or Swadesh Composite number list from Comparalex
+  deletedAt?: Timestamp;
+  ii?: string; // importId which can be used to show all entries from a particular import
+}
+
+interface DeprecatedEntry extends Omit<DatabaseSense, 'ps' | 'xs' | 'pfs' | 'deletedPfs' | 'vfs'> { // as deprecated fields are removed from the database we can continue to Omit them here until nothing more from DatabaseSense is left
+  lo?: string; // local_orthography_1
+  sf?: ActualDatabaseAudio; // turned into array at sfs
+  di?: string | string[]; // turned into array
+
+  // placed into first sense
+  ps?: string | string[]; // parts_of_speech
+  pf?: ActualDatabasePhoto; // photo file
+  vfs?: ActualDatabaseVideo[]; // video files
+  xs?: IExampleSentence;
+  xv?: string; // example vernacular - used for old dictionary imports (deprecated)
+  
+  // old metadata
+  ab?: string; // addedBy
+  createdBy?: string;
+  updatedBy?: string;
+  createdAt?: Timestamp;
+  updatedAt?: Timestamp;
+} // we can set up a nightly function to batch convert 1000 entries with deprecated fields in the database to the current format and then as fields get weeded out they can be removed from here
 
 interface LDAlgoliaFields {
   dictId?: string; // dictionary Id entry belongs to, to filter search results by dictionary
@@ -86,9 +115,3 @@ interface LDAlgoliaFields {
   hasPluralForm?: boolean;
 }
 
-interface DeprecatedFields {
-  createdBy?: string;
-  updatedBy?: string;
-  createdAt?: Timestamp;
-  updatedAt?: Timestamp;
-}
