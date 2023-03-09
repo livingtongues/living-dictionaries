@@ -87,6 +87,12 @@ describe('add_tones_to_word', () => {
     const accents = '\u0300';
     expect(add_tones_to_word(word, accents)).toEqual('potɨ (please check it!)');
   });
+
+  test('no accents at all', () => {
+    const word = 'pluma';
+    const accents = '';
+    expect(add_tones_to_word(word, accents)).toEqual('pluma');
+  });
 });
 
 describe('integrate_tones_to_bum_phonetics', () => {
