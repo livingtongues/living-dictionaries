@@ -31,10 +31,11 @@ export function add_tones_to_word(word: string, accents: string): string {
 
   splitted_word.forEach((letter, letter_index) => {
     let new_letter;
-    // Adds the tone to every vowel if the number of vowels in the word equals the total number of accents, if not only if the vowel has not another vowel before it: which means it's a diphthong
+    const is_vowel = bum_vowels.has(letter);
     if (
-      (bum_vowels.has(letter) && number_of_vowels_in_word === splitted_accents.length) ||
-      (bum_vowels.has(letter) && !bum_vowels.has(splitted_word[letter_index - 1]))
+      is_vowel &&
+      (number_of_vowels_in_word === splitted_accents.length ||
+        !bum_vowels.has(splitted_word[letter_index - 1]))
     ) {
       new_letter = `${letter}${splitted_accents[accent_index]}`;
       accent_index += 1;
