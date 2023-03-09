@@ -9,7 +9,7 @@ import type {
   IRegion,
   ICitation,
 } from './dictionary.interface';
-import type { IEntry } from './entry.interface';
+import type { ActualDatabaseEntry, ExpandedEntry, GoalDatabaseEntry, IEntry, DatabaseSense, ExpandedSense } from './entry.interface';
 import type { IGlossLanguages, IGlossLanguage } from './gloss-language.interface';
 import type { IGloss } from './gloss.interface';
 import type { IExampleSentence } from './exampe-sentence.interface';
@@ -36,6 +36,10 @@ export type {
   IGrammar,
   ICitation,
   IEntry,
+  GoalDatabaseEntry,
+  ActualDatabaseEntry,
+  ExpandedEntry,
+  DatabaseSense, ExpandedSense,
   IExampleSentence,
   IGlossLanguages,
   IGlossLanguage,

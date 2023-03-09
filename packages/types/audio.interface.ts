@@ -1,16 +1,33 @@
-export interface IAudio {
-    path: string; // Firebase Storage location
-    // mt: string; // deprecated after updating storage security rules // media-token, add onto end of URL + path // WAS url
-    ts?: any; // timestamp // WAS uploadedAt
-    ab?: string; // added by uid // WAS uploadedBy
-    sp?: string; // id of speaker
-    playing?: boolean; // turned true when audio is being played
-    sc?: string; // source
-    source?: string; // deprecated
+// current interface used across the site that we will migrate from this to just ExpandedAudio
+export type IAudio = ExpandedAudio & ActualDatabaseAudio;
 
-    // for old Talking Dictionaries
-    speakerName?: string;
-    previousFileName?: string; // deprecated, put into metadata instead
+export interface ExpandedAudio {
+  fb_storage_path: string;
+  uid_added_by?: string;
+  timestamp?: Date;
+  speaker_ids?: string[];
+  source?: string;
+  playing?: boolean; // true when audio is being played
+  speakerName?: string; // old Talking Dictionaries
 }
 
-// size?: number; // deprecating, it's in the metadata
+export type ActualDatabaseAudio = Omit<GoalDatabaseAudio, 'sp'> & DeprecatedAudio;
+
+export interface GoalDatabaseAudio {
+  path: string; // Firebase Storage location
+  ab?: string; // added by uid
+  ts?: any; // timestamp // TODO need to determine type, had some trouble with Firestore Timestamps previously maybe? Might need to settle for a number timestamp
+  sp?: string[]; // id of speakers
+  sc?: string; // source // TODO fix inconsistency w/ "sc" here vs "sr" in entry
+  speakerName?: string; // old Talking Dictionaries - can be deprecated if we create new speakers with IDs from these names
+}
+
+interface DeprecatedAudio {
+  sp?: string; // id of speaker
+  uploadedBy?: string;
+  uploadedAt?: any;
+  source?: string;
+  previousFileName?: string; // put into metadata
+  size?: number; // put into metadata
+  mt?: string; // media-token deprecated after updating storage security rules, add onto end of URL + path // WAS also url
+}
