@@ -11,7 +11,7 @@
     "deploy:specific": "firebase deploy --only functions:addToIndex,functions:updateIndex,functions:deleteFromIndex -P default",
     "deploy:specific:prod": "firebase deploy --only functions:addToIndex,functions:updateIndex,functions:deleteFromIndex -P production",
     "logs": "firebase functions:log",
-    "test": "vitest -u"
+    "test": "vitest"
   },
   "engines": {
     "node": "16"

@@ -1,10 +1,10 @@
 import { IEntry } from '@living-dictionaries/types';
-import type admin from 'firebase-admin';
+import type { firestore } from 'firebase-admin';
 
 export async function prepareDataForIndex(
   dbEntry: IEntry,
   dictionaryId: string,
-  db: admin.firestore.Firestore
+  db: firestore.Firestore
 ) {
   const entry: IEntry = dbEntry;
   delete entry.id;

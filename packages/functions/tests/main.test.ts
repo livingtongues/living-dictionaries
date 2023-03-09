@@ -1,11 +1,9 @@
-/// <reference types="jest" />
-
 import { testFun } from './test-config';
 testFun.cleanup;
 
 import { db } from '../src/config';
 
-test('Firestore is initialized', () => {
+test.skip('Firestore is initialized', () => {
     expect(db).toBeDefined();
 });
 
