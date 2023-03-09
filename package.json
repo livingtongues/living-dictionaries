@@ -7,6 +7,7 @@
 		"build": "pnpm --filter=site build",
 		"preview": "pnpm --filter=site preview",
 		"test": "pnpm --filter=site test",
+		"test:ui": "pnpm --filter=site test:ui",
 		"test:all": "pnpm --recursive --stream test -- --run",
 		"parts": "pnpm --filter=parts dev",
 		"parts:build": "pnpm --filter=parts build",
@@ -27,7 +28,6 @@
 		"prettier": "^2.8.1",
 		"prettier-plugin-svelte": "^2.9.0",
 		"svelte": "^3.55.1",
-		"typescript": "~4.9.4",
-		"vitest": "^0.28.4"
+		"typescript": "~4.9.4"
 	}
 }
