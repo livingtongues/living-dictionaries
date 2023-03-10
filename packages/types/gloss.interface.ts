@@ -1,3 +1,3 @@
 export interface IGloss {
-    [language: string]: string; // bcp code
+  [gloss_language_bcp: string]: string;
 }
