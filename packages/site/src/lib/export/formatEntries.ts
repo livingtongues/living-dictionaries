@@ -89,7 +89,7 @@ export function formatEntriesForCSV(
       pl: entry.pl,
       di: entry.di,
       nt: stripHTMLTags(entry.nt),
-      sr: entry.sr ? typeof entry.sr === 'string' ? entry.sr : entry.sr.join(' | ') : '', // some dictionaries (e.g. Kalanga) have sources that are strings and not arrays
+      sr: entry.sr ? (typeof entry.sr === 'string' ? entry.sr : entry.sr.join(' | ')) : '', // some dictionaries (e.g. Kalanga) have sources that are strings and not arrays
       psab: '',
       ps: '',
       sfFriendlyName: '',
@@ -153,7 +153,7 @@ export function formatEntriesForCSV(
     });
 
     // Dictionary specific
-    if (dictionaryId === 'babanki') {
+    if (['babanki', 'torwali'].includes(dictionaryId)) {
       formattedEntry.va = entry.va;
     }
 

@@ -13,7 +13,6 @@ importers:
       prettier-plugin-svelte: ^2.9.0
       svelte: ^3.55.1
       typescript: ~4.9.4
-      vitest: ^0.28.4
     devDependencies:
       '@typescript-eslint/eslint-plugin': 5.47.1_zl2l3xsn6elekauwv2pdno2thm
       '@typescript-eslint/parser': 5.47.1_v5bglvupnukcksncywgdzapdrq
@@ -24,7 +23,6 @@ importers:
       prettier-plugin-svelte: 2.9.0_4h247imu46srxjbpsfob5j3nnq
       svelte: 3.55.1
       typescript: 4.9.4
-      vitest: 0.28.4
 
   packages/functions:
     specifiers:
@@ -136,8 +134,10 @@ importers:
     specifiers:
       '@living-dictionaries/functions': workspace:^0.0.1
       '@living-dictionaries/parts': workspace:^0.0.1
+      '@living-dictionaries/site': workspace:^0.0.1
       '@living-dictionaries/types': ^1.0.0
       '@types/node': ^18.11.18
+      '@vitest/ui': ^0.28.4
       algoliasearch: ^4.11.0
       commander: ^9.4.1
       csv-parse: ^5.3.0
@@ -153,8 +153,10 @@ importers:
     devDependencies:
       '@living-dictionaries/functions': link:../functions
       '@living-dictionaries/parts': link:../parts
+      '@living-dictionaries/site': link:../site
       '@living-dictionaries/types': link:../types
       '@types/node': 18.11.18
+      '@vitest/ui': 0.28.4
       algoliasearch: 4.13.0
       commander: 9.4.1
       csv-parse: 5.3.0
@@ -166,7 +168,7 @@ importers:
       node-fetch: 3.2.3
       tsx: 3.12.1
       typescript: 4.9.4
-      vitest: 0.28.4
+      vitest: 0.28.4_@vitest+ui@0.28.4
 
   packages/site:
     specifiers:
@@ -1823,8 +1825,8 @@ packages:
       unist-util-visit: 4.1.2
     dev: true
 
-  /@kitbook/vite-plugin-kitbook/0.0.5_svelte@3.55.1:
-    resolution: {integrity: sha512-QqpuH8fEvy3Weum1hCDcJQRpn+6J6IAQ3EJWYNbaCw7ZP/KV+dBOQ9nBxkrgQHc841Z8XVWT3GL2OOpcrI84Qg==}
+  /@kitbook/vite-plugin-kitbook/0.0.6_svelte@3.55.1:
+    resolution: {integrity: sha512-ijtlfbUKsJ0PKL9CYR3KKwITiKQQYtY/gXOrFCsrGmOaV++vtUPowvL8FZ1ESnwwAMel+b3SRq7SAH8jyLEs9w==}
     dependencies:
       '@kitbook/mdsvex-shiki-twoslash': 0.0.3_svelte@3.55.1
       '@kitbook/rehype-display-link-titles': 0.0.3
@@ -6792,7 +6794,7 @@ packages:
     resolution: {integrity: sha512-8KImYGrlvfO2nGKTN9D/jVYSyB1gXCjpS8SEOP0mwl/NhqnQNfMT/dpKBZdCzF+SJthBQLqE7zGynD/esXuxzw==}
     dependencies:
       '@kitbook/mdsvex-shiki-twoslash': 0.0.3_svelte@3.55.1
-      '@kitbook/vite-plugin-kitbook': 0.0.5_svelte@3.55.1
+      '@kitbook/vite-plugin-kitbook': 0.0.6_svelte@3.55.1
       lz-string: 1.4.4
       svelte: 3.55.1
       svelte-pieces: 1.0.57_svelte@3.55.1

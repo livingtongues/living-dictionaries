@@ -32,12 +32,11 @@ export async function generateFilesFromSpreadsheet() {
     const translations_gl = await generateTranslationsFromSpreadsheet(rows_gl, { prefix: 'gl' });
     await writeLocaleFiles(translations_gl, localesDir + '/gl');
     const glossingLanguages = await generateGlossingLanguages(rows_gl);
-    // TODO: out of date - needs to update TS file in parts
     await fs.writeFile(
       `../site/src/lib/glosses/glossing-languages-list.json`,
       JSON.stringify(glossingLanguages, null, 2) + '\r\n'
     );
-    console.log('glossing-languages-list.json file written - if it has been updated, make sure to copy changes across into its sibling .ts file')
+    console.log('glossing-languages-list.json file written')
   } catch (error) {
     throw new Error(error.message);
   }

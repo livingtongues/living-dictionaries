@@ -3,6 +3,6 @@ import { defineConfig } from 'vitest/config';
 export default defineConfig({
   test: {
     globals: true,
-    includeSource: ['./import/**/*.ts', './spreadsheet_helpers/**/*.ts'],
+    includeSource: ['./import/**/*.ts', './refactor/**/*.ts', './spreadsheet_helpers/**/*.ts'],
   },
 });
