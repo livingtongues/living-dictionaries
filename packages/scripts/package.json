@@ -14,13 +14,16 @@
     "updateIndex": "tsx algolia/updateIndex.ts -e prod",
     "copyAlgoliaIndexRecords": "tsx algolia/copyAlgoliaIndexRecords.js",
     "copyAlgoliaIndexSettings": "tsx algolia/copyAlgoliaIndexSettings.js",
-    "test": "vitest -u"
+    "test": "vitest",
+    "test:ui": "vitest --ui"
   },
   "devDependencies": {
     "@living-dictionaries/functions": "workspace:^0.0.1",
     "@living-dictionaries/parts": "workspace:^0.0.1",
+    "@living-dictionaries/site": "workspace:^0.0.1",
     "@living-dictionaries/types": "^1.0.0",
     "@types/node": "^18.11.18",
+    "@vitest/ui": "^0.28.4",
     "algoliasearch": "^4.11.0",
     "commander": "^9.4.1",
     "csv-parse": "^5.3.0",

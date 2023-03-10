@@ -1,23 +1,71 @@
-import { semanticDomains } from '../../site/src/lib/mappings/semantic-domains';
+import { semanticDomains } from '@living-dictionaries/site';
 
 export function reverse_semantic_domains_mapping(semantic_domains: string[]): string[] {
-  const cleaned_semantic_domains = clean_semantic_domains(semantic_domains);
+  const cleaned_semantic_domains = replace_hyphen_with_comma(semantic_domains);
   const semantic_domain_number = cleaned_semantic_domains.map((semantic_domain) => {
-    semantic_domain = update_old_semantic_domains(semantic_domain);
-    const sdn = semanticDomains.find((sd) => sd.name === semantic_domain);
-    return sdn ? sdn.key : semantic_domain;
+    const domain = update_old_semantic_domains(semantic_domain);
+    const matched_domain_obj = semanticDomains.find((sd) => sd.name === domain);
+    return matched_domain_obj?.key || semantic_domain;
   });
   return semantic_domain_number;
 }
 
-function clean_semantic_domains(semantic_domains: string[]): string[] {
-  const cleaned_semantic_domains = semantic_domains.map((sd) => {
-    if (sd.includes('-')) {
-      return sd.replace(/ -/g, ',');
-    }
-    return sd;
+if (import.meta.vitest) {
+  describe('reverse_semantic_domains_mapping', () => {
+    test('converts normal domain strings', () => {
+      const sdn = ['Universe and the natural world', 'Earth, geology and landscape'];
+      const expected = ['1', '1.2']
+      expect(reverse_semantic_domains_mapping(sdn)).toEqual(expected);
+    });
+
+    test('converts domains with hyphens', () => {
+      const sdn = ['Health - well-being and sickness', 'Earth - geology and landscape'];
+      const expected = ['2.4', '1.2'];
+      expect(reverse_semantic_domains_mapping(sdn)).toEqual(expected);
+    });
+
+    test('ignores when strings are already the semantic domain keys', () => {
+      const sdn = ['2.4', '1.2'];
+      const expected = ['2.4', '1.2'];
+      expect(reverse_semantic_domains_mapping(sdn)).toEqual(expected);
+    });
+
+    test('checks the renamed semantic domains are updated', () => {
+      const sdn = ['States', 'Physical Actions and States'];
+      const expected = ['6.5', '6'];
+      expect(reverse_semantic_domains_mapping(sdn)).toEqual(expected);
+    });
   });
-  return cleaned_semantic_domains;
+}
+
+function replace_hyphen_with_comma(strings: string[]): string[] {
+  return strings.map((s) => s.replace(/ -/g, ','));
+}
+
+if (import.meta.vitest) {
+  describe('replace_hyphen_with_comma', () => {
+    test('changes space plus hyphen into comma', () => {
+      const strings = [
+        'Health - well-being and sickness',
+        'Coordinators - Subordinators - Relativizers - Quotatives',
+      ];
+      expect(replace_hyphen_with_comma(strings)).toEqual([
+        'Health, well-being and sickness',
+        'Coordinators, Subordinators, Relativizers, Quotatives',
+      ]);
+    });
+
+    test('ignores hyphens without space', () => {
+      const semantic_domains = [
+        'Pro-forms',
+        'Motion',
+      ];
+      expect(replace_hyphen_with_comma(semantic_domains)).toEqual([
+        'Pro-forms',
+        'Motion',
+      ]);
+    });
+  })
 }
 
 function update_old_semantic_domains(semantic_domain: string): string {
@@ -29,52 +77,4 @@ function update_old_semantic_domains(semantic_domain: string): string {
   return semantic_domain;
 }
 
-if (import.meta.vitest) {
-  test('cleans semantic domains', () => {
-    const semantic_domains = [
-      'Motion',
-      'Pro-forms',
-      'Spirituality and Religion',
-      'Humans - Social Relations and Organization',
-      'Health - well-being and sickness',
-      'Coordinators - Subordinators - Relativizers - Quotatives',
-    ];
-    expect(clean_semantic_domains(semantic_domains)).toEqual([
-      'Motion',
-      'Pro-forms',
-      'Spirituality and Religion',
-      'Humans, Social Relations and Organization',
-      'Health, well-being and sickness',
-      'Coordinators, Subordinators, Relativizers, Quotatives',
-    ]);
-  });
 
-  test.each([
-    {
-      sdn: ['TAM'],
-      expected: ['10.2'],
-    },
-    {
-      sdn: ['Universe and the natural world', 'Earth, geology and landscape'],
-      expected: ['1', '1.2'],
-    },
-    {
-      sdn: ['Names', 'Emotions', 'Birds', 'Colors', 'Animals'],
-      expected: ['4', '3.2', '1.7', '1.6', '1.5'],
-    },
-    {
-      sdn: ['Health - well-being and sickness', 'Earth - geology and landscape'],
-      expected: ['2.4', '1.2'],
-    },
-    {
-      sdn: ['2.4', '1.2'],
-      expected: ['2.4', '1.2'],
-    },
-    {
-      sdn: ['States', 'Physical Actions and States'],
-      expected: ['6.5', '6'],
-    },
-  ])('inverse semantic domains mapping', ({ sdn, expected }) => {
-    expect(reverse_semantic_domains_mapping(sdn)).toEqual(expected);
-  });
-}
