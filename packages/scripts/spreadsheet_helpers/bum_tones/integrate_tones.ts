@@ -1,11 +1,4 @@
-import * as fs from 'fs';
-import { bum_phonetics } from './bum_phonetics';
-import { bum_tones } from './bum_tones';
-//TODO previously change L H LH and HL characters for unicode accents, check test_tones.ts example
-// \u030C = ˇ (hacek)
-// \u0300 = ` (Grave accent)
-// \u0301 = ´ (Acute accent)
-// \u0302 = ˆ (Circumflex accent)
+import { writeFile } from 'fs';
 
 const bum_vowels = new Set(['a', 'e', 'i', 'o', 'u', 'ɛ', 'ə', 'ɔ', 'ɨ']);
 
@@ -64,7 +57,7 @@ export function integrate_tones_to_bum_phonetics(
   phonetics.forEach((word, i) => {
     new_phonetics.push(add_tones_to_word(word, tones[i]));
   });
-  fs.writeFile(path, new_phonetics.join('\n'), (err) => {
+  writeFile(path, new_phonetics.join('\n'), (err) => {
     if (err) {
       console.error(err);
       return;
@@ -73,4 +66,7 @@ export function integrate_tones_to_bum_phonetics(
   });
 }
 
-integrate_tones_to_bum_phonetics(bum_phonetics, bum_tones, './spreadsheet_helpers/bum_result.txt');
+// Uncomment to run:
+// import { bum_phonetics } from './bum_phonetics';
+// import { bum_tones } from './bum_tones';
+// integrate_tones_to_bum_phonetics(bum_phonetics, bum_tones, './spreadsheet_helpers/bum_result.txt');

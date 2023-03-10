@@ -1,6 +1,6 @@
-import * as fs from 'fs';
-import { test_words } from './test_words';
-import { test_tones } from './test_tones';
+import { readFileSync } from 'fs';
+import { test_words } from './fixtures/words';
+import { test_tones } from './fixtures/tones';
 import {
   count_vowels,
   add_tones_to_word,
@@ -96,13 +96,13 @@ describe('add_tones_to_word', () => {
 });
 
 describe('integrate_tones_to_bum_phonetics', () => {
-  const created_contents = fs.readFileSync('./spreadsheet_helpers/test_result.txt', 'utf8');
+  const created_contents = readFileSync('./spreadsheet_helpers/bum_tones/fixtures/result.txt', 'utf8');
   const expected_contents = `àbâ\nàbâh\nábâm\nàbâŋ\nabehi\nàbɛ̂n\nàbə̂h\nàbə̂h\nàbî\nábìn\nàbɔ̂ŋ\nabɔŋ\nábúk`;
   test('File written successfully', () => {
     integrate_tones_to_bum_phonetics(
       test_words,
       test_tones,
-      './spreadsheet_helpers/test_result.txt'
+      './spreadsheet_helpers/bum_tones/fixtures/result.txt'
     );
     expect(created_contents).toEqual(expected_contents);
   });
@@ -112,7 +112,7 @@ describe('integrate_tones_to_bum_phonetics', () => {
       integrate_tones_to_bum_phonetics(
         test_words,
         test_tones.slice(0, test_tones.length - 1),
-        './spreadsheet_helpers/test_result.txt'
+        './spreadsheet_helpers/bum_tones/fixtures/result.txt'
       )
     ).toThrowError('Tones and phonetics have to correspond to each other');
   });
