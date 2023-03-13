@@ -63,7 +63,7 @@
         value={entry.gl[bcp]}
         field={`gl.${bcp}`}
         {canEdit}
-        display={`${$t(`gl.${bcp}`)} ${$t('entry.gloss', {
+        display={`${$t(`gl.${bcp}`)}: ${$t('entry.gloss', {
           default: 'Gloss',
         })}`}
         on:valueupdate />
