@@ -144,7 +144,7 @@
         value={entry.xs && entry.xs[bcp]}
         field={`xs.${bcp}`}
         {canEdit}
-        display={`${$t(`gl.${bcp}`)} ${$t('entry.example_sentence', {
+        display={`${$t(`gl.${bcp}`)}: ${$t('entry.example_sentence', {
           default: 'Example Sentence',
         })}`}
         on:valueupdate />
