@@ -6,7 +6,6 @@ export function convert_db_to_raw_csv(input: string, output: string) {
     if (err) {
       console.error(err);
     }
-    console.log(data.trim().split('\n'));
     const csv_text = text_to_csv_format(data.trim().split('\n'));
 
     writeFile(`${relative_path}${output}`, csv_text, (err) => {
