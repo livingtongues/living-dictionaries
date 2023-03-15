@@ -3,35 +3,46 @@ import { lines_to_csv_format } from './lexical_db_to_raw_csv';
 describe('text_to_csv_format', () => {
   test('converts normal SMF text', () => {
     const data = [
-      '\\lx hiyaènhïì\r',
-      '\\ph hiZaNhi\r',
-      '\\tl H [L] L\r',
-      '\r',
-      '\\ge hasten, hurry\r',
-      '\\re hasten ; hurry\r',
-      '\\gn se dépêcher\r',
-      '\\dt 29/Aug/2005\r',
-      '\\de esto solo es una oración',
-      'cortada de ejemplo',
-      '\\b\r',
-      '\\pl\r',
-      '\\ps v\r',
-      '\\n 1544\r',
+      '\\lx This is only an example of a lexeme\r',
+      '\\ph\r',
+      '\\xe This is only an example of an example sentence field',
+    ];
+    expect(lines_to_csv_format(data)).toMatchInlineSnapshot(`
+      "\\\\lx,This is only an example of a lexeme
+      \\\\ph,
+      \\\\xe,This is only an example of an example sentence field"
+    `);
+  });
+
+  test('converts SMF text with broken lines', () => {
+    const data = [
+      '\\xv example that continues\r',
+      'in the next line.\r',
+      '\\xe another example without the',
+      'carriage return.',
+      '\\ph\r',
+    ];
+    expect(lines_to_csv_format(data)).toMatchInlineSnapshot(`
+      "\\\\xv,example that continues in the next line.
+
+      \\\\xe,another example without the carriage return.
+
+      \\\\ph,"
+    `);
+  });
+
+  test('converts SMF text with broken lines and removing unecessary line breaks', () => {
+    const data = [
+      '\\xv example that continues\r',
+      'in the next line.\r',
+      '\\xe another example without the',
+      'carriage return.',
+      '\\ph\r',
     ];
     expect(lines_to_csv_format(data).replace(/^[\s\n]*/gm, '')).toMatchInlineSnapshot(`
-      "\\\\lx,hiyaènhïì
-      \\\\ph,hiZaNhi
-      \\\\tl,H [L] L
-      \\\\ge,hasten, hurry
-      \\\\re,hasten ; hurry
-      \\\\gn,se dépêcher
-      \\\\dt,29/Aug/2005
-      \\\\de,esto solo es una oración cortada de ejemplo
-      \\\\b,
-      \\\\pl,
-      \\\\ps,v
-      \\\\n,1544
-      "
+      "\\\\xv,example that continues in the next line.
+      \\\\xe,another example without the carriage return.
+      \\\\ph,"
     `);
   });
 });
