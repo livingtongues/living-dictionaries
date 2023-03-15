@@ -6,7 +6,7 @@ export function convert_db_to_raw_csv(input: string, output: string) {
     if (err) {
       console.error(err);
     }
-    const csv_text = text_to_csv_format(data.trim().split('\n'));
+    const csv_text = lines_to_csv_format(data.trim().split('\n'));
 
     writeFile(`${relative_path}${output}`, csv_text, (err) => {
       if (err) {
@@ -17,11 +17,17 @@ export function convert_db_to_raw_csv(input: string, output: string) {
   });
 }
 
-export function text_to_csv_format(lines: string[]): string {
-  const rows = lines.map((line) => {
+export function lines_to_csv_format(lines: string[]): string {
+  const rows = lines.map((line, index) => {
+    const add_comma_after_field = line.includes(' ')
+      ? line.replace(/ /, ',')
+      : line.replace(/\r/, ',');
     let csv_line;
-    if (line.startsWith('\\')) {
-      csv_line = line.includes(' ') ? line.replace(/ /, ',') : line.replace(/\r/, ',');
+    if (index < lines.length - 1 && !lines[index + 1].startsWith('\\')) {
+      csv_line = add_comma_after_field;
+      csv_line += ' ' + lines[index + 1];
+    } else if (line.startsWith('\\')) {
+      csv_line = add_comma_after_field;
     }
     return csv_line;
   });
