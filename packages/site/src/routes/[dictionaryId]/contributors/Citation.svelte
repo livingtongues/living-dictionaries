@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { _ } from 'svelte-i18n';
+  import { _, locale } from 'svelte-i18n';
   import { Doc, set } from 'sveltefirets';
   import Button from 'svelte-pieces/ui/Button.svelte';
   import Form from 'svelte-pieces/data/Form.svelte';
@@ -52,8 +52,13 @@
   <div dir="ltr">
     {citation?.citation ? citation.citation + ' ' : ''}
     {new Date().getFullYear()}.
+    {#if ['es', 'fr', 'pt', 'vi'].includes($locale)}
+    <span>{$_('misc.LD_singular', { default: 'Living Dictionary' })}</span>
+    {dictionary.name}.
+    {:else}
     {dictionary.name}
     <span>{$_('misc.LD_singular', { default: 'Living Dictionary' })}.</span>
+    {/if}
     Living Tongues Institute for Endangered Languages. https://livingdictionaries.app/{dictionary.id}
   </div>
 </Doc>
