@@ -128,7 +128,8 @@
     "grammar": "Tata Bahasa",
     "entries": "Entri",
     "youtube_terms": "Istilah youtube",
-    "google_terms": "Istilah google"
+    "google_terms": "Istilah google",
+    "full_title": "{dictionary_name} Kamus Hidup"
   },
   "entry": {
     "view_entries": "Lihat Entri",

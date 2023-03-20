@@ -128,7 +128,8 @@
     "grammar": "ব্যাকরণ",
     "entries": "লিখন",
     "youtube_terms": "ইউটিউব শর্তাদি",
-    "google_terms": "গুগল শর্তাদি"
+    "google_terms": "গুগল শর্তাদি",
+    "full_title": "{dictionary_name} জীবন্ত অভিধান"
   },
   "entry": {
     "view_entries": "এন্ট্রি দেখুন",
