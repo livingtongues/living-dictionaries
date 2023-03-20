@@ -52,13 +52,7 @@
   <div dir="ltr">
     {citation?.citation ? citation.citation + ' ' : ''}
     {new Date().getFullYear()}.
-    {#if ['es', 'fr', 'pt', 'vi'].includes($locale)}
-    <span>{$_('misc.LD_singular', { default: 'Living Dictionary' })}</span>
-    {dictionary.name}.
-    {:else}
-    {dictionary.name}
-    <span>{$_('misc.LD_singular', { default: 'Living Dictionary' })}.</span>
-    {/if}
+    <span>{$_('dictionary.full_title', { values: { dictionary_name: dictionary.name }})}</span>
     Living Tongues Institute for Endangered Languages. https://livingdictionaries.app/{dictionary.id}
   </div>
 </Doc>
