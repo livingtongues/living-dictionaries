@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { _, locale } from 'svelte-i18n';
+  import { _ } from 'svelte-i18n';
   import { Doc, set } from 'sveltefirets';
   import Button from 'svelte-pieces/ui/Button.svelte';
   import Form from 'svelte-pieces/data/Form.svelte';
