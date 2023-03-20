@@ -128,7 +128,8 @@
     "grammar": "Grammar",
     "entries": "Entries",
     "youtube_terms": "Youtube terms",
-    "google_terms": "Google terms"
+    "google_terms": "Google terms",
+    "full_title": "{dictionary_name} Living Dictionary"
   },
   "entry": {
     "view_entries": "View Entries",

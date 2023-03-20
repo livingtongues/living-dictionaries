@@ -128,7 +128,8 @@
     "grammar": "语法",
     "entries": "词条",
     "youtube_terms": "YouTube条款",
-    "google_terms": "Google条款"
+    "google_terms": "Google条款",
+    "full_title": "{dictionary_name} 活字典"
   },
   "entry": {
     "view_entries": "查看词条",
