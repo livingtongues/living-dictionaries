@@ -128,7 +128,8 @@
     "grammar": "Tatabahasa",
     "entries": "Entri",
     "youtube_terms": "Terma YouTube",
-    "google_terms": "Terma Google"
+    "google_terms": "Terma Google",
+    "full_title": "{dictionary_name} Kamus Hidup"
   },
   "entry": {
     "view_entries": "Lihat Entri",

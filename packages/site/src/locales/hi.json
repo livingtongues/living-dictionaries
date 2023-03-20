@@ -128,7 +128,8 @@
     "grammar": "व्याकरण",
     "entries": "प्रविष्टियां",
     "youtube_terms": "यूट्यूब की शर्तें",
-    "google_terms": "गूगल की शर्तें"
+    "google_terms": "गूगल की शर्तें",
+    "full_title": "{dictionary_name} लिविंग शब्दकोश"
   },
   "entry": {
     "view_entries": "प्रविष्टियां देखें",
