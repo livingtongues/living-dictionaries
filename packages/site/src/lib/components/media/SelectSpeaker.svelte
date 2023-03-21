@@ -8,6 +8,7 @@
     initialSpeakerId: string = undefined;
   const addSpeaker = 'AddSpeaker';
   $: speakerId = initialSpeakerId;
+  $: speaker = speakers.find(speaker => speaker.id === speakerId);
 
   import type { ISpeaker } from '@living-dictionaries/types';
   let speakers: ISpeaker[] = [];
@@ -32,7 +33,7 @@
   </div>
 {/if}
 
-<div class="flex rounded-md shadow-sm mb-4">
+<div class="flex rounded-md shadow-sm mb-2">
   {#if $canEdit}
     <label
       for="speaker"
@@ -63,8 +64,13 @@
       </option>
     </select>
   {:else}
-    <p>{$_('entry.speaker', { default: 'Speaker' })}: {speakers.find(speaker => speaker.id === speakerId)?.displayName}</p>
+    <p>{$_('entry.speaker', { default: 'Speaker' })}: {speaker?.displayName}</p>
   {/if}
+</div>
+<!--TODO change age and location to svelte-i18n -->
+<div class="mb-4 flex justify-between text-xs">
+  <p>Age: {speaker?.decade}</p>
+  <p>Location: {speaker?.birthplace}</p>
 </div>
 
 {#if speakerId === addSpeaker}
