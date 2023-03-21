@@ -8,7 +8,7 @@
   import Waveform from '$lib/components/audio/Waveform.svelte';
   import SelectAudio from '$lib/components/audio/SelectAudio.svelte';
   import RecordAudio from '$lib/components/audio/RecordAudio.svelte';
-  import { dictionary, admin } from '$lib/stores';
+  import { dictionary, admin, canEdit } from '$lib/stores';
   import Button from 'svelte-pieces/ui/Button.svelte';
 
   import { deleteAudio } from '$lib/helpers/delete';
@@ -109,6 +109,7 @@
     </SelectSpeaker>
   {/if}
 
+  {#if $canEdit}
   <div class="modal-footer">
     {#if entry.sf}
       {#if $admin > 1}
@@ -145,4 +146,5 @@
       {$_('misc.close', { default: 'Close' })}
     </Button>
   </div>
+  {/if}
 </Modal>
