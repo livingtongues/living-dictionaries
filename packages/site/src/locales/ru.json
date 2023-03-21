@@ -128,7 +128,8 @@
     "grammar": "Грамматика",
     "entries": "Словарные статьи",
     "youtube_terms": "Условия YouTube",
-    "google_terms": "Google термины"
+    "google_terms": "Google термины",
+    "full_title": "{dictionary_name} Живой Словарь"
   },
   "entry": {
     "view_entries": "Просмотр словарных статей",

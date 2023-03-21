@@ -128,7 +128,8 @@
     "grammar": "Sarufi",
     "entries": "Maingizo",
     "youtube_terms": "Masharti ya YouTube",
-    "google_terms": "Masharti ya Google"
+    "google_terms": "Masharti ya Google",
+    "full_title": "{dictionary_name} Kamusi Hai"
   },
   "entry": {
     "view_entries": "Tazama Maingizo",

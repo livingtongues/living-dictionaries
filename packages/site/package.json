@@ -1,6 +1,9 @@
 {
-  "name": "site",
+  "name": "@living-dictionaries/site",
   "version": "0.0.1",
+  "description": "livingdictionaries.app",
+  "type": "module",
+  "main": "src/lib/index.ts",
   "scripts": {
     "dev": "vite dev",
     "build": "vite build",
@@ -60,7 +63,6 @@
     "web-vitals": "^2.1.2",
     "xss": "^1.0.14"
   },
-  "type": "module",
   "simple-git-hooks": {
     "pre-commit": "npx lint-staged"
   },

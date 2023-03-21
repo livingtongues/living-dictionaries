@@ -52,8 +52,7 @@
   <div dir="ltr">
     {citation?.citation ? citation.citation + ' ' : ''}
     {new Date().getFullYear()}.
-    {dictionary.name}
-    <span>{$_('misc.LD_singular', { default: 'Living Dictionary' })}.</span>
+    <span>{$_('dictionary.full_title', { values: { dictionary_name: dictionary.name }})}</span>
     Living Tongues Institute for Endangered Languages. https://livingdictionaries.app/{dictionary.id}
   </div>
 </Doc>

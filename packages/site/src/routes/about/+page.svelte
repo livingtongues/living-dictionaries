@@ -226,6 +226,7 @@
     </li>
     <li><b>{$_('gl.cmn', { default: 'Mandarin' })}</b>: Peng Dong, Joy Wu</li>
     <li><b>{$_('gl.tzm', { default: 'Tamazight' })}</b>: Radia Sami</li>
+    <li><b>{$_('gl.vi', { default: 'Vietnamese' })}</b>: Huy Phan</li>
   </ul>
 
   <h3
@@ -242,7 +243,8 @@
     Chloe Bourdon, Sichen (Larry) Lyu, Tali Tukachinsky, Valeria Macias, Evelyn Ho, Barbara Lourenco
     Oliveira Moreira, Adviye Pelin Teberoğlu, Sophie Shields, Anthony James Brandy, Rammi Quah,
     Alexandra Winslade, Gabriela Collaço Horton, Vikram Nagapudi, Sasha Viola Fennimore, Polly
-    Vishner, Loren Schneider.
+    Vishner, Loren Schneider, Kiasah Izzati, Manuel Aguilera, Maksymilian Rębisz, Rachel Mattie,
+    Aarushi Asthana, Akano Johnson, Selena Syrett.
   </p>
 
   <h3
