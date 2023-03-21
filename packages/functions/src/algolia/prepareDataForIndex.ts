@@ -28,6 +28,7 @@ export async function prepareDataForIndex(
     hasAudio: !!first_sound_file,
     hasSpeaker: !!first_sound_file?.speakerName,
     hasImage: false,
+    hasVideo: false,
     hasSemanticDomain: false,
     hasPartOfSpeech: false,
     hasNounClass: false,
@@ -43,7 +44,7 @@ export async function prepareDataForIndex(
   if (cleaned_entry.ps) cleaned_entry.hasPartOfSpeech = true;
   if (cleaned_entry.nc) cleaned_entry.hasNounClass = true;
   if (cleaned_entry.pl) cleaned_entry.hasPluralForm = true;
-  // TODO: check for videos after adding hasVideo flag to Algolia
+  if (cleaned_entry.vfs?.length) cleaned_entry.hasVideo = true;
 
   if (cleaned_entry.createdBy) {
     cleaned_entry.cb = cleaned_entry.createdBy;

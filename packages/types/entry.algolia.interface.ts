@@ -9,6 +9,7 @@ export interface LDAlgoliaFields {
 
   hasImage: boolean;
   hasAudio: boolean;
+  hasVideo: boolean;
   hasSpeaker: boolean;
   hasSemanticDomain: boolean;
   hasPartOfSpeech: boolean;

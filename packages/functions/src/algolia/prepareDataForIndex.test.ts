@@ -6,6 +6,7 @@ const base_algolia_entry: AlgoliaEntry = {
   dictId,
   hasImage: false,
   hasAudio: false,
+  hasVideo: false,
   hasSpeaker: false,
   hasSemanticDomain: false,
   hasPartOfSpeech: false,
@@ -51,6 +52,7 @@ describe('prepareDataForIndex', () => {
         sdn: ['1.1'],
         xs: [{ en: 'hello everyone' }],
         pfs: [{ gcs: 'foo' }],
+        vfs: [{ path: 'filepath' }],
         de: 'a fruit',
       }],
       sfs: [{ path: 'filepath' }],
@@ -71,6 +73,8 @@ describe('prepareDataForIndex', () => {
       hasSemanticDomain: true,
       pf: { gcs: 'foo' },
       hasImage: true,
+      vfs: [{ path: 'filepath' }],
+      hasVideo: true,
       de: 'a fruit',
       xs: { en: 'hello everyone' },
       sfs: [{ path: 'filepath' }],
@@ -145,7 +149,7 @@ describe('get_speaker_display_name', () => {
     expect(await get_speaker_display_name('foo', mockDb)).toEqual(speaker_name);
   });
 
-  test('returns speaker name', async () => {
+  test('returns speaker name in prepareDataForIndex', async () => {
     const db_entry: ActualDatabaseEntry = {
       sfs: [
         { path: 'filepath', sp: ['foo'] },
