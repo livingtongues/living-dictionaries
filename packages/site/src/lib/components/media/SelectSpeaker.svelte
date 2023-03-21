@@ -2,6 +2,7 @@
   import { _ } from 'svelte-i18n';
   import { Collection } from 'sveltefirets';
   import { where } from 'firebase/firestore';
+  import { canEdit } from '$lib/stores';
 
   export let dictionaryId: string,
     initialSpeakerId: string = undefined;
@@ -32,34 +33,38 @@
 {/if}
 
 <div class="flex rounded-md shadow-sm mb-4">
-  <label
-    for="speaker"
-    class="inline-flex items-center px-3 ltr:rounded-l-md rtl:rounded-r-md border
-  border-gray-300 bg-gray-50 text-gray-500">
-    {$_('entry.speaker', { default: 'Speaker' })}
-  </label>
-  <select
-    use:autofocus
-    bind:value={speakerId}
-    on:change={() => {
-      console.log({ speakerId });
-      if (speakerId && speakerId !== addSpeaker) {
-        dispatch('update', { speakerId });
-      }
-    }}
-    use:autofocus
-    class="block w-full pl-3 !rounded-none ltr:!rounded-r-md rtl:!rounded-l-md form-input hover:outline-blue-600">
-    <option />
-    {#each speakers as speaker}
+  {#if $canEdit}
+    <label
+      for="speaker"
+      class="inline-flex items-center px-3 ltr:rounded-l-md rtl:rounded-r-md border
+    border-gray-300 bg-gray-50 text-gray-500">
+      {$_('entry.speaker', { default: 'Speaker' })}
+    </label>
+    <select
+      use:autofocus
+      bind:value={speakerId}
+      on:change={() => {
+        console.log({ speakerId });
+        if (speakerId && speakerId !== addSpeaker) {
+          dispatch('update', { speakerId });
+        }
+      }}
+      use:autofocus
+      class="block w-full pl-3 !rounded-none ltr:!rounded-r-md rtl:!rounded-l-md form-input hover:outline-blue-600"> 
+      <option />
+      {#each speakers as speaker}
       <option value={speaker.id}>
         {speaker.displayName}
       </option>
-    {/each}
-    <option value={addSpeaker}>
-      +
-      {$_('misc.add', { default: 'Add' })}
-    </option>
-  </select>
+      {/each}
+      <option value={addSpeaker}>
+        +
+        {$_('misc.add', { default: 'Add' })}
+      </option>
+    </select>
+  {:else}
+    <p>{$_('entry.speaker', { default: 'Speaker' })}: {speakers.find(speaker => speaker.id === speakerId)?.displayName}</p>
+  {/if}
 </div>
 
 {#if speakerId === addSpeaker}
