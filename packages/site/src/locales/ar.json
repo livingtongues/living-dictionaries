@@ -128,7 +128,8 @@
     "grammar": "القواعد",
     "entries": "المُدخلات",
     "youtube_terms": "شروط يوتيوب",
-    "google_terms": "شروط جوجل"
+    "google_terms": "شروط جوجل",
+    "full_title": "القاموس الحي {dictionary_name}"
   },
   "entry": {
     "view_entries": "مشاهدة المدخلات",

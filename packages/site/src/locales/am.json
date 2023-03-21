@@ -128,7 +128,8 @@
     "grammar": "ሰዋስዉ",
     "entries": "ግቤቶች",
     "youtube_terms": "የዩቲዩብ ውሎች",
-    "google_terms": "ጉግል ውሎች"
+    "google_terms": "ጉግል ውሎች",
+    "full_title": "{dictionary_name} ሕያው መዝገበ"
   },
   "entry": {
     "view_entries": "ይመልከቱ ግቤቶችን",

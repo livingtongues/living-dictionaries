@@ -128,7 +128,8 @@
     "grammar": "Grammar",
     "entries": "Entries",
     "youtube_terms": "Sharuɗɗan YouTube",
-    "google_terms": "Sharuɗɗan Google"
+    "google_terms": "Sharuɗɗan Google",
+    "full_title": "{dictionary_name} Living Dictionary"
   },
   "entry": {
     "view_entries": "view Entries",

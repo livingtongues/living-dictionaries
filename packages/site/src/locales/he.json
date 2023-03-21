@@ -128,7 +128,8 @@
     "grammar": "דקדוק",
     "entries": "ערכים",
     "youtube_terms": "תנאי יוטיוב",
-    "google_terms": "מונחי גוגל"
+    "google_terms": "מונחי גוגל",
+    "full_title": "מילון חי {dictionary_name}"
   },
   "entry": {
     "view_entries": "צפייה בערכים",
