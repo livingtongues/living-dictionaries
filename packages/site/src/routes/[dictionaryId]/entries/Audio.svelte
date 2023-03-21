@@ -40,14 +40,8 @@
       class="{$$props.class} hover:bg-gray-200 flex flex-col items-center
     justify-center cursor-pointer p-1 select-none"
       use:longpress={800}
-      on:click={() => {
-        if ($canEdit) {
-          toggle();
-        } else {
-          initAudio(entry.sf);
-        }
-      }}
-      on:longpress={() => initAudio(entry.sf)}>
+      on:click={() => initAudio(entry.sf)}
+      on:longpress={toggle}>
       <span class:text-blue-700={playing} class="i-material-symbols-hearing text-2xl mt-1" />
       <div class="text-gray-600 text-sm mt-1">
         {$_('audio.listen', { default: 'Listen' })}
