@@ -8,7 +8,8 @@ import type { GoalDatabaseVideo, ActualDatabaseVideo, ExpandedVideo } from './vi
 import type { LDAlgoliaFields } from './entry.algolia.interface';
 
 // current interface used across the site that we will migrate from this to just ExpandedEntry
-export type IEntry = ExpandedEntry & ActualDatabaseEntry & Pick<LDAlgoliaFields, "_highlightResult">
+export type IEntry = ExpandedEntry & ActualDatabaseEntry & Omit<LDAlgoliaFields, 'ua' | 'ca'>;
+export type LDAlgoliaHit = ActualDatabaseEntry & LDAlgoliaFields;
 
 export interface ExpandedEntry extends IFirestoreMetaData {
   lexeme?: string;

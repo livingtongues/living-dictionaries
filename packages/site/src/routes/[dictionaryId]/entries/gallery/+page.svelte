@@ -39,6 +39,7 @@
   import { dictionary, canEdit } from '$lib/stores';
   import GalleryEntry from '../GalleryEntry.svelte';
   import { Doc } from 'sveltefirets';
+    import { convert_and_expand_entry } from '$lib/transformers/convert_and_expand_entry';
 </script>
 
 <Hits {search} let:entries>
@@ -50,14 +51,16 @@
             path="dictionaries/{$dictionary.id}/words/{algoliaEntry.id}"
             startWith={algoliaEntry}
             let:data={entry}>
-            <GalleryEntry {entry} canEdit={$canEdit} />
+            {@const new_entry_shape = convert_and_expand_entry(entry)}
+            <GalleryEntry entry={new_entry_shape} canEdit={$canEdit} />
           </Doc>
         {/if}
       {/each}
     {:else}
       {#each entries as entry (entry.id)}
         {#if entry.pf}
-          <GalleryEntry {entry} />
+          {@const new_entry_shape = convert_and_expand_entry(entry)}
+          <GalleryEntry entry={new_entry_shape} />
         {/if}
       {/each}
     {/if}
