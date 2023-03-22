@@ -6,6 +6,7 @@
   import { canEdit, columns, dictionary } from '$lib/stores';
   import Cell from './Cell.svelte';
   import { minutesAgo } from '$lib/helpers/time';
+  import { convert_and_expand_entry } from '$lib/transformers/convert_and_expand_entry';
 
   let selectedColumn: IColumn;
 
@@ -17,8 +18,9 @@
     }
   }
 
-  $: adjustedColumns =
-  ['babanki', 'torwali'].includes($dictionary.id) ? [...$columns, { field: 'va', width: 150 }] : $columns;
+  $: adjustedColumns = ['babanki', 'torwali'].includes($dictionary.id)
+    ? [...$columns, { field: 'va', width: 150 }]
+    : $columns;
 </script>
 
 <div
@@ -48,8 +50,8 @@
           <Doc
             path="dictionaries/{$dictionary.id}/words/{algoliaEntry.id}"
             startWith={algoliaEntry}
-            let:data={entry}
-            log>
+            let:data={unconverted_entry}>
+            {@const entry = convert_and_expand_entry(unconverted_entry)}
             <tr class="row-hover">
               {#each adjustedColumns as column, i}
                 <td
@@ -68,7 +70,8 @@
         {/each}
       {/await}
     {:else}
-      {#each entries as entry (entry.id)}
+      {#each entries as unconverted_entry (unconverted_entry.id)}
+        {@const entry = convert_and_expand_entry(unconverted_entry)}
         <tr class="row-hover">
           {#each adjustedColumns as column, i}
             <td

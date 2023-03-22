@@ -4,22 +4,25 @@
   import { limit, orderBy, where, Timestamp } from 'firebase/firestore';
   import { canEdit, dictionary, user } from '$lib/stores';
   import { mergeBy } from '$lib/helpers/array';
-  import type { IEntry } from '@living-dictionaries/types';
   import type { InstantSearch } from 'instantsearch.js';
   import { firebaseConfig } from 'sveltefirets';
+  import type { ActualDatabaseEntry, LDAlgoliaHit } from '@living-dictionaries/types';
 
   export let search: InstantSearch;
 
-  let hits: IEntry[] = [];
-  let recentlyUpdatedEntries: IEntry[] = [];
-  $: entries = mergeBy<IEntry>(hits, recentlyUpdatedEntries, 'id');
+  let hits: LDAlgoliaHit[] = [];
+  let recentlyUpdatedEntries: ActualDatabaseEntry[] = [];
+  $: entries = mergeBy<LDAlgoliaHit | ActualDatabaseEntry>(
+    hits,
+    recentlyUpdatedEntries,
+    'id'
+  );
 
   onMount(() => {
     const customHits = connectHits((params) => {
-      // @ts-ignore
       hits = params.hits.map((hit) => {
         return { ...hit, id: hit.objectID };
-      });
+      }) as unknown as LDAlgoliaHit[];
     });
 
     search.addWidgets([customHits({})]);

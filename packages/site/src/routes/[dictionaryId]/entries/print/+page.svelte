@@ -19,6 +19,7 @@
   import { Doc } from 'sveltefirets';
   import { truncateAuthors } from './truncateAuthors';
   import type { ICitation } from '@living-dictionaries/types';
+  import { convert_and_expand_entry } from '$lib/transformers/convert_and_expand_entry';
 
   const hitsPerPage = createPersistedStore<number>('printHitsPerPage', 50);
   $: if (browser) {
@@ -122,11 +123,12 @@
         class="print-columns pr-4 print:pr-9 max-w-full flex-grow"
         style="--column-count: {$columnCount}">
         {#each entries as entry (entry.id)}
+          {@const new_entry_shape = convert_and_expand_entry(entry)}
           <PrintEntry
             headwordSize={$headwordSize}
             fontSize={$fontSize}
             imagePercent={$imagePercent}
-            {entry}
+            entry={new_entry_shape}
             showQrCode={$showQrCode}
             showLabels={$showLabels}
             selectedFields={$preferredPrintFields}
