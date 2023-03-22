@@ -69,7 +69,7 @@ export interface GoalDatabaseEntry extends IFirestoreMetaDataAbbreviated {
   lo5?: string; // local_orthography_5
   ph?: string; // phonetic
   sfs?: GoalDatabaseAudio[];
-  deletedSfs?: GoalDatabaseAudio[]; // TODO copy across
+  deletedSfs?: GoalDatabaseAudio[]; // TODO sound files into here of subcollection when deleted
   sn?: DatabaseSense[];
   in?: string; // interlinearization
   mr?: string; // morphology
@@ -102,3 +102,5 @@ interface DeprecatedEntry extends Omit<DatabaseSense, 'ps' | 'xs' | 'pfs' | 'del
   createdAt?: Timestamp;
   updatedAt?: Timestamp;
 } // we can set up a nightly function to batch convert 1000 entries with deprecated fields in the database to the current format and then as fields get weeded out they can be removed from here
+
+// Note: entry.cb is "OTD" for entries that came from the Old Talking Dictionaries platform

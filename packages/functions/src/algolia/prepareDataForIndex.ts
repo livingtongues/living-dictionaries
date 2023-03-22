@@ -52,7 +52,8 @@ export async function prepareDataForIndex(
   }
 
   if (cleaned_entry.updatedBy) {
-    cleaned_entry.ub = cleaned_entry.updatedBy;
+    if (!cleaned_entry.ub)
+      cleaned_entry.ub = cleaned_entry.updatedBy;
     delete cleaned_entry.updatedBy;
   }
 
