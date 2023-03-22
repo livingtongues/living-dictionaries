@@ -1,121 +1,115 @@
-import { IEntry } from '@living-dictionaries/types';
-import type admin from 'firebase-admin';
+import { ActualDatabaseEntry, AlgoliaEntry } from '@living-dictionaries/types';
+import { ActualDatabaseAudio } from '@living-dictionaries/types/audio.interface';
+import type { firestore } from 'firebase-admin';
 
 export async function prepareDataForIndex(
-  dbEntry: IEntry,
+  dbEntry: ActualDatabaseEntry,
   dictionaryId: string,
-  db: admin.firestore.Firestore
-) {
-  const entry: IEntry = dbEntry;
-  delete entry.id;
-  entry.dictId = dictionaryId;
-
-  if (entry.pf && entry.pf.gcs) {
-    entry.hasImage = true;
-    entry.pf = {
-      gcs: entry.pf.gcs,
-    };
-  } else {
-    entry.hasImage = false;
-    delete entry.pf;
-  }
-
-  if (entry.sf && entry.sf.path) {
-    entry.hasAudio = true;
-    const cleanSf: any = {
-      path: entry.sf.path,
-    };
-    if (entry.sf.speakerName) {
-      entry.hasSpeaker = true;
-      cleanSf.speakerName = entry.sf.speakerName;
-    } else if (entry.sf.sp) {
-      entry.hasSpeaker = true;
-      const speakerSnap = await db.doc(`speakers/${entry.sf.sp}`).get();
-      const speaker = speakerSnap.data();
-      if (speaker && speaker.displayName) {
-        cleanSf.speakerName = speaker.displayName;
-      } else {
-        const userSnap = await db.doc(`users/${entry.sf.sp}`).get();
-        const user = userSnap.data();
-        if (user && user.displayName) {
-          cleanSf.speakerName = user.displayName;
-        }
-      }
-    } else {
-      entry.hasSpeaker = false;
-    }
-    entry.sf = cleanSf;
-  } else {
-    entry.hasAudio = false;
-    delete entry.sf;
-  }
-
-  if (entry.sd || (entry.sdn && entry.sdn.length)) {
-    entry.hasSemanticDomain = true;
-  } else {
-    entry.hasSemanticDomain = false;
-  }
-
-  if (entry.ps) {
-    entry.hasPartOfSpeech = true;
-  } else {
-    entry.hasPartOfSpeech = false;
-  }
-
-  if (entry.nc) {
-    entry.hasNounClass = true;
-  } else {
-    entry.hasNounClass = false;
-  }
-
-  if (entry.pl) {
-    entry.hasPluralForm = true;
-  } else {
-    entry.hasPluralForm = false;
-  }
-
-  if (entry.createdBy) {
-    entry.cb = entry.createdBy;
-    delete entry.createdBy;
-  }
-
-  if (entry.updatedBy) {
-    entry.ub = entry.updatedBy;
-    delete entry.updatedBy;
-  }
-
-  if (entry.ua) {
+  db: firestore.Firestore
+): Promise<AlgoliaEntry> {
+  // TODO: remove spread of first_sense once refactoring into first sense is complete
+  const first_sense = dbEntry.sn?.[0];
+  // TODO: remove need to backport sfs to sf once refactoring is complete
+  const first_sound_file = await get_first_sound_file(dbEntry, db);
+  const algolia_entry: AlgoliaEntry = {
+    ...dbEntry as Omit<ActualDatabaseEntry, 'ua' | 'ca'>,
+    gl: first_sense?.gl || dbEntry.gl,
+    ps: first_sense?.ps || dbEntry.ps,
+    sd: first_sense?.sd || dbEntry.sd,
+    sdn: first_sense?.sdn || dbEntry.sdn,
+    xs: first_sense?.xs?.[0] || dbEntry.xs,
+    pf: first_sense?.pfs?.[0] || dbEntry.pf,
+    sf: first_sound_file,
     // @ts-ignore
-    entry.ua = entry.ua._seconds;
+    vfs: first_sense?.vfs || dbEntry.vfs,
+    nc: first_sense?.nc || dbEntry.nc,
+    de: first_sense?.de || dbEntry.de,
+    dictId: dictionaryId,
+    hasAudio: !!first_sound_file,
+    hasSpeaker: !!first_sound_file?.speakerName,
+    hasImage: false,
+    hasVideo: false,
+    hasSemanticDomain: false,
+    hasPartOfSpeech: false,
+    hasNounClass: false,
+    hasPluralForm: false,
+  };
+
+  delete algolia_entry.id;
+
+  const cleaned_entry = remove_empty_fields(algolia_entry);
+
+  if (cleaned_entry.pf?.gcs) cleaned_entry.hasImage = true;
+  if (cleaned_entry.sd || cleaned_entry.sdn) cleaned_entry.hasSemanticDomain = true;
+  if (cleaned_entry.ps) cleaned_entry.hasPartOfSpeech = true;
+  if (cleaned_entry.nc) cleaned_entry.hasNounClass = true;
+  if (cleaned_entry.pl) cleaned_entry.hasPluralForm = true;
+  if (cleaned_entry.vfs?.length) cleaned_entry.hasVideo = true;
+
+  if (cleaned_entry.createdBy) {
+    cleaned_entry.cb = cleaned_entry.createdBy;
+    delete cleaned_entry.createdBy;
   }
 
-  if (entry.ca) {
-    // @ts-ignore
-    entry.ca = entry.ca._seconds;
+  if (cleaned_entry.updatedBy) {
+    if (!cleaned_entry.ub)
+      cleaned_entry.ub = cleaned_entry.updatedBy;
+    delete cleaned_entry.updatedBy;
   }
 
-  if (entry.updatedAt) {
-    // @ts-ignore
-    entry.ua = entry.updatedAt._seconds;
-    delete entry.updatedAt;
+  if (cleaned_entry.ua) {
+    cleaned_entry.ua = (cleaned_entry.ua as any)._seconds as number;
+  } else if (cleaned_entry.updatedAt) {
+    cleaned_entry.ua = (cleaned_entry.updatedAt as any)._seconds as number;
+    delete cleaned_entry.updatedAt;
   }
 
-  if (entry.createdAt) {
-    // @ts-ignore
-    entry.ca = entry.createdAt._seconds;
-    delete entry.createdAt;
+  if (cleaned_entry.ca) {
+    cleaned_entry.ca = (cleaned_entry.ca as any)._seconds as number;
+  } else if (cleaned_entry.createdAt) {
+    cleaned_entry.ca = (cleaned_entry.createdAt as any)._seconds as number;
+    delete cleaned_entry.createdAt;
   }
 
+  return cleaned_entry;
+}
+
+export function remove_empty_fields<T>(entry: T): T {
   Object.keys(entry).forEach((key) => {
-    //@ts-ignore
     const value = entry[key];
-    if (value === '' || value === null) {
-      //@ts-ignore
+    if (value === '' || value === null || value === undefined || (Array.isArray(value) && value.length === 0)) {
       delete entry[key];
     }
   });
-
-  // Handle ii? (import ID)
-
   return entry;
+}
+
+async function get_first_sound_file(dbEntry: ActualDatabaseEntry,
+  db: firestore.Firestore): Promise<ActualDatabaseAudio> {
+  const first_sound_file = dbEntry.sfs?.[0] || dbEntry.sf;
+  if (!first_sound_file?.path) return null;
+  if (first_sound_file?.speakerName) return first_sound_file as ActualDatabaseAudio;
+
+  const first_speaker_id = typeof first_sound_file.sp === 'string' ? first_sound_file.sp : first_sound_file.sp?.[0];
+
+  if (first_speaker_id) {
+    first_sound_file.speakerName = await get_speaker_display_name(first_speaker_id, db);
+  }
+
+  return first_sound_file as ActualDatabaseAudio;
+}
+
+export async function get_speaker_display_name(speaker_id: string, db: firestore.Firestore): Promise<string | null> {
+  const speakerSnap = await db.doc(`speakers/${speaker_id}`).get();
+
+  const speaker = speakerSnap.data();
+  if (speaker?.displayName)
+    return speaker.displayName;
+
+  const userSnap = await db.doc(`users/${speaker_id}`).get();
+  const user = userSnap.data();
+  if (user?.displayName)
+    return user.displayName;
+
+  return null;
 }

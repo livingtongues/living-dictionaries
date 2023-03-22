@@ -15,16 +15,16 @@
 		"target": "es2020",
 		"paths": {
 			"$lib": [
-				"src/lib"
+				"./src/lib"
 			],
 			"$lib/*": [
-				"src/lib/*"
+				"./src/lib/*"
 			],
 			"@living-dictionaries/parts": [
-				"src/lib"
+				"./src/lib"
 			],
 			"@living-dictionaries/parts/*": [
-				"src/lib/*"
+				"./src/lib/*"
 			]
 		},
 		"types": [

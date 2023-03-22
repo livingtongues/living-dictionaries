@@ -20,7 +20,7 @@
     "ckeditor5-build-classic-with-alignment-underline-smallcaps": "^1.0.0"
   },
   "devDependencies": {
-    "@iconify/json": "^2.2.18",
+    "@iconify/json": "^2.2.37",
     "@living-dictionaries/types": "^1.0.0",
     "@resvg/resvg-js": "^2.2.0",
     "@sveltejs/adapter-auto": "2.0.0",
@@ -53,7 +53,7 @@
     "typescript": "~4.9.4",
     "unocss": "^0.48.0",
     "vite": "^4.1.1",
-    "vitest": "^0.28.4",
+    "vitest": "^0.29.7",
     "xss": "^1.0.14"
   },
   "repository": {
