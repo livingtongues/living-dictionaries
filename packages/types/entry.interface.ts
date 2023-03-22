@@ -5,9 +5,10 @@ import type { IExampleSentence } from './exampe-sentence.interface';
 import type { GoalDatabaseAudio, ActualDatabaseAudio, ExpandedAudio } from './audio.interface';
 import type { GoalDatabasePhoto, ActualDatabasePhoto, ExpandedPhoto } from './photo.interface';
 import type { GoalDatabaseVideo, ActualDatabaseVideo, ExpandedVideo } from './video.interface';
+import { LDAlgoliaFields } from './entry.algolia.interface';
 
 // current interface used across the site that we will migrate from this to just ExpandedEntry
-export type IEntry = ExpandedEntry & ActualDatabaseEntry & LDAlgoliaFields
+export type IEntry = ExpandedEntry & ActualDatabaseEntry & Pick<LDAlgoliaFields, "_highlightResult">
 
 export interface ExpandedEntry extends IFirestoreMetaData {
   lexeme?: string;
@@ -68,7 +69,7 @@ export interface GoalDatabaseEntry extends IFirestoreMetaDataAbbreviated {
   lo5?: string; // local_orthography_5
   ph?: string; // phonetic
   sfs?: GoalDatabaseAudio[];
-  deletedSfs?: GoalDatabaseAudio[]; // TODO copy across
+  deletedSfs?: GoalDatabaseAudio[]; // TODO sound files into here of subcollection when deleted
   sn?: DatabaseSense[];
   in?: string; // interlinearization
   mr?: string; // morphology
@@ -93,7 +94,7 @@ interface DeprecatedEntry extends Omit<DatabaseSense, 'ps' | 'xs' | 'pfs' | 'del
   vfs?: ActualDatabaseVideo[]; // video files
   xs?: IExampleSentence;
   xv?: string; // example vernacular - used for old dictionary imports (deprecated)
-  
+
   // old metadata
   ab?: string; // addedBy
   createdBy?: string;
@@ -102,16 +103,4 @@ interface DeprecatedEntry extends Omit<DatabaseSense, 'ps' | 'xs' | 'pfs' | 'del
   updatedAt?: Timestamp;
 } // we can set up a nightly function to batch convert 1000 entries with deprecated fields in the database to the current format and then as fields get weeded out they can be removed from here
 
-interface LDAlgoliaFields {
-  dictId?: string; // dictionary Id entry belongs to, to filter search results by dictionary
-  _highlightResult?: any;
-
-  hasImage?: boolean;
-  hasAudio?: boolean;
-  hasSpeaker?: boolean;
-  hasSemanticDomain?: boolean;
-  hasPartOfSpeech?: boolean;
-  hasNounClass?: boolean;
-  hasPluralForm?: boolean;
-}
-
+// Note: entry.cb is "OTD" for entries that came from the Old Talking Dictionaries platform

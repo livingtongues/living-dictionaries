@@ -8,10 +8,10 @@
     "shell": "npm run build && firebase functions:shell",
     "start": "npm run shell",
     "deploy": "firebase deploy --only functions",
-    "deploy:specific": "firebase deploy --only functions:addToIndex,functions:updateIndex,functions:deleteFromIndex -P default",
-    "deploy:specific:prod": "firebase deploy --only functions:addToIndex,functions:updateIndex,functions:deleteFromIndex -P production",
+    "deploy:specific": "firebase deploy --only functions:addToIndex,functions:updateIndex -P default",
+    "deploy:specific:prod": "firebase deploy --only functions:addToIndex,functions:updateIndex -P production",
     "logs": "firebase functions:log",
-    "test": "vitest -u"
+    "test": "vitest"
   },
   "engines": {
     "node": "16"
@@ -20,7 +20,7 @@
   "dependencies": {
     "algoliasearch": "^4.13.0",
     "firebase-admin": "^10.3.0",
-    "firebase-functions": "^3.24.0",
+    "firebase-functions": "^4.2.1",
     "firebase-tools": "^10.8.0"
   },
   "devDependencies": {
@@ -31,7 +31,7 @@
     "firebase-functions-test": "^0.2.0",
     "node-fetch": "^2.6.7",
     "typescript": "^4.9.4",
-    "vitest": "^0.28.4"
+    "vitest": "^0.29.7"
   },
   "private": true
 }
