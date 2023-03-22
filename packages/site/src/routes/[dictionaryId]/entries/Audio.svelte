@@ -4,7 +4,7 @@
   export let entry: IEntry,
     minimal = false;
   import { canEdit } from '$lib/stores';
-  import { longpress } from 'svelte-pieces/actions/longpress';
+  import { getContext } from 'svelte';
   import { firebaseConfig } from 'sveltefirets';
   import ShowHide from 'svelte-pieces/functions/ShowHide.svelte';
 
@@ -30,6 +30,8 @@
   //   console.log(speaker);
   //   return speaker;
   // }
+
+  const parent = getContext('parent');
 </script>
 
 <ShowHide let:show let:toggle>
@@ -39,9 +41,13 @@
     <div
       class="{$$props.class} hover:bg-gray-200 flex flex-col items-center
     justify-center cursor-pointer p-1 select-none"
-      use:longpress={800}
-      on:click={() => initAudio(entry.sf)}
-      on:longpress={toggle}>
+      on:click={() => {
+        if (parent === 'EntryMedia') {
+          toggle();
+        } else {
+          initAudio(entry.sf);
+        }
+      }}>
       <span class:text-blue-700={playing} class="i-material-symbols-hearing text-2xl mt-1" />
       <div class="text-gray-600 text-sm mt-1">
         {$_('audio.listen', { default: 'Listen' })}

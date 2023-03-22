@@ -7,6 +7,9 @@
   import ShowHide from 'svelte-pieces/functions/ShowHide.svelte';
   import Video from '../../entries/Video.svelte';
   import { deleteImage } from '$lib/helpers/delete';
+  import { setContext } from 'svelte';
+
+  setContext('parent', 'EntryMedia')
 
   export let entry: IEntry,
     videoAccess = false,
@@ -56,3 +59,13 @@
 {#if entry.sf || canEdit}
   <Audio {entry} class="h-20 mb-2 rounded-md bg-gray-100 !px-3" />
 {/if}
+<!-- {#if entry.sf}
+  <ShowHide let:show let:toggle>
+    {#if show}
+      {#await import('$lib/components/audio/EditAudio.svelte') then { default: EditAudio }}
+        <EditAudio {entry} on:close={toggle} />
+      {/await}
+    {/if}
+  </ShowHide>
+{/if} -->
+
