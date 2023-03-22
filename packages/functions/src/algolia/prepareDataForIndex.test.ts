@@ -121,6 +121,18 @@ describe('prepareDataForIndex', () => {
     }
     expect(await prepareDataForIndex(db_entry, dictId, null)).toEqual(algolia_entry);
   });
+
+  test('does not overwrite ub with stale updatedBy', async () => {
+    const db_entry: ActualDatabaseEntry = {
+      ub: 'accurate',
+      updatedBy: 'stale',
+    };
+    const algolia_entry: AlgoliaEntry = {
+      ...base_algolia_entry,
+      ub: 'accurate',
+    }
+    expect(await prepareDataForIndex(db_entry, dictId, null)).toEqual(algolia_entry);
+  });
 });
 
 describe('get_speaker_display_name', () => {
