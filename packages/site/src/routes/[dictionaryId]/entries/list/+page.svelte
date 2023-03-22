@@ -30,6 +30,7 @@
         path="dictionaries/{$dictionary.id}/words/{algoliaEntry.id}"
         startWith={algoliaEntry}
         let:data={entry}>
+        {@const new_entry_shape = entry}
         <ListEntry {entry} videoAccess={$dictionary.videoAccess || $admin > 0} canEdit={$canEdit} />
       </Doc>
     {/each}

@@ -12,11 +12,11 @@ export type IEntry = ExpandedEntry & ActualDatabaseEntry & Pick<LDAlgoliaFields,
 
 export interface ExpandedEntry extends IFirestoreMetaData {
   lexeme?: string;
-  local_orthagraphy_1?: string;
-  local_orthagraphy_2?: string;
-  local_orthagraphy_3?: string;
-  local_orthagraphy_4?: string;
-  local_orthagraphy_5?: string;
+  local_orthography_1?: string;
+  local_orthography_2?: string;
+  local_orthography_3?: string;
+  local_orthography_4?: string;
+  local_orthography_5?: string;
   phonetic?: string;
   sound_files?: ExpandedAudio[];
   senses?: ExpandedSense[];

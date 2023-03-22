@@ -76,11 +76,11 @@ describe('expand_entry', () => {
     const expanded_entry: ExpandedEntry = {
       id: '1',
       lexeme: 'house',
-      local_orthagraphy_1: 'lo1 form',
-      local_orthagraphy_2: 'lo2 form',
-      local_orthagraphy_3: 'lo3 form',
-      local_orthagraphy_4: 'lo4 form',
-      local_orthagraphy_5: 'lo5 form',
+      local_orthography_1: 'lo1 form',
+      local_orthography_2: 'lo2 form',
+      local_orthography_3: 'lo3 form',
+      local_orthography_4: 'lo4 form',
+      local_orthography_5: 'lo5 form',
       phonetic: 'a?u',
       senses: [{
         glosses: { en: 'foo' },
@@ -123,6 +123,14 @@ describe('expand_entry', () => {
       elicitation_id: 'ei12',
     }
 
-    expect(expand_entry(database_entry)).toEqual({ ...database_entry, ...expanded_entry });
+    expect(expand_entry(database_entry)).toEqual(expanded_entry);
+  });
+
+  test('empty entry', () => {
+    const database_entry: GoalDatabaseEntry = {};
+    const expanded_entry: ExpandedEntry = {
+      senses: [],
+    };
+    expect(expand_entry(database_entry)).toEqual(expanded_entry);
   });
 });

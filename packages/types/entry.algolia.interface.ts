@@ -1,4 +1,4 @@
-import { ActualDatabaseEntry } from "./entry.interface";
+import type { ActualDatabaseEntry } from "./entry.interface";
 
 export type AlgoliaEntry = Omit<ActualDatabaseEntry, 'ua' | 'ca'> & LDAlgoliaFields;
 
