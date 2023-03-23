@@ -47,6 +47,7 @@
     <SelectSpeaker
       dictionaryId={$dictionary.id}
       initialSpeakerId={(entry.sf && entry.sf.sp) || null}
+      dialect={entry.di}
       let:speakerId
       on:update={async ({ detail }) => {
         if (entry.sf && detail.speakerId != entry.sf.sp) {

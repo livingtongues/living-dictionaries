@@ -5,6 +5,7 @@
   import { canEdit } from '$lib/stores';
 
   export let dictionaryId: string,
+    dialect: string | string[] = undefined, // string[] it's only to avoid lint, for now it's only a string
     initialSpeakerId: string = undefined;
   const addSpeaker = 'AddSpeaker';
   $: speakerId = initialSpeakerId;
@@ -67,11 +68,13 @@
     <p>{$_('entry.speaker', { default: 'Speaker' })}: {speaker?.displayName}</p>
   {/if}
 </div>
-<!--TODO change age and location to svelte-i18n -->
-<div class="mb-4 flex justify-between text-xs">
-  <p>Age: {speaker?.decade}</p>
-  <p>Location: {speaker?.birthplace}</p>
-</div>
+{#if speakerId}
+  <div class="mb-4 text-xs">
+    {#if typeof speaker?.decade === 'number'}<p>{$_('speakers.age_range', { default: 'Age Range' })}: {speaker.decade*10+1}-{(speaker.decade+1)*10}</p>{/if}
+    {#if speaker?.birthplace}<p>{$_('speakers.birthplace', { default: 'Birthplace' })}: {speaker?.birthplace}</p>{/if}
+    {#if dialect}<p>{$_('entry.di', { default: 'Dialect' })}: {dialect}</p>{/if}
+  </div>
+{/if}
 
 {#if speakerId === addSpeaker}
   {#await import('$lib/components/media/AddSpeaker.svelte') then { default: AddSpeaker }}
