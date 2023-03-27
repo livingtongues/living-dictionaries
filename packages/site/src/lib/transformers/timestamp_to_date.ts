@@ -1,6 +1,8 @@
-import type { Timestamp } from "firebase/firestore";
+import type { Timestamp } from 'firebase/firestore';
 
-export function convert_timestamp_to_date_object(timestamp: number | Date | Timestamp): Date | null {
+export function convert_timestamp_to_date_object(
+  timestamp: number | Date | Timestamp
+): Date | null {
   if (timestamp instanceof Date) {
     return timestamp;
   }
@@ -17,7 +19,7 @@ export function convert_timestamp_to_date_object(timestamp: number | Date | Time
     return null;
   }
   // eslint-disable-next-line no-prototype-builtins
-  if (timestamp.hasOwnProperty('toDate')) {
+  if (timestamp?.hasOwnProperty('toDate')) {
     return timestamp.toDate();
   }
   return null;
@@ -42,10 +44,10 @@ if (import.meta.vitest) {
     test('converts a Firestore Timestamp', () => {
       const mockToDate = function () {
         return new Date(this.toMillis());
-      }
+      };
       const mockToMillis = function () {
         return 1e3 * this.seconds + this.nanoseconds / 1e6;
-      }
+      };
       const fs_timestamp = {
         seconds: 1620000000,
         nanoseconds: 0,
