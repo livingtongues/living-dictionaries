@@ -9,6 +9,8 @@ import { glossingLanguages } from './glossing-languages-temp'; // todo - import 
 import { friendlyName } from './friendlyName';
 import { stripHTMLTags } from './stripHTMLTags';
 
+const dictionaries_with_variant = ['babanki', 'torwali'];
+
 enum EntryCSVFieldsEnum {
   id = 'Entry Id',
   lx = 'Lexeme/Word/Phrase',
@@ -74,7 +76,7 @@ export function formatEntriesForCSV(
   });
 
   // Dictionary specific
-  if (dictionaryId === 'babanki') {
+  if (dictionaries_with_variant.includes(dictionaryId)) {
     headers.va = 'variant';
   }
 
@@ -153,7 +155,7 @@ export function formatEntriesForCSV(
     });
 
     // Dictionary specific
-    if (['babanki', 'torwali'].includes(dictionaryId)) {
+    if (dictionaries_with_variant.includes(dictionaryId)) {
       formattedEntry.va = entry.va;
     }
 
