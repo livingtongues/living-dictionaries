@@ -5,7 +5,33 @@ import type {
   ISemanticDomain,
   ISpeaker,
 } from '@living-dictionaries/types';
-import { formatEntriesForCSV } from './formatEntries';
+import { formatEntriesForCSV, get_max_sdn } from './formatEntries';
+import { convert_entry_to_current_shape } from '$lib/transformers/convert_entry_to_current_shape';
+
+describe('get_max_sdn', () => {
+  test('gets the max number of semantic domains in all senses and entries', () => {
+    const entries: IEntry[] = [
+      {
+        sn: [{ sdn: ['1'] }],
+      },
+      {
+        sn: [{ sdn: ['1', '2', '3'] }],
+      },
+      {
+        sn: [{ sdn: ['1', '2'] }, { sdn: ['1', '2', '3', '4'] }],
+      },
+    ];
+    expect(get_max_sdn(entries)).toEqual(4);
+  });
+  test('gets the max number of empty senses', () => {
+    const entries: IEntry[] = [
+      {
+        sn: [],
+      },
+    ];
+    expect(get_max_sdn(entries)).toEqual(-Infinity);
+  });
+});
 
 test('formatEntriesForCSV basic example to smoke test', () => {
   const entriesArray: IEntry[] = [
@@ -31,7 +57,12 @@ test('formatEntriesForCSV basic example to smoke test', () => {
     },
     { id: '34qw', lx: 'tree', gl: { es: 'arbol' } },
   ];
-  const dictionary: IDictionary = { name: 'TestLang', id: 'test', glossLanguages: ['ar', 'en'], entryCount: 0 };
+  const dictionary: IDictionary = {
+    name: 'TestLang',
+    id: 'test',
+    glossLanguages: ['ar', 'en'],
+    entryCount: 0,
+  };
   const speakers: ISpeaker[] = [
     {
       displayName: 'John Smith',
@@ -43,7 +74,8 @@ test('formatEntriesForCSV basic example to smoke test', () => {
   ];
   const semanticDomains: ISemanticDomain[] = [{ key: '2.1', name: 'Plant Test Domain' }];
   const partsOfSpeech: IPartOfSpeech[] = [{ enAbbrev: 'n', enName: 'noun' }];
-  expect(formatEntriesForCSV(entriesArray, dictionary, speakers, semanticDomains, partsOfSpeech))
+  const entries = entriesArray.map((entry) => convert_entry_to_current_shape(entry));
+  expect(formatEntriesForCSV(entries, dictionary, speakers, semanticDomains, partsOfSpeech))
     .toMatchInlineSnapshot(`
       [
         {

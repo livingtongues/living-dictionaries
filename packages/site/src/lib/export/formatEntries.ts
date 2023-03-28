@@ -35,9 +35,16 @@ type EntryForCSV = {
 };
 export interface IEntryForCSV extends EntryForCSV {
   xsvn?: string;
-  va?: string; // optional for Babanki
+  va?: string; // optional for Babanki & Torwali
   sfpa?: string; // for downloading file, not exported in CSV
   pfpa?: string; // for downloading file, not exported in CSV
+}
+
+export function get_max_sdn(entries: IEntry[]): number {
+  const max_semantic_domain_length = Math.max(
+    ...entries.flatMap((entry) => entry.sn.map((sense) => sense.sdn.length))
+  );
+  return max_semantic_domain_length;
 }
 
 export function formatEntriesForCSV(
@@ -55,7 +62,7 @@ export function formatEntriesForCSV(
   // Begin dynamic headers
 
   // Assign max number of semantic domains used by a single entry
-  const maxSDN = Math.max(...entries.map((entry) => entry.sdn?.length || 0));
+  const maxSDN = get_max_sdn(entries);
   if (maxSDN > 0) {
     for (let index = 0; index < maxSDN; index++) {
       headers[`sd${index + 1}`] = `Semantic domain ${index + 1}`;
