@@ -29,7 +29,7 @@ test('formatEntriesForCSV basic example to smoke test', () => {
       pf: { gcs: 'not_needed_here', path: 'https://database.com/image.mp3' },
       xv: '',
     },
-    { id: '34qw', lx: 'tree', lo: 'sajb', lo2: 'sslk', gl: { es: 'arbol' } },
+    { id: '34qw', lx: 'tree', gl: { es: 'arbol' } },
   ];
   const dictionary: IDictionary = {
     name: 'TestLang',
@@ -121,8 +121,8 @@ test('formatEntriesForCSV basic example to smoke test', () => {
         "glen": "",
         "id": "34qw",
         "in": undefined,
-        "lo1": "sajb",
-        "lo2": "sslk",
+        "lo1": "",
+        "lo2": "",
         "lx": "tree",
         "mr": undefined,
         "nc": undefined,

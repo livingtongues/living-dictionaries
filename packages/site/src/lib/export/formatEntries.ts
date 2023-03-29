@@ -110,14 +110,16 @@ export function formatEntriesForCSV(
     } as IEntryForCSV;
 
     // alternate orthographies
-    const local_orthographies_keys = Object.keys(entry).filter((key) => key.startsWith('lo'));
-    alternateOrthographies.forEach((_, index) => {
-      if (entry[local_orthographies_keys[index]]) {
-        formattedEntry[`lo${index + 1}`] = entry[local_orthographies_keys[index]];
-      } else {
-        formattedEntry[`lo${index + 1}`] = '';
-      }
-    });
+    if (alternateOrthographies) {
+      const local_orthographies_keys = Object.keys(entry).filter((key) => key.startsWith('lo'));
+      alternateOrthographies.forEach((_, index) => {
+        if (entry[local_orthographies_keys[index]]) {
+          formattedEntry[`lo${index + 1}`] = entry[local_orthographies_keys[index]];
+        } else {
+          formattedEntry[`lo${index + 1}`] = '';
+        }
+      });
+    }
 
     // part of speech (abbreviation & name)
     if (entry.ps) {
