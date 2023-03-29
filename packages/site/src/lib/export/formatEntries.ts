@@ -44,7 +44,7 @@ export interface IEntryForCSV extends EntryForCSV {
 
 export function formatEntriesForCSV(
   entries: IEntry[],
-  { name: dictionaryName, id: dictionaryId, glossLanguages }: IDictionary,
+  { name: dictionaryName, id: dictionaryId, glossLanguages, alternateOrthographies }: IDictionary,
   speakers: ISpeaker[],
   semanticDomains: ISemanticDomain[],
   partsOfSpeech: IPartOfSpeech[]
@@ -55,6 +55,13 @@ export function formatEntriesForCSV(
   }
 
   // Begin dynamic headers
+
+  // Assign local orthographies
+  if (alternateOrthographies) {
+    alternateOrthographies.forEach((lo, index) => {
+      headers[`lo${index + 1}`] = lo;
+    });
+  }
 
   // Assign max number of semantic domains used by a single entry
   const maxSDN = Math.max(...entries.map((entry) => entry.sdn?.length || 0));
@@ -101,6 +108,16 @@ export function formatEntriesForCSV(
       sfge: '',
       pfFriendlyName: '',
     } as IEntryForCSV;
+
+    // alternate orthographies
+    const local_orthographies_keys = Object.keys(entry).filter((key) => key.startsWith('lo'));
+    alternateOrthographies.forEach((_, index) => {
+      if (entry[local_orthographies_keys[index]]) {
+        formattedEntry[`lo${index + 1}`] = entry[local_orthographies_keys[index]];
+      } else {
+        formattedEntry[`lo${index + 1}`] = '';
+      }
+    });
 
     // part of speech (abbreviation & name)
     if (entry.ps) {
