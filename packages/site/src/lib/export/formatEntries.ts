@@ -111,12 +111,19 @@ export function formatEntriesForCSV(
 
     // alternate orthographies
     if (alternateOrthographies) {
-      const local_orthographies_keys = Object.keys(entry).filter((key) => key.startsWith('lo'));
-      alternateOrthographies.forEach((_, index) => {
-        if (entry[local_orthographies_keys[index]]) {
-          formattedEntry[`lo${index + 1}`] = entry[local_orthographies_keys[index]];
+      const local_orthographies_keys_of_entry = Object.keys(entry).filter((key) =>
+        key.startsWith('lo')
+      );
+      const local_orthographies_headers = Object.keys(headers).filter((key) =>
+        key.startsWith('lo')
+      );
+      local_orthographies_headers.forEach((lo, index) => {
+        if (entry[local_orthographies_keys_of_entry[index]]) {
+          formattedEntry[lo] = local_orthographies_keys_of_entry.includes(lo)
+            ? entry[lo]
+            : entry['lo'];
         } else {
-          formattedEntry[`lo${index + 1}`] = '';
+          formattedEntry[lo] = '';
         }
       });
     }
