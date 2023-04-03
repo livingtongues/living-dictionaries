@@ -42,7 +42,7 @@ async function fetchEntries(dictionaryId: string) {
     // await notesToPluralForm(dictionaryId, entry);
     // turnPOSintoArray(dictionaryId, entry); // not awaiting so operations can run in parallel otherwise the function errors after about 1400 iterations
     // reverese_semantic_domains_in_db(dictionaryId, entry);
-    move_dialect_to_notes(dictionaryId, entry, '');
+    move_dialect_to_notes(dictionaryId, entry, ''); // if the manual_text parameter is not provided, the function will only delete the dialect field;
   }
 }
 
