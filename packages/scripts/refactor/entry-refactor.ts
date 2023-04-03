@@ -42,7 +42,7 @@ async function fetchEntries(dictionaryId: string) {
     // await notesToPluralForm(dictionaryId, entry);
     // turnPOSintoArray(dictionaryId, entry); // not awaiting so operations can run in parallel otherwise the function errors after about 1400 iterations
     // reverese_semantic_domains_in_db(dictionaryId, entry);
-    move_dialect_to_notes(dictionaryId, entry, 'Example: ');
+    move_dialect_to_notes(dictionaryId, entry, '');
   }
 }
 
@@ -64,18 +64,20 @@ const move_dialect_to_notes = async (
   entry: IEntry,
   manual_text: string = null
 ) => {
-  if (entry.di && manual_text) {
+  if (entry.di) {
     console.log('entry dialect before:');
     console.log(entry.di);
-    if (entry.nt) {
-      console.log('entry notes before:');
-      console.log(entry?.nt);
-      entry.nt = `${entry?.nt}<br>${manual_text}${entry.di}`;
-    } else {
-      entry.nt = `${manual_text}${entry.di}`;
+    if (manual_text !== null) {
+      if (entry.nt) {
+        console.log('entry notes before:');
+        console.log(entry?.nt);
+        entry.nt = `${entry?.nt}<p>${manual_text}${entry.di}</p>`;
+      } else {
+        entry.nt = `${manual_text}${entry.di}`;
+      }
+      console.log('entry notes after:');
+      console.log(entry.nt);
     }
-    console.log('entry notes after:');
-    console.log(entry.nt);
   }
   delete entry.di;
   if (!live) return;
