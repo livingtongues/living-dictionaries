@@ -65,7 +65,7 @@ const move_dialect_to_notes = async (
   manual_text: string = null
 ) => {
   if (entry.di) {
-    console.log('entry dialect before:');
+    console.log('entry dialect before deleting it:');
     console.log(entry.di);
     if (manual_text !== null) {
       if (entry.nt) {
