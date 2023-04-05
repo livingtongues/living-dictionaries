@@ -171,7 +171,8 @@
     "gloss": "terjemahan",
     "pl": "Bentuk jamak",
     "print": "Mencetak",
-    "id": "PENGENAL"
+    "id": "PENGENAL",
+    "scn": "Nama ilmiah"
   },
   "error": {
     "run_into_error": "Maaf, sistem kami mengalami masalah",

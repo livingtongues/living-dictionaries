@@ -171,7 +171,8 @@
     "gloss": "traducción",
     "pl": "Forma plural",
     "print": "Imprimir",
-    "id": "ID"
+    "id": "ID",
+    "scn": "Nombre científico"
   },
   "error": {
     "run_into_error": "Lo sentimos, hay un error.",
