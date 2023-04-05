@@ -20,7 +20,7 @@
 </script>
 
 <div
-  class:sompeng={column.display === 'Sompeng-Mardir'}
+  class:sompeng={column.display === 'Sompeng'}
   class="{updatedValue !== undefined
     ? 'bg-green-100 border-green-400 border'
     : ''} h-full w-full inline-block">
