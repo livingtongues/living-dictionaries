@@ -69,6 +69,14 @@
         on:valueupdate />
     {/each}
 
+    <EntryField
+      value={entry.scn?.[0]}
+      field="scn"
+      {canEdit}
+      display={$t('entry.scn', { default: 'Scientific Name' })}
+      on:valueupdate={({ detail }) =>
+        dispatch('valueupdate', { field: 'scn', newValue: [detail.newValue] })} />
+
     {#if entry.de}
       <!-- Only in Bahasa Lani (id: jaRhn6MAZim4Blvr1iEv) -->
       <EntryField
@@ -89,7 +97,7 @@
 
     <EntrySemanticDomains {canEdit} {entry} on:valueupdate />
 
-    {#if  ['babanki', 'torwali'].includes($dictionary.id)}
+    {#if ['babanki', 'torwali'].includes($dictionary.id)}
       <EntryField
         value={entry['va']}
         field="va"
@@ -99,7 +107,7 @@
     {/if}
 
     <EntryDialect {canEdit} {entry} on:valueupdate />
-    
+
     {#each ['pl', 'nc', 'mr', 'in', 'nt'] as field}
       <EntryField
         value={entry[field]}

@@ -177,7 +177,7 @@
         >Toggle sᴍᴀʟʟCᴀᴘs for selection</Button>
     {/if}
 
-    {#if field.startsWith('gl')}
+    {#if field === 'scn' || field.startsWith('gl')}
       <Button
         class="mt-1"
         size="sm"

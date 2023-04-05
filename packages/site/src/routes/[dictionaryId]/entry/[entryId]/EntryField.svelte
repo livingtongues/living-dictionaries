@@ -25,12 +25,14 @@
         class="border-dashed pb-1 mb-2">
         {#if value}
           <div dir="ltr">
-            {#if field === 'nt' || value.indexOf('<i>') > -1}
+            {#if field === 'nt' || value.includes('<i>')}
               <span class="tw-prose">
                 {@html value}
               </span>
             {:else if field === 'ph'}
               [{value}]
+            {:else if field === 'scn'}
+              <span class="italic">{value}</span>
             {:else}
               {value}
             {/if}
