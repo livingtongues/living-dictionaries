@@ -24,7 +24,7 @@
 
 <div
   class:disabled
-  class:sompeng={name === 'Sompeng-Mardir'}
+  class:sompeng={name === 'Sompeng'}
   class="field"
   style="--font-size: {size}rem;">
   <textarea

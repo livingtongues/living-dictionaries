@@ -18,8 +18,8 @@
   <EditField value="should have keyboard icon" field="gl.as" />
 </Story>
 
-<!-- <Story name="Sompeng-Mardir">
-  <EditField display="Sompeng-Mardir" value="Sompeng" field="gl" />
+<!-- <Story name="Sompeng">
+  <EditField display="Sompeng" value="Sompeng" field="gl" />
 </Story> -->
 
 <Story name="italicized gloss">
@@ -42,4 +42,3 @@
     {/if}
   </ShowHide>
 </Story>
-
