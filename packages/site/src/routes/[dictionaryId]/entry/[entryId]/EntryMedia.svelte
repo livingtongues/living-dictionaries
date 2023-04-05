@@ -7,9 +7,6 @@
   import ShowHide from 'svelte-pieces/functions/ShowHide.svelte';
   import Video from '../../entries/Video.svelte';
   import { deleteImage } from '$lib/helpers/delete';
-  import { setContext } from 'svelte';
-
-  setContext('parent', 'EntryMedia')
 
   export let entry: IEntry,
     videoAccess = false,
@@ -57,6 +54,6 @@
 {/if}
 
 {#if entry.sf || canEdit}
-  <Audio {entry} class="h-20 mb-2 rounded-md bg-gray-100 !px-3" />
+  <Audio {entry} showModal={true} class="h-20 mb-2 rounded-md bg-gray-100 !px-3" />
 {/if}
 

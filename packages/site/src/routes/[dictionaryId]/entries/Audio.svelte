@@ -2,9 +2,9 @@
   import { _ } from 'svelte-i18n';
   import type { IEntry } from '@living-dictionaries/types';
   export let entry: IEntry,
-    minimal = false;
+    minimal = false,
+    showModal = false;
   import { canEdit } from '$lib/stores';
-  import { getContext } from 'svelte';
   import { firebaseConfig } from 'sveltefirets';
   import ShowHide from 'svelte-pieces/functions/ShowHide.svelte';
 
@@ -30,8 +30,6 @@
   //   console.log(speaker);
   //   return speaker;
   // }
-
-  const parent = getContext('parent');
 </script>
 
 <ShowHide let:show let:toggle>
@@ -42,7 +40,7 @@
       class="{$$props.class} hover:bg-gray-200 flex flex-col items-center
     justify-center cursor-pointer p-1 select-none"
       on:click={() => {
-        if (parent === 'EntryMedia') {
+        if (showModal) {
           toggle();
         } else {
           initAudio(entry.sf);
