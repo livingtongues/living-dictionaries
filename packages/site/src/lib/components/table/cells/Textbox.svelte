@@ -11,6 +11,7 @@
 
 <div
   class:cursor-pointer={canEdit}
+  class:italic={field === 'scn'}
   class="h-full"
   style="padding: 0.1em 0.25em"
   on:click={() => {
