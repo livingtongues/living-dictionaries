@@ -11,7 +11,7 @@
 
 <div
   class:cursor-pointer={canEdit}
-  class:italic={field === 'scn'}
+  class:italic={field === 'scn' && !value?.includes('<i>')}
   class="h-full"
   style="padding: 0.1em 0.25em"
   on:click={() => {
