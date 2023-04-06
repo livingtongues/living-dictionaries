@@ -7,7 +7,7 @@ test('convertJsonRowToEntryFormat properly converts entries', async () => {
   const dictionaryId = 'example-v4';
   const file = readFileSync(`./import/data/${dictionaryId}/${dictionaryId}.csv`, 'utf8');
   const rows = parseCSVFrom(file);
-  const rowsWithoutHeader = removeHeaderRow(rows)
+  const rowsWithoutHeader = removeHeaderRow(rows);
   const entries = rowsWithoutHeader.map((row) =>
     convertJsonRowToEntryFormat(
       row,
@@ -62,6 +62,9 @@ test('convertJsonRowToEntryFormat properly converts entries', async () => {
           "n",
           "adj",
         ],
+        "scn": [
+          "Acer rubrum",
+        ],
         "sdn": [
           "1.4",
           "1.2",
@@ -96,9 +99,9 @@ test('convertJsonRowToEntryFormat properly converts entries', async () => {
         ],
         "ua": 10101010,
         "xs": {
-          "en": "The water goes through the tubes ",
+          "en": "The water goes through the tubes",
           "es": "El agua pasa a través de los tubos",
-          "vn": "L'eau passe à travers les tubes ",
+          "vn": "L'eau passe à travers les tubes",
         },
       },
       {
@@ -159,7 +162,7 @@ test('convertJsonRowToEntryFormat properly converts entries', async () => {
           "es": "celebrar",
         },
         "ii": "v4-10101010",
-        "lx": "fêter ",
+        "lx": "fêter",
         "nt": "to have a party",
         "ph": "fɛɪ̯te",
         "ps": [
