@@ -1,5 +1,6 @@
 import type { IEntry } from '@living-dictionaries/types';
 import type { Timestamp } from 'firebase/firestore';
+import { semanticDomains } from './FLEx/semanticDomains';
 
 export function convertJsonRowToEntryFormat(
   row: Record<string, string>,
@@ -19,10 +20,14 @@ export function convertJsonRowToEntryFormat(
   Boolean(row.pluralForm) && (entry.pl = row.pluralForm);
   Boolean(row.scientificName) && (entry.scn = [row.scientificName]);
 
-  if (row.semanticDomain || row.semanticDomain2) {
+  const semantic_domains_regex = /^semanticDomain\d*$/;
+  if (Object.keys(row).some((key) => semantic_domains_regex.test(key) && row[key])) {
     entry.sdn = [];
-    Boolean(row.semanticDomain) && entry.sdn.push(row.semanticDomain.toString());
-    Boolean(row.semanticDomain2) && entry.sdn.push(row.semanticDomain2.toString());
+    Object.entries(row).forEach((semantic_domain) => {
+      if (semantic_domains_regex.test(semantic_domain[0])) {
+        Boolean(semantic_domain[1]) && entry.sdn.push(semantic_domain[1].toString());
+      }
+    });
   }
   Boolean(row.semanticDomain_custom) && (entry.sd = [row.semanticDomain_custom]);
   Boolean(row.ID) && (entry.ei = row.ID);
