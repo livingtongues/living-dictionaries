@@ -197,7 +197,7 @@ importers:
       firebase: ^9.14.0
       instantsearch.js: ^4.33.2
       jszip: ^3.7.1
-      kitbook: ^1.0.0-alpha.20
+      kitbook: ^1.0.0-alpha.31
       logrocket: ^2.1.2
       lz-string: ^1.4.4
       recordrtc: ^5.6.2
@@ -243,7 +243,7 @@ importers:
       firebase: 9.14.0
       instantsearch.js: 4.40.2_algoliasearch@4.13.0
       jszip: 3.8.0
-      kitbook: 1.0.0-alpha.20_typescript@4.9.4
+      kitbook: 1.0.0-alpha.31_fiwguh24nb5ttsl4oaq3j7643a
       logrocket: 2.2.1
       lz-string: 1.4.4
       recordrtc: 5.6.2
@@ -2044,8 +2044,8 @@ packages:
       unist-util-visit: 4.1.2
     dev: true
 
-  /@kitbook/vite-plugin-kitbook/0.0.7_atrrhq7vg4ekua4nnyrpuardle:
-    resolution: {integrity: sha512-CMdQFP2A6zzMncB6ReGtPuwK0CiCtC/D6jDDikJydcTt4dUxb/G2e77yQa1xAoYZnDM0X0aC4+1p8Z4PNPNYMA==}
+  /@kitbook/vite-plugin-kitbook/0.0.10_atrrhq7vg4ekua4nnyrpuardle:
+    resolution: {integrity: sha512-5e8wC5Gu3h/y09p6ClDpgPo0MDlpeRl7xyMtx+rlF7q37hFQGAJF+80+mYt/SWzhkMBg5Ptm47mzvyj9av+vCg==}
     dependencies:
       '@kitbook/mdsvex-shiki-twoslash': 0.0.3_atrrhq7vg4ekua4nnyrpuardle
       '@kitbook/rehype-display-link-titles': 0.0.3
@@ -7088,14 +7088,18 @@ packages:
       - svelte
     dev: true
 
-  /kitbook/1.0.0-alpha.20_typescript@4.9.4:
-    resolution: {integrity: sha512-8KImYGrlvfO2nGKTN9D/jVYSyB1gXCjpS8SEOP0mwl/NhqnQNfMT/dpKBZdCzF+SJthBQLqE7zGynD/esXuxzw==}
+  /kitbook/1.0.0-alpha.31_fiwguh24nb5ttsl4oaq3j7643a:
+    resolution: {integrity: sha512-TONTdBCWsps5HFszbYDAChA6hwSzXMiJ6efSmHc+lpcgMELCtfvqSWjowwBsfQJtlnuccnZwu5iABnCLrYIdBw==}
+    peerDependencies:
+      '@sveltejs/kit': ^1.13.0
+      svelte: ^3.55.0
     dependencies:
       '@kitbook/mdsvex-shiki-twoslash': 0.0.3_atrrhq7vg4ekua4nnyrpuardle
-      '@kitbook/vite-plugin-kitbook': 0.0.7_atrrhq7vg4ekua4nnyrpuardle
-      lz-string: 1.4.4
+      '@kitbook/vite-plugin-kitbook': 0.0.10_atrrhq7vg4ekua4nnyrpuardle
+      '@sveltejs/kit': 1.5.0_svelte@3.55.1+vite@4.1.1
       svelte: 3.55.1
-      svelte-pieces: 1.0.57_svelte@3.55.1
+      svelte-pieces: 1.0.58_stq7ooc25ght4ze53cyj5iopy4
+      svelte2tsx: 0.6.11_atrrhq7vg4ekua4nnyrpuardle
     transitivePeerDependencies:
       - supports-color
       - typescript
@@ -9357,6 +9361,18 @@ packages:
       svelte: 3.55.1
     dev: true
 
+  /svelte-pieces/1.0.58_stq7ooc25ght4ze53cyj5iopy4:
+    resolution: {integrity: sha512-bY675bM4iBHY8XZYXS+LlNmtYuxe6eY9cwp2yxA4gkBbMLY8ecySUkWsdUd0w7/NzT46iblPNK7H17drDfPi4Q==}
+    peerDependencies:
+      '@sveltejs/kit': ^1.13.0
+      svelte: ^3.55.0
+    dependencies:
+      '@sveltejs/kit': 1.5.0_svelte@3.55.1+vite@4.1.1
+      fast-xml-parser: 3.21.1
+      he: 1.2.0
+      svelte: 3.55.1
+    dev: true
+
   /svelte-preprocess/5.0.0_4x7phaipmicbaooxtnresslofa:
     resolution: {integrity: sha512-q7lpa7i2FBu8Pa+G0MmuQQWETBwCKgsGmuq1Sf6n8q4uaG9ZLcLP0Y+etC6bF4sE6EbLxfiI38zV6RfPe3RSfg==}
     engines: {node: '>= 14.10.0'}
@@ -9473,6 +9489,18 @@ packages:
     peerDependencies:
       svelte: ^3.55
       typescript: ^4.9.4
+    dependencies:
+      dedent-js: 1.0.1
+      pascal-case: 3.1.2
+      svelte: 3.55.1
+      typescript: 4.9.4
+    dev: true
+
+  /svelte2tsx/0.6.11_atrrhq7vg4ekua4nnyrpuardle:
+    resolution: {integrity: sha512-rRW/3V/6mcejYWmSqcHpmILOSPsOhLgkbKbrTOz82s2n8TywmIsqj2jYPsiL6HeGoUM/atiTD0YKguW4b7ECog==}
+    peerDependencies:
+      svelte: ^3.55
+      typescript: ^4.9.4 || ^5.0.0
     dependencies:
       dedent-js: 1.0.1
       pascal-case: 3.1.2
@@ -9847,10 +9875,6 @@ packages:
     resolution: {integrity: sha512-F5CZ68eYzuSvJjGhCLPL3cYx45IxkqXSetCcRgUXtbcm50X2L9oOWQlfUfDdAf+6Pd27YDblBfdtmsThXmwpbQ==}
     dev: true
 
-  /unist-util-is/5.2.0:
-    resolution: {integrity: sha512-Glt17jWwZeyqrFqOK0pF1Ded5U3yzJnFr8CG1GMjCWTp9zDo2p+cmD6pWbZU8AgM5WU3IzRv6+rBwhzsGh6hBQ==}
-    dev: true
-
   /unist-util-is/5.2.1:
     resolution: {integrity: sha512-u9njyyfEh43npf1M+yGKDGVPbY/JWEemg5nH05ncKPfi+kBbKBJoTdsogMu33uhytuLlv9y0O7GH7fEdwLdLQw==}
     dependencies:
@@ -9879,7 +9903,7 @@ packages:
     resolution: {integrity: sha512-gks4baapT/kNRaWxuGkl5BIhoanZo7sC/cUT/JToSRNL1dYoXRFl75d++NkjYk4TAu2uv2Px+l8guMajogeuiw==}
     dependencies:
       '@types/unist': 2.0.6
-      unist-util-is: 5.2.0
+      unist-util-is: 5.2.1
     dev: true
 
   /unist-util-visit-parents/5.1.3:
