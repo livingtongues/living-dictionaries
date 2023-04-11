@@ -10,7 +10,7 @@
 
   export let value = '';
   export let field: string;
-  export let display: string = undefined; // used only for Sompeng-Mardir now that Modal is separate
+  export let display: string = undefined; // used only for Sompeng now that Modal is separate
   export let adding = false;
 
   function close() {
@@ -134,7 +134,7 @@
           type="text"
           use:autofocus
           bind:value
-          class:sompeng={display === 'Sompeng-Mardir'}
+          class:sompeng={display === 'Sompeng'}
           class="form-input block w-full pr-9" />
       </Keyman>
     {:else if field.startsWith('lo') || field === 'lx'}
@@ -146,7 +146,7 @@
           required={field === 'lx'}
           use:autofocus
           bind:value
-          class:sompeng={display === 'Sompeng-Mardir'}
+          class:sompeng={display === 'Sompeng'}
           class="form-input block w-full pr-9" />
       </Keyman>
     {:else}
