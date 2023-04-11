@@ -5,6 +5,8 @@ import { readFileSync } from 'fs';
 import { parseCSVFrom } from './parse-csv.js';
 import { convertJsonRowToEntryFormat } from './convertJsonRowToEntryFormat.js';
 
+const developerInCharge = 'qkTzJXH24Xfc57cZJRityS6OTn52';
+
 export async function importFromSpreadsheet(dictionaryId: string, dry = false) {
   const dateStamp = Date.now();
 
@@ -32,6 +34,8 @@ export async function importEntriesToFirebase(
   let batchCount = 0;
   let batch = db.batch();
   const colRef = db.collection(`dictionaries/${dictionaryId}/words`);
+  let speakerRef;
+  let speakerId;
 
   for (const row of rows) {
     if (!row.lexeme || row.lexeme === '(word/phrase)') {
@@ -53,6 +57,21 @@ export async function importEntriesToFirebase(
     }
 
     if (row.soundFile) {
+      if (row.speakerName) {
+        speakerRef = db.collection('speakers');
+        speakerId = speakerRef.doc().id;
+        batch.create(speakerRef.doc(speakerId), {
+          displayName: row.speakerName,
+          birthplace: row.speakerHometown,
+          decade: parseInt(row.speakerAge),
+          gender: row.speakerGender,
+          contributingTo: [dictionaryId],
+          createdAt: timestamp,
+          createdBy: developerInCharge,
+          updatedAt: timestamp,
+          updatedBy: developerInCharge,
+        });
+      }
       const audioFilePath = await uploadAudioFile(row.soundFile, entryId, dictionaryId, dry);
       if (audioFilePath) {
         entry.sf = {
