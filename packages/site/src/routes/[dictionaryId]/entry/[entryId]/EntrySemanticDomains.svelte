@@ -36,7 +36,7 @@
         {/each}
       {/if}
       {#if !hasValue}
-        <i class="far fa-pencil text-gray-500 text-sm mb-2" />
+        <span class="i-fa6-solid-pencil text-gray-500 text-sm mb-2" />
       {/if}
     </div>
   </div>

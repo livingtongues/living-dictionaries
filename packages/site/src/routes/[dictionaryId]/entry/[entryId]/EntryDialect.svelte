@@ -24,7 +24,7 @@
           <div dir="ltr">
             {value}
           </div>
-        {:else}<i class="far fa-pencil text-gray-500 text-sm" />{/if}
+        {:else}<span class="i-fa6-solid-pencil text-gray-500 text-sm" />{/if}
       </div>
     </div>
     {#if show}
