@@ -13,9 +13,9 @@
   import { dictionary } from '$lib/stores';
   import sanitize from 'xss';
 
-  export let entry: IEntry,
-    canEdit = false,
-    videoAccess = false;
+  export let entry: IEntry;
+  export let canEdit = false;
+  export let videoAccess = false;
 
   $: glosses = order_glosses({
     glosses: entry.gl,
@@ -62,11 +62,22 @@
             {/each}
           {/if}
         {/if}
-        {#if glosses.indexOf('<i>') > -1}
+
+        {#if glosses.includes('<i>')}
           {@html sanitize(glosses)}
         {:else}
           {glosses}
         {/if}
+
+        {#if entry.scn?.length}
+          {@const scientific_names = entry.scn.join(', ')}
+          {#if scientific_names.includes('<i>')}
+            {@html sanitize(scientific_names)}
+          {:else}
+            <i>{scientific_names}</i>
+          {/if}
+        {/if}
+
         {#if $dictionary.id === 'jewish-neo-aramaic'}
           {#if entry.di}<p class="text-xs">
               <i class="mr-1">{$t('entry.di', { default: 'Dialect' })}: {entry.di}</i>
