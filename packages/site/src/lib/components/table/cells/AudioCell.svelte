@@ -1,12 +1,12 @@
 <script lang="ts">
-  import ShowHide from 'svelte-pieces/functions/ShowHide.svelte';
   import { firebaseConfig } from 'sveltefirets';
-  import { longpress } from 'svelte-pieces/actions/longpress';
+  import { longpress, ShowHide } from 'svelte-pieces';
   import type { IEntry } from '@living-dictionaries/types';
-  export let entry: IEntry,
-    canEdit = false;
+  export let entry: IEntry;
+  export let canEdit = false;
 
-  let playing;
+  let playing = false;
+  
   function initAudio(sf) {
     const convertedPath = sf.path.replace(/\//g, '%2F');
     const url = `https://firebasestorage.googleapis.com/v0/b/${firebaseConfig.storageBucket}/o/${convertedPath}?alt=media`;

@@ -1,7 +1,6 @@
 <script lang="ts">
   import { t } from 'svelte-i18n';
-  import Form from 'svelte-pieces/data/Form.svelte';
-  import Button from 'svelte-pieces/ui/Button.svelte';
+  import { Button, Form } from 'svelte-pieces';
   import { user } from '$lib/stores';
   import Header from '$lib/components/shell/Header.svelte';
   import type { IDictionary, IHelper, IPoint, IRegion, IUser } from '@living-dictionaries/types';

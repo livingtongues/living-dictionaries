@@ -1,6 +1,5 @@
 <script lang="ts">
-  import BadgeArrayEmit from 'svelte-pieces/data/BadgeArrayEmit.svelte';
-  import ShowHide from 'svelte-pieces/functions/ShowHide.svelte';
+  import { BadgeArrayEmit, ShowHide } from 'svelte-pieces';
   import {
     removeDictionaryManager,
     removeDictionaryContributor,

@@ -31,6 +31,7 @@ export function expand_entry(database_entry: GoalDatabaseEntry): ExpandedEntry {
     sound_files: database_entry.sfs?.map(expand_audio),
     elicitation_id: database_entry.ei,
     deletedAt: database_entry.deletedAt,
+    scientific_names: database_entry.scn,
   }
 }
 

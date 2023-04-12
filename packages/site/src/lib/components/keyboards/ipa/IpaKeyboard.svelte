@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import Button from 'svelte-pieces/ui/Button.svelte';
+  import { Button } from 'svelte-pieces';
   import vowelTrapezoid from './vowel-trapezoid.gif';
 
   export let target: string | HTMLInputElement | HTMLTextAreaElement = undefined;

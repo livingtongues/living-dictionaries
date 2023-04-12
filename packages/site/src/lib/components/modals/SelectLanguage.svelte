@@ -1,9 +1,8 @@
 <script lang="ts">
-  import { _, locale, locales } from 'svelte-i18n';
-  import Modal from 'svelte-pieces/ui/Modal.svelte';
+  import { t, locale, locales } from 'svelte-i18n';
   import { setCookie } from '$lib/helpers/cookies';
   import { ReadyLocales, UnpublishedLocales } from '@living-dictionaries/types';
-  import Button from 'svelte-pieces/ui/Button.svelte';
+  import { Button, Modal } from 'svelte-pieces';
   import { admin } from '$lib/stores';
 
   function setLocale(bcp) {
@@ -14,7 +13,7 @@
 
 <Modal on:close>
   <span slot="heading">
-    {$_('header.select_language', { default: 'Select Language' })}
+    {$t('header.select_language', { default: 'Select Language' })}
   </span>
 
   <div>

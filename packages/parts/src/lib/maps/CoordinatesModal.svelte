@@ -3,8 +3,7 @@
   export let t: Readable<any> = undefined;
 
   import { onMount, createEventDispatcher } from 'svelte';
-  import Modal from 'svelte-pieces/ui/Modal.svelte';
-  import Button from 'svelte-pieces/ui/Button.svelte';
+  import { Button, Modal } from 'svelte-pieces';
   import Map from './mapbox/map/Map.svelte';
   import Geocoder from './mapbox/geocoder/Geocoder.svelte';
   import Marker from './mapbox/map/Marker.svelte';

@@ -1,7 +1,7 @@
 <script lang="ts">
   import { t } from 'svelte-i18n';
   import { createEventDispatcher } from 'svelte';
-  import Button from 'svelte-pieces/ui/Button.svelte';
+  import { Button } from 'svelte-pieces';
   import Keyman from '$lib/components/keyboards/keyman/Keyman.svelte';
   const dispatch = createEventDispatcher<{
     close: boolean;
@@ -177,7 +177,7 @@
         >Toggle sᴍᴀʟʟCᴀᴘs for selection</Button>
     {/if}
 
-    {#if field.startsWith('gl')}
+    {#if field === 'scn' || field.startsWith('gl')}
       <Button
         class="mt-1"
         size="sm"

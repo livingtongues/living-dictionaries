@@ -1,8 +1,7 @@
 <script lang="ts">
   import Keyman from './Keyman.svelte';
   import { Story } from 'kitbook';
-  import Button from 'svelte-pieces/ui/Button.svelte';
-  import Store from 'svelte-pieces/functions/Store.svelte';
+  import { Button, Store } from 'svelte-pieces';
   import ClassicCustomized from '@living-dictionaries/parts/src/lib/editor/ClassicCustomized.svelte';
 
   let value = '';

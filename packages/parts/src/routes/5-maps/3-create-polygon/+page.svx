@@ -1,10 +1,9 @@
 <script lang="ts">
   import { Story } from 'kitbook';
+  import { Button, ReactiveSet } from 'svelte-pieces';
   import Map from '$lib/maps/mapbox/map/Map.svelte';
   import Marker from '$lib/maps/mapbox/map/Marker.svelte';
-  import ReactiveSet from 'svelte-pieces/functions/ReactiveSet.svelte';
   import Popup from '$lib/maps/mapbox/map/Popup.svelte';
-  import Button from 'svelte-pieces/ui/Button.svelte';
   import GeoJSONSource from '$lib/maps/mapbox/sources/GeoJSONSource.svelte';
   import Layer from '$lib/maps/mapbox/map/Layer.svelte';
   import { polygonFeatureCoordinates } from '$lib/maps/utils/polygonFromCoordinates';

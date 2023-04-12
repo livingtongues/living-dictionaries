@@ -5,7 +5,7 @@ import type { IExampleSentence } from './exampe-sentence.interface';
 import type { GoalDatabaseAudio, ActualDatabaseAudio, ExpandedAudio } from './audio.interface';
 import type { GoalDatabasePhoto, ActualDatabasePhoto, ExpandedPhoto } from './photo.interface';
 import type { GoalDatabaseVideo, ActualDatabaseVideo, ExpandedVideo } from './video.interface';
-import { LDAlgoliaFields } from './entry.algolia.interface';
+import type { LDAlgoliaFields } from './entry.algolia.interface';
 
 // current interface used across the site that we will migrate from this to just ExpandedEntry
 export type IEntry = ExpandedEntry & ActualDatabaseEntry & Pick<LDAlgoliaFields, "_highlightResult">
@@ -30,7 +30,7 @@ export interface ExpandedEntry extends IFirestoreMetaData {
   elicitation_id?: string;
   deletedAt?: Timestamp;
   importId?: string; // TODO: expand this also
-  // scientific_names?: string[]; // TODO: add this, italic by default but they can use <i> and </i> to define where italics show
+  scientific_names?: string[]; // italic by default but they can use <i> and </i> to define where italics show
 }
 
 export interface ExpandedSense {
@@ -81,6 +81,7 @@ export interface GoalDatabaseEntry extends IFirestoreMetaDataAbbreviated {
   ei?: string; // Elicitation Id for Munda languages or Swadesh Composite number list from Comparalex
   deletedAt?: Timestamp;
   ii?: string; // importId which can be used to show all entries from a particular import
+  scn?: string[]; // scientific_names
 }
 
 interface DeprecatedEntry extends Omit<DatabaseSense, 'ps' | 'xs' | 'pfs' | 'deletedPfs' | 'vfs'> { // as deprecated fields are removed from the database we can continue to Omit them here until nothing more from DatabaseSense is left
