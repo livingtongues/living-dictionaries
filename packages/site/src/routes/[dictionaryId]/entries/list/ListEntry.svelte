@@ -150,7 +150,7 @@
         lexeme={entry.lx}
         gcs={entry.pf.gcs}
         {canEdit}
-        on:delete={() => deleteImage(entry)} />
+        on:deleteImage={() => deleteImage(entry)} />
     </div>
   {:else if canEdit}
     <AddImage {entry} class="w-12 bg-gray-100">

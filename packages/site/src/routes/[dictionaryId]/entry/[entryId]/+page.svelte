@@ -1,6 +1,13 @@
 <script lang="ts">
   import { t } from 'svelte-i18n';
   import { Doc } from 'sveltefirets';
+  import { Button, JSON } from 'svelte-pieces';
+  import { share } from '$lib/helpers/share';
+  import { deleteEntry, deleteImage, deleteVideo } from '$lib/helpers/delete';
+  import { saveUpdateToFirestore } from '$lib/helpers/entry/update';
+  import SeoMetaTags from '$lib/components/SeoMetaTags.svelte';
+  import EntryDisplay from './EntryDisplay.svelte';
+  import { seo_description } from './seo_description';
   import {
     dictionary,
     algoliaQueryParams,
@@ -10,16 +17,7 @@
     admin,
     user,
   } from '$lib/stores';
-  import { share } from '$lib/helpers/share';
-  import { Button, JSON } from 'svelte-pieces';
-  import { deleteEntry } from '$lib/helpers/delete';
-  import { saveUpdateToFirestore } from '$lib/helpers/entry/update';
-  import SeoMetaTags from '$lib/components/SeoMetaTags.svelte';
-  import { order_entry_and_dictionary_gloss_languages } from '$lib/helpers/glosses';
-  import EntryDisplay from './EntryDisplay.svelte';
   import type { PageData } from './$types';
-  import { seo_description } from './seo_description';
-
   export let data: PageData;
 </script>
 
@@ -63,13 +61,11 @@ bg-white pt-1 -mt-1">
 
   <EntryDisplay
     {entry}
-    videoAccess={$dictionary.videoAccess || $admin > 0}
+    dictionary={$dictionary}
+    admin={$admin > 0}
     canEdit={$canEdit}
-    glossingLanguages={order_entry_and_dictionary_gloss_languages(
-      entry.gl,
-      $dictionary.glossLanguages
-    )}
-    alternateOrthographies={$dictionary.alternateOrthographies || []}
+    on:deleteImage={() => deleteImage(entry)}
+    on:deleteVideo={() => deleteVideo(entry)}
     on:valueupdate={(e) => saveUpdateToFirestore(e, entry.id, $dictionary.id)} />
 
   <SeoMetaTags
