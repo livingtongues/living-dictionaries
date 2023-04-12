@@ -1,6 +1,5 @@
 import type { IEntry } from '@living-dictionaries/types';
 import type { Timestamp } from 'firebase/firestore';
-import { semanticDomains } from './FLEx/semanticDomains';
 
 export function convertJsonRowToEntryFormat(
   row: Record<string, string>,
