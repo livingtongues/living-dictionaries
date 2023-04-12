@@ -18,7 +18,7 @@
         <div class="text-xs text-gray-500 mt-1">{display}</div>
       {/if}
       <div
-        class:sompeng={display === 'Sompeng-Mardir'}
+        class:sompeng={display === 'Sompeng'}
         class:font-bold={field === 'lx'}
         class:text-4xl={field === 'lx'}
         class:border-b-2={field !== 'lx'}
