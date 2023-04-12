@@ -171,7 +171,8 @@
     "gloss": "Traduction",
     "pl": "Forme pluriel",
     "print": "Imprimer",
-    "id": "IDENTIFIANT"
+    "id": "IDENTIFIANT",
+    "scn": "Nom scientifique"
   },
   "error": {
     "run_into_error": "Nous sommes désolés, il y a une erreur.",

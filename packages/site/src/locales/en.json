@@ -171,7 +171,8 @@
     "gloss": "translation",
     "pl": "Plural form",
     "print": "Print",
-    "id": "ID"
+    "id": "ID",
+    "scn": "Scientific Name"
   },
   "error": {
     "run_into_error": "We're sorry, we've run into an error.",

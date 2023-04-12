@@ -2,7 +2,7 @@
   import { _ } from 'svelte-i18n';
   import { dictionary, isManager } from '$lib/stores';
   import { setOnline } from 'sveltefirets';
-  import Button from 'svelte-pieces/ui/Button.svelte';
+  import { Button } from 'svelte-pieces';
   import type { IAbout } from '@living-dictionaries/types';
   import sanitize from 'xss';
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte';

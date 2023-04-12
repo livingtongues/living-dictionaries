@@ -15,25 +15,35 @@ const base_algolia_entry: AlgoliaEntry = {
 }
 
 describe('prepareDataForIndex', () => {
-  test('defaults all has___ fields to false', async () => {
+  test('sets all "has___" fields to false by default', async () => {
     const db_entry: ActualDatabaseEntry = {};
     expect(await prepareDataForIndex(db_entry, dictId, null)).toEqual(base_algolia_entry);
+  });
+
+  test('items not needing transformed just pass through', async () => {
+    const db_entry: ActualDatabaseEntry = {
+      mr: 'morphology',
+      ph: 'phonetic',
+      scn: ['foo', 'bar'],
+    };
+    const algolia_entry: AlgoliaEntry = {
+      ...base_algolia_entry,
+      mr: 'morphology',
+      ph: 'phonetic',
+      scn: ['foo', 'bar'],
+    }
+    expect(await prepareDataForIndex(db_entry, dictId, null)).toEqual(algolia_entry);
   });
 
   test('handles all items from old shape', async () => {
     const db_entry: ActualDatabaseEntry = {
       pf: { gcs: 'foo' },
-      mr: 'morphology',
-      ph: 'phonetic',
-
       createdAt: { _seconds: 2 } as any,
       updatedAt: { _seconds: 1 } as any,
     };
     const algolia_entry: AlgoliaEntry = {
       ...base_algolia_entry,
       pf: { gcs: 'foo' },
-      mr: 'morphology',
-      ph: 'phonetic',
       hasImage: true,
       ca: 2,
       ua: 1,

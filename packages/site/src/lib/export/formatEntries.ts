@@ -9,6 +9,8 @@ import { glossingLanguages } from './glossing-languages-temp'; // todo - import 
 import { friendlyName } from './friendlyName';
 import { stripHTMLTags } from './stripHTMLTags';
 
+const dictionaries_with_variant = ['babanki', 'torwali'];
+
 enum EntryCSVFieldsEnum {
   id = 'Entry Id',
   lx = 'Lexeme/Word/Phrase',
@@ -42,7 +44,7 @@ export interface IEntryForCSV extends EntryForCSV {
 
 export function formatEntriesForCSV(
   entries: IEntry[],
-  { name: dictionaryName, id: dictionaryId, glossLanguages }: IDictionary,
+  { name: dictionaryName, id: dictionaryId, glossLanguages, alternateOrthographies }: IDictionary,
   speakers: ISpeaker[],
   semanticDomains: ISemanticDomain[],
   partsOfSpeech: IPartOfSpeech[]
@@ -53,6 +55,13 @@ export function formatEntriesForCSV(
   }
 
   // Begin dynamic headers
+
+  // Assign local orthographies
+  if (alternateOrthographies) {
+    alternateOrthographies.forEach((lo, index) => {
+      headers[`lo${index + 1}`] = lo;
+    });
+  }
 
   // Assign max number of semantic domains used by a single entry
   const maxSDN = Math.max(...entries.map((entry) => entry.sdn?.length || 0));
@@ -74,7 +83,7 @@ export function formatEntriesForCSV(
   });
 
   // Dictionary specific
-  if (dictionaryId === 'babanki') {
+  if (dictionaries_with_variant.includes(dictionaryId)) {
     headers.va = 'variant';
   }
 
@@ -99,6 +108,25 @@ export function formatEntriesForCSV(
       sfge: '',
       pfFriendlyName: '',
     } as IEntryForCSV;
+
+    // alternate orthographies
+    if (alternateOrthographies) {
+      const local_orthographies_keys_of_entry = Object.keys(entry).filter((key) =>
+        key.startsWith('lo')
+      );
+      const local_orthographies_headers = Object.keys(headers).filter((key) =>
+        key.startsWith('lo')
+      );
+      local_orthographies_headers.forEach((lo, index) => {
+        if (entry[local_orthographies_keys_of_entry[index]]) {
+          formattedEntry[lo] = local_orthographies_keys_of_entry.includes(lo)
+            ? entry[lo]
+            : entry['lo'];
+        } else {
+          formattedEntry[lo] = '';
+        }
+      });
+    }
 
     // part of speech (abbreviation & name)
     if (entry.ps) {
@@ -153,7 +181,7 @@ export function formatEntriesForCSV(
     });
 
     // Dictionary specific
-    if (['babanki', 'torwali'].includes(dictionaryId)) {
+    if (dictionaries_with_variant.includes(dictionaryId)) {
       formattedEntry.va = entry.va;
     }
 

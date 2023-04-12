@@ -1,7 +1,6 @@
 <script lang="ts">
-  import { _ } from 'svelte-i18n';
-  import Modal from 'svelte-pieces/ui/Modal.svelte';
-  import Button from 'svelte-pieces/ui/Button.svelte';
+  import { t } from 'svelte-i18n';
+  import { Button, Modal, ShowHide } from 'svelte-pieces';
   import RecordVideo from '$lib/components/video/RecordVideo.svelte';
   import SelectVideo from './SelectVideo.svelte';
   import PasteVideoLink from './PasteVideoLink.svelte';
@@ -9,7 +8,6 @@
   import SelectSpeaker from '$lib/components/media/SelectSpeaker.svelte';
   import { dictionary } from '$lib/stores';
   import type { IEntry, IVideo } from '@living-dictionaries/types';
-  import ShowHide from 'svelte-pieces/functions/ShowHide.svelte';
   import { addVideo } from '$lib/helpers/media/update';
 
   import { createEventDispatcher } from 'svelte';
@@ -28,11 +26,11 @@
       <VideoIFrame {video} />
       <div class="modal-footer">
         <Button onclick={close} color="black">
-          {$_('misc.cancel', { default: 'Cancel' })}
+          {$t('misc.cancel', { default: 'Cancel' })}
         </Button>
         <div class="w-1" />
         <Button onclick={async () => await addVideo(entry, video)} form="filled">
-          {$_('misc.save', { default: 'Save' })}
+          {$t('misc.save', { default: 'Save' })}
         </Button>
       </div>
     {:else if speakerId}
@@ -51,7 +49,7 @@
 
           <Button onclick={toggle} class="mt-4 !py-4 w-full" color="red" type="button">
             <i class="far fa-microphone-alt" />
-            {$_('video.prepare_to_record_video', {
+            {$t('video.prepare_to_record_video', {
               default: 'Prepare to Record with Microphone & Camera',
             })}
           </Button>
@@ -65,12 +63,12 @@
                 <div class="modal-footer">
                   <Button onclick={reset} color="red"
                     ><i class="far fa-trash-alt" />
-                    {$_('misc.delete', {
+                    {$t('misc.delete', {
                       default: 'Delete',
                     })}</Button>
                   <div class="w-1" />
                   <Button onclick={toggle} color="green" form="filled"
-                    ><i class="fas fa-upload" /> {$_('misc.upload', { default: 'Upload' })}</Button>
+                    ><i class="fas fa-upload" /> {$t('misc.upload', { default: 'Upload' })}</Button>
                 </div>
               {:else}
                 {#await import('$lib/components/video/UploadVideo.svelte') then { default: UploadVideo }}
@@ -84,7 +82,7 @@
     {:else}
       <div class="modal-footer">
         <Button onclick={close} color="black">
-          {$_('misc.cancel', { default: 'Cancel' })}
+          {$t('misc.cancel', { default: 'Cancel' })}
         </Button>
       </div>
     {/if}

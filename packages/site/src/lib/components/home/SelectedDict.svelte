@@ -3,7 +3,7 @@
   import type { IAbout, IDictionary } from '@living-dictionaries/types';
 
   import { _ } from 'svelte-i18n';
-  import Button from 'svelte-pieces/ui/Button.svelte';
+  import { Button } from 'svelte-pieces';
   export let dictionary: IDictionary;
   let aboutType: IAbout;
 
