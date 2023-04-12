@@ -2,14 +2,13 @@
   import { onMount } from 'svelte';
   import { _ } from 'svelte-i18n';
   import { admin, dictionary, isManager } from '$lib/stores';
-  import Button from 'svelte-pieces/ui/Button.svelte';
+  import { Button, ShowHide } from 'svelte-pieces';
   import { formatEntriesForCSV, type IEntryForCSV } from '$lib/export/formatEntries';
   import { partsOfSpeech } from '$lib/mappings/parts-of-speech';
   import { semanticDomains } from '$lib/mappings/semantic-domains';
   import type { IEntry } from '@living-dictionaries/types';
   import { getCollection } from 'sveltefirets';
   import { downloadBlob, arrayToCSVBlob } from '$lib/export/csv';
-  import ShowHide from 'svelte-pieces/functions/ShowHide.svelte';
   import DownloadMedia from '../../../lib/export/DownloadMedia.svelte';
   import Progress from '$lib/export/Progress.svelte';
   import { fetchSpeakers } from '$lib/helpers/fetchSpeakers';

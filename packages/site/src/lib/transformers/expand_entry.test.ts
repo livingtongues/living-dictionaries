@@ -71,6 +71,7 @@ describe('expand_entry', () => {
         sc: 'sc',
       }],
       ei: 'ei12',
+      scn: ['marmillion', '<i>leticus</i> Johnson']
     }
 
     const expanded_entry: ExpandedEntry = {
@@ -121,6 +122,7 @@ describe('expand_entry', () => {
         source: 'sc',
       }],
       elicitation_id: 'ei12',
+      scientific_names: ['marmillion', '<i>leticus</i> Johnson']
     }
 
     expect(expand_entry(database_entry)).toEqual(expanded_entry);

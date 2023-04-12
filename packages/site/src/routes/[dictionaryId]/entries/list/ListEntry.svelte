@@ -9,13 +9,13 @@
   import { order_glosses, order_entry_and_dictionary_gloss_languages } from '$lib/helpers/glosses';
   import { minutesAgo } from '$lib/helpers/time';
   import { deleteImage } from '$lib/helpers/delete';
-  import ShowHide from 'svelte-pieces/functions/ShowHide.svelte';
+  import { ShowHide } from 'svelte-pieces';
   import { dictionary } from '$lib/stores';
   import sanitize from 'xss';
 
-  export let entry: IEntry,
-    canEdit = false,
-    videoAccess = false;
+  export let entry: IEntry;
+  export let canEdit = false;
+  export let videoAccess = false;
 
   $: glosses = order_glosses({
     glosses: entry.gl,
@@ -35,7 +35,7 @@
   {/if}
   <a
     href={'/' + $page.params.dictionaryId + '/entry/' + entry.id}
-    class="p-2 text-lg flex-grow flex flex-col justify-between hover:bg-gray-200 ">
+    class="p-2 text-lg flex-grow flex flex-col justify-between hover:bg-gray-200">
     <div>
       <span class="font-semibold text-gray-900 mr-1">{entry.lx}</span>
       {#if entry.ph}
@@ -62,11 +62,22 @@
             {/each}
           {/if}
         {/if}
-        {#if glosses.indexOf('<i>') > -1}
+
+        {#if glosses.includes('<i>')}
           {@html sanitize(glosses)}
         {:else}
           {glosses}
         {/if}
+
+        {#if entry.scn?.length}
+          {@const scientific_names = entry.scn.join(', ')}
+          {#if scientific_names.includes('<i>')}
+            {@html sanitize(scientific_names)}
+          {:else}
+            <i>{scientific_names}</i>
+          {/if}
+        {/if}
+
         {#if $dictionary.id === 'jewish-neo-aramaic'}
           {#if entry.di}<p class="text-xs">
               <i class="mr-1">{$t('entry.di', { default: 'Dialect' })}: {entry.di}</i>
@@ -139,7 +150,7 @@
         lexeme={entry.lx}
         gcs={entry.pf.gcs}
         {canEdit}
-        on:delete={() => deleteImage(entry)} />
+        on:deleteImage={() => deleteImage(entry)} />
     </div>
   {:else if canEdit}
     <AddImage {entry} class="w-12 bg-gray-100">

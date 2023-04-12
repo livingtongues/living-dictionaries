@@ -5,11 +5,11 @@
   import type { IGrammar } from '@living-dictionaries/types';
   import sanitize from 'xss';
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte';
+  import { Button } from 'svelte-pieces';
 
   import type { PageData } from './$types';
   export let data: PageData;
   let grammar = data.grammar || '';
-  import Button from 'svelte-pieces/ui/Button.svelte';
 
   async function save() {
     try {

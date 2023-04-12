@@ -1,14 +1,14 @@
-import { dictionary } from '$lib/stores';
+import { t } from 'svelte-i18n';
 import { get } from 'svelte/store';
-import { _ } from 'svelte-i18n';
-
+import { dictionary } from '$lib/stores';
+import { goto } from '$app/navigation';
 import type { IEntry, IVideo } from '@living-dictionaries/types';
 import { updateOnline, deleteDocumentOnline, set } from 'sveltefirets';
 import { arrayUnion, arrayRemove } from 'firebase/firestore/lite';
 import { serverTimestamp } from 'firebase/firestore';
 
 export async function deleteImage(entry: IEntry) {
-  const $_ = get(_);
+  const $t = get(t);
   try {
     const $dictionary = get(dictionary);
     await updateOnline<IEntry>(
@@ -17,12 +17,12 @@ export async function deleteImage(entry: IEntry) {
       { abbreviate: true }
     );
   } catch (err) {
-    alert(`${$_('misc.error', { default: 'Error' })}: ${err}`);
+    alert(`${$t('misc.error', { default: 'Error' })}: ${err}`);
   }
 }
 
 export async function deleteAudio(entry: IEntry) {
-  const $_ = get(_);
+  const $t = get(t);
   try {
     const $dictionary = get(dictionary);
     await updateOnline<IEntry>(
@@ -31,34 +31,33 @@ export async function deleteAudio(entry: IEntry) {
       { abbreviate: true }
     );
   } catch (err) {
-    alert(`${$_('misc.error', { default: 'Error' })}: ${err}`);
+    alert(`${$t('misc.error', { default: 'Error' })}: ${err}`);
   }
 }
 
-export async function deleteVideo(entry: IEntry, video: IVideo) {
-  const $_ = get(_);
+export async function deleteVideo(entry: IEntry) {
+  const $t = get(t);
   try {
     const $dictionary = get(dictionary);
     const deletedVideo: IVideo = {
-      ...video,
+      ...entry.vfs[0],
       deleted: Date.now(),
     };
     await updateOnline<IEntry>(
       `dictionaries/${$dictionary.id}/words/${entry.id}`,
-      { vfs: arrayRemove(video), deletedVfs: arrayUnion(deletedVideo) },
+      { vfs: null, deletedVfs: arrayUnion(deletedVideo) },
       { abbreviate: true }
     );
   } catch (err) {
-    alert(`${$_('misc.error', { default: 'Error' })}: ${err}`);
+    alert(`${$t('misc.error', { default: 'Error' })}: ${err}`);
   }
 }
 
-import { goto } from '$app/navigation';
 export async function deleteEntry(entry: IEntry, dictionaryId: string, algoliaQueryParams: string) {
-  const $_ = get(_);
+  const $t = get(t);
   if (
     confirm(
-      $_('entry.delete_entry', {
+      $t('entry.delete_entry', {
         default: 'Delete entry?',
       })
     )
@@ -71,7 +70,7 @@ export async function deleteEntry(entry: IEntry, dictionaryId: string, algoliaQu
       }); // using cache based set to avoid conflicts w/ serverTimestamps loaded in from firestore normal and sent out via firestore lite, not awaiting in case internet is flaky - can go on to the delete operation.
       await deleteDocumentOnline(`dictionaries/${dictionaryId}/words/${entry.id}`);
     } catch (err) {
-      alert(`${$_('misc.error', { default: 'Error' })}: ${err}`);
+      alert(`${$t('misc.error', { default: 'Error' })}: ${err}`);
     }
   }
 }
