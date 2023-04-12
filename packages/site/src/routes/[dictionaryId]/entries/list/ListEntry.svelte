@@ -9,7 +9,7 @@
   import { order_glosses, order_entry_and_dictionary_gloss_languages } from '$lib/helpers/glosses';
   import { minutesAgo } from '$lib/helpers/time';
   import { deleteImage } from '$lib/helpers/delete';
-  import ShowHide from 'svelte-pieces/functions/ShowHide.svelte';
+  import { ShowHide } from 'svelte-pieces';
   import { dictionary } from '$lib/stores';
   import sanitize from 'xss';
 
@@ -35,7 +35,7 @@
   {/if}
   <a
     href={'/' + $page.params.dictionaryId + '/entry/' + entry.id}
-    class="p-2 text-lg flex-grow flex flex-col justify-between hover:bg-gray-200 ">
+    class="p-2 text-lg flex-grow flex flex-col justify-between hover:bg-gray-200">
     <div>
       <span class="font-semibold text-gray-900 mr-1">{entry.lx}</span>
       {#if entry.ph}

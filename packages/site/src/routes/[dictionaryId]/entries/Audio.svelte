@@ -1,12 +1,12 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
   import type { IEntry } from '@living-dictionaries/types';
-  export let entry: IEntry,
-    minimal = false;
   import { canEdit } from '$lib/stores';
-  import { longpress } from 'svelte-pieces/actions/longpress';
+  import { ShowHide, longpress } from 'svelte-pieces';
   import { firebaseConfig } from 'sveltefirets';
-  import ShowHide from 'svelte-pieces/functions/ShowHide.svelte';
+
+  export let entry: IEntry;
+  export let minimal = false;
 
   let playing = false;
 

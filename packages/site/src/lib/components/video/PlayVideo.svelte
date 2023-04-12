@@ -8,7 +8,7 @@
     storageBucket: string,
     canEdit = false;
 
-  import Button from 'svelte-pieces/ui/Button.svelte';
+  import { Button } from 'svelte-pieces';
   import { createEventDispatcher } from 'svelte';
   const dispatch = createEventDispatcher<{
     close: boolean;

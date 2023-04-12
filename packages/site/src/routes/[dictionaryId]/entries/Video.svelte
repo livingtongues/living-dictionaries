@@ -1,13 +1,13 @@
 <script lang="ts">
   import { t } from 'svelte-i18n';
   import type { IEntry, IVideo } from '@living-dictionaries/types';
-  import ShowHide from 'svelte-pieces/functions/ShowHide.svelte';
+  import { ShowHide } from 'svelte-pieces';
   import { deleteVideo } from '$lib/helpers/delete';
   import { firebaseConfig } from 'sveltefirets';
 
-  export let entry: IEntry,
-    video: IVideo,
-    canEdit = false;
+  export let entry: IEntry;
+  export let video: IVideo;
+  export let canEdit = false;
 </script>
 
 <ShowHide let:show let:toggle>

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import Modal from 'svelte-pieces/ui/Modal.svelte';
+  import { Modal } from 'svelte-pieces';
   import EditField from './EditField.svelte';
 
   export let value = '';

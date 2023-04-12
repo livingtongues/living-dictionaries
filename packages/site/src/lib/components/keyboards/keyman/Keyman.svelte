@@ -7,9 +7,7 @@
 <script lang="ts">
   import './keyman.css';
   import { onMount, tick } from 'svelte';
-  import ShowHide from 'svelte-pieces/functions/ShowHide.svelte';
-  import Button from 'svelte-pieces/ui/Button.svelte';
-  import Modal from 'svelte-pieces/ui/Modal.svelte';
+  import { Button, ShowHide, Modal } from 'svelte-pieces';
   import { additionalKeyboards, glossingLanguages } from '../../../glosses/glossing-languages';
   import { loadScriptOnce } from 'sveltefirets/helpers/loader';
 

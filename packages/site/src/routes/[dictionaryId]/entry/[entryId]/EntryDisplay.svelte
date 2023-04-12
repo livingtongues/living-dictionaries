@@ -5,7 +5,7 @@
   import EntryPartOfSpeech from '$lib/components/entry/EntryPartOfSpeech.svelte';
   import EntrySemanticDomains from './EntrySemanticDomains.svelte';
   import EntryDialect from './EntryDialect.svelte';
-  import BadgeArray from 'svelte-pieces/data/BadgeArray.svelte';
+  import { BadgeArray } from 'svelte-pieces';
   import EntryMedia from './EntryMedia.svelte';
   import { dictionary } from '$lib/stores';
 

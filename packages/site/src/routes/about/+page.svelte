@@ -1,7 +1,7 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
   import Header from '$lib/components/shell/Header.svelte';
-  import Button from 'svelte-pieces/ui/Button.svelte';
+  import { Button } from 'svelte-pieces';
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte';
 </script>
 

@@ -1,8 +1,7 @@
 <script lang="ts">
   import PlayVideo from './PlayVideo.svelte';
   import { Story } from 'kitbook';
-  import ShowHide from 'svelte-pieces/functions/ShowHide.svelte';
-  import Button from 'svelte-pieces/ui/Button.svelte';
+  import { Button, ShowHide } from 'svelte-pieces';
 </script>
 
 # Video

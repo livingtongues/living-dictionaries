@@ -4,8 +4,7 @@
   import UserRow from '../UserRow.svelte';
   import Filter from '$lib/components/Filter.svelte';
   import { exportUsersAsCSV } from '$lib/export/csv';
-  import Button from 'svelte-pieces/ui/Button.svelte';
-  import ResponsiveTable from 'svelte-pieces/ui/ResponsiveTable.svelte';
+  import { Button, ResponsiveTable } from 'svelte-pieces';
   import SortUsers from '../SortUsers.svelte';
 
   let usersType: IUser[] = [];

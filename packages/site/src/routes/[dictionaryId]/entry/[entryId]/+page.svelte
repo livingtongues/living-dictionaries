@@ -11,7 +11,7 @@
     user,
   } from '$lib/stores';
   import { share } from '$lib/helpers/share';
-  import Button from 'svelte-pieces/ui/Button.svelte';
+  import { Button, JSON } from 'svelte-pieces';
   import { deleteEntry } from '$lib/helpers/delete';
   import { saveUpdateToFirestore } from '$lib/helpers/entry/update';
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte';
@@ -41,9 +41,7 @@ bg-white pt-1 -mt-1">
 
     <div>
       {#if $admin > 1}
-        {#await import('svelte-pieces/data/JSON.svelte') then { default: JSON }}
-          <JSON obj={entry} />
-        {/await}
+        <JSON obj={entry} />
       {/if}
       {#if $isManager || ($isContributor && entry.cb === $user.uid)}
         <Button

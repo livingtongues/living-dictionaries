@@ -1,8 +1,7 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
   import { t } from 'svelte-i18n';
-  import Modal from 'svelte-pieces/ui/Modal.svelte';
-  import Button from 'svelte-pieces/ui/Button.svelte';
+  import { Button, Modal } from 'svelte-pieces';
   import { dictionary } from '$lib/stores';
 
   export let value: string;
