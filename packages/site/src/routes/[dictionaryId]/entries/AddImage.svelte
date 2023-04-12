@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { IEntry } from '@living-dictionaries/types';
-  import { _ } from 'svelte-i18n';
+  import { t } from 'svelte-i18n';
 
   export let entry: IEntry;
   let dragging = false;
@@ -15,14 +15,14 @@
     if (fileToCheck.type.split('/')[0] !== 'image') {
       return alert(
         // @ts-ignore
-        `${$_('upload.error', { default: 'Unsupported File Type' })}`
+        `${$t('upload.error', { default: 'Unsupported File Type' })}`
       );
     }
     // Must be smaller than 10MB, http://www.unitconversion.org/data-storage/megabytes-to-bytes-conversion.html
     if (fileToCheck.size > 10485760) {
       // @ts-ignore
       return alert(
-        `${$_('upload.file_must_be_smaller', {
+        `${$t('upload.file_must_be_smaller', {
           default: 'File must be smaller than',
         })} 10MB`
       );

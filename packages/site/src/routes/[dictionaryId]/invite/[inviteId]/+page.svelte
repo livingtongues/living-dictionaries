@@ -2,13 +2,12 @@
   import { _ } from 'svelte-i18n';
   import type { IInvite, IHelper, IUser } from '@living-dictionaries/types';
   import { isManager, isContributor, user, dictionary } from '$lib/stores';
-
+  import { Button, ShowHide } from 'svelte-pieces';
+  import { Doc, setOnline, updateOnline } from 'sveltefirets';
+  import { serverTimestamp } from 'firebase/firestore/lite';
   import type { PageData } from './$types';
   export let data: PageData;
   let inviteType: IInvite;
-
-  import { Doc, setOnline, updateOnline } from 'sveltefirets';
-  import { serverTimestamp } from 'firebase/firestore/lite';
 
   async function acceptInvite(role: 'manager' | 'contributor') {
     try {
@@ -33,9 +32,6 @@
       alert(`${$_('misc.error')}: ${err}`);
     }
   }
-
-  import Button from 'svelte-pieces/ui/Button.svelte';
-  import ShowHide from 'svelte-pieces/functions/ShowHide.svelte';
 </script>
 
 <div>

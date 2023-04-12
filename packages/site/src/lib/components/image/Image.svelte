@@ -1,15 +1,16 @@
 <script lang="ts">
   import { t } from 'svelte-i18n';
-  
-  export let lexeme: string,
-    // glosses = undefined,
-    gcs: string,
-    canEdit = false,
-    square: number = undefined,
-    width: number = undefined,
-    height: number = undefined;
-
   import { crossfade, scale } from 'svelte/transition';
+  import { Button } from 'svelte-pieces';
+  import { createEventDispatcher } from 'svelte';
+  
+  export let lexeme: string;
+  export let gcs: string;
+  export let canEdit = false;
+  export let square: number = undefined;
+  export let width: number = undefined;
+  export let height: number = undefined;
+
   const [send, receive] = crossfade({
     duration: 200,
     fallback: scale,
@@ -34,10 +35,8 @@
   }
   const key = {};
 
-  import Button from 'svelte-pieces/ui/Button.svelte';
-  import { createEventDispatcher } from 'svelte';
   const dispatch = createEventDispatcher<{
-    delete: boolean;
+    deleteImage: boolean;
   }>();
 </script>
 
@@ -91,7 +90,7 @@
             form="filled"
             onclick={(e) => {
               e.stopPropagation();
-              dispatch('delete');
+              dispatch('deleteImage');
             }}>
             <span class="i-fa-trash-o" style="margin: -1px 0 2px;" />
             {$t('misc.delete', { default: 'Delete' })}

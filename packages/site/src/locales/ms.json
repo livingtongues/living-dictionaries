@@ -171,7 +171,8 @@
     "gloss": "terjemahan",
     "pl": "Bentuk jamak",
     "print": "Cetak",
-    "id": "ID"
+    "id": "ID",
+    "scn": "Nama saintifik"
   },
   "error": {
     "run_into_error": "Maaf, kami telah menghadapi masalah.",

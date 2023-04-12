@@ -1,7 +1,6 @@
 <script lang="ts">
-  import { _ } from 'svelte-i18n';
-  import Button from 'svelte-pieces/ui/Button.svelte';
-  import Form from 'svelte-pieces/data/Form.svelte';
+  import { t } from 'svelte-i18n';
+  import { Button, Form } from 'svelte-pieces';
 
   export let id: string;
   export let display: string;
@@ -32,7 +31,7 @@
       placeholder={display} />
     <div class="w-1" />
     <Button class="flex-shrink-0" {loading} type="submit">
-      {$_('misc.save', { default: 'Save' })}
+      {$t('misc.save', { default: 'Save' })}
     </Button>
   </div>
 </Form>

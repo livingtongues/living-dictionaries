@@ -1,6 +1,6 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
-  import Button from 'svelte-pieces/ui/Button.svelte';
+  import { Button } from 'svelte-pieces';
   import MediaStream from '../record/MediaStream.svelte';
   import Recorder from '../record/Recorder.svelte';
   import { srcObject } from './srcObject';

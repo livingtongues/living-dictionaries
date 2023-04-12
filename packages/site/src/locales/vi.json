@@ -171,7 +171,8 @@
     "gloss": "Dịch",
     "pl": "Dạng số phức",
     "print": "In",
-    "id": "Thông tin định dạng"
+    "id": "Thông tin định dạng",
+    "scn": "Tên khoa học"
   },
   "error": {
     "run_into_error": "Lỗi đã xảy ra. Xin quý vị thông cảm.",

@@ -1,5 +1,4 @@
 <script lang="ts">
-  import Modal from 'svelte-pieces/ui/Modal.svelte';
   import { createEventDispatcher } from 'svelte';
   const dispatch = createEventDispatcher();
   const close = () => dispatch('close');
@@ -8,7 +7,7 @@
     addDictionaryManager,
   } from '$lib/helpers/dictionariesManaging';
   import type { IDictionary, IUser } from '@living-dictionaries/types';
-  import Button from 'svelte-pieces/ui/Button.svelte';
+  import { Button, Modal } from 'svelte-pieces';
   import { Collection } from 'sveltefirets';
   import Filter from '$lib/components/Filter.svelte';
 

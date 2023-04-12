@@ -1,19 +1,18 @@
 <script lang="ts">
-  import { _ } from 'svelte-i18n';
+  import { t } from 'svelte-i18n';
   import { user } from '$lib/stores';
   import Header from '$lib/components/shell/Header.svelte';
-  import Button from 'svelte-pieces/ui/Button.svelte';
   import { logOut } from 'sveltefirets';
-  import ShowHide from 'svelte-pieces/functions/ShowHide.svelte';
+  import { Button, ShowHide } from 'svelte-pieces';
 </script>
 
 <svelte:head>
   <title>
-    {$_('account.account_settings', { default: 'Account Settings' })}
+    {$t('account.account_settings', { default: 'Account Settings' })}
   </title>
 </svelte:head>
 
-<Header>{$_('account.account_settings', { default: 'Account Settings' })}</Header>
+<Header>{$t('account.account_settings', { default: 'Account Settings' })}</Header>
 
 <div class="max-w-screen-md mx-auto p-3">
   {#if $user}
@@ -24,7 +23,7 @@
     <div>{$user.email}</div>
     <div class="my-2">
       <Button onclick={logOut}
-        >{$_('account.log_out', {
+        >{$t('account.log_out', {
           default: 'Log Out',
         })}</Button>
     </div>

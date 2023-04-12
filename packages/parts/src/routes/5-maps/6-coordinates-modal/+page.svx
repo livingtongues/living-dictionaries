@@ -2,8 +2,7 @@
   import { Story } from 'kitbook';
   import CoordinatesModal from '$lib/maps/CoordinatesModal.svelte';
   import LatLngDisplay from '$lib/maps/LatLngDisplay.svelte';
-  import ShowHide from 'svelte-pieces/functions/ShowHide.svelte';
-  import Button from 'svelte-pieces/ui/Button.svelte';
+  import { Button, ShowHide } from 'svelte-pieces';
 </script>
 
 <!-- prettier-ignore -->

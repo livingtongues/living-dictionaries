@@ -5,10 +5,10 @@
   import ToggleRefinement from '$lib/components/search/ToggleRefinement.svelte';
   import ClearRefinements from '$lib/components/search/ClearRefinements.svelte';
   import type { InstantSearch } from 'instantsearch.js';
-  import Button from 'svelte-pieces/ui/Button.svelte';
-  import ResponsiveSlideover from 'svelte-pieces/ui/ResponsiveSlideover.svelte';
-  export let showMobileFilters = false,
-    search: InstantSearch;
+  import { Button, ResponsiveSlideover } from 'svelte-pieces';
+
+  export let showMobileFilters = false;
+  export let search: InstantSearch;
 </script>
 
 <ResponsiveSlideover
@@ -104,7 +104,8 @@
     <a
       class="block mt-3 md:mb-3 ml-auto"
       href="https://www.algolia.com/?utm_source=instantsearch.js&utm_medium=website&utm_content=livingdictionaries.app&utm_campaign=poweredby"
-      target="_blank" rel="noopener noreferrer">
+      target="_blank"
+      rel="noopener noreferrer">
       <img
         class="w-full"
         style="max-width: 145px;"

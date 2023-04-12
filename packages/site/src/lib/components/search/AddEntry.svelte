@@ -1,7 +1,6 @@
 <script lang="ts">
-  import ShowHide from 'svelte-pieces/functions/ShowHide.svelte';
-  import Button from 'svelte-pieces/ui/Button.svelte';
   import { t } from 'svelte-i18n';
+  import { Button, ShowHide } from 'svelte-pieces';
   import EditFieldModal from '$lib/components/entry/EditFieldModal.svelte';
   import type { IEntry } from '@living-dictionaries/types';
   import { page } from '$app/stores';

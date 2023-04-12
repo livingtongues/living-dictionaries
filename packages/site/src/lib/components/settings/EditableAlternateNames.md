@@ -1,7 +1,7 @@
 <script lang="ts">
   import { Story } from "kitbook";
   import EditableAlternateNames from './EditableAlternateNames.svelte';
-  import ReactiveSet from 'svelte-pieces/functions/ReactiveSet.svelte';
+  import { ReactiveSet } from 'svelte-pieces';
 </script>
 
 <!-- prettier-ignore -->
