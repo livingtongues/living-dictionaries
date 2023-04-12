@@ -5,7 +5,8 @@ import { readFileSync } from 'fs';
 import { parseCSVFrom } from './parse-csv.js';
 import { convertJsonRowToEntryFormat } from './convertJsonRowToEntryFormat.js';
 
-const developerInCharge = 'qkTzJXH24Xfc57cZJRityS6OTn52';
+const developer_in_charge = 'qkTzJXH24Xfc57cZJRityS6OTn52';
+const different_speakers: string[] = [];
 
 export async function importFromSpreadsheet(dictionaryId: string, dry = false) {
   const dateStamp = Date.now();
@@ -57,8 +58,9 @@ export async function importEntriesToFirebase(
     }
 
     if (row.soundFile) {
-      if (row.speakerName) {
-        speakerRef = db.collection('speakers');
+      speakerRef = db.collection('speakers');
+      if (row.speakerName && (!speakerId || !different_speakers.includes(row.speakerName))) {
+        different_speakers.push(row.speakerName);
         speakerId = speakerRef.doc().id;
         batch.create(speakerRef.doc(speakerId), {
           displayName: row.speakerName,
@@ -67,18 +69,22 @@ export async function importEntriesToFirebase(
           gender: row.speakerGender,
           contributingTo: [dictionaryId],
           createdAt: timestamp,
-          createdBy: developerInCharge,
+          createdBy: developer_in_charge,
           updatedAt: timestamp,
-          updatedBy: developerInCharge,
+          updatedBy: developer_in_charge,
         });
       }
       const audioFilePath = await uploadAudioFile(row.soundFile, entryId, dictionaryId, dry);
       if (audioFilePath) {
         entry.sf = {
           path: audioFilePath,
-          speakerName: row.speakerName,
           ts: timestamp,
         };
+        if (speakerId) {
+          entry.sf.sp = speakerId;
+        } else {
+          entry.sf.speakerName = row.speakerName;
+        }
       }
     }
 
