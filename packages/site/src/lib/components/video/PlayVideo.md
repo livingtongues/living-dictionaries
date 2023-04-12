@@ -16,7 +16,7 @@
         storageBucket={'change'}
         canEdit
         on:close={toggle}
-        on:delete={() => alert('delete clicked')} />
+        on:deleteVideo={() => alert('delete clicked')} />
     {/if}
   </ShowHide>
 </Story>

@@ -2,7 +2,6 @@
   import { t } from 'svelte-i18n';
   import type { IEntry, IVideo } from '@living-dictionaries/types';
   import { ShowHide } from 'svelte-pieces';
-  import { deleteVideo } from '$lib/helpers/delete';
   import { firebaseConfig } from 'sveltefirets';
 
   export let entry: IEntry;
@@ -27,8 +26,8 @@
         {video}
         storageBucket={firebaseConfig.storageBucket}
         {canEdit}
-        on:close={toggle}
-        on:delete={() => deleteVideo(entry, video)} />
+        on:deleteVideo
+        on:close={toggle} />
     {/await}
   {/if}
 </ShowHide>

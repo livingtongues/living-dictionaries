@@ -1,21 +1,25 @@
 <script lang="ts">
   import { t } from 'svelte-i18n';
-  import type { IEntry } from '@living-dictionaries/types';
+  import type { IDictionary, IEntry } from '@living-dictionaries/types';
   import EntryField from './EntryField.svelte';
   import EntryPartOfSpeech from '$lib/components/entry/EntryPartOfSpeech.svelte';
   import EntrySemanticDomains from './EntrySemanticDomains.svelte';
   import EntryDialect from './EntryDialect.svelte';
   import { BadgeArray } from 'svelte-pieces';
   import EntryMedia from './EntryMedia.svelte';
-  import { dictionary } from '$lib/stores';
-
-  export let entry: IEntry,
-    videoAccess = false,
-    canEdit = false,
-    alternateOrthographies = [],
-    glossingLanguages = ['en'];
-
   import { createEventDispatcher } from 'svelte';
+  import { order_entry_and_dictionary_gloss_languages } from '$lib/helpers/glosses';
+
+  export let entry: IEntry;
+  export let dictionary: IDictionary;
+  export let canEdit = false;
+  export let admin = true;
+
+  $: glossingLanguages = order_entry_and_dictionary_gloss_languages(
+    entry.gl,
+    dictionary.glossLanguages || ['en']
+  );
+
   const dispatch = createEventDispatcher<{
     valueupdate: { field: string; newValue: string[] }; // an array of strings for the sr field, but the valueupdate events being passed upwards are mostly strings
   }>();
@@ -32,7 +36,7 @@
   </div>
 
   <div class="md:w-1/3 flex flex-col md:flex-col-reverse justify-end mt-2">
-    <EntryMedia {entry} {canEdit} {videoAccess} />
+    <EntryMedia {entry} {canEdit} videoAccess={dictionary.videoAccess || admin} on:deleteImage on:deleteVideo />
   </div>
 
   <div class="hidden md:block w-1" />
@@ -47,7 +51,7 @@
         on:valueupdate />
     </div>
 
-    {#each alternateOrthographies as orthography, index}
+    {#each dictionary.alternateOrthographies || [] as orthography, index}
       <EntryField
         value={entry[index === 0 ? 'lo' : `lo${index + 1}`]}
         field={index === 0 ? 'lo' : `lo${index + 1}`}
@@ -60,7 +64,7 @@
 
     {#each glossingLanguages as bcp}
       <EntryField
-        value={entry.gl[bcp]}
+        value={entry.gl?.[bcp]}
         field={`gl.${bcp}`}
         {canEdit}
         display={`${$t(`gl.${bcp}`)}: ${$t('entry.gloss', {
@@ -77,8 +81,8 @@
       on:valueupdate={({ detail }) =>
         dispatch('valueupdate', { field: 'scn', newValue: [detail.newValue] })} />
 
+    <!-- Only in Bahasa Lani (id: jaRhn6MAZim4Blvr1iEv) -->
     {#if entry.de}
-      <!-- Only in Bahasa Lani (id: jaRhn6MAZim4Blvr1iEv) -->
       <EntryField
         value={entry.de}
         field="de"
@@ -97,7 +101,7 @@
 
     <EntrySemanticDomains {canEdit} {entry} on:valueupdate />
 
-    {#if ['babanki', 'torwali'].includes($dictionary.id)}
+    {#if ['babanki', 'torwali'].includes(dictionary.id)}
       <EntryField
         value={entry['va']}
         field="va"
@@ -130,8 +134,8 @@
       </div>
     {/if}
 
+    <!-- used for old dictionary imports, needs refactored into entry.xs -->
     {#if entry.xv}
-      <!-- used for old dictionary imports, needs refactored into entry.xs -->
       <EntryField
         value={entry.xv}
         field="xv"

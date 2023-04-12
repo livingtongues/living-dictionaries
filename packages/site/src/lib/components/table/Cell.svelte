@@ -12,9 +12,10 @@
   import { deleteImage } from '$lib/helpers/delete';
   import { dictionary } from '$lib/stores';
   import type { IColumn, IEntry } from '@living-dictionaries/types';
-  export let column: IColumn,
-    entry: IEntry,
-    canEdit = false;
+
+  export let column: IColumn;
+  export let entry: IEntry;
+  export let canEdit = false;
 
   let updatedValue;
 </script>
@@ -33,7 +34,7 @@
         lexeme={entry.lx}
         gcs={entry.pf.gcs}
         square={60}
-        on:delete={() => deleteImage(entry)} />
+        on:deleteImage={() => deleteImage(entry)} />
     {/if}
     <!-- // TODO: add videos to columns -->
     <!-- {:else if column.field === 'videoFile'}

@@ -1,18 +1,18 @@
 <script lang="ts">
-  import { _ } from 'svelte-i18n';
+  import { t } from 'svelte-i18n';
   import type { IEntry } from '@living-dictionaries/types';
-  import { canEdit } from '$lib/stores';
   import { ShowHide, longpress } from 'svelte-pieces';
   import { firebaseConfig } from 'sveltefirets';
 
   export let entry: IEntry;
   export let minimal = false;
+  export let canEdit = false;
 
   let playing = false;
 
-  function initAudio(sf) {
+  function initAudio(sf: IEntry['sf']) {
     const convertedPath = sf.path.replace(/\//g, '%2F');
-    const url = `https://firebasestorage.googleapis.com/v0/b/${firebaseConfig.storageBucket}/o/${convertedPath}?alt=media`;
+    const url = `https://firebasestorage.googleapis.com/v0/b/${firebaseConfig.storageBucket}/o/${convertedPath}?alt=media`; // TODO: this conversion should be done upon receiving data from the server - it should not be the component's responsibility, then we can just use the path as is and don't need to depend on sveltefirets and don't need to lazy-load this component
     const audio = new Audio(url);
     audio.play();
     playing = true;
@@ -41,7 +41,7 @@
     justify-center cursor-pointer p-1 select-none"
       use:longpress={800}
       on:click={() => {
-        if ($canEdit) {
+        if (canEdit) {
           toggle();
         } else {
           initAudio(entry.sf);
@@ -50,10 +50,10 @@
       on:longpress={() => initAudio(entry.sf)}>
       <span class:text-blue-700={playing} class="i-material-symbols-hearing text-2xl mt-1" />
       <div class="text-gray-600 text-sm mt-1">
-        {$_('audio.listen', { default: 'Listen' })}
-        {#if !minimal && $canEdit}
+        {$t('audio.listen', { default: 'Listen' })}
+        {#if !minimal && canEdit}
           +
-          {$_('audio.edit_audio', { default: 'Edit Audio' })}
+          {$t('audio.edit_audio', { default: 'Edit Audio' })}
         {/if}
         <!-- {#if !minimal && entry.sf.speakerName}
         to
@@ -66,7 +66,7 @@
       {/if} -->
       </div>
     </div>
-  {:else if $canEdit}
+  {:else if canEdit}
     <div
       class="{$$props.class} hover:bg-gray-300 flex flex-col items-center
     justify-center cursor-pointer p-2 text-lg"
@@ -74,7 +74,7 @@
       <i class="far fa-microphone my-1 mx-2 text-blue-800" />
       {#if !minimal}
         <div class="text-blue-800 text-xs">
-          {$_('audio.add_audio', { default: 'Add Audio' })}
+          {$t('audio.add_audio', { default: 'Add Audio' })}
         </div>
       {/if}
     </div>

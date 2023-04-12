@@ -2,17 +2,17 @@
   import { t } from 'svelte-i18n';
   import type { IEntry, IVideo } from '@living-dictionaries/types';
   import VideoIFrame from './VideoIFrame.svelte';
-
-  export let entry: IEntry,
-    video: IVideo,
-    storageBucket: string,
-    canEdit = false;
-
   import { Button } from 'svelte-pieces';
   import { createEventDispatcher } from 'svelte';
+
+  export let entry: IEntry;
+  export let video: IVideo;
+  export let storageBucket: string;
+  export let canEdit = false;
+
   const dispatch = createEventDispatcher<{
     close: boolean;
-    delete: boolean;
+    deleteVideo: boolean;
   }>();
 </script>
 
@@ -54,7 +54,7 @@
           form="filled"
           onclick={(e) => {
             e.stopPropagation();
-            dispatch('delete');
+            dispatch('deleteVideo');
           }}>
           <span class="i-fa-trash-o" style="margin: -1px 0 2px;" />
           {$t('misc.delete', { default: 'Delete' })}
