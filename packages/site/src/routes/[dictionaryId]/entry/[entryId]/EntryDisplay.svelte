@@ -36,7 +36,12 @@
   </div>
 
   <div class="md:w-1/3 flex flex-col md:flex-col-reverse justify-end mt-2">
-    <EntryMedia {entry} {canEdit} videoAccess={dictionary.videoAccess || admin} on:deleteImage on:deleteVideo />
+    <EntryMedia
+      {entry}
+      {canEdit}
+      videoAccess={dictionary.videoAccess || admin}
+      on:deleteImage
+      on:deleteVideo />
   </div>
 
   <div class="hidden md:block w-1" />
@@ -73,14 +78,6 @@
         on:valueupdate />
     {/each}
 
-    <EntryField
-      value={entry.scn?.[0]}
-      field="scn"
-      {canEdit}
-      display={$t('entry.scn', { default: 'Scientific Name' })}
-      on:valueupdate={({ detail }) =>
-        dispatch('valueupdate', { field: 'scn', newValue: [detail.newValue] })} />
-
     <!-- Only in Bahasa Lani (id: jaRhn6MAZim4Blvr1iEv) -->
     {#if entry.de}
       <EntryField
@@ -101,6 +98,16 @@
 
     <EntrySemanticDomains {canEdit} {entry} on:valueupdate />
 
+    <EntryDialect {canEdit} {entry} on:valueupdate />
+
+    <EntryField
+      value={entry.scn?.[0]}
+      field="scn"
+      {canEdit}
+      display={$t('entry.scn', { default: 'Scientific Name' })}
+      on:valueupdate={({ detail }) =>
+        dispatch('valueupdate', { field: 'scn', newValue: [detail.newValue] })} />
+
     {#if ['babanki', 'torwali'].includes(dictionary.id)}
       <EntryField
         value={entry['va']}
@@ -109,8 +116,6 @@
         display={$t(`entry.va`, { default: 'Variant' })}
         on:valueupdate />
     {/if}
-
-    <EntryDialect {canEdit} {entry} on:valueupdate />
 
     {#each ['pl', 'nc', 'mr', 'in', 'nt'] as field}
       <EntryField
