@@ -1,10 +1,9 @@
 
 <script lang="ts">
-  import { _ } from 'svelte-i18n';
+  import { t } from 'svelte-i18n';
   import { onMount } from 'svelte';
   import { firebaseConfig } from 'sveltefirets';
-  import Button from 'svelte-pieces/ui/Button.svelte';
-  import ShowHide from 'svelte-pieces/functions/ShowHide.svelte';
+  import { Button, ShowHide } from 'svelte-pieces';
   import { page } from '$app/stores';
 
   onMount(async () => {
@@ -17,23 +16,23 @@
 </script>
 
 <svelte:head>
-  <title>{$_('misc.error', { default: 'Error' })}: {$page.status}</title>
+  <title>{$t('misc.error', { default: 'Error' })}: {$page.status}</title>
 </svelte:head>
 
 <div class="p-4 bg-white relative z-20">
   <h2 class="text-xl sm:text-4xl font-bold mb-3">
-    {$_('error.run_into_error', {
+    {$t('error.run_into_error', {
       default: "We're sorry, we've run into an error.",
     })}
   </h2>
 
   <p class="mb-3">
-    {$_('error.error_recorded', {
+    {$t('error.error_recorded', {
       default: 'The error has been recorded and we will be looking into it.',
     })}
 
     <b>
-      {$_('error.please_explain', {
+      {$t('error.please_explain', {
         default: 'Can you please send us a short note to explain what happened?',
       })}
     </b>
@@ -49,7 +48,7 @@
   </ShowHide>
 
   <p class="text-gray-600 text-sm mt-6">
-    {$_('misc.error', { default: 'Error' })}:
+    {$t('misc.error', { default: 'Error' })}:
     {$page.status}
     -
     {$page.error.message}

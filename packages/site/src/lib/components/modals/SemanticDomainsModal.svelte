@@ -1,6 +1,5 @@
 <script lang="ts">
-  import { _ } from 'svelte-i18n';
-  import Modal from 'svelte-pieces/ui/Modal.svelte';
+  import { t } from 'svelte-i18n';
   import { createEventDispatcher } from 'svelte';
   const dispatch = createEventDispatcher();
   const close = () => dispatch('close');
@@ -8,7 +7,7 @@
   import MultiSelect from '$lib/components/ui/MultiSelect.svelte';
   import { semanticDomains } from '$lib/mappings/semantic-domains';
   import type { IEntry } from '@living-dictionaries/types';
-  import Button from 'svelte-pieces/ui/Button.svelte';
+  import { Button, Modal } from 'svelte-pieces';
   export let entry: IEntry;
   let domains = entry.sdn || [];
   let removedDeprecated = false;
@@ -33,18 +32,18 @@
 
 <Modal on:close>
   <span slot="heading"
-    >{$_('entry.select_semantic_domains', {
+    >{$t('entry.select_semantic_domains', {
       default: 'Select Semantic Domains',
     })}:
     {entry.lx}
   </span>
 
   <form on:submit|preventDefault={save}>
-    <MultiSelect bind:value={domains} placeholder={$_('entry.sdn', { default: 'Semantic Domain' })}>
+    <MultiSelect bind:value={domains} placeholder={$t('entry.sdn', { default: 'Semantic Domain' })}>
       <option />
       {#each semanticDomains as domain}
         <option value={domain.key}>
-          {$_('sd.' + domain.key, { default: domain.name })}
+          {$t('sd.' + domain.key, { default: domain.name })}
         </option>
       {/each}
     </MultiSelect>
@@ -70,11 +69,11 @@
 
     <div class="modal-footer space-x-1">
       <Button onclick={close} form="simple" color="black">
-        {$_('misc.cancel', { default: 'Cancel' })}
+        {$t('misc.cancel', { default: 'Cancel' })}
       </Button>
 
       <Button type="submit" form="filled">
-        {$_('misc.save', { default: 'Save' })}
+        {$t('misc.save', { default: 'Save' })}
       </Button>
     </div>
   </form>

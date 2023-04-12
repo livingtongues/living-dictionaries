@@ -1,5 +1,5 @@
 <script lang="ts">
-  import ShowHide from 'svelte-pieces/functions/ShowHide.svelte';
+  import { ShowHide } from 'svelte-pieces';
   import GeoJSONSource from '../sources/GeoJSONSource.svelte';
   import Layer from './Layer.svelte';
   import PopupOfMap from './PopupOfMap.svelte';

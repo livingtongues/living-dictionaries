@@ -1,6 +1,6 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
-  import Button from 'svelte-pieces/ui/Button.svelte';
+  import { Button } from 'svelte-pieces';
   import { parseVideoData } from './parseVideoData';
   import { createEventDispatcher } from 'svelte';
   import type { IVideo } from '@living-dictionaries/types';

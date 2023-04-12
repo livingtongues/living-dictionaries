@@ -3,8 +3,7 @@
   export let t: Readable<any> = undefined;
 
   import { onMount, createEventDispatcher } from 'svelte';
-  import Modal from 'svelte-pieces/ui/Modal.svelte';
-  import Button from 'svelte-pieces/ui/Button.svelte';
+  import { Button, Modal, ReactiveSet } from 'svelte-pieces';
   import Map from './mapbox/map/Map.svelte';
   import Geocoder from './mapbox/geocoder/Geocoder.svelte';
   import Marker from './mapbox/map/Marker.svelte';
@@ -15,9 +14,7 @@
   import { polygonFeatureCoordinates } from './utils/polygonFromCoordinates';
   import Layer from './mapbox/map/Layer.svelte';
   import { randomColor } from './utils/randomColor';
-  import ReactiveSet from 'svelte-pieces/functions/ReactiveSet.svelte';
   import Popup from './mapbox/map/Popup.svelte';
-
   import { points } from '@turf/helpers';
   import center from '@turf/center';
 

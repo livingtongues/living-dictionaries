@@ -14,7 +14,7 @@ declare namespace App {
 
 declare namespace svelte.JSX {
   interface HTMLAttributes<T> {
-    onclickOutside?: (event: CustomEvent<any> & { target: EventTarget & T }) => any;
+    onclickoutside?: (event: CustomEvent<any> & { target: EventTarget & T }) => any;
     onlongpress?: (event: CustomEvent<any> & { target: EventTarget & T }) => any;
     onshortpress?: (event: CustomEvent<any> & { target: EventTarget & T }) => any;
   }

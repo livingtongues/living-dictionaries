@@ -1,11 +1,9 @@
 <script lang="ts">
-  import { _ } from 'svelte-i18n';
+  import { t } from 'svelte-i18n';
   import SideMenu from './SideMenu.svelte';
   import { dictionary as dictionaryStore, algoliaQueryParams } from '$lib/stores';
   import Header from '$lib/components/shell/Header.svelte';
-  import ResponsiveSlideover from 'svelte-pieces/ui/ResponsiveSlideover.svelte';
-  import Button from 'svelte-pieces/ui/Button.svelte';
-
+  import { Button, ResponsiveSlideover } from 'svelte-pieces';
   import type { LayoutData } from './$types';
   export let data: LayoutData;
 
@@ -40,7 +38,7 @@
 
 <div class="flex px-3 print:px-0">
   <ResponsiveSlideover
-    side={$_('direction') === 'rtl' ? 'right' : 'left'}
+    side={$t('direction') === 'rtl' ? 'right' : 'left'}
     showWidth={'md'}
     bind:open={menuOpen}>
     <div
@@ -49,7 +47,7 @@
       <hr class="md:hidden" />
       <Button form="menu" class="text-left !md:hidden" onclick={() => (menuOpen = false)}>
         <i class="far fa-times fa-lg fa-fw" />
-        {$_('misc.close', { default: 'Close' })}
+        {$t('misc.close', { default: 'Close' })}
       </Button>
     </div>
   </ResponsiveSlideover>

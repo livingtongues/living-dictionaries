@@ -4,7 +4,7 @@
   import Audio from '../../entries/Audio.svelte';
   import AddImage from '../../entries/AddImage.svelte';
   import Image from '$lib/components/image/Image.svelte';
-  import ShowHide from 'svelte-pieces/functions/ShowHide.svelte';
+  import { ShowHide } from 'svelte-pieces';
   import Video from '../../entries/Video.svelte';
   import { deleteImage } from '$lib/helpers/delete';
 

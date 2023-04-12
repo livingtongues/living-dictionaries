@@ -1,14 +1,12 @@
 <script lang="ts">
   import type { IDictionary } from '@living-dictionaries/types';
-  import ResponsiveTable from 'svelte-pieces/ui/ResponsiveTable.svelte';
   import { Collection, updateOnline } from 'sveltefirets';
   import { arrayRemove, arrayUnion, deleteField, GeoPoint } from 'firebase/firestore/lite';
   import { exportDictionariesAsCSV } from '$lib/export/csv';
   import Filter from '$lib/components/Filter.svelte';
-  import Button from 'svelte-pieces/ui/Button.svelte';
+  import { Button, ResponsiveTable, ShowHide } from 'svelte-pieces';
   import DictionaryRow from '../DictionaryRow.svelte';
   import SortDictionaries from '../SortDictionaries.svelte';
-  import ShowHide from 'svelte-pieces/functions/ShowHide.svelte';
 
   let dictionariesType: IDictionary[] = [];
 </script>
