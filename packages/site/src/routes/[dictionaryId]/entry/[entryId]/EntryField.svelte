@@ -32,7 +32,7 @@
             {:else if field === 'ph'}
               [{value}]
             {:else if field === 'scn'}
-              <span class="italic">{value}</span>
+              <i>{value}</i>
             {:else}
               {value}
             {/if}
