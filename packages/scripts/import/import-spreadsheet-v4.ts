@@ -6,7 +6,10 @@ import { parseCSVFrom } from './parse-csv.js';
 import { convertJsonRowToEntryFormat } from './convertJsonRowToEntryFormat.js';
 
 const developer_in_charge = 'qkTzJXH24Xfc57cZJRityS6OTn52';
-const different_speakers: string[] = [];
+interface unique_speakers {
+  [key: string]: string;
+}
+const different_speakers: unique_speakers = {};
 
 export async function importFromSpreadsheet(dictionaryId: string, dry = false) {
   const dateStamp = Date.now();
@@ -59,9 +62,9 @@ export async function importEntriesToFirebase(
 
     if (row.soundFile) {
       speakerRef = db.collection('speakers');
-      if (row.speakerName && (!speakerId || !different_speakers.includes(row.speakerName))) {
-        different_speakers.push(row.speakerName);
+      if (row.speakerName && (!speakerId || !(row.speakerName in different_speakers))) {
         speakerId = speakerRef.doc().id;
+        different_speakers[row.speakerName] = speakerId;
         batch.create(speakerRef.doc(speakerId), {
           displayName: row.speakerName,
           birthplace: row.speakerHometown,
@@ -81,7 +84,7 @@ export async function importEntriesToFirebase(
           ts: timestamp,
         };
         if (speakerId) {
-          entry.sf.sp = speakerId;
+          entry.sf.sp = different_speakers[row.speakerName];
         } else {
           entry.sf.speakerName = row.speakerName;
         }
