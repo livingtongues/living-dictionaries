@@ -34,7 +34,7 @@ function expand_sense(sense: DatabaseSense): ExpandedSense {
   return {
     glosses: sense.gl,
     parts_of_speech: sense.ps?.map(translate_part_of_speech_to_current_language),
-    semantic_domains: [...sense.sd, ...sense.sdn?.map(translate_semantic_domain_keys_to_current_language) || []],
+    semantic_domains: [...sense.sd || [], ...sense.sdn?.map(translate_semantic_domain_keys_to_current_language) || []],
     example_sentences: sense.xs,
     photo_files: sense.pfs?.map(expand_photo),
     video_files: sense.vfs?.map(expand_video),
