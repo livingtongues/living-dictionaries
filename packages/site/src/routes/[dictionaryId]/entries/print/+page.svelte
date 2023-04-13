@@ -120,12 +120,11 @@
         class="print-columns pr-4 print:pr-9 max-w-full flex-grow"
         style="--column-count: {$columnCount}">
         {#each entries as entry (entry.id)}
-          {@const new_entry_shape = convert_and_expand_entry(entry)}
           <PrintEntry
             headwordSize={$headwordSize}
             fontSize={$fontSize}
             imagePercent={$imagePercent}
-            entry={new_entry_shape}
+            entry={convert_and_expand_entry(entry)}
             showQrCode={$showQrCode}
             showLabels={$showLabels}
             selectedFields={$preferredPrintFields}

@@ -7,6 +7,10 @@
   import { configure } from 'instantsearch.js/es/widgets/index.js';
   import { connectToggleRefinement } from 'instantsearch.js/es/connectors';
   import { onMount } from 'svelte';
+  import { dictionary, canEdit } from '$lib/stores';
+  import GalleryEntry from '../GalleryEntry.svelte';
+  import { Doc } from 'sveltefirets';
+  import { convert_and_expand_entry } from '$lib/transformers/convert_and_expand_entry';
   import type { InstantSearch } from 'instantsearch.js';
   const search: InstantSearch = getContext('search');
 
@@ -23,7 +27,6 @@
       }),
       configure({
         hitsPerPage: 20,
-        // page: 1,
       }),
     ]);
 
@@ -33,11 +36,6 @@
       refine({ isRefined: true });
     };
   });
-
-  import { dictionary, canEdit } from '$lib/stores';
-  import GalleryEntry from '../GalleryEntry.svelte';
-  import { Doc } from 'sveltefirets';
-    import { convert_and_expand_entry } from '$lib/transformers/convert_and_expand_entry';
 </script>
 
 <Hits {search} let:entries>
@@ -49,16 +47,14 @@
             path="dictionaries/{$dictionary.id}/words/{algoliaEntry.id}"
             startWith={algoliaEntry}
             let:data={entry}>
-            {@const new_entry_shape = convert_and_expand_entry(entry)}
-            <GalleryEntry entry={new_entry_shape} canEdit={$canEdit} />
+            <GalleryEntry entry={convert_and_expand_entry(entry)} canEdit={$canEdit} />
           </Doc>
         {/if}
       {/each}
     {:else}
       {#each entries as entry (entry.id)}
         {#if entry.pf}
-          {@const new_entry_shape = convert_and_expand_entry(entry)}
-          <GalleryEntry entry={new_entry_shape} />
+          <GalleryEntry entry={convert_and_expand_entry(entry)} />
         {/if}
       {/each}
     {/if}

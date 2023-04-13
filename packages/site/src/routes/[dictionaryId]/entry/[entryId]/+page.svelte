@@ -17,9 +17,8 @@
     admin,
     user,
   } from '$lib/stores';
-  import type { PageData } from './$types';
   import { convert_and_expand_entry } from '$lib/transformers/convert_and_expand_entry';
-
+  import type { PageData } from './$types';
   export let data: PageData;
   $: entry = data.initialEntry;
 </script>
@@ -28,8 +27,8 @@
   <Doc
     path={`dictionaries/${$dictionary.id}/words/${data.initialEntry.id}`}
     startWith={data.initialEntry}
-    on:data={(e) => {
-      entry = convert_and_expand_entry(e.detail.data);
+    on:data={({ detail: { data } }) => {
+      entry = convert_and_expand_entry(data);
     }} />
 {/if}
 
