@@ -62,7 +62,7 @@
       {#each invites as invite}
         <div class="my-1">
           <ContributorInvitationStatus
-            admin={$admin}
+            admin={$admin > 0}
             {invite}
             on:delete={() =>
               updateOnline(`dictionaries/${$dictionary.id}/invites/${invite.id}`, {
@@ -113,7 +113,7 @@
       {#each invites as invite}
         <div class="my-1">
           <ContributorInvitationStatus
-            admin={$admin}
+            admin={$admin > 0}
             {invite}
             on:delete={() =>
               updateOnline(`dictionaries/${$dictionary.id}/invites/${invite.id}`, {
