@@ -67,9 +67,9 @@ export async function importEntriesToFirebase(
         different_speakers[row.speakerName] = speakerId;
         batch.create(speakerRef.doc(speakerId), {
           displayName: row.speakerName,
-          birthplace: row.speakerHometown,
-          decade: parseInt(row.speakerAge),
-          gender: row.speakerGender,
+          birthplace: row.speakerHometown || '',
+          decade: parseInt(row.speakerAge) || '',
+          gender: row.speakerGender || '',
           contributingTo: [dictionaryId],
           createdAt: timestamp,
           createdBy: developer_in_charge,
@@ -86,7 +86,7 @@ export async function importEntriesToFirebase(
         if (speakerId) {
           entry.sf.sp = different_speakers[row.speakerName];
         } else {
-          entry.sf.speakerName = row.speakerName;
+          entry.sf.speakerName = row.speakerName; // Keep that if for some reason we need the speakername as text only again.
         }
       }
     }
