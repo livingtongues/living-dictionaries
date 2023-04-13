@@ -6,8 +6,7 @@
 
   import type { IUser } from '@living-dictionaries/types';
   import { getDb } from 'sveltefirets';
-  import BadgeArrayEmit from 'svelte-pieces/data/BadgeArrayEmit.svelte';
-  import ShowHide from 'svelte-pieces/functions/ShowHide.svelte';
+  import { BadgeArrayEmit, ShowHide } from 'svelte-pieces';
   import { collectionGroup, onSnapshot, query, type Unsubscribe, where } from 'firebase/firestore';
   import { onDestroy, onMount } from 'svelte';
 

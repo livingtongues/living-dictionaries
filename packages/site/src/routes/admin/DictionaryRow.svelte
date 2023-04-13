@@ -3,10 +3,8 @@
   import type { IDictionary, IHelper, IInvite } from '@living-dictionaries/types';
   import { printDate } from '$lib/helpers/time';
   export let dictionary: IDictionary;
-  import ShowHide from 'svelte-pieces/functions/ShowHide.svelte';
   import DictionaryFieldEdit from './DictionaryFieldEdit.svelte';
-  import Button from 'svelte-pieces/ui/Button.svelte';
-  import BadgeArrayEmit from 'svelte-pieces/data/BadgeArrayEmit.svelte';
+  import { BadgeArrayEmit, ShowHide, Button, IntersectionObserverShared } from 'svelte-pieces';
   import { createEventDispatcher } from 'svelte';
   import { Collection, updateOnline } from 'sveltefirets';
   import { where } from 'firebase/firestore';
@@ -14,7 +12,6 @@
   import ContributorInvitationStatus from '$lib/components/contributors/ContributorInvitationStatus.svelte';
 
   import RolesManagment from './RolesManagment.svelte';
-  import IntersectionObserverShared from 'svelte-pieces/functions/IntersectionObserverShared.svelte';
 
   const dispatch = createEventDispatcher<{
     addalternatename: string;

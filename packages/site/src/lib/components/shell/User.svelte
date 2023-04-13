@@ -1,28 +1,9 @@
 <script lang="ts">
-  import { _ } from 'svelte-i18n';
+  import { t } from 'svelte-i18n';
   import { page } from '$app/stores';
   import { admin, user as userStore } from '$lib/stores';
   import { logOut, firebaseConfig, authState } from 'sveltefirets';
-  import Avatar from 'svelte-pieces/shell/Avatar.svelte';
-  import ShowHide from 'svelte-pieces/functions/ShowHide.svelte';
-  import Menu from 'svelte-pieces/shell/Menu.svelte';
-  import Button from 'svelte-pieces/ui/Button.svelte';
-
-  // Deep import not working, so copying function here temporarily
-  // import { clickoutside } from 'svelte-pieces/actions/clickoutside.js';
-  function clickoutside(node) {
-    const handleClick = (event) => {
-      if (node && !node.contains(event.target) && !event.defaultPrevented) {
-        node.dispatchEvent(new CustomEvent('clickoutside'));
-      }
-    };
-    document.addEventListener('click', handleClick, true);
-    return {
-      destroy() {
-        document.removeEventListener('click', handleClick, true);
-      },
-    };
-  }
+  import { Button, Menu, ShowHide, Avatar, clickoutside } from 'svelte-pieces';
 
   // @ts-ignore
   $: user = $userStore || ($authState === undefined && $page.data?.user) || null;
@@ -45,9 +26,9 @@
               <i class="fas fa-key" />
             </a>
           {/if}
-          <a href="/account"> {$_('account.account_settings', { default: 'Account Settings' })} </a>
+          <a href="/account"> {$t('account.account_settings', { default: 'Account Settings' })} </a>
           {#if userStore}
-            <button on:click={logOut}>{$_('account.log_out', { default: 'Log Out' })}</button>
+            <button on:click={logOut}>{$t('account.log_out', { default: 'Log Out' })}</button>
           {/if}
           {#if firebaseConfig.projectId === 'talking-dictionaries-dev'}
             <button
@@ -73,7 +54,7 @@
     <Button form="text" onclick={toggle}>
       <i class="far fa-sign-in" />
       <span class="ml-1 hidden sm:inline">
-        {$_('header.login', { default: 'Log In' })}
+        {$t('header.login', { default: 'Log In' })}
       </span>
     </Button>
     {#if show}

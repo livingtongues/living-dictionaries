@@ -1,10 +1,8 @@
 <script lang="ts">
+  import { Story } from 'kitbook';
+  import { Button, ShowHide } from 'svelte-pieces';
   import EditField from './EditField.svelte';
   import EditFieldModal from './EditFieldModal.svelte';
-
-  import { Story } from 'kitbook';
-  import ShowHide from 'svelte-pieces/functions/ShowHide.svelte';
-  import Button from 'svelte-pieces/ui/Button.svelte';
 </script>
 
 <!-- prettier-ignore -->

@@ -12,9 +12,10 @@
   import { deleteImage } from '$lib/helpers/delete';
   import { dictionary } from '$lib/stores';
   import type { IColumn, IEntry } from '@living-dictionaries/types';
-  export let column: IColumn,
-    entry: IEntry,
-    canEdit = false;
+
+  export let column: IColumn;
+  export let entry: IEntry;
+  export let canEdit = false;
 
   let updatedValue;
 </script>
@@ -33,7 +34,7 @@
         lexeme={entry.lx}
         gcs={entry.pf.gcs}
         square={60}
-        on:delete={() => deleteImage(entry)} />
+        on:deleteImage={() => deleteImage(entry)} />
     {/if}
     <!-- // TODO: add videos to columns -->
     <!-- {:else if column.field === 'videoFile'}
@@ -66,14 +67,10 @@
     <Textbox
       {canEdit}
       field={`gl.${column.field}`}
-      value={entry.gl && entry.gl[column.field]}
+      value={entry.gl?.[column.field]}
       display={$t(`gl.${column.field}`, { default: 'Gloss' })}
       {updatedValue}
-      htmlValue={(entry._highlightResult &&
-        entry._highlightResult.gl &&
-        entry._highlightResult.gl[column.field] &&
-        entry._highlightResult.gl[column.field].value) ||
-        ''}
+      htmlValue={entry._highlightResult?.gl?.[column.field]?.value}
       on:valueupdate={(e) => saveUpdateToFirestore(e, entry.id, $dictionary.id)} />
   {:else if column.exampleSentence === true}
     <Textbox
@@ -87,12 +84,22 @@
         }
       )}`}
       {updatedValue}
-      htmlValue={(entry._highlightResult &&
-        entry._highlightResult.xs &&
-        entry._highlightResult.xs[column.field] &&
-        entry._highlightResult.xs[column.field].value) ||
-        ''}
+      htmlValue={entry._highlightResult?.gl?.[column.field]?.value}
       on:valueupdate={(e) => saveUpdateToFirestore(e, entry.id, $dictionary.id)} />
+  {:else if column.field === 'scn'}
+    <Textbox
+      {canEdit}
+      field="scn"
+      value={entry.scn?.[0]}
+      display={$t('entry.scn', { default: 'Scientific Name' })}
+      {updatedValue}
+      htmlValue={entry.scn?.[0]}
+      on:valueupdate={(e) =>
+        saveUpdateToFirestore(
+          { detail: { field: 'scn', newValue: [e.detail.newValue] } },
+          entry.id,
+          $dictionary.id
+        )} />
   {:else}
     <Textbox
       {canEdit}

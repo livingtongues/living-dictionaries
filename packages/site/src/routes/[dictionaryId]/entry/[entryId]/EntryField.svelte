@@ -1,5 +1,5 @@
 <script lang="ts">
-  import ShowHide from 'svelte-pieces/functions/ShowHide.svelte';
+  import { ShowHide } from 'svelte-pieces';
   export let value: string,
     field: string = undefined,
     display: string,
@@ -32,12 +32,12 @@
             {:else if field === 'ph'}
               [{value}]
             {:else if field === 'scn'}
-              <span class="italic">{value}</span>
+              <i>{value}</i>
             {:else}
               {value}
             {/if}
           </div>
-        {:else}<i class="far fa-pencil text-gray-500 text-sm" />{/if}
+        {:else}<span class="i-fa6-solid-pencil text-gray-500 text-sm" />{/if}
       </div>
     </div>
     {#if show}

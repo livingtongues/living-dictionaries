@@ -1,6 +1,5 @@
 <script lang="ts">
-  import { _ } from 'svelte-i18n';
-  import Modal from 'svelte-pieces/ui/Modal.svelte';
+  import { t } from 'svelte-i18n';
   import { createEventDispatcher } from 'svelte';
   const dispatch = createEventDispatcher();
   const close = () => dispatch('close');
@@ -9,10 +8,8 @@
   import SelectAudio from '$lib/components/audio/SelectAudio.svelte';
   import RecordAudio from '$lib/components/audio/RecordAudio.svelte';
   import { dictionary, admin } from '$lib/stores';
-  import Button from 'svelte-pieces/ui/Button.svelte';
-
+  import { Modal, Button, JSON } from 'svelte-pieces';
   import { deleteAudio } from '$lib/helpers/delete';
-
   import type { IEntry } from '@living-dictionaries/types';
   import SelectSpeaker from '$lib/components/media/SelectSpeaker.svelte';
   import { updateOnline, firebaseConfig } from 'sveltefirets';
@@ -36,7 +33,7 @@
 
   {#if entry.sf && entry.sf.speakerName}
     <div class="mb-4">
-      {$_('entry.speaker', { default: 'Speaker' })}:
+      {$t('entry.speaker', { default: 'Speaker' })}:
       {entry.sf.speakerName}
     </div>
     <Waveform
@@ -112,10 +109,8 @@
   <div class="modal-footer">
     {#if entry.sf}
       {#if $admin > 1}
-        {#await import('svelte-pieces/data/JSON.svelte') then { default: JSON }}
-          <JSON obj={entry} />
-          <div class="w-1" />
-        {/await}
+        <JSON obj={entry} />
+        <div class="w-1" />
       {/if}
 
       <Button
@@ -125,7 +120,7 @@
         target="_blank">
         <i class="fas fa-download" />
         <span class="hidden sm:inline"
-          >{$_('misc.download', {
+          >{$t('misc.download', {
             default: 'Download',
           })}</span>
       </Button>
@@ -134,7 +129,7 @@
       <Button onclick={() => deleteAudio(entry)} color="red">
         <i class="far fa-trash-alt" />&nbsp;
         <span class="hidden sm:inline"
-          >{$_('misc.delete', {
+          >{$t('misc.delete', {
             default: 'Delete',
           })}</span>
       </Button>
@@ -142,7 +137,7 @@
     {/if}
 
     <Button onclick={close} color="black">
-      {$_('misc.close', { default: 'Close' })}
+      {$t('misc.close', { default: 'Close' })}
     </Button>
   </div>
 </Modal>

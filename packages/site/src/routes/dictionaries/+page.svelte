@@ -4,8 +4,7 @@
   import { orderBy, where } from 'firebase/firestore';
   import { admin } from '$lib/stores';
   import { exportDictionariesAsCSV } from '$lib/export/csv';
-  import Button from 'svelte-pieces/ui/Button.svelte';
-  import ResponsiveTable from 'svelte-pieces/ui/ResponsiveTable.svelte';
+  import { Button, ResponsiveTable } from 'svelte-pieces';
   import Header from '$lib/components/shell/Header.svelte';
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte';
 

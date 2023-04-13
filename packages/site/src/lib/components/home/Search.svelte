@@ -7,7 +7,7 @@
   import { fly } from 'svelte/transition';
   import { myDictionaries } from '$lib/stores';
 
-  import Button from 'svelte-pieces/ui/Button.svelte';
+  import { Button } from 'svelte-pieces';
   import { createEventDispatcher } from 'svelte';
 
   export let selectedDictionaryId: string;
