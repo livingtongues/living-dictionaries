@@ -6,6 +6,7 @@ import * as fs from 'fs';
 import { IPhoto } from '@living-dictionaries/types';
 import { environment, storage, timestamp } from '../config.js';
 import { getImageServingUrl } from './getImageServingUrl.js';
+import { ActualDatabasePhoto } from '@living-dictionaries/types/photo.interface.js';
 
 const fileBucket = `talking-dictionaries-${environment == 'prod' ? 'alpha' : 'dev'}.appspot.com`;
 
@@ -49,7 +50,7 @@ export async function uploadImageFile(
   entryId: string,
   dictionaryId: string,
   dry = false
-): Promise<IPhoto> {
+): Promise<ActualDatabasePhoto> {
   const imageDir = join(__dirname, `data/${dictionaryId}/images`);
   const imageFilePath = join(imageDir, imageFileName);
 
@@ -61,7 +62,6 @@ export async function uploadImageFile(
   try {
     const fileTypeSuffix = imageFileName.match(/\.[0-9a-z]+$/i)[0];
     const storagePath = `${dictionaryId}/images/${entryId}_${new Date().getTime()}${fileTypeSuffix}`;
-
     if (dry) {
       return { path: storagePath, gcs: 'no-path-bc-dry-run' };
     }
