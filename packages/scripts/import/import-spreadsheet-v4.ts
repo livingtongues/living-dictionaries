@@ -5,7 +5,7 @@ import { readFileSync } from 'fs';
 import { parseCSVFrom } from './parse-csv.js';
 import { convertJsonRowToEntryFormat } from './convertJsonRowToEntryFormat.js';
 
-const developer_in_charge = 'qkTzJXH24Xfc57cZJRityS6OTn52';
+const developer_in_charge = 'qkTzJXH24Xfc57cZJRityS6OTn52'; // diego@livingtongues.org -> Diego Córdova Nieto;
 interface unique_speakers {
   [key: string]: string;
 }
