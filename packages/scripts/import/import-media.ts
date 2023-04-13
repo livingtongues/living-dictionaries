@@ -73,7 +73,14 @@ export async function uploadImageFile(
       },
     });
 
-    const gcsPath = await getImageServingUrl(storagePath, environment);
+    let gcsPath;
+    try {
+      gcsPath = await getImageServingUrl(storagePath, environment);
+    } catch (err) {
+      console.log(`!!! Error getting image serving URL: ${err}`);
+      gcsPath = '';
+    }
+
     return {
       path: storagePath,
       gcs: gcsPath,
