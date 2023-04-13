@@ -31,13 +31,6 @@ export function convertJsonRowToEntryFormat(
 
   const semantic_domains_regex = /^semanticDomain\d*$/;
   Object.keys(row).forEach((key) => {
-    // gloss fields are labeled using bcp47 language codes followed by '_gloss' (e.g. es_gloss, tpi_gloss)
-    if (key.includes('_gloss') && row[key]) {
-      const language = key.split('_gloss')[0];
-      entry.gl[language] = row[key];
-      return;
-    }
-
     if (semantic_domains_regex.test(key) && row[key]) {
       entry.sdn = [];
       Object.entries(row).forEach((semantic_domain) => {
@@ -45,6 +38,13 @@ export function convertJsonRowToEntryFormat(
           Boolean(semantic_domain[1]) && entry.sdn.push(semantic_domain[1].toString());
         }
       });
+    }
+
+    // gloss fields are labeled using bcp47 language codes followed by '_gloss' (e.g. es_gloss, tpi_gloss)
+    if (key.includes('_gloss') && row[key]) {
+      const language = key.split('_gloss')[0];
+      entry.gl[language] = row[key];
+      return;
     }
 
     if (key.includes('vernacular_exampleSentence') && row[key]) {
