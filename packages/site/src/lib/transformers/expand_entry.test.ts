@@ -135,4 +135,27 @@ describe('expand_entry', () => {
     };
     expect(expand_entry(database_entry)).toEqual(expanded_entry);
   });
+
+  test('simple entry with sense but without custom sd', () => {
+    const database_entry: GoalDatabaseEntry = {
+      sn: [
+        {
+          gl: {
+            en: 'Hi'
+          }
+        }
+      ]
+    };
+    const expanded_entry: ExpandedEntry = {
+      senses: [
+        {
+          glosses: {
+            en: 'Hi',
+          },
+          semantic_domains: [],
+        }
+      ],
+    };
+    expect(expand_entry(database_entry)).toEqual(expanded_entry);
+  });
 });
