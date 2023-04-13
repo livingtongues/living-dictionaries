@@ -1,14 +1,18 @@
 <script lang="ts">
   // import { t } from 'svelte-i18n';
+  // import SeoMetaTags from '$lib/components/SeoMetaTags.svelte';
   import { getContext } from 'svelte';
+  import { Doc } from 'sveltefirets';
+  import { dictionary, canEdit, admin } from '$lib/stores';
+  import ListEntry from './ListEntry.svelte';
+  import { convert_and_expand_entry } from '$lib/transformers/convert_and_expand_entry';
+  import Hits from '$lib/components/search/Hits.svelte';
+  import Pagination from '$lib/components/search/Pagination.svelte';
+  import { configure } from 'instantsearch.js/es/widgets/index.js';
+  import { onMount } from 'svelte';
   import type { InstantSearch } from 'instantsearch.js';
   const search: InstantSearch = getContext('search');
 
-  import Hits from '$lib/components/search/Hits.svelte';
-  import Pagination from '$lib/components/search/Pagination.svelte';
-
-  import { configure } from 'instantsearch.js/es/widgets/index.js';
-  import { onMount } from 'svelte';
   onMount(() => {
     search.addWidgets([
       configure({
@@ -16,12 +20,6 @@
       }),
     ]);
   });
-
-  import { dictionary, canEdit, admin } from '$lib/stores';
-  import ListEntry from './ListEntry.svelte';
-  import { Doc } from 'sveltefirets';
-  import { convert_and_expand_entry } from '$lib/transformers/convert_and_expand_entry';
-  // import SeoMetaTags from '$lib/components/SeoMetaTags.svelte';
 </script>
 
 <Hits {search} let:entries>
@@ -31,17 +29,15 @@
         path="dictionaries/{$dictionary.id}/words/{algoliaEntry.id}"
         startWith={algoliaEntry}
         let:data={entry}>
-        {@const new_entry_shape = convert_and_expand_entry(entry)}
         <ListEntry
-          entry={new_entry_shape}
+          entry={convert_and_expand_entry(entry)}
           videoAccess={$dictionary.videoAccess || $admin > 0}
           canEdit={$canEdit} />
       </Doc>
     {/each}
   {:else}
     {#each entries as entry (entry.id)}
-      {@const new_entry_shape = convert_and_expand_entry(entry)}
-      <ListEntry entry={new_entry_shape} />
+      <ListEntry entry={convert_and_expand_entry(entry)} />
     {/each}
   {/if}
 </Hits>
