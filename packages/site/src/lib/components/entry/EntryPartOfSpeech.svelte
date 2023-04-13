@@ -1,10 +1,8 @@
 <script lang="ts">
   import { t } from 'svelte-i18n';
-  import BadgeArrayEmit from 'svelte-pieces/data/BadgeArrayEmit.svelte';
-  import ReactiveSet from 'svelte-pieces/functions/ReactiveSet.svelte';
-  import DataList from 'svelte-pieces/ui/DataList.svelte';
-  import Modal from 'svelte-pieces/ui/Modal.svelte';
+  import { Modal, ShowHide, DataList, ReactiveSet, BadgeArrayEmit } from 'svelte-pieces';
   import { partsOfSpeech, mayanPOS, mayanDictionaries } from '$lib/mappings/parts-of-speech';
+  import { createEventDispatcher } from 'svelte';
 
   export let value: string[] | string;
   export let canEdit = false;
@@ -17,8 +15,6 @@
     } else return value || [];
   })();
 
-  import { createEventDispatcher } from 'svelte';
-  import ShowHide from 'svelte-pieces/functions/ShowHide.svelte';
   const dispatch = createEventDispatcher<{
     valueupdate: {
       field: string;
@@ -55,8 +51,7 @@
         on:additem={toggle} />
       {#if show}
         <Modal noscroll on:close={toggle}>
-          <span slot="heading"
-            >{$t('entry.ps', { default: 'Part of Speech' })}</span>
+          <span slot="heading">{$t('entry.ps', { default: 'Part of Speech' })}</span>
           <DataList
             type="search"
             class="form-input w-full leading-none"

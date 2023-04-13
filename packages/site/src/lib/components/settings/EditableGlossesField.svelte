@@ -1,10 +1,7 @@
 <script lang="ts">
   import { t } from 'svelte-i18n';
   import type { IGlossLanguages } from '@living-dictionaries/types';
-  import Button from 'svelte-pieces/ui/Button.svelte';
-  import ShowHide from 'svelte-pieces/functions/ShowHide.svelte';
-  import BadgeArrayEmit from 'svelte-pieces/data/BadgeArrayEmit.svelte';
-  import Modal from 'svelte-pieces/ui/Modal.svelte';
+  import { Button, ShowHide, BadgeArrayEmit, Modal } from 'svelte-pieces';
   import Filter from '$lib/components/Filter.svelte';
 
   export let availableLanguages: IGlossLanguages;

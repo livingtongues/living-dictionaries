@@ -1,8 +1,6 @@
 <script lang="ts">
   import { t } from 'svelte-i18n';
-
-  import Button from 'svelte-pieces/ui/Button.svelte';
-  import ShowHide from 'svelte-pieces/functions/ShowHide.svelte';
+  import { Button, ShowHide } from 'svelte-pieces';
   import type { IDictionary, IPoint, IRegion } from '@living-dictionaries/types';
   import type { LngLat } from 'mapbox-gl';
   import Map from '@living-dictionaries/parts/src/lib/maps/mapbox/map/Map.svelte';
@@ -12,7 +10,6 @@
   import CoordinatesModal from '@living-dictionaries/parts/src/lib/maps/CoordinatesModal.svelte';
   import RegionModal from '@living-dictionaries/parts/src/lib/maps/RegionModal.svelte';
   import NavigationControl from '@living-dictionaries/parts/src/lib/maps/mapbox/controls/NavigationControl.svelte';
-
   import { createEventDispatcher } from 'svelte';
   const dispatch = createEventDispatcher<{
     updateCoordinates: { longitude: number; latitude: number };

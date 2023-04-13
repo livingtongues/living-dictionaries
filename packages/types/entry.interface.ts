@@ -5,7 +5,7 @@ import type { IExampleSentence } from './exampe-sentence.interface';
 import type { GoalDatabaseAudio, ActualDatabaseAudio, ExpandedAudio } from './audio.interface';
 import type { GoalDatabasePhoto, ActualDatabasePhoto, ExpandedPhoto } from './photo.interface';
 import type { GoalDatabaseVideo, ActualDatabaseVideo, ExpandedVideo } from './video.interface';
-import { LDAlgoliaFields } from './entry.algolia.interface';
+import type { LDAlgoliaFields } from './entry.algolia.interface';
 
 // current interface used across the site that we will migrate from this to just ExpandedEntry
 export type IEntry = ExpandedEntry & ActualDatabaseEntry & Pick<LDAlgoliaFields, "_highlightResult">

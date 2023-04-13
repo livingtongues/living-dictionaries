@@ -15,7 +15,7 @@
         lexeme={entry.lx}
         gcs={entry.pf.gcs}
         {canEdit}
-        on:delete={() => deleteImage(entry)} />
+        on:deleteImage={() => deleteImage(entry)} />
     </div>
     <a href={entry.id} style="background: #f3f3f3;" class="block p-[10px]">
       <div class="font-semibold">

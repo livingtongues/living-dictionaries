@@ -5,7 +5,9 @@
     type LanguageCode,
     languagesWithTranslations,
   } from 'sveltefirets';
-  import { _, locale } from 'svelte-i18n';
+  import { t, locale } from 'svelte-i18n';
+  import { Modal } from 'svelte-pieces';
+  import { createEventDispatcher } from 'svelte';
 
   let languageCode: LanguageCode = 'en';
 
@@ -16,20 +18,18 @@
   }
   languageCode = localeAbbrev as LanguageCode;
 
-  import Modal from 'svelte-pieces/ui/Modal.svelte';
   export let context: 'force' = undefined;
 
-  import { createEventDispatcher } from 'svelte';
   const dispatch = createEventDispatcher<{
     close: boolean;
   }>();
 </script>
 
 <Modal on:close>
-  <span slot="heading">{$_('header.login', { default: 'Sign In' })}</span>
+  <span slot="heading">{$t('header.login', { default: 'Sign In' })}</span>
   {#if context === 'force'}
     <h4 class="text-lg text-center">
-      {$_('header.please_create_account', {
+      {$t('header.please_create_account', {
         default: 'Please create an account',
       })}
     </h4>
