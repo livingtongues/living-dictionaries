@@ -18,16 +18,6 @@ export function convertJsonRowToEntryFormat(
   Boolean(row.source) && (entry.sr = row.source.split('|'));
   Boolean(row.pluralForm) && (entry.pl = row.pluralForm);
   Boolean(row.scientificName) && (entry.scn = [row.scientificName]);
-
-  const semantic_domains_regex = /^semanticDomain\d*$/;
-  if (Object.keys(row).some((key) => semantic_domains_regex.test(key) && row[key])) {
-    entry.sdn = [];
-    Object.entries(row).forEach((semantic_domain) => {
-      if (semantic_domains_regex.test(semantic_domain[0])) {
-        Boolean(semantic_domain[1]) && entry.sdn.push(semantic_domain[1].toString());
-      }
-    });
-  }
   Boolean(row.semanticDomain_custom) && (entry.sd = [row.semanticDomain_custom]);
   Boolean(row.ID) && (entry.ei = row.ID);
 
@@ -39,12 +29,22 @@ export function convertJsonRowToEntryFormat(
 
   Boolean(row.notes) && (entry.nt = row.notes);
 
+  const semantic_domains_regex = /^semanticDomain\d*$/;
   Object.keys(row).forEach((key) => {
     // gloss fields are labeled using bcp47 language codes followed by '_gloss' (e.g. es_gloss, tpi_gloss)
     if (key.includes('_gloss') && row[key]) {
       const language = key.split('_gloss')[0];
       entry.gl[language] = row[key];
       return;
+    }
+
+    if (semantic_domains_regex.test(key) && row[key]) {
+      entry.sdn = [];
+      Object.entries(row).forEach((semantic_domain) => {
+        if (semantic_domains_regex.test(semantic_domain[0])) {
+          Boolean(semantic_domain[1]) && entry.sdn.push(semantic_domain[1].toString());
+        }
+      });
     }
 
     if (key.includes('vernacular_exampleSentence') && row[key]) {
