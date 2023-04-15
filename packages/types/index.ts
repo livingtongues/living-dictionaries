@@ -1,4 +1,4 @@
-import type { IAudio } from './audio.interface';
+import type { GoalDatabaseAudio, IAudio } from './audio.interface';
 import type { IVideo, IVideoCustomMetadata } from './video.interface';
 import type { IDialect } from './dialect.interface';
 import type {
@@ -27,7 +27,7 @@ import type { IPrintFields } from './print-entry.interface';
 import type { AlgoliaEntry } from './entry.algolia.interface';
 
 export type {
-  IAudio,
+  IAudio, GoalDatabaseAudio,
   IVideo,
   IVideoCustomMetadata,
   IDialect,
