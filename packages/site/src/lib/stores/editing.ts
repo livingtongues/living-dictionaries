@@ -8,8 +8,7 @@ export const isManager: Readable<boolean> = derived(
   [user, dictionary],
   ([$user, $dictionary], set) => {
     if ($user) {
-      // @ts-ignore
-      if ($user.roles && $user.roles.admin && $user.roles.admin > 0) {
+      if ($user?.roles?.admin > 0) {
         set(true);
       } else {
         docExists(`dictionaries/${$dictionary.id}/managers/${$user.uid}`)

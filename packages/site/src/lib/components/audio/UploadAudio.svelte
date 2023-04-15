@@ -1,11 +1,14 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
-  import type { IAudio, IEntry } from '@living-dictionaries/types';
-  export let file: File, entry: IEntry, speakerId: string;
+  import type { GoalDatabaseAudio, IEntry } from '@living-dictionaries/types';
+  import { updateOnline } from 'sveltefirets';
+  import { serverTimestamp } from 'firebase/firestore/lite';
+  import { getStorage, ref, uploadBytesResumable } from 'firebase/storage';
   import { dictionary, user } from '$lib/stores';
-
   import { tweened } from 'svelte/motion';
   import { cubicOut } from 'svelte/easing';
+
+  export let file: File, entry: IEntry, speakerId: string;
   let progress = tweened(0, {
     duration: 2000,
     easing: cubicOut,
@@ -18,10 +21,6 @@
   if (file && entry) {
     startUpload();
   }
-
-  import { updateOnline } from 'sveltefirets';
-  import { serverTimestamp } from 'firebase/firestore/lite';
-  import { getStorage, ref, uploadBytesResumable } from 'firebase/storage';
 
   async function startUpload() {
     // const _dictName = dictionary.name.replace(/\s+/g, '_');
@@ -75,11 +74,11 @@
       },
       async () => {
         try {
-          const sf: IAudio = {
+          const sf: GoalDatabaseAudio = {
             path: storagePath,
             ts: serverTimestamp(),
             ab: $user.uid,
-            sp: speakerId,
+            sp: [speakerId],
           };
 
           await updateOnline<IEntry>(
