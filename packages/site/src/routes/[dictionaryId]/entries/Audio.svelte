@@ -22,6 +22,7 @@
     // TODO: unsubscribe listener
   }
 
+  // This should be done upon getting page data, in a load function, not in this component
   // async function getSpeakerName(sf) {
   //   console.log(sf);
   //   const speakerSnap = await Firestore doc >> (`speakers/${sf.sp}`);
@@ -82,7 +83,7 @@
 
   {#if show}
     {#await import('$lib/components/audio/EditAudio.svelte') then { default: EditAudio }}
-      <EditAudio {entry} on:close={toggle} />
+      <EditAudio {entry} sound_file={entry.sound_files?.[0]} on:close={toggle} />
     {/await}
   {/if}
 </ShowHide>

@@ -1,21 +1,21 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
   import { Button } from 'svelte-pieces';
-
-  export let audioBlob = null;
+  import { onMount } from 'svelte';
+  import type { StereoAudioRecorder, Options } from 'recordrtc';
+  
+  export let audioBlob: Blob = null;
   export let permissionGranted = false;
   let permissionDenied = false;
-
+  
   let RecordRTC: typeof import('recordrtc');
-  import { onMount } from 'svelte';
   onMount(async () => {
     RecordRTC = (await import('recordrtc')).default;
     // Could also use `await loadScriptOnce('https://cdnjs.cloudflare.com/ajax/libs/RecordRTC/5.5.6/RecordRTC.js');` in context module block
   });
 
-  // import type { StereoAudioRecorder } from 'recordrtc';
   // let recorder: StereoAudioRecorder = null;
-  let recorder = null;
+  let recorder: StereoAudioRecorder = null;
   let stream = null;
 
   async function checkAudioPermissions() {
@@ -43,7 +43,7 @@
         video: false,
       });
 
-      const options = {
+      const options: Options = {
         type: 'audio',
         mimeType: 'audio/wav',
         // bufferSize: 16384

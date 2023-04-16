@@ -10,19 +10,20 @@
   import { dictionary, admin } from '$lib/stores';
   import { Modal, Button, JSON } from 'svelte-pieces';
   import { deleteAudio } from '$lib/helpers/delete';
-  import type { IEntry } from '@living-dictionaries/types';
+  import type { ExpandedAudio, IEntry } from '@living-dictionaries/types';
   import SelectSpeaker from '$lib/components/media/SelectSpeaker.svelte';
   import { updateOnline, firebaseConfig } from 'sveltefirets';
 
   export let entry: IEntry;
+  export let sound_file: ExpandedAudio;
 
   let readyToRecord: boolean;
   let showUploadAudio = true;
 
-  let file;
-  let audioBlob;
+  let file: File;
+  let audioBlob: Blob;
 
-  $: if (entry.sf) {
+  $: if (sound_file) {
     file = undefined;
     audioBlob = undefined;
   }
@@ -31,22 +32,23 @@
 <Modal on:close>
   <span slot="heading"> <i class="far fa-ear text-sm" /> {entry.lx} </span>
 
-  {#if entry.sf && entry.sf.speakerName}
+  {#if sound_file?.speakerName}
     <div class="mb-4">
       {$t('entry.speaker', { default: 'Speaker' })}:
-      {entry.sf.speakerName}
+      {sound_file.speakerName}
     </div>
     <Waveform
       audioUrl={`https://firebasestorage.googleapis.com/v0/b/${
         firebaseConfig.storageBucket
-      }/o/${entry.sf.path.replace(/\//g, '%2F')}?alt=media`} />
+      }/o/${sound_file.fb_storage_path.replace(/\//g, '%2F')}?alt=media`} />
   {:else}
+    {@const speaker_id = sound_file?.speaker_ids?.[0] || null}
     <SelectSpeaker
       dictionaryId={$dictionary.id}
-      initialSpeakerId={(entry.sf && entry.sf.sp) || null}
+      initialSpeakerId={speaker_id}
       let:speakerId
       on:update={async ({ detail }) => {
-        if (entry.sf && detail.speakerId != entry.sf.sp) {
+        if (sound_file && speaker_id !== detail.speakerId) {
           await updateOnline(
             `dictionaries/${$dictionary.id}/words/${entry.id}`,
             {
@@ -56,12 +58,12 @@
           );
         }
       }}>
-      {#if entry.sf}
+      {#if sound_file}
         <div class="px-1">
           <Waveform
             audioUrl={`https://firebasestorage.googleapis.com/v0/b/${
               firebaseConfig.storageBucket
-            }/o/${entry.sf.path.replace(/\//g, '%2F')}?alt=media`} />
+            }/o/${sound_file.fb_storage_path.replace(/\//g, '%2F')}?alt=media`} />
         </div>
       {:else if speakerId}
         {#if file}
@@ -107,7 +109,7 @@
   {/if}
 
   <div class="modal-footer">
-    {#if entry.sf}
+    {#if sound_file}
       {#if $admin > 1}
         <JSON obj={entry} />
         <div class="w-1" />
@@ -116,7 +118,7 @@
       <Button
         href={`https://firebasestorage.googleapis.com/v0/b/${
           firebaseConfig.storageBucket
-        }/o/${entry.sf.path.replace(/\//g, '%2F')}?alt=media`}
+        }/o/${sound_file.fb_storage_path.replace(/\//g, '%2F')}?alt=media`}
         target="_blank">
         <i class="fas fa-download" />
         <span class="hidden sm:inline"
