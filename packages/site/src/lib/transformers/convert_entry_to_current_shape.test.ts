@@ -180,4 +180,12 @@ describe('convert_entry_to_current_shape', () => {
     }
     expect(convert_entry_to_current_shape(entry)).toEqual(expected);
   });
+
+  test('handles null fields', () => {
+    const entry: ActualDatabaseEntry = {
+      sf: null,
+      pf: null,
+    }
+    expect(convert_entry_to_current_shape(entry)).toEqual({});
+  });
 });
