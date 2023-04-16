@@ -1,6 +1,8 @@
 import type { ActualDatabaseAudio, GoalDatabaseAudio } from "@living-dictionaries/types/audio.interface";
 
 export function convert_sound_file_to_current_shape(actual: ActualDatabaseAudio): GoalDatabaseAudio {
+  if (!actual) return null;
+  
   const goal: GoalDatabaseAudio = { path: actual.path, speakerName: actual.speakerName };
   
   goal.ab = actual.ab || actual.uploadedBy;
@@ -47,6 +49,10 @@ if (import.meta.vitest) {
         ab: 'should stay',
       };
       expect(convert_sound_file_to_current_shape(actual)).toEqual(goal);
+    });
+
+    test('handles undefined', () => {
+      expect(convert_sound_file_to_current_shape(undefined)).toEqual(null);
     });
   });
 }
