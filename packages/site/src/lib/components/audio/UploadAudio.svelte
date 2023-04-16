@@ -8,7 +8,10 @@
   import { tweened } from 'svelte/motion';
   import { cubicOut } from 'svelte/easing';
 
-  export let file: File, entry: IEntry, speakerId: string;
+  export let file: File | Blob; 
+  export let entry: IEntry;
+  export let speakerId: string;
+  
   let progress = tweened(0, {
     duration: 2000,
     easing: cubicOut,

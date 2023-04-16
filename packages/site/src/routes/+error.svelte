@@ -56,7 +56,7 @@
 
   {#if firebaseConfig.projectId === 'talking-dictionaries-dev' && $page.error.message}
     <div class="w-full overflow-x-auto">
-      <pre>{$page.error}</pre>
+      <pre>{JSON.stringify($page.error, null, 2)}</pre>
     </div>
   {/if}
 </div>
