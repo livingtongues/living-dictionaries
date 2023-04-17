@@ -1,28 +1,22 @@
 <script lang="ts">
-  export let value: string,
-    canEdit = false;
-  let edit = false;
+  import { ShowHide } from 'svelte-pieces';
+
+  export let value: string;
+  export let canEdit = false;
 </script>
 
-<div
-  class:cursor-pointer={canEdit}
-  class="h-full"
-  style="padding: 0.1em 0.25em"
-  on:click={() => {
-    if (canEdit) {
-      edit = true;
-    }
-  }}>
-  {value || ''}
-</div>
+<ShowHide let:show let:set let:toggle>
+  <div
+    class:cursor-pointer={canEdit}
+    class="h-full"
+    style="padding: 0.1em 0.25em"
+    on:click={() => set(canEdit)}>
+    {value || ''}
+  </div>
 
-{#if edit}
-  {#await import('$lib/components/modals/DialectModal.svelte') then { default: DialectModal }}
-    <DialectModal
-      on:valueupdate
-      {value}
-      on:close={() => {
-        edit = false;
-      }} />
-  {/await}
-{/if}
+  {#if show}
+    {#await import('$lib/components/modals/DialectModal.svelte') then { default: DialectModal }}
+      <DialectModal on:valueupdate {value} on:close={toggle} />
+    {/await}
+  {/if}
+</ShowHide>
