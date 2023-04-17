@@ -1,13 +1,8 @@
 <script lang="ts">
   import { t } from 'svelte-i18n';
   import { ShowHide } from 'svelte-pieces';
-  import type { IEntry } from '@living-dictionaries/types';
-  
-  export let entry: IEntry;
+  export let value: string;
   export let canEdit = false;
-
-  let value: string;
-  $: value = entry.di;
 </script>
 
 {#if value || canEdit}
@@ -29,7 +24,7 @@
     </div>
     {#if show}
       {#await import('$lib/components/modals/DialectModal.svelte') then { default: DialectModal }}
-        <DialectModal on:valueupdate value={entry.di} on:close={toggle} />
+        <DialectModal on:valueupdate {value} on:close={toggle} />
       {/await}
     {/if}
   </ShowHide>

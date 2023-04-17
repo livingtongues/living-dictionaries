@@ -1,1 +1,0 @@
-check that dialects display can handle string[]

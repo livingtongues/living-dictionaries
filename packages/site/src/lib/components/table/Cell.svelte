@@ -56,7 +56,7 @@
   {:else if column.field === 'di'}
     <DialectCell
       {canEdit}
-      value={entry.di}
+      value={entry.di?.[0]}
       on:valueupdate={(e) => saveUpdateToFirestore(e, entry.id, $dictionary.id)} />
   {:else if column.field === 'sr'}
     <SelectSource

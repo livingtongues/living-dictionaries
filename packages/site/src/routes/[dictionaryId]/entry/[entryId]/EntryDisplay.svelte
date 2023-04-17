@@ -98,7 +98,7 @@
 
     <EntrySemanticDomains {canEdit} {entry} on:valueupdate />
 
-    <EntryDialect {canEdit} {entry} on:valueupdate />
+    <EntryDialect {canEdit} value={entry.di?.[0]} on:valueupdate />
 
     <EntryField
       value={entry.scn?.[0]}
