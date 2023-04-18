@@ -29,7 +29,6 @@
   style="--font-size: {size}rem;">
   <textarea
     style={size > 1 && 'font-weight: bold;'}
-    type="text"
     rows="1"
     {name}
     {required}

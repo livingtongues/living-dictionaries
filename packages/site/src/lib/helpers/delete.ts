@@ -4,7 +4,7 @@ import { dictionary } from '$lib/stores';
 import { goto } from '$app/navigation';
 import type { IEntry, IVideo } from '@living-dictionaries/types';
 import { updateOnline, deleteDocumentOnline, set } from 'sveltefirets';
-import { arrayUnion, arrayRemove } from 'firebase/firestore/lite';
+import { arrayUnion } from 'firebase/firestore/lite';
 import { serverTimestamp } from 'firebase/firestore';
 
 export async function deleteImage(entry: IEntry) {
