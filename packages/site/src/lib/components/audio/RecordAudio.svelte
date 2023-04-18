@@ -78,6 +78,7 @@
           audioBlob = blob;
           // checkBlobForUpload(blob, lexeme);
         },
+        // @ts-ignore
         (err) => {
           turnOffMic();
           alert(`${$_('misc.error', { default: 'Error' })}: ${err}`);
