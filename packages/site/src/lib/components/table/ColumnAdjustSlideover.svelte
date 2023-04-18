@@ -39,7 +39,7 @@
 </script>
 
 <Slideover on:close>
-  <span slot="heading">{$_('column.adjust_columns', { default: 'Adjust Columns' })}</span>
+  <span slot="title">{$_('column.adjust_columns', { default: 'Adjust Columns' })}</span>
 
   <ul class="divide-y divid-gray-200">
     {#each $preferredColumns as column, i (column.field)}
