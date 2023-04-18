@@ -26,8 +26,8 @@ jobs:
       - name: Install Dependencies
         run: pnpm install --no-frozen-lockfile
 
-      # - name: Svelte Check
-      #   run: npm run check
+      - name: Svelte Check
+        run: npm run check
       
       - name: Run Vitest Unit Tests
         run: npm run test
