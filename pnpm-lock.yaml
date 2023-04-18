@@ -206,7 +206,7 @@ importers:
       svelte: ^3.55.1
       svelte-check: ^3.2.0
       svelte-i18n: ^3.3.13
-      svelte-pieces: 1.0.61
+      svelte-pieces: 1.0.62
       svelte-preprocess: ^5.0.0
       sveltefirets: ^0.0.32
       temp-s-p-u: ^0.0.7
@@ -253,7 +253,7 @@ importers:
       svelte: 3.55.1
       svelte-check: 3.2.0_svelte@3.55.1
       svelte-i18n: 3.3.13_svelte@3.55.1
-      svelte-pieces: 1.0.61_stq7ooc25ght4ze53cyj5iopy4
+      svelte-pieces: 1.0.62_stq7ooc25ght4ze53cyj5iopy4
       svelte-preprocess: 5.0.0_atrrhq7vg4ekua4nnyrpuardle
       sveltefirets: 0.0.32
       temp-s-p-u: 0.0.7_vite@4.1.1
@@ -9394,6 +9394,18 @@ packages:
 
   /svelte-pieces/1.0.61_stq7ooc25ght4ze53cyj5iopy4:
     resolution: {integrity: sha512-ynYeFFzshn9x58WPLVkyCmueKPHxJL4lwvJQ63tG/BpWwqzXOi3jOLNZoh7jFFlZlJDAWuTp5YjhdOs3fFHAhA==}
+    peerDependencies:
+      '@sveltejs/kit': ^1.13.0
+      svelte: ^3.55.0
+    dependencies:
+      '@sveltejs/kit': 1.5.0_svelte@3.55.1+vite@4.1.1
+      fast-xml-parser: 3.21.1
+      he: 1.2.0
+      svelte: 3.55.1
+    dev: true
+
+  /svelte-pieces/1.0.62_stq7ooc25ght4ze53cyj5iopy4:
+    resolution: {integrity: sha512-3yPntyi9eFXTE5JUm80bYlflfjVASKHwlz2Bk11M/QrXDQzsRhBmGSeIGsBOzs0LDkQWEGXPaFOGVYOJr4IW8A==}
     peerDependencies:
       '@sveltejs/kit': ^1.13.0
       svelte: ^3.55.0

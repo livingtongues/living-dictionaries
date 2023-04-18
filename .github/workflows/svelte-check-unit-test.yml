@@ -1,14 +1,13 @@
-name: Unit Test PR
+name: Svelte Check & Unit Test Push
 
 on:
-  pull_request:
-    types:
-      - opened
-      - synchronize
+  push:
+    branches:
+      - '**'
 
 jobs:
   unit_test:
-    name: Unit Test PR
+    name: Svelte Check & Unit Test
     runs-on: ubuntu-latest
 
     steps:
@@ -21,7 +20,9 @@ jobs:
           node-version: 16
 
       - name: Install pnpm
-        run: npm install -g pnpm
+        uses: pnpm/action-setup@v2.0.1
+        with:
+          version: 7.9.3
 
       - name: Install Dependencies
         run: pnpm install --no-frozen-lockfile

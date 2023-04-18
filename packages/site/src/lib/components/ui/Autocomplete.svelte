@@ -1,9 +1,13 @@
 <script lang="ts">
-  export let items: any[] = [],
-    placeholder = 'CHANGE',
-    keyField = 'key',
-    labelField = 'name',
-    value = '';
+  import { createEventDispatcher } from 'svelte';
+  const dispatch = createEventDispatcher();
+
+  export let items: any[] = [];
+  export let placeholder = 'CHANGE';
+  export let keyField = 'key';
+  export let labelField = 'name';
+  export let value = '';
+
   let search = '';
   let active = false;
   let results: { value: string; boldedLabel: string; label: string }[] = [];
@@ -30,8 +34,6 @@
   } else {
     value = '';
   }
-  import { createEventDispatcher } from 'svelte';
-  const dispatch = createEventDispatcher();
   $: if (value.length) {
     dispatch('selectedResult', { value });
   }
