@@ -14,12 +14,14 @@
     "check": "svelte-check --tsconfig ./tsconfig.json --threshold warning --diagnostic-sources js,svelte",
     "check:watch": "svelte-check --tsconfig ./tsconfig.json --threshold warning --diagnostic-sources js,svelte --watch",
     "test": "vitest",
-    "test:ui": "vitest --ui"
+    "test:ui": "vitest --ui",
+    "test:e2e": "playwright test"
   },
   "devDependencies": {
     "@iconify/json": "^2.2.49",
     "@living-dictionaries/parts": "workspace:^0.0.1",
     "@living-dictionaries/types": "workspace:^1.0.0",
+    "@playwright/test": "^1.28.1",
     "@sentry/browser": "^6.18.2",
     "@sveltejs/adapter-auto": "^2.0.0",
     "@sveltejs/kit": "^1.5.0",
