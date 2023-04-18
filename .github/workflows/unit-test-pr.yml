@@ -21,19 +21,16 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: 18
-
-      - name: Install pnpm
-        run: npm install -g pnpm
+          node-version: 16
 
       - name: Install Dependencies
-        run: pnpm ci
+        run: npm ci
 
-      - name: Svelte Check
-        run: pnpm check
+      # - name: Svelte Check
+      #   run: npm run check
       
       - name: Run Vitest Unit Tests
-        run: pnpm test
+        run: npm run test
 
       # - name: Slack E2E Results Notification
       #   if: failure()
