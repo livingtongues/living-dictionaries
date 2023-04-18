@@ -1,0 +1,44 @@
+name: Unit Test PR
+
+on:
+  pull_request:
+    types:
+      - opened
+      - synchronize
+
+jobs:
+  unit_test:
+    name: Unit Test PR
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: 18
+
+      - name: Install pnpm
+        run: npm install -g pnpm
+
+      - name: Install Dependencies
+        run: pnpm ci
+
+      - name: Svelte Check
+        run: pnpm check
+      
+      - name: Run Vitest Unit Tests
+        run: pnpm test
+
+      - name: Slack E2E Results Notification
+        if: failure()
+        uses: adamkdean/simple-slack-notify@master
+        with:
+          # channel: '#github'
+          status: ${{ job.status }}
+          failure_text: 'Unit Tests for (#${env.GITHUB_RUN_NUMBER}) failed'
+          cancelled_text: 'Unit Tests for (#${env.GITHUB_RUN_NUMBER}) cancelled'
+          fields: |
+            [{ "title": "Action URL", "value": "${env.GITHUB_SERVER_URL}/${env.GITHUB_REPOSITORY}/actions/runs/${env.GITHUB_RUN_ID}"}]
