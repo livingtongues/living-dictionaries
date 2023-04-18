@@ -61,7 +61,7 @@
       enableGeolocation: true,
       accessToken: mapbox.accessToken,
       // marker: false,
-      mapboxgl: mapbox as unknown as Map, // types are wrong and say it should be map
+      mapboxgl: mapbox,
       types: types.join(','),
       placeholder,
     });
