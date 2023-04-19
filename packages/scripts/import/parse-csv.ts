@@ -1,7 +1,7 @@
 import { readFileSync } from 'fs';
 import { parse } from 'csv-parse/sync';
 
-export function parseCSVFrom(file: string): any[] {
+export function parseCSVFrom(file: string): Record<string, any>[] {
   return parse(file, {
     columns: true,
     skip_empty_lines: true,
