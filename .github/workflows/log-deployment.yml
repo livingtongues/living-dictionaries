@@ -1,0 +1,10 @@
+on:
+  deployment_status:
+
+jobs:
+  log:
+    if: github.event.deployment_status.state == 'success'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Log environment name
+        run: echo "Environment Name: ${{ github.event.deployment_status.environment }}"
