@@ -27,11 +27,11 @@ jobs:
       - name: Install Dependencies
         run: pnpm install --no-frozen-lockfile
 
-      - name: Svelte Check
-        run: npm run check
+      - name: Svelte Check Site
+        run: pnpm -F site check
       
       - name: Run Vitest Unit Tests
-        run: npm run test
+        run: pnpm test:all
 
       - name: Slack E2E Results Notification
         uses: 8398a7/action-slack@v3 # https://action-slack.netlify.app/
