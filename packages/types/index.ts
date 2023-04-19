@@ -1,5 +1,5 @@
 import type { ExpandedAudio, GoalDatabaseAudio, IAudio } from './audio.interface';
-import type { IVideo, IVideoCustomMetadata } from './video.interface';
+import type { ExpandedVideo, GoalDatabaseVideo, IVideo, IVideoCustomMetadata } from './video.interface';
 import type { IDialect } from './dialect.interface';
 import type {
   IAbout,
@@ -14,7 +14,7 @@ import type { IGlossLanguages, IGlossLanguage } from './gloss-language.interface
 import type { IGloss } from './gloss.interface';
 import type { IExampleSentence } from './exampe-sentence.interface';
 import type { IImport } from './import.interface';
-import type { IPhoto } from './photo.interface';
+import type { ExpandedPhoto, GoalDatabasePhoto, IPhoto } from './photo.interface';
 import type { ISemanticDomain } from './semantic-domain.interface';
 import type { ISpeaker } from './speaker.interface';
 import type { IUser } from './user.interface';
@@ -28,7 +28,7 @@ import type { AlgoliaEntry } from './entry.algolia.interface';
 
 export type {
   IAudio, GoalDatabaseAudio, ExpandedAudio,
-  IVideo,
+  IVideo, GoalDatabaseVideo, ExpandedVideo,
   IVideoCustomMetadata,
   IDialect,
   IDictionarySettings,
@@ -48,7 +48,7 @@ export type {
   IGloss,
   IImport,
   IInvite,
-  IPhoto,
+  IPhoto, GoalDatabasePhoto, ExpandedPhoto,
   ISemanticDomain,
   ISpeaker,
   IUser,

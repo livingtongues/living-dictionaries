@@ -54,7 +54,7 @@ function expand_photo(pf: GoalDatabasePhoto): ExpandedPhoto {
   };
 }
 
-function expand_video(vf: GoalDatabaseVideo): ExpandedVideo {
+export function expand_video(vf: GoalDatabaseVideo): ExpandedVideo {
   return {
     fb_storage_path: vf.path,
     uid_added_by: vf.ab,
@@ -63,6 +63,7 @@ function expand_video(vf: GoalDatabaseVideo): ExpandedVideo {
     source: vf.sc,
     youtubeId: vf.youtubeId,
     vimeoId: vf.vimeoId,
+    start_at_seconds: vf.startAt,
   };
 }
 
