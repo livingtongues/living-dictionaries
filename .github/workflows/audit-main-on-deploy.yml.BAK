@@ -1,0 +1,57 @@
+name: Audit Main on Deploy
+
+on: deployment_status
+
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+  DEPLOY_URL: https://livingdictionaries.app/
+
+jobs:
+  build-publish-audit:
+    name: Build, Publish, Audit
+    if: ${{ github.event.deployment.environment == 'production' && github.event.deployment_status.state == 'success' }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      # - name: Install Dependencies
+      #   run: npm ci
+
+      - name: Lighthouse Audit
+        uses: treosh/lighthouse-ci-action@v7 # https://github.com/treosh/lighthouse-ci-action
+        id: lighthouse_audit
+        with:
+          urls: |
+            ${{env.DEPLOY_URL}}
+          # configPath: './.github/lighthouserc.json' # https://github.com/GoogleChrome/lighthouse-ci/blob/main/docs/getting-started.md https://github.com/GoogleChrome/lighthouse-ci/blob/main/docs/configuration.md#assert
+          uploadArtifacts: true
+          temporaryPublicStorage: true
+          # serverBaseUrl: ${{ secrets.LHCI_SERVER_URL }}
+          # serverToken: ${{ secrets.LHCI_SERVER_TOKEN }}
+
+      - name: Format Lighthouse Score
+        if: steps.lighthouse_audit.outputs.links
+        id: format_lighthouse_score_for_slack
+        uses: actions/github-script@v3
+        with:
+          github-token: ${{secrets.GITHUB_TOKEN}}
+          script: |
+            const result = ${{ steps.lighthouse_audit.outputs.manifest }}[0].summary
+            const links = ${{ steps.lighthouse_audit.outputs.links }}
+            const formatResult = (res) => Math.round((res * 100))
+            Object.keys(result).forEach(key => result[key] = formatResult(result[key]))
+            const score = res => res >= 90 ? '🟢' : res >= 50 ? '🟠' : '🔴'
+            const comment = `⚡️ ${score(result.performance)} Performance: ${result.performance}, ${score(result.accessibility)} Accessibility: ${result.accessibility}, ${score(result['best-practices'])} Best practices: ${result['best-practices']}, ${score(result.seo)} SEO: ${result.seo}, ${score(result.pwa)} PWA | ${result.pwa} PWA: ${result.pwa}, ${Object.values(links)[0]}`
+             core.setOutput("comment", comment);
+
+      - name: Slack Lighthouse Notification
+        uses: adamkdean/simple-slack-notify@master
+        with:
+          status: ${{ job.status }}
+          success_text: 'Lighthouse successfully audited ${env.DEPLOY_URL} (#${env.GITHUB_RUN_NUMBER})'
+          failure_text: 'Lighthouse failed (#${env.GITHUB_RUN_NUMBER})'
+          fields: |
+            [{ "title": "Action URL", "value": "${env.GITHUB_SERVER_URL}/${env.GITHUB_REPOSITORY}/actions/runs/${env.GITHUB_RUN_ID}"},
+            { "title": "Lighthouse scores", "value": "${{ steps.format_lighthouse_score_for_slack.outputs.comment}}"}]
