@@ -2,7 +2,7 @@ import { t } from 'svelte-i18n';
 import { get } from 'svelte/store';
 import { dictionary } from '$lib/stores';
 import { goto } from '$app/navigation';
-import type { GoalDatabaseVideo, IEntry, IVideo } from '@living-dictionaries/types';
+import type { GoalDatabaseVideo, IEntry } from '@living-dictionaries/types';
 import { updateOnline, deleteDocumentOnline, set } from 'sveltefirets';
 import { arrayUnion } from 'firebase/firestore/lite';
 import { serverTimestamp } from 'firebase/firestore';
@@ -27,7 +27,7 @@ export async function deleteAudio(entry: IEntry) {
     const $dictionary = get(dictionary);
     await updateOnline<IEntry>(
       `dictionaries/${$dictionary.id}/words/${entry.id}`,
-      { sf: null },
+      { sf: null, sfs: null },
       { abbreviate: true }
     );
   } catch (err) {
