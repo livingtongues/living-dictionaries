@@ -27,7 +27,7 @@ jobs:
       - name: Install Dependencies
         run: pnpm install --no-frozen-lockfile
 
-      - run: pnpm -F site svelte-kit sync
+      - run: pnpm -F site sync
       
       - name: Svelte Check Site
         run: pnpm -F site check
