@@ -7,4 +7,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Log environment name
-        run: echo "Environment Name: ${{ github.event.deployment_status.environment }}"
+        env:
+          ENVIRONMENT_NAME: ${{ github.event.deployment_status.environment }}
+        run: echo "Environment Name: $ENVIRONMENT_NAME"
