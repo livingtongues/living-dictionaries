@@ -3,8 +3,8 @@ import type { Timestamp } from 'firebase/firestore';
 
 export function convertJsonRowToEntryFormat(
   row: Record<string, string>,
-  dateStamp: number,
-  timestamp: FirebaseFirestore.FieldValue
+  dateStamp?: number,
+  timestamp?: FirebaseFirestore.FieldValue
 ): IEntry {
   const entry: IEntry = { lx: row.lexeme, gl: {}, xs: {} };
 
@@ -29,37 +29,40 @@ export function convertJsonRowToEntryFormat(
 
   Boolean(row.notes) && (entry.nt = row.notes);
 
-  const semantic_domains_regex = /^semanticDomain\d*$/;
-  Object.keys(row).forEach((key) => {
-    if (semantic_domains_regex.test(key) && row[key]) {
-      entry.sdn = [];
-      Object.entries(row).forEach((semantic_domain) => {
-        if (semantic_domains_regex.test(semantic_domain[0])) {
-          Boolean(semantic_domain[1]) && entry.sdn.push(semantic_domain[1].toString());
-        }
-      });
-    }
+  for (const [key, value] of Object.entries(row)) {
+    if (!value) continue;
 
     // gloss fields are labeled using bcp47 language codes followed by '_gloss' (e.g. es_gloss, tpi_gloss)
-    if (key.includes('_gloss') && row[key]) {
+    if (key.includes('_gloss')) {
       const language = key.split('_gloss')[0];
-      entry.gl[language] = row[key];
-      return;
+      entry.gl[language] = value;
     }
 
-    if (key.includes('vernacular_exampleSentence') && row[key]) {
-      return (entry.xs['vn'] = row[key]);
+    if (key.includes('vernacular_exampleSentence')) {
+      entry.xs['vn'] = value;
+      continue; // to keep next block from also adding
     }
 
     // example sentence fields are codes followed by '_exampleSentence'
-    if (key.includes('_exampleSentence') && row[key]) {
+    if (key.includes('_exampleSentence')) {
       const language = key.split('_exampleSentence')[0];
-      entry.xs[language] = row[key];
+      entry.xs[language] = value;
     }
-  });
+
+    const semanticDomain_FOLLOWED_BY_OPTIONAL_DIGIT = /^semanticDomain\d*$/; // semanticDomain, semanticDomain2, semanticDomain<#>, but not semanticDomain_custom
+    if (semanticDomain_FOLLOWED_BY_OPTIONAL_DIGIT.test(key)) {
+      if (!entry.sdn)
+        entry.sdn = [];
+
+      entry.sdn.push(value.toString());
+    }
+  };
+
   if (Object.keys(entry.xs).length === 0) {
     delete entry.xs;
   }
+
+  if (!dateStamp) return entry;
 
   entry.ii = `v4-${dateStamp}`;
   entry.ca = timestamp as Timestamp;
@@ -68,20 +71,6 @@ export function convertJsonRowToEntryFormat(
   return entry;
 }
 
-function returnArrayFromCommaSeparatedItems(string: string): string[] {
+export function returnArrayFromCommaSeparatedItems(string: string): string[] {
   return string?.split(',').map((item) => item.trim()) || [];
-}
-
-if (import.meta.vitest) {
-  describe('returnArrayFromCommaSeparatedItems', () => {
-    test('splits two comma separated items into an array', () => {
-      expect(returnArrayFromCommaSeparatedItems('n,v')).toStrictEqual(['n', 'v']);
-    });
-    test('handles unusual comma spacing', () => {
-      expect(returnArrayFromCommaSeparatedItems('n, v ,adj')).toStrictEqual(['n', 'v', 'adj']);
-    });
-    test('returns empty array from undefined', () => {
-      expect(returnArrayFromCommaSeparatedItems(undefined)).toStrictEqual([]);
-    });
-  });
 }
