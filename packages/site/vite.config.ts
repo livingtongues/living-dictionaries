@@ -41,7 +41,7 @@ const config: UserConfig = {
       // 'instantsearch.js', 'instantsearch.js/es/widgets/index.js', 'instantsearch.js/es/connectors',
     ],
   },
-  // @ts-ignore
+  // @ts-ignore - adding /// <reference types="vitest" /> doesn't seem to solve
   test: vitestConfig.test,
 };
 
