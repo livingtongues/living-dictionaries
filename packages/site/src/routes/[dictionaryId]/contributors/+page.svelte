@@ -6,6 +6,7 @@
   import type { IInvite, IHelper } from '@living-dictionaries/types';
   import { Button, ShowHide } from 'svelte-pieces';
   import { inviteHelper } from '$lib/helpers/inviteHelper';
+  import { removeDictionaryContributor } from '$lib/helpers/dictionariesManaging';
   import ContributorInvitationStatus from '$lib/components/contributors/ContributorInvitationStatus.svelte';
   import Citation from './Citation.svelte';
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte';
@@ -94,10 +95,19 @@
     startWith={helperType}
     let:data={contributors}>
     {#each contributors as contributor}
-      <div class="py-3">
+      <div class="py-3 flex flex-wrap items-center justify-between">
         <div class="text-sm leading-5 font-medium text-gray-900">
           {contributor.name}
         </div>
+        {#if $isManager}
+          <Button
+            onclick={() => removeDictionaryContributor(contributor, $dictionary.id)}
+            color="red"
+            size="sm">
+            {$t('misc.delete', { default: 'Delete' })}
+            <i class="fas fa-times" />
+          </Button>
+        {/if}
       </div>
     {/each}
   </Collection>
