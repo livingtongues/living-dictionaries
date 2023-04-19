@@ -1,24 +1,66 @@
-import { convertJsonRowToEntryFormat, returnArrayFromCommaSeparatedItems } from './convertJsonRowToEntryFormat.js';
+import {
+  convertJsonRowToEntryFormat,
+  returnArrayFromCommaSeparatedItems,
+} from './convertJsonRowToEntryFormat.js';
 import { readFileSync } from 'fs';
 import { parseCSVFrom } from './parse-csv.js';
 
 describe('convertJsonRowToEntryFormat', () => {
   const fakeTimeStamp = 10101010;
 
+  test('glosses', () => {
+    const csv_rows_without_header: Record<string, any>[] = [
+      {
+        lexeme: 'dolphin',
+        es_gloss: 'delfín',
+      },
+    ];
+    const entries = csv_rows_without_header.map((row) => convertJsonRowToEntryFormat(row));
+
+    expect(entries).toMatchInlineSnapshot(`
+      [
+        {
+          "gl": {
+            "es": "delfín",
+          },
+          "lx": "dolphin",
+        },
+      ]
+    `);
+  });
+
+  test('example sentences', () => {
+    const csv_rows_without_header: Record<string, any>[] = [
+      {
+        lexeme: 'dolphin',
+        es_exampleSentence: 'el delfín nada en el océano.',
+      },
+    ];
+    const entries = csv_rows_without_header.map((row) => convertJsonRowToEntryFormat(row));
+
+    expect(entries).toMatchInlineSnapshot(`
+      [
+        {
+          "gl": {},
+          "lx": "dolphin",
+          "xs": {
+            "es": "el delfín nada en el océano.",
+          },
+        },
+      ]
+    `);
+  });
+
   test('semantic domains', () => {
     const csv_rows_without_header: Record<string, any>[] = [
       {
-        "lexeme": "dolphins",
-        "semanticDomain": "5.15",
-        "semanticDomain2": "1",
-        "semanticDomain_custom": "the sea!",
-      }
-    ]
-    const entries = csv_rows_without_header.map((row) =>
-      convertJsonRowToEntryFormat(
-        row,
-      )
-    );
+        lexeme: 'dolphins',
+        semanticDomain: '5.15',
+        semanticDomain2: '1',
+        semanticDomain_custom: 'the sea!',
+      },
+    ];
+    const entries = csv_rows_without_header.map((row) => convertJsonRowToEntryFormat(row));
 
     expect(entries).toMatchInlineSnapshot(`
       [
@@ -203,12 +245,12 @@ describe('convertJsonRowToEntryFormat', () => {
   });
 
   test('does not duplicate vernacular', () => {
-    const csv_rows_without_header: Record<string, any>[] = [{
-      "vernacular_exampleSentence": "Hello world",
-    }]
-    const entries = csv_rows_without_header.map((row) =>
-      convertJsonRowToEntryFormat(row)
-    );
+    const csv_rows_without_header: Record<string, any>[] = [
+      {
+        vernacular_exampleSentence: 'Hello world',
+      },
+    ];
+    const entries = csv_rows_without_header.map((row) => convertJsonRowToEntryFormat(row));
 
     expect(entries).toMatchInlineSnapshot(`
       [
