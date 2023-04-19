@@ -1,12 +1,12 @@
 import { type PlaywrightTestConfig, devices } from '@playwright/test';
 
 const config: PlaywrightTestConfig = {
-  projects: [
-    {
-      name: 'Google Chrome',
-      use: { ...devices['Desktop Chrome'], channel: 'chrome' }, // or 'chrome-beta'
-    },
-  ], // from https://github.com/microsoft/playwright/issues/14434 and https://playwright.dev/docs/browsers#google-chrome--microsoft-edge
+  // projects: [
+  //   {
+  //     name: 'Google Chrome',
+  //     use: { ...devices['Desktop Chrome'], channel: 'chrome' }, // or 'chrome-beta'
+  //   },
+  // ], // from https://github.com/microsoft/playwright/issues/14434 and https://playwright.dev/docs/browsers#google-chrome--microsoft-edge
   use: {
     baseURL: process.env.PLAYWRIGHT_BASE_URL || 'http://localhost:4173'
   },
