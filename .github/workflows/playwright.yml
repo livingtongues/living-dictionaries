@@ -5,6 +5,7 @@ on:
 
 jobs:
   run-e2e:
+    name: Playwright E2E Tests
     if: github.event_name == 'deployment_status' && github.event.deployment_status.state == 'success'
     runs-on: ubuntu-latest
 
@@ -29,5 +30,6 @@ jobs:
 
       - name: Run e2e tests
         run: pnpm -F site test:e2e
-          env:
-            BASE_URL: ${{ github.event.deployment_status.target_url }}
+        env:
+          CI: true
+          PLAYWRIGHT_BASE_URL: ${{ github.event.deployment_status.target_url }}
