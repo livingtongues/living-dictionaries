@@ -125,8 +125,8 @@
       {/if}
     </div>
   </a>
-  {#if entry.vfs?.[0]}
-    <Video class="bg-gray-100 border-r-2" {entry} video={entry.vfs[0]} {canEdit} />
+  {#if entry.senses?.[0].video_files?.[0]}
+    <Video class="bg-gray-100 border-r-2" {entry} video={entry.senses[0].video_files[0]} {canEdit} />
   {:else if videoAccess && canEdit}
     <ShowHide let:show let:toggle>
       <button

@@ -51,7 +51,8 @@ describe('expand_entry', () => {
           ts: now.getTime(),
           sp: ['sp1', 'sp2'],
           sc: 'sc',
-          youtubeId: 'yt123'
+          youtubeId: 'yt123',
+          startAt: 25,
         }],
         nc: '1',
         de: 'bam',
@@ -103,6 +104,7 @@ describe('expand_entry', () => {
           speaker_ids: ['sp1', 'sp2'],
           source: 'sc',
           youtubeId: 'yt123',
+          start_at_seconds: 25,
         }],
         noun_class: '1',
         definition_english: 'bam',

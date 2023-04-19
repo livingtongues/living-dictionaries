@@ -9,6 +9,7 @@ export interface ExpandedVideo {
   source?: string;
   youtubeId?: string;
   vimeoId?: string;
+  start_at_seconds?: number;
 }
 
 export type ActualDatabaseVideo = Omit<GoalDatabaseVideo, 'sp'> & DeprecatedVideo;

@@ -1,11 +1,15 @@
 <script lang="ts">
-  import { _ } from 'svelte-i18n';
-  import type { IEntry, IPhoto } from '@living-dictionaries/types';
-  export let file: File, entry: IEntry;
+  import { t } from 'svelte-i18n';
+  import type { IEntry, GoalDatabasePhoto } from '@living-dictionaries/types';
   import { dictionary, user } from '$lib/stores';
-
   import { tweened } from 'svelte/motion';
   import { cubicOut } from 'svelte/easing';
+  import { getStorage, ref, uploadBytesResumable } from 'firebase/storage';
+  import { updateOnline, firebaseConfig } from 'sveltefirets';
+  import { serverTimestamp } from 'firebase/firestore/lite';
+  import { processImageUrl } from './processImageUrl';
+
+  export let file: File, entry: IEntry;
   let progress = tweened(0, {
     duration: 2000,
     easing: cubicOut,
@@ -20,8 +24,6 @@
     previewURL = URL.createObjectURL(file);
     startUpload();
   }
-
-  import { getStorage, ref, uploadBytesResumable } from 'firebase/storage';
 
   async function startUpload() {
     // Replace spaces w/ underscores in dict name, remove special characters from lexeme so image converter can accept filename
@@ -60,7 +62,7 @@
       },
       (err) => {
         alert(
-          `${$_('misc.error', {
+          `${$t('misc.error', {
             default: 'Error',
           })}: ${err} - Please contact us with the image name and lexeme.`
         );
@@ -85,10 +87,6 @@
     );
   }
 
-  import { updateOnline, firebaseConfig} from 'sveltefirets';
-  import { serverTimestamp } from 'firebase/firestore/lite';
-  import { processImageUrl } from './processImageUrl';
-
   async function savePhoto(storagePath: string) {
     try {
       const imageProcessingUrl = `${processImageUrl}/${firebaseConfig.storageBucket}/${storagePath}`;
@@ -97,7 +95,7 @@
       const url = await result.text();
       const gcsPath = url.replace('http://lh3.googleusercontent.com/', '');
 
-      const pf: IPhoto = {
+      const pf: GoalDatabasePhoto = {
         path: storagePath,
         gcs: gcsPath,
         ts: serverTimestamp(),
@@ -113,7 +111,7 @@
     } catch (err) {
       error = err;
       alert(
-        `${$_('misc.error', {
+        `${$t('misc.error', {
           default: 'Error',
         })}: ${err} - Please contact us with the image name and lexeme.`
       );
@@ -127,7 +125,7 @@
   {#if error}
     <div class="w-12 text-red-600 text-center">
       <i class="far fa-times" />
-      {$_('misc.error', { default: 'Error' })}
+      {$t('misc.error', { default: 'Error' })}
     </div>
   {:else}
     {#if success}
