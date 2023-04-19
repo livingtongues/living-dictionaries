@@ -3,6 +3,15 @@ import type { UserConfig } from 'vite';
 // import { svelte } from '@sveltejs/vite-plugin-svelte';
 
 import { kitbook } from 'kitbook/plugins/vite';
+import type { UserConfig as VitestUserConfigInterface } from 'vitest/config';
+
+const vitestConfig: VitestUserConfigInterface = {
+  test: {
+    // plugins: [svelte({ hot: !process.env.VITEST })],
+    globals: true,
+    includeSource: ['src/**/*.ts'],
+  }
+};
 
 const config: UserConfig = {
   plugins: [
@@ -32,11 +41,8 @@ const config: UserConfig = {
       // 'instantsearch.js', 'instantsearch.js/es/widgets/index.js', 'instantsearch.js/es/connectors',
     ],
   },
-  test: {
-    // plugins: [svelte({ hot: !process.env.VITEST })],
-    globals: true,
-    includeSource: ['src/**/*.ts'],
-  },
+  // @ts-ignore
+  test: vitestConfig.test,
 };
 
 export default config;

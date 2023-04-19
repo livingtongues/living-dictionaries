@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { _ } from 'svelte-i18n';
-  import type { GoalDatabaseAudio, IEntry } from '@living-dictionaries/types';
+  import { t } from 'svelte-i18n';
+  import type { GoalDatabaseAudio, GoalDatabaseEntry, IEntry } from '@living-dictionaries/types';
   import { updateOnline } from 'sveltefirets';
   import { serverTimestamp } from 'firebase/firestore/lite';
   import { getStorage, ref, uploadBytesResumable } from 'firebase/storage';
@@ -8,10 +8,10 @@
   import { tweened } from 'svelte/motion';
   import { cubicOut } from 'svelte/easing';
 
-  export let file: File | Blob; 
+  export let file: File | Blob;
   export let entry: IEntry;
   export let speakerId: string;
-  
+
   let progress = tweened(0, {
     duration: 2000,
     easing: cubicOut,
@@ -57,7 +57,7 @@
         }
       },
       (err) => {
-        alert(`${$_('misc.error', { default: 'Error' })}: ${err}`);
+        alert(`${$t('misc.error', { default: 'Error' })}: ${err}`);
         error = err;
         // A full list of error codes is available at
         // https://firebase.google.com/docs/storage/web/handle-errors
@@ -84,16 +84,16 @@
             sp: [speakerId],
           };
 
-          await updateOnline<IEntry>(
+          await updateOnline<GoalDatabaseEntry>(
             `dictionaries/${$dictionary.id}/words/${entry.id}`,
-            { sf },
+            { sfs: [sf] },
             { abbreviate: true }
           );
 
           // TODO: this.speakerService.addDictionaryToSpeaker(speakerId, dictionaryId);
           success = true;
         } catch (err) {
-          alert(`${$_('misc.error', { default: 'Error' })}: ${err}`);
+          alert(`${$t('misc.error', { default: 'Error' })}: ${err}`);
           error = err;
         }
       }
@@ -105,14 +105,14 @@
   <span
     class="text-xs font-semibold inline-block py-1 px-2 uppercase rounded-full
     text-red-600 bg-red-200">
-    {$_('misc.error', { default: 'Error' })}
+    {$t('misc.error', { default: 'Error' })}
   </span>
 {:else if success}
   <span
     class="text-xs font-semibold inline-block py-1 px-2 uppercase rounded-full
     text-green-600 bg-green-200">
     <i class="far fa-check" />
-    {$_('upload.success', { default: 'Success' })}
+    {$t('upload.success', { default: 'Success' })}
   </span>
 {:else}
   <div class="relative pt-1">
@@ -121,7 +121,7 @@
         <span
           class="text-xs font-semibold inline-block py-1 px-2 uppercase
           rounded-full text-blue-600 bg-blue-200">
-          {$_('upload.uploading', { default: 'Uploading' })}
+          {$t('upload.uploading', { default: 'Uploading' })}
         </span>
       </div>
       <div class="text-right">

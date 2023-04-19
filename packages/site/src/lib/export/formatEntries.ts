@@ -132,9 +132,11 @@ export function formatEntriesForCSV(
     if (entry.ps) {
       const fullPos = partsOfSpeech.find((ps) => ps.enAbbrev === entry.ps)?.enName;
       if (!fullPos) {
-        formattedEntry.ps = entry.ps;
+        // TODO: handle case of multiple parts of speech
+        formattedEntry.ps = Array.isArray(entry.ps) ? entry.ps[0] : entry.ps;
       } else {
-        formattedEntry.psab = entry.ps;
+        // TODO: handle case of multiple parts of speech
+        formattedEntry.psab = Array.isArray(entry.ps) ? entry.ps[0] : entry.ps;
         formattedEntry.ps = fullPos;
       }
     }
