@@ -7,7 +7,7 @@ on:
 jobs:
   run-e2e:
     name: Playwright E2E Tests
-    if: github.event.deployment_status.state == 'success'
+    if: github.event.deployment_status.state == 'success' && (github.event.deployment_status.environment == 'living-dictionaries' || github.event.deployment_status.environment == 'Preview – living-dictionaries')
     runs-on: ubuntu-latest
     timeout-minutes: 15
     container:
@@ -34,7 +34,8 @@ jobs:
           PLAYWRIGHT_BASE_URL: ${{ github.event.deployment_status.target_url }}
 
       - uses: actions/upload-artifact@v3
-        if: failure() # always()
+        # if: failure()
+        if: always()
         with:
           name: playwright-report
           path: playwright-report/
