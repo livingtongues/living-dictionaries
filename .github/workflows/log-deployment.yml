@@ -8,5 +8,5 @@ jobs:
     steps:
       - name: Log environment name
         env:
-          ENVIRONMENT_NAME: ${{ github.event.deployment_status.environment }}
-        run: echo "Environment Name: $ENVIRONMENT_NAME"
+          VERCEL_ENVIRONMENT_NAME: ${{ github.event.deployment_status.environment }}
+        run: echo "Environment Name is $VERCEL_ENVIRONMENT_NAME"
