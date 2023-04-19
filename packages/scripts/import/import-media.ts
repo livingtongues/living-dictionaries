@@ -3,10 +3,9 @@ import { fileURLToPath } from 'url';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 import * as fs from 'fs';
-import { IPhoto } from '@living-dictionaries/types';
 import { environment, storage, timestamp } from '../config.js';
 import { getImageServingUrl } from './getImageServingUrl.js';
-import { ActualDatabasePhoto } from '@living-dictionaries/types/photo.interface.js';
+import { GoalDatabasePhoto } from '@living-dictionaries/types/photo.interface.js';
 
 const fileBucket = `talking-dictionaries-${environment == 'prod' ? 'alpha' : 'dev'}.appspot.com`;
 
@@ -50,7 +49,7 @@ export async function uploadImageFile(
   entryId: string,
   dictionaryId: string,
   dry = false
-): Promise<ActualDatabasePhoto> {
+): Promise<GoalDatabasePhoto> {
   const imageDir = join(__dirname, `data/${dictionaryId}/images`);
   const imageFilePath = join(imageDir, imageFileName);
 
