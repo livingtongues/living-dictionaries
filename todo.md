@@ -1,4 +1,5 @@
 Before merge:
+- Get Playwright test running
 - Make sure all database saves (updateOnline, update, setOnline, set) use GoalDatabase___ interface
   - broken : EditAudio.svelte:52
 
