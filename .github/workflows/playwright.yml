@@ -7,7 +7,7 @@ on:
 jobs:
   run-e2e:
     name: Playwright E2E Tests
-    if: github.event.deployment_status.state == 'success' && (github.event.deployment_status.environment == 'living-dictionaries' || github.event.deployment_status.environment == 'Preview – living-dictionaries')
+    if: github.event.deployment_status.state == 'success' && (github.event.deployment_status.environment == 'Production – living-dictionaries' || github.event.deployment_status.environment == 'Preview – living-dictionaries')
     runs-on: ubuntu-latest
     timeout-minutes: 15
     container:
@@ -26,6 +26,11 @@ jobs:
 
       - name: Install Dependencies
         run: pnpm install --no-frozen-lockfile
+
+      - name: Log target url
+        env:
+          PLAYWRIGHT_BASE_URL: ${{ github.event.deployment_status.target_url }}
+        run: echo "Target Vercel Url is $PLAYWRIGHT_BASE_URL"
 
       - name: Run e2e tests
         run: pnpm -F site test:e2e
