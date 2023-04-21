@@ -22,7 +22,8 @@ jobs:
         with:
           urls: |
             ${{ github.event.deployment_status.target_url }}
-            ${{ github.event.deployment_status.target_url }}/achi
+            ${{ github.event.deployment_status.target_url }}/achi/entries/list
+            ${{ github.event.deployment_status.target_url }}/jaRhn6MAZim4Blvr1iEv/entry/yt9ja7ymh9xgba5i
           # configPath: './.github/lighthouserc.json' # https://github.com/GoogleChrome/lighthouse-ci/blob/main/docs/getting-started.md https://github.com/GoogleChrome/lighthouse-ci/blob/main/docs/configuration.md#assert
           uploadArtifacts: true
           temporaryPublicStorage: true
@@ -30,63 +31,58 @@ jobs:
           # serverToken: ${{ secrets.LHCI_SERVER_TOKEN }}
 
       - name: Format Lighthouse Score For Slack
-        if: steps.lighthouse_audit.outputs.links
         id: format_lighthouse_score_for_slack
-        uses: actions/github-script@v3
+        uses: actions/github-script@v6
         with:
           github-token: ${{secrets.GITHUB_TOKEN}}
           script: |
-            const result = ${{ steps.lighthouse_audit.outputs.manifest }}[0].summary
-            const links = ${{ steps.lighthouse_audit.outputs.links }}
-            const formatResult = (res) => Math.round((res * 100))
-            Object.keys(result).forEach(key => result[key] = formatResult(result[key]))
-            const score = res => res >= 90 ? '🟢' : res >= 50 ? '🟠' : '🔴'
-            const comment = `⚡️ ${score(result.performance)} Performance: ${result.performance}, ${score(result.accessibility)} Accessibility: ${result.accessibility}, ${score(result['best-practices'])} Best practices: ${result['best-practices']}, ${score(result.seo)} SEO: ${result.seo}, ${score(result.pwa)} PWA | ${result.pwa} PWA: ${result.pwa}, ${Object.values(links)[0]}`
-             core.setOutput("comment", comment);
+            const lighthouseCommentFormatter = require('./.github/workflows/lighthouse-comment-formatter.js');
+
+            const lighthouseOutputs = {
+              manifest: ${{ steps.lighthouse_audit.outputs.manifest }},
+              links: ${{ steps.lighthouse_audit.outputs.links }},
+            };
+
+            const comment = lighthouseCommentFormatter({ lighthouseOutputs, targetPlatform: 'slack' });
+            core.setOutput("comment", comment);
 
       - name: Send Lighthouse Score to Slack
         uses: adamkdean/simple-slack-notify@master
         with:
           status: ${{ job.status }}
-          # success_text: 'Lighthouse successfully audited ${{ github.event.deployment_status.target_url }} (#${env.GITHUB_RUN_NUMBER})'
-          # failure_text: 'Lighthouse failed audit of ${{ github.event.deployment_status.target_url }} (#${env.GITHUB_RUN_NUMBER})'
-          success_text: 'Lighthouse successfully audited (#${env.GITHUB_RUN_NUMBER})'
-          failure_text: 'Lighthouse failed audit of (#${env.GITHUB_RUN_NUMBER})'
+          success_text: 'Lighthouse successfully audited ${{ github.event.deployment_status.target_url }} (#${env.GITHUB_RUN_NUMBER})'
+          failure_text: 'Lighthouse failed audit of ${{ github.event.deployment_status.target_url }} (#${env.GITHUB_RUN_NUMBER})'
           fields: |
             [{ "title": "Action URL", "value": "${env.GITHUB_SERVER_URL}/${env.GITHUB_REPOSITORY}/actions/runs/${env.GITHUB_RUN_ID}"},
             { "title": "Lighthouse scores", "value": "${{ steps.format_lighthouse_score_for_slack.outputs.comment}}"}]
 
+      - name: Log Github event
+        env:
+          INFO: ${{ github.event }}
+        run: echo "Info is $INFO"
+
       - name: Format Lighthouse Score for PR
-        if: github.event.issue.pull_request
+        # if: github.event.issue.pull_request
         id: format_lighthouse_score_for_pr
         uses: actions/github-script@v3
         with:
           github-token: ${{secrets.GITHUB_TOKEN}}
           script: |
-            const result = ${{ steps.lighthouse_audit.outputs.manifest }}[0].summary
-            const links = ${{ steps.lighthouse_audit.outputs.links }}
-            const formatResult = (res) => Math.round((res * 100))
-            Object.keys(result).forEach(key => result[key] = formatResult(result[key]))
-            const score = res => res >= 90 ? '🟢' : res >= 50 ? '🟠' : '🔴'
-            const comment = [
-                `⚡️ [Lighthouse report](${Object.values(links)[0]}) for the changes in this PR:`,
-                '| Category | Score |',
-                '| --- | --- |',
-                `| ${score(result.performance)} Performance | ${result.performance} |`,
-                `| ${score(result.accessibility)} Accessibility | ${result.accessibility} |`,
-                `| ${score(result['best-practices'])} Best practices | ${result['best-practices']} |`,
-                `| ${score(result.seo)} SEO | ${result.seo} |`,
-                `| ${score(result.pwa)} PWA | ${result.pwa} |`,
-                ' ',
-                `*Lighthouse ran on [${Object.keys(links)[0]}](${Object.keys(links)[0]})*`
-            ].join('\n')
-             core.setOutput("comment", comment);
+            const lighthouseCommentFormatter = require('./.github/workflows/lighthouse-comment-formatter.js');
+
+            const lighthouseOutputs = {
+              manifest: ${{ steps.lighthouse_audit.outputs.manifest }},
+              links: ${{ steps.lighthouse_audit.outputs.links }},
+            };
+
+            const comment = lighthouseCommentFormatter({ lighthouseOutputs, targetPlatform: 'pr' });
+            core.setOutput("comment", comment);
 
       - name: Add Lighthouse Score to PR
-        if: github.event.issue.pull_request
+        # if: github.event.issue.pull_request
         uses: marocchino/sticky-pull-request-comment@v2
         with:
-          number: ${{ github.event.issue.number }}
+          number: ${{ github.event.pull_request.number }}
           header: lighthouse
           message: |
             ${{ steps.format_lighthouse_score_for_pr.outputs.comment }}
