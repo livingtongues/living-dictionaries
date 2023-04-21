@@ -4,6 +4,9 @@ name: Playwright E2E Tests
 on:
   deployment_status:
 
+env:
+  SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
 jobs:
   run-e2e:
     name: Playwright E2E Tests
@@ -12,7 +15,7 @@ jobs:
     timeout-minutes: 15
     container:
       image: mcr.microsoft.com/playwright:v1.32.0-focal #https://playwright.dev/docs/ci#github-actions-via-containers
-    
+
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
@@ -27,7 +30,7 @@ jobs:
       - name: Install Dependencies
         run: pnpm install --no-frozen-lockfile
 
-      - name: Log target url
+      - name: Log target url # can remove
         env:
           PLAYWRIGHT_BASE_URL: ${{ github.event.deployment_status.target_url }}
         run: echo "Target Vercel Url is $PLAYWRIGHT_BASE_URL"
@@ -45,3 +48,16 @@ jobs:
           name: playwright-report
           path: playwright-report/
           retention-days: 30
+
+      - name: Send E2E Results to Slack
+        # if: failure()
+        if: always()
+        uses: adamkdean/simple-slack-notify@master
+        with:
+          # channel: '#github'
+          status: ${{ job.status }}
+          success_text: 'E2E Tests for (#${env.GITHUB_RUN_NUMBER}) completed successfully on ${{ github.event.deployment_status.target_url }}'
+          failure_text: 'E2E Tests for (#${env.GITHUB_RUN_NUMBER}) on ${{ github.event.deployment_status.target_url }} failed'
+          cancelled_text: 'E2E Tests for (#${env.GITHUB_RUN_NUMBER}) cancelled'
+          fields: |
+            [{ "title": "Action URL", "value": "${env.GITHUB_SERVER_URL}/${env.GITHUB_REPOSITORY}/actions/runs/${env.GITHUB_RUN_ID}"}]

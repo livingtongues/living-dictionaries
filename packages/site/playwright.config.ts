@@ -1,5 +1,7 @@
 import { type PlaywrightTestConfig, devices } from '@playwright/test';
 
+// consider adding reporters https://playwright.dev/docs/test-reporters
+
 const config: PlaywrightTestConfig = {
   // projects: [
   //   {
