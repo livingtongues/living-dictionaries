@@ -49,12 +49,10 @@ jobs:
       - name: Send E2E Results to Slack
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-        # if: failure()
-        if: always()
+        if: failure()
         uses: adamkdean/simple-slack-notify@master
         with:
           status: ${{ job.status }}
-          success_text: 'E2E Tests for (#${env.GITHUB_RUN_NUMBER}) completed successfully on ${{ github.event.deployment_status.target_url }}'
           failure_text: 'E2E Tests for (#${env.GITHUB_RUN_NUMBER}) on ${{ github.event.deployment_status.target_url }} failed'
           cancelled_text: 'E2E Tests for (#${env.GITHUB_RUN_NUMBER}) cancelled'
           fields: |

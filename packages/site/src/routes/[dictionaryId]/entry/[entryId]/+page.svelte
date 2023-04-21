@@ -69,7 +69,7 @@ bg-white pt-1 -mt-1">
 <EntryDisplay
   {entry}
   dictionary={$dictionary}
-  admin={$admin > 0}
+  videoAccess={$dictionary.videoAccess || $admin > 0}
   canEdit={$canEdit}
   on:deleteImage={() => deleteImage(entry)}
   on:deleteVideo={() => deleteVideo(entry)}
