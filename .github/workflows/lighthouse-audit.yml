@@ -1,7 +1,7 @@
 name: Lighthouse Audit
 
 on:
-  deployment_status:
+  deployment_status
 
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -46,23 +46,21 @@ jobs:
             const comment = lighthouseCommentFormatter({ lighthouseOutputs, targetPlatform: 'slack' });
             core.setOutput("comment", comment);
 
-      - name: Send Lighthouse Score to Slack
-        uses: adamkdean/simple-slack-notify@master
-        with:
-          status: ${{ job.status }}
-          success_text: 'Lighthouse successfully audited ${{ github.event.deployment_status.target_url }} (#${env.GITHUB_RUN_NUMBER})'
-          failure_text: 'Lighthouse failed audit of ${{ github.event.deployment_status.target_url }} (#${env.GITHUB_RUN_NUMBER})'
-          fields: |
-            [{ "title": "Action URL", "value": "${env.GITHUB_SERVER_URL}/${env.GITHUB_REPOSITORY}/actions/runs/${env.GITHUB_RUN_ID}"},
-            { "title": "Lighthouse scores", "value": "${{ steps.format_lighthouse_score_for_slack.outputs.comment}}"}]
+      # - name: Send Lighthouse Score to Slack
+      #   uses: adamkdean/simple-slack-notify@master
+      #   with:
+      #     status: ${{ job.status }}
+      #     success_text: 'Lighthouse successfully audited ${{ github.event.deployment_status.target_url }} (#${env.GITHUB_RUN_NUMBER})'
+      #     failure_text: 'Lighthouse failed audit of ${{ github.event.deployment_status.target_url }} (#${env.GITHUB_RUN_NUMBER})'
+      #     fields: |
+      #       [{ "title": "Action URL", "value": "${env.GITHUB_SERVER_URL}/${env.GITHUB_REPOSITORY}/actions/runs/${env.GITHUB_RUN_ID}"},
+      #       { "title": "Lighthouse scores", "value": "${{ steps.format_lighthouse_score_for_slack.outputs.comment}}"}]
 
-      - name: Log Github event
-        env:
-          INFO: ${{ github.event }}
-        run: echo "Info is $INFO"
+      - uses: jwalton/gh-find-current-pr@v1
+        id: findPr
 
       - name: Format Lighthouse Score for PR
-        # if: github.event.issue.pull_request
+        if: steps.findPr.outputs.number
         id: format_lighthouse_score_for_pr
         uses: actions/github-script@v3
         with:
@@ -79,10 +77,10 @@ jobs:
             core.setOutput("comment", comment);
 
       - name: Add Lighthouse Score to PR
-        # if: github.event.issue.pull_request
+        if: steps.findPr.outputs.number
         uses: marocchino/sticky-pull-request-comment@v2
         with:
-          number: ${{ github.event.pull_request.number }}
+          number: ${{ steps.findPr.outputs.pr }}
           header: lighthouse
           message: |
             ${{ steps.format_lighthouse_score_for_pr.outputs.comment }}
