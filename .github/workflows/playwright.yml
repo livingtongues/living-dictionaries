@@ -4,9 +4,6 @@ name: Playwright E2E Tests
 on:
   deployment_status
 
-env:
-  SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-
 jobs:
   run-e2e:
     name: Playwright E2E Tests
@@ -50,6 +47,8 @@ jobs:
           retention-days: 30
 
       - name: Send E2E Results to Slack
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
         # if: failure()
         if: always()
         uses: adamkdean/simple-slack-notify@master
