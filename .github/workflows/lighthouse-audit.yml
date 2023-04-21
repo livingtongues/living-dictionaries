@@ -5,7 +5,6 @@ on:
 
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
 
 jobs:
   lighthouse:
@@ -27,8 +26,6 @@ jobs:
           # configPath: './.github/lighthouserc.json' # https://github.com/GoogleChrome/lighthouse-ci/blob/main/docs/getting-started.md https://github.com/GoogleChrome/lighthouse-ci/blob/main/docs/configuration.md#assert
           uploadArtifacts: true
           temporaryPublicStorage: true
-          # serverBaseUrl: ${{ secrets.LHCI_SERVER_URL }}
-          # serverToken: ${{ secrets.LHCI_SERVER_TOKEN }}
 
       - name: Format Lighthouse Score For Slack
         id: format_lighthouse_score_for_slack
@@ -46,15 +43,18 @@ jobs:
             const comment = lighthouseCommentFormatter({ lighthouseOutputs, targetPlatform: 'slack' });
             core.setOutput("comment", comment);
 
-      # - name: Send Lighthouse Score to Slack
-      #   uses: adamkdean/simple-slack-notify@master
-      #   with:
-      #     status: ${{ job.status }}
-      #     success_text: 'Lighthouse successfully audited ${{ github.event.deployment_status.target_url }} (#${env.GITHUB_RUN_NUMBER})'
-      #     failure_text: 'Lighthouse failed audit of ${{ github.event.deployment_status.target_url }} (#${env.GITHUB_RUN_NUMBER})'
-      #     fields: |
-      #       [{ "title": "Action URL", "value": "${env.GITHUB_SERVER_URL}/${env.GITHUB_REPOSITORY}/actions/runs/${env.GITHUB_RUN_ID}"},
-      #       { "title": "Lighthouse scores", "value": "${{ steps.format_lighthouse_score_for_slack.outputs.comment}}"}]
+      - name: Send Lighthouse Score to Slack
+        uses: adamkdean/simple-slack-notify@master
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        with:
+          status: ${{ job.status }}
+          success_text: 'Lighthouse successfully audited ${{ github.event.deployment_status.target_url }} (#${env.GITHUB_RUN_NUMBER})'
+          failure_text: 'Lighthouse failed audit of ${{ github.event.deployment_status.target_url }} (#${env.GITHUB_RUN_NUMBER})'
+          fields: |
+            [{ "title": "Action URL", "value": "${env.GITHUB_SERVER_URL}/${env.GITHUB_REPOSITORY}/actions/runs/${env.GITHUB_RUN_ID}"},
+            { "title": "Lighthouse scores", "value": "testing"}]
+          # { "title": "Lighthouse scores", "value": "${{ steps.format_lighthouse_score_for_slack.outputs.comment}}"}]
 
       - uses: jwalton/gh-find-current-pr@v1
         id: findPr
@@ -62,7 +62,7 @@ jobs:
       - name: Format Lighthouse Score for PR
         if: steps.findPr.outputs.number
         id: format_lighthouse_score_for_pr
-        uses: actions/github-script@v3
+        uses: actions/github-script@v6
         with:
           github-token: ${{secrets.GITHUB_TOKEN}}
           script: |
@@ -81,6 +81,7 @@ jobs:
         uses: marocchino/sticky-pull-request-comment@v2
         with:
           number: ${{ steps.findPr.outputs.pr }}
+          recreate: true
           header: lighthouse
           message: |
             ${{ steps.format_lighthouse_score_for_pr.outputs.comment }}
