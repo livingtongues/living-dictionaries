@@ -39,9 +39,14 @@ const scoreRow = (
  */
 function makeComment(lighthouseOutputs, targetPlatform) {
   if (targetPlatform === 'slack') {
-    return `## ⚡️Lighthouse report`;
+    return `## ⚡️Lighthouse report
+    
+| Category | Score |
+| -------- | ----- |    
+| 🟠 Performance | 50 |    
+`;
   }
-  
+
   let comment = `## ⚡️Lighthouse report`
 
   for (const manifest of lighthouseOutputs.manifest) {
