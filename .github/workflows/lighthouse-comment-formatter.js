@@ -49,7 +49,7 @@ function makeComment(lighthouseOutputs, targetPlatform) {
     const { url: testedUrl, summary } = manifest;
     const reportUrl = lighthouseOutputs.links[testedUrl];
     if (targetPlatform === 'slack') {
-      comment += `: Results for [${testedUrl}](${testedUrl}): ${scoreSimple('Performance', summary.performance)}, ${scoreSimple('Accessibility', summary.accessibility)}, ${scoreSimple('Best practices', summary['best-practices'])}, ${scoreSimple('SEO', summary.seo)}, ${scoreSimple('PWA', summary.pwa)}, [detailed report](${reportUrl}). `;
+      comment += ` | Results for ${new URL(testedUrl).pathname}: ${scoreSimple('Performance', summary.performance)}, ${scoreSimple('Accessibility', summary.accessibility)}, ${scoreSimple('Best practices', summary['best-practices'])}, ${scoreSimple('SEO', summary.seo)}, ${scoreSimple('PWA', summary.pwa)}, ${reportUrl}`;
     }
 
     if (targetPlatform === 'pr') {
