@@ -1,9 +1,5 @@
 <script lang="ts">
   import { t } from 'svelte-i18n';
-  import { createEventDispatcher } from 'svelte';
-  const dispatch = createEventDispatcher();
-  const close = () => dispatch('close');
-
   import Waveform from '$lib/components/audio/Waveform.svelte';
   import SelectAudio from '$lib/components/audio/SelectAudio.svelte';
   import RecordAudio from '$lib/components/audio/RecordAudio.svelte';
@@ -13,7 +9,10 @@
   import type { ExpandedAudio, IEntry } from '@living-dictionaries/types';
   import SelectSpeaker from '$lib/components/media/SelectSpeaker.svelte';
   import { updateOnline, firebaseConfig } from 'sveltefirets';
-
+  import { createEventDispatcher } from 'svelte';
+  const dispatch = createEventDispatcher();
+  const close = () => dispatch('close');
+  
   export let entry: IEntry;
   export let sound_file: ExpandedAudio;
 
@@ -30,7 +29,7 @@
 </script>
 
 <Modal on:close>
-  <span slot="heading"> <i class="far fa-ear text-sm" /> {entry.lx} </span>
+  <span slot="heading"> <span class="i-material-symbols-hearing text-lg text-sm" /> {entry.lx} </span>
 
   {#if sound_file?.speakerName}
     <div class="mb-4">

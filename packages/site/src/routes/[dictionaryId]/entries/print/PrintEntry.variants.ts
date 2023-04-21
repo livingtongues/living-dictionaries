@@ -30,10 +30,7 @@ export const variants: Variants<typeof Component> = [
         "sd": null,
         "sf": {
           "path": "gta/audio/local_import/Gta-Pkd-Dec13-Butterflies-common-jay-1580859671012.mp3",
-          "ts": {
-            "seconds": 1580859720,
-            "nanoseconds": 994000000
-          },
+          ts: 1580860148537,
           "speakerName": "Budra Raspeda",
           "source": "local_import"
         },
@@ -45,7 +42,6 @@ export const variants: Variants<typeof Component> = [
   },
   {
     name: 'long gloss',
-    // description: '',
     width: 300,
     height: 300,
     props: {
@@ -67,10 +63,7 @@ export const variants: Variants<typeof Component> = [
         "sd": null,
         "sf": {
           "path": "gta/audio/local_import/Gta-Pkd-Dec13-Butterflies-common-jay-1580859671012.mp3",
-          "ts": {
-            "seconds": 1580859720,
-            "nanoseconds": 994000000
-          },
+          ts: 1580860148537,
           "speakerName": "Budra Raspeda",
           "source": "local_import"
         },
@@ -80,31 +73,8 @@ export const variants: Variants<typeof Component> = [
       }
     },
   },
-  // {
-  //   name: 'no sound file',
-  //   // description: '',
-  //   // width: 800,
-  //   height,
-  //   props: {
-  //     entry: {
-  //       "di": "Hill",
-  //       "createdBy": "OTD",
-  //       "sdn": [
-  //         "10.9"
-  //       ],
-  //       "nt": "2011 Tikorapoda",
-  //       "lx": "a-dʒa",
-  //       "gl": {
-  //         "en": "whom"
-  //       },
-  //       "id": "RdaOfXwRhP7uBVDvzzBd"
-  //     }
-  //   },
-  // },
   {
     name: 'sound file',
-    // description: '',
-    // width: 800,
     height,
     props: {
       entry: {
@@ -120,10 +90,7 @@ export const variants: Variants<typeof Component> = [
         ],
         "sf": {
           "source": "local_import",
-          "ts": {
-            "seconds": 1580859720,
-            "nanoseconds": 994000000
-          },
+          ts: 1580860148537,
           "path": "gta/audio/local_import/Gta-BR-Tkrpr-11-11-fearless-1580859678428.mp3",
           "speakerName": "Budra Raspeda"
         },
@@ -140,10 +107,7 @@ export const variants: Variants<typeof Component> = [
         "lx": "[n]hug-boʔ",
         "sf": {
           "source": "local_import",
-          "ts": {
-            "seconds": 1580862103,
-            "nanoseconds": 478000000
-          },
+          ts: 1580860148537,
           "speakerName": "Budra Raspeda",
           "path": "gta/audio/local_import/2010-9-26-Gta-nhugbo-hair-1580862091120.mp3"
         },
@@ -153,7 +117,7 @@ export const variants: Variants<typeof Component> = [
         "createdBy": "OTD",
         "di": "Hill",
         "gl": {
-          // "en": "hair"
+          "en": null
         },
         "id": "xMnDS5aHSfemIdSpacN8"
       }
