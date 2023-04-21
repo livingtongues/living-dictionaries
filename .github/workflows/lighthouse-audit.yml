@@ -22,6 +22,7 @@ jobs:
         with:
           urls: |
             ${{ github.event.deployment_status.target_url }}
+            ${{ github.event.deployment_status.target_url }}/achi
           # configPath: './.github/lighthouserc.json' # https://github.com/GoogleChrome/lighthouse-ci/blob/main/docs/getting-started.md https://github.com/GoogleChrome/lighthouse-ci/blob/main/docs/configuration.md#assert
           uploadArtifacts: true
           temporaryPublicStorage: true
@@ -47,8 +48,10 @@ jobs:
         uses: adamkdean/simple-slack-notify@master
         with:
           status: ${{ job.status }}
-          success_text: 'Lighthouse successfully audited ${github.event.deployment_status.target_url} (#${env.GITHUB_RUN_NUMBER})'
-          failure_text: 'Lighthouse failed audit of ${github.event.deployment_status.target_url} (#${env.GITHUB_RUN_NUMBER})'
+          # success_text: 'Lighthouse successfully audited ${{ github.event.deployment_status.target_url }} (#${env.GITHUB_RUN_NUMBER})'
+          # failure_text: 'Lighthouse failed audit of ${{ github.event.deployment_status.target_url }} (#${env.GITHUB_RUN_NUMBER})'
+          success_text: 'Lighthouse successfully audited (#${env.GITHUB_RUN_NUMBER})'
+          failure_text: 'Lighthouse failed audit of (#${env.GITHUB_RUN_NUMBER})'
           fields: |
             [{ "title": "Action URL", "value": "${env.GITHUB_SERVER_URL}/${env.GITHUB_REPOSITORY}/actions/runs/${env.GITHUB_RUN_ID}"},
             { "title": "Lighthouse scores", "value": "${{ steps.format_lighthouse_score_for_slack.outputs.comment}}"}]
