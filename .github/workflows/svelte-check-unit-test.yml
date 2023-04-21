@@ -42,8 +42,4 @@ jobs:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
         with:
           status: ${{ job.status }}
-          fields: repo,message,commit,author,action,eventName,ref,workflow,job,took # selectable (default: repo,message)
-          # channel: '#github'
-          # failure_text: 'Unit Tests for (#${env.GITHUB_RUN_NUMBER}) failed'
-          # fields: |
-          #   [{ "title": "Action URL", "value": "${env.GITHUB_SERVER_URL}/${env.GITHUB_REPOSITORY}/actions/runs/${env.GITHUB_RUN_ID}"}]
+          fields: workflow,repo,message,commit,author,action,ref # selectable (default: repo,message)

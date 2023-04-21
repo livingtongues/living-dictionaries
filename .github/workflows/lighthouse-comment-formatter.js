@@ -38,20 +38,26 @@ const scoreRow = (
  * @param {'slack' | 'pr'} targetPlatform
  */
 function makeComment(lighthouseOutputs, targetPlatform) {
+  if (targetPlatform === 'slack') {
+    return `## ⚡️Lighthouse report`;
+  }
+  
   let comment = `## ⚡️Lighthouse report`
 
   for (const manifest of lighthouseOutputs.manifest) {
     const { url: testedUrl, summary } = manifest;
     const reportUrl = lighthouseOutputs.links[testedUrl];
     comment += `
-[${testedUrl}](${testedUrl}): [detailed report](${reportUrl})
+Results for [${testedUrl}](${testedUrl}) (see [detailed report](${reportUrl}))
+
 | Category | Score |
 | -------- | ----- |
 ${scoreRow('Performance', summary.performance)}
 ${scoreRow('Accessibility', summary.accessibility)}
 ${scoreRow('Best practices', summary['best-practices'])}
 ${scoreRow('SEO', summary.seo)}
-${scoreRow('PWA', summary.pwa)}`;
+${scoreRow('PWA', summary.pwa)}
+`;
   }
 
   return comment;
