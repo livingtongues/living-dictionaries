@@ -6,7 +6,6 @@
   import { cubicOut } from 'svelte/easing';
   import { getStorage, ref, uploadBytesResumable } from 'firebase/storage';
   import { updateOnline, firebaseConfig } from 'sveltefirets';
-  import { serverTimestamp } from 'firebase/firestore/lite';
   import { processImageUrl } from './processImageUrl';
 
   export let file: File, entry: IEntry;
@@ -98,7 +97,7 @@
       const pf: GoalDatabasePhoto = {
         path: storagePath,
         gcs: gcsPath,
-        ts: serverTimestamp(),
+        ts: new Date().getTime(),
         cr: $user.displayName,
         ab: $user.uid,
       };

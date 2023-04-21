@@ -62,10 +62,7 @@ export const entries: IEntry[] = [
       path: 'audio/bezhta/0860Y6h3Nnl63tiD6UWX_1591201519424.wav',
       ab: 'uwNgSHCEeRaJAUPsmZok1uMRXzO2',
       sp: 'uwNgSHCEeRaJAUPsmZok1uMRXzO2',
-      ts: {
-        seconds: 1591201520,
-        nanoseconds: 613000000,
-      },
+      ts: 1580860148537,
     },
     updatedBy: 'uwNgSHCEeRaJAUPsmZok1uMRXzO2',
     gl: {
@@ -99,10 +96,7 @@ export const entries: IEntry[] = [
       path: 'akateko/audio/local_import/akateko-Juan-Diego-Mat-as-07Aug2014-1349-mother-8217-s-mother-1581896570161.mp3',
       speakerName: 'Juan Diego Matías',
       source: 'local_import',
-      ts: {
-        seconds: 1581896609,
-        nanoseconds: 800000000,
-      },
+      ts: 1580860148537,
     },
     id: 'A9L0NWFc7xiLrWWqrmNh',
   },
@@ -118,10 +112,7 @@ export const entries: IEntry[] = [
     sf: {
       source: 'local_import',
       path: 'gta/audio/local_import/Gta-BR-Tkrpr-11-11-thousand-1580859670382.mp3',
-      ts: {
-        seconds: 1580859720,
-        nanoseconds: 994000000,
-      },
+      ts: 1580860148537,
       speakerName: 'Budra Raspeda',
     },
     nt: '2011 Tikorapoda',
@@ -137,10 +128,7 @@ export const entries: IEntry[] = [
       path: 'gta/audio/local_import/Gta-BR-Tkrpr-11-11-hang-up-swing-1580859669274.mp3',
       source: 'local_import',
       speakerName: 'Budra Raspeda',
-      ts: {
-        seconds: 1580859720,
-        nanoseconds: 994000000,
-      },
+      ts: 1580860148537,
     },
     sdn: ['6'],
     createdBy: 'OTD',
@@ -160,10 +148,7 @@ export const entries: IEntry[] = [
     sf: {
       speakerName: 'Budra Raspeda',
       path: 'gta/audio/local_import/Gta-BR-Tkrpr-11-11-latrine-2-1580859676385.mp3',
-      ts: {
-        seconds: 1580859720,
-        nanoseconds: 994000000,
-      },
+      ts: 1580860148537,
       source: 'local_import',
     },
     sdn: ['5.1', '5.5'],
@@ -220,10 +205,7 @@ export const entries: IEntry[] = [
     },
     nt: 'Parlakhemundi: Animals 232 to 258 #',
     sf: {
-      ts: {
-        seconds: 1580860148,
-        nanoseconds: 537000000,
-      },
+      ts: 1580860148537,
       speakerName: 'Budura Raspeda',
       source: 'local_import',
       path: 'gta/audio/local_import/Gta-Pkd-Dec13-An-rhesus-monkey-1580860134632.mp3',

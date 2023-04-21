@@ -19,7 +19,7 @@ export function convert_sound_file_to_current_shape(actual: ActualDatabaseAudio)
 
 if (import.meta.vitest) {
   describe('convert_sound_file_to_current_shape', () => {
-    const uploadedAt = new Date();
+    const uploadedAt = new Date().getTime();
     test('converts deprecated fields to current ones', () => {
       const actual: ActualDatabaseAudio = {
         path: 'some path',

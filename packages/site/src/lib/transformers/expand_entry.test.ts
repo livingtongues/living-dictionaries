@@ -8,7 +8,7 @@ describe('expand_entry', () => {
     locale.set(undefined);
   });
 
-  const now = new Date();
+  const now = new Date().getTime();
   test('returns an object with easily readable field names', () => {
     const part_of_speech_abbrev = 'n';
     const part_of_speech_english = 'noun';
@@ -48,7 +48,7 @@ describe('expand_entry', () => {
         vfs: [{
           path: 'path',
           ab: 'Bob',
-          ts: now.getTime(),
+          ts: now,
           sp: ['sp1', 'sp2'],
           sc: 'sc',
           youtubeId: 'yt123',
@@ -93,14 +93,14 @@ describe('expand_entry', () => {
           fb_storage_path: 'path',
           specifiable_image_url: 'gcs',
           uid_added_by: 'Bob',
-          timestamp: now,
+          timestamp: new Date(now),
           source: 'sc',
           photographer_credit: 'cr',
         }],
         video_files: [{
           fb_storage_path: 'path',
           uid_added_by: 'Bob',
-          timestamp: now,
+          timestamp: new Date(now),
           speaker_ids: ['sp1', 'sp2'],
           source: 'sc',
           youtubeId: 'yt123',
@@ -119,7 +119,7 @@ describe('expand_entry', () => {
       sound_files: [{
         fb_storage_path: 'path',
         uid_added_by: 'Bob',
-        timestamp: now,
+        timestamp: new Date(now),
         speaker_ids: ['sp1', 'sp2'],
         source: 'sc',
       }],

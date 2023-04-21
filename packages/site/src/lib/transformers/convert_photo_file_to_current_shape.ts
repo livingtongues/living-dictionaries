@@ -14,7 +14,7 @@ export function convert_photo_file_to_current_shape(actual: ActualDatabasePhoto)
 
 if (import.meta.vitest) {
   describe('convert_photo_file_to_current_shape', () => {
-    const uploadedAt = new Date();
+    const uploadedAt = new Date().getTime();
     test('converts deprecated fields to current ones', () => {
       const actual: ActualDatabasePhoto = {
         path: 'some path',

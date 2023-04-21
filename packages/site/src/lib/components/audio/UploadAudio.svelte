@@ -2,7 +2,6 @@
   import { t } from 'svelte-i18n';
   import type { GoalDatabaseAudio, GoalDatabaseEntry, IEntry } from '@living-dictionaries/types';
   import { updateOnline } from 'sveltefirets';
-  import { serverTimestamp } from 'firebase/firestore/lite';
   import { getStorage, ref, uploadBytesResumable } from 'firebase/storage';
   import { dictionary, user } from '$lib/stores';
   import { tweened } from 'svelte/motion';
@@ -79,7 +78,7 @@
         try {
           const sf: GoalDatabaseAudio = {
             path: storagePath,
-            ts: serverTimestamp(),
+            ts: new Date().getTime(),
             ab: $user.uid,
             sp: [speakerId],
           };
