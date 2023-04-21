@@ -49,8 +49,7 @@
           </SelectVideo>
 
           <Button onclick={toggle} class="mt-4 !py-4 w-full" color="red" type="button">
-            <i class="far fa-microphone-alt" />
-            <!-- i-fa6-solid-microphone -->
+            <span class="i-uil-microphone" />
             {$t('video.prepare_to_record_video', {
               default: 'Prepare to Record with Microphone & Camera',
             })}
