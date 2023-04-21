@@ -10,6 +10,7 @@
   import Pagination from '$lib/components/search/Pagination.svelte';
   import { configure } from 'instantsearch.js/es/widgets/index.js';
   import { onMount } from 'svelte';
+  import { deleteImage } from '$lib/helpers/delete';
   import type { InstantSearch } from 'instantsearch.js';
   const search: InstantSearch = getContext('search');
 
@@ -30,14 +31,16 @@
         startWith={algoliaEntry}
         let:data={entry}>
         <ListEntry
+          dictionary={$dictionary}
           entry={convert_and_expand_entry(entry)}
           videoAccess={$dictionary.videoAccess || $admin > 0}
-          canEdit={$canEdit} />
+          canEdit={$canEdit}
+          on:deleteImage={() => deleteImage(entry)} />
       </Doc>
     {/each}
   {:else}
     {#each entries as entry (entry.id)}
-      <ListEntry entry={convert_and_expand_entry(entry)} />
+      <ListEntry dictionary={$dictionary} entry={convert_and_expand_entry(entry)} />
     {/each}
   {/if}
 </Hits>

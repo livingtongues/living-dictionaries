@@ -72,7 +72,7 @@
       class="{$$props.class} hover:bg-gray-300 flex flex-col items-center
     justify-center cursor-pointer p-2 text-lg"
       on:click={toggle}>
-      <i class="far fa-microphone my-1 mx-2 text-blue-800" />
+      <span class="i-fa6-solid-microphone my-1 mx-2 text-blue-800" />
       {#if !minimal}
         <div class="text-blue-800 text-xs">
           {$t('audio.add_audio', { default: 'Add Audio' })}

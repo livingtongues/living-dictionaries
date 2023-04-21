@@ -122,7 +122,8 @@
       </div>
     {:else}
       <Button onclick={checkAudioPermissions} class="w-full">
-        <i class="far fa-microphone-alt" />
+        <i class="far fa-microphone-alt" /> 
+        <!-- i-fa6-solid-microphone -->
         {$_('audio.prepare_to_record', { default: 'Prepare to Record with Microphone' })}
       </Button>
     {/if}
