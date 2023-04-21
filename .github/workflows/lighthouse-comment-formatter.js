@@ -33,26 +33,27 @@ const scoreRow = (
   /** @type { number } */ score
 ) => `| ${emojiScore(score)} ${label} | ${formatScore(score)} |`;
 
+const scoreSimple = (
+  /** @type { string } */ label,
+  /** @type { number } */ score
+) => `${label} ${emojiScore(score)} ${formatScore(score)}`;
+
 /**
  * @param {LighthouseOutputs} lighthouseOutputs
  * @param {'slack' | 'pr'} targetPlatform
  */
 function makeComment(lighthouseOutputs, targetPlatform) {
-  if (targetPlatform === 'slack') {
-    return `## ⚡️Lighthouse report
-    
-| Category | Score |
-| -------- | ----- |    
-| 🟠 Performance | 50 |    
-`;
-  }
-
   let comment = `## ⚡️Lighthouse report`
 
   for (const manifest of lighthouseOutputs.manifest) {
     const { url: testedUrl, summary } = manifest;
     const reportUrl = lighthouseOutputs.links[testedUrl];
-    comment += `
+    if (targetPlatform === 'slack') {
+      comment += `: Results for [${testedUrl}](${testedUrl}): ${scoreSimple('Performance', summary.performance)}, ${scoreSimple('Accessibility', summary.accessibility)}, ${scoreSimple('Best practices', summary['best-practices'])}, ${scoreSimple('SEO', summary.seo)}, ${scoreSimple('PWA', summary.pwa)}, [detailed report](${reportUrl}). `;
+    }
+
+    if (targetPlatform === 'pr') {
+      comment += `
 Results for [${testedUrl}](${testedUrl}) (see [detailed report](${reportUrl}))
 
 | Category | Score |
@@ -63,6 +64,7 @@ ${scoreRow('Best practices', summary['best-practices'])}
 ${scoreRow('SEO', summary.seo)}
 ${scoreRow('PWA', summary.pwa)}
 `;
+    }
   }
 
   return comment;
