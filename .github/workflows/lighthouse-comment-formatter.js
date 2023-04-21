@@ -38,9 +38,6 @@ const scoreRow = (
  * @param {'slack' | 'pr'} targetPlatform
  */
 function makeComment(lighthouseOutputs, targetPlatform) {
-  // const { summary } = lighthouseOutputs.manifest[0];
-  // const [[testedUrl, reportUrl]] = Object.entries(lighthouseOutputs.links);
-
   let comment = `## ⚡️Lighthouse report`
 
   for (const manifest of lighthouseOutputs.manifest) {
@@ -50,7 +47,6 @@ function makeComment(lighthouseOutputs, targetPlatform) {
 [${testedUrl}](${testedUrl}): [detailed report](${reportUrl})
 | Category | Score |
 | -------- | ----- |
-| 🟢 Performance | 90 |
 ${scoreRow('Performance', summary.performance)}
 ${scoreRow('Accessibility', summary.accessibility)}
 ${scoreRow('Best practices', summary['best-practices'])}
@@ -64,3 +60,5 @@ ${scoreRow('PWA', summary.pwa)}`;
 module.exports = ({ lighthouseOutputs, targetPlatform }) => {
   return makeComment(lighthouseOutputs, targetPlatform);
 };
+
+// from https://blog.logrocket.com/lighthouse-meets-github-actions-use-lighthouse-ci/

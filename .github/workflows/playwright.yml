@@ -2,7 +2,7 @@
 name: Playwright E2E Tests
 
 on:
-  deployment_status:
+  deployment_status
 
 env:
   SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
