@@ -54,7 +54,6 @@ jobs:
         if: always()
         uses: adamkdean/simple-slack-notify@master
         with:
-          # channel: '#github'
           status: ${{ job.status }}
           success_text: 'E2E Tests for (#${env.GITHUB_RUN_NUMBER}) completed successfully on ${{ github.event.deployment_status.target_url }}'
           failure_text: 'E2E Tests for (#${env.GITHUB_RUN_NUMBER}) on ${{ github.event.deployment_status.target_url }} failed'
