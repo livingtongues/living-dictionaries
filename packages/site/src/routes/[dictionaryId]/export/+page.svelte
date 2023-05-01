@@ -13,6 +13,7 @@
   import Progress from '$lib/export/Progress.svelte';
   import { fetchSpeakers } from '$lib/helpers/fetchSpeakers';
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte';
+  import { convert_entry_to_current_shape } from '$lib/transformers/convert_entry_to_current_shape';
 
   let includeImages = false;
   let includeAudio = false;
@@ -23,7 +24,8 @@
   let mounted = false;
 
   onMount(async () => {
-    const entries = await getCollection<IEntry>(`dictionaries/${$dictionary.id}/words`);
+    const unconverted_entries = await getCollection<IEntry>(`dictionaries/${$dictionary.id}/words`);
+    const entries = unconverted_entries.map((entry) => convert_entry_to_current_shape(entry));
     const speakers = await fetchSpeakers(entries);
     formattedEntries = formatEntriesForCSV(
       entries,
