@@ -61,6 +61,19 @@
   {#await fetchDialects()}
     <span class="i-gg-spinner animate-spin mb-3 block" />
   {:then { facetHits }}
+    {#if value && !facetHits.some(facetHit => facetHit.value === value)}
+    <Button
+      form="filled"
+      class="mr-1 mb-1"
+      size="sm">
+      {value}
+      <button on:click|stopPropagation={() => save(null)} type="button" class="badge-x ml-1 rounded-4 hover:bg-blue-900 p-1">
+        <svg class="h-2 w-2" stroke="currentColor" fill="none" viewBox="0 0 8 8">
+          <path stroke-linecap="round" stroke-width="1.5" d="M1 1l6 6m0-6L1 7" />
+        </svg>
+      </button>
+    </Button>
+    {/if}
     {#each facetHits as dialect}
     <Button
       onclick={() => save(dialect.value)}
