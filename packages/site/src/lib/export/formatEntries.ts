@@ -37,7 +37,7 @@ type EntryForCSV = {
 };
 export interface IEntryForCSV extends EntryForCSV {
   xsvn?: string;
-  va?: string; // optional for Babanki
+  va?: string; // optional for Babanki & Torwali
   sfpa?: string; // for downloading file, not exported in CSV
   pfpa?: string; // for downloading file, not exported in CSV
 }
