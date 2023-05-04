@@ -352,8 +352,8 @@ importers:
         specifier: ^5.0.0
         version: 5.0.0(svelte@3.55.1)(typescript@4.9.4)
       sveltefirets:
-        specifier: ^0.0.34
-        version: 0.0.34(firebase@9.21.0)(svelte@3.55.1)
+        specifier: ^0.0.35
+        version: 0.0.35(firebase@9.21.0)(svelte@3.55.1)
       temp-s-p-u:
         specifier: ^0.0.7
         version: 0.0.7(vite@4.1.1)
@@ -9683,8 +9683,8 @@ packages:
       - encoding
     dev: true
 
-  /sveltefirets@0.0.34(firebase@9.21.0)(svelte@3.55.1):
-    resolution: {integrity: sha512-CAS4vBdJUpeS/r9uxDFfa9BgZqriBHKoH8Dvsc1B4lGVD9GLI8iRgjuGJVoDugtlmEsnj5d+WNeUNTcDmgQC8g==}
+  /sveltefirets@0.0.35(firebase@9.21.0)(svelte@3.55.1):
+    resolution: {integrity: sha512-jUASL6kf8xjaTSXnI2PieNM5zjRKPlY+fnmft0ZrBd6zJtz9F9vh9dfmacy5bdQNsVvVx+LubdHH/9PxcTJfUQ==}
     peerDependencies:
       firebase: ^9.21.0
       svelte: ^3.58.0

@@ -9,7 +9,7 @@
   import { onMount, tick } from 'svelte';
   import { Button, ShowHide, Modal } from 'svelte-pieces';
   import { additionalKeyboards, glossingLanguages } from '../../../glosses/glossing-languages';
-  import { loadScriptOnce } from 'sveltefirets';
+  import { loadScriptOnce } from 'sveltefirets/helpers/loader';
 
   /**
    * When using keyboard inside a fixed context like a modal, set fixed to true to use fixed positioning instead of absolute positioning to keep keyboard with fixed input, otherwise it will match page scroll height
