@@ -323,7 +323,7 @@ importers:
         version: 3.8.0
       kitbook:
         specifier: ^1.0.0-alpha.32
-        version: 1.0.0-alpha.32(@sveltejs/kit@1.5.0)(svelte@3.55.1)(typescript@4.9.4)
+        version: 1.0.0-alpha.32(@sveltejs/kit@1.5.0)(svelte@3.55.1)(typescript@5.0.4)
       logrocket:
         specifier: ^2.1.2
         version: 2.2.1
@@ -350,10 +350,10 @@ importers:
         version: 1.0.62(@sveltejs/kit@1.5.0)(svelte@3.55.1)
       svelte-preprocess:
         specifier: ^5.0.0
-        version: 5.0.0(svelte@3.55.1)(typescript@4.9.4)
+        version: 5.0.0(svelte@3.55.1)(typescript@5.0.4)
       sveltefirets:
-        specifier: ^0.0.35
-        version: 0.0.35(firebase@9.21.0)(svelte@3.55.1)
+        specifier: ^0.0.36
+        version: 0.0.36(firebase@9.21.0)(svelte@3.55.1)
       temp-s-p-u:
         specifier: ^0.0.7
         version: 0.0.7(vite@4.1.1)
@@ -361,8 +361,8 @@ importers:
         specifier: ^2.4.1
         version: 2.4.1
       typescript:
-        specifier: ~4.9.4
-        version: 4.9.4
+        specifier: ^5.0.0
+        version: 5.0.4
       unocss:
         specifier: ^0.48.0
         version: 0.48.0(vite@4.1.1)
@@ -2141,13 +2141,13 @@ packages:
     resolution: {integrity: sha512-4JQNk+3mVzK3xh2rqd6RB4J46qUR19azEHBneZyTZM+c456qOrbbM/5xcR8huNCCcbVt7+UmizG6GuUvPvKUYg==}
     dev: false
 
-  /@kitbook/mdsvex-shiki-twoslash@0.0.3(svelte@3.55.1)(typescript@4.9.4):
+  /@kitbook/mdsvex-shiki-twoslash@0.0.3(svelte@3.55.1)(typescript@5.0.4):
     resolution: {integrity: sha512-CGA+cFQaSg+KDsqCs2a1QMs/+MwdMEDoKH792GLAWJ24kT9PMg/Uo6pmSZ11ufMhY8ictSq0CzuRH+0ZMza/+w==}
     dependencies:
       fenceparser: 2.2.0
       mdsvex: 0.10.6(svelte@3.55.1)
       shiki: 0.10.1
-      shiki-twoslash: 3.1.1(typescript@4.9.4)
+      shiki-twoslash: 3.1.1(typescript@5.0.4)
     transitivePeerDependencies:
       - supports-color
       - svelte
@@ -2161,10 +2161,10 @@ packages:
       unist-util-visit: 4.1.2
     dev: true
 
-  /@kitbook/vite-plugin-kitbook@0.0.10(svelte@3.55.1)(typescript@4.9.4):
+  /@kitbook/vite-plugin-kitbook@0.0.10(svelte@3.55.1)(typescript@5.0.4):
     resolution: {integrity: sha512-5e8wC5Gu3h/y09p6ClDpgPo0MDlpeRl7xyMtx+rlF7q37hFQGAJF+80+mYt/SWzhkMBg5Ptm47mzvyj9av+vCg==}
     dependencies:
-      '@kitbook/mdsvex-shiki-twoslash': 0.0.3(svelte@3.55.1)(typescript@4.9.4)
+      '@kitbook/mdsvex-shiki-twoslash': 0.0.3(svelte@3.55.1)(typescript@5.0.4)
       '@kitbook/rehype-display-link-titles': 0.0.3
       mdsvex: 0.10.6(svelte@3.55.1)
       rehype-autolink-headings: 6.1.1
@@ -7220,18 +7220,18 @@ packages:
       - svelte
     dev: true
 
-  /kitbook@1.0.0-alpha.32(@sveltejs/kit@1.5.0)(svelte@3.55.1)(typescript@4.9.4):
+  /kitbook@1.0.0-alpha.32(@sveltejs/kit@1.5.0)(svelte@3.55.1)(typescript@5.0.4):
     resolution: {integrity: sha512-ykZjmoelp4Y7A/jpzy56yaDIjsGH8XSMsPDDuHq4Kq0UJt2EQqNG3fS+26CqiAgjCNXXAc3FOugiOztP4nXImQ==}
     peerDependencies:
       '@sveltejs/kit': ^1.13.0
       svelte: ^3.55.0
     dependencies:
-      '@kitbook/mdsvex-shiki-twoslash': 0.0.3(svelte@3.55.1)(typescript@4.9.4)
-      '@kitbook/vite-plugin-kitbook': 0.0.10(svelte@3.55.1)(typescript@4.9.4)
+      '@kitbook/mdsvex-shiki-twoslash': 0.0.3(svelte@3.55.1)(typescript@5.0.4)
+      '@kitbook/vite-plugin-kitbook': 0.0.10(svelte@3.55.1)(typescript@5.0.4)
       '@sveltejs/kit': 1.5.0(svelte@3.55.1)(vite@4.1.1)
       svelte: 3.55.1
       svelte-pieces: 1.0.60(@sveltejs/kit@1.5.0)(svelte@3.55.1)
-      svelte2tsx: 0.6.11(svelte@3.55.1)(typescript@4.9.4)
+      svelte2tsx: 0.6.11(svelte@3.55.1)(typescript@5.0.4)
     transitivePeerDependencies:
       - supports-color
       - typescript
@@ -9046,7 +9046,7 @@ packages:
     resolution: {integrity: sha512-7++dFhtcx3353uBaq8DDR4NuxBetBzC7ZQOhmTQInHEd6bSrXdiEyzCvG07Z44UYdLShWUyXt5M/yhz8ekcb1A==}
     engines: {node: '>=8'}
 
-  /shiki-twoslash@3.1.1(typescript@4.9.4):
+  /shiki-twoslash@3.1.1(typescript@5.0.4):
     resolution: {integrity: sha512-b2j/2yjEjnj0Yav7purKB7uuSbYBf/EQWmu2f7d4G96NiM+Qmr3Tb3UeHY7faN/IEaLW6ip7aQa7MpZNlU5xkQ==}
     peerDependencies:
       typescript: '>3'
@@ -9055,7 +9055,7 @@ packages:
       '@typescript/vfs': 1.3.4
       fenceparser: 1.1.1
       shiki: 0.10.1
-      typescript: 4.9.4
+      typescript: 5.0.4
     transitivePeerDependencies:
       - supports-color
     dev: true
@@ -9589,6 +9589,54 @@ packages:
       typescript: 4.9.4
     dev: true
 
+  /svelte-preprocess@5.0.0(svelte@3.55.1)(typescript@5.0.4):
+    resolution: {integrity: sha512-q7lpa7i2FBu8Pa+G0MmuQQWETBwCKgsGmuq1Sf6n8q4uaG9ZLcLP0Y+etC6bF4sE6EbLxfiI38zV6RfPe3RSfg==}
+    engines: {node: '>= 14.10.0'}
+    requiresBuild: true
+    peerDependencies:
+      '@babel/core': ^7.10.2
+      coffeescript: ^2.5.1
+      less: ^3.11.3 || ^4.0.0
+      postcss: ^7 || ^8
+      postcss-load-config: ^2.1.0 || ^3.0.0 || ^4.0.0
+      pug: ^3.0.0
+      sass: ^1.26.8
+      stylus: ^0.55.0
+      sugarss: ^2.0.0 || ^3.0.0 || ^4.0.0
+      svelte: ^3.23.0
+      typescript: ^3.9.5 || ^4.0.0
+    peerDependenciesMeta:
+      '@babel/core':
+        optional: true
+      coffeescript:
+        optional: true
+      less:
+        optional: true
+      postcss:
+        optional: true
+      postcss-load-config:
+        optional: true
+      pug:
+        optional: true
+      sass:
+        optional: true
+      stylus:
+        optional: true
+      sugarss:
+        optional: true
+      typescript:
+        optional: true
+    dependencies:
+      '@types/pug': 2.0.6
+      '@types/sass': 1.43.1
+      detect-indent: 6.1.0
+      magic-string: 0.27.0
+      sorcery: 0.10.0
+      strip-indent: 3.0.0
+      svelte: 3.55.1
+      typescript: 5.0.4
+    dev: true
+
   /svelte-preprocess@5.0.3(svelte@3.55.1)(typescript@5.0.4):
     resolution: {integrity: sha512-GrHF1rusdJVbOZOwgPWtpqmaexkydznKzy5qIC2FabgpFyKN57bjMUUUqPRfbBXK5igiEWn1uO/DXsa2vJ5VHA==}
     engines: {node: '>= 14.10.0'}
@@ -9658,7 +9706,7 @@ packages:
       typescript: 4.9.4
     dev: true
 
-  /svelte2tsx@0.6.11(svelte@3.55.1)(typescript@4.9.4):
+  /svelte2tsx@0.6.11(svelte@3.55.1)(typescript@5.0.4):
     resolution: {integrity: sha512-rRW/3V/6mcejYWmSqcHpmILOSPsOhLgkbKbrTOz82s2n8TywmIsqj2jYPsiL6HeGoUM/atiTD0YKguW4b7ECog==}
     peerDependencies:
       svelte: ^3.55
@@ -9667,7 +9715,7 @@ packages:
       dedent-js: 1.0.1
       pascal-case: 3.1.2
       svelte: 3.55.1
-      typescript: 4.9.4
+      typescript: 5.0.4
     dev: true
 
   /svelte@3.55.1:
@@ -9683,8 +9731,8 @@ packages:
       - encoding
     dev: true
 
-  /sveltefirets@0.0.35(firebase@9.21.0)(svelte@3.55.1):
-    resolution: {integrity: sha512-jUASL6kf8xjaTSXnI2PieNM5zjRKPlY+fnmft0ZrBd6zJtz9F9vh9dfmacy5bdQNsVvVx+LubdHH/9PxcTJfUQ==}
+  /sveltefirets@0.0.36(firebase@9.21.0)(svelte@3.55.1):
+    resolution: {integrity: sha512-PcO25/kkj+9kWynos7dypzWhcecbhAL595rM111e19TILyP87wBFqmJL7O0vDFXOn7uC4GS3g9s8Qi3zA/UfYQ==}
     peerDependencies:
       firebase: ^9.21.0
       svelte: ^3.58.0
