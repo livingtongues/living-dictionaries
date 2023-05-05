@@ -9,34 +9,6 @@ export function parseCSVFrom(file: string): Record<string, any>[] {
 }
 
 if (import.meta.vitest) {
-  test('Ainu problem', async () => {
-    const file = readFileSync('./import/data/ainu-test/ainu-test.csv', 'utf8');
-    expect(parseCSVFrom(file)).toMatchInlineSnapshot(`
-      [
-        {
-          "en_gloss": "foot",
-          "lexeme": "ure",
-          "source ": "Basic Ainu Words (a phrasebook from Wikitongues' Poly app)",
-        },
-        {
-          "en_gloss": "sit down",
-          "lexeme": "a",
-          "source ": "Basic Ainu Words (a phrasebook from Wikitongues' Poly app)",
-        },
-        {
-          "en_gloss": "stand up",
-          "lexeme": "ash",
-          "source ": "Basic Ainu Words (a phrasebook from Wikitongues' Poly app)",
-        },
-        {
-          "en_gloss": "go to bed",
-          "lexeme": "mokor",
-          "source ": "Basic Ainu Words (a phrasebook from Wikitongues' Poly app)",
-        },
-      ]
-    `);
-  });
-
   test('parseCSV logs out example.csv as array', async () => {
     const file = readFileSync('./import/data/example-v4/example-v4.csv', 'utf8');
     expect(parseCSVFrom(file)).toMatchInlineSnapshot(`

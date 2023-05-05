@@ -7,12 +7,10 @@ import { readFileSync } from 'fs';
 import { parseCSVFrom } from './parse-csv.js';
 
 describe('trim_object_keys', () => {
-  const fakeTimeStamp = 10101010;
-
-  test('should', () => {
+  test('trims all keys that require it', () => {
     const row: Record<string, any> = {
       en_gloss: 'foot',
-      lexeme: 'ure',
+      'lexeme ': 'ure',
       'source ': "Basic Ainu Words (a phrasebook from Wikitongues' Poly app)",
     };
     const trimmed_row: Record<string, any> = {
@@ -28,11 +26,21 @@ describe('trim_object_keys', () => {
 describe('convertJsonRowToEntryFormat', () => {
   const fakeTimeStamp = 10101010;
 
-  test.skip('Ainu rows', () => {
+  test('corrects keys', () => {
     const ainu_csv_rows: Record<string, any>[] = [
       {
         en_gloss: 'foot',
         lexeme: 'ure',
+        'source ': "Basic Ainu Words (a phrasebook from Wikitongues' Poly app)",
+      },
+      {
+        en_gloss: 'stand up',
+        lexeme: 'ash',
+        'source ': "Basic Ainu Words (a phrasebook from Wikitongues' Poly app)",
+      },
+      {
+        en_gloss: 'go to bed',
+        lexeme: 'mokor',
         'source ': "Basic Ainu Words (a phrasebook from Wikitongues' Poly app)",
       },
     ];
@@ -45,24 +53,27 @@ describe('convertJsonRowToEntryFormat', () => {
             "en": "foot",
           },
           "lx": "ure",
-        },
-        {
-          "gl": {
-            "en": "sit down",
-          },
-          "lx": "a",
+          "sr": [
+            "Basic Ainu Words (a phrasebook from Wikitongues' Poly app)",
+          ],
         },
         {
           "gl": {
             "en": "stand up",
           },
           "lx": "ash",
+          "sr": [
+            "Basic Ainu Words (a phrasebook from Wikitongues' Poly app)",
+          ],
         },
         {
           "gl": {
             "en": "go to bed",
           },
           "lx": "mokor",
+          "sr": [
+            "Basic Ainu Words (a phrasebook from Wikitongues' Poly app)",
+          ],
         },
       ]
     `);
