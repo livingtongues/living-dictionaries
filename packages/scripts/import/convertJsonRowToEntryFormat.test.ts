@@ -1,12 +1,72 @@
 import {
   convertJsonRowToEntryFormat,
   returnArrayFromCommaSeparatedItems,
+  trim_object_keys,
 } from './convertJsonRowToEntryFormat.js';
 import { readFileSync } from 'fs';
 import { parseCSVFrom } from './parse-csv.js';
 
+describe('trim_object_keys', () => {
+  const fakeTimeStamp = 10101010;
+
+  test('should', () => {
+    const row: Record<string, any> = {
+      en_gloss: 'foot',
+      lexeme: 'ure',
+      'source ': "Basic Ainu Words (a phrasebook from Wikitongues' Poly app)",
+    };
+    const trimmed_row: Record<string, any> = {
+      en_gloss: 'foot',
+      lexeme: 'ure',
+      source: "Basic Ainu Words (a phrasebook from Wikitongues' Poly app)",
+    };
+    trim_object_keys(row);
+    expect(row).toStrictEqual(trimmed_row);
+  });
+});
+
 describe('convertJsonRowToEntryFormat', () => {
   const fakeTimeStamp = 10101010;
+
+  test.skip('Ainu rows', () => {
+    const ainu_csv_rows: Record<string, any>[] = [
+      {
+        en_gloss: 'foot',
+        lexeme: 'ure',
+        'source ': "Basic Ainu Words (a phrasebook from Wikitongues' Poly app)",
+      },
+    ];
+    const entries = ainu_csv_rows.map((row) => convertJsonRowToEntryFormat(row));
+
+    expect(entries).toMatchInlineSnapshot(`
+      [
+        {
+          "gl": {
+            "en": "foot",
+          },
+          "lx": "ure",
+        },
+        {
+          "gl": {
+            "en": "sit down",
+          },
+          "lx": "a",
+        },
+        {
+          "gl": {
+            "en": "stand up",
+          },
+          "lx": "ash",
+        },
+        {
+          "gl": {
+            "en": "go to bed",
+          },
+          "lx": "mokor",
+        },
+      ]
+    `);
+  });
 
   test('glosses', () => {
     const csv_rows_without_header: Record<string, any>[] = [
