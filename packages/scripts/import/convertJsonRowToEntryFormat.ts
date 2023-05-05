@@ -16,7 +16,7 @@ export function convertJsonRowToEntryFormat(
   dateStamp?: number,
   timestamp?: FirebaseFirestore.FieldValue
 ): IEntry {
-  //Object.keys(row).forEach((field) => row[field] = row[]);
+  trim_object_keys(row);
   const entry: IEntry = { lx: row.lexeme, gl: {}, xs: {} };
 
   Boolean(row.phonetic) && (entry.ph = row.phonetic);
