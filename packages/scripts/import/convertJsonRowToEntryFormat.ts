@@ -1,11 +1,22 @@
 import type { IEntry } from '@living-dictionaries/types';
 import type { Timestamp } from 'firebase/firestore';
 
+export function trim_object_keys(row: Record<string, any>) {
+  Object.keys(row).forEach((key) => {
+    const trimmed_key = key.trim();
+    if (trimmed_key !== key) {
+      Object.defineProperty(row, trimmed_key, Object.getOwnPropertyDescriptor(row, key));
+      delete row[key];
+    }
+  });
+}
+
 export function convertJsonRowToEntryFormat(
   row: Record<string, string>,
   dateStamp?: number,
   timestamp?: FirebaseFirestore.FieldValue
 ): IEntry {
+  //Object.keys(row).forEach((field) => row[field] = row[]);
   const entry: IEntry = { lx: row.lexeme, gl: {}, xs: {} };
 
   Boolean(row.phonetic) && (entry.ph = row.phonetic);
@@ -51,12 +62,11 @@ export function convertJsonRowToEntryFormat(
 
     const semanticDomain_FOLLOWED_BY_OPTIONAL_DIGIT = /^semanticDomain\d*$/; // semanticDomain, semanticDomain2, semanticDomain<#>, but not semanticDomain_custom
     if (semanticDomain_FOLLOWED_BY_OPTIONAL_DIGIT.test(key)) {
-      if (!entry.sdn)
-        entry.sdn = [];
+      if (!entry.sdn) entry.sdn = [];
 
       entry.sdn.push(value.toString());
     }
-  };
+  }
 
   if (Object.keys(entry.xs).length === 0) {
     delete entry.xs;
