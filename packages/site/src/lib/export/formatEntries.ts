@@ -93,7 +93,7 @@ export function formatEntriesForCSV(
       lx: entry.lx,
       ph: entry.ph,
       in: entry.in,
-      nc: entry.nc,
+      nc: entry.nc, //|| entry?.sn[0]?.nc,
       mr: entry.mr,
       pl: entry.pl,
       di: entry.di,
@@ -129,6 +129,7 @@ export function formatEntriesForCSV(
     }
 
     // part of speech (abbreviation & name)
+    //TODO fix
     if (entry.ps) {
       const fullPos = partsOfSpeech.find((ps) => ps.enAbbrev === entry.ps)?.enName;
       if (!fullPos) {
@@ -172,7 +173,9 @@ export function formatEntriesForCSV(
 
     // glosses
     glossLanguages.forEach((bcp) => {
-      const cleanEntry = stripHTMLTags(entry.gl[bcp]);
+      const cleanEntry = entry.gl
+        ? stripHTMLTags(entry.gl[bcp])
+        : stripHTMLTags(entry?.sn[0].gl[bcp]);
       formattedEntry[`gl${bcp}`] = cleanEntry;
     });
 
