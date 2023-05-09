@@ -1,12 +1,16 @@
 import type { Variants } from 'kitbook';
 import type Component from './ListEntry.svelte';
+import type { IDictionary } from '@living-dictionaries/types';
 
-const height = 110;
+const dictionary: IDictionary = {
+  id: 'foo',
+  name: 'Foo',
+  glossLanguages: ['en', 'es'],
+}
+
 export const variants: Variants<typeof Component> = [
   {
     name: 'complete',
-    // description: '',
-    // width: 800,
     height: 150,
     props: {
       entry: {
@@ -26,10 +30,7 @@ export const variants: Variants<typeof Component> = [
         "sd": null,
         "sf": {
           "path": "gta/audio/local_import/Gta-Pkd-Dec13-Butterflies-common-jay-1580859671012.mp3",
-          "ts": {
-            "seconds": 1580859720,
-            "nanoseconds": 994000000
-          },
+          ts: 1580860148537,
           "speakerName": "Budra Raspeda",
           "source": "local_import"
         },
@@ -41,8 +42,6 @@ export const variants: Variants<typeof Component> = [
   },
   {
     name: 'long gloss',
-    // description: '',
-    // width: 800,
     height: 150,
     props: {
       entry: {
@@ -52,7 +51,7 @@ export const variants: Variants<typeof Component> = [
         ],
         "gl": {
           "en": "Graphium doson, common jay butterfly",
-          "es": "I just made this up, sorry that this isn't actually Spanish or anything useful. It's just here to make the lines wrap.",
+          "es": "I just made this up, this isn't actually Spanish or anything useful. It's just here to make the lines wrap a bit.",
         },
         "di": "Hill",
         "pf": {
@@ -63,10 +62,7 @@ export const variants: Variants<typeof Component> = [
         "sd": null,
         "sf": {
           "path": "gta/audio/local_import/Gta-Pkd-Dec13-Butterflies-common-jay-1580859671012.mp3",
-          "ts": {
-            "seconds": 1580859720,
-            "nanoseconds": 994000000
-          },
+          ts: 1580860148537,
           "speakerName": "Budra Raspeda",
           "source": "local_import"
         },
@@ -77,10 +73,7 @@ export const variants: Variants<typeof Component> = [
     },
   },
   {
-    name: 'no sound file',
-    // description: '',
-    // width: 800,
-    height,
+    name: 'no sound file - cannot edit',
     props: {
       entry: {
         "di": "Hill",
@@ -98,10 +91,26 @@ export const variants: Variants<typeof Component> = [
     },
   },
   {
+    name: 'no sound file - can edit',
+    props: {
+      entry: {
+        "di": "Hill",
+        "createdBy": "OTD",
+        "sdn": [
+          "10.9"
+        ],
+        "nt": "2011 Tikorapoda",
+        "lx": "a-dʒa",
+        "gl": {
+          "en": "whom"
+        },
+        "id": "RdaOfXwRhP7uBVDvzzBd"
+      },
+      canEdit: true,
+    },
+  },
+  {
     name: 'sound file',
-    // description: '',
-    // width: 800,
-    height,
     props: {
       entry: {
         "sd": null,
@@ -116,10 +125,7 @@ export const variants: Variants<typeof Component> = [
         ],
         "sf": {
           "source": "local_import",
-          "ts": {
-            "seconds": 1580859720,
-            "nanoseconds": 994000000
-          },
+          ts: 1580860148537,
           "path": "gta/audio/local_import/Gta-BR-Tkrpr-11-11-fearless-1580859678428.mp3",
           "speakerName": "Budra Raspeda"
         },
@@ -129,17 +135,13 @@ export const variants: Variants<typeof Component> = [
     },
   },
   {
-    name: 'no gloss (p.s. it should be hair)',
-    height,
+    name: 'no gloss',
     props: {
       entry: {
         "lx": "[n]hug-boʔ",
         "sf": {
           "source": "local_import",
-          "ts": {
-            "seconds": 1580862103,
-            "nanoseconds": 478000000
-          },
+          ts: 1580860148537,
           "speakerName": "Budra Raspeda",
           "path": "gta/audio/local_import/2010-9-26-Gta-nhugbo-hair-1580862091120.mp3"
         },
@@ -149,10 +151,19 @@ export const variants: Variants<typeof Component> = [
         "createdBy": "OTD",
         "di": "Hill",
         "gl": {
-          // "en": "hair"
+          "en": null
         },
         "id": "xMnDS5aHSfemIdSpacN8"
       }
     }
   }
-]
+].map(variant => {
+  return {
+    height: 110,
+    ...variant,
+    props: {
+      dictionary,
+      ...variant.props,
+    },
+  }
+})

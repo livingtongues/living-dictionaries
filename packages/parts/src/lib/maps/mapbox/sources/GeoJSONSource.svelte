@@ -41,6 +41,7 @@
   $: {
     source = map.getSource(id) as GeoJSONSource;
     if (source) {
+      // @ts-ignore
       source.setData(data);
     } else {
       // Add the source before "styledata" event occurs to make it available to child <Layer>.

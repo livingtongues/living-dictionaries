@@ -3,6 +3,15 @@ import type { UserConfig } from 'vite';
 // import { svelte } from '@sveltejs/vite-plugin-svelte';
 
 import { kitbook } from 'kitbook/plugins/vite';
+import type { UserConfig as VitestUserConfigInterface } from 'vitest/config';
+
+const vitestConfig: VitestUserConfigInterface = {
+  test: {
+    // plugins: [svelte({ hot: !process.env.VITEST })],
+    globals: true,
+    includeSource: ['src/**/*.ts'],
+  }
+};
 
 const config: UserConfig = {
   plugins: [
@@ -24,19 +33,18 @@ const config: UserConfig = {
   optimizeDeps: {
     include: [
       // 'algoliasearch',
+      // 'firebase/functions', // broke things when put in exclude - investigate later if it's helpful to put here when using Kitbook
     ],
     exclude: [
-      'svelte-i18n', 'sveltefirets', 'sveltefirets/helpers/loader', 'svelte-pieces',
-      'firebase/functions',
+      'svelte-i18n', 
+      'sveltefirets', 
+      'svelte-pieces',
       '@sentry/browser',
       // 'instantsearch.js', 'instantsearch.js/es/widgets/index.js', 'instantsearch.js/es/connectors',
     ],
   },
-  test: {
-    // plugins: [svelte({ hot: !process.env.VITEST })],
-    globals: true,
-    includeSource: ['src/**/*.ts'],
-  },
+  // @ts-ignore - adding /// <reference types="vitest" /> doesn't seem to solve
+  test: vitestConfig.test,
 };
 
 export default config;

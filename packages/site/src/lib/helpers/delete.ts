@@ -2,9 +2,9 @@ import { t } from 'svelte-i18n';
 import { get } from 'svelte/store';
 import { dictionary } from '$lib/stores';
 import { goto } from '$app/navigation';
-import type { IEntry, IVideo } from '@living-dictionaries/types';
+import type { GoalDatabaseVideo, IEntry } from '@living-dictionaries/types';
 import { updateOnline, deleteDocumentOnline, set } from 'sveltefirets';
-import { arrayUnion, arrayRemove } from 'firebase/firestore/lite';
+import { arrayUnion } from 'firebase/firestore/lite';
 import { serverTimestamp } from 'firebase/firestore';
 
 export async function deleteImage(entry: IEntry) {
@@ -27,7 +27,7 @@ export async function deleteAudio(entry: IEntry) {
     const $dictionary = get(dictionary);
     await updateOnline<IEntry>(
       `dictionaries/${$dictionary.id}/words/${entry.id}`,
-      { sf: null },
+      { sf: null, sfs: null },
       { abbreviate: true }
     );
   } catch (err) {
@@ -39,8 +39,10 @@ export async function deleteVideo(entry: IEntry) {
   const $t = get(t);
   try {
     const $dictionary = get(dictionary);
-    const deletedVideo: IVideo = {
-      ...entry.vfs[0],
+    const video = entry.vfs[0];
+    const deletedVideo: GoalDatabaseVideo = {
+      ...video,
+      sp: Array.isArray(video.sp) ? video.sp : [video.sp],
       deleted: Date.now(),
     };
     await updateOnline<IEntry>(

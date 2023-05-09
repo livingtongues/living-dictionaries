@@ -42,12 +42,12 @@
       class="hover:bg-gray-200 flex flex-col items-center justify-center
   cursor-pointer h-full select-none text-sm"
       on:click={toggle}>
-      <i class="far fa-microphone text-blue-800" />
+      <span class="i-uil-microphone text-blue-800" />
     </div>
   {/if}
   {#if show}
     {#await import('$lib/components/audio/EditAudio.svelte') then { default: EditAudio }}
-      <EditAudio {entry} on:close={toggle} />
+      <EditAudio {entry} sound_file={entry.sound_files?.[0]} on:close={toggle} />
     {/await}
   {/if}
 </ShowHide>

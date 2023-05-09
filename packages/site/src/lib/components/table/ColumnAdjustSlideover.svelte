@@ -1,12 +1,18 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
-
-  import Slideover from '$lib/components/ui/Slideover.svelte';
+  import { onMount } from 'svelte';
+  import { flip } from 'svelte/animate';
+  import { fade } from 'svelte/transition';
+  import { Slideover } from 'svelte-pieces';
   import { preferredColumns } from '$lib/stores';
   import type { IColumn } from '@living-dictionaries/types';
+  import ColumnTitle from './ColumnTitle.svelte';
 
   export let selectedColumn: IColumn;
   let selectedColumnElement: HTMLElement;
+  let widthToDisplay: string;
+  let widthDisplayTimeout;
+
   onMount(() => {
     if (selectedColumnElement) {
       selectedColumnElement.scrollIntoView({
@@ -16,15 +22,9 @@
     }
   });
 
-  import ColumnTitle from './ColumnTitle.svelte';
-
-  import { fade } from 'svelte/transition';
-  let widthToDisplay;
-  let widthDisplayTimeout;
   function showWidth(e) {
     const target: EventTarget & HTMLInputElement = e.target;
     widthToDisplay = target.value;
-    // widthToDisplay = (<HTMLInputElement>e.target).value;
     clearTimeout(widthDisplayTimeout);
     widthDisplayTimeout = setTimeout(() => {
       widthToDisplay = null;
@@ -36,12 +36,10 @@
     $preferredColumns.splice(direction === 'up' ? i - 1 : i + 1, 0, ...columnBeingMoved);
     $preferredColumns = $preferredColumns; // trigger Svelte reactivity;
   }
-  import { flip } from 'svelte/animate';
-  import { onMount } from 'svelte';
 </script>
 
 <Slideover on:close>
-  <span slot="heading">{$_('column.adjust_columns', { default: 'Adjust Columns' })}</span>
+  <span slot="title">{$_('column.adjust_columns', { default: 'Adjust Columns' })}</span>
 
   <ul class="divide-y divid-gray-200">
     {#each $preferredColumns as column, i (column.field)}
@@ -115,8 +113,7 @@
 {#if widthToDisplay}
   <div
     transition:fade
-    class="fixed inset-x-0 top-0 flex flex-col items-center p-1 pointer-events-none"
-    style="z-index: 60;">
+    class="fixed inset-x-0 top-0 flex flex-col items-center p-1 pointer-events-none z-60">
     <div class="bg-black bg-opacity-75 text-white mt-2 p-3 rounded max-w-sm">
       {$_('column.width', { default: 'Width' })}:
       {widthToDisplay}

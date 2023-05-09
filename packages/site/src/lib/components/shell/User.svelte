@@ -4,9 +4,9 @@
   import { admin, user as userStore } from '$lib/stores';
   import { logOut, firebaseConfig, authState } from 'sveltefirets';
   import { Button, Menu, ShowHide, Avatar, clickoutside } from 'svelte-pieces';
+  import type { IUser } from '@living-dictionaries/types';
 
-  // @ts-ignore
-  $: user = $userStore || ($authState === undefined && $page.data?.user) || null;
+  $: user = $userStore || ($authState === undefined && ($page.data?.user as IUser)) || null;
   // only use page data set from the cookie before authState has been inited so that when a user logs out, the user value here doesn't fall back to the page data  value initially set by the cookie. Even though the cookie is cleared on logout, the page data is not updated.
 </script>
 

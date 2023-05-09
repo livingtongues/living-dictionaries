@@ -13,7 +13,7 @@
   export let entry: IEntry;
   export let dictionary: IDictionary;
   export let canEdit = false;
-  export let admin = true;
+  export let videoAccess = false;
 
   $: glossingLanguages = order_entry_and_dictionary_gloss_languages(
     entry.gl,
@@ -36,12 +36,7 @@
   </div>
 
   <div class="md:w-1/3 flex flex-col md:flex-col-reverse justify-end mt-2">
-    <EntryMedia
-      {entry}
-      {canEdit}
-      videoAccess={dictionary.videoAccess || admin}
-      on:deleteImage
-      on:deleteVideo />
+    <EntryMedia {entry} {canEdit} {videoAccess} on:deleteImage on:deleteVideo />
   </div>
 
   <div class="hidden md:block w-1" />
@@ -98,7 +93,7 @@
 
     <EntrySemanticDomains {canEdit} {entry} on:valueupdate />
 
-    <EntryDialect {canEdit} {entry} on:valueupdate />
+    <EntryDialect {canEdit} value={entry.di?.[0]} on:valueupdate />
 
     <EntryField
       value={entry.scn?.[0]}

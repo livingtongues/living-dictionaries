@@ -22,7 +22,7 @@ export function seo_description(
   }).join(', ')
   const glosses = remove_italic_tags(ordered_and_labeled_glosses);
 
-  const dialect = entry?.di || '';
+  const dialect = Array.isArray(entry.di) ? entry.di.join(', ') : (entry.di || '');
 
   const items_for_description = [local_orthographies, phonetic, parts_of_speech, glosses, dialect];
   const items_with_values = items_for_description.filter(item => item);

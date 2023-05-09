@@ -14,6 +14,7 @@
   import { Doc } from 'sveltefirets';
   import { truncateAuthors } from './truncateAuthors';
   import type { ICitation } from '@living-dictionaries/types';
+  import { convert_and_expand_entry } from '$lib/transformers/convert_and_expand_entry';
   import type { InstantSearch } from 'instantsearch.js';
   const search: InstantSearch = getContext('search');
   
@@ -123,7 +124,7 @@
             headwordSize={$headwordSize}
             fontSize={$fontSize}
             imagePercent={$imagePercent}
-            {entry}
+            entry={convert_and_expand_entry(entry)}
             showQrCode={$showQrCode}
             showLabels={$showLabels}
             selectedFields={$preferredPrintFields}

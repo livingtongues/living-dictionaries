@@ -84,6 +84,24 @@ describe('seo_description', () => {
       '"আৰচি, 𑃢𑃝𑃐𑃤, [arsi], n., adj., Assamese: ক’লা মুখ\'ৰ বান্দৰ, English: black faced monkey, Oriya: କଳା ମୁହାଁ ମାଙ୍କଡ, West Bengal Sabar"'
     );
   });
+
+  test('handles no gloss field', () => {
+    const dictionary_gloss_languages = ['en'];
+    const result = seo_description({ lx: 'foo' }, dictionary_gloss_languages, $t);
+    expect(result).toEqual("");
+  });
+
+  test('handles deprecated dialect string and current array of strings', () => {
+    const dialect = 'West Bengal Sabar';
+    const dictionary_gloss_languages = ['en'];
+    const dialectString = seo_description({
+      di: dialect,
+    }, dictionary_gloss_languages, $t);
+    const dialectStringArray = seo_description({
+      di: [dialect],
+    }, dictionary_gloss_languages, $t);
+    expect(dialectString).toEqual(dialectStringArray);
+  });
 });
 
 // describe('removeLineBreaks', () => {

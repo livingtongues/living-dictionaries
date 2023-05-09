@@ -15,11 +15,13 @@ export type AnalyticsOptions = {
 const vitalsUrl = 'https://vitals.vercel-analytics.com/v1/vitals';
 
 function getConnectionSpeed(): string {
-  return 'connection' in navigator &&
+  if ('connection' in navigator &&
     navigator['connection'] &&
-    'effectiveType' in navigator['connection']
-    ? navigator['connection']['effectiveType']
-    : '';
+    'effectiveType' in (navigator['connection'] as object)) {
+    return navigator['connection']['effectiveType'] as string
+  } else {
+    return '';
+  }
 }
 
 function sendToAnalytics(metric: Metric, options: AnalyticsOptions) {

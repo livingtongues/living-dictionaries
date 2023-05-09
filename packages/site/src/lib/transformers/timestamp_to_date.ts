@@ -17,7 +17,7 @@ export function convert_timestamp_to_date_object(timestamp: number | Date | Time
     return null;
   }
   // eslint-disable-next-line no-prototype-builtins
-  if (timestamp.hasOwnProperty('toDate')) {
+  if (timestamp?.hasOwnProperty('toDate')) {
     return timestamp.toDate();
   }
   return null;
@@ -59,6 +59,10 @@ if (import.meta.vitest) {
     test('leaves a date object alone', () => {
       const now = new Date();
       expect(convert_timestamp_to_date_object(now)).toBe(now);
+    });
+
+    test('handles undefined', () => {
+      expect(convert_timestamp_to_date_object(undefined)).toBe(null);
     });
   });
 }
