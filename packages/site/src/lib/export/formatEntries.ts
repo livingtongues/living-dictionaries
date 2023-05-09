@@ -42,6 +42,25 @@ export interface IEntryForCSV extends EntryForCSV {
   pfpa?: string; // for downloading file, not exported in CSV
 }
 
+export function format_parts_of_speech(
+  global_pos: IPartOfSpeech[],
+  entry_for_csv: IEntryForCSV,
+  parts_of_speech: string | string[]
+) {
+  if (parts_of_speech) {
+    const fullPos = global_pos.find((ps) => ps.enAbbrev === parts_of_speech)?.enName;
+    if (!fullPos) {
+      // TODO: handle case of multiple parts of speech
+      entry_for_csv.ps = Array.isArray(parts_of_speech) ? parts_of_speech[0] : parts_of_speech;
+    } else {
+      // TODO: handle case of multiple parts of speech
+      entry_for_csv.psab = Array.isArray(parts_of_speech) ? parts_of_speech[0] : parts_of_speech;
+      entry_for_csv.ps = fullPos;
+    }
+  }
+}
+
+//TODO should handle ps as string an array
 export function formatEntriesForCSV(
   entries: IEntry[],
   { name: dictionaryName, id: dictionaryId, glossLanguages, alternateOrthographies }: IDictionary,
@@ -129,18 +148,9 @@ export function formatEntriesForCSV(
     }
 
     // part of speech (abbreviation & name)
-    //TODO fix
-    if (entry.ps) {
-      const fullPos = partsOfSpeech.find((ps) => ps.enAbbrev === entry.ps)?.enName;
-      if (!fullPos) {
-        // TODO: handle case of multiple parts of speech
-        formattedEntry.ps = Array.isArray(entry.ps) ? entry.ps[0] : entry.ps;
-      } else {
-        // TODO: handle case of multiple parts of speech
-        formattedEntry.psab = Array.isArray(entry.ps) ? entry.ps[0] : entry.ps;
-        formattedEntry.ps = fullPos;
-      }
-    }
+    const parts_of_speech = entry.sn ? entry.sn[0].ps : entry.ps;
+    console.log(parts_of_speech);
+    format_parts_of_speech(partsOfSpeech, formattedEntry, parts_of_speech);
 
     // Media
     if (entry.sf?.path) {
