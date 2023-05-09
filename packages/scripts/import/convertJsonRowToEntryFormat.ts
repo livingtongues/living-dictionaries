@@ -51,12 +51,11 @@ export function convertJsonRowToEntryFormat(
 
     const semanticDomain_FOLLOWED_BY_OPTIONAL_DIGIT = /^semanticDomain\d*$/; // semanticDomain, semanticDomain2, semanticDomain<#>, but not semanticDomain_custom
     if (semanticDomain_FOLLOWED_BY_OPTIONAL_DIGIT.test(key)) {
-      if (!entry.sdn)
-        entry.sdn = [];
+      if (!entry.sdn) entry.sdn = [];
 
       entry.sdn.push(value.toString());
     }
-  };
+  }
 
   if (Object.keys(entry.xs).length === 0) {
     delete entry.xs;
