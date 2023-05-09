@@ -93,7 +93,7 @@ export function formatEntriesForCSV(
       lx: entry.lx,
       ph: entry.ph,
       in: entry.in,
-      nc: entry.nc, //|| entry?.sn[0]?.nc,
+      nc: entry.sn ? entry.sn[0].nc : entry.nc,
       mr: entry.mr,
       pl: entry.pl,
       di: entry.di,

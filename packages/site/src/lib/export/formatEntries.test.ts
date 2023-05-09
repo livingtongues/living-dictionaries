@@ -8,8 +8,120 @@ import type {
 import { formatEntriesForCSV } from './formatEntries';
 
 describe('formatEntriesForCSV', () => {
+  const dictionary: IDictionary = {
+    name: 'TestLang',
+    id: 'test',
+    glossLanguages: ['ar', 'en'],
+    alternateOrthographies: ['native-1', 'native-2'],
+    entryCount: 0,
+  };
+  const speakers: ISpeaker[] = [
+    {
+      displayName: 'John Smith',
+      id: '123',
+      birthplace: 'Whoville',
+      decade: 4,
+      gender: 'm',
+    },
+  ];
+  const semanticDomains: ISemanticDomain[] = [{ key: '2.1', name: 'Plant Test Domain' }];
+  const partsOfSpeech: IPartOfSpeech[] = [{ enAbbrev: 'n', enName: 'noun' }];
+  const result = [
+    {
+      di: 'Dialect',
+      glar: 'Arabic Gloss',
+      glen: 'English Gloss',
+      id: 'Entry Id',
+      in: 'Interlinearization',
+      lo1: 'native-1',
+      lo2: 'native-2',
+      lx: 'Lexeme/Word/Phrase',
+      mr: 'Morphology',
+      nc: 'Noun class',
+      nt: 'Notes',
+      pfFriendlyName: 'Image filename',
+      ph: 'Phonetic (IPA)',
+      pl: 'Plural form',
+      ps: 'Part of Speech',
+      psab: 'Part of Speech abbreviation',
+      sd1: 'Semantic domain 1',
+      sd2: 'Semantic domain 2',
+      sd3: 'Semantic domain 3',
+      sfFriendlyName: 'Audio filename',
+      sfbp: 'Speaker birthplace',
+      sfde: 'Speaker decade',
+      sfge: 'Speaker gender',
+      sfsn: 'Speaker name',
+      sr: 'Source(s)',
+      xsar: 'Example sentence in Arabic',
+      xsen: 'Example sentence in English',
+      xsvn: 'Example sentence in TestLang',
+    },
+    {
+      di: 'dialect x',
+      glar: 'foo',
+      glen: 'banana',
+      id: '12345qwerty',
+      in: 'n',
+      lo1: 'کیلا',
+      lo2: '',
+      lx: 'xiangjiao',
+      mr: 'bar',
+      nc: '5',
+      nt: 'This is an example of a note, here we can write whatever we want.',
+      pfFriendlyName: '12345qwerty_platano.mp3',
+      pfpa: 'https://database.com/image.mp3',
+      ph: 'xiangjiao',
+      pl: 'shuang xiangjiao',
+      ps: 'noun',
+      psab: 'n',
+      sd1: 'Plant Test Domain',
+      sd2: '',
+      sd3: '',
+      sfFriendlyName: '12345qwerty_platano.mp3',
+      sfbp: 'Whoville',
+      sfde: '4',
+      sfge: 'm',
+      sfpa: 'https://database.com/sound.mp3',
+      sfsn: 'John Smith',
+      sr: 'A book | www.mybook.com',
+      xsar: undefined,
+      xsen: 'This is a banana',
+      xsvn: '我很喜歡吃香蕉',
+    },
+    {
+      di: undefined,
+      glar: '',
+      glen: '',
+      id: '34qw',
+      in: undefined,
+      lo1: '𑃐𑃥𑃝𑃢 𑃒𑃦𑃗𑃠𑃤',
+      lo2: 'চুড়া বংজি',
+      lx: 'tree',
+      mr: undefined,
+      nc: undefined,
+      nt: '',
+      pfFriendlyName: '',
+      ph: undefined,
+      pl: undefined,
+      ps: '',
+      psab: '',
+      sd1: '',
+      sd2: '',
+      sd3: '',
+      sfFriendlyName: '',
+      sfbp: '',
+      sfde: '',
+      sfge: '',
+      sfsn: '',
+      sr: '',
+      xsar: undefined,
+      xsen: undefined,
+      xsvn: undefined,
+    },
+  ];
   test('formatEntriesForCSV basic example to smoke test with GoalDatabaseEntry', () => {
-    const entriesArray: IEntry[] = [
+    const goal_entries_array: IEntry[] = [
       {
         id: '12345qwerty',
         lx: 'xiangjiao',
@@ -33,88 +145,24 @@ describe('formatEntriesForCSV', () => {
         sr: ['A book', 'www.mybook.com'],
         sfs: [{ path: 'https://database.com/sound.mp3', sp: ['123'] }],
       },
-    ];
-    const dictionary: IDictionary = {
-      name: 'TestLang',
-      id: 'test',
-      glossLanguages: ['ar', 'en'],
-      alternateOrthographies: ['native-1', 'native-2'],
-      entryCount: 0,
-    };
-    const speakers: ISpeaker[] = [
       {
-        displayName: 'John Smith',
-        id: '123',
-        birthplace: 'Whoville',
-        decade: 4,
-        gender: 'm',
+        id: '34qw',
+        lx: 'tree',
+        lo2: 'চুড়া বংজি',
+        lo1: '𑃐𑃥𑃝𑃢 𑃒𑃦𑃗𑃠𑃤',
+        sn: [{ gl: { es: 'arbol' } }],
       },
     ];
+
     const semanticDomains: ISemanticDomain[] = [{ key: '2.1', name: 'Plant Test Domain' }];
     const partsOfSpeech: IPartOfSpeech[] = [{ enAbbrev: 'n', enName: 'noun' }];
-    expect(formatEntriesForCSV(entriesArray, dictionary, speakers, semanticDomains, partsOfSpeech))
-      .toMatchInlineSnapshot(`
-      [
-        {
-          "di": "Dialect",
-          "glar": "Arabic Gloss",
-          "glen": "English Gloss",
-          "id": "Entry Id",
-          "in": "Interlinearization",
-          "lo1": "native-1",
-          "lo2": "native-2",
-          "lx": "Lexeme/Word/Phrase",
-          "mr": "Morphology",
-          "nc": "Noun class",
-          "nt": "Notes",
-          "pfFriendlyName": "Image filename",
-          "ph": "Phonetic (IPA)",
-          "pl": "Plural form",
-          "ps": "Part of Speech",
-          "psab": "Part of Speech abbreviation",
-          "sfFriendlyName": "Audio filename",
-          "sfbp": "Speaker birthplace",
-          "sfde": "Speaker decade",
-          "sfge": "Speaker gender",
-          "sfsn": "Speaker name",
-          "sr": "Source(s)",
-          "xsar": "Example sentence in Arabic",
-          "xsen": "Example sentence in English",
-          "xsvn": "Example sentence in TestLang",
-        },
-        {
-          "di": "dialect x",
-          "glar": "foo",
-          "glen": "banana",
-          "id": "12345qwerty",
-          "in": "n",
-          "lo1": "کیلا",
-          "lo2": "",
-          "lx": "xiangjiao",
-          "mr": "bar",
-          "nc": undefined,
-          "nt": "This is an example of a note, here we can write whatever we want.",
-          "pfFriendlyName": "",
-          "ph": "xiangjiao",
-          "pl": "shuang xiangjiao",
-          "ps": "",
-          "psab": "",
-          "sfFriendlyName": "",
-          "sfbp": "",
-          "sfde": "",
-          "sfge": "",
-          "sfsn": "",
-          "sr": "A book | www.mybook.com",
-          "xsar": undefined,
-          "xsen": undefined,
-          "xsvn": undefined,
-        },
-      ]
-    `);
+    expect(
+      formatEntriesForCSV(goal_entries_array, dictionary, speakers, semanticDomains, partsOfSpeech)
+    ).toStrictEqual(result);
   });
 
   test('formatEntriesForCSV basic example to smoke test with DeprecatedEntry', () => {
-    const entriesArray: IEntry[] = [
+    const deprecated_entries_array: IEntry[] = [
       {
         id: '12345qwerty',
         lx: 'xiangjiao',
@@ -137,120 +185,15 @@ describe('formatEntriesForCSV', () => {
       },
       { id: '34qw', lx: 'tree', lo2: 'চুড়া বংজি', lo: '𑃐𑃥𑃝𑃢 𑃒𑃦𑃗𑃠𑃤', gl: { es: 'arbol' } },
     ];
-    const dictionary: IDictionary = {
-      name: 'TestLang',
-      id: 'test',
-      glossLanguages: ['ar', 'en'],
-      alternateOrthographies: ['native-1', 'native-2'],
-      entryCount: 0,
-    };
-    const speakers: ISpeaker[] = [
-      {
-        displayName: 'John Smith',
-        id: '123',
-        birthplace: 'Whoville',
-        decade: 4,
-        gender: 'm',
-      },
-    ];
-    const semanticDomains: ISemanticDomain[] = [{ key: '2.1', name: 'Plant Test Domain' }];
-    const partsOfSpeech: IPartOfSpeech[] = [{ enAbbrev: 'n', enName: 'noun' }];
-    expect(formatEntriesForCSV(entriesArray, dictionary, speakers, semanticDomains, partsOfSpeech))
-      .toMatchInlineSnapshot(`
-      [
-        {
-          "di": "Dialect",
-          "glar": "Arabic Gloss",
-          "glen": "English Gloss",
-          "id": "Entry Id",
-          "in": "Interlinearization",
-          "lo1": "native-1",
-          "lo2": "native-2",
-          "lx": "Lexeme/Word/Phrase",
-          "mr": "Morphology",
-          "nc": "Noun class",
-          "nt": "Notes",
-          "pfFriendlyName": "Image filename",
-          "ph": "Phonetic (IPA)",
-          "pl": "Plural form",
-          "ps": "Part of Speech",
-          "psab": "Part of Speech abbreviation",
-          "sd1": "Semantic domain 1",
-          "sd2": "Semantic domain 2",
-          "sd3": "Semantic domain 3",
-          "sfFriendlyName": "Audio filename",
-          "sfbp": "Speaker birthplace",
-          "sfde": "Speaker decade",
-          "sfge": "Speaker gender",
-          "sfsn": "Speaker name",
-          "sr": "Source(s)",
-          "xsar": "Example sentence in Arabic",
-          "xsen": "Example sentence in English",
-          "xsvn": "Example sentence in TestLang",
-        },
-        {
-          "di": "dialect x",
-          "glar": "foo",
-          "glen": "banana",
-          "id": "12345qwerty",
-          "in": "n",
-          "lo1": "کیلا",
-          "lo2": "",
-          "lx": "xiangjiao",
-          "mr": "bar",
-          "nc": "5",
-          "nt": "This is an example of a note, here we can write whatever we want.",
-          "pfFriendlyName": "12345qwerty_platano.mp3",
-          "pfpa": "https://database.com/image.mp3",
-          "ph": "xiangjiao",
-          "pl": "shuang xiangjiao",
-          "ps": "noun",
-          "psab": "n",
-          "sd1": "Plant Test Domain",
-          "sd2": "",
-          "sd3": "",
-          "sfFriendlyName": "12345qwerty_platano.mp3",
-          "sfbp": "Whoville",
-          "sfde": "4",
-          "sfge": "m",
-          "sfpa": "https://database.com/sound.mp3",
-          "sfsn": "John Smith",
-          "sr": "A book | www.mybook.com",
-          "xsar": undefined,
-          "xsen": "This is a banana",
-          "xsvn": "我很喜歡吃香蕉",
-        },
-        {
-          "di": undefined,
-          "glar": "",
-          "glen": "",
-          "id": "34qw",
-          "in": undefined,
-          "lo1": "𑃐𑃥𑃝𑃢 𑃒𑃦𑃗𑃠𑃤",
-          "lo2": "চুড়া বংজি",
-          "lx": "tree",
-          "mr": undefined,
-          "nc": undefined,
-          "nt": "",
-          "pfFriendlyName": "",
-          "ph": undefined,
-          "pl": undefined,
-          "ps": "",
-          "psab": "",
-          "sd1": "",
-          "sd2": "",
-          "sd3": "",
-          "sfFriendlyName": "",
-          "sfbp": "",
-          "sfde": "",
-          "sfge": "",
-          "sfsn": "",
-          "sr": "",
-          "xsar": undefined,
-          "xsen": undefined,
-          "xsvn": undefined,
-        },
-      ]
-    `);
+
+    expect(
+      formatEntriesForCSV(
+        deprecated_entries_array,
+        dictionary,
+        speakers,
+        semanticDomains,
+        partsOfSpeech
+      )
+    ).toStrictEqual(result);
   });
 });
