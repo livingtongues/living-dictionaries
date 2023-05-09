@@ -5,6 +5,7 @@
   import { dictionary } from '$lib/stores';
 
   export let value: string;
+  
   interface IAlgoliaFacetsQuery {
     facetHits: {
       value: string;

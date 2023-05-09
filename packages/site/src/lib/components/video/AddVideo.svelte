@@ -7,29 +7,30 @@
   import VideoIFrame from '$lib/components/video/VideoIFrame.svelte';
   import SelectSpeaker from '$lib/components/media/SelectSpeaker.svelte';
   import { dictionary } from '$lib/stores';
-  import type { IEntry, IVideo } from '@living-dictionaries/types';
+  import type { GoalDatabaseVideo, IEntry } from '@living-dictionaries/types';
   import { addVideo } from '$lib/helpers/media/update';
-
   import { createEventDispatcher } from 'svelte';
+  import { expand_video } from '$lib/transformers/expand_entry';
+
   const dispatch = createEventDispatcher();
   const close = () => dispatch('close');
 
   export let entry: IEntry;
-  let video: IVideo;
+  let database_video: GoalDatabaseVideo;
 </script>
 
 <Modal on:close>
-  <span slot="heading"> <i class="far fa-film-alt text-sm" /> {entry.lx} </span>
+  <span slot="heading"> <i class="far fa-film-alt text-sm" /> {entry.lexeme} </span>
 
   <SelectSpeaker dictionaryId={$dictionary.id} let:speakerId>
-    {#if (video && video.youtubeId) || (video && video.vimeoId)}
-      <VideoIFrame {video} />
+    {#if database_video?.youtubeId || database_video?.vimeoId}
+      <VideoIFrame video={expand_video(database_video)} />
       <div class="modal-footer">
         <Button onclick={close} color="black">
           {$t('misc.cancel', { default: 'Cancel' })}
         </Button>
         <div class="w-1" />
-        <Button onclick={async () => await addVideo(entry, video)} form="filled">
+        <Button onclick={async () => await addVideo(entry.id, database_video)} form="filled">
           {$t('misc.save', { default: 'Save' })}
         </Button>
       </div>
@@ -38,7 +39,7 @@
         {#if !record}
           <PasteVideoLink
             on:update={({ detail }) => {
-              video = { sp: speakerId, ...detail };
+              database_video = { ...detail, sp: [speakerId] };
             }} />
 
           <SelectVideo let:file>
@@ -48,7 +49,7 @@
           </SelectVideo>
 
           <Button onclick={toggle} class="mt-4 !py-4 w-full" color="red" type="button">
-            <i class="far fa-microphone-alt" />
+            <span class="i-uil-microphone" />
             {$t('video.prepare_to_record_video', {
               default: 'Prepare to Record with Microphone & Camera',
             })}

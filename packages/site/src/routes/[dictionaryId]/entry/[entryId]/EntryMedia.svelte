@@ -9,11 +9,13 @@
   export let entry: IEntry;
   export let videoAccess = false;
   export let canEdit = false;
+
+  $: video = entry.senses?.[0].video_files?.[0];
 </script>
 
-{#if entry.vfs?.[0]}
+{#if video}
   <div class="w-full overflow-hidden rounded relative mb-2">
-    <Video class="bg-gray-100 border-r-2" {entry} video={entry.vfs[0]} {canEdit} on:deleteVideo />
+    <Video class="bg-gray-100 border-r-2" {entry} {video} {canEdit} on:deleteVideo />
   </div>
 {:else if videoAccess && canEdit}
   <ShowHide let:show let:toggle>

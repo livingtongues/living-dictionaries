@@ -165,7 +165,7 @@
     </div>
   </div>
 
-  <select bind:this={slot} type="multiple" class="hidden">
+  <select bind:this={slot} multiple class="hidden">
     <slot />
   </select>
 

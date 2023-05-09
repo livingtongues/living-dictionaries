@@ -1,15 +1,7 @@
 import type { Timestamp } from 'firebase/firestore';
-import type { IFirestoreMetaData } from 'sveltefirets';
+import type { IBaseUser } from 'sveltefirets';
 
-export type IUser = User & Omit<IFirestoreMetaData, 'id'>;
-
-interface User {
-  uid?: string;
-  email?: string;
-  displayName?: string;
-  photoURL?: string;
-  lastVisit?: Timestamp;
-
+export interface IUser extends IBaseUser {
   roles?: IRoles;
   managing?: string[]; // dictionary Ids - can be deprected because using a collectionGroup query of 'managers' instead
   contributing?: string[]; // dictionary Ids - can be deprected because using a collectionGroup query 'contributors' instead

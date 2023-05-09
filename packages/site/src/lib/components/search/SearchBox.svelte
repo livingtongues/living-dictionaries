@@ -1,6 +1,5 @@
 <script lang="ts">
-  import { _ } from 'svelte-i18n';
-
+  import { t } from 'svelte-i18n';
   import type { InstantSearch } from 'instantsearch.js';
   import { connectSearchBox } from 'instantsearch.js/es/connectors';
   import { onMount } from 'svelte';
@@ -38,8 +37,11 @@
     <input
       type="search"
       bind:value={query}
-      on:input={(e) => refine(e.target.value)}
-      placeholder={$_('entry.search_entries', { default: 'Search Entries' })}
+      on:input={(e) => {
+        //@ts-ignore
+        refine(e.target.value);
+      }}
+      placeholder={$t('entry.search_entries', { default: 'Search Entries' })}
       class="form-input text-sm w-full pl-10 pr-3 py-2 rounded-none ltr:!rounded-l-md rtl:!rounded-r-md md:!rounded-r-md md:!rounded-l-md" />
   </div>
   <button
@@ -51,7 +53,7 @@
       focus:z-10 transition ease-in-out duration-150 md:hidden">
     <i class="far fa-filter text-gray-400" />
     <span class="ml-2 hidden sm:inline">
-      {$_('entry.filters', { default: 'Filters' })}
+      {$t('entry.filters', { default: 'Filters' })}
     </span>
   </button>
 </div>

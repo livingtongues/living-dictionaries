@@ -8,6 +8,8 @@ export function convert_entry_to_current_shape(actual: ActualDatabaseEntry): Goa
   const goal: GoalDatabaseEntry = {};
   const first_sense_from_base: DatabaseSense = {};
   for (const [key, value] of Object.entries(actual) as [keyof ActualDatabaseEntry, any][]) {
+    if (!value) continue;
+
     if (key === 'lo') {
       goal.lo1 = value;
       continue;
@@ -80,7 +82,7 @@ export function convert_entry_to_current_shape(actual: ActualDatabaseEntry): Goa
     goal[key] = value;
   }
   if (Object.keys(first_sense_from_base).length > 0) {
-    goal.sn = [first_sense_from_base, ...actual.sn || []];
+    goal.sn = [first_sense_from_base, ...(actual.sn || [])];
   }
   return goal;
 }

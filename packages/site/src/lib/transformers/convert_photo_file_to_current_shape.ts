@@ -1,6 +1,8 @@
 import type { ActualDatabasePhoto, GoalDatabasePhoto } from "@living-dictionaries/types/photo.interface";
 
 export function convert_photo_file_to_current_shape(actual: ActualDatabasePhoto): GoalDatabasePhoto {
+  if (!actual) return null;
+  
   const goal: GoalDatabasePhoto = { path: actual.path, gcs: actual.gcs, cr: actual.cr };
 
   goal.ab = actual.ab || actual.uploadedBy;
@@ -12,7 +14,7 @@ export function convert_photo_file_to_current_shape(actual: ActualDatabasePhoto)
 
 if (import.meta.vitest) {
   describe('convert_photo_file_to_current_shape', () => {
-    const uploadedAt = new Date();
+    const uploadedAt = new Date().getTime();
     test('converts deprecated fields to current ones', () => {
       const actual: ActualDatabasePhoto = {
         path: 'some path',

@@ -1,0 +1,45 @@
+name: Svelte Check & Unit Test Push
+
+on:
+  push:
+    branches:
+      - '**'
+
+jobs:
+  unit_test:
+    name: Svelte Check & Unit Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2.0.1
+        with:
+          version: 7.9.3
+
+      - name: Install Dependencies
+        run: pnpm install --no-frozen-lockfile
+
+      - run: pnpm -F site sync
+      
+      - name: Svelte Check Site
+        run: pnpm -F site check
+      
+      - name: Run Vitest Unit Tests
+        run: pnpm test:all
+
+      - name: Slack E2E Results Notification
+        uses: 8398a7/action-slack@v3 # https://action-slack.netlify.app/
+        if: failure()
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        with:
+          status: ${{ job.status }}
+          fields: workflow,repo,message,commit,author,action,ref # selectable (default: repo,message)

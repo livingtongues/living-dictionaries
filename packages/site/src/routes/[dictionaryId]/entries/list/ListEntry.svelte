@@ -4,37 +4,35 @@
   import Video from '../Video.svelte';
   import Image from '$lib/components/image/Image.svelte';
   import AddImage from '../AddImage.svelte';
-  import { page } from '$app/stores';
-  import type { IEntry } from '@living-dictionaries/types';
+  import type { IDictionary, IEntry } from '@living-dictionaries/types';
   import { order_glosses, order_entry_and_dictionary_gloss_languages } from '$lib/helpers/glosses';
   import { minutesAgo } from '$lib/helpers/time';
-  import { deleteImage } from '$lib/helpers/delete';
   import { ShowHide } from 'svelte-pieces';
-  import { dictionary } from '$lib/stores';
   import sanitize from 'xss';
 
   export let entry: IEntry;
+  export let dictionary: IDictionary;
   export let canEdit = false;
   export let videoAccess = false;
 
   $: glosses = order_glosses({
     glosses: entry.gl,
-    dictionary_gloss_languages: $dictionary.glossLanguages,
+    dictionary_gloss_languages: dictionary.glossLanguages,
     $t,
-    label: $dictionary.id !== 'jewish-neo-aramaic',
+    label: dictionary.id !== 'jewish-neo-aramaic',
   }).join(', ');
 </script>
 
 <div
   dir="ltr"
-  class:border-b-2={entry.ua?.toMillis && entry.ua.toMillis() > minutesAgo(5)}
+  class:border-b-2={entry.ua?.toMillis?.() > minutesAgo(5)}
   class="flex rounded shadow my-1 overflow-hidden items-stretch border-green-300"
   style="margin-right: 2px;">
   {#if entry.sf || canEdit}
-    <Audio class="bg-gray-100" {entry} minimal />
+    <Audio class="bg-gray-100" {entry} {canEdit} minimal />
   {/if}
   <a
-    href={'/' + $page.params.dictionaryId + '/entry/' + entry.id}
+    href={'/' + dictionary.id + '/entry/' + entry.id}
     class="p-2 text-lg flex-grow flex flex-col justify-between hover:bg-gray-200">
     <div>
       <span class="font-semibold text-gray-900 mr-1">{entry.lx}</span>
@@ -43,7 +41,7 @@
       {/if}
 
       {#if entry.lo}<i class="mr-1">{entry.lo}</i>{/if}
-      {#if entry.lo2}<i class="mr-1" class:sompeng={$page.params.dictionaryId === 'sora'}
+      {#if entry.lo2}<i class="mr-1" class:sompeng={dictionary.id === 'sora'}
           >{entry.lo2}</i
         >{/if}
       {#if entry.lo3}<i class="mr-1">{entry.lo3}</i>{/if}
@@ -78,7 +76,7 @@
           {/if}
         {/if}
 
-        {#if $dictionary.id === 'jewish-neo-aramaic'}
+        {#if dictionary.id === 'jewish-neo-aramaic'}
           {#if entry.di}<p class="text-xs">
               <i class="mr-1">{$t('entry.di', { default: 'Dialect' })}: {entry.di}</i>
             </p>{/if}
@@ -88,7 +86,7 @@
               {entry.xs.vn}
             </p>{/if}
           {#if entry.xs}
-            {#each order_entry_and_dictionary_gloss_languages(entry.gl, $dictionary.glossLanguages) as bcp}
+            {#each order_entry_and_dictionary_gloss_languages(entry.gl, dictionary.glossLanguages) as bcp}
               {#if entry.xs[bcp]}
                 <p>
                   <span class="font-semibold"
@@ -101,7 +99,7 @@
               {/if}
             {/each}
           {/if}
-        {:else if $dictionary.id === 'babanki'}
+        {:else if dictionary.id === 'babanki'}
           {#if entry.pl}<p class="text-xs">
               {$t('entry.pl', { default: 'Plural form' })}: {entry.pl}
             </p>{/if}
@@ -125,8 +123,8 @@
       {/if}
     </div>
   </a>
-  {#if entry.vfs?.[0]}
-    <Video class="bg-gray-100 border-r-2" {entry} video={entry.vfs[0]} {canEdit} />
+  {#if entry.senses?.[0].video_files?.[0]}
+    <Video class="bg-gray-100 border-r-2" {entry} video={entry.senses[0].video_files[0]} {canEdit} />
   {:else if videoAccess && canEdit}
     <ShowHide let:show let:toggle>
       <button
@@ -150,7 +148,7 @@
         lexeme={entry.lx}
         gcs={entry.pf.gcs}
         {canEdit}
-        on:deleteImage={() => deleteImage(entry)} />
+        on:deleteImage />
     </div>
   {:else if canEdit}
     <AddImage {entry} class="w-12 bg-gray-100">
