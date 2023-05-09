@@ -1,22 +1,11 @@
 import type { IEntry } from '@living-dictionaries/types';
 import type { Timestamp } from 'firebase/firestore';
 
-export function trim_object_keys(row: Record<string, any>) {
-  Object.keys(row).forEach((key) => {
-    const trimmed_key = key.trim();
-    if (trimmed_key !== key) {
-      Object.defineProperty(row, trimmed_key, Object.getOwnPropertyDescriptor(row, key));
-      delete row[key];
-    }
-  });
-}
-
 export function convertJsonRowToEntryFormat(
   row: Record<string, string>,
   dateStamp?: number,
   timestamp?: FirebaseFirestore.FieldValue
 ): IEntry {
-  trim_object_keys(row);
   const entry: IEntry = { lx: row.lexeme, gl: {}, xs: {} };
 
   Boolean(row.phonetic) && (entry.ph = row.phonetic);
