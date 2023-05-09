@@ -1,83 +1,12 @@
 import {
   convertJsonRowToEntryFormat,
   returnArrayFromCommaSeparatedItems,
-  trim_object_keys,
 } from './convertJsonRowToEntryFormat.js';
 import { readFileSync } from 'fs';
 import { parseCSVFrom } from './parse-csv.js';
 
-describe('trim_object_keys', () => {
-  test('trims all keys that require it', () => {
-    const row: Record<string, any> = {
-      en_gloss: 'foot',
-      'lexeme ': 'ure',
-      'source ': "Basic Ainu Words (a phrasebook from Wikitongues' Poly app)",
-    };
-    const trimmed_row: Record<string, any> = {
-      en_gloss: 'foot',
-      lexeme: 'ure',
-      source: "Basic Ainu Words (a phrasebook from Wikitongues' Poly app)",
-    };
-    trim_object_keys(row);
-    expect(row).toStrictEqual(trimmed_row);
-  });
-});
-
 describe('convertJsonRowToEntryFormat', () => {
   const fakeTimeStamp = 10101010;
-
-  test('corrects keys', () => {
-    const ainu_csv_rows: Record<string, any>[] = [
-      {
-        en_gloss: 'foot',
-        lexeme: 'ure',
-        'source ': "Basic Ainu Words (a phrasebook from Wikitongues' Poly app)",
-      },
-      {
-        en_gloss: 'stand up',
-        lexeme: 'ash',
-        'source ': "Basic Ainu Words (a phrasebook from Wikitongues' Poly app)",
-      },
-      {
-        en_gloss: 'go to bed',
-        lexeme: 'mokor',
-        'source ': "Basic Ainu Words (a phrasebook from Wikitongues' Poly app)",
-      },
-    ];
-    const entries = ainu_csv_rows.map((row) => convertJsonRowToEntryFormat(row));
-
-    expect(entries).toMatchInlineSnapshot(`
-      [
-        {
-          "gl": {
-            "en": "foot",
-          },
-          "lx": "ure",
-          "sr": [
-            "Basic Ainu Words (a phrasebook from Wikitongues' Poly app)",
-          ],
-        },
-        {
-          "gl": {
-            "en": "stand up",
-          },
-          "lx": "ash",
-          "sr": [
-            "Basic Ainu Words (a phrasebook from Wikitongues' Poly app)",
-          ],
-        },
-        {
-          "gl": {
-            "en": "go to bed",
-          },
-          "lx": "mokor",
-          "sr": [
-            "Basic Ainu Words (a phrasebook from Wikitongues' Poly app)",
-          ],
-        },
-      ]
-    `);
-  });
 
   test('glosses', () => {
     const csv_rows_without_header: Record<string, any>[] = [
