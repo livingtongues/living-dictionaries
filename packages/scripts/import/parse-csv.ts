@@ -1,14 +1,29 @@
 import { readFileSync } from 'fs';
 import { parse } from 'csv-parse/sync';
 
-export function parseCSVFrom(file: string): any[] {
-  return parse(file, {
+export function parseCSVFrom(contents: string): Record<string, any>[] {
+  return parse(contents, {
     columns: true,
     skip_empty_lines: true,
+    trim: true,
   });
 }
 
 if (import.meta.vitest) {
+  test('parseCSV trims values', () => {
+    const csv = `
+a ,the book ,c
+1,2 , 3
+`
+    expect(parseCSVFrom(csv)).toEqual([
+        {
+          "a": "1",
+          "the book": "2",
+          "c": "3",
+        },
+      ])
+  })
+
   test('parseCSV logs out example.csv as array', async () => {
     const file = readFileSync('./import/data/example-v4/example-v4.csv', 'utf8');
     expect(parseCSVFrom(file)).toMatchInlineSnapshot(`

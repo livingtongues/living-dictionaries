@@ -4,7 +4,6 @@
   import { mapKey, type MapKeyContext } from '../context';
   import { loadScriptOnce, loadStylesOnce } from 'sveltefirets/helpers/loader';
 
-  import type { Map } from 'mapbox-gl';
   import type { Result, Results, GeocoderOptions } from '@mapbox/mapbox-gl-geocoder';
   import { bindEvents } from '../event-bindings';
 

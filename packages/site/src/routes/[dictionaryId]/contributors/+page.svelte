@@ -6,6 +6,7 @@
   import type { IInvite, IHelper } from '@living-dictionaries/types';
   import { Button, ShowHide } from 'svelte-pieces';
   import { inviteHelper } from '$lib/helpers/inviteHelper';
+  import { removeDictionaryContributor } from '$lib/helpers/dictionariesManaging';
   import ContributorInvitationStatus from '$lib/components/contributors/ContributorInvitationStatus.svelte';
   import Citation from './Citation.svelte';
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte';
@@ -94,10 +95,24 @@
     startWith={helperType}
     let:data={contributors}>
     {#each contributors as contributor}
-      <div class="py-3">
+      <div class="py-3 flex flex-wrap items-center">
         <div class="text-sm leading-5 font-medium text-gray-900">
           {contributor.name}
         </div>
+        {#if $isManager}
+          <div class="w-1" />
+          <Button
+            onclick={() => {
+              if (confirm($t('misc.delete', { default: 'Delete' }) + '?')) {
+                removeDictionaryContributor(contributor, $dictionary.id);
+              }
+            }}
+            color="red"
+            size="sm">
+            {$t('misc.delete', { default: 'Delete' })}
+            <i class="fas fa-times" />
+          </Button>
+        {/if}
       </div>
     {/each}
   </Collection>
@@ -156,16 +171,17 @@
     startWith={helperType}
     let:data={writeInCollaborators}>
     {#each writeInCollaborators as collaborator}
-      <div class="py-3 flex flex-wrap items-center justify-between">
+      <div class="py-3 flex flex-wrap items-center">
         <div class="text-sm leading-5 font-medium text-gray-900">
           {collaborator.name}
         </div>
         {#if $isManager}
+          <div class="w-1" />
           <Button
             color="red"
             size="sm"
             onclick={() => {
-              if (confirm($t('misc.delete', { default: 'Delete' }))) {
+              if (confirm($t('misc.delete', { default: 'Delete' }) + '?')) {
                 deleteDocumentOnline(
                   `dictionaries/${$dictionary.id}/writeInCollaborators/${collaborator.id}`
                 );
@@ -262,5 +278,7 @@
 <SeoMetaTags
   title={$t('dictionary.contributors', { default: 'Contributors' })}
   dictionaryName={$dictionary.name}
-  description={$t('', { default: 'Learn about the people who are building and managing this Living Dictionary.' })}
+  description={$t('', {
+    default: 'Learn about the people who are building and managing this Living Dictionary.',
+  })}
   keywords="Contributors, Managers, Writers, Editors, Dictionary builders, Endangered Languages, Language Documentation, Language Revitalization, Build a Dictionary, Online Dictionary, Digital Dictionary, Dictionary Software, Free Software, Online Dictionary Builder, Living Dictionaries, Living Dictionary, Edit a dictionary, Search a dictionary, Browse a dictionary, Explore a Dictionary, Print a dictionary" />
