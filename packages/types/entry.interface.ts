@@ -85,7 +85,8 @@ export interface GoalDatabaseEntry extends IFirestoreMetaDataAbbreviated {
   scn?: string[]; // scientific_names
 }
 
-interface DeprecatedEntry extends Omit<DatabaseSense, 'ps' | 'xs' | 'pfs' | 'deletedPfs' | 'vfs'> { // as deprecated fields are removed from the database we can continue to Omit them here until nothing more from DatabaseSense is left
+interface DeprecatedEntry extends Omit<DatabaseSense, 'ps' | 'xs' | 'pfs' | 'deletedPfs' | 'vfs'> {
+  // as deprecated fields are removed from the database we can continue to Omit them here until nothing more from DatabaseSense is left
   lo?: string; // local_orthography_1
   sf?: ActualDatabaseAudio; // turned into array at sfs
   di?: string | string[]; // turned into array
