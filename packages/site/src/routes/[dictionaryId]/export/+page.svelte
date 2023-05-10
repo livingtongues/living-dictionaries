@@ -3,10 +3,9 @@
   import { _ } from 'svelte-i18n';
   import { admin, dictionary, isManager } from '$lib/stores';
   import { Button, ShowHide } from 'svelte-pieces';
-  import { formatEntriesForCSV, type IEntryForCSV } from '$lib/export/formatEntries';
   import { partsOfSpeech } from '$lib/mappings/parts-of-speech';
   import { semanticDomains } from '$lib/mappings/semantic-domains';
-  import type { IEntry } from '@living-dictionaries/types';
+  import type { ActualDatabaseEntry } from '@living-dictionaries/types';
   import { getCollection } from 'sveltefirets';
   import { downloadBlob, arrayToCSVBlob } from '$lib/export/csv';
   import DownloadMedia from '../../../lib/export/DownloadMedia.svelte';
@@ -14,34 +13,48 @@
   import { fetchSpeakers } from '$lib/helpers/fetchSpeakers';
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte';
   import { convert_entry_to_current_shape } from '$lib/transformers/convert_entry_to_current_shape';
+    import { expand_entry } from '$lib/transformers/expand_entry';
+    import { prepareEntriesForCsv, type EntryForCSV } from '$lib/export/prepareEntriesForCsv';
 
   let includeImages = false;
   let includeAudio = false;
-  let formattedEntries: IEntryForCSV[] = [];
-  let entriesWithImages: IEntryForCSV[] = [];
-  let entriesWithAudio: IEntryForCSV[] = [];
-  let finalizedEntries: IEntryForCSV[] = [];
+  
+  let entriesWithImages: EntryForCSV[] = [];
+  let entriesWithAudio: EntryForCSV[] = [];
+  let allEntries: EntryForCSV[] = [];
   let mounted = false;
 
   onMount(async () => {
-    const unconverted_entries = await getCollection<IEntry>(`dictionaries/${$dictionary.id}/words`);
-    const entries = unconverted_entries.map((entry) => convert_entry_to_current_shape(entry));
-    const speakers = await fetchSpeakers(entries);
-    formattedEntries = formatEntriesForCSV(
-      entries,
+    const database_entries = await getCollection<ActualDatabaseEntry>(`dictionaries/${$dictionary.id}/words`);
+    const converted_to_current_shaped_entries = database_entries.map(convert_entry_to_current_shape);
+    const expanded_entries = converted_to_current_shaped_entries.map(expand_entry);
+
+    const speakers = await fetchSpeakers(expanded_entries);
+    
+    entriesWithImages = prepareEntriesForCsv(
+      expanded_entries.filter(entry => entry.senses[0].photo_files?.[0]?.fb_storage_path),
       $dictionary,
       speakers,
       semanticDomains,
       partsOfSpeech
     );
-    entriesWithImages = formattedEntries.filter((entry) => entry.pfpa);
-    entriesWithAudio = formattedEntries.filter((entry) => entry.sfpa);
-    finalizedEntries = formattedEntries.map((entry) => {
-      const newEntry = { ...entry };
-      delete newEntry.pfpa;
-      delete newEntry.sfpa;
-      return newEntry;
-    });
+
+    entriesWithAudio = prepareEntriesForCsv(
+      expanded_entries.filter(entry => entry.sound_files?.[0]?.fb_storage_path),
+      $dictionary,
+      speakers,
+      semanticDomains,
+      partsOfSpeech
+    )
+
+    allEntries = prepareEntriesForCsv(
+      expanded_entries,
+      $dictionary,
+      speakers,
+      semanticDomains,
+      partsOfSpeech
+    );
+
     mounted = true;
   });
 </script>
@@ -116,7 +129,7 @@
       {:else}
         <DownloadMedia
           dictionary={$dictionary}
-          {finalizedEntries}
+          finalizedEntries={allEntries}
           entriesWithImages={includeImages ? entriesWithImages : []}
           entriesWithAudio={includeAudio ? entriesWithAudio : []}
           on:completed={toggle}
@@ -132,9 +145,9 @@
     </ShowHide>
   {:else}
     <Button
-      loading={!finalizedEntries.length}
+      loading={!allEntries.length}
       onclick={() => {
-        const blob = arrayToCSVBlob(finalizedEntries);
+        const blob = arrayToCSVBlob(allEntries);
         downloadBlob(blob, $dictionary.id, '.csv');
       }}
       form="filled">

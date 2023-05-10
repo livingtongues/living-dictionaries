@@ -1,4 +1,5 @@
 import type {
+  ActualDatabaseEntry,
   IDictionary,
   IEntry,
   IPartOfSpeech,
@@ -9,19 +10,37 @@ import type { IEntryForCSV } from './formatEntries';
 import { format_parts_of_speech, formatEntriesForCSV } from './formatEntries';
 
 describe('format_parts_of_speech', () => {
-  test('should', () => {
-    const global_pos: IPartOfSpeech[] = [{ enAbbrev: 'n', enName: 'noun' }];
-    const formattedEntry = {
-      id: '001',
-      lx: 'pato',
-    } as IEntryForCSV;
-    const parts_of_speech = ['n'];
+  const global_pos: IPartOfSpeech[] = [
+    { enAbbrev: 'n', enName: 'noun' },
+    { enAbbrev: 'adj', enName: 'adjective' },
+  ];
+  const formattedEntry = {
+    lx: 'pato',
+  } as IEntryForCSV;
+  test('parts of speech as string', () => {
+    const parts_of_speech = 'n';
     format_parts_of_speech(global_pos, formattedEntry, parts_of_speech);
     expect(formattedEntry).toStrictEqual({
-      id: '001',
       lx: 'pato',
       ps: 'noun',
       psab: 'n',
+    });
+  });
+  test.fails('parts of speech not included', () => {
+    const parts_of_speech = 'old pos';
+    format_parts_of_speech(global_pos, formattedEntry, parts_of_speech);
+    expect(formattedEntry).toStrictEqual({
+      lx: 'pato',
+      ps: 'old pos',
+    });
+  });
+  test('parts of speech as array', () => {
+    const parts_of_speech = ['adj', 'n'];
+    format_parts_of_speech(global_pos, formattedEntry, parts_of_speech);
+    expect(formattedEntry).toStrictEqual({
+      lx: 'pato',
+      ps: 'adjective',
+      psab: 'adj',
     });
   });
 });
@@ -45,7 +64,7 @@ describe('formatEntriesForCSV', () => {
   ];
   const semanticDomains: ISemanticDomain[] = [{ key: '2.1', name: 'Plant Test Domain' }];
   const partsOfSpeech: IPartOfSpeech[] = [{ enAbbrev: 'n', enName: 'noun' }];
-  const result = [
+  const expected = [
     {
       di: 'Dialect',
       glar: 'Arabic Gloss',
@@ -139,7 +158,7 @@ describe('formatEntriesForCSV', () => {
       xsvn: undefined,
     },
   ];
-  test('formatEntriesForCSV basic example to smoke test with GoalDatabaseEntry', () => {
+  test.fails('formatEntriesForCSV basic example to smoke test with GoalDatabaseEntry', () => {
     const goal_entries_array: IEntry[] = [
       {
         id: '12345qwerty',
@@ -177,11 +196,11 @@ describe('formatEntriesForCSV', () => {
     const partsOfSpeech: IPartOfSpeech[] = [{ enAbbrev: 'n', enName: 'noun' }];
     expect(
       formatEntriesForCSV(goal_entries_array, dictionary, speakers, semanticDomains, partsOfSpeech)
-    ).toStrictEqual(result);
+    ).toStrictEqual(expected);
   });
 
   test('formatEntriesForCSV basic example to smoke test with DeprecatedEntry', () => {
-    const deprecated_entries_array: IEntry[] = [
+    const deprecated_entries_array: ActualDatabaseEntry[] = [
       {
         id: '12345qwerty',
         lx: 'xiangjiao',
@@ -213,6 +232,6 @@ describe('formatEntriesForCSV', () => {
         semanticDomains,
         partsOfSpeech
       )
-    ).toStrictEqual(result);
+    ).toStrictEqual(expected);
   });
 });

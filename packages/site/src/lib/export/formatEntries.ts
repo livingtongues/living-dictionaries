@@ -1,6 +1,6 @@
 import type {
+  ActualDatabaseEntry,
   IDictionary,
-  IEntry,
   IPartOfSpeech,
   ISemanticDomain,
   ISpeaker,
@@ -48,17 +48,17 @@ export function format_parts_of_speech(
   entry_parts_of_speech: string | string[]
 ) {
   if (entry_parts_of_speech) {
+    if (Array.isArray(entry_parts_of_speech)) {
+      entry_parts_of_speech = entry_parts_of_speech[0];
+    }
     const fullPos = global_pos.find((ps) => ps.enAbbrev === entry_parts_of_speech)?.enName;
+    console.log(fullPos);
     if (!fullPos) {
       // TODO: handle case of multiple parts of speech
-      entry_for_csv.ps = Array.isArray(entry_parts_of_speech)
-        ? entry_parts_of_speech[0]
-        : entry_parts_of_speech;
+      entry_for_csv.ps = entry_parts_of_speech;
     } else {
       // TODO: handle case of multiple parts of speech
-      entry_for_csv.psab = Array.isArray(entry_parts_of_speech)
-        ? entry_parts_of_speech[0]
-        : entry_parts_of_speech;
+      entry_for_csv.psab = entry_parts_of_speech;
       entry_for_csv.ps = fullPos;
     }
   }
@@ -66,12 +66,12 @@ export function format_parts_of_speech(
 
 //TODO should handle ps as string an array
 export function formatEntriesForCSV(
-  entries: IEntry[],
+  entries: ActualDatabaseEntry[],
   { name: dictionaryName, id: dictionaryId, glossLanguages, alternateOrthographies }: IDictionary,
   speakers: ISpeaker[],
   semanticDomains: ISemanticDomain[],
   partsOfSpeech: IPartOfSpeech[]
-) {
+): IEntryForCSV[] {
   const headers = {} as IEntryForCSV;
   for (const key in EntryCSVFieldsEnum) {
     headers[key] = EntryCSVFieldsEnum[key];
