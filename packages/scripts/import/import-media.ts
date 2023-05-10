@@ -3,9 +3,9 @@ import { fileURLToPath } from 'url';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 import * as fs from 'fs';
-import { IPhoto } from '@living-dictionaries/types';
 import { environment, storage, timestamp } from '../config.js';
 import { getImageServingUrl } from './getImageServingUrl.js';
+import { GoalDatabasePhoto } from '@living-dictionaries/types/photo.interface.js';
 
 const fileBucket = `talking-dictionaries-${environment == 'prod' ? 'alpha' : 'dev'}.appspot.com`;
 
@@ -49,7 +49,7 @@ export async function uploadImageFile(
   entryId: string,
   dictionaryId: string,
   dry = false
-): Promise<IPhoto> {
+): Promise<GoalDatabasePhoto> {
   const imageDir = join(__dirname, `data/${dictionaryId}/images`);
   const imageFilePath = join(imageDir, imageFileName);
 
@@ -61,7 +61,6 @@ export async function uploadImageFile(
   try {
     const fileTypeSuffix = imageFileName.match(/\.[0-9a-z]+$/i)[0];
     const storagePath = `${dictionaryId}/images/${entryId}_${new Date().getTime()}${fileTypeSuffix}`;
-
     if (dry) {
       return { path: storagePath, gcs: 'no-path-bc-dry-run' };
     }
@@ -73,7 +72,14 @@ export async function uploadImageFile(
       },
     });
 
-    const gcsPath = await getImageServingUrl(storagePath, environment);
+    let gcsPath;
+    try {
+      gcsPath = await getImageServingUrl(storagePath, environment);
+    } catch (err) {
+      console.log(`!!! Error getting image serving URL: ${err}`);
+      gcsPath = '';
+    }
+
     return {
       path: storagePath,
       gcs: gcsPath,
