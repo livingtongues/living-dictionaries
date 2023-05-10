@@ -42,4 +42,4 @@ async function prepareEntriesFromSnapshot(entriesSnapshot: FirebaseFirestore.Que
 }
 
 // updateIndexByField('nc', { dry: true });
-updateMostRecentEntries(10, { dry: false });
+updateMostRecentEntries(100, { dry: true });
