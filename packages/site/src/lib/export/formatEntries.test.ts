@@ -5,7 +5,26 @@ import type {
   ISemanticDomain,
   ISpeaker,
 } from '@living-dictionaries/types';
-import { formatEntriesForCSV } from './formatEntries';
+import type { IEntryForCSV } from './formatEntries';
+import { format_parts_of_speech, formatEntriesForCSV } from './formatEntries';
+
+describe('format_parts_of_speech', () => {
+  test('should', () => {
+    const global_pos: IPartOfSpeech[] = [{ enAbbrev: 'n', enName: 'noun' }];
+    const formattedEntry = {
+      id: '001',
+      lx: 'pato',
+    } as IEntryForCSV;
+    const parts_of_speech = ['n'];
+    format_parts_of_speech(global_pos, formattedEntry, parts_of_speech);
+    expect(formattedEntry).toStrictEqual({
+      id: '001',
+      lx: 'pato',
+      ps: 'noun',
+      psab: 'n',
+    });
+  });
+});
 
 describe('formatEntriesForCSV', () => {
   const dictionary: IDictionary = {

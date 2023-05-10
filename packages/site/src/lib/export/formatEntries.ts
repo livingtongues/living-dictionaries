@@ -45,16 +45,20 @@ export interface IEntryForCSV extends EntryForCSV {
 export function format_parts_of_speech(
   global_pos: IPartOfSpeech[],
   entry_for_csv: IEntryForCSV,
-  parts_of_speech: string | string[]
+  entry_parts_of_speech: string | string[]
 ) {
-  if (parts_of_speech) {
-    const fullPos = global_pos.find((ps) => ps.enAbbrev === parts_of_speech)?.enName;
+  if (entry_parts_of_speech) {
+    const fullPos = global_pos.find((ps) => ps.enAbbrev === entry_parts_of_speech)?.enName;
     if (!fullPos) {
       // TODO: handle case of multiple parts of speech
-      entry_for_csv.ps = Array.isArray(parts_of_speech) ? parts_of_speech[0] : parts_of_speech;
+      entry_for_csv.ps = Array.isArray(entry_parts_of_speech)
+        ? entry_parts_of_speech[0]
+        : entry_parts_of_speech;
     } else {
       // TODO: handle case of multiple parts of speech
-      entry_for_csv.psab = Array.isArray(parts_of_speech) ? parts_of_speech[0] : parts_of_speech;
+      entry_for_csv.psab = Array.isArray(entry_parts_of_speech)
+        ? entry_parts_of_speech[0]
+        : entry_parts_of_speech;
       entry_for_csv.ps = fullPos;
     }
   }
