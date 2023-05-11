@@ -5,7 +5,7 @@ import type {
   ISemanticDomain,
   ISpeaker,
 } from '@living-dictionaries/types';
-import type { IEntryForCSV } from './formatEntries';
+import { stripHTMLTags } from './stripHTMLTags';
 
 enum StandardEntryCSVFields {
   id = 'Entry Id',
@@ -43,6 +43,33 @@ export function prepareEntriesForCsv(
   speakers: ISpeaker[],
   semantic_domains: ISemanticDomain[],
   parts_of_speech: IPartOfSpeech[]
-): IEntryForCSV[] {
-  throw new Error('Function not implemented.');
+): EntryForCSV[] {
+  const headers = {} as EntryForCSV;
+  for (const key in StandardEntryCSVFields) {
+    headers[key] = StandardEntryCSVFields[key];
+  }
+  const formattedEntries: EntryForCSV[] = expanded_entries.map((entry) => {
+    const formattedEntry = {
+      id: entry.id,
+      lexeme: entry.lexeme,
+      phonetic: entry.phonetic,
+      interlinearization: entry.interlinearization,
+      noun_class: entry.senses?.[0]?.noun_class,
+      morphology: entry.morphology,
+      plural_form: entry.plural_form,
+      dialects: entry.dialects?.[0],
+      notes: stripHTMLTags(entry.notes),
+      sources: entry.sources?.join(' | '), // some dictionaries (e.g. Kalanga) have sources that are strings and not arrays
+      parts_of_speech_abbreviation: '',
+      parts_of_speech: '',
+      sound_filename: '',
+      speaker_name: '',
+      speaker_birthplace: '',
+      speaker_decade: '',
+      speaker_gender: '',
+      image_filename: '',
+    } as EntryForCSV;
+    return formattedEntry;
+  });
+  return [headers, ...formattedEntries];
 }
