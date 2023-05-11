@@ -5,7 +5,35 @@ import type {
   ISemanticDomain,
   IPartOfSpeech,
 } from '@living-dictionaries/types';
-import { prepareEntriesForCsv, type EntryForCSV } from './prepareEntriesForCsv';
+import {
+  prepareEntriesForCsv,
+  assign_local_orthographies_to_headers,
+  type EntryForCSV,
+} from './prepareEntriesForCsv';
+
+describe('assign_local_orthographies_to_headers', () => {
+  test('assigns alternate_orthographies if any exists', () => {
+    const headers = {} as EntryForCSV;
+    const alternate_orthographies = ['native-1', 'native-2'];
+    assign_local_orthographies_to_headers(headers, alternate_orthographies);
+    expect(headers).toEqual({
+      local_orthographies_1: 'native-1',
+      local_orthographies_2: 'native-2',
+    });
+  });
+  test("doesn't assign alternate_orthographies if empty array", () => {
+    const headers = {} as EntryForCSV;
+    const alternate_orthographies = [];
+    assign_local_orthographies_to_headers(headers, alternate_orthographies);
+    expect(headers).toEqual({});
+  });
+  test("doesn't assign alternate_orthographies if null", () => {
+    const headers = {} as EntryForCSV;
+    const alternate_orthographies = null;
+    assign_local_orthographies_to_headers(headers, alternate_orthographies);
+    expect(headers).toEqual({});
+  });
+});
 
 describe('prepareEntriesForCsv', () => {
   const headerRow = {
