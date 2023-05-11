@@ -37,6 +37,17 @@ export interface EntryForCSV extends StandardEntryForCSV {
   va?: string; // optional for Babanki & Torwali
 }
 
+export function assign_local_orthographies_to_headers(
+  headers: EntryForCSV,
+  alternate_orthographies: string[]
+): void {
+  if (alternate_orthographies) {
+    alternate_orthographies.forEach((lo, index) => {
+      headers[`local_orthographies_${index + 1}`] = lo;
+    });
+  }
+}
+
 export function prepareEntriesForCsv(
   expanded_entries: ExpandedEntry[],
   dictionary: IDictionary,
@@ -50,16 +61,16 @@ export function prepareEntriesForCsv(
   }
   const formattedEntries: EntryForCSV[] = expanded_entries.map((entry) => {
     const formattedEntry = {
-      id: entry.id,
-      lexeme: entry.lexeme,
-      phonetic: entry.phonetic,
-      interlinearization: entry.interlinearization,
-      noun_class: entry.senses?.[0]?.noun_class,
-      morphology: entry.morphology,
-      plural_form: entry.plural_form,
-      dialects: entry.dialects?.[0],
+      id: entry.id || '',
+      lexeme: entry.lexeme || '',
+      phonetic: entry.phonetic || '',
+      interlinearization: entry.interlinearization || '',
+      noun_class: entry.senses?.[0]?.noun_class || '',
+      morphology: entry.morphology || '',
+      plural_form: entry.plural_form || '',
+      dialects: entry.dialects?.[0] || '',
       notes: stripHTMLTags(entry.notes),
-      sources: entry.sources?.join(' | '), // some dictionaries (e.g. Kalanga) have sources that are strings and not arrays
+      sources: entry.sources?.join(' | ') || '', // some dictionaries (e.g. Kalanga) have sources that are strings and not arrays
       parts_of_speech_abbreviation: '',
       parts_of_speech: '',
       sound_filename: '',
@@ -69,6 +80,9 @@ export function prepareEntriesForCsv(
       speaker_gender: '',
       image_filename: '',
     } as EntryForCSV;
+
+    // Begin dynamic headers
+    assign_local_orthographies_to_headers(headers, dictionary.alternateOrthographies);
     return formattedEntry;
   });
   return [headers, ...formattedEntries];
