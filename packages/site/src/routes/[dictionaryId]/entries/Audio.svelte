@@ -34,7 +34,7 @@
 </script>
 
 <ShowHide let:show let:toggle>
-  {#if entry.sf}
+  {#if entry.sfs}
     <!-- preventDefault -->
     <!-- https://svelte.dev/tutorial/adding-parameters-to-actions -->
     <div
