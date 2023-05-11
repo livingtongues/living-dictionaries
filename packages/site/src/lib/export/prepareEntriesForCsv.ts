@@ -6,6 +6,7 @@ import type {
   ISpeaker,
 } from '@living-dictionaries/types';
 import { stripHTMLTags } from './stripHTMLTags';
+import { entries } from '$lib/stores';
 
 enum StandardEntryCSVFields {
   id = 'Entry Id',
@@ -48,6 +49,20 @@ export function assign_local_orthographies_to_headers(
   }
 }
 
+export function assign_total_semantic_domains_from_first_sense(
+  headers: EntryForCSV,
+  entries: ExpandedEntry[]
+): void {
+  const maxSDN = Math.max(
+    ...entries.map((entry) => entry.senses?.[0]?.semantic_domains?.length || 0)
+  );
+  if (maxSDN > 0) {
+    for (let index = 0; index < maxSDN; index++) {
+      headers[`semantic_domain_${index + 1}`] = `Semantic domain ${index + 1}`;
+    }
+  }
+}
+
 export function prepareEntriesForCsv(
   expanded_entries: ExpandedEntry[],
   dictionary: IDictionary,
@@ -83,6 +98,7 @@ export function prepareEntriesForCsv(
 
     // Begin dynamic headers
     assign_local_orthographies_to_headers(headers, dictionary.alternateOrthographies);
+    assign_total_semantic_domains_from_first_sense(headers, expanded_entries);
     return formattedEntry;
   });
   return [headers, ...formattedEntries];

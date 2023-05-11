@@ -8,6 +8,7 @@ import type {
 import {
   prepareEntriesForCsv,
   assign_local_orthographies_to_headers,
+  assign_total_semantic_domains_from_first_sense,
   type EntryForCSV,
 } from './prepareEntriesForCsv';
 
@@ -31,6 +32,42 @@ describe('assign_local_orthographies_to_headers', () => {
     const headers = {} as EntryForCSV;
     const alternate_orthographies = null;
     assign_local_orthographies_to_headers(headers, alternate_orthographies);
+    expect(headers).toEqual({});
+  });
+});
+
+describe('assign_total_semantic_domains_from_first_sense', () => {
+  test('assigns semantic_domains if any exists', () => {
+    const headers = {} as EntryForCSV;
+    const entries = [
+      {
+        lexme: 'foo',
+        senses: [{ semantic_domains: ['1.2'] }],
+      },
+      {
+        lexme: 'bar',
+        senses: [{ semantic_domains: ['2.1', '2.2', '2.3'] }],
+      },
+    ];
+    assign_total_semantic_domains_from_first_sense(headers, entries);
+    expect(headers).toEqual({
+      semantic_domain_1: 'Semantic domain 1',
+      semantic_domain_2: 'Semantic domain 2',
+      semantic_domain_3: 'Semantic domain 3',
+    });
+  });
+  test.skip("doesn't assign semantic domains if none", () => {
+    const headers = {} as EntryForCSV;
+    const entries = [
+      {
+        lexme: 'foo',
+        senses: [],
+      },
+      {
+        lexme: 'bar',
+      },
+    ];
+    assign_total_semantic_domains_from_first_sense(headers, entries);
     expect(headers).toEqual({});
   });
 });
