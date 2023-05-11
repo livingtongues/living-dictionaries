@@ -6,7 +6,6 @@ import type {
   ISpeaker,
 } from '@living-dictionaries/types';
 import { stripHTMLTags } from './stripHTMLTags';
-import { entries } from '$lib/stores';
 
 enum StandardEntryCSVFields {
   id = 'Entry Id',

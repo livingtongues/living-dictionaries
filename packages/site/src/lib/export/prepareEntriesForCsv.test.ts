@@ -56,7 +56,7 @@ describe('assign_total_semantic_domains_from_first_sense', () => {
       semantic_domain_3: 'Semantic domain 3',
     });
   });
-  test.skip("doesn't assign semantic domains if none", () => {
+  test("doesn't assign semantic domains if none", () => {
     const headers = {} as EntryForCSV;
     const entries = [
       {
