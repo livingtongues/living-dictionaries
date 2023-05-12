@@ -8,8 +8,8 @@ import type {
 import {
   prepareEntriesForCsv,
   assign_local_orthographies_to_headers,
-  assign_total_semantic_domains_from_first_sense,
-  assign_gloss_languages,
+  assign_total_semantic_domains_from_first_sense_to_headers,
+  assign_gloss_languages_to_headers,
   type EntryForCSV,
 } from './prepareEntriesForCsv';
 
@@ -37,7 +37,7 @@ describe('assign_local_orthographies_to_headers', () => {
   });
 });
 
-describe('assign_total_semantic_domains_from_first_sense', () => {
+describe('assign_total_semantic_domains_from_first_sense_to_headers', () => {
   test('assigns semantic domains if any exists', () => {
     const headers = {} as EntryForCSV;
     const entries = [
@@ -50,7 +50,7 @@ describe('assign_total_semantic_domains_from_first_sense', () => {
         senses: [{ semantic_domains: ['2.1', '2.2', '2.3'] }],
       },
     ];
-    assign_total_semantic_domains_from_first_sense(headers, entries);
+    assign_total_semantic_domains_from_first_sense_to_headers(headers, entries);
     expect(headers).toEqual({
       semantic_domain_1: 'Semantic domain 1',
       semantic_domain_2: 'Semantic domain 2',
@@ -68,16 +68,16 @@ describe('assign_total_semantic_domains_from_first_sense', () => {
         lexeme: 'bar',
       },
     ];
-    assign_total_semantic_domains_from_first_sense(headers, entries);
+    assign_total_semantic_domains_from_first_sense_to_headers(headers, entries);
     expect(headers).toEqual({});
   });
 });
 
-describe('assign_gloss_languages', () => {
+describe('assign_gloss_languages_to_headers', () => {
   test("assigns gloss languages if any exists or bcp if it doesn't", () => {
     const headers = {} as EntryForCSV;
     const gloss_languages = ['en', 'es', 'af'];
-    assign_gloss_languages(headers, gloss_languages);
+    assign_gloss_languages_to_headers(headers, gloss_languages);
     expect(headers).toEqual({
       en_gloss_language: 'English Gloss',
       es_gloss_language: 'español Gloss',
@@ -87,13 +87,13 @@ describe('assign_gloss_languages', () => {
   test("Doesn't assign gloss languages if empty array", () => {
     const headers = {} as EntryForCSV;
     const gloss_languages = [];
-    assign_gloss_languages(headers, gloss_languages);
+    assign_gloss_languages_to_headers(headers, gloss_languages);
     expect(headers).toEqual({});
   });
   test("Doesn't assign gloss languages if null", () => {
     const headers = {} as EntryForCSV;
     const gloss_languages = null;
-    assign_gloss_languages(headers, gloss_languages);
+    assign_gloss_languages_to_headers(headers, gloss_languages);
     expect(headers).toEqual({});
   });
 });

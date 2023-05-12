@@ -49,7 +49,7 @@ export function assign_local_orthographies_to_headers(
   }
 }
 
-export function assign_total_semantic_domains_from_first_sense(
+export function assign_total_semantic_domains_from_first_sense_to_headers(
   headers: EntryForCSV,
   entries: ExpandedEntry[]
 ): void {
@@ -63,7 +63,10 @@ export function assign_total_semantic_domains_from_first_sense(
   }
 }
 
-export function assign_gloss_languages(headers: EntryForCSV, gloss_languages: string[]) {
+export function assign_gloss_languages_to_headers(
+  headers: EntryForCSV,
+  gloss_languages: string[]
+): void {
   if (gloss_languages) {
     gloss_languages.forEach((bcp) => {
       headers[`${bcp}_gloss_language`] = `${glossingLanguages[bcp].vernacularName || bcp} Gloss`;
@@ -106,7 +109,8 @@ export function prepareEntriesForCsv(
 
     // Begin dynamic headers
     assign_local_orthographies_to_headers(headers, dictionary.alternateOrthographies);
-    assign_total_semantic_domains_from_first_sense(headers, expanded_entries);
+    assign_total_semantic_domains_from_first_sense_to_headers(headers, expanded_entries);
+    assign_gloss_languages_to_headers(headers, dictionary.glossLanguages);
     return formattedEntry;
   });
   return [headers, ...formattedEntries];
