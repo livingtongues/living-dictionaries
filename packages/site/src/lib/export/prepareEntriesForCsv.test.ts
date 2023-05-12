@@ -41,11 +41,11 @@ describe('assign_total_semantic_domains_from_first_sense', () => {
     const headers = {} as EntryForCSV;
     const entries = [
       {
-        lexme: 'foo',
+        lexeme: 'foo',
         senses: [{ semantic_domains: ['1.2'] }],
       },
       {
-        lexme: 'bar',
+        lexeme: 'bar',
         senses: [{ semantic_domains: ['2.1', '2.2', '2.3'] }],
       },
     ];
@@ -60,11 +60,11 @@ describe('assign_total_semantic_domains_from_first_sense', () => {
     const headers = {} as EntryForCSV;
     const entries = [
       {
-        lexme: 'foo',
+        lexeme: 'foo',
         senses: [],
       },
       {
-        lexme: 'bar',
+        lexeme: 'bar',
       },
     ];
     assign_total_semantic_domains_from_first_sense(headers, entries);
