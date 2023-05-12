@@ -34,7 +34,7 @@ type StandardEntryForCSV = {
 };
 
 export interface EntryForCSV extends StandardEntryForCSV {
-  xsvn?: string;
+  vernacular_example_sentence?: string;
   va?: string; // optional for Babanki & Torwali
 }
 
@@ -70,6 +70,21 @@ export function assign_gloss_languages_to_headers(
   if (gloss_languages) {
     gloss_languages.forEach((bcp) => {
       headers[`${bcp}_gloss_language`] = `${glossingLanguages[bcp].vernacularName || bcp} Gloss`;
+    });
+  }
+}
+
+export function assign_example_sentences_to_headers(
+  headers: EntryForCSV,
+  gloss_languages: string[],
+  dictionary_name: string
+): void {
+  headers.vernacular_example_sentence = `Example sentence in ${dictionary_name}`;
+  if (gloss_languages) {
+    gloss_languages.forEach((bcp) => {
+      headers[`${bcp}_example_sentence`] = `Example sentence in ${
+        glossingLanguages[bcp].vernacularName || bcp
+      }`;
     });
   }
 }
@@ -111,6 +126,7 @@ export function prepareEntriesForCsv(
     assign_local_orthographies_to_headers(headers, dictionary.alternateOrthographies);
     assign_total_semantic_domains_from_first_sense_to_headers(headers, expanded_entries);
     assign_gloss_languages_to_headers(headers, dictionary.glossLanguages);
+    assign_example_sentences_to_headers(headers, dictionary.glossLanguages, dictionary.name);
     return formattedEntry;
   });
   return [headers, ...formattedEntries];

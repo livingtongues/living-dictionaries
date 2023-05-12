@@ -10,6 +10,7 @@ import {
   assign_local_orthographies_to_headers,
   assign_total_semantic_domains_from_first_sense_to_headers,
   assign_gloss_languages_to_headers,
+  assign_example_sentences_to_headers,
   type EntryForCSV,
 } from './prepareEntriesForCsv';
 
@@ -95,6 +96,38 @@ describe('assign_gloss_languages_to_headers', () => {
     const gloss_languages = null;
     assign_gloss_languages_to_headers(headers, gloss_languages);
     expect(headers).toEqual({});
+  });
+});
+
+describe('assign_example_sentences_to_headers', () => {
+  test("assigns vernacular and other example sentences if any exists or bcp if it doesn't", () => {
+    const headers = {} as EntryForCSV;
+    const gloss_languages = ['it', 'af'];
+    const dictionary_name = 'Foo';
+    assign_example_sentences_to_headers(headers, gloss_languages, dictionary_name);
+    expect(headers).toEqual({
+      vernacular_example_sentence: 'Example sentence in Foo',
+      it_example_sentence: 'Example sentence in Italiano',
+      af_example_sentence: 'Example sentence in af',
+    });
+  });
+  test('Assigns only verncaular if empty array', () => {
+    const headers = {} as EntryForCSV;
+    const gloss_languages = [];
+    const dictionary_name = 'Baz';
+    assign_example_sentences_to_headers(headers, gloss_languages, dictionary_name);
+    expect(headers).toEqual({
+      vernacular_example_sentence: 'Example sentence in Baz',
+    });
+  });
+  test("Doesn't assign gloss languages if null", () => {
+    const headers = {} as EntryForCSV;
+    const gloss_languages = null;
+    const dictionary_name = 'Boo';
+    assign_example_sentences_to_headers(headers, gloss_languages, dictionary_name);
+    expect(headers).toEqual({
+      vernacular_example_sentence: 'Example sentence in Boo',
+    });
   });
 });
 
