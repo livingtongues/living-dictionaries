@@ -6,6 +6,7 @@ import type {
   ISpeaker,
 } from '@living-dictionaries/types';
 import { stripHTMLTags } from './stripHTMLTags';
+import { glossingLanguages } from '$lib/glosses/glossing-languages';
 
 enum StandardEntryCSVFields {
   id = 'Entry Id',
@@ -59,6 +60,14 @@ export function assign_total_semantic_domains_from_first_sense(
     for (let index = 0; index < maxSDN; index++) {
       headers[`semantic_domain_${index + 1}`] = `Semantic domain ${index + 1}`;
     }
+  }
+}
+
+export function assign_gloss_languages(headers: EntryForCSV, gloss_languages: string[]) {
+  if (gloss_languages) {
+    gloss_languages.forEach((bcp) => {
+      headers[`${bcp}_gloss_language`] = `${glossingLanguages[bcp].vernacularName || bcp} Gloss`;
+    });
   }
 }
 
