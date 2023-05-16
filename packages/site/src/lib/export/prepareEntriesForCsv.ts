@@ -7,7 +7,6 @@ import type {
 } from '@living-dictionaries/types';
 import { stripHTMLTags } from './stripHTMLTags';
 import { glossingLanguages } from '$lib/glosses/glossing-languages';
-import { semanticDomains } from '$lib';
 
 enum StandardEntryCSVFields {
   id = 'Entry Id',
@@ -110,7 +109,7 @@ export function prepareEntriesForCsv(
   expanded_entries: ExpandedEntry[],
   dictionary: IDictionary,
   speakers: ISpeaker[],
-  semantic_domains: ISemanticDomain[],
+  global_semantic_domains: ISemanticDomain[],
   parts_of_speech: IPartOfSpeech[]
 ): EntryForCSV[] {
   const max_semantic_domain_number =
@@ -163,7 +162,7 @@ export function prepareEntriesForCsv(
     for (let index = 0; index < max_semantic_domain_number; index++) {
       formattedEntry[`semantic_domain_${index + 1}`] = '';
       if (entry.senses?.[0].semantic_domains) {
-        const matching_domain = semanticDomains.find(
+        const matching_domain = global_semantic_domains.find(
           (sd) => sd.key === entry.senses?.[0].semantic_domains[index]
         );
         if (matching_domain) {
@@ -171,6 +170,10 @@ export function prepareEntriesForCsv(
         }
       }
     }
+    //Extract a function
+    dictionary.glossLanguages.forEach((bcp) => {
+      formattedEntry[`${bcp}_gloss_language`] = entry.senses?.[0].glosses[bcp] || '';
+    });
 
     return formattedEntry;
   });
