@@ -174,6 +174,12 @@ export function prepareEntriesForCsv(
     dictionary.glossLanguages.forEach((bcp) => {
       formattedEntry[`${bcp}_gloss_language`] = entry.senses?.[0].glosses[bcp] || '';
     });
+    //Extract a function
+    formattedEntry.vernacular_example_sentence = entry.senses?.[0].example_sentences?.[0].vn || '';
+    dictionary.glossLanguages.forEach((bcp) => {
+      formattedEntry[`${bcp}_example_sentence`] =
+        entry.senses?.[0].example_sentences?.[0][bcp] || '';
+    });
 
     return formattedEntry;
   });
