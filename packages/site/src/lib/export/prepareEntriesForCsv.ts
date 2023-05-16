@@ -49,7 +49,7 @@ export function assign_local_orthographies_to_headers(
   }
 }
 
-export function assign_total_semantic_domains_from_first_sense_to_headers(
+export function assign_semantic_domains_to_headers(
   headers: EntryForCSV,
   max_semantic_domain_number: number
 ): void {
@@ -120,12 +120,11 @@ export function prepareEntriesForCsv(
   }
   // Begin dynamic headers
   assign_local_orthographies_to_headers(headers, dictionary.alternateOrthographies);
-  assign_total_semantic_domains_from_first_sense_to_headers(headers, max_semantic_domain_number);
+  assign_semantic_domains_to_headers(headers, max_semantic_domain_number);
   assign_gloss_languages_to_headers(headers, dictionary.glossLanguages);
   assign_example_sentences_to_headers(headers, dictionary.glossLanguages, dictionary.name);
 
   const formattedEntries: EntryForCSV[] = expanded_entries.map((entry) => {
-    console.log('pos_abbr:', entry.senses?.[0]?.parts_of_speech?.[0]);
     const formattedEntry = {
       id: entry.id || '',
       lexeme: entry.lexeme || '',
