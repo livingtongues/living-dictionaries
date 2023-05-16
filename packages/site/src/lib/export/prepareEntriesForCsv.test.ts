@@ -151,15 +151,19 @@ describe('prepareEntriesForCsv', () => {
     speaker_decade: 'Speaker decade',
     speaker_gender: 'Speaker gender',
     image_filename: 'Image filename',
+    // dynamic fields - you can use easier to read field names
     local_orthography_1: 'native_script_1',
     local_orthography_2: 'native_script_2',
-    // dynamic fields - you can use easier to read field names
-    // glar: 'Arabic Gloss',
-    // glen: 'English Gloss',
-    // sd1: 'Semantic domain 1',
-    // sd2: 'Semantic domain 2',
-    // sd3: 'Semantic domain 3',
+    ar_example_sentence: 'Example sentence in العَرَبِيَّة‎',
+    ar_gloss_language: 'العَرَبِيَّة‎ Gloss',
+    en_example_sentence: 'Example sentence in English',
+    en_gloss_language: 'English Gloss',
+    semantic_domain_1: 'Semantic domain 1',
+    semantic_domain_2: 'Semantic domain 2',
+    semantic_domain_3: 'Semantic domain 3',
+    vernacular_example_sentence: 'Example sentence in TestLang',
   };
+
   const dictionary: IDictionary = {
     name: 'TestLang',
     id: 'test',
@@ -207,22 +211,13 @@ describe('prepareEntriesForCsv', () => {
         lexeme: 'tree',
         local_orthography_2: 'চুড়া বংজি',
         local_orthography_1: '𑃐𑃥𑃝𑃢 𑃒𑃦𑃗𑃠𑃤',
-        senses: [{ glosses: { es: 'arbol' } }],
+        senses: [{ glosses: { es: 'árbol' } }],
       },
     ];
-    const expected: EntryForCSV[] = [
+    //TODO after make everything passes, allow multiple parts of speech
+    const expected = [
       {
         ...headerRow,
-        ar_example_sentence: 'Example sentence in العَرَبِيَّة‎',
-        ar_gloss_language: 'العَرَبِيَّة‎ Gloss',
-        en_example_sentence: 'Example sentence in English',
-        en_gloss_language: 'English Gloss',
-        semantic_domain_1: 'Semantic domain 1',
-        semantic_domain_2: 'Semantic domain 2',
-        semantic_domain_3: 'Semantic domain 3',
-        local_orthography_1: 'native_script_1',
-        local_orthography_2: 'native_script_2',
-        vernacular_example_sentence: 'Example sentence in TestLang',
       },
       {
         dialects: 'dialect x',
@@ -234,16 +229,20 @@ describe('prepareEntriesForCsv', () => {
         native_script_2: 'کیلا',
         notes: 'This is an example of a note, here we can write whatever we want.',
         noun_class: '',
-        parts_of_speech: '',
-        parts_of_speech_abbreviation: '',
+        parts_of_speech: 'noun',
+        parts_of_speech_abbreviation: 'n',
         phonetic: 'xiangjiao',
         plural_form: '',
-        sound_filename: '',
+        sound_filename: 'https://database.com/sound.mp3',
         sources: 'A book | www.mybook.com',
-        speaker_birthplace: '',
-        speaker_decade: '',
-        speaker_gender: '',
-        speaker_name: '',
+        speaker_birthplace: 'Whoville',
+        speaker_decade: '41-50',
+        speaker_gender: 'male',
+        speaker_name: 'John Smith',
+        ar_gloss_language: 'foo',
+        en_gloss_language: 'banana',
+        en_example_sentence: 'This is a banana',
+        vernacular_example_sentence: '我很喜歡吃香蕉',
       },
       {
         dialects: '',
@@ -266,6 +265,7 @@ describe('prepareEntriesForCsv', () => {
         speaker_decade: '',
         speaker_gender: '',
         speaker_name: '',
+        es_gloss_language: 'árbol',
       },
     ];
     expect(
