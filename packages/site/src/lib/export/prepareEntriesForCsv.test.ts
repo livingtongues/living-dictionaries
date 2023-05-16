@@ -193,7 +193,7 @@ describe('prepareEntriesForCsv', () => {
   const dictionary: IDictionary = {
     name: 'TestLang',
     id: 'test',
-    glossLanguages: ['ar', 'en', 'en'],
+    glossLanguages: ['ar', 'en', 'es'],
     alternateOrthographies: ['native_script_1', 'native_script_2'],
     entryCount: 0,
   };
@@ -206,7 +206,10 @@ describe('prepareEntriesForCsv', () => {
       gender: 'm',
     },
   ];
-  const semanticDomains: ISemanticDomain[] = [{ key: '2.1', name: 'Plant Test Domain' }];
+  const semanticDomains: ISemanticDomain[] = [
+    { key: '2.1', name: 'Body parts' },
+    { key: '2.2', name: 'Body functions' },
+  ];
   const partsOfSpeech: IPartOfSpeech[] = [{ enAbbrev: 'n', enName: 'noun' }];
 
   test('works', () => {
@@ -267,6 +270,7 @@ describe('prepareEntriesForCsv', () => {
         speaker_name: 'John Smith',
         ar_gloss_language: 'foo',
         en_gloss_language: 'banana',
+        es_gloss_language: '',
         en_example_sentence: 'This is a banana',
         vernacular_example_sentence: '我很喜歡吃香蕉',
         semantic_domain_1: 'Body parts',
@@ -293,6 +297,8 @@ describe('prepareEntriesForCsv', () => {
         speaker_decade: '',
         speaker_gender: '',
         speaker_name: '',
+        ar_gloss_language: '',
+        en_gloss_language: '',
         es_gloss_language: 'árbol',
         semantic_domain_1: '',
         semantic_domain_2: '',
