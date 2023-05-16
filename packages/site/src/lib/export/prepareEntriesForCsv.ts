@@ -44,7 +44,7 @@ export function assign_local_orthographies_to_headers(
 ): void {
   if (alternate_orthographies) {
     alternate_orthographies.forEach((lo, index) => {
-      headers[`local_orthographies_${index + 1}`] = lo;
+      headers[`local_orthography_${index + 1}`] = lo;
     });
   }
 }
@@ -100,6 +100,12 @@ export function prepareEntriesForCsv(
   for (const key in StandardEntryCSVFields) {
     headers[key] = StandardEntryCSVFields[key];
   }
+  // Begin dynamic headers
+  assign_local_orthographies_to_headers(headers, dictionary.alternateOrthographies);
+  assign_total_semantic_domains_from_first_sense_to_headers(headers, expanded_entries);
+  assign_gloss_languages_to_headers(headers, dictionary.glossLanguages);
+  assign_example_sentences_to_headers(headers, dictionary.glossLanguages, dictionary.name);
+
   const formattedEntries: EntryForCSV[] = expanded_entries.map((entry) => {
     const formattedEntry = {
       id: entry.id || '',
@@ -122,11 +128,15 @@ export function prepareEntriesForCsv(
       image_filename: '',
     } as EntryForCSV;
 
-    // Begin dynamic headers
-    assign_local_orthographies_to_headers(headers, dictionary.alternateOrthographies);
-    assign_total_semantic_domains_from_first_sense_to_headers(headers, expanded_entries);
-    assign_gloss_languages_to_headers(headers, dictionary.glossLanguages);
-    assign_example_sentences_to_headers(headers, dictionary.glossLanguages, dictionary.name);
+    if (dictionary.alternateOrthographies) {
+      const local_orthographies_of_entry = Object.keys(entry).filter((key) =>
+        key.startsWith('local_orthography')
+      );
+      local_orthographies_of_entry.forEach((local_orthography) => {
+        formattedEntry[headers[local_orthography]] = entry[local_orthography];
+      });
+    }
+
     return formattedEntry;
   });
   return [headers, ...formattedEntries];

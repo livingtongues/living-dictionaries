@@ -20,8 +20,8 @@ describe('assign_local_orthographies_to_headers', () => {
     const alternate_orthographies = ['native-1', 'native-2'];
     assign_local_orthographies_to_headers(headers, alternate_orthographies);
     expect(headers).toEqual({
-      local_orthographies_1: 'native-1',
-      local_orthographies_2: 'native-2',
+      local_orthography_1: 'native-1',
+      local_orthography_2: 'native-2',
     });
   });
   test("doesn't assign alternate_orthographies if empty array", () => {
@@ -151,11 +151,11 @@ describe('prepareEntriesForCsv', () => {
     speaker_decade: 'Speaker decade',
     speaker_gender: 'Speaker gender',
     image_filename: 'Image filename',
+    local_orthography_1: 'native-1',
+    local_orthography_2: 'native-2',
     // dynamic fields - you can use easier to read field names
     // glar: 'Arabic Gloss',
     // glen: 'English Gloss',
-    // lo1: 'native-1',
-    // lo2: 'native-2',
     // sd1: 'Semantic domain 1',
     // sd2: 'Semantic domain 2',
     // sd3: 'Semantic domain 3',
@@ -164,7 +164,7 @@ describe('prepareEntriesForCsv', () => {
     name: 'TestLang',
     id: 'test',
     glossLanguages: ['ar', 'en'],
-    alternateOrthographies: ['native-1', 'native-2'],
+    alternateOrthographies: ['native_script_1', 'native_script_2'],
     entryCount: 0,
   };
   const speakers: ISpeaker[] = [
@@ -182,7 +182,7 @@ describe('prepareEntriesForCsv', () => {
   test('works', () => {
     const expanded_entries: ExpandedEntry[] = [
       {
-        //local_orthography_1: 'foo',
+        local_orthography_2: 'foo',
         lexeme: 'foo',
         // 1) fill out a couple entries
       },
@@ -208,6 +208,7 @@ describe('prepareEntriesForCsv', () => {
         speaker_decade: '',
         speaker_gender: '',
         image_filename: '',
+        native_script_2: 'foo',
       },
     ];
     expect(
