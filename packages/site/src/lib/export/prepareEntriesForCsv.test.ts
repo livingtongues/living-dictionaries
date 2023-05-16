@@ -8,9 +8,11 @@ import type {
 import {
   prepareEntriesForCsv,
   assign_local_orthographies_to_headers,
+  count_maximum_semantic_domains_only_from_first_senses,
   assign_total_semantic_domains_from_first_sense_to_headers,
   assign_gloss_languages_to_headers,
   assign_example_sentences_to_headers,
+  find_part_of_speech,
   type EntryForCSV,
 } from './prepareEntriesForCsv';
 
@@ -38,9 +40,8 @@ describe('assign_local_orthographies_to_headers', () => {
   });
 });
 
-describe('assign_total_semantic_domains_from_first_sense_to_headers', () => {
-  test('assigns semantic domains if any exists', () => {
-    const headers = {} as EntryForCSV;
+describe('count_maximum_semantic_domains_only_from_first_senses', () => {
+  test('counts the maximum number of the semantic domains in the first sense of each entry', () => {
     const entries = [
       {
         lexeme: 'foo',
@@ -51,15 +52,9 @@ describe('assign_total_semantic_domains_from_first_sense_to_headers', () => {
         senses: [{ semantic_domains: ['2.1', '2.2', '2.3'] }],
       },
     ];
-    assign_total_semantic_domains_from_first_sense_to_headers(headers, entries);
-    expect(headers).toEqual({
-      semantic_domain_1: 'Semantic domain 1',
-      semantic_domain_2: 'Semantic domain 2',
-      semantic_domain_3: 'Semantic domain 3',
-    });
+    expect(count_maximum_semantic_domains_only_from_first_senses(entries)).toEqual(3);
   });
-  test("doesn't assign semantic domains if none", () => {
-    const headers = {} as EntryForCSV;
+  test("returns 0 if there's only empty arrays or null values in semantic_doains", () => {
     const entries = [
       {
         lexeme: 'foo',
@@ -69,7 +64,25 @@ describe('assign_total_semantic_domains_from_first_sense_to_headers', () => {
         lexeme: 'bar',
       },
     ];
-    assign_total_semantic_domains_from_first_sense_to_headers(headers, entries);
+    expect(count_maximum_semantic_domains_only_from_first_senses(entries)).toEqual(0);
+  });
+});
+
+describe('assign_total_semantic_domains_from_first_sense_to_headers', () => {
+  test('assigns semantic domains if any exists', () => {
+    const headers = {} as EntryForCSV;
+    const max_semantic_domain_number = 3;
+    assign_total_semantic_domains_from_first_sense_to_headers(headers, max_semantic_domain_number);
+    expect(headers).toEqual({
+      semantic_domain_1: 'Semantic domain 1',
+      semantic_domain_2: 'Semantic domain 2',
+      semantic_domain_3: 'Semantic domain 3',
+    });
+  });
+  test("doesn't assign semantic domains if none", () => {
+    const headers = {} as EntryForCSV;
+    const max_semantic_domain_number = 0;
+    assign_total_semantic_domains_from_first_sense_to_headers(headers, max_semantic_domain_number);
     expect(headers).toEqual({});
   });
 });
@@ -128,6 +141,20 @@ describe('assign_example_sentences_to_headers', () => {
     expect(headers).toEqual({
       vernacular_example_sentence: 'Example sentence in Boo',
     });
+  });
+});
+
+describe('find_part_of_speech', () => {
+  //TODO null test
+  test('should', () => {
+    const parts_of_speech = [
+      {
+        enAbbrev: 'n',
+        enName: 'noun',
+      },
+    ];
+    const part_of_speech_abbreviation = 'n';
+    expect(find_part_of_speech(parts_of_speech, part_of_speech_abbreviation)).toEqual('noun');
   });
 });
 
