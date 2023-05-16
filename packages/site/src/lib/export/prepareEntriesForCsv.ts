@@ -7,6 +7,7 @@ import type {
 } from '@living-dictionaries/types';
 import { stripHTMLTags } from './stripHTMLTags';
 import { glossingLanguages } from '$lib/glosses/glossing-languages';
+import { semanticDomains } from '$lib';
 
 enum StandardEntryCSVFields {
   id = 'Entry Id',
@@ -157,6 +158,18 @@ export function prepareEntriesForCsv(
       local_orthographies_of_entry.forEach((local_orthography) => {
         formattedEntry[headers[local_orthography]] = entry[local_orthography];
       });
+    }
+    //Extract a function
+    for (let index = 0; index < max_semantic_domain_number; index++) {
+      formattedEntry[`semantic_domain_${index + 1}`] = '';
+      if (entry.senses?.[0].semantic_domains) {
+        const matching_domain = semanticDomains.find(
+          (sd) => sd.key === entry.senses?.[0].semantic_domains[index]
+        );
+        if (matching_domain) {
+          formattedEntry[`semantic_domain_${index + 1}`] = matching_domain.name;
+        }
+      }
     }
 
     return formattedEntry;
