@@ -9,7 +9,7 @@ import {
   prepareEntriesForCsv,
   assign_local_orthographies_to_headers,
   count_maximum_semantic_domains_only_from_first_senses,
-  assign_total_semantic_domains_from_first_sense_to_headers,
+  assign_semantic_domains_to_headers,
   assign_gloss_languages_to_headers,
   assign_example_sentences_to_headers,
   find_part_of_speech,
@@ -68,11 +68,11 @@ describe('count_maximum_semantic_domains_only_from_first_senses', () => {
   });
 });
 
-describe('assign_total_semantic_domains_from_first_sense_to_headers', () => {
+describe('assign_semantic_domains_to_headers', () => {
   test('assigns semantic domains if any exists', () => {
     const headers = {} as EntryForCSV;
     const max_semantic_domain_number = 3;
-    assign_total_semantic_domains_from_first_sense_to_headers(headers, max_semantic_domain_number);
+    assign_semantic_domains_to_headers(headers, max_semantic_domain_number);
     expect(headers).toEqual({
       semantic_domain_1: 'Semantic domain 1',
       semantic_domain_2: 'Semantic domain 2',
@@ -82,7 +82,7 @@ describe('assign_total_semantic_domains_from_first_sense_to_headers', () => {
   test("doesn't assign semantic domains if none", () => {
     const headers = {} as EntryForCSV;
     const max_semantic_domain_number = 0;
-    assign_total_semantic_domains_from_first_sense_to_headers(headers, max_semantic_domain_number);
+    assign_semantic_domains_to_headers(headers, max_semantic_domain_number);
     expect(headers).toEqual({});
   });
 });
