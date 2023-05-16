@@ -187,7 +187,6 @@ describe('prepareEntriesForCsv', () => {
     en_gloss_language: 'English Gloss',
     semantic_domain_1: 'Semantic domain 1',
     semantic_domain_2: 'Semantic domain 2',
-    semantic_domain_3: 'Semantic domain 3',
     vernacular_example_sentence: 'Example sentence in TestLang',
   };
 
@@ -220,7 +219,7 @@ describe('prepareEntriesForCsv', () => {
           {
             glosses: { ar: 'foo', en: 'banana' },
             parts_of_speech: ['n', 'adj'],
-            semantic_domains: ['2.1', '2.2', '2.3'],
+            semantic_domains: ['2.1', '2.2'],
             example_sentences: [{ en: 'This is a banana', vn: '我很喜歡吃香蕉' }],
             photo_files: [
               { fb_storage_path: 'https://database.com/image.png', uid_added_by: 'Diego' },
@@ -270,6 +269,8 @@ describe('prepareEntriesForCsv', () => {
         en_gloss_language: 'banana',
         en_example_sentence: 'This is a banana',
         vernacular_example_sentence: '我很喜歡吃香蕉',
+        semantic_domain_1: 'Body parts',
+        semantic_domain_2: 'Body functions',
       },
       {
         dialects: '',
@@ -293,6 +294,8 @@ describe('prepareEntriesForCsv', () => {
         speaker_gender: '',
         speaker_name: '',
         es_gloss_language: 'árbol',
+        semantic_domain_1: '',
+        semantic_domain_2: '',
       },
     ];
     expect(
