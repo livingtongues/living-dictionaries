@@ -20,9 +20,9 @@ import {
   assign_local_orthographies_to_formatted_entry,
   assign_semantic_domains_to_formatted_entry,
   assign_gloss_languages_to_formatted_entry,
+  assign_example_sentences_to_formatted_entry,
   type EntryForCSV,
 } from './prepareEntriesForCsv';
-import { semanticDomains } from '$lib';
 
 //headers tests
 describe('assign_local_orthographies_to_headers', () => {
@@ -287,6 +287,37 @@ describe('assign_gloss_languages_to_formatted_entry', () => {
       es_gloss_language: 'oso',
     };
     assign_gloss_languages_to_formatted_entry({ formatted_entry, entry, gloss_languages });
+    expect(formatted_entry).toEqual(expected);
+  });
+});
+
+describe('assign_example_sentences_to_formatted_entry', () => {
+  test('assigns example sentences values to formatted entry if value exist or assigns an empty string if does not', () => {
+    const formatted_entry: EntryForCSV = {};
+    const entry: ExpandedEntry = {
+      lexeme: 'Boo',
+      senses: [{ example_sentences: [{ es: 'el oso es enorme' }] }],
+    };
+    const gloss_languages = ['en', 'es'];
+    const expected = {
+      en_example_sentence: '',
+      es_example_sentence: 'el oso es enorme',
+      vernacular_example_sentence: '',
+    };
+    assign_example_sentences_to_formatted_entry({ formatted_entry, entry, gloss_languages });
+    expect(formatted_entry).toEqual(expected);
+  });
+  test('assigns vernacular example sentence value to formatted entry if any gloss languages exist', () => {
+    const formatted_entry: EntryForCSV = {};
+    const entry: ExpandedEntry = {
+      lexeme: 'min',
+      senses: [{ example_sentences: [{ vn: 'native example' }] }],
+    };
+    const gloss_languages = [];
+    const expected = {
+      vernacular_example_sentence: 'native example',
+    };
+    assign_example_sentences_to_formatted_entry({ formatted_entry, entry, gloss_languages });
     expect(formatted_entry).toEqual(expected);
   });
 });
