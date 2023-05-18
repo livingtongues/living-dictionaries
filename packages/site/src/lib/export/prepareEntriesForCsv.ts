@@ -102,10 +102,11 @@ export function prepareEntriesForCsv(
     } as EntryForCSV;
 
     //Begin dynamic values
-    // Dictionary specific
-    if (dictionaries_with_variant.includes(dictionary.id)) {
-      formatted_entry.variant = entry.variant || '';
-    }
+    const speaker = get_first_speaker_from_first_sound_file(entry, speakers);
+    formatted_entry.speaker_name = speaker?.displayName || '';
+    formatted_entry.speaker_birthplace = speaker?.birthplace || '';
+    formatted_entry.speaker_decade = display_speaker_age_range(speaker?.decade);
+    formatted_entry.speaker_gender = display_speaker_gender(speaker?.gender);
 
     assign_local_orthographies_to_formatted_entry({
       formatted_entry,
@@ -133,11 +134,10 @@ export function prepareEntriesForCsv(
       gloss_languages: dictionary.glossLanguages,
     });
 
-    const speaker = get_first_speaker_from_first_sound_file(entry, speakers);
-    formatted_entry.speaker_name = speaker?.displayName || '';
-    formatted_entry.speaker_birthplace = speaker?.birthplace || '';
-    formatted_entry.speaker_decade = display_speaker_age_range(speaker?.decade);
-    formatted_entry.speaker_gender = display_speaker_gender(speaker?.gender);
+    // Dictionary specific
+    if (dictionaries_with_variant.includes(dictionary.id)) {
+      formatted_entry.variant = entry.variant || '';
+    }
 
     return formatted_entry;
   });
