@@ -18,8 +18,10 @@ import {
   display_speaker_gender,
   display_speaker_age_range,
   assign_local_orthographies_to_formatted_entry,
+  assign_semantic_domains_to_formatted_entry,
   type EntryForCSV,
 } from './prepareEntriesForCsv';
+import { semanticDomains } from '$lib';
 
 //headers tests
 describe('assign_local_orthographies_to_headers', () => {
@@ -239,6 +241,33 @@ describe('assign_local_orthographies_to_formatted_entry', () => {
       headers,
       entry,
       alternate_orthographies,
+    });
+    expect(formatted_entry).toEqual(expected);
+  });
+});
+describe('assign_semantic_domains_to_formatted_entry', () => {
+  test('assigns semantic domain to formatted entry if value exist or assigns an empty string if does not', () => {
+    const formatted_entry: EntryForCSV = {};
+    const entry: ExpandedEntry = {
+      lexeme: 'baz',
+      senses: [{ semantic_domains: ['1.6', '1.7'] }],
+    };
+    const max_semantic_domain_number = 3;
+    const global_semantic_domains: ISemanticDomain[] = [
+      { key: '1.5', name: 'Animals' },
+      { key: '1.6', name: 'Colors' },
+      { key: '1.7', name: 'Birds' },
+    ];
+    const expected = {
+      semantic_domain_1: 'Colors',
+      semantic_domain_2: 'Birds',
+      semantic_domain_3: '',
+    };
+    assign_semantic_domains_to_formatted_entry({
+      formatted_entry,
+      entry,
+      max_semantic_domain_number,
+      global_semantic_domains,
     });
     expect(formatted_entry).toEqual(expected);
   });
