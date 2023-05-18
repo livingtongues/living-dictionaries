@@ -17,9 +17,11 @@ import {
   get_first_speaker_from_first_sound_file,
   display_speaker_gender,
   display_speaker_age_range,
+  assign_local_orthographies_to_formatted_entry,
   type EntryForCSV,
 } from './prepareEntriesForCsv';
 
+//headers tests
 describe('assign_local_orthographies_to_headers', () => {
   test('assigns alternate_orthographies if any exists', () => {
     const headers = {} as EntryForCSV;
@@ -212,6 +214,36 @@ describe('display_speaker_age_range', () => {
   });
 });
 
+//formattedEntry tests
+describe('assign_local_orthographies_to_formatted_entry', () => {
+  test('assigns local orthography to formatted entry if value exist or assigns an empty string if does not', () => {
+    const formatted_entry: EntryForCSV = {};
+    const headers: EntryForCSV = {
+      local_orthography_1: 'script_1',
+      local_orthography_2: 'script_2',
+      local_orthography_3: 'script_3',
+    };
+    const entry: ExpandedEntry = {
+      lexeme: 'foo',
+      local_orthography_3: 'example-3',
+      local_orthography_2: 'example-2',
+    };
+    const alternate_orthographies = ['script_1', 'script_2', 'scriprt_3'];
+    const expected = {
+      script_1: '',
+      script_2: 'example-2',
+      script_3: 'example-3',
+    };
+    assign_local_orthographies_to_formatted_entry({
+      formatted_entry,
+      headers,
+      entry,
+      alternate_orthographies,
+    });
+    expect(formatted_entry).toEqual(expected);
+  });
+});
+
 describe('prepareEntriesForCsv', () => {
   const headerRow = {
     id: 'Entry Id',
@@ -311,6 +343,7 @@ describe('prepareEntriesForCsv', () => {
         interlinearization: '',
         lexeme: 'xiangjiao',
         morphology: '',
+        native_script_1: '',
         native_script_2: 'کیلا',
         notes: 'This is an example of a note, here we can write whatever we want.',
         noun_class: '',

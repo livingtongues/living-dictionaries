@@ -145,6 +145,25 @@ export function display_speaker_age_range(decade: number) {
       return '';
   }
 }
+type LocalOrthographyAllocator = {
+  formatted_entry: EntryForCSV;
+  headers: EntryForCSV;
+  entry: ExpandedEntry;
+  alternate_orthographies: string[];
+};
+export function assign_local_orthographies_to_formatted_entry(
+  allocator: LocalOrthographyAllocator
+): void {
+  const { formatted_entry, headers, entry, alternate_orthographies } = allocator;
+  if (alternate_orthographies) {
+    const local_orthographies_of_headers = Object.keys(headers).filter((key) =>
+      key.startsWith('local_orthography')
+    );
+    local_orthographies_of_headers.forEach((header) => {
+      formatted_entry[headers[header]] = entry[header] || '';
+    });
+  }
+}
 
 const dictionaries_with_variant = ['babanki', 'torwali'];
 
@@ -198,21 +217,19 @@ export function prepareEntriesForCsv(
       formattedEntry.variant = entry.variant || '';
     }
 
+    assign_local_orthographies_to_formatted_entry({
+      formatted_entry: formattedEntry,
+      headers,
+      entry,
+      alternate_orthographies: dictionary.alternateOrthographies,
+    });
+
     const speaker = get_first_speaker_from_first_sound_file(entry, speakers);
     formattedEntry.speaker_name = speaker?.displayName || '';
     formattedEntry.speaker_birthplace = speaker?.birthplace || '';
     formattedEntry.speaker_decade = display_speaker_age_range(speaker?.decade);
     formattedEntry.speaker_gender = display_speaker_gender(speaker?.gender);
 
-    //Extract a function
-    if (dictionary.alternateOrthographies) {
-      const local_orthographies_of_entry = Object.keys(entry).filter((key) =>
-        key.startsWith('local_orthography')
-      );
-      local_orthographies_of_entry.forEach((local_orthography) => {
-        formattedEntry[headers[local_orthography]] = entry[local_orthography];
-      });
-    }
     //Extract a function
     for (let index = 0; index < max_semantic_domain_number; index++) {
       formattedEntry[`semantic_domain_${index + 1}`] = '';
