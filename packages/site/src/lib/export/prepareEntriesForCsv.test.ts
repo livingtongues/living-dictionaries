@@ -149,16 +149,20 @@ describe('assign_example_sentences_to_headers', () => {
 });
 
 describe('find_part_of_speech', () => {
-  //TODO null test
-  test('should', () => {
-    const parts_of_speech = [
-      {
-        enAbbrev: 'n',
-        enName: 'noun',
-      },
-    ];
+  const parts_of_speech = [
+    {
+      enAbbrev: 'n',
+      enName: 'noun',
+    },
+  ];
+  test('finds readable part of speech name', () => {
     const part_of_speech_abbreviation = 'n';
     expect(find_part_of_speech(parts_of_speech, part_of_speech_abbreviation)).toEqual('noun');
+  });
+
+  test('return empty string if abbreviation does not exist', () => {
+    const part_of_speech_abbreviation = null;
+    expect(find_part_of_speech(parts_of_speech, part_of_speech_abbreviation)).toEqual('');
   });
 });
 
