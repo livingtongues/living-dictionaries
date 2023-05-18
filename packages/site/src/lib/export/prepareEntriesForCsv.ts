@@ -35,7 +35,7 @@ type StandardEntryForCSV = {
 
 export interface EntryForCSV extends StandardEntryForCSV {
   vernacular_example_sentence?: string;
-  va?: string; // optional for Babanki & Torwali
+  variant?: string; // optional for Babanki & Torwali
 }
 
 export function assign_local_orthographies_to_headers(
@@ -146,6 +146,8 @@ export function display_speaker_age_range(decade: number) {
   }
 }
 
+const dictionaries_with_variant = ['babanki', 'torwali'];
+
 export function prepareEntriesForCsv(
   expanded_entries: ExpandedEntry[],
   dictionary: IDictionary,
@@ -164,6 +166,11 @@ export function prepareEntriesForCsv(
   assign_semantic_domains_to_headers(headers, max_semantic_domain_number);
   assign_gloss_languages_to_headers(headers, dictionary.glossLanguages);
   assign_example_sentences_to_headers(headers, dictionary.glossLanguages, dictionary.name);
+
+  // Dictionary specific
+  if (dictionaries_with_variant.includes(dictionary.id)) {
+    headers['variant'] = 'Variant';
+  }
 
   const formattedEntries: EntryForCSV[] = expanded_entries.map((entry) => {
     const formattedEntry = {
@@ -185,6 +192,11 @@ export function prepareEntriesForCsv(
       image_filename: entry.senses?.[0].photo_files?.[0].fb_storage_path || '',
       sound_filename: entry.sound_files?.[0].fb_storage_path || '',
     } as EntryForCSV;
+
+    // Dictionary specific
+    if (dictionaries_with_variant.includes(dictionary.id)) {
+      formattedEntry.variant = entry.variant || '';
+    }
 
     const speaker = get_first_speaker_from_first_sound_file(entry, speakers);
     formattedEntry.speaker_name = speaker?.displayName || '';
