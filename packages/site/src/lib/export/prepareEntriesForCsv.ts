@@ -145,14 +145,14 @@ export function display_speaker_age_range(decade: number) {
       return '';
   }
 }
-type LocalOrthographyAllocator = {
+type LocalOrthographiesAllocator = {
   formatted_entry: EntryForCSV;
   headers: EntryForCSV;
   entry: ExpandedEntry;
   alternate_orthographies: string[];
 };
 export function assign_local_orthographies_to_formatted_entry(
-  allocator: LocalOrthographyAllocator
+  allocator: LocalOrthographiesAllocator
 ): void {
   const { formatted_entry, headers, entry, alternate_orthographies } = allocator;
   if (alternate_orthographies) {
@@ -162,6 +162,29 @@ export function assign_local_orthographies_to_formatted_entry(
     local_orthographies_of_headers.forEach((header) => {
       formatted_entry[headers[header]] = entry[header] || '';
     });
+  }
+}
+
+type SemanticDomainsAllocator = {
+  formatted_entry: EntryForCSV;
+  entry: ExpandedEntry;
+  max_semantic_domain_number: number;
+  global_semantic_domains: ISemanticDomain[];
+};
+export function assign_semantic_domains_to_formatted_entry(
+  allocator: SemanticDomainsAllocator
+): void {
+  const { formatted_entry, entry, max_semantic_domain_number, global_semantic_domains } = allocator;
+  for (let index = 0; index < max_semantic_domain_number; index++) {
+    formatted_entry[`semantic_domain_${index + 1}`] = '';
+    if (entry.senses?.[0].semantic_domains) {
+      const matching_domain = global_semantic_domains.find(
+        (sd) => sd.key === entry.senses?.[0].semantic_domains[index]
+      );
+      if (matching_domain) {
+        formatted_entry[`semantic_domain_${index + 1}`] = matching_domain.name;
+      }
+    }
   }
 }
 
@@ -192,7 +215,7 @@ export function prepareEntriesForCsv(
   }
 
   const formattedEntries: EntryForCSV[] = expanded_entries.map((entry) => {
-    const formattedEntry = {
+    const formatted_entry = {
       id: entry.id || '',
       lexeme: entry.lexeme || '',
       phonetic: entry.phonetic || '',
@@ -214,46 +237,41 @@ export function prepareEntriesForCsv(
 
     // Dictionary specific
     if (dictionaries_with_variant.includes(dictionary.id)) {
-      formattedEntry.variant = entry.variant || '';
+      formatted_entry.variant = entry.variant || '';
     }
 
     assign_local_orthographies_to_formatted_entry({
-      formatted_entry: formattedEntry,
+      formatted_entry,
       headers,
       entry,
       alternate_orthographies: dictionary.alternateOrthographies,
     });
 
+    assign_semantic_domains_to_formatted_entry({
+      formatted_entry,
+      entry,
+      max_semantic_domain_number,
+      global_semantic_domains,
+    });
+
     const speaker = get_first_speaker_from_first_sound_file(entry, speakers);
-    formattedEntry.speaker_name = speaker?.displayName || '';
-    formattedEntry.speaker_birthplace = speaker?.birthplace || '';
-    formattedEntry.speaker_decade = display_speaker_age_range(speaker?.decade);
-    formattedEntry.speaker_gender = display_speaker_gender(speaker?.gender);
+    formatted_entry.speaker_name = speaker?.displayName || '';
+    formatted_entry.speaker_birthplace = speaker?.birthplace || '';
+    formatted_entry.speaker_decade = display_speaker_age_range(speaker?.decade);
+    formatted_entry.speaker_gender = display_speaker_gender(speaker?.gender);
 
     //Extract a function
-    for (let index = 0; index < max_semantic_domain_number; index++) {
-      formattedEntry[`semantic_domain_${index + 1}`] = '';
-      if (entry.senses?.[0].semantic_domains) {
-        const matching_domain = global_semantic_domains.find(
-          (sd) => sd.key === entry.senses?.[0].semantic_domains[index]
-        );
-        if (matching_domain) {
-          formattedEntry[`semantic_domain_${index + 1}`] = matching_domain.name;
-        }
-      }
-    }
-    //Extract a function
     dictionary.glossLanguages.forEach((bcp) => {
-      formattedEntry[`${bcp}_gloss_language`] = entry.senses?.[0].glosses[bcp] || '';
+      formatted_entry[`${bcp}_gloss_language`] = entry.senses?.[0].glosses[bcp] || '';
     });
     //Extract a function
-    formattedEntry.vernacular_example_sentence = entry.senses?.[0].example_sentences?.[0].vn || '';
+    formatted_entry.vernacular_example_sentence = entry.senses?.[0].example_sentences?.[0].vn || '';
     dictionary.glossLanguages.forEach((bcp) => {
-      formattedEntry[`${bcp}_example_sentence`] =
+      formatted_entry[`${bcp}_example_sentence`] =
         entry.senses?.[0].example_sentences?.[0][bcp] || '';
     });
 
-    return formattedEntry;
+    return formatted_entry;
   });
   return [headers, ...formattedEntries];
 }
