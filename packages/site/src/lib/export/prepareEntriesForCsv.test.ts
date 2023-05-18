@@ -4,6 +4,7 @@ import type {
   ISpeaker,
   ISemanticDomain,
   IPartOfSpeech,
+  IEntry,
 } from '@living-dictionaries/types';
 import {
   prepareEntriesForCsv,
@@ -13,6 +14,9 @@ import {
   assign_gloss_languages_to_headers,
   assign_example_sentences_to_headers,
   find_part_of_speech,
+  get_first_speaker_from_first_sound_file,
+  display_speaker_gender,
+  display_speaker_age_range,
   type EntryForCSV,
 } from './prepareEntriesForCsv';
 
@@ -158,6 +162,52 @@ describe('find_part_of_speech', () => {
   });
 });
 
+describe('get_first_speaker_from_first_sound_file', () => {
+  test('gets speaker', () => {
+    const speakers: ISpeaker[] = [
+      {
+        displayName: 'Arthur Morgan',
+        id: 'rdr2',
+        birthplace: 'New Hanover',
+        decade: 3,
+        gender: 'm',
+      },
+    ];
+    const entry: IEntry = {
+      lexeme: 'zoo',
+      sound_files: [{ fb_storage_path: 'https://database.com/example.mp3', speaker_ids: ['rdr2'] }],
+    };
+    expect(get_first_speaker_from_first_sound_file(entry, speakers)).toEqual(speakers[0]);
+  });
+  test("gets undefined if there's no speaker", () => {
+    const speakers: ISpeaker[] = [];
+    const entry: IEntry = {
+      lexeme: 'zoo',
+      sound_files: [{ fb_storage_path: 'https://database.com/example.mp3', speaker_ids: ['rdr2'] }],
+    };
+    expect(get_first_speaker_from_first_sound_file(entry, speakers)).toEqual(undefined);
+  });
+});
+
+describe('display_speaker_gender', () => {
+  test('displays readable speaker gender', () => {
+    expect(display_speaker_gender('m')).toEqual('male');
+  });
+  test('displays empty string if speaker gender it is an empty string or undefined', () => {
+    expect(display_speaker_gender('')).toEqual('');
+    expect(display_speaker_gender(undefined)).toEqual('');
+  });
+});
+
+describe('display_speaker_age_range', () => {
+  test('displays readable speaker age range', () => {
+    expect(display_speaker_age_range(3)).toEqual('31-40');
+  });
+  test('displays empty string if speaker age range is undefined', () => {
+    expect(display_speaker_age_range(undefined)).toEqual('');
+  });
+});
+
 describe('prepareEntriesForCsv', () => {
   const headerRow = {
     id: 'Entry Id',
@@ -253,7 +303,7 @@ describe('prepareEntriesForCsv', () => {
       {
         dialects: 'dialect x',
         id: '12345qwerty',
-        image_filename: '',
+        image_filename: 'https://database.com/image.png',
         interlinearization: '',
         lexeme: 'xiangjiao',
         morphology: '',
