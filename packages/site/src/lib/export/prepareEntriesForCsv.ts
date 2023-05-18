@@ -188,6 +188,18 @@ export function assign_semantic_domains_to_formatted_entry(
   }
 }
 
+type GlossesAllocator = {
+  formatted_entry: EntryForCSV;
+  entry: ExpandedEntry;
+  gloss_languages: string[];
+};
+export function assign_gloss_languages_to_formatted_entry(allocator: GlossesAllocator): void {
+  const { formatted_entry, entry, gloss_languages } = allocator;
+  gloss_languages.forEach((bcp) => {
+    formatted_entry[`${bcp}_gloss_language`] = entry.senses?.[0].glosses[bcp] || '';
+  });
+}
+
 const dictionaries_with_variant = ['babanki', 'torwali'];
 
 export function prepareEntriesForCsv(
@@ -235,6 +247,7 @@ export function prepareEntriesForCsv(
       sound_filename: entry.sound_files?.[0].fb_storage_path || '',
     } as EntryForCSV;
 
+    //Begin dynamic values
     // Dictionary specific
     if (dictionaries_with_variant.includes(dictionary.id)) {
       formatted_entry.variant = entry.variant || '';
@@ -254,16 +267,18 @@ export function prepareEntriesForCsv(
       global_semantic_domains,
     });
 
+    assign_gloss_languages_to_formatted_entry({
+      formatted_entry,
+      entry,
+      gloss_languages: dictionary.glossLanguages,
+    });
+
     const speaker = get_first_speaker_from_first_sound_file(entry, speakers);
     formatted_entry.speaker_name = speaker?.displayName || '';
     formatted_entry.speaker_birthplace = speaker?.birthplace || '';
     formatted_entry.speaker_decade = display_speaker_age_range(speaker?.decade);
     formatted_entry.speaker_gender = display_speaker_gender(speaker?.gender);
 
-    //Extract a function
-    dictionary.glossLanguages.forEach((bcp) => {
-      formatted_entry[`${bcp}_gloss_language`] = entry.senses?.[0].glosses[bcp] || '';
-    });
     //Extract a function
     formatted_entry.vernacular_example_sentence = entry.senses?.[0].example_sentences?.[0].vn || '';
     dictionary.glossLanguages.forEach((bcp) => {

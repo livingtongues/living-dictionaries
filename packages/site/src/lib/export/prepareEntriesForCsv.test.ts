@@ -19,6 +19,7 @@ import {
   display_speaker_age_range,
   assign_local_orthographies_to_formatted_entry,
   assign_semantic_domains_to_formatted_entry,
+  assign_gloss_languages_to_formatted_entry,
   type EntryForCSV,
 } from './prepareEntriesForCsv';
 import { semanticDomains } from '$lib';
@@ -269,6 +270,23 @@ describe('assign_semantic_domains_to_formatted_entry', () => {
       max_semantic_domain_number,
       global_semantic_domains,
     });
+    expect(formatted_entry).toEqual(expected);
+  });
+});
+
+describe('assign_gloss_languages_to_formatted_entry', () => {
+  test('assigns gloss languages values to formatted entry if value exist or assigns an empty string if does not', () => {
+    const formatted_entry: EntryForCSV = {};
+    const entry: ExpandedEntry = {
+      lexeme: 'Boo',
+      senses: [{ glosses: { es: 'oso' } }],
+    };
+    const gloss_languages = ['en', 'es'];
+    const expected = {
+      en_gloss_language: '',
+      es_gloss_language: 'oso',
+    };
+    assign_gloss_languages_to_formatted_entry({ formatted_entry, entry, gloss_languages });
     expect(formatted_entry).toEqual(expected);
   });
 });
