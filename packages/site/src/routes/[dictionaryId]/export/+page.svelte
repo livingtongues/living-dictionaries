@@ -29,7 +29,7 @@
     const converted_to_current_shaped_entries = database_entries.map(convert_entry_to_current_shape);
     const expanded_entries = converted_to_current_shaped_entries.map(expand_entry);
 
-    const speakers = await fetchSpeakers(expanded_entries);
+    const speakers = await fetchSpeakers(database_entries);
     
     entriesWithImages = prepareEntriesForCsv(
       expanded_entries.filter(entry => entry.senses[0].photo_files?.[0]?.fb_storage_path),
