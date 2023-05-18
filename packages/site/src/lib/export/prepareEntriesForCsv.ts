@@ -21,12 +21,12 @@ enum StandardEntryCSVFields {
   sources = 'Source(s)',
   parts_of_speech_abbreviation = 'Part of Speech abbreviation',
   parts_of_speech = 'Part of Speech',
+  image_filename = 'Image filename',
   sound_filename = 'Audio filename',
   speaker_name = 'Speaker name',
   speaker_birthplace = 'Speaker birthplace',
   speaker_decade = 'Speaker decade',
   speaker_gender = 'Speaker gender',
-  image_filename = 'Image filename',
 }
 type EntryForCSVKeys = keyof typeof StandardEntryCSVFields;
 type StandardEntryForCSV = {
@@ -105,6 +105,47 @@ export function find_part_of_speech(
   return part_of_speech ? part_of_speech.enName : '';
 }
 
+export function get_first_speaker_from_first_sound_file(
+  entry: ExpandedEntry,
+  speakers: ISpeaker[]
+): ISpeaker {
+  return speakers.find((speaker) => speaker.id === entry.sound_files?.[0].speaker_ids?.[0]);
+}
+
+export function display_speaker_gender(speaker_gender: string): string {
+  if (speaker_gender) {
+    return speaker_gender === 'f' ? 'female' : 'male';
+  }
+  return '';
+}
+
+export function display_speaker_age_range(decade: number) {
+  switch (decade) {
+    case 0:
+      return '0-10';
+    case 1:
+      return '11-20';
+    case 2:
+      return '21-30';
+    case 3:
+      return '31-40';
+    case 4:
+      return '41-50';
+    case 5:
+      return '51-60';
+    case 6:
+      return '61-70';
+    case 7:
+      return '71-80';
+    case 8:
+      return '81-90';
+    case 9:
+      return '91-100';
+    default:
+      return '';
+  }
+}
+
 export function prepareEntriesForCsv(
   expanded_entries: ExpandedEntry[],
   dictionary: IDictionary,
@@ -141,13 +182,15 @@ export function prepareEntriesForCsv(
         parts_of_speech,
         entry.senses?.[0]?.parts_of_speech?.[0]
       ),
-      sound_filename: '',
-      speaker_name: '',
-      speaker_birthplace: '',
-      speaker_decade: '',
-      speaker_gender: '',
-      image_filename: '',
+      image_filename: entry.senses?.[0].photo_files?.[0].fb_storage_path || '',
+      sound_filename: entry.sound_files?.[0].fb_storage_path || '',
     } as EntryForCSV;
+
+    const speaker = get_first_speaker_from_first_sound_file(entry, speakers);
+    formattedEntry.speaker_name = speaker?.displayName || '';
+    formattedEntry.speaker_birthplace = speaker?.birthplace || '';
+    formattedEntry.speaker_decade = display_speaker_age_range(speaker?.decade);
+    formattedEntry.speaker_gender = display_speaker_gender(speaker?.gender);
 
     //Extract a function
     if (dictionary.alternateOrthographies) {
