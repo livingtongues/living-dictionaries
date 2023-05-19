@@ -162,9 +162,9 @@ describe('prepareEntriesForCsv', () => {
         semantic_domain_2: '',
       },
     ];
-    expect(
-      prepareEntriesForCsv(expanded_entries, dictionary, speakers, semanticDomains, partsOfSpeech)
-    ).toEqual(expected);
+    expect(prepareEntriesForCsv(expanded_entries, dictionary, speakers, partsOfSpeech)).toEqual(
+      expected
+    );
   });
   test('super simple example to show variant column', () => {
     const dictionary: IDictionary = {
@@ -182,9 +182,7 @@ describe('prepareEntriesForCsv', () => {
         lexeme: 'baz',
       },
     ];
-    expect(
-      prepareEntriesForCsv(expanded_entries, dictionary, speakers, semanticDomains, partsOfSpeech)
-    ).toEqual([
+    expect(prepareEntriesForCsv(expanded_entries, dictionary, speakers, partsOfSpeech)).toEqual([
       {
         dialects: 'Dialects',
         id: 'Entry Id',
