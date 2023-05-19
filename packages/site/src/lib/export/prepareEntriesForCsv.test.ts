@@ -6,7 +6,6 @@ import type {
   IPartOfSpeech,
 } from '@living-dictionaries/types';
 import { prepareEntriesForCsv } from './prepareEntriesForCsv';
-import { variants } from '$lib/components/entry/EditField.variants';
 
 describe('prepareEntriesForCsv', () => {
   const headerRow = {
@@ -72,7 +71,7 @@ describe('prepareEntriesForCsv', () => {
         senses: [
           {
             glosses: { ar: 'foo', en: 'banana' },
-            parts_of_speech: ['n', 'adj'],
+            parts_of_speech: ['noun', 'adjective'],
             semantic_domains: ['Body parts', 'Body functions'],
             example_sentences: [{ en: 'This is a banana', vn: '我很喜歡吃香蕉' }],
             photo_files: [

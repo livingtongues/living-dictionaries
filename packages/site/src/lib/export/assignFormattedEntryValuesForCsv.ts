@@ -6,14 +6,14 @@ import type {
 } from '@living-dictionaries/types';
 import type { EntryForCSV } from './prepareEntriesForCsv';
 
-export function find_part_of_speech(
-  parts_of_speech: IPartOfSpeech[],
-  part_of_speech_abbreviation: string
+export function find_part_of_speech_abbreviation(
+  global_parts_of_speech: IPartOfSpeech[],
+  part_of_speech: string
 ): string {
-  const part_of_speech = parts_of_speech.find(
-    (part_of_speech) => part_of_speech.enAbbrev === part_of_speech_abbreviation
+  const part_of_speech_abbreviation = global_parts_of_speech.find(
+    (pos) => pos.enName === part_of_speech
   );
-  return part_of_speech ? part_of_speech.enName : '';
+  return part_of_speech_abbreviation ? part_of_speech_abbreviation.enAbbrev : '';
 }
 
 export function get_first_speaker_from_first_sound_file(
