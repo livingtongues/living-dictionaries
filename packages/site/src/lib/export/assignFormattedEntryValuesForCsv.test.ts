@@ -109,14 +109,9 @@ describe('assign_semantic_domains_to_formatted_entry', () => {
     const formatted_entry: EntryForCSV = {};
     const entry: ExpandedEntry = {
       lexeme: 'baz',
-      senses: [{ semantic_domains: ['1.6', '1.7'] }],
+      senses: [{ semantic_domains: ['Colors', 'Birds'] }],
     };
     const max_semantic_domain_number = 3;
-    const global_semantic_domains: ISemanticDomain[] = [
-      { key: '1.5', name: 'Animals' },
-      { key: '1.6', name: 'Colors' },
-      { key: '1.7', name: 'Birds' },
-    ];
     const expected = {
       semantic_domain_1: 'Colors',
       semantic_domain_2: 'Birds',
@@ -126,7 +121,6 @@ describe('assign_semantic_domains_to_formatted_entry', () => {
       formatted_entry,
       entry,
       max_semantic_domain_number,
-      global_semantic_domains,
     });
     expect(formatted_entry).toEqual(expected);
   });

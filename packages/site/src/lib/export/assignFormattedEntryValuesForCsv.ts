@@ -80,22 +80,14 @@ type SemanticDomainsAllocator = {
   formatted_entry: EntryForCSV;
   entry: ExpandedEntry;
   max_semantic_domain_number: number;
-  global_semantic_domains: ISemanticDomain[];
 };
 export function assign_semantic_domains_to_formatted_entry(
   allocator: SemanticDomainsAllocator
 ): void {
-  const { formatted_entry, entry, max_semantic_domain_number, global_semantic_domains } = allocator;
+  const { formatted_entry, entry, max_semantic_domain_number } = allocator;
   for (let index = 0; index < max_semantic_domain_number; index++) {
-    formatted_entry[`semantic_domain_${index + 1}`] = '';
-    if (entry.senses?.[0].semantic_domains) {
-      const matching_domain = global_semantic_domains.find(
-        (sd) => sd.key === entry.senses?.[0].semantic_domains[index]
-      );
-      if (matching_domain) {
-        formatted_entry[`semantic_domain_${index + 1}`] = matching_domain.name;
-      }
-    }
+    formatted_entry[`semantic_domain_${index + 1}`] =
+      entry.senses?.[0].semantic_domains?.[index] || '';
   }
 }
 
