@@ -73,7 +73,7 @@ describe('prepareEntriesForCsv', () => {
           {
             glosses: { ar: 'foo', en: 'banana' },
             parts_of_speech: ['n', 'adj'],
-            semantic_domains: ['2.1', '2.2'],
+            semantic_domains: ['Body parts', 'Body functions'],
             example_sentences: [{ en: 'This is a banana', vn: '我很喜歡吃香蕉' }],
             photo_files: [
               { fb_storage_path: 'https://database.com/image.png', uid_added_by: 'Diego' },

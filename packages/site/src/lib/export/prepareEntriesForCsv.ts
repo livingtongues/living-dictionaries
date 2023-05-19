@@ -139,6 +139,7 @@ export function prepareEntriesForCsv(
       formatted_entry.variant = entry.variant || '';
     }
 
+    // console.log('fe:', formatted_entry);
     return formatted_entry;
   });
   return [headers, ...formattedEntries];
