@@ -1,7 +1,7 @@
 import type { EntryForCSV } from './prepareEntriesForCsv';
 import type { ExpandedEntry, ISpeaker, ISemanticDomain, IEntry } from '@living-dictionaries/types';
 import {
-  find_part_of_speech,
+  find_part_of_speech_abbreviation,
   get_first_speaker_from_first_sound_file,
   display_speaker_gender,
   display_speaker_age_range,
@@ -11,21 +11,21 @@ import {
   assign_example_sentences_to_formatted_entry,
 } from './assignFormattedEntryValuesForCsv';
 
-describe('find_part_of_speech', () => {
-  const parts_of_speech = [
+describe('find_part_of_speech_abbreviation', () => {
+  const global_parts_of_speech = [
     {
       enAbbrev: 'n',
       enName: 'noun',
     },
   ];
   test('finds readable part of speech name', () => {
-    const part_of_speech_abbreviation = 'n';
-    expect(find_part_of_speech(parts_of_speech, part_of_speech_abbreviation)).toEqual('noun');
+    const part_of_speech = 'noun';
+    expect(find_part_of_speech_abbreviation(global_parts_of_speech, part_of_speech)).toEqual('n');
   });
 
   test('return empty string if abbreviation does not exist', () => {
-    const part_of_speech_abbreviation = null;
-    expect(find_part_of_speech(parts_of_speech, part_of_speech_abbreviation)).toEqual('');
+    const part_of_speech = null;
+    expect(find_part_of_speech_abbreviation(global_parts_of_speech, part_of_speech)).toEqual('');
   });
 });
 

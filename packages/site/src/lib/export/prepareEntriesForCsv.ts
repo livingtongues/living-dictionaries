@@ -2,7 +2,6 @@ import type {
   ExpandedEntry,
   IDictionary,
   IPartOfSpeech,
-  ISemanticDomain,
   ISpeaker,
 } from '@living-dictionaries/types';
 import { stripHTMLTags } from './stripHTMLTags';
@@ -14,7 +13,7 @@ import {
   count_maximum_semantic_domains_only_from_first_senses,
 } from './assignHeadersForCsv';
 import {
-  find_part_of_speech,
+  find_part_of_speech_abbreviation,
   get_first_speaker_from_first_sound_file,
   display_speaker_gender,
   display_speaker_age_range,
@@ -60,7 +59,7 @@ export function prepareEntriesForCsv(
   expanded_entries: ExpandedEntry[],
   dictionary: IDictionary,
   speakers: ISpeaker[],
-  parts_of_speech: IPartOfSpeech[]
+  global_parts_of_speech: IPartOfSpeech[]
 ): EntryForCSV[] {
   const max_semantic_domain_number =
     count_maximum_semantic_domains_only_from_first_senses(expanded_entries);
@@ -91,11 +90,11 @@ export function prepareEntriesForCsv(
       dialects: entry.dialects?.[0] || '',
       notes: stripHTMLTags(entry.notes),
       sources: entry.sources?.join(' | ') || '', // some dictionaries (e.g. Kalanga) have sources that are strings and not arrays
-      parts_of_speech_abbreviation: entry.senses?.[0]?.parts_of_speech?.[0] || '',
-      parts_of_speech: find_part_of_speech(
-        parts_of_speech,
+      parts_of_speech_abbreviation: find_part_of_speech_abbreviation(
+        global_parts_of_speech,
         entry.senses?.[0]?.parts_of_speech?.[0]
       ),
+      parts_of_speech: entry.senses?.[0]?.parts_of_speech?.[0] || '',
       image_filename: entry.senses?.[0].photo_files?.[0].fb_storage_path || '',
       sound_filename: entry.sound_files?.[0].fb_storage_path || '',
     } as EntryForCSV;
@@ -137,7 +136,7 @@ export function prepareEntriesForCsv(
       formatted_entry.variant = entry.variant || '';
     }
 
-    console.log('fe:', formatted_entry);
+    // console.log('fe:', formatted_entry);
     return formatted_entry;
   });
   return [headers, ...formattedEntries];
