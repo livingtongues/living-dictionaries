@@ -60,7 +60,6 @@ export function prepareEntriesForCsv(
   expanded_entries: ExpandedEntry[],
   dictionary: IDictionary,
   speakers: ISpeaker[],
-  global_semantic_domains: ISemanticDomain[],
   parts_of_speech: IPartOfSpeech[]
 ): EntryForCSV[] {
   const max_semantic_domain_number =
@@ -119,7 +118,6 @@ export function prepareEntriesForCsv(
       formatted_entry,
       entry,
       max_semantic_domain_number,
-      global_semantic_domains,
     });
 
     assign_gloss_languages_to_formatted_entry({
@@ -139,7 +137,7 @@ export function prepareEntriesForCsv(
       formatted_entry.variant = entry.variant || '';
     }
 
-    // console.log('fe:', formatted_entry);
+    console.log('fe:', formatted_entry);
     return formatted_entry;
   });
   return [headers, ...formattedEntries];

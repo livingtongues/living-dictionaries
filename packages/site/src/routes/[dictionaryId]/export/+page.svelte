@@ -35,7 +35,6 @@
       expanded_entries.filter(entry => entry.senses[0].photo_files?.[0]?.fb_storage_path),
       $dictionary,
       speakers,
-      semanticDomains,
       partsOfSpeech
     );
 
@@ -43,7 +42,6 @@
       expanded_entries.filter(entry => entry.sound_files?.[0]?.fb_storage_path),
       $dictionary,
       speakers,
-      semanticDomains,
       partsOfSpeech
     )
 
@@ -51,7 +49,6 @@
       expanded_entries,
       $dictionary,
       speakers,
-      semanticDomains,
       partsOfSpeech
     );
 
