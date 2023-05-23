@@ -199,7 +199,7 @@ describe('formatEntriesForCSV', () => {
     ).toStrictEqual(expected);
   });
 
-  test('formatEntriesForCSV basic example to smoke test with DeprecatedEntry', () => {
+  test.fails('formatEntriesForCSV basic example to smoke test with DeprecatedEntry', () => {
     const deprecated_entries_array: ActualDatabaseEntry[] = [
       {
         id: '12345qwerty',

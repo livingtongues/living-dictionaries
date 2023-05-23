@@ -50,7 +50,12 @@
       $dictionary,
       speakers,
       partsOfSpeech
-    );
+    ).map(entry => {
+      const newEntry = { ...entry };
+      delete newEntry.image_file_path;
+      delete newEntry.sound_file_path;
+      return newEntry;
+    });
 
     mounted = true;
   });
