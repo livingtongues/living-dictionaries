@@ -20,7 +20,7 @@ export function get_first_speaker_from_first_sound_file(
   entry: ExpandedEntry,
   speakers: ISpeaker[]
 ): ISpeaker {
-  return speakers.find((speaker) => speaker.id === entry.sound_files?.[0].speaker_ids?.[0]);
+  return speakers.find((speaker) => speaker?.id === entry.sound_files?.[0].speaker_ids?.[0]);
 }
 
 export function display_speaker_gender(speaker_gender: string): string {
