@@ -4,7 +4,6 @@
   import { admin, dictionary, isManager } from '$lib/stores';
   import { Button, ShowHide } from 'svelte-pieces';
   import { partsOfSpeech } from '$lib/mappings/parts-of-speech';
-  import { semanticDomains } from '$lib/mappings/semantic-domains';
   import type { ActualDatabaseEntry } from '@living-dictionaries/types';
   import { getCollection } from 'sveltefirets';
   import { downloadBlob, arrayToCSVBlob } from '$lib/export/csv';
