@@ -1,9 +1,4 @@
-import type {
-  ExpandedEntry,
-  ISpeaker,
-  ISemanticDomain,
-  IPartOfSpeech,
-} from '@living-dictionaries/types';
+import type { ExpandedEntry, ISpeaker, IPartOfSpeech } from '@living-dictionaries/types';
 import type { EntryForCSV } from './prepareEntriesForCsv';
 
 export function find_part_of_speech_abbreviation(
