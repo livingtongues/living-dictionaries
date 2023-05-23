@@ -5,6 +5,7 @@ import type {
   ISpeaker,
 } from '@living-dictionaries/types';
 import { stripHTMLTags } from './stripHTMLTags';
+import { friendlyName } from './friendlyName';
 import {
   assign_local_orthographies_to_headers,
   assign_example_sentences_to_headers,
@@ -51,6 +52,8 @@ type StandardEntryForCSV = {
 export interface EntryForCSV extends StandardEntryForCSV {
   vernacular_example_sentence?: string;
   variant?: string; // optional for Babanki & Torwali
+  sound_file_path?: string; // for downloading file, not exported in CSV
+  image_file_path?: string; // for downloading file, not exported in CSV
 }
 
 const dictionaries_with_variant = ['babanki', 'torwali'];
@@ -95,12 +98,14 @@ export function prepareEntriesForCsv(
         entry.senses?.[0]?.parts_of_speech?.[0]
       ),
       parts_of_speech: entry.senses?.[0]?.parts_of_speech?.[0] || '',
-      image_filename: entry.senses?.[0].photo_files?.[0].fb_storage_path || '',
-      sound_filename: entry.sound_files?.[0].fb_storage_path || '',
+      image_filename: friendlyName(entry, entry.senses?.[0].photo_files?.[0].fb_storage_path),
+      sound_filename: friendlyName(entry, entry.sound_files?.[0].fb_storage_path),
     } as EntryForCSV;
 
     //Begin dynamic values
+    formatted_entry.image_file_path = entry.senses?.[0].photo_files?.[0].fb_storage_path || '';
     const speaker = get_first_speaker_from_first_sound_file(entry, speakers);
+    formatted_entry.sound_file_path = entry.sound_files?.[0].fb_storage_path || '';
     formatted_entry.speaker_name = speaker?.displayName || '';
     formatted_entry.speaker_birthplace = speaker?.birthplace || '';
     formatted_entry.speaker_decade = display_speaker_age_range(speaker?.decade);
