@@ -5,6 +5,10 @@ import {
 import { readFileSync } from 'fs';
 import { parseCSVFrom } from './parse-csv.js';
 
+// TODO
+// step 1: change all tests
+// step 2: make the tests pass
+
 describe('convertJsonRowToEntryFormat', () => {
   const fakeTimeStamp = 10101010;
 
@@ -17,16 +21,16 @@ describe('convertJsonRowToEntryFormat', () => {
     ];
     const entries = csv_rows_without_header.map((row) => convertJsonRowToEntryFormat(row));
 
-    expect(entries).toMatchInlineSnapshot(`
-      [
-        {
-          "gl": {
-            "es": "delfín",
+    expect(entries).toEqual([
+      {
+        sn: [
+          {
+            gl: { es: 'delfín' },
           },
-          "lx": "dolphin",
-        },
-      ]
-    `);
+        ],
+        lx: 'dolphin',
+      },
+    ]);
   });
 
   test('example sentences', () => {
@@ -38,17 +42,21 @@ describe('convertJsonRowToEntryFormat', () => {
     ];
     const entries = csv_rows_without_header.map((row) => convertJsonRowToEntryFormat(row));
 
-    expect(entries).toMatchInlineSnapshot(`
-      [
-        {
-          "gl": {},
-          "lx": "dolphin",
-          "xs": {
-            "es": "el delfín nada en el océano.",
+    expect(entries).toEqual([
+      {
+        sn: [
+          {
+            gl: {},
+            xs: [
+              {
+                es: 'el delfín nada en el océano.',
+              },
+            ],
           },
-        },
-      ]
-    `);
+        ],
+        lx: 'dolphin',
+      },
+    ]);
   });
 
   test('semantic domains', () => {
@@ -62,21 +70,18 @@ describe('convertJsonRowToEntryFormat', () => {
     ];
     const entries = csv_rows_without_header.map((row) => convertJsonRowToEntryFormat(row));
 
-    expect(entries).toMatchInlineSnapshot(`
-      [
-        {
-          "gl": {},
-          "lx": "dolphins",
-          "sd": [
-            "the sea!",
-          ],
-          "sdn": [
-            "5.15",
-            "1",
-          ],
-        },
-      ]
-    `);
+    expect(entries).toEqual([
+      {
+        sn: [
+          {
+            gl: {},
+            sd: ['the sea!'],
+            sdn: ['5.15', '1'],
+          },
+        ],
+        lx: 'dolphins',
+      },
+    ]);
   });
 
   test('high-level conversion from csv', async () => {
@@ -252,17 +257,21 @@ describe('convertJsonRowToEntryFormat', () => {
     ];
     const entries = csv_rows_without_header.map((row) => convertJsonRowToEntryFormat(row));
 
-    expect(entries).toMatchInlineSnapshot(`
-      [
-        {
-          "gl": {},
-          "lx": undefined,
-          "xs": {
-            "vn": "Hello world",
+    expect(entries).toMatchInlineSnapshot([
+      {
+        sn: [
+          {
+            gl: {},
+            xs: [
+              {
+                vn: 'Hello world',
+              },
+            ],
           },
-        },
-      ]
-    `);
+        ],
+        lx: undefined,
+      },
+    ]);
   });
 });
 
