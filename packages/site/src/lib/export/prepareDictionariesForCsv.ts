@@ -11,7 +11,7 @@ enum StandardDictionaryCSVFields {
   thumbnail = 'Thumbnail',
 }
 export type DictionaryForCSVKeys = keyof typeof StandardDictionaryCSVFields;
-type DictionaryForCSV = {
+export type DictionaryForCSV = {
   [key in DictionaryForCSVKeys]: string;
 };
 
