@@ -26,6 +26,7 @@ describe('convertJsonRowToEntryFormat', () => {
         sn: [
           {
             gl: { es: 'delfín' },
+            xs: [{}],
           },
         ],
         lx: 'dolphin',
@@ -77,9 +78,33 @@ describe('convertJsonRowToEntryFormat', () => {
             gl: {},
             sd: ['the sea!'],
             sdn: ['5.15', '1'],
+            xs: [{}],
           },
         ],
         lx: 'dolphins',
+      },
+    ]);
+  });
+
+  test('dialects', () => {
+    const csv_rows_without_header: Record<string, any>[] = [
+      {
+        lexeme: 'foo',
+        dialects: 'dialect one , dialect two',
+      },
+    ];
+    const entries = csv_rows_without_header.map((row) => convertJsonRowToEntryFormat(row));
+
+    expect(entries).toEqual([
+      {
+        sn: [
+          {
+            gl: {},
+            xs: [{}],
+          },
+        ],
+        lx: 'foo',
+        di: ['dialect one', 'dialect two'],
       },
     ]);
   });
