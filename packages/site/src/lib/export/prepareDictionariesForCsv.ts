@@ -34,8 +34,8 @@ export function prepareDictionariesForCsv(dictionaries: IDictionary[]): Dictiona
       iso6393: dictionary.iso6393 || '',
       glottocode: dictionary.glottocode || '',
       location: cleanedLocation,
-      latitude: (dictionary.coordinates && dictionary.coordinates.latitude).toString() || '',
-      longitude: (dictionary.coordinates && dictionary.coordinates.longitude).toString() || '',
+      latitude: dictionary.coordinates ? dictionary.coordinates.latitude.toString() : '',
+      longitude: dictionary.coordinates ? dictionary.coordinates.longitude.toString() : '',
       thumbnail: dictionary.thumbnail || '',
     };
   });
