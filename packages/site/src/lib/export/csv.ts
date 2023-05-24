@@ -1,4 +1,5 @@
 import type { IDictionary, IUser } from '@living-dictionaries/types';
+import { prepareDictionariesForCsv } from './prepareDictionariesForCsv';
 
 function objectsToCSV(array: Record<string, any>[]) {
   return array
@@ -43,37 +44,8 @@ export function downloadBlob(blob: Blob, title: string, extension: string) {
 }
 
 export function exportDictionariesAsCSV(dictionaries: IDictionary[], title: string) {
-  const headers = {
-    name: 'Dictionary Name',
-    url: 'URL',
-    iso6393: 'ISO 639-3',
-    glottocode: 'Glottocode',
-    location: 'Location',
-    latitude: 'Latitude',
-    longitude: 'Longitude',
-    thumbnail: 'Thumbnail',
-  };
-
-  const formattedDictionaries = dictionaries.map((dictionary) => {
-    let cleanedLocation = '';
-    if (dictionary.location) {
-      const location = dictionary.location + '';
-      cleanedLocation = location.replace(/,/g, '_');
-    }
-
-    return {
-      name: dictionary.name.replace(/,/g, '_'),
-      url: dictionary.url,
-      iso6393: dictionary.iso6393 || '',
-      glottocode: dictionary.glottocode || '',
-      location: cleanedLocation,
-      latitude: (dictionary.coordinates && dictionary.coordinates.latitude) || '',
-      longitude: (dictionary.coordinates && dictionary.coordinates.longitude) || '',
-      thumbnail: dictionary.thumbnail || '',
-    };
-  });
-
-  const blob = arrayToCSVBlob([headers, ...formattedDictionaries]);
+  const all_dictionaries = prepareDictionariesForCsv(dictionaries);
+  const blob = arrayToCSVBlob(all_dictionaries);
   downloadBlob(blob, title, '.csv');
 }
 
