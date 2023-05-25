@@ -18,10 +18,10 @@ import {
   get_first_speaker_from_first_sound_file,
   display_speaker_gender,
   display_speaker_age_range,
-  assign_local_orthographies_to_formatted_entry,
-  assign_semantic_domains_to_formatted_entry,
-  assign_gloss_languages_to_formatted_entry,
-  assign_example_sentences_to_formatted_entry,
+  format_local_orthographies,
+  format_semantic_domains,
+  format_gloss_languages,
+  format_example_sentences,
 } from './assignFormattedEntryValuesForCsv';
 
 enum StandardEntryCSVFields {
@@ -124,38 +124,29 @@ export function prepareEntriesForCsv(
     formatted_entry.speaker_decade = display_speaker_age_range(speaker?.decade);
     formatted_entry.speaker_gender = display_speaker_gender(speaker?.gender);
 
-    assign_local_orthographies_to_formatted_entry({
-      formatted_entry,
+    const formatted_local_orthographies = format_local_orthographies(
       local_orthographies_headers,
-      entry,
-      alternate_orthographies: dictionary.alternateOrthographies,
-    });
+      entry
+    );
+    const formatted_semantic_domains = format_semantic_domains(entry, max_semantic_domain_number);
 
-    assign_semantic_domains_to_formatted_entry({
-      formatted_entry,
-      entry,
-      max_semantic_domain_number,
-    });
+    const formatted_gloss_languages = format_gloss_languages(entry, dictionary.glossLanguages);
 
-    assign_gloss_languages_to_formatted_entry({
-      formatted_entry,
-      entry,
-      gloss_languages: dictionary.glossLanguages,
-    });
-
-    assign_example_sentences_to_formatted_entry({
-      formatted_entry,
-      entry,
-      gloss_languages: dictionary.glossLanguages,
-    });
+    const formatted_example_sentences = format_example_sentences(entry, dictionary.glossLanguages);
 
     // Dictionary specific
     if (dictionaries_with_variant.includes(dictionary.id)) {
       formatted_entry.variant = entry.variant || '';
     }
 
-    // console.log('fe:', formatted_entry);
-    return formatted_entry;
+    const complete_formatted_entry = {
+      ...formatted_entry,
+      ...formatted_local_orthographies,
+      ...formatted_semantic_domains,
+      ...formatted_gloss_languages,
+      ...formatted_example_sentences,
+    };
+    return complete_formatted_entry;
   });
   return [all_headers, ...formattedEntries];
 }
