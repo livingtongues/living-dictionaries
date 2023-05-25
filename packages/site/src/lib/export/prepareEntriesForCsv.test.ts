@@ -169,95 +169,36 @@ describe('prepareEntriesForCsv', () => {
       expected
     );
   });
-  test('super simple example to show variant column', () => {
-    const dictionary: IDictionary = {
-      name: 'Babanki example',
-      id: 'babanki',
-      glossLanguages: [],
-      entryCount: 2,
-    };
-    const expanded_entries: ExpandedEntry[] = [
-      {
-        lexeme: 'foo',
-        variant: 'new variant',
-      },
-      {
-        lexeme: 'baz',
-      },
-    ];
-    expect(prepareEntriesForCsv(expanded_entries, dictionary, speakers, partsOfSpeech)).toEqual([
-      {
-        dialects: 'Dialects',
-        id: 'Entry Id',
-        image_filename: 'Image filename',
-        interlinearization: 'Interlinearization',
-        lexeme: 'Lexeme/Word/Phrase',
-        morphology: 'Morphology',
-        notes: 'Notes',
-        noun_class: 'Noun class',
-        parts_of_speech: 'Part of Speech',
-        parts_of_speech_abbreviation: 'Part of Speech abbreviation',
-        phonetic: 'Phonetic (IPA)',
-        plural_form: 'Plural form',
-        sound_filename: 'Audio filename',
-        sources: 'Source(s)',
-        speaker_birthplace: 'Speaker birthplace',
-        speaker_decade: 'Speaker decade',
-        speaker_gender: 'Speaker gender',
-        speaker_name: 'Speaker name',
-        variant: 'Variant',
-        vernacular_example_sentence: 'Example sentence in Babanki example',
-      },
-      {
-        dialects: '',
-        id: '',
-        image_file_path: '',
-        image_filename: '',
-        interlinearization: '',
-        lexeme: 'foo',
-        morphology: '',
-        notes: '',
-        noun_class: '',
-        parts_of_speech: '',
-        parts_of_speech_abbreviation: '',
-        phonetic: '',
-        plural_form: '',
-        sound_file_path: '',
-        sound_filename: '',
-        sources: '',
-        speaker_birthplace: '',
-        speaker_decade: '',
-        speaker_gender: '',
-        speaker_name: '',
-        variant: 'new variant',
-        vernacular_example_sentence: '',
-      },
-      {
-        dialects: '',
-        id: '',
-        image_file_path: '',
-        image_filename: '',
-        interlinearization: '',
-        lexeme: 'baz',
-        morphology: '',
-        notes: '',
-        noun_class: '',
-        parts_of_speech: '',
-        parts_of_speech_abbreviation: '',
-        phonetic: '',
-        plural_form: '',
-        sound_file_path: '',
-        sound_filename: '',
-        sources: '',
-        speaker_birthplace: '',
-        speaker_decade: '',
-        speaker_gender: '',
-        speaker_name: '',
-        variant: '',
-        vernacular_example_sentence: '',
-      },
-    ]);
+
+  describe('variant column', () => {
+    test('added to babanki', () => {
+      const dictionary = { id: 'babanki', glossLanguages: [] } as IDictionary;
+      const entries: ExpandedEntry[] = [
+        {
+          lexeme: 'foo',
+          variant: 'fooey',
+        },
+        {
+          lexeme: 'baz',
+        },
+      ];
+      const [headerRow, firstEntry, secondEntry] = prepareEntriesForCsv(entries, dictionary, speakers, partsOfSpeech)
+
+      expect(headerRow.variant).toEqual('Variant');
+      expect(firstEntry.variant).toEqual('fooey');
+      expect(secondEntry.variant).toEqual('');
+    });
+    
+    test('not added to fooDictionary', () => {
+      const dictionary: IDictionary = {
+        id: 'fooDictionary',
+        glossLanguages: [],
+      } as IDictionary;
+      const entries: ExpandedEntry[] = [{ lexeme: 'foo'},
+      ];
+      const [headerRow] = prepareEntriesForCsv(entries, dictionary, speakers, partsOfSpeech)
+
+      expect(headerRow.variant).toBeFalsy();
+    });
   });
 });
-
-// 3) then go and make sure export/+page.svelte is happy
