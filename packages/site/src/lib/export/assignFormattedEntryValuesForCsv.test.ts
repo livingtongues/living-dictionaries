@@ -5,10 +5,10 @@ import {
   get_first_speaker_from_first_sound_file,
   display_speaker_gender,
   display_speaker_age_range,
-  assign_local_orthographies_to_formatted_entry,
-  assign_semantic_domains_to_formatted_entry,
-  assign_gloss_languages_to_formatted_entry,
-  assign_example_sentences_to_formatted_entry,
+  format_local_orthographies,
+  format_semantic_domains,
+  format_gloss_languages,
+  format_example_sentences,
 } from './assignFormattedEntryValuesForCsv';
 
 describe('find_part_of_speech_abbreviation', () => {
@@ -76,10 +76,9 @@ describe('display_speaker_age_range', () => {
 });
 
 //formattedEntry tests
-describe('assign_local_orthographies_to_formatted_entry', () => {
+describe('format_local_orthographies', () => {
   test('assigns local orthography to formatted entry if value exist or assigns an empty string if does not', () => {
-    const formatted_entry: EntryForCSV = {};
-    const headers: EntryForCSV = {
+    const local_orthographies_headers: EntryForCSV = {
       local_orthography_1: 'script_1',
       local_orthography_2: 'script_2',
       local_orthography_3: 'script_3',
@@ -89,24 +88,16 @@ describe('assign_local_orthographies_to_formatted_entry', () => {
       local_orthography_3: 'example-3',
       local_orthography_2: 'example-2',
     };
-    const alternate_orthographies = ['script_1', 'script_2', 'scriprt_3'];
     const expected = {
       script_1: '',
       script_2: 'example-2',
       script_3: 'example-3',
     };
-    assign_local_orthographies_to_formatted_entry({
-      formatted_entry,
-      headers,
-      entry,
-      alternate_orthographies,
-    });
-    expect(formatted_entry).toEqual(expected);
+    expect(format_local_orthographies(entry, local_orthographies_headers)).toEqual(expected);
   });
 });
-describe('assign_semantic_domains_to_formatted_entry', () => {
+describe('format_semantic_domains', () => {
   test('assigns semantic domain to formatted entry if value exist or assigns an empty string if does not', () => {
-    const formatted_entry: EntryForCSV = {};
     const entry: ExpandedEntry = {
       lexeme: 'baz',
       senses: [{ semantic_domains: ['Colors', 'Birds'] }],
@@ -117,18 +108,12 @@ describe('assign_semantic_domains_to_formatted_entry', () => {
       semantic_domain_2: 'Birds',
       semantic_domain_3: '',
     };
-    assign_semantic_domains_to_formatted_entry({
-      formatted_entry,
-      entry,
-      max_semantic_domain_number,
-    });
-    expect(formatted_entry).toEqual(expected);
+    expect(format_semantic_domains(entry, max_semantic_domain_number)).toEqual(expected);
   });
 });
 
-describe('assign_gloss_languages_to_formatted_entry', () => {
+describe('format_gloss_languages', () => {
   test('assigns gloss languages values to formatted entry if value exist or assigns an empty string if does not', () => {
-    const formatted_entry: EntryForCSV = {};
     const entry: ExpandedEntry = {
       lexeme: 'Boo',
       senses: [{ glosses: { es: 'oso' } }],
@@ -138,14 +123,12 @@ describe('assign_gloss_languages_to_formatted_entry', () => {
       en_gloss_language: '',
       es_gloss_language: 'oso',
     };
-    assign_gloss_languages_to_formatted_entry({ formatted_entry, entry, gloss_languages });
-    expect(formatted_entry).toEqual(expected);
+    expect(format_gloss_languages(entry, gloss_languages)).toEqual(expected);
   });
 });
 
-describe('assign_example_sentences_to_formatted_entry', () => {
+describe('format_example_sentences', () => {
   test('assigns example sentences values to formatted entry if value exist or assigns an empty string if does not', () => {
-    const formatted_entry: EntryForCSV = {};
     const entry: ExpandedEntry = {
       lexeme: 'Boo',
       senses: [{ example_sentences: [{ es: 'el oso es enorme' }] }],
@@ -156,11 +139,9 @@ describe('assign_example_sentences_to_formatted_entry', () => {
       es_example_sentence: 'el oso es enorme',
       vernacular_example_sentence: '',
     };
-    assign_example_sentences_to_formatted_entry({ formatted_entry, entry, gloss_languages });
-    expect(formatted_entry).toEqual(expected);
+    expect(format_example_sentences(entry, gloss_languages)).toEqual(expected);
   });
   test('assigns vernacular example sentence value to formatted entry if any gloss languages exist', () => {
-    const formatted_entry: EntryForCSV = {};
     const entry: ExpandedEntry = {
       lexeme: 'min',
       senses: [{ example_sentences: [{ vn: 'native example' }] }],
@@ -169,7 +150,6 @@ describe('assign_example_sentences_to_formatted_entry', () => {
     const expected = {
       vernacular_example_sentence: 'native example',
     };
-    assign_example_sentences_to_formatted_entry({ formatted_entry, entry, gloss_languages });
-    expect(formatted_entry).toEqual(expected);
+    expect(format_example_sentences(entry, gloss_languages)).toEqual(expected);
   });
 });
