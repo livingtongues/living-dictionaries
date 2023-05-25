@@ -1,5 +1,5 @@
 import type { EntryForCSV } from './prepareEntriesForCsv';
-import type { ExpandedEntry, ISpeaker, ISemanticDomain, IEntry } from '@living-dictionaries/types';
+import type { ExpandedEntry, ISpeaker, IEntry } from '@living-dictionaries/types';
 import {
   find_part_of_speech_abbreviation,
   get_first_speaker_from_first_sound_file,

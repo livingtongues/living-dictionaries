@@ -1,5 +1,6 @@
 import type { ExpandedEntry, ISpeaker, IPartOfSpeech } from '@living-dictionaries/types';
 import type { EntryForCSV } from './prepareEntriesForCsv';
+import { decades } from '$lib/components/media/ages';
 
 export function find_part_of_speech_abbreviation(
   global_parts_of_speech: IPartOfSpeech[],
@@ -26,30 +27,7 @@ export function display_speaker_gender(speaker_gender: string): string {
 }
 
 export function display_speaker_age_range(decade: number) {
-  switch (decade) {
-    case 0:
-      return '0-10';
-    case 1:
-      return '11-20';
-    case 2:
-      return '21-30';
-    case 3:
-      return '31-40';
-    case 4:
-      return '41-50';
-    case 5:
-      return '51-60';
-    case 6:
-      return '61-70';
-    case 7:
-      return '71-80';
-    case 8:
-      return '81-90';
-    case 9:
-      return '91-100';
-    default:
-      return '';
-  }
+  return decades[decade] || '';
 }
 type LocalOrthographiesAllocator = {
   formatted_entry: EntryForCSV;
