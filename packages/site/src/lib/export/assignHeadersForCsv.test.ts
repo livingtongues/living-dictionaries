@@ -5,7 +5,6 @@ import {
   assign_gloss_languages_as_headers,
   assign_example_sentences_as_headers,
 } from './assignHeadersForCsv';
-import type { EntryForCSV } from './prepareEntriesForCsv';
 
 describe('assign_local_orthographies_as_headers', () => {
   test('assigns alternate_orthographies if any exists', () => {

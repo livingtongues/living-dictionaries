@@ -51,59 +51,51 @@ export function display_speaker_age_range(decade: number) {
       return '';
   }
 }
-type LocalOrthographiesAllocator = {
-  formatted_entry: EntryForCSV;
-  local_orthographies_headers: EntryForCSV;
-  entry: ExpandedEntry;
-  alternate_orthographies: string[];
-};
-export function assign_local_orthographies_to_formatted_entry(
-  allocator: LocalOrthographiesAllocator
-): void {
-  const { formatted_entry, local_orthographies_headers, entry, alternate_orthographies } =
-    allocator;
-  if (alternate_orthographies) {
-    const local_orthographies_of_headers = Object.keys(local_orthographies_headers).filter((key) =>
-      key.startsWith('local_orthography')
-    );
-    local_orthographies_of_headers.forEach((header) => {
-      formatted_entry[local_orthographies_headers[header]] = entry[header] || '';
-    });
-  }
+
+export function format_local_orthographies(
+  local_orthographies_headers: EntryForCSV,
+  entry: ExpandedEntry
+): EntryForCSV {
+  const formatted_local_orthographies = {};
+  Object.keys(local_orthographies_headers).forEach((header) => {
+    formatted_local_orthographies[local_orthographies_headers[header]] = entry[header] || '';
+  });
+  return formatted_local_orthographies;
 }
 
-type SemanticDomainsAllocator = {
-  formatted_entry: EntryForCSV;
-  entry: ExpandedEntry;
-  max_semantic_domain_number: number;
-};
-export function assign_semantic_domains_to_formatted_entry(
-  allocator: SemanticDomainsAllocator
-): void {
-  const { formatted_entry, entry, max_semantic_domain_number } = allocator;
+export function format_semantic_domains(
+  entry: ExpandedEntry,
+  max_semantic_domain_number: number
+): EntryForCSV {
+  const formatted_semantic_domains = {};
   for (let index = 0; index < max_semantic_domain_number; index++) {
-    formatted_entry[`semantic_domain_${index + 1}`] =
+    formatted_semantic_domains[`semantic_domain_${index + 1}`] =
       entry.senses?.[0].semantic_domains?.[index] || '';
   }
+  return formatted_semantic_domains;
 }
 
-type GlossesAllocator = {
-  formatted_entry: EntryForCSV;
-  entry: ExpandedEntry;
-  gloss_languages: string[];
-};
-export function assign_gloss_languages_to_formatted_entry(allocator: GlossesAllocator): void {
-  const { formatted_entry, entry, gloss_languages } = allocator;
+export function format_gloss_languages(
+  entry: ExpandedEntry,
+  gloss_languages: string[]
+): EntryForCSV {
+  const formatted_gloss_languages = {};
   gloss_languages.forEach((bcp) => {
-    formatted_entry[`${bcp}_gloss_language`] = entry.senses?.[0].glosses[bcp] || '';
+    formatted_gloss_languages[`${bcp}_gloss_language`] = entry.senses?.[0].glosses[bcp] || '';
   });
+  return formatted_gloss_languages;
 }
 
-export function assign_example_sentences_to_formatted_entry(allocator: GlossesAllocator): void {
-  const { formatted_entry, entry, gloss_languages } = allocator;
-  formatted_entry.vernacular_example_sentence = entry.senses?.[0].example_sentences?.[0].vn || '';
+export function format_example_sentences(
+  entry: ExpandedEntry,
+  gloss_languages: string[]
+): EntryForCSV {
+  const formatted_example_sentences = {};
+  formatted_example_sentences['vernacular_example_sentence'] =
+    entry.senses?.[0].example_sentences?.[0].vn || '';
   gloss_languages.forEach((bcp) => {
-    formatted_entry[`${bcp}_example_sentence`] =
+    formatted_example_sentences[`${bcp}_example_sentence`] =
       entry.senses?.[0].example_sentences?.[0][bcp] || '';
   });
+  return formatted_example_sentences;
 }
