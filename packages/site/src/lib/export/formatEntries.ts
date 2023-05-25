@@ -52,7 +52,6 @@ export function format_parts_of_speech(
       entry_parts_of_speech = entry_parts_of_speech[0];
     }
     const fullPos = global_pos.find((ps) => ps.enAbbrev === entry_parts_of_speech)?.enName;
-    console.log(fullPos);
     if (!fullPos) {
       // TODO: handle case of multiple parts of speech
       entry_for_csv.ps = entry_parts_of_speech;
@@ -153,7 +152,6 @@ export function formatEntriesForCSV(
 
     // part of speech (abbreviation & name)
     const parts_of_speech = entry.sn ? entry.sn[0].ps : entry.ps;
-    console.log(parts_of_speech);
     format_parts_of_speech(partsOfSpeech, formattedEntry, parts_of_speech);
 
     // Media
