@@ -53,20 +53,21 @@ export function display_speaker_age_range(decade: number) {
 }
 type LocalOrthographiesAllocator = {
   formatted_entry: EntryForCSV;
-  headers: EntryForCSV;
+  local_orthographies_headers: EntryForCSV;
   entry: ExpandedEntry;
   alternate_orthographies: string[];
 };
 export function assign_local_orthographies_to_formatted_entry(
   allocator: LocalOrthographiesAllocator
 ): void {
-  const { formatted_entry, headers, entry, alternate_orthographies } = allocator;
+  const { formatted_entry, local_orthographies_headers, entry, alternate_orthographies } =
+    allocator;
   if (alternate_orthographies) {
-    const local_orthographies_of_headers = Object.keys(headers).filter((key) =>
+    const local_orthographies_of_headers = Object.keys(local_orthographies_headers).filter((key) =>
       key.startsWith('local_orthography')
     );
     local_orthographies_of_headers.forEach((header) => {
-      formatted_entry[headers[header]] = entry[header] || '';
+      formatted_entry[local_orthographies_headers[header]] = entry[header] || '';
     });
   }
 }

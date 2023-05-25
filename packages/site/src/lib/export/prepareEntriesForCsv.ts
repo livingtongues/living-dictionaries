@@ -7,10 +7,10 @@ import type {
 import { stripHTMLTags } from './stripHTMLTags';
 import { friendlyName } from './friendlyName';
 import {
-  assign_local_orthographies_to_headers,
-  assign_example_sentences_to_headers,
-  assign_gloss_languages_to_headers,
-  assign_semantic_domains_to_headers,
+  assign_local_orthographies_as_headers,
+  assign_example_sentences_as_headers,
+  assign_gloss_languages_as_headers,
+  assign_semantic_domains_as_headers,
   count_maximum_semantic_domains_only_from_first_senses,
 } from './assignHeadersForCsv';
 import {
@@ -71,15 +71,28 @@ export function prepareEntriesForCsv(
     headers[key] = StandardEntryCSVFields[key];
   }
   // Begin dynamic headers
-  assign_local_orthographies_to_headers(headers, dictionary.alternateOrthographies);
-  assign_semantic_domains_to_headers(headers, max_semantic_domain_number);
-  assign_gloss_languages_to_headers(headers, dictionary.glossLanguages);
-  assign_example_sentences_to_headers(headers, dictionary.glossLanguages, dictionary.name);
+  const local_orthographies_headers = assign_local_orthographies_as_headers(
+    dictionary.alternateOrthographies
+  );
+  const semantic_domains_headers = assign_semantic_domains_as_headers(max_semantic_domain_number);
+  const gloss_languages_headers = assign_gloss_languages_as_headers(dictionary.glossLanguages);
+  const example_sentences_headers = assign_example_sentences_as_headers(
+    dictionary.glossLanguages,
+    dictionary.name
+  );
 
   // Dictionary specific
   if (dictionaries_with_variant.includes(dictionary.id)) {
     headers['variant'] = 'Variant';
   }
+
+  const all_headers = {
+    ...headers,
+    ...local_orthographies_headers,
+    ...semantic_domains_headers,
+    ...gloss_languages_headers,
+    ...example_sentences_headers,
+  };
 
   const formattedEntries: EntryForCSV[] = expanded_entries.map((entry) => {
     const formatted_entry = {
@@ -113,7 +126,7 @@ export function prepareEntriesForCsv(
 
     assign_local_orthographies_to_formatted_entry({
       formatted_entry,
-      headers,
+      local_orthographies_headers,
       entry,
       alternate_orthographies: dictionary.alternateOrthographies,
     });
@@ -144,5 +157,5 @@ export function prepareEntriesForCsv(
     // console.log('fe:', formatted_entry);
     return formatted_entry;
   });
-  return [headers, ...formattedEntries];
+  return [all_headers, ...formattedEntries];
 }
