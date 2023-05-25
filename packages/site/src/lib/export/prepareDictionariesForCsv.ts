@@ -2,6 +2,8 @@ import type { IDictionary } from '@living-dictionaries/types';
 
 enum StandardDictionaryCSVFields {
   name = 'Dictionary Name',
+  public = 'Public',
+  entries = 'No. Entries',
   url = 'URL',
   iso6393 = 'ISO 639-3',
   glottocode = 'Glottocode',
@@ -30,6 +32,8 @@ export function prepareDictionariesForCsv(dictionaries: IDictionary[]): Dictiona
 
     return {
       name: dictionary.name.replace(/,/g, '_'),
+      public: dictionary?.public.toString() || '',
+      entries: dictionary?.entryCount.toString() || '',
       url: dictionary.url,
       iso6393: dictionary.iso6393 || '',
       glottocode: dictionary.glottocode || '',
