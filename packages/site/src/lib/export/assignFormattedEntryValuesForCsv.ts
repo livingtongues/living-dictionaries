@@ -53,8 +53,8 @@ export function display_speaker_age_range(decade: number) {
 }
 
 export function format_local_orthographies(
-  local_orthographies_headers: EntryForCSV,
-  entry: ExpandedEntry
+  entry: ExpandedEntry,
+  local_orthographies_headers: EntryForCSV
 ): EntryForCSV {
   const formatted_local_orthographies = {};
   Object.keys(local_orthographies_headers).forEach((header) => {

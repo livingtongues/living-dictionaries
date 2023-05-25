@@ -125,8 +125,8 @@ export function prepareEntriesForCsv(
     formatted_entry.speaker_gender = display_speaker_gender(speaker?.gender);
 
     const formatted_local_orthographies = format_local_orthographies(
-      local_orthographies_headers,
-      entry
+      entry,
+      local_orthographies_headers
     );
     const formatted_semantic_domains = format_semantic_domains(entry, max_semantic_domain_number);
 
