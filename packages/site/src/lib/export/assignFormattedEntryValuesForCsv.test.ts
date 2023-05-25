@@ -93,7 +93,7 @@ describe('format_local_orthographies', () => {
       script_2: 'example-2',
       script_3: 'example-3',
     };
-    expect(format_local_orthographies(local_orthographies_headers, entry)).toEqual(expected);
+    expect(format_local_orthographies(entry, local_orthographies_headers)).toEqual(expected);
   });
 });
 describe('format_semantic_domains', () => {
