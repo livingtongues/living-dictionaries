@@ -9,52 +9,53 @@
   import { downloadBlob, arrayToCSVBlob } from '$lib/export/csv';
   import DownloadMedia from '../../../lib/export/DownloadMedia.svelte';
   import Progress from '$lib/export/Progress.svelte';
-  import { fetchSpeakers } from '$lib/helpers/fetchSpeakers';
+  import { fetchSpeakers } from './fetchSpeakers';
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte';
   import { convert_entry_to_current_shape } from '$lib/transformers/convert_entry_to_current_shape';
-    import { expand_entry } from '$lib/transformers/expand_entry';
-    import { prepareEntriesForCsv, type EntryForCSV } from '$lib/export/prepareEntriesForCsv';
+  import { expand_entry } from '$lib/transformers/expand_entry';
+  import { prepareEntriesForCsv, type EntryForCSV } from '$lib/export/prepareEntriesForCsv';
 
   let includeImages = false;
   let includeAudio = false;
-  
+
   let entriesWithImages: EntryForCSV[] = [];
   let entriesWithAudio: EntryForCSV[] = [];
   let allEntries: EntryForCSV[] = [];
   let mounted = false;
 
   onMount(async () => {
-    const database_entries = await getCollection<ActualDatabaseEntry>(`dictionaries/${$dictionary.id}/words`);
-    const converted_to_current_shaped_entries = database_entries.map(convert_entry_to_current_shape);
+    const database_entries = await getCollection<ActualDatabaseEntry>(
+      `dictionaries/${$dictionary.id}/words`
+    );
+    const converted_to_current_shaped_entries = database_entries.map(
+      convert_entry_to_current_shape
+    );
     const expanded_entries = converted_to_current_shaped_entries.map(expand_entry);
 
-    const speakers = await fetchSpeakers(database_entries);
-    
+    const speakers = await fetchSpeakers(expanded_entries);
+
     entriesWithImages = prepareEntriesForCsv(
-      expanded_entries.filter(entry => entry.senses[0].photo_files?.[0]?.fb_storage_path),
+      expanded_entries.filter((entry) => entry.senses[0].photo_files?.[0]?.fb_storage_path),
       $dictionary,
       speakers,
       partsOfSpeech
     );
 
     entriesWithAudio = prepareEntriesForCsv(
-      expanded_entries.filter(entry => entry.sound_files?.[0]?.fb_storage_path),
+      expanded_entries.filter((entry) => entry.sound_files?.[0]?.fb_storage_path),
       $dictionary,
       speakers,
       partsOfSpeech
-    )
+    );
 
-    allEntries = prepareEntriesForCsv(
-      expanded_entries,
-      $dictionary,
-      speakers,
-      partsOfSpeech
-    ).map(entry => {
-      const newEntry = { ...entry };
-      delete newEntry.image_file_path;
-      delete newEntry.sound_file_path;
-      return newEntry;
-    });
+    allEntries = prepareEntriesForCsv(expanded_entries, $dictionary, speakers, partsOfSpeech).map(
+      (entry) => {
+        const newEntry = { ...entry };
+        delete newEntry.image_file_path;
+        delete newEntry.sound_file_path;
+        return newEntry;
+      }
+    );
 
     mounted = true;
   });
@@ -169,5 +170,8 @@
 <SeoMetaTags
   title={$_('misc.export', { default: 'export' })}
   dictionaryName={$dictionary.name}
-  description={$_('', { default: "Dictionary managers can easily export their Living Dictionary's text data as a .CSV spreadsheet as well as export their images and audio files in convenient ZIP folders." })}
+  description={$_('', {
+    default:
+      "Dictionary managers can easily export their Living Dictionary's text data as a .CSV spreadsheet as well as export their images and audio files in convenient ZIP folders.",
+  })}
   keywords="How to print a dictionary, How to create lessons for endangered languages, Language Documentation, Language Revitalization, Build a Dictionary, Online Dictionary, Digital Dictionary, Dictionary Software, Free Software, Online Dictionary Builder, Living Dictionaries, Living Dictionary, Edit a dictionary, Search a dictionary, Browse a dictionary, Explore a Dictionary" />
