@@ -7,13 +7,13 @@
   import type { ActualDatabaseEntry } from '@living-dictionaries/types';
   import { getCollection } from 'sveltefirets';
   import { downloadBlob, arrayToCSVBlob } from '$lib/export/csv';
-  import DownloadMedia from '../../../lib/export/DownloadMedia.svelte';
   import Progress from '$lib/export/Progress.svelte';
-  import { fetchSpeakers } from './fetchSpeakers';
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte';
   import { convert_entry_to_current_shape } from '$lib/transformers/convert_entry_to_current_shape';
   import { expand_entry } from '$lib/transformers/expand_entry';
-  import { prepareEntriesForCsv, type EntryForCSV } from '$lib/export/prepareEntriesForCsv';
+  import DownloadMedia from './DownloadMedia.svelte';
+  import { fetchSpeakers } from './fetchSpeakers';
+  import { prepareEntriesForCsv, type EntryForCSV } from './prepareEntriesForCsv';
 
   let includeImages = false;
   let includeAudio = false;
