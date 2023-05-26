@@ -5,7 +5,7 @@ import type {
   IPartOfSpeech,
 } from '@living-dictionaries/types';
 import { StandardEntryCSVFields, prepareEntriesForCsv } from './prepareEntriesForCsv';
-import { objectsToCSV } from './csv';
+import { objectsToCSV } from '$lib/export/csv';
 
 describe('prepareEntriesForCsv', () => {
   const speakers: ISpeaker[] = [

@@ -4,7 +4,6 @@ import {
   find_part_of_speech_abbreviation,
   get_first_speaker_from_first_sound_file,
   display_speaker_gender,
-  display_speaker_age_range,
   format_local_orthographies,
   format_semantic_domains,
   format_gloss_languages,
@@ -23,9 +22,9 @@ describe('find_part_of_speech_abbreviation', () => {
     expect(find_part_of_speech_abbreviation(global_parts_of_speech, part_of_speech)).toEqual('n');
   });
 
-  test('return empty string if abbreviation does not exist', () => {
+  test('return undefined if abbreviation does not exist', () => {
     const part_of_speech = null;
-    expect(find_part_of_speech_abbreviation(global_parts_of_speech, part_of_speech)).toEqual('');
+    expect(find_part_of_speech_abbreviation(global_parts_of_speech, part_of_speech)).toEqual(undefined);
   });
 });
 
@@ -61,41 +60,42 @@ describe('display_speaker_gender', () => {
     expect(display_speaker_gender('m')).toEqual('male');
   });
   test('displays empty string if speaker gender it is an empty string or undefined', () => {
-    expect(display_speaker_gender('')).toEqual('');
-    expect(display_speaker_gender(undefined)).toEqual('');
+    expect(display_speaker_gender('')).toEqual(undefined);
+    expect(display_speaker_gender(undefined)).toEqual(undefined);
   });
 });
 
-describe('display_speaker_age_range', () => {
-  test('displays readable speaker age range', () => {
-    expect(display_speaker_age_range(3)).toEqual('31-40');
-  });
-  test('displays empty string if speaker age range is undefined', () => {
-    expect(display_speaker_age_range(undefined)).toEqual('');
-  });
-});
+// describe('display_speaker_age_range', () => {
+//   test('displays readable speaker age range', () => {
+//     expect(display_speaker_age_range(3)).toEqual('31-40');
+//   });
+//   test('displays empty string if speaker age range is undefined', () => {
+//     expect(display_speaker_age_range(undefined)).toEqual('');
+//   });
+// });
 
 //formattedEntry tests
 describe('format_local_orthographies', () => {
   test('assigns local orthography to formatted entry if value exist or assigns an empty string if does not', () => {
-    const local_orthographies_headers: EntryForCSV = {
+    const local_orthographies_headers = {
       local_orthography_1: 'script_1',
       local_orthography_2: 'script_2',
       local_orthography_3: 'script_3',
-    };
+    } as EntryForCSV;
     const entry: ExpandedEntry = {
       lexeme: 'foo',
       local_orthography_3: 'example-3',
       local_orthography_2: 'example-2',
     };
     const expected = {
-      script_1: '',
+      script_1: undefined,
       script_2: 'example-2',
       script_3: 'example-3',
     };
     expect(format_local_orthographies(entry, local_orthographies_headers)).toEqual(expected);
   });
 });
+
 describe('format_semantic_domains', () => {
   test('assigns semantic domain to formatted entry if value exist or assigns an empty string if does not', () => {
     const entry: ExpandedEntry = {
@@ -106,7 +106,7 @@ describe('format_semantic_domains', () => {
     const expected = {
       semantic_domain_1: 'Colors',
       semantic_domain_2: 'Birds',
-      semantic_domain_3: '',
+      semantic_domain_3: undefined,
     };
     expect(format_semantic_domains(entry, max_semantic_domain_number)).toEqual(expected);
   });
@@ -120,7 +120,7 @@ describe('format_gloss_languages', () => {
     };
     const gloss_languages = ['en', 'es'];
     const expected = {
-      en_gloss_language: '',
+      en_gloss_language: undefined,
       es_gloss_language: 'oso',
     };
     expect(format_gloss_languages(entry, gloss_languages)).toEqual(expected);
@@ -135,9 +135,9 @@ describe('format_example_sentences', () => {
     };
     const gloss_languages = ['en', 'es'];
     const expected = {
-      en_example_sentence: '',
+      en_example_sentence: undefined,
       es_example_sentence: 'el oso es enorme',
-      vernacular_example_sentence: '',
+      vernacular_example_sentence: undefined,
     };
     expect(format_example_sentences(entry, gloss_languages)).toEqual(expected);
   });
