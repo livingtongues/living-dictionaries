@@ -51,12 +51,10 @@ type StandardEntryForCSV = {
 
 export interface EntryForCSV extends StandardEntryForCSV {
   vernacular_example_sentence?: string;
-  variant?: string; // optional for Babanki & Torwali
+  variant?: string; // should be just for babanki & torwali
   sound_file_path?: string; // for downloading file, not exported in CSV
   image_file_path?: string; // for downloading file, not exported in CSV
 }
-
-const dictionaries_with_variant = ['babanki', 'torwali'];
 
 export function prepareEntriesForCsv(
   expanded_entries: ExpandedEntry[],
@@ -64,6 +62,16 @@ export function prepareEntriesForCsv(
   speakers: ISpeaker[],
   global_parts_of_speech: IPartOfSpeech[]
 ): EntryForCSV[] {
+
+  // TODO: In a future PR
+  // 1. break this apart into 2 functions
+  // const headers = getHeaders(expanded_entries, dictionary)
+  // const formattedEntries = getFormattedEntries(expanded_entries, dictionary, headers, speakers, global_parts_of_speech)
+
+  // 2. create a new function similar to objectsToCSV but it takes two arguments headers and data (entries in this case) and for each row (data entry) it loops through each header value and installs the values or empty string if none exists - then the aforementioned `getFormmatedEntries` function doesn't need to care about how many semantic domains there are in the dictionary or glossing languages, etc...)
+  
+  // 3. Update Vitest and use the new .matchFileSnapshot method to output to a .csv file so we can more easily test the actual user output (cell ordering especially) without having to fire up the front-end
+
   const max_semantic_domain_number =
     count_maximum_semantic_domains_only_from_first_senses(expanded_entries);
 
@@ -80,8 +88,8 @@ export function prepareEntriesForCsv(
     dictionary.name
   );
 
-  // Dictionary specific
-  if (dictionaries_with_variant.includes(dictionary.id)) {
+  const has_variants = expanded_entries.some((entry) => entry.variant);
+  if (has_variants) {
     default_headers['variant'] = 'Variant';
   }
 
@@ -133,8 +141,7 @@ export function prepareEntriesForCsv(
 
     const formatted_example_sentences = format_example_sentences(entry, dictionary.glossLanguages);
 
-    // Dictionary specific
-    if (dictionaries_with_variant.includes(dictionary.id)) {
+    if (has_variants) {
       formatted_entry.variant = entry.variant;
     }
 
