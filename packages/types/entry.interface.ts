@@ -59,7 +59,7 @@ export interface DatabaseSense {
   de?: string; // definition_english, only in Bahasa Lani (jaRhn6MAZim4Blvr1iEv) deprecated by Greg
 }
 
-export type ActualDatabaseEntry = Omit<GoalDatabaseEntry, 'di'> & DeprecatedEntry;
+export type ActualDatabaseEntry = Omit<GoalDatabaseEntry, 'di' | 'sr'> & DeprecatedEntry;
 
 export interface GoalDatabaseEntry extends IFirestoreMetaDataAbbreviated {
   lx?: string; // lexeme
@@ -90,6 +90,7 @@ interface DeprecatedEntry extends Omit<DatabaseSense, 'ps' | 'xs' | 'pfs' | 'del
   lo?: string; // local_orthography_1
   sf?: ActualDatabaseAudio; // turned into array at sfs
   di?: string | string[]; // turned into array
+  sr?: string | string[] // some dictionaries, e.g. Kalanga, have just a string
 
   // placed into first sense
   ps?: string | string[]; // parts_of_speech

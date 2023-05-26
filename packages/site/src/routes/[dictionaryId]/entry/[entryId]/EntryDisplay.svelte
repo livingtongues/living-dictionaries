@@ -125,7 +125,7 @@
       <div class="md:px-2" class:order-2={!entry.sr?.length}>
         <div class="rounded text-xs text-gray-500 mt-1 mb-2">{$t('entry.sr')}</div>
         <BadgeArray
-          strings={entry.sr || []}
+          strings={typeof entry.sr === 'string' ? [entry.sr] : entry.sr || []}
           {canEdit}
           promptMessage={$t('entry.sr')}
           addMessage={$t('misc.add', { default: 'Add' })}

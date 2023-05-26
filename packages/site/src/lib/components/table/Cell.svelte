@@ -61,7 +61,7 @@
   {:else if column.field === 'sr'}
     <SelectSource
       {canEdit}
-      value={entry.sr}
+      value={typeof entry.sr === 'string' ? [entry.sr] : entry.sr}
       on:valueupdate={(e) => saveUpdateToFirestore(e, entry.id, $dictionary.id)} />
   {:else if column.gloss === true}
     <Textbox
