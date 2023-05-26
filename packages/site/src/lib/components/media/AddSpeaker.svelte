@@ -5,6 +5,7 @@
   import { Button, Form, Modal } from 'svelte-pieces';
   import { addOnline } from 'sveltefirets';
   import type { ISpeaker } from '@living-dictionaries/types';
+  import { decades } from './ages';
 
   const dispatch = createEventDispatcher();
   const close = () => dispatch('close');
@@ -66,16 +67,9 @@
     </label>
     <div class="mt-1 rounded-md shadow-sm">
       <select id="age" bind:value={decade} class="form-input block w-full">
-        <option value={0}>0-10</option>
-        <option value={1}>11-20</option>
-        <option value={2}>21-30</option>
-        <option value={3}>31-40</option>
-        <option value={4}>41-50</option>
-        <option value={5}>51-60</option>
-        <option value={6}>61-70</option>
-        <option value={7}>71-80</option>
-        <option value={8}>81-90</option>
-        <option value={9}>91-100</option>
+        {#each Object.entries(decades) as [value, label] (value)}
+          <option {value}>{label}</option>
+        {/each}
       </select>
     </div>
 

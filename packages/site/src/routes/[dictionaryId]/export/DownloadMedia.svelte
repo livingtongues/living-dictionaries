@@ -1,15 +1,15 @@
 <script lang="ts">
   import JSZip from 'jszip';
-  import { arrayToCSVBlob, downloadBlob } from './csv';
+  import { arrayToCSVBlob, downloadBlob } from '$lib/export/csv';
   import type { IDictionary } from '@living-dictionaries/types';
   import { createEventDispatcher, onDestroy, onMount } from 'svelte';
   import { getStorageDownloadUrl } from './storageUrl';
-  import type { IEntryForCSV } from './formatEntries';
+  import type { EntryForCSV } from './prepareEntriesForCsv';
 
   export let dictionary: IDictionary;
-  export let finalizedEntries: IEntryForCSV[];
-  export let entriesWithImages: IEntryForCSV[] = [];
-  export let entriesWithAudio: IEntryForCSV[] = [];
+  export let finalizedEntries: EntryForCSV[];
+  export let entriesWithImages: EntryForCSV[] = [];
+  export let entriesWithAudio: EntryForCSV[] = [];
 
   const dispatch = createEventDispatcher<{ completed: null }>();
 
@@ -24,36 +24,36 @@
     for (const entry of entriesWithImages) {
       if (destroyed) return;
       try {
-        const response = await fetch(getStorageDownloadUrl(entry.pfpa));
+        const response = await fetch(getStorageDownloadUrl(entry.image_file_path));
         if (response.ok) {
           const blob = await response.blob();
-          zip.folder(`${dictionary.id}_Images/`).file(entry.pfFriendlyName, blob, { binary: true });
+          zip.folder(`${dictionary.id}_Images/`).file(entry.image_filename, blob, { binary: true });
         } else {
           errors = [
             ...errors,
-            `Entry: ${entry.lx}, Id: ${entry.id}, File: ${entry.pfpa}, Error: ${response.statusText}`,
+            `Entry: ${entry.lexeme}, Id: ${entry.id}, File: ${entry.image_file_path}, Error: ${response.statusText}`,
           ];
         }
       } catch (e) {
-        errors = [...errors, `Entry: ${entry.id}, File: ${entry.pfpa}, ${e}`];
+        errors = [...errors, `Entry: ${entry.id}, File: ${entry.image_file_path}, ${e}`];
       }
       fetched++;
     }
     for (const entry of entriesWithAudio) {
       if (destroyed) return;
       try {
-        const response = await fetch(getStorageDownloadUrl(entry.sfpa));
+        const response = await fetch(getStorageDownloadUrl(entry.sound_file_path));
         if (response.ok) {
           const blob = await response.blob();
-          zip.folder(`${dictionary.id}_Audio/`).file(entry.sfFriendlyName, blob, { binary: true });
+          zip.folder(`${dictionary.id}_Audio/`).file(entry.sound_filename, blob, { binary: true });
         } else {
           errors = [
             ...errors,
-            `Entry: ${entry.lx}, Id: ${entry.id}, File: ${entry.sfpa}, Error: ${response.status} ${response.statusText}`,
+            `Entry: ${entry.lexeme}, Id: ${entry.id}, File: ${entry.sound_file_path}, Error: ${response.status} ${response.statusText}`,
           ];
         }
       } catch (e) {
-        errors = [...errors, `Entry: ${entry.id}, File: ${entry.sfpa}, ${e}`];
+        errors = [...errors, `Entry: ${entry.id}, File: ${entry.sound_file_path}, ${e}`];
       }
       fetched++;
     }
