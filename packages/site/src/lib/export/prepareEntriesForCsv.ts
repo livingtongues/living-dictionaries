@@ -24,7 +24,7 @@ import {
   format_example_sentences,
 } from './assignFormattedEntryValuesForCsv';
 
-enum StandardEntryCSVFields {
+export enum StandardEntryCSVFields {
   id = 'Entry Id',
   lexeme = 'Lexeme/Word/Phrase',
   phonetic = 'Phonetic (IPA)',
@@ -66,10 +66,12 @@ export function prepareEntriesForCsv(
 ): EntryForCSV[] {
   const max_semantic_domain_number =
     count_maximum_semantic_domains_only_from_first_senses(expanded_entries);
-  const headers = {} as EntryForCSV;
+  const headers: EntryForCSV = {};
+
   for (const key in StandardEntryCSVFields) {
     headers[key] = StandardEntryCSVFields[key];
   }
+  
   // Begin dynamic headers
   const local_orthographies_headers = assign_local_orthographies_as_headers(
     dictionary.alternateOrthographies
