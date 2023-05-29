@@ -1,7 +1,7 @@
 import type { IDictionary, IUser } from '@living-dictionaries/types';
 import { prepareDictionariesForCsv } from './prepareDictionariesForCsv';
 
-function objectsToCSV(array: Record<string, any>[]) {
+export function objectsToCSV(array: Record<string, any>[]) {
   return array
     .map((row) => {
       return Object.values(row)
