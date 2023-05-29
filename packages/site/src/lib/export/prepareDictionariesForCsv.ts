@@ -27,13 +27,13 @@ export type DictionaryForCSV = {
   [key in DictionaryForCSVKeys]: string;
 };
 
-export function timestamp_to_string_date(timestamp: Timestamp): string | undefined {
+export function timestamp_to_string_date(timestamp: Timestamp): string {
   if (timestamp) {
     const milliseconds = timestamp.seconds * 1000 + Math.floor(timestamp.nanoseconds / 1000000);
     const date = new Date(milliseconds);
     return date.toDateString();
   }
-  return undefined;
+  return '';
 }
 
 export function prepareDictionariesForCsv(dictionaries: IDictionary[]): DictionaryForCSV[] {
