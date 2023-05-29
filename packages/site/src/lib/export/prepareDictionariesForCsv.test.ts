@@ -13,6 +13,10 @@ describe('timestamp_to_string_date', () => {
     };
     expect(timestamp_to_string_date(timpestamp)).toEqual('Tue Jun 02 2020');
   });
+  test('returns an empty string if timestime is falsy', () => {
+    const timestamp = undefined;
+    expect(timestamp_to_string_date(timestamp)).toEqual('');
+  });
 });
 
 describe('prepareDictionariesForCsv', () => {
