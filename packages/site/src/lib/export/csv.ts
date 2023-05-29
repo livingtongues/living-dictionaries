@@ -44,8 +44,8 @@ export function downloadBlob(blob: Blob, title: string, extension: string) {
 }
 
 export function exportDictionariesAsCSV(dictionaries: IDictionary[], title: string) {
-  console.log('Dictionaries:', dictionaries);
-  // const all_dictionaries = prepareDictionariesForCsv(dictionaries);
+  // console.log('Dictionaries:', dictionaries);
+  const all_dictionaries = prepareDictionariesForCsv(dictionaries);
   // const blob = arrayToCSVBlob(all_dictionaries);
   // downloadBlob(blob, title, '.csv');
 }
