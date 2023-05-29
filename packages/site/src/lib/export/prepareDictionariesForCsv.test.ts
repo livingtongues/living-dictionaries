@@ -1,5 +1,19 @@
 import type { IDictionary } from '@living-dictionaries/types';
-import { prepareDictionariesForCsv, type DictionaryForCSV } from './prepareDictionariesForCsv';
+import {
+  prepareDictionariesForCsv,
+  timestamp_to_string_date,
+  type DictionaryForCSV,
+} from './prepareDictionariesForCsv';
+
+describe('timestamp_to_string_date', () => {
+  test('converts createdAt to readable string', () => {
+    const timpestamp = {
+      seconds: 1591088635,
+      nanoseconds: 880000000,
+    };
+    expect(timestamp_to_string_date(timpestamp)).toEqual('Tue Jun 02 2020');
+  });
+});
 
 describe('prepareDictionariesForCsv', () => {
   const dictionaries: IDictionary[] = [
@@ -52,93 +66,6 @@ describe('prepareDictionariesForCsv', () => {
     },
   ];
   test('smoke test', () => {
-    expect(prepareDictionariesForCsv(dictionaries)).toMatchInlineSnapshot(`
-      [
-        {
-          "alternate_names": "Alternate Names",
-          "alternate_orthographies": "Alternate Orthographies",
-          "author_connection": "Author Connection",
-          "community_permission": "Community Permission",
-          "conlang_description": "Conlang Description",
-          "created_at": "Created At",
-          "entries": "No. Entries",
-          "gloss_languages": "Gloss Languages",
-          "glottocode": "Glottocode",
-          "iso6393": "ISO 639-3",
-          "language_used_by_community": "Language Used By Community",
-          "latitude": "Latitude",
-          "location": "Location",
-          "longitude": "Longitude",
-          "name": "Dictionary Name",
-          "public": "Public",
-          "thumbnail": "Thumbnail",
-          "url": "URL",
-          "video_access": "Video Access",
-        },
-        {
-          "alternate_names": "",
-          "alternate_orthographies": "",
-          "author_connection": "",
-          "community_permission": "",
-          "conlang_description": "",
-          "created_at": "Created At",
-          "entries": "0",
-          "gloss_languages": "en, hi, pa",
-          "glottocode": "badh1238",
-          "iso6393": "",
-          "language_used_by_community": "",
-          "latitude": "30.133",
-          "location": "",
-          "longitude": "79.539",
-          "name": "<xaxdeleted>",
-          "public": "false",
-          "thumbnail": "",
-          "url": undefined,
-          "video_access": "",
-        },
-        {
-          "alternate_names": "Buriat, Buriad, Bargu",
-          "alternate_orthographies": "",
-          "author_connection": "",
-          "community_permission": "",
-          "conlang_description": "",
-          "created_at": "Created At",
-          "entries": "1",
-          "gloss_languages": "en, ru, mn, cmn",
-          "glottocode": "buri1258",
-          "iso6393": "bua",
-          "language_used_by_community": "",
-          "latitude": "51.833",
-          "location": "",
-          "longitude": "107.616",
-          "name": "Buryat",
-          "public": "false",
-          "thumbnail": "",
-          "url": undefined,
-          "video_access": "",
-        },
-        {
-          "alternate_names": "",
-          "alternate_orthographies": "",
-          "author_connection": "",
-          "community_permission": "",
-          "conlang_description": "",
-          "created_at": "Created At",
-          "entries": "1",
-          "gloss_languages": "ig",
-          "glottocode": "",
-          "iso6393": "",
-          "language_used_by_community": "",
-          "latitude": "",
-          "location": "South Eastern States of Nigeria_ West Africa",
-          "longitude": "",
-          "name": " IGBO LANGUAGE (ASUSU IGBO)",
-          "public": "false",
-          "thumbnail": "",
-          "url": undefined,
-          "video_access": "",
-        },
-      ]
-    `);
+    expect(prepareDictionariesForCsv(dictionaries)).toMatchSnapshot();
   });
 });
