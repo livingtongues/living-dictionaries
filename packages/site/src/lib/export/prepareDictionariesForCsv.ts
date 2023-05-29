@@ -48,7 +48,7 @@ export function prepareDictionariesForCsv(dictionaries: IDictionary[]): Dictiona
       const location = dictionary.location + '';
       cleanedLocation = location.replace(/,/g, '_');
     }
-    // console.log('Dic Name', dictionary.name);
+
     return {
       name: dictionary.name.replace(/,/g, '_'),
       public: dictionary?.public?.toString(),
