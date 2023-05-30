@@ -57,12 +57,8 @@ export function prepareDictionariesForCsv(dictionaries: IDictionary[]): Dictiona
       iso6393: dictionary.iso6393,
       glottocode: dictionary.glottocode,
       location: cleanedLocation,
-      latitude: dictionary?.coordinates?.latitude
-        ? dictionary.coordinates.latitude?.toString()
-        : '',
-      longitude: dictionary?.coordinates?.longitude
-        ? dictionary.coordinates.longitude?.toString()
-        : '',
+      latitude: dictionary?.coordinates?.latitude?.toString(),
+      longitude: dictionary?.coordinates?.longitude?.toString(),
       thumbnail: dictionary.thumbnail,
       gloss_languages: dictionary?.glossLanguages?.join(', '),
       alternate_names: dictionary?.alternateNames?.join(', '),
