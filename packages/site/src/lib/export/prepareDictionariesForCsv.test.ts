@@ -69,7 +69,12 @@ describe('prepareDictionariesForCsv', () => {
       id: 'igbo-language-(asusu-igb',
     },
   ];
-  test('smoke test', () => {
-    expect(prepareDictionariesForCsv(dictionaries)).toMatchSnapshot();
+  test('admin/dictionaries example', () => {
+    const admin = 2;
+    expect(prepareDictionariesForCsv(dictionaries, admin)).toMatchSnapshot();
+  });
+  test('List of dictionaries example', () => {
+    const admin = 0;
+    expect(prepareDictionariesForCsv(dictionaries, admin)).toMatchSnapshot();
   });
 });

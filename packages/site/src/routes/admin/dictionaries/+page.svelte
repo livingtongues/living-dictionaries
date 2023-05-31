@@ -7,6 +7,7 @@
   import { Button, ResponsiveTable, ShowHide } from 'svelte-pieces';
   import DictionaryRow from '../DictionaryRow.svelte';
   import SortDictionaries from '../SortDictionaries.svelte';
+  import { admin } from '$lib/stores';
 
   let dictionariesType: IDictionary[] = [];
 </script>
@@ -29,7 +30,7 @@
             form="filled"
             color="black"
             onclick={() =>
-              exportDictionariesAsCSV(filteredDictionaries, 'living-dictionaries-list')}>
+              exportDictionariesAsCSV(filteredDictionaries, 'living-dictionaries-list', $admin)}>
             <i class="fas fa-download mr-1" />
             Download {filteredDictionaries.length} Dictionaries as CSV
           </Button>
