@@ -22,7 +22,7 @@ exports[`prepareDictionariesForCsv > List of dictionaries example 1`] = `
     "name": "<xaxdeleted>",
     "public": "false",
     "thumbnail": undefined,
-    "url": undefined,
+    "url": "https://livingdictionaries.app/badhani/entries/list",
   },
   {
     "glottocode": "buri1258",
@@ -33,7 +33,7 @@ exports[`prepareDictionariesForCsv > List of dictionaries example 1`] = `
     "name": "Buryat",
     "public": "false",
     "thumbnail": undefined,
-    "url": undefined,
+    "url": "https://livingdictionaries.app/buryat/entries/list",
   },
   {
     "glottocode": undefined,
@@ -44,7 +44,7 @@ exports[`prepareDictionariesForCsv > List of dictionaries example 1`] = `
     "name": " IGBO LANGUAGE (ASUSU IGBO)",
     "public": "false",
     "thumbnail": undefined,
-    "url": undefined,
+    "url": "https://livingdictionaries.app/igbo-language-(asusu-igb/entries/list",
   },
 ]
 `;
@@ -90,7 +90,7 @@ exports[`prepareDictionariesForCsv > admin/dictionaries example 1`] = `
     "name": "<xaxdeleted>",
     "public": "false",
     "thumbnail": undefined,
-    "url": undefined,
+    "url": "https://livingdictionaries.app/badhani/entries/list",
     "video_access": undefined,
   },
   {
@@ -111,7 +111,7 @@ exports[`prepareDictionariesForCsv > admin/dictionaries example 1`] = `
     "name": "Buryat",
     "public": "false",
     "thumbnail": undefined,
-    "url": undefined,
+    "url": "https://livingdictionaries.app/buryat/entries/list",
     "video_access": undefined,
   },
   {
@@ -132,7 +132,7 @@ exports[`prepareDictionariesForCsv > admin/dictionaries example 1`] = `
     "name": " IGBO LANGUAGE (ASUSU IGBO)",
     "public": "false",
     "thumbnail": undefined,
-    "url": undefined,
+    "url": "https://livingdictionaries.app/igbo-language-(asusu-igb/entries/list",
     "video_access": undefined,
   },
 ]
