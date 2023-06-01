@@ -39,10 +39,15 @@ export function timestamp_to_string_date(timestamp: Timestamp): string {
   return '';
 }
 
+export function create_dictionary_url(dictionary_id: string) {
+  return `https://livingdictionaries.app/${dictionary_id}/entries/list`;
+}
+
 export function prepareDictionariesForCsv(
   dictionaries: IDictionary[],
   admin: number
 ): DictionaryForCSV[] {
+  console.log('Dictionaries:', dictionaries);
   const default_headers: DictionaryForCSV = { ...StandardDictionaryCSVFields };
   let admin_headers = {};
   if (admin > 1) {
@@ -71,7 +76,7 @@ export function prepareDictionariesForCsv(
     const formatted_dictionary = {
       name: dictionary.name.replace(/,/g, '_'),
       public: dictionary?.public?.toString(),
-      url: dictionary.url,
+      url: dictionary.url || create_dictionary_url(dictionary.id),
       iso6393: dictionary.iso6393,
       glottocode: dictionary.glottocode,
       location: cleanedLocation,
