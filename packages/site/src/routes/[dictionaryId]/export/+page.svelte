@@ -73,7 +73,7 @@
   <div class="mb-6">
     <div>
       <i class="far fa-check" />
-      {$_('export.csv_data', { default: 'Data as CSV' })}
+      {$_('export.csv_data', { default: 'Data as .CSV' })} ({$_('export.spreadsheet', { default: 'Spreadsheet' })})
     </div>
     <div
       class="flex items-center mt-2 {entriesWithImages.length
