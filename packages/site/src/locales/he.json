@@ -269,14 +269,15 @@
     "role": "תַפְקִיד"
   },
   "export": {
-    "csv_data": "נתונים כ- CSV",
+    "csv_data": "נתונים כ- .CSV",
     "checking_images": "בודק אם קיימים קבצי תמונה",
     "no_images": "אין קבצי תמונה",
     "checking_audios": "בודק אם קיימים קבצי שמע",
     "no_audios": "אין קבצי שמע",
     "download_csv": "הורד CSV",
     "availability": "הייצוא זמין רק למנהלי מילון",
-    "download_pdf": "הורד PDF"
+    "download_pdf": "הורד PDF",
+    "spreadsheet": "גיליון אלקטרוני"
   },
   "video": {
     "video_url": "קישור לוידאו",
