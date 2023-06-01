@@ -8,9 +8,7 @@ import {
 describe('create_dictionary_url', () => {
   test('returns a dictionary URL', () => {
     const dictionary_id = 'foo';
-    expect(create_dictionary_url(dictionary_id)).toEqual(
-      'https://livingdictionaries.app/foo/entries/list'
-    );
+    expect(create_dictionary_url(dictionary_id)).toEqual('https://livingdictionaries.app/foo');
   });
 });
 
