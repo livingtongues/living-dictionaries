@@ -276,7 +276,8 @@
     "no_audios": "没有音频文件",
     "download_csv": "下载CSV",
     "availability": "出口仅适用于字典经理",
-    "download_pdf": "下载PDF"
+    "download_pdf": "下载PDF",
+    "spreadsheet": "电子表格"
   },
   "video": {
     "video_url": "视频网址",

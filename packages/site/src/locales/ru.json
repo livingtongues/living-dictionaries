@@ -269,14 +269,15 @@
     "role": "Роль"
   },
   "export": {
-    "csv_data": "Данные как CSV",
+    "csv_data": "Данные как .CSV",
     "checking_images": "Проверка, есть ли файлы изображений",
     "no_images": "Нет файлов изображений",
     "checking_audios": "Проверка, существует ли аудиофайлы",
     "no_audios": "Нет аудиофайлов",
     "download_csv": "Скачать CSV",
     "availability": "Экспорт доступен только руководителям словарей",
-    "download_pdf": "Скачать PDF"
+    "download_pdf": "Скачать PDF",
+    "spreadsheet": "Электронная таблица"
   },
   "video": {
     "video_url": "Видео URL",
