@@ -269,14 +269,15 @@
     "role": "Peranan"
   },
   "export": {
-    "csv_data": "Data sebagai CSV",
+    "csv_data": "Data sebagai .CSV",
     "checking_images": "Memeriksa jika fail gambar wujud",
     "no_images": "Tidak ada fail gambar",
     "checking_audios": "Memeriksa jika fail audio wujud",
     "no_audios": "Tidak ada fail audio",
     "download_csv": "Muat turun CSV",
     "availability": "Eksport hanya tersedia untuk pengurus kamus",
-    "download_pdf": "Muat turun pdf"
+    "download_pdf": "Muat turun pdf",
+    "spreadsheet": "Spreadsheet"
   },
   "video": {
     "video_url": "URL Video",

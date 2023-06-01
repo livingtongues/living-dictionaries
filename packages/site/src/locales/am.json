@@ -269,14 +269,15 @@
     "role": "ሚና"
   },
   "export": {
-    "csv_data": "መረጃ እንደ ሲ.ኤስ.ቪ.",
+    "csv_data": "መረጃ እንደ .csv",
     "checking_images": "የምስል ፋይሎች ካሉ ያረጋግጡ",
     "no_images": "የምስል ፋይሎች የሉም",
     "checking_audios": "የድምፅ ፋይሎች ካሉ ያረጋግጡ",
     "no_audios": "ምንም የኦዲዮ ፋይሎች የሉም",
     "download_csv": "CSV ን ያውርዱ",
     "availability": "ወደ ውጭ መላክ የሚገኘው ለመዝገበ-ቃላት አስተዳዳሪዎች ብቻ ነው",
-    "download_pdf": "ፒዲኤፍ ያውርዱ"
+    "download_pdf": "ፒዲኤፍ ያውርዱ",
+    "spreadsheet": "የተመን ሉህ"
   },
   "video": {
     "video_url": "ቪዲዮ ዩ.አር.ኤል.",
