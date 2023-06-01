@@ -40,14 +40,13 @@ export function timestamp_to_string_date(timestamp: Timestamp): string {
 }
 
 export function create_dictionary_url(dictionary_id: string) {
-  return `https://livingdictionaries.app/${dictionary_id}/entries/list`;
+  return `https://livingdictionaries.app/${dictionary_id}`;
 }
 
 export function prepareDictionariesForCsv(
   dictionaries: IDictionary[],
   admin: number
 ): DictionaryForCSV[] {
-  console.log('Dictionaries:', dictionaries);
   const default_headers: DictionaryForCSV = { ...StandardDictionaryCSVFields };
   let admin_headers = {};
   if (admin > 1) {
