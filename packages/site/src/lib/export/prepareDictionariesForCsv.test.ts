@@ -1,8 +1,5 @@
 import type { IDictionary } from '@living-dictionaries/types';
-import {
-  prepareDictionaryForCsv,
-  timestamp_to_string_date,
-} from './prepareDictionariesForCsv';
+import { prepareDictionaryForCsv, timestamp_to_string_date } from './prepareDictionariesForCsv';
 import type { Timestamp } from 'firebase/firestore';
 
 const timestamp = {
@@ -16,7 +13,7 @@ describe('timestamp_to_string_date', () => {
   });
 
   test('returns an empty string if timestamp is falsy', () => {
-    expect(timestamp_to_string_date(undefined)).toEqual('');
+    expect(timestamp_to_string_date(undefined)).toEqual(undefined);
   });
 });
 

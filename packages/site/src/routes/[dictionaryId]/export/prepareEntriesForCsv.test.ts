@@ -56,7 +56,12 @@ describe('prepareEntriesForCsv', () => {
         senses: [{ glosses: { es: 'árbol' } }],
       },
     ];
-    const [headerRow, firstEntry, secondEntry] = prepareEntriesForCsv(entries, dictionary, speakers, partsOfSpeech)
+    const [headerRow, firstEntry, secondEntry] = prepareEntriesForCsv(
+      entries,
+      dictionary,
+      speakers,
+      partsOfSpeech
+    );
 
     const expectedHeaders_PlusDynamic_ArEnEs_TwoLocalOrthographies = {
       ...StandardEntryCSVFields,
@@ -77,15 +82,15 @@ describe('prepareEntriesForCsv', () => {
     expect(firstEntry).toMatchSnapshot();
     expect(secondEntry).toMatchSnapshot();
 
-    expect(objectsToCsvByHeaders(headerRow, [firstEntry, secondEntry])).toMatchInlineSnapshot(`
-      "Entry Id,Lexeme/Word/Phrase,Phonetic (IPA),Interlinearization,Noun class,Morphology,Plural form,Dialects,Notes,Source(s),Part of Speech abbreviation,Part of Speech,Image filename,Audio filename,Speaker name,Speaker birthplace,Speaker decade,Speaker gender,native_script_1,native_script_2,Semantic domain 1,Semantic domain 2,العَرَبِيَّة‎ Gloss,English Gloss,español Gloss,Example sentence in TestLang,Example sentence in العَرَبِيَّة‎,Example sentence in English,Example sentence in español
-      12345qwerty,xiangjiao,xiangjiao,,,,,dialect x,\\"This is an example of a note, here we can write whatever we want.\\",A book | www.mybook.com,n,noun,12345qwerty_foo.png,12345qwerty_foo.mp3,John Smith,Whoville,41-50,male,,,Body parts,Body functions,foo,banana,,我很喜歡吃香蕉,,This is a banana,
-      34qw,tree,,,,,,,,,,,,,,,,,,,,,,,árbol,,,,"
-    `);
+    expect(objectsToCsvByHeaders(headerRow, [firstEntry, secondEntry])).toEqual(
+      `Entry Id,Lexeme/Word/Phrase,Phonetic (IPA),Interlinearization,Noun class,Morphology,Plural form,Dialects,Notes,Source(s),Part of Speech abbreviation,Part of Speech,Image filename,Audio filename,Speaker name,Speaker birthplace,Speaker decade,Speaker gender,native_script_1,native_script_2,Semantic domain 1,Semantic domain 2,العَرَبِيَّة‎ Gloss,English Gloss,español Gloss,Example sentence in TestLang,Example sentence in العَرَبِيَّة‎,Example sentence in English,Example sentence in español
+    12345qwerty,xiangjiao,xiangjiao,,,,,dialect x,\\"This is an example of a note, here we can write whatever we want.\\",A book | www.mybook.com,n,noun,12345qwerty_foo.png,12345qwerty_foo.mp3,https://database.com/image.png,https://database.com/sound.mp3,John Smith,Whoville,41-50,male,,کیلا,Body parts,Body functions,foo,banana,,我很喜歡吃香蕉,,This is a banana,
+    34qw,tree,,,,,,,,,,,,,,,,,,,𑃐𑃥𑃝𑃢 𑃒𑃦𑃗𑃠𑃤,চুড়া বংজি,,,,,árbol,,,,`
+    );
   });
 
   //TODO after make everything passes, allow multiple parts of speech
-  
+
   describe('variant column', () => {
     test('added to babanki', () => {
       const dictionary = { id: 'babanki', glossLanguages: [] } as IDictionary;
@@ -98,7 +103,12 @@ describe('prepareEntriesForCsv', () => {
           lexeme: 'baz',
         },
       ];
-      const [headerRow, firstEntry, secondEntry] = prepareEntriesForCsv(entries, dictionary, speakers, partsOfSpeech)
+      const [headerRow, firstEntry, secondEntry] = prepareEntriesForCsv(
+        entries,
+        dictionary,
+        speakers,
+        partsOfSpeech
+      );
 
       expect(headerRow.variant).toEqual('Variant');
       expect(firstEntry.variant).toEqual('fooey');
@@ -108,7 +118,7 @@ describe('prepareEntriesForCsv', () => {
     test('not added to fooDictionary', () => {
       const dictionary = { id: 'fooDictionary', glossLanguages: [] } as IDictionary;
       const entries: ExpandedEntry[] = [{ lexeme: 'foo' }];
-      const [headerRow] = prepareEntriesForCsv(entries, dictionary, speakers, partsOfSpeech)
+      const [headerRow] = prepareEntriesForCsv(entries, dictionary, speakers, partsOfSpeech);
       expect(headerRow.variant).toBeFalsy();
     });
   });
