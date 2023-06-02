@@ -13,7 +13,7 @@ enum StandardDictionaryCSVFields {
   thumbnail = 'Thumbnail',
 }
 type DictionaryForCSVKeys = keyof typeof StandardDictionaryCSVFields;
-type StandardDictionaryForCSV = {
+export type StandardDictionaryForCSV = {
   [key in DictionaryForCSVKeys]: string | number | boolean;
 };
 
