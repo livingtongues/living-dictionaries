@@ -1,40 +1,31 @@
 import type { IDictionary } from '@living-dictionaries/types';
 import {
-  prepareDictionariesForCsv,
+  prepareDictionaryForCsv,
   timestamp_to_string_date,
-  create_dictionary_url,
 } from './prepareDictionariesForCsv';
+import type { Timestamp } from 'firebase/firestore';
 
-describe('create_dictionary_url', () => {
-  test('returns a dictionary URL', () => {
-    const dictionary_id = 'foo';
-    expect(create_dictionary_url(dictionary_id)).toEqual('https://livingdictionaries.app/foo');
-  });
-});
+const timestamp = {
+  seconds: 1591088635,
+  nanoseconds: 880000000,
+} as Timestamp;
 
 describe('timestamp_to_string_date', () => {
   test('converts createdAt to readable string', () => {
-    const timpestamp = {
-      seconds: 1591088635,
-      nanoseconds: 880000000,
-    };
-    expect(timestamp_to_string_date(timpestamp)).toEqual('Tue Jun 02 2020');
+    expect(timestamp_to_string_date(timestamp)).toEqual('Tue Jun 02 2020');
   });
-  test('returns an empty string if timestime is falsy', () => {
-    const timestamp = undefined;
-    expect(timestamp_to_string_date(timestamp)).toEqual('');
+
+  test('returns an empty string if timestamp is falsy', () => {
+    expect(timestamp_to_string_date(undefined)).toEqual('');
   });
 });
 
-describe('prepareDictionariesForCsv', () => {
+describe('prepareDictionaryForCsv', () => {
   const dictionaries: IDictionary[] = [
     {
       glottocode: 'badh1238',
       glossLanguages: ['en', 'hi', 'pa'],
-      createdAt: {
-        seconds: 1669080253,
-        nanoseconds: 340000000,
-      },
+      createdAt: timestamp,
       createdBy: 'OeVwHacvXMTW0ocKuidCWxBrCIP2',
       updatedBy: 'OeVwHacvXMTW0ocKuidCWxBrCIP2',
       name: '<xaxdeleted>',
@@ -76,12 +67,10 @@ describe('prepareDictionariesForCsv', () => {
       id: 'igbo-language-(asusu-igb',
     },
   ];
-  test('admin/dictionaries example', () => {
-    const admin = 2;
-    expect(prepareDictionariesForCsv(dictionaries, admin)).toMatchSnapshot();
-  });
-  test('List of dictionaries example', () => {
-    const admin = 0;
-    expect(prepareDictionariesForCsv(dictionaries, admin)).toMatchSnapshot();
+
+  dictionaries.forEach((dictionary, index) => {
+    test(`dictionary example ${index + 1}`, () => {
+      expect(prepareDictionaryForCsv(dictionary)).toMatchSnapshot();
+    });
   });
 });

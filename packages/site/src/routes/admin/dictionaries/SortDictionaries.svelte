@@ -1,7 +1,7 @@
 <script lang="ts">
-  import type { DictionaryWithHelpers } from './dictionaryWithHelpers';
+  import type { DictionaryWithHelperStores } from './dictionaryWithHelpers';
 
-  export let dictionaries: DictionaryWithHelpers[] = [];
+  export let dictionaries: DictionaryWithHelperStores[] = [];
 
   enum DictionaryFields {
     name = 'Dictionary Name',

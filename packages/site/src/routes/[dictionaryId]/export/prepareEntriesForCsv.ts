@@ -68,7 +68,7 @@ export function prepareEntriesForCsv(
   // const headers = getHeaders(expanded_entries, dictionary)
   // const formattedEntries = getFormattedEntries(expanded_entries, dictionary, headers, speakers, global_parts_of_speech)
 
-  // 2. create a new function similar to objectsToCSV but it takes two arguments headers and data (entries in this case) and for each row (data entry) it loops through each header value and installs the values or empty string if none exists - then the aforementioned `getFormmatedEntries` function doesn't need to care about how many semantic domains there are in the dictionary or glossing languages, etc...)
+  // 2. Take advantage of improved objectsToCsvByHeaders that takes two arguments: headers and data (entries in this case) and for each row (data entry) it loops through each header value and installs the values or empty string if none exists - then the aforementioned `getFormmatedEntries` function doesn't need to care about how many semantic domains there are in the dictionary or glossing languages, etc...)
   
   // 3. Update Vitest and use the new .matchFileSnapshot method to output to a .csv file so we can more easily test the actual user output (cell ordering especially) without having to fire up the front-end
 

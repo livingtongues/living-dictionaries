@@ -5,7 +5,7 @@ import type {
   IPartOfSpeech,
 } from '@living-dictionaries/types';
 import { StandardEntryCSVFields, prepareEntriesForCsv } from './prepareEntriesForCsv';
-import { objectsToCSV } from '$lib/export/csv';
+import { objectsToCsvByHeaders } from '$lib/export/csv';
 
 describe('prepareEntriesForCsv', () => {
   const speakers: ISpeaker[] = [
@@ -77,10 +77,10 @@ describe('prepareEntriesForCsv', () => {
     expect(firstEntry).toMatchSnapshot();
     expect(secondEntry).toMatchSnapshot();
 
-    expect(objectsToCSV([headerRow, firstEntry, secondEntry])).toMatchInlineSnapshot(`
+    expect(objectsToCsvByHeaders(headerRow, [firstEntry, secondEntry])).toMatchInlineSnapshot(`
       "Entry Id,Lexeme/Word/Phrase,Phonetic (IPA),Interlinearization,Noun class,Morphology,Plural form,Dialects,Notes,Source(s),Part of Speech abbreviation,Part of Speech,Image filename,Audio filename,Speaker name,Speaker birthplace,Speaker decade,Speaker gender,native_script_1,native_script_2,Semantic domain 1,Semantic domain 2,العَرَبِيَّة‎ Gloss,English Gloss,español Gloss,Example sentence in TestLang,Example sentence in العَرَبِيَّة‎,Example sentence in English,Example sentence in español
-      12345qwerty,xiangjiao,xiangjiao,,,,,dialect x,\\"This is an example of a note, here we can write whatever we want.\\",A book | www.mybook.com,n,noun,12345qwerty_foo.png,12345qwerty_foo.mp3,https://database.com/image.png,https://database.com/sound.mp3,John Smith,Whoville,41-50,male,,کیلا,Body parts,Body functions,foo,banana,,我很喜歡吃香蕉,,This is a banana,
-      34qw,tree,,,,,,,,,,,,,,,,,,,𑃐𑃥𑃝𑃢 𑃒𑃦𑃗𑃠𑃤,চুড়া বংজি,,,,,árbol,,,,"
+      12345qwerty,xiangjiao,xiangjiao,,,,,dialect x,\\"This is an example of a note, here we can write whatever we want.\\",A book | www.mybook.com,n,noun,12345qwerty_foo.png,12345qwerty_foo.mp3,John Smith,Whoville,41-50,male,,,Body parts,Body functions,foo,banana,,我很喜歡吃香蕉,,This is a banana,
+      34qw,tree,,,,,,,,,,,,,,,,,,,,,,,árbol,,,,"
     `);
   });
 
