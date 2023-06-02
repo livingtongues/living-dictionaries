@@ -2,25 +2,25 @@
   import type { IDictionary, IHelper, IInvite } from '@living-dictionaries/types';
   import { updateOnline, collectionStore } from 'sveltefirets';
   import { arrayRemove, arrayUnion, deleteField, GeoPoint } from 'firebase/firestore/lite';
-  import { exportDictionariesAsCSV } from '$lib/export/csv';
   import Filter from '$lib/components/Filter.svelte';
-  import { Button, ResponsiveTable, ShowHide } from 'svelte-pieces';
+  import { Button, ResponsiveTable } from 'svelte-pieces';
   import DictionaryRow from './DictionaryRow.svelte';
   import SortDictionaries from './SortDictionaries.svelte';
-  import { admin } from '$lib/stores';
   import { where } from 'firebase/firestore';
-  import type { DictionaryWithHelpers } from './dictionaryWithHelpers';
+  import type { DictionaryWithHelperStores } from './dictionaryWithHelpers';
   import IntersectionObserverShared from './IntersectionObserverShared.svelte';
+  import { exportAdminDictionariesAsCSV } from './export';
 
   const dictionaries = collectionStore<IDictionary>('dictionaries', [], {
     startWith: [],
     log: true,
   });
 
-  let dictionariesAndHelpers: DictionaryWithHelpers[] = [];
+  let dictionariesAndHelpers: DictionaryWithHelperStores[] = [];
   $: dictionariesAndHelpers = $dictionaries.map((dictionary) => {
     return {
       ...dictionary,
+      entryCount: dictionary.entryCount || -1,
       managers: collectionStore<IHelper>(`dictionaries/${dictionary.id}/managers`, [], {
         startWith: [],
         log: true,
@@ -63,8 +63,7 @@
       <Button
         form="filled"
         color="black"
-        onclick={() =>
-          exportDictionariesAsCSV(filteredDictionaries, 'living-dictionaries-list', $admin)}>
+        onclick={() => exportAdminDictionariesAsCSV(filteredDictionaries)}>
         <i class="fas fa-download mr-1" />
         Download {filteredDictionaries.length} Dictionaries as CSV
       </Button>

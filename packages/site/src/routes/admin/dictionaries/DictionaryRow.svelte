@@ -8,9 +8,9 @@
   import { LatLngDisplay } from '@living-dictionaries/parts';
   import ContributorInvitationStatus from '$lib/components/contributors/ContributorInvitationStatus.svelte';
   import RolesManagment from './RolesManagment.svelte';
-  import type { DictionaryWithHelpers } from './dictionaryWithHelpers';
+  import type { DictionaryWithHelperStores } from './dictionaryWithHelpers';
 
-  export let dictionary: DictionaryWithHelpers;
+  export let dictionary: DictionaryWithHelperStores;
   const { managers, contributors, writeInCollaborators, invites } = dictionary;
 
   const dispatch = createEventDispatcher<{
@@ -40,8 +40,9 @@
     </Button>
   </td>
   <td>
-    <Button href="/{dictionary.id}">
-      {dictionary.entryCount || '?'}
+    <Button title="View Entries" size="sm" form="simple" href="/{dictionary.id}">
+      {dictionary.entryCount} 
+      <!-- <span class="i-tabler-external-link" style="vertical-align: -1px;" /> -->
     </Button>
   </td>
   <td>
