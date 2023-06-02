@@ -2,8 +2,15 @@ import type { IDictionary } from '@living-dictionaries/types';
 import {
   prepareDictionariesForCsv,
   timestamp_to_string_date,
-  type DictionaryForCSV,
+  create_dictionary_url,
 } from './prepareDictionariesForCsv';
+
+describe('create_dictionary_url', () => {
+  test('returns a dictionary URL', () => {
+    const dictionary_id = 'foo';
+    expect(create_dictionary_url(dictionary_id)).toEqual('https://livingdictionaries.app/foo');
+  });
+});
 
 describe('timestamp_to_string_date', () => {
   test('converts createdAt to readable string', () => {
