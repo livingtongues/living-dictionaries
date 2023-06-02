@@ -7,7 +7,7 @@ export function downloadObjectsAsCSV(headers: Record<string, any>, items: Record
 }
 
 export function objectsToCsvByHeaders(headers: Record<string, any>, items: Record<string, any>[]): string {
-  const headerRow = Object.values(headers).join(',');
+  const headerRow = Object.values(headers).map(turnValueIntoStringSurroundWithQuotesAsNeeded).join(',');
   
   const headerKeys = Object.keys(headers);
   const itemRows = items
@@ -82,6 +82,19 @@ if (import.meta.vitest) {
       const items = [ { city: 'Chicago', windy: true } ];
       const result = objectsToCsvByHeaders(headers, items);
       const expectedCsv = `City,Windy\nChicago,true`;
+      expect(result).toEqual(expectedCsv);
+    });
+
+    test('also handles abnormal header values', () => {
+      const headers = {
+        number: 1,
+        boolean: true,
+        hasComma: 'City, State',
+        hasQuote: 'The "Expression"',
+      };
+      const items = [];
+      const result = objectsToCsvByHeaders(headers, items);
+      const expectedCsv = `1,true,"City, State","The ""Expression"""`;
       expect(result).toEqual(expectedCsv);
     });
   });

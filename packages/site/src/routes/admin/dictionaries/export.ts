@@ -1,10 +1,10 @@
 import { get } from 'svelte/store';
 import type { DictionaryWithHelperStores, DictionaryWithHelpers } from './dictionaryWithHelpers';
 import { downloadObjectsAsCSV } from '$lib/export/csv';
-import { dictionary_headers, prepareDictionaryForCsv, timestamp_to_string_date } from '$lib/export/prepareDictionariesForCsv';
+import { dictionary_headers as standard_headers, prepareDictionaryForCsv, timestamp_to_string_date, type StandardDictionaryForCSV } from '$lib/export/prepareDictionariesForCsv';
 
 enum AdminDictionaryCSVFields {
-  entries = 'No. Entries',
+  entryCount = 'Entries',
   gloss_languages = 'Gloss Languages',
   alternate_names = 'Alternate Names',
   alternate_orthographies = 'Alternate Orthographies',
@@ -14,11 +14,15 @@ enum AdminDictionaryCSVFields {
   communityPermission = 'Community Permission',
   authorConnection = 'Author Connection',
   conLangDescription = 'Conlang Description',
+  managers = 'Managers',
+  contributors = 'Contributors',
+  writeInCollaborators = 'Write-In Collaborators',
+  invites = 'Pending Invites',
 }
 
 type DictionaryForCSVKeys = keyof typeof AdminDictionaryCSVFields;
 type AdminDictionaryForCSV = {
-  [key in DictionaryForCSVKeys]: string;
+  [key in DictionaryForCSVKeys]: string | boolean | number;
 };
 
 const admin_headers: AdminDictionaryForCSV = { ...AdminDictionaryCSVFields };
@@ -26,28 +30,36 @@ const admin_headers: AdminDictionaryForCSV = { ...AdminDictionaryCSVFields };
 export function exportAdminDictionariesAsCSV(dictionariesAndHelpers: DictionaryWithHelperStores[]) {
   const dictionaries = getAllDictionariesAndHelpers(dictionariesAndHelpers);
 
-  const formatted_dictionaries = dictionaries.map((dictionary) => {
-    return {
-      ...prepareDictionaryForCsv(dictionary),
-      
-      // could just use ...dictionary before prepareDictionaryForCsv, but this is more explicit
+  const formatted_dictionaries: (StandardDictionaryForCSV & AdminDictionaryForCSV)[] = dictionaries.map((dictionary) => {
+    const standard_dictionary = prepareDictionaryForCsv(dictionary);
+    const admin_dictionary: AdminDictionaryForCSV = {
       entryCount: dictionary.entryCount,
       videoAccess: dictionary.videoAccess,
       languageUsedByCommunity: dictionary.languageUsedByCommunity,
-      communityPermission: dictionary.communityPermission,
+      communityPermission: dictionary.communityPermission as string,
       authorConnection: dictionary.authorConnection,
       conLangDescription: dictionary.conLangDescription,
-      
+
       // special adjustments needed
       gloss_languages: dictionary.glossLanguages?.join(', '),
       alternate_names: dictionary.alternateNames?.join(', '),
       alternate_orthographies: dictionary.alternateOrthographies?.join(', '),
       created_at: timestamp_to_string_date(dictionary.createdAt),
+
+      // data from subcollections
+      managers: dictionary.managers.map(({ name }) => name).join(', '),
+      contributors: dictionary.contributors.map(({ name }) => name).join(', '),
+      writeInCollaborators: dictionary.writeInCollaborators.map(({ name }) => name).join(', '),
+      invites: dictionary.invites.map((invite) => {
+        return `${invite.inviterName} (${invite.inviterEmail}) invited ${invite.targetEmail} as ${invite.role} on ${timestamp_to_string_date(invite.createdAt)}`;
+      }).join(', '),
     }
+
+    return { ...standard_dictionary, ...admin_dictionary };
   });
 
   downloadObjectsAsCSV(
-    { ...dictionary_headers, ...admin_headers },
+    { ...standard_headers, ...admin_headers },
     formatted_dictionaries,
     'living-dictionaries-public-private'
   )
