@@ -1,11 +1,11 @@
 <script lang="ts">
   import type { IUser } from '@living-dictionaries/types';
   import { Collection } from 'sveltefirets';
-  import UserRow from '../UserRow.svelte';
   import Filter from '$lib/components/Filter.svelte';
   import { exportUsersAsCSV } from '$lib/export/csv';
   import { Button, ResponsiveTable } from 'svelte-pieces';
-  import SortUsers from '../SortUsers.svelte';
+  import UserRow from './UserRow.svelte';
+  import SortUsers from './SortUsers.svelte';
 
   let usersType: IUser[] = [];
 </script>

@@ -46,7 +46,7 @@
     on:additem={role === 'writeInCollaborator' ? addWriteInCollaborator : toggleSelectUserModal} />
 
   {#if show && role !== 'writeInCollaborator'}
-    {#await import('./SelectUserModal.svelte') then { default: SelectUserModal }}
+    {#await import('../users/SelectUserModal.svelte') then { default: SelectUserModal }}
       <SelectUserModal {dictionary} {role} on:close={toggleSelectUserModal} />
     {/await}
   {/if}
