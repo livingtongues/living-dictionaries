@@ -12,7 +12,7 @@
     "kitbook:build": "svelte-kit sync && vite build --mode kitbook",
     "kitbook:preview": "vite preview --mode kitbook",
     "sync": "svelte-kit sync",
-    "check": "svelte-check --tsconfig ./tsconfig.json --threshold warning --diagnostic-sources js,svelte",
+    "check": "svelte-check --tsconfig ./tsconfig.json --threshold error --diagnostic-sources js,svelte",
     "check:watch": "svelte-check --tsconfig ./tsconfig.json --threshold warning --diagnostic-sources js,svelte --watch",
     "test": "vitest",
     "test:ui": "vitest --ui",
