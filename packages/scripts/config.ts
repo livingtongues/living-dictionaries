@@ -1,5 +1,10 @@
 import { program } from 'commander';
-import admin from 'firebase-admin';
+import { initializeApp, cert } from "firebase-admin/app";
+import { FieldValue, getFirestore } from "firebase-admin/firestore";
+import { getStorage } from 'firebase-admin/storage';
+// import serviceAccountDev from './service-account-dev.json';
+// import serviceAccountProd from './service-account-prod.json';
+import { serviceAccountDev, serviceAccountProd } from './service-accounts';
 
 program
   //   .version('0.0.1')
@@ -11,23 +16,19 @@ export const environment = program.opts().environment === 'prod' ? 'prod' : 'dev
 export const projectId =
   environment === 'prod' ? 'talking-dictionaries-alpha' : 'talking-dictionaries-dev';
 
-// import serviceAccountDev from './service-account-dev.json';
-// import serviceAccountProd from './service-account-prod.json';
-import { serviceAccountDev, serviceAccountProd } from './service-accounts.js';
 const serviceAccount = environment === 'dev' ? serviceAccountDev : serviceAccountProd;
 
-admin.initializeApp({
-  //@ts-ignore
-  credential: admin.credential.cert(serviceAccount),
+initializeApp({
+  // @ts-expect-error
+  credential: cert(serviceAccount),
   databaseURL: `https://${projectId}.firebaseio.com`,
   storageBucket: `${projectId}.appspot.com`,
 });
-export const db = admin.firestore();
+export const db = getFirestore();
 // const settings = { timestampsInSnapshots: true };
 // db.settings(settings);
-export const firebase = admin;
-export const timestamp = admin.firestore.FieldValue.serverTimestamp();
-export const storage = admin.storage();
+export const timestamp = FieldValue.serverTimestamp();
+export const storage = getStorage();
 
 ///LOGGER///
 import fs from 'fs';
