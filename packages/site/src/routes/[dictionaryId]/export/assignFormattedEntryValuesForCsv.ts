@@ -5,9 +5,7 @@ export function find_part_of_speech_abbreviation(
   global_parts_of_speech: IPartOfSpeech[],
   part_of_speech: string
 ): string {
-  return global_parts_of_speech.find(
-    ({ enName }) => enName === part_of_speech
-  )?.enAbbrev;
+  return global_parts_of_speech.find(({ enName }) => enName === part_of_speech)?.enAbbrev;
 }
 
 export function get_first_speaker_from_first_sound_file(
@@ -26,8 +24,8 @@ export function format_local_orthographies(
   local_orthographies_headers: EntryForCSV
 ): EntryForCSV {
   const formatted_local_orthographies = {};
-  Object.keys(local_orthographies_headers).forEach((header) => {
-    formatted_local_orthographies[local_orthographies_headers[header]] = entry[header];
+  Object.keys(local_orthographies_headers).forEach((header, index) => {
+    formatted_local_orthographies[`local_orthography_${index + 1}`] = entry[header];
   });
   return formatted_local_orthographies;
 }
