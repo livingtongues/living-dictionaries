@@ -269,14 +269,15 @@
     "role": "Role"
   },
   "export": {
-    "csv_data": "Data as CSV",
+    "csv_data": "Data as .CSV",
     "checking_images": "Checking if image files exist",
     "no_images": "There are no image files",
     "checking_audios": "Checking if audio files exist",
     "no_audios": "There are no audio files",
     "download_csv": "Download CSV",
     "availability": "Export is only available to dictionary managers",
-    "download_pdf": "Download PDF"
+    "download_pdf": "Download PDF",
+    "spreadsheet": "Spreadsheet"
   },
   "video": {
     "video_url": "Video URL",
