@@ -24,7 +24,9 @@ describe('find_part_of_speech_abbreviation', () => {
 
   test('return undefined if abbreviation does not exist', () => {
     const part_of_speech = null;
-    expect(find_part_of_speech_abbreviation(global_parts_of_speech, part_of_speech)).toEqual(undefined);
+    expect(find_part_of_speech_abbreviation(global_parts_of_speech, part_of_speech)).toEqual(
+      undefined
+    );
   });
 });
 
@@ -88,9 +90,9 @@ describe('format_local_orthographies', () => {
       local_orthography_2: 'example-2',
     };
     const expected = {
-      script_1: undefined,
-      script_2: 'example-2',
-      script_3: 'example-3',
+      local_orthography_1: undefined,
+      local_orthography_2: 'example-2',
+      local_orthography_3: 'example-3',
     };
     expect(format_local_orthographies(entry, local_orthographies_headers)).toEqual(expected);
   });
