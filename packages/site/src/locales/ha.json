@@ -269,14 +269,15 @@
     "role": "Aikin"
   },
   "export": {
-    "csv_data": "Bayani a matsayin CSV",
+    "csv_data": "Bayanai kamar yadda .csv",
     "checking_images": "Duba idan fayilolin hoto sun wanzu",
     "no_images": "Babu fayilolin hoto",
     "checking_audios": "Dubawa idan fayilolin sauti sun wanzu",
     "no_audios": "Babu fayilolin mai jiwuwa",
     "download_csv": "Sauke CSV",
     "availability": "Ana samun fitarwa kawai don manajan kamawa",
-    "download_pdf": "Download PDF"
+    "download_pdf": "Download PDF",
+    "spreadsheet": "Yadow"
   },
   "video": {
     "video_url": "URL ɗin bidiyo",
