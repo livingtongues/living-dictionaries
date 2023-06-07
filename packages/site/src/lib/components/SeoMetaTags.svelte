@@ -3,6 +3,7 @@
   import { page } from '$app/stores';
   import LZString from 'lz-string';
   import { seoTitle } from './seo-title';
+  import '@fontsource/noto-sans-wancho';
   const { compressToEncodedURIComponent: encode } = LZString;
 
   export let admin = false;
