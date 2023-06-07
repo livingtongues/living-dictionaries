@@ -19,7 +19,6 @@
   } from '$lib/stores';
   import { convert_and_expand_entry } from '$lib/transformers/convert_and_expand_entry';
   import type { PageData } from './$types';
-  import '@fontsource/noto-sans-wancho';
   export let data: PageData;
   $: entry = data.initialEntry;
 </script>
