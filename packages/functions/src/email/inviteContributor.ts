@@ -1,4 +1,4 @@
-import * as functions from 'firebase-functions';
+import { FirestoreEvent, QueryDocumentSnapshot } from 'firebase-functions/v2/firestore';
 import { db } from '../config';
 
 import { adminRecipients } from './recipients';
@@ -7,13 +7,10 @@ import { sendEmail } from './mailChannels';
 
 import { IInvite } from '@living-dictionaries/types';
 
-export default async (
-  snapshot: functions.firestore.DocumentSnapshot,
-  context: functions.EventContext
-) => {
-  const invite = snapshot.data() as IInvite;
-  const dictionaryId = context.params.dictionaryId;
-  const inviteId = context.params.inviteId;
+export async function inviteContributor({ data, params }: FirestoreEvent<QueryDocumentSnapshot, { dictionaryId: string, inviteId: string }>) {
+  const invite = data.data() as IInvite;
+  const dictionaryId = params.dictionaryId;
+  const inviteId = params.inviteId;
 
   try {
     if (invite) {
