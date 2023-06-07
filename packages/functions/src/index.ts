@@ -2,7 +2,7 @@
 // Read https://medium.com/firebase-developers/organize-cloud-functions-for-max-cold-start-performance-and-readability-with-typescript-and-9261ee8450f0
 
 // firebase-functions should be the only imports in index.ts beside function imports
-import { https, firestore } from 'firebase-functions';
+import { firestore } from 'firebase-functions';
 import {
   onDocumentCreated,
   onDocumentDeleted,
@@ -19,23 +19,6 @@ import { onSchedule } from "firebase-functions/v2/scheduler";
 //   await (await import('./export/semanticDomainOfDictionary')).default(req, res);
 // });
 // TODO: end restore
-
-// Email
-export const supportEmail = https.onCall(async (data, context) => {
-  return (await import('./email/supportEmail')).default(data, context);
-});
-
-export const inviteContributor = onDocumentCreated('dictionaries/{dictionaryId}/invites/{inviteId}', async (event) => {
-  await (await import('./email/inviteContributor')).inviteContributor(event);
-});
-
-export const onNewUser = onDocumentCreated('users/{userId}', async (event) => {
-  await (await import('./email/onNewUser')).onNewUser(event);
-});
-
-export const onNewDictionary = onDocumentCreated('dictionaries/{dictionaryId}', async (event) => {
-  await (await import('./email/onNewDictionary')).onNewDictionary(event);
-});
 
 // Aggregation
 export const increaseEntryCount = onDocumentCreated('dictionaries/{dictionaryId}/words/{wordId}', async (event) => {
