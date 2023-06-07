@@ -5,6 +5,7 @@
   import Header from '$lib/components/shell/Header.svelte';
   import { Button, ResponsiveSlideover } from 'svelte-pieces';
   import type { LayoutData } from './$types';
+  import '@fontsource/noto-sans-wancho';
   export let data: LayoutData;
 
   if (data.dictionary) {
