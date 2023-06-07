@@ -1,16 +1,16 @@
-import * as functions from 'firebase-functions';
+import {
+  FirestoreEvent, QueryDocumentSnapshot
+} from "firebase-functions/v2/firestore";
 
 import { adminRecipients } from './recipients';
 import { MailChannelsSendBody } from './mail-channels.interface';
 import { sendEmail } from './mailChannels';
 
 import newUserWelcome from './html/newUserWelcome';
+import { IUser } from "@living-dictionaries/types";
 
-export default async (
-  snapshot: functions.firestore.DocumentSnapshot,
-  context: functions.EventContext
-) => {
-  const user = snapshot.data();
+export async function onNewUser({ data }: FirestoreEvent<QueryDocumentSnapshot, { userId: string }>) {
+  const user = data.data() as IUser;
   try {
     if (user) {
       const userMsg: MailChannelsSendBody = {

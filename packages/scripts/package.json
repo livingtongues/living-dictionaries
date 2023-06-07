@@ -5,6 +5,7 @@
   "type": "module",
   "main": "index.ts",
   "scripts": {
+    "countAllEntries": "tsx countAllEntries.ts",
     "entryRefactor": "tsx refactor/entry-refactor.ts",
     "sendEmail": "tsx sendEmail.ts",
     "updateLocales": "tsx locales/update-locales.ts",
@@ -30,8 +31,8 @@
     "csvtojson": "^2.0.10",
     "dot-object": "^2.1.4",
     "dotenv": "^16.0.2",
-    "firebase": "^9.21.0",
-    "firebase-admin": "^10.3.0",
+    "firebase": "^9.22.1",
+    "firebase-admin": "^11.9.0",
     "node-fetch": "^3.1.0",
     "tsx": "^3.12.1",
     "typescript": "~4.9.4",

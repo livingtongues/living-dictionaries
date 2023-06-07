@@ -1,4 +1,4 @@
-import * as functions from 'firebase-functions';
+import { FirestoreEvent, QueryDocumentSnapshot } from 'firebase-functions/v2/firestore';
 import { db } from '../config';
 
 import { adminRecipients } from './recipients';
@@ -10,12 +10,9 @@ import { IDictionary, IUser } from '@living-dictionaries/types';
 import { notifyAdminsOnNewDictionary } from './composeMessages';
 import newDictionary from './html/newDictionary';
 
-export default async (
-  snapshot: functions.firestore.DocumentSnapshot,
-  context: functions.EventContext
-) => {
-  const dictionary = snapshot.data() as IDictionary;
-  const dictionaryId = context.params.dictionaryId;
+export async function onNewDictionary({ data, params }: FirestoreEvent<QueryDocumentSnapshot, { dictionaryId: string }>) {
+  const dictionary = data.data() as IDictionary;
+  const dictionaryId = params.dictionaryId;
 
   const userSnap = await db.doc(`users/${dictionary && dictionary.createdBy}`).get();
   const user = userSnap.data() as IUser;
