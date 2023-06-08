@@ -1,11 +1,11 @@
-import { IDictionary, IUser } from '@living-dictionaries/types';
+import type { IDictionary, IUser } from '@living-dictionaries/types';
 
-export function notifyAdminsOnNewDictionary(dictionary: IDictionary, dictionaryId: string, user: IUser) {
+export function notifyAdminsOnNewDictionary(dictionary: IDictionary, user: IUser) {
   return `Hey Admins,
 
   ${user.displayName} created a new Living Dictionary named ${dictionary.name}. Here's the details:
   
-  URL: https://livingdictionaries.app/${dictionaryId} 
+  URL: https://livingdictionaries.app/${dictionary.id} 
   
   Glossing languages: ${dictionary.glossLanguages.join(', ')}
   Alternate names: ${dictionary.alternateNames ? dictionary.alternateNames.join(', ') : ''}
