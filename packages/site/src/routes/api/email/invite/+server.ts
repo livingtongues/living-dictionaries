@@ -1,10 +1,10 @@
 import { SEND_EMAIL_KEY } from '$env/static/private';
 import { decodeToken, getDb } from '$lib/server/firebase-admin';
 import { json } from '@sveltejs/kit';
-import type { MailChannelsSendBody } from '../send/mail-channels.interface';
+import type { EmailParts } from '../send/mail-channels.interface';
 import type { RequestHandler } from './$types';
 import type { IInvite, IUser } from '@living-dictionaries/types';
-import { getAdminRecipients } from '../admin_recipients';
+import { getAdminRecipients } from '../addresses';
 
 export interface InviteRequestBody {
   auth_token: string;
@@ -42,18 +42,12 @@ export const POST: RequestHandler = async ({ request, fetch }) => {
       ? 'manager'
       : 'contributor, which allows you to add and edit entries';
 
-  const userMsg: MailChannelsSendBody = {
-    personalizations: [{ to: [{ email: targetEmail }] }],
-    from: {
-      email: 'annaluisa@livingtongues.org',
-      name: 'Anna Luisa Daigneault',
-    },
+  const userMsg: EmailParts = {
+    to: [{ email: targetEmail }],
     reply_to: { email: inviterEmail },
     subject: `${inviterName} has invited you to contribute to the ${dictionaryName} Living Dictionary`,
-    content: [
-      {
-        type: 'text/plain',
-        value: `Hello,
+    type: 'text/plain',
+    body: `Hello,
 
 ${inviterName} has invited you to work on the ${dictionaryName} Living Dictionary as a ${roleMessage}. If you would like to help with this dictionary, then open this link: https://livingdictionaries.app/${dictionaryId}/invite/${inviteRef.id} to  access the dictionary.
 
@@ -64,13 +58,11 @@ Living Tongues Institute for Endangered Languages
 
 https://livingtongues.org (Living Tongues Homepage)
 https://livingdictionaries.app (Living Dictionaries website)`,
-      },
-    ],
   };
 
   await fetch('/api/email/send', {
     method: 'POST',
-    body: JSON.stringify({ send_key: SEND_EMAIL_KEY, mailChannelsSendBody: userMsg }),
+    body: JSON.stringify({ send_key: SEND_EMAIL_KEY, emailParts: userMsg }),
     headers: {
       'content-type': 'application/json'
     }
@@ -78,17 +70,12 @@ https://livingdictionaries.app (Living Dictionaries website)`,
 
   const adminRecipients = getAdminRecipients(inviterEmail);
   if (!adminRecipients.find(({ email }) => email === inviterEmail)) {
-    const adminMsg: MailChannelsSendBody = {
-      personalizations: [{ to: adminRecipients }],
-      from: {
-        email: 'annaluisa@livingtongues.org',
-      },
+    const adminMsg: EmailParts = {
+      to: adminRecipients,
       reply_to: { email: inviterEmail },
       subject: `${inviterName} has invited ${targetEmail} to contribute to the ${dictionaryName} Living Dictionary`,
-      content: [
-        {
-          type: 'text/plain',
-          value: `Hello Admins,
+      type: 'text/plain',
+      body: `Hello Admins,
 
 ${inviterName} has invited ${targetEmail} to work on the ${dictionaryName} Living Dictionary as a ${roleMessage}.
 
@@ -100,13 +87,11 @@ Thanks,
 Our automatic Vercel function
 
 https://livingdictionaries.app`,
-        },
-      ],
     };
 
     await fetch('/api/email/send', {
       method: 'POST',
-      body: JSON.stringify({ send_key: SEND_EMAIL_KEY, mailChannelsSendBody: adminMsg }),
+      body: JSON.stringify({ send_key: SEND_EMAIL_KEY, emailParts: adminMsg }),
       headers: {
         'content-type': 'application/json'
       }
