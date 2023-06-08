@@ -5,12 +5,6 @@
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte';
 </script>
 
-<svelte:head>
-  <title>
-    {$_('about.about_LD', { default: 'About Living Dictionaries' })}
-  </title>
-</svelte:head>
-
 <Header>
   {$_('about.about_LD', { default: 'About Living Dictionaries' })}
 </Header>
