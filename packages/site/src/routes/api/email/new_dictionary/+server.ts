@@ -1,10 +1,10 @@
 import { SEND_EMAIL_KEY } from '$env/static/private';
 import { decodeToken, getDb } from '$lib/server/firebase-admin';
 import { json } from '@sveltejs/kit';
-import type { MailChannelsSendBody } from '../send/mail-channels.interface';
+import type { EmailParts } from '../send/mail-channels.interface';
 import type { RequestHandler } from './$types';
 import type { IDictionary, IUser } from '@living-dictionaries/types';
-import { getAdminRecipients } from '../admin_recipients';
+import { getAdminRecipients } from '../addresses';
 import newDictionary from '../html/newDictionary';
 import { notifyAdminsOnNewDictionary } from './composeMessages';
 
@@ -29,47 +29,32 @@ export const POST: RequestHandler = async ({ request, fetch }) => {
   const userSnap = await db.doc(`users/${decodedToken.uid}`).get()
   const user = userSnap.data() as IUser;
 
-  const userMsg: MailChannelsSendBody = {
-    personalizations: [{ to: [{ email: user.email }] }],
-    from: {
-      email: 'annaluisa@livingtongues.org',
-      name: 'Anna Luisa Daigneault',
-    },
+  const userMsg: EmailParts = {
+    to: [{ email: user.email }],
     subject: 'New Living Dictionary Created',
-    content: [
-      {
-        type: 'text/html',
-        value: newDictionary(dictionary.name, dictionary.id),
-      },
-    ],
+    type: 'text/html',
+    body: newDictionary(dictionary.name, dictionary.id),
   };
 
   await fetch('/api/email/send', {
     method: 'POST',
-    body: JSON.stringify({ send_key: SEND_EMAIL_KEY, mailChannelsSendBody: userMsg }),
+    body: JSON.stringify({ send_key: SEND_EMAIL_KEY, emailParts: userMsg }),
     headers: {
       'content-type': 'application/json'
     }
   });
 
   const adminRecipients = getAdminRecipients(decodedToken.email);
-  const adminMsg: MailChannelsSendBody = {
-    personalizations: [{ to: adminRecipients }],
-    from: {
-      email: 'annaluisa@livingtongues.org',
-    },
+  const adminMsg: EmailParts = {
+    to: adminRecipients,
     subject: `Living Dictionary created: ${dictionary.name}`,
-    content: [
-      {
-        type: 'text/plain',
-        value: notifyAdminsOnNewDictionary(dictionary, user),
-      },
-    ],
+    type: 'text/plain',
+    body: notifyAdminsOnNewDictionary(dictionary, user),
   };
 
   await fetch('/api/email/send', {
     method: 'POST',
-    body: JSON.stringify({ send_key: SEND_EMAIL_KEY, mailChannelsSendBody: adminMsg }),
+    body: JSON.stringify({ send_key: SEND_EMAIL_KEY, emailParts: adminMsg }),
     headers: {
       'content-type': 'application/json'
     }
