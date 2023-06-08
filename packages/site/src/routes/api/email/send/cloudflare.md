@@ -1,9 +1,13 @@
-The following is placed into a Cloudflare Worker:
+# Easy Email Sending
 
+Using MailChannels and a Cloudflare Worker as described in
+https://mailchannels.zendesk.com/hc/en-us/articles/4565898358413-Sending-Email-from-Cloudflare-Workers-using-MailChannels-Send-API
+
+Then added DKIM with help from  https://support.mailchannels.com/hc/en-us/articles/7122849237389-Adding-a-DKIM-Signature
+
+The following is placed into a Cloudflare Worker after adding in the API_KEY:
 ```js
-// from https://mailchannels.zendesk.com/hc/en-us/articles/4565898358413-Sending-Email-from-Cloudflare-Workers-using-MailChannels-Send-API
 // status codes: https://restfulapi.net/http-status-codes/#4xx
-// TODO: DKIM: https://support.mailchannels.com/hc/en-us/articles/7122849237389-Adding-a-DKIM-Signature
 
 const AUTH_HEADER_KEY = 'x-api-key';
 const AUTH_HEADER_VALUE = 'CHANGE_TO_API_KEY';
