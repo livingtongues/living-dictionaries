@@ -111,12 +111,6 @@
 
 <svelte:window bind:online />
 
-<svelte:head>
-  <title>
-    {$t('create.create_new_dictionary', { default: 'Create New Dictionary' })}
-  </title>
-</svelte:head>
-
 <Header
   >{$t('create.create_new_dictionary', {
     default: 'Create New Dictionary',
