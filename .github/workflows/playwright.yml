@@ -1,8 +1,9 @@
 # https://vercel.com/guides/how-can-i-run-end-to-end-tests-after-my-vercel-preview-deployment helps a little - beware syntax issues
 name: Playwright E2E Tests
 
-on:
-  deployment_status
+# Skip until we can make it work
+# on:
+#   deployment_status
 
 jobs:
   run-e2e:
