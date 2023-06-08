@@ -5,8 +5,10 @@
   import { tweened } from 'svelte/motion';
   import { cubicOut } from 'svelte/easing';
   import { getStorage, ref, uploadBytesResumable } from 'firebase/storage';
-  import { updateOnline, firebaseConfig } from 'sveltefirets';
-  import { processImageUrl } from './processImageUrl';
+  import { updateOnline, firebaseConfig, authState } from 'sveltefirets';
+    import { apiFetch } from '$lib/client/apiFetch';
+    import type { ImageUrlRequestBody } from '../../../routes/api/image_url/+server';
+    import { get } from 'svelte/store';
 
   export let file: File, entry: IEntry;
   let progress = tweened(0, {
@@ -88,11 +90,19 @@
 
   async function savePhoto(storagePath: string) {
     try {
-      const imageProcessingUrl = `${processImageUrl}/${firebaseConfig.storageBucket}/${storagePath}`;
+      const firebase_storage_location = `${firebaseConfig.storageBucket}/${storagePath}`;
 
-      const result = await fetch(imageProcessingUrl);
-      const url = await result.text();
-      const gcsPath = url.replace('http://lh3.googleusercontent.com/', '');
+      const auth_state_user = get(authState);
+      const auth_token = await auth_state_user.getIdToken();
+      const response = await apiFetch<ImageUrlRequestBody>('/api/image_url', {
+        auth_token,
+        firebase_storage_location,
+      });
+      
+      if (response.status !== 200) {
+        throw new Error(`Error getting image serving url.`);
+      }
+      const gcsPath = await response.json() as string
 
       const pf: GoalDatabasePhoto = {
         path: storagePath,

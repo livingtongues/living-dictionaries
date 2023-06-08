@@ -7,7 +7,6 @@
   "scripts": {
     "countAllEntries": "tsx countAllEntries.ts",
     "entryRefactor": "tsx refactor/entry-refactor.ts",
-    "sendEmail": "tsx sendEmail.ts",
     "updateLocales": "tsx locales/update-locales.ts",
     "importDictionary": "tsx import/import.ts",
     "addDictionariesToIndex:dev": "tsx algolia/addDictionariesToIndex.ts dev",
