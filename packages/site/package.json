@@ -19,7 +19,6 @@
     "test:e2e": "playwright test"
   },
   "devDependencies": {
-    "@fontsource/noto-sans-wancho": "^5.0.2",
     "@iconify/json": "^2.2.49",
     "@living-dictionaries/parts": "workspace:^0.0.1",
     "@living-dictionaries/types": "workspace:^1.0.0",
