@@ -9,16 +9,11 @@ import {
 } from "firebase-functions/v2/firestore";
 import { onSchedule } from "firebase-functions/v2/scheduler";
 
-// TODO: restore
-// export const updateDevAdminRole = functions.https.onCall(async (data, context) => {
-//   return (await import('./updateDevAdminRole')).default(data, context);
-// });
-
-// // Export
-// export const exportSemanticDomainOfDictionary = functions.https.onRequest(async (req, res) => {
-//   await (await import('./export/semanticDomainOfDictionary')).default(req, res);
-// });
-// TODO: end restore
+// TODO: create endpoints
+// updateDevAdminRole
+// exportSemanticDomainOfDictionary // if needed or just work on the api endpoint
+// deleteMediaOnDictionaryDelete
+// recursiveDelete, .runWith({ timeoutSeconds: 540, memory: '2GB' })
 
 // Aggregation
 export const increaseEntryCount = onDocumentCreated('dictionaries/{dictionaryId}/words/{wordId}', async (event) => {
@@ -33,27 +28,6 @@ export const decreaseEntryCount = onDocumentDeleted('dictionaries/{dictionaryId}
 export const countAllEntries = onSchedule("every day 00:00", async (event) => {
   await (await import('./aggregation/countAllEntries')).countAllEntries();
 })
-
-// TODO: restore
-// // Deletion
-// export const deleteMediaOnDictionaryDelete = functions.firestore
-//   .document('dictionaries/{dictionaryId}')
-//   .onDelete(async (snapshot, context) => {
-//     await (await import('./deletion/deleteMediaOnDictionaryDelete')).default(snapshot, context);
-//   });
-
-// export const recursiveDelete = functions
-//   .runWith({
-//     timeoutSeconds: 540,
-//     memory: '2GB',
-//   })
-//   .https.onCall(async (data, context) => {
-//     return (await import('./deletion/recursiveDelete')).default(data, context);
-//   });
-// TODO: end restore
-
-// Import
-// export { processImport } from './import/importing';
 
 // Algolia Search Indexing
 export const addToIndex = firestore
