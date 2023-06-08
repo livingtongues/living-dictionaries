@@ -3,10 +3,11 @@
   import { Button, Modal, Form } from 'svelte-pieces';
   import { user } from '$lib/stores';
   import { goto } from '$app/navigation';
-
   import { createEventDispatcher } from 'svelte';
+  import { apiFetch } from '$lib/client/apiFetch';
+  import type { SupportRequestBody } from '../../../routes/api/email/support/+server';
 
-  const dispatch = createEventDispatcher();
+  const dispatch = createEventDispatcher<{ close: boolean }>();
 
   function close() {
     dispatch('close');
@@ -19,14 +20,18 @@
 
   async function send() {
     try {
-      const data = {
+      const response = await apiFetch<SupportRequestBody>('/api/email/support', {
         message,
-        email: ($user && $user.email) || email,
-        name: ($user && $user.displayName) || 'Anonymous',
+        email: $user?.email || email,
+        name: $user?.displayName || 'Anonymous',
         url: window.location.href,
-      };
-      const { getFunctions, httpsCallable } = await import('firebase/functions');
-      await httpsCallable(getFunctions(), 'supportEmail')(data);
+      });
+
+      if (response.status !== 200) {
+        const body = await response.json();
+        throw new Error(body.message);
+      }
+
       status = 'success';
     } catch (err) {
       status = 'fail';
