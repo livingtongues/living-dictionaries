@@ -23,13 +23,6 @@
   let editing = false;
 </script>
 
-<svelte:head>
-  <title>
-    {$dictionary.name}
-    {$_('header.about', { default: 'About' })}
-  </title>
-</svelte:head>
-
 <div class="about">
   <h3 class="text-xl font-semibold mb-3">
     {$_('header.about', { default: 'About' })}
