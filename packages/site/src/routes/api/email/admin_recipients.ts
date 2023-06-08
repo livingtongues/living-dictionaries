@@ -7,15 +7,16 @@ export function getAdminRecipients(initiatorEmail: string): Address[] {
     || initiatorEmail === 'diego@livingtongues.org')
     return [{ email: initiatorEmail }]
 
-  if (dev || firebaseConfig.projectId === 'talking-dictionaries-dev')
-    return [
-      { email: 'jacob@livingtongues.org' },
-      { email: 'diego@livingtongues.org' },
-    ]
-
-  return [
+  const recipients: Address[] = [
     { email: 'jacob@livingtongues.org' },
     { email: 'diego@livingtongues.org' },
+  ]
+
+  if (dev || firebaseConfig.projectId === 'talking-dictionaries-dev')
+    return recipients
+
+  return [
+    ...recipients,
     { email: 'annaluisa@livingtongues.org' },
     { email: 'livingtongues@gmail.com' }, // Greg
   ];
