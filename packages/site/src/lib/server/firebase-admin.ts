@@ -23,7 +23,7 @@ export function getFirebaseAdminApp(): App {
     databaseURL: `https://${SERVICE_ACCOUNT.project_id}.firebaseio.com`,
   })
 
-  console.log(`Firebase Admin (${firebaseAdminApp.options.projectId}) initialized on server`);
+  console.log('Firebase Admin initialized on server');
 
   return firebaseAdminApp;
 }

@@ -31,7 +31,7 @@ export function notifyAdminsOnNewDictionary(dictionary: IDictionary, user: IUser
   }, but you can also get in touch with them if needed.
   
   Thanks,
-  Our automatic Firebase Cloud Function
+  Our automatic Vercel Function
   
   https://livingdictionaries.app`;
 }

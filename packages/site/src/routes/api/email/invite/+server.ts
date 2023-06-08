@@ -97,7 +97,7 @@ Dictionary URL: https://livingdictionaries.app/${dictionaryId}
 If you have any questions for ${inviterName}, just reply to this email.
 
 Thanks,
-Our automatic function
+Our automatic Vercel function
 
 https://livingdictionaries.app`,
         },

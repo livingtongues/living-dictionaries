@@ -108,7 +108,7 @@
       const auth_token = await auth_state_user.getIdToken();
       await apiFetch<NewDictionaryRequestBody>('/api/email/new_dictionary', {
         auth_token,
-        dictionary: prunedDictionary,
+        dictionary: { ...prunedDictionary, id: url },
       });
 
       window.location.replace(`/${url}/entries/list`);

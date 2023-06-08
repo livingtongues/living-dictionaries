@@ -10,7 +10,7 @@ import { notifyAdminsOnNewDictionary } from './composeMessages';
 
 export interface NewDictionaryRequestBody {
   auth_token: string;
-  dictionary: IDictionary;
+  dictionary: IDictionary & { id: string };
 }
 
 export const POST: RequestHandler = async ({ request, fetch }) => {
@@ -20,7 +20,7 @@ export const POST: RequestHandler = async ({ request, fetch }) => {
     throw new Error('No dictionary id found in request')
 
   const decodedToken = await decodeToken(auth_token)
-  if (decodedToken?.uid)
+  if (!decodedToken?.uid)
     throw new Error('No user id found in token')
   if (dictionary.createdBy !== decodedToken.uid)
     throw new Error('CreatedBy is does not matched user id')
