@@ -17,7 +17,7 @@ export const POST: RequestHandler = async ({ request, fetch }) => {
   const { auth_token, user } = await request.json() as NewUserRequestBody
 
   const decodedToken = await decodeToken(auth_token)
-  if (decodedToken?.uid)
+  if (!decodedToken?.uid)
     throw new Error('No user id found in token')
   if (user.email !== decodedToken.email)
     throw new Error('token email does not match user email')
@@ -61,7 +61,7 @@ export const POST: RequestHandler = async ({ request, fetch }) => {
 ${user.displayName} has just created a Living Dictionaries account, and we sent an automatic welcome email to ${user.email}
 
 Thanks,
-Our automatic Firebase Cloud Function
+Our automatic Vercel Function
 
 https://livingdictionaries.app`,
       },

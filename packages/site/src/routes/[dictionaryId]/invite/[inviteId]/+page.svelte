@@ -39,7 +39,7 @@
     path={`dictionaries/${$dictionary.id}/invites/${data.inviteId}`}
     let:data={invite}
     startWith={inviteType}>
-    {#if invite && invite.status === 'sent'}
+    {#if invite?.status === 'sent'}
       <p class="font-semibold mb-2">
         {$_('invite.invited_by', { default: 'Invited by' })}: {invite.inviterName}
       </p>
@@ -47,9 +47,20 @@
         {$_('invite.role', { default: 'Role' })}: {invite.role}
       </p>
       {#if $user}
-        {#if ($isManager && invite.role === 'manager') || ($isContributor && invite.role === 'contributor')}
+        {#if $isManager}
           <p class="mb-2">
-            You are already a {invite.role}.
+            You are already a manager.
+          </p>
+          <Button href={`/${$dictionary.id}/entries/list`}>
+            {$_('dictionary.entries', {
+              default: 'Entries',
+            })}
+            &nbsp;
+            <i class="fas fa-chevron-right rtl-x-flip" />
+          </Button>
+        {:else if $isContributor && invite.role === 'contributor'}
+          <p class="mb-2">
+            You are already a contributor.
           </p>
           <Button href={`/${$dictionary.id}/entries/list`}>
             {$_('dictionary.entries', {
@@ -89,7 +100,7 @@
           {/if}
         </ShowHide>
       {/if}
-    {:else if invite && invite.status === 'claimed'}
+    {:else if invite?.status === 'claimed'}
       <p class="font-semibold mb-2">
         {$_('invite.invitation_claimed', {
           default: 'Invitation claimed',

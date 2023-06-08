@@ -47,7 +47,7 @@ test('composeAdminNotice returns', () => {
       We sent James Johnson an automatic dictionary-info email to jamesj@gmail.com, but you can also get in touch with them if needed.
       
       Thanks,
-      Our automatic Firebase Cloud Function
+      Our automatic Vercel function
       
       https://livingdictionaries.app"
   `);
