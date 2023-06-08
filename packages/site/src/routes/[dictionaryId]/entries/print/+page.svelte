@@ -22,6 +22,7 @@
   $: if (browser) {
     search.addWidgets([
       configure({
+        // @ts-ignore odd error in CI
         hitsPerPage: $hitsPerPage,
       }),
     ]);

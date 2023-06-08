@@ -42,6 +42,7 @@
 
   search.addWidgets([
     configure({
+      // @ts-ignore odd error in CI, that hopefully Algolia will resolve: Argument of type '{ hitsPerPage: number; }' is not assignable to parameter of type 'PlainSearchParameters'
       hitsPerPage: 30, // adjust lower for mobile
       filters: `dictId:"${dictionaryId}"`,
     }),
