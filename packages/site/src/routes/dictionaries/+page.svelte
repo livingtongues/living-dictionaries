@@ -22,12 +22,6 @@
   }
 </script>
 
-<svelte:head>
-  <title>
-    {$_('home.list_of_dictionaries', { default: 'List of Dictionaries' })}
-  </title>
-</svelte:head>
-
 <Header>{$_('home.list_of_dictionaries', { default: 'List of Dictionaries' })}</Header>
 
 <div class="p-3 sticky top-0 relative z-2 h-screen flex flex-col bg-white">

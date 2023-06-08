@@ -1,6 +1,8 @@
+import { GeoPoint } from 'firebase-admin/firestore';
 import { IDictionary } from '@living-dictionaries/types';
-import { db, firebase } from '../config';
+import { db } from '../config';
 import { tdLocations } from './tdv1-dictionaries';
+
 (() => {
   try {
     tdLocations.forEach(async (dictionary) => {
@@ -12,7 +14,7 @@ import { tdLocations } from './tdv1-dictionaries';
           name: dictionary.properties.label,
           population: dictionary.properties.size,
           publishYear: dictionary.properties.date,
-          coordinates: new firebase.firestore.GeoPoint(
+          coordinates: new GeoPoint(
             dictionary.geometry.coordinates[1],
             dictionary.geometry.coordinates[0]
           ),

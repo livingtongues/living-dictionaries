@@ -23,13 +23,6 @@
   let editing = false;
 </script>
 
-<svelte:head>
-  <title>
-    {$dictionary.name}
-    {$_('dictionary.grammar', { default: 'Grammar' })}
-  </title>
-</svelte:head>
-
 <div class="grammar">
   <h3 class="text-xl font-semibold mb-3">
     {$_('dictionary.grammar', { default: 'Grammar' })}

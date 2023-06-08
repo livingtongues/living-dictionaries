@@ -203,7 +203,7 @@ Visit the Living Tongues website to learn more about the background and usefulne
 
 If you have any questions about building your Living Dictionary, please email Diego at <a
                       style="color: #546e7a"
-                      href="mailto:annaluisa@livingtongues.org">annaluisa@livingtongues.org</a> or just reply to this email.<br /><br />
+                      href="mailto:diego@livingtongues.org">diego@livingtongues.org</a> or just reply to this email.<br /><br />
 
 On behalf of everyone at Living Tongues Institute for Endangered Languages, thank you for registering and we look forward to seeing your Living Dictionary come to life.<br /><br />
 

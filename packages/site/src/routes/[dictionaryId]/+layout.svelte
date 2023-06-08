@@ -5,6 +5,7 @@
   import Header from '$lib/components/shell/Header.svelte';
   import { Button, ResponsiveSlideover } from 'svelte-pieces';
   import type { LayoutData } from './$types';
+  import './custom-fonts.css'
   export let data: LayoutData;
 
   if (data.dictionary) {
@@ -56,18 +57,3 @@
     <slot />
   </div>
 </div>
-
-<style>
-  @font-face {
-    font-family: 'sompeng';
-    src: url('/fonts/Sompeng-Code200365k.ttf') format('truetype');
-  }
-
-  :global(.sompeng) {
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue',
-      Arial, 'Noto Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol',
-      'Noto Color Emoji', 'sompeng';
-    font-weight: normal;
-    font-style: normal;
-  }
-</style>
