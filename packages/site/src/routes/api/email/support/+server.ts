@@ -3,6 +3,7 @@ import type { Address, EmailParts } from '../send/mail-channels.interface';
 import { dev } from '$app/environment';
 import { SEND_EMAIL_KEY } from '$env/static/private';
 import { firebaseConfig } from 'sveltefirets';
+import { getSupportMessageRecipients } from '../addresses';
 
 export interface SupportRequestBody {
   email: string;
@@ -31,19 +32,4 @@ Sent by ${name} (${email}) from ${url}`,
       'content-type': 'application/json'
     }
   });
-};
-
-function getSupportMessageRecipients({ dev }: { dev: boolean }): Address[] {
-  const recipients: Address[] = [
-    { email: 'jacob@livingtongues.org' },
-    { email: 'diego@livingtongues.org' },
-  ]
-
-  if (dev || firebaseConfig.projectId === 'talking-dictionaries-dev')
-    return recipients
-
-  return [
-    ...recipients,
-    { email: 'annaluisa@livingtongues.org' }
-  ];
 };

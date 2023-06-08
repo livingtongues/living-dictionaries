@@ -3,7 +3,7 @@ import type { RequestHandler } from './$types';
 import { sendEmail } from './mailChannels';
 import type { EmailParts, MailChannelsSendBody } from './mail-channels.interface';
 import { DKIM_PRIVATE_KEY, SEND_EMAIL_KEY } from '$env/static/private';
-import { noReplyAddress } from '../addresses';
+import { annaAddress, noReplyAddress } from '../addresses';
 
 export interface SendRequestBody {
   send_key: string;
@@ -26,6 +26,7 @@ export const POST: RequestHandler = async ({ request, fetch }) => {
         dkim_private_key: DKIM_PRIVATE_KEY,
       }],
       from: noReplyAddress,
+      reply_to: reply_to || annaAddress,
       subject,
       content: [{
         type,
@@ -33,8 +34,6 @@ export const POST: RequestHandler = async ({ request, fetch }) => {
       }],
     }
 
-    if (reply_to)
-      mailChannelsSendBody.reply_to = reply_to
     if (bcc)
       mailChannelsSendBody.personalizations[0].bcc = bcc
 
