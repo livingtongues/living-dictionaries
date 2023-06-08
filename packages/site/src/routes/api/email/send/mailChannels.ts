@@ -7,7 +7,7 @@ export async function sendEmail(emailData: MailChannelsSendBody, _fetch: typeof 
   if (!MAILCHANNELS_WORKER_KEY)
     throw new Error('EMAIL_KEY env variable not configured')
 
-  console.log({ sending: JSON.stringify(emailData) })
+  console.log({ sendingTo: emailData.personalizations[0].to, body: emailData.content[0].value })
 
   const response = await _fetch(cloudflareEmailEndpoint, {
     method: 'POST',
