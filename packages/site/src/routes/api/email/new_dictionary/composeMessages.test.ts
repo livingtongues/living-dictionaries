@@ -1,8 +1,9 @@
-import { IDictionary, IUser } from '@living-dictionaries/types';
+import type { IDictionary, IUser } from '@living-dictionaries/types';
 import { notifyAdminsOnNewDictionary } from './composeMessages';
 
 test('composeAdminNotice returns', () => {
   const dictionary: IDictionary = {
+    id: 'testID',
     glossLanguages: ['en', 'es'],
     name: 'Test-Dictionary',
     entryCount: 0,
@@ -21,7 +22,7 @@ test('composeAdminNotice returns', () => {
     displayName: 'James Johnson',
     email: 'jamesj@gmail.com',
   };
-  expect(notifyAdminsOnNewDictionary(dictionary, 'testID', user)).toMatchInlineSnapshot(`
+  expect(notifyAdminsOnNewDictionary(dictionary, user)).toMatchInlineSnapshot(`
     "Hey Admins,
     
       James Johnson created a new Living Dictionary named Test-Dictionary. Here's the details:
