@@ -22,13 +22,6 @@
   }
 </script>
 
-<svelte:head>
-  <title>
-    {$dictionary.name}
-    {$t('dictionary.contributors', { default: 'Contributors' })}
-  </title>
-</svelte:head>
-
 <p class="mb-2">
   <i
     >{$t('contributors.manager_contributor_distinction', {

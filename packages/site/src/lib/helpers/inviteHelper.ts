@@ -1,22 +1,24 @@
 import type { IDictionary, IInvite } from '@living-dictionaries/types';
-import { addOnline } from 'sveltefirets';
 import { get } from 'svelte/store';
-import { _ } from 'svelte-i18n';
+import { t } from 'svelte-i18n';
 import { user } from '$lib/stores';
+import { apiFetch } from '$lib/client/apiFetch';
+import { authState } from 'sveltefirets';
+import type { InviteRequestBody } from '../../routes/api/email/invite/+server';
 
 export async function inviteHelper(
   role: 'manager' | 'contributor' = 'contributor',
   dictionary: IDictionary
 ) {
-  const $_ = get(_);
+  const $t = get(t);
   const inviter = get(user);
 
-  const targetEmail = prompt(`${$_('contact.email', { default: 'Email' })}?`);
+  const targetEmail = prompt(`${$t('contact.email', { default: 'Email' })}?`);
   if (!targetEmail) return;
 
   const isEmail = /^\S+@\S+\.\S+$/.test(targetEmail);
   if (!isEmail) {
-    return alert($_('misc.invalid', { default: 'Invalid Email' }));
+    return alert($t('misc.invalid', { default: 'Invalid Email' }));
   }
 
   try {
@@ -28,9 +30,22 @@ export async function inviteHelper(
       role,
       status: 'queued',
     };
-    await addOnline(`dictionaries/${dictionary.id}/invites`, invite);
+
+    const auth_state_user = get(authState);
+    const auth_token = await auth_state_user.getIdToken();
+
+    const response = await apiFetch<InviteRequestBody>('/api/email/invite', {
+      auth_token,
+      dictionaryId: dictionary.id,
+      invite
+    });
+
+    if (response.status !== 200) {
+      const body = await response.json();
+      throw new Error(body.message);
+    }
   } catch (err) {
-    alert(`${$_('misc.error', { default: 'Error' })}: ${err}`);
+    alert(`${$t('misc.error', { default: 'Error' })}: ${err}`);
     console.error(err);
   }
 }

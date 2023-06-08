@@ -19,6 +19,7 @@
   onMount(() => {
     search.addWidgets([
       configure({
+        // @ts-ignore odd error in CI
         hitsPerPage: 35,
       }),
     ]);

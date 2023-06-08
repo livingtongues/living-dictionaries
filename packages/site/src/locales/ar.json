@@ -269,14 +269,15 @@
     "role": "دور"
   },
   "export": {
-    "csv_data": "البيانات مثل CSV",
+    "csv_data": "البيانات مثل .CSV",
     "checking_images": "التحقق مما إذا كانت ملفات الصور موجودة",
     "no_images": "لا توجد ملفات صور",
     "checking_audios": "التحقق من وجود ملفات صوتية",
     "no_audios": "لا توجد ملفات صوتية",
     "download_csv": "تنزيل CSV",
     "availability": "التصدير متاح فقط لمديري القاموس",
-    "download_pdf": "تحميل PDF"
+    "download_pdf": "تحميل PDF",
+    "spreadsheet": "جدول"
   },
   "video": {
     "video_url": "رابط الفيديو",

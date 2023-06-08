@@ -26,6 +26,7 @@
         attribute: 'hasImage',
       }),
       configure({
+        // @ts-ignore odd error in CI
         hitsPerPage: 20,
       }),
     ]);

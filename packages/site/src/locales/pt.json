@@ -269,14 +269,15 @@
     "role": "Função "
   },
   "export": {
-    "csv_data": "Dados como CSV",
+    "csv_data": "Dados como .CSV",
     "checking_images": "Verificando se existem arquivos de imagem",
     "no_images": "Não há arquivos de imagem",
     "checking_audios": "Verificando se houver arquivos de áudio",
     "no_audios": "Não há arquivos de áudio",
     "download_csv": "Baixe CSV",
     "availability": "A exportação está disponível apenas para gerentes de dicionário",
-    "download_pdf": "baixar PDF"
+    "download_pdf": "baixar PDF",
+    "spreadsheet": "Planilha"
   },
   "video": {
     "video_url": "URL do vídeo",
