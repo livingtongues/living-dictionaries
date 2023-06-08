@@ -210,14 +210,8 @@
         <JSON obj={dictionary} />
       </div>
     {/if}
-  </div></Doc>
-
-<svelte:head>
-  <title>
-    {$dictionaryStore.name}
-    {$t('misc.settings', { default: 'Settings' })}
-  </title>
-</svelte:head>
+  </div>
+</Doc>
 
 <SeoMetaTags
   title={$t('misc.settings', { default: 'Settings' })}

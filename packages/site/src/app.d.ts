@@ -19,8 +19,3 @@ declare namespace svelte.JSX {
     onshortpress?: (event: CustomEvent<any> & { target: EventTarget & T }) => any;
   }
 }
-
-interface ImportMetaEnv {
-  PUBLIC_mapboxAccessToken: string;
-  PUBLIC_ProcessImageUrl: string; // added to Vercel env variables
-}

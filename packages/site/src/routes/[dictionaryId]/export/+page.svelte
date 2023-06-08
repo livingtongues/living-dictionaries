@@ -61,13 +61,6 @@
   });
 </script>
 
-<svelte:head>
-  <title>
-    {$dictionary.name}
-    {$_('misc.export', { default: 'export' })}
-  </title>
-</svelte:head>
-
 <h3 class="text-xl font-semibold mb-4">{$_('misc.export', { default: 'export' })}</h3>
 {#if $isManager}
   <div class="mb-6">
