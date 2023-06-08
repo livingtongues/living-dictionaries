@@ -2,6 +2,7 @@ import type { RequestHandler } from './$types';
 import type { Address, MailChannelsSendBody } from '../send/mail-channels.interface';
 import { dev } from '$app/environment';
 import { SEND_EMAIL_KEY } from '$env/static/private';
+import { firebaseConfig } from 'sveltefirets';
 
 export interface SupportRequestBody {
   email: string;
@@ -23,7 +24,7 @@ export const POST: RequestHandler = async ({ request, fetch }) => {
         type: 'text/plain',
         value: `${message} 
 
-        Sent by ${name} (${email}) from ${url}`,
+Sent by ${name} (${email}) from ${url}`,
       },
     ],
   };
@@ -43,9 +44,11 @@ function getSupportMessageRecipients({ dev }: { dev: boolean }): Address[] {
     { email: 'diego@livingtongues.org' },
   ]
 
-  if (!dev) {
-    recipients.push({ email: 'annaluisa@livingtongues.org' });
-  }
+  if (dev || firebaseConfig.projectId === 'talking-dictionaries-dev')
+    return recipients
 
-  return recipients;
+  return [
+    ...recipients,
+    { email: 'annaluisa@livingtongues.org' }
+  ];
 };
