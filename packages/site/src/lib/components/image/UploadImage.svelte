@@ -94,7 +94,7 @@
 
       const auth_state_user = get(authState);
       const auth_token = await auth_state_user.getIdToken();
-      const response = await apiFetch<ImageUrlRequestBody>('/api/email/new_dictionary', {
+      const response = await apiFetch<ImageUrlRequestBody>('/api/image_url', {
         auth_token,
         firebase_storage_location,
       });
