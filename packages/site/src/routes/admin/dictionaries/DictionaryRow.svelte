@@ -2,7 +2,7 @@
   import { admin } from '$lib/stores';
   import { printDate } from '$lib/helpers/time';
   import DictionaryFieldEdit from './DictionaryFieldEdit.svelte';
-  import { BadgeArrayEmit, ShowHide, Button, IntersectionObserverShared } from 'svelte-pieces';
+  import { BadgeArrayEmit, ShowHide, Button } from 'svelte-pieces';
   import { createEventDispatcher } from 'svelte';
   import { updateOnline } from 'sveltefirets';
   import { LatLngDisplay } from '@living-dictionaries/parts';
