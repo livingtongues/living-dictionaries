@@ -30,9 +30,6 @@ const admin_headers: AdminDictionaryForCSV = { ...AdminDictionaryCSVFields };
 export async function exportAdminDictionariesAsCSV(dictionariesAndHelpers: DictionaryWithHelperStores[]) {
   const dictionaries = await getAllDictionariesAndHelpers(dictionariesAndHelpers);
 
-  console.table(dictionariesAndHelpers)
-  console.table(dictionaries)
-
   const formatted_dictionaries: (StandardDictionaryForCSV & AdminDictionaryForCSV)[] = dictionaries.map((dictionary) => {
     const standard_dictionary = prepareDictionaryForCsv(dictionary);
     const admin_dictionary: AdminDictionaryForCSV = {
