@@ -1,20 +1,10 @@
 import { sveltekit } from '@sveltejs/kit/vite';
-import type { UserConfig } from 'vite';
+import { defineConfig } from 'vite'
+
 import UnoCSS from '@unocss/svelte-scoped/vite'
-// import { svelte } from '@sveltejs/vite-plugin-svelte';
-
 import { kitbook } from 'kitbook/plugins/vite';
-import type { UserConfig as VitestUserConfigInterface } from 'vitest/config';
 
-const vitestConfig: VitestUserConfigInterface = {
-  test: {
-    // plugins: [svelte({ hot: !process.env.VITEST })],
-    globals: true,
-    includeSource: ['src/**/*.ts'],
-  }
-};
-
-const config: UserConfig = {
+export default defineConfig({
   plugins: [
     kitbook(),
     UnoCSS({
@@ -47,8 +37,9 @@ const config: UserConfig = {
       // 'instantsearch.js', 'instantsearch.js/es/widgets/index.js', 'instantsearch.js/es/connectors',
     ],
   },
-  // @ts-ignore - adding /// <reference types="vitest" /> doesn't seem to solve
-  test: vitestConfig.test,
-};
-
-export default config;
+  test: {
+    name: 'site',
+    globals: true,
+    includeSource: ['src/**/*.ts'],
+  }
+});
