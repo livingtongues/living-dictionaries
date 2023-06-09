@@ -6,6 +6,10 @@ type DictionaryWithHelperStores = IDictionary & {
   contributors: Readable<IHelper[]>;
   writeInCollaborators: Readable<IHelper[]>;
   invites: Readable<IInvite[]>;
+  getManagers: Promise<IHelper[]>;
+  getContributors: Promise<IHelper[]>;
+  getWriteInCollaborators: Promise<IHelper[]>;
+  getInvites: Promise<IInvite[]>;
 };
 
 type DictionaryWithHelpers = IDictionary & {
