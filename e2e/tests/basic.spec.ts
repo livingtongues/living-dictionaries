@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
 
 test('navigate into a dictionary', async ({ page }) => {
-	await page.goto('/');
+	await page.goto('https://livingdictionaries.app/');
 	await page.waitForTimeout(2000);
 	await page.getByPlaceholder('Find a Dictionary').click();
 	await page.getByPlaceholder('Find a Dictionary').fill('Achi');
