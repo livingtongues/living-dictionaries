@@ -23,7 +23,6 @@
   $: dictionariesAndHelpers = $dictionaries.map((dictionary) => {
     return {
       ...dictionary,
-      entryCount: dictionary.entryCount || -1,
       managers: collectionStore<IHelper>(
         `dictionaries/${dictionary.id}/managers`,
         noopConstraints,
