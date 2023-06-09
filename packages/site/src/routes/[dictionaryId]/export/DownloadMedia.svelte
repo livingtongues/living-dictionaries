@@ -1,11 +1,11 @@
 <script lang="ts">
   import JSZip from 'jszip';
   import { downloadBlob } from '$lib/export/downloadBlob';
+  import { objectsToCsvByHeaders } from '$lib/export/csv';
   import type { IDictionary } from '@living-dictionaries/types';
   import { createEventDispatcher, onDestroy, onMount } from 'svelte';
   import { getStorageDownloadUrl } from './storageUrl';
   import type { EntryForCSV } from './prepareEntriesForCsv';
-  import { objectsToCsvByHeaders } from '$lib/export/csv';
 
   export let dictionary: IDictionary;
   export let finalizedEntries: EntryForCSV[];
@@ -59,8 +59,7 @@
       fetched++;
     }
 
-    const headers = finalizedEntries[0]
-    const entries = finalizedEntries.slice(1) // takes all but first
+    const [headers, ...entries] = finalizedEntries;
     const csv = objectsToCsvByHeaders(headers, entries);
     const csvBlob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
 

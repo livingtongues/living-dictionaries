@@ -6,7 +6,6 @@
   import { partsOfSpeech } from '$lib/mappings/parts-of-speech';
   import type { ActualDatabaseEntry } from '@living-dictionaries/types';
   import { getCollection } from 'sveltefirets';
-  import { downloadBlob } from '$lib/export/downloadBlob';
   import Progress from '$lib/export/Progress.svelte';
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte';
   import { convert_entry_to_current_shape } from '$lib/transformers/convert_entry_to_current_shape';
@@ -143,8 +142,7 @@
     <Button
       loading={!allEntries.length}
       onclick={() => {
-        const headers = allEntries[0];
-        const entries = allEntries.slice(1); // takes all but first
+        const [headers, ...entries] = allEntries;
         downloadObjectsAsCSV(headers, entries, $dictionary.id);
       }}
       form="filled">
