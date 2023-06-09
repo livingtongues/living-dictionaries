@@ -27,8 +27,11 @@ type AdminDictionaryForCSV = {
 
 const admin_headers: AdminDictionaryForCSV = { ...AdminDictionaryCSVFields };
 
-export function exportAdminDictionariesAsCSV(dictionariesAndHelpers: DictionaryWithHelperStores[]) {
-  const dictionaries = getAllDictionariesAndHelpers(dictionariesAndHelpers);
+export async function exportAdminDictionariesAsCSV(dictionariesAndHelpers: DictionaryWithHelperStores[]) {
+  const dictionaries = await getAllDictionariesAndHelpers(dictionariesAndHelpers);
+
+  console.table(dictionariesAndHelpers)
+  console.table(dictionaries)
 
   const formatted_dictionaries: (StandardDictionaryForCSV & AdminDictionaryForCSV)[] = dictionaries.map((dictionary) => {
     const standard_dictionary = prepareDictionaryForCsv(dictionary);
@@ -65,16 +68,18 @@ export function exportAdminDictionariesAsCSV(dictionariesAndHelpers: DictionaryW
   )
 }
 
-function getAllDictionariesAndHelpers(
+async function getAllDictionariesAndHelpers(
   dictionariesAndHelpers: DictionaryWithHelperStores[]
-): DictionaryWithHelpers[] {
-  return dictionariesAndHelpers.map((dictionary) => {
-    return {
+): Promise<DictionaryWithHelpers[]> {
+  const dictionaries: DictionaryWithHelpers[] = []
+  for (const dictionary of dictionariesAndHelpers) {
+    dictionaries.push({
       ...dictionary,
-      managers: get(dictionary.managers),
-      contributors: get(dictionary.contributors),
-      writeInCollaborators: get(dictionary.writeInCollaborators),
-      invites: get(dictionary.invites),
-    };
-  });
+      managers: await dictionary.getManagers,
+      contributors: await dictionary.getContributors,
+      writeInCollaborators: await dictionary.getWriteInCollaborators,
+      invites: await dictionary.getInvites,
+    })
+  }
+  return dictionaries
 }

@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { IDictionary, IHelper, IInvite } from '@living-dictionaries/types';
-  import { updateOnline, collectionStore } from 'sveltefirets';
+  import { updateOnline, collectionStore, getCollection } from 'sveltefirets';
   import { arrayRemove, arrayUnion, deleteField, GeoPoint } from 'firebase/firestore/lite';
   import Filter from '$lib/components/Filter.svelte';
   import { Button, ResponsiveTable } from 'svelte-pieces';
@@ -16,35 +16,38 @@
     log: true,
   });
 
+  const noopConstraints = [];
+  const inviteQueryConstraints = [where('status', 'in', ['queued', 'sent'])];
+
   let dictionariesAndHelpers: DictionaryWithHelperStores[] = [];
   $: dictionariesAndHelpers = $dictionaries.map((dictionary) => {
     return {
       ...dictionary,
       entryCount: dictionary.entryCount || -1,
-      managers: collectionStore<IHelper>(`dictionaries/${dictionary.id}/managers`, [], {
-        startWith: [],
-        log: true,
-      }),
-      contributors: collectionStore<IHelper>(`dictionaries/${dictionary.id}/contributors`, [], {
-        startWith: [],
-        log: true,
-      }),
+      managers: collectionStore<IHelper>(
+        `dictionaries/${dictionary.id}/managers`,
+        noopConstraints,
+        { log: true }
+      ),
+      contributors: collectionStore<IHelper>(
+        `dictionaries/${dictionary.id}/contributors`,
+        noopConstraints,
+        { log: true }
+      ),
       writeInCollaborators: collectionStore<IHelper>(
         `dictionaries/${dictionary.id}/writeInCollaborators`,
-        [],
-        {
-          startWith: [],
-          log: true,
-        }
+        noopConstraints,
+        { log: true }
       ),
       invites: collectionStore<IInvite>(
         `dictionaries/${dictionary.id}/invites`,
-        [where('status', 'in', ['queued', 'sent'])],
-        {
-          startWith: [],
-          log: true,
-        }
+        inviteQueryConstraints,
+        { log: true }
       ),
+      getManagers: getCollection<IHelper>(`dictionaries/${dictionary.id}/managers`),
+      getContributors: getCollection<IHelper>(`dictionaries/${dictionary.id}/managers`),
+      getWriteInCollaborators: getCollection<IHelper>(`dictionaries/${dictionary.id}/writeInCollaborators`),
+      getInvites: getCollection<IInvite>(`dictionaries/${dictionary.id}/invites`, inviteQueryConstraints),
     };
   });
 </script>
@@ -63,7 +66,7 @@
       <Button
         form="filled"
         color="black"
-        onclick={() => exportAdminDictionariesAsCSV(filteredDictionaries)}>
+        onclick={async () => await exportAdminDictionariesAsCSV(filteredDictionaries)}>
         <i class="fas fa-download mr-1" />
         Download {filteredDictionaries.length} Dictionaries as CSV
       </Button>

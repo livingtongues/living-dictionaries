@@ -48,7 +48,7 @@
   <td>
     <div style="width: 300px;" />
     <RolesManagment helpers={$managers} {dictionary} role="manager" />
-    {#each $invites as invite}
+    {#each $invites || [] as invite}
       {#if invite.role === 'manager'}
         <div class="my-1">
           <ContributorInvitationStatus
@@ -67,7 +67,7 @@
   <td>
     <div style="width: 300px;" />
     <RolesManagment helpers={$contributors} {dictionary} role="contributor" />
-    {#each $invites as invite}
+    {#each $invites || [] as invite}
       {#if invite.role === 'contributor'}
         <div class="my-1">
           <ContributorInvitationStatus
