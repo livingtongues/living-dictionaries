@@ -33,13 +33,12 @@ jobs:
         run: echo "Target Vercel Url is $PLAYWRIGHT_BASE_URL"
 
       - name: Run e2e tests
-        run: pnpm -F site test:e2e
+        run: pnpm test:e2e
         env:
           CI: true
           PLAYWRIGHT_BASE_URL: ${{ github.event.deployment_status.target_url }}
 
       - uses: actions/upload-artifact@v3
-        # if: failure()
         if: always()
         with:
           name: playwright-report

@@ -9,6 +9,8 @@
 		"test": "pnpm --filter=site test",
 		"test:ui": "pnpm --filter=site test:ui",
 		"test:all": "pnpm --recursive --stream test -- --run",
+		"test:e2e": "playwright test",
+		"test:e2e:ui": "playwright test --ui",
 		"parts": "pnpm --filter=parts dev",
 		"parts:build": "pnpm --filter=parts build",
 		"parts:test": "pnpm --filter=parts test",
@@ -20,6 +22,7 @@
 		"check-packages": "pnpm update --interactive --recursive --latest"
 	},
 	"devDependencies": {
+		"@playwright/test": "^1.35.0",
 		"@typescript-eslint/eslint-plugin": "^5.56.0",
 		"@typescript-eslint/parser": "^5.56.0",
 		"eslint": "^8.36.0",
