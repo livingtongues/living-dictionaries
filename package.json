@@ -17,19 +17,16 @@
 		"kitbook": "pnpm --filter=site kitbook",
 		"both": "pnpm --filter=./packages/** dev",
 		"lint": "eslint .",
-		"format-check": "prettier --check --plugin-search-dir=. .",
-		"format": "prettier --write --plugin-search-dir=. .",
+		"lint:fix": "eslint . --fix",
 		"check-packages": "pnpm update --interactive --recursive --latest"
 	},
 	"devDependencies": {
+		"@antfu/eslint-config": "^0.39.5",
 		"@playwright/test": "^1.35.0",
-		"@typescript-eslint/eslint-plugin": "^5.56.0",
-		"@typescript-eslint/parser": "^5.56.0",
-		"eslint": "^8.36.0",
-		"eslint-config-prettier": "^8.8.0",
-		"eslint-plugin-svelte3": "^4.0.0",
-		"prettier": "^2.8.6",
-		"prettier-plugin-svelte": "^2.9.0",
+		"@typescript-eslint/eslint-plugin": "^5.59.7",
+		"@typescript-eslint/parser": "^5.59.8",
+		"eslint": "^8.41.0",
+		"eslint-plugin-svelte": "^2.29.0",
 		"svelte": "^3.55.1",
 		"typescript": "~4.9.4"
 	}

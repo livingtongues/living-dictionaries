@@ -6,10 +6,8 @@
     // Styles
     "antfu.iconify",
     "antfu.unocss",
-    // "voorjaar.windicss-intellisense",
     // Code quality
     "dbaeumer.vscode-eslint",
-    "esbenp.prettier-vscode",
     // Git
     "eamodio.gitlens",
     "github.vscode-pull-request-github",

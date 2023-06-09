@@ -5,9 +5,11 @@ node_modules
 /package
 .env
 .env.*
-!.env.example
-
-# Ignore files for PNPM, NPM and YARN
 pnpm-lock.yaml
-package-lock.json
-yarn.lock
+
+# strange lint changes, need to diagnose before allow lint to format these
+*.yaml
+*.json
+
+packages/**/dist/*
+packages/functions/lib/*
