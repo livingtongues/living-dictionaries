@@ -17,6 +17,7 @@ describe('find_part_of_speech_abbreviation', () => {
       enName: 'noun',
     },
   ];
+  
   test('finds readable part of speech name', () => {
     const part_of_speech = 'noun';
     expect(find_part_of_speech_abbreviation(global_parts_of_speech, part_of_speech)).toEqual('n');
@@ -47,6 +48,7 @@ describe('get_first_speaker_from_first_sound_file', () => {
     };
     expect(get_first_speaker_from_first_sound_file(entry, speakers)).toEqual(speakers[0]);
   });
+
   test("gets undefined if there's no speaker", () => {
     const speakers: ISpeaker[] = [];
     const entry: IEntry = {
@@ -61,6 +63,7 @@ describe('display_speaker_gender', () => {
   test('displays readable speaker gender', () => {
     expect(display_speaker_gender('m')).toEqual('male');
   });
+
   test('displays empty string if speaker gender it is an empty string or undefined', () => {
     expect(display_speaker_gender('')).toEqual(undefined);
     expect(display_speaker_gender(undefined)).toEqual(undefined);
@@ -143,6 +146,7 @@ describe('format_example_sentences', () => {
     };
     expect(format_example_sentences(entry, gloss_languages)).toEqual(expected);
   });
+
   test('assigns vernacular example sentence value to formatted entry if any gloss languages exist', () => {
     const entry: ExpandedEntry = {
       lexeme: 'min',
