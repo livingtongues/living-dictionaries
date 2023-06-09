@@ -2,7 +2,6 @@
 node_modules
 /build
 /.svelte-kit
-/package
 .env
 .env.*
 pnpm-lock.yaml
@@ -11,5 +10,5 @@ pnpm-lock.yaml
 *.yaml
 *.json
 
-packages/**/dist/*
-packages/functions/lib/*
+/dist
+/lib
