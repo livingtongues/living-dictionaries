@@ -269,14 +269,15 @@
     "role": "Vai trò"
   },
   "export": {
-    "csv_data": "Dữ liệu theo định dạng CSV",
+    "csv_data": "Dữ liệu theo định dạng .CSV",
     "checking_images": "Đang kiểm tra nếu các tệp hình ảnh có tồn tại hay không",
     "no_images": "Không có tệp hình ảnh nào",
     "checking_audios": "Đang kiểm tra nếu các tệp âm có tồn tại hay không",
     "no_audios": "Không có tệp âm nào",
     "download_csv": "Tải CSV xuống",
     "availability": "Chức năng Xuất Khẩu chỉ dành cho người quản lí Từ Điển",
-    "download_pdf": "Tải file PDF"
+    "download_pdf": "Tải file PDF",
+    "spreadsheet": "Bảng tính"
   },
   "video": {
     "video_url": "Tên miền của video",

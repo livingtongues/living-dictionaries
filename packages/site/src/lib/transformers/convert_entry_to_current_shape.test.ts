@@ -35,6 +35,12 @@ describe('convert_entry_to_current_shape', () => {
     expect(convert_entry_to_current_shape({ lo })).toEqual(expected);
   });
 
+  test('converts source string to array of strings', () => {
+    const sr = 'I am a string, like found in Kalanga';
+    const expected: GoalDatabaseEntry = { sr: [sr] }
+    expect(convert_entry_to_current_shape({ sr })).toEqual(expected);
+  });
+
   test('moves sense related fields into first sense (and converts necessary fields)', () => {
     const entry: ActualDatabaseEntry = {
       gl: { en: 'foo' },

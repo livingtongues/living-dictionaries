@@ -269,14 +269,15 @@
     "role": "Wajibu"
   },
   "export": {
-    "csv_data": "Takwimu kama CSV",
+    "csv_data": "Takwimu kama .CSV",
     "checking_images": "Kuangalia ikiwa faili za picha zipo",
     "no_images": "Hakuna faili za picha",
     "checking_audios": "Kuangalia ikiwa faili za sauti zipo",
     "no_audios": "Hakuna faili za sauti",
     "download_csv": "Pakua CSV",
     "availability": "Usafirishaji unapatikana tu kwa wasimamizi wa kamusi",
-    "download_pdf": "Pakua pdf"
+    "download_pdf": "Pakua pdf",
+    "spreadsheet": "Lahajedwali"
   },
   "video": {
     "video_url": "URL ya video",

@@ -11,35 +11,29 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     container:
-      image: mcr.microsoft.com/playwright:v1.32.0-focal #https://playwright.dev/docs/ci#github-actions-via-containers
+      image: mcr.microsoft.com/playwright:v1.35.0-jammy #https://playwright.dev/docs/ci#github-actions-via-containers - keep version in sync with installed package
 
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
         with:
-          node-version: 16
+          node-version: 18
 
       - name: Install pnpm
-        uses: pnpm/action-setup@v2.0.1
+        uses: pnpm/action-setup@v2
         with:
-          version: 7.9.3
+          version: 8.6.0
 
       - name: Install Dependencies
         run: pnpm install --no-frozen-lockfile
 
-      - name: Log target url # can remove
-        env:
-          PLAYWRIGHT_BASE_URL: ${{ github.event.deployment_status.target_url }}
-        run: echo "Target Vercel Url is $PLAYWRIGHT_BASE_URL"
-
-      - name: Run e2e tests
-        run: pnpm -F site test:e2e
+      - name: Run Playwright e2e tests
+        run: pnpm test:e2e
         env:
           CI: true
           PLAYWRIGHT_BASE_URL: ${{ github.event.deployment_status.target_url }}
 
       - uses: actions/upload-artifact@v3
-        # if: failure()
         if: always()
         with:
           name: playwright-report
