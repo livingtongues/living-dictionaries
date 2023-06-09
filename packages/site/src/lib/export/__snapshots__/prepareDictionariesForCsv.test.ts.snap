@@ -1,0 +1,43 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`prepareDictionaryForCsv > dictionary example 1 1`] = `
+{
+  "glottocode": "badh1238",
+  "iso6393": "",
+  "latitude": 30.133,
+  "location": "",
+  "longitude": 79.539,
+  "name": "<xaxdeleted>",
+  "public": false,
+  "thumbnail": undefined,
+  "url": "https://livingdictionaries.app/badhani",
+}
+`;
+
+exports[`prepareDictionaryForCsv > dictionary example 2 1`] = `
+{
+  "glottocode": "buri1258",
+  "iso6393": "bua",
+  "latitude": 51.833,
+  "location": "",
+  "longitude": 107.616,
+  "name": "Buryat",
+  "public": false,
+  "thumbnail": undefined,
+  "url": "https://livingdictionaries.app/buryat",
+}
+`;
+
+exports[`prepareDictionaryForCsv > dictionary example 3 1`] = `
+{
+  "glottocode": undefined,
+  "iso6393": undefined,
+  "latitude": undefined,
+  "location": "South Eastern States of Nigeria_ West Africa",
+  "longitude": undefined,
+  "name": " IGBO LANGUAGE (ASUSU IGBO)",
+  "public": false,
+  "thumbnail": undefined,
+  "url": "https://livingdictionaries.app/igbo-language-(asusu-igb",
+}
+`;

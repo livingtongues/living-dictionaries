@@ -1,6 +1,7 @@
 <script lang="ts">
   import JSZip from 'jszip';
-  import { arrayToCSVBlob, downloadBlob } from '$lib/export/csv';
+  import { downloadBlob } from '$lib/export/downloadBlob';
+  import { objectsToCsvByHeaders } from '$lib/export/csv';
   import type { IDictionary } from '@living-dictionaries/types';
   import { createEventDispatcher, onDestroy, onMount } from 'svelte';
   import { getStorageDownloadUrl } from './storageUrl';
@@ -58,8 +59,11 @@
       fetched++;
     }
 
-    const CSVBlob = arrayToCSVBlob(finalizedEntries);
-    zip.file(`${dictionary.id}.csv`, CSVBlob);
+    const [headers, ...entries] = finalizedEntries;
+    const csv = objectsToCsvByHeaders(headers, entries);
+    const csvBlob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+
+    zip.file(`${dictionary.id}.csv`, csvBlob);
 
     const blob = await zip.generateAsync({ type: 'blob' });
     if (destroyed) return;
