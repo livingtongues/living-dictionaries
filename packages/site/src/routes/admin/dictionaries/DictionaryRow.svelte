@@ -10,6 +10,7 @@
   import RolesManagment from './RolesManagment.svelte';
   import type { DictionaryWithHelperStores } from './dictionaryWithHelpers';
 
+  export let index: number;
   export let dictionary: DictionaryWithHelperStores;
   const { managers, contributors, writeInCollaborators, invites } = dictionary;
 
@@ -24,7 +25,8 @@
 </script>
 
 <tr>
-  <td class="italic">
+  <td class="relative">
+    <span class="absolute top-0 left-0 text-xs text-gray-400">{index + 1}</span>
     <DictionaryFieldEdit field={'name'} value={dictionary.name} dictionaryId={dictionary.id} />
   </td>
   <td>

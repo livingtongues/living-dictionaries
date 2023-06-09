@@ -45,8 +45,13 @@
       ),
       getManagers: getCollection<IHelper>(`dictionaries/${dictionary.id}/managers`),
       getContributors: getCollection<IHelper>(`dictionaries/${dictionary.id}/managers`),
-      getWriteInCollaborators: getCollection<IHelper>(`dictionaries/${dictionary.id}/writeInCollaborators`),
-      getInvites: getCollection<IInvite>(`dictionaries/${dictionary.id}/invites`, inviteQueryConstraints),
+      getWriteInCollaborators: getCollection<IHelper>(
+        `dictionaries/${dictionary.id}/writeInCollaborators`
+      ),
+      getInvites: getCollection<IInvite>(
+        `dictionaries/${dictionary.id}/invites`,
+        inviteQueryConstraints
+      ),
     };
   });
 </script>
@@ -73,10 +78,11 @@
     <div class="mb-1" />
     <ResponsiveTable stickyHeading stickyColumn>
       <SortDictionaries dictionaries={filteredDictionaries} let:sortedDictionaries>
-        {#each sortedDictionaries as dictionary (dictionary.id)}
+        {#each sortedDictionaries as dictionary, index (dictionary.id)}
           <IntersectionObserverShared bottom={2000} let:intersecting once>
             {#if intersecting}
               <DictionaryRow
+                {index}
                 {dictionary}
                 on:toggleprivacy={() => {
                   try {
