@@ -1,6 +1,8 @@
 <script lang="ts">
-  import type { IDictionary } from '@living-dictionaries/types';
-  export let dictionaries: IDictionary[] = [];
+  import type { DictionaryWithHelperStores } from './dictionaryWithHelpers';
+
+  export let dictionaries: DictionaryWithHelperStores[] = [];
+
   enum DictionaryFields {
     name = 'Dictionary Name',
     public = 'Public',

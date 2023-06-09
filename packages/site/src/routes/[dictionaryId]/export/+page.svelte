@@ -6,7 +6,6 @@
   import { partsOfSpeech } from '$lib/mappings/parts-of-speech';
   import type { ActualDatabaseEntry } from '@living-dictionaries/types';
   import { getCollection } from 'sveltefirets';
-  import { downloadBlob, arrayToCSVBlob } from '$lib/export/csv';
   import Progress from '$lib/export/Progress.svelte';
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte';
   import { convert_entry_to_current_shape } from '$lib/transformers/convert_entry_to_current_shape';
@@ -14,6 +13,7 @@
   import DownloadMedia from './DownloadMedia.svelte';
   import { fetchSpeakers } from './fetchSpeakers';
   import { prepareEntriesForCsv, type EntryForCSV } from './prepareEntriesForCsv';
+  import { downloadObjectsAsCSV } from '$lib/export/csv';
 
   let includeImages = false;
   let includeAudio = false;
@@ -142,8 +142,8 @@
     <Button
       loading={!allEntries.length}
       onclick={() => {
-        const blob = arrayToCSVBlob(allEntries);
-        downloadBlob(blob, $dictionary.id, '.csv');
+        const [headers, ...entries] = allEntries;
+        downloadObjectsAsCSV(headers, entries, $dictionary.id);
       }}
       form="filled">
       {$_('export.download_csv', { default: 'Download CSV' })}

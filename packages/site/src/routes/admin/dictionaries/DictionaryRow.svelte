@@ -1,17 +1,18 @@
 <script lang="ts">
   import { admin } from '$lib/stores';
-  import type { IDictionary, IHelper, IInvite } from '@living-dictionaries/types';
   import { printDate } from '$lib/helpers/time';
-  export let dictionary: IDictionary;
   import DictionaryFieldEdit from './DictionaryFieldEdit.svelte';
-  import { BadgeArrayEmit, ShowHide, Button, IntersectionObserverShared } from 'svelte-pieces';
+  import { BadgeArrayEmit, ShowHide, Button } from 'svelte-pieces';
   import { createEventDispatcher } from 'svelte';
-  import { Collection, updateOnline } from 'sveltefirets';
-  import { where } from 'firebase/firestore';
+  import { updateOnline } from 'sveltefirets';
   import { LatLngDisplay } from '@living-dictionaries/parts';
   import ContributorInvitationStatus from '$lib/components/contributors/ContributorInvitationStatus.svelte';
-
   import RolesManagment from './RolesManagment.svelte';
+  import type { DictionaryWithHelperStores } from './dictionaryWithHelpers';
+
+  export let index: number;
+  export let dictionary: DictionaryWithHelperStores;
+  const { managers, contributors, writeInCollaborators, invites } = dictionary;
 
   const dispatch = createEventDispatcher<{
     addalternatename: string;
@@ -21,13 +22,11 @@
     updatecoordinates: { lat: number; lng: number };
     removecoordinates: boolean;
   }>();
-
-  let helperType: IHelper[];
-  let inviteType: IInvite[];
 </script>
 
 <tr>
-  <td class="italic">
+  <td class="relative">
+    <span class="absolute top-0 left-0 text-xs text-gray-400">{index + 1}</span>
     <DictionaryFieldEdit field={'name'} value={dictionary.name} dictionaryId={dictionary.id} />
   </td>
   <td>
@@ -43,92 +42,52 @@
     </Button>
   </td>
   <td>
-    <Button href="/{dictionary.id}">
-      {dictionary.entryCount || '?'}
+    <Button title="View Entries" size="sm" form="simple" href="/{dictionary.id}">
+      {dictionary.entryCount} 
+      <!-- <span class="i-tabler-external-link" style="vertical-align: -1px;" /> -->
     </Button>
   </td>
   <td>
     <div style="width: 300px;" />
-    <IntersectionObserverShared bottom={2000} let:intersecting once>
-      {#if intersecting}
-        <Collection
-          path={`dictionaries/${dictionary.id}/managers`}
-          startWith={helperType}
-          let:data={managers}>
-          <RolesManagment helpers={managers} {dictionary} role="manager" />
-        </Collection>
-        <Collection
-          path={`dictionaries/${dictionary.id}/invites`}
-          queryConstraints={[
-            where('role', '==', 'manager'),
-            where('status', 'in', ['queued', 'sent']),
-          ]}
-          startWith={inviteType}
-          let:data={invites}>
-          {#each invites as invite}
-            <div class="my-1">
-              <ContributorInvitationStatus
-                admin
-                {invite}
-                on:delete={() =>
-                  updateOnline(`dictionaries/${dictionary.id}/invites/${invite.id}`, {
-                    status: 'cancelled',
-                  })}>
-                <span class="i-mdi-email-send" slot="prefix" />
-              </ContributorInvitationStatus>
-            </div>
-          {/each}
-        </Collection>
+    <RolesManagment helpers={$managers} {dictionary} role="manager" />
+    {#each $invites || [] as invite}
+      {#if invite.role === 'manager'}
+        <div class="my-1">
+          <ContributorInvitationStatus
+            admin
+            {invite}
+            on:delete={() =>
+              updateOnline(`dictionaries/${dictionary.id}/invites/${invite.id}`, {
+                status: 'cancelled',
+              })}>
+            <span class="i-mdi-email-send" slot="prefix" />
+          </ContributorInvitationStatus>
+        </div>
       {/if}
-    </IntersectionObserverShared>
+    {/each}
   </td>
   <td>
     <div style="width: 300px;" />
-    <IntersectionObserverShared bottom={2000} let:intersecting once>
-      {#if intersecting}
-        <Collection
-          path={`dictionaries/${dictionary.id}/contributors`}
-          startWith={helperType}
-          let:data={contributors}>
-          <RolesManagment helpers={contributors} {dictionary} role="contributor" />
-        </Collection>
-        <Collection
-          path={`dictionaries/${dictionary.id}/invites`}
-          queryConstraints={[
-            where('role', '==', 'contributor'),
-            where('status', 'in', ['queued', 'sent']),
-          ]}
-          startWith={inviteType}
-          let:data={invites}>
-          {#each invites as invite}
-            <div class="my-1">
-              <ContributorInvitationStatus
-                admin
-                {invite}
-                on:delete={() =>
-                  updateOnline(`dictionaries/${dictionary.id}/invites/${invite.id}`, {
-                    status: 'cancelled',
-                  })}>
-                <span class="i-mdi-email-send" slot="prefix" />
-              </ContributorInvitationStatus>
-            </div>
-          {/each}
-        </Collection>
+    <RolesManagment helpers={$contributors} {dictionary} role="contributor" />
+    {#each $invites || [] as invite}
+      {#if invite.role === 'contributor'}
+        <div class="my-1">
+          <ContributorInvitationStatus
+            admin
+            {invite}
+            on:delete={() =>
+              updateOnline(`dictionaries/${dictionary.id}/invites/${invite.id}`, {
+                status: 'cancelled',
+              })}>
+            <span class="i-mdi-email-send" slot="prefix" />
+          </ContributorInvitationStatus>
+        </div>
       {/if}
-    </IntersectionObserverShared>
+    {/each}
   </td>
   <td>
     <div style="width: 300px;" />
-    <IntersectionObserverShared bottom={2000} let:intersecting once>
-      {#if intersecting}
-        <Collection
-          path={`dictionaries/${dictionary.id}/writeInCollaborators`}
-          startWith={helperType}
-          let:data={writeInCollaborators}>
-          <RolesManagment helpers={writeInCollaborators} {dictionary} role="writeInCollaborator" />
-        </Collection>
-      {/if}
-    </IntersectionObserverShared>
+    <RolesManagment helpers={$writeInCollaborators} {dictionary} role="writeInCollaborator" />
   </td>
   <td>
     <DictionaryFieldEdit
@@ -216,5 +175,8 @@
   <td>
     <div style="width: 300px;" />
     {dictionary.conLangDescription ? dictionary.conLangDescription : ''}</td>
-  <td class="cursor-pointer" title={$admin > 1 && JSON.stringify(dictionary, null, 1)}>data</td>
+  {#if $admin > 1}
+    <td class="cursor-pointer" title={JSON.stringify(dictionary, null, 1)}
+      ><span class="i-material-symbols-info-outline" /></td>
+  {/if}
 </tr>
