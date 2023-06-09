@@ -40,13 +40,15 @@
         <span class="mr-1 hidden sm:inline">[{entry.ph}]</span>
       {/if}
 
-      {#if entry.lo}<i class="mr-1">{entry.lo}</i>{/if}
-      {#if entry.lo2}<i class="mr-1" class:sompeng={dictionary.id === 'sora'}
-          >{entry.lo2}</i
-        >{/if}
-      {#if entry.lo3}<i class="mr-1">{entry.lo3}</i>{/if}
-      {#if entry.lo4}<i class="mr-1">{entry.lo4}</i>{/if}
-      {#if entry.lo5}<i class="mr-1">{entry.lo5}</i>{/if}
+      {#if dictionary.id !== 'garifuna'}
+        {#if entry.lo}<i class="mr-1">{entry.lo}</i>{/if}
+        {#if entry.lo2}<i class="mr-1" class:sompeng={dictionary.id === 'sora'}
+            >{entry.lo2}</i
+          >{/if}
+        {#if entry.lo3}<i class="mr-1">{entry.lo3}</i>{/if}
+        {#if entry.lo4}<i class="mr-1">{entry.lo4}</i>{/if}
+        {#if entry.lo5}<i class="mr-1">{entry.lo5}</i>{/if}
+      {/if}
     </div>
     <div class="flex flex-wrap items-center justify-end -mb-1">
       <div class="text-xs text-gray-600 mr-auto mb-1">
