@@ -1,5 +1,6 @@
 import { sveltekit } from '@sveltejs/kit/vite';
 import type { UserConfig } from 'vite';
+import UnoCSS from '@unocss/svelte-scoped/vite'
 // import { svelte } from '@sveltejs/vite-plugin-svelte';
 
 import { kitbook } from 'kitbook/plugins/vite';
@@ -16,6 +17,9 @@ const vitestConfig: VitestUserConfigInterface = {
 const config: UserConfig = {
   plugins: [
     kitbook(),
+    UnoCSS({
+      injectReset: '@unocss/reset/tailwind.css',
+    }),
     sveltekit(),
   ],
 
