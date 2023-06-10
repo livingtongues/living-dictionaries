@@ -16,7 +16,6 @@
     let:chooseCamera
     let:selectedMicrophone
     let:selectedCamera>
-    <!-- svelte-ignore a11y-media-has-caption -->
     <video muted volume={0} use:srcObject={stream} autoplay playsinline />
 
     <Recorder
