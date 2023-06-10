@@ -1,7 +1,6 @@
 module.exports = {
   extends: [
-    'eslint:recommended', // can remove after going through all rules and seeing if all are in @antfu or overridden
-    // '@antfu',
+    'plugin:@typescript-eslint/recommended',
     'plugin:svelte/recommended',
     // '@unocss',
   ],
@@ -14,7 +13,7 @@ module.exports = {
   },
   env: {
     browser: true,
-    es2017: true, // @antfu has es6
+    es2017: true,
     node: true,
   },
   overrides: [
@@ -38,26 +37,32 @@ module.exports = {
     },
   ],
   rules: {
-    'no-console': ['warn', { allow: ['warn', 'error'] }],
-    'no-alert': 'off',
-    // 'n/prefer-global/buffer': ['error', 'always'],
+    'svelte/valid-compile': 'off', // throws error on a11y issues without recourse
+    'svelte/no-at-html-tags': ['warn'],
 
-    // 'imports/no-unused-imports': 'off', // had no effect
-    // 'imports/no-unused-vars': 'off', // had no effect on bug fix
-    // 'unused-imports/no-unused-imports': 'off', // had no effect
-    
-    'unused-imports/no-unused-vars': 'off',
+    'a11y-click-events-have-key-events': 'off',
+    '@typescript-eslint/no-var-requires': 'off',
+    '@typescript-eslint/no-unused-vars': 'off',
+    '@typescript-eslint/no-empty-function': 'off',
+    '@typescript-eslint/no-explicit-any': 'off',
+    '@typescript-eslint/explicit-module-boundary-types': 'off',
+    '@typescript-eslint/ban-ts-comment': 'off',
+
+    'no-unused-vars': 'off', // is marking enum values as unused
     'prefer-template': 'off',
+    'no-console': ['warn', { allow: ['warn', 'error'] }],
+
+
+    // 'n/prefer-global/buffer': ['error', 'always'],
+    // 'unused-imports/no-unused-vars': 'off',
     // 'svelte/require-store-reactive-access': 'warn',
     // 'no-undef': 'off',
-
-    // rules prior to @antfu import:
-    // 'a11y-click-events-have-key-events': 'off',
-    // '@typescript-eslint/no-var-requires': 'off',
-    // '@typescript-eslint/no-unused-vars': 'off',
-    // '@typescript-eslint/no-empty-function': 'off',
-    // '@typescript-eslint/no-explicit-any': 'off',
-    // '@typescript-eslint/explicit-module-boundary-types': 'off',
-    // '@typescript-eslint/ban-ts-comment': 'off',
   },
+  // settings: {
+  //   svelte: {
+  //     ignoreWarnings: [
+  //       "a11y-click-events-have-key-events",
+  //     ],
+  //   },
+  // },
 }

@@ -12,7 +12,7 @@ export const load: PageLoad = async ({ params, parent }) => {
       return { grammar: grammarDoc.grammar };
     }
   } catch (err) {
-    console.log(err);
+    alert(err);
   }
   return { grammar: null };
 };
