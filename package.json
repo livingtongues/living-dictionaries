@@ -1,6 +1,7 @@
 {
 	"name": "living-dictionaries",
 	"version": "0.0.1",
+	"type": "module",
 	"scripts": {
 		"dev": "pnpm --filter=site dev",
 		"dev:open": "pnpm --filter=site dev --open",
@@ -22,11 +23,13 @@
 	},
 	"devDependencies": {
 		"@playwright/test": "^1.35.0",
-		"@typescript-eslint/eslint-plugin": "^5.59.7",
-		"@typescript-eslint/parser": "^5.59.8",
+		"@typescript-eslint/eslint-plugin": "6.0.0-alpha.138",
+		"@typescript-eslint/parser": "6.0.0-alpha.144",
 		"eslint": "^8.41.0",
+		"eslint-define-config": "^1.20.0",
 		"eslint-plugin-svelte": "^2.29.0",
+		"globals": "^13.20.0",
 		"svelte": "^3.55.1",
-		"typescript": "~4.9.4"
+		"typescript": "~5.1.3"
 	}
 }
