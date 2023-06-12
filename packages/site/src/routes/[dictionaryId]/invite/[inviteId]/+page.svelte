@@ -104,8 +104,7 @@
       <p class="font-semibold mb-2">
         {$_('invite.invitation_claimed', {
           default: 'Invitation claimed',
-        })}: {invite.updatedAt &&
-          invite.updatedAt.toDate().toLocaleDateString(undefined, {
+        })}: {invite.updatedAt?.toDate().toLocaleDateString(undefined, {
             weekday: 'long',
             year: 'numeric',
             month: 'long',

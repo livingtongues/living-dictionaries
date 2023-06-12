@@ -145,7 +145,7 @@
     {/if}
 
     <EntryField
-      value={entry.xs && entry.xs.vn}
+      value={entry.xs?.vn}
       field="xs.vn"
       {canEdit}
       display={$t('entry.example_sentence', { default: 'Example Sentence' })}
@@ -153,7 +153,7 @@
 
     {#each glossingLanguages as bcp}
       <EntryField
-        value={entry.xs && entry.xs[bcp]}
+        value={entry.xs?.[bcp]}
         field={`xs.${bcp}`}
         {canEdit}
         display={`${$t(`gl.${bcp}`)}: ${$t('entry.example_sentence', {
