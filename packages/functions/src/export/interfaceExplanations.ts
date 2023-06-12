@@ -2,12 +2,12 @@ export const entryInterface = {
   id:
     'Unique Entry ID - use this for links to the entry on Living Dictionaries, as well as to compare new imports with previous data',
   lx:
-    "lexeme is the linguistic term meaning the 'headword' for the dictionary entry - this is the word or phrase in the vernacular language which is being described by all of the other data, being photographed, and recorded",
+    'lexeme is the linguistic term meaning the \'headword\' for the dictionary entry - this is the word or phrase in the vernacular language which is being described by all of the other data, being photographed, and recorded',
   gl: {
     en:
       'English gloss - the word/phrase used in English that is a translation of the lexeme into English',
     es:
-      "Multiple keys can show up in the gloss object - one for each language which the lexemes in this dictionary are being made available in. So for a dictionary that makes words understandable to English and Spanish speakers, you would see a gloss object with 'en' and 'es' keys (keys are the bcp codes for languages)",
+      'Multiple keys can show up in the gloss object - one for each language which the lexemes in this dictionary are being made available in. So for a dictionary that makes words understandable to English and Spanish speakers, you would see a gloss object with \'en\' and \'es\' keys (keys are the bcp codes for languages)',
   },
   in: 'interlinearization',
   lo:
@@ -24,7 +24,7 @@ export const entryInterface = {
   nt: 'notes',
   xv: 'example vernacular',
   xs:
-    "example sentences object formatted in same manner as gl object, except the 'vn' key refers to the vernacular language",
+    'example sentences object formatted in same manner as gl object, except the \'vn\' key refers to the vernacular language',
   mr: 'morphology (of the lexeme)',
   sf: {
     speakerName: 'name of speaker in recorded sound file',

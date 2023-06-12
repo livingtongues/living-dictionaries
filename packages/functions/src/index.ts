@@ -6,8 +6,8 @@ import { firestore } from 'firebase-functions';
 import {
   onDocumentCreated,
   onDocumentDeleted,
-} from "firebase-functions/v2/firestore";
-import { onSchedule } from "firebase-functions/v2/scheduler";
+} from 'firebase-functions/v2/firestore';
+import { onSchedule } from 'firebase-functions/v2/scheduler';
 
 // TODO: create endpoints
 // updateDevAdminRole
@@ -25,9 +25,9 @@ export const decreaseEntryCount = onDocumentDeleted('dictionaries/{dictionaryId}
 });
 
 // can manually run task at https://console.cloud.google.com/cloudscheduler?project=talking-dictionaries-alpha
-export const countAllEntries = onSchedule("every day 00:00", async (event) => {
+export const countAllEntries = onSchedule('every day 00:00', async (event) => {
   await (await import('./aggregation/countAllEntries')).countAllEntries();
-})
+});
 
 // Algolia Search Indexing
 export const addToIndex = firestore

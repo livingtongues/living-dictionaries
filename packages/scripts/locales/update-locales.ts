@@ -8,7 +8,7 @@ const languages = [...Object.keys(ReadyLocales), ...Object.keys(UnpublishedLocal
 
 export async function generateFilesFromSpreadsheet() {
   const i18nGoogleSheetId = '1SqtfUvYYAEQSFTaTPoAJq6k-wlbuAgWCkswE_kiUhLs';
-  const localesDir = '../site/src/locales'
+  const localesDir = '../site/src/locales';
   try {
     const rows = await jsonFromCsvUrl(googleSheetCsvUrl(i18nGoogleSheetId, 'App-Translations'));
     const translations = await generateTranslationsFromSpreadsheet(rows, { nesting: 'deep' });
@@ -36,7 +36,7 @@ export async function generateFilesFromSpreadsheet() {
       `../site/src/lib/glosses/glossing-languages-list.json`,
       JSON.stringify(glossingLanguages, null, 2) + '\r\n'
     );
-    console.log('glossing-languages-list.json file written')
+    console.log('glossing-languages-list.json file written');
   } catch (error) {
     throw new Error(error.message);
   }

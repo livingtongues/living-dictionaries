@@ -1,4 +1,4 @@
-import { client } from "./algolia";
+import { client } from './algolia';
 
 client.copyIndex('entries_prod', 'entries_dev').then(() => {
   console.log('entry records copied');

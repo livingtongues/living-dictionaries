@@ -25,7 +25,7 @@ export default defineFlatConfig([
   },
   jsEslintPlugin.configs.recommended, // new way to do 'eslint:recommended'
   {
-    // files: ['**/*.ts', '**/*.js', '**/*.svelte'], // adding this keeps this config from linting svelte files so don't add
+    files: ['**/*.ts', '**/*.js', '**/*.svelte'],
     plugins: {
       '@typescript-eslint': tsEslintPlugin,
     },

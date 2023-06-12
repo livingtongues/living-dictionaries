@@ -5,7 +5,7 @@ import type { IDictionary } from '@living-dictionaries/types';
 const dictionary: IDictionary = {
   name: 'Banange',
   glossLanguages: ['en', 'es'],
-}
+};
 
 export const variants: Variants<typeof Component> = [
   {
@@ -41,4 +41,4 @@ export const variants: Variants<typeof Component> = [
       canEdit: true,
     },
   },
-]
+];

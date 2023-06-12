@@ -5,7 +5,7 @@ const devFirebaseConfig = {
     databaseURL: 'https://talking-dictionaries-dev.firebaseio.com',
     projectId: 'talking-dictionaries-dev',
     storageBucket: 'talking-dictionaries-dev.appspot.com',
-}
+};
 
 // const testFun = TestFunctions(devFirebaseConfig, 'service-account-dev.json');
 const testFun = TestFunctions();

@@ -12,7 +12,7 @@ const base_algolia_entry: AlgoliaEntry = {
   hasPartOfSpeech: false,
   hasNounClass: false,
   hasPluralForm: false,
-}
+};
 
 describe('prepareDataForIndex', () => {
   test('sets all "has___" fields to false by default', async () => {
@@ -31,7 +31,7 @@ describe('prepareDataForIndex', () => {
       mr: 'morphology',
       ph: 'phonetic',
       scn: ['foo', 'bar'],
-    }
+    };
     expect(await prepareDataForIndex(db_entry, dictId, null)).toEqual(algolia_entry);
   });
 
@@ -47,7 +47,7 @@ describe('prepareDataForIndex', () => {
       hasImage: true,
       ca: 2,
       ua: 1,
-    }
+    };
     expect(await prepareDataForIndex(db_entry, dictId, null)).toEqual(algolia_entry);
   });
 
@@ -94,7 +94,7 @@ describe('prepareDataForIndex', () => {
       hasNounClass: true,
       ca: 2,
       ua: 1,
-    }
+    };
     expect(await prepareDataForIndex(db_entry, dictId, null)).toEqual(algolia_entry);
   });
 
@@ -107,7 +107,7 @@ describe('prepareDataForIndex', () => {
       sf: { path: 'filepath', speakerName: 'Bob' },
       hasAudio: true,
       hasSpeaker: true,
-    }
+    };
     expect(await prepareDataForIndex(db_entry, dictId, null)).toEqual(algolia_entry);
   });
 
@@ -118,7 +118,7 @@ describe('prepareDataForIndex', () => {
     };
     const algolia_entry: AlgoliaEntry = {
       ...base_algolia_entry,
-    }
+    };
     expect(await prepareDataForIndex(db_entry, dictId, null)).toEqual(algolia_entry);
   });
 
@@ -128,7 +128,7 @@ describe('prepareDataForIndex', () => {
     };
     const algolia_entry: AlgoliaEntry = {
       ...base_algolia_entry,
-    }
+    };
     expect(await prepareDataForIndex(db_entry, dictId, null)).toEqual(algolia_entry);
   });
 
@@ -140,7 +140,7 @@ describe('prepareDataForIndex', () => {
     const algolia_entry: AlgoliaEntry = {
       ...base_algolia_entry,
       ub: 'accurate',
-    }
+    };
     expect(await prepareDataForIndex(db_entry, dictId, null)).toEqual(algolia_entry);
   });
 });
@@ -157,7 +157,7 @@ describe('get_speaker_display_name', () => {
               data: () => {
                 return {
                   displayName: speaker_name,
-                }
+                };
               },
             };
             resolve(speakerSnap);
@@ -194,7 +194,7 @@ describe('get_speaker_display_name', () => {
         sp: ['foo'],
         speakerName: speaker_name
       },
-    }
+    };
     expect(await prepareDataForIndex(db_entry, dictId, mockDb)).toEqual(algolia_entry);
   });
 });

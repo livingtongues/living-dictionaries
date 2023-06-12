@@ -14,13 +14,13 @@ export interface NewUserRequestBody {
 }
 
 export const POST: RequestHandler = async ({ request, fetch }) => {
-  const { auth_token, user } = await request.json() as NewUserRequestBody
+  const { auth_token, user } = await request.json() as NewUserRequestBody;
 
-  const decodedToken = await decodeToken(auth_token)
+  const decodedToken = await decodeToken(auth_token);
   if (!decodedToken?.uid)
-    throw new Error('No user id found in token')
+    throw new Error('No user id found in token');
   if (user.email !== decodedToken.email)
-    throw new Error('token email does not match user email')
+    throw new Error('token email does not match user email');
 
   const userMsg: EmailParts = {
     to: [{ email: user.email }],
@@ -60,5 +60,5 @@ https://livingdictionaries.app`,
     }
   });
 
-  return json('success')
-}
+  return json('success');
+};

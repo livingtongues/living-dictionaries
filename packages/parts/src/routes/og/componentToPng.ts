@@ -88,9 +88,9 @@ const loadDynamicAsset = withCache(
 								'Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_6_8; de-at) AppleWebKit/533.21.1 (KHTML, like Gecko) Version/5.0.5 Safari/533.21.1',
 						},
 					})
-				).text()
+				).text();
 
-				const resource = css.match(/src: url\((.+)\) format\('(opentype|truetype)'\)/)
+				const resource = css.match(/src: url\((.+)\) format\('(opentype|truetype)'\)/);
 
 				if (!resource) return;
 
@@ -124,12 +124,12 @@ function withCache(fn: Function) {
 }
 
 function hash(str: string) {
-  let i; let l
-  let hval = 0x811C9DC5
+  let i; let l;
+  let hval = 0x811C9DC5;
 
   for (i = 0, l = str.length; i < l; i++) {
-    hval ^= str.charCodeAt(i)
-    hval += (hval << 1) + (hval << 4) + (hval << 7) + (hval << 8) + (hval << 24)
+    hval ^= str.charCodeAt(i);
+    hval += (hval << 1) + (hval << 4) + (hval << 7) + (hval << 8) + (hval << 24);
   }
-  return (`00000${(hval >>> 0).toString(36)}`).slice(-6)
+  return (`00000${(hval >>> 0).toString(36)}`).slice(-6);
 }
