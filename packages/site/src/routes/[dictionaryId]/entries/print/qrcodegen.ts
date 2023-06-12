@@ -419,32 +419,32 @@ export class QrCode {
       for (let x = 0; x < this.size; x++) {
         let invert: boolean;
         switch (mask) {
-          case 0:
-            invert = (x + y) % 2 == 0;
-            break;
-          case 1:
-            invert = y % 2 == 0;
-            break;
-          case 2:
-            invert = x % 3 == 0;
-            break;
-          case 3:
-            invert = (x + y) % 3 == 0;
-            break;
-          case 4:
-            invert = (Math.floor(x / 3) + Math.floor(y / 2)) % 2 == 0;
-            break;
-          case 5:
-            invert = ((x * y) % 2) + ((x * y) % 3) == 0;
-            break;
-          case 6:
-            invert = (((x * y) % 2) + ((x * y) % 3)) % 2 == 0;
-            break;
-          case 7:
-            invert = (((x + y) % 2) + ((x * y) % 3)) % 2 == 0;
-            break;
-          default:
-            throw new Error('Unreachable');
+        case 0:
+          invert = (x + y) % 2 == 0;
+          break;
+        case 1:
+          invert = y % 2 == 0;
+          break;
+        case 2:
+          invert = x % 3 == 0;
+          break;
+        case 3:
+          invert = (x + y) % 3 == 0;
+          break;
+        case 4:
+          invert = (Math.floor(x / 3) + Math.floor(y / 2)) % 2 == 0;
+          break;
+        case 5:
+          invert = ((x * y) % 2) + ((x * y) % 3) == 0;
+          break;
+        case 6:
+          invert = (((x * y) % 2) + ((x * y) % 3)) % 2 == 0;
+          break;
+        case 7:
+          invert = (((x + y) % 2) + ((x * y) % 3)) % 2 == 0;
+          break;
+        default:
+          throw new Error('Unreachable');
         }
         if (!this.isFunction[y][x] && invert) this.modules[y][x] = !this.modules[y][x];
       }

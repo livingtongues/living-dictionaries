@@ -6,7 +6,7 @@ import { ActualDatabaseEntry } from '@living-dictionaries/types';
 import * as prepare from '@living-dictionaries/functions/src/algolia/prepareDataForIndex';
 // @ts-ignore
 const prepareDataForIndex = prepare.default
-.prepareDataForIndex as typeof import('@living-dictionaries/functions/src/algolia/prepareDataForIndex').prepareDataForIndex; // b/c file is declared to be commonjs by its package.json
+  .prepareDataForIndex as typeof import('@living-dictionaries/functions/src/algolia/prepareDataForIndex').prepareDataForIndex; // b/c file is declared to be commonjs by its package.json
 
 const indexAllDictionaries = async () => {
   const dictionariesSnapshot = await db.collection(`dictionaries`).get();

@@ -1,3 +1,5 @@
+// To run automatically on commit, add `simple-git-hooks` and `lint-staged` then run `npx simple-git-hooks` once. After that all commits will be linted.
+
 // @ts-check
 import { defineFlatConfig } from 'eslint-define-config';
 import jsEslintPlugin from '@eslint/js';
@@ -25,6 +27,11 @@ export default defineFlatConfig([
   },
   jsEslintPlugin.configs.recommended, // new way to do 'eslint:recommended'
   {
+    rules: {
+      'indent': ['error', 2]
+    }
+  },
+  {
     files: ['**/*.ts', '**/*.js', '**/*.svelte', '**/*.svx'],
     plugins: {
       '@typescript-eslint': tsEslintPlugin,
@@ -32,7 +39,7 @@ export default defineFlatConfig([
     languageOptions: {
       parser: typescriptParser,
       parserOptions: {
-        extraFileExtensions: ['.svelte', '.svx'], // not sure if needed here or in Svelte below or anywhere, "a configuration property that needs to be added to an ESLint configuration in order to tell ESLint to ignore certain file extensions . This is often required for non-standard file extensions, such as those used in Vue or Angular projects."
+        extraFileExtensions: ['.svelte', '.svx'],
         //   tsconfigRootDir: process.cwd(),
         //   project: true,
       },

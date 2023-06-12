@@ -4,26 +4,26 @@ import { seo_description } from './seo_description';
 describe('seo_description', () => {
   const $t = (id: string) => {
     switch (id) {
-      case 'gl.en':
-        return 'English';
-      case 'gl.es':
-        return 'Spanish';
-      case 'gl.or':
-        return 'Oriya';
-      case 'gl.as':
-        return 'Assamese';
-      case 'gl.hi':
-        return 'Hindi';
-      case 'gl.fr':
-        return 'French';
-      case 'gl.de':
-        return 'German';
-      case 'gl.pt':
-        return 'Portuguese';
-      case 'gl.it':
-        return 'Italian';
-      default:
-        return 'other';
+    case 'gl.en':
+      return 'English';
+    case 'gl.es':
+      return 'Spanish';
+    case 'gl.or':
+      return 'Oriya';
+    case 'gl.as':
+      return 'Assamese';
+    case 'gl.hi':
+      return 'Hindi';
+    case 'gl.fr':
+      return 'French';
+    case 'gl.de':
+      return 'German';
+    case 'gl.pt':
+      return 'Portuguese';
+    case 'gl.it':
+      return 'Italian';
+    default:
+      return 'other';
     }
   };
 
