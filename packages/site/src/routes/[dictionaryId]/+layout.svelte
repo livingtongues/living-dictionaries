@@ -5,7 +5,7 @@
   import Header from '$lib/components/shell/Header.svelte';
   import { Button, ResponsiveSlideover } from 'svelte-pieces';
   import type { LayoutData } from './$types';
-  import './custom-fonts.css'
+  import './custom-fonts.css';
   export let data: LayoutData;
 
   if (data.dictionary) {

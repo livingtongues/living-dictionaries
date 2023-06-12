@@ -7,7 +7,7 @@
   export let dictionary: IDictionary;
   export let isManager = false;
 
-  let citationType: ICitation = { citation: '' };
+  const citationType: ICitation = { citation: '' };
   let value = '';
 </script>
 

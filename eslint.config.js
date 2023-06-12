@@ -23,24 +23,16 @@ export default defineFlatConfig([
       'packages/scripts/import/old**',
     ],
   },
+  jsEslintPlugin.configs.recommended, // new way to do 'eslint:recommended'
   {
-    files: ['**/*.test.ts'],
-    languageOptions: {
-      globals: {
-        ...globals.jest,
-      }
-    }
-  },
-  jsEslintPlugin.configs.recommended,
-  {
-    // files: ['**/*.ts', '**/*.js'], // adding this keeps this config from linting svelte files so don't add
+    // files: ['**/*.ts', '**/*.js', '**/*.svelte'], // adding this keeps this config from linting svelte files so don't add
     plugins: {
       '@typescript-eslint': tsEslintPlugin,
     },
     languageOptions: {
       parser: typescriptParser,
       parserOptions: {
-        // extraFileExtensions: ['.svelte'], // not sure if needed here or in Svelte below or anywhere, "a configuration property that needs to be added to an ESLint configuration in order to tell ESLint to ignore certain file extensions . This is often required for non-standard file extensions, such as those used in Vue or Angular projects."
+        extraFileExtensions: ['.svelte'], // not sure if needed here or in Svelte below or anywhere, "a configuration property that needs to be added to an ESLint configuration in order to tell ESLint to ignore certain file extensions . This is often required for non-standard file extensions, such as those used in Vue or Angular projects."
         //   tsconfigRootDir: process.cwd(),
         //   project: true,
       },
@@ -49,22 +41,20 @@ export default defineFlatConfig([
         ...globals.es2021,
         ...globals.node,
         ...globals.worker,
-        test: 'readonly',
-        expect: 'readonly',
-        describe: 'readonly',
+        ...globals.jest,
       },
     },
     linterOptions: {
-      // reportUnusedDisableDirectives: true
+      reportUnusedDisableDirectives: true
     },
     rules: {
-      // ...jsEslintPlugin.configs.recommended?.rules, // new way to do 'eslint:recommended'
       ...tsEslintPlugin.configs.recommended?.rules,
       ...tsEslintPlugin.configs.stylistic?.rules,
+      // Possibly update to this in the future:
       // ...tsEslint.configs['recommended-type-checked']?.rules,
       // ...tsEslint.configs['stylistic-type-checked']?.rules,
       '@typescript-eslint/sort-type-constituents': 'off', // prefer logical rather than alphabetical sorting
-      'no-console': ['warn', { allow: ['warn', 'error', 'info'] }],
+      'no-console': ['error', { allow: ['warn', 'error', 'info'] }],
       '@typescript-eslint/no-unused-vars': [
         'error',
         {
@@ -99,12 +89,12 @@ export default defineFlatConfig([
       //   },
       // ],
       // to sort through:
-      '@typescript-eslint/no-var-requires': 'off',
-      '@typescript-eslint/no-empty-function': 'off',
-      '@typescript-eslint/no-explicit-any': 'off',
+      // '@typescript-eslint/no-explicit-any': 'off',
       '@typescript-eslint/explicit-module-boundary-types': 'off',
       '@typescript-eslint/ban-ts-comment': 'off',
       'prefer-template': 'off',
+      semi: 'error',
+      'prefer-const': 'error'
     }
   },
   {
@@ -117,7 +107,6 @@ export default defineFlatConfig([
       parser: svelteParser,
       parserOptions: {
         parser: typescriptParser,
-        extraFileExtensions: ['.svelte'] // not sure if needed
       }
     },
     rules: {
