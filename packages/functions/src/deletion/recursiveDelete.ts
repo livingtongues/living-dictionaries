@@ -41,6 +41,6 @@ export default async (data: any, context: functions.https.CallableContext) => {
     token: functions.config().fb.token,
   });
   return {
-    path: path,
+    path,
   };
 };
