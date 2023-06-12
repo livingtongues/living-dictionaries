@@ -21,8 +21,8 @@ export default async (
   console.log('Export Semantic Domains Request Query params: ', request.query);
   const queryParams = request.query;
   if (queryParams?.dictionaryID && queryParams?.semanticDomainID) {
-    const dictionaryID = queryParams.dictionaryID;
-    const semanticDomainID = queryParams.semanticDomainID;
+    const {dictionaryID} = queryParams;
+    const {semanticDomainID} = queryParams;
 
     const dictionarySnap = await admin.firestore().doc(`dictionaries/${dictionaryID}`).get();
     const dictionaryDoc = dictionarySnap.data() as IDictionary;

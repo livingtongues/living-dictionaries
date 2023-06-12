@@ -13,10 +13,10 @@ export interface SendRequestBody {
 export const POST: RequestHandler = async ({ request, fetch }) => {
   try {
     const { send_key, emailParts: { to, bcc, reply_to, subject, body, type }
-    } = await request.json() as SendRequestBody
+    } = await request.json() as SendRequestBody;
 
     if (send_key !== SEND_EMAIL_KEY)
-      throw new Error('SEND_EMAIL_KEY env variable not configured')
+      throw new Error('SEND_EMAIL_KEY env variable not configured');
 
     const mailChannelsSendBody: MailChannelsSendBody = {
       personalizations: [{
@@ -32,17 +32,17 @@ export const POST: RequestHandler = async ({ request, fetch }) => {
         type,
         value: body,
       }],
-    }
+    };
 
     if (bcc)
-      mailChannelsSendBody.personalizations[0].bcc = bcc
+      mailChannelsSendBody.personalizations[0].bcc = bcc;
 
-    await sendEmail(mailChannelsSendBody as MailChannelsSendBody, fetch)
+    await sendEmail(mailChannelsSendBody as MailChannelsSendBody, fetch);
 
-    return json('success')
+    return json('success');
   }
   catch (err: any) {
-    console.error(`Error with email send request: ${err.message}`)
-    throw error(500, `Error with email send request: ${err.message}`)
+    console.error(`Error with email send request: ${err.message}`);
+    throw error(500, `Error with email send request: ${err.message}`);
   }
 };

@@ -10,11 +10,11 @@ export interface ImageUrlRequestBody {
 }
 
 export const POST: RequestHandler = async ({ request, fetch }) => {
-  const { auth_token, firebase_storage_location } = await request.json() as ImageUrlRequestBody
+  const { auth_token, firebase_storage_location } = await request.json() as ImageUrlRequestBody;
 
-  const decodedToken = await decodeToken(auth_token)
+  const decodedToken = await decodeToken(auth_token);
   if (!decodedToken?.uid)
-    throw new Error('No user id found in token')
+    throw new Error('No user id found in token');
 
   const processAndLocationUrl = `${PROCESS_IMAGE_URL}/${firebase_storage_location}`;
 
@@ -22,5 +22,5 @@ export const POST: RequestHandler = async ({ request, fetch }) => {
   const url = await result.text();
   const gcsPath = url.replace('http://lh3.googleusercontent.com/', '');
 
-  return json(gcsPath)
-}
+  return json(gcsPath);
+};

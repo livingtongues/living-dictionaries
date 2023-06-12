@@ -1,9 +1,9 @@
 <script lang="ts">
   import { BadgeArrayEmit, ShowHide } from 'svelte-pieces';
   import {
-    removeDictionaryManager,
-    removeDictionaryContributor,
     removeDictionaryCollaborator,
+    removeDictionaryContributor,
+    removeDictionaryManager,
   } from '$lib/helpers/dictionariesManaging';
   import { addOnline } from 'sveltefirets';
   import type { HelperRoles, IDictionary, IHelper } from '@living-dictionaries/types';
@@ -14,15 +14,15 @@
 
   async function remove(helper: IHelper, dictionaryId: string, role: HelperRoles) {
     try {
-      if (role === 'manager') {
-        removeDictionaryManager(helper, dictionaryId);
-      }
-      if (role === 'writeInCollaborator') {
-        removeDictionaryCollaborator(helper, dictionaryId);
-      }
-      if (role === 'contributor') {
-        removeDictionaryContributor(helper, dictionaryId);
-      }
+      if (role === 'manager') 
+        await removeDictionaryManager(helper, dictionaryId);
+      
+      if (role === 'writeInCollaborator') 
+        await removeDictionaryCollaborator(helper, dictionaryId);
+      
+      if (role === 'contributor') 
+        await removeDictionaryContributor(helper, dictionaryId);
+      
     } catch (err) {
       alert(`Error: ${err}`);
     }
@@ -30,9 +30,9 @@
 
   async function addWriteInCollaborator() {
     const name = prompt('Name?');
-    if (name) {
-      addOnline(`dictionaries/${dictionary.id}/writeInCollaborators`, { name });
-    }
+    if (name) 
+      await addOnline(`dictionaries/${dictionary.id}/writeInCollaborators`, { name });
+    
   }
 </script>
 
@@ -42,7 +42,7 @@
     canEdit
     addMessage="Add"
     on:itemclicked={(e) => alert(helpers[e.detail.index].id)}
-    on:itemremoved={(e) => remove(helpers[e.detail.index], dictionary.id, role)}
+    on:itemremoved={async (e) => await remove(helpers[e.detail.index], dictionary.id, role)}
     on:additem={role === 'writeInCollaborator' ? addWriteInCollaborator : toggleSelectUserModal} />
 
   {#if show && role !== 'writeInCollaborator'}

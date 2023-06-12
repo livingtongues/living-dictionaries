@@ -14,15 +14,15 @@ if (import.meta.vitest) {
     const csv = `
 a ,the book ,c
 1,2 , 3
-`
+`;
     expect(parseCSVFrom(csv)).toEqual([
-        {
-          "a": "1",
-          "the book": "2",
-          "c": "3",
-        },
-      ])
-  })
+      {
+        'a': '1',
+        'the book': '2',
+        'c': '3',
+      },
+    ]);
+  });
 
   test('parseCSV logs out example.csv as array', async () => {
     const file = readFileSync('./import/data/example-v4/example-v4.csv', 'utf8');

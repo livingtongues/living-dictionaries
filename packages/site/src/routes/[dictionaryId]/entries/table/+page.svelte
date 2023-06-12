@@ -1,14 +1,13 @@
 <script lang="ts">
   // import { t } from 'svelte-i18n';
   // import SeoMetaTags from '$lib/components/SeoMetaTags.svelte';
-  import { getContext } from 'svelte';
+  import { onMount, getContext } from 'svelte';
   import { Doc } from 'sveltefirets';
   import { canEdit, columns, dictionary } from '$lib/stores';
   import Hits from '$lib/components/search/Hits.svelte';
   import Pagination from '$lib/components/search/Pagination.svelte';
   import EntriesTable from '$lib/components/table/EntriesTable.svelte';
   import { configure } from 'instantsearch.js/es/widgets/index.js';
-  import { onMount } from 'svelte';
   import { convert_and_expand_entry } from '$lib/transformers/convert_and_expand_entry';
   import { writable } from 'svelte/store';
   import type { InstantSearch } from 'instantsearch.js';
@@ -29,7 +28,7 @@
     ? [...$columns, { field: 'va', width: 150 }]
     : $columns;
 
-  let entries = writable<(ActualDatabaseEntry | LDAlgoliaHit)[]>([]);
+  const entries = writable<(ActualDatabaseEntry | LDAlgoliaHit)[]>([]);
 </script>
 
 <Hits {search} let:entries={algoliaEntries}>

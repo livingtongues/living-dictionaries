@@ -5,7 +5,7 @@
   import Header from '$lib/components/shell/Header.svelte';
   import { Button, ResponsiveSlideover } from 'svelte-pieces';
   import type { LayoutData } from './$types';
-  import './custom-fonts.css'
+  import './custom-fonts.css';
   export let data: LayoutData;
 
   if (data.dictionary) {
@@ -27,7 +27,7 @@
     </a>
     <div class="w-2 hidden md:inline" />
 
-    <button class="p-3 md:hidden print:p-0" on:click={() => (menuOpen = !menuOpen)}>
+    <button type="button" class="p-3 md:hidden print:p-0" on:click={() => (menuOpen = !menuOpen)}>
       <i class="far fa-bars print:hidden" />
       {$dictionaryStore.name}
     </button>

@@ -14,19 +14,19 @@ export interface NewDictionaryRequestBody {
 }
 
 export const POST: RequestHandler = async ({ request, fetch }) => {
-  const { auth_token, dictionary } = await request.json() as NewDictionaryRequestBody
+  const { auth_token, dictionary } = await request.json() as NewDictionaryRequestBody;
 
   if (!dictionary.id)
-    throw new Error('No dictionary id found in request')
+    throw new Error('No dictionary id found in request');
 
-  const decodedToken = await decodeToken(auth_token)
+  const decodedToken = await decodeToken(auth_token);
   if (!decodedToken?.uid)
-    throw new Error('No user id found in token')
+    throw new Error('No user id found in token');
   if (dictionary.createdBy !== decodedToken.uid)
-    throw new Error('CreatedBy is does not matched user id')
+    throw new Error('CreatedBy is does not matched user id');
 
-  const db = getDb()
-  const userSnap = await db.doc(`users/${decodedToken.uid}`).get()
+  const db = getDb();
+  const userSnap = await db.doc(`users/${decodedToken.uid}`).get();
   const user = userSnap.data() as IUser;
 
   const userMsg: EmailParts = {
@@ -60,5 +60,5 @@ export const POST: RequestHandler = async ({ request, fetch }) => {
     }
   });
 
-  return json('success')
+  return json('success');
 };

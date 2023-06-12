@@ -5,7 +5,7 @@ const cloudflareEmailEndpoint = 'https://send.livingdictionaries.workers.dev/';
 
 export async function sendEmail(emailData: MailChannelsSendBody, _fetch: typeof fetch) {
   if (!MAILCHANNELS_WORKER_KEY)
-    throw new Error('EMAIL_KEY env variable not configured')
+    throw new Error('EMAIL_KEY env variable not configured');
 
   const response = await _fetch(cloudflareEmailEndpoint, {
     method: 'POST',

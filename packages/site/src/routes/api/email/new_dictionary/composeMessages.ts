@@ -11,10 +11,10 @@ export function notifyAdminsOnNewDictionary(dictionary: IDictionary, user: IUser
   Alternate names: ${dictionary.alternateNames ? dictionary.alternateNames.join(', ') : ''}
   
   Coordinates: ${
-    dictionary.coordinates
-      ? 'lat: ' + dictionary.coordinates.latitude + ', lon: ' + dictionary.coordinates.longitude
-      : ''
-  }
+  dictionary.coordinates
+    ? 'lat: ' + dictionary.coordinates.latitude + ', lon: ' + dictionary.coordinates.longitude
+    : ''
+}
   Location: ${dictionary.location ? dictionary.location : ''}
   
   Public: Users can no longer make their dictionaries public.
@@ -27,8 +27,8 @@ export function notifyAdminsOnNewDictionary(dictionary: IDictionary, user: IUser
   ConLang Description: "${dictionary.conLangDescription}"
   
   We sent ${user.displayName} an automatic dictionary-info email to ${
-    user.email
-  }, but you can also get in touch with them if needed.
+  user.email
+}, but you can also get in touch with them if needed.
   
   Thanks,
   Our automatic Vercel Function

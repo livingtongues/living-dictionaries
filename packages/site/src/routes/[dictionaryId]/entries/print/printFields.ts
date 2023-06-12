@@ -1,4 +1,4 @@
-import type { IPrintFields } from "@living-dictionaries/types";
+import type { IPrintFields } from '@living-dictionaries/types';
 
 export const defaultPrintFields: IPrintFields = {
   gloss: true,

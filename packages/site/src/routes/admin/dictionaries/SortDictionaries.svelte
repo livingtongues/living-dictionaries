@@ -42,45 +42,45 @@
     let valueB: string | number;
     // prettier-ignore
     switch (sortKey) {
-      case 'public':
-        valueA = a.public?.toString() || '';
-        valueB = b.public?.toString() || '';
-        break;
-      case 'languageUsedByCommunity': // should add a test and try to combine these first two cases with the default case, boolean and strings should be able to be handled in one case
-        valueA = a.public?.toString() || '';
-        valueB = b.public?.toString() || '';
-        break;
-      case 'videoAccess':
-        valueA = a.videoAccess?.toString() || '';
-        valueB = b.videoAccess?.toString() || '';
-        break;
-      case 'entryCount':
-        valueA = a.entryCount || 0;
-        valueB = b.entryCount || 0;
-        break;
-      case 'coordinates':
-        valueA = a.coordinates?.latitude || 0;
-        valueB = b.coordinates?.latitude || 0;
-        break;
-      case 'glossLanguages':
-        valueA = a.glossLanguages?.length || 0;
-        valueB = b.glossLanguages?.length || 0;
-        break;
-      case 'alternateNames':
-        valueA = a.alternateNames?.length || 0;
-        valueB = b.alternateNames?.length || 0;
-        break;
-      case 'alternateOrthographies':
-        valueA = a.alternateOrthographies?.length || 0;
-        valueB = b.alternateOrthographies?.length || 0;
-        break;
-      case 'createdAt':
-        valueA = a.createdAt?.seconds || 0;
-        valueB = b.createdAt?.seconds || 0;
-        break;
-      default: 
-        valueA = a[sortKey] ? a[sortKey].toUpperCase() : 'zz'; // if we ever have missing names or email, then pass 'zz' when the sortKey is undefined
-        valueB = b[sortKey] ? b[sortKey].toUpperCase() : 'zz';
+    case 'public':
+      valueA = a.public?.toString() || '';
+      valueB = b.public?.toString() || '';
+      break;
+    case 'languageUsedByCommunity': // should add a test and try to combine these first two cases with the default case, boolean and strings should be able to be handled in one case
+      valueA = a.public?.toString() || '';
+      valueB = b.public?.toString() || '';
+      break;
+    case 'videoAccess':
+      valueA = a.videoAccess?.toString() || '';
+      valueB = b.videoAccess?.toString() || '';
+      break;
+    case 'entryCount':
+      valueA = a.entryCount || 0;
+      valueB = b.entryCount || 0;
+      break;
+    case 'coordinates':
+      valueA = a.coordinates?.latitude || 0;
+      valueB = b.coordinates?.latitude || 0;
+      break;
+    case 'glossLanguages':
+      valueA = a.glossLanguages?.length || 0;
+      valueB = b.glossLanguages?.length || 0;
+      break;
+    case 'alternateNames':
+      valueA = a.alternateNames?.length || 0;
+      valueB = b.alternateNames?.length || 0;
+      break;
+    case 'alternateOrthographies':
+      valueA = a.alternateOrthographies?.length || 0;
+      valueB = b.alternateOrthographies?.length || 0;
+      break;
+    case 'createdAt':
+      valueA = a.createdAt?.seconds || 0;
+      valueB = b.createdAt?.seconds || 0;
+      break;
+    default: 
+      valueA = a[sortKey] ? a[sortKey].toUpperCase() : 'zz'; // if we ever have missing names or email, then pass 'zz' when the sortKey is undefined
+      valueB = b[sortKey] ? b[sortKey].toUpperCase() : 'zz';
         // a[sortKey].localeCompare(b[sortKey])
     }
     if (valueA < valueB) {
