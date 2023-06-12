@@ -1,4 +1,4 @@
-// tslint:disable-next-line: no-implicit-dependencies
+
 import * as TestFunctions from 'firebase-functions-test';
 
 const devFirebaseConfig = {

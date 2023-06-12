@@ -22,7 +22,7 @@ export const abbreviateTDPartOfSpeech = (input: string): string => {
       part.esName === sanitizedInput ||
       part.enAbbrev === sanitizedInput ||
       part.esAbbrev === sanitizedInput ||
-      (part.tdAlternates && part.tdAlternates.includes(sanitizedInput))
+      (part.tdAlternates?.includes(sanitizedInput))
     );
   });
   if (matchingPOS) {

@@ -1,11 +1,12 @@
 import { sveltekit } from '@sveltejs/kit/vite';
-// import { svelte } from '@sveltejs/vite-plugin-svelte';
+import { defineConfig } from 'vite'
 import path from 'path';
 
-/** @type {import('vite').UserConfig} */
-const config = {
-  plugins: [sveltekit(), rawFonts(['.ttf'])],
-  // envDir: '../../',
+export default defineConfig({
+  plugins: [
+    sveltekit(),
+    rawFonts(['.ttf'])
+  ],
   resolve: {
     alias: {
       '@living-dictionaries/parts': path.resolve('./src/lib'),
@@ -15,11 +16,11 @@ const config = {
     'import.meta.vitest': false,
   },
   test: {
-    // plugins: [svelte({ hot: !process.env.VITEST })],
+    name: 'parts',
     globals: true,
     includeSource: ['src/**/*.ts'],
   },
-};
+});
 
 import fs from 'fs';
 function rawFonts(ext) {
@@ -36,5 +37,3 @@ function rawFonts(ext) {
     }
   };
 }
-
-export default config;

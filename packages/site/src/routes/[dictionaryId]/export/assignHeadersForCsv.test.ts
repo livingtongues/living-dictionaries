@@ -14,11 +14,11 @@ describe('assign_local_orthographies_as_headers', () => {
       local_orthography_2: 'native-2',
     });
   });
-  test("doesn't assign alternate_orthographies if empty array", () => {
+  test('doesn\'t assign alternate_orthographies if empty array', () => {
     const alternate_orthographies = [];
     expect(assign_local_orthographies_as_headers(alternate_orthographies)).toEqual({});
   });
-  test("doesn't assign alternate_orthographies if null", () => {
+  test('doesn\'t assign alternate_orthographies if null', () => {
     const alternate_orthographies = null;
     expect(assign_local_orthographies_as_headers(alternate_orthographies)).toEqual({});
   });
@@ -38,7 +38,7 @@ describe('count_maximum_semantic_domains_only_from_first_senses', () => {
     ];
     expect(count_maximum_semantic_domains_only_from_first_senses(entries)).toEqual(3);
   });
-  test("returns 0 if there's only empty arrays or null values in semantic_doains", () => {
+  test('returns 0 if there\'s only empty arrays or null values in semantic_doains', () => {
     const entries = [
       {
         lexeme: 'foo',
@@ -61,14 +61,14 @@ describe('assign_semantic_domains_as_headers', () => {
       semantic_domain_3: 'Semantic domain 3',
     });
   });
-  test("doesn't assign semantic domains if none", () => {
+  test('doesn\'t assign semantic domains if none', () => {
     const max_semantic_domain_number = 0;
     expect(assign_semantic_domains_as_headers(max_semantic_domain_number)).toEqual({});
   });
 });
 
 describe('assign_gloss_languages_as_headers', () => {
-  test("assigns gloss languages if any exists or bcp if it doesn't", () => {
+  test('assigns gloss languages if any exists or bcp if it doesn\'t', () => {
     const gloss_languages = ['en', 'es', 'af'];
     expect(assign_gloss_languages_as_headers(gloss_languages)).toEqual({
       en_gloss_language: 'English Gloss',
@@ -76,18 +76,18 @@ describe('assign_gloss_languages_as_headers', () => {
       af_gloss_language: 'af Gloss',
     });
   });
-  test("Doesn't assign gloss languages if empty array", () => {
+  test('Doesn\'t assign gloss languages if empty array', () => {
     const gloss_languages = [];
     expect(assign_gloss_languages_as_headers(gloss_languages)).toEqual({});
   });
-  test("Doesn't assign gloss languages if null", () => {
+  test('Doesn\'t assign gloss languages if null', () => {
     const gloss_languages = null;
     expect(assign_gloss_languages_as_headers(gloss_languages)).toEqual({});
   });
 });
 
 describe('assign_example_sentences_as_headers', () => {
-  test("assigns vernacular and other example sentences if any exists or bcp if it doesn't", () => {
+  test('assigns vernacular and other example sentences if any exists or bcp if it doesn\'t', () => {
     const gloss_languages = ['it', 'af'];
     const dictionary_name = 'Foo';
     expect(assign_example_sentences_as_headers(gloss_languages, dictionary_name)).toEqual({
@@ -103,7 +103,7 @@ describe('assign_example_sentences_as_headers', () => {
       vernacular_example_sentence: 'Example sentence in Baz',
     });
   });
-  test("Doesn't assign gloss languages if null", () => {
+  test('Doesn\'t assign gloss languages if null', () => {
     const gloss_languages = null;
     const dictionary_name = 'Boo';
     expect(assign_example_sentences_as_headers(gloss_languages, dictionary_name)).toEqual({

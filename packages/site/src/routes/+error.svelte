@@ -9,7 +9,7 @@
   onMount(async () => {
     const Sentry = await import('@sentry/browser');
     const eventId = Sentry.captureException($page.error);
-    console.log('sent error', eventId);
+    console.error('sent error', eventId);
     // https://docs.sentry.io/enriching-error-data/user-feedback
     // Sentry.showReportDialog({ eventId });
   });
@@ -22,7 +22,7 @@
 <div class="p-4 bg-white relative z-20">
   <h2 class="text-xl sm:text-4xl font-bold mb-3">
     {$t('error.run_into_error', {
-      default: "We're sorry, we've run into an error.",
+      default: 'We\'re sorry, we\'ve run into an error.',
     })}
   </h2>
 

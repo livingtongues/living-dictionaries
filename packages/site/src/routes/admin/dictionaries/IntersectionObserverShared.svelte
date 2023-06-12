@@ -43,7 +43,7 @@
           (entries) => {
             for (var entry of entries) {
               const callback = mapping.get(entry.target);
-              callback && callback(entry.isIntersecting);
+              callback?.(entry.isIntersecting);
             }
           },
           {

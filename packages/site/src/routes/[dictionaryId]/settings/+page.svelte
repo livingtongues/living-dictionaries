@@ -145,7 +145,7 @@
             alert($t('header.contact_us', { default: 'Contact Us' }));
           }
         } catch (err) {
-          return console.log(err);
+          return console.error(err);
         }
       }} />
     <div class="mb-5" />
@@ -218,6 +218,6 @@
   dictionaryName={$dictionaryStore.name}
   description={$t('', {
     default:
-      "Under Settings, dictionary managers can edit the dictionary's parameters such as its name, ISO 639-3 Code, Glottocode, translation languages, alternate names, geo-coordinates, and other information. They can also toggle on or off the ability to make the dictionary public, and the ability to make the dictionary printable to viewers.",
+      'Under Settings, dictionary managers can edit the dictionary\'s parameters such as its name, ISO 639-3 Code, Glottocode, translation languages, alternate names, geo-coordinates, and other information. They can also toggle on or off the ability to make the dictionary public, and the ability to make the dictionary printable to viewers.',
   })}
   keywords="Settings, Parameters, ISO 639-3, Glottocde, glossing languages, alternate names, GPS, language medata, public dictionary, private dictionary, Endangered Languages, Language Documentation, Language Revitalization, Build a Dictionary, Online Dictionary, Digital Dictionary, Dictionary Software, Free Software, Online Dictionary Builder, Living Dictionaries, Living Dictionary, Edit a dictionary, Search a dictionary, Browse a dictionary, Explore a Dictionary" />

@@ -1,6 +1,7 @@
 {
   "name": "@living-dictionaries/functions",
   "version": "0.0.1",
+  "type": "commonjs",
   "scripts": {
     "build": "tsc",
     "build:watch": "tsc --watch",

@@ -31,7 +31,6 @@
   }
 </script>
 
-<!-- svelte-ignore a11y-no-onchange -->
 {#if !hasNoResults}
   <select value={currentRefinement} on:change={select}>
     {#each options as option}

@@ -6,9 +6,7 @@ import { parseCSVFrom } from './parse-csv.js';
 import { convertJsonRowToEntryFormat } from './convertJsonRowToEntryFormat.js';
 
 const developer_in_charge = 'qkTzJXH24Xfc57cZJRityS6OTn52'; // diego@livingtongues.org -> Diego Córdova Nieto;
-interface unique_speakers {
-  [key: string]: string;
-}
+type unique_speakers = Record<string, string>;
 const different_speakers: unique_speakers = {};
 
 export async function importFromSpreadsheet(dictionaryId: string, dry = false) {

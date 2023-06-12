@@ -49,7 +49,7 @@ describe('get_first_speaker_from_first_sound_file', () => {
     expect(get_first_speaker_from_first_sound_file(entry, speakers)).toEqual(speakers[0]);
   });
 
-  test("gets undefined if there's no speaker", () => {
+  test('gets undefined if there\'s no speaker', () => {
     const speakers: ISpeaker[] = [];
     const entry: IEntry = {
       lexeme: 'zoo',

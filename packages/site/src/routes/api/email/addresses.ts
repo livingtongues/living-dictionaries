@@ -28,7 +28,7 @@ export function getAdminRecipients(initiatorEmail: string): Address[] {
     annaAddress,
     gregAddress,
   ];
-};
+}
 
 export function getSupportMessageRecipients({ dev }: { dev: boolean }): Address[] {
   const recipients: Address[] = [
@@ -43,4 +43,4 @@ export function getSupportMessageRecipients({ dev }: { dev: boolean }): Address[
     ...recipients,
     annaAddress,
   ];
-};
+}
