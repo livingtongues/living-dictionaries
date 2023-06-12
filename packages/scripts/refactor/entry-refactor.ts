@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
+ 
 import { IEntry } from '@living-dictionaries/types';
 import { db } from '../config';
 import { program } from 'commander';
@@ -94,27 +94,27 @@ const refactorGloss = async (dictionaryId: string, entry: IEntry) => {
   console.log(entry.gl);
   for (const key in entry.gl) {
     if (key === 'English') {
-      entry.gl['en'] = entry.gl[key];
+      entry.gl.en = entry.gl[key];
       delete entry.gl[key];
     }
     if (key === 'Spanish') {
-      entry.gl['es'] = entry.gl[key];
+      entry.gl.es = entry.gl[key];
       delete entry.gl[key];
     }
     if (key === 'Español') {
-      entry.gl['es'] = entry.gl[key];
+      entry.gl.es = entry.gl[key];
       delete entry.gl[key];
     }
     if (key === 'Bahasa Indonesia') {
-      entry.gl['id'] = entry.gl[key];
+      entry.gl.id = entry.gl[key];
       delete entry.gl[key];
     }
     if (key === 'French') {
-      entry.gl['fr'] = entry.gl[key];
+      entry.gl.fr = entry.gl[key];
       delete entry.gl[key];
     }
     if (key === 'Mandarin 中文') {
-      entry.gl['cmn'] = entry.gl[key];
+      entry.gl.cmn = entry.gl[key];
       delete entry.gl[key];
     }
   }

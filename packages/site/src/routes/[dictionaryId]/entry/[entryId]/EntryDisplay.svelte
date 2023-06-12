@@ -105,7 +105,7 @@
 
     {#if ['babanki', 'torwali'].includes(dictionary.id)}
       <EntryField
-        value={entry['va']}
+        value={entry.va}
         field="va"
         {canEdit}
         display={$t(`entry.va`, { default: 'Variant' })}
