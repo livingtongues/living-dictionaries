@@ -117,7 +117,7 @@
     alt={entry.lx} />
 {/if}
 {#if showQrCode}
-  {#await new Promise((r) => setTimeout(() => r(true), 1)) then value}
+  {#await new Promise((r) => setTimeout(() => r(true), 1))}
     <QrCode
       pixelsPerModule={2}
       value={`livingdictionaries.app/${dictionaryId}/entry/${entry.id}`} />

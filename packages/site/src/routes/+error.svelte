@@ -22,7 +22,7 @@
 <div class="p-4 bg-white relative z-20">
   <h2 class="text-xl sm:text-4xl font-bold mb-3">
     {$t('error.run_into_error', {
-      default: "We're sorry, we've run into an error.",
+      default: 'We\'re sorry, we\'ve run into an error.',
     })}
   </h2>
 
