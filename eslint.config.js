@@ -71,6 +71,24 @@ export default defineFlatConfig([
         },
       ],
       '@typescript-eslint/quotes': ['error', 'single', { 'allowTemplateLiterals': true }],
+      '@typescript-eslint/ban-ts-comment': 'off',
+      semi: 'error',
+      'prefer-const': 'error',
+      'no-duplicate-imports': ['error', { 'includeExports': true }],
+      'no-constant-binary-expression': 'error',
+      'no-template-curly-in-string': 'error',
+      'no-unmodified-loop-condition': 'error',
+      'require-atomic-updates': 'error',
+      'dot-notation': 'error',
+      
+      
+      // Warnings to move to errors in time:
+      'curly': ['warn', 'multi-or-nest', 'consistent'],
+      'no-await-in-loop': 'warn',
+      'default-param-last': 'warn',
+
+      // Suggestions to try:
+      // 'no-promise-executor-return': 'error', // has issue with "sleep" function
 
       // '@typescript-eslint/naming-convention': [
       //   'error',
@@ -95,12 +113,6 @@ export default defineFlatConfig([
       //     'format': null,
       //   },
       // ],
-      // to sort through:
-      '@typescript-eslint/ban-ts-comment': 'off',
-      'prefer-template': 'off',
-      semi: 'error',
-      'prefer-const': 'error',
-      'no-duplicate-imports': ['error', { 'includeExports': true }],
     }
   },
   {

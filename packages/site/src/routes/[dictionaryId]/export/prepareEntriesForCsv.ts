@@ -89,9 +89,9 @@ export function prepareEntriesForCsv(
   );
 
   const has_variants = expanded_entries.some((entry) => entry.variant);
-  if (has_variants) {
-    default_headers['variant'] = 'Variant';
-  }
+  if (has_variants) 
+    default_headers.variant = 'Variant';
+  
 
   const headers = {
     ...default_headers,
@@ -141,9 +141,9 @@ export function prepareEntriesForCsv(
 
     const formatted_example_sentences = format_example_sentences(entry, dictionary.glossLanguages);
 
-    if (has_variants) {
+    if (has_variants) 
       formatted_entry.variant = entry.variant;
-    }
+    
 
     return {
       ...formatted_entry,

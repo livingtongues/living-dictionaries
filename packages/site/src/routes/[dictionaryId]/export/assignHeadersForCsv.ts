@@ -21,9 +21,9 @@ export function assign_semantic_domains_as_headers(
 ): EntryForCSV {
   const headers = {};
   if (max_semantic_domain_number > 0) {
-    for (let index = 0; index < max_semantic_domain_number; index++) {
+    for (let index = 0; index < max_semantic_domain_number; index++) 
       headers[`semantic_domain_${index + 1}`] = `Semantic domain ${index + 1}`;
-    }
+    
   }
   return headers;
 }
@@ -51,8 +51,8 @@ export function assign_example_sentences_as_headers(
   gloss_languages: string[],
   dictionary_name: string
 ): EntryForCSV {
-  const headers = {};
-  headers['vernacular_example_sentence'] = `Example sentence in ${dictionary_name}`;
+  const headers: EntryForCSV = {};
+  headers.vernacular_example_sentence = `Example sentence in ${dictionary_name}`;
   if (gloss_languages) {
     gloss_languages.forEach((bcp) => {
       headers[`${bcp}_example_sentence`] = `Example sentence in ${

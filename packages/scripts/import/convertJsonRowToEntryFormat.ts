@@ -40,7 +40,7 @@ export function convertJsonRowToEntryFormat(
     }
 
     if (key.includes('vernacular_exampleSentence')) {
-      entry.xs['vn'] = value;
+      entry.xs.vn = value;
       continue; // to keep next block from also adding
     }
 
@@ -58,9 +58,9 @@ export function convertJsonRowToEntryFormat(
     }
   }
 
-  if (Object.keys(entry.xs).length === 0) {
+  if (Object.keys(entry.xs).length === 0) 
     delete entry.xs;
-  }
+  
 
   if (!dateStamp) return entry;
 
