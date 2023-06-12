@@ -1,5 +1,5 @@
-import { ActualDatabaseEntry, AlgoliaEntry } from "@living-dictionaries/types";
-import { get_speaker_display_name, prepareDataForIndex, remove_empty_fields } from "./prepareDataForIndex";
+import { ActualDatabaseEntry, AlgoliaEntry } from '@living-dictionaries/types';
+import { get_speaker_display_name, prepareDataForIndex, remove_empty_fields } from './prepareDataForIndex';
 
 const dictId = 'foo-dictionary';
 const base_algolia_entry: AlgoliaEntry = {
@@ -148,10 +148,10 @@ describe('prepareDataForIndex', () => {
 describe('get_speaker_display_name', () => {
   const speaker_name = 'John Doe';
   const mockDb = {
-    doc: (path) => {
+    doc: () => {
       return {
         get: () => {
-          return new Promise((resolve, reject) => {
+          return new Promise((resolve) => {
             const speakerSnap = {
               id: 'foo',
               data: () => {

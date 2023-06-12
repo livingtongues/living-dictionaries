@@ -74,7 +74,7 @@ describe('seo_description', () => {
       lo: 'আৰচি',
       lo2: '𑃢𑃝𑃐𑃤',
       ph: 'arsi',
-      gl: { or: 'କଳା ମୁହାଁ ମାଙ୍କଡ', as: "ক’লা মুখ'ৰ বান্দৰ", en: 'black faced monkey' },
+      gl: { or: 'କଳା ମୁହାଁ ମାଙ୍କଡ', as: 'ক’লা মুখ\'ৰ বান্দৰ', en: 'black faced monkey' },
       ps: ['n', 'adj'],
       di: 'West Bengal Sabar',
     };
@@ -88,7 +88,7 @@ describe('seo_description', () => {
   test('handles no gloss field', () => {
     const dictionary_gloss_languages = ['en'];
     const result = seo_description({ lx: 'foo' }, dictionary_gloss_languages, $t);
-    expect(result).toEqual("");
+    expect(result).toEqual('');
   });
 
   test('handles deprecated dialect string and current array of strings', () => {

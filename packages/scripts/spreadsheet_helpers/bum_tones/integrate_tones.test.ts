@@ -107,7 +107,7 @@ describe('integrate_tones_to_bum_phonetics', () => {
     expect(created_contents).toEqual(expected_contents);
   });
 
-  test("Tones and phonetics don't match", () => {
+  test('Tones and phonetics don\'t match', () => {
     expect(() =>
       integrate_tones_to_bum_phonetics(
         test_words,

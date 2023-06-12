@@ -41,8 +41,8 @@ export default defineFlatConfig([
       parser: typescriptParser,
       parserOptions: {
         // extraFileExtensions: ['.svelte'], // not sure if needed here or in Svelte below or anywhere, "a configuration property that needs to be added to an ESLint configuration in order to tell ESLint to ignore certain file extensions . This is often required for non-standard file extensions, such as those used in Vue or Angular projects."
-      //   tsconfigRootDir: process.cwd(),
-      //   project: true,
+        //   tsconfigRootDir: process.cwd(),
+        //   project: true,
       },
       globals: {
         ...globals.browser,
@@ -63,22 +63,53 @@ export default defineFlatConfig([
       ...tsEslintPlugin.configs.stylistic?.rules,
       // ...tsEslint.configs['recommended-type-checked']?.rules,
       // ...tsEslint.configs['stylistic-type-checked']?.rules,
-
       '@typescript-eslint/sort-type-constituents': 'off', // prefer logical rather than alphabetical sorting
+      'no-console': ['warn', { allow: ['warn', 'error', 'info'] }],
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        {
+          'argsIgnorePattern': '^_',
+          'caughtErrors': 'all',
+          'ignoreRestSiblings': true,
+        },
+      ],
+      '@typescript-eslint/quotes': ['error', 'single', { 'allowTemplateLiterals': true }],
 
+      // '@typescript-eslint/naming-convention': [
+      //   'error',
+      //   {
+      //     'selector': 'default',
+      //     'format': ['camelCase'],
+      //     'leadingUnderscore': 'allow',
+      //   },
+      //   {
+      //     'selector': 'default',
+      //     'modifiers': ['const'],
+      //     'format': ['camelCase', 'UPPER_CASE'],
+      //     'leadingUnderscore': 'allow',
+      //   },
+      //   {
+      //     'selector': ['typeLike', 'enumMember'],
+      //     'format': ['PascalCase'],
+      //   },
+      //   {
+      //     'selector': 'default',
+      //     'modifiers': ['requiresQuotes'],
+      //     'format': null,
+      //   },
+      // ],
+      // to sort through:
       '@typescript-eslint/no-var-requires': 'off',
-      '@typescript-eslint/no-unused-vars': 'off',
       '@typescript-eslint/no-empty-function': 'off',
       '@typescript-eslint/no-explicit-any': 'off',
       '@typescript-eslint/explicit-module-boundary-types': 'off',
       '@typescript-eslint/ban-ts-comment': 'off',
       'prefer-template': 'off',
-      'no-console': ['warn', { allow: ['warn', 'error', 'info'] }],
     }
   },
   {
     // https://github.com/JNSMDT/token-generator/blob/main/eslint.config.js
-    files: ['**/*.svelte'], // *.svelte
+    files: ['**/*.svelte', '**/*.svx'],
     plugins: {
       svelte: sveltePlugin
     },
@@ -93,7 +124,7 @@ export default defineFlatConfig([
       ...sveltePlugin.configs.base.overrides[0].rules,
       ...sveltePlugin.configs.recommended?.rules,
       'svelte/no-at-html-tags': ['warn'],
-      'svelte/valid-compile': [ 'error', { 'ignoreWarnings': true } ], // throws error on a11y issues
+      'svelte/valid-compile': ['error', { 'ignoreWarnings': true }], // throws error on a11y issues
       'svelte/no-dom-manipulating': 'error',
       'svelte/html-quotes': 'error',
       'svelte/no-reactive-reassign': ['warn', { 'props': false }],
@@ -101,8 +132,10 @@ export default defineFlatConfig([
       'svelte/require-store-reactive-access': 'error',
       'svelte/mustache-spacing': 'error',
       // https://sveltejs.github.io/eslint-plugin-svelte/rules/
-      '@typescript-eslint/quotes': ['error', 'single', { 'allowTemplateLiterals': true }],
-    }
+    },
+    // globals: {
+    //   '$$Generic': 'readonly',
+    // }
   },
   allowScriptLogs,
 ]);

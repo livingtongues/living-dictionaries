@@ -20,7 +20,7 @@ test('complex HTML tags wrap text around', () =>
 test('real rich text example', () =>
   expect(
     stripHTMLTags(
-      "<p><strong>I</strong> <i>just</i> <u>want</u> <span style='font-variant:small-caps;'>to</span> <a href='https://example.com'>test</a></p>"
+      '<p><strong>I</strong> <i>just</i> <u>want</u> <span style=\'font-variant:small-caps;\'>to</span> <a href=\'https://example.com\'>test</a></p>'
     )
   ).toBe('I just want to test'));
 
