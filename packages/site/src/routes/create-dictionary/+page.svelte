@@ -212,7 +212,7 @@
 
       <EditableAlternateNames
         {alternateNames}
-        on:update={(e) => (alternateNames = e.detail.alternateNames)} />
+        on:update={({ detail }) => (alternateNames = detail.alternateNames)} />
       <div class="mb-6" />
 
       <WhereSpoken

@@ -56,7 +56,7 @@ export const generateTranslationsFromSpreadsheet: (
     translations[lang] = {};
 
     rows.forEach((row) => {
-      const key = row.key;
+      const {key} = row;
       const langColumn = options.prefix === 'psAbbrev' ? lang + 'Abbrev' : lang;
       const value = row[langColumn];
       if (key && value) {
