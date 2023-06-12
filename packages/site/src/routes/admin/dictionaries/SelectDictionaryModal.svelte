@@ -18,11 +18,11 @@
 
   async function add(dictionaryId: string) {
     try {
-      if (role === 'manager') {
-        addDictionaryManager({ id: user.uid, name: user.displayName }, dictionaryId);
-      } else {
-        addDictionaryContributor({ id: user.uid, name: user.displayName }, dictionaryId);
-      }
+      if (role === 'manager') 
+        await addDictionaryManager({ id: user.uid, name: user.displayName }, dictionaryId);
+      else 
+        await addDictionaryContributor({ id: user.uid, name: user.displayName }, dictionaryId);
+      
       close();
     } catch (err) {
       alert(`Error: ${err}`);
@@ -41,7 +41,7 @@
       placeholder="Search dictionaries">
       {#each filteredDictionaries as dictionary}
         <Button
-          onclick={() => add(dictionary.id)}
+          onclick={async () => await add(dictionary.id)}
           color="green"
           form="simple"
           class="w-full !text-left">{dictionary.name} <small>({dictionary.id})</small></Button>

@@ -45,7 +45,7 @@ export const updateIndex = firestore
 export const deleteFromIndex = firestore
   .document('dictionaries/{dictionaryId}/words/{wordId}')
   .onDelete(async (snapshot, context) => {
-    await (await import('./algolia/modifyIndex')).deleteFromIndex(snapshot, context);
+    await (await import('./algolia/modifyIndex')).deleteFromIndex(snapshot);
   });
 
 // Video
