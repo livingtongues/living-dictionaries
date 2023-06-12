@@ -96,12 +96,11 @@ export default defineFlatConfig([
       //   },
       // ],
       // to sort through:
-      // '@typescript-eslint/no-explicit-any': 'off',
-      '@typescript-eslint/explicit-module-boundary-types': 'off',
       '@typescript-eslint/ban-ts-comment': 'off',
       'prefer-template': 'off',
       semi: 'error',
-      'prefer-const': 'error'
+      'prefer-const': 'error',
+      'no-duplicate-imports': ['error', { 'includeExports': true }],
     }
   },
   {
