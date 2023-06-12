@@ -1,5 +1,5 @@
 import { testFun } from '../test-config';
-testFun.cleanup;
+testFun.cleanup();
 // import * as admin from 'firebase-admin';
 
 import { supportEmail } from '../../src/index';

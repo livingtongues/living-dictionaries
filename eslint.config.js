@@ -81,6 +81,11 @@ export default defineFlatConfig([
       'require-atomic-updates': 'error',
       'dot-notation': 'error',
       'no-else-return': 'error',
+      'no-unneeded-ternary': 'error',
+      'no-unused-expressions': 'error',
+      'no-useless-concat': 'error',
+      'no-useless-return': 'error',
+      'object-shorthand': 'error',
       
       
       // Warnings to move to errors in time:
@@ -92,6 +97,7 @@ export default defineFlatConfig([
       // Suggestions to try:
       // 'no-promise-executor-return': 'error', // has issue with "sleep" function
       // 'max-lines-per-function': ['error', 20]
+      // 'no-return-await': 'error',
 
 
 
@@ -144,6 +150,7 @@ export default defineFlatConfig([
       'svelte/require-store-reactive-access': 'error',
       'svelte/mustache-spacing': 'error',
       'svelte/button-has-type': 'error',
+      'no-unused-expressions': 'off',
       // https://sveltejs.github.io/eslint-plugin-svelte/rules/
     },
     // globals: {

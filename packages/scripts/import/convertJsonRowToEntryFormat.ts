@@ -9,26 +9,26 @@ export function convertJsonRowToEntryFormat(
 ): IEntry {
   const entry: IEntry = { lx: row.lexeme, gl: {}, xs: {} };
 
-  Boolean(row.phonetic) && (entry.ph = row.phonetic);
-  Boolean(row.morphology) && (entry.mr = row.morphology);
-  Boolean(row.interlinearization) && (entry.in = row.interlinearization);
-  Boolean(row.partOfSpeech) && (entry.ps = returnArrayFromCommaSeparatedItems(row.partOfSpeech));
-  Boolean(row.dialect) && (entry.di = row.dialect);
-  Boolean(row.variant) && (entry.va = row.variant);
-  Boolean(row.nounClass) && (entry.nc = row.nounClass);
-  Boolean(row.source) && (entry.sr = row.source.split('|'));
-  Boolean(row.pluralForm) && (entry.pl = row.pluralForm);
-  Boolean(row.scientificName) && (entry.scn = [row.scientificName]);
-  Boolean(row.semanticDomain_custom) && (entry.sd = [row.semanticDomain_custom]);
-  Boolean(row.ID) && (entry.ei = row.ID);
+  if (row.phonetic) entry.ph = row.phonetic;
+  if (row.morphology) entry.mr = row.morphology;
+  if (row.interlinearization) entry.in = row.interlinearization;
+  if (row.partOfSpeech) entry.ps = returnArrayFromCommaSeparatedItems(row.partOfSpeech);
+  if (row.dialect) entry.di = row.dialect;
+  if (row.variant) entry.va = row.variant;
+  if (row.nounClass) entry.nc = row.nounClass;
+  if (row.source) entry.sr = row.source.split('|');
+  if (row.pluralForm) entry.pl = row.pluralForm;
+  if (row.scientificName) entry.scn = [row.scientificName];
+  if (row.semanticDomain_custom) entry.sd = [row.semanticDomain_custom];
+  if (row.ID) entry.ei = row.ID;
 
-  Boolean(row.localOrthography) && (entry.lo = row.localOrthography);
-  Boolean(row.localOrthography2) && (entry.lo2 = row.localOrthography2);
-  Boolean(row.localOrthography3) && (entry.lo3 = row.localOrthography3);
-  Boolean(row.localOrthography4) && (entry.lo4 = row.localOrthography4);
-  Boolean(row.localOrthography5) && (entry.lo5 = row.localOrthography5);
+  if (row.localOrthography) entry.lo = row.localOrthography;
+  if (row.localOrthography2) entry.lo2 = row.localOrthography2;
+  if (row.localOrthography3) entry.lo3 = row.localOrthography3;
+  if (row.localOrthography4) entry.lo4 = row.localOrthography4;
+  if (row.localOrthography5) entry.lo5 = row.localOrthography5;
 
-  Boolean(row.notes) && (entry.nt = row.notes);
+  if (row.notes) entry.nt = row.notes;
 
   for (const [key, value] of Object.entries(row)) {
     if (!value) continue;

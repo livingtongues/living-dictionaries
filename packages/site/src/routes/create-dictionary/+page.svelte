@@ -218,7 +218,8 @@
       <WhereSpoken
         dictionary={{ coordinates: { latitude, longitude }, points, regions }}
         on:updateCoordinates={({ detail }) => {
-          (latitude = detail.latitude), (longitude = detail.longitude);
+          latitude = detail.latitude, 
+          longitude = detail.longitude;
         }}
         on:removeCoordinates={() => ((latitude = null), (longitude = null))}
         on:updatePoints={({ detail }) => (points = detail)}

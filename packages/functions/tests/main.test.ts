@@ -1,5 +1,5 @@
 import { testFun } from './test-config';
-testFun.cleanup;
+testFun.cleanup();
 
 import { db } from '../src/config';
 
