@@ -88,9 +88,11 @@ export default defineFlatConfig([
       'object-shorthand': 'error',
       'prefer-arrow-callback': 'error',
       'prefer-object-spread': 'error',
-      
+
       // Warnings to move to errors in time:
-      'comma-dangle': ['warn', 'only-multiline'], 
+      'no-trailing-spaces': 'warn',
+      'eol-last': 'warn',
+      'comma-dangle': ['warn', 'only-multiline'],
       'require-await': 'warn',
       'curly': ['warn', 'multi-or-nest', 'consistent'],
       'no-await-in-loop': 'warn',
@@ -116,7 +118,11 @@ export default defineFlatConfig([
       // comma-dangle
       // comma-spacing
       // comma-style
-
+      // dot-location
+      // multiline-ternary
+      // no-extra-parens
+      // no-multiple-empty-lines
+      // quotes
 
 
       // '@typescript-eslint/naming-convention': [
