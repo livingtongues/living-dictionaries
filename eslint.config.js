@@ -7,7 +7,7 @@ import typescriptParser from '@typescript-eslint/parser';
 import sveltePlugin from 'eslint-plugin-svelte';
 import svelteParser from 'svelte-eslint-parser';
 import globals from 'globals';
-import { allowScriptLogs } from './lint/allowScriptLogs.js';
+import { scriptExceptions } from './lint/allowScriptLogs.js';
 
 // @ts-ignore
 export default defineFlatConfig([
@@ -25,14 +25,14 @@ export default defineFlatConfig([
   },
   jsEslintPlugin.configs.recommended, // new way to do 'eslint:recommended'
   {
-    files: ['**/*.ts', '**/*.js', '**/*.svelte'],
+    files: ['**/*.ts', '**/*.js', '**/*.svelte', '**/*.svx'],
     plugins: {
       '@typescript-eslint': tsEslintPlugin,
     },
     languageOptions: {
       parser: typescriptParser,
       parserOptions: {
-        extraFileExtensions: ['.svelte'], // not sure if needed here or in Svelte below or anywhere, "a configuration property that needs to be added to an ESLint configuration in order to tell ESLint to ignore certain file extensions . This is often required for non-standard file extensions, such as those used in Vue or Angular projects."
+        extraFileExtensions: ['.svelte', '.svx'], // not sure if needed here or in Svelte below or anywhere, "a configuration property that needs to be added to an ESLint configuration in order to tell ESLint to ignore certain file extensions . This is often required for non-standard file extensions, such as those used in Vue or Angular projects."
         //   tsconfigRootDir: process.cwd(),
         //   project: true,
       },
@@ -126,7 +126,7 @@ export default defineFlatConfig([
     //   '$$Generic': 'readonly',
     // }
   },
-  allowScriptLogs,
+  scriptExceptions,
 ]);
 
 // learn more

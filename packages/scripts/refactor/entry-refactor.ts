@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { IEntry } from '@living-dictionaries/types';
 import { db } from '../config';
 import { program } from 'commander';

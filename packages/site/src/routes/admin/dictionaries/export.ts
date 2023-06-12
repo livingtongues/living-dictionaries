@@ -1,4 +1,3 @@
-import { get } from 'svelte/store';
 import type { DictionaryWithHelperStores, DictionaryWithHelpers } from './dictionaryWithHelpers';
 import { downloadObjectsAsCSV } from '$lib/export/csv';
 import { dictionary_headers as standard_headers, prepareDictionaryForCsv, timestamp_to_string_date, type StandardDictionaryForCSV } from '$lib/export/prepareDictionariesForCsv';

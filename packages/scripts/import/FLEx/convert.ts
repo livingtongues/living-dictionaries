@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 // import torwali from './torwali-edited.json'; **Note that data files aren't in this repo**
 import { abbreviateTDPartOfSpeech } from './abbreviate-pos';
 import { IEntry } from '../../../../src/lib/interfaces';
