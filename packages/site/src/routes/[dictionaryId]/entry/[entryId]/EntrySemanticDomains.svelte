@@ -7,7 +7,7 @@
 
   let edit = false;
 
-  $: hasValue = Boolean((entry.sdn && entry.sdn.length) || entry.sd);
+  $: hasValue = Boolean((entry.sdn?.length) || entry.sd);
 </script>
 
 {#if hasValue || canEdit}
@@ -27,7 +27,7 @@
         </span>
         <div class="w-1" />
       {/if}
-      {#if entry.sdn && entry.sdn.length}
+      {#if entry.sdn?.length}
         {#each entry.sdn as domain}
           <span class="px-2 py-1 leading-tight text-xs bg-blue-100 rounded mb-1">
             {$_('sd.' + domain, { default: domain })}

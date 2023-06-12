@@ -9,7 +9,7 @@
   onMount(async () => {
     const Sentry = await import('@sentry/browser');
     const eventId = Sentry.captureException($page.error);
-    console.log('sent error', eventId);
+    console.error('sent error', eventId);
     // https://docs.sentry.io/enriching-error-data/user-feedback
     // Sentry.showReportDialog({ eventId });
   });

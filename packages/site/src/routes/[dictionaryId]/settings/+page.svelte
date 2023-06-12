@@ -145,7 +145,7 @@
             alert($t('header.contact_us', { default: 'Contact Us' }));
           }
         } catch (err) {
-          return console.log(err);
+          return console.error(err);
         }
       }} />
     <div class="mb-5" />
