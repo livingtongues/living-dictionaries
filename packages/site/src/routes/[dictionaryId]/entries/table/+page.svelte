@@ -29,7 +29,7 @@
     ? [...$columns, { field: 'va', width: 150 }]
     : $columns;
 
-  let entries = writable<(ActualDatabaseEntry | LDAlgoliaHit)[]>([]);
+  const entries = writable<(ActualDatabaseEntry | LDAlgoliaHit)[]>([]);
 </script>
 
 <Hits {search} let:entries={algoliaEntries}>

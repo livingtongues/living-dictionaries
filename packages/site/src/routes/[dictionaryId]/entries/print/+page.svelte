@@ -39,7 +39,7 @@
   const showLabels = createPersistedStore<boolean>('printShowLabels', true);
   const showQrCode = createPersistedStore<boolean>('showQrCode', false);
 
-  let citationType: ICitation = { citation: '' };
+  const citationType: ICitation = { citation: '' };
 </script>
 
 {#if $dictionary.printAccess || $canEdit}

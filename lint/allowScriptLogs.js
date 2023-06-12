@@ -6,4 +6,4 @@ export const allowScriptLogs = {
   rules: {
     'no-console': 'off',
   },
-}
+};

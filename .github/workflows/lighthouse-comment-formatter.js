@@ -43,7 +43,7 @@ const scoreSimple = (
  * @param {'slack' | 'pr'} targetPlatform
  */
 function makeComment(lighthouseOutputs, targetPlatform) {
-  let comment = `## ⚡️Lighthouse report`
+  let comment = `## ⚡️Lighthouse report`;
 
   for (const manifest of lighthouseOutputs.manifest) {
     const { url: testedUrl, summary } = manifest;
