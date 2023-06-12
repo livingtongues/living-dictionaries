@@ -7,13 +7,13 @@ export const saveVersionHistory = functions.firestore
     const newValue = change.after.data(); 
     const previousValue = change.before.data();
     console.log(newValue, previousValue);
-    if (!previousValue.ua) {
+    if (!previousValue.ua) 
       previousValue.ua = oneMinuteAgo; // to keep history from getting out of order in case of entries without an updated at field
-    }
+    
     console.log(newValue, previousValue);
 
-    const dictionaryId = context.params.dictionaryId;
-    const wordId = context.params.wordId;
+    const {dictionaryId} = context.params;
+    const {wordId} = context.params;
     const wordHistoryColRef = db.collection(`dictionaries/${dictionaryId}/words/${wordId}/history`);
     await wordHistoryColRef.add({previousValue}); 
     // TODO, make sure app is saving updatedAt timestamps

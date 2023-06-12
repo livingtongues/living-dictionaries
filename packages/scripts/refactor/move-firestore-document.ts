@@ -56,7 +56,7 @@ export async function copyDoc(
         await subcollectionRef
           .get()
           .then(async (snapshot) => {
-            const docs = snapshot.docs;
+            const {docs} = snapshot;
             for await (const doc of docs) {
               await copyDoc(
                 `${subcollectionPath}/${doc.id}`,
@@ -85,10 +85,10 @@ export async function deleteDocRecursively(docPath: string): Promise<boolean> {
     await subcollectionRef
       .get()
       .then(async (snapshot) => {
-        const docs = snapshot.docs;
-        for await (const doc of docs) {
+        const {docs} = snapshot;
+        for await (const doc of docs) 
           await deleteDocRecursively(`${docPath}/${subcollectionRef.id}/${doc.id}`);
-        }
+        
         return true;
       })
       .catch((error) => {

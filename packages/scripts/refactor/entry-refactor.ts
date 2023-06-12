@@ -10,7 +10,7 @@ program
   .parse(process.argv);
 
 const dictionaryId = program.opts().id;
-const live = program.opts().live;
+const {live} = program.opts();
 
 async function entryRefactor() {
   try {

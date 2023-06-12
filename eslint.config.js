@@ -87,6 +87,7 @@ export default defineFlatConfig([
       'no-useless-return': 'error',
       'object-shorthand': 'error',
       'prefer-arrow-callback': 'error',
+      'prefer-destructuring': 'error',
       
       
       // Warnings to move to errors in time:
@@ -94,6 +95,7 @@ export default defineFlatConfig([
       'no-await-in-loop': 'warn',
       'default-param-last': 'warn',
       'no-magic-numbers': ['warn', { 'ignore': [ 60 ] }],
+      'prefer-named-capture-group': 'warn',
 
       // Suggestions to try:
       // 'no-promise-executor-return': 'error', // has issue with "sleep" function
@@ -152,6 +154,8 @@ export default defineFlatConfig([
       'svelte/mustache-spacing': 'error',
       'svelte/button-has-type': 'error',
       'no-unused-expressions': 'off',
+      'prefer-destructuring': 'warn',
+
       // https://sveltejs.github.io/eslint-plugin-svelte/rules/
     },
     // globals: {
