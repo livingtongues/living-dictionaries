@@ -99,7 +99,7 @@ export const abbreviateTDPartOfSpeech = (input: string) => {
       part.enName === sanitizedInput ||
       part.esName === sanitizedInput ||
       part.enAbbrev === sanitizedInput ||
-      (part.tdAlternates && part.tdAlternates.includes(sanitizedInput))
+      (part.tdAlternates?.includes(sanitizedInput))
     );
   });
   // console.log({sanitizedInput}, {matchingPOS});

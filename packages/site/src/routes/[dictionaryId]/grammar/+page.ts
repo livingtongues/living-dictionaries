@@ -8,7 +8,7 @@ export const load: PageLoad = async ({ params, parent }) => {
     const grammarDoc = await getDocument<IGrammar>(
       `dictionaries/${params.dictionaryId}/info/grammar`
     );
-    if (grammarDoc && grammarDoc.grammar) {
+    if (grammarDoc?.grammar) {
       return { grammar: grammarDoc.grammar };
     }
   } catch (err) {

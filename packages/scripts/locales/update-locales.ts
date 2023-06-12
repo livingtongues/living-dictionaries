@@ -107,7 +107,7 @@ function googleSheetCsvUrl(spreadsheetId: string, sheetName: string) {
   return `https://docs.google.com/spreadsheets/d/${spreadsheetId}/gviz/tq?tqx=out:csv&sheet=${sheetName}`;
 }
 
-async function writeLocaleFiles(translations: { [key: string]: any }, directory: string) {
+async function writeLocaleFiles(translations: Record<string, any>, directory: string) {
   const languagesToWrite = languages.map(async (lang) => {
     const path = `${directory}/${lang}.json`;
     return fs.writeFile(path, JSON.stringify(translations[lang], null, 2) + '\r\n');

@@ -25,6 +25,7 @@ async function indexDictionary(dictionaryId: string) {
   await updateIndex(entries)
 }
 
+// eslint-disable-next-line no-undef
 async function prepareEntriesFromSnapshot(entriesSnapshot: FirebaseFirestore.QuerySnapshot<FirebaseFirestore.DocumentData>, dictionaryId: string) {
   const entryPromises = entriesSnapshot.docs.map(async (doc) => {
     const dbEntry = doc.data() as ActualDatabaseEntry

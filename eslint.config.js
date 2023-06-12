@@ -1,11 +1,19 @@
 // @ts-check
 import jsEslintPlugin from '@eslint/js';
 import { defineFlatConfig } from 'eslint-define-config';
+// @ts-ignore
 import typescriptParser from '@typescript-eslint/parser';
 import tsEslint from '@typescript-eslint/eslint-plugin'
 import globals from 'globals'
 
-// import vitest from 'eslint-plugin-vitest'
+/**
+ * @type {import('eslint-define-config').FlatESLintConfigItem}
+ */const allowScriptLogs = {
+  files: ['packages/{scripts,functions}/**',],
+  rules: {
+    'no-console': 'off',
+  },
+}
 
 export default defineFlatConfig([
   {
@@ -17,7 +25,16 @@ export default defineFlatConfig([
       '.git/**',
       '**/.svelte-kit/**',
       // pnpm-lock.yaml
+      'packages/scripts/import/old**',
     ],
+  },
+  {
+    files: ['**/*.test.ts'],
+    languageOptions: {
+      globals: {
+        ...globals.jest,
+      }
+    }
   },
   {
     files: ['**/*.ts', '**/*.js'],
@@ -34,6 +51,7 @@ export default defineFlatConfig([
         ...globals.browser,
         ...globals.es2021,
         ...globals.node,
+        ...globals.worker,
         test: 'readonly',
         expect: 'readonly',
         describe: 'readonly',
@@ -48,54 +66,25 @@ export default defineFlatConfig([
       ...tsEslint.configs.stylistic?.rules,
       // ...tsEslint.configs['recommended-type-checked']?.rules,
       // ...tsEslint.configs['stylistic-type-checked']?.rules,
+
+      '@typescript-eslint/sort-type-constituents': 'off', // prefer logical rather than alphabetical sorting
+
+      // 'svelte/valid-compile': 'off', // throws error on a11y issues without recourse
+      // 'svelte/no-at-html-tags': ['warn'],
+
+      'a11y-click-events-have-key-events': 'off',
+      '@typescript-eslint/no-var-requires': 'off',
+      '@typescript-eslint/no-unused-vars': 'off',
+      '@typescript-eslint/no-empty-function': 'off',
+      '@typescript-eslint/no-explicit-any': 'off',
+      '@typescript-eslint/explicit-module-boundary-types': 'off',
+      '@typescript-eslint/ban-ts-comment': 'off',
+
+      // 'no-unused-vars': 'off', // is marking enum values as unused
+      'prefer-template': 'off',
+      'no-console': ['warn', { allow: ['warn', 'error', 'info'] }],
     }
   },
-
+  allowScriptLogs,
 ]);
 
-const vitestConfig = {
-  files: [
-    '**/test/*.js',
-    '**/test/*.ts',
-    '**/test/*.jsx',
-    '**/test/*.tsx',
-    '**/*.test.js',
-    '**/*.test.ts',
-    '**/*.test.jsx',
-    '**/*.test.tsx',
-  ],
-
-  plugins: {
-    // vitest,
-  },
-
-  rules: {
-    'vitest/consistent-test-filename': 'error',
-    'vitest/consistent-test-it': ['error', { fn: 'it' }],
-    'vitest/no-alias-methods': 'error',
-    'vitest/no-commented-out-tests': 'error',
-    'vitest/no-conditional-expect': 'error',
-    'vitest/no-conditional-in-test': 'error',
-    'vitest/no-conditional-tests': 'error',
-    'vitest/no-disabled-tests': 'error',
-    'vitest/no-duplicate-hooks': 'error',
-    'vitest/no-focused-tests': 'error',
-    'vitest/no-identical-title': 'error',
-    'vitest/no-standalone-expect': 'error',
-    'vitest/no-test-return-statement': 'error',
-    'vitest/prefer-comparison-matcher': 'error',
-    'vitest/prefer-expect-resolves': 'error',
-    'vitest/prefer-hooks-in-order': 'error',
-    'vitest/prefer-hooks-on-top': 'error',
-    'vitest/prefer-lowercase-title': 'error',
-    'vitest/prefer-spy-on': 'error',
-    'vitest/prefer-to-be-falsy': 'error',
-    'vitest/prefer-to-be-truthy': 'error',
-    'vitest/prefer-to-be': 'error',
-    'vitest/prefer-to-contain': 'error',
-    'vitest/prefer-to-have-length': 'error',
-    'vitest/require-top-level-describe': 'error',
-    'vitest/valid-describe-callback': 'error',
-    'vitest/valid-expect': 'error',
-  },
-}

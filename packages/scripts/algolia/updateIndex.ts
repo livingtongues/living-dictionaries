@@ -26,8 +26,9 @@ async function updateIndexByField(fieldToIndex: string, { dry = true }) {
   if (!dry) {
     await updateIndex(entries);
   }
-};
+}
 
+// eslint-disable-next-line no-undef
 async function prepareEntriesFromSnapshot(entriesSnapshot: FirebaseFirestore.QuerySnapshot<FirebaseFirestore.DocumentData>) {
   const entryPromises = entriesSnapshot.docs.map(async (doc) => {
     const dbEntry = doc.data() as ActualDatabaseEntry

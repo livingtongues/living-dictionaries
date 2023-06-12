@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 import { version, files, build } from '$service-worker';
 
 const ASSETS = `cache${version}`;

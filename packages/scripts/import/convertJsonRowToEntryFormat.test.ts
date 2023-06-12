@@ -88,6 +88,7 @@ describe('convertJsonRowToEntryFormat', () => {
       convertJsonRowToEntryFormat(
         row,
         fakeTimeStamp,
+        // eslint-disable-next-line no-undef
         fakeTimeStamp as unknown as FirebaseFirestore.FieldValue
       )
     );
