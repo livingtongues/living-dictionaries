@@ -18,6 +18,7 @@ async function updateMostRecentEntries(count: number, { dry = true }) {
   }
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 async function updateIndexByField(fieldToIndex: string, { dry = true }) {
   // The field must be indexed first in Firebase
   const entriesSnapshot = await db.collectionGroup('words').where(fieldToIndex, '!=', null).get();

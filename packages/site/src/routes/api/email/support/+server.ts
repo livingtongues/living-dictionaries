@@ -1,8 +1,7 @@
 import type { RequestHandler } from './$types';
-import type { Address, EmailParts } from '../send/mail-channels.interface';
+import type { EmailParts } from '../send/mail-channels.interface';
 import { dev } from '$app/environment';
 import { SEND_EMAIL_KEY } from '$env/static/private';
-import { firebaseConfig } from 'sveltefirets';
 import { getSupportMessageRecipients } from '../addresses';
 
 export interface SupportRequestBody {

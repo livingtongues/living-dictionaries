@@ -46,7 +46,6 @@ export const updateIndex = async (
 
 export const deleteFromIndex = async (
   snapshot: functions.firestore.DocumentSnapshot,
-  context: functions.EventContext
 ) => {
   console.log(`deleting ${snapshot.id} from Algolia index`);
   if (projectId === 'talking-dictionaries-alpha') {

@@ -25,7 +25,7 @@ export const decreaseEntryCount = onDocumentDeleted('dictionaries/{dictionaryId}
 });
 
 // can manually run task at https://console.cloud.google.com/cloudscheduler?project=talking-dictionaries-alpha
-export const countAllEntries = onSchedule('every day 00:00', async (event) => {
+export const countAllEntries = onSchedule('every day 00:00', async () => {
   await (await import('./aggregation/countAllEntries')).countAllEntries();
 });
 
