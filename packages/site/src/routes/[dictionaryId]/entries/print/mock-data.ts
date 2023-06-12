@@ -8,7 +8,7 @@ export const speakers: ISpeaker[] = [
     contributingTo: ['bezhta'],
     decade: 4,
     displayName: 'zaira',
-    gender: gender,
+    gender,
     uid: 'uwNgSHCEeRaJAUPsmZok1uMRXzO2',
   },
 ];

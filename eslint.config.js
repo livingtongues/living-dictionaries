@@ -86,6 +86,7 @@ export default defineFlatConfig([
       'no-useless-concat': 'error',
       'no-useless-return': 'error',
       'object-shorthand': 'error',
+      'prefer-arrow-callback': 'error',
       
       
       // Warnings to move to errors in time:

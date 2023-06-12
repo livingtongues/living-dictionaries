@@ -45,7 +45,7 @@ From https://gitlab.com/jailbreak/svelte-mapbox-gl
             map.easeTo({
               // @ts-ignore
               center: features[0].geometry.coordinates,
-              zoom: zoom,
+              zoom,
             });
           });
         }}
