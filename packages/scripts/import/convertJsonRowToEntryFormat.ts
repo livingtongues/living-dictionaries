@@ -4,6 +4,7 @@ import type { Timestamp } from 'firebase/firestore';
 export function convertJsonRowToEntryFormat(
   row: Record<string, string>,
   dateStamp?: number,
+  // eslint-disable-next-line no-undef
   timestamp?: FirebaseFirestore.FieldValue
 ): IEntry {
   const entry: IEntry = { lx: row.lexeme, gl: {}, xs: {} };

@@ -34,7 +34,7 @@
       color={dictionary.public ? 'green' : 'orange'}
       size="sm"
       onclick={() => {
-        if (confirm("Flip this dictionary's visibility?")) {
+        if (confirm('Flip this dictionary\'s visibility?')) {
           dispatch('toggleprivacy');
         }
       }}>

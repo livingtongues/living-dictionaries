@@ -28,8 +28,8 @@ async function entryRefactor() {
       }
     }
   } catch (error) {
-    console.log('Refactor failed!');
-    console.log(error);
+    console.error('Refactor failed!');
+    console.error(error);
   }
 }
 
@@ -124,7 +124,7 @@ const refactorGloss = async (dictionaryId: string, entry: IEntry) => {
 
 const notesToPluralForm = async (dictionaryId: string, entry: IEntry) => {
   const ntBefore = entry.nt;
-  if (entry.nt && entry.nt.startsWith('Plural form:')) {
+  if (entry?.nt.startsWith('Plural form:')) {
     entry.pl = entry.nt.replace('Plural form: ', '');
     delete entry.nt;
     console.log(`${entry.id}, ntBefore:${ntBefore}, ntAfter:${entry.nt}, pl:${entry.pl}`);

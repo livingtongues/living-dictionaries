@@ -165,6 +165,6 @@
   dictionaryName={$dictionary.name}
   description={$_('', {
     default:
-      "Dictionary managers can easily export their Living Dictionary's text data as a .CSV spreadsheet as well as export their images and audio files in convenient ZIP folders.",
+      'Dictionary managers can easily export their Living Dictionary\'s text data as a .CSV spreadsheet as well as export their images and audio files in convenient ZIP folders.',
   })}
   keywords="How to print a dictionary, How to create lessons for endangered languages, Language Documentation, Language Revitalization, Build a Dictionary, Online Dictionary, Digital Dictionary, Dictionary Software, Free Software, Online Dictionary Builder, Living Dictionaries, Living Dictionary, Edit a dictionary, Search a dictionary, Browse a dictionary, Explore a Dictionary" />

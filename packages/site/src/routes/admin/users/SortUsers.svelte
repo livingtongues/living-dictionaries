@@ -29,16 +29,16 @@
     // prettier-ignore
     switch (sortKey) {
       case 'createdAt':
-        valueA = a.createdAt && a.createdAt.seconds || 0;
-        valueB = b.createdAt && b.createdAt.seconds || 0;
+        valueA = a.createdAt?.seconds || 0;
+        valueB = b.createdAt?.seconds || 0;
         break;
       case 'lastVisit':
-        valueA = a.lastVisit && a.lastVisit.seconds || 0;
-        valueB = b.lastVisit && b.lastVisit.seconds || 0;
+        valueA = a.lastVisit?.seconds || 0;
+        valueB = b.lastVisit?.seconds || 0;
         break;
       case 'unsubscribe':
-        valueA = a.unsubscribe && a.unsubscribe.seconds || 0;
-        valueB = b.unsubscribe && b.unsubscribe.seconds || 0;
+        valueA = a.unsubscribe?.seconds || 0;
+        valueB = b.unsubscribe?.seconds || 0;
         break;
       default: 
         valueA = a[sortKey] ? a[sortKey].toUpperCase() : 'zz'; // if we ever have missing names or email, then pass 'zz' when the sortKey is undefined

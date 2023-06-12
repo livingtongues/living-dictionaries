@@ -88,6 +88,7 @@ describe('convertJsonRowToEntryFormat', () => {
       convertJsonRowToEntryFormat(
         row,
         fakeTimeStamp,
+        // eslint-disable-next-line no-undef
         fakeTimeStamp as unknown as FirebaseFirestore.FieldValue
       )
     );
@@ -132,7 +133,7 @@ describe('convertJsonRowToEntryFormat', () => {
         xs: {
           en: 'The tree gives us shade',
           es: 'El árbol nos da sombra',
-          vn: "L'arbre nous donne de l'ombre",
+          vn: 'L\'arbre nous donne de l\'ombre',
         },
       },
       {
@@ -154,7 +155,7 @@ describe('convertJsonRowToEntryFormat', () => {
         xs: {
           en: 'The water goes through the tubes',
           es: 'El agua pasa a través de los tubos',
-          vn: "L'eau passe à travers les tubes",
+          vn: 'L\'eau passe à travers les tubes',
         },
       },
       {
@@ -194,7 +195,7 @@ describe('convertJsonRowToEntryFormat', () => {
         xs: {
           en: 'My room is painted with a neutral color.',
           es: 'Mi habitación está pintada con un color neutro.',
-          vn: "Ma chambre est peinte d'une couleur neutre.",
+          vn: 'Ma chambre est peinte d\'une couleur neutre.',
         },
       },
       {

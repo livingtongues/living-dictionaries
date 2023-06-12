@@ -43,40 +43,40 @@
     // prettier-ignore
     switch (sortKey) {
       case 'public':
-        valueA = a.public && a.public.toString() || '';
-        valueB = b.public && b.public.toString() || '';
+        valueA = a.public?.toString() || '';
+        valueB = b.public?.toString() || '';
         break;
       case 'languageUsedByCommunity': // should add a test and try to combine these first two cases with the default case, boolean and strings should be able to be handled in one case
-        valueA = a.public && a.public.toString() || '';
-        valueB = b.public && b.public.toString() || '';
+        valueA = a.public?.toString() || '';
+        valueB = b.public?.toString() || '';
         break;
       case 'videoAccess':
-        valueA = a.videoAccess && a.videoAccess.toString() || '';
-        valueB = b.videoAccess && b.videoAccess.toString() || '';
+        valueA = a.videoAccess?.toString() || '';
+        valueB = b.videoAccess?.toString() || '';
         break;
       case 'entryCount':
         valueA = a.entryCount || 0;
         valueB = b.entryCount || 0;
         break;
       case 'coordinates':
-        valueA = a.coordinates && a.coordinates.latitude || 0;
-        valueB = b.coordinates && b.coordinates.latitude || 0;
+        valueA = a.coordinates?.latitude || 0;
+        valueB = b.coordinates?.latitude || 0;
         break;
       case 'glossLanguages':
-        valueA = a.glossLanguages && a.glossLanguages.length || 0;
-        valueB = b.glossLanguages && b.glossLanguages.length || 0;
+        valueA = a.glossLanguages?.length || 0;
+        valueB = b.glossLanguages?.length || 0;
         break;
       case 'alternateNames':
-        valueA = a.alternateNames && a.alternateNames.length || 0;
-        valueB = b.alternateNames && b.alternateNames.length || 0;
+        valueA = a.alternateNames?.length || 0;
+        valueB = b.alternateNames?.length || 0;
         break;
       case 'alternateOrthographies':
-        valueA = a.alternateOrthographies && a.alternateOrthographies.length || 0;
-        valueB = b.alternateOrthographies && b.alternateOrthographies.length || 0;
+        valueA = a.alternateOrthographies?.length || 0;
+        valueB = b.alternateOrthographies?.length || 0;
         break;
       case 'createdAt':
-        valueA = a.createdAt && a.createdAt.seconds || 0;
-        valueB = b.createdAt && b.createdAt.seconds || 0;
+        valueA = a.createdAt?.seconds || 0;
+        valueB = b.createdAt?.seconds || 0;
         break;
       default: 
         valueA = a[sortKey] ? a[sortKey].toUpperCase() : 'zz'; // if we ever have missing names or email, then pass 'zz' when the sortKey is undefined

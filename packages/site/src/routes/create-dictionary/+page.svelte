@@ -85,7 +85,7 @@
       };
       const prunedDictionary = pruneObject(dictionary);
       if (firebaseConfig.projectId === 'talking-dictionaries-dev') {
-        console.log(prunedDictionary);
+        console.info(prunedDictionary);
         if (
           !confirm(
             'Dictionary value logged to console because in dev mode. Do you still want to create this dictionary?'

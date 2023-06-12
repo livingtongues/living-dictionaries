@@ -6,7 +6,7 @@ try {
     from: /src\/lib\/index.ts/g,
     to: 'index.js',
   });
-  console.log('Replacement results:', results);
+  console.info('Replacement results:', results);
 } catch (error) {
   console.error('Error occurred:', error);
 }

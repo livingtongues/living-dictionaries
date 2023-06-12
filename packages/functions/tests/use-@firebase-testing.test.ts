@@ -1,4 +1,4 @@
-/* tslint:disable */
+
 import * as firebase from '@firebase/testing';
 
 /**
