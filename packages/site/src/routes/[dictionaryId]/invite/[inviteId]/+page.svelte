@@ -105,11 +105,11 @@
         {$_('invite.invitation_claimed', {
           default: 'Invitation claimed',
         })}: {invite.updatedAt?.toDate().toLocaleDateString(undefined, {
-            weekday: 'long',
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric',
-          })}
+          weekday: 'long',
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+        })}
       </p>
 
       <Button href={`/${$dictionary.id}/entries/list`}>

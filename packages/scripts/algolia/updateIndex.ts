@@ -6,7 +6,7 @@ import { ActualDatabaseEntry } from '@living-dictionaries/types';
 import * as prepare from '@living-dictionaries/functions/src/algolia/prepareDataForIndex';
 // @ts-ignore
 const prepareDataForIndex = prepare.default
-.prepareDataForIndex as typeof import('@living-dictionaries/functions/src/algolia/prepareDataForIndex').prepareDataForIndex; // b/c file is declared to be commonjs by its package.json
+  .prepareDataForIndex as typeof import('@living-dictionaries/functions/src/algolia/prepareDataForIndex').prepareDataForIndex; // b/c file is declared to be commonjs by its package.json
 
 
 async function updateMostRecentEntries(count: number, { dry = true }) {
@@ -18,7 +18,7 @@ async function updateMostRecentEntries(count: number, { dry = true }) {
   }
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+ 
 async function updateIndexByField(fieldToIndex: string, { dry = true }) {
   // The field must be indexed first in Firebase
   const entriesSnapshot = await db.collectionGroup('words').where(fieldToIndex, '!=', null).get();
