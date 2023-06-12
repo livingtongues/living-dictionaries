@@ -1,7 +1,7 @@
 import { sveltekit } from '@sveltejs/kit/vite';
-import { defineConfig } from 'vite'
+import { defineConfig } from 'vite';
 
-import UnoCSS from '@unocss/svelte-scoped/vite'
+import UnoCSS from '@unocss/svelte-scoped/vite';
 import { kitbook } from 'kitbook/plugins/vite';
 
 export default defineConfig({

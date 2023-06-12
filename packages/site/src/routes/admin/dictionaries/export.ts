@@ -1,4 +1,3 @@
-import { get } from 'svelte/store';
 import type { DictionaryWithHelperStores, DictionaryWithHelpers } from './dictionaryWithHelpers';
 import { downloadObjectsAsCSV } from '$lib/export/csv';
 import { dictionary_headers as standard_headers, prepareDictionaryForCsv, timestamp_to_string_date, type StandardDictionaryForCSV } from '$lib/export/prepareDictionariesForCsv';
@@ -53,7 +52,7 @@ export async function exportAdminDictionariesAsCSV(dictionariesAndHelpers: Dicti
       invites: dictionary.invites.map((invite) => {
         return `${invite.inviterName} (${invite.inviterEmail}) invited ${invite.targetEmail} as ${invite.role} on ${timestamp_to_string_date(invite.createdAt)}`;
       }).join(', '),
-    }
+    };
 
     return { ...standard_dictionary, ...admin_dictionary };
   });
@@ -62,13 +61,13 @@ export async function exportAdminDictionariesAsCSV(dictionariesAndHelpers: Dicti
     { ...standard_headers, ...admin_headers },
     formatted_dictionaries,
     'living-dictionaries-public-private'
-  )
+  );
 }
 
 async function getAllDictionariesAndHelpers(
   dictionariesAndHelpers: DictionaryWithHelperStores[]
 ): Promise<DictionaryWithHelpers[]> {
-  const dictionaries: DictionaryWithHelpers[] = []
+  const dictionaries: DictionaryWithHelpers[] = [];
   for (const dictionary of dictionariesAndHelpers) {
     dictionaries.push({
       ...dictionary,
@@ -76,7 +75,7 @@ async function getAllDictionariesAndHelpers(
       contributors: await dictionary.getContributors,
       writeInCollaborators: await dictionary.getWriteInCollaborators,
       invites: await dictionary.getInvites,
-    })
+    });
   }
-  return dictionaries
+  return dictionaries;
 }

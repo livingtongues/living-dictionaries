@@ -45,4 +45,4 @@ export const vitestConfig = {
     'vitest/valid-describe-callback': 'error',
     'vitest/valid-expect': 'error',
   },
-}
+};

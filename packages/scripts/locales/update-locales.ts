@@ -8,7 +8,7 @@ const languages = [...Object.keys(ReadyLocales), ...Object.keys(UnpublishedLocal
 
 export async function generateFilesFromSpreadsheet() {
   const i18nGoogleSheetId = '1SqtfUvYYAEQSFTaTPoAJq6k-wlbuAgWCkswE_kiUhLs';
-  const localesDir = '../site/src/locales'
+  const localesDir = '../site/src/locales';
   try {
     const rows = await jsonFromCsvUrl(googleSheetCsvUrl(i18nGoogleSheetId, 'App-Translations'));
     const translations = await generateTranslationsFromSpreadsheet(rows, { nesting: 'deep' });
@@ -36,7 +36,7 @@ export async function generateFilesFromSpreadsheet() {
       `../site/src/lib/glosses/glossing-languages-list.json`,
       JSON.stringify(glossingLanguages, null, 2) + '\r\n'
     );
-    console.log('glossing-languages-list.json file written')
+    console.log('glossing-languages-list.json file written');
   } catch (error) {
     throw new Error(error.message);
   }
@@ -56,21 +56,21 @@ export const generateTranslationsFromSpreadsheet: (
     translations[lang] = {};
 
     rows.forEach((row) => {
-      const key = row.key;
+      const {key} = row;
       const langColumn = options.prefix === 'psAbbrev' ? lang + 'Abbrev' : lang;
       const value = row[langColumn];
       if (key && value) {
-        if (options.nesting === 'deep') {
+        if (options.nesting === 'deep') 
           dot.str(key, value, translations[lang]); // doesn't work with dot.str('1.1', "Sky, weather and climate", translations['en'])
-        } else {
+        else 
           translations[lang][key] = value;
-        }
+        
       }
     });
 
-    if (options.prefix) {
+    if (options.prefix) 
       translations[lang] = { [options.prefix]: translations[lang] };
-    }
+    
   });
 
   return translations;
@@ -81,13 +81,13 @@ async function generateGlossingLanguages(rows: any[]) {
   rows.forEach((row) => {
     const language: IGlossLanguage = {};
     for (const column of ['vernacularName', 'vernacularAlternate', 'internalName', 'useKeyboard']) {
-      if (row[column].length) {
+      if (row[column].length) 
         language[column] = row[column];
-      }
+      
     }
-    if (row.showKeyboard == 'true') {
+    if (row.showKeyboard == 'true') 
       language.showKeyboard = true;
-    }
+    
     glossingLanguages[row.key] = language;
   });
   return glossingLanguages;

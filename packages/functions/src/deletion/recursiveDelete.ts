@@ -28,7 +28,7 @@ export default async (data: any, context: functions.https.CallableContext) => {
     );
   }
 
-  const path = data.path;
+  const {path} = data;
   console.log(`User ${context.auth.uid} has requested to delete path ${path}`);
 
   // Run a recursive delete on the given document or collection path.
@@ -41,6 +41,6 @@ export default async (data: any, context: functions.https.CallableContext) => {
     token: functions.config().fb.token,
   });
   return {
-    path: path,
+    path,
   };
 };

@@ -7,7 +7,7 @@
   import UserRow from './UserRow.svelte';
   import SortUsers from './SortUsers.svelte';
 
-  let usersType: IUser[] = [];
+  const usersType: IUser[] = [];
 
   function exportUsersAsCSV(users: IUser[]) {
     const headers = {

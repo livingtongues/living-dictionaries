@@ -1,8 +1,7 @@
 import type { RequestHandler } from './$types';
-import type { Address, EmailParts } from '../send/mail-channels.interface';
+import type { EmailParts } from '../send/mail-channels.interface';
 import { dev } from '$app/environment';
 import { SEND_EMAIL_KEY } from '$env/static/private';
-import { firebaseConfig } from 'sveltefirets';
 import { getSupportMessageRecipients } from '../addresses';
 
 export interface SupportRequestBody {
@@ -13,7 +12,7 @@ export interface SupportRequestBody {
 }
 
 export const POST: RequestHandler = async ({ request, fetch }) => {
-  const { email, message, name, url } = await request.json() as SupportRequestBody
+  const { email, message, name, url } = await request.json() as SupportRequestBody;
 
   const emailParts: EmailParts = {
     to: getSupportMessageRecipients({ dev }),

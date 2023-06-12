@@ -5,7 +5,7 @@ export function truncateAuthors(authors: string): string {
   if (!authors) return '';
   if (authors.length < maxLengthLookingGoodInLetter) return authors + ', ';
 
-  const truncatedFirstAuthor = authors.split(firstCommaAndTypeOfDividerRgx)[0];
+  const [truncatedFirstAuthor] = authors.split(firstCommaAndTypeOfDividerRgx);
   return addEtAlEnding(truncatedFirstAuthor);
 }
 

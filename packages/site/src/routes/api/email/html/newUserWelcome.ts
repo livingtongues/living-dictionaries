@@ -284,4 +284,4 @@ The Living Tongues team
   </table>
 </body>
 
-</html>`
+</html>`;

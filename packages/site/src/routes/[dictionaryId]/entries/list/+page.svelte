@@ -1,7 +1,7 @@
 <script lang="ts">
   // import { t } from 'svelte-i18n';
   // import SeoMetaTags from '$lib/components/SeoMetaTags.svelte';
-  import { getContext } from 'svelte';
+  import { onMount, getContext } from 'svelte';
   import { Doc } from 'sveltefirets';
   import { dictionary, canEdit, admin } from '$lib/stores';
   import ListEntry from './ListEntry.svelte';
@@ -9,7 +9,6 @@
   import Hits from '$lib/components/search/Hits.svelte';
   import Pagination from '$lib/components/search/Pagination.svelte';
   import { configure } from 'instantsearch.js/es/widgets/index.js';
-  import { onMount } from 'svelte';
   import { deleteImage } from '$lib/helpers/delete';
   import type { InstantSearch } from 'instantsearch.js';
   const search: InstantSearch = getContext('search');

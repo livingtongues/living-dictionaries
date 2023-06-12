@@ -5,4 +5,4 @@ export const variants: Variants<typeof Component> = [
     name: 'First',
     props: {}
   },
-]
+];

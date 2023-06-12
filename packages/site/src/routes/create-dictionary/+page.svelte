@@ -212,13 +212,14 @@
 
       <EditableAlternateNames
         {alternateNames}
-        on:update={(e) => (alternateNames = e.detail.alternateNames)} />
+        on:update={({ detail }) => (alternateNames = detail.alternateNames)} />
       <div class="mb-6" />
 
       <WhereSpoken
         dictionary={{ coordinates: { latitude, longitude }, points, regions }}
         on:updateCoordinates={({ detail }) => {
-          (latitude = detail.latitude), (longitude = detail.longitude);
+          latitude = detail.latitude, 
+          longitude = detail.longitude;
         }}
         on:removeCoordinates={() => ((latitude = null), (longitude = null))}
         on:updatePoints={({ detail }) => (points = detail)}

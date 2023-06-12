@@ -7,19 +7,19 @@ export async function countAllEntries() {
   const dictionaryIds = dictionarySnaps.docs.map(doc => doc.id);
 
   for (const dictionaryId of dictionaryIds) {
-    if (dictionaryId.startsWith("tdv1-")) continue;
+    if (dictionaryId.startsWith('tdv1-')) continue;
 
     const countData = await db.collection(`dictionaries/${dictionaryId}/words`).count().get();
-    const { count: entryCount } = countData.data()
-    console.log({ dictionaryId, entryCount, overallEntryCount })
+    const { count: entryCount } = countData.data();
+    console.log({ dictionaryId, entryCount, overallEntryCount });
     overallEntryCount += entryCount;
-    console.log({ dictionaryId, entryCount, overallEntryCount })
+    console.log({ dictionaryId, entryCount, overallEntryCount });
     await db.doc(`dictionaries/${dictionaryId}`).update({ entryCount });
   }
 
   await db.doc('stats/data').update({ overallEntryCount });
 
-  return true
+  return true;
 }
 
 countAllEntries().then(() => console.log('done')).catch(console.error);
