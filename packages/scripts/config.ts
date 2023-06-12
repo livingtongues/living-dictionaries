@@ -1,6 +1,6 @@
 import { program } from 'commander';
-import { initializeApp, cert } from "firebase-admin/app";
-import { FieldValue, getFirestore } from "firebase-admin/firestore";
+import { initializeApp, cert } from 'firebase-admin/app';
+import { FieldValue, getFirestore } from 'firebase-admin/firestore';
 import { getStorage } from 'firebase-admin/storage';
 // import serviceAccountDev from './service-account-dev.json';
 // import serviceAccountProd from './service-account-prod.json';

@@ -8,12 +8,12 @@ export async function countAllEntries() {
 
   for (const dictionaryId of dictionaryIds) {
     const countData = await db.collection(`dictionaries/${dictionaryId}/words`).count().get();
-    const { count: entryCount } = countData.data()
+    const { count: entryCount } = countData.data();
     overallEntryCount += entryCount;
     await db.doc(`dictionaries/${dictionaryId}`).update({ entryCount });
   }
 
   await db.doc('stats/data').update({ overallEntryCount });
 
-  return true
+  return true;
 }

@@ -14,7 +14,7 @@ if (import.meta.vitest) {
   describe('reverse_semantic_domains_mapping', () => {
     test('converts normal domain strings', () => {
       const sdn = ['Universe and the natural world', 'Earth, geology and landscape'];
-      const expected = ['1', '1.2']
+      const expected = ['1', '1.2'];
       expect(reverse_semantic_domains_mapping(sdn)).toEqual(expected);
     });
 
@@ -65,7 +65,7 @@ if (import.meta.vitest) {
         'Motion',
       ]);
     });
-  })
+  });
 }
 
 function update_old_semantic_domains(semantic_domain: string): string {

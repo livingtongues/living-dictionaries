@@ -1,5 +1,5 @@
 import { db } from '../config';
-import { updateIndex } from './algolia'
+import { updateIndex } from './algolia';
 import { ActualDatabaseEntry } from '@living-dictionaries/types';
 
 // import { prepareDataForIndex } from '@living-dictionaries/functions/src/algolia/prepareDataForIndex';
@@ -11,7 +11,7 @@ const prepareDataForIndex = prepare.default
 
 async function updateMostRecentEntries(count: number, { dry = true }) {
   const entriesSnapshot = await db.collectionGroup('words').orderBy('ua', 'desc').limit(count).get();
-  const entries = await prepareEntriesFromSnapshot(entriesSnapshot)
+  const entries = await prepareEntriesFromSnapshot(entriesSnapshot);
 
   if (!dry) {
     await updateIndex(entries);
@@ -21,7 +21,7 @@ async function updateMostRecentEntries(count: number, { dry = true }) {
 async function updateIndexByField(fieldToIndex: string, { dry = true }) {
   // The field must be indexed first in Firebase
   const entriesSnapshot = await db.collectionGroup('words').where(fieldToIndex, '!=', null).get();
-  const entries = await prepareEntriesFromSnapshot(entriesSnapshot)
+  const entries = await prepareEntriesFromSnapshot(entriesSnapshot);
 
   if (!dry) {
     await updateIndex(entries);
@@ -31,10 +31,10 @@ async function updateIndexByField(fieldToIndex: string, { dry = true }) {
 // eslint-disable-next-line no-undef
 async function prepareEntriesFromSnapshot(entriesSnapshot: FirebaseFirestore.QuerySnapshot<FirebaseFirestore.DocumentData>) {
   const entryPromises = entriesSnapshot.docs.map(async (doc) => {
-    const dbEntry = doc.data() as ActualDatabaseEntry
-    const dictionaryId = doc.ref.parent.parent.id // dictionary/words/entry-123 -> doc.ref: entry-123, doc.ref.parent: words, doc.ref.parent.parent: dictionary
+    const dbEntry = doc.data() as ActualDatabaseEntry;
+    const dictionaryId = doc.ref.parent.parent.id; // dictionary/words/entry-123 -> doc.ref: entry-123, doc.ref.parent: words, doc.ref.parent.parent: dictionary
     const algoliaEntry = await prepareDataForIndex(dbEntry, dictionaryId, db);
-    console.log({ dbEntry, algoliaEntry})
+    console.log({ dbEntry, algoliaEntry});
     return { ...algoliaEntry, objectID: doc.id };
   });
   

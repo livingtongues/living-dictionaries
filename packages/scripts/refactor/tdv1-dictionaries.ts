@@ -745,7 +745,7 @@
     },
     properties: {
       icon: 'logo',
-      label: "Ch'orti'",
+      label: 'Ch\'orti\'',
       xlink: 'https://livingdictionaries.app/chorti',
       size: 10,
       status: 'guatemala2014',
@@ -902,7 +902,7 @@
     },
     properties: {
       icon: 'logo',
-      label: "K'iche'",
+      label: 'K\'iche\'',
       xlink: 'https://livingdictionaries.app/kiche',
       size: 1900000,
       status: 'guatemala2014',
@@ -928,7 +928,7 @@
     },
     properties: {
       icon: 'logo',
-      label: "Poqomchi'",
+      label: 'Poqomchi\'',
       xlink: 'https://livingdictionaries.app/poqomchi',
       size: 42200,
       status: 'guatemala2014',
@@ -941,7 +941,7 @@
     },
     properties: {
       icon: 'logo',
-      label: "Q'anjob'al",
+      label: 'Q\'anjob\'al',
       xlink: 'https://livingdictionaries.app/qanjobal',
       size: 77700,
       status: 'guatemala2014',
@@ -954,7 +954,7 @@
     },
     properties: {
       icon: 'logo',
-      label: "Q'eqchi'",
+      label: 'Q\'eqchi\'',
       xlink: 'https://livingdictionaries.app/qeqchi',
       size: 400000,
       status: 'guatemala2014',
@@ -980,7 +980,7 @@
     },
     properties: {
       icon: 'logo',
-      label: "Tz'utujil",
+      label: 'Tz\'utujil',
       xlink: 'https://livingdictionaries.app/tzutujil',
       size: 50000,
       status: 'guatemala2014',
@@ -1111,7 +1111,7 @@
     },
     properties: {
       icon: 'logo',
-      label: "Gta'",
+      label: 'Gta\'',
       xlink: 'https://livingdictionaries.app/gta',
       size: 3060,
       status: 'in_progress',

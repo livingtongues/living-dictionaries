@@ -15,8 +15,8 @@ export const saveVersionHistory = functions.firestore
         const dictionaryId = context.params.dictionaryId;
         const wordId = context.params.wordId;
         const wordHistoryColRef = db.collection(`dictionaries/${dictionaryId}/words/${wordId}/history`);
-        await wordHistoryColRef.add({previousValue}) 
+        await wordHistoryColRef.add({previousValue}); 
         // TODO, make sure app is saving updatedAt timestamps
 
         return true;
-    })
+    });

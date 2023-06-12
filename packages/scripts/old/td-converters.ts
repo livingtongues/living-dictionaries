@@ -12,7 +12,7 @@ export const convertOldTDKeyNames = (tdData: any[]) => {
   for (const tdEntry of tdData) {
     ++entryCount;
     // Always set lexeme even if blank string
-    tdEntry.lexeme = tdEntry.lang.replace(/&#8217;/g, "'"); // handle old TD apostrophes correctly
+    tdEntry.lexeme = tdEntry.lang.replace(/&#8217;/g, '\''); // handle old TD apostrophes correctly
     delete tdEntry.lang;
 
     // if these fields are blank, delete, otherwise leave alone as they're named correct
@@ -33,7 +33,7 @@ export const convertOldTDKeyNames = (tdData: any[]) => {
     delete tdEntry.gloss;
 
     if (tdEntry.ipa) {
-      tdEntry.phonetic = tdEntry.ipa.replace(/&#8217;/g, "'"); // handle old TD apostrophes correctly
+      tdEntry.phonetic = tdEntry.ipa.replace(/&#8217;/g, '\''); // handle old TD apostrophes correctly
     }
     delete tdEntry.ipa;
 

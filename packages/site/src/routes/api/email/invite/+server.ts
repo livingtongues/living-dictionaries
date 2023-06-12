@@ -13,27 +13,27 @@ export interface InviteRequestBody {
 }
 
 export const POST: RequestHandler = async ({ request, fetch }) => {
-  const { auth_token, dictionaryId, invite } = await request.json() as InviteRequestBody
+  const { auth_token, dictionaryId, invite } = await request.json() as InviteRequestBody;
   const { dictionaryName, inviterName, role, targetEmail, inviterEmail } = invite;
 
-  const decodedToken = await decodeToken(auth_token)
+  const decodedToken = await decodeToken(auth_token);
   if (inviterEmail !== decodedToken?.email)
-    throw new Error('Requesting from incorrect account')
+    throw new Error('Requesting from incorrect account');
 
-  const db = getDb()
+  const db = getDb();
 
   const checkForPermission = async () => {
-    const dictionaryManagers = await db.collection(`dictionaries/${dictionaryId}/managers`).get()
-    const isDictionaryManager = dictionaryManagers.docs.some(({ id }) => id === decodedToken.uid)
-    if (isDictionaryManager) return true
+    const dictionaryManagers = await db.collection(`dictionaries/${dictionaryId}/managers`).get();
+    const isDictionaryManager = dictionaryManagers.docs.some(({ id }) => id === decodedToken.uid);
+    if (isDictionaryManager) return true;
 
-    const userSnap = await db.doc(`users/${decodedToken.uid}`).get()
-    const { roles } = userSnap.data() as IUser
-    if (roles?.admin) return true
+    const userSnap = await db.doc(`users/${decodedToken.uid}`).get();
+    const { roles } = userSnap.data() as IUser;
+    if (roles?.admin) return true;
 
-    throw new Error('Is not a manager of this dictionary.')
-  }
-  await checkForPermission()
+    throw new Error('Is not a manager of this dictionary.');
+  };
+  await checkForPermission();
 
   const inviteRef = await db.collection(`dictionaries/${dictionaryId}/invites`).add(invite);
 
@@ -100,5 +100,5 @@ https://livingdictionaries.app`,
 
   await inviteRef.update({ status: 'sent' });
 
-  return json('success')
+  return json('success');
 };
