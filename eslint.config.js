@@ -120,7 +120,7 @@ export default defineFlatConfig([
       'svelte/no-store-async': 'error',
       'svelte/require-store-reactive-access': 'error',
       'svelte/mustache-spacing': 'error',
-      'svelte/button-has-type': "error",
+      'svelte/button-has-type': 'error',
       // https://sveltejs.github.io/eslint-plugin-svelte/rules/
     },
     // globals: {

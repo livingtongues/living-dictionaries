@@ -82,7 +82,7 @@
       {#if $admin}
         <ShowHide let:show={hide} let:toggle>
           <CustomControl position="bottom-right">
-            <button class="whitespace-nowrap w-90px! px-2" on:click={toggle}>Toggle Private</button>
+            <button type="button" class="whitespace-nowrap w-90px! px-2" on:click={toggle}>Toggle Private</button>
           </CustomControl>
 
           {#if !hide && privateDictionaries.length}
