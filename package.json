@@ -17,8 +17,8 @@
 		"parts:test": "pnpm --filter=parts test",
 		"kitbook": "pnpm --filter=site kitbook",
 		"both": "pnpm --filter=./packages/** dev",
-		"lint": "eslint .",
-		"lint:fix": "eslint . --fix",
+		"lint": "eslint . --cache",
+		"lint:fix": "eslint . --cache --fix",
 		"check-packages": "pnpm update --interactive --recursive --latest"
 	},
 	"devDependencies": {

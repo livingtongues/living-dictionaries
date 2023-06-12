@@ -29,6 +29,7 @@
     "markdown",
     "svelte"
   ],
+  "eslint.experimental.useFlatConfig": true,
   "files.associations": {
     "*.svx": "svelte"
   },

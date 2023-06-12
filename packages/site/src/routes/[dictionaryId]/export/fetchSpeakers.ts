@@ -6,7 +6,7 @@ export async function fetchSpeakers(entries: ExpandedEntry[]): Promise<ISpeaker[
   for (const { sound_files } of entries) {
     const ids = sound_files?.[0]?.speaker_ids || [];
     speaker_ids = speaker_ids.concat(ids);
-  };
+  }
 
   const speakers = await Promise.all(speaker_ids.map(async (id) => await getDocument<ISpeaker>(`speakers/${id}`)));
   return speakers;

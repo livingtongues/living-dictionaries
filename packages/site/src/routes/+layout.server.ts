@@ -17,7 +17,7 @@ export const load: LayoutServerLoad = async ({ cookies, request }) => {
   try {
     user = JSON.parse(cookies.get('user') || null) as IUser;
   } catch (err) {
-    console.log(err);
+    console.error(err);
   }
 
   return {
