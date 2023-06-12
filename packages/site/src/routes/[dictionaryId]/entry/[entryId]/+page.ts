@@ -15,9 +15,9 @@ export const load: PageLoad = async ({ params, parent }) => {
       return {
         initialEntry: convert_and_expand_entry(entry),
       };
-    } else {
-      throw redirect(301, `/${params.dictionaryId}`);
-    }
+    } 
+    throw redirect(301, `/${params.dictionaryId}`);
+    
   } catch (err) {
     throw error(500, err);
   }

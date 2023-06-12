@@ -80,15 +80,20 @@ export default defineFlatConfig([
       'no-unmodified-loop-condition': 'error',
       'require-atomic-updates': 'error',
       'dot-notation': 'error',
+      'no-else-return': 'error',
       
       
       // Warnings to move to errors in time:
       'curly': ['warn', 'multi-or-nest', 'consistent'],
       'no-await-in-loop': 'warn',
       'default-param-last': 'warn',
+      'no-magic-numbers': ['warn', { 'ignore': [ 60 ] }],
 
       // Suggestions to try:
       // 'no-promise-executor-return': 'error', // has issue with "sleep" function
+      // 'max-lines-per-function': ['error', 20]
+
+
 
       // '@typescript-eslint/naming-convention': [
       //   'error',

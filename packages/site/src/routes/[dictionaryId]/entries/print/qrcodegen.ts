@@ -527,14 +527,14 @@ export class QrCode {
   // This could be implemented as lookup table of 40 variable-length lists of integers.
   private getAlignmentPatternPositions(): int[] {
     if (this.version == 1) return [];
-    else {
-      const numAlign: int = Math.floor(this.version / 7) + 2;
-      const step: int =
+    
+    const numAlign: int = Math.floor(this.version / 7) + 2;
+    const step: int =
         this.version == 32 ? 26 : Math.ceil((this.version * 4 + 4) / (numAlign * 2 - 2)) * 2;
-      const result: int[] = [6];
-      for (let pos = this.size - 7; result.length < numAlign; pos -= step) result.splice(1, 0, pos);
-      return result;
-    }
+    const result: int[] = [6];
+    for (let pos = this.size - 7; result.length < numAlign; pos -= step) result.splice(1, 0, pos);
+    return result;
+    
   }
 
   // Returns the number of data bits that can be stored in a QR Code of the given version number, after
@@ -802,22 +802,22 @@ export class QrSegment {
     if (text == '') return [];
     else if (QrSegment.isNumeric(text)) return [QrSegment.makeNumeric(text)];
     else if (QrSegment.isAlphanumeric(text)) return [QrSegment.makeAlphanumeric(text)];
-    else return [QrSegment.makeBytes(QrSegment.toUtf8ByteArray(text))];
+    return [QrSegment.makeBytes(QrSegment.toUtf8ByteArray(text))];
   }
 
   // Returns a segment representing an Extended Channel Interpretation
   // (ECI) designator with the given assignment value.
   public static makeEci(assignVal: int): QrSegment {
     const bb: bit[] = [];
-    if (assignVal < 0) throw new RangeError('ECI assignment value out of range');
-    else if (assignVal < 1 << 7) appendBits(assignVal, 8, bb);
+    if (assignVal < 0) {throw new RangeError('ECI assignment value out of range');}
+    else if (assignVal < 1 << 7) {appendBits(assignVal, 8, bb);}
     else if (assignVal < 1 << 14) {
       appendBits(0b10, 2, bb);
       appendBits(assignVal, 14, bb);
     } else if (assignVal < 1000000) {
       appendBits(0b110, 3, bb);
       appendBits(assignVal, 21, bb);
-    } else throw new RangeError('ECI assignment value out of range');
+    } else {throw new RangeError('ECI assignment value out of range');}
     return new QrSegment(QrSegmentMode.ECI, 0, bb);
   }
 
@@ -879,7 +879,7 @@ export class QrSegment {
     str = encodeURI(str);
     const result: byte[] = [];
     for (let i = 0; i < str.length; i++) {
-      if (str.charAt(i) != '%') result.push(str.charCodeAt(i));
+      if (str.charAt(i) != '%') {result.push(str.charCodeAt(i));}
       else {
         result.push(parseInt(str.substr(i + 1, 2), 16));
         i += 2;
