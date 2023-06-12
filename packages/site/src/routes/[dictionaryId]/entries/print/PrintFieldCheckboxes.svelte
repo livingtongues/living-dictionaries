@@ -1,8 +1,7 @@
 <script lang="ts">
   import type { Readable } from 'svelte/store';
   import { _ } from 'svelte-i18n';
-  import type { IEntry, IPrintFields } from '@living-dictionaries/types';
-  import { StandardPrintFields } from '@living-dictionaries/types';
+  import { StandardPrintFields, type IEntry, type IPrintFields } from '@living-dictionaries/types';
 
   export let entries: IEntry[];
   export let preferredPrintFields: Readable<IPrintFields>;

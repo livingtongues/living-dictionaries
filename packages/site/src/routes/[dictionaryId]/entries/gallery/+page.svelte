@@ -1,12 +1,11 @@
 <script lang="ts">
   // import { t } from 'svelte-i18n';
   // import SeoMetaTags from '$lib/components/SeoMetaTags.svelte';
-  import { getContext } from 'svelte';
+  import { onMount, getContext } from 'svelte';
   import Hits from '$lib/components/search/Hits.svelte';
   import Pagination from '$lib/components/search/Pagination.svelte';
   import { configure } from 'instantsearch.js/es/widgets/index.js';
   import { connectToggleRefinement } from 'instantsearch.js/es/connectors';
-  import { onMount } from 'svelte';
   import { dictionary, canEdit } from '$lib/stores';
   import GalleryEntry from '../GalleryEntry.svelte';
   import { Doc } from 'sveltefirets';

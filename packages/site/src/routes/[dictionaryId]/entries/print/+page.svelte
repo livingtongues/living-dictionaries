@@ -9,11 +9,10 @@
   import PrintEntry from './PrintEntry.svelte';
   import { dictionary, isManager, canEdit } from '$lib/stores';
   import { browser } from '$app/environment';
-  import type { IPrintFields } from '@living-dictionaries/types';
+  import type { IPrintFields, ICitation } from '@living-dictionaries/types';
   import PrintFieldCheckboxes from './PrintFieldCheckboxes.svelte';
   import { Doc } from 'sveltefirets';
   import { truncateAuthors } from './truncateAuthors';
-  import type { ICitation } from '@living-dictionaries/types';
   import { convert_and_expand_entry } from '$lib/transformers/convert_and_expand_entry';
   import type { InstantSearch } from 'instantsearch.js';
   const search: InstantSearch = getContext('search');
