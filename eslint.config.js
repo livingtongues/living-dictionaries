@@ -28,8 +28,8 @@ export default defineFlatConfig([
   jsEslintPlugin.configs.recommended, // new way to do 'eslint:recommended'
   {
     rules: {
-      'indent': ['error', 2]
-    }
+      'indent': ['error', 2],
+    },
   },
   {
     files: ['**/*.ts', '**/*.js', '**/*.svelte', '**/*.svx'],
@@ -52,7 +52,7 @@ export default defineFlatConfig([
       },
     },
     linterOptions: {
-      reportUnusedDisableDirectives: true
+      reportUnusedDisableDirectives: true,
     },
     rules: {
       ...tsEslintPlugin.configs.recommended?.rules,
@@ -87,20 +87,35 @@ export default defineFlatConfig([
       'no-useless-return': 'error',
       'object-shorthand': 'error',
       'prefer-arrow-callback': 'error',
-      'prefer-destructuring': 'error',
-      
+      'prefer-object-spread': 'error',
       
       // Warnings to move to errors in time:
+      'comma-dangle': ['warn', 'only-multiline'], 
+      'require-await': 'warn',
       'curly': ['warn', 'multi-or-nest', 'consistent'],
       'no-await-in-loop': 'warn',
       'default-param-last': 'warn',
       'no-magic-numbers': ['warn', { 'ignore': [ 60 ] }],
       'prefer-named-capture-group': 'warn',
+      'prefer-destructuring': 'warn',
+      'prefer-regex-literals': 'warn',
+      'prefer-rest-params': 'warn',
+      'sort-imports': 'warn',
 
       // Suggestions to try:
       // 'no-promise-executor-return': 'error', // has issue with "sleep" function
       // 'max-lines-per-function': ['error', 20]
       // 'no-return-await': 'error',
+      // array-bracket-spacing
+      // array-bracket-newline
+      // array-element-newline
+      // arrow-parens
+      // arrow-spacing
+      // block-spacing
+      // brace-style
+      // comma-dangle
+      // comma-spacing
+      // comma-style
 
 
 
@@ -127,19 +142,19 @@ export default defineFlatConfig([
       //     'format': null,
       //   },
       // ],
-    }
+    },
   },
   {
     // https://github.com/JNSMDT/token-generator/blob/main/eslint.config.js
     files: ['**/*.svelte', '**/*.svx'],
     plugins: {
-      svelte: sveltePlugin
+      svelte: sveltePlugin,
     },
     languageOptions: {
       parser: svelteParser,
       parserOptions: {
         parser: typescriptParser,
-      }
+      },
     },
     rules: {
       ...sveltePlugin.configs.base.overrides[0].rules,
