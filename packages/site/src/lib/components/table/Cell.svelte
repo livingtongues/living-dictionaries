@@ -3,8 +3,8 @@
   import Textbox from './cells/Textbox.svelte';
   import SemanticDomains from './cells/SemanticDomains.svelte';
   import EntryPartOfSpeech from '$lib/components/entry/EntryPartOfSpeech.svelte';
+  import EntryDialect from '$lib/components/entry/EntryDialect.svelte';
   import SelectSpeakerCell from './cells/SelectSpeakerCell.svelte';
-  import DialectCell from './cells/DialectCell.svelte';
   import SelectSource from './cells/SelectSource.svelte';
   import AudioCell from './cells/AudioCell.svelte';
   import Image from '$lib/components/image/Image.svelte';
@@ -46,7 +46,7 @@
   {:else if column.field === 'ps'}
     <EntryPartOfSpeech
       {canEdit}
-      value={entry.ps}
+      value={entry.senses[0].parts_of_speech}
       on:valueupdate={(e) => saveUpdateToFirestore(e, entry.id, $dictionary.id)} />
   {:else if column.field === 'sdn'}
     <SemanticDomains
@@ -54,9 +54,9 @@
       {entry}
       on:valueupdate={(e) => saveUpdateToFirestore(e, entry.id, $dictionary.id)} />
   {:else if column.field === 'di'}
-    <DialectCell
+    <EntryDialect
       {canEdit}
-      value={entry.di?.[0]}
+      dialects={entry.dialects}
       on:valueupdate={(e) => saveUpdateToFirestore(e, entry.id, $dictionary.id)} />
   {:else if column.field === 'sr'}
     <SelectSource
