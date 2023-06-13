@@ -1,4 +1,4 @@
-import { redirect, error } from '@sveltejs/kit';
+import { error, redirect } from '@sveltejs/kit';
 
 import type { ActualDatabaseEntry } from '@living-dictionaries/types';
 import { getDocument } from 'sveltefirets';
@@ -15,9 +15,8 @@ export const load: PageLoad = async ({ params, parent }) => {
       return {
         initialEntry: convert_and_expand_entry(entry),
       };
-    } 
+    }
     throw redirect(301, `/${params.dictionaryId}`);
-    
   } catch (err) {
     throw error(500, err);
   }

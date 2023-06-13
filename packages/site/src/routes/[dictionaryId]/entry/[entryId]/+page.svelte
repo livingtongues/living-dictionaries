@@ -9,12 +9,12 @@
   import EntryDisplay from './EntryDisplay.svelte';
   import { seo_description } from './seo_description';
   import {
-    dictionary,
-    algoliaQueryParams,
-    isManager,
-    isContributor,
-    canEdit,
     admin,
+    algoliaQueryParams,
+    canEdit,
+    dictionary,
+    isContributor,
+    isManager,
     user,
   } from '$lib/stores';
   import { convert_and_expand_entry } from '$lib/transformers/convert_and_expand_entry';
@@ -34,7 +34,7 @@
 
 <div
   class="flex justify-between items-center mb-3 md:top-12 sticky top-0 z-30
-bg-white pt-1 -mt-1">
+    bg-white pt-1 -mt-1">
   <Button
     class="-ml-2 !px-2"
     color="black"
