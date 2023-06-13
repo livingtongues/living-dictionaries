@@ -46,7 +46,7 @@
   {:else if column.field === 'ps'}
     <EntryPartOfSpeech
       {canEdit}
-      value={entry.ps}
+      value={entry.senses[0].parts_of_speech}
       on:valueupdate={(e) => saveUpdateToFirestore(e, entry.id, $dictionary.id)} />
   {:else if column.field === 'sdn'}
     <SemanticDomains

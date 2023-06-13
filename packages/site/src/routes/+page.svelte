@@ -22,20 +22,18 @@
   let selectedDictionaryId: string;
   let selectedDictionary: IDictionary;
   $: dictionaries = [...publicDictionaries, ...privateDictionaries, ...$myDictionaries];
-  $: if (selectedDictionaryId) {
+  $: if (selectedDictionaryId)
     selectedDictionary = dictionaries.find((d) => d.id === selectedDictionaryId);
-  } else {
+  else
     selectedDictionary = null;
-  }
 
-  $: {
-    if (browser && $admin) {
-      getCollection<IDictionary>('dictionaries', [where('public', '!=', true)]).then(
-        (docs) => (privateDictionaries = docs)
-      );
-    } else {
-      privateDictionaries = [];
-    }
+
+  $: if (browser && $admin) {
+    getCollection<IDictionary>('dictionaries', [where('public', '!=', true)]).then(
+      (docs) => (privateDictionaries = docs)
+    );
+  } else {
+    privateDictionaries = [];
   }
 
   let mapComponent: Map;
