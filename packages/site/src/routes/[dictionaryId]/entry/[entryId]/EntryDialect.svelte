@@ -1,31 +1,57 @@
 <script lang="ts">
+  import { BadgeArrayEmit, ShowHide, ReactiveSet } from 'svelte-pieces';
   import { t } from 'svelte-i18n';
-  import { ShowHide } from 'svelte-pieces';
-  export let value: string;
+  import { createEventDispatcher } from 'svelte';
+
+  export let dialects: string[] = [];
   export let canEdit = false;
+
+  const dispatch = createEventDispatcher<{
+    valueupdate: {
+      field: 'di';
+      newValue: string[];
+    };
+  }>();
 </script>
 
-{#if value || canEdit}
-  <ShowHide let:show let:set let:toggle>
-    <div
-      class="md:px-2 rounded"
-      on:click={() => set(canEdit)}
-      class:hover:bg-gray-100={canEdit}
-      class:cursor-pointer={canEdit}
-      class:order-2={!value}>
-      <div class="text-xs text-gray-500 mt-1">{$t('entry.di', { default: 'Dialect' })}</div>
-      <div class="border-b-2 border-dashed pb-1 mb-2">
-        {#if value}
-          <div dir="ltr">
-            {value}
-          </div>
-        {:else}<span class="i-fa6-solid-pencil text-gray-500 text-sm" />{/if}
-      </div>
-    </div>
-    {#if show}
-      {#await import('$lib/components/modals/DialectModal.svelte') then { default: DialectModal }}
-        <DialectModal on:valueupdate {value} on:close={toggle} />
-      {/await}
+{#if dialects?.length || canEdit}
+  <div class="md:px-2" class:order-2={!dialects.length}>
+    <div class="rounded text-xs text-gray-500 mt-1 mb-2">{$t('entry.di')}</div>
+    {#if canEdit}
+      <ReactiveSet
+        input={dialects}
+        let:value={editedDialects}
+        let:add
+        let:remove
+        on:modified={({ detail: newValue }) => {
+          dispatch('valueupdate', {
+            field: 'di',
+            newValue,
+          });
+        }}
+      >
+        <ShowHide let:show let:toggle>
+          <BadgeArrayEmit
+            strings={editedDialects}
+            addMessage={$t('misc.add', { default: 'Add' })}
+            canEdit
+            on:itemremoved={({ detail: { index } }) => {
+              remove(editedDialects[index]);
+            }}
+            on:additem={toggle}
+          />
+          {#if show}
+            {#await import('$lib/components/modals/DialectModal.svelte') then { default: DialectModal }}
+              <DialectModal on:selected={(e) => {
+                add(e.detail);
+              }} on:close={toggle} />
+            {/await}
+          {/if}
+        </ShowHide>
+      </ReactiveSet>
+    {:else}
+      <BadgeArrayEmit strings={dialects} />
     {/if}
-  </ShowHide>
+    <div class="border-b-2 pb-1 mb-2" />
+  </div>
 {/if}

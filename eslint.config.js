@@ -97,14 +97,14 @@ export default defineFlatConfig([
       'curly': ['warn', 'multi-or-nest', 'consistent'],
       'no-await-in-loop': 'warn',
       'default-param-last': 'warn',
-      'no-magic-numbers': ['warn', { 'ignore': [ 60 ] }],
+      'no-magic-numbers': ['warn', { 'ignore': [ 0, 1, 60 ], 'ignoreArrayIndexes': true }],
       'prefer-named-capture-group': 'warn',
       'prefer-destructuring': 'warn',
       'prefer-regex-literals': 'warn',
       'prefer-rest-params': 'warn',
-      'sort-imports': 'warn',
 
       // Suggestions to try:
+      // 'sort-imports': 'warn',
       // 'no-promise-executor-return': 'error', // has issue with "sleep" function
       // 'max-lines-per-function': ['error', 20]
       // 'no-return-await': 'error',
@@ -163,21 +163,28 @@ export default defineFlatConfig([
       },
     },
     rules: {
+      // https://sveltejs.github.io/eslint-plugin-svelte/rules/
       ...sveltePlugin.configs.base.overrides[0].rules,
       ...sveltePlugin.configs.recommended?.rules,
-      'svelte/no-at-html-tags': ['warn'],
       'svelte/valid-compile': ['error', { 'ignoreWarnings': true }], // throws error on a11y issues
       'svelte/no-dom-manipulating': 'error',
       'svelte/html-quotes': 'error',
-      'svelte/no-reactive-reassign': ['warn', { 'props': false }],
       'svelte/no-store-async': 'error',
       'svelte/require-store-reactive-access': 'error',
       'svelte/mustache-spacing': 'error',
       'svelte/button-has-type': 'error',
-      'no-unused-expressions': 'off',
-      'prefer-destructuring': 'warn',
+      'svelte/html-closing-bracket-spacing': 'error',
+      'svelte/no-extra-reactive-curlies': 'error',
 
-      // https://sveltejs.github.io/eslint-plugin-svelte/rules/
+      // turn into errors later
+      'svelte/no-reactive-reassign': ['warn', { 'props': false }],
+      'svelte/require-event-dispatcher-types': 'warn',
+      'svelte/indent': 'warn',
+      'indent': 'off',
+      'prefer-destructuring': 'warn',
+      'svelte/no-at-html-tags': ['warn'], // will require figuring out how to disable in svelte
+
+      'no-unused-expressions': 'off',
     },
     // globals: {
     //   '$$Generic': 'readonly',

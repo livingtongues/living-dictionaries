@@ -1,11 +1,11 @@
 <script lang="ts">
   import { t } from 'svelte-i18n';
+  import { BadgeArray } from 'svelte-pieces';
   import type { IDictionary, IEntry } from '@living-dictionaries/types';
   import EntryField from './EntryField.svelte';
   import EntryPartOfSpeech from '$lib/components/entry/EntryPartOfSpeech.svelte';
   import EntrySemanticDomains from './EntrySemanticDomains.svelte';
   import EntryDialect from './EntryDialect.svelte';
-  import { BadgeArray } from 'svelte-pieces';
   import EntryMedia from './EntryMedia.svelte';
   import { createEventDispatcher } from 'svelte';
   import { order_entry_and_dictionary_gloss_languages } from '$lib/helpers/glosses';
@@ -83,17 +83,9 @@
         on:valueupdate />
     {/if}
 
-    {#if entry.ps?.length || canEdit}
-      <div class="md:px-2" class:order-2={!entry.ps?.length}>
-        <div class="rounded text-xs text-gray-500 mt-1 mb-2">{$t('entry.ps')}</div>
-        <EntryPartOfSpeech value={entry.ps} {canEdit} on:valueupdate />
-        <div class="border-b-2 pb-1 mb-2" />
-      </div>
-    {/if}
-
+    <EntryPartOfSpeech {canEdit} value={entry.senses[0].parts_of_speech} on:valueupdate />
     <EntrySemanticDomains {canEdit} {entry} on:valueupdate />
-
-    <EntryDialect {canEdit} value={entry.di?.[0]} on:valueupdate />
+    <EntryDialect {canEdit} dialects={entry.dialects} on:valueupdate />
 
     <EntryField
       value={entry.scn?.[0]}
