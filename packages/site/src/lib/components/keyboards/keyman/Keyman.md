@@ -8,7 +8,7 @@
   let html = '';
 </script>
 
-<!-- prettier-ignore -->
+
 # Keyman Keyboard
 
 Keyman will accept an element (documentQuerySelector usable string or element itself) and if none is given then it will attach to the first child element it finds inside its slot. The slot method is used in the first two examples, and the target method is used for the CKEditor example because it's input component is nested multiple layers deep. 
@@ -71,7 +71,7 @@ Keyman will accept an element (documentQuerySelector usable string or element it
   </div>
 </Story>
 
-<!-- prettier-ignore -->
+
 ### Useful Links
 
 - [KeymanWeb docs](https://keyman.com/developer/keymanweb/)

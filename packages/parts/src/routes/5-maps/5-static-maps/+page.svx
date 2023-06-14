@@ -3,7 +3,7 @@
   import { Story } from 'kitbook';
 </script>
 
-<!-- prettier-ignore -->
+
 # Static Maps
 
 Copy paste width/height changes to avoid thousands of needless image requests to the API
