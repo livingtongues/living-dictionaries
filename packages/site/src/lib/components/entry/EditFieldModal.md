@@ -5,7 +5,7 @@
   import EditFieldModal from './EditFieldModal.svelte';
 </script>
 
-<!-- prettier-ignore -->
+
 # Edit Field Modal
 
 <Story name="lexeme">

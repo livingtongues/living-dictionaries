@@ -23,7 +23,7 @@
   const [lng, lat] = center(features).geometry.coordinates;
 </script>
 
-<!-- prettier-ignore -->
+
 # Region
 
 <Story knobs={{color: '#38c73a'}} let:props={{color}} height={400}>
