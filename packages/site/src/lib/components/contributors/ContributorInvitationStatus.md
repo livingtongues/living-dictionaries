@@ -3,7 +3,7 @@
   import ContributorInvitationStatus from './ContributorInvitationStatus.svelte';
 </script>
 
-<!-- prettier-ignore -->
+
 # Invitations 
 
 - "Invited:" can be replaced using the `prefix` slot

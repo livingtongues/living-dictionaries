@@ -4,7 +4,7 @@
   import Marker from '$lib/maps/mapbox/map/Marker.svelte';
 </script>
 
-<!-- prettier-ignore -->
+
 # Markers
 
 Markers can be `draggable` (red marker) and update their position if changed externally as seen when editing the lng/lat knobs here (black marker).

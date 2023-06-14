@@ -8,7 +8,7 @@
   let admin = true;
 </script>
 
-<!-- prettier-ignore -->
+
 # Edit Gloss Languages
 
 There must always be at least one glossing language (or however many the

@@ -4,8 +4,8 @@
   import SetLanguage from '$lib/maps/mapbox/controls/SetLanguage.svelte';
 </script>
 
-<!-- prettier-ignore -->
-# Change Language 
+
+# Change Language
 
 *(WIP - doesn't work yet)*
 
