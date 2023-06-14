@@ -69,11 +69,12 @@ if (import.meta.vitest) {
 }
 
 function update_old_semantic_domains(semantic_domain: string): string {
-  if (semantic_domain === 'States') {
+  if (semantic_domain === 'States')
     return 'States and Characteristics';
-  } else if (semantic_domain === 'Physical Actions and States') {
+
+  if (semantic_domain === 'Physical Actions and States')
     return 'Physical Actions';
-  }
+
   return semantic_domain;
 }
 
