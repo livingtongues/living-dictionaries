@@ -9,8 +9,7 @@
   import ToggleStyle from '$lib/maps/mapbox/controls/ToggleStyle.svelte';
 </script>
 
-<!-- prettier-ignore -->
-# Mapbox 
+# Mapbox
 
 From https://github.com/beyonk-adventures/svelte-mapbox
 
