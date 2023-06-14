@@ -8,6 +8,7 @@
   import type { IDictionary, IPoint, IRegion } from '@living-dictionaries/types';
   import EditableGlossesField from '$lib/components/settings/EditableGlossesField.svelte';
   import WhereSpoken from '$lib/components/settings/WhereSpoken.svelte';
+  // import DeleteDictionary from '$lib/components/settings/DeleteDictionary.svelte';
   import EditableAlternateNames from '$lib/components/settings/EditableAlternateNames.svelte';
   import PublicCheckbox from '$lib/components/settings/PublicCheckbox.svelte'; // only used here - perhaps colocate
   import PrintAccessCheckbox from '$lib/components/settings/PrintAccessCheckbox.svelte'; // only used here - perhaps colocate
@@ -47,9 +48,9 @@
               default: 'Does the speech community allow this language to be online?',
             })}`
           )
-        ) {
+        )
           alert($t('header.contact_us', { default: 'Contact Us' }));
-        }
+
         location.reload();
       }
     } catch (err) {
@@ -204,6 +205,8 @@
         {/await}
       {/if}
     </ShowHide>
+
+    <!-- <DeleteDictionary {dictionary} /> -->
 
     {#if $admin > 1}
       <div class="mt-5">
