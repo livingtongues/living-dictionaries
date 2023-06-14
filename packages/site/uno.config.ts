@@ -5,7 +5,9 @@ export default defineConfig({
   presets: [
     presetUno(),
     presetForms(),
-    presetTypography(),
+    presetTypography({
+      selectorName: 'tw-prose',
+    }),
     presetIcons({
       prefix: 'i-',
       extraProperties: {
@@ -22,4 +24,5 @@ export default defineConfig({
   shortcuts: [
     { 'form-input': 'border-gray-300 rounded-md focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50' },
   ],
+  safelist: ['tw-prose']
 });
