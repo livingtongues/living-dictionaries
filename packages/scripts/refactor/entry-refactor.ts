@@ -1,8 +1,9 @@
- 
+
 import { IEntry } from '@living-dictionaries/types';
 import { db } from '../config';
 import { program } from 'commander';
 import { reverse_semantic_domains_mapping } from './reverse-semantic-domains-mapping';
+import { turn_dialect_strings_to_arrays } from './turn-dialects-to-arrays';
 program
   //   .version('0.0.1')
   .option('--id <value>', 'Dictionary Id')
@@ -42,9 +43,26 @@ async function fetchEntries(dictionaryId: string) {
     // await refactorGloss(dictionaryId, entry);
     // await notesToPluralForm(dictionaryId, entry);
     // turnPOSintoArray(dictionaryId, entry); // not awaiting so operations can run in parallel otherwise the function errors after about 1400 iterations
-    reverese_semantic_domains_in_db(dictionaryId, entry);
+    // reverese_semantic_domains_in_db(dictionaryId, entry);
+    turnDialectsIntoArray(dictionaryId, entry);
   }
 }
+
+const turnDialectsIntoArray = async (dictionaryId: string, entry: IEntry) => {
+  if (entry.di) {
+    console.log('entry dialect before:');
+    console.log(entry.di);
+    if (Array.isArray(entry.di))
+      return true;
+
+    entry.di =  turn_dialect_strings_to_arrays(entry.di);
+    console.log('entry dialect after:');
+    console.log(entry.di);
+    if (!live) return;
+    await db.collection(`dictionaries/${dictionaryId}/words`).doc(entry.id).set(entry);
+  }
+  return true;
+};
 
 const reverese_semantic_domains_in_db = async (dictionaryId: string, entry: IEntry) => {
   if (entry.sdn) {
