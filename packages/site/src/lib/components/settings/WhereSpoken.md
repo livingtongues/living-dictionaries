@@ -36,7 +36,7 @@
   let dictWithout: Partial<IDictionary> = {};
 </script>
 
-<!-- prettier-ignore -->
+
 # Areas Where Language Spoken
 
 <Story name="Without coordinates">

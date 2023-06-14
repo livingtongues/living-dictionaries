@@ -4,7 +4,7 @@
   import { ReactiveSet } from 'svelte-pieces';
 </script>
 
-<!-- prettier-ignore -->
+
 # Edit Alternate Names
 
 Listen to the `update` event when adding or removing alternate names.

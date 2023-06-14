@@ -5,7 +5,7 @@
   import { Button, ShowHide } from 'svelte-pieces';
 </script>
 
-<!-- prettier-ignore -->
+
 # Coordinates Modal
 
 We record points to the 4th decimal point: handheld GPS accuracy.

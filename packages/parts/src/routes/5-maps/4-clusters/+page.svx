@@ -6,7 +6,7 @@
   const clustersId = 'clusters';
 </script>
 
-<!-- prettier-ignore -->
+
 # GeoJSON Layer to Clusters
 
 From https://gitlab.com/jailbreak/svelte-mapbox-gl
