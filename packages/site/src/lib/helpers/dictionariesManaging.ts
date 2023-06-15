@@ -40,3 +40,12 @@ export async function removeDictionaryCollaborator(collaborator: IHelper, dictio
     await deleteDocument(`dictionaries/${dictionaryId}/writeInCollaborators/${collaborator.id}`);
   }
 }
+
+export async function removeDictionary(dictionaryId: string) {
+  const confirm = prompt('If you are sure about this, type the dictionary ID to confirm the complete deletion');
+  if (confirm === dictionaryId) {
+    await deleteDocument(`dictionaries/${dictionaryId}`);
+  } else if (confirm?.length > 0) {
+    alert('Sorry the dictionary ID does not match what you typed');
+  } 
+}
