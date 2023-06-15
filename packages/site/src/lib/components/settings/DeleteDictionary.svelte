@@ -11,7 +11,7 @@
     if (!dictionary?.entryCount || dictionary?.entryCount < 1) {
       const words_collection = await getCollection(`dictionaries/${dictionary.id}/words`);
       if (words_collection.length === 0) {
-        removeDictionary(dictionary.id);
+        await removeDictionary(dictionary.id);
       } else {
         alert('You must delete every entry in the dictionary first');
       }

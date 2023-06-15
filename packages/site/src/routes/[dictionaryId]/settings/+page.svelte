@@ -1,6 +1,6 @@
 <script lang="ts">
   import { t } from 'svelte-i18n';
-  import { admin, dictionary as dictionaryStore } from '$lib/stores';
+  import { admin, isManager, dictionary as dictionaryStore } from '$lib/stores';
   import { update, updateOnline, getCollection, Doc } from 'sveltefirets';
   import { Button, ShowHide, JSON } from 'svelte-pieces';
   import EditString from '../EditString.svelte';
@@ -191,7 +191,6 @@
     <PublicCheckbox
       checked={dictionary.public}
       on:changed={({ detail: { checked } }) => togglePublic(checked)} />
-    <div class="mb-5" />
 
     <ShowHide let:show let:toggle>
       <Button onclick={toggle} class="mb-5">
@@ -206,13 +205,16 @@
       {/if}
     </ShowHide>
 
-    <DeleteDictionary {dictionary} />
+    {#if $isManager}
+      <DeleteDictionary {dictionary} />
+    {/if}
 
     {#if $admin > 1}
       <div class="mt-5">
         <JSON obj={dictionary} />
       </div>
     {/if}
+    <div class="mb-5" />
   </div>
 </Doc>
 
