@@ -177,7 +177,8 @@
     <div style="width: 300px;" />
     {dictionary.conLangDescription ? dictionary.conLangDescription : ''}</td>
   <td>
-    <div style="width: 200px;"><DeleteDictionary {dictionary} /></div></td>
+    <div style="width: 200px;">
+      <DeleteDictionary {dictionary} /></div></td>
   {#if $admin > 1}
     <td class="cursor-pointer" title={JSON.stringify(dictionary, null, 1)}
     ><span class="i-material-symbols-info-outline" /></td>
