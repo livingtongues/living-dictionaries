@@ -1,6 +1,5 @@
 import { deleteDocument, deleteDocumentOnline, setOnline } from 'sveltefirets';
 import type { IHelper } from '@living-dictionaries/types';
-import { goto } from '$app/navigation';
 
 export async function addDictionaryManager(manager: IHelper, dictionaryId: string) {
   await setOnline<IHelper>(`dictionaries/${dictionaryId}/managers/${manager.id}`, {
@@ -45,8 +44,8 @@ export async function removeDictionaryCollaborator(collaborator: IHelper, dictio
 export async function removeDictionary(dictionaryId: string) {
   const confirm = prompt('If you are sure about this, type the dictionary ID to confirm the complete deletion');
   if (confirm === dictionaryId) {
+    window.location.href = '/';
     await deleteDocumentOnline(`dictionaries/${dictionaryId}`);
-    goto('/');
   } else if (confirm?.length > 0) {
     alert('Sorry the dictionary ID does not match what you typed');
   }
