@@ -44,7 +44,7 @@ export async function removeDictionaryCollaborator(collaborator: IHelper, dictio
 export async function removeDictionary(dictionaryId: string) {
   const confirm = prompt('If you are sure about this, type the dictionary ID to confirm the complete deletion');
   if (confirm === dictionaryId) {
-    window.location.href = '/';
+    if (window.location.pathname !== '/admin/dictionaries') window.location.href = '/';
     await deleteDocumentOnline(`dictionaries/${dictionaryId}`);
   } else if (confirm?.length > 0) {
     alert('Sorry the dictionary ID does not match what you typed');
