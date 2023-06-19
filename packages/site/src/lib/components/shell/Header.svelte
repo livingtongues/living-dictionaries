@@ -53,6 +53,13 @@
           default: 'Tutorials',
         })}</span>
     </Button>
+    <Button href="/batch-import" form="text" class="!hidden !md:inline">
+      <span class="far fa-file-import -mt-2px" />
+      <span class="ml-1 hidden lg:inline"
+        >{$t('header.batch-import', {
+          default: 'Batch Import',
+        })}</span>
+    </Button>
     <Button
       form="text"
       href="https://docs.google.com/document/d/1MZGkBbnCiAch3tWjBOHRYPpjX1MVd7f6x5uVuwbxM-Q/edit?usp=sharing"
