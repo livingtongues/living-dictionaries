@@ -4,6 +4,7 @@ export type { IDialect } from './dialect.interface';
 export type {
   IAbout,
   IDictionary,
+  FeaturedImage,
   IGrammar,
   IPoint,
   IRegion,
