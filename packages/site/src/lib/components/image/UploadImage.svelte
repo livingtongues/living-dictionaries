@@ -1,6 +1,6 @@
 <script lang="ts">
   import { t } from 'svelte-i18n';
-  import type { IEntry, GoalDatabasePhoto } from '@living-dictionaries/types';
+  import type { IEntry, GoalDatabasePhoto, FeaturedImage } from '@living-dictionaries/types';
   import { dictionary, user } from '$lib/stores';
   import { tweened } from 'svelte/motion';
   import { cubicOut } from 'svelte/easing';
@@ -10,7 +10,8 @@
     import type { ImageUrlRequestBody } from '../../../routes/api/image_url/+server';
     import { get } from 'svelte/store';
 
-  export let file: File, entry: IEntry;
+  export let file: File;
+  export let entry: IEntry = undefined;
   let progress = tweened(0, {
     duration: 2000,
     easing: cubicOut,
@@ -21,20 +22,18 @@
   let success: boolean;
   let previewURL: string;
 
-  if (file && entry) {
+  if (file) {
     previewURL = URL.createObjectURL(file);
-    startUpload();
+    const fileTypeSuffix = file.name.match(/\.[0-9a-z]+$/i)[0];
+    startUpload( entry ? `${$dictionary.id}/images/${
+      entry.id
+    }_${new Date().getTime()}${fileTypeSuffix}` : `${$dictionary.id}/images/_${new Date().getTime()}${fileTypeSuffix}`);
   }
 
-  async function startUpload() {
+  async function startUpload(storagePath: string) {
     // Replace spaces w/ underscores in dict name, remove special characters from lexeme so image converter can accept filename
     // const _dictName = dictionary.name.replace(/\s+/g, '_');
     // const _lexeme = this.entry.lx.replace(/[^a-z0-9+]+/gi, '_');
-    const fileTypeSuffix = file.name.match(/\.[0-9a-z]+$/i)[0];
-
-    const storagePath = `${$dictionary.id}/images/${
-      entry.id
-    }_${new Date().getTime()}${fileTypeSuffix}`;
 
     const customMetadata = {
       uploadedBy: $user.displayName,
@@ -104,18 +103,29 @@
       }
       const gcsPath = await response.json() as string
 
-      const pf: GoalDatabasePhoto = {
+      let pf: GoalDatabasePhoto = {
         path: storagePath,
         gcs: gcsPath,
         ts: new Date().getTime(),
-        cr: $user.displayName,
         ab: $user.uid,
       };
-      await updateOnline<IEntry>(
-        `dictionaries/${$dictionary.id}/words/${entry.id}`,
-        { pf },
-        { abbreviate: true }
-      );
+
+      const featuredImage: FeaturedImage = {...pf} 
+
+      if (entry) {
+        pf = {...pf, cr: $user.displayName, }
+        await updateOnline<IEntry>(
+          `dictionaries/${$dictionary.id}/words/${entry.id}`,
+          { pf },
+          { abbreviate: true }
+        );
+      } else {
+        await updateOnline(
+          `dictionaries/${$dictionary.id}`,
+          { featuredImage },
+          { abbreviate: true }
+        );
+      }
       success = true;
     } catch (err) {
       error = err;

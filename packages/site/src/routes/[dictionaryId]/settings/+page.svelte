@@ -13,6 +13,7 @@
   import PrintAccessCheckbox from '$lib/components/settings/PrintAccessCheckbox.svelte'; // only used here - perhaps colocate
   import { glossingLanguages } from '$lib/glosses/glossing-languages';
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte';
+  import AddImage from '../AddImage.svelte';
 
   async function togglePrintAccess(settingPrintAccess: boolean) {
     try {
@@ -47,9 +48,9 @@
               default: 'Does the speech community allow this language to be online?',
             })}`
           )
-        ) {
+        )
           alert($t('header.contact_us', { default: 'Contact Us' }));
-        }
+
         location.reload();
       }
     } catch (err) {
@@ -181,6 +182,23 @@
         })}
       display={$t('dictionary.location', { default: 'Location' })} />
     <div class="mb-5" />
+
+    {#if $dictionaryStore?.featuredImage?.gcsPath}
+      <div class="media-block bg-gray-300 relative">
+        <!-- <Image
+          square={128}
+          lexeme={entry.lx}
+          gcs={entry.pf.gcs}
+          {canEdit}
+          on:deleteImage /> -->
+      </div>
+    {:else}
+      <AddImage class="w-12 bg-gray-100">
+        <div class="text-xs" slot="text">
+          {$t('entry.photo', { default: 'Photo' })}
+        </div>
+      </AddImage>
+    {/if}
 
     <PrintAccessCheckbox
       checked={dictionary.printAccess}
