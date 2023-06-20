@@ -185,12 +185,7 @@
 
     {#if $dictionaryStore?.featuredImage?.gcsPath}
       <div class="media-block bg-gray-300 relative">
-        <!-- <Image
-          square={128}
-          lexeme={entry.lx}
-          gcs={entry.pf.gcs}
-          {canEdit}
-          on:deleteImage /> -->
+        <img class="object-contain max-h-full" alt="Featured image of {$dictionaryStore.name}" src="https://lh3.googleusercontent.com/{$dictionaryStore.featuredImage.gcsPath}=w36" />
       </div>
     {:else}
       <AddImage class="w-12 bg-gray-100">

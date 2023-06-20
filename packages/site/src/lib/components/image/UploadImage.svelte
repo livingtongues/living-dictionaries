@@ -27,7 +27,7 @@
     const fileTypeSuffix = file.name.match(/\.[0-9a-z]+$/i)[0];
     startUpload( entry ? `${$dictionary.id}/images/${
       entry.id
-    }_${new Date().getTime()}${fileTypeSuffix}` : `${$dictionary.id}/images/_${new Date().getTime()}${fileTypeSuffix}`);
+    }_${new Date().getTime()}${fileTypeSuffix}` : `${$dictionary.id}/images/featured_image_${new Date().getTime()}${fileTypeSuffix}`);
   }
 
   async function startUpload(storagePath: string) {
@@ -103,23 +103,26 @@
       }
       const gcsPath = await response.json() as string
 
-      let pf: GoalDatabasePhoto = {
-        path: storagePath,
-        gcs: gcsPath,
-        ts: new Date().getTime(),
-        ab: $user.uid,
-      };
-
-      const featuredImage: FeaturedImage = {...pf} 
-
       if (entry) {
-        pf = {...pf, cr: $user.displayName, }
+        const pf: GoalDatabasePhoto = {
+          path: storagePath,
+          gcs: gcsPath,
+          ts: new Date().getTime(),
+          cr: $user.displayName,
+          ab: $user.uid,
+        };
         await updateOnline<IEntry>(
           `dictionaries/${$dictionary.id}/words/${entry.id}`,
           { pf },
           { abbreviate: true }
-        );
+          );
       } else {
+        const featuredImage: FeaturedImage = {
+          path: storagePath,
+          gcsPath,
+          timestamp: new Date().getTime(),
+          addedBy: $user.uid,
+        } 
         await updateOnline(
           `dictionaries/${$dictionary.id}`,
           { featuredImage },
