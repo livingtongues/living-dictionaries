@@ -13,7 +13,7 @@
   import PrintAccessCheckbox from '$lib/components/settings/PrintAccessCheckbox.svelte'; // only used here - perhaps colocate
   import { glossingLanguages } from '$lib/glosses/glossing-languages';
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte';
-  import AddImage from '../AddImage.svelte';
+  import UploadFeaturedImage from '$lib/components/settings/UploadFeaturedImage.svelte';
 
   async function togglePrintAccess(settingPrintAccess: boolean) {
     try {
@@ -183,24 +183,7 @@
       display={$t('dictionary.location', { default: 'Location' })} />
     <div class="mb-5" />
 
-    <!-- TODO make a component of this and add a delete button -->
-    {#if $dictionaryStore?.featuredImage?.gcsPath}
-      <div class="text-sm font-medium text-gray-700 mb-2">
-        {$t('', { default: 'Featured Image' })}
-      </div>
-      <div class="bg-gray-300 w-14 h-14">
-        <img class="object-cover w-full h-full" alt="Featured image of {$dictionaryStore.name}" src="https://lh3.googleusercontent.com/{$dictionaryStore.featuredImage.gcsPath}=w36" />
-      </div>
-    {:else}
-      <div class="text-sm font-medium text-gray-700 mb-2">
-        {$t('', { default: 'Upload a featured image' })}
-      </div>
-      <AddImage class="bg-gray-100">
-        <div class="text-xs" slot="text">
-          {$t('entry.photo', { default: 'Photo' })}
-        </div>
-      </AddImage>
-    {/if}
+    <UploadFeaturedImage gcsPath={$dictionaryStore?.featuredImage?.gcsPath} dictionayName={$dictionaryStore.name} />
     <div class="mb-5" />
 
     <PrintAccessCheckbox

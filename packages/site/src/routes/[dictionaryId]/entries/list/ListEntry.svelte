@@ -3,7 +3,7 @@
   import Audio from '../Audio.svelte';
   import Video from '../Video.svelte';
   import Image from '$lib/components/image/Image.svelte';
-  import AddImage from '../../AddImage.svelte';
+  import AddImage from '$lib/components/image/AddImage.svelte';
   import type { IDictionary, IEntry } from '@living-dictionaries/types';
   import { order_glosses, order_entry_and_dictionary_gloss_languages } from '$lib/helpers/glosses';
   import { minutesAgo } from '$lib/helpers/time';
