@@ -69,8 +69,8 @@
           {glosses}
         {/if}
 
-        {#if entry.scn?.length}
-          {@const scientific_names = entry.scn.join(', ')}
+        {#if entry?.scn?.length}
+          {@const scientific_names = entry?.scn?.join(', ')}
           {#if scientific_names.includes('<i>')}
             {@html sanitize(scientific_names)}
           {:else}
