@@ -14,6 +14,7 @@
   import { glossingLanguages } from '$lib/glosses/glossing-languages';
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte';
   import UploadFeaturedImage from '$lib/components/settings/UploadFeaturedImage.svelte';
+  import { deleteDictionayImage } from '$lib/helpers/delete';
 
   async function togglePrintAccess(settingPrintAccess: boolean) {
     try {
@@ -183,7 +184,10 @@
       display={$t('dictionary.location', { default: 'Location' })} />
     <div class="mb-5" />
 
-    <UploadFeaturedImage gcsPath={$dictionaryStore?.featuredImage?.gcsPath} dictionayName={$dictionaryStore.name} />
+    <UploadFeaturedImage
+      gcsPath={$dictionaryStore?.featuredImage?.gcsPath}
+      dictionayName={$dictionaryStore.name}
+      on:deleteDictionaryImage={deleteDictionayImage} />
     <div class="mb-5" />
 
     <PrintAccessCheckbox
