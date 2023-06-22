@@ -21,6 +21,21 @@ export async function deleteImage(entry: IEntry) {
   }
 }
 
+//Don't know why is not working
+export async function deleteDictionayImage() {
+  const $t = get(t);
+  try {
+    const $dictionary = get(dictionary);
+    await updateOnline(
+      `dictionaries/${$dictionary.id}}`,
+      { featuredImage: null },
+      { abbreviate: true }
+    );
+  } catch (err) {
+    alert(`${$t('misc.error', { default: 'Error' })}: ${err}`);
+  }
+}
+
 export async function deleteAudio(entry: IEntry) {
   const $t = get(t);
   try {
