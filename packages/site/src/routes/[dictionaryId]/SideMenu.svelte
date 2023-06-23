@@ -54,7 +54,7 @@
   </a>
   <a
     href={'/' + $dictionary.id + '/batch-import'}
-    class:active={$page.url.pathname.includes('grammar')}>
+    class:active={$page.url.pathname.includes('batch-import')}>
     <i class="far fa-file-import" />
     <span class="font-medium mx-2">
       {$_('header.batch-import', {
