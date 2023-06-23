@@ -24,7 +24,7 @@
     <span class="flex-grow" />
     <span
       class="inline-block py-1 px-2 leading-none text-xs font-semibold
-      text-gray-700 bg-gray-300 rounded-full">
+        text-gray-700 bg-gray-300 rounded-full">
       {new Intl.NumberFormat().format($dictionary.entryCount || 0)}
     </span>
   </a>
@@ -50,6 +50,16 @@
     <i class="far fa-edit fa-fw" />
     <span class="font-medium mx-2">
       {$_('dictionary.grammar', { default: 'Grammar' })}
+    </span>
+  </a>
+  <a
+    href={'/' + $dictionary.id + '/batch-import'}
+    class:active={$page.url.pathname.includes('grammar')}>
+    <i class="far fa-file-import" />
+    <span class="font-medium mx-2">
+      {$_('header.batch-import', {
+        default: 'Batch Import',
+      })}
     </span>
   </a>
   {#if $isManager}
