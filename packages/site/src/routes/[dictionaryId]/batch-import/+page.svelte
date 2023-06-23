@@ -1,6 +1,7 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
   import { Button, ShowHide } from 'svelte-pieces';
+  import { dictionary } from '$lib/stores';
   import Header from '$lib/components/shell/Header.svelte';
 </script>
 
@@ -15,7 +16,7 @@
         sm:text-4xl sm:leading-10">
       {$_('header.batch-import', {
         default: 'Batch Import',
-      })}
+      })}: {$dictionary.name}
     </h3>
 
     <p class="mb-3">
