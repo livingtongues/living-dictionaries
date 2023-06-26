@@ -8,7 +8,6 @@
   import type { IDictionary, IPoint, IRegion } from '@living-dictionaries/types';
   import EditableGlossesField from '$lib/components/settings/EditableGlossesField.svelte';
   import WhereSpoken from '$lib/components/settings/WhereSpoken.svelte';
-  import DeleteDictionary from '$lib/components/settings/DeleteDictionary.svelte';
   import EditableAlternateNames from '$lib/components/settings/EditableAlternateNames.svelte';
   import PublicCheckbox from '$lib/components/settings/PublicCheckbox.svelte'; // only used here - perhaps colocate
   import PrintAccessCheckbox from '$lib/components/settings/PrintAccessCheckbox.svelte'; // only used here - perhaps colocate
@@ -206,7 +205,19 @@
     </ShowHide>
 
     {#if $isManager}
-      <DeleteDictionary {dictionary} />
+      <div>
+        <ShowHide let:show let:toggle>
+          <Button onclick={toggle} class="mb-5" color="red">
+            {$t('misc.delete', { default: 'Delete' })} {dictionary.name} {$t('misc.LD_singular', { default: 'Living Dictionary' })}:
+            {$t('header.contact_us', { default: 'Contact Us' })}
+          </Button>
+          {#if show}
+            {#await import('$lib/components/modals/Contact.svelte') then { default: Contact }}
+              <Contact on:close={toggle} />
+            {/await}
+          {/if}
+        </ShowHide>
+      </div>
     {/if}
 
     {#if $admin > 1}
