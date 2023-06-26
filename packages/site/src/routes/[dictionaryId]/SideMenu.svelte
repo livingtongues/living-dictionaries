@@ -52,17 +52,17 @@
       {$_('dictionary.grammar', { default: 'Grammar' })}
     </span>
   </a>
-  <a
-    href={'/' + $dictionary.id + '/batch-import'}
-    class:active={$page.url.pathname.includes('batch-import')}>
-    <i class="far fa-file-import" />
-    <span class="font-medium mx-2">
-      {$_('header.batch-import', {
-        default: 'Batch Import',
-      })}
-    </span>
-  </a>
   {#if $isManager}
+    <a
+      href={'/' + $dictionary.id + '/import'}
+      class:active={$page.url.pathname.includes('import')}>
+      <i class="far fa-file-import" />
+      <span class="font-medium mx-2">
+        {$_('header.import', {
+          default: 'Import',
+        })}
+      </span>
+    </a>
     <a
       href={'/' + $dictionary.id + '/settings'}
       class:active={$page.url.pathname.includes('settings')}>
@@ -71,8 +71,6 @@
         {$_('misc.settings', { default: 'Settings' })}
       </span>
     </a>
-  {/if}
-  {#if $isManager}
     <a
       href={'/' + $dictionary.id + '/export'}
       class:active={$page.url.pathname.includes('export')}>
