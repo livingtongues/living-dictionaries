@@ -12,7 +12,7 @@
     if (!dictionary?.entryCount || dictionary?.entryCount < 1) {
       const words_collection = await getCollection(`dictionaries/${dictionary.id}/words`);
       if (words_collection.length === 0) {
-        await removeDictionary(dictionary.id);
+        await removeDictionary(dictionary);
       } else {
         alert(warning_message);
       }
