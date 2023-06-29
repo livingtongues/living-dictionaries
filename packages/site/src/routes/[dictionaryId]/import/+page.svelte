@@ -6,7 +6,7 @@
 </script>
 
 <Header>
-  {$_('batch-import.header', { default: 'Import to a Living Dictionary' })}
+  {$_('import.header', { default: 'Import to a Living Dictionary' })}
 </Header>
 
 <div class="max-w-screen-md ml-4">
@@ -14,8 +14,8 @@
     <h3
       class="mb-6 text-3xl leading-8 font-bold tracking-tight text-gray-900
         sm:text-4xl sm:leading-10">
-      {$_('header.batch-import', {
-        default: 'Batch Import',
+      {$_('header.import', {
+        default: 'Import',
       })}: {$dictionary.name}
     </h3>
 
