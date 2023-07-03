@@ -1,6 +1,6 @@
 <script lang="ts">
   import { t } from 'svelte-i18n';
-  import { Button, Modal, Form } from 'svelte-pieces';
+  import { Button, Modal, Form, DataList } from 'svelte-pieces';
   import { user } from '$lib/stores';
   import { goto } from '$app/navigation';
   import { createEventDispatcher } from 'svelte';
@@ -15,6 +15,8 @@
 
   let message = '';
   let email = '';
+  let subject = '';
+  const subjects = ['Delete dictionary', 'Information about batch import', 'Optional data fields', 'Other']
 
   let status: 'success' | 'fail';
 
@@ -25,6 +27,7 @@
         email: $user?.email || email,
         name: $user?.displayName || 'Anonymous',
         url: window.location.href,
+        subject
       });
 
       if (response.status !== 200) {
@@ -76,6 +79,22 @@
 
   {#if !status}
     <Form let:loading onsubmit={send}>
+      <div class="my-2">
+        <label for="subject">Choose a subject:</label>
+        <input 
+          bind:value={subject}
+          list="subjects"
+          id="subject"
+          name="subject"
+          class="form-input w-full leading-none"
+          pattern={subjects.join('|')}
+        >
+        <datalist id="subjects">
+          {#each subjects as subject}
+            <option data-value={subject}>{subject}</option>        
+          {/each}
+        </datalist>
+      </div>
       <label class="block text-gray-700 text-sm font-bold mb-2" for="message">
         {$t('contact.what_is_your_question', {
           default: 'What is your question or comment?',
