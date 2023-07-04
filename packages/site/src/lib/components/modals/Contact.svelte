@@ -8,6 +8,8 @@
   import type { SupportRequestBody } from '../../../routes/api/email/support/+server';
   import { subjects } from './subjects';
 
+  export let componentSubject: string = undefined;
+
   const dispatch = createEventDispatcher<{ close: boolean }>();
 
   function close() {
@@ -27,7 +29,7 @@
         email: $user?.email || email,
         name: $user?.displayName || 'Anonymous',
         url: window.location.href,
-        subject
+        subject: componentSubject || subject
       });
 
       if (response.status !== 200) {
@@ -79,24 +81,26 @@
 
   {#if !status}
     <Form let:loading onsubmit={send}>
-      <div class="my-2">
-        <label for="subject">Choose a subject:</label>
-        <input 
-          bind:value={subject}
-          list="subjects"
-          id="subject"
-          name="subject"
-          class="form-input w-full leading-none"
-          pattern={subjects.map(sbj => sbj.title).join('|')}
-        >
-        <datalist id="subjects">
-          {#each subjects as sbj}
-          <option data-value={subject}
-            >{$t("ps." + sbj.keyName, { default: sbj.title })}</option
+      {#if !componentSubject}  
+        <div class="my-2">
+          <label for="subject">Choose a subject:</label>
+          <input 
+            bind:value={subject}
+            list="subjects"
+            id="subject"
+            name="subject"
+            class="form-input w-full leading-none"
+            pattern={subjects.map(sbj => sbj.title).join('|')}
           >
-          {/each}
-        </datalist>
-      </div>
+          <datalist id="subjects">
+            {#each subjects as sbj}
+            <option data-value={subject}
+              >{$t("ps." + sbj.keyName, { default: sbj.title })}</option
+            >
+            {/each}
+          </datalist>
+        </div>
+      {/if}
       <label class="block text-gray-700 text-sm font-bold mb-2" for="message">
         {$t('contact.what_is_your_question', {
           default: 'What is your question or comment?',

@@ -13,6 +13,10 @@ export const subjects = [
     title: 'Optional data fields'
   },
   {
+    keyName: 'request-access',
+    title: 'Request access'
+  },
+  {
     keyName: 'other',
     title: 'Other'
   },
