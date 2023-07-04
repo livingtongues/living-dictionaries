@@ -1,11 +1,12 @@
 <script lang="ts">
   import { t } from 'svelte-i18n';
-  import { Button, Modal, Form, DataList } from 'svelte-pieces';
+  import { Button, Modal, Form } from 'svelte-pieces';
   import { user } from '$lib/stores';
   import { goto } from '$app/navigation';
   import { createEventDispatcher } from 'svelte';
   import { apiFetch } from '$lib/client/apiFetch';
   import type { SupportRequestBody } from '../../../routes/api/email/support/+server';
+  import { subjects } from './subjects';
 
   const dispatch = createEventDispatcher<{ close: boolean }>();
 
@@ -16,8 +17,7 @@
   let message = '';
   let email = '';
   let subject = '';
-  const subjects = ['Delete dictionary', 'Information about batch import', 'Optional data fields', 'Other']
-
+  
   let status: 'success' | 'fail';
 
   async function send() {
@@ -87,11 +87,13 @@
           id="subject"
           name="subject"
           class="form-input w-full leading-none"
-          pattern={subjects.join('|')}
+          pattern={subjects.map(sbj => sbj.title).join('|')}
         >
         <datalist id="subjects">
-          {#each subjects as subject}
-            <option data-value={subject}>{subject}</option>        
+          {#each subjects as sbj}
+          <option data-value={subject}
+            >{$t("ps." + sbj.keyName, { default: sbj.title })}</option
+          >
           {/each}
         </datalist>
       </div>
