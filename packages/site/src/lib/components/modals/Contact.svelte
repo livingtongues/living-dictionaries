@@ -6,7 +6,7 @@
   import { createEventDispatcher } from 'svelte';
   import { apiFetch } from '$lib/client/apiFetch';
   import type { SupportRequestBody } from '../../../routes/api/email/support/+server';
-  import { subjects } from './subjects';
+  import { subjects } from '$lib/mappings/email-subjects';
 
   export let componentSubject: string = undefined;
 

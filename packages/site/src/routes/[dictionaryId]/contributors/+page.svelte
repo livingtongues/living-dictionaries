@@ -10,7 +10,7 @@
   import ContributorInvitationStatus from '$lib/components/contributors/ContributorInvitationStatus.svelte';
   import Citation from './Citation.svelte';
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte';
-  import { subjects } from '$lib/components/modals/subjects';
+  import { findSubject } from '$lib/helpers/contact/findSubject';
 
   let helperType: IHelper[];
   let inviteType: IInvite[];
@@ -149,8 +149,7 @@
       </Button>
       {#if show}
         {#await import('$lib/components/modals/Contact.svelte') then { default: Contact }}
-          <!-- TODO extract find function into another folder -->
-          <Contact componentSubject={subjects.find(sbj => sbj.keyName === 'request-access').title} on:close={toggle} />
+          <Contact componentSubject={findSubject('request-access')} on:close={toggle} />
         {/await}
       {/if}
     </ShowHide>
