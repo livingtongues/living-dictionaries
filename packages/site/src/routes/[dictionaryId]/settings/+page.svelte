@@ -13,6 +13,7 @@
   import PrintAccessCheckbox from '$lib/components/settings/PrintAccessCheckbox.svelte'; // only used here - perhaps colocate
   import { glossingLanguages } from '$lib/glosses/glossing-languages';
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte';
+  import { findSubject } from '$lib/helpers/contact/findSubject';
 
   async function togglePrintAccess(settingPrintAccess: boolean) {
     try {
@@ -199,7 +200,7 @@
 
       {#if show}
         {#await import('$lib/components/modals/Contact.svelte') then { default: Contact }}
-          <Contact on:close={toggle} />
+          <Contact componentSubject={findSubject('data-fields')} on:close={toggle} />
         {/await}
       {/if}
     </ShowHide>
@@ -213,7 +214,7 @@
           </Button>
           {#if show}
             {#await import('$lib/components/modals/Contact.svelte') then { default: Contact }}
-              <Contact on:close={toggle} />
+              <Contact componentSubject={findSubject('delete-dictionary')} on:close={toggle} />
             {/await}
           {/if}
         </ShowHide>
