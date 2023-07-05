@@ -1,12 +1,15 @@
-//This probably should disappear, instead create a new file that automatically updates when running updateLocales 
-export const subjects = [
+ export const subjects = [
   {
     keyName: 'delete-dictionary',
-    title: 'Delete dicionary'
+    title: 'Delete a dictionary'
   },
   {
-    keyName: 'batch-import',
-    title: 'Information about batch import'
+    keyName: 'public-dictionary',
+    title: 'Make a dictionary public'
+  },
+  {
+    keyName: 'import-data',
+    title: 'Import data'
   },
   {
     keyName: 'data-fields',
@@ -14,7 +17,11 @@ export const subjects = [
   },
   {
     keyName: 'request-access',
-    title: 'Request access'
+    title: 'Request editing access'
+  },
+  {
+    keyName: 'report-problem',
+    title: 'Report a problem'
   },
   {
     keyName: 'other',
