@@ -83,22 +83,14 @@
     <Form let:loading onsubmit={send}>
       {#if !componentSubject}  
         <div class="my-2">
-          <label for="subject">Choose a subject:</label>
-          <input 
-            bind:value={subject}
-            list="subjects"
-            id="subject"
-            name="subject"
-            class="form-input w-full leading-none"
-            pattern={subjects.map(sbj => sbj.title).join('|')}
-          >
-          <datalist id="subjects">
+          <select class="w-full" bind:value={subject}>
+            <option disabled selected value="">Select a topic</option>
             {#each subjects as sbj}
             <option data-value={subject}
               >{$t("ps." + sbj.keyName, { default: sbj.title })}</option
             >
             {/each}
-          </datalist>
+          </select>
         </div>
       {/if}
       <label class="block text-gray-700 text-sm font-bold mb-2" for="message">
