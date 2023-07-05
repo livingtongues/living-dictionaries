@@ -84,7 +84,8 @@
       {#if !componentSubject}  
         <div class="my-2">
           <select class="w-full" bind:value={subject}>
-            <option disabled selected value="">Select a topic</option>
+            <!-- TODO i18n translations -->
+            <option disabled selected value="">Select a topic:</option>
             {#each subjects as sbj}
             <option data-value={subject}
               >{$t("ps." + sbj.keyName, { default: sbj.title })}</option
@@ -98,6 +99,7 @@
           default: 'What is your question or comment?',
         })}
       </label>
+      <!-- TODO change contact.enter_message in i18n translations -->
       <textarea
         name="message"
         required
@@ -106,7 +108,7 @@
         bind:value={message}
         class="form-input bg-white w-full"
         placeholder={$t('contact.enter_message', {
-          default: 'Enter your message',
+          default: 'Please write your message in English, French or Spanish',
         }) + '...'} />
       <div class="flex text-xs">
         <div class="text-gray-500 ml-auto">{message.length}/1000</div>
