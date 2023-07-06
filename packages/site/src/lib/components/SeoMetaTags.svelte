@@ -52,7 +52,7 @@
 <svelte:head>
   <title>{textTitle}</title>
 
-  <meta name="description" content={description} />
+  <meta name="description" content="" />
   <meta name="keywords" content={keywords} />
 
   {#if norobots}
