@@ -61,7 +61,7 @@
 
   <!-- https://ogp.me -->
   <meta property="og:title" content={textTitle} />
-  <meta property="og:description" content={description} />
+  <meta property="og:description" content="" />
   <meta property="og:site_name" content="Living Dictionaries" />
   <meta property="og:type" content={type} />
   <meta property="og:url" content={url} />
