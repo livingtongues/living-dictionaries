@@ -30,7 +30,6 @@
   export let width = 1200;
   export let height = 600;
   export let gcsPath: string = undefined;
-  export let featuredImage: string = undefined;
   export let lng: number = undefined;
   export let lat: number = undefined;
   $: props = encode(
@@ -84,12 +83,6 @@
   <meta name="twitter:url" content={url} />
   <meta name="twitter:site" content="@{handle}" />
   <meta name="twitter:creator" content="@{handle}" />
-
-  {#if featuredImage}
-    <meta property="og:image" content="{featuredImage}" />
-    <meta property="og:image:width" content="1200" />
-    <meta property="og:image:height" content="630" /> 
-  {/if}
 </svelte:head>
 
 <!-- 
