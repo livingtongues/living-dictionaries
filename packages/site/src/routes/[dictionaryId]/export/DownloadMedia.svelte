@@ -8,6 +8,7 @@
   import type { EntryForCSV } from './prepareEntriesForCsv';
 
   export let dictionary: IDictionary;
+  export let entryHeaders: EntryForCSV;
   export let finalizedEntries: EntryForCSV[];
   export let entriesWithImages: EntryForCSV[] = [];
   export let entriesWithAudio: EntryForCSV[] = [];
@@ -40,6 +41,7 @@
       }
       fetched++;
     }
+
     for (const entry of entriesWithAudio) {
       if (destroyed) return;
       try {
@@ -59,8 +61,7 @@
       fetched++;
     }
 
-    const [headers, ...entries] = finalizedEntries;
-    const csv = objectsToCsvByHeaders(headers, entries);
+    const csv = objectsToCsvByHeaders(entryHeaders, finalizedEntries);
     const csvBlob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
 
     zip.file(`${dictionary.id}.csv`, csvBlob);
@@ -68,9 +69,9 @@
     const blob = await zip.generateAsync({ type: 'blob' });
     if (destroyed) return;
     downloadBlob(blob, dictionary.id, '.zip');
-    if (!errors.length) {
+    if (!errors.length)
       dispatch('completed');
-    }
+
   });
 
   onDestroy(() => {

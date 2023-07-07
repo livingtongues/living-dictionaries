@@ -56,7 +56,7 @@ describe('prepareEntriesForCsv', () => {
         senses: [{ glosses: { es: 'árbol' } }],
       },
     ];
-    const [headerRow, firstEntry, secondEntry] = prepareEntriesForCsv(
+    const {headers, formattedEntries} = prepareEntriesForCsv(
       entries,
       dictionary,
       speakers,
@@ -77,12 +77,10 @@ describe('prepareEntriesForCsv', () => {
       semantic_domain_1: 'Semantic domain 1',
       semantic_domain_2: 'Semantic domain 2',
     };
-    expect(headerRow).toMatchObject(expectedHeaders_PlusDynamic_ArEnEs_TwoLocalOrthographies);
 
-    expect(firstEntry).toMatchSnapshot();
-    expect(secondEntry).toMatchSnapshot();
-
-    expect(objectsToCsvByHeaders(headerRow, [firstEntry, secondEntry])).toMatchFileSnapshot('./test-output/prepareEntriesForCsv.csv');
+    expect(headers).toMatchObject(expectedHeaders_PlusDynamic_ArEnEs_TwoLocalOrthographies);
+    expect(formattedEntries).toMatchFileSnapshot('./test-output/prepareEntriesForCsv_noHeaders.txt');
+    expect(objectsToCsvByHeaders(headers, formattedEntries)).toMatchFileSnapshot('./test-output/prepareEntriesForCsv.csv');
   });
 
   //TODO after make everything passes, allow multiple parts of speech
@@ -99,14 +97,14 @@ describe('prepareEntriesForCsv', () => {
           lexeme: 'baz',
         },
       ];
-      const [headerRow, firstEntry, secondEntry] = prepareEntriesForCsv(
+      const {headers, formattedEntries: [firstEntry, secondEntry]} = prepareEntriesForCsv(
         entries,
         dictionary,
         speakers,
         partsOfSpeech
       );
 
-      expect(headerRow.variant).toEqual('Variant');
+      expect(headers.variant).toEqual('Variant');
       expect(firstEntry.variant).toEqual('fooey');
       expect(secondEntry.variant).toEqual(undefined);
     });
@@ -114,8 +112,8 @@ describe('prepareEntriesForCsv', () => {
     test('not added to fooDictionary', () => {
       const dictionary = { id: 'fooDictionary', glossLanguages: [] } as IDictionary;
       const entries: ExpandedEntry[] = [{ lexeme: 'foo' }];
-      const [headerRow] = prepareEntriesForCsv(entries, dictionary, speakers, partsOfSpeech);
-      expect(headerRow.variant).toBeFalsy();
+      const {headers} = prepareEntriesForCsv(entries, dictionary, speakers, partsOfSpeech);
+      expect(headers.variant).toBeFalsy();
     });
   });
 });

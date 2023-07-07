@@ -68,9 +68,9 @@
         bcr.top - top < window.innerHeight &&
         bcr.left - left < window.innerWidth;
 
-      if (intersecting && once) {
+      if (intersecting && once)
         window.removeEventListener('scroll', handler);
-      }
+
     }
 
     window.addEventListener('scroll', handler);
@@ -83,9 +83,9 @@
     dispatch('intersected');
     if (intervalMs) {
       interval = setInterval(() => {
-        if (intersecting === true) {
+        if (intersecting === true)
           dispatch('intersected');
-        }
+
       }, intervalMs);
     }
   } else {
