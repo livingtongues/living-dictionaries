@@ -54,6 +54,7 @@ describe('prepareEntriesForCsv', () => {
         local_orthography_1: '𑃐𑃥𑃝𑃢 𑃒𑃦𑃗𑃠𑃤',
         local_orthography_2: 'চুড়া বংজি',
         senses: [{ glosses: { es: 'árbol' } }],
+        variant: 'bananer',
       },
     ];
     const {headers, formattedEntries} = prepareEntriesForCsv(

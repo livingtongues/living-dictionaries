@@ -17,7 +17,6 @@ import {
   find_part_of_speech_abbreviation,
   get_first_speaker_from_first_sound_file,
   display_speaker_gender,
-  format_local_orthographies,
   format_semantic_domains,
   format_gloss_languages,
   format_example_sentences,
@@ -100,13 +99,8 @@ export function prepareEntriesForCsv(
 
   const formattedEntries: EntryForCSV[] = expanded_entries.map((entry) => {
     const formatted_entry = {
-      id: entry.id,
-      lexeme: entry.lexeme,
-      phonetic: entry.phonetic,
-      interlinearization: entry.interlinearization,
+      ...entry,
       noun_class: entry.senses?.[0]?.noun_class,
-      morphology: entry.morphology,
-      plural_form: entry.plural_form,
       dialects: entry.dialects?.[0],
       notes: stripHTMLTags(entry.notes),
       sources: entry.sources?.join(' | '),
@@ -128,22 +122,14 @@ export function prepareEntriesForCsv(
     formatted_entry.speaker_decade = decades[speaker?.decade];
     formatted_entry.speaker_gender = display_speaker_gender(speaker?.gender);
 
-    const formatted_local_orthographies = format_local_orthographies(
-      entry,
-      local_orthographies_headers
-    );
     const formatted_semantic_domains = format_semantic_domains(entry, max_semantic_domain_number);
 
     const formatted_gloss_languages = format_gloss_languages(entry, dictionary.glossLanguages);
 
     const formatted_example_sentences = format_example_sentences(entry, dictionary.glossLanguages);
 
-    if (has_variants)
-      formatted_entry.variant = entry.variant;
-
     return {
       ...formatted_entry,
-      ...formatted_local_orthographies,
       ...formatted_semantic_domains,
       ...formatted_gloss_languages,
       ...formatted_example_sentences,
