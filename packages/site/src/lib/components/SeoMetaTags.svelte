@@ -39,6 +39,7 @@
         width,
         height,
         title,
+        description: '',
         dictionaryName,
         lng,
         lat,
