@@ -24,9 +24,9 @@ export function format_local_orthographies(
   local_orthographies_headers: EntryForCSV
 ): EntryForCSV {
   const formatted_local_orthographies = {};
-  for (const key of Object.keys(local_orthographies_headers)) 
+  for (const key of Object.keys(local_orthographies_headers))
     formatted_local_orthographies[key] = entry[key] ?? undefined;
-  
+
   return formatted_local_orthographies;
 }
 

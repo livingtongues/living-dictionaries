@@ -10,21 +10,53 @@
     "id": "12345qwerty",
     "image_file_path": "https://database.com/image.png",
     "image_filename": "12345qwerty_foo.png",
-    "interlinearization": undefined,
     "lexeme": "xiangjiao",
-    "local_orthography_1": undefined,
     "local_orthography_2": "کیلا",
-    "morphology": undefined,
     "notes": "This is an example of a note, here we can write whatever we want.",
     "noun_class": undefined,
     "parts_of_speech": "noun",
     "parts_of_speech_abbreviation": "n",
     "phonetic": "xiangjiao",
-    "plural_form": undefined,
     "semantic_domain_1": "Body parts",
     "semantic_domain_2": "Body functions",
+    "senses": [
+      {
+        "example_sentences": [
+          {
+            "en": "This is a banana",
+            "vn": "我很喜歡吃香蕉",
+          },
+        ],
+        "glosses": {
+          "ar": "foo",
+          "en": "banana",
+        },
+        "parts_of_speech": [
+          "noun",
+          "adjective",
+        ],
+        "photo_files": [
+          {
+            "fb_storage_path": "https://database.com/image.png",
+            "uid_added_by": "Diego",
+          },
+        ],
+        "semantic_domains": [
+          "Body parts",
+          "Body functions",
+        ],
+      },
+    ],
     "sound_file_path": "https://database.com/sound.mp3",
     "sound_filename": "12345qwerty_foo.mp3",
+    "sound_files": [
+      {
+        "fb_storage_path": "https://database.com/sound.mp3",
+        "speaker_ids": [
+          "123",
+        ],
+      },
+    ],
     "sources": "A book | www.mybook.com",
     "speaker_birthplace": "Whoville",
     "speaker_decade": "41-50",
@@ -43,19 +75,22 @@
     "id": "34qw",
     "image_file_path": undefined,
     "image_filename": "",
-    "interlinearization": undefined,
     "lexeme": "tree",
     "local_orthography_1": "𑃐𑃥𑃝𑃢 𑃒𑃦𑃗𑃠𑃤",
     "local_orthography_2": "চুড়া বংজি",
-    "morphology": undefined,
     "notes": "",
     "noun_class": undefined,
     "parts_of_speech": undefined,
     "parts_of_speech_abbreviation": undefined,
-    "phonetic": undefined,
-    "plural_form": undefined,
     "semantic_domain_1": undefined,
     "semantic_domain_2": undefined,
+    "senses": [
+      {
+        "glosses": {
+          "es": "árbol",
+        },
+      },
+    ],
     "sound_file_path": undefined,
     "sound_filename": "",
     "sources": undefined,
@@ -63,6 +98,7 @@
     "speaker_decade": undefined,
     "speaker_gender": undefined,
     "speaker_name": undefined,
+    "variant": "bananer",
     "vernacular_example_sentence": undefined,
   },
 ]
