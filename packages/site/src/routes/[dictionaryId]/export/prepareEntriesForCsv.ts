@@ -61,16 +61,13 @@ export function prepareEntriesForCsv(
   dictionary: IDictionary,
   speakers: ISpeaker[],
   global_parts_of_speech: IPartOfSpeech[]
-): EntryForCSV[] {
-
+): {headers: EntryForCSV, formattedEntries: EntryForCSV[] } {
   // TODO: In a future PR
-  // 1. break this apart into 2 functions
+  // First take advantage of no longer needing add empty string values, the headers will take care of undefined cells: by making it so the entry rows themselves don't need to care about how many semantic domains there are in the dictionary or glossing languages, etc...)
+
+  // Then break this apart into 2 functions
   // const headers = getHeaders(expanded_entries, dictionary)
   // const formattedEntries = getFormattedEntries(expanded_entries, dictionary, headers, speakers, global_parts_of_speech)
-
-  // 2. Take advantage of improved objectsToCsvByHeaders that takes two arguments: headers and data (entries in this case) and for each row (data entry) it loops through each header value and installs the values or empty string if none exists - then the aforementioned `getFormmatedEntries` function doesn't need to care about how many semantic domains there are in the dictionary or glossing languages, etc...)
-  
-  // 3. Update Vitest and use the new .matchFileSnapshot method to output to a .csv file so we can more easily test the actual user output (cell ordering especially) without having to fire up the front-end
 
   const max_semantic_domain_number =
     count_maximum_semantic_domains_only_from_first_senses(expanded_entries);
@@ -89,9 +86,9 @@ export function prepareEntriesForCsv(
   );
 
   const has_variants = expanded_entries.some((entry) => entry.variant);
-  if (has_variants) 
+  if (has_variants)
     default_headers.variant = 'Variant';
-  
+
 
   const headers = {
     ...default_headers,
@@ -141,9 +138,8 @@ export function prepareEntriesForCsv(
 
     const formatted_example_sentences = format_example_sentences(entry, dictionary.glossLanguages);
 
-    if (has_variants) 
+    if (has_variants)
       formatted_entry.variant = entry.variant;
-    
 
     return {
       ...formatted_entry,
@@ -153,5 +149,5 @@ export function prepareEntriesForCsv(
       ...formatted_example_sentences,
     };
   });
-  return [headers, ...formattedEntries];
+  return { headers, formattedEntries };
 }

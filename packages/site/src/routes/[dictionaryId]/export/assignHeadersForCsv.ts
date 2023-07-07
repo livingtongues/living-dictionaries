@@ -21,9 +21,8 @@ export function assign_semantic_domains_as_headers(
 ): EntryForCSV {
   const headers = {};
   if (max_semantic_domain_number > 0) {
-    for (let index = 0; index < max_semantic_domain_number; index++) 
+    for (let index = 0; index < max_semantic_domain_number; index++)
       headers[`semantic_domain_${index + 1}`] = `Semantic domain ${index + 1}`;
-    
   }
   return headers;
 }

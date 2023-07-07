@@ -17,7 +17,7 @@ describe('find_part_of_speech_abbreviation', () => {
       enName: 'noun',
     },
   ];
-  
+
   test('finds readable part of speech name', () => {
     const part_of_speech = 'noun';
     expect(find_part_of_speech_abbreviation(global_parts_of_speech, part_of_speech)).toEqual('n');
