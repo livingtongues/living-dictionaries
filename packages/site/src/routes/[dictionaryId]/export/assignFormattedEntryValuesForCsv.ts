@@ -19,50 +19,34 @@ export function display_speaker_gender(speaker_gender: string): string {
   if (speaker_gender) return speaker_gender === 'f' ? 'female' : 'male';
 }
 
-export function format_local_orthographies(
-  entry: ExpandedEntry,
-  local_orthographies_headers: EntryForCSV
-): EntryForCSV {
-  const formatted_local_orthographies = {};
-  for (const key of Object.keys(local_orthographies_headers))
-    formatted_local_orthographies[key] = entry[key] ?? undefined;
-
-  return formatted_local_orthographies;
-}
-
 export function format_semantic_domains(
   entry: ExpandedEntry,
-  max_semantic_domain_number: number
 ): EntryForCSV {
-  const formatted_semantic_domains = {};
-  for (let index = 0; index < max_semantic_domain_number; index++) {
-    formatted_semantic_domains[`semantic_domain_${index + 1}`] =
-      entry.senses?.[0].semantic_domains?.[index];
-  }
-  return formatted_semantic_domains;
+  const domains = {};
+  for (const [index, domain] of (entry.senses?.[0].semantic_domains || []).entries())
+    domains[`semantic_domain_${index + 1}`] = domain;
+  return domains;
 }
 
 export function format_gloss_languages(
   entry: ExpandedEntry,
-  gloss_languages: string[]
 ): EntryForCSV {
-  const formatted_gloss_languages = {};
-  gloss_languages.forEach((bcp) => {
-    formatted_gloss_languages[`${bcp}_gloss_language`] = entry.senses?.[0].glosses[bcp];
-  });
-  return formatted_gloss_languages;
+  const gloss_languages = {};
+  for (const [bcp, value] of Object.entries(entry.senses?.[0].glosses || {}))
+    gloss_languages[`${bcp}_gloss_language`] = value
+  return gloss_languages;
 }
 
 export function format_example_sentences(
   entry: ExpandedEntry,
-  gloss_languages: string[]
 ): EntryForCSV {
-  const formatted_example_sentences: EntryForCSV = {};
-  formatted_example_sentences.vernacular_example_sentence =
-    entry.senses?.[0].example_sentences?.[0].vn;
-  gloss_languages.forEach((bcp) => {
-    formatted_example_sentences[`${bcp}_example_sentence`] =
-      entry.senses?.[0].example_sentences?.[0][bcp];
-  });
-  return formatted_example_sentences;
+  const example_sentences: EntryForCSV = {};
+  for (const [bcp, value] of Object.entries(entry.senses?.[0].example_sentences?.[0] || {})) {
+    if (bcp === 'vn')
+      example_sentences.vernacular_example_sentence = value;
+    else
+      example_sentences[`${bcp}_example_sentence`] = value;
+  }
+
+  return example_sentences;
 }

@@ -1,12 +1,9 @@
 [
   {
-    "ar_example_sentence": undefined,
     "ar_gloss_language": "foo",
     "dialects": "dialect x",
     "en_example_sentence": "This is a banana",
     "en_gloss_language": "banana",
-    "es_example_sentence": undefined,
-    "es_gloss_language": undefined,
     "id": "12345qwerty",
     "image_file_path": "https://database.com/image.png",
     "image_filename": "12345qwerty_foo.png",
@@ -65,12 +62,7 @@
     "vernacular_example_sentence": "我很喜歡吃香蕉",
   },
   {
-    "ar_example_sentence": undefined,
-    "ar_gloss_language": undefined,
     "dialects": undefined,
-    "en_example_sentence": undefined,
-    "en_gloss_language": undefined,
-    "es_example_sentence": undefined,
     "es_gloss_language": "árbol",
     "id": "34qw",
     "image_file_path": undefined,
@@ -82,8 +74,6 @@
     "noun_class": undefined,
     "parts_of_speech": undefined,
     "parts_of_speech_abbreviation": undefined,
-    "semantic_domain_1": undefined,
-    "semantic_domain_2": undefined,
     "senses": [
       {
         "glosses": {
@@ -99,6 +89,5 @@
     "speaker_gender": undefined,
     "speaker_name": undefined,
     "variant": "bananer",
-    "vernacular_example_sentence": undefined,
   },
 ]

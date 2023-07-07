@@ -17,9 +17,9 @@ import {
   find_part_of_speech_abbreviation,
   get_first_speaker_from_first_sound_file,
   display_speaker_gender,
-  format_semantic_domains,
   format_gloss_languages,
   format_example_sentences,
+  format_semantic_domains,
 } from './assignFormattedEntryValuesForCsv';
 import { decades } from '$lib/components/media/ages';
 
@@ -50,7 +50,7 @@ type StandardEntryForCSV = {
 
 export interface EntryForCSV extends StandardEntryForCSV {
   vernacular_example_sentence?: string;
-  variant?: string; // should be just for babanki & torwali
+  variant?: string; // for any dictionary with it, probably just babanki & torwali
   sound_file_path?: string; // for downloading file, not exported in CSV
   image_file_path?: string; // for downloading file, not exported in CSV
 }
@@ -61,12 +61,9 @@ export function prepareEntriesForCsv(
   speakers: ISpeaker[],
   global_parts_of_speech: IPartOfSpeech[]
 ): {headers: EntryForCSV, formattedEntries: EntryForCSV[] } {
-  // TODO: In a future PR
-  // First take advantage of no longer needing add empty string values, the headers will take care of undefined cells: by making it so the entry rows themselves don't need to care about how many semantic domains there are in the dictionary or glossing languages, etc...)
-
-  // Then break this apart into 2 functions
+  // TODO: Break this apart into 2 functions
   // const headers = getHeaders(expanded_entries, dictionary)
-  // const formattedEntries = getFormattedEntries(expanded_entries, dictionary, headers, speakers, global_parts_of_speech)
+  // const formattedEntries = getFormattedEntries(expanded_entries, headers, speakers, global_parts_of_speech)
 
   const max_semantic_domain_number =
     count_maximum_semantic_domains_only_from_first_senses(expanded_entries);
@@ -122,17 +119,11 @@ export function prepareEntriesForCsv(
     formatted_entry.speaker_decade = decades[speaker?.decade];
     formatted_entry.speaker_gender = display_speaker_gender(speaker?.gender);
 
-    const formatted_semantic_domains = format_semantic_domains(entry, max_semantic_domain_number);
-
-    const formatted_gloss_languages = format_gloss_languages(entry, dictionary.glossLanguages);
-
-    const formatted_example_sentences = format_example_sentences(entry, dictionary.glossLanguages);
-
     return {
       ...formatted_entry,
-      ...formatted_semantic_domains,
-      ...formatted_gloss_languages,
-      ...formatted_example_sentences,
+      ...format_semantic_domains(entry),
+      ...format_gloss_languages(entry),
+      ...format_example_sentences(entry),
     };
   });
   return { headers, formattedEntries };

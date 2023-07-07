@@ -84,7 +84,7 @@ describe('prepareEntriesForCsv', () => {
     expect(objectsToCsvByHeaders(headers, formattedEntries)).toMatchFileSnapshot('./test-output/prepareEntriesForCsv.csv');
   });
 
-  //TODO after make everything passes, allow multiple parts of speech
+  // TODO: allow multiple parts of speech
 
   describe('variant column', () => {
     test('added to babanki', () => {
