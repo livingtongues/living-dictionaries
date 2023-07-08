@@ -4,7 +4,7 @@ import type {
   ISpeaker,
   IPartOfSpeech,
 } from '@living-dictionaries/types';
-import { StandardEntryCSVFields, prepareEntriesForCsv } from './prepareEntriesForCsv';
+import { StandardEntryCSVFields, getCsvHeaders, formatCsvEntries } from './prepareEntriesForCsv';
 import { objectsToCsvByHeaders } from '$lib/export/csv';
 
 describe('prepareEntriesForCsv', () => {
@@ -57,12 +57,9 @@ describe('prepareEntriesForCsv', () => {
         variant: 'bananer',
       },
     ];
-    const {headers, formattedEntries} = prepareEntriesForCsv(
-      entries,
-      dictionary,
-      speakers,
-      partsOfSpeech
-    );
+
+    const headers = getCsvHeaders(entries, dictionary)
+    const formattedEntries = formatCsvEntries(entries, speakers, partsOfSpeech)
 
     const expectedHeaders_PlusDynamic_ArEnEs_TwoLocalOrthographies = {
       ...StandardEntryCSVFields,
@@ -87,8 +84,8 @@ describe('prepareEntriesForCsv', () => {
   // TODO: allow multiple parts of speech
 
   describe('variant column', () => {
-    test('added to babanki', () => {
-      const dictionary = { id: 'babanki', glossLanguages: [] } as IDictionary;
+    test('added when entries have variants', () => {
+      const dictionary = {} as IDictionary;
       const entries: ExpandedEntry[] = [
         {
           lexeme: 'foo',
@@ -98,23 +95,21 @@ describe('prepareEntriesForCsv', () => {
           lexeme: 'baz',
         },
       ];
-      const {headers, formattedEntries: [firstEntry, secondEntry]} = prepareEntriesForCsv(
-        entries,
-        dictionary,
-        speakers,
-        partsOfSpeech
-      );
+
+      const headers = getCsvHeaders(entries, dictionary)
+      const [firstEntry, secondEntry] = formatCsvEntries(entries, speakers, partsOfSpeech)
+
 
       expect(headers.variant).toEqual('Variant');
       expect(firstEntry.variant).toEqual('fooey');
-      expect(secondEntry.variant).toEqual(undefined);
+      expect(secondEntry.variant).toBeFalsy();
     });
 
-    test('not added to fooDictionary', () => {
-      const dictionary = { id: 'fooDictionary', glossLanguages: [] } as IDictionary;
+    test('not added when entries do not have variants', () => {
+      const dictionary = {} as IDictionary;
       const entries: ExpandedEntry[] = [{ lexeme: 'foo' }];
-      const {headers} = prepareEntriesForCsv(entries, dictionary, speakers, partsOfSpeech);
-      expect(headers.variant).toBeFalsy();
+      const { variant } = getCsvHeaders(entries, dictionary);
+      expect(variant).toBeFalsy();
     });
   });
 });
