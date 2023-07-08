@@ -50,6 +50,7 @@ function makeComment(lighthouseOutputs, targetPlatform) {
     const reportUrl = lighthouseOutputs.links[testedUrl];
     
     if (targetPlatform === 'slack') {
+      // eslint-disable-next-line no-undef
       comment += ` | Results for ${new URL(testedUrl).pathname}: ${scoreSimple('Performance', summary.performance)}, ${scoreSimple('Accessibility', summary.accessibility)}, ${scoreSimple('Best practices', summary['best-practices'])}, ${scoreSimple('SEO', summary.seo)}, ${scoreSimple('PWA', summary.pwa)}, ${reportUrl}`;
     }
 
