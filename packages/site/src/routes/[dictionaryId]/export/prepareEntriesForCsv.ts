@@ -7,11 +7,10 @@ import type {
 import { stripHTMLTags } from './stripHTMLTags';
 import { friendlyName } from './friendlyName';
 import {
-  assign_local_orthographies_as_headers,
-  assign_example_sentences_as_headers,
-  assign_gloss_languages_as_headers,
-  assign_semantic_domains_as_headers,
-  count_maximum_semantic_domains_only_from_first_senses,
+  get_local_orthography_headers,
+  get_example_sentence_headers,
+  get_gloss_language_headers,
+  get_semantic_domain_headers,
 } from './assignHeadersForCsv';
 import {
   find_part_of_speech_abbreviation,
@@ -55,46 +54,28 @@ export interface EntryForCSV extends StandardEntryForCSV {
   image_file_path?: string; // for downloading file, not exported in CSV
 }
 
-export function prepareEntriesForCsv(
-  expanded_entries: ExpandedEntry[],
-  dictionary: IDictionary,
-  speakers: ISpeaker[],
-  global_parts_of_speech: IPartOfSpeech[]
-): {headers: EntryForCSV, formattedEntries: EntryForCSV[] } {
-  // TODO: Break this apart into 2 functions
-  // const headers = getHeaders(expanded_entries, dictionary)
-  // const formattedEntries = getFormattedEntries(expanded_entries, headers, speakers, global_parts_of_speech)
-
-  const max_semantic_domain_number =
-    count_maximum_semantic_domains_only_from_first_senses(expanded_entries);
-
-  const default_headers: EntryForCSV = { ...StandardEntryCSVFields };
-
-  // Begin dynamic headers
-  const local_orthographies_headers = assign_local_orthographies_as_headers(
-    dictionary.alternateOrthographies
-  );
-  const semantic_domains_headers = assign_semantic_domains_as_headers(max_semantic_domain_number);
-  const gloss_languages_headers = assign_gloss_languages_as_headers(dictionary.glossLanguages);
-  const example_sentences_headers = assign_example_sentences_as_headers(
-    dictionary.glossLanguages,
-    dictionary.name
-  );
+export function getCsvHeaders(expanded_entries: ExpandedEntry[], { alternateOrthographies, glossLanguages, name: dictionaryName}: IDictionary): EntryForCSV {
+  const headers: EntryForCSV = { ...StandardEntryCSVFields };
 
   const has_variants = expanded_entries.some((entry) => entry.variant);
   if (has_variants)
-    default_headers.variant = 'Variant';
+    headers.variant = 'Variant';
 
-
-  const headers = {
-    ...default_headers,
-    ...local_orthographies_headers,
-    ...semantic_domains_headers,
-    ...gloss_languages_headers,
-    ...example_sentences_headers,
+  return {
+    ...headers,
+    ...get_local_orthography_headers(alternateOrthographies),
+    ...get_semantic_domain_headers(expanded_entries),
+    ...get_gloss_language_headers(glossLanguages),
+    ...get_example_sentence_headers(glossLanguages, dictionaryName),
   };
+}
 
-  const formattedEntries: EntryForCSV[] = expanded_entries.map((entry) => {
+export function formatCsvEntries(
+  expanded_entries: ExpandedEntry[],
+  speakers: ISpeaker[],
+  global_parts_of_speech: IPartOfSpeech[]
+): EntryForCSV[] {
+  return expanded_entries.map((entry) => {
     const formatted_entry = {
       ...entry,
       noun_class: entry.senses?.[0]?.noun_class,
@@ -126,5 +107,4 @@ export function prepareEntriesForCsv(
       ...format_example_sentences(entry),
     };
   });
-  return { headers, formattedEntries };
 }

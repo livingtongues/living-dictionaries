@@ -47,6 +47,5 @@ export function format_example_sentences(
     else
       example_sentences[`${bcp}_example_sentence`] = value;
   }
-
   return example_sentences;
 }

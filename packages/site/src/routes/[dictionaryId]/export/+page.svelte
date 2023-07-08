@@ -12,14 +12,14 @@
   import { expand_entry } from '$lib/transformers/expand_entry';
   import DownloadMedia from './DownloadMedia.svelte';
   import { fetchSpeakers } from './fetchSpeakers';
-  import { prepareEntriesForCsv, type EntryForCSV } from './prepareEntriesForCsv';
+  import { getCsvHeaders, formatCsvEntries, type EntryForCSV } from './prepareEntriesForCsv';
   import { downloadObjectsAsCSV } from '$lib/export/csv';
 
   let includeImages = false;
   let includeAudio = false;
 
   let entryHeaders: EntryForCSV = {}
-  let allEntries: EntryForCSV[] = [];
+  let formattedEntries: EntryForCSV[] = [];
   let entriesWithImages: EntryForCSV[] = [];
   let entriesWithAudio: EntryForCSV[] = [];
 
@@ -31,17 +31,8 @@
     const expanded_entries = converted_to_current_shaped_entries.map(expand_entry);
     const speakers = await fetchSpeakers(expanded_entries);
 
-    const {headers, formattedEntries } = prepareEntriesForCsv(expanded_entries, $dictionary, speakers, partsOfSpeech)
-    entryHeaders = headers
-    allEntries = formattedEntries.map(
-      (entry) => {
-        const newEntry = { ...entry };
-        delete newEntry.image_file_path;
-        delete newEntry.sound_file_path;
-        return newEntry;
-      }
-    );
-
+    entryHeaders = getCsvHeaders(expanded_entries, $dictionary)
+    formattedEntries = formatCsvEntries(expanded_entries, speakers, partsOfSpeech)
     entriesWithImages = formattedEntries.filter((entry) => entry.image_filename);
     entriesWithAudio = formattedEntries.filter((entry) => entry.sound_filename);
 
@@ -113,7 +104,7 @@
         <DownloadMedia
           dictionary={$dictionary}
           {entryHeaders}
-          finalizedEntries={allEntries}
+          finalizedEntries={formattedEntries}
           entriesWithImages={includeImages ? entriesWithImages : []}
           entriesWithAudio={includeAudio ? entriesWithAudio : []}
           on:completed={toggle}
@@ -129,9 +120,9 @@
     </ShowHide>
   {:else}
     <Button
-      loading={!allEntries.length}
+      loading={!formattedEntries.length}
       onclick={() => {
-        downloadObjectsAsCSV(entryHeaders, allEntries, $dictionary.id);
+        downloadObjectsAsCSV(entryHeaders, formattedEntries, $dictionary.id);
       }}
       form="filled">
       {$_('export.download_csv', { default: 'Download CSV' })}
