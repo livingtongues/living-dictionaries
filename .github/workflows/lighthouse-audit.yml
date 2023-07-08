@@ -33,7 +33,7 @@ jobs:
         with:
           github-token: ${{secrets.GITHUB_TOKEN}}
           script: |
-            const lighthouseCommentFormatter = require('./.github/workflows/lighthouse-comment-formatter.js');
+            const lighthouseCommentFormatter = require('./.github/workflows/lighthouse-comment-formatter.cjs');
 
             const lighthouseOutputs = {
               manifest: ${{ steps.lighthouse_audit.outputs.manifest }},
@@ -65,7 +65,7 @@ jobs:
         with:
           github-token: ${{secrets.GITHUB_TOKEN}}
           script: |
-            const lighthouseCommentFormatter = require('./.github/workflows/lighthouse-comment-formatter.js');
+            const lighthouseCommentFormatter = require('./.github/workflows/lighthouse-comment-formatter.cjs');
 
             const lighthouseOutputs = {
               manifest: ${{ steps.lighthouse_audit.outputs.manifest }},
