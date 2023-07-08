@@ -30,20 +30,9 @@
   export let width = 1200;
   export let height = 600;
   export let gcsPath: string = undefined;
-  export let featuredImage: string = undefined;
   export let lng: number = undefined;
   export let lat: number = undefined;
-  $: props = featuredImage ?
-    encode(
-      JSON.stringify({
-        width,
-        height,
-        title,
-        dictionaryName,
-        lng,
-        lat,
-        featuredImage,
-    })) : encode(
+  $: imageProps = encode(
     JSON.stringify({
       width,
       height,
@@ -55,7 +44,7 @@
       gcsPath,
     })
   );
-  $: imageUrl = gcsPath || featuredImage ? `${IMAGE_API}?props=${props}&v=3` : DEFAULT_IMAGE;
+  $: imageUrl = gcsPath ? `${IMAGE_API}?props=${imageProps}&v=3` : DEFAULT_IMAGE;
   $: imageWidth = dictionaryName ? width.toString() : '987';
   $: imageHeight = dictionaryName ? width.toString() : '299';
 </script>
