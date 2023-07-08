@@ -2,7 +2,7 @@
   import type { IEntry } from '@living-dictionaries/types';
   import { t } from 'svelte-i18n';
 
-  export let entry: IEntry = undefined;
+  export let entry: IEntry;
   let dragging = false;
   let file: File;
 
@@ -39,7 +39,7 @@
       class="text-gray-600 border-transparent
         h-full flex flex-col items-center justify-center border-2 border-dashed
         cursor-pointer"
-      title={entry ? 'Add Photo to Entry' : 'Add Featured Image to Dictionary'}
+      title="Add Photo"
       on:drop|preventDefault={(e) => handleImage(e.dataTransfer.files)}
       on:dragover|preventDefault={() => (dragging = true)}
       on:dragleave|preventDefault={() => (dragging = false)}>
