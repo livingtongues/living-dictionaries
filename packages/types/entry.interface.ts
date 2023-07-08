@@ -75,7 +75,7 @@ export interface GoalDatabaseEntry extends IFirestoreMetaDataAbbreviated {
   in?: string; // interlinearization
   mr?: string; // morphology
   pl?: string; // plural_form
-  va?: string; // variant (currently babanki only)
+  va?: string; // variant (currently babanki & torwali only)
   di?: string[]; // dialects
   nt?: string; // notes
   sr?: string[]; // sources
