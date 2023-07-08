@@ -10,7 +10,6 @@
   import ContributorInvitationStatus from '$lib/components/contributors/ContributorInvitationStatus.svelte';
   import Citation from './Citation.svelte';
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte';
-  import { findSubject } from '$lib/helpers/contact/findSubject';
 
   let helperType: IHelper[];
   let inviteType: IInvite[];
@@ -149,7 +148,7 @@
       </Button>
       {#if show}
         {#await import('$lib/components/modals/Contact.svelte') then { default: Contact }}
-          <Contact componentSubject={findSubject('request-access')} on:close={toggle} />
+          <Contact subject="request-access" on:close={toggle} />
         {/await}
       {/if}
     </ShowHide>

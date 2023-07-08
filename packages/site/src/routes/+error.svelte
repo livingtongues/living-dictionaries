@@ -5,7 +5,6 @@
   import { firebaseConfig } from 'sveltefirets';
   import { Button, ShowHide } from 'svelte-pieces';
   import { page } from '$app/stores';
-  import { findSubject } from '$lib/helpers/contact/findSubject';
 
   onMount(async () => {
     const Sentry = await import('@sentry/browser');
@@ -43,7 +42,7 @@
     <Button form="filled" onclick={toggle}>{$t('header.contact_us', { default: 'Contact Us' })}</Button>
     {#if show}
       {#await import('$lib/components/modals/Contact.svelte') then { default: Contact }}
-        <Contact componentSubject={findSubject('report-problem')} on:close={toggle} />
+        <Contact subject="report-problem" on:close={toggle} />
       {/await}
     {/if}
   </ShowHide>

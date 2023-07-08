@@ -6,9 +6,18 @@
   import { createEventDispatcher } from 'svelte';
   import { apiFetch } from '$lib/client/apiFetch';
   import type { SupportRequestBody } from '../../../routes/api/email/support/+server';
-  import { subjects } from '$lib/mappings/email-subjects';
 
-  export let componentSubject: string = undefined;
+  const subjects = {
+    'delete-dictionary': 'Delete a dictionary',
+    'public-dictionary': 'Make a dictionary public',
+    'import-data': 'Import data',
+    'data-fields': 'Optional data fields',
+    'request-access': 'Request editing access',
+    'report-problem': 'Report a problem',
+    'other': 'Other'
+  }
+  type Subjects = keyof typeof subjects;
+  export let subject: Subjects = undefined;
 
   const dispatch = createEventDispatcher<{ close: boolean }>();
 
@@ -18,7 +27,6 @@
 
   let message = '';
   let email = '';
-  let subject = '';
   
   let status: 'success' | 'fail';
 
@@ -29,7 +37,7 @@
         email: $user?.email || email,
         name: $user?.displayName || 'Anonymous',
         url: window.location.href,
-        subject: componentSubject || subject
+        subject: subject || subject
       });
 
       if (response.status !== 200) {
@@ -81,14 +89,14 @@
 
   {#if !status}
     <Form let:loading onsubmit={send}>
-      {#if !componentSubject}  
+      {#if !subject}  
         <div class="my-2">
           <select class="w-full" bind:value={subject}>
             <!-- TODO i18n translations -->
             <option disabled selected value="">Select a topic:</option>
-            {#each subjects as sbj}
+            {#each Object.entries(subjects) as [key, title]}
             <option data-value={subject}
-              >{$t("ps." + sbj.keyName, { default: sbj.title })}</option
+              >{$t("ps." + key, { default: title })}</option
             >
             {/each}
           </select>
