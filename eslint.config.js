@@ -1,15 +1,15 @@
 // To run automatically on commit, add `simple-git-hooks` and `lint-staged` then run `npx simple-git-hooks` once. After that all commits will be linted.
 
 // @ts-check
-import { defineFlatConfig } from 'eslint-define-config';
-import jsEslintPlugin from '@eslint/js';
-import tsEslintPlugin from '@typescript-eslint/eslint-plugin';
-// @ts-ignore
-import typescriptParser from '@typescript-eslint/parser';
-import sveltePlugin from 'eslint-plugin-svelte';
-import svelteParser from 'svelte-eslint-parser';
-import globals from 'globals';
-import { scriptExceptions } from './lint/allowScriptLogs.js';
+import { defineFlatConfig } from 'eslint-define-config'
+import jsEslintPlugin from '@eslint/js'
+import tsEslintPlugin from '@typescript-eslint/eslint-plugin'
+// @ts-expect-error
+import typescriptParser from '@typescript-eslint/parser'
+import sveltePlugin from 'eslint-plugin-svelte'
+import svelteParser from 'svelte-eslint-parser'
+import globals from 'globals'
+import { scriptExceptions } from './lint/allowScriptLogs.js'
 
 // @ts-ignore
 export default defineFlatConfig([
@@ -20,14 +20,14 @@ export default defineFlatConfig([
       '**/dist/**',
       '**/lib/**',
       '.git/**',
-      '**/.svelte-kit/**',
+      '**/.svelte-kit**',
       // pnpm-lock.yaml
       'packages/scripts/import/old**',
     ],
   },
-  jsEslintPlugin.configs.recommended, // new way to do 'eslint:recommended'
   {
     rules: {
+      ...jsEslintPlugin.configs.recommended.rules, // new way to do 'eslint:recommended'
       'indent': ['error', 2],
     },
   },
@@ -72,7 +72,7 @@ export default defineFlatConfig([
       ],
       '@typescript-eslint/quotes': ['error', 'single', { 'allowTemplateLiterals': true }],
       '@typescript-eslint/ban-ts-comment': 'off',
-      semi: 'error',
+      // '@typescript-eslint/semi': ['error', 'never'],
       'prefer-const': 'error',
       'no-duplicate-imports': ['error', { 'includeExports': true }],
       'no-constant-binary-expression': 'error',
@@ -97,7 +97,7 @@ export default defineFlatConfig([
       'curly': ['warn', 'multi-or-nest', 'consistent'],
       'no-await-in-loop': 'warn',
       'default-param-last': 'warn',
-      'no-magic-numbers': ['warn', { 'ignore': [ 0, 1, 60 ], 'ignoreArrayIndexes': true }],
+      'no-magic-numbers': ['warn', { 'ignore': [ -1, 0, 1, 2, 60 ], 'ignoreArrayIndexes': true }],
       'prefer-named-capture-group': 'warn',
       'prefer-destructuring': 'warn',
       'prefer-regex-literals': 'warn',
@@ -191,7 +191,7 @@ export default defineFlatConfig([
     // }
   },
   scriptExceptions,
-]);
+])
 
 // learn more
 // https://github.com/AndreaPontrandolfo/sheriff
