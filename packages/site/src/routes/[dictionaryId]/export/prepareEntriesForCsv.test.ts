@@ -4,7 +4,7 @@ import type {
   ISpeaker,
   IPartOfSpeech,
 } from '@living-dictionaries/types';
-import { StandardEntryCSVFields, prepareEntriesForCsv } from './prepareEntriesForCsv';
+import { StandardEntryCSVFields, getCsvHeaders, formatCsvEntries } from './prepareEntriesForCsv';
 import { objectsToCsvByHeaders } from '$lib/export/csv';
 
 describe('prepareEntriesForCsv', () => {
@@ -54,14 +54,12 @@ describe('prepareEntriesForCsv', () => {
         local_orthography_1: '𑃐𑃥𑃝𑃢 𑃒𑃦𑃗𑃠𑃤',
         local_orthography_2: 'চুড়া বংজি',
         senses: [{ glosses: { es: 'árbol' } }],
+        variant: 'bananer',
       },
     ];
-    const [headerRow, firstEntry, secondEntry] = prepareEntriesForCsv(
-      entries,
-      dictionary,
-      speakers,
-      partsOfSpeech
-    );
+
+    const headers = getCsvHeaders(entries, dictionary)
+    const formattedEntries = formatCsvEntries(entries, speakers, partsOfSpeech)
 
     const expectedHeaders_PlusDynamic_ArEnEs_TwoLocalOrthographies = {
       ...StandardEntryCSVFields,
@@ -77,19 +75,17 @@ describe('prepareEntriesForCsv', () => {
       semantic_domain_1: 'Semantic domain 1',
       semantic_domain_2: 'Semantic domain 2',
     };
-    expect(headerRow).toMatchObject(expectedHeaders_PlusDynamic_ArEnEs_TwoLocalOrthographies);
 
-    expect(firstEntry).toMatchSnapshot();
-    expect(secondEntry).toMatchSnapshot();
-
-    expect(objectsToCsvByHeaders(headerRow, [firstEntry, secondEntry])).toMatchFileSnapshot('./test-output/prepareEntriesForCsv.csv');
+    expect(headers).toMatchObject(expectedHeaders_PlusDynamic_ArEnEs_TwoLocalOrthographies);
+    expect(formattedEntries).toMatchFileSnapshot('./test-output/prepareEntriesForCsv_noHeaders.txt');
+    expect(objectsToCsvByHeaders(headers, formattedEntries)).toMatchFileSnapshot('./test-output/prepareEntriesForCsv.csv');
   });
 
-  //TODO after make everything passes, allow multiple parts of speech
+  // TODO: allow multiple parts of speech
 
   describe('variant column', () => {
-    test('added to babanki', () => {
-      const dictionary = { id: 'babanki', glossLanguages: [] } as IDictionary;
+    test('added when entries have variants', () => {
+      const dictionary = {} as IDictionary;
       const entries: ExpandedEntry[] = [
         {
           lexeme: 'foo',
@@ -99,23 +95,21 @@ describe('prepareEntriesForCsv', () => {
           lexeme: 'baz',
         },
       ];
-      const [headerRow, firstEntry, secondEntry] = prepareEntriesForCsv(
-        entries,
-        dictionary,
-        speakers,
-        partsOfSpeech
-      );
 
-      expect(headerRow.variant).toEqual('Variant');
+      const headers = getCsvHeaders(entries, dictionary)
+      const [firstEntry, secondEntry] = formatCsvEntries(entries, speakers, partsOfSpeech)
+
+
+      expect(headers.variant).toEqual('Variant');
       expect(firstEntry.variant).toEqual('fooey');
-      expect(secondEntry.variant).toEqual(undefined);
+      expect(secondEntry.variant).toBeFalsy();
     });
 
-    test('not added to fooDictionary', () => {
-      const dictionary = { id: 'fooDictionary', glossLanguages: [] } as IDictionary;
+    test('not added when entries do not have variants', () => {
+      const dictionary = {} as IDictionary;
       const entries: ExpandedEntry[] = [{ lexeme: 'foo' }];
-      const [headerRow] = prepareEntriesForCsv(entries, dictionary, speakers, partsOfSpeech);
-      expect(headerRow.variant).toBeFalsy();
+      const { variant } = getCsvHeaders(entries, dictionary);
+      expect(variant).toBeFalsy();
     });
   });
 });
