@@ -76,6 +76,8 @@ export function formatCsvEntries(
   global_parts_of_speech: IPartOfSpeech[]
 ): EntryForCSV[] {
   return expanded_entries.map((entry) => {
+    const speaker = get_first_speaker_from_first_sound_file(entry, speakers);
+
     const formatted_entry = {
       ...entry,
       noun_class: entry.senses?.[0]?.noun_class,
@@ -89,16 +91,13 @@ export function formatCsvEntries(
       parts_of_speech: entry.senses?.[0]?.parts_of_speech?.[0],
       image_filename: friendlyName(entry, entry.senses?.[0].photo_files?.[0].fb_storage_path),
       sound_filename: friendlyName(entry, entry.sound_files?.[0].fb_storage_path),
+      image_file_path: entry.senses?.[0].photo_files?.[0].fb_storage_path,
+      sound_file_path: entry.sound_files?.[0].fb_storage_path,
+      speaker_name: speaker?.displayName,
+      speaker_birthplace: speaker?.birthplace,
+      speaker_decade: decades[speaker?.decade],
+      speaker_gender: display_speaker_gender(speaker?.gender),
     } as EntryForCSV;
-
-    //Begin dynamic values
-    formatted_entry.image_file_path = entry.senses?.[0].photo_files?.[0].fb_storage_path;
-    const speaker = get_first_speaker_from_first_sound_file(entry, speakers);
-    formatted_entry.sound_file_path = entry.sound_files?.[0].fb_storage_path;
-    formatted_entry.speaker_name = speaker?.displayName;
-    formatted_entry.speaker_birthplace = speaker?.birthplace;
-    formatted_entry.speaker_decade = decades[speaker?.decade];
-    formatted_entry.speaker_gender = display_speaker_gender(speaker?.gender);
 
     return {
       ...formatted_entry,
