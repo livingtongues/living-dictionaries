@@ -11,7 +11,7 @@
     'delete-dictionary': 'Delete a dictionary',
     'public-dictionary': 'Make a dictionary public',
     'import-data': 'Import data',
-    'data-fields': 'Optional data fields',
+    // 'data-fields': 'Optional data fields',
     'request-access': 'Request editing access',
     'report-problem': 'Report a problem',
     'other': 'Other'
@@ -89,19 +89,17 @@
 
   {#if !status}
     <Form let:loading onsubmit={send}>
-      {#if !subject}  
-        <div class="my-2">
-          <select class="w-full" bind:value={subject}>
-            <!-- TODO i18n translations -->
-            <option disabled selected value="">Select a topic:</option>
-            {#each Object.entries(subjects) as [key, title]}
-            <option data-value={subject}
-              >{$t("ps." + key, { default: title })}</option
-            >
-            {/each}
-          </select>
-        </div>
-      {/if}
+      <div class="my-2">
+        <select class="w-full" bind:value={subject}>
+          <!-- TODO i18n translations -->
+          <option disabled selected value="">Select a topic:</option>
+          {#each Object.entries(subjects) as [key, title]}
+          <option data-value={subject}
+            >{$t("ps." + key, { default: title })}</option
+          >
+          {/each}
+        </select>
+      </div>
       <label class="block text-gray-700 text-sm font-bold mb-2" for="message">
         {$t('contact.what_is_your_question', {
           default: 'What is your question or comment?',
