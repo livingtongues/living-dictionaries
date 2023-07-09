@@ -1,14 +1,14 @@
 <script lang="ts">
   import { t } from 'svelte-i18n';
-  import type { IEntry, GoalDatabasePhoto, FeaturedImage } from '@living-dictionaries/types';
+  import type { IEntry, GoalDatabasePhoto, DictionaryPhoto, IDictionary } from '@living-dictionaries/types';
   import { dictionary, user } from '$lib/stores';
   import { tweened } from 'svelte/motion';
   import { cubicOut } from 'svelte/easing';
   import { getStorage, ref, uploadBytesResumable } from 'firebase/storage';
   import { updateOnline, firebaseConfig, authState } from 'sveltefirets';
-    import { apiFetch } from '$lib/client/apiFetch';
-    import type { ImageUrlRequestBody } from '../../../routes/api/image_url/+server';
-    import { get } from 'svelte/store';
+  import { apiFetch } from '$lib/client/apiFetch';
+  import type { ImageUrlRequestBody } from '../../../routes/api/image_url/+server';
+  import { get } from 'svelte/store';
 
   export let file: File;
   export let entry: IEntry = undefined;
@@ -117,13 +117,13 @@
           { abbreviate: true }
           );
       } else {
-        const featuredImage: FeaturedImage = {
-          path: storagePath,
-          gcsPath,
-          timestamp: new Date().getTime(),
-          addedBy: $user.uid,
+        const featuredImage: DictionaryPhoto = {
+          fb_storage_path: storagePath,
+          specifiable_image_url: gcsPath,
+          timestamp: new Date(),
+          uid_added_by: $user.uid,
         } 
-        await updateOnline(
+        await updateOnline<IDictionary>(
           `dictionaries/${$dictionary.id}`,
           { featuredImage },
           { abbreviate: true }

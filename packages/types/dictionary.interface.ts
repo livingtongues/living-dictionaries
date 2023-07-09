@@ -1,5 +1,6 @@
 import type { GeoPoint } from 'firebase/firestore';
 import type { IFirestoreMetaData } from 'sveltefirets';
+import type { DictionaryPhoto } from '.';
 
 export interface IDictionary extends IFirestoreMetaData {
   // allContribute?: boolean; // deprecated
@@ -27,7 +28,7 @@ export interface IDictionary extends IFirestoreMetaData {
   authorConnection?: string;
   conLangDescription?: string;
 
-  featuredImage?: FeaturedImage; // Featured image for dictionaries to show as SEO image
+  featuredImage?: DictionaryPhoto;
 
   // tdv1 (old Talking Dictionaries platform at Swarthmore)
   publishYear?: number;
@@ -62,12 +63,6 @@ export interface IRegion {
   coordinates: LngLatFull[];
   label?: string;
   color?: string;
-}
-export interface FeaturedImage {
-  path?: string; // Firebase storage location
-  gcsPath?: string; // Google's Magic Image serving url reference which accepts requests for exact image size https://medium.com/google-cloud/uploading-resizing-and-serving-images-with-google-cloud-platform-ca9631a2c556
-  addedBy?: string; // added by uid
-  timestamp?: number; // timestamp in milliseconds, Firestore Timestamps not supported inside arrays
 }
 
 interface LngLatFull {
