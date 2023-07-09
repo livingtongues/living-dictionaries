@@ -13,8 +13,9 @@
   import PrintAccessCheckbox from '$lib/components/settings/PrintAccessCheckbox.svelte'; // only used here - perhaps colocate
   import { glossingLanguages } from '$lib/glosses/glossing-languages';
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte';
-  import UploadFeaturedImage from '$lib/components/settings/UploadFeaturedImage.svelte';
-  import { deleteDictionayImage } from '$lib/helpers/delete';
+  import { deleteDictionaryImage } from '$lib/helpers/delete';
+  import Image from '$lib/components/image/Image.svelte';
+  import ImageDropZone from '$lib/components/image/ImageDropZone.svelte';
 
   async function togglePrintAccess(settingPrintAccess: boolean) {
     try {
@@ -184,10 +185,20 @@
       display={$t('dictionary.location', { default: 'Location' })} />
     <div class="mb-5" />
 
-    <UploadFeaturedImage
-      gcsPath={$dictionaryStore?.featuredImage?.gcsPath}
-      dictionayName={$dictionaryStore.name}
-      on:deleteDictionaryImage={deleteDictionayImage} />
+    <div class="text-sm font-medium text-gray-700 mb-2">
+      Featured Image
+    </div>
+    {#if $dictionaryStore.featuredImage}
+      <Image height={300} title={$dictionaryStore.name} gcs={$dictionaryStore.featuredImage.specifiable_image_url} canEdit on:deleteImage={() => deleteDictionaryImage($dictionaryStore.id)} />
+    {:else}
+      <ImageDropZone let:file>
+        {#if file}
+          <!-- {#await import('$lib/components/image/UploadImage.svelte') then { default: UploadImage }} -->
+          <!-- <UploadImage {file} {entry} /> -->
+          <!-- {/await} -->
+        {/if}
+      </ImageDropZone>
+    {/if}
     <div class="mb-5" />
 
     <PrintAccessCheckbox

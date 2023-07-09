@@ -147,7 +147,7 @@
     <div class="media-block bg-gray-300 relative">
       <Image
         square={128}
-        lexeme={entry.lx}
+        title={entry.lx}
         gcs={entry.pf.gcs}
         {canEdit}
         on:deleteImage />
