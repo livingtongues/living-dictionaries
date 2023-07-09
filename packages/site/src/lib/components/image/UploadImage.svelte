@@ -1,17 +1,18 @@
 <script lang="ts">
   import { t } from 'svelte-i18n';
-  import type { IEntry, GoalDatabasePhoto, DictionaryPhoto, IDictionary } from '@living-dictionaries/types';
-  import { dictionary, user } from '$lib/stores';
+  import { user } from '$lib/stores';
   import { tweened } from 'svelte/motion';
   import { cubicOut } from 'svelte/easing';
   import { getStorage, ref, uploadBytesResumable } from 'firebase/storage';
-  import { updateOnline, firebaseConfig, authState } from 'sveltefirets';
+  import { firebaseConfig, authState } from 'sveltefirets';
   import { apiFetch } from '$lib/client/apiFetch';
   import type { ImageUrlRequestBody } from '../../../routes/api/image_url/+server';
   import { get } from 'svelte/store';
+  import { createEventDispatcher, onMount } from 'svelte';
 
   export let file: File;
-  export let entry: IEntry = undefined;
+  export let fileLocationPrefix: string;
+
   let progress = tweened(0, {
     duration: 2000,
     easing: cubicOut,
@@ -20,16 +21,16 @@
 
   let error;
   let success: boolean;
-  let previewURL: string;
+  $: previewURL = URL.createObjectURL(file);
 
-  if (file) {
-    previewURL = URL.createObjectURL(file);
+  onMount(() => {
     const fileTypeSuffix = file.name.match(/\.[0-9a-z]+$/i)[0];
-    startUpload( entry ? `${$dictionary.id}/images/${
-      entry.id
-    }_${new Date().getTime()}${fileTypeSuffix}` : `${$dictionary.id}/images/featured_image_${new Date().getTime()}${fileTypeSuffix}`);
-  }
+    const fileLocation = `${fileLocationPrefix}${new Date().getTime()}${fileTypeSuffix}`
+    startUpload(fileLocation)
+  })
 
+  const dispatch = createEventDispatcher<{uploaded: { fb_storage_path: string, specifiable_image_url: string }}>();
+    
   async function startUpload(storagePath: string) {
     // Replace spaces w/ underscores in dict name, remove special characters from lexeme so image converter can accept filename
     // const _dictName = dictionary.name.replace(/\s+/g, '_');
@@ -60,28 +61,14 @@
             break;
         }
       },
+      // https://firebase.google.com/docs/storage/web/handle-errors
       (err) => {
         alert(
           `${$t('misc.error', {
             default: 'Error',
-          })}: ${err} - Please contact us with the image name and lexeme.`
+          })}: ${err} - Please contact us with the image name.`
         );
         error = err;
-        // A full list of error codes is available at
-        // https://firebase.google.com/docs/storage/web/handle-errors
-        // switch (error.code) {
-        //     case 'storage/unauthorized':
-        //         // User doesn't have permission to access the object
-        //         break;
-
-        //     case 'storage/canceled':
-        //         // User canceled the upload
-        //         break;
-
-        //     case 'storage/unknown':
-        //         // Unknown error occurred, inspect error.serverResponse
-        //         break;
-        // }
       },
       () => savePhoto(storagePath)
     );
@@ -103,32 +90,8 @@
       }
       const gcsPath = await response.json() as string
 
-      if (entry) {
-        const pf: GoalDatabasePhoto = {
-          path: storagePath,
-          gcs: gcsPath,
-          ts: new Date().getTime(),
-          cr: $user.displayName,
-          ab: $user.uid,
-        };
-        await updateOnline<IEntry>(
-          `dictionaries/${$dictionary.id}/words/${entry.id}`,
-          { pf },
-          { abbreviate: true }
-          );
-      } else {
-        const featuredImage: DictionaryPhoto = {
-          fb_storage_path: storagePath,
-          specifiable_image_url: gcsPath,
-          timestamp: new Date(),
-          uid_added_by: $user.uid,
-        } 
-        await updateOnline<IDictionary>(
-          `dictionaries/${$dictionary.id}`,
-          { featuredImage },
-          { abbreviate: true }
-        );
-      }
+      dispatch('uploaded', { fb_storage_path: storagePath, specifiable_image_url: gcsPath})
+
       success = true;
     } catch (err) {
       error = err;
