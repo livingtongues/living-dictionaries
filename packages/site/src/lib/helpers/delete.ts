@@ -2,7 +2,7 @@ import { t } from 'svelte-i18n';
 import { get } from 'svelte/store';
 import { dictionary } from '$lib/stores';
 import { goto } from '$app/navigation';
-import type { GoalDatabaseVideo, IEntry } from '@living-dictionaries/types';
+import type { IDictionary, GoalDatabaseVideo, IEntry } from '@living-dictionaries/types';
 import { updateOnline, deleteDocumentOnline, set } from 'sveltefirets';
 import { arrayUnion } from 'firebase/firestore/lite';
 import { serverTimestamp } from 'firebase/firestore';
@@ -21,15 +21,12 @@ export async function deleteImage(entry: IEntry) {
   }
 }
 
-//Don't know why is not working
-export async function deleteDictionayImage() {
+export async function deleteDictionaryImage(dictionaryId: string) {
   const $t = get(t);
   try {
-    const $dictionary = get(dictionary);
-    await updateOnline(
-      `dictionaries/${$dictionary.id}}`,
+    await updateOnline<IDictionary>(
+      `dictionaries/${dictionaryId}}`,
       { featuredImage: null },
-      { abbreviate: true }
     );
   } catch (err) {
     alert(`${$t('misc.error', { default: 'Error' })}: ${err}`);

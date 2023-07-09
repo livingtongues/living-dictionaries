@@ -12,7 +12,7 @@
     <div class="aspect-square overflow-hidden">
       <Image
         square={480}
-        lexeme={entry.lx}
+        title={entry.lx}
         gcs={entry.pf.gcs}
         {canEdit}
         on:deleteImage={() => deleteImage(entry)} />
