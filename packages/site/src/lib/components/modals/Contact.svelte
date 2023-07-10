@@ -6,9 +6,11 @@
   import { createEventDispatcher } from 'svelte';
   import { apiFetch } from '$lib/client/apiFetch';
   import type { SupportRequestBody } from '../../../routes/api/email/support/+server';
+  import type { Address } from '../../../routes/api/email/send/mail-channels.interface';
   import { subjects } from '$lib/mappings/email-subjects';
 
   export let componentSubject: string = undefined;
+  export let toManagers: Address[] = [];
 
   const dispatch = createEventDispatcher<{ close: boolean }>();
 
@@ -29,7 +31,8 @@
         email: $user?.email || email,
         name: $user?.displayName || 'Anonymous',
         url: window.location.href,
-        subject: componentSubject || subject
+        subject: componentSubject || subject,
+        to: toManagers
       });
 
       if (response.status !== 200) {
