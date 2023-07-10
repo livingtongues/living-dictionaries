@@ -144,6 +144,7 @@
     </Button>
   {:else if !$isContributor}
     <ShowHide let:show let:toggle>
+      <!-- TODO call the Collection component to fecth all managers -->
       <Button onclick={toggle} form="filled">
         {$t('contributors.request_access', { default: 'Request Access' })}
       </Button>
