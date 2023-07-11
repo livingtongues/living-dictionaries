@@ -11,7 +11,7 @@
     'delete-dictionary': 'Delete a dictionary',
     'public-dictionary': 'Make a dictionary public',
     'import-data': 'Import data',
-    'data-fields': 'Optional data fields',
+    // 'data-fields': 'Optional data fields',
     'request-access': 'Request editing access',
     'report-problem': 'Report a problem',
     'other': 'Other'
@@ -37,7 +37,7 @@
         email: $user?.email || email,
         name: $user?.displayName || 'Anonymous',
         url: window.location.href,
-        subject: subject || subject
+        subject: subjects[subject]
       });
 
       if (response.status !== 200) {
@@ -90,7 +90,7 @@
   {#if !status}
     <Form let:loading onsubmit={send}>
       <div class="my-2">
-        <select class="w-full" bind:value={subject}>
+        <select class="w-full" bind:value={subjects[subject]}>
           <!-- TODO i18n translations -->
           <option disabled selected value="">Select a topic:</option>
           {#each Object.entries(subjects) as [key, title]}
