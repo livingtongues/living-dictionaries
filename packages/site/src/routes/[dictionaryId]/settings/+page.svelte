@@ -190,8 +190,9 @@
     <PublicCheckbox
       checked={dictionary.public}
       on:changed={({ detail: { checked } }) => togglePublic(checked)} />
+    <div class="mb-5" />
 
-    <ShowHide let:show let:toggle>
+    <!-- <ShowHide let:show let:toggle>
       <Button onclick={toggle} class="mb-5">
         {$t('settings.optional_data_fields', { default: 'Optional Data Fields' })}:
         {$t('header.contact_us', { default: 'Contact Us' })}
@@ -202,7 +203,7 @@
           <Contact subject="data-fields" on:close={toggle} />
         {/await}
       {/if}
-    </ShowHide>
+    </ShowHide> -->
 
     {#if $isManager}
       <div>
