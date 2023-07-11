@@ -42,7 +42,7 @@
     <Button form="filled" onclick={toggle}>{$t('header.contact_us', { default: 'Contact Us' })}</Button>
     {#if show}
       {#await import('$lib/components/modals/Contact.svelte') then { default: Contact }}
-        <Contact subject="report-problem" on:close={toggle} />
+        <Contact subject="report_problem" on:close={toggle} />
       {/await}
     {/if}
   </ShowHide>

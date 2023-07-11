@@ -148,7 +148,7 @@
       </Button>
       {#if show}
         {#await import('$lib/components/modals/Contact.svelte') then { default: Contact }}
-          <Contact subject="request-access" on:close={toggle} />
+          <Contact subject="request_access" on:close={toggle} />
         {/await}
       {/if}
     </ShowHide>
