@@ -1,6 +1,5 @@
 import { deleteDocument, deleteDocumentOnline, setOnline } from 'sveltefirets';
 import type { IHelper, IDictionary } from '@living-dictionaries/types';
-import { dictionary } from 'svelte-i18n';
 
 export async function addDictionaryManager(manager: IHelper, dictionaryId: string) {
   await setOnline<IHelper>(`dictionaries/${dictionaryId}/managers/${manager.id}`, {
