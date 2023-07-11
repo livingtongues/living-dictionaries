@@ -13,7 +13,6 @@
   import PrintAccessCheckbox from '$lib/components/settings/PrintAccessCheckbox.svelte'; // only used here - perhaps colocate
   import { glossingLanguages } from '$lib/glosses/glossing-languages';
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte';
-  import { findSubject } from '$lib/helpers/contact/findSubject';
 
   async function togglePrintAccess(settingPrintAccess: boolean) {
     try {
@@ -191,8 +190,10 @@
     <PublicCheckbox
       checked={dictionary.public}
       on:changed={({ detail: { checked } }) => togglePublic(checked)} />
+    <div class="mb-5" />
 
-    <ShowHide let:show let:toggle>
+    <!-- Comment this in case we want to include it again in the future -->
+    <!-- <ShowHide let:show let:toggle>
       <Button onclick={toggle} class="mb-5">
         {$t('settings.optional_data_fields', { default: 'Optional Data Fields' })}:
         {$t('header.contact_us', { default: 'Contact Us' })}
@@ -200,10 +201,10 @@
 
       {#if show}
         {#await import('$lib/components/modals/Contact.svelte') then { default: Contact }}
-          <Contact componentSubject={findSubject('data-fields')} on:close={toggle} />
+          <Contact subject="data-fields" on:close={toggle} />
         {/await}
       {/if}
-    </ShowHide>
+    </ShowHide> -->
 
     {#if $isManager}
       <div>
@@ -214,7 +215,7 @@
           </Button>
           {#if show}
             {#await import('$lib/components/modals/Contact.svelte') then { default: Contact }}
-              <Contact componentSubject={findSubject('delete-dictionary')} on:close={toggle} />
+              <Contact subject="delete_dictionary" on:close={toggle} />
             {/await}
           {/if}
         </ShowHide>
