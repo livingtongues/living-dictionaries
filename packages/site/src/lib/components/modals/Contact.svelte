@@ -8,13 +8,13 @@
   import type { SupportRequestBody } from '../../../routes/api/email/support/+server';
 
   const subjects = {
-    'delete-dictionary': 'Delete a dictionary',
-    'public-dictionary': 'Make a dictionary public',
-    'import-data': 'Import data',
-    // 'data-fields': 'Optional data fields',
-    'request-access': 'Request editing access',
-    'report-problem': 'Report a problem',
-    'other': 'Other'
+    'delete_dictionary': 'Delete a dictionary',
+    'public_dictionary': 'Make a dictionary public',
+    'import_data': 'Import data',
+    // 'data_fields': 'Optional data fields',
+    'request_access': 'Request editing access',
+    'report_problem': 'Report a problem',
+    'other': 'Other topic'
   }
   type Subjects = keyof typeof subjects;
   export let subject: Subjects = undefined;
@@ -92,9 +92,9 @@
       <div class="my-2">
         <select class="w-full" bind:value={subjects[subject]}>
           <!-- TODO i18n translations -->
-          <option disabled selected value="">Select a topic:</option>
+          <option disabled selected value="">{$t('contact.select_topic', { default: 'Select a topic' })}:</option>
           {#each Object.entries(subjects) as [key, title]}
-            <option data-value={subject}>{$t("ps." + key, { default: title })}</option>
+            <option data-value={subject}>{$t('contact.' + key, { default: title })}</option>
           {/each}
         </select>
       </div>
@@ -103,7 +103,6 @@
           default: 'What is your question or comment?',
         })}
       </label>
-      <!-- TODO change contact.enter_message in i18n translations -->
       <textarea
         name="message"
         required
@@ -112,7 +111,7 @@
         bind:value={message}
         class="form-input bg-white w-full"
         placeholder={$t('contact.enter_message', {
-          default: 'Please write your message in English, French or Spanish',
+          default: 'Enter your message',
         }) + '...'} />
       <div class="flex text-xs">
         <div class="text-gray-500 ml-auto">{message.length}/1000</div>
