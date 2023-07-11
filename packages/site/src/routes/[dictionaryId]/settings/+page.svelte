@@ -192,6 +192,7 @@
       on:changed={({ detail: { checked } }) => togglePublic(checked)} />
     <div class="mb-5" />
 
+    <!-- Comment this in case we want to include it again in the future -->
     <!-- <ShowHide let:show let:toggle>
       <Button onclick={toggle} class="mb-5">
         {$t('settings.optional_data_fields', { default: 'Optional Data Fields' })}:
@@ -214,7 +215,7 @@
           </Button>
           {#if show}
             {#await import('$lib/components/modals/Contact.svelte') then { default: Contact }}
-              <Contact subject="delete-dictionary" on:close={toggle} />
+              <Contact subject="delete_dictionary" on:close={toggle} />
             {/await}
           {/if}
         </ShowHide>

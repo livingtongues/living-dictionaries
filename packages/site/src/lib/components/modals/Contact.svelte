@@ -11,7 +11,7 @@
     'delete_dictionary': 'Delete a dictionary',
     'public_dictionary': 'Make a dictionary public',
     'import_data': 'Import data',
-    // 'data_fields': 'Optional data fields',
+    // 'data_fields': 'Optional data fields', //Comment this in case we want to include it again in the future
     'request_access': 'Request editing access',
     'report_problem': 'Report a problem',
     'other': 'Other topic'
@@ -91,7 +91,6 @@
     <Form let:loading onsubmit={send}>
       <div class="my-2">
         <select class="w-full" bind:value={subjects[subject]}>
-          <!-- TODO i18n translations -->
           <option disabled selected value="">{$t('contact.select_topic', { default: 'Select a topic' })}:</option>
           {#each Object.entries(subjects) as [key, title]}
             <option data-value={subject}>{$t('contact.' + key, { default: title })}</option>
