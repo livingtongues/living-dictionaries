@@ -24,7 +24,7 @@
     <span class="flex-grow" />
     <span
       class="inline-block py-1 px-2 leading-none text-xs font-semibold
-      text-gray-700 bg-gray-300 rounded-full">
+        text-gray-700 bg-gray-300 rounded-full">
       {new Intl.NumberFormat().format($dictionary.entryCount || 0)}
     </span>
   </a>
@@ -54,6 +54,16 @@
   </a>
   {#if $isManager}
     <a
+      href={'/' + $dictionary.id + '/import'}
+      class:active={$page.url.pathname.includes('import')}>
+      <i class="far fa-file-import" />
+      <span class="font-medium mx-2">
+        {$_('import.import', {
+          default: 'Import',
+        })}
+      </span>
+    </a>
+    <a
       href={'/' + $dictionary.id + '/settings'}
       class:active={$page.url.pathname.includes('settings')}>
       <i class="far fa-cog fa-fw" />
@@ -61,8 +71,6 @@
         {$_('misc.settings', { default: 'Settings' })}
       </span>
     </a>
-  {/if}
-  {#if $isManager}
     <a
       href={'/' + $dictionary.id + '/export'}
       class:active={$page.url.pathname.includes('export')}>
