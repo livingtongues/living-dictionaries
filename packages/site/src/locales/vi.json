@@ -85,7 +85,15 @@
     "send_message": "Gửi tin nhắn",
     "message_sent": "Tin nhắn đã được gửi đi. Chúng tôi sẽ cố gắng phản hồi trong thời gian sớm nhất có thể.",
     "what_is_your_question": "Bạn có câu hỏi hay nhận xét gì hay không?",
-    "message_failed": "Tin nhắn không được gửi. Xin vui lòng kiểm tra kết nối mạng của bạn hoặc gửi email cho chúng tôi tại: "
+    "message_failed": "Tin nhắn không được gửi. Xin vui lòng kiểm tra kết nối mạng của bạn hoặc gửi email cho chúng tôi tại: ",
+    "delete_dictionary": "Xóa một từ điển",
+    "public_dictionary": "Làm cho một từ điển công khai",
+    "import_data": "Nhập dữ liệu",
+    "request_access": "Yêu cầu chỉnh sửa truy cập",
+    "report_problem": "Báo cáo một vấn đề",
+    "other": "Chủ đề khác",
+    "select_topic": "Chọn một chủ đề",
+    "data_fields": "Trường dữ liệu tùy chọn"
   },
   "create": {
     "select_coordinates": "Chọn tọa độ",
@@ -235,7 +243,8 @@
     "public_private_meaning": " 'Công khai' nghĩa là ai cũng có thể xem Từ Điển của bạn. Việc này cần có sự chấp thuận từ cộng đồng. Từ Điển được đặt ở chế độ 'Riêng tư' sẽ chỉ hiển thị với bạn và các người cộng tác của bạn. ",
     "optional_data_fields": "Các mục dữ liệu tùy chọn khác",
     "unable_to_delete": "Lưu ý: Sau này bạn sẽ không thể xóa các ngôn ngữ chú thích đã dùng",
-    "print_access_meaning": "Việc này cho phép công chúng khả năng tải xuống và in Từ Điển này theo định dạng tệp PDF."
+    "print_access_meaning": "Việc này cho phép công chúng khả năng tải xuống và in Từ Điển này theo định dạng tệp PDF.",
+    "featured_image": "Hình ảnh nổi bật"
   },
   "speakers": {
     "add_new_speaker": "Thêm người nói mới",
@@ -303,5 +312,13 @@
     "columns": "Cột",
     "headword_size": "Kích thước tiêu đề",
     "font_size": "Kích cỡ chữ"
+  },
+  "import": {
+    "import": "Nhập khẩu",
+    "template_link": "Liên kết đến mẫu",
+    "instructions_1": "Nếu bạn đã có dữ liệu ngôn ngữ mà bạn muốn nhập vào từ điển của mình, vui lòng làm theo các bước dưới đây.",
+    "instructions_2": "Nhấp vào liên kết màu xanh lam đến nút Mẫu bên dưới. Tải xuống mẫu dưới dạng tệp Excel hoặc tạo bản sao trên Google Docs. Chỉnh sửa mẫu theo nhu cầu dự án của bạn. Sao chép và dán dữ liệu của bạn vào bảng tính.",
+    "instructions_3": "Sử dụng liên hệ với chúng tôi dưới đây để liên hệ với chúng tôi. Hãy cho chúng tôi biết rằng bạn có một bảng tính mới đã sẵn sàng để nhập. Hỏi chúng tôi bất kỳ câu hỏi bạn có. Chúng tôi sẽ trả lời bạn qua email và sau đó bạn có thể gửi cho chúng tôi tệp của bạn.",
+    "instructions_4": "Để gửi cho chúng tôi dữ liệu được xuất từ ​​các phần mềm từ điển như Flex, Lexique Pro, Shoebox, vui lòng sử dụng nút Liên hệ với chúng tôi bên dưới và cho chúng tôi biết chi tiết về dự án của bạn."
   }
 }
