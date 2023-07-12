@@ -10,7 +10,7 @@
     const Sentry = await import('@sentry/browser');
     const eventId = Sentry.captureException($page.error);
     console.error('sent error', eventId);
-    // https://docs.sentry.io/enriching-error-data/user-feedback
+  // https://docs.sentry.io/enriching-error-data/user-feedback
     // Sentry.showReportDialog({ eventId });
   });
 </script>
@@ -42,7 +42,7 @@
     <Button form="filled" onclick={toggle}>{$t('header.contact_us', { default: 'Contact Us' })}</Button>
     {#if show}
       {#await import('$lib/components/modals/Contact.svelte') then { default: Contact }}
-        <Contact on:close={toggle} />
+        <Contact subject="report_problem" on:close={toggle} />
       {/await}
     {/if}
   </ShowHide>

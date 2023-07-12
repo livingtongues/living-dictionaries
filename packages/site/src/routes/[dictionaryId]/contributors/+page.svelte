@@ -16,18 +16,18 @@
 
   function writeIn() {
     const name = prompt(`${$t('speakers.name', { default: 'Name' })}?`);
-    if (name) {
+    if (name)
       add(`dictionaries/${$dictionary.id}/writeInCollaborators`, { name });
-    }
+
   }
 </script>
 
 <p class="mb-2">
   <i
-    >{$t('contributors.manager_contributor_distinction', {
-      default:
-        'Note: Dictionary managers may add, edit or delete content. Contributors are project collaborators who can also add and edit, but cannot delete any content.',
-    })}</i>
+  >{$t('contributors.manager_contributor_distinction', {
+    default:
+      'Note: Dictionary managers may add, edit or delete content. Contributors are project collaborators who can also add and edit, but cannot delete any content.',
+  })}</i>
 </p>
 
 <h3 class="font-semibold text-lg mb-1 mt-3">
@@ -63,9 +63,9 @@
                 status: 'cancelled',
               })}>
             <i slot="prefix"
-              >{$t('contributors.invitation_sent', {
-                default: 'Invitation sent',
-              })}:</i>
+            >{$t('contributors.invitation_sent', {
+              default: 'Invitation sent',
+            })}:</i>
           </ContributorInvitationStatus>
         </div>
       {/each}
@@ -96,9 +96,9 @@
           <div class="w-1" />
           <Button
             onclick={() => {
-              if (confirm($t('misc.delete', { default: 'Delete' }) + '?')) {
+              if (confirm($t('misc.delete', { default: 'Delete' }) + '?'))
                 removeDictionaryContributor(contributor, $dictionary.id);
-              }
+
             }}
             color="red"
             size="sm">
@@ -128,9 +128,9 @@
                 status: 'cancelled',
               })}>
             <i slot="prefix"
-              >{$t('contributors.invitation_sent', {
-                default: 'Invitation sent',
-              })}:</i>
+            >{$t('contributors.invitation_sent', {
+              default: 'Invitation sent',
+            })}:</i>
           </ContributorInvitationStatus>
         </div>
       {/each}
@@ -148,7 +148,7 @@
       </Button>
       {#if show}
         {#await import('$lib/components/modals/Contact.svelte') then { default: Contact }}
-          <Contact on:close={toggle} />
+          <Contact subject="request_access" on:close={toggle} />
         {/await}
       {/if}
     </ShowHide>
@@ -180,7 +180,7 @@
                 );
               }
             }}
-            >{$t('misc.delete', { default: 'Delete' })}
+          >{$t('misc.delete', { default: 'Delete' })}
             <i class="fas fa-times" /></Button>
         {/if}
       </div>
