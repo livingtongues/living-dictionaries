@@ -58,7 +58,7 @@
       class:active={$page.url.pathname.includes('import')}>
       <i class="far fa-file-import" />
       <span class="font-medium mx-2">
-        {$_('header.import', {
+        {$_('import.import', {
           default: 'Import',
         })}
       </span>
