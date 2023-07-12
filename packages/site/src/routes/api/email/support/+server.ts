@@ -9,15 +9,16 @@ export interface SupportRequestBody {
   message: string;
   name: string;
   url: string;
+  subject?: string;
 }
 
 export const POST: RequestHandler = async ({ request, fetch }) => {
-  const { email, message, name, url } = await request.json() as SupportRequestBody;
+  const { email, message, name, url, subject } = await request.json() as SupportRequestBody;
 
   const emailParts: EmailParts = {
     to: getSupportMessageRecipients({ dev }),
     reply_to: { email },
-    subject: 'Living Dictionaries Support Request',
+    subject: subject || 'Living Dictionaries Support Request',
     type: 'text/plain',
     body: `${message} 
 

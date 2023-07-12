@@ -34,16 +34,16 @@
       color={dictionary.public ? 'green' : 'orange'}
       size="sm"
       onclick={() => {
-        if (confirm('Flip this dictionary\'s visibility?')) {
+        if (confirm('Flip this dictionary\'s visibility?'))
           dispatch('toggleprivacy');
-        }
+
       }}>
       {dictionary.public ? 'Public' : 'Private'}
     </Button>
   </td>
   <td>
     <Button title="View Entries" size="sm" form="simple" href="/{dictionary.id}">
-      {dictionary.entryCount} 
+      {dictionary.entryCount}
       <!-- <span class="i-tabler-external-link" style="vertical-align: -1px;" /> -->
     </Button>
   </td>
@@ -141,9 +141,9 @@
       strings={dictionary.alternateNames}
       on:additem={() => {
         const name = prompt('Enter alternate name:');
-        if (name) {
+        if (name)
           dispatch('addalternatename', name);
-        }
+
       }}
       on:itemremoved={(e) => dispatch('removealternatename', e.detail.value)} />
   </td>
@@ -164,19 +164,19 @@
     </Button>
   </td>
   <td
-    >{dictionary.languageUsedByCommunity !== undefined
-      ? dictionary.languageUsedByCommunity
-      : ''}</td>
+  >{dictionary.languageUsedByCommunity !== undefined
+    ? dictionary.languageUsedByCommunity
+    : ''}</td>
   <td>{dictionary.communityPermission ? dictionary.communityPermission : ''}</td>
 
   <td
-    ><div style="width: 300px;" />
+  ><div style="width: 300px;" />
     {dictionary.authorConnection ? dictionary.authorConnection : ''}</td>
   <td>
     <div style="width: 300px;" />
     {dictionary.conLangDescription ? dictionary.conLangDescription : ''}</td>
   {#if $admin > 1}
     <td class="cursor-pointer" title={JSON.stringify(dictionary, null, 1)}
-      ><span class="i-material-symbols-info-outline" /></td>
+    ><span class="i-material-symbols-info-outline" /></td>
   {/if}
 </tr>
