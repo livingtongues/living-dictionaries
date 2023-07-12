@@ -1,6 +1,6 @@
 <script lang="ts">
   import { t } from 'svelte-i18n';
-  import { admin, dictionary as dictionaryStore } from '$lib/stores';
+  import { admin, isManager, dictionary as dictionaryStore } from '$lib/stores';
   import { update, updateOnline, getCollection, Doc } from 'sveltefirets';
   import { Button, ShowHide, JSON } from 'svelte-pieces';
   import EditString from '../EditString.svelte';
@@ -47,9 +47,9 @@
               default: 'Does the speech community allow this language to be online?',
             })}`
           )
-        ) {
+        )
           alert($t('header.contact_us', { default: 'Contact Us' }));
-        }
+
         location.reload();
       }
     } catch (err) {
@@ -192,7 +192,8 @@
       on:changed={({ detail: { checked } }) => togglePublic(checked)} />
     <div class="mb-5" />
 
-    <ShowHide let:show let:toggle>
+    <!-- Comment this in case we want to include it again in the future -->
+    <!-- <ShowHide let:show let:toggle>
       <Button onclick={toggle} class="mb-5">
         {$t('settings.optional_data_fields', { default: 'Optional Data Fields' })}:
         {$t('header.contact_us', { default: 'Contact Us' })}
@@ -200,16 +201,33 @@
 
       {#if show}
         {#await import('$lib/components/modals/Contact.svelte') then { default: Contact }}
-          <Contact on:close={toggle} />
+          <Contact subject="data-fields" on:close={toggle} />
         {/await}
       {/if}
-    </ShowHide>
+    </ShowHide> -->
+
+    {#if $isManager}
+      <div>
+        <ShowHide let:show let:toggle>
+          <Button onclick={toggle} class="mb-5" color="red">
+            {$t('misc.delete', { default: 'Delete' })} {dictionary.name} {$t('misc.LD_singular', { default: 'Living Dictionary' })}:
+            {$t('header.contact_us', { default: 'Contact Us' })}
+          </Button>
+          {#if show}
+            {#await import('$lib/components/modals/Contact.svelte') then { default: Contact }}
+              <Contact subject="delete_dictionary" on:close={toggle} />
+            {/await}
+          {/if}
+        </ShowHide>
+      </div>
+    {/if}
 
     {#if $admin > 1}
       <div class="mt-5">
         <JSON obj={dictionary} />
       </div>
     {/if}
+    <div class="mb-5" />
   </div>
 </Doc>
 

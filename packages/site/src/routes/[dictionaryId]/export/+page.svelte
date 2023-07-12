@@ -12,50 +12,29 @@
   import { expand_entry } from '$lib/transformers/expand_entry';
   import DownloadMedia from './DownloadMedia.svelte';
   import { fetchSpeakers } from './fetchSpeakers';
-  import { prepareEntriesForCsv, type EntryForCSV } from './prepareEntriesForCsv';
+  import { getCsvHeaders, formatCsvEntries, type EntryForCSV } from './prepareEntriesForCsv';
   import { downloadObjectsAsCSV } from '$lib/export/csv';
 
   let includeImages = false;
   let includeAudio = false;
 
+  let entryHeaders: EntryForCSV = {}
+  let formattedEntries: EntryForCSV[] = [];
   let entriesWithImages: EntryForCSV[] = [];
   let entriesWithAudio: EntryForCSV[] = [];
-  let allEntries: EntryForCSV[] = [];
+
   let mounted = false;
 
   onMount(async () => {
-    const database_entries = await getCollection<ActualDatabaseEntry>(
-      `dictionaries/${$dictionary.id}/words`
-    );
-    const converted_to_current_shaped_entries = database_entries.map(
-      convert_entry_to_current_shape
-    );
+    const database_entries = await getCollection<ActualDatabaseEntry>(`dictionaries/${$dictionary.id}/words`);
+    const converted_to_current_shaped_entries = database_entries.map(convert_entry_to_current_shape);
     const expanded_entries = converted_to_current_shaped_entries.map(expand_entry);
-
     const speakers = await fetchSpeakers(expanded_entries);
 
-    entriesWithImages = prepareEntriesForCsv(
-      expanded_entries.filter((entry) => entry.senses[0].photo_files?.[0]?.fb_storage_path),
-      $dictionary,
-      speakers,
-      partsOfSpeech
-    );
-
-    entriesWithAudio = prepareEntriesForCsv(
-      expanded_entries.filter((entry) => entry.sound_files?.[0]?.fb_storage_path),
-      $dictionary,
-      speakers,
-      partsOfSpeech
-    );
-
-    allEntries = prepareEntriesForCsv(expanded_entries, $dictionary, speakers, partsOfSpeech).map(
-      (entry) => {
-        const newEntry = { ...entry };
-        delete newEntry.image_file_path;
-        delete newEntry.sound_file_path;
-        return newEntry;
-      }
-    );
+    entryHeaders = getCsvHeaders(expanded_entries, $dictionary)
+    formattedEntries = formatCsvEntries(expanded_entries, speakers, partsOfSpeech)
+    entriesWithImages = formattedEntries.filter((entry) => entry.image_filename);
+    entriesWithAudio = formattedEntries.filter((entry) => entry.sound_filename);
 
     mounted = true;
   });
@@ -124,7 +103,8 @@
       {:else}
         <DownloadMedia
           dictionary={$dictionary}
-          finalizedEntries={allEntries}
+          {entryHeaders}
+          finalizedEntries={formattedEntries}
           entriesWithImages={includeImages ? entriesWithImages : []}
           entriesWithAudio={includeAudio ? entriesWithAudio : []}
           on:completed={toggle}
@@ -140,10 +120,9 @@
     </ShowHide>
   {:else}
     <Button
-      loading={!allEntries.length}
+      loading={!formattedEntries.length}
       onclick={() => {
-        const [headers, ...entries] = allEntries;
-        downloadObjectsAsCSV(headers, entries, $dictionary.id);
+        downloadObjectsAsCSV(entryHeaders, formattedEntries, $dictionary.id);
       }}
       form="filled">
       {$_('export.download_csv', { default: 'Download CSV' })}
@@ -156,7 +135,7 @@
 {#if $admin}
   <div class="mt-5">
     <Button form="filled" href="entries/print"
-      >{$_('export.download_pdf', { default: 'Download PDF' })}</Button>
+    >{$_('export.download_pdf', { default: 'Download PDF' })}</Button>
   </div>
 {/if}
 
