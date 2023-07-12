@@ -90,10 +90,10 @@
   {#if !status}
     <Form let:loading onsubmit={send}>
       <div class="my-2">
-        <select class="w-full" bind:value={subjects[subject]}>
+        <select class="w-full" bind:value={subject}>
           <option disabled selected value="">{$t('contact.select_topic', { default: 'Select a topic' })}:</option>
           {#each Object.entries(subjects) as [key, title]}
-            <option data-value={subject}>{$t('contact.' + key, { default: title })}</option>
+            <option value={key}>{$t('contact.' + key, { default: title })}</option>
           {/each}
         </select>
       </div>
