@@ -24,7 +24,7 @@
   export let url = $page.url.toString();
 
   const DEFAULT_IMAGE =
-    'https://firebasestorage.googleapis.com/v0/b/talking-dictionaries-dev.appspot.com/o/livingdictionary%2Fimages%2FNEW_Living_Tongues_logo_with_white_around_it.png?alt=media&token=ec3f31e5-a426-4222-a5a1-a29a1da7efd3'; // 1484 x 729
+    'https://firebasestorage.googleapis.com/v0/b/talking-dictionaries-alpha.appspot.com/o/livingdictionary%2Fimages%2FNEW_Living_Tongues_logo_with_white_around_it.png?alt=media&token=dceda3c5-85c4-4cec-9f9e-885047653524'; // 1484 x 729
 
   const IMAGE_API = 'https://ld-parts.vercel.app/og';
   export let width = 1200;
