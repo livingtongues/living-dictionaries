@@ -24,7 +24,7 @@
   export let url = $page.url.toString();
 
   const DEFAULT_IMAGE =
-    'https://i2.wp.com/livingtongues.org/wp-content/uploads/2015/03/LT-logo-1.png?w=987&ssl=1'; // 987 x 299
+    'https://firebasestorage.googleapis.com/v0/b/talking-dictionaries-alpha.appspot.com/o/livingdictionary%2Fimages%2FNEW_Living_Tongues_logo_with_white_around_it.png?alt=media&token=dceda3c5-85c4-4cec-9f9e-885047653524'; // 1484 x 729
 
   const IMAGE_API = 'https://ld-parts.vercel.app/og';
   export let width = 1200;
