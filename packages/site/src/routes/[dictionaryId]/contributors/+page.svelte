@@ -1,6 +1,6 @@
 <script lang="ts">
   import { t } from 'svelte-i18n';
-  import { add, deleteDocumentOnline, updateOnline, Collection } from 'sveltefirets';
+  import { add, deleteDocumentOnline, updateOnline, Collection, collectionStore } from 'sveltefirets';
   import { where } from 'firebase/firestore';
   import { isManager, isContributor, dictionary, admin } from '$lib/stores';
   import type { IInvite, IHelper } from '@living-dictionaries/types';
@@ -13,6 +13,15 @@
 
   let helperType: IHelper[];
   let inviteType: IInvite[];
+
+  const managersSub = collectionStore<IHelper>(`dictionaries/${$dictionary.id}/managers`, [], {
+    startWith: [],
+    log: true,
+  });
+  let managers: IHelper[];
+  $: managers = $managersSub.map(manager => {
+    return {...manager}
+  })
 
   function writeIn() {
     const name = prompt(`${$t('speakers.name', { default: 'Name' })}?`);
@@ -35,18 +44,13 @@
 </h3>
 
 <div class="divide-y divide-gray-200">
-  <Collection
-    path={`dictionaries/${$dictionary.id}/managers`}
-    startWith={helperType}
-    let:data={managers}>
-    {#each managers as manager}
-      <div class="py-3">
-        <div class="text-sm leading-5 font-medium text-gray-900">
-          {manager.name}
-        </div>
+  {#each managers as manager}
+    <div class="py-3">
+      <div class="text-sm leading-5 font-medium text-gray-900">
+        {manager.name}
       </div>
-    {/each}
-  </Collection>
+    </div>
+  {/each}
   {#if $isManager}
     <Collection
       path={`dictionaries/${$dictionary.id}/invites`}
@@ -143,7 +147,7 @@
     </Button>
   {:else if !$isContributor}
     <ShowHide let:show let:toggle>
-      <!-- TODO call the Collection component to fecth all managers -->
+      <!-- TODO call the Collection component to fetch all managers -->
       <Button onclick={toggle} form="filled">
         {$t('contributors.request_access', { default: 'Request Access' })}
       </Button>
