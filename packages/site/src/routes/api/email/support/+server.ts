@@ -17,7 +17,7 @@ export const POST: RequestHandler = async ({ request, fetch }) => {
   const { email, message, name, url, subject, to } = await request.json() as SupportRequestBody;
 
   const emailParts: EmailParts = {
-    to: to ? to.concat(getSupportMessageRecipients({ dev })) : getSupportMessageRecipients({ dev }),
+    to: to || getSupportMessageRecipients({ dev }),
     reply_to: { email },
     subject: subject || 'Living Dictionaries Support Request',
     type: 'text/plain',
