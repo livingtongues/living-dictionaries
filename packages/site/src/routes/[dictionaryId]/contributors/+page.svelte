@@ -10,14 +10,14 @@
   import ContributorInvitationStatus from '$lib/components/contributors/ContributorInvitationStatus.svelte';
   import Citation from './Citation.svelte';
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte';
-  // import type { Address } from '../../api/email/send/mail-channels.interface';
+  import type { Address } from '../../api/email/send/mail-channels.interface';
 
   let helperType: IHelper[];
   let inviteType: IInvite[];
   let managers:IHelper[] = []
 
   let users:any[]; // What's this type? I thought it was a DocumentReference but I think it's not
-  let managerAddresses:IUser[] = []
+  let managerAddresses:Address[] = []
   $: if (managers) {
     users = managers.map(manager => {
       const userStore = docStore<IUser>(`users/${manager.id}`, { startWith:[], log: true });
@@ -25,16 +25,14 @@
     });
   }
 
-  $: if (users.length > 0){
+  $: if (users){
     users.forEach((user, i) => {
       user.subscribe(u => {
-        if (u) managerAddresses[i] = u;
+        if (u) managerAddresses[i] = {email: u.email, name: u.displayName};
       })
     });
     managerAddresses = managerAddresses
   }
-
-  // $: if (managerAddresses)
 
   function writeIn() {
     const name = prompt(`${$t('speakers.name', { default: 'Name' })}?`);
@@ -162,17 +160,13 @@
       })}
     </Button>
   {:else if !$isContributor}
-    {#each managerAddresses as user}
-      {user.displayName}
-    {/each}
     <ShowHide let:show let:toggle>
-      <!-- TODO call the Collection component to fetch all managers -->
       <Button onclick={toggle} form="filled">
         {$t('contributors.request_access', { default: 'Request Access' })}
       </Button>
       {#if show}
         {#await import('$lib/components/modals/Contact.svelte') then { default: Contact }}
-          <Contact subject="request_access" on:close={toggle} />
+          <Contact subject="request_access" toManagers={managerAddresses} on:close={toggle} />
         {/await}
       {/if}
     </ShowHide>
