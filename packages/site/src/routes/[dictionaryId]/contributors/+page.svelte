@@ -1,18 +1,40 @@
 <script lang="ts">
   import { t } from 'svelte-i18n';
-  import { add, deleteDocumentOnline, updateOnline, Collection } from 'sveltefirets';
+  import { add, deleteDocumentOnline, updateOnline, Collection, docStore } from 'sveltefirets';
   import { where } from 'firebase/firestore';
   import { isManager, isContributor, dictionary, admin } from '$lib/stores';
-  import type { IInvite, IHelper } from '@living-dictionaries/types';
+  import type { IInvite, IHelper, IUser } from '@living-dictionaries/types';
   import { Button, ShowHide } from 'svelte-pieces';
   import { inviteHelper } from '$lib/helpers/inviteHelper';
   import { removeDictionaryContributor } from '$lib/helpers/dictionariesManaging';
   import ContributorInvitationStatus from '$lib/components/contributors/ContributorInvitationStatus.svelte';
   import Citation from './Citation.svelte';
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte';
+  // import type { Address } from '../../api/email/send/mail-channels.interface';
 
   let helperType: IHelper[];
   let inviteType: IInvite[];
+  let managers:IHelper[] = []
+
+  let users:any[]; // What's this type? I thought it was a DocumentReference but I think it's not
+  let managerAddresses:IUser[] = []
+  $: if (managers) {
+    users = managers.map(manager => {
+      const userStore = docStore<IUser>(`users/${manager.id}`, { startWith:[], log: true });
+      return userStore
+    });
+  }
+
+  $: if (users.length > 0){
+    users.forEach((user, i) => {
+      user.subscribe(u => {
+        if (u) managerAddresses[i] = u;
+      })
+    });
+    managerAddresses = managerAddresses
+  }
+
+  // $: if (managerAddresses)
 
   function writeIn() {
     const name = prompt(`${$t('speakers.name', { default: 'Name' })}?`);
@@ -37,16 +59,15 @@
 <div class="divide-y divide-gray-200">
   <Collection
     path={`dictionaries/${$dictionary.id}/managers`}
-    startWith={helperType}
-    let:data={managers}>
-    {#each managers as manager}
-      <div class="py-3">
-        <div class="text-sm leading-5 font-medium text-gray-900">
-          {manager.name}
-        </div>
+    on:data={e => managers = e.detail.data}
+    startWith={helperType} />
+  {#each managers as manager}
+    <div class="py-3">
+      <div class="text-sm leading-5 font-medium text-gray-900">
+        {manager.name}
       </div>
-    {/each}
-  </Collection>
+    </div>
+  {/each}
   {#if $isManager}
     <Collection
       path={`dictionaries/${$dictionary.id}/invites`}
@@ -98,7 +119,6 @@
             onclick={() => {
               if (confirm($t('misc.delete', { default: 'Delete' }) + '?'))
                 removeDictionaryContributor(contributor, $dictionary.id);
-
             }}
             color="red"
             size="sm">
@@ -142,8 +162,11 @@
       })}
     </Button>
   {:else if !$isContributor}
+    {#each managerAddresses as user}
+      {user.displayName}
+    {/each}
     <ShowHide let:show let:toggle>
-      <!-- TODO call the Collection component to fecth all managers -->
+      <!-- TODO call the Collection component to fetch all managers -->
       <Button onclick={toggle} form="filled">
         {$t('contributors.request_access', { default: 'Request Access' })}
       </Button>
