@@ -7,8 +7,8 @@
   import { apiFetch } from '$lib/client/apiFetch';
   import type { SupportRequestBody } from '../../../routes/api/email/support/+server';
   import type { Address } from '../../../routes/api/email/send/mail-channels.interface';
+  import { dictionary } from '$lib/stores';
 
-  export let componentSubject: string = undefined;
   export let toManagers: Address[] = [];
 
   const subjects = {
@@ -33,6 +33,10 @@
   let email = '';
   
   let status: 'success' | 'fail';
+  let special_request_access_subject = '';
+  $: if ($user?.email || email) {
+    special_request_access_subject = `${$dictionary.name} Living Dictionary: ${$user?.email || email} requests editing access`;
+  }
 
   async function send() {
     try {
@@ -41,7 +45,7 @@
         email: $user?.email || email,
         name: $user?.displayName || 'Anonymous',
         url: window.location.href,
-        subject: subjects[subject],
+        subject: toManagers.length > 0 && subject === 'request_access' ? special_request_access_subject : subjects[subject],
         to: subject === 'request_access' ? toManagers : []
       });
 
