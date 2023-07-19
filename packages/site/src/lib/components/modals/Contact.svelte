@@ -42,7 +42,7 @@
         name: $user?.displayName || 'Anonymous',
         url: window.location.href,
         subject: subjects[subject],
-        to: toManagers
+        to: subject === 'request_access' ? toManagers : []
       });
 
       if (response.status !== 200) {
