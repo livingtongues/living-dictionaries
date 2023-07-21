@@ -11,24 +11,27 @@
   import Citation from './Citation.svelte';
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte';
   import type { Address } from '../../api/email/send/mail-channels.interface';
+  import type { Writable } from 'svelte/store';
 
   let helperType: IHelper[];
   let inviteType: IInvite[];
+  let userType: IUser;
   let managers:IHelper[] = []
 
-  let users:any[]; // What's this type? I thought it was a DocumentReference but I think it's not
+  let users:Partial<Writable<IUser>>[]; // Is this ok?
   let managerAddresses:Address[] = []
   $: if (managers) {
     users = managers.map(manager => {
-      const userStore = docStore<IUser>(`users/${manager.id}`, { startWith:[], log: true });
+      const userStore = docStore<IUser>(`users/${manager.id}`, { startWith: userType, log: true });
       return userStore
     });
   }
 
   $: if (users){
-    users.forEach((user, i) => {
-      user.subscribe(u => {
-        if (u) managerAddresses[i] = {email: u.email, name: u.displayName};
+    users.forEach((user) => {
+      // Should I unsubscribe? Where?
+      user.subscribe((u: IUser) => {
+        if (u) managerAddresses.push({email: u.email, name: u.displayName});
       })
     });
     managerAddresses = managerAddresses
@@ -38,7 +41,6 @@
     const name = prompt(`${$t('speakers.name', { default: 'Name' })}?`);
     if (name)
       add(`dictionaries/${$dictionary.id}/writeInCollaborators`, { name });
-
   }
 </script>
 
