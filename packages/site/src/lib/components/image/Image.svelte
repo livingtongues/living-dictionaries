@@ -42,7 +42,9 @@
   }>();
 </script>
 
-<svelte:window bind:innerWidth={windowWidth} />
+<svelte:window bind:innerWidth={windowWidth} on:keydown={(e) => {
+  if (e.key === 'Escape') viewing = false;
+}} />
 
 {#if !viewing}
   <div class="h-full w-full relative">
@@ -79,7 +81,7 @@
         class="font-semibold text-white p-4 flex justify-between items-center
           absolute top-0 inset-x-0 bg-opacity-25 bg-black">
         <span on:click|stopPropagation>{title}</span>
-        <span class="i-fa-solid-times p-3 cursor-pointer" />
+        <span class="i-fa-solid-times p-3 cursor-pointer opacity-75 hover:opacity-100" />
       </div>
       <img class="object-contain max-h-full" alt="Image of {title}" src={fullscreenSource} />
       {#if canEdit}
