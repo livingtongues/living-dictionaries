@@ -32,10 +32,6 @@
   const dispatch = createEventDispatcher<{uploaded: { fb_storage_path: string, specifiable_image_url: string }}>();
     
   async function startUpload(storagePath: string) {
-    // Replace spaces w/ underscores in dict name, remove special characters from lexeme so image converter can accept filename
-    // const _dictName = dictionary.name.replace(/\s+/g, '_');
-    // const _lexeme = this.entry.lx.replace(/[^a-z0-9+]+/gi, '_');
-
     const customMetadata = {
       uploadedBy: $user.displayName,
       originalFileName: file.name,
@@ -105,7 +101,7 @@
 </script>
 
 <div
-  class="w-full h-full relative flex flex-col items-center justify-center
+  class="w-full h-full flex-grow relative flex flex-col items-center justify-center
   overflow-hidden">
   {#if error}
     <div class="w-12 text-red-600 text-center">
