@@ -117,28 +117,26 @@
       gcs={$dictionary.featuredImage.specifiable_image_url}
       on:deleteImage={async () => await updateDictionary({ featuredImage: null })} />
   {:else}
-    <div class="rounded border">
-      <ImageDropZone let:file class="p-3">
-        <span slot="label">Upload</span>
-        {#if file}
-          {#await import('$lib/components/image/UploadImage.svelte') then { default: UploadImage }}
-            <div class="flex flex-col min-h-100px">
-              <UploadImage
-                {file}
-                fileLocationPrefix={`${$dictionary.id}/featured_images/`}
-                on:uploaded={async ({detail: {fb_storage_path, specifiable_image_url}}) => await updateDictionary({
-                  featuredImage: {
-                    fb_storage_path,
-                    specifiable_image_url,
-                    uid_added_by: $user.uid,
-                    timestamp: new Date(),
-                  }
-                })} />
-            </div>
-          {/await}
-        {/if}
-      </ImageDropZone>
-    </div>
+    <ImageDropZone let:file class="p-3 rounded">
+      <span slot="label">Upload</span>
+      {#if file}
+        {#await import('$lib/components/image/UploadImage.svelte') then { default: UploadImage }}
+          <div class="flex flex-col min-h-100px">
+            <UploadImage
+              {file}
+              fileLocationPrefix={`${$dictionary.id}/featured_images/`}
+              on:uploaded={async ({detail: {fb_storage_path, specifiable_image_url}}) => await updateDictionary({
+                featuredImage: {
+                  fb_storage_path,
+                  specifiable_image_url,
+                  uid_added_by: $user.uid,
+                  timestamp: new Date(),
+                }
+              })} />
+          </div>
+        {/await}
+      {/if}
+    </ImageDropZone>
   {/if}
   <div class="mb-5" />
 

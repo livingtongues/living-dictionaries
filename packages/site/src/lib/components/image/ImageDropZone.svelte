@@ -31,7 +31,7 @@
 {#if !file}
   <label
     class:dragging
-    class="{$$props.class} hover:bg-gray-300 text-gray-600 border-transparent
+    class="{$$props.class} hover:bg-gray-100 text-gray-600
       h-full flex flex-col items-center justify-center border-2 border-dashed
       cursor-pointer"
     title="Add Photo"
