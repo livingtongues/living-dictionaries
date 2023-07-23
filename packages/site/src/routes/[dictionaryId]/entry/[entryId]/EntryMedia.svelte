@@ -2,7 +2,7 @@
   import { t } from 'svelte-i18n';
   import { ShowHide } from 'svelte-pieces';
   import type { IEntry } from '@living-dictionaries/types';
-  import AddImage from '$lib/components/image/AddImage.svelte';
+  import AddImage from '../../entries/AddImage.svelte';
   import Image from '$lib/components/image/Image.svelte';
   import Video from '../../entries/Video.svelte';
 
