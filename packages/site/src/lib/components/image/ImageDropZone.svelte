@@ -28,38 +28,36 @@
   }
 </script>
 
-<div class="{$$props.class} hover:bg-gray-300 flex flex-col">
-  {#if !file}
-    <label
-      class:dragging
-      class="text-gray-600 border-transparent
-        h-full flex flex-col items-center justify-center border-2 border-dashed
-        cursor-pointer"
-      title="Add Photo"
-      on:drop|preventDefault={(e) => handleImage(e.dataTransfer.files)}
-      on:dragover|preventDefault={() => (dragging = true)}
-      on:dragleave|preventDefault={() => (dragging = false)}>
-      <input
-        type="file"
-        accept="image/*"
-        class="hidden"
-        on:input={(e) => {
-          // @ts-ignore
-          handleImage(e.target.files);
-        }} />
-      <span class="hidden md:inline">
-        <i class="far fa-upload" />
-      </span>
-      <span class="md:hidden">
-        <i class="far fa-camera" />
-      </span>
+{#if !file}
+  <label
+    class:dragging
+    class="{$$props.class} hover:bg-gray-300 text-gray-600 border-transparent
+      h-full flex flex-col items-center justify-center border-2 border-dashed
+      cursor-pointer"
+    title="Add Photo"
+    on:drop|preventDefault={(e) => handleImage(e.dataTransfer.files)}
+    on:dragover|preventDefault={() => (dragging = true)}
+    on:dragleave|preventDefault={() => (dragging = false)}>
+    <input
+      type="file"
+      accept="image/*"
+      class="hidden"
+      on:input={(e) => {
+        // @ts-ignore
+        handleImage(e.target.files);
+      }} />
+    <span class="hidden md:inline">
+      <i class="far fa-upload" />
+    </span>
+    <span class="md:hidden">
+      <i class="far fa-camera" />
+    </span>
 
-      <slot name="text" />
-    </label>
-  {:else}
-    <slot {file} />
-  {/if}
-</div>
+    <slot name="label" />
+  </label>
+{:else}
+  <slot {file} />
+{/if}
 
 <style>
   .dragging {
