@@ -21,8 +21,8 @@ export default defineFlatConfig([
       '**/lib/**',
       '.git/**',
       '**/.svelte-kit**',
-      // pnpm-lock.yaml
       'packages/scripts/import/old**',
+      '**/.kitbook/routes/**',
     ],
   },
   {

@@ -11,7 +11,7 @@
   let:props={{ canEdit, width, height }}>
   <div style="width: {width}px; height: {height}px">
     <Image
-      lexeme="butterfly"
+      title="butterfly"
       gcs="LGuBKhg7vuv5-aJcOdnb_ucOXLSCIR1Kjxrh70xRlaIHqWo-mWqfWUcH3Xznz63QsFZmkeVmoNN0PEXzSc0Jh4g"
       width={+width}
       height={+height}

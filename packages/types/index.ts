@@ -14,7 +14,7 @@ export type { IGlossLanguages, IGlossLanguage } from './gloss-language.interface
 export type { IGloss } from './gloss.interface';
 export type { IExampleSentence } from './exampe-sentence.interface';
 export type { IImport } from './import.interface';
-export type { ExpandedPhoto, GoalDatabasePhoto, IPhoto } from './photo.interface';
+export type { ExpandedPhoto, GoalDatabasePhoto, IPhoto, DictionaryPhoto } from './photo.interface';
 export type { ISemanticDomain } from './semantic-domain.interface';
 export type { ISpeaker } from './speaker.interface';
 export type { IUser } from './user.interface';

@@ -4,7 +4,7 @@
   import { Button } from 'svelte-pieces';
   import { createEventDispatcher } from 'svelte';
   
-  export let lexeme: string;
+  export let title: string;
   export let gcs: string;
   export let canEdit = false;
   export let square: number = undefined;
@@ -15,11 +15,13 @@
     duration: 200,
     fallback: scale,
   });
-  let w: number;
+
+  let windowWidth: number;
   let loading = false;
   let viewing = false;
 
-  $: src = `https://lh3.googleusercontent.com/${gcs}=w${w >= 768 ? w - 24 : w}`;
+  $: isDesktop = windowWidth >= 768 
+  $: fullscreenSource = `https://lh3.googleusercontent.com/${gcs}=w${isDesktop ? windowWidth - 24 : windowWidth}`;
 
   function load() {
     const timeout = setTimeout(() => (loading = true), 100);
@@ -31,7 +33,7 @@
       viewing = true;
     };
 
-    img.src = src;
+    img.src = fullscreenSource;
   }
   const key = {};
 
@@ -39,6 +41,10 @@
     deleteImage: boolean;
   }>();
 </script>
+
+<svelte:window bind:innerWidth={windowWidth} on:keydown={(e) => {
+  if (e.key === 'Escape') viewing = false;
+}} />
 
 {#if !viewing}
   <div class="h-full w-full relative">
@@ -61,8 +67,6 @@
   </div>
 {/if}
 
-<div class="fixed left-0 right-0 top-0" style="height: 1px;" bind:clientWidth={w} />
-
 {#if viewing}
   <div
     on:click={() => {
@@ -76,10 +80,10 @@
       <div
         class="font-semibold text-white p-4 flex justify-between items-center
           absolute top-0 inset-x-0 bg-opacity-25 bg-black">
-        <span on:click|stopPropagation>{lexeme}</span>
-        <span class="i-fa-solid-times p-3 cursor-pointer" />
+        <span on:click|stopPropagation>{title}</span>
+        <span class="i-fa-solid-times p-3 cursor-pointer opacity-75 hover:opacity-100" />
       </div>
-      <img class="object-contain max-h-full" alt="Image of {lexeme}" {src} />
+      <img class="object-contain max-h-full" alt="Image of {title}" src={fullscreenSource} />
       {#if canEdit}
         <div
           class="p-4 flex justify-between

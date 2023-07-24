@@ -1,5 +1,6 @@
 import type { GeoPoint } from 'firebase/firestore';
 import type { IFirestoreMetaData } from 'sveltefirets';
+import type { DictionaryPhoto } from '.';
 
 export interface IDictionary extends IFirestoreMetaData {
   // allContribute?: boolean; // deprecated
@@ -26,6 +27,8 @@ export interface IDictionary extends IFirestoreMetaData {
   communityPermission?: 'yes' | 'no' | 'unknown';
   authorConnection?: string;
   conLangDescription?: string;
+
+  featuredImage?: DictionaryPhoto;
 
   // tdv1 (old Talking Dictionaries platform at Swarthmore)
   publishYear?: number;
@@ -66,3 +69,4 @@ interface LngLatFull {
   longitude: number;
   latitude: number;
 }
+
