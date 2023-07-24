@@ -8,6 +8,7 @@
   const IMAGE_API = 'https://ld-parts.vercel.app/og';
   const DEFAULT_IMAGE =
     'https://firebasestorage.googleapis.com/v0/b/talking-dictionaries-alpha.appspot.com/o/livingdictionary%2Fimages%2FNEW_Living_Tongues_logo_with_white_around_it.png?alt=media'; // 1484 x 729
+  const OG_IMAGE_VERSION = 4;
 
   export let admin = false;
   export let dictionaryName: string = undefined;
@@ -45,7 +46,7 @@
       gcsPath: gcsPath?.replace('\n', ''), // this slipped into the server response, can remove after database cleaned
     };
   $: encodedImageProps = encode(JSON.stringify(imageProps));
-  $: imageUrl = gcsPath ? `${IMAGE_API}?props=${encodedImageProps}&v=3` : DEFAULT_IMAGE;
+  $: imageUrl = gcsPath ? `${IMAGE_API}?props=${encodedImageProps}&v=${OG_IMAGE_VERSION}` : DEFAULT_IMAGE;
   $: imageWidth = dictionaryName ? width.toString() : '987';
   $: imageHeight = dictionaryName ? width.toString() : '299';
 </script>
