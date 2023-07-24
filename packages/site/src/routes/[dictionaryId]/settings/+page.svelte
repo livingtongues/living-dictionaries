@@ -1,6 +1,6 @@
 <script lang="ts">
   import { t } from 'svelte-i18n';
-  import { user, admin, dictionary } from '$lib/stores';
+  import { user, admin, dictionary, isManager } from '$lib/stores';
   import { updateOnline, getCollection, Doc } from 'sveltefirets';
   import { Button, ShowHide, JSON } from 'svelte-pieces';
   import EditString from '../EditString.svelte';
@@ -158,6 +158,22 @@
       }
     }} />
   <div class="mb-5" />
+
+  {#if $isManager}
+    <div>
+      <ShowHide let:show let:toggle>
+        <Button onclick={toggle} class="mb-5" color="red">
+          {$t('misc.delete', { default: 'Delete' })} {$dictionary.name} {$t('misc.LD_singular', { default: 'Living Dictionary' })}:
+          {$t('header.contact_us', { default: 'Contact Us' })}
+        </Button>
+        {#if show}
+          {#await import('$lib/components/modals/Contact.svelte') then { default: Contact }}
+            <Contact subject="delete_dictionary" on:close={toggle} />
+          {/await}
+        {/if}
+      </ShowHide>
+    </div>
+  {/if}
 
   <ShowHide let:show let:toggle>
     <Button onclick={toggle} class="mb-5">

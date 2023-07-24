@@ -7,6 +7,18 @@
   import { apiFetch } from '$lib/client/apiFetch';
   import type { SupportRequestBody } from '../../../routes/api/email/support/+server';
 
+  const subjects = {
+    'delete_dictionary': 'Delete a dictionary',
+    'public_dictionary': 'Make a dictionary public',
+    'import_data': 'Import data',
+    // 'data_fields': 'Optional data fields', //Comment this in case we want to include it again in the future
+    'request_access': 'Request editing access',
+    'report_problem': 'Report a problem',
+    'other': 'Other topic'
+  }
+  type Subjects = keyof typeof subjects;
+  export let subject: Subjects = undefined;
+
   const dispatch = createEventDispatcher<{ close: boolean }>();
 
   function close() {
@@ -15,7 +27,7 @@
 
   let message = '';
   let email = '';
-
+  
   let status: 'success' | 'fail';
 
   async function send() {
@@ -25,6 +37,7 @@
         email: $user?.email || email,
         name: $user?.displayName || 'Anonymous',
         url: window.location.href,
+        subject: subjects[subject]
       });
 
       if (response.status !== 200) {
@@ -76,6 +89,14 @@
 
   {#if !status}
     <Form let:loading onsubmit={send}>
+      <div class="my-2">
+        <select class="w-full" bind:value={subject}>
+          <option disabled selected value="">{$t('contact.select_topic', { default: 'Select a topic' })}:</option>
+          {#each Object.entries(subjects) as [key, title]}
+            <option value={key}>{$t('contact.' + key, { default: title })}</option>
+          {/each}
+        </select>
+      </div>
       <label class="block text-gray-700 text-sm font-bold mb-2" for="message">
         {$t('contact.what_is_your_question', {
           default: 'What is your question or comment?',

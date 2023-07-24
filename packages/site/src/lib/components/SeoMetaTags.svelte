@@ -7,7 +7,7 @@
 
   const IMAGE_API = 'https://ld-parts.vercel.app/og';
   const DEFAULT_IMAGE =
-    'https://i2.wp.com/livingtongues.org/wp-content/uploads/2015/03/LT-logo-1.png?w=987&ssl=1'; // 987 x 299
+    'https://firebasestorage.googleapis.com/v0/b/talking-dictionaries-alpha.appspot.com/o/livingdictionary%2Fimages%2FNEW_Living_Tongues_logo_with_white_around_it.png?alt=media'; // 1484 x 729
 
   export let admin = false;
   export let dictionaryName: string = undefined;
@@ -21,6 +21,7 @@
   export let norobots = false;
   export let handle = 'livingtongues';
   export let url = $page.url.toString();
+
   export let width = 1200;
   export let height = 600;
   export let gcsPath: string = undefined;
