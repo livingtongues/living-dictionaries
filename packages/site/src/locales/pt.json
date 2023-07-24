@@ -85,7 +85,15 @@
     "send_message": "Enviar Mensagem",
     "message_sent": "Mensagem enviada. Nós responderemos o mais rápido possível.",
     "what_is_your_question": "Qual é a sua pergunta ou comentário?",
-    "message_failed": "Mensagem Enviar falha. Verifique sua conexão com a Internet ou envie um email:"
+    "message_failed": "Mensagem Enviar falha. Verifique sua conexão com a Internet ou envie um email:",
+    "delete_dictionary": "Exclua um dicionário",
+    "public_dictionary": "Fazer um dicionário público",
+    "import_data": "Importar dados",
+    "request_access": "Solicitar acesso à edição",
+    "report_problem": "Reportar um problema",
+    "other": "Outro tópico",
+    "select_topic": "selecione um topico",
+    "data_fields": "Campos de dados opcionais"
   },
   "create": {
     "select_coordinates": "Seleccione coordenadas",
@@ -235,7 +243,8 @@
     "public_private_meaning": "Público significa que qualquer um pode ver o seu Dicionário o qual requer consentimento da comunidade. Os Dicionários Privados são visíveis apenas para si e para os seus colaboradores.",
     "optional_data_fields": "Campo de dados opcionais",
     "unable_to_delete": "Nota: Você não poderá excluir esses idiomas de brilho posteriormente.",
-    "print_access_meaning": "Isso dá ao público a capacidade de baixar e imprimir este dicionário vivo como um .pdf"
+    "print_access_meaning": "Isso dá ao público a capacidade de baixar e imprimir este dicionário vivo como um .pdf",
+    "featured_image": "Imagem em destaque"
   },
   "speakers": {
     "add_new_speaker": "Adicionar um falante novo",
@@ -303,5 +312,13 @@
     "columns": "Colunas",
     "headword_size": "Tamanho da palavra da cabeça",
     "font_size": "Tamanho da fonte"
+  },
+  "import": {
+    "import": "Importar",
+    "template_link": "Link para modelo",
+    "instructions_1": "Se você já possui dados linguísticos que deseja importar para o seu dicionário, siga as etapas abaixo.",
+    "instructions_2": "Clique no botão azul \"Link to modelo\" abaixo. Faça o download do modelo como um arquivo do Excel ou crie uma cópia no Google Docs. Edite o modelo de acordo com as necessidades do seu projeto. Copie e cole seus dados na planilha.",
+    "instructions_3": "Use o \"Entre em contato conosco\" abaixo para entrar em contato conosco. Deixe -nos saber que você tem uma nova planilha pronta para importação. Faça -nos todas as perguntas que você tiver. Nós responderemos a você por e -mail e você pode nos enviar seu arquivo.",
+    "instructions_4": "Para nos enviar dados exportados de softwares de dicionário como Flex, Lexique Pro, Shoebox, use o botão \"Entre em contato conosco\" abaixo e conte -nos os detalhes do seu projeto."
   }
 }
