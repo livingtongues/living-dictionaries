@@ -31,7 +31,7 @@
     {#if entry.pf}
       <Image
         {canEdit}
-        lexeme={entry.lx}
+        title={entry.lx}
         gcs={entry.pf.gcs}
         square={60}
         on:deleteImage={() => deleteImage(entry)} />

@@ -43,8 +43,8 @@
       {#if dictionary.id !== 'garifuna'}
         {#if entry.lo}<i class="mr-1">{entry.lo}</i>{/if}
         {#if entry.lo2}<i class="mr-1" class:sompeng={dictionary.id === 'sora'}
-            >{entry.lo2}</i
-          >{/if}
+        >{entry.lo2}</i
+        >{/if}
         {#if entry.lo3}<i class="mr-1">{entry.lo3}</i>{/if}
         {#if entry.lo4}<i class="mr-1">{entry.lo4}</i>{/if}
         {#if entry.lo5}<i class="mr-1">{entry.lo5}</i>{/if}
@@ -70,7 +70,7 @@
         {/if}
 
         {#if entry.scn?.length}
-          {@const scientific_names = entry.scn.join(', ')}
+          {@const scientific_names = entry.scn?.join(', ')}
           {#if scientific_names.includes('<i>')}
             {@html sanitize(scientific_names)}
           {:else}
@@ -80,19 +80,19 @@
 
         {#if dictionary.id === 'jewish-neo-aramaic'}
           {#if entry.di}<p class="text-xs">
-              <i class="mr-1">{$t('entry.di', { default: 'Dialect' })}: {entry.di}</i>
-            </p>{/if}
+            <i class="mr-1">{$t('entry.di', { default: 'Dialect' })}: {entry.di}</i>
+          </p>{/if}
           {#if entry.xs?.vn}<p>
-              <span class="font-semibold"
-                >{$t('entry.example_sentence', { default: 'Example Sentence' })}:</span>
-              {entry.xs.vn}
-            </p>{/if}
+            <span class="font-semibold"
+            >{$t('entry.example_sentence', { default: 'Example Sentence' })}:</span>
+            {entry.xs.vn}
+          </p>{/if}
           {#if entry.xs}
             {#each order_entry_and_dictionary_gloss_languages(entry.gl, dictionary.glossLanguages) as bcp}
               {#if entry.xs[bcp]}
                 <p>
                   <span class="font-semibold"
-                    >{$t(`gl.${bcp}`)}
+                  >{$t(`gl.${bcp}`)}
                     {$t('entry.example_sentence', {
                       default: 'Example Sentence',
                     })}:</span>
@@ -103,8 +103,8 @@
           {/if}
         {:else if dictionary.id === 'babanki'}
           {#if entry.pl}<p class="text-xs">
-              {$t('entry.pl', { default: 'Plural form' })}: {entry.pl}
-            </p>{/if}
+            {$t('entry.pl', { default: 'Plural form' })}: {entry.pl}
+          </p>{/if}
         {/if}
       </div>
 
@@ -118,7 +118,7 @@
         {#each entry.sdn as domain}
           <span
             class="px-2 py-1 leading-tight text-xs bg-gray-100 rounded ml-1
-        mb-1">
+              mb-1">
             {$t('sd.' + domain, { default: domain })}
           </span>
         {/each}
@@ -132,7 +132,7 @@
       <button
         type="button"
         class="media-block bg-gray-100 border-r-2 hover:bg-gray-300 flex flex-col items-center
-        justify-center cursor-pointer p-2 text-lg"
+          justify-center cursor-pointer p-2 text-lg"
         on:click={toggle}>
         <i class="far fa-video-plus my-1 mx-2 text-blue-800" />
       </button>
@@ -147,7 +147,7 @@
     <div class="media-block bg-gray-300 relative">
       <Image
         square={128}
-        lexeme={entry.lx}
+        title={entry.lx}
         gcs={entry.pf.gcs}
         {canEdit}
         on:deleteImage />
