@@ -175,19 +175,6 @@
     </div>
   {/if}
 
-  <ShowHide let:show let:toggle>
-    <Button onclick={toggle} class="mb-5">
-      {$t('settings.optional_data_fields', { default: 'Optional Data Fields' })}:
-      {$t('header.contact_us', { default: 'Contact Us' })}
-    </Button>
-
-    {#if show}
-      {#await import('$lib/components/modals/Contact.svelte') then { default: Contact }}
-        <Contact on:close={toggle} />
-      {/await}
-    {/if}
-  </ShowHide>
-
   {#if $admin > 1}
     <div class="mt-5">
       <JSON obj={dictionary} />
