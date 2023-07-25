@@ -6,9 +6,9 @@ export const load: PageLoad = async ({ params, parent }) => {
   await parent();
   try {
     const aboutDoc = await getDocument<IAbout>(`dictionaries/${params.dictionaryId}/info/about`);
-    if (aboutDoc?.about) {
+    if (aboutDoc?.about)
       return { about: aboutDoc.about };
-    }
+
   } catch (err) {
     console.error(err);
   }

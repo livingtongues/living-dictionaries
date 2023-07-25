@@ -40,9 +40,9 @@ export async function importEntriesToFirebase(
   let speakerId;
 
   for (const row of rows) {
-    if (!row.lexeme || row.lexeme === '(word/phrase)') 
+    if (!row.lexeme || row.lexeme === '(word/phrase)')
       continue;
-    
+
     if (!dry && batchCount === 200) {
       console.log('Committing batch of entries ending with: ', entryCount);
       await batch.commit();
@@ -81,11 +81,11 @@ export async function importEntriesToFirebase(
           path: audioFilePath,
           ts: timestamp,
         };
-        if (speakerId) 
+        if (speakerId)
           entry.sf.sp = different_speakers[row.speakerName];
-        else 
+        else
           entry.sf.speakerName = row.speakerName; // Keep that if for some reason we need the speakername as text only again.
-        
+
       }
     }
 

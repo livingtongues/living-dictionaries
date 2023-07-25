@@ -19,10 +19,10 @@
     audio.addEventListener('ended', () => {
       playing = false;
     });
-    // TODO: unsubscribe listener
+  // TODO: unsubscribe listener
   }
 
-  // This should be done upon getting page data, in a load function, not in this component
+// This should be done upon getting page data, in a load function, not in this component
   // async function getSpeakerName(sf) {
   //   console.log(sf);
   //   const speakerSnap = await Firestore doc >> (`speakers/${sf.sp}`);
@@ -39,14 +39,14 @@
     <!-- https://svelte.dev/tutorial/adding-parameters-to-actions -->
     <div
       class="{$$props.class} hover:bg-gray-200 flex flex-col items-center
-    justify-center cursor-pointer p-1 select-none"
+        justify-center cursor-pointer p-1 select-none"
       use:longpress={800}
       on:click={() => {
-        if (canEdit) {
+        if (canEdit)
           toggle();
-        } else {
+        else
           initAudio(entry.sf);
-        }
+
       }}
       on:longpress={() => initAudio(entry.sf)}>
       <span class:text-blue-700={playing} class="i-material-symbols-hearing text-2xl mt-1" />
@@ -70,7 +70,7 @@
   {:else if canEdit}
     <div
       class="{$$props.class} hover:bg-gray-300 flex flex-col items-center
-    justify-center cursor-pointer p-2 text-lg"
+        justify-center cursor-pointer p-2 text-lg"
       on:click={toggle}>
       <span class="i-uil-microphone text-lg my-1 mx-1 text-blue-800" />
       {#if !minimal}

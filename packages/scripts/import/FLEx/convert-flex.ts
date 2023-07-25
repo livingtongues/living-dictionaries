@@ -36,12 +36,12 @@ export function convertFLExToLDFormat(data: IFLExData[]) {
 
     // check.add(e.z1);
 
-    if (e.co_Eng) {
+    if (e.co_Eng)
       entry.nt = e.co_Eng;
-    }
-    if (e.ps_Eng) {
+
+    if (e.ps_Eng)
       entry.ps = matchPartsOfSpeech(e.ps_Eng);
-    }
+
     entries.push(entry);
   });
   // console.log(check);

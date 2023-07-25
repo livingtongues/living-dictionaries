@@ -10,11 +10,11 @@ const config = {
   kit: {
     adapter: adapter(),
   },
-  
+
   onwarn: (warning, handler) => {
-    if (warning.code.startsWith('a11y-')) 
+    if (warning.code.startsWith('a11y-'))
       return;
-    
+
     handler(warning);
   },
 
@@ -27,5 +27,5 @@ const config = {
   }
 };
 
-import { augmentSvelteConfigForKitbook } from 'kitbook/plugins/vite'; 
+import { augmentSvelteConfigForKitbook } from 'kitbook/plugins/vite';
 export default augmentSvelteConfigForKitbook(config);

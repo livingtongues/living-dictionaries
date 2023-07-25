@@ -23,9 +23,9 @@ self.addEventListener('activate', <EventType extends ExtendableEvent>(event: Eve
   event.waitUntil(
     caches.keys().then(async (keys) => {
       // delete old caches
-      for (const key of keys) {
+      for (const key of keys)
         if (key !== ASSETS) await caches.delete(key);
-      }
+
 
       ((self as any) as ServiceWorkerGlobalScope).clients.claim();
     })

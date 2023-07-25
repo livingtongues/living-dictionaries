@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
+
 // import torwali from './torwali-edited.json'; **Note that data files aren't in this repo**
 import { abbreviateTDPartOfSpeech } from './abbreviate-pos';
 import { IEntry } from '../../../../src/lib/interfaces';
@@ -12,11 +12,11 @@ const data: IEntry[] = entries.map((entry) => {
   delete entry.sn;
 
   if (entry.ps_Eng) {
-    if (entry.ps_Eng === 'Idiom') {
+    if (entry.ps_Eng === 'Idiom')
       entry.nt = 'idiom';
-    } else {
+    else
       entry.ps = abbreviateTDPartOfSpeech(entry.ps_Eng);
-    }
+
   }
   delete entry.ps_Eng; // part of speech
 
@@ -45,9 +45,9 @@ const data: IEntry[] = entries.map((entry) => {
     entry.xs.ur = entry.xv_Urd;
     delete entry.xv_Urd; // Example (sentence) Urdu
   }
-  if (Object.keys(entry.xs).length === 0) {
+  if (Object.keys(entry.xs).length === 0)
     delete entry.xs;
-  }
+
 
   // leave entry.hm; // 1, 2, 3, 4, 5 (homonym)
   // leave entry.dt; // date written as 12/Jan/2020
@@ -61,9 +61,9 @@ const data: IEntry[] = entries.map((entry) => {
       delete entry[key];
     }
   });
-  if (semanticDomainNumbers.length) {
+  if (semanticDomainNumbers.length)
     entry.sdn = semanticDomainNumbers;
-  }
+
 
   return entry;
 });

@@ -71,9 +71,9 @@
           </Button>
         {:else}
           <Button form="filled" onclick={() => acceptInvite(invite.role)}
-            >{$_('invite.accept_invitation', {
-              default: 'Accept Invitation',
-            })}</Button>
+          >{$_('invite.accept_invitation', {
+            default: 'Accept Invitation',
+          })}</Button>
 
           <div class="mt-2 text-sm text-gray-600">
             {$_('terms.agree_by_submit', {

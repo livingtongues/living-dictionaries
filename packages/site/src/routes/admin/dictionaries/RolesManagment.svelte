@@ -14,15 +14,15 @@
 
   async function remove(helper: IHelper, dictionaryId: string, role: HelperRoles) {
     try {
-      if (role === 'manager') 
+      if (role === 'manager')
         await removeDictionaryManager(helper, dictionaryId);
-      
-      if (role === 'writeInCollaborator') 
+
+      if (role === 'writeInCollaborator')
         await removeDictionaryCollaborator(helper, dictionaryId);
-      
-      if (role === 'contributor') 
+
+      if (role === 'contributor')
         await removeDictionaryContributor(helper, dictionaryId);
-      
+
     } catch (err) {
       alert(`Error: ${err}`);
     }
@@ -30,9 +30,9 @@
 
   async function addWriteInCollaborator() {
     const name = prompt('Name?');
-    if (name) 
+    if (name)
       await addOnline(`dictionaries/${dictionary.id}/writeInCollaborators`, { name });
-    
+
   }
 </script>
 

@@ -20,12 +20,12 @@
 
   async function add(user: IUser) {
     try {
-      if (role === 'manager') 
+      if (role === 'manager')
         await addDictionaryManager({ id: user.uid, name: user.displayName }, dictionary.id);
-      
-      if (role === 'contributor') 
+
+      if (role === 'contributor')
         await addDictionaryContributor({ id: user.uid, name: user.displayName }, dictionary.id);
-      
+
       close();
     } catch (err) {
       alert(`Error: ${err}`);
@@ -43,7 +43,7 @@
     <Filter items={users} let:filteredItems={filteredUsers} placeholder="Search names and emails">
       {#each filteredUsers as user}
         <Button onclick={async () => await add(user)} color="green" form="simple" class="w-full !text-left"
-          >{user.displayName} <small>({user.email})</small></Button>
+        >{user.displayName} <small>({user.email})</small></Button>
       {:else}
         <Button size="sm" onclick={() => inviteHelper(role, dictionary)}>Invite New User</Button>
       {/each}

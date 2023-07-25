@@ -16,7 +16,7 @@
   import { convert_and_expand_entry } from '$lib/transformers/convert_and_expand_entry';
   import type { InstantSearch } from 'instantsearch.js';
   const search: InstantSearch = getContext('search');
-  
+
   const hitsPerPage = createPersistedStore<number>('printHitsPerPage', 50);
   $: if (browser) {
     search.addWidgets([
@@ -52,7 +52,7 @@
 
         <div class="mb-1 mr-2">
           <label class="font-medium text-gray-700" for="maxEntries"
-            >{$t('print.max_entries', { default: 'Max entries' })}</label>
+          >{$t('print.max_entries', { default: 'Max entries' })}</label>
           <input
             class="form-input text-sm w-17"
             id="maxEntries"
@@ -64,7 +64,7 @@
         </div>
         <div class="mb-1 mr-2">
           <label class="font-medium text-gray-700" for="columnCount"
-            >{$t('print.columns', { default: 'Columns' })}</label>
+          >{$t('print.columns', { default: 'Columns' })}</label>
           <input
             class="form-input text-sm w-17"
             id="columnCount"
@@ -75,7 +75,7 @@
         </div>
         <div class="mb-1 mr-2">
           <label class="font-medium text-gray-700" for="headwordSize"
-            >{$t('print.headword_size', { default: 'Headword size' })} (pt)</label>
+          >{$t('print.headword_size', { default: 'Headword size' })} (pt)</label>
           <input
             class="form-input text-sm w-17"
             id="headwordSize"
@@ -86,7 +86,7 @@
         </div>
         <div class="mb-1 mr-2">
           <label class="font-medium text-gray-700" for="fontSize"
-            >{$t('print.font_size', { default: 'Font size' })} (pt)</label>
+          >{$t('print.font_size', { default: 'Font size' })} (pt)</label>
           <input
             class="form-input text-sm w-15"
             id="fontSize"
@@ -97,7 +97,7 @@
         </div>
         <div class="mb-1 mr-2">
           <label class="font-medium text-gray-700" for="imageSize"
-            >{$t('misc.images', { default: 'Images' })}:</label>
+          >{$t('misc.images', { default: 'Images' })}:</label>
           <input
             class="form-input text-sm w-17"
             id="imageSize"
