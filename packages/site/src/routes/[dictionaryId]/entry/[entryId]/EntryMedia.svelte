@@ -5,6 +5,7 @@
   import AddImage from '../../entries/AddImage.svelte';
   import Image from '$lib/components/image/Image.svelte';
   import Video from '../../entries/Video.svelte';
+  import GeoTaggingModal from './GeoTaggingModal.svelte';
 
   export let entry: IEntry;
   export let videoAccess = false;
@@ -12,6 +13,24 @@
 
   $: video = entry.senses?.[0].video_files?.[0];
 </script>
+
+{#if canEdit}
+  <ShowHide let:show let:toggle>
+    <button
+      on:click={toggle}
+      type="button"
+      class="rounded bg-gray-100 border-r-2 hover:bg-gray-300 flex flex-col items-center
+        justify-center cursor-pointer p-6 mb-2">
+      <i class="far fa-map my-1 mx-2" />
+      <span class="text-xs">
+        {$t('entry.geo_tagging', { default: 'Geo Tagging' })}
+      </span>
+    </button>
+    {#if show}
+      <GeoTaggingModal on:close={toggle} />
+    {/if}
+  </ShowHide>
+{/if}
 
 {#if video}
   <div class="w-full overflow-hidden rounded relative mb-2">
@@ -22,7 +41,7 @@
     <button
       type="button"
       class="rounded bg-gray-100 border-r-2 hover:bg-gray-300 flex flex-col items-center
-        justify-center cursor-pointer p-6"
+        justify-center cursor-pointer p-6 mb-2"
       on:click={toggle}>
       <i class="far fa-video-plus my-1 mx-2" />
       <span class="text-xs">
