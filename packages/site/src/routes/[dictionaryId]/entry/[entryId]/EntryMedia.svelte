@@ -12,9 +12,18 @@
   export let canEdit = false;
 
   $: video = entry.senses?.[0].video_files?.[0];
+  //Only for testing
+  const mocking = true
 </script>
 
-{#if canEdit}
+{#if mocking}
+  <div>
+    <img
+      class="h-full w-full object-cover cursor-pointer"
+      alt=""
+      src="https://api.mapbox.com/styles/v1/mapbox/streets-v12/static/-98.4241,20.38,4.25,0,0/300x300@2x?logo=false&attribution=false&access_token=pk.eyJ1IjoidGFsa2luZ2RpY3Rpb25hcmllcyIsImEiOiJjazYwOGMxY24wM2E3M290ZGlqM2VjaWlpIn0.FF1HWFtUB4mt2lcYnRRNrw" />
+  </div>
+{:else if canEdit}
   <ShowHide let:show let:toggle>
     <button
       on:click={toggle}
