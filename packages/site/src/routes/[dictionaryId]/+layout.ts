@@ -12,7 +12,7 @@ export const load: LayoutLoad = async ({ params }) => {
 
     throw redirect(301, '/');
 
-  } catch (e) {
-    throw error(500, e);
+  } catch (err) {
+    throw error(500, err);
   }
 };

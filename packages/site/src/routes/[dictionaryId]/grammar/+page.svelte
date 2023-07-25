@@ -1,20 +1,19 @@
 <script lang="ts">
-  import { _ } from 'svelte-i18n';
-  import { dictionary, isManager } from '$lib/stores';
+  import { t } from 'svelte-i18n';
   import { setOnline } from 'sveltefirets';
+  import { Button } from 'svelte-pieces';
   import type { IGrammar } from '@living-dictionaries/types';
   import sanitize from 'xss';
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte';
-  import { Button } from 'svelte-pieces';
 
-  import type { PageData } from './$types';
-  export let data: PageData;
-  let grammar = data.grammar || '';
+  export let data;
+  $: ({ isManager } = data)
+  let updated = '';
 
   async function save() {
     try {
-      await setOnline<IGrammar>(`dictionaries/${$dictionary.id}/info/grammar`, { grammar });
-      window.location.replace(`/${$dictionary.id}/grammar`);
+      await setOnline<IGrammar>(`dictionaries/${data.dictionary.id}/info/grammar`, { grammar: updated });
+      window.location.replace(`/${data.dictionary.id}/grammar`);
     } catch (err) {
       alert(err);
     }
@@ -25,43 +24,43 @@
 
 <div class="grammar">
   <h3 class="text-xl font-semibold mb-3">
-    {$_('dictionary.grammar', { default: 'Grammar' })}
+    {$t('dictionary.grammar', { default: 'Grammar' })}
   </h3>
 
   {#if $isManager}
     {#if editing}
       <Button class="mb-2" onclick={() => (editing = false)}
-      >{$_('misc.cancel', { default: 'Cancel' })}</Button>
+      >{$t('misc.cancel', { default: 'Cancel' })}</Button>
       <Button class="mb-2" form="filled" onclick={save}
-      >{$_('misc.save', { default: 'Save' })}</Button>
+      >{$t('misc.save', { default: 'Save' })}</Button>
     {:else}
       <Button class="mb-2" onclick={() => (editing = true)}
-      >{$_('misc.edit', { default: 'Edit' })}</Button>
+      >{$t('misc.edit', { default: 'Edit' })}</Button>
     {/if}
   {/if}
 
   <div class="flex">
     {#if editing}
       <div class="max-w-screen-md tw-prose prose-lg">
-        {#await import('@living-dictionaries/parts/src/lib/editor/ClassicCustomized.svelte') then { default: ClassicCustomized }}
-          <ClassicCustomized bind:html={grammar} />
+        {#await import('$lib/components/editor/ClassicCustomized.svelte') then { default: ClassicCustomized }}
+          <ClassicCustomized html={data.grammar} on:update={({ detail }) => (updated = detail)} />
         {/await}
       </div>
     {/if}
     <div class="tw-prose prose-lg max-w-screen-md {editing && 'hidden md:block mt-14 ml-3'}">
-      {#if grammar}
-        {@html sanitize(grammar)}
+      {#if updated || data.grammar}
+        {@html sanitize(updated || data.grammar)}
       {:else}
-        <i>{$_('dictionary.no_info_yet', { default: 'No information yet' })}</i>
+        <i>{$t('dictionary.no_info_yet', { default: 'No information yet' })}</i>
       {/if}
     </div>
   </div>
 </div>
 
 <SeoMetaTags
-  title={$_('dictionary.grammar', { default: 'Grammar' })}
-  dictionaryName={$dictionary.name}
-  description={$_('', { default: 'Learn about the grammar of the language in this Living Dictionary.' })}
+  title={$t('dictionary.grammar', { default: 'Grammar' })}
+  dictionaryName={data.dictionary.name}
+  description="Learn about the grammar of the language in this Living Dictionary."
   keywords="Grammar of a language, grammatical, Endangered Languages, Language Documentation, Language Revitalization, Build a Dictionary, Online Dictionary, Digital Dictionary, Dictionary Software, Free Software, Online Dictionary Builder, Living Dictionaries, Living Dictionary, Bibliography" />
 
 <style>

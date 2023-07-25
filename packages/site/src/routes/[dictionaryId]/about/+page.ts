@@ -1,16 +1,14 @@
 import { getDocument } from 'sveltefirets';
 import type { IAbout } from '@living-dictionaries/types';
+import { isManager } from '$lib/stores';
 
-import type { PageLoad } from './$types';
-export const load: PageLoad = async ({ params, parent }) => {
+export const load = async ({ params, parent }) => {
   await parent();
   try {
     const aboutDoc = await getDocument<IAbout>(`dictionaries/${params.dictionaryId}/info/about`);
-    if (aboutDoc?.about)
-      return { about: aboutDoc.about };
-
+    return { about: aboutDoc?.about, isManager };
   } catch (err) {
     console.error(err);
+    return { about: null, isManager };
   }
-  return { about: null };
 };

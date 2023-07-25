@@ -16,9 +16,6 @@
     "release": "npm run package && cd package && npm publish",
     "test": "vitest -u"
   },
-  "dependencies": {
-    "ckeditor5-build-classic-with-alignment-underline-smallcaps": "^1.0.0"
-  },
   "devDependencies": {
     "@iconify/json": "^2.2.94",
     "@julr/unocss-preset-forms": "^0.0.5",

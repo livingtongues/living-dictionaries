@@ -121,7 +121,7 @@
 <form on:submit|preventDefault={save}>
   <div class="rounded-md shadow-sm">
     {#if field === 'nt'}
-      {#await import('@living-dictionaries/parts/src/lib/editor/ClassicCustomized.svelte') then { default: ClassicCustomized }}
+      {#await import('$lib/components/editor/ClassicCustomized.svelte') then { default: ClassicCustomized }}
         <Keyman fixed target=".ck-editor__editable_inline" canChooseKeyboard position="bottom">
           <ClassicCustomized {editorConfig} bind:html={value} />
         </Keyman>
