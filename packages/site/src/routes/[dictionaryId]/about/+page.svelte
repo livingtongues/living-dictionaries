@@ -1,20 +1,19 @@
 <script lang="ts">
-  import { _ } from 'svelte-i18n';
-  import { dictionary, isManager } from '$lib/stores';
+  import { t } from 'svelte-i18n';
   import { setOnline } from 'sveltefirets';
   import { Button } from 'svelte-pieces';
   import type { IAbout } from '@living-dictionaries/types';
   import sanitize from 'xss';
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte';
 
-  import type { PageData } from './$types';
-  export let data: PageData;
-  let about = data.about || '';
+  export let data;
+  $: ({ isManager } = data)
+  let updated = '';
 
   async function save() {
     try {
-      await setOnline<IAbout>(`dictionaries/${$dictionary.id}/info/about`, { about });
-      window.location.replace(`/${$dictionary.id}/about`);
+      await setOnline<IAbout>(`dictionaries/${data.dictionary.id}/info/about`, { about: updated });
+      window.location.replace(`/${data.dictionary.id}/about`);
     } catch (err) {
       alert(err);
     }
@@ -25,43 +24,43 @@
 
 <div class="about">
   <h3 class="text-xl font-semibold mb-3">
-    {$_('header.about', { default: 'About' })}
+    {$t('header.about', { default: 'About' })}
   </h3>
 
   {#if $isManager}
     {#if editing}
       <Button class="mb-2" onclick={() => (editing = false)}
-      >{$_('misc.cancel', { default: 'Cancel' })}</Button>
+      >{$t('misc.cancel', { default: 'Cancel' })}</Button>
       <Button class="mb-2" form="filled" onclick={save}
-      >{$_('misc.save', { default: 'Save' })}</Button>
+      >{$t('misc.save', { default: 'Save' })}</Button>
     {:else}
       <Button class="mb-2" onclick={() => (editing = true)}
-      >{$_('misc.edit', { default: 'Edit' })}</Button>
+      >{$t('misc.edit', { default: 'Edit' })}</Button>
     {/if}
   {/if}
 
   <div class="flex">
     {#if editing}
       <div class="max-w-screen-md tw-prose prose-lg">
-        {#await import('@living-dictionaries/parts/src/lib/editor/ClassicCustomized.svelte') then { default: ClassicCustomized }}
-          <ClassicCustomized bind:html={about} />
+        {#await import('$lib/components/editor/ClassicCustomized.svelte') then { default: ClassicCustomized }}
+          <ClassicCustomized html={data.about} on:update={({ detail }) => (updated = detail)} />
         {/await}
       </div>
     {/if}
     <div class="tw-prose prose-lg max-w-screen-md {editing && 'hidden md:block mt-14 ml-3'}">
-      {#if about}
-        {@html sanitize(about)}
+      {#if updated || data.about}
+        {@html sanitize(updated || data.about)}
       {:else}
-        <i>{$_('dictionary.no_info_yet', { default: 'No information yet' })}</i>
+        <i>{$t('dictionary.no_info_yet', { default: 'No information yet' })}</i>
       {/if}
     </div>
   </div>
 </div>
 
 <SeoMetaTags
-  title={$_('header.about', { default: 'About' })}
-  dictionaryName={$dictionary.name}
-  description={$_('', { default: 'Learn about the background and creation of this Living Dictionary.' })}
+  title={$t('header.about', { default: 'About' })}
+  dictionaryName={data.dictionary.name}
+  description="Learn about the background and creation of this Living Dictionary."
   keywords="About this dictionary, background, creation, Endangered Languages, Language Documentation, Language Revitalization, Build a Dictionary, Online Dictionary, Digital Dictionary, Dictionary Software, Free Software, Online Dictionary Builder, Living Dictionaries, Living Dictionary" />
 
 <style>

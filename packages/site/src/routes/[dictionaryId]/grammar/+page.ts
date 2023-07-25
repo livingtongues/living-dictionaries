@@ -1,5 +1,6 @@
 import { getDocument } from 'sveltefirets';
 import type { IGrammar } from '@living-dictionaries/types';
+import { isManager } from '$lib/stores';
 
 import type { PageLoad } from './$types';
 export const load: PageLoad = async ({ params, parent }) => {
@@ -8,11 +9,9 @@ export const load: PageLoad = async ({ params, parent }) => {
     const grammarDoc = await getDocument<IGrammar>(
       `dictionaries/${params.dictionaryId}/info/grammar`
     );
-    if (grammarDoc?.grammar)
-      return { grammar: grammarDoc.grammar };
-
+    return { grammar: grammarDoc?.grammar, isManager };
   } catch (err) {
-    alert(err);
+    console.error(err);
+    return { grammar: null, isManager };
   }
-  return { grammar: null };
 };

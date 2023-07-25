@@ -2,7 +2,7 @@
   import Keyman from './Keyman.svelte';
   import { Story } from 'kitbook';
   import { Button, Store } from 'svelte-pieces';
-  import ClassicCustomized from '@living-dictionaries/parts/src/lib/editor/ClassicCustomized.svelte';
+  import ClassicCustomized from '$lib/components/editor/ClassicCustomized.svelte';
 
   let value = '';
   let html = '';

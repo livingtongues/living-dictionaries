@@ -1,10 +1,10 @@
 import { init, register, getLocaleFromNavigator } from 'svelte-i18n';
 
 export default async function () {
-  await initFunction();
+  await initI18n();
 }
 
-async function initFunction(): Promise<void> {
+async function initI18n(): Promise<void> {
   registerMessages('en');
   await init({
     fallbackLocale: 'en',
