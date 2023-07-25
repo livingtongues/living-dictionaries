@@ -1,6 +1,6 @@
 import type { Variants } from 'kitbook';
 import type Component from './EditField.svelte';
-export const variants: Variants<typeof Component> = [
+export const variants: Variants<Component> = [
   {
     name: 'Assamese Gloss',
     width: 550,

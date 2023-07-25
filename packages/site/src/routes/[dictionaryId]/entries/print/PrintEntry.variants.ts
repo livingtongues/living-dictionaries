@@ -3,7 +3,7 @@ import type { Variants } from 'kitbook';
 import type Component from './PrintEntry.svelte';
 
 const height = 110;
-export const variants: Variants<typeof Component> = [
+export const variants: Variants<Component> = [
   {
     name: 'multiple empty glosses',
     description: 'needs fixed',
