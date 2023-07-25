@@ -86,9 +86,9 @@ export async function deleteDocRecursively(docPath: string): Promise<boolean> {
       .get()
       .then(async (snapshot) => {
         const {docs} = snapshot;
-        for await (const doc of docs) 
+        for await (const doc of docs)
           await deleteDocRecursively(`${docPath}/${subcollectionRef.id}/${doc.id}`);
-        
+
         return true;
       })
       .catch((error) => {

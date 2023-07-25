@@ -21,9 +21,9 @@ import { tdLocations } from './tdv1-dictionaries';
           url: dictionary.properties.xlink,
           type: 'tdv1',
         };
-        if (dictionary.properties.thumbnail) {
+        if (dictionary.properties.thumbnail)
           data.thumbnail = dictionary.properties.thumbnail;
-        }
+
         await db.doc(`dictionaries/tdv1-${dictionaryUrl}`).set(data);
       }
     });

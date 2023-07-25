@@ -25,10 +25,10 @@ export const abbreviateTDPartOfSpeech = (input: string): string => {
       (part.tdAlternates?.includes(sanitizedInput))
     );
   });
-  if (matchingPOS) 
+  if (matchingPOS)
     return matchingPOS.enAbbrev;
-   
+
   console.log('unmatched: ', input);
   return null;
-  
+
 };

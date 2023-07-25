@@ -58,9 +58,9 @@ export function convertJsonRowToEntryFormat(
     }
   }
 
-  if (Object.keys(entry.xs).length === 0) 
+  if (Object.keys(entry.xs).length === 0)
     delete entry.xs;
-  
+
 
   if (!dateStamp) return entry;
 

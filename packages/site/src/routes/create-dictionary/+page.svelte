@@ -123,9 +123,9 @@
 <svelte:window bind:online />
 
 <Header
-  >{$t('create.create_new_dictionary', {
-    default: 'Create New Dictionary',
-  })}</Header>
+>{$t('create.create_new_dictionary', {
+  default: 'Create New Dictionary',
+})}</Header>
 
 <Form let:loading onsubmit={createNewDictionary}>
   <div class="flex-col justify-center p-4 max-w-md mx-auto">
@@ -218,7 +218,7 @@
       <WhereSpoken
         dictionary={{ coordinates: { latitude, longitude }, points, regions }}
         on:updateCoordinates={({ detail }) => {
-          latitude = detail.latitude, 
+          latitude = detail.latitude,
           longitude = detail.longitude;
         }}
         on:removeCoordinates={() => ((latitude = null), (longitude = null))}
@@ -390,7 +390,7 @@
           default: 'By submitting this form, you agree to our',
         })}
         <a href="/terms" class="underline" target="_blank"
-          >{$t('dictionary.terms_of_use', { default: 'Terms of Use' })}</a
+        >{$t('dictionary.terms_of_use', { default: 'Terms of Use' })}</a
         >.
       </div>
       <div class="mb-6" />

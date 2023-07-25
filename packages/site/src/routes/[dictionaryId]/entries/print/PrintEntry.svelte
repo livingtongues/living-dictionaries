@@ -20,7 +20,7 @@
   export let showLabels = false;
   export let showQrCode = false;
 
-  // $: speaker = entry.sf?.sp ? speakers.find((s) => s.uid === entry.sf.sp) : null;
+// $: speaker = entry.sf?.sp ? speakers.find((s) => s.uid === entry.sf.sp) : null;
 </script>
 
 <div style="font-size: {fontSize}pt;">
@@ -67,7 +67,7 @@
       {#if entry.sdn?.length || entry.sd}
         {#if showLabels}
           <span class="italic text-[80%]"
-            >{$t('entry.sdn', { default: 'Semantic Domains' })}:
+          >{$t('entry.sdn', { default: 'Semantic Domains' })}:
           </span>
         {/if}
 
@@ -88,7 +88,7 @@
         <p>
           {#if showLabels}
             <span class="italic text-[80%]"
-              >{$t(`entry.${key}`, { default: StandardPrintFields[key] })}:</span>
+            >{$t(`entry.${key}`, { default: StandardPrintFields[key] })}:</span>
           {/if}
           {#if key === 'nt'}
             {@html sanitize(entry[key])}

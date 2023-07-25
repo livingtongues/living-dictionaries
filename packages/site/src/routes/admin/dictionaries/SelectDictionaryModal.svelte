@@ -18,11 +18,11 @@
 
   async function add(dictionaryId: string) {
     try {
-      if (role === 'manager') 
+      if (role === 'manager')
         await addDictionaryManager({ id: user.uid, name: user.displayName }, dictionaryId);
-      else 
+      else
         await addDictionaryContributor({ id: user.uid, name: user.displayName }, dictionaryId);
-      
+
       close();
     } catch (err) {
       alert(`Error: ${err}`);

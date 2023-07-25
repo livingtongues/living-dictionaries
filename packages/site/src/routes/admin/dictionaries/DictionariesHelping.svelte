@@ -37,11 +37,11 @@
     addMessage="Add"
     on:itemclicked={(e) => window.open(`/${e.detail.value}`, '_blank')}
     on:itemremoved={(e) => {
-      if (role === 'manager') {
+      if (role === 'manager')
         removeDictionaryManager({ id: user.uid, name: user.displayName }, e.detail.value);
-      } else {
+      else
         removeDictionaryContributor({ id: user.uid, name: user.displayName }, e.detail.value);
-      }
+
     }}
     on:additem={toggle} />
   {#if show}

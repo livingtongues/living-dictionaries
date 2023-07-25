@@ -17,9 +17,9 @@
   $: publicDictionaries = data.publicDictionaries || [];
 
   let queryConstraints = [orderBy('name'), where('public', '==', true)];
-  $: if ($admin) {
+  $: if ($admin)
     queryConstraints = [orderBy('name')];
-  }
+
 </script>
 
 <Header>{$_('home.list_of_dictionaries', { default: 'List of Dictionaries' })}</Header>

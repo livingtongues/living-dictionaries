@@ -32,7 +32,7 @@
   <div class="flex items-center mr-3 mb-1">
     <input id={field} type="checkbox" bind:checked={$preferredPrintFields[field]} />
     <label class="ml-1 text-sm text-gray-700" for={field}
-      >{$_(`entry.${field}`, { default: field })}</label>
+    >{$_(`entry.${field}`, { default: field })}</label>
   </div>
 {/each}
 

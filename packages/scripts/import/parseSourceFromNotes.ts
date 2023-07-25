@@ -5,9 +5,9 @@ export function parseSourceFromNotes(notes: string): { notes: string; source?: s
       notes: matches[1].trim().replace(/\s+/g, ' '),
       source: matches[2].trim().replace(/\s+/g, ' '),
     };
-  } 
+  }
   return { notes };
-  
+
 }
 
 if (import.meta.vitest) {

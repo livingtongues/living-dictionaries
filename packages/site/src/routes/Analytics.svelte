@@ -14,7 +14,7 @@
     // const { Integrations } = await import('@sentry/tracing');
     init({
       dsn: 'https://b344dd4315d54249afd9c03762aec0c9@o424638.ingest.sentry.io/5888340',
-      // integrations: [new Integrations.BrowserTracing()],
+    // integrations: [new Integrations.BrowserTracing()],
 
       // Set tracesSampleRate to 1.0 to capture 100% of transactions for performance monitoring. We recommend adjusting this value in production
       // tracesSampleRate: 1.0,
