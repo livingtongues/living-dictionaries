@@ -27,7 +27,7 @@
       </span>
     </button>
     {#if show}
-      <GeoTaggingModal on:close={toggle} />
+      <GeoTaggingModal {t} on:close={toggle} />
     {/if}
   </ShowHide>
 {/if}
