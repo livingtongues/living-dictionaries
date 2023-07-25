@@ -6,6 +6,7 @@ import {
   add_tones_to_word,
   integrate_tones_to_bum_phonetics,
 } from './integrate_tones';
+import path from 'node:path'
 
 describe('count_vowels', () => {
   test.each([
@@ -96,13 +97,16 @@ describe('add_tones_to_word', () => {
 });
 
 describe('integrate_tones_to_bum_phonetics', () => {
-  const created_contents = readFileSync('./spreadsheet_helpers/bum_tones/fixtures/result.txt', 'utf8');
+  const fixturesFilePath = path.join(__dirname, './fixtures/result.txt')
+
+  const created_contents = readFileSync(fixturesFilePath, 'utf8');
   const expected_contents = `àbâ\nàbâh\nábâm\nàbâŋ\nabehi\nàbɛ̂n\nàbə̂h\nàbə̂h\nàbî\nábìn\nàbɔ̂ŋ\nabɔŋ\nábúk`;
+
   test('File written successfully', () => {
     integrate_tones_to_bum_phonetics(
       test_words,
       test_tones,
-      './spreadsheet_helpers/bum_tones/fixtures/result.txt'
+      fixturesFilePath
     );
     expect(created_contents).toEqual(expected_contents);
   });
@@ -112,7 +116,7 @@ describe('integrate_tones_to_bum_phonetics', () => {
       integrate_tones_to_bum_phonetics(
         test_words,
         test_tones.slice(0, test_tones.length - 1),
-        './spreadsheet_helpers/bum_tones/fixtures/result.txt'
+        fixturesFilePath
       )
     ).toThrowError('Tones and phonetics have to correspond to each other');
   });

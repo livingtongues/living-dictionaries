@@ -1,5 +1,6 @@
 import { readFileSync } from 'fs';
 import { parse } from 'csv-parse/sync';
+import path from 'node:path'
 
 export function parseCSVFrom(contents: string): Record<string, any>[] {
   return parse(contents, {
@@ -24,8 +25,9 @@ a ,the book ,c
     ]);
   });
 
-  test('parseCSV logs out example.csv as array', async () => {
-    const file = readFileSync('./import/data/example-v4/example-v4.csv', 'utf8');
+  test('parseCSV logs out example.csv as array', () => {
+    const filepath = path.join(__dirname, './data/example-v4/example-v4.csv')
+    const file = readFileSync(filepath, 'utf8');
     expect(parseCSVFrom(file)).toMatchInlineSnapshot(`
       [
         {
