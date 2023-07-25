@@ -23,6 +23,7 @@
         justify-center cursor-pointer p-6 mb-2">
       <i class="far fa-map my-1 mx-2" />
       <span class="text-xs">
+        <!-- TODO add i18n translations -->
         {$t('entry.geo_tagging', { default: 'Geo Tagging' })}
       </span>
     </button>
