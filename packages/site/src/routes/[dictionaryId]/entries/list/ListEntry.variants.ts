@@ -8,7 +8,7 @@ const dictionary: IDictionary = {
   glossLanguages: ['en', 'es'],
 };
 
-export const variants: Variants<typeof Component> = [
+export const variants: Variants<Component> = [
   {
     name: 'complete',
     height: 150,
