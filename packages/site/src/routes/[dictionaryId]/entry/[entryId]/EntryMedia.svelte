@@ -6,24 +6,23 @@
   import Image from '$lib/components/image/Image.svelte';
   import Video from '../../entries/Video.svelte';
   import GeoTaggingModal from './GeoTaggingModal.svelte';
+  import { PUBLIC_mapboxAccessToken } from '$env/static/public';
 
   export let entry: IEntry;
   export let videoAccess = false;
   export let canEdit = false;
 
   $: video = entry.senses?.[0].video_files?.[0];
-  //Only for testing
-  const mocking = false
 </script>
 
 <ShowHide let:show let:toggle>
-  {#if mocking}
+  {#if entry.gt}
     <div>
       <img
         on:click={toggle}
         class="h-full w-full object-cover cursor-pointer"
         alt=""
-        src="https://api.mapbox.com/styles/v1/mapbox/streets-v12/static/-98.4241,20.38,4.25,0,0/300x300@2x?logo=false&attribution=false&access_token=pk.eyJ1IjoidGFsa2luZ2RpY3Rpb25hcmllcyIsImEiOiJjazYwOGMxY24wM2E3M290ZGlqM2VjaWlpIn0.FF1HWFtUB4mt2lcYnRRNrw" />
+        src="{entry.gt}{PUBLIC_mapboxAccessToken}" />
     </div>
   {:else}
     <button
