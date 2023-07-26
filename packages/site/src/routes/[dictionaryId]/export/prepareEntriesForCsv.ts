@@ -49,7 +49,7 @@ type StandardEntryForCSV = {
 
 export interface EntryForCSV extends StandardEntryForCSV {
   vernacular_example_sentence?: string;
-  variant?: string; // for any dictionary with it, probably just babanki & torwali
+  variant?: string; // for DICTIONARIES_WITH_VARIANTS
   sound_file_path?: string; // for downloading file, not exported in CSV
   image_file_path?: string; // for downloading file, not exported in CSV
 }
