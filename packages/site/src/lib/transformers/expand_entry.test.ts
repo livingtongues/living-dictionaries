@@ -10,14 +10,16 @@ describe('expand_entry', () => {
 
   const now = new Date().getTime();
   test('returns an object with easily readable field names', () => {
-    const part_of_speech_abbrev = 'n';
+    const part_of_speech_key = 'n';
+    // const part_of_speech_en_abbrev = part_of_speech_key;
     const part_of_speech_english = 'noun';
 
     const sdn_key = '1.1';
     const sdn_english = 'Sky, weather and climate';
+    const write_in_sd = 'earth and sky';
 
     addMessages('en', {
-      ps: { [part_of_speech_abbrev]: part_of_speech_english },
+      ps: { [part_of_speech_key]: part_of_speech_english },
       sd: { [sdn_key]: sdn_english }
     })
     init({ fallbackLocale: 'en', initialLocale: 'en' });
@@ -33,8 +35,8 @@ describe('expand_entry', () => {
       ph: 'a?u',
       sn: [{
         gl: { en: 'foo' },
-        ps: [part_of_speech_abbrev],
-        sd: ['earth'],
+        ps: [part_of_speech_key],
+        sd: [write_in_sd],
         sdn: [sdn_key],
         xs: [{ en: 'baz', vn: 'foo' }],
         pfs: [{
@@ -86,8 +88,11 @@ describe('expand_entry', () => {
       phonetic: 'a?u',
       senses: [{
         glosses: { en: 'foo' },
-        parts_of_speech: [part_of_speech_english],
-        semantic_domains: ['earth', sdn_english],
+        parts_of_speech_keys: [part_of_speech_key],
+        translated_parts_of_speech: [part_of_speech_english],
+        ld_semantic_domains_keys: [sdn_key],
+        translated_ld_semantic_domains: [sdn_english],
+        write_in_semantic_domains: [write_in_sd],
         example_sentences: [{ en: 'baz', vn: 'foo' }],
         photo_files: [{
           fb_storage_path: 'path',
@@ -154,7 +159,6 @@ describe('expand_entry', () => {
           glosses: {
             en: 'Hi',
           },
-          semantic_domains: [],
         }
       ],
     };

@@ -1,13 +1,14 @@
 <script lang="ts">
   import { t } from 'svelte-i18n';
   import { createEventDispatcher } from 'svelte';
-  const dispatch = createEventDispatcher();
-  const close = () => dispatch('close');
-
   import MultiSelect from '$lib/components/ui/MultiSelect.svelte';
   import { semanticDomains } from '$lib/mappings/semantic-domains';
   import type { IEntry } from '@living-dictionaries/types';
   import { Button, Modal } from 'svelte-pieces';
+  
+  const dispatch = createEventDispatcher<{close: boolean, valueupdate: { field: string; newValue: string[] }}>();
+  const close = () => dispatch('close');
+
   export let entry: IEntry;
   let domains = entry.sdn || [];
   let removedDeprecated = false;

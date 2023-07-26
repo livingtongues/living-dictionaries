@@ -26,8 +26,8 @@
 </div>
 
 {#if edit}
-  {#await import('$lib/components/modals/SemanticDomainsModal.svelte') then SemanticDomainsModal}
-    <SemanticDomainsModal.default
+  {#await import('$lib/components/entry/SemanticDomainsModal.svelte') then { default: SemanticDomainsModal }}
+    <SemanticDomainsModal
       {entry}
       on:valueupdate
       on:close={() => {

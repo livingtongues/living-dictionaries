@@ -1,18 +1,16 @@
 import { t } from 'svelte-i18n';
 import { get } from 'svelte/store';
-import { dictionary } from '$lib/stores';
 import { goto } from '$app/navigation';
 import type { GoalDatabaseVideo, IEntry } from '@living-dictionaries/types';
 import { updateOnline, deleteDocumentOnline, set } from 'sveltefirets';
 import { arrayUnion } from 'firebase/firestore/lite';
 import { serverTimestamp } from 'firebase/firestore';
 
-export async function deleteImage(entry: IEntry) {
+export async function deleteImage(entry: IEntry, dictionaryId: string) {
   const $t = get(t);
   try {
-    const $dictionary = get(dictionary);
     await updateOnline<IEntry>(
-      `dictionaries/${$dictionary.id}/words/${entry.id}`,
+      `dictionaries/${dictionaryId}/words/${entry.id}`,
       { pf: null },
       { abbreviate: true }
     );
@@ -21,12 +19,11 @@ export async function deleteImage(entry: IEntry) {
   }
 }
 
-export async function deleteAudio(entry: IEntry) {
+export async function deleteAudio(entry: IEntry, dictionaryId: string) {
   const $t = get(t);
   try {
-    const $dictionary = get(dictionary);
     await updateOnline<IEntry>(
-      `dictionaries/${$dictionary.id}/words/${entry.id}`,
+      `dictionaries/${dictionaryId}/words/${entry.id}`,
       { sf: null, sfs: null },
       { abbreviate: true }
     );
@@ -35,10 +32,9 @@ export async function deleteAudio(entry: IEntry) {
   }
 }
 
-export async function deleteVideo(entry: IEntry) {
+export async function deleteVideo(entry: IEntry, dictionaryId: string) {
   const $t = get(t);
   try {
-    const $dictionary = get(dictionary);
     const video = entry.vfs[0];
     const deletedVideo: GoalDatabaseVideo = {
       ...video,
@@ -46,7 +42,7 @@ export async function deleteVideo(entry: IEntry) {
       deleted: Date.now(),
     };
     await updateOnline<IEntry>(
-      `dictionaries/${$dictionary.id}/words/${entry.id}`,
+      `dictionaries/${dictionaryId}/words/${entry.id}`,
       { vfs: null, deletedVfs: arrayUnion(deletedVideo) },
       { abbreviate: true }
     );

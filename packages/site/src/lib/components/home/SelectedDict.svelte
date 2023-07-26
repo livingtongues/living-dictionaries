@@ -85,7 +85,7 @@
     </Doc>
     <Button class="mt-1 w-full" form="filled" color="black" href={dictionary.id}>
       {$_('home.open_dictionary', { default: 'Open Dictionary' })}
-      <i class="far fa-chevron-right rtl-x-flip" />
+      <span class="i-fa6-solid-chevron-right rtl-x-flip -mt-1" />
     </Button>
   {/if}
 </div>

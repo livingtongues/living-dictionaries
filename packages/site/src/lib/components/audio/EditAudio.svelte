@@ -127,7 +127,7 @@
       </Button>
       <div class="w-1" />
 
-      <Button onclick={() => deleteAudio(entry)} color="red">
+      <Button onclick={() => deleteAudio(entry, $dictionary.id)} color="red">
         <i class="far fa-trash-alt" />&nbsp;
         <span class="hidden sm:inline"
           >{$t('misc.delete', {

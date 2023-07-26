@@ -52,22 +52,16 @@
             You are already a manager.
           </p>
           <Button href={`/${$dictionary.id}/entries/list`}>
-            {$_('dictionary.entries', {
-              default: 'Entries',
-            })}
-            &nbsp;
-            <i class="fas fa-chevron-right rtl-x-flip" />
+            {$_('dictionary.entries', { default: 'Entries' })}
+            <span class="i-fa6-solid-chevron-right rtl-x-flip -mt-1" />
           </Button>
         {:else if $isContributor && invite.role === 'contributor'}
           <p class="mb-2">
             You are already a contributor.
           </p>
           <Button href={`/${$dictionary.id}/entries/list`}>
-            {$_('dictionary.entries', {
-              default: 'Entries',
-            })}
-            &nbsp;
-            <i class="fas fa-chevron-right rtl-x-flip" />
+            {$_('dictionary.entries', { default: 'Entries' })}
+            <span class="i-fa6-solid-chevron-right rtl-x-flip -mt-1" />
           </Button>
         {:else}
           <Button form="filled" onclick={() => acceptInvite(invite.role)}
@@ -113,11 +107,8 @@
       </p>
 
       <Button href={`/${$dictionary.id}/entries/list`}>
-        {$_('dictionary.entries', {
-          default: 'Entries',
-        })}
-        &nbsp;
-        <i class="fas fa-chevron-right rtl-x-flip" />
+        {$_('dictionary.entries', { default: 'Entries' })}
+        <span class="i-fa6-solid-chevron-right rtl-x-flip -mt-1" />
       </Button>
     {:else}
       <p class="font-semibold">

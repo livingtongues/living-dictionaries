@@ -34,8 +34,9 @@
 
 <ShowHide let:show let:toggle>
   <Button form="filled" onclick={toggle} disabled={!online}>
-    <i class="far fa-plus" />
-    {#if !online}
+    {#if online}
+      <span class="i-fa-solid-plus -mt-1" />
+    {:else}
       Return online to
     {/if}
     {$t('entry.add_entry', { default: 'Add Entry' })}

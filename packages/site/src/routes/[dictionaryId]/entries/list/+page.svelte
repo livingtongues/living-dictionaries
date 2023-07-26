@@ -35,7 +35,7 @@
           entry={convert_and_expand_entry(entry)}
           videoAccess={$dictionary.videoAccess || $admin > 0}
           canEdit={$canEdit}
-          on:deleteImage={() => deleteImage(entry)} />
+          on:deleteImage={() => deleteImage(entry, $dictionary.id)} />
       </Doc>
     {/each}
   {:else}
