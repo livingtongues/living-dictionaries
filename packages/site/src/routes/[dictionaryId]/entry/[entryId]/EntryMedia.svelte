@@ -13,18 +13,19 @@
 
   $: video = entry.senses?.[0].video_files?.[0];
   //Only for testing
-  const mocking = true
+  const mocking = false
 </script>
 
-{#if mocking}
-  <div>
-    <img
-      class="h-full w-full object-cover cursor-pointer"
-      alt=""
-      src="https://api.mapbox.com/styles/v1/mapbox/streets-v12/static/-98.4241,20.38,4.25,0,0/300x300@2x?logo=false&attribution=false&access_token=pk.eyJ1IjoidGFsa2luZ2RpY3Rpb25hcmllcyIsImEiOiJjazYwOGMxY24wM2E3M290ZGlqM2VjaWlpIn0.FF1HWFtUB4mt2lcYnRRNrw" />
-  </div>
-{:else if canEdit}
-  <ShowHide let:show let:toggle>
+<ShowHide let:show let:toggle>
+  {#if mocking}
+    <div>
+      <img
+        on:click={toggle}
+        class="h-full w-full object-cover cursor-pointer"
+        alt=""
+        src="https://api.mapbox.com/styles/v1/mapbox/streets-v12/static/-98.4241,20.38,4.25,0,0/300x300@2x?logo=false&attribution=false&access_token=pk.eyJ1IjoidGFsa2luZ2RpY3Rpb25hcmllcyIsImEiOiJjazYwOGMxY24wM2E3M290ZGlqM2VjaWlpIn0.FF1HWFtUB4mt2lcYnRRNrw" />
+    </div>
+  {:else}
     <button
       on:click={toggle}
       type="button"
@@ -36,11 +37,11 @@
         {$t('entry.geo_tagging', { default: 'Geo Tagging' })}
       </span>
     </button>
-    {#if show}
-      <GeoTaggingModal {t} on:close={toggle} />
-    {/if}
-  </ShowHide>
-{/if}
+  {/if}
+  {#if show}
+    <GeoTaggingModal {t} on:close={toggle} />
+  {/if}
+</ShowHide>
 
 {#if video}
   <div class="w-full overflow-hidden rounded relative mb-2">
