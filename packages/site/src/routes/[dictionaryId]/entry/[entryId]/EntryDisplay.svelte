@@ -8,6 +8,7 @@
   import EntryDialect from '$lib/components/entry/EntryDialect.svelte';
   import { BadgeArray, Button } from 'svelte-pieces';
   import { order_entry_and_dictionary_gloss_languages } from '$lib/helpers/glosses';
+  import { DICTIONARIES_WITH_VARIANTS } from '$lib/constants';
   // import EntryMedia from './EntryMedia.svelte';
 
   export let entry: ExpandedEntry;
@@ -61,27 +62,30 @@
 
     {#each entry.senses as sense, index}
       {@const glossingLanguages = order_entry_and_dictionary_gloss_languages(sense.glosses, dictionary.glossLanguages)}
-
       <div class="p-2 hover:bg-gray-50 rounded">
-        <div class="font-semibold mb-2 flex">
-          <!-- TODO: don't show sense heading if only 1 and not editor -->
-          <div class="font-semibold">
-            Sense {index + 1}
-          </div>
-          <div class="mx-auto" />
-          {#if index > 0}
-            <Button size="sm" form="menu" onclick={() => alert('Re-ordering not ready yet.')}><span class="i-fa-chevron-up -mt-1" /></Button>
-          {/if}
-          {#if index < entry.senses.length - 1}
-            <Button size="sm" form="menu" onclick={() => alert('Re-ordering not ready yet.')}><span class="i-fa-chevron-down -mt-1" /></Button>
-          {/if}
-          {#if entry.senses.length > 1}
-            <Button size="sm" form="menu" onclick={() => alert('Delete sense feature not ready yet.')}><span class="i-fa-solid-times -mt-1" /></Button>
-          {/if}
-          <Button size="sm" form="menu" onclick={() => alert('Ability to add additional senses coming soon.')}><span class="i-fa-solid-plus -mt-1" /></Button>
-        </div>
-        <div class="flex flex-col border-l-2">
 
+        {#if entry.senses.length > 1 || canEdit}
+          <div class="font-semibold mb-2 flex">
+            <div class="font-semibold">
+              Sense {index + 1}
+            </div>
+            <div class="mx-auto" />
+            {#if canEdit}
+              {#if index > 0}
+                <Button size="sm" form="menu" onclick={() => alert('Re-ordering not ready yet.')}><span class="i-fa-chevron-up -mt-1" /></Button>
+              {/if}
+              {#if index < entry.senses.length - 1}
+                <Button size="sm" form="menu" onclick={() => alert('Re-ordering not ready yet.')}><span class="i-fa-chevron-down -mt-1" /></Button>
+              {/if}
+              {#if entry.senses.length > 1}
+                <Button size="sm" form="menu" onclick={() => alert('Delete sense feature not ready yet.')}><span class="i-fa-solid-times -mt-1" /></Button>
+              {/if}
+              <Button size="sm" form="menu" onclick={() => alert('Ability to add additional senses coming soon.')}><span class="i-fa-solid-plus -mt-1" /></Button>
+            {/if}
+          </div>
+        {/if}
+
+        <div class="flex flex-col border-l-2">
           {#each glossingLanguages as bcp}
             <EntryField
               value={sense.glosses?.[bcp]}
@@ -141,7 +145,6 @@
                 on:valueupdate />
             {/each}
           {/each}
-
         </div>
       </div>
     {/each}
@@ -163,8 +166,7 @@
       on:valueupdate={({ detail }) =>
         dispatch('valueupdate', { field: 'scn', newValue: [detail.newValue] })} />
 
-    <!-- TODO: make these site constants -->
-    {#if ['babanki', 'torwali'].includes(dictionary.id)}
+    {#if DICTIONARIES_WITH_VARIANTS.includes(dictionary.id)}
       <EntryField
         value={entry.variant}
         field="va"
@@ -173,13 +175,12 @@
         on:valueupdate />
     {/if}
 
-    <!-- TODO: use object keys to use expanded field names -->
-    {#each ['pl', 'mr', 'in', 'nt'] as field}
+    {#each Object.entries({'pl': 'plural_form', 'mr': 'morphology', 'in': 'interlinearization', 'nt': 'notes'}) as [databaseField, expandedField]}
       <EntryField
-        value={entry[field]}
-        {field}
+        value={entry[expandedField]}
+        field={databaseField}
         {canEdit}
-        display={$t(`entry.${field}`)}
+        display={$t(`entry.${databaseField}`)}
         on:valueupdate />
     {/each}
 

@@ -12,6 +12,7 @@
   import { writable } from 'svelte/store';
   import type { InstantSearch } from 'instantsearch.js';
   import type { ActualDatabaseEntry, LDAlgoliaHit } from '@living-dictionaries/types';
+  import { DICTIONARIES_WITH_VARIANTS } from '$lib/constants';
 
   const search: InstantSearch = getContext('search');
 
@@ -24,7 +25,7 @@
     ]);
   });
 
-  $: adjustedColumns = ['babanki', 'torwali'].includes($dictionary.id)
+  $: adjustedColumns = DICTIONARIES_WITH_VARIANTS.includes($dictionary.id)
     ? [...$columns, { field: 'va', width: 150 }]
     : $columns;
 
