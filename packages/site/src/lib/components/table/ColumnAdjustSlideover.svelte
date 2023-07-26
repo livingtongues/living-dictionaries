@@ -54,7 +54,7 @@
                 type="button"
                 on:click={() => move(i, 'up')}
                 class="w-8 h-8 flex items-center justify-center hover:bg-gray-200 transition ease-in-out duration-150 text-gray-400 hover:text-gray-500 focus:text-gray-700 rounded-full focus:outline-none">
-                <i class="far fa-chevron-up" />
+                <span class="i-fa6-solid-chevron-up" />
               </button>
             {/if}
             {#if i > 0 && i !== $preferredColumns.length - 1}
@@ -62,7 +62,7 @@
                 type="button"
                 on:click={() => move(i, 'down')}
                 class="w-8 h-8 flex items-center justify-center hover:bg-gray-200 transition ease-in-out duration-150 text-gray-400 hover:text-gray-500 focus:text-gray-700 rounded-full focus:outline-none">
-                <i class="far fa-chevron-down" />
+                <span class="i-fa6-solid-chevron-down" />
               </button>
             {/if}
           </div>

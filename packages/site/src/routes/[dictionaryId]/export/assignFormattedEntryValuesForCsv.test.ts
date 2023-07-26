@@ -69,7 +69,7 @@ describe(display_speaker_gender, () => {
 describe('format arrays into objects', () => {
   test(format_semantic_domains, () => {
     const entry: ExpandedEntry = {
-      senses: [{ semantic_domains: ['Colors', 'Birds'] }],
+      senses: [{ translated_ld_semantic_domains: ['Colors', 'Birds'] }],
     };
     const expected = {
       semantic_domain_1: 'Colors',

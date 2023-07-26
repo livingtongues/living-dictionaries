@@ -190,7 +190,7 @@
       {/if}
       {#if !(searchFocused && filteredDictionaries.length > 3)}
         <Button href="/create-dictionary" class="mt-2" color="black" form="filled">
-          <i class="far fa-plus" />
+          <span class="i-fa-solid-plus -mt-1.25" />
           {$_('create.create_new_dictionary', {
             default: 'Create New Dictionary',
           })}
@@ -225,7 +225,7 @@
         type="button"
         class="flex flex-start items-center px-2 py-2 -mx-1 rounded hover:bg-gray-200"
         on:click={clearDictionary}>
-        <i class="far fa-chevron-left rtl-x-flip" />
+        <span class="i-fa6-solid-chevron-left rtl-x-flip" />
         <div class="w-1" />
         {$_('misc.back', { default: 'Back' })}
       </button>

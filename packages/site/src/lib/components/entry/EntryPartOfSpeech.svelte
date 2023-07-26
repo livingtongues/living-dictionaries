@@ -24,10 +24,6 @@
       newValue: string[];
     };
   }>();
-
-  $: translateValues = (values: string[]) => {
-    return t ? values.map((v) => $t("ps." + v, { default: v })) : values;
-  };
 </script>
 
 {#if canEdit}
@@ -45,7 +41,7 @@
   >
     <ShowHide let:show let:toggle>
       <BadgeArrayEmit
-        strings={translateValues(editedParts)}
+        strings={editedParts}
         addMessage={$t("misc.add", { default: "Add" })}
         canEdit
         on:itemremoved={({ detail: { index } }) => {

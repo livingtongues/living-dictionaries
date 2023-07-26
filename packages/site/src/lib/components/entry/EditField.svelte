@@ -199,7 +199,7 @@
     {#if adding}
       <Button type="submit" form="filled">
         {$t('misc.next', { default: 'Next' })}
-        <i class="far fa-chevron-right rtl-x-flip" />
+        <span class="i-fa6-solid-chevron-right rtl-x-flip -mt-.5" />
       </Button>
     {:else}
       <Button type="submit" form="filled">

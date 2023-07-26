@@ -1,9 +1,9 @@
 <script lang="ts">
   import { ShowHide } from 'svelte-pieces';
-  export let value: string,
-    field: string = undefined,
-    display: string,
-    canEdit = false;
+  export let value: string;
+  export let field: string = undefined;
+  export let display: string;
+  export let canEdit = false;
 </script>
 
 {#if value || canEdit}

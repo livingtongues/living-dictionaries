@@ -34,7 +34,7 @@
         title={entry.lx}
         gcs={entry.pf.gcs}
         square={60}
-        on:deleteImage={() => deleteImage(entry)} />
+        on:deleteImage={() => deleteImage(entry, $dictionary.id)} />
     {/if}
     <!-- // TODO: add videos to columns -->
     <!-- {:else if column.field === 'videoFile'}
@@ -46,7 +46,7 @@
   {:else if column.field === 'ps'}
     <EntryPartOfSpeech
       {canEdit}
-      value={entry.senses[0].parts_of_speech}
+      value={entry.senses[0].translated_parts_of_speech}
       on:valueupdate={(e) => saveUpdateToFirestore(e, entry.id, $dictionary.id)} />
   {:else if column.field === 'sdn'}
     <SemanticDomains

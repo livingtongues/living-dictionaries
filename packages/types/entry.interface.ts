@@ -36,8 +36,11 @@ export interface ExpandedEntry extends IFirestoreMetaData {
 
 export interface ExpandedSense {
   glosses?: IGloss;
-  parts_of_speech?: string[]; // translation to current language happens during expansion
-  semantic_domains?: string[]; // translation to current language happens during expansion
+  parts_of_speech_keys?: string[];
+  translated_parts_of_speech?: string[];
+  ld_semantic_domains_keys?: string[];
+  translated_ld_semantic_domains?: string[];
+  write_in_semantic_domains?: string[];
   example_sentences?: IExampleSentence[];
   photo_files?: ExpandedPhoto[];
   video_files?: ExpandedVideo[];
@@ -48,8 +51,8 @@ export interface ExpandedSense {
 export interface DatabaseSense {
   gl?: IGloss;
   ps?: string[]; // parts_of_speech
-  sd?: string[]; // semantic domain strings, only using for custom semantic domains brought in from imports
   sdn?: string[]; // semantic domain number, simplified system modeled after SemDom (eg. 2.1.2.3)
+  sd?: string[]; // semantic domain strings, only using for custom semantic domains brought in from imports
   xs?: IExampleSentence[];
   pfs?: GoalDatabasePhoto[];
   deletedPfs?: GoalDatabasePhoto[];

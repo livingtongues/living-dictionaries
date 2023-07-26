@@ -1,4 +1,4 @@
-<script lang="javascript">
+<script>
   import { onMount } from 'svelte';
   import { fly } from 'svelte/transition';
   export let value = [];

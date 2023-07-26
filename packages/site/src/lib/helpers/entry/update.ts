@@ -1,6 +1,6 @@
 import { update } from 'sveltefirets';
 import { get } from 'svelte/store';
-import { _ } from 'svelte-i18n';
+import { t } from 'svelte-i18n';
 
 export async function saveUpdateToFirestore(
   e: {
@@ -9,7 +9,7 @@ export async function saveUpdateToFirestore(
   entryId: string,
   dictionaryId: string
 ) {
-  const $_ = get(_);
+  const $t = get(t);
 
   try {
     update(
@@ -20,6 +20,6 @@ export async function saveUpdateToFirestore(
       { abbreviate: true }
     );
   } catch (err) {
-    alert(`${$_('misc.error', { default: 'Error' })}: ${err}`);
+    alert(`${$t('misc.error', { default: 'Error' })}: ${err}`);
   }
 }

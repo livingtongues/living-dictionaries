@@ -127,13 +127,15 @@
 </ul>
 
 {#if canToggleShowMore || filteredItems.length > maxInitialItems}
-  <button type="button" class="p-1 mb-1 ml-1 text-xs text-gray-600" on:click={showMore}
-    ><i class="far {isShowingMore ? 'fa-chevron-up' : 'fa-chevron-down'}" />
-    {isShowingMore
-      ? $_('entry.show_less', {
-          default: 'Show less',
-        })
-      : $_('entry.show_more', { default: 'Show more' })}</button>
+  <button type="button" class="p-1 mb-1 ml-1 text-xs text-gray-600" on:click={showMore}>
+    {#if isShowingMore}
+      <span class="i-fa6-solid-chevron-up" />
+      {$_('entry.show_less', { default: 'Show less' })}
+    {:else}
+      <span class="i-fa6-solid-chevron-down -mt-1" />
+      {$_('entry.show_more', { default: 'Show more' })}
+    {/if}
+  </button>
 {/if}
 
 <div class="mb-3" />
