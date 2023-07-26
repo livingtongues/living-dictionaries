@@ -32,6 +32,7 @@ export interface ExpandedEntry extends IFirestoreMetaData {
   deletedAt?: Timestamp;
   importId?: string; // TODO: expand this also
   scientific_names?: string[]; // italic by default but they can use <i> and </i> to define where italics show
+  geo_tagging?: string;
 }
 
 export interface ExpandedSense {
@@ -83,6 +84,7 @@ export interface GoalDatabaseEntry extends IFirestoreMetaDataAbbreviated {
   deletedAt?: Timestamp;
   ii?: string; // importId which can be used to show all entries from a particular import
   scn?: string[]; // scientific_names
+  gt?: string; // geo_tagging
 }
 
 interface DeprecatedEntry extends Omit<DatabaseSense, 'ps' | 'xs' | 'pfs' | 'deletedPfs' | 'vfs'> {
