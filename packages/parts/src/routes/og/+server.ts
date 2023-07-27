@@ -4,7 +4,7 @@ import LZString from 'lz-string';
 const { decompressFromEncodedURIComponent: decode } = LZString;
 import Image from './OpenGraphImage.svelte';
 
-const HEIGHT = 600;
+const HEIGHT = 628;
 const WIDTH = 1200;
 
 export const GET: RequestHandler = async ({ url }) => {
