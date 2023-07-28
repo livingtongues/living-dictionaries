@@ -1,21 +1,21 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
-  import Button from 'svelte-pieces/ui/Button.svelte';
+  import { Button } from 'svelte-pieces';
   import { parseVideoData } from './parseVideoData';
   import { createEventDispatcher } from 'svelte';
-  import type { IVideo } from '@living-dictionaries/types';
-  const dispatch = createEventDispatcher<{ update: IVideo }>();
+  import type { GoalDatabaseVideo } from '@living-dictionaries/types';
+  const dispatch = createEventDispatcher<{ update: GoalDatabaseVideo }>();
 
   let url: string;
 
   function handle() {
-    const videoData = parseVideoData(url);
-    if (!videoData) {
+    const video = parseVideoData(url);
+    if (!video) {
       alert($_('misc.invalid_url', { default: 'This is not a valid URL' }));
       url = '';
       return;
     }
-    dispatch('update', videoData);
+    dispatch('update', video);
   }
 </script>
 

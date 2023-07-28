@@ -85,7 +85,15 @@
     "send_message": "aika sako",
     "message_sent": "Saƙon aika. Za mu amsa da zaran mun iya.",
     "what_is_your_question": "Mene ne tambaya ko comment?",
-    "message_failed": "Sakon Sakon Sako ya kasa. Duba haɗin intanet ɗinka ko Imel na Amurka:"
+    "message_failed": "Sakon Sakon Sako ya kasa. Duba haɗin intanet ɗinka ko Imel na Amurka:",
+    "delete_dictionary": "Share ƙamus",
+    "public_dictionary": "Yi ƙamus na jama'a",
+    "import_data": "Shigo da bayanai",
+    "request_access": "Neman Samun Samun dama",
+    "report_problem": "Bayar da rahoton matsala",
+    "other": "Sauran batun",
+    "select_topic": "Zaɓi taken",
+    "data_fields": "Zaɓin bayanan bayanan zaɓi"
   },
   "create": {
     "select_coordinates": "Zabi tsarawa",
@@ -128,7 +136,8 @@
     "grammar": "Grammar",
     "entries": "Entries",
     "youtube_terms": "Sharuɗɗan YouTube",
-    "google_terms": "Sharuɗɗan Google"
+    "google_terms": "Sharuɗɗan Google",
+    "full_title": "{dictionary_name} Living Dictionary"
   },
   "entry": {
     "view_entries": "view Entries",
@@ -170,7 +179,8 @@
     "gloss": "juyawa",
     "pl": "Tsari",
     "print": "Buga",
-    "id": "ID"
+    "id": "ID",
+    "scn": "Sunan kimiyya"
   },
   "error": {
     "run_into_error": "Muna yi hakuri, mun gudu a cikin wani kuskure.",
@@ -233,7 +243,8 @@
     "public_private_meaning": "Jama'a nufin kowa zai iya gani da ƙamus da bukatar al'umma yarda. Private kamus ne bayyane ne kawai zuwa gare ku, kuma ku hadin gwiwar.",
     "optional_data_fields": "ZABI Data Fields",
     "unable_to_delete": "SAURARA: Ba za ku iya share waɗannan harsunan walƙiya daga baya ba.",
-    "print_access_meaning": "Wannan yana bawa jama'a damar saukar da buga wannan ƙamus na rayuwa a matsayin .pdf"
+    "print_access_meaning": "Wannan yana bawa jama'a damar saukar da buga wannan ƙamus na rayuwa a matsayin .pdf",
+    "featured_image": "Hoton da aka nuna"
   },
   "speakers": {
     "add_new_speaker": "Add New Majalisa",
@@ -267,14 +278,15 @@
     "role": "Aikin"
   },
   "export": {
-    "csv_data": "Bayani a matsayin CSV",
+    "csv_data": "Bayanai kamar yadda .csv",
     "checking_images": "Duba idan fayilolin hoto sun wanzu",
     "no_images": "Babu fayilolin hoto",
     "checking_audios": "Dubawa idan fayilolin sauti sun wanzu",
     "no_audios": "Babu fayilolin mai jiwuwa",
     "download_csv": "Sauke CSV",
     "availability": "Ana samun fitarwa kawai don manajan kamawa",
-    "download_pdf": "Download PDF"
+    "download_pdf": "Download PDF",
+    "spreadsheet": "Yadow"
   },
   "video": {
     "video_url": "URL ɗin bidiyo",
@@ -300,5 +312,13 @@
     "columns": "Ginshiƙai",
     "headword_size": "Girman taken",
     "font_size": "Girman font"
+  },
+  "import": {
+    "import": "Shigowa da kayan ciniki",
+    "template_link": "Haɗi zuwa samfuri",
+    "instructions_1": "Idan kun riga kun sami bayanan ilimin harshe waɗanda kuke so ku shigo cikin ƙamus ɗinku, don Allah bi matakan da ke ƙasa.",
+    "instructions_2": "Danna kan hanyar Blue \"zuwa samfuri\" maɓallin ƙasa. Zazzage samfuri azaman fayil mai kyau, ko ƙirƙirar kwafin akan Google Docs. Shirya samfuri gwargwadon bukatun aikinku. Kwafa da liƙa bayananka a cikin falle.",
+    "instructions_3": "Yi amfani da \"tuntuɓi mu\" a ƙasa don tuntuɓarmu. Bari mu san cewa kuna da sabon falle wanda ya shirya don shigo da kaya. Tambaye mana wasu tambayoyin da kake da shi. Zamu amsa muku ta hanyar imel, sannan zaku iya aiko mana da fayil ɗinku.",
+    "instructions_4": "Don aiko mana da fitarwa daga software na kamus kamar flayer, LEXICE POL, SOXICE Pro, Button takalmin \"Ka tuntube mu na a ƙasa ka gaya mana cikakkun bayanan aikinka."
   }
 }

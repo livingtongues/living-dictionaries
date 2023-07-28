@@ -1,7 +1,9 @@
+
 import { IEntry } from '@living-dictionaries/types';
 import { db } from '../config';
 import { program } from 'commander';
 import { reverse_semantic_domains_mapping } from './reverse-semantic-domains-mapping';
+import { turn_dialect_strings_to_arrays } from './turn-dialects-to-arrays';
 program
   //   .version('0.0.1')
   .option('--id <value>', 'Dictionary Id')
@@ -9,7 +11,7 @@ program
   .parse(process.argv);
 
 const dictionaryId = program.opts().id;
-const live = program.opts().live;
+const {live} = program.opts();
 
 async function entryRefactor() {
   try {
@@ -28,8 +30,8 @@ async function entryRefactor() {
       }
     }
   } catch (error) {
-    console.log('Refactor failed!');
-    console.log(error);
+    console.error('Refactor failed!');
+    console.error(error);
   }
 }
 
@@ -41,9 +43,26 @@ async function fetchEntries(dictionaryId: string) {
     // await refactorGloss(dictionaryId, entry);
     // await notesToPluralForm(dictionaryId, entry);
     // turnPOSintoArray(dictionaryId, entry); // not awaiting so operations can run in parallel otherwise the function errors after about 1400 iterations
-    reverese_semantic_domains_in_db(dictionaryId, entry);
+    // reverese_semantic_domains_in_db(dictionaryId, entry);
+    turnDialectsIntoArray(dictionaryId, entry);
   }
 }
+
+const turnDialectsIntoArray = async (dictionaryId: string, entry: IEntry) => {
+  if (entry.di) {
+    console.log('entry dialect before:');
+    console.log(entry.di);
+    if (Array.isArray(entry.di))
+      return true;
+
+    entry.di =  turn_dialect_strings_to_arrays(entry.di);
+    console.log('entry dialect after:');
+    console.log(entry.di);
+    if (!live) return;
+    await db.collection(`dictionaries/${dictionaryId}/words`).doc(entry.id).set(entry);
+  }
+  return true;
+};
 
 const reverese_semantic_domains_in_db = async (dictionaryId: string, entry: IEntry) => {
   if (entry.sdn) {
@@ -93,27 +112,27 @@ const refactorGloss = async (dictionaryId: string, entry: IEntry) => {
   console.log(entry.gl);
   for (const key in entry.gl) {
     if (key === 'English') {
-      entry.gl['en'] = entry.gl[key];
+      entry.gl.en = entry.gl[key];
       delete entry.gl[key];
     }
     if (key === 'Spanish') {
-      entry.gl['es'] = entry.gl[key];
+      entry.gl.es = entry.gl[key];
       delete entry.gl[key];
     }
     if (key === 'Español') {
-      entry.gl['es'] = entry.gl[key];
+      entry.gl.es = entry.gl[key];
       delete entry.gl[key];
     }
     if (key === 'Bahasa Indonesia') {
-      entry.gl['id'] = entry.gl[key];
+      entry.gl.id = entry.gl[key];
       delete entry.gl[key];
     }
     if (key === 'French') {
-      entry.gl['fr'] = entry.gl[key];
+      entry.gl.fr = entry.gl[key];
       delete entry.gl[key];
     }
     if (key === 'Mandarin 中文') {
-      entry.gl['cmn'] = entry.gl[key];
+      entry.gl.cmn = entry.gl[key];
       delete entry.gl[key];
     }
   }
@@ -124,7 +143,7 @@ const refactorGloss = async (dictionaryId: string, entry: IEntry) => {
 
 const notesToPluralForm = async (dictionaryId: string, entry: IEntry) => {
   const ntBefore = entry.nt;
-  if (entry.nt && entry.nt.startsWith('Plural form:')) {
+  if (entry?.nt.startsWith('Plural form:')) {
     entry.pl = entry.nt.replace('Plural form: ', '');
     delete entry.nt;
     console.log(`${entry.id}, ntBefore:${ntBefore}, ntAfter:${entry.nt}, pl:${entry.pl}`);

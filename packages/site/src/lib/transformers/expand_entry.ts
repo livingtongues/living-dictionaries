@@ -7,20 +7,15 @@ import { translate_part_of_speech_to_current_language, translate_semantic_domain
 
 export function expand_entry(database_entry: GoalDatabaseEntry): ExpandedEntry {
   return {
-    ...database_entry, // This can be removed if:
-    // 1) entire front-end uses expanded format
-    // 2) all fields are expanded or at least copied into expanded entry (including deprecated fields in sounds files like previousFileName) until completely refactored out of database
-    // should still retain abbreviated translated fields (ps, sdn) as they lose their database value when expanded (because of translation into current language)
-
     id: database_entry.id,
     lexeme: database_entry.lx,
-    local_orthagraphy_1: database_entry.lo1,
-    local_orthagraphy_2: database_entry.lo2,
-    local_orthagraphy_3: database_entry.lo3,
-    local_orthagraphy_4: database_entry.lo4,
-    local_orthagraphy_5: database_entry.lo5,
+    local_orthography_1: database_entry.lo1,
+    local_orthography_2: database_entry.lo2,
+    local_orthography_3: database_entry.lo3,
+    local_orthography_4: database_entry.lo4,
+    local_orthography_5: database_entry.lo5,
     phonetic: database_entry.ph,
-    senses: database_entry.sn.map(expand_sense),
+    senses: database_entry.sn?.map(expand_sense) || [],
     interlinearization: database_entry.in,
     morphology: database_entry.mr,
     plural_form: database_entry.pl,
@@ -31,6 +26,7 @@ export function expand_entry(database_entry: GoalDatabaseEntry): ExpandedEntry {
     sound_files: database_entry.sfs?.map(expand_audio),
     elicitation_id: database_entry.ei,
     deletedAt: database_entry.deletedAt,
+    scientific_names: database_entry.scn,
   }
 }
 
@@ -38,7 +34,7 @@ function expand_sense(sense: DatabaseSense): ExpandedSense {
   return {
     glosses: sense.gl,
     parts_of_speech: sense.ps?.map(translate_part_of_speech_to_current_language),
-    semantic_domains: [...sense.sd, ...sense.sdn?.map(translate_semantic_domain_keys_to_current_language) || []],
+    semantic_domains: [...sense.sd || [], ...sense.sdn?.map(translate_semantic_domain_keys_to_current_language) || []],
     example_sentences: sense.xs,
     photo_files: sense.pfs?.map(expand_photo),
     video_files: sense.vfs?.map(expand_video),
@@ -58,7 +54,7 @@ function expand_photo(pf: GoalDatabasePhoto): ExpandedPhoto {
   };
 }
 
-function expand_video(vf: GoalDatabaseVideo): ExpandedVideo {
+export function expand_video(vf: GoalDatabaseVideo): ExpandedVideo {
   return {
     fb_storage_path: vf.path,
     uid_added_by: vf.ab,
@@ -67,6 +63,7 @@ function expand_video(vf: GoalDatabaseVideo): ExpandedVideo {
     source: vf.sc,
     youtubeId: vf.youtubeId,
     vimeoId: vf.vimeoId,
+    start_at_seconds: vf.startAt,
   };
 }
 

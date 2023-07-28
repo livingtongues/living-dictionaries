@@ -1,7 +1,5 @@
-/// <reference types="jest" />
-
 import { testFun } from '../test-config';
-testFun.cleanup;
+testFun.cleanup();
 // import * as admin from 'firebase-admin';
 
 import { supportEmail } from '../../src/index';
@@ -10,7 +8,7 @@ const envConfig = {
   // sendgrid: { key: env.sendgrid }
 };
 
-test('supportEmail sends email (check email inbox)', () => {
+test.skip('supportEmail sends email (check email inbox)', () => {
   testFun.mockConfig(envConfig);
 
   const wrapped = testFun.wrap(supportEmail);
@@ -21,6 +19,7 @@ test('supportEmail sends email (check email inbox)', () => {
     url: 'https://td-dev-svelte.web.app/achi-1579819002171/entries/list',
   };
   wrapped(data).then(() => {
+    // should spy on email sending function to make sure it was called
     console.log('nothing to assert here, check email to find result of test');
     expect(true).toBe(true);
   });

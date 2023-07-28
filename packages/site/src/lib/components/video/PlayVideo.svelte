@@ -1,18 +1,18 @@
 <script lang="ts">
   import { t } from 'svelte-i18n';
-  import type { IEntry, IVideo } from '@living-dictionaries/types';
+  import type { ExpandedVideo, IEntry } from '@living-dictionaries/types';
   import VideoIFrame from './VideoIFrame.svelte';
-
-  export let entry: IEntry,
-    video: IVideo,
-    storageBucket: string,
-    canEdit = false;
-
-  import Button from 'svelte-pieces/ui/Button.svelte';
+  import { Button } from 'svelte-pieces';
   import { createEventDispatcher } from 'svelte';
+
+  export let entry: IEntry;
+  export let video: ExpandedVideo;
+  export let storageBucket: string;
+  export let canEdit = false;
+
   const dispatch = createEventDispatcher<{
     close: boolean;
-    delete: boolean;
+    deleteVideo: boolean;
   }>();
 </script>
 
@@ -24,7 +24,7 @@
     <div
       class="font-semibold text-white p-4 flex justify-between items-center
           absolute top-0 inset-x-0 bg-opacity-25 bg-black">
-      <span on:click|stopPropagation>{entry.lx}</span>
+      <span on:click|stopPropagation>{entry.lexeme}</span>
       <span class="i-fa-solid-times p-3 cursor-pointer" />
     </div>
     {#if video}
@@ -33,7 +33,7 @@
           controls
           autoplay
           playsinline
-          src={`https://firebasestorage.googleapis.com/v0/b/${storageBucket}/o/${video.path.replace(
+          src={`https://firebasestorage.googleapis.com/v0/b/${storageBucket}/o/${video.fb_storage_path.replace(
             /\//g,
             '%2F'
           )}?alt=media`}>
@@ -54,7 +54,7 @@
           form="filled"
           onclick={(e) => {
             e.stopPropagation();
-            dispatch('delete');
+            dispatch('deleteVideo');
           }}>
           <span class="i-fa-trash-o" style="margin: -1px 0 2px;" />
           {$t('misc.delete', { default: 'Delete' })}

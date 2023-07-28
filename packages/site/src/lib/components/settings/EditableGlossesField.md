@@ -2,12 +2,13 @@
   import { Story } from 'kitbook';
   import EditableGlossesField from './EditableGlossesField.svelte';
   import { glossingLanguages } from '$lib/glosses/glossing-languages';
-  import ReactiveSet from 'svelte-pieces/functions/ReactiveSet.svelte';
+  import { ReactiveSet } from 'svelte-pieces';
+  
   let selectedLanguages = ['en', 'de', 'fr'];
   let admin = true;
 </script>
 
-<!-- prettier-ignore -->
+
 # Edit Gloss Languages
 
 There must always be at least one glossing language (or however many the

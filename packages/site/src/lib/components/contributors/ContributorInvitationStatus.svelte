@@ -1,8 +1,8 @@
 <script lang="ts">
-  import Button from 'svelte-pieces/ui/Button.svelte';
+  import { Button } from 'svelte-pieces';
   import type { IInvite } from '@living-dictionaries/types';
   export let invite: Partial<IInvite>;
-  export let admin: number | boolean = false;
+  export let admin = false;
 
   import { createEventDispatcher } from 'svelte';
   const dispatch = createEventDispatcher<{ delete: { id: string } }>();

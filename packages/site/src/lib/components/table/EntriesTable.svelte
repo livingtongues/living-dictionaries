@@ -1,24 +1,21 @@
 <script lang="ts">
   import type { IColumn, IEntry } from '@living-dictionaries/types';
-  export let entries: IEntry[] = [];
   import ColumnTitle from './ColumnTitle.svelte';
-
-  import { canEdit, columns, dictionary } from '$lib/stores';
   import Cell from './Cell.svelte';
   import { minutesAgo } from '$lib/helpers/time';
 
+  export let canEdit = false;
+  export let entries: IEntry[] = [];
+  export let columns: IColumn[];
   let selectedColumn: IColumn;
 
   function getLeftValue(index: number) {
     if (index === 0) {
       return 0;
     } else {
-      return $columns[index - 1].width;
+      return columns[index - 1].width;
     }
   }
-
-  $: adjustedColumns =
-  ['babanki', 'torwali'].includes($dictionary.id) ? [...$columns, { field: 'va', width: 150 }] : $columns;
 </script>
 
 <div
@@ -27,7 +24,7 @@
   style="height: calc(100vh - 189px);">
   <table class="relative">
     <tr class="text-left">
-      {#each adjustedColumns as column, i}
+      {#each columns as column, i}
         <th
           on:click={() => {
             selectedColumn = column;
@@ -42,46 +39,20 @@
         </th>
       {/each}
     </tr>
-    {#if $canEdit}
-      {#await import('sveltefirets/firestore/Doc.svelte') then { default: Doc }}
-        {#each entries as algoliaEntry (algoliaEntry.id)}
-          <Doc
-            path="dictionaries/{$dictionary.id}/words/{algoliaEntry.id}"
-            startWith={algoliaEntry}
-            let:data={entry}
-            log>
-            <tr class="row-hover">
-              {#each adjustedColumns as column, i}
-                <td
-                  class:bg-green-100={entry.ua &&
-                    entry.ua.toMillis &&
-                    entry.ua.toMillis() > minutesAgo(5)}
-                  class="{column.sticky ? 'sticky bg-white' : ''} h-0"
-                  style="{column.sticky
-                    ? 'left:' + getLeftValue(i) + 'px; --border-right-width: 3px;'
-                    : ''} --col-width: {entry.sr ? 'auto' : `${column.width}px`};">
-                  <Cell {column} {entry} canEdit={$canEdit} />
-                </td>
-              {/each}
-            </tr>
-          </Doc>
+    {#each entries as entry (entry.id)}
+      <tr class="row-hover">
+        {#each columns as column, i}
+          <td
+            class:bg-green-100={canEdit && entry.ua?.toMillis?.() > minutesAgo(5)}
+            class="{column.sticky ? 'sticky bg-white' : ''} h-0"
+            style="{column.sticky
+              ? 'left:' + getLeftValue(i) + 'px; --border-right-width: 3px;'
+              : ''} --col-width: {entry.sr ? 'auto' : `${column.width}px`};">
+            <Cell {column} {entry} {canEdit} />
+          </td>
         {/each}
-      {/await}
-    {:else}
-      {#each entries as entry (entry.id)}
-        <tr class="row-hover">
-          {#each adjustedColumns as column, i}
-            <td
-              class="{column.sticky ? 'sticky bg-white' : ''} h-0"
-              style="{column.sticky
-                ? 'left:' + getLeftValue(i) + 'px; --border-right-width: 3px;'
-                : ''} --col-width: {entry.sr ? 'auto' : `${column.width}px`};">
-              <Cell {column} {entry} canEdit={$canEdit} />
-            </td>
-          {/each}
-        </tr>
-      {/each}
-    {/if}
+      </tr>
+    {/each}
   </table>
 </div>
 

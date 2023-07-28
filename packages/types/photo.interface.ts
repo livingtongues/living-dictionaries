@@ -1,3 +1,5 @@
+import type { Timestamp } from 'firebase/firestore';
+
 // current interface used across the site that we will migrate from this to just ExpandedPhoto
 export type IPhoto = ExpandedPhoto & ActualDatabasePhoto;
 
@@ -16,7 +18,7 @@ export interface GoalDatabasePhoto {
   path?: string; // Firebase storage location
   gcs?: string; // Google's Magic Image serving url reference which accepts requests for exact image size https://medium.com/google-cloud/uploading-resizing-and-serving-images-with-google-cloud-platform-ca9631a2c556
   ab?: string; // added by uid
-  ts?: any; // timestamp // TODO: determine type and make parallel w/ all media, had some trouble with Firestore Timestamps previously? Might need to settle for a number timestamp
+  ts?: number; // timestamp in milliseconds, Firestore Timestamps not supported inside arrays
   cr?: string; // credit: photographer name
   sc?: string; // source
 }
@@ -25,4 +27,8 @@ interface DeprecatedPhoto {
   uploadedBy?: string;
   uploadedAt?: any;
   source?: string;
+}
+
+export interface DictionaryPhoto extends Omit<ExpandedPhoto, 'timestamp'> {
+  timestamp?: Date | Timestamp;
 }

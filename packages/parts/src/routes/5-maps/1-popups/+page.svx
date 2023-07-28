@@ -6,7 +6,7 @@
   import PopupOfMap from '$lib/maps/mapbox/map/PopupOfMap.svelte';
 </script>
 
-<!-- prettier-ignore -->
+
 # Popups
 
 <Story

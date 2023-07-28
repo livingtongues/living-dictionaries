@@ -1,12 +1,14 @@
 <script lang="ts">
-  import type { IEntry } from '@living-dictionaries/types';
-  import { _ } from 'svelte-i18n';
+  import type { GoalDatabasePhoto, IEntry } from '@living-dictionaries/types';
+  import { t } from 'svelte-i18n';
+  import { updateOnline } from 'sveltefirets';
+  import { user, dictionary } from '$lib/stores';
 
   export let entry: IEntry;
   let dragging = false;
   let file: File;
 
-  async function handleImage(files: FileList) {
+  function handleImage(files: FileList) {
     dragging = false;
 
     const fileToCheck = files.item(0);
@@ -15,20 +17,33 @@
     if (fileToCheck.type.split('/')[0] !== 'image') {
       return alert(
         // @ts-ignore
-        `${$_('upload.error', { default: 'Unsupported File Type' })}`
+        `${$t('upload.error', { default: 'Unsupported File Type' })}`
       );
     }
-    // Must be smaller than 10MB, http://www.unitconversion.org/data-storage/megabytes-to-bytes-conversion.html
-    if (fileToCheck.size > 10485760) {
+    const tenMB = 10485760; // http://www.unitconversion.org/data-storage/megabytes-to-bytes-conversion.html
+    if (fileToCheck.size > tenMB) {
       // @ts-ignore
       return alert(
-        `${$_('upload.file_must_be_smaller', {
+        `${$t('upload.file_must_be_smaller', {
           default: 'File must be smaller than',
         })} 10MB`
       );
     }
 
     file = fileToCheck;
+  }
+
+  async function saveImage(fb_storage_path: string, specifiable_image_url: string) {
+    const pf: GoalDatabasePhoto = {
+      path: fb_storage_path,
+      gcs: specifiable_image_url,
+      ts: new Date().getTime(),
+      cr: $user.displayName,
+      ab: $user.uid,
+    }
+    await updateOnline<IEntry>(`dictionaries/${$dictionary.id}/words/${entry.id}`, { pf} ,
+      { abbreviate: true }
+    )
   }
 </script>
 
@@ -37,8 +52,8 @@
     <label
       class:dragging
       class="text-gray-600 border-transparent
-      h-full flex flex-col items-center justify-center border-2 border-dashed
-      cursor-pointer"
+        h-full flex flex-col items-center justify-center border-2 border-dashed
+        cursor-pointer"
       title="Add Photo to Entry"
       on:drop|preventDefault={(e) => handleImage(e.dataTransfer.files)}
       on:dragover|preventDefault={() => (dragging = true)}
@@ -62,7 +77,10 @@
     </label>
   {:else}
     {#await import('$lib/components/image/UploadImage.svelte') then { default: UploadImage }}
-      <UploadImage {file} {entry} />
+      <UploadImage
+        {file}
+        fileLocationPrefix="{$dictionary.id}/images/{entry.id}_"
+        on:uploaded={({detail: {fb_storage_path, specifiable_image_url}}) => saveImage(fb_storage_path, specifiable_image_url)} />
     {/await}
   {/if}
 </div>

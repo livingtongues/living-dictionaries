@@ -1,12 +1,11 @@
 <script lang="ts">
-  import { _ } from 'svelte-i18n';
-  import Modal from 'svelte-pieces/ui/Modal.svelte';
+  import { t } from 'svelte-i18n';
   import { createEventDispatcher } from 'svelte';
   import { dictionary } from '$lib/stores';
-  import Form from 'svelte-pieces/data/Form.svelte';
-  import Button from 'svelte-pieces/ui/Button.svelte';
+  import { Button, Form, Modal } from 'svelte-pieces';
   import { addOnline } from 'sveltefirets';
   import type { ISpeaker } from '@living-dictionaries/types';
+  import { decades } from './ages';
 
   const dispatch = createEventDispatcher();
   const close = () => dispatch('close');
@@ -33,14 +32,14 @@
 
 <Modal on:close>
   <span slot="heading"
-    >{$_('speakers.add_new_speaker', {
+    >{$t('speakers.add_new_speaker', {
       default: 'Add New Speaker',
     })}
   </span>
 
   <Form let:loading onsubmit={addSpeaker}>
     <label for="name" class="block text-sm font-medium leading-5 text-gray-700 mt-4">
-      {$_('speakers.name', { default: 'Name' })}
+      {$t('speakers.name', { default: 'Name' })}
     </label>
     <div class="mt-1 rounded-md shadow-sm">
       <input
@@ -52,7 +51,7 @@
     </div>
 
     <label for="birthplace" class="block text-sm font-medium leading-5 text-gray-700 mt-4">
-      {$_('speakers.birthplace', { default: 'Birthplace' })}
+      {$t('speakers.birthplace', { default: 'Birthplace' })}
     </label>
     <div class="mt-1 rounded-md shadow-sm">
       <input
@@ -64,25 +63,18 @@
     </div>
 
     <label for="age" class="block text-sm font-medium leading-5 text-gray-700 mt-4">
-      {$_('speakers.age_range', { default: 'Age Range' })}
+      {$t('speakers.age_range', { default: 'Age Range' })}
     </label>
     <div class="mt-1 rounded-md shadow-sm">
       <select id="age" bind:value={decade} class="form-input block w-full">
-        <option value={0}>0-10</option>
-        <option value={1}>11-20</option>
-        <option value={2}>21-30</option>
-        <option value={3}>31-40</option>
-        <option value={4}>41-50</option>
-        <option value={5}>51-60</option>
-        <option value={6}>61-70</option>
-        <option value={7}>71-80</option>
-        <option value={8}>81-90</option>
-        <option value={9}>91-100</option>
+        {#each Object.entries(decades) as [value, label] (value)}
+          <option {value}>{label}</option>
+        {/each}
       </select>
     </div>
 
     <div class="font-medium text-sm text-gray-700 mt-4">
-      {$_('speakers.gender', { default: 'Gender' })}
+      {$t('speakers.gender', { default: 'Gender' })}
     </div>
     <div class="flex">
       <div class="mt-2 flex items-center">
@@ -90,7 +82,7 @@
         <div class="w-2" />
         <label for="male">
           <span class="block text-sm leading-5 font-medium text-gray-700">
-            {$_('speakers.male', { default: 'Male' })}
+            {$t('speakers.male', { default: 'Male' })}
           </span>
         </label>
       </div>
@@ -100,7 +92,7 @@
         <div class="w-2" />
         <label for="female">
           <span class="block text-sm leading-5 font-medium text-gray-700">
-            {$_('speakers.female', { default: 'Female' })}
+            {$t('speakers.female', { default: 'Female' })}
           </span>
         </label>
       </div>
@@ -110,7 +102,7 @@
         <div class="w-2" />
         <label for="other">
           <span class="block text-sm leading-5 font-medium text-gray-700">
-            {$_('speakers.other', { default: 'Other' })}
+            {$t('speakers.other', { default: 'Other' })}
           </span>
         </label>
       </div>
@@ -120,7 +112,7 @@
       <input id="agree" type="checkbox" required bind:checked={agreeToBeOnline} />
       <div class="w-2" />
       <label for="agree" class="block text-sm leading-5 text-gray-900">
-        {$_('speakers.speaker_agrees', {
+        {$t('speakers.speaker_agrees', {
           default: 'The speaker agrees to let these recordings be publicly available online.',
         })}
       </label>
@@ -130,10 +122,10 @@
 
     <div class="modal-footer space-x-1">
       <Button onclick={close} form="simple" color="black">
-        {$_('misc.cancel', { default: 'Cancel' })}
+        {$t('misc.cancel', { default: 'Cancel' })}
       </Button>
       <Button type="submit" form="filled" {loading}>
-        {$_('misc.save', { default: 'Save' })}
+        {$t('misc.save', { default: 'Save' })}
       </Button>
     </div>
   </Form>

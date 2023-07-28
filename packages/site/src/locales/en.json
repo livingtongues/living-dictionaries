@@ -85,7 +85,15 @@
     "send_message": "Send Message",
     "message_sent": "Message sent. We will reply as soon as we can.",
     "what_is_your_question": "What is your question or comment?",
-    "message_failed": "Message send failed. Check your internet connection or email us:"
+    "message_failed": "Message send failed. Check your internet connection or email us:",
+    "delete_dictionary": "Delete a dictionary",
+    "public_dictionary": "Make a dictionary public",
+    "import_data": "Import data",
+    "request_access": "Request editing access",
+    "report_problem": "Report a problem",
+    "other": "Other topic",
+    "select_topic": "Select a topic",
+    "data_fields": "Optional data fields"
   },
   "create": {
     "select_coordinates": "Select Coordinates",
@@ -128,7 +136,8 @@
     "grammar": "Grammar",
     "entries": "Entries",
     "youtube_terms": "Youtube terms",
-    "google_terms": "Google terms"
+    "google_terms": "Google terms",
+    "full_title": "{dictionary_name} Living Dictionary"
   },
   "entry": {
     "view_entries": "View Entries",
@@ -170,7 +179,8 @@
     "gloss": "translation",
     "pl": "Plural form",
     "print": "Print",
-    "id": "ID"
+    "id": "ID",
+    "scn": "Scientific Name"
   },
   "error": {
     "run_into_error": "We're sorry, we've run into an error.",
@@ -233,7 +243,8 @@
     "public_private_meaning": "Public means anyone can see your dictionary which requires community consent. Private dictionaries are visible only to you and your collaborators.",
     "optional_data_fields": "Optional Data Fields",
     "unable_to_delete": "Note: you will not be able to delete these glossing languages later.",
-    "print_access_meaning": "This gives the public the ability to download and print this Living Dictionary as a .PDF"
+    "print_access_meaning": "This gives the public the ability to download and print this Living Dictionary as a .PDF",
+    "featured_image": "Featured Image"
   },
   "speakers": {
     "add_new_speaker": "Add New Speaker",
@@ -267,14 +278,15 @@
     "role": "Role"
   },
   "export": {
-    "csv_data": "Data as CSV",
+    "csv_data": "Data as .CSV",
     "checking_images": "Checking if image files exist",
     "no_images": "There are no image files",
     "checking_audios": "Checking if audio files exist",
     "no_audios": "There are no audio files",
     "download_csv": "Download CSV",
     "availability": "Export is only available to dictionary managers",
-    "download_pdf": "Download PDF"
+    "download_pdf": "Download PDF",
+    "spreadsheet": "Spreadsheet"
   },
   "video": {
     "video_url": "Video URL",
@@ -300,5 +312,13 @@
     "columns": "Columns",
     "headword_size": "Headword size",
     "font_size": "Font size"
+  },
+  "import": {
+    "import": "Import",
+    "template_link": "Link to Template",
+    "instructions_1": "If you already have linguistic data that you want to import into your Dictionary, please follow the steps below.",
+    "instructions_2": "Click on the blue “Link to Template” button below. Download the template as an Excel file, or create a copy on Google Docs. Edit the template according to your project’s needs. Copy and paste your data into the spreadsheet.",
+    "instructions_3": "Use the “Contact Us” below to contact us. Let us know that you have a new spreadsheet that is ready for import. Ask us any questions you have. We will respond to you by email, and then you can send us your file.",
+    "instructions_4": "To send us data exported from dictionary softwares like FLEx, Lexique Pro, Shoebox, please use the “Contact Us” button below and tell us the details of your project."
   }
 }

@@ -1,15 +1,9 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
   import Header from '$lib/components/shell/Header.svelte';
-  import Button from 'svelte-pieces/ui/Button.svelte';
+  import { Button } from 'svelte-pieces';
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte';
 </script>
-
-<svelte:head>
-  <title>
-    {$_('about.about_LD', { default: 'About Living Dictionaries' })}
-  </title>
-</svelte:head>
 
 <Header>
   {$_('about.about_LD', { default: 'About Living Dictionaries' })}
@@ -18,7 +12,7 @@
 <div class="max-w-screen-md mx-auto p-3">
   <h3
     class="mb-6 text-3xl leading-8 font-bold tracking-tight text-gray-900
-    sm:text-4xl sm:leading-10">
+      sm:text-4xl sm:leading-10">
     {$_('about.about_LD', { default: 'About Living Dictionaries' })}
   </h3>
 
@@ -45,7 +39,7 @@
 
   <h4
     class="text-2xl leading-8 font-bold text-gray-900 tracking-tight
-    sm:text-3xl sm:leading-9 mb-2">
+      sm:text-3xl sm:leading-9 mb-2">
     {$_('about.current_features', { default: 'Current Dictionary Features' })}
   </h4>
   <p>
@@ -81,7 +75,7 @@
 
   <h4
     class="text-2xl leading-8 font-bold text-gray-900 tracking-tight
-    sm:text-3xl sm:leading-9 mb-2 mt-3">
+      sm:text-3xl sm:leading-9 mb-2 mt-3">
     {$_('about.dev_roadmap', { default: 'Development Roadmap' })}
   </h4>
   <p>
@@ -102,15 +96,15 @@
     sizes="auto"
     src="https://lh3.googleusercontent.com/ENct1iLDI3jupgP-g4wK968Y1vMuqwNcYNg1XAwnIwnhsEms_7gyBM3I_a55x8ai61GBk8eY8Cg8QW3Kkw_w=w900"
     srcset="https://lh3.googleusercontent.com/ENct1iLDI3jupgP-g4wK968Y1vMuqwNcYNg1XAwnIwnhsEms_7gyBM3I_a55x8ai61GBk8eY8Cg8QW3Kkw_w=w300
-    300w,
-    https://lh3.googleusercontent.com/ENct1iLDI3jupgP-g4wK968Y1vMuqwNcYNg1XAwnIwnhsEms_7gyBM3I_a55x8ai61GBk8eY8Cg8QW3Kkw_w=w600
-    600w,
-    https://lh3.googleusercontent.com/ENct1iLDI3jupgP-g4wK968Y1vMuqwNcYNg1XAwnIwnhsEms_7gyBM3I_a55x8ai61GBk8eY8Cg8QW3Kkw_w=w1200
-    1200w" />
+      300w,
+      https://lh3.googleusercontent.com/ENct1iLDI3jupgP-g4wK968Y1vMuqwNcYNg1XAwnIwnhsEms_7gyBM3I_a55x8ai61GBk8eY8Cg8QW3Kkw_w=w600
+      600w,
+      https://lh3.googleusercontent.com/ENct1iLDI3jupgP-g4wK968Y1vMuqwNcYNg1XAwnIwnhsEms_7gyBM3I_a55x8ai61GBk8eY8Cg8QW3Kkw_w=w1200
+      1200w" />
 
   <h3
     class="mb-3 text-2xl leading-8 font-bold text-gray-900 tracking-tight
-    sm:text-3xl sm:leading-9">
+      sm:text-3xl sm:leading-9">
     {$_('about.why_document', {
       default: 'Why document endangered languages?',
     })}
@@ -134,15 +128,15 @@
     sizes="auto"
     src="https://lh3.googleusercontent.com/5vsJJzuYggQZaS50JUs2wuwZMUSM0BaPJHMOJfc83Yy8hvMJrvB3YVRfb9eJTBGqrPbhVEW6pzoAp39S2-pC=w900"
     srcset="https://lh3.googleusercontent.com/5vsJJzuYggQZaS50JUs2wuwZMUSM0BaPJHMOJfc83Yy8hvMJrvB3YVRfb9eJTBGqrPbhVEW6pzoAp39S2-pC=w300
-    300w,
-    https://lh3.googleusercontent.com/5vsJJzuYggQZaS50JUs2wuwZMUSM0BaPJHMOJfc83Yy8hvMJrvB3YVRfb9eJTBGqrPbhVEW6pzoAp39S2-pC=w600
-    600w,
-    https://lh3.googleusercontent.com/5vsJJzuYggQZaS50JUs2wuwZMUSM0BaPJHMOJfc83Yy8hvMJrvB3YVRfb9eJTBGqrPbhVEW6pzoAp39S2-pC=w1200
-    1200w" />
+      300w,
+      https://lh3.googleusercontent.com/5vsJJzuYggQZaS50JUs2wuwZMUSM0BaPJHMOJfc83Yy8hvMJrvB3YVRfb9eJTBGqrPbhVEW6pzoAp39S2-pC=w600
+      600w,
+      https://lh3.googleusercontent.com/5vsJJzuYggQZaS50JUs2wuwZMUSM0BaPJHMOJfc83Yy8hvMJrvB3YVRfb9eJTBGqrPbhVEW6pzoAp39S2-pC=w1200
+      1200w" />
 
   <h3
     class="mb-3 text-2xl leading-8 font-bold text-gray-900 tracking-tight
-    sm:text-3xl sm:leading-9">
+      sm:text-3xl sm:leading-9">
     {$_('about.what_is_LT', {
       default: 'What is Living Tongues Institute for Endangered Languages?',
     })}
@@ -166,15 +160,15 @@
     sizes="auto"
     src="https://lh3.googleusercontent.com/BeaR13dGwglkfGBEJsJ6qytJLHygBpxapv3MRdGRpkvEnYs1nGZ6mJBfdR_FsovtOJvkELc1XgWozG-OlPUD=w900"
     srcset="https://lh3.googleusercontent.com/BeaR13dGwglkfGBEJsJ6qytJLHygBpxapv3MRdGRpkvEnYs1nGZ6mJBfdR_FsovtOJvkELc1XgWozG-OlPUD=w300
-    300w,
-    https://lh3.googleusercontent.com/BeaR13dGwglkfGBEJsJ6qytJLHygBpxapv3MRdGRpkvEnYs1nGZ6mJBfdR_FsovtOJvkELc1XgWozG-OlPUD=w600
-    600w,
-    https://lh3.googleusercontent.com/BeaR13dGwglkfGBEJsJ6qytJLHygBpxapv3MRdGRpkvEnYs1nGZ6mJBfdR_FsovtOJvkELc1XgWozG-OlPUD=w1200
-    1200w" />
+      300w,
+      https://lh3.googleusercontent.com/BeaR13dGwglkfGBEJsJ6qytJLHygBpxapv3MRdGRpkvEnYs1nGZ6mJBfdR_FsovtOJvkELc1XgWozG-OlPUD=w600
+      600w,
+      https://lh3.googleusercontent.com/BeaR13dGwglkfGBEJsJ6qytJLHygBpxapv3MRdGRpkvEnYs1nGZ6mJBfdR_FsovtOJvkELc1XgWozG-OlPUD=w1200
+      1200w" />
 
   <h3
     class="mb-3 text-2xl leading-8 font-bold text-gray-900 tracking-tight
-    sm:text-3xl sm:leading-9">
+      sm:text-3xl sm:leading-9">
     {$_('about.translators', {
       default: 'Translators',
     })}
@@ -226,11 +220,13 @@
     </li>
     <li><b>{$_('gl.cmn', { default: 'Mandarin' })}</b>: Peng Dong, Joy Wu</li>
     <li><b>{$_('gl.tzm', { default: 'Tamazight' })}</b>: Radia Sami</li>
+    <li><b>{$_('gl.vi', { default: 'Vietnamese' })}</b>: Huy Phan</li>
+    <li><b>{$_('gl.id', { default: 'Bahasa Indonesia' })}</b>: Yustinus Ghanggo Ate</li>
   </ul>
 
   <h3
     class="mb-3 text-2xl leading-8 font-bold text-gray-900 tracking-tight
-    sm:text-3xl sm:leading-9">
+      sm:text-3xl sm:leading-9">
     {$_('about.interns', {
       default: 'Interns',
     })} (Living Tongues Institute)
@@ -242,12 +238,13 @@
     Chloe Bourdon, Sichen (Larry) Lyu, Tali Tukachinsky, Valeria Macias, Evelyn Ho, Barbara Lourenco
     Oliveira Moreira, Adviye Pelin Teberoğlu, Sophie Shields, Anthony James Brandy, Rammi Quah,
     Alexandra Winslade, Gabriela Collaço Horton, Vikram Nagapudi, Sasha Viola Fennimore, Polly
-    Vishner, Loren Schneider.
+    Vishner, Loren Schneider, Kiasah Izzati, Manuel Aguilera, Maksymilian Rębisz, Rachel Mattie,
+    Aarushi Asthana, Akano Johnson, Selena Syrett.
   </p>
 
   <h3
     class="mb-3 text-2xl leading-8 font-bold text-gray-900 tracking-tight
-    sm:text-3xl sm:leading-9">
+      sm:text-3xl sm:leading-9">
     {$_('about.help_us_launch_more', {
       default: 'Help Us Launch More Living Dictionaries',
     })}

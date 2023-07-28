@@ -1,79 +1,46 @@
 import { parseVideoData } from './parseVideoData';
 
-test('parseVideoData properly parses YouTube Ids, even w/ query params like timestamp', () => {
-  const id = 'GrsknWZpr-k';
+describe('parseVideoData', () => {
+  const youtubeId = 'GrsknWZpr-k';
+  const vimeoId = '239862299';
 
-  expect(parseVideoData(`http://www.youtube.com/watch?v=${id}`)).toMatchInlineSnapshot(`
-    {
-      "youtubeId": "GrsknWZpr-k",
-    }
-  `);
-  expect(parseVideoData(`http://www.youtube.com/watch?v=${id}`)).toMatchInlineSnapshot(`
-    {
-      "youtubeId": "GrsknWZpr-k",
-    }
-  `);
-  expect(parseVideoData(`http://www.youtube.com/watch?v=${id}?t=2113s`)).toMatchInlineSnapshot(`
-    {
-      "startAt": 2113,
-      "youtubeId": "GrsknWZpr-k",
-    }
-  `);
-  expect(parseVideoData(`http://www.youtube.com/watch?v=${id}&t=20s`)).toMatchInlineSnapshot(`
-    {
-      "startAt": 20,
-      "youtubeId": "GrsknWZpr-k",
-    }
-  `);
-  expect(parseVideoData(`http://youtu.be/watch?v=${id}`)).toMatchInlineSnapshot(`
-    {
-      "youtubeId": "GrsknWZpr-k",
-    }
-  `);
-  expect(parseVideoData(`https://youtube.googleapis.com/v/${id}`)).toMatchInlineSnapshot(`
-    {
-      "youtubeId": "GrsknWZpr-k",
-    }
-  `);
-  expect(parseVideoData(`http://www.youtube.com/watch?v=${id}&t=sahda`)).toMatchInlineSnapshot(`
-    {
-      "youtubeId": "GrsknWZpr-k",
-    }
-  `);
-});
+  test('handles YouTube urls', () => {
+    const youtubeUrls = [
+      `http://www.youtube.com/watch?v=${youtubeId}`,
+      `http://youtu.be/watch?v=${youtubeId}`,
+      `https://youtube.googleapis.com/v/${youtubeId}`,
+      `http://www.youtube.com/watch?v=${youtubeId}&t=sahda`,
+    ]
 
-test('parseVideoData properly parses Vimeo Ids, including relative urls', () => {
-  const id = '239862299';
-  expect(parseVideoData(`http://vimeo.com/${id}`)).toMatchInlineSnapshot(`
-    {
-      "vimeoId": "239862299",
+    for (const url of youtubeUrls) {
+      expect(parseVideoData(url)).toEqual({ youtubeId });
     }
-  `);
-  expect(parseVideoData(`http://player.vimeo.com/video/${id}`)).toMatchInlineSnapshot(`
-    {
-      "vimeoId": "239862299",
-    }
-  `);
-  expect(parseVideoData(`//player.vimeo.com/video/${id}`)).toMatchInlineSnapshot(`
-    {
-      "vimeoId": "239862299",
-    }
-  `);
-  expect(parseVideoData(`http://player.vimeo.com/video/${id}#t=64`)).toMatchInlineSnapshot(`
-    {
-      "startAt": 64,
-      "vimeoId": "239862299",
-    }
-  `);
-  expect(parseVideoData(`http://player.vimeo.com/video/${id}&t=64`)).toMatchInlineSnapshot(`
-    {
-      "startAt": 64,
-      "vimeoId": "239862299",
-    }
-  `);
-});
+  });
 
-test('parseVideoData handles returns null for invalid URL', () => {
-  expect(parseVideoData('https://www.nba.com')).toBeNull();
-  expect(parseVideoData('https://www.youtube.com')).toBeNull();
-});
+  test('handles Youtube timestamps', () => {
+    expect(parseVideoData(`http://www.youtube.com/watch?v=${youtubeId}?t=2113s`)).toEqual({ youtubeId, startAt: 2113 });
+    expect(parseVideoData(`http://www.youtube.com/watch?v=${youtubeId}&t=20s`)).toEqual({ youtubeId, startAt: 20 });
+  });
+
+  test('handles Vimeo urls, including relative urls', () => {
+    const vimeoUrls = [
+      `http://vimeo.com/${vimeoId}`,
+      `http://player.vimeo.com/video/${vimeoId}`,
+      `//player.vimeo.com/video/${vimeoId}`,
+    ]
+
+    for (const url of vimeoUrls) {
+      expect(parseVideoData(url)).toEqual({ vimeoId });
+    }
+  });
+
+  test('handles Vimeo timestamps', () => {
+    expect(parseVideoData(`http://player.vimeo.com/video/${vimeoId}#t=64`)).toEqual({ vimeoId, startAt: 64 });
+    expect(parseVideoData(`http://player.vimeo.com/video/${vimeoId}&t=64`)).toEqual({ vimeoId, startAt: 64 });
+  });
+
+  test('returns null for invalid URLs', () => {
+    expect(parseVideoData('https://www.nba.com')).toBeNull();
+    expect(parseVideoData('https://www.youtube.com')).toBeNull();
+  });
+})

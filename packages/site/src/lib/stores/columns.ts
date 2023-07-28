@@ -77,6 +77,10 @@ const defaultColumns: IColumn[] = [
     width: 150,
   },
   {
+    field: 'scn', // scientific names
+    width: 150,
+  },
+  {
     field: 'pl', // plural form
     width: 150,
   },
@@ -95,7 +99,7 @@ const defaultColumns: IColumn[] = [
 ];
 
 let cachedColumns: IColumn[] = [];
-const tableCacheKey = 'table_columns_20.9.2022'; // IMPORTANT: rename when adding more columns to invalidate the user's cache
+const tableCacheKey = 'table_columns_05.4.2023'; // IMPORTANT: rename when adding more columns to invalidate the user's cache
 if (browser) {
   cachedColumns = JSON.parse(localStorage.getItem(tableCacheKey));
 }

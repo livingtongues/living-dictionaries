@@ -12,52 +12,52 @@ export const convertOldTDKeyNames = (tdData: any[]) => {
   for (const tdEntry of tdData) {
     ++entryCount;
     // Always set lexeme even if blank string
-    tdEntry.lexeme = tdEntry.lang.replace(/&#8217;/g, "'"); // handle old TD apostrophes correctly
+    tdEntry.lexeme = tdEntry.lang.replace(/&#8217;/g, '\''); // handle old TD apostrophes correctly
     delete tdEntry.lang;
 
     // if these fields are blank, delete, otherwise leave alone as they're named correct
-    if (!tdEntry.es_gloss) {
+    if (!tdEntry.es_gloss) 
       delete tdEntry.es_gloss;
-    }
-    if (!tdEntry.authority) {
+    
+    if (!tdEntry.authority) 
       delete tdEntry.authority;
-    }
-    if (!tdEntry.dialect) {
+    
+    if (!tdEntry.dialect) 
       delete tdEntry.dialect;
-    }
+    
 
     // Set proper fields if they exist, delete old fields
-    if (tdEntry.gloss) {
+    if (tdEntry.gloss) 
       tdEntry.en_gloss = tdEntry.gloss;
-    }
+    
     delete tdEntry.gloss;
 
-    if (tdEntry.ipa) {
-      tdEntry.phonetic = tdEntry.ipa.replace(/&#8217;/g, "'"); // handle old TD apostrophes correctly
-    }
+    if (tdEntry.ipa) 
+      tdEntry.phonetic = tdEntry.ipa.replace(/&#8217;/g, '\''); // handle old TD apostrophes correctly
+    
     delete tdEntry.ipa;
 
     if (tdEntry.pos) {
       const { value, matched } = abbreviateTDPartOfSpeech(tdEntry.pos);
-      if (matched) {
+      if (matched) 
         tdEntry.partOfSpeech = value;
-      } else {
+      else 
         tdEntry.notes = value; // save misc parts of speech into the notes column if they don't match up with our standard POS list
-      }
+      
     }
     delete tdEntry.pos;
 
-    if (tdEntry.usage_example) {
+    if (tdEntry.usage_example) 
       tdEntry.vernacular_exampleSentence = tdEntry.usage_example;
-    }
+    
     delete tdEntry.usage_example;
 
     if (tdEntry.metadata) {
-      if (tdEntry.notes) {
+      if (tdEntry.notes) 
         tdEntry.notes = tdEntry.notes + ', ' + tdEntry.metadata;
-      } else {
+      else 
         tdEntry.notes = tdEntry.metadata;
-      }
+      
     }
     delete tdEntry.metadata;
 
@@ -73,9 +73,9 @@ export const convertOldTDKeyNames = (tdData: any[]) => {
     }
     delete tdEntry.image;
 
-    if (tdEntry.semantic_ids) {
+    if (tdEntry.semantic_ids) 
       tdEntry.semanticDomain_custom = tdEntry.semantic_ids;
-    }
+    
     delete tdEntry.semantic_ids;
   }
   console.log(
@@ -99,7 +99,7 @@ export const abbreviateTDPartOfSpeech = (input: string) => {
       part.enName === sanitizedInput ||
       part.esName === sanitizedInput ||
       part.enAbbrev === sanitizedInput ||
-      (part.tdAlternates && part.tdAlternates.includes(sanitizedInput))
+      (part.tdAlternates?.includes(sanitizedInput))
     );
   });
   // console.log({sanitizedInput}, {matchingPOS});
@@ -119,14 +119,14 @@ export const identifyUnmatchedPOS = (tdData: any[]) => {
 
   for (const tdEntry of tdData) {
     if (tdEntry.pos) {
-      const pos = tdEntry.pos;
+      const {pos} = tdEntry;
       if (uniquePartsOfSpeech.indexOf(pos) === -1) uniquePartsOfSpeech.push(pos);
     }
   }
   uniquePartsOfSpeech.forEach((part: string) => {
     const { matched } = abbreviateTDPartOfSpeech(part);
-    if (!matched) {
+    if (!matched) 
       console.log('No abbreviation found for: ', part);
-    }
+    
   });
 };

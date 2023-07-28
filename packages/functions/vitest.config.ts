@@ -1,10 +1,11 @@
 import { defineConfig } from 'vitest/config';
 
-const defaultExclude = ['node_modules', 'dist', '.idea', '.git', '.cache'];
 export default defineConfig({
   test: {
+    name: 'functions',
     globals: true,
-    // includeSource: ['./**/composeMessages.ts'],
-    exclude: [...defaultExclude, 'lib'],
+    // includeSource: ['./src/**/*.ts'],
+    include: ['./src/**/*.test.ts'],
+    // exclude: [...defaultExclude, 'lib'],
   },
 });

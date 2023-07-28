@@ -13,14 +13,10 @@ declare namespace App {
 }
 
 declare namespace svelte.JSX {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   interface HTMLAttributes<T> {
-    onclickOutside?: (event: CustomEvent<any> & { target: EventTarget & T }) => any;
+    onclickoutside?: (event: CustomEvent<any> & { target: EventTarget & T }) => any;
     onlongpress?: (event: CustomEvent<any> & { target: EventTarget & T }) => any;
     onshortpress?: (event: CustomEvent<any> & { target: EventTarget & T }) => any;
   }
-}
-
-interface ImportMetaEnv {
-  PUBLIC_mapboxAccessToken: string;
-  PUBLIC_ProcessImageUrl: string; // added to Vercel env variables
 }

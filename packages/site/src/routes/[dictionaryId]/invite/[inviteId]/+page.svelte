@@ -2,13 +2,12 @@
   import { _ } from 'svelte-i18n';
   import type { IInvite, IHelper, IUser } from '@living-dictionaries/types';
   import { isManager, isContributor, user, dictionary } from '$lib/stores';
-
+  import { Button, ShowHide } from 'svelte-pieces';
+  import { Doc, setOnline, updateOnline } from 'sveltefirets';
+  import { serverTimestamp } from 'firebase/firestore/lite';
   import type { PageData } from './$types';
   export let data: PageData;
   let inviteType: IInvite;
-
-  import { Doc, setOnline, updateOnline } from 'sveltefirets';
-  import { serverTimestamp } from 'firebase/firestore/lite';
 
   async function acceptInvite(role: 'manager' | 'contributor') {
     try {
@@ -33,9 +32,6 @@
       alert(`${$_('misc.error')}: ${err}`);
     }
   }
-
-  import Button from 'svelte-pieces/ui/Button.svelte';
-  import ShowHide from 'svelte-pieces/functions/ShowHide.svelte';
 </script>
 
 <div>
@@ -43,7 +39,7 @@
     path={`dictionaries/${$dictionary.id}/invites/${data.inviteId}`}
     let:data={invite}
     startWith={inviteType}>
-    {#if invite && invite.status === 'sent'}
+    {#if invite?.status === 'sent'}
       <p class="font-semibold mb-2">
         {$_('invite.invited_by', { default: 'Invited by' })}: {invite.inviterName}
       </p>
@@ -51,9 +47,20 @@
         {$_('invite.role', { default: 'Role' })}: {invite.role}
       </p>
       {#if $user}
-        {#if ($isManager && invite.role === 'manager') || ($isContributor && invite.role === 'contributor')}
+        {#if $isManager}
           <p class="mb-2">
-            You are already a {invite.role}.
+            You are already a manager.
+          </p>
+          <Button href={`/${$dictionary.id}/entries/list`}>
+            {$_('dictionary.entries', {
+              default: 'Entries',
+            })}
+            &nbsp;
+            <i class="fas fa-chevron-right rtl-x-flip" />
+          </Button>
+        {:else if $isContributor && invite.role === 'contributor'}
+          <p class="mb-2">
+            You are already a contributor.
           </p>
           <Button href={`/${$dictionary.id}/entries/list`}>
             {$_('dictionary.entries', {
@@ -93,17 +100,16 @@
           {/if}
         </ShowHide>
       {/if}
-    {:else if invite && invite.status === 'claimed'}
+    {:else if invite?.status === 'claimed'}
       <p class="font-semibold mb-2">
         {$_('invite.invitation_claimed', {
           default: 'Invitation claimed',
-        })}: {invite.updatedAt &&
-          invite.updatedAt.toDate().toLocaleDateString(undefined, {
-            weekday: 'long',
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric',
-          })}
+        })}: {invite.updatedAt?.toDate().toLocaleDateString(undefined, {
+          weekday: 'long',
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+        })}
       </p>
 
       <Button href={`/${$dictionary.id}/entries/list`}>

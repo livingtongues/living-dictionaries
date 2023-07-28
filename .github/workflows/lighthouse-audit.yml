@@ -1,0 +1,86 @@
+name: Lighthouse Audit
+
+on:
+  deployment_status
+
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+jobs:
+  lighthouse:
+    name: Lighthouse Audit
+    if: github.event.deployment_status.state == 'success' && (github.event.deployment_status.environment == 'Production – living-dictionaries' || github.event.deployment_status.environment == 'Preview – living-dictionaries')
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Lighthouse Audit
+        uses: treosh/lighthouse-ci-action@v9 # https://github.com/treosh/lighthouse-ci-action
+        id: lighthouse_audit
+        with:
+          urls: |
+            ${{ github.event.deployment_status.target_url }}
+            ${{ github.event.deployment_status.target_url }}/achi/entries/list
+            ${{ github.event.deployment_status.target_url }}/jaRhn6MAZim4Blvr1iEv/entry/yt9ja7ymh9xgba5i
+          # configPath: './.github/lighthouserc.json' # https://github.com/GoogleChrome/lighthouse-ci/blob/main/docs/getting-started.md https://github.com/GoogleChrome/lighthouse-ci/blob/main/docs/configuration.md#assert
+          uploadArtifacts: true
+          temporaryPublicStorage: true
+
+      - name: Format Lighthouse Score For Slack
+        id: format_lighthouse_score_for_slack
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{secrets.GITHUB_TOKEN}}
+          script: |
+            const lighthouseCommentFormatter = require('./.github/workflows/lighthouse-comment-formatter.cjs');
+
+            const lighthouseOutputs = {
+              manifest: ${{ steps.lighthouse_audit.outputs.manifest }},
+              links: ${{ steps.lighthouse_audit.outputs.links }},
+            };
+
+            const comment = lighthouseCommentFormatter({ lighthouseOutputs, targetPlatform: 'slack' });
+            core.setOutput("comment", comment);
+
+      - name: Send Lighthouse Score to Slack
+        uses: adamkdean/simple-slack-notify@master
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        with:
+          status: ${{ job.status }}
+          success_text: 'Lighthouse successfully audited ${{ github.event.deployment_status.target_url }} (#${env.GITHUB_RUN_NUMBER})'
+          failure_text: 'Lighthouse failed audit of ${{ github.event.deployment_status.target_url }} (#${env.GITHUB_RUN_NUMBER})'
+          fields: |
+            [{ "title": "Action URL", "value": "${env.GITHUB_SERVER_URL}/${env.GITHUB_REPOSITORY}/actions/runs/${env.GITHUB_RUN_ID}"},
+            { "title": "Lighthouse scores", "value": "${{ steps.format_lighthouse_score_for_slack.outputs.comment}}"}]
+
+      - uses: jwalton/gh-find-current-pr@v1
+        id: findPr
+
+      - name: Format Lighthouse Score for PR
+        if: steps.findPr.outputs.number
+        id: format_lighthouse_score_for_pr
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{secrets.GITHUB_TOKEN}}
+          script: |
+            const lighthouseCommentFormatter = require('./.github/workflows/lighthouse-comment-formatter.cjs');
+
+            const lighthouseOutputs = {
+              manifest: ${{ steps.lighthouse_audit.outputs.manifest }},
+              links: ${{ steps.lighthouse_audit.outputs.links }},
+            };
+
+            const comment = lighthouseCommentFormatter({ lighthouseOutputs, targetPlatform: 'pr' });
+            core.setOutput("comment", comment);
+
+      - name: Add Lighthouse Score to PR
+        if: steps.findPr.outputs.number
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          number: ${{ steps.findPr.outputs.pr }}
+          recreate: true
+          header: lighthouse
+          message: |
+            ${{ steps.format_lighthouse_score_for_pr.outputs.comment }}

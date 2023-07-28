@@ -1,9 +1,10 @@
 <script lang="ts">
-  import { _ } from 'svelte-i18n';
-  import BadgeArray from 'svelte-pieces/data/BadgeArray.svelte';
+  import { t } from 'svelte-i18n';
+  import { BadgeArray } from 'svelte-pieces';
   import { createEventDispatcher } from 'svelte';
-  export let canEdit = false,
-    value: string[];
+  export let canEdit = false;
+  export let value: string[];
+  
   const dispatch = createEventDispatcher<{
     valueupdate: { field: string; newValue: string[] };
   }>();
@@ -13,8 +14,8 @@
   class="remove-button-mb"
   strings={value || []}
   {canEdit}
-  promptMessage={$_('entry.sr')}
-  addMessage={$_('misc.add', { default: 'Add' })}
+  promptMessage={$t('entry.sr')}
+  addMessage={$t('misc.add', { default: 'Add' })}
   on:valueupdated={(e) => dispatch('valueupdate', { field: 'sr', newValue: e.detail })} />
 
 <style>

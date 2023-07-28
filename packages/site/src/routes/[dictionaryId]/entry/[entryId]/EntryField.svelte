@@ -1,5 +1,5 @@
 <script lang="ts">
-  import ShowHide from 'svelte-pieces/functions/ShowHide.svelte';
+  import { ShowHide } from 'svelte-pieces';
   export let value: string,
     field: string = undefined,
     display: string,
@@ -18,24 +18,26 @@
         <div class="text-xs text-gray-500 mt-1">{display}</div>
       {/if}
       <div
-        class:sompeng={display === 'Sompeng-Mardir'}
+        class:sompeng={display === 'Sompeng'}
         class:font-bold={field === 'lx'}
         class:text-4xl={field === 'lx'}
         class:border-b-2={field !== 'lx'}
         class="border-dashed pb-1 mb-2">
         {#if value}
           <div dir="ltr">
-            {#if field === 'nt' || value.indexOf('<i>') > -1}
+            {#if field === 'nt' || value.includes('<i>')}
               <span class="tw-prose">
                 {@html value}
               </span>
             {:else if field === 'ph'}
               [{value}]
+            {:else if field === 'scn'}
+              <i>{value}</i>
             {:else}
               {value}
             {/if}
           </div>
-        {:else}<i class="far fa-pencil text-gray-500 text-sm" />{/if}
+        {:else}<span class="i-fa6-solid-pencil text-gray-500 text-sm" />{/if}
       </div>
     </div>
     {#if show}

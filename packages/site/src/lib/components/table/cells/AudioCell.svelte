@@ -1,12 +1,12 @@
 <script lang="ts">
-  import ShowHide from 'svelte-pieces/functions/ShowHide.svelte';
   import { firebaseConfig } from 'sveltefirets';
-  import { longpress } from 'svelte-pieces/actions/longpress';
+  import { longpress, ShowHide } from 'svelte-pieces';
   import type { IEntry } from '@living-dictionaries/types';
-  export let entry: IEntry,
-    canEdit = false;
+  export let entry: IEntry;
+  export let canEdit = false;
 
-  let playing;
+  let playing = false;
+  
   function initAudio(sf) {
     const convertedPath = sf.path.replace(/\//g, '%2F');
     const url = `https://firebasestorage.googleapis.com/v0/b/${firebaseConfig.storageBucket}/o/${convertedPath}?alt=media`;
@@ -42,12 +42,12 @@
       class="hover:bg-gray-200 flex flex-col items-center justify-center
   cursor-pointer h-full select-none text-sm"
       on:click={toggle}>
-      <i class="far fa-microphone text-blue-800" />
+      <span class="i-uil-microphone text-blue-800" />
     </div>
   {/if}
   {#if show}
     {#await import('$lib/components/audio/EditAudio.svelte') then { default: EditAudio }}
-      <EditAudio {entry} on:close={toggle} />
+      <EditAudio {entry} sound_file={entry.sound_files?.[0]} on:close={toggle} />
     {/await}
   {/if}
 </ShowHide>

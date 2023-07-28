@@ -1,6 +1,6 @@
 import type { IEntry } from '@living-dictionaries/types';
 import { order_glosses } from '$lib/helpers/glosses';
-import { add_periods_and_comma_separate_parts_of_speech } from "$lib/helpers/entry/add_periods_and_comma_separate_parts_of_speech";
+import { add_periods_and_comma_separate_parts_of_speech } from '$lib/helpers/entry/add_periods_and_comma_separate_parts_of_speech';
 import { remove_italic_tags } from '$lib/helpers/remove_italic_tags';
 import { get_local_orthographies } from '$lib/helpers/entry/get_local_orthagraphies';
 
@@ -19,10 +19,10 @@ export function seo_description(
     dictionary_gloss_languages,
     $t,
     label: true,
-  }).join(', ')
+  }).join(', ');
   const glosses = remove_italic_tags(ordered_and_labeled_glosses);
 
-  const dialect = entry?.di || '';
+  const dialect = Array.isArray(entry.di) ? entry.di.join(', ') : (entry.di || '');
 
   const items_for_description = [local_orthographies, phonetic, parts_of_speech, glosses, dialect];
   const items_with_values = items_for_description.filter(item => item);

@@ -85,7 +85,15 @@
     "send_message": "发信息",
     "message_sent": "邮件已发送。我们将尽快进行答复。",
     "what_is_your_question": "您有什么问题或评论？",
-    "message_failed": "消息发送失败。检查您的互联网连接或给我们发送电子邮件："
+    "message_failed": "消息发送失败。检查您的互联网连接或给我们发送电子邮件：",
+    "delete_dictionary": "删除字典",
+    "public_dictionary": "公开词典",
+    "import_data": "导入数据",
+    "request_access": "请求编辑访问",
+    "report_problem": "报告一个问题",
+    "other": "其他主题",
+    "select_topic": "选择一个话题",
+    "data_fields": "可选数据字段"
   },
   "create": {
     "select_coordinates": "选择坐标",
@@ -128,7 +136,8 @@
     "grammar": "语法",
     "entries": "词条",
     "youtube_terms": "YouTube条款",
-    "google_terms": "Google条款"
+    "google_terms": "Google条款",
+    "full_title": "{dictionary_name} 活字典"
   },
   "entry": {
     "view_entries": "查看词条",
@@ -170,7 +179,8 @@
     "gloss": "翻译",
     "pl": "复数形式",
     "print": "打印",
-    "id": "ID"
+    "id": "ID",
+    "scn": "科学名称"
   },
   "error": {
     "run_into_error": "很抱歉，我们遇到了一个错误。",
@@ -233,7 +243,8 @@
     "public_private_meaning": "公共意味着任何人都可以看到你的字典所以需要社区的同意。私人字典则是只有你和你的合作者可见。",
     "optional_data_fields": "可选的数据字段",
     "unable_to_delete": "注意：您将无法删除这些语言标注",
-    "print_access_meaning": "这使公众能够下载和打印此Living词典为.pdf"
+    "print_access_meaning": "这使公众能够下载和打印此Living词典为.pdf",
+    "featured_image": "特色图像"
   },
   "speakers": {
     "add_new_speaker": "添加新的母语者",
@@ -274,7 +285,8 @@
     "no_audios": "没有音频文件",
     "download_csv": "下载CSV",
     "availability": "出口仅适用于字典经理",
-    "download_pdf": "下载PDF"
+    "download_pdf": "下载PDF",
+    "spreadsheet": "电子表格"
   },
   "video": {
     "video_url": "视频网址",
@@ -300,5 +312,13 @@
     "columns": "列",
     "headword_size": "头词大小",
     "font_size": "字体大小"
+  },
+  "import": {
+    "import": "进口",
+    "template_link": "链接到模板",
+    "instructions_1": "如果您已经有要导入到字典中的语言数据，请按照以下步骤操作。",
+    "instructions_2": "单击下面的蓝色“链接到模板”按钮。将模板作为Excel文件下载，或在Google文档上创建副本。根据您的项目的需求编辑模板。将数据复制并粘贴到电子表格中。",
+    "instructions_3": "使用下面的“联系我们”与我们联系。让我们知道，您有一个准备进口的新电子表格。问我们任何问题。我们将通过电子邮件回复您，然后您可以向我们发送您的文件。",
+    "instructions_4": "要向我们发送从Flex，Lexique Pro，Shoebox等字典软件导出的数据，请使用下面的“联系我们”按钮，并告诉我们您的项目的详细信息。"
   }
 }

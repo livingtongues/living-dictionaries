@@ -85,7 +85,15 @@
     "send_message": "Mengirim Pesan",
     "message_sent": "Pesan terkirim. Kami akan membalas pesan Anda secepat mungkin",
     "what_is_your_question": "Apa pertanyaan atau komentar anda?",
-    "message_failed": "Kirim pesan gagal. Periksa koneksi internet Anda atau email kami:"
+    "message_failed": "Kirim pesan gagal. Periksa koneksi internet Anda atau email kami:",
+    "delete_dictionary": "Hapus kamus",
+    "public_dictionary": "Publik Buat Kamus",
+    "import_data": "Impor data",
+    "request_access": "Meminta akses pengeditan",
+    "report_problem": "Melaporkan masalah",
+    "other": "Topik lainnya",
+    "select_topic": "Pilih topik",
+    "data_fields": "Bidang data opsional"
   },
   "create": {
     "select_coordinates": "Pilih Koordinat",
@@ -128,7 +136,8 @@
     "grammar": "Tata Bahasa",
     "entries": "Entri",
     "youtube_terms": "Istilah youtube",
-    "google_terms": "Istilah google"
+    "google_terms": "Istilah google",
+    "full_title": "{dictionary_name} Kamus Hidup"
   },
   "entry": {
     "view_entries": "Lihat Entri",
@@ -170,7 +179,8 @@
     "gloss": "terjemahan",
     "pl": "Bentuk jamak",
     "print": "Mencetak",
-    "id": "PENGENAL"
+    "id": "PENGENAL",
+    "scn": "Nama ilmiah"
   },
   "error": {
     "run_into_error": "Maaf, sistem kami mengalami masalah",
@@ -233,7 +243,8 @@
     "public_private_meaning": "Kamus yang bersifat umum berarti setiap orang dapat melihat kamus anda yang kemudian memerlukan surat persetujuan komunitas bahasa. Kamus yang bersifat pribadi hanya dapat dilihat oleh anda dan kolaborator anda.",
     "optional_data_fields": "Opsional Bidang Data",
     "unable_to_delete": "CATATAN: Anda tidak akan dapat menghapus bahasa -bahasa yang memoles ini nanti.",
-    "print_access_meaning": "Ini memberi publik kemampuan untuk mengunduh dan mencetak kamus hidup ini sebagai .pdf"
+    "print_access_meaning": "Ini memberi publik kemampuan untuk mengunduh dan mencetak kamus hidup ini sebagai .pdf",
+    "featured_image": "Gambar unggulan"
   },
   "speakers": {
     "add_new_speaker": "Bidang Data Bersifat Pilihan ",
@@ -267,18 +278,19 @@
     "role": "Peran"
   },
   "export": {
-    "csv_data": "Data sebagai CSV",
+    "csv_data": "Data sebagai .csv",
     "checking_images": "Memeriksa apakah ada file gambar",
     "no_images": "Tidak ada file gambar",
     "checking_audios": "Memeriksa apakah ada file audio",
     "no_audios": "Tidak ada file audio",
     "download_csv": "Unduh CSV",
     "availability": "Ekspor hanya tersedia untuk manajer kamus",
-    "download_pdf": "Unduh PDF"
+    "download_pdf": "Unduh PDF",
+    "spreadsheet": "Spreadsheet"
   },
   "video": {
     "video_url": "URL video",
-    "video_credit": "Kredit video",
+    "video_credit": "Kredit Video",
     "prepare_to_record_video": "Bersiaplah untuk merekam dengan mikrofon & kamera",
     "video_info": "Ada dua cara untuk menampilkan video Anda di Kamus Hidup: 1) Anda dapat merekam video Anda di sini, atau mengunggah video yang Anda rekam sebelumnya ke platform kami. Keuntungan: Mudah dan bagus untuk rekaman cepat. Kekurangan: Anda hanya dapat mengunggah video hingga 100MB sehingga hanya resolusi pendek dan rendah. 2) Miliki video Anda di layanan hosting yang berspesialisasi dalam penyimpanan video dan menautkan URL ke situs kami. Keuntungan: Mudah (selama video Anda sudah diunggah pada platform itu), video Anda dapat memiliki resolusi dan panjang yang Anda inginkan. Kekurangan: Jika Anda ingin merekam sesuatu yang tidak terduga atau sangat sederhana, mungkin terlalu banyak upaya untuk melakukannya seperti itu, dan Anda mungkin ingin memprioritaskan metode 1.",
     "paste_video_url": "Tempelkan tautan YouTube atau Vimeo",
@@ -300,5 +312,13 @@
     "columns": "Kolom",
     "headword_size": "Ukuran kata kepala",
     "font_size": "Ukuran huruf"
+  },
+  "import": {
+    "import": "Impor",
+    "template_link": "Tautan ke template",
+    "instructions_1": "Jika Anda sudah memiliki data linguistik yang ingin Anda impor ke kamus Anda, silakan ikuti langkah -langkah di bawah ini.",
+    "instructions_2": "Klik tombol Blue \"Link to Template\" di bawah ini. Unduh templat sebagai file Excel, atau buat salinan di Google Documents. Edit template sesuai dengan kebutuhan proyek Anda. Salin dan tempel data Anda ke spreadsheet.",
+    "instructions_3": "Gunakan \"Hubungi Kami\" di bawah ini untuk menghubungi kami. Beri tahu kami bahwa Anda memiliki spreadsheet baru yang siap untuk diimpor. Ajukan pertanyaan yang Anda miliki. Kami akan menanggapi Anda melalui email, dan kemudian Anda dapat mengirimkan file Anda kepada kami.",
+    "instructions_4": "Untuk mengirimi kami data yang diekspor dari software kamus seperti Flex, Lexique Pro, Shoebox, silakan gunakan tombol \"Hubungi Kami\" di bawah ini dan beri tahu kami detail proyek Anda."
   }
 }

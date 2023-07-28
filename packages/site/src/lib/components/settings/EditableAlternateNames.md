@@ -1,10 +1,10 @@
 <script lang="ts">
   import { Story } from "kitbook";
   import EditableAlternateNames from './EditableAlternateNames.svelte';
-  import ReactiveSet from 'svelte-pieces/functions/ReactiveSet.svelte';
+  import { ReactiveSet } from 'svelte-pieces';
 </script>
 
-<!-- prettier-ignore -->
+
 # Edit Alternate Names
 
 Listen to the `update` event when adding or removing alternate names.

@@ -1,0 +1,53 @@
+# https://vercel.com/guides/how-can-i-run-end-to-end-tests-after-my-vercel-preview-deployment helps a little - beware syntax issues
+name: Playwright E2E Tests
+
+on:
+  deployment_status
+
+jobs:
+  run-e2e:
+    name: Playwright E2E Tests
+    if: github.event.deployment_status.state == 'success' && (github.event.deployment_status.environment == 'Production – living-dictionaries' || github.event.deployment_status.environment == 'Preview – living-dictionaries')
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    container:
+      image: mcr.microsoft.com/playwright:v1.35.0-jammy #https://playwright.dev/docs/ci#github-actions-via-containers - keep version in sync with installed package
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8.6.0
+
+      - name: Install Dependencies
+        run: pnpm install --no-frozen-lockfile
+
+      - name: Run Playwright e2e tests
+        run: pnpm test:e2e
+        env:
+          CI: true
+          PLAYWRIGHT_BASE_URL: ${{ github.event.deployment_status.target_url }}
+
+      - uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 30
+
+      - name: Send E2E Results to Slack
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        if: failure()
+        uses: adamkdean/simple-slack-notify@master
+        with:
+          status: ${{ job.status }}
+          failure_text: 'E2E Tests for (#${env.GITHUB_RUN_NUMBER}) on ${{ github.event.deployment_status.target_url }} failed'
+          cancelled_text: 'E2E Tests for (#${env.GITHUB_RUN_NUMBER}) cancelled'
+          fields: |
+            [{ "title": "Action URL", "value": "${env.GITHUB_SERVER_URL}/${env.GITHUB_REPOSITORY}/actions/runs/${env.GITHUB_RUN_ID}"}]

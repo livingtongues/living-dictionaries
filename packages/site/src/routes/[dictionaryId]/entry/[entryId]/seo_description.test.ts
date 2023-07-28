@@ -4,26 +4,26 @@ import { seo_description } from './seo_description';
 describe('seo_description', () => {
   const $t = (id: string) => {
     switch (id) {
-      case 'gl.en':
-        return 'English';
-      case 'gl.es':
-        return 'Spanish';
-      case 'gl.or':
-        return 'Oriya';
-      case 'gl.as':
-        return 'Assamese';
-      case 'gl.hi':
-        return 'Hindi';
-      case 'gl.fr':
-        return 'French';
-      case 'gl.de':
-        return 'German';
-      case 'gl.pt':
-        return 'Portuguese';
-      case 'gl.it':
-        return 'Italian';
-      default:
-        return 'other';
+    case 'gl.en':
+      return 'English';
+    case 'gl.es':
+      return 'Spanish';
+    case 'gl.or':
+      return 'Oriya';
+    case 'gl.as':
+      return 'Assamese';
+    case 'gl.hi':
+      return 'Hindi';
+    case 'gl.fr':
+      return 'French';
+    case 'gl.de':
+      return 'German';
+    case 'gl.pt':
+      return 'Portuguese';
+    case 'gl.it':
+      return 'Italian';
+    default:
+      return 'other';
     }
   };
 
@@ -74,7 +74,7 @@ describe('seo_description', () => {
       lo: 'আৰচি',
       lo2: '𑃢𑃝𑃐𑃤',
       ph: 'arsi',
-      gl: { or: 'କଳା ମୁହାଁ ମାଙ୍କଡ', as: "ক’লা মুখ'ৰ বান্দৰ", en: 'black faced monkey' },
+      gl: { or: 'କଳା ମୁହାଁ ମାଙ୍କଡ', as: 'ক’লা মুখ\'ৰ বান্দৰ', en: 'black faced monkey' },
       ps: ['n', 'adj'],
       di: 'West Bengal Sabar',
     };
@@ -83,6 +83,24 @@ describe('seo_description', () => {
     expect(result).toMatchInlineSnapshot(
       '"আৰচি, 𑃢𑃝𑃐𑃤, [arsi], n., adj., Assamese: ক’লা মুখ\'ৰ বান্দৰ, English: black faced monkey, Oriya: କଳା ମୁହାଁ ମାଙ୍କଡ, West Bengal Sabar"'
     );
+  });
+
+  test('handles no gloss field', () => {
+    const dictionary_gloss_languages = ['en'];
+    const result = seo_description({ lx: 'foo' }, dictionary_gloss_languages, $t);
+    expect(result).toEqual('');
+  });
+
+  test('handles deprecated dialect string and current array of strings', () => {
+    const dialect = 'West Bengal Sabar';
+    const dictionary_gloss_languages = ['en'];
+    const dialectString = seo_description({
+      di: dialect,
+    }, dictionary_gloss_languages, $t);
+    const dialectStringArray = seo_description({
+      di: [dialect],
+    }, dictionary_gloss_languages, $t);
+    expect(dialectString).toEqual(dialectStringArray);
   });
 });
 

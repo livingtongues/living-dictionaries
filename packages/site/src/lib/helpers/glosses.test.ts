@@ -54,6 +54,10 @@ describe('order_glosses', () => {
     expect(order_glosses({ glosses: {}, dictionary_gloss_languages, $t })).toMatchInlineSnapshot('[]');
   });
 
+  test('handles undefined glosses object', () => {
+    expect(order_glosses({ glosses: undefined, dictionary_gloss_languages, $t })).toMatchInlineSnapshot('[]');
+  });
+
   test('example implementation with join and italics removal', () => {
     expect(
       remove_italic_tags(

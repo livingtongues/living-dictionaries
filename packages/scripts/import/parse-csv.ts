@@ -1,14 +1,29 @@
 import { readFileSync } from 'fs';
 import { parse } from 'csv-parse/sync';
 
-export function parseCSVFrom(file: string): any[] {
-  return parse(file, {
+export function parseCSVFrom(contents: string): Record<string, any>[] {
+  return parse(contents, {
     columns: true,
     skip_empty_lines: true,
+    trim: true,
   });
 }
 
 if (import.meta.vitest) {
+  test('parseCSV trims values', () => {
+    const csv = `
+a ,the book ,c
+1,2 , 3
+`;
+    expect(parseCSVFrom(csv)).toEqual([
+      {
+        'a': '1',
+        'the book': '2',
+        'c': '3',
+      },
+    ]);
+  });
+
   test('parseCSV logs out example.csv as array', async () => {
     const file = readFileSync('./import/data/example-v4/example-v4.csv', 'utf8');
     expect(parseCSVFrom(file)).toMatchInlineSnapshot(`
@@ -29,6 +44,7 @@ if (import.meta.vitest) {
           "phonetic": "",
           "photoFile": "",
           "pluralForm": "",
+          "scientificName": "",
           "semanticDomain": "key",
           "semanticDomain2": "key",
           "semanticDomain_custom": "(try not to use, separate multiples with a |)",
@@ -56,6 +72,7 @@ if (import.meta.vitest) {
           "phonetic": "vwatyʁ",
           "photoFile": "mountain.jpg",
           "pluralForm": "",
+          "scientificName": "",
           "semanticDomain": "5.15",
           "semanticDomain2": "5",
           "semanticDomain_custom": "vehicle|cars",
@@ -83,6 +100,7 @@ if (import.meta.vitest) {
           "phonetic": "aʁbʁ",
           "photoFile": "",
           "pluralForm": "",
+          "scientificName": "Acer rubrum",
           "semanticDomain": "1.4",
           "semanticDomain2": "1.2",
           "semanticDomain_custom": "",
@@ -97,7 +115,7 @@ if (import.meta.vitest) {
         {
           "": "",
           "dialect": "Modern Parisian French",
-          "en_exampleSentence": "The water goes through the tubes ",
+          "en_exampleSentence": "The water goes through the tubes",
           "en_gloss": "tube",
           "es_exampleSentence": "El agua pasa a través de los tubos",
           "es_gloss": "tubo",
@@ -110,6 +128,7 @@ if (import.meta.vitest) {
           "phonetic": "tyb",
           "photoFile": "missing.jpg",
           "pluralForm": "tubes",
+          "scientificName": "",
           "semanticDomain": "5.9",
           "semanticDomain2": "",
           "semanticDomain_custom": "plumbing",
@@ -119,7 +138,7 @@ if (import.meta.vitest) {
           "speakerGender": "",
           "speakerHometown": "",
           "speakerName": "",
-          "vernacular_exampleSentence": "L'eau passe à travers les tubes ",
+          "vernacular_exampleSentence": "L'eau passe à travers les tubes",
         },
         {
           "": "",
@@ -137,6 +156,7 @@ if (import.meta.vitest) {
           "phonetic": "vwɑtYʁ",
           "photoFile": "",
           "pluralForm": "",
+          "scientificName": "",
           "semanticDomain": "5.15",
           "semanticDomain2": "",
           "semanticDomain_custom": "vehicle",
@@ -164,6 +184,7 @@ if (import.meta.vitest) {
           "phonetic": "nøʏ̯tʁ̥",
           "photoFile": "",
           "pluralForm": "",
+          "scientificName": "",
           "semanticDomain": "",
           "semanticDomain2": "",
           "semanticDomain_custom": "",
@@ -183,7 +204,7 @@ if (import.meta.vitest) {
           "es_exampleSentence": "Vamos a celebrar esta noche",
           "es_gloss": "celebrar",
           "interlinearization": "",
-          "lexeme": "fêter ",
+          "lexeme": "fêter",
           "localOrthography": "",
           "morphology": "",
           "notes": "to have a party",
@@ -191,6 +212,7 @@ if (import.meta.vitest) {
           "phonetic": "fɛɪ̯te",
           "photoFile": "",
           "pluralForm": "",
+          "scientificName": "",
           "semanticDomain": "",
           "semanticDomain2": "",
           "semanticDomain_custom": "",
@@ -218,6 +240,7 @@ if (import.meta.vitest) {
           "phonetic": "",
           "photoFile": "",
           "pluralForm": "",
+          "scientificName": "",
           "semanticDomain": "",
           "semanticDomain2": "",
           "semanticDomain_custom": "",
@@ -245,6 +268,7 @@ if (import.meta.vitest) {
           "phonetic": "",
           "photoFile": "",
           "pluralForm": "",
+          "scientificName": "",
           "semanticDomain": "",
           "semanticDomain2": "",
           "semanticDomain_custom": "",

@@ -1,13 +1,12 @@
 <script lang="ts">
   import { t } from 'svelte-i18n';
-  import type { IEntry, IVideo } from '@living-dictionaries/types';
-  import ShowHide from 'svelte-pieces/functions/ShowHide.svelte';
-  import { deleteVideo } from '$lib/helpers/delete';
+  import type { IEntry, ExpandedVideo } from '@living-dictionaries/types';
+  import { ShowHide } from 'svelte-pieces';
   import { firebaseConfig } from 'sveltefirets';
 
-  export let entry: IEntry,
-    video: IVideo,
-    canEdit = false;
+  export let entry: IEntry;
+  export let video: ExpandedVideo;
+  export let canEdit = false;
 </script>
 
 <ShowHide let:show let:toggle>
@@ -27,8 +26,8 @@
         {video}
         storageBucket={firebaseConfig.storageBucket}
         {canEdit}
-        on:close={toggle}
-        on:delete={() => deleteVideo(entry, video)} />
+        on:deleteVideo
+        on:close={toggle} />
     {/await}
   {/if}
 </ShowHide>

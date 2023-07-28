@@ -1,18 +1,18 @@
 <script lang="ts">
-  import { _ } from 'svelte-i18n';
+  import { t } from 'svelte-i18n';
   import type { IEntry } from '@living-dictionaries/types';
-  export let entry: IEntry,
-    minimal = false;
-  import { canEdit } from '$lib/stores';
-  import { longpress } from 'svelte-pieces/actions/longpress';
+  import { ShowHide, longpress } from 'svelte-pieces';
   import { firebaseConfig } from 'sveltefirets';
-  import ShowHide from 'svelte-pieces/functions/ShowHide.svelte';
+
+  export let entry: IEntry;
+  export let minimal = false;
+  export let canEdit = false;
 
   let playing = false;
 
-  function initAudio(sf) {
+  function initAudio(sf: IEntry['sf']) {
     const convertedPath = sf.path.replace(/\//g, '%2F');
-    const url = `https://firebasestorage.googleapis.com/v0/b/${firebaseConfig.storageBucket}/o/${convertedPath}?alt=media`;
+    const url = `https://firebasestorage.googleapis.com/v0/b/${firebaseConfig.storageBucket}/o/${convertedPath}?alt=media`; // TODO: this conversion should be done upon receiving data from the server - it should not be the component's responsibility, then we can just use the path as is and don't need to depend on sveltefirets and don't need to lazy-load this component
     const audio = new Audio(url);
     audio.play();
     playing = true;
@@ -22,6 +22,7 @@
     // TODO: unsubscribe listener
   }
 
+  // This should be done upon getting page data, in a load function, not in this component
   // async function getSpeakerName(sf) {
   //   console.log(sf);
   //   const speakerSnap = await Firestore doc >> (`speakers/${sf.sp}`);
@@ -33,7 +34,7 @@
 </script>
 
 <ShowHide let:show let:toggle>
-  {#if entry.sf}
+  {#if entry.sfs}
     <!-- preventDefault -->
     <!-- https://svelte.dev/tutorial/adding-parameters-to-actions -->
     <div
@@ -41,7 +42,7 @@
     justify-center cursor-pointer p-1 select-none"
       use:longpress={800}
       on:click={() => {
-        if ($canEdit) {
+        if (canEdit) {
           toggle();
         } else {
           initAudio(entry.sf);
@@ -50,10 +51,10 @@
       on:longpress={() => initAudio(entry.sf)}>
       <span class:text-blue-700={playing} class="i-material-symbols-hearing text-2xl mt-1" />
       <div class="text-gray-600 text-sm mt-1">
-        {$_('audio.listen', { default: 'Listen' })}
-        {#if !minimal && $canEdit}
+        {$t('audio.listen', { default: 'Listen' })}
+        {#if !minimal && canEdit}
           +
-          {$_('audio.edit_audio', { default: 'Edit Audio' })}
+          {$t('audio.edit_audio', { default: 'Edit Audio' })}
         {/if}
         <!-- {#if !minimal && entry.sf.speakerName}
         to
@@ -66,15 +67,15 @@
       {/if} -->
       </div>
     </div>
-  {:else if $canEdit}
+  {:else if canEdit}
     <div
       class="{$$props.class} hover:bg-gray-300 flex flex-col items-center
     justify-center cursor-pointer p-2 text-lg"
       on:click={toggle}>
-      <i class="far fa-microphone my-1 mx-2 text-blue-800" />
+      <span class="i-uil-microphone text-lg my-1 mx-1 text-blue-800" />
       {#if !minimal}
         <div class="text-blue-800 text-xs">
-          {$_('audio.add_audio', { default: 'Add Audio' })}
+          {$t('audio.add_audio', { default: 'Add Audio' })}
         </div>
       {/if}
     </div>
@@ -82,7 +83,7 @@
 
   {#if show}
     {#await import('$lib/components/audio/EditAudio.svelte') then { default: EditAudio }}
-      <EditAudio {entry} on:close={toggle} />
+      <EditAudio {entry} sound_file={entry.sound_files?.[0]} on:close={toggle} />
     {/await}
   {/if}
 </ShowHide>

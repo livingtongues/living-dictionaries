@@ -21,8 +21,8 @@ export default async (
   console.log('Export Semantic Domains Request Query params: ', request.query);
   const queryParams = request.query;
   if (queryParams?.dictionaryID && queryParams?.semanticDomainID) {
-    const dictionaryID = queryParams.dictionaryID;
-    const semanticDomainID = queryParams.semanticDomainID;
+    const {dictionaryID} = queryParams;
+    const {semanticDomainID} = queryParams;
 
     const dictionarySnap = await admin.firestore().doc(`dictionaries/${dictionaryID}`).get();
     const dictionaryDoc = dictionarySnap.data() as IDictionary;
@@ -49,7 +49,7 @@ export default async (
         // @ts-ignore
         entry.sourceURL = `https://livingdictionaries.app/${dictionaryID}/entry/${snap.id}`;
 
-        if (entry.sf && entry.sf.path) {
+        if (entry.sf?.path) {
           delete entry.sf.source;
           const convertedPath = entry.sf.path.replace(/\//g, '%2F');
           // @ts-ignore;
@@ -57,7 +57,7 @@ export default async (
           delete entry.sf.path;
         }
 
-        if (entry.pf && entry.pf.path) {
+        if (entry.pf?.path) {
           delete entry.pf.gcs;
           const convertedPath = entry.pf.path.replace(/\//g, '%2F');
           // @ts-ignore;
@@ -121,5 +121,5 @@ function semanticDomain(input: string): string {
   const matching = semanticDomains.find((domain) => {
     return domain.key === input;
   });
-  return (matching && matching.name) || 'NOT FOUND';
+  return matching?.name || 'NOT FOUND';
 }

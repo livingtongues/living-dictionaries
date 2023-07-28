@@ -16,7 +16,7 @@ export type ActualDatabaseAudio = Omit<GoalDatabaseAudio, 'sp'> & DeprecatedAudi
 export interface GoalDatabaseAudio {
   path: string; // Firebase Storage location
   ab?: string; // added by uid
-  ts?: any; // timestamp // TODO need to determine type, had some trouble with Firestore Timestamps previously maybe? Might need to settle for a number timestamp
+  ts?: number; // timestamp in milliseconds, Firestore Timestamps not supported inside arrays
   sp?: string[]; // id of speakers
   sc?: string; // source // TODO fix inconsistency w/ "sc" here vs "sr" in entry
   speakerName?: string; // old Talking Dictionaries - can be deprecated if we create new speakers with IDs from these names

@@ -30,7 +30,7 @@
     <b>{get_local_orthographies(entry).sort().join(' ')}</b>
   {/if}
   {entry.ph && selectedFields.ph ? `/${entry.ph}/` : ''}
-  <i>{add_periods_and_comma_separate_parts_of_speech(entry.ps)}</i>
+  {#if entry.ps && selectedFields.ps}<i>{add_periods_and_comma_separate_parts_of_speech(entry.ps)}</i>{/if}
   {#if entry.gl && selectedFields.gloss}
     <span>
       {@html sanitize(order_glosses({
@@ -117,7 +117,7 @@
     alt={entry.lx} />
 {/if}
 {#if showQrCode}
-  {#await new Promise((r) => setTimeout(() => r(true), 1)) then value}
+  {#await new Promise((r) => setTimeout(() => r(true), 1))}
     <QrCode
       pixelsPerModule={2}
       value={`livingdictionaries.app/${dictionaryId}/entry/${entry.id}`} />

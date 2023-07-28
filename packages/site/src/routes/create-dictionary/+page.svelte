@@ -1,11 +1,10 @@
 <script lang="ts">
   import { t } from 'svelte-i18n';
-  import Form from 'svelte-pieces/data/Form.svelte';
-  import Button from 'svelte-pieces/ui/Button.svelte';
+  import { Button, Form } from 'svelte-pieces';
   import { user } from '$lib/stores';
   import Header from '$lib/components/shell/Header.svelte';
   import type { IDictionary, IHelper, IPoint, IRegion, IUser } from '@living-dictionaries/types';
-  import { docExists, setOnline, updateOnline, firebaseConfig } from 'sveltefirets';
+  import { docExists, setOnline, updateOnline, firebaseConfig, authState } from 'sveltefirets';
   import { arrayUnion, GeoPoint, serverTimestamp } from 'firebase/firestore/lite';
   import { debounce } from '$lib/helpers/debounce';
   import { pruneObject } from '$lib/helpers/prune';
@@ -14,6 +13,9 @@
   import EditableAlternateNames from '$lib/components/settings/EditableAlternateNames.svelte';
   import { glossingLanguages } from '$lib/glosses/glossing-languages';
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte';
+  import type { NewDictionaryRequestBody } from '../api/email/new_dictionary/+server';
+  import { apiFetch } from '$lib/client/apiFetch';
+  import { get } from 'svelte/store';
 
   let modal: 'auth' = null;
 
@@ -83,7 +85,7 @@
       };
       const prunedDictionary = pruneObject(dictionary);
       if (firebaseConfig.projectId === 'talking-dictionaries-dev') {
-        console.log(prunedDictionary);
+        console.info(prunedDictionary);
         if (
           !confirm(
             'Dictionary value logged to console because in dev mode. Do you still want to create this dictionary?'
@@ -92,7 +94,7 @@
           return;
       }
 
-      await setOnline<IDictionary>(`dictionaries/${url}`, dictionary);
+      await setOnline<IDictionary>(`dictionaries/${url}`, prunedDictionary);
       await setOnline<IHelper>(`dictionaries/${url}/managers/${$user.uid}`, {
         id: $user.uid,
         name: $user.displayName,
@@ -101,6 +103,14 @@
         managing: arrayUnion(url),
         termsAgreement: serverTimestamp(),
       });
+
+      const auth_state_user = get(authState);
+      const auth_token = await auth_state_user.getIdToken();
+      await apiFetch<NewDictionaryRequestBody>('/api/email/new_dictionary', {
+        auth_token,
+        dictionary: { ...prunedDictionary, id: url },
+      });
+
       window.location.replace(`/${url}/entries/list`);
     } catch (err) {
       alert(`${$t('misc.error', { default: 'Error' })}: ${err}`);
@@ -111,12 +121,6 @@
 </script>
 
 <svelte:window bind:online />
-
-<svelte:head>
-  <title>
-    {$t('create.create_new_dictionary', { default: 'Create New Dictionary' })}
-  </title>
-</svelte:head>
 
 <Header
   >{$t('create.create_new_dictionary', {
@@ -151,7 +155,7 @@
 
     {#if name.length > 2}
       <div class="flex justify-between items-center" style="direction: ltr">
-        <label for="url" class="text-sm font-medium  text-gray-700"> URL </label>
+        <label for="url" class="text-sm font-medium text-gray-700"> URL </label>
       </div>
 
       <div class="mt-1 flex rounded-md shadow-sm" style="direction: ltr">
@@ -208,13 +212,14 @@
 
       <EditableAlternateNames
         {alternateNames}
-        on:update={(e) => (alternateNames = e.detail.alternateNames)} />
+        on:update={({ detail }) => (alternateNames = detail.alternateNames)} />
       <div class="mb-6" />
 
       <WhereSpoken
         dictionary={{ coordinates: { latitude, longitude }, points, regions }}
         on:updateCoordinates={({ detail }) => {
-          (latitude = detail.latitude), (longitude = detail.longitude);
+          latitude = detail.latitude, 
+          longitude = detail.longitude;
         }}
         on:removeCoordinates={() => ((latitude = null), (longitude = null))}
         on:updatePoints={({ detail }) => (points = detail)}
@@ -223,7 +228,7 @@
 
       <div class="flex">
         <div class="w-1/2">
-          <label for="isocode" class="block text-sm font-medium  text-gray-700">
+          <label for="isocode" class="block text-sm font-medium text-gray-700">
             ISO 639-3
             <a
               href="https://en.wikipedia.org/wiki/ISO_639-3"
@@ -248,7 +253,7 @@
         </div>
         <div class="w-1" />
         <div class="w-1/2">
-          <label for="glottocode" class="block text-sm font-medium  text-gray-700">
+          <label for="glottocode" class="block text-sm font-medium text-gray-700">
             Glottocode
             <a
               href="https://en.wikipedia.org/wiki/Glottolog"

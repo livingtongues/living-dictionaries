@@ -85,7 +85,15 @@
     "send_message": "Enviar el mensaje",
     "message_sent": "Mensaje enviado. Responderemos lo antes posible.",
     "what_is_your_question": "¿Cuál es su pregunta o comentario?",
-    "message_failed": "Mensaje de envío falló. Consulte su conexión a internet o envíenos un correo electrónico:"
+    "message_failed": "Mensaje de envío falló. Consulte su conexión a internet o envíenos un correo electrónico:",
+    "delete_dictionary": "Eliminar un diccionario",
+    "public_dictionary": "Cambiar de privado a público un diccionario",
+    "import_data": "Datos de importacion",
+    "request_access": "Solicitar acceso a la edición",
+    "report_problem": "Informar de un problema",
+    "other": "Otro tema",
+    "select_topic": "Seleccione un tema",
+    "data_fields": "Campos de datos opcionales"
   },
   "create": {
     "select_coordinates": "Seleccione las coordenadas GPS",
@@ -128,7 +136,8 @@
     "grammar": "Gramática",
     "entries": "Entradas",
     "youtube_terms": "Términos de YouTube",
-    "google_terms": "Términos de Google"
+    "google_terms": "Términos de Google",
+    "full_title": "Diccionario Vivo {dictionary_name}"
   },
   "entry": {
     "view_entries": "Ver las entradas",
@@ -170,7 +179,8 @@
     "gloss": "traducción",
     "pl": "Forma plural",
     "print": "Imprimir",
-    "id": "ID"
+    "id": "ID",
+    "scn": "Nombre científico"
   },
   "error": {
     "run_into_error": "Lo sentimos, hay un error.",
@@ -233,7 +243,8 @@
     "public_private_meaning": "\"Público\" significa que cualquiera puede ver su diccionario, lo que requiere el consentimiento de la comunidad. Los diccionarios privados son visibles sólo para usted y sus colaboradores.",
     "optional_data_fields": "Campos de datos opcionales",
     "unable_to_delete": "Nota: no podrá eliminar las glosas de estas lenguas más tarde",
-    "print_access_meaning": "Esto le da al público la capacidad de descargar e imprimir este diccionario vivo como un .pdf"
+    "print_access_meaning": "Esto le da al público la capacidad de descargar e imprimir este diccionario vivo como un .pdf",
+    "featured_image": "Imagen principal"
   },
   "speakers": {
     "add_new_speaker": "Agregar un nuevo hablante",
@@ -267,14 +278,15 @@
     "role": "Rol"
   },
   "export": {
-    "csv_data": "Datos en CSV",
+    "csv_data": "Datos en .CSV",
     "checking_images": "Comprobando si existen archivos de imagen",
     "no_images": "No hay archivos de imagen",
     "checking_audios": "Comprobando si existen archivos de audio",
     "no_audios": "No hay archivos de audio",
     "download_csv": "Descargar CSV",
     "availability": "Exportar sólo está disponible para los administradores del diccionario",
-    "download_pdf": "Descargar PDF"
+    "download_pdf": "Descargar PDF",
+    "spreadsheet": "Hoja de cálculo"
   },
   "video": {
     "video_url": "URL de video",
@@ -300,5 +312,13 @@
     "columns": "Columnas",
     "headword_size": "Tamaño de la palabra principal",
     "font_size": "Tamaño de la fuente"
+  },
+  "import": {
+    "import": "Importar",
+    "template_link": "Enlace a la plantilla",
+    "instructions_1": "Si ya tiene datos lingüísticos que desea importar a su diccionario, siga los pasos a continuación.",
+    "instructions_2": "Haga clic en el botón azul \"Enlace a plantilla\" a continuación. Descargue la plantilla como un archivo de Excel, o cree una copia en Google Docs. Edite la plantilla de acuerdo con las necesidades de su proyecto. Copie y pegue sus datos en la hoja de cálculo.",
+    "instructions_3": "Use el \"Contáctenos\" a continuación para contactarnos. Háganos saber que tiene una nueva hoja de cálculo que está lista para la importación. Háganos cualquier pregunta que tenga. Le responderemos por correo electrónico, y luego puede enviarnos su archivo.",
+    "instructions_4": "Para enviarnos datos exportados desde softwares de diccionarios como Flex, Lexique Pro, Shobox, use el botón \"Contáctenos\" a continuación y cuéntenos los detalles de su proyecto."
   }
 }

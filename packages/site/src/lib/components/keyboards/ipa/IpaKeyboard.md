@@ -3,7 +3,7 @@
   import { Story } from 'kitbook';
 </script>
 
-<!-- prettier-ignore -->
+
 # IPA Keyboard
 
 <Story>

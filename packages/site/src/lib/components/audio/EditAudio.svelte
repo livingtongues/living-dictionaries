@@ -1,55 +1,53 @@
 <script lang="ts">
-  import { _ } from 'svelte-i18n';
-  import Modal from 'svelte-pieces/ui/Modal.svelte';
-  import { createEventDispatcher } from 'svelte';
-  const dispatch = createEventDispatcher();
-  const close = () => dispatch('close');
-
+  import { t } from 'svelte-i18n';
   import Waveform from '$lib/components/audio/Waveform.svelte';
   import SelectAudio from '$lib/components/audio/SelectAudio.svelte';
   import RecordAudio from '$lib/components/audio/RecordAudio.svelte';
   import { dictionary, admin } from '$lib/stores';
-  import Button from 'svelte-pieces/ui/Button.svelte';
-
+  import { Modal, Button, JSON } from 'svelte-pieces';
   import { deleteAudio } from '$lib/helpers/delete';
-
-  import type { IEntry } from '@living-dictionaries/types';
+  import type { ExpandedAudio, IEntry } from '@living-dictionaries/types';
   import SelectSpeaker from '$lib/components/media/SelectSpeaker.svelte';
   import { updateOnline, firebaseConfig } from 'sveltefirets';
-
+  import { createEventDispatcher } from 'svelte';
+  const dispatch = createEventDispatcher();
+  const close = () => dispatch('close');
+  
   export let entry: IEntry;
+  export let sound_file: ExpandedAudio;
 
   let readyToRecord: boolean;
   let showUploadAudio = true;
 
-  let file;
-  let audioBlob;
+  let file: File;
+  let audioBlob: Blob;
 
-  $: if (entry.sf) {
+  $: if (sound_file) {
     file = undefined;
     audioBlob = undefined;
   }
 </script>
 
 <Modal on:close>
-  <span slot="heading"> <i class="far fa-ear text-sm" /> {entry.lx} </span>
+  <span slot="heading"> <span class="i-material-symbols-hearing text-lg text-sm" /> {entry.lx} </span>
 
-  {#if entry.sf && entry.sf.speakerName}
+  {#if sound_file?.speakerName}
     <div class="mb-4">
-      {$_('entry.speaker', { default: 'Speaker' })}:
-      {entry.sf.speakerName}
+      {$t('entry.speaker', { default: 'Speaker' })}:
+      {sound_file.speakerName}
     </div>
     <Waveform
       audioUrl={`https://firebasestorage.googleapis.com/v0/b/${
         firebaseConfig.storageBucket
-      }/o/${entry.sf.path.replace(/\//g, '%2F')}?alt=media`} />
+      }/o/${sound_file.fb_storage_path.replace(/\//g, '%2F')}?alt=media`} />
   {:else}
+    {@const speaker_id = sound_file?.speaker_ids?.[0] || null}
     <SelectSpeaker
       dictionaryId={$dictionary.id}
-      initialSpeakerId={(entry.sf && entry.sf.sp) || null}
+      initialSpeakerId={speaker_id}
       let:speakerId
       on:update={async ({ detail }) => {
-        if (entry.sf && detail.speakerId != entry.sf.sp) {
+        if (sound_file && speaker_id !== detail.speakerId) {
           await updateOnline(
             `dictionaries/${$dictionary.id}/words/${entry.id}`,
             {
@@ -59,12 +57,12 @@
           );
         }
       }}>
-      {#if entry.sf}
+      {#if sound_file}
         <div class="px-1">
           <Waveform
             audioUrl={`https://firebasestorage.googleapis.com/v0/b/${
               firebaseConfig.storageBucket
-            }/o/${entry.sf.path.replace(/\//g, '%2F')}?alt=media`} />
+            }/o/${sound_file.fb_storage_path.replace(/\//g, '%2F')}?alt=media`} />
         </div>
       {:else if speakerId}
         {#if file}
@@ -110,22 +108,20 @@
   {/if}
 
   <div class="modal-footer">
-    {#if entry.sf}
+    {#if sound_file}
       {#if $admin > 1}
-        {#await import('svelte-pieces/data/JSON.svelte') then { default: JSON }}
-          <JSON obj={entry} />
-          <div class="w-1" />
-        {/await}
+        <JSON obj={entry} />
+        <div class="w-1" />
       {/if}
 
       <Button
         href={`https://firebasestorage.googleapis.com/v0/b/${
           firebaseConfig.storageBucket
-        }/o/${entry.sf.path.replace(/\//g, '%2F')}?alt=media`}
+        }/o/${sound_file.fb_storage_path.replace(/\//g, '%2F')}?alt=media`}
         target="_blank">
         <i class="fas fa-download" />
         <span class="hidden sm:inline"
-          >{$_('misc.download', {
+          >{$t('misc.download', {
             default: 'Download',
           })}</span>
       </Button>
@@ -134,7 +130,7 @@
       <Button onclick={() => deleteAudio(entry)} color="red">
         <i class="far fa-trash-alt" />&nbsp;
         <span class="hidden sm:inline"
-          >{$_('misc.delete', {
+          >{$t('misc.delete', {
             default: 'Delete',
           })}</span>
       </Button>
@@ -142,7 +138,7 @@
     {/if}
 
     <Button onclick={close} color="black">
-      {$_('misc.close', { default: 'Close' })}
+      {$t('misc.close', { default: 'Close' })}
     </Button>
   </div>
 </Modal>

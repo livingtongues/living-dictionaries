@@ -6,7 +6,7 @@
   const clustersId = 'clusters';
 </script>
 
-<!-- prettier-ignore -->
+
 # GeoJSON Layer to Clusters
 
 From https://gitlab.com/jailbreak/svelte-mapbox-gl
@@ -45,7 +45,7 @@ From https://gitlab.com/jailbreak/svelte-mapbox-gl
             map.easeTo({
               // @ts-ignore
               center: features[0].geometry.coordinates,
-              zoom: zoom,
+              zoom,
             });
           });
         }}

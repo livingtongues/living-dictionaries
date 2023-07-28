@@ -2,28 +2,26 @@
   import { t } from 'svelte-i18n';
   import { getContext } from 'svelte';
   import { configure } from 'instantsearch.js/es/widgets/index.js';
-  import type { InstantSearch } from 'instantsearch.js';
-  const search: InstantSearch = getContext('search');
-
   import Hits from '$lib/components/search/Hits.svelte';
   import Pagination from '$lib/components/search/Pagination.svelte';
-  import Button from 'svelte-pieces/ui/Button.svelte';
-  // import SeoMetaTags from '$lib/components/SeoMetaTags.svelte';
-  import { createPersistedStore } from 'svelte-pieces/stores/persisted';
+  import { Button, createPersistedStore } from 'svelte-pieces';
   import { defaultPrintFields } from './printFields';
   import PrintEntry from './PrintEntry.svelte';
   import { dictionary, isManager, canEdit } from '$lib/stores';
   import { browser } from '$app/environment';
-  import type { IPrintFields } from '@living-dictionaries/types';
+  import type { IPrintFields, ICitation } from '@living-dictionaries/types';
   import PrintFieldCheckboxes from './PrintFieldCheckboxes.svelte';
   import { Doc } from 'sveltefirets';
   import { truncateAuthors } from './truncateAuthors';
-  import type { ICitation } from '@living-dictionaries/types';
-
+  import { convert_and_expand_entry } from '$lib/transformers/convert_and_expand_entry';
+  import type { InstantSearch } from 'instantsearch.js';
+  const search: InstantSearch = getContext('search');
+  
   const hitsPerPage = createPersistedStore<number>('printHitsPerPage', 50);
   $: if (browser) {
     search.addWidgets([
       configure({
+        // @ts-ignore odd error in CI
         hitsPerPage: $hitsPerPage,
       }),
     ]);
@@ -40,7 +38,7 @@
   const showLabels = createPersistedStore<boolean>('printShowLabels', true);
   const showQrCode = createPersistedStore<boolean>('showQrCode', false);
 
-  let citationType: ICitation = { citation: '' };
+  const citationType: ICitation = { citation: '' };
 </script>
 
 {#if $dictionary.printAccess || $canEdit}
@@ -126,7 +124,7 @@
             headwordSize={$headwordSize}
             fontSize={$fontSize}
             imagePercent={$imagePercent}
-            {entry}
+            entry={convert_and_expand_entry(entry)}
             showQrCode={$showQrCode}
             showLabels={$showLabels}
             selectedFields={$preferredPrintFields}

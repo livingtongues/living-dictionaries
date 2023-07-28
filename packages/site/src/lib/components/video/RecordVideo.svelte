@@ -1,6 +1,6 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
-  import Button from 'svelte-pieces/ui/Button.svelte';
+  import { Button } from 'svelte-pieces';
   import MediaStream from '../record/MediaStream.svelte';
   import Recorder from '../record/Recorder.svelte';
   import { srcObject } from './srcObject';
@@ -16,7 +16,6 @@
     let:chooseCamera
     let:selectedMicrophone
     let:selectedCamera>
-    <!-- svelte-ignore a11y-media-has-caption -->
     <video muted volume={0} use:srcObject={stream} autoplay playsinline />
 
     <Recorder

@@ -1,10 +1,9 @@
 <script lang="ts">
   import { Story } from 'kitbook';
+  import { Button, ReactiveSet } from 'svelte-pieces';
   import Map from '$lib/maps/mapbox/map/Map.svelte';
   import Marker from '$lib/maps/mapbox/map/Marker.svelte';
-  import ReactiveSet from 'svelte-pieces/functions/ReactiveSet.svelte';
   import Popup from '$lib/maps/mapbox/map/Popup.svelte';
-  import Button from 'svelte-pieces/ui/Button.svelte';
   import GeoJSONSource from '$lib/maps/mapbox/sources/GeoJSONSource.svelte';
   import Layer from '$lib/maps/mapbox/map/Layer.svelte';
   import { polygonFeatureCoordinates } from '$lib/maps/utils/polygonFromCoordinates';
@@ -12,8 +11,8 @@
   import { convertPointsIntoRegion } from '$lib/maps/mapbox/static/shapeGeoJson';
 </script>
 
-<!-- prettier-ignore -->
-# Create Polygon from Multiple Markers 
+
+# Create Polygon from Multiple Markers
 
 In this example, if `autoDrawShape` is true and three markers exist, an updating filled region will automatically be drawn if coordinates are passed to a `GeoJSONSource` for use in a fill `Layer`.
 

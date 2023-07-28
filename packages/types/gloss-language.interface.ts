@@ -1,4 +1,6 @@
 // BCP47 https://www.google.com/url?q=https://www.w3.org/International/articles/language-tags/&sa=D&ust=1610645045591000&usg=AFQjCNEcqauESoZHcQuEffpfDl6gC7KWIw, also LanguageCode in Keyman
+
+// eslint-disable-next-line @typescript-eslint/consistent-indexed-object-style
 export interface IGlossLanguages {
   [bcp: string]: IGlossLanguage;
 }

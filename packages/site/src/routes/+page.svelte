@@ -1,44 +1,39 @@
 <script lang="ts">
+  import { t } from 'svelte-i18n';
   import { getCollection } from 'sveltefirets';
   import { where } from 'firebase/firestore';
-
-  import { _ } from 'svelte-i18n';
   import type { IDictionary } from '@living-dictionaries/types';
   import { admin, myDictionaries } from '$lib/stores';
-
-  import ShowHide from 'svelte-pieces/functions/ShowHide.svelte';
+  import { ShowHide } from 'svelte-pieces';
   import Map from '@living-dictionaries/parts/src/lib/maps/mapbox/map/Map.svelte';
   import ToggleStyle from '@living-dictionaries/parts/src/lib/maps/mapbox/controls/ToggleStyle.svelte';
   import NavigationControl from '@living-dictionaries/parts/src/lib/maps/mapbox/controls/NavigationControl.svelte';
   import CustomControl from '@living-dictionaries/parts/src/lib/maps/mapbox/controls/CustomControl.svelte';
-
   import DictionaryPoints from '$lib/components/home/DictionaryPoints.svelte';
   import Search from '$lib/components/home/Search.svelte';
   import Header from '$lib/components/shell/Header.svelte';
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte';
-
+  import { browser } from '$app/environment';
   import type { PageData } from './$types';
   export let data: PageData;
+
   $: publicDictionaries = data.publicDictionaries || [];
   let privateDictionaries: IDictionary[] = [];
   let selectedDictionaryId: string;
   let selectedDictionary: IDictionary;
   $: dictionaries = [...publicDictionaries, ...privateDictionaries, ...$myDictionaries];
-  $: if (selectedDictionaryId) {
+  $: if (selectedDictionaryId)
     selectedDictionary = dictionaries.find((d) => d.id === selectedDictionaryId);
-  } else {
+  else
     selectedDictionary = null;
-  }
 
-  import { browser } from '$app/environment';
-  $: {
-    if (browser && $admin) {
-      getCollection<IDictionary>('dictionaries', [where('public', '!=', true)]).then(
-        (docs) => (privateDictionaries = docs)
-      );
-    } else {
-      privateDictionaries = [];
-    }
+
+  $: if (browser && $admin) {
+    getCollection<IDictionary>('dictionaries', [where('public', '!=', true)]).then(
+      (docs) => (privateDictionaries = docs)
+    );
+  } else {
+    privateDictionaries = [];
   }
 
   let mapComponent: Map;
@@ -85,7 +80,7 @@
       {#if $admin}
         <ShowHide let:show={hide} let:toggle>
           <CustomControl position="bottom-right">
-            <button class="whitespace-nowrap w-90px! px-2" on:click={toggle}>Toggle Private</button>
+            <button type="button" class="whitespace-nowrap w-90px! px-2" on:click={toggle}>Toggle Private</button>
           </CustomControl>
 
           {#if !hide && privateDictionaries.length}
@@ -110,6 +105,9 @@
 </main>
 
 <SeoMetaTags
-  title={$_('misc.LD', { default: 'Living Dictionaries' })}
-  description={$_('', { default: 'Living Dictionaries are language documentation tools that support endangered and under-represented languages. This online platform was created by Living Tongues Institute for Endangered Languages as a free multimedia resource for community activists and linguists who want to build digital dictionaries and phrasebooks.' })}
+  title={$t('misc.LD', { default: 'Living Dictionaries' })}
+  description={$t('', {
+    default:
+      'Living Dictionaries are language documentation tools that support endangered and under-represented languages. This online platform was created by Living Tongues Institute for Endangered Languages as a free multimedia resource for community activists and linguists who want to build digital dictionaries and phrasebooks.',
+  })}
   keywords="Minority Languages, Indigenous Languages, Language Documentation, Dictionary, Minority Community, Language Analysis, Language Education, Endangered Languages, Language Revitalization, Linguistics, Word Lists, Linguistic Analysis, Dictionaries, Living Dictionaries, Living Tongues, Under-represented Languages, Tech Resources, Language Sustainability, Language Resources, Diaspora Languages, Elicitation, Language Archives, Ancient Languages, World Languages, Obscure Languages, Little Known languages, Digital Dictionary, Dictionary Software, Free Software, Online Dictionary Builder, Dictionary with audio, dictionary with pronunciations, dictionary with speakers, dictionaries that you can edit" />

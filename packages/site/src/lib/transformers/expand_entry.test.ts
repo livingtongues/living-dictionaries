@@ -8,7 +8,7 @@ describe('expand_entry', () => {
     locale.set(undefined);
   });
 
-  const now = new Date();
+  const now = new Date().getTime();
   test('returns an object with easily readable field names', () => {
     const part_of_speech_abbrev = 'n';
     const part_of_speech_english = 'noun';
@@ -48,10 +48,11 @@ describe('expand_entry', () => {
         vfs: [{
           path: 'path',
           ab: 'Bob',
-          ts: now.getTime(),
+          ts: now,
           sp: ['sp1', 'sp2'],
           sc: 'sc',
-          youtubeId: 'yt123'
+          youtubeId: 'yt123',
+          startAt: 25,
         }],
         nc: '1',
         de: 'bam',
@@ -71,16 +72,17 @@ describe('expand_entry', () => {
         sc: 'sc',
       }],
       ei: 'ei12',
+      scn: ['marmillion', '<i>leticus</i> Johnson']
     }
 
     const expanded_entry: ExpandedEntry = {
       id: '1',
       lexeme: 'house',
-      local_orthagraphy_1: 'lo1 form',
-      local_orthagraphy_2: 'lo2 form',
-      local_orthagraphy_3: 'lo3 form',
-      local_orthagraphy_4: 'lo4 form',
-      local_orthagraphy_5: 'lo5 form',
+      local_orthography_1: 'lo1 form',
+      local_orthography_2: 'lo2 form',
+      local_orthography_3: 'lo3 form',
+      local_orthography_4: 'lo4 form',
+      local_orthography_5: 'lo5 form',
       phonetic: 'a?u',
       senses: [{
         glosses: { en: 'foo' },
@@ -91,17 +93,18 @@ describe('expand_entry', () => {
           fb_storage_path: 'path',
           specifiable_image_url: 'gcs',
           uid_added_by: 'Bob',
-          timestamp: now,
+          timestamp: new Date(now),
           source: 'sc',
           photographer_credit: 'cr',
         }],
         video_files: [{
           fb_storage_path: 'path',
           uid_added_by: 'Bob',
-          timestamp: now,
+          timestamp: new Date(now),
           speaker_ids: ['sp1', 'sp2'],
           source: 'sc',
           youtubeId: 'yt123',
+          start_at_seconds: 25,
         }],
         noun_class: '1',
         definition_english: 'bam',
@@ -116,13 +119,45 @@ describe('expand_entry', () => {
       sound_files: [{
         fb_storage_path: 'path',
         uid_added_by: 'Bob',
-        timestamp: now,
+        timestamp: new Date(now),
         speaker_ids: ['sp1', 'sp2'],
         source: 'sc',
       }],
       elicitation_id: 'ei12',
+      scientific_names: ['marmillion', '<i>leticus</i> Johnson']
     }
 
-    expect(expand_entry(database_entry)).toEqual({ ...database_entry, ...expanded_entry });
+    expect(expand_entry(database_entry)).toEqual(expanded_entry);
+  });
+
+  test('empty entry', () => {
+    const database_entry: GoalDatabaseEntry = {};
+    const expanded_entry: ExpandedEntry = {
+      senses: [],
+    };
+    expect(expand_entry(database_entry)).toEqual(expanded_entry);
+  });
+
+  test('simple entry with sense but without custom sd', () => {
+    const database_entry: GoalDatabaseEntry = {
+      sn: [
+        {
+          gl: {
+            en: 'Hi'
+          }
+        }
+      ]
+    };
+    const expanded_entry: ExpandedEntry = {
+      senses: [
+        {
+          glosses: {
+            en: 'Hi',
+          },
+          semantic_domains: [],
+        }
+      ],
+    };
+    expect(expand_entry(database_entry)).toEqual(expanded_entry);
   });
 });

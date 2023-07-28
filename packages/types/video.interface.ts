@@ -9,6 +9,7 @@ export interface ExpandedVideo {
   source?: string;
   youtubeId?: string;
   vimeoId?: string;
+  start_at_seconds?: number;
 }
 
 export type ActualDatabaseVideo = Omit<GoalDatabaseVideo, 'sp'> & DeprecatedVideo;
@@ -16,7 +17,7 @@ export type ActualDatabaseVideo = Omit<GoalDatabaseVideo, 'sp'> & DeprecatedVide
 export interface GoalDatabaseVideo {
   path?: string; // Firebase Storage location
   ab?: string; // added by uid
-  ts?: number; // timestamp in milliseconds
+  ts?: number; // timestamp in milliseconds, Firestore Timestamps not supported inside arrays
   sp?: string[]; // id of speakers
   sc?: string; // source
   youtubeId?: string;

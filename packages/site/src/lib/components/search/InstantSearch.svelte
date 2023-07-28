@@ -18,7 +18,8 @@
     'e6d98efb32d3dc2435dce7b97ea87c3e' // Search-Only public API key
   );
 
-  const prodIndex = dictionaryId === 'onondaga' ? 'entries_prod_by_ei' : 'entries_prod';
+  const prodIndex = 'entries_prod';
+  // const prodIndex = dictionaryId === 'onondaga' ? 'entries_prod_by_ei' : 'entries_prod';
 
   const search = instantsearch({
     searchClient,
@@ -41,6 +42,7 @@
 
   search.addWidgets([
     configure({
+      // @ts-ignore odd error in CI, that hopefully Algolia will resolve: Argument of type '{ hitsPerPage: number; }' is not assignable to parameter of type 'PlainSearchParameters'
       hitsPerPage: 30, // adjust lower for mobile
       filters: `dictId:"${dictionaryId}"`,
     }),

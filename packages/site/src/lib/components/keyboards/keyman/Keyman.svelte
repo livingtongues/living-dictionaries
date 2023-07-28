@@ -7,11 +7,9 @@
 <script lang="ts">
   import './keyman.css';
   import { onMount, tick } from 'svelte';
-  import ShowHide from 'svelte-pieces/functions/ShowHide.svelte';
-  import Button from 'svelte-pieces/ui/Button.svelte';
-  import Modal from 'svelte-pieces/ui/Modal.svelte';
+  import { Button, ShowHide, Modal } from 'svelte-pieces';
   import { additionalKeyboards, glossingLanguages } from '../../../glosses/glossing-languages';
-  import { loadScriptOnce } from 'sveltefirets/helpers/loader';
+  import { loadScriptOnce } from 'sveltefirets';
 
   /**
    * When using keyboard inside a fixed context like a modal, set fixed to true to use fixed positioning instead of absolute positioning to keep keyboard with fixed input, otherwise it will match page scroll height

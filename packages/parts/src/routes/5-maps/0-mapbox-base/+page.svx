@@ -9,8 +9,7 @@
   import ToggleStyle from '$lib/maps/mapbox/controls/ToggleStyle.svelte';
 </script>
 
-<!-- prettier-ignore -->
-# Mapbox 
+# Mapbox
 
 From https://github.com/beyonk-adventures/svelte-mapbox
 
@@ -33,26 +32,26 @@ From https://github.com/beyonk-adventures/svelte-mapbox
 
 <Story name="Everything" knobs={{ showControls: true }} let:props={{ showControls }} height={400}>
   <Map
-    on:dragend={(e) => console.log(e.detail)}
-    on:moveend={(e) => console.log(e.detail)}
-    on:click={(e) => console.log({ lng: e.detail.lng, lat: e.detail.lat })}
-    on:zoomend={(e) => console.log(e.detail)}
-    on:error={(e) => console.log(e.detail)}>
+    on:dragend={(e) => console.info(e.detail)}
+    on:moveend={(e) => console.info(e.detail)}
+    on:click={(e) => console.info({ lng: e.detail.lng, lat: e.detail.lat })}
+    on:zoomend={(e) => console.info(e.detail)}
+    on:error={(e) => console.info(e.detail)}>
     {#if showControls}
       <Geocoder
         placeholder={'Search Places'}
-        on:clear={() => console.log('cleared')}
-        on:loading={(e) => console.log(e.detail)}
-        on:result={(e) => console.log(e.detail)}
-        on:results={(e) => console.log(e.detail)}
-        on:error={(e) => console.log(e.detail)} />
+        on:clear={() => console.info('cleared')}
+        on:loading={(e) => console.info(e.detail)}
+        on:result={(e) => console.info(e.detail)}
+        on:results={(e) => console.info(e.detail)}
+        on:error={(e) => console.info(e.detail)} />
       <NavigationControl />
       <GeolocateControl
-        on:geolocate={(e) => console.log(e.detail)}
-        on:outofmaxbounds={(e) => console.log(e.detail)}
-        on:trackuserlocationstart={(e) => console.log(e.detail)}
-        on:trackuserlocationend={(e) => console.log(e.detail)}
-        on:error={(e) => console.log(e.detail)} />
+        on:geolocate={(e) => console.info(e.detail)}
+        on:outofmaxbounds={(e) => console.info(e.detail)}
+        on:trackuserlocationstart={(e) => console.info(e.detail)}
+        on:trackuserlocationend={(e) => console.info(e.detail)}
+        on:error={(e) => console.info(e.detail)} />
       <ScaleControl />
       <ToggleStyle />
     {/if}

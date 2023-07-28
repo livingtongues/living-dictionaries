@@ -1,14 +1,25 @@
 <script lang="ts">
-  import { _ } from 'svelte-i18n';
-  import Modal from 'svelte-pieces/ui/Modal.svelte';
-  import Button from 'svelte-pieces/ui/Button.svelte';
-  import Form from 'svelte-pieces/data/Form.svelte';
+  import { t } from 'svelte-i18n';
+  import { Button, Modal, Form } from 'svelte-pieces';
   import { user } from '$lib/stores';
   import { goto } from '$app/navigation';
-
   import { createEventDispatcher } from 'svelte';
+  import { apiFetch } from '$lib/client/apiFetch';
+  import type { SupportRequestBody } from '../../../routes/api/email/support/+server';
 
-  const dispatch = createEventDispatcher();
+  const subjects = {
+    'delete_dictionary': 'Delete a dictionary',
+    'public_dictionary': 'Make a dictionary public',
+    'import_data': 'Import data',
+    // 'data_fields': 'Optional data fields', //Comment this in case we want to include it again in the future
+    'request_access': 'Request editing access',
+    'report_problem': 'Report a problem',
+    'other': 'Other topic'
+  }
+  type Subjects = keyof typeof subjects;
+  export let subject: Subjects = undefined;
+
+  const dispatch = createEventDispatcher<{ close: boolean }>();
 
   function close() {
     dispatch('close');
@@ -16,23 +27,28 @@
 
   let message = '';
   let email = '';
-
+  
   let status: 'success' | 'fail';
 
   async function send() {
     try {
-      const data = {
+      const response = await apiFetch<SupportRequestBody>('/api/email/support', {
         message,
-        email: ($user && $user.email) || email,
-        name: ($user && $user.displayName) || 'Anonymous',
+        email: $user?.email || email,
+        name: $user?.displayName || 'Anonymous',
         url: window.location.href,
-      };
-      const { getFunctions, httpsCallable } = await import('firebase/functions');
-      await httpsCallable(getFunctions(), 'supportEmail')(data);
+        subject: subjects[subject]
+      });
+
+      if (response.status !== 200) {
+        const body = await response.json();
+        throw new Error(body.message);
+      }
+
       status = 'success';
     } catch (err) {
       status = 'fail';
-      alert(`${$_('misc.error', { default: 'Error' })}: ${err}`);
+      alert(`${$t('misc.error', { default: 'Error' })}: ${err}`);
     }
   }
 </script>
@@ -49,7 +65,7 @@
       }}
       class="mb-2">
       <span class="i-fluent-learning-app-24-regular -mt-2px" />
-      {$_('header.tutorials', {
+      {$t('header.tutorials', {
         default: 'Tutorials',
       })}
     </Button>
@@ -68,13 +84,21 @@
 
   <h2 class="text-xl mb-3">
     <i class="far fa-comment" />
-    {$_('header.contact_us', { default: 'Contact Us' })}
+    {$t('header.contact_us', { default: 'Contact Us' })}
   </h2>
 
   {#if !status}
     <Form let:loading onsubmit={send}>
+      <div class="my-2">
+        <select class="w-full" bind:value={subject}>
+          <option disabled selected value="">{$t('contact.select_topic', { default: 'Select a topic' })}:</option>
+          {#each Object.entries(subjects) as [key, title]}
+            <option value={key}>{$t('contact.' + key, { default: title })}</option>
+          {/each}
+        </select>
+      </div>
       <label class="block text-gray-700 text-sm font-bold mb-2" for="message">
-        {$_('contact.what_is_your_question', {
+        {$t('contact.what_is_your_question', {
           default: 'What is your question or comment?',
         })}
       </label>
@@ -85,7 +109,7 @@
         maxlength="1000"
         bind:value={message}
         class="form-input bg-white w-full"
-        placeholder={$_('contact.enter_message', {
+        placeholder={$t('contact.enter_message', {
           default: 'Enter your message',
         }) + '...'} />
       <div class="flex text-xs">
@@ -95,7 +119,7 @@
       {#if !$user}
         <div class="mt-3">
           <label class="block uppercase text-gray-700 text-xs font-bold mb-2" for="email">
-            {$_('contact.your_email_address', {
+            {$t('contact.your_email_address', {
               default: 'Your Email Address',
             })}
           </label>
@@ -104,35 +128,35 @@
             required
             bind:value={email}
             class="form-input bg-white w-full"
-            placeholder={$_('contact.email', { default: 'Email' })}
+            placeholder={$t('contact.email', { default: 'Email' })}
             style="direction: ltr" />
         </div>
       {/if}
 
       <div class="mt-5">
         <Button {loading} form="filled" type="submit">
-          {$_('contact.send_message', { default: 'Send Message' })}
+          {$t('contact.send_message', { default: 'Send Message' })}
         </Button>
         <Button disabled={loading} onclick={close} form="simple" color="black">
-          {$_('misc.cancel', { default: 'Cancel' })}
+          {$t('misc.cancel', { default: 'Cancel' })}
         </Button>
       </div>
     </Form>
   {:else if status == 'success'}
     <h4 class="text-lg mt-3 mb-4">
       <i class="fas fa-check" />
-      {$_('contact.message_sent', {
+      {$t('contact.message_sent', {
         default: 'Message sent. We will reply as soon as we can.',
       })}
     </h4>
     <div>
       <Button onclick={close} color="black">
-        {$_('misc.close', { default: 'Close' })}
+        {$t('misc.close', { default: 'Close' })}
       </Button>
     </div>
   {:else if status == 'fail'}
     <h4 class="text-xl mt-1 mb-4">
-      {$_('contact.message_failed', {
+      {$t('contact.message_failed', {
         default: 'Message send failed. Check your internet connection or email us:',
       })}
       <a class="underline ml-1" href="mailto:annaluisa@livingtongues.org">

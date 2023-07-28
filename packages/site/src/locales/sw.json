@@ -85,7 +85,15 @@
     "send_message": "Tuma ujumbe ",
     "message_sent": "Ujumbe umetumwa. Tutajibu haraka iwezekanavyo.",
     "what_is_your_question": "Je! Swali lako au maoni yako ni nini?",
-    "message_failed": "Ujumbe Tuma umeshindwa. Angalia unganisho lako la mtandao au tutumie barua pepe:"
+    "message_failed": "Ujumbe Tuma umeshindwa. Angalia unganisho lako la mtandao au tutumie barua pepe:",
+    "delete_dictionary": "Futa kamusi",
+    "public_dictionary": "Fanya kamusi ya umma",
+    "import_data": "Ingiza data",
+    "request_access": "Omba ufikiaji wa uhariri",
+    "report_problem": "Ripoti shida",
+    "other": "Mada nyingine",
+    "select_topic": "Chagua mada",
+    "data_fields": "Sehemu za data za hiari"
   },
   "create": {
     "select_coordinates": "Chagua mahali kijiografia",
@@ -128,7 +136,8 @@
     "grammar": "Sarufi",
     "entries": "Maingizo",
     "youtube_terms": "Masharti ya YouTube",
-    "google_terms": "Masharti ya Google"
+    "google_terms": "Masharti ya Google",
+    "full_title": "{dictionary_name} Kamusi Hai"
   },
   "entry": {
     "view_entries": "Tazama Maingizo",
@@ -170,7 +179,8 @@
     "gloss": "tafsiri",
     "pl": "Fomu ya wingi",
     "print": "Chapisha",
-    "id": "Id"
+    "id": "Id",
+    "scn": "Jina la kisayansi"
   },
   "error": {
     "run_into_error": "Samahani, tumepata hitilafu.",
@@ -233,7 +243,8 @@
     "public_private_meaning": "Je, jamii ya wazungumzaji inaruhusu lugha hii kuwekwa mtandaoni? Umma inamaanisha mtu yeyote anaweza kuona kamusi yako, suala ambalo linahitaji idhini ya jamii. Kamusi binafsi zinaonekana kwako tu na washirika wako.",
     "optional_data_fields": "Sehemu za Taarifa Mbadala",
     "unable_to_delete": "Kumbuka: Hautaweza kufuta lugha hizi za glossing baadaye.",
-    "print_access_meaning": "Hii inatoa umma uwezo wa kupakua na kuchapisha kamusi hii hai kama .pdf"
+    "print_access_meaning": "Hii inatoa umma uwezo wa kupakua na kuchapisha kamusi hii hai kama .pdf",
+    "featured_image": "Picha iliyoangaziwa"
   },
   "speakers": {
     "add_new_speaker": "Ongeza Mzungumzaji Mpya",
@@ -267,14 +278,15 @@
     "role": "Wajibu"
   },
   "export": {
-    "csv_data": "Takwimu kama CSV",
+    "csv_data": "Takwimu kama .CSV",
     "checking_images": "Kuangalia ikiwa faili za picha zipo",
     "no_images": "Hakuna faili za picha",
     "checking_audios": "Kuangalia ikiwa faili za sauti zipo",
     "no_audios": "Hakuna faili za sauti",
     "download_csv": "Pakua CSV",
     "availability": "Usafirishaji unapatikana tu kwa wasimamizi wa kamusi",
-    "download_pdf": "Pakua pdf"
+    "download_pdf": "Pakua pdf",
+    "spreadsheet": "Lahajedwali"
   },
   "video": {
     "video_url": "URL ya video",
@@ -300,5 +312,13 @@
     "columns": "Nguzo",
     "headword_size": "Saizi ya kichwa",
     "font_size": "Saizi ya fonti"
+  },
+  "import": {
+    "import": "Kuagiza",
+    "template_link": "Unganisha kwa template",
+    "instructions_1": "Ikiwa tayari unayo data ya lugha ambayo unataka kuingiza kwenye kamusi yako, tafadhali fuata hatua hapa chini.",
+    "instructions_2": "Bonyeza kitufe cha \"Kiunga cha Kiolezo\" hapa chini. Pakua templeti kama faili ya Excel, au unda nakala kwenye Hati za Google. Hariri templeti kulingana na mahitaji ya mradi wako. Nakili na ubandike data yako kwenye lahajedwali.",
+    "instructions_3": "Tumia \"Wasiliana Nasi\" hapa chini kuwasiliana nasi. Tujue kuwa una lahajedwali mpya ambayo iko tayari kwa kuagiza. Tuulize maswali yoyote unayo. Tutakujibu kwa barua pepe, halafu unaweza kututumia faili yako.",
+    "instructions_4": "Kututumia data iliyosafirishwa kutoka kwa laini za kamusi kama Flex, Lexique Pro, Sanduku la Viatu, tafadhali tumia kitufe cha \"Wasiliana Nasi\" hapa chini na tuambie maelezo ya mradi wako."
   }
 }

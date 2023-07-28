@@ -5,6 +5,10 @@ import { readFileSync } from 'fs';
 import { parseCSVFrom } from './parse-csv.js';
 import { convertJsonRowToEntryFormat } from './convertJsonRowToEntryFormat.js';
 
+const developer_in_charge = 'qkTzJXH24Xfc57cZJRityS6OTn52'; // diego@livingtongues.org -> Diego Córdova Nieto;
+type unique_speakers = Record<string, string>;
+const different_speakers: unique_speakers = {};
+
 export async function importFromSpreadsheet(dictionaryId: string, dry = false) {
   const dateStamp = Date.now();
 
@@ -32,11 +36,13 @@ export async function importEntriesToFirebase(
   let batchCount = 0;
   let batch = db.batch();
   const colRef = db.collection(`dictionaries/${dictionaryId}/words`);
+  let speakerRef;
+  let speakerId;
 
   for (const row of rows) {
-    if (!row.lexeme || row.lexeme === '(word/phrase)') {
+    if (!row.lexeme || row.lexeme === '(word/phrase)') 
       continue;
-    }
+    
     if (!dry && batchCount === 200) {
       console.log('Committing batch of entries ending with: ', entryCount);
       await batch.commit();
@@ -53,13 +59,33 @@ export async function importEntriesToFirebase(
     }
 
     if (row.soundFile) {
+      speakerRef = db.collection('speakers');
+      if (row.speakerName && (!speakerId || !(row.speakerName in different_speakers))) {
+        speakerId = speakerRef.doc().id;
+        different_speakers[row.speakerName] = speakerId;
+        batch.create(speakerRef.doc(speakerId), {
+          displayName: row.speakerName,
+          birthplace: row.speakerHometown || '',
+          decade: parseInt(row.speakerAge) || '',
+          gender: row.speakerGender || '',
+          contributingTo: [dictionaryId],
+          createdAt: timestamp,
+          createdBy: developer_in_charge,
+          updatedAt: timestamp,
+          updatedBy: developer_in_charge,
+        });
+      }
       const audioFilePath = await uploadAudioFile(row.soundFile, entryId, dictionaryId, dry);
       if (audioFilePath) {
         entry.sf = {
           path: audioFilePath,
-          speakerName: row.speakerName,
           ts: timestamp,
         };
+        if (speakerId) 
+          entry.sf.sp = different_speakers[row.speakerName];
+        else 
+          entry.sf.speakerName = row.speakerName; // Keep that if for some reason we need the speakername as text only again.
+        
       }
     }
 
@@ -69,6 +95,6 @@ export async function importEntriesToFirebase(
     entryCount++;
   }
   console.log(`Committing final batch of entries ending with: ${entryCount}`);
-  !dry && (await batch.commit());
+  if (!dry) await batch.commit();
   return entries;
 }

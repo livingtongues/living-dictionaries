@@ -1,12 +1,11 @@
 <script lang="ts">
-  import { _ } from 'svelte-i18n';
+  import { t } from 'svelte-i18n';
   import SideMenu from './SideMenu.svelte';
   import { dictionary as dictionaryStore, algoliaQueryParams } from '$lib/stores';
   import Header from '$lib/components/shell/Header.svelte';
-  import ResponsiveSlideover from 'svelte-pieces/ui/ResponsiveSlideover.svelte';
-  import Button from 'svelte-pieces/ui/Button.svelte';
-
+  import { Button, ResponsiveSlideover } from 'svelte-pieces';
   import type { LayoutData } from './$types';
+  import './custom-fonts.css';
   export let data: LayoutData;
 
   if (data.dictionary) {
@@ -28,7 +27,7 @@
     </a>
     <div class="w-2 hidden md:inline" />
 
-    <button class="p-3 md:hidden print:p-0" on:click={() => (menuOpen = !menuOpen)}>
+    <button type="button" class="p-3 md:hidden print:p-0" on:click={() => (menuOpen = !menuOpen)}>
       <i class="far fa-bars print:hidden" />
       {$dictionaryStore.name}
     </button>
@@ -40,7 +39,7 @@
 
 <div class="flex px-3 print:px-0">
   <ResponsiveSlideover
-    side={$_('direction') === 'rtl' ? 'right' : 'left'}
+    side={$t('direction') === 'rtl' ? 'right' : 'left'}
     showWidth={'md'}
     bind:open={menuOpen}>
     <div
@@ -49,7 +48,7 @@
       <hr class="md:hidden" />
       <Button form="menu" class="text-left !md:hidden" onclick={() => (menuOpen = false)}>
         <i class="far fa-times fa-lg fa-fw" />
-        {$_('misc.close', { default: 'Close' })}
+        {$t('misc.close', { default: 'Close' })}
       </Button>
     </div>
   </ResponsiveSlideover>
@@ -58,18 +57,3 @@
     <slot />
   </div>
 </div>
-
-<style>
-  @font-face {
-    font-family: 'sompeng';
-    src: url('/fonts/Sompeng-Code200365k.ttf') format('truetype');
-  }
-
-  :global(.sompeng) {
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue',
-      Arial, 'Noto Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol',
-      'Noto Color Emoji', 'sompeng';
-    font-weight: normal;
-    font-style: normal;
-  }
-</style>

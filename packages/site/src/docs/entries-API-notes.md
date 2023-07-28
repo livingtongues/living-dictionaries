@@ -2,7 +2,7 @@
   import { Story } from 'kitbook';
 </script>
 
-<!-- prettier-ignore -->
+
 # Entries API
 
 These are just initial scratch notes and no API has been created yet.

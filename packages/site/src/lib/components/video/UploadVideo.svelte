@@ -1,28 +1,28 @@
 <script lang="ts">
   import { onDestroy, onMount } from 'svelte';
-  import { _ } from 'svelte-i18n';
-  import type { IVideo, IEntry, IVideoCustomMetadata } from '@living-dictionaries/types';
+  import { t } from 'svelte-i18n';
+  import type { GoalDatabaseVideo, IEntry, IVideoCustomMetadata } from '@living-dictionaries/types';
   import { dictionary, user } from '$lib/stores';
   import { getStorage, ref, uploadBytesResumable } from 'firebase/storage';
   import type { UploadTask, TaskState, StorageError } from 'firebase/storage';
   import { addVideo } from '$lib/helpers/media/update';
-
   import { tweened } from 'svelte/motion';
   import { cubicOut } from 'svelte/easing';
+
+  export let file: File | Blob
+  export let entry: IEntry
+  export let speakerId: string;
+
+  let uploadTask: UploadTask;
+  let taskState: TaskState;
+  let error: StorageError;
+  let success: boolean;
   let progress = tweened(0, {
     duration: 2000,
     easing: cubicOut,
   });
   $: percentage = Math.floor($progress * 100);
-
-  export let file: File | Blob, entry: IEntry, speakerId: string;
-  let error: StorageError;
-  let success: boolean;
-
-  let uploadTask: UploadTask;
-  let taskState: TaskState;
-  $: console.log({ taskState });
-
+  
   onMount(async () => {
     if (!file || !entry) return;
 
@@ -49,21 +49,21 @@
         taskState = snapshot.state;
       },
       (err) => {
-        alert(`${$_('misc.error', { default: 'Error' })}: ${err}`);
+        alert(`${$t('misc.error', { default: 'Error' })}: ${err}`);
         error = err;
       },
       async () => {
         try {
-          const videoFile: IVideo = {
+          const database_video: GoalDatabaseVideo = {
             path: storagePath,
             ab: $user.uid,
-            sp: speakerId,
+            sp: [speakerId],
           };
-          await addVideo(entry, videoFile);
+          await addVideo(entry.id, database_video);
 
           success = true;
         } catch (err) {
-          alert(`${$_('misc.error', { default: 'Error' })}: ${err}`);
+          alert(`${$t('misc.error', { default: 'Error' })}: ${err}`);
           error = err;
         }
       }
@@ -80,14 +80,14 @@
   <span
     class="text-xs font-semibold inline-block py-1 px-2 uppercase rounded-full
     text-red-600 bg-red-200">
-    {$_('misc.error', { default: 'Error' })}
+    {$t('misc.error', { default: 'Error' })}
   </span>
 {:else if success}
   <span
     class="text-xs font-semibold inline-block py-1 px-2 uppercase rounded-full
     text-green-600 bg-green-200">
     <i class="far fa-check" />
-    {$_('upload.success', { default: 'Success' })}
+    {$t('upload.success', { default: 'Success' })}
   </span>
 {:else}
   <div class="relative pt-1">
@@ -96,7 +96,7 @@
         <span
           class="text-xs font-semibold inline-block py-1 px-2 uppercase
           rounded-full text-blue-600 bg-blue-200">
-          {$_('upload.uploading', { default: 'Uploading' })}
+          {$t('upload.uploading', { default: 'Uploading' })}
         </span>
       </div>
       <div class="text-right">

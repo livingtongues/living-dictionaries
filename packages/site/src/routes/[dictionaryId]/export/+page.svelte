@@ -2,62 +2,50 @@
   import { onMount } from 'svelte';
   import { _ } from 'svelte-i18n';
   import { admin, dictionary, isManager } from '$lib/stores';
-  import Button from 'svelte-pieces/ui/Button.svelte';
-  import { formatEntriesForCSV, type IEntryForCSV } from '$lib/export/formatEntries';
+  import { Button, ShowHide } from 'svelte-pieces';
   import { partsOfSpeech } from '$lib/mappings/parts-of-speech';
-  import { semanticDomains } from '$lib/mappings/semantic-domains';
-  import type { IEntry } from '@living-dictionaries/types';
+  import type { ActualDatabaseEntry } from '@living-dictionaries/types';
   import { getCollection } from 'sveltefirets';
-  import { downloadBlob, arrayToCSVBlob } from '$lib/export/csv';
-  import ShowHide from 'svelte-pieces/functions/ShowHide.svelte';
-  import DownloadMedia from '../../../lib/export/DownloadMedia.svelte';
   import Progress from '$lib/export/Progress.svelte';
-  import { fetchSpeakers } from '$lib/helpers/fetchSpeakers';
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte';
+  import { convert_entry_to_current_shape } from '$lib/transformers/convert_entry_to_current_shape';
+  import { expand_entry } from '$lib/transformers/expand_entry';
+  import DownloadMedia from './DownloadMedia.svelte';
+  import { fetchSpeakers } from './fetchSpeakers';
+  import { getCsvHeaders, formatCsvEntries, type EntryForCSV } from './prepareEntriesForCsv';
+  import { downloadObjectsAsCSV } from '$lib/export/csv';
 
   let includeImages = false;
   let includeAudio = false;
-  let formattedEntries: IEntryForCSV[] = [];
-  let entriesWithImages: IEntryForCSV[] = [];
-  let entriesWithAudio: IEntryForCSV[] = [];
-  let finalizedEntries: IEntryForCSV[] = [];
+
+  let entryHeaders: EntryForCSV = {}
+  let formattedEntries: EntryForCSV[] = [];
+  let entriesWithImages: EntryForCSV[] = [];
+  let entriesWithAudio: EntryForCSV[] = [];
+
   let mounted = false;
 
   onMount(async () => {
-    const entries = await getCollection<IEntry>(`dictionaries/${$dictionary.id}/words`);
-    const speakers = await fetchSpeakers(entries);
-    formattedEntries = formatEntriesForCSV(
-      entries,
-      $dictionary,
-      speakers,
-      semanticDomains,
-      partsOfSpeech
-    );
-    entriesWithImages = formattedEntries.filter((entry) => entry.pfpa);
-    entriesWithAudio = formattedEntries.filter((entry) => entry.sfpa);
-    finalizedEntries = formattedEntries.map((entry) => {
-      const newEntry = { ...entry };
-      delete newEntry.pfpa;
-      delete newEntry.sfpa;
-      return newEntry;
-    });
+    const database_entries = await getCollection<ActualDatabaseEntry>(`dictionaries/${$dictionary.id}/words`);
+    const converted_to_current_shaped_entries = database_entries.map(convert_entry_to_current_shape);
+    const expanded_entries = converted_to_current_shaped_entries.map(expand_entry);
+    const speakers = await fetchSpeakers(expanded_entries);
+
+    entryHeaders = getCsvHeaders(expanded_entries, $dictionary)
+    formattedEntries = formatCsvEntries(expanded_entries, speakers, partsOfSpeech)
+    entriesWithImages = formattedEntries.filter((entry) => entry.image_filename);
+    entriesWithAudio = formattedEntries.filter((entry) => entry.sound_filename);
+
     mounted = true;
   });
 </script>
-
-<svelte:head>
-  <title>
-    {$dictionary.name}
-    {$_('misc.export', { default: 'export' })}
-  </title>
-</svelte:head>
 
 <h3 class="text-xl font-semibold mb-4">{$_('misc.export', { default: 'export' })}</h3>
 {#if $isManager}
   <div class="mb-6">
     <div>
       <i class="far fa-check" />
-      {$_('export.csv_data', { default: 'Data as CSV' })}
+      {$_('export.csv_data', { default: 'Data as .CSV' })} ({$_('export.spreadsheet', { default: 'Spreadsheet' })})
     </div>
     <div
       class="flex items-center mt-2 {entriesWithImages.length
@@ -115,7 +103,8 @@
       {:else}
         <DownloadMedia
           dictionary={$dictionary}
-          {finalizedEntries}
+          {entryHeaders}
+          finalizedEntries={formattedEntries}
           entriesWithImages={includeImages ? entriesWithImages : []}
           entriesWithAudio={includeAudio ? entriesWithAudio : []}
           on:completed={toggle}
@@ -131,10 +120,9 @@
     </ShowHide>
   {:else}
     <Button
-      loading={!finalizedEntries.length}
+      loading={!formattedEntries.length}
       onclick={() => {
-        const blob = arrayToCSVBlob(finalizedEntries);
-        downloadBlob(blob, $dictionary.id, '.csv');
+        downloadObjectsAsCSV(entryHeaders, formattedEntries, $dictionary.id);
       }}
       form="filled">
       {$_('export.download_csv', { default: 'Download CSV' })}
@@ -147,12 +135,15 @@
 {#if $admin}
   <div class="mt-5">
     <Button form="filled" href="entries/print"
-      >{$_('export.download_pdf', { default: 'Download PDF' })}</Button>
+    >{$_('export.download_pdf', { default: 'Download PDF' })}</Button>
   </div>
 {/if}
 
 <SeoMetaTags
   title={$_('misc.export', { default: 'export' })}
   dictionaryName={$dictionary.name}
-  description={$_('', { default: "Dictionary managers can easily export their Living Dictionary's text data as a .CSV spreadsheet as well as export their images and audio files in convenient ZIP folders." })}
+  description={$_('', {
+    default:
+      'Dictionary managers can easily export their Living Dictionary\'s text data as a .CSV spreadsheet as well as export their images and audio files in convenient ZIP folders.',
+  })}
   keywords="How to print a dictionary, How to create lessons for endangered languages, Language Documentation, Language Revitalization, Build a Dictionary, Online Dictionary, Digital Dictionary, Dictionary Software, Free Software, Online Dictionary Builder, Living Dictionaries, Living Dictionary, Edit a dictionary, Search a dictionary, Browse a dictionary, Explore a Dictionary" />
