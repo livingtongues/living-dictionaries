@@ -13,9 +13,11 @@
   let lng:number;
   let lat:number;
   let zoom = 4;
+  let pitch = 0;
+  let bearing = 0;
   export let canRemove = true;
 
-  $: static_image_link = `https://api.mapbox.com/styles/v1/${username}/${style_id}/static/${overlay ? overlay + '/' : ''}${lng},${lat},${zoom}`;
+  $: static_image_link = `https://api.mapbox.com/styles/v1/${username}/${style_id}/static/${overlay ? overlay + '/' : ''}${lng},${lat},${zoom},${bearing},${pitch}`;
 
   onMount(() => {
     if (navigator.geolocation) {
@@ -39,6 +41,7 @@
 <Modal on:close noscroll>
   <form on:submit|preventDefault style="height: 50vh;">
     <Map {lng} {lat}
+      on:pitchend={({ detail }) => ([pitch, bearing] = detail)}
       on:dragend={({ detail }) => ({ lng, lat } = detail)}
       on:zoomend={({ detail }) => zoom = detail}>
       <NavigationControl />

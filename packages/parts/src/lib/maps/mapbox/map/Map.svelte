@@ -34,6 +34,7 @@
   let ready = false;
 
   const dispatch = createEventDispatcher<{
+    pitchend: number[]
     ready: null;
     dragend: LngLat;
     moveend: LngLat;
@@ -44,6 +45,7 @@
 
   // More events at https://docs.mapbox.com/mapbox-gl-js/api/map/#map-events
   const handlers: Record<string, any> = {
+    pitchend: () => dispatch('pitchend', [map.getPitch(), map.getBearing()]),
     dragend: () => dispatch('dragend', map.getCenter()),
     moveend: () => dispatch('moveend', map.getCenter()),
     click: (e) => {
