@@ -1,16 +1,18 @@
 <script lang="ts">
   import { t } from 'svelte-i18n';
-  import type { IEntry, GoalDatabasePhoto } from '@living-dictionaries/types';
-  import { dictionary, user } from '$lib/stores';
+  import { user } from '$lib/stores';
   import { tweened } from 'svelte/motion';
   import { cubicOut } from 'svelte/easing';
   import { getStorage, ref, uploadBytesResumable } from 'firebase/storage';
-  import { updateOnline, firebaseConfig, authState } from 'sveltefirets';
-    import { apiFetch } from '$lib/client/apiFetch';
-    import type { ImageUrlRequestBody } from '../../../routes/api/image_url/+server';
-    import { get } from 'svelte/store';
+  import { firebaseConfig, authState } from 'sveltefirets';
+  import { apiFetch } from '$lib/client/apiFetch';
+  import type { ImageUrlRequestBody } from '../../../routes/api/image_url/+server';
+  import { get } from 'svelte/store';
+  import { createEventDispatcher, onMount } from 'svelte';
 
-  export let file: File, entry: IEntry;
+  export let file: File;
+  export let fileLocationPrefix: string;
+
   let progress = tweened(0, {
     duration: 2000,
     easing: cubicOut,
@@ -19,23 +21,17 @@
 
   let error;
   let success: boolean;
-  let previewURL: string;
+  $: previewURL = URL.createObjectURL(file);
 
-  if (file && entry) {
-    previewURL = URL.createObjectURL(file);
-    startUpload();
-  }
-
-  async function startUpload() {
-    // Replace spaces w/ underscores in dict name, remove special characters from lexeme so image converter can accept filename
-    // const _dictName = dictionary.name.replace(/\s+/g, '_');
-    // const _lexeme = this.entry.lx.replace(/[^a-z0-9+]+/gi, '_');
+  onMount(() => {
     const fileTypeSuffix = file.name.match(/\.[0-9a-z]+$/i)[0];
+    const fileLocation = `${fileLocationPrefix}${new Date().getTime()}${fileTypeSuffix}`
+    startUpload(fileLocation)
+  })
 
-    const storagePath = `${$dictionary.id}/images/${
-      entry.id
-    }_${new Date().getTime()}${fileTypeSuffix}`;
-
+  const dispatch = createEventDispatcher<{uploaded: { fb_storage_path: string, specifiable_image_url: string }}>();
+    
+  async function startUpload(storagePath: string) {
     const customMetadata = {
       uploadedBy: $user.displayName,
       originalFileName: file.name,
@@ -61,28 +57,14 @@
             break;
         }
       },
+      // https://firebase.google.com/docs/storage/web/handle-errors
       (err) => {
         alert(
           `${$t('misc.error', {
             default: 'Error',
-          })}: ${err} - Please contact us with the image name and lexeme.`
+          })}: ${err} - Please contact us with the image name.`
         );
         error = err;
-        // A full list of error codes is available at
-        // https://firebase.google.com/docs/storage/web/handle-errors
-        // switch (error.code) {
-        //     case 'storage/unauthorized':
-        //         // User doesn't have permission to access the object
-        //         break;
-
-        //     case 'storage/canceled':
-        //         // User canceled the upload
-        //         break;
-
-        //     case 'storage/unknown':
-        //         // Unknown error occurred, inspect error.serverResponse
-        //         break;
-        // }
       },
       () => savePhoto(storagePath)
     );
@@ -104,18 +86,8 @@
       }
       const gcsPath = await response.json() as string
 
-      const pf: GoalDatabasePhoto = {
-        path: storagePath,
-        gcs: gcsPath,
-        ts: new Date().getTime(),
-        cr: $user.displayName,
-        ab: $user.uid,
-      };
-      await updateOnline<IEntry>(
-        `dictionaries/${$dictionary.id}/words/${entry.id}`,
-        { pf },
-        { abbreviate: true }
-      );
+      dispatch('uploaded', { fb_storage_path: storagePath, specifiable_image_url: gcsPath})
+
       success = true;
     } catch (err) {
       error = err;
@@ -129,7 +101,7 @@
 </script>
 
 <div
-  class="w-full h-full relative flex flex-col items-center justify-center
+  class="w-full h-full flex-grow relative flex flex-col items-center justify-center
   overflow-hidden">
   {#if error}
     <div class="w-12 text-red-600 text-center">
