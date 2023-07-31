@@ -4,8 +4,12 @@
   import Geocoder from '@living-dictionaries/parts/src/lib/maps/mapbox/geocoder/Geocoder.svelte';
   import NavigationControl from '@living-dictionaries/parts/src/lib/maps/mapbox/controls/NavigationControl.svelte';
   import type { Readable } from 'svelte/store';
+  import type { IEntry } from '@living-dictionaries/types';
   import { onMount, createEventDispatcher } from 'svelte';
+  import { updateOnline } from 'sveltefirets';
+  import { dictionary } from '$lib/stores';
   export let t: Readable<any> = undefined;
+  export let entry:IEntry;
 
   const username = 'mapbox';
   const width = '450';
@@ -19,6 +23,10 @@
   let bearing = 0;
   const high_density = true
   export let canRemove = true;
+
+  async function saveStaticImage() {
+    await updateOnline<IEntry>(`dictionaries/${$dictionary.id}/words/${entry.id}`, { gt: static_image_link }, { abbreviate: true })
+  }
 
   $: static_image_link = `https://api.mapbox.com/styles/v1/${username}/${style_id}/static/${overlay ? overlay + '/' : ''}${lng},${lat},${zoom},${bearing},${pitch}/${width}x${height}${high_density ? '@2x' : ''}?access_token=`;
 
@@ -42,31 +50,33 @@
 </script>
 
 <Modal on:close noscroll>
-  <form on:submit|preventDefault style="width: {width}px;height: {height}px;">
-    <Map {lng} {lat}
-      on:pitchend={({ detail }) => ([pitch, bearing] = detail)}
-      on:dragend={({ detail }) => ({ lng, lat } = detail)}
-      on:zoomend={({ detail }) => zoom = detail}>
-      <NavigationControl />
-      <Geocoder
-        options={{ marker: false }}
-        placeholder={t ? $t('about.search') : 'Search'}
-        on:result={({ detail }) => ([lng, lat] = detail.center)}
-        on:error={(e) => console.error(e.detail)} />
-    </Map>
-  </form>
-  <div class="modal-footer">
-    <Button onclick={() => dispatch('close')} form="simple" color="black">
-      {t ? $t('misc.cancel') : 'Cancel'}
-    </Button>
-    {#if canRemove}
-      <Button onclick={remove} form="simple" color="red">
-        {t ? $t('misc.remove') : 'Remove'}
+  <form on:submit|preventDefault={saveStaticImage}>
+    <div style="width: {width}px;height: {height}px;">
+      <Map {lng} {lat}
+        on:pitchend={({ detail }) => ([pitch, bearing] = detail)}
+        on:dragend={({ detail }) => ({ lng, lat } = detail)}
+        on:zoomend={({ detail }) => zoom = detail}>
+        <NavigationControl />
+        <Geocoder
+          options={{ marker: false }}
+          placeholder={t ? $t('about.search') : 'Search'}
+          on:result={({ detail }) => ([lng, lat] = detail.center)}
+          on:error={(e) => console.error(e.detail)} />
+      </Map>
+    </div>
+
+    <div class="modal-footer">
+      <Button onclick={() => dispatch('close')} form="simple" color="black">
+        {t ? $t('misc.cancel') : 'Cancel'}
       </Button>
-    {/if}
-    <Button type="submit" form="filled">
-      {t ? $t('misc.save') : 'Save'}
-    </Button>
-  </div>
-  {static_image_link}
+      {#if canRemove}
+        <Button onclick={remove} form="simple" color="red">
+          {t ? $t('misc.remove') : 'Remove'}
+        </Button>
+      {/if}
+      <Button type="submit" form="filled">
+        {t ? $t('misc.save') : 'Save'}
+      </Button>
+    </div>
+  </form>
 </Modal>
