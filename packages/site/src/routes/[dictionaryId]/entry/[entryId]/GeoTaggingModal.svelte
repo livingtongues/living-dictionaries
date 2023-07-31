@@ -8,6 +8,8 @@
   export let t: Readable<any> = undefined;
 
   const username = 'mapbox';
+  const width = '450';
+  const height = '375';
   const style_id = 'outdoors-v12';
   let overlay;
   let lng:number;
@@ -15,9 +17,10 @@
   let zoom = 4;
   let pitch = 0;
   let bearing = 0;
+  const high_density = true
   export let canRemove = true;
 
-  $: static_image_link = `https://api.mapbox.com/styles/v1/${username}/${style_id}/static/${overlay ? overlay + '/' : ''}${lng},${lat},${zoom},${bearing},${pitch}`;
+  $: static_image_link = `https://api.mapbox.com/styles/v1/${username}/${style_id}/static/${overlay ? overlay + '/' : ''}${lng},${lat},${zoom},${bearing},${pitch}/${width}x${height}${high_density ? '@2x' : ''}?access_token=`;
 
   onMount(() => {
     if (navigator.geolocation) {
@@ -39,7 +42,7 @@
 </script>
 
 <Modal on:close noscroll>
-  <form on:submit|preventDefault style="height: 50vh;">
+  <form on:submit|preventDefault style="width: {width}px;height: {height}px;">
     <Map {lng} {lat}
       on:pitchend={({ detail }) => ([pitch, bearing] = detail)}
       on:dragend={({ detail }) => ({ lng, lat } = detail)}
