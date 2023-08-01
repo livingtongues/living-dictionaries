@@ -56,7 +56,14 @@
   }
 
   async function saveStaticImage() {
-    await updateOnline<IEntry>(`dictionaries/${$dictionary.id}/words/${entry.id}`, { gt: static_image_link }, { abbreviate: true })
+    await updateOnline<IEntry>(`dictionaries/${$dictionary.id}/words/${entry.id}`, { gt: static_image_link }, { abbreviate: true });
+    dispatch('close');
+  }
+
+  async function remove() {
+    if (entry.gt)
+      await updateOnline<IEntry>(`dictionaries/${$dictionary.id}/words/${entry.id}`, { gt: '' }, { abbreviate: true });
+    dispatch('close');
   }
 
   $: if (marker_lat && marker_lng)
@@ -83,10 +90,6 @@
     remove: boolean;
     close: boolean;
   }>();
-  function remove() {
-    dispatch('remove');
-    dispatch('close');
-  }
 </script>
 
 <Modal on:close noscroll>
