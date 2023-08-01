@@ -93,7 +93,7 @@
   <form on:submit|preventDefault={saveStaticImage}>
     <div style="width: {width}px;height: {height}px;">
       <Map {lng} {lat} {zoom} {bearing} {pitch}
-        on:pitchend={({ detail }) => ([pitch, bearing] = detail)}
+        on:pitchend={({ detail }) => ({pitch, bearing} = detail)}
         on:dragend={({ detail }) => ({ lng, lat } = detail)}
         on:zoomend={({ detail }) => zoom = detail}
         on:click={({ detail }) => setMarker(detail.lng, detail.lat)}>
