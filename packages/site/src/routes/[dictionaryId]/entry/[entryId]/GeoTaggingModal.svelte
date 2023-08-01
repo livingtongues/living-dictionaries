@@ -28,6 +28,21 @@
   // let color:string = 'black'
   export let canRemove = true;
 
+  function getCoordinatesFromURL(url) {
+    const coordinatesMatch = url.match(/\/[-+]?\d+\.?\d+(,[-+]?\d+\.?(\d+)?)+/);
+
+    if (coordinatesMatch){
+
+      const matched =  coordinatesMatch[0];
+      const new_array = matched.split(',');
+      new_array[0] = new_array[0].substring(1);
+      return new_array.map(e => +e)
+    }
+
+    return null;
+  }
+
+
   function add_marker_to_static_image() {
     return `pin-s+000000(${marker_lng},${marker_lat})`;
   }
@@ -52,7 +67,9 @@
   $: static_image_link = `https://api.mapbox.com/styles/v1/${username}/${style_id}/static/${overlay ? overlay + '/' : ''}${lng},${lat},${zoom},${bearing},${pitch}/${width}x${height}${high_density ? '@2x' : ''}?access_token=`;
 
   onMount(() => {
-    if (navigator.geolocation) {
+    if (entry.gt) {
+      [lng, lat, zoom, bearing, pitch] = getCoordinatesFromURL(entry.gt);
+    } else if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition((position) => {
         lng = position.coords.longitude;
         lat = position.coords.latitude;
