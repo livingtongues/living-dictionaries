@@ -32,11 +32,10 @@
     const coordinatesMatch = url.match(/\/[-+]?\d+\.?\d+(,[-+]?\d+\.?(\d+)?)+/);
 
     if (coordinatesMatch){
-
-      const matched =  coordinatesMatch[0];
-      const new_array = matched.split(',');
-      new_array[0] = new_array[0].substring(1);
-      return new_array.map(e => +e)
+      const [matched] =  coordinatesMatch;
+      const staticImageData = matched.split(',');
+      staticImageData[0] = staticImageData[0].substring(1);
+      return staticImageData.map(e => +e)
     }
 
     return null;
@@ -90,7 +89,7 @@
 <Modal on:close noscroll>
   <form on:submit|preventDefault={saveStaticImage}>
     <div style="width: {width}px;height: {height}px;">
-      <Map {lng} {lat}
+      <Map {lng} {lat} {zoom}
         on:pitchend={({ detail }) => ([pitch, bearing] = detail)}
         on:dragend={({ detail }) => ({ lng, lat } = detail)}
         on:zoomend={({ detail }) => zoom = detail}
