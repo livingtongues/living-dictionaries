@@ -30,7 +30,7 @@
   // let color:string = 'black'
   export let canRemove = true;
 
-  function getCoordinatesFromURL(url) {
+  function getDataFromStaticImageURL(url) {
     const coordinatesMatch = url.match(/\/[-+]?\d+\.?\d+(,[-+]?\d+\.?(\d+)?)+/);
     if (coordinatesMatch){
       const [matched] =  coordinatesMatch;
@@ -67,7 +67,7 @@
 
   onMount(() => {
     if (entry.gt) {
-      [lng, lat, zoom, bearing, pitch] = getCoordinatesFromURL(entry.gt);
+      [lng, lat, zoom, bearing, pitch] = getDataFromStaticImageURL(entry.gt);
     } else if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition((position) => {
         lng = position.coords.longitude;
