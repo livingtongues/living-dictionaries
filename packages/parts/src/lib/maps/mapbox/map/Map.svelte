@@ -35,8 +35,13 @@
   const queue = new EventQueue();
   let ready = false;
 
+  type PitchBearingType = {
+    pitch: number;
+    bearing: number;
+  };
+
   const dispatch = createEventDispatcher<{
-    pitchend: number[]
+    pitchend: PitchBearingType;
     ready: null;
     dragend: LngLat;
     moveend: LngLat;
@@ -47,7 +52,7 @@
 
   // More events at https://docs.mapbox.com/mapbox-gl-js/api/map/#map-events
   const handlers: Record<string, any> = {
-    pitchend: () => dispatch('pitchend', [map.getPitch(), map.getBearing()]),
+    pitchend: () => dispatch('pitchend', {pitch: map.getPitch(), bearing: map.getBearing()}),
     dragend: () => dispatch('dragend', map.getCenter()),
     moveend: () => dispatch('moveend', map.getCenter()),
     click: (e) => {
