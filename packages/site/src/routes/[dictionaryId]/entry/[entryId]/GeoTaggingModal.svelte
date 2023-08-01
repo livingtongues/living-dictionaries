@@ -62,6 +62,9 @@
   $: if (marker_lat && marker_lng)
     overlay = add_marker_to_static_image();
 
+  $: if (pitch > 60)
+    pitch = 60
+
 
   $: static_image_link = `https://api.mapbox.com/styles/v1/${username}/${style_id}/static/${overlay ? overlay + '/' : ''}${lng},${lat},${zoom},${bearing},${pitch}/${width}x${height}${high_density ? '@2x' : ''}?access_token=`;
 
@@ -89,7 +92,7 @@
 <Modal on:close noscroll>
   <form on:submit|preventDefault={saveStaticImage}>
     <div style="width: {width}px;height: {height}px;">
-      <Map {lng} {lat} {zoom}
+      <Map {lng} {lat} {zoom} {bearing} {pitch}
         on:pitchend={({ detail }) => ([pitch, bearing] = detail)}
         on:dragend={({ detail }) => ({ lng, lat } = detail)}
         on:zoomend={({ detail }) => zoom = detail}

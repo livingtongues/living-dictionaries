@@ -19,6 +19,8 @@
   export let style = 'mapbox://styles/mapbox/streets-v11?optimize=true'; //'Mapbox Streets' // light-v8, light-v9, light-v10, dark-v10, satellite-v9, streets-v11
   export let lng: number = undefined;
   export let lat: number = undefined;
+  export let bearing = 0;
+  export let pitch = 0;
 
   let center: LngLatLike;
   $: center = lng && lat ? [lng, lat] : [getTimeZoneLongitude() || -80, 10];
@@ -75,6 +77,8 @@
       style,
       center,
       zoom,
+      bearing,
+      pitch
     });
     mapbox = window.mapboxgl;
     queue.start(map);
