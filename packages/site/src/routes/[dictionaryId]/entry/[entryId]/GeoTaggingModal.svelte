@@ -18,7 +18,7 @@
   const width = '450';
   const height = '375';
   const style_id = 'outdoors-v12';
-  let overlay;
+  let overlay:string;
   let lng:number;
   let lat:number;
   let zoom = 4;
@@ -32,14 +32,12 @@
 
   function getCoordinatesFromURL(url) {
     const coordinatesMatch = url.match(/\/[-+]?\d+\.?\d+(,[-+]?\d+\.?(\d+)?)+/);
-
     if (coordinatesMatch){
       const [matched] =  coordinatesMatch;
       const staticImageData = matched.split(',');
       staticImageData[0] = staticImageData[0].substring(1);
       return staticImageData.map(e => +e)
     }
-
     return null;
   }
 
@@ -64,7 +62,6 @@
 
   $: if (pitch > 60)
     pitch = 60
-
 
   $: static_image_link = `https://api.mapbox.com/styles/v1/${username}/${style_id}/static/${overlay ? overlay + '/' : ''}${lng},${lat},${zoom},${bearing},${pitch}/${width}x${height}${high_density ? '@2x' : ''}?access_token=`;
 
