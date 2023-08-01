@@ -1,3 +1,5 @@
+import type { Timestamp } from 'firebase/firestore';
+
 // current interface used across the site that we will migrate from this to just ExpandedPhoto
 export type IPhoto = ExpandedPhoto & ActualDatabasePhoto;
 
@@ -25,4 +27,8 @@ interface DeprecatedPhoto {
   uploadedBy?: string;
   uploadedAt?: any;
   source?: string;
+}
+
+export interface DictionaryPhoto extends Omit<ExpandedPhoto, 'timestamp'> {
+  timestamp?: Date | Timestamp;
 }

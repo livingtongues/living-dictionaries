@@ -42,7 +42,7 @@ export async function componentToPng(component: typeof SvelteComponent, props, h
     headers: {
       'content-type': 'image/png',
       'cache-control': 'public, immutable, no-transform, max-age=31536000',
-    } 
+    }
   });
 }
 
@@ -73,9 +73,9 @@ const loadDynamicAsset = withCache(
     if (!names) code = 'unknown';
 
     try {
-      if (typeof names === 'string') {
+      if (typeof names === 'string')
         names = [names];
-      }
+
 
       for (const name of names) {
         const API = `https://fonts.googleapis.com/css2?family=${name}&text=${encodeURIComponent(text)}`;
