@@ -13,11 +13,11 @@
 
   export let t: Readable<any> = undefined;
   export let entry:IEntry;
-
+  const map_styles = ['outdoors-v12', 'streets-v12', 'satellite-v9', 'satellite-streets-v12']
   const username = 'mapbox';
   const width = '450';
   const height = '375';
-  const style_id = 'outdoors-v12';
+  let style_id = 'outdoors-v12';
   let overlay:string;
   let lng:number;
   let lat:number;
@@ -84,6 +84,11 @@
 
 <Modal on:close noscroll>
   <form on:submit|preventDefault={saveStaticImage}>
+    <select class="w-full mb-2" bind:value={style_id}>
+      {#each map_styles as style}
+        <option value={style}>{style}</option>
+      {/each}
+    </select>
     <div style="width: {width}px;height: {height}px;">
       <Map {lng} {lat} {zoom} {bearing} {pitch}
         on:pitchend={({ detail }) => ({pitch, bearing} = detail)}
