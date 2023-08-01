@@ -9,7 +9,7 @@
   import type { Address } from '../../../routes/api/email/send/mail-channels.interface';
   import { dictionary } from '$lib/stores';
 
-  export let toManagers: Address[] = [];
+  export let additionalRecipients: Address[] = [];
 
   const subjects = {
     'delete_dictionary': 'Delete a dictionary',
@@ -45,8 +45,8 @@
         email: $user?.email || email,
         name: $user?.displayName || 'Anonymous',
         url: window.location.href,
-        subject: toManagers.length > 0 && subject === 'request_access' ? special_request_access_subject : subjects[subject],
-        to: subject === 'request_access' ? toManagers : []
+        subject: additionalRecipients.length > 0 && subject === 'request_access' ? special_request_access_subject : subjects[subject],
+        to: subject === 'request_access' ? additionalRecipients : []
       });
 
       if (response.status !== 200) {
