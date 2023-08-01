@@ -9,6 +9,8 @@
   import { onMount, createEventDispatcher } from 'svelte';
   import { updateOnline } from 'sveltefirets';
   import { dictionary } from '$lib/stores';
+  import { setMarker } from '@living-dictionaries/parts/src/lib/maps/utils/setCoordinatesToMarker';
+
   export let t: Readable<any> = undefined;
   export let entry:IEntry;
 
@@ -44,15 +46,6 @@
 
   function add_marker_to_static_image() {
     return `pin-s+000000(${marker_lng},${marker_lat})`;
-  }
-
-  function setMarker(longitude: number, latitude: number) {
-    if (!(longitude && latitude)) return;
-    if (longitude < -180 || longitude > 180 || latitude < -90 || latitude > 90)
-      return;
-
-    marker_lng = +longitude.toFixed(4);
-    marker_lat = +latitude.toFixed(4);
   }
 
   async function saveStaticImage() {
@@ -99,7 +92,7 @@
         on:pitchend={({ detail }) => ({pitch, bearing} = detail)}
         on:dragend={({ detail }) => ({ lng, lat } = detail)}
         on:zoomend={({ detail }) => zoom = detail}
-        on:click={({ detail }) => setMarker(detail.lng, detail.lat)}>
+        on:click={({ detail }) => ({lng: marker_lng, lat: marker_lat} = setMarker(detail.lng, detail.lat))}>
         <NavigationControl />
         <Geocoder
           options={{ marker: false }}
@@ -109,7 +102,7 @@
         {#if marker_lng && marker_lat}
           <Marker
             draggable
-            on:dragend={({ detail }) => setMarker(detail.lng, detail.lat)}
+            on:dragend={({ detail }) => ({lng: marker_lng, lat: marker_lat} = setMarker(detail.lng, detail.lat))}
             lng={marker_lng}
             lat={marker_lat} />
         {/if}
