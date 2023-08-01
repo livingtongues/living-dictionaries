@@ -1,3 +1,4 @@
+// @ts-check
 import { vitePreprocess } from '@sveltejs/kit/vite';
 import adapter from '@sveltejs/adapter-auto';
 
@@ -19,10 +20,8 @@ const config = {
   },
 
   vitePlugin: {
-    experimental: {
-      inspector: {
-        holdMode: true,
-      }
+    inspector: {
+      holdMode: true,
     }
   }
 };
