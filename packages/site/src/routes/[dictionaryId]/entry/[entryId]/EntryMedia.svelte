@@ -39,7 +39,7 @@
 
 {#if entry.pf}
   <div class="w-full overflow-hidden rounded relative mb-2" style="height: 25vh;">
-    <Image width={400} lexeme={entry.lx} gcs={entry.pf.gcs} {canEdit} on:deleteImage />
+    <Image width={400} title={entry.lx} gcs={entry.pf.gcs} {canEdit} on:deleteImage />
   </div>
 {:else if canEdit}
   <AddImage {entry} class="rounded-md h-20 bg-gray-100 mb-2">
