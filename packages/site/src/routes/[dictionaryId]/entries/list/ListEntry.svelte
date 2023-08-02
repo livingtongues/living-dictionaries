@@ -155,7 +155,7 @@
         on:deleteImage />
     </div>
   {:else if canEdit}
-    <AddImage {entry} class="w-12 bg-gray-100">
+    <AddImage dictionaryId={dictionary.id} {entry} class="w-12 bg-gray-100">
       <div class="text-xs" slot="text">
         {$t('entry.photo', { default: 'Photo' })}
       </div>
