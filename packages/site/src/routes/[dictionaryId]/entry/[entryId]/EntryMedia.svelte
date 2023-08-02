@@ -6,7 +6,7 @@
   import Image from '$lib/components/image/Image.svelte';
   import Video from '../../entries/Video.svelte';
   import GeoTaggingModal from './GeoTaggingModal.svelte';
-  import { PUBLIC_mapboxAccessToken } from '$env/static/public';
+  import { MapboxStatic } from '@living-dictionaries/parts'
 
   export let entry: IEntry;
   export let videoAccess = false;
@@ -16,13 +16,9 @@
 </script>
 
 <ShowHide let:show let:toggle>
-  {#if entry.gt}
-    <div>
-      <img
-        on:click={toggle}
-        class="h-full w-full object-cover cursor-pointer"
-        alt=""
-        src="{entry.gt}{PUBLIC_mapboxAccessToken}" />
+  {#if entry.coordinates}
+    <div on:click={toggle}>
+      <MapboxStatic points={entry.coordinates.points} regions={entry.coordinates.regions} />
     </div>
   {:else}
     <button
@@ -30,15 +26,14 @@
       type="button"
       class="rounded bg-gray-100 border-r-2 hover:bg-gray-300 flex flex-col items-center
         justify-center cursor-pointer p-6 mb-2">
-      <i class="far fa-map my-1 mx-2" />
+      <span class="i-mdi-map-marker-plus mr-1" style="margin-top: -3px;" />
       <span class="text-xs">
-        <!-- TODO add i18n translations -->
-        {$t('entry.geo_tagging', { default: 'Geo Tagging' })}
+        {$t('create.select_coordinates', { default: 'Select Coordinates' })}
       </span>
     </button>
   {/if}
   {#if show}
-    <GeoTaggingModal {entry} {t} on:close={toggle} />
+    <GeoTaggingModal coordinates={entry.coordinates} on:close={toggle} on:valueupdate />
   {/if}
 </ShowHide>
 

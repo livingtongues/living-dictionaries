@@ -6,6 +6,7 @@ import type { GoalDatabaseAudio, ActualDatabaseAudio, ExpandedAudio } from './au
 import type { GoalDatabasePhoto, ActualDatabasePhoto, ExpandedPhoto } from './photo.interface';
 import type { GoalDatabaseVideo, ActualDatabaseVideo, ExpandedVideo } from './video.interface';
 import type { LDAlgoliaFields } from './entry.algolia.interface';
+import type { Coordinates } from '.';
 
 // current interface used across the site that we will migrate from this to just ExpandedEntry
 export type IEntry = ExpandedEntry & ActualDatabaseEntry & Omit<LDAlgoliaFields, 'ua' | 'ca'>;
@@ -32,7 +33,7 @@ export interface ExpandedEntry extends IFirestoreMetaData {
   deletedAt?: Timestamp;
   importId?: string; // TODO: expand this also
   scientific_names?: string[]; // italic by default but they can use <i> and </i> to define where italics show
-  geo_tagging?: string;
+  coordinates?: Coordinates;
 }
 
 export interface ExpandedSense {
@@ -84,7 +85,7 @@ export interface GoalDatabaseEntry extends IFirestoreMetaDataAbbreviated {
   deletedAt?: Timestamp;
   ii?: string; // importId which can be used to show all entries from a particular import
   scn?: string[]; // scientific_names
-  gt?: string; // geo_tagging
+  co?: Coordinates;
 }
 
 interface DeprecatedEntry extends Omit<DatabaseSense, 'ps' | 'xs' | 'pfs' | 'deletedPfs' | 'vfs'> {

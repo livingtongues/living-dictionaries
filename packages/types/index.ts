@@ -5,10 +5,13 @@ export type {
   IAbout,
   IDictionary,
   IGrammar,
-  IPoint,
-  IRegion,
   ICitation,
 } from './dictionary.interface';
+export type {
+  Coordinates,
+  IPoint,
+  IRegion,
+} from './coordinates.interface';
 export type { ActualDatabaseEntry, ExpandedEntry, GoalDatabaseEntry, IEntry, DatabaseSense, ExpandedSense, LDAlgoliaHit } from './entry.interface';
 export type { IGlossLanguages, IGlossLanguage } from './gloss-language.interface';
 export type { IGloss } from './gloss.interface';

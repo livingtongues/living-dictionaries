@@ -36,7 +36,7 @@
   </div>
 
   <div class="md:w-1/3 flex flex-col md:flex-col-reverse justify-end mt-2">
-    <EntryMedia {entry} {canEdit} {videoAccess} on:deleteImage on:deleteVideo />
+    <EntryMedia {entry} {canEdit} {videoAccess} on:deleteImage on:deleteVideo on:valueupdate />
   </div>
 
   <div class="hidden md:block w-1" />

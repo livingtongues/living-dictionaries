@@ -174,11 +174,7 @@
       color={hasCoordinates ? 'black' : 'primary'}
       size={hasCoordinates ? 'sm' : 'md'}>
       <span class="i-mdi-map-marker-plus mr-1" style="margin-top: -3px;" />
-      {#if hasCoordinates}
       {$t('create.select_coordinates', { default: 'Select Coordinates' })}
-      {:else}
-        {$t('create.select_coordinates', { default: 'Select Coordinates' })}
-      {/if}
     </Button>
     {#if show}
       <CoordinatesModal {t} lng={dictionary?.coordinates?.longitude} lat={dictionary?.coordinates?.latitude} on:update={addCoordinates} on:close={toggle}>

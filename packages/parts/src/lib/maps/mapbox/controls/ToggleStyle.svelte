@@ -6,7 +6,7 @@
   const { getMap } = getContext<MapKeyContext>(mapKey);
   const map = getMap();
 
-  export let alternateStyle = 'mapbox://styles/mapbox/satellite-streets-v11?optimize=true'; // 'Mapbox Satellite Streets'
+  export let alternateStyle = 'mapbox://styles/mapbox/satellite-streets-v12?optimize=true'; // 'Mapbox Satellite Streets'
   let initialStyle: Style;
 
   onMount(() => {

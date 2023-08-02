@@ -27,6 +27,7 @@ export function expand_entry(database_entry: GoalDatabaseEntry): ExpandedEntry {
     elicitation_id: database_entry.ei,
     deletedAt: database_entry.deletedAt,
     scientific_names: database_entry.scn,
+    coordinates: database_entry.co,
   }
 }
 
