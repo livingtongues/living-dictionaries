@@ -16,7 +16,16 @@
 
 {#if entry.sf || canEdit}
   {#await import('../../entries/Audio.svelte') then { default: Audio }}
-    <Audio {entry} {canEdit} class="h-20 mb-2 rounded-md bg-gray-100 !px-3" />
+    <Audio {entry} {canEdit} class="h-20 mb-2 rounded-md bg-gray-100 !px-3" let:playing>
+      <span class:text-blue-700={playing} class="i-material-symbols-hearing text-2xl mt-1" />
+      <div class="text-gray-600 text-sm mt-1">
+        {$t('audio.listen', { default: 'Listen' })}
+        {#if canEdit}
+          +
+          {$t('audio.edit_audio', { default: 'Edit Audio' })}
+        {/if}
+      </div>
+    </Audio>
   {/await}
 {/if}
 

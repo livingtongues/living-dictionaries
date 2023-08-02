@@ -29,7 +29,10 @@
   class="flex rounded shadow my-1 overflow-hidden items-stretch border-green-300"
   style="margin-right: 2px;">
   {#if entry.sf || canEdit}
-    <Audio class="bg-gray-100" {entry} {canEdit} minimal />
+    <Audio class="bg-gray-100 p-2" {entry} {canEdit} minimal let:playing>
+      <span class:text-blue-700={playing} class="i-material-symbols-hearing text-2xl mt-1" />
+      {$t('audio.listen', { default: 'Listen' })}
+    </Audio>
   {/if}
   <a
     href={'/' + dictionary.id + '/entry/' + entry.id}
