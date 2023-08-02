@@ -43,6 +43,7 @@ From https://github.com/beyonk-adventures/svelte-mapbox
         on:clear={() => console.info('cleared')}
         on:loading={(e) => console.info(e.detail)}
         on:result={(e) => console.info(e.detail)}
+        on:resultCoordinates={(e) => console.info(e.detail)}
         on:results={(e) => console.info(e.detail)}
         on:error={(e) => console.info(e.detail)} />
       <NavigationControl />
