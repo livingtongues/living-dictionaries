@@ -2,9 +2,11 @@
   import type { GoalDatabasePhoto, IEntry } from '@living-dictionaries/types';
   import { t } from 'svelte-i18n';
   import { updateOnline } from 'sveltefirets';
-  import { user, dictionary } from '$lib/stores';
+  import { get } from 'svelte/store';
 
   export let entry: IEntry;
+  export let dictionaryId: string;
+
   let dragging = false;
   let file: File;
 
@@ -34,14 +36,16 @@
   }
 
   async function saveImage(fb_storage_path: string, specifiable_image_url: string) {
+    const { user } = await import('$lib/stores');
+    const {displayName, uid} = get(user);
     const pf: GoalDatabasePhoto = {
       path: fb_storage_path,
       gcs: specifiable_image_url,
       ts: new Date().getTime(),
-      cr: $user.displayName,
-      ab: $user.uid,
+      cr: displayName,
+      ab: uid,
     }
-    await updateOnline<IEntry>(`dictionaries/${$dictionary.id}/words/${entry.id}`, { pf} ,
+    await updateOnline<IEntry>(`dictionaries/${dictionaryId}/words/${entry.id}`, { pf} ,
       { abbreviate: true }
     )
   }
@@ -67,10 +71,10 @@
           handleImage(e.target.files);
         }} />
       <span class="hidden md:inline">
-        <i class="far fa-upload" />
+        <span class="i-ic-outline-cloud-upload text-2xl" />
       </span>
       <span class="md:hidden">
-        <i class="far fa-camera" />
+        <span class="i-ic-outline-camera-alt text-xl" />
       </span>
 
       <slot name="text" />
@@ -79,7 +83,7 @@
     {#await import('$lib/components/image/UploadImage.svelte') then { default: UploadImage }}
       <UploadImage
         {file}
-        fileLocationPrefix="{$dictionary.id}/images/{entry.id}_"
+        fileLocationPrefix="{dictionaryId}/images/{entry.id}_"
         on:uploaded={({detail: {fb_storage_path, specifiable_image_url}}) => saveImage(fb_storage_path, specifiable_image_url)} />
     {/await}
   {/if}

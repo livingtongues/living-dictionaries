@@ -9,7 +9,7 @@
   import { BadgeArray, Button } from 'svelte-pieces';
   import { order_entry_and_dictionary_gloss_languages } from '$lib/helpers/glosses';
   import { DICTIONARIES_WITH_VARIANTS } from '$lib/constants';
-  // import EntryMedia from './EntryMedia.svelte';
+  import EntryMedia from './EntryMedia.svelte';
 
   export let entry: ExpandedEntry;
   export let dictionary: IDictionary;
@@ -31,9 +31,8 @@
       on:valueupdate />
   </div>
 
-  <div class="md:w-1/3 flex flex-col md:flex-col-reverse justify-end mt-2">
-    Media needs reworked
-    <!-- <EntryMedia {entry} {canEdit} {videoAccess} on:deleteImage on:deleteVideo /> -->
+  <div class="md:w-1/3 flex flex-col mt-2">
+    <EntryMedia dictionaryId={dictionary.id} {entry} {canEdit} {videoAccess} on:deleteImage on:deleteVideo />
   </div>
 
   <div class="hidden md:block w-1" />

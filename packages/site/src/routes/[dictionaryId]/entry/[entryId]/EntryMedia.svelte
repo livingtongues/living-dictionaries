@@ -7,11 +7,30 @@
   import Video from '../../entries/Video.svelte';
 
   export let entry: IEntry;
+  export let dictionaryId: string;
   export let videoAccess = false;
   export let canEdit = false;
 
   $: video = entry.senses?.[0].video_files?.[0];
 </script>
+
+{#if entry.sf || canEdit}
+  {#await import('../../entries/Audio.svelte') then { default: Audio }}
+    <Audio {entry} {canEdit} class="h-20 mb-2 rounded-md bg-gray-100 !px-3" />
+  {/await}
+{/if}
+
+{#if entry.pf}
+  <div class="w-full overflow-hidden rounded relative mb-2" style="height: 25vh;">
+    <Image width={400} title={entry.lx} gcs={entry.pf.gcs} {canEdit} on:deleteImage />
+  </div>
+{:else if canEdit}
+  <AddImage {dictionaryId} {entry} class="rounded-md h-20 bg-gray-100 mb-2">
+    <div class="text-xs" slot="text">
+      {$t('entry.upload_photo', { default: 'Upload Photo' })}
+    </div>
+  </AddImage>
+{/if}
 
 {#if video}
   <div class="w-full overflow-hidden rounded relative mb-2">
@@ -22,9 +41,9 @@
     <button
       type="button"
       class="rounded bg-gray-100 border-r-2 hover:bg-gray-300 flex flex-col items-center
-        justify-center cursor-pointer p-6"
+        justify-center cursor-pointer p-6 mb-2"
       on:click={toggle}>
-      <i class="far fa-video-plus my-1 mx-2" />
+      <span class="i-bi-camera-video text-xl" />
       <span class="text-xs">
         {$t('video.add_video', { default: 'Add Video' })}
       </span>
@@ -37,20 +56,3 @@
   </ShowHide>
 {/if}
 
-{#if entry.pf}
-  <div class="w-full overflow-hidden rounded relative mb-2" style="height: 25vh;">
-    <Image width={400} title={entry.lx} gcs={entry.pf.gcs} {canEdit} on:deleteImage />
-  </div>
-{:else if canEdit}
-  <AddImage {entry} class="rounded-md h-20 bg-gray-100 mb-2">
-    <div class="text-xs" slot="text">
-      {$t('entry.upload_photo', { default: 'Upload Photo' })}
-    </div>
-  </AddImage>
-{/if}
-
-{#if entry.sf || canEdit}
-  {#await import('../../entries/Audio.svelte') then { default: Audio }}
-    <Audio {entry} {canEdit} class="h-20 mb-2 rounded-md bg-gray-100 !px-3" />
-  {/await}
-{/if}
