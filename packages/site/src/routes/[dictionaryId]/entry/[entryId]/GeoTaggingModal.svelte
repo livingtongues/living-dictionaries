@@ -47,25 +47,27 @@
 </script>
 
 <Modal on:close noscroll>
-  <Map style={style_id} {lng} {lat} {zoom}
-    on:dragend={({ detail }) => ({ lng, lat } = detail)}
-    on:zoomend={({ detail }) => zoom = detail}
-    on:click={({ detail }) => ({lng, lat} = setMarker(detail.lng, detail.lat))}>
-    <NavigationControl />
-    <Geocoder
-      options={{ marker: false }}
-      placeholder={$t('about.search')}
-      on:result={({ detail }) => ([lng, lat] = detail.center)}
-      on:error={(e) => console.error(e.detail)} />
-    {#if lng && lat}
-      <Marker
-        draggable
-        on:dragend={({ detail }) => ({lng, lat} = setMarker(detail.lng, detail.lat))}
-        {lng}
-        {lat} />
-    {/if}
-    <ToggleStyle />
-  </Map>
+  <div class="h-sm">
+    <Map style={style_id} {lng} {lat} {zoom}
+      on:dragend={({ detail }) => ({ lng, lat } = detail)}
+      on:zoomend={({ detail }) => zoom = detail}
+      on:click={({ detail }) => ({lng, lat} = setMarker(detail.lng, detail.lat))}>
+      <NavigationControl />
+      <Geocoder
+        options={{ marker: false }}
+        placeholder={$t('about.search')}
+        on:result={({ detail }) => ([lng, lat] = detail.center)}
+        on:error={(e) => console.error(e.detail)} />
+      {#if lng && lat}
+        <Marker
+          draggable
+          on:dragend={({ detail }) => ({lng, lat} = setMarker(detail.lng, detail.lat))}
+          {lng}
+          {lat} />
+      {/if}
+      <ToggleStyle />
+    </Map>
+  </div>
 
   <div class="modal-footer">
     <Button onclick={() => dispatch('close')} form="simple" color="black">
