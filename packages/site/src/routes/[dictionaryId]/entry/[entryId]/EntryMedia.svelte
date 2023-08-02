@@ -1,20 +1,22 @@
 <script lang="ts">
   import { t } from 'svelte-i18n';
   import { ShowHide } from 'svelte-pieces';
-  import type { IEntry } from '@living-dictionaries/types';
+  import type { ExpandedEntry } from '@living-dictionaries/types';
   import AddImage from '../../entries/AddImage.svelte';
   import Image from '$lib/components/image/Image.svelte';
   import Video from '../../entries/Video.svelte';
 
-  export let entry: IEntry;
+  export let entry: ExpandedEntry;
   export let dictionaryId: string;
   export let videoAccess = false;
   export let canEdit = false;
 
-  $: video = entry.senses?.[0].video_files?.[0];
+  $: first_sound_file = entry.sound_files?.[0];
+  $: first_photo = entry.senses?.[0].photo_files?.[0];
+  $: first_video = entry.senses?.[0].video_files?.[0];
 </script>
 
-{#if entry.sf || canEdit}
+{#if first_sound_file || canEdit}
   {#await import('../../entries/Audio.svelte') then { default: Audio }}
     <Audio {entry} {canEdit} class="h-20 mb-2 rounded-md bg-gray-100 !px-3" let:playing>
       <span class:text-blue-700={playing} class="i-material-symbols-hearing text-2xl mt-1" />
@@ -29,9 +31,9 @@
   {/await}
 {/if}
 
-{#if entry.pf}
+{#if first_photo}
   <div class="w-full overflow-hidden rounded relative mb-2" style="height: 25vh;">
-    <Image width={400} title={entry.lx} gcs={entry.pf.gcs} {canEdit} on:deleteImage />
+    <Image width={400} title={entry.lexeme} gcs={first_photo.specifiable_image_url} {canEdit} on:deleteImage />
   </div>
 {:else if canEdit}
   <AddImage {dictionaryId} {entry} class="rounded-md h-20 bg-gray-100 mb-2">
@@ -41,9 +43,9 @@
   </AddImage>
 {/if}
 
-{#if video}
+{#if first_video}
   <div class="w-full overflow-hidden rounded relative mb-2">
-    <Video class="bg-gray-100 border-r-2" {entry} {video} {canEdit} on:deleteVideo />
+    <Video class="bg-gray-100 border-r-2" {entry} video={first_video} {canEdit} on:deleteVideo />
   </div>
 {:else if videoAccess && canEdit}
   <ShowHide let:show let:toggle>

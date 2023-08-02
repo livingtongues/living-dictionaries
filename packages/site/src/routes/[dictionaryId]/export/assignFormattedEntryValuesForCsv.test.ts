@@ -1,4 +1,4 @@
-import type { ExpandedEntry, ISpeaker, IEntry } from '@living-dictionaries/types';
+import type { ExpandedEntry, ISpeaker } from '@living-dictionaries/types';
 import {
   find_part_of_speech_abbreviation,
   get_first_speaker_from_first_sound_file,
@@ -40,7 +40,7 @@ describe(get_first_speaker_from_first_sound_file, () => {
         gender: 'm',
       },
     ];
-    const entry: IEntry = {
+    const entry: ExpandedEntry = {
       sound_files: [{ fb_storage_path: 'https://database.com/example.mp3', speaker_ids: ['rdr2'] }],
     };
     expect(get_first_speaker_from_first_sound_file(entry, speakers)).toEqual(speakers[0]);
@@ -48,7 +48,7 @@ describe(get_first_speaker_from_first_sound_file, () => {
 
   test('returns undefined if no speaker', () => {
     const speakers: ISpeaker[] = [];
-    const entry: IEntry = {
+    const entry: ExpandedEntry = {
       sound_files: [{ fb_storage_path: 'https://database.com/example.mp3', speaker_ids: ['rdr2'] }],
     };
     expect(get_first_speaker_from_first_sound_file(entry, speakers)).toEqual(undefined);

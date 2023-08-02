@@ -5,6 +5,7 @@
   import type { ExpandedEntry } from '@living-dictionaries/types';
 
   export let entry: ExpandedEntry;
+  // export let sound_file: ExpandedAudio; // TODO
   export let minimal = false;
   export let canEdit = false;
 
