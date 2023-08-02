@@ -20,14 +20,6 @@
 
   let zoom = lng && lat ? 6 : 2;
 
-  function handleGeocoderResult({ detail }) {
-    if (detail?.user_coordinates?.[0]) {
-      ({lng, lat} = setMarker(detail.user_coordinates[0], detail.user_coordinates[1]));
-    } else {
-      ({lng, lat} = setMarker(detail.center[0], detail.center[1]));
-    }
-  }
-
   onMount(async () => {
     if (!(lng && lat) && navigator.geolocation) {
       navigator.geolocation.getCurrentPosition((position) => {
@@ -110,7 +102,7 @@
         <Geocoder
           options={{ marker: false }}
           placeholder={t ? $t('about.search') : 'Search'}
-          on:result={handleGeocoderResult}
+          on:resultCoordinates={({detail: { longitude, latitude }}) => ({lng, lat} = setMarker(longitude, latitude))}
           on:error={(e) => console.log(e.detail)} />
         {#if lng && lat}
           <Marker

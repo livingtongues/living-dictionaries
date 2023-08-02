@@ -32,14 +32,6 @@
     if (c?.geometry?.coordinates) [centerLng, centerLat] = c.geometry.coordinates;
   }
 
-  function handleGeocoderResult({ detail }, add) {
-    if (detail?.user_coordinates?.[0]) {
-      add({ longitude: detail.user_coordinates[0], latitude: detail.user_coordinates[1] });
-    } else {
-      add({ longitude: detail.center[0], latitude: detail.center[1] });
-    }
-  }
-
   onMount(async () => {
     if (!region && navigator.geolocation) {
       navigator.geolocation.getCurrentPosition((position) => {
@@ -81,7 +73,7 @@
           <Geocoder
             options={{ marker: false }}
             placeholder={t ? $t('about.search') : 'Search'}
-            on:result={(e) => handleGeocoderResult(e, add)}
+            on:resultCoordinates={({detail}) => add(detail)}
             on:error={(e) => console.log(e.detail)} />
           {#each Array.from(points) as point (point)}
             <Marker
