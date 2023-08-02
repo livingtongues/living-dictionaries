@@ -15,7 +15,6 @@
   const style_id = 'mapbox://styles/mapbox/outdoors-v12?optimize=true';
   let lng: number;
   let lat: number;
-  let zoom = 4;
 
   const dispatch = createEventDispatcher<{
     close: boolean;
@@ -48,9 +47,7 @@
 
 <Modal on:close noscroll>
   <div class="h-sm">
-    <Map style={style_id} {lng} {lat} {zoom}
-      on:dragend={({ detail }) => ({ lng, lat } = detail)}
-      on:zoomend={({ detail }) => zoom = detail}
+    <Map style={style_id} {lng} {lat}
       on:click={({ detail }) => ({lng, lat} = setMarker(detail.lng, detail.lat))}>
       <NavigationControl />
       <Geocoder
