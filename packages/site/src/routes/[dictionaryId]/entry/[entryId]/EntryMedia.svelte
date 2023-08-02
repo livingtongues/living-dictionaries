@@ -15,12 +15,12 @@
   $: video = entry.senses?.[0].video_files?.[0];
 </script>
 
-<ShowHide let:show let:toggle>
+<ShowHide let:show let:toggle let:set>
   {#if entry.coordinates}
-    <div on:click={toggle}>
+    <div class="rounded overflow-hidden cursor-pointer" on:click={() => set(canEdit)}>
       <MapboxStatic points={entry.coordinates.points} regions={entry.coordinates.regions} />
     </div>
-  {:else}
+  {:else if canEdit}
     <button
       on:click={toggle}
       type="button"
