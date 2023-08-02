@@ -72,6 +72,7 @@ describe('expand_entry', () => {
         sc: 'sc',
       }],
       ei: 'ei12',
+
       scn: ['marmillion', '<i>leticus</i> Johnson'],
       co: { points:[{coordinates: {latitude: 23, longitude: -93}}]}
     }
