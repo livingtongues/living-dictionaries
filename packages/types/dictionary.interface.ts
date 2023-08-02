@@ -1,6 +1,7 @@
 import type { GeoPoint } from 'firebase/firestore';
 import type { IFirestoreMetaData } from 'sveltefirets';
-import type { DictionaryPhoto } from '.';
+import type { DictionaryPhoto, IPoint, IRegion } from '.';
+import type { LngLatFull } from './coordinates.interface'
 
 export interface IDictionary extends IFirestoreMetaData {
   // allContribute?: boolean; // deprecated
@@ -53,20 +54,5 @@ export interface ICitation extends IFirestoreMetaData {
   citation: string;
 }
 
-export interface IPoint {
-  coordinates: LngLatFull;
-  label?: string;
-  color?: string;
-}
 
-export interface IRegion {
-  coordinates: LngLatFull[];
-  label?: string;
-  color?: string;
-}
-
-interface LngLatFull {
-  longitude: number;
-  latitude: number;
-}
 
