@@ -1,6 +1,6 @@
 <script lang="ts">
   import { t } from 'svelte-i18n';
-  import type { GoalDatabaseAudio, GoalDatabaseEntry, IEntry } from '@living-dictionaries/types';
+  import type { GoalDatabaseAudio, GoalDatabaseEntry } from '@living-dictionaries/types';
   import { updateOnline } from 'sveltefirets';
   import { getStorage, ref, uploadBytesResumable } from 'firebase/storage';
   import { dictionary, user } from '$lib/stores';
@@ -8,7 +8,7 @@
   import { cubicOut } from 'svelte/easing';
 
   export let file: File | Blob;
-  export let entry: IEntry;
+  export let entryId: string;
   export let speakerId: string;
 
   let progress = tweened(0, {
@@ -20,7 +20,7 @@
   let error;
   let success: boolean;
 
-  if (file && entry) {
+  if (file && entryId) {
     startUpload();
   }
 
@@ -30,10 +30,7 @@
     const fileTypeSuffix = file.type.split('/')[1];
 
     // const storagePath = `${_dictName}_${dictionary.id}/audio/{_lexeme}_${entryId}_${new Date().getTime()}.${fileTypeSuffix}`;
-    const storagePath = `${$dictionary.id}/audio/${
-      entry.id
-    }_${new Date().getTime()}.${fileTypeSuffix}`;
-
+    const storagePath = `${$dictionary.id}/audio/${entryId}_${new Date().getTime()}.${fileTypeSuffix}`;
     const customMetadata = { uploadedBy: $user.displayName };
 
     // https://firebase.google.com/docs/storage/web/upload-files
@@ -84,7 +81,7 @@
           };
 
           await updateOnline<GoalDatabaseEntry>(
-            `dictionaries/${$dictionary.id}/words/${entry.id}`,
+            `dictionaries/${$dictionary.id}/words/${entryId}`,
             { sfs: [sf] },
             { abbreviate: true }
           );

@@ -6,12 +6,12 @@
   import EntryDialect from '$lib/components/entry/EntryDialect.svelte';
   import SelectSpeakerCell from './cells/SelectSpeakerCell.svelte';
   import SelectSource from './cells/SelectSource.svelte';
-  import AudioCell from './cells/AudioCell.svelte';
   import Image from '$lib/components/image/Image.svelte';
   import { saveUpdateToFirestore } from '$lib/helpers/entry/update';
   import { deleteImage } from '$lib/helpers/delete';
   import { dictionary } from '$lib/stores';
   import type { IColumn, IEntry } from '@living-dictionaries/types';
+  import Audio from '../../../routes/[dictionaryId]/entries/Audio.svelte';
 
   export let column: IColumn;
   export let entry: IEntry;
@@ -26,7 +26,9 @@
     ? 'bg-green-100 border-green-400 border'
     : ''} h-full w-full inline-block">
   {#if column.field === 'soundFile'}
-    <AudioCell {canEdit} {entry} />
+    <Audio class="h-full text-sm" minimal {canEdit} {entry} let:playing>
+      <span class:text-blue-700={playing} class="i-material-symbols-hearing text-lg mt-1" />
+    </Audio>
   {:else if column.field === 'photoFile'}
     {#if entry.pf}
       <Image
