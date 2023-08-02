@@ -26,6 +26,7 @@ const partialVariants: DeepPartial<Variants<Component>> = [
     height: 800,
     props: {
       canEdit: true,
+      videoAccess: true,
       entry: {
         lexeme: 'shoot',
         phonetic: 'ʃut',
