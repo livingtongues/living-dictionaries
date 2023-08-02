@@ -36,7 +36,7 @@
         square={60}
         on:deleteImage={() => deleteImage(entry, $dictionary.id)} />
     {/if}
-    <!-- // TODO: add videos to columns -->
+    <!-- TODO: add videos to columns -->
     <!-- {:else if column.field === 'videoFile'}
     {#if entry.vfs}
       <VideoCell {canEdit} {entry} />

@@ -123,7 +123,7 @@
     {#if field === 'nt'}
       {#await import('$lib/components/editor/ClassicCustomized.svelte') then { default: ClassicCustomized }}
         <Keyman fixed target=".ck-editor__editable_inline" canChooseKeyboard position="bottom">
-          <ClassicCustomized {editorConfig} bind:html={value} />
+          <ClassicCustomized {editorConfig} html={value} on:update={({ detail }) => (value = detail)} />
         </Keyman>
       {/await}
     {:else if field.startsWith('gl') || field.startsWith('xs')}
