@@ -55,7 +55,7 @@ function getPolygonFeature(region: IRegion) {
   };
 }
 
-export function shapeGeoJson(points: IPoint[], regions: IRegion[]) {
+export function shapeGeoJson(points: IPoint[] = [], regions: IRegion[] = []) {
   const features = [];
   for (const region of regions) {
     features.push(getPolygonFeature(region));

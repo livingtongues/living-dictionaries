@@ -22,7 +22,7 @@
 
   $: singlePointUrl =
     points.length === 1 &&
-    regions.length === 0 &&
+    !regions?.length &&
     `https://api.mapbox.com/styles/v1/mapbox/${style}/static/geojson(${encodeURIComponent(
       JSON.stringify(geoJson)
     )})/${points[0].coordinates.longitude},${
