@@ -15,7 +15,6 @@
   const style_id = 'mapbox://styles/mapbox/outdoors-v12?optimize=true';
   let lng: number;
   let lat: number;
-  let zoom = 4;
 
   const dispatch = createEventDispatcher<{
     close: boolean;
@@ -34,7 +33,7 @@
 
   onMount(() => {
     if (coordinates?.points?.[0]) {
-      const { coordinates: { longitude, latitude } } = coordinates.points[0]
+      const [{ coordinates: { longitude, latitude } }] = coordinates.points;
       lng = longitude
       lat = latitude
     } else if (navigator.geolocation) {
@@ -48,15 +47,13 @@
 
 <Modal on:close noscroll>
   <div class="h-sm">
-    <Map style={style_id} {lng} {lat} {zoom}
-      on:dragend={({ detail }) => ({ lng, lat } = detail)}
-      on:zoomend={({ detail }) => zoom = detail}
+    <Map style={style_id} {lng} {lat}
       on:click={({ detail }) => ({lng, lat} = setMarker(detail.lng, detail.lat))}>
       <NavigationControl />
       <Geocoder
         options={{ marker: false }}
         placeholder={$t('about.search')}
-        on:result={({ detail }) => ([lng, lat] = detail.center)}
+        on:resultCoordinates={({detail: { longitude, latitude }}) => ({lng, lat} = setMarker(longitude, latitude))}
         on:error={(e) => console.error(e.detail)} />
       {#if lng && lat}
         <Marker

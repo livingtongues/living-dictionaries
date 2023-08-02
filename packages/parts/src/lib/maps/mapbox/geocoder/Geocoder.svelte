@@ -23,29 +23,44 @@
     'locality',
     'neighborhood',
     'address',
-    'poi', // must include map to search these
+    'poi', // must include map to search points of interest
   ]; // https://docs.mapbox.com/api/search/#data-types
   export let placeholder = 'Search';
   export let value = null;
   export let customStylesheetUrl: string = undefined;
 
+  type ResultOrUserCoordinates = Result | { user_coordinates: [number, number] };
+
   const dispatch = createEventDispatcher<{
-    clear: null;
+    clear: boolean;
     loading: any;
-    result: Result | { user_coordinates: [number, number] };
+    result: ResultOrUserCoordinates;
+    resultCoordinates: { longitude: number, latitude: number };
     results: Results;
     error: string;
   }>();
+
+  function handleGeocoderResult(result: ResultOrUserCoordinates): { longitude: number, latitude: number } {
+    if ('user_coordinates' in result) {
+      return { longitude: result.user_coordinates[0], latitude: result.user_coordinates[1] };
+    }
+    return { longitude: result.center[0], latitude: result.center[1] };
+  }
+
   const handlers: Record<string, any> = {
     clear: () => dispatch('clear'),
-    loading: ({ query }) => dispatch('loading', query),
+    loading: ({ query }: {query: string}) => dispatch('loading', query),
+    result: ({ result }: { result: ResultOrUserCoordinates }) => {
+      dispatch('result', result)
+      if (result) dispatch('resultCoordinates', handleGeocoderResult(result))
+    },
     results: (e: Results) => dispatch('results', e),
-    result: (e: Record<'result', Result | { user_coordinates: [number, number] }>) => dispatch('result', e.result),
     error: ({ error }) => dispatch('error', error),
   };
+  
   let unbind = () => {};
-
   let geocoder: MapboxGeocoder;
+
   onMount(async () => {
     await loadScriptOnce(
       `//api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/${version}/mapbox-gl-geocoder.min.js`
