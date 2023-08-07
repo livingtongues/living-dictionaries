@@ -39,7 +39,7 @@
     <Waveform
       audioUrl={`https://firebasestorage.googleapis.com/v0/b/${
         firebaseConfig.storageBucket
-      }/o/${sound_file.fb_storage_path.replace(/\//g, '%2F')}?alt=media`} />
+      }/o/${sound_file?.fb_storage_path?.replace(/\//g, '%2F')}?alt=media`} />
   {:else}
     {@const speaker_id = sound_file?.speaker_ids?.[0] || null}
     <SelectSpeaker
@@ -62,7 +62,7 @@
           <Waveform
             audioUrl={`https://firebasestorage.googleapis.com/v0/b/${
               firebaseConfig.storageBucket
-            }/o/${sound_file.fb_storage_path.replace(/\//g, '%2F')}?alt=media`} />
+            }/o/${sound_file?.fb_storage_path?.replace(/\//g, '%2F')}?alt=media`} />
         </div>
       {:else if speakerId}
         {#if file}
@@ -117,7 +117,7 @@
       <Button
         href={`https://firebasestorage.googleapis.com/v0/b/${
           firebaseConfig.storageBucket
-        }/o/${sound_file.fb_storage_path.replace(/\//g, '%2F')}?alt=media`}
+        }/o/${sound_file?.fb_storage_path?.replace(/\//g, '%2F')}?alt=media`}
         target="_blank">
         <i class="fas fa-download" />
         <span class="hidden sm:inline"
