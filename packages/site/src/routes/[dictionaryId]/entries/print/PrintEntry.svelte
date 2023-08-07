@@ -1,88 +1,76 @@
 <script lang="ts">
   import { t } from 'svelte-i18n';
-  import { StandardPrintFields, type IEntry } from '@living-dictionaries/types';
-  import { semanticDomains } from '$lib/mappings/semantic-domains';
+  import { StandardPrintFields, type ExpandedEntry, type IDictionary } from '@living-dictionaries/types';
   import { order_glosses } from '$lib/helpers/glosses';
-  import { dictionary } from '$lib/stores';
   import QrCode from './QrCode.svelte';
   import sanitize from 'xss';
   import { defaultPrintFields } from './printFields';
   import { add_periods_and_comma_separate_parts_of_speech } from '$lib/helpers/entry/add_periods_and_comma_separate_parts_of_speech';
   import { get_local_orthographies } from '$lib/helpers/entry/get_local_orthagraphies';
+  import { spaceSeparateSentences } from './separateSentences';
+  import { tick } from 'svelte';
 
-  export let entry: IEntry;
-  // export let speakers: ISpeaker[];
+  export let entry: ExpandedEntry;
   export let selectedFields = defaultPrintFields;
   export let imagePercent = 50;
   export let fontSize = 12;
   export let headwordSize = 12;
-  export let dictionaryId: string;
+  export let dictionary: IDictionary;
   export let showLabels = false;
   export let showQrCode = false;
-
-// $: speaker = entry.sf?.sp ? speakers.find((s) => s.uid === entry.sf.sp) : null;
 </script>
 
 <div style="font-size: {fontSize}pt;">
-  <!--Essential Fields-->
-  <b style="font-size: {headwordSize}pt;">{entry.lx}</b>
+  <b style="font-size: {headwordSize}pt;">{entry.lexeme}</b>
+
   {#if selectedFields.alternateOrthographies}
     <b>{get_local_orthographies(entry).sort().join(' ')}</b>
   {/if}
-  {entry.ph && selectedFields.ph ? `/${entry.ph}/` : ''}
-  {#if entry.ps && selectedFields.ps}<i>{add_periods_and_comma_separate_parts_of_speech(entry.ps)}</i>{/if}
-  {#if entry.gl && selectedFields.gloss}
+
+  {#if selectedFields.ph && entry.phonetic}
+    [${entry.phonetic}]
+  {/if}
+
+  {#if selectedFields.ps && entry.senses?.[0].parts_of_speech_keys}<i>{add_periods_and_comma_separate_parts_of_speech(entry.senses?.[0].parts_of_speech_keys)}</i>{/if}
+
+  {#if selectedFields.gloss && entry.senses?.[0].glosses}
     <span>
       {@html sanitize(order_glosses({
-        glosses: entry.gl,
-        dictionary_gloss_languages: $dictionary.glossLanguages,
+        glosses: entry.senses?.[0].glosses,
+        dictionary_gloss_languages: dictionary.glossLanguages,
         $t,
       }).join(' - '))}
     </span>
   {/if}
-  <b>{entry.xv && selectedFields.example_sentence ? entry.xv : ''}</b>
-  {#if entry.xs && selectedFields.example_sentence}
-    {#each Object.entries(entry.xs) as sentence, index}
-      {sentence[1]}{index < Object.entries(entry.xs).length - 1 ? ', ' : ''}
-    {/each}
+
+  {#if selectedFields.example_sentence}
+    {@const example_sentences = entry.senses?.[0].example_sentences}
+    {spaceSeparateSentences(example_sentences)}
   {/if}
 
-  <!-- Remaining Fields -->
-  {#if entry.sr && selectedFields.sr}
+  {#if selectedFields.sr && entry.sources}
     <div>
       {#if showLabels}
         <span class="italic text-[80%]">{$t('entry.sr', { default: 'Source' })}: </span>
       {/if}
-      {#if typeof entry.sr === 'string'}
-        <i>{entry.sr}</i>
-      {:else}
-        {#each entry.sr as source, index}
-          <i>{index < entry.sr.length - 1 ? `${source}, ` : `${source}`}</i>
-        {/each}
-      {/if}
+      {entry.sources.join(', ')}
     </div>
   {/if}
+
   <div>
     {#if selectedFields.sdn}
-      {#if entry.sdn?.length || entry.sd}
+      {@const semantic_domains = [...entry.senses?.[0].translated_ld_semantic_domains || [], ...entry.senses?.[0].write_in_semantic_domains || []]}
+      {#if semantic_domains.length}
         {#if showLabels}
-          <span class="italic text-[80%]"
-          >{$t('entry.sdn', { default: 'Semantic Domains' })}:
+          <span class="italic text-[80%]">
+            {$t('entry.sdn', { default: 'Semantic Domains' })}:
           </span>
         {/if}
-
-        {#if entry.sdn}
-          {#each entry.sdn as key, index}
-            {semanticDomains.find((sd) => sd.key === key).name}{index < entry.sdn.length - 1
-              ? '; '
-              : ''}
-          {/each}
-        {/if}
-        {#if entry.sd}
-          {entry.sd}
-        {/if}
+        {semantic_domains.join(', ')}
       {/if}
     {/if}
+
+    <!-- TODO -->
     {#each Object.keys(StandardPrintFields) as key}
       {#if entry[key] && selectedFields[key]}
         <p>
@@ -99,27 +87,31 @@
       {/if}
     {/each}
   </div>
-  {#if entry.sf?.speakerName && selectedFields.speaker}
+
+  <!-- TODO: get speaker names from speaker_ids -->
+  {#if selectedFields.speaker && entry.sound_files?.[0].speakerName}
     <div>
       {#if showLabels}
         <span class="italic text-[80%]">{$t('entry.speaker', { default: 'Speaker' })}: </span>
       {/if}
-      {entry.sf.speakerName}
+      {entry.sound_files?.[0].speakerName}
     </div>
   {/if}
 </div>
-{#if entry.pf && selectedFields.image}
+
+{#if selectedFields.image && entry.senses?.[0].photo_files?.[0]}
   <!-- max-height keeps tall images from spilling onto 2nd page when printing single column w/ images at 100% width; -->
   <img
     class="block mb-1 mt-1px"
     style="width:{imagePercent}%; max-height: 100vh;"
-    src={`https://lh3.googleusercontent.com/${entry.pf.gcs}`}
-    alt={entry.lx} />
+    src="https://lh3.googleusercontent.com/{entry.senses[0].photo_files[0].specifiable_image_url}"
+    alt={entry.lexeme} />
 {/if}
+
 {#if showQrCode}
-  {#await new Promise((r) => setTimeout(() => r(true), 1))}
+  {#await tick()}
     <QrCode
       pixelsPerModule={2}
-      value={`livingdictionaries.app/${dictionaryId}/entry/${entry.id}`} />
+      value={`livingdictionaries.app/${dictionary.id}/entry/${entry.id}`} />
   {/await}
 {/if}
