@@ -1,12 +1,17 @@
 <script lang="ts">
   import { t } from 'svelte-i18n';
   import { ShowHide } from 'svelte-pieces';
-  import type { IEntry } from '@living-dictionaries/types';
+  import type { IEntry, IRegion } from '@living-dictionaries/types';
   import AddImage from '../../entries/AddImage.svelte';
   import Image from '$lib/components/image/Image.svelte';
   import Video from '../../entries/Video.svelte';
-  import GeoTaggingModal from './GeoTaggingModal.svelte';
-  import { MapboxStatic } from '@living-dictionaries/parts'
+  // import GeoTaggingModal from './GeoTaggingModal.svelte';
+  import RegionModal from '@living-dictionaries/parts/src/lib/maps/RegionModal.svelte';
+  import { MapboxStatic } from '@living-dictionaries/parts';
+  import { createEventDispatcher } from 'svelte';
+  const dispatch = createEventDispatcher<{
+    updateRegions: IRegion[];
+  }>();
 
   export let entry: IEntry;
   export let videoAccess = false;
@@ -33,7 +38,16 @@
     </button>
   {/if}
   {#if show}
-    <GeoTaggingModal coordinates={entry.coordinates} on:close={toggle} on:valueupdate />
+    <!-- <GeoTaggingModal coordinates={entry.coordinates} on:close={toggle} on:valueupdate /> -->
+    <RegionModal
+      {t}
+      region={null}
+      on:update={({ detail }) => {
+        const regions = (entry?.coordinates?.regions && [...entry.coordinates.regions, detail]) || [detail];
+        dispatch('updateRegions', regions);
+      }}
+      on:close={toggle}>
+    </RegionModal>
   {/if}
 </ShowHide>
 
