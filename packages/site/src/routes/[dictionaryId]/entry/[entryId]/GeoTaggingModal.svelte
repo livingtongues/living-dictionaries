@@ -22,7 +22,7 @@
   }>();
 
   function save() {
-    dispatch('valueupdate', { field: 'co', newValue: { points: [{coordinates: {latitude: lat, longitude: lng}}]}})
+    dispatch('valueupdate', { field: 'co', newValue: { ...coordinates, points: [{coordinates: {latitude: lat, longitude: lng}}]}})
     dispatch('close');
   }
 
