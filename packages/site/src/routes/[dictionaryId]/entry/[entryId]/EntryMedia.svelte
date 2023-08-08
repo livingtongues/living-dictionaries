@@ -1,7 +1,7 @@
 <script lang="ts">
   import { t } from 'svelte-i18n';
   import { ShowHide } from 'svelte-pieces';
-  import type { IEntry, IRegion } from '@living-dictionaries/types';
+  import type { IEntry, Coordinates } from '@living-dictionaries/types';
   import AddImage from '../../entries/AddImage.svelte';
   import Image from '$lib/components/image/Image.svelte';
   import Video from '../../entries/Video.svelte';
@@ -10,7 +10,7 @@
   import { MapboxStatic } from '@living-dictionaries/parts';
   import { createEventDispatcher } from 'svelte';
   const dispatch = createEventDispatcher<{
-    updateRegions: IRegion[];
+    valueupdate: { field: string; newValue: Coordinates };
   }>();
 
   export let entry: IEntry;
@@ -44,7 +44,7 @@
       region={null}
       on:update={({ detail }) => {
         const regions = (entry?.coordinates?.regions && [...entry.coordinates.regions, detail]) || [detail];
-        dispatch('updateRegions', regions);
+        dispatch('valueupdate', { field: 'co',  newValue: { ...entry.coordinates, regions } });
       }}
       on:close={toggle}>
     </RegionModal>
