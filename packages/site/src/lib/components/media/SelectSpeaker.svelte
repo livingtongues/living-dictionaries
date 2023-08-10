@@ -72,6 +72,7 @@
       }}
       on:newSpeaker={(event) => {
         speakerId = event.detail.id;
+        dispatch('update', { speakerId });
       }} />
   {/await}
 {/if}

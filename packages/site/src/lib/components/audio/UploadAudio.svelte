@@ -89,7 +89,6 @@
             { abbreviate: true }
           );
 
-          // TODO: this.speakerService.addDictionaryToSpeaker(speakerId, dictionaryId);
           success = true;
         } catch (err) {
           alert(`${$t('misc.error', { default: 'Error' })}: ${err}`);
