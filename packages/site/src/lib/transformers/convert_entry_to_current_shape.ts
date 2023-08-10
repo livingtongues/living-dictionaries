@@ -15,8 +15,10 @@ export function convert_entry_to_current_shape(actual: ActualDatabaseEntry): Goa
       continue;
     }
     if (key === 'sf') {
-      const sound_file = convert_sound_file_to_current_shape(value);
-      goal.sfs = [sound_file];
+      if (!actual.sfs?.[0]) {
+        const sound_file = convert_sound_file_to_current_shape(value);
+        goal.sfs = [sound_file];
+      }
       continue;
     }
     if (key === 'di' && typeof value === 'string') {
