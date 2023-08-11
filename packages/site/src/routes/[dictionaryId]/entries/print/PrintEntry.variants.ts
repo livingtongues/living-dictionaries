@@ -13,16 +13,15 @@ const selectedFields: IPrintFields = {
   sdn: true,
   noun_class: true,
   interlinearization: true,
-  morphology: false,
-  plural_form: false,
-  variant: false,
-  dialects: false,
+  morphology: true,
+  plural_form: true,
+  variant: true,
+  dialects: true,
   notes: true,
   image: true,
-  speaker: false,
+  speaker: true,
   sr: true,
 };
-
 
 export const variants: Variants<Component> = mockEntries.map(variant => {
   return {

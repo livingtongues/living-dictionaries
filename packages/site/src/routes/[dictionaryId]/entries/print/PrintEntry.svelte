@@ -30,7 +30,7 @@
   {/if}
 
   {#if selectedFields.ph && entry.phonetic}
-    [${entry.phonetic}]
+    [{entry.phonetic}]
   {/if}
 
   {#each entry.senses || [] as sense}
@@ -84,6 +84,8 @@
           {/if}
           {#if key === 'nt'}
             {@html sanitize(entry[key])}
+          {:else if key === 'dialects'}
+            {entry[key].join(', ')}
           {:else}
             {entry[key]}
           {/if}
