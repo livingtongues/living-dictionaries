@@ -9,7 +9,7 @@ export function get_local_orthographies(entry: Partial<ExpandedEntry>): string[]
 }
 
 if (import.meta.vitest) {
-  describe('get_local_orthographies', () => {
+  describe(get_local_orthographies, () => {
     test('returns array of local orthographies', () => {
       const entryWith5LocalOrthographies: Partial<ExpandedEntry> = {
         local_orthography_1:'Nnọọ',
@@ -26,7 +26,8 @@ if (import.meta.vitest) {
         'שלום',
       ]);
     });
-    test('does not return field if field is empty or missing', () => {
+
+    test('does not return null or empty string fields', () => {
       const entryWith3LocalOrthographies: Partial<ExpandedEntry> = {
         local_orthography_1: 'さよなら',
         local_orthography_2: '안녕',

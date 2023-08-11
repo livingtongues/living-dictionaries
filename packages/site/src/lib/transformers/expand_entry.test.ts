@@ -2,7 +2,7 @@ import type { ExpandedEntry, GoalDatabaseEntry } from "@living-dictionaries/type
 import { expand_entry } from "./expand_entry";
 import { init, locale, dictionary, addMessages } from 'svelte-i18n';
 
-describe('expand_entry', () => {
+describe(expand_entry, () => {
   beforeEach(() => {
     dictionary.set({});
     locale.set(undefined);

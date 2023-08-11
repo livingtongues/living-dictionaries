@@ -6,7 +6,7 @@
   import { dictionary, admin } from '$lib/stores';
   import { Modal, Button, JSON } from 'svelte-pieces';
   import { deleteAudio } from '$lib/helpers/delete';
-  import type { ExpandedAudio, ExpandedEntry } from '@living-dictionaries/types';
+  import type { ExpandedAudio, ExpandedEntry, GoalDatabaseEntry } from '@living-dictionaries/types';
   import SelectSpeaker from '$lib/components/media/SelectSpeaker.svelte';
   import { updateOnline, firebaseConfig } from 'sveltefirets';
   import { createEventDispatcher } from 'svelte';
@@ -37,6 +37,7 @@
     if (speaker_id === newSpeakerId) return;
     
     const sf = {
+      // @ts-ignore = TODO: export this event to handle saving in the page
       ...entry.sfs[0],
       sp: [newSpeakerId]
     }
