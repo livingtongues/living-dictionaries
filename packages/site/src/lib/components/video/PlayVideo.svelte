@@ -1,11 +1,11 @@
 <script lang="ts">
   import { t } from 'svelte-i18n';
-  import type { ExpandedVideo, IEntry } from '@living-dictionaries/types';
+  import type { ExpandedVideo } from '@living-dictionaries/types';
   import VideoIFrame from './VideoIFrame.svelte';
   import { Button } from 'svelte-pieces';
   import { createEventDispatcher } from 'svelte';
 
-  export let entry: IEntry;
+  export let lexeme: string;
   export let video: ExpandedVideo;
   export let storageBucket: string;
   export let canEdit = false;
@@ -24,7 +24,7 @@
     <div
       class="font-semibold text-white p-4 flex justify-between items-center
           absolute top-0 inset-x-0 bg-opacity-25 bg-black">
-      <span on:click|stopPropagation>{entry.lexeme}</span>
+      <span on:click|stopPropagation>{lexeme}</span>
       <span class="i-fa-solid-times p-3 cursor-pointer" />
     </div>
     {#if video}

@@ -131,7 +131,7 @@
     </div>
   </a>
   {#if entry.senses?.[0].video_files?.[0]}
-    <Video class="bg-gray-100 border-r-2" {entry} video={entry.senses[0].video_files[0]} {canEdit} />
+    <Video class="bg-gray-100 border-r-2" lexeme={entry.lexeme} video={entry.senses[0].video_files[0]} {canEdit} />
   {:else if videoAccess && canEdit}
     <ShowHide let:show let:toggle>
       <button
