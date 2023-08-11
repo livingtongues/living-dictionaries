@@ -45,7 +45,7 @@
 
 {#if first_video}
   <div class="w-full overflow-hidden rounded relative mb-2">
-    <Video class="bg-gray-100 border-r-2" {entry} video={first_video} {canEdit} on:deleteVideo />
+    <Video class="bg-gray-100 border-r-2" lexeme={entry.lexeme} video={first_video} {canEdit} on:deleteVideo />
   </div>
 {:else if videoAccess && canEdit}
   <ShowHide let:show let:toggle>
