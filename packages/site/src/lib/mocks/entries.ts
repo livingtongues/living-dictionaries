@@ -5,6 +5,9 @@ export const mockEntries: { name: string, description?: string, entry: GoalDatab
     name: 'multiple empty glosses',
     entry: {
       lx: '(h)æg-ko gag=tǝnǝ nlaʔ-pog',
+      ph: 'hæg-ko gag=tǝnǝ nlaʔ-pog',
+      mr: 'morphology',
+      in: '3SG-POSS sit-PROG',
       lo1: 'local orthography 1',
       lo2: 'local orthography 2',
       lo3: 'local orthography 3',
@@ -17,10 +20,12 @@ export const mockEntries: { name: string, description?: string, entry: GoalDatab
             pt: 'this is a very long gloss to simulate that sort of situation',
             il: null,
           },
+          ps: ['n', 'v'],
           sdn: [
             '1.5',
             '1.9'
           ],
+          sd: ['Flying Mammals', 'Flying Insects'],
           pfs: [{
             path: 'gta/images/local_import/6-Common-jay-1580859671358.JPG',
             sc: 'local_import',
@@ -29,13 +34,14 @@ export const mockEntries: { name: string, description?: string, entry: GoalDatab
           xs: [
             {
               en: 'Watch how the common jay butterfly flies.',
+              vn: 'A vernacular sentence.',
             }
           ],
           nc: '1'
         }
       ],
       scn: ['Graphium doson'],
-      di: ['Hill'],
+      di: ['Hill', 'Southern Berm'],
       sfs: [{
         path: 'gta/audio/local_import/Gta-Pkd-Dec13-Butterflies-common-jay-1580859671012.mp3',
         ts: 1580860148537,
@@ -43,7 +49,7 @@ export const mockEntries: { name: string, description?: string, entry: GoalDatab
         sc: 'local_import'
       }],
       sr: ['Some cool guy in the village'],
-      nt: 'recorded in 1998'
+      nt: `recorded in 1998, <img src=x" onerror="alert('XSS Attack will be sanitized')">`,
       // 'createdBy': 'OTD',
     }
   },
