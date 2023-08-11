@@ -9,18 +9,17 @@ export enum CustomPrintFields {
   image = 'Image', // pf.gcs
   speaker = 'Speaker', // sf.sp or sf.speakerName
   sr = 'Source', // same as entry field
+  noun_class = 'Noun Class',
 }
 
 // displayed with labels, no custom logic
 export enum StandardPrintFields {
-  in = 'Interlinearization',
-  mr = 'Morphology',
-  nc = 'Noun Class',
-  pl = 'Plural Form',
-  va = 'Variant',
-  di = 'Dialect',
-  nt = 'Notes',
-  id = 'Id',
+  interlinearization = 'Interlinearization',
+  morphology = 'Morphology',
+  plural_form = 'Plural Form',
+  variant = 'Variant',
+  dialects = 'Dialects',
+  notes = 'Notes',
 }
 
 type PrintFieldKeys = keyof typeof CustomPrintFields | keyof typeof StandardPrintFields;
