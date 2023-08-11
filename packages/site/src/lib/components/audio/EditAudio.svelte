@@ -10,8 +10,7 @@
   import SelectSpeaker from '$lib/components/media/SelectSpeaker.svelte';
   import { updateOnline, firebaseConfig } from 'sveltefirets';
   import { createEventDispatcher } from 'svelte';
-  const dispatch = createEventDispatcher();
-  const close = () => dispatch('close');
+  const dispatch = createEventDispatcher<{close: boolean}>();
   
   export let entry: ExpandedEntry;
   export let sound_file: ExpandedAudio;
@@ -26,6 +25,27 @@
     file = undefined;
     audioBlob = undefined;
   }
+
+  $: audio_url = sound_file?.fb_storage_path 
+    ? `https://firebasestorage.googleapis.com/v0/b/${firebaseConfig.storageBucket}/o/${encodeURIComponent(sound_file.fb_storage_path)}?alt=media` 
+    : undefined;
+
+  $: speaker_id = sound_file?.speaker_ids?.[0]
+
+  async function updateSpeaker(newSpeakerId: string) {
+    if(!sound_file) return;
+    if (speaker_id === newSpeakerId) return;
+    
+    const sf = {
+      ...entry.sfs[0],
+      sp: [newSpeakerId]
+    }
+    await updateOnline<GoalDatabaseEntry>(
+      `dictionaries/${$dictionary.id}/words/${entry.id}`,
+      { sfs: [sf] },
+      { abbreviate: true }
+    );
+  }
 </script>
 
 <Modal on:close>
@@ -36,33 +56,16 @@
       {$t('entry.speaker', { default: 'Speaker' })}:
       {sound_file.speakerName}
     </div>
-    <Waveform
-      audioUrl={`https://firebasestorage.googleapis.com/v0/b/${
-        firebaseConfig.storageBucket
-      }/o/${sound_file.fb_storage_path.replace(/\//g, '%2F')}?alt=media`} />
+    <Waveform audioUrl={audio_url} />
   {:else}
-    {@const speaker_id = sound_file?.speaker_ids?.[0] || null}
     <SelectSpeaker
       dictionaryId={$dictionary.id}
       initialSpeakerId={speaker_id}
       let:speakerId
-      on:update={async ({ detail }) => {
-        if (sound_file && speaker_id !== detail.speakerId) {
-          await updateOnline(
-            `dictionaries/${$dictionary.id}/words/${entry.id}`,
-            {
-              'sf.sp': detail.speakerId,
-            },
-            { abbreviate: true }
-          );
-        }
-      }}>
+      on:update={async ({ detail: {speakerId} }) => await updateSpeaker(speakerId)}>
       {#if sound_file}
         <div class="px-1">
-          <Waveform
-            audioUrl={`https://firebasestorage.googleapis.com/v0/b/${
-              firebaseConfig.storageBucket
-            }/o/${sound_file.fb_storage_path.replace(/\//g, '%2F')}?alt=media`} />
+          <Waveform audioUrl={audio_url} />
         </div>
       {:else if speakerId}
         {#if file || audioBlob}
@@ -100,14 +103,12 @@
   <div class="modal-footer">
     {#if sound_file}
       {#if $admin > 1}
-        <JSON obj={entry} />
+        <JSON obj={sound_file} />
         <div class="w-1" />
       {/if}
 
       <Button
-        href={`https://firebasestorage.googleapis.com/v0/b/${
-          firebaseConfig.storageBucket
-        }/o/${sound_file.fb_storage_path.replace(/\//g, '%2F')}?alt=media`}
+        href={audio_url}
         target="_blank">
         <i class="fas fa-download" />
         <span class="hidden sm:inline"
@@ -127,7 +128,7 @@
       <div class="w-1" />
     {/if}
 
-    <Button onclick={close} color="black">
+    <Button onclick={() => dispatch('close')} color="black">
       {$t('misc.close', { default: 'Close' })}
     </Button>
   </div>
