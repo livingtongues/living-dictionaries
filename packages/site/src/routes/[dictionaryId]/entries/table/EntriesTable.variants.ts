@@ -2,8 +2,9 @@ import type { Variants } from 'kitbook';
 import type Component from './EntriesTable.svelte';
 import { mock_expanded_entries } from '$lib/mocks/entries';
 import type { IColumn } from '@living-dictionaries/types';
+// import { setUpColumns } from './setUpColumns';
 
-let column: IColumn = {
+const column: IColumn = {
   field: 'lx',
   width: 300,
   display: 'The lexeme',

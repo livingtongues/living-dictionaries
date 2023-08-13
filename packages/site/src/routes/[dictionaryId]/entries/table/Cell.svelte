@@ -8,7 +8,7 @@
   import SelectSource from './cells/SelectSource.svelte';
   import Image from '$lib/components/image/Image.svelte';
   import type { ExpandedEntry, IColumn } from '@living-dictionaries/types';
-  import Audio from '../../../routes/[dictionaryId]/entries/Audio.svelte';
+  import Audio from '../../entries/Audio.svelte';
   import { createEventDispatcher } from 'svelte';
 
   export let column: IColumn;
@@ -37,7 +37,7 @@
         square={60}
         on:deleteImage />
     {/if}
-  <!-- TODO: add videos to columns -->
+    <!-- TODO: add videos to columns -->
   {:else if column.field === 'speaker'}
     <SelectSpeakerCell {canEdit} {entry} />
   {:else if column.field === 'ps'}
@@ -67,7 +67,7 @@
       value={entry.senses?.[0]?.glosses?.[column.field]}
       display={$t(`gl.${column.field}`, { default: 'Gloss' })}
       on:valueupdate />
-      <!-- htmlValue={entry._highlightResult?.gl?.[column.field]?.value} -->
+    <!-- htmlValue={entry._highlightResult?.gl?.[column.field]?.value} -->
   {:else if column.exampleSentence === true}
     <Textbox
       {canEdit}
@@ -96,18 +96,18 @@
       value={entry[column.field]}
       display={$t(`entry.${column.field}`, { default: 'Edit' })}
       on:valueupdate />
-      <!-- htmlValue={entry._highlightResult?.[column.field]?.value} -->
+    <!-- htmlValue={entry._highlightResult?.[column.field]?.value} -->
   {/if}
 </div>
 
 <style>
   /* Firefox */
   /* .hide-scrollbar {
-    scrollbar-width: none; 
+    scrollbar-width: none;
   } */
   /* Safari and Chrome */
   /* .hide-scrollbar::-webkit-scrollbar {
-    display: none; 
+    display: none;
   } */
 
   div :global(button) {

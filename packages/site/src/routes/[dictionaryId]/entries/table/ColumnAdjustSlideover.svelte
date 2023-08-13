@@ -23,7 +23,7 @@
   });
 
   function showWidth(e) {
-    const target: EventTarget & HTMLInputElement = e.target;
+    const {target} = e;
     widthToDisplay = target.value;
     clearTimeout(widthDisplayTimeout);
     widthDisplayTimeout = setTimeout(() => {

@@ -1,8 +1,9 @@
 <script lang="ts">
-  import type { IColumn } from '@living-dictionaries/types';
-  export let column: IColumn,
-    verbose = false;
   import { _ } from 'svelte-i18n';
+  import type { IColumn } from '@living-dictionaries/types';
+
+  export let column: IColumn;
+  export let verbose = false;
 </script>
 
 <span class:flex={!verbose}>
