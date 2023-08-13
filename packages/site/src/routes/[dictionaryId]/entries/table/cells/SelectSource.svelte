@@ -4,7 +4,7 @@
   import { createEventDispatcher } from 'svelte';
   export let canEdit = false;
   export let value: string[];
-  
+
   const dispatch = createEventDispatcher<{
     valueupdate: { field: string; newValue: string[] };
   }>();
