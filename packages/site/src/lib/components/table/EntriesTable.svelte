@@ -1,21 +1,24 @@
 <script lang="ts">
-  import type { IColumn, IEntry } from '@living-dictionaries/types';
+  import type { ExpandedEntry, IColumn } from '@living-dictionaries/types';
   import ColumnTitle from './ColumnTitle.svelte';
   import Cell from './Cell.svelte';
   import { minutesAgo } from '$lib/helpers/time';
+  import { createEventDispatcher } from 'svelte';
 
   export let canEdit = false;
-  export let entries: IEntry[] = [];
+  export let entries: ExpandedEntry[] = [];
   export let columns: IColumn[];
   let selectedColumn: IColumn;
 
   function getLeftValue(index: number) {
-    if (index === 0) {
-      return 0;
-    } else {
-      return columns[index - 1].width;
-    }
+    if (index === 0) return 0;
+    return columns[index - 1].width;
   }
+
+  const dispatch = createEventDispatcher<{
+    deleteImage: { entryId: string };
+    valueupdate: { field: string; newValue: string | string[]; entryId: string };
+  }>();
 </script>
 
 <div
@@ -47,8 +50,8 @@
             class="{column.sticky ? 'sticky bg-white' : ''} h-0"
             style="{column.sticky
               ? 'left:' + getLeftValue(i) + 'px; --border-right-width: 3px;'
-              : ''} --col-width: {entry.sr ? 'auto' : `${column.width}px`};">
-            <Cell {column} {entry} {canEdit} />
+              : ''} --col-width: {entry.sources ? 'auto' : `${column.width}px`};">
+            <Cell {column} {entry} {canEdit} on:deleteImage={() => dispatch('deleteImage', { entryId: entry.id})} on:valueupdate={({detail: {field, newValue}}) => dispatch('valueupdate', { field, newValue, entryId: entry.id })} />
           </td>
         {/each}
       </tr>

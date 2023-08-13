@@ -4,7 +4,7 @@ import { isManager, isContributor, canEdit } from './editing';
 
 import { myDictionaries } from './dictionaries';
 import { dictionary, entries } from './dictionary';
-import { columns, preferredColumns } from './columns';
+import { preferredColumns } from './columns';
 import { algoliaQueryParams } from './search';
 
 export {
@@ -16,7 +16,6 @@ export {
   myDictionaries,
   dictionary,
   entries,
-  columns,
   preferredColumns,
   algoliaQueryParams,
 };

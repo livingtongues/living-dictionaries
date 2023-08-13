@@ -1,7 +1,9 @@
 <script lang="ts">
-  import type { IEntry } from '@living-dictionaries/types';
-  export let entry: IEntry,
-    canEdit = false;
+  import type { ExpandedEntry } from '@living-dictionaries/types';
+  export let entry: ExpandedEntry;
+  export let canEdit = false;
+
+  $: first_sound_file = entry.sound_files?.[0];
 </script>
 
 <div
@@ -10,7 +12,7 @@
   style="padding: 0.1em 0.25em"
   on:click={() => {
     if (canEdit) {
-      if (entry.sf && entry.sf.sp) {
+      if (first_sound_file?.speaker_ids?.length) {
         alert(
           'Please edit the speaker by from the edit audio modal accessed by clicking on the ear.'
         );
@@ -19,7 +21,12 @@
       }
     }
   }}>
-  {#if entry.sf}{entry.sf.sp || entry.sf.speakerName || ''}{/if}
+  {#if first_sound_file}
+    {#if first_sound_file.speaker_ids?.length}
+      {first_sound_file.speaker_ids[0]}
+    {:else}
+      {first_sound_file.speakerName || ''}
+    {/if}
+  {/if}
   &nbsp;
 </div>
-<!-- sf.speakerName is a write-in name from old Talking Dictionary imports -->

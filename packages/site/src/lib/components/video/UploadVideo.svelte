@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onDestroy, onMount } from 'svelte';
   import { t } from 'svelte-i18n';
-  import type { GoalDatabaseVideo, IEntry, IVideoCustomMetadata } from '@living-dictionaries/types';
+  import type { GoalDatabaseVideo, IVideoCustomMetadata } from '@living-dictionaries/types';
   import { dictionary, user } from '$lib/stores';
   import { getStorage, ref, uploadBytesResumable } from 'firebase/storage';
   import type { UploadTask, TaskState, StorageError } from 'firebase/storage';
@@ -10,7 +10,7 @@
   import { cubicOut } from 'svelte/easing';
 
   export let file: File | Blob
-  export let entry: IEntry
+  export let entryId: string
   export let speakerId: string;
 
   let uploadTask: UploadTask;
@@ -24,13 +24,11 @@
   $: percentage = Math.floor($progress * 100);
   
   onMount(async () => {
-    if (!file || !entry) return;
+    if (!file || !entryId) return;
 
     const fileTypeSuffix = file.type.split('/')[1].split(';')[0]; // turns 'video/webm;codecs=vp8,opus' to 'webm' and 'video/mp4' to 'mp4'
 
-    const storagePath = `${$dictionary.id}/videos/${
-      entry.id
-    }_${new Date().getTime()}.${fileTypeSuffix}`;
+    const storagePath = `${$dictionary.id}/videos/${entryId}_${new Date().getTime()}.${fileTypeSuffix}`;
 
     const customMetadata: IVideoCustomMetadata & { [key: string]: string } = {
       uploadedByUid: $user.uid,
@@ -59,7 +57,7 @@
             ab: $user.uid,
             sp: [speakerId],
           };
-          await addVideo(entry.id, database_video);
+          await addVideo(entryId, database_video);
 
           success = true;
         } catch (err) {

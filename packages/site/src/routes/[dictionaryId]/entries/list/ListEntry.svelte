@@ -4,19 +4,19 @@
   import Video from '../Video.svelte';
   import Image from '$lib/components/image/Image.svelte';
   import AddImage from '../AddImage.svelte';
-  import type { IDictionary, IEntry } from '@living-dictionaries/types';
+  import type { ExpandedEntry, IDictionary } from '@living-dictionaries/types';
   import { order_glosses, order_entry_and_dictionary_gloss_languages } from '$lib/helpers/glosses';
   import { minutesAgo } from '$lib/helpers/time';
   import { ShowHide } from 'svelte-pieces';
   import sanitize from 'xss';
 
-  export let entry: IEntry;
+  export let entry: ExpandedEntry;
   export let dictionary: IDictionary;
   export let canEdit = false;
   export let videoAccess = false;
 
   $: glosses = order_glosses({
-    glosses: entry.gl,
+    glosses: entry.senses?.[0]?.glosses,
     dictionary_gloss_languages: dictionary.glossLanguages,
     $t,
     label: dictionary.id !== 'jewish-neo-aramaic',
@@ -28,7 +28,7 @@
   class:border-b-2={entry.ua?.toMillis?.() > minutesAgo(5)}
   class="flex rounded shadow my-1 overflow-hidden items-stretch border-green-300"
   style="margin-right: 2px;">
-  {#if entry.sf || canEdit}
+  {#if entry.sound_files?.[0] || canEdit}
     <Audio class="bg-gray-100 p-2" {entry} {canEdit} minimal let:playing>
       <span class:text-blue-700={playing} class="i-material-symbols-hearing text-2xl mt-1" />
       {$t('audio.listen', { default: 'Listen' })}
@@ -38,32 +38,28 @@
     href={'/' + dictionary.id + '/entry/' + entry.id}
     class="p-2 text-lg flex-grow flex flex-col justify-between hover:bg-gray-200">
     <div>
-      <span class="font-semibold text-gray-900 mr-1">{entry.lx}</span>
-      {#if entry.ph}
-        <span class="mr-1 hidden sm:inline">[{entry.ph}]</span>
+      <span class="font-semibold text-gray-900 mr-1">{entry.lexeme}</span>
+      {#if entry.phonetic}
+        <span class="mr-1 hidden sm:inline">[{entry.phonetic}]</span>
       {/if}
 
       {#if dictionary.id !== 'garifuna'}
-        {#if entry.lo}<i class="mr-1">{entry.lo}</i>{/if}
-        {#if entry.lo2}<i class="mr-1" class:sompeng={dictionary.id === 'sora'}
-        >{entry.lo2}</i
+        {#if entry.local_orthography_1}<i class="mr-1">{entry.local_orthography_1}</i>{/if}
+        {#if entry.local_orthography_2}<i class="mr-1" class:sompeng={dictionary.id === 'sora'}
+        >{entry.local_orthography_2}</i
         >{/if}
-        {#if entry.lo3}<i class="mr-1">{entry.lo3}</i>{/if}
-        {#if entry.lo4}<i class="mr-1">{entry.lo4}</i>{/if}
-        {#if entry.lo5}<i class="mr-1">{entry.lo5}</i>{/if}
+        {#if entry.local_orthography_3}<i class="mr-1">{entry.local_orthography_3}</i>{/if}
+        {#if entry.local_orthography_4}<i class="mr-1">{entry.local_orthography_4}</i>{/if}
+        {#if entry.local_orthography_5}<i class="mr-1">{entry.local_orthography_5}</i>{/if}
       {/if}
     </div>
     <div class="flex flex-wrap items-center justify-end -mb-1">
       <div class="text-xs text-gray-600 mr-auto mb-1">
-        {#if entry.ps}
-          {#if typeof entry.ps === 'string'}
-            <!-- TODO: refactor entry.ps strings to array of strings, then remove this -->
-            <i>{$t('psAbbrev.' + entry.ps, { default: entry.ps })},</i>
-          {:else}
-            {#each entry.ps as pos}
-              <i>{$t('psAbbrev.' + pos, { default: pos })}, </i>
-            {/each}
-          {/if}
+        <!-- TODO: translated abbrevs -->
+        {#if entry.senses?.[0]?.translated_parts_of_speech}
+          {#each entry.senses?.[0]?.translated_parts_of_speech as pos}
+            <i>{$t('psAbbrev.' + pos, { default: pos })}, </i>
+          {/each}
         {/if}
 
         {#if glosses.includes('<i>')}
@@ -72,8 +68,8 @@
           {glosses}
         {/if}
 
-        {#if entry.scn?.length}
-          {@const scientific_names = entry.scn?.join(', ')}
+        {#if entry.scientific_names}
+          {@const scientific_names = entry.scientific_names.join(', ')}
           {#if scientific_names.includes('<i>')}
             {@html sanitize(scientific_names)}
           {:else}
@@ -82,8 +78,8 @@
         {/if}
 
         {#if dictionary.id === 'jewish-neo-aramaic'}
-          {#if entry.di}<p class="text-xs">
-            <i class="mr-1">{$t('entry.di', { default: 'Dialect' })}: {entry.di}</i>
+          {#if entry.dialects}<p class="text-xs">
+            <i class="mr-1">{$t('entry.di', { default: 'Dialect' })}: {entry.dialects.join(', ')}</i>
           </p>{/if}
           {#if entry.xs?.vn}<p>
             <span class="font-semibold"
@@ -106,9 +102,9 @@
           {/if}
         {/if}
 
-        {#if entry.pl}
+        {#if entry.plural_form}
           <p class="text-xs">
-            {$t('entry.pl', { default: 'Plural form' })}: {entry.pl}
+            {$t('entry.pl', { default: 'Plural form' })}: {entry.plural_form}
           </p>
         {/if}
       </div>
@@ -148,12 +144,12 @@
       {/if}
     </ShowHide>
   {/if}
-  {#if entry.pf}
+  {#if entry.senses?.[0]?.photo_files?.[0]}
     <div class="media-block bg-gray-300 relative">
       <Image
         square={128}
-        title={entry.lx}
-        gcs={entry.pf.gcs}
+        title={entry.lexeme}
+        gcs={entry.senses?.[0]?.photo_files?.[0].specifiable_image_url}
         {canEdit}
         on:deleteImage />
     </div>

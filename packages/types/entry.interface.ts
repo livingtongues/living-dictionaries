@@ -1,5 +1,5 @@
 import type { Timestamp } from 'firebase/firestore';
-import type { IFirestoreMetaData, IFirestoreMetaDataAbbreviated } from 'sveltefirets';
+import type { IFirestoreMetaDataAbbreviated } from 'sveltefirets';
 import type { IGloss } from './gloss.interface';
 import type { IExampleSentence } from './exampe-sentence.interface';
 import type { GoalDatabaseAudio, ActualDatabaseAudio, ExpandedAudio } from './audio.interface';
@@ -11,7 +11,7 @@ import type { LDAlgoliaFields } from './entry.algolia.interface';
 export type IEntry = ExpandedEntry & ActualDatabaseEntry & Omit<LDAlgoliaFields, 'ua' | 'ca'>;
 export type LDAlgoliaHit = ActualDatabaseEntry & LDAlgoliaFields;
 
-export interface ExpandedEntry extends IFirestoreMetaData {
+export interface ExpandedEntry extends IFirestoreMetaDataAbbreviated {
   lexeme?: string;
   local_orthography_1?: string;
   local_orthography_2?: string;

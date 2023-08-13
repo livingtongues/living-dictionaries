@@ -64,7 +64,7 @@
   canEdit={$canEdit}
   on:deleteImage={() => deleteImage(entry, $dictionary.id)}
   on:deleteVideo={() => deleteVideo(entry, $dictionary.id)}
-  on:valueupdate={(e) => saveUpdateToFirestore(e, entry.id, $dictionary.id)} />
+  on:valueupdate={({detail: { field, newValue}}) => saveUpdateToFirestore({field, value: newValue, entryId: entry.id, dictionaryId: $dictionary.id})} />
 
 <SeoMetaTags
   imageTitle={entry.lx}

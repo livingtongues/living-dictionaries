@@ -1,3 +1,4 @@
+import { expand_entry } from '$lib/transformers/expand_entry';
 import type { GoalDatabaseEntry } from '@living-dictionaries/types';
 
 export const mockEntries: { name: string, description?: string, entry: GoalDatabaseEntry}[] = [
@@ -62,3 +63,10 @@ export const mockEntries: { name: string, description?: string, entry: GoalDatab
 ]
 
 
+export const mock_expanded_entries = mockEntries.map(entry => {
+  return {
+    name: entry.name,
+    description: entry.description,
+    entry: expand_entry(entry.entry),
+  };
+});
