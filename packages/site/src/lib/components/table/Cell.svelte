@@ -7,100 +7,87 @@
   import SelectSpeakerCell from './cells/SelectSpeakerCell.svelte';
   import SelectSource from './cells/SelectSource.svelte';
   import Image from '$lib/components/image/Image.svelte';
-  import { saveUpdateToFirestore } from '$lib/helpers/entry/update';
-  import { deleteImage } from '$lib/helpers/delete';
-  import { dictionary } from '$lib/stores';
-  import type { IColumn, IEntry } from '@living-dictionaries/types';
+  import type { ExpandedEntry, IColumn } from '@living-dictionaries/types';
   import Audio from '../../../routes/[dictionaryId]/entries/Audio.svelte';
+  import { createEventDispatcher } from 'svelte';
 
   export let column: IColumn;
-  export let entry: IEntry;
+  export let entry: ExpandedEntry;
   export let canEdit = false;
 
-  let updatedValue;
+  const dispatch = createEventDispatcher<{
+    valueupdate: { field: string; newValue: string | string[] };
+  }>();
 </script>
 
 <div
   class:sompeng={column.display === 'Sompeng'}
-  class="{updatedValue !== undefined
-    ? 'bg-green-100 border-green-400 border'
-    : ''} h-full w-full inline-block">
+  class="h-full w-full inline-block">
   {#if column.field === 'soundFile'}
     <Audio class="h-full text-sm" minimal {canEdit} {entry} let:playing>
       <span class:text-blue-700={playing} class="i-material-symbols-hearing text-lg mt-1" />
     </Audio>
   {:else if column.field === 'photoFile'}
-    {#if entry.pf}
+    {@const first_photo = entry.senses?.[0]?.photo_files?.[0]}
+    {#if first_photo}
       <Image
         {canEdit}
-        title={entry.lx}
-        gcs={entry.pf.gcs}
+        title={entry.lexeme}
+        gcs={first_photo.specifiable_image_url}
         square={60}
-        on:deleteImage={() => deleteImage(entry, $dictionary.id)} />
+        on:deleteImage />
     {/if}
-    <!-- TODO: add videos to columns -->
-    <!-- {:else if column.field === 'videoFile'}
-    {#if entry.vfs}
-      <VideoCell {canEdit} {entry} />
-    {/if} -->
+  <!-- TODO: add videos to columns -->
   {:else if column.field === 'speaker'}
     <SelectSpeakerCell {canEdit} {entry} />
   {:else if column.field === 'ps'}
     <EntryPartOfSpeech
       {canEdit}
       value={entry.senses[0].translated_parts_of_speech}
-      on:valueupdate={(e) => saveUpdateToFirestore(e, entry.id, $dictionary.id)} />
+      on:valueupdate />
   {:else if column.field === 'sdn'}
     <SemanticDomains
       {canEdit}
       {entry}
-      on:valueupdate={(e) => saveUpdateToFirestore(e, entry.id, $dictionary.id)} />
+      on:valueupdate />
   {:else if column.field === 'di'}
     <EntryDialect
       {canEdit}
       dialects={entry.dialects}
-      on:valueupdate={(e) => saveUpdateToFirestore(e, entry.id, $dictionary.id)} />
+      on:valueupdate />
   {:else if column.field === 'sr'}
     <SelectSource
       {canEdit}
-      value={typeof entry.sr === 'string' ? [entry.sr] : entry.sr}
-      on:valueupdate={(e) => saveUpdateToFirestore(e, entry.id, $dictionary.id)} />
+      value={entry.sources}
+      on:valueupdate />
   {:else if column.gloss === true}
     <Textbox
       {canEdit}
       field={`gl.${column.field}`}
-      value={entry.gl?.[column.field]}
+      value={entry.senses?.[0]?.glosses?.[column.field]}
       display={$t(`gl.${column.field}`, { default: 'Gloss' })}
-      {updatedValue}
-      htmlValue={entry._highlightResult?.gl?.[column.field]?.value}
-      on:valueupdate={(e) => saveUpdateToFirestore(e, entry.id, $dictionary.id)} />
+      on:valueupdate />
+      <!-- htmlValue={entry._highlightResult?.gl?.[column.field]?.value} -->
   {:else if column.exampleSentence === true}
     <Textbox
       {canEdit}
       field={`xs.${column.field}`}
-      value={entry.xs && entry.xs[column.field]}
+      value={entry.senses?.[0]?.example_sentences?.[column.field]}
       display={`${column.field !== 'xv' ? $t(`gl.${column.field}`) : ''} ${$t(
         'entry.example_sentence',
         {
           default: 'Example Sentence',
         }
       )}`}
-      {updatedValue}
-      htmlValue={entry._highlightResult?.gl?.[column.field]?.value}
-      on:valueupdate={(e) => saveUpdateToFirestore(e, entry.id, $dictionary.id)} />
+      on:valueupdate />
   {:else if column.field === 'scn'}
     <Textbox
       {canEdit}
       field="scn"
-      value={entry.scn?.[0]}
+      value={entry.scientific_names?.[0]}
       display={$t('entry.scn', { default: 'Scientific Name' })}
-      {updatedValue}
-      htmlValue={entry.scn?.[0]}
-      on:valueupdate={(e) =>
-        saveUpdateToFirestore(
-          { detail: { field: 'scn', newValue: [e.detail.newValue] } },
-          entry.id,
-          $dictionary.id
+      on:valueupdate={({detail: {field, newValue}}) =>
+        dispatch('valueupdate', { field, newValue: [newValue]},
         )} />
   {:else}
     <Textbox
@@ -108,12 +95,8 @@
       field={column.field}
       value={entry[column.field]}
       display={$t(`entry.${column.field}`, { default: 'Edit' })}
-      {updatedValue}
-      htmlValue={(entry._highlightResult &&
-        entry._highlightResult[column.field] &&
-        entry._highlightResult[column.field].value) ||
-        ''}
-      on:valueupdate={(e) => saveUpdateToFirestore(e, entry.id, $dictionary.id)} />
+      on:valueupdate />
+      <!-- htmlValue={entry._highlightResult?.[column.field]?.value} -->
   {/if}
 </div>
 

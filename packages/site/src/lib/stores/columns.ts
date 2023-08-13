@@ -1,9 +1,6 @@
-import { writable, derived } from 'svelte/store';
+import { writable } from 'svelte/store';
 import type { IColumn } from '@living-dictionaries/types';
-import { vernacularName } from '$lib/helpers/vernacularName';
-import { dictionary } from './dictionary';
-import { get } from 'svelte/store';
-import { _ } from 'svelte-i18n';
+
 import { browser } from '$app/environment';
 
 const defaultColumns: IColumn[] = [
@@ -111,72 +108,3 @@ if (browser) {
     localStorage.setItem(tableCacheKey, JSON.stringify(selectedColumns))
   );
 }
-// Possible idea: if no set of preferredcolumns is in localstorage then query firestore if dictionary defaults exist
-
-export const columns = derived(
-  [preferredColumns, dictionary],
-  ([$preferredColumns, $dictionary]) => {
-    const cols = $preferredColumns.filter((column) => !column.hidden);
-
-    const glossIndex = cols.findIndex((col) => col.field === 'gloss');
-    if (glossIndex >= 0) {
-      const $_ = get(_);
-      const glossColumns: IColumn[] = [];
-      $dictionary.glossLanguages.forEach((bcp) => {
-        glossColumns.push({
-          field: bcp,
-          width: cols[glossIndex].width,
-          sticky: cols[glossIndex].sticky || false,
-          display: $_('gl.' + bcp),
-          explanation: vernacularName(bcp),
-          gloss: true,
-        });
-      });
-      cols.splice(glossIndex, 1, ...glossColumns);
-    }
-
-    const exampleSentenceIndex = cols.findIndex((col) => col.field === 'example_sentence');
-    if (exampleSentenceIndex >= 0) {
-      const $_ = get(_);
-      const exampleSentenceColumns: IColumn[] = [
-        {
-          field: 'xv',
-          width: cols[exampleSentenceIndex].width,
-          sticky: cols[exampleSentenceIndex].sticky || false,
-          display: $_('entry.example_sentence', { default: 'Example Sentence' }),
-          exampleSentence: true,
-        },
-      ];
-      $dictionary.glossLanguages.forEach((bcp) => {
-        exampleSentenceColumns.push({
-          field: bcp,
-          width: cols[exampleSentenceIndex].width,
-          sticky: cols[exampleSentenceIndex].sticky || false,
-          display: `${$_(`gl.${bcp}`)} ${$_('entry.example_sentence', {
-            default: 'Example Sentence',
-          })}`,
-          exampleSentence: true,
-        });
-      });
-      cols.splice(exampleSentenceIndex, 1, ...exampleSentenceColumns);
-    }
-
-    const orthographyIndex = cols.findIndex((col) => col.field === 'alternateOrthographies');
-    if (orthographyIndex >= 0) {
-      const alternateOrthographyColumns: IColumn[] = [];
-      if ($dictionary.alternateOrthographies) {
-        for (const [index, orthography] of $dictionary.alternateOrthographies.entries()) {
-          alternateOrthographyColumns.push({
-            field: index === 0 ? 'lo' : 'lo' + (index + 1),
-            width: 170,
-            display: orthography,
-            orthography: true,
-          });
-        }
-      }
-      cols.splice(orthographyIndex, 1, ...alternateOrthographyColumns);
-    }
-
-    return cols;
-  }
-);

@@ -7,7 +7,7 @@
   import VideoIFrame from '$lib/components/video/VideoIFrame.svelte';
   import SelectSpeaker from '$lib/components/media/SelectSpeaker.svelte';
   import { dictionary } from '$lib/stores';
-  import type { GoalDatabaseVideo, IEntry } from '@living-dictionaries/types';
+  import type { ExpandedEntry, GoalDatabaseVideo } from '@living-dictionaries/types';
   import { addVideo } from '$lib/helpers/media/update';
   import { createEventDispatcher } from 'svelte';
   import { expand_video } from '$lib/transformers/expand_entry';
@@ -15,7 +15,7 @@
   const dispatch = createEventDispatcher();
   const close = () => dispatch('close');
 
-  export let entry: IEntry;
+  export let entry: ExpandedEntry;
   let database_video: GoalDatabaseVideo;
 </script>
 
@@ -44,7 +44,7 @@
 
           <SelectVideo let:file>
             {#await import('$lib/components/video/UploadVideo.svelte') then { default: UploadVideo }}
-              <UploadVideo {file} {entry} {speakerId} />
+              <UploadVideo {file} entryId={entry.id} {speakerId} />
             {/await}
           </SelectVideo>
 
@@ -73,7 +73,7 @@
                 </div>
               {:else}
                 {#await import('$lib/components/video/UploadVideo.svelte') then { default: UploadVideo }}
-                  <UploadVideo file={videoBlob} {entry} {speakerId} />
+                  <UploadVideo file={videoBlob} entryId={entry.id} {speakerId} />
                 {/await}
               {/if}
             </ShowHide>

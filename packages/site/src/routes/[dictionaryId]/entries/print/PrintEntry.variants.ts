@@ -1,6 +1,6 @@
-import type { IPrintFields } from '@living-dictionaries/types';
 import type { Variants } from 'kitbook';
 import type Component from './PrintEntry.svelte';
+import type { IPrintFields } from '@living-dictionaries/types';
 import { mockEntries } from '$lib/mocks/entries';
 import { expand_entry } from '$lib/transformers/expand_entry';
 
