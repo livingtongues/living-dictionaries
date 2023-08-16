@@ -6,6 +6,8 @@
   import { createEventDispatcher } from 'svelte';
   import { apiFetch } from '$lib/client/apiFetch';
   import type { SupportRequestBody } from '../../../routes/api/email/support/+server';
+  import { dictionary } from '$lib/stores';
+  import type { RequestAccessBody } from '../../../routes/api/email/request_access/+server';
 
   const subjects = {
     'delete_dictionary': 'Delete a dictionary',
@@ -32,13 +34,25 @@
 
   async function send() {
     try {
-      const response = await apiFetch<SupportRequestBody>('/api/email/support', {
-        message,
-        email: $user?.email || email,
-        name: $user?.displayName || 'Anonymous',
-        url: window.location.href,
-        subject: subjects[subject]
-      });
+      let response: Response
+      if ($dictionary && subject === 'request_access') {
+        response = await apiFetch<RequestAccessBody>('/api/email/request_access', {
+          message,
+          email: $user?.email || email,
+          name: $user?.displayName || 'Anonymous',
+          url: window.location.href,
+          dictionaryId: $dictionary.id,
+          dictionaryName: $dictionary.name,
+        });
+      } else {
+        response = await apiFetch<SupportRequestBody>('/api/email/support', {
+          message,
+          email: $user?.email || email,
+          name: $user?.displayName || 'Anonymous',
+          url: window.location.href,
+          subject: subjects[subject],
+        });
+      }
 
       if (response.status !== 200) {
         const body = await response.json();
