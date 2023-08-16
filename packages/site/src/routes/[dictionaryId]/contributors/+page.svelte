@@ -13,7 +13,6 @@
 
   let helperType: IHelper[];
   let inviteType: IInvite[];
-  let managers: IHelper[] = []
 
   function writeIn() {
     const name = prompt(`${$t('speakers.name', { default: 'Name' })}?`);
@@ -37,15 +36,16 @@
 <div class="divide-y divide-gray-200">
   <Collection
     path={`dictionaries/${$dictionary.id}/managers`}
-    on:data={e => managers = e.detail.data}
-    startWith={helperType} />
-  {#each managers as manager}
-    <div class="py-3">
-      <div class="text-sm leading-5 font-medium text-gray-900">
-        {manager.name}
+    startWith={helperType}
+    let:data={managers}>
+    {#each managers as manager}
+      <div class="py-3">
+        <div class="text-sm leading-5 font-medium text-gray-900">
+          {manager.name}
+        </div>
       </div>
-    </div>
-  {/each}
+    {/each}
+  </Collection>
   {#if $isManager}
     <Collection
       path={`dictionaries/${$dictionary.id}/invites`}
