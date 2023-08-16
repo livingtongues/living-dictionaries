@@ -6,10 +6,8 @@
   import { createEventDispatcher } from 'svelte';
   import { apiFetch } from '$lib/client/apiFetch';
   import type { SupportRequestBody } from '../../../routes/api/email/support/+server';
-  import type { Address } from '../../../routes/api/email/send/mail-channels.interface';
   import { dictionary } from '$lib/stores';
-
-  export let additionalRecipients: Address[] = [];
+  import type { RequestAccessBody } from '../../../routes/api/email/request_access/+server';
 
   const subjects = {
     'delete_dictionary': 'Delete a dictionary',
@@ -22,9 +20,6 @@
   }
   type Subjects = keyof typeof subjects;
   export let subject: Subjects = undefined;
-  $: computed_subject = subject === 'request_access' 
-    ? `${$dictionary.name} Living Dictionary: ${$user?.email || email} requests editing access` 
-    : subjects[subject];
 
   const dispatch = createEventDispatcher<{ close: boolean }>();
 
@@ -39,14 +34,25 @@
 
   async function send() {
     try {
-      const response = await apiFetch<SupportRequestBody>('/api/email/support', {
-        message,
-        email: $user?.email || email,
-        name: $user?.displayName || 'Anonymous',
-        url: window.location.href,
-        subject: computed_subject,
-        additionalRecipients,
-      });
+      let response: Response
+      if (subject === 'request_access') {
+        response = await apiFetch<RequestAccessBody>('/api/email/request_access', {
+          message,
+          email: $user?.email || email,
+          name: $user?.displayName || 'Anonymous',
+          url: window.location.href,
+          dictionaryId: $dictionary.id,
+          dictionaryName: $dictionary.name,
+        });
+      } else {
+        response = await apiFetch<SupportRequestBody>('/api/email/support', {
+          message,
+          email: $user?.email || email,
+          name: $user?.displayName || 'Anonymous',
+          url: window.location.href,
+          subject: subjects[subject],
+        });
+      }
 
       if (response.status !== 200) {
         const body = await response.json();

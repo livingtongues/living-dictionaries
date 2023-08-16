@@ -1,34 +1,19 @@
 <script lang="ts">
   import { t } from 'svelte-i18n';
-  import { add, deleteDocumentOnline, updateOnline, Collection, getDocument } from 'sveltefirets';
+  import { add, deleteDocumentOnline, updateOnline, Collection } from 'sveltefirets';
   import { where } from 'firebase/firestore';
   import { isManager, isContributor, dictionary, admin } from '$lib/stores';
-  import type { IInvite, IHelper, IUser } from '@living-dictionaries/types';
+  import type { IInvite, IHelper } from '@living-dictionaries/types';
   import { Button, ShowHide } from 'svelte-pieces';
   import { inviteHelper } from '$lib/helpers/inviteHelper';
   import { removeDictionaryContributor } from '$lib/helpers/dictionariesManaging';
   import ContributorInvitationStatus from '$lib/components/contributors/ContributorInvitationStatus.svelte';
   import Citation from './Citation.svelte';
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte';
-  import type { Address } from '../../api/email/send/mail-channels.interface';
 
   let helperType: IHelper[];
   let inviteType: IInvite[];
   let managers: IHelper[] = []
-
-  async function getManagerAddresses(): Promise<Address[]> {
-    if (!managers) return []
-    const userPromises = managers.map(manager => {
-      return getDocument<IUser>(`users/${manager.id}`);
-    });
-    const users = await Promise.all(userPromises)
-    return users.map(user => {
-      return {
-        name: user.displayName,
-        email: user.email
-      }
-    })
-  }
 
   function writeIn() {
     const name = prompt(`${$t('speakers.name', { default: 'Name' })}?`);
@@ -161,9 +146,7 @@
       </Button>
       {#if show}
         {#await import('$lib/components/modals/Contact.svelte') then { default: Contact }}
-          {#await getManagerAddresses() then managerAddresses}
-            <Contact subject="request_access" additionalRecipients={managerAddresses} on:close={toggle} />
-          {/await}
+          <Contact subject="request_access" on:close={toggle} />
         {/await}
       {/if}
     </ShowHide>
