@@ -2,8 +2,8 @@
   import { onMount, onDestroy } from 'svelte';
   import { Button } from 'svelte-pieces';
 
-  export let audioUrl: string = undefined,
-    audioBlob = undefined;
+  export let audioUrl: string = undefined
+  export let audioBlob = undefined;
   let wavesurfer;
   let waveform;
   let playing = false;
