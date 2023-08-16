@@ -35,7 +35,7 @@
   async function send() {
     try {
       let response: Response
-      if (subject === 'request_access') {
+      if ($dictionary && subject === 'request_access') {
         response = await apiFetch<RequestAccessBody>('/api/email/request_access', {
           message,
           email: $user?.email || email,
