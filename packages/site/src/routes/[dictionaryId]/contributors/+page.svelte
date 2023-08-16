@@ -1,6 +1,6 @@
 <script lang="ts">
   import { t } from 'svelte-i18n';
-  import { add, deleteDocumentOnline, updateOnline, Collection, docStore } from 'sveltefirets';
+  import { add, deleteDocumentOnline, updateOnline, Collection, getDocument } from 'sveltefirets';
   import { where } from 'firebase/firestore';
   import { isManager, isContributor, dictionary, admin } from '$lib/stores';
   import type { IInvite, IHelper, IUser } from '@living-dictionaries/types';
@@ -11,30 +11,23 @@
   import Citation from './Citation.svelte';
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte';
   import type { Address } from '../../api/email/send/mail-channels.interface';
-  import type { Writable } from 'svelte/store';
 
   let helperType: IHelper[];
   let inviteType: IInvite[];
-  let userType: IUser;
-  let managers:IHelper[] = []
+  let managers: IHelper[] = []
 
-  let users:Partial<Writable<IUser>>[]; // Is this ok?
-  let managerAddresses:Address[] = []
-  $: if (managers) {
-    users = managers.map(manager => {
-      const userStore = docStore<IUser>(`users/${manager.id}`, { startWith: userType, log: true });
-      return userStore
+  async function getManagerAddresses(): Promise<Address[]> {
+    if (!managers) return []
+    const userPromises = managers.map(manager => {
+      return getDocument<IUser>(`users/${manager.id}`);
     });
-  }
-
-  $: if (users){
-    users.forEach((user) => {
-      // Should I unsubscribe? Where?
-      user.subscribe((u: IUser) => {
-        if (u) managerAddresses.push({email: u.email, name: u.displayName});
-      })
-    });
-    managerAddresses = managerAddresses
+    const users = await Promise.all(userPromises)
+    return users.map(user => {
+      return {
+        name: user.displayName,
+        email: user.email
+      }
+    })
   }
 
   function writeIn() {
@@ -168,7 +161,9 @@
       </Button>
       {#if show}
         {#await import('$lib/components/modals/Contact.svelte') then { default: Contact }}
-          <Contact subject="request_access" additionalRecipients={managerAddresses} on:close={toggle} />
+          {#await getManagerAddresses() then managerAddresses}
+            <Contact subject="request_access" additionalRecipients={managerAddresses} on:close={toggle} />
+          {/await}
         {/await}
       {/if}
     </ShowHide>

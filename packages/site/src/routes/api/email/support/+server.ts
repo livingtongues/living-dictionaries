@@ -10,14 +10,13 @@ export interface SupportRequestBody {
   name: string;
   url: string;
   subject?: string;
-  to?: Address[]
+  additionalRecipients?: Address[]
 }
 
 export const POST: RequestHandler = async ({ request, fetch }) => {
-  const { email, message, name, url, subject, to } = await request.json() as SupportRequestBody;
-  const recipients: Address[] = getSupportMessageRecipients({ dev })
+  const { email, message, name, url, subject, additionalRecipients } = await request.json() as SupportRequestBody;
   const emailParts: EmailParts = {
-    to: recipients.concat(to),
+    to: [...getSupportMessageRecipients({ dev }), ...additionalRecipients],
     reply_to: { email },
     subject: subject || 'Living Dictionaries Support Request',
     type: 'text/plain',

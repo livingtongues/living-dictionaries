@@ -22,6 +22,9 @@
   }
   type Subjects = keyof typeof subjects;
   export let subject: Subjects = undefined;
+  $: computed_subject = subject === 'request_access' 
+    ? `${$dictionary.name} Living Dictionary: ${$user?.email || email} requests editing access` 
+    : subjects[subject];
 
   const dispatch = createEventDispatcher<{ close: boolean }>();
 
@@ -33,10 +36,6 @@
   let email = '';
   
   let status: 'success' | 'fail';
-  let special_request_access_subject = '';
-  $: if ($user?.email || email) {
-    special_request_access_subject = `${$dictionary.name} Living Dictionary: ${$user?.email || email} requests editing access`;
-  }
 
   async function send() {
     try {
@@ -45,8 +44,8 @@
         email: $user?.email || email,
         name: $user?.displayName || 'Anonymous',
         url: window.location.href,
-        subject: additionalRecipients.length > 0 && subject === 'request_access' ? special_request_access_subject : subjects[subject],
-        to: subject === 'request_access' ? additionalRecipients : []
+        subject: computed_subject,
+        additionalRecipients,
       });
 
       if (response.status !== 200) {
