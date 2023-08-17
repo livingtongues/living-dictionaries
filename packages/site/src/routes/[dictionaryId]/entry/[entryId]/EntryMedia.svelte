@@ -36,7 +36,7 @@
     <Image width={400} title={entry.lexeme} gcs={first_photo.specifiable_image_url} {canEdit} on:deleteImage />
   </div>
 {:else if canEdit}
-  <AddImage {dictionaryId} {entry} class="rounded-md h-20 bg-gray-100 mb-2">
+  <AddImage {dictionaryId} entryId={entry.id} class="rounded-md h-20 bg-gray-100 mb-2">
     <div class="text-xs" slot="text">
       {$t('entry.upload_photo', { default: 'Upload Photo' })}
     </div>

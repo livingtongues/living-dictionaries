@@ -1,4 +1,4 @@
-import type { IEntry } from '@living-dictionaries/types';
+import type { ActualDatabaseEntry } from '@living-dictionaries/types';
 import type { Timestamp } from 'firebase/firestore';
 
 export function convertJsonRowToEntryFormat(
@@ -6,8 +6,8 @@ export function convertJsonRowToEntryFormat(
   dateStamp?: number,
   // eslint-disable-next-line no-undef
   timestamp?: FirebaseFirestore.FieldValue
-): IEntry {
-  const entry: IEntry = { lx: row.lexeme, gl: {}, xs: {} };
+): ActualDatabaseEntry {
+  const entry: ActualDatabaseEntry = { lx: row.lexeme, gl: {}, xs: {} };
 
   if (row.phonetic) entry.ph = row.phonetic;
   if (row.morphology) entry.mr = row.morphology;

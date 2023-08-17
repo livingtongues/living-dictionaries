@@ -1,5 +1,5 @@
 import { writable } from 'svelte/store';
-import type { IDictionary, IEntry } from '@living-dictionaries/types';
+import type { IDictionary } from '@living-dictionaries/types';
 
 export const dictionary = writable<IDictionary>({
   id: '',
@@ -9,4 +9,3 @@ export const dictionary = writable<IDictionary>({
   glossLanguages: ['en'],
 });
 
-export const entries = writable<IEntry[]>([]);

@@ -1,4 +1,4 @@
-import type { IEntry, ISpeaker } from '@living-dictionaries/types';
+import type { ActualDatabaseEntry, ISpeaker } from '@living-dictionaries/types';
 
 const gender: 'm' | 'f' | 'o' = 'f';
 
@@ -13,7 +13,7 @@ export const speakers: ISpeaker[] = [
   },
 ];
 
-export const entries: IEntry[] = [
+export const entries: ActualDatabaseEntry[] = [
   {
     id: '12345qwerty',
     lx: 'xiangjiao',
@@ -226,7 +226,7 @@ export const entries: IEntry[] = [
   },
 ];
 
-export const entriesWithSemanticDomains: IEntry[] = [
+export const entriesWithSemanticDomains: ActualDatabaseEntry[] = [
   {
     id: '1',
     lx: 'One semantic domain',
@@ -273,7 +273,7 @@ export const entriesWithSemanticDomains: IEntry[] = [
   },
 ];
 
-export const entriesWithAlternateOrthographies: IEntry[] = [
+export const entriesWithAlternateOrthographies: ActualDatabaseEntry[] = [
   {
     id: 'altOrth5',
     lx: 'Hello',
@@ -294,7 +294,7 @@ export const entriesWithAlternateOrthographies: IEntry[] = [
   },
 ];
 
-export const entriesWithPhonetics: IEntry[] = [
+export const entriesWithPhonetics: ActualDatabaseEntry[] = [
   {
     id: 'phonetics',
     lx: 'Giraffe',
@@ -308,7 +308,7 @@ export const entriesWithPhonetics: IEntry[] = [
   },
 ];
 
-export const entriesWithPartsOfSpeech: IEntry[] = [
+export const entriesWithPartsOfSpeech: ActualDatabaseEntry[] = [
   {
     id: 'PoS',
     lx: 'Parts of speech',
@@ -323,7 +323,7 @@ export const entriesWithPartsOfSpeech: IEntry[] = [
   },
 ];
 
-export const entriesWithGlosses: IEntry[] = [
+export const entriesWithGlosses: ActualDatabaseEntry[] = [
   {
     id: 'multipleGlosses',
     lx: 'Hello World',
@@ -347,7 +347,7 @@ export const entriesWithGlosses: IEntry[] = [
   },
 ];
 
-export const entriesWithExampleSentences: IEntry[] = [
+export const entriesWithExampleSentences: ActualDatabaseEntry[] = [
   {
     id: 'multipleExampleSentences',
     lx: 'Fear',
