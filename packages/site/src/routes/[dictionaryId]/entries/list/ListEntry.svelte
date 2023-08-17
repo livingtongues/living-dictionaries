@@ -45,9 +45,7 @@
 
       {#if dictionary.id !== 'garifuna'}
         {#if entry.local_orthography_1}<i class="mr-1">{entry.local_orthography_1}</i>{/if}
-        {#if entry.local_orthography_2}<i class="mr-1" class:sompeng={dictionary.id === 'sora'}
-        >{entry.local_orthography_2}</i
-        >{/if}
+        {#if entry.local_orthography_2}<i class="mr-1" class:sompeng={dictionary.id === 'sora'}>{entry.local_orthography_2}</i>{/if}
         {#if entry.local_orthography_3}<i class="mr-1">{entry.local_orthography_3}</i>{/if}
         {#if entry.local_orthography_4}<i class="mr-1">{entry.local_orthography_4}</i>{/if}
         {#if entry.local_orthography_5}<i class="mr-1">{entry.local_orthography_5}</i>{/if}
@@ -55,9 +53,8 @@
     </div>
     <div class="flex flex-wrap items-center justify-end -mb-1">
       <div class="text-xs text-gray-600 mr-auto mb-1">
-        <!-- TODO: translated abbrevs -->
         {#if entry.senses?.[0]?.translated_parts_of_speech}
-          {#each entry.senses?.[0]?.translated_parts_of_speech as pos}
+          {#each entry.senses?.[0]?.parts_of_speech_keys as pos}
             <i>{$t('psAbbrev.' + pos, { default: pos })}, </i>
           {/each}
         {/if}
