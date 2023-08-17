@@ -6,21 +6,22 @@ export const variants: Variants<Component> = [
     width: 550,
     height: 300,
     props: {
-      field: 'gl.as'
+      field: 'gloss',
+      bcp: 'as',
     },
   },
   {
     name: 'Normal',
     height: 100,
     props: {
-      field: 'mr'
+      field: 'morphology',
     },
   },
   {
     name: 'Lexeme',
     height: 300,
     props: {
-      field: 'lx'
+      field: 'lexeme',
     },
   },
   {
@@ -28,7 +29,7 @@ export const variants: Variants<Component> = [
     width: 550,
     height: 300,
     props: {
-      field: 'nt'
+      field: 'notes',
     },
   },
   {
@@ -36,7 +37,7 @@ export const variants: Variants<Component> = [
     width: 550,
     height: 300,
     props: {
-      field: 'ph'
+      field: 'phonetic',
     },
   },
 ]
