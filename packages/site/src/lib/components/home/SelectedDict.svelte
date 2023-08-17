@@ -1,8 +1,9 @@
 <script lang="ts">
   import { Doc } from 'sveltefirets';
   import type { IAbout, IDictionary } from '@living-dictionaries/types';
-  import { _ } from 'svelte-i18n';
+  import { t } from 'svelte-i18n';
   import { Button } from 'svelte-pieces';
+  import sanitize from 'xss';
 
   export let dictionary: IDictionary;
   let aboutType: IAbout;
@@ -35,7 +36,7 @@
   {#if dictionary.glossLanguages}
     <div class="mb-2">
       <i class="far fa-info-circle fa-fw" />
-      {dictionary.glossLanguages.map((bcp) => $_('gl.' + bcp)).join(', ')}
+      {dictionary.glossLanguages.map((bcp) => $t('gl.' + bcp)).join(', ')}
     </div>
   {/if}
 
@@ -43,7 +44,7 @@
     <span
       class="mb-2 mr-2 inline-flex items-center px-2 py-1 rounded-full
         text-xs font-medium leading-4 bg-gray-200 text-gray-800">
-      {$_('dictionary.entries', { default: 'Entries' })}:&nbsp;
+      {$t('dictionary.entries', { default: 'Entries' })}:&nbsp;
       <b>{dictionary.entryCount}</b>
     </span>
   {/if}
@@ -67,7 +68,7 @@
 
   {#if dictionary.type === 'tdv1'}
     <Button target="_blank" class="mt-1 w-full" form="filled" color="black" href={dictionary.url}>
-      {$_('home.open_dictionary', { default: 'Open Dictionary' })}
+      {$t('home.open_dictionary', { default: 'Open Dictionary' })}
     </Button>
   {:else}
     <Doc
@@ -75,16 +76,16 @@
       startWith={aboutType}
       let:data={{ about }}>
       <div class="mb-2 text-sm inline-children-elements">
-        {@html truncateString(about, 200)}
+        {@html sanitize(truncateString(about, 200))}
         {#if about.length > 200}
           <a class="hover:underline" href={dictionary.id + '/about'}>
-            {$_('home.read_more', { default: 'Read More' })}
+            {$t('home.read_more', { default: 'Read More' })}
           </a>
         {/if}
       </div>
     </Doc>
     <Button class="mt-1 w-full" form="filled" color="black" href={dictionary.id}>
-      {$_('home.open_dictionary', { default: 'Open Dictionary' })}
+      {$t('home.open_dictionary', { default: 'Open Dictionary' })}
       <span class="i-fa6-solid-chevron-right rtl-x-flip -mt-1" />
     </Button>
   {/if}

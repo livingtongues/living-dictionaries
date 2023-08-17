@@ -1,13 +1,13 @@
 <script lang="ts">
+  import { createEventDispatcher } from 'svelte';
   import type { ExpandedEntry, IColumn } from '@living-dictionaries/types';
   import ColumnTitle from './ColumnTitle.svelte';
   import Cell from './Cell.svelte';
   import { minutesAgo } from '$lib/helpers/time';
-  import { createEventDispatcher } from 'svelte';
 
-  export let canEdit = false;
-  export let entries: ExpandedEntry[] = [];
   export let columns: IColumn[];
+  export let entries: ExpandedEntry[] = [];
+  export let canEdit = false;
   let selectedColumn: IColumn;
 
   function getLeftValue(index: number) {
@@ -60,7 +60,7 @@
 </div>
 
 {#if selectedColumn}
-  {#await import('$lib/components/table/ColumnAdjustSlideover.svelte') then { default: ColumnAdjustSlideover }}
+  {#await import('./ColumnAdjustSlideover.svelte') then { default: ColumnAdjustSlideover }}
     <ColumnAdjustSlideover
       {selectedColumn}
       on:close={() => {

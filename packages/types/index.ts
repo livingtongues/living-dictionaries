@@ -26,3 +26,4 @@ export type { HelperRoles, IHelper } from './helper.interface';
 export type { AlgoliaEntry } from './entry.algolia.interface';
 export { type IPrintFields, CustomPrintFields, StandardPrintFields } from './print-entry.interface';
 export { ReadyLocales, UnpublishedLocales } from './languages.interface';
+export { EntryFields, type EntryFieldValue } from './entry-fields.enum';

@@ -55,11 +55,11 @@ export function convert_entry_to_current_shape(actual: ActualDatabaseEntry): Goa
       continue;
     }
     if (key === 'xs') {
-      first_sense_from_base.xs = [value];
+      first_sense_from_base.xs = [{...first_sense_from_base.xs?.[0], ...value}];
       continue;
     }
     if (key === 'xv') {
-      first_sense_from_base.xs = [{ ...first_sense_from_base.xs?.[0], vn: value }];
+      first_sense_from_base.xs = [{ vn: value, ...first_sense_from_base.xs?.[0] }];
       continue;
     }
 

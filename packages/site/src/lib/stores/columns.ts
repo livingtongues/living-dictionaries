@@ -1,27 +1,20 @@
 import { writable } from 'svelte/store';
 import type { IColumn } from '@living-dictionaries/types';
-
 import { browser } from '$app/environment';
 
-const defaultColumns: IColumn[] = [
-  // field must match those used for i18n
-  // {
-  //   field: 'lx', // connects to entry.lx in i18n keys
-  //   width: 25,
-  //   hidden: true,
-  //   sticky: true,
-  // },
+export const defaultColumns: IColumn[] = [
+  // field must match those used for i18n (e.g. lx = entry.lx)
   {
-    field: 'lx', // lexeme
+    field: 'lexeme',
     width: 170,
     sticky: true,
   },
   {
-    field: 'soundFile',
+    field: 'audio',
     width: 31, // 50? // AudioCell
   },
   {
-    field: 'photoFile',
+    field: 'photo',
     width: 31, // 50? // ImageCell
   },
   // TODO: add videos to columns
@@ -34,27 +27,27 @@ const defaultColumns: IColumn[] = [
     width: 250,
   },
   {
-    field: 'alternateOrthographies',
+    field: 'local_orthography',
     width: 170,
   },
   {
-    field: 'ei', // elicitation ID
+    field: 'elicitation_id',
     width: 90,
   },
   {
-    field: 'sdn', // semanticDomain
+    field: 'semantic_domains',
     width: 200,
   },
   {
-    field: 'ps', // partOfSpeech
+    field: 'parts_of_speech',
     width: 137, // SelectPOS
   },
   {
-    field: 'nc', // nounClass
+    field: 'noun_class',
     width: 150,
   },
   {
-    field: 'ph', // phonetic
+    field: 'phonetic',
     width: 170,
   },
   {
@@ -62,27 +55,27 @@ const defaultColumns: IColumn[] = [
     width: 150, // SelectSpeakerCell
   },
   {
-    field: 'di', // dialect
+    field: 'dialects',
     width: 130,
   },
   {
-    field: 'in', // interlinearization
+    field: 'interlinearization',
     width: 150,
   },
   {
-    field: 'mr', // morphology
+    field: 'morphology',
     width: 150,
   },
   {
-    field: 'scn', // scientific names
+    field: 'scientific_names',
     width: 150,
   },
   {
-    field: 'pl', // plural form
+    field: 'plural_form',
     width: 150,
   },
   {
-    field: 'nt', // notes
+    field: 'notes',
     width: 300,
   },
   {
@@ -90,13 +83,13 @@ const defaultColumns: IColumn[] = [
     width: 300,
   },
   {
-    field: 'sr', // source
+    field: 'sources',
     width: 200,
   },
 ];
 
 let cachedColumns: IColumn[] = [];
-const tableCacheKey = 'table_columns_05.4.2023'; // IMPORTANT: rename when adding more columns to invalidate the user's cache
+const tableCacheKey = 'table_columns_08.17.2023'; // rename when adding more columns to invalidate the user's cache
 if (browser) {
   cachedColumns = JSON.parse(localStorage.getItem(tableCacheKey));
 }

@@ -2,13 +2,14 @@
   import { BadgeArrayEmit, ShowHide, ReactiveSet } from 'svelte-pieces';
   import { t } from 'svelte-i18n';
   import { createEventDispatcher } from 'svelte';
+  import { EntryFields } from '@living-dictionaries/types';
 
   export let dialects: string[] = [];
   export let canEdit = false;
 
   const dispatch = createEventDispatcher<{
     valueupdate: {
-      field: 'di';
+      field: EntryFields.dialects;
       newValue: string[];
     };
   }>();
@@ -22,7 +23,7 @@
     let:remove
     on:modified={({ detail: newValue }) => {
       dispatch('valueupdate', {
-        field: 'di',
+        field: EntryFields.dialects,
         newValue,
       });
     }}

@@ -66,13 +66,39 @@ describe(convert_entry_to_current_shape, () => {
     expect(convert_entry_to_current_shape(entry)).toEqual(expected);
   });
 
-  test('can add xv into first xs item even if it does not exist yet', () => {
+  test('can add xv into first xs item if does not exist', () => {
     const entry: ActualDatabaseEntry = {
       xv: 'foo',
     }
     const expected: GoalDatabaseEntry = {
       sn: [{
         xs: [{ vn: 'foo' }],
+      }]
+    }
+    expect(convert_entry_to_current_shape(entry)).toEqual(expected);
+  });
+
+  test('if entry has old xv and new example sentence that is not vernacular', () => {
+    const entry: ActualDatabaseEntry = {
+      xv: 'vernacular',
+      xs: { en: 'english' },
+    }
+    const expected: GoalDatabaseEntry = {
+      sn: [{
+        xs: [{ en: 'english', vn: 'vernacular' }],
+      }]
+    }
+    expect(convert_entry_to_current_shape(entry)).toEqual(expected);
+  });
+
+  test('if entry has both xv and xs.vn then xs.vn is used', () => {
+    const entry: ActualDatabaseEntry = {
+      xv: 'should not show',
+      xs: { vn: 'should show' },
+    }
+    const expected: GoalDatabaseEntry = {
+      sn: [{
+        xs: [{ vn: 'should show' }],
       }]
     }
     expect(convert_entry_to_current_shape(entry)).toEqual(expected);

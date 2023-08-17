@@ -1,7 +1,16 @@
 <script lang="ts">
+  import type { EntryFieldValue } from '@living-dictionaries/types';
   import { ShowHide } from 'svelte-pieces';
+  import sanitize from 'xss';
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  interface $$Events {
+    update: CustomEvent<string>;
+  }
+
   export let value: string;
-  export let field: string = undefined;
+  export let field: EntryFieldValue;
+  export let bcp: string = undefined;
   export let display: string;
   export let canEdit = false;
 </script>
@@ -14,24 +23,24 @@
       class:hover:bg-gray-100={canEdit}
       class:cursor-pointer={canEdit}
       class:order-2={!value}>
-      {#if field != 'lx'}
+      {#if field != 'lexeme'}
         <div class="text-xs text-gray-500 mt-1">{display}</div>
       {/if}
       <div
         class:sompeng={display === 'Sompeng'}
-        class:font-bold={field === 'lx'}
-        class:text-4xl={field === 'lx'}
-        class:border-b-2={field !== 'lx'}
+        class:font-bold={field === 'lexeme'}
+        class:text-4xl={field === 'lexeme'}
+        class:border-b-2={field !== 'lexeme'}
         class="border-dashed pb-1 mb-2">
         {#if value}
           <div dir="ltr">
-            {#if field === 'nt' || value.includes('<i>')}
+            {#if field === 'notes' || value.includes('<i>')}
               <span class="tw-prose">
-                {@html value}
+                {@html sanitize(value)}
               </span>
-            {:else if field === 'ph'}
+            {:else if field === 'phonetic'}
               [{value}]
-            {:else if field === 'scn'}
+            {:else if field === 'scientific_names' && !value?.includes('<i>')}
               <i>{value}</i>
             {:else}
               {value}
@@ -42,7 +51,7 @@
     </div>
     {#if show}
       {#await import('$lib/components/entry/EditFieldModal.svelte') then { default: EditFieldModal }}
-        <EditFieldModal on:valueupdate {value} {field} {display} on:close={toggle} />
+        <EditFieldModal on:update {value} {field} {display} {bcp} on:close={toggle} />
       {/await}
     {/if}
   </ShowHide>

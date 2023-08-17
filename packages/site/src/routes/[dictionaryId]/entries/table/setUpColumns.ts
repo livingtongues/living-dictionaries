@@ -2,6 +2,7 @@ import type { IColumn, IDictionary } from '@living-dictionaries/types';
 import { get } from 'svelte/store';
 import { t } from 'svelte-i18n';
 import { vernacularName } from '$lib/helpers/vernacularName';
+import { DICTIONARIES_WITH_VARIANTS } from '$lib/constants';
 
 export function setUpColumns(columns: IColumn[], dictionary: IDictionary): IColumn[] {
   const cols = columns.filter((column) => !column.hidden);
@@ -12,12 +13,12 @@ export function setUpColumns(columns: IColumn[], dictionary: IDictionary): IColu
     const glossColumns: IColumn[] = [];
     dictionary.glossLanguages.forEach((bcp) => {
       glossColumns.push({
-        field: bcp,
+        field: 'gloss',
+        bcp,
         width: cols[glossIndex].width,
         sticky: cols[glossIndex].sticky || false,
         display: $t('gl.' + bcp),
         explanation: vernacularName(bcp),
-        gloss: true,
       });
     });
     cols.splice(glossIndex, 1, ...glossColumns);
@@ -28,42 +29,45 @@ export function setUpColumns(columns: IColumn[], dictionary: IDictionary): IColu
     const $t = get(t);
     const exampleSentenceColumns: IColumn[] = [
       {
-        field: 'xv',
+        field: 'example_sentence',
+        bcp: 'vn', // vernacular
         width: cols[exampleSentenceIndex].width,
         sticky: cols[exampleSentenceIndex].sticky || false,
         display: $t('entry.example_sentence', { default: 'Example Sentence' }),
-        exampleSentence: true,
       },
     ];
     dictionary.glossLanguages.forEach((bcp) => {
       exampleSentenceColumns.push({
-        field: bcp,
+        field: 'example_sentence',
+        bcp,
         width: cols[exampleSentenceIndex].width,
         sticky: cols[exampleSentenceIndex].sticky || false,
         display: `${$t(`gl.${bcp}`)} ${$t('entry.example_sentence', {
           default: 'Example Sentence',
         })}`,
-        exampleSentence: true,
       });
     });
     cols.splice(exampleSentenceIndex, 1, ...exampleSentenceColumns);
   }
 
-  const orthographyIndex = cols.findIndex((col) => col.field === 'alternateOrthographies');
+  const orthographyIndex = cols.findIndex(({field}) => field === 'local_orthography');
   if (orthographyIndex >= 0) {
     const alternateOrthographyColumns: IColumn[] = [];
     if (dictionary.alternateOrthographies) {
       for (const [index, orthography] of dictionary.alternateOrthographies.entries()) {
         alternateOrthographyColumns.push({
-          field: index === 0 ? 'lo' : 'lo' + (index + 1),
+          field: 'local_orthography',
           width: 170,
           display: orthography,
-          orthography: true,
+          orthography_index: index + 1,
         });
       }
     }
     cols.splice(orthographyIndex, 1, ...alternateOrthographyColumns);
   }
+
+  if (DICTIONARIES_WITH_VARIANTS.includes(dictionary.id))
+    cols.push({ field: 'variant', width: 150 });
 
   return cols;
 }

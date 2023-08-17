@@ -8,7 +8,6 @@
 </script>
 
 <ShowHide let:show let:toggle let:set>
-
   <div
     class:cursor-pointer={canEdit}
     class="h-full"

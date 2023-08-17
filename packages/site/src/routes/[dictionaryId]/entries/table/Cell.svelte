@@ -7,7 +7,7 @@
   import SelectSpeakerCell from './cells/SelectSpeakerCell.svelte';
   import SelectSource from './cells/SelectSource.svelte';
   import Image from '$lib/components/image/Image.svelte';
-  import type { ExpandedEntry, IColumn } from '@living-dictionaries/types';
+  import { EntryFields, type ExpandedEntry, type IColumn } from '@living-dictionaries/types';
   import Audio from '../../entries/Audio.svelte';
   import { createEventDispatcher } from 'svelte';
 
@@ -23,11 +23,11 @@
 <div
   class:sompeng={column.display === 'Sompeng'}
   class="h-full w-full inline-block">
-  {#if column.field === 'soundFile'}
+  {#if column.field === 'audio'}
     <Audio class="h-full text-sm" minimal {canEdit} {entry} let:playing>
       <span class:text-blue-700={playing} class="i-material-symbols-hearing text-lg mt-1" />
     </Audio>
-  {:else if column.field === 'photoFile'}
+  {:else if column.field === 'photo'}
     {@const first_photo = entry.senses?.[0]?.photo_files?.[0]}
     {#if first_photo}
       <Image
@@ -37,68 +37,68 @@
         square={60}
         on:deleteImage />
     {/if}
-    <!-- TODO: add videos to columns -->
   {:else if column.field === 'speaker'}
     <SelectSpeakerCell {canEdit} {entry} />
-  {:else if column.field === 'ps'}
+  {:else if column.field === 'parts_of_speech'}
     <EntryPartOfSpeech
       {canEdit}
-      value={entry.senses[0].translated_parts_of_speech}
+      value={entry.senses?.[0]?.translated_parts_of_speech}
       on:valueupdate />
-  {:else if column.field === 'sdn'}
+  {:else if column.field === 'semantic_domains'}
     <SemanticDomains
       {canEdit}
       {entry}
       on:valueupdate />
-  {:else if column.field === 'di'}
+  {:else if column.field === 'dialects'}
     <EntryDialect
       {canEdit}
       dialects={entry.dialects}
       on:valueupdate />
-  {:else if column.field === 'sr'}
+  {:else if column.field === 'sources'}
     <SelectSource
       {canEdit}
       value={entry.sources}
       on:valueupdate />
-  {:else if column.gloss === true}
-    <Textbox
-      {canEdit}
-      field={`gl.${column.field}`}
-      value={entry.senses?.[0]?.glosses?.[column.field]}
-      display={$t(`gl.${column.field}`, { default: 'Gloss' })}
-      on:valueupdate />
-    <!-- htmlValue={entry._highlightResult?.gl?.[column.field]?.value} -->
-  {:else if column.exampleSentence === true}
-    <Textbox
-      {canEdit}
-      field={`xs.${column.field}`}
-      value={entry.senses?.[0]?.example_sentences?.[column.field]}
-      display={`${column.field !== 'xv' ? $t(`gl.${column.field}`) : ''} ${$t(
-        'entry.example_sentence',
-        {
-          default: 'Example Sentence',
-        }
-      )}`}
-      on:valueupdate />
-  {:else if column.field === 'scn'}
-    <Textbox
-      {canEdit}
-      field="scn"
-      value={entry.scientific_names?.[0]}
-      display={$t('entry.scn', { default: 'Scientific Name' })}
-      on:valueupdate={({detail: {field, newValue}}) =>
-        dispatch('valueupdate', { field, newValue: [newValue]},
-        )} />
-  {:else}
+  {:else if column.field === 'gloss'}
     <Textbox
       {canEdit}
       field={column.field}
+      value={entry.senses?.[0]?.glosses?.[column.bcp]}
+      display={column.display}
+      on:update={({detail}) => dispatch('valueupdate', { field: `gl.${column.bcp}`, newValue: detail})} />
+  {:else if column.field === 'example_sentence'}
+    <Textbox
+      {canEdit}
+      field={column.field}
+      value={entry.senses?.[0]?.example_sentences?.[0]?.[column.bcp]}
+      display={column.display}
+      on:update={({detail}) => dispatch('valueupdate', { field: `xs.${column.bcp}`, newValue: detail})} />
+  {:else if column.field === 'scientific_names'}
+    <Textbox
+      {canEdit}
+      field={column.field}
+      value={entry.scientific_names?.[0]}
+      display={$t('entry.scn', { default: 'Scientific Name' })}
+      on:update={({detail}) => dispatch('valueupdate', { field: EntryFields.scientific_names, newValue: [detail]} )} />
+  {:else if column.field === 'local_orthography'}
+    {@const orthographyIndex = `local_orthography_${column.orthography_index}`}
+    <Textbox
+      {canEdit}
+      field={column.field}
+      value={entry[orthographyIndex]}
+      display={column.display}
+      on:update={({detail}) => dispatch('valueupdate', { field: orthographyIndex, newValue: detail} )} />
+  {:else}
+    <Textbox
+      field={column.field}
+      {canEdit}
       value={entry[column.field]}
-      display={$t(`entry.${column.field}`, { default: 'Edit' })}
-      on:valueupdate />
-    <!-- htmlValue={entry._highlightResult?.[column.field]?.value} -->
+      display={$t(`entry.${EntryFields[column.field]}`, { default: 'Edit' })}
+      on:update={({detail}) => dispatch('valueupdate', { field: EntryFields[column.field], newValue: detail})} />
   {/if}
 </div>
+<!-- htmlValue={entry._highlightResult?.[column.field]?.value} -->
+
 
 <style>
   /* Firefox */
