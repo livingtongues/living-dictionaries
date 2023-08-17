@@ -18,7 +18,7 @@ export const mockEntries: { name: string, description?: string, entry: GoalDatab
             en: 'common jay butterfly',
             es: 'mariposa común jay',
             fr: 'papillon jay commun',
-            pt: 'this is a very long gloss to simulate that sort of situation',
+            pt: 'this is a very long gloss to simulate that sort of situation where it is ridiculously long',
             il: null,
           },
           ps: ['n', 'v'],
@@ -62,9 +62,21 @@ export const mockEntries: { name: string, description?: string, entry: GoalDatab
       id: '2',
       ei: '123',
     }
-  }
+  },
+  {
+    name: 'has video',
+    entry: {
+      lx: 'running through the forest',
+      sn: [
+        {
+          vfs: [{
+          path: 'not-real-path',
+          }],
+        }
+      ]
+    }
+  },
 ]
-
 
 export const mock_expanded_entries = mockEntries.map(entry => {
   return {

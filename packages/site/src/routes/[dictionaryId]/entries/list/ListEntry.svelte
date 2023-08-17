@@ -5,7 +5,7 @@
   import Image from '$lib/components/image/Image.svelte';
   import AddImage from '../AddImage.svelte';
   import type { ExpandedEntry, IDictionary } from '@living-dictionaries/types';
-  import { order_glosses, order_entry_and_dictionary_gloss_languages } from '$lib/helpers/glosses';
+  import { order_glosses } from '$lib/helpers/glosses';
   import { minutesAgo } from '$lib/helpers/time';
   import { ShowHide } from 'svelte-pieces';
   import sanitize from 'xss';
@@ -81,25 +81,18 @@
           {#if entry.dialects}<p class="text-xs">
             <i class="mr-1">{$t('entry.di', { default: 'Dialect' })}: {entry.dialects.join(', ')}</i>
           </p>{/if}
-          {#if entry.xs?.vn}<p>
-            <span class="font-semibold"
-            >{$t('entry.example_sentence', { default: 'Example Sentence' })}:</span>
-            {entry.xs.vn}
-          </p>{/if}
-          {#if entry.xs}
-            {#each order_entry_and_dictionary_gloss_languages(entry.gl, dictionary.glossLanguages) as bcp}
-              {#if entry.xs[bcp]}
-                <p>
-                  <span class="font-semibold"
-                  >{$t(`gl.${bcp}`)}
-                    {$t('entry.example_sentence', {
-                      default: 'Example Sentence',
-                    })}:</span>
-                  {entry.xs[bcp]}
-                </p>
-              {/if}
+          {#each entry.senses?.[0]?.example_sentences || [{}] as sentence}
+            {#each Object.entries(sentence) as [bcp, content]}
+              <p>
+                <span class="font-semibold">
+                  {#if bcp !== 'vn'}
+                    {$t(`gl.${bcp}`)}
+                  {/if}
+                  {$t('entry.example_sentence', { default: 'Example Sentence' })}:</span>
+                {content}
+              </p>
             {/each}
-          {/if}
+          {/each}
         {/if}
 
         {#if entry.plural_form}
@@ -109,25 +102,23 @@
         {/if}
       </div>
 
-      {#if entry.sd}
+      {#if entry.senses?.[0]?.write_in_semantic_domains}
         <span class="px-2 py-1 leading-tight text-xs bg-gray-100 rounded ml-1">
-          <i>{entry.sd}</i>
+          <i>{entry.senses?.[0]?.write_in_semantic_domains.join(', ')}</i>
         </span>
       {/if}
 
-      {#if entry.sdn?.length}
-        {#each entry.sdn as domain}
-          <span
-            class="px-2 py-1 leading-tight text-xs bg-gray-100 rounded ml-1
-              mb-1">
-            {$t('sd.' + domain, { default: domain })}
-          </span>
-        {/each}
-      {/if}
+      {#each entry.senses?.[0]?.translated_ld_semantic_domains || [] as domain}
+        <span
+          class="px-2 py-1 leading-tight text-xs bg-gray-100 rounded ml-1
+            mb-1">
+          {domain}
+        </span>
+      {/each}
     </div>
   </a>
-  {#if entry.senses?.[0].video_files?.[0]}
-    <Video class="bg-gray-100 border-r-2" lexeme={entry.lexeme} video={entry.senses[0].video_files[0]} {canEdit} />
+  {#if entry.senses?.[0]?.video_files?.[0]}
+    <Video class="bg-gray-100 p-1.5 border-r-2" lexeme={entry.lexeme} video={entry.senses[0].video_files[0]} {canEdit} />
   {:else if videoAccess && canEdit}
     <ShowHide let:show let:toggle>
       <button
@@ -135,7 +126,7 @@
         class="media-block bg-gray-100 border-r-2 hover:bg-gray-300 flex flex-col items-center
           justify-center cursor-pointer p-2 text-lg"
         on:click={toggle}>
-        <i class="far fa-video-plus my-1 mx-2 text-blue-800" />
+        <span class="i-bi-camera-video text-2xl mt-1  text-blue-800" />
       </button>
       {#if show}
         {#await import('$lib/components/video/AddVideo.svelte') then { default: AddVideo }}

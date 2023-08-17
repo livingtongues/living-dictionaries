@@ -6,7 +6,6 @@
   import EntrySemanticDomains from './EntrySemanticDomains.svelte';
   import { createEventDispatcher } from 'svelte';
   import EntryDialect from '$lib/components/entry/EntryDialect.svelte';
-  // import { BadgeArray, Button } from 'svelte-pieces';
   import { BadgeArray } from 'svelte-pieces';
   import { order_entry_and_dictionary_gloss_languages } from '$lib/helpers/glosses';
   import { DICTIONARIES_WITH_VARIANTS } from '$lib/constants';
