@@ -3,6 +3,12 @@
   import type { ExpandedEntry } from '@living-dictionaries/types';
   import { ShowHide } from 'svelte-pieces';
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  interface $$Events {
+    update: CustomEvent<string>;
+    removeCustomDomain: CustomEvent<boolean>;
+  }
+
   export let entry: ExpandedEntry;
   export let canEdit = false;
 </script>
@@ -29,8 +35,10 @@
   {#if show}
     {#await import('$lib/components/entry/SemanticDomainsModal.svelte') then { default: SemanticDomainsModal }}
       <SemanticDomainsModal
-        {entry}
-        on:valueupdate
+        write_in_semantic_domains={entry.senses?.[0]?.write_in_semantic_domains}
+        ld_semantic_domains_keys={entry.senses?.[0]?.ld_semantic_domains_keys}
+        on:update
+        on:removeCustomDomain
         on:close={toggle} />
     {/await}
   {/if}

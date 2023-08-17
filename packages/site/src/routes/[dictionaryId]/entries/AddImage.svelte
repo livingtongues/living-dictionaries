@@ -1,10 +1,10 @@
 <script lang="ts">
-  import type { GoalDatabasePhoto, IEntry } from '@living-dictionaries/types';
+  import type { GoalDatabasePhoto, ActualDatabaseEntry } from '@living-dictionaries/types';
   import { t } from 'svelte-i18n';
   import { updateOnline } from 'sveltefirets';
   import { get } from 'svelte/store';
 
-  export let entry: IEntry;
+  export let entryId: string;
   export let dictionaryId: string;
 
   let dragging = false;
@@ -45,7 +45,7 @@
       cr: displayName,
       ab: uid,
     }
-    await updateOnline<IEntry>(`dictionaries/${dictionaryId}/words/${entry.id}`, { pf} ,
+    await updateOnline<ActualDatabaseEntry>(`dictionaries/${dictionaryId}/words/${entryId}`, { pf } ,
       { abbreviate: true }
     )
   }
@@ -83,7 +83,7 @@
     {#await import('$lib/components/image/UploadImage.svelte') then { default: UploadImage }}
       <UploadImage
         {file}
-        fileLocationPrefix="{dictionaryId}/images/{entry.id}_"
+        fileLocationPrefix="{dictionaryId}/images/{entryId}_"
         on:uploaded={({detail: {fb_storage_path, specifiable_image_url}}) => saveImage(fb_storage_path, specifiable_image_url)} />
     {/await}
   {/if}

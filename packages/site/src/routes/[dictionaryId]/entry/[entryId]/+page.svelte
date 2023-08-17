@@ -43,7 +43,7 @@
       <Button
         color="red"
         form="simple"
-        onclick={() => deleteEntry(entry, $dictionary.id, $algoliaQueryParams)}>
+        onclick={() => deleteEntry($initialEntry, $dictionary.id, $algoliaQueryParams)}>
         <span class="hidden md:inline">
           {$t('misc.delete', { default: 'Delete' })}
         </span>
@@ -73,5 +73,5 @@
   lat={$dictionary.coordinates?.latitude}
   lng={$dictionary.coordinates?.longitude}
   url="https://livingdictionaries.app/{$dictionary.id}/entry/{entry.id}"
-  gcsPath={entry.pf?.gcs}
+  gcsPath={entry.senses?.[0]?.photo_files?.[0]?.specifiable_image_url}
   keywords="Minority Languages, Indigenous Languages, Language Documentation, Dictionary, Minority Community, Language Analysis, Language Education, Endangered Languages, Language Revitalization, Linguistics, Word Lists, Linguistic Analysis, Dictionaries, Living Dictionaries, Living Tongues, Under-represented Languages, Tech Resources, Language Sustainability, Language Resources, Diaspora Languages, Elicitation, Language Archives, Ancient Languages, World Languages, Obscure Languages, Little Known languages, Digital Dictionary, Dictionary Software, Free Software, Online Dictionary Builder" />

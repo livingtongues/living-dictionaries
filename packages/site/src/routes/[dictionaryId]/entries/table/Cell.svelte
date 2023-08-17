@@ -48,7 +48,8 @@
     <SemanticDomains
       {canEdit}
       {entry}
-      on:valueupdate />
+      on:update={({detail}) => dispatch('valueupdate', { field: 'sdn', newValue: detail })}
+      on:removeCustomDomain={() => dispatch('valueupdate', { field: 'sd', newValue: null })} />
   {:else if column.field === 'dialects'}
     <EntryDialect
       {canEdit}

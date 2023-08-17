@@ -2,7 +2,7 @@
   import { t } from 'svelte-i18n';
   import { Button, ShowHide } from 'svelte-pieces';
   import EditFieldModal from '$lib/components/entry/EditFieldModal.svelte';
-  import type { IEntry } from '@living-dictionaries/types';
+  import type { ActualDatabaseEntry } from '@living-dictionaries/types';
   import { page } from '$app/stores';
   import { goto } from '$app/navigation';
   import { addOnline } from 'sveltefirets';
@@ -12,7 +12,7 @@
       return alert(`Missing: ${$t('entry.lx', { default: 'Lexeme/Word/Phrase' })}`);
     }
     try {
-      const entryDoc = await addOnline<IEntry>(
+      const entryDoc = await addOnline<ActualDatabaseEntry>(
         `dictionaries/${$page.params.dictionaryId}/words`,
         {
           lx,

@@ -1,12 +1,11 @@
-
 // import torwali from './torwali-edited.json'; **Note that data files aren't in this repo**
+import { ActualDatabaseEntry } from '@living-dictionaries/types';
 import { abbreviateTDPartOfSpeech } from './abbreviate-pos';
-import { IEntry } from '../../../../src/lib/interfaces';
 
 // const entries = [...torwali];
 const entries = [];
 
-const data: IEntry[] = entries.map((entry) => {
+const data: ActualDatabaseEntry[] = entries.map((entry) => {
   entry.lx.trim();
   delete entry.lx_Tor; // duplicate of lx
   delete entry.sn;
@@ -69,7 +68,7 @@ const data: IEntry[] = entries.map((entry) => {
 });
 // .filter((entry) => Object.keys(entry).length !== 0);
 
-function download(entries: IEntry[], fileName: string, contentType: string) {
+function download(entries: ActualDatabaseEntry[], fileName: string, contentType: string) {
   const a = document.createElement('a');
   const file = new Blob([JSON.stringify(entries)], { type: contentType });
   a.href = URL.createObjectURL(file);

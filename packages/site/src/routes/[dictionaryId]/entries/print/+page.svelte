@@ -128,7 +128,7 @@
             showQrCode={$showQrCode}
             showLabels={$showLabels}
             selectedFields={$preferredPrintFields}
-            dictionaryId={$dictionary.id} />
+            dictionary={$dictionary} />
         {/each}
       </div>
       <Doc

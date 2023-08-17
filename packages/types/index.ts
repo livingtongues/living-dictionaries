@@ -9,7 +9,7 @@ export type {
   IRegion,
   ICitation,
 } from './dictionary.interface';
-export type { ActualDatabaseEntry, ExpandedEntry, GoalDatabaseEntry, IEntry, DatabaseSense, ExpandedSense, LDAlgoliaHit } from './entry.interface';
+export type { ActualDatabaseEntry, ExpandedEntry, GoalDatabaseEntry, DatabaseSense, ExpandedSense, LDAlgoliaHit } from './entry.interface';
 export type { IGlossLanguages, IGlossLanguage } from './gloss-language.interface';
 export type { IGloss } from './gloss.interface';
 export type { IExampleSentence } from './exampe-sentence.interface';

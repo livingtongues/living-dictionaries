@@ -1,4 +1,4 @@
-import type { IEntry } from '@living-dictionaries/types';
+import type { ActualDatabaseEntry } from '@living-dictionaries/types';
 import { db, timestamp, environment } from '../config.js';
 import { uploadAudioFile, uploadImageFile } from './import-media.js';
 import { readFileSync } from 'fs';
@@ -31,7 +31,7 @@ export async function importEntriesToFirebase(
   dateStamp: number,
   dry = false
 ) {
-  const entries: IEntry[] = [];
+  const entries: ActualDatabaseEntry[] = [];
   let entryCount = 0;
   let batchCount = 0;
   let batch = db.batch();
