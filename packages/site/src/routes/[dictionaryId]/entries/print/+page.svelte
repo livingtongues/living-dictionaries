@@ -28,7 +28,7 @@
   }
 
   const preferredPrintFields = createPersistedStore<IPrintFields>(
-    'printFields_10.18.2022',
+    'printFields_8.18.2023',
     defaultPrintFields
   );
   const headwordSize = createPersistedStore<number>('printHeadwordSize', 12);
