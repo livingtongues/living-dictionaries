@@ -43,10 +43,10 @@
   </Button>
   {#if show}
     <EditFieldModal
-      field="lx"
+      field="lexeme"
       display={$t('entry.lx', { default: 'Lexeme/Word/Phrase' })}
-      on:valueupdate={(e) => addNewEntry(e.detail.newValue)}
+      on:update={({detail}) => addNewEntry(detail)}
       on:close={toggle}
-      adding />
+      addingLexeme />
   {/if}
 </ShowHide>

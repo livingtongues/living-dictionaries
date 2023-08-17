@@ -1,8 +1,8 @@
 import type { Variants } from 'kitbook';
 import type Component from './PrintEntry.svelte';
 import type { IPrintFields } from '@living-dictionaries/types';
-import { mockEntries } from '$lib/mocks/entries';
-import { expand_entry } from '$lib/transformers/expand_entry';
+import { mock_expanded_entries } from '$lib/mocks/entries';
+import { basic_mock_dictionary } from '$lib/mocks/dictionaries';
 
 const selectedFields: IPrintFields = {
   gloss: true,
@@ -23,19 +23,14 @@ const selectedFields: IPrintFields = {
   sr: true,
 };
 
-export const variants: Variants<Component> = mockEntries.map(variant => {
+export const variants: Variants<Component> = mock_expanded_entries.map(variant => {
   return {
     name: variant.name,
     height: 400,
-    // ...variant,
     props: {
-      dictionary: {
-        id: 'gta',
-        name: 'Gtaʼ',
-        glossLanguages: ['en', 'es'],
-      },
+      dictionary: basic_mock_dictionary,
       selectedFields,
-      entry: expand_entry(variant.entry),
+      entry: variant.entry,
       showQrCode: true,
       headwordSize: 20,
       showLabels: true,

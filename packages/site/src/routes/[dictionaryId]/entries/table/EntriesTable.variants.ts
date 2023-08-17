@@ -1,25 +1,21 @@
 import type { Variants } from 'kitbook';
 import type Component from './EntriesTable.svelte';
 import { mock_expanded_entries } from '$lib/mocks/entries';
-import type { IColumn } from '@living-dictionaries/types';
-// import { setUpColumns } from './setUpColumns';
+import { defaultColumns } from '$lib/stores/columns';
+import { setUpColumns } from './setUpColumns';
+import { basic_mock_dictionary } from '$lib/mocks/dictionaries';
 
-const column: IColumn = {
-  field: 'lx',
-  width: 300,
-  display: 'The lexeme',
-}
+const columns = setUpColumns(defaultColumns, basic_mock_dictionary);
 
-// const columns = setUpColumns($preferredColumns, $dictionary);
-
-export const variants: Variants<Component> = mock_expanded_entries.map(variant => {
-  return {
-    name: variant.name,
-    // height: 400,
+export const variants: Variants<Component> = [
+  {
+    // name: variant.name,
+    height: 600,
     props: {
-      column,
-      entry: variant.entry,
+      columns,
+      entries: mock_expanded_entries.map(({entry}) => entry),
       canEdit: true,
     }
-  };
-});
+  }
+]
+

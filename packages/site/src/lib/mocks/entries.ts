@@ -52,12 +52,15 @@ export const mockEntries: { name: string, description?: string, entry: GoalDatab
       sr: ['Some cool guy in the village'],
       nt: `recorded in 1998, <img src=x" onerror="alert('XSS Attack will be sanitized')">`,
       // 'createdBy': 'OTD',
+      id: '1',
     }
   },
   {
     name: 'simple',
     entry: {
       lx: 'hello',
+      id: '2',
+      ei: '123',
     }
   }
 ]
