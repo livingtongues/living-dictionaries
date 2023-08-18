@@ -1,76 +1,75 @@
-<script>
+<script lang="ts">
   import { onMount } from 'svelte';
   import { fly } from 'svelte/transition';
-  export let value = [];
-  export let readonly = false;
+
+  export let value: string[] = [];
   export let placeholder = '';
 
-  $: calculatedPlaceholder = value && value.length ? '' : placeholder;
+  $: calculatedPlaceholder = value?.length ? '' : placeholder;
 
-  let input,
-    inputValue,
-    options = [],
-    activeOption,
-    showOptions = false,
-    selected = {},
-    first = true,
-    slot;
+  type Option = {
+      value: string;
+      name: string;
+  };
+
+  let input: HTMLInputElement;
+  let inputValue: string;
+  let options: Option[] = [];
+  let activeOption: Option;
+  let showOptions = false;
+  let selected: Record<string, Option> = {};
+  let inited = false;
+  let selectSlot: HTMLSelectElement;
 
   onMount(() => {
-    slot.querySelectorAll('option').forEach((o) => {
-      o.selected && o.value && !value.includes(o.value) && (value = [...value, o.value]);
-      options = [...options, { value: o.value, name: o.textContent }];
+    selectSlot.querySelectorAll('option').forEach((option) => {
+      if (option.selected && option.value && !value.includes(option.value)) value = [...value, option.value];
+      options = [...options, { value: option.value, name: option.textContent }];
     });
-    value &&
-      (selected = options.reduce(
-        (obj, op) => (value.includes(op.value) ? { ...obj, [op.value]: op } : obj),
-        {}
-      ));
-    first = false;
+    if (value) {
+      let newSelected = {}
+      for (const option of options) {
+        if (value.includes(option.value)) {
+          newSelected[option.value] = option
+        }
+      }
+      selected = newSelected
+    }
+    inited = true;
   });
 
-  $: if (!first) value = Object.values(selected).map((o) => o.value);
+  $: if (inited) value = Object.values(selected).map((option) => option.value);
   $: filtered = options.filter((o) =>
     inputValue ? o.name.toLowerCase().includes(inputValue.toLowerCase()) : o
   );
   $: if ((activeOption && !filtered.includes(activeOption)) || (!activeOption && inputValue))
     activeOption = filtered[0];
 
-  function add(token) {
+  function add(option: Option) {
     inputValue = '';
-    if (!readonly) selected[token.value] = token;
+    selected[option.value] = option;
   }
 
-  function remove(value) {
-    if (!readonly) {
-      const { [value]: val, ...rest } = selected;
-      selected = rest;
-    }
+  function remove(value: string) {
+    const { [value]: option, ...restOfOptions } = selected;
+    selected = restOfOptions;
   }
 
-  function optionsVisibility(show) {
-    if (readonly) return;
-    if (typeof show === 'boolean') {
-      showOptions = show;
-      show && input.focus();
-    } else {
-      showOptions = !showOptions;
-    }
-    if (!showOptions) {
-      activeOption = undefined;
-    }
+  function setShowOptions(show: boolean) {
+    showOptions = show;
+    if (show) input.focus();
+    if (!show) activeOption = undefined;
   }
 
-  function handleKeyup(e) {
-    if (e.keyCode === 13) {
+  function handleKeydown(e: KeyboardEvent) {
+    if (e.key === 'Enter') {
       Object.keys(selected).includes(activeOption.value)
         ? remove(activeOption.value)
         : add(activeOption);
       inputValue = '';
     }
-    if ([38, 40].includes(e.keyCode)) {
-      // up and down arrows
-      const increment = e.keyCode === 38 ? -1 : 1;
+    if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+      const increment = e.key === 'ArrowUp' ? -1 : 1;
       const calcIndex = filtered.indexOf(activeOption) + increment;
       activeOption =
         calcIndex < 0
@@ -81,104 +80,57 @@
     }
   }
 
-  function handleBlur(e) {
-    optionsVisibility(false);
-  }
-
-  function handleTokenClick(e) {
-    if (e.target.closest('.token-remove')) {
-      e.stopPropagation();
-      remove(e.target.closest('.token').dataset.id);
-    } else if (e.target.closest('.remove-all')) {
-      selected = [];
-      inputValue = '';
+  function selectOption(option: Option) {
+    if (selected[option.value]) {
+      remove(option.value);
     } else {
-      optionsVisibility(true);
-    }
-  }
-
-  function handleOptionMousedown(e) {
-    const value = e.target.dataset.value;
-    if (selected[value]) {
-      remove(value);
-    } else {
-      add(options.filter((o) => o.value === value)[0]);
+      add(option);
       input.focus();
     }
   }
 </script>
 
-<div class="multiselect" class:readonly>
-  <div class="tokens" class:showOptions on:click={handleTokenClick}>
-    {#each Object.values(selected) as s}
+<div class="multiselect">
+  <div class="tokens" class:showOptions on:click={() => setShowOptions(true)}>
+    {#each Object.values(selected) as option}
       <div
-        class="token items-center flex rounded-lg px-2 py-1 whitespace-nowrap
-        text-sm font-medium leading-4 bg-blue-100 text-blue-800 mr-2 my-1"
-        data-id={s.value}>
-        <span>{s.name}</span>
-        {#if !readonly}
-          <div
-            class="token-remove cursor-pointer justify-center items-center flex
+        class="items-center flex rounded-lg px-2 py-1 whitespace-nowrap
+        text-sm font-medium leading-4 bg-blue-100 text-blue-800 mr-2 my-1">
+        <span>{option.name}</span>
+          <div on:click|stopPropagation={() => remove(option.value)}
+            class="cursor-pointer justify-center items-center flex
             bg-blue-300 hover:bg-blue-400 rounded-full h-4 w-4 ml-1"
-            title="Remove {s.name}">
-            <i class="far fa-times fa-sm" />
+            title="Remove {option.name}">
+            <span class="i-la-times" />
           </div>
-        {/if}
       </div>
     {/each}
     <div class="actions">
-      {#if !readonly}
-        <!-- class="appearance-none block w-full px-3 py-2 border border-gray-300
-      rounded-md placeholder-gray-400 focus:outline-none
-      focus:shadow-outline-blue focus:border-blue-300 transition
-      duration-150 ease-in-out sm:text-sm sm:leading-5" -->
         <input
           class="border-none m-0 p-0 outline-none w-full"
           autocomplete="off"
           bind:value={inputValue}
           bind:this={input}
-          on:keyup={handleKeyup}
-          on:blur={handleBlur}
+          on:keydown={handleKeydown}
+          on:blur={() => setShowOptions(false)}
           placeholder={calculatedPlaceholder} />
-        <!-- <div
-          class="remove-all"
-          title="Remove All"
-          class:hidden={!Object.keys(selected).length}>
-          <svg
-            class="icon-clear"
-            xmlns="http://www.w3.org/2000/svg"
-            width="18"
-            height="18"
-            viewBox="0 0 24 24">
-            <path d={iconClearPath} />
-          </svg>
-        </div> -->
-        <svg
-          class="dropdown-arrow"
-          xmlns="http://www.w3.org/2000/svg"
-          width="18"
-          height="18"
-          viewBox="0 0 18 18">
-          <path d="M5 8l4 4 4-4z" />
-        </svg>
-      {/if}
+          <span class="i-carbon-caret-down opacity-50" />
     </div>
   </div>
 
-  <select bind:this={slot} multiple class="hidden">
+  <select bind:this={selectSlot} multiple class="hidden">
     <slot />
   </select>
 
   {#if showOptions}
     <ul
       class="options"
-      transition:fly={{ duration: 200, y: 5 }}
-      on:mousedown|preventDefault={handleOptionMousedown}>
+      transition:fly={{ duration: 200, y: 5 }}>
       {#each filtered as option}
         <li
           class:selected={selected[option.value]}
           class:active={activeOption === option}
-          data-value={option.value}>
+          on:click={() => selectOption(option)}>
           {option.name}
         </li>
       {/each}
@@ -220,22 +172,11 @@
     left: 0;
   }
 
-  .readonly .token {
-    color: hsl(0, 0%, 40%);
-  }
-
   .actions {
     align-items: center;
     display: flex;
     flex: 1;
     min-width: 3rem;
-  }
-
-  .dropdown-arrow path {
-    fill: hsl(0, 0%, 70%);
-  }
-  .multiselect:hover .dropdown-arrow path {
-    fill: hsl(0, 0%, 50%);
   }
 
   .options {

@@ -14,7 +14,7 @@
 
   $: hasValue = sense.translated_ld_semantic_domains?.length || sense.write_in_semantic_domains?.length;
 
-  $: translated_semantic_domains = semanticDomains.map((domain) => ({
+  $: translated_semantic_domain_options = semanticDomains.map((domain) => ({
     key: domain.key,
     name: $t('sd.' + domain.key, { default: domain.name }),
   }));
@@ -70,7 +70,7 @@
           on:update
           value={[...sense.ld_semantic_domains_keys || []]}
           placeholder={$t('entry.sdn', { default: 'Semantic Domain' })}
-          options={translated_semantic_domains}
+          options={translated_semantic_domain_options}
           on:close={toggle}>
           <span slot="heading"
           >{$t('entry.select_semantic_domains', {

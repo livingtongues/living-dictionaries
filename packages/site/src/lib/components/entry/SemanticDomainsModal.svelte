@@ -55,7 +55,7 @@
               hover:bg-blue-400 rounded-full h-4 w-4 ml-1"
             title="Remove"
             on:click={() => (removeCustomDomain = true)}>
-            <i class="far fa-times fa-sm" />
+            <span class="i-la-times" />
           </div>
         </div>
       </div>
