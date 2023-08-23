@@ -14,7 +14,6 @@ export interface SupportRequestBody {
 
 export const POST: RequestHandler = async ({ request, fetch }) => {
   const { email, message, name, url, subject } = await request.json() as SupportRequestBody;
-
   const emailParts: EmailParts = {
     to: getSupportMessageRecipients({ dev }),
     reply_to: { email },

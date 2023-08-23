@@ -5,7 +5,7 @@ import type { ActualDatabaseVideo } from "@living-dictionaries/types/video.inter
 import type { Timestamp } from "firebase/firestore";
 import { convert_entry_to_current_shape } from "./convert_entry_to_current_shape";
 
-describe('convert_entry_to_current_shape', () => {
+describe(convert_entry_to_current_shape, () => {
   test('converts parts of speech string to string[]', () => {
     const actual_database_entry: ActualDatabaseEntry = { ps: 'n' };
     const goal_database_entry: GoalDatabaseEntry = { sn: [{ ps: ['n'], }] };
@@ -91,6 +91,17 @@ describe('convert_entry_to_current_shape', () => {
       }],
     }
     expect(convert_entry_to_current_shape(entry)).toEqual(expected);
+  });
+
+  test('when both sf and sfs[0] exist, sf does not overwrite', () => {
+    const doubledUp: ActualDatabaseEntry = {
+      sf: { path: 'foo', sp: 'x123' },
+      sfs: [{ path: 'bar', sp: ['x456'] }],
+    }
+    const expected: GoalDatabaseEntry = {
+      sfs: [{ path: 'bar', sp: ['x456'] }],
+    }
+    expect(convert_entry_to_current_shape(doubledUp)).toEqual(expected);
   });
 
   test('photo file is placed into array in first sense', () => {

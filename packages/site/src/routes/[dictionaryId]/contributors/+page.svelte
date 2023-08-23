@@ -18,7 +18,6 @@
     const name = prompt(`${$t('speakers.name', { default: 'Name' })}?`);
     if (name)
       add(`dictionaries/${$dictionary.id}/writeInCollaborators`, { name });
-
   }
 </script>
 
@@ -98,7 +97,6 @@
             onclick={() => {
               if (confirm($t('misc.delete', { default: 'Delete' }) + '?'))
                 removeDictionaryContributor(contributor, $dictionary.id);
-
             }}
             color="red"
             size="sm">
