@@ -41,9 +41,10 @@
       lng = longitude
       lat = latitude
     } else if (navigator.geolocation) {
+      const max_digits = 4;
       navigator.geolocation.getCurrentPosition((position) => {
-        lng = position.coords.longitude;
-        lat = position.coords.latitude;
+        lng = parseFloat(position.coords.longitude.toFixed(max_digits));
+        lat = parseFloat(position.coords.latitude.toFixed(max_digits));
       });
     }
   });
