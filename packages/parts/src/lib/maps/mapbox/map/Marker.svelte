@@ -5,9 +5,9 @@
     markers.forEach((marker) => {
       if (marker === currentMarker) return;
       const popup = marker.getPopup();
-      if (popup?.isOpen()) {
+      if (popup?.isOpen())
         marker.togglePopup();
-      }
+
     });
   }
 </script>

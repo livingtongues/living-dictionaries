@@ -12,9 +12,9 @@ export class EventQueue {
   }
 
   send(command, params = []) {
-    if (!command) {
+    if (!command)
       return;
-    }
+
     this.queue.update((q) => [...q, [command, params]]);
   }
 
@@ -22,7 +22,7 @@ export class EventQueue {
     this.unsubscribe = this.queue.subscribe((queue) => {
       while (queue.length) {
         const [command, params] = queue.shift();
-        // eslint-disable-next-line prefer-spread
+
         map[command].apply(map, params);
         // map[command](...params);
       }
@@ -31,9 +31,9 @@ export class EventQueue {
   }
 
   stop() {
-    if (!this.started) {
+    if (!this.started)
       return;
-    }
+
     this.unsubscribe();
     this.queue = writable([]);
     this.started = false;

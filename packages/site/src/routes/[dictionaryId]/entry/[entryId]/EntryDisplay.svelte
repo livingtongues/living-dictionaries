@@ -3,13 +3,13 @@
   import { t } from 'svelte-i18n';
   import EntryField from './EntryField.svelte';
   import EntryPartOfSpeech from '$lib/components/entry/EntryPartOfSpeech.svelte';
-  import EntrySemanticDomains from './EntrySemanticDomains.svelte';
+  import EntrySemanticDomains from '$lib/components/entry/EntrySemanticDomains.svelte';
   import { createEventDispatcher } from 'svelte';
   import EntryDialect from '$lib/components/entry/EntryDialect.svelte';
-  import { BadgeArray } from 'svelte-pieces';
   import { order_entry_and_dictionary_gloss_languages } from '$lib/helpers/glosses';
   import { DICTIONARIES_WITH_VARIANTS } from '$lib/constants';
   import EntryMedia from './EntryMedia.svelte';
+  import SelectSource from '$lib/components/entry/EntrySource.svelte';
 
   export let entry: ExpandedEntry;
   export let dictionary: IDictionary;
@@ -112,13 +112,18 @@
         <div class="md:px-2" class:order-2={!sense.translated_parts_of_speech?.length}>
           <div class="rounded text-xs text-gray-500 mt-1 mb-2">{$t('entry.ps')}</div>
           <EntryPartOfSpeech value={sense.translated_parts_of_speech} {canEdit} on:valueupdate />
-          <div class="border-b-2 pb-1 mb-2" />
+          <div class="border-b-2 pb-1 mb-2 border-dashed" />
         </div>
       {/if}
 
-      <EntrySemanticDomains {sense} {canEdit}
-        on:update={({detail}) => dispatch('valueupdate', { field: 'sdn', newValue: detail })}
-        on:removeCustomDomain={() => dispatch('valueupdate', { field: 'sd', newValue: null })} />
+      {@const hasSemanticDomain = sense.translated_ld_semantic_domains?.length || sense.write_in_semantic_domains?.length}
+      {#if hasSemanticDomain || canEdit}
+        <div class="md:px-2" class:order-2={!hasSemanticDomain}>
+          <div class="rounded text-xs text-gray-500 mt-1 mb-2">{$t('entry.sdn')}</div>
+          <EntrySemanticDomains {canEdit} {sense} on:valueupdate />
+          <div class="border-b-2 pb-1 mb-2 border-dashed" />
+        </div>
+      {/if}
 
       <EntryField
         value={sense.noun_class}
@@ -154,8 +159,8 @@
     {#if entry.dialects?.length || canEdit}
       <div class="md:px-2" class:order-2={!entry.dialects?.length}>
         <div class="rounded text-xs text-gray-500 mt-1 mb-2">{$t('entry.di')}</div>
-        <EntryDialect {canEdit} dialects={entry.dialects} on:valueupdate />
-        <div class="border-b-2 pb-1 mb-2" />
+        <EntryDialect {canEdit} dialects={entry.dialects} dictionaryId={dictionary.id} on:valueupdate />
+        <div class="border-b-2 pb-1 mb-2 border-dashed" />
       </div>
     {/if}
 
@@ -188,13 +193,11 @@
     {#if entry.sources?.length || canEdit}
       <div class="md:px-2" class:order-2={!entry.sources?.length}>
         <div class="rounded text-xs text-gray-500 mt-1 mb-2">{$t('entry.sr')}</div>
-        <BadgeArray
-          strings={entry.sources}
+        <SelectSource
           {canEdit}
-          promptMessage={$t('entry.sr')}
-          addMessage={$t('misc.add', { default: 'Add' })}
-          on:valueupdated={({detail}) => dispatch('valueupdate', { field: 'sr', newValue: detail })} />
-        <div class="border-b-2 pb-1 mb-2" />
+          value={entry.sources}
+          on:valueupdate />
+        <div class="border-b-2 pb-1 mb-2 border-dashed" />
       </div>
     {/if}
   </div>

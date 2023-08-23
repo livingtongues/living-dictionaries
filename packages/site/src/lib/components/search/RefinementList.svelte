@@ -11,7 +11,7 @@
     label = '';
 
   let value = '';
-  let maxInitialItems = 5;
+  const maxInitialItems = 5;
 
   interface IRefinementItem extends RefinementListItem {
     translatedLabel?: string;
@@ -29,9 +29,9 @@
     const customRefinementList = connectRefinementList((params) => {
       ({ items, refine, searchForItems, isShowingMore, canToggleShowMore, toggleShowMore } =
         params);
-      if (!params.isFromSearch && value) {
+      if (!params.isFromSearch && value)
         value = ''; // not sure why this was in instantsearch docs
-      }
+
     });
 
     search.addWidgets([
@@ -44,9 +44,9 @@
     ]);
   });
 
-  $: if (items.length && $locale) {
+  $: if (items.length && $locale)
     translateItems();
-  }
+
   function translateItems() {
     items = items.map((item) => {
       if (attribute === 'ps') {
@@ -81,11 +81,11 @@
     }
   }
   function showMore() {
-    if (attribute === 'ps' || attribute === 'sdn') {
+    if (attribute === 'ps' || attribute === 'sdn')
       isShowingMore = !isShowingMore;
-    } else {
+    else
       toggleShowMore();
-    }
+
   }
 </script>
 

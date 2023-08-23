@@ -9,9 +9,9 @@ export function order_glosses({ glosses, dictionary_gloss_languages, $t, label =
   }
 ): string[] {
   if (!glosses) return [];
-  
+
   const sorted_gloss_languages = order_entry_and_dictionary_gloss_languages(glosses, dictionary_gloss_languages);
-  
+
   const gloss_languages_that_have_gloss = sorted_gloss_languages.filter((bcp) => glosses[bcp]);
 
   return gloss_languages_that_have_gloss.map((bcp) => {

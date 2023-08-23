@@ -3,7 +3,7 @@
   import { crossfade, scale } from 'svelte/transition';
   import { Button } from 'svelte-pieces';
   import { createEventDispatcher } from 'svelte';
-  
+
   export let title: string;
   export let gcs: string;
   export let canEdit = false;
@@ -20,7 +20,7 @@
   let loading = false;
   let viewing = false;
 
-  $: isDesktop = windowWidth >= 768 
+  $: isDesktop = windowWidth >= 768
   $: fullscreenSource = `https://lh3.googleusercontent.com/${gcs}=w${isDesktop ? windowWidth - 24 : windowWidth}`;
 
   function load() {
@@ -89,7 +89,7 @@
           class="p-4 flex justify-between
             items-center absolute bottom-0 inset-x-0 bg-opacity-25 bg-black">
           <Button
-          class="ml-auto"
+            class="ml-auto"
             color="red"
             form="filled"
             onclick={(e) => {

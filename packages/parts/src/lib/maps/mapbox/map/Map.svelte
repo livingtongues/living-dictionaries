@@ -57,7 +57,7 @@
     zoomend: () => dispatch('zoomend', map.getZoom()),
     error: (e: ErrorEvent & EventData) => dispatch('error', e),
     load: () => dispatch('ready') && (ready = true),
-    // drag: () => dispatch('drag', map.getCenter()),
+  // drag: () => dispatch('drag', map.getCenter()),
   };
   let unbind = () => {};
 

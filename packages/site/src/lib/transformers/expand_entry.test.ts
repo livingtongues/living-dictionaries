@@ -1,5 +1,5 @@
-import type { ExpandedEntry, GoalDatabaseEntry } from "@living-dictionaries/types";
-import { expand_entry } from "./expand_entry";
+import type { ExpandedEntry, GoalDatabaseEntry } from '@living-dictionaries/types';
+import { expand_entry } from './expand_entry';
 import { init, locale, dictionary, addMessages } from 'svelte-i18n';
 
 describe(expand_entry, () => {

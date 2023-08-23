@@ -364,8 +364,8 @@ importers:
         specifier: ^3.3.13
         version: 3.3.13(svelte@3.59.2)
       svelte-pieces:
-        specifier: next
-        version: 2.0.0-next.1(svelte@3.59.2)
+        specifier: 2.0.0-next.2
+        version: 2.0.0-next.2(svelte@3.59.2)
       sveltefirets:
         specifier: ^0.0.36
         version: 0.0.36(firebase@9.21.0)(svelte@3.59.2)
@@ -4076,7 +4076,7 @@ packages:
     peerDependencies:
       '@sveltejs/kit': ^1.0.0
     dependencies:
-      '@sveltejs/kit': 1.22.3(svelte@3.55.1)(vite@4.4.7)
+      '@sveltejs/kit': 1.22.3(svelte@3.59.2)(vite@4.4.7)
       import-meta-resolve: 3.0.0
     dev: true
 
@@ -12411,6 +12411,16 @@ packages:
 
   /svelte-pieces@2.0.0-next.1(svelte@3.59.2):
     resolution: {integrity: sha512-UFmaeu1l2uIdWrLAdVTiS17rOCpfDabxx3eNSZrz8t0juS8t9e0zW/2XlUb+qaQopRoWX6LnPh6S9EB+cW94VQ==}
+    peerDependencies:
+      svelte: ^3.55.0 || ^4.0.0
+    dependencies:
+      fast-xml-parser: 3.21.1
+      he: 1.2.0
+      svelte: 3.59.2
+    dev: true
+
+  /svelte-pieces@2.0.0-next.2(svelte@3.59.2):
+    resolution: {integrity: sha512-taPDWZhs47DjVPg8Mfa3JTpGKc1cGj6lDL3MYjgXC/imCG216sq3LNF96I+bibr6R/U+w+BDgd1QqsmRMeC6yg==}
     peerDependencies:
       svelte: ^3.55.0 || ^4.0.0
     dependencies:

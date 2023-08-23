@@ -30,7 +30,8 @@ function copy(message) {
     document.execCommand('copy');
     document.body.removeChild(el);
     alert($t('entry.link_copied', { default: 'Link copied' }));
-  } catch (e) {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  } catch (err) {
     alert(`${$t('entry.copy_and_share', { default: 'Copy and share:' })} ${message}`);
   }
 }

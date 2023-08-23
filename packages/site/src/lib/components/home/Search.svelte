@@ -1,15 +1,12 @@
 <script lang="ts">
   import { _ } from 'svelte-i18n';
   import type { IDictionary } from '@living-dictionaries/types';
-  export let dictionaries: IDictionary[] = [];
-  import { admin } from '$lib/stores';
-
+  import { admin, myDictionaries } from '$lib/stores';
   import { fly } from 'svelte/transition';
-  import { myDictionaries } from '$lib/stores';
-
   import { Button } from 'svelte-pieces';
   import { createEventDispatcher } from 'svelte';
 
+  export let dictionaries: IDictionary[] = [];
   export let selectedDictionaryId: string;
   let currentDictionary: IDictionary;
 
@@ -25,20 +22,18 @@
   let searchString = '';
 
   let filteredDictionaries: IDictionary[] = [];
-  $: {
-    filteredDictionaries = dictionaries
-      .filter((dictionary) => {
-        return Object.keys(dictionary).some((k) => {
-          return (
-            typeof dictionary[k] === 'string' &&
+  $: filteredDictionaries = dictionaries
+    .filter((dictionary) => {
+      return Object.keys(dictionary).some((k) => {
+        return (
+          typeof dictionary[k] === 'string' &&
             dictionary[k].toLowerCase().includes(searchString.toLowerCase())
-          );
-        });
-      })
-      .reduce((acc, dictionary) => {
-        return acc.find((e) => e.id === dictionary.id) ? [...acc] : [...acc, dictionary];
-      }, []);
-  }
+        );
+      });
+    })
+    .reduce((acc, dictionary) => {
+      return acc.find((e) => e.id === dictionary.id) ? [...acc] : [...acc, dictionary];
+    }, []);
 
   let searchBlurTimeout;
   function delayedSearchClose() {
@@ -82,24 +77,24 @@
     <div class="relative text-xl px-2 mt-2 sm:mb-2">
       <div
         class="absolute inset-y-0 left-0 pl-5 flex items-center
-        pointer-events-none text-gray-500">
+          pointer-events-none text-gray-500">
         <span class="i-carbon-search" />
       </div>
       <input
         type="text"
         bind:value={searchString}
         class="form-input w-full pl-10 pr-8 py-1 rounded-lg
-        text-gray-900 placeholder-gray-500 shadow"
+          text-gray-900 placeholder-gray-500 shadow"
         placeholder={$_('home.find_dictionary', {
           default: 'Find a Dictionary',
         })}
         on:focus={() => (searchFocused = true)}
         on:blur={delayedSearchClose} />
       {#if searchString || searchFocused}
-        <button
+        <button type="button"
           on:click={() => (searchString = '')}
           class="absolute inset-y-0 right-0 px-4 flex items-center
-          focus:outline-none">
+            focus:outline-none">
           <span class="i-la-times text-gray-400" />
         </button>
       {/if}
@@ -147,7 +142,7 @@
           type="button"
           class="text-left px-3 py-1 my-1 hover:bg-gray-200"
           on:click={() => setCurrentDictionary(dictionary)}>
-          <div>{dictionary && dictionary.name}</div>
+          <div>{dictionary?.name}</div>
           {#if dictionary.location}
             <small class="-mt-1 text-gray-600">{dictionary.location}</small>
           {/if}
@@ -163,7 +158,7 @@
     <div class="mt-auto hidden sm:block border-t" />
     <div
       class="flex flex-wrap sm:flex-col overflow-y-auto
-      overflow-x-hidden px-2 pb-2">
+        overflow-x-hidden px-2 pb-2">
       {#if !searchFocused && $myDictionaries}
         {#each $myDictionaries as dictionary, i}
           {#if showAllMyDictionaries || i < 3}
@@ -171,7 +166,7 @@
               type="button"
               class="sm:hidden rounded px-3 py-2 bg-white mt-2"
               on:click={() => setCurrentDictionary(dictionary)}>
-              {dictionary && dictionary.name}
+              {dictionary?.name}
             </button>
             <div class="w-2 sm:hidden" />
           {/if}
@@ -202,7 +197,7 @@
           color="black"
           form="simple"
           class="mt-2 opacity-75 focus:opacity-100
-      sm:opacity-100 bg-white sm:bg-transparent">
+            sm:opacity-100 bg-white sm:bg-transparent">
           <i class="far fa-list" />
           {$_('home.list_of_dictionaries', { default: 'List of Dictionaries' })}
         </Button>
@@ -213,7 +208,7 @@
           color="black"
           form="simple"
           class="mt-2 opacity-75 focus:opacity-100
-      sm:opacity-100 bg-white sm:bg-transparent !sm:hidden">
+            sm:opacity-100 bg-white sm:bg-transparent !sm:hidden">
           <i class="far fa-info-circle" />
           <span class="ml-1">{$_('header.about', { default: 'About' })}</span>
         </Button>

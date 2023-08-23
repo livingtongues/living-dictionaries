@@ -90,9 +90,9 @@ export const defaultColumns: IColumn[] = [
 
 let cachedColumns: IColumn[] = [];
 const tableCacheKey = 'table_columns_08.17.2023'; // rename when adding more columns to invalidate the user's cache
-if (browser) {
+if (browser)
   cachedColumns = JSON.parse(localStorage.getItem(tableCacheKey));
-}
+
 
 export const preferredColumns = writable(cachedColumns || defaultColumns);
 

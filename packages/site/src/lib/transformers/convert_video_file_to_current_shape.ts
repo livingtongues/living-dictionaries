@@ -1,11 +1,11 @@
-import type { ActualDatabaseVideo, GoalDatabaseVideo } from "@living-dictionaries/types/video.interface";
+import type { ActualDatabaseVideo, GoalDatabaseVideo } from '@living-dictionaries/types/video.interface';
 
 export function convert_video_file_to_current_shape(actual: ActualDatabaseVideo): GoalDatabaseVideo {
   // @ts-ignore
   const goal: GoalDatabaseVideo = { ...actual };
-  if (typeof actual.sp === 'string') {
+  if (typeof actual.sp === 'string')
     goal.sp = [actual.sp];
-  }
+
   return goal;
 }
 

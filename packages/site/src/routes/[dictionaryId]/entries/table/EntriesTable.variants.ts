@@ -15,6 +15,7 @@ export const variants: Variants<Component> = [
       columns,
       entries: mock_expanded_entries.map(({entry}) => entry),
       canEdit: true,
+      dictionaryId: basic_mock_dictionary.id,
     }
   }
 ]

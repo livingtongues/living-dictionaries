@@ -66,9 +66,9 @@
     });
     map.addControl(geocoder, position);
 
-    if (value) {
+    if (value)
       geocoder.setInput(value);
-    }
+
 
     unbind = bindEvents(geocoder, handlers);
 

@@ -63,13 +63,13 @@
               {#if !show}
                 <div class="modal-footer">
                   <Button onclick={reset} color="red"
-                    ><i class="far fa-trash-alt" />
+                  ><i class="far fa-trash-alt" />
                     {$t('misc.delete', {
                       default: 'Delete',
                     })}</Button>
                   <div class="w-1" />
                   <Button onclick={toggle} color="green" form="filled"
-                    ><i class="fas fa-upload" /> {$t('misc.upload', { default: 'Upload' })}</Button>
+                  ><i class="fas fa-upload" /> {$t('misc.upload', { default: 'Upload' })}</Button>
                 </div>
               {:else}
                 {#await import('$lib/components/video/UploadVideo.svelte') then { default: UploadVideo }}

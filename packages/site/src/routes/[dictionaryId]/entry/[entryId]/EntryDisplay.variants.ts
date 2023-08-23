@@ -54,6 +54,7 @@ const partialVariants: DeepPartial<Variants<Component>> = [
           },
         ],
         local_orthography_1: 'special writing system',
+        sources: ['someone'],
       },
       dictionary: {
         alternateOrthographies: [

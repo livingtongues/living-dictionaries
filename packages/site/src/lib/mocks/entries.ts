@@ -70,7 +70,7 @@ export const mockEntries: { name: string, description?: string, entry: GoalDatab
       sn: [
         {
           vfs: [{
-          path: 'not-real-path',
+            path: 'not-real-path',
           }],
         }
       ]

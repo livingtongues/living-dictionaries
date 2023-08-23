@@ -1,14 +1,14 @@
-import type { ActualDatabaseEntry, GoalDatabaseEntry } from "@living-dictionaries/types";
-import type { ActualDatabaseAudio } from "@living-dictionaries/types/audio.interface";
-import type { ActualDatabasePhoto } from "@living-dictionaries/types/photo.interface";
-import type { ActualDatabaseVideo } from "@living-dictionaries/types/video.interface";
-import type { Timestamp } from "firebase/firestore";
-import { convert_entry_to_current_shape } from "./convert_entry_to_current_shape";
+import type { ActualDatabaseEntry, GoalDatabaseEntry } from '@living-dictionaries/types';
+import type { ActualDatabaseAudio } from '@living-dictionaries/types/audio.interface';
+import type { ActualDatabasePhoto } from '@living-dictionaries/types/photo.interface';
+import type { ActualDatabaseVideo } from '@living-dictionaries/types/video.interface';
+import type { Timestamp } from 'firebase/firestore';
+import { convert_entry_to_current_shape } from './convert_entry_to_current_shape';
 
 describe(convert_entry_to_current_shape, () => {
   test('converts parts of speech string to string[]', () => {
     const actual_database_entry: ActualDatabaseEntry = { ps: 'n' };
-    const goal_database_entry: GoalDatabaseEntry = { sn: [{ ps: ['n'], }] };
+    const goal_database_entry: GoalDatabaseEntry = { sn: [{ ps: ['n'] }] };
     expect(convert_entry_to_current_shape(actual_database_entry)).toEqual(goal_database_entry);
   });
 
@@ -217,8 +217,8 @@ describe(convert_entry_to_current_shape, () => {
     }
     const expected: GoalDatabaseEntry = {
       sn: [
-        { gl: { en: 'first' }, },
-        { gl: { en: 'second' }, }
+        { gl: { en: 'first' } },
+        { gl: { en: 'second' } }
       ]
     }
     expect(convert_entry_to_current_shape(entry)).toEqual(expected);

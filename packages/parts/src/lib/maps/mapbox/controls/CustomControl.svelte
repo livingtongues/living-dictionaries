@@ -12,7 +12,7 @@
 
   onMount(() => {
     const customControl: IControl = {
-      onAdd(map) {
+      onAdd(_map) {
         return el;
       },
       onRemove() {},

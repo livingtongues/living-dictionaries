@@ -11,11 +11,11 @@
     const warning_message = 'You must delete every entry in the dictionary first'
     if (!dictionary?.entryCount || dictionary?.entryCount < 1) {
       const words_collection = await getCollection(`dictionaries/${dictionary.id}/words`);
-      if (words_collection.length === 0) {
+      if (words_collection.length === 0)
         await removeDictionary(dictionary);
-      } else {
+      else
         alert(warning_message);
-      }
+
     } else {
       alert(warning_message);
     }

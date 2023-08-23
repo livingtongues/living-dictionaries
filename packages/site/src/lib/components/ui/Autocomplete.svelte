@@ -19,7 +19,7 @@
     results = matchingItems.map((item) => {
       const boldedLabel = item[labelField].replace(
         RegExp(regExpEscape(search.trim()), 'i'),
-        "<span class='font-semibold text-gray-900'>$&</span>"
+        '<span class=\'font-semibold text-gray-900\'>$&</span>'
       );
       return { value: item[keyField], boldedLabel, label: item[labelField] };
     });
@@ -29,14 +29,14 @@
     return s.replace(/[-\\^$*+?.()|[\]{}]/g, '\\$&');
   };
 
-  $: if (results.length === 1) {
-    value = results[0].value;
-  } else {
+  $: if (results.length === 1)
+    [{value}] = results;
+  else
     value = '';
-  }
-  $: if (value.length) {
+
+  $: if (value.length)
     dispatch('selectedResult', { value });
-  }
+
 </script>
 
 <svelte:window on:click={() => (active = false)} />
@@ -53,11 +53,11 @@
   <ul
     class:hidden={!active}
     class="border absolute w-full bg-white overflow-auto 6rem z-10 shadow-lg">
-    {#each results as result, i}
+    {#each results as result}
       <li
         on:click={() => {
           search = result.label;
-          value = result.value;
+          ({value} = result);
           active = false;
         }}
         class="text-gray-600 px-2 py-1 hover:bg-gray-200 cursor-pointer">

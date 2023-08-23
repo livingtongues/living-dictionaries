@@ -1,83 +1,52 @@
 <script lang="ts">
-  import { t } from "svelte-i18n";
-  import {
-    Modal,
-    ShowHide,
-    DataList,
-    ReactiveSet,
-    BadgeArrayEmit,
-  } from "svelte-pieces";
+  import { t } from 'svelte-i18n';
   import {
     partsOfSpeech,
     mayanPOS,
     mayanDictionaries,
-  } from "$lib/mappings/parts-of-speech";
-  import { createEventDispatcher } from "svelte";
+  } from '$lib/mappings/parts-of-speech';
+  import { createEventDispatcher } from 'svelte';
+  import ModalEditableArray from '../ui/array/ModalEditableArray.svelte';
+  import type { SelectOption } from '../ui/array/select-options.interface';
+  import { EntryFields } from '@living-dictionaries/types';
 
   export let value: string[];
   export let canEdit = false;
   export let dictionaryId: string = undefined;
+  export let showPlus = true;
 
   const dispatch = createEventDispatcher<{
     valueupdate: {
-      field: "ps";
+      field: EntryFields.parts_of_speech;
       newValue: string[];
     };
   }>();
+
+  $: parts_of_speech_options = partsOfSpeech.map(part => {
+    return {
+      value: part.enAbbrev,
+      name: $t('ps.' + part.enAbbrev, { default: part.enName }),
+    };
+  }) as SelectOption[];
+
+  const mayan_pos_options: SelectOption[] = mayanPOS.map(pos => {
+    return {
+      value: pos,
+      name: pos,
+    };
+  });
+
+  $: options = mayanDictionaries.includes(dictionaryId)
+    ? [...parts_of_speech_options, ...mayan_pos_options]
+    : parts_of_speech_options;
 </script>
 
-{#if canEdit}
-  <ReactiveSet
-    input={value}
-    let:value={editedParts}
-    let:add
-    let:remove
-    on:modified={({ detail: newValue }) => {
-      dispatch("valueupdate", {
-        field: "ps",
-        newValue,
-      });
-    }}
-  >
-    <ShowHide let:show let:toggle>
-      <BadgeArrayEmit
-        strings={editedParts}
-        addMessage={$t("misc.add", { default: "Add" })}
-        canEdit
-        on:itemremoved={({ detail: { index } }) => {
-          remove(editedParts[index]);
-        }}
-        on:additem={toggle}
-      />
-      {#if show}
-        <Modal noscroll on:close={toggle}>
-          <span slot="heading"
-            >{$t("entry.ps", { default: "Part of Speech" })}</span
-          >
-          <DataList
-            type="search"
-            class="form-input w-full leading-none"
-            resetOnSelect
-            on:selected={(e) => {
-              add(e.detail.value);
-              toggle();
-            }}
-          >
-            {#if mayanDictionaries.includes(dictionaryId)}
-              {#each mayanPOS as pos}
-                <option data-value={pos}>{pos}</option>
-              {/each}
-            {/if}
-            {#each partsOfSpeech as pos}
-              <option data-value={pos.enAbbrev}
-                >{$t("ps." + pos.enAbbrev, { default: pos.enName })}</option
-              >
-            {/each}
-          </DataList>
-        </Modal>
-      {/if}
-    </ShowHide>
-  </ReactiveSet>
-{:else}
-  <BadgeArrayEmit strings={value} />
-{/if}
+<ModalEditableArray values={value} {options} {canEdit} {showPlus} placeholder={$t('entry.ps')} on:update={({ detail: newValue }) => {
+  dispatch('valueupdate', {
+    field: EntryFields.parts_of_speech,
+    newValue,
+  });
+}}>
+  <span slot="heading">{$t('entry.ps')}</span>
+</ModalEditableArray>
+
