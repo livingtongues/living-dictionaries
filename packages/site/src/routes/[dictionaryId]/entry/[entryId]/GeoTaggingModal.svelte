@@ -127,7 +127,7 @@
         {#if show}
           <CoordinatesModal {t} lng={lng} lat={lat} on:update={({ detail }) => {
             const newPoint = { coordinates: { longitude: detail.lng, latitude: detail.lat }}
-            const points = [...(coordinates.points || []), newPoint];
+            const points = [...(coordinates?.points || []), newPoint];
             savePoints(points)
           }} on:close={toggle} />
         {/if}
@@ -143,7 +143,7 @@
             {t}
             region={null}
             on:update={({ detail }) => {
-              const regions = [...(coordinates.regions || []), detail];
+              const regions = [...(coordinates?.regions || []), detail];
               saveRegions(regions)
             }}
             on:close={toggle} />

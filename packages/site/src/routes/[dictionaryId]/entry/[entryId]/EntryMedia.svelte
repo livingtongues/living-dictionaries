@@ -16,12 +16,12 @@
   $: video = entry.senses?.[0].video_files?.[0];
 </script>
 
-{#if entry.coordinates?.points || entry.coordinates?.regions}
-  <div class="rounded overflow-hidden cursor-pointer">
-    <MapboxStatic points={entry.coordinates.points} regions={entry.coordinates.regions} />
-  </div>
-{:else if canEdit}
-  <ShowHide let:show let:toggle>
+<ShowHide let:show let:toggle let:set>
+  {#if entry.coordinates?.points || entry.coordinates?.regions}
+    <div class="rounded overflow-hidden cursor-pointer" on:click={() => set(canEdit)}>
+      <MapboxStatic points={entry.coordinates.points} regions={entry.coordinates.regions} />
+    </div>
+  {:else if canEdit}
     <button
       on:click={toggle}
       type="button"
@@ -32,11 +32,11 @@
         {$t('create.select_coordinates', { default: 'Select Coordinates' })}
       </span>
     </button>
-    {#if show}
-      <GeoTaggingModal coordinates={entry.coordinates} on:close={toggle} on:valueupdate />
-    {/if}
-  </ShowHide>
-{/if}
+  {/if}
+  {#if show}
+    <GeoTaggingModal coordinates={entry.coordinates} on:close={toggle} on:valueupdate />
+  {/if}
+</ShowHide>
 
 {#if video}
   <div class="w-full overflow-hidden rounded relative mb-2">
