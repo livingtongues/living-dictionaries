@@ -1,17 +1,13 @@
 <script lang="ts">
   import { t } from 'svelte-i18n';
   import { ShowHide } from 'svelte-pieces';
-  import type { IEntry, Coordinates } from '@living-dictionaries/types';
+  import type { IEntry } from '@living-dictionaries/types';
   import AddImage from '../../entries/AddImage.svelte';
   import Image from '$lib/components/image/Image.svelte';
   import Video from '../../entries/Video.svelte';
-  // import GeoTaggingModal from './GeoTaggingModal.svelte';
-  import RegionModal from '@living-dictionaries/parts/src/lib/maps/RegionModal.svelte';
+  import GeoTaggingModal from './GeoTaggingModal.svelte';
   import { MapboxStatic } from '@living-dictionaries/parts';
-  import { createEventDispatcher } from 'svelte';
-  const dispatch = createEventDispatcher<{
-    valueupdate: { field: string; newValue: Coordinates };
-  }>();
+
 
   export let entry: IEntry;
   export let videoAccess = false;
@@ -20,12 +16,12 @@
   $: video = entry.senses?.[0].video_files?.[0];
 </script>
 
-<ShowHide let:show let:toggle let:set>
-  {#if entry.coordinates}
-    <div class="rounded overflow-hidden cursor-pointer" on:click={() => set(canEdit)}>
-      <MapboxStatic points={entry.coordinates.points} regions={entry.coordinates.regions} />
-    </div>
-  {:else if canEdit}
+{#if entry.coordinates?.points || entry.coordinates?.regions}
+  <div class="rounded overflow-hidden cursor-pointer">
+    <MapboxStatic points={entry.coordinates.points} regions={entry.coordinates.regions} />
+  </div>
+{:else if canEdit}
+  <ShowHide let:show let:toggle>
     <button
       on:click={toggle}
       type="button"
@@ -36,20 +32,11 @@
         {$t('create.select_coordinates', { default: 'Select Coordinates' })}
       </span>
     </button>
-  {/if}
-  {#if show}
-    <!-- <GeoTaggingModal coordinates={entry.coordinates} on:close={toggle} on:valueupdate /> -->
-    <RegionModal
-      {t}
-      region={null}
-      on:update={({ detail }) => {
-        const regions = (entry?.coordinates?.regions && [...entry.coordinates.regions, detail]) || [detail];
-        dispatch('valueupdate', { field: 'co',  newValue: { ...entry.coordinates, regions } });
-      }}
-      on:close={toggle}>
-    </RegionModal>
-  {/if}
-</ShowHide>
+    {#if show}
+      <GeoTaggingModal coordinates={entry.coordinates} on:close={toggle} on:valueupdate />
+    {/if}
+  </ShowHide>
+{/if}
 
 {#if video}
   <div class="w-full overflow-hidden rounded relative mb-2">
