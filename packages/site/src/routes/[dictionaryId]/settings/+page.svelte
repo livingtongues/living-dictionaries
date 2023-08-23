@@ -2,9 +2,10 @@
   import { t } from 'svelte-i18n';
   import { user, admin, dictionary, isManager } from '$lib/stores';
   import { updateOnline, getCollection, Doc } from 'sveltefirets';
+  import { where, limit } from 'firebase/firestore';
+  import { arrayRemove, arrayUnion, GeoPoint, type FieldValue } from 'firebase/firestore/lite';
   import { Button, ShowHide, JSON } from 'svelte-pieces';
   import EditString from '../EditString.svelte';
-  import { arrayRemove, arrayUnion, GeoPoint, where, limit, FieldValue } from 'firebase/firestore';
   import type { IDictionary } from '@living-dictionaries/types';
   import EditableGlossesField from '$lib/components/settings/EditableGlossesField.svelte';
   import WhereSpoken from '$lib/components/settings/WhereSpoken.svelte';
@@ -177,7 +178,7 @@
 
   {#if $admin > 1}
     <div class="mt-5">
-      <JSON obj={dictionary} />
+      <JSON obj={$dictionary} />
     </div>
   {/if}
 </div>
