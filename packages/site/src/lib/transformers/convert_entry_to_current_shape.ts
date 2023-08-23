@@ -1,8 +1,8 @@
-import type { ActualDatabaseEntry, GoalDatabaseEntry, DatabaseSense } from "@living-dictionaries/types";
-import type { ActualDatabaseVideo } from "@living-dictionaries/types/video.interface";
-import { convert_photo_file_to_current_shape } from "./convert_photo_file_to_current_shape";
-import { convert_sound_file_to_current_shape } from "./convert_sound_file_to_current_shape";
-import { convert_video_file_to_current_shape } from "./convert_video_file_to_current_shape";
+import type { ActualDatabaseEntry, GoalDatabaseEntry, DatabaseSense } from '@living-dictionaries/types';
+import type { ActualDatabaseVideo } from '@living-dictionaries/types/video.interface';
+import { convert_photo_file_to_current_shape } from './convert_photo_file_to_current_shape';
+import { convert_sound_file_to_current_shape } from './convert_sound_file_to_current_shape';
+import { convert_video_file_to_current_shape } from './convert_video_file_to_current_shape';
 
 export function convert_entry_to_current_shape(actual: ActualDatabaseEntry): GoalDatabaseEntry {
   const goal: GoalDatabaseEntry = {};
@@ -47,11 +47,11 @@ export function convert_entry_to_current_shape(actual: ActualDatabaseEntry): Goa
       continue;
     }
     if (key === 'ps') {
-      if (typeof value === 'string') {
+      if (typeof value === 'string')
         first_sense_from_base.ps = [value];
-      } else {
+      else
         first_sense_from_base.ps = value;
-      }
+
       continue;
     }
     if (key === 'xs') {
@@ -87,8 +87,8 @@ export function convert_entry_to_current_shape(actual: ActualDatabaseEntry): Goa
 
     goal[key] = value;
   }
-  if (Object.keys(first_sense_from_base).length > 0) {
+  if (Object.keys(first_sense_from_base).length > 0)
     goal.sn = [first_sense_from_base, ...(actual.sn || [])];
-  }
+
   return goal;
 }

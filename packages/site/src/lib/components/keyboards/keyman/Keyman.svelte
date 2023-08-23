@@ -52,9 +52,9 @@
       if (!inputEl) await waitForCKEditorToInitAndBeTargeted();
     }
 
-    if (!inputEl) {
+    if (!inputEl)
       inputEl = wrapperEl.firstElementChild as HTMLInputElement | HTMLTextAreaElement;
-    }
+
   }
 
   async function waitForCKEditorToInitAndBeTargeted() {
@@ -97,11 +97,11 @@
     })();
   }
 
-  $: if (show) {
+  $: if (show)
     inputEl?.classList.remove('kmw-disabled');
-  } else {
+  else
     inputEl?.classList.add('kmw-disabled');
-  }
+
 </script>
 
 <ShowHide let:show={showKeyboardOptions} let:toggle>

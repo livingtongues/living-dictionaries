@@ -1,4 +1,4 @@
-import type { IDictionary } from "@living-dictionaries/types";
+import type { IDictionary } from '@living-dictionaries/types';
 
 export const basic_mock_dictionary: IDictionary = {
   id: 'gta',

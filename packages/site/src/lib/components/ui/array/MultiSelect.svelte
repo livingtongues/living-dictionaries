@@ -1,58 +1,36 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
   import { fly } from 'svelte/transition';
+  import type { SelectOption } from './select-options.interface'
+  import { onMount } from 'svelte';
 
-  export let value: string[] = [];
-  export let placeholder = '';
-
-  $: calculatedPlaceholder = value?.length ? '' : placeholder;
-
-  type Option = {
-      value: string;
-      name: string;
-  };
+  export let selectedOptions: Record<string, SelectOption>;
+  export let options: SelectOption[];
+  export let placeholder = 'Select...';
 
   let input: HTMLInputElement;
   let inputValue: string;
-  let options: Option[] = [];
-  let activeOption: Option;
+  let activeOption: SelectOption;
   let showOptions = false;
-  let selected: Record<string, Option> = {};
-  let inited = false;
-  let selectSlot: HTMLSelectElement;
 
   onMount(() => {
-    selectSlot.querySelectorAll('option').forEach((option) => {
-      if (option.selected && option.value && !value.includes(option.value)) value = [...value, option.value];
-      options = [...options, { value: option.value, name: option.textContent }];
-    });
-    if (value) {
-      let newSelected = {}
-      for (const option of options) {
-        if (value.includes(option.value)) {
-          newSelected[option.value] = option
-        }
-      }
-      selected = newSelected
-    }
-    inited = true;
-  });
+    input.focus();
+  })
 
-  $: if (inited) value = Object.values(selected).map((option) => option.value);
   $: filtered = options.filter((o) =>
-    inputValue ? o.name.toLowerCase().includes(inputValue.toLowerCase()) : o
+    inputValue ? o.name.toLowerCase().includes(inputValue.trim().toLowerCase()) : o
   );
   $: if ((activeOption && !filtered.includes(activeOption)) || (!activeOption && inputValue))
-    activeOption = filtered[0];
+    [activeOption] = filtered;
 
-  function add(option: Option) {
+  function add(option: SelectOption) {
+    selectedOptions[option.value] = option;
+    input.focus();
     inputValue = '';
-    selected[option.value] = option;
   }
 
   function remove(value: string) {
-    const { [value]: option, ...restOfOptions } = selected;
-    selected = restOfOptions;
+    const { [value]: option, ...restOfOptions } = selectedOptions;
+    selectedOptions = restOfOptions;
   }
 
   function setShowOptions(show: boolean) {
@@ -62,11 +40,15 @@
   }
 
   function handleKeydown(e: KeyboardEvent) {
-    if (e.key === 'Enter') {
-      Object.keys(selected).includes(activeOption.value)
-        ? remove(activeOption.value)
-        : add(activeOption);
-      inputValue = '';
+    if (e.key === 'Escape')
+      setShowOptions(false)
+    if (e.key === ' ' && activeOption)
+      add(activeOption)
+    if (e.key === 'Backspace' && !inputValue)
+      remove(Object.keys(selectedOptions).pop());
+    if (e.key === 'Enter' && activeOption) {
+      e.preventDefault(); // keep form from submitting and closing modal
+      selectOption(activeOption)
     }
     if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
       const increment = e.key === 'ArrowUp' ? -1 : 1;
@@ -80,47 +62,42 @@
     }
   }
 
-  function selectOption(option: Option) {
-    if (selected[option.value]) {
+  function selectOption(option: SelectOption) {
+    if (selectedOptions[option.value])
       remove(option.value);
-    } else {
+    else
       add(option);
-      input.focus();
-    }
   }
 </script>
 
 <div class="multiselect">
   <div class="tokens" class:showOptions on:click={() => setShowOptions(true)}>
-    {#each Object.values(selected) as option}
+    {#each Object.values(selectedOptions) as option}
       <div
         class="items-center flex rounded-lg px-2 py-1 whitespace-nowrap
-        text-sm font-medium leading-4 bg-blue-100 text-blue-800 mr-2 my-1">
+          text-sm font-medium leading-4 bg-blue-100 text-blue-800 mr-2 my-1">
         <span>{option.name}</span>
-          <div on:click|stopPropagation={() => remove(option.value)}
-            class="cursor-pointer justify-center items-center flex
+        <div on:click|stopPropagation={() => remove(option.value)}
+          class="cursor-pointer justify-center items-center flex
             bg-blue-300 hover:bg-blue-400 rounded-full h-4 w-4 ml-1"
-            title="Remove {option.name}">
-            <span class="i-la-times" />
-          </div>
+          title="Remove {option.name}">
+          <span class="i-la-times" />
+        </div>
       </div>
     {/each}
     <div class="actions">
-        <input
-          class="border-none m-0 p-0 outline-none w-full"
-          autocomplete="off"
-          bind:value={inputValue}
-          bind:this={input}
-          on:keydown={handleKeydown}
-          on:blur={() => setShowOptions(false)}
-          placeholder={calculatedPlaceholder} />
-          <span class="i-carbon-caret-down opacity-50" />
+      <input
+        class="border-none m-0 p-0 outline-none w-full"
+        autocomplete="off"
+        bind:value={inputValue}
+        bind:this={input}
+        on:keydown|stopPropagation={handleKeydown}
+        on:focus={() => setShowOptions(true)}
+        on:blur={() => setShowOptions(false)}
+        placeholder={Object.keys(selectedOptions).length ? '' : placeholder} />
+      <span class="i-carbon-caret-down opacity-50" />
     </div>
   </div>
-
-  <select bind:this={selectSlot} multiple class="hidden">
-    <slot />
-  </select>
 
   {#if showOptions}
     <ul
@@ -128,7 +105,7 @@
       transition:fly={{ duration: 200, y: 5 }}>
       {#each filtered as option}
         <li
-          class:selected={selected[option.value]}
+          class:selected={selectedOptions[option.value]}
           class:active={activeOption === option}
           on:click={() => selectOption(option)}>
           {option.name}
@@ -145,7 +122,7 @@
     position: relative;
     z-index: 1;
   }
-  .multiselect:not(.readonly):hover {
+  .multiselect:hover {
     border-bottom-color: hsl(0, 0%, 50%);
   }
 

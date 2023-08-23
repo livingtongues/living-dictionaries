@@ -9,9 +9,9 @@
   let aboutType: IAbout;
 
   function truncateString(str, num) {
-    if (str.length <= num) {
+    if (str.length <= num)
       return str;
-    }
+
     return str.slice(0, num).trim() + '...';
   }
 </script>
@@ -19,7 +19,7 @@
 <div>
   <div class="mb-2">
     <h2 class="text-3xl font-semibold">{dictionary.name}</h2>
-    {#if dictionary.alternateNames && dictionary.alternateNames.length}
+    {#if dictionary.alternateNames?.length}
       <div class="text-gray-600">
         ({dictionary.alternateNames.join(', ')})
       </div>

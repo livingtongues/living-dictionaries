@@ -3,6 +3,7 @@
   import EditField from './EditField.svelte';
   import type { EntryFieldValue } from '@living-dictionaries/types';
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   interface $$Events {
     update: CustomEvent<string>;
     close: CustomEvent<boolean>;

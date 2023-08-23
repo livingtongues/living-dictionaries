@@ -15,11 +15,11 @@
 
   function toggleStyle() {
     const style = map.getStyle();
-    if (style.name === initialStyle.name) {
+    if (style.name === initialStyle.name)
       map.setStyle(alternateStyle);
-    } else {
+    else
       map.setStyle(initialStyle);
-    }
+
   }
 </script>
 

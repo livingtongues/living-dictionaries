@@ -1,11 +1,11 @@
 <script lang="ts">
   import { t } from 'svelte-i18n';
   import Textbox from './cells/Textbox.svelte';
-  import SemanticDomains from './cells/SemanticDomains.svelte';
+  import EntrySemanticDomains from '$lib/components/entry/EntrySemanticDomains.svelte';
   import EntryPartOfSpeech from '$lib/components/entry/EntryPartOfSpeech.svelte';
   import EntryDialect from '$lib/components/entry/EntryDialect.svelte';
   import SelectSpeakerCell from './cells/SelectSpeakerCell.svelte';
-  import SelectSource from './cells/SelectSource.svelte';
+  import SelectSource from '$lib/components/entry/EntrySource.svelte';
   import Image from '$lib/components/image/Image.svelte';
   import { EntryFields, type ExpandedEntry, type IColumn } from '@living-dictionaries/types';
   import Audio from '../../entries/Audio.svelte';
@@ -14,6 +14,7 @@
   export let column: IColumn;
   export let entry: ExpandedEntry;
   export let canEdit = false;
+  export let dictionaryId: string;
 
   const dispatch = createEventDispatcher<{
     valueupdate: { field: string; newValue: string | string[] };
@@ -22,7 +23,7 @@
 
 <div
   class:sompeng={column.display === 'Sompeng'}
-  class="h-full w-full inline-block">
+  class="h-full w-full flex cell">
   {#if column.field === 'audio'}
     <Audio class="h-full text-sm" minimal {canEdit} {entry} let:playing>
       <span class:text-blue-700={playing} class="i-material-symbols-hearing text-lg mt-1" />
@@ -43,16 +44,15 @@
     <EntryPartOfSpeech
       {canEdit}
       value={entry.senses?.[0]?.translated_parts_of_speech}
+      showPlus={false}
       on:valueupdate />
   {:else if column.field === 'semantic_domains'}
-    <SemanticDomains
-      {canEdit}
-      {entry}
-      on:update={({detail}) => dispatch('valueupdate', { field: 'sdn', newValue: detail })}
-      on:removeCustomDomain={() => dispatch('valueupdate', { field: 'sd', newValue: null })} />
+    <EntrySemanticDomains {canEdit} showPlus={false} sense={entry.senses?.[0]} on:valueupdate />
   {:else if column.field === 'dialects'}
     <EntryDialect
       {canEdit}
+      showPlus={false}
+      {dictionaryId}
       dialects={entry.dialects}
       on:valueupdate />
   {:else if column.field === 'sources'}
@@ -110,6 +110,10 @@
   /* .hide-scrollbar::-webkit-scrollbar {
     display: none;
   } */
+
+  :global(.cell > *) {
+    flex: 1
+  }
 
   div :global(button) {
     margin-bottom: 0px !important;

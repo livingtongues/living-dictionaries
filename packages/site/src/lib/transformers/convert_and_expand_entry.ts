@@ -1,6 +1,6 @@
-import type { ActualDatabaseEntry, ExpandedEntry, GoalDatabaseEntry } from "@living-dictionaries/types";
-import { convert_entry_to_current_shape } from "./convert_entry_to_current_shape";
-import { expand_entry } from "./expand_entry";
+import type { ActualDatabaseEntry, ExpandedEntry, GoalDatabaseEntry } from '@living-dictionaries/types';
+import { convert_entry_to_current_shape } from './convert_entry_to_current_shape';
+import { expand_entry } from './expand_entry';
 
 /**
  * using ..entry can be removed if:
@@ -23,7 +23,7 @@ if (import.meta.vitest) {
   describe('convert_and_expand_entry', () => {
     test('updates entry to goal database shape and expands for UI while keeping old database shape (actual database) until UI is refactored to use expanded shape', () => {
       const entry: ActualDatabaseEntry = {
-        lo: 'lo1', // old shape 
+        lo: 'lo1', // old shape
         lo2: 'lo2' // current shape
       }
       // @ts-ignore - TODO: can we remove ...entry?

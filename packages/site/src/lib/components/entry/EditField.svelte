@@ -5,13 +5,13 @@
   import Keyman from '$lib/components/keyboards/keyman/Keyman.svelte';
   import sanitize from 'xss';
   import type { EntryFieldValue } from '@living-dictionaries/types';
-  
+
   export let value = '';
   export let field: EntryFieldValue;
   export let isSompeng = false;
   export let addingLexeme = false;
   export let bcp: string = undefined;
-  
+
   const dispatch = createEventDispatcher<{
     close: boolean;
     update: string;
@@ -175,7 +175,7 @@
         size="sm"
         form="simple"
         onclick={() => (value = smallCapsSelection(inputEl))}
-        >Toggle sᴍᴀʟʟCᴀᴘs for selection</Button>
+      >Toggle sᴍᴀʟʟCᴀᴘs for selection</Button>
     {/if}
 
     {#if field === 'scientific_names'}

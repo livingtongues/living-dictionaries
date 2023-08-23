@@ -23,7 +23,7 @@
   <div class="h-full flex flex-col justify-center">
     <div
       class="font-semibold text-white p-4 flex justify-between items-center
-          absolute top-0 inset-x-0 bg-opacity-25 bg-black">
+        absolute top-0 inset-x-0 bg-opacity-25 bg-black">
       <span on:click|stopPropagation>{lexeme}</span>
       <span class="i-fa-solid-times p-3 cursor-pointer" />
     </div>
@@ -47,7 +47,7 @@
     {#if canEdit}
       <div
         class="p-4 flex justify-between
-            items-center absolute bottom-0 inset-x-0 bg-opacity-25 bg-black">
+          items-center absolute bottom-0 inset-x-0 bg-opacity-25 bg-black">
         <Button
           class="ml-auto"
           color="red"

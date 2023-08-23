@@ -13,7 +13,7 @@
 
   const dispatch = createEventDispatcher<{
     update: string;
-    // focus: { evt: any; instance: Editor };
+  // focus: { evt: any; instance: Editor };
     // blur: { evt: any; instance: Editor };
   }>();
 
@@ -30,7 +30,7 @@
         instance = editor;
         instance.model.document.on('change:data', emitInputEvent);
 
-        // instance.editing.view.document.on('focus', (evt) => {
+      // instance.editing.view.document.on('focus', (evt) => {
         //   dispatch('focus', { evt, instance });
         // });
 

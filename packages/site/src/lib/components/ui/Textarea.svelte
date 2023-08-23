@@ -39,9 +39,9 @@
     }}
     use:autoresize
     on:keyup={(e) => {
-      if (e.code === 'Enter') {
+      if (e.code === 'Enter')
         dispatch('submit');
-      }
+
     }}
     autocomplete="false" />
   <!-- svelte-ignore a11y-label-has-associated-control -->

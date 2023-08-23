@@ -7,15 +7,15 @@
   import { goto } from '$app/navigation';
   import { addOnline } from 'sveltefirets';
 
-  async function addNewEntry(lx: string) {
-    if (!lx) {
+  async function addNewEntry(lexeme: string) {
+    if (!lexeme)
       return alert(`Missing: ${$t('entry.lx', { default: 'Lexeme/Word/Phrase' })}`);
-    }
+
     try {
       const entryDoc = await addOnline<ActualDatabaseEntry>(
         `dictionaries/${$page.params.dictionaryId}/words`,
         {
-          lx,
+          lx: lexeme,
           gl: {},
         },
         { abbreviate: true }

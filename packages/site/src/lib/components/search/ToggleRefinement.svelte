@@ -26,7 +26,7 @@
   });
 </script>
 
-{#if value && value.onFacetValue.count}
+{#if value?.onFacetValue.count}
   <div class="flex items-center my-2">
     <input
       id={label.replace(' ', '')}

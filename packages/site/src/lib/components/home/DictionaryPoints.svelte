@@ -16,9 +16,9 @@
   const { getMap } = getContext<MapKeyContext>(mapKey);
   const map = getMap();
 
-  let clustersId = `${type}_clusters`;
+  const clustersId = `${type}_clusters`;
 
-  // map.loadImage("/icons/favicon-32x32.png", function(error, image) {
+// map.loadImage("/icons/favicon-32x32.png", function(error, image) {
   //   if (error) throw error;
   //   map.addImage("logo", image);
   // });
@@ -112,9 +112,9 @@
       // Ensure that if the map is zoomed out such that multiple
       // copies of the feature are visible, the popup appears
       // over the copy being pointed to.
-      while (Math.abs(detail.lngLat.lng - coordinates[0]) > 180) {
+      while (Math.abs(detail.lngLat.lng - coordinates[0]) > 180)
         coordinates[0] += detail.lngLat.lng > coordinates[0] ? 360 : -360;
-      }
+
       map.setCenter(coordinates);
 
       const { id } = detail.features[0].properties;

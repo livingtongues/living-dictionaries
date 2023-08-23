@@ -103,14 +103,14 @@
                     lng={point.coordinates.longitude}
                     lat={point.coordinates.latitude}
                     on:update={({ detail }) => {
-                      const points = dictionary.points;
+                      const {points} = dictionary;
                       points[index] = {
                         coordinates: { longitude: detail.lng, latitude: detail.lat },
                       };
                       dispatch('updatePoints', points);
                     }}
                     on:remove={() => {
-                      const points = dictionary.points;
+                      const {points} = dictionary;
                       points.splice(index, 1);
                       dispatch('updatePoints', points);
                     }}
@@ -141,12 +141,12 @@
                   {t}
                   {region}
                   on:update={({ detail }) => {
-                    const regions = dictionary.regions;
+                    const {regions} = dictionary;
                     regions[index] = detail;
                     dispatch('updateRegions', regions);
                   }}
                   on:remove={() => {
-                    const regions = dictionary.regions;
+                    const {regions} = dictionary;
                     regions.splice(index, 1);
                     dispatch('updateRegions', regions);
                   }}
@@ -175,7 +175,7 @@
       size={hasCoordinates ? 'sm' : 'md'}>
       <span class="i-mdi-map-marker-plus mr-1" style="margin-top: -3px;" />
       {#if hasCoordinates}
-      {$t('create.select_coordinates', { default: 'Select Coordinates' })}
+        {$t('create.select_coordinates', { default: 'Select Coordinates' })}
       {:else}
         {$t('create.select_coordinates', { default: 'Select Coordinates' })}
       {/if}

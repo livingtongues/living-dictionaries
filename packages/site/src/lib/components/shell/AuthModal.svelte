@@ -16,9 +16,9 @@
 
   let localeAbbrev = $locale.substring(0, 2);
   if (localeAbbrev === 'he') localeAbbrev = 'iw';
-  if (!Object.values(languagesWithTranslations).includes(localeAbbrev)) {
+  if (!Object.values(languagesWithTranslations).includes(localeAbbrev))
     localeAbbrev = 'en'; // Malay 'ms' and Assamese 'as' not yet available
-  }
+
   languageCode = localeAbbrev as LanguageCode;
 
   export let context: 'force' = undefined;

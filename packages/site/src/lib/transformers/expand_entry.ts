@@ -1,9 +1,9 @@
-import type { DatabaseSense, ExpandedEntry, ExpandedSense, GoalDatabaseEntry } from "@living-dictionaries/types";
-import type { ExpandedAudio, GoalDatabaseAudio } from "@living-dictionaries/types/audio.interface";
-import type { ExpandedPhoto, GoalDatabasePhoto } from "@living-dictionaries/types/photo.interface";
-import type { ExpandedVideo, GoalDatabaseVideo } from "@living-dictionaries/types/video.interface";
-import { convert_timestamp_to_date_object } from "./timestamp_to_date";
-import { translate_part_of_speech_to_current_language, translate_semantic_domain_keys_to_current_language } from "./translate_keys_to_current_language";
+import type { DatabaseSense, ExpandedEntry, ExpandedSense, GoalDatabaseEntry } from '@living-dictionaries/types';
+import type { ExpandedAudio, GoalDatabaseAudio } from '@living-dictionaries/types/audio.interface';
+import type { ExpandedPhoto, GoalDatabasePhoto } from '@living-dictionaries/types/photo.interface';
+import type { ExpandedVideo, GoalDatabaseVideo } from '@living-dictionaries/types/video.interface';
+import { convert_timestamp_to_date_object } from './timestamp_to_date';
+import { translate_part_of_speech_to_current_language, translate_semantic_domain_keys_to_current_language } from './translate_keys_to_current_language';
 
 export function expand_entry(database_entry: GoalDatabaseEntry): ExpandedEntry {
   return {

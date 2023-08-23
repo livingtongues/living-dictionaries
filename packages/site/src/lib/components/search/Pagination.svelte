@@ -3,7 +3,6 @@
   import { connectPagination } from 'instantsearch.js/es/connectors';
   import { onMount } from 'svelte';
   import { canEdit } from '$lib/stores';
-  import { _ } from 'svelte-i18n';
 
   export let search: InstantSearch;
   export let showAdd = true;

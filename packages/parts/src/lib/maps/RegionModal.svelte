@@ -19,7 +19,7 @@
   import center from '@turf/center';
 
   export let region: IRegion;
-  let zoom = region ? 4 : 2;
+  const zoom = region ? 4 : 2;
 
   let centerLng: number;
   let centerLat: number;
@@ -33,11 +33,11 @@
   }
 
   function handleGeocoderResult({ detail }, add) {
-    if (detail?.user_coordinates?.[0]) {
+    if (detail?.user_coordinates?.[0])
       add({ longitude: detail.user_coordinates[0], latitude: detail.user_coordinates[1] });
-    } else {
+    else
       add({ longitude: detail.center[0], latitude: detail.center[1] });
-    }
+
   }
 
   onMount(async () => {
@@ -82,7 +82,7 @@
             options={{ marker: false }}
             placeholder={t ? $t('about.search') : 'Search'}
             on:result={(e) => handleGeocoderResult(e, add)}
-            on:error={(e) => console.log(e.detail)} />
+            on:error={(e) => console.error(e.detail)} />
           {#each Array.from(points) as point (point)}
             <Marker
               draggable
@@ -94,7 +94,7 @@
               lat={point.latitude}>
               <Popup>
                 <Button form="simple" size="sm" color="red" onclick={() => remove(point)}
-                  ><span class="i-fa-trash-o" /></Button>
+                ><span class="i-fa-trash-o" /></Button>
               </Popup>
             </Marker>
           {/each}

@@ -11,7 +11,7 @@
   import { updateOnline, firebaseConfig } from 'sveltefirets';
   import { createEventDispatcher } from 'svelte';
   const dispatch = createEventDispatcher<{close: boolean}>();
-  
+
   export let entry: ExpandedEntry;
   export let sound_file: ExpandedAudio;
 
@@ -26,8 +26,8 @@
     audioBlob = undefined;
   }
 
-  $: audio_url = sound_file?.fb_storage_path 
-    ? `https://firebasestorage.googleapis.com/v0/b/${firebaseConfig.storageBucket}/o/${encodeURIComponent(sound_file.fb_storage_path)}?alt=media` 
+  $: audio_url = sound_file?.fb_storage_path
+    ? `https://firebasestorage.googleapis.com/v0/b/${firebaseConfig.storageBucket}/o/${encodeURIComponent(sound_file.fb_storage_path)}?alt=media`
     : undefined;
 
   $: speaker_id = sound_file?.speaker_ids?.[0]
@@ -35,7 +35,7 @@
   async function updateSpeaker(newSpeakerId: string) {
     if(!sound_file) return;
     if (speaker_id === newSpeakerId) return;
-    
+
     const sf = {
       // @ts-ignore = TODO: export this event to handle saving in the page
       ...entry.sfs[0],
@@ -113,18 +113,18 @@
         target="_blank">
         <i class="fas fa-download" />
         <span class="hidden sm:inline"
-          >{$t('misc.download', {
-            default: 'Download',
-          })}</span>
+        >{$t('misc.download', {
+          default: 'Download',
+        })}</span>
       </Button>
       <div class="w-1" />
 
       <Button onclick={() => deleteAudio(entry, $dictionary.id)} color="red">
         <i class="far fa-trash-alt" />&nbsp;
         <span class="hidden sm:inline"
-          >{$t('misc.delete', {
-            default: 'Delete',
-          })}</span>
+        >{$t('misc.delete', {
+          default: 'Delete',
+        })}</span>
       </Button>
       <div class="w-1" />
     {/if}

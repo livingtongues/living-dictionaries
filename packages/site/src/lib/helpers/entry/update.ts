@@ -19,8 +19,8 @@ export async function saveUpdateToFirestore({
       `dictionaries/${dictionaryId}/words/${entryId}`,
       { [field]: value },
       { abbreviate: true }
-      );
-    } catch (err) {
+    );
+  } catch (err) {
     const $t = get(t);
     alert(`${$t('misc.error', { default: 'Error' })}: ${err}`);
   }

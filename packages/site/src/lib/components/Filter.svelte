@@ -5,9 +5,9 @@
   let value = '';
   $: filteredItems = items.filter((item) => {
     const itemStr = JSON.stringify(item);
-    if (itemStr.toLowerCase().indexOf(value.toLowerCase()) !== -1) {
+    if (itemStr.toLowerCase().indexOf(value.toLowerCase()) !== -1)
       return true;
-    }
+
   });
 
   function autofocus(node: HTMLInputElement) {

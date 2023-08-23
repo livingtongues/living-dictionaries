@@ -17,9 +17,9 @@ export async function inviteHelper(
   if (!targetEmail) return;
 
   const isEmail = /^\S+@\S+\.\S+$/.test(targetEmail);
-  if (!isEmail) {
+  if (!isEmail)
     return alert($t('misc.invalid', { default: 'Invalid Email' }));
-  }
+
 
   try {
     const invite: IInvite = {

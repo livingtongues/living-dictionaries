@@ -25,4 +25,4 @@ enum SpacebarText {
   LANGUAGE = 'language',
   LANGUAGE_KEYBOARD = 'languageKeyboard',
   BLANK = 'blank'
-};
+}

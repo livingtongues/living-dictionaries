@@ -1,4 +1,4 @@
-import { downloadBlob } from "./downloadBlob";
+import { downloadBlob } from './downloadBlob';
 
 export function downloadObjectsAsCSV(headers: Record<string, any>, items: Record<string, any>[], title: string) {
   const csv = objectsToCsvByHeaders(headers, items);
@@ -8,7 +8,7 @@ export function downloadObjectsAsCSV(headers: Record<string, any>, items: Record
 
 export function objectsToCsvByHeaders(headers: Record<string, any>, items: Record<string, any>[]): string {
   const headerRow = Object.values(headers).map(turnValueIntoStringSurroundWithQuotesAsNeeded).join(',');
-  
+
   const headerKeys = Object.keys(headers);
   const itemRows = items
     .map((row) => {

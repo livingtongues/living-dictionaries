@@ -28,7 +28,7 @@
   export let gcsPath: string = undefined;
   export let lng: number = undefined;
   export let lat: number = undefined;
-  
+
   $: expandedDictionaryName = dictionaryName
     ? `${dictionaryName} ${$t('misc.LD_singular', { default: 'Living Dictionary' })}`
     : null;
@@ -36,15 +36,15 @@
   $: textDescription = description || imageDescription || 'Language Documentation Web App - Speeding the availability of language resources for endangered languages. Using technology to shift how we think about endangered languages. Rather than perceiving them as being antiquated, difficult to learn and on the brink of vanishing, we see them as modern and easily accessible for learning online in text and audio formats.'
 
   $: imageProps = {
-      width,
-      height,
-      title: imageTitle,
-      description: imageDescription,
-      dictionaryName,
-      lng,
-      lat,
-      gcsPath: gcsPath?.replace('\n', ''), // this slipped into the server response, can remove after database cleaned
-    };
+    width,
+    height,
+    title: imageTitle,
+    description: imageDescription,
+    dictionaryName,
+    lng,
+    lat,
+    gcsPath: gcsPath?.replace('\n', ''), // this slipped into the server response, can remove after database cleaned
+  };
   $: encodedImageProps = encode(JSON.stringify(imageProps));
   $: imageUrl = gcsPath ? `${IMAGE_API}?props=${encodedImageProps}&v=${OG_IMAGE_VERSION}` : DEFAULT_IMAGE;
   $: imageWidth = dictionaryName ? width.toString() : '987';
@@ -87,7 +87,7 @@
   <meta name="twitter:creator" content="@{handle}" />
 </svelte:head>
 
-<!-- 
+<!--
   Once refactored to an initial language route url schema, update title to use proper one: {$_('misc.LD', { default: 'Living Dictionaries' })}
   Can offer alternate language urls when this is a feature: <link rel="alternate" hrefLang={languageAlternate.hrefLang} href={languageAlternate.href} />
  -->
