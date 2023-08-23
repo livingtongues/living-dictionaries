@@ -20,7 +20,7 @@
   export let target: string | Element = undefined;
   export let show = false;
   export let position: 'top' | 'bottom' = 'top';
-  export let version = '16.0.111'; // beta version; latest stable is '15.0.269' https://keyman.com/downloads/pre-release/ && https://help.keyman.com/developer/engine/web/history
+  export let version = '16.0.141'; // https://keyman.com/developer/keymanweb/, https://keyman.com/downloads/pre-release/, https://help.keyman.com/developer/engine/web/history
 
   let kmw: KeymanWeb;
   let wrapperEl: HTMLDivElement;
