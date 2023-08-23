@@ -10,6 +10,7 @@
   import { EntryFields, type ExpandedEntry, type IColumn } from '@living-dictionaries/types';
   import Audio from '../../entries/Audio.svelte';
   import { createEventDispatcher } from 'svelte';
+  import AddImage from '../AddImage.svelte';
 
   export let column: IColumn;
   export let entry: ExpandedEntry;
@@ -37,6 +38,8 @@
         gcs={first_photo.specifiable_image_url}
         square={60}
         on:deleteImage />
+    {:else if canEdit}
+      <AddImage {dictionaryId} entryId={entry.id} class="text-xs" />
     {/if}
   {:else if column.field === 'speaker'}
     <SelectSpeakerCell {canEdit} {entry} />
