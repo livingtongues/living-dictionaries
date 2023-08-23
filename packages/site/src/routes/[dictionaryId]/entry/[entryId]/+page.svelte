@@ -36,7 +36,6 @@
 
   <div>
     {#if $admin > 1}
-      <JSON obj={$initialEntry} />
       <JSON obj={entry} />
     {/if}
     {#if $isManager || ($isContributor && entry.cb === $user.uid)}

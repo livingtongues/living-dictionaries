@@ -60,7 +60,7 @@
   }
 </script>
 
-<ModalEditableArray values={dialects} options={$options} {canEdit} {showPlus} placeholder={$t('entry.di')} on:update={({ detail: newValue }) => {
+<ModalEditableArray values={dialects} options={$options} {canEdit} canWriteIn {showPlus} placeholder={$t('entry.di')} on:update={({ detail: newValue }) => {
   dispatch('valueupdate', {
     field: EntryFields.dialects,
     newValue,
