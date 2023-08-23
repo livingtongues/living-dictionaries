@@ -29,4 +29,16 @@ export const variants: Variants<Component> = [
       canEdit: true,
     }
   },
+  {
+    name: 'can write-in',
+    height: 450,
+    width: 700,
+    props: {
+      values: [],
+      placeholder: 'Select elements',
+      options: [],
+      canEdit: true,
+      canWriteIn: true,
+    }
+  },
 ]

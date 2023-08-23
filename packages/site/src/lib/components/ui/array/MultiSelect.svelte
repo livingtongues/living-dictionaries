@@ -6,6 +6,7 @@
   export let selectedOptions: Record<string, SelectOption>;
   export let options: SelectOption[];
   export let placeholder = 'Select...';
+  export let canWriteIn = false;
 
   let input: HTMLInputElement;
   let inputValue: string;
@@ -46,9 +47,12 @@
       add(activeOption)
     if (e.key === 'Backspace' && !inputValue)
       remove(Object.keys(selectedOptions).pop());
-    if (e.key === 'Enter' && activeOption) {
+    if (e.key === 'Enter') {
       e.preventDefault(); // keep form from submitting and closing modal
-      selectOption(activeOption)
+      if (activeOption)
+        selectOption(activeOption)
+      else
+        addWriteInIfApplicable()
     }
     if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
       const increment = e.key === 'ArrowUp' ? -1 : 1;
@@ -60,6 +64,13 @@
           ? filtered[0]
           : filtered[calcIndex];
     }
+  }
+
+  function addWriteInIfApplicable() {
+    if (!canWriteIn) return
+    const value = inputValue.trim();
+    if (value)
+      add({name: value, value})
   }
 
   function selectOption(option: SelectOption) {
@@ -93,7 +104,9 @@
         bind:this={input}
         on:keydown|stopPropagation={handleKeydown}
         on:focus={() => setShowOptions(true)}
-        on:blur={() => setShowOptions(false)}
+        on:blur={() => {
+          setShowOptions(false);
+          addWriteInIfApplicable()}}
         placeholder={Object.keys(selectedOptions).length ? '' : placeholder} />
       <span class="i-carbon-caret-down opacity-50" />
     </div>

@@ -12,6 +12,7 @@
   export let placeholder: string;
   export let canEdit = false;
   export let showPlus = true;
+  export let canWriteIn = false;
 
   let selectedOptions: Record<string, SelectOption> = {};
   $: prepareSelected(values, options);
@@ -58,8 +59,7 @@
         dispatch('update', Object.keys(selectedOptions));
         toggle();
       }}>
-        <MultiSelect bind:selectedOptions {options} {placeholder} />
-
+        <MultiSelect bind:selectedOptions {options} {placeholder} {canWriteIn} />
         <div class="min-h-[50vh]" />
 
         <div class="modal-footer space-x-1">
