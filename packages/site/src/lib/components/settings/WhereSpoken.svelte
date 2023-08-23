@@ -40,10 +40,10 @@
   {$t('create.where_spoken', { default: 'Where is this language spoken?' })}*
 </div>
 
-<div class="text-xs text-gray-600 mb-2">
-  {$t('create.map_instructions', { default: 'Click on the map to add secondary coordinates.' })}
-</div>
 {#if hasCoordinates}
+  <div class="text-xs text-gray-600 mb-2">
+    {$t('create.map_instructions', { default: 'Click on the map to add secondary coordinates.' })}
+  </div>
   <div class="h-240px">
     <Map
       lng={dictionary.coordinates.longitude}
