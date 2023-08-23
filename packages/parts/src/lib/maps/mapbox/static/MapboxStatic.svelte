@@ -21,7 +21,7 @@
   )})/auto/${width}x${height}${highDef ? '@2x' : ''}?logo=false&access_token=${accessToken}`;
 
   $: singlePointUrl =
-    points.length === 1 &&
+    points?.length === 1 &&
     !regions?.length &&
     `https://api.mapbox.com/styles/v1/mapbox/${style}/static/geojson(${encodeURIComponent(
       JSON.stringify(geoJson)

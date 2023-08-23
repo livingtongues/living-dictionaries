@@ -89,8 +89,7 @@
         </Popup>
       </Marker>
 
-      {#if dictionary.points}
-        {#each dictionary.points as point, index (point)}
+        {#each dictionary.points || [] as point, index (point)}
           <Marker lat={point.coordinates.latitude} lng={point.coordinates.longitude}>
             <Popup>
               <ShowHide let:show let:toggle>
@@ -127,10 +126,8 @@
             </Popup>
           </Marker>
         {/each}
-      {/if}
 
-      {#if dictionary.regions}
-        {#each dictionary.regions as region, index (region)}
+        {#each dictionary.regions || [] as region, index (region)}
           <Region {region}>
             <ShowHide let:show let:toggle>
               <Button form="simple" size="sm" onclick={toggle}>
@@ -162,7 +159,6 @@
             </ShowHide>
           </Region>
         {/each}
-      {/if}
     </Map>
   </div>
 {/if}
