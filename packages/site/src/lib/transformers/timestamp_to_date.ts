@@ -1,9 +1,9 @@
-import type { Timestamp } from "firebase/firestore";
+import type { Timestamp } from 'firebase/firestore';
 
 export function convert_timestamp_to_date_object(timestamp: number | Date | Timestamp): Date | null {
-  if (timestamp instanceof Date) {
+  if (timestamp instanceof Date)
     return timestamp;
-  }
+
   if (typeof timestamp === 'number') {
     const SECONDS_LENGTH = 10;
     const MILLISECONDS_LENGTH = 13;
@@ -11,15 +11,15 @@ export function convert_timestamp_to_date_object(timestamp: number | Date | Time
       const milliseconds = timestamp * 1000;
       return new Date(milliseconds);
     }
-    if (timestamp.toString().length === MILLISECONDS_LENGTH) {
+    if (timestamp.toString().length === MILLISECONDS_LENGTH)
       return new Date(timestamp);
-    }
+
     return null;
   }
   // eslint-disable-next-line no-prototype-builtins
-  if (timestamp?.hasOwnProperty('toDate')) {
+  if (timestamp?.hasOwnProperty('toDate'))
     return timestamp.toDate();
-  }
+
   return null;
 }
 

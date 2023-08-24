@@ -78,7 +78,7 @@
           {$_('audio.stop_recording', { default: 'Stop Recording' })}
         </Button>
         <Button class="w-full mt-1" color="black" onclick={pause}
-          >{state === 'recording' ? 'Pause' : 'Unpause'}</Button>
+        >{state === 'recording' ? 'Pause' : 'Unpause'}</Button>
       {/if}
     </Recorder>
 
@@ -102,7 +102,7 @@
       </div>
       <div>
         <Button form="filled" class="mt-2" onclick={() => location.reload()}
-          >{$_('audio.reload', { default: 'Reload' })}</Button>
+        >{$_('audio.reload', { default: 'Reload' })}</Button>
       </div>
     </div>
 

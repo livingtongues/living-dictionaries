@@ -4,7 +4,7 @@
   import { backOut } from 'svelte/easing';
 
   let toasts = [];
-  let retainMs = 2000;
+  const retainMs = 2000;
 
   let toastId = 0;
   const pushToast = (msg = '') => {

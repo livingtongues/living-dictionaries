@@ -15,11 +15,6 @@ export default defineConfig({
   define: {
     'import.meta.vitest': false,
   },
-  test: {
-    name: 'parts',
-    globals: true,
-    includeSource: ['src/**/*.ts'],
-  },
 });
 
 import fs from 'fs';

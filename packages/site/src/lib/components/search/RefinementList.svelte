@@ -11,7 +11,7 @@
     label = '';
 
   let value = '';
-  let maxInitialItems = 5;
+  const maxInitialItems = 5;
 
   interface IRefinementItem extends RefinementListItem {
     translatedLabel?: string;
@@ -29,9 +29,9 @@
     const customRefinementList = connectRefinementList((params) => {
       ({ items, refine, searchForItems, isShowingMore, canToggleShowMore, toggleShowMore } =
         params);
-      if (!params.isFromSearch && value) {
+      if (!params.isFromSearch && value)
         value = ''; // not sure why this was in instantsearch docs
-      }
+
     });
 
     search.addWidgets([
@@ -44,9 +44,9 @@
     ]);
   });
 
-  $: if (items.length && $locale) {
+  $: if (items.length && $locale)
     translateItems();
-  }
+
   function translateItems() {
     items = items.map((item) => {
       if (attribute === 'ps') {
@@ -81,11 +81,11 @@
     }
   }
   function showMore() {
-    if (attribute === 'ps' || attribute === 'sdn') {
+    if (attribute === 'ps' || attribute === 'sdn')
       isShowingMore = !isShowingMore;
-    } else {
+    else
       toggleShowMore();
-    }
+
   }
 </script>
 
@@ -127,13 +127,15 @@
 </ul>
 
 {#if canToggleShowMore || filteredItems.length > maxInitialItems}
-  <button type="button" class="p-1 mb-1 ml-1 text-xs text-gray-600" on:click={showMore}
-    ><i class="far {isShowingMore ? 'fa-chevron-up' : 'fa-chevron-down'}" />
-    {isShowingMore
-      ? $_('entry.show_less', {
-          default: 'Show less',
-        })
-      : $_('entry.show_more', { default: 'Show more' })}</button>
+  <button type="button" class="p-1 mb-1 ml-1 text-xs text-gray-600" on:click={showMore}>
+    {#if isShowingMore}
+      <span class="i-fa6-solid-chevron-up" />
+      {$_('entry.show_less', { default: 'Show less' })}
+    {:else}
+      <span class="i-fa6-solid-chevron-down -mt-1" />
+      {$_('entry.show_more', { default: 'Show more' })}
+    {/if}
+  </button>
 {/if}
 
 <div class="mb-3" />

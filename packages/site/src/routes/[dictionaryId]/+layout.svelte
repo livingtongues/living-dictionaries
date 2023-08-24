@@ -8,9 +8,9 @@
   import './custom-fonts.css';
   export let data: LayoutData;
 
-  if (data.dictionary) {
+  if (data.dictionary)
     dictionaryStore.set(data.dictionary);
-  }
+
 
   let menuOpen = false;
 </script>

@@ -19,7 +19,7 @@
   import center from '@turf/center';
 
   export let region: IRegion;
-  let zoom = region ? 4 : 2;
+  const zoom = region ? 4 : 2;
 
   let centerLng: number;
   let centerLat: number;
@@ -32,7 +32,15 @@
     if (c?.geometry?.coordinates) [centerLng, centerLat] = c.geometry.coordinates;
   }
 
-  onMount(async () => {
+  function handleGeocoderResult({ detail }, add) {
+    if (detail?.user_coordinates?.[0])
+      add({ longitude: detail.user_coordinates[0], latitude: detail.user_coordinates[1] });
+    else
+      add({ longitude: detail.center[0], latitude: detail.center[1] });
+
+  }
+
+  onMount(() => {
     if (!region && navigator.geolocation) {
       navigator.geolocation.getCurrentPosition((position) => {
         centerLng = position.coords.longitude;
@@ -46,11 +54,11 @@
     remove: boolean;
     close: boolean;
   }>();
-  async function update(coordinates: IRegion['coordinates']) {
+  function update(coordinates: IRegion['coordinates']) {
     dispatch('update', { coordinates });
     dispatch('close');
   }
-  async function removeRegion() {
+  function removeRegion() {
     dispatch('remove');
     dispatch('close');
   }
@@ -73,8 +81,8 @@
           <Geocoder
             options={{ marker: false }}
             placeholder={t ? $t('about.search') : 'Search'}
-            on:resultCoordinates={({detail}) => add(detail)}
-            on:error={(e) => console.log(e.detail)} />
+            on:result={(e) => handleGeocoderResult(e, add)}
+            on:error={(e) => console.error(e.detail)} />
           {#each Array.from(points) as point (point)}
             <Marker
               draggable
@@ -86,7 +94,7 @@
               lat={point.latitude}>
               <Popup>
                 <Button form="simple" size="sm" color="red" onclick={() => remove(point)}
-                  ><span class="i-fa-trash-o" /></Button>
+                ><span class="i-fa-trash-o" /></Button>
               </Popup>
             </Marker>
           {/each}

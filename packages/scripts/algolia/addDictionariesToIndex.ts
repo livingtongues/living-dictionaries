@@ -14,9 +14,9 @@ const indexAllDictionaries = async () => {
   console.log(dictionaryIds);
   process.stdout.write(dictionaryIds + '\n');
 
-  for (const dictionaryId of dictionaryIds) {
+  for (const dictionaryId of dictionaryIds)
     await indexDictionary(dictionaryId);
-  }
+
 };
 
 async function indexDictionary(dictionaryId: string) {
@@ -33,7 +33,7 @@ async function prepareEntriesFromSnapshot(entriesSnapshot: FirebaseFirestore.Que
     console.log({ dbEntry, algoliaEntry});
     return { ...algoliaEntry, objectID: doc.id };
   });
-  
+
   const entries = await Promise.all(entryPromises);
   return entries;
 }

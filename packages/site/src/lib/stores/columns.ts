@@ -1,30 +1,20 @@
-import { writable, derived } from 'svelte/store';
+import { writable } from 'svelte/store';
 import type { IColumn } from '@living-dictionaries/types';
-import { vernacularName } from '$lib/helpers/vernacularName';
-import { dictionary } from './dictionary';
-import { get } from 'svelte/store';
-import { _ } from 'svelte-i18n';
 import { browser } from '$app/environment';
 
-const defaultColumns: IColumn[] = [
-  // field must match those used for i18n
-  // {
-  //   field: 'lx', // connects to entry.lx in i18n keys
-  //   width: 25,
-  //   hidden: true,
-  //   sticky: true,
-  // },
+export const defaultColumns: IColumn[] = [
+  // field must match those used for i18n (e.g. lx = entry.lx)
   {
-    field: 'lx', // lexeme
+    field: 'lexeme',
     width: 170,
     sticky: true,
   },
   {
-    field: 'soundFile',
+    field: 'audio',
     width: 31, // 50? // AudioCell
   },
   {
-    field: 'photoFile',
+    field: 'photo',
     width: 31, // 50? // ImageCell
   },
   // TODO: add videos to columns
@@ -37,27 +27,27 @@ const defaultColumns: IColumn[] = [
     width: 250,
   },
   {
-    field: 'alternateOrthographies',
+    field: 'local_orthography',
     width: 170,
   },
   {
-    field: 'ei', // elicitation ID
+    field: 'elicitation_id',
     width: 90,
   },
   {
-    field: 'sdn', // semanticDomain
+    field: 'semantic_domains',
     width: 200,
   },
   {
-    field: 'ps', // partOfSpeech
+    field: 'parts_of_speech',
     width: 137, // SelectPOS
   },
   {
-    field: 'nc', // nounClass
+    field: 'noun_class',
     width: 150,
   },
   {
-    field: 'ph', // phonetic
+    field: 'phonetic',
     width: 170,
   },
   {
@@ -65,27 +55,27 @@ const defaultColumns: IColumn[] = [
     width: 150, // SelectSpeakerCell
   },
   {
-    field: 'di', // dialect
+    field: 'dialects',
     width: 130,
   },
   {
-    field: 'in', // interlinearization
+    field: 'interlinearization',
     width: 150,
   },
   {
-    field: 'mr', // morphology
+    field: 'morphology',
     width: 150,
   },
   {
-    field: 'scn', // scientific names
+    field: 'scientific_names',
     width: 150,
   },
   {
-    field: 'pl', // plural form
+    field: 'plural_form',
     width: 150,
   },
   {
-    field: 'nt', // notes
+    field: 'notes',
     width: 300,
   },
   {
@@ -93,16 +83,16 @@ const defaultColumns: IColumn[] = [
     width: 300,
   },
   {
-    field: 'sr', // source
+    field: 'sources',
     width: 200,
   },
 ];
 
 let cachedColumns: IColumn[] = [];
-const tableCacheKey = 'table_columns_05.4.2023'; // IMPORTANT: rename when adding more columns to invalidate the user's cache
-if (browser) {
+const tableCacheKey = 'table_columns_08.17.2023'; // rename when adding more columns to invalidate the user's cache
+if (browser)
   cachedColumns = JSON.parse(localStorage.getItem(tableCacheKey));
-}
+
 
 export const preferredColumns = writable(cachedColumns || defaultColumns);
 
@@ -111,72 +101,3 @@ if (browser) {
     localStorage.setItem(tableCacheKey, JSON.stringify(selectedColumns))
   );
 }
-// Possible idea: if no set of preferredcolumns is in localstorage then query firestore if dictionary defaults exist
-
-export const columns = derived(
-  [preferredColumns, dictionary],
-  ([$preferredColumns, $dictionary]) => {
-    const cols = $preferredColumns.filter((column) => !column.hidden);
-
-    const glossIndex = cols.findIndex((col) => col.field === 'gloss');
-    if (glossIndex >= 0) {
-      const $_ = get(_);
-      const glossColumns: IColumn[] = [];
-      $dictionary.glossLanguages.forEach((bcp) => {
-        glossColumns.push({
-          field: bcp,
-          width: cols[glossIndex].width,
-          sticky: cols[glossIndex].sticky || false,
-          display: $_('gl.' + bcp),
-          explanation: vernacularName(bcp),
-          gloss: true,
-        });
-      });
-      cols.splice(glossIndex, 1, ...glossColumns);
-    }
-
-    const exampleSentenceIndex = cols.findIndex((col) => col.field === 'example_sentence');
-    if (exampleSentenceIndex >= 0) {
-      const $_ = get(_);
-      const exampleSentenceColumns: IColumn[] = [
-        {
-          field: 'xv',
-          width: cols[exampleSentenceIndex].width,
-          sticky: cols[exampleSentenceIndex].sticky || false,
-          display: $_('entry.example_sentence', { default: 'Example Sentence' }),
-          exampleSentence: true,
-        },
-      ];
-      $dictionary.glossLanguages.forEach((bcp) => {
-        exampleSentenceColumns.push({
-          field: bcp,
-          width: cols[exampleSentenceIndex].width,
-          sticky: cols[exampleSentenceIndex].sticky || false,
-          display: `${$_(`gl.${bcp}`)} ${$_('entry.example_sentence', {
-            default: 'Example Sentence',
-          })}`,
-          exampleSentence: true,
-        });
-      });
-      cols.splice(exampleSentenceIndex, 1, ...exampleSentenceColumns);
-    }
-
-    const orthographyIndex = cols.findIndex((col) => col.field === 'alternateOrthographies');
-    if (orthographyIndex >= 0) {
-      const alternateOrthographyColumns: IColumn[] = [];
-      if ($dictionary.alternateOrthographies) {
-        for (const [index, orthography] of $dictionary.alternateOrthographies.entries()) {
-          alternateOrthographyColumns.push({
-            field: index === 0 ? 'lo' : 'lo' + (index + 1),
-            width: 170,
-            display: orthography,
-            orthography: true,
-          });
-        }
-      }
-      cols.splice(orthographyIndex, 1, ...alternateOrthographyColumns);
-    }
-
-    return cols;
-  }
-);

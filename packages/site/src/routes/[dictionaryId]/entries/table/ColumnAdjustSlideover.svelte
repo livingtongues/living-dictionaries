@@ -23,7 +23,7 @@
   });
 
   function showWidth(e) {
-    const target: EventTarget & HTMLInputElement = e.target;
+    const {target} = e;
     widthToDisplay = target.value;
     clearTimeout(widthDisplayTimeout);
     widthDisplayTimeout = setTimeout(() => {
@@ -54,7 +54,7 @@
                 type="button"
                 on:click={() => move(i, 'up')}
                 class="w-8 h-8 flex items-center justify-center hover:bg-gray-200 transition ease-in-out duration-150 text-gray-400 hover:text-gray-500 focus:text-gray-700 rounded-full focus:outline-none">
-                <i class="far fa-chevron-up" />
+                <span class="i-fa6-solid-chevron-up" />
               </button>
             {/if}
             {#if i > 0 && i !== $preferredColumns.length - 1}
@@ -62,7 +62,7 @@
                 type="button"
                 on:click={() => move(i, 'down')}
                 class="w-8 h-8 flex items-center justify-center hover:bg-gray-200 transition ease-in-out duration-150 text-gray-400 hover:text-gray-500 focus:text-gray-700 rounded-full focus:outline-none">
-                <i class="far fa-chevron-down" />
+                <span class="i-fa6-solid-chevron-down" />
               </button>
             {/if}
           </div>
@@ -77,8 +77,10 @@
                   on:click={() => (column.sticky = !column.sticky)}
                   class="w-8 h-8 flex-shrink-0 flex items-center justify-center hover:bg-gray-200 transition ease-in-out duration-150 text-gray-400 hover:text-gray-500 focus:text-gray-700 rounded-full focus:outline-none">
                   {#if column.sticky}
-                    <i class="fas fa-thumbtack" />
-                  {:else}<i class="far fa-thumbtack" />{/if}
+                    <span class="i-teenyicons-thumbtack-solid" />
+                  {:else}
+                    <span class="i-teenyicons-thumbtack-outline" />
+                  {/if}
                 </button>
               {/if}
               <button
@@ -86,12 +88,14 @@
                 on:click={() => (column.hidden = !column.hidden)}
                 class="w-8 h-8 flex-shrink-0 flex items-center justify-center hover:bg-gray-200 transition ease-in-out duration-150 text-gray-400 hover:text-gray-500 focus:text-gray-700 rounded-full focus:outline-none">
                 {#if column.hidden}
-                  <i class="far fa-eye-slash" />
-                {:else}<i class="far fa-eye" />{/if}
+                  <span class="i-streamline-interface-edit-view-off-disable-eye-eyeball-hide-off-view" />
+                {:else}
+                  <span class="i-streamline-interface-edit-view-eye-eyeball-open-view" />
+                {/if}
               </button>
             </div>
             <!-- Source range input shouldn't be here because we need to show complete sources and they can be very long -->
-            {#if column.field != 'sr'}
+            {#if column.field != 'sources'}
               <input
                 class="w-full"
                 type="range"

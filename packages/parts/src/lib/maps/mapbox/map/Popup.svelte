@@ -31,11 +31,11 @@
       offset,
     });
 
-    if (container.hasChildNodes()) {
+    if (container.hasChildNodes())
       popup.setDOMContent(container);
-    } else {
+    else
       popup.setText(label);
-    }
+
 
     marker.setPopup(popup);
 
@@ -45,9 +45,9 @@
   });
 
   $: if (popup) {
-    if (open !== popup.isOpen()) {
+    if (open !== popup.isOpen())
       marker.togglePopup();
-    }
+
   }
 </script>
 

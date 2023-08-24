@@ -1,5 +1,4 @@
-
-import { IEntry } from '@living-dictionaries/types';
+import { ActualDatabaseEntry } from '@living-dictionaries/types';
 import { db } from '../config';
 import { program } from 'commander';
 import { reverse_semantic_domains_mapping } from './reverse-semantic-domains-mapping';
@@ -38,7 +37,7 @@ async function entryRefactor() {
 async function fetchEntries(dictionaryId: string) {
   const snapshot = await db.collection(`dictionaries/${dictionaryId}/words`).get();
   for (const snap of snapshot.docs) {
-    const entry: IEntry = { id: snap.id, ...(snap.data() as IEntry) };
+    const entry: ActualDatabaseEntry = { id: snap.id, ...(snap.data() as ActualDatabaseEntry) };
     // await turnSDintoArray(dictionaryId, entry);
     // await refactorGloss(dictionaryId, entry);
     // await notesToPluralForm(dictionaryId, entry);
@@ -48,7 +47,7 @@ async function fetchEntries(dictionaryId: string) {
   }
 }
 
-const turnDialectsIntoArray = async (dictionaryId: string, entry: IEntry) => {
+const turnDialectsIntoArray = async (dictionaryId: string, entry: ActualDatabaseEntry) => {
   if (entry.di) {
     console.log('entry dialect before:');
     console.log(entry.di);
@@ -64,7 +63,7 @@ const turnDialectsIntoArray = async (dictionaryId: string, entry: IEntry) => {
   return true;
 };
 
-const reverese_semantic_domains_in_db = async (dictionaryId: string, entry: IEntry) => {
+const reverese_semantic_domains_in_db = async (dictionaryId: string, entry: ActualDatabaseEntry) => {
   if (entry.sdn) {
     console.log('entry sdn before:');
     console.log(entry.sdn);
@@ -77,7 +76,7 @@ const reverese_semantic_domains_in_db = async (dictionaryId: string, entry: IEnt
   return true;
 };
 
-const turnSDintoArray = async (dictionaryId: string, entry: IEntry) => {
+const turnSDintoArray = async (dictionaryId: string, entry: ActualDatabaseEntry) => {
   if (entry.sd && typeof entry.sd === 'string') {
     console.log('entry sd before: ', entry.sd);
     const emptyArray: string[] = [];
@@ -95,7 +94,7 @@ const turnSDintoArray = async (dictionaryId: string, entry: IEntry) => {
 };
 
 let count = 1;
-const turnPOSintoArray = async (dictionaryId: string, entry: IEntry) => {
+const turnPOSintoArray = async (dictionaryId: string, entry: ActualDatabaseEntry) => {
   if (entry.ps && typeof entry.ps === 'string') {
     console.log(`${count}:${dictionaryId}:${entry.id}`);
     console.log(entry.ps);
@@ -108,7 +107,7 @@ const turnPOSintoArray = async (dictionaryId: string, entry: IEntry) => {
   }
 };
 
-const refactorGloss = async (dictionaryId: string, entry: IEntry) => {
+const refactorGloss = async (dictionaryId: string, entry: ActualDatabaseEntry) => {
   console.log(entry.gl);
   for (const key in entry.gl) {
     if (key === 'English') {
@@ -141,7 +140,7 @@ const refactorGloss = async (dictionaryId: string, entry: IEntry) => {
   return console.log(`${entry.id}: `, entry.gl);
 };
 
-const notesToPluralForm = async (dictionaryId: string, entry: IEntry) => {
+const notesToPluralForm = async (dictionaryId: string, entry: ActualDatabaseEntry) => {
   const ntBefore = entry.nt;
   if (entry?.nt.startsWith('Plural form:')) {
     entry.pl = entry.nt.replace('Plural form: ', '');

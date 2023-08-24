@@ -4,12 +4,11 @@
   export let items;
   export let height = '100%';
   export let itemHeight = undefined;
-  let foo;
   // read-only, but visible to consumers via bind:start
   export let start = 0;
   export let end = 15;
   // local state
-  let height_map = [];
+  const height_map = [];
   let rows;
   let viewport;
   let contents;
@@ -49,9 +48,9 @@
   async function handle_scroll() {
     const { scrollTop } = viewport;
     const old_start = start;
-    for (let v = 0; v < rows.length; v += 1) {
+    for (let v = 0; v < rows.length; v += 1)
       height_map[start + v] = itemHeight || rows[v].offsetHeight;
-    }
+
     let i = 0;
     let y = 0;
     while (i < items.length) {
@@ -88,7 +87,7 @@
       const d = actual_height - expected_height;
       viewport.scrollTo(0, scrollTop + d);
     }
-    // TODO if we overestimated the space these
+  // TODO if we overestimated the space these
     // rows would occupy we may need to add some
     // more. maybe we can just call handle_scroll again?
   }

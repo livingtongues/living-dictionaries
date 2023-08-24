@@ -2,7 +2,7 @@
   import Keyman from './Keyman.svelte';
   import { Story } from 'kitbook';
   import { Button, Store } from 'svelte-pieces';
-  import ClassicCustomized from '@living-dictionaries/parts/src/lib/editor/ClassicCustomized.svelte';
+  import ClassicCustomized from '$lib/components/editor/ClassicCustomized.svelte';
 
   let value = '';
   let html = '';
@@ -56,7 +56,7 @@ Keyman will accept an element (documentQuerySelector usable string or element it
 <Story name="CKEditor - set to Assamese">
   <div class="w-full">
     <Keyman bcp="as" target=".ck-editor__editable_inline" position="bottom">
-      <ClassicCustomized bind:html />
+      <ClassicCustomized {html} on:update={({ detail }) => (html = detail)} />
     </Keyman>
     <pre class="pl-3">{html}</pre>
   </div>
@@ -65,7 +65,7 @@ Keyman will accept an element (documentQuerySelector usable string or element it
 <Story name="CKEditor - no language - can choose">
   <div class="w-full">
     <Keyman canChooseKeyboard target=".ck-editor__editable_inline" position="bottom">
-      <ClassicCustomized bind:html />
+      <ClassicCustomized {html} on:update={({ detail }) => (html = detail)} />
     </Keyman>
     <pre class="pl-3">{html}</pre>
   </div>

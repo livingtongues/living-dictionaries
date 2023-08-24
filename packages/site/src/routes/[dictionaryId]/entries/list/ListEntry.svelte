@@ -4,19 +4,19 @@
   import Video from '../Video.svelte';
   import Image from '$lib/components/image/Image.svelte';
   import AddImage from '../AddImage.svelte';
-  import type { IDictionary, IEntry } from '@living-dictionaries/types';
-  import { order_glosses, order_entry_and_dictionary_gloss_languages } from '$lib/helpers/glosses';
+  import type { ExpandedEntry, IDictionary } from '@living-dictionaries/types';
+  import { order_glosses } from '$lib/helpers/glosses';
   import { minutesAgo } from '$lib/helpers/time';
   import { ShowHide } from 'svelte-pieces';
   import sanitize from 'xss';
 
-  export let entry: IEntry;
+  export let entry: ExpandedEntry;
   export let dictionary: IDictionary;
   export let canEdit = false;
   export let videoAccess = false;
 
   $: glosses = order_glosses({
-    glosses: entry.gl,
+    glosses: entry.senses?.[0]?.glosses,
     dictionary_gloss_languages: dictionary.glossLanguages,
     $t,
     label: dictionary.id !== 'jewish-neo-aramaic',
@@ -28,39 +28,35 @@
   class:border-b-2={entry.ua?.toMillis?.() > minutesAgo(5)}
   class="flex rounded shadow my-1 overflow-hidden items-stretch border-green-300"
   style="margin-right: 2px;">
-  {#if entry.sf || canEdit}
-    <Audio class="bg-gray-100" {entry} {canEdit} minimal />
+  {#if entry.sound_files?.[0] || canEdit}
+    <Audio class="bg-gray-100 p-2" {entry} {canEdit} minimal let:playing>
+      <span class:text-blue-700={playing} class="i-material-symbols-hearing text-2xl mt-1" />
+      {$t('audio.listen', { default: 'Listen' })}
+    </Audio>
   {/if}
   <a
     href={'/' + dictionary.id + '/entry/' + entry.id}
     class="p-2 text-lg flex-grow flex flex-col justify-between hover:bg-gray-200">
     <div>
-      <span class="font-semibold text-gray-900 mr-1">{entry.lx}</span>
-      {#if entry.ph}
-        <span class="mr-1 hidden sm:inline">[{entry.ph}]</span>
+      <span class="font-semibold text-gray-900 mr-1">{entry.lexeme}</span>
+      {#if entry.phonetic}
+        <span class="mr-1 hidden sm:inline">[{entry.phonetic}]</span>
       {/if}
 
       {#if dictionary.id !== 'garifuna'}
-        {#if entry.lo}<i class="mr-1">{entry.lo}</i>{/if}
-        {#if entry.lo2}<i class="mr-1" class:sompeng={dictionary.id === 'sora'}
-        >{entry.lo2}</i
-        >{/if}
-        {#if entry.lo3}<i class="mr-1">{entry.lo3}</i>{/if}
-        {#if entry.lo4}<i class="mr-1">{entry.lo4}</i>{/if}
-        {#if entry.lo5}<i class="mr-1">{entry.lo5}</i>{/if}
+        {#if entry.local_orthography_1}<i class="mr-1">{entry.local_orthography_1}</i>{/if}
+        {#if entry.local_orthography_2}<i class="mr-1" class:sompeng={dictionary.id === 'sora'}>{entry.local_orthography_2}</i>{/if}
+        {#if entry.local_orthography_3}<i class="mr-1">{entry.local_orthography_3}</i>{/if}
+        {#if entry.local_orthography_4}<i class="mr-1">{entry.local_orthography_4}</i>{/if}
+        {#if entry.local_orthography_5}<i class="mr-1">{entry.local_orthography_5}</i>{/if}
       {/if}
     </div>
     <div class="flex flex-wrap items-center justify-end -mb-1">
       <div class="text-xs text-gray-600 mr-auto mb-1">
-        {#if entry.ps}
-          {#if typeof entry.ps === 'string'}
-            <!-- TODO: refactor entry.ps strings to array of strings, then remove this -->
-            <i>{$t('psAbbrev.' + entry.ps, { default: entry.ps })},</i>
-          {:else}
-            {#each entry.ps as pos}
-              <i>{$t('psAbbrev.' + pos, { default: pos })}, </i>
-            {/each}
-          {/if}
+        {#if entry.senses?.[0]?.translated_parts_of_speech}
+          {#each entry.senses?.[0]?.parts_of_speech_keys as pos}
+            <i>{$t('psAbbrev.' + pos, { default: pos })}, </i>
+          {/each}
         {/if}
 
         {#if glosses.includes('<i>')}
@@ -69,8 +65,8 @@
           {glosses}
         {/if}
 
-        {#if entry.scn?.length}
-          {@const scientific_names = entry.scn?.join(', ')}
+        {#if entry.scientific_names}
+          {@const scientific_names = entry.scientific_names.join(', ')}
           {#if scientific_names.includes('<i>')}
             {@html sanitize(scientific_names)}
           {:else}
@@ -79,54 +75,47 @@
         {/if}
 
         {#if dictionary.id === 'jewish-neo-aramaic'}
-          {#if entry.di}<p class="text-xs">
-            <i class="mr-1">{$t('entry.di', { default: 'Dialect' })}: {entry.di}</i>
+          {#if entry.dialects}<p class="text-xs">
+            <i class="mr-1">{$t('entry.di', { default: 'Dialect' })}: {entry.dialects.join(', ')}</i>
           </p>{/if}
-          {#if entry.xs?.vn}<p>
-            <span class="font-semibold"
-            >{$t('entry.example_sentence', { default: 'Example Sentence' })}:</span>
-            {entry.xs.vn}
-          </p>{/if}
-          {#if entry.xs}
-            {#each order_entry_and_dictionary_gloss_languages(entry.gl, dictionary.glossLanguages) as bcp}
-              {#if entry.xs[bcp]}
-                <p>
-                  <span class="font-semibold"
-                  >{$t(`gl.${bcp}`)}
-                    {$t('entry.example_sentence', {
-                      default: 'Example Sentence',
-                    })}:</span>
-                  {entry.xs[bcp]}
-                </p>
-              {/if}
+          {#each entry.senses?.[0]?.example_sentences || [{}] as sentence}
+            {#each Object.entries(sentence) as [bcp, content]}
+              <p>
+                <span class="font-semibold">
+                  {#if bcp !== 'vn'}
+                    {$t(`gl.${bcp}`)}
+                  {/if}
+                  {$t('entry.example_sentence', { default: 'Example Sentence' })}:</span>
+                {content}
+              </p>
             {/each}
-          {/if}
-        {:else if dictionary.id === 'babanki'}
-          {#if entry.pl}<p class="text-xs">
-            {$t('entry.pl', { default: 'Plural form' })}: {entry.pl}
-          </p>{/if}
+          {/each}
+        {/if}
+
+        {#if entry.plural_form}
+          <p class="text-xs">
+            {$t('entry.pl', { default: 'Plural form' })}: {entry.plural_form}
+          </p>
         {/if}
       </div>
 
-      {#if entry.sd}
+      {#if entry.senses?.[0]?.write_in_semantic_domains}
         <span class="px-2 py-1 leading-tight text-xs bg-gray-100 rounded ml-1">
-          <i>{entry.sd}</i>
+          <i>{entry.senses?.[0]?.write_in_semantic_domains.join(', ')}</i>
         </span>
       {/if}
 
-      {#if entry.sdn?.length}
-        {#each entry.sdn as domain}
-          <span
-            class="px-2 py-1 leading-tight text-xs bg-gray-100 rounded ml-1
-              mb-1">
-            {$t('sd.' + domain, { default: domain })}
-          </span>
-        {/each}
-      {/if}
+      {#each entry.senses?.[0]?.translated_ld_semantic_domains || [] as domain}
+        <span
+          class="px-2 py-1 leading-tight text-xs bg-gray-100 rounded ml-1
+            mb-1">
+          {domain}
+        </span>
+      {/each}
     </div>
   </a>
-  {#if entry.senses?.[0].video_files?.[0]}
-    <Video class="bg-gray-100 border-r-2" {entry} video={entry.senses[0].video_files[0]} {canEdit} />
+  {#if entry.senses?.[0]?.video_files?.[0]}
+    <Video class="bg-gray-100 p-1.5 border-r-2" lexeme={entry.lexeme} video={entry.senses[0].video_files[0]} {canEdit} />
   {:else if videoAccess && canEdit}
     <ShowHide let:show let:toggle>
       <button
@@ -134,7 +123,7 @@
         class="media-block bg-gray-100 border-r-2 hover:bg-gray-300 flex flex-col items-center
           justify-center cursor-pointer p-2 text-lg"
         on:click={toggle}>
-        <i class="far fa-video-plus my-1 mx-2 text-blue-800" />
+        <span class="i-bi-camera-video text-2xl mt-1  text-blue-800" />
       </button>
       {#if show}
         {#await import('$lib/components/video/AddVideo.svelte') then { default: AddVideo }}
@@ -143,17 +132,17 @@
       {/if}
     </ShowHide>
   {/if}
-  {#if entry.pf}
+  {#if entry.senses?.[0]?.photo_files?.[0]}
     <div class="media-block bg-gray-300 relative">
       <Image
         square={128}
-        title={entry.lx}
-        gcs={entry.pf.gcs}
+        title={entry.lexeme}
+        gcs={entry.senses?.[0]?.photo_files?.[0].specifiable_image_url}
         {canEdit}
         on:deleteImage />
     </div>
   {:else if canEdit}
-    <AddImage {entry} class="w-12 bg-gray-100">
+    <AddImage dictionaryId={dictionary.id} entryId={entry.id} class="w-12 bg-gray-100">
       <div class="text-xs" slot="text">
         {$t('entry.photo', { default: 'Photo' })}
       </div>

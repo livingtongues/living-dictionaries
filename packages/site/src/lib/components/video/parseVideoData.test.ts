@@ -12,9 +12,9 @@ describe('parseVideoData', () => {
       `http://www.youtube.com/watch?v=${youtubeId}&t=sahda`,
     ]
 
-    for (const url of youtubeUrls) {
+    for (const url of youtubeUrls)
       expect(parseVideoData(url)).toEqual({ youtubeId });
-    }
+
   });
 
   test('handles Youtube timestamps', () => {
@@ -29,9 +29,9 @@ describe('parseVideoData', () => {
       `//player.vimeo.com/video/${vimeoId}`,
     ]
 
-    for (const url of vimeoUrls) {
+    for (const url of vimeoUrls)
       expect(parseVideoData(url)).toEqual({ vimeoId });
-    }
+
   });
 
   test('handles Vimeo timestamps', () => {

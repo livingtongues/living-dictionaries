@@ -4,14 +4,14 @@ import { remove_italic_tags } from './remove_italic_tags';
 describe('order_glosses', () => {
   const $t = (id: string) => {
     switch (id) {
-      case 'gl.de':
-        return 'German';
-      case 'gl.en':
-        return 'English';
-      case 'gl.es':
-        return 'Spanish';
-      default:
-        return 'other';
+    case 'gl.de':
+      return 'German';
+    case 'gl.en':
+      return 'English';
+    case 'gl.es':
+      return 'Spanish';
+    default:
+      return 'other';
     }
   };
 

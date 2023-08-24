@@ -7,7 +7,7 @@
   import type { IUser } from '@living-dictionaries/types';
 
   $: user = $userStore || ($authState === undefined && ($page.data?.user as IUser)) || null;
-  // only use page data set from the cookie before authState has been inited so that when a user logs out, the user value here doesn't fall back to the page data  value initially set by the cookie. Even though the cookie is cleared on logout, the page data is not updated.
+// only use page data set from the cookie before authState has been inited so that when a user logs out, the user value here doesn't fall back to the page data  value initially set by the cookie. Even though the cookie is cleared on logout, the page data is not updated.
 </script>
 
 {#if user}
@@ -28,10 +28,10 @@
           {/if}
           <a href="/account"> {$t('account.account_settings', { default: 'Account Settings' })} </a>
           {#if userStore}
-            <button on:click={logOut}>{$t('account.log_out', { default: 'Log Out' })}</button>
+            <button type="button" on:click={logOut}>{$t('account.log_out', { default: 'Log Out' })}</button>
           {/if}
           {#if firebaseConfig.projectId === 'talking-dictionaries-dev'}
-            <button
+            <button type="button"
               on:click={async () => {
                 const roleNumber = +prompt('Enter 0, 1, or 2');
                 const { getFunctions, httpsCallable } = await import('firebase/functions');

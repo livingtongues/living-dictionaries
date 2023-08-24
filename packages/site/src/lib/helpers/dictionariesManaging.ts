@@ -9,9 +9,9 @@ export async function addDictionaryManager(manager: IHelper, dictionaryId: strin
 }
 
 export async function removeDictionaryManager(manager: IHelper, dictionaryId: string) {
-  if (confirm(`Are you sure you want to remove ${manager.name} as manager from ${dictionaryId}?`)) {
+  if (confirm(`Are you sure you want to remove ${manager.name} as manager from ${dictionaryId}?`))
     await deleteDocumentOnline(`dictionaries/${dictionaryId}/managers/${manager.id}`);
-  }
+
 }
 
 export async function addDictionaryContributor(contributor: IHelper, dictionaryId: string) {
@@ -26,9 +26,9 @@ export async function removeDictionaryContributor(contributor: IHelper, dictiona
     confirm(
       `Are you sure you want to remove ${contributor.name} as contributor from ${dictionaryId}?`
     )
-  ) {
+  )
     await deleteDocument(`dictionaries/${dictionaryId}/contributors/${contributor.id}`);
-  }
+
 }
 
 export async function removeDictionaryCollaborator(collaborator: IHelper, dictionaryId: string) {
@@ -36,9 +36,9 @@ export async function removeDictionaryCollaborator(collaborator: IHelper, dictio
     confirm(
       `Are you sure you want to remove ${collaborator.name} as write-in collaborator from ${dictionaryId}?`
     )
-  ) {
+  )
     await deleteDocument(`dictionaries/${dictionaryId}/writeInCollaborators/${collaborator.id}`);
-  }
+
 }
 
 export async function removeDictionary(dictionary: IDictionary) {

@@ -23,7 +23,7 @@ export function format_semantic_domains(
   entry: ExpandedEntry,
 ): EntryForCSV {
   const domains = {};
-  for (const [index, domain] of (entry.senses?.[0].semantic_domains || []).entries())
+  for (const [index, domain] of (entry.senses?.[0].translated_ld_semantic_domains || []).entries())
     domains[`semantic_domain_${index + 1}`] = domain;
   return domains;
 }

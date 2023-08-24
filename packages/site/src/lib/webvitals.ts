@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 // From https://ivoberger.com/posts/using-vercel-analytics-with-svelte-kit/ which was from https://github.com/vercel/gatsby-plugin-vercel/blob/main/src/web-vitals.js
 
 import type { Metric } from 'web-vitals';
@@ -5,23 +6,24 @@ import type { Metric } from 'web-vitals';
 
 let isRegistered = false;
 
-export type AnalyticsOptions = {
-  params: { [s: string]: any } | ArrayLike<any>;
+export interface AnalyticsOptions {
+  params: Record<string, any> | ArrayLike<any>;
   path: string;
   analyticsId: string;
   debug?: true;
-};
+}
 
 const vitalsUrl = 'https://vitals.vercel-analytics.com/v1/vitals';
 
 function getConnectionSpeed(): string {
   if ('connection' in navigator &&
-    navigator['connection'] &&
-    'effectiveType' in (navigator['connection'] as object)) {
-    return navigator['connection']['effectiveType'] as string
-  } else {
-    return '';
-  }
+    navigator.connection &&
+    'effectiveType' in (navigator.connection as object))
+    // eslint-disable-next-line dot-notation
+    return navigator.connection['effectiveType'] as string
+
+  return '';
+
 }
 
 function sendToAnalytics(metric: Metric, options: AnalyticsOptions) {
@@ -40,9 +42,9 @@ function sendToAnalytics(metric: Metric, options: AnalyticsOptions) {
     speed: getConnectionSpeed(),
   };
 
-  if (options.debug) {
-    console.log('[Analytics]', metric.name, JSON.stringify(body, null, 2));
-  }
+  if (options.debug)
+    console.info('[Analytics]', metric.name, JSON.stringify(body, null, 2));
+
 
   const blob = new Blob([new URLSearchParams(body).toString()], {
     // This content type is necessary for `sendBeacon`:
@@ -51,12 +53,12 @@ function sendToAnalytics(metric: Metric, options: AnalyticsOptions) {
   if (navigator.sendBeacon) {
     navigator.sendBeacon(vitalsUrl, blob);
   } else
-    fetch(vitalsUrl, {
-      body: blob,
-      method: 'POST',
-      credentials: 'omit',
-      keepalive: true,
-    });
+  {fetch(vitalsUrl, {
+    body: blob,
+    method: 'POST',
+    credentials: 'omit',
+    keepalive: true,
+  });}
 }
 
 export function measureWebVitals(options: AnalyticsOptions): void {

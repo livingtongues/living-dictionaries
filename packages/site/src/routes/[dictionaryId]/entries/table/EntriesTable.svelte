@@ -1,21 +1,26 @@
 <script lang="ts">
-  import type { IColumn, IEntry } from '@living-dictionaries/types';
+  import { createEventDispatcher } from 'svelte';
+  import type { ExpandedEntry, IColumn } from '@living-dictionaries/types';
   import ColumnTitle from './ColumnTitle.svelte';
   import Cell from './Cell.svelte';
   import { minutesAgo } from '$lib/helpers/time';
 
-  export let canEdit = false;
-  export let entries: IEntry[] = [];
   export let columns: IColumn[];
+  export let entries: ExpandedEntry[] = [];
+  export let canEdit = false;
+  export let dictionaryId: string;
+
   let selectedColumn: IColumn;
 
   function getLeftValue(index: number) {
-    if (index === 0) {
-      return 0;
-    } else {
-      return columns[index - 1].width;
-    }
+    if (index === 0) return 0;
+    return columns[index - 1].width;
   }
+
+  const dispatch = createEventDispatcher<{
+    deleteImage: { entryId: string };
+    valueupdate: { field: string; newValue: string | string[]; entryId: string };
+  }>();
 </script>
 
 <div
@@ -44,11 +49,11 @@
         {#each columns as column, i}
           <td
             class:bg-green-100={canEdit && entry.ua?.toMillis?.() > minutesAgo(5)}
-            class="{column.sticky ? 'sticky bg-white' : ''} h-0"
+            class="{column.sticky ? 'sticky bg-white z-1' : ''} h-0"
             style="{column.sticky
               ? 'left:' + getLeftValue(i) + 'px; --border-right-width: 3px;'
-              : ''} --col-width: {entry.sr ? 'auto' : `${column.width}px`};">
-            <Cell {column} {entry} {canEdit} />
+              : ''} --col-width: {entry.sources ? 'auto' : `${column.width}px`};">
+            <Cell {column} {entry} {canEdit} {dictionaryId} on:deleteImage={() => dispatch('deleteImage', { entryId: entry.id})} on:valueupdate={({detail: {field, newValue}}) => dispatch('valueupdate', { field, newValue, entryId: entry.id })} />
           </td>
         {/each}
       </tr>
@@ -57,7 +62,7 @@
 </div>
 
 {#if selectedColumn}
-  {#await import('$lib/components/table/ColumnAdjustSlideover.svelte') then { default: ColumnAdjustSlideover }}
+  {#await import('./ColumnAdjustSlideover.svelte') then { default: ColumnAdjustSlideover }}
     <ColumnAdjustSlideover
       {selectedColumn}
       on:close={() => {

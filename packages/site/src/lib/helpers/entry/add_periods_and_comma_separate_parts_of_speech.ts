@@ -1,8 +1,8 @@
 export function add_periods_and_comma_separate_parts_of_speech(partOfSpeech: string | string[]): string {
   if (partOfSpeech) {
-    if (typeof partOfSpeech !== 'string' && partOfSpeech.length > 0) {
+    if (typeof partOfSpeech !== 'string' && partOfSpeech.length > 0)
       return partOfSpeech.join('., ') + '.';
-    }
+
     if (typeof partOfSpeech === 'string')
       return partOfSpeech + '.';
   }

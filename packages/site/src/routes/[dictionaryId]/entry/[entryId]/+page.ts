@@ -1,22 +1,41 @@
 import { error, redirect } from '@sveltejs/kit';
-
 import type { ActualDatabaseEntry } from '@living-dictionaries/types';
-import { getDocument } from 'sveltefirets';
-import { convert_and_expand_entry } from '$lib/transformers/convert_and_expand_entry';
+import { docStore, getDocument } from 'sveltefirets';
 
-import type { PageLoad } from './$types';
-export const load: PageLoad = async ({ params, parent }) => {
+import {
+  admin,
+  algoliaQueryParams,
+  canEdit,
+  dictionary,
+  isContributor,
+  isManager,
+  user,
+} from '$lib/stores';
+import { browser } from '$app/environment';
+import { readable } from 'svelte/store';
+
+export const load = async ({ params, parent }) => {
   await parent();
   try {
-    const entry = await getDocument<ActualDatabaseEntry>(
-      `dictionaries/${params.dictionaryId}/words/${params.entryId}`
-    );
-    if (entry) {
-      return {
-        initialEntry: convert_and_expand_entry(entry),
-      };
-    }
-    throw redirect(301, `/${params.dictionaryId}`);
+    const entryPath = `dictionaries/${params.dictionaryId}/words/${params.entryId}`;
+    const entry = await getDocument<ActualDatabaseEntry>(entryPath);
+    if (!entry)
+      throw redirect(301, `/${params.dictionaryId}`);
+
+    let entryStore = readable(entry)
+    if (browser)
+      entryStore = docStore<ActualDatabaseEntry>(entryPath, {startWith: entry})
+
+    return {
+      initialEntry: entryStore,
+      admin,
+      algoliaQueryParams,
+      canEdit,
+      dictionary,
+      isContributor,
+      isManager,
+      user,
+    };
   } catch (err) {
     throw error(500, err);
   }

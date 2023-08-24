@@ -2,7 +2,7 @@
   // https://www.npmjs.com/package/@mapbox/mapbox-gl-geocoder
   import { getContext, onDestroy, onMount, createEventDispatcher } from 'svelte';
   import { mapKey, type MapKeyContext } from '../context';
-  import { loadScriptOnce, loadStylesOnce } from 'sveltefirets/helpers/loader';
+  import { loadScriptOnce, loadStylesOnce } from 'sveltefirets';
 
   import type { Result, Results, GeocoderOptions } from '@mapbox/mapbox-gl-geocoder';
   import { bindEvents } from '../event-bindings';
@@ -41,9 +41,9 @@
   }>();
 
   function handleGeocoderResult(result: ResultOrUserCoordinates): { longitude: number, latitude: number } {
-    if ('user_coordinates' in result) {
+    if ('user_coordinates' in result)
       return { longitude: result.user_coordinates[0], latitude: result.user_coordinates[1] };
-    }
+
     return { longitude: result.center[0], latitude: result.center[1] };
   }
 
@@ -57,7 +57,7 @@
     results: (e: Results) => dispatch('results', e),
     error: ({ error }) => dispatch('error', error),
   };
-  
+
   let unbind = () => {};
   let geocoder: MapboxGeocoder;
 
@@ -81,9 +81,9 @@
     });
     map.addControl(geocoder, position);
 
-    if (value) {
+    if (value)
       geocoder.setInput(value);
-    }
+
 
     unbind = bindEvents(geocoder, handlers);
 

@@ -77,9 +77,9 @@ export async function prepareDataForIndex(
 export function remove_empty_fields<T>(entry: T): T {
   Object.keys(entry).forEach((key) => {
     const value = entry[key];
-    if (value === '' || value === null || value === undefined || (Array.isArray(value) && value.length === 0)) {
+    if (value === '' || value === null || value === undefined || (Array.isArray(value) && value.length === 0))
       delete entry[key];
-    }
+
   });
   return entry;
 }
@@ -92,9 +92,9 @@ async function get_first_sound_file(dbEntry: ActualDatabaseEntry,
 
   const first_speaker_id = typeof first_sound_file.sp === 'string' ? first_sound_file.sp : first_sound_file.sp?.[0];
 
-  if (first_speaker_id) {
+  if (first_speaker_id)
     first_sound_file.speakerName = await get_speaker_display_name(first_speaker_id, db);
-  }
+
 
   return first_sound_file as ActualDatabaseAudio;
 }

@@ -36,7 +36,7 @@
   <label
     for="speaker"
     class="inline-flex items-center px-3 ltr:rounded-l-md rtl:rounded-r-md border
-  border-gray-300 bg-gray-50 text-gray-500">
+      border-gray-300 bg-gray-50 text-gray-500">
     {$t('entry.speaker', { default: 'Speaker' })}
   </label>
   <select
@@ -44,9 +44,9 @@
     bind:value={speakerId}
     on:change={() => {
       // Currently means you can't remove a speaker
-      if (speakerId && speakerId !== addSpeaker) {
+      if (speakerId && speakerId !== addSpeaker)
         dispatch('update', { speakerId });
-      }
+
     }}
     class="block w-full pl-3 !rounded-none ltr:!rounded-r-md rtl:!rounded-l-md form-input hover:outline-blue-600">
     {#if !speakerId}
