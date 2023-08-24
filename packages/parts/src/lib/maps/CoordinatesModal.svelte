@@ -9,6 +9,7 @@
   import Marker from './mapbox/map/Marker.svelte';
   import ToggleStyle from './mapbox/controls/ToggleStyle.svelte';
   import NavigationControl from './mapbox/controls/NavigationControl.svelte';
+  import { setMarker } from './utils/setCoordinatesToMarker';
 
   export let lng: number;
   export let lat: number;
@@ -18,15 +19,6 @@
   let centerLat = lat;
 
   const zoom = lng && lat ? 6 : 2;
-
-  function setMarker(longitude: number, latitude: number) {
-    if (!(longitude && latitude)) return;
-    if (longitude < -180 || longitude > 180 || latitude < -90 || latitude > 90)
-      return;
-
-    lng = +longitude.toFixed(4);
-    lat = +latitude.toFixed(4);
-  }
 
   function handleGeocoderResult({ detail }) {
     if (detail?.user_coordinates?.[0])
@@ -112,7 +104,7 @@
         lng={centerLng}
         lat={centerLat}
         {zoom}
-        on:click={({ detail }) => setMarker(detail.lng, detail.lat)}>
+        on:click={({ detail }) => ({lng, lat} = setMarker(detail.lng, detail.lat))}>
         <slot />
         <NavigationControl />
         <Geocoder
@@ -123,7 +115,7 @@
         {#if lng && lat}
           <Marker
             draggable
-            on:dragend={({ detail }) => setMarker(detail.lng, detail.lat)}
+            on:dragend={({ detail }) => ({lng, lat} = setMarker(detail.lng, detail.lat))}
             {lng}
             {lat} />
         {/if}

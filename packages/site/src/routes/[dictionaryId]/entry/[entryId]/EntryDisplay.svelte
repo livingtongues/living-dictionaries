@@ -34,7 +34,7 @@
   </div>
 
   <div class="md:w-1/3 flex flex-col mt-2">
-    <EntryMedia dictionaryId={dictionary.id} {entry} {canEdit} {videoAccess} on:deleteImage on:deleteVideo />
+    <EntryMedia dictionaryId={dictionary.id} {entry} {canEdit} {videoAccess} on:deleteImage on:deleteVideo on:valueupdate />
   </div>
 
   <div class="hidden md:block w-1" />

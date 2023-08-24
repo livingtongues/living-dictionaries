@@ -74,7 +74,9 @@ describe(expand_entry, () => {
         sc: 'sc',
       }],
       ei: 'ei12',
-      scn: ['marmillion', '<i>leticus</i> Johnson']
+
+      scn: ['marmillion', '<i>leticus</i> Johnson'],
+      co: { points:[{coordinates: {latitude: 23, longitude: -93}}]}
     }
 
     const expanded_entry: ExpandedEntry = {
@@ -129,7 +131,8 @@ describe(expand_entry, () => {
         source: 'sc',
       }],
       elicitation_id: 'ei12',
-      scientific_names: ['marmillion', '<i>leticus</i> Johnson']
+      scientific_names: ['marmillion', '<i>leticus</i> Johnson'],
+      coordinates: {points:[{coordinates: {latitude: 23, longitude: -93}}]}
     }
 
     expect(expand_entry(database_entry)).toEqual(expanded_entry);

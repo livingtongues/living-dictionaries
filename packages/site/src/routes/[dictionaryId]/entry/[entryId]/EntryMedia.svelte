@@ -5,6 +5,8 @@
   import AddImage from '../../entries/AddImage.svelte';
   import Image from '$lib/components/image/Image.svelte';
   import Video from '../../entries/Video.svelte';
+  import GeoTaggingModal from './GeoTaggingModal.svelte';
+  import { MapboxStatic } from '@living-dictionaries/parts';
 
   export let entry: ExpandedEntry;
   export let dictionaryId: string;
@@ -67,3 +69,24 @@
   </ShowHide>
 {/if}
 
+<ShowHide let:show let:toggle let:set>
+  {#if entry.coordinates?.points?.length || entry.coordinates?.regions?.length}
+    <div class="rounded overflow-hidden cursor-pointer" on:click={() => set(canEdit)}>
+      <MapboxStatic points={entry.coordinates.points} regions={entry.coordinates.regions} />
+    </div>
+  {:else if canEdit}
+    <button
+      on:click={toggle}
+      type="button"
+      class="rounded bg-gray-100 border-r-2 hover:bg-gray-300 flex flex-col items-center
+        justify-center cursor-pointer p-6 mb-2">
+      <span class="i-mdi-map-marker-plus mr-1" style="margin-top: -3px;" />
+      <span class="text-xs">
+        {$t('create.select_coordinates', { default: 'Select Coordinates' })}
+      </span>
+    </button>
+  {/if}
+  {#if show}
+    <GeoTaggingModal coordinates={entry.coordinates} on:close={toggle} on:valueupdate />
+  {/if}
+</ShowHide>

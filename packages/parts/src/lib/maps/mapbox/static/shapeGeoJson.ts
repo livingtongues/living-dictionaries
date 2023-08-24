@@ -1,6 +1,7 @@
 import type { IPoint, IRegion } from '@living-dictionaries/types';
 import { sortPoints } from '../../utils/polygonFromCoordinates';
 // http://geojson.io/ to create GeoJSON easily
+import type { FeatureCollection, Feature, Polygon, Point } from 'geojson';
 
 export function convertPointsIntoRegion(
   points: {
@@ -15,12 +16,12 @@ export function convertPointsIntoRegion(
   return sortedLooped.map(({ lng, lat }) => ({ longitude: lng, latitude: lat }));
 }
 
-function getPointFeature(point: IPoint, primary = false) {
+function getPointFeature(point: IPoint, options = { primary: false }): Feature<Point> {
   const coordinates = [
     +point.coordinates.longitude.toFixed(3),
     +point.coordinates.latitude.toFixed(3),
   ];
-  const properties = primary ? { 'marker-color': '#578da5', 'marker-symbol': 'star' } : {};
+  const properties = options.primary ? { 'marker-color': '#578da5', 'marker-symbol': 'star' } : {};
   return {
     type: 'Feature',
     properties,
@@ -31,7 +32,7 @@ function getPointFeature(point: IPoint, primary = false) {
   };
 }
 
-function getPolygonFeature(region: IRegion) {
+function getPolygonFeature(region: IRegion): Feature<Polygon> {
   const looped = [...region.coordinates, region.coordinates[0]];
   const coordinates = [
     looped.map(({ longitude, latitude }) => [
@@ -55,15 +56,15 @@ function getPolygonFeature(region: IRegion) {
   };
 }
 
-export function shapeGeoJson(points: IPoint[], regions: IRegion[]) {
-  const features = [];
+export function shapeGeoJson(points: IPoint[] = [], regions: IRegion[] = [], options = { primary: false }): FeatureCollection {
+  const features: FeatureCollection['features'] = [];
   for (const region of regions)
     features.push(getPolygonFeature(region));
 
   // add points afterwards so pins show on top of regions
   for (const [index, point] of points.entries()) {
-    const primary = index === 0;
-    features.push(getPointFeature(point, primary));
+    const isFirstPoint = index === 0;
+    features.push(getPointFeature(point, { primary: options.primary && isFirstPoint }));
   }
   return {
     type: 'FeatureCollection',
@@ -72,86 +73,123 @@ export function shapeGeoJson(points: IPoint[], regions: IRegion[]) {
 }
 
 if (import.meta.vitest) {
-  test('shapeGeoJson', () => {
-    expect(
-      shapeGeoJson(
-        [
-          { coordinates: { longitude: 126.123456789, latitude: 40.123456789 } },
-          { coordinates: { longitude: 127.123456789, latitude: 41.123456789 } },
-        ],
-        [
-          {
-            coordinates: [
-              { longitude: -126.91406249999999, latitude: 40.97989806962013 },
-              { longitude: -118.828125, latitude: 36.03133177633187 },
-              { longitude: -115.6640625, latitude: 38.8225909761771 },
-              { longitude: -116.01562499999999, latitude: 42.8115217450979 },
-            ],
-          },
-        ]
-      )
-    ).toMatchInlineSnapshot(`
-      {
-        "features": [
-          {
-            "geometry": {
-              "coordinates": [
-                [
+  const twoPoints = [
+    { coordinates: { longitude: 126.123456789, latitude: 40.123456789 } },
+    { coordinates: { longitude: 127.123456789, latitude: 41.123456789 } },
+  ]
+
+  describe(shapeGeoJson, () => {
+    test('two simple points', () => {
+      expect(shapeGeoJson(twoPoints)).toMatchInlineSnapshot(`
+        {
+          "features": [
+            {
+              "geometry": {
+                "coordinates": [
+                  126.123,
+                  40.123,
+                ],
+                "type": "Point",
+              },
+              "properties": {},
+              "type": "Feature",
+            },
+            {
+              "geometry": {
+                "coordinates": [
+                  127.123,
+                  41.123,
+                ],
+                "type": "Point",
+              },
+              "properties": {},
+              "type": "Feature",
+            },
+          ],
+          "type": "FeatureCollection",
+        }
+      `)
+    });
+
+    test('primary, secondary points and region', () => {
+      expect(
+        shapeGeoJson(
+          twoPoints,
+          [
+            {
+              coordinates: [
+                { longitude: -126.91406249999999, latitude: 40.97989806962013 },
+                { longitude: -118.828125, latitude: 36.03133177633187 },
+                { longitude: -115.6640625, latitude: 38.8225909761771 },
+                { longitude: -116.01562499999999, latitude: 42.8115217450979 },
+              ],
+            },
+          ],
+          { primary: true }
+        )
+      ).toMatchInlineSnapshot(`
+        {
+          "features": [
+            {
+              "geometry": {
+                "coordinates": [
                   [
-                    -126.914,
-                    40.98,
-                  ],
-                  [
-                    -118.828,
-                    36.031,
-                  ],
-                  [
-                    -115.664,
-                    38.823,
-                  ],
-                  [
-                    -116.016,
-                    42.812,
-                  ],
-                  [
-                    -126.914,
-                    40.98,
+                    [
+                      -126.914,
+                      40.98,
+                    ],
+                    [
+                      -118.828,
+                      36.031,
+                    ],
+                    [
+                      -115.664,
+                      38.823,
+                    ],
+                    [
+                      -116.016,
+                      42.812,
+                    ],
+                    [
+                      -126.914,
+                      40.98,
+                    ],
                   ],
                 ],
-              ],
-              "type": "Polygon",
+                "type": "Polygon",
+              },
+              "properties": {},
+              "type": "Feature",
             },
-            "properties": {},
-            "type": "Feature",
-          },
-          {
-            "geometry": {
-              "coordinates": [
-                126.123,
-                40.123,
-              ],
-              "type": "Point",
+            {
+              "geometry": {
+                "coordinates": [
+                  126.123,
+                  40.123,
+                ],
+                "type": "Point",
+              },
+              "properties": {
+                "marker-color": "#578da5",
+                "marker-symbol": "star",
+              },
+              "type": "Feature",
             },
-            "properties": {
-              "marker-color": "#578da5",
-              "marker-symbol": "star",
+            {
+              "geometry": {
+                "coordinates": [
+                  127.123,
+                  41.123,
+                ],
+                "type": "Point",
+              },
+              "properties": {},
+              "type": "Feature",
             },
-            "type": "Feature",
-          },
-          {
-            "geometry": {
-              "coordinates": [
-                127.123,
-                41.123,
-              ],
-              "type": "Point",
-            },
-            "properties": {},
-            "type": "Feature",
-          },
-        ],
-        "type": "FeatureCollection",
-      }
-    `);
+          ],
+          "type": "FeatureCollection",
+        }
+      `);
+    });
   });
 }

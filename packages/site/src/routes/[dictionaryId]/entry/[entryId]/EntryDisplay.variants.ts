@@ -122,7 +122,7 @@ const partialVariants: DeepPartial<Variants<Component>> = [
       canEdit: true,
     },
   },
-]
+];
 
 export const variants: Variants<Component> = (partialVariants as Variants<Component>).map((variant) => ({
   ...variant,
