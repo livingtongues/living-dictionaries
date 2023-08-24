@@ -40,7 +40,7 @@
 
   }
 
-  onMount(async () => {
+  onMount(() => {
     if (!region && navigator.geolocation) {
       navigator.geolocation.getCurrentPosition((position) => {
         centerLng = position.coords.longitude;
@@ -54,11 +54,11 @@
     remove: boolean;
     close: boolean;
   }>();
-  async function update(coordinates: IRegion['coordinates']) {
+  function update(coordinates: IRegion['coordinates']) {
     dispatch('update', { coordinates });
     dispatch('close');
   }
-  async function removeRegion() {
+  function removeRegion() {
     dispatch('remove');
     dispatch('close');
   }
