@@ -9,9 +9,9 @@
     const fileToCheck = files.item(0);
 
     // Client-side validation: Must be video and smaller than 100MB.
-    if (fileToCheck.type.split('/')[0] !== 'video') {
+    if (fileToCheck.type.split('/')[0] !== 'video')
       return alert(`${$_('upload.error', { default: 'Unsupported File Type' })}`);
-    }
+
     // Must be smaller than 100MB, http://www.unitconversion.org/data-storage/megabytes-to-bytes-conversion.html
     if (fileToCheck.size > 104857600) {
       return alert(

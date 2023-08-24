@@ -1,10 +1,11 @@
 <script lang="ts">
-  export let html: string;
   import CKEditor from './CKEditor.svelte';
   import { onMount } from 'svelte';
-  let editor: any;
+  import type { Editor } from '@ckeditor/ckeditor5-core';
+  import type { EditorConfig } from '@ckeditor/ckeditor5-core/src/editor/editorconfig';
 
-  export let editorConfig: Record<string, any> = {
+  export let html: string;
+  export let editorConfig: EditorConfig = {
     // TODO: figure out which plugins to remove related to photos to speed up
     // removePlugins: ['MediaEmbed'],
     // Available plugins for ClassicEditor: Essentials, CKFinderUploadAdapter, Autoformat, Bold, Italic, BlockQuote, CKFinder, EasyImage, Heading, Image, ImageCaption, ImageStyle, ImageToolbar, ImageUpload, Link, List, MediaEmbed, Paragraph, PasteFromOffice, Table, TableToolbar, ++ Alignment
@@ -30,14 +31,20 @@
     ],
   };
 
-  let mounted = false;
+  let editor: typeof Editor;
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  interface $$Events {
+    update: CustomEvent<string>;
+  }
+
   onMount(async () => {
-    editor = (await import('ckeditor5-build-classic-with-alignment-underline-smallcaps')).default;
-    // pull into own package together with https://github.com/jacob-8/ckeditor5-build-classic-alignment-and-smallCaps
-    mounted = true;
+    editor = (
+      await import('ckeditor5-build-classic-with-alignment-underline-smallcaps')
+    ).default;
   });
 </script>
 
-{#if mounted}
-  <CKEditor bind:editor bind:value={html} bind:config={editorConfig} />
+{#if editor}
+  <CKEditor {editor} value={html} {editorConfig} on:update />
 {/if}

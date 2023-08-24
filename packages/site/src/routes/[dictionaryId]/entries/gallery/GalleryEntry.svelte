@@ -1,10 +1,11 @@
 <script lang="ts">
-  import type { IEntry } from '@living-dictionaries/types';
+  import type { ExpandedEntry } from '@living-dictionaries/types';
   import Image from '$lib/components/image/Image.svelte';
-  export let entry: IEntry;
-  export let canEdit = false;
   import { dictionary } from '$lib/stores';
   import { deleteImage } from '$lib/helpers/delete';
+
+  export let entry: ExpandedEntry;
+  export let canEdit = false;
 </script>
 
 <div class="flex flex-col relative rounded max-w-[500px]">
@@ -12,21 +13,21 @@
     <div class="aspect-square overflow-hidden">
       <Image
         square={480}
-        title={entry.lx}
-        gcs={entry.pf.gcs}
+        title={entry.lexeme}
+        gcs={entry.senses?.[0]?.photo_files?.[0].specifiable_image_url}
         {canEdit}
-        on:deleteImage={() => deleteImage(entry)} />
+        on:deleteImage={() => deleteImage(entry, $dictionary.id)} />
     </div>
     <a href={entry.id} style="background: #f3f3f3;" class="block p-[10px]">
       <div class="font-semibold">
-        {@html entry._highlightResult?.lx?.value || entry.lx}
+        {entry.lexeme}
       </div>
       <div class="text-xs">
         <!--Simple solution until we really work on implementing this feature-->
         {#if $dictionary.id === 'iquito' || $dictionary.id === 'muniche'}
-          {@html entry._highlightResult?.gl?.es?.value || entry.gl?.es || ''}
+          {entry.senses?.[0]?.glosses?.es || ''}
         {:else}
-          {@html entry._highlightResult?.gl?.en?.value || entry.gl?.en || ''}
+          {entry.senses?.[0]?.glosses?.en || ''}
         {/if}
       </div>
     </a>

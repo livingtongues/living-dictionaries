@@ -10,7 +10,7 @@ import * as admin from 'firebase-admin';
 admin.initializeApp();
 const projectId = functions.config().project?.key;
 
-import { IDictionary, IEntry } from '@living-dictionaries/types';
+import { IDictionary, ActualDatabaseEntry } from '@living-dictionaries/types';
 import { entryInterface } from './interfaceExplanations';
 import { partsOfSpeech, semanticDomains } from '@living-dictionaries/parts';
 
@@ -38,7 +38,7 @@ export default async (
       }.appspot.com`;
 
       const entries = entriesSnapshot.docs.map((snap) => {
-        const entry = snap.data() as IEntry;
+        const entry = snap.data() as ActualDatabaseEntry;
         delete entry.ii;
         delete entry.cb;
         // @ts-ignore

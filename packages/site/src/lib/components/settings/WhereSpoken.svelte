@@ -89,63 +89,29 @@
         </Popup>
       </Marker>
 
-        {#each dictionary.points || [] as point, index (point)}
-          <Marker lat={point.coordinates.latitude} lng={point.coordinates.longitude}>
-            <Popup>
-              <ShowHide let:show let:toggle>
-                <Button form="simple" size="sm" onclick={toggle}>
-                  <span class="i-octicon-pencil" />
-                </Button>
-                {#if show}
-                  <CoordinatesModal
-                    {t}
-                    lng={point.coordinates.longitude}
-                    lat={point.coordinates.latitude}
-                    on:update={({ detail }) => {
-                      const points = dictionary.points;
-                      points[index] = {
-                        coordinates: { longitude: detail.lng, latitude: detail.lat },
-                      };
-                      dispatch('updatePoints', points);
-                    }}
-                    on:remove={() => {
-                      const points = dictionary.points;
-                      points.splice(index, 1);
-                      dispatch('updatePoints', points);
-                    }}
-                    on:close={toggle}>
-                    <Marker
-                      lng={dictionary.coordinates.longitude}
-                      lat={dictionary.coordinates.latitude}
-                      color="blue">
-                      <Popup offset={30}>Primary coordinate</Popup>
-                    </Marker>
-                  </CoordinatesModal>
-                {/if}
-              </ShowHide>
-            </Popup>
-          </Marker>
-        {/each}
-
-        {#each dictionary.regions || [] as region, index (region)}
-          <Region {region}>
+      {#each dictionary.points || [] as point, index (point)}
+        <Marker lat={point.coordinates.latitude} lng={point.coordinates.longitude}>
+          <Popup>
             <ShowHide let:show let:toggle>
               <Button form="simple" size="sm" onclick={toggle}>
                 <span class="i-octicon-pencil" />
               </Button>
               {#if show}
-                <RegionModal
+                <CoordinatesModal
                   {t}
-                  {region}
+                  lng={point.coordinates.longitude}
+                  lat={point.coordinates.latitude}
                   on:update={({ detail }) => {
-                    const regions = dictionary.regions;
-                    regions[index] = detail;
-                    dispatch('updateRegions', regions);
+                    const {points} = dictionary;
+                    points[index] = {
+                      coordinates: { longitude: detail.lng, latitude: detail.lat },
+                    };
+                    dispatch('updatePoints', points);
                   }}
                   on:remove={() => {
-                    const regions = dictionary.regions;
-                    regions.splice(index, 1);
-                    dispatch('updateRegions', regions);
+                    const {points} = dictionary;
+                    points.splice(index, 1);
+                    dispatch('updatePoints', points);
                   }}
                   on:close={toggle}>
                   <Marker
@@ -154,11 +120,45 @@
                     color="blue">
                     <Popup offset={30}>Primary coordinate</Popup>
                   </Marker>
-                </RegionModal>
+                </CoordinatesModal>
               {/if}
             </ShowHide>
-          </Region>
-        {/each}
+          </Popup>
+        </Marker>
+      {/each}
+
+      {#each dictionary.regions || [] as region, index (region)}
+        <Region {region}>
+          <ShowHide let:show let:toggle>
+            <Button form="simple" size="sm" onclick={toggle}>
+              <span class="i-octicon-pencil" />
+            </Button>
+            {#if show}
+              <RegionModal
+                {t}
+                {region}
+                on:update={({ detail }) => {
+                  const {regions} = dictionary;
+                  regions[index] = detail;
+                  dispatch('updateRegions', regions);
+                }}
+                on:remove={() => {
+                  const {regions} = dictionary;
+                  regions.splice(index, 1);
+                  dispatch('updateRegions', regions);
+                }}
+                on:close={toggle}>
+                <Marker
+                  lng={dictionary.coordinates.longitude}
+                  lat={dictionary.coordinates.latitude}
+                  color="blue">
+                  <Popup offset={30}>Primary coordinate</Popup>
+                </Marker>
+              </RegionModal>
+            {/if}
+          </ShowHide>
+        </Region>
+      {/each}
     </Map>
   </div>
 {/if}

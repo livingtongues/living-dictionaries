@@ -7,6 +7,7 @@
   // const sessionStorageCache =
   // instantsearch.createInfiniteHitsSessionStorageCache();
 
+  // eslint-disable-next-line no-undef
   type T = $$Generic;
   export let hitsType: T;
 
@@ -19,14 +20,13 @@
     const customInfiniteHits = connectInfiniteHits((params) => {
       //@ts-ignore
       ({ hits, showMore, isLastPage } = params);
-      console.log({ hits });
-      // showPrevious, // function
+    // showPrevious, // function
       // isFirstPage, // boolean
     });
 
     search.addWidgets([
       customInfiniteHits({
-        // showPrevious: true,
+      // showPrevious: true,
         // cache: sessionStorageCache,
       }),
     ]);

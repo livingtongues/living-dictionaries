@@ -18,5 +18,5 @@
 
 {#if hasRefinements}
   <button type="button" class="text-xs text-gray-600 p-1" on:click={refine}
-    ><i class="far fa-undo fa-sm" /> Clear</button>
+  ><i class="far fa-undo fa-sm" /> Clear</button>
 {/if}

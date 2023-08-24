@@ -3,15 +3,15 @@
   import { Button } from 'svelte-pieces';
   import { onMount } from 'svelte';
   import type { StereoAudioRecorder, Options } from 'recordrtc';
-  
+
   export let audioBlob: Blob = null;
   export let permissionGranted = false;
-  let permissionDenied = false;
-  
+  const permissionDenied = false;
+
   let RecordRTC: typeof import('recordrtc');
   onMount(async () => {
     RecordRTC = (await import('recordrtc')).default;
-    // Could also use `await loadScriptOnce('https://cdnjs.cloudflare.com/ajax/libs/RecordRTC/5.5.6/RecordRTC.js');` in context module block
+  // Could also use `await loadScriptOnce('https://cdnjs.cloudflare.com/ajax/libs/RecordRTC/5.5.6/RecordRTC.js');` in context module block
   });
 
   // let recorder: StereoAudioRecorder = null;
@@ -49,15 +49,15 @@
         // bufferSize: 16384
         // the range is 22050 to 96000.
         sampleRate: 48000,
-        // let us force 16khz recording:
+      // let us force 16khz recording:
         // desiblueSampRate: 16000,
         // numberOfAudioChannels: 2;
       };
 
       const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
-      if (isSafari) {
+      if (isSafari)
         options.sampleRate = 44100;
-      }
+
 
       recorder = new RecordRTC.StereoAudioRecorder(stream, options);
       recorder.record();
@@ -76,7 +76,7 @@
         (blob) => {
           turnOffMic();
           audioBlob = blob;
-          // checkBlobForUpload(blob, lexeme);
+        // checkBlobForUpload(blob, lexeme);
         },
         // @ts-ignore
         (err) => {
@@ -90,9 +90,9 @@
   }
 
   function turnOffMic() {
-    if (stream) {
+    if (stream)
       stream.getAudioTracks().forEach((track) => track.stop());
-    }
+
     stream = null;
     recorder = null;
   }
@@ -104,13 +104,13 @@
       <div>
         {$_('audio.undo_permission_denied_explanation', {
           default:
-            "Permission to access your microphone was denied. If you previously clicked 'No', please reload and click 'Yes' when your browser asks for permission to use your microphone.",
+            'Permission to access your microphone was denied. If you previously clicked \'No\', please reload and click \'Yes\' when your browser asks for permission to use your microphone.',
         })}
       </div>
 
       <div>
         <Button class="mt-1" size="sm" onclick={() => location.reload()}
-          >{$_('audio.reload', { default: 'Reload' })}</Button>
+        >{$_('audio.reload', { default: 'Reload' })}</Button>
         <Button
           size="sm"
           class="mt-1"
@@ -122,7 +122,7 @@
       </div>
     {:else}
       <Button onclick={checkAudioPermissions} class="w-full">
-        <span class="i-uil-microphone" /> 
+        <span class="i-uil-microphone" />
         {$_('audio.prepare_to_record', { default: 'Prepare to Record with Microphone' })}
       </Button>
     {/if}

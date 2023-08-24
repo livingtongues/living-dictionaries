@@ -1,4 +1,4 @@
-import type { IEntry } from '@living-dictionaries/types';
+import type { ExpandedEntry } from '@living-dictionaries/types';
 import { seo_description } from './seo_description';
 
 describe('seo_description', () => {
@@ -28,8 +28,10 @@ describe('seo_description', () => {
   };
 
   test('prints simple labeled english and spanish glosses', () => {
-    const entry: Partial<IEntry> = {
-      gl: { en: 'hello', es: 'hola' },
+    const entry: Partial<ExpandedEntry> = {
+      senses: [{
+        glosses: { en: 'hello', es: 'hola' },
+      }]
     };
     const dictionary_gloss_languages = ['es'];
     const result = seo_description(entry, dictionary_gloss_languages, $t);
@@ -37,18 +39,20 @@ describe('seo_description', () => {
   });
 
   test('properly orders glosses according to dictionary gloss languages order', () => {
-    const entry: Partial<IEntry> = {
-      gl: {
-        en: 'goats',
-        es: 'cabras',
-        it: 'capre',
-        pt: 'cabras',
-        fr: 'chèvres',
-        de: 'Ziegen',
-        or: 'ଛେଳି ଗୁଡିକ',
-        as: 'ছাগল কেইতা',
-        hi: 'बकरियाँ',
-      },
+    const entry: Partial<ExpandedEntry> = {
+      senses: [{
+        glosses: {
+          en: 'goats',
+          es: 'cabras',
+          it: 'capre',
+          pt: 'cabras',
+          fr: 'chèvres',
+          de: 'Ziegen',
+          or: 'ଛେଳି ଗୁଡିକ',
+          as: 'ছাগল কেইতা',
+          hi: 'बकरियाँ',
+        },
+      }],
     };
     const dictionary_gloss_languages = ['hi', 'or', 'as', 'en', 'fr', 'es', 'it', 'de', 'pt'];
     const result = seo_description(entry, dictionary_gloss_languages, $t);
@@ -56,13 +60,15 @@ describe('seo_description', () => {
   });
 
   test('places local orthographies first', () => {
-    const entry: Partial<IEntry> = {
-      lo: 'امتحان',
-      lo2: 'Ölçek',
-      lo3: 'परीक्षा',
-      lo4: '시험',
-      lo5: 'מִבְחָן',
-      gl: { en: 'test' },
+    const entry: Partial<ExpandedEntry> = {
+      local_orthography_1: 'امتحان',
+      local_orthography_2: 'Ölçek',
+      local_orthography_3: 'परीक्षा',
+      local_orthography_4: '시험',
+      local_orthography_5: 'מִבְחָן',
+      senses: [{
+        glosses: { en: 'test' },
+      }],
     };
     const no_dictionary_gloss_languages = [];
     const result = seo_description(entry, no_dictionary_gloss_languages, $t);
@@ -70,13 +76,15 @@ describe('seo_description', () => {
   });
 
   test('handles local orthagraphies, phonetic, glosses, parts of speech, and dialect', () => {
-    const entry: Partial<IEntry> = {
-      lo: 'আৰচি',
-      lo2: '𑃢𑃝𑃐𑃤',
-      ph: 'arsi',
-      gl: { or: 'କଳା ମୁହାଁ ମାଙ୍କଡ', as: 'ক’লা মুখ\'ৰ বান্দৰ', en: 'black faced monkey' },
-      ps: ['n', 'adj'],
-      di: 'West Bengal Sabar',
+    const entry: Partial<ExpandedEntry> = {
+      local_orthography_1: 'আৰচি',
+      local_orthography_2: '𑃢𑃝𑃐𑃤',
+      phonetic: 'arsi',
+      senses: [{
+        glosses: { or: 'କଳା ମୁହାଁ ମାଙ୍କଡ', as: 'ক’লা মুখ\'ৰ বান্দৰ', en: 'black faced monkey' },
+        parts_of_speech_keys: ['n', 'adj'],
+      }],
+      dialects: ['West Bengal Sabar'],
     };
     const dictionary_gloss_languages = ['as', 'en', 'or', 'hi'];
     const result = seo_description(entry, dictionary_gloss_languages, $t);
@@ -87,20 +95,8 @@ describe('seo_description', () => {
 
   test('handles no gloss field', () => {
     const dictionary_gloss_languages = ['en'];
-    const result = seo_description({ lx: 'foo' }, dictionary_gloss_languages, $t);
+    const result = seo_description({ lexeme: 'foo' }, dictionary_gloss_languages, $t);
     expect(result).toEqual('');
-  });
-
-  test('handles deprecated dialect string and current array of strings', () => {
-    const dialect = 'West Bengal Sabar';
-    const dictionary_gloss_languages = ['en'];
-    const dialectString = seo_description({
-      di: dialect,
-    }, dictionary_gloss_languages, $t);
-    const dialectStringArray = seo_description({
-      di: [dialect],
-    }, dictionary_gloss_languages, $t);
-    expect(dialectString).toEqual(dialectStringArray);
   });
 });
 

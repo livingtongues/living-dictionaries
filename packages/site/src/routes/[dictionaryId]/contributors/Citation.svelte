@@ -3,7 +3,7 @@
   import { Doc, set } from 'sveltefirets';
   import { Button, Form } from 'svelte-pieces';
   import type { ICitation, IDictionary } from '@living-dictionaries/types';
-  
+
   export let dictionary: IDictionary;
   export let isManager = false;
 

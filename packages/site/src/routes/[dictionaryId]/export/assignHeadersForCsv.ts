@@ -18,7 +18,7 @@ export function get_semantic_domain_headers(entries: ExpandedEntry[]): EntryForC
   const headers = {};
 
   const max_semantic_domains = Math.max(
-    ...entries.map((entry) => entry.senses?.[0]?.semantic_domains?.length || 0)
+    ...entries.map((entry) => entry.senses?.[0]?.translated_ld_semantic_domains?.length || 0)
   );
 
   if (max_semantic_domains > 0) {

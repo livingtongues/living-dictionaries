@@ -27,7 +27,7 @@ export default defineConfig({
   //     use: { ...devices['Desktop Chrome'], channel: 'chrome' }, // or 'chrome-beta'
   //   },
   // from https://github.com/microsoft/playwright/issues/14434 and https://playwright.dev/docs/browsers#google-chrome--microsoft-edge
-    
+
   // {
   //   name: 'chromium',
   //   use: { ...devices['Desktop Chrome'] },

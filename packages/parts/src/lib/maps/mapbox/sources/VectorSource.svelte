@@ -30,9 +30,9 @@
   }
 
   function handleStyledata() {
-    if (!map.getSource(id)) {
+    if (!map.getSource(id))
       addSource();
-    }
+
   }
 
   $: {
@@ -53,14 +53,14 @@
 
     // Remove all <Layer> children of <VectorSource>.
     for (const layerId of layerIds) {
-      if (map.getLayer(layerId)) {
+      if (map.getLayer(layerId))
         map.removeLayer(layerId);
-      }
+
     }
 
-    if (map.getSource(id)) {
+    if (map.getSource(id))
       map.removeSource(id);
-    }
+
   });
 </script>
 

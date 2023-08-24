@@ -1,5 +1,4 @@
-import { derived } from 'svelte/store';
-import type { Readable } from 'svelte/store';
+import { derived, type Readable } from 'svelte/store';
 import { user } from './user';
 import type { IUser, IDictionary } from '@living-dictionaries/types';
 import { browser } from '$app/environment';
@@ -20,9 +19,9 @@ export const myDictionaries = derived<Readable<IUser>, IDictionary[]>(
       return () => {
         localStorage.removeItem(key);
       };
-    } else {
-      set([]);
     }
+    set([]);
+
   },
   browser ? JSON.parse(localStorage[key] || '[]') : []
 );
@@ -30,7 +29,7 @@ export const myDictionaries = derived<Readable<IUser>, IDictionary[]>(
 async function getMyDictionaries(userId: string) {
   const myDictionaryIds = [];
   const db = getDb();
-  
+
   const managers = query(collectionGroup(db, 'managers'), where('id', '==', userId));
   const managersSnapshot = await getDocs(managers);
   managersSnapshot.forEach((doc) => {

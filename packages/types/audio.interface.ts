@@ -8,7 +8,7 @@ export interface ExpandedAudio {
   speaker_ids?: string[];
   source?: string;
   playing?: boolean; // true when audio is being played
-  speakerName?: string; // old Talking Dictionaries
+  speakerName?: string; // old Talking Dictionaries write-in
 }
 
 export type ActualDatabaseAudio = Omit<GoalDatabaseAudio, 'sp'> & DeprecatedAudio;

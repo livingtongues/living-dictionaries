@@ -60,27 +60,27 @@ export function shapeGeoJson(points: IPoint[] = [], regions: IRegion[] = [], opt
   const features: FeatureCollection['features'] = [];
   for (const region of regions) {
     features.push(getPolygonFeature(region));
-  }
-  // add points afterwards so pins show on top of regions
-  for (const [index, point] of points.entries()) {
-    const isFirstPoint = index === 0;
-    features.push(getPointFeature(point, { primary: options.primary && isFirstPoint })); 
-  }
-  return {
-    type: 'FeatureCollection',
-    features,
-  };
-}
 
-if (import.meta.vitest) {
-  const twoPoints = [
-    { coordinates: { longitude: 126.123456789, latitude: 40.123456789 } },
-    { coordinates: { longitude: 127.123456789, latitude: 41.123456789 } },
-  ]
+    // add points afterwards so pins show on top of regions
+    for (const [index, point] of points.entries()) {
+      const isFirstPoint = index === 0;
+      features.push(getPointFeature(point, { primary: options.primary && isFirstPoint }));
+    }
+    return {
+      type: 'FeatureCollection',
+      features,
+    };
+  }
 
-  describe(shapeGeoJson, () => {
-    test('two simple points', () => {
-      expect(shapeGeoJson(twoPoints)).toMatchInlineSnapshot(`
+  if (import.meta.vitest) {
+    const twoPoints = [
+      { coordinates: { longitude: 126.123456789, latitude: 40.123456789 } },
+      { coordinates: { longitude: 127.123456789, latitude: 41.123456789 } },
+    ]
+
+    describe(shapeGeoJson, () => {
+      test('two simple points', () => {
+        expect(shapeGeoJson(twoPoints)).toMatchInlineSnapshot(`
         {
           "features": [
             {
@@ -109,25 +109,25 @@ if (import.meta.vitest) {
           "type": "FeatureCollection",
         }
       `)
-    });
+      });
 
-    test('primary, secondary points and region', () => {
-      expect(
-        shapeGeoJson(
-          twoPoints,
-          [
-            {
-              coordinates: [
-                { longitude: -126.91406249999999, latitude: 40.97989806962013 },
-                { longitude: -118.828125, latitude: 36.03133177633187 },
-                { longitude: -115.6640625, latitude: 38.8225909761771 },
-                { longitude: -116.01562499999999, latitude: 42.8115217450979 },
-              ],
-            },
-          ],
-          { primary: true }
-        )
-      ).toMatchInlineSnapshot(`
+      test('primary, secondary points and region', () => {
+        expect(
+          shapeGeoJson(
+            twoPoints,
+            [
+              {
+                coordinates: [
+                  { longitude: -126.91406249999999, latitude: 40.97989806962013 },
+                  { longitude: -118.828125, latitude: 36.03133177633187 },
+                  { longitude: -115.6640625, latitude: 38.8225909761771 },
+                  { longitude: -116.01562499999999, latitude: 42.8115217450979 },
+                ],
+              },
+            ],
+            { primary: true }
+          )
+        ).toMatchInlineSnapshot(`
         {
           "features": [
             {
@@ -190,6 +190,7 @@ if (import.meta.vitest) {
           "type": "FeatureCollection",
         }
       `);
+      });
     });
-  });
+  }
 }

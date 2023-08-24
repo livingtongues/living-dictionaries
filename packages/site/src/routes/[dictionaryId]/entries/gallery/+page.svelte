@@ -7,7 +7,7 @@
   import { configure } from 'instantsearch.js/es/widgets/index.js';
   import { connectToggleRefinement } from 'instantsearch.js/es/connectors';
   import { dictionary, canEdit } from '$lib/stores';
-  import GalleryEntry from '../GalleryEntry.svelte';
+  import GalleryEntry from './GalleryEntry.svelte';
   import { Doc } from 'sveltefirets';
   import { convert_and_expand_entry } from '$lib/transformers/convert_and_expand_entry';
   import type { InstantSearch } from 'instantsearch.js';
@@ -62,7 +62,7 @@
 </Hits>
 <Pagination {search} />
 
-<!-- <SeoMetaTags 
+<!-- <SeoMetaTags
   title={$t('', { default: 'Entries Gallery' })}
   dictionaryName={$dictionary.name}
   description={$t('', { default: 'The entries that are accompanied by images in this Living Dictionary are displayed in a beautiful Gallery that visitors can easily browse by using the page tabs at the bottom of the screen, or search by using the powerful search bar located at the top of the page. Visitors may also filter and display the visual contents of this Living Dictionary by activating filters for parts of speech, semantic domains, custom tags, speaker information and other metadata.' })}

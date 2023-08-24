@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { connectHits } from 'instantsearch.js/es/connectors';
-  import { limit, orderBy, where, Timestamp } from 'firebase/firestore';
+  import { limit, orderBy } from 'firebase/firestore';
   import { dictionary } from '$lib/stores';
   import { mergeBy } from '$lib/helpers/array';
   import type { InstantSearch } from 'instantsearch.js';
@@ -24,10 +24,6 @@
 
     search.addWidgets([customHits({})]);
   });
-
-  // function minutesAgoTimestamp(minutes: number) {
-  //   return Timestamp.fromMillis(Date.now() - minutes * 1000 * 60);
-  // }
 </script>
 
 <slot {entries}>Loading...</slot>
@@ -56,7 +52,6 @@
         <Collection
           path={`dictionaries/${$dictionary.id}/words`}
           queryConstraints={[
-            // where('ua', '>', minutesAgoTimestamp(60)),
             orderBy('ua', 'desc'),
             limit(10),
           ]}

@@ -18,7 +18,7 @@ export default defineFlatConfig([
     ignores: [
       '**/node_modules/**',
       '**/dist/**',
-      '**/lib/**',
+      '**/functions/lib/**',
       '.git/**',
       '**/.svelte-kit**',
       'packages/scripts/import/old**',
@@ -72,6 +72,7 @@ export default defineFlatConfig([
       ],
       '@typescript-eslint/quotes': ['error', 'single', { 'allowTemplateLiterals': true }],
       '@typescript-eslint/ban-ts-comment': 'off',
+      '@typescript-eslint/no-empty-function': 'off',
       // '@typescript-eslint/semi': ['error', 'never'],
       'prefer-const': 'error',
       'no-duplicate-imports': ['error', { 'includeExports': true }],
@@ -88,6 +89,7 @@ export default defineFlatConfig([
       'object-shorthand': 'error',
       'prefer-arrow-callback': 'error',
       'prefer-object-spread': 'error',
+      'no-undef': 'warn', // may just turn off as has lots of conflicts
 
       // Warnings to move to errors in time:
       'no-trailing-spaces': 'warn',

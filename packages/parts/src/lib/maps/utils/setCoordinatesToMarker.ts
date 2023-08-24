@@ -1,4 +1,4 @@
-type CoordinatesType = {
+interface CoordinatesType {
   lng: number;
   lat: number;
 }

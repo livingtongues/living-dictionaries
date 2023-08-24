@@ -11,11 +11,11 @@
   onMount(() => {
     if (target) {
       // @ts-ignore
-      if (typeof target === 'string') {
+      if (typeof target === 'string')
         inputEl = document.querySelector(target);
-      } else {
+      else
         inputEl = target;
-      }
+
     } else {
       inputEl = wrapperEl.firstElementChild as HTMLInputElement | HTMLTextAreaElement;
     }
@@ -138,7 +138,7 @@
         <td class="bt1 br0 bb1 bl1"><span class="ipa" title="Voiceless bilabial stop">p</span></td>
         <td class="bt1 br1 bb1 bl0"><span class="ipa" title="Voiced bilabial stop">b</span></td>
         <td class="bt1 br0 bb1 bl1"
-          ><span class="ipa" title="Voiceless labiodental stop">p̪</span></td>
+        ><span class="ipa" title="Voiceless labiodental stop">p̪</span></td>
         <td class="bt1 br1 bb1 bl0"><span class="ipa" title="Voiced labiodental stop">b̪</span></td>
         <td class="bt1 br0 bb1 bl1"><span class="ipa" title="Voiceless dental stop">t̪</span></td>
         <td class="bt1 br1 bb1 bl0"><span class="ipa" title="Voiced dental stop">d̪</span></td>
@@ -163,53 +163,53 @@
       <tr>
         <td class="rowheader">Fricative</td>
         <td class="bt1 br0 bb1 bl1"
-          ><span class="ipa" title="Voiceless bilabial fricative">ɸ</span></td>
+        ><span class="ipa" title="Voiceless bilabial fricative">ɸ</span></td>
         <td class="bt1 br1 bb1 bl0"
-          ><span class="ipa" title="Voiced bilabial fricative">β</span></td>
+        ><span class="ipa" title="Voiced bilabial fricative">β</span></td>
         <td class="bt1 br0 bb1 bl1"
-          ><span class="ipa" title="Voiceless labiodental fricative">f</span></td>
+        ><span class="ipa" title="Voiceless labiodental fricative">f</span></td>
         <td class="bt1 br1 bb1 bl0"
-          ><span class="ipa" title="Voiced labiodental fricative">v</span></td>
+        ><span class="ipa" title="Voiced labiodental fricative">v</span></td>
         <td class="bt1 br0 bb1 bl1"
-          ><span class="ipa" title="Voiceless dental fricative">θ</span></td>
+        ><span class="ipa" title="Voiceless dental fricative">θ</span></td>
         <td class="bt1 br1 bb1 bl0"><span class="ipa" title="Voiced dental fricative">ð</span></td>
         <td class="bt1 br0 bb1 bl1"
-          ><span class="ipa" title="Voiceless alveolar sibilant">s</span></td>
+        ><span class="ipa" title="Voiceless alveolar sibilant">s</span></td>
         <td class="bt1 br1 bb1 bl0"><span class="ipa" title="Voiced alveolar sibilant">z</span></td>
         <td class="bt1 br0 bb1 bl1"
-          ><span class="ipa" title="Voiceless palato-alveolar sibilant">ʃ</span></td>
+        ><span class="ipa" title="Voiceless palato-alveolar sibilant">ʃ</span></td>
         <td class="bt1 br1 bb1 bl0"
-          ><span class="ipa" title="Voiced palato-alveolar sibilant">ʒ</span></td>
+        ><span class="ipa" title="Voiced palato-alveolar sibilant">ʒ</span></td>
         <td class="bt1 br0 bb1 bl1"
-          ><span class="ipa" title="Voiceless retroflex sibilant">ʂ</span></td>
+        ><span class="ipa" title="Voiceless retroflex sibilant">ʂ</span></td>
         <td class="bt1 br1 bb1 bl0"
-          ><span class="ipa" title="Voiced retroflex sibilant">ʐ</span></td>
+        ><span class="ipa" title="Voiced retroflex sibilant">ʐ</span></td>
         <td class="bt1 br0 bb1 bl1"
-          ><span class="ipa" title="Voiceless alveolo-palatal sibilant">ɕ</span></td>
+        ><span class="ipa" title="Voiceless alveolo-palatal sibilant">ɕ</span></td>
         <td class="bt1 br1 bb1 bl0"
-          ><span class="ipa" title="Voiced alveolo-palatal sibilant">ʑ</span></td>
+        ><span class="ipa" title="Voiced alveolo-palatal sibilant">ʑ</span></td>
         <td class="bt1 br0 bb1 bl1"
-          ><span class="ipa" title="Voiceless palatal fricative">ç</span></td>
+        ><span class="ipa" title="Voiceless palatal fricative">ç</span></td>
         <td class="bt1 br1 bb1 bl0"><span class="ipa" title="Voiced palatal fricative">ʝ</span></td>
         <td class="bt1 br0 bb1 bl1"
-          ><span class="ipa" title="Voiceless velar fricative">x</span></td>
+        ><span class="ipa" title="Voiceless velar fricative">x</span></td>
         <td class="bt1 br1 bb1 bl0"><span class="ipa" title="Voiced velar fricative">ɣ</span></td>
         <td class="bt1 br0 bb1 bl1"
-          ><span class="ipa" title="Voiceless uvular fricative">χ</span></td>
+        ><span class="ipa" title="Voiceless uvular fricative">χ</span></td>
         <td rowspan="2" class="bt1 br1 bb1 bl0" style="vertical-align:middle;"
-          ><span class="ipa" title="Voiced uvular fricative">ʁ</span></td>
+        ><span class="ipa" title="Voiced uvular fricative">ʁ</span></td>
         <td class="bt1 br0 bb1 bl1"
-          ><span class="ipa" title="Voiceless pharyngeal fricative">ħ</span></td>
+        ><span class="ipa" title="Voiceless pharyngeal fricative">ħ</span></td>
         <td rowspan="2" class="bt1 br1 bb1 bl0" style="vertical-align:middle;"
-          ><span class="ipa" title="Voiced pharyngeal fricative">ʕ</span></td>
+        ><span class="ipa" title="Voiced pharyngeal fricative">ʕ</span></td>
         <td class="bt1 br0 bb1 bl1"
-          ><span class="ipa" title="Voiceless epiglottal fricative">ʜ</span></td>
+        ><span class="ipa" title="Voiceless epiglottal fricative">ʜ</span></td>
         <td rowspan="2" class="bt1 br1 bb1 bl0" style="vertical-align:middle;"
-          ><span class="ipa" title="Voiced epiglottal fricative">ʢ</span></td>
+        ><span class="ipa" title="Voiced epiglottal fricative">ʢ</span></td>
         <td rowspan="2" class="bt1 br0 bb1 bl1"
-          ><span class="ipa" title="Voiceless glottal fricative">h</span></td>
+        ><span class="ipa" title="Voiceless glottal fricative">h</span></td>
         <td rowspan="2" class="bt1 br1 bb1 bl0" style="vertical-align:middle;"
-          ><span class="ipa" title="Voiced glottal fricative">ɦ</span></td>
+        ><span class="ipa" title="Voiced glottal fricative">ɦ</span></td>
       </tr>
       <tr>
         <td class="rowheader">Approximant</td>
@@ -276,22 +276,22 @@
         <td colspan="4" class="bt0 br1 bb0 bl1 nd" />
         <td colspan="2" class="bt1 br0 bb1 bl1" />
         <td class="bt1 br0 bb1 bl0"
-          ><span class="ipa" title="Voiceless alveolar lateral fricative">ɬ</span></td>
+        ><span class="ipa" title="Voiceless alveolar lateral fricative">ɬ</span></td>
         <td class="bt1 br0 bb1 bl0"
-          ><span class="ipa" title="Voiced alveolar lateral fricative">ɮ</span></td>
+        ><span class="ipa" title="Voiced alveolar lateral fricative">ɮ</span></td>
         <td colspan="2" class="bt1 br1 bb1 bl0" />
         <td class="bt1 br0 bb1 bl1"
-          ><span class="ipa" title="Voiceless retroflex lateral fricative">ɭ˔̊</span></td>
+        ><span class="ipa" title="Voiceless retroflex lateral fricative">ɭ˔̊</span></td>
         <td class="bt1 br1 bb1 bl0" />
         <td class="bt1 br0 bb1 bl1" />
         <td class="bt1 br0 bb1 bl0" />
         <td class="bt1 br0 bb1 bl0"
-          ><span class="ipa" title="Voiceless palatal lateral fricative">ʎ̥˔</span></td>
+        ><span class="ipa" title="Voiceless palatal lateral fricative">ʎ̥˔</span></td>
         <td class="bt1 br1 bb1 bl0" />
         <td class="bt1 br0 bb1 bl1"
-          ><span class="ipa" title="Voiceless velar lateral fricative">ʟ̝̊</span></td>
+        ><span class="ipa" title="Voiceless velar lateral fricative">ʟ̝̊</span></td>
         <td class="bt1 br1 bb1 bl0"
-          ><span class="ipa" title="Voiced velar lateral fricative">ʟ̝</span></td>
+        ><span class="ipa" title="Voiced velar lateral fricative">ʟ̝</span></td>
         <td colspan="8" class="bt0 br1 bb0 bl1 nd" />
       </tr>
       <tr>
@@ -300,20 +300,20 @@
         <td colspan="2" class="bt1 br0 bb1 bl1" />
         <td class="bt1 br0 bb1 bl0" />
         <td class="bt1 br0 bb1 bl0"
-          ><span class="ipa" title="Alveolar lateral approximant">l</span></td>
+        ><span class="ipa" title="Alveolar lateral approximant">l</span></td>
         <td colspan="2" style="width:3em;" class="bt1 br1 bb1 bl0" />
         <td class="bt1 br0 bb1 bl1" />
         <td class="bt1 br1 bb1 bl0"
-          ><span class="ipa" title="Retroflex lateral approximant">ɭ</span></td>
+        ><span class="ipa" title="Retroflex lateral approximant">ɭ</span></td>
         <td class="bt1 br0 bb1 bl1" />
         <td class="bt1 br0 bb1 bl0"
-          ><span class="ipa" title="Lateral alveolo-palatal approximant">ʎ̟</span></td>
+        ><span class="ipa" title="Lateral alveolo-palatal approximant">ʎ̟</span></td>
         <td class="bt1 br0 bb1 bl0" />
         <td class="bt1 br1 bb1 bl0"
-          ><span class="ipa" title="Palatal lateral approximant">ʎ</span></td>
+        ><span class="ipa" title="Palatal lateral approximant">ʎ</span></td>
         <td class="bt1 br0 bb1 bl1" />
         <td class="bt1 br1 bb1 bl0"
-          ><span class="ipa" title="Velar lateral approximant">ʟ</span></td>
+        ><span class="ipa" title="Velar lateral approximant">ʟ</span></td>
         <td colspan="8" class="bt0 br1 bb0 bl1 nd" />
       </tr>
       <tr>
@@ -350,7 +350,7 @@
       </tr>
       <tr>
         <td class="rowheader" style="height:36.5px; text-align:right;" title="Close vowel"
-          ><b>Close</b></td>
+        ><b>Close</b></td>
         <td rowspan="7" colspan="5" style="font-size: 80%; padding: 15px 30px 15px 17px;">
           <div style="position:relative;">
             <img
@@ -366,101 +366,101 @@
                   <td style="vertical-align: top;">
                     <div class="vowel_row">
                       <span style="left:-13px;"
-                        ><span class="ipa" title="Close front unrounded vowel">i</span>•<span
-                          class="ipa"
-                          title="Close front rounded vowel">y</span
-                        ></span>
+                      ><span class="ipa" title="Close front unrounded vowel">i</span>•<span
+                        class="ipa"
+                        title="Close front rounded vowel">y</span
+                      ></span>
                       <span style="left:145px;"
-                        ><span class="ipa" title="Close central unrounded vowel">ɨ</span>•<span
-                          class="ipa"
-                          title="Close central rounded vowel">ʉ</span
-                        ></span>
+                      ><span class="ipa" title="Close central unrounded vowel">ɨ</span>•<span
+                        class="ipa"
+                        title="Close central rounded vowel">ʉ</span
+                      ></span>
                       <span style="left:294px;"
-                        ><span class="ipa" title="Close back unrounded vowel">ɯ</span>•<span
-                          class="ipa"
-                          title="Close back rounded vowel">u</span
-                        ></span>
+                      ><span class="ipa" title="Close back unrounded vowel">ɯ</span>•<span
+                        class="ipa"
+                        title="Close back rounded vowel">u</span
+                      ></span>
                     </div>
                     <div class="vowel_row">
                       <span style="left:78px;"
-                        ><span class="ipa" title="Near-close near-front unrounded vowel">ɪ</span
-                        >•<span class="ipa" title="Near-close near-front rounded vowel">ʏ</span
-                        ></span>
+                      ><span class="ipa" title="Near-close near-front unrounded vowel">ɪ</span
+                      >•<span class="ipa" title="Near-close near-front rounded vowel">ʏ</span
+                      ></span>
                       <span style="left:157px;"
-                        ><span class="ipa" title="Near-close central unrounded vowel">ɪ̈</span>•<span
-                          class="ipa"
-                          title="Near-close central rounded vowel">ʊ̈</span
-                        ></span>
+                      ><span class="ipa" title="Near-close central unrounded vowel">ɪ̈</span>•<span
+                        class="ipa"
+                        title="Near-close central rounded vowel">ʊ̈</span
+                      ></span>
                       <span style="left:257px;"
-                        ><span class="ipa" title="Near-close near-back vowel">ʊ</span></span>
+                      ><span class="ipa" title="Near-close near-back vowel">ʊ</span></span>
                     </div>
                     <div class="vowel_row">
                       <span style="left:33px;"
-                        ><span class="ipa" title="Close-mid front unrounded vowel">e</span>•<span
-                          class="ipa"
-                          title="Close-mid front rounded vowel">ø</span
-                        ></span>
+                      ><span class="ipa" title="Close-mid front unrounded vowel">e</span>•<span
+                        class="ipa"
+                        title="Close-mid front rounded vowel">ø</span
+                      ></span>
                       <span style="left:168px;"
-                        ><span class="ipa" title="Close-mid central unrounded vowel">ɘ</span>•<span
-                          class="ipa"
-                          title="Close-mid central rounded vowel">ɵ</span
-                        ></span>
+                      ><span class="ipa" title="Close-mid central unrounded vowel">ɘ</span>•<span
+                        class="ipa"
+                        title="Close-mid central rounded vowel">ɵ</span
+                      ></span>
                       <span style="left:301px;"
-                        ><span class="ipa" title="Close-mid back unrounded vowel">ɤ</span>•<span
-                          class="ipa"
-                          title="Close-mid back rounded vowel">o</span
-                        ></span>
+                      ><span class="ipa" title="Close-mid back unrounded vowel">ɤ</span>•<span
+                        class="ipa"
+                        title="Close-mid back rounded vowel">o</span
+                      ></span>
                     </div>
                     <div class="vowel_row">
                       <span style="left:61px;"
-                        ><span class="ipa" title="Mid front unrounded vowel">e̞</span>•<span
-                          class="ipa"
-                          title="Mid front rounded vowel">ø̞</span
-                        ></span>
+                      ><span class="ipa" title="Mid front unrounded vowel">e̞</span>•<span
+                        class="ipa"
+                        title="Mid front rounded vowel">ø̞</span
+                      ></span>
                       <span style="left:191px;"
-                        ><span class="ipa" title="Mid-central vowel">ə</span></span>
+                      ><span class="ipa" title="Mid-central vowel">ə</span></span>
                       <span style="left:300px;"
-                        ><span class="ipa" title="Mid back unrounded vowel">ɤ̞</span>•<span
-                          class="ipa"
-                          title="Mid back rounded vowel">o̞</span
-                        ></span>
+                      ><span class="ipa" title="Mid back unrounded vowel">ɤ̞</span>•<span
+                        class="ipa"
+                        title="Mid back rounded vowel">o̞</span
+                      ></span>
                     </div>
                     <div class="vowel_row">
                       <span style="left:88px;"
-                        ><span class="ipa" title="Open-mid front unrounded vowel">ɛ</span>•<span
-                          class="ipa"
-                          title="Open-mid front rounded vowel">œ</span
-                        ></span>
+                      ><span class="ipa" title="Open-mid front unrounded vowel">ɛ</span>•<span
+                        class="ipa"
+                        title="Open-mid front rounded vowel">œ</span
+                      ></span>
                       <span style="left:194px;"
-                        ><span class="ipa" title="Open-mid central unrounded vowel">ɜ</span>•<span
-                          class="ipa"
-                          title="Open-mid central rounded vowel">ɞ</span
-                        ></span>
+                      ><span class="ipa" title="Open-mid central unrounded vowel">ɜ</span>•<span
+                        class="ipa"
+                        title="Open-mid central rounded vowel">ɞ</span
+                      ></span>
                       <span style="left:300px;"
-                        ><span class="ipa" title="Open-mid back unrounded vowel">ʌ</span>•<span
-                          class="ipa"
-                          title="Open-mid back rounded vowel">ɔ</span
-                        ></span>
+                      ><span class="ipa" title="Open-mid back unrounded vowel">ʌ</span>•<span
+                        class="ipa"
+                        title="Open-mid back rounded vowel">ɔ</span
+                      ></span>
                     </div>
                     <div class="vowel_row">
                       <span style="left:114px;"
-                        ><span class="ipa" title="Near-open front unrounded vowel">æ</span></span>
+                      ><span class="ipa" title="Near-open front unrounded vowel">æ</span></span>
                       <span style="left:215px;"
-                        ><span class="ipa" title="Near-open central vowel">ɐ</span></span>
+                      ><span class="ipa" title="Near-open central vowel">ɐ</span></span>
                     </div>
                     <div class="vowel_row">
                       <span style="left:141px;"
-                        ><span class="ipa" title="Open front unrounded vowel">a</span>•<span
-                          class="ipa"
-                          title="Open front rounded vowel">ɶ</span
-                        ></span>
+                      ><span class="ipa" title="Open front unrounded vowel">a</span>•<span
+                        class="ipa"
+                        title="Open front rounded vowel">ɶ</span
+                      ></span>
                       <span style="left:229px;"
-                        ><span class="ipa" title="Open central unrounded vowel">ä</span></span>
+                      ><span class="ipa" title="Open central unrounded vowel">ä</span></span>
                       <span style="left:301px;"
-                        ><span class="ipa" title="Open back unrounded vowel">ɑ</span>•<span
-                          class="ipa"
-                          title="Open back rounded vowel">ɒ</span
-                        ></span>
+                      ><span class="ipa" title="Open back unrounded vowel">ɑ</span>•<span
+                        class="ipa"
+                        title="Open back rounded vowel">ɒ</span
+                      ></span>
                     </div>
                   </td>
                 </tr>
@@ -606,7 +606,7 @@
         <th class="align-middle" colspan="2" rowspan="1">Suprasegmentals</th>
         <th colspan="2" rowspan="1" style="line-height:100%">Diacritic<br />tone marks</th>
         <th colspan="2" rowspan="1" style="line-height:100%"
-          >Tone&nbsp;Letters<br />&amp; Numbers</th>
+        >Tone&nbsp;Letters<br />&amp; Numbers</th>
       </tr>
       <tr>
         <td class="rowheader">Long</td>
@@ -745,18 +745,18 @@
         <td class="bt0 br1 bb1 bl1" title="Bilabial clicks"><span class="ipa">ʘ</span></td>
         <td class="bt0 br1 bb1 bl1" title="Dental clicks"><span class="ipa">ǀ</span></td>
         <td class="bt0 br1 bb1 bl1" colspan="2" title="Alveolar clicks"
-          ><span class="ipa">ǃ</span></td>
+        ><span class="ipa">ǃ</span></td>
         <td class="bt0 br1 bb1 bl1" colspan="2" title="Palatal clicks"
-          ><span class="ipa">ǂ</span></td>
+        ><span class="ipa">ǂ</span></td>
         <td class="bt0 br1 bb1 bl1" title="Lateral clicks"><span class="ipa">ǁ</span></td>
       </tr>
       <tr>
         <td class="bt0 br1 bb1 bl1" title="Nasal clicks"><span class="ipa">ʘ̃</span></td>
         <td class="bt0 br1 bb1 bl1" title="Glottalized clicks"><span class="ipa">ʘ̃ˀ</span></td>
         <td class="bt0 br1 bb1 bl1" colspan="2" title="Pulmonic-contour clicks"
-          ><span class="ipa">ʘ͡q</span></td>
+        ><span class="ipa">ʘ͡q</span></td>
         <td class="bt0 br1 bb1 bl1" colspan="2" title="Ejective-contour clicks"
-          ><span class="ipa">ʘ͡qʼ</span></td>
+        ><span class="ipa">ʘ͡qʼ</span></td>
         <td class="bt0 br1 bb1 bl1" title="Retroflex clicks"><span class="ipa">‼</span></td>
       </tr>
       <tr>
@@ -804,42 +804,42 @@
       </tr>
       <tr>
         <td class="bt0 br0 bb0 bl1"
-          ><span class="ipa" title="Voiceless labiodental affricate">p̪f</span></td>
+        ><span class="ipa" title="Voiceless labiodental affricate">p̪f</span></td>
         <td class="bt0 br1 bb0 bl0"
-          ><span class="ipa" title="Voiced labiodental affricate">b̪v</span></td>
+        ><span class="ipa" title="Voiced labiodental affricate">b̪v</span></td>
         <td class="bt0 br0 bb0 bl1"
-          ><span class="ipa" title="Voiceless alveolar affricate">ts</span></td>
+        ><span class="ipa" title="Voiceless alveolar affricate">ts</span></td>
         <td class="bt0 br1 bb0 bl0"
-          ><span class="ipa" title="Voiced alveolar affricate">dz</span></td>
+        ><span class="ipa" title="Voiced alveolar affricate">dz</span></td>
         <td class="bt0 br0 bb0 bl1"
-          ><span class="ipa" title="Voiceless palato-alveolar affricate">tʃ</span></td>
+        ><span class="ipa" title="Voiceless palato-alveolar affricate">tʃ</span></td>
         <td class="bt0 br1 bb0 bl0"
-          ><span class="ipa" title="Voiced palato-alveolar affricate">dʒ</span></td>
+        ><span class="ipa" title="Voiced palato-alveolar affricate">dʒ</span></td>
         <td class="bt0 br0 bb0 bl1"
-          ><span class="ipa" title="Voiceless alveolo-palatal affricate">tɕ</span></td>
+        ><span class="ipa" title="Voiceless alveolo-palatal affricate">tɕ</span></td>
         <td class="bt0 br1 bb0 bl0"
-          ><span class="ipa" title="Voiced alveolo-palatal affricate">dʑ</span></td>
+        ><span class="ipa" title="Voiced alveolo-palatal affricate">dʑ</span></td>
         <td class="bt0 br0 bb0 bl1"
-          ><span class="ipa" title="Voiceless retroflex affricate">ʈʂ</span></td>
+        ><span class="ipa" title="Voiceless retroflex affricate">ʈʂ</span></td>
         <td class="bt0 br1 bb0 bl0"
-          ><span class="ipa" title="Voiced retroflex affricate">ɖʐ</span></td>
+        ><span class="ipa" title="Voiced retroflex affricate">ɖʐ</span></td>
       </tr>
       <tr>
         <td class="bt1 br0 bb1 bl1" />
         <td class="bt1 br1 bb1 bl0" />
         <td class="bt1 br0 bb1 bl1"
-          ><span class="ipa" title="Voiceless alveolar lateral affricate">tɬ</span></td>
+        ><span class="ipa" title="Voiceless alveolar lateral affricate">tɬ</span></td>
         <td class="bt1 br1 bb1 bl0"
-          ><span class="ipa" title="Voiced alveolar lateral affricate">dɮ</span></td>
+        ><span class="ipa" title="Voiced alveolar lateral affricate">dɮ</span></td>
         <td class="bt1 br0 bb1 bl1"
-          ><span class="ipa" title="Voiceless palatal affricate">cç</span></td>
+        ><span class="ipa" title="Voiceless palatal affricate">cç</span></td>
         <td class="bt1 br1 bb1 bl0"
-          ><span class="ipa" title="Voiced palatal affricate">ɟʝ</span></td>
+        ><span class="ipa" title="Voiced palatal affricate">ɟʝ</span></td>
         <td class="bt1 br0 bb1 bl1"
-          ><span class="ipa" title="Voiceless palatal lateral affricate">cʎ̥˔</span></td>
+        ><span class="ipa" title="Voiceless palatal lateral affricate">cʎ̥˔</span></td>
         <td class="bt1 br1 bb1 bl0" />
         <td class="bt1 br0 bb1 bl1"
-          ><span class="ipa" title="Voiceless velar lateral affricate">kʟ̝̊</span></td>
+        ><span class="ipa" title="Voiceless velar lateral affricate">kʟ̝̊</span></td>
         <td class="bt1 br1 bb1 bl0" />
       </tr>
     </table>
@@ -853,18 +853,18 @@
       <tr>
         <td class="rowheader">Continuants</td>
         <td class="bt0 br0 bb1 bl1"
-          ><span class="ipa" title="Voiceless labio-velar approximant">ʍ</span></td>
+        ><span class="ipa" title="Voiceless labio-velar approximant">ʍ</span></td>
         <td class="bt0 br1 bb1 bl0"><span class="ipa" title="Labio-velar approximant">w</span></td>
         <td class="bt0 br1 bb1 bl1"
-          ><span class="ipa" title="Labial-palatal approximant">ɥ</span></td>
+        ><span class="ipa" title="Labial-palatal approximant">ɥ</span></td>
         <td class="bt0 br1 bb1 bl0"><span class="ipa" title="Sj-sound">ɧ</span></td>
       </tr>
       <tr>
         <td class="rowheader">Occlusives</td>
         <td class="bt1 br0 bb1 bl1"
-          ><span class="ipa" title="Voiceless labial-velar stop">k͡p</span></td>
+        ><span class="ipa" title="Voiceless labial-velar stop">k͡p</span></td>
         <td class="bt1 br1 bb1 bl0"
-          ><span class="ipa" title="Voiced labial-velar stop">ɡ͡b</span></td>
+        ><span class="ipa" title="Voiced labial-velar stop">ɡ͡b</span></td>
         <td class="b1" colspan="2"><span class="ipa" title="Labial-velar nasal">ŋ͡m</span></td>
       </tr>
     </table>

@@ -21,7 +21,7 @@
       normalize: true,
     });
 
-    wavesurfer.on('finish', function () {
+    wavesurfer.on('finish', () => {
       playing = false;
     });
 
@@ -34,11 +34,11 @@
   });
 
   function startStop() {
-    if (playing) {
+    if (playing)
       wavesurfer.stop();
-    } else {
+    else
       wavesurfer.play();
-    }
+
     playing = !playing;
   }
 

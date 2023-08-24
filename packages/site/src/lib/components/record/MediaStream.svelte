@@ -1,7 +1,7 @@
 <script context="module" lang="ts">
   import { writable } from 'svelte/store';
-  let selectedMicrophone = writable<MediaDeviceInfo>(null);
-  let selectedCamera = writable<MediaDeviceInfo>(null);
+  const selectedMicrophone = writable<MediaDeviceInfo>(null);
+  const selectedCamera = writable<MediaDeviceInfo>(null);
 </script>
 
 <script lang="ts">
@@ -14,12 +14,12 @@
   $: microphones = devices.filter((d) => d.kind === 'audioinput');
   $: cameras = devices.filter((d) => d.kind === 'videoinput');
   $: {
-    if (!$selectedMicrophone) {
+    if (!$selectedMicrophone)
       selectedMicrophone.set(microphones[0]);
-    }
-    if (!$selectedCamera) {
+
+    if (!$selectedCamera)
       selectedCamera.set(cameras[0]);
-    }
+
   }
 
   let error: any;
@@ -30,7 +30,7 @@
       devices = await navigator.mediaDevices.enumerateDevices();
     } catch (e) {
       error = { name: e.name, message: e.message };
-      console.log(e.name + ': ' + e.message);
+      console.error(e.name + ': ' + e.message);
     }
   });
 
@@ -39,13 +39,13 @@
     const constraints: MediaStreamConstraints = {
       audio: audio
         ? {
-            deviceId: $selectedMicrophone ? $selectedMicrophone.deviceId : undefined,
-          }
+          deviceId: $selectedMicrophone ? $selectedMicrophone.deviceId : undefined,
+        }
         : false,
       video: video
         ? {
-            deviceId: $selectedCamera ? $selectedCamera.deviceId : undefined,
-          }
+          deviceId: $selectedCamera ? $selectedCamera.deviceId : undefined,
+        }
         : false,
     };
     return navigator.mediaDevices.getUserMedia(constraints);

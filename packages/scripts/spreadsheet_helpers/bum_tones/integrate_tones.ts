@@ -5,17 +5,17 @@ const bum_vowels = new Set(['a', 'e', 'i', 'o', 'u', 'ɛ', 'ə', 'ɔ', 'ɨ']);
 export function count_vowels(word: string, vowels: Set<string>): number {
   let number_of_vowels = 0;
   word.split('').forEach((letter) => {
-    if (vowels.has(letter)) {
+    if (vowels.has(letter))
       number_of_vowels += 1;
-    }
+
   });
   return number_of_vowels;
 }
 
 export function add_tones_to_word(word: string, accents: string): string {
-  if (accents === '') {
+  if (accents === '')
     return word;
-  }
+
   let new_word = '';
   let accent_index = 0;
   const splitted_accents = accents.split(' ');
@@ -51,9 +51,9 @@ export function integrate_tones_to_bum_phonetics(
   path: string
 ): void {
   const new_phonetics: string[] = [];
-  if (phonetics.length !== tones.length) {
+  if (phonetics.length !== tones.length)
     throw new Error('Tones and phonetics have to correspond to each other');
-  }
+
   phonetics.forEach((word, i) => {
     new_phonetics.push(add_tones_to_word(word, tones[i]));
   });

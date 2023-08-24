@@ -124,7 +124,7 @@
         default: 'No',
       }) + ' ' + $_('entry.image', { default: 'Image' })} />
     <hr />
-  {/if} 
+  {/if}
    {#if $isManager}
   <ToggleRefinement
     {search}
@@ -133,7 +133,7 @@
     label={$_('entry.does_not_exist', {
       default: 'No',
     }) + ' ' + $_('entry.audio', { default: 'Audio' })} />
-{/if} 
+{/if}
  {#if $isManager}
   <ToggleRefinement
     {search}
@@ -153,7 +153,7 @@
       default: 'No',
     }) + ' ' + $_('entry.ps', { default: 'Part of Speech' })} />
   <hr />
-{/if} 
+{/if}
  {#if $isManager}
   <ToggleRefinement
     {search}

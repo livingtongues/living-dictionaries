@@ -3,12 +3,11 @@
   import { updateOnline, collectionStore, getCollection } from 'sveltefirets';
   import { arrayRemove, arrayUnion, deleteField, GeoPoint } from 'firebase/firestore/lite';
   import Filter from '$lib/components/Filter.svelte';
-  import { Button, ResponsiveTable } from 'svelte-pieces';
+  import { Button, ResponsiveTable, IntersectionObserverShared } from 'svelte-pieces';
   import DictionaryRow from './DictionaryRow.svelte';
   import SortDictionaries from './SortDictionaries.svelte';
   import { where } from 'firebase/firestore';
   import type { DictionaryWithHelperStores } from './dictionaryWithHelpers';
-  import IntersectionObserverShared from './IntersectionObserverShared.svelte';
   import { exportAdminDictionariesAsCSV } from './export';
 
   const dictionaries = collectionStore<IDictionary>('dictionaries', [], {

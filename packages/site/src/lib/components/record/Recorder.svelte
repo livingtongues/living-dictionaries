@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount, onDestroy } from 'svelte';
   import type RecordRTCType from 'recordrtc';
+  // eslint-disable-next-line no-duplicate-imports
   import type { Options, State } from 'recordrtc';
 
   export let stream: MediaStream, options: Options;
@@ -15,9 +16,9 @@
   });
 
   $: if (RecordRTC) {
-    if (recorder) {
+    if (recorder)
       recorder.stopRecording();
-    }
+
     recorder = new RecordRTC(stream, options);
     state = recorder.getState();
   }
@@ -46,7 +47,7 @@
       recordingTime = 0;
       recorder.stopRecording(() => {
         state = recorder.getState();
-        let blob = recorder.getBlob();
+        const blob = recorder.getBlob();
         resolve(blob);
       });
     });
@@ -58,7 +59,7 @@
     }, 1000);
   }
 
-  onDestroy(() => recorder && recorder.stopRecording());
+  onDestroy(() => recorder?.stopRecording());
 </script>
 
 <slot {start} {pause} {stop} {recorder} {recordingTime} {state} />

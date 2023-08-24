@@ -22,4 +22,4 @@ export interface LDAlgoliaFields {
 
 // media timestamps needs converted to a timestamp usable by Algolia
 // only need gcs value of photos
-// need path and speakerName value for audio - pull from speakerId on import to Algolia 
+// need path and speakerName value for audio - pull from speakerId on import to Algolia

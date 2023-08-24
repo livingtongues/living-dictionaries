@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 export function checkForMissingKeysInHeaders(headers: Record<string, any>, items: Record<string, any>[]) {
   const headersKeys = Object.keys(headers);
   const itemKeys = new Set(items.map((item) => Object.keys(item)).flat());

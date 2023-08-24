@@ -2,28 +2,27 @@
   import { t } from 'svelte-i18n';
   import type { InstantSearch } from 'instantsearch.js';
   import { connectSearchBox } from 'instantsearch.js/es/connectors';
-  import { onMount } from 'svelte';
+  import { onMount, createEventDispatcher } from 'svelte';
 
   export let search: InstantSearch;
 
   let query = null;
   let isSearchStalled = false;
 
-  let refine: (arg0: string) => any = (query?) => {}; // stub function until received from instantsearch;
+  let refine: (arg0: string) => any = (_query?) => {}; // stub function until received from instantsearch;
 
   onMount(() => {
     const customSearchBox = connectSearchBox((params) => {
       ({ refine, isSearchStalled } = params);
       const { query: currentQuery } = params;
-      if (query === null) {
+      if (query === null)
         query = currentQuery;
-      }
+
     });
 
     search.addWidgets([customSearchBox({})]);
   });
 
-  import { createEventDispatcher } from 'svelte';
   const dispatch = createEventDispatcher();
 </script>
 

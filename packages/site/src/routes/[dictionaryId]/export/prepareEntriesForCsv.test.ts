@@ -34,8 +34,8 @@ describe('prepareEntriesForCsv', () => {
         senses: [
           {
             glosses: { ar: 'foo', en: 'banana' },
-            parts_of_speech: ['noun', 'adjective'],
-            semantic_domains: ['Body parts', 'Body functions'],
+            translated_parts_of_speech: ['noun', 'adjective'],
+            translated_ld_semantic_domains: ['Body parts', 'Body functions'],
             example_sentences: [{ en: 'This is a banana', vn: '我很喜歡吃香蕉' }],
             photo_files: [
               { fb_storage_path: 'https://database.com/image.png', uid_added_by: 'Diego' },

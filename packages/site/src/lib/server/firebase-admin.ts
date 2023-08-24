@@ -1,7 +1,7 @@
 import { type ServiceAccount, cert, getApps, initializeApp, type App } from 'firebase-admin/app'
 import { getAuth } from 'firebase-admin/auth'
 import { Firestore, getFirestore } from 'firebase-admin/firestore'
-import { FIREBASE_SERVICE_ACCOUNT_CREDENTIALS } from "$env/static/private"
+import { FIREBASE_SERVICE_ACCOUNT_CREDENTIALS } from '$env/static/private'
 
 const SERVICE_ACCOUNT: ServiceAccount & { project_id?: string } = JSON.parse(FIREBASE_SERVICE_ACCOUNT_CREDENTIALS) // Firebase Admin typings use camelCase but Google Cloud Service Account credentials use snake_case oddly enough
 
@@ -23,15 +23,15 @@ export function getFirebaseAdminApp(): App {
     databaseURL: `https://${SERVICE_ACCOUNT.project_id}.firebaseio.com`,
   })
 
-  console.log('Firebase Admin initialized on server');
+  console.info('Firebase Admin initialized on server');
 
   return firebaseAdminApp;
 }
 
 export function getDb(): Firestore {
-  if (db) {
+  if (db)
     return db;
-  }
+
 
   db = getFirestore(getFirebaseAdminApp());
   return db;

@@ -4,9 +4,9 @@ import type { IUser } from '@living-dictionaries/types';
 import type { LayoutServerLoad } from './$types';
 export const load: LayoutServerLoad = async ({ cookies, request }) => {
   let acceptedLanguage = 'en';
-  if (request.headers['accept-language']) {
+  if (request.headers['accept-language'])
     acceptedLanguage = request.headers['accept-language'].split(',')[0].trim();
-  }
+
 
   const chosenLocale = cookies.get('locale') || null;
 

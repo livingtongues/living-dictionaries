@@ -16,7 +16,7 @@
         These Terms of Use constitute a legally binding agreement made between you, whether
         personally or on behalf of an entity (“you”) and Living Tongues Institute for Endangered
         Languages ("<strong>Company</strong>", “<strong>we</strong>”, “<strong>us</strong>”, or “<strong
-          >our</strong
+        >our</strong
         >”), concerning your access to and use of the https://livingdictionaries.app/ website as
         well as any other media form, media channel, mobile website or mobile application related,
         linked, or otherwise connected thereto (collectively, the “Site”). You agree that by
