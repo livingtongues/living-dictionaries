@@ -10,7 +10,7 @@ const tw_region: IRegion = {coordinates: [
 ]}
 
 
-export const variants: Variants<typeof Component> = [
+export const variants: Variants<Component> = [
   {
     height: 600,
     props: {
