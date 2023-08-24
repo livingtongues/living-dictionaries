@@ -1,19 +1,19 @@
-import type { ActualDatabaseAudio, GoalDatabaseAudio } from "@living-dictionaries/types/audio.interface";
+import type { ActualDatabaseAudio, GoalDatabaseAudio } from '@living-dictionaries/types/audio.interface';
 
 export function convert_sound_file_to_current_shape(actual: ActualDatabaseAudio): GoalDatabaseAudio {
   if (!actual) return null;
-  
+
   const goal: GoalDatabaseAudio = { path: actual.path, speakerName: actual.speakerName };
-  
+
   goal.ab = actual.ab || actual.uploadedBy;
   goal.ts = actual.ts || actual.uploadedAt;
-  if (typeof actual.sp === 'string') {
+  if (typeof actual.sp === 'string')
     goal.sp = [actual.sp];
-  } else {
+  else
     goal.sp = actual.sp;
-  }
+
   goal.sc = actual.sc || actual.source;
-  
+
   return goal;
 }
 

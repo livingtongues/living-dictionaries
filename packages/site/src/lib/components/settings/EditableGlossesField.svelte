@@ -11,8 +11,8 @@
 
   $: activeGlossingBcps = Array.isArray(selectedLanguages)
     ? selectedLanguages.map((bcp) =>
-        $t('gl.' + bcp, { default: availableLanguages[bcp].vernacularName })
-      )
+      $t('gl.' + bcp, { default: availableLanguages[bcp].vernacularName })
+    )
     : [];
   $: remainingGlossingLanguagesAsArray = Object.entries(availableLanguages)
     .map((e) => ({

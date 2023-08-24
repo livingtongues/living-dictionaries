@@ -28,39 +28,39 @@
     let valueB: string | number;
     // prettier-ignore
     switch (sortKey) {
-    case 'createdAt':
-      valueA = a.createdAt?.seconds || 0;
-      valueB = b.createdAt?.seconds || 0;
-      break;
-    case 'lastVisit':
-      valueA = a.lastVisit?.seconds || 0;
-      valueB = b.lastVisit?.seconds || 0;
-      break;
-    case 'unsubscribe':
-      valueA = a.unsubscribe?.seconds || 0;
-      valueB = b.unsubscribe?.seconds || 0;
-      break;
-    default: 
-      valueA = a[sortKey] ? a[sortKey].toUpperCase() : 'zz'; // if we ever have missing names or email, then pass 'zz' when the sortKey is undefined
-      valueB = b[sortKey] ? b[sortKey].toUpperCase() : 'zz';
-        // a[sortKey].localeCompare(b[sortKey])
+      case 'createdAt':
+        valueA = a.createdAt?.seconds || 0;
+        valueB = b.createdAt?.seconds || 0;
+        break;
+      case 'lastVisit':
+        valueA = a.lastVisit?.seconds || 0;
+        valueB = b.lastVisit?.seconds || 0;
+        break;
+      case 'unsubscribe':
+        valueA = a.unsubscribe?.seconds || 0;
+        valueB = b.unsubscribe?.seconds || 0;
+        break;
+      default:
+        valueA = a[sortKey] ? a[sortKey].toUpperCase() : 'zz'; // if we ever have missing names or email, then pass 'zz' when the sortKey is undefined
+        valueB = b[sortKey] ? b[sortKey].toUpperCase() : 'zz';
+    // a[sortKey].localeCompare(b[sortKey])
     }
-    if (valueA < valueB) {
+    if (valueA < valueB)
       return sortDescending ? -1 : 1;
-    }
-    if (valueA > valueB) {
+
+    if (valueA > valueB)
       return sortDescending ? 1 : -1;
-    }
+
     return 0;
   });
 
   function setSortSettings(paraSortKey: SortFields) {
     //Changes the key if the sort wasn't based on the button before, and if it was, change the direction
-    if (sortKey === paraSortKey) {
+    if (sortKey === paraSortKey)
       sortDescending = !sortDescending;
-    } else {
+    else
       sortKey = paraSortKey;
-    }
+
   }
 </script>
 

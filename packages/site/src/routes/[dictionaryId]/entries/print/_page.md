@@ -27,7 +27,7 @@
 
 <Story name="Semantic Domains Field" knobs={{ showLabels: true }} let:props={{ showLabels }}>
   {#each entriesWithSemanticDomains as entry}
-    <PrintEntry selectedFields={{ sdn: true, id: true }} {entry} {dictionaryId} {showLabels} />
+    <PrintEntry selectedFields={{ sdn: true }} {entry} {dictionaryId} {showLabels} />
   {/each}
 </Story>
 

@@ -3,11 +3,11 @@ export function mergeBy<T>(sourceArray: T[], updatingArray: T[], field: string) 
   if (Array.isArray(updatingArray)) {
     for (const value of updatingArray.reverse()) {
       const matchedIndex = sourceArray.findIndex((x) => x[field] === value[field]);
-      if (matchedIndex >= 0) {
+      if (matchedIndex >= 0)
         sourceArray[matchedIndex] = value;
-      } else {
+      else
         mergedArr.unshift(value);
-      }
+
     }
   }
   return mergedArr;
@@ -31,7 +31,7 @@ if (import.meta.vitest) {
         { id: 2, name: 'Jane' },
       ]);
     });
-  
+
     test('should return the original array if updatingArray is not an array', () => {
       const sourceArray = [
         { id: 1, name: 'John' },
@@ -41,14 +41,14 @@ if (import.meta.vitest) {
       const result = mergeBy(sourceArray, updatingArray, 'id');
       expect(result).toEqual(sourceArray);
     });
-  
+
     test('should return an empty array if both arrays are empty', () => {
       const sourceArray: any[] = [];
       const updatingArray: any[] = [];
       const result = mergeBy(sourceArray, updatingArray, 'id');
       expect(result).toEqual([]);
     });
-  
+
     test('should return the updatingArray if sourceArray is empty', () => {
       const sourceArray: any[] = [];
       const updatingArray = [

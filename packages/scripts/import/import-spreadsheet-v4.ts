@@ -1,4 +1,4 @@
-import type { IEntry } from '@living-dictionaries/types';
+import type { ActualDatabaseEntry } from '@living-dictionaries/types';
 import { db, timestamp, environment } from '../config.js';
 import { uploadAudioFile, uploadImageFile } from './import-media.js';
 import { readFileSync } from 'fs';
@@ -31,7 +31,7 @@ export async function importEntriesToFirebase(
   dateStamp: number,
   dry = false
 ) {
-  const entries: IEntry[] = [];
+  const entries: ActualDatabaseEntry[] = [];
   let entryCount = 0;
   let batchCount = 0;
   let batch = db.batch();
@@ -40,9 +40,9 @@ export async function importEntriesToFirebase(
   let speakerId;
 
   for (const row of rows) {
-    if (!row.lexeme || row.lexeme === '(word/phrase)') 
+    if (!row.lexeme || row.lexeme === '(word/phrase)')
       continue;
-    
+
     if (!dry && batchCount === 200) {
       console.log('Committing batch of entries ending with: ', entryCount);
       await batch.commit();
@@ -81,11 +81,11 @@ export async function importEntriesToFirebase(
           path: audioFilePath,
           ts: timestamp,
         };
-        if (speakerId) 
+        if (speakerId)
           entry.sf.sp = different_speakers[row.speakerName];
-        else 
+        else
           entry.sf.speakerName = row.speakerName; // Keep that if for some reason we need the speakername as text only again.
-        
+
       }
     }
 

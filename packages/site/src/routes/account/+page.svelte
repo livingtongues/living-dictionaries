@@ -23,9 +23,9 @@
     <div>{$user.email}</div>
     <div class="my-2">
       <Button onclick={logOut}
-        >{$t('account.log_out', {
-          default: 'Log Out',
-        })}</Button>
+      >{$t('account.log_out', {
+        default: 'Log Out',
+      })}</Button>
     </div>
   {:else}
     Not logged in

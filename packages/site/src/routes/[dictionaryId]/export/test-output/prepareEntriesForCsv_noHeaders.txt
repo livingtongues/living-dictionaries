@@ -28,19 +28,19 @@
           "ar": "foo",
           "en": "banana",
         },
-        "parts_of_speech": [
-          "noun",
-          "adjective",
-        ],
         "photo_files": [
           {
             "fb_storage_path": "https://database.com/image.png",
             "uid_added_by": "Diego",
           },
         ],
-        "semantic_domains": [
+        "translated_ld_semantic_domains": [
           "Body parts",
           "Body functions",
+        ],
+        "translated_parts_of_speech": [
+          "noun",
+          "adjective",
         ],
       },
     ],

@@ -13,20 +13,20 @@ async function updateMostRecentEntries(count: number, { dry = true }) {
   const entriesSnapshot = await db.collectionGroup('words').orderBy('ua', 'desc').limit(count).get();
   const entries = await prepareEntriesFromSnapshot(entriesSnapshot);
 
-  if (!dry) {
+  if (!dry)
     await updateIndex(entries);
-  }
+
 }
 
- 
+
 async function updateIndexByField(fieldToIndex: string, { dry = true }) {
   // The field must be indexed first in Firebase
   const entriesSnapshot = await db.collectionGroup('words').where(fieldToIndex, '!=', null).get();
   const entries = await prepareEntriesFromSnapshot(entriesSnapshot);
 
-  if (!dry) {
+  if (!dry)
     await updateIndex(entries);
-  }
+
 }
 
 // eslint-disable-next-line no-undef
@@ -38,7 +38,7 @@ async function prepareEntriesFromSnapshot(entriesSnapshot: FirebaseFirestore.Que
     console.log({ dbEntry, algoliaEntry});
     return { ...algoliaEntry, objectID: doc.id };
   });
-  
+
   const entries = await Promise.all(entryPromises);
   return entries;
 }

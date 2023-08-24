@@ -7,8 +7,8 @@ export function bindEvents(el, handlers) {
   }
 
   return () => {
-    for (const [handler, fn] of unbindings) {
+    for (const [handler, fn] of unbindings)
       el.off(handler, fn);
-    }
+
   };
 }

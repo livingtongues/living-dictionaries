@@ -527,14 +527,14 @@ export class QrCode {
   // This could be implemented as lookup table of 40 variable-length lists of integers.
   private getAlignmentPatternPositions(): int[] {
     if (this.version == 1) return [];
-    
+
     const numAlign: int = Math.floor(this.version / 7) + 2;
     const step: int =
         this.version == 32 ? 26 : Math.ceil((this.version * 4 + 4) / (numAlign * 2 - 2)) * 2;
     const result: int[] = [6];
     for (let pos = this.size - 7; result.length < numAlign; pos -= step) result.splice(1, 0, pos);
     return result;
-    
+
   }
 
   // Returns the number of data bits that can be stored in a QR Code of the given version number, after

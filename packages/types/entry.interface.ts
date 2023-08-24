@@ -1,5 +1,5 @@
 import type { Timestamp } from 'firebase/firestore';
-import type { IFirestoreMetaData, IFirestoreMetaDataAbbreviated } from 'sveltefirets';
+import type { IFirestoreMetaDataAbbreviated } from 'sveltefirets';
 import type { IGloss } from './gloss.interface';
 import type { IExampleSentence } from './exampe-sentence.interface';
 import type { GoalDatabaseAudio, ActualDatabaseAudio, ExpandedAudio } from './audio.interface';
@@ -7,11 +7,9 @@ import type { GoalDatabasePhoto, ActualDatabasePhoto, ExpandedPhoto } from './ph
 import type { GoalDatabaseVideo, ActualDatabaseVideo, ExpandedVideo } from './video.interface';
 import type { LDAlgoliaFields } from './entry.algolia.interface';
 
-// current interface used across the site that we will migrate from this to just ExpandedEntry
-export type IEntry = ExpandedEntry & ActualDatabaseEntry & Omit<LDAlgoliaFields, 'ua' | 'ca'>;
 export type LDAlgoliaHit = ActualDatabaseEntry & LDAlgoliaFields;
 
-export interface ExpandedEntry extends IFirestoreMetaData {
+export interface ExpandedEntry extends IFirestoreMetaDataAbbreviated {
   lexeme?: string;
   local_orthography_1?: string;
   local_orthography_2?: string;
@@ -36,8 +34,11 @@ export interface ExpandedEntry extends IFirestoreMetaData {
 
 export interface ExpandedSense {
   glosses?: IGloss;
-  parts_of_speech?: string[]; // translation to current language happens during expansion
-  semantic_domains?: string[]; // translation to current language happens during expansion
+  parts_of_speech_keys?: string[];
+  translated_parts_of_speech?: string[];
+  ld_semantic_domains_keys?: string[];
+  translated_ld_semantic_domains?: string[];
+  write_in_semantic_domains?: string[];
   example_sentences?: IExampleSentence[];
   photo_files?: ExpandedPhoto[];
   video_files?: ExpandedVideo[];
@@ -48,8 +49,8 @@ export interface ExpandedSense {
 export interface DatabaseSense {
   gl?: IGloss;
   ps?: string[]; // parts_of_speech
-  sd?: string[]; // semantic domain strings, only using for custom semantic domains brought in from imports
   sdn?: string[]; // semantic domain number, simplified system modeled after SemDom (eg. 2.1.2.3)
+  sd?: string[]; // semantic domain strings, only using for custom semantic domains brought in from imports
   xs?: IExampleSentence[];
   pfs?: GoalDatabasePhoto[];
   deletedPfs?: GoalDatabasePhoto[];
@@ -75,7 +76,7 @@ export interface GoalDatabaseEntry extends IFirestoreMetaDataAbbreviated {
   in?: string; // interlinearization
   mr?: string; // morphology
   pl?: string; // plural_form
-  va?: string; // variant (currently babanki & torwali only)
+  va?: string; // variant (currently DICTIONARIES_WITH_VARIANTS only)
   di?: string[]; // dialects
   nt?: string; // notes
   sr?: string[]; // sources

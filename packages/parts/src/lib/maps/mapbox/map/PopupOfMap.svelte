@@ -30,11 +30,11 @@
       closeOnMove,
     });
 
-    if (container.hasChildNodes()) {
+    if (container.hasChildNodes())
       popup.setDOMContent(container);
-    } else {
+    else
       popup.setText(label);
-    }
+
 
     return () => {
       popup.remove();
@@ -42,11 +42,11 @@
   });
 
   $: if (popup) {
-    if (open) {
+    if (open)
       popup.addTo(map);
-    } else {
+    else
       popup.remove();
-    }
+
   }
 </script>
 

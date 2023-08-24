@@ -49,7 +49,7 @@ type StandardEntryForCSV = {
 
 export interface EntryForCSV extends StandardEntryForCSV {
   vernacular_example_sentence?: string;
-  variant?: string; // for any dictionary with it, probably just babanki & torwali
+  variant?: string; // for DICTIONARIES_WITH_VARIANTS
   sound_file_path?: string; // for downloading file, not exported in CSV
   image_file_path?: string; // for downloading file, not exported in CSV
 }
@@ -86,9 +86,9 @@ export function formatCsvEntries(
       sources: entry.sources?.join(' | '),
       parts_of_speech_abbreviation: find_part_of_speech_abbreviation(
         global_parts_of_speech,
-        entry.senses?.[0]?.parts_of_speech?.[0]
+        entry.senses?.[0]?.translated_parts_of_speech?.[0]
       ),
-      parts_of_speech: entry.senses?.[0]?.parts_of_speech?.[0],
+      parts_of_speech: entry.senses?.[0]?.translated_parts_of_speech?.[0],
       image_filename: friendlyName(entry, entry.senses?.[0].photo_files?.[0].fb_storage_path),
       sound_filename: friendlyName(entry, entry.sound_files?.[0].fb_storage_path),
       image_file_path: entry.senses?.[0].photo_files?.[0].fb_storage_path,

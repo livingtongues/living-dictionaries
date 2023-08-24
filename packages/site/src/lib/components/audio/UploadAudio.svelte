@@ -1,6 +1,6 @@
 <script lang="ts">
   import { t } from 'svelte-i18n';
-  import type { GoalDatabaseAudio, GoalDatabaseEntry, IEntry } from '@living-dictionaries/types';
+  import type { GoalDatabaseAudio, GoalDatabaseEntry } from '@living-dictionaries/types';
   import { updateOnline } from 'sveltefirets';
   import { getStorage, ref, uploadBytesResumable } from 'firebase/storage';
   import { dictionary, user } from '$lib/stores';
@@ -8,10 +8,10 @@
   import { cubicOut } from 'svelte/easing';
 
   export let file: File | Blob;
-  export let entry: IEntry;
+  export let entryId: string;
   export let speakerId: string;
 
-  let progress = tweened(0, {
+  const progress = tweened(0, {
     duration: 2000,
     easing: cubicOut,
   });
@@ -20,9 +20,9 @@
   let error;
   let success: boolean;
 
-  if (file && entry) {
+  if (file && entryId)
     startUpload();
-  }
+
 
   async function startUpload() {
     // const _dictName = dictionary.name.replace(/\s+/g, '_');
@@ -30,10 +30,7 @@
     const fileTypeSuffix = file.type.split('/')[1];
 
     // const storagePath = `${_dictName}_${dictionary.id}/audio/{_lexeme}_${entryId}_${new Date().getTime()}.${fileTypeSuffix}`;
-    const storagePath = `${$dictionary.id}/audio/${
-      entry.id
-    }_${new Date().getTime()}.${fileTypeSuffix}`;
-
+    const storagePath = `${$dictionary.id}/audio/${entryId}_${new Date().getTime()}.${fileTypeSuffix}`;
     const customMetadata = { uploadedBy: $user.displayName };
 
     // https://firebase.google.com/docs/storage/web/upload-files
@@ -44,21 +41,21 @@
       'state_changed',
       (snapshot) => {
         const progressAmount = snapshot.bytesTransferred / snapshot.totalBytes;
-        console.log('Upload is ' + progressAmount * 100 + '% done');
+        console.info('Upload is ' + progressAmount * 100 + '% done');
         progress.set(progressAmount);
         switch (snapshot.state) {
           case 'paused':
-            console.log('Upload is paused');
+            console.info('Upload is paused');
             break;
           case 'running':
-            console.log('Upload is running');
+            console.info('Upload is running');
             break;
         }
       },
       (err) => {
         alert(`${$t('misc.error', { default: 'Error' })}: ${err}`);
         error = err;
-        // A full list of error codes is available at
+      // A full list of error codes is available at
         // https://firebase.google.com/docs/storage/web/handle-errors
         // switch (error.code) {
         //     case 'storage/unauthorized':
@@ -84,7 +81,7 @@
           };
 
           await updateOnline<GoalDatabaseEntry>(
-            `dictionaries/${$dictionary.id}/words/${entry.id}`,
+            `dictionaries/${$dictionary.id}/words/${entryId}`,
             { sfs: [sf] },
             { abbreviate: true }
           );
@@ -102,13 +99,13 @@
 {#if error}
   <span
     class="text-xs font-semibold inline-block py-1 px-2 uppercase rounded-full
-    text-red-600 bg-red-200">
+      text-red-600 bg-red-200">
     {$t('misc.error', { default: 'Error' })}
   </span>
 {:else if success}
   <span
     class="text-xs font-semibold inline-block py-1 px-2 uppercase rounded-full
-    text-green-600 bg-green-200">
+      text-green-600 bg-green-200">
     <i class="far fa-check" />
     {$t('upload.success', { default: 'Success' })}
   </span>
@@ -118,7 +115,7 @@
       <div>
         <span
           class="text-xs font-semibold inline-block py-1 px-2 uppercase
-          rounded-full text-blue-600 bg-blue-200">
+            rounded-full text-blue-600 bg-blue-200">
           {$t('upload.uploading', { default: 'Uploading' })}
         </span>
       </div>
@@ -132,7 +129,7 @@
       <div
         style="width:{percentage}%"
         class="shadow-none flex flex-col text-center whitespace-nowrap
-        text-white justify-center bg-blue-500" />
+          text-white justify-center bg-blue-500" />
     </div>
   </div>
 {/if}

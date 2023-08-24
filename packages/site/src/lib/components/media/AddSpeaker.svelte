@@ -32,9 +32,9 @@
 
 <Modal on:close>
   <span slot="heading"
-    >{$t('speakers.add_new_speaker', {
-      default: 'Add New Speaker',
-    })}
+  >{$t('speakers.add_new_speaker', {
+    default: 'Add New Speaker',
+  })}
   </span>
 
   <Form let:loading onsubmit={addSpeaker}>

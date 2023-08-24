@@ -9,17 +9,18 @@
 
   let ww = 0;
   let wh = 0;
-  let scale = spring(1);
-  let opacity = spring(0, { stiffness: 0.2, damping: 1 });
+  const scale = spring(1);
+  const opacity = spring(0, { stiffness: 0.2, damping: 1 });
   let viewing = false;
 
   function handle_click() {
     if (imageEl === null) return;
     const styles = window.getComputedStyle(imageEl);
-    const top_offset = parseInt(styles.getPropertyValue('margin-top'));
+    // const top_offset = parseInt(styles.getPropertyValue('margin-top'));
     const left_offset = parseInt(styles.getPropertyValue('margin-left'));
     const { left, right, top, bottom, width } = imageEl.getBoundingClientRect();
-    let pos = [left < ww - right ? 0 : 100, top < wh - bottom ? 0 : 100];
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const pos = [left < ww - right ? 0 : 100, top < wh - bottom ? 0 : 100];
     // active_el.index = i;
     // active_el.left = `${left - left_offset}px`;
     // active_el.top = `${top - top_offset}px`;

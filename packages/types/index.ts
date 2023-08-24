@@ -9,7 +9,7 @@ export type {
   IRegion,
   ICitation,
 } from './dictionary.interface';
-export type { ActualDatabaseEntry, ExpandedEntry, GoalDatabaseEntry, IEntry, DatabaseSense, ExpandedSense, LDAlgoliaHit } from './entry.interface';
+export type { ActualDatabaseEntry, ExpandedEntry, GoalDatabaseEntry, DatabaseSense, ExpandedSense, LDAlgoliaHit } from './entry.interface';
 export type { IGlossLanguages, IGlossLanguage } from './gloss-language.interface';
 export type { IGloss } from './gloss.interface';
 export type { IExampleSentence } from './exampe-sentence.interface';
@@ -26,3 +26,4 @@ export type { HelperRoles, IHelper } from './helper.interface';
 export type { AlgoliaEntry } from './entry.algolia.interface';
 export { type IPrintFields, CustomPrintFields, StandardPrintFields } from './print-entry.interface';
 export { ReadyLocales, UnpublishedLocales } from './languages.interface';
+export { EntryFields, type EntryFieldValue } from './entry-fields.enum';

@@ -19,7 +19,7 @@
     } catch (err) {
       alert(err);
     }
-    // const data = await db.collection('dictionaries').doc(dictionaryId).get();
+  // const data = await db.collection('dictionaries').doc(dictionaryId).get();
     // if (data.exists) {
     //   console.log(data.data());
     // } else {

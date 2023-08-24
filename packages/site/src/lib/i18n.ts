@@ -36,11 +36,11 @@ export async function loadLocaleOnClient(locale = 'en') {
   if (i18nInited) return;
   const chosenLocale = getCookie('locale') || null;
   const acceptedLanguage = getLocaleFromNavigator() || null;
-  if (chosenLocale) {
+  if (chosenLocale)
     locale = chosenLocale;
-  } else if (isReadyLocale(acceptedLanguage)) {
+  else if (isReadyLocale(acceptedLanguage))
     locale = acceptedLanguage;
-  }
+
   INIT_OPTIONS.initialLocale = locale;
   init(INIT_OPTIONS);
   i18nInited = true;
@@ -51,17 +51,17 @@ let currentLocale = null;
 export async function loadLocaleOnServer(chosenLocale: string, acceptedLanguage: string) {
   let locale = chosenLocale;
   if (!locale) {
-    if (isReadyLocale(acceptedLanguage)) {
+    if (isReadyLocale(acceptedLanguage))
       locale = acceptedLanguage;
-    } else {
+    else
       locale = 'en';
-    }
+
   }
   if (i18nInited) {
-    if (locale !== currentLocale) {
+    if (locale !== currentLocale)
       $locale.set(locale);
-    }
-    return;
+
+
   } else {
     INIT_OPTIONS.initialLocale = locale;
     init(INIT_OPTIONS);

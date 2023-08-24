@@ -3,8 +3,8 @@ import { admin } from './admin';
 import { isManager, isContributor, canEdit } from './editing';
 
 import { myDictionaries } from './dictionaries';
-import { dictionary, entries } from './dictionary';
-import { columns, preferredColumns } from './columns';
+import { dictionary } from './dictionary';
+import { preferredColumns } from './columns';
 import { algoliaQueryParams } from './search';
 
 export {
@@ -15,8 +15,6 @@ export {
   canEdit,
   myDictionaries,
   dictionary,
-  entries,
-  columns,
   preferredColumns,
   algoliaQueryParams,
 };

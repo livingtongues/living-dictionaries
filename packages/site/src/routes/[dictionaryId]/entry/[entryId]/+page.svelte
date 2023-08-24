@@ -1,36 +1,26 @@
 <script lang="ts">
-  import { t } from 'svelte-i18n';
-  import { Doc } from 'sveltefirets';
+  import { t, locale } from 'svelte-i18n';
   import { Button, JSON } from 'svelte-pieces';
   import { share } from '$lib/helpers/share';
   import { deleteEntry, deleteImage, deleteVideo } from '$lib/helpers/delete';
   import { saveUpdateToFirestore } from '$lib/helpers/entry/update';
-  import SeoMetaTags from '$lib/components/SeoMetaTags.svelte';
   import EntryDisplay from './EntryDisplay.svelte';
+  import SeoMetaTags from '$lib/components/SeoMetaTags.svelte';
   import { seo_description } from './seo_description';
-  import {
-    admin,
+  import { convert_and_expand_entry } from '$lib/transformers/convert_and_expand_entry';
+
+  export let data;
+  $: ({ admin,
     algoliaQueryParams,
     canEdit,
     dictionary,
     isContributor,
     isManager,
     user,
-  } from '$lib/stores';
-  import { convert_and_expand_entry } from '$lib/transformers/convert_and_expand_entry';
-  import type { PageData } from './$types';
-  export let data: PageData;
-  $: entry = data.initialEntry;
-</script>
+    initialEntry } = data);
 
-{#if canEdit}
-  <Doc
-    path={`dictionaries/${$dictionary.id}/words/${data.initialEntry.id}`}
-    startWith={data.initialEntry}
-    on:data={({ detail: { data } }) => {
-      entry = convert_and_expand_entry(data);
-    }} />
-{/if}
+  $: entry = $locale && convert_and_expand_entry($initialEntry); // adding locale triggers update of translated semantic domains and parts of speech
+</script>
 
 <div
   class="flex justify-between items-center mb-3 md:top-12 sticky top-0 z-30
@@ -52,7 +42,7 @@
       <Button
         color="red"
         form="simple"
-        onclick={() => deleteEntry(entry, $dictionary.id, $algoliaQueryParams)}>
+        onclick={() => deleteEntry($initialEntry, $dictionary.id, $algoliaQueryParams)}>
         <span class="hidden md:inline">
           {$t('misc.delete', { default: 'Delete' })}
         </span>
@@ -71,9 +61,9 @@
   dictionary={$dictionary}
   videoAccess={$dictionary.videoAccess || $admin > 0}
   canEdit={$canEdit}
-  on:deleteImage={() => deleteImage(entry)}
-  on:deleteVideo={() => deleteVideo(entry)}
-  on:valueupdate={(e) => saveUpdateToFirestore(e, entry.id, $dictionary.id)} />
+  on:deleteImage={() => deleteImage(entry, $dictionary.id)}
+  on:deleteVideo={() => deleteVideo(entry, $dictionary.id)}
+  on:valueupdate={({detail: { field, newValue}}) => saveUpdateToFirestore({field, value: newValue, entryId: entry.id, dictionaryId: $dictionary.id})} />
 
 <SeoMetaTags
   imageTitle={entry.lx}
@@ -82,5 +72,5 @@
   lat={$dictionary.coordinates?.latitude}
   lng={$dictionary.coordinates?.longitude}
   url="https://livingdictionaries.app/{$dictionary.id}/entry/{entry.id}"
-  gcsPath={entry.pf?.gcs}
+  gcsPath={entry.senses?.[0]?.photo_files?.[0]?.specifiable_image_url}
   keywords="Minority Languages, Indigenous Languages, Language Documentation, Dictionary, Minority Community, Language Analysis, Language Education, Endangered Languages, Language Revitalization, Linguistics, Word Lists, Linguistic Analysis, Dictionaries, Living Dictionaries, Living Tongues, Under-represented Languages, Tech Resources, Language Sustainability, Language Resources, Diaspora Languages, Elicitation, Language Archives, Ancient Languages, World Languages, Obscure Languages, Little Known languages, Digital Dictionary, Dictionary Software, Free Software, Online Dictionary Builder" />

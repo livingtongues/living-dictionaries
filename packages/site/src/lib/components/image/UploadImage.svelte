@@ -13,7 +13,7 @@
   export let file: File;
   export let fileLocationPrefix: string;
 
-  let progress = tweened(0, {
+  const progress = tweened(0, {
     duration: 2000,
     easing: cubicOut,
   });
@@ -30,8 +30,8 @@
   })
 
   const dispatch = createEventDispatcher<{uploaded: { fb_storage_path: string, specifiable_image_url: string }}>();
-    
-  async function startUpload(storagePath: string) {
+
+  function startUpload(storagePath: string) {
     const customMetadata = {
       uploadedBy: $user.displayName,
       originalFileName: file.name,
@@ -46,14 +46,14 @@
       'state_changed',
       (snapshot) => {
         const progressAmount = snapshot.bytesTransferred / snapshot.totalBytes;
-        console.log('Upload is ' + progressAmount * 100 + '% done');
+        console.info('Upload is ' + progressAmount * 100 + '% done');
         progress.set(progressAmount);
         switch (snapshot.state) {
           case 'paused':
-            console.log('Upload is paused');
+            console.info('Upload is paused');
             break;
           case 'running':
-            console.log('Upload is running');
+            console.info('Upload is running');
             break;
         }
       },
@@ -80,10 +80,10 @@
         auth_token,
         firebase_storage_location,
       });
-      
-      if (response.status !== 200) {
+
+      if (response.status !== 200)
         throw new Error(`Error getting image serving url.`);
-      }
+
       const gcsPath = await response.json() as string
 
       dispatch('uploaded', { fb_storage_path: storagePath, specifiable_image_url: gcsPath})
@@ -102,7 +102,7 @@
 
 <div
   class="w-full h-full flex-grow relative flex flex-col items-center justify-center
-  overflow-hidden">
+    overflow-hidden">
   {#if error}
     <div class="w-12 text-red-600 text-center">
       <i class="far fa-times" />
@@ -116,7 +116,7 @@
     {:else}
       <div
         class="text-dark-shadow text-white z-10 font-semibold w-12 text-center
-        font-mono">
+          font-mono">
         {percentage}%
       </div>
     {/if}

@@ -37,9 +37,4 @@ export default defineConfig({
       // 'instantsearch.js', 'instantsearch.js/es/widgets/index.js', 'instantsearch.js/es/connectors',
     ],
   },
-  test: {
-    name: 'site',
-    globals: true,
-    includeSource: ['src/**/*.ts'],
-  }
 });

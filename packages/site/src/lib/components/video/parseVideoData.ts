@@ -7,14 +7,14 @@ export function parseVideoData(url: string): GoalDatabaseVideo {
 
   if (match) {
     const video: GoalDatabaseVideo = {};
-    if (match[3].indexOf('youtu') > -1) {
+    if (match[3].indexOf('youtu') > -1)
       video.youtubeId = match[6];
-    } else if (match[3].indexOf('vimeo') > -1) {
+    else if (match[3].indexOf('vimeo') > -1)
       video.vimeoId = match[6];
-    }
-    if (match[7]) {
+
+    if (match[7])
       video.startAt = +match[7].match(/[0-9]+/)[0];
-    }
+
     return video;
   }
   return null;

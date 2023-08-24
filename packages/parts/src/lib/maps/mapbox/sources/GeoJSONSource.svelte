@@ -9,7 +9,7 @@
   export let data: GeoJSONSourceOptions['data']; // URL or inline data
   export let options: Partial<GeoJSONSourceRaw> = {};
 
-    const { getMap } = getContext<MapKeyContext>(mapKey);
+  const { getMap } = getContext<MapKeyContext>(mapKey);
   const map = getMap();
 
   // Remember ID of all <Layer> children, in order to remove them in onDestroy, before removing the source.
@@ -33,9 +33,9 @@
   }
 
   function handleStyledata() {
-    if (!map.getSource(id)) {
+    if (!map.getSource(id))
       addSource();
-    }
+
   }
 
   $: {
@@ -57,14 +57,14 @@
 
     // Remove all <Layer> children of <GeoJSONSource>.
     for (const layerId of layerIds) {
-      if (map.getLayer(layerId)) {
+      if (map.getLayer(layerId))
         map.removeLayer(layerId);
-      }
+
     }
 
-    if (map.getSource(id)) {
+    if (map.getSource(id))
       map.removeSource(id);
-    }
+
   });
 </script>
 

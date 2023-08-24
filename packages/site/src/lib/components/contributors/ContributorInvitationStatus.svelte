@@ -19,9 +19,8 @@
       color="red"
       size="sm"
       onclick={() => {
-        if (confirm('Are you sure you want to delete this invite?')) {
+        if (confirm('Are you sure you want to delete this invite?'))
           dispatch('delete', { id: invite.id });
-        }
       }}>
       <span class="i-fa-solid-times" />
       <span class="i-fa-key" />

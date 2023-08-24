@@ -2,7 +2,7 @@
   // from https://github.com/beyonk-adventures/svelte-mapbox
   import { setContext, onDestroy, createEventDispatcher, onMount, tick } from 'svelte';
   import { mapKey } from '../context';
-  import { loadScriptOnce, loadStylesOnce } from 'sveltefirets/helpers/loader';
+  import { loadScriptOnce, loadStylesOnce } from 'sveltefirets';
   import { EventQueue } from '../queue';
   import type { LngLatLike, MapboxOptions, Map, LngLat, ErrorEvent, EventData } from 'mapbox-gl';
   import { bindEvents } from '../event-bindings';
@@ -57,7 +57,7 @@
     zoomend: () => dispatch('zoomend', map.getZoom()),
     error: (e: ErrorEvent & EventData) => dispatch('error', e),
     load: () => dispatch('ready') && (ready = true),
-    // drag: () => dispatch('drag', map.getCenter()),
+  // drag: () => dispatch('drag', map.getCenter()),
   };
   let unbind = () => {};
 
