@@ -70,7 +70,7 @@
 {/if}
 
 <ShowHide let:show let:toggle let:set>
-  {#if entry.coordinates?.points || entry.coordinates?.regions}
+  {#if entry.coordinates?.points?.length || entry.coordinates?.regions?.length}
     <div class="rounded overflow-hidden cursor-pointer" on:click={() => set(canEdit)}>
       <MapboxStatic points={entry.coordinates.points} regions={entry.coordinates.regions} />
     </div>
