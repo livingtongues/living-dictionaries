@@ -16,22 +16,20 @@
   export let singlePointZoom = 3;
 
   $: geoJson = shapeGeoJson(points, regions);
-  $: autoUrl = `https://api.mapbox.com/styles/v1/mapbox/${style}/static/geojson(${encodeURIComponent(
-    JSON.stringify(geoJson)
-  )})/auto/${width}x${height}${highDef ? '@2x' : ''}?logo=false&access_token=${accessToken}`;
+  $: urlFriendlyGeoJson = encodeURIComponent(JSON.stringify(geoJson));
+  $: urlPrefix = `https://api.mapbox.com/styles/v1/mapbox/${style}/static/geojson(${urlFriendlyGeoJson})`;
+  $: urlSuffix = `${width}x${height}${highDef ? '@2x' : ''}?logo=false&access_token=${accessToken}`
 
-  $: singlePointUrl =
-    points?.length === 1 &&
-    !regions?.length &&
-    `https://api.mapbox.com/styles/v1/mapbox/${style}/static/geojson(${encodeURIComponent(
-      JSON.stringify(geoJson)
-    )})/${points[0].coordinates.longitude},${
-      points[0].coordinates.latitude
-    },${singlePointZoom}/${width}x${height}${
-      highDef ? '@2x' : ''
-    }?logo=false&access_token=${accessToken}`;
-
-  $: src = singlePointUrl || autoUrl;
+  let src = '';
+  $: isSinglePoint = points?.length === 1 && !regions?.length;
+  $: if (isSinglePoint) {
+    const [{ coordinates: firstPoint }] = points
+    const { longitude } = firstPoint;
+    const { latitude } = firstPoint;
+    src = `${urlPrefix}/${longitude},${latitude},${singlePointZoom}/${urlSuffix}`
+  } else {
+    src = `${urlPrefix}/auto/${urlSuffix}`
+  }
 </script>
 
 {#if src}
