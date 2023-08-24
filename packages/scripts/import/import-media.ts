@@ -61,9 +61,9 @@ export async function uploadImageFile(
   try {
     const fileTypeSuffix = imageFileName.match(/\.[0-9a-z]+$/i)[0];
     const storagePath = `${dictionaryId}/images/${entryId}_${new Date().getTime()}${fileTypeSuffix}`;
-    if (dry) {
+    if (dry)
       return { path: storagePath, gcs: 'no-path-bc-dry-run' };
-    }
+
 
     await storage.bucket(fileBucket).upload(imageFilePath, {
       destination: storagePath,

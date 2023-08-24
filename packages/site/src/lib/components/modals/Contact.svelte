@@ -1,12 +1,11 @@
 <script lang="ts">
   import { t } from 'svelte-i18n';
   import { Button, Modal, Form } from 'svelte-pieces';
-  import { user } from '$lib/stores';
+  import { user, dictionary } from '$lib/stores';
   import { goto } from '$app/navigation';
   import { createEventDispatcher } from 'svelte';
   import { apiFetch } from '$lib/client/apiFetch';
   import type { SupportRequestBody } from '../../../routes/api/email/support/+server';
-  import { dictionary } from '$lib/stores';
   import type { RequestAccessBody } from '../../../routes/api/email/request_access/+server';
 
   const subjects = {
@@ -29,7 +28,7 @@
 
   let message = '';
   let email = '';
-  
+
   let status: 'success' | 'fail';
 
   async function send() {

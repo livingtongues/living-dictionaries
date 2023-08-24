@@ -17,23 +17,23 @@
   let centerLng = lng;
   let centerLat = lat;
 
-  let zoom = lng && lat ? 6 : 2;
+  const zoom = lng && lat ? 6 : 2;
 
   function setMarker(longitude: number, latitude: number) {
     if (!(longitude && latitude)) return;
-    if (longitude < -180 || longitude > 180 || latitude < -90 || latitude > 90) {
+    if (longitude < -180 || longitude > 180 || latitude < -90 || latitude > 90)
       return;
-    }
+
     lng = +longitude.toFixed(4);
     lat = +latitude.toFixed(4);
   }
 
   function handleGeocoderResult({ detail }) {
-    if (detail?.user_coordinates?.[0]) {
+    if (detail?.user_coordinates?.[0])
       setMarker(detail.user_coordinates[0], detail.user_coordinates[1]);
-    } else {
+    else
       setMarker(detail.center[0], detail.center[1]);
-    }
+
   }
 
   onMount(async () => {
@@ -73,7 +73,7 @@
         <div class="relative">
           <div
             class="absolute inset-y-0 flex items-center text-sm text-gray-500
-            uppercase left-0 pl-2 pointer-events-none">
+              uppercase left-0 pl-2 pointer-events-none">
             Lat
           </div>
           <input
@@ -91,7 +91,7 @@
         <div class="relative">
           <div
             class="absolute inset-y-0 flex items-center text-sm text-gray-500
-            uppercase left-0 pl-2 pointer-events-none">
+              uppercase left-0 pl-2 pointer-events-none">
             Lng
           </div>
           <input
@@ -119,7 +119,7 @@
           options={{ marker: false }}
           placeholder={t ? $t('about.search') : 'Search'}
           on:result={handleGeocoderResult}
-          on:error={(e) => console.log(e.detail)} />
+          on:error={(e) => console.error(e.detail)} />
         {#if lng && lat}
           <Marker
             draggable

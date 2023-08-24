@@ -11,7 +11,7 @@ export default async (data: any, context: functions.https.CallableContext) => {
       },
     });
     return true;
-  } 
+  }
   return true;
-  
+
 };

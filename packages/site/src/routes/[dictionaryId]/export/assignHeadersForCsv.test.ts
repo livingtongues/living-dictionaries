@@ -1,3 +1,4 @@
+import type { ExpandedEntry } from '@living-dictionaries/types';
 import {
   get_local_orthography_headers,
   get_semantic_domain_headers,
@@ -25,14 +26,14 @@ describe(get_local_orthography_headers, () => {
 
 describe(get_semantic_domain_headers, () => {
   test('adds semantic domain headers if any exists', () => {
-    const entries = [
+    const entries: ExpandedEntry[] = [
       {
         lexeme: 'foo',
-        senses: [{ semantic_domains: ['1.2'] }],
+        senses: [{ translated_ld_semantic_domains: ['NA'] }],
       },
       {
         lexeme: 'bar',
-        senses: [{ semantic_domains: ['2.1', '2.2', '2.3'] }],
+        senses: [{ translated_ld_semantic_domains: ['NA', 'NA', 'NA'] }],
       },
     ];
     expect(get_semantic_domain_headers(entries)).toEqual({

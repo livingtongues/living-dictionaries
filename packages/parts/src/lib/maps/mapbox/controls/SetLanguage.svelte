@@ -24,7 +24,7 @@
   type SupportedLanguages = typeof supportedLanguages[number]
   export let bcp: SupportedLanguages = 'en';
 
-  $: if (bcp !== 'en') {
+  $: if (bcp !== 'en')
     map.setLayoutProperty('country-label', 'text-field', ['get', `name_${bcp}`]);
-  }
+
 </script>

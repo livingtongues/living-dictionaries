@@ -1,7 +1,7 @@
 <script lang="ts">
   // User Experience Logging, 3 second delayed init after load completes
   async function loadLogRocket() {
-    console.log('load in logrocket');
+    console.info('load in logrocket');
     (await import('logrocket')).default.init('wsolfu/td-dev');
   }
 

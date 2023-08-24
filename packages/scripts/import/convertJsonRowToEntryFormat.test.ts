@@ -4,6 +4,7 @@ import {
 } from './convertJsonRowToEntryFormat.js';
 import { readFileSync } from 'fs';
 import { parseCSVFrom } from './parse-csv.js';
+import path from 'node:path'
 
 describe('convertJsonRowToEntryFormat', () => {
   const fakeTimeStamp = 10101010;
@@ -81,7 +82,7 @@ describe('convertJsonRowToEntryFormat', () => {
 
   test('high-level conversion from csv', async () => {
     const dictionaryId = 'example-v4';
-    const file = readFileSync(`./import/data/${dictionaryId}/${dictionaryId}.csv`, 'utf8');
+    const file = readFileSync(path.join(__dirname, `./data/${dictionaryId}/${dictionaryId}.csv`), 'utf8');
     const rows = parseCSVFrom(file);
     const rowsWithoutHeader = removeHeaderRow(rows);
     const entries = rowsWithoutHeader.map((row) =>

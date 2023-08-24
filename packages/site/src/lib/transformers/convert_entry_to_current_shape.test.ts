@@ -1,14 +1,14 @@
-import type { ActualDatabaseEntry, GoalDatabaseEntry } from "@living-dictionaries/types";
-import type { ActualDatabaseAudio } from "@living-dictionaries/types/audio.interface";
-import type { ActualDatabasePhoto } from "@living-dictionaries/types/photo.interface";
-import type { ActualDatabaseVideo } from "@living-dictionaries/types/video.interface";
-import type { Timestamp } from "firebase/firestore";
-import { convert_entry_to_current_shape } from "./convert_entry_to_current_shape";
+import type { ActualDatabaseEntry, GoalDatabaseEntry } from '@living-dictionaries/types';
+import type { ActualDatabaseAudio } from '@living-dictionaries/types/audio.interface';
+import type { ActualDatabasePhoto } from '@living-dictionaries/types/photo.interface';
+import type { ActualDatabaseVideo } from '@living-dictionaries/types/video.interface';
+import type { Timestamp } from 'firebase/firestore';
+import { convert_entry_to_current_shape } from './convert_entry_to_current_shape';
 
 describe(convert_entry_to_current_shape, () => {
   test('converts parts of speech string to string[]', () => {
     const actual_database_entry: ActualDatabaseEntry = { ps: 'n' };
-    const goal_database_entry: GoalDatabaseEntry = { sn: [{ ps: ['n'], }] };
+    const goal_database_entry: GoalDatabaseEntry = { sn: [{ ps: ['n'] }] };
     expect(convert_entry_to_current_shape(actual_database_entry)).toEqual(goal_database_entry);
   });
 
@@ -66,13 +66,39 @@ describe(convert_entry_to_current_shape, () => {
     expect(convert_entry_to_current_shape(entry)).toEqual(expected);
   });
 
-  test('can add xv into first xs item even if it does not exist yet', () => {
+  test('can add xv into first xs item if does not exist', () => {
     const entry: ActualDatabaseEntry = {
       xv: 'foo',
     }
     const expected: GoalDatabaseEntry = {
       sn: [{
         xs: [{ vn: 'foo' }],
+      }]
+    }
+    expect(convert_entry_to_current_shape(entry)).toEqual(expected);
+  });
+
+  test('if entry has old xv and new example sentence that is not vernacular', () => {
+    const entry: ActualDatabaseEntry = {
+      xv: 'vernacular',
+      xs: { en: 'english' },
+    }
+    const expected: GoalDatabaseEntry = {
+      sn: [{
+        xs: [{ en: 'english', vn: 'vernacular' }],
+      }]
+    }
+    expect(convert_entry_to_current_shape(entry)).toEqual(expected);
+  });
+
+  test('if entry has both xv and xs.vn then xs.vn is used', () => {
+    const entry: ActualDatabaseEntry = {
+      xv: 'should not show',
+      xs: { vn: 'should show' },
+    }
+    const expected: GoalDatabaseEntry = {
+      sn: [{
+        xs: [{ vn: 'should show' }],
       }]
     }
     expect(convert_entry_to_current_shape(entry)).toEqual(expected);
@@ -191,8 +217,8 @@ describe(convert_entry_to_current_shape, () => {
     }
     const expected: GoalDatabaseEntry = {
       sn: [
-        { gl: { en: 'first' }, },
-        { gl: { en: 'second' }, }
+        { gl: { en: 'first' } },
+        { gl: { en: 'second' } }
       ]
     }
     expect(convert_entry_to_current_shape(entry)).toEqual(expected);

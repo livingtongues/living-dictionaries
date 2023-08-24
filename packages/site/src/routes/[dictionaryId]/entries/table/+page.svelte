@@ -3,15 +3,18 @@
   // import SeoMetaTags from '$lib/components/SeoMetaTags.svelte';
   import { onMount, getContext } from 'svelte';
   import { Doc } from 'sveltefirets';
-  import { canEdit, columns, dictionary } from '$lib/stores';
+  import { canEdit, preferredColumns, dictionary } from '$lib/stores';
   import Hits from '$lib/components/search/Hits.svelte';
   import Pagination from '$lib/components/search/Pagination.svelte';
-  import EntriesTable from '$lib/components/table/EntriesTable.svelte';
+  import EntriesTable from './EntriesTable.svelte';
   import { configure } from 'instantsearch.js/es/widgets/index.js';
   import { convert_and_expand_entry } from '$lib/transformers/convert_and_expand_entry';
   import { writable } from 'svelte/store';
   import type { InstantSearch } from 'instantsearch.js';
   import type { ActualDatabaseEntry, LDAlgoliaHit } from '@living-dictionaries/types';
+  import { deleteImage } from '$lib/helpers/delete';
+  import { saveUpdateToFirestore } from '$lib/helpers/entry/update';
+  import { setUpColumns } from './setUpColumns';
 
   const search: InstantSearch = getContext('search');
 
@@ -24,10 +27,7 @@
     ]);
   });
 
-  $: adjustedColumns = ['babanki', 'torwali'].includes($dictionary.id)
-    ? [...$columns, { field: 'va', width: 150 }]
-    : $columns;
-
+  $: columns = setUpColumns($preferredColumns, $dictionary);
   const entries = writable<(ActualDatabaseEntry | LDAlgoliaHit)[]>([]);
 </script>
 
@@ -38,8 +38,11 @@
 
   <EntriesTable
     entries={$entries.map(convert_and_expand_entry)}
-    columns={adjustedColumns}
-    canEdit={$canEdit} />
+    {columns}
+    dictionaryId={$dictionary.id}
+    canEdit={$canEdit}
+    on:deleteImage={({detail: {entryId}}) => deleteImage({id: entryId}, $dictionary.id)}
+    on:valueupdate={({detail: { field, newValue, entryId }}) => saveUpdateToFirestore({field, value: newValue, entryId, dictionaryId: $dictionary.id})} />
 
   {#if $canEdit}
     {#each algoliaEntries as algoliaEntry (algoliaEntry.id)}
@@ -47,7 +50,7 @@
         path="dictionaries/{$dictionary.id}/words/{algoliaEntry.id}"
         startWith={algoliaEntry}
         on:data={({ detail: { data: entry } }) => {
-          const index = $entries.findIndex((e) => e.id === entry.id);
+          const index = $entries.findIndex(({id}) => id === entry.id);
           if (index > -1) $entries[index] = entry;
         }} />
     {/each}

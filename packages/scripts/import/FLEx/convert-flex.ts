@@ -1,6 +1,7 @@
 // import { data } from "./Babanki-Kejom";
 
-import type { IEntry } from '../../../../src/lib/interfaces';
+import { ActualDatabaseEntry } from '@living-dictionaries/types';
+
 
 interface IFLExData {
   lx: string;
@@ -23,11 +24,11 @@ interface IFLExData {
 }
 
 export function convertFLExToLDFormat(data: IFLExData[]) {
-  const entries: IEntry[] = [];
+  const entries: ActualDatabaseEntry[] = [];
   // const check = new Set();
 
   data.map((e) => {
-    const entry: IEntry = {
+    const entry: ActualDatabaseEntry = {
       lx: e.lx.trim(),
       gl: {
         en: e.d_Eng || null,
@@ -36,12 +37,12 @@ export function convertFLExToLDFormat(data: IFLExData[]) {
 
     // check.add(e.z1);
 
-    if (e.co_Eng) {
+    if (e.co_Eng)
       entry.nt = e.co_Eng;
-    }
-    if (e.ps_Eng) {
+
+    if (e.ps_Eng)
       entry.ps = matchPartsOfSpeech(e.ps_Eng);
-    }
+
     entries.push(entry);
   });
   // console.log(check);

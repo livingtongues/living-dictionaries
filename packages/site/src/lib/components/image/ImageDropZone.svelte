@@ -47,10 +47,10 @@
         handleImage(e.target.files);
       }} />
     <span class="hidden md:inline">
-      <i class="far fa-upload" />
+      <span class="i-ic-outline-cloud-upload text-2xl" />
     </span>
     <span class="md:hidden">
-      <i class="far fa-camera" />
+      <span class="i-ic-outline-camera-alt text-xl" />
     </span>
 
     <slot name="label" />

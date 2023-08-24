@@ -1,26 +1,27 @@
 import type { Variants } from 'kitbook';
 import type Component from './EditField.svelte';
-export const variants: Variants<typeof Component> = [
+export const variants: Variants<Component> = [
   {
     name: 'Assamese Gloss',
     width: 550,
     height: 300,
     props: {
-      field: 'gl.as'
+      field: 'gloss',
+      bcp: 'as',
     },
   },
   {
     name: 'Normal',
     height: 100,
     props: {
-      field: 'mr'
+      field: 'morphology',
     },
   },
   {
     name: 'Lexeme',
     height: 300,
     props: {
-      field: 'lx'
+      field: 'lexeme',
     },
   },
   {
@@ -28,7 +29,7 @@ export const variants: Variants<typeof Component> = [
     width: 550,
     height: 300,
     props: {
-      field: 'nt'
+      field: 'notes',
     },
   },
   {
@@ -36,7 +37,7 @@ export const variants: Variants<typeof Component> = [
     width: 550,
     height: 300,
     props: {
-      field: 'ph'
+      field: 'phonetic',
     },
   },
 ]

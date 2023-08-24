@@ -14,8 +14,8 @@
   import { algoliaQueryParams } from '$lib/stores';
 
   const searchClient = algoliasearch(
-    'XCVBAYSYXD', // App ID
-    'e6d98efb32d3dc2435dce7b97ea87c3e' // Search-Only public API key
+    PUBLIC_ALGOLIA_APPLICATION_ID,
+    PUBLIC_ALGOLIA_SEARCH_ONLY_API_KEY
   );
 
   const prodIndex = 'entries_prod';
@@ -30,7 +30,7 @@
       setUiState(uiState);
       setTimeout(() => {
         const queryParams = window.location.href.match(/(\?.*)/);
-        algoliaQueryParams.set((queryParams && queryParams[0]) || '');
+        algoliaQueryParams.set((queryParams?.[0]) || '');
       }, 1000);
     },
   });
@@ -54,6 +54,7 @@
   search.start();
 
   import { setContext } from 'svelte';
+  import { PUBLIC_ALGOLIA_SEARCH_ONLY_API_KEY, PUBLIC_ALGOLIA_APPLICATION_ID } from '$env/static/public';
   setContext('search', search);
 </script>
 

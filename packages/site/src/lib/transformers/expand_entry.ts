@@ -1,9 +1,9 @@
-import type { DatabaseSense, ExpandedEntry, ExpandedSense, GoalDatabaseEntry } from "@living-dictionaries/types";
-import type { ExpandedAudio, GoalDatabaseAudio } from "@living-dictionaries/types/audio.interface";
-import type { ExpandedPhoto, GoalDatabasePhoto } from "@living-dictionaries/types/photo.interface";
-import type { ExpandedVideo, GoalDatabaseVideo } from "@living-dictionaries/types/video.interface";
-import { convert_timestamp_to_date_object } from "./timestamp_to_date";
-import { translate_part_of_speech_to_current_language, translate_semantic_domain_keys_to_current_language } from "./translate_keys_to_current_language";
+import type { DatabaseSense, ExpandedEntry, ExpandedSense, GoalDatabaseEntry } from '@living-dictionaries/types';
+import type { ExpandedAudio, GoalDatabaseAudio } from '@living-dictionaries/types/audio.interface';
+import type { ExpandedPhoto, GoalDatabasePhoto } from '@living-dictionaries/types/photo.interface';
+import type { ExpandedVideo, GoalDatabaseVideo } from '@living-dictionaries/types/video.interface';
+import { convert_timestamp_to_date_object } from './timestamp_to_date';
+import { translate_part_of_speech_to_current_language, translate_semantic_domain_keys_to_current_language } from './translate_keys_to_current_language';
 
 export function expand_entry(database_entry: GoalDatabaseEntry): ExpandedEntry {
   return {
@@ -33,8 +33,11 @@ export function expand_entry(database_entry: GoalDatabaseEntry): ExpandedEntry {
 function expand_sense(sense: DatabaseSense): ExpandedSense {
   return {
     glosses: sense.gl,
-    parts_of_speech: sense.ps?.map(translate_part_of_speech_to_current_language),
-    semantic_domains: [...sense.sd || [], ...sense.sdn?.map(translate_semantic_domain_keys_to_current_language) || []],
+    parts_of_speech_keys: sense.ps,
+    translated_parts_of_speech: sense.ps?.map(translate_part_of_speech_to_current_language),
+    ld_semantic_domains_keys: sense.sdn,
+    translated_ld_semantic_domains: sense.sdn?.map(translate_semantic_domain_keys_to_current_language),
+    write_in_semantic_domains: sense.sd,
     example_sentences: sense.xs,
     photo_files: sense.pfs?.map(expand_photo),
     video_files: sense.vfs?.map(expand_video),

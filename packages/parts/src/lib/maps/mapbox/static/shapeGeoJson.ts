@@ -57,13 +57,13 @@ function getPolygonFeature(region: IRegion) {
 
 export function shapeGeoJson(points: IPoint[], regions: IRegion[]) {
   const features = [];
-  for (const region of regions) {
+  for (const region of regions)
     features.push(getPolygonFeature(region));
-  }
+
   // add points afterwards so pins show on top of regions
   for (const [index, point] of points.entries()) {
     const primary = index === 0;
-    features.push(getPointFeature(point, primary)); 
+    features.push(getPointFeature(point, primary));
   }
   return {
     type: 'FeatureCollection',

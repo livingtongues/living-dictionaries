@@ -11,7 +11,7 @@ import { importFromSpreadsheet } from './import-spreadsheet-v4.js';
 
 const dictionaryId = program.opts().id;
 const {dry} = program.opts();
-if (dry) 
+if (dry)
   console.log('Dry run, no data will be uploaded');
 
 console.log(`Importing ${dictionaryId} to ${program.opts().environment}.`);

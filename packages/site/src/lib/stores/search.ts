@@ -1,2 +1,2 @@
 import { writable } from 'svelte/store';
-export const algoliaQueryParams = writable<string>('');
+export const algoliaQueryParams = writable('');

@@ -6,7 +6,7 @@
   export let column;
   export let rowNumber;
 
-  function onChange(event) {
+  function onChange(_event) {
     // delay this until after the ui updates on the screen
     setTimeout(() => {
       dispatch('valueupdate', {
