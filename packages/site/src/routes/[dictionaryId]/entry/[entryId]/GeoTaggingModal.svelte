@@ -17,6 +17,7 @@
   const style_id = 'mapbox://styles/mapbox/outdoors-v12?optimize=true';
   let lng: number;
   let lat: number;
+  const GPS_DECIMAL_PRECISION = 4;
 
   const dispatch = createEventDispatcher<{
     close: boolean;
@@ -41,10 +42,9 @@
       lng = longitude
       lat = latitude
     } else if (navigator.geolocation) {
-      const max_digits = 4;
       navigator.geolocation.getCurrentPosition((position) => {
-        lng = parseFloat(position.coords.longitude.toFixed(max_digits));
-        lat = parseFloat(position.coords.latitude.toFixed(max_digits));
+        lng = +position.coords.longitude.toFixed(GPS_DECIMAL_PRECISION);
+        lat = +position.coords.latitude.toFixed(GPS_DECIMAL_PRECISION);
       });
     }
   });
