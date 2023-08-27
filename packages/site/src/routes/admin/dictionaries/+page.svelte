@@ -79,70 +79,70 @@
       <SortDictionaries dictionaries={filteredDictionaries} let:sortedDictionaries>
         {#each sortedDictionaries as dictionary, index (dictionary.id)}
           <IntersectionObserverShared bottom={2000} let:intersecting once>
-            {#if intersecting}
-              <DictionaryRow
-                {index}
-                {dictionary}
-                on:toggleprivacy={() => {
-                  try {
-                    updateOnline(`dictionaries/${dictionary.id}`, {
-                      public: !dictionary.public,
-                    });
-                  } catch (err) {
-                    alert(err);
-                  }
-                }}
-                on:togglevideoaccess={() => {
-                  try {
-                    updateOnline(`dictionaries/${dictionary.id}`, {
-                      videoAccess: !dictionary.videoAccess,
-                    });
-                  } catch (err) {
-                    alert(err);
-                  }
-                }}
-                on:addalternatename={(event) => {
-                  try {
-                    updateOnline(`dictionaries/${dictionary.id}`, {
-                      alternateNames: arrayUnion(event.detail),
-                    });
-                  } catch (err) {
-                    alert(err);
-                  }
-                }}
-                on:removealternatename={(event) => {
-                  try {
-                    updateOnline(`dictionaries/${dictionary.id}`, {
-                      alternateNames: arrayRemove(event.detail),
-                    });
-                  } catch (err) {
-                    alert(err);
-                  }
-                }}
-                on:updatecoordinates={({ detail: { lat, lng } }) => {
-                  try {
-                    const location = new GeoPoint(lat, lng);
-                    updateOnline(`dictionaries/${dictionary.id}`, {
-                      coordinates: location,
-                    });
-                  } catch (err) {
-                    alert(err);
-                  }
-                }}
-                on:removecoordinates={() => {
-                  try {
-                    updateOnline(`dictionaries/${dictionary.id}`, {
-                      coordinates: deleteField(),
-                    });
-                  } catch (err) {
-                    alert(err);
-                  }
-                }} />
-            {:else}
-              <tr>
+            <tr>
+              {#if intersecting}
+                <DictionaryRow
+                  {index}
+                  {dictionary}
+                  on:toggleprivacy={() => {
+                    try {
+                      updateOnline(`dictionaries/${dictionary.id}`, {
+                        public: !dictionary.public,
+                      });
+                    } catch (err) {
+                      alert(err);
+                    }
+                  }}
+                  on:togglevideoaccess={() => {
+                    try {
+                      updateOnline(`dictionaries/${dictionary.id}`, {
+                        videoAccess: !dictionary.videoAccess,
+                      });
+                    } catch (err) {
+                      alert(err);
+                    }
+                  }}
+                  on:addalternatename={(event) => {
+                    try {
+                      updateOnline(`dictionaries/${dictionary.id}`, {
+                        alternateNames: arrayUnion(event.detail),
+                      });
+                    } catch (err) {
+                      alert(err);
+                    }
+                  }}
+                  on:removealternatename={(event) => {
+                    try {
+                      updateOnline(`dictionaries/${dictionary.id}`, {
+                        alternateNames: arrayRemove(event.detail),
+                      });
+                    } catch (err) {
+                      alert(err);
+                    }
+                  }}
+                  on:updatecoordinates={({ detail: { lat, lng } }) => {
+                    try {
+                      const location = new GeoPoint(lat, lng);
+                      updateOnline(`dictionaries/${dictionary.id}`, {
+                        coordinates: location,
+                      });
+                    } catch (err) {
+                      alert(err);
+                    }
+                  }}
+                  on:removecoordinates={() => {
+                    try {
+                      updateOnline(`dictionaries/${dictionary.id}`, {
+                        coordinates: deleteField(),
+                      });
+                    } catch (err) {
+                      alert(err);
+                    }
+                  }} />
+              {:else}
                 <td colspan="30"> Loading... </td>
-              </tr>
-            {/if}
+              {/if}
+            </tr>
           </IntersectionObserverShared>
         {/each}
       </SortDictionaries>
