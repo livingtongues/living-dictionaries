@@ -16,15 +16,15 @@
     {user.email}
   </td>
   <td>
-    <div style="width: 200px;" />
     <IntersectionObserverShared bottom={2000} let:intersecting once>
+      <div style="width: 200px;" />
       {#if intersecting}
         <DictionariesHelping role="manager" {user} />
       {/if}
     </IntersectionObserverShared></td>
   <td>
-    <div style="width: 200px;" />
     <IntersectionObserverShared bottom={2000} let:intersecting once>
+      <div style="width: 200px;" />
       {#if intersecting}
         <DictionariesHelping role="contributor" {user} />
       {/if}
