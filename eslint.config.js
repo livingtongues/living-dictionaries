@@ -23,6 +23,7 @@ export default defineFlatConfig([
       '**/.svelte-kit**',
       'packages/scripts/import/old**',
       '**/.kitbook/routes/**',
+      '**/ids-import/**'
     ],
   },
   {
