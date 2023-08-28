@@ -1,0 +1,7 @@
+{
+  "compilerOptions": {
+    "lib": ["ES2019"],
+    "experimentalDecorators": true
+  },
+  "include": ["**/*.ts"]
+}
