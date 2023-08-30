@@ -9,7 +9,7 @@
   import Marker from './mapbox/map/Marker.svelte';
   import ToggleStyle from './mapbox/controls/ToggleStyle.svelte';
   import NavigationControl from './mapbox/controls/NavigationControl.svelte';
-  import type { IRegion } from '@living-dictionaries/types';
+  import type { IRegion, LngLatFull } from '@living-dictionaries/types';
   import GeoJSONSource from './mapbox/sources/GeoJSONSource.svelte';
   import { polygonFeatureCoordinates } from './utils/polygonFromCoordinates';
   import Layer from './mapbox/map/Layer.svelte';
@@ -19,8 +19,10 @@
   import center from '@turf/center';
 
   export let region: IRegion;
-  const zoom = region ? 4 : 2;
+  export let custom_zoom: number = undefined;
+  export let custom_center: LngLatFull = undefined;
 
+  const zoom = custom_zoom || (region ? 4 : 2);
   let centerLng: number;
   let centerLat: number;
 
@@ -41,7 +43,10 @@
   }
 
   onMount(() => {
-    if (!region && navigator.geolocation) {
+    if (custom_center) {
+      centerLng = custom_center.longitude;
+      centerLat = custom_center.latitude;
+    } else if (!region && navigator.geolocation) {
       navigator.geolocation.getCurrentPosition((position) => {
         centerLng = position.coords.longitude;
         centerLat = position.coords.latitude;

@@ -14,9 +14,10 @@
 
   export let coordinates: Coordinates;
 
-  const style_id = 'mapbox://styles/mapbox/outdoors-v12?optimize=true';
+  // const style_id = 'mapbox://styles/mapbox/outdoors-v12?optimize=true';
   let lng: number;
   let lat: number;
+  let maps_zoom = 6;
   const GPS_DECIMAL_PRECISION = 4;
 
   const dispatch = createEventDispatcher<{
@@ -52,7 +53,9 @@
 
 <Modal on:close noscroll>
   <div class="h-sm">
-    <Map style={style_id} {lng} {lat} zoom={6}>
+    <Map on:zoomend={({detail}) => {
+      maps_zoom = detail;
+    }} {lng} {lat} zoom={maps_zoom}>
       <NavigationControl />
       {#each coordinates?.points || [] as point, index (point)}
         <Marker lat={point.coordinates.latitude} lng={point.coordinates.longitude}>
@@ -64,6 +67,7 @@
               {#if show}
                 <CoordinatesModal
                   {t}
+                  custom_zoom={maps_zoom}
                   lng={point.coordinates.longitude}
                   lat={point.coordinates.latitude}
                   on:update={({ detail }) => {
@@ -96,6 +100,7 @@
               <RegionModal
                 {t}
                 {region}
+                custom_zoom={maps_zoom}
                 on:update={({ detail }) => {
                   const {regions} = coordinates;
                   regions[index] = detail;
@@ -126,7 +131,7 @@
           {$t('create.select_coordinates', { default: 'Select Coordinates' })}
         </Button>
         {#if show}
-          <CoordinatesModal {t} lng={lng} lat={lat} on:update={({ detail }) => {
+          <CoordinatesModal {t} lng={lng} lat={lat} custom_zoom={maps_zoom} on:update={({ detail }) => {
             const newPoint = { coordinates: { longitude: detail.lng, latitude: detail.lat }}
             const points = [...(coordinates?.points || []), newPoint];
             savePoints(points)
@@ -143,6 +148,8 @@
           <RegionModal
             {t}
             region={null}
+            custom_zoom={maps_zoom}
+            custom_center={{longitude: lng, latitude: lat}}
             on:update={({ detail }) => {
               const regions = [...(coordinates?.regions || []), detail];
               saveRegions(regions)

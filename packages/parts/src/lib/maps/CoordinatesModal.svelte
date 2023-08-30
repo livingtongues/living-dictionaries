@@ -14,11 +14,12 @@
   export let lng: number;
   export let lat: number;
   export let canRemove = true;
+  export let custom_zoom: number = undefined;
 
   let centerLng = lng;
   let centerLat = lat;
 
-  const zoom = lng && lat ? 6 : 2;
+  const zoom = custom_zoom || (lng && lat ? 6 : 2);
 
   function handleGeocoderResult({ detail }) {
     if (detail?.user_coordinates?.[0])

@@ -2,7 +2,7 @@ export type { ExpandedAudio, GoalDatabaseAudio, IAudio } from './audio.interface
 export type { ExpandedVideo, GoalDatabaseVideo, IVideo, IVideoCustomMetadata } from './video.interface';
 export type { IDialect } from './dialect.interface';
 export type { IAbout, IDictionary, IGrammar, ICitation } from './dictionary.interface';
-export type { Coordinates, IPoint, IRegion } from './coordinates.interface';
+export type { Coordinates, IPoint, IRegion, LngLatFull } from './coordinates.interface';
 export type { ActualDatabaseEntry, ExpandedEntry, GoalDatabaseEntry, DatabaseSense, ExpandedSense, LDAlgoliaHit } from './entry.interface';
 export type { IGlossLanguages, IGlossLanguage } from './gloss-language.interface';
 export type { IGloss } from './gloss.interface';
