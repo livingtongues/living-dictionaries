@@ -1,0 +1,7 @@
+temp.json
+read-env-variables.js
+roll-back-variables.js
+clasp-push.js
+node_modules/**
+node_modules/**/.*/**
+node_modules/**/.*
