@@ -1,1 +1,1 @@
-{"scriptId":"${process_env.SCRIPT_ID}","rootDir":"${process_env.DIEGO_ROOT_DIRECTORY}"}
+{"scriptId":"SCRIPT_ID","rootDir":"ROOT_DIRECTORY"}
