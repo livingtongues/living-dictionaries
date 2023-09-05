@@ -2,7 +2,6 @@
   import type { Readable } from 'svelte/store';
   import { t } from 'svelte-i18n';
   import { StandardPrintFields, type ExpandedEntry, type IPrintFields } from '@living-dictionaries/types';
-  import { convert_and_expand_entry } from '$lib/transformers/convert_and_expand_entry';
 
   export let entries: ExpandedEntry[];
   export let preferredPrintFields: Readable<IPrintFields>;
@@ -10,15 +9,14 @@
   export let showQrCode: Readable<boolean>;
 
   $: fieldsThatExist = Object.keys($preferredPrintFields).filter((field) => {
+    if (field === 'gloss') return true;
     return entries.find((entry) => {
-      entry = convert_and_expand_entry(entry);
-      if (field === 'gloss' && entry.senses?.[0].glosses) return true;
-      if (field === 'alternateOrthographies' && entry.local_orthography_1 || entry.local_orthography_2 || entry.local_orthography_3 || entry.local_orthography_4 || entry.local_orthography_5)
-        return true;
-      if (field === 'example_sentence'&& entry.senses?.[0].example_sentences?.length) return true;
-      if (field === 'sdn' && entry.senses?.[0].ld_semantic_domains_keys?.length) return true;
-      if (field === 'image' && entry.senses?.[0].photo_files?.length) return true;
-      if (field === 'speaker' && (entry.sound_files?.[0].speakerName || entry.sound_files?.[0].speaker_ids?.length)) return true;
+      if (field === 'alternateOrthographies')
+        return entry.local_orthography_1 || entry.local_orthography_2 || entry.local_orthography_3 || entry.local_orthography_4 || entry.local_orthography_5;
+      if (field === 'example_sentence') return entry.senses?.[0].example_sentences?.length;
+      if (field === 'sdn') return entry.senses?.[0].ld_semantic_domains_keys?.length;
+      if (field === 'image') return entry.senses?.[0].photo_files?.length;
+      if (field === 'speaker') return entry.sound_files?.[0].speakerName || entry.sound_files?.[0].speaker_ids?.length;
       return entry[field];
     });
   });
