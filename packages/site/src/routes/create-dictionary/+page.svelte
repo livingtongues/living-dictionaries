@@ -36,6 +36,8 @@
   $: url = name;
 
   let urlAlreadyExists = false;
+  let invalidUrl = false;
+
   $: {
     url = url
       .trim()
@@ -46,6 +48,7 @@
       .toLowerCase();
     urlAlreadyExists = false;
     if (url.length > 2) checkIfExists(url);
+    if (url.length) checkIfValidURL(url);
   }
 
   const checkIfExists = debounce((passedUrl) => {
@@ -53,6 +56,12 @@
       urlAlreadyExists = exists;
     });
   }, 500);
+
+  /* eslint-disable no-control-regex */
+  const regex_ascii_pattern = /^[\x00-\x7F]+$/;
+  const checkIfValidURL = (passedUrl: string) => {
+    invalidUrl = !regex_ascii_pattern.test(passedUrl);
+  };
 
   async function createNewDictionary() {
     if (!$user) {
@@ -64,6 +73,13 @@
       return alert(
         $t('create.choose_different_url', {
           default: 'Choose a different URL.',
+        })
+      );
+    }
+    if (invalidUrl) {
+      return alert(
+        $t('create.choose_different_url', {
+          default: 'Remove the non ASCII character from the URL.',
         })
       );
     }
@@ -189,6 +205,13 @@
         <div class="text-xs text-red-600 mt-1">
           {$t('create.choose_different_url', {
             default: 'Choose a different URL',
+          })}
+        </div>
+      {/if}
+      {#if invalidUrl}
+        <div class="text-xs text-red-600 mt-1">
+          {$t('create.choose_different_url', {
+            default: 'Remove the non ASCII character from the URL.',
           })}
         </div>
       {/if}
