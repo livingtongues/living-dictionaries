@@ -106,7 +106,7 @@
             max="100"
             bind:value={$imagePercent} /><span class="font-medium text-gray-700">%</span>
         </div>
-        <PrintFieldCheckboxes {entries} {preferredPrintFields} {showLabels} {showQrCode} />
+        <PrintFieldCheckboxes entries={entries.map(convert_and_expand_entry)} {preferredPrintFields} {showLabels} {showQrCode} />
       </div>
     </div>
 
