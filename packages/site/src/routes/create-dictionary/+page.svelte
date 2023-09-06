@@ -15,6 +15,7 @@
   import type { NewDictionaryRequestBody } from '../api/email/new_dictionary/+server';
   import { apiFetch } from '$lib/client/apiFetch';
   import { get } from 'svelte/store';
+  import { tick } from 'svelte';
 
   const MIN_URL_LENGTH = 3;
   const MAX_URL_LENGTH = 25;
@@ -37,20 +38,14 @@
   let authorConnection = '';
   let conLangDescription = '';
 
-  $: urlFromName = convertToFriendlyUrl(name);
-  let customUrl: string;
-  $: urlToUse = customUrl || urlFromName;
-  let isUniqueURL = false;
-
-  function convertToFriendlyUrl(url: string) {
-    return url
-      .trim()
-      .slice(0, MAX_URL_LENGTH)
-      .trim()
+  let urlToUse = '';
+  $: urlToUse = urlToUse.length ?
+    urlToUse
       .replace(SPACES, '-')
       .toLowerCase()
-      .replace(NOT_LOWERCASE_LETTERS_NUMBERS_HYPHEN, '')
-  }
+      .trim() : ''
+
+  let isUniqueURL = false;
 
   $: if (urlToUse.length >= MIN_URL_LENGTH) checkIfUniqueUrl(urlToUse)
 
@@ -137,6 +132,24 @@
     }
   }
 
+  async function handleUrl(e) {
+    // @ts-ignore
+    if (e.target.value.match(NOT_LOWERCASE_LETTERS_NUMBERS_HYPHEN)) {
+      const indexOfFirstIncorrectCharacter = urlToUse.indexOf(urlToUse.match(NOT_LOWERCASE_LETTERS_NUMBERS_HYPHEN)[0])
+      alert(
+        $t('create.choose_different_url', {
+          default: 'Choose a different URL.',
+        })
+      );
+      urlToUse = urlToUse.replace(NOT_LOWERCASE_LETTERS_NUMBERS_HYPHEN, '');
+      await tick();
+      this.selectionEnd = indexOfFirstIncorrectCharacter;
+    } else {
+      // @ts-ignore
+      urlToUse = e.target.value;
+    }
+  }
+
   let online = true;
 </script>
 
@@ -186,14 +199,8 @@
         </span>
         <input
           id="url"
-          value={customUrl || urlFromName}
-          on:change={(e) => {
-            // @ts-ignore
-            const newCustomUrl = e.target.value
-            if (customUrl !== newCustomUrl)
-              customUrl = convertToFriendlyUrl(newCustomUrl)
-
-          }}
+          bind:value={urlToUse}
+          on:keyup={handleUrl}
           required
           minlength={MIN_URL_LENGTH}
           maxlength={MAX_URL_LENGTH}
