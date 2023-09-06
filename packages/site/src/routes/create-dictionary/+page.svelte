@@ -6,7 +6,6 @@
   import type { IDictionary, IHelper, IPoint, IRegion, IUser } from '@living-dictionaries/types';
   import { docExists, setOnline, updateOnline, firebaseConfig, authState } from 'sveltefirets';
   import { arrayUnion, GeoPoint, serverTimestamp } from 'firebase/firestore/lite';
-  import { debounce } from '$lib/helpers/debounce';
   import { pruneObject } from '$lib/helpers/prune';
   import EditableGlossesField from '$lib/components/settings/EditableGlossesField.svelte';
   import WhereSpoken from '$lib/components/settings/WhereSpoken.svelte';
@@ -16,6 +15,11 @@
   import type { NewDictionaryRequestBody } from '../api/email/new_dictionary/+server';
   import { apiFetch } from '$lib/client/apiFetch';
   import { get } from 'svelte/store';
+
+  const MIN_URL_LENGTH = 3;
+  const MAX_URL_LENGTH = 25;
+  const SPACES = /\s+/g;
+  const NOT_LOWERCASE_LETTERS_NUMBERS_HYPHEN = /[^0-9a-z-]/g;
 
   let modal: 'auth' = null;
 
@@ -33,53 +37,53 @@
   let authorConnection = '';
   let conLangDescription = '';
 
-  $: url = name;
+  $: urlFromName = convertToFriendlyUrl(name);
+  let customUrl: string;
+  $: urlToUse = customUrl || urlFromName;
+  let isUniqueURL = false;
 
-  let urlAlreadyExists = false;
-  let invalidUrl = false;
-
-  $: {
-    url = url
+  function convertToFriendlyUrl(url: string) {
+    return url
       .trim()
-      .slice(0, 25) // Max 25 characters
+      .slice(0, MAX_URL_LENGTH)
       .trim()
-      .replace(/\s+/g, '-') // Replace string-medial spaces with hyphens
-      .replace(/[';,!@#$%^&*()]/g, '') // Remove special characters
-      .toLowerCase();
-    urlAlreadyExists = false;
-    if (url.length > 2) checkIfExists(url);
-    if (url.length) checkIfValidURL(url);
+      .replace(SPACES, '-')
+      .toLowerCase()
+      .replace(NOT_LOWERCASE_LETTERS_NUMBERS_HYPHEN, '')
   }
 
-  const checkIfExists = debounce((passedUrl) => {
-    docExists(`dictionaries/${passedUrl}`).then((exists) => {
-      urlAlreadyExists = exists;
+  $: if (urlToUse.length >= MIN_URL_LENGTH) checkIfUniqueUrl(urlToUse)
+
+  let checkingUrlIsUnique = false;
+
+  async function checkIfUniqueUrl(url: string) {
+    isUniqueURL = false;
+    checkingUrlIsUnique = true
+    isUniqueURL = !(await docExists(`dictionaries/${url}`));
+    checkingUrlIsUnique = false
+  }
+
+  function waitForCheckToFinish(): Promise<void> {
+    return new Promise((resolve) => {
+      const interval = setInterval(() => {
+        if (!checkingUrlIsUnique) {
+          clearInterval(interval);
+          resolve();
+        }
+      }, 50);
     });
-  }, 500);
-
-
-  const regex_ascii_pattern = /^[a-z-]+$/;
-  const checkIfValidURL = (passedUrl: string) => {
-    invalidUrl = !regex_ascii_pattern.test(passedUrl);
-  };
+  }
 
   async function createNewDictionary() {
     if (!$user) {
       modal = 'auth';
       return;
     }
-    if (await docExists(`dictionaries/${url}`)) {
-      urlAlreadyExists = true;
+    await waitForCheckToFinish();
+    if (urlToUse.length < MIN_URL_LENGTH || !isUniqueURL) {
       return alert(
         $t('create.choose_different_url', {
           default: 'Choose a different URL.',
-        })
-      );
-    }
-    if (invalidUrl) {
-      return alert(
-        $t('create.choose_different_url', {
-          default: 'Remove the non ASCII character from the URL.',
         })
       );
     }
@@ -110,13 +114,13 @@
           return;
       }
 
-      await setOnline<IDictionary>(`dictionaries/${url}`, prunedDictionary);
-      await setOnline<IHelper>(`dictionaries/${url}/managers/${$user.uid}`, {
+      await setOnline<IDictionary>(`dictionaries/${urlToUse}`, prunedDictionary);
+      await setOnline<IHelper>(`dictionaries/${urlToUse}/managers/${$user.uid}`, {
         id: $user.uid,
         name: $user.displayName,
       });
       await updateOnline<IUser>(`users/${$user.uid}`, {
-        managing: arrayUnion(url),
+        managing: arrayUnion(urlToUse),
         termsAgreement: serverTimestamp(),
       });
 
@@ -124,10 +128,10 @@
       const auth_token = await auth_state_user.getIdToken();
       await apiFetch<NewDictionaryRequestBody>('/api/email/new_dictionary', {
         auth_token,
-        dictionary: { ...prunedDictionary, id: url },
+        dictionary: { ...prunedDictionary, id: urlToUse },
       });
 
-      window.location.replace(`/${url}/entries/list`);
+      window.location.replace(`/${urlToUse}/entries/list`);
     } catch (err) {
       alert(`${$t('misc.error', { default: 'Error' })}: ${err}`);
     }
@@ -157,7 +161,7 @@
         autocorrect="off"
         spellcheck={false}
         autofocus
-        minlength="3"
+        minlength={MIN_URL_LENGTH}
         required
         bind:value={name}
         class="form-input w-full" />
@@ -182,10 +186,17 @@
         </span>
         <input
           id="url"
-          bind:value={url}
+          value={customUrl || urlFromName}
+          on:change={(e) => {
+            // @ts-ignore
+            const newCustomUrl = e.target.value
+            if (customUrl !== newCustomUrl)
+              customUrl = convertToFriendlyUrl(newCustomUrl)
+
+          }}
           required
-          minlength="3"
-          maxlength="25"
+          minlength={MIN_URL_LENGTH}
+          maxlength={MAX_URL_LENGTH}
           autocomplete="off"
           autocorrect="off"
           spellcheck={false}
@@ -201,17 +212,10 @@
           default: 'Only letters and numbers allowed (no spaces or special characters)',
         })}
       </div>
-      {#if urlAlreadyExists}
+      {#if !checkingUrlIsUnique && urlToUse.length >= MIN_URL_LENGTH && !isUniqueURL}
         <div class="text-xs text-red-600 mt-1">
           {$t('create.choose_different_url', {
             default: 'Choose a different URL',
-          })}
-        </div>
-      {/if}
-      {#if invalidUrl}
-        <div class="text-xs text-red-600 mt-1">
-          {$t('create.choose_different_url', {
-            default: 'Remove the non ASCII character from the URL.',
           })}
         </div>
       {/if}
