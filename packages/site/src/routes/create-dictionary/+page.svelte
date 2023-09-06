@@ -57,8 +57,8 @@
     });
   }, 500);
 
-  /* eslint-disable no-control-regex */
-  const regex_ascii_pattern = /^[\x00-\x7F]+$/;
+
+  const regex_ascii_pattern = /^[a-z-]+$/;
   const checkIfValidURL = (passedUrl: string) => {
     invalidUrl = !regex_ascii_pattern.test(passedUrl);
   };
