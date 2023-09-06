@@ -8,7 +8,7 @@
   export let showLabels: Readable<boolean>;
   export let showQrCode: Readable<boolean>;
 
-  $: fieldsThatExist = Object.keys($preferredPrintFields).filter((field) => {
+  $: fieldsThatExist = (Object.keys($preferredPrintFields) as (keyof IPrintFields)[]).filter((field) => {
     if (field === 'gloss') return true;
     return entries.find((entry) => {
       if (field === 'alternateOrthographies')
