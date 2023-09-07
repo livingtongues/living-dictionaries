@@ -8,4 +8,3 @@ export function debounce(func: Function, delay = 1000) {
     }, delay);
   };
 }
-// no longer in use
