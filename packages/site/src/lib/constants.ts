@@ -1,1 +1,1 @@
-export const DICTIONARIES_WITH_VARIANTS = ['babanki', 'torwali']
+export const DICTIONARIES_WITH_VARIANTS = ['babanki', 'torwali', 'ksingmul']
