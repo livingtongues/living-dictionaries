@@ -15,11 +15,11 @@
   import type { NewDictionaryRequestBody } from '../api/email/new_dictionary/+server';
   import { apiFetch } from '$lib/client/apiFetch';
   import { get } from 'svelte/store';
+  import { convertToFriendlyUrl } from './convertToFriendlyUrl';
+  import { debounce } from '$lib/helpers/debounce';
 
   const MIN_URL_LENGTH = 3;
   const MAX_URL_LENGTH = 25;
-  const SPACES = /\s+/g;
-  const NOT_LOWERCASE_LETTERS_NUMBERS_HYPHEN = /[^0-9a-z-]/g;
 
   let modal: 'auth' = null;
 
@@ -37,41 +37,23 @@
   let authorConnection = '';
   let conLangDescription = '';
 
-  $: urlFromName = convertToFriendlyUrl(name);
+  $: urlFromName = convertToFriendlyUrl(name, MAX_URL_LENGTH);
   let customUrl: string;
   $: urlToUse = customUrl || urlFromName;
-  let isUniqueURL = false;
+  let isUniqueURL = true;
+  $: if (urlToUse.length >= MIN_URL_LENGTH) debouncedCheckIfUniqueUrl(urlToUse)
 
-  function convertToFriendlyUrl(url: string) {
-    return url
-      .trim()
-      .slice(0, MAX_URL_LENGTH)
-      .trim()
-      .replace(SPACES, '-')
-      .toLowerCase()
-      .replace(NOT_LOWERCASE_LETTERS_NUMBERS_HYPHEN, '')
-  }
+  const debouncedCheckIfUniqueUrl = debounce(checkIfUniqueUrl, 500);
 
-  $: if (urlToUse.length >= MIN_URL_LENGTH) checkIfUniqueUrl(urlToUse)
-
-  let checkingUrlIsUnique = false;
-
-  async function checkIfUniqueUrl(url: string) {
-    isUniqueURL = false;
-    checkingUrlIsUnique = true
+  async function checkIfUniqueUrl(url: string): Promise<boolean> {
     isUniqueURL = !(await docExists(`dictionaries/${url}`));
-    checkingUrlIsUnique = false
+    return isUniqueURL;
   }
 
-  function waitForCheckToFinish(): Promise<void> {
-    return new Promise((resolve) => {
-      const interval = setInterval(() => {
-        if (!checkingUrlIsUnique) {
-          clearInterval(interval);
-          resolve();
-        }
-      }, 50);
-    });
+  function handleUrlKeyup(e: Event) {
+    const newCustomUrl = (e.target as HTMLInputElement).value
+    if (customUrl !== newCustomUrl)
+      customUrl = convertToFriendlyUrl(newCustomUrl, MAX_URL_LENGTH)
   }
 
   async function createNewDictionary() {
@@ -79,8 +61,8 @@
       modal = 'auth';
       return;
     }
-    await waitForCheckToFinish();
-    if (urlToUse.length < MIN_URL_LENGTH || !isUniqueURL) {
+    const isUnique = await checkIfUniqueUrl(urlToUse);
+    if (urlToUse.length < MIN_URL_LENGTH || !isUnique) {
       return alert(
         $t('create.choose_different_url', {
           default: 'Choose a different URL.',
@@ -187,13 +169,7 @@
         <input
           id="url"
           value={customUrl || urlFromName}
-          on:change={(e) => {
-            // @ts-ignore
-            const newCustomUrl = e.target.value
-            if (customUrl !== newCustomUrl)
-              customUrl = convertToFriendlyUrl(newCustomUrl)
-
-          }}
+          on:keyup={handleUrlKeyup}
           required
           minlength={MIN_URL_LENGTH}
           maxlength={MAX_URL_LENGTH}
@@ -212,7 +188,7 @@
           default: 'Only letters and numbers allowed (no spaces or special characters)',
         })}
       </div>
-      {#if !checkingUrlIsUnique && urlToUse.length >= MIN_URL_LENGTH && !isUniqueURL}
+      {#if urlToUse.length >= MIN_URL_LENGTH && !isUniqueURL}
         <div class="text-xs text-red-600 mt-1">
           {$t('create.choose_different_url', {
             default: 'Choose a different URL',
@@ -239,14 +215,14 @@
 
       <EditableAlternateNames
         {alternateNames}
-        on:update={({ detail }) => (alternateNames = detail.alternateNames)} />
+        on:update={({ detail }) => ({alternateNames} = detail)} />
       <div class="mb-6" />
 
       <WhereSpoken
         dictionary={{ coordinates: { latitude, longitude }, points, regions }}
         on:updateCoordinates={({ detail }) => {
-          latitude = detail.latitude,
-          longitude = detail.longitude;
+          ({latitude} = detail);
+          ({longitude} = detail);
         }}
         on:removeCoordinates={() => ((latitude = null), (longitude = null))}
         on:updatePoints={({ detail }) => (points = detail)}
