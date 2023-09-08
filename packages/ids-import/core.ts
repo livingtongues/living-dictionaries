@@ -3,6 +3,11 @@ function checkSheet(sheet: GoogleAppsScript.Spreadsheet.Sheet): boolean {
   return headerRow.includes("en_gloss");
 }
 
+function isTSVFile(sheet: GoogleAppsScript.Spreadsheet.Sheet): boolean {
+  const sheetName = sheet.getName();
+  return sheetName.endsWith("_tsv");
+}
+
 function makeHeadersBold(sheet: GoogleAppsScript.Spreadsheet.Sheet): void {
   const headerRange = sheet.getRange(1, 1, 1, sheet.getLastColumn());
   headerRange.setFontWeight("bold");
@@ -26,8 +31,8 @@ function highlightTargetedSemanticDomains(sheet: GoogleAppsScript.Spreadsheet.Sh
   const semantic_domains_column = header_row.indexOf("semanticDomain") + 1;
   if (semantic_domains_column > 0) {
     const semantic_domains_key_column_values = sheet.getRange(2, semantic_domains_column, sheet.getLastRow() - 1, 1).getValues();
-    semantic_domains_key_column_values.forEach((row, index) => {
-      const cell_value = row[0].toString();
+    semantic_domains_key_column_values.forEach((cell, index) => {
+      const cell_value = cell[0].toString();
       if (targeted_sematic_domains.includes(cell_value)) {
         sheet.getRange(index + 2, semantic_domains_column).setBackground(highlight_color);
       }
@@ -43,12 +48,12 @@ function copyGlossToTSV(sheet_info: GlossesSheetData, gloss_data: GlossData): vo
   const header_values = get_header_values(tsvSheet);
   const chapter_id_header = header_values.indexOf("chapter_id");
   const entry_id_header = header_values.indexOf("entry_id");
-  const chapter_id_column_values = tsvSheet.getRange(2, chapter_id_header + 1, tsvSheet.getLastRow() - 1, 1).getValues();
   const entry_id_column_values = tsvSheet.getRange(2, entry_id_header + 1, tsvSheet.getLastRow() - 1, 1).getValues();
   const first_empty_column = get_first_empty_column(header_values);
   const first_empty_column_range = tsvSheet.getRange(2, first_empty_column, tsvSheet.getLastRow() - 1, 1);
-  chapter_id_column_values.forEach((row, i) => {
-    const lookupValue = `${row[0]}-${entry_id_column_values[i][0]}`;
+  const chapter_id_column_values = tsvSheet.getRange(2, chapter_id_header + 1, tsvSheet.getLastRow() - 1, 1).getValues();
+  chapter_id_column_values.forEach((cell, i) => {
+    const lookupValue = `${cell[0]}-${entry_id_column_values[i][0]}`;
     const match_index = ids_id_column_values.findIndex((value) => value[0] === lookupValue);
     if (match_index !== -1) {
       first_empty_column_range.getCell(i + 1, 1).setValue(ids_gloss_column_values[match_index][0]);
@@ -86,9 +91,9 @@ function copySemanticDomainsToTSV(sheet_info: SemanticDomainsSheetData): void {
   const dropdown_rule = SpreadsheetApp.newDataValidation().requireValueInRange(semantic_domains_range).build();
   tsvSheet.getRange(1, first_empty_column, 1, 2).setValue("semanticDomain").mergeAcross(); // Merge with the next column
   second_empty_column_range.setDataValidation(dropdown_rule);
-  chapter_id_column_values.forEach((row, i) => {
+  chapter_id_column_values.forEach((cell, i) => {
     const match_index = ids_semantic_domains_equivalent_column_values.findIndex((value) =>
-      value[0].split(",").some((num) => num == row)
+      value[0].split(",").some((num) => num == cell)
     );
     if (match_index !== -1) {
       first_empty_column_range
