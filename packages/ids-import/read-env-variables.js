@@ -1,4 +1,4 @@
-import { promises as fsPromises } from 'node:fs';
+import { promises as fsPromises } from 'fs';
 
 async function read_env_variables(variables_file, clasp_file) {
   try {
