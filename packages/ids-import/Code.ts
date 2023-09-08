@@ -1,4 +1,3 @@
-// Using env variables
 function prepareIDSDictionariesToBatchImport() {
   const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
   const idsDataSheet = spreadsheet.getSheetByName("IDS Data");
