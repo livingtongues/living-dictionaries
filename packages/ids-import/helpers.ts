@@ -7,7 +7,7 @@ function get_first_empty_column(header_values: string[]): number {
   return (
     header_values.length -
     reversed_header_values.findIndex((value) => {
-      return value === "";
+      return value === '';
     })
   );
 }
@@ -17,13 +17,13 @@ function create_unique_ids(chapter_id_column_values: any[], entry_id_column_valu
   const concatenated_freq = {};
 
   chapter_id_column_values.forEach((cell, i) => {
-    const concatenated = cell + "-" + entry_id_column_values[i];
+    const concatenated = cell + '-' + entry_id_column_values[i];
     if (concatenated_freq[concatenated] === undefined) {
       concatenated_freq[concatenated] = 1;
       concatenated_data_with_suffixes.push([concatenated]);
     } else {
       concatenated_freq[concatenated]++;
-      const new_concatenated = concatenated + "-" + concatenated_freq[concatenated];
+      const new_concatenated = concatenated + '-' + concatenated_freq[concatenated];
       concatenated_data_with_suffixes.push([new_concatenated]);
     }
   });
