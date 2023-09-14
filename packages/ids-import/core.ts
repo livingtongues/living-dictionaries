@@ -1,5 +1,5 @@
 function checkSheet(sheet: GoogleAppsScript.Spreadsheet.Sheet): boolean {
-  const headerRow = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+  const [headerRow] = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues();
   return headerRow.includes('en_gloss');
 }
 
@@ -101,7 +101,7 @@ function copySemanticDomainsToTSV(sheet_info: SemanticDomainsSheetData): void {
         .setFormula(
           `=IF(ISTEXT(${second_empty_column_range.getCell(i + 1, 1).getA1Notation()}),VLOOKUP(${second_empty_column_range
             .getCell(i + 1, 1)
-            .getA1Notation()}, 'semantic domains'!$A$3:$B$1004, 2, FALSE),'')`
+            .getA1Notation()}, 'semantic domains'!$A$3:$B$1004, 2, FALSE),"")`
         );
       second_empty_column_range.getCell(i + 1, 1).setValue(semantic_domains_label_column_values[match_index][0]);
     }
