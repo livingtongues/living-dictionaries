@@ -25,7 +25,7 @@
 </script>
 
 <td class="relative">
-  <span class="absolute top-0 left-0 text-xs text-gray-400">{index + 1}</span>
+  <span on:click={() => window.open(`/${dictionary.id}`)} class="absolute top-0 left-0 text-xs text-gray-400 cursor-pointer">{index + 1}</span>
   <DictionaryFieldEdit field={'name'} value={dictionary.name} dictionaryId={dictionary.id} />
 </td>
 <td>
