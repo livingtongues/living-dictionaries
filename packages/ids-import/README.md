@@ -1,4 +1,4 @@
-# Apps-script code for IDS Project
+# Apps-script code for [Intercontinental Dictionary Series](https://ids.clld.org/) Project
 
 ## Description
 This script automates data import from the previously exported IDS tsv files to our batch import sheets.
