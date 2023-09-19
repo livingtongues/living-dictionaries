@@ -8,6 +8,7 @@
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte';
   import { seo_description } from './seo_description';
   import { convert_and_expand_entry } from '$lib/transformers/convert_and_expand_entry';
+  import { navigating } from '$app/stores';
 
   export let data;
   $: ({ admin,
@@ -20,6 +21,8 @@
     initialEntry } = data);
 
   $: entry = $locale && convert_and_expand_entry($initialEntry); // adding locale triggers update of translated semantic domains and parts of speech
+
+  localStorage.setItem('last_href_visited', $navigating?.from.url.href);
 </script>
 
 <div
@@ -29,7 +32,7 @@
     class="-ml-2 !px-2"
     color="black"
     form="simple"
-    href="/{$dictionary.id}/entries/list{$algoliaQueryParams}">
+    href={localStorage.getItem('last_href_visited')}>
     <i class="fas fa-arrow-left rtl-x-flip" />
     {$t('misc.back', { default: 'Back' })}
   </Button>
