@@ -34,7 +34,12 @@
     class="-ml-2 !px-2"
     color="black"
     form="simple"
-    onclick={() => goto(localStorage.getItem('last_href_visited'))}>
+    onclick={() => {
+      if (localStorage.getItem('last_href_visited'))
+        goto(localStorage.getItem('last_href_visited'));
+      else
+        goto(`/${$dictionary.id}/entries/list${$algoliaQueryParams}`);
+    }}>
     <i class="fas fa-arrow-left rtl-x-flip" />
     {$t('misc.back', { default: 'Back' })}
   </Button>
