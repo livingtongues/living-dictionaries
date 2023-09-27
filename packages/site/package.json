@@ -15,7 +15,7 @@
     "test:ui": "vitest --ui"
   },
   "devDependencies": {
-    "@iconify/json": "^2.2.94",
+    "@iconify/json": "^2.2.121",
     "@julr/unocss-preset-forms": "^0.0.5",
     "@living-dictionaries/types": "workspace:^1.0.0",
     "@sentry/browser": "^6.18.2",
@@ -23,9 +23,9 @@
     "@sveltejs/kit": "^1.22.3",
     "@testing-library/jest-dom": "^5.16.5",
     "@testing-library/svelte": "^3.2.2",
-    "@turf/turf": "7.0.0-alpha.1",
     "@turf/center": "^6.5.0",
     "@turf/helpers": "^6.5.0",
+    "@turf/turf": "7.0.0-alpha.1",
     "@types/ckeditor__ckeditor5-core": "^33.0.3",
     "@types/d3-dsv": "^3.0.0",
     "@types/file-saver": "^2.0.4",

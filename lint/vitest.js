@@ -1,19 +1,14 @@
-// import vitest from 'eslint-plugin-vitest'
+// @ts-check
+import vitestPlugin from 'eslint-plugin-vitest'
+import { defineFlatConfig } from 'eslint-define-config'
 
-export const vitestConfig = {
+export const vitest = defineFlatConfig({
   files: [
-    '**/test/*.js',
-    '**/test/*.ts',
-    '**/test/*.jsx',
-    '**/test/*.tsx',
-    '**/*.test.js',
-    '**/*.test.ts',
-    '**/*.test.jsx',
-    '**/*.test.tsx',
+    '**/test.ts',
   ],
 
   plugins: {
-    // vitest,
+    vitest: vitestPlugin,
   },
 
   rules: {
@@ -45,4 +40,4 @@ export const vitestConfig = {
     'vitest/valid-describe-callback': 'error',
     'vitest/valid-expect': 'error',
   },
-};
+})
