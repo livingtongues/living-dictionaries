@@ -41,138 +41,48 @@ function distCompare(p0: Point, a: Point, b: Point) {
 }
 
 if (import.meta.vitest) {
-  test('sortPoints', () => {
-    expect(
-      sortPoints([
+  describe(sortPoints, () => {
+    test('basic', () => {
+      const expected = [
+        { lng: 1, lat: 0 },
         { lng: 0, lat: 0 },
         { lng: 0, lat: 1 },
         { lng: 1, lat: 1 },
-        { lng: 1, lat: 0 },
-      ])
-    ).toMatchInlineSnapshot(`
-      [
-        {
-          "lat": 0,
-          "lng": 1,
-        },
-        {
-          "lat": 0,
-          "lng": 0,
-        },
-        {
-          "lat": 1,
-          "lng": 0,
-        },
-        {
-          "lat": 1,
-          "lng": 1,
-        },
       ]
-    `);
-    expect(
-      sortPoints([
-        { lng: 0, lat: 0 },
-        { lng: 1, lat: 0 },
-        { lng: 1, lat: 1 },
-        { lng: 0, lat: 1 },
-      ])
-    ).toMatchInlineSnapshot(`
-      [
-        {
-          "lat": 0,
-          "lng": 1,
-        },
-        {
-          "lat": 0,
-          "lng": 0,
-        },
-        {
-          "lat": 1,
-          "lng": 0,
-        },
-        {
-          "lat": 1,
-          "lng": 1,
-        },
-      ]
-    `);
-  });
+      expect(
+        sortPoints([
+          { lng: 0, lat: 0 },
+          { lng: 0, lat: 1 },
+          { lng: 1, lat: 1 },
+          { lng: 1, lat: 0 },
+        ])
+      ).toEqual(expected);
 
-  test('polygonFromCoordinates', () => {
-    const points = [
-      { lng: 0, lat: 1 },
-      { lng: 1, lat: 0 },
-      { lng: 0, lat: 0 },
-      { lng: 1, lat: 1 },
-    ];
-    expect(sortPoints(points).map(({ lng, lat }) => [lng, lat])).toMatchInlineSnapshot(`
-      [
-        [
-          1,
-          0,
-        ],
-        [
-          0,
-          0,
-        ],
-        [
-          0,
-          1,
-        ],
-        [
-          1,
-          1,
-        ],
-      ]
-    `);
-  });
+      expect(
+        sortPoints([
+          { lng: 0, lat: 0 },
+          { lng: 1, lat: 0 },
+          { lng: 1, lat: 1 },
+          { lng: 0, lat: 1 },
+        ])
+      ).toEqual(expected);
+    });
 
-  test('more complicated polygonFromCoordinates test', () => {
-    const points = [
-      {
-        lng: -95,
-        lat: 44,
-      },
-      {
-        lng: -105,
-        lat: 35,
-      },
-      {
-        lng: -105,
-        lat: 42,
-      },
-      {
-        lng: -96,
-        lat: 37,
-      },
-      {
-        lng: -99.91155986691973,
-        lat: 34.45282591700905,
-      },
-    ];
-    expect(sortPoints(points).map(({ lng, lat }) => [lng, lat])).toMatchInlineSnapshot(`
-      [
-        [
-          -99.91155986691973,
-          34.45282591700905,
-        ],
-        [
-          -105,
-          35,
-        ],
-        [
-          -105,
-          42,
-        ],
-        [
-          -95,
-          44,
-        ],
-        [
-          -96,
-          37,
-        ],
-      ]
-    `);
+    test('more complicated', () => {
+      const points = [
+        { lng: -95, lat: 44 },
+        { lng: -105, lat: 35 },
+        { lng: -105, lat: 42 },
+        { lng: -96, lat: 37 },
+        { lng: -99.9115, lat: 34.4528 },
+      ];
+      expect(sortPoints(points)).toEqual([
+        { lng: -99.9115, lat: 34.4528 },
+        { lng: -105, lat: 35 },
+        { lng: -105, lat: 42 },
+        { lng: -95, lat: 44 },
+        { lng: -96, lat: 37 },
+      ]);
+    });
   });
 }
