@@ -6,8 +6,8 @@
   import Image from '$lib/components/image/Image.svelte';
   import Video from '../../entries/Video.svelte';
   import GeoTaggingModal from './GeoTaggingModal.svelte';
-  import { MapboxStatic } from '@living-dictionaries/parts';
   import InitableShowHide from './InitableShowHide.svelte';
+  import MapboxStatic from '$lib/components/maps/mapbox/static/MapboxStatic.svelte';
 
   export let entry: ExpandedEntry;
   export let dictionary: IDictionary;
@@ -138,7 +138,7 @@
       addPoint={show === 'point'}
       addRegion={show === 'region'}
       coordinates={entry.coordinates}
-      dictionaryCenter={dictionary.coordinates}
+      initialCenter={dictionary.coordinates}
       on:close={toggle}
       on:valueupdate
     />

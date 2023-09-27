@@ -52,7 +52,6 @@
       <NavigationControl />
       {#if mapClickCoordinates}
         <CoordinatesModal
-          {t}
           lng={+mapClickCoordinates.lng.toFixed(4)}
           lat={+mapClickCoordinates.lat.toFixed(4)}
           on:update={addCoordinates}
@@ -76,7 +75,6 @@
             </Button>
             {#if show}
               <CoordinatesModal
-                {t}
                 lng={dictionary.coordinates.longitude}
                 lat={dictionary.coordinates.latitude}
                 canRemove={!dictionary.points?.length && !dictionary.regions?.length}
@@ -98,7 +96,6 @@
               </Button>
               {#if show}
                 <CoordinatesModal
-                  {t}
                   lng={point.coordinates.longitude}
                   lat={point.coordinates.latitude}
                   on:update={({ detail }) => {
@@ -135,7 +132,6 @@
             </Button>
             {#if show}
               <RegionModal
-                {t}
                 {region}
                 on:update={({ detail }) => {
                   const {regions} = dictionary;
@@ -173,7 +169,7 @@
       {$t('create.select_coordinates', { default: 'Select Coordinates' })}
     </Button>
     {#if show}
-      <CoordinatesModal {t} lng={dictionary?.coordinates?.longitude} lat={dictionary?.coordinates?.latitude} on:update={addCoordinates} on:close={toggle}>
+      <CoordinatesModal lng={dictionary?.coordinates?.longitude} lat={dictionary?.coordinates?.latitude} on:update={addCoordinates} on:close={toggle}>
         {#if hasCoordinates}
           <Marker
             lng={dictionary.coordinates.longitude}
@@ -194,7 +190,6 @@
       </Button>
       {#if show}
         <RegionModal
-          {t}
           region={null}
           on:update={({ detail }) => {
             const regions = (dictionary.regions && [...dictionary.regions, detail]) || [detail];
