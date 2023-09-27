@@ -286,7 +286,7 @@
         {$t('create.language_used_by_community', {
           default:
             'Is this dictionary for a language that is spoken or signed by a specific human community?',
-        })}
+        })}*
       </div>
 
       <label class="block">
@@ -312,7 +312,7 @@
       <div class="mb-2 text-sm font-medium text-gray-700">
         {$t('create.community_permission', {
           default: 'Has the language community given you permission to make this dictionary?',
-        })}
+        })}*
         <!-- Similar to create.speech_community_permission but not the same -->
       </div>
       <label class="block">
@@ -348,7 +348,7 @@
         {$t('create.author_connection', {
           default:
             'Please briefly describe how you know this language and why you are creating a Living Dictionary for it. Are you part of the community that will be using this Living Dictionary? If not, how do you know the community?',
-        })}
+        })}*
       </label>
       <textarea
         name="authorConnection"
