@@ -1,7 +1,7 @@
 <script lang="ts">
   import { t } from 'svelte-i18n';
   import { ShowHide } from 'svelte-pieces';
-  import type { ExpandedEntry } from '@living-dictionaries/types';
+  import type { ExpandedEntry, IDictionary } from '@living-dictionaries/types';
   import AddImage from '../../entries/AddImage.svelte';
   import Image from '$lib/components/image/Image.svelte';
   import Video from '../../entries/Video.svelte';
@@ -9,7 +9,7 @@
   import { MapboxStatic } from '@living-dictionaries/parts';
 
   export let entry: ExpandedEntry;
-  export let dictionaryId: string;
+  export let dictionary: IDictionary;
   export let videoAccess = false;
   export let canEdit = false;
 
@@ -38,7 +38,7 @@
     <Image width={400} title={entry.lexeme} gcs={first_photo.specifiable_image_url} {canEdit} on:deleteImage />
   </div>
 {:else if canEdit}
-  <AddImage {dictionaryId} entryId={entry.id} class="rounded-md h-20 bg-gray-100 mb-2">
+  <AddImage dictionaryId={dictionary.id} entryId={entry.id} class="rounded-md h-20 bg-gray-100 mb-2">
     <div class="text-xs" slot="text">
       {$t('entry.upload_photo', { default: 'Upload Photo' })}
     </div>
@@ -85,8 +85,18 @@
         {$t('create.select_coordinates', { default: 'Select Coordinates' })}
       </span>
     </button>
+    <button
+      on:click={toggle}
+      type="button"
+      class="rounded bg-gray-100 border-r-2 hover:bg-gray-300 flex flex-col items-center
+        justify-center cursor-pointer p-6 mb-2">
+      <span class="i-mdi-map-marker-path mr-1" style="margin-top: -2px;" />
+      <span class="text-xs">
+        {$t('create.select_region', { default: 'Select Region' })}
+      </span>
+    </button>
   {/if}
   {#if show}
-    <GeoTaggingModal coordinates={entry.coordinates} on:close={toggle} on:valueupdate />
+    <GeoTaggingModal coordinates={entry.coordinates} dictionaryCenter={dictionary.coordinates} on:close={toggle} on:valueupdate />
   {/if}
 </ShowHide>

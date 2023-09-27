@@ -11,10 +11,11 @@
   import CoordinatesModal from '@living-dictionaries/parts/src/lib/maps/CoordinatesModal.svelte';
   import RegionModal from '@living-dictionaries/parts/src/lib/maps/RegionModal.svelte';
   import Region from '@living-dictionaries/parts/src/lib/maps/mapbox/map/Region.svelte';
+  import type { LngLatFull } from '@living-dictionaries/types/coordinates.interface';
 
   export let coordinates: Coordinates;
+  export let dictionaryCenter: LngLatFull | undefined;
 
-  const style_id = 'mapbox://styles/mapbox/outdoors-v12?optimize=true';
   let lng: number;
   let lat: number;
   const GPS_DECIMAL_PRECISION = 4;
@@ -52,7 +53,7 @@
 
 <Modal on:close noscroll>
   <div class="h-sm">
-    <Map style={style_id} {lng} {lat} zoom={6}>
+    <Map {lng} {lat} zoom={6}>
       <NavigationControl />
       {#each coordinates?.points || [] as point, index (point)}
         <Marker lat={point.coordinates.latitude} lng={point.coordinates.longitude}>
@@ -94,6 +95,7 @@
             </Button>
             {#if show}
               <RegionModal
+                {dictionaryCenter}
                 {t}
                 {region}
                 on:update={({ detail }) => {
@@ -115,7 +117,6 @@
 
       <ToggleStyle />
     </Map>
-
     <div class="mt-1">
       <ShowHide let:show let:toggle>
         <Button
@@ -126,7 +127,7 @@
           {$t('create.select_coordinates', { default: 'Select Coordinates' })}
         </Button>
         {#if show}
-          <CoordinatesModal {t} lng={lng} lat={lat} on:update={({ detail }) => {
+          <CoordinatesModal {t} lat={dictionaryCenter.latitude} lng={dictionaryCenter.longitude} on:update={({ detail }) => {
             const newPoint = { coordinates: { longitude: detail.lng, latitude: detail.lat }}
             const points = [...(coordinates?.points || []), newPoint];
             savePoints(points)
@@ -141,6 +142,7 @@
         </Button>
         {#if show}
           <RegionModal
+            {dictionaryCenter}
             {t}
             region={null}
             on:update={({ detail }) => {
