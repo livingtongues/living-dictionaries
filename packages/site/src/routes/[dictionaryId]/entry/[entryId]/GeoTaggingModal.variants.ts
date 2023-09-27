@@ -8,12 +8,13 @@ const tw_region: IRegion = {coordinates: [
   {latitude: 23.4, longitude: 121.5},
   {latitude: 23.0, longitude: 121.3},
 ]}
+const bangladesh = {latitude: 23.2, longitude: 90}
 
 export const variants: Variants<Component> = [
   {
     name: 'points and region',
     props: {
-      initialCenter: null,
+      initialCenter: bangladesh,
       coordinates: {
         points: [
           {coordinates: {latitude: 23.2, longitude: 121.1}},
@@ -39,7 +40,7 @@ export const variants: Variants<Component> = [
   {
     name: 'no points, initial dictionary center',
     props: {
-      initialCenter: {latitude: 23.2, longitude: 90},
+      initialCenter: bangladesh,
       coordinates: null,
     }
   },

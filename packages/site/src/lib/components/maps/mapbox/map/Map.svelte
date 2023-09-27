@@ -1,10 +1,24 @@
 <script lang="ts">
   // from https://github.com/beyonk-adventures/svelte-mapbox
-  import { setContext, onDestroy, createEventDispatcher, onMount, tick } from 'svelte';
+  import {
+    setContext,
+    onDestroy,
+    createEventDispatcher,
+    onMount,
+    tick,
+  } from 'svelte';
   import { mapKey } from '../context';
   import { loadScriptOnce, loadStylesOnce } from 'sveltefirets';
   import { EventQueue } from '../queue';
-  import type { LngLatLike, MapboxOptions, Map, LngLat, ErrorEvent, EventData } from 'mapbox-gl';
+  import type {
+    LngLatLike,
+    MapboxOptions,
+    Map,
+    LngLat,
+    ErrorEvent,
+    EventData,
+    LngLatBoundsLike,
+  } from 'mapbox-gl';
   import { bindEvents } from '../event-bindings';
   import { getTimeZoneLongitude } from '../../utils/getTimeZoneLongitude';
   import { ADDED_FEATURE_ID_PREFIX } from '../../utils/randomId';
@@ -19,6 +33,7 @@
   export let style = 'mapbox://styles/mapbox/streets-v11?optimize=true'; //'Mapbox Streets' // light-v8, light-v9, light-v10, dark-v10, satellite-v9, streets-v11
   export let lng: number = undefined;
   export let lat: number = undefined;
+  export let pointsToFit: number[][] = undefined;
 
   let center: LngLatLike;
   $: center = lng && lat ? [lng, lat] : [getTimeZoneLongitude() || -80, 10];
@@ -50,7 +65,8 @@
       if (
         map
           .queryRenderedFeatures(e.point)
-          .filter((f) => f.source.startsWith(ADDED_FEATURE_ID_PREFIX)).length === 0
+          .filter((f) => f.source.startsWith(ADDED_FEATURE_ID_PREFIX))
+          .length === 0
       )
         dispatch('click', e.lngLat);
     },
@@ -62,8 +78,12 @@
   let unbind = () => {};
 
   onMount(async () => {
-    await loadScriptOnce(`//api.mapbox.com/mapbox-gl-js/${version}/mapbox-gl.js`);
-    await loadStylesOnce(`//api.mapbox.com/mapbox-gl-js/${version}/mapbox-gl.css`);
+    await loadScriptOnce(
+      `//api.mapbox.com/mapbox-gl-js/${version}/mapbox-gl.js`
+    );
+    await loadStylesOnce(
+      `//api.mapbox.com/mapbox-gl-js/${version}/mapbox-gl.css`
+    );
     customStylesheetUrl && (await loadStylesOnce(customStylesheetUrl));
 
     window.mapboxgl.accessToken = accessToken;
@@ -78,6 +98,16 @@
     queue.start(map);
 
     unbind = bindEvents(map, handlers);
+
+    if (pointsToFit?.length > 1) {
+      const { bbox, lineString } = await import('@turf/turf');
+      const line = lineString(pointsToFit);
+      const box = bbox(line) as LngLatBoundsLike;
+      map.fitBounds(box, {
+        padding: { top: 10, bottom: 10, left: 10, right: 10 },
+        maxZoom: 6,
+      });
+    }
   });
 
   onDestroy(async () => {
@@ -85,11 +115,11 @@
 
     queue.stop();
     await tick(); // allow controls to remove themselves from the map
-    map?.remove && map.remove();
+    map?.remove?.();
   });
 
   // use via https://svelte.dev/tutorial/component-this
-  export function fitBounds(bbox, data = {}) {
+  export function fitBounds(bbox: LngLatBoundsLike, data = {}) {
     queue.send('fitBounds', [bbox, data]);
   }
 
@@ -126,7 +156,9 @@
     <slot {map} />
   {:else}
     <div class="w-full h-full bg-gray-100 flex items-center justify-center">
-      <span class="i-fa-solid-globe-asia text-6xl text-gray-300 animate-pulse" />
+      <span
+        class="i-fa-solid-globe-asia text-6xl text-gray-300 animate-pulse"
+      />
     </div>
   {/if}
 </div>
