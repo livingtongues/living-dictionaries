@@ -2,8 +2,8 @@ import type { Variants } from 'kitbook';
 import type Component from './ModalEditableArray.svelte';
 export const variants: Variants<Component> = [
   {
-    height: 450,
-    width: 700,
+    // height: 450,
+    // width: 700,
     props: {
       values: ['1.2'],
       placeholder: 'Select...',
@@ -15,8 +15,8 @@ export const variants: Variants<Component> = [
   },
   {
     name: 'can edit',
-    height: 450,
-    width: 700,
+    // height: 450,
+    // width: 700,
     props: {
       values: ['1.2', '1.3'],
       placeholder: 'Select elements',
@@ -31,8 +31,8 @@ export const variants: Variants<Component> = [
   },
   {
     name: 'can write-in',
-    height: 450,
-    width: 700,
+    // height: 450,
+    // width: 700,
     props: {
       values: [],
       placeholder: 'Select elements',

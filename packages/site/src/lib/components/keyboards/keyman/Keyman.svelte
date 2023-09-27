@@ -17,7 +17,7 @@
   export let fixed = false;
   export let bcp: string = undefined;
   export let canChooseKeyboard = false;
-  export let target: string | Element = undefined;
+  export let target: string = undefined;
   export let show = false;
   export let position: 'top' | 'bottom' = 'top';
   export let version = '16.0.141'; // https://keyman.com/developer/keymanweb/, https://keyman.com/downloads/pre-release/, https://help.keyman.com/developer/engine/web/history
@@ -47,7 +47,6 @@
 
   async function targetInput() {
     if (target) {
-      // @ts-ignore
       inputEl = wrapperEl.querySelector(target);
       if (!inputEl) await waitForCKEditorToInitAndBeTargeted();
     }
@@ -57,18 +56,18 @@
 
   }
 
-  async function waitForCKEditorToInitAndBeTargeted() {
+  function waitForCKEditorToInitAndBeTargeted() {
     return new Promise((resolve) => {
       let attempts = 0;
+      const MAX_ATTEMPTS = 10
       const interval = setInterval(() => {
         attempts++;
-        // @ts-ignore
         inputEl = wrapperEl.querySelector(target);
-        if (inputEl || attempts > 9) {
-          resolve;
+        if (inputEl || attempts > MAX_ATTEMPTS) {
           clearInterval(interval);
+          resolve;
         }
-      }, 500);
+      }, 500) as unknown as number;
     });
   }
 

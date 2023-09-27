@@ -3,11 +3,7 @@
   import { Modal, Button, ShowHide } from 'svelte-pieces';
   import Map from '$lib/components/maps/mapbox/map/Map.svelte';
   import NavigationControl from '$lib/components/maps/mapbox/controls/NavigationControl.svelte';
-  import type {
-    Coordinates,
-    IPoint,
-    IRegion,
-  } from '@living-dictionaries/types';
+  import type { Coordinates, IPoint, IRegion } from '@living-dictionaries/types';
   import { onMount, createEventDispatcher } from 'svelte';
   import ToggleStyle from '$lib/components/maps/mapbox/controls/ToggleStyle.svelte';
   import Marker from '$lib/components/maps/mapbox/map/Marker.svelte';
@@ -17,6 +13,7 @@
   import Region from '$lib/components/maps/mapbox/map/Region.svelte';
   import type { LngLatFull } from '@living-dictionaries/types/coordinates.interface';
   import InitableShowHide from './InitableShowHide.svelte';
+
   export let coordinates: Coordinates;
   export let initialCenter: LngLatFull | undefined;
 
@@ -45,19 +42,11 @@
 
   onMount(() => {
     if (coordinates?.points?.[0]) {
-      const [
-        {
-          coordinates: { longitude, latitude },
-        },
-      ] = coordinates.points;
+      const [{ coordinates: { longitude, latitude }}] = coordinates.points;
       lng = longitude;
       lat = latitude;
     } else if (coordinates?.regions?.[0]) {
-      const [
-        {
-          coordinates: [{ longitude, latitude }],
-        },
-      ] = coordinates.regions;
+      const [{coordinates: [{ longitude, latitude }]}] = coordinates.regions;
       lng = longitude;
       lat = latitude;
     }
@@ -153,10 +142,7 @@
       {#if mounted}
         <InitableShowHide show={addPoint} let:show let:toggle>
           <Button onclick={toggle} color="black" size="sm">
-            <span
-              class="i-mdi-map-marker-plus mr-1"
-              style="margin-top: -3px;"
-            />
+            <span class="i-mdi-map-marker-plus mr-1" style="margin-top: -3px;" />
             {$t('create.select_coordinates', { default: 'Select Coordinates' })}
           </Button>
           {#if show}
@@ -176,10 +162,7 @@
 
         <InitableShowHide show={addRegion} let:show let:toggle>
           <Button onclick={toggle} color="black" size="sm">
-            <span
-              class="i-mdi-map-marker-path mr-1"
-              style="margin-top: -2px;"
-            />
+            <span class="i-mdi-map-marker-path mr-1" style="margin-top: -2px;" />
             {$t('create.select_region', { default: 'Select Region' })}
           </Button>
           {#if show}
@@ -190,8 +173,7 @@
                 const regions = [...(coordinates?.regions || []), detail];
                 saveRegions(regions);
               }}
-              on:close={toggle}
-            />
+              on:close={toggle} />
           {/if}
         </InitableShowHide>
       {/if}
