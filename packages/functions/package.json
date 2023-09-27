@@ -26,7 +26,6 @@
   },
   "devDependencies": {
     "@firebase/testing": "^0.20.11",
-    "@living-dictionaries/parts": "^0.0.1",
     "@living-dictionaries/types": "^1.0.0",
     "@types/node": "^18.11.18",
     "firebase-functions-test": "^3.1.0",

@@ -5,10 +5,10 @@
   import type { IDictionary } from '@living-dictionaries/types';
   import { admin, myDictionaries } from '$lib/stores';
   import { ShowHide } from 'svelte-pieces';
-  import Map from '@living-dictionaries/parts/src/lib/maps/mapbox/map/Map.svelte';
-  import ToggleStyle from '@living-dictionaries/parts/src/lib/maps/mapbox/controls/ToggleStyle.svelte';
-  import NavigationControl from '@living-dictionaries/parts/src/lib/maps/mapbox/controls/NavigationControl.svelte';
-  import CustomControl from '@living-dictionaries/parts/src/lib/maps/mapbox/controls/CustomControl.svelte';
+  import Map from '$lib/components/maps/mapbox/map/Map.svelte';
+  import ToggleStyle from '$lib/components/maps/mapbox/controls/ToggleStyle.svelte';
+  import NavigationControl from '$lib/components/maps/mapbox/controls/NavigationControl.svelte';
+  import CustomControl from '$lib/components/maps/mapbox/controls/CustomControl.svelte';
   import DictionaryPoints from '$lib/components/home/DictionaryPoints.svelte';
   import Search from '$lib/components/home/Search.svelte';
   import Header from '$lib/components/shell/Header.svelte';
@@ -58,7 +58,7 @@
   <div class="relative flex-1">
     <Map bind:this={mapComponent} style="mapbox://styles/mapbox/light-v10?optimize=true" zoom={2}>
       {#if selectedDictionary?.coordinates?.latitude}
-        {#await import('@living-dictionaries/parts/src/lib/maps/mapbox/map/Marker.svelte') then { default: Marker }}
+        {#await import('$lib/components/maps/mapbox/map/Marker.svelte') then { default: Marker }}
           <Marker
             lat={selectedDictionary.coordinates.latitude}
             lng={selectedDictionary.coordinates.longitude}
@@ -70,7 +70,7 @@
           {/if}
         {/await}
         {#if selectedDictionary.regions}
-          {#await import('@living-dictionaries/parts/src/lib/maps/mapbox/map/Region.svelte') then { default: Region }}
+          {#await import('$lib/components/maps/mapbox/map/Region.svelte') then { default: Region }}
             {#each selectedDictionary.regions as region (region)}
               <Region {region} />
             {/each}

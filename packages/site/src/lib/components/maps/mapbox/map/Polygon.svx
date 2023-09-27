@@ -1,14 +1,14 @@
 <script lang="ts">
   import { Story } from 'kitbook';
   import { Button, ReactiveSet } from 'svelte-pieces';
-  import Map from '$lib/maps/mapbox/map/Map.svelte';
-  import Marker from '$lib/maps/mapbox/map/Marker.svelte';
-  import Popup from '$lib/maps/mapbox/map/Popup.svelte';
-  import GeoJSONSource from '$lib/maps/mapbox/sources/GeoJSONSource.svelte';
-  import Layer from '$lib/maps/mapbox/map/Layer.svelte';
-  import { polygonFeatureCoordinates } from '$lib/maps/utils/polygonFromCoordinates';
-  import MapboxStatic from '$lib/maps/mapbox/static/MapboxStatic.svelte';
-  import { convertPointsIntoRegion } from '$lib/maps/mapbox/static/shapeGeoJson';
+  import Map from './Map.svelte';
+  import Marker from './Marker.svelte';
+  import Popup from './Popup.svelte';
+  import GeoJSONSource from '../sources/GeoJSONSource.svelte';
+  import Layer from './Layer.svelte';
+  import { polygonFeatureCoordinates } from '../../utils/polygonFromCoordinates';
+  import MapboxStatic from '../static/MapboxStatic.svelte';
+  import { convertPointsIntoRegion } from '../static/shapeGeoJson';
 </script>
 
 

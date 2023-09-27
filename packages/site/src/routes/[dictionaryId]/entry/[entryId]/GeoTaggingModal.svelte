@@ -1,20 +1,20 @@
 <script lang="ts">
   import { t } from 'svelte-i18n';
   import { Modal, Button, ShowHide } from 'svelte-pieces';
-  import Map from '@living-dictionaries/parts/src/lib/maps/mapbox/map/Map.svelte';
-  import NavigationControl from '@living-dictionaries/parts/src/lib/maps/mapbox/controls/NavigationControl.svelte';
+  import Map from '$lib/components/maps/mapbox/map/Map.svelte';
+  import NavigationControl from '$lib/components/maps/mapbox/controls/NavigationControl.svelte';
   import type {
     Coordinates,
     IPoint,
     IRegion,
   } from '@living-dictionaries/types';
   import { onMount, createEventDispatcher } from 'svelte';
-  import ToggleStyle from '@living-dictionaries/parts/src/lib/maps/mapbox/controls/ToggleStyle.svelte';
-  import Marker from '@living-dictionaries/parts/src/lib/maps/mapbox/map/Marker.svelte';
-  import Popup from '@living-dictionaries/parts/src/lib/maps/mapbox/map/Popup.svelte';
-  import CoordinatesModal from '@living-dictionaries/parts/src/lib/maps/CoordinatesModal.svelte';
-  import RegionModal from '@living-dictionaries/parts/src/lib/maps/RegionModal.svelte';
-  import Region from '@living-dictionaries/parts/src/lib/maps/mapbox/map/Region.svelte';
+  import ToggleStyle from '$lib/components/maps/mapbox/controls/ToggleStyle.svelte';
+  import Marker from '$lib/components/maps/mapbox/map/Marker.svelte';
+  import Popup from '$lib/components/maps/mapbox/map/Popup.svelte';
+  import CoordinatesModal from '$lib/components/maps/CoordinatesModal.svelte';
+  import RegionModal from '$lib/components/maps/RegionModal.svelte';
+  import Region from '$lib/components/maps/mapbox/map/Region.svelte';
   import type { LngLatFull } from '@living-dictionaries/types/coordinates.interface';
   import InitableShowHide from './InitableShowHide.svelte';
   export let coordinates: Coordinates;
