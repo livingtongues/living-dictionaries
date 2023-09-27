@@ -21,7 +21,8 @@
   const zoom = lng && lat ? 6 : 3;
 
   onMount(() => {
-    if (!(lng && lat) && initialCenter) {
+    if (lng && lat) return;
+    if (initialCenter) {
       ({longitude: centerLng, latitude: centerLat} = initialCenter);
     } else if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition((position) => {

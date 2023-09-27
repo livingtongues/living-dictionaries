@@ -23,7 +23,7 @@ const defaultEntry = {
 const partialVariants: DeepPartial<Variants<Component>> = [
   {
     name: 'Everything',
-    height: 800,
+    // height: 800,
     props: {
       canEdit: true,
       videoAccess: true,
@@ -80,7 +80,7 @@ const partialVariants: DeepPartial<Variants<Component>> = [
   },
   {
     name: 'Local orthographies',
-    height: 250,
+    // height: 250,
     props: {
       entry: {
         lexeme: 'Hello',
@@ -117,7 +117,7 @@ const partialVariants: DeepPartial<Variants<Component>> = [
   },
   {
     name: 'No details, can edit',
-    height: 600,
+    // height: 600,
     props: {
       canEdit: true,
     },

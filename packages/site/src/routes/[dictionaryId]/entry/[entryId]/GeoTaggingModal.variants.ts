@@ -11,7 +11,7 @@ const tw_region: IRegion = {coordinates: [
 
 export const variants: Variants<Component> = [
   {
-    height: 600,
+    name: 'points and region',
     props: {
       initialCenter: null,
       coordinates: {
@@ -26,7 +26,7 @@ export const variants: Variants<Component> = [
     }
   },
   {
-    height: 600,
+    name: 'region only',
     props: {
       initialCenter: null,
       coordinates: {
@@ -37,7 +37,14 @@ export const variants: Variants<Component> = [
     }
   },
   {
-    height: 600,
+    name: 'no points, initial dictionary center',
+    props: {
+      initialCenter: {latitude: 23.2, longitude: 90},
+      coordinates: null,
+    }
+  },
+  {
+    name: 'nothing',
     props: {
       initialCenter: null,
       coordinates: null,
