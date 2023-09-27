@@ -1,5 +1,5 @@
 {
-  "name": "@living-dictionaries/parts",
+  "name": "parts",
   "version": "0.0.1",
   "description": "Language documentation components and helpers for use in livingdictionaries.app",
   "type": "module",

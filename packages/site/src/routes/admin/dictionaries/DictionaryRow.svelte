@@ -110,7 +110,7 @@
       {:else}<b>Add</b>{/if}
     </Button>
     {#if show}
-      {#await import('@living-dictionaries/parts/src/lib/maps/CoordinatesModal.svelte') then { default: CoordinatesModal }}
+      {#await import('$lib/components/maps/CoordinatesModal.svelte') then { default: CoordinatesModal }}
         <CoordinatesModal
           lng={dictionary.coordinates ? dictionary.coordinates.longitude : undefined}
           lat={dictionary.coordinates ? dictionary.coordinates.latitude : undefined}

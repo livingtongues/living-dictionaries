@@ -20,7 +20,6 @@
   "devDependencies": {
     "@iconify/json": "^2.2.94",
     "@julr/unocss-preset-forms": "^0.0.5",
-    "@living-dictionaries/parts": "workspace:^0.0.1",
     "@living-dictionaries/types": "workspace:^1.0.0",
     "@sentry/browser": "^6.18.2",
     "@sveltejs/adapter-auto": "^2.1.0",

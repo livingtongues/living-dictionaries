@@ -19,7 +19,6 @@
   },
   "devDependencies": {
     "@living-dictionaries/functions": "workspace:^0.0.1",
-    "@living-dictionaries/parts": "workspace:^0.0.1",
     "@living-dictionaries/site": "workspace:^0.0.1",
     "@living-dictionaries/types": "^1.0.0",
     "@types/node": "^18.11.18",

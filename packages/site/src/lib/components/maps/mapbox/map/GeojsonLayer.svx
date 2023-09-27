@@ -1,8 +1,8 @@
 <script lang="ts">
   import { Story } from 'kitbook';
-  import Map from '$lib/maps/mapbox/map/Map.svelte';
-  import GeoJSONSource from '$lib/maps/mapbox/sources/GeoJSONSource.svelte';
-  import Layer from '$lib/maps/mapbox/map/Layer.svelte';
+  import Map from './Map.svelte';
+  import GeoJSONSource from '../sources/GeoJSONSource.svelte';
+  import Layer from './Layer.svelte';
 
   // from https://docs.mapbox.com/mapbox-gl-js/example/geojson-polygon/
   const maineOutline = [

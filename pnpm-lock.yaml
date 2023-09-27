@@ -63,9 +63,6 @@ importers:
       '@firebase/testing':
         specifier: ^0.20.11
         version: 0.20.11
-      '@living-dictionaries/parts':
-        specifier: ^0.0.1
-        version: link:../parts
       '@living-dictionaries/types':
         specifier: ^1.0.0
         version: link:../types
@@ -201,9 +198,6 @@ importers:
       '@living-dictionaries/functions':
         specifier: workspace:^0.0.1
         version: link:../functions
-      '@living-dictionaries/parts':
-        specifier: workspace:^0.0.1
-        version: link:../parts
       '@living-dictionaries/site':
         specifier: workspace:^0.0.1
         version: link:../site
@@ -261,9 +255,6 @@ importers:
       '@julr/unocss-preset-forms':
         specifier: ^0.0.5
         version: 0.0.5(unocss@0.53.6)
-      '@living-dictionaries/parts':
-        specifier: workspace:^0.0.1
-        version: link:../parts
       '@living-dictionaries/types':
         specifier: workspace:^1.0.0
         version: link:../types
@@ -9198,45 +9189,6 @@ packages:
       micromatch: 4.0.5
       parse-json: 5.2.0
       pretty-format: 29.6.1
-      slash: 3.0.0
-      strip-json-comments: 3.1.1
-    transitivePeerDependencies:
-      - supports-color
-    dev: true
-
-  /jest-config@29.5.0(@types/node@18.15.5):
-    resolution: {integrity: sha512-kvDUKBnNJPNBmFFOhDbm59iu1Fii1Q6SxyhXfvylq3UTHbg6o7j/g8k2dZyXWLvfdKB1vAPxNZnMgtKJcmu3kA==}
-    engines: {node: ^14.15.0 || ^16.10.0 || >=18.0.0}
-    peerDependencies:
-      '@types/node': '*'
-      ts-node: '>=9.0.0'
-    peerDependenciesMeta:
-      '@types/node':
-        optional: true
-      ts-node:
-        optional: true
-    dependencies:
-      '@babel/core': 7.22.5
-      '@jest/test-sequencer': 29.5.0
-      '@jest/types': 29.5.0
-      '@types/node': 18.15.5
-      babel-jest: 29.5.0(@babel/core@7.22.5)
-      chalk: 4.1.2
-      ci-info: 3.8.0
-      deepmerge: 4.3.1
-      glob: 7.2.3
-      graceful-fs: 4.2.11
-      jest-circus: 29.5.0
-      jest-environment-node: 29.5.0
-      jest-get-type: 29.4.3
-      jest-regex-util: 29.4.3
-      jest-resolve: 29.5.0
-      jest-runner: 29.5.0
-      jest-util: 29.5.0
-      jest-validate: 29.5.0
-      micromatch: 4.0.5
-      parse-json: 5.2.0
-      pretty-format: 29.5.0
       slash: 3.0.0
       strip-json-comments: 3.1.1
     transitivePeerDependencies:
