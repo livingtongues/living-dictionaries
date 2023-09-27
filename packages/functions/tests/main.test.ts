@@ -3,7 +3,7 @@ testFun.cleanup();
 
 import { db } from '../src/config';
 
-test.skip('Firestore is initialized', () => {
+test.skip('firestore is initialized', () => {
   expect(db).toBeDefined();
 });
 
