@@ -98,16 +98,6 @@
     queue.start(map);
 
     unbind = bindEvents(map, handlers);
-
-    if (pointsToFit?.length > 1) {
-      const { bbox, lineString } = await import('@turf/turf');
-      const line = lineString(pointsToFit);
-      const box = bbox(line) as LngLatBoundsLike;
-      map.fitBounds(box, {
-        padding: { top: 10, bottom: 10, left: 10, right: 10 },
-        maxZoom: 6,
-      });
-    }
   });
 
   onDestroy(async () => {
@@ -147,8 +137,23 @@
     return mapbox;
   }
 
-  $: zoom && setZoom(zoom);
-  $: center && setCenter(center);
+  $: if (zoom) setZoom(zoom);
+  $: if (center) setCenter(center);
+  $: if (pointsToFit?.length) fitPoints()
+
+  async function fitPoints() {
+    if (pointsToFit.length === 1) {
+      setCenter(pointsToFit[0]);
+      return;
+    }
+    const { bbox, lineString } = await import('@turf/turf');
+    const line = lineString(pointsToFit);
+    const box = bbox(line) as LngLatBoundsLike;
+    map.fitBounds(box, {
+      padding: { top: 10, bottom: 10, left: 10, right: 10 },
+      maxZoom: 6,
+    });
+  }
 </script>
 
 <div bind:this={container}>
