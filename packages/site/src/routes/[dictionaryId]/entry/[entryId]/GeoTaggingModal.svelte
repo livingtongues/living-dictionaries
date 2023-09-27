@@ -13,9 +13,12 @@
   import Region from '$lib/components/maps/mapbox/map/Region.svelte';
   import type { LngLatFull } from '@living-dictionaries/types/coordinates.interface';
   import InitableShowHide from './InitableShowHide.svelte';
+  import { flattenCoordinates } from './flattenCoordinates';
 
   export let coordinates: Coordinates;
   export let initialCenter: LngLatFull | undefined;
+  export let addPoint = false;
+  export let addRegion = false;
 
   let lng: number;
   let lat: number;
@@ -40,6 +43,7 @@
     });
   }
 
+  let mounted = false
   onMount(() => {
     if (coordinates?.points?.[0]) {
       const [{ coordinates: { longitude, latitude }}] = coordinates.points;
@@ -58,19 +62,13 @@
         lat = +position.coords.latitude.toFixed(GPS_DECIMAL_PRECISION);
       });
     }
-  });
-
-  export let addPoint = false;
-  export let addRegion = false;
-  let mounted = false
-  onMount(() => {
     mounted = true;
-  })
+  });
 </script>
 
 <Modal on:close noscroll>
   <div class="h-sm">
-    <Map {lng} {lat} zoom={6}>
+    <Map pointsToFit={flattenCoordinates(coordinates)} {lng} {lat} zoom={6}>
       <NavigationControl />
       {#each coordinates?.points || [] as point, index (point)}
         <Marker
