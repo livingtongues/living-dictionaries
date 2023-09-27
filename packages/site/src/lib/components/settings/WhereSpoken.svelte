@@ -37,7 +37,7 @@
 </script>
 
 <div class="text-sm font-medium text-gray-700 mb-2">
-  {$t('create.where_spoken', { default: 'Where is this language spoken?' })}*
+  {$t('create.where_spoken', { default: 'Where is this language spoken?' })}
 </div>
 
 {#if hasCoordinates}
