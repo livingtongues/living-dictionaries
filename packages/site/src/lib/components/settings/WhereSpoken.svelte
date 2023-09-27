@@ -3,13 +3,13 @@
   import { Button, ShowHide } from 'svelte-pieces';
   import type { IDictionary, IPoint, IRegion } from '@living-dictionaries/types';
   import type { LngLat } from 'mapbox-gl';
-  import Map from '@living-dictionaries/parts/src/lib/maps/mapbox/map/Map.svelte';
-  import Marker from '@living-dictionaries/parts/src/lib/maps/mapbox/map/Marker.svelte';
-  import Popup from '@living-dictionaries/parts/src/lib/maps/mapbox/map/Popup.svelte';
-  import Region from '@living-dictionaries/parts/src/lib/maps/mapbox/map/Region.svelte';
-  import CoordinatesModal from '@living-dictionaries/parts/src/lib/maps/CoordinatesModal.svelte';
-  import RegionModal from '@living-dictionaries/parts/src/lib/maps/RegionModal.svelte';
-  import NavigationControl from '@living-dictionaries/parts/src/lib/maps/mapbox/controls/NavigationControl.svelte';
+  import Map from '$lib/components/maps/mapbox/map/Map.svelte';
+  import Marker from '$lib/components/maps/mapbox/map/Marker.svelte';
+  import Popup from '$lib/components/maps/mapbox/map/Popup.svelte';
+  import Region from '$lib/components/maps/mapbox/map/Region.svelte';
+  import CoordinatesModal from '$lib/components/maps/CoordinatesModal.svelte';
+  import RegionModal from '$lib/components/maps/RegionModal.svelte';
+  import NavigationControl from '$lib/components/maps/mapbox/controls/NavigationControl.svelte';
   import { createEventDispatcher } from 'svelte';
   const dispatch = createEventDispatcher<{
     updateCoordinates: { longitude: number; latitude: number };
@@ -37,7 +37,7 @@
 </script>
 
 <div class="text-sm font-medium text-gray-700 mb-2">
-  {$t('create.where_spoken', { default: 'Where is this language spoken?' })}*
+  {$t('create.where_spoken', { default: 'Where is this language spoken?' })}
 </div>
 
 {#if hasCoordinates}
@@ -52,7 +52,6 @@
       <NavigationControl />
       {#if mapClickCoordinates}
         <CoordinatesModal
-          {t}
           lng={+mapClickCoordinates.lng.toFixed(4)}
           lat={+mapClickCoordinates.lat.toFixed(4)}
           on:update={addCoordinates}
@@ -76,7 +75,6 @@
             </Button>
             {#if show}
               <CoordinatesModal
-                {t}
                 lng={dictionary.coordinates.longitude}
                 lat={dictionary.coordinates.latitude}
                 canRemove={!dictionary.points?.length && !dictionary.regions?.length}
@@ -98,7 +96,6 @@
               </Button>
               {#if show}
                 <CoordinatesModal
-                  {t}
                   lng={point.coordinates.longitude}
                   lat={point.coordinates.latitude}
                   on:update={({ detail }) => {
@@ -135,7 +132,6 @@
             </Button>
             {#if show}
               <RegionModal
-                {t}
                 {region}
                 on:update={({ detail }) => {
                   const {regions} = dictionary;
@@ -173,7 +169,7 @@
       {$t('create.select_coordinates', { default: 'Select Coordinates' })}
     </Button>
     {#if show}
-      <CoordinatesModal {t} lng={dictionary?.coordinates?.longitude} lat={dictionary?.coordinates?.latitude} on:update={addCoordinates} on:close={toggle}>
+      <CoordinatesModal lng={dictionary?.coordinates?.longitude} lat={dictionary?.coordinates?.latitude} on:update={addCoordinates} on:close={toggle}>
         {#if hasCoordinates}
           <Marker
             lng={dictionary.coordinates.longitude}
@@ -194,7 +190,6 @@
       </Button>
       {#if show}
         <RegionModal
-          {t}
           region={null}
           on:update={({ detail }) => {
             const regions = (dictionary.regions && [...dictionary.regions, detail]) || [detail];

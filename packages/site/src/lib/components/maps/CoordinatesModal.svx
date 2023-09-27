@@ -1,7 +1,7 @@
 <script lang="ts">
   import { Story } from 'kitbook';
-  import CoordinatesModal from '$lib/maps/CoordinatesModal.svelte';
-  import LatLngDisplay from '$lib/maps/LatLngDisplay.svelte';
+  import CoordinatesModal from './CoordinatesModal.svelte';
+  import LatLngDisplay from './LatLngDisplay.svelte';
   import { Button, ShowHide } from 'svelte-pieces';
 </script>
 

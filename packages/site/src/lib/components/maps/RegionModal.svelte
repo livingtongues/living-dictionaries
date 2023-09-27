@@ -1,7 +1,5 @@
 <script lang="ts">
-  import type { Readable } from 'svelte/store';
-  export let t: Readable<any> = undefined;
-
+  import { t } from 'svelte-i18n';
   import { onMount, createEventDispatcher } from 'svelte';
   import { Button, Modal, ReactiveSet } from 'svelte-pieces';
   import Map from './mapbox/map/Map.svelte';
@@ -17,37 +15,42 @@
   import Popup from './mapbox/map/Popup.svelte';
   import { points } from '@turf/helpers';
   import center from '@turf/center';
+  import type { LngLatFull } from '@living-dictionaries/types/coordinates.interface';
 
+  export let initialCenter: LngLatFull = undefined;
   export let region: IRegion;
-  const zoom = region ? 4 : 2;
+  const zoom = region ? 4 : 3;
 
   let centerLng: number;
   let centerLat: number;
 
-  if (region) {
-    const features = points(
-      region.coordinates.map(({ longitude, latitude }) => [longitude, latitude])
-    );
-    const c = center(features);
-    if (c?.geometry?.coordinates) [centerLng, centerLat] = c.geometry.coordinates;
-  }
-
-  function handleGeocoderResult({ detail }, add) {
-    if (detail?.user_coordinates?.[0])
-      add({ longitude: detail.user_coordinates[0], latitude: detail.user_coordinates[1] });
-    else
-      add({ longitude: detail.center[0], latitude: detail.center[1] });
-
-  }
-
   onMount(() => {
-    if (!region && navigator.geolocation) {
+    if (region) {
+      const features = points(
+        region.coordinates.map(({ longitude, latitude }) => [longitude, latitude])
+      );
+      const c = center(features);
+      if (c?.geometry?.coordinates)
+        [centerLng, centerLat] = c.geometry.coordinates;
+    }
+    else if (initialCenter) {
+      ({longitude: centerLng, latitude: centerLat} = initialCenter);
+    } else if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition((position) => {
         centerLng = position.coords.longitude;
         centerLat = position.coords.latitude;
       });
     }
   });
+
+  function handleGeocoderResult({ detail }, add) {
+    if (detail?.user_coordinates?.[0])
+    {add({
+      longitude: detail.user_coordinates[0],
+      latitude: detail.user_coordinates[1],
+    });}
+    else {add({ longitude: detail.center[0], latitude: detail.center[1] });}
+  }
 
   const dispatch = createEventDispatcher<{
     update: IRegion;
@@ -64,7 +67,13 @@
   }
 </script>
 
-<ReactiveSet input={region?.coordinates || []} let:value={points} let:add let:size let:remove>
+<ReactiveSet
+  input={region?.coordinates || []}
+  let:value={points}
+  let:add
+  let:size
+  let:remove
+>
   <Modal on:close noscroll>
     <span slot="heading">
       {t ? $t('create.select_region') : 'Select Region'}
@@ -75,14 +84,17 @@
           lng={centerLng}
           lat={centerLat}
           {zoom}
-          on:click={({ detail: { lng, lat } }) => add({ longitude: lng, latitude: lat })}>
+          on:click={({ detail: { lng, lat } }) =>
+            add({ longitude: lng, latitude: lat })}
+        >
           <slot />
           <NavigationControl />
           <Geocoder
             options={{ marker: false }}
             placeholder={t ? $t('about.search') : 'Search'}
             on:result={(e) => handleGeocoderResult(e, add)}
-            on:error={(e) => console.error(e.detail)} />
+            on:error={(e) => console.error(e.detail)}
+          />
           {#each Array.from(points) as point (point)}
             <Marker
               draggable
@@ -91,10 +103,16 @@
                 add({ longitude: lng, latitude: lat });
               }}
               lng={point.longitude}
-              lat={point.latitude}>
+              lat={point.latitude}
+            >
               <Popup>
-                <Button form="simple" size="sm" color="red" onclick={() => remove(point)}
-                ><span class="i-fa-trash-o" /></Button>
+                <Button
+                  form="simple"
+                  size="sm"
+                  color="red"
+                  onclick={() => remove(point)}
+                ><span class="i-fa-trash-o" /></Button
+                >
               </Popup>
             </Marker>
           {/each}
@@ -107,7 +125,8 @@
                   coordinates: polygonFeatureCoordinates(points),
                 },
                 properties: undefined,
-              }}>
+              }}
+            >
               <Layer
                 options={{
                   type: 'fill',
@@ -115,7 +134,8 @@
                     'fill-color': randomColor(),
                     'fill-opacity': 0.5,
                   },
-                }} />
+                }}
+              />
               <Layer
                 options={{
                   type: 'line',
@@ -123,7 +143,8 @@
                     'line-color': '#555555',
                     'line-width': 1,
                   },
-                }} />
+                }}
+              />
             </GeoJSONSource>
           {/if}
           <ToggleStyle />

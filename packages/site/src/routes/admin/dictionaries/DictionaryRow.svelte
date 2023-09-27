@@ -5,10 +5,10 @@
   import { BadgeArrayEmit, ShowHide, Button } from 'svelte-pieces';
   import { createEventDispatcher } from 'svelte';
   import { updateOnline } from 'sveltefirets';
-  import { LatLngDisplay } from '@living-dictionaries/parts';
   import ContributorInvitationStatus from '$lib/components/contributors/ContributorInvitationStatus.svelte';
   import RolesManagment from './RolesManagment.svelte';
   import type { DictionaryWithHelperStores } from './dictionaryWithHelpers';
+  import LatLngDisplay from '$lib/components/maps/LatLngDisplay.svelte';
 
   export let index: number;
   export let dictionary: DictionaryWithHelperStores;
@@ -110,7 +110,7 @@
       {:else}<b>Add</b>{/if}
     </Button>
     {#if show}
-      {#await import('@living-dictionaries/parts/src/lib/maps/CoordinatesModal.svelte') then { default: CoordinatesModal }}
+      {#await import('$lib/components/maps/CoordinatesModal.svelte') then { default: CoordinatesModal }}
         <CoordinatesModal
           lng={dictionary.coordinates ? dictionary.coordinates.longitude : undefined}
           lat={dictionary.coordinates ? dictionary.coordinates.latitude : undefined}
