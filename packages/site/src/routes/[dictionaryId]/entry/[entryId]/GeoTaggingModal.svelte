@@ -18,7 +18,7 @@
   import type { LngLatFull } from '@living-dictionaries/types/coordinates.interface';
   import InitableShowHide from './InitableShowHide.svelte';
   export let coordinates: Coordinates;
-  export let dictionaryCenter: LngLatFull | undefined;
+  export let initialCenter: LngLatFull | undefined;
 
   let lng: number;
   let lat: number;
@@ -60,6 +60,9 @@
       ] = coordinates.regions;
       lng = longitude;
       lat = latitude;
+    }
+    else if (initialCenter) {
+      ({longitude: lng, latitude: lat} = initialCenter);
     } else if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition((position) => {
         lng = +position.coords.longitude.toFixed(GPS_DECIMAL_PRECISION);
@@ -92,7 +95,6 @@
               </Button>
               {#if show}
                 <CoordinatesModal
-                  {t}
                   lng={point.coordinates.longitude}
                   lat={point.coordinates.latitude}
                   on:update={({ detail }) => {
@@ -126,8 +128,7 @@
             </Button>
             {#if show}
               <RegionModal
-                {dictionaryCenter}
-                {t}
+                initialCenter={initialCenter}
                 {region}
                 on:update={({ detail }) => {
                   const { regions } = coordinates;
@@ -152,14 +153,15 @@
       {#if mounted}
         <InitableShowHide show={addPoint} let:show let:toggle>
           <Button onclick={toggle} color="black" size="sm">
-            <span class="i-mdi-map-marker-plus mr-1" style="margin-top: -3px;" />
+            <span
+              class="i-mdi-map-marker-plus mr-1"
+              style="margin-top: -3px;"
+            />
             {$t('create.select_coordinates', { default: 'Select Coordinates' })}
           </Button>
           {#if show}
             <CoordinatesModal
-              {t}
-              lat={dictionaryCenter.latitude}
-              lng={dictionaryCenter.longitude}
+              {initialCenter}
               on:update={({ detail }) => {
                 const newPoint = {
                   coordinates: { longitude: detail.lng, latitude: detail.lat },
@@ -174,13 +176,15 @@
 
         <InitableShowHide show={addRegion} let:show let:toggle>
           <Button onclick={toggle} color="black" size="sm">
-            <span class="i-mdi-map-marker-path mr-1" style="margin-top: -2px;" />
+            <span
+              class="i-mdi-map-marker-path mr-1"
+              style="margin-top: -2px;"
+            />
             {$t('create.select_region', { default: 'Select Region' })}
           </Button>
           {#if show}
             <RegionModal
-              {dictionaryCenter}
-              {t}
+              initialCenter={initialCenter}
               region={null}
               on:update={({ detail }) => {
                 const regions = [...(coordinates?.regions || []), detail];
@@ -191,7 +195,6 @@
           {/if}
         </InitableShowHide>
       {/if}
-
     </div>
   </div>
 

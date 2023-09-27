@@ -31,6 +31,7 @@
     "@types/ckeditor__ckeditor5-core": "^33.0.3",
     "@types/d3-dsv": "^3.0.0",
     "@types/file-saver": "^2.0.4",
+    "@types/geojson": "^7946.0.10",
     "@types/mapbox-gl": "^2.7.6",
     "@types/mapbox__mapbox-gl-geocoder": "^4.7.3",
     "@types/recordrtc": "^5.6.10",

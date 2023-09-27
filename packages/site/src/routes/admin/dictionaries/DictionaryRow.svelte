@@ -5,10 +5,10 @@
   import { BadgeArrayEmit, ShowHide, Button } from 'svelte-pieces';
   import { createEventDispatcher } from 'svelte';
   import { updateOnline } from 'sveltefirets';
-  import { LatLngDisplay } from '@living-dictionaries/parts';
   import ContributorInvitationStatus from '$lib/components/contributors/ContributorInvitationStatus.svelte';
   import RolesManagment from './RolesManagment.svelte';
   import type { DictionaryWithHelperStores } from './dictionaryWithHelpers';
+  import LatLngDisplay from '$lib/components/maps/LatLngDisplay.svelte';
 
   export let index: number;
   export let dictionary: DictionaryWithHelperStores;

@@ -9,11 +9,11 @@ const tw_region: IRegion = {coordinates: [
   {latitude: 23.0, longitude: 121.3},
 ]}
 
-
 export const variants: Variants<Component> = [
   {
     height: 600,
     props: {
+      initialCenter: null,
       coordinates: {
         points: [
           {coordinates: {latitude: 23.2, longitude: 121.1}},
@@ -28,6 +28,7 @@ export const variants: Variants<Component> = [
   {
     height: 600,
     props: {
+      initialCenter: null,
       coordinates: {
         regions: [
           tw_region,
@@ -38,6 +39,7 @@ export const variants: Variants<Component> = [
   {
     height: 600,
     props: {
+      initialCenter: null,
       coordinates: null,
     }
   },

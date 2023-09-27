@@ -1,7 +1,5 @@
 <script lang="ts">
-  import type { Readable } from 'svelte/store';
-  export let t: Readable<any> = undefined;
-
+  import { t } from 'svelte-i18n';
   import { onMount, createEventDispatcher } from 'svelte';
   import { Button, Modal } from 'svelte-pieces';
   import Map from './mapbox/map/Map.svelte';
@@ -10,26 +8,22 @@
   import ToggleStyle from './mapbox/controls/ToggleStyle.svelte';
   import NavigationControl from './mapbox/controls/NavigationControl.svelte';
   import { setMarker } from './utils/setCoordinatesToMarker';
+  import type { LngLatFull } from '@living-dictionaries/types/coordinates.interface';
 
-  export let lng: number;
-  export let lat: number;
+  export let initialCenter: LngLatFull = undefined;
+  export let lng: number = undefined;
+  export let lat: number = undefined;
   export let canRemove = true;
 
   let centerLng = lng;
   let centerLat = lat;
 
-  const zoom = lng && lat ? 6 : 2;
+  const zoom = lng && lat ? 6 : 3;
 
-  function handleGeocoderResult({ detail }) {
-    if (detail?.user_coordinates?.[0])
-      setMarker(detail.user_coordinates[0], detail.user_coordinates[1]);
-    else
-      setMarker(detail.center[0], detail.center[1]);
-
-  }
-
-  onMount(async () => {
-    if (!(lng && lat) && navigator.geolocation) {
+  onMount(() => {
+    if (!(lng && lat) && initialCenter) {
+      ({longitude: centerLng, latitude: centerLat} = initialCenter);
+    } else if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition((position) => {
         centerLng = position.coords.longitude;
         centerLat = position.coords.latitude;
@@ -37,19 +31,26 @@
     }
   });
 
+  function handleGeocoderResult({ detail }) {
+    if (detail?.user_coordinates?.[0])
+      setMarker(detail.user_coordinates[0], detail.user_coordinates[1]);
+    else
+      setMarker(detail.center[0], detail.center[1]);
+  }
+
   const dispatch = createEventDispatcher<{
     update: { lat: number; lng: number };
     remove: boolean;
     close: boolean;
   }>();
-  async function update() {
+  function update() {
     dispatch('update', {
       lat,
       lng,
     });
     dispatch('close');
   }
-  async function remove() {
+  function remove() {
     dispatch('remove');
     dispatch('close');
   }

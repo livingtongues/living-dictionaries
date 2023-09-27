@@ -1,7 +1,5 @@
 <script lang="ts">
-  import type { Readable } from 'svelte/store';
-  export let t: Readable<any> = undefined;
-
+  import { t } from 'svelte-i18n';
   import { onMount, createEventDispatcher } from 'svelte';
   import { Button, Modal, ReactiveSet } from 'svelte-pieces';
   import Map from './mapbox/map/Map.svelte';
@@ -19,21 +17,12 @@
   import center from '@turf/center';
   import type { LngLatFull } from '@living-dictionaries/types/coordinates.interface';
 
-  export let dictionaryCenter: LngLatFull | undefined;
+  export let initialCenter: LngLatFull = undefined;
   export let region: IRegion;
   const zoom = region ? 4 : 3;
 
   let centerLng: number;
   let centerLat: number;
-
-  function handleGeocoderResult({ detail }, add) {
-    if (detail?.user_coordinates?.[0])
-    {add({
-      longitude: detail.user_coordinates[0],
-      latitude: detail.user_coordinates[1],
-    });}
-    else {add({ longitude: detail.center[0], latitude: detail.center[1] });}
-  }
 
   onMount(() => {
     if (region) {
@@ -44,9 +33,8 @@
       if (c?.geometry?.coordinates)
         [centerLng, centerLat] = c.geometry.coordinates;
     }
-    else if (dictionaryCenter) {
-      centerLng = dictionaryCenter.longitude;
-      centerLat = dictionaryCenter.latitude;
+    else if (initialCenter) {
+      ({longitude: centerLng, latitude: centerLat} = initialCenter);
     } else if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition((position) => {
         centerLng = position.coords.longitude;
@@ -54,6 +42,15 @@
       });
     }
   });
+
+  function handleGeocoderResult({ detail }, add) {
+    if (detail?.user_coordinates?.[0])
+    {add({
+      longitude: detail.user_coordinates[0],
+      latitude: detail.user_coordinates[1],
+    });}
+    else {add({ longitude: detail.center[0], latitude: detail.center[1] });}
+  }
 
   const dispatch = createEventDispatcher<{
     update: IRegion;
