@@ -33,11 +33,12 @@ function getPointFeature(point: IPoint, options = { primary: false }): Feature<P
 }
 
 function getPolygonFeature(region: IRegion): Feature<Polygon> {
-  const looped = [...region.coordinates, region.coordinates[0]];
+  const sorted = sortPoints(region.coordinates.map(({ longitude, latitude }) => ({ lng: longitude, lat: latitude })));
+  const sortedLooped = [...sorted, sorted[0]];
   const coordinates = [
-    looped.map(({ longitude, latitude }) => [
-      +longitude.toFixed(3),
-      +latitude.toFixed(3),
+    sortedLooped.map(({ lng, lat }) => [
+      +lng.toFixed(3),
+      +lat.toFixed(3),
     ]),
   ];
   return {
@@ -135,24 +136,24 @@ if (import.meta.vitest) {
                 "coordinates": [
                   [
                     [
-                      -126.914,
-                      40.98,
-                    ],
-                    [
                       -118.828,
                       36.031,
                     ],
                     [
-                      -115.664,
-                      38.823,
+                      -126.914,
+                      40.98,
                     ],
                     [
                       -116.016,
                       42.812,
                     ],
                     [
-                      -126.914,
-                      40.98,
+                      -115.664,
+                      38.823,
+                    ],
+                    [
+                      -118.828,
+                      36.031,
                     ],
                   ],
                 ],
