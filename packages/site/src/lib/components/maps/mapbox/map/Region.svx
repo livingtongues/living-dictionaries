@@ -2,8 +2,8 @@
   import { Story } from 'kitbook';
   import { Button } from 'svelte-pieces';
   import type { IRegion } from '@living-dictionaries/types';
-  import Region from '$lib/maps/mapbox/map/Region.svelte';
-  import Map from '$lib/maps/mapbox/map/Map.svelte';
+  import Region from './Region.svelte';
+  import Map from './Map.svelte';
   import { points } from '@turf/helpers';
   import center from '@turf/center';
 

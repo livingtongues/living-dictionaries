@@ -1,5 +1,5 @@
 <script lang="ts">
-  import MapboxStatic from '$lib/maps/mapbox/static/MapboxStatic.svelte';
+  import MapboxStatic from './MapboxStatic.svelte';
   import { Story } from 'kitbook';
 </script>
 

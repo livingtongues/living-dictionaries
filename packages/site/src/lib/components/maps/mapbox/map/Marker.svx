@@ -1,7 +1,7 @@
 <script lang="ts">
   import { Story } from 'kitbook';
-  import Map from '$lib/maps/mapbox/map/Map.svelte';
-  import Marker from '$lib/maps/mapbox/map/Marker.svelte';
+  import Map from './Map.svelte';
+  import Marker from './Marker.svelte';
 </script>
 
 

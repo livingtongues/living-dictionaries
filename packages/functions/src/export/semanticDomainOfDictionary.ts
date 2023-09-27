@@ -12,7 +12,6 @@ const projectId = functions.config().project?.key;
 
 import { IDictionary, ActualDatabaseEntry } from '@living-dictionaries/types';
 import { entryInterface } from './interfaceExplanations';
-import { partsOfSpeech, semanticDomains } from '@living-dictionaries/parts';
 
 export default async (
   request: functions.https.Request,

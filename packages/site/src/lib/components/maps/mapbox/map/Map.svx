@@ -1,12 +1,13 @@
 <script lang="ts">
   import { Story } from 'kitbook';
-  import Map from '$lib/maps/mapbox/map/Map.svelte';
-  import NavigationControl from '$lib/maps/mapbox/controls/NavigationControl.svelte';
-  import GeolocateControl from '$lib/maps/mapbox/controls/GeolocateControl.svelte';
-  import Geocoder from '$lib/maps/mapbox/geocoder/Geocoder.svelte';
-  import ScaleControl from '$lib/maps/mapbox/controls/ScaleControl.svelte';
-  import Marker from '$lib/maps/mapbox/map/Marker.svelte';
-  import ToggleStyle from '$lib/maps/mapbox/controls/ToggleStyle.svelte';
+  import Map from './Map.svelte';
+  import NavigationControl from '../controls/NavigationControl.svelte';
+  import GeolocateControl from '../controls/GeolocateControl.svelte';
+  import Geocoder from '../geocoder/Geocoder.svelte';
+  import ScaleControl from '../controls/ScaleControl.svelte';
+  import Marker from './Marker.svelte';
+  import ToggleStyle from '../controls/ToggleStyle.svelte';
+  import SetLanguage from '../controls/SetLanguage.svelte';
 </script>
 
 # Mapbox
@@ -62,3 +63,19 @@ From https://github.com/beyonk-adventures/svelte-mapbox
 <Story name="globe" height={400}>
   <Map options={{ projection: { name: 'globe' } }} />
 </Story>
+
+# Change Language
+
+*(WIP - doesn't work yet)*
+
+Started from https://docs.mapbox.com/mapbox-gl-js/example/language-switch/ and needs continued from https://blog.mapbox.com/how-to-localize-your-maps-in-mapbox-gl-js-da4cc6749f47 and https://github.com/mapbox/mapbox-gl-language#mapboxlanguage
+
+
+<Story name="Spanish" height={400}>
+  <Map>
+    <SetLanguage bcp={'es'} />
+  </Map>
+</Story>
+
+[Languages](https://docs.mapbox.com/data/tilesets/reference/mapbox-streets-v8/#data-sources-and-updates)
+[See also](https://docs.mapbox.com/help/troubleshooting/change-language/)
