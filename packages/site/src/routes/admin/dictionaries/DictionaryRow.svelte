@@ -162,19 +162,16 @@
     {dictionary.videoAccess ? 'Can Record' : 'Give Access'}
   </Button>
 </td>
-<td
->{dictionary.languageUsedByCommunity !== undefined
+<td>{dictionary.languageUsedByCommunity !== undefined
   ? dictionary.languageUsedByCommunity
   : ''}</td>
 <td>{dictionary.communityPermission ? dictionary.communityPermission : ''}</td>
 
-<td
-><div style="width: 300px;" />
+<td><div style="width: 300px;" />
   {dictionary.authorConnection ? dictionary.authorConnection : ''}</td>
 <td>
   <div style="width: 300px;" />
   {dictionary.conLangDescription ? dictionary.conLangDescription : ''}</td>
 {#if $admin > 1}
-  <td class="cursor-pointer" title={JSON.stringify(dictionary, null, 1)}
-  ><span class="i-material-symbols-info-outline" /></td>
+  <td class="cursor-pointer" title={JSON.stringify(dictionary, null, 1)}><span class="i-material-symbols-info-outline" /></td>
 {/if}

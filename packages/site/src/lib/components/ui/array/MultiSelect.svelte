@@ -88,7 +88,8 @@
         class="items-center flex rounded-lg px-2 py-1 whitespace-nowrap
           text-sm font-medium leading-4 bg-blue-100 text-blue-800 mr-2 my-1">
         <span>{option.name}</span>
-        <div on:click|stopPropagation={() => remove(option.value)}
+        <div
+          on:click|stopPropagation={() => remove(option.value)}
           class="cursor-pointer justify-center items-center flex
             bg-blue-300 hover:bg-blue-400 rounded-full h-4 w-4 ml-1"
           title="Remove {option.name}">

@@ -37,8 +37,7 @@
       href="https://www.flipcause.com/secure/cause_pdetails/NTQ3NDQ"
       target="_blank">
       <i class="far fa-donate" />
-      <span class="ml-1 hidden lg:inline"
-      >{$t('header.donate', {
+      <span class="ml-1 hidden lg:inline">{$t('header.donate', {
         default: 'Donate',
       })}</span>
     </Button>
@@ -48,8 +47,7 @@
     </Button>
     <Button href="/tutorials" form="text" class="!hidden !md:inline">
       <span class="i-fluent-learning-app-24-regular -mt-2px" />
-      <span class="ml-1 hidden lg:inline"
-      >{$t('header.tutorials', {
+      <span class="ml-1 hidden lg:inline">{$t('header.tutorials', {
         default: 'Tutorials',
       })}</span>
     </Button>

@@ -20,8 +20,7 @@ For more info: https://gis.stackexchange.com/questions/8650/measuring-accuracy-o
   let:props={{ lat, lng }}
   let:set>
   <ShowHide let:show let:toggle>
-    <Button onclick={toggle}
-      >Modify Coordinates:
+    <Button onclick={toggle}>Modify Coordinates:
       <LatLngDisplay lat={+lat} lng={+lng} /></Button>
     {#if show}
       <CoordinatesModal

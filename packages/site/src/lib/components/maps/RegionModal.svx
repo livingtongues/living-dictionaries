@@ -20,8 +20,7 @@
 
 <Story name="Has Region">
   <ShowHide let:show let:toggle>
-    <Button onclick={toggle} class="mb-1"
-      ><span class="i-mdi-map-marker-path mr-1" /> {region ? 'Modify' : 'Select'} Region</Button>
+    <Button onclick={toggle} class="mb-1"><span class="i-mdi-map-marker-path mr-1" /> {region ? 'Modify' : 'Select'} Region</Button>
     {#if region}
       <MapboxStatic regions={[region]} width={200} height={130} highDef={false} />
     {/if}

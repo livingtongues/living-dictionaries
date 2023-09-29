@@ -25,12 +25,10 @@
       {entry}
       {canEdit}
       class="h-20 mb-2 rounded-md bg-gray-100 !px-3"
-      let:playing
-    >
+      let:playing>
       <span
         class:text-blue-700={playing}
-        class="i-material-symbols-hearing text-2xl mt-1"
-      />
+        class="i-material-symbols-hearing text-2xl mt-1" />
       <div class="text-gray-600 text-sm mt-1">
         {$t('audio.listen', { default: 'Listen' })}
         {#if canEdit}
@@ -45,22 +43,19 @@
 {#if first_photo}
   <div
     class="w-full overflow-hidden rounded relative mb-2"
-    style="height: 25vh;"
-  >
+    style="height: 25vh;">
     <Image
       width={400}
       title={entry.lexeme}
       gcs={first_photo.specifiable_image_url}
       {canEdit}
-      on:deleteImage
-    />
+      on:deleteImage />
   </div>
 {:else if canEdit}
   <AddImage
     dictionaryId={dictionary.id}
     entryId={entry.id}
-    class="rounded-md h-20 bg-gray-100 mb-2"
-  >
+    class="rounded-md h-20 bg-gray-100 mb-2">
     <div class="text-xs" slot="text">
       {$t('entry.upload_photo', { default: 'Upload Photo' })}
     </div>
@@ -74,8 +69,7 @@
       lexeme={entry.lexeme}
       video={first_video}
       {canEdit}
-      on:deleteVideo
-    />
+      on:deleteVideo />
   </div>
 {:else if videoAccess && canEdit}
   <ShowHide let:show let:toggle>
@@ -83,8 +77,7 @@
       type="button"
       class="rounded bg-gray-100 border-r-2 hover:bg-gray-300 flex flex-col items-center
         justify-center cursor-pointer p-6 mb-2"
-      on:click={toggle}
-    >
+      on:click={toggle}>
       <span class="i-bi-camera-video text-xl" />
       <span class="text-xs">
         {$t('video.add_video', { default: 'Add Video' })}
@@ -102,20 +95,17 @@
   {#if entry.coordinates?.points?.length || entry.coordinates?.regions?.length}
     <div
       class="rounded overflow-hidden cursor-pointer"
-      on:click={() => set(canEdit)}
-    >
+      on:click={() => set(canEdit)}>
       <MapboxStatic
         points={entry.coordinates.points}
-        regions={entry.coordinates.regions}
-      />
+        regions={entry.coordinates.regions} />
     </div>
   {:else if canEdit}
     <button
       on:click={() => set('point')}
       type="button"
       class="rounded bg-gray-100 border-r-2 hover:bg-gray-300 flex flex-col items-center
-        justify-center cursor-pointer p-6 mb-2"
-    >
+        justify-center cursor-pointer p-6 mb-2">
       <span class="i-mdi-map-marker-plus mr-1" style="margin-top: -3px;" />
       <span class="text-xs">
         {$t('create.select_coordinates', { default: 'Select Coordinates' })}
@@ -125,8 +115,7 @@
       on:click={() => set('region')}
       type="button"
       class="rounded bg-gray-100 border-r-2 hover:bg-gray-300 flex flex-col items-center
-        justify-center cursor-pointer p-6 mb-2"
-    >
+        justify-center cursor-pointer p-6 mb-2">
       <span class="i-mdi-map-marker-path mr-1" style="margin-top: -2px;" />
       <span class="text-xs">
         {$t('create.select_region', { default: 'Select Region' })}
@@ -140,7 +129,6 @@
       coordinates={entry.coordinates}
       initialCenter={dictionary.coordinates}
       on:close={toggle}
-      on:valueupdate
-    />
+      on:valueupdate />
   {/if}
 </InitableShowHide>

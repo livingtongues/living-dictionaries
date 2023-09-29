@@ -91,10 +91,7 @@
         on:focus={() => (searchFocused = true)}
         on:blur={delayedSearchClose} />
       {#if searchString || searchFocused}
-        <button type="button"
-          on:click={() => (searchString = '')}
-          class="absolute inset-y-0 right-0 px-4 flex items-center
-            focus:outline-none">
+        <button type="button" on:click={() => (searchString = '')} class="absolute inset-y-0 right-0 px-4 flex items-center focus:outline-none">
           <span class="i-la-times text-gray-400" />
         </button>
       {/if}

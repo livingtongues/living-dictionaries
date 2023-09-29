@@ -22,8 +22,7 @@
     <div class="font-semibold">{$user.displayName}</div>
     <div>{$user.email}</div>
     <div class="my-2">
-      <Button onclick={logOut}
-      >{$t('account.log_out', {
+      <Button onclick={logOut}>{$t('account.log_out', {
         default: 'Log Out',
       })}</Button>
     </div>

@@ -50,8 +50,7 @@ With help from https://github.com/beyonk-adventures/svelte-mapbox
             lng={point.longitude}
             lat={point.latitude}>
             <Popup open={index === 0 && openFirst}>
-              <Button form="simple" size="sm" color="red" onclick={() => remove(point)}
-                ><span class="i-fa-trash-o" /></Button>
+              <Button form="simple" size="sm" color="red" onclick={() => remove(point)}><span class="i-fa-trash-o" /></Button>
             </Popup>
           </Marker>
         {/each}

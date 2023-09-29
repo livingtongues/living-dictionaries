@@ -49,29 +49,34 @@
   </div>
 
   {#if show}
-    <Modal noscroll on:close={() => {
-      prepareSelected(values, options);
-      toggle();
-    }}>
-      <span slot="heading"><slot name="heading">Select</slot></span>
-
-      <form on:submit={() => {
-        dispatch('update', Object.keys(selectedOptions));
+    <Modal
+      noscroll
+      on:close={() => {
+        prepareSelected(values, options);
         toggle();
       }}>
+      <span slot="heading"><slot name="heading">Select</slot></span>
+
+      <form
+        on:submit={() => {
+          dispatch('update', Object.keys(selectedOptions));
+          toggle();
+        }}>
         <MultiSelect bind:selectedOptions {options} {placeholder} {canWriteIn} />
         <div class="min-h-[50vh]" />
 
         <div class="modal-footer space-x-1">
-          <Button onclick={() => {
-            prepareSelected(values, options);
-            toggle();
-          }} form="simple" color="black">
+          <Button
+            onclick={() => {
+              prepareSelected(values, options);
+              toggle();
+            }}
+            form="simple"
+            color="black">
             {$t('misc.cancel', { default: 'Cancel' })}
           </Button>
 
-          <Button type="submit"
-            form="filled">
+          <Button type="submit" form="filled">
             {$t('misc.save', { default: 'Save' })}
           </Button>
         </div>

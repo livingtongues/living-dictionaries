@@ -23,19 +23,26 @@
   })) as SelectOption[];
 </script>
 
-<ModalEditableArray values={sense?.ld_semantic_domains_keys || []} options={translated_semantic_domain_options} {canEdit} {showPlus} placeholder={$t('entry.sdn')} on:update={({ detail: newValue }) => {
-  dispatch('valueupdate', {
-    field: EntryFields.semantic_domains,
-    newValue,
-  });
-}}>
+<ModalEditableArray
+  values={sense?.ld_semantic_domains_keys || []}
+  options={translated_semantic_domain_options}
+  {canEdit}
+  {showPlus}
+  placeholder={$t('entry.sdn')}
+  on:update={({ detail: newValue }) => {
+    dispatch('valueupdate', {
+      field: EntryFields.semantic_domains,
+      newValue,
+    });
+  }}>
   <span slot="heading">{$t('entry.select_semantic_domains')}</span>
   <svelte:fragment slot="additional">
     {#each sense?.write_in_semantic_domains || [] as domain}
       <div class="px-2 py-1 leading-tight text-xs bg-blue-100 rounded mb-1 whitespace-nowrap flex items-center">
         <i>{domain}</i>
         {#if canEdit}
-          <button type="button"
+          <button
+            type="button"
             class="cursor-pointer justify-center items-center flex opacity-50 hover:opacity-100 rounded-full h-4 w-4 ml-1"
             title="Remove"
             on:click|stopPropagation={() => {

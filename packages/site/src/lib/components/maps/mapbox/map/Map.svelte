@@ -161,9 +161,7 @@
     <slot {map} />
   {:else}
     <div class="w-full h-full bg-gray-100 flex items-center justify-center">
-      <span
-        class="i-fa-solid-globe-asia text-6xl text-gray-300 animate-pulse"
-      />
+      <span class="i-fa-solid-globe-asia text-6xl text-gray-300 animate-pulse" />
     </div>
   {/if}
 </div>
