@@ -34,8 +34,7 @@
 
 <div
   class="flex justify-between items-center mb-3 md:top-12 sticky top-0 z-30
-    bg-white pt-1 -mt-1"
->
+    bg-white pt-1 -mt-1">
   <Button class="-ml-2 !px-2" color="black" form="simple" href={backUrl}>
     <i class="fas fa-arrow-left rtl-x-flip" />
     {$t('misc.back', { default: 'Back' })}
@@ -50,8 +49,7 @@
         color="red"
         form="simple"
         onclick={() =>
-          deleteEntry($initialEntry, $dictionary.id, $algoliaQueryParams)}
-      >
+          deleteEntry($initialEntry, $dictionary.id, $algoliaQueryParams)}>
         <span class="hidden md:inline">
           {$t('misc.delete', { default: 'Delete' })}
         </span>
@@ -78,8 +76,7 @@
       value: newValue,
       entryId: entry.id,
       dictionaryId: $dictionary.id,
-    })}
-/>
+    })} />
 
 <SeoMetaTags
   imageTitle={entry.lx}
@@ -89,5 +86,4 @@
   lng={$dictionary.coordinates?.longitude}
   url="https://livingdictionaries.app/{$dictionary.id}/entry/{entry.id}"
   gcsPath={entry.senses?.[0]?.photo_files?.[0]?.specifiable_image_url}
-  keywords="Minority Languages, Indigenous Languages, Language Documentation, Dictionary, Minority Community, Language Analysis, Language Education, Endangered Languages, Language Revitalization, Linguistics, Word Lists, Linguistic Analysis, Dictionaries, Living Dictionaries, Living Tongues, Under-represented Languages, Tech Resources, Language Sustainability, Language Resources, Diaspora Languages, Elicitation, Language Archives, Ancient Languages, World Languages, Obscure Languages, Little Known languages, Digital Dictionary, Dictionary Software, Free Software, Online Dictionary Builder"
-/>
+  keywords="Minority Languages, Indigenous Languages, Language Documentation, Dictionary, Minority Community, Language Analysis, Language Education, Endangered Languages, Language Revitalization, Linguistics, Word Lists, Linguistic Analysis, Dictionaries, Living Dictionaries, Living Tongues, Under-represented Languages, Tech Resources, Language Sustainability, Language Resources, Diaspora Languages, Elicitation, Language Archives, Ancient Languages, World Languages, Obscure Languages, Little Known languages, Digital Dictionary, Dictionary Software, Free Software, Online Dictionary Builder" />

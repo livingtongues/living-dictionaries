@@ -41,12 +41,18 @@
     : parts_of_speech_options;
 </script>
 
-<ModalEditableArray values={value} {options} {canEdit} {showPlus} placeholder={$t('entry.ps')} on:update={({ detail: newValue }) => {
-  dispatch('valueupdate', {
-    field: EntryFields.parts_of_speech,
-    newValue,
-  });
-}}>
+<ModalEditableArray
+  values={value}
+  {options}
+  {canEdit}
+  {showPlus}
+  placeholder={$t('entry.ps')}
+  on:update={({ detail: newValue }) => {
+    dispatch('valueupdate', {
+      field: EntryFields.parts_of_speech,
+      newValue,
+    });
+  }}>
   <span slot="heading">{$t('entry.ps')}</span>
 </ModalEditableArray>
 

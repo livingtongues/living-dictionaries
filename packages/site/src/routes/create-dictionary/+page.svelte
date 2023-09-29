@@ -124,8 +124,7 @@
 
 <svelte:window bind:online />
 
-<Header
->{$t('create.create_new_dictionary', {
+<Header>{$t('create.create_new_dictionary', {
   default: 'Create New Dictionary',
 })}</Header>
 
@@ -392,9 +391,7 @@
         {$t('terms.agree_by_submit', {
           default: 'By submitting this form, you agree to our',
         })}
-        <a href="/terms" class="underline" target="_blank"
-        >{$t('dictionary.terms_of_use', { default: 'Terms of Use' })}</a
-        >.
+        <a href="/terms" class="underline" target="_blank">{$t('dictionary.terms_of_use', { default: 'Terms of Use' })}</a>.
       </div>
       <div class="mb-6" />
     {/if}
