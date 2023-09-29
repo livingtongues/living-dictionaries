@@ -60,11 +60,18 @@
   }
 </script>
 
-<ModalEditableArray values={dialects} options={$options} {canEdit} canWriteIn {showPlus} placeholder={$t('entry.di')} on:update={({ detail: newValue }) => {
-  dispatch('valueupdate', {
-    field: EntryFields.dialects,
-    newValue,
-  });
-}}>
+<ModalEditableArray
+  values={dialects}
+  options={$options}
+  {canEdit}
+  canWriteIn
+  {showPlus}
+  placeholder={$t('entry.di')}
+  on:update={({ detail: newValue }) => {
+    dispatch('valueupdate', {
+      field: EntryFields.dialects,
+      newValue,
+    });
+  }}>
   <span slot="heading">{$t('entry.di')}</span>
 </ModalEditableArray>

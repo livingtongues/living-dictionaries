@@ -72,8 +72,7 @@
   let:value={points}
   let:add
   let:size
-  let:remove
->
+  let:remove>
   <Modal on:close noscroll>
     <span slot="heading">
       {t ? $t('create.select_region') : 'Select Region'}
@@ -85,16 +84,14 @@
           lat={centerLat}
           {zoom}
           on:click={({ detail: { lng, lat } }) =>
-            add({ longitude: lng, latitude: lat })}
-        >
+            add({ longitude: lng, latitude: lat })}>
           <slot />
           <NavigationControl />
           <Geocoder
             options={{ marker: false }}
             placeholder={t ? $t('about.search') : 'Search'}
             on:result={(e) => handleGeocoderResult(e, add)}
-            on:error={(e) => console.error(e.detail)}
-          />
+            on:error={(e) => console.error(e.detail)} />
           {#each Array.from(points) as point (point)}
             <Marker
               draggable
@@ -103,16 +100,13 @@
                 add({ longitude: lng, latitude: lat });
               }}
               lng={point.longitude}
-              lat={point.latitude}
-            >
+              lat={point.latitude}>
               <Popup>
                 <Button
                   form="simple"
                   size="sm"
                   color="red"
-                  onclick={() => remove(point)}
-                ><span class="i-fa-trash-o" /></Button
-                >
+                  onclick={() => remove(point)}><span class="i-fa-trash-o" /></Button>
               </Popup>
             </Marker>
           {/each}
@@ -125,8 +119,7 @@
                   coordinates: polygonFeatureCoordinates(points),
                 },
                 properties: undefined,
-              }}
-            >
+              }}>
               <Layer
                 options={{
                   type: 'fill',
@@ -134,8 +127,7 @@
                     'fill-color': randomColor(),
                     'fill-opacity': 0.5,
                   },
-                }}
-              />
+                }} />
               <Layer
                 options={{
                   type: 'line',
@@ -143,8 +135,7 @@
                     'line-color': '#555555',
                     'line-width': 1,
                   },
-                }}
-              />
+                }} />
             </GeoJSONSource>
           {/if}
           <ToggleStyle />

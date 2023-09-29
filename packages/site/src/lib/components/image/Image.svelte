@@ -42,9 +42,11 @@
   }>();
 </script>
 
-<svelte:window bind:innerWidth={windowWidth} on:keydown={(e) => {
-  if (e.key === 'Escape') viewing = false;
-}} />
+<svelte:window
+  bind:innerWidth={windowWidth}
+  on:keydown={(e) => {
+    if (e.key === 'Escape') viewing = false;
+  }} />
 
 {#if !viewing}
   <div class="h-full w-full relative">

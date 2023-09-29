@@ -64,8 +64,7 @@
             <span class="i-fa6-solid-chevron-right rtl-x-flip -mt-1" />
           </Button>
         {:else}
-          <Button form="filled" onclick={() => acceptInvite(invite.role)}
-          >{$_('invite.accept_invitation', {
+          <Button form="filled" onclick={() => acceptInvite(invite.role)}>{$_('invite.accept_invitation', {
             default: 'Accept Invitation',
           })}</Button>
 

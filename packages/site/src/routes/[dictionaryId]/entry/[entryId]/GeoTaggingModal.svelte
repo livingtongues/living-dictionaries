@@ -73,8 +73,7 @@
       {#each coordinates?.points || [] as point, index (point)}
         <Marker
           lat={point.coordinates.latitude}
-          lng={point.coordinates.longitude}
-        >
+          lng={point.coordinates.longitude}>
           <Popup>
             <ShowHide let:show let:toggle>
               <Button form="simple" size="sm" onclick={toggle}>
@@ -99,8 +98,7 @@
                     points.splice(index, 1);
                     savePoints(points);
                   }}
-                  on:close={toggle}
-                />
+                  on:close={toggle} />
               {/if}
             </ShowHide>
           </Popup>
@@ -127,8 +125,7 @@
                   regions.splice(index, 1);
                   saveRegions(regions);
                 }}
-                on:close={toggle}
-              />
+                on:close={toggle} />
             {/if}
           </ShowHide>
         </Region>
@@ -153,8 +150,7 @@
                 const points = [...(coordinates?.points || []), newPoint];
                 savePoints(points);
               }}
-              on:close={toggle}
-            />
+              on:close={toggle} />
           {/if}
         </InitableShowHide>
 

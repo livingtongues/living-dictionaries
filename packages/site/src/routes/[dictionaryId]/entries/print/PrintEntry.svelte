@@ -79,8 +79,7 @@
       {#if entry[key] && selectedFields[key]}
         <p>
           {#if showLabels}
-            <span class="italic text-[80%]"
-            >{$t(`entry.${key}`, { default: StandardPrintFields[key] })}:</span>
+            <span class="italic text-[80%]">{$t(`entry.${key}`, { default: StandardPrintFields[key] })}:</span>
           {/if}
           {#if key === 'nt'}
             {@html sanitize(entry[key])}
