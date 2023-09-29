@@ -4,13 +4,17 @@
 import typescriptParser from '@typescript-eslint/parser'
 import sveltePlugin from 'eslint-plugin-svelte'
 import svelteParser from 'svelte-eslint-parser'
-import { defineFlatConfig } from 'eslint-define-config'
+import svelteStylistic from 'eslint-plugin-svelte-stylistic'
 
-export const svelte = defineFlatConfig({
-  // @ts-ignore
+/**
+ * @type {import('eslint-define-config').FlatESLintConfigItem}
+ */
+export const svelte = {
   files: ['**/*.svelte', '**/*.svx'],
   plugins: {
+    /** @type {any} */
     svelte: sveltePlugin,
+    'svelte-stylistic': svelteStylistic,
   },
   languageOptions: {
     parser: svelteParser,
@@ -21,8 +25,11 @@ export const svelte = defineFlatConfig({
       '$$Generic': 'readonly',
     },
   },
+  // @ts-ignore
   rules: {
-    // https://sveltejs.github.io/eslint-plugin-svelte/rules/
+    'svelte-stylistic/brackets-same-line': 'error',
+    'svelte-stylistic/consistent-attribute-lines': 'error',
+
     ...sveltePlugin.configs.base.overrides[0].rules,
     ...sveltePlugin.configs.recommended?.rules,
     'svelte/valid-compile': ['error', { 'ignoreWarnings': true }], // throws error on a11y issues
@@ -45,4 +52,4 @@ export const svelte = defineFlatConfig({
 
     'no-unused-expressions': 'off',
   },
-})
+}
