@@ -29,13 +29,10 @@
 
   {#if $isManager}
     {#if editing}
-      <Button class="mb-2" onclick={() => (editing = false)}
-      >{$t('misc.cancel', { default: 'Cancel' })}</Button>
-      <Button class="mb-2" form="filled" onclick={save}
-      >{$t('misc.save', { default: 'Save' })}</Button>
+      <Button class="mb-2" onclick={() => (editing = false)}>{$t('misc.cancel', { default: 'Cancel' })}</Button>
+      <Button class="mb-2" form="filled" onclick={save}>{$t('misc.save', { default: 'Save' })}</Button>
     {:else}
-      <Button class="mb-2" onclick={() => (editing = true)}
-      >{$t('misc.edit', { default: 'Edit' })}</Button>
+      <Button class="mb-2" onclick={() => (editing = true)}>{$t('misc.edit', { default: 'Edit' })}</Button>
     {/if}
   {/if}
 

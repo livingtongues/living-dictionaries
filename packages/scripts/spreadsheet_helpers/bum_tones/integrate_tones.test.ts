@@ -102,7 +102,7 @@ describe('integrate_tones_to_bum_phonetics', () => {
   const created_contents = readFileSync(fixturesFilePath, 'utf8');
   const expected_contents = `àbâ\nàbâh\nábâm\nàbâŋ\nabehi\nàbɛ̂n\nàbə̂h\nàbə̂h\nàbî\nábìn\nàbɔ̂ŋ\nabɔŋ\nábúk`;
 
-  test('File written successfully', () => {
+  test('file written successfully', () => {
     integrate_tones_to_bum_phonetics(
       test_words,
       test_tones,
@@ -111,13 +111,13 @@ describe('integrate_tones_to_bum_phonetics', () => {
     expect(created_contents).toEqual(expected_contents);
   });
 
-  test('Tones and phonetics don\'t match', () => {
+  test('tones and phonetics don\'t match', () => {
     expect(() =>
       integrate_tones_to_bum_phonetics(
         test_words,
         test_tones.slice(0, test_tones.length - 1),
         fixturesFilePath
       )
-    ).toThrowError('Tones and phonetics have to correspond to each other');
+    ).toThrow('Tones and phonetics have to correspond to each other');
   });
 });

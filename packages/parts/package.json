@@ -17,7 +17,7 @@
     "test": "vitest -u"
   },
   "devDependencies": {
-    "@iconify/json": "^2.2.94",
+    "@iconify/json": "^2.2.121",
     "@julr/unocss-preset-forms": "^0.0.5",
     "@living-dictionaries/types": "^1.0.0",
     "@resvg/resvg-js": "^2.2.0",

@@ -1,9 +1,9 @@
 import { stripHTMLTags } from './stripHTMLTags';
 
-test('Simple text wrapped in HTML tags', () =>
+test('simple text wrapped in HTML tags', () =>
   expect(stripHTMLTags('<strong>test</strong>')).toBe('test'));
 
-test('Simple text wrapped in HTML tags with styles', () =>
+test('simple text wrapped in HTML tags with styles', () =>
   expect(
     stripHTMLTags(
       '<p><strong>testing </strong><i><strong>just </strong></i><span style="font-variant:small-caps;"><strong>testing</strong></span></p>'

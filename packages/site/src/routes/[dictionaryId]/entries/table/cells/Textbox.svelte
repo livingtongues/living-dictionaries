@@ -24,8 +24,7 @@
     class:italic={field === 'scientific_names' && !value?.includes('<i>')}
     class="h-full"
     style="padding: 0.1em 0.25em"
-    on:click={() => set(canEdit)}
-  >
+    on:click={() => set(canEdit)}>
     {@html sanitizedHtml}
     &nbsp;
   </div>
@@ -38,8 +37,7 @@
         {field}
         {display}
         {bcp}
-        on:close={toggle}
-      />
+        on:close={toggle} />
     {/await}
   {/if}
 </ShowHide>
