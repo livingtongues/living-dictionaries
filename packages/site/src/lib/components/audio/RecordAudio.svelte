@@ -109,8 +109,7 @@
       </div>
 
       <div>
-        <Button class="mt-1" size="sm" onclick={() => location.reload()}
-        >{$_('audio.reload', { default: 'Reload' })}</Button>
+        <Button class="mt-1" size="sm" onclick={() => location.reload()}>{$_('audio.reload', { default: 'Reload' })}</Button>
         <Button
           size="sm"
           class="mt-1"

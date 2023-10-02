@@ -7,7 +7,6 @@
   // const sessionStorageCache =
   // instantsearch.createInfiniteHitsSessionStorageCache();
 
-  // eslint-disable-next-line no-undef
   type T = $$Generic;
   export let hitsType: T;
 

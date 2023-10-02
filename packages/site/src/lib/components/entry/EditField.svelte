@@ -174,8 +174,7 @@
         class="mt-1"
         size="sm"
         form="simple"
-        onclick={() => (value = smallCapsSelection(inputEl))}
-      >Toggle sᴍᴀʟʟCᴀᴘs for selection</Button>
+        onclick={() => (value = smallCapsSelection(inputEl))}>Toggle sᴍᴀʟʟCᴀᴘs for selection</Button>
     {/if}
 
     {#if field === 'scientific_names'}

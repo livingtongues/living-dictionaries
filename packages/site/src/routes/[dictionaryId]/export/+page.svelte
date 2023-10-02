@@ -134,8 +134,7 @@
 
 {#if $admin}
   <div class="mt-5">
-    <Button form="filled" href="entries/print"
-    >{$_('export.download_pdf', { default: 'Download PDF' })}</Button>
+    <Button form="filled" href="entries/print">{$_('export.download_pdf', { default: 'Download PDF' })}</Button>
   </div>
 {/if}
 
