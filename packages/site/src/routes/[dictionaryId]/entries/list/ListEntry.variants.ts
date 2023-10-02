@@ -6,7 +6,7 @@ import { mock_expanded_entries } from '$lib/mocks/entries';
 export const variants: Variants<Component> = [...mock_expanded_entries.map(variant => {
   return {
     name: variant.name,
-    height: 130,
+    // height: 130,
     props: {
       dictionary: basic_mock_dictionary,
       entry: variant.entry,
@@ -17,7 +17,7 @@ export const variants: Variants<Component> = [...mock_expanded_entries.map(varia
 }),
 {
   name: 'video access',
-  height: 110,
+  // height: 110,
   props: {
     dictionary: basic_mock_dictionary,
     entry: mock_expanded_entries[1].entry,
@@ -28,7 +28,7 @@ export const variants: Variants<Component> = [...mock_expanded_entries.map(varia
 {
   name: 'jewish-neo-aramaic',
   description: 'This dictionary has an exception where we show dialects and example sentences in the list view.',
-  height: 190,
+  // height: 190,
   props: {
     dictionary: {
       id: 'jewish-neo-aramaic',

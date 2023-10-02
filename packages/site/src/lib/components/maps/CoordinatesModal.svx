@@ -1,0 +1,53 @@
+<script lang="ts">
+  import { Story } from 'kitbook';
+  import CoordinatesModal from './CoordinatesModal.svelte';
+  import LatLngDisplay from './LatLngDisplay.svelte';
+  import { Button, ShowHide } from 'svelte-pieces';
+</script>
+
+
+# Coordinates Modal
+
+We record points to the 4th decimal point: handheld GPS accuracy.
+
+The 3rd decimal point is what we used previously for saving geopoints: 111 meters and is currently what we use for displaying static maps.
+
+For more info: https://gis.stackexchange.com/questions/8650/measuring-accuracy-of-latitude-and-longitude and https://gisjames.wordpress.com/2016/04/27/deciding-how-many-decimal-places-to-include-when-reporting-latitude-and-longitude/
+
+<Story
+  name="Passing Coordinates In"
+  knobs={{ lat: '-90-90;7', lng: '-180-180;1' }}
+  let:props={{ lat, lng }}
+  let:set>
+  <ShowHide let:show let:toggle>
+    <Button onclick={toggle}>Modify Coordinates:
+      <LatLngDisplay lat={+lat} lng={+lng} /></Button>
+    {#if show}
+      <CoordinatesModal
+        lng={+lng}
+        lat={+lat}
+        on:update={(event) => {
+          set('lat', event.detail.lat);
+          set('lng', event.detail.lng);
+        }}
+        on:remove={() => {
+          set('lat', 0);
+          set('lng', 0);
+        }}
+        on:close={toggle} />
+    {/if}
+  </ShowHide>
+</Story>
+
+<Story name="Passing Undefined">
+  <ShowHide let:show let:toggle>
+    <Button onclick={toggle}>Add Coordinates</Button>
+    {#if show}
+      <CoordinatesModal
+        lng={undefined}
+        lat={undefined}
+        on:update={(event) => alert(`set: ${event.detail.lat}, ${event.detail.lng}`)}
+        on:close={toggle} />
+    {/if}
+  </ShowHide>
+</Story>

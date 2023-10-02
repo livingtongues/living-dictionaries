@@ -31,7 +31,8 @@
             <button type="button" on:click={logOut}>{$t('account.log_out', { default: 'Log Out' })}</button>
           {/if}
           {#if firebaseConfig.projectId === 'talking-dictionaries-dev'}
-            <button type="button"
+            <button
+              type="button"
               on:click={async () => {
                 const roleNumber = +prompt('Enter 0, 1, or 2');
                 const { getFunctions, httpsCallable } = await import('firebase/functions');

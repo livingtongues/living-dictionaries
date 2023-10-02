@@ -33,4 +33,4 @@ test('truncateAuthors shows the full name if no comma is used', () =>
     '"James Rock, et al., "'
   ));
 
-test('Handles undefined', () => expect(truncateAuthors(undefined)).toMatchInlineSnapshot('""'));
+test('handles undefined', () => expect(truncateAuthors(undefined)).toMatchInlineSnapshot('""'));

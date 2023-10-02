@@ -5,10 +5,10 @@
   import { BadgeArrayEmit, ShowHide, Button } from 'svelte-pieces';
   import { createEventDispatcher } from 'svelte';
   import { updateOnline } from 'sveltefirets';
-  import { LatLngDisplay } from '@living-dictionaries/parts';
   import ContributorInvitationStatus from '$lib/components/contributors/ContributorInvitationStatus.svelte';
   import RolesManagment from './RolesManagment.svelte';
   import type { DictionaryWithHelperStores } from './dictionaryWithHelpers';
+  import LatLngDisplay from '$lib/components/maps/LatLngDisplay.svelte';
 
   export let index: number;
   export let dictionary: DictionaryWithHelperStores;
@@ -25,7 +25,7 @@
 </script>
 
 <td class="relative">
-  <span class="absolute top-0 left-0 text-xs text-gray-400">{index + 1}</span>
+  <span on:click={() => window.open(`/${dictionary.id}`)} class="absolute top-0 left-0 text-xs text-gray-400 cursor-pointer">{index + 1}</span>
   <DictionaryFieldEdit field={'name'} value={dictionary.name} dictionaryId={dictionary.id} />
 </td>
 <td>
@@ -110,7 +110,7 @@
       {:else}<b>Add</b>{/if}
     </Button>
     {#if show}
-      {#await import('@living-dictionaries/parts/src/lib/maps/CoordinatesModal.svelte') then { default: CoordinatesModal }}
+      {#await import('$lib/components/maps/CoordinatesModal.svelte') then { default: CoordinatesModal }}
         <CoordinatesModal
           lng={dictionary.coordinates ? dictionary.coordinates.longitude : undefined}
           lat={dictionary.coordinates ? dictionary.coordinates.latitude : undefined}
@@ -162,19 +162,16 @@
     {dictionary.videoAccess ? 'Can Record' : 'Give Access'}
   </Button>
 </td>
-<td
->{dictionary.languageUsedByCommunity !== undefined
+<td>{dictionary.languageUsedByCommunity !== undefined
   ? dictionary.languageUsedByCommunity
   : ''}</td>
 <td>{dictionary.communityPermission ? dictionary.communityPermission : ''}</td>
 
-<td
-><div style="width: 300px;" />
+<td><div style="width: 300px;" />
   {dictionary.authorConnection ? dictionary.authorConnection : ''}</td>
 <td>
   <div style="width: 300px;" />
   {dictionary.conLangDescription ? dictionary.conLangDescription : ''}</td>
 {#if $admin > 1}
-  <td class="cursor-pointer" title={JSON.stringify(dictionary, null, 1)}
-  ><span class="i-material-symbols-info-outline" /></td>
+  <td class="cursor-pointer" title={JSON.stringify(dictionary, null, 1)}><span class="i-material-symbols-info-outline" /></td>
 {/if}

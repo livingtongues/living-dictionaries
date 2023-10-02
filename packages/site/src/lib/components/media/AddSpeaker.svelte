@@ -31,8 +31,7 @@
 </script>
 
 <Modal on:close>
-  <span slot="heading"
-  >{$t('speakers.add_new_speaker', {
+  <span slot="heading">{$t('speakers.add_new_speaker', {
     default: 'Add New Speaker',
   })}
   </span>

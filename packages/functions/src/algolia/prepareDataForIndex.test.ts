@@ -14,7 +14,7 @@ const base_algolia_entry: AlgoliaEntry = {
   hasPluralForm: false,
 };
 
-describe('prepareDataForIndex', () => {
+describe(prepareDataForIndex, () => {
   test('sets all "has___" fields to false by default', async () => {
     const db_entry: ActualDatabaseEntry = {};
     expect(await prepareDataForIndex(db_entry, dictId, null)).toEqual(base_algolia_entry);
