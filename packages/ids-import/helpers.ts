@@ -30,3 +30,11 @@ function create_unique_ids(chapter_id_column_values: any[], entry_id_column_valu
 
   return concatenated_data_with_suffixes;
 }
+
+if (import.meta.vitest) {
+  describe(create_unique_ids, () => {
+    test('start', () => {
+      expect('a').toEqual('a');
+    });
+  });
+}

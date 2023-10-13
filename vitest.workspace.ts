@@ -5,4 +5,5 @@ export default defineWorkspace([
   'packages/parts/vitest.config.ts',
   'packages/scripts/vitest.config.ts',
   'packages/functions/vitest.config.ts',
+  'packages/ids-import/vitest.config.ts',
 ])
