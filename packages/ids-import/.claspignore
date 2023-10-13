@@ -5,3 +5,5 @@ clasp-push.js
 node_modules/**
 node_modules/**/.*/**
 node_modules/**/.*
+interfaces.ts
+vitest.config.ts
