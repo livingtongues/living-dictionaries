@@ -45,5 +45,5 @@ afterAll(async () => {
 
 test('foo', async () => {
   await getAdminFirestore().doc('users/123').set({ id: 123, name: 'John' });
-  expect(true).toBe(true);
+  expect(true).toBeTruthy();
 });

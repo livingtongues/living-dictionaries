@@ -58,7 +58,7 @@ describe(get_semantic_domain_headers, () => {
 });
 
 describe(get_gloss_language_headers, () => {
-  test('Using full name or bcp if it no name exists', () => {
+  test('uses full name or bcp if it no name exists', () => {
     const gloss_languages = ['en', 'es', 'af'];
     expect(get_gloss_language_headers(gloss_languages)).toEqual({
       en_gloss_language: 'English Gloss',
@@ -66,11 +66,11 @@ describe(get_gloss_language_headers, () => {
       af_gloss_language: 'af Gloss',
     });
   });
-  test('Doesn\'t assign gloss languages if empty array', () => {
+  test('doesn\'t assign gloss languages if empty array', () => {
     const gloss_languages = [];
     expect(get_gloss_language_headers(gloss_languages)).toEqual({});
   });
-  test('Doesn\'t assign gloss languages if null', () => {
+  test('doesn\'t assign gloss languages if null', () => {
     const gloss_languages = null;
     expect(get_gloss_language_headers(gloss_languages)).toEqual({});
   });
@@ -86,14 +86,14 @@ describe(get_example_sentence_headers, () => {
       af_example_sentence: 'Example sentence in af',
     });
   });
-  test('Assigns only verncaular if empty array', () => {
+  test('assigns only verncaular if empty array', () => {
     const gloss_languages = [];
     const dictionary_name = 'Baz';
     expect(get_example_sentence_headers(gloss_languages, dictionary_name)).toEqual({
       vernacular_example_sentence: 'Example sentence in Baz',
     });
   });
-  test('Doesn\'t assign gloss languages if null', () => {
+  test('doesn\'t assign gloss languages if null', () => {
     const gloss_languages = null;
     const dictionary_name = 'Boo';
     expect(get_example_sentence_headers(gloss_languages, dictionary_name)).toEqual({

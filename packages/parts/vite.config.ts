@@ -1,17 +1,11 @@
 import { sveltekit } from '@sveltejs/kit/vite';
 import { defineConfig } from 'vite';
-import path from 'path';
 
 export default defineConfig({
   plugins: [
     sveltekit(),
     rawFonts(['.ttf'])
   ],
-  resolve: {
-    alias: {
-      '@living-dictionaries/parts': path.resolve('./src/lib'),
-    },
-  },
   define: {
     'import.meta.vitest': false,
   },

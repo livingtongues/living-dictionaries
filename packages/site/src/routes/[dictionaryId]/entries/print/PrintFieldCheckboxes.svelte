@@ -31,8 +31,7 @@
 {#each fieldsThatExist as field}
   <div class="flex items-center mr-3 mb-1">
     <input id={field} type="checkbox" bind:checked={$preferredPrintFields[field]} />
-    <label class="ml-1 text-sm text-gray-700" for={field}
-    >{$t(`entry.${field}`, { default: field })}</label>
+    <label class="ml-1 text-sm text-gray-700" for={field}>{$t(`entry.${field}`, { default: field })}</label>
   </div>
 {/each}
 

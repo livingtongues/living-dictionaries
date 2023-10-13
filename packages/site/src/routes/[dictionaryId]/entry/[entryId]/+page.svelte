@@ -8,28 +8,34 @@
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte';
   import { seo_description } from './seo_description';
   import { convert_and_expand_entry } from '$lib/transformers/convert_and_expand_entry';
+  import { navigating } from '$app/stores';
+  import { onMount } from 'svelte';
 
   export let data;
-  $: ({ admin,
+  $: ({
+    admin,
     algoliaQueryParams,
     canEdit,
     dictionary,
     isContributor,
     isManager,
     user,
-    initialEntry } = data);
+    initialEntry,
+  } = data);
 
   $: entry = $locale && convert_and_expand_entry($initialEntry); // adding locale triggers update of translated semantic domains and parts of speech
+  let backUrl: string;
+  onMount(() => {
+    backUrl = $navigating?.from?.url.href
+      ? `${$navigating.from.url.href}${$algoliaQueryParams}`
+      : `/${$dictionary.id}/entries/list${$algoliaQueryParams}`;
+  });
 </script>
 
 <div
   class="flex justify-between items-center mb-3 md:top-12 sticky top-0 z-30
     bg-white pt-1 -mt-1">
-  <Button
-    class="-ml-2 !px-2"
-    color="black"
-    form="simple"
-    href="/{$dictionary.id}/entries/list{$algoliaQueryParams}">
+  <Button class="-ml-2 !px-2" color="black" form="simple" href={backUrl}>
     <i class="fas fa-arrow-left rtl-x-flip" />
     {$t('misc.back', { default: 'Back' })}
   </Button>
@@ -42,7 +48,8 @@
       <Button
         color="red"
         form="simple"
-        onclick={() => deleteEntry($initialEntry, $dictionary.id, $algoliaQueryParams)}>
+        onclick={() =>
+          deleteEntry($initialEntry, $dictionary.id, $algoliaQueryParams)}>
         <span class="hidden md:inline">
           {$t('misc.delete', { default: 'Delete' })}
         </span>
@@ -63,7 +70,13 @@
   canEdit={$canEdit}
   on:deleteImage={() => deleteImage(entry, $dictionary.id)}
   on:deleteVideo={() => deleteVideo(entry, $dictionary.id)}
-  on:valueupdate={({detail: { field, newValue}}) => saveUpdateToFirestore({field, value: newValue, entryId: entry.id, dictionaryId: $dictionary.id})} />
+  on:valueupdate={({ detail: { field, newValue } }) =>
+    saveUpdateToFirestore({
+      field,
+      value: newValue,
+      entryId: entry.id,
+      dictionaryId: $dictionary.id,
+    })} />
 
 <SeoMetaTags
   imageTitle={entry.lx}

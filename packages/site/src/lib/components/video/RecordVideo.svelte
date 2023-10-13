@@ -77,8 +77,7 @@
           <div class="font-semibold font-mono text-2xl">{recordingTime}s</div>
           {$_('audio.stop_recording', { default: 'Stop Recording' })}
         </Button>
-        <Button class="w-full mt-1" color="black" onclick={pause}
-        >{state === 'recording' ? 'Pause' : 'Unpause'}</Button>
+        <Button class="w-full mt-1" color="black" onclick={pause}>{state === 'recording' ? 'Pause' : 'Unpause'}</Button>
       {/if}
     </Recorder>
 
@@ -101,8 +100,7 @@
         browser asks for permission.
       </div>
       <div>
-        <Button form="filled" class="mt-2" onclick={() => location.reload()}
-        >{$_('audio.reload', { default: 'Reload' })}</Button>
+        <Button form="filled" class="mt-2" onclick={() => location.reload()}>{$_('audio.reload', { default: 'Reload' })}</Button>
       </div>
     </div>
 
