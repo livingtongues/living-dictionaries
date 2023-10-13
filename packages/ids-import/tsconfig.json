@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "lib": ["ES2019"],
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "experimentalDecorators": true,
+    "types": [
+      "vitest/globals",
+      "vitest/importMeta"
+    ]
+  },
+  "include": ["**/*.ts"]
+}
