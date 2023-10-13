@@ -112,8 +112,7 @@
         href={audio_url}
         target="_blank">
         <i class="fas fa-download" />
-        <span class="hidden sm:inline"
-        >{$t('misc.download', {
+        <span class="hidden sm:inline">{$t('misc.download', {
           default: 'Download',
         })}</span>
       </Button>
@@ -121,8 +120,7 @@
 
       <Button onclick={() => deleteAudio(entry, $dictionary.id)} color="red">
         <i class="far fa-trash-alt" />&nbsp;
-        <span class="hidden sm:inline"
-        >{$t('misc.delete', {
+        <span class="hidden sm:inline">{$t('misc.delete', {
           default: 'Delete',
         })}</span>
       </Button>

@@ -1,5 +1,5 @@
 {
-  "name": "@living-dictionaries/parts",
+  "name": "parts",
   "version": "0.0.1",
   "description": "Language documentation components and helpers for use in livingdictionaries.app",
   "type": "module",
@@ -17,7 +17,7 @@
     "test": "vitest -u"
   },
   "devDependencies": {
-    "@iconify/json": "^2.2.94",
+    "@iconify/json": "^2.2.121",
     "@julr/unocss-preset-forms": "^0.0.5",
     "@living-dictionaries/types": "^1.0.0",
     "@resvg/resvg-js": "^2.2.0",
@@ -34,7 +34,6 @@
     "@unocss/preset-icons": "^0.53.6",
     "@unocss/svelte-scoped": "^0.53.6",
     "d3-geo": "^3.0.1",
-    "kitbook": "^1.0.0-alpha.32",
     "lz-string": "^1.4.4",
     "mdsvex": "^0.10.6",
     "replace-in-file": "^6.3.5",
@@ -51,7 +50,7 @@
     "typescript": "^5.1.6",
     "unocss": "^0.53.6",
     "vite": "^4.4.7",
-    "vitest": "^0.33.0",
+    "vitest": "^0.34.5",
     "xss": "^1.0.14"
   },
   "repository": {

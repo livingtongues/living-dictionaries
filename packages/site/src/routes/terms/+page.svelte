@@ -15,9 +15,7 @@
       <p>
         These Terms of Use constitute a legally binding agreement made between you, whether
         personally or on behalf of an entity (“you”) and Living Tongues Institute for Endangered
-        Languages ("<strong>Company</strong>", “<strong>we</strong>”, “<strong>us</strong>”, or “<strong
-        >our</strong
-        >”), concerning your access to and use of the https://livingdictionaries.app/ website as
+        Languages ("<strong>Company</strong>", “<strong>we</strong>”, “<strong>us</strong>”, or “<strong>our</strong>”), concerning your access to and use of the https://livingdictionaries.app/ website as
         well as any other media form, media channel, mobile website or mobile application related,
         linked, or otherwise connected thereto (collectively, the “Site”). You agree that by
         accessing the Site, you have read, understood, and agreed to be bound by all of these Terms
@@ -475,8 +473,7 @@
           class="underline"
           href="https://livingtongues.org/privacy-policy/"
           rel="noopener noreferrer"
-          target="_blank">Privacy Policy</a
-        >. By using the Site, you agree to be bound by our Privacy Policy, which is incorporated
+          target="_blank">Privacy Policy</a>. By using the Site, you agree to be bound by our Privacy Policy, which is incorporated
         into these Terms of Use. Please be advised the Site is hosted in the United States. If you
         access the Site from the European Union, Asia, or any other region of the world with laws or
         other requirements governing personal data collection, use, or disclosure that differ from

@@ -21,7 +21,7 @@ test.skip('supportEmail sends email (check email inbox)', () => {
   wrapped(data).then(() => {
     // should spy on email sending function to make sure it was called
     console.log('nothing to assert here, check email to find result of test');
-    expect(true).toBe(true);
+    expect(true).toBeTruthy();
   });
 });
 // test('success', () => {

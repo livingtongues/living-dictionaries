@@ -10,7 +10,7 @@ const columns = setUpColumns(defaultColumns, basic_mock_dictionary);
 export const variants: Variants<Component> = [
   {
     // name: variant.name,
-    height: 600,
+    // height: 600,
     props: {
       columns,
       entries: mock_expanded_entries.map(({entry}) => entry),

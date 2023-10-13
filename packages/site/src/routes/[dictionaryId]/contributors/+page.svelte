@@ -22,8 +22,7 @@
 </script>
 
 <p class="mb-2">
-  <i
-  >{$t('contributors.manager_contributor_distinction', {
+  <i>{$t('contributors.manager_contributor_distinction', {
     default:
       'Note: Dictionary managers may add, edit or delete content. Contributors are project collaborators who can also add and edit, but cannot delete any content.',
   })}</i>
@@ -61,8 +60,7 @@
               updateOnline(`dictionaries/${$dictionary.id}/invites/${invite.id}`, {
                 status: 'cancelled',
               })}>
-            <i slot="prefix"
-            >{$t('contributors.invitation_sent', {
+            <i slot="prefix">{$t('contributors.invitation_sent', {
               default: 'Invitation sent',
             })}:</i>
           </ContributorInvitationStatus>
@@ -125,8 +123,7 @@
               updateOnline(`dictionaries/${$dictionary.id}/invites/${invite.id}`, {
                 status: 'cancelled',
               })}>
-            <i slot="prefix"
-            >{$t('contributors.invitation_sent', {
+            <i slot="prefix">{$t('contributors.invitation_sent', {
               default: 'Invitation sent',
             })}:</i>
           </ContributorInvitationStatus>
@@ -177,8 +174,7 @@
                   `dictionaries/${$dictionary.id}/writeInCollaborators/${collaborator.id}`
                 );
               }
-            }}
-          >{$t('misc.delete', { default: 'Delete' })}
+            }}>{$t('misc.delete', { default: 'Delete' })}
             <i class="fas fa-times" /></Button>
         {/if}
       </div>

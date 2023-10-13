@@ -42,8 +42,7 @@
     queryConstraints={[orderBy('displayName')]}>
     <Filter items={users} let:filteredItems={filteredUsers} placeholder="Search names and emails">
       {#each filteredUsers as user}
-        <Button onclick={async () => await add(user)} color="green" form="simple" class="w-full !text-left"
-        >{user.displayName} <small>({user.email})</small></Button>
+        <Button onclick={async () => await add(user)} color="green" form="simple" class="w-full !text-left">{user.displayName} <small>({user.email})</small></Button>
       {:else}
         <Button size="sm" onclick={() => inviteHelper(role, dictionary)}>Invite New User</Button>
       {/each}
