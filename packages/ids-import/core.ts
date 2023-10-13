@@ -1,18 +1,22 @@
+// @ts-expect-error
 function checkSheet(sheet: GoogleAppsScript.Spreadsheet.Sheet): boolean {
   const [headerRow] = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues();
   return headerRow.includes('en_gloss');
 }
 
+// @ts-expect-error
 function isTSVFile(sheet: GoogleAppsScript.Spreadsheet.Sheet): boolean {
   const sheetName = sheet.getName();
   return sheetName.endsWith('_tsv');
 }
 
+// @ts-expect-error
 function makeHeadersBold(sheet: GoogleAppsScript.Spreadsheet.Sheet): void {
   const headerRange = sheet.getRange(1, 1, 1, sheet.getLastColumn());
   headerRange.setFontWeight('bold');
 }
 
+// @ts-expect-error
 function modifyTSVHeaders(sheet: GoogleAppsScript.Spreadsheet.Sheet): void {
   const [header_row] = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues();
   const modified_rows = header_row.map((hr) => {
@@ -24,6 +28,7 @@ function modifyTSVHeaders(sheet: GoogleAppsScript.Spreadsheet.Sheet): void {
   sheet.getRange(1, 1, 1, modified_rows.length).setValues([modified_rows]);
 }
 
+// @ts-expect-error
 function highlightTargetedSemanticDomains(sheet: GoogleAppsScript.Spreadsheet.Sheet): void {
   const targeted_sematic_domains = ['1.5', '2.1', '5.4', '1.4', '6', '9', '2.3', '3.2', '5.9'];
   const highlight_color = '#ffe599';
@@ -63,6 +68,7 @@ function copyGlossToTSV(sheet_info: GlossesSheetData, gloss_data: GlossData): vo
   tsvSheet.getRange(1, first_empty_column, 1, 1).setValue(glossName);
 }
 
+// @ts-expect-error
 function createIDToTSV(sheet: GoogleAppsScript.Spreadsheet.Sheet): void {
   const header_values = get_header_values(sheet);
   const chapter_id_header = header_values.indexOf('chapter_id');
