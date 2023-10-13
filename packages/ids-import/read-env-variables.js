@@ -7,7 +7,7 @@ async function read_env_variables(variables_file, clasp_file) {
     const match_script = variables.match(/SCRIPT_ID=(.+)/);
     const script_id = match_script ? match_script[1] : null;
     const match_root_dir = variables.match(/ROOT_DIRECTORY=(.+)/);
-    const root_dir = match_root_dir ? match_root_dir[1] : null; 
+    const root_dir = match_root_dir ? match_root_dir[1] : null;
 
     if (!script_id) {
       console.error('SCRIPT_ID not found in .env.local');
@@ -19,9 +19,9 @@ async function read_env_variables(variables_file, clasp_file) {
     }
     await fsPromises.writeFile('./temp.json', clasp_content);
     const updatedContent = clasp_content.replace(/SCRIPT_ID|ROOT_DIRECTORY/g, match => {
-      return match === "SCRIPT_ID" ? script_id : root_dir;
+      return match === 'SCRIPT_ID' ? script_id : root_dir;
     });
-    
+
     await fsPromises.writeFile(clasp_file, updatedContent);
   } catch (err) {
     console.error(err);

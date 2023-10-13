@@ -7,6 +7,7 @@ import { typescript } from './lint/typescript.js'
 import { scriptExceptions } from './lint/allowScriptLogs.js'
 import { svelte } from './lint/svelte.js'
 import { vitest } from './lint/vitest.js'
+import { intercontinentalDictionarySeries } from './lint/ids.js'
 
 const ignore = defineFlatConfig({
   ignores: [
@@ -17,15 +18,16 @@ const ignore = defineFlatConfig({
     '**/.svelte-kit**',
     'packages/scripts/import/old**',
     '**/.kitbook/routes/**',
+    // '**/ids-import/**.ts'
   ],
 })
 
-const universal = {
+const universal = defineFlatConfig({
   rules: {
     ...jsEslintPlugin.configs.recommended.rules,
     'indent': ['error', 2],
   },
-}
+})
 
 // @ts-ignore
 export default defineFlatConfig([
@@ -35,7 +37,10 @@ export default defineFlatConfig([
   svelte,
   vitest,
   scriptExceptions,
+  intercontinentalDictionarySeries,
 ])
+
+// ! You must manually restart ESLint for changes to imported files to take effect in the extension.
 
 // learn more
 // https://github.com/AndreaPontrandolfo/sheriff
