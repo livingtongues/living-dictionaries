@@ -10,14 +10,14 @@ const options = {
 spawn('npx', ['clasp', 'push', '-w'], options);
 
 // Listen for the SIGINT signal
-process.on('SIGINT', function() {
-  console.log("Caught interrupt signal, running roll-back-variables.js...");
+process.on('SIGINT', () => {
+  console.info('Caught interrupt signal, running roll-back-variables.js...');
 
   // Spawn a new process to run the roll-back-variables.js script
   const rollback = spawn('node', ['roll-back-variables.js'], options);
 
-  rollback.on('exit', function (code, signal) {
-    console.log('Rollback script exited with ' +
+  rollback.on('exit', (code, signal) => {
+    console.info('Rollback script exited with ' +
                 `code ${code} and signal ${signal}`);
     // End the process
     process.exit();
