@@ -17,7 +17,9 @@ function create_unique_ids(chapter_id_column_values: any[], entry_id_column_valu
   const concatenated_freq = {};
 
   chapter_id_column_values.forEach((cell, i) => {
-    const concatenated = cell + '-' + entry_id_column_values[i];
+    const prefix = Number(cell) <= 9 ? '0' : '';
+    const concatenated = `${prefix}${cell}.${entry_id_column_values[i]}`;
+
     if (concatenated_freq[concatenated] === undefined) {
       concatenated_freq[concatenated] = 1;
       concatenated_data_with_suffixes.push([concatenated]);
@@ -34,7 +36,22 @@ function create_unique_ids(chapter_id_column_values: any[], entry_id_column_valu
 if (import.meta.vitest) {
   describe(create_unique_ids, () => {
     test('start', () => {
-      expect('a').toEqual('a');
+      expect(create_unique_ids(['1', '9', '13', '1'], ['123', '234', '345', '123'])).toEqual(
+        [
+          [
+            '01.123',
+          ],
+          [
+            '09.234',
+          ],
+          [
+            '13.345',
+          ],
+          [
+            '01.123-2',
+          ],
+        ]
+      )
     });
   });
 }
