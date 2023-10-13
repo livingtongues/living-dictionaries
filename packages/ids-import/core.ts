@@ -78,6 +78,7 @@ function createIDToTSV(sheet: GoogleAppsScript.Spreadsheet.Sheet): void {
   const first_empty_column = get_first_empty_column(header_values);
   const first_empty_column_range = sheet.getRange(2, first_empty_column, sheet.getLastRow() - 1, 1);
   const concatenated_data_with_suffixes = create_unique_ids(chapter_id_column_values, entry_id_column_values);
+  first_empty_column_range.setNumberFormat('@'); // converts the entire column in a text column.
 
   first_empty_column_range.setValues(concatenated_data_with_suffixes);
   sheet.getRange(1, first_empty_column, 1, 1).setValue('ID');
