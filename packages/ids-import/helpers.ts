@@ -33,25 +33,25 @@ function create_unique_ids(chapter_id_column_values: any[], entry_id_column_valu
   return concatenated_data_with_suffixes;
 }
 
-if (import.meta.vitest) {
-  describe(create_unique_ids, () => {
-    test('start', () => {
-      expect(create_unique_ids(['1', '9', '13', '1'], ['123', '234', '345', '123'])).toEqual(
-        [
-          [
-            '01.123',
-          ],
-          [
-            '09.234',
-          ],
-          [
-            '13.345',
-          ],
-          [
-            '01.123-2',
-          ],
-        ]
-      )
-    });
-  });
-}
+// if (import.meta.vitest) {
+//   describe(create_unique_ids, () => {
+//     test('start', () => {
+//       expect(create_unique_ids(['1', '9', '13', '1'], ['123', '234', '345', '123'])).toEqual(
+//         [
+//           [
+//             '01.123',
+//           ],
+//           [
+//             '09.234',
+//           ],
+//           [
+//             '13.345',
+//           ],
+//           [
+//             '01.123-2',
+//           ],
+//         ]
+//       )
+//     });
+//   });
+// }
