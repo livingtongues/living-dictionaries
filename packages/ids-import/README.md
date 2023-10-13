@@ -9,3 +9,7 @@ This script automates data import from the previously exported IDS tsv files to 
 3. If it's the first time, type `npx clasp login` to grant permission to handle the spreadsheet you want.
 4. Finally type `npm run clasp:push` to start editing the code. Each time you save any file it will automatically push all the changes to the Apps-script code of your spreadsheet.
 5. Just stop the process when you have finished.
+
+## Notes
+
+Using NPM because Google Apps Script requires it.
