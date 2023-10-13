@@ -1,0 +1,16 @@
+{
+  "name": "apps-script-sheets",
+  "version": "1.0.0",
+  "description": "Code to automate IDS tsv files to our batch import sheets",
+  "type": "module",
+  "scripts": {
+    "clasp:push": "node read-env-variables.js && node clasp-push.js"
+  },
+  "author": "Diego Córdova Nieto",
+  "devDependencies": {
+    "@google/clasp": "^2.4.2",
+    "@types/google-apps-script": "^1.0.66",
+    "typescript": "^5.1.6",
+    "vitest": "^0.34.6"
+  }
+}
