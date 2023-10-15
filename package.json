@@ -23,20 +23,20 @@
 		"check-packages": "pnpm update --interactive --recursive --latest"
 	},
 	"devDependencies": {
-		"@playwright/test": "^1.35.0",
-		"@typescript-eslint/eslint-plugin": "6.7.3",
-		"@typescript-eslint/parser": "6.7.3",
-		"eslint": "^8.50.0",
-		"eslint-define-config": "^1.23.0",
-		"eslint-plugin-svelte": "^2.33.2",
+		"@playwright/test": "^1.39.0",
+		"@typescript-eslint/eslint-plugin": "6.7.5",
+		"@typescript-eslint/parser": "6.7.5",
+		"eslint": "^8.51.0",
+		"eslint-define-config": "^1.24.1",
+		"eslint-plugin-svelte": "^2.34.0",
 		"eslint-plugin-svelte-stylistic": "^0.0.4",
-		"eslint-plugin-vitest": "^0.3.1",
-		"globals": "^13.20.0",
-		"lint-staged": "^13.2.2",
+		"eslint-plugin-vitest": "^0.3.2",
+		"globals": "^13.23.0",
+		"lint-staged": "^15.0.1",
 		"simple-git-hooks": "^2.8.1",
 		"svelte": "^3.55.1",
 		"typescript": "~5.1.6",
-		"vitest": "^0.34.5"
+		"vitest": "^0.34.6"
 	},
 	"simple-git-hooks": {
 		"pre-commit": "npx lint-staged"
