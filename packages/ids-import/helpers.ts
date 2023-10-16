@@ -3,13 +3,7 @@ function get_header_values(sheet: GoogleAppsScript.Spreadsheet.Sheet): string[] 
 }
 
 function get_first_empty_column(header_values: string[]): number {
-  const reversed_header_values = header_values.slice().reverse();
-  return (
-    header_values.length -
-    reversed_header_values.findIndex((value) => {
-      return value === '';
-    })
-  );
+  return header_values.length + 1;
 }
 
 function create_unique_ids(chapter_id_column_values: any[], entry_id_column_values: any[]): any[][] {
@@ -34,6 +28,13 @@ function create_unique_ids(chapter_id_column_values: any[], entry_id_column_valu
 }
 
 if (import.meta.vitest) {
+  describe(get_first_empty_column, () => {
+    test('Get First Empty Column', () => {
+      const header_values = ['chapter_id', 'entry_id', 'meaning', 'Example_Phonemic', 'comment'];
+      expect(get_first_empty_column(header_values)).toEqual(6);
+    })
+  })
+
   describe(create_unique_ids, () => {
     test('start', () => {
       expect(create_unique_ids(['1', '9', '13', '1'], ['123', '234', '345', '123'])).toEqual(
