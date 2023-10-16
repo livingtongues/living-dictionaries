@@ -14,5 +14,6 @@
 3. Open VS Code and pull the repository onto your computer:<br/>
     a) Type `Ctrl + Shift + p` to get VS Code ready to receive a command and enter `Git init` then select a folder where you would like to store the site.<br/>
     b) Type `Ctrl + Shift + p` again and enter `git: clone` followed by `https://github.com/jwrunner/talking-dictionaries` to pull down the code.
-4. Install Node.js (includes NPM).
-5. Next run `npm install` to install all the project's package dependencies and finish setting up your dev environment.
+4. Install Node.js.
+5. Install pnpm
+6. Next run `pnpm install` to install all the project's package dependencies and finish setting up your dev environment.
