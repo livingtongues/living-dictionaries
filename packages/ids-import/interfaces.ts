@@ -12,3 +12,8 @@ interface SemanticDomainsSheetData {
   tsvSheet: GoogleAppsScript.Spreadsheet.Sheet;
   semanticDomainsSheet: GoogleAppsScript.Spreadsheet.Sheet;
 }
+
+interface GetValues {
+  from_sheet: GoogleAppsScript.Spreadsheet.Sheet,
+  columns: string[]
+}
