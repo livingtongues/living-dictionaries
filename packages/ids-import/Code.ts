@@ -8,12 +8,16 @@ function prepareIDSDictionariesToBatchImport() {
       return;
 
     if (isTSVFile(sheet)) {
-      modifyTSVHeaders(sheet);
+      // Logger.log(getValuesAndRanges([{
+      //   from_sheet: sheet,
+      //   columns: ['meaning', 'comment']
+      // }]));
+      // modifyTSVHeaders(sheet);
       createIDToTSV(sheet);
-      copyGlossToTSV({ idsDataSheet, tsvSheet: sheet }, { idsGlossColumn: 'H', glossName: 'es_gloss' });
-      copyGlossToTSV({ idsDataSheet, tsvSheet: sheet }, { idsGlossColumn: 'I', glossName: 'fr_gloss' });
-      copyGlossToTSV({ idsDataSheet, tsvSheet: sheet }, { idsGlossColumn: 'J', glossName: 'po_gloss' });
-      copyGlossToTSV({ idsDataSheet, tsvSheet: sheet }, { idsGlossColumn: 'K', glossName: 'ru_gloss' });
+      copyGlossToTSV({ idsDataSheet, tsvSheet: sheet }, { idsGlossColumn: 'SPANISH', glossName: 'es_gloss' });
+      copyGlossToTSV({ idsDataSheet, tsvSheet: sheet }, { idsGlossColumn: 'FRENCH', glossName: 'fr_gloss' });
+      copyGlossToTSV({ idsDataSheet, tsvSheet: sheet }, { idsGlossColumn: 'PORTUGUESE', glossName: 'po_gloss' });
+      copyGlossToTSV({ idsDataSheet, tsvSheet: sheet }, { idsGlossColumn: 'RUSSIAN', glossName: 'ru_gloss' });
       copySemanticDomainsToTSV({ tsvSheet: sheet, semanticDomainsSheet });
       // style details
       makeHeadersBold(sheet);

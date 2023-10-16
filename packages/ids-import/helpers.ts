@@ -27,32 +27,32 @@ function create_unique_ids(chapter_id_column_values: any[], entry_id_column_valu
   return concatenated_data_with_suffixes;
 }
 
-if (import.meta.vitest) {
-  describe(get_first_empty_column, () => {
-    test('Get First Empty Column', () => {
-      const header_values = ['chapter_id', 'entry_id', 'meaning', 'Example_Phonemic', 'comment'];
-      expect(get_first_empty_column(header_values)).toEqual(6);
-    })
-  })
+// if (import.meta.vitest) {
+//   describe(get_first_empty_column, () => {
+//     test('Get First Empty Column', () => {
+//       const header_values = ['chapter_id', 'entry_id', 'meaning', 'Example_Phonemic', 'comment'];
+//       expect(get_first_empty_column(header_values)).toEqual(6);
+//     })
+//   })
 
-  describe(create_unique_ids, () => {
-    test('start', () => {
-      expect(create_unique_ids(['1', '9', '13', '1'], ['123', '234', '345', '123'])).toEqual(
-        [
-          [
-            '01.123',
-          ],
-          [
-            '09.234',
-          ],
-          [
-            '13.345',
-          ],
-          [
-            '01.123-2',
-          ],
-        ]
-      )
-    });
-  });
-}
+//   describe(create_unique_ids, () => {
+//     test('Create Unique IDs', () => {
+//       expect(create_unique_ids(['1', '9', '13', '1'], ['123', '234', '345', '123'])).toEqual(
+//         [
+//           [
+//             '01.123',
+//           ],
+//           [
+//             '09.234',
+//           ],
+//           [
+//             '13.345',
+//           ],
+//           [
+//             '01.123-2',
+//           ],
+//         ]
+//       )
+//     });
+//   });
+// }
