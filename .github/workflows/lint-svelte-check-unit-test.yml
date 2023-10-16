@@ -45,7 +45,9 @@ jobs:
 
       - name: Install Dependencies
         run: pnpm install --no-frozen-lockfile
-
+      - name: Change Kitbook from local usage to pulling from NPM repository
+        run: pnpm install -F site kitbook@alpha
+      
       - run: pnpm -F site sync
       
       - name: Svelte Check Site

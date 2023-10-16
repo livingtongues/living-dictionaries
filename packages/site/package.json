@@ -6,7 +6,7 @@
   "main": "src/lib/index.ts",
   "scripts": {
     "dev": "vite dev",
-    "build": "vite build",
+    "build": "pnpm install -F site kitbook@alpha && vite build",
     "preview": "vite preview",
     "sync": "svelte-kit sync",
     "check": "svelte-check --tsconfig ./tsconfig.json --threshold error --diagnostic-sources js,svelte",
