@@ -17,13 +17,14 @@ function getValuesFromColumns(values_from_columns: ValuesFromColumns[]): string[
   });
   return values;
 }
-
+//TODO merge these two functions might be better
 function getRangesFromColumns(ranges_from_columns: RangesFromColumns[]): GoogleAppsScript.Spreadsheet.Range[] {
   const ranges = []
   ranges_from_columns.forEach((element) => {
-    const {from_sheet, columns} = element;
+    const {from_sheet, columns, are_columns_numbers} = element;
+    const header_values = get_header_values(from_sheet);
     columns.forEach((column) => {
-      ranges.push(from_sheet.getRange(2, column, from_sheet.getLastRow() - 1, 1));
+      ranges.push(from_sheet.getRange(2, are_columns_numbers ? column : header_values.indexOf(column) + 1, from_sheet.getLastRow() - 1, 1));
     })
   });
   return ranges;

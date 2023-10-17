@@ -20,5 +20,6 @@ interface ValuesFromColumns {
 
 interface RangesFromColumns {
   from_sheet: GoogleAppsScript.Spreadsheet.Sheet,
-  columns: number[]
+  columns: number[] | string[],
+  are_columns_numbers?: boolean
 }
