@@ -1,7 +1,7 @@
 // @ts-check
 import { vitePreprocess } from '@sveltejs/kit/vite';
 import adapter from '@sveltejs/adapter-auto';
-import { mdsvex, MDSVEX_EXTENSIONS, KITBOOK_MDSVEX_CONFIG } from 'kitbook/plugins/vite';
+import { mdsvex, MDSVEX_EXTENSIONS, KITBOOK_MDSVEX_CONFIG } from 'kitbook/plugins/mdsvex';
 
 /** @type {import('@sveltejs/kit').Config} */
 const config = {
