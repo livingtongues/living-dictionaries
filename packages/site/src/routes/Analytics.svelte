@@ -2,8 +2,7 @@
   import { onMount } from 'svelte';
   import { page } from '$app/stores';
 
-  // const analyticsId = import.meta.env.VERCEL_ANALYTICS_ID as string;
-  const analyticsId = 'unknown'
+  const analyticsId = 'REPLACED_WITH_VERCEL_ANALYTICS_ID';
 
   onMount(async () => {
     if (analyticsId) {
