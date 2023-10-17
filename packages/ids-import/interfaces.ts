@@ -15,11 +15,7 @@ interface SemanticDomainsSheetData {
 
 interface ValuesFromColumns {
   from_sheet: GoogleAppsScript.Spreadsheet.Sheet,
-  columns: string[]
-}
-
-interface RangesFromColumns {
-  from_sheet: GoogleAppsScript.Spreadsheet.Sheet,
-  columns: number[] | string[],
-  are_columns_numbers?: boolean
+  columns: string[] | number[],
+  are_columns_numbers?: boolean,
+  is_range?: boolean
 }

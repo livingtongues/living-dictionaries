@@ -6,28 +6,24 @@ function get_first_empty_column(header_values: string[]): number {
   return header_values.length + 1;
 }
 
-function getValuesFromColumns(values_from_columns: ValuesFromColumns[]): string[][][] {
+function getValuesFromColumns(values_from_columns: ValuesFromColumns[]): string[][][] | GoogleAppsScript.Spreadsheet.Range[] {
   const values = []
   values_from_columns.forEach((element) => {
-    const {from_sheet, columns} = element;
+    const {from_sheet, columns, are_columns_numbers, is_range} = element;
     const header_values = get_header_values(from_sheet);
     columns.forEach((column) => {
-      values.push(from_sheet.getRange(2, header_values.indexOf(column) + 1, from_sheet.getLastRow() - 1, 1).getValues());
-    })
+      const ranges = from_sheet.getRange(
+        2,
+        are_columns_numbers ? column : header_values.indexOf(column) + 1,
+        from_sheet.getLastRow() - 1,
+        1);
+      if(is_range)
+        values.push(ranges);
+      else
+        values.push(ranges.getValues());
+    });
   });
   return values;
-}
-//TODO merge these two functions might be better
-function getRangesFromColumns(ranges_from_columns: RangesFromColumns[]): GoogleAppsScript.Spreadsheet.Range[] {
-  const ranges = []
-  ranges_from_columns.forEach((element) => {
-    const {from_sheet, columns, are_columns_numbers} = element;
-    const header_values = get_header_values(from_sheet);
-    columns.forEach((column) => {
-      ranges.push(from_sheet.getRange(2, are_columns_numbers ? column : header_values.indexOf(column) + 1, from_sheet.getLastRow() - 1, 1));
-    })
-  });
-  return ranges;
 }
 
 function create_unique_ids(chapter_id_column_values: any[], entry_id_column_values: any[]): any[][] {
