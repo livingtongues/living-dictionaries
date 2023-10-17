@@ -8,11 +8,7 @@ function prepareIDSDictionariesToBatchImport() {
       return;
 
     if (isTSVFile(sheet)) {
-      // Logger.log(getValuesAndRanges([{
-      //   from_sheet: sheet,
-      //   columns: ['meaning', 'comment']
-      // }]));
-      // modifyTSVHeaders(sheet);
+      modifyTSVHeaders(sheet);
       createIDToTSV(sheet);
       copyGlossToTSV({ idsDataSheet, tsvSheet: sheet }, { idsGlossColumn: 'SPANISH', glossName: 'es_gloss' });
       copyGlossToTSV({ idsDataSheet, tsvSheet: sheet }, { idsGlossColumn: 'FRENCH', glossName: 'fr_gloss' });
