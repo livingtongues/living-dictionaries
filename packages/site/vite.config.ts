@@ -3,6 +3,8 @@ import { defineConfig } from 'vite';
 import UnoCSS from '@unocss/svelte-scoped/vite';
 import { kitbook } from 'kitbook/plugins/vite';
 
+console.info({ VERCEL_ANALYTICS_ID: process.env.VERCEL_ANALYTICS_ID })
+
 export default defineConfig({
   plugins: [
     kitbook({
@@ -29,7 +31,7 @@ export default defineConfig({
   },
   define: {
     'import.meta.vitest': false,
-    'import.meta.env.VERCEL_ANALYTICS_ID': JSON.stringify(process.env.VERCEL_ANALYTICS_ID),
+    // 'import.meta.env.VERCEL_ANALYTICS_ID': JSON.stringify(process.env.VERCEL_ANALYTICS_ID),
   },
   optimizeDeps: {
     include: [

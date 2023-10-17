@@ -1,8 +1,26 @@
 <script lang="ts">
+  import { onMount } from 'svelte';
   import { page } from '$app/stores';
 
-  const analyticsId = import.meta.env.VERCEL_ANALYTICS_ID as string;
-  console.info({analyticsId})
+  // const analyticsId = import.meta.env.VERCEL_ANALYTICS_ID as string;
+  const analyticsId = 'unknown'
+
+  onMount(async () => {
+    if (analyticsId) {
+      const { measureWebVitals } = await import('$lib/webvitals');
+      measureWebVitals({ path: $page.url.pathname, params: $page.params, analyticsId });
+    }
+
+    const { init } = await import('@sentry/browser');
+    // const { Integrations } = await import('@sentry/tracing');
+    init({
+      dsn: 'https://b344dd4315d54249afd9c03762aec0c9@o424638.ingest.sentry.io/5888340',
+    // integrations: [new Integrations.BrowserTracing()],
+
+      // Set tracesSampleRate to 1.0 to capture 100% of transactions for performance monitoring. We recommend adjusting this value in production
+      // tracesSampleRate: 1.0,
+    });
+  });
 </script>
 
 {#if $page.url.host.includes('livingdictionaries.app')}
