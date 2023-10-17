@@ -6,6 +6,29 @@ function get_first_empty_column(header_values: string[]): number {
   return header_values.length + 1;
 }
 
+function getValuesFromColumns(values_from_columns: ValuesFromColumns[]): string[][][] {
+  const values = []
+  values_from_columns.forEach((element) => {
+    const {from_sheet, columns} = element;
+    const header_values = get_header_values(from_sheet);
+    columns.forEach((column) => {
+      values.push(from_sheet.getRange(2, header_values.indexOf(column) + 1, from_sheet.getLastRow() - 1, 1).getValues());
+    })
+  });
+  return values;
+}
+
+function getRangesFromColumns(ranges_from_columns: RangesFromColumns[]): GoogleAppsScript.Spreadsheet.Range[] {
+  const ranges = []
+  ranges_from_columns.forEach((element) => {
+    const {from_sheet, columns} = element;
+    columns.forEach((column) => {
+      ranges.push(from_sheet.getRange(2, column, from_sheet.getLastRow() - 1, 1));
+    })
+  });
+  return ranges;
+}
+
 function create_unique_ids(chapter_id_column_values: any[], entry_id_column_values: any[]): any[][] {
   const concatenated_data_with_suffixes = [];
   const concatenated_freq = {};

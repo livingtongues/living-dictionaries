@@ -13,7 +13,12 @@ interface SemanticDomainsSheetData {
   semanticDomainsSheet: GoogleAppsScript.Spreadsheet.Sheet;
 }
 
-interface GetValues {
+interface ValuesFromColumns {
   from_sheet: GoogleAppsScript.Spreadsheet.Sheet,
   columns: string[]
+}
+
+interface RangesFromColumns {
+  from_sheet: GoogleAppsScript.Spreadsheet.Sheet,
+  columns: number[]
 }
