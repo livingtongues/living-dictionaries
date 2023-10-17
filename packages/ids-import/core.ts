@@ -45,37 +45,36 @@ function highlightTargetedSemanticDomains(sheet: GoogleAppsScript.Spreadsheet.Sh
   }
 }
 
-function getValuesOrRanges(get_values: GetValues[]): string[][][] | GoogleAppsScript.Spreadsheet.Range[] {
-  const values = []
-  get_values.forEach((element) => {
-    const {from_sheet, columns} = element;
-    const header_values = get_header_values(from_sheet);
-    columns.forEach((column) => {
-      values.push(from_sheet.getRange(2, header_values.indexOf(column) + 1, from_sheet.getLastRow() - 1, 1).getValues())
-    })
-  });
-  return values;
-}
-
 function copyGlossToTSV(sheet_info: GlossesSheetData, gloss_data: GlossData): void {
   const { idsGlossColumn, glossName } = gloss_data;
   const { idsDataSheet, tsvSheet } = sheet_info;
   const tsv_header_values = get_header_values(tsvSheet);
-  const [ids_id_column_values, ids_gloss_column_values, entry_id_column_values, chapter_id_column_values] = getValuesOrRanges([{from_sheet: idsDataSheet, columns: ['IDS_ID', idsGlossColumn]}, {from_sheet: tsvSheet, columns: ['entry_id', 'chapter_id']}]);
-  // const ids_id_column_values = idsDataSheet.getRange('C2:C').getValues();
-  // const ids_gloss_column_values = idsDataSheet.getRange(`${idsGlossColumn}2:${idsGlossColumn}`).getValues();
-  // const entry_id_column_values = tsvSheet.getRange(2, tsv_header_values.indexOf('entry_id') + 1, tsvSheet.getLastRow() - 1, 1).getValues();
-  // const chapter_id_column_values = tsvSheet.getRange(2, tsv_header_values.indexOf('chapter_id') + 1, tsvSheet.getLastRow() - 1, 1).getValues();
-  const first_empty_column_range = tsvSheet.getRange(2, get_first_empty_column(tsv_header_values), tsvSheet.getLastRow() - 1, 1);
+  const first_empty_column = get_first_empty_column(tsv_header_values);
+  const [ids_id_column_values, ids_gloss_column_values, entry_id_column_values, chapter_id_column_values] = getValuesFromColumns([
+    {
+      from_sheet: idsDataSheet,
+      columns: ['IDS_ID', idsGlossColumn]
+    },
+    {
+      from_sheet: tsvSheet,
+      columns: ['entry_id', 'chapter_id']
+    }
+  ]);
+  const [first_empty_column_range] = getRangesFromColumns([
+    {
+      from_sheet: tsvSheet,
+      columns: [first_empty_column]
+    }
+  ]);
+
   chapter_id_column_values.forEach((cell, i) => {
     const lookupValue = `${cell[0]}-${entry_id_column_values[i][0]}`;
     const match_index = ids_id_column_values.findIndex((value) => value[0] === lookupValue);
     if (match_index !== -1)
       first_empty_column_range.getCell(i + 1, 1).setValue(ids_gloss_column_values[match_index][0]);
-
   });
 
-  tsvSheet.getRange(1, get_first_empty_column(tsv_header_values), 1, 1).setValue(glossName);
+  tsvSheet.getRange(1, first_empty_column, 1, 1).setValue(glossName);
 }
 
 // @ts-expect-error
