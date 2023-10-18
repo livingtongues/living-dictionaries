@@ -34,13 +34,13 @@ function highlightTargetedSemanticDomains(sheet: GoogleAppsScript.Spreadsheet.Sh
   const highlight_color = '#ffe599';
   const [header_row] = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues();
   const semantic_domains_column = header_row.indexOf('semanticDomain') + 1;
+
   if (semantic_domains_column > 0) {
     const semantic_domains_key_column_values = sheet.getRange(2, semantic_domains_column, sheet.getLastRow() - 1, 1).getValues();
     semantic_domains_key_column_values.forEach((cell, index) => {
       const cell_value = cell[0].toString();
       if (targeted_sematic_domains.includes(cell_value))
         sheet.getRange(index + 2, semantic_domains_column).setBackground(highlight_color);
-
     });
   }
 }

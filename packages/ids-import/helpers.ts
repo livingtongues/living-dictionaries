@@ -47,32 +47,93 @@ function create_unique_ids(chapter_id_column_values: any[], entry_id_column_valu
   return concatenated_data_with_suffixes;
 }
 
-// if (import.meta.vitest) {
-//   describe(get_first_empty_column, () => {
-//     test('Get First Empty Column', () => {
-//       const header_values = ['chapter_id', 'entry_id', 'meaning', 'Example_Phonemic', 'comment'];
-//       expect(get_first_empty_column(header_values)).toEqual(6);
-//     })
-//   })
+if (import.meta.vitest) {
+  describe(get_header_values, () => {
+    test('Get Header Values', () => {
+      const mockSheet = {
+        getLastColumn: () => 2,
+        getRange: (row: number, col: number, numRows: number, numCols: number) => ({
+          getValues: () => [['header1', 'header2']],
+        }),
+      };
+      expect(get_header_values(mockSheet)).toEqual(
+        [
+          'header1',
+          'header2'
+        ]
+      );
+    });
+  });
 
-//   describe(create_unique_ids, () => {
-//     test('Create Unique IDs', () => {
-//       expect(create_unique_ids(['1', '9', '13', '1'], ['123', '234', '345', '123'])).toEqual(
-//         [
-//           [
-//             '01.123',
-//           ],
-//           [
-//             '09.234',
-//           ],
-//           [
-//             '13.345',
-//           ],
-//           [
-//             '01.123-2',
-//           ],
-//         ]
-//       )
-//     });
-//   });
-// }
+  describe(get_first_empty_column, () => {
+    test('Get First Empty Column', () => {
+      const header_values = ['chapter_id', 'entry_id', 'meaning', 'Example_Phonemic', 'comment'];
+      expect(get_first_empty_column(header_values)).toEqual(6);
+    });
+  });
+
+  describe(getValuesFromColumns, () => {
+    test('Get Values or Ranges From Sheets Columns', () => {
+      const mockSheet = {
+        getLastRow: () => 2,
+        getLastColumn: () => 2,
+        getRange: (row: number, col: number, numRows: number, numCols: number) => {
+          const columnValues = [
+            [['column1-value1'], ['column1-value2']],
+            [['column2-value1'], ['column2-value2']],
+          ];
+          return {
+            getValues: () => columnValues[col - 1]
+          }
+        },
+      };
+      expect(getValuesFromColumns([
+        {
+          from_sheet: mockSheet,
+          columns: [1, 2],
+          are_columns_numbers: true
+        }
+      ])).toEqual(
+        [
+          [
+            [
+              'column1-value1',
+            ],
+            [
+              'column1-value2',
+            ],
+          ],
+          [
+            [
+              'column2-value1',
+            ],
+            [
+              'column2-value2',
+            ],
+          ],
+        ]
+      )
+    });
+  });
+
+  describe(create_unique_ids, () => {
+    test('Create Unique IDs', () => {
+      expect(create_unique_ids(['1', '9', '13', '1'], ['123', '234', '345', '123'])).toEqual(
+        [
+          [
+            '01.123',
+          ],
+          [
+            '09.234',
+          ],
+          [
+            '13.345',
+          ],
+          [
+            '01.123-2',
+          ],
+        ]
+      );
+    });
+  });
+}
