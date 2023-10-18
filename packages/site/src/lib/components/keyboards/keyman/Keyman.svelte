@@ -6,7 +6,7 @@
 
 <script lang="ts">
   import './keyman.css';
-  import { onMount, tick } from 'svelte';
+  import { onDestroy, onMount, tick } from 'svelte';
   import { Button, ShowHide, Modal } from 'svelte-pieces';
   import { additionalKeyboards, glossingLanguages } from '../../../glosses/glossing-languages';
   import { loadScriptOnce } from 'sveltefirets';
@@ -38,12 +38,13 @@
 
     const root = document.documentElement;
     if (fixed) root.style.setProperty('--kmw-osk-pos', 'fixed');
-
-    return () => {
-      root.style.setProperty('--kmw-osk-pos', 'absolute');
-      kmw.detachFromControl(inputEl);
-    };
   });
+
+  onDestroy(() => {
+    const root = document.documentElement;
+    root.style.setProperty('--kmw-osk-pos', 'absolute');
+    kmw.detachFromControl(inputEl);
+  })
 
   async function targetInput() {
     if (target) {

@@ -1,4 +1,4 @@
-import type { Variants } from 'kitbook';
+import type { Variant } from 'kitbook';
 import type Component from './EntriesTable.svelte';
 import { mock_expanded_entries } from '$lib/mocks/entries';
 import { defaultColumns } from '$lib/stores/columns';
@@ -7,7 +7,7 @@ import { basic_mock_dictionary } from '$lib/mocks/dictionaries';
 
 const columns = setUpColumns(defaultColumns, basic_mock_dictionary);
 
-export const variants: Variants<Component> = [
+export const variants: Variant<Component>[] = [
   {
     // name: variant.name,
     // height: 600,

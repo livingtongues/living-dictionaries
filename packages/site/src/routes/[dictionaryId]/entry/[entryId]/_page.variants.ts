@@ -1,4 +1,4 @@
-import type { Variants } from 'kitbook';
+import type { Variant } from 'kitbook';
 import type Component from './+page.svelte';
 import { readable, writable } from 'svelte/store';
 
@@ -15,7 +15,7 @@ const defaultStores = {
   }),
 }
 
-export const variants: Variants<Component> = [
+export const variants: Variant<Component>[] = [
   {
     name: 'Regular',
     props: {
