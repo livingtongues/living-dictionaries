@@ -134,7 +134,6 @@
       {$t('dictionary.name_of_language', { default: 'Name of Language' })}*
     </label>
     <div class="mt-2 rounded-md shadow-sm">
-      <!-- svelte-ignore a11y-autofocus -->
       <input
         id="name"
         type="text"

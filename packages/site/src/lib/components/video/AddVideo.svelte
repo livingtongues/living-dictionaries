@@ -56,7 +56,6 @@
           </Button>
         {:else}
           <RecordVideo let:videoBlob let:reset>
-            <!-- svelte-ignore a11y-media-has-caption -->
             <video controls autoplay playsinline src={URL.createObjectURL(videoBlob)} />
 
             <ShowHide let:show let:toggle>
