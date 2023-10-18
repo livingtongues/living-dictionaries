@@ -27,10 +27,7 @@ export default defineConfig({
   build: {
     target: 'es2015',
   },
-  define: {
-    'import.meta.vitest': false,
-    'REPLACED_WITH_VERCEL_ANALYTICS_ID': process.env.VERCEL_ANALYTICS_ID || '',
-  },
+  define: getReplacements(),
   optimizeDeps: {
     include: [
       // 'algoliasearch',
@@ -45,3 +42,16 @@ export default defineConfig({
     ],
   },
 });
+
+function getReplacements() {
+  if (typeof process !== 'undefined' && process.env.VERCEL_ANALYTICS_ID) {
+    return {
+      'import.meta.vitest': false,
+      'REPLACED_WITH_VERCEL_ANALYTICS_ID': process.env.VERCEL_ANALYTICS_ID,
+    }
+  }
+
+  return {
+    'import.meta.vitest': false,
+  }
+}
