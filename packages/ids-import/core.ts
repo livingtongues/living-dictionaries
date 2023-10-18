@@ -86,12 +86,24 @@ function copyGlossToTSV(sheet_info: GlossesSheetData, gloss_data: GlossData): vo
 // @ts-expect-error
 function createIDToTSV(sheet: GoogleAppsScript.Spreadsheet.Sheet): void {
   const header_values = get_header_values(sheet);
-  const chapter_id_header = header_values.indexOf('chapter_id');
-  const entry_id_header = header_values.indexOf('entry_id');
-  const chapter_id_column_values = sheet.getRange(2, chapter_id_header + 1, sheet.getLastRow() - 1, 1).getValues();
-  const entry_id_column_values = sheet.getRange(2, entry_id_header + 1, sheet.getLastRow() - 1, 1).getValues();
   const first_empty_column = get_first_empty_column(header_values);
-  const first_empty_column_range = sheet.getRange(2, first_empty_column, sheet.getLastRow() - 1, 1);
+  const [
+    chapter_id_column_values,
+    entry_id_column_values,
+    first_empty_column_range
+  ] = getValuesFromColumns([
+    {
+      from_sheet: sheet,
+      columns: ['chapter_id', 'entry_id']
+    },
+    {
+      from_sheet: sheet,
+      columns: [first_empty_column],
+      are_columns_numbers: true,
+      is_range: true
+    }
+  ]);
+
   const concatenated_data_with_suffixes = create_unique_ids(chapter_id_column_values, entry_id_column_values);
   first_empty_column_range.setNumberFormat('@'); // converts the entire column in a text column.
 
