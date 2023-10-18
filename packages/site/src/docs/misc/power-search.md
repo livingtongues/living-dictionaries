@@ -1,3 +1,5 @@
+# Power Search
+
 There are a few features in the pipeline and a few pain points that would all be solved by a better search system:
 - API
 - No advanced search ability with Algolia, for example, search just the start or end of lexemes, search for minimal pairs, use wildcards, etc... (phoneme analysis features, etc...)
