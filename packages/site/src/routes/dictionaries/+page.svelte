@@ -76,8 +76,8 @@
           <td class="font-semibold">
             <a href={dictionary.url}>{dictionary.name}</a>
           </td>
-          <td class="font-semibold">
-            <p>{dictionary.entryCount}</p>
+          <td>
+            {dictionary.entryCount}
           </td>
           <td class="underline">
             {#if dictionary.url}
