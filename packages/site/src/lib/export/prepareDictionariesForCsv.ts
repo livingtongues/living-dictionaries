@@ -4,6 +4,7 @@ import type { Timestamp } from 'firebase/firestore';
 enum StandardDictionaryCSVFields {
   name = 'Dictionary Name',
   public = 'Public',
+  entry_count = 'Entry Count',
   url = 'URL',
   iso6393 = 'ISO 639-3',
   glottocode = 'Glottocode',
@@ -29,6 +30,7 @@ export function prepareDictionaryForCsv(dictionary: IDictionary): StandardDictio
   return {
     name: dictionary.name.replace(/,/g, '_'),
     public: dictionary.public,
+    entry_count: dictionary.entryCount,
     url: dictionary.url || create_dictionary_url(dictionary.id),
     iso6393: dictionary.iso6393,
     glottocode: dictionary.glottocode,
