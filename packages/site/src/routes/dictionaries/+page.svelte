@@ -77,7 +77,7 @@
             <a href={dictionary.url}>{dictionary.name}</a>
           </td>
           <td>
-            {dictionary.entryCount}
+            {dictionary.url?.startsWith('http://talkingdictionary') ? '' : dictionary.entryCount}
           </td>
           <td class="underline">
             {#if dictionary.url}
