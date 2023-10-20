@@ -2,12 +2,13 @@
   type T = $$Generic;
   export let items: T[];
   export let placeholder = 'Search';
+
   let value = '';
+
   $: filteredItems = items.filter((item) => {
     const itemStr = JSON.stringify(item);
     if (itemStr.toLowerCase().indexOf(value.toLowerCase()) !== -1)
       return true;
-
   });
 
   function autofocus(node: HTMLInputElement) {
@@ -20,6 +21,7 @@
   <div class="mr-1" />
   <slot name="right" />
 </div>
+
 <slot {filteredItems} />
 
 <style>
