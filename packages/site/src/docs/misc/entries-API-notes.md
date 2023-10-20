@@ -1,8 +1,3 @@
-<script lang="ts">
-  import { Story } from 'kitbook';
-</script>
-
-
 # Entries API
 
 These are just initial scratch notes and no API has been created yet.
@@ -18,20 +13,12 @@ documentation (this page once it's ready). This API section will have:
 
 - Explain how the API works and then provide users with the following Story that allows them to paste in their API key and set up other parameters that are available, like limit. Presently we are using JSONPlaceholder as a demo and a simple user number instead of a real API key:
 
-<Story name="API Preview" knobs={{ apiKey: 1, limit: '0-100;10' }} let:props={{ apiKey, limit }}>
-  <div>URL: https://livingdictionaries.app/api?apiKey={apiKey}&limit={limit}</div>
-  {#await fetch(`https://jsonplaceholder.typicode.com/posts?userId=${apiKey}&limit=${limit}`)}
-    Loading...
-  {:then response}
-    {#await response.json() then json}
-      <div class="ml-3">
-        <pre>{JSON.stringify(json, null, 1)}</pre>
-      </div>
-    {/await}
-    {:catch error}
-      {error}
-  {/await}
-</Story>
+```
+apiKey: 1, 
+limit: '0-100;10'
+
+URL: https://livingdictionaries.app/api?apiKey={apiKey}&limit={limit}
+```
 
 ## Questions
 
