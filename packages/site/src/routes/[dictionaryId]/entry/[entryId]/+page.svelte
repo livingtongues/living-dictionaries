@@ -25,6 +25,7 @@
 
   $: entry = $locale && convert_and_expand_entry($initialEntry); // adding locale triggers update of translated semantic domains and parts of speech
 
+  // saved algoliaQueryParams will be overwritten by the gallery view as it turns on the images only facet
   function backToEntries() {
     if ($lastEntriesUrl)
       goto($lastEntriesUrl);
