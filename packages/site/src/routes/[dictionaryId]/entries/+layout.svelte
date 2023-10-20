@@ -4,13 +4,22 @@
   import SearchBox from '$lib/components/search/SearchBox.svelte';
   import Stats from '$lib/components/search/Stats.svelte';
   import EntryFilters from './EntryFilters.svelte';
-  import { dictionary, canEdit, admin } from '$lib/stores';
+  import { dictionary, canEdit, admin, algoliaQueryParams } from '$lib/stores';
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte';
-
-  import { page } from '$app/stores';
+  import { page, navigating } from '$app/stores';
   import { browser } from '$app/environment';
+  import { lastEntriesUrl } from '$lib/stores/lastEntriesUrl';
 
   let showMobileFilters = false;
+
+  $: if ($algoliaQueryParams) {
+    const { href, origin } = window.location
+    $lastEntriesUrl = href.replace(origin, '')
+  } else if ($navigating?.from?.url) {
+    const { origin } = window.location
+    const { href } = $navigating.from.url
+    $lastEntriesUrl = href.replace(origin, '')
+  }
 </script>
 
 {#if browser}
