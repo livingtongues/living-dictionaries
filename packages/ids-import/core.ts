@@ -34,13 +34,13 @@ function highlightTargetedSemanticDomains(sheet: GoogleAppsScript.Spreadsheet.Sh
   const highlight_color = '#ffe599';
   const [header_row] = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues();
   const semantic_domains_column = header_row.indexOf('semanticDomain') + 1;
+
   if (semantic_domains_column > 0) {
     const semantic_domains_key_column_values = sheet.getRange(2, semantic_domains_column, sheet.getLastRow() - 1, 1).getValues();
     semantic_domains_key_column_values.forEach((cell, index) => {
       const cell_value = cell[0].toString();
       if (targeted_sematic_domains.includes(cell_value))
         sheet.getRange(index + 2, semantic_domains_column).setBackground(highlight_color);
-
     });
   }
 }
@@ -48,21 +48,36 @@ function highlightTargetedSemanticDomains(sheet: GoogleAppsScript.Spreadsheet.Sh
 function copyGlossToTSV(sheet_info: GlossesSheetData, gloss_data: GlossData): void {
   const { idsGlossColumn, glossName } = gloss_data;
   const { idsDataSheet, tsvSheet } = sheet_info;
-  const ids_id_column_values = idsDataSheet.getRange('C2:C').getValues();
-  const ids_gloss_column_values = idsDataSheet.getRange(`${idsGlossColumn}2:${idsGlossColumn}`).getValues();
-  const header_values = get_header_values(tsvSheet);
-  const chapter_id_header = header_values.indexOf('chapter_id');
-  const entry_id_header = header_values.indexOf('entry_id');
-  const entry_id_column_values = tsvSheet.getRange(2, entry_id_header + 1, tsvSheet.getLastRow() - 1, 1).getValues();
-  const first_empty_column = get_first_empty_column(header_values);
-  const first_empty_column_range = tsvSheet.getRange(2, first_empty_column, tsvSheet.getLastRow() - 1, 1);
-  const chapter_id_column_values = tsvSheet.getRange(2, chapter_id_header + 1, tsvSheet.getLastRow() - 1, 1).getValues();
+  const tsv_header_values = get_header_values(tsvSheet);
+  const first_empty_column = get_first_empty_column(tsv_header_values);
+  const [
+    ids_id_column_values,
+    ids_gloss_column_values,
+    entry_id_column_values,
+    chapter_id_column_values,
+    first_empty_column_range
+  ] = getValuesFromColumns([
+    {
+      from_sheet: idsDataSheet,
+      columns: ['IDS_ID', idsGlossColumn]
+    },
+    {
+      from_sheet: tsvSheet,
+      columns: ['entry_id', 'chapter_id']
+    },
+    {
+      from_sheet: tsvSheet,
+      columns: [first_empty_column],
+      are_columns_numbers: true,
+      is_range: true
+    }
+  ]);
+
   chapter_id_column_values.forEach((cell, i) => {
     const lookupValue = `${cell[0]}-${entry_id_column_values[i][0]}`;
     const match_index = ids_id_column_values.findIndex((value) => value[0] === lookupValue);
     if (match_index !== -1)
       first_empty_column_range.getCell(i + 1, 1).setValue(ids_gloss_column_values[match_index][0]);
-
   });
 
   tsvSheet.getRange(1, first_empty_column, 1, 1).setValue(glossName);
@@ -71,12 +86,24 @@ function copyGlossToTSV(sheet_info: GlossesSheetData, gloss_data: GlossData): vo
 // @ts-expect-error
 function createIDToTSV(sheet: GoogleAppsScript.Spreadsheet.Sheet): void {
   const header_values = get_header_values(sheet);
-  const chapter_id_header = header_values.indexOf('chapter_id');
-  const entry_id_header = header_values.indexOf('entry_id');
-  const chapter_id_column_values = sheet.getRange(2, chapter_id_header + 1, sheet.getLastRow() - 1, 1).getValues();
-  const entry_id_column_values = sheet.getRange(2, entry_id_header + 1, sheet.getLastRow() - 1, 1).getValues();
   const first_empty_column = get_first_empty_column(header_values);
-  const first_empty_column_range = sheet.getRange(2, first_empty_column, sheet.getLastRow() - 1, 1);
+  const [
+    chapter_id_column_values,
+    entry_id_column_values,
+    first_empty_column_range
+  ] = getValuesFromColumns([
+    {
+      from_sheet: sheet,
+      columns: ['chapter_id', 'entry_id']
+    },
+    {
+      from_sheet: sheet,
+      columns: [first_empty_column],
+      are_columns_numbers: true,
+      is_range: true
+    }
+  ]);
+
   const concatenated_data_with_suffixes = create_unique_ids(chapter_id_column_values, entry_id_column_values);
   first_empty_column_range.setNumberFormat('@'); // converts the entire column in a text column.
 
@@ -86,21 +113,42 @@ function createIDToTSV(sheet: GoogleAppsScript.Spreadsheet.Sheet): void {
 
 function copySemanticDomainsToTSV(sheet_info: SemanticDomainsSheetData): void {
   const { semanticDomainsSheet, tsvSheet } = sheet_info;
-  const semantic_domains_range = semanticDomainsSheet.getRange('A2:A');
-  const semantic_domains_label_column_values = semantic_domains_range.getValues();
-  const ids_semantic_domains_equivalent_column_values = semanticDomainsSheet.getRange('C2:C').getValues();
-  const header_values = get_header_values(tsvSheet);
-  const chapter_id_header = header_values.indexOf('chapter_id');
-  const first_empty_column = get_first_empty_column(header_values);
-  const chapter_id_column_values = tsvSheet.getRange(2, chapter_id_header + 1, tsvSheet.getLastRow() - 1, 1).getValues();
-  const first_empty_column_range = tsvSheet.getRange(2, first_empty_column, tsvSheet.getLastRow() - 1, 1);
-  const second_empty_column_range = tsvSheet.getRange(2, first_empty_column + 1, tsvSheet.getLastRow() - 1, 1);
+  const first_empty_column = get_first_empty_column(get_header_values(tsvSheet));
+  const [
+    semantic_domains_label_column_values,
+    ids_semantic_domains_equivalent_column_values,
+    chapter_id_column_values,
+    semantic_domains_range,
+    first_empty_column_range,
+    second_empty_column_range
+  ] = getValuesFromColumns([
+    {
+      from_sheet: semanticDomainsSheet,
+      columns: ['Semantic Domain', 'IDS Chapter Equivalent']
+    },
+    {
+      from_sheet: tsvSheet,
+      columns: ['chapter_id']
+    },
+    {
+      from_sheet: semanticDomainsSheet,
+      columns: ['Semantic Domain'],
+      is_range: true
+    },
+    {
+      from_sheet: tsvSheet,
+      columns: [first_empty_column, first_empty_column + 1],
+      are_columns_numbers: true,
+      is_range: true
+    }
+  ]);
+
   const dropdown_rule = SpreadsheetApp.newDataValidation().requireValueInRange(semantic_domains_range).build();
   tsvSheet.getRange(1, first_empty_column, 1, 2).setValue('semanticDomain').mergeAcross(); // Merge with the next column
   second_empty_column_range.setDataValidation(dropdown_rule);
   chapter_id_column_values.forEach((cell, i) => {
     const match_index = ids_semantic_domains_equivalent_column_values.findIndex((value) =>
-      value[0].split(',').some((num) => num == cell)
+      value[0].split(',').some((num) => num == cell[0])
     );
     if (match_index !== -1) {
       first_empty_column_range
