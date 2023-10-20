@@ -30,7 +30,7 @@ export function prepareDictionaryForCsv(dictionary: IDictionary): StandardDictio
   return {
     name: dictionary.name.replace(/,/g, '_'),
     public: dictionary.public,
-    entry_count: dictionary.entryCount,
+    entry_count: dictionary.url?.startsWith('http://talkingdictionary') ? '' : dictionary.entryCount,
     url: dictionary.url || create_dictionary_url(dictionary.id),
     iso6393: dictionary.iso6393,
     glottocode: dictionary.glottocode,
