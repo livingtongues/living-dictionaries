@@ -7,7 +7,7 @@ on:
 jobs:
   run-e2e:
     name: Playwright E2E Tests
-    if: github.event.deployment_status.state == 'success' && (github.event.deployment_status.environment == 'Production – living-dictionaries' || github.event.deployment_status.environment == 'Preview – living-dictionaries')
+    if: github.event.deployment_status.state == 'success' && (github.event.deployment_status.environment == 'Production' || github.event.deployment_status.environment == 'Preview')
     runs-on: ubuntu-latest
     timeout-minutes: 15
     container:
