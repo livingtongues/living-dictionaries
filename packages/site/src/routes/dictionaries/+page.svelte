@@ -57,6 +57,7 @@
         <th>
           {$_('dictionary.name_of_language', { default: 'Name of Language' })}
         </th>
+        <th> {$_('about.entry_count', { default: 'Entry Count' })} </th>
         <th> URL </th>
         <th> ISO 639-3 </th>
         <th> Glottocode </th>
@@ -74,6 +75,9 @@
         <tr>
           <td class="font-semibold">
             <a href={dictionary.url}>{dictionary.name}</a>
+          </td>
+          <td>
+            {dictionary.url?.startsWith('http://talkingdictionary') ? '' : dictionary.entryCount}
           </td>
           <td class="underline">
             {#if dictionary.url}

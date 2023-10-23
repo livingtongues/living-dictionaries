@@ -12,3 +12,10 @@ interface SemanticDomainsSheetData {
   tsvSheet: GoogleAppsScript.Spreadsheet.Sheet;
   semanticDomainsSheet: GoogleAppsScript.Spreadsheet.Sheet;
 }
+
+interface ValuesFromColumns {
+  from_sheet: GoogleAppsScript.Spreadsheet.Sheet,
+  columns: string[] | number[],
+  are_columns_numbers?: boolean,
+  is_range?: boolean
+}
