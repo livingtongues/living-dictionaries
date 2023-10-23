@@ -1,7 +1,7 @@
 <script lang="ts">
   import { t, locale, locales } from 'svelte-i18n';
   import { setCookie } from '$lib/helpers/cookies';
-  import { ReadyLocales, UnpublishedLocales } from '@living-dictionaries/types';
+  import { ReadyLocales, UnpublishedLocales } from '../../../locales/languages.interface';
   import { Button, Modal } from 'svelte-pieces';
   import { admin } from '$lib/stores';
 

@@ -2,19 +2,11 @@ import { sveltekit } from '@sveltejs/kit/vite';
 import { defineConfig } from 'vite';
 import UnoCSS from '@unocss/svelte-scoped/vite';
 import { kitbook } from 'kitbook/plugins/vite';
+import kitbookConfig from './kitbook.config';
 
 export default defineConfig({
   plugins: [
-    kitbook({
-      title: 'Living Dictionaries',
-      description: 'Svelte Component Documentation and Prototyping Workbench built for Living Dictionaries using Kitbook',
-      githubURL: 'https://github.com/livingtongues/living-dictionaries/tree/main/packages/site',
-      expandTree: true,
-      viewports: [
-        { name: 'mobile', width: 375, height: 667 },
-        { name: 'desktop', width: 768, height: 800 },
-      ]
-    }),
+    kitbook(kitbookConfig),
     UnoCSS({
       injectReset: '@unocss/reset/tailwind.css',
     }),

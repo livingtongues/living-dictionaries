@@ -1,4 +1,3 @@
-// Live for all users
 export enum ReadyLocales {
   en = 'English',
   es = 'Español',
@@ -16,7 +15,6 @@ export enum ReadyLocales {
   vi = 'Vietnamese',
 }
 
-// Admin only
 export enum UnpublishedLocales {
   ha = 'Harshen Hausa / هَرْشَن هَوْسَ',
   ar = 'العَرَبِيَّة‎',
@@ -32,7 +30,3 @@ export enum UnpublishedLocales {
 // add more codes from https://www.iana.org/assignments/language-subtag-registry/language-subtag-registry
 
 export type Languages = keyof typeof ReadyLocales;
-
-// export interface ITranslatedField {
-//   language: Languages;
-// }
