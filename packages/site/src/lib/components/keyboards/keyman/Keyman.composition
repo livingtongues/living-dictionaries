@@ -1,0 +1,28 @@
+<script lang="ts" context="module">
+  export const height = 250
+  export const width = 700
+</script>
+
+<script lang="ts">
+  import Keyman from './Keyman.svelte';
+  import { Button } from 'svelte-pieces';
+
+  // name="input - with option to change keyboard"
+  export let value = '';
+  export let bcp = 'am';
+  export let show = false;
+  export let canChooseKeyboard = true;
+</script>
+
+<Keyman {bcp} {show} {canChooseKeyboard}>
+  <input type="text" bind:value class="form-input block w-full" />
+</Keyman>
+<div>{value}</div>
+<div class="mt-2">
+  Set to bcp without keyboard:
+  <Button
+    form="menu"
+    size="sm"
+    onclick={() => (bcp = 'en')}
+    active={'en' === bcp}>English (en)</Button>
+</div>

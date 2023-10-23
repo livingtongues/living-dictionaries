@@ -1,0 +1,13 @@
+<script context="module" lang="ts">
+  export const width = 600
+  export const height = 400
+</script>
+
+<script lang="ts">
+  import IpaKeyboard from './IpaKeyboard.svelte'
+</script>
+
+<IpaKeyboard>
+  <input type="text" value="some sta̤rting value" class="form-input block w-full mb-2" />
+</IpaKeyboard>
+

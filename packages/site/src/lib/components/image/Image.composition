@@ -1,0 +1,23 @@
+<script context="module" lang="ts">
+  export let width = 600
+  export let height = 400
+</script>
+
+<script lang="ts">
+  import Image from './Image.svelte'
+  export let canEdit = true
+  export let width = 80
+  export let height = 80
+  export let title = 'butterfly'
+  export let gcs = 'LGuBKhg7vuv5-aJcOdnb_ucOXLSCIR1Kjxrh70xRlaIHqWo-mWqfWUcH3Xznz63QsFZmkeVmoNN0PEXzSc0Jh4g'
+</script>
+
+<div style="width: {width}px; height: {height}px">
+  <Image
+    {title}
+    {gcs}
+    {width}
+    {height}
+    {canEdit}
+    on:delete={() => alert('delete clicked')} />
+</div>

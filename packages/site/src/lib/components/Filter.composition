@@ -1,13 +1,17 @@
+<script lang="ts" context="module">
+  export const width = 300
+  export const height = 200
+</script>
+
 <script lang="ts">
-  import Filter from "./Filter.svelte";
-  export let placeholder = "Search People";
+  import Filter from './Filter.svelte';
+  export let placeholder = 'Search People';
   // TODO: try with empty array
 </script>
 
 <Filter
-  items={["this", "is", "testing", "with", "words"]}
-  let:filteredItems={items}
->
+  items={['this', 'is', 'testing', 'with', 'words']}
+  let:filteredItems={items}>
   {#each items as item}
     <p>{item}</p>
   {/each}

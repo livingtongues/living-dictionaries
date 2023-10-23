@@ -1,18 +1,18 @@
 <script>
-  import { dev } from "$app/environment";
-  import { onMount } from "svelte";
-  import LZString from "lz-string";
+  import { dev } from '$app/environment';
+  import { onMount } from 'svelte';
+  import LZString from 'lz-string';
   const { compressToEncodedURIComponent: encode } = LZString;
 
   export let width = 1200;
   export let height = 600;
-  export let title = "húdié 蝴蝶 עִבְרִית";
-  export let description = "butterfly";
-  export let dictionaryName = "Fuliolo";
+  export let title = 'húdié 蝴蝶 עִבְרִית';
+  export let description = 'butterfly';
+  export let dictionaryName = 'Fuliolo';
   export let lat = 10;
   export let lng = 35;
   export let showImage = true;
-  export let gcsPath = "LGuBKhg7vuv5-aJcOdnb_ucOXLSCIR1Kjxrh70xRlaIHqWo-mWqfWUcH3Xznz63QsFZmkeVmoNN0PEXzSc0Jh4g";
+  export let gcsPath = 'LGuBKhg7vuv5-aJcOdnb_ucOXLSCIR1Kjxrh70xRlaIHqWo-mWqfWUcH3Xznz63QsFZmkeVmoNN0PEXzSc0Jh4g';
 
   let version = 4; // after updating svelte-kit version can set this automatically
   onMount(() => {
@@ -42,8 +42,7 @@
       lat,
       gcsPath: showImage ? gcsPath : '',
     })
-  )}&v={version}"
-/>
+  )}&v={version}" />
 
 <img
   alt=""
@@ -58,8 +57,7 @@
       lng,
       lat,
     })
-  )}&v={version}"
-/>
+  )}&v={version}" />
 
 <img
   alt=""
@@ -75,8 +73,7 @@
       lng: -95,
       lat: 40,
     })
-  )}&v={version}"
-/>
+  )}&v={version}" />
 
 <img
   alt=""
@@ -92,8 +89,7 @@
       lng,
       lat,
     })
-  )}&v={version}"
-/>
+  )}&v={version}" />
 
 <style>
   img {

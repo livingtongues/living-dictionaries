@@ -1,5 +1,5 @@
 <script lang="ts">
-  import PlayVideo from './PlayVideo.svelte';
+  // import PlayVideo from './PlayVideo.svelte';
   import { Button, ShowHide } from 'svelte-pieces';
 </script>
 
@@ -7,7 +7,7 @@
   <Button onclick={toggle}>Open Video</Button>
   {#if show}
     <!-- <PlayVideo
-      entry={{ lx: 'Hallibut', gl: {} }}
+      entry={{lexeme: 'foo'}}
       video={null}
       storageBucket={'change'}
       canEdit
