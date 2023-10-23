@@ -3,13 +3,27 @@ function get_header_values(sheet: GoogleAppsScript.Spreadsheet.Sheet): string[] 
 }
 
 function get_first_empty_column(header_values: string[]): number {
-  const reversed_header_values = header_values.slice().reverse();
-  return (
-    header_values.length -
-    reversed_header_values.findIndex((value) => {
-      return value === '';
-    })
-  );
+  return header_values.length + 1;
+}
+
+function getValuesFromColumns(values_from_columns: ValuesFromColumns[]): string[][][] | GoogleAppsScript.Spreadsheet.Range[] {
+  const values = []
+  values_from_columns.forEach((element) => {
+    const {from_sheet, columns, are_columns_numbers, is_range} = element;
+    const header_values = get_header_values(from_sheet);
+    columns.forEach((column) => {
+      const ranges = from_sheet.getRange(
+        2,
+        are_columns_numbers ? column : header_values.indexOf(column) + 1,
+        from_sheet.getLastRow() - 1,
+        1);
+      if(is_range)
+        values.push(ranges);
+      else
+        values.push(ranges.getValues());
+    });
+  });
+  return values;
 }
 
 function create_unique_ids(chapter_id_column_values: any[], entry_id_column_values: any[]): any[][] {
@@ -34,24 +48,94 @@ function create_unique_ids(chapter_id_column_values: any[], entry_id_column_valu
 }
 
 if (import.meta.vitest) {
-  describe(create_unique_ids, () => {
-    test('start', () => {
-      expect(create_unique_ids(['1', '9', '13', '1'], ['123', '234', '345', '123'])).toEqual(
+  test(get_header_values, () => {
+    const mockSheet = {
+      getLastColumn: () => 2,
+      getRange: (row: number, col: number, numRows: number, numCols: number) => ({
+        getValues: () => [['header1', 'header2']],
+      }),
+    };
+    expect(get_header_values(mockSheet)).toEqual(
+      [
+        'header1',
+        'header2'
+      ]
+    );
+  });
+
+  test(get_first_empty_column, () => {
+    const header_values = ['chapter_id', 'entry_id', 'meaning', 'Example_Phonemic', 'comment'];
+    expect(get_first_empty_column(header_values)).toEqual(6);
+  });
+
+  test(getValuesFromColumns, () => {
+    const mockSheet = {
+      getLastRow: () => 2,
+      getLastColumn: () => 3,
+      getRange: (row: number, col: number, numRows: number, numCols: number) => {
+        const columnValues = [
+          [['column1-value1'], ['column1-value2']],
+          [['column2-value1'], ['column2-value2']],
+          [['column3-range1'], ['column3-range2']],
+        ];
+        return {
+          getValues: () => columnValues[col - 1]
+        }
+      },
+    };
+    expect(getValuesFromColumns([
+      {
+        from_sheet: mockSheet,
+        columns: [1, 2],
+        are_columns_numbers: true
+      },
+      {
+        from_sheet: mockSheet,
+        columns: [3],
+        are_columns_numbers: true,
+        is_range: true
+      },
+    ])).toEqual(
+      [
         [
           [
-            '01.123',
+            'column1-value1',
           ],
           [
-            '09.234',
+            'column1-value2',
+          ],
+        ],
+        [
+          [
+            'column2-value1',
           ],
           [
-            '13.345',
+            'column2-value2',
           ],
-          [
-            '01.123-2',
-          ],
-        ]
-      )
-    });
+        ],
+        {
+          getValues: expect.any(Function),
+        },
+      ]
+    );
+  });
+
+  test(create_unique_ids, () => {
+    expect(create_unique_ids(['1', '9', '13', '1'], ['123', '234', '345', '123'])).toEqual(
+      [
+        [
+          '01.123',
+        ],
+        [
+          '09.234',
+        ],
+        [
+          '13.345',
+        ],
+        [
+          '01.123-2',
+        ],
+      ]
+    );
   });
 }
