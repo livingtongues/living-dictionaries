@@ -1,5 +1,5 @@
 import { register, init, getLocaleFromNavigator, waitLocale, locale as $locale } from 'svelte-i18n';
-import { ReadyLocales, UnpublishedLocales } from '@living-dictionaries/types';
+import { ReadyLocales, UnpublishedLocales } from '../locales/languages.interface';
 import { getCookie } from '$lib/helpers/cookies';
 
 const INIT_OPTIONS = {
