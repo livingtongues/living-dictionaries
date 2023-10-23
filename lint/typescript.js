@@ -5,14 +5,14 @@ import tsEslintPlugin from '@typescript-eslint/eslint-plugin'
 import typescriptParser from '@typescript-eslint/parser'
 
 export const typescript = {
-  files: ['**/*.ts', '**/*.js', '**/*.svelte', '**/*.svx'],
+  files: ['**/*.ts', '**/*.js', '**/*.svelte', '**/*.composition'],
   plugins: {
     '@typescript-eslint': tsEslintPlugin,
   },
   languageOptions: {
     parser: typescriptParser,
     parserOptions: {
-      extraFileExtensions: ['.svelte', '.svx'],
+      extraFileExtensions: ['.svelte', '.composition'],
     },
     globals: {
       ...globals.browser,

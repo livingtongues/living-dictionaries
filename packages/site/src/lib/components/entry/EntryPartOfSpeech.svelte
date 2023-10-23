@@ -10,7 +10,7 @@
   import type { SelectOption } from '../ui/array/select-options.interface';
   import { EntryFields } from '@living-dictionaries/types';
 
-  export let value: string[];
+  export let value: string[] = [];
   export let canEdit = false;
   export let dictionaryId: string = undefined;
   export let showPlus = true;

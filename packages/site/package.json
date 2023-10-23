@@ -11,8 +11,7 @@
     "sync": "svelte-kit sync",
     "check": "svelte-check --tsconfig ./tsconfig.json --threshold error --diagnostic-sources js,svelte",
     "check:watch": "svelte-check --tsconfig ./tsconfig.json --threshold warning --diagnostic-sources js,svelte --watch",
-    "test": "vitest",
-    "test:ui": "vitest --ui"
+    "test": "vitest"
   },
   "devDependencies": {
     "@iconify/json": "^2.2.121",

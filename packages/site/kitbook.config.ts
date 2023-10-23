@@ -7,8 +7,8 @@ export default defineConfig({
   githubURL: 'https://github.com/livingtongues/living-dictionaries/tree/main/packages/site',
   expandTree: true,
   viewports: [
-    { name: 'mobile', width: 375, height: 667 },
-    { name: 'desktop', width: 768, height: 800 },
+    { name: 'mobile', width: 375, height: 400 },
+    { name: 'desktop', width: 768, height: 400 },
   ],
   languages: Object.entries(ReadyLocales).map(([code, name]) => ({ code, name })),
   addLanguageToUrl: ({code, url}) => {
