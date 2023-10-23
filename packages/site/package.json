@@ -12,12 +12,14 @@
     "check": "svelte-check --tsconfig ./tsconfig.json --threshold error --diagnostic-sources js,svelte",
     "check:watch": "svelte-check --tsconfig ./tsconfig.json --threshold warning --diagnostic-sources js,svelte --watch",
     "test": "vitest",
+    "test:e2e": "playwright test --update-snapshots",
     "local-kitbook": "link:../../../kitbook/packages/kitbook"
   },
   "devDependencies": {
     "@iconify/json": "^2.2.121",
     "@julr/unocss-preset-forms": "^0.0.5",
     "@living-dictionaries/types": "workspace:^1.0.0",
+		"@playwright/test": "1.39.0",
     "@sentry/browser": "^6.18.2",
     "@sveltejs/adapter-auto": "^2.1.0",
     "@sveltejs/kit": "^1.22.3",
