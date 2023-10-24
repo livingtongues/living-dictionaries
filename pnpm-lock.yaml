@@ -346,8 +346,8 @@ importers:
         specifier: ^3.7.1
         version: 3.8.0
       kitbook:
-        specifier: 1.0.0-alpha.52
-        version: 1.0.0-alpha.52(@sveltejs/kit@1.22.3)(svelte@3.59.2)(typescript@5.1.6)
+        specifier: 1.0.0-alpha.53
+        version: 1.0.0-alpha.53(@sveltejs/kit@1.22.3)(svelte@3.59.2)(typescript@5.1.6)
       logrocket:
         specifier: ^2.1.2
         version: 2.2.1
@@ -3852,8 +3852,8 @@ packages:
       unocss: 0.53.6(postcss@8.4.30)(vite@4.4.7)
     dev: true
 
-  /@kitbook/mdsvex-shiki-twoslash@1.0.0-alpha.52(svelte@3.59.2)(typescript@5.1.6):
-    resolution: {integrity: sha512-7MS1Sr9u7AyjxkltThstypIruU0wc9OTRSsoz0bgJgk1gb6vB0JZLH3D6F6KA6GopVrFEADysTD6FjapKqh3Pw==}
+  /@kitbook/mdsvex-shiki-twoslash@1.0.0-alpha.53(svelte@3.59.2)(typescript@5.1.6):
+    resolution: {integrity: sha512-XaW4rp2e3j1GMFsqIo8oUSZWD1MCi6Wht9FiwwET1jIVTwXcCOTvvQH9yK/us+E5GON184kX2ExR10/sy+RKOg==}
     dependencies:
       fenceparser: 2.2.0
       mdsvex: 0.11.0(svelte@3.59.2)
@@ -3865,8 +3865,8 @@ packages:
       - typescript
     dev: true
 
-  /@kitbook/rehype-display-link-titles@1.0.0-alpha.52:
-    resolution: {integrity: sha512-XdjVENgkyYJs2pk6nyZWEtG1C+RTxYubA8gBKmTtw19q7iTCu0hF7JhsofvoSaC9oMpEfAa4gB8QRrrSFHwtyg==}
+  /@kitbook/rehype-display-link-titles@1.0.0-alpha.53:
+    resolution: {integrity: sha512-GFFJBHLjMVJtOwGjAgTnGw6P1DEdrs6CoVqLaTlmXuH381eAy6n8N9N6tJPAi5EHsLYuvXhSBV6ZEP0+dVxQPA==}
     dependencies:
       github-slugger: 2.0.0
       unist-util-visit: 4.1.2
@@ -11159,14 +11159,14 @@ packages:
       json-buffer: 3.0.1
     dev: true
 
-  /kitbook@1.0.0-alpha.52(@sveltejs/kit@1.22.3)(svelte@3.59.2)(typescript@5.1.6):
-    resolution: {integrity: sha512-ZSYipvIP0a+OdC+N22A4v/gAVEtqgOWIl7gVVEZ+l4nbM12IzKLc/h1XYPobDGK2xHfJoUESr9vfNFdnLnZgvw==}
+  /kitbook@1.0.0-alpha.53(@sveltejs/kit@1.22.3)(svelte@3.59.2)(typescript@5.1.6):
+    resolution: {integrity: sha512-qHkUxxEL+BQ3RLpY/nPgmYyRQi07VIyFOnF7b2BQH1vW/vVpnuUFkCOAc5zQ37+u44KCEEJ1l4YNcdqROKTsoA==}
     peerDependencies:
       '@sveltejs/kit': ^1.13.0
       svelte: ^3.55.0 || ^4.0.0
     dependencies:
-      '@kitbook/mdsvex-shiki-twoslash': 1.0.0-alpha.52(svelte@3.59.2)(typescript@5.1.6)
-      '@kitbook/rehype-display-link-titles': 1.0.0-alpha.52
+      '@kitbook/mdsvex-shiki-twoslash': 1.0.0-alpha.53(svelte@3.59.2)(typescript@5.1.6)
+      '@kitbook/rehype-display-link-titles': 1.0.0-alpha.53
       '@sveltejs/kit': 1.22.3(svelte@3.59.2)(vite@4.4.7)
       magicast: 0.3.0
       mdsvex: 0.11.0(svelte@3.59.2)
