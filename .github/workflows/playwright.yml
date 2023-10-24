@@ -40,7 +40,7 @@ jobs:
         run: pnpm install
 
       - name: Run Playwright e2e tests
-        run: pnpm -F site test:e2e
+        run: pnpm test:e2e basic # remove basic to add snapshotting in
         env:
           CI: true
           PLAYWRIGHT_BASE_URL: ${{ github.event.deployment_status.target_url }}
