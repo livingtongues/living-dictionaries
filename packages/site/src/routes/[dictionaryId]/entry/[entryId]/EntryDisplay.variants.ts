@@ -105,8 +105,8 @@ const partialVariants: DeepPartial<Variant<Component>[]> = [
     },
   },
   {
-    name: 'Scientific Name',
-    description: 'Partial italics, can edit',
+    name: 'Scientific Name - Partial italics',
+    description: 'can edit',
     props: {
       entry: {
         lexeme: 'Old world swallowtail',
