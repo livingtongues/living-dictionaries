@@ -45,12 +45,12 @@ jobs:
           CI: true
           PLAYWRIGHT_BASE_URL: ${{ github.event.deployment_status.target_url }}
 
-      - name: Commit Changed Component Snapshots
-        uses: stefanzweifel/git-auto-commit-action@v4.16.0
-        if: github.event.deployment_status.environment != 'Production'
-        with:
-          commit_message: '[Updated Component Snapshots]'
-          branch: ${{ steps.extract_branch.outputs.GITHUB_BRANCH }}
+      # - name: Commit Changed Component Snapshots
+      #   uses: stefanzweifel/git-auto-commit-action@v4.16.0
+      #   if: github.event.deployment_status.environment != 'Production'
+      #   with:
+      #     commit_message: '[Updated Component Snapshots]'
+      #     branch: ${{ steps.extract_branch.outputs.GITHUB_BRANCH }}
 
       - uses: actions/upload-artifact@v3
         if: always()
