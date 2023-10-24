@@ -8,8 +8,8 @@
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte';
   import { seo_description } from './seo_description';
   import { convert_and_expand_entry } from '$lib/transformers/convert_and_expand_entry';
-  import { navigating } from '$app/stores';
-  import { onMount } from 'svelte';
+  import { goto } from '$app/navigation';
+  import { lastEntriesUrl } from '$lib/stores/lastEntriesUrl';
 
   export let data;
   $: ({
@@ -24,18 +24,20 @@
   } = data);
 
   $: entry = $locale && convert_and_expand_entry($initialEntry); // adding locale triggers update of translated semantic domains and parts of speech
-  let backUrl: string;
-  onMount(() => {
-    backUrl = $navigating?.from?.url.href
-      ? `${$navigating.from.url.href}${$algoliaQueryParams}`
-      : `/${$dictionary.id}/entries/list${$algoliaQueryParams}`;
-  });
+
+  // saved algoliaQueryParams will be overwritten by the gallery view as it turns on the images only facet
+  function backToEntries() {
+    if ($lastEntriesUrl)
+      goto($lastEntriesUrl);
+    else
+      history.back()
+  }
 </script>
 
 <div
   class="flex justify-between items-center mb-3 md:top-12 sticky top-0 z-30
     bg-white pt-1 -mt-1">
-  <Button class="-ml-2 !px-2" color="black" form="simple" href={backUrl}>
+  <Button class="-ml-2 !px-2" color="black" form="simple" onclick={backToEntries}>
     <i class="fas fa-arrow-left rtl-x-flip" />
     {$t('misc.back', { default: 'Back' })}
   </Button>

@@ -29,9 +29,9 @@
     onStateChange({ uiState, setUiState }) {
       setUiState(uiState);
       setTimeout(() => {
-        const queryParams = window.location.href.match(/(\?.*)/);
-        algoliaQueryParams.set((queryParams?.[0]) || '');
-      }, 1000);
+        const queryParams = window.location.search
+        algoliaQueryParams.set(queryParams || '');
+      }, 500);
     },
   });
 
