@@ -2,7 +2,7 @@ import fetch from 'node-fetch';
 import csv from 'csvtojson';
 import dot from 'dot-object';
 import { promises as fs } from 'fs';
-import { ReadyLocales, UnpublishedLocales } from '@living-dictionaries/types/languages.interface.js';
+import { ReadyLocales, UnpublishedLocales } from '../../site/src/locales/languages.interface.js';
 import { type IGlossLanguage } from '@living-dictionaries/types';
 const languages = [...Object.keys(ReadyLocales), ...Object.keys(UnpublishedLocales)];
 

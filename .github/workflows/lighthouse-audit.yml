@@ -9,7 +9,7 @@ env:
 jobs:
   lighthouse:
     name: Lighthouse Audit
-    if: github.event.deployment_status.state == 'success' && (github.event.deployment_status.environment == 'Production – living-dictionaries' || github.event.deployment_status.environment == 'Preview – living-dictionaries')
+    if: github.event.deployment_status.state == 'success' && (github.event.deployment_status.environment == 'Production' || github.event.deployment_status.environment == 'Preview')
     runs-on: ubuntu-latest
 
     steps:

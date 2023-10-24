@@ -1,19 +1,50 @@
-/* eslint-disable no-undef */
 // From https://ivoberger.com/posts/using-vercel-analytics-with-svelte-kit/ which was from https://github.com/vercel/gatsby-plugin-vercel/blob/main/src/web-vitals.js
 
-import type { Metric } from 'web-vitals';
-// import { getCLS, getFCP, getFID, getLCP, getTTFB } from 'web-vitals';
+import type { Metric, getCLS, getFCP, getFID, getLCP, getTTFB } from 'web-vitals';
+
+declare const webVitals: {
+  getFID: typeof getFID;
+  getTTFB: typeof getTTFB;
+  getLCP: typeof getLCP;
+  getCLS: typeof getCLS;
+  getFCP: typeof getFCP;
+};
 
 let isRegistered = false;
 
-export interface AnalyticsOptions {
+interface AnalyticsOptions {
   params: Record<string, any> | ArrayLike<any>;
   path: string;
   analyticsId: string;
   debug?: true;
 }
 
-const vitalsUrl = 'https://vitals.vercel-analytics.com/v1/vitals';
+const VITALS_URL = 'https://vitals.vercel-analytics.com/v1/vitals';
+
+export function measureWebVitals(options: AnalyticsOptions): void {
+  // Only register listeners once
+  if (isRegistered) return;
+  isRegistered = true;
+
+  try {
+    const script = document.createElement('script');
+    script.src = 'https://unpkg.com/web-vitals@2.1.4/dist/web-vitals.iife.js';
+    script.onload = function () {
+      // Using CDN as described in https://github.com/GoogleChrome/web-vitals
+      // because of ES module import problem
+      // When loading `web-vitals` using CDN, all the public
+      // methods can be found on the `webVitals` global namespace.
+      webVitals.getFID((metric) => sendToAnalytics(metric, options));
+      webVitals.getTTFB((metric) => sendToAnalytics(metric, options));
+      webVitals.getLCP((metric) => sendToAnalytics(metric, options));
+      webVitals.getCLS((metric) => sendToAnalytics(metric, options));
+      webVitals.getFCP((metric) => sendToAnalytics(metric, options));
+    };
+    document.head.appendChild(script);
+  } catch (err) {
+    console.error('[Analytics]', err);
+  }
+}
 
 function getConnectionSpeed(): string {
   if ('connection' in navigator &&
@@ -23,7 +54,6 @@ function getConnectionSpeed(): string {
     return navigator.connection['effectiveType'] as string
 
   return '';
-
 }
 
 function sendToAnalytics(metric: Metric, options: AnalyticsOptions) {
@@ -51,9 +81,9 @@ function sendToAnalytics(metric: Metric, options: AnalyticsOptions) {
     type: 'application/x-www-form-urlencoded',
   });
   if (navigator.sendBeacon) {
-    navigator.sendBeacon(vitalsUrl, blob);
+    navigator.sendBeacon(VITALS_URL, blob);
   } else
-  {fetch(vitalsUrl, {
+  {fetch(VITALS_URL, {
     body: blob,
     method: 'POST',
     credentials: 'omit',
@@ -61,33 +91,3 @@ function sendToAnalytics(metric: Metric, options: AnalyticsOptions) {
   });}
 }
 
-export function measureWebVitals(options: AnalyticsOptions): void {
-  // Only register listeners once
-  if (isRegistered) return;
-  isRegistered = true;
-
-  try {
-    const script = document.createElement('script');
-    // script.src = 'https://unpkg.com/web-vitals/dist/web-vitals.iife.js';
-    script.src = 'https://unpkg.com/web-vitals@2.1.4/dist/web-vitals.iife.js';
-    script.onload = function () {
-      // Using CDN as described in https://github.com/GoogleChrome/web-vitals
-      // because of ES module import problem
-      // When loading `web-vitals` using CDN, all the public
-      // methods can be found on the `webVitals` global namespace.
-      //@ts-ignore
-      webVitals.getFID((metric) => sendToAnalytics(metric, options));
-      //@ts-ignore
-      webVitals.getTTFB((metric) => sendToAnalytics(metric, options));
-      //@ts-ignore
-      webVitals.getLCP((metric) => sendToAnalytics(metric, options));
-      //@ts-ignore
-      webVitals.getCLS((metric) => sendToAnalytics(metric, options));
-      //@ts-ignore
-      webVitals.getFCP((metric) => sendToAnalytics(metric, options));
-    };
-    document.head.appendChild(script);
-  } catch (err) {
-    console.error('[Analytics]', err);
-  }
-}

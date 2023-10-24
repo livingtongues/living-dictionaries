@@ -1,9 +1,9 @@
-import type { Variants } from 'kitbook';
+import type { Variant } from 'kitbook';
 import type Component from './ListEntry.svelte';
 import { basic_mock_dictionary } from '$lib/mocks/dictionaries';
 import { mock_expanded_entries } from '$lib/mocks/entries';
 
-export const variants: Variants<Component> = [...mock_expanded_entries.map(variant => {
+export const variants: Variant<Component>[] = [...mock_expanded_entries.map(variant => {
   return {
     name: variant.name,
     // height: 130,

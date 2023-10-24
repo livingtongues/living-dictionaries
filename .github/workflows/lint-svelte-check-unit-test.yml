@@ -54,7 +54,7 @@ jobs:
       - name: Run Vitest Unit Tests
         run: pnpm test
 
-      - name: Slack E2E Results Notification
+      - name: Slack Unit Test Results Notification
         uses: 8398a7/action-slack@v3 # https://action-slack.netlify.app/
         if: failure()
         env:

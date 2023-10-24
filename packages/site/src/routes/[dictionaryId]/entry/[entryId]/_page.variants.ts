@@ -1,7 +1,8 @@
-import type { Variants } from 'kitbook';
+import type { Variant } from 'kitbook';
 import type Component from './+page.svelte';
 import { readable, writable } from 'svelte/store';
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const defaultStores = {
   user: null,
   admin: readable(0),
@@ -15,30 +16,30 @@ const defaultStores = {
   }),
 }
 
-export const variants: Variants<Component> = [
-  {
-    name: 'Regular',
-    props: {
-      data: {
-        ...defaultStores,
-        initialEntry: readable({
-          lx: 'test',
-        })
-      },
-    },
-  },
-  {
-    name: 'Admin 2',
-    description: 'Will show JSON viewer',
-    props: {
-      data: {
-        ...defaultStores,
-        admin: readable(2),
-        canEdit: readable(true),
-        initialEntry: readable({
-          lx: 'test',
-        })
-      },
-    },
-  },
+export const variants: Variant<Component>[] = [
+  // {
+  //   name: 'Regular',
+  //   props: {
+  //     data: {
+  //       ...defaultStores,
+  //       initialEntry: readable({
+  //         lx: 'test',
+  //       })
+  //     },
+  //   },
+  // },
+  // {
+  //   name: 'Admin 2',
+  //   description: 'Will show JSON viewer',
+  //   props: {
+  //     data: {
+  //       ...defaultStores,
+  //       admin: readable(2),
+  //       canEdit: readable(true),
+  //       initialEntry: readable({
+  //         lx: 'test',
+  //       })
+  //     },
+  //   },
+  // },
 ]

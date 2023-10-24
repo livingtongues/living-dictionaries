@@ -3,7 +3,7 @@ node_modules
 
 *.local
 
-/test-results/
-/playwright-report/
+test-results
+playwright-report
 /playwright/.cache/
 .eslintcache

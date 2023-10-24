@@ -1,43 +1,64 @@
-import type { Variants } from 'kitbook';
+import type { Variant, Viewport } from 'kitbook';
 import type Component from './EditField.svelte';
-export const variants: Variants<Component> = [
+
+export const viewports: Viewport[] = [{
+  width: 700,
+  height: 200,
+}]
+
+
+export const variants: Variant<Component>[] = [
   {
     name: 'Assamese Gloss',
-    // width: 550,
-    // height: 300,
+    description: 'should have keyboard icon',
     props: {
       field: 'gloss',
       bcp: 'as',
     },
   },
   {
-    name: 'Normal',
-    // height: 100,
+    name: 'Italicized Gloss',
+    props: {
+      field: 'gloss',
+      bcp: 'as',
+      value: 'red <i>tomato</i>',
+    },
+  },
+  { name: 'Interlinear',
+    props: {
+      field: 'interlinearization',
+      value: '3p.sɢ.ind',
+    },
+  },
+  {
+    name: 'Morphology',
     props: {
       field: 'morphology',
     },
   },
   {
     name: 'Lexeme',
-    // height: 300,
     props: {
       field: 'lexeme',
+      value: 'banana',
     },
   },
   {
     name: 'Notes',
-    // width: 550,
-    // height: 300,
     props: {
       field: 'notes',
+      value: 'hello',
     },
   },
   {
     name: 'Phonetic',
-    // width: 550,
-    // height: 300,
+    viewports: [{
+      width: 750,
+      height: 600,
+    }],
     props: {
       field: 'phonetic',
+      value: 'banana',
     },
   },
 ]

@@ -8,9 +8,6 @@ importers:
 
   .:
     devDependencies:
-      '@playwright/test':
-        specifier: ^1.35.0
-        version: 1.35.0
       '@typescript-eslint/eslint-plugin':
         specifier: 6.7.3
         version: 6.7.3(@typescript-eslint/parser@6.7.3)(eslint@8.50.0)(typescript@5.1.6)
@@ -49,7 +46,7 @@ importers:
         version: 5.1.6
       vitest:
         specifier: ^0.34.5
-        version: 0.34.5
+        version: 0.34.5(@vitest/ui@0.33.0)
 
   packages/functions:
     dependencies:
@@ -86,7 +83,7 @@ importers:
         version: 5.1.6
       vitest:
         specifier: ^0.34.5
-        version: 0.34.5
+        version: 0.34.5(@vitest/ui@0.33.0)
 
   packages/parts:
     devDependencies:
@@ -191,7 +188,7 @@ importers:
         version: 4.4.7(@types/node@18.18.0)
       vitest:
         specifier: ^0.34.5
-        version: 0.34.5
+        version: 0.34.5(@vitest/ui@0.33.0)
       xss:
         specifier: ^1.0.14
         version: 1.0.14
@@ -261,6 +258,9 @@ importers:
       '@living-dictionaries/types':
         specifier: workspace:^1.0.0
         version: link:../types
+      '@playwright/test':
+        specifier: 1.39.0
+        version: 1.39.0
       '@sentry/browser':
         specifier: ^6.18.2
         version: 6.19.3
@@ -346,8 +346,8 @@ importers:
         specifier: ^3.7.1
         version: 3.8.0
       kitbook:
-        specifier: 1.0.0-alpha.42
-        version: 1.0.0-alpha.42(@playwright/test@1.38.1)(@sveltejs/kit@1.22.3)(svelte@3.59.2)(typescript@5.1.6)
+        specifier: 1.0.0-alpha.53
+        version: 1.0.0-alpha.53(@sveltejs/kit@1.22.3)(svelte@3.59.2)(typescript@5.1.6)
       logrocket:
         specifier: ^2.1.2
         version: 2.2.1
@@ -649,22 +649,12 @@ packages:
       '@babel/types': 7.23.0
     dev: true
 
-  /@babel/helper-string-parser@7.21.5:
-    resolution: {integrity: sha512-5pTUx3hAJaZIdW99sJ6ZUUgWq/Y+Hja7TowEnLNMm1VivRgZQL3vpBY3qUACVsvw+yQU6+YgfBVmcbLaZtrA1w==}
-    engines: {node: '>=6.9.0'}
-
   /@babel/helper-string-parser@7.22.5:
     resolution: {integrity: sha512-mM4COjgZox8U+JcXQwPijIZLElkgEpO5rsERVDJTc2qfCDfERyob6k5WegS14SX18IIjv+XD+GrqNumY5JRCDw==}
     engines: {node: '>=6.9.0'}
-    dev: true
 
   /@babel/helper-validator-identifier@7.22.20:
     resolution: {integrity: sha512-Y4OZ+ytlatR8AI+8KZfKuL5urKp7qey08ha31L8b3BwewJAoJamTzyvxPR/5D+KkdJCGPq/+8TukHBlY10FX9A==}
-    engines: {node: '>=6.9.0'}
-    dev: true
-
-  /@babel/helper-validator-identifier@7.22.5:
-    resolution: {integrity: sha512-aJXu+6lErq8ltp+JhkJUfk1MTGyuA4v7f3pA+BJ5HLfNC6nAQ0Cpi9uOquUj8Hehg0aUiHzWQbOVJGao6ztBAQ==}
     engines: {node: '>=6.9.0'}
 
   /@babel/helper-validator-option@7.22.15:
@@ -696,17 +686,10 @@ packages:
     resolution: {integrity: sha512-BSKlD1hgnedS5XRnGOljZawtag7H1yPfQp0tdNJCHoH6AZ+Pcm9VvkrK59/Yy593Ypg0zMxH2BxD1VPYUQ7UIw==}
     engines: {node: '>=6.9.0'}
     dependencies:
-      '@babel/helper-validator-identifier': 7.22.5
+      '@babel/helper-validator-identifier': 7.22.20
       chalk: 2.4.2
       js-tokens: 4.0.0
     dev: true
-
-  /@babel/parser@7.22.4:
-    resolution: {integrity: sha512-VLLsx06XkEYqBtE5YGPwfSGwfrjnyPP5oiGty3S8pQLFDFLaS8VwWSIxkTXpcvr5zeYLE6+MBNl2npl/YnfofA==}
-    engines: {node: '>=6.0.0'}
-    hasBin: true
-    dependencies:
-      '@babel/types': 7.22.4
 
   /@babel/parser@7.23.0:
     resolution: {integrity: sha512-vvPKKdMemU85V9WE/l5wZEmImpCtLqbnTvqDS2U1fJ96KrxoW7KrXhNsNCblQlg8Ck4b85yxdTyelsMUgFUXiw==}
@@ -714,7 +697,6 @@ packages:
     hasBin: true
     dependencies:
       '@babel/types': 7.23.0
-    dev: true
 
   /@babel/plugin-syntax-async-generators@7.8.4(@babel/core@7.23.0):
     resolution: {integrity: sha512-tycmZxkGfZaxhMRbXlPXuVFpdWlXpir2W4AMhSJgRKzk/eDlIXOhb2LHWoLpDF7TEHylV5zNhykX6KAgHJmTNw==}
@@ -886,14 +868,6 @@ packages:
       - supports-color
     dev: true
 
-  /@babel/types@7.22.4:
-    resolution: {integrity: sha512-Tx9x3UBHTTsMSW85WB2kphxYQVvrZ/t1FxD88IpSgIjiUJlCm9z+xWIDwyo1vffTwSqteqyznB8ZE9vYYk16zA==}
-    engines: {node: '>=6.9.0'}
-    dependencies:
-      '@babel/helper-string-parser': 7.21.5
-      '@babel/helper-validator-identifier': 7.22.5
-      to-fast-properties: 2.0.0
-
   /@babel/types@7.23.0:
     resolution: {integrity: sha512-0oIyUfKoI3mSqMvsxBdclDwxXKXAUA8v/apZbc+iSyARYou1o8ZGDxbUYyLFoW2arqS2jDGqJuZvv1d/io1axg==}
     engines: {node: '>=6.9.0'}
@@ -901,7 +875,6 @@ packages:
       '@babel/helper-string-parser': 7.22.5
       '@babel/helper-validator-identifier': 7.22.20
       to-fast-properties: 2.0.0
-    dev: true
 
   /@bcoe/v8-coverage@0.2.3:
     resolution: {integrity: sha512-0hYQ8SB4Db5zvZB4axdMHGwEaQjkZzFjQiN9LVYvIFB2nSUHW9tYpxWriPrWDASIxiaXax83REcLxuSdnGPZtw==}
@@ -1934,7 +1907,7 @@ packages:
       '@firebase/app-compat': 0.2.11
       '@firebase/component': 0.6.4
       '@firebase/util': 1.9.3
-      tslib: 2.6.1
+      tslib: 2.6.2
     transitivePeerDependencies:
       - '@firebase/app'
     dev: true
@@ -1987,7 +1960,7 @@ packages:
       '@firebase/installations': 0.6.4(@firebase/app@0.9.11)
       '@firebase/logger': 0.4.0
       '@firebase/util': 1.9.3
-      tslib: 2.6.1
+      tslib: 2.6.2
     dev: true
 
   /@firebase/analytics@0.10.0(@firebase/app@0.9.13):
@@ -2000,7 +1973,7 @@ packages:
       '@firebase/installations': 0.6.4(@firebase/app@0.9.13)
       '@firebase/logger': 0.4.0
       '@firebase/util': 1.9.3
-      tslib: 2.6.1
+      tslib: 2.6.2
     dev: true
 
   /@firebase/analytics@0.10.0(@firebase/app@0.9.9):
@@ -2013,7 +1986,7 @@ packages:
       '@firebase/installations': 0.6.4(@firebase/app@0.9.9)
       '@firebase/logger': 0.4.0
       '@firebase/util': 1.9.3
-      tslib: 2.6.1
+      tslib: 2.6.2
     dev: true
 
   /@firebase/analytics@0.4.2(@firebase/app-types@0.6.1)(@firebase/app@0.6.10):
@@ -2059,7 +2032,7 @@ packages:
       '@firebase/component': 0.6.4
       '@firebase/logger': 0.4.0
       '@firebase/util': 1.9.3
-      tslib: 2.6.1
+      tslib: 2.6.2
     transitivePeerDependencies:
       - '@firebase/app'
     dev: true
@@ -2075,7 +2048,7 @@ packages:
       '@firebase/component': 0.6.4
       '@firebase/logger': 0.4.0
       '@firebase/util': 1.9.3
-      tslib: 2.6.1
+      tslib: 2.6.2
     transitivePeerDependencies:
       - '@firebase/app'
     dev: true
@@ -2113,7 +2086,7 @@ packages:
       '@firebase/component': 0.6.4
       '@firebase/logger': 0.4.0
       '@firebase/util': 1.9.3
-      tslib: 2.6.1
+      tslib: 2.6.2
     dev: true
 
   /@firebase/app-check@0.8.0(@firebase/app@0.9.13):
@@ -2125,7 +2098,7 @@ packages:
       '@firebase/component': 0.6.4
       '@firebase/logger': 0.4.0
       '@firebase/util': 1.9.3
-      tslib: 2.6.1
+      tslib: 2.6.2
     dev: true
 
   /@firebase/app-compat@0.2.11:
@@ -2135,7 +2108,7 @@ packages:
       '@firebase/component': 0.6.4
       '@firebase/logger': 0.4.0
       '@firebase/util': 1.9.3
-      tslib: 2.6.1
+      tslib: 2.6.2
     dev: true
 
   /@firebase/app-compat@0.2.13:
@@ -2184,7 +2157,7 @@ packages:
       '@firebase/logger': 0.4.0
       '@firebase/util': 1.9.3
       idb: 7.1.1
-      tslib: 2.6.1
+      tslib: 2.6.2
     dev: true
 
   /@firebase/app@0.9.13:
@@ -2236,7 +2209,7 @@ packages:
       '@firebase/component': 0.6.4
       '@firebase/util': 1.9.3
       node-fetch: 2.6.7
-      tslib: 2.6.1
+      tslib: 2.6.2
     transitivePeerDependencies:
       - '@firebase/app'
       - '@firebase/app-types'
@@ -2254,7 +2227,7 @@ packages:
       '@firebase/component': 0.6.4
       '@firebase/util': 1.9.3
       node-fetch: 2.6.7
-      tslib: 2.6.1
+      tslib: 2.6.2
     transitivePeerDependencies:
       - '@firebase/app'
       - '@firebase/app-types'
@@ -2331,7 +2304,7 @@ packages:
       '@firebase/logger': 0.4.0
       '@firebase/util': 1.9.3
       node-fetch: 2.6.7
-      tslib: 2.6.1
+      tslib: 2.6.2
     transitivePeerDependencies:
       - encoding
     dev: true
@@ -2346,7 +2319,7 @@ packages:
       '@firebase/logger': 0.4.0
       '@firebase/util': 1.9.3
       node-fetch: 2.6.7
-      tslib: 2.6.1
+      tslib: 2.6.2
     transitivePeerDependencies:
       - encoding
     dev: true
@@ -2362,7 +2335,7 @@ packages:
     resolution: {integrity: sha512-rLMyrXuO9jcAUCaQXCMjCMUsWrba5fzHlNK24xz5j2W6A/SRmK8mZJ/hn7V0fViLbxC0lPMtrK1eYzk6Fg03jA==}
     dependencies:
       '@firebase/util': 1.9.3
-      tslib: 2.6.1
+      tslib: 2.6.2
 
   /@firebase/database-compat@0.3.4:
     resolution: {integrity: sha512-kuAW+l+sLMUKBThnvxvUZ+Q1ZrF/vFJ58iUY9kAcbX48U03nVzIF6Tmkf0p3WVQwMqiXguSgtOPIB6ZCeF+5Gg==}
@@ -2420,7 +2393,7 @@ packages:
       '@firebase/firestore': 3.12.1(@firebase/app@0.9.11)
       '@firebase/firestore-types': 2.5.1(@firebase/app-types@0.9.0)(@firebase/util@1.9.3)
       '@firebase/util': 1.9.3
-      tslib: 2.6.1
+      tslib: 2.6.2
     transitivePeerDependencies:
       - '@firebase/app'
       - '@firebase/app-types'
@@ -2532,7 +2505,7 @@ packages:
       '@grpc/grpc-js': 1.7.3
       '@grpc/proto-loader': 0.6.13
       node-fetch: 2.6.7
-      tslib: 2.6.1
+      tslib: 2.6.2
     transitivePeerDependencies:
       - encoding
     dev: true
@@ -2582,7 +2555,7 @@ packages:
       '@firebase/functions': 0.10.0(@firebase/app@0.9.11)
       '@firebase/functions-types': 0.6.0
       '@firebase/util': 1.9.3
-      tslib: 2.6.1
+      tslib: 2.6.2
     transitivePeerDependencies:
       - '@firebase/app'
       - encoding
@@ -2598,7 +2571,7 @@ packages:
       '@firebase/functions': 0.10.0(@firebase/app@0.9.13)
       '@firebase/functions-types': 0.6.0
       '@firebase/util': 1.9.3
-      tslib: 2.6.1
+      tslib: 2.6.2
     transitivePeerDependencies:
       - '@firebase/app'
       - encoding
@@ -2624,7 +2597,7 @@ packages:
       '@firebase/messaging-interop-types': 0.2.0
       '@firebase/util': 1.9.3
       node-fetch: 2.6.7
-      tslib: 2.6.1
+      tslib: 2.6.2
     transitivePeerDependencies:
       - encoding
     dev: true
@@ -2641,7 +2614,7 @@ packages:
       '@firebase/messaging-interop-types': 0.2.0
       '@firebase/util': 1.9.3
       node-fetch: 2.6.7
-      tslib: 2.6.1
+      tslib: 2.6.2
     transitivePeerDependencies:
       - encoding
     dev: true
@@ -2688,7 +2661,7 @@ packages:
       '@firebase/installations': 0.6.4(@firebase/app@0.9.11)
       '@firebase/installations-types': 0.5.0(@firebase/app-types@0.9.0)
       '@firebase/util': 1.9.3
-      tslib: 2.6.1
+      tslib: 2.6.2
     transitivePeerDependencies:
       - '@firebase/app'
       - '@firebase/app-types'
@@ -2766,7 +2739,7 @@ packages:
       '@firebase/component': 0.6.4
       '@firebase/util': 1.9.3
       idb: 7.0.1
-      tslib: 2.6.1
+      tslib: 2.6.2
     dev: true
 
   /@firebase/installations@0.6.4(@firebase/app@0.9.13):
@@ -2800,7 +2773,7 @@ packages:
   /@firebase/logger@0.4.0:
     resolution: {integrity: sha512-eRKSeykumZ5+cJPdxxJRgAC3G5NknY2GwEbKfymdnXtnT0Ucm4pspfR6GT4MUQEDuJwRVbVcSx85kgJulMoFFA==}
     dependencies:
-      tslib: 2.6.1
+      tslib: 2.6.2
 
   /@firebase/messaging-compat@0.2.4(@firebase/app-compat@0.2.11)(@firebase/app@0.9.11):
     resolution: {integrity: sha512-lyFjeUhIsPRYDPNIkYX1LcZMpoVbBWXX4rPl7c/rqc7G+EUea7IEtSt4MxTvh6fDfPuzLn7+FZADfscC+tNMfg==}
@@ -2811,7 +2784,7 @@ packages:
       '@firebase/component': 0.6.4
       '@firebase/messaging': 0.12.4(@firebase/app@0.9.11)
       '@firebase/util': 1.9.3
-      tslib: 2.6.1
+      tslib: 2.6.2
     transitivePeerDependencies:
       - '@firebase/app'
     dev: true
@@ -2825,7 +2798,7 @@ packages:
       '@firebase/component': 0.6.4
       '@firebase/messaging': 0.12.4(@firebase/app@0.9.13)
       '@firebase/util': 1.9.3
-      tslib: 2.6.1
+      tslib: 2.6.2
     transitivePeerDependencies:
       - '@firebase/app'
     dev: true
@@ -2839,7 +2812,7 @@ packages:
       '@firebase/component': 0.6.4
       '@firebase/messaging': 0.12.4(@firebase/app@0.9.9)
       '@firebase/util': 1.9.3
-      tslib: 2.6.1
+      tslib: 2.6.2
     transitivePeerDependencies:
       - '@firebase/app'
     dev: true
@@ -2867,7 +2840,7 @@ packages:
       '@firebase/messaging-interop-types': 0.2.0
       '@firebase/util': 1.9.3
       idb: 7.0.1
-      tslib: 2.6.1
+      tslib: 2.6.2
     dev: true
 
   /@firebase/messaging@0.12.4(@firebase/app@0.9.13):
@@ -2925,7 +2898,7 @@ packages:
       '@firebase/performance': 0.6.4(@firebase/app@0.9.11)
       '@firebase/performance-types': 0.2.0
       '@firebase/util': 1.9.3
-      tslib: 2.6.1
+      tslib: 2.6.2
     transitivePeerDependencies:
       - '@firebase/app'
     dev: true
@@ -2996,7 +2969,7 @@ packages:
       '@firebase/installations': 0.6.4(@firebase/app@0.9.11)
       '@firebase/logger': 0.4.0
       '@firebase/util': 1.9.3
-      tslib: 2.6.1
+      tslib: 2.6.2
     dev: true
 
   /@firebase/performance@0.6.4(@firebase/app@0.9.13):
@@ -3009,7 +2982,7 @@ packages:
       '@firebase/installations': 0.6.4(@firebase/app@0.9.13)
       '@firebase/logger': 0.4.0
       '@firebase/util': 1.9.3
-      tslib: 2.6.1
+      tslib: 2.6.2
     dev: true
 
   /@firebase/performance@0.6.4(@firebase/app@0.9.9):
@@ -3022,7 +2995,7 @@ packages:
       '@firebase/installations': 0.6.4(@firebase/app@0.9.9)
       '@firebase/logger': 0.4.0
       '@firebase/util': 1.9.3
-      tslib: 2.6.1
+      tslib: 2.6.2
     dev: true
 
   /@firebase/polyfill@0.3.36:
@@ -3044,7 +3017,7 @@ packages:
       '@firebase/remote-config': 0.4.4(@firebase/app@0.9.11)
       '@firebase/remote-config-types': 0.3.0
       '@firebase/util': 1.9.3
-      tslib: 2.6.1
+      tslib: 2.6.2
     transitivePeerDependencies:
       - '@firebase/app'
     dev: true
@@ -3115,7 +3088,7 @@ packages:
       '@firebase/installations': 0.6.4(@firebase/app@0.9.11)
       '@firebase/logger': 0.4.0
       '@firebase/util': 1.9.3
-      tslib: 2.6.1
+      tslib: 2.6.2
     dev: true
 
   /@firebase/remote-config@0.4.4(@firebase/app@0.9.13):
@@ -3128,7 +3101,7 @@ packages:
       '@firebase/installations': 0.6.4(@firebase/app@0.9.13)
       '@firebase/logger': 0.4.0
       '@firebase/util': 1.9.3
-      tslib: 2.6.1
+      tslib: 2.6.2
     dev: true
 
   /@firebase/remote-config@0.4.4(@firebase/app@0.9.9):
@@ -3141,7 +3114,7 @@ packages:
       '@firebase/installations': 0.6.4(@firebase/app@0.9.9)
       '@firebase/logger': 0.4.0
       '@firebase/util': 1.9.3
-      tslib: 2.6.1
+      tslib: 2.6.2
     dev: true
 
   /@firebase/storage-compat@0.3.2(@firebase/app-compat@0.2.11)(@firebase/app-types@0.9.0)(@firebase/app@0.9.11):
@@ -3154,7 +3127,7 @@ packages:
       '@firebase/storage': 0.11.2(@firebase/app@0.9.11)
       '@firebase/storage-types': 0.8.0(@firebase/app-types@0.9.0)(@firebase/util@1.9.3)
       '@firebase/util': 1.9.3
-      tslib: 2.6.1
+      tslib: 2.6.2
     transitivePeerDependencies:
       - '@firebase/app'
       - '@firebase/app-types'
@@ -3224,7 +3197,7 @@ packages:
       '@firebase/component': 0.6.4
       '@firebase/util': 1.9.3
       node-fetch: 2.6.7
-      tslib: 2.6.1
+      tslib: 2.6.2
     transitivePeerDependencies:
       - encoding
     dev: true
@@ -3238,7 +3211,7 @@ packages:
       '@firebase/component': 0.6.4
       '@firebase/util': 1.9.3
       node-fetch: 2.6.7
-      tslib: 2.6.1
+      tslib: 2.6.2
     transitivePeerDependencies:
       - encoding
     dev: true
@@ -3252,7 +3225,7 @@ packages:
       '@firebase/component': 0.6.4
       '@firebase/util': 1.9.3
       node-fetch: 2.6.7
-      tslib: 2.6.1
+      tslib: 2.6.2
     transitivePeerDependencies:
       - encoding
     dev: true
@@ -3309,13 +3282,13 @@ packages:
     resolution: {integrity: sha512-EBikYFp2JCdIfGEb5G9dyCkTGDmC57KSHhRQOC3aYxoPWVZvfWCDjZwkGYHN7Lis/fmuWl906bnNTJifDQ3sXw==}
     dependencies:
       '@formatjs/intl-localematcher': 0.2.25
-      tslib: 2.6.1
+      tslib: 2.6.2
     dev: true
 
   /@formatjs/fast-memoize@1.2.1:
     resolution: {integrity: sha512-Rg0e76nomkz3vF9IPlKeV+Qynok0r7YZjL6syLz4/urSg0IbjPZCB/iYUMNsYA643gh4mgrX3T7KEIFIxJBQeg==}
     dependencies:
-      tslib: 2.6.1
+      tslib: 2.6.2
     dev: true
 
   /@formatjs/icu-messageformat-parser@2.0.19:
@@ -3323,20 +3296,20 @@ packages:
     dependencies:
       '@formatjs/ecma402-abstract': 1.11.4
       '@formatjs/icu-skeleton-parser': 1.3.6
-      tslib: 2.6.1
+      tslib: 2.6.2
     dev: true
 
   /@formatjs/icu-skeleton-parser@1.3.6:
     resolution: {integrity: sha512-I96mOxvml/YLrwU2Txnd4klA7V8fRhb6JG/4hm3VMNmeJo1F03IpV2L3wWt7EweqNLES59SZ4d6hVOPCSf80Bg==}
     dependencies:
       '@formatjs/ecma402-abstract': 1.11.4
-      tslib: 2.6.1
+      tslib: 2.6.2
     dev: true
 
   /@formatjs/intl-localematcher@0.2.25:
     resolution: {integrity: sha512-YmLcX70BxoSopLFdLr1Ds99NdlTI2oWoLbaUW2M406lxOIPzE1KQhRz2fPUkq34xVZQaihCoU29h0KK7An3bhA==}
     dependencies:
-      tslib: 2.6.1
+      tslib: 2.6.2
     dev: true
 
   /@google-cloud/firestore@6.8.0:
@@ -3879,8 +3852,8 @@ packages:
       unocss: 0.53.6(postcss@8.4.30)(vite@4.4.7)
     dev: true
 
-  /@kitbook/mdsvex-shiki-twoslash@0.0.4(svelte@3.59.2)(typescript@5.1.6):
-    resolution: {integrity: sha512-2Y8Mkmxs/AXiylu24CroC+fK/XmsuThm0qavU5G7TNelvt6EuLfqqEwPN8sWs/7g9+vdDjnRFSawPrvGC7F+Pg==}
+  /@kitbook/mdsvex-shiki-twoslash@1.0.0-alpha.53(svelte@3.59.2)(typescript@5.1.6):
+    resolution: {integrity: sha512-XaW4rp2e3j1GMFsqIo8oUSZWD1MCi6Wht9FiwwET1jIVTwXcCOTvvQH9yK/us+E5GON184kX2ExR10/sy+RKOg==}
     dependencies:
       fenceparser: 2.2.0
       mdsvex: 0.11.0(svelte@3.59.2)
@@ -3892,26 +3865,11 @@ packages:
       - typescript
     dev: true
 
-  /@kitbook/rehype-display-link-titles@0.0.3:
-    resolution: {integrity: sha512-153CZO9vwDIQDTKpUVu+zCCxJvvM+DaDfeBVFqqH8c7WeqB5MSl4wZiMTTeU20/o/FTTYynQNMOhmuscH2lqTQ==}
+  /@kitbook/rehype-display-link-titles@1.0.0-alpha.53:
+    resolution: {integrity: sha512-GFFJBHLjMVJtOwGjAgTnGw6P1DEdrs6CoVqLaTlmXuH381eAy6n8N9N6tJPAi5EHsLYuvXhSBV6ZEP0+dVxQPA==}
     dependencies:
       github-slugger: 2.0.0
       unist-util-visit: 4.1.2
-    dev: true
-
-  /@kitbook/vite-plugin-kitbook@0.0.15(svelte@3.59.2)(typescript@5.1.6):
-    resolution: {integrity: sha512-M0XUet6Vvcnvc7U9ilBPub67uWLAqEceMkB9hZtt/07ADyIZ07fUT6Een+yZfN6uigwP2ZGmf5qaTAjBQzU9pQ==}
-    dependencies:
-      '@kitbook/mdsvex-shiki-twoslash': 0.0.4(svelte@3.59.2)(typescript@5.1.6)
-      '@kitbook/rehype-display-link-titles': 0.0.3
-      mdsvex: 0.11.0(svelte@3.59.2)
-      rehype-autolink-headings: 6.1.1
-      rehype-slug: 5.1.0
-      rehype-urls: 1.2.0
-    transitivePeerDependencies:
-      - supports-color
-      - svelte
-      - typescript
     dev: true
 
   /@nodelib/fs.scandir@2.1.5:
@@ -3960,23 +3918,12 @@ packages:
     dev: false
     optional: true
 
-  /@playwright/test@1.35.0:
-    resolution: {integrity: sha512-6qXdd5edCBynOwsz1YcNfgX8tNWeuS9fxy5o59D0rvHXxRtjXRebB4gE4vFVfEMXl/z8zTnAzfOs7aQDEs8G4Q==}
+  /@playwright/test@1.39.0:
+    resolution: {integrity: sha512-3u1iFqgzl7zr004bGPYiN/5EZpRUSFddQBra8Rqll5N0/vfpqlP9I9EXqAoGacuAbX6c9Ulg/Cjqglp5VkK6UQ==}
     engines: {node: '>=16'}
     hasBin: true
     dependencies:
-      '@types/node': 18.15.5
-      playwright-core: 1.35.0
-    optionalDependencies:
-      fsevents: 2.3.2
-    dev: true
-
-  /@playwright/test@1.38.1:
-    resolution: {integrity: sha512-NqRp8XMwj3AK+zKLbZShl0r/9wKgzqI/527bkptKXomtuo+dOjU9NdMASQ8DNC9z9zLOMbG53T4eihYr3XR+BQ==}
-    engines: {node: '>=16'}
-    hasBin: true
-    dependencies:
-      playwright: 1.38.1
+      playwright: 1.39.0
     dev: true
 
   /@pnpm/config.env-replace@1.1.0:
@@ -6137,8 +6084,8 @@ packages:
       '@types/node': 18.18.0
     dev: true
 
-  /@types/hast@2.3.6:
-    resolution: {integrity: sha512-47rJE80oqPmFdVDCD7IheXBrVdwuBgsYwoczFvKmwfo2Mzsnt+V9OONsYauFmICb6lQPpCuXYJWejBNs4pDJRg==}
+  /@types/hast@2.3.7:
+    resolution: {integrity: sha512-EVLigw5zInURhzfXUM65eixfadfsHKomGKUakToXo84t8gGIJuTcD2xooM2See7GyQ7DRtYjhCHnSUQez8JaLw==}
     dependencies:
       '@types/unist': 2.0.8
     dev: true
@@ -6241,10 +6188,6 @@ packages:
 
   /@types/node@18.11.18:
     resolution: {integrity: sha512-DHQpWGjyQKSHj3ebjFI/wRKcqQcdR+MoFBygntYOZytCqNfkd2ZC4ARDJ2DQqhjH5p85Nnd3jhUJIXrszFX/JA==}
-
-  /@types/node@18.15.5:
-    resolution: {integrity: sha512-Ark2WDjjZO7GmvsyFFf81MXuGTA/d6oP38anyxWOL6EREyBKAxKoFHwBhaZxCfLRLpO8JgVXwqOwSwa7jRcjew==}
-    dev: true
 
   /@types/node@18.18.0:
     resolution: {integrity: sha512-3xA4X31gHT1F1l38ATDIL9GpRLdwVhnEFC8Uikv5ZLlXATwrCYyPq7ZWHxzxc3J/30SUiwiYT+bQe0/XvKlWbw==}
@@ -8560,7 +8503,7 @@ packages:
       '@typescript-eslint/utils': 6.7.3(eslint@8.50.0)(typescript@5.2.2)
       eslint: 8.50.0
       typescript: 5.2.2
-      vitest: 0.34.5
+      vitest: 0.34.5(@vitest/ui@0.33.0)
     transitivePeerDependencies:
       - supports-color
     dev: true
@@ -9872,20 +9815,20 @@ packages:
   /hast-util-heading-rank@2.1.1:
     resolution: {integrity: sha512-iAuRp+ESgJoRFJbSyaqsfvJDY6zzmFoEnL1gtz1+U8gKtGGj1p0CVlysuUAUjq95qlZESHINLThwJzNGmgGZxA==}
     dependencies:
-      '@types/hast': 2.3.6
+      '@types/hast': 2.3.7
     dev: true
 
   /hast-util-is-element@2.1.3:
     resolution: {integrity: sha512-O1bKah6mhgEq2WtVMk+Ta5K7pPMqsBBlmzysLdcwKVrqzZQ0CHqUPiIVspNhAG1rvxpvJjtGee17XfauZYKqVA==}
     dependencies:
-      '@types/hast': 2.3.6
+      '@types/hast': 2.3.7
       '@types/unist': 2.0.8
     dev: true
 
   /hast-util-to-string@2.0.0:
     resolution: {integrity: sha512-02AQ3vLhuH3FisaMM+i/9sm4OXGSq1UhOOCpTLLQtHdL3tZt7qil69r8M8iDkZYyC0HCFylcYoP+8IO7ddta1A==}
     dependencies:
-      '@types/hast': 2.3.6
+      '@types/hast': 2.3.7
     dev: true
 
   /he@1.2.0:
@@ -11043,7 +10986,7 @@ packages:
     engines: {node: '>=12.0.0'}
     hasBin: true
     dependencies:
-      '@babel/parser': 7.22.4
+      '@babel/parser': 7.23.0
       '@jsdoc/salty': 0.2.5
       '@types/markdown-it': 12.2.3
       bluebird: 3.7.2
@@ -11216,20 +11159,23 @@ packages:
       json-buffer: 3.0.1
     dev: true
 
-  /kitbook@1.0.0-alpha.42(@playwright/test@1.38.1)(@sveltejs/kit@1.22.3)(svelte@3.59.2)(typescript@5.1.6):
-    resolution: {integrity: sha512-yBwqxYZU8hhhbS7XhS9GKOZlmmzKaNHc1rZ9ImodrZKKqYaEsuetZORTg2gNZTeQf9d9MwGDbwI/gBC6dOcKDQ==}
+  /kitbook@1.0.0-alpha.53(@sveltejs/kit@1.22.3)(svelte@3.59.2)(typescript@5.1.6):
+    resolution: {integrity: sha512-qHkUxxEL+BQ3RLpY/nPgmYyRQi07VIyFOnF7b2BQH1vW/vVpnuUFkCOAc5zQ37+u44KCEEJ1l4YNcdqROKTsoA==}
     peerDependencies:
-      '@playwright/test': ^1.37.1
       '@sveltejs/kit': ^1.13.0
       svelte: ^3.55.0 || ^4.0.0
     dependencies:
-      '@kitbook/mdsvex-shiki-twoslash': 0.0.4(svelte@3.59.2)(typescript@5.1.6)
-      '@kitbook/vite-plugin-kitbook': 0.0.15(svelte@3.59.2)(typescript@5.1.6)
-      '@playwright/test': 1.38.1
+      '@kitbook/mdsvex-shiki-twoslash': 1.0.0-alpha.53(svelte@3.59.2)(typescript@5.1.6)
+      '@kitbook/rehype-display-link-titles': 1.0.0-alpha.53
       '@sveltejs/kit': 1.22.3(svelte@3.59.2)(vite@4.4.7)
+      magicast: 0.3.0
+      mdsvex: 0.11.0(svelte@3.59.2)
+      rehype-autolink-headings: 6.1.1
+      rehype-slug: 5.1.0
+      rehype-urls: 1.2.0
       svelte: 3.59.2
       svelte-pieces: 2.0.0-next.1(svelte@3.59.2)
-      svelte2tsx: 0.6.22(svelte@3.59.2)(typescript@5.1.6)
+      svelte2tsx: 0.6.23(svelte@3.59.2)(typescript@5.1.6)
     transitivePeerDependencies:
       - supports-color
       - typescript
@@ -11480,7 +11426,7 @@ packages:
   /lower-case@2.0.2:
     resolution: {integrity: sha512-7fm3l3NAF9WfN6W3JOmf5drwpVqX78JtoGJ3A6W0a6ZnldM41w2fV5D490psKFTpMds8TJse/eHLFFsNHHjHgg==}
     dependencies:
-      tslib: 2.6.1
+      tslib: 2.6.2
     dev: true
 
   /lru-cache@10.0.0:
@@ -11542,6 +11488,14 @@ packages:
     engines: {node: '>=12'}
     dependencies:
       '@jridgewell/sourcemap-codec': 1.4.15
+    dev: true
+
+  /magicast@0.3.0:
+    resolution: {integrity: sha512-ZsEzw35h7xYoFlWHIyxU6zmH4sdwzdmY0DY4s/Lie/qKimeijz2jRw8/OV2248kt/y6FbvoTvGRKyB7y/Mpx8w==}
+    dependencies:
+      '@babel/parser': 7.23.0
+      '@babel/types': 7.23.0
+      source-map-js: 1.0.2
     dev: true
 
   /make-dir@3.1.0:
@@ -11926,7 +11880,7 @@ packages:
     resolution: {integrity: sha512-fgAN3jGAh+RoxUGZHTSOLJIqUc2wmoBwGR4tbpNAKmmovFoWq0OdRkb0VkldReO2a2iBT/OEulG9XSUc10r3zg==}
     dependencies:
       lower-case: 2.0.2
-      tslib: 2.6.1
+      tslib: 2.6.2
     dev: true
 
   /node-domexception@1.0.0:
@@ -12325,7 +12279,7 @@ packages:
     resolution: {integrity: sha512-uWlGT3YSnK9x3BQJaOdcZwrnV6hPpd8jFH1/ucpiLRPh/2zCVJKS19E4GvYHvaCcACn3foXZ0cLB9Wrx1KGe5g==}
     dependencies:
       no-case: 3.0.4
-      tslib: 2.6.1
+      tslib: 2.6.2
     dev: true
 
   /path-exists@4.0.0:
@@ -12427,24 +12381,18 @@ packages:
       pathe: 1.1.1
     dev: true
 
-  /playwright-core@1.35.0:
-    resolution: {integrity: sha512-muMXyPmIx/2DPrCHOD1H1ePT01o7OdKxKj2ebmCAYvqhUy+Y1bpal7B0rdoxros7YrXI294JT/DWw2LqyiqTPA==}
+  /playwright-core@1.39.0:
+    resolution: {integrity: sha512-+k4pdZgs1qiM+OUkSjx96YiKsXsmb59evFoqv8SKO067qBA+Z2s/dCzJij/ZhdQcs2zlTAgRKfeiiLm8PQ2qvw==}
     engines: {node: '>=16'}
     hasBin: true
     dev: true
 
-  /playwright-core@1.38.1:
-    resolution: {integrity: sha512-tQqNFUKa3OfMf4b2jQ7aGLB8o9bS3bOY0yMEtldtC2+spf8QXG9zvXLTXUeRsoNuxEYMgLYR+NXfAa1rjKRcrg==}
-    engines: {node: '>=16'}
-    hasBin: true
-    dev: true
-
-  /playwright@1.38.1:
-    resolution: {integrity: sha512-oRMSJmZrOu1FP5iu3UrCx8JEFRIMxLDM0c/3o4bpzU5Tz97BypefWf7TuTNPWeCe279TPal5RtPPZ+9lW/Qkow==}
+  /playwright@1.39.0:
+    resolution: {integrity: sha512-naE5QT11uC/Oiq0BwZ50gDmy8c8WLPRTEWuSSFVG2egBka/1qMoSqYQcROMT9zLwJ86oPofcTH2jBY/5wWOgIw==}
     engines: {node: '>=16'}
     hasBin: true
     dependencies:
-      playwright-core: 1.38.1
+      playwright-core: 1.39.0
     optionalDependencies:
       fsevents: 2.3.2
     dev: true
@@ -12990,7 +12938,7 @@ packages:
   /rehype-autolink-headings@6.1.1:
     resolution: {integrity: sha512-NMYzZIsHM3sA14nC5rAFuUPIOfg+DFmf9EY1YMhaNlB7+3kK/ZlE6kqPfuxr1tsJ1XWkTrMtMoyHosU70d35mA==}
     dependencies:
-      '@types/hast': 2.3.6
+      '@types/hast': 2.3.7
       extend: 3.0.2
       hast-util-has-property: 2.0.1
       hast-util-heading-rank: 2.1.1
@@ -13002,7 +12950,7 @@ packages:
   /rehype-slug@5.1.0:
     resolution: {integrity: sha512-Gf91dJoXneiorNEnn+Phx97CO7oRMrpi+6r155tTxzGuLtm+QrI4cTwCa9e1rtePdL4i9tSO58PeSS6HWfgsiw==}
     dependencies:
-      '@types/hast': 2.3.6
+      '@types/hast': 2.3.7
       github-slugger: 2.0.0
       hast-util-has-property: 2.0.1
       hast-util-heading-rank: 2.1.1
@@ -14074,8 +14022,8 @@ packages:
       typescript: 5.1.6
     dev: true
 
-  /svelte2tsx@0.6.22(svelte@3.59.2)(typescript@5.1.6):
-    resolution: {integrity: sha512-eFCfz0juaWeanbwGeQV21kPMwH3LKhfrUYRy1PqRmlieuHvJs8VeK7CaoHJdpBZWCXba2cltHVdywJmwOGhbww==}
+  /svelte2tsx@0.6.23(svelte@3.59.2)(typescript@5.1.6):
+    resolution: {integrity: sha512-3bwd1PuWUA3oEXy8+85zrLDnmJOsVpShpKVAehGWeYsz/66zMihTpRpUN97VVAKTZbO5tP4wnchHUXYs0zOwdw==}
     peerDependencies:
       svelte: ^3.55 || ^4.0.0-next.0 || ^4.0
       typescript: ^4.9.4 || ^5.0.0
@@ -14682,7 +14630,7 @@ packages:
   /vfile-message@2.0.4:
     resolution: {integrity: sha512-DjssxRGkMvifUOJre00juHoP9DPWuzjxKuMDrhNbk2TdaYYBNMStsNhEOt3idrtI12VQYM/1+iM0KOzXi4pxwQ==}
     dependencies:
-      '@types/unist': 2.0.6
+      '@types/unist': 2.0.8
       unist-util-stringify-position: 2.0.3
     dev: true
 
@@ -14700,28 +14648,6 @@ packages:
       is-buffer: 2.0.5
       unist-util-stringify-position: 3.0.3
       vfile-message: 3.1.4
-    dev: true
-
-  /vite-node@0.34.5(@types/node@18.11.18):
-    resolution: {integrity: sha512-RNZ+DwbCvDoI5CbCSQSyRyzDTfFvFauvMs6Yq4ObJROKlIKuat1KgSX/Ako5rlDMfVCyMcpMRMTkJBxd6z8YRA==}
-    engines: {node: '>=v14.18.0'}
-    hasBin: true
-    dependencies:
-      cac: 6.7.14
-      debug: 4.3.4
-      mlly: 1.4.2
-      pathe: 1.1.1
-      picocolors: 1.0.0
-      vite: 4.4.9(@types/node@18.11.18)
-    transitivePeerDependencies:
-      - '@types/node'
-      - less
-      - lightningcss
-      - sass
-      - stylus
-      - sugarss
-      - supports-color
-      - terser
     dev: true
 
   /vite-node@0.34.5(@types/node@18.18.0):
@@ -14782,42 +14708,6 @@ packages:
       fsevents: 2.3.3
     dev: true
 
-  /vite@4.4.9(@types/node@18.11.18):
-    resolution: {integrity: sha512-2mbUn2LlUmNASWwSCNSJ/EG2HuSRTnVNaydp6vMCm5VIqJsjMfbIWtbH2kDuwUVW5mMUKKZvGPX/rqeqVvv1XA==}
-    engines: {node: ^14.18.0 || >=16.0.0}
-    hasBin: true
-    peerDependencies:
-      '@types/node': '>= 14'
-      less: '*'
-      lightningcss: ^1.21.0
-      sass: '*'
-      stylus: '*'
-      sugarss: '*'
-      terser: ^5.4.0
-    peerDependenciesMeta:
-      '@types/node':
-        optional: true
-      less:
-        optional: true
-      lightningcss:
-        optional: true
-      sass:
-        optional: true
-      stylus:
-        optional: true
-      sugarss:
-        optional: true
-      terser:
-        optional: true
-    dependencies:
-      '@types/node': 18.11.18
-      esbuild: 0.18.20
-      postcss: 8.4.30
-      rollup: 3.29.3
-    optionalDependencies:
-      fsevents: 2.3.3
-    dev: true
-
   /vite@4.4.9(@types/node@18.18.0):
     resolution: {integrity: sha512-2mbUn2LlUmNASWwSCNSJ/EG2HuSRTnVNaydp6vMCm5VIqJsjMfbIWtbH2kDuwUVW5mMUKKZvGPX/rqeqVvv1XA==}
     engines: {node: ^14.18.0 || >=16.0.0}
@@ -14863,71 +14753,6 @@ packages:
         optional: true
     dependencies:
       vite: 4.4.7(@types/node@18.18.0)
-    dev: true
-
-  /vitest@0.34.5:
-    resolution: {integrity: sha512-CPI68mmnr2DThSB3frSuE5RLm9wo5wU4fbDrDwWQQB1CWgq9jQVoQwnQSzYAjdoBOPoH2UtXpOgHVge/uScfZg==}
-    engines: {node: '>=v14.18.0'}
-    hasBin: true
-    peerDependencies:
-      '@edge-runtime/vm': '*'
-      '@vitest/browser': '*'
-      '@vitest/ui': '*'
-      happy-dom: '*'
-      jsdom: '*'
-      playwright: '*'
-      safaridriver: '*'
-      webdriverio: '*'
-    peerDependenciesMeta:
-      '@edge-runtime/vm':
-        optional: true
-      '@vitest/browser':
-        optional: true
-      '@vitest/ui':
-        optional: true
-      happy-dom:
-        optional: true
-      jsdom:
-        optional: true
-      playwright:
-        optional: true
-      safaridriver:
-        optional: true
-      webdriverio:
-        optional: true
-    dependencies:
-      '@types/chai': 4.3.6
-      '@types/chai-subset': 1.3.3
-      '@types/node': 18.11.18
-      '@vitest/expect': 0.34.5
-      '@vitest/runner': 0.34.5
-      '@vitest/snapshot': 0.34.5
-      '@vitest/spy': 0.34.5
-      '@vitest/utils': 0.34.5
-      acorn: 8.10.0
-      acorn-walk: 8.2.0
-      cac: 6.7.14
-      chai: 4.3.8
-      debug: 4.3.4
-      local-pkg: 0.4.3
-      magic-string: 0.30.3
-      pathe: 1.1.1
-      picocolors: 1.0.0
-      std-env: 3.4.3
-      strip-literal: 1.3.0
-      tinybench: 2.5.1
-      tinypool: 0.7.0
-      vite: 4.4.9(@types/node@18.11.18)
-      vite-node: 0.34.5(@types/node@18.11.18)
-      why-is-node-running: 2.2.2
-    transitivePeerDependencies:
-      - less
-      - lightningcss
-      - sass
-      - stylus
-      - sugarss
-      - supports-color
-      - terser
     dev: true
 
   /vitest@0.34.5(@vitest/ui@0.33.0):

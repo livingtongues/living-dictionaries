@@ -10,7 +10,7 @@ import svelteStylistic from 'eslint-plugin-svelte-stylistic'
  * @type {import('eslint-define-config').FlatESLintConfigItem}
  */
 export const svelte = {
-  files: ['**/*.svelte', '**/*.svx'],
+  files: ['**/*.svelte', '**/*.composition'],
   plugins: {
     /** @type {any} */
     svelte: sveltePlugin,

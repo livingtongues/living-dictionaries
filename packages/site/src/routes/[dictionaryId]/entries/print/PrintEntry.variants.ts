@@ -1,4 +1,4 @@
-import type { Variants } from 'kitbook';
+import type { Variant } from 'kitbook';
 import type Component from './PrintEntry.svelte';
 import type { IPrintFields } from '@living-dictionaries/types';
 import { mock_expanded_entries } from '$lib/mocks/entries';
@@ -23,7 +23,7 @@ const selectedFields: IPrintFields = {
   sr: true,
 };
 
-export const variants: Variants<Component> = mock_expanded_entries.map(variant => {
+export const variants: Variant<Component>[] = mock_expanded_entries.map(variant => {
   return {
     name: variant.name,
     height: 400,

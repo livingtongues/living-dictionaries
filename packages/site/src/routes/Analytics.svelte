@@ -2,10 +2,10 @@
   import { onMount } from 'svelte';
   import { page } from '$app/stores';
 
-  const analyticsId = import.meta.env.VERCEL_ANALYTICS_ID as string;
+  const analyticsId = 'REPLACED_WITH_VERCEL_ANALYTICS_ID';
 
   onMount(async () => {
-    if (analyticsId) {
+    if (!analyticsId.startsWith('REPLACED')) {
       const { measureWebVitals } = await import('$lib/webvitals');
       measureWebVitals({ path: $page.url.pathname, params: $page.params, analyticsId });
     }
