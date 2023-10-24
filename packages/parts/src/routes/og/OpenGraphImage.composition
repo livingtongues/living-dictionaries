@@ -1,0 +1,98 @@
+<script>
+  import { dev } from '$app/environment';
+  import { onMount } from 'svelte';
+  import LZString from 'lz-string';
+  const { compressToEncodedURIComponent: encode } = LZString;
+
+  export let width = 1200;
+  export let height = 600;
+  export let title = 'húdié 蝴蝶 עִבְרִית';
+  export let description = 'butterfly';
+  export let dictionaryName = 'Fuliolo';
+  export let lat = 10;
+  export let lng = 35;
+  export let showImage = true;
+  export let gcsPath = 'LGuBKhg7vuv5-aJcOdnb_ucOXLSCIR1Kjxrh70xRlaIHqWo-mWqfWUcH3Xznz63QsFZmkeVmoNN0PEXzSc0Jh4g';
+
+  let version = 4; // after updating svelte-kit version can set this automatically
+  onMount(() => {
+    if (dev) {
+      const interval = setInterval(
+        () => (version = new Date().getTime()),
+        5000
+      );
+      return () => {
+        clearInterval(interval);
+      };
+    }
+  });
+</script>
+
+<img
+  alt=""
+  style="max-width: 100%;"
+  src="/og?props={encode(
+    JSON.stringify({
+      width,
+      height,
+      title,
+      description,
+      dictionaryName,
+      lng,
+      lat,
+      gcsPath: showImage ? gcsPath : '',
+    })
+  )}&v={version}" />
+
+<img
+  alt=""
+  style="max-width: 100%;"
+  src="/og?props={encode(
+    JSON.stringify({
+      width,
+      height,
+      title,
+      description,
+      dictionaryName,
+      lng,
+      lat,
+    })
+  )}&v={version}" />
+
+<img
+  alt=""
+  style="max-width: 100%;"
+  src="/og?props={encode(
+    JSON.stringify({
+      width,
+      height,
+      title: 'This is an example where the lexeme is an entire sentence!',
+      description:
+        'So you can see how the font got a little bit smaller to allow for larger entries. This one also has USA coordinates.',
+      dictionaryName,
+      lng: -95,
+      lat: 40,
+    })
+  )}&v={version}" />
+
+<img
+  alt=""
+  style="max-width: 100%;"
+  src="/og?props={encode(
+    JSON.stringify({
+      width,
+      height,
+      title,
+      description:
+        'Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industrys standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.',
+      dictionaryName,
+      lng,
+      lat,
+    })
+  )}&v={version}" />
+
+<style>
+  img {
+    margin-bottom: 10px;
+  }
+</style>

@@ -20,6 +20,16 @@
     "types": [
       "vitest/globals",
       "vitest/importMeta"
-    ]
+    ],
+    // defining paths here and adding baseUrl for Playwright to work
+    "paths": {
+			"$lib": [
+				"./src/lib"
+			],
+			"$lib/*": [
+				"./src/lib/*"
+			]
+		},
+    "baseUrl": "."
   },
 }

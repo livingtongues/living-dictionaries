@@ -12,12 +12,14 @@
     "check": "svelte-check --tsconfig ./tsconfig.json --threshold error --diagnostic-sources js,svelte",
     "check:watch": "svelte-check --tsconfig ./tsconfig.json --threshold warning --diagnostic-sources js,svelte --watch",
     "test": "vitest",
-    "test:ui": "vitest --ui"
+    "test:e2e": "playwright test --update-snapshots",
+    "local-kitbook": "link:../../../kitbook/packages/kitbook"
   },
   "devDependencies": {
     "@iconify/json": "^2.2.121",
     "@julr/unocss-preset-forms": "^0.0.5",
     "@living-dictionaries/types": "workspace:^1.0.0",
+		"@playwright/test": "1.39.0",
     "@sentry/browser": "^6.18.2",
     "@sveltejs/adapter-auto": "^2.1.0",
     "@sveltejs/kit": "^1.22.3",
@@ -46,7 +48,7 @@
     "firebase-admin": "^11.10.1",
     "instantsearch.js": "^4.33.2",
     "jszip": "^3.7.1",
-    "kitbook": "1.0.0-alpha.42",
+    "kitbook": "1.0.0-alpha.53",
     "logrocket": "^2.1.2",
     "lz-string": "^1.4.4",
     "recordrtc": "^5.6.2",

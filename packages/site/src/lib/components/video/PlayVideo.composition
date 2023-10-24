@@ -1,0 +1,17 @@
+<script lang="ts">
+  // import PlayVideo from './PlayVideo.svelte';
+  import { Button, ShowHide } from 'svelte-pieces';
+</script>
+
+<ShowHide let:show let:toggle>
+  <Button onclick={toggle}>Open Video</Button>
+  {#if show}
+    <!-- <PlayVideo
+      entry={{lexeme: 'foo'}}
+      video={null}
+      storageBucket={'change'}
+      canEdit
+      on:close={toggle}
+      on:deleteVideo={() => alert('delete clicked')} /> -->
+  {/if}
+</ShowHide>

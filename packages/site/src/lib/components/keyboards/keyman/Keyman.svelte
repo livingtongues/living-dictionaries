@@ -6,10 +6,11 @@
 
 <script lang="ts">
   import './keyman.css';
-  import { onMount, tick } from 'svelte';
+  import { onDestroy, onMount, tick } from 'svelte';
   import { Button, ShowHide, Modal } from 'svelte-pieces';
   import { additionalKeyboards, glossingLanguages } from '../../../glosses/glossing-languages';
   import { loadScriptOnce } from 'sveltefirets';
+  import { browser } from '$app/environment';
 
   /**
    * When using keyboard inside a fixed context like a modal, set fixed to true to use fixed positioning instead of absolute positioning to keep keyboard with fixed input, otherwise it will match page scroll height
@@ -38,12 +39,15 @@
 
     const root = document.documentElement;
     if (fixed) root.style.setProperty('--kmw-osk-pos', 'fixed');
+  });
 
-    return () => {
+  onDestroy(() => {
+    if (browser) {
+      const root = document.documentElement;
       root.style.setProperty('--kmw-osk-pos', 'absolute');
       kmw.detachFromControl(inputEl);
-    };
-  });
+    }
+  })
 
   async function targetInput() {
     if (target) {

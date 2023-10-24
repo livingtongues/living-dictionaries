@@ -1,4 +1,4 @@
-import type { Variants } from 'kitbook';
+import type { Variant } from 'kitbook';
 import type Component from './EntryDisplay.svelte';
 import type { IDictionary } from '@living-dictionaries/types';
 
@@ -20,7 +20,7 @@ const defaultEntry = {
   ],
 }
 
-const partialVariants: DeepPartial<Variants<Component>> = [
+const partialVariants: DeepPartial<Variant<Component>[]> = [
   {
     name: 'Everything',
     // height: 800,
@@ -105,8 +105,8 @@ const partialVariants: DeepPartial<Variants<Component>> = [
     },
   },
   {
-    name: 'Scientific Name',
-    description: 'Partial italics, can edit',
+    name: 'Scientific Name - Partial italics',
+    description: 'can edit',
     props: {
       entry: {
         lexeme: 'Old world swallowtail',
@@ -124,7 +124,7 @@ const partialVariants: DeepPartial<Variants<Component>> = [
   },
 ];
 
-export const variants: Variants<Component> = (partialVariants as Variants<Component>).map((variant) => ({
+export const variants: Variant<Component>[] = (partialVariants as Variant<Component>[]).map((variant) => ({
   ...variant,
   props: {
     ...variant.props,

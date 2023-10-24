@@ -1,4 +1,4 @@
-import type { Variants } from 'kitbook';
+import type { Variant } from 'kitbook';
 import type Component from './GeoTaggingModal.svelte';
 import type { IRegion } from '@living-dictionaries/types';
 
@@ -10,7 +10,7 @@ const tw_region: IRegion = {coordinates: [
 ]}
 const bangladesh = {latitude: 23.2, longitude: 90}
 
-export const variants: Variants<Component> = [
+export const variants: Variant<Component>[] = [
   {
     name: 'points and region',
     props: {

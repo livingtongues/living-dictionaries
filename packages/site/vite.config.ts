@@ -1,20 +1,12 @@
 import { sveltekit } from '@sveltejs/kit/vite';
 import { defineConfig } from 'vite';
 import UnoCSS from '@unocss/svelte-scoped/vite';
-// import { kitbook } from 'kitbook/plugins/vite';
+import { kitbook } from 'kitbook/plugins/vite';
+import kitbookConfig from './kitbook.config';
 
 export default defineConfig({
   plugins: [
-    // kitbook({
-    //   title: 'Living Dictionaries',
-    //   description: 'Svelte Component Documentation and Prototyping Workbench built for Living Dictionaries using Kitbook',
-    //   githubURL: 'https://github.com/livingtongues/living-dictionaries/tree/main/packages/site',
-    //   expandTree: true,
-    //   viewports: [
-    //     { width: 320, height: 640 },
-    //     { width: 768, height: 800 },
-    //   ]
-    // }),
+    kitbook(kitbookConfig),
     UnoCSS({
       injectReset: '@unocss/reset/tailwind.css',
     }),
@@ -27,10 +19,7 @@ export default defineConfig({
   build: {
     target: 'es2015',
   },
-  define: {
-    'import.meta.vitest': false,
-    'import.meta.env.VERCEL_ANALYTICS_ID': JSON.stringify(process.env.VERCEL_ANALYTICS_ID),
-  },
+  define: getReplacements(),
   optimizeDeps: {
     include: [
       // 'algoliasearch',
@@ -45,3 +34,16 @@ export default defineConfig({
     ],
   },
 });
+
+function getReplacements() {
+  if (typeof process !== 'undefined' && process.env.VERCEL_ANALYTICS_ID) {
+    return {
+      'import.meta.vitest': false,
+      'REPLACED_WITH_VERCEL_ANALYTICS_ID': process.env.VERCEL_ANALYTICS_ID,
+    }
+  }
+
+  return {
+    'import.meta.vitest': false,
+  }
+}
