@@ -10,6 +10,7 @@
   import { DICTIONARIES_WITH_VARIANTS } from '$lib/constants';
   import EntryMedia from './EntryMedia.svelte';
   import SelectSource from '$lib/components/entry/EntrySource.svelte';
+  import EntryHistory from './EntryHistory.svelte';
 
   export let entry: ExpandedEntry;
   export let dictionary: IDictionary;
@@ -35,6 +36,7 @@
 
   <div class="md:w-1/3 flex flex-col mt-2">
     <EntryMedia {dictionary} {entry} {canEdit} {videoAccess} on:deleteImage on:deleteVideo on:valueupdate />
+    <EntryHistory class="hidden md:block" />
   </div>
 
   <div class="hidden md:block w-1" />
@@ -202,3 +204,5 @@
     {/if}
   </div>
 </div>
+
+<EntryHistory class="md:hidden" />
