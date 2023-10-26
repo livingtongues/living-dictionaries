@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { EntryFields, type EntryFieldValue, type ExpandedEntry, type IDictionary } from '@living-dictionaries/types';
+  import { EntryFields, type EntryFieldValue, type ExpandedEntry, type IDictionary, type History } from '@living-dictionaries/types';
   import { t } from 'svelte-i18n';
   import EntryField from './EntryField.svelte';
   import EntryPartOfSpeech from '$lib/components/entry/EntryPartOfSpeech.svelte';
@@ -16,6 +16,7 @@
   export let dictionary: IDictionary;
   export let canEdit = false;
   export let videoAccess = false;
+  export let history: History[];
 
   const dispatch = createEventDispatcher<{
     valueupdate: { field: string; newValue: string | string[] };
@@ -36,7 +37,7 @@
 
   <div class="md:w-1/3 flex flex-col mt-2">
     <EntryMedia {dictionary} {entry} {canEdit} {videoAccess} on:deleteImage on:deleteVideo on:valueupdate />
-    <EntryHistory class="hidden md:block" />
+    <EntryHistory {history} class="hidden md:block" />
   </div>
 
   <div class="hidden md:block w-1" />
@@ -205,4 +206,4 @@
   </div>
 </div>
 
-<EntryHistory class="md:hidden" />
+<EntryHistory {history} class="md:hidden" />

@@ -1,6 +1,7 @@
 import type { Variant } from 'kitbook';
 import type Component from './EntryDisplay.svelte';
 import type { IDictionary } from '@living-dictionaries/types';
+import { Timestamp } from 'firebase/firestore';
 
 type DeepPartial<T> = {
   [P in keyof T]?: T[P] extends object ? DeepPartial<T[P]> : T[P];
@@ -111,6 +112,46 @@ const partialVariants: DeepPartial<Variant<Component>[]> = [
       entry: {
         lexeme: 'Old world swallowtail',
         scientific_names: ['<i>Papilio machaon</i>, Dr. G.'],
+      },
+      canEdit: true,
+    },
+  },
+  {
+    name: 'History',
+    description: 'Entry with history',
+    props: {
+      history: [
+        {
+          editor: 'Diego Córdova',
+          editedLexeme: 'EntryDisplay',
+          editedDictionaryId: 'Banange',
+          action: 'created',
+          updatedAt: Timestamp.fromDate(new Date(2023, 9, 12, 15, 35, 54))
+        },
+        {
+          editor: 'Anna Luisa',
+          editedLexeme: '002',
+          editedDictionaryId: 'Banange',
+          action: 'created',
+          updatedAt: Timestamp.fromDate(new Date(2023, 9, 12, 15, 36, 54))
+        },
+        {
+          editor: 'Diego Córdova',
+          editedLexeme: 'EntryDisplay',
+          editedDictionaryId: 'Banange',
+          action: 'edited',
+          updatedAt: Timestamp.fromDate(new Date(2023, 9, 12, 15, 35, 59))
+        },
+        {
+          editor: 'Anna Luisa',
+          editedLexeme: 'EntryDisplay',
+          editedDictionaryId: 'Banange',
+          action: 'edited',
+          updatedAt: Timestamp.fromDate(new Date(2023, 9, 12, 15, 39, 2))
+        },
+      ],
+      entry: {
+        lexeme: 'Giraffe',
       },
       canEdit: true,
     },
