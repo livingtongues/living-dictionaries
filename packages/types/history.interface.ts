@@ -5,5 +5,6 @@ export interface History {
   editedLexeme: string,
   editedDictionaryId: string,
   action: string,
-  updatedAt?: Timestamp;
+  // field?: string, by request
+  updatedAt: Timestamp;
 }
