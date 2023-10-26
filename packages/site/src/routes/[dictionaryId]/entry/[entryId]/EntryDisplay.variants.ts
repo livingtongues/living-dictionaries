@@ -126,14 +126,14 @@ const partialVariants: DeepPartial<Variant<Component>[]> = [
           editedLexeme: 'EntryDisplay',
           editedDictionaryId: 'Banange',
           action: 'created',
-          updatedAt: Timestamp.fromDate(new Date(2023, 9, 12, 15, 35, 54))
+          updatedAt: Timestamp.fromDate(new Date(2023, 7, 11, 15, 35, 54))
         },
         {
           editor: 'Anna Luisa',
           editedLexeme: '002',
           editedDictionaryId: 'Banange',
           action: 'created',
-          updatedAt: Timestamp.fromDate(new Date(2023, 9, 12, 15, 36, 54))
+          updatedAt: Timestamp.fromDate(new Date(2023, 8, 24, 15, 36, 54))
         },
         {
           editor: 'Diego Córdova',

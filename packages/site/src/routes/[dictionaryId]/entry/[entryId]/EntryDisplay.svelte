@@ -37,7 +37,7 @@
 
   <div class="md:w-1/3 flex flex-col mt-2">
     <EntryMedia {dictionary} {entry} {canEdit} {videoAccess} on:deleteImage on:deleteVideo on:valueupdate />
-    <EntryHistory {history} class="hidden md:block" />
+    <EntryHistory {history} class="mt-5 hidden md:block" />
   </div>
 
   <div class="hidden md:block w-1" />
@@ -206,4 +206,4 @@
   </div>
 </div>
 
-<EntryHistory {history} class="md:hidden" />
+<EntryHistory {history} class="mt-3 md:hidden" />
