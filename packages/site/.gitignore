@@ -1,4 +1,8 @@
 /build
 /.svelte-kit*
-/package
 vite.config.ts*
+
+**/e2e/snapshots/*
+test-results
+playwright-report
+/playwright/.cache/
