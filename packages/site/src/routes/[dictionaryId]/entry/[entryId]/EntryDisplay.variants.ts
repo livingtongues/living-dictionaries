@@ -123,28 +123,32 @@ const partialVariants: DeepPartial<Variant<Component>[]> = [
       history: [
         {
           editor: 'Diego Córdova',
-          editedLexeme: 'EntryDisplay',
+          editedLexeme: 'Giraffe',
+          entryId: 'EntryDisplay',
           editedDictionaryId: 'Banange',
           action: 'created',
           updatedAt: Timestamp.fromDate(new Date(2023, 7, 11, 15, 35, 54))
         },
         {
           editor: 'Anna Luisa',
-          editedLexeme: '002',
+          editedLexeme: 'Snake',
+          entryId: '002',
           editedDictionaryId: 'Banange',
           action: 'created',
           updatedAt: Timestamp.fromDate(new Date(2023, 8, 24, 15, 36, 54))
         },
         {
           editor: 'Diego Córdova',
-          editedLexeme: 'EntryDisplay',
+          editedLexeme: 'Elephant',
+          entryId: 'EntryDisplay',
           editedDictionaryId: 'Banange',
           action: 'edited',
           updatedAt: Timestamp.fromDate(new Date(2023, 9, 12, 15, 35, 59))
         },
         {
           editor: 'Anna Luisa',
-          editedLexeme: 'EntryDisplay',
+          editedLexeme: 'Giraffe',
+          entryId: 'EntryDisplay',
           editedDictionaryId: 'Banange',
           action: 'edited',
           updatedAt: Timestamp.fromDate(new Date(2023, 9, 12, 15, 39, 2))

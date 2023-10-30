@@ -44,7 +44,7 @@
       {$_('dictionary.contributors', { default: 'Contributors' })}
     </span>
   </a>
-  {#if canEdit}
+  {#if $canEdit}
     <a
       href={'/' + $dictionary.id + '/history'}
       class:active={$page.url.pathname.includes('history')}>
