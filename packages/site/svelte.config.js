@@ -1,18 +1,11 @@
 // @ts-check
 import { vitePreprocess } from '@sveltejs/kit/vite';
 import adapter from '@sveltejs/adapter-auto';
-import { mdsvex, KITBOOK_MDSVEX_CONFIG } from 'kitbook/plugins/mdsvex';
-
-const withoutSVX = {
-  ...KITBOOK_MDSVEX_CONFIG,
-  extensions: ['.md'],
-}
 
 /** @type {import('@sveltejs/kit').Config} */
 const config = {
-  extensions: ['.svelte', '.composition', '.md'],
+  extensions: ['.svelte', '.composition'],
   preprocess: [
-    mdsvex(withoutSVX),
     vitePreprocess(),
   ],
 
