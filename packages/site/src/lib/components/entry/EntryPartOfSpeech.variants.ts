@@ -1,5 +1,10 @@
-import type { Variant } from 'kitbook';
+import type { Variant, Viewport } from 'kitbook';
 import type Component from './EntryPartOfSpeech.svelte';
+
+export const viewports: Viewport[] = [
+  { width: 400, height: 200}
+]
+
 export const variants: Variant<Component>[] = [
   {
     name: 'cannot edit',
