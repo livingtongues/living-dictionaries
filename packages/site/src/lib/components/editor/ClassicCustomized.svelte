@@ -37,5 +37,5 @@
 </script>
 
 {#await import('ckeditor5-build-classic-with-alignment-underline-smallcaps') then editor}
-  <CKEditor {editor} value={html} {editorConfig} on:update />
+  <CKEditor editor={editor.default} value={html} {editorConfig} on:update />
 {/await}
