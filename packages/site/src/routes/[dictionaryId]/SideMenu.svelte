@@ -1,7 +1,7 @@
 <script lang="ts">
   export let menuOpen: boolean;
   import { _ } from 'svelte-i18n';
-  import { dictionary, isManager } from '$lib/stores';
+  import { canEdit, dictionary, isManager } from '$lib/stores';
   import { page } from '$app/stores';
 </script>
 
@@ -44,6 +44,16 @@
       {$_('dictionary.contributors', { default: 'Contributors' })}
     </span>
   </a>
+  {#if canEdit}
+    <a
+      href={'/' + $dictionary.id + '/history'}
+      class:active={$page.url.pathname.includes('history')}>
+      <i class="far fa-user-clock fa-fw" />
+      <span class="font-medium mx-2">
+        {$_('dictionary.history', { default: 'History' })}
+      </span>
+    </a>
+  {/if}
   <a
     href={'/' + $dictionary.id + '/grammar'}
     class:active={$page.url.pathname.includes('grammar')}>
