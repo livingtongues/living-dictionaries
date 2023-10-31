@@ -12,11 +12,12 @@
   </h3>
 
   {#if canEdit}
-    {#if history.length > 0}
+    {#if data.history.length > 0}
       <ul class="m-3 md:text-xl">
         {#each data.history as record}
           {@const { editor, editedLexeme, editedDictionaryId, action, updatedAt } = record}
-          <li class="mb-2">{editor} <strong>{action}</strong> <a href="{editedDictionaryId}/{editedLexeme}">{editedLexeme}</a> on {updatedAt.toDate().toLocaleString()}</li>
+          {@const date = updatedAt.toDate()}
+          <li class="mb-2">{editor} <strong>{action}</strong> <a href="{editedDictionaryId}/{editedLexeme}">{editedLexeme}</a> on {date.toLocaleString()}</li>
         {/each}
       </ul>
     {:else}

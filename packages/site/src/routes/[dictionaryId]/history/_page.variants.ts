@@ -63,7 +63,7 @@ const history = [
 
 export const variants: Variant<Component>[] = [
   {
-    name: 'Normal',
+    name: 'Sorted by latest update',
     props: {
       data: {
         dictionary: {
@@ -71,7 +71,59 @@ export const variants: Variant<Component>[] = [
           glossLanguages: []
         },
         user: null,
-        history
+        history: [...history].sort((a, b) => b.updatedAt.toDate().getTime() - a.updatedAt.toDate().getTime())
+      }
+    }
+  },
+  {
+    name: 'Inverse order',
+    props: {
+      data: {
+        dictionary: {
+          name: 'Banange',
+          glossLanguages: []
+        },
+        user: null,
+        history: [...history].sort((a, b) => a.updatedAt.toDate().getTime() - b.updatedAt.toDate().getTime())
+      }
+    }
+  },
+  {
+    name: 'Sorted by action',
+    props: {
+      data: {
+        dictionary: {
+          name: 'Banange',
+          glossLanguages: []
+        },
+        user: null,
+        history: [...history].sort((a, b) => b.action > a.action ? 1 : -1)
+      }
+    }
+  },
+  {
+    name: 'Sorted by editor',
+    props: {
+      data: {
+        dictionary: {
+          name: 'Banange',
+          glossLanguages: []
+        },
+        user: null,
+        history: [...history].sort((a, b) => a.editor > b.editor ? 1 : -1)
+      }
+    }
+  },
+  {
+    name: 'Sorted by lexeme',
+    props: {
+      data: {
+        dictionary: {
+          name: 'Banange',
+          glossLanguages: []
+        },
+        user: null,
+        history: [...history].sort((a, b) => a.editedLexeme > b.editedLexeme ? 1 : -1)
       }
     }
   },
