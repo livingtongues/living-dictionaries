@@ -1,6 +1,6 @@
 <script context="module" lang="ts">
-  export const width = 600
-  export const height = 400
+  import type { Viewport } from 'kitbook';
+  export const viewports: Viewport[] = [{ width: 600, height: 400 }]
 </script>
 
 <script lang="ts">
