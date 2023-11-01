@@ -1,9 +1,30 @@
 <script lang="ts">
   import { t } from 'svelte-i18n';
   import { canEdit } from '$lib/stores';
+  import Block from './Block.svelte';
   // import SeoMetaTags from '$lib/components/SeoMetaTags.svelte';
 
   export let data;
+  interface monthAndYear {
+    month: number;
+    year: number;
+  }
+  let dates: monthAndYear[]
+  $: if (data.history.length > 0) {
+    const reducedDates = data.history.reduce((acc, record) => {
+      const date = record.updatedAt.toDate();
+      const month = date.getMonth();
+      const year = date.getFullYear();
+      const key = `${month}-${year}`;
+
+      if (!acc.has(key))
+        acc.set(key, {month, year});
+
+      return acc;
+    }, new Map());
+
+    dates = Array.from(reducedDates.values());
+  }
 </script>
 
 <div>
@@ -13,13 +34,9 @@
 
   {#if canEdit}
     {#if data.history.length > 0}
-      <ul class="m-3 md:text-xl">
-        {#each data.history as record}
-          {@const { editor, editedLexeme, editedDictionaryId, action, updatedAt } = record}
-          {@const date = updatedAt.toDate()}
-          <li class="mb-2">{editor} <strong>{action}</strong> <a href="{editedDictionaryId}/{editedLexeme}">{editedLexeme}</a> on {date.toLocaleString()}</li>
-        {/each}
-      </ul>
+      {#each dates as date}
+        <Block records={data.history.filter(record => record.updatedAt.toDate().getMonth() === date.month && record.updatedAt.toDate().getFullYear() === date.year)} />
+      {/each}
     {:else}
       <p>History is empty</p>
     {/if}
@@ -27,3 +44,5 @@
     Only Managers and contributors can see this.
   {/if}
 </div>
+
+
