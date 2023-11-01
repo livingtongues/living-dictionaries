@@ -9,8 +9,16 @@
     month: number;
     year: number;
   }
-  let dates: monthAndYear[]
-  $: if (data.history.length > 0) {
+  let dates: monthAndYear[];
+  let selected: 'date' | 'action' | 'editor' | 'lexeme' = 'date';
+  const options = [
+    'date',
+    'action',
+    'editor',
+    'lexeme'
+  ]
+
+  function sortByDates() {
     const reducedDates = data.history.reduce((acc, record) => {
       const date = record.updatedAt.toDate();
       const month = date.getMonth();
@@ -25,12 +33,26 @@
 
     dates = Array.from(reducedDates.values());
   }
+
+  $: if (data.history.length > 0)
+    sortByDates();
+
 </script>
 
 <div>
   <h3 class="text-xl font-semibold mb-3">
     {$t('dictionary.history', { default: 'History' })}
   </h3>
+
+  <div class="flex justify-end m-3">
+    <label for="value-select">Sort by:</label>
+
+    <select bind:value={selected}>
+      {#each options as value}
+        <option {value}>{value[0].toUpperCase() + value.slice(1)}</option>
+      {/each}
+    </select>
+  </div>
 
   {#if canEdit}
     {#if data.history.length > 0}
