@@ -20,7 +20,6 @@ enum ReadyLocales {
 
 
 export default defineConfig({
-  importModuleGlobs: ['/src/**/*.{md,svelte,variants.ts,composition}', '/README.md'],
   title: 'Living Dictionaries',
   description: 'Svelte Component Documentation and Prototyping Workbench built for Living Dictionaries using Kitbook',
   githubURL: 'https://github.com/livingtongues/living-dictionaries/tree/main/packages/site',

@@ -5,7 +5,7 @@ export const viewports: Viewport[] = [
   { name: 'Mobile', width: 320, height: 320}
 ]
 
-// export const languages = []
+export const languages = []
 
 export const variants: Variant<Component>[] = [
   {
