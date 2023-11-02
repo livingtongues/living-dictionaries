@@ -21,6 +21,8 @@
     deleteImage: { entryId: string };
     valueupdate: { field: string; newValue: string | string[]; entryId: string };
   }>();
+
+  const isFirefox = /Firefox/i.test(navigator.userAgent);
 </script>
 
 <div
@@ -49,7 +51,7 @@
         {#each columns as column, i}
           <td
             class:bg-green-100={canEdit && entry.ua?.toMillis?.() > minutesAgo(5)}
-            class="{column.sticky ? 'sticky bg-white z-1' : ''} h-0"
+            class="{column.sticky ? 'sticky bg-white z-1' : ''} {isFirefox ? '' : 'h-0'}"
             style="{column.sticky
               ? 'left:' + getLeftValue(i) + 'px; --border-right-width: 3px;'
               : ''} --col-width: {entry.sources ? 'auto' : `${column.width}px`};">
