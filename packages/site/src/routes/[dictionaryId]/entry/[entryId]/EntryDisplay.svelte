@@ -54,7 +54,7 @@
       <Sense sense={entry.senses[0]} {canEdit} glossLanguages={dictionary.glossLanguages} on:valueupdate />
 
       {#if admin && canEdit}
-        <button type="button" class="text-start p-2 mb-2 rounded order-2 hover:bg-gray-100 text-gray-600" on:click={() => alert('Ability to add additional senses coming soon.')}><span class="i-system-uicons-versions text-xl" /> Add another sense</button>
+        <button type="button" class="text-start p-2 mb-2 rounded order-2 hover:bg-gray-100 text-gray-600" on:click={() => alert('Ability to add additional senses coming soon.')}><span class="i-system-uicons-versions text-xl" /> Add Sense</button>
       {/if}
     {:else}
       {#each entry.senses as sense, index}
