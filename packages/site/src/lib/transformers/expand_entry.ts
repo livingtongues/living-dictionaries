@@ -15,7 +15,7 @@ export function expand_entry(database_entry: GoalDatabaseEntry): ExpandedEntry {
     local_orthography_4: database_entry.lo4,
     local_orthography_5: database_entry.lo5,
     phonetic: database_entry.ph,
-    senses: database_entry.sn?.map(expand_sense) || [],
+    senses: database_entry.sn?.map(expand_sense) || [{}],
     interlinearization: database_entry.in,
     morphology: database_entry.mr,
     plural_form: database_entry.pl,
