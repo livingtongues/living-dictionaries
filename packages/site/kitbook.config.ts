@@ -23,7 +23,7 @@ export default defineConfig({
   title: 'Living Dictionaries',
   description: 'Svelte Component Documentation and Prototyping Workbench built for Living Dictionaries using Kitbook',
   githubURL: 'https://github.com/livingtongues/living-dictionaries/tree/main/packages/site',
-  expandTree: true,
+  // expandTree: true,
   viewports: [
     { name: 'mobile', width: 375, height: 400 },
     { name: 'desktop', width: 768, height: 400 },

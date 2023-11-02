@@ -121,6 +121,8 @@ const partialVariants: DeepPartial<Variant<Component>[]> = [
   },
   {
     name: 'Local orthographies',
+    languages: [],
+    viewports: [{width: 400, height: 300}],
     props: {
       entry: {
         lexeme: 'Hello',
@@ -137,6 +139,8 @@ const partialVariants: DeepPartial<Variant<Component>[]> = [
   },
   {
     name: 'Scientific Name',
+    languages: [],
+    viewports: [{width: 400, height: 200}],
     props: {
       entry: {
         lexeme: 'Old world swallowtail',
@@ -147,6 +151,7 @@ const partialVariants: DeepPartial<Variant<Component>[]> = [
   {
     name: 'Scientific Name - Partial italics',
     description: 'can edit',
+    languages: [],
     props: {
       entry: {
         lexeme: 'Old world swallowtail',
@@ -157,6 +162,7 @@ const partialVariants: DeepPartial<Variant<Component>[]> = [
   },
   {
     name: 'No details, can edit',
+    languages: [],
     props: {
       canEdit: true,
     },
