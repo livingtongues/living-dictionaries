@@ -1,45 +1,42 @@
 import type { Variant } from 'kitbook';
 import type Component from './ListEntry.svelte';
 import { basic_mock_dictionary } from '$lib/mocks/dictionaries';
-import { mock_expanded_entries } from '$lib/mocks/entries';
+import { complex, simple } from '$lib/mocks/entries';
 
-export const variants: Variant<Component>[] = [...mock_expanded_entries.map(variant => {
-  return {
-    name: variant.name,
-    // height: 130,
+export const variants: Variant<Component>[] = [
+  {
+    name: 'complex',
     props: {
       dictionary: basic_mock_dictionary,
-      entry: variant.entry,
+      entry: complex,
       canEdit: true,
-      // videoAccess,
     }
-  };
-}),
-{
-  name: 'video access',
-  // height: 110,
-  props: {
-    dictionary: basic_mock_dictionary,
-    entry: mock_expanded_entries[1].entry,
-    canEdit: true,
-    videoAccess: true,
-  }
-},
-{
-  name: 'jewish-neo-aramaic',
-  description: 'This dictionary has an exception where we show dialects and example sentences in the list view.',
-  // height: 190,
-  props: {
-    dictionary: {
-      id: 'jewish-neo-aramaic',
-      name: 'Jewish Neo-Aramaic',
-      glossLanguages: ['en'],
-    },
-    entry: mock_expanded_entries[0].entry,
-    canEdit: true,
-    videoAccess: true,
-  }
-},
+  },
+  {
+    name: 'video access',
+    languages: [],
+    viewports: [{width: 400, height: 100}],
+    props: {
+      dictionary: basic_mock_dictionary,
+      entry: simple,
+      canEdit: true,
+      videoAccess: true,
+    }
+  },
+  {
+    name: 'jewish-neo-aramaic',
+    description: 'This dictionary has an exception where we show dialects and example sentences in the list view.',
+    props: {
+      dictionary: {
+        id: 'jewish-neo-aramaic',
+        name: 'Jewish Neo-Aramaic',
+        glossLanguages: ['en'],
+      },
+      entry: complex,
+      canEdit: true,
+      videoAccess: true,
+    }
+  },
 ];
 
 // const extras = [

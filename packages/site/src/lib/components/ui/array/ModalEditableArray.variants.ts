@@ -1,9 +1,18 @@
-import type { Variant } from 'kitbook';
+import type { Variant, Viewport } from 'kitbook';
 import type Component from './ModalEditableArray.svelte';
+
+export const viewports: Viewport[] = [
+  { width: 400, height: 600}
+]
+
+export const languages = []
+
 export const variants: Variant<Component>[] = [
   {
-    // height: 450,
-    // width: 700,
+    name: 'cannot edit',
+    viewports: [
+      { width: 300, height: 50}
+    ],
     props: {
       values: ['1.2'],
       placeholder: 'Select...',
@@ -15,8 +24,6 @@ export const variants: Variant<Component>[] = [
   },
   {
     name: 'can edit',
-    // height: 450,
-    // width: 700,
     props: {
       values: ['1.2', '1.3'],
       placeholder: 'Select elements',
@@ -31,8 +38,6 @@ export const variants: Variant<Component>[] = [
   },
   {
     name: 'can write-in',
-    // height: 450,
-    // width: 700,
     props: {
       values: [],
       placeholder: 'Select elements',

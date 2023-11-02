@@ -8,6 +8,7 @@ env:
   BUCKET_NAME: component-snapshots
   PROJECT_NAME: living-dictionaries
   PROJECT_ROOT: ./packages/site
+  KITBOOK_ROUTE: kitbook
 
 on:
   deployment_status
@@ -20,20 +21,21 @@ jobs:
     name: Keep Base Component Snapshots In Sync with Main Branch
     if: github.event.deployment_status.state == 'success' && github.event.deployment_status.environment == 'Production' # 👈 set this
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 30
     container:
       image: mcr.microsoft.com/playwright:v1.39.0-jammy # 👈 keep version in sync with installed playwright package https://playwright.dev/docs/ci#github-actions-via-containers
     steps:
       - uses: actions/checkout@v3
 
-      - uses: actions/setup-node@v3
-        with:
-          node-version: 18
-
       - name: Install pnpm
         uses: pnpm/action-setup@v2
         with:
           version: 8.6.0
+
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+          cache: pnpm
 
       - name: Install Dependencies
         run: pnpm install
@@ -64,23 +66,24 @@ jobs:
     name: Compare Components Against Base Snapshots
     if: github.event.deployment_status.state == 'success' && github.event.deployment_status.environment == 'Preview' # 👈 set this
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 30
     container:
       image: mcr.microsoft.com/playwright:v1.39.0-jammy # 👈 keep version in sync with installed playwright package https://playwright.dev/docs/ci#github-actions-via-containers
 
     steps:
       - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
-        with:
-          node-version: 18
 
       - name: Install pnpm
         uses: pnpm/action-setup@v2
         with:
           version: 8.6.0
 
-      - name: Install Dependencies
-        run: pnpm install
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+          cache: pnpm
+
+      - run: pnpm install
 
       - name: Authenticate to Google Cloud
         id: auth
@@ -123,12 +126,14 @@ jobs:
       - name: Format Changed Component Snapshots for PR
         if: steps.findPr.outputs.number && steps.upload-snapshots.outputs.uploaded
         id: format_snapshot_links_for_pr
-        uses: jacob-8/kitbook/packages/format-snapshot-results-action@v1.0.0-beta.4
+        uses: jacob-8/kitbook/packages/format-snapshot-results-action@v1
         with:
           upload-results: '${{ steps.upload-snapshots.outputs.uploaded }}'
           pr: '${{ steps.findPr.outputs.pr }}'
           bucket: '${{ env.BUCKET_NAME }}'
           project: '${{ env.PROJECT_NAME }}'
+          deployment-url: '${{ env.PLAYWRIGHT_BASE_URL }}'
+          kitbook-route: '${{ env.KITBOOK_ROUTE }}'
 
       - name: Add Changed Component Snapshots to PR
         if: steps.findPr.outputs.number && steps.format_snapshot_links_for_pr.outputs.comment

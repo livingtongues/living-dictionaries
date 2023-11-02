@@ -3,9 +3,9 @@ import { defineConfig } from 'kitbook/defineConfig'
 
 enum ReadyLocales {
   en = 'English',
-  // es = 'Español',
-  // fr = 'Français',
-  // zh = '中文',
+  es = 'Español',
+  fr = 'Français',
+  zh = '中文',
   // sw = 'Kiswahili',
   // ru = 'русский',
   he = 'עברית',
@@ -20,14 +20,13 @@ enum ReadyLocales {
 
 
 export default defineConfig({
-  importModuleGlobs: ['/src/**/*.{md,svelte,variants.ts,composition}', '/README.md'],
   title: 'Living Dictionaries',
   description: 'Svelte Component Documentation and Prototyping Workbench built for Living Dictionaries using Kitbook',
   githubURL: 'https://github.com/livingtongues/living-dictionaries/tree/main/packages/site',
-  expandTree: true,
+  // expandTree: true,
   viewports: [
     { name: 'mobile', width: 375, height: 400 },
-    { name: 'desktop', width: 768, height: 400 },
+    { name: 'desktop', width: 786, height: 400 },
   ],
   languages: Object.entries(ReadyLocales).map(([code, name]) => ({ code, name })),
   addLanguageToUrl: ({code, url}) => {

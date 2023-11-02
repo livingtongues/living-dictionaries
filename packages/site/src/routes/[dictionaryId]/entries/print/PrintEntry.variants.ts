@@ -1,7 +1,7 @@
 import type { Variant } from 'kitbook';
 import type Component from './PrintEntry.svelte';
 import type { IPrintFields } from '@living-dictionaries/types';
-import { mock_expanded_entries } from '$lib/mocks/entries';
+import { complex, simple } from '$lib/mocks/entries';
 import { basic_mock_dictionary } from '$lib/mocks/dictionaries';
 
 const selectedFields: IPrintFields = {
@@ -23,17 +23,28 @@ const selectedFields: IPrintFields = {
   sr: true,
 };
 
-export const variants: Variant<Component>[] = mock_expanded_entries.map(variant => {
-  return {
-    name: variant.name,
-    height: 400,
+export const variants: Variant<Component>[] = [
+  {
+    name: 'complex',
+    viewports: [{width: 400, height: 700}],
     props: {
       dictionary: basic_mock_dictionary,
       selectedFields,
-      entry: variant.entry,
+      entry: complex,
       showQrCode: true,
       headwordSize: 20,
       showLabels: true,
     }
-  };
-});
+  },
+  {
+    name: 'simple',
+    viewports: [{width: 400, height: 100}],
+    languages: [],
+    props: {
+      dictionary: basic_mock_dictionary,
+      selectedFields,
+      entry: simple,
+      headwordSize: 20,
+    }
+  }
+]

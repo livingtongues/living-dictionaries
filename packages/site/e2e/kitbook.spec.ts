@@ -7,7 +7,8 @@ init({ fallbackLocale: 'en', initialLocale: 'en', warnOnMissingMessages: false }
 
 const variantModules = await getVariants({skipFiles: [
   '/routes/[dictionaryId]/entries/table/EntriesTable',
-  '/routes/[dictionaryId]/entry/[entryId]/GeoTaggingModal' // Skip Mapbox
+  '/lib/components/maps/mapbox/static/MapboxStatic', // Skip Mapbox
+  '/routes/[dictionaryId]/entry/[entryId]/GeoTaggingModal', // Skip Mapbox
 ]})
 
 runComponentTests({ test, expect, kitbookConfig, variantModules })
