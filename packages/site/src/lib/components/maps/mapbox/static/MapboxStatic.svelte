@@ -38,12 +38,15 @@
       <img alt="Map" {src} />
     {:else}
       {#await response.json() then body}
-        <div class="text-red-600">
+        <div style="width: {highDef ? (width * 2) : width}px; height: {highDef ? height * 2 : height}px;" class="bg-gray-200 flex items-center justify-center max-w-full max-h-full text-red-600">
           Error code {response.status}: {body.message}
         </div>
       {/await}
     {/if}
   {:catch error}
-    Error {error}
+    <div style="width: {highDef ? (width * 2) : width}px; height: {highDef ? height * 2 : height}px;" class="bg-gray-200 flex items-center justify-center max-w-full max-h-full">
+      Error {error}
+    </div>
   {/await}
 {/if}
+

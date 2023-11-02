@@ -34,10 +34,8 @@
   }
 </script>
 
-<div
-  class="flex justify-between items-center mb-3 md:top-12 sticky top-0 z-30
-    bg-white pt-1 -mt-1">
-  <Button class="-ml-2 !px-2" color="black" form="simple" onclick={backToEntries}>
+<div class="flex justify-between items-center mb-3 sticky top-0 z-30 bg-white pt-1">
+  <Button class="!px-2" color="black" form="simple" onclick={backToEntries}>
     <i class="fas fa-arrow-left rtl-x-flip" />
     {$t('misc.back', { default: 'Back' })}
   </Button>
@@ -58,9 +56,10 @@
         <i class="fas fa-trash ml-1" />
       </Button>
     {/if}
-    <Button form="filled" onclick={() => share($dictionary.id, entry)}>
+    <Button class="inline-flex items-center" form="simple" onclick={() => share($dictionary.id, entry)}>
       <span>{$t('misc.share', { default: 'Share' })}</span>
-      <i class="fas fa-share-square ml-1" />
+      <div class="w-2"></div>
+      <i class="fas fa-share-square rtl-x-flip" />
     </Button>
   </div>
 </div>
@@ -69,6 +68,7 @@
   {entry}
   dictionary={$dictionary}
   videoAccess={$dictionary.videoAccess || $admin > 0}
+  admin={$admin}
   canEdit={$canEdit}
   on:deleteImage={() => deleteImage(entry, $dictionary.id)}
   on:deleteVideo={() => deleteVideo(entry, $dictionary.id)}

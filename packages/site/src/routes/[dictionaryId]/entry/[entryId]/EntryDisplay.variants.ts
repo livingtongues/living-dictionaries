@@ -1,7 +1,20 @@
-import type { Variant } from 'kitbook';
+import type { Variant, Viewport } from 'kitbook';
 import type Component from './EntryDisplay.svelte';
 import type { IDictionary } from '@living-dictionaries/types';
 import { Timestamp } from 'firebase/firestore';
+
+export const viewports: Viewport[] = [
+  {
+    name: 'Desktop',
+    width: 1024,
+    height: 768,
+  },
+  {
+    name: 'Mobile',
+    width: 375,
+    height: 667,
+  }
+]
 
 type DeepPartial<T> = {
   [P in keyof T]?: T[P] extends object ? DeepPartial<T[P]> : T[P];
@@ -21,16 +34,40 @@ const defaultEntry = {
   ],
 }
 
+// const indiaBox: IRegion = {
+//   'coordinates': [
+//     {
+//       'longitude': 76.53807812500065,
+//       'latitude': 25.598062849584352
+//     },
+//     {
+//       'longitude': 91.12792187500162,
+//       'latitude': 25.598062849584352
+//     },
+//     {
+//       'longitude': 82.60253125000094,
+//       'latitude': 30.93627270844425
+//     },
+//     {
+//       'latitude': 18.933437473181115,
+//       'longitude': 83.04198437500133
+//     }
+//   ]
+// }
+
 const partialVariants: DeepPartial<Variant<Component>[]> = [
   {
-    name: 'Everything',
-    // height: 800,
+    name: '2 senses',
     props: {
       canEdit: true,
       videoAccess: true,
       entry: {
         lexeme: 'shoot',
         phonetic: 'ʃut',
+        sound_files: [{
+          fb_storage_path: 'sora/audio/local_import/2011-9-15-Sora-7-26-ZR-bolya-tree-bst-1580869801459.mp3',
+          speakerName: 'Zasina Roita',
+        }],
         senses: [
           {
             glosses: {
@@ -54,12 +91,15 @@ const partialVariants: DeepPartial<Variant<Component>[]> = [
             translated_ld_semantic_domains: ['warfare'],
           },
         ],
-        local_orthography_1: 'special writing system',
+        local_orthography_1: 'संस्कृतम्',
         sources: ['someone'],
+        coordinates: {
+          // 'regions': [indiaBox],
+        }
       },
       dictionary: {
         alternateOrthographies: [
-          'foobey',
+          'Old Sanskrit',
         ]
       },
     },
@@ -71,6 +111,7 @@ const partialVariants: DeepPartial<Variant<Component>[]> = [
       entry: {
         senses: [
           {
+            photo_files: [{ specifiable_image_url: 'LGuBKhg7vuv5-aJcOdnb_ucOXLSCIR1Kjxrh70xRlaIHqWo-mWqfWUcH3Xznz63QsFZmkeVmoNN0PEXzSc0Jh4g'}],
             write_in_semantic_domains: ['something-random-from-1992'],
             ld_semantic_domains_keys: ['1'],
             translated_ld_semantic_domains: ['Universe and the natural world']
@@ -81,7 +122,8 @@ const partialVariants: DeepPartial<Variant<Component>[]> = [
   },
   {
     name: 'Local orthographies',
-    // height: 250,
+    languages: [],
+    viewports: [{width: 400, height: 300}],
     props: {
       entry: {
         lexeme: 'Hello',
@@ -98,6 +140,8 @@ const partialVariants: DeepPartial<Variant<Component>[]> = [
   },
   {
     name: 'Scientific Name',
+    languages: [],
+    viewports: [{width: 400, height: 200}],
     props: {
       entry: {
         lexeme: 'Old world swallowtail',
@@ -108,6 +152,7 @@ const partialVariants: DeepPartial<Variant<Component>[]> = [
   {
     name: 'Scientific Name - Partial italics',
     description: 'can edit',
+    languages: [],
     props: {
       entry: {
         lexeme: 'Old world swallowtail',
@@ -162,7 +207,7 @@ const partialVariants: DeepPartial<Variant<Component>[]> = [
   },
   {
     name: 'No details, can edit',
-    // height: 600,
+    languages: [],
     props: {
       canEdit: true,
     },

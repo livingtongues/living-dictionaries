@@ -2,6 +2,8 @@ import type { Variant } from 'kitbook';
 import type Component from './GeoTaggingModal.svelte';
 import type { IRegion } from '@living-dictionaries/types';
 
+export const languages = []
+
 const tw_region: IRegion = {coordinates: [
   {latitude: 23.2, longitude: 121},
   {latitude: 24, longitude: 121.1},

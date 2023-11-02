@@ -2,21 +2,21 @@
   import { EntryFields, type EntryFieldValue, type ExpandedEntry, type IDictionary, type History } from '@living-dictionaries/types';
   import { t } from 'svelte-i18n';
   import EntryField from './EntryField.svelte';
-  import EntryPartOfSpeech from '$lib/components/entry/EntryPartOfSpeech.svelte';
-  import EntrySemanticDomains from '$lib/components/entry/EntrySemanticDomains.svelte';
   import { createEventDispatcher } from 'svelte';
   import EntryDialect from '$lib/components/entry/EntryDialect.svelte';
-  import { order_entry_and_dictionary_gloss_languages } from '$lib/helpers/glosses';
   import { DICTIONARIES_WITH_VARIANTS } from '$lib/constants';
   import EntryMedia from './EntryMedia.svelte';
   import SelectSource from '$lib/components/entry/EntrySource.svelte';
   import EntryHistory from './EntryHistory.svelte';
+  import { Button } from 'svelte-pieces';
+  import Sense from './Sense.svelte';
 
   export let entry: ExpandedEntry;
   export let dictionary: IDictionary;
   export let canEdit = false;
   export let videoAccess = false;
   export let history: History[];
+  export let admin: number;
 
   const dispatch = createEventDispatcher<{
     valueupdate: { field: string; newValue: string | string[] };
@@ -25,8 +25,8 @@
   const regularFields: EntryFieldValue[] = ['plural_form', 'morphology', 'interlinearization', 'notes']
 </script>
 
-<div class="flex flex-col md:flex-row-reverse mb-3">
-  <div class="md:hidden" dir="ltr">
+<div class="flex flex-col md:grid mb-3 media-on-right-grid grid-gap-2">
+  <div dir="ltr" style="grid-area: title;">
     <EntryField
       value={entry.lexeme}
       field="lexeme"
@@ -35,23 +35,12 @@
       on:update={({detail}) => dispatch('valueupdate', { field: EntryFields.lexeme, newValue: detail})} />
   </div>
 
-  <div class="md:w-1/3 flex flex-col mt-2">
+  <div style="grid-area: media;">
     <EntryMedia {dictionary} {entry} {canEdit} {videoAccess} on:deleteImage on:deleteVideo on:valueupdate />
     <EntryHistory {history} class="mt-5 hidden md:block" />
   </div>
 
-  <div class="hidden md:block w-1" />
-
-  <div class="md:w-2/3 flex flex-col">
-    <div class="hidden md:block">
-      <EntryField
-        value={entry.lexeme}
-        field="lexeme"
-        {canEdit}
-        display={$t('entry.lx', { default: 'Lexeme/Word/Phrase' })}
-        on:update={({detail}) => dispatch('valueupdate', { field: EntryFields.lexeme, newValue: detail})} />
-    </div>
-
+  <div class="flex flex-col grow" style="grid-area: content;">
     {#each dictionary.alternateOrthographies || [] as orthography, index}
       {@const orthographyIndex = `local_orthography_${index + 1}`}
       <EntryField
@@ -64,100 +53,43 @@
 
     <EntryField value={entry.phonetic} field="phonetic" {canEdit} display={$t('entry.ph')} on:update={({detail}) => dispatch('valueupdate', { field: EntryFields.phonetic, newValue: detail})} />
 
-    {#each entry.senses as sense}
-      <!-- {#each entry.senses as sense, index} -->
-      {@const glossingLanguages = order_entry_and_dictionary_gloss_languages(sense.glosses, dictionary.glossLanguages)}
-      <!-- <div class="p-2 hover:bg-gray-50 rounded"> -->
+    {#if entry.senses.length < 2}
+      <Sense sense={entry.senses[0]} {canEdit} glossLanguages={dictionary.glossLanguages} on:valueupdate />
 
-      <!-- {#if entry.senses.length > 1 || canEdit}
-        <div class="font-semibold mb-2 flex">
-          <div class="font-semibold">
-            Sense {index + 1}
-          </div>
-          <div class="mx-auto" />
-          {#if canEdit}
-            {#if index > 0}
+      {#if admin && canEdit}
+        <button type="button" class="text-start p-2 mb-2 rounded order-2 hover:bg-gray-100 text-gray-600" on:click={() => alert('Ability to add additional senses coming soon.')}><span class="i-system-uicons-versions text-xl" /> Add Sense</button>
+      {/if}
+    {:else}
+      {#each entry.senses as sense, index}
+        <div class="p-2 hover:bg-gray-50 rounded">
+
+          {#if entry.senses.length > 1 || canEdit}
+            <div class="font-semibold mb-2 flex">
+              <div class="font-semibold">
+                Sense {index + 1}
+              </div>
+              <div class="mx-auto" />
+              {#if canEdit}
+                <!-- {#if index > 0}
               <Button size="sm" form="menu" onclick={() => alert('Re-ordering not ready yet.')}><span class="i-fa-chevron-up -mt-1" /></Button>
             {/if}
             {#if index < entry.senses.length - 1}
               <Button size="sm" form="menu" onclick={() => alert('Re-ordering not ready yet.')}><span class="i-fa-chevron-down -mt-1" /></Button>
-            {/if}
-            {#if entry.senses.length > 1}
-              <Button size="sm" form="menu" onclick={() => alert('Delete sense feature not ready yet.')}><span class="i-fa-solid-times -mt-1" /></Button>
-            {/if}
-            <Button size="sm" form="menu" onclick={() => alert('Ability to add additional senses coming soon.')}><span class="i-fa-solid-plus -mt-1" /></Button>
+            {/if} -->
+                {#if entry.senses.length > 1}
+                  <Button class="text-gray-500!" size="sm" form="menu" onclick={() => alert('Delete sense feature coming.')}><span class="i-fa-solid-times -mt-1" /></Button>
+                {/if}
+                <Button class="text-gray-500!" size="sm" form="menu" onclick={() => alert('Ability to add additional senses coming soon.')}><span class="i-fa-solid-plus -mt-1" /></Button>
+              {/if}
+            </div>
           {/if}
-        </div>
-      {/if} -->
 
-      <!-- <div class="flex flex-col border-l-2"> -->
-      {#each glossingLanguages as bcp}
-        <EntryField
-          value={sense.glosses?.[bcp]}
-          field="gloss"
-          {bcp}
-          {canEdit}
-          display={`${$t(`gl.${bcp}`)}: ${$t('entry.gloss', { default: 'Gloss' })}`}
-          on:update={({detail}) => dispatch('valueupdate', { field: `gl.${bcp}`, newValue: detail})} />
+          <div class="flex flex-col border-l-2 pl-2">
+            <Sense {sense} {canEdit} glossLanguages={dictionary.glossLanguages} on:valueupdate />
+          </div>
+        </div>
       {/each}
-
-      <!-- Only in Bahasa Lani (id: jaRhn6MAZim4Blvr1iEv) -->
-      {#if sense.definition_english}
-        <EntryField
-          value={sense.definition_english}
-          field="definition_english"
-          {canEdit}
-          display="Definition (deprecated)"
-          on:update={({detail}) => dispatch('valueupdate', { field: EntryFields.definition_english, newValue: detail})} />
-      {/if}
-
-      {#if sense.translated_parts_of_speech?.length || canEdit}
-        <div class="md:px-2" class:order-2={!sense.translated_parts_of_speech?.length}>
-          <div class="rounded text-xs text-gray-500 mt-1 mb-2">{$t('entry.ps')}</div>
-          <EntryPartOfSpeech value={sense.translated_parts_of_speech} {canEdit} on:valueupdate />
-          <div class="border-b-2 pb-1 mb-2 border-dashed" />
-        </div>
-      {/if}
-
-      {@const hasSemanticDomain = sense.translated_ld_semantic_domains?.length || sense.write_in_semantic_domains?.length}
-      {#if hasSemanticDomain || canEdit}
-        <div class="md:px-2" class:order-2={!hasSemanticDomain}>
-          <div class="rounded text-xs text-gray-500 mt-1 mb-2">{$t('entry.sdn')}</div>
-          <EntrySemanticDomains {canEdit} {sense} on:valueupdate />
-          <div class="border-b-2 pb-1 mb-2 border-dashed" />
-        </div>
-      {/if}
-
-      <EntryField
-        value={sense.noun_class}
-        field="noun_class"
-        {canEdit}
-        display={$t('entry.nc')}
-        on:update={({detail}) => dispatch('valueupdate', { field: EntryFields.noun_class, newValue: detail})} />
-
-      {#each sense.example_sentences || [{}] as sentence}
-        <EntryField
-          value={sentence.vn}
-          field="example_sentence"
-          {canEdit}
-          display={$t('entry.example_sentence', { default: 'Example Sentence' })}
-          on:update={({detail}) => dispatch('valueupdate', { field: 'xs.vn', newValue: detail})} />
-
-        {#each glossingLanguages as bcp}
-          <EntryField
-            value={sentence[bcp]}
-            field="example_sentence"
-            {bcp}
-            {canEdit}
-            display={`${$t(`gl.${bcp}`)}: ${$t('entry.example_sentence', {
-              default: 'Example Sentence',
-            })}`}
-            on:update={({detail}) => dispatch('valueupdate', { field: `xs.${bcp}`, newValue: detail})} />
-        {/each}
-      {/each}
-      <!-- </div> -->
-      <!-- </div> -->
-    {/each}
+    {/if}
 
     {#if entry.dialects?.length || canEdit}
       <div class="md:px-2" class:order-2={!entry.dialects?.length}>
@@ -207,3 +139,11 @@
 </div>
 
 <EntryHistory {history} class="mt-3 md:hidden" />
+<style>
+  .media-on-right-grid {
+      grid-template-columns: 3fr 1fr;
+      grid-template-areas:
+        'title media'
+        'content media';
+    }
+</style>

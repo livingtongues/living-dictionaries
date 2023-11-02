@@ -34,34 +34,41 @@ let i18nInited = false;
 
 export async function loadLocaleOnClient(locale = 'en') {
   if (i18nInited) return;
-  const chosenLocale = getCookie('locale') || null;
-  const acceptedLanguage = getLocaleFromNavigator() || null;
-  if (chosenLocale)
-    locale = chosenLocale;
-  else if (isReadyLocale(acceptedLanguage))
-    locale = acceptedLanguage;
-
-  INIT_OPTIONS.initialLocale = locale;
+  INIT_OPTIONS.initialLocale = getLocalePreferenceOnClient() || locale;
   init(INIT_OPTIONS);
   i18nInited = true;
   return await waitLocale();
 }
 
+function getLocalePreferenceOnClient(): string {
+  const urlParams = new URLSearchParams(window.location.search);
+  const urlLocale = urlParams.get('lang');
+  if (urlLocale)
+    return urlLocale;
+
+  const chosenLocale = getCookie('locale') || null;
+  if (chosenLocale)
+    return chosenLocale;
+
+  const acceptedLanguage = getLocaleFromNavigator() || null;
+  if (isReadyLocale(acceptedLanguage))
+    return acceptedLanguage;
+}
+
 let currentLocale = null;
 export async function loadLocaleOnServer(chosenLocale: string, acceptedLanguage: string) {
   let locale = chosenLocale;
+
   if (!locale) {
     if (isReadyLocale(acceptedLanguage))
       locale = acceptedLanguage;
     else
       locale = 'en';
-
   }
+
   if (i18nInited) {
     if (locale !== currentLocale)
       $locale.set(locale);
-
-
   } else {
     INIT_OPTIONS.initialLocale = locale;
     init(INIT_OPTIONS);
