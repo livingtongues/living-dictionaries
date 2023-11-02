@@ -33,6 +33,27 @@ const defaultEntry = {
   ],
 }
 
+// const indiaBox: IRegion = {
+//   'coordinates': [
+//     {
+//       'longitude': 76.53807812500065,
+//       'latitude': 25.598062849584352
+//     },
+//     {
+//       'longitude': 91.12792187500162,
+//       'latitude': 25.598062849584352
+//     },
+//     {
+//       'longitude': 82.60253125000094,
+//       'latitude': 30.93627270844425
+//     },
+//     {
+//       'latitude': 18.933437473181115,
+//       'longitude': 83.04198437500133
+//     }
+//   ]
+// }
+
 const partialVariants: DeepPartial<Variant<Component>[]> = [
   {
     name: '2 senses',
@@ -72,28 +93,7 @@ const partialVariants: DeepPartial<Variant<Component>[]> = [
         local_orthography_1: 'संस्कृतम्',
         sources: ['someone'],
         coordinates: {
-          'regions': [
-            {
-              'coordinates': [
-                {
-                  'longitude': 76.53807812500065,
-                  'latitude': 25.598062849584352
-                },
-                {
-                  'longitude': 91.12792187500162,
-                  'latitude': 25.598062849584352
-                },
-                {
-                  'longitude': 82.60253125000094,
-                  'latitude': 30.93627270844425
-                },
-                {
-                  'latitude': 18.933437473181115,
-                  'longitude': 83.04198437500133
-                }
-              ]
-            }
-          ]
+          // 'regions': [indiaBox],
         }
       },
       dictionary: {

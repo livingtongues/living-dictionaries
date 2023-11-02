@@ -32,7 +32,7 @@ if (import.meta.vitest) {
         lo1: 'lo1', // current shape for lo
         local_orthography_1: 'lo1',
         local_orthography_2: 'lo2',
-        senses: [],
+        senses: [{}],
       };
       expect(convert_and_expand_entry(entry)).toEqual(expected);
     });

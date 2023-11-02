@@ -14,6 +14,7 @@
   export let dictionary: IDictionary;
   export let canEdit = false;
   export let videoAccess = false;
+  export let admin: number;
 
   const dispatch = createEventDispatcher<{
     valueupdate: { field: string; newValue: string | string[] };
@@ -52,7 +53,7 @@
     {#if entry.senses.length < 2}
       <Sense sense={entry.senses[0]} {canEdit} glossLanguages={dictionary.glossLanguages} on:valueupdate />
 
-      {#if canEdit}
+      {#if admin && canEdit}
         <button type="button" class="text-start p-2 mb-2 rounded order-2 hover:bg-gray-100 text-gray-600" on:click={() => alert('Ability to add additional senses coming soon.')}><span class="i-system-uicons-versions text-xl" /> Add another sense</button>
       {/if}
     {:else}
