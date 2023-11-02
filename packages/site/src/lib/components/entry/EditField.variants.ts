@@ -15,6 +15,7 @@ export const variants: Variant<Component>[] = [
       field: 'gloss',
       bcp: 'as',
     },
+    languages: [],
   },
   {
     name: 'Italicized Gloss',
@@ -23,8 +24,11 @@ export const variants: Variant<Component>[] = [
       bcp: 'as',
       value: 'red <i>tomato</i>',
     },
+    languages: [],
   },
-  { name: 'Interlinear',
+  {
+    name: 'Interlinear',
+    description: 'has small caps toggle option (needs translation)',
     props: {
       field: 'interlinearization',
       value: '3p.sɢ.ind',
@@ -35,6 +39,7 @@ export const variants: Variant<Component>[] = [
     props: {
       field: 'morphology',
     },
+    languages: [],
   },
   {
     name: 'Lexeme',
@@ -42,6 +47,7 @@ export const variants: Variant<Component>[] = [
       field: 'lexeme',
       value: 'banana',
     },
+    languages: [],
   },
   {
     name: 'Notes',
@@ -49,9 +55,14 @@ export const variants: Variant<Component>[] = [
       field: 'notes',
       value: 'hello',
     },
+    languages: [],
+    tests: {
+      clientSideRendered: true, // let rich-text editor load in
+    }
   },
   {
     name: 'Phonetic',
+    description: 'needs translation',
     viewports: [{
       width: 750,
       height: 600,
@@ -60,5 +71,8 @@ export const variants: Variant<Component>[] = [
       field: 'phonetic',
       value: 'banana',
     },
+    tests: {
+      clientSideRendered: true, // so that keyboard can load in
+    }
   },
 ]

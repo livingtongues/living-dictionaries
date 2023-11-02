@@ -2,7 +2,7 @@ import type { Variant } from 'kitbook';
 import type Component from './+page.svelte';
 import { readable, writable } from 'svelte/store';
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+
 const defaultStores = {
   user: null,
   admin: readable(0),
@@ -17,29 +17,52 @@ const defaultStores = {
 }
 
 export const variants: Variant<Component>[] = [
-  // {
-  //   name: 'Regular',
-  //   props: {
-  //     data: {
-  //       ...defaultStores,
-  //       initialEntry: readable({
-  //         lx: 'test',
-  //       })
-  //     },
-  //   },
-  // },
-  // {
-  //   name: 'Admin 2',
-  //   description: 'Will show JSON viewer',
-  //   props: {
-  //     data: {
-  //       ...defaultStores,
-  //       admin: readable(2),
-  //       canEdit: readable(true),
-  //       initialEntry: readable({
-  //         lx: 'test',
-  //       })
-  //     },
-  //   },
-  // },
+  {
+    name: 'Viewer',
+    viewports: [{ width: 500, height: 250}],
+    props: {
+      data: {
+        ...defaultStores,
+        initialEntry: readable({
+          lx: 'test',
+          gl: {
+            'en': 'foo',
+          }
+        })
+      },
+    },
+  },
+  {
+    name: 'Editor',
+    viewports: [{ width: 786, height: 500}],
+    props: {
+      data: {
+        ...defaultStores,
+        isManager: readable(true),
+        canEdit: readable(true),
+        initialEntry: readable({
+          lx: 'test',
+        })
+      },
+    },
+  },
+  {
+    name: 'Admin 2',
+    description: 'Will show JSON viewer and Add Sense (as it is in beta)',
+    languages: [],
+    viewports: [{ width: 786, height: 500}],
+    props: {
+      data: {
+        ...defaultStores,
+        admin: readable(2),
+        canEdit: readable(true),
+        initialEntry: readable({
+          lx: 'test',
+        })
+      },
+    },
+    tests: {
+      skip: true,
+    }
+  },
 ]
