@@ -14,6 +14,6 @@
       {/if}
     {/each}
   {:else}
-    <p class="m-3">Last edited on {history[history.length-1].updatedAt.toDate().toLocaleString()}</p>
+    <p class="m-3">Last edited on {history[0].updatedAt.toDate().toLocaleString()}</p>
   {/if}
 </div>

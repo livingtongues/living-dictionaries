@@ -4,20 +4,20 @@ import { Timestamp } from 'firebase/firestore';
 
 const history = [
   {
+    editor: 'Anna Luisa',
+    editedLexeme: 'Giraffe',
+    entryId: 'EntryHistory',
+    editedDictionaryId: 'Banange',
+    action: 'edited',
+    updatedAt: Timestamp.fromDate(new Date(2023, 9, 12, 18, 39, 2))
+  },
+  {
     editor: 'Diego Córdova',
     editedLexeme: 'Elephant',
     entryId: 'EntryHistory',
     editedDictionaryId: 'Banange',
     action: 'edited',
     updatedAt: Timestamp.fromDate(new Date(2023, 9, 12, 15, 35, 59))
-  },
-  {
-    editor: 'Anna Luisa',
-    editedLexeme: 'Giraffe',
-    entryId: 'EntryHistory',
-    editedDictionaryId: 'Banange',
-    action: 'edited',
-    updatedAt: Timestamp.fromDate(new Date(2023, 9, 12, 15, 39, 2))
   },
 ];
 
