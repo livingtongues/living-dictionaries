@@ -56,6 +56,9 @@ export const variants: Variant<Component>[] = [
       value: 'hello',
     },
     languages: [],
+    tests: {
+      clientSideRendered: true, // let rich-text editor load in
+    }
   },
   {
     name: 'Phonetic',
@@ -68,5 +71,8 @@ export const variants: Variant<Component>[] = [
       field: 'phonetic',
       value: 'banana',
     },
+    tests: {
+      clientSideRendered: true, // so that keyboard can load in
+    }
   },
 ]
