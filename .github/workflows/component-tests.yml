@@ -8,6 +8,7 @@ env:
   BUCKET_NAME: component-snapshots
   PROJECT_NAME: living-dictionaries
   PROJECT_ROOT: ./packages/site
+  KITBOOK_ROUTE: kitbook
 
 on:
   deployment_status
@@ -125,12 +126,14 @@ jobs:
       - name: Format Changed Component Snapshots for PR
         if: steps.findPr.outputs.number && steps.upload-snapshots.outputs.uploaded
         id: format_snapshot_links_for_pr
-        uses: jacob-8/kitbook/packages/format-snapshot-results-action@v1.0.0-beta.4
+        uses: jacob-8/kitbook/packages/format-snapshot-results-action@v1
         with:
           upload-results: '${{ steps.upload-snapshots.outputs.uploaded }}'
           pr: '${{ steps.findPr.outputs.pr }}'
           bucket: '${{ env.BUCKET_NAME }}'
           project: '${{ env.PROJECT_NAME }}'
+          deployment-url: '${{ env.PLAYWRIGHT_BASE_URL }}'
+          kitbook-route: '${{ env.KITBOOK_ROUTE }}'
 
       - name: Add Changed Component Snapshots to PR
         if: steps.findPr.outputs.number && steps.format_snapshot_links_for_pr.outputs.comment
