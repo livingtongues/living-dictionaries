@@ -48,7 +48,7 @@
     <a
       href={'/' + $dictionary.id + '/history'}
       class:active={$page.url.pathname.includes('history')}>
-      <i class="far fa-user-clock fa-fw" />
+      <i class="far fa-history fa-fw" />
       <span class="font-medium mx-2">
         {$_('dictionary.history', { default: 'History' })}
       </span>
