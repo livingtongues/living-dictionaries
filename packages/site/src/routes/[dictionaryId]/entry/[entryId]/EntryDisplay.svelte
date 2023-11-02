@@ -15,7 +15,7 @@
   export let dictionary: IDictionary;
   export let canEdit = false;
   export let videoAccess = false;
-  export let history: History[];
+  export let history: History[] = undefined;
   export let admin: number;
 
   const dispatch = createEventDispatcher<{
@@ -37,7 +37,7 @@
 
   <div style="grid-area: media;">
     <EntryMedia {dictionary} {entry} {canEdit} {videoAccess} on:deleteImage on:deleteVideo on:valueupdate />
-    <EntryHistory {history} class="mt-5 hidden md:block" />
+    <EntryHistory {history} {canEdit} class="mt-5 hidden md:block" />
   </div>
 
   <div class="flex flex-col grow" style="grid-area: content;">
@@ -138,7 +138,7 @@
   </div>
 </div>
 
-<EntryHistory {history} class="mt-3 md:hidden" />
+<EntryHistory {history} {canEdit} class="mt-3 md:hidden" />
 <style>
   .media-on-right-grid {
       grid-template-columns: 3fr 1fr;

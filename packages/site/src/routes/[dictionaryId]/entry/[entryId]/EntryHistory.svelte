@@ -1,7 +1,7 @@
 <script lang="ts">
-  import { canEdit } from '$lib/stores';
   import type { History } from '@living-dictionaries/types';
   export let history: History[];
+  export let canEdit = false;
 </script>
 
 <div class="{$$props.class} text-gray-500">
