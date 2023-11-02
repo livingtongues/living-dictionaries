@@ -141,7 +141,7 @@ describe(expand_entry, () => {
   test('empty entry', () => {
     const database_entry: GoalDatabaseEntry = {};
     const expanded_entry: ExpandedEntry = {
-      senses: [],
+      senses: [{}],
     };
     expect(expand_entry(database_entry)).toEqual(expanded_entry);
   });
