@@ -1,10 +1,12 @@
-import type { Variant } from 'kitbook'
+import type { Variant, Viewport } from 'kitbook'
 import type Component from './Sense.svelte'
 
-// export const viewports: Viewport[] = [
-//   { name: 'Desktop', width: 800, height: 600 },
-//   { name: 'Mobile', width: 320, height: 480}
-// ]
+export const viewports: Viewport[] = [
+  { width: 800, height: 500 },
+  { width: 320, height: 580}
+]
+
+export const languages = []
 
 export const variants: Variant<Component>[] = [
   {
@@ -26,6 +28,5 @@ export const variants: Variant<Component>[] = [
       canEdit: true,
       glossLanguages: ['en', 'es'],
     },
-
   },
 ]
