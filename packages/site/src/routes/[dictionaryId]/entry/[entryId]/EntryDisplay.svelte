@@ -37,7 +37,7 @@
 
   <div style="grid-area: media;">
     <EntryMedia {dictionary} {entry} {canEdit} {videoAccess} on:deleteImage on:deleteVideo on:valueupdate />
-    <EntryHistory {history} {canEdit} class="mt-5 hidden md:block" />
+    {#if history?.length > 0}<EntryHistory {history} {canEdit} class="mt-5 hidden md:block" />{/if}
   </div>
 
   <div class="flex flex-col grow" style="grid-area: content;">
@@ -138,7 +138,7 @@
   </div>
 </div>
 
-<EntryHistory {history} {canEdit} class="mt-3 md:hidden" />
+{#if history?.length > 0}<EntryHistory {history} {canEdit} class="mt-3 md:hidden" />{/if}
 <style>
   .media-on-right-grid {
       grid-template-columns: 3fr 1fr;
