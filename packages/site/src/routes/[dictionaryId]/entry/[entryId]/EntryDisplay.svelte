@@ -81,7 +81,7 @@
             </div>
           {/if}
 
-          <div class="flex flex-col border-l-2 pl-2">
+          <div class="flex flex-col border-s-2 ps-3 ms-1">
             <Sense {sense} {canEdit} glossLanguages={dictionary.glossLanguages} on:valueupdate />
           </div>
         </div>
