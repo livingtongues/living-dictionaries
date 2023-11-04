@@ -88,7 +88,7 @@
       <i class="far fa-question-circle" />
       <span class="ml-1">
         FAQ
-        <!-- {$_('header.faq', { default: 'FAQ' })} -->
+        <!-- {$t('header.faq', { default: 'FAQ' })} -->
       </span>
     </Button>
   </div>

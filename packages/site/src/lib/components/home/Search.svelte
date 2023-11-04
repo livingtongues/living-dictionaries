@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { _ } from 'svelte-i18n';
+  import { t } from 'svelte-i18n';
   import type { IDictionary } from '@living-dictionaries/types';
   import { admin, myDictionaries } from '$lib/stores';
   import { fly } from 'svelte/transition';
@@ -85,7 +85,7 @@
         bind:value={searchString}
         class="form-input w-full pl-10 pr-8 py-1 rounded-lg
           text-gray-900 placeholder-gray-500 shadow"
-        placeholder={$_('home.find_dictionary', {
+        placeholder={$t('home.find_dictionary', {
           default: 'Find a Dictionary',
         })}
         on:focus={() => (searchFocused = true)}
@@ -112,7 +112,7 @@
 
       {#if !searchString && $myDictionaries && $myDictionaries.length}
         <div class="text-sm font-semibold px-3 my-1">
-          {$_('home.my_dictionaries', { default: 'My Dictionaries' })}
+          {$t('home.my_dictionaries', { default: 'My Dictionaries' })}
         </div>
         {#each $myDictionaries as dictionary}
           <button
@@ -127,7 +127,7 @@
         {/each}
         <hr class="my-2" />
         <div class="text-sm font-semibold px-3 my-1">
-          {$_('home.public_dictionaries', { default: 'Public Dictionaries' })}
+          {$t('home.public_dictionaries', { default: 'Public Dictionaries' })}
           {#if $admin}
             (+ Private)
           {/if}
@@ -147,7 +147,7 @@
       {/each}
       {#if !filteredDictionaries.length}
         <div class="p-3">
-          <i> {$_('home.no_results', { default: 'No Results' })} </i>
+          <i> {$t('home.no_results', { default: 'No Results' })} </i>
         </div>
       {/if}
     </div>
@@ -173,7 +173,7 @@
             type="button"
             class="sm:hidden rounded px-3 py-2 bg-white mt-2"
             on:click={() => (showAllMyDictionaries = true)}>
-            {$_('home.show_all_my_dictionaries', {
+            {$t('home.show_all_my_dictionaries', {
               default: 'Show all my dictionaries',
             })}
           </button>
@@ -183,7 +183,7 @@
       {#if !(searchFocused && filteredDictionaries.length > 3)}
         <Button href="/create-dictionary" class="mt-2" color="black" form="filled">
           <span class="i-fa-solid-plus -mt-1.25" />
-          {$_('create.create_new_dictionary', {
+          {$t('create.create_new_dictionary', {
             default: 'Create New Dictionary',
           })}
         </Button>
@@ -196,7 +196,7 @@
           class="mt-2 opacity-75 focus:opacity-100
             sm:opacity-100 bg-white sm:bg-transparent">
           <i class="far fa-list" />
-          {$_('home.list_of_dictionaries', { default: 'List of Dictionaries' })}
+          {$t('home.list_of_dictionaries', { default: 'List of Dictionaries' })}
         </Button>
         <div class="w-2 sm:hidden" />
 
@@ -207,7 +207,7 @@
           class="mt-2 opacity-75 focus:opacity-100
             sm:opacity-100 bg-white sm:bg-transparent !sm:hidden">
           <i class="far fa-info-circle" />
-          <span class="ml-1">{$_('header.about', { default: 'About' })}</span>
+          <span class="ml-1">{$t('header.about', { default: 'About' })}</span>
         </Button>
       {/if}
     </div>
@@ -219,7 +219,7 @@
         on:click={clearDictionary}>
         <span class="i-fa6-solid-chevron-left rtl-x-flip" />
         <div class="w-1" />
-        {$_('misc.back', { default: 'Back' })}
+        {$t('misc.back', { default: 'Back' })}
       </button>
       {#await import('./SelectedDict.svelte') then { default: SelectedDict }}
         <SelectedDict dictionary={currentDictionary} />

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { _ } from 'svelte-i18n';
+  import { t } from 'svelte-i18n';
   import { Button } from 'svelte-pieces';
   import MediaStream from '../record/MediaStream.svelte';
   import Recorder from '../record/Recorder.svelte';
@@ -34,7 +34,7 @@
       let:state>
       {#if state === 'inactive'}
         <Button onclick={start} color="red" class="w-full h-24 mt-1">
-          {$_('audio.tap_to_record', { default: 'Tap to Record' })}
+          {$t('audio.tap_to_record', { default: 'Tap to Record' })}
         </Button>
 
         {#if microphones.length > 1 && selectedMicrophone}
@@ -75,7 +75,7 @@
           color="red"
           class="w-full h-24 mt-1">
           <div class="font-semibold font-mono text-2xl">{recordingTime}s</div>
-          {$_('audio.stop_recording', { default: 'Stop Recording' })}
+          {$t('audio.stop_recording', { default: 'Stop Recording' })}
         </Button>
         <Button class="w-full mt-1" color="black" onclick={pause}>{state === 'recording' ? 'Pause' : 'Unpause'}</Button>
       {/if}
@@ -91,7 +91,7 @@
         form="filled"
         href="https://www.google.com/search?q=How+do+I+enable+microphone+access"
         target="_blank"
-        rel="noopener">{$_('audio.learn_more', { default: 'Learn More' })}</Button>
+        rel="noopener">{$t('audio.learn_more', { default: 'Learn More' })}</Button>
     </div>
 
     <div slot="dismissed">
@@ -100,7 +100,7 @@
         browser asks for permission.
       </div>
       <div>
-        <Button form="filled" class="mt-2" onclick={() => location.reload()}>{$_('audio.reload', { default: 'Reload' })}</Button>
+        <Button form="filled" class="mt-2" onclick={() => location.reload()}>{$t('audio.reload', { default: 'Reload' })}</Button>
       </div>
     </div>
 

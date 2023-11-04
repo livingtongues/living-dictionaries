@@ -1,16 +1,16 @@
 <script lang="ts">
-  import { _ } from 'svelte-i18n';
+  import { t } from 'svelte-i18n';
   import Header from '$lib/components/shell/Header.svelte';
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte';
 </script>
 
 <Header>
-  {$_('dictionary.terms_of_use', { default: 'Terms of Use' })}
+  {$t('dictionary.terms_of_use', { default: 'Terms of Use' })}
 </Header>
 
 <div class="max-w-screen-md mx-auto p-3">
   <div class="tw-prose max-w-none">
-    <h2 class="uppercase">{$_('terms.agreement_to_terms', { default: 'Agreement to Terms' })}</h2>
+    <h2 class="uppercase">{$t('terms.agreement_to_terms', { default: 'Agreement to Terms' })}</h2>
     <div style="direction: ltr">
       <p>
         These Terms of Use constitute a legally binding agreement made between you, whether
@@ -810,6 +810,6 @@
 </div>
 
 <SeoMetaTags
-  title={$_('dictionary.terms_of_use', { default: 'Terms of Use' })}
-  description={$_('', { default: 'Terms of Use for the Living Dictionaries platform. This page includes information about the terms, intellectual property rights, user representations, prohibited activities, user-generated contributions, and more.' })}
+  title={$t('dictionary.terms_of_use', { default: 'Terms of Use' })}
+  description={$t('', { default: 'Terms of Use for the Living Dictionaries platform. This page includes information about the terms, intellectual property rights, user representations, prohibited activities, user-generated contributions, and more.' })}
   keywords="Terms of Use for the Living Dictionaries platform. This page includes information about the terms, intellectual property rights, user representations, prohibited activities, user-generated contributions, and more." />

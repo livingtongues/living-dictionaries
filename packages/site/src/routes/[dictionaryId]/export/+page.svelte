@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { _ } from 'svelte-i18n';
+  import { t } from 'svelte-i18n';
   import { admin, dictionary, isManager } from '$lib/stores';
   import { Button, ShowHide } from 'svelte-pieces';
   import { partsOfSpeech } from '$lib/mappings/parts-of-speech';
@@ -40,12 +40,12 @@
   });
 </script>
 
-<h3 class="text-xl font-semibold mb-4">{$_('misc.export', { default: 'export' })}</h3>
+<h3 class="text-xl font-semibold mb-4">{$t('misc.export', { default: 'export' })}</h3>
 {#if $isManager}
   <div class="mb-6">
     <div>
       <i class="far fa-check" />
-      {$_('export.csv_data', { default: 'Data as .CSV' })} ({$_('export.spreadsheet', { default: 'Spreadsheet' })})
+      {$t('export.csv_data', { default: 'Data as .CSV' })} ({$t('export.spreadsheet', { default: 'Spreadsheet' })})
     </div>
     <div
       class="flex items-center mt-2 {entriesWithImages.length
@@ -57,15 +57,15 @@
         type="checkbox"
         bind:checked={includeImages} />
       <label for="images" class="mx-2 block leading-5 text-gray-900">
-        {$_('misc.images', { default: 'Images' })} ({entriesWithImages.length})</label>
+        {$t('misc.images', { default: 'Images' })} ({entriesWithImages.length})</label>
     </div>
     {#if !mounted}
       <p class="text-xs italic text-orange-400 p-2">
-        {$_('export.checking_images', { default: 'Checking if image files exist' })}
+        {$t('export.checking_images', { default: 'Checking if image files exist' })}
       </p>
     {:else if !entriesWithImages.length}
       <p class="text-sm text-red-700 p-3">
-        {$_('export.no_images', { default: 'There are no image files' })}
+        {$t('export.no_images', { default: 'There are no image files' })}
       </p>
     {/if}
 
@@ -75,15 +75,15 @@
         : 'opacity-50 cursor-not-allowed'}">
       <input id="audio" type="checkbox" bind:checked={includeAudio} />
       <label for="audio" class="mx-2 block leading-5 text-gray-900">
-        {$_('entry.audio', { default: 'Audio' })} ({entriesWithAudio.length})</label>
+        {$t('entry.audio', { default: 'Audio' })} ({entriesWithAudio.length})</label>
     </div>
     {#if !mounted}
       <p class="text-xs italic text-orange-400 p-2">
-        {$_('export.checking_audios', { default: 'Checking if audio files exist' })}
+        {$t('export.checking_audios', { default: 'Checking if audio files exist' })}
       </p>
     {:else if !entriesWithAudio.length}
       <p class="text-sm text-red-700 p-3">
-        {$_('export.no_audios', { default: 'There are no audio files' })}
+        {$t('export.no_audios', { default: 'There are no audio files' })}
       </p>
     {/if}
   </div>
@@ -92,12 +92,12 @@
     <ShowHide let:show let:toggle>
       {#if !show}
         <Button onclick={toggle} form="filled">
-          {$_('export.download_csv', { default: 'Download CSV' })}
+          {$t('export.download_csv', { default: 'Download CSV' })}
           {#if includeImages}
-            + {$_('misc.images', { default: 'Images' })}
+            + {$t('misc.images', { default: 'Images' })}
           {/if}
           {#if includeAudio}
-            + {$_('entry.audio', { default: 'Audio' })}
+            + {$t('entry.audio', { default: 'Audio' })}
           {/if}
         </Button>
       {:else}
@@ -111,9 +111,9 @@
           let:progress>
           <Progress {progress} />
           {#if progress < 1}
-            <Button onclick={toggle} color="red">{$_('misc.cancel', { default: 'Cancel' })}</Button>
+            <Button onclick={toggle} color="red">{$t('misc.cancel', { default: 'Cancel' })}</Button>
           {:else}
-            <Button onclick={toggle}>{$_('misc.reset', { default: 'Reset' })}</Button>
+            <Button onclick={toggle}>{$t('misc.reset', { default: 'Reset' })}</Button>
           {/if}
         </DownloadMedia>
       {/if}
@@ -125,23 +125,23 @@
         downloadObjectsAsCSV(entryHeaders, formattedEntries, $dictionary.id);
       }}
       form="filled">
-      {$_('export.download_csv', { default: 'Download CSV' })}
+      {$t('export.download_csv', { default: 'Download CSV' })}
     </Button>
   {/if}
 {:else}
-  <p>{$_('export.availability', { default: 'Export is only available to dictionary managers' })}</p>
+  <p>{$t('export.availability', { default: 'Export is only available to dictionary managers' })}</p>
 {/if}
 
 {#if $admin}
   <div class="mt-5">
-    <Button form="filled" href="entries/print">{$_('export.download_pdf', { default: 'Download PDF' })}</Button>
+    <Button form="filled" href="entries/print">{$t('export.download_pdf', { default: 'Download PDF' })}</Button>
   </div>
 {/if}
 
 <SeoMetaTags
-  title={$_('misc.export', { default: 'export' })}
+  title={$t('misc.export', { default: 'export' })}
   dictionaryName={$dictionary.name}
-  description={$_('', {
+  description={$t('', {
     default:
       'Dictionary managers can easily export their Living Dictionary\'s text data as a .CSV spreadsheet as well as export their images and audio files in convenient ZIP folders.',
   })}

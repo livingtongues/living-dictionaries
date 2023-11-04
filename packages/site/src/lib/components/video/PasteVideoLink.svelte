@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { _ } from 'svelte-i18n';
+  import { t } from 'svelte-i18n';
   import { Button } from 'svelte-pieces';
   import { parseVideoData } from './parseVideoData';
   import { createEventDispatcher } from 'svelte';
@@ -11,7 +11,7 @@
   function handle() {
     const video = parseVideoData(url);
     if (!video) {
-      alert($_('misc.invalid_url', { default: 'This is not a valid URL' }));
+      alert($t('misc.invalid_url', { default: 'This is not a valid URL' }));
       url = '';
       return;
     }
@@ -22,7 +22,7 @@
 <form class="mb-4" on:submit|preventDefault={handle}>
   <label for="vURL" class="block text-sm font-medium leading-5 text-gray-700 mb-2">
     <i class="far fa-link" />
-    {$_('video.video_url', { default: 'Video URL' })}
+    {$t('video.video_url', { default: 'Video URL' })}
   </label>
   <div class="flex">
     <div class="rounded-md shadow-sm flex-grow">
@@ -36,8 +36,8 @@
     </div>
     <div class="w-1" />
     <Button type="submit" form={url ? 'filled' : 'outline'}>
-      {$_('misc.add', { default: 'Add' })}
+      {$t('misc.add', { default: 'Add' })}
     </Button>
   </div>
-  <!-- {$_('video.video_credit', { default: 'Video credit' })} -->
+  <!-- {$t('video.video_credit', { default: 'Video credit' })} -->
 </form>

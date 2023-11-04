@@ -1,5 +1,4 @@
 <script lang="ts">
-  // import { t } from 'svelte-i18n';
   // import SeoMetaTags from '$lib/components/SeoMetaTags.svelte';
   import { onMount, getContext } from 'svelte';
   import Hits from '$lib/components/search/Hits.svelte';

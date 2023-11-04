@@ -1,11 +1,11 @@
 <script lang="ts">
-  import { _ } from 'svelte-i18n';
+  import { t } from 'svelte-i18n';
   import Header from '$lib/components/shell/Header.svelte';
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte';
 </script>
 
 <Header>
-  {$_('header.tutorials', { default: 'Tutorials' })}
+  {$t('header.tutorials', { default: 'Tutorials' })}
 </Header>
 
 <div class="max-w-screen-md mx-auto p-3">
@@ -47,9 +47,9 @@
 </div>
 
 <SeoMetaTags
-  title={$_('header.tutorials', { default: 'Tutorials' })}
+  title={$t('header.tutorials', { default: 'Tutorials' })}
   type="video"
-  description={$_('', { default: 'We offer video tutorials narrated in English and Spanish for dictionary managers seeking to learn how to create a Living Dictionary on the platform, as well as how to add entries with multimedia. Living Dictionaries are language documentation tools that support endangered and under-represented languages. This online platform was created by Living Tongues Institute for Endangered Languages as a free multimedia resource for community activists and linguists who want to build digital dictionaries and phrasebooks.' })}
+  description={$t('', { default: 'We offer video tutorials narrated in English and Spanish for dictionary managers seeking to learn how to create a Living Dictionary on the platform, as well as how to add entries with multimedia. Living Dictionaries are language documentation tools that support endangered and under-represented languages. This online platform was created by Living Tongues Institute for Endangered Languages as a free multimedia resource for community activists and linguists who want to build digital dictionaries and phrasebooks.' })}
   keywords="Minority Languages, Indigenous Languages, Language Documentation, Dictionary, Minority Community, Language Analysis, Language Education, Endangered Languages, Language Revitalization, Linguistics, Word Lists, Linguistic Analysis, Dictionaries, Living Dictionaries, Living Tongues, Under-represented Languages, Tech Resources, Language Sustainability, Language Resources, Diaspora Languages, Elicitation, Language Archives, Ancient Languages, World Languages, Obscure Languages, Little Known languages, Digital Dictionary, Dictionary Software, Free Software, Online Dictionary Builder, Tutorials, Lesson, Seminarios, Videos, Masterclass" />
 
 <style>

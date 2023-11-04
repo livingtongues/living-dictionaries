@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { _, locale } from 'svelte-i18n';
+  import { t, locale } from 'svelte-i18n';
 
   import type { InstantSearch } from 'instantsearch.js';
   import { connectRefinementList } from 'instantsearch.js/es/connectors';
@@ -51,7 +51,7 @@
     items = items.map((item) => {
       if (attribute === 'ps') {
         if (item.value) {
-          item.translatedLabel = $_('ps.' + item.label, {
+          item.translatedLabel = $t('ps.' + item.label, {
             default: item.label,
           });
         }
@@ -59,7 +59,7 @@
       } else if (attribute === 'sdn') {
         return {
           ...item,
-          translatedLabel: $_('sd.' + item.label, { default: item.label }),
+          translatedLabel: $t('sd.' + item.label, { default: item.label }),
         };
       }
       return item;
@@ -99,7 +99,7 @@
     shadow-sm">
   <input
     type="search"
-    placeholder="{$_('about.search', { default: 'Search' })} {label}"
+    placeholder="{$t('about.search', { default: 'Search' })} {label}"
     class="form-input block w-full text-sm md:text-xs md:leading-5 transition py-1 px-3"
     bind:value
     on:input={filterList} />
@@ -130,10 +130,10 @@
   <button type="button" class="p-1 mb-1 ml-1 text-xs text-gray-600" on:click={showMore}>
     {#if isShowingMore}
       <span class="i-fa6-solid-chevron-up" />
-      {$_('entry.show_less', { default: 'Show less' })}
+      {$t('entry.show_less', { default: 'Show less' })}
     {:else}
       <span class="i-fa6-solid-chevron-down -mt-1" />
-      {$_('entry.show_more', { default: 'Show more' })}
+      {$t('entry.show_more', { default: 'Show more' })}
     {/if}
   </button>
 {/if}

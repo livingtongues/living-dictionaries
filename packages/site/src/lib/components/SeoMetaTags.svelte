@@ -88,6 +88,6 @@
 </svelte:head>
 
 <!--
-  Once refactored to an initial language route url schema, update title to use proper one: {$_('misc.LD', { default: 'Living Dictionaries' })}
+  Once refactored to an initial language route url schema, update title to use proper one: {$t('misc.LD', { default: 'Living Dictionaries' })}
   Can offer alternate language urls when this is a feature: <link rel="alternate" hrefLang={languageAlternate.hrefLang} href={languageAlternate.href} />
  -->
