@@ -35,17 +35,17 @@ export interface ExpandedEntry extends IFirestoreMetaDataAbbreviated {
 }
 
 export interface ExpandedSense {
-  glosses?: IGloss;
-  parts_of_speech_keys?: string[];
+  glosses?: IGloss; // jsonb object
+  parts_of_speech_keys?: string[]; // jsonb array
   translated_parts_of_speech?: string[];
-  ld_semantic_domains_keys?: string[];
+  ld_semantic_domains_keys?: string[]; // jsonb array
   translated_ld_semantic_domains?: string[];
-  write_in_semantic_domains?: string[];
-  example_sentences?: IExampleSentence[];
-  photo_files?: ExpandedPhoto[];
-  video_files?: ExpandedVideo[];
-  noun_class?: string;
-  definition_english?: string;
+  write_in_semantic_domains?: string[]; // jsonb array
+  example_sentences?: IExampleSentence[]; // junction table
+  photo_files?: ExpandedPhoto[]; // junction table
+  video_files?: ExpandedVideo[]; // junction table
+  noun_class?: string; // varchar
+  definition_english?: string; // text
 }
 
 export interface DatabaseSense {
