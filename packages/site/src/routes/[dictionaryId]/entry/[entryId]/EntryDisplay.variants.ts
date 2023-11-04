@@ -103,6 +103,9 @@ const partialVariants: DeepPartial<Variant<Component>[]> = [
         ]
       },
     },
+    tests: {
+      clientSideRendered: true,
+    }
   },
   {
     name: 'Custom imported semantic domain',
