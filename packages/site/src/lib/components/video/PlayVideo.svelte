@@ -72,7 +72,7 @@
           target="_blank">
           <i class="fas fa-download" />
           <span class="hidden sm:inline"
-            >{$_('misc.download', {
+            >{$t('misc.download', {
               default: 'Download',
             })}</span>
         </Button>

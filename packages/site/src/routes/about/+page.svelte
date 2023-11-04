@@ -1,35 +1,35 @@
 <script lang="ts">
-  import { _ } from 'svelte-i18n';
+  import { t } from 'svelte-i18n';
   import Header from '$lib/components/shell/Header.svelte';
   import { Button } from 'svelte-pieces';
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte';
 </script>
 
 <Header>
-  {$_('about.about_LD', { default: 'About Living Dictionaries' })}
+  {$t('about.about_LD', { default: 'About Living Dictionaries' })}
 </Header>
 
 <div class="max-w-screen-md mx-auto p-3">
   <h3
     class="mb-6 text-3xl leading-8 font-bold tracking-tight text-gray-900
       sm:text-4xl sm:leading-10">
-    {$_('about.about_LD', { default: 'About Living Dictionaries' })}
+    {$t('about.about_LD', { default: 'About Living Dictionaries' })}
   </h3>
 
   <p class="mb-3">
-    {$_('about.online_tool', {
+    {$t('about.online_tool', {
       default:
         'Living Dictionaries is an online tool built with the latest web technologies in an effort to speed the availability of language resources for every endangered language in the world. Tools such as this have the power to shift how we think about endangered languages. Rather than perceiving these tongues as being antiquated, difficult to learn and on the brink of vanishing, we can see them as modern, accessible for learning, and easily visible and audible online.',
     })}
   </p>
   <p class="mb-3">
-    {$_('about.promote_connectivity', {
+    {$t('about.promote_connectivity', {
       default:
         'Living Dictionaries promote connectivity over vast distances, and support an online community of language learners who wish to hear and learn a language without close proximity to fluent speakers. They allow thousands of recorded entries to be available at one’s fingertips. High-quality audio recordings accompany the dictionary entries so that community members, new speakers and research scholars can listen to the correct pronunciation by a fluent speaker. Engaging images also provide a wider sense of the cultural context for the language.',
     })}
   </p>
   <p class="mb-3">
-    {$_('about.td_beginnings', {
+    {$t('about.td_beginnings', {
       default:
         'Linguists at Living Tongues Institute for Endangered Languages, Dr. Gregory D. S. Anderson and Dr. K. David Harrison, first spearheaded the Living Dictionaries in 2006 as exceptional digital tools to help preserve and learn words and phrases in endangered languages. Now in a mobile-friendly format, with an offline mode available for working in areas with little to no internet, the Living Dictionaries will reach new audiences and serve more speech communities.',
     })}
@@ -40,53 +40,53 @@
   <h4
     class="text-2xl leading-8 font-bold text-gray-900 tracking-tight
       sm:text-3xl sm:leading-9 mb-2">
-    {$_('about.current_features', { default: 'Current Dictionary Features' })}
+    {$t('about.current_features', { default: 'Current Dictionary Features' })}
   </h4>
   <p>
-    {$_('about.manage_entries', {
+    {$t('about.manage_entries', {
       default: 'Manage Dictionary: View & Edit Entries in Real-Time',
     })}
   </p>
   <p>
-    {$_('about.record_playback_audio', { default: 'Record & Playback Audio' })}
+    {$t('about.record_playback_audio', { default: 'Record & Playback Audio' })}
   </p>
-  <p>{$_('about.photo_upload', { default: 'Photo Upload' })}</p>
-  <p>{$_('about.offline_data', { default: 'Offline Data Access' })}</p>
-  <p>{$_('about.search', { default: 'Search' })}</p>
-  <p>{$_('about.entry_count', { default: 'Entry Count' })}</p>
-  <p>{$_('about.SD', { default: 'Semantic Domains' })}</p>
+  <p>{$t('about.photo_upload', { default: 'Photo Upload' })}</p>
+  <p>{$t('about.offline_data', { default: 'Offline Data Access' })}</p>
+  <p>{$t('about.search', { default: 'Search' })}</p>
+  <p>{$t('about.entry_count', { default: 'Entry Count' })}</p>
+  <p>{$t('about.SD', { default: 'Semantic Domains' })}</p>
   <p>
-    {$_('about.private_public', {
+    {$t('about.private_public', {
       default: 'Set Dictionaries as Private or Public',
     })}
   </p>
   <p>
-    {$_('about.OSK', { default: 'On-Screen Keyboards for Glossing Languages' })}
+    {$t('about.OSK', { default: 'On-Screen Keyboards for Glossing Languages' })}
   </p>
   <p>
-    {$_('about.import_data', { default: 'Import Data (CSV, JSON formats)' })}
+    {$t('about.import_data', { default: 'Import Data (CSV, JSON formats)' })}
   </p>
   <p>
-    {$_('about.video_upload', { default: 'Video Upload' })}
+    {$t('about.video_upload', { default: 'Video Upload' })}
   </p>
   <p>
-    {$_('about.export_data', { default: 'Export Data (CSV, PDF formats)' })}
+    {$t('about.export_data', { default: 'Export Data (CSV, PDF formats)' })}
   </p>
 
   <h4
     class="text-2xl leading-8 font-bold text-gray-900 tracking-tight
       sm:text-3xl sm:leading-9 mb-2 mt-3">
-    {$_('about.dev_roadmap', { default: 'Development Roadmap' })}
+    {$t('about.dev_roadmap', { default: 'Development Roadmap' })}
   </h4>
   <p>
-    {$_('about.import_export', { default: 'Import/Export (FLEx, Standard Format)' })}
+    {$t('about.import_export', { default: 'Import/Export (FLEx, Standard Format)' })}
   </p>
-  <p>{$_( 'about.geo_tagging', { default:  'Geo-tagging Entries' })}</p>
-  <p>{$_( 'about.flashcard_view', { default:  'Flashcard View for Language Learners' })}</p>
-  <p>{$_( 'about.peer_review', { default:  'Peer Review of Spellings' })}</p>
-  <p>{$_( 'about.suggestions_from_users', { default:  'Suggestions from Users' })}</p>
-  <p>{$_( 'about.push_notifications', { default:  'Push Notifications to Contributors' })}</p>
-  <p>{$_( 'about.contributor_awards', { default:  'Contributor Community Awards' })}</p>
+  <p>{$t( 'about.geo_tagging', { default:  'Geo-tagging Entries' })}</p>
+  <p>{$t( 'about.flashcard_view', { default:  'Flashcard View for Language Learners' })}</p>
+  <p>{$t( 'about.peer_review', { default:  'Peer Review of Spellings' })}</p>
+  <p>{$t( 'about.suggestions_from_users', { default:  'Suggestions from Users' })}</p>
+  <p>{$t( 'about.push_notifications', { default:  'Push Notifications to Contributors' })}</p>
+  <p>{$t( 'about.contributor_awards', { default:  'Contributor Community Awards' })}</p>
 
   <hr style="margin: 40px 0;" />
 
@@ -105,18 +105,18 @@
   <h3
     class="mb-3 text-2xl leading-8 font-bold text-gray-900 tracking-tight
       sm:text-3xl sm:leading-9">
-    {$_('about.why_document', {
+    {$t('about.why_document', {
       default: 'Why document endangered languages?',
     })}
   </h3>
   <p class="mb-3">
-    {$_('about.language_is_history', {
+    {$t('about.language_is_history', {
       default:
         'Languages are humanity’s living history; they encode centuries of ancestral wisdom related to the environment, local culture and much more. Language is the vital, creative lens through which we perceive the world and express ourselves. There are over 3,000 threatened and endangered languages in the world, and it is up to our current generation to address this urgent problem before it’s too late.',
     })}
   </p>
   <p class="mb-3">
-    {$_('about.important_to_document', {
+    {$t('about.important_to_document', {
       default:
         'Not only is it important to scientifically document and preserve endangered languages, but from an educational standpoint, learning one’s heritage language is a boost for communities who wish to conserve and celebrate their cultural identity, locally as well as internationally. Knowing about one’s linguistic and cultural origins has significant, positive health impacts, and this translates to better well-being of the community in the long-term.',
     })}
@@ -137,18 +137,18 @@
   <h3
     class="mb-3 text-2xl leading-8 font-bold text-gray-900 tracking-tight
       sm:text-3xl sm:leading-9">
-    {$_('about.what_is_LT', {
+    {$t('about.what_is_LT', {
       default: 'What is Living Tongues Institute for Endangered Languages?',
     })}
   </h3>
   <p class="mb-3">
-    {$_('about.leading_research', {
+    {$t('about.leading_research', {
       default:
         'Living Tongues Institute for Endangered Languages is a leading research organization dedicated to documenting endangered languages. Founded by linguist Dr. Gregory D. S. Anderson, Living Tongues Institute is a non-profit research institute based in Salem, Oregon, with remote researchers and collaborators located around the globe.',
     })}
   </p>
   <p class="mb-3">
-    {$_('about.two_decades_experience', {
+    {$t('about.two_decades_experience', {
       default:
         'With nearly two decades of fieldwork experience, we have the skills and methods in place to help communities document, protect, and promote their languages. Our teams conduct documentary linguistic fieldwork, publish scientific papers and present at academic conferences. We also run digital training workshops to empower language activists, and collaborate with speakers of endangered languages to teach them how to release their own online Living Dictionaries. Furthermore, we raise awareness about endangered languages and support language revitalization efforts in many of the communities we work in.',
     })}
@@ -169,65 +169,65 @@
   <h3
     class="mb-3 text-2xl leading-8 font-bold text-gray-900 tracking-tight
       sm:text-3xl sm:leading-9">
-    {$_('about.translators', {
+    {$t('about.translators', {
       default: 'Translators',
     })}
   </h3>
   <ul class="mb-3">
     <li>
-      <b>{$_('gl.as', { default: 'Assamese' })}</b>: Palash Nath, Luke Horo, Kapil Medhi, Dr. Seuji
+      <b>{$t('gl.as', { default: 'Assamese' })}</b>: Palash Nath, Luke Horo, Kapil Medhi, Dr. Seuji
       Sharma, Dr. Gitanjali Bezbaruah, Biren Baruah, Khagendra Nath Medhi, Pranab Sharma, Dhanmani
       Baishya, Chan Mohammad Ali, Rahul Choudhary
     </li>
     <li>
-      <b>{$_('gl.bn', { default: 'Bangla' })}</b>: Sumedha Sengupta, Prof. Arun Ghosh
+      <b>{$t('gl.bn', { default: 'Bangla' })}</b>: Sumedha Sengupta, Prof. Arun Ghosh
     </li>
     <li>
-      <b>{$_('gl.fr', { default: 'French' })}</b>: Anna Luisa Daigneault
+      <b>{$t('gl.fr', { default: 'French' })}</b>: Anna Luisa Daigneault
     </li>
     <li>
-      <b>{$_('gl.he', { default: 'Hebrew' })}</b>: Dana Melaver, Daniel Bögre Udell
+      <b>{$t('gl.he', { default: 'Hebrew' })}</b>: Dana Melaver, Daniel Bögre Udell
     </li>
     <li>
-      <b>{$_('gl.sw', { default: 'KiSwahili' })}</b>: Michael Karani
+      <b>{$t('gl.sw', { default: 'KiSwahili' })}</b>: Michael Karani
     </li>
     <li>
-      <b>{$_('gl.hi', { default: 'Hindi' })}</b>: Ashwini Parmar, Luke Horo, Bikram Jora, Prof. K.V.
+      <b>{$t('gl.hi', { default: 'Hindi' })}</b>: Ashwini Parmar, Luke Horo, Bikram Jora, Prof. K.V.
       Subbarao
     </li>
     <li>
-      <b>{$_('gl.or', { default: 'Oriya' })}</b>: Anup Kumar Kujur, Panchanan Mohanty
+      <b>{$t('gl.or', { default: 'Oriya' })}</b>: Anup Kumar Kujur, Panchanan Mohanty
     </li>
     <li>
-      <b>{$_('gl.pt', { default: 'Portuguese' })}</b>: Crisofia Langa da Camara
+      <b>{$t('gl.pt', { default: 'Portuguese' })}</b>: Crisofia Langa da Camara
     </li>
     <li>
-      <b>{$_('gl.ru', { default: 'Russian' })}</b>: Denis Tokmashev
+      <b>{$t('gl.ru', { default: 'Russian' })}</b>: Denis Tokmashev
     </li>
     <li>
-      <b>{$_('gl.sn', { default: 'Shona' })}</b>: Reggemore Marongedze
+      <b>{$t('gl.sn', { default: 'Shona' })}</b>: Reggemore Marongedze
     </li>
     <li>
-      <b>{$_('gl.es', { default: 'Spanish' })}</b>: Anna Luisa Daigneault, Amanda Chao Benbassat,
+      <b>{$t('gl.es', { default: 'Spanish' })}</b>: Anna Luisa Daigneault, Amanda Chao Benbassat,
       Mónica Bonilla Parra
     </li>
     <li>
-      <b>{$_('gl.ms', { default: 'Malay' })}</b>: Nur Hidayah Binte Sunaryo
+      <b>{$t('gl.ms', { default: 'Malay' })}</b>: Nur Hidayah Binte Sunaryo
     </li>
-    <li><b>{$_('gl.zu', { default: 'Zulu' })}</b>: Mthulisi Ncube</li>
+    <li><b>{$t('gl.zu', { default: 'Zulu' })}</b>: Mthulisi Ncube</li>
     <li>
-      <b>{$_('gl.it', { default: 'Italian' })}</b>: Iara Mantenuto
+      <b>{$t('gl.it', { default: 'Italian' })}</b>: Iara Mantenuto
     </li>
-    <li><b>{$_('gl.cmn', { default: 'Mandarin' })}</b>: Peng Dong, Joy Wu</li>
-    <li><b>{$_('gl.tzm', { default: 'Tamazight' })}</b>: Radia Sami</li>
-    <li><b>{$_('gl.vi', { default: 'Vietnamese' })}</b>: Huy Phan</li>
-    <li><b>{$_('gl.id', { default: 'Bahasa Indonesia' })}</b>: Yustinus Ghanggo Ate</li>
+    <li><b>{$t('gl.cmn', { default: 'Mandarin' })}</b>: Peng Dong, Joy Wu</li>
+    <li><b>{$t('gl.tzm', { default: 'Tamazight' })}</b>: Radia Sami</li>
+    <li><b>{$t('gl.vi', { default: 'Vietnamese' })}</b>: Huy Phan</li>
+    <li><b>{$t('gl.id', { default: 'Bahasa Indonesia' })}</b>: Yustinus Ghanggo Ate</li>
   </ul>
 
   <h3
     class="mb-3 text-2xl leading-8 font-bold text-gray-900 tracking-tight
       sm:text-3xl sm:leading-9">
-    {$_('about.interns', {
+    {$t('about.interns', {
       default: 'Interns',
     })} (Living Tongues Institute)
   </h3>
@@ -245,12 +245,12 @@
   <h3
     class="mb-3 text-2xl leading-8 font-bold text-gray-900 tracking-tight
       sm:text-3xl sm:leading-9">
-    {$_('about.help_us_launch_more', {
+    {$t('about.help_us_launch_more', {
       default: 'Help Us Launch More Living Dictionaries',
     })}
   </h3>
   <p class="mb-3">
-    {$_('about.with_your_help', {
+    {$t('about.with_your_help', {
       default:
         'With your help, we can continue to improve our software and make it available for anyone or any group who wishes to create their own Living Dictionary for their community’s language. Our goal is to launch 100 new Living Dictionaries every year for the next 30 years (yes, indeed, that’s 3,000 dictionaries!). Our long-term goal is to have a Living Dictionary online for each of the 3,000+ threatened languages in the world by 2050. Donate today and make an impact!',
     })}
@@ -261,13 +261,13 @@
     target="_blank"
     href="https://www.flipcause.com/secure/cause_pdetails/NTQ3NDQ"
     rel="noopener">
-    {$_('header.donate', { default: 'Donate' })}
+    {$t('header.donate', { default: 'Donate' })}
   </Button>
 </div>
 
 <SeoMetaTags
-  title={$_('about.about_LD', { default: 'About Living Dictionaries' })}
-  description={$_('', { default: 'Living Dictionaries are mobile-friendly web tools that support endangered, under-represented and diasporic languages. Led by community activists around the globe, Living Dictionaries are collaborative multimedia projects that help languages survive for generations to come.' })}
+  title={$t('about.about_LD', { default: 'About Living Dictionaries' })}
+  description={$t('', { default: 'Living Dictionaries are mobile-friendly web tools that support endangered, under-represented and diasporic languages. Led by community activists around the globe, Living Dictionaries are collaborative multimedia projects that help languages survive for generations to come.' })}
   keywords="Minority Languages, Indigenous Languages, Language Documentation, Dictionary, Minority Community, Language Analysis, Language Education, Endangered Languages, Language Revitalization, Linguistics, Word Lists, Linguistic Analysis, Dictionaries, Living Dictionaries, Living Tongues, Under-represented Languages, Tech Resources, Language Sustainability, Language Resources, Diaspora Languages, Elicitation, Language Archives, Ancient Languages, World Languages, Obscure Languages, Little Known languages, Digital Dictionary, Dictionary Software, Free Software, Online Dictionary Builder, Living Tongues Institute for Endangered Languages, Gregory D. S. Anderson" />
 
 <!-- Used to have TOU link here -->

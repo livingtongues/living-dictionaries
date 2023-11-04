@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { _ } from 'svelte-i18n';
+  import { t } from 'svelte-i18n';
   import type { InstantSearch } from 'instantsearch.js';
   import { connectStats } from 'instantsearch.js/es/connectors';
   import { onMount } from 'svelte';
@@ -18,7 +18,7 @@
 </script>
 
 <div class="print:hidden italic text-xs text-gray-500 mb-1">
-  {$_('dictionary.entries', { default: 'Entries' })}:
+  {$t('dictionary.entries', { default: 'Entries' })}:
   {nbHits}
   {#if nbHits}({processingTimeMS}ms){/if}
 </div>

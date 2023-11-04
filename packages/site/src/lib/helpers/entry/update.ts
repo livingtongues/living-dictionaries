@@ -2,7 +2,7 @@ import { update } from 'sveltefirets';
 import { get } from 'svelte/store';
 import { t } from 'svelte-i18n';
 
-export async function saveUpdateToFirestore({
+export function saveUpdateToFirestore({
   field,
   value,
   entryId,

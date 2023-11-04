@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { _ } from 'svelte-i18n';
+  import { t } from 'svelte-i18n';
   import type { IInvite, IHelper, IUser } from '@living-dictionaries/types';
   import { isManager, isContributor, user, dictionary } from '$lib/stores';
   import { Button, ShowHide } from 'svelte-pieces';
@@ -29,7 +29,7 @@
         termsAgreement: serverTimestamp(),
       });
     } catch (err) {
-      alert(`${$_('misc.error')}: ${err}`);
+      alert(`${$t('misc.error')}: ${err}`);
     }
   }
 </script>
@@ -41,10 +41,10 @@
     startWith={inviteType}>
     {#if invite?.status === 'sent'}
       <p class="font-semibold mb-2">
-        {$_('invite.invited_by', { default: 'Invited by' })}: {invite.inviterName}
+        {$t('invite.invited_by', { default: 'Invited by' })}: {invite.inviterName}
       </p>
       <p class="font-semibold mb-2">
-        {$_('invite.role', { default: 'Role' })}: {invite.role}
+        {$t('invite.role', { default: 'Role' })}: {invite.role}
       </p>
       {#if $user}
         {#if $isManager}
@@ -52,7 +52,7 @@
             You are already a manager.
           </p>
           <Button href={`/${$dictionary.id}/entries/list`}>
-            {$_('dictionary.entries', { default: 'Entries' })}
+            {$t('dictionary.entries', { default: 'Entries' })}
             <span class="i-fa6-solid-chevron-right rtl-x-flip -mt-1" />
           </Button>
         {:else if $isContributor && invite.role === 'contributor'}
@@ -60,20 +60,20 @@
             You are already a contributor.
           </p>
           <Button href={`/${$dictionary.id}/entries/list`}>
-            {$_('dictionary.entries', { default: 'Entries' })}
+            {$t('dictionary.entries', { default: 'Entries' })}
             <span class="i-fa6-solid-chevron-right rtl-x-flip -mt-1" />
           </Button>
         {:else}
-          <Button form="filled" onclick={() => acceptInvite(invite.role)}>{$_('invite.accept_invitation', {
+          <Button form="filled" onclick={() => acceptInvite(invite.role)}>{$t('invite.accept_invitation', {
             default: 'Accept Invitation',
           })}</Button>
 
           <div class="mt-2 text-sm text-gray-600">
-            {$_('terms.agree_by_submit', {
+            {$t('terms.agree_by_submit', {
               default: 'By submitting this form, you agree to our',
             })}
             <a href="/terms" class="underline" target="_blank">
-              {$_('dictionary.terms_of_use', { default: 'Terms of Use' })}
+              {$t('dictionary.terms_of_use', { default: 'Terms of Use' })}
             </a>
             .
           </div>
@@ -83,7 +83,7 @@
           <Button form="text" onclick={toggle}>
             <i class="far fa-sign-in" />
             <span class="ml-1">
-              {$_('header.login', { default: 'Sign In' })}
+              {$t('header.login', { default: 'Sign In' })}
             </span>
           </Button>
           {#if show}
@@ -95,7 +95,7 @@
       {/if}
     {:else if invite?.status === 'claimed'}
       <p class="font-semibold mb-2">
-        {$_('invite.invitation_claimed', {
+        {$t('invite.invitation_claimed', {
           default: 'Invitation claimed',
         })}: {invite.updatedAt?.toDate().toLocaleDateString(undefined, {
           weekday: 'long',
@@ -106,12 +106,12 @@
       </p>
 
       <Button href={`/${$dictionary.id}/entries/list`}>
-        {$_('dictionary.entries', { default: 'Entries' })}
+        {$t('dictionary.entries', { default: 'Entries' })}
         <span class="i-fa6-solid-chevron-right rtl-x-flip -mt-1" />
       </Button>
     {:else}
       <p class="font-semibold">
-        {$_('invite.invalid_invitation', {
+        {$t('invite.invalid_invitation', {
           default: 'Invalid Invitation',
         })}
       </p>

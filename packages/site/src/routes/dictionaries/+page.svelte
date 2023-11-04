@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { _ } from 'svelte-i18n';
+  import { t } from 'svelte-i18n';
   import { Collection } from 'sveltefirets';
   import { orderBy, where } from 'firebase/firestore';
   import { admin } from '$lib/stores';
@@ -22,7 +22,7 @@
 
 </script>
 
-<Header>{$_('home.list_of_dictionaries', { default: 'List of Dictionaries' })}</Header>
+<Header>{$t('home.list_of_dictionaries', { default: 'List of Dictionaries' })}</Header>
 
 <div class="p-3 sticky top-0 relative z-2 h-screen flex flex-col bg-white">
   <Collection
@@ -41,7 +41,7 @@
             'living-dictionaries-list'
           )}>
         <i class="fas fa-download mr-1" />
-        {$_('misc.download', { default: 'Download' })}
+        {$t('misc.download', { default: 'Download' })}
         (.csv)
       </Button>
       {#if $admin}
@@ -55,20 +55,20 @@
     <ResponsiveTable stickyColumn stickyHeading class="my-1">
       <thead>
         <th>
-          {$_('dictionary.name_of_language', { default: 'Name of Language' })}
+          {$t('dictionary.name_of_language', { default: 'Name of Language' })}
         </th>
-        <th> {$_('about.entry_count', { default: 'Entry Count' })} </th>
+        <th> {$t('about.entry_count', { default: 'Entry Count' })} </th>
         <th> URL </th>
         <th> ISO 639-3 </th>
         <th> Glottocode </th>
         <th>
-          {$_('dictionary.location', { default: 'Location' })}
+          {$t('dictionary.location', { default: 'Location' })}
         </th>
         <th>
-          {$_('dictionary.latitude', { default: 'Latitude' })}
+          {$t('dictionary.latitude', { default: 'Latitude' })}
         </th>
         <th>
-          {$_('dictionary.longitude', { default: 'Longitude' })}
+          {$t('dictionary.longitude', { default: 'Longitude' })}
         </th>
       </thead>
       {#each dictionaries as dictionary}
@@ -116,8 +116,8 @@
 </div>
 
 <SeoMetaTags
-  title={$_('home.list_of_dictionaries', { default: 'List of Dictionaries' })}
-  description={$_('', {
+  title={$t('home.list_of_dictionaries', { default: 'List of Dictionaries' })}
+  description={$t('', {
     default:
       'A dynamically updated list of all the public dictionaries available on the Living Dictionaries platform. This list includes the names, URLs, GPS coordinates, ISO 639-3 Codes and Glottocodes associated with the Living Dictionaries. Living Dictionaries are language documentation tools that support endangered and under-represented languages.',
   })}

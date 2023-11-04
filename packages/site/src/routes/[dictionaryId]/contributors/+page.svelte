@@ -183,7 +183,7 @@
 </div>
 
 <!-- <div class="text-gray-600 my-1 text-sm">
-    {$_('dictionary.contributors', { default: 'Contributors' })} = {$_(
+    {$t('dictionary.contributors', { default: 'Contributors' })} = {$t(
       'contributors.speakers_other_collaborators',
       {
         default: 'speakers and any other collaborators',
