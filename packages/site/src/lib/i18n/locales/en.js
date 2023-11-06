@@ -1,4 +1,4 @@
-{
+export default {
   "direction": "ltr",
   "about": {
     "about_LD": "About Living Dictionaries",
