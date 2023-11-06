@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { t } from 'svelte-i18n';
+  import { page } from '$app/stores';
   import { Button, Modal, ShowHide } from 'svelte-pieces';
   import RecordVideo from '$lib/components/video/RecordVideo.svelte';
   import SelectVideo from './SelectVideo.svelte';
@@ -27,11 +27,11 @@
       <VideoIFrame video={expand_video(database_video)} />
       <div class="modal-footer">
         <Button onclick={close} color="black">
-          {$t('misc.cancel', { default: 'Cancel' })}
+          {$page.data.t('misc.cancel')}
         </Button>
         <div class="w-1" />
         <Button onclick={async () => await addVideo(entry.id, database_video)} form="filled">
-          {$t('misc.save', { default: 'Save' })}
+          {$page.data.t('misc.save')}
         </Button>
       </div>
     {:else if speakerId}
@@ -50,9 +50,7 @@
 
           <Button onclick={toggle} class="mt-4 !py-4 w-full" color="red" type="button">
             <span class="i-uil-microphone" />
-            {$t('video.prepare_to_record_video', {
-              default: 'Prepare to Record with Microphone & Camera',
-            })}
+            {$page.data.t('video.prepare_to_record_video')}
           </Button>
         {:else}
           <RecordVideo let:videoBlob let:reset>
@@ -62,11 +60,9 @@
               {#if !show}
                 <div class="modal-footer">
                   <Button onclick={reset} color="red"><i class="far fa-trash-alt" />
-                    {$t('misc.delete', {
-                      default: 'Delete',
-                    })}</Button>
+                    {$page.data.t('misc.delete')}</Button>
                   <div class="w-1" />
-                  <Button onclick={toggle} color="green" form="filled"><i class="fas fa-upload" /> {$t('misc.upload', { default: 'Upload' })}</Button>
+                  <Button onclick={toggle} color="green" form="filled"><i class="fas fa-upload" /> {$page.data.t('misc.upload')}</Button>
                 </div>
               {:else}
                 {#await import('$lib/components/video/UploadVideo.svelte') then { default: UploadVideo }}
@@ -80,7 +76,7 @@
     {:else}
       <div class="modal-footer">
         <Button onclick={close} color="black">
-          {$t('misc.cancel', { default: 'Cancel' })}
+          {$page.data.t('misc.cancel')}
         </Button>
       </div>
     {/if}

@@ -3,10 +3,10 @@ import { update } from 'sveltefirets';
 import { get } from 'svelte/store';
 import { dictionary } from '$lib/stores';
 import { arrayUnion } from 'firebase/firestore';
-import { t } from 'svelte-i18n';
+import { page } from '$app/stores';
 
 export async function addVideo(entry_id: string, video: GoalDatabaseVideo) {
-  const $t = get(t);
+  const { data: { t } } = get(page)
   try {
     const $dictionary = get(dictionary);
     video.ts = Date.now();
@@ -16,6 +16,6 @@ export async function addVideo(entry_id: string, video: GoalDatabaseVideo) {
       { abbreviate: true }
     );
   } catch (err) {
-    alert(`${$t('misc.error', { default: 'Error' })}: ${err}`);
+    alert(`${t('misc.error')}: ${err}`);
   }
 }

@@ -1,6 +1,6 @@
 <script lang="ts">
   import { EntryFields, type EntryFieldValue, type ExpandedEntry, type IDictionary } from '@living-dictionaries/types';
-  import { t } from 'svelte-i18n';
+  import { page } from '$app/stores';
   import EntryField from './EntryField.svelte';
   import { createEventDispatcher } from 'svelte';
   import EntryDialect from '$lib/components/entry/EntryDialect.svelte';
@@ -29,7 +29,7 @@
       value={entry.lexeme}
       field="lexeme"
       {canEdit}
-      display={$t('entry.lx', { default: 'Lexeme/Word/Phrase' })}
+      display={$page.data.t('entry.lx')}
       on:update={({detail}) => dispatch('valueupdate', { field: EntryFields.lexeme, newValue: detail})} />
   </div>
 
@@ -48,7 +48,7 @@
         on:update={({detail}) => dispatch('valueupdate', { field: orthographyIndex, newValue: detail})} />
     {/each}
 
-    <EntryField value={entry.phonetic} field="phonetic" {canEdit} display={$t('entry.ph')} on:update={({detail}) => dispatch('valueupdate', { field: EntryFields.phonetic, newValue: detail})} />
+    <EntryField value={entry.phonetic} field="phonetic" {canEdit} display={$page.data.t('entry.ph')} on:update={({detail}) => dispatch('valueupdate', { field: EntryFields.phonetic, newValue: detail})} />
 
     {#if entry.senses.length < 2}
       <Sense sense={entry.senses[0]} {canEdit} glossLanguages={dictionary.glossLanguages} on:valueupdate />
@@ -90,7 +90,7 @@
 
     {#if entry.dialects?.length || canEdit}
       <div class="md:px-2" class:order-2={!entry.dialects?.length}>
-        <div class="rounded text-xs text-gray-500 mt-1 mb-2">{$t('entry.di')}</div>
+        <div class="rounded text-xs text-gray-500 mt-1 mb-2">{$page.data.t('entry.di')}</div>
         <EntryDialect {canEdit} dialects={entry.dialects} dictionaryId={dictionary.id} on:valueupdate />
         <div class="border-b-2 pb-1 mb-2 border-dashed" />
       </div>
@@ -101,7 +101,7 @@
       value={entry.scientific_names?.[0]}
       field="scientific_names"
       {canEdit}
-      display={$t('entry.scn', { default: 'Scientific Name' })}
+      display={$page.data.t('entry.scn')}
       on:update={({ detail }) => dispatch('valueupdate', { field: EntryFields.scientific_names, newValue: [detail] })} />
 
     {#if DICTIONARIES_WITH_VARIANTS.includes(dictionary.id)}
@@ -109,7 +109,7 @@
         value={entry.variant}
         field="variant"
         {canEdit}
-        display={$t(`entry.va`, { default: 'Variant' })}
+        display={$page.data.t(`entry.va`)}
         on:update={({detail}) => dispatch('valueupdate', { field: EntryFields.variant, newValue: detail})} />
     {/if}
 
@@ -118,13 +118,13 @@
         value={entry[field]}
         {field}
         {canEdit}
-        display={$t(`entry.${EntryFields[field]}`)}
+        display={$page.data.t(`entry.${EntryFields[field]}`)}
         on:update={({detail}) => dispatch('valueupdate', { field: EntryFields[field], newValue: detail})} />
     {/each}
 
     {#if entry.sources?.length || canEdit}
       <div class="md:px-2" class:order-2={!entry.sources?.length}>
-        <div class="rounded text-xs text-gray-500 mt-1 mb-2">{$t('entry.sr')}</div>
+        <div class="rounded text-xs text-gray-500 mt-1 mb-2">{$page.data.t('entry.sr')}</div>
         <SelectSource
           {canEdit}
           value={entry.sources}

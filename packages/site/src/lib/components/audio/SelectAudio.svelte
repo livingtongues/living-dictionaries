@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { t } from 'svelte-i18n';
+  import { page } from '$app/stores';
   let dragging = false;
   export let file: File;
 
@@ -10,12 +10,12 @@
 
     // Client-side validation: Must be audio and smaller than 100MB.
     if (fileToCheck.type.split('/')[0] !== 'audio')
-      return alert(`${$t('upload.error', { default: 'Unsupported File Type' })}`);
+      return alert(`${$page.data.t('upload.error')}`);
 
     // Must be smaller than 100MB, http://www.unitconversion.org/data-storage/megabytes-to-bytes-conversion.html
     if (fileToCheck.size > 104857600) {
       return alert(
-        `${$t('upload.file_must_be_smaller', { default: 'File must be smaller than' })} 100MB`
+        `${$page.data.t('upload.file_must_be_smaller')} 100MB`
       );
     }
 
@@ -39,8 +39,8 @@
 
   <i class="far fa-upload" />&nbsp;
   {dragging
-    ? $t('upload.drop_to_upload', { default: 'Drop to Upload' })
-    : $t('upload.select_audio_file', { default: 'Select Audio File' })}
+    ? $page.data.t('upload.drop_to_upload')
+    : $page.data.t('upload.select_audio_file')}
 </label>
 
 <style>

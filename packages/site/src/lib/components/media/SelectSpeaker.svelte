@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { t } from 'svelte-i18n';
+  import { page } from '$app/stores';
   import { Collection } from 'sveltefirets';
   import { where } from 'firebase/firestore';
 
@@ -28,7 +28,7 @@
 
 {#if !speakerId}
   <div class="text-sm font-medium leading-5 text-gray-600 mb-2">
-    {$t('audio.select_speaker', { default: 'Select Speaker' })}
+    {$page.data.t('audio.select_speaker')}
   </div>
 {/if}
 
@@ -37,7 +37,7 @@
     for="speaker"
     class="inline-flex items-center px-3 ltr:rounded-l-md rtl:rounded-r-md border
       border-gray-300 bg-gray-50 text-gray-500">
-    {$t('entry.speaker', { default: 'Speaker' })}
+    {$page.data.t('entry.speaker')}
   </label>
   <select
     use:autofocus
@@ -59,7 +59,7 @@
     {/each}
     <option value={addSpeaker}>
       +
-      {$t('misc.add', { default: 'Add' })}
+      {$page.data.t('misc.add')}
     </option>
   </select>
 </div>

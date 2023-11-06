@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { t } from 'svelte-i18n';
+  import { page } from '$app/stores';
   import { getContext } from 'svelte';
   import { configure } from 'instantsearch.js/es/widgets/index.js';
   import Hits from '$lib/components/search/Hits.svelte';
@@ -47,11 +47,11 @@
       <div class="flex flex-wrap mb-1">
         <Button class="mb-1 mr-2" form="filled" type="button" onclick={() => window.print()}>
           <span class="i-fa-print -mt-1" />
-          {$t('entry.print', { default: 'Print' })}
+          {$page.data.t('entry.print')}
         </Button>
 
         <div class="mb-1 mr-2">
-          <label class="font-medium text-gray-700" for="maxEntries">{$t('print.max_entries', { default: 'Max entries' })}</label>
+          <label class="font-medium text-gray-700" for="maxEntries">{$page.data.t('print.max_entries')}</label>
           <input
             class="form-input text-sm w-17"
             id="maxEntries"
@@ -62,7 +62,7 @@
           <!-- Algolia hard max per page is 1000 -->
         </div>
         <div class="mb-1 mr-2">
-          <label class="font-medium text-gray-700" for="columnCount">{$t('print.columns', { default: 'Columns' })}</label>
+          <label class="font-medium text-gray-700" for="columnCount">{$page.data.t('print.columns')}</label>
           <input
             class="form-input text-sm w-17"
             id="columnCount"
@@ -72,7 +72,7 @@
             bind:value={$columnCount} />
         </div>
         <div class="mb-1 mr-2">
-          <label class="font-medium text-gray-700" for="headwordSize">{$t('print.headword_size', { default: 'Headword size' })} (pt)</label>
+          <label class="font-medium text-gray-700" for="headwordSize">{$page.data.t('print.headword_size')} (pt)</label>
           <input
             class="form-input text-sm w-17"
             id="headwordSize"
@@ -82,7 +82,7 @@
             bind:value={$headwordSize} />
         </div>
         <div class="mb-1 mr-2">
-          <label class="font-medium text-gray-700" for="fontSize">{$t('print.font_size', { default: 'Font size' })} (pt)</label>
+          <label class="font-medium text-gray-700" for="fontSize">{$page.data.t('print.font_size')} (pt)</label>
           <input
             class="form-input text-sm w-15"
             id="fontSize"
@@ -92,7 +92,7 @@
             bind:value={$fontSize} />
         </div>
         <div class="mb-1 mr-2">
-          <label class="font-medium text-gray-700" for="imageSize">{$t('misc.images', { default: 'Images' })}:</label>
+          <label class="font-medium text-gray-700" for="imageSize">{$page.data.t('misc.images')}:</label>
           <input
             class="form-input text-sm w-17"
             id="imageSize"
@@ -107,7 +107,7 @@
 
     <div class="hidden print:block text-2xl mb-5">
       {$dictionary.name}
-      {$t('misc.LD_singular', { default: 'Living Dictionary' })}
+      {$page.data.t('misc.LD_singular')}
     </div>
 
     <div class="flex overflow-x-hidden">
@@ -138,7 +138,7 @@
             {truncateAuthors(citation?.citation)}
             {new Date().getFullYear()}.
             {$dictionary.name}
-            <span>{$t('misc.LD_singular', { default: 'Living Dictionary' })}.</span>
+            <span>{$page.data.t('misc.LD_singular')}.</span>
             Living Tongues Institute for Endangered Languages. https://livingdictionaries.app/{$dictionary.id}
           </div>
         {/if}
@@ -147,17 +147,13 @@
   </Hits>
   <Pagination showAdd={false} {search} />
 {:else}
-  <p>
-    {$t('export.print_availability', {
-      default: 'Print view is only available to dictionary managers and contributors',
-    })}
-  </p>
+  <p>Print view is only available to dictionary managers and contributors</p>
 {/if}
 
 <!-- <SeoMetaTags
-  title={$t('', { default: 'Print Entries' })}
+  title={$page.data.t(''})}
   dictionaryName={$dictionary.name}
-  description={$t('', { default: 'The entries in this Living Dictionary are displayed in a comprehensive, nicely designed list that can be exported into a PDF and printed on paper. Users can activate different parameters according to their printing needs. They may also filter and print specific content from this Living Dictionary by activating filters for parts of speech, semantic domains, custom tags, speaker information and other metadata.' })}
+  description={$page.data.t(''})}
   keywords="Endangered Languages, Language Documentation, Language Revitalization, Build a Dictionary, Online Dictionary, Digital Dictionary, Dictionary Software, Free Software, Online Dictionary Builder, Living Dictionaries, Living Dictionary, Edit a dictionary, Search a dictionary, Browse a dictionary, Explore a Dictionary, Print a dictionary" /> -->
 <style>
   .print-columns {

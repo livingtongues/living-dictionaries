@@ -62,9 +62,9 @@
 <Pagination {search} />
 
 <!-- <SeoMetaTags
-  title={$t('', { default: 'Entries Gallery' })}
+  title={$page.data.t(''})}
   dictionaryName={$dictionary.name}
-  description={$t('', { default: 'The entries that are accompanied by images in this Living Dictionary are displayed in a beautiful Gallery that visitors can easily browse by using the page tabs at the bottom of the screen, or search by using the powerful search bar located at the top of the page. Visitors may also filter and display the visual contents of this Living Dictionary by activating filters for parts of speech, semantic domains, custom tags, speaker information and other metadata.' })}
+  description={$page.data.t(''})}
   keywords="Endangered Languages, Language Documentation, Language Revitalization, Build a Dictionary, Online Dictionary, Digital Dictionary, Dictionary Software, Free Software, Online Dictionary Builder, Living Dictionaries, Living Dictionary, Visual, Gallery, Images" /> -->
 
 <!-- Talking Dictionaries v1 example: http://talkingdictionary.swarthmore.edu/kapingamarangi/?images&gallery&page=1 -->

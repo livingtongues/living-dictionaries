@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { t } from 'svelte-i18n';
+  import { page } from '$app/stores';
   import {
     partsOfSpeech,
     mayanPOS,
@@ -25,7 +25,7 @@
   $: parts_of_speech_options = partsOfSpeech.map(part => {
     return {
       value: part.enAbbrev,
-      name: $t('ps.' + part.enAbbrev, { default: part.enName }),
+      name: $page.data.t('ps.' + part.enAbbrev, { fallback: part.enName }),
     };
   }) as SelectOption[];
 
@@ -46,13 +46,13 @@
   {options}
   {canEdit}
   {showPlus}
-  placeholder={$t('entry.ps')}
+  placeholder={$page.data.t('entry.ps')}
   on:update={({ detail: newValue }) => {
     dispatch('valueupdate', {
       field: EntryFields.parts_of_speech,
       newValue,
     });
   }}>
-  <span slot="heading">{$t('entry.ps')}</span>
+  <span slot="heading">{$page.data.t('entry.ps')}</span>
 </ModalEditableArray>
 

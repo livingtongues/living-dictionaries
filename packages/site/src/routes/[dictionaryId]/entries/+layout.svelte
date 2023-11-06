@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { t } from 'svelte-i18n';
   import InstantSearch from '$lib/components/search/InstantSearch.svelte';
   import SearchBox from '$lib/components/search/SearchBox.svelte';
   import Stats from '$lib/components/search/Stats.svelte';
@@ -40,7 +39,7 @@
               px-2 py-1 rounded">
             <i class="far fa-list" />
             <span class="hidden md:inline">
-              {$t('entry.list', { default: 'List' })}
+              {$page.data.t('entry.list')}
             </span>
           </a>
           <div class="hidden md:block w-1" />
@@ -50,7 +49,7 @@
               px-2 py-1 rounded">
             <i class="fal fa-table" />
             <span class="hidden md:inline">
-              {$t('entry.table', { default: 'Table' })}
+              {$page.data.t('entry.table')}
             </span>
           </a>
           <div class="hidden md:block w-1" />
@@ -62,7 +61,7 @@
               px-2 py-1 rounded">
             <i class="fal fa-image" />
             <span class="hidden md:inline">
-              {$t('entry.gallery', { default: 'Gallery' })}
+              {$page.data.t('entry.gallery')}
             </span>
           </a>
           {#if $dictionary.printAccess || $canEdit}
@@ -74,7 +73,7 @@
                 px-2 py-1 rounded">
               <span class="i-fa-print" style="margin-top: -4px;" />
               <span class="hidden md:inline">
-                {$t('entry.print', { default: 'Print' })}
+                {$page.data.t('entry.print')}
               </span>
             </a>
           {/if}

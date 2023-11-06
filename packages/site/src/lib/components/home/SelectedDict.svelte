@@ -1,7 +1,7 @@
 <script lang="ts">
   import { Doc } from 'sveltefirets';
   import type { IAbout, IDictionary } from '@living-dictionaries/types';
-  import { t } from 'svelte-i18n';
+  import { page } from '$app/stores';
   import { Button } from 'svelte-pieces';
   import sanitize from 'xss';
 
@@ -36,7 +36,7 @@
   {#if dictionary.glossLanguages}
     <div class="mb-2">
       <i class="far fa-info-circle fa-fw" />
-      {dictionary.glossLanguages.map((bcp) => $t('gl.' + bcp)).join(', ')}
+      {dictionary.glossLanguages.map((bcp) => $page.data.t('gl.' + bcp)).join(', ')}
     </div>
   {/if}
 
@@ -44,7 +44,7 @@
     <span
       class="mb-2 mr-2 inline-flex items-center px-2 py-1 rounded-full
         text-xs font-medium leading-4 bg-gray-200 text-gray-800">
-      {$t('dictionary.entries', { default: 'Entries' })}:&nbsp;
+      {$page.data.t('dictionary.entries')}:&nbsp;
       <b>{dictionary.entryCount}</b>
     </span>
   {/if}
@@ -68,7 +68,7 @@
 
   {#if dictionary.type === 'tdv1'}
     <Button target="_blank" class="mt-1 w-full" form="filled" color="black" href={dictionary.url}>
-      {$t('home.open_dictionary', { default: 'Open Dictionary' })}
+      {$page.data.t('home.open_dictionary')}
     </Button>
   {:else}
     <Doc
@@ -79,13 +79,13 @@
         {@html sanitize(truncateString(about, 200))}
         {#if about.length > 200}
           <a class="hover:underline" href={dictionary.id + '/about'}>
-            {$t('home.read_more', { default: 'Read More' })}
+            {$page.data.t('home.read_more')}
           </a>
         {/if}
       </div>
     </Doc>
     <Button class="mt-1 w-full" form="filled" color="black" href={dictionary.id}>
-      {$t('home.open_dictionary', { default: 'Open Dictionary' })}
+      {$page.data.t('home.open_dictionary')}
       <span class="i-fa6-solid-chevron-right rtl-x-flip -mt-1" />
     </Button>
   {/if}

@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { GoalDatabasePhoto, ActualDatabaseEntry } from '@living-dictionaries/types';
-  import { t } from 'svelte-i18n';
+  import { page } from '$app/stores';
   import { updateOnline } from 'sveltefirets';
   import { get } from 'svelte/store';
 
@@ -19,16 +19,14 @@
     if (fileToCheck.type.split('/')[0] !== 'image') {
       return alert(
         // @ts-ignore
-        `${$t('upload.error', { default: 'Unsupported File Type' })}`
+        `${$page.data.t('upload.error')}`
       );
     }
     const tenMB = 10485760; // http://www.unitconversion.org/data-storage/megabytes-to-bytes-conversion.html
     if (fileToCheck.size > tenMB) {
       // @ts-ignore
       return alert(
-        `${$t('upload.file_must_be_smaller', {
-          default: 'File must be smaller than',
-        })} 10MB`
+        `${$page.data.t('upload.file_must_be_smaller')} 10MB`
       );
     }
 

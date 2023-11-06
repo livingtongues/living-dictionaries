@@ -2,7 +2,7 @@ import type { ExpandedEntry } from '@living-dictionaries/types';
 import { seo_description } from './seo_description';
 
 describe('seo_description', () => {
-  const $t = (id: string) => {
+  const t = (id: string) => {
     switch (id) {
     case 'gl.en':
       return 'English';
@@ -34,7 +34,7 @@ describe('seo_description', () => {
       }]
     };
     const dictionary_gloss_languages = ['es'];
-    const result = seo_description(entry, dictionary_gloss_languages, $t);
+    const result = seo_description(entry, dictionary_gloss_languages, t);
     expect(result).toMatchInlineSnapshot('"Spanish: hola, English: hello"');
   });
 
@@ -55,7 +55,7 @@ describe('seo_description', () => {
       }],
     };
     const dictionary_gloss_languages = ['hi', 'or', 'as', 'en', 'fr', 'es', 'it', 'de', 'pt'];
-    const result = seo_description(entry, dictionary_gloss_languages, $t);
+    const result = seo_description(entry, dictionary_gloss_languages, t);
     expect(result).toMatchInlineSnapshot('"Hindi: बकरियाँ, Oriya: ଛେଳି ଗୁଡିକ, Assamese: ছাগল কেইতা, English: goats, French: chèvres, Spanish: cabras, Italian: capre, German: Ziegen, Portuguese: cabras"');
   });
 
@@ -71,7 +71,7 @@ describe('seo_description', () => {
       }],
     };
     const no_dictionary_gloss_languages = [];
-    const result = seo_description(entry, no_dictionary_gloss_languages, $t);
+    const result = seo_description(entry, no_dictionary_gloss_languages, t);
     expect(result).toMatchInlineSnapshot('"امتحان, Ölçek, परीक्षा, 시험, מִבְחָן, English: test"');
   });
 
@@ -87,7 +87,7 @@ describe('seo_description', () => {
       dialects: ['West Bengal Sabar'],
     };
     const dictionary_gloss_languages = ['as', 'en', 'or', 'hi'];
-    const result = seo_description(entry, dictionary_gloss_languages, $t);
+    const result = seo_description(entry, dictionary_gloss_languages, t);
     expect(result).toMatchInlineSnapshot(
       '"আৰচি, 𑃢𑃝𑃐𑃤, [arsi], n., adj., Assamese: ক’লা মুখ\'ৰ বান্দৰ, English: black faced monkey, Oriya: କଳା ମୁହାଁ ମାଙ୍କଡ, West Bengal Sabar"'
     );
@@ -95,7 +95,7 @@ describe('seo_description', () => {
 
   test('handles no gloss field', () => {
     const dictionary_gloss_languages = ['en'];
-    const result = seo_description({ lexeme: 'foo' }, dictionary_gloss_languages, $t);
+    const result = seo_description({ lexeme: 'foo' }, dictionary_gloss_languages, t);
     expect(result).toEqual('');
   });
 });

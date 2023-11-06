@@ -6,15 +6,15 @@
     languagesWithTranslations,
     type AuthResult,
   } from 'sveltefirets';
-  import { t, locale } from 'svelte-i18n';
   import { Modal } from 'svelte-pieces';
   import { createEventDispatcher } from 'svelte';
   import { apiFetch } from '$lib/client/apiFetch';
   import type { NewUserRequestBody } from '../../../routes/api/email/new_user/+server';
+  import { page } from '$app/stores';
 
   let languageCode: LanguageCode = 'en';
 
-  let localeAbbrev = $locale.substring(0, 2);
+  let localeAbbrev: string = $page.data.locale;
   if (localeAbbrev === 'he') localeAbbrev = 'iw';
   if (!Object.values(languagesWithTranslations).includes(localeAbbrev))
     localeAbbrev = 'en'; // Malay 'ms' and Assamese 'as' not yet available
@@ -45,7 +45,7 @@
         }
       }
     } catch (err) {
-      alert(`${$t('misc.error', { default: 'Error' })}: ${err}`);
+      alert(`${$page.data.t('misc.error')}: ${err}`);
       console.error(err);
     }
     dispatch('close');
@@ -53,12 +53,10 @@
 </script>
 
 <Modal on:close>
-  <span slot="heading">{$t('header.login', { default: 'Sign In' })}</span>
+  <span slot="heading">{$page.data.t('header.login')}</span>
   {#if context === 'force'}
     <h4 class="text-lg text-center">
-      {$t('header.please_create_account', {
-        default: 'Please create an account',
-      })}
+      {$page.data.t('header.please_create_account')}
     </h4>
   {/if}
 

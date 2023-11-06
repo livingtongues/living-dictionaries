@@ -3,11 +3,12 @@ import { order_glosses } from '$lib/helpers/glosses';
 import { add_periods_and_comma_separate_parts_of_speech } from '$lib/helpers/entry/add_periods_and_comma_separate_parts_of_speech';
 import { remove_italic_tags } from '$lib/helpers/remove_italic_tags';
 import { get_local_orthographies } from '$lib/helpers/entry/get_local_orthagraphies';
+import type { TranslateFunction } from '$lib/i18n/types';
 
 export function seo_description(
   entry: Partial<ExpandedEntry>,
   dictionary_gloss_languages: string[],
-  $t: (key: string) => string
+  t: TranslateFunction
 ) {
 
   const local_orthographies = get_local_orthographies(entry).join(', ');
@@ -18,7 +19,7 @@ export function seo_description(
     glosses: entry.senses?.[0].glosses,
     // glosses: entry.senses.map(sense => sense.glosses).flat(), // TODO: use all senses
     dictionary_gloss_languages,
-    $t,
+    t,
     label: true,
   }).join(', ');
   const glosses = remove_italic_tags(ordered_and_labeled_glosses);

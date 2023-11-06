@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { Readable } from 'svelte/store';
-  import { t } from 'svelte-i18n';
+  import { page } from '$app/stores';
   import { StandardPrintFields, type ExpandedEntry, type IPrintFields } from '@living-dictionaries/types';
 
   export let entries: ExpandedEntry[];
@@ -31,18 +31,18 @@
 {#each fieldsThatExist as field}
   <div class="flex items-center mr-3 mb-1">
     <input id={field} type="checkbox" bind:checked={$preferredPrintFields[field]} />
-    <label class="ml-1 text-sm text-gray-700" for={field}>{$t(`entry.${field}`, { default: field })}</label>
+    <label class="ml-1 text-sm text-gray-700" for={field}>{$page.data.t(`entry.${field}`, { fallback: field })}</label>
   </div>
 {/each}
 
 {#if showingFieldsWithLabels}
   <div class="flex items-center mr-3 mb-1">
     <input id="showLabels" type="checkbox" bind:checked={$showLabels} />
-    <label class="ml-1 text-sm text-gray-700" for="showLabels">{$t('print.labels', { default: 'Show Labels' })}</label>
+    <label class="ml-1 text-sm text-gray-700" for="showLabels">{$page.data.t('print.labels')}</label>
   </div>
 {/if}
 
 <div class="flex items-center mr-3 mb-1">
   <input id="showLabels" type="checkbox" bind:checked={$showQrCode} />
-  <label class="ml-1 text-sm text-gray-700" for="showLabels">{$t('print.qr_code', { default: 'Show QR Code' })}</label>
+  <label class="ml-1 text-sm text-gray-700" for="showLabels">{$page.data.t('print.qr_code')}</label>
 </div>

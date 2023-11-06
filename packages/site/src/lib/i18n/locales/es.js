@@ -1,6 +1,8 @@
 /** @type {typeof import('./en.js').default} */
 export default {
-  "direction": "ltr",
+  "page": {
+    "direction": "ltr",
+  },
   "about": {
     "about_LD": "Acerca de Diccionarios Vivos",
     "online_tool": "Diccionarios Vivos son herramientas digitales móviles que apoyan a las lenguas amenazadas, subrepresentadas y diaspóricas.",

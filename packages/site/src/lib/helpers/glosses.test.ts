@@ -2,7 +2,7 @@ import { order_entry_and_dictionary_gloss_languages, order_glosses } from './glo
 import { remove_italic_tags } from './remove_italic_tags';
 
 describe('order_glosses', () => {
-  const $t = (id: string) => {
+  const t = (id: string) => {
     switch (id) {
     case 'gl.de':
       return 'German';
@@ -26,7 +26,7 @@ describe('order_glosses', () => {
   const dictionary_gloss_languages = ['de', 'es', 'en'];
 
   test('orders based on dictionary_gloss_languages first', () => {
-    expect(order_glosses({ glosses, dictionary_gloss_languages, $t })).toMatchInlineSnapshot(
+    expect(order_glosses({ glosses, dictionary_gloss_languages, t })).toMatchInlineSnapshot(
       `
         [
           "apfel",
@@ -39,7 +39,7 @@ describe('order_glosses', () => {
   });
 
   test('adds language label when label set to true', () => {
-    expect(order_glosses({ glosses, dictionary_gloss_languages, $t, label: true }))
+    expect(order_glosses({ glosses, dictionary_gloss_languages, t, label: true }))
       .toMatchInlineSnapshot(`
       [
         "German: apfel",
@@ -51,17 +51,17 @@ describe('order_glosses', () => {
   });
 
   test('handles an empty glosses object', () => {
-    expect(order_glosses({ glosses: {}, dictionary_gloss_languages, $t })).toMatchInlineSnapshot('[]');
+    expect(order_glosses({ glosses: {}, dictionary_gloss_languages, t })).toMatchInlineSnapshot('[]');
   });
 
   test('handles undefined glosses object', () => {
-    expect(order_glosses({ glosses: undefined, dictionary_gloss_languages, $t })).toMatchInlineSnapshot('[]');
+    expect(order_glosses({ glosses: undefined, dictionary_gloss_languages, t })).toMatchInlineSnapshot('[]');
   });
 
   test('example implementation with join and italics removal', () => {
     expect(
       remove_italic_tags(
-        order_glosses({ glosses, dictionary_gloss_languages, $t }).join(', ')
+        order_glosses({ glosses, dictionary_gloss_languages, t }).join(', ')
       )
     ).toMatchInlineSnapshot('"apfel, manzana, apple, Neolamarckia cadamba"');
   });

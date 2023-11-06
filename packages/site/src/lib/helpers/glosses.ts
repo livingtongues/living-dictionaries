@@ -1,10 +1,11 @@
+import type { TranslateFunction } from '$lib/i18n/types';
 import type { IGloss } from '@living-dictionaries/types';
 
-export function order_glosses({ glosses, dictionary_gloss_languages, $t, label = false }:
+export function order_glosses({ glosses, dictionary_gloss_languages, t, label = false }:
   {
     glosses: IGloss;
     dictionary_gloss_languages: string[],
-    $t: (id: string) => string,
+    t: TranslateFunction,
     label?: boolean
   }
 ): string[] {
@@ -16,7 +17,7 @@ export function order_glosses({ glosses, dictionary_gloss_languages, $t, label =
 
   return gloss_languages_that_have_gloss.map((bcp) => {
     const gloss = glosses[bcp];
-    if (label) return `${$t('gl.' + bcp)}: ${gloss}`;
+    if (label) return `${t('gl.' + bcp)}: ${gloss}`;
     return gloss;
   });
 }

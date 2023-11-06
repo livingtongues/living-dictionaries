@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { t } from 'svelte-i18n';
+  import { page } from '$app/stores';
   import type { ExpandedVideo } from '@living-dictionaries/types';
   import VideoIFrame from './VideoIFrame.svelte';
   import { Button } from 'svelte-pieces';
@@ -57,7 +57,7 @@
             dispatch('deleteVideo');
           }}>
           <span class="i-fa-trash-o" style="margin: -1px 0 2px;" />
-          {$t('misc.delete', { default: 'Delete' })}
+          {$page.data.t('misc.delete')}
         </Button>
       </div>
     {/if}
@@ -72,7 +72,7 @@
           target="_blank">
           <i class="fas fa-download" />
           <span class="hidden sm:inline"
-            >{$t('misc.download', {
+            >{$page.data.t('misc.download', {
               default: 'Download',
             })}</span>
         </Button>

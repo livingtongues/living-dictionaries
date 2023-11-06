@@ -1,5 +1,7 @@
 export default {
-  "direction": "ltr",
+  "page": {
+    "direction": "ltr",
+  },
   "about": {
     "about_LD": "About Living Dictionaries",
     "online_tool": "Living Dictionaries are mobile-friendly web tools that support endangered, under-represented and diasporic languages.",

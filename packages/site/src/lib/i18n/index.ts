@@ -32,7 +32,7 @@ export async function getTranslator(locale: LocaleCode) {
     }
   }
 
-  return (key: TranslationKeys, options?: { values?: Record<string, string> }): string => {
+  return (key: TranslationKeys, options?: { values?: Record<string, string>, fallback?: string }): string => {
     if (!key.includes('.'))
       throw new Error('Incorrect i18n key. Must be nested 1 level (contain 1 period).')
 
@@ -43,15 +43,15 @@ export async function getTranslator(locale: LocaleCode) {
       return interpolate(localeResult, options?.values)
     console.warn(`Missing ${locale} translation for ${key}`)
 
-    const fallbackResult = loadedTranslations.en[section][item]
-    if (fallbackResult)
-      return interpolate(fallbackResult, options?.values)
+    const englishResult = loadedTranslations.en[section][item]
+    if (englishResult)
+      return interpolate(englishResult, options?.values)
     const error = `Missing English for: ${key}`
 
     if (dev)
       throw new Error(error)
 
     console.error(error)
-    return key
+    return options?.fallback || key
   }
 }

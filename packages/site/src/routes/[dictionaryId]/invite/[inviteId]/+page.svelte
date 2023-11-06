@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { t } from 'svelte-i18n';
+  import { page } from '$app/stores';
   import type { IInvite, IHelper, IUser } from '@living-dictionaries/types';
   import { isManager, isContributor, user, dictionary } from '$lib/stores';
   import { Button, ShowHide } from 'svelte-pieces';
@@ -29,7 +29,7 @@
         termsAgreement: serverTimestamp(),
       });
     } catch (err) {
-      alert(`${$t('misc.error')}: ${err}`);
+      alert(`${$page.data.t('misc.error')}: ${err}`);
     }
   }
 </script>
@@ -41,10 +41,10 @@
     startWith={inviteType}>
     {#if invite?.status === 'sent'}
       <p class="font-semibold mb-2">
-        {$t('invite.invited_by', { default: 'Invited by' })}: {invite.inviterName}
+        {$page.data.t('invite.invited_by')}: {invite.inviterName}
       </p>
       <p class="font-semibold mb-2">
-        {$t('invite.role', { default: 'Role' })}: {invite.role}
+        {$page.data.t('invite.role')}: {invite.role}
       </p>
       {#if $user}
         {#if $isManager}
@@ -52,7 +52,7 @@
             You are already a manager.
           </p>
           <Button href={`/${$dictionary.id}/entries/list`}>
-            {$t('dictionary.entries', { default: 'Entries' })}
+            {$page.data.t('dictionary.entries')}
             <span class="i-fa6-solid-chevron-right rtl-x-flip -mt-1" />
           </Button>
         {:else if $isContributor && invite.role === 'contributor'}
@@ -60,20 +60,16 @@
             You are already a contributor.
           </p>
           <Button href={`/${$dictionary.id}/entries/list`}>
-            {$t('dictionary.entries', { default: 'Entries' })}
+            {$page.data.t('dictionary.entries')}
             <span class="i-fa6-solid-chevron-right rtl-x-flip -mt-1" />
           </Button>
         {:else}
-          <Button form="filled" onclick={() => acceptInvite(invite.role)}>{$t('invite.accept_invitation', {
-            default: 'Accept Invitation',
-          })}</Button>
+          <Button form="filled" onclick={() => acceptInvite(invite.role)}>{$page.data.t('invite.accept_invitation')}</Button>
 
           <div class="mt-2 text-sm text-gray-600">
-            {$t('terms.agree_by_submit', {
-              default: 'By submitting this form, you agree to our',
-            })}
+            {$page.data.t('terms.agree_by_submit')}
             <a href="/terms" class="underline" target="_blank">
-              {$t('dictionary.terms_of_use', { default: 'Terms of Use' })}
+              {$page.data.t('dictionary.terms_of_use')}
             </a>
             .
           </div>
@@ -83,7 +79,7 @@
           <Button form="text" onclick={toggle}>
             <i class="far fa-sign-in" />
             <span class="ml-1">
-              {$t('header.login', { default: 'Sign In' })}
+              {$page.data.t('header.login')}
             </span>
           </Button>
           {#if show}
@@ -95,9 +91,7 @@
       {/if}
     {:else if invite?.status === 'claimed'}
       <p class="font-semibold mb-2">
-        {$t('invite.invitation_claimed', {
-          default: 'Invitation claimed',
-        })}: {invite.updatedAt?.toDate().toLocaleDateString(undefined, {
+        {$page.data.t('invite.invitation_claimed')}: {invite.updatedAt?.toDate().toLocaleDateString(undefined, {
           weekday: 'long',
           year: 'numeric',
           month: 'long',
@@ -106,14 +100,12 @@
       </p>
 
       <Button href={`/${$dictionary.id}/entries/list`}>
-        {$t('dictionary.entries', { default: 'Entries' })}
+        {$page.data.t('dictionary.entries')}
         <span class="i-fa6-solid-chevron-right rtl-x-flip -mt-1" />
       </Button>
     {:else}
       <p class="font-semibold">
-        {$t('invite.invalid_invitation', {
-          default: 'Invalid Invitation',
-        })}
+        {$page.data.t('invite.invalid_invitation')}
       </p>
     {/if}
   </Doc>

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { t } from 'svelte-i18n';
+  import { page } from '$app/stores';
   import { user } from '$lib/stores';
   import { tweened } from 'svelte/motion';
   import { cubicOut } from 'svelte/easing';
@@ -60,9 +60,7 @@
       // https://firebase.google.com/docs/storage/web/handle-errors
       (err) => {
         alert(
-          `${$t('misc.error', {
-            default: 'Error',
-          })}: ${err} - Please contact us with the image name.`
+          `${$page.data.t('misc.error')}: ${err} - Please contact us with the image name.`
         );
         error = err;
       },
@@ -92,9 +90,7 @@
     } catch (err) {
       error = err;
       alert(
-        `${$t('misc.error', {
-          default: 'Error',
-        })}: ${err} - Please contact us with the image name and lexeme.`
+        `${$page.data.t('misc.error')}: ${err} - Please contact us with the image name and lexeme.`
       );
     }
   }
@@ -106,7 +102,7 @@
   {#if error}
     <div class="w-12 text-red-600 text-center">
       <i class="far fa-times" />
-      {$t('misc.error', { default: 'Error' })}
+      {$page.data.t('misc.error')}
     </div>
   {:else}
     {#if success}

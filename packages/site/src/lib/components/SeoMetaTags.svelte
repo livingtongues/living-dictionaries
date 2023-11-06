@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { t } from 'svelte-i18n';
   import { page } from '$app/stores';
   import LZString from 'lz-string';
   import { seoTitle } from './seo-title';
@@ -30,7 +29,7 @@
   export let lat: number = undefined;
 
   $: expandedDictionaryName = dictionaryName
-    ? `${dictionaryName} ${$t('misc.LD_singular', { default: 'Living Dictionary' })}`
+    ? `${dictionaryName} ${$page.data.t('misc.LD_singular')}`
     : null;
   $: textTitle = seoTitle({ title: title || imageTitle, dictionaryName: expandedDictionaryName, admin });
   $: textDescription = description || imageDescription || 'Language Documentation Web App - Speeding the availability of language resources for endangered languages. Using technology to shift how we think about endangered languages. Rather than perceiving them as being antiquated, difficult to learn and on the brink of vanishing, we see them as modern and easily accessible for learning online in text and audio formats.'
@@ -88,6 +87,6 @@
 </svelte:head>
 
 <!--
-  Once refactored to an initial language route url schema, update title to use proper one: {$t('misc.LD', { default: 'Living Dictionaries' })}
+  Once refactored to an initial language route url schema, update title to use proper one: {$page.data.t('misc.LD')}
   Can offer alternate language urls when this is a feature: <link rel="alternate" hrefLang={languageAlternate.hrefLang} href={languageAlternate.href} />
  -->
