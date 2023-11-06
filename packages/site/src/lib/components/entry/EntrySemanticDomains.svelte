@@ -19,7 +19,7 @@
 
   $: translated_semantic_domain_options = semanticDomains.map((domain) => ({
     value: domain.key,
-    name: $page.data.t('sd.' + domain.key, { fallback: domain.name }),
+    name: $page.data.t({ dynamicKey: 'sd.' + domain.key, fallback: domain.name }),
   })) as SelectOption[];
 </script>
 

@@ -21,6 +21,12 @@ export const en = {
 // English is always loaded because it is the fallback
 const loadedTranslations: Record<string, typeof en> = { en }
 
+interface TranslateOptions {
+  values?: Record<string, string>
+  dynamicKey?: string
+  fallback?: string
+}
+
 export async function getTranslator(locale: LocaleCode) {
   if (!loadedTranslations[locale]) {
     loadedTranslations[locale] = {
@@ -32,7 +38,16 @@ export async function getTranslator(locale: LocaleCode) {
     }
   }
 
-  return (key: TranslationKeys, options?: { values?: Record<string, string>, fallback?: string }): string => {
+  return (keyOrOptions: TranslationKeys | TranslateOptions, options?: TranslateOptions): string => {
+    let key: string
+
+    if (typeof keyOrOptions === 'string') {
+      key = keyOrOptions
+    } else {
+      options = keyOrOptions
+      key = options.dynamicKey
+    }
+
     if (!key.includes('.'))
       throw new Error('Incorrect i18n key. Must be nested 1 level (contain 1 period).')
 

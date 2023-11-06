@@ -50,12 +50,12 @@
     items = items.map((item) => {
       if (attribute === 'ps') {
         if (item.value)
-          item.translatedLabel = $page.data.t('ps.' + item.label, { fallback: item.label });
+          item.translatedLabel = $page.data.t({ dynamicKey: 'ps.' + item.label, fallback: item.label });
         return item;
       } else if (attribute === 'sdn') {
         return {
           ...item,
-          translatedLabel: $page.data.t('sd.' + item.label, { fallback: item.label }),
+          translatedLabel: $page.data.t({ dynamicKey: 'sd.' + item.label, fallback: item.label }),
         };
       }
       return item;

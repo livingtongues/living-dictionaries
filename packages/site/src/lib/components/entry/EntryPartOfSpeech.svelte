@@ -25,7 +25,7 @@
   $: parts_of_speech_options = partsOfSpeech.map(part => {
     return {
       value: part.enAbbrev,
-      name: $page.data.t('ps.' + part.enAbbrev, { fallback: part.enName }),
+      name: $page.data.t({ dynamicKey: 'ps.' + part.enAbbrev, fallback: part.enName }),
     };
   }) as SelectOption[];
 
