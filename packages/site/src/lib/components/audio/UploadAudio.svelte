@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { t } from 'svelte-i18n';
+  import { page } from '$app/stores';
   import type { GoalDatabaseAudio, GoalDatabaseEntry } from '@living-dictionaries/types';
   import { updateOnline } from 'sveltefirets';
   import { getStorage, ref, uploadBytesResumable } from 'firebase/storage';
@@ -53,7 +53,7 @@
         }
       },
       (err) => {
-        alert(`${$t('misc.error', { default: 'Error' })}: ${err}`);
+        alert(`${$page.data.t('misc.error')}: ${err}`);
         error = err;
       // A full list of error codes is available at
         // https://firebase.google.com/docs/storage/web/handle-errors
@@ -88,7 +88,7 @@
 
           success = true;
         } catch (err) {
-          alert(`${$t('misc.error', { default: 'Error' })}: ${err}`);
+          alert(`${$page.data.t('misc.error')}: ${err}`);
           error = err;
         }
       }
@@ -100,14 +100,14 @@
   <span
     class="text-xs font-semibold inline-block py-1 px-2 uppercase rounded-full
       text-red-600 bg-red-200">
-    {$t('misc.error', { default: 'Error' })}
+    {$page.data.t('misc.error')}
   </span>
 {:else if success}
   <span
     class="text-xs font-semibold inline-block py-1 px-2 uppercase rounded-full
       text-green-600 bg-green-200">
     <i class="far fa-check" />
-    {$t('upload.success', { default: 'Success' })}
+    {$page.data.t('upload.success')}
   </span>
 {:else}
   <div class="relative pt-1">
@@ -116,7 +116,7 @@
         <span
           class="text-xs font-semibold inline-block py-1 px-2 uppercase
             rounded-full text-blue-600 bg-blue-200">
-          {$t('upload.uploading', { default: 'Uploading' })}
+          {$page.data.t('upload.uploading')}
         </span>
       </div>
       <div class="text-right">

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { t } from 'svelte-i18n';
+  import { page } from '$app/stores';
   import { Button } from 'svelte-pieces';
   import type { IDictionary } from '@living-dictionaries/types';
   import { getCollection } from 'sveltefirets';
@@ -28,7 +28,7 @@
     form="simple"
     onclick={() => delete_dictionary_if_empty(dictionary)}>
     <span class="md:inline">
-      {$t('misc.delete', { default: 'Delete' })} {dictionary.name} {$t('misc.LD_singular', { default: 'Living Dictionary' })}
+      {$page.data.t('misc.delete')}: {$page.data.t('dictionary.full_title', { values: { dictionary_name: dictionary.name }})}
     </span>
     <i class="fas fa-trash ml-1" />
   </Button>

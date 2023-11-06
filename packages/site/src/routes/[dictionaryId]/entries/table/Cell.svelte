@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { t } from 'svelte-i18n';
+  import { page } from '$app/stores';
   import Textbox from './cells/Textbox.svelte';
   import EntrySemanticDomains from '$lib/components/entry/EntrySemanticDomains.svelte';
   import EntryPartOfSpeech from '$lib/components/entry/EntryPartOfSpeech.svelte';
@@ -82,7 +82,7 @@
       {canEdit}
       field={column.field}
       value={entry.scientific_names?.[0]}
-      display={$t('entry.scn', { default: 'Scientific Name' })}
+      display={$page.data.t('entry.scn')}
       on:update={({detail}) => dispatch('valueupdate', { field: EntryFields.scientific_names, newValue: [detail]} )} />
   {:else if column.field === 'local_orthography'}
     {@const orthographyIndex = `local_orthography_${column.orthography_index}`}
@@ -97,7 +97,7 @@
       field={column.field}
       {canEdit}
       value={entry[column.field]}
-      display={$t(`entry.${EntryFields[column.field]}`, { default: 'Edit' })}
+      display={$page.data.t(`entry.${EntryFields[column.field]}`)}
       on:update={({detail}) => dispatch('valueupdate', { field: EntryFields[column.field], newValue: detail})} />
   {/if}
 </div>

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { t } from 'svelte-i18n';
+  import { page } from '$app/stores';
   import type { ExpandedVideo } from '@living-dictionaries/types';
   import { ShowHide } from 'svelte-pieces';
   import { firebaseConfig } from 'sveltefirets';
@@ -16,7 +16,7 @@
     on:click={toggle}>
     <span class="i-bi-camera-video text-xl mt-1" />
     <div class="text-sm">
-      {$t('video.view', { default: 'View' })}
+      {$page.data.t('video.view')}
     </div>
   </div>
   {#if show}

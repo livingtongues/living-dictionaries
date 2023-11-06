@@ -3,7 +3,7 @@ declare namespace App {
   // interface Locals {}
   interface PageData {
     locale: import('$lib/i18n/locales').LocaleCode;
-    t: Awaited<ReturnType<typeof import('$lib/i18n').getTranslator>>;
+    t: import('$lib/i18n/types.ts').TranslateFunction;
     // user: import('@living-dictionaries/types').IUser;
   }
   // interface Error {}

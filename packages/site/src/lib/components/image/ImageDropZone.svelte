@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { t } from 'svelte-i18n';
+  import { page } from '$app/stores';
 
   let dragging = false;
   let file: File;
@@ -12,15 +12,13 @@
     // Client-side validation: Must be an image and smaller than 10MB.
     if (fileToCheck.type.split('/')[0] !== 'image') {
       return alert(
-        `${$t('upload.error', { default: 'Unsupported File Type' })}`
+        `${$page.data.t('upload.error')}`
       );
     }
     // Must be smaller than 10MB, http://www.unitconversion.org/data-storage/megabytes-to-bytes-conversion.html
     if (fileToCheck.size > 10485760) {
       return alert(
-        `${$t('upload.file_must_be_smaller', {
-          default: 'File must be smaller than',
-        })} 10MB`
+        `${$page.data.t('upload.file_must_be_smaller')} 10MB`
       );
     }
 

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { t } from 'svelte-i18n';
+  import { page } from '$app/stores';
   import { Modal, Button, ShowHide } from 'svelte-pieces';
   import Map from '$lib/components/maps/mapbox/map/Map.svelte';
   import NavigationControl from '$lib/components/maps/mapbox/controls/NavigationControl.svelte';
@@ -138,7 +138,7 @@
         <InitableShowHide show={addPoint} let:show let:toggle>
           <Button onclick={toggle} color="black" size="sm">
             <span class="i-mdi-map-marker-plus mr-1" style="margin-top: -3px;" />
-            {$t('create.select_coordinates', { default: 'Select Coordinates' })}
+            {$page.data.t('create.select_coordinates')}
           </Button>
           {#if show}
             <CoordinatesModal
@@ -157,7 +157,7 @@
         <InitableShowHide show={addRegion} let:show let:toggle>
           <Button onclick={toggle} color="black" size="sm">
             <span class="i-mdi-map-marker-path mr-1" style="margin-top: -2px;" />
-            {$t('create.select_region', { default: 'Select Region' })}
+            {$page.data.t('create.select_region')}
           </Button>
           {#if show}
             <RegionModal
@@ -176,7 +176,7 @@
 
   <div class="modal-footer">
     <Button onclick={() => dispatch('close')} form="simple" color="black">
-      {$t('misc.close')}
+      {$page.data.t('misc.close')}
     </Button>
   </div>
 </Modal>

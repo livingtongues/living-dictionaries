@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { t } from 'svelte-i18n';
   import { page } from '$app/stores';
   import RefinementList from '$lib/components/search/RefinementList.svelte';
   import ToggleRefinement from '$lib/components/search/ToggleRefinement.svelte';
@@ -12,94 +11,80 @@
 </script>
 
 <ResponsiveSlideover
-  side={$t('direction') === 'rtl' ? 'left' : 'right'}
+  side={$page.data.t('page.direction') === 'rtl' ? 'left' : 'right'}
   showWidth={'md'}
   bind:open={showMobileFilters}>
   <section
     class="md:w-52 md:sticky md:top-24 md:max-h-[calc(100vh-107px)] print:hidden p-4 md:p-0 md:overflow-y-auto">
     <header class="flex items-center justify-between space-x-3">
       <h2 class="text-lg leading-7 font-medium text-gray-900 mb-3">
-        {$t('entry.filters', { default: 'Filters' })}
+        {$page.data.t('entry.filters')}
       </h2>
       <ClearRefinements {search} />
       <Button onclick={() => (showMobileFilters = false)} size="sm" form="filled" class="md:hidden">
-        {$t('entry.view_entries', { default: 'View Entries' })}
+        {$page.data.t('entry.view_entries')}
       </Button>
     </header>
     <div class="relative flex-1 overflow-y-auto">
       <RefinementList
         {search}
         attribute="ps"
-        label={$t('entry.ps', { default: 'Parts of Speech' })} />
+        label={$page.data.t('entry.ps')} />
       <RefinementList
         {search}
         attribute="sdn"
-        label={$t('entry.sdn', { default: 'Semantic Domains' })} />
-      <RefinementList {search} attribute="di" label={$t('entry.di', { default: 'Dialect' })} />
+        label={$page.data.t('entry.sdn')} />
+      <RefinementList {search} attribute="di" label={$page.data.t('entry.di')} />
       <RefinementList
         {search}
         attribute="sf.speakerName"
-        label={$t('entry.speaker', { default: 'Speaker' })} />
+        label={$page.data.t('entry.speaker')} />
       <hr />
 
       {#if !$page.url.pathname.includes('gallery')}
         <ToggleRefinement
           {search}
           attribute="hasImage"
-          label={$t('entry.has_exists', {
-            default: 'Has',
-          }) +
+          label={$page.data.t('entry.has_exists') +
             ' ' +
-            $t('entry.image', { default: 'Image' })} />
+            $page.data.t('entry.image')} />
       {/if}
       <ToggleRefinement
         {search}
         attribute="hasAudio"
-        label={$t('entry.has_exists', {
-          default: 'Has',
-        }) +
+        label={$page.data.t('entry.has_exists') +
           ' ' +
-          $t('entry.audio', { default: 'Audio' })} />
+          $page.data.t('entry.audio')} />
       <ToggleRefinement
         {search}
         attribute="hasSpeaker"
-        label={$t('entry.has_exists', {
-          default: 'Has',
-        }) +
+        label={$page.data.t('entry.has_exists') +
           ' ' +
-          $t('entry.speaker', { default: 'Speaker' })} />
+          $page.data.t('entry.speaker')} />
       <ToggleRefinement
         {search}
         attribute="hasNounClass"
-        label={$t('entry.has_exists', {
-          default: 'Has',
-        }) +
+        label={$page.data.t('entry.has_exists') +
           ' ' +
-          $t('entry.nc', { default: 'Noun Class' })} />
+          $page.data.t('entry.nc')} />
       <ToggleRefinement
         {search}
         attribute="hasPluralForm"
-        label={$t('entry.has_exists', {
-          default: 'Has',
-        }) +
+        label={$page.data.t('entry.has_exists') +
           ' ' +
-          $t('entry.pl', { default: 'Plural Form' })} />
+          $page.data.t('entry.pl')} />
       <ToggleRefinement
         {search}
         attribute="hasPartOfSpeech"
-        label={$t('entry.has_exists', {
-          default: 'Has',
-        }) +
+        label={$page.data.t('entry.has_exists') +
           ' ' +
-          $t('entry.ps', { default: 'Part of Speech' })} />
+          $page.data.t('entry.ps')} />
       <ToggleRefinement
         {search}
         attribute="hasSemanticDomain"
-        label={$t('entry.has_exists', {
-          default: 'Has',
-        }) +
+        label={$page.data.t('entry.has_exists') +
           ' ' +
-          $t('entry.sdn', { default: 'Semantic Domain' })} />
+          $page.data.t('entry.sdn')} />
     </div>
     <a
       class="block mt-3 md:mb-3 ml-auto"
@@ -120,9 +105,9 @@
       {search}
       attribute="hasImage"
       on={false}
-      label={$t('entry.does_not_exist', {
+      label={$page.data.t('entry.does_not_exist', {
         default: 'No',
-      }) + ' ' + $t('entry.image', { default: 'Image' })} />
+      }) + ' ' + $page.data.t('entry.image')} />
     <hr />
   {/if}
    {#if $isManager}
@@ -130,18 +115,18 @@
     {search}
     attribute="hasAudio"
     on={false}
-    label={$t('entry.does_not_exist', {
+    label={$page.data.t('entry.does_not_exist', {
       default: 'No',
-    }) + ' ' + $t('entry.audio', { default: 'Audio' })} />
+    }) + ' ' + $page.data.t('entry.audio')} />
 {/if}
  {#if $isManager}
   <ToggleRefinement
     {search}
     attribute="hasSpeaker"
     on={false}
-    label={$t('entry.does_not_exist', {
+    label={$page.data.t('entry.does_not_exist', {
       default: 'No',
-    }) + ' ' + $t('entry.speaker', { default: 'Speaker' })} />
+    }) + ' ' + $page.data.t('entry.speaker')} />
   <hr />
 {/if}
  {#if $isManager}
@@ -149,9 +134,9 @@
     {search}
     attribute="hasPartOfSpeech"
     on={false}
-    label={$t('entry.does_not_exist', {
+    label={$page.data.t('entry.does_not_exist', {
       default: 'No',
-    }) + ' ' + $t('entry.ps', { default: 'Part of Speech' })} />
+    }) + ' ' + $page.data.t('entry.ps')} />
   <hr />
 {/if}
  {#if $isManager}
@@ -159,9 +144,9 @@
     {search}
     attribute="hasSemanticDomain"
     on={false}
-    label={$t('entry.does_not_exist', {
+    label={$page.data.t('entry.does_not_exist', {
       default: 'No',
-    }) + ' ' + $t('entry.sdn', {
+    }) + ' ' + $page.data.t('entry.sdn', {
         default: 'Semantic Domain',
       })} />
 {/if} -->

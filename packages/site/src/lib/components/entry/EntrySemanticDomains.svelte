@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { t } from 'svelte-i18n';
+  import { page } from '$app/stores';
   import { createEventDispatcher } from 'svelte';
   import { EntryFields, type ExpandedSense } from '@living-dictionaries/types';
   import { semanticDomains } from '$lib/mappings/semantic-domains';
@@ -19,7 +19,7 @@
 
   $: translated_semantic_domain_options = semanticDomains.map((domain) => ({
     value: domain.key,
-    name: $t('sd.' + domain.key, { default: domain.name }),
+    name: $page.data.t('sd.' + domain.key, { fallback: domain.name }),
   })) as SelectOption[];
 </script>
 
@@ -28,14 +28,14 @@
   options={translated_semantic_domain_options}
   {canEdit}
   {showPlus}
-  placeholder={$t('entry.sdn')}
+  placeholder={$page.data.t('entry.sdn')}
   on:update={({ detail: newValue }) => {
     dispatch('valueupdate', {
       field: EntryFields.semantic_domains,
       newValue,
     });
   }}>
-  <span slot="heading">{$t('entry.select_semantic_domains')}</span>
+  <span slot="heading">{$page.data.t('entry.select_semantic_domains')}</span>
   <svelte:fragment slot="additional">
     {#each sense?.write_in_semantic_domains || [] as domain}
       <div class="px-2 py-1 leading-tight text-xs bg-blue-100 rounded mb-1 whitespace-nowrap flex items-center">
@@ -46,7 +46,7 @@
             class="cursor-pointer justify-center items-center flex opacity-50 hover:opacity-100 rounded-full h-4 w-4 ml-1"
             title="Remove"
             on:click|stopPropagation={() => {
-              if (confirm($t('misc.delete', { default: 'Delete' }) + '?'))
+              if (confirm($page.data.t('misc.delete') + '?'))
                 dispatch('valueupdate', { field: 'sd', newValue: null })
             }}>
             <span class="i-fa-solid-times" />

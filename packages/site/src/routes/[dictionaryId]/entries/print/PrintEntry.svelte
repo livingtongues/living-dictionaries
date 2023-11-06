@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { t } from 'svelte-i18n';
+  import { page } from '$app/stores';
   import { StandardPrintFields, type ExpandedEntry, type IDictionary } from '@living-dictionaries/types';
   import { order_glosses } from '$lib/helpers/glosses';
   import QrCode from './QrCode.svelte';
@@ -41,7 +41,7 @@
         {@html sanitize(order_glosses({
           glosses: sense.glosses,
           dictionary_gloss_languages: dictionary.glossLanguages,
-          $t,
+          t: $page.data.t,
         }).join(', '))}
       </span>
     {/if}
@@ -56,7 +56,7 @@
         <div>
           {#if showLabels}
             <span class="italic text-[80%]">
-              {$t('entry.sdn', { default: 'Semantic Domains' })}:
+              {$page.data.t('entry.sdn')}:
             </span>
           {/if}
           {semantic_domains.join(', ')}
@@ -67,7 +67,7 @@
     {#if selectedFields.noun_class && sense.noun_class}
       <p>
         {#if showLabels}
-          <span class="italic text-[80%]">{$t('entry.nc', { default: 'Noun Class' })}: </span>
+          <span class="italic text-[80%]">{$page.data.t('entry.nc')}: </span>
         {/if}
         {sense.noun_class}
       </p>
@@ -79,7 +79,7 @@
       {#if entry[key] && selectedFields[key]}
         <p>
           {#if showLabels}
-            <span class="italic text-[80%]">{$t(`entry.${key}`, { default: StandardPrintFields[key] })}:</span>
+            <span class="italic text-[80%]">{$page.data.t(`entry.${key}`, { fallback: StandardPrintFields[key] })}:</span>
           {/if}
           {#if key === 'nt'}
             {@html sanitize(entry[key])}
@@ -96,7 +96,7 @@
   {#if selectedFields.sr && entry.sources}
     <div>
       {#if showLabels}
-        <span class="italic text-[80%]">{$t('entry.sr', { default: 'Source' })}: </span>
+        <span class="italic text-[80%]">{$page.data.t('entry.sr')}: </span>
       {/if}
       {entry.sources.join(', ')}
     </div>
@@ -106,7 +106,7 @@
   {#if selectedFields.speaker && entry.sound_files?.[0].speakerName}
     <div>
       {#if showLabels}
-        <span class="italic text-[80%]">{$t('entry.speaker', { default: 'Speaker' })}: </span>
+        <span class="italic text-[80%]">{$page.data.t('entry.speaker')}: </span>
       {/if}
       {entry.sound_files?.[0].speakerName}
     </div>

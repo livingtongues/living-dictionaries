@@ -1,15 +1,14 @@
 <script lang="ts">
-  import { t } from 'svelte-i18n';
+  import { page } from '$app/stores';
   import { Button, ShowHide } from 'svelte-pieces';
   import EditFieldModal from '$lib/components/entry/EditFieldModal.svelte';
   import type { ActualDatabaseEntry } from '@living-dictionaries/types';
-  import { page } from '$app/stores';
   import { goto } from '$app/navigation';
   import { addOnline } from 'sveltefirets';
 
   async function addNewEntry(lexeme: string) {
     if (!lexeme)
-      return alert(`Missing: ${$t('entry.lx', { default: 'Lexeme/Word/Phrase' })}`);
+      return alert(`Missing: ${$page.data.t('entry.lx')}`);
 
     try {
       const entryDoc = await addOnline<ActualDatabaseEntry>(
@@ -23,7 +22,7 @@
       goto(`/${$page.params.dictionaryId}/entry/${entryDoc.id}`);
     } catch (err) {
       console.error(err);
-      alert(`${$t('misc.error', { default: 'Error' })}: ${err}`);
+      alert(`${$page.data.t('misc.error')}: ${err}`);
     }
   }
 
@@ -39,12 +38,12 @@
     {:else}
       Return online to
     {/if}
-    {$t('entry.add_entry', { default: 'Add Entry' })}
+    {$page.data.t('entry.add_entry')}
   </Button>
   {#if show}
     <EditFieldModal
       field="lexeme"
-      display={$t('entry.lx', { default: 'Lexeme/Word/Phrase' })}
+      display={$page.data.t('entry.lx')}
       on:update={({detail}) => addNewEntry(detail)}
       on:close={toggle}
       addingLexeme />

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { t } from 'svelte-i18n';
+  import { page } from '$app/stores';
   import { createEventDispatcher } from 'svelte';
   import { Button, Modal, ShowHide } from 'svelte-pieces';
   import MultiSelect from './MultiSelect.svelte';
@@ -73,11 +73,11 @@
             }}
             form="simple"
             color="black">
-            {$t('misc.cancel', { default: 'Cancel' })}
+            {$page.data.t('misc.cancel')}
           </Button>
 
           <Button type="submit" form="filled">
-            {$t('misc.save', { default: 'Save' })}
+            {$page.data.t('misc.save')}
           </Button>
         </div>
       </form>

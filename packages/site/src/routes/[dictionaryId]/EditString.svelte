@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { t } from 'svelte-i18n';
+  import { page } from '$app/stores';
   import { Button, Form } from 'svelte-pieces';
 
   export let id: string;
@@ -12,7 +12,7 @@
   export let save: (value: string) => Promise<void>;
 </script>
 
-<Form let:loading onsubmit={async () => save(value.trim())}>
+<Form let:loading onsubmit={async () => await save(value.trim())}>
   <label for={id} class="text-sm font-medium text-gray-700 mb-2">
     {display}
   </label>
@@ -31,7 +31,7 @@
       placeholder={display} />
     <div class="w-1" />
     <Button class="flex-shrink-0" {loading} type="submit">
-      {$t('misc.save', { default: 'Save' })}
+      {$page.data.t('misc.save')}
     </Button>
   </div>
 </Form>

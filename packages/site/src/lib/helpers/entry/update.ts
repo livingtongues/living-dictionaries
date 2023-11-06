@@ -1,6 +1,6 @@
 import { update } from 'sveltefirets';
 import { get } from 'svelte/store';
-import { t } from 'svelte-i18n';
+import { page } from '$app/stores';
 
 export function saveUpdateToFirestore({
   field,
@@ -21,7 +21,7 @@ export function saveUpdateToFirestore({
       { abbreviate: true }
     );
   } catch (err) {
-    const $t = get(t);
-    alert(`${$t('misc.error', { default: 'Error' })}: ${err}`);
+    const { data: { t } } = get(page)
+    alert(`${t('misc.error')}: ${err}`);
   }
 }

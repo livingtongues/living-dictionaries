@@ -1,13 +1,12 @@
 <script lang="ts">
   export let menuOpen: boolean;
-  import { t } from 'svelte-i18n';
-  import { dictionary, isManager } from '$lib/stores';
   import { page } from '$app/stores';
+  import { dictionary, isManager } from '$lib/stores';
 </script>
 
 <div class="md:hidden">
   <a href="/" class="block p-3 text-lg font-semibold mb-3 border-b">
-    {$t('misc.LD', { default: 'Living Dictionaries' })}
+    {$page.data.t('misc.LD')}
   </a>
   <h5 class="font-semibold uppercase tracking-wide mx-3 mb-2">
     {$dictionary.name}
@@ -19,7 +18,7 @@
     href={`/${$dictionary.id}/entries/list`}>
     <i class="far fa-list fa-fw" />
     <span class="font-medium mx-2">
-      {$t('dictionary.entries', { default: 'Entries' })}
+      {$page.data.t('dictionary.entries')}
     </span>
     <span class="flex-grow" />
     <span
@@ -33,7 +32,7 @@
     class:active={$page.url.pathname.includes('about')}>
     <i class="far fa-info-circle fa-fw" />
     <span class="font-medium mx-2">
-      {$t('header.about', { default: 'About' })}
+      {$page.data.t('header.about')}
     </span>
   </a>
   <a
@@ -41,7 +40,7 @@
     class:active={$page.url.pathname.includes('contributors')}>
     <i class="far fa-users fa-fw" />
     <span class="font-medium mx-2">
-      {$t('dictionary.contributors', { default: 'Contributors' })}
+      {$page.data.t('dictionary.contributors')}
     </span>
   </a>
   <a
@@ -49,7 +48,7 @@
     class:active={$page.url.pathname.includes('grammar')}>
     <i class="far fa-edit fa-fw" />
     <span class="font-medium mx-2">
-      {$t('dictionary.grammar', { default: 'Grammar' })}
+      {$page.data.t('dictionary.grammar')}
     </span>
   </a>
   {#if $isManager}
@@ -58,9 +57,7 @@
       class:active={$page.url.pathname.includes('import')}>
       <i class="far fa-file-import" />
       <span class="font-medium mx-2">
-        {$t('import.import', {
-          default: 'Import',
-        })}
+        {$page.data.t('import.import')}
       </span>
     </a>
     <a
@@ -68,7 +65,7 @@
       class:active={$page.url.pathname.includes('settings')}>
       <i class="far fa-cog fa-fw" />
       <span class="font-medium mx-2">
-        {$t('misc.settings', { default: 'Settings' })}
+        {$page.data.t('misc.settings')}
       </span>
     </a>
     <a
@@ -76,7 +73,7 @@
       class:active={$page.url.pathname.includes('export')}>
       <i class="far fa-download" />
       <span class="font-medium mx-2">
-        {$t('misc.export', { default: 'Export' })}
+        {$page.data.t('misc.export')}
       </span>
     </a>
   {/if}
@@ -85,13 +82,13 @@
 <div class="mt-auto" />
 
 <a href="/terms" target="_blank" class="link">
-  {$t('dictionary.terms_of_use', { default: 'Terms of Use' })}
+  {$page.data.t('dictionary.terms_of_use')}
 </a>
 <a href="https://www.youtube.com/static?template=terms" target="_blank" rel="noopener noreferrer" class="link">
-  {$t('dictionary.youtube_terms', { default: 'YouTube terms' })}
+  {$page.data.t('dictionary.youtube_terms')}
 </a>
 <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer" class="link mb-3">
-  {$t('dictionary.google_terms', { default: 'Google terms' })}
+  {$page.data.t('dictionary.google_terms')}
 </a>
 
 <style>

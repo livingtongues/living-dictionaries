@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { t } from 'svelte-i18n';
+  import { page } from '$app/stores';
   import { createEventDispatcher } from 'svelte';
   import { Button } from 'svelte-pieces';
   import Keyman from '$lib/components/keyboards/keyman/Keyman.svelte';
@@ -193,17 +193,17 @@
 
   <div class="modal-footer">
     <Button onclick={close} form="simple" color="black">
-      {$t('misc.cancel', { default: 'Cancel' })}
+      {$page.data.t('misc.cancel')}
     </Button>
     <div class="w-1" />
     {#if addingLexeme}
       <Button type="submit" form="filled">
-        {$t('misc.next', { default: 'Next' })}
+        {$page.data.t('misc.next')}
         <span class="i-fa6-solid-chevron-right rtl-x-flip -mt-.5" />
       </Button>
     {:else}
       <Button type="submit" form="filled">
-        {$t('misc.save', { default: 'Save' })}
+        {$page.data.t('misc.save')}
       </Button>
     {/if}
   </div>

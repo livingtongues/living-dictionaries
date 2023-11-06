@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { t } from 'svelte-i18n';
+  import { page } from '$app/stores';
   import { Button, Modal, Form } from 'svelte-pieces';
   import { user, dictionary } from '$lib/stores';
   import { goto } from '$app/navigation';
@@ -61,7 +61,7 @@
       status = 'success';
     } catch (err) {
       status = 'fail';
-      alert(`${$t('misc.error', { default: 'Error' })}: ${err}`);
+      alert(`${$page.data.t('misc.error')}: ${err}`);
     }
   }
 </script>
@@ -78,9 +78,7 @@
       }}
       class="mb-2">
       <span class="i-fluent-learning-app-24-regular -mt-2px" />
-      {$t('header.tutorials', {
-        default: 'Tutorials',
-      })}
+      {$page.data.t('header.tutorials')}
     </Button>
     <Button
       href="https://docs.google.com/document/d/1MZGkBbnCiAch3tWjBOHRYPpjX1MVd7f6x5uVuwbxM-Q/edit?usp=sharing"
@@ -88,7 +86,7 @@
       <i class="far fa-question-circle" />
       <span class="ml-1">
         FAQ
-        <!-- {$t('header.faq', { default: 'FAQ' })} -->
+        <!-- {$page.data.t('header.faq')} -->
       </span>
     </Button>
   </div>
@@ -97,23 +95,21 @@
 
   <h2 class="text-xl mb-3">
     <i class="far fa-comment" />
-    {$t('header.contact_us', { default: 'Contact Us' })}
+    {$page.data.t('header.contact_us')}
   </h2>
 
   {#if !status}
     <Form let:loading onsubmit={send}>
       <div class="my-2">
         <select class="w-full" bind:value={subject}>
-          <option disabled selected value="">{$t('contact.select_topic', { default: 'Select a topic' })}:</option>
+          <option disabled selected value="">{$page.data.t('contact.select_topic')}:</option>
           {#each Object.entries(subjects) as [key, title]}
-            <option value={key}>{$t('contact.' + key, { default: title })}</option>
+            <option value={key}>{$page.data.t('contact.' + key, { fallback: title })}</option>
           {/each}
         </select>
       </div>
       <label class="block text-gray-700 text-sm font-bold mb-2" for="message">
-        {$t('contact.what_is_your_question', {
-          default: 'What is your question or comment?',
-        })}
+        {$page.data.t('contact.what_is_your_question')}
       </label>
       <textarea
         name="message"
@@ -122,9 +118,7 @@
         maxlength="1000"
         bind:value={message}
         class="form-input bg-white w-full"
-        placeholder={$t('contact.enter_message', {
-          default: 'Enter your message',
-        }) + '...'} />
+        placeholder={$page.data.t('contact.enter_message') + '...'} />
       <div class="flex text-xs">
         <div class="text-gray-500 ml-auto">{message.length}/1000</div>
       </div>
@@ -132,46 +126,40 @@
       {#if !$user}
         <div class="mt-3">
           <label class="block uppercase text-gray-700 text-xs font-bold mb-2" for="email">
-            {$t('contact.your_email_address', {
-              default: 'Your Email Address',
-            })}
+            {$page.data.t('contact.your_email_address')}
           </label>
           <input
             type="email"
             required
             bind:value={email}
             class="form-input bg-white w-full"
-            placeholder={$t('contact.email', { default: 'Email' })}
+            placeholder={$page.data.t('contact.email')}
             style="direction: ltr" />
         </div>
       {/if}
 
       <div class="mt-5">
         <Button {loading} form="filled" type="submit">
-          {$t('contact.send_message', { default: 'Send Message' })}
+          {$page.data.t('contact.send_message')}
         </Button>
         <Button disabled={loading} onclick={close} form="simple" color="black">
-          {$t('misc.cancel', { default: 'Cancel' })}
+          {$page.data.t('misc.cancel')}
         </Button>
       </div>
     </Form>
   {:else if status == 'success'}
     <h4 class="text-lg mt-3 mb-4">
       <i class="fas fa-check" />
-      {$t('contact.message_sent', {
-        default: 'Message sent. We will reply as soon as we can.',
-      })}
+      {$page.data.t('contact.message_sent')}
     </h4>
     <div>
       <Button onclick={close} color="black">
-        {$t('misc.close', { default: 'Close' })}
+        {$page.data.t('misc.close')}
       </Button>
     </div>
   {:else if status == 'fail'}
     <h4 class="text-xl mt-1 mb-4">
-      {$t('contact.message_failed', {
-        default: 'Message send failed. Check your internet connection or email us:',
-      })}
+      {$page.data.t('contact.message_failed')}
       <a class="underline ml-1" href="mailto:annaluisa@livingtongues.org">
         annaluisa@livingtongues.org
       </a>
