@@ -8,17 +8,20 @@
   import type { SupportRequestBody } from '../../../routes/api/email/support/+server';
   import type { RequestAccessBody } from '../../../routes/api/email/request_access/+server';
 
-  const subjects = {
-    'delete_dictionary': 'Delete a dictionary',
-    'public_dictionary': 'Make a dictionary public',
-    'import_data': 'Import data',
-    // 'data_fields': 'Optional data fields', //Comment this in case we want to include it again in the future
-    'request_access': 'Request editing access',
-    'report_problem': 'Report a problem',
-    'other': 'Other topic'
-  }
-  type Subjects = keyof typeof subjects;
   export let subject: Subjects = undefined;
+
+  const subjects = {
+    'delete_dictionary': 'contact.delete_dictionary',
+    'public_dictionary': 'contact.public_dictionary',
+    'import_data': 'contact.import_data',
+    'request_access': 'contact.request_access',
+    'report_problem': 'contact.report_problem',
+    'other': 'contact.other'
+  } as const
+
+  type Subjects = keyof typeof subjects;
+  type SubjectValues  = typeof subjects[Subjects];
+  const typedSubjects = Object.entries(subjects) as [Subjects, SubjectValues][];
 
   const dispatch = createEventDispatcher<{ close: boolean }>();
 
@@ -103,8 +106,9 @@
       <div class="my-2">
         <select class="w-full" bind:value={subject}>
           <option disabled selected value="">{$page.data.t('contact.select_topic')}:</option>
-          {#each Object.entries(subjects) as [key, title]}
-            <option value={key}>{$page.data.t('contact.' + key, { fallback: title })}</option>
+
+          {#each typedSubjects as [key, value]}
+            <option value={key}>{$page.data.t(value)}</option>
           {/each}
         </select>
       </div>

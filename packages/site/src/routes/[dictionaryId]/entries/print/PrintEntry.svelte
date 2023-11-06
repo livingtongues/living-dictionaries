@@ -79,7 +79,7 @@
       {#if entry[key] && selectedFields[key]}
         <p>
           {#if showLabels}
-            <span class="italic text-[80%]">{$page.data.t(`entry.${key}`, { fallback: StandardPrintFields[key] })}:</span>
+            <span class="italic text-[80%]">{$page.data.t({ dynamicKey: `entry.${key}`, fallback: StandardPrintFields[key] })}:</span>
           {/if}
           {#if key === 'nt'}
             {@html sanitize(entry[key])}

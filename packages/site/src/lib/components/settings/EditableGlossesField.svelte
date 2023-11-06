@@ -11,7 +11,7 @@
 
   $: activeGlossingBcps = Array.isArray(selectedLanguages)
     ? selectedLanguages.map((bcp) =>
-      $page.data.t('gl.' + bcp, { fallback: availableLanguages[bcp].vernacularName })
+      $page.data.t({ dynamicKey: 'gl.' + bcp, fallback: availableLanguages[bcp].vernacularName })
     )
     : [];
   $: remainingGlossingLanguagesAsArray = Object.entries(availableLanguages)
@@ -63,12 +63,12 @@
             color="green"
             form="simple"
             class="w-full !text-left">
-            {language.vernacularName || $page.data.t('gl.' + language.bcp, { fallback: language.bcp })}
+            {language.vernacularName || $page.data.t({ dynamicKey: 'gl.' + language.bcp, fallback: language.bcp })}
             {#if language.vernacularAlternate}
               {language.vernacularAlternate}
             {/if}
             {#if language.vernacularName}
-              <small>({$page.data.t('gl.' + language.bcp, { fallback: language.bcp })})</small>
+              <small>({$page.data.t({ dynamicKey: 'gl.' + language.bcp, fallback: language.bcp })})</small>
             {/if}
           </Button>
         {/each}

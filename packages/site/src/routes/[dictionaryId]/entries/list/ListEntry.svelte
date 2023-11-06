@@ -55,7 +55,7 @@
       <div class="text-xs text-gray-600 mr-auto mb-1">
         {#if entry.senses?.[0]?.translated_parts_of_speech}
           {#each entry.senses?.[0]?.parts_of_speech_keys as pos}
-            <i>{$page.data.t('psAbbrev.' + pos)}, </i>
+            <i>{$page.data.t({ dynamicKey: 'psAbbrev.' + pos, fallback: pos })}, </i>
           {/each}
         {/if}
 
@@ -83,7 +83,7 @@
               <p>
                 <span class="font-semibold">
                   {#if bcp !== 'vn'}
-                    {$page.data.t(`gl.${bcp}`)}
+                    {$page.data.t({ dynamicKey: `gl.${bcp}`, fallback: bcp })}
                   {/if}
                   {$page.data.t('entry.example_sentence')}:</span>
                 {content}
