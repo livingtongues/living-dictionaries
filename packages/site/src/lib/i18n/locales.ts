@@ -1,4 +1,4 @@
-export enum ReadyLocales {
+export enum Locales {
   en = 'English',
   es = 'Español',
   fr = 'Français',
@@ -29,4 +29,21 @@ export enum UnpublishedLocales {
 }
 // add more codes from https://www.iana.org/assignments/language-subtag-registry/language-subtag-registry
 
-export type Languages = keyof typeof ReadyLocales;
+export type LocaleCode = keyof typeof Locales;
+
+export function findSupportedLocaleFromAcceptedLangauges(acceptedLanguageHeader: string | null) {
+  const locales = acceptedLanguageHeader
+    ?.split(',')
+    ?.map(lang => lang.split(';')[0].trim()) ?? []
+  for (const locale of locales) {
+    const supportedLocale = getSupportedLocale(locale)
+    if (supportedLocale)
+      return supportedLocale
+  }
+}
+
+function getSupportedLocale(userLocale: string | undefined) {
+  return Object.keys(Locales).find((supportedLocale) => {
+    return userLocale?.includes(supportedLocale)
+  }) as LocaleCode | undefined
+}
