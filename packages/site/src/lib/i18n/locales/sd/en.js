@@ -1,4 +1,4 @@
-{
+export default {
   "sd": {
     "1": "Universe and the natural world",
     "2": "Humans, Social Relations and Organization",

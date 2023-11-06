@@ -1,19 +1,16 @@
 // See https://kit.svelte.dev/docs/types#app
-// for information about these interfaces
-// and what to do when importing types
 declare namespace App {
-	// interface Locals {}
-
-	// interface PageData {}
-  // user: import('@living-dictionaries/types').IUser;
-
-	// interface Error {}
-
-	// interface Platform {}
+  // interface Locals {}
+  interface PageData {
+    locale: import('$lib/i18n/locales').LocaleCode;
+    t: Awaited<ReturnType<typeof import('$lib/i18n').getTranslator>>;
+    // user: import('@living-dictionaries/types').IUser;
+  }
+  // interface Error {}
+  // interface Platform {}
 }
 
 declare namespace svelte.JSX {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   interface HTMLAttributes<T> {
     onclickoutside?: (event: CustomEvent<any> & { target: EventTarget & T }) => any;
     onlongpress?: (event: CustomEvent<any> & { target: EventTarget & T }) => any;

@@ -56,7 +56,6 @@
     "recordrtc": "^5.6.2",
     "svelte": "^3.59.2",
     "svelte-check": "^3.2.0",
-    "svelte-i18n": "^3.3.13",
     "svelte-pieces": "2.0.0-next.2",
     "sveltefirets": "^0.0.36",
     "tslib": "^2.6.1",

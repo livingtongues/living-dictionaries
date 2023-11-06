@@ -1,4 +1,4 @@
-{
+export default {
   "gl": {
     "en": "English",
     "ab": "Abkhaz",

@@ -1,4 +1,5 @@
-{
+/** @type {typeof import('./en.js').default} */
+export default {
   "direction": "ltr",
   "about": {
     "about_LD": "Acerca de Diccionarios Vivos",

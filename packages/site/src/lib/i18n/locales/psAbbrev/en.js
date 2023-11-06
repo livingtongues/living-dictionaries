@@ -1,4 +1,4 @@
-{
+export default {
   "psAbbrev": {
     "n": "n",
     "pro": "pro",

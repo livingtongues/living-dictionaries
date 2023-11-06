@@ -1,41 +1,36 @@
 <script lang="ts">
-  import { t, locale, locales } from 'svelte-i18n';
-  import { setCookie } from '$lib/helpers/cookies';
-  import { ReadyLocales, UnpublishedLocales } from '../../../locales/languages.interface';
   import { Button, Modal } from 'svelte-pieces';
   import { admin } from '$lib/stores';
-
-  function setLocale(bcp) {
-    $locale = bcp;
-    setCookie('locale', bcp, { 'max-age': 31536000 });
-  }
+  import { page } from '$app/stores'
+  import { changeLocale, locales, unpublishedLocales } from '$lib/i18n/changeLocale';
 </script>
 
 <Modal on:close>
   <span slot="heading">
-    {$t('header.select_language', { default: 'Select Language' })}
+    {$page.data.t('header.select_language')}
   </span>
 
   <div>
-    {#each $locales as bcp}
-      {#if Object.keys(ReadyLocales).includes(bcp)}
+    {#each locales as [bcp, name]}
+      <Button
+        class="mr-1 mb-1 !normal-case"
+        color="black"
+        form={$page.data.locale.includes(bcp) ? 'filled' : 'simple'}
+        onclick={() => changeLocale(bcp)}>
+        {name}
+      </Button>
+    {/each}
+    {#if $admin}
+      {#each unpublishedLocales as [bcp, name]}
         <Button
           class="mr-1 mb-1 !normal-case"
           color="black"
-          form={$locale.includes(bcp) ? 'filled' : 'simple'}
-          onclick={() => setLocale(bcp)}>
-          {ReadyLocales[bcp]}
-        </Button>
-      {:else if $admin}
-        <Button
-          class="mr-1 mb-1 !normal-case"
-          color="black"
-          form={$locale.includes(bcp) ? 'filled' : 'simple'}
-          onclick={() => setLocale(bcp)}>
-          {UnpublishedLocales[bcp]}
+          form={$page.data.locale.includes(bcp) ? 'filled' : 'simple'}
+          onclick={() => changeLocale(bcp)}>
+          {name}
           <i class="far fa-key" />
         </Button>
-      {/if}
-    {/each}
+      {/each}
+    {/if}
   </div>
 </Modal>
