@@ -1,7 +1,7 @@
 /** @type {typeof import('./en.js').default} */
 export default {
   "page": {
-    "direction": "ltr",
+    "direction": "ltr"
   },
   "about": {
     "about_LD": "Acerca de Diccionarios Vivos",

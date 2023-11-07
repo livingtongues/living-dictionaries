@@ -1,6 +1,6 @@
 export default {
   "page": {
-    "direction": "ltr",
+    "direction": "ltr"
   },
   "about": {
     "about_LD": "About Living Dictionaries",
