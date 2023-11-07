@@ -1,30 +1,13 @@
 import type { ExpandedEntry } from '@living-dictionaries/types';
 import { seo_description } from './seo_description';
 import type { TranslateFunction } from '$lib/i18n/types';
+import { en } from '$lib/i18n';
 
 describe('seo_description', () => {
-  const t = ((id: string) => {
-    switch (id) {
-    case 'gl.en':
-      return 'English';
-    case 'gl.es':
-      return 'Spanish';
-    case 'gl.or':
-      return 'Oriya';
-    case 'gl.as':
-      return 'Assamese';
-    case 'gl.hi':
-      return 'Hindi';
-    case 'gl.fr':
-      return 'French';
-    case 'gl.de':
-      return 'German';
-    case 'gl.pt':
-      return 'Portuguese';
-    case 'gl.it':
-      return 'Italian';
-    }
-  }) as TranslateFunction;
+  const t = (({dynamicKey: key}: { dynamicKey: string}) => {
+    const [section, item] = key.split('.')
+    return en[section][item];
+  }) as TranslateFunction
 
   test('prints simple labeled english and spanish glosses', () => {
     const entry: Partial<ExpandedEntry> = {
