@@ -245,7 +245,7 @@ export default {
     "dict_name": "Nom du dictionnaire",
     "public_private_meaning": "“Public\" signifie que tout le monde peut voir votre dictionnaire, ce qui nécessite le consentement de la communauté. Les dictionnaires privés ne sont visibles que pour vous et vos collaborateurs.",
     "optional_data_fields": "Champs de données facultatifs",
-    "unable_to_delete": "Remarque: vous ne pourrez pas supprimer ces langues brillantes plus tard.",
+    "unable_to_delete": "Remarque: vous ne pourrez pas supprimer ces langues de brillance plus tard.",
     "print_access_meaning": "Cela donne au public la possibilité de télécharger et d'imprimer ce dictionnaire de vie en tant que .pdf",
     "featured_image": "Image en vedette"
   },
@@ -310,7 +310,7 @@ export default {
   "print": {
     "qr_code": "Afficher le code QR",
     "labels": "Montrer les étiquettes",
-    "availability": "La vue imprimée n'est disponible que pour les gestionnaires et les contributeurs de dictionnaire",
+    "availability": "La vue imprimée est uniquement disponible pour les gestionnaires et les contributeurs de dictionnaires",
     "max_entries": "Entrées maximales",
     "columns": "Colonnes",
     "headword_size": "Taille de mot de tête",

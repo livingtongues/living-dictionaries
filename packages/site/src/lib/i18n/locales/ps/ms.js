@@ -82,6 +82,12 @@ export default {
     "adp": "kata sendi nama",
     "def": "kata sandang pasti",
     "indf": "kata sandang tidak pasti",
-    "indfpro": "kata ganti nama tak tentu"
+    "indfpro": "kata ganti nama tak tentu",
+    "pers": "",
+    "poss": "",
+    "reflpro": "",
+    "relpro": "",
+    "vd": "",
+    "va": ""
   }
 }

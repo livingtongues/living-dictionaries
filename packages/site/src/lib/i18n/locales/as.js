@@ -29,7 +29,16 @@ export default {
     "help_us_launch_more": "অধিক জীৱন্ত অভিধান/লিভিং দিক্সনেৰী আৰম্ভ কৰাত সহায় কৰক",
     "with_your_help": "আপোনাৰ সহায়ত, আমি আমাৰ ছফ্টৱেৰ উন্নত কৰা অব্যাহত ৰাখিব পাৰোঁ আৰু যিকোনো সম্প্ৰদায়ৰ বাবে ইয়াক উপলব্ধ কৰিব পাৰোঁ যি তেওঁলোকৰ নিজা জীৱন্ত অভিধান সৃষ্টি কৰিব বিচাৰে। আজিয়েই দান কৰক আৰু প্ৰভাৱ পেলাওক!",
     "translators": "অনুবাদক",
-    "interns": "প্ৰশিক্ষাৰ্থীসকল"
+    "interns": "প্ৰশিক্ষাৰ্থীসকল",
+    "video_upload": "",
+    "export_data": "",
+    "import_export": "",
+    "geo_tagging": "",
+    "flashcard_view": "",
+    "peer_review": "",
+    "suggestions_from_users": "",
+    "push_notifications": "",
+    "contributor_awards": ""
   },
   "contributors": {
     "invite_contributors": "অৱদানকাৰীসকলক আমন্ত্ৰণ কৰক",
@@ -47,7 +56,9 @@ export default {
     "invite_manager": "এজন পৰিচালক আমন্ত্ৰন কৰক",
     "write_in_contributor": "অৱদানকাৰীৰ ঠাইত লিখক",
     "invitation_sent": "আমন্ত্ৰণ প্ৰেৰণ কৰা হৈছে",
-    "manager_contributor_distinction": "অভিধান ব্যৱস্থাপকসকলে কোনো প্ৰসঙ্গ সংযোগ, সম্পাদন বা নুই কৰিব পাৰে। বৰঙনি যোগাওঁতা সকল হ'ল প্ৰকল্পটোৰ সহযোগীসকল, যিসকলে কোনোএটা প্ৰসঙ্গ সংযোগ আৰু সম্পাদন কৰিব পাৰে, কিন্তু নুই কৰিব নোৱাৰে।"
+    "manager_contributor_distinction": "অভিধান ব্যৱস্থাপকসকলে কোনো প্ৰসঙ্গ সংযোগ, সম্পাদন বা নুই কৰিব পাৰে। বৰঙনি যোগাওঁতা সকল হ'ল প্ৰকল্পটোৰ সহযোগীসকল, যিসকলে কোনোএটা প্ৰসঙ্গ সংযোগ আৰু সম্পাদন কৰিব পাৰে, কিন্তু নুই কৰিব নোৱাৰে।",
+    "other_contributors": "",
+    "how_to_cite_instructions": ""
   },
   "account": {
     "account_settings": "একাওন্টৰ সংহতিসমূহ",
@@ -76,7 +87,16 @@ export default {
     "email": "ইমেইল",
     "send_message": "বাৰ্তা প্ৰেৰণ কৰক",
     "message_sent": "বাৰ্তা প্ৰেৰণ কৰা হৈছে। আমি যিমান সোনকালে পাৰোঁ উত্তৰ দিম।",
-    "what_is_your_question": "আপোনাৰ প্ৰশ্ন বা মন্তব্য কি?"
+    "what_is_your_question": "আপোনাৰ প্ৰশ্ন বা মন্তব্য কি?",
+    "message_failed": "",
+    "delete_dictionary": "",
+    "public_dictionary": "",
+    "import_data": "",
+    "request_access": "",
+    "report_problem": "",
+    "other": "",
+    "select_topic": "",
+    "data_fields": ""
   },
   "create": {
     "select_coordinates": "স্থানাংক চয়ন কৰক",
@@ -94,7 +114,19 @@ export default {
     "alternate_names": "বিকল্প নামবোৰ",
     "visible_to_public": "ৰাজহুৱাভাৱে দৃশ্যমান",
     "req_com_consent": "সম্প্ৰদায়ৰ সন্মতিৰ প্ৰয়োজন",
-    "create_dictionary": "অভিধান প্ৰস্তুত কৰক"
+    "create_dictionary": "অভিধান প্ৰস্তুত কৰক",
+    "permanent_url_msg": "",
+    "add_gloss_msg": "",
+    "language_used_by_community": "",
+    "community_permission": "",
+    "author_connection": "",
+    "con_lang_description": "",
+    "uncertainty": "",
+    "select_region": "",
+    "secondary_coordinates": "",
+    "map_instructions": "",
+    "print_access": "",
+    "primary_coordinate": ""
   },
   "dictionary": {
     "latitude": "অক্ষাংশ",
@@ -144,7 +176,14 @@ export default {
     "link_copied": "লিংক নকল কৰা হৈছে",
     "copy_and_share": "নকল কৰক আৰু ভগাই দিয়ক",
     "sr": "উৎস",
-    "example_sentence": "উদাহৰণ বাক্য"
+    "example_sentence": "উদাহৰণ বাক্য",
+    "nc": "",
+    "va": "",
+    "gloss": "",
+    "pl": "",
+    "print": "",
+    "id": "",
+    "scn": ""
   },
   "error": {
     "run_into_error": "আমি দুঃখিত, আমি এটা ত্ৰুটিত পৰিছো।",
@@ -159,7 +198,8 @@ export default {
     "login": "ছাইন ইন",
     "donate": "দান কৰক",
     "about": "বিষয়ে",
-    "faq": "সঘনাই উত্থাপিত কৰা প্ৰশ্নসমূহ"
+    "faq": "সঘনাই উত্থাপিত কৰা প্ৰশ্নসমূহ",
+    "tutorials": ""
   },
   "home": {
     "list_of_dictionaries": "অভিধানসমূহৰ তালিকা",
@@ -191,14 +231,23 @@ export default {
     "next": "পৰৱৰ্তী",
     "export": "ৰপ্তানি",
     "images": "Images",
-    "reset": "Reset"
+    "reset": "Reset",
+    "invalid_url": "",
+    "downloading": "",
+    "upload": "",
+    "assertion": "",
+    "negation": "",
+    "clean": ""
   },
   "settings": {
     "community_permission": "ভাষণ সম্প্ৰদায়ে এই ভাষাটো অনলাইন/ইণ্টাৰনেটত উপলব্ধ হ'বলৈ অনুমতি দিয়ে নেকি?",
     "edit_dict_name": "অভিধানৰ নাম সম্পাদনা কৰক",
     "dict_name": "অভিধানৰ নাম",
     "public_private_meaning": "ৰাজহুৱা মানে যিকোনো লোকে আপোনাৰ অভিধান চাব পাৰে যাৰ বাবে সম্প্ৰদায়ৰ সন্মতিৰ প্ৰয়োজন। ব্যক্তিগত অভিধানবোৰ কেৱল আপোনাৰ আৰু আপোনাৰ সহযোগীসকলৰ বাবে দৃশ্যমান।",
-    "optional_data_fields": "বৈকল্পিক ডাটা/তথ্য ফিল্ডসমূহ/ক্ষেত্ৰসমূহ"
+    "optional_data_fields": "বৈকল্পিক ডাটা/তথ্য ফিল্ডসমূহ/ক্ষেত্ৰসমূহ",
+    "unable_to_delete": "",
+    "print_access_meaning": "",
+    "featured_image": ""
   },
   "speakers": {
     "add_new_speaker": "নতুন বক্তা যোগ কৰক",
@@ -221,7 +270,8 @@ export default {
     "drop_to_upload": "আপল'ড কৰিবলৈ পেলাওক",
     "select_audio_file": "অডিঅ' ফাইল নিৰ্বাচন কৰক",
     "success": "সফলতা",
-    "uploading": "আপল'ড হৈ আছে"
+    "uploading": "আপল'ড হৈ আছে",
+    "select_video_file": ""
   },
   "invite": {
     "invitation_claimed": "নিমন্ত্ৰণ দাবী কৰা হৈছে",
@@ -236,6 +286,42 @@ export default {
     "no_images": "কোনো মানসচিত্ৰৰ / ছবিৰ ফাইল নাই",
     "checking_audios": "শ্ৰব্যৰ / অডিঅ'ৰ ফাইল সমূহ আছেনে নাই তাৰেই নিৰীক্ষণ কৰি আছে",
     "no_audios": "কোনো শ্ৰব্যৰ / অডিঅ'ৰ ফাইল নাই",
-    "download_csv": "CSV ডাউনলোড কৰিবলৈ"
+    "download_csv": "CSV ডাউনলোড কৰিবলৈ",
+    "availability": "",
+    "download_pdf": "",
+    "spreadsheet": ""
+  },
+  "video": {
+    "video_url": "",
+    "video_credit": "",
+    "prepare_to_record_video": "",
+    "video_info": "",
+    "paste_video_url": "",
+    "record_upload_video": "",
+    "view": "",
+    "edit_video": "",
+    "add_video": "",
+    "accesing": "",
+    "pause": "",
+    "unpause": "",
+    "previously_dismissed_msg": "",
+    "permission_denied": ""
+  },
+  "print": {
+    "qr_code": "",
+    "labels": "",
+    "availability": "",
+    "max_entries": "",
+    "columns": "",
+    "headword_size": "",
+    "font_size": ""
+  },
+  "import": {
+    "import": "",
+    "template_link": "",
+    "instructions_1": "",
+    "instructions_2": "",
+    "instructions_3": "",
+    "instructions_4": ""
   }
 }

@@ -82,6 +82,12 @@ export default {
     "adp": "kh",
     "def": "kb.by",
     "indf": "kbf",
-    "indfpro": "kwj"
+    "indfpro": "kwj",
+    "pers": "",
+    "poss": "",
+    "reflpro": "",
+    "relpro": "",
+    "vd": "",
+    "va": ""
   }
 }

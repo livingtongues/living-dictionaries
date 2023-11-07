@@ -96,7 +96,7 @@ export default {
     "report_problem": "Báo cáo một vấn đề",
     "other": "Chủ đề khác",
     "select_topic": "Chọn một chủ đề",
-    "data_fields": "Trường dữ liệu tùy chọn"
+    "data_fields": "Các trường dữ liệu tùy chọn"
   },
   "create": {
     "select_coordinates": "Chọn tọa độ",

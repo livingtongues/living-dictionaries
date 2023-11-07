@@ -287,6 +287,13 @@ export default {
     "yap": "Bahasa Yapese",
     "yo": "Bahasa Yoruba",
     "dje": "Bahasa Zarma",
-    "zu": "Bahasa Zulu"
+    "zu": "Bahasa Zulu",
+    "tri": "",
+    "hix": "",
+    "waw": "",
+    "way": "",
+    "apy": "",
+    "jen": "",
+    "mko": ""
   }
 }

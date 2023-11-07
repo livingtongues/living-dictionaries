@@ -87,6 +87,7 @@ export default {
     "poss": "物主代词",
     "reflpro": "反身代词",
     "relpro": "关系代词",
-    "vd": "双及物动词"
+    "vd": "双及物动词",
+    "va": ""
   }
 }

@@ -82,6 +82,12 @@ export default {
     "adp": "adpos",
     "def": "déf",
     "indf": "indf",
-    "indfpro": "indf"
+    "indfpro": "indf",
+    "pers": "",
+    "poss": "",
+    "reflpro": "",
+    "relpro": "",
+    "vd": "",
+    "va": ""
   }
 }

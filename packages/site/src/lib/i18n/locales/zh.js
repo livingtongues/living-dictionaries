@@ -246,7 +246,7 @@ export default {
     "public_private_meaning": "公共意味着任何人都可以看到你的字典所以需要社区的同意。私人字典则是只有你和你的合作者可见。",
     "optional_data_fields": "可选的数据字段",
     "unable_to_delete": "注意：您将无法删除这些语言标注",
-    "print_access_meaning": "这使公众能够下载和打印本Living词典作为.pdf",
+    "print_access_meaning": "这使公众能够下载和打印此Living词典作为.pdf",
     "featured_image": "特色图像"
   },
   "speakers": {

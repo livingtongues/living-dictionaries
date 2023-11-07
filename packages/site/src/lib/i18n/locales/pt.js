@@ -116,7 +116,7 @@ export default {
     "req_com_consent": "Requer Consentimento da Comunidade",
     "create_dictionary": "Criar Dicionário",
     "permanent_url_msg": "O nome do URL é permanente e não pode ser alterado mais tarde.",
-    "add_gloss_msg": "Você pode adicionar mais linguagens de brilho posteriormente em ambientes.",
+    "add_gloss_msg": "Você pode adicionar mais linguagens de brilho posteriormente em configurações.",
     "language_used_by_community": "Este dicionário é um idioma falado ou assinado por uma comunidade humana específica?",
     "community_permission": "A comunidade de idiomas lhe deu permissão para fazer esse dicionário?",
     "author_connection": "Descreva brevemente como você conhece esse idioma e por que está criando um dicionário vivo para ele. Você faz parte da comunidade que usará este dicionário vivo? Caso contrário, como você conhece a comunidade?",
@@ -245,7 +245,7 @@ export default {
     "dict_name": "Nome do Dicionário",
     "public_private_meaning": "Público significa que qualquer um pode ver o seu Dicionário o qual requer consentimento da comunidade. Os Dicionários Privados são visíveis apenas para si e para os seus colaboradores.",
     "optional_data_fields": "Campo de dados opcionais",
-    "unable_to_delete": "NOTA: Você não poderá excluir esses idiomas de brilho posteriormente.",
+    "unable_to_delete": "Nota: Você não poderá excluir esses idiomas de brilho posteriormente.",
     "print_access_meaning": "Isso dá ao público a capacidade de baixar e imprimir este dicionário vivo como um .pdf",
     "featured_image": "Imagem em destaque"
   },
@@ -304,13 +304,13 @@ export default {
     "accesing": "Acessando microfone e câmera",
     "pause": "Pausa",
     "unpause": "Não musa",
-    "previously_dismissed_msg": "Se você descartou anteriormente a solicitação do navegador, recarregue e clique em 'Sim' quando seu navegador solicitar permissão.",
+    "previously_dismissed_msg": "Se você já descartou a solicitação do navegador, recarregue e clique em 'Sim' quando o seu navegador solicitar permissão.",
     "permission_denied": "A permissão para acessar a mídia foi negada."
   },
   "print": {
     "qr_code": "Mostrar código QR",
     "labels": "Mostrar rótulos",
-    "availability": "A exibição de impressão está disponível apenas para gerentes de dicionário e colaboradores",
+    "availability": "A exibição de impressão está disponível apenas para gerentes e colaboradores de dicionários",
     "max_entries": "Entradas máximas",
     "columns": "Colunas",
     "headword_size": "Tamanho da palavra da cabeça",
