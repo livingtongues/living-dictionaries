@@ -28,7 +28,7 @@
   onMount(async () => {
     const database_entries = await getCollection<ActualDatabaseEntry>(`dictionaries/${$dictionary.id}/words`);
     const converted_to_current_shaped_entries = database_entries.map(convert_entry_to_current_shape);
-    const expanded_entries = converted_to_current_shaped_entries.map(expand_entry);
+    const expanded_entries = converted_to_current_shaped_entries.map(entry => expand_entry(entry, $page.data.t));
     const speakers = await fetchSpeakers(expanded_entries);
 
     entryHeaders = getCsvHeaders(expanded_entries, $dictionary)

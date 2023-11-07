@@ -15,8 +15,8 @@
     {#if verbose}{$page.data.t('entry.image')}{/if}
     <!-- {:else if column.field === 'checked'} ✓ -->
   {:else if ['gloss', 'example_sentence', 'local_orthography'].includes(column.field)}
-    <span class="capitalize" title={column.explanation}> {column.display || $page.data.t(`entry.${EntryFields[column.field]}`)} </span>
+    <span class="capitalize" title={column.explanation}> {column.display || $page.data.t({dynamicKey: `entry.${EntryFields[column.field]}`, fallback: column.field})} </span>
   {:else}
-    {$page.data.t(`entry.${EntryFields[column.field]}`)}
+    {$page.data.t({dynamicKey: `entry.${EntryFields[column.field]}`, fallback: column.field})}
   {/if}
 </span>

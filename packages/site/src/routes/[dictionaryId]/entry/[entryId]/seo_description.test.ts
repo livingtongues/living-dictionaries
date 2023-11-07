@@ -1,8 +1,9 @@
 import type { ExpandedEntry } from '@living-dictionaries/types';
 import { seo_description } from './seo_description';
+import type { TranslateFunction } from '$lib/i18n/types';
 
 describe('seo_description', () => {
-  const t = (id: string) => {
+  const t = ((id: string) => {
     switch (id) {
     case 'gl.en':
       return 'English';
@@ -22,10 +23,8 @@ describe('seo_description', () => {
       return 'Portuguese';
     case 'gl.it':
       return 'Italian';
-    default:
-      return 'other';
     }
-  };
+  }) as TranslateFunction;
 
   test('prints simple labeled english and spanish glosses', () => {
     const entry: Partial<ExpandedEntry> = {

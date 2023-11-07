@@ -1,8 +1,9 @@
+import type { TranslateFunction } from '$lib/i18n/types';
 import { order_entry_and_dictionary_gloss_languages, order_glosses } from './glosses';
 import { remove_italic_tags } from './remove_italic_tags';
 
 describe('order_glosses', () => {
-  const t = (id: string) => {
+  const t = ((id: string) => {
     switch (id) {
     case 'gl.de':
       return 'German';
@@ -13,7 +14,7 @@ describe('order_glosses', () => {
     default:
       return 'other';
     }
-  };
+  }) as TranslateFunction;
 
   const glosses = {
     en: 'apple',

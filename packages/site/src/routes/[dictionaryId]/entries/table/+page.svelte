@@ -14,6 +14,7 @@
   import { deleteImage } from '$lib/helpers/delete';
   import { saveUpdateToFirestore } from '$lib/helpers/entry/update';
   import { setUpColumns } from './setUpColumns';
+  import { page } from '$app/stores';
 
   const search: InstantSearch = getContext('search');
 
@@ -36,7 +37,7 @@
   </div>
 
   <EntriesTable
-    entries={$entries.map(convert_and_expand_entry)}
+    entries={$entries.map(entry => convert_and_expand_entry(entry, $page.data.t))}
     {columns}
     dictionaryId={$dictionary.id}
     canEdit={$canEdit}

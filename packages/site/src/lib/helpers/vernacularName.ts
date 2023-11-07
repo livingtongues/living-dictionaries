@@ -7,6 +7,6 @@ export function vernacularName(bcp: string) {
     return glossingLanguages[bcp].vernacularName;
 
   const { data: { t } } = get(page)
-  return `${t('gl.' + bcp)}`;
+  return `${t({dynamicKey: 'gl.' + bcp, fallback: bcp})}`;
 }
 

@@ -36,7 +36,7 @@
   {#if dictionary.glossLanguages}
     <div class="mb-2">
       <i class="far fa-info-circle fa-fw" />
-      {dictionary.glossLanguages.map((bcp) => $page.data.t('gl.' + bcp)).join(', ')}
+      {dictionary.glossLanguages.map((bcp) => $page.data.t({dynamicKey: 'gl.' + bcp, fallback: bcp})).join(', ')}
     </div>
   {/if}
 

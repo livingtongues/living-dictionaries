@@ -10,6 +10,8 @@
   import { Doc } from 'sveltefirets';
   import { convert_and_expand_entry } from '$lib/transformers/convert_and_expand_entry';
   import type { InstantSearch } from 'instantsearch.js';
+  import { page } from '$app/stores';
+
   const search: InstantSearch = getContext('search');
 
   onMount(() => {
@@ -46,14 +48,14 @@
             path="dictionaries/{$dictionary.id}/words/{algoliaEntry.id}"
             startWith={algoliaEntry}
             let:data={entry}>
-            <GalleryEntry entry={convert_and_expand_entry(entry)} canEdit={$canEdit} />
+            <GalleryEntry entry={convert_and_expand_entry(entry, $page.data.t)} canEdit={$canEdit} />
           </Doc>
         {/if}
       {/each}
     {:else}
       {#each entries as entry (entry.id)}
         {#if entry.pf}
-          <GalleryEntry entry={convert_and_expand_entry(entry)} />
+          <GalleryEntry entry={convert_and_expand_entry(entry, $page.data.t)} />
         {/if}
       {/each}
     {/if}

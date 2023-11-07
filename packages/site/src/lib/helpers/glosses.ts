@@ -17,7 +17,7 @@ export function order_glosses({ glosses, dictionary_gloss_languages, t, label = 
 
   return gloss_languages_that_have_gloss.map((bcp) => {
     const gloss = glosses[bcp];
-    if (label) return `${t('gl.' + bcp)}: ${gloss}`;
+    if (label) return `${t({dynamicKey: 'gl.' + bcp, fallback: bcp})}: ${gloss}`;
     return gloss;
   });
 }
