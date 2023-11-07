@@ -5,7 +5,7 @@
   import LoadingIndicator from './LoadingIndicator.svelte';
 </script>
 
-{#if $navigating}
+{#if browser && $navigating}
   <LoadingIndicator />
 {/if}
 

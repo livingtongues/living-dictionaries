@@ -14,7 +14,7 @@
   $: if ($algoliaQueryParams) {
     const { href, origin } = window.location
     $lastEntriesUrl = href.replace(origin, '')
-  } else if ($navigating?.from?.url) {
+  } else if (browser && $navigating?.from?.url) {
     const { origin } = window.location
     const { href } = $navigating.from.url
     $lastEntriesUrl = href.replace(origin, '')
