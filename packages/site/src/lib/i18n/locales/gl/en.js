@@ -1,4 +1,3 @@
-/** @type {typeof import('./en.js').default} */
 export default {
   "gl": {
     "en": "English",
