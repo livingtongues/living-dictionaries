@@ -51,7 +51,7 @@ const complexData: GoalDatabaseEntry = {
   id: '1', // for table
 }
 
-const t = ((key: string) => {
+const t = (({dynamicKey: key}: { dynamicKey: string}) => {
   const [section, item] = key.split('.')
   return en[section][item];
 }) as TranslateFunction

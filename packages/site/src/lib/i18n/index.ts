@@ -8,7 +8,6 @@ import enSemanticDomains from './locales/sd/en'
 import type { LocaleCode } from './locales'
 import type { TranslationKeys } from './types'
 import { interpolate } from './interpolate'
-import { dev } from '$app/environment'
 
 export const en = {
   ...enBase,
@@ -21,13 +20,17 @@ export const en = {
 // English is always loaded because it is the fallback
 const loadedTranslations: Record<string, typeof en> = { en }
 
+interface GetTranslatorOptions {
+  errorOnMissingBase: boolean
+}
+
 interface TranslateOptions {
   values?: Record<string, string>
   dynamicKey?: string
   fallback?: string
 }
 
-export async function getTranslator(locale: LocaleCode) {
+export async function getTranslator(locale: LocaleCode, { errorOnMissingBase }: GetTranslatorOptions = { errorOnMissingBase: false}) {
   if (!loadedTranslations[locale]) {
     loadedTranslations[locale] = {
       ...(await import(`./locales/${locale}.js`)).default,
@@ -63,7 +66,7 @@ export async function getTranslator(locale: LocaleCode) {
       return interpolate(englishResult, options?.values)
     const error = `Missing English for: ${key}`
 
-    if (dev)
+    if (errorOnMissingBase)
       throw new Error(error)
 
     console.error(error)

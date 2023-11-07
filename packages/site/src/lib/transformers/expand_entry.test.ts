@@ -7,7 +7,7 @@ import { en } from '$lib/i18n';
 describe(expand_entry, () => {
   const now = new Date().getTime();
 
-  const t = ((key: string) => {
+  const t = (({dynamicKey: key}: { dynamicKey: string}) => {
     const [section, item] = key.split('.')
     return en[section][item];
   }) as TranslateFunction
@@ -86,7 +86,7 @@ describe(expand_entry, () => {
         parts_of_speech_keys: [part_of_speech_key],
         translated_parts_of_speech: ['noun'],
         ld_semantic_domains_keys: [sdn_key],
-        translated_ld_semantic_domains: ['Sky, weather and climate'],
+        translated_ld_semantic_domains: ['Universe and the natural world'],
         write_in_semantic_domains: [write_in_sd],
         example_sentences: [{ en: 'baz', vn: 'foo' }],
         photo_files: [{
