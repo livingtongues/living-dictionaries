@@ -54,7 +54,7 @@ export async function getTranslator(locale: LocaleCode, { errorOnMissingBase }: 
     if (!key.includes('.'))
       throw new Error('Incorrect i18n key. Must be nested 1 level (contain 1 period).')
 
-    const [section, item] = key.split('.') as [string, string]
+    const [section, item] = splitByFirstPeriod(key)
 
     const localeResult = loadedTranslations[locale][section]?.[item]
     if (localeResult)
@@ -72,4 +72,24 @@ export async function getTranslator(locale: LocaleCode, { errorOnMissingBase }: 
     console.error(error)
     return options?.fallback || key
   }
+}
+
+function splitByFirstPeriod(key: string): [string, string] {
+  const [section, ...rest] = key.split('.') as [string, string]
+  const item = rest.join('.')
+  return [section, item]
+}
+
+if (import.meta.vitest) {
+  describe(splitByFirstPeriod, () => {
+    test('splits with one period', () => {
+      const [section, item] = splitByFirstPeriod('hello.world')
+      expect([section, item]).toEqual(['hello', 'world']);
+    });
+
+    test('only splits on first period when there are two', () => {
+      const [section, item] = splitByFirstPeriod('ps.pr.n')
+      expect([section, item]).toEqual(['ps', 'pr.n']);
+    });
+  });
 }
