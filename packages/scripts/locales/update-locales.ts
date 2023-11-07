@@ -21,16 +21,13 @@ export async function generateFilesFromSpreadsheet() {
   const rows_ps = await jsonFromCsvUrl(getGoogleSheetCsvUrl(I18N_GOOGLE_SHEET_ID, 'Parts-of-Speech'));
   const translations_ps = generateTranslationsFromSpreadsheet(rows_ps, { prefix: 'ps' });
   await writeLocaleFiles(translations_ps, LOCALES_DIRECTORY + '/ps');
-  const translations_psAbbrev = generateTranslationsFromSpreadsheet(rows_ps, {
-    prefix: 'psAbbrev',
-  });
+  const translations_psAbbrev = generateTranslationsFromSpreadsheet(rows_ps, { prefix: 'psAbbrev' });
   await writeLocaleFiles(translations_psAbbrev, LOCALES_DIRECTORY + '/psAbbrev');
 
-  const rows_gl = await jsonFromCsvUrl(
-    getGoogleSheetCsvUrl(I18N_GOOGLE_SHEET_ID, 'Glossing-Languages')
-  );
+  const rows_gl = await jsonFromCsvUrl(getGoogleSheetCsvUrl(I18N_GOOGLE_SHEET_ID, 'Glossing-Languages'));
   const translations_gl = generateTranslationsFromSpreadsheet(rows_gl, { prefix: 'gl' });
   await writeLocaleFiles(translations_gl, LOCALES_DIRECTORY + '/gl');
+  
   const glossingLanguages = await generateGlossingLanguages(rows_gl);
   await fs.writeFile(
     `../site/src/lib/glosses/glossing-languages-list.json`,
@@ -38,6 +35,7 @@ export async function generateFilesFromSpreadsheet() {
   );
   console.log('glossing-languages-list.json file written');
 }
+
 generateFilesFromSpreadsheet();
 
 export const generateTranslationsFromSpreadsheet: (
@@ -55,13 +53,12 @@ export const generateTranslationsFromSpreadsheet: (
     rows.forEach((row) => {
       const { key } = row;
       const langColumn = options.prefix === 'psAbbrev' ? lang + 'Abbrev' : lang;
-      const value = row[langColumn];
-      if (key && value) {
+      const value = row[langColumn] || '';
+      if (key) {
         if (options.nesting === 'deep')
           dot.str(key, value, translations[lang]); // doesn't work with dot.str('1.1', "Sky, weather and climate", translations['en'])
         else
           translations[lang][key] = value;
-
       }
     });
 
@@ -107,8 +104,8 @@ function getGoogleSheetCsvUrl(spreadsheetId: string, sheetName: string) {
 async function writeLocaleFiles(translations: Record<string, any>, directory: string) {
   const languagesToWrite = languages.map(async (lang) => {
     const path = `${directory}/${lang}.js`;
-    const content = `/** @type {typeof import('./en.js').default} */
-export default ${JSON.stringify(translations[lang], null, 2)}
+    const typings = lang === 'en' ? '' : `/** @type {typeof import('./en.js').default} */\r\n`;
+    const content = `${typings}export default ${JSON.stringify(translations[lang], null, 2)}
 `
     return fs.writeFile(path, content);
   });

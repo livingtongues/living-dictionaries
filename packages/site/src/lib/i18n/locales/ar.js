@@ -89,7 +89,7 @@ export default {
     "message_sent": "تم ارسال الرسالة. سوف نقوم بالرد بأسرع ما يمكن.",
     "what_is_your_question": "ما هو سؤالك أو تعليقك؟",
     "message_failed": "فشل إرسال الرسالة. تحقق من اتصال الإنترنت الخاص بك أو راسلنا عبر البريد الإلكتروني:",
-    "delete_dictionary": "حذف القاموس",
+    "delete_dictionary": "حذف قاموس",
     "public_dictionary": "اجعل القاموس العام",
     "import_data": "بيانات الاستيراد",
     "request_access": "طلب الوصول إلى التحرير",

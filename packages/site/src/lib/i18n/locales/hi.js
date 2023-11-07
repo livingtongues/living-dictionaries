@@ -37,7 +37,7 @@ export default {
     "flashcard_view": "भाषा सीखने वालों के लिए फ्लैशकार्ड दृश्य",
     "peer_review": "वर्तनी की सहकर्मी समीक्षा",
     "suggestions_from_users": "उपयोगकर्ताओं से सुझाव",
-    "push_notifications": "योगदानकर्ताओं को सूचनाएँ",
+    "push_notifications": "योगदानकर्ताओं के लिए सूचनाएं",
     "contributor_awards": "योगदानकर्ता सामुदायिक पुरस्कार"
   },
   "contributors": {
@@ -58,7 +58,7 @@ export default {
     "invitation_sent": "निमंत्रण भेज दिया गया ",
     "manager_contributor_distinction": "टिप्पणीः शब्दकोश के प्रबंधक विषय वस्तुओं को जोड़, संपादित या हटा सकते हैं। योगदानकर्ता, जो परियोजना के सहयोगी हैं, विषय वस्तुओं को जोड़ और संपादित कर सकते हैं परंतु हटा नहीं सकते हैं।",
     "other_contributors": "अन्य योगदानकर्ता",
-    "how_to_cite_instructions": "प्रशस्ति पत्र में अपना नाम दिखाने के लिए इस शब्दकोश के लेखकों को जोड़ें"
+    "how_to_cite_instructions": "उद्धरण में अपना नाम दिखाने के लिए इस शब्दकोश के लेखकों को जोड़ें"
   },
   "account": {
     "account_settings": "अकाउंट सेटिंग",

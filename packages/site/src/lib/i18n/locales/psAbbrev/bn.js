@@ -82,6 +82,12 @@ export default {
     "adp": "সংস.",
     "def": "নিদ. নি.",
     "indf": "অনিদ.নি.",
-    "indfpro": "অনি.সর্ব."
+    "indfpro": "অনি.সর্ব.",
+    "pers": "",
+    "poss": "",
+    "reflpro": "",
+    "relpro": "",
+    "vd": "",
+    "va": ""
   }
 }
