@@ -1,3 +1,5 @@
+import { en } from '$lib/i18n';
+import type { TranslateFunction } from '$lib/i18n/types';
 import { expand_entry } from '$lib/transformers/expand_entry';
 import type { ExpandedEntry, GoalDatabaseEntry } from '@living-dictionaries/types';
 
@@ -49,7 +51,12 @@ const complexData: GoalDatabaseEntry = {
   id: '1', // for table
 }
 
-export const complex: ExpandedEntry = expand_entry(complexData);
+const t = ((key: string) => {
+  const [section, item] = key.split('.')
+  return en[section][item];
+}) as TranslateFunction
+
+export const complex: ExpandedEntry = expand_entry(complexData, t);
 
 export const simple: ExpandedEntry = {
   lexeme: 'hello',

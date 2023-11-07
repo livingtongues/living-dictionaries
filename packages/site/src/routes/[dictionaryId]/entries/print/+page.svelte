@@ -101,7 +101,7 @@
             max="100"
             bind:value={$imagePercent} /><span class="font-medium text-gray-700">%</span>
         </div>
-        <PrintFieldCheckboxes entries={entries.map(convert_and_expand_entry)} {preferredPrintFields} {showLabels} {showQrCode} />
+        <PrintFieldCheckboxes entries={entries.map(entry => convert_and_expand_entry(entry, $page.data.t))} {preferredPrintFields} {showLabels} {showQrCode} />
       </div>
     </div>
 
@@ -119,7 +119,7 @@
             headwordSize={$headwordSize}
             fontSize={$fontSize}
             imagePercent={$imagePercent}
-            entry={convert_and_expand_entry(entry)}
+            entry={convert_and_expand_entry(entry, $page.data.t)}
             showQrCode={$showQrCode}
             showLabels={$showLabels}
             selectedFields={$preferredPrintFields}

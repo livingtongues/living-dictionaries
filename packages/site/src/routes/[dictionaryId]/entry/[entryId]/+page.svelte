@@ -23,7 +23,7 @@
     initialEntry,
   } = data);
 
-  $: entry = convert_and_expand_entry($initialEntry);
+  $: entry = convert_and_expand_entry($initialEntry, $page.data.t);
 
   // saved algoliaQueryParams will be overwritten by the gallery view as it turns on the images only facet
   function backToEntries() {

@@ -97,7 +97,7 @@
       field={column.field}
       {canEdit}
       value={entry[column.field]}
-      display={$page.data.t(`entry.${EntryFields[column.field]}`)}
+      display={$page.data.t({dynamicKey: `entry.${EntryFields[column.field]}`, fallback: column.display})}
       on:update={({detail}) => dispatch('valueupdate', { field: EntryFields[column.field], newValue: detail})} />
   {/if}
 </div>

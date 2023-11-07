@@ -26,7 +26,7 @@
     field="gloss"
     {bcp}
     {canEdit}
-    display={`${$page.data.t(`gl.${bcp}`)}: ${$page.data.t('entry.gloss')}`}
+    display={`${$page.data.t({ dynamicKey: `gl.${bcp}`, fallback: bcp})}: ${$page.data.t('entry.gloss')}`}
     on:update={({detail}) => dispatch('valueupdate', { field: `gl.${bcp}`, newValue: detail})} />
 {/each}
 
@@ -77,7 +77,7 @@
       field="example_sentence"
       {bcp}
       {canEdit}
-      display={`${$page.data.t(`gl.${bcp}`)}: ${$page.data.t('entry.example_sentence')}`}
+      display={`${$page.data.t({dynamicKey: `gl.${bcp}`, fallback: bcp})}: ${$page.data.t('entry.example_sentence')}`}
       on:update={({detail}) => dispatch('valueupdate', { field: `xs.${bcp}`, newValue: detail})} />
   {/each}
 {/each}

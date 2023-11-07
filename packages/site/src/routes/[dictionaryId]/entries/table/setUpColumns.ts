@@ -17,7 +17,7 @@ export function setUpColumns(columns: IColumn[], dictionary: IDictionary): IColu
         bcp,
         width: cols[glossIndex].width,
         sticky: cols[glossIndex].sticky || false,
-        display: t('gl.' + bcp),
+        display: t({dynamicKey: 'gl.' + bcp, fallback: bcp}),
         explanation: vernacularName(bcp),
       });
     });
@@ -42,7 +42,7 @@ export function setUpColumns(columns: IColumn[], dictionary: IDictionary): IColu
         bcp,
         width: cols[exampleSentenceIndex].width,
         sticky: cols[exampleSentenceIndex].sticky || false,
-        display: `${t(`gl.${bcp}`)} ${t('entry.example_sentence')}`,
+        display: `${t({ dynamicKey: `gl.${bcp}`, fallback: bcp})} ${t('entry.example_sentence')}`,
       });
     });
     cols.splice(exampleSentenceIndex, 1, ...exampleSentenceColumns);

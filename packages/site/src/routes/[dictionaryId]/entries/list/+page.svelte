@@ -11,6 +11,7 @@
   import { deleteImage } from '$lib/helpers/delete';
   import type { InstantSearch } from 'instantsearch.js';
   import { saveUpdateToFirestore } from '$lib/helpers/entry/update';
+  import { page } from '$app/stores';
 
   const search: InstantSearch = getContext('search');
 
@@ -33,7 +34,7 @@
         let:data={entry}>
         <ListEntry
           dictionary={$dictionary}
-          entry={convert_and_expand_entry(entry)}
+          entry={convert_and_expand_entry(entry, $page.data.t)}
           videoAccess={$dictionary.videoAccess || $admin > 0}
           canEdit={$canEdit}
           on:deleteImage={() => deleteImage(entry, $dictionary.id)}
@@ -42,7 +43,7 @@
     {/each}
   {:else}
     {#each entries as entry (entry.id)}
-      <ListEntry dictionary={$dictionary} entry={convert_and_expand_entry(entry)} />
+      <ListEntry dictionary={$dictionary} entry={convert_and_expand_entry(entry, $page.data.t)} />
     {/each}
   {/if}
 </Hits>
