@@ -164,6 +164,7 @@ const partialVariants: DeepPartial<Variant<Component>[]> = [
   {
     name: 'History',
     description: 'Entry with history',
+    languages: [],
     props: {
       history: [
         {

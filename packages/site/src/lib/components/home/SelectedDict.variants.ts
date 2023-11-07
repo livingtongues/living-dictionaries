@@ -23,24 +23,12 @@ const dictionary: IDictionary =  {
   updatedAt: Timestamp.fromDate(new Date(2023, 7, 11, 15, 35, 54))
 }
 
-const partialVariants = [
+export const variants: Variant<Component>[] = [
   {
     name: 'Normal',
+    languages: [],
     props: {
       dictionary
     }
   },
-  // {
-  //   name: 'Last updated message',
-  //   props: {
-  //     dictionary
-  //   }
-  // },
-]
-
-export const variants: Variant<Component>[] = partialVariants.map((variant) => ({
-  ...variant,
-  props: {
-    ...variant.props
-  }
-}));
+];

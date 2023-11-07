@@ -64,6 +64,7 @@ const history = [
 export const variants: Variant<Component>[] = [
   {
     name: 'Sorted by latest update',
+    languages: [],
     props: {
       data: {
         dictionary: {
@@ -77,6 +78,7 @@ export const variants: Variant<Component>[] = [
   },
   {
     name: 'Inverse order',
+    languages: [],
     props: {
       data: {
         dictionary: {
@@ -90,6 +92,7 @@ export const variants: Variant<Component>[] = [
   },
   {
     name: 'Sorted by action',
+    languages: [],
     props: {
       data: {
         dictionary: {
@@ -103,6 +106,7 @@ export const variants: Variant<Component>[] = [
   },
   {
     name: 'Sorted by editor',
+    languages: [],
     props: {
       data: {
         dictionary: {
@@ -116,6 +120,7 @@ export const variants: Variant<Component>[] = [
   },
   {
     name: 'Sorted by lexeme',
+    languages: [],
     props: {
       data: {
         dictionary: {

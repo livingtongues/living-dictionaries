@@ -24,6 +24,7 @@ const history = [
 export const variants: Variant<Component>[] = [
   {
     name: 'Lexeme history authorized',
+    languages: [],
     props: {
       history,
       canEdit: true,
@@ -31,8 +32,9 @@ export const variants: Variant<Component>[] = [
   },
   {
     name: 'Lexeme history unauthorized',
+    languages: [],
     props: {
       history,
     },
   },
-]
+];
