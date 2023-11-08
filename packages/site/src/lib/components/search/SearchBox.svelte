@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { t } from 'svelte-i18n';
+  import { page } from '$app/stores';
   import type { InstantSearch } from 'instantsearch.js';
   import { connectSearchBox } from 'instantsearch.js/es/connectors';
   import { onMount, createEventDispatcher } from 'svelte';
@@ -23,7 +23,7 @@
     search.addWidgets([customSearchBox({})]);
   });
 
-  const dispatch = createEventDispatcher();
+  const dispatch = createEventDispatcher<{showFilterMenu: boolean}>();
 </script>
 
 <div class="flex flex-grow rounded-md shadow-sm">
@@ -40,7 +40,7 @@
         //@ts-ignore
         refine(e.target.value);
       }}
-      placeholder={$t('entry.search_entries', { default: 'Search Entries' })}
+      placeholder={$page.data.t('entry.search_entries')}
       class="form-input text-sm w-full pl-10 pr-3 py-2 rounded-none ltr:!rounded-l-md rtl:!rounded-r-md md:!rounded-r-md md:!rounded-l-md" />
   </div>
   <button
@@ -52,7 +52,7 @@
       focus:z-10 transition ease-in-out duration-150 md:hidden">
     <i class="far fa-filter text-gray-400" />
     <span class="ml-2 hidden sm:inline">
-      {$t('entry.filters', { default: 'Filters' })}
+      {$page.data.t('entry.filters')}
     </span>
   </button>
 </div>

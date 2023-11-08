@@ -1,10 +1,9 @@
 
 <script lang="ts">
-  import { t } from 'svelte-i18n';
+  import { page } from '$app/stores';
   import { onMount } from 'svelte';
   import { firebaseConfig } from 'sveltefirets';
   import { Button, ShowHide } from 'svelte-pieces';
-  import { page } from '$app/stores';
 
   onMount(async () => {
     const Sentry = await import('@sentry/browser');
@@ -16,30 +15,24 @@
 </script>
 
 <svelte:head>
-  <title>{$t('misc.error', { default: 'Error' })}: {$page.status}</title>
+  <title>{$page.data.t('misc.error')}: {$page.status}</title>
 </svelte:head>
 
 <div class="p-4 bg-white relative z-20">
   <h2 class="text-xl sm:text-4xl font-bold mb-3">
-    {$t('error.run_into_error', {
-      default: 'We\'re sorry, we\'ve run into an error.',
-    })}
+    {$page.data.t('error.run_into_error')}
   </h2>
 
   <p class="mb-3">
-    {$t('error.error_recorded', {
-      default: 'The error has been recorded and we will be looking into it.',
-    })}
+    {$page.data.t('error.error_recorded')}
 
     <b>
-      {$t('error.please_explain', {
-        default: 'Can you please send us a short note to explain what happened?',
-      })}
+      {$page.data.t('error.please_explain')}
     </b>
   </p>
 
   <ShowHide let:show let:toggle>
-    <Button form="filled" onclick={toggle}>{$t('header.contact_us', { default: 'Contact Us' })}</Button>
+    <Button form="filled" onclick={toggle}>{$page.data.t('header.contact_us')}</Button>
     {#if show}
       {#await import('$lib/components/modals/Contact.svelte') then { default: Contact }}
         <Contact subject="report_problem" on:close={toggle} />
@@ -48,7 +41,7 @@
   </ShowHide>
 
   <p class="text-gray-600 text-sm mt-6">
-    {$t('misc.error', { default: 'Error' })}:
+    {$page.data.t('misc.error')}:
     {$page.status}
     -
     {$page.error.message}

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { t } from 'svelte-i18n';
+  import { page } from '$app/stores';
   import User from './User.svelte';
   import { Button, ShowHide } from 'svelte-pieces';
   import { firebaseConfig } from 'sveltefirets';
@@ -21,7 +21,7 @@
           src="/images/LD_logo_white.svg"
           class="mr-2 ml-2"
           style="height: 30px; width: 30px; filter: invert(100%);" />
-        {$t('misc.LD', { default: 'Living Dictionaries' })}
+        {$page.data.t('misc.LD')}
         {#if firebaseConfig.projectId === 'talking-dictionaries-dev'}
           <span class="ml-1 text-xs opacity-50">(dev)</span>
         {/if}
@@ -37,19 +37,15 @@
       href="https://www.flipcause.com/secure/cause_pdetails/NTQ3NDQ"
       target="_blank">
       <i class="far fa-donate" />
-      <span class="ml-1 hidden lg:inline">{$t('header.donate', {
-        default: 'Donate',
-      })}</span>
+      <span class="ml-1 hidden lg:inline">{$page.data.t('header.donate')}</span>
     </Button>
     <Button href="/about" form="text" class="!hidden !lg:inline">
       <i class="far fa-info-circle" />
-      <span class="ml-1 hidden lg:inline">{$t('header.about', { default: 'About' })}</span>
+      <span class="ml-1 hidden lg:inline">{$page.data.t('header.about')}</span>
     </Button>
     <Button href="/tutorials" form="text" class="!hidden !md:inline">
       <span class="i-fluent-learning-app-24-regular -mt-2px" />
-      <span class="ml-1 hidden lg:inline">{$t('header.tutorials', {
-        default: 'Tutorials',
-      })}</span>
+      <span class="ml-1 hidden lg:inline">{$page.data.t('header.tutorials')}</span>
     </Button>
     <Button
       form="text"
@@ -71,7 +67,7 @@
           <i class="far fa-question-circle" />
         </span>
         <span class="ml-1 hidden sm:inline">
-          {$t('header.contact_us', { default: 'Contact Us' })}
+          {$page.data.t('header.contact_us')}
         </span>
       </Button>
       {#if show}
@@ -85,7 +81,7 @@
       <Button form="text" onclick={toggle}>
         <i class="far fa-language" />
         <span class="ml-1 hidden lg:inline">
-          {$t('header.language', { default: 'Language' })}
+          {$page.data.t('header.language')}
         </span>
       </Button>
       {#if show}

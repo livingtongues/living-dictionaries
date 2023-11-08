@@ -4,7 +4,7 @@
 </script>
 
 <script lang="ts">
-  import { t } from 'svelte-i18n';
+  import { page } from '$app/stores';
   import { createEventDispatcher, onMount } from 'svelte';
   import { EntryFields } from '@living-dictionaries/types';
   import ModalEditableArray from '../ui/array/ModalEditableArray.svelte';
@@ -66,12 +66,12 @@
   {canEdit}
   canWriteIn
   {showPlus}
-  placeholder={$t('entry.di')}
+  placeholder={$page.data.t('entry_field.dialects')}
   on:update={({ detail: newValue }) => {
     dispatch('valueupdate', {
       field: EntryFields.dialects,
       newValue,
     });
   }}>
-  <span slot="heading">{$t('entry.di')}</span>
+  <span slot="heading">{$page.data.t('entry_field.dialects')}</span>
 </ModalEditableArray>

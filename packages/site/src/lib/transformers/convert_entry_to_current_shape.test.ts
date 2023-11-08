@@ -12,7 +12,7 @@ describe(convert_entry_to_current_shape, () => {
     expect(convert_entry_to_current_shape(actual_database_entry)).toEqual(goal_database_entry);
   });
 
-  test('ensure dialect is an array', () => {
+  test('ensure dialects is an array', () => {
     const dialect = 'west';
     const expected: GoalDatabaseEntry = { di: [dialect] }
 
@@ -21,6 +21,17 @@ describe(convert_entry_to_current_shape, () => {
 
     const dialect_array = [dialect];
     expect(convert_entry_to_current_shape({ di: dialect_array })).toEqual(expected);
+  });
+
+  test('ensure scientific_names is an array', () => {
+    const scientific_name = 'west';
+    const expected: GoalDatabaseEntry = { scn: [scientific_name] }
+
+    const scientific_name_string = scientific_name;
+    expect(convert_entry_to_current_shape({ scn: scientific_name_string })).toEqual(expected);
+
+    const scientifi_name_array = [scientific_name];
+    expect(convert_entry_to_current_shape({ scn: scientifi_name_array })).toEqual(expected);
   });
 
   test('moves parts of speech arrays', () => {

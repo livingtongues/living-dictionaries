@@ -1,5 +1,4 @@
 <script lang="ts">
-  // import { t } from 'svelte-i18n';
   // import SeoMetaTags from '$lib/components/SeoMetaTags.svelte';
   import { onMount, getContext } from 'svelte';
   import { Doc } from 'sveltefirets';
@@ -12,6 +11,7 @@
   import { deleteImage } from '$lib/helpers/delete';
   import type { InstantSearch } from 'instantsearch.js';
   import { saveUpdateToFirestore } from '$lib/helpers/entry/update';
+  import { page } from '$app/stores';
 
   const search: InstantSearch = getContext('search');
 
@@ -34,7 +34,7 @@
         let:data={entry}>
         <ListEntry
           dictionary={$dictionary}
-          entry={convert_and_expand_entry(entry)}
+          entry={convert_and_expand_entry(entry, $page.data.t)}
           videoAccess={$dictionary.videoAccess || $admin > 0}
           canEdit={$canEdit}
           on:deleteImage={() => deleteImage(entry, $dictionary.id)}
@@ -43,14 +43,14 @@
     {/each}
   {:else}
     {#each entries as entry (entry.id)}
-      <ListEntry dictionary={$dictionary} entry={convert_and_expand_entry(entry)} />
+      <ListEntry dictionary={$dictionary} entry={convert_and_expand_entry(entry, $page.data.t)} />
     {/each}
   {/if}
 </Hits>
 <Pagination {search} />
 
 <!-- <SeoMetaTags
-  title={$t('', { default: 'Entries List' })}
+  title={$page.data.t(''})}
   dictionaryName={$dictionary.name}
-  description={$t('', { default: 'The entries in this Living Dictionary are displayed in a comprehensive list that visitors can easily browse by using the page tabs at the bottom of the screen, or search by using the powerful search bar located at the top of the page.' })}
+  description={$page.data.t(''})}
   keywords="Endangered Languages, Language Documentation, Language Revitalization, Build a Dictionary, Online Dictionary, Digital Dictionary, Dictionary Software, Free Software, Online Dictionary Builder, Living Dictionaries, Living Dictionary, Edit a dictionary, Search a dictionary, Browse a dictionary, Explore a Dictionary" /> -->

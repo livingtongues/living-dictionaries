@@ -4,8 +4,9 @@ import type { ExpandedPhoto, GoalDatabasePhoto } from '@living-dictionaries/type
 import type { ExpandedVideo, GoalDatabaseVideo } from '@living-dictionaries/types/video.interface';
 import { convert_timestamp_to_date_object } from './timestamp_to_date';
 import { translate_part_of_speech_to_current_language, translate_semantic_domain_keys_to_current_language } from './translate_keys_to_current_language';
+import type { TranslateFunction } from '$lib/i18n/types';
 
-export function expand_entry(database_entry: GoalDatabaseEntry): ExpandedEntry {
+export function expand_entry(database_entry: GoalDatabaseEntry, t: TranslateFunction): ExpandedEntry {
   return {
     id: database_entry.id,
     lexeme: database_entry.lx,
@@ -15,7 +16,7 @@ export function expand_entry(database_entry: GoalDatabaseEntry): ExpandedEntry {
     local_orthography_4: database_entry.lo4,
     local_orthography_5: database_entry.lo5,
     phonetic: database_entry.ph,
-    senses: database_entry.sn?.map(expand_sense) || [{}],
+    senses: database_entry.sn?.map(sense => expand_sense(sense, t)) || [{}],
     interlinearization: database_entry.in,
     morphology: database_entry.mr,
     plural_form: database_entry.pl,
@@ -31,13 +32,13 @@ export function expand_entry(database_entry: GoalDatabaseEntry): ExpandedEntry {
   }
 }
 
-function expand_sense(sense: DatabaseSense): ExpandedSense {
+function expand_sense(sense: DatabaseSense, t: TranslateFunction): ExpandedSense {
   return {
     glosses: sense.gl,
     parts_of_speech_keys: sense.ps,
-    translated_parts_of_speech: sense.ps?.map(translate_part_of_speech_to_current_language),
+    translated_parts_of_speech: sense.ps?.map(part => translate_part_of_speech_to_current_language(part, t)),
     ld_semantic_domains_keys: sense.sdn,
-    translated_ld_semantic_domains: sense.sdn?.map(translate_semantic_domain_keys_to_current_language),
+    translated_ld_semantic_domains: sense.sdn?.map(domain => translate_semantic_domain_keys_to_current_language(domain, t)),
     write_in_semantic_domains: sense.sd,
     example_sentences: sense.xs,
     photo_files: sense.pfs?.map(expand_photo),

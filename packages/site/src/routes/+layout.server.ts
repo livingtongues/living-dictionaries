@@ -1,17 +1,10 @@
-import { loadLocaleOnServer } from '$lib/i18n';
 import type { IUser } from '@living-dictionaries/types';
-
 import type { LayoutServerLoad } from './$types';
-export const load: LayoutServerLoad = async ({ cookies, request, url }) => {
-  const urlLocale = url.searchParams.get('lang');
-  const chosenLocale = cookies.get('locale') || null;
+import { findSupportedLocaleFromAcceptedLangauges } from '$lib/i18n/locales';
 
-  let acceptedLanguage = 'en';
-  if (request.headers['accept-language'])
-    acceptedLanguage = request.headers['accept-language'].split(',')[0].trim();
-
-  // perhaps could still run in hooks.server.ts
-  await loadLocaleOnServer(urlLocale || chosenLocale, acceptedLanguage);
+export const load: LayoutServerLoad = ({ cookies, request }) => {
+  const chosenLocale = cookies.get('locale')
+  const acceptedLanguage = findSupportedLocaleFromAcceptedLangauges(request.headers.get('accept-language'))
 
   let user: IUser = null;
   try {
@@ -21,6 +14,7 @@ export const load: LayoutServerLoad = async ({ cookies, request, url }) => {
   }
 
   return {
+    serverLocale: chosenLocale || acceptedLanguage,
     user,
   };
 };
