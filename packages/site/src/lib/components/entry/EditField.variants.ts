@@ -62,7 +62,7 @@ export const variants: Variant<Component>[] = [
   },
   {
     name: 'Phonetic',
-    description: 'needs translation',
+    description: 'needs translation, needs modal width to max-width of 60rem',
     viewports: [{
       width: 750,
       height: 600,

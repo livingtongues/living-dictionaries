@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { t } from 'svelte-i18n';
+  import { page } from '$app/stores';
   import { tweened } from 'svelte/motion';
   import { cubicOut } from 'svelte/easing';
 
@@ -18,7 +18,7 @@
       <span
         class="text-xs font-semibold inline-block py-1 px-2 uppercase
           rounded-full text-blue-600 bg-blue-200">
-        {$t('misc.downloading', { default: 'Downloading' })}
+        {$page.data.t('misc.downloading')}
       </span>
     </div>
     <div class="text-right">

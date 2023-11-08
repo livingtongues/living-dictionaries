@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { t } from 'svelte-i18n';
+  import { page } from '$app/stores';
   import { Doc, set } from 'sveltefirets';
   import { Button, Form } from 'svelte-pieces';
   import type { ICitation, IDictionary } from '@living-dictionaries/types';
@@ -28,7 +28,7 @@
         }
       }}>
       <label for="names" class="block text-sm font-medium leading-5 text-gray-700 mt-4">
-        {$t('contributors.how_to_cite_instructions', { default: 'Add the authors of this dictionary to show their names in the citation' })}
+        {$page.data.t('contributors.how_to_cite_instructions')}
       </label>
       <div class="mt-1 rounded-md shadow-sm">
         <input
@@ -44,7 +44,7 @@
           }} />
       </div>
       <Button class="my-1" {loading} type="submit">
-        {$t('misc.save', { default: 'Save' })}
+        {$page.data.t('misc.save')}
       </Button>
     </Form>
   {/if}
@@ -52,7 +52,7 @@
   <div dir="ltr">
     {citation?.citation ? citation.citation + ' ' : ''}
     {new Date().getFullYear()}.
-    <span>{$t('dictionary.full_title', { values: { dictionary_name: dictionary.name }})}</span>
+    <span>{$page.data.t('dictionary.full_title', { values: { dictionary_name: dictionary.name }})}</span>
     Living Tongues Institute for Endangered Languages. https://livingdictionaries.app/{dictionary.id}
   </div>
 </Doc>

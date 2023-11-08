@@ -3,14 +3,11 @@ import type Component from './PrintEntry.svelte';
 import type { IPrintFields } from '@living-dictionaries/types';
 import { complex, simple } from '$lib/mocks/entries';
 import { basic_mock_dictionary } from '$lib/mocks/dictionaries';
+import { defaultPrintFields } from './printFields';
 
 const selectedFields: IPrintFields = {
-  gloss: true,
-  alternateOrthographies: true,
-  ph: true,
-  ps: true,
-  example_sentence: true,
-  sdn: true,
+  ...defaultPrintFields,
+  semantic_domains: true,
   noun_class: true,
   interlinearization: true,
   morphology: true,
@@ -18,9 +15,9 @@ const selectedFields: IPrintFields = {
   variant: true,
   dialects: true,
   notes: true,
-  image: true,
+  photo: true,
   speaker: true,
-  sr: true,
+  sources: true,
 };
 
 export const variants: Variant<Component>[] = [

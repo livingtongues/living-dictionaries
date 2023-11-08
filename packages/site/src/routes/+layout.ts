@@ -1,11 +1,11 @@
-import { loadLocaleOnClient } from '$lib/i18n';
-import { browser } from '$app/environment';
 import type { LayoutLoad } from './$types';
-export const load: LayoutLoad = async ({ data }) => {
-  if (browser)
-    await loadLocaleOnClient();
+import { getTranslator } from '$lib/i18n'
+import { getSupportedLocale } from '$lib/i18n/locales'
+import { dev } from '$app/environment';
 
-  return {
-    user: data.user,
-  };
+export const load: LayoutLoad = async ({  url: { searchParams }, data: { serverLocale, user } }) => {
+  const urlLocale = searchParams.get('lang')
+  const locale = getSupportedLocale(urlLocale || serverLocale) || 'en'
+  const t = await getTranslator(locale, { errorOnMissingBase: dev})
+  return { locale, t, user }
 };
