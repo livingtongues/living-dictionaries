@@ -12,21 +12,21 @@ test('generateTranslationsFromSpreadsheet deep nests app translations', async ()
 
 test('generateTranslationsFromSpreadsheet prefixes glossing languages', async () => {
   const rows = await jsonFromLocalCsv(path.join(__dirname, './Glossing-Languages.csv'));
-  const translations = generateTranslationsFromSpreadsheet(rows, { prefix: 'gl' });
+  const translations = generateTranslationsFromSpreadsheet(rows, { section: 'gl' });
   expect(translations.en.gl.aa).toBe('Afar');
   expect(translations.es.gl.aa).toBe('Lejos');
 });
 
 test('generateTranslationsFromSpreadsheet prefixes parts of speech', async () => {
   const rows = await jsonFromLocalCsv(path.join(__dirname, './Parts-of-Speech.csv'));
-  const translations = generateTranslationsFromSpreadsheet(rows, { prefix: 'ps' });
+  const translations = generateTranslationsFromSpreadsheet(rows, { section: 'ps' });
   expect(translations.en.ps.n).toBe('noun');
   expect(translations.es.ps.n).toBe('sustantivo');
 });
 
 test('generateTranslationsFromSpreadsheet prefixes parts of speech abbreviations', async () => {
   const rows = await jsonFromLocalCsv(path.join(__dirname, './Parts-of-Speech.csv'));
-  const translations = generateTranslationsFromSpreadsheet(rows, { prefix: 'psAbbrev' });
+  const translations = generateTranslationsFromSpreadsheet(rows, { section: 'psAbbrev' });
   expect(translations.en.psAbbrev.n).toBe('n');
   expect(translations.es.psAbbrev.n).toBe('s');
 });

@@ -222,9 +222,6 @@ importers:
       csvtojson:
         specifier: ^2.0.10
         version: 2.0.10
-      dot-object:
-        specifier: ^2.1.4
-        version: 2.1.4
       dotenv:
         specifier: ^16.0.2
         version: 16.0.2
@@ -327,9 +324,6 @@ importers:
       d3-dsv:
         specifier: ^3.0.1
         version: 3.0.1
-      dot-object:
-        specifier: ^2.1.4
-        version: 2.1.4
       file-saver:
         specifier: ^2.0.5
         version: 2.0.5
@@ -4173,7 +4167,7 @@ packages:
     peerDependencies:
       '@sveltejs/kit': ^1.0.0
     dependencies:
-      '@sveltejs/kit': 1.22.3(svelte@3.55.1)(vite@4.4.7)
+      '@sveltejs/kit': 1.22.3(svelte@3.59.2)(vite@4.4.7)
       import-meta-resolve: 3.0.0
     dev: true
 
@@ -7639,6 +7633,7 @@ packages:
   /commander@4.1.1:
     resolution: {integrity: sha512-NOKm8xhkzAjzFx8B2v5OAHT+u5pRQc2UCa2Vq9jYL/31o2wi9mxBA7LIFs3sV5VSC49z6pEhfbMULvShKj26WA==}
     engines: {node: '>= 6'}
+    dev: false
 
   /commander@7.2.0:
     resolution: {integrity: sha512-QrWXB+ZQSVPmIWIhtEO9H+gwHaMGYiF5ChvoJ+K9ZGHG/sVsa6yiesAD1GC/x46sET00Xlwo1u49RVVVzvcSkw==}
@@ -8184,14 +8179,6 @@ packages:
 
   /dom-storage@2.1.0:
     resolution: {integrity: sha512-g6RpyWXzl0RR6OTElHKBl7nwnK87GUyZMYC7JWsB/IA73vpqK2K6LT39x4VepLxlSsWBFrPVLnsSR5Jyty0+2Q==}
-    dev: true
-
-  /dot-object@2.1.4:
-    resolution: {integrity: sha512-7FXnyyCLFawNYJ+NhkqyP9Wd2yzuo+7n9pGiYpkmXCTYa8Ci2U0eUNDVg5OuO5Pm6aFXI2SWN8/N/w7SJWu1WA==}
-    hasBin: true
-    dependencies:
-      commander: 4.1.1
-      glob: 7.2.0
     dev: true
 
   /dot-prop@5.3.0:
@@ -9547,17 +9534,6 @@ packages:
       path-scurry: 1.10.1
     dev: false
     optional: true
-
-  /glob@7.2.0:
-    resolution: {integrity: sha512-lmLf6gtyrPq8tTjSmrO94wBeQbFR3HbLHbuyD69wuyQkImp2hWqMGB47OX65FBkPffO641IP9jWa1z4ivqG26Q==}
-    dependencies:
-      fs.realpath: 1.0.0
-      inflight: 1.0.6
-      inherits: 2.0.4
-      minimatch: 3.1.2
-      once: 1.4.0
-      path-is-absolute: 1.0.1
-    dev: true
 
   /glob@7.2.3:
     resolution: {integrity: sha512-nFR0zLpU2YCaRxwoCJvL6UvCH2JFyFVIvwTLsIf21AuHlMskA1hhTdk+LlYJtOlYt9v6dvszD2BGRqBL+iQK9Q==}
