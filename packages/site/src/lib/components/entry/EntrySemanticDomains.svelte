@@ -28,7 +28,7 @@
   options={translated_semantic_domain_options}
   {canEdit}
   {showPlus}
-  placeholder={$page.data.t('entry.sdn')}
+  placeholder={$page.data.t('entry_field.semantic_domains')}
   on:update={({ detail: newValue }) => {
     dispatch('valueupdate', {
       field: EntryFields.semantic_domains,

@@ -29,7 +29,7 @@
       value={entry.lexeme}
       field="lexeme"
       {canEdit}
-      display={$page.data.t('entry.lx')}
+      display={$page.data.t('entry_field.lexeme')}
       on:update={({detail}) => dispatch('valueupdate', { field: EntryFields.lexeme, newValue: detail})} />
   </div>
 
@@ -48,7 +48,7 @@
         on:update={({detail}) => dispatch('valueupdate', { field: orthographyIndex, newValue: detail})} />
     {/each}
 
-    <EntryField value={entry.phonetic} field="phonetic" {canEdit} display={$page.data.t('entry.ph')} on:update={({detail}) => dispatch('valueupdate', { field: EntryFields.phonetic, newValue: detail})} />
+    <EntryField value={entry.phonetic} field="phonetic" {canEdit} display={$page.data.t('entry_field.phonetic')} on:update={({detail}) => dispatch('valueupdate', { field: EntryFields.phonetic, newValue: detail})} />
 
     {#if entry.senses.length < 2}
       <Sense sense={entry.senses[0]} {canEdit} glossLanguages={dictionary.glossLanguages} on:valueupdate />
@@ -90,7 +90,7 @@
 
     {#if entry.dialects?.length || canEdit}
       <div class="md:px-2" class:order-2={!entry.dialects?.length}>
-        <div class="rounded text-xs text-gray-500 mt-1 mb-2">{$page.data.t('entry.di')}</div>
+        <div class="rounded text-xs text-gray-500 mt-1 mb-2">{$page.data.t('entry_field.dialects')}</div>
         <EntryDialect {canEdit} dialects={entry.dialects} dictionaryId={dictionary.id} on:valueupdate />
         <div class="border-b-2 pb-1 mb-2 border-dashed" />
       </div>
@@ -101,7 +101,7 @@
       value={entry.scientific_names?.[0]}
       field="scientific_names"
       {canEdit}
-      display={$page.data.t('entry.scn')}
+      display={$page.data.t('entry_field.scientific_names')}
       on:update={({ detail }) => dispatch('valueupdate', { field: EntryFields.scientific_names, newValue: [detail] })} />
 
     {#if DICTIONARIES_WITH_VARIANTS.includes(dictionary.id)}
@@ -109,7 +109,7 @@
         value={entry.variant}
         field="variant"
         {canEdit}
-        display={$page.data.t(`entry.va`)}
+        display={$page.data.t(`entry_field.variant`)}
         on:update={({detail}) => dispatch('valueupdate', { field: EntryFields.variant, newValue: detail})} />
     {/if}
 
@@ -124,7 +124,7 @@
 
     {#if entry.sources?.length || canEdit}
       <div class="md:px-2" class:order-2={!entry.sources?.length}>
-        <div class="rounded text-xs text-gray-500 mt-1 mb-2">{$page.data.t('entry.sr')}</div>
+        <div class="rounded text-xs text-gray-500 mt-1 mb-2">{$page.data.t('entry_field.sources')}</div>
         <SelectSource
           {canEdit}
           value={entry.sources}

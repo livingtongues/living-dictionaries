@@ -37,7 +37,7 @@
     for="speaker"
     class="inline-flex items-center px-3 ltr:rounded-l-md rtl:rounded-r-md border
       border-gray-300 bg-gray-50 text-gray-500">
-    {$page.data.t('entry.speaker')}
+    {$page.data.t('entry_field.speaker')}
   </label>
   <select
     use:autofocus

@@ -15,7 +15,7 @@
     class="remove-button-mb"
     strings={value || []}
     {canEdit}
-    promptMessage={$page.data.t('entry.sr')}
+    promptMessage={$page.data.t('entry_field.sources')}
     addMessage=""
     on:valueupdated={(e) => dispatch('valueupdate', { field: 'sr', newValue: e.detail })}>
     <svelte:fragment slot="add" let:add>

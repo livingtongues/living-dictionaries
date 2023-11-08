@@ -82,7 +82,7 @@
       {canEdit}
       field={column.field}
       value={entry.scientific_names?.[0]}
-      display={$page.data.t('entry.scn')}
+      display={$page.data.t('entry_field.scientific_names')}
       on:update={({detail}) => dispatch('valueupdate', { field: EntryFields.scientific_names, newValue: [detail]} )} />
   {:else if column.field === 'local_orthography'}
     {@const orthographyIndex = `local_orthography_${column.orthography_index}`}

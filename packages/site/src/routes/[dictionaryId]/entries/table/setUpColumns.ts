@@ -33,7 +33,7 @@ export function setUpColumns(columns: IColumn[], dictionary: IDictionary): IColu
         bcp: 'vn', // vernacular
         width: cols[exampleSentenceIndex].width,
         sticky: cols[exampleSentenceIndex].sticky || false,
-        display: t('entry.example_sentence'),
+        display: t('entry_field.example_sentence'),
       },
     ];
     dictionary.glossLanguages.forEach((bcp) => {
@@ -42,7 +42,7 @@ export function setUpColumns(columns: IColumn[], dictionary: IDictionary): IColu
         bcp,
         width: cols[exampleSentenceIndex].width,
         sticky: cols[exampleSentenceIndex].sticky || false,
-        display: `${t({ dynamicKey: `gl.${bcp}`, fallback: bcp})} ${t('entry.example_sentence')}`,
+        display: `${t({ dynamicKey: `gl.${bcp}`, fallback: bcp})} ${t('entry_field.example_sentence')}`,
       });
     });
     cols.splice(exampleSentenceIndex, 1, ...exampleSentenceColumns);

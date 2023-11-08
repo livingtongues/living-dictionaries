@@ -1,3 +1,4 @@
+// Primary purpose is to give a readable way to dispatch database updates, the left is the readable, the right is the database value
 export enum EntryFields {
   'lexeme' = 'lx',
   'phonetic' = 'ph',
@@ -14,13 +15,16 @@ export enum EntryFields {
   'variant' = 'va',
   'sources' = 'sr',
   'elicitation_id' = 'ei',
-  'definition_english' = 'de', // only Bahasa Lani
   'parts_of_speech' = 'ps',
   'semantic_domains' = 'sdn',
   'speaker' = 'speaker',
+  'definition_english' = 'de', // only Bahasa Lani
   'photo' = 'pf',
   'audio' = 'sf',
 }
 
+
 export type EntryFieldValue = keyof typeof EntryFields;
 // export type EntryFieldKey = `${EntryFields}`;
+
+// i18n keys are `entry_field.${EntryFieldValue}` (using the left column values)

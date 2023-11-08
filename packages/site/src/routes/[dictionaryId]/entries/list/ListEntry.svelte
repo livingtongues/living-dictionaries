@@ -76,7 +76,7 @@
 
         {#if dictionary.id === 'jewish-neo-aramaic'}
           {#if entry.dialects}<p class="text-xs">
-            <i class="mr-1">{$page.data.t('entry.di')}: {entry.dialects.join(', ')}</i>
+            <i class="mr-1">{$page.data.t('entry_field.dialects')}: {entry.dialects.join(', ')}</i>
           </p>{/if}
           {#each entry.senses?.[0]?.example_sentences || [{}] as sentence}
             {#each Object.entries(sentence) as [bcp, content]}
@@ -85,7 +85,7 @@
                   {#if bcp !== 'vn'}
                     {$page.data.t({ dynamicKey: `gl.${bcp}`, fallback: bcp })}
                   {/if}
-                  {$page.data.t('entry.example_sentence')}:</span>
+                  {$page.data.t('entry_field.example_sentence')}:</span>
                 {content}
               </p>
             {/each}
@@ -94,7 +94,7 @@
 
         {#if entry.plural_form}
           <p class="text-xs">
-            {$page.data.t('entry.pl')}: {entry.plural_form}
+            {$page.data.t('entry_field.plural_form')}: {entry.plural_form}
           </p>
         {/if}
       </div>
@@ -144,7 +144,7 @@
   {:else if canEdit}
     <AddImage dictionaryId={dictionary.id} entryId={entry.id} class="w-12 bg-gray-100">
       <div class="text-xs" slot="text">
-        {$page.data.t('entry.photo')}
+        {$page.data.t('entry_field.photo')}
       </div>
     </AddImage>
   {/if}
