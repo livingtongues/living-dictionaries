@@ -25,18 +25,18 @@
 <div style="font-size: {fontSize}pt;">
   <b style="font-size: {headwordSize}pt;">{entry.lexeme}</b>
 
-  {#if selectedFields.alternateOrthographies}
+  {#if selectedFields.local_orthography}
     {#each get_local_orthographies(entry) as orthography}
       <b>{orthography}, </b>
     {/each}
   {/if}
 
-  {#if selectedFields.ph && entry.phonetic}
+  {#if selectedFields.phonetic && entry.phonetic}
     [{entry.phonetic}]
   {/if}
 
   {#each entry.senses || [] as sense}
-    {#if selectedFields.ps && sense.parts_of_speech_keys}<i>{add_periods_and_comma_separate_parts_of_speech(sense.parts_of_speech_keys)}</i>{/if}
+    {#if selectedFields.parts_of_speech && sense.parts_of_speech_keys}<i>{add_periods_and_comma_separate_parts_of_speech(sense.parts_of_speech_keys)}</i>{/if}
 
     {#if selectedFields.gloss && sense.glosses}
       <span>
@@ -52,7 +52,7 @@
       {spaceSeparateSentences(sense.example_sentences)}
     {/if}
 
-    {#if selectedFields.sdn}
+    {#if selectedFields.semantic_domains}
       {@const semantic_domains = [...sense.translated_ld_semantic_domains || [], ...sense.write_in_semantic_domains || []]}
       {#if semantic_domains.length}
         <div>
@@ -93,7 +93,7 @@
     {/each}
   </div>
 
-  {#if selectedFields.sr && entry.sources}
+  {#if selectedFields.sources && entry.sources}
     <div>
       {#if showLabels}
         <span class="italic text-[80%]">{$page.data.t('entry_field.sources')}: </span>
@@ -113,7 +113,7 @@
   {/if}
 </div>
 
-{#if selectedFields.image && entry.senses?.[0]?.photo_files?.[0]}
+{#if selectedFields.photo && entry.senses?.[0]?.photo_files?.[0]}
   <!-- max-height keeps tall images from spilling onto 2nd page when printing single column w/ images at 100% width; -->
   <img
     class="block mb-1 mt-1px"
