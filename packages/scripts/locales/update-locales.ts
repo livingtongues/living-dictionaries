@@ -10,21 +10,21 @@ const LOCALES_DIRECTORY = '../site/src/lib/i18n/locales';
 
 export async function generateFilesFromSpreadsheet() {
   const rows = await jsonFromCsvUrl(getGoogleSheetCsvUrl(I18N_GOOGLE_SHEET_ID, 'App-Translations'));
-  const translations = generateTranslationsFromSpreadsheet(rows);
+  const translations = prepareMainTranslationsFromSpreadsheet(rows);
   await writeLocaleFiles(translations, LOCALES_DIRECTORY);
 
   const rows_sd = await jsonFromCsvUrl(getGoogleSheetCsvUrl(I18N_GOOGLE_SHEET_ID, 'Semantic-Domains'));
-  const translations_sd = generateTranslationsFromSpreadsheet(rows_sd, { section: 'sd' });
+  const translations_sd = getSectionTranslationsFromSpreadsheet(rows_sd, { section: 'sd' });
   await writeLocaleFiles(translations_sd, LOCALES_DIRECTORY + '/sd');
 
   const rows_ps = await jsonFromCsvUrl(getGoogleSheetCsvUrl(I18N_GOOGLE_SHEET_ID, 'Parts-of-Speech'));
-  const translations_ps = generateTranslationsFromSpreadsheet(rows_ps, { section: 'ps' });
+  const translations_ps = getSectionTranslationsFromSpreadsheet(rows_ps, { section: 'ps' });
   await writeLocaleFiles(translations_ps, LOCALES_DIRECTORY + '/ps');
-  const translations_psAbbrev = generateTranslationsFromSpreadsheet(rows_ps, { section: 'psAbbrev' });
+  const translations_psAbbrev = getSectionTranslationsFromSpreadsheet(rows_ps, { section: 'psAbbrev' });
   await writeLocaleFiles(translations_psAbbrev, LOCALES_DIRECTORY + '/psAbbrev');
 
   const rows_gl = await jsonFromCsvUrl(getGoogleSheetCsvUrl(I18N_GOOGLE_SHEET_ID, 'Glossing-Languages'));
-  const translations_gl = generateTranslationsFromSpreadsheet(rows_gl, { section: 'gl' });
+  const translations_gl = getSectionTranslationsFromSpreadsheet(rows_gl, { section: 'gl' });
   await writeLocaleFiles(translations_gl, LOCALES_DIRECTORY + '/gl');
   
   const glossingLanguages = await generateGlossingLanguages(rows_gl);
@@ -37,36 +37,55 @@ export async function generateFilesFromSpreadsheet() {
 
 generateFilesFromSpreadsheet();
 
-export const generateTranslationsFromSpreadsheet: (
-  rows: any[],
-  options?: {
-    section?: string;
+interface AllTranslations {
+  [languageBCP47: string]: TranslationsForLanguage
+}
+
+interface TranslationsForLanguage {
+  [component: string]: {
+    [item: string]: string;
   }
-) => Record<string, unknown> = (rows, options = {}) => {
-  const translations: Record<string, any> = {};
+}
 
+export const prepareMainTranslationsFromSpreadsheet = (rows: Record<string | 'component' | 'item', string>[]) => {
+  const translations: AllTranslations = {};
+  
   languages.forEach((lang) => {
-    translations[lang] = {};
-    
-    const langColumn = options.section === 'psAbbrev' 
-      ? lang + 'Abbrev' 
-      : lang;
-
+    const translationsForLanguage: TranslationsForLanguage = {};
     rows.forEach((row) => {
-      const { component, item, key } = row;
-      const value = row[langColumn] || '';
-      if (component && item) { // main translations
-        translations[lang][component][item] = value;
-      } else if (options.section && key) { // glosses, parts of speech, semantic domains
-        translations[lang][options.section][key] = value;
-      } else {
-        console.log('missing component, item, or key for row:', row)
+      const { component, item } = row;
+      const value = row[lang] || '';
+      if (!translationsForLanguage[component]) {
+        translationsForLanguage[component] = {};
       }
+      translationsForLanguage[component][item] = value;
     });
 
-    if (options.section)
-      translations[lang] = { [options.section]: translations[lang] };
+    translations[lang] = translationsForLanguage;
+  });
 
+  return translations;
+}
+
+// glosses, parts of speech, semantic domains
+export const getSectionTranslationsFromSpreadsheet = (rows: Record<string | 'key', string>[], options: { section: 'gl' | 'ps' | 'psAbbrev' | 'sd' }) => {
+  const translations: AllTranslations = {};
+
+  languages.forEach((lang) => {
+    const translationsForSection: { [key: string]: string } = {};
+    
+    const langColumn = 
+      options.section === 'psAbbrev' 
+        ? lang + 'Abbrev' 
+        : lang;
+
+    rows.forEach((row) => {
+      const { key } = row;
+      const value = row[langColumn] || '';
+      translationsForSection[key] = value;
+    });
+
+    translations[lang] = { [options.section]: translationsForSection };
   });
 
   return translations;
@@ -79,7 +98,6 @@ async function generateGlossingLanguages(rows: any[]) {
     for (const column of ['vernacularName', 'vernacularAlternate', 'internalName', 'useKeyboard']) {
       if (row[column].length)
         language[column] = row[column];
-
     }
     if (row.showKeyboard == 'true')
       language.showKeyboard = true;
