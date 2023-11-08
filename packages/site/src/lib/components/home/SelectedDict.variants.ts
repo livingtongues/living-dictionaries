@@ -1,7 +1,6 @@
 import type { Variant } from 'kitbook';
 import type Component from './SelectedDict.svelte';
 import type { IDictionary } from '@living-dictionaries/types';
-import { Timestamp } from 'firebase/firestore';
 
 const dictionary: IDictionary =  {
   'updatedBy': 'U9u2OqBEArZSFV88Xu8TlvOWbbn1',
@@ -20,7 +19,6 @@ const dictionary: IDictionary =  {
   ],
   'public': true,
   'id': 'achi',
-  updatedAt: Timestamp.fromDate(new Date(2023, 7, 11, 15, 35, 54))
 }
 
 export const variants: Variant<Component>[] = [
@@ -28,7 +26,15 @@ export const variants: Variant<Component>[] = [
     name: 'Normal',
     languages: [],
     props: {
-      dictionary
+      dictionary,
+    }
+  },
+  {
+    name: 'Displays last update',
+    languages: [],
+    props: {
+      dictionary,
+      lastFieldUpdatedAt: 1673598370158,
     }
   },
 ];

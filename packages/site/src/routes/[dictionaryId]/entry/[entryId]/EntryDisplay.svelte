@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { EntryFields, type EntryFieldValue, type ExpandedEntry, type IDictionary, type History } from '@living-dictionaries/types';
+  import { EntryFields, type EntryFieldValue, type ExpandedEntry, type IDictionary, type Change } from '@living-dictionaries/types';
   import { t } from 'svelte-i18n';
   import EntryField from './EntryField.svelte';
   import { createEventDispatcher } from 'svelte';
@@ -15,7 +15,7 @@
   export let dictionary: IDictionary;
   export let canEdit = false;
   export let videoAccess = false;
-  export let history: History[] = undefined;
+  export let history: Change[] = undefined;
   export let admin: number;
 
   const dispatch = createEventDispatcher<{

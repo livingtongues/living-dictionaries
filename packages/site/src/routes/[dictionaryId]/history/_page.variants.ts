@@ -1,64 +1,92 @@
 import type { Variant } from 'kitbook';
-import { Timestamp } from 'firebase/firestore';
 import type Component from './+page.svelte';
+import type { Change } from '@living-dictionaries/types';
 
-const history = [
+const history: Change[] = [
   {
-    editor: 'Diego Córdova',
-    editedLexeme: 'Giraffe',
+    updatedBy: '',
+    updatedName: 'Diego Córdova',
     entryId: '001',
-    editedDictionaryId: 'Banange',
-    action: 'created',
-    updatedAt: Timestamp.fromDate(new Date(2023, 7, 11, 15, 35, 54))
+    entryName: 'Giraffe',
+    dictionaryId: 'Banange',
+    dictionaryName: '',
+    previousValue: 'created',
+    currentValue: '',
+    field: '',
+    updatedAtMs: 1669598370158
   },
   {
-    editor: 'Anna Luisa',
-    editedLexeme: 'Elephant',
+    updatedBy: '',
+    updatedName: 'Anna Luisa',
     entryId: '002',
-    editedDictionaryId: 'Banange',
-    action: 'created',
-    updatedAt: Timestamp.fromDate(new Date(2023, 8, 24, 15, 36, 54))
+    entryName: 'Elephant',
+    dictionaryId: 'Banange',
+    dictionaryName: '',
+    previousValue: 'created',
+    currentValue: '',
+    field: '',
+    updatedAtMs: 1669593870158
   },
   {
-    editor: 'Diego Córdova',
-    editedLexeme: 'Elephant',
+    updatedBy: '',
+    updatedName: 'Diego Córdova',
     entryId: '002',
-    editedDictionaryId: 'Banange',
-    action: 'edited',
-    updatedAt: Timestamp.fromDate(new Date(2023, 9, 12, 15, 35, 59))
+    entryName: 'Elephant',
+    dictionaryId: 'Banange',
+    dictionaryName: '',
+    previousValue: 'edited',
+    currentValue: '',
+    field: '',
+    updatedAtMs: 1669528370158
   },
   {
-    editor: 'Anna Luisa',
-    editedLexeme: 'Giraffe',
+    updatedBy: '',
+    updatedName: 'Anna Luisa',
     entryId: '001',
-    editedDictionaryId: 'Banange',
-    action: 'edited',
-    updatedAt: Timestamp.fromDate(new Date(2023, 9, 12, 15, 39, 2))
+    entryName: 'Giraffe',
+    dictionaryId: 'Banange',
+    dictionaryName: '',
+    previousValue: 'edited',
+    currentValue: '',
+    field: '',
+    updatedAtMs: 1663898370158
   },
   {
-    editor: 'Jacob Bowdoin',
-    editedLexeme: 'Monkey',
+    updatedBy: '',
+    updatedName: 'Jacob Bowdoin',
     entryId: '005',
-    editedDictionaryId: 'Banange',
-    action: 'created',
-    updatedAt: Timestamp.fromDate(new Date(2023, 9, 31, 12, 35, 9))
+    entryName: 'Monkey',
+    dictionaryId: 'Banange',
+    dictionaryName: '',
+    previousValue: 'created',
+    currentValue: '',
+    field: '',
+    updatedAtMs: 1663812370158
   },
   {
-    editor: 'Diego Córdova',
-    editedLexeme: 'Monkey',
+    updatedBy: '',
+    updatedName: 'Diego Córdova',
     entryId: '005',
-    editedDictionaryId: 'Banange',
-    action: 'deleted',
-    updatedAt: Timestamp.fromDate(new Date(2023, 10, 1, 15, 36, 54))
+    entryName: 'Monkey',
+    dictionaryId: 'Banange',
+    dictionaryName: '',
+    previousValue: '',
+    currentValue: 'mʌŋki',
+    field: 'phonetic',
+    updatedAtMs: 1663808370558
   },
   {
-    editor: 'Anna Luisa',
-    editedLexeme: 'Giraffe',
+    updatedBy: '',
+    updatedName: 'Anna Luisa',
     entryId: '001',
-    editedDictionaryId: 'Banange',
-    action: 'deleted',
-    updatedAt: Timestamp.fromDate(new Date(2023, 9, 30, 11, 39, 42))
-  },
+    entryName: 'Giraffe',
+    dictionaryId: 'Banange',
+    dictionaryName: '',
+    previousValue: 'Snake',
+    currentValue: 'Giraffe',
+    field: 'lexeme',
+    updatedAtMs: 1660099370158
+  }
 ];
 
 export const variants: Variant<Component>[] = [
@@ -72,7 +100,7 @@ export const variants: Variant<Component>[] = [
           glossLanguages: []
         },
         user: null,
-        history: [...history].sort((a, b) => b.updatedAt.toDate().getTime() - a.updatedAt.toDate().getTime())
+        history: [...history].sort((a, b) => b.updatedAtMs - a.updatedAtMs)
       }
     }
   },
@@ -86,50 +114,50 @@ export const variants: Variant<Component>[] = [
           glossLanguages: []
         },
         user: null,
-        history: [...history].sort((a, b) => a.updatedAt.toDate().getTime() - b.updatedAt.toDate().getTime())
+        history: [...history].sort((a, b) => a.updatedAtMs - b.updatedAtMs)
       }
     }
   },
-  {
-    name: 'Sorted by action',
-    languages: [],
-    props: {
-      data: {
-        dictionary: {
-          name: 'Banange',
-          glossLanguages: []
-        },
-        user: null,
-        history: [...history].sort((a, b) => b.action > a.action ? 1 : -1)
-      }
-    }
-  },
-  {
-    name: 'Sorted by editor',
-    languages: [],
-    props: {
-      data: {
-        dictionary: {
-          name: 'Banange',
-          glossLanguages: []
-        },
-        user: null,
-        history: [...history].sort((a, b) => a.editor > b.editor ? 1 : -1)
-      }
-    }
-  },
-  {
-    name: 'Sorted by lexeme',
-    languages: [],
-    props: {
-      data: {
-        dictionary: {
-          name: 'Banange',
-          glossLanguages: []
-        },
-        user: null,
-        history: [...history].sort((a, b) => a.editedLexeme > b.editedLexeme ? 1 : -1)
-      }
-    }
-  },
+  // {
+  //   name: 'Sorted by action',
+  //   languages: [],
+  //   props: {
+  //     data: {
+  //       dictionary: {
+  //         name: 'Banange',
+  //         glossLanguages: []
+  //       },
+  //       user: null,
+  //       history: [...history].sort((a, b) => b.action > a.action ? 1 : -1)
+  //     }
+  //   }
+  // },
+  // {
+  //   name: 'Sorted by editor',
+  //   languages: [],
+  //   props: {
+  //     data: {
+  //       dictionary: {
+  //         name: 'Banange',
+  //         glossLanguages: []
+  //       },
+  //       user: null,
+  //       history: [...history].sort((a, b) => a.editor > b.editor ? 1 : -1)
+  //     }
+  //   }
+  // },
+  // {
+  //   name: 'Sorted by lexeme',
+  //   languages: [],
+  //   props: {
+  //     data: {
+  //       dictionary: {
+  //         name: 'Banange',
+  //         glossLanguages: []
+  //       },
+  //       user: null,
+  //       history: [...history].sort((a, b) => a.editedLexeme > b.editedLexeme ? 1 : -1)
+  //     }
+  //   }
+  // },
 ]

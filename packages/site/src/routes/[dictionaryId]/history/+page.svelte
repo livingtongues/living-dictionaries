@@ -10,17 +10,18 @@
     year: number;
   }
   let dates: monthAndYear[];
-  let selected: 'date' | 'action' | 'editor' | 'lexeme' = 'date';
+  let selected: 'date' | 'action' | 'editor' | 'lexeme' | 'field' = 'date';
   const options = [
     'date',
     'action',
     'editor',
-    'lexeme'
+    'lexeme',
+    'field'
   ]
 
   function sortByDates() {
     const reducedDates = data.history.reduce((acc, record) => {
-      const date = record.updatedAt.toDate();
+      const date = new Date(record.updatedAtMs);
       const month = date.getMonth();
       const year = date.getFullYear();
       const key = `${month}-${year}`;
@@ -57,7 +58,7 @@
   {#if canEdit}
     {#if data.history.length > 0}
       {#each dates as date}
-        <Block records={data.history.filter(record => record.updatedAt.toDate().getMonth() === date.month && record.updatedAt.toDate().getFullYear() === date.year)} />
+        <Block records={data.history.filter(record => new Date(record.updatedAtMs).getMonth() === date.month && new Date(record.updatedAtMs).getFullYear() === date.year)} />
       {/each}
     {:else}
       <p>History is empty</p>

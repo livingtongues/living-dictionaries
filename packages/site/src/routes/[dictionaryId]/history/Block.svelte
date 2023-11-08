@@ -1,14 +1,23 @@
 <script lang="ts">
-  import type { History } from '@living-dictionaries/types';
+  import type { Change } from '@living-dictionaries/types';
 
-  export let records: History[];
+  export let records: Change[];
+
+  function getAction(previousValue: string | string[], currentValue: string | string[]): string {
+    if (previousValue?.length === 0)
+      return 'created';
+    else if (currentValue?.length === 0)
+      return 'deleted';
+
+    return 'edited';
+  }
 </script>
 
 <ul class="m-3 md:text-xl">
   {#each records as record}
-    {@const { editor, editedLexeme, editedDictionaryId, action, updatedAt } = record}
-    {@const date = updatedAt.toDate()}
-    <li class="mb-2">{editor} <strong>{action}</strong> <a href="{editedDictionaryId}/{editedLexeme}">{editedLexeme}</a> on {date.toLocaleString()}</li>
+    {@const { updatedName, entryId, entryName, dictionaryId, previousValue, currentValue, field, updatedAtMs } = record}
+    {@const date = new Date(updatedAtMs)}
+    <li class="mb-2">{updatedName} <strong>{getAction(previousValue, currentValue)}</strong> {field} field on <a href="{dictionaryId}/{entryId}">{entryName}</a> on {date.toLocaleString()}</li>
   {/each}
 </ul>
 

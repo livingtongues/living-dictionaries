@@ -6,6 +6,7 @@
   import sanitize from 'xss';
 
   export let dictionary: IDictionary;
+  export let lastFieldUpdatedAt: number = undefined;
   let aboutType: IAbout;
 
   function truncateString(str, num) {
@@ -89,7 +90,7 @@
       <span class="i-fa6-solid-chevron-right rtl-x-flip -mt-1" />
     </Button>
   {/if}
-  <p class="mt-3 text-xs text-gray-500">This dictionary was last updated on {dictionary.updatedAt.toDate().toLocaleString()}</p>
+  {#if lastFieldUpdatedAt}<p class="mt-3 text-xs text-gray-500">This dictionary was last updated on {new Date(lastFieldUpdatedAt).toString()}</p>{/if}
 </div>
 
 <style>

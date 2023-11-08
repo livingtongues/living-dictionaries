@@ -1,19 +1,27 @@
 <script lang="ts">
-  import type { History } from '@living-dictionaries/types';
-  export let history: History[];
+  import type { Change } from '@living-dictionaries/types';
+
+  export let history: Change[];
   export let canEdit = false;
+
+  const formatter = new Intl.DateTimeFormat('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    timeZoneName: 'short'
+  });
 </script>
 
 <div class="{$$props.class} text-gray-500">
   {#if canEdit}
     <strong>Lexeme history:</strong>
     {#each history as record}
-      <!-- TODO it could be better to query only lexeme records-->
-      {#if window.location.pathname.match(record.entryId)}
-        <p class="m-3">{record.editor} edited this entry on {record.updatedAt.toDate().toLocaleString()}</p>
-      {/if}
+      <p class="m-3">{record.updatedName} edited this entry on {formatter.format(new Date(record.updatedAtMs))}</p>
     {/each}
   {:else}
-    <p class="m-3">Last edited on {history[0].updatedAt.toDate().toLocaleString()}</p>
+    <p class="m-3">Last edited on {new Date(history[0].updatedAtMs).toDateString()}</p>
   {/if}
 </div>

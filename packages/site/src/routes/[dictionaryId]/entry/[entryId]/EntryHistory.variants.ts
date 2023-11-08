@@ -1,23 +1,55 @@
 import type { Variant } from 'kitbook';
 import type Component from './EntryHistory.svelte';
-import { Timestamp } from 'firebase/firestore';
+import type { Change } from '@living-dictionaries/types';
 
-const history = [
+const history:Change[] = [
   {
-    editor: 'Anna Luisa',
-    editedLexeme: 'Giraffe',
-    entryId: 'EntryHistory',
-    editedDictionaryId: 'Banange',
-    action: 'edited',
-    updatedAt: Timestamp.fromDate(new Date(2023, 9, 12, 18, 39, 2))
+    updatedBy: '0002',
+    updatedName: 'Diego Córdova',
+    entryName: 'Giraffe',
+    entryId: '002',
+    dictionaryId: 'banange',
+    dictionaryName: 'Banange',
+    previousValue: ['n'],
+    currentValue: [],
+    field: 'parts of speech',
+    updatedAtMs: 1673598370158
   },
   {
-    editor: 'Diego Córdova',
-    editedLexeme: 'Elephant',
-    entryId: 'EntryHistory',
-    editedDictionaryId: 'Banange',
-    action: 'edited',
-    updatedAt: Timestamp.fromDate(new Date(2023, 9, 12, 15, 35, 59))
+    updatedBy: '0001',
+    updatedName: 'Anna Luisa',
+    entryName: 'Giraffe',
+    entryId: '002',
+    dictionaryId: 'banange',
+    dictionaryName: 'Banange',
+    previousValue: ['adj'],
+    currentValue: ['n'],
+    field: 'parts of speech',
+    updatedAtMs: 1673238370158
+  },
+  {
+    updatedBy: '0002',
+    updatedName: 'Diego Córdova',
+    entryName: 'Giraffe',
+    entryId: '002',
+    dictionaryId: 'banange',
+    dictionaryName: 'Banange',
+    previousValue: null,
+    currentValue: ['adj'],
+    field: 'parts of speech',
+    updatedAtMs: 1669598370158
+  },
+  {
+    updatedBy: '0001',
+    updatedName: 'Anna Luisa',
+    entryName: 'Giraffe',
+    entryId: '002',
+    dictionaryId: 'banange',
+    dictionaryName: 'Banange',
+    previousValue: 'Snake',
+    currentValue: 'Giraffe',
+    field: 'Lexeme',
+    updatedAtMs: 1619598370128
   },
 ];
 

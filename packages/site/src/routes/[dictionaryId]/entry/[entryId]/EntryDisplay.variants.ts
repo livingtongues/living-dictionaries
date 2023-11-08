@@ -1,7 +1,6 @@
 import type { Variant, Viewport } from 'kitbook';
 import type Component from './EntryDisplay.svelte';
 import type { IDictionary } from '@living-dictionaries/types';
-import { Timestamp } from 'firebase/firestore';
 
 export const viewports: Viewport[] = [
   {
@@ -171,36 +170,28 @@ const partialVariants: DeepPartial<Variant<Component>[]> = [
     props: {
       history: [
         {
-          editor: 'Anna Luisa',
-          editedLexeme: 'Giraffe',
-          entryId: 'EntryDisplay',
-          editedDictionaryId: 'Banange',
-          action: 'edited',
-          updatedAt: Timestamp.fromDate(new Date(2023, 9, 12, 15, 59, 2))
+          updatedBy: '0001',
+          updatedName: 'Anna Luisa',
+          entryName: 'Giraffe',
+          entryId: '1234',
+          dictionaryId: 'banange',
+          dictionaryName: 'Banage',
+          previousValue: ['1.1'],
+          currentValue: ['2.3'],
+          field: 'semantic domain',
+          updatedAtMs: 1673598240158
         },
         {
-          editor: 'Diego Córdova',
-          editedLexeme: 'Giraffe',
-          entryId: 'EntryDisplay',
-          editedDictionaryId: 'Banange',
-          action: 'edited',
-          updatedAt: Timestamp.fromDate(new Date(2023, 9, 12, 15, 35, 59))
-        },
-        {
-          editor: 'Anna Luisa',
-          editedLexeme: 'Snake',
-          entryId: '002',
-          editedDictionaryId: 'Banange',
-          action: 'created',
-          updatedAt: Timestamp.fromDate(new Date(2023, 8, 24, 15, 36, 54))
-        },
-        {
-          editor: 'Diego Córdova',
-          editedLexeme: 'Giraffe',
-          entryId: 'EntryDisplay',
-          editedDictionaryId: 'Banange',
-          action: 'created',
-          updatedAt: Timestamp.fromDate(new Date(2023, 7, 11, 15, 35, 54))
+          updatedBy: '0002',
+          updatedName: 'Diego Córdova',
+          entryName: 'Giraffe',
+          entryId: '1234',
+          dictionaryId: 'banange',
+          dictionaryName: 'Banage',
+          previousValue: 'dialect-1',
+          currentValue: 'dialect-2',
+          field: 'dialect',
+          updatedAtMs: 1671543560158
         },
       ],
       entry: {
