@@ -11,11 +11,11 @@
   $: fieldsThatExist = (Object.keys($preferredPrintFields) as (keyof IPrintFields)[]).filter((field) => {
     if (field === 'gloss') return true;
     return entries.find((entry) => {
-      if (field === 'alternateOrthographies')
+      if (field === 'local_orthography')
         return entry.local_orthography_1 || entry.local_orthography_2 || entry.local_orthography_3 || entry.local_orthography_4 || entry.local_orthography_5;
       if (field === 'example_sentence') return entry.senses?.[0].example_sentences?.length;
-      if (field === 'sdn') return entry.senses?.[0].ld_semantic_domains_keys?.length;
-      if (field === 'image') return entry.senses?.[0].photo_files?.length;
+      if (field === 'semantic_domains') return entry.senses?.[0].ld_semantic_domains_keys?.length;
+      if (field === 'photo') return entry.senses?.[0].photo_files?.length;
       if (field === 'speaker') return entry.sound_files?.[0].speakerName || entry.sound_files?.[0].speaker_ids?.length;
       return entry[field];
     });
