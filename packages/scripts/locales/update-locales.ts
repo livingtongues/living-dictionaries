@@ -54,6 +54,8 @@ export const prepareMainTranslationsFromSpreadsheet = (rows: Record<string | 'co
     const translationsForLanguage: TranslationsForLanguage = {};
     rows.forEach((row) => {
       const { component, item } = row;
+      if (!component || !item) return;
+
       const value = row[lang] || '';
       if (!translationsForLanguage[component]) {
         translationsForLanguage[component] = {};
@@ -81,6 +83,8 @@ export const getSectionTranslationsFromSpreadsheet = (rows: Record<string | 'key
 
     rows.forEach((row) => {
       const { key } = row;
+      if (!key) return;
+
       const value = row[langColumn] || '';
       translationsForSection[key] = value;
     });
