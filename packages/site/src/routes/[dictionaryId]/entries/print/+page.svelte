@@ -27,10 +27,7 @@
     ]);
   }
 
-  const preferredPrintFields = createPersistedStore<IPrintFields>(
-    'printFields_8.18.2023',
-    defaultPrintFields
-  );
+  const preferredPrintFields = createPersistedStore<IPrintFields>('printFields_8.18.2023', defaultPrintFields);
   const headwordSize = createPersistedStore<number>('printHeadwordSize', 12);
   const fontSize = createPersistedStore<number>('printFontSize', 12);
   const imagePercent = createPersistedStore<number>('printImagePercent', 50);

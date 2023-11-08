@@ -109,7 +109,7 @@
         value={entry.variant}
         field="variant"
         {canEdit}
-        display={$page.data.t(`entry_field.variant`)}
+        display={$page.data.t('entry_field.variant')}
         on:update={({detail}) => dispatch('valueupdate', { field: EntryFields.variant, newValue: detail})} />
     {/if}
 
@@ -118,7 +118,7 @@
         value={entry[field]}
         {field}
         {canEdit}
-        display={$page.data.t({dynamicKey: `entry.${EntryFields[field]}`, fallback: field })}
+        display={$page.data.t(`entry_field.${field}`)}
         on:update={({detail}) => dispatch('valueupdate', { field: EntryFields[field], newValue: detail})} />
     {/each}
 
