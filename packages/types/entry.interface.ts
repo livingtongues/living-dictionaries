@@ -62,7 +62,7 @@ export interface DatabaseSense {
   de?: string; // definition_english, only in Bahasa Lani (jaRhn6MAZim4Blvr1iEv) deprecated by Greg
 }
 
-export type ActualDatabaseEntry = Omit<GoalDatabaseEntry, 'di' | 'sr'> & DeprecatedEntry;
+export type ActualDatabaseEntry = Omit<GoalDatabaseEntry, 'di' | 'sr' | 'scn'> & DeprecatedEntry;
 
 export interface GoalDatabaseEntry extends IFirestoreMetaDataAbbreviated {
   lx?: string; // lexeme
@@ -95,6 +95,7 @@ interface DeprecatedEntry extends Omit<DatabaseSense, 'ps' | 'xs' | 'pfs' | 'del
   sf?: ActualDatabaseAudio; // turned into array at sfs
   di?: string | string[]; // turned into array
   sr?: string | string[] // some dictionaries, e.g. Kalanga, have just a string
+  scn?: string | string[]; // scientific_names
 
   // placed into first sense
   ps?: string | string[]; // parts_of_speech
