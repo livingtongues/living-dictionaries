@@ -1,6 +1,6 @@
 <script lang="ts">
   import { page } from '$app/stores';
-  import { StandardPrintFields, type ExpandedEntry, type IDictionary } from '@living-dictionaries/types';
+  import { StandardPrintFields, type ExpandedEntry, type IDictionary, type IPrintFields } from '@living-dictionaries/types';
   import { order_glosses } from '$lib/helpers/glosses';
   import QrCode from './QrCode.svelte';
   import sanitize from 'xss';
@@ -18,6 +18,8 @@
   export let dictionary: IDictionary;
   export let showLabels = false;
   export let showQrCode = false;
+
+  $: selectedPrintFields = (Object.keys(StandardPrintFields) as (keyof IPrintFields)[]).filter((key) => entry[key] && selectedFields[key])
 </script>
 
 <div style="font-size: {fontSize}pt;">
@@ -75,21 +77,19 @@
   {/each}
 
   <div>
-    {#each Object.keys(StandardPrintFields) as key}
-      {#if entry[key] && selectedFields[key]}
-        <p>
-          {#if showLabels}
-            <span class="italic text-[80%]">{$page.data.t({ dynamicKey: `entry.${key}`, fallback: StandardPrintFields[key] })}:</span>
-          {/if}
-          {#if key === 'nt'}
-            {@html sanitize(entry[key])}
-          {:else if key === 'dialects'}
-            {entry[key].join(', ')}
-          {:else}
-            {entry[key]}
-          {/if}
-        </p>
-      {/if}
+    {#each selectedPrintFields as key}
+      <p>
+        {#if showLabels}
+          <span class="italic text-[80%]">{$page.data.t(`entry_field.${key}`)}:</span>
+        {/if}
+        {#if key === 'notes'}
+          {@html sanitize(entry[key])}
+        {:else if key === 'dialects'}
+          {entry[key].join(', ')}
+        {:else}
+          {entry[key]}
+        {/if}
+      </p>
     {/each}
   </div>
 

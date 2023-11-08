@@ -6,9 +6,9 @@ export enum EntryFields {
   'interlinearization' = 'in',
   'morphology' = 'mr',
   'plural_form' = 'pl',
-  'gloss' = 'gloss',
-  'example_sentence' = 'example_sentence',
-  'local_orthography' = 'alternateOrthographies',
+  'gloss' = 'gloss', // not actual db value
+  'example_sentence' = 'example_sentence', // not actual db value
+  'local_orthography' = 'alternateOrthographies', // not actual db value
   'scientific_names' = 'scn',
   'noun_class' = 'nc',
   'dialects' = 'di',
