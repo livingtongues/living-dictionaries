@@ -1,10 +1,10 @@
 import type { ExpandedEntry } from '@living-dictionaries/types';
 import { get } from 'svelte/store';
-import { t } from 'svelte-i18n';
+import { page } from '$app/stores';
 
 export async function share(dictionaryId: string, entry: ExpandedEntry) {
-  const $t = get(t);
-  const title = `${dictionaryId} ${$t('misc.LD_singular', { default: 'Living Dictionary' })}`;
+  const { data: { t } } = get(page)
+  const title = `${dictionaryId} ${t('misc.LD_singular')}`;
   const text = `${entry.lexeme}`;
   const url = `https://livingdictionaries.app/${dictionaryId}/entry/${entry.id}`;
 
@@ -19,8 +19,8 @@ export async function share(dictionaryId: string, entry: ExpandedEntry) {
   }
 }
 
-function copy(message) {
-  const $t = get(t);
+function copy(message: string) {
+  const { data: { t } } = get(page)
 
   try {
     const el = document.createElement('textarea');
@@ -29,9 +29,9 @@ function copy(message) {
     el.select();
     document.execCommand('copy');
     document.body.removeChild(el);
-    alert($t('entry.link_copied', { default: 'Link copied' }));
+    alert(t('entry.link_copied'));
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (err) {
-    alert(`${$t('entry.copy_and_share', { default: 'Copy and share:' })} ${message}`);
+    alert(`${t('entry.copy_and_share')} ${message}`);
   }
 }

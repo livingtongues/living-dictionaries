@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { t } from 'svelte-i18n';
+  import { page } from '$app/stores';
   import { BadgeArray } from 'svelte-pieces';
   import { createEventDispatcher } from 'svelte';
   export let canEdit = false;
@@ -15,13 +15,13 @@
     class="remove-button-mb"
     strings={value || []}
     {canEdit}
-    promptMessage={$t('entry.sr')}
+    promptMessage={$page.data.t('entry_field.sources')}
     addMessage=""
     on:valueupdated={(e) => dispatch('valueupdate', { field: 'sr', newValue: e.detail })}>
     <svelte:fragment slot="add" let:add>
       <button type="button" on:click={add} class="opacity-40 p-0.5 text-left grow-1 hover:bg-gray-200 rounded">
         <span class="i-fa-solid-plus mb-1" />
-        {$t('misc.add', { default: 'Add' })}
+        {$page.data.t('misc.add')}
       </button>
     </svelte:fragment>
   </BadgeArray>

@@ -18,6 +18,6 @@ export type { IPartOfSpeech } from './part-of-speech.interface';
 export type { IColumn } from './column.interface';
 export type { HelperRoles, IHelper } from './helper.interface';
 export type { AlgoliaEntry } from './entry.algolia.interface';
-export { type IPrintFields, CustomPrintFields, StandardPrintFields } from './print-entry.interface';
+export { type IPrintFields, StandardPrintFields } from './print-entry.interface';
 export { EntryFields, type EntryFieldValue } from './entry-fields.enum';
 export type { Change } from './change.interface';

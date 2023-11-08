@@ -2,8 +2,9 @@ import type { Variant } from 'kitbook';
 import type Component from './+page.svelte';
 import { readable, writable } from 'svelte/store';
 
-
 const defaultStores = {
+  locale: null,
+  t: null,
   user: null,
   admin: readable(0),
   isManager: readable(false),

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { t } from 'svelte-i18n';
+  import { page } from '$app/stores';
   import { user, admin, dictionary, isManager } from '$lib/stores';
   import { updateOnline, getCollection, Doc } from 'sveltefirets';
   import { where, limit } from 'firebase/firestore';
@@ -21,7 +21,7 @@
     try {
       await updateOnline<IDictionary>(`dictionaries/${$dictionary.id}`, change)
     } catch (err) {
-      alert(`${$t('misc.error', { default: 'Error' })}: ${err}`);
+      alert(`${$page.data.t('misc.error')}: ${err}`);
     }
   }
 
@@ -36,7 +36,7 @@
   on:data={(e) => dictionary.set(e.detail.data)} />
 
 <div style="max-width: 700px">
-  <h3 class="text-xl font-semibold mb-4">{$t('misc.settings', { default: 'Settings' })}</h3>
+  <h3 class="text-xl font-semibold mb-4">{$page.data.t('misc.settings')}</h3>
 
   <EditString
     value={$dictionary.name}
@@ -44,7 +44,7 @@
     required
     id="name"
     save={async (name) => await updateDictionary({ name })}
-    display={$t('settings.edit_dict_name', { default: 'Edit Dictionary Name' })} />
+    display={$page.data.t('settings.edit_dict_name')} />
   <div class="mb-5" />
 
   <EditString
@@ -78,7 +78,7 @@
           const removeGlossLanguageInUse = confirm('Remove as admin even though this glossing language is in use already? Know that regular editors get a message saying "Contact Us"')
           if (removeGlossLanguageInUse) await updateGlossLanguages(arrayRemove(languageId));
         } else {
-          alert($t('header.contact_us', { default: 'Contact Us' }));
+          alert($page.data.t('header.contact_us'));
         }
       } catch (err) {
         return console.error(err);
@@ -104,7 +104,7 @@
     maxlength={100}
     id="location"
     save={async (location) => await updateDictionary({ location })}
-    display={$t('dictionary.location', { default: 'Location' })} />
+    display={$page.data.t('dictionary.location')} />
   <div class="mb-5" />
 
   <div class="text-sm font-medium text-gray-700 mb-2">
@@ -154,8 +154,8 @@
       } else if ($admin) {
         await updateDictionary({ public: true });
       } else {
-        const communityAllowsOnline = confirm($t('settings.community_permission', { default: 'Does the speech community allow this language to be online?' }))
-        if (communityAllowsOnline) alert($t('header.contact_us', { default: 'Contact Us' }));
+        const communityAllowsOnline = confirm($page.data.t('settings.community_permission'))
+        if (communityAllowsOnline) alert($page.data.t('header.contact_us'));
       }
     }} />
   <div class="mb-5" />
@@ -164,8 +164,8 @@
     <div>
       <ShowHide let:show let:toggle>
         <Button onclick={toggle} class="mb-5" color="red">
-          {$t('misc.delete', { default: 'Delete' })} {$dictionary.name} {$t('misc.LD_singular', { default: 'Living Dictionary' })}:
-          {$t('header.contact_us', { default: 'Contact Us' })}
+          {$page.data.t('misc.delete')}:
+          {$page.data.t('header.contact_us')}
         </Button>
         {#if show}
           {#await import('$lib/components/modals/Contact.svelte') then { default: Contact }}
@@ -184,10 +184,7 @@
 </div>
 
 <SeoMetaTags
-  title={$t('misc.settings', { default: 'Settings' })}
+  title={$page.data.t('misc.settings')}
   dictionaryName={$dictionary.name}
-  description={$t('', {
-    default:
-      'Under Settings, dictionary managers can edit the dictionary\'s parameters such as its name, ISO 639-3 Code, Glottocode, translation languages, alternate names, geo-coordinates, and other information. They can also toggle on or off the ability to make the dictionary public, and the ability to make the dictionary printable to viewers.',
-  })}
+  description="Under Settings, dictionary managers can edit the dictionary\'s parameters such as its name, ISO 639-3 Code, Glottocode, translation languages, alternate names, geo-coordinates, and other information. They can also toggle on or off the ability to make the dictionary public, and the ability to make the dictionary printable to viewers."
   keywords="Settings, Parameters, ISO 639-3, Glottocde, glossing languages, alternate names, GPS, language medata, public dictionary, private dictionary, Endangered Languages, Language Documentation, Language Revitalization, Build a Dictionary, Online Dictionary, Digital Dictionary, Dictionary Software, Free Software, Online Dictionary Builder, Living Dictionaries, Living Dictionary, Edit a dictionary, Search a dictionary, Browse a dictionary, Explore a Dictionary" />

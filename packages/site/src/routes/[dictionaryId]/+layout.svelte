@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { t } from 'svelte-i18n';
+  import { page } from '$app/stores';
   import SideMenu from './SideMenu.svelte';
   import { dictionary as dictionaryStore, algoliaQueryParams } from '$lib/stores';
   import Header from '$lib/components/shell/Header.svelte';
@@ -39,7 +39,7 @@
 
 <div class="flex px-3 print:px-0">
   <ResponsiveSlideover
-    side={$t('direction') === 'rtl' ? 'right' : 'left'}
+    side={$page.data.t('page.direction') === 'rtl' ? 'right' : 'left'}
     showWidth={'md'}
     bind:open={menuOpen}>
     <div
@@ -48,7 +48,7 @@
       <hr class="md:hidden" />
       <Button form="menu" class="text-left !md:hidden" onclick={() => (menuOpen = false)}>
         <i class="far fa-times fa-lg fa-fw" />
-        {$t('misc.close', { default: 'Close' })}
+        {$page.data.t('misc.close')}
       </Button>
     </div>
   </ResponsiveSlideover>

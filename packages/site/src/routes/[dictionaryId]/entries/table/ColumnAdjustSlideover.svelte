@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { _ } from 'svelte-i18n';
+  import { page } from '$app/stores';
   import { onMount } from 'svelte';
   import { flip } from 'svelte/animate';
   import { fade } from 'svelte/transition';
@@ -39,7 +39,7 @@
 </script>
 
 <Slideover on:close>
-  <span slot="title">{$_('column.adjust_columns', { default: 'Adjust Columns' })}</span>
+  <span slot="title">{$page.data.t('column.adjust_columns')}</span>
 
   <ul class="divide-y divid-gray-200">
     {#each $preferredColumns as column, i (column.field)}
@@ -119,7 +119,7 @@
     transition:fade
     class="fixed inset-x-0 top-0 flex flex-col items-center p-1 pointer-events-none z-60">
     <div class="bg-black bg-opacity-75 text-white mt-2 p-3 rounded max-w-sm">
-      {$_('column.width', { default: 'Width' })}:
+      {$page.data.t('column.width')}:
       {widthToDisplay}
     </div>
   </div>

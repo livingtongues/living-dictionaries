@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { t } from 'svelte-i18n';
+  import { page } from '$app/stores';
   import { firebaseConfig } from 'sveltefirets';
   import { ShowHide, longpress } from 'svelte-pieces';
   import type { ExpandedEntry } from '@living-dictionaries/types';
@@ -49,7 +49,7 @@
       <span class="i-uil-microphone text-lg m-1 text-blue-800" />
       {#if !minimal}
         <div class="text-blue-800 text-xs">
-          {$t('audio.add_audio', { default: 'Add Audio' })}
+          {$page.data.t('audio.add_audio')}
         </div>
       {/if}
     </div>

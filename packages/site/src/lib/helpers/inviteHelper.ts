@@ -1,6 +1,6 @@
 import type { IDictionary, IInvite } from '@living-dictionaries/types';
 import { get } from 'svelte/store';
-import { t } from 'svelte-i18n';
+import { page } from '$app/stores';
 import { user } from '$lib/stores';
 import { apiFetch } from '$lib/client/apiFetch';
 import { authState } from 'sveltefirets';
@@ -10,15 +10,15 @@ export async function inviteHelper(
   role: 'manager' | 'contributor' = 'contributor',
   dictionary: IDictionary
 ) {
-  const $t = get(t);
+  const { data: { t } } = get(page)
   const inviter = get(user);
 
-  const targetEmail = prompt(`${$t('contact.email', { default: 'Email' })}?`);
+  const targetEmail = prompt(`${t('contact.email')}?`);
   if (!targetEmail) return;
 
   const isEmail = /^\S+@\S+\.\S+$/.test(targetEmail);
   if (!isEmail)
-    return alert($t('misc.invalid', { default: 'Invalid Email' }));
+    return alert(t('misc.invalid'));
 
 
   try {
@@ -45,7 +45,7 @@ export async function inviteHelper(
       throw new Error(body.message);
     }
   } catch (err) {
-    alert(`${$t('misc.error', { default: 'Error' })}: ${err}`);
+    alert(`${t('misc.error')}: ${err}`);
     console.error(err);
   }
 }

@@ -14,8 +14,7 @@ import {
 import { browser } from '$app/environment';
 import { readable } from 'svelte/store';
 
-export const load = async ({ params, parent }) => {
-  await parent();
+export const load = async ({ params }) => {
   try {
     const entryPath = `dictionaries/${params.dictionaryId}/words/${params.entryId}`;
     const entry = await getDocument<ActualDatabaseEntry>(entryPath);

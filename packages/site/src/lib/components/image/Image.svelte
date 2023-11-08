@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { t } from 'svelte-i18n';
+  import { page } from '$app/stores';
   import { crossfade, scale } from 'svelte/transition';
   import { Button } from 'svelte-pieces';
   import { createEventDispatcher } from 'svelte';
@@ -99,7 +99,7 @@
               dispatch('deleteImage');
             }}>
             <span class="i-fa-trash-o" style="margin: -1px 0 2px;" />
-            {$t('misc.delete', { default: 'Delete' })}
+            {$page.data.t('misc.delete')}
           </Button>
         </div>
       {/if}

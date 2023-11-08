@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { _ } from 'svelte-i18n';
+  import { page } from '$app/stores';
   import { Button } from 'svelte-pieces';
   import { onMount } from 'svelte';
   import type { StereoAudioRecorder, Options } from 'recordrtc';
@@ -27,7 +27,7 @@
       permissionGranted = true;
       setTimeout(turnOffMic, 60);
     } catch (err) {
-      alert(`${$_('misc.error', { default: 'Error' })}: ${err}`);
+      alert(`${$page.data.t('misc.error')}: ${err}`);
     }
   }
 
@@ -81,7 +81,7 @@
         // @ts-ignore
         (err) => {
           turnOffMic();
-          alert(`${$_('misc.error', { default: 'Error' })}: ${err}`);
+          alert(`${$page.data.t('misc.error')}: ${err}`);
         }
       );
     }
@@ -102,14 +102,11 @@
   {#if !permissionGranted}
     {#if permissionDenied && RecordRTC}
       <div>
-        {$_('audio.undo_permission_denied_explanation', {
-          default:
-            'Permission to access your microphone was denied. If you previously clicked \'No\', please reload and click \'Yes\' when your browser asks for permission to use your microphone.',
-        })}
+        {$page.data.t('audio.undo_permission_denied_explanation')}
       </div>
 
       <div>
-        <Button class="mt-1" size="sm" onclick={() => location.reload()}>{$_('audio.reload', { default: 'Reload' })}</Button>
+        <Button class="mt-1" size="sm" onclick={() => location.reload()}>{$page.data.t('audio.reload')}</Button>
         <Button
           size="sm"
           class="mt-1"
@@ -117,25 +114,25 @@
           color="green"
           href="https://www.google.com/search?q=How+do+I+enable+microphone+access"
           target="_blank"
-          rel="noopener">{$_('audio.learn_more', { default: 'Learn More' })}</Button>
+          rel="noopener">{$page.data.t('audio.learn_more')}</Button>
       </div>
     {:else}
       <Button onclick={checkAudioPermissions} class="w-full">
         <span class="i-uil-microphone" />
-        {$_('audio.prepare_to_record', { default: 'Prepare to Record with Microphone' })}
+        {$page.data.t('audio.prepare_to_record')}
       </Button>
     {/if}
   {:else if !recorder}
     <Button onclick={record} color="red" class="w-full h-24">
-      {$_('audio.tap_to_record', { default: 'Tap to Record' })}
+      {$page.data.t('audio.tap_to_record')}
     </Button>
     <div class="text-gray-600 text-center text-xs mt-2">
-      ({$_('audio.tapToStopRecording', { default: 'Then you will tap to stop recording' })})
+      ({$page.data.t('audio.tapToStopRecording')})
     </div>
   {:else}
     <Button onclick={stop} color="red" class="w-full h-24">
       <div class="font-semibold font-mono text-2xl">{recordingTime}s</div>
-      {$_('audio.stop_recording', { default: 'Stop Recording' })}
+      {$page.data.t('audio.stop_recording')}
     </Button>
   {/if}
 
