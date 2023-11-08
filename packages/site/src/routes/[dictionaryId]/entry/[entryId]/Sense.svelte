@@ -26,7 +26,7 @@
     field="gloss"
     {bcp}
     {canEdit}
-    display={`${$page.data.t({ dynamicKey: `gl.${bcp}`, fallback: bcp})}: ${$page.data.t('entry.gloss')}`}
+    display={`${$page.data.t({ dynamicKey: `gl.${bcp}`, fallback: bcp})}: ${$page.data.t('entry_field.gloss')}`}
     on:update={({detail}) => dispatch('valueupdate', { field: `gl.${bcp}`, newValue: detail})} />
 {/each}
 
@@ -42,7 +42,7 @@
 
 {#if sense.translated_parts_of_speech?.length || canEdit}
   <div class="md:px-2" class:order-2={!sense.translated_parts_of_speech?.length}>
-    <div class="rounded text-xs text-gray-500 mt-1 mb-2">{$page.data.t('entry.ps')}</div>
+    <div class="rounded text-xs text-gray-500 mt-1 mb-2">{$page.data.t('entry_field.parts_of_speech')}</div>
     <EntryPartOfSpeech value={sense.translated_parts_of_speech} {canEdit} on:valueupdate />
     <div class="border-b-2 pb-1 mb-2 border-dashed" />
   </div>
@@ -50,7 +50,7 @@
 
 {#if hasSemanticDomain || canEdit}
   <div class="md:px-2" class:order-2={!hasSemanticDomain}>
-    <div class="rounded text-xs text-gray-500 mt-1 mb-2">{$page.data.t('entry.sdn')}</div>
+    <div class="rounded text-xs text-gray-500 mt-1 mb-2">{$page.data.t('entry_field.semantic_domains')}</div>
     <EntrySemanticDomains {canEdit} {sense} on:valueupdate />
     <div class="border-b-2 pb-1 mb-2 border-dashed" />
   </div>
@@ -60,7 +60,7 @@
   value={sense.noun_class}
   field="noun_class"
   {canEdit}
-  display={$page.data.t('entry.nc')}
+  display={$page.data.t('entry_field.noun_class')}
   on:update={({detail}) => dispatch('valueupdate', { field: EntryFields.noun_class, newValue: detail})} />
 
 {#each sense.example_sentences || [{}] as sentence}
@@ -68,7 +68,7 @@
     value={sentence.vn}
     field="example_sentence"
     {canEdit}
-    display={$page.data.t('entry.example_sentence')}
+    display={$page.data.t('entry_field.example_sentence')}
     on:update={({detail}) => dispatch('valueupdate', { field: 'xs.vn', newValue: detail})} />
 
   {#each glossingLanguages as bcp}
@@ -77,7 +77,7 @@
       field="example_sentence"
       {bcp}
       {canEdit}
-      display={`${$page.data.t({dynamicKey: `gl.${bcp}`, fallback: bcp})}: ${$page.data.t('entry.example_sentence')}`}
+      display={`${$page.data.t({dynamicKey: `gl.${bcp}`, fallback: bcp})}: ${$page.data.t('entry_field.example_sentence')}`}
       on:update={({detail}) => dispatch('valueupdate', { field: `xs.${bcp}`, newValue: detail})} />
   {/each}
 {/each}

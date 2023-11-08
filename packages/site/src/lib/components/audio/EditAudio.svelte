@@ -54,7 +54,7 @@
 
   {#if sound_file?.speakerName}
     <div class="mb-4">
-      {$page.data.t('entry.speaker')}:
+      {$page.data.t('entry_field.speaker')}:
       {sound_file.speakerName}
     </div>
     <Waveform audioUrl={audio_url} />

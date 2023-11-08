@@ -75,7 +75,7 @@
         : 'opacity-50 cursor-not-allowed'}">
       <input id="audio" type="checkbox" bind:checked={includeAudio} />
       <label for="audio" class="mx-2 block leading-5 text-gray-900">
-        {$page.data.t('entry.audio')} ({entriesWithAudio.length})</label>
+        {$page.data.t('entry_field.audio')} ({entriesWithAudio.length})</label>
     </div>
     {#if !mounted}
       <p class="text-xs italic text-orange-400 p-2">
@@ -97,7 +97,7 @@
             + {$page.data.t('misc.images')}
           {/if}
           {#if includeAudio}
-            + {$page.data.t('entry.audio')}
+            + {$page.data.t('entry_field.audio')}
           {/if}
         </Button>
       {:else}

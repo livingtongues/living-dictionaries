@@ -56,7 +56,7 @@
         <div>
           {#if showLabels}
             <span class="italic text-[80%]">
-              {$page.data.t('entry.sdn')}:
+              {$page.data.t('entry_field.semantic_domains')}:
             </span>
           {/if}
           {semantic_domains.join(', ')}
@@ -67,7 +67,7 @@
     {#if selectedFields.noun_class && sense.noun_class}
       <p>
         {#if showLabels}
-          <span class="italic text-[80%]">{$page.data.t('entry.nc')}: </span>
+          <span class="italic text-[80%]">{$page.data.t('entry_field.noun_class')}: </span>
         {/if}
         {sense.noun_class}
       </p>
@@ -96,7 +96,7 @@
   {#if selectedFields.sr && entry.sources}
     <div>
       {#if showLabels}
-        <span class="italic text-[80%]">{$page.data.t('entry.sr')}: </span>
+        <span class="italic text-[80%]">{$page.data.t('entry_field.sources')}: </span>
       {/if}
       {entry.sources.join(', ')}
     </div>
@@ -106,7 +106,7 @@
   {#if selectedFields.speaker && entry.sound_files?.[0].speakerName}
     <div>
       {#if showLabels}
-        <span class="italic text-[80%]">{$page.data.t('entry.speaker')}: </span>
+        <span class="italic text-[80%]">{$page.data.t('entry_field.speaker')}: </span>
       {/if}
       {entry.sound_files?.[0].speakerName}
     </div>

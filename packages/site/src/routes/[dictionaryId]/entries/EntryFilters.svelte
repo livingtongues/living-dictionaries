@@ -29,16 +29,16 @@
       <RefinementList
         {search}
         attribute="ps"
-        label={$page.data.t('entry.ps')} />
+        label={$page.data.t('entry_field.parts_of_speech')} />
       <RefinementList
         {search}
         attribute="sdn"
-        label={$page.data.t('entry.sdn')} />
-      <RefinementList {search} attribute="di" label={$page.data.t('entry.di')} />
+        label={$page.data.t('entry_field.semantic_domains')} />
+      <RefinementList {search} attribute="di" label={$page.data.t('entry_field.dialects')} />
       <RefinementList
         {search}
         attribute="sf.speakerName"
-        label={$page.data.t('entry.speaker')} />
+        label={$page.data.t('entry_field.speaker')} />
       <hr />
 
       {#if !$page.url.pathname.includes('gallery')}
@@ -54,37 +54,37 @@
         attribute="hasAudio"
         label={$page.data.t('entry.has_exists') +
           ' ' +
-          $page.data.t('entry.audio')} />
+          $page.data.t('entry_field.audio')} />
       <ToggleRefinement
         {search}
         attribute="hasSpeaker"
         label={$page.data.t('entry.has_exists') +
           ' ' +
-          $page.data.t('entry.speaker')} />
+          $page.data.t('entry_field.speaker')} />
       <ToggleRefinement
         {search}
         attribute="hasNounClass"
         label={$page.data.t('entry.has_exists') +
           ' ' +
-          $page.data.t('entry.nc')} />
+          $page.data.t('entry_field.noun_class')} />
       <ToggleRefinement
         {search}
         attribute="hasPluralForm"
         label={$page.data.t('entry.has_exists') +
           ' ' +
-          $page.data.t('entry.pl')} />
+          $page.data.t('entry_field.plural_form')} />
       <ToggleRefinement
         {search}
         attribute="hasPartOfSpeech"
         label={$page.data.t('entry.has_exists') +
           ' ' +
-          $page.data.t('entry.ps')} />
+          $page.data.t('entry_field.parts_of_speech')} />
       <ToggleRefinement
         {search}
         attribute="hasSemanticDomain"
         label={$page.data.t('entry.has_exists') +
           ' ' +
-          $page.data.t('entry.sdn')} />
+          $page.data.t('entry_field.semantic_domains')} />
     </div>
     <a
       class="block mt-3 md:mb-3 ml-auto"

@@ -46,13 +46,13 @@
   {options}
   {canEdit}
   {showPlus}
-  placeholder={$page.data.t('entry.ps')}
+  placeholder={$page.data.t('entry_field.parts_of_speech')}
   on:update={({ detail: newValue }) => {
     dispatch('valueupdate', {
       field: EntryFields.parts_of_speech,
       newValue,
     });
   }}>
-  <span slot="heading">{$page.data.t('entry.ps')}</span>
+  <span slot="heading">{$page.data.t('entry_field.parts_of_speech')}</span>
 </ModalEditableArray>
 

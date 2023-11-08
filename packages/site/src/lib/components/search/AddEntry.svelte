@@ -8,7 +8,7 @@
 
   async function addNewEntry(lexeme: string) {
     if (!lexeme)
-      return alert(`Missing: ${$page.data.t('entry.lx')}`);
+      return alert(`Missing: ${$page.data.t('entry_field.lexeme')}`);
 
     try {
       const entryDoc = await addOnline<ActualDatabaseEntry>(
@@ -43,7 +43,7 @@
   {#if show}
     <EditFieldModal
       field="lexeme"
-      display={$page.data.t('entry.lx')}
+      display={$page.data.t('entry_field.lexeme')}
       on:update={({detail}) => addNewEntry(detail)}
       on:close={toggle}
       addingLexeme />

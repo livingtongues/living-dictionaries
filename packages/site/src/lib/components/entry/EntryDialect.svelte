@@ -66,12 +66,12 @@
   {canEdit}
   canWriteIn
   {showPlus}
-  placeholder={$page.data.t('entry.di')}
+  placeholder={$page.data.t('entry_field.dialects')}
   on:update={({ detail: newValue }) => {
     dispatch('valueupdate', {
       field: EntryFields.dialects,
       newValue,
     });
   }}>
-  <span slot="heading">{$page.data.t('entry.di')}</span>
+  <span slot="heading">{$page.data.t('entry_field.dialects')}</span>
 </ModalEditableArray>
