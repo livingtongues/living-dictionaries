@@ -1,6 +1,5 @@
 import fetch from 'node-fetch';
 import csv from 'csvtojson';
-import dot from 'dot-object';
 import { promises as fs } from 'fs';
 import { Locales, UnpublishedLocales } from '../../site/src/lib/i18n/locales.js';
 import { type IGlossLanguage } from '@living-dictionaries/types';
@@ -11,21 +10,21 @@ const LOCALES_DIRECTORY = '../site/src/lib/i18n/locales';
 
 export async function generateFilesFromSpreadsheet() {
   const rows = await jsonFromCsvUrl(getGoogleSheetCsvUrl(I18N_GOOGLE_SHEET_ID, 'App-Translations'));
-  const translations = generateTranslationsFromSpreadsheet(rows, { nesting: 'deep' });
+  const translations = generateTranslationsFromSpreadsheet(rows);
   await writeLocaleFiles(translations, LOCALES_DIRECTORY);
 
   const rows_sd = await jsonFromCsvUrl(getGoogleSheetCsvUrl(I18N_GOOGLE_SHEET_ID, 'Semantic-Domains'));
-  const translations_sd = generateTranslationsFromSpreadsheet(rows_sd, { prefix: 'sd' });
+  const translations_sd = generateTranslationsFromSpreadsheet(rows_sd, { section: 'sd' });
   await writeLocaleFiles(translations_sd, LOCALES_DIRECTORY + '/sd');
 
   const rows_ps = await jsonFromCsvUrl(getGoogleSheetCsvUrl(I18N_GOOGLE_SHEET_ID, 'Parts-of-Speech'));
-  const translations_ps = generateTranslationsFromSpreadsheet(rows_ps, { prefix: 'ps' });
+  const translations_ps = generateTranslationsFromSpreadsheet(rows_ps, { section: 'ps' });
   await writeLocaleFiles(translations_ps, LOCALES_DIRECTORY + '/ps');
-  const translations_psAbbrev = generateTranslationsFromSpreadsheet(rows_ps, { prefix: 'psAbbrev' });
+  const translations_psAbbrev = generateTranslationsFromSpreadsheet(rows_ps, { section: 'psAbbrev' });
   await writeLocaleFiles(translations_psAbbrev, LOCALES_DIRECTORY + '/psAbbrev');
 
   const rows_gl = await jsonFromCsvUrl(getGoogleSheetCsvUrl(I18N_GOOGLE_SHEET_ID, 'Glossing-Languages'));
-  const translations_gl = generateTranslationsFromSpreadsheet(rows_gl, { prefix: 'gl' });
+  const translations_gl = generateTranslationsFromSpreadsheet(rows_gl, { section: 'gl' });
   await writeLocaleFiles(translations_gl, LOCALES_DIRECTORY + '/gl');
   
   const glossingLanguages = await generateGlossingLanguages(rows_gl);
@@ -41,29 +40,32 @@ generateFilesFromSpreadsheet();
 export const generateTranslationsFromSpreadsheet: (
   rows: any[],
   options?: {
-    nesting?: 'shallow' | 'deep';
-    prefix?: string;
+    section?: string;
   }
 ) => Record<string, unknown> = (rows, options = {}) => {
   const translations: Record<string, any> = {};
 
   languages.forEach((lang) => {
     translations[lang] = {};
+    
+    const langColumn = options.section === 'psAbbrev' 
+      ? lang + 'Abbrev' 
+      : lang;
 
     rows.forEach((row) => {
-      const { key } = row;
-      const langColumn = options.prefix === 'psAbbrev' ? lang + 'Abbrev' : lang;
+      const { component, item, key } = row;
       const value = row[langColumn] || '';
-      if (key) {
-        if (options.nesting === 'deep')
-          dot.str(key, value, translations[lang]); // doesn't work with dot.str('1.1', "Sky, weather and climate", translations['en'])
-        else
-          translations[lang][key] = value;
+      if (component && item) { // main translations
+        translations[lang][component][item] = value;
+      } else if (options.section && key) { // glosses, parts of speech, semantic domains
+        translations[lang][options.section][key] = value;
+      } else {
+        console.log('missing component, item, or key for row:', row)
       }
     });
 
-    if (options.prefix)
-      translations[lang] = { [options.prefix]: translations[lang] };
+    if (options.section)
+      translations[lang] = { [options.section]: translations[lang] };
 
   });
 
