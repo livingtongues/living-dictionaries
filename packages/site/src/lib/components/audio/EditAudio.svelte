@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { t } from 'svelte-i18n';
+  import { page } from '$app/stores';
   import Waveform from '$lib/components/audio/Waveform.svelte';
   import SelectAudio from '$lib/components/audio/SelectAudio.svelte';
   import RecordAudio from '$lib/components/audio/RecordAudio.svelte';
@@ -54,7 +54,7 @@
 
   {#if sound_file?.speakerName}
     <div class="mb-4">
-      {$t('entry.speaker', { default: 'Speaker' })}:
+      {$page.data.t('entry_field.speaker')}:
       {sound_file.speakerName}
     </div>
     <Waveform audioUrl={audio_url} />
@@ -112,23 +112,19 @@
         href={audio_url}
         target="_blank">
         <i class="fas fa-download" />
-        <span class="hidden sm:inline">{$t('misc.download', {
-          default: 'Download',
-        })}</span>
+        <span class="hidden sm:inline">{$page.data.t('misc.download')}</span>
       </Button>
       <div class="w-1" />
 
       <Button onclick={() => deleteAudio(entry, $dictionary.id)} color="red">
         <i class="far fa-trash-alt" />&nbsp;
-        <span class="hidden sm:inline">{$t('misc.delete', {
-          default: 'Delete',
-        })}</span>
+        <span class="hidden sm:inline">{$page.data.t('misc.delete')}</span>
       </Button>
       <div class="w-1" />
     {/if}
 
     <Button onclick={() => dispatch('close')} color="black">
-      {$t('misc.close', { default: 'Close' })}
+      {$page.data.t('misc.close')}
     </Button>
   </div>
 </Modal>

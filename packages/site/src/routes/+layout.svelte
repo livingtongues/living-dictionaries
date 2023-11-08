@@ -1,16 +1,15 @@
 <script lang="ts">
   import './global.css';
-  import { navigating } from '$app/stores';
+  import { navigating, page } from '$app/stores';
   import { browser } from '$app/environment';
-  import { t } from 'svelte-i18n';
   import LoadingIndicator from './LoadingIndicator.svelte';
 </script>
 
-{#if $navigating}
+{#if browser && $navigating}
   <LoadingIndicator />
 {/if}
 
-<div id="direction" dir={$t('direction')}>
+<div id="direction" dir={$page.data.t('page.direction')}>
   <slot />
 </div>
 

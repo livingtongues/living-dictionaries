@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { _ } from 'svelte-i18n';
+  import { page } from '$app/stores';
   import { Collection } from 'sveltefirets';
   import { orderBy, where } from 'firebase/firestore';
   import { admin } from '$lib/stores';
@@ -22,7 +22,7 @@
 
 </script>
 
-<Header>{$_('home.list_of_dictionaries', { default: 'List of Dictionaries' })}</Header>
+<Header>{$page.data.t('home.list_of_dictionaries')}</Header>
 
 <div class="p-3 sticky top-0 relative z-2 h-screen flex flex-col bg-white">
   <Collection
@@ -41,7 +41,7 @@
             'living-dictionaries-list'
           )}>
         <i class="fas fa-download mr-1" />
-        {$_('misc.download', { default: 'Download' })}
+        {$page.data.t('misc.download')}
         (.csv)
       </Button>
       {#if $admin}
@@ -55,20 +55,20 @@
     <ResponsiveTable stickyColumn stickyHeading class="my-1">
       <thead>
         <th>
-          {$_('dictionary.name_of_language', { default: 'Name of Language' })}
+          {$page.data.t('dictionary.name_of_language')}
         </th>
-        <th> {$_('about.entry_count', { default: 'Entry Count' })} </th>
+        <th> {$page.data.t('about.entry_count')} </th>
         <th> URL </th>
         <th> ISO 639-3 </th>
         <th> Glottocode </th>
         <th>
-          {$_('dictionary.location', { default: 'Location' })}
+          {$page.data.t('dictionary.location')}
         </th>
         <th>
-          {$_('dictionary.latitude', { default: 'Latitude' })}
+          {$page.data.t('dictionary.latitude')}
         </th>
         <th>
-          {$_('dictionary.longitude', { default: 'Longitude' })}
+          {$page.data.t('dictionary.longitude')}
         </th>
       </thead>
       {#each dictionaries as dictionary}
@@ -116,11 +116,8 @@
 </div>
 
 <SeoMetaTags
-  title={$_('home.list_of_dictionaries', { default: 'List of Dictionaries' })}
-  description={$_('', {
-    default:
-      'A dynamically updated list of all the public dictionaries available on the Living Dictionaries platform. This list includes the names, URLs, GPS coordinates, ISO 639-3 Codes and Glottocodes associated with the Living Dictionaries. Living Dictionaries are language documentation tools that support endangered and under-represented languages.',
-  })}
+  title={$page.data.t('home.list_of_dictionaries')}
+  description="A dynamically updated list of all the public dictionaries available on the Living Dictionaries platform. This list includes the names, URLs, GPS coordinates, ISO 639-3 Codes and Glottocodes associated with the Living Dictionaries. Living Dictionaries are language documentation tools that support endangered and under-represented languages"
   keywords="Minority Languages, Indigenous Languages, Language Documentation, Dictionary, Minority Community, Language Analysis, Language Education, Endangered Languages, Language Revitalization, Linguistics, Word Lists, Linguistic Analysis, Dictionaries, Living Dictionaries, Living Tongues, Under-represented Languages, Tech Resources, Language Sustainability, Language Resources, Diaspora Languages, Elicitation, Language Archives, Ancient Languages, World Languages, Obscure Languages, Little Known languages, Digital Dictionary, Dictionary Software, Free Software, Online Dictionary Builder" />
 
 <style>

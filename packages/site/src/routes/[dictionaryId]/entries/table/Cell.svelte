@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { t } from 'svelte-i18n';
+  import { page } from '$app/stores';
   import Textbox from './cells/Textbox.svelte';
   import EntrySemanticDomains from '$lib/components/entry/EntrySemanticDomains.svelte';
   import EntryPartOfSpeech from '$lib/components/entry/EntryPartOfSpeech.svelte';
@@ -7,7 +7,7 @@
   import SelectSpeakerCell from './cells/SelectSpeakerCell.svelte';
   import SelectSource from '$lib/components/entry/EntrySource.svelte';
   import Image from '$lib/components/image/Image.svelte';
-  import { EntryFields, type ExpandedEntry, type IColumn } from '@living-dictionaries/types';
+  import { EntryFields, type EntryFieldValue, type ExpandedEntry, type IColumn } from '@living-dictionaries/types';
   import Audio from '../../entries/Audio.svelte';
   import { createEventDispatcher } from 'svelte';
   import AddImage from '../AddImage.svelte';
@@ -16,6 +16,8 @@
   export let entry: ExpandedEntry;
   export let canEdit = false;
   export let dictionaryId: string;
+
+  $: i18nKey = `entry_field.${column.field}` as `entry_field.${EntryFieldValue}`
 
   const dispatch = createEventDispatcher<{
     valueupdate: { field: string; newValue: string | string[] };
@@ -82,7 +84,7 @@
       {canEdit}
       field={column.field}
       value={entry.scientific_names?.[0]}
-      display={$t('entry.scn', { default: 'Scientific Name' })}
+      display={$page.data.t('entry_field.scientific_names')}
       on:update={({detail}) => dispatch('valueupdate', { field: EntryFields.scientific_names, newValue: [detail]} )} />
   {:else if column.field === 'local_orthography'}
     {@const orthographyIndex = `local_orthography_${column.orthography_index}`}
@@ -97,7 +99,7 @@
       field={column.field}
       {canEdit}
       value={entry[column.field]}
-      display={$t(`entry.${EntryFields[column.field]}`, { default: 'Edit' })}
+      display={$page.data.t(i18nKey, {fallback: column.display})}
       on:update={({detail}) => dispatch('valueupdate', { field: EntryFields[column.field], newValue: detail})} />
   {/if}
 </div>

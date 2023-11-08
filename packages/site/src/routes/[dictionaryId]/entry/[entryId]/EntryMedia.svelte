@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { t } from 'svelte-i18n';
+  import { page } from '$app/stores';
   import { ShowHide } from 'svelte-pieces';
   import type { ExpandedEntry, IDictionary } from '@living-dictionaries/types';
   import AddImage from '../../entries/AddImage.svelte';
@@ -31,10 +31,10 @@
           class:text-blue-700={playing}
           class="i-material-symbols-hearing text-2xl mt-1" />
         <div class="text-gray-600 text-sm mt-1">
-          {$t('audio.listen', { default: 'Listen' })}
+          {$page.data.t('audio.listen')}
           {#if canEdit}
             +
-            {$t('audio.edit_audio', { default: 'Edit Audio' })}
+            {$page.data.t('audio.edit_audio')}
           {/if}
         </div>
       </Audio>
@@ -58,7 +58,7 @@
       entryId={entry.id}
       class="rounded-md h-20 bg-gray-100 mb-2">
       <div class="text-xs" slot="text">
-        {$t('entry.upload_photo', { default: 'Upload Photo' })}
+        {$page.data.t('entry.upload_photo')}
       </div>
     </AddImage>
   {/if}
@@ -81,7 +81,7 @@
         on:click={toggle}>
         <span class="i-bi-camera-video text-xl" />
         <span class="text-xs">
-          {$t('video.add_video', { default: 'Add Video' })}
+          {$page.data.t('video.add_video')}
         </span>
       </button>
       {#if show}
@@ -109,7 +109,7 @@
           justify-center cursor-pointer p-6 mb-2">
         <span class="i-mdi-map-marker-plus mr-1" style="margin-top: -3px;" />
         <span class="text-xs">
-          {$t('create.select_coordinates', { default: 'Select Coordinates' })}
+          {$page.data.t('create.select_coordinates')}
         </span>
       </button>
       <button
@@ -119,7 +119,7 @@
           justify-center cursor-pointer p-6 mb-2">
         <span class="i-mdi-map-marker-path mr-1" style="margin-top: -2px;" />
         <span class="text-xs">
-          {$t('create.select_region', { default: 'Select Region' })}
+          {$page.data.t('create.select_region')}
         </span>
       </button>
     {/if}

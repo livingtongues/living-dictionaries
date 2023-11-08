@@ -18,6 +18,7 @@ const ignore = defineFlatConfig({
     '**/.svelte-kit**',
     'packages/scripts/import/old**',
     '**/route/kitbook/**',
+    '**/locales/**',
     // '**/ids-import/**.ts'
   ],
 })

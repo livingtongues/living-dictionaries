@@ -29,6 +29,10 @@ export function convert_entry_to_current_shape(actual: ActualDatabaseEntry): Goa
       goal.sr = [value]
       continue;
     }
+    if (key === 'scn' && typeof value === 'string') {
+      goal.scn = [value]
+      continue;
+    }
 
     // Sense related fields
     if (['gl', 'sd', 'sdn', 'nc', 'de'].includes(key)) {

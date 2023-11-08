@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { t } from 'svelte-i18n';
   import Audio from '../Audio.svelte';
   import Video from '../Video.svelte';
   import Image from '$lib/components/image/Image.svelte';
@@ -9,6 +8,7 @@
   import { minutesAgo } from '$lib/helpers/time';
   import { ShowHide } from 'svelte-pieces';
   import sanitize from 'xss';
+  import { page } from '$app/stores';
 
   export let entry: ExpandedEntry;
   export let dictionary: IDictionary;
@@ -18,7 +18,7 @@
   $: glosses = order_glosses({
     glosses: entry.senses?.[0]?.glosses,
     dictionary_gloss_languages: dictionary.glossLanguages,
-    $t,
+    t: $page.data.t,
     label: dictionary.id !== 'jewish-neo-aramaic',
   }).join(', ');
 </script>
@@ -31,7 +31,7 @@
   {#if entry.sound_files?.[0] || canEdit}
     <Audio class="bg-gray-100 p-2" {entry} {canEdit} minimal let:playing>
       <span class:text-blue-700={playing} class="i-material-symbols-hearing text-2xl mt-1" />
-      {$t('audio.listen', { default: 'Listen' })}
+      {$page.data.t('audio.listen')}
     </Audio>
   {/if}
   <a
@@ -55,7 +55,7 @@
       <div class="text-xs text-gray-600 mr-auto mb-1">
         {#if entry.senses?.[0]?.translated_parts_of_speech}
           {#each entry.senses?.[0]?.parts_of_speech_keys as pos}
-            <i>{$t('psAbbrev.' + pos, { default: pos })}, </i>
+            <i>{$page.data.t({ dynamicKey: 'psAbbrev.' + pos, fallback: pos })}, </i>
           {/each}
         {/if}
 
@@ -76,16 +76,16 @@
 
         {#if dictionary.id === 'jewish-neo-aramaic'}
           {#if entry.dialects}<p class="text-xs">
-            <i class="mr-1">{$t('entry.di', { default: 'Dialect' })}: {entry.dialects.join(', ')}</i>
+            <i class="mr-1">{$page.data.t('entry_field.dialects')}: {entry.dialects.join(', ')}</i>
           </p>{/if}
           {#each entry.senses?.[0]?.example_sentences || [{}] as sentence}
             {#each Object.entries(sentence) as [bcp, content]}
               <p>
                 <span class="font-semibold">
                   {#if bcp !== 'vn'}
-                    {$t(`gl.${bcp}`)}
+                    {$page.data.t({ dynamicKey: `gl.${bcp}`, fallback: bcp })}
                   {/if}
-                  {$t('entry.example_sentence', { default: 'Example Sentence' })}:</span>
+                  {$page.data.t('entry_field.example_sentence')}:</span>
                 {content}
               </p>
             {/each}
@@ -94,7 +94,7 @@
 
         {#if entry.plural_form}
           <p class="text-xs">
-            {$t('entry.pl', { default: 'Plural form' })}: {entry.plural_form}
+            {$page.data.t('entry_field.plural_form')}: {entry.plural_form}
           </p>
         {/if}
       </div>
@@ -144,7 +144,7 @@
   {:else if canEdit}
     <AddImage dictionaryId={dictionary.id} entryId={entry.id} class="w-12 bg-gray-100">
       <div class="text-xs" slot="text">
-        {$t('entry.photo', { default: 'Photo' })}
+        {$page.data.t('entry_field.photo')}
       </div>
     </AddImage>
   {/if}

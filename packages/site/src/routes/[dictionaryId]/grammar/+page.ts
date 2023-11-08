@@ -3,8 +3,7 @@ import type { IGrammar } from '@living-dictionaries/types';
 import { isManager } from '$lib/stores';
 
 import type { PageLoad } from './$types';
-export const load: PageLoad = async ({ params, parent }) => {
-  await parent();
+export const load: PageLoad = async ({ params }) => {
   try {
     const grammarDoc = await getDocument<IGrammar>(
       `dictionaries/${params.dictionaryId}/info/grammar`

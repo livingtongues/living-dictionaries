@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { t } from 'svelte-i18n';
+  import { page } from '$app/stores';
   import { user } from '$lib/stores';
   import Header from '$lib/components/shell/Header.svelte';
   import { logOut } from 'sveltefirets';
@@ -8,11 +8,11 @@
 
 <svelte:head>
   <title>
-    {$t('account.account_settings', { default: 'Account Settings' })}
+    {$page.data.t('account.account_settings')}
   </title>
 </svelte:head>
 
-<Header>{$t('account.account_settings', { default: 'Account Settings' })}</Header>
+<Header>{$page.data.t('account.account_settings')}</Header>
 
 <div class="max-w-screen-md mx-auto p-3">
   {#if $user}
@@ -22,9 +22,7 @@
     <div class="font-semibold">{$user.displayName}</div>
     <div>{$user.email}</div>
     <div class="my-2">
-      <Button onclick={logOut}>{$t('account.log_out', {
-        default: 'Log Out',
-      })}</Button>
+      <Button onclick={logOut}>{$page.data.t('account.log_out')}</Button>
     </div>
   {:else}
     Not logged in

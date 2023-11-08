@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { t } from 'svelte-i18n';
+  import { page } from '$app/stores';
 
   export let checked: boolean;
 
@@ -19,9 +19,9 @@
       dispatch('changed', { checked: e.target.checked });
     }} />
   <label for="public" class="mx-2 block text-sm font-medium text-gray-700">
-    {$t('create.print_access', { default: 'Allow Viewers to Print Dictionary' })}
+    {$page.data.t('create.print_access')}
   </label>
 </div>
 <div class="text-xs text-gray-600 mt-1">
-  ({$t('settings.print_access_meaning', { default: 'This gives the public the ability to download and print this Living Dictionary as a .PDF' })})
+  ({$page.data.t('settings.print_access_meaning')})
 </div>

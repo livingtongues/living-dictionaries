@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { t } from 'svelte-i18n';
+  import { page } from '$app/stores';
   import { Button, Form } from 'svelte-pieces';
   import { user } from '$lib/stores';
   import Header from '$lib/components/shell/Header.svelte';
@@ -64,9 +64,7 @@
     const isUnique = await checkIfUniqueUrl(urlToUse);
     if (urlToUse.length < MIN_URL_LENGTH || !isUnique) {
       return alert(
-        $t('create.choose_different_url', {
-          default: 'Choose a different URL.',
-        })
+        $page.data.t('create.choose_different_url')
       );
     }
     try {
@@ -115,7 +113,7 @@
 
       window.location.replace(`/${urlToUse}/entries/list`);
     } catch (err) {
-      alert(`${$t('misc.error', { default: 'Error' })}: ${err}`);
+      alert(`${$page.data.t('misc.error')}: ${err}`);
     }
   }
 
@@ -124,14 +122,12 @@
 
 <svelte:window bind:online />
 
-<Header>{$t('create.create_new_dictionary', {
-  default: 'Create New Dictionary',
-})}</Header>
+<Header>{$page.data.t('create.create_new_dictionary')}</Header>
 
 <Form let:loading onsubmit={createNewDictionary}>
   <div class="flex-col justify-center p-4 max-w-md mx-auto">
     <label for="name" class="block text-xl font-medium text-gray-700">
-      {$t('dictionary.name_of_language', { default: 'Name of Language' })}*
+      {$page.data.t('dictionary.name_of_language')}*
     </label>
     <div class="mt-2 rounded-md shadow-sm">
       <input
@@ -147,9 +143,7 @@
         class="form-input w-full" />
     </div>
     <div class="text-xs text-gray-600 mt-1">
-      {$t('create.name_clarification', {
-        default: 'This will be the name of the dictionary.',
-      })}
+      {$page.data.t('create.name_clarification')}
     </div>
     <div class="mb-6" />
 
@@ -179,18 +173,12 @@
           placeholder="url" />
       </div>
       <div class="text-xs text-gray-600 mt-1">
-        {$t('create.permanent_url_msg', {
-          default: 'The URL name is permanent and cannot be changed later.',
-        })}
-        {$t('create.only_letters_numbers', {
-          default: 'Only letters and numbers allowed (no spaces or special characters)',
-        })}
+        {$page.data.t('create.permanent_url_msg')}
+        {$page.data.t('create.only_letters_numbers')}
       </div>
       {#if urlToUse.length >= MIN_URL_LENGTH && !isUniqueURL}
         <div class="text-xs text-red-600 mt-1">
-          {$t('create.choose_different_url', {
-            default: 'Choose a different URL',
-          })}
+          {$page.data.t('create.choose_different_url')}
         </div>
       {/if}
       <div class="mb-6" />
@@ -208,7 +196,7 @@
           glossLanguages = glossLanguages;
         }} />
       <!-- not used in web app presently -->
-      <!-- placeholder={$t('create.languages', { default: 'Language(s)' })} -->
+      <!-- placeholder={$page.data.t('create.languages')} -->
       <div class="mb-6" />
 
       <EditableAlternateNames
@@ -281,10 +269,7 @@
       <div class="mb-6" />
 
       <div class="mb-2 text-sm font-medium text-gray-700">
-        {$t('create.language_used_by_community', {
-          default:
-            'Is this dictionary for a language that is spoken or signed by a specific human community?',
-        })}*
+        {$page.data.t('create.language_used_by_community')}*
       </div>
 
       <label class="block">
@@ -294,7 +279,7 @@
           bind:group={languageUsedByCommunity}
           value={true}
           required />
-        {$t('misc.assertion', { default: 'Yes' })}
+        {$page.data.t('misc.assertion')}
       </label>
 
       <label class="block">
@@ -303,14 +288,12 @@
           name="languageUsedByCommunity"
           bind:group={languageUsedByCommunity}
           value={false} />
-        {$t('misc.negation', { default: 'No' })}
+        {$page.data.t('misc.negation')}
       </label>
       <div class="mb-6" />
 
       <div class="mb-2 text-sm font-medium text-gray-700">
-        {$t('create.community_permission', {
-          default: 'Has the language community given you permission to make this dictionary?',
-        })}*
+        {$page.data.t('create.community_permission')}*
         <!-- Similar to create.speech_community_permission but not the same -->
       </div>
       <label class="block">
@@ -320,7 +303,7 @@
           bind:group={communityPermission}
           value={'yes'}
           required />
-        {$t('misc.assertion', { default: 'Yes' })}
+        {$page.data.t('misc.assertion')}
       </label>
 
       <label class="block">
@@ -329,7 +312,7 @@
           name="communityPermission"
           bind:group={communityPermission}
           value={'no'} />
-        {$t('misc.negation', { default: 'No' })}
+        {$page.data.t('misc.negation')}
       </label>
 
       <label class="block">
@@ -338,15 +321,12 @@
           name="communityPermission"
           bind:group={communityPermission}
           value={'unknown'} />
-        {$t('create.uncertainty', { default: 'I don’t know' })}
+        {$page.data.t('create.uncertainty')}
       </label>
       <div class="mb-6" />
 
       <label class="block mb-2 text-sm font-medium text-gray-700" for="authorConnection">
-        {$t('create.author_connection', {
-          default:
-            'Please briefly describe how you know this language and why you are creating a Living Dictionary for it. Are you part of the community that will be using this Living Dictionary? If not, how do you know the community?',
-        })}*
+        {$page.data.t('create.author_connection')}*
       </label>
       <textarea
         name="authorConnection"
@@ -362,10 +342,7 @@
       <div class="mb-6" />
 
       <label class="block mb-2 text-sm font-medium text-gray-700" for="conLangDescription">
-        {$t('create.con_lang_description', {
-          default:
-            'Is this dictionary for a constructed language (a language invented by humans in recent years, for a book or a movie)? If yes, please briefly describe.',
-        })}
+        {$page.data.t('create.con_lang_description')}
       </label>
       <textarea
         name="conLangDescription"
@@ -383,14 +360,12 @@
         {#if !online}
           Return online to
         {/if}
-        {$t('create.create_dictionary', { default: 'Create Dictionary' })}
+        {$page.data.t('create.create_dictionary')}
       </Button>
 
       <div class="mt-2 text-sm text-gray-600">
-        {$t('terms.agree_by_submit', {
-          default: 'By submitting this form, you agree to our',
-        })}
-        <a href="/terms" class="underline" target="_blank">{$t('dictionary.terms_of_use', { default: 'Terms of Use' })}</a>.
+        {$page.data.t('terms.agree_by_submit')}
+        <a href="/terms" class="underline" target="_blank">{$page.data.t('dictionary.terms_of_use')}</a>.
       </div>
       <div class="mb-6" />
     {/if}
@@ -408,9 +383,6 @@
 {/if}
 
 <SeoMetaTags
-  title={$t('create.create_new_dictionary', { default: 'Create New Dictionary' })}
-  description={$t('', {
-    default:
-      'Build a new Living Dictionary in a few short steps. Create a title and set the URL, and then configure the settings. Living Dictionaries are comprehensive, free, online technological tools integrating audio, images and video.',
-  })}
+  title={$page.data.t('create.create_new_dictionary')}
+  description="Build a new Living Dictionary in a few short steps. Create a title and set the URL, and then configure the settings. Living Dictionaries are comprehensive, free, online technological tools integrating audio, images and video."
   keywords="Endangered Languages, Language Documentation, Language Revitalization, Build a Dictionary, Online Dictionary, Digital Dictionary, Dictionary Software, Free Software, Online Dictionary Builder, Living Dictionaries, Living Dictionary" />

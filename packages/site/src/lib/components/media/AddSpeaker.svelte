@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { t } from 'svelte-i18n';
+  import { page } from '$app/stores';
   import { createEventDispatcher } from 'svelte';
   import { dictionary } from '$lib/stores';
   import { Button, Form, Modal } from 'svelte-pieces';
@@ -31,14 +31,12 @@
 </script>
 
 <Modal on:close>
-  <span slot="heading">{$t('speakers.add_new_speaker', {
-    default: 'Add New Speaker',
-  })}
+  <span slot="heading">{$page.data.t('speakers.add_new_speaker')}
   </span>
 
   <Form let:loading onsubmit={addSpeaker}>
     <label for="name" class="block text-sm font-medium leading-5 text-gray-700 mt-4">
-      {$t('speakers.name', { default: 'Name' })}
+      {$page.data.t('speakers.name')}
     </label>
     <div class="mt-1 rounded-md shadow-sm">
       <input
@@ -50,7 +48,7 @@
     </div>
 
     <label for="birthplace" class="block text-sm font-medium leading-5 text-gray-700 mt-4">
-      {$t('speakers.birthplace', { default: 'Birthplace' })}
+      {$page.data.t('speakers.birthplace')}
     </label>
     <div class="mt-1 rounded-md shadow-sm">
       <input
@@ -62,7 +60,7 @@
     </div>
 
     <label for="age" class="block text-sm font-medium leading-5 text-gray-700 mt-4">
-      {$t('speakers.age_range', { default: 'Age Range' })}
+      {$page.data.t('speakers.age_range')}
     </label>
     <div class="mt-1 rounded-md shadow-sm">
       <select id="age" bind:value={decade} class="form-input block w-full">
@@ -73,7 +71,7 @@
     </div>
 
     <div class="font-medium text-sm text-gray-700 mt-4">
-      {$t('speakers.gender', { default: 'Gender' })}
+      {$page.data.t('speakers.gender')}
     </div>
     <div class="flex">
       <div class="mt-2 flex items-center">
@@ -81,7 +79,7 @@
         <div class="w-2" />
         <label for="male">
           <span class="block text-sm leading-5 font-medium text-gray-700">
-            {$t('speakers.male', { default: 'Male' })}
+            {$page.data.t('speakers.male')}
           </span>
         </label>
       </div>
@@ -91,7 +89,7 @@
         <div class="w-2" />
         <label for="female">
           <span class="block text-sm leading-5 font-medium text-gray-700">
-            {$t('speakers.female', { default: 'Female' })}
+            {$page.data.t('speakers.female')}
           </span>
         </label>
       </div>
@@ -101,7 +99,7 @@
         <div class="w-2" />
         <label for="other">
           <span class="block text-sm leading-5 font-medium text-gray-700">
-            {$t('speakers.other', { default: 'Other' })}
+            {$page.data.t('speakers.other')}
           </span>
         </label>
       </div>
@@ -111,9 +109,7 @@
       <input id="agree" type="checkbox" required bind:checked={agreeToBeOnline} />
       <div class="w-2" />
       <label for="agree" class="block text-sm leading-5 text-gray-900">
-        {$t('speakers.speaker_agrees', {
-          default: 'The speaker agrees to let these recordings be publicly available online.',
-        })}
+        {$page.data.t('speakers.speaker_agrees')}
       </label>
     </div>
 
@@ -121,10 +117,10 @@
 
     <div class="modal-footer space-x-1">
       <Button onclick={close} form="simple" color="black">
-        {$t('misc.cancel', { default: 'Cancel' })}
+        {$page.data.t('misc.cancel')}
       </Button>
       <Button type="submit" form="filled" {loading}>
-        {$t('misc.save', { default: 'Save' })}
+        {$page.data.t('misc.save')}
       </Button>
     </div>
   </Form>

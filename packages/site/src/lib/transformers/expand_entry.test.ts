@@ -1,28 +1,21 @@
 import type { ExpandedEntry, GoalDatabaseEntry } from '@living-dictionaries/types';
 import { expand_entry } from './expand_entry';
-import { init, locale, dictionary, addMessages } from 'svelte-i18n';
+import type { TranslateFunction } from '$lib/i18n/types';
+import { en } from '$lib/i18n';
+
 
 describe(expand_entry, () => {
-  beforeEach(() => {
-    dictionary.set({});
-    locale.set(undefined);
-  });
-
   const now = new Date().getTime();
+
+  const t = (({dynamicKey: key}: { dynamicKey: string}) => {
+    const [section, item] = key.split('.')
+    return en[section][item];
+  }) as TranslateFunction
+
   test('returns an object with easily readable field names', () => {
     const part_of_speech_key = 'n';
-    // const part_of_speech_en_abbrev = part_of_speech_key;
-    const part_of_speech_english = 'noun';
-
     const sdn_key = '1.1';
-    const sdn_english = 'Sky, weather and climate';
     const write_in_sd = 'earth and sky';
-
-    addMessages('en', {
-      ps: { [part_of_speech_key]: part_of_speech_english },
-      sd: { [sdn_key]: sdn_english }
-    })
-    init({ fallbackLocale: 'en', initialLocale: 'en' });
 
     const database_entry: GoalDatabaseEntry = {
       id: '1',
@@ -91,9 +84,9 @@ describe(expand_entry, () => {
       senses: [{
         glosses: { en: 'foo' },
         parts_of_speech_keys: [part_of_speech_key],
-        translated_parts_of_speech: [part_of_speech_english],
+        translated_parts_of_speech: ['noun'],
         ld_semantic_domains_keys: [sdn_key],
-        translated_ld_semantic_domains: [sdn_english],
+        translated_ld_semantic_domains: ['Universe and the natural world'],
         write_in_semantic_domains: [write_in_sd],
         example_sentences: [{ en: 'baz', vn: 'foo' }],
         photo_files: [{
@@ -135,7 +128,7 @@ describe(expand_entry, () => {
       coordinates: {points:[{coordinates: {latitude: 23, longitude: -93}}]}
     }
 
-    expect(expand_entry(database_entry)).toEqual(expanded_entry);
+    expect(expand_entry(database_entry, t)).toEqual(expanded_entry);
   });
 
   test('empty entry', () => {
@@ -143,7 +136,7 @@ describe(expand_entry, () => {
     const expanded_entry: ExpandedEntry = {
       senses: [{}],
     };
-    expect(expand_entry(database_entry)).toEqual(expanded_entry);
+    expect(expand_entry(database_entry, t)).toEqual(expanded_entry);
   });
 
   test('simple entry with sense but without custom sd', () => {
@@ -165,6 +158,6 @@ describe(expand_entry, () => {
         }
       ],
     };
-    expect(expand_entry(database_entry)).toEqual(expanded_entry);
+    expect(expand_entry(database_entry, t)).toEqual(expanded_entry);
   });
 });

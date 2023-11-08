@@ -1,14 +1,16 @@
-export enum CustomPrintFields {
-  // lx always shows and is not toggleable
-  gloss = 'Glosses', // always show toggle
-  alternateOrthographies = 'Alternate Orthographies', // lo, lo2, lo3, lo4, lo5
-  ph = 'Phonetic', // same as entry field
-  ps = 'Part of Speech', // same as entry field
+// these values are never used - this could be simplified to not use enums
+
+enum CustomPrintFields {
+  // lexeme always shows
+  gloss = 'Glosses',
+  local_orthography = 'Alternate Orthographies', // lo, lo2, lo3, lo4, lo5
+  phonetic = 'Phonetic',
+  parts_of_speech = 'Part of Speech',
   example_sentence = 'Example Sentences', // xv or xs
-  sdn = 'Semantic Domains', // sdn || sd
-  image = 'Image', // pf.gcs
+  semantic_domains = 'Semantic Domains', // sdn || sd
+  photo = 'Photo', // pf.gcs
   speaker = 'Speaker', // sf.sp or sf.speakerName
-  sr = 'Source', // same as entry field
+  sources = 'Source',
   noun_class = 'Noun Class',
 }
 
@@ -23,6 +25,7 @@ export enum StandardPrintFields {
 }
 
 type PrintFieldKeys = keyof typeof CustomPrintFields | keyof typeof StandardPrintFields;
+
 export type IPrintFields = {
   [key in PrintFieldKeys]?: boolean;
 };

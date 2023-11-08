@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { t } from 'svelte-i18n';
   import { page } from '$app/stores';
   import { admin, user as userStore } from '$lib/stores';
   import { logOut, firebaseConfig, authState } from 'sveltefirets';
@@ -26,9 +25,9 @@
               <i class="fas fa-key" />
             </a>
           {/if}
-          <a href="/account"> {$t('account.account_settings', { default: 'Account Settings' })} </a>
+          <a href="/account"> {$page.data.t('account.account_settings')} </a>
           {#if userStore}
-            <button type="button" on:click={logOut}>{$t('account.log_out', { default: 'Log Out' })}</button>
+            <button type="button" on:click={logOut}>{$page.data.t('account.log_out')}</button>
           {/if}
           {#if firebaseConfig.projectId === 'talking-dictionaries-dev'}
             <button
@@ -55,7 +54,7 @@
     <Button form="text" onclick={toggle}>
       <i class="far fa-sign-in" />
       <span class="ml-1 hidden sm:inline">
-        {$t('header.login', { default: 'Log In' })}
+        {$page.data.t('header.login')}
       </span>
     </Button>
     {#if show}
