@@ -24,6 +24,10 @@
 <span class="line" />
 
 <style>
+  a {
+    color: blue;
+  }
+
   .line {
     display: block;
     height: 1px;

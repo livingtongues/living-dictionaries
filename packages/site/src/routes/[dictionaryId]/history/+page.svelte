@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { t } from 'svelte-i18n';
+  // import { page } from '$app/stores';
   import { canEdit } from '$lib/stores';
   import Block from './Block.svelte';
   // import SeoMetaTags from '$lib/components/SeoMetaTags.svelte';
@@ -42,7 +42,7 @@
 
 <div>
   <h3 class="text-xl font-semibold mb-3">
-    {$t('dictionary.history', { default: 'History' })}
+    History <!-- {$page.data.t('dictionary.history')} -->
   </h3>
 
   <div class="flex justify-end m-3">
