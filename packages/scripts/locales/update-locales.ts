@@ -127,10 +127,8 @@ function getGoogleSheetCsvUrl(spreadsheetId: string, sheetName: string) {
 
 async function writeLocaleFiles(translations: Record<string, any>, directory: string) {
   const languagesToWrite = languages.map(async (lang) => {
-    const path = `${directory}/${lang}.js`;
-    const typings = lang === 'en' ? '' : `/** @type {typeof import('./en.js').default} */\r\n`;
-    const content = `${typings}export default ${JSON.stringify(translations[lang], null, 2)}
-`
+    const path = `${directory}/${lang}.json`;
+    const content = `${JSON.stringify(translations[lang], null, 2)}\r\n`
     return fs.writeFile(path, content);
   });
   await Promise.all(languagesToWrite);
