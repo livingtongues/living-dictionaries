@@ -12,7 +12,7 @@
     ],
     "moduleResolution": "bundler",
     "ignoreDeprecations": "5.0",
-    "module": "es2020",
+    "module": "esnext",
     "resolveJsonModule": true,
     "skipLibCheck": true,
     "sourceMap": true,
