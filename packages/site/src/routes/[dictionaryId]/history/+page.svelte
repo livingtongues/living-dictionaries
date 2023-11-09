@@ -10,6 +10,7 @@
     year: number;
   }
   let dates: monthAndYear[];
+  let editors: string[];
   let selected: 'date' | 'action' | 'editor' | 'lexeme' | 'field' = 'date';
   const options = [
     'date',
@@ -17,7 +18,7 @@
     'editor',
     'lexeme',
     'field'
-  ]
+  ];
 
   function sortByDates() {
     const reducedDates = data.history.reduce((acc, record) => {
@@ -35,9 +36,23 @@
     dates = Array.from(reducedDates.values());
   }
 
-  $: if (data.history.length > 0)
-    sortByDates();
+  function sortByEditor() {
+    const reducedEditors = data.history.reduce((acc, record) => {
+      if (!acc.has(record.updatedBy))
+        acc.set(record.updatedBy, record.updatedBy);
 
+      return acc;
+    }, new Map());
+
+    editors = Array.from(reducedEditors.values());
+  }
+
+  $: if (data.history.length > 0 ) {
+    if ( selected === 'date')
+      sortByDates();
+    else if (selected === 'editor')
+      sortByEditor();
+  }
 </script>
 
 <div>
@@ -56,10 +71,16 @@
   </div>
 
   {#if canEdit}
-    {#if data.history.length > 0}
-      {#each dates as date}
-        <Block records={data.history.filter(record => new Date(record.updatedAtMs).getMonth() === date.month && new Date(record.updatedAtMs).getFullYear() === date.year)} />
-      {/each}
+    {#if data.history?.length > 0}
+      {#if selected === 'date'}
+        {#each dates as date}
+          <Block records={data.history.filter(record => new Date(record.updatedAtMs).getMonth() === date.month && new Date(record.updatedAtMs).getFullYear() === date.year)} />
+        {/each}
+      {:else if selected === 'editor'}
+        {#each editors as editor}
+          <Block records={data.history.filter(record => record.updatedBy === editor)} />
+        {/each}
+      {/if}
     {:else}
       <p>History is empty</p>
     {/if}
