@@ -1,9 +1,9 @@
 /* eslint-disable require-atomic-updates */
-import enBase from './locales/en'
-import enGloss from './locales/gl/en'
-import enPartsOfSpeech from './locales/ps/en'
-import enPartsOfSpeechAbbrev from './locales/psAbbrev/en'
-import enSemanticDomains from './locales/sd/en'
+import enBase from './locales/en.json'
+import enGloss from './locales/gl/en.json'
+import enPartsOfSpeech from './locales/ps/en.json'
+import enPartsOfSpeechAbbrev from './locales/psAbbrev/en.json'
+import enSemanticDomains from './locales/sd/en.json'
 
 import type { LocaleCode } from './locales'
 import type { TranslationKeys } from './types'
@@ -33,11 +33,11 @@ interface TranslateOptions {
 export async function getTranslator(locale: LocaleCode, { errorOnMissingBase }: GetTranslatorOptions = { errorOnMissingBase: false}) {
   if (!loadedTranslations[locale]) {
     loadedTranslations[locale] = {
-      ...(await import(`./locales/${locale}.js`)).default,
-      ...(await import(`./locales/gl/${locale}.js`)).default, // glossing languages
-      ...(await import(`./locales/ps/${locale}.js`)).default, // parts of speech
-      ...(await import(`./locales/psAbbrev/${locale}.js`)).default,
-      ...(await import(`./locales/sd/${locale}.js`)).default, // semantic domains
+      ...(await import(`./locales/${locale}.json`)),
+      ...(await import(`./locales/gl/${locale}.json`)), // glossing languages
+      ...(await import(`./locales/ps/${locale}.json`)), // parts of speech
+      ...(await import(`./locales/psAbbrev/${locale}.json`)),
+      ...(await import(`./locales/sd/${locale}.json`)), // semantic domains
     }
   }
 
