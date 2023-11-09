@@ -1,4 +1,4 @@
-import { Locales } from '$lib/i18n/locales'
+import { Locales } from './src/lib/i18n/locales'
 import { defineConfig } from 'kitbook/defineConfig'
 
 export default defineConfig({
