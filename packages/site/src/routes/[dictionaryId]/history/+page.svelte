@@ -11,6 +11,8 @@
   }
   let dates: monthAndYear[];
   let editors: string[];
+  let entries: string[];
+  let fields: string[];
   let selected: 'date' | 'action' | 'editor' | 'lexeme' | 'field' = 'date';
   const options = [
     'date',
@@ -47,11 +49,37 @@
     editors = Array.from(reducedEditors.values());
   }
 
+  function sortByLexeme() {
+    const reducedEntries = data.history.reduce((acc, record) => {
+      if (!acc.has(record.entryId))
+        acc.set(record.entryId, record.entryId);
+
+      return acc;
+    }, new Map());
+
+    entries = Array.from(reducedEntries.values());
+  }
+
+  function sortByField() {
+    const reducedFields = data.history.reduce((acc, record) => {
+      if (!acc.has(record.field))
+        acc.set(record.field, record.field);
+
+      return acc;
+    }, new Map());
+
+    fields = Array.from(reducedFields.values());
+  }
+
   $: if (data.history.length > 0 ) {
     if ( selected === 'date')
       sortByDates();
     else if (selected === 'editor')
       sortByEditor();
+    else if (selected === 'lexeme')
+      sortByLexeme();
+    else if (selected === 'field')
+      sortByField();
   }
 </script>
 
@@ -76,9 +104,21 @@
         {#each dates as date}
           <RecordsBlock records={data.history.filter(record => new Date(record.updatedAtMs).getMonth() === date.month && new Date(record.updatedAtMs).getFullYear() === date.year)} />
         {/each}
+      {:else if selected === 'action'}
+        {#if data.history.find(r => r.previousValue?.length === 0)}<RecordsBlock records={data.history.filter(record => record.previousValue?.length === 0)} />{/if}
+        {#if data.history.find(r => r.currentValue?.length != 0 && r.previousValue?.length != 0)}<RecordsBlock records={data.history.filter(record => record.currentValue?.length != 0 && record.previousValue?.length != 0)} />{/if}
+        {#if data.history.find(r => r.currentValue?.length === 0)}<RecordsBlock records={data.history.filter(record => record.currentValue?.length === 0)} />{/if}
       {:else if selected === 'editor'}
         {#each editors as editor}
           <RecordsBlock records={data.history.filter(record => record.updatedBy === editor)} />
+        {/each}
+      {:else if selected === 'lexeme'}
+        {#each entries as entry}
+          <RecordsBlock records={data.history.filter(record => record.entryId === entry)} />
+        {/each}
+      {:else if selected === 'field'}
+        {#each fields as field}
+          <RecordsBlock records={data.history.filter(record => record.field === field)} />
         {/each}
       {/if}
     {:else}
