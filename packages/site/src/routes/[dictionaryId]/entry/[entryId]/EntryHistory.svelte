@@ -17,6 +17,7 @@
 
 <div class="{$$props.class} text-gray-500">
   {#if canEdit}
+    <!-- TODO translate -->
     <strong>Lexeme history:</strong>
     {#each history as record}
       <p class="m-3">{record.updatedName} edited this entry on {formatter.format(new Date(record.updatedAtMs))}</p>

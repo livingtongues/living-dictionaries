@@ -1,6 +1,5 @@
 <script lang="ts">
   export let menuOpen: boolean;
-  import { _ } from 'svelte-i18n';
   import { canEdit, dictionary, isManager } from '$lib/stores';
   import { page } from '$app/stores';
 </script>
@@ -50,7 +49,7 @@
       class:active={$page.url.pathname.includes('history')}>
       <i class="far fa-history fa-fw" />
       <span class="font-medium mx-2">
-        {$_('dictionary.history', { default: 'History' })}
+        History <!-- TODO {$page.data.t('dictionary.history')} -->
       </span>
     </a>
   {/if}

@@ -1,7 +1,7 @@
 <script lang="ts">
   // import { page } from '$app/stores';
   import { canEdit } from '$lib/stores';
-  import Block from './Block.svelte';
+  import RecordsBlock from './RecordsBlock.svelte';
   // import SeoMetaTags from '$lib/components/SeoMetaTags.svelte';
 
   export let data;
@@ -57,7 +57,7 @@
 
 <div>
   <h3 class="text-xl font-semibold mb-3">
-    History <!-- {$page.data.t('dictionary.history')} -->
+    History <!-- TODO {$page.data.t('dictionary.history')} -->
   </h3>
 
   <div class="flex justify-end m-3">
@@ -74,11 +74,11 @@
     {#if data.history?.length > 0}
       {#if selected === 'date'}
         {#each dates as date}
-          <Block records={data.history.filter(record => new Date(record.updatedAtMs).getMonth() === date.month && new Date(record.updatedAtMs).getFullYear() === date.year)} />
+          <RecordsBlock records={data.history.filter(record => new Date(record.updatedAtMs).getMonth() === date.month && new Date(record.updatedAtMs).getFullYear() === date.year)} />
         {/each}
       {:else if selected === 'editor'}
         {#each editors as editor}
-          <Block records={data.history.filter(record => record.updatedBy === editor)} />
+          <RecordsBlock records={data.history.filter(record => record.updatedBy === editor)} />
         {/each}
       {/if}
     {:else}
