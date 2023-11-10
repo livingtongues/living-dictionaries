@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onDestroy, onMount } from 'svelte';
-  import { t } from 'svelte-i18n';
+  import { page } from '$app/stores';
   import type { GoalDatabaseVideo, IVideoCustomMetadata } from '@living-dictionaries/types';
   import { dictionary, user } from '$lib/stores';
   import { getStorage, ref, uploadBytesResumable, type TaskState, type UploadTask, StorageError } from 'firebase/storage';
@@ -22,7 +22,7 @@
   });
   $: percentage = Math.floor($progress * 100);
 
-  onMount(async () => {
+  onMount(() => {
     if (!file || !entryId) return;
 
     const fileTypeSuffix = file.type.split('/')[1].split(';')[0]; // turns 'video/webm;codecs=vp8,opus' to 'webm' and 'video/mp4' to 'mp4'
@@ -46,7 +46,7 @@
         taskState = snapshot.state;
       },
       (err) => {
-        alert(`${$t('misc.error', { default: 'Error' })}: ${err}`);
+        alert(`${$page.data.t('misc.error')}: ${err}`);
         error = err;
       },
       async () => {
@@ -60,7 +60,7 @@
 
           success = true;
         } catch (err) {
-          alert(`${$t('misc.error', { default: 'Error' })}: ${err}`);
+          alert(`${$page.data.t('misc.error')}: ${err}`);
           error = err;
         }
       }
@@ -77,14 +77,14 @@
   <span
     class="text-xs font-semibold inline-block py-1 px-2 uppercase rounded-full
       text-red-600 bg-red-200">
-    {$t('misc.error', { default: 'Error' })}
+    {$page.data.t('misc.error')}
   </span>
 {:else if success}
   <span
     class="text-xs font-semibold inline-block py-1 px-2 uppercase rounded-full
       text-green-600 bg-green-200">
     <i class="far fa-check" />
-    {$t('upload.success', { default: 'Success' })}
+    {$page.data.t('upload.success')}
   </span>
 {:else}
   <div class="relative pt-1">
@@ -93,7 +93,7 @@
         <span
           class="text-xs font-semibold inline-block py-1 px-2 uppercase
             rounded-full text-blue-600 bg-blue-200">
-          {$t('upload.uploading', { default: 'Uploading' })}
+          {$page.data.t('upload.uploading')}
         </span>
       </div>
       <div class="text-right">

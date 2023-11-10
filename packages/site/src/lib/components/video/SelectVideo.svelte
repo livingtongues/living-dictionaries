@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { _ } from 'svelte-i18n';
+  import { page } from '$app/stores';
   let dragging = false;
   let file: File;
 
@@ -10,12 +10,12 @@
 
     // Client-side validation: Must be video and smaller than 100MB.
     if (fileToCheck.type.split('/')[0] !== 'video')
-      return alert(`${$_('upload.error', { default: 'Unsupported File Type' })}`);
+      return alert(`${$page.data.t('upload.error')}`);
 
     // Must be smaller than 100MB, http://www.unitconversion.org/data-storage/megabytes-to-bytes-conversion.html
     if (fileToCheck.size > 104857600) {
       return alert(
-        `${$_('upload.file_must_be_smaller', { default: 'File must be smaller than' })} 100MB`
+        `${$page.data.t('upload.file_must_be_smaller')} 100MB`
       );
     }
 
@@ -43,11 +43,11 @@
     <div>
       <i class="far fa-upload" />&nbsp;
       {dragging
-        ? $_('upload.drop_to_upload', { default: 'Drop to Upload' })
-        : $_('upload.select_video_file', { default: 'Select Video File' })}
+        ? $page.data.t('upload.drop_to_upload')
+        : $page.data.t('upload.select_video_file')}
     </div>
     <div class="text-xs">
-      {$_('upload.file_must_be_smaller', { default: 'File must be smaller than' })} 100MB
+      {$page.data.t('upload.file_must_be_smaller')} 100MB
     </div>
   </label>
 {/if}

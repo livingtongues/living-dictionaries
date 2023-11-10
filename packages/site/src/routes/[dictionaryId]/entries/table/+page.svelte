@@ -1,5 +1,4 @@
 <script lang="ts">
-  // import { t } from 'svelte-i18n';
   // import SeoMetaTags from '$lib/components/SeoMetaTags.svelte';
   import { onMount, getContext } from 'svelte';
   import { Doc } from 'sveltefirets';
@@ -15,6 +14,7 @@
   import { deleteImage } from '$lib/helpers/delete';
   import { saveUpdateToFirestore } from '$lib/helpers/entry/update';
   import { setUpColumns } from './setUpColumns';
+  import { page } from '$app/stores';
 
   const search: InstantSearch = getContext('search');
 
@@ -37,7 +37,7 @@
   </div>
 
   <EntriesTable
-    entries={$entries.map(convert_and_expand_entry)}
+    entries={$entries.map(entry => convert_and_expand_entry(entry, $page.data.t))}
     {columns}
     dictionaryId={$dictionary.id}
     canEdit={$canEdit}
@@ -59,7 +59,7 @@
 <Pagination {search} />
 
 <!-- <SeoMetaTags
-  title={$t('', { default: 'Entries Table' })}
+  title={$page.data.t(''})}
   dictionaryName={$dictionary.name}
-  description={$t('', { default: 'The entries in this Living Dictionary are displayed in a comprehensive table (spreadsheet) that visitors can easily browse by using the page tabs at the bottom of the screen, or search by using the powerful search bar located at the top of the page.' })}
+  description={$page.data.t(''})}
   keywords="Endangered Languages, Language Documentation, Language Revitalization, Build a Dictionary, Online Dictionary, Digital Dictionary, Dictionary Software, Free Software, Online Dictionary Builder, Living Dictionaries, Living Dictionary, Edit a dictionary, Search a dictionary, Browse a dictionary, Explore a Dictionary" /> -->

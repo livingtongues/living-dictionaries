@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { t } from 'svelte-i18n';
+  import { page } from '$app/stores';
   import { onMount, createEventDispatcher } from 'svelte';
   import { Button, Modal } from 'svelte-pieces';
   import Map from './mapbox/map/Map.svelte';
@@ -59,7 +59,7 @@
 
 <Modal on:close noscroll>
   <span slot="heading">
-    {t ? $t('create.select_coordinates') : 'Select Coordinates'}
+    {$page.data.t('create.select_coordinates')}
   </span>
   <form on:submit|preventDefault={update}>
     <div class="flex flex-wrap items-center mb-2">
@@ -78,7 +78,7 @@
             min="-90"
             bind:value={lat}
             class="w-32 pl-10 pr-3 py-2 form-input"
-            placeholder={t ? $t('dictionary.latitude') : 'Latitude'} />
+            placeholder={$page.data.t('dictionary.latitude')} />
         </div>
         <div class="w-1" />
 
@@ -96,7 +96,7 @@
             min="-180"
             bind:value={lng}
             class="w-32 md:w-36 pl-10 pr-3 py-2 form-input"
-            placeholder={t ? $t('dictionary.longitude') : 'Longitude'} />
+            placeholder={$page.data.t('dictionary.longitude')} />
         </div>
       </div>
     </div>
@@ -111,7 +111,7 @@
         <NavigationControl />
         <Geocoder
           options={{ marker: false }}
-          placeholder={t ? $t('about.search') : 'Search'}
+          placeholder={$page.data.t('about.search')}
           on:result={handleGeocoderResult}
           on:error={(e) => console.error(e.detail)} />
         {#if lng && lat}
@@ -127,15 +127,15 @@
 
     <div class="modal-footer">
       <Button onclick={() => dispatch('close')} form="simple" color="black">
-        {t ? $t('misc.cancel') : 'Cancel'}
+        {$page.data.t('misc.cancel')}
       </Button>
       {#if canRemove}
         <Button onclick={remove} form="simple" color="red">
-          {t ? $t('misc.remove') : 'Remove'}
+          {$page.data.t('misc.remove')}
         </Button>
       {/if}
       <Button type="submit" form="filled">
-        {t ? $t('misc.save') : 'Save'}
+        {$page.data.t('misc.save')}
       </Button>
     </div>
   </form>

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { t } from 'svelte-i18n';
+  import { page } from '$app/stores';
   import { setOnline } from 'sveltefirets';
   import { Button } from 'svelte-pieces';
   import type { IGrammar } from '@living-dictionaries/types';
@@ -24,15 +24,15 @@
 
 <div class="grammar">
   <h3 class="text-xl font-semibold mb-3">
-    {$t('dictionary.grammar', { default: 'Grammar' })}
+    {$page.data.t('dictionary.grammar')}
   </h3>
 
   {#if $isManager}
     {#if editing}
-      <Button class="mb-2" onclick={() => (editing = false)}>{$t('misc.cancel', { default: 'Cancel' })}</Button>
-      <Button class="mb-2" form="filled" onclick={save}>{$t('misc.save', { default: 'Save' })}</Button>
+      <Button class="mb-2" onclick={() => (editing = false)}>{$page.data.t('misc.cancel')}</Button>
+      <Button class="mb-2" form="filled" onclick={save}>{$page.data.t('misc.save')}</Button>
     {:else}
-      <Button class="mb-2" onclick={() => (editing = true)}>{$t('misc.edit', { default: 'Edit' })}</Button>
+      <Button class="mb-2" onclick={() => (editing = true)}>{$page.data.t('misc.edit')}</Button>
     {/if}
   {/if}
 
@@ -48,14 +48,14 @@
       {#if updated || data.grammar}
         {@html sanitize(updated || data.grammar)}
       {:else}
-        <i>{$t('dictionary.no_info_yet', { default: 'No information yet' })}</i>
+        <i>{$page.data.t('dictionary.no_info_yet')}</i>
       {/if}
     </div>
   </div>
 </div>
 
 <SeoMetaTags
-  title={$t('dictionary.grammar', { default: 'Grammar' })}
+  title={$page.data.t('dictionary.grammar')}
   dictionaryName={data.dictionary.name}
   description="Learn about the grammar of the language in this Living Dictionary."
   keywords="Grammar of a language, grammatical, Endangered Languages, Language Documentation, Language Revitalization, Build a Dictionary, Online Dictionary, Digital Dictionary, Dictionary Software, Free Software, Online Dictionary Builder, Living Dictionaries, Living Dictionary, Bibliography" />

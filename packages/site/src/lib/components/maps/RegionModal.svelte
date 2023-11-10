@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { t } from 'svelte-i18n';
+  import { page } from '$app/stores';
   import { onMount, createEventDispatcher } from 'svelte';
   import { Button, Modal, ReactiveSet } from 'svelte-pieces';
   import Map from './mapbox/map/Map.svelte';
@@ -75,7 +75,7 @@
   let:remove>
   <Modal on:close noscroll>
     <span slot="heading">
-      {t ? $t('create.select_region') : 'Select Region'}
+      {$page.data.t('create.select_region')}
     </span>
     <form on:submit|preventDefault={() => update(points)}>
       <form on:submit={(e) => e.preventDefault()} style="height: 50vh;">
@@ -89,7 +89,7 @@
           <NavigationControl />
           <Geocoder
             options={{ marker: false }}
-            placeholder={t ? $t('about.search') : 'Search'}
+            placeholder={$page.data.t('about.search')}
             on:result={(e) => handleGeocoderResult(e, add)}
             on:error={(e) => console.error(e.detail)} />
           {#each Array.from(points) as point (point)}
@@ -144,13 +144,13 @@
 
       <div class="modal-footer">
         <Button onclick={() => dispatch('close')} form="simple" color="black">
-          {t ? $t('misc.cancel') : 'Cancel'}
+          {$page.data.t('misc.cancel')}
         </Button>
         <Button onclick={removeRegion} form="simple" color="red">
-          {t ? $t('misc.remove') : 'Remove'}
+          {$page.data.t('misc.remove')}
         </Button>
         <Button type="submit" form="filled" disabled={size < 3}>
-          {t ? $t('misc.save') : 'Save'}
+          {$page.data.t('misc.save')}
         </Button>
       </div>
     </form>

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { t } from 'svelte-i18n';
+  import { page } from '$app/stores';
   import { Button, ShowHide } from 'svelte-pieces';
   import type { IDictionary, IPoint, IRegion } from '@living-dictionaries/types';
   import type { LngLat } from 'mapbox-gl';
@@ -11,6 +11,7 @@
   import RegionModal from '$lib/components/maps/RegionModal.svelte';
   import NavigationControl from '$lib/components/maps/mapbox/controls/NavigationControl.svelte';
   import { createEventDispatcher } from 'svelte';
+
   const dispatch = createEventDispatcher<{
     updateCoordinates: { longitude: number; latitude: number };
     removeCoordinates: boolean;
@@ -37,12 +38,12 @@
 </script>
 
 <div class="text-sm font-medium text-gray-700 mb-2">
-  {$t('create.where_spoken', { default: 'Where is this language spoken?' })}
+  {$page.data.t('create.where_spoken')}
 </div>
 
 {#if hasCoordinates}
   <div class="text-xs text-gray-600 mb-2">
-    {$t('create.map_instructions', { default: 'Click on the map to add secondary coordinates.' })}
+    {$page.data.t('create.map_instructions')}
   </div>
   <div class="h-240px">
     <Map
@@ -60,7 +61,7 @@
             lng={dictionary.coordinates.longitude}
             lat={dictionary.coordinates.latitude}
             color="blue">
-            <Popup offset={30} open>{$t('create.primary_coordinate', { default: 'Primary coordinate' })}</Popup>
+            <Popup offset={30} open>{$page.data.t('create.primary_coordinate')}</Popup>
           </Marker>
         </CoordinatesModal>
       {/if}
@@ -166,7 +167,7 @@
       color={hasCoordinates ? 'black' : 'primary'}
       size={hasCoordinates ? 'sm' : 'md'}>
       <span class="i-mdi-map-marker-plus mr-1" style="margin-top: -3px;" />
-      {$t('create.select_coordinates', { default: 'Select Coordinates' })}
+      {$page.data.t('create.select_coordinates')}
     </Button>
     {#if show}
       <CoordinatesModal lng={dictionary?.coordinates?.longitude} lat={dictionary?.coordinates?.latitude} on:update={addCoordinates} on:close={toggle}>
@@ -175,7 +176,7 @@
             lng={dictionary.coordinates.longitude}
             lat={dictionary.coordinates.latitude}
             color="blue">
-            <Popup offset={30} open>{$t('create.map_instructions', { default: 'Click on the map to add secondary coordinates.' })}</Popup>
+            <Popup offset={30} open>{$page.data.t('create.map_instructions')}</Popup>
           </Marker>
         {/if}
       </CoordinatesModal>
@@ -186,7 +187,7 @@
     <ShowHide let:show let:toggle>
       <Button onclick={toggle} color="black" size="sm">
         <span class="i-mdi-map-marker-path mr-1" style="margin-top: -2px;" />
-        {$t('create.select_region', { default: 'Select Region' })}
+        {$page.data.t('create.select_region')}
       </Button>
       {#if show}
         <RegionModal
@@ -200,7 +201,7 @@
             lng={dictionary.coordinates.longitude}
             lat={dictionary.coordinates.latitude}
             color="blue">
-            <Popup offset={30} open>{$t('create.map_instructions', { default: 'Click on the map to add secondary coordinates.' })}</Popup>
+            <Popup offset={30} open>{$page.data.t('create.map_instructions')}</Popup>
           </Marker>
         </RegionModal>
       {/if}
