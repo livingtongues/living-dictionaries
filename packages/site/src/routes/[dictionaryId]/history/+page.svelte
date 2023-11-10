@@ -38,48 +38,26 @@
     dates = Array.from(reducedDates.values());
   }
 
-  function sortByEditor() {
-    const reducedEditors = data.history.reduce((acc, record) => {
-      if (!acc.has(record.updatedBy))
-        acc.set(record.updatedBy, record.updatedBy);
+  function sortBy(field: string) {
+    const reducedElements = data.history.reduce((acc, record) => {
+      if (!acc.has(record[field]))
+        acc.set(record[field], record[field]);
 
       return acc;
     }, new Map());
 
-    editors = Array.from(reducedEditors.values());
-  }
-
-  function sortByLexeme() {
-    const reducedEntries = data.history.reduce((acc, record) => {
-      if (!acc.has(record.entryId))
-        acc.set(record.entryId, record.entryId);
-
-      return acc;
-    }, new Map());
-
-    entries = Array.from(reducedEntries.values());
-  }
-
-  function sortByField() {
-    const reducedFields = data.history.reduce((acc, record) => {
-      if (!acc.has(record.field))
-        acc.set(record.field, record.field);
-
-      return acc;
-    }, new Map());
-
-    fields = Array.from(reducedFields.values());
+    return Array.from(reducedElements.values());
   }
 
   $: if (data.history.length > 0 ) {
     if ( selected === 'date')
       sortByDates();
     else if (selected === 'editor')
-      sortByEditor();
+      editors = sortBy('updatedBy');
     else if (selected === 'lexeme')
-      sortByLexeme();
+      entries = sortBy('entryId')
     else if (selected === 'field')
-      sortByField();
+      fields = sortBy('field')
   }
 </script>
 

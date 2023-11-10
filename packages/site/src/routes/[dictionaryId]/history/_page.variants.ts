@@ -118,46 +118,4 @@ export const variants: Variant<Component>[] = [
       }
     }
   },
-  // {
-  //   name: 'Sorted by action',
-  //   languages: [],
-  //   props: {
-  //     data: {
-  //       dictionary: {
-  //         name: 'Banange',
-  //         glossLanguages: []
-  //       },
-  //       user: null,
-  //       history: [...history].sort((a, b) => b.action > a.action ? 1 : -1)
-  //     }
-  //   }
-  // },
-  // {
-  //   name: 'Sorted by editor',
-  //   languages: [],
-  //   props: {
-  //     data: {
-  //       dictionary: {
-  //         name: 'Banange',
-  //         glossLanguages: []
-  //       },
-  //       user: null,
-  //       history: [...history].sort((a, b) => a.editor > b.editor ? 1 : -1)
-  //     }
-  //   }
-  // },
-  // {
-  //   name: 'Sorted by lexeme',
-  //   languages: [],
-  //   props: {
-  //     data: {
-  //       dictionary: {
-  //         name: 'Banange',
-  //         glossLanguages: []
-  //       },
-  //       user: null,
-  //       history: [...history].sort((a, b) => a.editedLexeme > b.editedLexeme ? 1 : -1)
-  //     }
-  //   }
-  // },
 ]
