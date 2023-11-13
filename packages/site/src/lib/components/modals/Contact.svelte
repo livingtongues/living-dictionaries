@@ -52,7 +52,7 @@
           email: $user?.email || email,
           name: $user?.displayName || 'Anonymous',
           url: window.location.href,
-          subject: subjects[subject],
+          subject: $page.data.t(subjects[subject]),
         });
       }
 
