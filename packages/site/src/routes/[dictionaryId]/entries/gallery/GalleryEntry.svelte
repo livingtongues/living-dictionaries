@@ -3,9 +3,18 @@
   import Image from '$lib/components/image/Image.svelte';
   import { dictionary } from '$lib/stores';
   import { deleteImage } from '$lib/helpers/delete';
+  import { order_glosses } from '$lib/helpers/glosses';
+  import { page } from '$app/stores';
 
   export let entry: ExpandedEntry;
   export let canEdit = false;
+
+  $: glosses = order_glosses({
+    glosses: entry.senses?.[0]?.glosses,
+    dictionary_gloss_languages: $dictionary.glossLanguages,
+    t: $page.data.t,
+    label: true
+  });
 </script>
 
 <div class="flex flex-col relative rounded max-w-[500px]">
@@ -23,12 +32,7 @@
         {entry.lexeme}
       </div>
       <div class="text-xs">
-        <!--Simple solution until we really work on implementing this feature-->
-        {#if $dictionary.id === 'iquito' || $dictionary.id === 'muniche'}
-          {entry.senses?.[0]?.glosses?.es || ''}
-        {:else}
-          {entry.senses?.[0]?.glosses?.en || ''}
-        {/if}
+        {glosses[0] || ''}
       </div>
     </a>
   </div>
