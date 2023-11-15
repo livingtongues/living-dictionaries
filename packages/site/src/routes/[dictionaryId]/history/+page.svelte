@@ -80,23 +80,23 @@
     {#if data.history?.length > 0}
       {#if selected === 'date'}
         {#each dates as date}
-          <RecordsBlock records={data.history.filter(record => new Date(record.updatedAtMs).getMonth() === date.month && new Date(record.updatedAtMs).getFullYear() === date.year)} />
+          <RecordsBlock {selected} records={data.history.filter(record => new Date(record.updatedAtMs).getMonth() === date.month && new Date(record.updatedAtMs).getFullYear() === date.year)} />
         {/each}
       {:else if selected === 'action'}
-        {#if data.history.find(r => r.previousValue?.length === 0)}<RecordsBlock records={data.history.filter(record => record.previousValue?.length === 0)} />{/if}
-        {#if data.history.find(r => r.currentValue?.length != 0 && r.previousValue?.length != 0)}<RecordsBlock records={data.history.filter(record => record.currentValue?.length != 0 && record.previousValue?.length != 0)} />{/if}
-        {#if data.history.find(r => r.currentValue?.length === 0)}<RecordsBlock records={data.history.filter(record => record.currentValue?.length === 0)} />{/if}
+        {#if data.history.find(r => r.previousValue?.length === 0)}<RecordsBlock {selected} records={data.history.filter(record => record.previousValue?.length === 0)} />{/if}
+        {#if data.history.find(r => r.currentValue?.length != 0 && r.previousValue?.length != 0)}<RecordsBlock {selected} records={data.history.filter(record => record.currentValue?.length != 0 && record.previousValue?.length != 0)} />{/if}
+        {#if data.history.find(r => r.currentValue?.length === 0)}<RecordsBlock {selected} records={data.history.filter(record => record.currentValue?.length === 0)} />{/if}
       {:else if selected === 'editor'}
         {#each editors as editor}
-          <RecordsBlock records={data.history.filter(record => record.updatedBy === editor)} />
+          <RecordsBlock {selected} records={data.history.filter(record => record.updatedBy === editor)} />
         {/each}
       {:else if selected === 'lexeme'}
         {#each entries as entry}
-          <RecordsBlock records={data.history.filter(record => record.entryId === entry)} />
+          <RecordsBlock {selected} records={data.history.filter(record => record.entryId === entry)} />
         {/each}
       {:else if selected === 'field'}
         {#each fields as field}
-          <RecordsBlock records={data.history.filter(record => record.field === field)} />
+          <RecordsBlock {selected} records={data.history.filter(record => record.field === field)} />
         {/each}
       {/if}
     {:else}
