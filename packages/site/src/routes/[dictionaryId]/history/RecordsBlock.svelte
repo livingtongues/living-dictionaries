@@ -18,7 +18,7 @@
   {#each records as record}
     {@const { updatedName, entryId, entryName, dictionaryId, previousValue, currentValue, field, updatedAtMs } = record}
     {@const date = new Date(updatedAtMs)}
-    <li class="mb-2"><a href="{dictionaryId}/{entryId}">{entryName}</a>: <span class={selected === 'editor' ? 'highlighted' : ''}>{updatedName}</span> <span class={selected === 'action' ? 'highlighted' : ''}>{getAction(previousValue, currentValue)}</span> a <span class={selected === 'field' ? 'highlighted' : ''}>{field}</span> field on <span class={selected === 'date' ? 'highlighted' : ''}>{date.toLocaleString()}</span></li>
+    <li class="mb-2"><a class={selected === 'lexeme' ? 'highlighted' : ''} href="{dictionaryId}/{entryId}">{entryName}</a>: <span class={selected === 'editor' ? 'highlighted' : ''}>{updatedName}</span> <span class={selected === 'action' ? 'highlighted' : ''}>{getAction(previousValue, currentValue)}</span> a <span class={selected === 'field' ? 'highlighted' : ''}>{field}</span> field on <span class={selected === 'date' ? 'highlighted' : ''}>{date.toLocaleString()}</span></li>
   {/each}
 </ul>
 
