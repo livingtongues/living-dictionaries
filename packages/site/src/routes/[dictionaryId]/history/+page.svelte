@@ -67,7 +67,7 @@
   </h3>
 
   <div class="flex justify-end m-3">
-    <label for="value-select">Sort by:</label>
+    <label class="mt-2 mr-2" for="value-select">Sort by:</label>
 
     <select bind:value={selected}>
       {#each options as value}

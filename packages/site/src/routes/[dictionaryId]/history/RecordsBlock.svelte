@@ -2,7 +2,7 @@
   import type { Change } from '@living-dictionaries/types';
 
   export let records: Change[];
-  export let selected: 'date' | 'action' | 'editor' | 'lexeme' | 'field' = 'date';
+  export let selected: 'date' | 'action' | 'editor' | 'lexeme' | 'field';
 
   function getAction(previousValue: string | string[], currentValue: string | string[]): string {
     if (previousValue?.length === 0)
