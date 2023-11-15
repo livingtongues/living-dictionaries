@@ -17,7 +17,7 @@
   {#each records as record}
     {@const { updatedName, entryId, entryName, dictionaryId, previousValue, currentValue, field, updatedAtMs } = record}
     {@const date = new Date(updatedAtMs)}
-    <li class="mb-2">{updatedName} <strong>{getAction(previousValue, currentValue)}</strong> {field} field on <a href="{dictionaryId}/{entryId}">{entryName}</a> on {date.toLocaleString()}</li>
+    <li class="mb-2"><a href="{dictionaryId}/{entryId}">{entryName}</a>: {updatedName} {getAction(previousValue, currentValue)} a {field} field on {date.toLocaleString()}</li>
   {/each}
 </ul>
 
