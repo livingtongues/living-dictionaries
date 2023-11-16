@@ -2,6 +2,7 @@ import { PROCESS_IMAGE_URL } from '$env/static/private';
 import { decodeToken } from '$lib/server/firebase-admin';
 import { json, error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
+import { ErrorCodes } from '$lib/constants';
 
 export interface ImageUrlRequestBody {
   auth_token: string;
@@ -27,6 +28,6 @@ export const POST: RequestHandler = async ({ request, fetch }) => {
   }
   catch (err: any) {
     console.error(`Photo processing error when getting serving url: ${err.message}`);
-    throw error(500, `Photo processing error when getting serving url: ${err.message}`);
+    throw error(ErrorCodes.INTERNAL_SERVER_ERROR, `Photo processing error when getting serving url: ${err.message}`);
   }
 };
