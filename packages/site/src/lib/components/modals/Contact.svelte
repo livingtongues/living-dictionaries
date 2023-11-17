@@ -7,6 +7,7 @@
   import { apiFetch } from '$lib/client/apiFetch';
   import type { SupportRequestBody } from '../../../routes/api/email/support/+server';
   import type { RequestAccessBody } from '../../../routes/api/email/request_access/+server';
+  import enBase from '$lib/i18n/locales/en.json';
 
   export let subject: Subjects = undefined;
 
@@ -52,7 +53,7 @@
           email: $user?.email || email,
           name: $user?.displayName || 'Anonymous',
           url: window.location.href,
-          subject: $page.data.t(subjects[subject]),
+          subject: enBase.contact[subject],
         });
       }
 
