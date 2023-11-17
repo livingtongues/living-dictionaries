@@ -2,7 +2,7 @@ import { update } from 'sveltefirets';
 import { get } from 'svelte/store';
 import { page } from '$app/stores';
 
-export function saveUpdateToFirestore({
+export function updateFirestoreEntry({
   field,
   value,
   entryId,

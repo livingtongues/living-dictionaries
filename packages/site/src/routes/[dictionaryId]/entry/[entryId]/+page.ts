@@ -12,9 +12,15 @@ import {
 } from '$lib/stores';
 import { browser } from '$app/environment';
 import { readable } from 'svelte/store';
-import { getUpdateSense } from '$lib/supabase/change/sense';
-import { saveUpdateToFirestore } from '$lib/helpers/entry/update';
+import { updateSense } from '$lib/supabase/change/sense';
+import { updateFirestoreEntry } from '$lib/helpers/entry/update';
 import { ErrorCodes } from '$lib/constants';
+
+const dbOperations = {
+  updateFirestoreEntry,
+  updateSense,
+}
+export type DbOperations = typeof dbOperations
 
 export const load = async ({ params }) => {
   const entryPath = `dictionaries/${params.dictionaryId}/words/${params.entryId}`;
@@ -47,7 +53,6 @@ export const load = async ({ params }) => {
     isContributor,
     isManager,
     user,
-    saveUpdateToFirestore,
-    updateSense: getUpdateSense(params.dictionaryId)
+    dbOperations,
   };
 };

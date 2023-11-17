@@ -20,3 +20,5 @@ export type { HelperRoles, IHelper } from './helper.interface';
 export type { AlgoliaEntry } from './entry.algolia.interface';
 export { type IPrintFields, StandardPrintFields } from './print-entry.interface';
 export { EntryFields, type EntryFieldValue } from './entry-fields.enum';
+
+export type { SupaEntry } from './supabase/entry.interface';

@@ -10,7 +10,7 @@
   import { configure } from 'instantsearch.js/es/widgets/index.js';
   import { deleteImage } from '$lib/helpers/delete';
   import type { InstantSearch } from 'instantsearch.js';
-  import { saveUpdateToFirestore } from '$lib/helpers/entry/update';
+  import { updateFirestoreEntry } from '$lib/helpers/entry/update';
   import { page } from '$app/stores';
 
   const search: InstantSearch = getContext('search');
@@ -38,7 +38,7 @@
           videoAccess={$dictionary.videoAccess || $admin > 0}
           canEdit={$canEdit}
           on:deleteImage={() => deleteImage(entry, $dictionary.id)}
-          on:valueupdate={({detail: { field, newValue}}) => saveUpdateToFirestore({field, value: newValue, entryId: entry.id})} />
+          on:valueupdate={({detail: { field, newValue}}) => updateFirestoreEntry({field, value: newValue, entryId: entry.id})} />
       </Doc>
     {/each}
   {:else}

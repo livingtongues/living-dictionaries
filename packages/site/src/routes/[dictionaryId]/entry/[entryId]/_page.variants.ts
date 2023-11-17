@@ -1,6 +1,7 @@
 import type { Variant } from 'kitbook';
 import type Component from './+page.svelte';
 import { readable, writable } from 'svelte/store';
+import { logDbOperations } from '$lib/mocks/db';
 
 const defaultStores = {
   locale: null,
@@ -15,7 +16,7 @@ const defaultStores = {
     name: 'test',
     glossLanguages: []
   }),
-  insertSense: async (args) => { console.info({insertSense: args})},
+  dbOperations: logDbOperations,
 }
 
 export const variants: Variant<Component>[] = [

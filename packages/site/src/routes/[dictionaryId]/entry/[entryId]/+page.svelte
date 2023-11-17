@@ -20,8 +20,7 @@
     isManager,
     user,
     initialEntry,
-    saveUpdateToFirestore,
-    updateSense: insertSense,
+    dbOperations,
   } = data);
 
   $: entry = convert_and_expand_entry($initialEntry, $page.data.t);
@@ -36,10 +35,6 @@
 </script>
 
 <div class="flex justify-between items-center mb-3 sticky top-0 z-30 bg-white pt-1">
-  <Button class="!px-2" color="black" form="simple" onclick={() => insertSense({column: 'definition_english_deprecated', entry_id: entry.id, new_value: 'Hello!', old_value: null, sense_id: window.crypto.randomUUID()})}>
-    Trigger Sense Change
-  </Button>
-
   <Button class="!px-2" color="black" form="simple" onclick={backToEntries}>
     <i class="fas fa-arrow-left rtl-x-flip" />
     {$page.data.t('misc.back')}
@@ -75,10 +70,11 @@
   videoAccess={$dictionary.videoAccess || $admin > 0}
   admin={$admin}
   canEdit={$canEdit}
+  {dbOperations}
   on:deleteImage={() => deleteImage(entry, $dictionary.id)}
   on:deleteVideo={() => deleteVideo(entry, $dictionary.id)}
   on:valueupdate={({ detail: { field, newValue } }) =>
-    saveUpdateToFirestore({
+    dbOperations.updateFirestoreEntry({
       field,
       value: newValue,
       entryId: entry.id,
