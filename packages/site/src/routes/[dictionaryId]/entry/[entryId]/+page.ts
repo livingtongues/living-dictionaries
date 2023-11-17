@@ -13,6 +13,7 @@ import {
 } from '$lib/stores';
 import { browser } from '$app/environment';
 import { readable } from 'svelte/store';
+import { getInsertSense } from '$lib/supabase/change/sense';
 
 export const load = async ({ params }) => {
   try {
@@ -34,9 +35,9 @@ export const load = async ({ params }) => {
       isContributor,
       isManager,
       user,
+      insertSense: getInsertSense(params.dictionaryId)
     };
   } catch (err) {
     throw error(500, err);
   }
 };
-

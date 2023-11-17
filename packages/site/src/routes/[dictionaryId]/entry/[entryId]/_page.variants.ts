@@ -15,6 +15,7 @@ const defaultStores = {
     name: 'test',
     glossLanguages: []
   }),
+  insertSense: async (args) => { console.info({insertSense: args})},
 }
 
 export const variants: Variant<Component>[] = [

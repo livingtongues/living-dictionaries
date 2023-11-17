@@ -1,0 +1,36 @@
+import { apiFetch } from '$lib/client/apiFetch';
+import { authState } from 'sveltefirets';
+import { get } from 'svelte/store';
+import type { ChangeEntryRequestBody } from './types';
+
+type SenseColumns = 'glosses' | 'parts_of_speech' | 'semantic_domains' | 'write_in_semantic_domains' | 'noun_class' | 'definition_english_deprecated' | 'deleted'
+
+export function getInsertSense(dictionary_id: string) {
+  return async ({new_value, old_value, entry_id, column, sense_id }: {new_value: string, old_value: string | undefined, entry_id: string, column: SenseColumns, sense_id: string }) => {
+    try {
+      const auth_state_user = get(authState);
+      const auth_token = await auth_state_user.getIdToken();
+
+      const response = await apiFetch<ChangeEntryRequestBody>('/api/db/change/entry', {
+        auth_token,
+        id: window.crypto.randomUUID(),
+        dictionary_id,
+        entry_id,
+        table: 'senses',
+        column,
+        row: sense_id,
+        new_value,
+        old_value,
+        timestamp: new Date().toISOString(),
+      });
+
+      if (response.status !== 200) {
+        const body = await response.json();
+        throw new Error(body.message);
+      }
+    } catch (err) {
+      alert(err);
+      console.error(err);
+    }
+  }
+}
