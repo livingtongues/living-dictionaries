@@ -58,11 +58,11 @@ export interface Database {
           glosses: Json | null
           id: string
           noun_class: string | null
-          parts_of_speech: Json | null
-          semantic_domains: Json | null
+          parts_of_speech: string[] | null
+          semantic_domains: string[] | null
           updated_at: string
           updated_by: string
-          write_in_semantic_domains: Json | null
+          write_in_semantic_domains: string[] | null
         }
         Insert: {
           created_at?: string
@@ -73,11 +73,11 @@ export interface Database {
           glosses?: Json | null
           id: string
           noun_class?: string | null
-          parts_of_speech?: Json | null
-          semantic_domains?: Json | null
+          parts_of_speech?: string[] | null
+          semantic_domains?: string[] | null
           updated_at?: string
           updated_by: string
-          write_in_semantic_domains?: Json | null
+          write_in_semantic_domains?: string[] | null
         }
         Update: {
           created_at?: string
@@ -88,29 +88,29 @@ export interface Database {
           glosses?: Json | null
           id?: string
           noun_class?: string | null
-          parts_of_speech?: Json | null
-          semantic_domains?: Json | null
+          parts_of_speech?: string[] | null
+          semantic_domains?: string[] | null
           updated_at?: string
           updated_by?: string
-          write_in_semantic_domains?: Json | null
+          write_in_semantic_domains?: string[] | null
         }
         Relationships: []
       }
     }
     Views: {
-      [_ in never]: never
+      entries_view: {
+        Row: {
+          entry_id: string | null
+          senses: Json | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       [_ in never]: never
     }
     Enums: {
-      entry_tables:
-        | 'entry'
-        | 'senses'
-        | 'audio'
-        | 'videos'
-        | 'photos'
-        | 'speakers'
+      entry_tables: 'senses'
     }
     CompositeTypes: {
       [_ in never]: never
