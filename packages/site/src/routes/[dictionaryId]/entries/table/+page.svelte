@@ -42,7 +42,7 @@
     dictionaryId={$dictionary.id}
     canEdit={$canEdit}
     on:deleteImage={({detail: {entryId}}) => deleteImage({id: entryId}, $dictionary.id)}
-    on:valueupdate={({detail: { field, newValue, entryId }}) => saveUpdateToFirestore({field, value: newValue, entryId, dictionaryId: $dictionary.id})} />
+    on:valueupdate={({detail: { field, newValue, entryId }}) => saveUpdateToFirestore({field, value: newValue, entryId })} />
 
   {#if $canEdit}
     {#each algoliaEntries as algoliaEntry (algoliaEntry.id)}

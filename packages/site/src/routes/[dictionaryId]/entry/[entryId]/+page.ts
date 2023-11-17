@@ -1,7 +1,6 @@
 import { error, redirect } from '@sveltejs/kit';
 import type { ActualDatabaseEntry } from '@living-dictionaries/types';
 import { docStore, getDocument } from 'sveltefirets';
-
 import {
   admin,
   algoliaQueryParams,
@@ -13,7 +12,8 @@ import {
 } from '$lib/stores';
 import { browser } from '$app/environment';
 import { readable } from 'svelte/store';
-import { getInsertSense } from '$lib/supabase/change/sense';
+import { getUpdateSense } from '$lib/supabase/change/sense';
+import { saveUpdateToFirestore } from '$lib/helpers/entry/update';
 
 export const load = async ({ params }) => {
   try {
@@ -35,7 +35,8 @@ export const load = async ({ params }) => {
       isContributor,
       isManager,
       user,
-      insertSense: getInsertSense(params.dictionaryId)
+      saveUpdateToFirestore,
+      updateSense: getUpdateSense(params.dictionaryId)
     };
   } catch (err) {
     throw error(500, err);

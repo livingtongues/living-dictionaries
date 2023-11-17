@@ -5,7 +5,7 @@ import type { ChangeEntryRequestBody } from './types';
 
 type SenseColumns = 'glosses' | 'parts_of_speech' | 'semantic_domains' | 'write_in_semantic_domains' | 'noun_class' | 'definition_english_deprecated' | 'deleted'
 
-export function getInsertSense(dictionary_id: string) {
+export function getUpdateSense(dictionary_id: string) {
   return async ({new_value, old_value, entry_id, column, sense_id }: {new_value: string, old_value: string | undefined, entry_id: string, column: SenseColumns, sense_id: string }) => {
     try {
       const auth_state_user = get(authState);

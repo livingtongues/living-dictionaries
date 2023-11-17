@@ -2,7 +2,6 @@
   import { Button, JSON } from 'svelte-pieces';
   import { share } from '$lib/helpers/share';
   import { deleteEntry, deleteImage, deleteVideo } from '$lib/helpers/delete';
-  import { saveUpdateToFirestore } from '$lib/helpers/entry/update';
   import EntryDisplay from './EntryDisplay.svelte';
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte';
   import { seo_description } from './seo_description';
@@ -21,7 +20,8 @@
     isManager,
     user,
     initialEntry,
-    insertSense,
+    saveUpdateToFirestore,
+    updateSense: insertSense,
   } = data);
 
   $: entry = convert_and_expand_entry($initialEntry, $page.data.t);
@@ -36,7 +36,7 @@
 </script>
 
 <div class="flex justify-between items-center mb-3 sticky top-0 z-30 bg-white pt-1">
-  <Button class="!px-2" color="black" form="simple" onclick={() => insertSense({column: 'definition_english_deprecated', entry_id: entry.id, new_value: 'Hello!', old_value: null, sense_id: '1'})}>
+  <Button class="!px-2" color="black" form="simple" onclick={() => insertSense({column: 'definition_english_deprecated', entry_id: entry.id, new_value: 'Hello!', old_value: null, sense_id: window.crypto.randomUUID()})}>
     Trigger Sense Change
   </Button>
 
@@ -82,7 +82,6 @@
       field,
       value: newValue,
       entryId: entry.id,
-      dictionaryId: $dictionary.id,
     })} />
 
 <SeoMetaTags

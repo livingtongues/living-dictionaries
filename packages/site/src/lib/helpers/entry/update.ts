@@ -6,14 +6,13 @@ export function saveUpdateToFirestore({
   field,
   value,
   entryId,
-  dictionaryId,
 }: {
   field: string;
   value: string | string[];
   entryId: string,
-  dictionaryId: string
 }
 ) {
+  const { data: { t }, params: { dictionaryId } } = get(page)
   try {
     update(
       `dictionaries/${dictionaryId}/words/${entryId}`,
@@ -21,7 +20,6 @@ export function saveUpdateToFirestore({
       { abbreviate: true }
     );
   } catch (err) {
-    const { data: { t } } = get(page)
     alert(`${t('misc.error')}: ${err}`);
   }
 }

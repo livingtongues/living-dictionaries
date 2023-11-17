@@ -38,7 +38,7 @@
           videoAccess={$dictionary.videoAccess || $admin > 0}
           canEdit={$canEdit}
           on:deleteImage={() => deleteImage(entry, $dictionary.id)}
-          on:valueupdate={({detail: { field, newValue}}) => saveUpdateToFirestore({field, value: newValue, entryId: entry.id, dictionaryId: $dictionary.id})} />
+          on:valueupdate={({detail: { field, newValue}}) => saveUpdateToFirestore({field, value: newValue, entryId: entry.id})} />
       </Doc>
     {/each}
   {:else}
