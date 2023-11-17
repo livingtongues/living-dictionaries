@@ -3,6 +3,8 @@ import type { TranslateFunction } from '$lib/i18n/types';
 import { expand_entry } from '$lib/transformers/expand_entry';
 import type { ExpandedEntry, GoalDatabaseEntry } from '@living-dictionaries/types';
 
+export const butterfly_google_storage_url = 'LGuBKhg7vuv5-aJcOdnb_ucOXLSCIR1Kjxrh70xRlaIHqWo-mWqfWUcH3Xznz63QsFZmkeVmoNN0PEXzSc0Jh4g'
+
 const complexData: GoalDatabaseEntry = {
   lx: '(h)æg-ko gag=tǝnǝ nlaʔ-pog',
   ph: 'hæg-ko gag=tǝnǝ nlaʔ-pog',
@@ -26,7 +28,7 @@ const complexData: GoalDatabaseEntry = {
       pfs: [{
         path: 'gta/images/local_import/6-Common-jay-1580859671358.JPG',
         sc: 'local_import',
-        gcs: 'LGuBKhg7vuv5-aJcOdnb_ucOXLSCIR1Kjxrh70xRlaIHqWo-mWqfWUcH3Xznz63QsFZmkeVmoNN0PEXzSc0Jh4g\n'
+        gcs: butterfly_google_storage_url
       }],
       xs: [
         {

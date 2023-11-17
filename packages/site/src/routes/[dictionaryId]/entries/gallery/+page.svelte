@@ -48,14 +48,14 @@
             path="dictionaries/{$dictionary.id}/words/{algoliaEntry.id}"
             startWith={algoliaEntry}
             let:data={entry}>
-            <GalleryEntry entry={convert_and_expand_entry(entry, $page.data.t)} canEdit={$canEdit} />
+            <GalleryEntry dictionary={$dictionary} entry={convert_and_expand_entry(entry, $page.data.t)} canEdit={$canEdit} />
           </Doc>
         {/if}
       {/each}
     {:else}
       {#each entries as entry (entry.id)}
         {#if entry.pf}
-          <GalleryEntry entry={convert_and_expand_entry(entry, $page.data.t)} />
+          <GalleryEntry dictionary={$dictionary} entry={convert_and_expand_entry(entry, $page.data.t)} />
         {/if}
       {/each}
     {/if}
