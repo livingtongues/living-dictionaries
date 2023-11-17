@@ -1,17 +1,17 @@
 <script lang="ts">
-  import type { ExpandedEntry } from '@living-dictionaries/types';
+  import type { ExpandedEntry, IDictionary } from '@living-dictionaries/types';
   import Image from '$lib/components/image/Image.svelte';
-  import { dictionary } from '$lib/stores';
   import { deleteImage } from '$lib/helpers/delete';
   import { order_glosses } from '$lib/helpers/glosses';
   import { page } from '$app/stores';
 
   export let entry: ExpandedEntry;
   export let canEdit = false;
+  export let dictionary: IDictionary;
 
   $: glosses = order_glosses({
     glosses: entry.senses?.[0]?.glosses,
-    dictionary_gloss_languages: $dictionary.glossLanguages,
+    dictionary_gloss_languages: dictionary.glossLanguages,
     t: $page.data.t,
     label: true
   });
@@ -25,7 +25,7 @@
         title={entry.lexeme}
         gcs={entry.senses?.[0]?.photo_files?.[0].specifiable_image_url}
         {canEdit}
-        on:deleteImage={() => deleteImage(entry, $dictionary.id)} />
+        on:deleteImage={() => deleteImage(entry, dictionary.id)} />
     </div>
     <a href={entry.id} style="background: #f3f3f3;" class="block p-[10px]">
       <div class="font-semibold">
