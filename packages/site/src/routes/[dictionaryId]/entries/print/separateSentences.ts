@@ -29,17 +29,17 @@ if (import.meta.vitest) {
       const sentences: IExampleSentence[] = [
         {
           en: 'This is the first sentence.',
-          vn: 'Đây là câu đầu tiên.',
+          vn: 'Prima lexema sententia.',
           es: 'Esta es la primer oración.'
         },
         {
           en: 'This is the second sentence.',
-          vn: 'Đây là câu thứ hai.',
+          vn: 'Secunda lexema sententia.',
           es: 'Esta es la segunda oración.'
         },
       ];
       expect(spaceSeparateSentences(sentences)).toBe(
-        'Đây là câu đầu tiên. This is the first sentence. Esta es la primer oración. Đây là câu thứ hai. This is the second sentence. Esta es la segunda oración.'
+        'Prima lexema sententia. This is the first sentence. Esta es la primer oración. Secunda lexema sententia. This is the second sentence. Esta es la segunda oración.'
       );
     });
   });
