@@ -173,9 +173,11 @@ const partialVariants: DeepPartial<Variant<Component>[]> = [
   },
   {
     name: 'No details, can edit',
+    description: 'temporarily using admin is true until edit senses is no longer behind a flag',
     languages: [],
     props: {
       canEdit: true,
+      admin: 1,
     },
   },
   {
