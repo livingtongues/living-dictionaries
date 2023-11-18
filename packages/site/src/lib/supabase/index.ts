@@ -4,6 +4,8 @@ import type { Database } from './types'
 
 // import type { Database } from '../DatabaseDefinitions' // https://supabase.com/docs/reference/javascript/typescript-support
 
+const [origin] = PUBLIC_SUPABASE_API_URL.split('.')
+const [, supabaseId] = origin.split('//')
 const browser = typeof window !== 'undefined'
 let supabase: SupabaseClient<Database> | undefined
 
@@ -12,17 +14,17 @@ let supabase: SupabaseClient<Database> | undefined
 // runs in +layout.ts for isomorphic use in pages
 // the result is that on the server, two clients are created with the same auth - it's not a race condition issue but it's not ideal, however we can't just do it once because we can't pass it to +layout.ts from +layout.server.ts
 export function getSupabase() {
-  const [origin] = PUBLIC_SUPABASE_API_URL.split('.')
-  const [, supabaseId] = origin.split('//')
   console.info(`creating Supabase client: https://supabase.com/dashboard/project/${supabaseId}`)
 
-  if (!browser)
-    return createClient(PUBLIC_SUPABASE_API_URL, PUBLIC_SUPABASE_ANON_KEY, { auth: { persistSession: false } })
-
-  if (supabase)
+  if (browser && supabase)
     return supabase
 
-  return createClient<Database>(PUBLIC_SUPABASE_API_URL, PUBLIC_SUPABASE_ANON_KEY, { auth: { persistSession: true } })
+  const _supabase = createClient<Database>(PUBLIC_SUPABASE_API_URL, PUBLIC_SUPABASE_ANON_KEY, { auth: { persistSession: browser } })
+
+  if (browser)
+    supabase = _supabase
+
+  return _supabase
 }
 
 const NULL_RESPONSE = {

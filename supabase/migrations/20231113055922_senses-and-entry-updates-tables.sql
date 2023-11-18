@@ -18,7 +18,7 @@ ALTER TABLE senses ENABLE ROW LEVEL SECURITY;
 
 CREATE VIEW entries_view AS
 SELECT
-  entry_id,
+  entry_id as id,
   jsonb_agg(
     jsonb_strip_nulls(
       jsonb_build_object(

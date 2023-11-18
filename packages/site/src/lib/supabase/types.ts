@@ -15,7 +15,7 @@ export interface Database {
           dictionary_id: string
           entry_id: string
           id: string
-          new_value: string
+          new_value: string | null
           old_value: string | null
           row: string
           table: Database['public']['Enums']['entry_tables']
@@ -27,7 +27,7 @@ export interface Database {
           dictionary_id: string
           entry_id: string
           id: string
-          new_value: string
+          new_value?: string | null
           old_value?: string | null
           row: string
           table: Database['public']['Enums']['entry_tables']
@@ -39,7 +39,7 @@ export interface Database {
           dictionary_id?: string
           entry_id?: string
           id?: string
-          new_value?: string
+          new_value?: string | null
           old_value?: string | null
           row?: string
           table?: Database['public']['Enums']['entry_tables']
@@ -100,7 +100,7 @@ export interface Database {
     Views: {
       entries_view: {
         Row: {
-          entry_id: string | null
+          id: string | null
           senses: Json | null
         }
         Relationships: []

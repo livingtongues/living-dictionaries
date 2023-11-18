@@ -1,6 +1,7 @@
 import type { IGloss } from '../gloss.interface'
 
 export interface SupaEntry {
+  id: string;
   senses: SupaSense[];
 }
 

@@ -1,5 +1,5 @@
 import { error, redirect } from '@sveltejs/kit';
-import type { ActualDatabaseEntry } from '@living-dictionaries/types';
+import type { ActualDatabaseEntry, SupaEntry } from '@living-dictionaries/types';
 import { docStore, getDocument } from 'sveltefirets';
 import {
   admin,
@@ -13,9 +13,12 @@ import {
 import { browser } from '$app/environment';
 import { readable } from 'svelte/store';
 import { ErrorCodes } from '$lib/constants';
-import { dbOperations } from '$lib/dbOperations';
+import { ENTRY_UPDATED_LOAD_TRIGGER, dbOperations } from '$lib/dbOperations';
+import { getSupabase } from '$lib/supabase';
 
-export const load = async ({ params }) => {
+export const load = async ({ params, depends }) => {
+  depends(ENTRY_UPDATED_LOAD_TRIGGER)
+
   const entryPath = `dictionaries/${params.dictionaryId}/words/${params.entryId}`;
 
   let entry: ActualDatabaseEntry;
@@ -37,9 +40,18 @@ export const load = async ({ params }) => {
     }
   }
 
+  const supabase = getSupabase()
+
+  const { data: [supaEntry], error: supaError } = await supabase
+    .from('entries_view')
+    .select('*')
+    .eq('id', params.entryId)
+
+  console.info({ supaEntry, supaError })
+
   return {
     initialEntry: entryStore,
-    supaEntry: { senses: []},
+    supaEntry: supaEntry as any as SupaEntry,
     admin,
     algoliaQueryParams,
     canEdit,

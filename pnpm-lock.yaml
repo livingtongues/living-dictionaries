@@ -39,8 +39,8 @@ importers:
         specifier: ^2.8.1
         version: 2.8.1
       supabase:
-        specifier: ^1.110.1
-        version: 1.110.1
+        specifier: ^1.113.2
+        version: 1.113.2
       svelte:
         specifier: ^3.55.1
         version: 3.55.1
@@ -4228,7 +4228,7 @@ packages:
     peerDependencies:
       '@sveltejs/kit': ^1.0.0
     dependencies:
-      '@sveltejs/kit': 1.22.3(svelte@3.59.2)(vite@4.4.7)
+      '@sveltejs/kit': 1.22.3(svelte@3.55.1)(vite@4.4.7)
       import-meta-resolve: 3.0.0
     dev: true
 
@@ -14453,8 +14453,8 @@ packages:
     resolution: {integrity: sha512-PdHt7hHUJKxvTCgbKX9C1V/ftOcjJQgz8BZwNfV5c4B6dcGqlpelTbJ999jBGZ2jYiPAwcX5dP6oBwVlBlUbxw==}
     optional: true
 
-  /supabase@1.110.1:
-    resolution: {integrity: sha512-pQVfbs/n8ZBDuSDv6YJKIH1Uh/QBRxjp6pLW52YkKgjgfwndlKwKuJoPiuWDxBkRG1QXxmCHi3Hk+JeNx9/FRg==}
+  /supabase@1.113.2:
+    resolution: {integrity: sha512-l0MO+MsXzONZHEadHT7IGcT511nRk+vTbnHAvF4DlGhsuQyI39F6dZVljlU4g2mUPJl9q6Cwz8n8WOZ+BhtqvA==}
     engines: {npm: '>=8'}
     hasBin: true
     requiresBuild: true
