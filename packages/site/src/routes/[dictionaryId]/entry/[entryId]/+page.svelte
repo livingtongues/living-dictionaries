@@ -12,6 +12,8 @@
 
   export let data;
   $: ({
+    initialEntry,
+    supaEntry,
     admin,
     algoliaQueryParams,
     canEdit,
@@ -19,7 +21,6 @@
     isContributor,
     isManager,
     user,
-    initialEntry,
     dbOperations,
   } = data);
 
@@ -66,6 +67,7 @@
 
 <EntryDisplay
   {entry}
+  {supaEntry}
   dictionary={$dictionary}
   videoAccess={$dictionary.videoAccess || $admin > 0}
   admin={$admin}

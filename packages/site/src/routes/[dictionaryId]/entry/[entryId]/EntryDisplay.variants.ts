@@ -99,7 +99,7 @@ const partialVariants: DeepPartial<Variant<Component>[]> = [
               en: 'to fire a rocket',
             },
             parts_of_speech: ['v'],
-            semantic_domains: ['astronomy'],
+            semantic_domains: ['1.1'],
           }
         ]
       },
@@ -178,6 +178,26 @@ const partialVariants: DeepPartial<Variant<Component>[]> = [
       canEdit: true,
     },
   },
+  {
+    name: 'cannot edit, two additional senses',
+    languages: [],
+    props: {
+      entry: {
+        lexeme: 'apple',
+        phonetic: 'æpl',
+        senses: [
+          { glosses: { 'en': 'a fruit' } },
+        ]
+      },
+      supaEntry: {
+        senses: [
+          { glosses: { 'en': 'a company' } },
+          { glosses: { 'en': 'a color' }, semantic_domains: ['1.6'] },
+        ]
+      },
+      dbOperations: logDbOperations,
+    }
+  }
 ];
 
 export const variants: Variant<Component>[] = (partialVariants as Variant<Component>[]).map((variant) => ({

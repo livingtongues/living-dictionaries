@@ -12,15 +12,8 @@ import {
 } from '$lib/stores';
 import { browser } from '$app/environment';
 import { readable } from 'svelte/store';
-import { updateSense } from '$lib/supabase/change/sense';
-import { updateFirestoreEntry } from '$lib/helpers/entry/update';
 import { ErrorCodes } from '$lib/constants';
-
-const dbOperations = {
-  updateFirestoreEntry,
-  updateSense,
-}
-export type DbOperations = typeof dbOperations
+import { dbOperations } from '$lib/dbOperations';
 
 export const load = async ({ params }) => {
   const entryPath = `dictionaries/${params.dictionaryId}/words/${params.entryId}`;
@@ -46,6 +39,7 @@ export const load = async ({ params }) => {
 
   return {
     initialEntry: entryStore,
+    supaEntry: { senses: []},
     admin,
     algoliaQueryParams,
     canEdit,

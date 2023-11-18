@@ -9,7 +9,8 @@
   import SelectSource from '$lib/components/entry/EntrySource.svelte';
   import { Button } from 'svelte-pieces';
   import Sense from './Sense.svelte';
-  import type { DbOperations } from './+page';
+  import SupaSense from './SupaSense.svelte';
+  import type { DbOperations } from '$lib/dbOperations';
 
   export let entry: ExpandedEntry;
   export let supaEntry: SupaEntry;
@@ -26,7 +27,7 @@
   const regularFields: EntryFieldValue[] = ['plural_form', 'morphology', 'interlinearization', 'notes']
 
   async function addSense() {
-    await dbOperations.updateSense({entry_id: entry.id, column: 'glosses', new_value: '{}', sense_id: window.crypto.randomUUID()})
+    await dbOperations.updateSense({entry_id: entry.id, column: 'glosses', new_value: null, sense_id: window.crypto.randomUUID()})
   }
   async function deleteSense(sense_id: string) {
     await dbOperations.updateSense({entry_id: entry.id, column: 'deleted', new_value: new Date().toISOString(), sense_id})
@@ -64,7 +65,7 @@
       <Sense sense={entry.senses[0]} {canEdit} glossLanguages={dictionary.glossLanguages} on:valueupdate />
 
       {#if admin && canEdit}
-        <button type="button" class="text-start p-2 mb-2 rounded order-2 hover:bg-gray-100 text-gray-600" on:click={addSense}><span class="i-system-uicons-versions text-xl" /> Add Sense</button>
+        <Button class="text-start p-2! mb-2 rounded order-2 hover:bg-gray-100! text-gray-600" form="menu" onclick={addSense}><span class="i-system-uicons-versions text-xl" /> Add Sense</Button>
       {/if}
     {:else}
       <div class="p-2 hover:bg-gray-50 rounded">
@@ -80,27 +81,25 @@
 
       {#each supaEntry.senses as sense, index}
         <div class="p-2 hover:bg-gray-50 rounded">
-          {#if canEdit}
-            <div class="font-semibold mb-2 flex">
-              <div class="font-semibold">
-                Sense {index + 2}
-              </div>
-              <div class="mx-auto" />
-              {#if canEdit}
-                <!-- {#if index > 0}
+          <div class="font-semibold mb-2 flex">
+            <div class="font-semibold">
+              Sense {index + 2}
+            </div>
+            <div class="mx-auto" />
+            {#if canEdit}
+              <!-- {#if index > 0}
               <Button size="sm" form="menu" onclick={() => alert('Re-ordering not ready yet.')}><span class="i-fa-chevron-up -mt-1" /></Button>
             {/if}
             {#if index < entry.senses.length - 1}
               <Button size="sm" form="menu" onclick={() => alert('Re-ordering not ready yet.')}><span class="i-fa-chevron-down -mt-1" /></Button>
             {/if} -->
-                <Button class="text-gray-500!" size="sm" form="menu" onclick={() => deleteSense(sense.id)}><span class="i-fa-solid-times -mt-1" /></Button>
-                <Button class="text-gray-500!" size="sm" form="menu" onclick={addSense}><span class="i-fa-solid-plus -mt-1" /></Button>
-              {/if}
-            </div>
-          {/if}
+              <Button class="text-gray-500!" size="sm" form="menu" onclick={() => deleteSense(sense.id)}><span class="i-fa-solid-times -mt-1" /></Button>
+              <Button class="text-gray-500!" size="sm" form="menu" onclick={addSense}><span class="i-fa-solid-plus -mt-1" /></Button>
+            {/if}
+          </div>
 
           <div class="flex flex-col border-s-2 ps-3 ms-1">
-            <pre>{JSON.stringify(sense, null, 2)}</pre>
+            <SupaSense entryId={entry.id} updateSense={dbOperations.updateSense} {sense} glossLanguages={dictionary.glossLanguages} {canEdit} />
           </div>
         </div>
       {/each}

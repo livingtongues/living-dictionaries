@@ -9,9 +9,9 @@ export interface SupaSense {
   glosses?: IGloss;
   parts_of_speech?: string[];
   semantic_domains?: string[];
-  write_in_semantic_domains?: string[];
+  write_in_semantic_domains?: string[]; // these will not exist until the Firestore migration
   noun_class?: string;
-  definition_english_deprecated?: string;
+  definition_english_deprecated?: string; // these will not exist until the Firestore migration
   // example_sentences?: IExampleSentence[]; // junction table
   // photo_files?: ExpandedPhoto[]; // junction table
   // video_files?: ExpandedVideo[]; // junction table
