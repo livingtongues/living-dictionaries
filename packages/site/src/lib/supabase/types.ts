@@ -11,7 +11,7 @@ export interface Database {
     Tables: {
       entry_updates: {
         Row: {
-          column: string
+          column: Database['public']['Enums']['entry_columns']
           dictionary_id: string
           entry_id: string
           id: string
@@ -23,7 +23,7 @@ export interface Database {
           user_id: string
         }
         Insert: {
-          column: string
+          column: Database['public']['Enums']['entry_columns']
           dictionary_id: string
           entry_id: string
           id: string
@@ -35,7 +35,7 @@ export interface Database {
           user_id: string
         }
         Update: {
-          column?: string
+          column?: Database['public']['Enums']['entry_columns']
           dictionary_id?: string
           entry_id?: string
           id?: string
@@ -110,6 +110,14 @@ export interface Database {
       [_ in never]: never
     }
     Enums: {
+      entry_columns:
+        | 'deleted'
+        | 'glosses'
+        | 'parts_of_speech'
+        | 'semantic_domains'
+        | 'write_in_semantic_domains'
+        | 'noun_class'
+        | 'definition_english_deprecated'
       entry_tables: 'senses'
     }
     CompositeTypes: {
