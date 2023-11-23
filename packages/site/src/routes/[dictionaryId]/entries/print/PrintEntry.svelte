@@ -7,7 +7,7 @@
   import { defaultPrintFields } from './printFields';
   import { add_periods_and_comma_separate_parts_of_speech } from '$lib/helpers/entry/add_periods_and_comma_separate_parts_of_speech';
   import { get_local_orthographies } from '$lib/helpers/entry/get_local_orthagraphies';
-  import { spaceSeparateSentences } from './separateSentences';
+  import { slashSeparateSentences } from './separateSentences';
   import { tick } from 'svelte';
 
   export let entry: ExpandedEntry;
@@ -44,12 +44,12 @@
           glosses: sense.glosses,
           dictionary_gloss_languages: dictionary.glossLanguages,
           t: $page.data.t,
-        }).join(', '))}
+        }).join(', '))}{selectedFields.example_sentence && sense.example_sentences?.length > 0 ? ';' : ''}
       </span>
     {/if}
 
     {#if selectedFields.example_sentence}
-      {spaceSeparateSentences(sense.example_sentences)}
+      <i>{slashSeparateSentences(sense.example_sentences)}</i>
     {/if}
 
     {#if selectedFields.semantic_domains}
