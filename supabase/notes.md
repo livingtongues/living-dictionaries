@@ -6,9 +6,12 @@ https://supabase.com/docs/guides/cli
 - Install Docker
 
 ## Make changes and test locally
-- run `pnpx supabase start` (then later `pnpx supabase stop` when you are done)
+- make sure Docker is running
+- run `pnpx supabase start`
 - create a new migration file: `pnpx supabase migration new adding-foo` (choose a descriptive name)
-- make changes and run `pnpx supabase db reset` to reset the database using all the migrations, including your changes, and then apply the seed.sql file on top.
+- makes changes to the new migrations file. You can then run `pnpx supabase migration up` to update the local db with your new migration. However if you change the same migration file after that point, you'll need to start the db fresh and run `pnpx supabase db reset` to reset the database using all the migrations, including your changes, and then apply the seed.sql file on top.
+- if you get the db into a funny state, just run `pnpx supabase db reset`
+- you can run `pnpx supabase stop` to stop the db in Docker
 
 ## Generate types
 - local `pnpx supabase gen types typescript --local --schema public > packages/site/src/lib/supabase/types.ts`
@@ -18,10 +21,12 @@ https://supabase.com/docs/guides/cli
 This is only needed if you are committing migrations to change the database schema.
 - create personal access token which grants access to all your user's projects (not your organization): https://supabase.com/dashboard/account/tokens
 - run `pnpx supabase login` and use the access token
-- `pnpx supabase link --project-ref=yfyhfjgsdtybisgqxrss --password=<DB password>`
-- `pnpx supabase db remote commit` and then `pnpx supabase migrate up` if happy with changes
+- `pnpx supabase link --project-ref=yxxjpfqcioiendytrdfi --password=<DB password>`
+- `pnpx supabase db push`
 
 ## Other commands
+- `pnpx supabase status` to see local urls and keys
+- `pnpx supabase db remote commit` will get changes made to cloud dashboard and write them locally?
 - `pnpx supabase db diff --use-migra initial_schema -f initial_schema` is used to generate a migration file that captures the difference between your current database schema and an initial schema if you never created the project in Supabase.
 - We will never do this, because we are only pushing changes from local code, but if on a test project you want to make changes in the cloud and then pull down the migration capturing those changes, run `pnpx supabase db pull` to pull down from cloud and say yes to "update remote migration history table"
 
