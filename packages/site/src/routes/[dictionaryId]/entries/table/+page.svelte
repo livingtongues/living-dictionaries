@@ -12,7 +12,7 @@
   import type { InstantSearch } from 'instantsearch.js';
   import type { ActualDatabaseEntry, LDAlgoliaHit } from '@living-dictionaries/types';
   import { deleteImage } from '$lib/helpers/delete';
-  import { saveUpdateToFirestore } from '$lib/helpers/entry/update';
+  import { updateFirestoreEntry } from '$lib/helpers/entry/update';
   import { setUpColumns } from './setUpColumns';
   import { page } from '$app/stores';
 
@@ -42,7 +42,7 @@
     dictionaryId={$dictionary.id}
     canEdit={$canEdit}
     on:deleteImage={({detail: {entryId}}) => deleteImage({id: entryId}, $dictionary.id)}
-    on:valueupdate={({detail: { field, newValue, entryId }}) => saveUpdateToFirestore({field, value: newValue, entryId, dictionaryId: $dictionary.id})} />
+    on:valueupdate={({detail: { field, newValue, entryId }}) => updateFirestoreEntry({field, value: newValue, entryId })} />
 
   {#if $canEdit}
     {#each algoliaEntries as algoliaEntry (algoliaEntry.id)}
