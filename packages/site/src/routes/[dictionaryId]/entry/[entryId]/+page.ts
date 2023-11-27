@@ -42,10 +42,11 @@ export const load = async ({ params, depends }) => {
 
   const supabase = getSupabase()
 
-  const { data: [supaEntry], error: supaError } = await supabase
+  const { data: supaEntry, error: supaError } = await supabase
     .from('entries_view')
     .select('*')
     .eq('id', params.entryId)
+    .single()
 
   console.info({ supaEntry, supaError })
 
