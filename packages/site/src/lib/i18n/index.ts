@@ -19,9 +19,9 @@ export const en = {
 // English is always loaded because it is the fallback
 const loadedTranslations: Record<string, typeof en> = { en }
 
-interface GetTranslatorOptions {
-  errorOnMissingBase: boolean
-}
+// interface GetTranslatorOptions {
+//   errorOnMissingBase: boolean
+// }
 
 interface TranslateOptions {
   values?: Record<string, string>
@@ -29,7 +29,7 @@ interface TranslateOptions {
   fallback?: string
 }
 
-export async function getTranslator(locale: LocaleCode, { errorOnMissingBase }: GetTranslatorOptions = { errorOnMissingBase: false}) {
+export async function getTranslator(locale: LocaleCode) {
   if (!loadedTranslations[locale]) {
     loadedTranslations[locale] = {
       ...await import(`./locales/${locale}.json`),
@@ -64,9 +64,6 @@ export async function getTranslator(locale: LocaleCode, { errorOnMissingBase }: 
     if (englishResult)
       return interpolate(englishResult, options?.values)
     const error = `Missing English for: ${key}`
-
-    if (errorOnMissingBase)
-      throw new Error(error)
 
     console.error(error)
     return options?.fallback || key

@@ -4,7 +4,7 @@ import { sendEmail } from './mailChannels';
 import type { EmailParts, MailChannelsSendBody } from './mail-channels.interface';
 import { DKIM_PRIVATE_KEY, SEND_EMAIL_KEY } from '$env/static/private';
 import { annaAddress, noReplyAddress } from '../addresses';
-import { ErrorCodes } from '$lib/constants';
+import { ResponseCodes } from '$lib/constants';
 
 export interface SendRequestBody {
   send_key: string;
@@ -44,6 +44,6 @@ export const POST: RequestHandler = async ({ request, fetch }) => {
   }
   catch (err: any) {
     console.error(`Error with email send request: ${err.message}`);
-    throw error(ErrorCodes.INTERNAL_SERVER_ERROR, `Error with email send request: ${err.message}`);
+    throw error(ResponseCodes.INTERNAL_SERVER_ERROR, `Error with email send request: ${err.message}`);
   }
 };
