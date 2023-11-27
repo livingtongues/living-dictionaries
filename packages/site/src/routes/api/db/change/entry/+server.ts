@@ -4,6 +4,7 @@ import type { RequestHandler } from './$types';
 import { getAdminSupabaseClient } from '$lib/supabase/admin';
 import type { IUser } from '@living-dictionaries/types';
 import type { ChangeEntryRequestBody } from '$lib/supabase/change/types';
+import { ResponseCodes } from '$lib/constants';
 
 export const POST: RequestHandler = async ({ request }) => {
   try {
@@ -32,7 +33,7 @@ export const POST: RequestHandler = async ({ request }) => {
     await checkForPermission();
 
     const adminSupabase = getAdminSupabaseClient();
-    const { data, error } = await adminSupabase.from('entry_updates').insert([
+    const { data, error: insertError } = await adminSupabase.from('entry_updates').insert([
       {
         user_id: decodedToken.uid,
         dictionary_id,
@@ -47,12 +48,13 @@ export const POST: RequestHandler = async ({ request }) => {
       }
     ]).select();
 
-    console.info({data,error})
+    if (insertError)
+      throw new Error(insertError.message);
 
-    return json('success');
+    return json(data);
   }
   catch (err: any) {
     console.error(`Error saving sense: ${err.message}`);
-    throw error(500, `Error saving sense: ${err.message}`);
+    throw error(ResponseCodes.INTERNAL_SERVER_ERROR, `Error saving sense: ${err.message}`);
   }
 };

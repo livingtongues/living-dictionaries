@@ -5,6 +5,7 @@ import { page } from '$app/stores';
 import type { ChangeEntryRequestBody } from './types';
 import { invalidate } from '$app/navigation';
 import { ENTRY_UPDATED_LOAD_TRIGGER } from '$lib/dbOperations';
+import { ResponseCodes } from '$lib/constants';
 
 type SenseColumns = 'glosses' | 'parts_of_speech' | 'semantic_domains' | 'write_in_semantic_domains' | 'noun_class' | 'definition_english_deprecated' | 'deleted'
 
@@ -28,7 +29,7 @@ export async function updateSense({new_value, old_value, entry_id, column, sense
       timestamp: new Date().toISOString(),
     });
 
-    if (response.status !== 200) {
+    if (response.status !== ResponseCodes.OK) {
       const body = await response.json();
       throw new Error(body.message);
     }
