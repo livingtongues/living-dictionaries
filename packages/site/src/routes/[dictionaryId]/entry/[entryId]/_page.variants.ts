@@ -1,8 +1,9 @@
 import type { Variant } from 'kitbook';
 import type Component from './+page.svelte';
 import { readable, writable } from 'svelte/store';
+import { logDbOperations } from '$lib/mocks/db';
 
-const defaultStores = {
+const defaultProps = {
   locale: null,
   t: null,
   user: null,
@@ -15,6 +16,8 @@ const defaultStores = {
     name: 'test',
     glossLanguages: []
   }),
+  dbOperations: logDbOperations,
+  supaEntry: null,
 }
 
 export const variants: Variant<Component>[] = [
@@ -23,7 +26,7 @@ export const variants: Variant<Component>[] = [
     viewports: [{ width: 500, height: 250}],
     props: {
       data: {
-        ...defaultStores,
+        ...defaultProps,
         initialEntry: readable({
           lx: 'test',
           gl: {
@@ -38,7 +41,7 @@ export const variants: Variant<Component>[] = [
     viewports: [{ width: 786, height: 500}],
     props: {
       data: {
-        ...defaultStores,
+        ...defaultProps,
         isManager: readable(true),
         canEdit: readable(true),
         initialEntry: readable({
@@ -54,7 +57,7 @@ export const variants: Variant<Component>[] = [
     viewports: [{ width: 786, height: 500}],
     props: {
       data: {
-        ...defaultStores,
+        ...defaultProps,
         admin: readable(2),
         canEdit: readable(true),
         initialEntry: readable({

@@ -1,7 +1,8 @@
 /* eslint-disable no-magic-numbers */
 export const DICTIONARIES_WITH_VARIANTS = ['babanki', 'torwali', 'ksingmul', 'tutelo-saponi']
 
-export enum ErrorCodes {
+export enum ResponseCodes {
+  OK = 200,
   INTERNAL_SERVER_ERROR = 500,
   NOT_FOUND = 404,
   BAD_REQUEST = 400,

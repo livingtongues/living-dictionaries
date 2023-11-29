@@ -14,7 +14,7 @@ export function getFirebaseAdminApp(): App {
 
   const currentApps = getApps();
   if (currentApps.length) {
-    firebaseAdminApp = currentApps[0];
+    [firebaseAdminApp] = currentApps;
     return firebaseAdminApp;
   }
 
