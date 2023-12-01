@@ -70,7 +70,6 @@
   {supaEntry}
   dictionary={$dictionary}
   videoAccess={$dictionary.videoAccess || $admin > 0}
-  admin={$admin}
   canEdit={$canEdit}
   {dbOperations}
   on:deleteImage={() => deleteImage(entry, $dictionary.id)}

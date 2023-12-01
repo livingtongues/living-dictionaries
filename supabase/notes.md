@@ -21,7 +21,7 @@ https://supabase.com/docs/guides/cli
 This is only needed if you are committing migrations to change the database schema.
 - create personal access token which grants access to all your user's projects (not your organization): https://supabase.com/dashboard/account/tokens
 - run `pnpx supabase login` and use the access token
-- `pnpx supabase link --project-ref=yxxjpfqcioiendytrdfi --password=<DB password>`
+- `pnpx supabase link --project-ref=actkqboqpzniojhgtqzw --password=<DB password>`
 - `pnpx supabase db push`
 
 ## Other commands

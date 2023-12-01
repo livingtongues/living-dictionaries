@@ -33,7 +33,7 @@ export enum UnpublishedLocales {
 
 export type UnpublishedLocaleCode = keyof typeof UnpublishedLocales;
 
-export function findSupportedLocaleFromAcceptedLangauges(acceptedLanguageHeader: string | null) {
+export function findSupportedLocaleFromAcceptedLanguages(acceptedLanguageHeader: string | null) {
   const locales = acceptedLanguageHeader
     ?.split(',')
     ?.map(lang => lang.split(';')[0].trim()) ?? []
