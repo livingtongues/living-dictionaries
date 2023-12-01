@@ -17,7 +17,6 @@
   export let dictionary: IDictionary;
   export let canEdit = false;
   export let videoAccess = false;
-  export let admin: number;
   export let dbOperations: DbOperations;
 
   const dispatch = createEventDispatcher<{
@@ -64,7 +63,7 @@
     {#if !supaEntry?.senses?.length}
       <Sense sense={entry.senses[0]} {canEdit} glossLanguages={dictionary.glossLanguages} on:valueupdate />
 
-      {#if admin && canEdit}
+      {#if canEdit}
         <Button class="text-start p-2! mb-2 rounded order-2 hover:bg-gray-100! text-gray-600" form="menu" onclick={addSense}><span class="i-system-uicons-versions text-xl" /> Add Sense</Button>
       {/if}
     {:else}

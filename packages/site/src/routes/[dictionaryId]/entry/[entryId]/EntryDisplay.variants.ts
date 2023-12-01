@@ -177,7 +177,6 @@ const partialVariants: DeepPartial<Variant<Component>[]> = [
     languages: [],
     props: {
       canEdit: true,
-      admin: 1,
     },
   },
   {
