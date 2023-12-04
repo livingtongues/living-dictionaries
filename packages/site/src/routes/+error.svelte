@@ -4,6 +4,7 @@
   import { onMount } from 'svelte';
   import { firebaseConfig } from 'sveltefirets';
   import { Button, ShowHide } from 'svelte-pieces';
+  import Header from '$lib/components/shell/Header.svelte';
 
   onMount(async () => {
     const Sentry = await import('@sentry/browser');
@@ -18,7 +19,9 @@
   <title>{$page.data.t('misc.error')}: {$page.status}</title>
 </svelte:head>
 
-<div class="p-4 bg-white relative z-20">
+<Header />
+
+<div class="p-4 bg-white relative z-20 border-t">
   <h2 class="text-xl sm:text-4xl font-bold mb-3">
     {$page.data.t('error.run_into_error')}
   </h2>

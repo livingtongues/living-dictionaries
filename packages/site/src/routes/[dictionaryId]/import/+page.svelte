@@ -2,12 +2,7 @@
   import { page } from '$app/stores';
   import { Button, ShowHide } from 'svelte-pieces';
   import { dictionary } from '$lib/stores';
-  import Header from '$lib/components/shell/Header.svelte';
 </script>
-
-<Header>
-  {$page.data.t('import.import')}
-</Header>
 
 <div class="max-w-screen-md ml-4">
   <div class="p-2">

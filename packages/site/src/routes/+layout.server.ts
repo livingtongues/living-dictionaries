@@ -1,10 +1,10 @@
 import type { IUser } from '@living-dictionaries/types';
 import type { LayoutServerLoad } from './$types';
-import { findSupportedLocaleFromAcceptedLangauges } from '$lib/i18n/locales';
+import { findSupportedLocaleFromAcceptedLanguages } from '$lib/i18n/locales';
 
 export const load: LayoutServerLoad = ({ cookies, request }) => {
   const chosenLocale = cookies.get('locale')
-  const acceptedLanguage = findSupportedLocaleFromAcceptedLangauges(request.headers.get('accept-language'))
+  const acceptedLanguage = findSupportedLocaleFromAcceptedLanguages(request.headers.get('accept-language'))
 
   let user: IUser = null;
   try {

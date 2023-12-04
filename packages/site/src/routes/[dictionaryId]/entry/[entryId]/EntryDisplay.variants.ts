@@ -1,6 +1,7 @@
 import type { Variant, Viewport } from 'kitbook';
 import type Component from './EntryDisplay.svelte';
 import type { IDictionary } from '@living-dictionaries/types';
+import { logDbOperations } from '$lib/mocks/db';
 
 export const viewports: Viewport[] = [
   {
@@ -61,6 +62,7 @@ const partialVariants: DeepPartial<Variant<Component>[]> = [
       canEdit: true,
       videoAccess: true,
       entry: {
+        id: 'entryId123',
         lexeme: 'shoot',
         phonetic: 'ʃut',
         sound_files: [{
@@ -82,13 +84,6 @@ const partialVariants: DeepPartial<Variant<Component>[]> = [
               }
             ]
           },
-          {
-            glosses: {
-              en: 'to hit, wound, damage, kill, or destroy with a missile discharged from a weapon',
-            },
-            translated_parts_of_speech: ['verb'],
-            translated_ld_semantic_domains: ['warfare'],
-          },
         ],
         local_orthography_1: 'संस्कृतम्',
         sources: ['someone'],
@@ -96,6 +91,19 @@ const partialVariants: DeepPartial<Variant<Component>[]> = [
           // 'regions': [indiaBox],
         }
       },
+      supaEntry: {
+        senses: [
+          {
+            id: '1',
+            glosses: {
+              en: 'to fire a rocket',
+            },
+            parts_of_speech: ['v'],
+            semantic_domains: ['1.1'],
+          }
+        ]
+      },
+      dbOperations: logDbOperations,
       dictionary: {
         alternateOrthographies: [
           'Old Sanskrit',
@@ -202,11 +210,32 @@ const partialVariants: DeepPartial<Variant<Component>[]> = [
   },
   {
     name: 'No details, can edit',
+    description: 'temporarily using admin is true until edit senses is no longer behind a flag',
     languages: [],
     props: {
       canEdit: true,
     },
   },
+  {
+    name: 'cannot edit, two additional senses',
+    languages: [],
+    props: {
+      entry: {
+        lexeme: 'apple',
+        phonetic: 'æpl',
+        senses: [
+          { glosses: { 'en': 'a fruit' } },
+        ]
+      },
+      supaEntry: {
+        senses: [
+          { glosses: { 'en': 'a company' } },
+          { glosses: { 'en': 'a color' }, semantic_domains: ['1.6'] },
+        ]
+      },
+      dbOperations: logDbOperations,
+    }
+  }
 ];
 
 export const variants: Variant<Component>[] = (partialVariants as Variant<Component>[]).map((variant) => ({

@@ -1,10 +1,10 @@
 import { error } from '@sveltejs/kit';
-
 import type { IDictionary } from '@living-dictionaries/types';
 import { getCollection } from 'sveltefirets';
 import { orderBy, where } from 'firebase/firestore';
-
 import type { PageLoad } from './$types';
+import { ResponseCodes } from '$lib/constants';
+
 export const load: PageLoad = async () => {
   try {
     const publicDictionaries = await getCollection<IDictionary>('dictionaries', [
@@ -12,7 +12,7 @@ export const load: PageLoad = async () => {
       where('public', '==', true),
     ]);
     return { publicDictionaries };
-  } catch (e) {
-    throw error(500, e);
+  } catch (err) {
+    throw error(ResponseCodes.INTERNAL_SERVER_ERROR, err);
   }
 };

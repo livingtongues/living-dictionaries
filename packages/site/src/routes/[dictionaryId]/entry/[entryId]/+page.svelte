@@ -2,7 +2,6 @@
   import { Button, JSON } from 'svelte-pieces';
   import { share } from '$lib/helpers/share';
   import { deleteEntry, deleteImage, deleteVideo } from '$lib/helpers/delete';
-  import { saveUpdateToFirestore } from '$lib/helpers/entry/update';
   import EntryDisplay from './EntryDisplay.svelte';
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte';
   import { seo_description } from './seo_description';
@@ -13,6 +12,8 @@
 
   export let data;
   $: ({
+    initialEntry,
+    supaEntry,
     admin,
     algoliaQueryParams,
     canEdit,
@@ -20,7 +21,7 @@
     isContributor,
     isManager,
     user,
-    initialEntry,
+    dbOperations,
   } = data);
 
   $: entry = convert_and_expand_entry($initialEntry, $page.data.t);
@@ -66,18 +67,18 @@
 
 <EntryDisplay
   {entry}
+  {supaEntry}
   dictionary={$dictionary}
   videoAccess={$dictionary.videoAccess || $admin > 0}
-  admin={$admin}
   canEdit={$canEdit}
+  {dbOperations}
   on:deleteImage={() => deleteImage(entry, $dictionary.id)}
   on:deleteVideo={() => deleteVideo(entry, $dictionary.id)}
   on:valueupdate={({ detail: { field, newValue } }) =>
-    saveUpdateToFirestore({
+    dbOperations.updateFirestoreEntry({
       field,
       value: newValue,
       entryId: entry.id,
-      dictionaryId: $dictionary.id,
     })} />
 
 <SeoMetaTags

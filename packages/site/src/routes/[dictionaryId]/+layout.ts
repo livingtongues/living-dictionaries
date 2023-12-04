@@ -1,18 +1,16 @@
 import { redirect, error } from '@sveltejs/kit';
-
 import type { IDictionary } from '@living-dictionaries/types';
 import { getDocument } from 'sveltefirets';
-
 import type { LayoutLoad } from './$types';
-export const load: LayoutLoad = async ({ params }) => {
+import { ResponseCodes } from '$lib/constants';
+
+export const load: LayoutLoad = async ({ params: { dictionaryId } }) => {
   try {
-    const dictionary = await getDocument<IDictionary>(`dictionaries/${params.dictionaryId}`);
+    const dictionary = await getDocument<IDictionary>(`dictionaries/${dictionaryId}`);
     if (dictionary)
       return { dictionary };
-
-    throw redirect(301, '/');
-
   } catch (err) {
-    throw error(500, err);
+    throw error(ResponseCodes.INTERNAL_SERVER_ERROR, err);
   }
+  throw redirect(ResponseCodes.MOVED_PERMANENTLY, '/');
 };
