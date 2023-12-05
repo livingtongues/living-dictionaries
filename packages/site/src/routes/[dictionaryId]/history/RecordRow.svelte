@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { Change } from '@living-dictionaries/types';
-  import { printDate } from '$lib/helpers/time';
+  // import { printDate } from '$lib/helpers/time'; We can use printDate or create another helper function with time
 
   export let record: Change;
   function getAction(previousValue: string | string[], currentValue: string | string[]): string {
@@ -27,6 +27,6 @@
     {record.field}
   </td>
   <td>
-    {printDate(record.updatedAtMs)}
+    {new Date(record.updatedAtMs).toString()}
   </td>
 </tr>
