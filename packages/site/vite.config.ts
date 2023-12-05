@@ -26,7 +26,6 @@ export default defineConfig({
       // 'firebase/functions', // broke things when put in exclude - investigate later if it's helpful to put here when using Kitbook
     ],
     exclude: [
-      'svelte-i18n',
       'sveltefirets',
       'svelte-pieces',
       '@sentry/browser',
