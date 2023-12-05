@@ -325,5 +325,13 @@
     "instructions_2": "Klik tombol Blue \"Link to Template\" di bawah ini. Unduh templat sebagai file Excel, atau buat salinan di Google Documents. Edit template sesuai dengan kebutuhan proyek Anda. Salin dan tempel data Anda ke spreadsheet.",
     "instructions_3": "Gunakan \"Hubungi Kami\" di bawah ini untuk menghubungi kami. Beri tahu kami bahwa Anda memiliki spreadsheet baru yang siap untuk diimpor. Ajukan pertanyaan yang Anda miliki. Kami akan menanggapi Anda melalui email, dan kemudian Anda dapat mengirimkan file Anda kepada kami.",
     "instructions_4": "Untuk mengirimi kami data yang diekspor dari software kamus seperti Flex, Lexique Pro, Shoebox, silakan gunakan tombol \"Hubungi Kami\" di bawah ini dan beri tahu kami detail proyek Anda."
+  },
+  "history": {
+    "history": "Sejarah",
+    "entry_name": "Nama Entri",
+    "editor": "Editor",
+    "action": "Tindakan",
+    "field": "Bidang",
+    "date": "Tanggal"
   }
 }

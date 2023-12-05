@@ -325,5 +325,13 @@
     "instructions_2": "Clique no botão azul \"Link to modelo\" abaixo. Faça o download do modelo como um arquivo do Excel ou crie uma cópia no Google Docs. Edite o modelo de acordo com as necessidades do seu projeto. Copie e cole seus dados na planilha.",
     "instructions_3": "Use o \"Entre em contato conosco\" abaixo para entrar em contato conosco. Deixe -nos saber que você tem uma nova planilha pronta para importação. Faça -nos todas as perguntas que você tiver. Nós responderemos a você por e -mail e você pode nos enviar seu arquivo.",
     "instructions_4": "Para nos enviar dados exportados de softwares de dicionário como Flex, Lexique Pro, Shoebox, use o botão \"Entre em contato conosco\" abaixo e conte -nos os detalhes do seu projeto."
+  },
+  "history": {
+    "history": "História",
+    "entry_name": "Nome de entrada",
+    "editor": "editor",
+    "action": "Ação",
+    "field": "Campo",
+    "date": "Data"
   }
 }

@@ -325,5 +325,13 @@
     "instructions_2": "Nhấp vào liên kết màu xanh lam đến nút Mẫu bên dưới. Tải xuống mẫu dưới dạng tệp Excel hoặc tạo bản sao trên Google Docs. Chỉnh sửa mẫu theo nhu cầu dự án của bạn. Sao chép và dán dữ liệu của bạn vào bảng tính.",
     "instructions_3": "Sử dụng liên hệ với chúng tôi dưới đây để liên hệ với chúng tôi. Hãy cho chúng tôi biết rằng bạn có một bảng tính mới đã sẵn sàng để nhập. Hỏi chúng tôi bất kỳ câu hỏi bạn có. Chúng tôi sẽ trả lời bạn qua email và sau đó bạn có thể gửi cho chúng tôi tệp của bạn.",
     "instructions_4": "Để gửi cho chúng tôi dữ liệu được xuất từ ​​các phần mềm từ điển như Flex, Lexique Pro, Shoebox, vui lòng sử dụng nút Liên hệ với chúng tôi bên dưới và cho chúng tôi biết chi tiết về dự án của bạn."
+  },
+  "history": {
+    "history": "Lịch sử",
+    "entry_name": "Tên nhập cảnh",
+    "editor": "Biên tập viên",
+    "action": "Hoạt động",
+    "field": "Cánh đồng",
+    "date": "Ngày"
   }
 }

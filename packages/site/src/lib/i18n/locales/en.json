@@ -325,5 +325,13 @@
     "instructions_2": "Click on the blue “Link to Template” button below. Download the template as an Excel file, or create a copy on Google Docs. Edit the template according to your project’s needs. Copy and paste your data into the spreadsheet.",
     "instructions_3": "Use the “Contact Us” below to contact us. Let us know that you have a new spreadsheet that is ready for import. Ask us any questions you have. We will respond to you by email, and then you can send us your file.",
     "instructions_4": "To send us data exported from dictionary softwares like FLEx, Lexique Pro, Shoebox, please use the “Contact Us” button below and tell us the details of your project."
+  },
+  "history": {
+    "history": "History",
+    "entry_name": "Entry Name",
+    "editor": "Editor",
+    "action": "Action",
+    "field": "Field",
+    "date": "Date"
   }
 }
