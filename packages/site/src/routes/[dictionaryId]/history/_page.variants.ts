@@ -1,6 +1,15 @@
-import type { Variant } from 'kitbook';
+import type { Variant, Viewport } from 'kitbook';
 import type Component from './+page.svelte';
 import type { Change } from '@living-dictionaries/types';
+
+export const viewports: Viewport[] = [{
+  width: 700,
+  height: 550,
+},
+{
+  width: 300,
+  height: 500
+}]
 
 const history: Change[] = [
   {
@@ -103,19 +112,5 @@ export const variants: Variant<Component>[] = [
         history: [...history].sort((a, b) => b.updatedAtMs - a.updatedAtMs)
       }
     }
-  },
-  {
-    name: 'Inverse order',
-    languages: [],
-    props: {
-      data: {
-        dictionary: {
-          name: 'Banange',
-          glossLanguages: []
-        },
-        user: null,
-        history: [...history].sort((a, b) => a.updatedAtMs - b.updatedAtMs)
-      }
-    }
-  },
+  }
 ]
