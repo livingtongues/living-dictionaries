@@ -11,7 +11,7 @@
 		"test:site": "pnpm --filter=site test",
 		"test:all": "pnpm --recursive --stream test -- --run",
 		"test:e2e": "pnpm --filter=site test:e2e",
-		"lint": "eslint . --cache",
+		"lint": "eslint . --cache --quiet",
 		"lint:fix": "eslint . --cache --fix",
 		"check-packages": "pnpm update --interactive --recursive --latest"
 	},
@@ -35,7 +35,7 @@
 		"pre-commit": "npx lint-staged"
 	},
 	"lint-staged": {
-		"*.{js,ts,svelte,svx}": [
+		"*.{js,ts,svelte,composition}": [
 			"eslint --cache --fix"
 		]
 	}
