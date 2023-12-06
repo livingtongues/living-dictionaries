@@ -24,7 +24,7 @@ jobs:
 
       - run: pnpm install
 
-      - run: pnpm lint --quiet
+      - run: pnpm lint
 
   unit_test:
     name: Svelte Check & Unit Test
