@@ -11,6 +11,7 @@
   $: fieldsThatExist = (Object.keys($preferredPrintFields) as (keyof IPrintFields)[]).filter((field) => {
     if (field === 'gloss') return true;
     return entries.find((entry) => {
+      if (field === 'parts_of_speech') return entry.senses?.[0].parts_of_speech_keys?.length;
       if (field === 'local_orthography')
         return entry.local_orthography_1 || entry.local_orthography_2 || entry.local_orthography_3 || entry.local_orthography_4 || entry.local_orthography_5;
       if (field === 'example_sentence') return entry.senses?.[0].example_sentences?.length;

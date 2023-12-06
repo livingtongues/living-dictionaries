@@ -1,8 +1,8 @@
 import type { IExampleSentence } from '@living-dictionaries/types';
 
-export function spaceSeparateSentences(sentences: IExampleSentence[]): string {
+export function slashSeparateSentences(sentences: IExampleSentence[]): string {
   if (!sentences) return '';
-  return sentences.map((sentence) => Object.values(sortVernacularFirst(sentence)).join(' ')).join(' ');
+  return sentences.map((sentence) => Object.values(sortVernacularFirst(sentence)).join(' / ')).join(' ');
 }
 
 export function sortVernacularFirst(example_sentence: IExampleSentence) {
@@ -19,10 +19,10 @@ export function sortVernacularFirst(example_sentence: IExampleSentence) {
 }
 
 if (import.meta.vitest) {
-  describe(spaceSeparateSentences, () => {
+  describe(slashSeparateSentences, () => {
     it('should return an empty string when given an empty array', () => {
-      expect(spaceSeparateSentences([])).toBe('');
-      expect(spaceSeparateSentences(null)).toBe('');
+      expect(slashSeparateSentences([])).toBe('');
+      expect(slashSeparateSentences(null)).toBe('');
     });
 
     it('should return a string with sentences separated by spaces', () => {
@@ -38,8 +38,8 @@ if (import.meta.vitest) {
           es: 'Esta es la segunda oración.'
         },
       ];
-      expect(spaceSeparateSentences(sentences)).toBe(
-        'Prima lexema sententia. This is the first sentence. Esta es la primer oración. Secunda lexema sententia. This is the second sentence. Esta es la segunda oración.'
+      expect(slashSeparateSentences(sentences)).toBe(
+        'Prima lexema sententia. / This is the first sentence. / Esta es la primer oración. Secunda lexema sententia. / This is the second sentence. / Esta es la segunda oración.'
       );
     });
   });
