@@ -11,6 +11,15 @@
     date = 'date',
   }
 
+  function getActionValue(record: Change) {
+    if (record.previousValue?.length === 0)
+      return 'created';
+    else if (record.currentValue?.length === 0)
+      return 'deleted';
+
+    return 'edited';
+  }
+
   type SortFields = keyof typeof HistoryFields;
   //@ts-ignore
   const historyFields: {
@@ -24,29 +33,25 @@
   let sortDescending = true;
 
   $: sortedRecords = history.sort((a, b) => {
+    const getValue = (record: Change, key: SortFields) => record[key] ? record[key].toUpperCase() : 'zz';
     let valueA: string | number;
     let valueB: string | number;
+
     // prettier-ignore
     switch (sortKey) {
       case 'date':
-        valueA = a.updatedAtMs || 0;
-        valueB = b.updatedAtMs || 0;
+        valueA = String(a.updatedAtMs || 0);
+        valueB = String(b.updatedAtMs || 0);
         break;
       case 'action':
-        valueA = a.previousValue?.length === 0 ? 3 : 1;
-        valueB = b.currentValue?.length === 0 ? 0 : 2;
+        valueA = getActionValue(a);
+        valueB = getActionValue(b);
         break;
       default:
-        valueA = a[sortKey] ? a[sortKey].toUpperCase() : 'zz'; // if we ever have missing names or email, then pass 'zz' when the sortKey is undefined
-        valueB = b[sortKey] ? b[sortKey].toUpperCase() : 'zz';
+        valueA = String(getValue(a, sortKey));
+        valueB = String(getValue(b, sortKey));
     }
-    if (valueA < valueB)
-      return sortDescending ? -1 : 1;
-
-    if (valueA > valueB)
-      return sortDescending ? 1 : -1;
-
-    return 0;
+    return sortDescending ? valueB.localeCompare(valueA) : valueA.localeCompare(valueB);
   });
 
   function setSortSettings(paraSortKey: SortFields) {
