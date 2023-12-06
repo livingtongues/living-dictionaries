@@ -53,12 +53,34 @@ const complexData: GoalDatabaseEntry = {
   id: '1', // for table
 }
 
+const hebrewData: GoalDatabaseEntry = {
+  lx: 'אילא',
+  sn: [
+    {
+      gl: {
+        en: 'hand',
+        he: 'יָד'
+      },
+      xs: [
+        {
+          en: 'My hand does not reach.',
+          he: 'הַיָּד שֶׁלִּי לֹא מַגִּיעָה',
+          vn: 'אִילָא דִּידִי לָא מַתְיָא',
+        }
+      ],
+    }
+  ],
+  id: '4', // for table
+}
+
 const t = (({dynamicKey: key}: { dynamicKey: string}) => {
   const [section, item] = key.split('.')
   return en[section][item];
 }) as TranslateFunction
 
 export const complex: ExpandedEntry = expand_entry(complexData, t);
+
+export const hebrew: ExpandedEntry = expand_entry(hebrewData, t);
 
 export const simple: ExpandedEntry = {
   lexeme: 'hello',
