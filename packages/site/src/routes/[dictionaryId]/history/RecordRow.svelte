@@ -17,6 +17,12 @@
     {getActionValue(record)}
   </td>
   <td>
+    {record.previousValue}
+  </td>
+  <td>
+    {record.currentValue}
+  </td>
+  <td>
     {record.field}
   </td>
   <td>

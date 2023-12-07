@@ -8,6 +8,8 @@
     entryName = 'entry_name',
     updatedName = 'editor',
     action = 'action',
+    previousValue = 'old_value',
+    currentValue = 'new_value',
     field = 'field',
     date = 'date',
   }
@@ -25,7 +27,6 @@
   let sortDescending = true;
 
   $: sortedRecords = history.sort((a, b) => {
-    const getValue = (record: Change, key: SortFields) => record[key] ? record[key].toUpperCase() : 'zz';
     let valueA: string | number;
     let valueB: string | number;
 
@@ -40,8 +41,8 @@
         valueB = getActionValue(b);
         break;
       default:
-        valueA = String(getValue(a, sortKey));
-        valueB = String(getValue(b, sortKey));
+        valueA = a[sortKey] ? JSON.stringify(a[sortKey]).toUpperCase() : 'zz';
+        valueB = b[sortKey] ? JSON.stringify(b[sortKey]).toUpperCase() : 'zz';
     }
     return sortDescending ? valueB.localeCompare(valueA) : valueA.localeCompare(valueB);
   });
