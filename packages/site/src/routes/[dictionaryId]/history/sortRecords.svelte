@@ -1,5 +1,6 @@
 <script lang="ts">
   import { page } from '$app/stores';
+  import { getActionValue } from './getActionValue';
   import type { Change } from '@living-dictionaries/types';
 
   export let history: Change[] = [];
@@ -9,15 +10,6 @@
     action = 'action',
     field = 'field',
     date = 'date',
-  }
-
-  function getActionValue(record: Change) {
-    if (record.previousValue?.length === 0)
-      return 'created';
-    else if (record.currentValue?.length === 0)
-      return 'deleted';
-
-    return 'edited';
   }
 
   type SortFields = keyof typeof HistoryFields;
