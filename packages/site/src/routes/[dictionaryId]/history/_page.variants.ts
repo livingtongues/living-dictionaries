@@ -19,9 +19,9 @@ const history: Change[] = [
     entryName: 'Giraffe',
     dictionaryId: 'banange',
     dictionaryName: 'Banange',
-    previousValue: [],
-    currentValue: ['n'],
-    field: 'parts of speech',
+    previousValue: ['n'],
+    currentValue: ['n', 'adj'],
+    field: 'parts_of_speech',
     updatedAtMs: 1669598370158
   },
   {
@@ -33,7 +33,7 @@ const history: Change[] = [
     dictionaryName: 'Banange',
     previousValue: null,
     currentValue: ['1.5'],
-    field: 'semantic domains',
+    field: 'semantic_domains',
     updatedAtMs: 1669593870158
   },
   {
@@ -57,7 +57,7 @@ const history: Change[] = [
     dictionaryName: 'Banange',
     previousValue: '',
     currentValue: 'Жирафа',
-    field: 'local orthography',
+    field: 'local_orthography',
     updatedAtMs: 1663898370158
   },
   {
@@ -95,6 +95,18 @@ const history: Change[] = [
     currentValue: 'Giraffe',
     field: 'lexeme',
     updatedAtMs: 1660099370158
+  },
+  {
+    updatedBy: '0002',
+    updatedName: 'Diego Córdova',
+    entryId: '011',
+    entryName: 'Snake',
+    dictionaryId: 'banange',
+    dictionaryName: 'Banange',
+    previousValue: '',
+    currentValue: 'víbora',
+    field: 'gloss',
+    updatedAtMs: 1690039310158
   }
 ];
 
