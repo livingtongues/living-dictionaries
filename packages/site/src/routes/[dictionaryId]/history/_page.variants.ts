@@ -98,6 +98,12 @@ const history: Change[] = [
   }
 ];
 
+const mockLayoutData = {
+  user: null,
+  locale: null,
+  t: null,
+}
+
 export const variants: Variant<Component>[] = [
   {
     name: 'Sorted by latest update',
@@ -105,11 +111,12 @@ export const variants: Variant<Component>[] = [
     props: {
       data: {
         dictionary: {
+          id: 'banange',
           name: 'Banange',
           glossLanguages: []
         },
-        user: null,
-        history: [...history].sort((a, b) => b.updatedAtMs - a.updatedAtMs)
+        history: [...history].sort((a, b) => b.updatedAtMs - a.updatedAtMs),
+        ...mockLayoutData,
       }
     }
   }

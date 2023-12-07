@@ -8,6 +8,7 @@
   import SortRecords from './sortRecords.svelte';
   import { getActionValue } from './getActionValue';
   import { printDateTime } from '$lib/helpers/time';
+  // import { page } from '$app/stores';
 
   export let data;
 
@@ -30,17 +31,18 @@
       };
     });
 
-    downloadObjectsAsCSV(headers, formattedUsers, '[dictionary-name]-history');
+    downloadObjectsAsCSV(headers, formattedUsers, `${data.dictionary.id}-history`);
   }
 </script>
 
+<!-- {$page.data.t('history.entry_name')} -->
 {#if canEdit}
   <div class="sticky top-0 h-[calc(100vh-1.5rem)] z-2 relative flex flex-col">
-    <Filter items={data.history} let:filteredItems={filteredRecords} placeholder="Search entry names, editors and fields"> <!--TODO Translate-->
+    <Filter items={data.history} let:filteredItems={filteredRecords} placeholder="Search entries, editors and fields"> <!--TODO Translate-->
       <div slot="right">
-        <Button form="filled" color="black" onclick={() => exportHistoryAsCSV(filteredRecords)}>
-          <i class="fas fa-download mr-1" />
-          Download History as CSV
+        <Button form="filled" color="black" class="flex items-center space-x-1" onclick={() => exportHistoryAsCSV(filteredRecords)}>
+          <i class="fas fa-download" />
+          <span class="hidden sm:inline">Download History as CSV</span>
         </Button>
       </div>
       <div class="mb-1" />
