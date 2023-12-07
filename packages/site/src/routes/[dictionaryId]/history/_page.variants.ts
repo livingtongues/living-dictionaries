@@ -9,7 +9,7 @@ export const viewports: Viewport[] = [{
 {
   width: 300,
   height: 500
-}]
+}];
 
 const history: Change[] = [
   {
