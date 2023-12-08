@@ -24,7 +24,7 @@
     {record.currentValue}
   </td>
   <td>
-    {record.field}
+    {$page.data.t(`entry_field.${record.field}`)}
   </td>
   <td>
     {printDateTime(record.updatedAtMs)}
