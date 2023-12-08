@@ -14,9 +14,11 @@
 
   function exportHistoryAsCSV(records: Change[]) {
     const headers = {
-      entryName: 'entry_name',
+      entryName: 'entry',
       updatedName: 'editor',
       action: 'action',
+      previousValue: 'old_value',
+      currentValue: 'new_value',
       field: 'field',
       date: 'date',
     };
@@ -26,6 +28,8 @@
         entryName: record.entryName,
         updatedName: record.updatedName,
         action: getActionValue(record),
+        previousValue: JSON.stringify(record.previousValue),
+        currentValue: JSON.stringify(record.currentValue),
         field: record.field,
         date: printDateTime(record.updatedAtMs)
       };
