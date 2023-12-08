@@ -328,10 +328,17 @@
   },
   "history": {
     "history": "הִיסטוֹרִיָה",
-    "entry_name": "שם כניסה",
+    "entry": "כְּנִיסָה",
     "editor": "עוֹרֵך",
     "action": "פעולה",
     "field": "שדה",
-    "date": "תַאֲרִיך"
+    "date": "תַאֲרִיך",
+    "old_value": "ערך ישן",
+    "new_value": "ערך חדש",
+    "created": "נוצר",
+    "edited": "עָרוּך",
+    "deleted": "נמחק",
+    "history_search": "ערכי חיפוש, עורכים, שדות וערכים",
+    "download_history": "הורד את ההיסטוריה כ- CSV"
   }
 }

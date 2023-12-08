@@ -328,10 +328,17 @@
   },
   "history": {
     "history": "Sejarah",
-    "entry_name": "Nama Kemasukan",
+    "entry": "Kemasukan",
     "editor": "Editor",
     "action": "Tindakan",
     "field": "Medan",
-    "date": "Tarikh"
+    "date": "Tarikh",
+    "old_value": "Nilai lama",
+    "new_value": "Nilai baru",
+    "created": "Dicipta",
+    "edited": "Diedit",
+    "deleted": "Dipadam",
+    "history_search": "Cari penyertaan, editor, medan dan nilai",
+    "download_history": "Muat turun Sejarah sebagai CSV"
   }
 }

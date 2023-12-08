@@ -328,10 +328,17 @@
   },
   "history": {
     "history": "Lịch sử",
-    "entry_name": "Tên nhập cảnh",
+    "entry": "Lối vào",
     "editor": "Biên tập viên",
     "action": "Hoạt động",
     "field": "Cánh đồng",
-    "date": "Ngày"
+    "date": "Ngày",
+    "old_value": "Giá trị cũ",
+    "new_value": "Giá trị mới",
+    "created": "Tạo",
+    "edited": "Đã chỉnh sửa",
+    "deleted": "Bị xóa",
+    "history_search": "Tìm kiếm các mục, biên tập viên, trường và giá trị",
+    "download_history": "Tải xuống lịch sử dưới dạng CSV"
   }
 }

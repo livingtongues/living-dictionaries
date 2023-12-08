@@ -328,10 +328,17 @@
   },
   "history": {
     "history": "Historial",
-    "entry_name": "Nombre de entrada",
+    "entry": "Entrada",
     "editor": "Editor",
     "action": "Acción",
     "field": "Campo",
-    "date": "Fecha"
+    "date": "Fecha",
+    "old_value": "Valor antiguo",
+    "new_value": "Nuevo valor",
+    "created": "Creado",
+    "edited": "Editado",
+    "deleted": "Eliminado",
+    "history_search": "Buscar entradas, editores, campos y valores",
+    "download_history": "Descargar historia como CSV"
   }
 }

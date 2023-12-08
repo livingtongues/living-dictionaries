@@ -328,10 +328,17 @@
   },
   "history": {
     "history": "Historia",
-    "entry_name": "Jina la kuingia",
+    "entry": "Kiingilio",
     "editor": "Mhariri",
     "action": "Hatua",
     "field": "Uwanja",
-    "date": "Tarehe"
+    "date": "Tarehe",
+    "old_value": "Thamani ya zamani",
+    "new_value": "Thamani mpya",
+    "created": "Imeundwa",
+    "edited": "Kuhaririwa",
+    "deleted": "Kufutwa",
+    "history_search": "Tafuta viingilio, wahariri, uwanja na maadili",
+    "download_history": "Pakua historia kama CSV"
   }
 }

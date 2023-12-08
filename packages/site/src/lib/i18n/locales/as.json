@@ -328,10 +328,17 @@
   },
   "history": {
     "history": "",
-    "entry_name": "",
+    "entry": "",
     "editor": "",
     "action": "",
     "field": "",
-    "date": ""
+    "date": "",
+    "old_value": "",
+    "new_value": "",
+    "created": "",
+    "edited": "",
+    "deleted": "",
+    "history_search": "",
+    "download_history": ""
   }
 }

@@ -8,7 +8,7 @@
   import SortRecords from './sortRecords.svelte';
   import { getActionValue } from './getActionValue';
   import { printDateTime } from '$lib/helpers/time';
-  // import { page } from '$app/stores';
+  import { page } from '$app/stores';
 
   export let data;
 
@@ -35,14 +35,13 @@
   }
 </script>
 
-<!-- {$page.data.t('history.entry_name')} -->
 {#if canEdit}
   <div class="sticky top-0 h-[calc(100vh-1.5rem)] z-2 relative flex flex-col">
-    <Filter items={data.history} let:filteredItems={filteredRecords} placeholder="Search entries, editors and fields"> <!--TODO Translate-->
+    <Filter items={data.history} let:filteredItems={filteredRecords} placeholder={$page.data.t('history.history_search')}>
       <div slot="right">
         <Button form="filled" color="black" class="flex items-center space-x-1" onclick={() => exportHistoryAsCSV(filteredRecords)}>
           <i class="fas fa-download" />
-          <span class="hidden sm:inline">Download History as CSV</span>
+          <span class="hidden sm:inline">{$page.data.t('history.download_history')}</span>
         </Button>
       </div>
       <div class="mb-1" />

@@ -49,7 +49,7 @@
       class:active={$page.url.pathname.includes('history')}>
       <i class="far fa-history fa-fw" />
       <span class="font-medium mx-2">
-        History <!-- TODO {$page.data.t('dictionary.history')} -->
+        {$page.data.t('history.history')}
       </span>
     </a>
   {/if}

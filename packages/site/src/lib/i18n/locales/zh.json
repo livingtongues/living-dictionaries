@@ -328,10 +328,17 @@
   },
   "history": {
     "history": "历史",
-    "entry_name": "条目名称",
+    "entry": "入口",
     "editor": "编辑",
     "action": "行动",
     "field": "场地",
-    "date": "日期"
+    "date": "日期",
+    "old_value": "旧价值",
+    "new_value": "新价值",
+    "created": "创建",
+    "edited": "编辑",
+    "deleted": "删除",
+    "history_search": "搜索条目，编辑，字段和值",
+    "download_history": "将历史记录为CSV"
   }
 }

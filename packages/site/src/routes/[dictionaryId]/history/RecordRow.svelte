@@ -2,6 +2,7 @@
   import type { Change } from '@living-dictionaries/types';
   import { printDateTime } from '$lib/helpers/time';
   import { getActionValue } from './getActionValue';
+  import { page } from '$app/stores';
 
   export let record: Change;
 </script>
@@ -14,7 +15,7 @@
     {record.updatedName}
   </td>
   <td>
-    {getActionValue(record)}
+    {$page.data.t(`history.${getActionValue(record)}`)}
   </td>
   <td>
     {record.previousValue}

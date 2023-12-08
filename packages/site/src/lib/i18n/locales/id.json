@@ -328,10 +328,17 @@
   },
   "history": {
     "history": "Sejarah",
-    "entry_name": "Nama Entri",
+    "entry": "Pintu masuk",
     "editor": "Editor",
     "action": "Tindakan",
     "field": "Bidang",
-    "date": "Tanggal"
+    "date": "Tanggal",
+    "old_value": "Nilai lama",
+    "new_value": "Nilai baru",
+    "created": "Dibuat",
+    "edited": "Diedit",
+    "deleted": "Dihapus",
+    "history_search": "Cari entri, editor, bidang dan nilai",
+    "download_history": "Unduh riwayat sebagai CSV"
   }
 }

@@ -328,10 +328,17 @@
   },
   "history": {
     "history": "تاريخ",
-    "entry_name": "اسم الدخول",
+    "entry": "دخول",
     "editor": "محرر",
     "action": "فعل",
     "field": "مجال",
-    "date": "تاريخ"
+    "date": "تاريخ",
+    "old_value": "القيمة القديمة",
+    "new_value": "قيمة جديدة",
+    "created": "مخلوق",
+    "edited": "تحرير",
+    "deleted": "تم الحذف",
+    "history_search": "إدخالات البحث والمحررين والحقول والقيم",
+    "download_history": "تنزيل السجل كـ CSV"
   }
 }

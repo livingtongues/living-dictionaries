@@ -328,10 +328,17 @@
   },
   "history": {
     "history": "Tarihi",
-    "entry_name": "Sunan Shiga",
+    "entry": "Shigowa",
     "editor": "Edita",
     "action": "Mataki",
     "field": "Fili",
-    "date": "Rana"
+    "date": "Rana",
+    "old_value": "Tsohon darajar",
+    "new_value": "Sabuwar darajar",
+    "created": "Halitta",
+    "edited": "Gyara",
+    "deleted": "Goge",
+    "history_search": "Shigarwar bincike, masu gyara, filaye da dabi'u",
+    "download_history": "Zazzagewa Tarihi azaman CSV"
   }
 }

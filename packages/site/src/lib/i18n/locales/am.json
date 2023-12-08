@@ -328,10 +328,17 @@
   },
   "history": {
     "history": "ታሪክ",
-    "entry_name": "የመግቢያ ስም",
+    "entry": "ግባ",
     "editor": "አርታኢ",
     "action": "እርምጃ",
     "field": "መስክ",
-    "date": "ቀን"
+    "date": "ቀን",
+    "old_value": "የድሮ እሴት",
+    "new_value": "አዲስ እሴት",
+    "created": "ተፈጠረ",
+    "edited": "ተስተካክሏል",
+    "deleted": "ተሰር .ል",
+    "history_search": "የፍለጋ ግቤቶች, አርታኢዎች, መስኮች እና እሴቶች",
+    "download_history": "እንደ CSV ታሪክ ያውርዱ"
   }
 }

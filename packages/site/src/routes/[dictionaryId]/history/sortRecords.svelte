@@ -5,7 +5,7 @@
 
   export let history: Change[] = [];
   enum HistoryFields {
-    entryName = 'entry_name',
+    entryName = 'entry',
     updatedName = 'editor',
     action = 'action',
     previousValue = 'old_value',
