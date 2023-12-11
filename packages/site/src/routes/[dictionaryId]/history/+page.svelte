@@ -40,22 +40,26 @@
 </script>
 
 {#if canEdit}
-  <div class="sticky top-0 h-[calc(100vh-1.5rem)] z-2 relative flex flex-col">
-    <Filter items={data.history} let:filteredItems={filteredRecords} placeholder={$page.data.t('history.history_search')}>
-      <div slot="right">
-        <Button form="filled" color="black" class="flex items-center space-x-1" onclick={() => exportHistoryAsCSV(filteredRecords)}>
-          <i class="fas fa-download" />
-          <span class="hidden sm:inline">{$page.data.t('history.download_history')}</span>
-        </Button>
-      </div>
-      <div class="mb-1" />
-      <ResponsiveTable stickyColumn stickyHeading>
-        <SortRecords history={filteredRecords} let:sortedRecords>
-          {#each sortedRecords as record}
-            <RecordRow {record} />
-          {/each}
-        </SortRecords>
-      </ResponsiveTable>
-    </Filter>
-  </div>
+  {#if data.history?.length > 0}
+    <div class="sticky top-0 h-[calc(100vh-1.5rem)] z-2 relative flex flex-col">
+      <Filter items={data.history} let:filteredItems={filteredRecords} placeholder={$page.data.t('history.history_search')}>
+        <div slot="right">
+          <Button form="filled" color="black" class="flex items-center space-x-1" onclick={() => exportHistoryAsCSV(filteredRecords)}>
+            <i class="fas fa-download" />
+            <span class="hidden sm:inline">{$page.data.t('history.download_history')}</span>
+          </Button>
+        </div>
+        <div class="mb-1" />
+        <ResponsiveTable stickyColumn stickyHeading>
+          <SortRecords history={filteredRecords} let:sortedRecords>
+            {#each sortedRecords as record}
+              <RecordRow {record} />
+            {/each}
+          </SortRecords>
+        </ResponsiveTable>
+      </Filter>
+    </div>
+  {:else}
+    No history yet
+  {/if}
 {/if}

@@ -5,11 +5,12 @@
   import { page } from '$app/stores';
 
   export let record: Change;
+  const maxNumChar = 150;
 </script>
 
 <tr>
   <td>
-    {record.entryName}
+    <a href="entry/{record.entryId}" target="_blank">{record.entryName}</a>
   </td>
   <td>
     {record.updatedName}
@@ -18,10 +19,10 @@
     {$page.data.t(`history.${getActionValue(record)}`)}
   </td>
   <td>
-    {record.previousValue}
+    {record.previousValue?.slice(0, maxNumChar)}
   </td>
   <td>
-    {record.currentValue}
+    {record.currentValue?.slice(0, maxNumChar)}
   </td>
   <td>
     {$page.data.t(`entry_field.${record.field}`)}
