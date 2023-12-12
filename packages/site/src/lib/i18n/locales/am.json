@@ -339,6 +339,7 @@
     "edited": "ተስተካክሏል",
     "deleted": "ተሰር .ል",
     "history_search": "የፍለጋ ግቤቶች, አርታኢዎች, መስኮች እና እሴቶች",
-    "download_history": "እንደ CSV ታሪክ ያውርዱ"
+    "download_history": "እንደ CSV ታሪክ ያውርዱ",
+    "empty": "ገና ታሪክ የለም"
   }
 }

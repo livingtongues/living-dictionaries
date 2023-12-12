@@ -339,6 +339,7 @@
     "edited": "עָרוּך",
     "deleted": "נמחק",
     "history_search": "ערכי חיפוש, עורכים, שדות וערכים",
-    "download_history": "הורד את ההיסטוריה כ- CSV"
+    "download_history": "הורד את ההיסטוריה כ- CSV",
+    "empty": "אין עדיין היסטוריה"
   }
 }

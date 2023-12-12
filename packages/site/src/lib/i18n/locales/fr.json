@@ -339,6 +339,7 @@
     "edited": "Édité",
     "deleted": "Supprimé",
     "history_search": "Rechercher des entrées, des éditeurs, des champs et des valeurs",
-    "download_history": "Télécharger l'histoire en tant que CSV"
+    "download_history": "Télécharger l'histoire en tant que CSV",
+    "empty": "Pas encore d'histoire"
   }
 }

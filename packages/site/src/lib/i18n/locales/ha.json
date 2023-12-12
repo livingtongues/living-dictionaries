@@ -339,6 +339,7 @@
     "edited": "Gyara",
     "deleted": "Goge",
     "history_search": "Shigarwar bincike, masu gyara, filaye da dabi'u",
-    "download_history": "Zazzagewa Tarihi azaman CSV"
+    "download_history": "Zazzagewa Tarihi azaman CSV",
+    "empty": "Babu tarihi tukuna"
   }
 }

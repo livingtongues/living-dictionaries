@@ -339,6 +339,7 @@
     "edited": "Editado",
     "deleted": "Eliminado",
     "history_search": "Buscar entradas, editores, campos y valores",
-    "download_history": "Descargar historia como CSV"
+    "download_history": "Descargar historia como CSV",
+    "empty": "No hay historial todavía"
   }
 }

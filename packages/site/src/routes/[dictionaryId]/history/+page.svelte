@@ -60,6 +60,6 @@
       </Filter>
     </div>
   {:else}
-    No history yet
+    {$page.data.t('history.empty')}
   {/if}
 {/if}

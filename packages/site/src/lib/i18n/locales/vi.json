@@ -339,6 +339,7 @@
     "edited": "Đã chỉnh sửa",
     "deleted": "Bị xóa",
     "history_search": "Tìm kiếm các mục, biên tập viên, trường và giá trị",
-    "download_history": "Tải xuống lịch sử dưới dạng CSV"
+    "download_history": "Tải xuống lịch sử dưới dạng CSV",
+    "empty": "Chưa có lịch sử"
   }
 }

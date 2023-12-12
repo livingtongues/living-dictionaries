@@ -339,6 +339,7 @@
     "edited": "编辑",
     "deleted": "删除",
     "history_search": "搜索条目，编辑，字段和值",
-    "download_history": "将历史记录为CSV"
+    "download_history": "下载历史记录为CSV",
+    "empty": "还没有历史"
   }
 }

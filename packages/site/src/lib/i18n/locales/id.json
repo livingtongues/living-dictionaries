@@ -339,6 +339,7 @@
     "edited": "Diedit",
     "deleted": "Dihapus",
     "history_search": "Cari entri, editor, bidang dan nilai",
-    "download_history": "Unduh riwayat sebagai CSV"
+    "download_history": "Unduh riwayat sebagai CSV",
+    "empty": "Belum ada sejarah"
   }
 }

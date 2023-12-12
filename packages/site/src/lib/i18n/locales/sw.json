@@ -339,6 +339,7 @@
     "edited": "Kuhaririwa",
     "deleted": "Kufutwa",
     "history_search": "Tafuta viingilio, wahariri, uwanja na maadili",
-    "download_history": "Pakua historia kama CSV"
+    "download_history": "Pakua historia kama CSV",
+    "empty": "Hakuna historia bado"
   }
 }

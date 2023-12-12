@@ -339,6 +339,7 @@
     "edited": "تحرير",
     "deleted": "تم الحذف",
     "history_search": "إدخالات البحث والمحررين والحقول والقيم",
-    "download_history": "تنزيل السجل كـ CSV"
+    "download_history": "تنزيل السجل كـ CSV",
+    "empty": "لا يوجد تاريخ حتى الآن"
   }
 }
