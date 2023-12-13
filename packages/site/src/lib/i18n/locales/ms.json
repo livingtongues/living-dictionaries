@@ -294,7 +294,7 @@
     "spreadsheet": "Spreadsheet"
   },
   "video": {
-    "video_url": "URL video",
+    "video_url": "URL Video",
     "video_credit": "Kredit video",
     "prepare_to_record_video": "Bersedia untuk merakam dengan mikrofon & kamera",
     "video_info": "Terdapat dua cara untuk memaparkan video anda dalam kamus yang hidup: 1) Anda boleh merakam video anda di sini, atau memuat naik video anda yang dirakam sebelumnya ke platform kami. Kelebihan: Mudah dan hebat untuk rakaman cepat. Kelemahan: Anda hanya boleh memuat naik video sehingga 100MB supaya ia hanya perlu resolusi pendek dan rendah. 2) Mempunyai video anda pada perkhidmatan hosting yang mengkhususkan diri dalam penyimpanan video dan menghubungkan URL ke laman web kami. Kelebihan: Mudah (selagi video anda sudah dimuat naik di platform itu), video anda boleh mempunyai resolusi dan panjang yang anda inginkan. Kelemahan: Jika anda ingin merakam sesuatu yang tidak dijangka atau sangat mudah, mungkin terlalu banyak usaha untuk melakukannya dengan cara itu, dan anda mungkin ingin mengutamakan Kaedah 1.",
@@ -333,7 +333,7 @@
     "action": "Tindakan",
     "field": "Medan",
     "date": "Tarikh",
-    "old_value": "Nilai lama",
+    "old_value": "Bekas nilai",
     "new_value": "Nilai baru",
     "created": "Dicipta",
     "edited": "Diedit",

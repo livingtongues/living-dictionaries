@@ -333,7 +333,7 @@
     "action": "Action",
     "field": "Field",
     "date": "Date",
-    "old_value": "Old Value",
+    "old_value": "Former Value",
     "new_value": "New Value",
     "created": "Created",
     "edited": "Edited",

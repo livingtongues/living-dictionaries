@@ -333,7 +333,7 @@
     "action": "እርምጃ",
     "field": "መስክ",
     "date": "ቀን",
-    "old_value": "የድሮ እሴት",
+    "old_value": "የቀድሞው እሴት",
     "new_value": "አዲስ እሴት",
     "created": "ተፈጠረ",
     "edited": "ተስተካክሏል",
