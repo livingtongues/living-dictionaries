@@ -10,7 +10,7 @@
 
 <tr>
   <td>
-    <a href="entry/{record.entryId}" target="_blank">{record.entryName}</a>
+    <a class="underline hover:no-underline text-blue-500 visited:text-purple-500" href="entry/{record.entryId}" target="_blank">{record.entryName}</a>
   </td>
   <td>
     {record.updatedName}
