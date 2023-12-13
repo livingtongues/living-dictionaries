@@ -2,6 +2,7 @@
   import { page } from '$app/stores';
   import { getActionValue } from './getActionValue';
   import type { Change } from '@living-dictionaries/types';
+  import { sortedColumn } from './sortedColumnStore';
 
   export let history: Change[] = [];
   enum HistoryFields {
@@ -25,6 +26,8 @@
 
   let sortKey: SortFields = 'date';
   let sortDescending = true;
+
+  $: sortedColumn.set(sortKey);
 
   $: sortedRecords = history.sort((a, b) => {
     let valueA: string | number;

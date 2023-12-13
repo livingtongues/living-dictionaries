@@ -3,31 +3,32 @@
   import { printDateTime } from '$lib/helpers/time';
   import { getActionValue } from './getActionValue';
   import { page } from '$app/stores';
+  import { sortedColumn } from './sortedColumnStore';
 
   export let record: Change;
   const maxNumChar = 150;
 </script>
 
 <tr>
-  <td>
+  <td class:font-bold={$sortedColumn === 'entryName'}>
     <a class="underline hover:no-underline text-blue-500 visited:text-purple-500" href="entry/{record.entryId}" target="_blank">{record.entryName}</a>
   </td>
-  <td>
+  <td class:font-bold={$sortedColumn === 'updatedName'}>
     {record.updatedName}
   </td>
-  <td>
+  <td class:font-bold={$sortedColumn === 'action'}>
     {$page.data.t(`history.${getActionValue(record)}`)}
   </td>
-  <td>
+  <td class:font-bold={$sortedColumn === 'previousValue'}>
     {record.previousValue?.slice(0, maxNumChar)}
   </td>
-  <td>
+  <td class:font-bold={$sortedColumn === 'currentValue'}>
     {record.currentValue?.slice(0, maxNumChar)}
   </td>
-  <td>
+  <td class:font-bold={$sortedColumn === 'field'}>
     {$page.data.t(`entry_field.${record.field}`)}
   </td>
-  <td>
+  <td class:font-bold={$sortedColumn === 'date'}>
     {printDateTime(record.updatedAtMs)}
   </td>
 </tr>
