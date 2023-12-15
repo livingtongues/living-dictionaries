@@ -6,7 +6,8 @@
   import { sortedColumn } from './sortedColumnStore';
 
   export let record: Change;
-  const maxNumChar = 150;
+  const maxNumChar = 50;
+  const htmlRegex = /<[^>]*>/g;
 </script>
 
 <tr>
@@ -20,10 +21,10 @@
     {$page.data.t(`history.${getActionValue(record)}`) || ''}
   </td>
   <td class:font-bold={$sortedColumn === 'previousValue'}>
-    {record.previousValue?.slice(0, maxNumChar) || ''}
+    {record.previousValue?.slice(0, maxNumChar).toString().replace(htmlRegex, '') || ''}{#if record.previousValue?.length >= maxNumChar}<a href="entry/{record.entryId}" target="_blank">...</a>{/if}
   </td>
   <td class:font-bold={$sortedColumn === 'currentValue'}>
-    {record.currentValue?.slice(0, maxNumChar) || ''}
+    {record.currentValue?.slice(0, maxNumChar).toString().replace(htmlRegex, '') || ''}{#if record.currentValue?.length >= maxNumChar}<a href="entry/{record.entryId}" target="_blank">...</a>{/if}
   </td>
   <td class:font-bold={$sortedColumn === 'field'}>
     {$page.data.t(`entry_field.${record.field}`) || ''}
