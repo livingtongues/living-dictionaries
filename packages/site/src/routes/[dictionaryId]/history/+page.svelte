@@ -14,23 +14,23 @@
 
   function exportHistoryAsCSV(records: Change[]) {
     const headers = {
-      entryName: 'entry',
-      updatedName: 'editor',
-      action: 'action',
-      previousValue: 'old_value',
-      currentValue: 'new_value',
-      field: 'field',
-      date: 'date',
+      entryName: $page.data.t('history.entry'),
+      updatedName: $page.data.t('history.editor'),
+      action: $page.data.t('history.action'),
+      previousValue: $page.data.t('history.old_value'),
+      currentValue: $page.data.t('history.new_value'),
+      field: $page.data.t('history.field'),
+      date: $page.data.t('history.date'),
     };
 
     const formattedUsers = records.map((record) => {
       return {
         entryName: record.entryName,
         updatedName: record.updatedName,
-        action: getActionValue(record),
+        action: $page.data.t(`history.${getActionValue(record)}`),
         previousValue: JSON.stringify(record.previousValue),
         currentValue: JSON.stringify(record.currentValue),
-        field: record.field,
+        field: $page.data.t(`entry_field.${record.field}`),
         date: printDateTime(record.updatedAtMs)
       };
     });
