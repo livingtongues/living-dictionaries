@@ -16,6 +16,17 @@ export function printDate(date: Date | number): string {
   }).format(date);
 }
 
+export function printDateTime(date: Date | number): string {
+  return new Intl.DateTimeFormat('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: 'numeric',
+    second: 'numeric',
+  }).format(date);
+}
+
 export function printDateWithWeekday(date: Date | number): string {
   return new Intl.DateTimeFormat('en-US', {
     weekday: 'long',

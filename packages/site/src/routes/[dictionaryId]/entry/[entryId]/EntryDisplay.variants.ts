@@ -172,6 +172,43 @@ const partialVariants: DeepPartial<Variant<Component>[]> = [
     },
   },
   {
+    name: 'History',
+    description: 'Entry with history',
+    languages: [],
+    props: {
+      history: [
+        {
+          updatedBy: '0001',
+          updatedName: 'Anna Luisa',
+          entryName: 'Giraffe',
+          entryId: '1234',
+          dictionaryId: 'banange',
+          dictionaryName: 'Banage',
+          previousValue: ['1.1'],
+          currentValue: ['2.3'],
+          field: 'semantic domain',
+          updatedAtMs: 1673598240158
+        },
+        {
+          updatedBy: '0002',
+          updatedName: 'Diego Córdova',
+          entryName: 'Giraffe',
+          entryId: '1234',
+          dictionaryId: 'banange',
+          dictionaryName: 'Banage',
+          previousValue: 'dialect-1',
+          currentValue: 'dialect-2',
+          field: 'dialect',
+          updatedAtMs: 1671543560158
+        },
+      ],
+      entry: {
+        lexeme: 'Giraffe',
+      },
+      canEdit: true,
+    },
+  },
+  {
     name: 'No details, can edit',
     description: 'temporarily using admin is true until edit senses is no longer behind a flag',
     languages: [],

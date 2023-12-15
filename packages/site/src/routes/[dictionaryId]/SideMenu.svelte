@@ -1,7 +1,7 @@
 <script lang="ts">
   export let menuOpen: boolean;
+  import { canEdit, dictionary, isManager } from '$lib/stores';
   import { page } from '$app/stores';
-  import { dictionary, isManager } from '$lib/stores';
 </script>
 
 <div class="md:hidden">
@@ -43,6 +43,16 @@
       {$page.data.t('dictionary.contributors')}
     </span>
   </a>
+  {#if $canEdit}
+    <a
+      href={'/' + $dictionary.id + '/history'}
+      class:active={$page.url.pathname.includes('history')}>
+      <i class="far fa-history fa-fw" />
+      <span class="font-medium mx-2">
+        {$page.data.t('history.history')}
+      </span>
+    </a>
+  {/if}
   <a
     href={'/' + $dictionary.id + '/grammar'}
     class:active={$page.url.pathname.includes('grammar')}>

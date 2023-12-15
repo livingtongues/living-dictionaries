@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { EntryFields, type EntryFieldValue, type ExpandedEntry, type IDictionary, type SupaEntry } from '@living-dictionaries/types';
+  import { EntryFields, type EntryFieldValue, type ExpandedEntry, type IDictionary, type SupaEntry, type Change } from '@living-dictionaries/types';
   import { page } from '$app/stores';
   import EntryField from './EntryField.svelte';
   import { createEventDispatcher } from 'svelte';
@@ -7,6 +7,7 @@
   import { DICTIONARIES_WITH_VARIANTS } from '$lib/constants';
   import EntryMedia from './EntryMedia.svelte';
   import SelectSource from '$lib/components/entry/EntrySource.svelte';
+  import EntryHistory from './EntryHistory.svelte';
   import { Button } from 'svelte-pieces';
   import Sense from './Sense.svelte';
   import SupaSense from './SupaSense.svelte';
@@ -17,6 +18,8 @@
   export let dictionary: IDictionary;
   export let canEdit = false;
   export let videoAccess = false;
+  export let history: Change[] = undefined;
+  export let admin: number;
   export let dbOperations: DbOperations;
 
   const dispatch = createEventDispatcher<{
@@ -45,6 +48,7 @@
 
   <div style="grid-area: media;">
     <EntryMedia {dictionary} {entry} {canEdit} {videoAccess} on:deleteImage on:deleteVideo on:valueupdate />
+    {#if history?.length > 0}<EntryHistory {history} {canEdit} class="mt-5 hidden md:block" />{/if}
   </div>
 
   <div class="flex flex-col grow" style="grid-area: content;">
@@ -151,6 +155,7 @@
   </div>
 </div>
 
+{#if history?.length > 0}<EntryHistory {history} {canEdit} class="mt-3 md:hidden" />{/if}
 <style>
   .media-on-right-grid {
       grid-template-columns: 3fr 1fr;
