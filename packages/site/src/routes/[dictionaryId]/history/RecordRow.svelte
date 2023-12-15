@@ -14,21 +14,21 @@
     <a class="underline hover:no-underline text-blue-500 visited:text-purple-500" href="entry/{record.entryId}" target="_blank">{record.entryName}</a>
   </td>
   <td class:font-bold={$sortedColumn === 'updatedName'}>
-    {record.updatedName}
+    {record.updatedName || ''}
   </td>
   <td class:font-bold={$sortedColumn === 'action'}>
-    {$page.data.t(`history.${getActionValue(record)}`)}
+    {$page.data.t(`history.${getActionValue(record)}`) || ''}
   </td>
   <td class:font-bold={$sortedColumn === 'previousValue'}>
-    {record.previousValue?.slice(0, maxNumChar)}
+    {record.previousValue?.slice(0, maxNumChar) || ''}
   </td>
   <td class:font-bold={$sortedColumn === 'currentValue'}>
-    {record.currentValue?.slice(0, maxNumChar)}
+    {record.currentValue?.slice(0, maxNumChar) || ''}
   </td>
   <td class:font-bold={$sortedColumn === 'field'}>
-    {$page.data.t(`entry_field.${record.field}`)}
+    {$page.data.t(`entry_field.${record.field}`) || ''}
   </td>
   <td class:font-bold={$sortedColumn === 'date'}>
-    {printDateTime(record.updatedAtMs)}
+    {printDateTime(record.updatedAtMs) || ''}
   </td>
 </tr>
