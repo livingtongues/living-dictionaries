@@ -1,5 +1,5 @@
 /* eslint-disable no-magic-numbers */
-export const DICTIONARIES_WITH_VARIANTS = ['babanki', 'torwali', 'ksingmul', 'tutelo-saponi']
+export const DICTIONARIES_WITH_VARIANTS = ['babanki', 'torwali', 'ksingmul', 'tutelo-saponi', 'tseltal'];
 
 export enum ResponseCodes {
   OK = 200,
