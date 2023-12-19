@@ -20,6 +20,7 @@ export enum StandardPrintFields {
   morphology = 'Morphology',
   plural_form = 'Plural Form',
   variant = 'Variant',
+  noun_class = 'Noun Class',
   dialects = 'Dialects',
   notes = 'Notes',
 }
