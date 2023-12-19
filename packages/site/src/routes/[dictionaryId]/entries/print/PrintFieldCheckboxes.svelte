@@ -16,6 +16,7 @@
         return entry.local_orthography_1 || entry.local_orthography_2 || entry.local_orthography_3 || entry.local_orthography_4 || entry.local_orthography_5;
       if (field === 'example_sentence') return entry.senses?.[0].example_sentences?.length;
       if (field === 'semantic_domains') return entry.senses?.[0].ld_semantic_domains_keys?.length;
+      if (field === 'noun_class') return entry.senses?.[0].noun_class;
       if (field === 'photo') return entry.senses?.[0].photo_files?.length;
       if (field === 'speaker') return entry.sound_files?.[0].speakerName || entry.sound_files?.[0].speaker_ids?.length;
       return entry[field];

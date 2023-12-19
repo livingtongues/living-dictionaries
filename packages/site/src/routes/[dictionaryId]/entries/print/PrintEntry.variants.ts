@@ -34,6 +34,18 @@ export const variants: Variant<Component>[] = [
     }
   },
   {
+    name: 'complex without labels',
+    viewports: [{width: 400, height: 700}],
+    props: {
+      dictionary: basic_mock_dictionary,
+      selectedFields,
+      entry: complex,
+      showQrCode: true,
+      headwordSize: 20,
+      showLabels: false,
+    }
+  },
+  {
     name: 'example with Hebrew text',
     description: 'This is an example where non-hebrew characters are mixed with hebrew characters in the same line.',
     viewports: [{width: 400, height: 100}],
