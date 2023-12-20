@@ -138,7 +138,7 @@
           class:sompeng={isSompeng}
           class="form-input block w-full pr-9" />
       </Keyman>
-    {:else if field === 'local_orthography' || field === 'lexeme'}
+    {:else if field.includes('local_orthography') || field === 'lexeme'}
       <Keyman fixed canChooseKeyboard>
         <input
           bind:this={inputEl}
