@@ -14,7 +14,8 @@ const defaultProps = {
   algoliaQueryParams: writable(''),
   dictionary: writable({
     name: 'test',
-    glossLanguages: []
+    glossLanguages: [],
+    alternateOrthographies: ['Alternate'],
   }),
   dbOperations: logDbOperations,
   supaEntry: null,
