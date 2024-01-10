@@ -1,9 +1,7 @@
 import { updateSense } from '$lib/supabase/change/sense';
 import { updateFirestoreEntry } from '$lib/helpers/entry/update';
-import { updateFirestoreDictionary } from './helpers/updateDictionary';
 
 export const dbOperations = {
-  updateFirestoreDictionary,
   updateFirestoreEntry,
   updateSense,
 }

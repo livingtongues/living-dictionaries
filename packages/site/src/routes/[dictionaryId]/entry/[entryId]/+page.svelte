@@ -75,10 +75,7 @@
   on:deleteImage={() => deleteImage(entry, $dictionary.id)}
   on:deleteVideo={() => deleteVideo(entry, $dictionary.id)}
   on:valueupdate={({ detail: { field, newValue } }) =>
-    field.startsWith('local_orthography') ? dbOperations.updateFirestoreDictionary({
-      field,
-      value: newValue
-    }) : dbOperations.updateFirestoreEntry({
+    dbOperations.updateFirestoreEntry({
       field,
       value: newValue,
       entryId: entry.id,
