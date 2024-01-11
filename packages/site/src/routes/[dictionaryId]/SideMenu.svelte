@@ -57,7 +57,7 @@
       class:active={$page.url.pathname.includes('import')}>
       <i class="far fa-file-import" />
       <span class="font-medium mx-2">
-        {$page.data.t('import.import')}
+        {$page.data.t('import_page.import')}
       </span>
     </a>
     <a
