@@ -31,7 +31,7 @@
     "interns": "Estagiários",
     "video_upload": "Upload de vídeo",
     "export_data": "Dados de exportação (CSV, Formatos PDF)",
-    "import_export": "Importação/exportação (Flex, Formato Padrão)",
+    "import_export": "Importação/exportação (Flex, formato padrão)",
     "geo_tagging": "Entradas de margem geográfica",
     "flashcard_view": "Visualização do Flashcard para alunos de idiomas",
     "peer_review": "Revisão por pares de grafias",
@@ -318,12 +318,28 @@
     "headword_size": "Tamanho da palavra da cabeça",
     "font_size": "Tamanho da fonte"
   },
-  "import": {
+  "import_page": {
     "import": "Importar",
     "template_link": "Link para modelo",
     "instructions_1": "Se você já possui dados linguísticos que deseja importar para o seu dicionário, siga as etapas abaixo.",
     "instructions_2": "Clique no botão azul \"Link to modelo\" abaixo. Faça o download do modelo como um arquivo do Excel ou crie uma cópia no Google Docs. Edite o modelo de acordo com as necessidades do seu projeto. Copie e cole seus dados na planilha.",
     "instructions_3": "Use o \"Entre em contato conosco\" abaixo para entrar em contato conosco. Deixe -nos saber que você tem uma nova planilha pronta para importação. Faça -nos todas as perguntas que você tiver. Nós responderemos a você por e -mail e você pode nos enviar seu arquivo.",
     "instructions_4": "Para nos enviar dados exportados de softwares de dicionário como Flex, Lexique Pro, Shoebox, use o botão \"Entre em contato conosco\" abaixo e conte -nos os detalhes do seu projeto."
+  },
+  "history": {
+    "history": "História",
+    "entry": "Entrada",
+    "editor": "editor",
+    "action": "Ação",
+    "field": "Campo",
+    "date": "Data",
+    "old_value": "Valor anterior",
+    "new_value": "Novo valor",
+    "created": "Criada",
+    "edited": "Editado",
+    "deleted": "Excluído",
+    "history_search": "Entradas de pesquisa, editores, campos e valores",
+    "download_history": "Baixe o histórico como CSV",
+    "empty": "Sem história ainda"
   }
 }

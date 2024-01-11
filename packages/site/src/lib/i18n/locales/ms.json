@@ -318,12 +318,28 @@
     "headword_size": "Saiz kata kunci",
     "font_size": "Saiz huruf"
   },
-  "import": {
+  "import_page": {
     "import": "Import",
     "template_link": "Pautan ke templat",
     "instructions_1": "Jika anda sudah mempunyai data linguistik yang anda ingin import ke dalam kamus anda, sila ikuti langkah -langkah di bawah.",
     "instructions_2": "Klik pada butang \"Link to Template\" biru di bawah. Muat turun templat sebagai fail Excel, atau buat salinan di Google Docs. Edit templat mengikut keperluan projek anda. Salin dan tampal data anda ke dalam spreadsheet.",
     "instructions_3": "Gunakan \"hubungi kami\" di bawah untuk menghubungi kami. Beritahu kami bahawa anda mempunyai spreadsheet baru yang siap untuk diimport. Tanya kami sebarang soalan yang anda ada. Kami akan memberi respons kepada anda melalui e -mel, dan kemudian anda boleh menghantar fail anda kepada kami.",
     "instructions_4": "Untuk menghantar kami data yang dieksport dari perisian kamus seperti Flex, Lexique Pro, Shoebox, sila gunakan butang \"Hubungi Kami\" di bawah dan beritahu kami butiran projek anda."
+  },
+  "history": {
+    "history": "Sejarah",
+    "entry": "Kemasukan",
+    "editor": "Editor",
+    "action": "Tindakan",
+    "field": "Medan",
+    "date": "Tarikh",
+    "old_value": "Bekas nilai",
+    "new_value": "Nilai baru",
+    "created": "Dicipta",
+    "edited": "Diedit",
+    "deleted": "Dipadam",
+    "history_search": "Cari penyertaan, editor, medan dan nilai",
+    "download_history": "Muat turun Sejarah sebagai CSV",
+    "empty": "Belum ada sejarah"
   }
 }
