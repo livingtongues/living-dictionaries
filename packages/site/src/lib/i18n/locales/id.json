@@ -125,7 +125,7 @@
     "secondary_coordinates": "Koordinat sekunder",
     "map_instructions": "Klik pada peta untuk menambahkan koordinat sekunder.",
     "print_access": "Izinkan pemirsa mencetak kamus",
-    "primary_coordinate": "Koordinat primer"
+    "primary_coordinate": "Koordinat utama"
   },
   "dictionary": {
     "latitude": "Garis Lintang",
@@ -318,12 +318,28 @@
     "headword_size": "Ukuran kata kepala",
     "font_size": "Ukuran huruf"
   },
-  "import": {
+  "import_page": {
     "import": "Impor",
     "template_link": "Tautan ke template",
     "instructions_1": "Jika Anda sudah memiliki data linguistik yang ingin Anda impor ke kamus Anda, silakan ikuti langkah -langkah di bawah ini.",
     "instructions_2": "Klik tombol Blue \"Link to Template\" di bawah ini. Unduh templat sebagai file Excel, atau buat salinan di Google Documents. Edit template sesuai dengan kebutuhan proyek Anda. Salin dan tempel data Anda ke spreadsheet.",
     "instructions_3": "Gunakan \"Hubungi Kami\" di bawah ini untuk menghubungi kami. Beri tahu kami bahwa Anda memiliki spreadsheet baru yang siap untuk diimpor. Ajukan pertanyaan yang Anda miliki. Kami akan menanggapi Anda melalui email, dan kemudian Anda dapat mengirimkan file Anda kepada kami.",
     "instructions_4": "Untuk mengirimi kami data yang diekspor dari software kamus seperti Flex, Lexique Pro, Shoebox, silakan gunakan tombol \"Hubungi Kami\" di bawah ini dan beri tahu kami detail proyek Anda."
+  },
+  "history": {
+    "history": "Sejarah",
+    "entry": "Pintu masuk",
+    "editor": "Editor",
+    "action": "Tindakan",
+    "field": "Bidang",
+    "date": "Tanggal",
+    "old_value": "Nilai sebelumnya",
+    "new_value": "Nilai baru",
+    "created": "Dibuat",
+    "edited": "Diedit",
+    "deleted": "Dihapus",
+    "history_search": "Cari entri, editor, bidang dan nilai",
+    "download_history": "Unduh riwayat sebagai CSV",
+    "empty": "Belum ada sejarah"
   }
 }

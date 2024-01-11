@@ -9,23 +9,23 @@
     <h3
       class="mb-6 text-3xl leading-8 font-bold tracking-tight text-gray-900
         sm:text-4xl sm:leading-10">
-      {$page.data.t('import.import')}: {$dictionary.name}
+      {$page.data.t('import_page.import')}: {$dictionary.name}
     </h3>
 
     <p class="mb-3">
-      {$page.data.t('import.instructions_1')}
+      {$page.data.t('import_page.instructions_1')}
     </p>
     <ol class="py-3 px-5">
-      <li class="list-decimal mb-3">{$page.data.t('import.instructions_2')}</li>
-      <li class="list-decimal mb-3">{$page.data.t('import.instructions_3')}</li>
+      <li class="list-decimal mb-3">{$page.data.t('import_page.instructions_2')}</li>
+      <li class="list-decimal mb-3">{$page.data.t('import_page.instructions_3')}</li>
     </ol>
     <p class="mb-3">
-      {$page.data.t('import.instructions_4')}
+      {$page.data.t('import_page.instructions_4')}
     </p>
   </div>
   <div class="flex justify-between">
     <Button form="filled" type="button" target="_blank" href="https://docs.google.com/spreadsheets/d/1Bqy1q_XZzlZLDM_glTxQ9gw0Pb5JEUssqQFtINxbwzY/edit#gid=1392642957">
-      {$page.data.t('import.template_link')}
+      {$page.data.t('import_page.template_link')}
     </Button>
     <ShowHide let:show let:toggle>
       <Button onclick={toggle}>
