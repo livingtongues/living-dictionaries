@@ -87,13 +87,12 @@
       display={$page.data.t('entry_field.scientific_names')}
       on:update={({detail}) => dispatch('valueupdate', { field: EntryFields.scientific_names, newValue: [detail]} )} />
   {:else if column.field === 'local_orthography'}
-    {@const orthographyIndex = `local_orthography_${column.orthography_index}`}
     <Textbox
       {canEdit}
       field={column.field}
-      value={entry[orthographyIndex]}
+      value={entry[`local_orthography_${column.orthography_index}`]}
       display={column.display}
-      on:update={({detail}) => dispatch('valueupdate', { field: orthographyIndex, newValue: detail} )} />
+      on:update={({detail}) => dispatch('valueupdate', { field: `lo${column.orthography_index}`, newValue: detail} )} />
   {:else}
     <Textbox
       field={column.field}

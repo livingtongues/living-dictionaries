@@ -66,7 +66,7 @@ export type ActualDatabaseEntry = Omit<GoalDatabaseEntry, 'di' | 'sr' | 'scn'> &
 
 export interface GoalDatabaseEntry extends IFirestoreMetaDataAbbreviated {
   lx?: string; // lexeme
-  lo1?: string; // local_orthography_2
+  lo1?: string; // local_orthography_1
   lo2?: string; // local_orthography_2
   lo3?: string; // local_orthography_3
   lo4?: string; // local_orthography_4
