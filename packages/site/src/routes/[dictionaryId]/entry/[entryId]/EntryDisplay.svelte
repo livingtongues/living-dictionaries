@@ -49,13 +49,13 @@
 
   <div class="flex flex-col grow" style="grid-area: content;">
     {#each dictionary.alternateOrthographies || [] as orthography, index}
-      {@const orthographyIndex = `local_orthography_${index + 1}`}
+      {@const orthographyIndex = index + 1}
       <EntryField
-        value={entry[orthographyIndex]}
+        value={entry[`local_orthography_${orthographyIndex}`]}
         field="local_orthography"
         {canEdit}
         display={orthography}
-        on:update={({detail}) => dispatch('valueupdate', { field: orthographyIndex, newValue: detail})} />
+        on:update={({detail}) => dispatch('valueupdate', { field: `lo${orthographyIndex}`, newValue: detail})} />
     {/each}
 
     <EntryField value={entry.phonetic} field="phonetic" {canEdit} display={$page.data.t('entry_field.phonetic')} on:update={({detail}) => dispatch('valueupdate', { field: EntryFields.phonetic, newValue: detail})} />
