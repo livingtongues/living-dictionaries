@@ -1,10 +1,9 @@
 import { defaultExclude, defineProject } from 'vitest/config'
-import path from 'node:path'
 
 export default defineProject({
   test: {
     alias: {
-      $lib: path.join(__dirname, './src/lib'),
+      $lib: new URL('./src/lib', import.meta.url).pathname,
     },
     name: 'site:unit',
     globals: true,

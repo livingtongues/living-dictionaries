@@ -18,6 +18,9 @@ export async function sendEmail(emailData: MailChannelsSendBody, _fetch: typeof 
   });
 
   // receives status 202 from MailChannels to indicate send pending
-  if (!response.status.toString().startsWith('2'))
-    throw new Error(`MailChannels workers error: ${response.status} ${response.statusText}`);
+  if (!response.status.toString().startsWith('2')) {
+    const body = await response.json()
+    throw new Error(`MailChannels workers error: ${response.status} ${body.errors?.[0]}`);
+  }
+  return response
 }
