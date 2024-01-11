@@ -318,12 +318,28 @@
     "headword_size": "头词大小",
     "font_size": "字体大小"
   },
-  "import": {
+  "import_page": {
     "import": "进口",
     "template_link": "链接到模板",
     "instructions_1": "如果您已经有要导入到字典中的语言数据，请按照以下步骤操作。",
     "instructions_2": "单击下面的蓝色“链接到模板”按钮。将模板作为Excel文件下载，或在Google文档上创建副本。根据您的项目的需求编辑模板。将数据复制并粘贴到电子表格中。",
     "instructions_3": "使用下面的“联系我们”与我们联系。让我们知道，您有一个准备进口的新电子表格。问我们任何问题。我们将通过电子邮件回复您，然后您可以向我们发送您的文件。",
     "instructions_4": "要向我们发送从Flex，Lexique Pro，Shoebox等字典软件导出的数据，请使用下面的“联系我们”按钮，并告诉我们您的项目的详细信息。"
+  },
+  "history": {
+    "history": "历史",
+    "entry": "入口",
+    "editor": "编辑",
+    "action": "行动",
+    "field": "场地",
+    "date": "日期",
+    "old_value": "以前的价值",
+    "new_value": "新价值",
+    "created": "创建",
+    "edited": "编辑",
+    "deleted": "删除",
+    "history_search": "搜索条目，编辑，字段和值",
+    "download_history": "下载历史记录为CSV",
+    "empty": "还没有历史"
   }
 }
