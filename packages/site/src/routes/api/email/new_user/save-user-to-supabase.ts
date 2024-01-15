@@ -22,4 +22,3 @@ function get_firebase_user_meta_data({displayName, photoURL}: IUser) {
     metadata.photoURL = photoURL;
   return metadata;
 }
-
