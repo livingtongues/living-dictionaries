@@ -119,10 +119,10 @@ function get_firebase_user_meta_data({displayName, photoURL}: UserRecord) {
   if (!escapedDisplayName && !photoURL)
     return '{}';
   if (!escapedDisplayName)
-    return `{"photoURL":"${photoURL}"}`;
+    return `{"avatar_url":"${photoURL}"}`;
   if (!photoURL)
-    return `{"displayName": "${escapedDisplayName}"}`;
-  return `{"displayName": "${escapedDisplayName}","photoURL":"${photoURL}"}`;
+    return `{"full_name": "${escapedDisplayName}"}`;
+  return `{"full_name": "${escapedDisplayName}","avatar_url":"${photoURL}"}`;
 }
 
 function escape_apostrophes(str: string): string {

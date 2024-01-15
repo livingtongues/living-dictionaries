@@ -1,4 +1,5 @@
 import { getAdminSupabaseClient } from '$lib/supabase/admin';
+import type { GoogleAuthUserMetaData } from '$lib/supabase/database.types';
 import type { IUser } from '@living-dictionaries/types';
 
 export async function save_user_to_supabase(user: IUser): Promise<string> {
@@ -15,10 +16,10 @@ export async function save_user_to_supabase(user: IUser): Promise<string> {
 }
 
 function get_firebase_user_meta_data({displayName, photoURL}: IUser) {
-  const metadata: {displayName?: string, photoURL?: string} = {}
+  const metadata: GoogleAuthUserMetaData = {}
   if (displayName)
-    metadata.displayName = displayName;
+    metadata.full_name = displayName;
   if (photoURL)
-    metadata.photoURL = photoURL;
+    metadata.avatar_url = photoURL;
   return metadata;
 }
