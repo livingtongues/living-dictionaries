@@ -1,11 +1,8 @@
-import { UserInfo, UserRecord } from 'firebase-admin/auth';
+import { UserRecord } from 'firebase-admin/auth';
 const POSTGRES_NOW = 'NOW()'
 const POSTGRESS_UUID_GENERATE_V4 = 'uuid_generate_v4()'
 
 export function write_users_insert(users: UserRecord[]) {
-  // const user_sql_rows = users.map(create_user_sql_row)
-  // return `INSERT INTO auth.users (${user_header()}) VALUES ${user_sql_rows.join(',\n')} ON CONFLICT DO NOTHING;`
-
   const user_rows = users.map(user => {
     return {
       instance_id: '00000000-0000-0000-0000-000000000000',
@@ -69,7 +66,7 @@ if (import.meta.vitest) {
         'lastRefreshTime': 'Thu, 08 Jun 2023 04:42:14 GMT',
       },
       'tokensValidAfterTime': 'Thu, 08 Jun 2023 04:42:14 GMT',
-      'providerData': [{ 'uid': 'robert@me.org', 'email': 'robert@me.org', 'providerId': 'password'  }],
+      'providerData': [{ 'email': 'robert@me.org', 'providerId': 'password'  }],
     },
     {'uid':'0FCdmOc6qlWuKxFkKPi7VeC2mp52',
       'email':'bob@gmail.com',
@@ -82,43 +79,14 @@ if (import.meta.vitest) {
         'creationTime':'Tue, 29 Dec 2020 00:08:26 GMT',
         'lastRefreshTime':null
       },
-      'tokensValidAfterTime':'Thu, 18 Mar 2021 08:26:40 GMT','providerData':[{'uid':'101321196686998195781','displayName':'Bob Smith','email':'bob@gmail.com','photoURL':'https://lh3.googleusercontent.com/a-/AOh14Gg-GMlUaNPYaSYvzMEjyHW9Q5PAngePLc26LsI4=s96-c','providerId':'google.com'}]}
+      'tokensValidAfterTime':'Thu, 18 Mar 2021 08:26:40 GMT',
+      'providerData':[{'displayName':'Bob Smith','email':'bob@gmail.com','photoURL':'https://lh3.googleusercontent.com/a-/AOh14Gg-GMlUaNPYaSYvzMEjyHW9Q5PAngePLc26LsI4=s96-c','providerId':'google.com'}]}
   ] as UserRecord[];
 
   test(write_users_insert, () => {
     expect(write_users_insert(users)).toMatchFileSnapshot('./users-js.sql');
   });
 }
-
-// function user_header() {
-//   return `
-// instance_id,
-// id,
-// aud,
-// role,
-// email,
-// email_confirmed_at,
-// last_sign_in_at,
-// raw_app_meta_data,
-// raw_user_meta_data,
-// created_at,
-// updated_at
-// `;
-// }
-
-// function create_user_sql_row(user: UserRecord) {
-//   return `('00000000-0000-0000-0000-000000000000', /* instance_id */
-//   uuid_generate_v4(), /* id */
-//   'authenticated', /* aud character varying(255),*/
-//   'authenticated', /* role character varying(255),*/
-//   '${user.email}', /* email character varying(255),*/
-//   ${user.emailVerified ? 'NOW()' : 'null'}, /* email_confirmed_at timestamp with time zone,*/
-//   '${convert_utc_string_to_timestamp(user.metadata.lastSignInTime)}', /* last_sign_in_at timestamp with time zone, */
-//   '${get_provider_string(user.providerData)}', /* raw_app_meta_data jsonb,*/
-//   '${get_firebase_metadata_string(user)}', /* raw_user_meta_data jsonb,*/
-//   '${convert_utc_string_to_timestamp(user.metadata.creationTime)}', /* created_at timestamp with time zone, */
-//   NOW() /* updated_at timestamp with time zone, */)`;
-// }
 
 function convert_utc_string_to_timestamp(dateString: string) {
   const date = new Date(dateString);
@@ -130,7 +98,6 @@ if (import.meta.vitest) {
   test('times', () => {
     expect(convert_utc_string_to_timestamp('Fri, 12 Mar 2021 21:04:29 GMT')).toEqual('2021-03-12 21:04:29.0001+00');
     expect(convert_utc_string_to_timestamp('Thu, 08 Jun 2023 04:42:14 GMT')).toEqual('2023-06-08 04:42:14.0001+00');
-
   });
 }
 

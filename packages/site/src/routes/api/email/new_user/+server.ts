@@ -1,12 +1,13 @@
 
 import { SEND_EMAIL_KEY } from '$env/static/private';
-import { decodeToken } from '$lib/server/firebase-admin';
+import { decodeToken, getDb } from '$lib/server/firebase-admin';
 import { json } from '@sveltejs/kit';
 import type { EmailParts } from '../send/mail-channels.interface';
 import type { RequestHandler } from './$types';
 import type { IUser } from '@living-dictionaries/types';
 import { getAdminRecipients } from '../addresses';
 import newUserWelcome from '../html/newUserWelcome';
+import { save_user_to_supabase } from './save-user-to-supabase';
 
 export interface NewUserRequestBody {
   auth_token: string;
@@ -59,6 +60,10 @@ https://livingdictionaries.app`,
       'content-type': 'application/json'
     }
   });
+
+  const supabase_user_id = await save_user_to_supabase(user);
+  const firebase_db = getDb();
+  await firebase_db.doc(`users/${user.uid}`).update({ supabase_user_id });
 
   return json('success');
 };
