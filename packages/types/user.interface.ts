@@ -8,6 +8,7 @@ export interface IUser extends IBaseUser {
   // starred?: string[]; // in future save dictionary Ids to user that they star, to allow them quick access back to those dictionaries
   termsAgreement?: Timestamp;
   unsubscribe?: Timestamp;
+  supabase_user_id?: string;
 }
 
 export interface IRoles {

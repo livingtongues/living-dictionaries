@@ -1,9 +1,60 @@
 import { UserInfo, UserRecord } from 'firebase-admin/auth';
+const POSTGRES_NOW = 'NOW()'
+const POSTGRESS_UUID_GENERATE_V4 = 'uuid_generate_v4()'
 
 export function write_users_insert(users: UserRecord[]) {
-  const user_sql_rows = users.map(create_user_sql_row)
+  // const user_sql_rows = users.map(create_user_sql_row)
+  // return `INSERT INTO auth.users (${user_header()}) VALUES ${user_sql_rows.join(',\n')} ON CONFLICT DO NOTHING;`
 
-  return `INSERT INTO auth.users (${user_header()}) VALUES ${user_sql_rows.join(',\n')} ON CONFLICT DO NOTHING;`
+  const user_rows = users.map(user => {
+    return {
+      instance_id: '00000000-0000-0000-0000-000000000000',
+      id: POSTGRESS_UUID_GENERATE_V4,
+      aud: 'authenticated',
+      role: 'authenticated',
+      email: user.email,
+      email_confirmed_at: user.emailVerified ? POSTGRES_NOW : null,
+      last_sign_in_at: convert_utc_string_to_timestamp(user.metadata.lastSignInTime),
+      created_at: convert_utc_string_to_timestamp(user.metadata.creationTime),
+      updated_at: POSTGRES_NOW,
+      raw_app_meta_data: get_firebase_app_meta_data(user),
+      raw_user_meta_data: get_firebase_user_meta_data(user),
+    }
+  })
+
+  return write_sql_insert('auth.users', user_rows)
+}
+
+function write_sql_insert(table_name: string, rows: object[]) {
+  const column_names = Object.keys(rows[0]).sort()
+  const column_names_string = `"${column_names.join('", "')}"`
+
+  const values_string = rows.map(row => {
+    // @ts-expect-error
+    const values = column_names.map(column => convert_to_sql_string(row[column]))
+    return `(${values.join(', ')})`
+  }).join(',\n')
+
+  return `INSERT INTO ${table_name} (${column_names_string}) VALUES\n${values_string} ON CONFLICT DO NOTHING;`
+}
+
+function convert_to_sql_string(value: string | number | object) {
+  if (value === POSTGRES_NOW || value === POSTGRESS_UUID_GENERATE_V4)
+    return value;
+
+  if (typeof value === 'boolean')
+    return `${value}`
+  if (typeof value === 'string')
+    return `'${value}'`
+  if (typeof value === 'number')
+    return `${value}`
+  if (Array.isArray(value))
+    return `'{${value.join(',')}}'`
+  if (!value) // must come here to avoid snatching up 0, empty string, or false, but not after object
+    return 'null'
+  if (typeof value === 'object')
+    return `'${JSON.stringify(value)}'::jsonb`
+  throw new Error(`${value} has an unexpected value type: ${typeof value}`)
 }
 
 if (import.meta.vitest) {
@@ -22,9 +73,10 @@ if (import.meta.vitest) {
     },
     {'uid':'0FCdmOc6qlWuKxFkKPi7VeC2mp52',
       'email':'bob@gmail.com',
-      'emailVerified':true,
+      'emailVerified':false,
       'displayName':'Bob D\'Smith',
-      'photoURL':'https://lh3.googleusercontent.com/a-/AOh14Gg-GMlUaNPYaSYvzMEjyHW9Q5PAngePLc26LsI4=s96-c','disabled':false,
+      'photoURL':'https://lh3.googleusercontent.com/a-/AOh14Gg-GMlUaNPYaSYvzMEjyHW9Q5PAngePLc26LsI4=s96-c',
+      'disabled':false,
       'metadata':{
         'lastSignInTime':'Fri, 12 Mar 2021 21:04:29 GMT',
         'creationTime':'Tue, 29 Dec 2020 00:08:26 GMT',
@@ -32,40 +84,41 @@ if (import.meta.vitest) {
       },
       'tokensValidAfterTime':'Thu, 18 Mar 2021 08:26:40 GMT','providerData':[{'uid':'101321196686998195781','displayName':'Bob Smith','email':'bob@gmail.com','photoURL':'https://lh3.googleusercontent.com/a-/AOh14Gg-GMlUaNPYaSYvzMEjyHW9Q5PAngePLc26LsI4=s96-c','providerId':'google.com'}]}
   ] as UserRecord[];
+
   test(write_users_insert, () => {
-    expect(write_users_insert(users)).toMatchFileSnapshot('./users.sql');
+    expect(write_users_insert(users)).toMatchFileSnapshot('./users-js.sql');
   });
 }
 
-function user_header() {
-  return `
-instance_id,
-id,
-aud,
-role,
-email,
-email_confirmed_at,
-last_sign_in_at,
-raw_app_meta_data,
-raw_user_meta_data,
-created_at,
-updated_at
-`;
-}
+// function user_header() {
+//   return `
+// instance_id,
+// id,
+// aud,
+// role,
+// email,
+// email_confirmed_at,
+// last_sign_in_at,
+// raw_app_meta_data,
+// raw_user_meta_data,
+// created_at,
+// updated_at
+// `;
+// }
 
-function create_user_sql_row(user: UserRecord) {
-  return `('00000000-0000-0000-0000-000000000000', /* instance_id */
-  uuid_generate_v4(), /* id */
-  'authenticated', /* aud character varying(255),*/
-  'authenticated', /* role character varying(255),*/
-  '${user.email}', /* email character varying(255),*/
-  ${user.emailVerified ? 'NOW()' : 'null'}, /* email_confirmed_at timestamp with time zone,*/
-  '${convert_utc_string_to_timestamp(user.metadata.lastSignInTime)}', /* last_sign_in_at timestamp with time zone, */
-  '${get_provider_string(user.providerData)}', /* raw_app_meta_data jsonb,*/
-  '${get_firebase_metadata_string(user)}', /* raw_user_meta_data jsonb,*/
-  '${convert_utc_string_to_timestamp(user.metadata.creationTime)}', /* created_at timestamp with time zone, */
-  NOW() /* updated_at timestamp with time zone, */)`;
-}
+// function create_user_sql_row(user: UserRecord) {
+//   return `('00000000-0000-0000-0000-000000000000', /* instance_id */
+//   uuid_generate_v4(), /* id */
+//   'authenticated', /* aud character varying(255),*/
+//   'authenticated', /* role character varying(255),*/
+//   '${user.email}', /* email character varying(255),*/
+//   ${user.emailVerified ? 'NOW()' : 'null'}, /* email_confirmed_at timestamp with time zone,*/
+//   '${convert_utc_string_to_timestamp(user.metadata.lastSignInTime)}', /* last_sign_in_at timestamp with time zone, */
+//   '${get_provider_string(user.providerData)}', /* raw_app_meta_data jsonb,*/
+//   '${get_firebase_metadata_string(user)}', /* raw_user_meta_data jsonb,*/
+//   '${convert_utc_string_to_timestamp(user.metadata.creationTime)}', /* created_at timestamp with time zone, */
+//   NOW() /* updated_at timestamp with time zone, */)`;
+// }
 
 function convert_utc_string_to_timestamp(dateString: string) {
   const date = new Date(dateString);
@@ -81,8 +134,8 @@ if (import.meta.vitest) {
   });
 }
 
-function get_provider_string(firebase_providers: UserInfo[]) {
-  const providers = firebase_providers.map(({providerId}) => {
+function get_firebase_app_meta_data({providerData, uid}: UserRecord) {
+  const providers = providerData.map(({providerId}) => {
     if (providerId === 'password')
       return 'email';
     if (providerId === 'google.com')
@@ -90,10 +143,10 @@ function get_provider_string(firebase_providers: UserInfo[]) {
     return 'email';
   })
 
-  return `{"provider": "${providers[0]}","providers":["${providers.join('","')}"]}`;
+  return `{"provider": "${providers[0]}","providers":["${providers.join('","')}"], "fb_uid": "${uid}"}`;
 }
 
-function get_firebase_metadata_string({displayName, photoURL}: UserRecord) {
+function get_firebase_user_meta_data({displayName, photoURL}: UserRecord) {
   const escapedDisplayName = displayName ? escape_apostrophes(displayName) : '';
 
   if (!escapedDisplayName && !photoURL)
