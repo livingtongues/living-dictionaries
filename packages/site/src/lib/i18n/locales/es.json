@@ -318,12 +318,28 @@
     "headword_size": "Tamaño de la palabra principal",
     "font_size": "Tamaño de la fuente"
   },
-  "import": {
+  "import_page": {
     "import": "Importar",
     "template_link": "Enlace a la plantilla",
     "instructions_1": "Si ya tiene datos lingüísticos que desea importar a su diccionario, siga los pasos a continuación.",
     "instructions_2": "Haga clic en el botón azul \"Enlace a plantilla\" a continuación. Descargue la plantilla como un archivo de Excel, o cree una copia en Google Docs. Edite la plantilla de acuerdo con las necesidades de su proyecto. Copie y pegue sus datos en la hoja de cálculo.",
     "instructions_3": "Use el \"Contáctenos\" a continuación para contactarnos. Háganos saber que tiene una nueva hoja de cálculo que está lista para la importación. Háganos cualquier pregunta que tenga. Le responderemos por correo electrónico, y luego puede enviarnos su archivo.",
     "instructions_4": "Para enviarnos datos exportados desde softwares de diccionarios como Flex, Lexique Pro, Shobox, use el botón \"Contáctenos\" a continuación y cuéntenos los detalles de su proyecto."
+  },
+  "history": {
+    "history": "Historial",
+    "entry": "Entrada",
+    "editor": "Editor",
+    "action": "Acción",
+    "field": "Campo",
+    "date": "Fecha",
+    "old_value": "Valor anterior",
+    "new_value": "Nuevo valor",
+    "created": "Creado",
+    "edited": "Editado",
+    "deleted": "Eliminado",
+    "history_search": "Buscar entradas, editores, campos y valores",
+    "download_history": "Descargar historia como CSV",
+    "empty": "No hay historial todavía"
   }
 }
