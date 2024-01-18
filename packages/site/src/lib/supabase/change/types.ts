@@ -1,4 +1,4 @@
-import type { Database } from '../types';
+import type { Database } from '../database.types';
 
 export interface ChangeEntryRequestBody {
   auth_token: string;

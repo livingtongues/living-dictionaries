@@ -2,6 +2,7 @@ import { program } from 'commander';
 import { initializeApp, cert } from 'firebase-admin/app';
 import { FieldValue, getFirestore } from 'firebase-admin/firestore';
 import { getStorage } from 'firebase-admin/storage';
+import { getAuth } from 'firebase-admin/auth';
 // import serviceAccountDev from './service-account-dev.json';
 // import serviceAccountProd from './service-account-prod.json';
 import { serviceAccountDev, serviceAccountProd } from './service-accounts';
@@ -29,6 +30,7 @@ export const db = getFirestore();
 // db.settings(settings);
 export const timestamp = FieldValue.serverTimestamp();
 export const storage = getStorage();
+export const auth = getAuth();
 
 ///LOGGER///
 import fs from 'fs';

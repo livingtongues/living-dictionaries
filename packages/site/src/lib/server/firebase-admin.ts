@@ -32,7 +32,6 @@ export function getDb(): Firestore {
   if (db)
     return db;
 
-
   db = getFirestore(getFirebaseAdminApp());
   return db;
 }

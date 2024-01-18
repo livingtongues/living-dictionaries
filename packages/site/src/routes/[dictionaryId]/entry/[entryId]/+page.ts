@@ -42,17 +42,17 @@ export const load = async ({ params, depends }) => {
 
   const supabase = getSupabase()
 
-  const { data: supaEntry, error: supaError } = await supabase
+  const { data, error: supaError } = await supabase
     .from('entries_view')
-    .select('*')
+    .select()
     .eq('id', params.entryId)
-    .single()
 
+  const supaEntry = data?.[0]  as any as SupaEntry
   console.info({ supaEntry, supaError })
 
   return {
     initialEntry: entryStore,
-    supaEntry: supaEntry as any as SupaEntry,
+    supaEntry,
     admin,
     algoliaQueryParams,
     canEdit,

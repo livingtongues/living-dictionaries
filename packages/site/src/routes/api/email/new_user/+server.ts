@@ -7,6 +7,7 @@ import type { RequestHandler } from './$types';
 import type { IUser } from '@living-dictionaries/types';
 import { getAdminRecipients } from '../addresses';
 import newUserWelcome from '../html/newUserWelcome';
+import { save_user_to_supabase } from './save-user-to-supabase';
 
 export interface NewUserRequestBody {
   auth_token: string;
@@ -59,6 +60,9 @@ https://livingdictionaries.app`,
       'content-type': 'application/json'
     }
   });
+
+  const supabase_user_id = await save_user_to_supabase(user);
+  console.info({supabase_user_id})
 
   return json('success');
 };

@@ -35,7 +35,7 @@ export const POST: RequestHandler = async ({ request }) => {
     const adminSupabase = getAdminSupabaseClient();
     const { data, error: insertError } = await adminSupabase.from('entry_updates').insert([
       {
-        user_id: decodedToken.uid,
+        user_id: decodedToken.email, // until Firebase migration is finished, Supabase DB trigger function will lookup matching supabase user id and replace this field with the user id
         dictionary_id,
         entry_id,
         id,
