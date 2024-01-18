@@ -47,7 +47,7 @@
     "d3-dsv": "^3.0.1",
     "file-saver": "^2.0.5",
     "firebase": "^9.21.0",
-    "firebase-admin": "^11.10.1",
+    "firebase-admin": "^12.0.0",
     "instantsearch.js": "^4.33.2",
     "jszip": "^3.7.1",
     "kitbook": "1.0.0-beta.10",

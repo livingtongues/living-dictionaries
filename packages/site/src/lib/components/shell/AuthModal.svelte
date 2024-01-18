@@ -11,6 +11,7 @@
   import { apiFetch } from '$lib/client/apiFetch';
   import type { NewUserRequestBody } from '../../../routes/api/email/new_user/+server';
   import { page } from '$app/stores';
+  import { ResponseCodes } from '$lib/constants';
 
   let languageCode: LanguageCode = 'en';
 
@@ -39,7 +40,7 @@
             displayName: detail.user.displayName || detail.user.email,
           },
         });
-        if (response.status !== 200) {
+        if (response.status !== ResponseCodes.OK) {
           const body = await response.json();
           throw new Error(body.message);
         }
