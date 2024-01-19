@@ -4,10 +4,10 @@ CREATE TABLE imports (
   dictionary_id text NOT NULL, -- would reference dictionaries table
   entry_id text NOT NULL, -- would reference entries table
   created_at timestamp with time zone DEFAULT now(),
-  value jsonb not null, -- if you dump data here, it gives us a record, we can have a supabase function (deno/node) triggered that will then process the data and create rows in appropriate tables throughout database.
+  -- value jsonb not null, -- if you dump data here, it gives us a record, we can have a supabase function (deno/node) triggered that will then process the data and create rows in appropriate tables throughout database.
 );
 
-ALTER TABLE playlists_youtubes ENABLE ROW LEVEL SECURITY;
+ALTER TABLE imports ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY imports_manager_policy
 ON imports
