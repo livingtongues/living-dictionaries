@@ -1,12 +1,26 @@
 import type { ActualDatabaseEntry } from '@living-dictionaries/types';
 import type { Timestamp } from 'firebase/firestore';
+import { apiFetch } from '@living-dictionaries/site/src/lib/client/apiFetch.js';
+import { ResponseCodes } from '@living-dictionaries/site/src/lib/constants.js';
+import type { ChangeEntryRequestBody } from '@living-dictionaries/site/src/lib/supabase/change/types.js';
+
+interface Standart {
+  row: Record<string, string>;
+  dateStamp?: number;
+  // eslint-disable-next-line no-undef
+  timestamp?: FirebaseFirestore.FieldValue;
+}
+
+interface SenseData {
+  entry_id: string;
+  dictionary_id: string;
+}
 
 export function convertJsonRowToEntryFormat(
-  row: Record<string, string>,
-  dateStamp?: number,
-  // eslint-disable-next-line no-undef
-  timestamp?: FirebaseFirestore.FieldValue
+  standart: Standart,
+  senseData?: SenseData
 ): ActualDatabaseEntry {
+  const { row, dateStamp, timestamp } = standart;
   const entry: ActualDatabaseEntry = { lx: row.lexeme, gl: {}, xs: {} };
 
   if (row.phonetic) entry.ph = row.phonetic;
@@ -50,6 +64,16 @@ export function convertJsonRowToEntryFormat(
       entry.xs[language] = value;
     }
 
+    if (senseData) {
+      const { entry_id, dictionary_id } = senseData;
+      const sense_regex = /^s\d+_/;
+      if (sense_regex.test(key)) {
+        console.log('Row Key:')
+        console.log(row[key])
+        // addAdditionalSensesToSupabase(entry_id, dictionary_id, row[key]);
+      }
+    }
+
     const semanticDomain_FOLLOWED_BY_OPTIONAL_DIGIT = /^semanticDomain\d*$/; // semanticDomain, semanticDomain2, semanticDomain<#>, but not semanticDomain_custom
     if (semanticDomain_FOLLOWED_BY_OPTIONAL_DIGIT.test(key)) {
       if (!entry.sdn) entry.sdn = [];
@@ -73,4 +97,28 @@ export function convertJsonRowToEntryFormat(
 
 export function returnArrayFromCommaSeparatedItems(string: string): string[] {
   return string?.split(',').map((item) => item.trim()) || [];
+}
+
+export async function addAdditionalSensesToSupabase(entry_id: string, dictionary_id: string, value: any) {
+  try {
+    const response = await apiFetch<ChangeEntryRequestBody>('/api/db/change/entry', {
+      id: crypto.randomUUID(),
+      dictionary_id,
+      entry_id,
+      table: 'senses',
+      column: 'glosses',
+      row: entry_id,
+      new_value: value,
+      old_value: '',
+      timestamp: new Date().toISOString(),
+    });
+
+    if (response.status !== ResponseCodes.OK) {
+      const body = await response.json();
+      throw new Error(body.message);
+    }
+  } catch (err) {
+    alert(err);
+    console.error(err);
+  }
 }

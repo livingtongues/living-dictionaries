@@ -51,7 +51,8 @@ export async function importEntriesToFirebase(
     }
 
     const entryId = colRef.doc().id;
-    const entry = convertJsonRowToEntryFormat(row, dateStamp, timestamp);
+    const sense_regex = /^s\d+_/;
+    const entry = Object.keys(row).some(key => sense_regex.test(key)) ? convertJsonRowToEntryFormat({row, dateStamp, timestamp}, {entry_id: entryId, dictionary_id: dictionaryId}) : convertJsonRowToEntryFormat({row, dateStamp, timestamp});
 
     if (row.photoFile) {
       const pf = await uploadImageFile(row.photoFile, entryId, dictionaryId, dry);
@@ -89,11 +90,6 @@ export async function importEntriesToFirebase(
       }
     }
 
-    const sense_regex = /^s\d+_/;
-    if (Object.keys(row).some(key => sense_regex.test(key)))
-      addAdditionalSensesToSupabase(entryId, dictionaryId, entry);
-
-
     entries.push(entry);
     batch.create(colRef.doc(entryId), entry);
     batchCount++;
@@ -102,11 +98,6 @@ export async function importEntriesToFirebase(
   console.log(`Committing final batch of entries ending with: ${entryCount}`);
   if (!dry) await batch.commit();
   return entries;
-}
-
-
-export async function addAdditionalSensesToSupabase(entry_id: string, dictionary_id: string, entry: any) {
-  throw new Error('not implemented')
 }
 
 // Current flow:
