@@ -2,12 +2,10 @@ import { apiFetch } from '$lib/client/apiFetch';
 import { authState } from 'sveltefirets';
 import { get } from 'svelte/store';
 import { page } from '$app/stores';
-import type { ChangeEntryRequestBody } from './types';
+import type { ChangeEntryRequestBody, SenseColumns } from './types';
 import { invalidate } from '$app/navigation';
 import { ENTRY_UPDATED_LOAD_TRIGGER } from '$lib/dbOperations';
 import { ResponseCodes } from '$lib/constants';
-
-type SenseColumns = 'glosses' | 'parts_of_speech' | 'semantic_domains' | 'write_in_semantic_domains' | 'noun_class' | 'definition_english_deprecated' | 'deleted'
 
 export async function updateSense({new_value, old_value, entry_id, column, sense_id }: {new_value: string, old_value?: string, entry_id: string, column: SenseColumns, sense_id: string }) {
   try {

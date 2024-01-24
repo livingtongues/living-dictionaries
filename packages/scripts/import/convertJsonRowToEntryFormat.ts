@@ -1,8 +1,9 @@
 import type { ActualDatabaseEntry } from '@living-dictionaries/types';
 import type { Timestamp } from 'firebase/firestore';
-import { apiFetch } from '@living-dictionaries/site/src/lib/client/apiFetch.js';
 import { ResponseCodes } from '@living-dictionaries/site/src/lib/constants.js';
-import type { ChangeEntryRequestBody } from '@living-dictionaries/site/src/lib/supabase/change/types.js';
+import type { SenseColumns } from '@living-dictionaries/site/src/lib/supabase/change/types.js';
+import { randomUUID } from 'crypto';
+import { getAdminSupabaseClient } from '@living-dictionaries/site/src/lib/supabase/admin';
 
 interface Standart {
   row: Record<string, string>;
@@ -68,9 +69,8 @@ export function convertJsonRowToEntryFormat(
       const { entry_id, dictionary_id } = senseData;
       const sense_regex = /^s\d+_/;
       if (sense_regex.test(key)) {
-        console.log('Row Key:')
-        console.log(row[key])
-        // addAdditionalSensesToSupabase(entry_id, dictionary_id, row[key]);
+        if (key.includes('_gloss'))
+          addAdditionalSensesToSupabase(entry_id, dictionary_id, row[key], 'glosses');
       }
     }
 
@@ -99,26 +99,30 @@ export function returnArrayFromCommaSeparatedItems(string: string): string[] {
   return string?.split(',').map((item) => item.trim()) || [];
 }
 
-export async function addAdditionalSensesToSupabase(entry_id: string, dictionary_id: string, value: any) {
+export async function addAdditionalSensesToSupabase(entry_id: string, dictionary_id: string, value: any, column: SenseColumns) {
   try {
-    const response = await apiFetch<ChangeEntryRequestBody>('/api/db/change/entry', {
-      id: crypto.randomUUID(),
-      dictionary_id,
-      entry_id,
-      table: 'senses',
-      column: 'glosses',
-      row: entry_id,
-      new_value: value,
-      old_value: '',
-      timestamp: new Date().toISOString(),
-    });
+    const adminSupabase = getAdminSupabaseClient();
+    const { data, error: insertError } = await adminSupabase.from('entry_updates').insert([
+      {
+        user_id: 'diego@livingtongues.org',
+        id: randomUUID(),
+        dictionary_id,
+        entry_id,
+        table: 'senses',
+        column,
+        row: entry_id,
+        new_value: value,
+        old_value: '',
+        timestamp: new Date().toISOString(),
+      }
+    ]).select();
 
-    if (response.status !== ResponseCodes.OK) {
-      const body = await response.json();
-      throw new Error(body.message);
-    }
-  } catch (err) {
-    alert(err);
+    if (insertError)
+      throw new Error(insertError.message);
+
+    return data;
+  }
+  catch (err) {
     console.error(err);
   }
 }

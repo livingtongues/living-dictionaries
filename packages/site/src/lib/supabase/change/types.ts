@@ -2,6 +2,7 @@ import type { Database } from '../database.types';
 
 export interface ChangeEntryRequestBody {
   auth_token?: string;
+  email?: string;
   id: string; // id of the change, a uuidv4 created on client to make things idempotent
   dictionary_id: string;
   entry_id: string;
@@ -12,3 +13,6 @@ export interface ChangeEntryRequestBody {
   old_value: string | undefined;
   timestamp: string;
 }
+
+export type SenseColumns = 'glosses' | 'parts_of_speech' | 'semantic_domains' | 'write_in_semantic_domains' | 'noun_class' | 'definition_english_deprecated' | 'deleted'
+

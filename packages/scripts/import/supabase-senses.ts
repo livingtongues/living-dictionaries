@@ -51,6 +51,7 @@ export async function importEntriesToFirebase(
     }
 
     const entryId = colRef.doc().id;
+    // It's now duplicated
     const sense_regex = /^s\d+_/;
     const entry = Object.keys(row).some(key => sense_regex.test(key)) ? convertJsonRowToEntryFormat({row, dateStamp, timestamp}, {entry_id: entryId, dictionary_id: dictionaryId}) : convertJsonRowToEntryFormat({row, dateStamp, timestamp});
 
