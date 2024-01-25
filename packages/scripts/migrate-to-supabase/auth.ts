@@ -1,6 +1,6 @@
 import { UserRecord } from 'firebase-admin/auth';
-import { auth } from '../config'
-import { executeQuery } from './supabase-db';
+import { auth } from '../config-firebase'
+import { executeQuery } from '../config-supabase';
 import { write_users_insert } from './write-users-insert';
 
 migrate_users()

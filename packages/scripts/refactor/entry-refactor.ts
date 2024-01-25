@@ -1,5 +1,5 @@
 import { ActualDatabaseEntry } from '@living-dictionaries/types';
-import { db } from '../config';
+import { db } from '../config-firebase';
 import { program } from 'commander';
 import { reverse_semantic_domains_mapping } from './reverse-semantic-domains-mapping';
 import { turn_dialect_strings_to_arrays } from './turn-dialects-to-arrays';

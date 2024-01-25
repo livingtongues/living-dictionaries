@@ -1,4 +1,4 @@
-import { db } from '../config';
+import { db } from '../config-firebase';
 import { updateIndex } from './algolia';
 import { ActualDatabaseEntry } from '@living-dictionaries/types';
 

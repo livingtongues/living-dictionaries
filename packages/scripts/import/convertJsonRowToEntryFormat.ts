@@ -1,9 +1,8 @@
 import type { ActualDatabaseEntry } from '@living-dictionaries/types';
 import type { Timestamp } from 'firebase/firestore';
-import { ResponseCodes } from '@living-dictionaries/site/src/lib/constants.js';
 import type { SenseColumns } from '@living-dictionaries/site/src/lib/supabase/change/types.js';
 import { randomUUID } from 'crypto';
-import { getAdminSupabaseClient } from '@living-dictionaries/site/src/lib/supabase/admin';
+import { supabase } from '../config-supabase';
 
 interface Standart {
   row: Record<string, string>;
@@ -101,8 +100,7 @@ export function returnArrayFromCommaSeparatedItems(string: string): string[] {
 
 export async function addAdditionalSensesToSupabase(entry_id: string, dictionary_id: string, value: any, column: SenseColumns) {
   try {
-    const adminSupabase = getAdminSupabaseClient();
-    const { data, error: insertError } = await adminSupabase.from('entry_updates').insert([
+    const { data, error: insertError } = await supabase.from('entry_updates').insert([
       {
         user_id: 'diego@livingtongues.org',
         id: randomUUID(),

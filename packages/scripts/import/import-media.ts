@@ -3,7 +3,7 @@ import { fileURLToPath } from 'url';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 import * as fs from 'fs';
-import { environment, storage, timestamp } from '../config.js';
+import { environment, storage, timestamp } from '../config-firebase.js';
 import { getImageServingUrl } from './getImageServingUrl.js';
 import { GoalDatabasePhoto } from '@living-dictionaries/types/photo.interface.js';
 

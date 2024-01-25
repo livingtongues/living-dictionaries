@@ -1,5 +1,5 @@
 import type { ActualDatabaseEntry } from '@living-dictionaries/types';
-import { db, timestamp, environment } from '../config.js';
+import { db, timestamp, environment } from '../config-firebase.js';
 import { uploadAudioFile, uploadImageFile } from './import-media.js';
 import { readFileSync } from 'fs';
 import { parseCSVFrom } from './parse-csv.js';

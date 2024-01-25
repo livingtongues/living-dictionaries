@@ -1,5 +1,5 @@
 import * as fs from 'fs-extra';
-import { environment } from './config';
+import { environment } from './config-firebase';
 import * as xlsx from 'xlsx';
 import * as csv from 'csvtojson';
 import { importSpreadsheetToFirebase } from './import-spreadsheet-to-firebase';
