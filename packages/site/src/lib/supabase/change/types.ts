@@ -1,8 +1,7 @@
 import type { Database } from '../database.types';
 
 export interface ChangeEntryRequestBody {
-  auth_token?: string;
-  email?: string;
+  auth_token: string;
   id: string; // id of the change, a uuidv4 created on client to make things idempotent
   dictionary_id: string;
   entry_id: string;

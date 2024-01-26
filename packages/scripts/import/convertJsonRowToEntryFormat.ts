@@ -2,9 +2,9 @@ import type { ActualDatabaseEntry } from '@living-dictionaries/types';
 import type { Timestamp } from 'firebase/firestore';
 import type { SenseColumns } from '@living-dictionaries/site/src/lib/supabase/change/types.js';
 import { randomUUID } from 'crypto';
-import { supabase, fetchData } from '../config-supabase';
+import { supabase } from '../config-supabase';
 
-interface Standart {
+interface StandartData {
   row: Record<string, string>;
   dateStamp?: number;
   // eslint-disable-next-line no-undef
@@ -17,7 +17,7 @@ interface SenseData {
 }
 
 export function convertJsonRowToEntryFormat(
-  standart: Standart,
+  standart: StandartData,
   senseData?: SenseData
 ): ActualDatabaseEntry {
   const { row, dateStamp, timestamp } = standart;
@@ -69,8 +69,7 @@ export function convertJsonRowToEntryFormat(
       const sense_regex = /^s\d+_/;
       if (sense_regex.test(key)) {
         if (key.includes('_gloss'))
-          // addAdditionalSensesToSupabase(entry_id, dictionary_id, row[key], 'glosses');
-          fetchData()
+          addAdditionalSensesToSupabase(entry_id, dictionary_id, row[key], 'glosses');
       }
     }
 
@@ -101,21 +100,22 @@ export function returnArrayFromCommaSeparatedItems(string: string): string[] {
 
 export async function addAdditionalSensesToSupabase(entry_id: string, dictionary_id: string, value: any, column: SenseColumns) {
   try {
+    const sense_id = randomUUID();
     const { data, error } = await supabase
       .from('entry_updates')
       .insert([
         {
           user_id: 'diego@livingtongues.org',
-          id: randomUUID(),
+          id: sense_id,
           dictionary_id,
           entry_id,
           table: 'senses',
           column,
-          row: randomUUID(),
-          new_value: value,
+          row: sense_id,
+          new_value: JSON.stringify(value),
         },
       ])
-      .single();
+      .select();
 
     if (error) {
       console.error('Error inserting into Supabase: ', error);
@@ -126,12 +126,4 @@ export async function addAdditionalSensesToSupabase(entry_id: string, dictionary
   } catch (error) {
     console.error('Error: ', error);
   }
-  const { data, error } = await supabase
-    .from('entry_updates')
-    .select('*');
-
-  console.log('Data:');
-  console.log(data);
-  console.log('Error:');
-  console.log(error);
 }

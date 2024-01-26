@@ -5,7 +5,6 @@
   "type": "module",
   "main": "index.ts",
   "scripts": {
-    "hello": "tsx config-supabase.ts",
     "migrate-users": "tsx migrate-to-supabase/auth.ts",
     "countAllEntries": "tsx countAllEntries.ts",
     "entryRefactor": "tsx refactor/entry-refactor.ts",
