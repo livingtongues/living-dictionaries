@@ -49,7 +49,7 @@ export function convertJsonRowToEntryFormat(
 
     // gloss fields are labeled using bcp47 language codes followed by '_gloss' (e.g. es_gloss, tpi_gloss)
     if (key.includes('_gloss')) {
-      const language = key.split('_gloss')[0];
+      const [language] = key.split('_gloss');
       entry.gl[language] = value;
     }
 
@@ -60,7 +60,7 @@ export function convertJsonRowToEntryFormat(
 
     // example sentence fields are codes followed by '_exampleSentence'
     if (key.includes('_exampleSentence')) {
-      const language = key.split('_exampleSentence')[0];
+      const [language] = key.split('_exampleSentence');
       entry.xs[language] = value;
     }
 
