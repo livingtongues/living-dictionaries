@@ -68,8 +68,14 @@ export function convertJsonRowToEntryFormat(
       const { entry_id, dictionary_id } = senseData;
       const sense_regex = /^s\d+_/;
       if (sense_regex.test(key)) {
-        if (key.includes('_gloss'))
-          addAdditionalSensesToSupabase(entry_id, dictionary_id, row[key], 'glosses');
+        if (key.includes('_gloss')) {
+          let language_key = key.replace(sense_regex, '');
+          language_key = language_key.replace('_gloss', '');
+          const glossObject = {
+            [language_key]: row[key]
+          };
+          addAdditionalSensesToSupabase(entry_id, dictionary_id, glossObject, 'glosses');
+        }
       }
     }
 
@@ -112,7 +118,7 @@ export async function addAdditionalSensesToSupabase(entry_id: string, dictionary
           table: 'senses',
           column,
           row: sense_id,
-          new_value: JSON.stringify(value),
+          new_value: value,
         },
       ])
       .select();
