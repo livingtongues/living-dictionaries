@@ -22,6 +22,7 @@ export function convertJsonRowToEntryFormat(
 ): ActualDatabaseEntry {
   const { row, dateStamp, timestamp } = standart;
   const entry: ActualDatabaseEntry = { lx: row.lexeme, gl: {}, xs: {} };
+  const sense_regex = /^s\d+_/;
 
   if (row.phonetic) entry.ph = row.phonetic;
   if (row.morphology) entry.mr = row.morphology;
@@ -48,7 +49,7 @@ export function convertJsonRowToEntryFormat(
     if (!value) continue;
 
     // gloss fields are labeled using bcp47 language codes followed by '_gloss' (e.g. es_gloss, tpi_gloss)
-    if (key.includes('_gloss')) {
+    if (key.includes('_gloss') && !sense_regex.test(key)) {
       const [language] = key.split('_gloss');
       entry.gl[language] = value;
     }
@@ -66,9 +67,9 @@ export function convertJsonRowToEntryFormat(
 
     if (senseData) {
       const { entry_id, dictionary_id } = senseData;
-      const sense_regex = /^s\d+_/;
       if (sense_regex.test(key)) {
         if (key.includes('_gloss')) {
+          //TODO create a loop to get all the glosses in a single sense and add them  to the glossObject
           let language_key = key.replace(sense_regex, '');
           language_key = language_key.replace('_gloss', '');
           const glossObject = {
