@@ -1,6 +1,7 @@
 import type { ActualDatabaseEntry } from '@living-dictionaries/types';
 import type { Timestamp } from 'firebase/firestore';
 import type { SenseColumns } from '@living-dictionaries/site/src/lib/supabase/change/types.js';
+import { stringifyArray } from '@living-dictionaries/site/src/lib/supabase/stringifyArray';
 import { randomUUID } from 'crypto';
 import { supabase } from '../config-supabase';
 
@@ -23,7 +24,7 @@ export function convertJsonRowToEntryFormat(
   const { row, dateStamp, timestamp } = standart;
   const entry: ActualDatabaseEntry = { lx: row.lexeme, gl: {}, xs: {} };
   const sense_regex = /^s\d+_/;
-  let glossObject:Record<string, any> = {};
+  let glossObject:Record<string, string> = {};
   let row_id = randomUUID();
   let old_key = 2;
 
@@ -85,6 +86,15 @@ export function convertJsonRowToEntryFormat(
           }
           addAdditionalSensesToSupabase(entry_id, dictionary_id, glossObject, 'glosses', row_id);
         }
+
+        if (key.includes('_partOfSpeech'))
+          addAdditionalSensesToSupabase(entry_id, dictionary_id, stringifyArray([row[key]]), 'parts_of_speech', row_id);
+
+        if (key.includes('_semanticDomains'))
+          addAdditionalSensesToSupabase(entry_id, dictionary_id, stringifyArray([row[key]]), 'semantic_domains', row_id);
+
+        if (key.includes('_nounClass'))
+          addAdditionalSensesToSupabase(entry_id, dictionary_id, row[key], 'noun_class', row_id);
       }
     }
 
