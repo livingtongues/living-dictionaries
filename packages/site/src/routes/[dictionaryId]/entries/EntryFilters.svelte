@@ -48,11 +48,25 @@
           label={$page.data.t('entry.has_exists') +
             ' ' +
             $page.data.t('entry.image')} />
+        <ToggleRefinement
+          {search}
+          attribute="NoImage"
+          on={false}
+          label={'No' +
+            ' ' +
+            $page.data.t('entry.image')} />
       {/if}
       <ToggleRefinement
         {search}
         attribute="hasAudio"
         label={$page.data.t('entry.has_exists') +
+          ' ' +
+          $page.data.t('entry_field.audio')} />
+      <ToggleRefinement
+        {search}
+        attribute="NoAudio"
+        on={false}
+        label={'No' +
           ' ' +
           $page.data.t('entry_field.audio')} />
       <ToggleRefinement
