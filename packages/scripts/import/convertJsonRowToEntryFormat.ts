@@ -23,6 +23,9 @@ export function convertJsonRowToEntryFormat(
   const { row, dateStamp, timestamp } = standart;
   const entry: ActualDatabaseEntry = { lx: row.lexeme, gl: {}, xs: {} };
   const sense_regex = /^s\d+_/;
+  let glossObject:Record<string, any> = {};
+  let row_id = randomUUID();
+  let old_key = 2;
 
   if (row.phonetic) entry.ph = row.phonetic;
   if (row.morphology) entry.mr = row.morphology;
@@ -69,13 +72,18 @@ export function convertJsonRowToEntryFormat(
       const { entry_id, dictionary_id } = senseData;
       if (sense_regex.test(key)) {
         if (key.includes('_gloss')) {
-          //TODO create a loop to get all the glosses in a single sense and add them  to the glossObject
           let language_key = key.replace(sense_regex, '');
           language_key = language_key.replace('_gloss', '');
-          const glossObject = {
-            [language_key]: row[key]
-          };
-          addAdditionalSensesToSupabase(entry_id, dictionary_id, glossObject, 'glosses');
+
+          if (key === `s${old_key}_${language_key}_gloss`) {
+            glossObject[language_key] = row[key];
+          } else {
+            old_key++;
+            row_id = randomUUID();
+            glossObject = {};
+            glossObject[language_key] = row[key];
+          }
+          addAdditionalSensesToSupabase(entry_id, dictionary_id, glossObject, 'glosses', row_id);
         }
       }
     }
@@ -105,20 +113,19 @@ export function returnArrayFromCommaSeparatedItems(string: string): string[] {
   return string?.split(',').map((item) => item.trim()) || [];
 }
 
-export async function addAdditionalSensesToSupabase(entry_id: string, dictionary_id: string, value: any, column: SenseColumns) {
+export async function addAdditionalSensesToSupabase(entry_id: string, dictionary_id: string, value: any, column: SenseColumns, row: string) {
   try {
-    const sense_id = randomUUID();
     const { data, error } = await supabase
       .from('entry_updates')
       .insert([
         {
           user_id: 'diego@livingtongues.org',
-          id: sense_id,
+          id: randomUUID(),
           dictionary_id,
           entry_id,
           table: 'senses',
           column,
-          row: sense_id,
+          row,
           new_value: value,
         },
       ])
