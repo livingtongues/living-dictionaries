@@ -8,7 +8,9 @@ export interface LDAlgoliaFields {
   _highlightResult?: any;
 
   hasImage?: boolean;
+  noAudio?: boolean;
   hasAudio?: boolean;
+  noImage?: boolean
   hasVideo?: boolean;
   hasSpeaker?: boolean;
   hasSemanticDomain?: boolean;
