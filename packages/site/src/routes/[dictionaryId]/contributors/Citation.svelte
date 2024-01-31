@@ -52,7 +52,7 @@
   <div dir="ltr">
     {citation?.citation ? citation.citation + ' ' : ''}
     {new Date().getFullYear()}.
-    <span>{$page.data.t('dictionary.full_title', { values: { dictionary_name: dictionary.name }})}</span>
+    <span>{$page.data.t('dictionary.full_title', { values: { dictionary_name: dictionary.name }})}.</span>
     Living Tongues Institute for Endangered Languages. https://livingdictionaries.app/{dictionary.id}
   </div>
 </Doc>
