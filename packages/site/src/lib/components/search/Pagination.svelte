@@ -3,6 +3,7 @@
   import { connectPagination } from 'instantsearch.js/es/connectors';
   import { onMount } from 'svelte';
   import { canEdit } from '$lib/stores';
+  import { Button } from 'svelte-pieces';
 
   export let search: InstantSearch;
   export let showAdd = true;
@@ -12,6 +13,7 @@
   let isFirstPage: boolean;
   let isLastPage: boolean;
   let refine: (page: number) => void;
+  let goToPage: string;
 
   onMount(() => {
     const customPagination = connectPagination((params) => {
@@ -79,6 +81,23 @@
       class="hidden sm:block rounded py-2 px-3 mr-1 text-sm leading-5 font-medium text-gray-500 hover:text-gray-700 hover:bg-gray-100 focus:text-gray-800 focus:outline-none transition ease-in-out duration-150">
       <i class="far fa-angle-double-right rtl-x-flip" /></button>
   {/if}
+
+  <form on:submit={() => refine(parseInt(goToPage) - 1)} class="flex">
+    <input
+      bind:value={goToPage}
+      type="text"
+      id="name"
+      name="name"
+      maxlength="4"
+      size="1"
+      class="form-input w-full" />
+    <Button
+      type="submit"
+      form="filled"
+      size="sm">
+      Go to
+    </Button>
+  </form>
 
   <div class="flex-grow" />
 
