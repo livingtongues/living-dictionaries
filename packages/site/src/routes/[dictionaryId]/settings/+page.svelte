@@ -108,7 +108,7 @@
   <div class="mb-5" />
 
   <div class="text-sm font-medium text-gray-700 mb-2">
-    Featured Image
+    {$page.data.t('settings.featured_image')}
   </div>
   {#if $dictionary.featuredImage}
     <Image
@@ -119,7 +119,7 @@
       on:deleteImage={async () => await updateDictionary({ featuredImage: null })} />
   {:else}
     <ImageDropZone let:file class="p-3 rounded">
-      <span slot="label">Upload</span>
+      <span slot="label">{$page.data.t('misc.upload')}</span>
       {#if file}
         {#await import('$lib/components/image/UploadImage.svelte') then { default: UploadImage }}
           <div class="flex flex-col min-h-100px">
