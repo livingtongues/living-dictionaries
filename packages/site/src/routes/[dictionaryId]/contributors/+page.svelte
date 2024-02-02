@@ -189,6 +189,10 @@
   </Button>
 {/if}
 
+<hr style="margin: 20px 0;" />
+<!-- Add Partnership component -->
+
+
 <!-- Not using contributors.request_to_add_manager -->
 
 <hr class="my-3" />

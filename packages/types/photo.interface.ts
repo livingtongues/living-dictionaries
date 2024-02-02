@@ -32,3 +32,7 @@ interface DeprecatedPhoto {
 export interface DictionaryPhoto extends Omit<ExpandedPhoto, 'timestamp'> {
   timestamp?: Date | Timestamp;
 }
+
+export interface PartnerPhoto extends Omit<ExpandedPhoto, 'timestamp'> {
+  timestamp?: Date | Timestamp;
+}
