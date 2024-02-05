@@ -10,6 +10,7 @@
   import ContributorInvitationStatus from '$lib/components/contributors/ContributorInvitationStatus.svelte';
   import Citation from './Citation.svelte';
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte';
+  import Partnership from './Partnership.svelte';
 
   let helperType: IHelper[];
   let inviteType: IInvite[];
@@ -191,6 +192,7 @@
 
 <hr style="margin: 20px 0;" />
 <!-- Add Partnership component -->
+<Partnership dictionary={$dictionary} />
 
 
 <!-- Not using contributors.request_to_add_manager -->
