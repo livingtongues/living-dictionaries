@@ -1,14 +1,22 @@
 <script lang="ts">
   import { page } from '$app/stores';
-  import { Doc, set } from 'sveltefirets';
+  import { Doc, set, getCollection } from 'sveltefirets';
   import { Button, Form } from 'svelte-pieces';
-  import type { ICitation, IDictionary } from '@living-dictionaries/types';
+  import type { ICitation, IDictionary, IPartnership } from '@living-dictionaries/types';
+  import { browser } from '$app/environment';
 
   export let dictionary: IDictionary;
   export let isManager = false;
 
   const citationType: ICitation = { citation: '' };
+  let partners: IPartnership[];
   let value = '';
+
+  $: if (browser) {
+    getCollection<IPartnership>(`dictionaries/${dictionary.id}/partnerships`).then(
+      (partnerships) => (partners = partnerships)
+    );
+  }
 </script>
 
 <Doc
@@ -53,6 +61,6 @@
     {citation?.citation ? citation.citation + ' ' : ''}
     {new Date().getFullYear()}.
     <span>{$page.data.t('dictionary.full_title', { values: { dictionary_name: dictionary.name }})}.</span>
-    Living Tongues Institute for Endangered Languages. https://livingdictionaries.app/{dictionary.id}
+    Living Tongues Institute for Endangered Languages{partners ? ' & ' + partners.map(partner => partner.name).join(' & ') : ''}. https://livingdictionaries.app/{dictionary.id}
   </div>
 </Doc>
