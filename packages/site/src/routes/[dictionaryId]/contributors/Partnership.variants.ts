@@ -21,7 +21,7 @@ export const variants: Variant<Component>[] = [
     languages: [],
     props: {
       dictionary,
-      admin: 2
+      isContributor: true
     },
   },
 ]
