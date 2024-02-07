@@ -50,7 +50,7 @@
     "firebase-admin": "^12.0.0",
     "instantsearch.js": "^4.33.2",
     "jszip": "^3.7.1",
-    "kitbook": "1.0.0-beta.10",
+    "kitbook": "1.0.0-beta.12",
     "logrocket": "^2.1.2",
     "lz-string": "^1.4.4",
     "recordrtc": "^5.6.2",
