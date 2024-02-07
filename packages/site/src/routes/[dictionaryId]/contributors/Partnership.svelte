@@ -12,7 +12,7 @@
   let showLivingTonguesLogo = true;
   let partnershipType: IPartnership[];
   const DEFAULT_IMAGE =
-    'https://firebasestorage.googleapis.com/v0/b/talking-dictionaries-alpha.appspot.com/o/livingdictionary%2Fimages%2FNEW_Living_Tongues_logo_with_white_around_it.png?alt=media&token=dceda3c5-85c4-4cec-9f9e-885047653524';
+    'https://firebasestorage.googleapis.com/v0/b/talking-dictionaries-alpha.appspot.com/o/livingdictionary%2Fimages%2FLiving_Tongues_Logo_transparent%20300dpi.png?alt=media&token=c24c8e03-9f2a-44a9-855d-d5f2c0ecf5f3';
 
   function writeIn() {
     const name = prompt($page.data.t('partnership.name'));
