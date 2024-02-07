@@ -4,17 +4,16 @@
   export let go_to_page: (page: number) => void
 
   function center_current(node: HTMLElement, active = false) {
-    if (active) {
+    if (active) center()
+
+    function center() {
       node?.scrollIntoView({ behavior: 'instant', inline: 'center' })
       window.scrollTo({ top: 0 });
     }
 
     return {
       update(active: boolean) {
-        if (active) {
-          node?.scrollIntoView({ behavior: 'instant', inline: 'center' })
-          window.scrollTo({ top: 0 });
-        }
+        if (active) center()
       },
     };
   }
@@ -22,10 +21,11 @@
   const isMac = typeof navigator !== 'undefined' && /Mac|iPod|iPhone|iPad/.test(navigator.userAgent)
 </script>
 
-<div class="flex items-center w-full">
+<div class="flex items-center max-w-full">
   {#if current_page > 2}
     <button
       type="button"
+      class="hidden sm:block"
       on:click={() => go_to_page(1)}>
       <span class="i-fa6-solid-angles-left rtl-x-flip" /></button>
   {/if}
@@ -58,9 +58,12 @@
   {#if current_page < pages - 1}
     <button
       type="button"
+      class="hidden sm:block"
       on:click={() => go_to_page(pages)}>
       <span class="i-fa6-solid-angles-right rtl-x-flip" /></button>
   {/if}
+
+  <slot />
 </div>
 
 <svelte:window

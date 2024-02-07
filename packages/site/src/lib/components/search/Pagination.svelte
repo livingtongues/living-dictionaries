@@ -25,14 +25,18 @@
   }
 </script>
 
-<nav class="sticky md:bottom-0 bg-white pt-2 pb-1 flex items-center print:hidden">
-  <PaginationButtons pages={nbPages} current_page={currentRefinement + 1} {go_to_page} />
+{#if $canEdit && showAdd}
+  {#await import('./AddEntry.svelte') then { default: AddEntry }}
+    <AddEntry class="sticky bottom-3 z-10 md:hidden" />
+  {/await}
+{/if}
 
-  {#if $canEdit && showAdd}
-    <span class="px-3 md:px-0 fixed md:sticky bottom-3 ltr:right-0 rtl:left-0 z-10">
+<nav class="md:sticky md:bottom-0 bg-white pt-2 pb-1 flex items-center print:hidden">
+  <PaginationButtons pages={nbPages} current_page={currentRefinement + 1} {go_to_page}>
+    {#if $canEdit && showAdd}
       {#await import('./AddEntry.svelte') then { default: AddEntry }}
-        <AddEntry />
+        <AddEntry class="ml-3 hidden md:block" />
       {/await}
-    </span>
-  {/if}
+    {/if}
+  </PaginationButtons>
 </nav>
