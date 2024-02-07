@@ -51,7 +51,7 @@
     </div>
     <div class="max-w-[400px]">
       <img
-        class="h-full w-full object-cover cursor-pointer"
+        class="h-full w-full object-cover"
         alt=""
         src={DEFAULT_IMAGE} />
     </div>
