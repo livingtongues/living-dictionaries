@@ -32,7 +32,7 @@
 <svelte:window bind:online />
 
 <ShowHide let:show let:toggle>
-  <Button form="filled" onclick={toggle} disabled={!online}>
+  <Button class="text-nowrap {$$props.class}" form="filled" onclick={toggle} disabled={!online}>
     {#if online}
       <span class="i-fa-solid-plus -mt-1" />
     {:else}
