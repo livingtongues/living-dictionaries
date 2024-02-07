@@ -12,7 +12,7 @@ const dictionary:IDictionary = {
   id: 'Bananga',
   glossLanguages: ['es', 'it'],
 } as IDictionary
-
+//TODO improve variant and create another with partners
 export const variants: Variant<Component>[] = [
   {
     name: 'Situation A',
