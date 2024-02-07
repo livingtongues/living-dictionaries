@@ -1,5 +1,6 @@
 <script lang="ts">
   import { page } from '$app/stores';
+  import { admin } from '$lib/stores';
   import { add, updateOnline, deleteDocumentOnline, Collection } from 'sveltefirets';
   import { Button } from 'svelte-pieces';
   import type { IPartnership, IDictionary } from '@living-dictionaries/types';
@@ -38,7 +39,7 @@
       <div class="text-sm leading-5 font-medium text-gray-900">
         Living Tongues Institute for Endangered Languages
       </div>
-      {#if isContributor}
+      {#if $admin > 1}
         <div class="w-1" />
         <Button
           color="red"
