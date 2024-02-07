@@ -7,7 +7,7 @@
   import ImageDropZone from '$lib/components/image/ImageDropZone.svelte';
 
   export let dictionary: IDictionary;
-  export let admin: number;
+  export let isContributor = false;
   let partnershipType: IPartnership[];
 
   function writeIn() {
@@ -39,7 +39,7 @@
         <div class="text-sm leading-5 font-medium text-gray-900">
           {partner.name}
         </div>
-        {#if admin > 1}
+        {#if isContributor}
           <div class="w-1" />
           <Button
             color="red"
@@ -55,17 +55,17 @@
         {/if}
       </div>
       {#if partner.logo}
-        <div class="aspect-square max-w-[100px]">
+        <div class="max-w-[400px]">
           <Image
             canEdit
-            square={300}
+            width={400}
             title="{partner.name} Logo"
             gcs={partner.logo.specifiable_image_url}
             on:deleteImage={async () => await updatePartner({ logo: null }, partner.id)} />
         </div>
       {:else}
-        {#if admin > 1}
-          <ImageDropZone let:file class="p-3 rounded">
+        {#if isContributor}
+          <ImageDropZone let:file class="p-3 rounded max-w-[400px]">
             <span slot="label">{$page.data.t('misc.upload')}</span>
             {#if file}
               {#await import('$lib/components/image/UploadImage.svelte') then { default: UploadImage }}
@@ -89,7 +89,7 @@
       {/if}
     {/each}
   </Collection>
-  {#if admin > 1}
+  {#if isContributor}
     <Button class="mt-2" onclick={writeIn} form="filled">
       <i class="far fa-pencil" />
       Write in Partner<!-- {$page.data.t('')} -->

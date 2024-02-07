@@ -192,7 +192,7 @@
 
 <hr style="margin: 20px 0;" />
 <!-- Add Partnership component -->
-<Partnership dictionary={$dictionary} admin={$admin} />
+<Partnership dictionary={$dictionary} isContributor={$isContributor || $isManager} />
 
 
 <!-- Not using contributors.request_to_add_manager -->
