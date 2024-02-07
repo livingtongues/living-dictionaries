@@ -290,7 +290,7 @@
     "no_audios": "Tidak ada fail audio",
     "download_csv": "Muat turun CSV",
     "availability": "Eksport hanya tersedia untuk pengurus kamus",
-    "download_pdf": "Muat turun pdf",
+    "download_pdf": "Muat turun PDF",
     "spreadsheet": "Spreadsheet"
   },
   "video": {
@@ -341,5 +341,10 @@
     "history_search": "Cari penyertaan, editor, medan dan nilai",
     "download_history": "Muat turun Sejarah sebagai CSV",
     "empty": "Belum ada sejarah"
+  },
+  "partnership": {
+    "title": "Organisasi rakan kongsi",
+    "button": "Tulis dalam organisasi rakan kongsi",
+    "name": "Nama organisasi rakan kongsi"
   }
 }

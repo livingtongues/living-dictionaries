@@ -15,7 +15,7 @@
     'https://firebasestorage.googleapis.com/v0/b/talking-dictionaries-alpha.appspot.com/o/livingdictionary%2Fimages%2FNEW_Living_Tongues_logo_with_white_around_it.png?alt=media&token=dceda3c5-85c4-4cec-9f9e-885047653524';
 
   function writeIn() {
-    const name = prompt(`Partner Organization Name`);
+    const name = prompt($page.data.t('partnership.name'));
     if (name)
       add(`dictionaries/${dictionary.id}/partnerships`, { name });
   }
@@ -30,7 +30,7 @@
 </script>
 
 <h3 class="font-semibold text-lg mb-1 mt-3">
-  Partner Organizations<!-- {$page.data.t('')} -->
+  {$page.data.t('partnership.title')}
 </h3>
 
 <div>
@@ -119,7 +119,7 @@
   {#if isContributor}
     <Button class="mt-2" onclick={writeIn} form="filled">
       <i class="far fa-pencil" />
-      Write in Partner Organization<!-- {$page.data.t('')} -->
+      {$page.data.t('partnership.button')}
     </Button>
   {/if}
 </div>

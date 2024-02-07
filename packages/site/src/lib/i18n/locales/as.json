@@ -341,5 +341,10 @@
     "history_search": "",
     "download_history": "",
     "empty": ""
+  },
+  "partnership": {
+    "title": "",
+    "button": "",
+    "name": ""
   }
 }
