@@ -16,8 +16,10 @@
   import { convert_and_expand_entry } from '$lib/transformers/convert_and_expand_entry';
   import type { InstantSearch } from 'instantsearch.js';
   const search: InstantSearch = getContext('search');
+  const managerMaxEntries = 1000;
+  const defaultMaxEntries = 300;
 
-  const hitsPerPage = createPersistedStore<number>('printHitsPerPage', 50);
+  const hitsPerPage = createPersistedStore<number>('printHitsPerPage', ($isManager ? managerMaxEntries : defaultMaxEntries));
   $: if (browser) {
     search.addWidgets([
       configure({
@@ -54,7 +56,7 @@
             id="maxEntries"
             type="number"
             min="1"
-            max={$isManager ? 1000 : 300}
+            max={$isManager ? managerMaxEntries : defaultMaxEntries}
             bind:value={$hitsPerPage} />
           <!-- Algolia hard max per page is 1000 -->
         </div>
