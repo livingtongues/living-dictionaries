@@ -54,6 +54,6 @@
     {citation?.citation ? citation.citation + ' ' : ''}
     {new Date().getFullYear()}.
     <span>{$page.data.t('dictionary.full_title', { values: { dictionary_name: dictionary.name }})}.</span>
-    Living Tongues Institute for Endangered Languages{partners ? ', ' + partners.map(partner => partner.name).join(', ') : ''}. https://livingdictionaries.app/{dictionary.id}
+    Living Tongues Institute for Endangered Languages{partners?.length ? ', ' + partners.map(partner => partner.name).join(', ') : ''}. https://livingdictionaries.app/{dictionary.id}
   </div>
 </Doc>
