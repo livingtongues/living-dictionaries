@@ -54,9 +54,8 @@ export interface ICitation extends IFirestoreMetaData {
   citation: string;
 }
 
-export interface IPartnership extends IFirestoreMetaData {
+export interface Partner extends IFirestoreMetaData {
   name: string;
-  members: string[];
-  logo: PartnerPhoto;
+  logo?: PartnerPhoto;
 }
 

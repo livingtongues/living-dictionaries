@@ -9,6 +9,10 @@ export interface ImageUrlRequestBody {
   firebase_storage_location: string;
 }
 
+export interface ImageUrlResponseBody {
+  serving_url: string
+}
+
 export const POST: RequestHandler = async ({ request, fetch }) => {
   try {
     const { auth_token, firebase_storage_location } = await request.json() as ImageUrlRequestBody;
@@ -23,8 +27,8 @@ export const POST: RequestHandler = async ({ request, fetch }) => {
     const url = await result.text();
     if (!url)
       throw new Error('No serving url returned');
-    const gcsPath = url.replace('http://lh3.googleusercontent.com/', '').replace('\n', '');
-    return json(gcsPath);
+    const serving_url = url.replace('http://lh3.googleusercontent.com/', '').replace('\n', '');
+    return json({serving_url} satisfies ImageUrlResponseBody);
   }
   catch (err: any) {
     console.error(`Photo processing error when getting serving url: ${err.message}`);

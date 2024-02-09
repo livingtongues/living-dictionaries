@@ -1,22 +1,15 @@
 <script lang="ts">
   import { page } from '$app/stores';
-  import { Doc, set, getCollection } from 'sveltefirets';
+  import { Doc, set } from 'sveltefirets';
   import { Button, Form } from 'svelte-pieces';
-  import type { ICitation, IDictionary, IPartnership } from '@living-dictionaries/types';
-  import { browser } from '$app/environment';
+  import type { ICitation, IDictionary, Partner } from '@living-dictionaries/types';
 
   export let dictionary: IDictionary;
   export let isManager = false;
+  export let partners: Partner[];
 
   const citationType: ICitation = { citation: '' };
-  let partners: IPartnership[];
   let value = '';
-
-  $: if (browser) {
-    getCollection<IPartnership>(`dictionaries/${dictionary.id}/partnerships`).then(
-      (partnerships) => (partners = partnerships)
-    );
-  }
 </script>
 
 <Doc

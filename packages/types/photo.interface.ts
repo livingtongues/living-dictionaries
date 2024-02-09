@@ -33,6 +33,7 @@ export interface DictionaryPhoto extends Omit<ExpandedPhoto, 'timestamp'> {
   timestamp?: Date | Timestamp;
 }
 
-export interface PartnerPhoto extends Omit<ExpandedPhoto, 'timestamp'> {
-  timestamp?: Date | Timestamp;
+export interface PartnerPhoto {
+  fb_storage_path: string;
+  specifiable_image_url?: string;
 }

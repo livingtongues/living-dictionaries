@@ -5,10 +5,10 @@
   import { cubicOut } from 'svelte/easing';
   import { getStorage, ref, uploadBytesResumable } from 'firebase/storage';
   import { firebaseConfig, authState } from 'sveltefirets';
-  import { apiFetch } from '$lib/client/apiFetch';
-  import type { ImageUrlRequestBody } from '../../../routes/api/image_url/+server';
+  import type { ImageUrlRequestBody, ImageUrlResponseBody } from '$api/image_url/+server';
   import { get } from 'svelte/store';
   import { createEventDispatcher, onMount } from 'svelte';
+  import { post_request } from '$lib/client/get-post-requests';
 
   export let file: File;
   export let fileLocationPrefix: string;
@@ -74,17 +74,16 @@
 
       const auth_state_user = get(authState);
       const auth_token = await auth_state_user.getIdToken();
-      const response = await apiFetch<ImageUrlRequestBody>('/api/image_url', {
-        auth_token,
-        firebase_storage_location,
+
+      const { data, error } = await post_request<ImageUrlRequestBody, ImageUrlResponseBody>({
+        route: '/api/image_url',
+        data: { auth_token, firebase_storage_location },
       });
 
-      if (response.status !== 200)
-        throw new Error(`Error getting image serving url.`);
+      if (error)
+        throw new Error(error.message);
 
-      const gcsPath = await response.json() as string
-
-      dispatch('uploaded', { fb_storage_path: storagePath, specifiable_image_url: gcsPath})
+      dispatch('uploaded', { fb_storage_path: storagePath, specifiable_image_url: data.serving_url})
 
       success = true;
     } catch (err) {
