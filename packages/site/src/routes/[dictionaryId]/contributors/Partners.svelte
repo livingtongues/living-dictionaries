@@ -13,8 +13,9 @@
   export let delete_partner: (partner_id: string) => Promise<void>;
   export let add_partner_image: (partner_id: string, file: File) => Readable<{ progress: number; error?: string, preview_url: string }>;
   export let delete_partner_image: ({partner_id, fb_storage_path}: {partner_id: string, fb_storage_path: string}) => Promise<void>;
+  export let allow_living_tongues_logo: (allowLivingTonguesLogo: boolean) => Promise<void>;
+  export let allowLivingTonguesLogo = true;
 
-  let showLivingTonguesLogo = true;
   const LIVING_TONGUES_LOGO =
     'https://firebasestorage.googleapis.com/v0/b/talking-dictionaries-alpha.appspot.com/o/livingdictionary%2Fimages%2FLiving_Tongues_Logo_transparent%20300dpi.png?alt=media';
 
@@ -30,7 +31,7 @@
 </h3>
 
 <div>
-  <div class:hidden={!showLivingTonguesLogo}>
+  {#if allowLivingTonguesLogo}
     <div class="py-3 flex flex-wrap items-center">
       <div class="text-sm leading-5 font-medium text-gray-900">
         Living Tongues Institute for Endangered Languages
@@ -40,8 +41,8 @@
         <Button
           color="red"
           size="sm"
-          onclick={() => {
-            showLivingTonguesLogo = false;
+          onclick={async () => {
+            await allow_living_tongues_logo(false);
           }}>{$page.data.t('misc.delete')}
           <i class="fas fa-times" /></Button>
       {/if}
@@ -52,7 +53,13 @@
         alt=""
         src={LIVING_TONGUES_LOGO} />
     </div>
-  </div>
+  {:else}
+    <Button
+      size="sm"
+      onclick={async () => {
+        await allow_living_tongues_logo(true);
+      }}>Show Logo</Button>
+  {/if}
   {#each partners as partner}
     <div class="py-3 flex flex-wrap items-center">
       <div class="text-sm leading-5 font-medium text-gray-900">

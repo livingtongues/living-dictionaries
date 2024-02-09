@@ -7,6 +7,7 @@
   export let dictionary: IDictionary;
   export let isManager = false;
   export let partners: Partner[];
+  export let allowLivingTonguesLogo: boolean;
 
   const citationType: ICitation = { citation: '' };
   let value = '';
@@ -54,6 +55,6 @@
     {citation?.citation ? citation.citation + ' ' : ''}
     {new Date().getFullYear()}.
     <span>{$page.data.t('dictionary.full_title', { values: { dictionary_name: dictionary.name }})}.</span>
-    Living Tongues Institute for Endangered Languages{partners?.length ? ', ' + partners.map(partner => partner.name).join(', ') : ''}. https://livingdictionaries.app/{dictionary.id}
+    {allowLivingTonguesLogo ? 'Living Tongues Institute for Endangered Languages' : ''}{partners?.length && allowLivingTonguesLogo ? ', ' : ''}{partners?.length ? partners.map(partner => partner.name).join(', ') : ''}. https://livingdictionaries.app/{dictionary.id}
   </div>
 </Doc>

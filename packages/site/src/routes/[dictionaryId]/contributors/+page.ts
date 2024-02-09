@@ -54,6 +54,14 @@ export const load = (async ({params: { dictionaryId }, parent}) => {
         alert(`${t('misc.error')}: ${err}`);
       }
     },
+
+    allow_living_tongues_logo: async (allow_living_tongues_logo: boolean) => {
+      try {
+        await updateOnline(`dictionaries/${dictionaryId}`, {allowLivingTonguesLogo: allow_living_tongues_logo})
+      } catch (err) {
+        alert(`${t('misc.error')}: ${err}`);
+      }
+    },
   }
 
   return {
