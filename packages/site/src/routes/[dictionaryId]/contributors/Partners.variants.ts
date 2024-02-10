@@ -28,10 +28,11 @@ const edits = {
     }
     raise_progresss()
     return { subscribe }
-    // return readable({ progress: 0.79, preview_url })
+    // return readable({ progress: 79, preview_url })
   },
   delete_partner: (id: string) => delay(alert(`Deleted ${id}`)),
   delete_partner_image: ({partner_id, fb_storage_path}: {partner_id: string, fb_storage_path: string}) => delay(alert(`Deleted ${partner_id} ${fb_storage_path}`)),
+  hide_living_tongues_logo: (hide: boolean) => delay(alert(`Hidden: ${hide}`)),
 }
 
 const partners = [
@@ -59,7 +60,7 @@ export const variants: Variant<Component>[] = [
     },
   },
   {
-    name: 'Viewer',
+    name: 'viewer',
     props: {
       partners,
       ...edits,

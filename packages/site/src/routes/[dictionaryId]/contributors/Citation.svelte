@@ -3,11 +3,11 @@
   import { Doc, set } from 'sveltefirets';
   import { Button, Form } from 'svelte-pieces';
   import type { ICitation, IDictionary, Partner } from '@living-dictionaries/types';
+  import { build_citation } from './build-citation';
 
   export let dictionary: IDictionary;
   export let isManager = false;
   export let partners: Partner[];
-  export let allowLivingTonguesLogo: boolean;
 
   const citationType: ICitation = { citation: '' };
   let value = '';
@@ -52,9 +52,6 @@
   {/if}
 
   <div dir="ltr">
-    {citation?.citation ? citation.citation + ' ' : ''}
-    {new Date().getFullYear()}.
-    <span>{$page.data.t('dictionary.full_title', { values: { dictionary_name: dictionary.name }})}.</span>
-    {allowLivingTonguesLogo ? 'Living Tongues Institute for Endangered Languages' : ''}{partners?.length && allowLivingTonguesLogo ? ', ' : ''}{partners?.length ? partners.map(partner => partner.name).join(', ') : ''}. https://livingdictionaries.app/{dictionary.id}
+    {build_citation({t: $page.data.t, dictionary, custom_citation: citation?.citation, partners})}
   </div>
 </Doc>

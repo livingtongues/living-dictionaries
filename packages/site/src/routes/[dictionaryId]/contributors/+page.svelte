@@ -191,7 +191,7 @@
 {/if}
 
 <hr class="my-4" />
-<Partners partners={$partners} can_edit={$isManager} allowLivingTonguesLogo={$dictionary.allowLivingTonguesLogo} admin={$admin} {...data.partner_edits} />
+<Partners partners={$partners} can_edit={$isManager} hideLivingTonguesLogo={$dictionary.hideLivingTonguesLogo} admin={$admin} {...data.partner_edits} />
 
 <!-- Not using contributors.request_to_add_manager -->
 
@@ -239,7 +239,7 @@
   {$page.data.t('contributors.how_to_cite_academics')}
 </h3>
 
-<Citation isManager={$isManager} dictionary={$dictionary} partners={$partners} allowLivingTonguesLogo={$dictionary.allowLivingTonguesLogo} />
+<Citation isManager={$isManager} dictionary={$dictionary} partners={$partners} />
 
 <div class="mb-12" />
 

@@ -1,6 +1,6 @@
 import type { PageLoad } from './$types';
 import { addOnline, updateOnline, deleteDocumentOnline, collectionStore } from 'sveltefirets';
-import type { Partner } from '@living-dictionaries/types';
+import type { IDictionary, Partner } from '@living-dictionaries/types';
 import { upload_image } from '$lib/components/image/upload-image';
 
 export const load = (async ({params: { dictionaryId }, parent}) => {
@@ -55,9 +55,9 @@ export const load = (async ({params: { dictionaryId }, parent}) => {
       }
     },
 
-    allow_living_tongues_logo: async (allow_living_tongues_logo: boolean) => {
+    hide_living_tongues_logo: async (hide: boolean) => {
       try {
-        await updateOnline(`dictionaries/${dictionaryId}`, {allowLivingTonguesLogo: allow_living_tongues_logo})
+        await updateOnline<IDictionary>(`dictionaries/${dictionaryId}`, {hideLivingTonguesLogo: hide})
       } catch (err) {
         alert(`${t('misc.error')}: ${err}`);
       }

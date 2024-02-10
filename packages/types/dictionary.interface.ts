@@ -30,7 +30,7 @@ export interface IDictionary extends IFirestoreMetaData {
   conLangDescription?: string;
 
   featuredImage?: DictionaryPhoto;
-  allowLivingTonguesLogo?: boolean;
+  hideLivingTonguesLogo?: boolean;
 
   // tdv1 (old Talking Dictionaries platform at Swarthmore)
   publishYear?: number;
