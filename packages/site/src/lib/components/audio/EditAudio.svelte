@@ -3,7 +3,7 @@
   import Waveform from '$lib/components/audio/Waveform.svelte';
   import SelectAudio from '$lib/components/audio/SelectAudio.svelte';
   import RecordAudio from '$lib/components/audio/RecordAudio.svelte';
-  import { dictionary, admin } from '$lib/stores';
+  import { dictionary_deprecated as dictionary, admin } from '$lib/stores';
   import { Modal, Button, JSON } from 'svelte-pieces';
   import { deleteAudio } from '$lib/helpers/delete';
   import type { ExpandedAudio, ExpandedEntry, GoalDatabaseEntry } from '@living-dictionaries/types';

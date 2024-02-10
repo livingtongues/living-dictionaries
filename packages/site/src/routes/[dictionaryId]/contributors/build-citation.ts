@@ -32,13 +32,9 @@ export function build_citation({t, dictionary, custom_citation, partners}: {
   return citation + url
 }
 
-
 if (import.meta.vitest) {
   const t = (key: TranslationKeys, { values: { dictionary_name }}: TranslateOptions) => `${dictionary_name} Living Dictionary`
-  const dictionary: IDictionary = {
-    id: 'traba',
-    name: 'Trabajar'
-  } as IDictionary
+  const dictionary: IDictionary = { id: 'traba', name: 'Trabajar' } as IDictionary
 
   describe(build_citation, () => {
     test('default', () => {
@@ -67,9 +63,3 @@ if (import.meta.vitest) {
     });
   });
 }
-
-
-// {citation?.citation ? citation.citation + ' ' : ''}
-// {new Date().getFullYear()}.
-// <span>{$page.data.t('dictionary.full_title', { values: { dictionary_name: dictionary.name }})}.</span>
-// {!hideLivingTonguesLogo ? 'Living Tongues Institute for Endangered Languages' : ''}{partners?.length && !hideLivingTonguesLogo ? ', ' : ''}{partners?.length ? partners.map(partner => partner.name).join(', ') : ''}. https://livingdictionaries.app/{dictionary.id}

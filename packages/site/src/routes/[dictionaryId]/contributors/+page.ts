@@ -2,6 +2,7 @@ import type { PageLoad } from './$types';
 import { addOnline, updateOnline, deleteDocumentOnline, collectionStore } from 'sveltefirets';
 import type { IDictionary, Partner } from '@living-dictionaries/types';
 import { upload_image } from '$lib/components/image/upload-image';
+import { invalidateAll } from '$app/navigation';
 
 export const load = (async ({params: { dictionaryId }, parent}) => {
   const { t } = await parent();
@@ -58,6 +59,7 @@ export const load = (async ({params: { dictionaryId }, parent}) => {
     hide_living_tongues_logo: async (hide: boolean) => {
       try {
         await updateOnline<IDictionary>(`dictionaries/${dictionaryId}`, {hideLivingTonguesLogo: hide})
+        await invalidateAll()
       } catch (err) {
         alert(`${t('misc.error')}: ${err}`);
       }

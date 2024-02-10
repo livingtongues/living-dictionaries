@@ -6,7 +6,7 @@
   import PasteVideoLink from './PasteVideoLink.svelte';
   import VideoIFrame from '$lib/components/video/VideoIFrame.svelte';
   import SelectSpeaker from '$lib/components/media/SelectSpeaker.svelte';
-  import { dictionary } from '$lib/stores';
+  import { dictionary_deprecated as dictionary } from '$lib/stores';
   import type { ExpandedEntry, GoalDatabaseVideo } from '@living-dictionaries/types';
   import { addVideo } from '$lib/helpers/media/update';
   import { createEventDispatcher } from 'svelte';

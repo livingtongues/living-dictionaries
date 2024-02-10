@@ -2,7 +2,7 @@
   import { onMount } from 'svelte';
   import { connectHits } from 'instantsearch.js/es/connectors';
   import { limit, orderBy } from 'firebase/firestore';
-  import { dictionary } from '$lib/stores';
+  import { dictionary_deprecated as dictionary } from '$lib/stores';
   import { mergeBy } from '$lib/helpers/array';
   import type { InstantSearch } from 'instantsearch.js';
   import { firebaseConfig } from 'sveltefirets';

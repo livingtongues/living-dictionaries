@@ -7,7 +7,7 @@
   import { Button, createPersistedStore } from 'svelte-pieces';
   import { defaultPrintFields } from './printFields';
   import PrintEntry from './PrintEntry.svelte';
-  import { dictionary, isManager, canEdit } from '$lib/stores';
+  import { dictionary_deprecated as dictionary, isManager, canEdit } from '$lib/stores';
   import { browser } from '$app/environment';
   import type { IPrintFields, ICitation } from '@living-dictionaries/types';
   import PrintFieldCheckboxes from './PrintFieldCheckboxes.svelte';

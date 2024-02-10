@@ -5,7 +5,7 @@ import {
   admin,
   algoliaQueryParams,
   canEdit,
-  dictionary,
+  dictionary_deprecated as dictionary,
   isContributor,
   isManager,
   user,

@@ -2,7 +2,7 @@
   import { page } from '$app/stores';
   import { add, deleteDocumentOnline, updateOnline, Collection } from 'sveltefirets';
   import { where } from 'firebase/firestore';
-  import { isManager, isContributor, dictionary, admin } from '$lib/stores';
+  import { isManager, isContributor, dictionary_deprecated as dictionary, admin } from '$lib/stores';
   import type { IInvite, IHelper } from '@living-dictionaries/types';
   import { Button, ShowHide } from 'svelte-pieces';
   import { inviteHelper } from '$lib/helpers/inviteHelper';
