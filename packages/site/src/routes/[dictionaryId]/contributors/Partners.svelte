@@ -50,15 +50,14 @@
     <div class="max-w-[400px]">
       <img
         class="h-full w-full object-cover"
-        alt=""
+        alt="Living Tongues Institute for Endangered Languages"
         src={LIVING_TONGUES_LOGO} />
     </div>
-  {:else}
+  {:else if can_edit}
     <Button
-      size="sm"
       onclick={async () => {
         await hide_living_tongues_logo(false);
-      }}>Show Logo</Button>
+      }}>Show Living Tongues Logo</Button>
   {/if}
   {#each partners as partner}
     <div class="py-3 flex flex-wrap items-center">
