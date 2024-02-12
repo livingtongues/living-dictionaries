@@ -3,7 +3,7 @@
   import type { GoalDatabaseAudio, GoalDatabaseEntry } from '@living-dictionaries/types';
   import { updateOnline } from 'sveltefirets';
   import { getStorage, ref, uploadBytesResumable } from 'firebase/storage';
-  import { dictionary, user } from '$lib/stores';
+  import { dictionary_deprecated as dictionary, user } from '$lib/stores';
   import { tweened } from 'svelte/motion';
   import { cubicOut } from 'svelte/easing';
 
@@ -24,7 +24,7 @@
     startUpload();
 
 
-  async function startUpload() {
+  function startUpload() {
     // const _dictName = dictionary.name.replace(/\s+/g, '_');
     // const _lexeme = lexeme.replace(/\s+/g, '_');
     const fileTypeSuffix = file.type.split('/')[1];

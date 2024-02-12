@@ -31,7 +31,7 @@
     "interns": "Estagiários",
     "video_upload": "Upload de vídeo",
     "export_data": "Dados de exportação (CSV, Formatos PDF)",
-    "import_export": "Importação/exportação (Flex, formato padrão)",
+    "import_export": "Importação/exportação (Flex, Formato Padrão)",
     "geo_tagging": "Entradas de margem geográfica",
     "flashcard_view": "Visualização do Flashcard para alunos de idiomas",
     "peer_review": "Revisão por pares de grafias",
@@ -286,7 +286,7 @@
     "csv_data": "Dados como .csv",
     "checking_images": "Verificando se existem arquivos de imagem",
     "no_images": "Não há arquivos de imagem",
-    "checking_audios": "Verificação se houver arquivos de áudio",
+    "checking_audios": "Verificando se houver arquivos de áudio",
     "no_audios": "Não há arquivos de áudio",
     "download_csv": "Baixe CSV",
     "availability": "A exportação está disponível apenas para gerentes de dicionário",
@@ -306,7 +306,7 @@
     "accesing": "Acessando microfone e câmera",
     "pause": "Pausa",
     "unpause": "Não musa",
-    "previously_dismissed_msg": "Se você já descartou a solicitação do navegador, recarregue e clique em 'Sim' quando o seu navegador solicitar permissão.",
+    "previously_dismissed_msg": "Se você descartou anteriormente a solicitação do navegador, recarregue e clique em 'Sim' quando seu navegador solicitar permissão.",
     "permission_denied": "A permissão para acessar a mídia foi negada."
   },
   "print": {
@@ -341,5 +341,10 @@
     "history_search": "Entradas de pesquisa, editores, campos e valores",
     "download_history": "Baixe o histórico como CSV",
     "empty": "Sem história ainda"
+  },
+  "partnership": {
+    "title": "Organizações parceiras",
+    "button": "Escreva na organização parceira",
+    "name": "Nome da organização de parceiros"
   }
 }

@@ -2,7 +2,7 @@
   import { onDestroy, onMount } from 'svelte';
   import { page } from '$app/stores';
   import type { GoalDatabaseVideo, IVideoCustomMetadata } from '@living-dictionaries/types';
-  import { dictionary, user } from '$lib/stores';
+  import { dictionary_deprecated as dictionary, user } from '$lib/stores';
   import { getStorage, ref, uploadBytesResumable, type TaskState, type UploadTask, StorageError } from 'firebase/storage';
   import { addVideo } from '$lib/helpers/media/update';
   import { tweened } from 'svelte/motion';

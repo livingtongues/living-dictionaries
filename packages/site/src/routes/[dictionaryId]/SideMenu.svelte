@@ -1,7 +1,7 @@
 <script lang="ts">
   export let menuOpen: boolean;
   import { page } from '$app/stores';
-  import { dictionary, isManager } from '$lib/stores';
+  import { dictionary_deprecated as dictionary, isManager } from '$lib/stores';
 </script>
 
 <div class="md:hidden">

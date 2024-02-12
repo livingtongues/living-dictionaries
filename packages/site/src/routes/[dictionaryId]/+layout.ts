@@ -10,7 +10,9 @@ export const load: LayoutLoad = async ({ params: { dictionaryId } }) => {
     if (dictionary)
       return { dictionary };
   } catch (err) {
+    // only thrown if there was a db error
     throw error(ResponseCodes.INTERNAL_SERVER_ERROR, err);
   }
+  // reaches here if no dictionary
   throw redirect(ResponseCodes.MOVED_PERMANENTLY, '/');
 };

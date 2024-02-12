@@ -4,13 +4,13 @@
   let dragging = false;
   let file: File;
 
-  async function handleImage(files: FileList) {
+  function handleImage(files: FileList) {
     dragging = false;
 
     const fileToCheck = files.item(0);
 
-    // Client-side validation: Must be an image and smaller than 10MB.
-    if (fileToCheck.type.split('/')[0] !== 'image') {
+    // Client-side validation: Must be an image (not SVG) and smaller than 10MB.
+    if (fileToCheck.type.split('/')[0] !== 'image' || fileToCheck.type === 'image/svg+xml') {
       return alert(
         `${$page.data.t('upload.error')}`
       );

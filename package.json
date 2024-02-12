@@ -7,6 +7,7 @@
 		"dev:open": "pnpm --filter=site dev --open",
 		"build": "pnpm --filter=site build",
 		"preview": "pnpm --filter=site preview",
+		"check": "pnpm --filter=site check",
 		"test": "pnpm vitest",
 		"test:site": "pnpm --filter=site test",
 		"test:all": "pnpm --recursive --stream test -- --run",

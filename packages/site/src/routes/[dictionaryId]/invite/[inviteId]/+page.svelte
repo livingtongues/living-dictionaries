@@ -1,7 +1,7 @@
 <script lang="ts">
   import { page } from '$app/stores';
   import type { IInvite, IHelper, IUser } from '@living-dictionaries/types';
-  import { isManager, isContributor, user, dictionary } from '$lib/stores';
+  import { isManager, isContributor, user, dictionary_deprecated as dictionary } from '$lib/stores';
   import { Button, ShowHide } from 'svelte-pieces';
   import { Doc, setOnline, updateOnline } from 'sveltefirets';
   import { serverTimestamp } from 'firebase/firestore/lite';

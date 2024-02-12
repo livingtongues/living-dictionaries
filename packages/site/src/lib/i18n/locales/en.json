@@ -341,5 +341,10 @@
     "history_search": "Search entries, editors, fields and values",
     "download_history": "Download History as CSV",
     "empty": "No history yet"
+  },
+  "partnership": {
+    "title": "Partner Organizations",
+    "button": "Write in Partner Organization",
+    "name": "Partner Organization Name"
   }
 }

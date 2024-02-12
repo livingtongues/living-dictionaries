@@ -341,5 +341,10 @@
     "history_search": "Tìm kiếm các mục, trình soạn thảo, trường và giá trị",
     "download_history": "Tải xuống lịch sử dưới dạng CSV",
     "empty": "Chưa có lịch sử"
+  },
+  "partnership": {
+    "title": "Các tổ chức đối tác",
+    "button": "Viết trong tổ chức đối tác",
+    "name": "Tên tổ chức đối tác"
   }
 }
