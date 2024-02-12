@@ -12,18 +12,16 @@ type Return<ExpectedResponse> = {
   error: { status: number, message: string }
 }
 
-export async function post_request<T extends Record<string, any>, ExpectedResponse extends Record<string, any>>({ route, data, fetch: svelte_powered_fetch, headers }: {
-  route: string,
-  data: T,
+export async function post_request<T extends Record<string, any>, ExpectedResponse extends Record<string, any>>(route: string, data: T, options?: {
   fetch?: typeof fetch,
   headers?: RequestInit['headers']
 }): Promise<Return<ExpectedResponse>> {
-  const fetch_to_use = svelte_powered_fetch || fetch
+  const fetch_to_use = options?.fetch || fetch
 
   const response = await fetch_to_use(route, {
     method: 'POST',
     body: JSON.stringify(data),
-    headers: headers || default_headers,
+    headers: options?.headers || default_headers,
   })
 
   return handleResponse<ExpectedResponse>(response)

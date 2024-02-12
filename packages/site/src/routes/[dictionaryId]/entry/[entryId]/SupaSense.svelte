@@ -42,7 +42,7 @@
     {canEdit}
     display="Definition (deprecated)"
     on:update={({detail}) => updateSense({
-      column: 'definition_english_deprecated',
+      column: 'definition',
       entry_id: entryId,
       sense_id: sense.id,
       new_value: detail || null,
