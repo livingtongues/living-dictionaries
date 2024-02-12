@@ -17,9 +17,9 @@
 		"check-packages": "pnpm update --interactive --recursive --latest"
 	},
 	"devDependencies": {
-		"@typescript-eslint/eslint-plugin": "6.7.3",
-		"@typescript-eslint/parser": "6.7.3",
-		"eslint": "^8.50.0",
+		"@typescript-eslint/eslint-plugin": "6.21.0",
+		"@typescript-eslint/parser": "6.21.0",
+		"eslint": "^8.56.0",
 		"eslint-define-config": "^1.23.0",
 		"eslint-plugin-svelte": "^2.33.2",
 		"eslint-plugin-svelte-stylistic": "^0.0.4",
@@ -27,7 +27,7 @@
 		"globals": "^13.20.0",
 		"lint-staged": "^13.2.2",
 		"simple-git-hooks": "^2.8.1",
-    "supabase": "^1.113.2",
+		"supabase": "^1.113.2",
 		"svelte": "^3.55.1",
 		"typescript": "~5.1.6",
 		"vitest": "^0.34.5"

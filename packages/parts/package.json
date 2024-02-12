@@ -44,7 +44,6 @@
     "svelte-pieces": "1.0.60",
     "svelte-store-router": "^2.0.10",
     "svelte2tsx": "^0.6.0",
-    "sveltefirets": "^0.0.36",
     "topojson-client": "^3.1.0",
     "tslib": "^2.6.1",
     "typescript": "^5.1.6",
