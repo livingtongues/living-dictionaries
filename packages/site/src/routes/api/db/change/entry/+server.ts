@@ -70,6 +70,6 @@ export const POST: RequestHandler = async ({ request }) => {
   }
   catch (err: any) {
     console.error(`Error saving sense: ${err.message}`);
-    throw error(ResponseCodes.INTERNAL_SERVER_ERROR, `Error saving sense: ${err.message}`);
+    error(ResponseCodes.INTERNAL_SERVER_ERROR, `Error saving sense: ${err.message}`);
   }
 };

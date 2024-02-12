@@ -25,18 +25,18 @@ export const load = async ({ params, depends }) => {
   try {
     entry = await getDocument<ActualDatabaseEntry>(entryPath);
   } catch (err) {
-    throw error(ResponseCodes.INTERNAL_SERVER_ERROR, err);
+    error(ResponseCodes.INTERNAL_SERVER_ERROR, err);
   }
 
   if (!entry)
-    throw redirect(ResponseCodes.MOVED_PERMANENTLY, `/${params.dictionaryId}`);
+    redirect(ResponseCodes.MOVED_PERMANENTLY, `/${params.dictionaryId}`);
 
   let entryStore = readable(entry)
   if (browser) {
     try {
       entryStore = docStore<ActualDatabaseEntry>(entryPath, {startWith: entry})
     } catch (err) {
-      throw error(ResponseCodes.INTERNAL_SERVER_ERROR, err);
+      error(ResponseCodes.INTERNAL_SERVER_ERROR, err);
     }
   }
 

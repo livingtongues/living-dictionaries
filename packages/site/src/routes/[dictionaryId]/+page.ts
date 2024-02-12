@@ -1,6 +1,7 @@
 import { redirect } from '@sveltejs/kit';
 
 import type { PageLoad } from './$types';
+import { ResponseCodes } from '$lib/constants';
 export const load: PageLoad = async ({ params }) => {
-  throw redirect(307, `/${params.dictionaryId}/entries/list`);
+  redirect(ResponseCodes.TEMPORARY_REDIRECT, `/${params.dictionaryId}/entries/list`);
 };
