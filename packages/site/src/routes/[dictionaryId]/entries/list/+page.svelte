@@ -2,7 +2,7 @@
   // import SeoMetaTags from '$lib/components/SeoMetaTags.svelte';
   import { onMount, getContext } from 'svelte';
   import { Doc } from 'sveltefirets';
-  import { dictionary, canEdit, admin } from '$lib/stores';
+  import { dictionary_deprecated as dictionary, canEdit, admin } from '$lib/stores';
   import ListEntry from './ListEntry.svelte';
   import { convert_and_expand_entry } from '$lib/transformers/convert_and_expand_entry';
   import Hits from '$lib/components/search/Hits.svelte';

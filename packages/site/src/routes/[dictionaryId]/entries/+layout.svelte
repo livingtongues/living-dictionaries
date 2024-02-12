@@ -3,7 +3,7 @@
   import SearchBox from '$lib/components/search/SearchBox.svelte';
   import Stats from '$lib/components/search/Stats.svelte';
   import EntryFilters from './EntryFilters.svelte';
-  import { dictionary, canEdit, admin, algoliaQueryParams } from '$lib/stores';
+  import { dictionary_deprecated as dictionary, canEdit, admin, algoliaQueryParams } from '$lib/stores';
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte';
   import { page, navigating } from '$app/stores';
   import { browser } from '$app/environment';

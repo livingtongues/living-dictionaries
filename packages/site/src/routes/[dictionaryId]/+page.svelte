@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { dictionary } from '$lib/stores';
+  import { dictionary_deprecated as dictionary } from '$lib/stores';
 // function downloadObjectAsJson(exportObj, exportName) {
   //   var dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(exportObj));
   //   var downloadAnchorNode = document.createElement('a');

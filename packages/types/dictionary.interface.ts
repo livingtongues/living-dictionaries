@@ -1,6 +1,6 @@
 import type { GeoPoint } from 'firebase/firestore';
 import type { IFirestoreMetaData } from 'sveltefirets';
-import type { DictionaryPhoto, IPoint, IRegion } from '.';
+import type { PartnerPhoto, DictionaryPhoto, IPoint, IRegion } from '.';
 import type { LngLatFull } from './coordinates.interface'
 
 export interface IDictionary extends IFirestoreMetaData {
@@ -30,6 +30,7 @@ export interface IDictionary extends IFirestoreMetaData {
   conLangDescription?: string;
 
   featuredImage?: DictionaryPhoto;
+  hideLivingTonguesLogo?: boolean;
 
   // tdv1 (old Talking Dictionaries platform at Swarthmore)
   publishYear?: number;
@@ -54,5 +55,8 @@ export interface ICitation extends IFirestoreMetaData {
   citation: string;
 }
 
-
+export interface Partner extends IFirestoreMetaData {
+  name: string;
+  logo?: PartnerPhoto;
+}
 

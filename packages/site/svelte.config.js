@@ -11,8 +11,12 @@ const config = {
 
   kit: {
     adapter: adapter(),
+    alias: {
+      '$api': 'src/routes/api',
+    },
   },
 
+  // https://github.com/sveltejs/language-tools/issues/650#issuecomment-1337317336
   onwarn: (warning, handler) => {
     if (warning.code.startsWith('a11y-'))
       return;

@@ -341,5 +341,10 @@
     "history_search": "Shigarwar bincike, masu gyara, filaye da dabi'u",
     "download_history": "Zazzagewa Tarihi azaman CSV",
     "empty": "Babu tarihi tukuna"
+  },
+  "partnership": {
+    "title": "Kungiyoyin abokin tarayya",
+    "button": "Rubuta cikin kungiyar abokin tarayya",
+    "name": "Sunan kungiyar abokin tarayya"
   }
 }

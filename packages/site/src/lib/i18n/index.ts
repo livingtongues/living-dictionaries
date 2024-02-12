@@ -23,7 +23,7 @@ const loadedTranslations: Record<string, typeof en> = { en }
 //   errorOnMissingBase: boolean
 // }
 
-interface TranslateOptions {
+export interface TranslateOptions {
   values?: Record<string, string>
   dynamicKey?: string
   fallback?: string

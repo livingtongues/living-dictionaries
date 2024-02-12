@@ -1,16 +1,15 @@
 <script lang="ts">
   import { page } from '$app/stores';
   import SideMenu from './SideMenu.svelte';
-  import { dictionary as dictionaryStore, algoliaQueryParams } from '$lib/stores';
+  import { dictionary_deprecated as dictionaryStore, algoliaQueryParams } from '$lib/stores';
   import Header from '$lib/components/shell/Header.svelte';
   import { Button, ResponsiveSlideover } from 'svelte-pieces';
   import type { LayoutData } from './$types';
   import './custom-fonts.css';
   export let data: LayoutData;
 
-  if (data.dictionary)
+  $: if (data.dictionary)
     dictionaryStore.set(data.dictionary);
-
 
   let menuOpen = false;
 </script>

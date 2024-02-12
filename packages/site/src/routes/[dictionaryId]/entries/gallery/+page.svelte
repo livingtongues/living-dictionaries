@@ -5,7 +5,7 @@
   import Pagination from '$lib/components/search/Pagination.svelte';
   import { configure } from 'instantsearch.js/es/widgets/index.js';
   import { connectToggleRefinement } from 'instantsearch.js/es/connectors';
-  import { dictionary, canEdit } from '$lib/stores';
+  import { dictionary_deprecated as dictionary, canEdit } from '$lib/stores';
   import GalleryEntry from './GalleryEntry.svelte';
   import { Doc } from 'sveltefirets';
   import { convert_and_expand_entry } from '$lib/transformers/convert_and_expand_entry';

@@ -341,5 +341,10 @@
     "history_search": "Buscar entradas, editores, campos y valores",
     "download_history": "Descargar historia como CSV",
     "empty": "No hay historial todavía"
+  },
+  "partnership": {
+    "title": "Organizaciones asociadas",
+    "button": "Escribir la organización asociada",
+    "name": "Nombre de la organización asociada"
   }
 }

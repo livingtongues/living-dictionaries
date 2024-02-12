@@ -1,12 +1,12 @@
 <script lang="ts">
   import { page } from '$app/stores';
   import { Button, Modal, Form } from 'svelte-pieces';
-  import { user, dictionary } from '$lib/stores';
+  import { user, dictionary_deprecated as dictionary } from '$lib/stores';
   import { goto } from '$app/navigation';
   import { createEventDispatcher } from 'svelte';
   import { apiFetch } from '$lib/client/apiFetch';
-  import type { SupportRequestBody } from '../../../routes/api/email/support/+server';
-  import type { RequestAccessBody } from '../../../routes/api/email/request_access/+server';
+  import type { SupportRequestBody } from '$api/email/support/+server';
+  import type { RequestAccessBody } from '$api/email/request_access/+server';
   import enBase from '$lib/i18n/locales/en.json';
 
   export let subject: Subjects = undefined;

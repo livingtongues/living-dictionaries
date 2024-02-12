@@ -341,5 +341,10 @@
     "history_search": "搜索条目，编辑，字段和值",
     "download_history": "下载历史记录为CSV",
     "empty": "还没有历史"
+  },
+  "partnership": {
+    "title": "合作伙伴组织",
+    "button": "在合作伙伴组织中写信",
+    "name": "合作伙伴组织名称"
   }
 }

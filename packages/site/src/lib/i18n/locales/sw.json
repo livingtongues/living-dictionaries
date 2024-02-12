@@ -116,7 +116,7 @@
     "create_dictionary": "Tengeneza Kamusi  ",
     "permanent_url_msg": "Jina la URL ni la kudumu na haliwezi kubadilishwa baadaye.",
     "add_gloss_msg": "Unaweza kuongeza lugha zaidi ya glossing baadaye katika Mipangilio.",
-    "language_used_by_community": "Je! Hii ni kamusi kwa lugha ambayo inazungumzwa au kusainiwa na jamii maalum ya wanadamu?",
+    "language_used_by_community": "Je! Hii ni kamusi ya lugha ambayo inazungumzwa au kusainiwa na jamii maalum ya wanadamu?",
     "community_permission": "Je! Jumuiya ya lugha imekupa ruhusa ya kufanya kamusi hii?",
     "author_connection": "Tafadhali eleza kwa kifupi jinsi unavyojua lugha hii na kwa nini unaunda kamusi hai kwa hiyo. Je! Wewe ni sehemu ya jamii ambayo itakuwa ikitumia kamusi hii hai? Ikiwa sivyo, unajuaje jamii?",
     "con_lang_description": "Je! Hii ni kamusi ya lugha iliyojengwa (lugha iliyoundwa na wanadamu katika miaka ya hivi karibuni, kwa kitabu au sinema)? Ikiwa ndio, tafadhali eleza kwa kifupi.",
@@ -341,5 +341,10 @@
     "history_search": "Tafuta viingilio, wahariri, uwanja na maadili",
     "download_history": "Pakua historia kama CSV",
     "empty": "Hakuna historia bado"
+  },
+  "partnership": {
+    "title": "Mashirika ya washirika",
+    "button": "Andika katika shirika la washirika",
+    "name": "Jina la shirika la mshirika"
   }
 }

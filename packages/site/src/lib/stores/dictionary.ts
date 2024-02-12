@@ -1,7 +1,8 @@
 import { writable } from 'svelte/store';
 import type { IDictionary } from '@living-dictionaries/types';
 
-export const dictionary = writable<IDictionary>({
+/** @deprecated use dictionary from layout data instead */
+export const dictionary_deprecated = writable<IDictionary>({
   id: '',
   name: '---',
   public: false,

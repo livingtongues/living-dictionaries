@@ -2,7 +2,7 @@
   import { page } from '$app/stores';
   import { add, deleteDocumentOnline, updateOnline, Collection } from 'sveltefirets';
   import { where } from 'firebase/firestore';
-  import { isManager, isContributor, dictionary, admin } from '$lib/stores';
+  import { isManager, isContributor, dictionary_deprecated as dictionary, admin } from '$lib/stores';
   import type { IInvite, IHelper } from '@living-dictionaries/types';
   import { Button, ShowHide } from 'svelte-pieces';
   import { inviteHelper } from '$lib/helpers/inviteHelper';
@@ -10,6 +10,10 @@
   import ContributorInvitationStatus from '$lib/components/contributors/ContributorInvitationStatus.svelte';
   import Citation from './Citation.svelte';
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte';
+  import Partners from './Partners.svelte';
+
+  export let data
+  $: ({ partners } = data)
 
   let helperType: IHelper[];
   let inviteType: IInvite[];
@@ -70,7 +74,8 @@
     {$page.data.t('contributors.invite_manager')}
   </Button>
 {/if}
-<hr style="margin: 20px 0;" />
+
+<hr class="my-4" />
 <h3 class="font-semibold text-lg mb-1 mt-3">
   {$page.data.t('dictionary.contributors')}
 </h3>
@@ -140,7 +145,8 @@
     </ShowHide>
   {/if}
 </div>
-<hr style="margin: 20px 0;" />
+
+<hr class="my-4" />
 <h3 class="font-semibold text-lg mb-1 mt-3">
   {$page.data.t('contributors.other_contributors')}
 </h3>
@@ -173,14 +179,9 @@
   </Collection>
 </div>
 
-<!-- <div class="text-gray-600 my-1 text-sm">
-    {$page.data.t('dictionary.contributors')} = {$page.data.t(
-      'contributors.speakers_other_collaborators',
-      {
-        default: 'speakers and any other collaborators',
-      }
-    )}
-  </div> -->
+<!-- <div class="text-gray-600 mb-2 text-sm">
+  ({$page.data.t('contributors.speakers_other_collaborators')})
+</div> -->
 
 {#if $isManager}
   <Button onclick={writeIn} form="filled">
@@ -189,9 +190,12 @@
   </Button>
 {/if}
 
+<hr class="my-4" />
+<Partners partners={$partners} can_edit={$isManager} hideLivingTonguesLogo={$dictionary.hideLivingTonguesLogo} admin={$admin} {...data.partner_edits} />
+
 <!-- Not using contributors.request_to_add_manager -->
 
-<hr class="my-3" />
+<hr class="my-4" />
 
 {#if $dictionary.id != 'onondaga'}
   <h3 class="font-semibold mb-1 mt-3">
@@ -235,7 +239,7 @@
   {$page.data.t('contributors.how_to_cite_academics')}
 </h3>
 
-<Citation isManager={$isManager} dictionary={$dictionary} />
+<Citation isManager={$isManager} dictionary={$dictionary} partners={$partners} />
 
 <div class="mb-12" />
 

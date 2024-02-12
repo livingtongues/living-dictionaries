@@ -9,7 +9,7 @@
   import { Modal } from 'svelte-pieces';
   import { createEventDispatcher } from 'svelte';
   import { apiFetch } from '$lib/client/apiFetch';
-  import type { NewUserRequestBody } from '../../../routes/api/email/new_user/+server';
+  import type { NewUserRequestBody } from '$api/email/new_user/+server';
   import { page } from '$app/stores';
   import { ResponseCodes } from '$lib/constants';
 

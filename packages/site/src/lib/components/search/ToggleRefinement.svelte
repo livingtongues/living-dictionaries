@@ -4,6 +4,7 @@
   import { connectToggleRefinement } from 'instantsearch.js/es/connectors';
   import { onMount } from 'svelte';
 
+  // ! Can't use the same attribute twice with InstantSearch (ie - cannot do hasImage true and hasImage false)
   export let search: InstantSearch,
     attribute = '',
     on = true,
