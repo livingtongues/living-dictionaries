@@ -42,7 +42,7 @@
 <Header />
 
 <main
-  class="top-12 fixed bottom-0 right-0 left-0 flex flex-col sm:flex-row border-t border-gray-200">
+  class="top-18 fixed bottom-0 right-0 left-0 flex flex-col sm:flex-row border-t border-gray-200">
   <div class="sm:w-72 max-h-full">
     <Search
       {dictionaries}
