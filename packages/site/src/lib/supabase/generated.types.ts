@@ -48,6 +48,119 @@ export interface Database {
         }
         Relationships: []
       }
+      example_sentence_updates: {
+        Row: {
+          column: Database['public']['Enums']['example_sentence_columns'] | null
+          dictionary_id: string
+          example_sentence_id: string
+          id: string
+          new_value: string | null
+          old_value: string | null
+          sense_id: string
+          table: Database['public']['Enums']['example_sentence_tables']
+          timestamp: string
+          user_id: string
+        }
+        Insert: {
+          column?:
+            | Database['public']['Enums']['example_sentence_columns']
+            | null
+          dictionary_id: string
+          example_sentence_id: string
+          id: string
+          new_value?: string | null
+          old_value?: string | null
+          sense_id: string
+          table: Database['public']['Enums']['example_sentence_tables']
+          timestamp?: string
+          user_id: string
+        }
+        Update: {
+          column?:
+            | Database['public']['Enums']['example_sentence_columns']
+            | null
+          dictionary_id?: string
+          example_sentence_id?: string
+          id?: string
+          new_value?: string | null
+          old_value?: string | null
+          sense_id?: string
+          table?: Database['public']['Enums']['example_sentence_tables']
+          timestamp?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'example_sentence_updates_example_sentence_id_fkey'
+            columns: ['example_sentence_id']
+            isOneToOne: false
+            referencedRelation: 'example_sentences'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'example_sentence_updates_sense_id_fkey'
+            columns: ['sense_id']
+            isOneToOne: false
+            referencedRelation: 'senses'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'example_sentence_updates_user_id_fkey'
+            columns: ['user_id']
+            isOneToOne: false
+            referencedRelation: 'users'
+            referencedColumns: ['id']
+          }
+        ]
+      }
+      example_sentences: {
+        Row: {
+          created_at: string
+          created_by: string
+          deleted: string | null
+          id: string
+          text: string
+          translation: Json | null
+          updated_at: string
+          updated_by: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          deleted?: string | null
+          id: string
+          text: string
+          translation?: Json | null
+          updated_at?: string
+          updated_by: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          deleted?: string | null
+          id?: string
+          text?: string
+          translation?: Json | null
+          updated_at?: string
+          updated_by?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'example_sentences_created_by_fkey'
+            columns: ['created_by']
+            isOneToOne: false
+            referencedRelation: 'users'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'example_sentences_updated_by_fkey'
+            columns: ['updated_by']
+            isOneToOne: false
+            referencedRelation: 'users'
+            referencedColumns: ['id']
+          }
+        ]
+      }
       senses: {
         Row: {
           created_at: string
@@ -96,6 +209,52 @@ export interface Database {
         }
         Relationships: []
       }
+      senses_in_example_sentences: {
+        Row: {
+          created_at: string
+          created_by: string
+          deleted: string | null
+          example_sentence_id: string
+          sense_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          deleted?: string | null
+          example_sentence_id: string
+          sense_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          deleted?: string | null
+          example_sentence_id?: string
+          sense_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'senses_in_example_sentences_created_by_fkey'
+            columns: ['created_by']
+            isOneToOne: false
+            referencedRelation: 'users'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'senses_in_example_sentences_example_sentence_id_fkey'
+            columns: ['example_sentence_id']
+            isOneToOne: false
+            referencedRelation: 'example_sentences'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'senses_in_example_sentences_sense_id_fkey'
+            columns: ['sense_id']
+            isOneToOne: false
+            referencedRelation: 'senses'
+            referencedColumns: ['id']
+          }
+        ]
+      }
     }
     Views: {
       entries_view: {
@@ -119,6 +278,10 @@ export interface Database {
         | 'noun_class'
         | 'definition'
       entry_tables: 'senses'
+      example_sentence_columns: 'deleted' | 'text' | 'translation'
+      example_sentence_tables:
+        | 'example_sentences'
+        | 'senses_in_example_sentences'
     }
     CompositeTypes: {
       [_ in never]: never
