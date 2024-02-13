@@ -52,6 +52,25 @@ const partners = [
 
 export const variants: Variant<Component>[] = [
   {
+    name: 'only admin',
+    props: {
+      admin: 1,
+      can_edit: true,
+      partners,
+      ...edits,
+    },
+  },
+  {
+    name: 'only admin without Living Tongues logo',
+    props: {
+      hideLivingTonguesLogo: true,
+      admin: 1,
+      can_edit: true,
+      partners,
+      ...edits,
+    },
+  },
+  {
     name: 'can edit',
     props: {
       can_edit: true,
@@ -62,6 +81,14 @@ export const variants: Variant<Component>[] = [
   {
     name: 'viewer',
     props: {
+      partners,
+      ...edits,
+    },
+  },
+  {
+    name: 'viewer without Living Tongues logo',
+    props: {
+      hideLivingTonguesLogo: true,
       partners,
       ...edits,
     },
