@@ -324,7 +324,8 @@
     "instructions_1": "Nếu bạn đã có dữ liệu ngôn ngữ mà bạn muốn nhập vào từ điển của mình, vui lòng làm theo các bước dưới đây.",
     "instructions_2": "Nhấp vào liên kết màu xanh lam đến nút Mẫu bên dưới. Tải xuống mẫu dưới dạng tệp Excel hoặc tạo bản sao trên Google Docs. Chỉnh sửa mẫu theo nhu cầu dự án của bạn. Sao chép và dán dữ liệu của bạn vào bảng tính.",
     "instructions_3": "Sử dụng liên hệ với chúng tôi dưới đây để liên hệ với chúng tôi. Hãy cho chúng tôi biết rằng bạn có một bảng tính mới đã sẵn sàng để nhập. Hỏi chúng tôi bất kỳ câu hỏi bạn có. Chúng tôi sẽ trả lời bạn qua email và sau đó bạn có thể gửi cho chúng tôi tệp của bạn.",
-    "instructions_4": "Để gửi cho chúng tôi dữ liệu được xuất từ ​​các phần mềm từ điển như Flex, Lexique Pro, Shoebox, vui lòng sử dụng nút Liên hệ với chúng tôi bên dưới và cho chúng tôi biết chi tiết về dự án của bạn."
+    "instructions_4": "Để gửi cho chúng tôi dữ liệu được xuất từ ​​các phần mềm từ điển như Flex, Lexique Pro, Shoebox, vui lòng sử dụng nút Liên hệ với chúng tôi bên dưới và cho chúng tôi biết chi tiết về dự án của bạn.",
+    "no_imports": "Chúng tôi hiện đang làm việc với nhiều cộng đồng và các tổ chức đối tác để nhập một số lượng lớn các mục từ điển vào nền tảng này. Chúng tôi cũng đang thực hiện các cập nhật lớn cho cơ sở dữ liệu của chúng tôi. Chúng tôi sẽ chấp nhận nhập dữ liệu mới bắt đầu vào ngày 1 tháng 5 năm 2024. Chúng tôi đánh giá cao sự kiên nhẫn của bạn và chúng tôi xin lỗi vì sự bất tiện này."
   },
   "history": {
     "history": "Lịch sử",
@@ -338,7 +339,7 @@
     "created": "Tạo",
     "edited": "Đã chỉnh sửa",
     "deleted": "Bị xóa",
-    "history_search": "Tìm kiếm các mục, trình soạn thảo, trường và giá trị",
+    "history_search": "Tìm kiếm các mục, biên tập viên, trường và giá trị",
     "download_history": "Tải xuống lịch sử dưới dạng CSV",
     "empty": "Chưa có lịch sử"
   },
