@@ -11,7 +11,7 @@
   <LoadingIndicator />
 {/if}
 
-<div class:hidden={hideMessage} class="bg-amber-400 pl-4 text-sm">
+<div class:hidden={hideMessage} class="bg-amber-400 pl-4 sticky top-0 z-10 md:text-sm text-xs">
   <span class="cursor-pointer" on:click={() => hideMessage = true}>&times;</span>
   <strong>Attention:</strong> New dictionary entries are not being displayed correctly at this time. This will be resolved on February 15, 2024. We apologize for the inconvenience.
 </div>
