@@ -1,11 +1,12 @@
 <script lang="ts">
-  import { page } from '$app/stores';
-  import { Button, ShowHide } from 'svelte-pieces';
-  import { dictionary_deprecated as dictionary } from '$lib/stores';
+// import { page } from '$app/stores';
+  // import { Button, ShowHide } from 'svelte-pieces';
+  // import { dictionary_deprecated as dictionary } from '$lib/stores';
 </script>
 
 <div class="max-w-screen-md ml-4">
-  <div class="p-2">
+  <!-- Temporarily disabling imports -->
+  <!-- <div class="p-2">
     <h3
       class="mb-6 text-3xl leading-8 font-bold tracking-tight text-gray-900
         sm:text-4xl sm:leading-10">
@@ -42,5 +43,6 @@
         {/await}
       {/if}
     </ShowHide>
-  </div>
+  </div> -->
+  <p class="m-10 text-xl font-semibold">We are currently working with many communities and partner organizations to import a large number of dictionary entries to this platform. We are also making big updates to our database. We will accept new data imports starting on May 1, 2024. We appreciate your patience, and we apologize for the inconvenience.</p>
 </div>
