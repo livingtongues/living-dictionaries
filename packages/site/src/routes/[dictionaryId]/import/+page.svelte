@@ -1,6 +1,6 @@
 <script lang="ts">
-// import { page } from '$app/stores';
-  // import { Button, ShowHide } from 'svelte-pieces';
+  import { page } from '$app/stores';
+// import { Button, ShowHide } from 'svelte-pieces';
   // import { dictionary_deprecated as dictionary } from '$lib/stores';
 </script>
 
@@ -44,5 +44,5 @@
       {/if}
     </ShowHide>
   </div> -->
-  <p class="m-10 text-xl font-semibold">We are currently working with many communities and partner organizations to import a large number of dictionary entries to this platform. We are also making big updates to our database. We will accept new data imports starting on May 1, 2024. We appreciate your patience, and we apologize for the inconvenience.</p>
+  <p class="m-10 text-xl font-semibold">{$page.data.t('import_page.no_imports')}</p>
 </div>

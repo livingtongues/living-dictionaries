@@ -122,7 +122,7 @@
     "con_lang_description": "这本针对构造语言的字典（近年来人类发明的语言，一本书还是电影）？如果是，请简要描述。",
     "uncertainty": "我不知道",
     "select_region": "选择区域",
-    "secondary_coordinates": "次级坐标",
+    "secondary_coordinates": "次要坐标",
     "map_instructions": "单击地图以添加辅助坐标。",
     "print_access": "允许观众打印词典",
     "primary_coordinate": "主坐标"
@@ -138,7 +138,7 @@
     "grammar": "语法",
     "entries": "词条",
     "youtube_terms": "YouTube条款",
-    "google_terms": "Google条款",
+    "google_terms": "Google术语",
     "full_title": "{dictionary_name} 活字典"
   },
   "entry": {
@@ -324,7 +324,8 @@
     "instructions_1": "如果您已经有要导入到字典中的语言数据，请按照以下步骤操作。",
     "instructions_2": "单击下面的蓝色“链接到模板”按钮。将模板作为Excel文件下载，或在Google文档上创建副本。根据您的项目的需求编辑模板。将数据复制并粘贴到电子表格中。",
     "instructions_3": "使用下面的“联系我们”与我们联系。让我们知道，您有一个准备进口的新电子表格。问我们任何问题。我们将通过电子邮件回复您，然后您可以向我们发送您的文件。",
-    "instructions_4": "要向我们发送从Flex，Lexique Pro，Shoebox等字典软件导出的数据，请使用下面的“联系我们”按钮，并告诉我们您的项目的详细信息。"
+    "instructions_4": "要向我们发送从Flex，Lexique Pro，Shoebox等字典软件导出的数据，请使用下面的“联系我们”按钮，并告诉我们您的项目的详细信息。",
+    "no_imports": "我们目前正在与许多社区和合作伙伴组织合作，以进口大量的词典条目。我们还对数据库进行了重大更新。我们将从2024年5月1日开始接受新的数据进口。我们感谢您的耐心，为您带来的不便，我们深表歉意。"
   },
   "history": {
     "history": "历史",
