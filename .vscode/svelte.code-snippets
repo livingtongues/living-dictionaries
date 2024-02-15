@@ -30,7 +30,7 @@
 		"scope": "javascript,typescript",
 		"prefix": "v-test",
 		"body": [
-			"test('$1', () => {",
+			"test($1, () => {",
 			"  expect($2).toEqual();",
 			"  expect($3).toMatchInlineSnapshot();",
 			"});",
@@ -40,7 +40,7 @@
 		"scope": "javascript,typescript",
 		"prefix": "v-desc",
 		"body": [
-			"describe('$1', () => {",
+			"describe($1, () => {",
 			"  test('$2', () => {",
 			"    expect($3).toEqual();",
 			"    expect($4).toMatchInlineSnapshot();",
