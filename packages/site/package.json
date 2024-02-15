@@ -6,6 +6,7 @@
   "main": "src/lib/index.ts",
   "scripts": {
     "dev": "vite dev",
+		"prod": "vite dev --mode production",
     "build": "vite build",
     "preview": "vite preview",
     "sync": "svelte-kit sync",
