@@ -6,7 +6,7 @@
   "main": "src/lib/index.ts",
   "scripts": {
     "dev": "vite dev",
-		"prod": "vite dev --mode production",
+    "prod": "vite dev --mode production",
     "build": "vite build",
     "preview": "vite preview",
     "sync": "svelte-kit sync",
@@ -17,6 +17,7 @@
     "test:e2e": "playwright test",
     "test:components:update": "playwright test kitbook --update-snapshots",
     "test:components": "playwright test kitbook",
+    "reset-db": "pnpx tsx ./src/lib/mocks/seed/write-seed-and-reset-db.ts",
     "local-kitbook": "link:../../../kitbook/packages/kitbook"
   },
   "devDependencies": {
@@ -38,6 +39,7 @@
     "@types/geojson": "^7946.0.10",
     "@types/mapbox-gl": "^2.7.6",
     "@types/mapbox__mapbox-gl-geocoder": "^4.7.3",
+    "@types/pg": "^8.10.9",
     "@types/recordrtc": "^5.6.10",
     "@unocss/preset-icons": "^0.53.6",
     "@unocss/svelte-scoped": "^0.53.6",
@@ -54,6 +56,7 @@
     "kitbook": "1.0.0-beta.12",
     "logrocket": "^2.1.2",
     "lz-string": "^1.4.4",
+    "pg": "^8.11.3",
     "recordrtc": "^5.6.2",
     "svelte": "^4.2.10",
     "svelte-check": "^3.6.4",
