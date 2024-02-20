@@ -1,6 +1,6 @@
 <script lang="ts">
   // import SeoMetaTags from '$lib/components/SeoMetaTags.svelte';
-  import { onMount, getContext } from 'svelte';
+  import { onMount, getContext, onDestroy, tick } from 'svelte';
   import { Doc } from 'sveltefirets';
   import { dictionary_deprecated as dictionary, canEdit, admin } from '$lib/stores';
   import ListEntry from './ListEntry.svelte';
@@ -14,6 +14,7 @@
   import { page } from '$app/stores';
 
   const search: InstantSearch = getContext('search');
+  let lastScrollPoint = 0;
 
   onMount(() => {
     search.addWidgets([
@@ -22,13 +23,26 @@
         hitsPerPage: 30,
       }),
     ]);
+    lastScrollPoint = parseInt(localStorage.getItem('list_scroll_point')) || 0;
+  });
+
+  async function handleMounted() {
+    await tick();
+    window.scrollTo({top: lastScrollPoint});
+  }
+
+  onDestroy(() => {
+    localStorage.setItem('list_scroll_point', JSON.stringify(lastScrollPoint))
   });
 </script>
+
+<svelte:window on:scroll={() => lastScrollPoint = window.scrollY} />
 
 <Hits {search} let:entries>
   {#if $canEdit}
     {#each entries as algoliaEntry (algoliaEntry.id)}
       <Doc
+        on:ref={handleMounted}
         path="dictionaries/{$dictionary.id}/words/{algoliaEntry.id}"
         startWith={algoliaEntry}
         let:data={entry}>
