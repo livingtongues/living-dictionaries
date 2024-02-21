@@ -12,6 +12,8 @@
   import type { InstantSearch } from 'instantsearch.js';
   import { updateFirestoreEntry } from '$lib/helpers/entry/update';
   import { page } from '$app/stores';
+  import { lastEntriesUrl } from '$lib/stores/lastEntriesUrl';
+  import { sliceUrl, getScrollPointFromLocalStorage } from '$lib/helpers/scrollPoint';
 
   const search: InstantSearch = getContext('search');
   let lastScrollPoint = 0;
@@ -23,7 +25,7 @@
         hitsPerPage: 30,
       }),
     ]);
-    lastScrollPoint = parseInt(localStorage.getItem('list_scroll_point')) || 0;
+    lastScrollPoint = sliceUrl($lastEntriesUrl) === `/${$dictionary.id}/entry` ? getScrollPointFromLocalStorage() : 0;
   });
 
   async function handleMounted() {
