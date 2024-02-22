@@ -29,7 +29,6 @@
   beforeUpdate(() => {
     if (hits.length)
       on_updated();
-
   })
 </script>
 

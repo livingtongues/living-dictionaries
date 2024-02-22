@@ -1,14 +1,5 @@
 import { tick } from 'svelte'
 
-// export function sliceUrl(url: string): string {
-//   return url.slice(0, url.lastIndexOf('/'));
-// }
-
-
-// export function getScrollPointFromLocalStorage(local_storage_scroll_point_key: string): number {
-//   return parseInt(sessionStorage.getItem(local_storage_scroll_point_key)) || 0
-// }
-
 export function save_scroll_point(url: string, pixels_from_top: number) {
   const last_scroll_point = {
     url,

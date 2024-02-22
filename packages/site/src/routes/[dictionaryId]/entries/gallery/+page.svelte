@@ -15,7 +15,7 @@
   import { browser } from '$app/environment';
 
   const search: InstantSearch = getContext('search');
-  let scrollYPoint = 0;
+  let pixels_from_top = 0;
 
   onMount(() => {
     let refine: (value?: { isRefined: boolean }) => void;
@@ -34,7 +34,6 @@
       }),
     ]);
 
-    // lastScrollPoint = sliceUrl($lastEntriesUrl) === `/${$dictionary.id}/entry` ? getScrollPointFromLocalStorage('gallery_scroll_point') : 0;
     refine({ isRefined: false });
 
     return () => {
@@ -45,14 +44,11 @@
   onDestroy(() => {
     if (!browser || !$navigating?.from?.url) return;
     const { href } = $navigating.from.url;
-    const href_from_location = window.location.href; // but I don't know if the url has already changed when this is destroyed so this probably won't be right or if it's the same prefer the navigating
-    // eslint-disable-next-line no-console
-    console.log('href', {href, href_from_location})
-    save_scroll_point(href, scrollYPoint);
+    save_scroll_point(href, pixels_from_top);
   });
 </script>
 
-<svelte:window bind:scrollY={scrollYPoint} />
+<svelte:window bind:scrollY={pixels_from_top} />
 
 <Hits {search} let:entries on_updated={restore_scroll_point}>
   <div class="gallery">
