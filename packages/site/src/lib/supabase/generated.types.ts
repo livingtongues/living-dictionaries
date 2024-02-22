@@ -72,15 +72,109 @@ export interface Database {
         }
         Relationships: []
       }
+      senses: {
+        Row: {
+          created_at: string
+          created_by: string
+          definition: Json | null
+          deleted: string | null
+          entry_id: string
+          glosses: Json | null
+          id: string
+          noun_class: string | null
+          parts_of_speech: string[] | null
+          semantic_domains: string[] | null
+          updated_at: string
+          updated_by: string
+          write_in_semantic_domains: string[] | null
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          definition?: Json | null
+          deleted?: string | null
+          entry_id: string
+          glosses?: Json | null
+          id: string
+          noun_class?: string | null
+          parts_of_speech?: string[] | null
+          semantic_domains?: string[] | null
+          updated_at?: string
+          updated_by: string
+          write_in_semantic_domains?: string[] | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          definition?: Json | null
+          deleted?: string | null
+          entry_id?: string
+          glosses?: Json | null
+          id?: string
+          noun_class?: string | null
+          parts_of_speech?: string[] | null
+          semantic_domains?: string[] | null
+          updated_at?: string
+          updated_by?: string
+          write_in_semantic_domains?: string[] | null
+        }
+        Relationships: []
+      }
+      senses_in_sentences: {
+        Row: {
+          created_at: string
+          created_by: string
+          deleted: string | null
+          sense_id: string
+          sentence_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          deleted?: string | null
+          sense_id: string
+          sentence_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          deleted?: string | null
+          sense_id?: string
+          sentence_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'senses_in_sentences_created_by_fkey'
+            columns: ['created_by']
+            isOneToOne: false
+            referencedRelation: 'users'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'senses_in_sentences_sense_id_fkey'
+            columns: ['sense_id']
+            isOneToOne: false
+            referencedRelation: 'senses'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'senses_in_sentences_sentence_id_fkey'
+            columns: ['sentence_id']
+            isOneToOne: false
+            referencedRelation: 'sentences'
+            referencedColumns: ['id']
+          }
+        ]
+      }
       sentence_updates: {
         Row: {
           column: Database['public']['Enums']['sentence_columns'] | null
           dictionary_id: string
-          sentence_id: string
           id: string
           new_value: string | null
           old_value: string | null
           sense_id: string | null
+          sentence_id: string
           table: Database['public']['Enums']['sentence_tables']
           timestamp: string
           user_id: string
@@ -88,11 +182,11 @@ export interface Database {
         Insert: {
           column?: Database['public']['Enums']['sentence_columns'] | null
           dictionary_id: string
-          sentence_id: string
           id: string
           new_value?: string | null
           old_value?: string | null
           sense_id?: string | null
+          sentence_id: string
           table: Database['public']['Enums']['sentence_tables']
           timestamp?: string
           user_id: string
@@ -100,11 +194,11 @@ export interface Database {
         Update: {
           column?: Database['public']['Enums']['sentence_columns'] | null
           dictionary_id?: string
-          sentence_id?: string
           id?: string
           new_value?: string | null
           old_value?: string | null
           sense_id?: string | null
+          sentence_id?: string
           table?: Database['public']['Enums']['sentence_tables']
           timestamp?: string
           user_id?: string
@@ -118,17 +212,17 @@ export interface Database {
             referencedColumns: ['id']
           },
           {
-            foreignKeyName: 'sentence_updates_sentence_id_fkey'
-            columns: ['sentence_id']
-            isOneToOne: false
-            referencedRelation: 'sentences'
-            referencedColumns: ['id']
-          },
-          {
             foreignKeyName: 'sentence_updates_sense_id_fkey'
             columns: ['sense_id']
             isOneToOne: false
             referencedRelation: 'senses'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'sentence_updates_sentence_id_fkey'
+            columns: ['sentence_id']
+            isOneToOne: false
+            referencedRelation: 'sentences'
             referencedColumns: ['id']
           },
           {
@@ -184,100 +278,6 @@ export interface Database {
             columns: ['updated_by']
             isOneToOne: false
             referencedRelation: 'users'
-            referencedColumns: ['id']
-          }
-        ]
-      }
-      senses: {
-        Row: {
-          created_at: string
-          created_by: string
-          definition: Json | null
-          deleted: string | null
-          entry_id: string
-          glosses: Json | null
-          id: string
-          noun_class: string | null
-          parts_of_speech: string[] | null
-          semantic_domains: string[] | null
-          updated_at: string
-          updated_by: string
-          write_in_semantic_domains: string[] | null
-        }
-        Insert: {
-          created_at?: string
-          created_by: string
-          definition?: Json | null
-          deleted?: string | null
-          entry_id: string
-          glosses?: Json | null
-          id: string
-          noun_class?: string | null
-          parts_of_speech?: string[] | null
-          semantic_domains?: string[] | null
-          updated_at?: string
-          updated_by: string
-          write_in_semantic_domains?: string[] | null
-        }
-        Update: {
-          created_at?: string
-          created_by?: string
-          definition?: Json | null
-          deleted?: string | null
-          entry_id?: string
-          glosses?: Json | null
-          id?: string
-          noun_class?: string | null
-          parts_of_speech?: string[] | null
-          semantic_domains?: string[] | null
-          updated_at?: string
-          updated_by?: string
-          write_in_semantic_domains?: string[] | null
-        }
-        Relationships: []
-      }
-      senses_in_sentences: {
-        Row: {
-          created_at: string
-          created_by: string
-          deleted: string | null
-          sentence_id: string
-          sense_id: string
-        }
-        Insert: {
-          created_at?: string
-          created_by: string
-          deleted?: string | null
-          sentence_id: string
-          sense_id: string
-        }
-        Update: {
-          created_at?: string
-          created_by?: string
-          deleted?: string | null
-          sentence_id?: string
-          sense_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: 'senses_in_sentences_created_by_fkey'
-            columns: ['created_by']
-            isOneToOne: false
-            referencedRelation: 'users'
-            referencedColumns: ['id']
-          },
-          {
-            foreignKeyName: 'senses_in_sentences_sentence_id_fkey'
-            columns: ['sentence_id']
-            isOneToOne: false
-            referencedRelation: 'sentences'
-            referencedColumns: ['id']
-          },
-          {
-            foreignKeyName: 'senses_in_sentences_sense_id_fkey'
-            columns: ['sense_id']
-            isOneToOne: false
-            referencedRelation: 'senses'
             referencedColumns: ['id']
           }
         ]
