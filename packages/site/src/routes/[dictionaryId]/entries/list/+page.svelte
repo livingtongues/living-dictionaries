@@ -1,6 +1,6 @@
 <script lang="ts">
   // import SeoMetaTags from '$lib/components/SeoMetaTags.svelte';
-  import { onMount, getContext, onDestroy, tick } from 'svelte';
+  import { onMount, getContext, onDestroy } from 'svelte';
   import { Doc } from 'sveltefirets';
   import { dictionary_deprecated as dictionary, canEdit, admin } from '$lib/stores';
   import ListEntry from './ListEntry.svelte';
@@ -11,11 +11,12 @@
   import { deleteImage } from '$lib/helpers/delete';
   import type { InstantSearch } from 'instantsearch.js';
   import { updateFirestoreEntry } from '$lib/helpers/entry/update';
-  import { page } from '$app/stores';
-  // import { lastEntriesUrl } from '$lib/stores/lastEntriesUrl';
+  import { navigating, page } from '$app/stores';
+  import { save_scroll_point, restore_scroll_point } from '$lib/helpers/scrollPoint';
+  import { browser } from '$app/environment';
 
   const search: InstantSearch = getContext('search');
-  let lastScrollPoint = 0;
+  let pixels_from_top = 0;
 
   onMount(() => {
     search.addWidgets([
@@ -27,23 +28,19 @@
   // lastScrollPoint = sliceUrl($lastEntriesUrl) === `/${$dictionary.id}/entry` ? getScrollPointFromLocalStorage('list_scroll_point') : 0;
   });
 
-  async function handleMounted() {
-    await tick();
-    window.scrollTo({top: lastScrollPoint});
-  }
-
   onDestroy(() => {
-    localStorage.setItem('list_scroll_point', JSON.stringify(lastScrollPoint))
+    if (!browser || !$navigating?.from?.url) return;
+    const { href } = $navigating.from.url;
+    save_scroll_point(href, pixels_from_top);
   });
 </script>
 
-<svelte:window on:scroll={() => lastScrollPoint = window.scrollY} />
+<svelte:window bind:scrollY={pixels_from_top} />
 
-<Hits {search} let:entries>
+<Hits {search} let:entries on_updated={restore_scroll_point}>
   {#if $canEdit}
     {#each entries as algoliaEntry (algoliaEntry.id)}
       <Doc
-        on:ref={handleMounted}
         path="dictionaries/{$dictionary.id}/words/{algoliaEntry.id}"
         startWith={algoliaEntry}
         let:data={entry}>

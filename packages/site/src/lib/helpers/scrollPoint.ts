@@ -1,4 +1,4 @@
-import { tick } from 'svelte'
+import { tick } from 'svelte';
 
 export function save_scroll_point(url: string, pixels_from_top: number) {
   const last_scroll_point = {
