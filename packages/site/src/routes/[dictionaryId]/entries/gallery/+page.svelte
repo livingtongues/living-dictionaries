@@ -15,6 +15,7 @@
   import { browser } from '$app/environment';
 
   const search: InstantSearch = getContext('search');
+  let scrollYPoint = 0;
 
   onMount(() => {
     let refine: (value?: { isRefined: boolean }) => void;
@@ -43,13 +44,15 @@
 
   onDestroy(() => {
     if (!browser || !$navigating?.from?.url) return;
-    const { href } = $navigating.from.url
+    const { href } = $navigating.from.url;
     const href_from_location = window.location.href; // but I don't know if the url has already changed when this is destroyed so this probably won't be right or if it's the same prefer the navigating
     // eslint-disable-next-line no-console
-    console.log({href, href_from_location})
-    save_scroll_point(href)
+    console.log('href', {href, href_from_location})
+    save_scroll_point(href, scrollYPoint);
   });
 </script>
+
+<svelte:window bind:scrollY={scrollYPoint} />
 
 <Hits {search} let:entries on_updated={restore_scroll_point}>
   <div class="gallery">

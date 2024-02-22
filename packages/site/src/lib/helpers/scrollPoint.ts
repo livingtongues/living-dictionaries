@@ -9,8 +9,7 @@ import { tick } from 'svelte'
 //   return parseInt(sessionStorage.getItem(local_storage_scroll_point_key)) || 0
 // }
 
-export function save_scroll_point(url: string) {
-  const pixels_from_top = window.scrollY
+export function save_scroll_point(url: string, pixels_from_top: number) {
   const last_scroll_point = {
     url,
     pixels_from_top,
@@ -19,13 +18,11 @@ export function save_scroll_point(url: string) {
 }
 
 export async function restore_scroll_point() {
-  const url = window.location.href
-  // eslint-disable-next-line no-console
-  console.log({url})
-  const last_scroll_point = JSON.parse(sessionStorage.getItem('entries_scroll_point'))
+  const url = window.location.href;
+  const last_scroll_point = JSON.parse(sessionStorage.getItem('entries_scroll_point'));
   if (last_scroll_point && last_scroll_point.url === url) {
-    await tick()
-    window.scrollTo(0, last_scroll_point.pixels_from_top)
-    sessionStorage.setItem('entries_scroll_point', null)
+    await tick();
+    window.scrollTo(0, last_scroll_point.pixels_from_top);
+    sessionStorage.setItem('entries_scroll_point', null);
   }
 }

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
+  import { onMount, beforeUpdate } from 'svelte';
   import { connectHits } from 'instantsearch.js/es/connectors';
   import { limit, orderBy } from 'firebase/firestore';
   import { dictionary_deprecated as dictionary } from '$lib/stores';
@@ -19,14 +19,18 @@
   onMount(() => {
     const customHits = connectHits((params) => {
       hits = params.hits.map((hit) => {
-        if (hits.length)
-          on_updated();
         return { ...hit, id: hit.objectID };
       }) as unknown as LDAlgoliaHit[];
     });
 
     search.addWidgets([customHits({})]);
   });
+
+  beforeUpdate(() => {
+    if (hits.length)
+      on_updated();
+
+  })
 </script>
 
 <slot {entries}>Loading...</slot>
