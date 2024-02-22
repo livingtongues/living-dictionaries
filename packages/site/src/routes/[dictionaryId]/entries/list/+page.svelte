@@ -25,7 +25,7 @@
         hitsPerPage: 30,
       }),
     ]);
-    lastScrollPoint = sliceUrl($lastEntriesUrl) === `/${$dictionary.id}/entry` ? getScrollPointFromLocalStorage() : 0;
+    lastScrollPoint = sliceUrl($lastEntriesUrl) === `/${$dictionary.id}/entry` ? getScrollPointFromLocalStorage('list_scroll_point') : 0;
   });
 
   async function handleMounted() {
