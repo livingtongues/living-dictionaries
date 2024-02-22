@@ -9,6 +9,30 @@ export type Json =
 export interface Database {
   public: {
     Tables: {
+      dictionaries: {
+        Row: {
+          id: string
+        }
+        Insert: {
+          id: string
+        }
+        Update: {
+          id?: string
+        }
+        Relationships: []
+      }
+      entries: {
+        Row: {
+          id: string
+        }
+        Insert: {
+          id: string
+        }
+        Update: {
+          id?: string
+        }
+        Relationships: []
+      }
       entry_updates: {
         Row: {
           column: Database['public']['Enums']['entry_columns']
@@ -56,40 +80,43 @@ export interface Database {
           id: string
           new_value: string | null
           old_value: string | null
-          sense_id: string
+          sense_id: string | null
           table: Database['public']['Enums']['sentence_tables']
           timestamp: string
           user_id: string
         }
         Insert: {
-          column?:
-            | Database['public']['Enums']['sentence_columns']
-            | null
+          column?: Database['public']['Enums']['sentence_columns'] | null
           dictionary_id: string
           sentence_id: string
           id: string
           new_value?: string | null
           old_value?: string | null
-          sense_id: string
+          sense_id?: string | null
           table: Database['public']['Enums']['sentence_tables']
           timestamp?: string
           user_id: string
         }
         Update: {
-          column?:
-            | Database['public']['Enums']['sentence_columns']
-            | null
+          column?: Database['public']['Enums']['sentence_columns'] | null
           dictionary_id?: string
           sentence_id?: string
           id?: string
           new_value?: string | null
           old_value?: string | null
-          sense_id?: string
+          sense_id?: string | null
           table?: Database['public']['Enums']['sentence_tables']
           timestamp?: string
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: 'sentence_updates_dictionary_id_fkey'
+            columns: ['dictionary_id']
+            isOneToOne: false
+            referencedRelation: 'dictionaries'
+            referencedColumns: ['id']
+          },
           {
             foreignKeyName: 'sentence_updates_sentence_id_fkey'
             columns: ['sentence_id']
@@ -119,7 +146,7 @@ export interface Database {
           created_by: string
           deleted: string | null
           id: string
-          text: string
+          text: string | null
           translation: Json | null
           updated_at: string
           updated_by: string
@@ -129,7 +156,7 @@ export interface Database {
           created_by: string
           deleted?: string | null
           id: string
-          text: string
+          text?: string | null
           translation?: Json | null
           updated_at?: string
           updated_by: string
@@ -139,7 +166,7 @@ export interface Database {
           created_by?: string
           deleted?: string | null
           id?: string
-          text?: string
+          text?: string | null
           translation?: Json | null
           updated_at?: string
           updated_by?: string
@@ -279,9 +306,7 @@ export interface Database {
         | 'definition'
       entry_tables: 'senses'
       sentence_columns: 'deleted' | 'text' | 'translation'
-      sentence_tables:
-        | 'sentences'
-        | 'senses_in_sentences'
+      sentence_tables: 'sentences' | 'senses_in_sentences'
     }
     CompositeTypes: {
       [_ in never]: never
