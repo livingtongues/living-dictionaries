@@ -10,6 +10,7 @@
   import { Button, ShowHide } from 'svelte-pieces';
 
   export let search: InstantSearch;
+  export let on_updated: () => void = undefined
 
   let hits: LDAlgoliaHit[] = [];
   let recentlyUpdatedEntries: ActualDatabaseEntry[] = [];
@@ -18,6 +19,8 @@
   onMount(() => {
     const customHits = connectHits((params) => {
       hits = params.hits.map((hit) => {
+        if (hits.length)
+          on_updated();
         return { ...hit, id: hit.objectID };
       }) as unknown as LDAlgoliaHit[];
     });
