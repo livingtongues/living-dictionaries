@@ -1,6 +1,16 @@
 import { execute_sql_query_on_db } from './postgres'
-import { sql_string_for_all_seeded_tables } from './to-sql-string'
 import { writeFileSync } from 'fs'
+import { sql_file_string } from './to-sql-string'
+import { users, entry_updates, sentence_updates } from './tables'
+
+function sql_string_for_all_seeded_tables() {
+  return `${sql_file_string('auth.users', users)}
+
+${sql_file_string('entry_updates', entry_updates)}
+
+${sql_file_string('sentence_updates', sentence_updates)}
+`
+}
 
 async function write_seed_and_reset_db() {
   console.info('reseting db from seed sql')

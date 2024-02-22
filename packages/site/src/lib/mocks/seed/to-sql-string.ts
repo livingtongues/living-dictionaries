@@ -1,5 +1,4 @@
 import type { Database } from '$lib/supabase/generated.types'
-import { users, entry_updates } from './tables'
 
 function convert_to_sql_string(value: string | number | object) {
   if (typeof value === 'boolean')
@@ -25,7 +24,7 @@ function convert_to_sql_string(value: string | number | object) {
   throw new Error(`${value} has an unexpected value type: ${typeof value}`)
 }
 
-function sql_file_string(table_name: keyof Database['public']['Tables'] | 'auth.users', rows: object[]) {
+export function sql_file_string(table_name: keyof Database['public']['Tables'] | 'auth.users', rows: object[]) {
   const column_names = Object.keys(rows[0]).sort()
   const column_names_string = `"${column_names.join('", "')}"`
 
@@ -74,11 +73,4 @@ if (import.meta.vitest) {
     ]
     expect(sql_file_string('everything' as 'entry_updates', everything_mock)).toMatchFileSnapshot('./to-sql-string.test.sql')
   })
-}
-
-export function sql_string_for_all_seeded_tables() {
-  return `${sql_file_string('auth.users', users)}
-
-${sql_file_string('entry_updates', entry_updates)}
-`
 }
