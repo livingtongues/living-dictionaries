@@ -36,7 +36,7 @@
       <div class="text-sm leading-5 font-medium text-gray-900">
         Living Tongues Institute for Endangered Languages
       </div>
-      {#if admin > 1}
+      {#if admin}
         <div class="w-1" />
         <Button
           color="red"
@@ -53,7 +53,7 @@
         alt="Living Tongues Institute for Endangered Languages"
         src={LIVING_TONGUES_LOGO} />
     </div>
-  {:else if can_edit}
+  {:else if admin}
     <Button
       onclick={async () => {
         await hide_living_tongues_logo(false);
