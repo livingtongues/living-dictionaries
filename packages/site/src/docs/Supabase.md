@@ -18,6 +18,13 @@ Once you have run `supabase start` you can open the Studio URL to explore your l
 - `supabase gen types typescript --local --schema public > packages/site/src/lib/supabase/generated.types.ts`
 - `supabase gen types typescript --project-id=actkqboqpzniojhgtqzw --schema public > packages/site/src/lib/supabase/generated.types.ts`
 
+## Tests
+
+See [pgTAP docs](https://pgtap.org/documentation.html) and https://supabase.com/docs/guides/database/extensions/pgtap
+
+- `supabase test new <name>` to create a new test file
+- `supabase test db` to run tests
+
 ## Push changes to cloud project
 
 - `supabase login`

@@ -1,7 +1,3 @@
-CREATE TABLE entries (
-
-);
-
 -- connect senses to entries
 
 ALTER TABLE senses

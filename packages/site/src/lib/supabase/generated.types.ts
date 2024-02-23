@@ -170,6 +170,7 @@ export interface Database {
         Row: {
           column: Database['public']['Enums']['sentence_columns'] | null
           dictionary_id: string
+          firebase_email: string | null
           id: string
           new_value: string | null
           old_value: string | null
@@ -182,6 +183,7 @@ export interface Database {
         Insert: {
           column?: Database['public']['Enums']['sentence_columns'] | null
           dictionary_id: string
+          firebase_email?: string | null
           id: string
           new_value?: string | null
           old_value?: string | null
@@ -194,6 +196,7 @@ export interface Database {
         Update: {
           column?: Database['public']['Enums']['sentence_columns'] | null
           dictionary_id?: string
+          firebase_email?: string | null
           id?: string
           new_value?: string | null
           old_value?: string | null

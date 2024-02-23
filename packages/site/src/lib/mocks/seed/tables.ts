@@ -1,4 +1,3 @@
-// import type {  } from '$lib/supabase/database.types'
 import type { TablesInsert } from '$lib/supabase/generated.types'
 
 const uuid_template = '11111111-1111-1111-1111-111111111111'
@@ -25,7 +24,7 @@ const second_entry_first_sense_id = 'aaaaaaaa-bbbb-cccc-dddd-eeeeeefff011';
 
 const first_entry_first_sense_text_field: TablesInsert<'entry_updates'> = {
   id: uuid_template.slice(0, -2) + '01',
-  user_id: seeded_user_id,
+  user_id: seeded_user_email, // testing use of email for Firestore migration compatibility
   dictionary_id,
   entry_id: first_entry_id,
   table: 'senses',
@@ -104,31 +103,104 @@ export const entry_updates: TablesInsert<'entry_updates'>[] = [
   second_entry_first_sense_text_field,
 ]
 
-const first_example_sentence_id = uuid_template.slice(0, -2) + 'a1'
+const first_sentence_id = uuid_template.slice(0, -2) + 'a1'
+const second_sentence_id = uuid_template.slice(0, -2) + 'a2'
+const third_sentence_id = uuid_template.slice(0, -2) + 'a3'
+const fourth_sentence_id = uuid_template.slice(0, -2) + 'a4'
+
+const first_sentence_text_attached_to_first_entry_first_sense: TablesInsert<'sentence_updates'> = {
+  id: uuid_template.slice(0, -2) + '07',
+  dictionary_id,
+  user_id: uuid_template, // uuid_template is just a placeholder and will be replaced by user_id from triggered function lookup from firebase_email
+  firebase_email: seeded_user_email, // testing Firebase auth migration trigger
+  sense_id: first_entry_first_sense_id,
+  sentence_id: first_sentence_id,
+  table: 'sentences',
+  column: 'text',
+  new_value: 'Hi, I am a sentence connected to the first sense of the first entry.',
+}
+
+const first_sentence_translation_no_sense_id_as_not_needed: TablesInsert<'sentence_updates'> = {
+  id: uuid_template.slice(0, -2) + '08',
+  dictionary_id,
+  user_id: seeded_user_id,
+  sentence_id: first_sentence_id,
+  table: 'sentences',
+  column: 'translation',
+  new_value: '{"es":"Hola, soy una oración de ejemplo para el primer sentido de la primera entrada."}',
+}
+
+const second_sentence_soon_to_be_deleted: TablesInsert<'sentence_updates'> = {
+  id: uuid_template.slice(0, -2) + '09',
+  dictionary_id,
+  user_id: seeded_user_id,
+  sense_id: first_entry_first_sense_id,
+  sentence_id: second_sentence_id,
+  table: 'sentences',
+  column: 'text',
+  new_value: 'I am a sentence that will be deleted and should not be in entries_view.',
+}
+
+const second_sentence_deleted: TablesInsert<'sentence_updates'> = {
+  id: uuid_template.slice(0, -2) + '10',
+  dictionary_id,
+  user_id: seeded_user_id,
+  sense_id: first_entry_first_sense_id,
+  sentence_id: second_sentence_id,
+  table: 'sentences',
+  column: 'deleted',
+  new_value: '2024-02-01T07:13:48.267Z',
+}
+
+const third_sentence_attached_to_first_entry_second_sense: TablesInsert<'sentence_updates'> = {
+  id: uuid_template.slice(0, -2) + '11',
+  dictionary_id,
+  user_id: seeded_user_id,
+  sense_id: first_entry_second_sense_id,
+  sentence_id: third_sentence_id,
+  table: 'sentences',
+  column: 'text',
+  new_value: 'Hi, I am a sentence initially connected to the second sense of the first entry that is later added to first sense of the second entry and disconnected from original second sense of first entry.',
+}
+
+const third_sentence_also_attached_to_second_entry_first_sense: TablesInsert<'sentence_updates'> = {
+  id: uuid_template.slice(0, -2) + '12',
+  dictionary_id,
+  user_id: seeded_user_id,
+  sense_id: second_entry_first_sense_id,
+  sentence_id: third_sentence_id,
+  table: 'senses_in_sentences',
+}
+
+const third_sentence_removed_from_original_first_entry_second_sense: TablesInsert<'sentence_updates'> = {
+  id: uuid_template.slice(0, -2) + '13',
+  dictionary_id,
+  user_id: seeded_user_id,
+  sense_id: first_entry_second_sense_id,
+  sentence_id: third_sentence_id,
+  table: 'senses_in_sentences',
+  column: 'deleted',
+  new_value: '2023-11-16T07:13:48.267Z',
+}
+
+const fourth_sentence_attached_to_first_entry_first_sense: TablesInsert<'sentence_updates'> = {
+  id: uuid_template.slice(0, -2) + '14',
+  dictionary_id,
+  user_id: seeded_user_id,
+  sense_id: first_entry_first_sense_id,
+  sentence_id: fourth_sentence_id,
+  table: 'sentences',
+  column: 'text',
+  new_value: 'Hi, I should be the second sentence connected to the first sense of the first entry.',
+}
 
 export const sentence_updates: TablesInsert<'sentence_updates'>[] = [
-  {
-    id: uuid_template.slice(0, -2) + '07',
-    dictionary_id,
-    user_id: seeded_user_id,
-    sense_id: first_entry_first_sense_id,
-    sentence_id: first_example_sentence_id,
-    table: 'sentences',
-    column: 'text',
-    new_value: 'Hi, I am an example sentence for the first sense of the first entry.',
-  },
-  {
-    id: uuid_template.slice(0, -2) + '08',
-    dictionary_id,
-    user_id: seeded_user_id,
-    sense_id: first_entry_first_sense_id,
-    sentence_id: first_example_sentence_id,
-    table: 'sentences',
-    column: 'translation',
-    new_value: '{"es":"Hola, soy una oración de ejemplo para el primer sentido de la primera entrada."}',
-  },
-
-  // TODO: delete example sentence and make sure not in entries_view
-  // TODO: add to additional sense
-  // TODO: delete from original sense
+  first_sentence_text_attached_to_first_entry_first_sense,
+  first_sentence_translation_no_sense_id_as_not_needed,
+  second_sentence_soon_to_be_deleted,
+  second_sentence_deleted,
+  third_sentence_attached_to_first_entry_second_sense,
+  third_sentence_also_attached_to_second_entry_first_sense,
+  third_sentence_removed_from_original_first_entry_second_sense,
+  fourth_sentence_attached_to_first_entry_first_sense,
 ]
