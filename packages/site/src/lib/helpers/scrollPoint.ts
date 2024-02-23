@@ -1,5 +1,7 @@
 import { tick } from 'svelte';
 
+// Temporal solution until we no longer depend on Algolia. After tha we will rely on snapshots: https://svelte.dev/blog/streaming-snapshots-sveltekit#snapshots and only use history back()
+
 export function save_scroll_point(url: string, pixels_from_top: number) {
   const last_scroll_point = {
     url,
