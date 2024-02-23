@@ -340,8 +340,8 @@ importers:
         specifier: ^3.7.1
         version: 3.8.0
       kitbook:
-        specifier: 1.0.0-beta.18
-        version: 1.0.0-beta.18(@sveltejs/kit@2.5.0)(svelte@4.2.10)(typescript@5.1.6)
+        specifier: 1.0.0-beta.20
+        version: 1.0.0-beta.20(@sveltejs/kit@2.5.0)(svelte@4.2.10)(typescript@5.1.6)
       logrocket:
         specifier: ^2.1.2
         version: 2.2.1
@@ -3077,8 +3077,8 @@ packages:
       unocss: 0.53.6(postcss@8.4.35)(vite@5.1.1)
     dev: true
 
-  /@kitbook/mdsvex-shiki-twoslash@1.0.0-beta.18(svelte@4.2.10)(typescript@5.1.6):
-    resolution: {integrity: sha512-E5ChN5C8t48/pWFzPMGLiXJoIDiiOF8ojL/c/yy51RMdDjGXgQHeKf0qF969bixXre+MscCOroBaiOJaECV6/g==}
+  /@kitbook/mdsvex-shiki-twoslash@1.0.0-beta.20(svelte@4.2.10)(typescript@5.1.6):
+    resolution: {integrity: sha512-vOGSnGqm7plr01IFWVuwb8NuU4LCRUpoosheGg7ZKtgiaEuCmOrgcfTPfeaGcksLj6IxRdfSKmgXSD+1mn8ujQ==}
     dependencies:
       fenceparser: 2.2.0
       mdsvex: 0.11.0(svelte@4.2.10)
@@ -3090,8 +3090,8 @@ packages:
       - typescript
     dev: true
 
-  /@kitbook/rehype-display-link-titles@1.0.0-beta.18:
-    resolution: {integrity: sha512-YbBriSuzqgwq/kftIHsj51Qc87VS1PpcoqWXfcvdtiFEZdYU3pgV7MUWFEHCygc6d6j8rihrnVl2t1sa/vO5iw==}
+  /@kitbook/rehype-display-link-titles@1.0.0-beta.20:
+    resolution: {integrity: sha512-/O8pDIbFvtnw8aLRje66F4jeu87MicohOS4Zj34pWM5G38dqwwreDLN94EFARD4nmqvWcYz6Pfnj06AR4LaVBg==}
     dependencies:
       github-slugger: 2.0.0
       unist-util-visit: 4.1.2
@@ -9921,10 +9921,6 @@ packages:
     resolution: {integrity: sha1-Epai1Y/UXxmg9s4B1lcB4sc1tus=}
     dev: false
 
-  /jsonc-parser@3.2.0:
-    resolution: {integrity: sha512-gfFQZrcTc8CnKXp6Y4/CBT3fTc0OVuDofpre4aEeEpSBPV5X5v4+Vmx+8snU7RLPrNHPKSgLxGo9YuQzz20o+w==}
-    dev: true
-
   /jsonc-parser@3.2.1:
     resolution: {integrity: sha512-AilxAyFOAcK5wA1+LeaySVBrHsGQvUFCDWXKpZjzaL0PqW+xfBOttn8GNtWKFWqneyMZj41MWF9Kl6iPWLwgOA==}
     dev: true
@@ -10037,14 +10033,14 @@ packages:
       json-buffer: 3.0.1
     dev: true
 
-  /kitbook@1.0.0-beta.18(@sveltejs/kit@2.5.0)(svelte@4.2.10)(typescript@5.1.6):
-    resolution: {integrity: sha512-kfncRzQgWD0WubzWyZ3yW02Ex7p12s4Jg9VIBMj7nuw7fEjt9smRh8ULZPuGN2aJXTY0eQEwg1EgmQ2oawu7zw==}
+  /kitbook@1.0.0-beta.20(@sveltejs/kit@2.5.0)(svelte@4.2.10)(typescript@5.1.6):
+    resolution: {integrity: sha512-PGjMdiFpV2k3J/f807XRWdZyFg9LrCdsVrbSlXIioZRrylGtyS1uZ5T60Wz+FO3cNtsmMKHJdDGgjqvfg/y2ZQ==}
     peerDependencies:
       '@sveltejs/kit': ^1.13.0 || ^2.0.0
       svelte: ^3.55.0 || ^4.0.0
     dependencies:
-      '@kitbook/mdsvex-shiki-twoslash': 1.0.0-beta.18(svelte@4.2.10)(typescript@5.1.6)
-      '@kitbook/rehype-display-link-titles': 1.0.0-beta.18
+      '@kitbook/mdsvex-shiki-twoslash': 1.0.0-beta.20(svelte@4.2.10)(typescript@5.1.6)
+      '@kitbook/rehype-display-link-titles': 1.0.0-beta.20
       '@sveltejs/kit': 2.5.0(@sveltejs/vite-plugin-svelte@3.0.2)(svelte@4.2.10)(vite@5.1.1)
       magicast: 0.3.3
       mdsvex: 0.11.0(svelte@4.2.10)
@@ -12846,7 +12842,7 @@ packages:
   /shiki@0.10.1:
     resolution: {integrity: sha512-VsY7QJVzU51j5o1+DguUd+6vmCmZ5v/6gYu4vyYAhzjuNQU6P/vmSy4uQaOhvje031qQMiW0d2BwgMH52vqMng==}
     dependencies:
-      jsonc-parser: 3.2.0
+      jsonc-parser: 3.2.1
       vscode-oniguruma: 1.7.0
       vscode-textmate: 5.2.0
     dev: true
