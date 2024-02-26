@@ -63,6 +63,7 @@
     "svelte-pieces": "2.0.0-next.7",
     "sveltefirets": "^0.0.36",
     "tslib": "^2.6.1",
+    "type-fest": "^4.10.3",
     "typescript": "^5.1.6",
     "unocss": "^0.53.6",
     "vite": "^5.0.0",

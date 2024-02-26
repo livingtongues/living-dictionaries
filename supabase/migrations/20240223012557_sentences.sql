@@ -30,8 +30,8 @@ CREATE TABLE sentence_updates (
   user_id uuid NOT NULL REFERENCES auth.users (id),
   firebase_email text, -- temporary until migration complete
   dictionary_id text NOT NULL REFERENCES dictionaries (id),
-  sense_id uuid REFERENCES senses (id), -- could be null, but if included the apply_sentence_updates trigger will create a sense-sentence relationship
   sentence_id uuid NOT NULL REFERENCES sentences (id),
+  sense_id uuid REFERENCES senses (id), -- could be null, but if included the apply_sentence_updates trigger will create a sense-sentence relationship
   "timestamp" timestamp with time zone NOT NULL DEFAULT now(),
   "table" sentence_tables NOT NULL,
   -- all following could be null if just adding a new sense-sentence relationship using senses_in_sentences table

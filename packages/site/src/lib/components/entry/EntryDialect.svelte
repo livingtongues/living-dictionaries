@@ -5,8 +5,7 @@
 
 <script lang="ts">
   import { page } from '$app/stores';
-  import { createEventDispatcher, onMount } from 'svelte';
-  import { EntryFields } from '@living-dictionaries/types';
+  import { onMount } from 'svelte';
   import ModalEditableArray from '../ui/array/ModalEditableArray.svelte';
   import type { SelectOption } from '../ui/array/select-options.interface';
   import { browser } from '$app/environment';
@@ -19,12 +18,7 @@
   export let dictionaryId: string;
   export let showPlus = true;
 
-  const dispatch = createEventDispatcher<{
-    valueupdate: {
-      field: EntryFields.dialects;
-      newValue: string[];
-    };
-  }>();
+  export let on_update: (new_value: string[]) => void;
 
   onMount(async () => {
     if (browser && fetchedDictionaryId !== dictionaryId) {
@@ -70,11 +64,6 @@
   canWriteIn
   {showPlus}
   placeholder={$page.data.t('entry_field.dialects')}
-  on:update={({ detail: newValue }) => {
-    dispatch('valueupdate', {
-      field: EntryFields.dialects,
-      newValue,
-    });
-  }}>
+  {on_update}>
   <span slot="heading">{$page.data.t('entry_field.dialects')}</span>
 </ModalEditableArray>

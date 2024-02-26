@@ -1,10 +1,10 @@
-import { decodeToken, getDb } from '$lib/server/firebase-admin';
+import { decodeToken } from '$lib/server/firebase-admin';
 import { json, error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { getAdminSupabaseClient } from '$lib/supabase/admin';
-import type { IUser } from '@living-dictionaries/types';
 import { ResponseCodes } from '$lib/constants';
 import type { Database, TablesInsert } from '$lib/supabase/generated.types';
+import { checkForPermission } from '../check-dictionary-permission';
 
 export interface ChangeEntryRequestBody {
   auth_token: string;
@@ -15,7 +15,7 @@ export interface ChangeEntryRequestBody {
   column: Database['public']['Enums']['entry_columns'];
   row: string; // uuidv4 created by client if insert, otherwise id of row to update
   new_value: string; // JSON stringified if column type is jsonb (glosses, parts_of_speech, semantic_domains, write_in_semantic_domains)
-  old_value: string | undefined;
+  old_value?: string;
   timestamp: string;
 }
 
@@ -29,23 +29,7 @@ export const POST: RequestHandler = async ({ request }) => {
     if (!decodedToken?.uid)
       throw new Error('No user id found in token');
 
-    const db = getDb();
-    const checkForPermission = async () => {
-      const dictionaryManagers = await db.collection(`dictionaries/${dictionary_id}/managers`).get();
-      const isDictionaryManager = dictionaryManagers.docs.some(({ id }) => id === decodedToken.uid);
-      if (isDictionaryManager) return true;
-
-      const dictionaryContributors = await db.collection(`dictionaries/${dictionary_id}/contributors`).get();
-      const isDictionaryContributor = dictionaryContributors.docs.some(({ id }) => id === decodedToken.uid);
-      if (isDictionaryContributor) return true;
-
-      const userSnap = await db.doc(`users/${decodedToken.uid}`).get();
-      const { roles } = userSnap.data() as IUser;
-      if (roles?.admin) return true;
-
-      throw new Error('Is not a manager of this dictionary.');
-    };
-    await checkForPermission();
+    await checkForPermission(decodedToken.uid, dictionary_id);
 
     const adminSupabase = getAdminSupabaseClient();
     const { data: entry_update, error: insertError } = await adminSupabase.from('entry_updates').insert({
@@ -68,7 +52,7 @@ export const POST: RequestHandler = async ({ request }) => {
 
     return json(entry_update satisfies ChangeEntryResponseBody);
   }
-  catch (err: any) {
+  catch (err) {
     console.error(`Error saving sense: ${err.message}`);
     error(ResponseCodes.INTERNAL_SERVER_ERROR, `Error saving sense: ${err.message}`);
   }

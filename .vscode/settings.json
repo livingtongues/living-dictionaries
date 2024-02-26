@@ -29,7 +29,7 @@
   "prettier.enable": false,
   "editor.formatOnSave": false,
   "editor.codeActionsOnSave": {
-    "source.fixAll.eslint": true
+    "source.fixAll.eslint": "explicit"
   },
   // Silence stylistic rules in IDE, but still auto fix them
   "eslint.rules.customizations": [
