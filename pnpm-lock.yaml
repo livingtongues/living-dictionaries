@@ -255,6 +255,9 @@ importers:
       '@playwright/test':
         specifier: 1.39.0
         version: 1.39.0
+      '@resvg/resvg-js':
+        specifier: ^2.2.0
+        version: 2.2.0
       '@sentry/browser':
         specifier: ^6.18.2
         version: 6.19.3
@@ -285,6 +288,9 @@ importers:
       '@types/d3-dsv':
         specifier: ^3.0.0
         version: 3.0.0
+      '@types/d3-geo':
+        specifier: ^3.1.0
+        version: 3.1.0
       '@types/file-saver':
         specifier: ^2.0.4
         version: 2.0.5
@@ -324,6 +330,9 @@ importers:
       d3-dsv:
         specifier: ^3.0.1
         version: 3.0.1
+      d3-geo:
+        specifier: ^3.1.0
+        version: 3.1.0
       file-saver:
         specifier: ^2.0.5
         version: 2.0.5
@@ -354,6 +363,12 @@ importers:
       recordrtc:
         specifier: ^5.6.2
         version: 5.6.2
+      satori:
+        specifier: ^0.0.44
+        version: 0.0.44
+      satori-html:
+        specifier: ^0.3.0
+        version: 0.3.0
       svelte:
         specifier: ^4.2.10
         version: 4.2.10
@@ -366,6 +381,9 @@ importers:
       sveltefirets:
         specifier: ^0.0.36
         version: 0.0.36(firebase@10.8.0)(svelte@4.2.10)
+      topojson-client:
+        specifier: ^3.1.0
+        version: 3.1.0
       tslib:
         specifier: ^2.6.1
         version: 2.6.1
@@ -5360,6 +5378,12 @@ packages:
       '@types/geojson': 7946.0.10
     dev: true
 
+  /@types/d3-geo@3.1.0:
+    resolution: {integrity: sha512-856sckF0oP/diXtS4jNsiQw/UuK5fQG8l/a9VVLeSouf1/PPbBE1i1W852zVwKwYCBkFJJB7nCFTbk6UMEXBOQ==}
+    dependencies:
+      '@types/geojson': 7946.0.10
+    dev: true
+
   /@types/d3-hierarchy@3.1.0:
     resolution: {integrity: sha512-g+sey7qrCa3UbsQlMZZBOHROkFqx7KZKvUpRzI/tAp/8erZWpYq7FgNKvYwebi2LaEiVs1klhUfd3WCThxmmWQ==}
     dev: true
@@ -7371,6 +7395,13 @@ packages:
 
   /d3-geo@3.0.1:
     resolution: {integrity: sha512-Wt23xBych5tSy9IYAM1FR2rWIBFWa52B/oF/GYe5zbdHrg08FU8+BuI6X4PvTwPDdqdAdq04fuWJpELtsaEjeA==}
+    engines: {node: '>=12'}
+    dependencies:
+      d3-array: 3.2.0
+    dev: true
+
+  /d3-geo@3.1.0:
+    resolution: {integrity: sha512-JEo5HxXDdDYXCaWdwLRt79y7giK8SbhZJbFWXqbRTolCHFI5jRqteLzCsq51NKbUoX0PjBVSohxrx+NoOUujYA==}
     engines: {node: '>=12'}
     dependencies:
       d3-array: 3.2.0
@@ -10961,6 +10992,7 @@ packages:
     resolution: {integrity: sha512-jSCU7/VB1loIWBZe14aEYHU/+1UMEHoaO7qxCOVJOw9GgH72VAWppxNcjU+x9a2k3GSIBXNKxXQFqRvvZ7vr3A==}
     engines: {node: '>=10.0.0'}
     hasBin: true
+    requiresBuild: true
 
   /mimic-fn@2.1.0:
     resolution: {integrity: sha512-OqbOk5oEQeAZ8WXWydlu9HJjz9WVdEIvamMCcXmuqUYjTknH/sqsWvhQ3vgwKFRR1HpjvNBKQ37nbJgYzGqGcg==}

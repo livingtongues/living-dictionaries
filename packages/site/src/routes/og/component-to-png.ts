@@ -1,15 +1,16 @@
+/* eslint-disable no-await-in-loop */
 import satori from 'satori';
 import { Resvg } from '@resvg/resvg-js';
 import { html as toReactNode } from 'satori-html';
 
-// Vite plugin turns import into the result of fs.readFileSync during build
+// Vite plugin turns import into the result of readFileSync during build
 import NotoSans from './notoSans.ttf';
 import type { SvelteComponent } from 'svelte';
-// import NotoSansRegular from './NotoSans-Regular.ttf';
+import { ResponseCodes } from '$lib/constants';
 
 // based on what text is contained in the props, load fonts accordingly
 
-const getPng = withCache(async (html: string, height: number, width: number) => {
+const get_png = withCache(async (html: string, height: number, width: number) => {
   const markup = toReactNode(html);
   const svg = await satori(markup, {
     fonts: [
@@ -35,9 +36,9 @@ const getPng = withCache(async (html: string, height: number, width: number) => 
   return resvg.render().asPng();
 });
 
-export async function componentToPng(component: typeof SvelteComponent, props, height: number, width: number) {
-  const result = (component as any).render(props);
-  const png = await getPng(result.html, height, width);
+export async function component_to_png(component, props, height: number, width: number) {
+  const result = (component as SvelteComponent).render(props);
+  const png = await get_png(result.html, height, width);
   return new Response(png, {
     headers: {
       'content-type': 'image/png',
@@ -95,7 +96,7 @@ const loadDynamicAsset = withCache(
         if (!resource) return;
 
         const res = await fetch(resource[1]);
-        if (res.status === 200) {
+        if (res.status === ResponseCodes.OK) {
           const font = await res.arrayBuffer();
           return {
             name: `satori_${code}_fallback_${text}`,
@@ -114,7 +115,7 @@ const loadDynamicAsset = withCache(
 // eslint-disable-next-line @typescript-eslint/ban-types
 function withCache(fn: Function) {
   const cache = new Map();
-  return async (...args: string[]) => {
+  return async (...args: (string | number)[]) => {
     const key = hash(args.join());
     if (cache.has(key)) return cache.get(key);
     const result = await fn(...args);

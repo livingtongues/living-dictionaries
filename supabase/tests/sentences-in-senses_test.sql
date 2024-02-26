@@ -1,3 +1,5 @@
+CREATE EXTENSION IF NOT EXISTS pgtap WITH SCHEMA extensions;
+
 -- https://pgtap.org/documentation.html
 BEGIN;
 SELECT plan(4);
