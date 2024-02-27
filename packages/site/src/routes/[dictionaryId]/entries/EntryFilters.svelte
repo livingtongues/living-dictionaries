@@ -50,7 +50,7 @@
             $page.data.t('entry.image')} />
         <ToggleRefinement
           {search}
-          attribute="noImage"
+          attribute="NoImage"
           on={false}
           label={'No' +
             ' ' +
@@ -64,7 +64,7 @@
           $page.data.t('entry_field.audio')} />
       <ToggleRefinement
         {search}
-        attribute="noAudio"
+        attribute="NoAudio"
         on={false}
         label={'No' +
           ' ' +
