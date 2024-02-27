@@ -116,7 +116,7 @@
     "create_dictionary": "Tengeneza Kamusi  ",
     "permanent_url_msg": "Jina la URL ni la kudumu na haliwezi kubadilishwa baadaye.",
     "add_gloss_msg": "Unaweza kuongeza lugha zaidi ya glossing baadaye katika Mipangilio.",
-    "language_used_by_community": "Je! Hii ni kamusi kwa lugha ambayo inazungumzwa au kusainiwa na jamii maalum ya wanadamu?",
+    "language_used_by_community": "Je! Hii ni kamusi ya lugha ambayo inazungumzwa au kusainiwa na jamii maalum ya wanadamu?",
     "community_permission": "Je! Jumuiya ya lugha imekupa ruhusa ya kufanya kamusi hii?",
     "author_connection": "Tafadhali eleza kwa kifupi jinsi unavyojua lugha hii na kwa nini unaunda kamusi hai kwa hiyo. Je! Wewe ni sehemu ya jamii ambayo itakuwa ikitumia kamusi hii hai? Ikiwa sivyo, unajuaje jamii?",
     "con_lang_description": "Je! Hii ni kamusi ya lugha iliyojengwa (lugha iliyoundwa na wanadamu katika miaka ya hivi karibuni, kwa kitabu au sinema)? Ikiwa ndio, tafadhali eleza kwa kifupi.",
@@ -313,7 +313,7 @@
     "qr_code": "Onyesha nambari ya QR",
     "labels": "Onyesha lebo",
     "availability": "Mtazamo wa kuchapisha unapatikana tu kwa wasimamizi wa kamusi na wachangiaji",
-    "max_entries": "Max",
+    "max_entries": "Maingizo max",
     "columns": "Nguzo",
     "headword_size": "Saizi ya kichwa",
     "font_size": "Saizi ya fonti"
@@ -324,7 +324,8 @@
     "instructions_1": "Ikiwa tayari unayo data ya lugha ambayo unataka kuingiza kwenye kamusi yako, tafadhali fuata hatua hapa chini.",
     "instructions_2": "Bonyeza kitufe cha \"Kiunga cha Kiolezo\" hapa chini. Pakua templeti kama faili ya Excel, au unda nakala kwenye Hati za Google. Hariri templeti kulingana na mahitaji ya mradi wako. Nakili na ubandike data yako kwenye lahajedwali.",
     "instructions_3": "Tumia \"Wasiliana Nasi\" hapa chini kuwasiliana nasi. Tujue kuwa una lahajedwali mpya ambayo iko tayari kwa kuagiza. Tuulize maswali yoyote unayo. Tutakujibu kwa barua pepe, halafu unaweza kututumia faili yako.",
-    "instructions_4": "Kututumia data iliyosafirishwa kutoka kwa laini za kamusi kama Flex, Lexique Pro, Sanduku la Viatu, tafadhali tumia kitufe cha \"Wasiliana Nasi\" hapa chini na tuambie maelezo ya mradi wako."
+    "instructions_4": "Kututumia data iliyosafirishwa kutoka kwa laini za kamusi kama Flex, Lexique Pro, Sanduku la Viatu, tafadhali tumia kitufe cha \"Wasiliana Nasi\" hapa chini na tuambie maelezo ya mradi wako.",
+    "no_imports": "Hivi sasa tunafanya kazi na jamii nyingi na mashirika ya washirika kuingiza idadi kubwa ya viingilio vya kamusi kwenye jukwaa hili. Tunafanya pia sasisho kubwa kwa hifadhidata yetu. Tutakubali uagizaji mpya wa data kuanzia Mei 1, 2024. Tunashukuru uvumilivu wako, na tunaomba radhi kwa usumbufu."
   },
   "history": {
     "history": "Historia",
@@ -341,5 +342,10 @@
     "history_search": "Tafuta viingilio, wahariri, uwanja na maadili",
     "download_history": "Pakua historia kama CSV",
     "empty": "Hakuna historia bado"
+  },
+  "partnership": {
+    "title": "Mashirika ya washirika",
+    "button": "Andika katika shirika la washirika",
+    "name": "Jina la shirika la mshirika"
   }
 }

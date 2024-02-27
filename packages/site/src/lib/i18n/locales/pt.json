@@ -286,7 +286,7 @@
     "csv_data": "Dados como .csv",
     "checking_images": "Verificando se existem arquivos de imagem",
     "no_images": "Não há arquivos de imagem",
-    "checking_audios": "Verificação se houver arquivos de áudio",
+    "checking_audios": "Verificando se houver arquivos de áudio",
     "no_audios": "Não há arquivos de áudio",
     "download_csv": "Baixe CSV",
     "availability": "A exportação está disponível apenas para gerentes de dicionário",
@@ -306,7 +306,7 @@
     "accesing": "Acessando microfone e câmera",
     "pause": "Pausa",
     "unpause": "Não musa",
-    "previously_dismissed_msg": "Se você já descartou a solicitação do navegador, recarregue e clique em 'Sim' quando o seu navegador solicitar permissão.",
+    "previously_dismissed_msg": "Se você descartou anteriormente a solicitação do navegador, recarregue e clique em 'Sim' quando seu navegador solicitar permissão.",
     "permission_denied": "A permissão para acessar a mídia foi negada."
   },
   "print": {
@@ -324,7 +324,8 @@
     "instructions_1": "Se você já possui dados linguísticos que deseja importar para o seu dicionário, siga as etapas abaixo.",
     "instructions_2": "Clique no botão azul \"Link to modelo\" abaixo. Faça o download do modelo como um arquivo do Excel ou crie uma cópia no Google Docs. Edite o modelo de acordo com as necessidades do seu projeto. Copie e cole seus dados na planilha.",
     "instructions_3": "Use o \"Entre em contato conosco\" abaixo para entrar em contato conosco. Deixe -nos saber que você tem uma nova planilha pronta para importação. Faça -nos todas as perguntas que você tiver. Nós responderemos a você por e -mail e você pode nos enviar seu arquivo.",
-    "instructions_4": "Para nos enviar dados exportados de softwares de dicionário como Flex, Lexique Pro, Shoebox, use o botão \"Entre em contato conosco\" abaixo e conte -nos os detalhes do seu projeto."
+    "instructions_4": "Para nos enviar dados exportados de softwares de dicionário como Flex, Lexique Pro, Shoebox, use o botão \"Entre em contato conosco\" abaixo e conte -nos os detalhes do seu projeto.",
+    "no_imports": "Atualmente, estamos trabalhando com muitas comunidades e organizações parceiras para importar um grande número de entradas de dicionário para esta plataforma. Também estamos fazendo grandes atualizações em nosso banco de dados. Aceitaremos novas importações de dados a partir de 1º de maio de 2024. Agradecemos sua paciência e pedimos desculpas pelo inconveniente."
   },
   "history": {
     "history": "História",
@@ -341,5 +342,10 @@
     "history_search": "Entradas de pesquisa, editores, campos e valores",
     "download_history": "Baixe o histórico como CSV",
     "empty": "Sem história ainda"
+  },
+  "partnership": {
+    "title": "Organizações parceiras",
+    "button": "Escreva na organização parceira",
+    "name": "Nome da organização de parceiros"
   }
 }

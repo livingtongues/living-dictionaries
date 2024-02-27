@@ -4,7 +4,7 @@ import { page } from '$app/stores';
 import { user } from '$lib/stores';
 import { apiFetch } from '$lib/client/apiFetch';
 import { authState } from 'sveltefirets';
-import type { InviteRequestBody } from '../../routes/api/email/invite/+server';
+import type { InviteRequestBody } from '$api/email/invite/+server';
 
 export async function inviteHelper(
   role: 'manager' | 'contributor' = 'contributor',

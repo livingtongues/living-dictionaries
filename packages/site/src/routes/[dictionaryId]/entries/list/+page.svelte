@@ -1,8 +1,8 @@
 <script lang="ts">
   // import SeoMetaTags from '$lib/components/SeoMetaTags.svelte';
-  import { onMount, getContext } from 'svelte';
+  import { onMount, getContext, onDestroy } from 'svelte';
   import { Doc } from 'sveltefirets';
-  import { dictionary, canEdit, admin } from '$lib/stores';
+  import { dictionary_deprecated as dictionary, canEdit, admin } from '$lib/stores';
   import ListEntry from './ListEntry.svelte';
   import { convert_and_expand_entry } from '$lib/transformers/convert_and_expand_entry';
   import Hits from '$lib/components/search/Hits.svelte';
@@ -11,9 +11,12 @@
   import { deleteImage } from '$lib/helpers/delete';
   import type { InstantSearch } from 'instantsearch.js';
   import { updateFirestoreEntry } from '$lib/helpers/entry/update';
-  import { page } from '$app/stores';
+  import { navigating, page } from '$app/stores';
+  import { save_scroll_point, restore_scroll_point } from '$lib/helpers/scrollPoint';
+  import { browser } from '$app/environment';
 
   const search: InstantSearch = getContext('search');
+  let pixels_from_top = 0;
 
   onMount(() => {
     search.addWidgets([
@@ -23,9 +26,17 @@
       }),
     ]);
   });
+
+  onDestroy(() => {
+    if (!browser || !$navigating?.from?.url) return;
+    const { href } = $navigating.from.url;
+    save_scroll_point(href, pixels_from_top);
+  });
 </script>
 
-<Hits {search} let:entries>
+<svelte:window bind:scrollY={pixels_from_top} />
+
+<Hits {search} let:entries on_updated={restore_scroll_point}>
   {#if $canEdit}
     {#each entries as algoliaEntry (algoliaEntry.id)}
       <Doc

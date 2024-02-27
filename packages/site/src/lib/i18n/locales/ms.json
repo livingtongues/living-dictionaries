@@ -324,7 +324,8 @@
     "instructions_1": "Jika anda sudah mempunyai data linguistik yang anda ingin import ke dalam kamus anda, sila ikuti langkah -langkah di bawah.",
     "instructions_2": "Klik pada butang \"Link to Template\" biru di bawah. Muat turun templat sebagai fail Excel, atau buat salinan di Google Docs. Edit templat mengikut keperluan projek anda. Salin dan tampal data anda ke dalam spreadsheet.",
     "instructions_3": "Gunakan \"hubungi kami\" di bawah untuk menghubungi kami. Beritahu kami bahawa anda mempunyai spreadsheet baru yang siap untuk diimport. Tanya kami sebarang soalan yang anda ada. Kami akan memberi respons kepada anda melalui e -mel, dan kemudian anda boleh menghantar fail anda kepada kami.",
-    "instructions_4": "Untuk menghantar kami data yang dieksport dari perisian kamus seperti Flex, Lexique Pro, Shoebox, sila gunakan butang \"Hubungi Kami\" di bawah dan beritahu kami butiran projek anda."
+    "instructions_4": "Untuk menghantar kami data yang dieksport dari perisian kamus seperti Flex, Lexique Pro, Shoebox, sila gunakan butang \"Hubungi Kami\" di bawah dan beritahu kami butiran projek anda.",
+    "no_imports": "Kami sedang bekerjasama dengan banyak komuniti dan organisasi rakan kongsi untuk mengimport sejumlah besar entri kamus ke platform ini. Kami juga membuat kemas kini besar ke pangkalan data kami. Kami akan menerima import data baru bermula pada 1 Mei, 2024. Kami menghargai kesabaran anda, dan kami memohon maaf atas kesulitan ini."
   },
   "history": {
     "history": "Sejarah",
@@ -341,5 +342,10 @@
     "history_search": "Cari penyertaan, editor, medan dan nilai",
     "download_history": "Muat turun Sejarah sebagai CSV",
     "empty": "Belum ada sejarah"
+  },
+  "partnership": {
+    "title": "Organisasi rakan kongsi",
+    "button": "Tulis dalam organisasi rakan kongsi",
+    "name": "Nama organisasi rakan kongsi"
   }
 }

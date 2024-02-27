@@ -7,7 +7,7 @@
   import { Button, createPersistedStore } from 'svelte-pieces';
   import { defaultPrintFields } from './printFields';
   import PrintEntry from './PrintEntry.svelte';
-  import { dictionary, isManager, canEdit } from '$lib/stores';
+  import { dictionary_deprecated as dictionary, isManager, canEdit } from '$lib/stores';
   import { browser } from '$app/environment';
   import type { IPrintFields, ICitation } from '@living-dictionaries/types';
   import PrintFieldCheckboxes from './PrintFieldCheckboxes.svelte';
@@ -16,8 +16,10 @@
   import { convert_and_expand_entry } from '$lib/transformers/convert_and_expand_entry';
   import type { InstantSearch } from 'instantsearch.js';
   const search: InstantSearch = getContext('search');
+  const managerMaxEntries = 1000;
+  const defaultMaxEntries = 300;
 
-  const hitsPerPage = createPersistedStore<number>('printHitsPerPage', 50);
+  const hitsPerPage = createPersistedStore<number>('printHitsPerPage', ($isManager ? managerMaxEntries : defaultMaxEntries));
   $: if (browser) {
     search.addWidgets([
       configure({
@@ -54,7 +56,7 @@
             id="maxEntries"
             type="number"
             min="1"
-            max={$isManager ? 1000 : 300}
+            max={$isManager ? managerMaxEntries : defaultMaxEntries}
             bind:value={$hitsPerPage} />
           <!-- Algolia hard max per page is 1000 -->
         </div>

@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { page } from '$app/stores';
-  import { admin, dictionary, isManager } from '$lib/stores';
+  import { admin, dictionary_deprecated as dictionary, isManager } from '$lib/stores';
   import { Button, ShowHide } from 'svelte-pieces';
   import { partsOfSpeech } from '$lib/mappings/parts-of-speech';
   import type { ActualDatabaseEntry } from '@living-dictionaries/types';
