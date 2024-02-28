@@ -1,8 +1,8 @@
 CREATE TABLE senses (
   id uuid unique primary key NOT NULL, -- generated on client so users can create a sense offline and keep editing it
-  entry_id text NOT NULL, -- TODO: add trigger that adds entry placeholder if not existing, deploy, then add entry_id placeholders for all existing senses, then change to REFERENCES entries (id)
-  glosses jsonb,
-  "definition" jsonb, -- works the same as glosses
+  entry_id text NOT NULL, -- TODO: add trigger that adds entry placeholder if not existing, deploy, then add entry_id placeholders for all existing senses, then add REFERENCES entries
+  glosses jsonb, -- MultiString
+  "definition" jsonb, -- MultiString
   parts_of_speech text[],
   semantic_domains text[],
   write_in_semantic_domains text[],
