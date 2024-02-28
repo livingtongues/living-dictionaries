@@ -29,7 +29,7 @@
 //           dkim_private_key: DKIM_PRIVATE_KEY,
 //         }],
 //         from,
-//         reply_to: { email: 'annaluisa@livingtongues.org' },
+//         reply_to: { email: 'dictionaries@livingtongues.org' },
 //         subject: 'Living Dictionaries - News and Numbers from 2023',
 //         content: [{
 //           type: 'text/html',
