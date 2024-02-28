@@ -5,6 +5,7 @@
   import ClearRefinements from '$lib/components/search/ClearRefinements.svelte';
   import type { InstantSearch } from 'instantsearch.js';
   import { Button, ResponsiveSlideover } from 'svelte-pieces';
+  import { checkboxes } from '$lib/stores';
 
   export let showMobileFilters = false;
   export let search: InstantSearch;
@@ -41,9 +42,12 @@
         label={$page.data.t('entry_field.speaker')} />
       <hr />
 
+      <!-- todo use this button to modify the checkboxes boolean value -->
+      <Button>Flip Checkboxes</Button>
       {#if !$page.url.pathname.includes('gallery')}
         <ToggleRefinement
           {search}
+          on={$checkboxes}
           attribute="hasImage"
           label={$page.data.t('entry.has_exists') +
             ' ' +
@@ -51,6 +55,7 @@
       {/if}
       <ToggleRefinement
         {search}
+        on={$checkboxes}
         attribute="hasAudio"
         label={$page.data.t('entry.has_exists') +
           ' ' +

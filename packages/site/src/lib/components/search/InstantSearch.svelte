@@ -29,6 +29,7 @@
     onStateChange({ uiState, setUiState }) {
       setUiState(uiState);
       setTimeout(() => {
+        // Can we wait for checboxes boolean value here?
         const queryParams = window.location.search
         algoliaQueryParams.set(queryParams || '');
       }, 500);

@@ -5,7 +5,7 @@ import { isManager, isContributor, canEdit } from './editing';
 import { myDictionaries } from './dictionaries';
 import { dictionary_deprecated } from './dictionary';
 import { preferredColumns } from './columns';
-import { algoliaQueryParams } from './search';
+import { algoliaQueryParams, checkboxes } from './search';
 
 export {
   user,
@@ -17,4 +17,5 @@ export {
   dictionary_deprecated,
   preferredColumns,
   algoliaQueryParams,
+  checkboxes,
 };
