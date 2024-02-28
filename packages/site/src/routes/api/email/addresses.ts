@@ -7,7 +7,7 @@ export const noReplyAddress = {
   name: 'Living Tongues Institute for Endangered Languages',
 };
 
-export const annaAddress = { email: 'annaluisa@livingtongues.org' };
+export const officialAddress = { email: 'dictionaries@livingtongues.org' };
 const gregAddress = { email: 'livingtongues@gmail.com' };
 
 export function getAdminRecipients(initiatorEmail: string): Address[] {
@@ -25,7 +25,7 @@ export function getAdminRecipients(initiatorEmail: string): Address[] {
 
   return [
     ...recipients,
-    annaAddress,
+    officialAddress,
     gregAddress,
   ];
 }
@@ -41,6 +41,6 @@ export function getSupportMessageRecipients({ dev }: { dev: boolean }): Address[
 
   return [
     ...recipients,
-    annaAddress,
+    officialAddress,
   ];
 }
