@@ -99,9 +99,10 @@
         {/if}
       </div>
 
+      <!-- {entry.senses[0].} -->
       {#if entry.senses?.[0]?.write_in_semantic_domains}
         <span class="px-2 py-1 leading-tight text-xs bg-gray-100 rounded ml-1">
-          <i>{entry.senses?.[0]?.write_in_semantic_domains.join(', ')}</i>
+          <i>{entry.senses?.[0]?.write_in_semantic_domains}</i>
         </span>
       {/if}
 

@@ -56,7 +56,6 @@ describe(convert_entry_to_current_shape, () => {
     const entry: ActualDatabaseEntry = {
       gl: { en: 'foo' },
       ps: 'n',
-      sd: ['bar'],
       sdn: ['1.1'],
       xs: { en: 'baz' },
       xv: 'foo',
@@ -67,7 +66,6 @@ describe(convert_entry_to_current_shape, () => {
       sn: [{
         gl: { en: 'foo' },
         ps: ['n'],
-        sd: ['bar'],
         sdn: ['1.1'],
         xs: [{ en: 'baz', vn: 'foo' }],
         nc: '1',
@@ -242,4 +240,16 @@ describe(convert_entry_to_current_shape, () => {
     }
     expect(convert_entry_to_current_shape(entry)).toEqual({});
   });
+
+  test('handles string semantic domains', () => {
+    const entry: ActualDatabaseEntry = {
+      sd: 'bird'
+    }
+    const expected: GoalDatabaseEntry = {
+      sn: [{
+        sd: ['bird']
+      }]
+    }
+    expect(convert_entry_to_current_shape(entry)).toEqual(expected)
+  })
 });

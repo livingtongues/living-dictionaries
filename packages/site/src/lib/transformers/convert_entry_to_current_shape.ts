@@ -35,7 +35,14 @@ export function convert_entry_to_current_shape(actual: ActualDatabaseEntry): Goa
     }
 
     // Sense related fields
-    if (['gl', 'sd', 'sdn', 'nc', 'de'].includes(key)) {
+    if (key === 'sd') {
+      if (typeof value === 'string')
+        first_sense_from_base.sd = [value];
+      else
+        first_sense_from_base[key] = value;
+      continue;
+    }
+    if (['gl', 'sdn', 'nc', 'de'].includes(key)) {
       first_sense_from_base[key] = value;
       continue;
     }
@@ -54,7 +61,7 @@ export function convert_entry_to_current_shape(actual: ActualDatabaseEntry): Goa
       if (typeof value === 'string')
         first_sense_from_base.ps = [value];
       else
-        first_sense_from_base.ps = value;
+        first_sense_from_base[key] = value;
 
       continue;
     }
