@@ -56,6 +56,7 @@ describe(convert_entry_to_current_shape, () => {
     const entry: ActualDatabaseEntry = {
       gl: { en: 'foo' },
       ps: 'n',
+      sd: ['bar'],
       sdn: ['1.1'],
       xs: { en: 'baz' },
       xv: 'foo',
@@ -66,6 +67,7 @@ describe(convert_entry_to_current_shape, () => {
       sn: [{
         gl: { en: 'foo' },
         ps: ['n'],
+        sd: ['bar'],
         sdn: ['1.1'],
         xs: [{ en: 'baz', vn: 'foo' }],
         nc: '1',
