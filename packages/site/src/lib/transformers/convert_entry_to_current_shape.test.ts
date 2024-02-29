@@ -242,4 +242,16 @@ describe(convert_entry_to_current_shape, () => {
     }
     expect(convert_entry_to_current_shape(entry)).toEqual({});
   });
+
+  test('handles string semantic domains', () => {
+    const entry: ActualDatabaseEntry = {
+      sd: 'bird'
+    }
+    const expected: GoalDatabaseEntry = {
+      sn: [{
+        sd: ['bird']
+      }]
+    }
+    expect(convert_entry_to_current_shape(entry)).toEqual(expected)
+  })
 });
