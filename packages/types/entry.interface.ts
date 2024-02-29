@@ -89,13 +89,14 @@ export interface GoalDatabaseEntry extends IFirestoreMetaDataAbbreviated {
   co?: Coordinates;
 }
 
-interface DeprecatedEntry extends Omit<DatabaseSense, 'ps' | 'xs' | 'pfs' | 'deletedPfs' | 'vfs'> {
+interface DeprecatedEntry extends Omit<DatabaseSense, 'ps' | 'xs' | 'pfs' | 'deletedPfs' | 'vfs' | 'sd'> {
   // as deprecated fields are removed from the database we can continue to Omit them here until nothing more from DatabaseSense is left
   lo?: string; // local_orthography_1
   sf?: ActualDatabaseAudio; // turned into array at sfs
   di?: string | string[]; // turned into array
   sr?: string | string[] // some dictionaries, e.g. Kalanga, have just a string
   scn?: string | string[]; // scientific_names
+  sd?: string | string[]; // old semantic domains from talking dictionaries site
 
   // placed into first sense
   ps?: string | string[]; // parts_of_speech
