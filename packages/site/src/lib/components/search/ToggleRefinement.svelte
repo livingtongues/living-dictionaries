@@ -4,7 +4,7 @@
   import { connectToggleRefinement } from 'instantsearch.js/es/connectors';
   import { onMount } from 'svelte';
 
-  // ! Can't use the same attribute twice with InstantSearch (ie - cannot do hasImage true and hasImage false)
+  // Can't have the same attribute mounted twice with InstantSearch (ie - cannot do hasImage true and hasImage false) but you can remove one and mount the other. The attribute being toggled is saved in the url but not the "on" value, so when they are both mounted they trigger and cancel out the other.
   export let search: InstantSearch,
     attribute = '',
     on = true,
