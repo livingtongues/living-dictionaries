@@ -161,7 +161,8 @@
     "link_copied": "הקישור הועתק",
     "copy_and_share": "להעתיק ולשתף",
     "print": "הדפס",
-    "id": "תְעוּדַת זֶהוּת"
+    "id": "תְעוּדַת זֶהוּת",
+    "switch_opposite": "לעבור להפך"
   },
   "entry_field": {
     "photo": "תמונה",

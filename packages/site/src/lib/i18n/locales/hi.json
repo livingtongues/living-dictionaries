@@ -161,7 +161,8 @@
     "link_copied": "लिंक कॉपी हो गया",
     "copy_and_share": "कॉपी और शेयर करें",
     "print": "छाप",
-    "id": "पहचान"
+    "id": "पहचान",
+    "switch_opposite": "इसके विपरीत स्विच करना"
   },
   "entry_field": {
     "photo": "तस्वीर",

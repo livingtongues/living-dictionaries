@@ -31,7 +31,7 @@
     "interns": "Estagiários",
     "video_upload": "Upload de vídeo",
     "export_data": "Dados de exportação (CSV, Formatos PDF)",
-    "import_export": "Importação/exportação (Flex, formato padrão)",
+    "import_export": "Importação/exportação (Flex, Formato Padrão)",
     "geo_tagging": "Entradas de margem geográfica",
     "flashcard_view": "Visualização do Flashcard para alunos de idiomas",
     "peer_review": "Revisão por pares de grafias",
@@ -161,7 +161,8 @@
     "link_copied": "Link copiado",
     "copy_and_share": "Copiar e partilhar",
     "print": "Imprimir",
-    "id": "EU IA"
+    "id": "EU IA",
+    "switch_opposite": "Mude para oposto"
   },
   "entry_field": {
     "photo": "Foto",

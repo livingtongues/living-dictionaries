@@ -36,7 +36,7 @@
     "flashcard_view": "Tampilan kartu flash untuk pelajar bahasa",
     "peer_review": "Tinjauan Peer ejaan",
     "suggestions_from_users": "Saran dari pengguna",
-    "push_notifications": "Dorong pemberitahuan untuk kontributor",
+    "push_notifications": "Pemberitahuan Dorong untuk Kontributor",
     "contributor_awards": "Penghargaan Komunitas Kontributor"
   },
   "contributors": {
@@ -125,7 +125,7 @@
     "secondary_coordinates": "Koordinat sekunder",
     "map_instructions": "Klik pada peta untuk menambahkan koordinat sekunder.",
     "print_access": "Izinkan pemirsa mencetak kamus",
-    "primary_coordinate": "Koordinat utama"
+    "primary_coordinate": "Koordinat primer"
   },
   "dictionary": {
     "latitude": "Garis Lintang",
@@ -161,7 +161,8 @@
     "link_copied": "Tautan disalin",
     "copy_and_share": "Menyalin dan Menempel",
     "print": "Mencetak",
-    "id": "PENGENAL"
+    "id": "PENGENAL",
+    "switch_opposite": "Beralih ke sebaliknya"
   },
   "entry_field": {
     "photo": "Foto",
