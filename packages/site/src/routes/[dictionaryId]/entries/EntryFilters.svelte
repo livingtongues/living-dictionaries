@@ -115,7 +115,7 @@
         {/if}
 
         {#if $isManager}
-          <Button class="mb-1" size="sm" onclick={toggle}>Opposite Attribute</Button>
+          <Button class="mb-1" size="sm" onclick={toggle}>{$page.data.t('entry.switch_opposite')}</Button>
         {/if}
       </ShowHide>
     </div>
