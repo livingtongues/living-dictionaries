@@ -161,7 +161,8 @@
     "link_copied": "Link copied",
     "copy_and_share": "Copy and share",
     "print": "Print",
-    "id": "ID"
+    "id": "ID",
+    "switch_opposite": "Switch to opposite"
   },
   "entry_field": {
     "photo": "Photo",
