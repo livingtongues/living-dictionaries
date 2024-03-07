@@ -14,6 +14,7 @@
   import { navigating, page } from '$app/stores';
   import { save_scroll_point, restore_scroll_point } from '$lib/helpers/scrollPoint';
   import { browser } from '$app/environment';
+  import List from './List.svelte';
 
   const search: InstantSearch = getContext('search');
   let pixels_from_top = 0;
@@ -53,9 +54,7 @@
       </Doc>
     {/each}
   {:else}
-    {#each entries as entry (entry.id)}
-      <ListEntry dictionary={$dictionary} entry={convert_and_expand_entry(entry, $page.data.t)} />
-    {/each}
+    <List {entries} dictionary={$dictionary} />
   {/if}
 </Hits>
 <Pagination {search} />

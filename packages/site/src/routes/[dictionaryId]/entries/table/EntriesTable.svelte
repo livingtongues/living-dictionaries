@@ -4,6 +4,7 @@
   import ColumnTitle from './ColumnTitle.svelte';
   import Cell from './Cell.svelte';
   import { minutesAgo } from '$lib/helpers/time';
+  import { browser } from '$app/environment';
 
   export let columns: IColumn[];
   export let entries: ExpandedEntry[] = [];
@@ -22,7 +23,7 @@
     valueupdate: { field: string; newValue: string | string[]; entryId: string };
   }>();
 
-  const isFirefox = /Firefox/i.test(navigator.userAgent);
+  const isFirefox = browser && /Firefox/i.test(navigator.userAgent);
 </script>
 
 <div
