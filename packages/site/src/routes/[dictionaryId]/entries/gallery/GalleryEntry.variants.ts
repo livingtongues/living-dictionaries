@@ -67,7 +67,7 @@ export const variants: Variant<Component>[] = [
   },
   {
     name: 'Very long gloss',
-    description: 'Spanish should show because it is first',
+    description: 'Very long glosses are clamped to avoid having different card (or box) sizes',
     props: {
       dictionary,
       entry: {
