@@ -31,7 +31,7 @@ export const variants: Variant<Component>[] = [
     },
   },
   {
-    name: 'entry with small amount of data vs entry with a big amount',
+    name: 'entry with big amount of data vs entry with small amount',
     props: {
       entries: [
         {
