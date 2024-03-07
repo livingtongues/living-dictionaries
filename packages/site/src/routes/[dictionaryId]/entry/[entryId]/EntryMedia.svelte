@@ -22,22 +22,7 @@
 <div class="flex flex-col">
   {#if first_sound_file || canEdit}
     {#await import('../../entries/Audio.svelte') then { default: Audio }}
-      <Audio
-        {entry}
-        {canEdit}
-        class="h-20 mb-2 rounded-md bg-gray-100 !px-3"
-        let:playing>
-        <span
-          class:text-blue-700={playing}
-          class="i-material-symbols-hearing text-2xl mt-1" />
-        <div class="text-gray-600 text-sm mt-1">
-          {$page.data.t('audio.listen')}
-          {#if canEdit}
-            +
-            {$page.data.t('audio.edit_audio')}
-          {/if}
-        </div>
-      </Audio>
+      <Audio {entry} {canEdit} context="entry" class="h-20 mb-2 rounded-md bg-gray-100 !px-3" />
     {/await}
   {/if}
 

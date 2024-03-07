@@ -29,10 +29,7 @@
   class="flex rounded shadow my-1 overflow-hidden items-stretch border-green-300"
   style="margin-right: 2px;">
   {#if entry.sound_files?.[0] || canEdit}
-    <Audio class="bg-gray-100 p-2" {entry} {canEdit} minimal let:playing>
-      <span class:text-blue-700={playing} class="i-material-symbols-hearing text-2xl mt-1" />
-      {$page.data.t('audio.listen')}
-    </Audio>
+    <Audio class="bg-gray-100 py-1.5 px-1 w-60px" {entry} {canEdit} context="list" />
   {/if}
   <a
     href={'/' + dictionary.id + '/entry/' + entry.id}
