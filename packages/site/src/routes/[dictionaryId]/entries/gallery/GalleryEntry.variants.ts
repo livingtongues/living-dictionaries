@@ -91,7 +91,6 @@ export const variants: Variant<Component>[] = [
   },
   {
     name: 'Entry without gloss',
-    description: 'Very long glosses are clamped to avoid having different card (or box) sizes',
     props: {
       dictionary,
       entry: {
