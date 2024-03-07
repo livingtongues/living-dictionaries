@@ -27,7 +27,7 @@
         {canEdit}
         on:deleteImage={() => deleteImage(entry, dictionary.id)} />
     </div>
-    <a href={entry.id} style="background: #f3f3f3;" class="block p-[10px]">
+    <a href={entry.id} style="background: #f3f3f3;" class="block p-[10px] h-60px">
       <div class="font-semibold">
         {entry.lexeme}
       </div>
