@@ -31,7 +31,7 @@
       <div class="font-semibold">
         {entry.lexeme}
       </div>
-      <div class="text-xs">
+      <div class="text-xs line-clamp-1">
         {glosses[0] || ''}
       </div>
     </a>
