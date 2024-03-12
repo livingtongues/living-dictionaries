@@ -13,7 +13,7 @@ export function convertJsonRowToEntryFormat(
   if (row.morphology) entry.mr = row.morphology;
   if (row.interlinearization) entry.in = row.interlinearization;
   if (row.partOfSpeech) entry.ps = returnArrayFromCommaSeparatedItems(row.partOfSpeech);
-  if (row.dialect) entry.di = row.dialect;
+  if (row.dialects) entry.di = row.dialects.split(',').map(dialect => dialect.trim());
   if (row.variant) entry.va = row.variant;
   if (row.nounClass) entry.nc = row.nounClass;
   if (row.source) entry.sr = row.source.split('|');
