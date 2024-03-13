@@ -39,8 +39,6 @@ export async function importEntriesToFirebase(
   const speakerRef = db.collection('speakers');
   const dictionarySpeakerSnapshot = await speakerRef.where('contributingTo', 'array-contains', dictionaryId).get();
   dictionarySpeakerSnapshot.docs.forEach((snap) => different_speakers.push({ [snap.data().displayName]: snap.id }));
-  // let dictionarySpeakerSnapshot;
-  // let speakerRef;
   let speakerId;
 
   for (const row of rows) {
