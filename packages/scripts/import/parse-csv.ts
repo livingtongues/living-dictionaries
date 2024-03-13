@@ -32,7 +32,7 @@ a ,the book ,c
       [
         {
           "": "",
-          "dialect": "",
+          "dialects": "",
           "en_exampleSentence": "English",
           "en_gloss": "English",
           "es_exampleSentence": "Spanish",
@@ -60,7 +60,7 @@ a ,the book ,c
         },
         {
           "": "Daily life",
-          "dialect": "Modern Parisian French",
+          "dialects": "Modern Parisian French",
           "en_exampleSentence": "I drive my car",
           "en_gloss": "car",
           "es_exampleSentence": "Conduzco mi auto",
@@ -88,7 +88,7 @@ a ,the book ,c
         },
         {
           "": "Earth, geology and landscape",
-          "dialect": "Modern Parisian French",
+          "dialects": "Modern Parisian French, Quebec French",
           "en_exampleSentence": "The tree gives us shade",
           "en_gloss": "tree",
           "es_exampleSentence": "El árbol nos da sombra",
@@ -116,7 +116,7 @@ a ,the book ,c
         },
         {
           "": "",
-          "dialect": "Modern Parisian French",
+          "dialects": "Modern Parisian French",
           "en_exampleSentence": "The water goes through the tubes",
           "en_gloss": "tube",
           "es_exampleSentence": "El agua pasa a través de los tubos",
@@ -144,7 +144,7 @@ a ,the book ,c
         },
         {
           "": "",
-          "dialect": "Quebec French",
+          "dialects": "Quebec French",
           "en_exampleSentence": "I drive my car",
           "en_gloss": "car",
           "es_exampleSentence": "Conduzco mi auto",
@@ -172,7 +172,7 @@ a ,the book ,c
         },
         {
           "": "",
-          "dialect": "Quebec French",
+          "dialects": "Quebec French",
           "en_exampleSentence": "My room is painted with a neutral color.",
           "en_gloss": "neutral",
           "es_exampleSentence": "Mi habitación está pintada con un color neutro.",
@@ -200,7 +200,7 @@ a ,the book ,c
         },
         {
           "": "",
-          "dialect": "Quebec French",
+          "dialects": "Quebec French",
           "en_exampleSentence": "We will really party tonight",
           "en_gloss": "to celebrate",
           "es_exampleSentence": "Vamos a celebrar esta noche",
@@ -228,7 +228,7 @@ a ,the book ,c
         },
         {
           "": "",
-          "dialect": "Central Luganda",
+          "dialects": "Central Luganda",
           "en_exampleSentence": "",
           "en_gloss": "I will see you",
           "es_exampleSentence": "",
@@ -256,7 +256,7 @@ a ,the book ,c
         },
         {
           "": "",
-          "dialect": "",
+          "dialects": "",
           "en_exampleSentence": "",
           "en_gloss": "bye",
           "es_exampleSentence": "",

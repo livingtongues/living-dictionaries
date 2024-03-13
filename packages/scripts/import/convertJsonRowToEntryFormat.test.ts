@@ -97,7 +97,7 @@ describe('convertJsonRowToEntryFormat', () => {
     expect(entries).toEqual([
       {
         ca: 10101010,
-        di: 'Modern Parisian French',
+        di: ['Modern Parisian French'],
         gl: {
           en: 'car',
           es: 'auto',
@@ -118,7 +118,7 @@ describe('convertJsonRowToEntryFormat', () => {
       },
       {
         ca: 10101010,
-        di: 'Modern Parisian French',
+        di: ['Modern Parisian French', 'Quebec French'],
         gl: {
           en: 'tree',
           es: 'árbol',
@@ -139,7 +139,7 @@ describe('convertJsonRowToEntryFormat', () => {
       },
       {
         ca: 10101010,
-        di: 'Modern Parisian French',
+        di: ['Modern Parisian French'],
         gl: {
           en: 'tube',
           es: 'tubo',
@@ -161,7 +161,7 @@ describe('convertJsonRowToEntryFormat', () => {
       },
       {
         ca: 10101010,
-        di: 'Quebec French',
+        di: ['Quebec French'],
         gl: {
           en: 'car',
           es: 'auto',
@@ -183,7 +183,7 @@ describe('convertJsonRowToEntryFormat', () => {
       },
       {
         ca: 10101010,
-        di: 'Quebec French',
+        di: ['Quebec French'],
         gl: {
           en: 'neutral',
           es: 'neutro',
@@ -201,7 +201,7 @@ describe('convertJsonRowToEntryFormat', () => {
       },
       {
         ca: 10101010,
-        di: 'Quebec French',
+        di: ['Quebec French'],
         gl: {
           en: 'to celebrate',
           es: 'celebrar',
@@ -221,7 +221,7 @@ describe('convertJsonRowToEntryFormat', () => {
       },
       {
         ca: 10101010,
-        di: 'Central Luganda',
+        di: ['Central Luganda'],
         gl: {
           en: 'I will see you',
           es: 'Voy a verte',
