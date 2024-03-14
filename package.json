@@ -8,12 +8,15 @@
 		"build": "pnpm --filter=site build",
 		"preview": "pnpm --filter=site preview",
 		"check": "pnpm --filter=site check",
-		"test": "pnpm vitest",
+		"test": "vitest",
+    "test:db": "pnpm --filter=site test:db",
 		"test:site": "pnpm --filter=site test",
 		"test:all": "pnpm --recursive --stream test -- --run",
 		"test:e2e": "pnpm --filter=site test:e2e",
 		"lint": "eslint . --cache --quiet",
 		"lint:fix": "eslint . --cache --fix",
+		"reset-db": "pnpm --filter=site reset-db",
+		"generate-types": "supabase gen types typescript --local --schema public > packages/site/src/lib/supabase/generated.types.ts",
 		"check-packages": "pnpm update --interactive --recursive --latest"
 	},
 	"devDependencies": {

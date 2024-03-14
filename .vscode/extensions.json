@@ -15,6 +15,7 @@
     "yzhang.markdown-all-in-one",
     "foam.foam-vscode",
     // ---- You should definitely install the ones above, the ones below are recommended
+    // "denoland.vscode-deno", -- if editing Supabase Edge Functions
     // "usernamehw.errorlens",
     // "eamodio.gitlens",
     // "cschleiden.vscode-github-actions",

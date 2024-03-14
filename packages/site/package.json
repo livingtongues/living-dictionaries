@@ -14,10 +14,11 @@
     "check:warnings": "svelte-check --tsconfig ./tsconfig.json --diagnostic-sources js,svelte",
     "check:watch": "svelte-check --tsconfig ./tsconfig.json --threshold warning --diagnostic-sources js,svelte --watch",
     "test": "vitest",
+    "test:db": "vitest --config ./vitest.config.db.ts",
     "test:e2e": "playwright test",
     "test:components:update": "playwright test kitbook --update-snapshots",
     "test:components": "playwright test kitbook",
-    "reset-db": "pnpx tsx ./src/lib/mocks/seed/write-seed-and-reset-db.ts",
+    "reset-db": "pnpx tsx ./src/lib/mocks/seed/write-seed-and-reset-db-script.ts",
     "local-kitbook": "link:../../../kitbook/packages/kitbook"
   },
   "devDependencies": {

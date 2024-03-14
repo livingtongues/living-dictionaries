@@ -13,17 +13,15 @@ export interface ChangeSentenceRequestBody {
   sentence_id: string;
   sense_id?: string;
   timestamp: string;
-  table: Database['public']['Enums']['sentence_tables'];
-  column: Database['public']['Enums']['sentence_columns'];
-  new_value: string; // JSON stringified if column type is jsonb (translation)
-  old_value?: string;
+  table: Database['public']['Enums']['content_tables'];
+  change: any;
 }
 
-export type ChangeSentenceResponseBody = TablesInsert<'sentence_updates'>
+export type ChangeSentenceResponseBody = TablesInsert<'content_updates'>
 
 export const POST: RequestHandler = async ({ request }) => {
   try {
-    const { auth_token, id, table, dictionary_id, sentence_id, sense_id, column, new_value, old_value, timestamp } = await request.json() as ChangeSentenceRequestBody;
+    const { auth_token, id, table, dictionary_id, sentence_id, sense_id, change, timestamp } = await request.json() as ChangeSentenceRequestBody;
 
     const decodedToken = await decodeToken(auth_token);
     if (!decodedToken?.uid)
@@ -32,7 +30,7 @@ export const POST: RequestHandler = async ({ request }) => {
     await checkForPermission(decodedToken.uid, dictionary_id);
 
     const adminSupabase = getAdminSupabaseClient();
-    const { data: sentence_update, error: insert_error } = await adminSupabase.from('sentence_updates').insert({
+    const { data: sentence_update, error: insert_error } = await adminSupabase.from('content_updates').insert({
       id,
       user_id: '11111111-1111-1111-1111-111111111111', // will be replaced by trigger that pulls appropriate user id from supabase auth.users using firebase_email
       firebase_email: decodedToken.email,
@@ -41,12 +39,12 @@ export const POST: RequestHandler = async ({ request }) => {
       sense_id,
       timestamp,
       table,
-      column,
-      new_value,
-      old_value,
+      change,
     })
       .select()
       .single()
+
+    // TODO: update the appropriate tables in the db
 
     if (insert_error)
       throw new Error(insert_error.message);

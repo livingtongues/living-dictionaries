@@ -12,7 +12,14 @@ export const users = [{
   role: 'authenticated',
 }]
 
-const dictionary_id = 'dictionary1'
+export const seeded_dictionary_id = 'dictionary1'
+
+export const seed_dictionaries: TablesInsert<'dictionaries'>[] = [{
+  created_by: seeded_user_id,
+  id: seeded_dictionary_id,
+  name: 'Test Dictionary',
+  updated_by: seeded_user_id,
+}]
 
 const first_entry_id = 'entry1'
 const first_entry_first_sense_id = 'aaaaaaaa-bbbb-cccc-dddd-eeeeeefff001'
@@ -25,7 +32,7 @@ const second_entry_first_sense_id = 'aaaaaaaa-bbbb-cccc-dddd-eeeeeefff011';
 const first_entry_first_sense_text_field: TablesInsert<'entry_updates'> = {
   id: uuid_template.slice(0, -2) + '01',
   user_id: seeded_user_email, // testing use of email for Firestore migration compatibility
-  dictionary_id,
+  dictionary_id: seeded_dictionary_id,
   entry_id: first_entry_id,
   table: 'senses',
   row: first_entry_first_sense_id,
@@ -37,7 +44,7 @@ const first_entry_first_sense_text_field: TablesInsert<'entry_updates'> = {
 const first_entry_first_sense_text_array_field: TablesInsert<'entry_updates'> = {
   id: uuid_template.slice(0, -2) + '02',
   user_id: seeded_user_id,
-  dictionary_id,
+  dictionary_id: seeded_dictionary_id,
   entry_id: first_entry_id,
   table: 'senses',
   row: first_entry_first_sense_id,
@@ -49,7 +56,7 @@ const first_entry_first_sense_text_array_field: TablesInsert<'entry_updates'> = 
 const first_entry_second_sense_jsonb_field: TablesInsert<'entry_updates'> = {
   id: uuid_template.slice(0, -2) + '03',
   user_id: seeded_user_id,
-  dictionary_id,
+  dictionary_id: seeded_dictionary_id,
   entry_id: first_entry_id,
   table: 'senses',
   row: first_entry_second_sense_id,
@@ -61,7 +68,7 @@ const first_entry_second_sense_jsonb_field: TablesInsert<'entry_updates'> = {
 const first_entry_third_sense_jsonb_field: TablesInsert<'entry_updates'> = {
   id: uuid_template.slice(0, -2) + '04',
   user_id: seeded_user_id,
-  dictionary_id,
+  dictionary_id: seeded_dictionary_id,
   entry_id: first_entry_id,
   table: 'senses',
   row: first_entry_third_sense_id,
@@ -73,7 +80,7 @@ const first_entry_third_sense_jsonb_field: TablesInsert<'entry_updates'> = {
 const first_entry_third_sense_deleted_timestamp: TablesInsert<'entry_updates'> = {
   id: uuid_template.slice(0, -2) + '05',
   user_id: seeded_user_id,
-  dictionary_id,
+  dictionary_id: seeded_dictionary_id,
   entry_id: first_entry_id,
   table: 'senses',
   row: first_entry_third_sense_id,
@@ -85,7 +92,7 @@ const first_entry_third_sense_deleted_timestamp: TablesInsert<'entry_updates'> =
 const second_entry_first_sense_text_field: TablesInsert<'entry_updates'> = {
   id: uuid_template.slice(0, -2) + '06',
   user_id: seeded_user_id,
-  dictionary_id,
+  dictionary_id: seeded_dictionary_id,
   entry_id: second_entry_id,
   table: 'senses',
   row: second_entry_first_sense_id,
@@ -108,93 +115,110 @@ const second_sentence_id = uuid_template.slice(0, -2) + 'a2'
 const third_sentence_id = uuid_template.slice(0, -2) + 'a3'
 const fourth_sentence_id = uuid_template.slice(0, -2) + 'a4'
 
-const first_sentence_text_attached_to_first_entry_first_sense: TablesInsert<'sentence_updates'> = {
+const first_sentence_text_attached_to_first_entry_first_sense: TablesInsert<'content_updates'> = {
   id: uuid_template.slice(0, -2) + '07',
-  dictionary_id,
+  dictionary_id: seeded_dictionary_id,
   user_id: uuid_template, // uuid_template is just a placeholder and will be replaced by user_id from triggered function lookup from firebase_email
   firebase_email: seeded_user_email, // testing Firebase auth migration trigger
   sense_id: first_entry_first_sense_id,
   sentence_id: first_sentence_id,
   table: 'sentences',
-  column: 'text',
-  new_value: 'Hi, I am a sentence connected to the first sense of the first entry.',
+  change: {
+    column: 'text',
+    new_value: 'Hi, I am a sentence connected to the first sense of the first entry.',
+  },
 }
 
-const first_sentence_translation_no_sense_id_as_not_needed: TablesInsert<'sentence_updates'> = {
+const first_sentence_translation_no_sense_id_as_not_needed: TablesInsert<'content_updates'> = {
   id: uuid_template.slice(0, -2) + '08',
-  dictionary_id,
+  dictionary_id: seeded_dictionary_id,
   user_id: seeded_user_id,
   sentence_id: first_sentence_id,
   table: 'sentences',
-  column: 'translation',
-  new_value: '{"es":"Hola, soy una oración de ejemplo para el primer sentido de la primera entrada."}',
+  change: {
+    column: 'translation',
+    new_value: '{"es":"Hola, soy una oración de ejemplo para el primer sentido de la primera entrada."}',
+  },
 }
 
-const second_sentence_soon_to_be_deleted: TablesInsert<'sentence_updates'> = {
+const second_sentence_soon_to_be_deleted: TablesInsert<'content_updates'> = {
   id: uuid_template.slice(0, -2) + '09',
-  dictionary_id,
+  dictionary_id: seeded_dictionary_id,
   user_id: seeded_user_id,
   sense_id: first_entry_first_sense_id,
   sentence_id: second_sentence_id,
   table: 'sentences',
-  column: 'text',
-  new_value: 'I am a sentence that will be deleted and should not be in entries_view.',
+  change: {
+    column: 'text',
+    new_value: 'I am a sentence that will be deleted and should not be in entries_view.',
+  },
 }
 
-const second_sentence_deleted: TablesInsert<'sentence_updates'> = {
+const second_sentence_deleted: TablesInsert<'content_updates'> = {
   id: uuid_template.slice(0, -2) + '10',
-  dictionary_id,
+  dictionary_id: seeded_dictionary_id,
   user_id: seeded_user_id,
   sense_id: first_entry_first_sense_id,
   sentence_id: second_sentence_id,
   table: 'sentences',
-  column: 'deleted',
-  new_value: '2024-02-01T07:13:48.267Z',
+  change: {
+    column: 'deleted',
+    new_value: '2024-02-01T07:13:48.267Z',
+  },
 }
 
-const third_sentence_attached_to_first_entry_second_sense: TablesInsert<'sentence_updates'> = {
+const third_sentence_attached_to_first_entry_second_sense: TablesInsert<'content_updates'> = {
   id: uuid_template.slice(0, -2) + '11',
-  dictionary_id,
+  dictionary_id: seeded_dictionary_id,
   user_id: seeded_user_id,
   sense_id: first_entry_second_sense_id,
   sentence_id: third_sentence_id,
   table: 'sentences',
-  column: 'text',
-  new_value: 'Hi, I am a sentence initially connected to the second sense of the first entry that is later added to first sense of the second entry and disconnected from original second sense of first entry.',
+  change: {
+    column: 'text',
+    new_value: 'Hi, I am a sentence initially connected to the second sense of the first entry that is later added to first sense of the second entry and disconnected from original second sense of first entry.',
+  },
 }
 
-const third_sentence_also_attached_to_second_entry_first_sense: TablesInsert<'sentence_updates'> = {
+const third_sentence_also_attached_to_second_entry_first_sense: TablesInsert<'content_updates'> = {
   id: uuid_template.slice(0, -2) + '12',
-  dictionary_id,
+  dictionary_id: seeded_dictionary_id,
   user_id: seeded_user_id,
   sense_id: second_entry_first_sense_id,
   sentence_id: third_sentence_id,
   table: 'senses_in_sentences',
+  change: {
+    action: 'make the connection'
+  }
 }
 
-const third_sentence_removed_from_original_first_entry_second_sense: TablesInsert<'sentence_updates'> = {
+const third_sentence_removed_from_original_first_entry_second_sense: TablesInsert<'content_updates'> = {
   id: uuid_template.slice(0, -2) + '13',
-  dictionary_id,
+  dictionary_id: seeded_dictionary_id,
   user_id: seeded_user_id,
   sense_id: first_entry_second_sense_id,
   sentence_id: third_sentence_id,
   table: 'senses_in_sentences',
-  column: 'deleted',
-  new_value: '2023-11-16T07:13:48.267Z',
+  change: {
+    column: 'deleted',
+    new_value: '2023-11-16T07:13:48.267Z',
+  },
 }
 
-const fourth_sentence_attached_to_first_entry_first_sense: TablesInsert<'sentence_updates'> = {
+const fourth_sentence_attached_to_first_entry_first_sense: TablesInsert<'content_updates'> = {
   id: uuid_template.slice(0, -2) + '14',
-  dictionary_id,
+  dictionary_id: seeded_dictionary_id,
   user_id: seeded_user_id,
   sense_id: first_entry_first_sense_id,
   sentence_id: fourth_sentence_id,
   table: 'sentences',
-  column: 'text',
-  new_value: 'Hi, I should be the second sentence connected to the first sense of the first entry.',
+  change: {
+    column: 'text',
+    new_value: 'Hi, I should be the second sentence connected to the first sense of the first entry.',
+  },
 }
 
-export const sentence_updates: TablesInsert<'sentence_updates'>[] = [
+export const content_updates: TablesInsert<'content_updates'>[] = [
   first_sentence_text_attached_to_first_entry_first_sense,
   first_sentence_translation_no_sense_id_as_not_needed,
   second_sentence_soon_to_be_deleted,
