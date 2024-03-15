@@ -93,14 +93,13 @@ export const POST: RequestHandler = async ({ request }) => {
 
       await checkForPermission(decodedToken.uid, dictionary_id);
       user_id = decodedToken.uid;
-      const { data } = await adminSupabase.from('auth.users')
-        .select('user_id')
+      const { data } = await adminSupabase.from('users')
+        .select('id')
         .eq('email', decodedToken.email)
         .single()
-      if (!data?.user_id)
+      if (!data?.id)
         throw new Error('No user id found in database');
-      // eslint-disable-next-line prefer-destructuring
-      user_id = data.user_id
+      user_id = data.id
     }
 
     const { data: dictionary } = await adminSupabase.from('dictionaries').select().eq('id', dictionary_id).single()

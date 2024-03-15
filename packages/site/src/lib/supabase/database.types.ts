@@ -108,7 +108,7 @@ export interface SupaSense {
 
 export interface Sentence {
   id: string;
-  text: string;
+  text: MultiString;
   translation: MultiString;
 }
 

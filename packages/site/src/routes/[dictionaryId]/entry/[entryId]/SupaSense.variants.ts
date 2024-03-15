@@ -25,7 +25,7 @@ const fullSense: SupaSense = {
   sentences: [
     {
       id: '',
-      text: 'Hello',
+      text: { default: 'Hello' },
       translation: {
         es: 'Hola'
       }

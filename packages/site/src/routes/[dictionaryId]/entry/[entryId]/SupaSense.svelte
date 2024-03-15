@@ -15,6 +15,8 @@
   export let update_sense: DbOperations['update_sense'];
   export let update_sentence: DbOperations['update_sentence'];
 
+  const writing_systems = ['default']
+
   $: glossingLanguages = order_entry_and_dictionary_gloss_languages(sense.glosses, glossLanguages)
   $: hasSemanticDomain = sense.semantic_domains?.length || sense.write_in_semantic_domains?.length
 </script>
@@ -124,44 +126,49 @@
     sense_id: sense.id,
   })} />
 
-{#each sense.sentences || [{text: null, id: null, translation: null}] as sentence}
-  <EntryField
-    value={sentence.text}
-    field="example_sentence"
-    canEdit={can_edit}
-    display={$page.data.t('entry_field.example_sentence')}
-    on_update={new_value => update_sentence({
-      change: {
-        text: {
-          new: { default: new_value || null },
-          old: sentence.text ? { default: sentence.text } : null,
-        }
-      },
-      sentence_id: sentence.id || window.crypto.randomUUID(),
-      sense_id: sense.id,
-    })} />
-
-  {#if sentence.text}
-    {#each glossingLanguages as bcp}
+{#each sense.sentences || [{text: {}, id: null, translation: null}] as sentence}
+  {@const has_sentences = Object.keys(sentence.text).length}
+  <div class:order-2={!has_sentences}>
+    {#each writing_systems as orthography}
       <EntryField
-        value={sentence.translation?.[bcp]}
+        value={sentence.text[orthography]}
         field="example_sentence"
-        {bcp}
         canEdit={can_edit}
-        display="{$page.data.t({dynamicKey: `gl.${bcp}`, fallback: bcp})}: {$page.data.t('entry_field.example_sentence')}"
+        display={$page.data.t('entry_field.example_sentence')}
         on_update={new_value => update_sentence({
           change: {
-            translation: {
-              new: {
-                ...sentence.translation,
-                [bcp]: new_value
-              },
-              old: sentence.translation,
+            text: {
+              new: { [orthography]: new_value || null },
+              old: sentence.text?.[orthography] ? { default: sentence.text[orthography] } : null,
             }
           },
-          sentence_id: sentence.id,
+          sentence_id: sentence.id || window.crypto.randomUUID(),
           sense_id: sense.id,
         })} />
     {/each}
-  {/if}
+
+    {#if has_sentences}
+      {#each glossingLanguages as bcp}
+        <EntryField
+          value={sentence.translation?.[bcp]}
+          field="example_sentence"
+          {bcp}
+          canEdit={can_edit}
+          display="{$page.data.t({dynamicKey: `gl.${bcp}`, fallback: bcp})}: {$page.data.t('entry_field.example_sentence')}"
+          on_update={new_value => update_sentence({
+            change: {
+              translation: {
+                new: {
+                  ...sentence.translation,
+                  [bcp]: new_value
+                },
+                old: sentence.translation,
+              }
+            },
+            sentence_id: sentence.id,
+            sense_id: sense.id,
+          })} />
+      {/each}
+    {/if}
+  </div>
 {/each}

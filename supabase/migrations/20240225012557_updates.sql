@@ -71,3 +71,6 @@ CREATE TRIGGER set_created_by_trigger_speakers
 BEFORE UPDATE ON speakers
 FOR EACH ROW
 EXECUTE FUNCTION set_created_by();
+
+-- CREATE VIEW public.emails AS SELECT id, email, last_sign_in_at, created_at FROM auth.users;
+-- REVOKE ALL ON public.users FROM anon, authenticated;

@@ -2,18 +2,19 @@ import type { TablesInsert } from '$lib/supabase/generated.types'
 
 export const seeded_user_id_1 = '12345678-abcd-efab-cdef-123456789012'
 export const seeded_user_id_2 = '12345678-abcd-efab-cdef-123456789013'
+export const seed_user_email_1 = 'jacob@livingtongues.org'
 
 export const users = [
   {
     id: seeded_user_id_1,
-    email: 'seeded1@mock.com',
+    email: seed_user_email_1,
     instance_id: '00000000-0000-0000-0000-000000000000',
     aud: 'authenticated',
     role: 'authenticated',
   },
   {
     id: seeded_user_id_2,
-    email: 'seeded2@mock.com',
+    email: 'diego@livingtongues.org',
     instance_id: '00000000-0000-0000-0000-000000000000',
     aud: 'authenticated',
     role: 'authenticated',

@@ -5,8 +5,6 @@ import { users } from './tables'
 
 function sql_string_for_all_seeded_tables() {
   return `${sql_file_string('auth.users', users)}
-
-  
   `
   // ${sql_file_string('dictionaries', seed_dictionaries)}
 // ${sql_file_string('entries', seed_entries)}
