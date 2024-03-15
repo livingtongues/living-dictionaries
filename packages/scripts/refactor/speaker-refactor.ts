@@ -1,15 +1,19 @@
 import { ActualDatabaseEntry, ISpeaker } from '@living-dictionaries/types';
-import { db } from '../config';
+import { db, timestamp } from '../config';
 import { program } from 'commander';
-// import { CollectionReference } from 'firebase/firestore;
+// import { CollectionReference } from 'firebase/firestore';
 program
-  //   .version('0.0.1')
+//   .version('0.0.1')
   .option('--id <value>', 'Dictionary Id')
   .option('--live', 'If not included, only log values')
   .parse(process.argv);
 
 const dictionaryId = program.opts().id;
 const {live} = program.opts();
+
+type unique_speakers = Record<string, string>;
+const different_speakers: unique_speakers[] = [];
+const developer_in_charge = 'qkTzJXH24Xfc57cZJRityS6OTn52'; // diego@livingtongues.org -> Diego Córdova Nieto;
 
 async function speakerRefactor() {
   try {
@@ -34,15 +38,13 @@ async function speakerRefactor() {
 }
 
 async function fetchEntries(dictionaryId: string) {
-  type unique_speakers = Record<string, string>;
-  const different_speakers: unique_speakers[] = [];
   const speakerRef = db.collection('speakers');
   const dictionarySpeakerSnapshot = await speakerRef.where('contributingTo', 'array-contains', dictionaryId).get();
   dictionarySpeakerSnapshot.docs.forEach((snap) => different_speakers.push({ [snap.data().displayName]: snap.id }));
   const snapshot = await db.collection(`dictionaries/${dictionaryId}/words`).get();
   for (const snap of snapshot.docs) {
     const entry: ActualDatabaseEntry = { id: snap.id, ...(snap.data() as ActualDatabaseEntry) };
-    addSpeakerIdToEntry(dictionaryId, entry, {birthplace: 'USA', displayName: ''}, speakerRef);
+    await addSpeakerIdToEntry(dictionaryId, entry, {birthplace: 'USA', displayName: ''}, speakerRef);
   }
 }
 
@@ -56,20 +58,25 @@ const addSpeaker = async (speakerData: ISpeaker, speakerRef: any) => {
 }
 
 const addSpeakerIdToEntry = async (dictionaryId: string, entry: ActualDatabaseEntry, speakerData: ISpeaker, speakerRef: any) => {
+  // let speakerId = null;
   const sfBefore = entry.sf;
-
   if (entry.sf?.speakerName) {
-    const speakerId = await addSpeaker({
-      ...speakerData,
-      displayName: entry.sf.speakerName,
-      contributingTo: [dictionaryId]
-    }, speakerRef);
+    let speakerId = different_speakers.find(speaker => Object.keys(speaker).some(key => key === entry.sf.speakerName))?.[entry.sf.speakerName];
+    if (!speakerId) {
+      speakerId = await addSpeaker({
+        ...speakerData,
+        displayName: entry.sf.speakerName,
+        contributingTo: [dictionaryId]
+      }, speakerRef);
+      different_speakers.push({ [entry.sf.speakerName]: speakerId });
+    }
 
     console.log(`Before: sf-${JSON.stringify(sfBefore)} sfs-${JSON.stringify(entry?.sfs)}`);
     entry.sfs = [{
+      ab: developer_in_charge,
       sp: [speakerId],
       path: entry.sf.path,
-      // TODO complete all other fields
+      ts: timestamp
     }]
     delete entry.sf;
     console.log(`After: sf-${JSON.stringify(entry?.sf)} sfs-${JSON.stringify(entry.sfs)}`);
