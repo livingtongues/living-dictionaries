@@ -45,7 +45,21 @@ export interface Database {
             foreignKeyName: 'audio_created_by_fkey'
             columns: ['created_by']
             isOneToOne: false
+            referencedRelation: 'user_emails'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'audio_created_by_fkey'
+            columns: ['created_by']
+            isOneToOne: false
             referencedRelation: 'users'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'audio_updated_by_fkey'
+            columns: ['updated_by']
+            isOneToOne: false
+            referencedRelation: 'user_emails'
             referencedColumns: ['id']
           },
           {
@@ -85,6 +99,13 @@ export interface Database {
             columns: ['audio_id']
             isOneToOne: false
             referencedRelation: 'audio'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'audio_speakers_created_by_fkey'
+            columns: ['created_by']
+            isOneToOne: false
+            referencedRelation: 'user_emails'
             referencedColumns: ['id']
           },
           {
@@ -213,6 +234,13 @@ export interface Database {
             foreignKeyName: 'content_updates_user_id_fkey'
             columns: ['user_id']
             isOneToOne: false
+            referencedRelation: 'user_emails'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'content_updates_user_id_fkey'
+            columns: ['user_id']
+            isOneToOne: false
             referencedRelation: 'users'
             referencedColumns: ['id']
           },
@@ -309,7 +337,21 @@ export interface Database {
             foreignKeyName: 'dictionaries_created_by_fkey'
             columns: ['created_by']
             isOneToOne: false
+            referencedRelation: 'user_emails'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'dictionaries_created_by_fkey'
+            columns: ['created_by']
+            isOneToOne: false
             referencedRelation: 'users'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'dictionaries_updated_by_fkey'
+            columns: ['updated_by']
+            isOneToOne: false
+            referencedRelation: 'user_emails'
             referencedColumns: ['id']
           },
           {
@@ -390,6 +432,13 @@ export interface Database {
             foreignKeyName: 'entries_created_by_fkey'
             columns: ['created_by']
             isOneToOne: false
+            referencedRelation: 'user_emails'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'entries_created_by_fkey'
+            columns: ['created_by']
+            isOneToOne: false
             referencedRelation: 'users'
             referencedColumns: ['id']
           },
@@ -398,6 +447,13 @@ export interface Database {
             columns: ['dictionary_id']
             isOneToOne: false
             referencedRelation: 'dictionaries'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'entries_updated_by_fkey'
+            columns: ['updated_by']
+            isOneToOne: false
+            referencedRelation: 'user_emails'
             referencedColumns: ['id']
           },
           {
@@ -490,7 +546,21 @@ export interface Database {
             foreignKeyName: 'photos_created_by_fkey'
             columns: ['created_by']
             isOneToOne: false
+            referencedRelation: 'user_emails'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'photos_created_by_fkey'
+            columns: ['created_by']
+            isOneToOne: false
             referencedRelation: 'users'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'photos_updated_by_fkey'
+            columns: ['updated_by']
+            isOneToOne: false
+            referencedRelation: 'user_emails'
             referencedColumns: ['id']
           },
           {
@@ -525,6 +595,13 @@ export interface Database {
           sense_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: 'sense_photos_created_by_fkey'
+            columns: ['created_by']
+            isOneToOne: false
+            referencedRelation: 'user_emails'
+            referencedColumns: ['id']
+          },
           {
             foreignKeyName: 'sense_photos_created_by_fkey'
             columns: ['created_by']
@@ -571,6 +648,13 @@ export interface Database {
           video_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: 'sense_videos_created_by_fkey'
+            columns: ['created_by']
+            isOneToOne: false
+            referencedRelation: 'user_emails'
+            referencedColumns: ['id']
+          },
           {
             foreignKeyName: 'sense_videos_created_by_fkey'
             columns: ['created_by']
@@ -669,6 +753,13 @@ export interface Database {
             foreignKeyName: 'senses_in_sentences_created_by_fkey'
             columns: ['created_by']
             isOneToOne: false
+            referencedRelation: 'user_emails'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'senses_in_sentences_created_by_fkey'
+            columns: ['created_by']
+            isOneToOne: false
             referencedRelation: 'users'
             referencedColumns: ['id']
           },
@@ -715,6 +806,13 @@ export interface Database {
             foreignKeyName: 'sentence_photos_created_by_fkey'
             columns: ['created_by']
             isOneToOne: false
+            referencedRelation: 'user_emails'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'sentence_photos_created_by_fkey'
+            columns: ['created_by']
+            isOneToOne: false
             referencedRelation: 'users'
             referencedColumns: ['id']
           },
@@ -757,6 +855,13 @@ export interface Database {
           video_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: 'sentence_videos_created_by_fkey'
+            columns: ['created_by']
+            isOneToOne: false
+            referencedRelation: 'user_emails'
+            referencedColumns: ['id']
+          },
           {
             foreignKeyName: 'sentence_videos_created_by_fkey'
             columns: ['created_by']
@@ -822,6 +927,13 @@ export interface Database {
             foreignKeyName: 'sentences_created_by_fkey'
             columns: ['created_by']
             isOneToOne: false
+            referencedRelation: 'user_emails'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'sentences_created_by_fkey'
+            columns: ['created_by']
+            isOneToOne: false
             referencedRelation: 'users'
             referencedColumns: ['id']
           },
@@ -837,6 +949,13 @@ export interface Database {
             columns: ['text_id']
             isOneToOne: false
             referencedRelation: 'texts'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'sentences_updated_by_fkey'
+            columns: ['updated_by']
+            isOneToOne: false
+            referencedRelation: 'user_emails'
             referencedColumns: ['id']
           },
           {
@@ -893,6 +1012,13 @@ export interface Database {
             foreignKeyName: 'speakers_created_by_fkey'
             columns: ['created_by']
             isOneToOne: false
+            referencedRelation: 'user_emails'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'speakers_created_by_fkey'
+            columns: ['created_by']
+            isOneToOne: false
             referencedRelation: 'users'
             referencedColumns: ['id']
           },
@@ -900,7 +1026,21 @@ export interface Database {
             foreignKeyName: 'speakers_updated_by_fkey'
             columns: ['updated_by']
             isOneToOne: false
+            referencedRelation: 'user_emails'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'speakers_updated_by_fkey'
+            columns: ['updated_by']
+            isOneToOne: false
             referencedRelation: 'users'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'speakers_user_id_fkey'
+            columns: ['user_id']
+            isOneToOne: false
+            referencedRelation: 'user_emails'
             referencedColumns: ['id']
           },
           {
@@ -951,6 +1091,13 @@ export interface Database {
             foreignKeyName: 'texts_created_by_fkey'
             columns: ['created_by']
             isOneToOne: false
+            referencedRelation: 'user_emails'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'texts_created_by_fkey'
+            columns: ['created_by']
+            isOneToOne: false
             referencedRelation: 'users'
             referencedColumns: ['id']
           },
@@ -959,6 +1106,13 @@ export interface Database {
             columns: ['dictionary_id']
             isOneToOne: false
             referencedRelation: 'dictionaries'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'texts_updated_by_fkey'
+            columns: ['updated_by']
+            isOneToOne: false
+            referencedRelation: 'user_emails'
             referencedColumns: ['id']
           },
           {
@@ -993,6 +1147,13 @@ export interface Database {
           video_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: 'video_speakers_created_by_fkey'
+            columns: ['created_by']
+            isOneToOne: false
+            referencedRelation: 'user_emails'
+            referencedColumns: ['id']
+          },
           {
             foreignKeyName: 'video_speakers_created_by_fkey'
             columns: ['created_by']
@@ -1055,7 +1216,21 @@ export interface Database {
             foreignKeyName: 'videos_created_by_fkey'
             columns: ['created_by']
             isOneToOne: false
+            referencedRelation: 'user_emails'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'videos_created_by_fkey'
+            columns: ['created_by']
+            isOneToOne: false
             referencedRelation: 'users'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'videos_updated_by_fkey'
+            columns: ['updated_by']
+            isOneToOne: false
+            referencedRelation: 'user_emails'
             referencedColumns: ['id']
           },
           {
@@ -1073,6 +1248,27 @@ export interface Database {
         Row: {
           id: string | null
           senses: Json | null
+        }
+        Relationships: []
+      }
+      user_emails: {
+        Row: {
+          created_at: string | null
+          email: string | null
+          id: string | null
+          last_sign_in_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          email?: string | null
+          id?: string | null
+          last_sign_in_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          email?: string | null
+          id?: string | null
+          last_sign_in_at?: string | null
         }
         Relationships: []
       }

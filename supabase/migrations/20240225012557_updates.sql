@@ -72,5 +72,5 @@ BEFORE UPDATE ON speakers
 FOR EACH ROW
 EXECUTE FUNCTION set_created_by();
 
--- CREATE VIEW public.emails AS SELECT id, email, last_sign_in_at, created_at FROM auth.users;
--- REVOKE ALL ON public.users FROM anon, authenticated;
+CREATE VIEW public.user_emails AS SELECT id, email, last_sign_in_at, created_at FROM auth.users;
+REVOKE ALL ON public.user_emails FROM anon, authenticated;

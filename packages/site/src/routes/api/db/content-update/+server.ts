@@ -93,7 +93,7 @@ export const POST: RequestHandler = async ({ request }) => {
 
       await checkForPermission(decodedToken.uid, dictionary_id);
       user_id = decodedToken.uid;
-      const { data } = await adminSupabase.from('users')
+      const { data } = await adminSupabase.from('user_emails')
         .select('id')
         .eq('email', decodedToken.email)
         .single()
