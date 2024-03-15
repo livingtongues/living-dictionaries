@@ -44,7 +44,7 @@ CREATE TABLE entries ( -- TODO: migrate from Firestore
   dialects text[], -- TODO: remove this field by creating a dialects table and many-many table
   notes text, -- TODO: should this be a MultiString?
   sources text[],
-  elicitation_id text, -- TODO: deprecate in favor of tags
+  -- elicitation_id text, -- TODO: save as a tag when migrating onondaga
   scientific_names text[],
   coordinates jsonb, -- Coordinates
   created_at timestamp with time zone DEFAULT now() NOT NULL,
