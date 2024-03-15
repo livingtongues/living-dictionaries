@@ -10,7 +10,7 @@
 		"check": "pnpm --filter=site check",
 		"test": "vitest",
 		"test:db": "pnpm --filter=site test:db",
-		"test:db:ci": "start-server-and-test dev http://localhost:3041 test:db",
+		"test:db:ci": "start-server-and-test dev http://localhost:3041/kitbook test:db",
 		"test:site": "pnpm --filter=site test",
 		"test:all": "pnpm --recursive --stream test -- --run",
 		"test:e2e": "pnpm --filter=site test:e2e",
