@@ -111,8 +111,3 @@ export interface Sentence {
   text: MultiString;
   translation: MultiString;
 }
-
-export interface Change {
-  a: string;
-  b: string;
-}
