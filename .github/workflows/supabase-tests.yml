@@ -26,6 +26,5 @@ jobs:
       - name: Install Dependencies
         run: pnpm install
 
-      - run: pnpm dev
       - name: Run DB Tests
         run: pnpm test:db:ci
