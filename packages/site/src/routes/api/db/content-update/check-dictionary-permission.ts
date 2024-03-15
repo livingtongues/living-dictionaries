@@ -1,9 +1,12 @@
 import { getDb } from '$lib/server/firebase-admin';
 import type { IUser } from '@living-dictionaries/types';
 
-const db = getDb();
+let db: FirebaseFirestore.Firestore
 
 export async function checkForPermission(user_id: string, dictionary_id: string) {
+  if (!db)
+    db = getDb();
+
   const dictionaryManagers = await db.collection(`dictionaries/${dictionary_id}/managers`).get();
   const isDictionaryManager = dictionaryManagers.docs.some(({ id }) => id === user_id);
   if (isDictionaryManager) return true;
