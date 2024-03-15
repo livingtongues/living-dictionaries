@@ -161,7 +161,8 @@
     "link_copied": "Đường link đã được sao chép",
     "copy_and_share": "Sao chép và chia sẻ ",
     "print": "In",
-    "id": "Thông tin định dạng"
+    "id": "Thông tin định dạng",
+    "switch_opposite": "Chuyển sang đối diện"
   },
   "entry_field": {
     "photo": "Hình ảnh",
@@ -339,7 +340,7 @@
     "created": "Tạo",
     "edited": "Đã chỉnh sửa",
     "deleted": "Bị xóa",
-    "history_search": "Tìm kiếm các mục, biên tập viên, trường và giá trị",
+    "history_search": "Tìm kiếm các mục, trình soạn thảo, trường và giá trị",
     "download_history": "Tải xuống lịch sử dưới dạng CSV",
     "empty": "Chưa có lịch sử"
   },

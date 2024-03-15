@@ -29,9 +29,7 @@
   class:sompeng={column.display === 'Sompeng'}
   class="h-full w-full flex cell">
   {#if column.field === 'audio'}
-    <Audio class="h-full text-sm" minimal {canEdit} {entry} let:playing>
-      <span class:text-blue-700={playing} class="i-material-symbols-hearing text-lg mt-1" />
-    </Audio>
+    <Audio class="h-full text-sm" context="table" {canEdit} {entry} />
   {:else if column.field === 'photo'}
     {@const first_photo = sense.photo_files?.[0]}
     {#if first_photo}

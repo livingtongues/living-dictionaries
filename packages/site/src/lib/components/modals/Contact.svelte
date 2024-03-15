@@ -164,8 +164,8 @@
   {:else if status == 'fail'}
     <h4 class="text-xl mt-1 mb-4">
       {$page.data.t('contact.message_failed')}
-      <a class="underline ml-1" href="mailto:annaluisa@livingtongues.org">
-        annaluisa@livingtongues.org
+      <a class="underline ml-1" href="mailto:dictionaries@livingtongues.org">
+        dictionaries@livingtongues.org
       </a>
     </h4>
   {/if}
