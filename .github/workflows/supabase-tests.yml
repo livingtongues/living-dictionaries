@@ -1,4 +1,4 @@
-name: PGTap Supabase DB Tests
+name: Supabase DB Vitest Tests
 on:
   pull_request:
     branches: [ main ]
@@ -11,7 +11,21 @@ jobs:
       - uses: supabase/setup-cli@v1
         with:
           version: 1.145.4
-      - name: Supabase Start
-        run: supabase start
-      - name: Run Tests
-        run: supabase test db
+      - run: supabase start
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8.6.0
+
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+          cache: pnpm
+
+      - name: Install Dependencies
+        run: pnpm install
+
+      - run: pnpm dev
+      - name: Run DB Tests
+        run: pnpm test:db:ci
