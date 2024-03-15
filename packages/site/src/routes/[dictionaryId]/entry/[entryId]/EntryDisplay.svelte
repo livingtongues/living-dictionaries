@@ -27,10 +27,10 @@
   const regularFields: EntryFieldValue[] = ['plural_form', 'morphology', 'interlinearization', 'notes']
 
   async function addSense() {
-    await dbOperations.update_sense({entry_id: entry.id, column: 'glosses', new_value: null, sense_id: window.crypto.randomUUID()})
+    await dbOperations.update_sense({entry_id: entry.id, change: { glosses: { new: null }}, sense_id: window.crypto.randomUUID()})
   }
   async function deleteSense(sense_id: string) {
-    await dbOperations.update_sense({entry_id: entry.id, column: 'deleted', new_value: new Date().toISOString(), sense_id})
+    await dbOperations.update_sense({entry_id: entry.id, change: { deleted: true }, sense_id})
   }
 </script>
 

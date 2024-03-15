@@ -18,3 +18,56 @@ CREATE TABLE content_updates (
 );
 
 ALTER TABLE content_updates ENABLE ROW LEVEL SECURITY;
+
+CREATE OR REPLACE FUNCTION set_created_by()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW.created_by := OLD.created_by;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER set_created_by_trigger_dictionaries
+BEFORE UPDATE ON dictionaries
+FOR EACH ROW
+EXECUTE FUNCTION set_created_by();
+
+CREATE TRIGGER set_created_by_trigger_entries
+BEFORE UPDATE ON entries
+FOR EACH ROW
+EXECUTE FUNCTION set_created_by();
+
+CREATE TRIGGER set_created_by_trigger_senses
+BEFORE UPDATE ON senses
+FOR EACH ROW
+EXECUTE FUNCTION set_created_by();
+
+CREATE TRIGGER set_created_by_trigger_texts
+BEFORE UPDATE ON texts
+FOR EACH ROW
+EXECUTE FUNCTION set_created_by();
+
+CREATE TRIGGER set_created_by_trigger_sentences
+BEFORE UPDATE ON sentences
+FOR EACH ROW
+EXECUTE FUNCTION set_created_by();
+
+CREATE TRIGGER set_created_by_trigger_photos
+BEFORE UPDATE ON photos
+FOR EACH ROW
+EXECUTE FUNCTION set_created_by();
+
+CREATE TRIGGER set_created_by_trigger_audio
+BEFORE UPDATE ON audio
+FOR EACH ROW
+EXECUTE FUNCTION set_created_by();
+
+CREATE TRIGGER set_created_by_trigger_videos
+BEFORE UPDATE ON videos
+FOR EACH ROW
+EXECUTE FUNCTION set_created_by();
+
+CREATE TRIGGER set_created_by_trigger_speakers
+BEFORE UPDATE ON speakers
+FOR EACH ROW
+EXECUTE FUNCTION set_created_by();

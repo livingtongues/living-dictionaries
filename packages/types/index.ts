@@ -5,7 +5,7 @@ export type { IAbout, IDictionary, IGrammar, ICitation, Partner } from './dictio
 export type { Coordinates, IPoint, IRegion } from './coordinates.interface';
 export type { ActualDatabaseEntry, ExpandedEntry, GoalDatabaseEntry, DatabaseSense, ExpandedSense, LDAlgoliaHit } from './entry.interface';
 export type { IGlossLanguages, IGlossLanguage } from './gloss-language.interface';
-export type { IGloss } from './gloss.interface';
+export type { MultiString } from './gloss.interface';
 export type { IExampleSentence } from './exampe-sentence.interface';
 export type { IImport } from './import.interface';
 export type { ExpandedPhoto, GoalDatabasePhoto, IPhoto, DictionaryPhoto, PartnerPhoto } from './photo.interface';

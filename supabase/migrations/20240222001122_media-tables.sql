@@ -1,30 +1,3 @@
-CREATE TABLE audio (
-  id uuid primary key default uuid_generate_v4(),
-  storage_path text NOT NULL,
-  source text,
-  created_at timestamp with time zone DEFAULT now() NOT NULL,
-  created_by uuid NOT NULL REFERENCES auth.users,
-  updated_at timestamp with time zone DEFAULT now() NOT NULL,
-  updated_by uuid NOT NULL REFERENCES auth.users,
-  deleted timestamp with time zone
-);
-
-ALTER TABLE audio ENABLE ROW LEVEL SECURITY;
-
-CREATE TABLE videos (
-  id uuid primary key default uuid_generate_v4(),
-  storage_path text NOT NULL,
-  source text,
-  videographer text,
-  created_at timestamp with time zone DEFAULT now() NOT NULL,
-  created_by uuid NOT NULL REFERENCES auth.users,
-  updated_at timestamp with time zone DEFAULT now() NOT NULL,
-  updated_by uuid NOT NULL REFERENCES auth.users,
-  deleted timestamp with time zone
-);
-
-ALTER TABLE videos ENABLE ROW LEVEL SECURITY;
-
 CREATE TABLE photos (
   id uuid primary key default uuid_generate_v4(),
   storage_path text NOT NULL,
@@ -40,8 +13,34 @@ CREATE TABLE photos (
 
 ALTER TABLE photos ENABLE ROW LEVEL SECURITY;
 
-CREATE TYPE gender AS ENUM ('m', 'f', 'o');
+CREATE TABLE videos (
+  id uuid primary key default uuid_generate_v4(),
+  storage_path text NOT NULL,
+  source text,
+  videographer text,
+  created_at timestamp with time zone DEFAULT now() NOT NULL,
+  created_by uuid NOT NULL REFERENCES auth.users,
+  updated_at timestamp with time zone DEFAULT now() NOT NULL,
+  updated_by uuid NOT NULL REFERENCES auth.users,
+  deleted timestamp with time zone
+);
 
+ALTER TABLE videos ENABLE ROW LEVEL SECURITY;
+
+CREATE TABLE audio (
+  id uuid primary key default uuid_generate_v4(),
+  storage_path text NOT NULL,
+  source text,
+  created_at timestamp with time zone DEFAULT now() NOT NULL,
+  created_by uuid NOT NULL REFERENCES auth.users,
+  updated_at timestamp with time zone DEFAULT now() NOT NULL,
+  updated_by uuid NOT NULL REFERENCES auth.users,
+  deleted timestamp with time zone
+);
+
+ALTER TABLE audio ENABLE ROW LEVEL SECURITY;
+
+CREATE TYPE gender AS ENUM ('m', 'f', 'o');
 CREATE TABLE speakers (
   id uuid primary key default uuid_generate_v4(),
   user_id uuid REFERENCES auth.users, -- only if speaker has an account
