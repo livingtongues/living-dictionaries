@@ -128,7 +128,7 @@
 
 {#each sense.sentences || [{text: {}, id: null, translation: null}] as sentence}
   {@const has_sentences = Object.keys(sentence.text).length}
-  <div class:order-2={!has_sentences}>
+  <div class:order-2={!has_sentences} class="flex flex-col">
     {#each writing_systems as orthography}
       <EntryField
         value={sentence.text[orthography]}
@@ -150,6 +150,7 @@
     {#if has_sentences}
       {#each glossingLanguages as bcp}
         <EntryField
+          class="ml-3"
           value={sentence.translation?.[bcp]}
           field="example_sentence"
           {bcp}

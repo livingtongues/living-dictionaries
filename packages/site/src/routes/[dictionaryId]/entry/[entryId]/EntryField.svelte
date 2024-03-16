@@ -14,7 +14,7 @@
 {#if value || canEdit}
   <ShowHide let:show let:set let:toggle>
     <div
-      class="md:px-2 rounded"
+      class="md:px-2 rounded {$$props.class}"
       on:click={() => set(canEdit)}
       class:hover:bg-gray-100={canEdit}
       class:cursor-pointer={canEdit}

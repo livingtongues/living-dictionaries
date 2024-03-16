@@ -77,20 +77,25 @@
   on_update={new_value => dispatch('valueupdate', { field: EntryFields.noun_class, newValue: new_value})} />
 
 {#each sense.example_sentences || [{}] as sentence}
-  <EntryField
-    value={sentence.vn}
-    field="example_sentence"
-    {canEdit}
-    display={$page.data.t('entry_field.example_sentence')}
-    on_update={new_value => dispatch('valueupdate', { field: 'xs.vn', newValue: new_value})} />
-
-  {#each glossingLanguages as bcp}
+  <div class:order-2={!sentence.vn} class="flex flex-col">
     <EntryField
-      value={sentence[bcp]}
+      value={sentence.vn}
       field="example_sentence"
-      {bcp}
       {canEdit}
-      display={`${$page.data.t({dynamicKey: `gl.${bcp}`, fallback: bcp})}: ${$page.data.t('entry_field.example_sentence')}`}
-      on_update={new_value => dispatch('valueupdate', { field: `xs.${bcp}`, newValue: new_value})} />
-  {/each}
+      display={$page.data.t('entry_field.example_sentence')}
+      on_update={new_value => dispatch('valueupdate', { field: 'xs.vn', newValue: new_value})} />
+
+    {#if sentence.vn}
+      {#each glossingLanguages as bcp}
+        <EntryField
+          class="ml-3"
+          value={sentence[bcp]}
+          field="example_sentence"
+          {bcp}
+          {canEdit}
+          display={`${$page.data.t({dynamicKey: `gl.${bcp}`, fallback: bcp})}: ${$page.data.t('entry_field.example_sentence')}`}
+          on_update={new_value => dispatch('valueupdate', { field: `xs.${bcp}`, newValue: new_value})} />
+      {/each}
+    {/if}
+  </div>
 {/each}
