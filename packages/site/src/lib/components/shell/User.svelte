@@ -2,7 +2,7 @@
   import { page } from '$app/stores';
   import { admin, user as userStore } from '$lib/stores';
   import { logOut, firebaseConfig, authState } from 'sveltefirets';
-  import { Button, Menu, ShowHide, Avatar, clickoutside } from 'svelte-pieces';
+  import { Button, Menu, ShowHide, Avatar } from 'svelte-pieces';
   import type { IUser } from '@living-dictionaries/types';
 
   $: user = $userStore || ($authState === undefined && ($page.data?.user as IUser)) || null;
@@ -11,12 +11,12 @@
 
 {#if user}
   <ShowHide let:show let:toggle let:set>
-    <div class="relative flex-shrink-0" use:clickoutside on:clickoutside={() => set(false)}>
+    <div class="relative flex-shrink-0">
       <button class="px-3 py-1" type="button" on:click={toggle}>
         <Avatar {user} />
       </button>
       {#if show}
-        <Menu portalTarget="#direction" class="right-2 rtl:left-2 top-11">
+        <Menu portalTarget="#direction" class="right-2 rtl:left-2 top-11" onclickoutside={() => set(false)}>
           <div class="px-4 py-2 text-xs font-semibold text-gray-600">{user.displayName}</div>
           <div class="px-4 py-2 -mt-3 text-xs text-gray-600 border-b">{user.email}</div>
           {#if $admin}

@@ -19,7 +19,7 @@
 <div class="flex items-center mb-2">
   <input type="search" bind:value use:autofocus placeholder={`${placeholder} (${items.length})`} />
   <div class="mr-1" />
-  <slot name="right" />
+  <slot name="right" {filteredItems} />
 </div>
 
 <slot {filteredItems} />

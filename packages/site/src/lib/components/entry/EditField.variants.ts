@@ -6,6 +6,9 @@ export const viewports: Viewport[] = [{
   height: 200,
 }]
 
+const on_update = (new_value: string) => {
+  console.info('new_value', new_value)
+}
 
 export const variants: Variant<Component>[] = [
   {
@@ -14,6 +17,8 @@ export const variants: Variant<Component>[] = [
     props: {
       field: 'gloss',
       bcp: 'as',
+      on_update,
+      on_close: null,
     },
     languages: [],
   },
@@ -23,6 +28,8 @@ export const variants: Variant<Component>[] = [
       field: 'gloss',
       bcp: 'as',
       value: 'red <i>tomato</i>',
+      on_update,
+      on_close: null,
     },
     languages: [],
   },
@@ -32,12 +39,16 @@ export const variants: Variant<Component>[] = [
     props: {
       field: 'interlinearization',
       value: '3p.sɢ.ind',
+      on_update,
+      on_close: null,
     },
   },
   {
     name: 'Morphology',
     props: {
       field: 'morphology',
+      on_update,
+      on_close: null,
     },
     languages: [],
   },
@@ -46,6 +57,8 @@ export const variants: Variant<Component>[] = [
     props: {
       field: 'lexeme',
       value: 'banana',
+      on_update,
+      on_close: null,
     },
     languages: [],
   },
@@ -54,6 +67,8 @@ export const variants: Variant<Component>[] = [
     props: {
       field: 'notes',
       value: 'hello',
+      on_update,
+      on_close: null,
     },
     languages: [],
     tests: {
@@ -70,6 +85,8 @@ export const variants: Variant<Component>[] = [
     props: {
       field: 'phonetic',
       value: 'banana',
+      on_update,
+      on_close: null,
     },
     tests: {
       clientSideRendered: true, // so that keyboard can load in

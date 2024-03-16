@@ -17,4 +17,5 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 CREATE TRIGGER convert_email_to_id_before_insert
 BEFORE INSERT ON entry_updates
-FOR EACH ROW EXECUTE FUNCTION convert_firebase_email_to_supabase_user_id();
+FOR EACH ROW 
+EXECUTE FUNCTION convert_firebase_email_to_supabase_user_id();

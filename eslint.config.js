@@ -19,7 +19,7 @@ const ignore = defineFlatConfig({
     'packages/scripts/import/old**',
     '**/route/kitbook/**',
     '**/locales/**',
-    // '**/ids-import/**.ts'
+    'supabase/functions/**'
   ],
 })
 

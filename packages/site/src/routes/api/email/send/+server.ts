@@ -44,6 +44,6 @@ export const POST: RequestHandler = async ({ request, fetch }) => {
   }
   catch (err: any) {
     console.error(`Error with email send request: ${err.message}`);
-    throw error(ResponseCodes.INTERNAL_SERVER_ERROR, `Error with email send request: ${err.message}`);
+    error(ResponseCodes.INTERNAL_SERVER_ERROR, `Error with email send request: ${err.message}`);
   }
 };

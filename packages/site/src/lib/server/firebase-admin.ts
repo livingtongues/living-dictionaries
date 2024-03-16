@@ -3,7 +3,7 @@ import { getAuth } from 'firebase-admin/auth'
 import { Firestore, getFirestore } from 'firebase-admin/firestore'
 import { FIREBASE_SERVICE_ACCOUNT_CREDENTIALS } from '$env/static/private'
 
-const SERVICE_ACCOUNT: ServiceAccount & { project_id?: string } = JSON.parse(FIREBASE_SERVICE_ACCOUNT_CREDENTIALS) // Firebase Admin typings use camelCase but Google Cloud Service Account credentials use snake_case oddly enough
+const SERVICE_ACCOUNT: ServiceAccount & { project_id?: string } = JSON.parse(FIREBASE_SERVICE_ACCOUNT_CREDENTIALS || '{}') // Firebase Admin typings use camelCase but Google Cloud Service Account credentials use snake_case oddly enough
 
 let firebaseAdminApp: App = null;
 let db: Firestore = null;

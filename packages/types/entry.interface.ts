@@ -1,6 +1,6 @@
 import type { Timestamp } from 'firebase/firestore';
 import type { IFirestoreMetaDataAbbreviated } from 'sveltefirets';
-import type { IGloss } from './gloss.interface';
+import type { MultiString } from './gloss.interface';
 import type { IExampleSentence } from './exampe-sentence.interface';
 import type { GoalDatabaseAudio, ActualDatabaseAudio, ExpandedAudio } from './audio.interface';
 import type { GoalDatabasePhoto, ActualDatabasePhoto, ExpandedPhoto } from './photo.interface';
@@ -35,7 +35,7 @@ export interface ExpandedEntry extends IFirestoreMetaDataAbbreviated {
 }
 
 export interface ExpandedSense {
-  glosses?: IGloss;
+  glosses?: MultiString;
   parts_of_speech_keys?: string[];
   translated_parts_of_speech?: string[];
   ld_semantic_domains_keys?: string[];
@@ -49,7 +49,7 @@ export interface ExpandedSense {
 }
 
 export interface DatabaseSense {
-  gl?: IGloss;
+  gl?: MultiString;
   ps?: string[]; // parts_of_speech
   sdn?: string[]; // semantic domain number, simplified system modeled after SemDom (eg. 2.1.2.3)
   sd?: string[]; // semantic domain strings, only using for custom semantic domains brought in from imports

@@ -29,7 +29,7 @@
   "prettier.enable": false,
   "editor.formatOnSave": false,
   "editor.codeActionsOnSave": {
-    "source.fixAll.eslint": true
+    "source.fixAll.eslint": "explicit"
   },
   // Silence stylistic rules in IDE, but still auto fix them
   "eslint.rules.customizations": [
@@ -82,4 +82,11 @@
     "a11y-no-static-element-interactions": "ignore",
     "a11y-no-noninteractive-element-interactions": "ignore",
   },
+  
+  "deno.enable": true,
+   "deno.lint": true,
+   "deno.enablePaths": [
+     "supabase"
+   ],
+   "deno.importMap": "./supabase/functions/import-map.json"
 }

@@ -65,7 +65,7 @@
     items={dictionariesAndHelpers}
     let:filteredItems={filteredDictionaries}
     placeholder="Search dictionaries">
-    <div slot="right">
+    <div slot="right" let:filteredItems={filteredDictionaries}>
       <Button
         form="filled"
         color="black"

@@ -3,22 +3,18 @@
   import { ShowHide } from 'svelte-pieces';
   import sanitize from 'xss';
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  interface $$Events {
-    update: CustomEvent<string>;
-  }
-
   export let value: string;
   export let field: EntryFieldValue;
   export let bcp: string = undefined;
   export let display: string;
   export let canEdit = false;
+  export let on_update: (new_value: string) => void;
 </script>
 
 {#if value || canEdit}
   <ShowHide let:show let:set let:toggle>
     <div
-      class="md:px-2 rounded"
+      class="md:px-2 rounded {$$props.class}"
       on:click={() => set(canEdit)}
       class:hover:bg-gray-100={canEdit}
       class:cursor-pointer={canEdit}
@@ -51,7 +47,7 @@
     </div>
     {#if show}
       {#await import('$lib/components/entry/EditFieldModal.svelte') then { default: EditFieldModal }}
-        <EditFieldModal on:update {value} {field} {display} {bcp} on:close={toggle} />
+        <EditFieldModal {on_update} {value} {field} {display} {bcp} on_close={toggle} />
       {/await}
     {/if}
   </ShowHide>

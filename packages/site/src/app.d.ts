@@ -1,22 +1,37 @@
-// See https://kit.svelte.dev/docs/types#app
-declare namespace App {
-  // eslint-disable-next-line @typescript-eslint/no-empty-interface
-  interface Locals {
+// https://kit.svelte.dev/docs/types#app
+// import type { BaseUser } from '$lib/supabase/user'
+// import type { AuthResponse } from '@supabase/supabase-js'
+// import type { Readable } from 'svelte/store'
+// import type { Supabase } from '$lib/supabase/database.types'
 
-  }
-  interface PageData {
-    locale: import('$lib/i18n/locales').LocaleCode;
-    t: import('$lib/i18n/types.ts').TranslateFunction;
-    // user: import('@living-dictionaries/types').IUser;
-  }
-  // interface Error {}
-  // interface Platform {}
+declare global {
+	namespace App {
+    // eslint-disable-next-line @typescript-eslint/no-empty-interface
+    interface Locals {
+			// getSession(): Promise<AuthResponse & { supabase: Supabase}> | null
+    }
+    interface PageData {
+      locale: import('$lib/i18n/locales').LocaleCode;
+      t: import('$lib/i18n/types.ts').TranslateFunction;
+      // user: import('@living-dictionaries/types').IUser;
+			// supabase: Supabase
+			// authResponse: AuthResponse
+			// user: Readable<BaseUser>
+    }
+		// interface Error {}
+		// interface Platform {}
+	}
+
+	interface ViewTransition {
+		updateCallbackDone: Promise<void>;
+		ready: Promise<void>;
+		finished: Promise<void>;
+		skipTransition: () => void;
+	}
+
+	interface Document {
+		startViewTransition(updateCallback: () => Promise<void>): ViewTransition;
+	}
 }
 
-declare namespace svelte.JSX {
-  interface HTMLAttributes<T> {
-    onclickoutside?: (event: CustomEvent<any> & { target: EventTarget & T }) => any;
-    onlongpress?: (event: CustomEvent<any> & { target: EventTarget & T }) => any;
-    onshortpress?: (event: CustomEvent<any> & { target: EventTarget & T }) => any;
-  }
-}
+export {}

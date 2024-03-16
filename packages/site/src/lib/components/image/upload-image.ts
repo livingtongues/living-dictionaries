@@ -3,7 +3,7 @@ import { firebaseConfig, authState } from 'sveltefirets';
 import { get, writable, type Readable } from 'svelte/store';
 import { user } from '$lib/stores';
 import type { ImageUrlRequestBody, ImageUrlResponseBody } from '$api/image_url/+server';
-import { post_request } from '$lib/client/get-post-requests';
+import { post_request } from '$lib/helpers/get-post-requests';
 
 export interface ImageUploadStatus {
   progress: number;
@@ -58,10 +58,7 @@ export function upload_image({file, folder}: {file: File, folder: string}): Read
 
       const auth_state_user = get(authState);
       const auth_token = await auth_state_user.getIdToken();
-      const { data, error } = await post_request<ImageUrlRequestBody, ImageUrlResponseBody>({
-        route: '/api/image_url',
-        data: { auth_token, firebase_storage_location },
-      });
+      const { data, error } = await post_request<ImageUrlRequestBody, ImageUrlResponseBody>('/api/image_url', { auth_token, firebase_storage_location });
 
       if (error) {
         console.error(error);

@@ -1,6 +1,5 @@
 <script lang="ts">
   import { page } from '$app/stores';
-  import { createEventDispatcher } from 'svelte';
   import { Button } from 'svelte-pieces';
   import Keyman from '$lib/components/keyboards/keyman/Keyman.svelte';
   import sanitize from 'xss';
@@ -11,20 +10,13 @@
   export let isSompeng = false;
   export let addingLexeme = false;
   export let bcp: string = undefined;
-
-  const dispatch = createEventDispatcher<{
-    close: boolean;
-    update: string;
-  }>();
-
-  function close() {
-    dispatch('close');
-  }
+  export let on_update: (new_value: string) => void;
+  export let on_close: () => void;
 
   function save() {
     value = inputEl?.value || value; // IpaKeyboard modifies input's value from outside this component so the bound value here doesn't update. This is hacky and the alternative is to emit events from the IpaKeyboard rather than bind to any neighboring element. This makes the adding and backspacing functions potentially needing to be applied in every context where the IPA keyboard is used. Until we know more how the IPA keyboard will be used, this line here is sufficient.
-    dispatch('update', value.trim());
-    close();
+    on_update(value.trim());
+    on_close();
   }
 
   function autofocus(node: HTMLInputElement) {
@@ -192,7 +184,7 @@
   </div>
 
   <div class="modal-footer">
-    <Button onclick={close} form="simple" color="black">
+    <Button onclick={on_close} form="simple" color="black">
       {$page.data.t('misc.cancel')}
     </Button>
     <div class="w-1" />

@@ -29,7 +29,7 @@
 <Collection path="users" startWith={usersType} let:data={users}>
   <div class="sticky top-0 h-[calc(100vh-1.5rem)] z-2 relative flex flex-col">
     <Filter items={users} let:filteredItems={filteredUsers} placeholder="Search names and emails">
-      <div slot="right">
+      <div slot="right" let:filteredItems={filteredUsers}>
         <Button form="filled" color="black" onclick={() => exportUsersAsCSV(filteredUsers)}>
           <i class="fas fa-download mr-1" />
           Download {filteredUsers.length} Users as CSV

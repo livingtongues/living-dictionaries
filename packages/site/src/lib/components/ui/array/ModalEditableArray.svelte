@@ -1,11 +1,8 @@
 <script lang="ts">
   import { page } from '$app/stores';
-  import { createEventDispatcher } from 'svelte';
   import { Button, Modal, ShowHide } from 'svelte-pieces';
   import MultiSelect from './MultiSelect.svelte';
   import type { SelectOption } from './select-options.interface';
-
-  const dispatch = createEventDispatcher<{ update: string[] }>();
 
   export let values: string[];
   export let options: SelectOption[];
@@ -13,6 +10,7 @@
   export let canEdit = false;
   export let showPlus = true;
   export let canWriteIn = false;
+  export let on_update: (new_value: string[]) => void;
 
   let selectedOptions: Record<string, SelectOption> = {};
   $: prepareSelected(values, options);
@@ -59,7 +57,7 @@
 
       <form
         on:submit={() => {
-          dispatch('update', Object.keys(selectedOptions));
+          on_update(Object.keys(selectedOptions));
           toggle();
         }}>
         <MultiSelect bind:selectedOptions {options} {placeholder} {canWriteIn} />

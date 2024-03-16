@@ -29,4 +29,13 @@ export const variants: Variant<Component>[] = [
       glossLanguages: ['en', 'es'],
     },
   },
+  {
+    name: 'empty',
+    description: 'translation fields for example sentence do not show when there is no vernacular sentence',
+    props: {
+      sense: {},
+      canEdit: true,
+      glossLanguages: ['en', 'es'],
+    },
+  },
 ]

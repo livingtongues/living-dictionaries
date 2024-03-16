@@ -11,7 +11,7 @@ CREATE TABLE user_profiles (
 -- TODO: add editors table to store managers and contributors
 
 CREATE TABLE dictionaries (
-  id uuid text unique primary key NOT NULL,
+  id text unique primary key NOT NULL,
   CONSTRAINT proper_dictionary_id CHECK (id ~ '^[a-zA-Z0-9_-]+$'),
   CONSTRAINT dictionary_id_length CHECK (char_length(id) > 2 and char_length(id) <= 20),
 );
