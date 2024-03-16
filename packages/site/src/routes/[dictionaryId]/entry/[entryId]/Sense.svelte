@@ -88,7 +88,7 @@
     {#if sentence.vn}
       {#each glossingLanguages as bcp}
         <EntryField
-          class="ml-3"
+          class="ms-3"
           value={sentence[bcp]}
           field="example_sentence"
           {bcp}
