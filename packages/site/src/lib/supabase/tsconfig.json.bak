@@ -1,0 +1,14 @@
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "target": "es2020",
+    "strictNullChecks": true
+  },
+  "include": [
+    "database.types.ts",
+    "generated.types.ts",
+    // "./routes/[dictionaryId]/entry/[entryId]/EntryDisplay.svelte"
+  ]
+}
+
+https://dev.to/viridia/typescript-strictnullchecks-a-migration-guide-3glo

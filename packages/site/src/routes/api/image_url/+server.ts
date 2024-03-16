@@ -32,6 +32,6 @@ export const POST: RequestHandler = async ({ request, fetch }) => {
   }
   catch (err: any) {
     console.error(`Photo processing error when getting serving url: ${err.message}`);
-    throw error(ResponseCodes.INTERNAL_SERVER_ERROR, `Photo processing error when getting serving url: ${err.message}`);
+    error(ResponseCodes.INTERNAL_SERVER_ERROR, `Photo processing error when getting serving url: ${err.message}`);
   }
 };

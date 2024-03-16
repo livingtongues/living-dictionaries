@@ -2,13 +2,13 @@ import type { IDictionary, IInvite } from '@living-dictionaries/types';
 import { get } from 'svelte/store';
 import { page } from '$app/stores';
 import { user } from '$lib/stores';
-import { apiFetch } from '$lib/client/apiFetch';
 import { authState } from 'sveltefirets';
 import type { InviteRequestBody } from '$api/email/invite/+server';
+import { post_request } from './get-post-requests';
 
 export async function inviteHelper(
-  role: 'manager' | 'contributor' = 'contributor',
-  dictionary: IDictionary
+  role: 'manager' | 'contributor',
+  dictionary: IDictionary,
 ) {
   const { data: { t } } = get(page)
   const inviter = get(user);
@@ -34,16 +34,15 @@ export async function inviteHelper(
     const auth_state_user = get(authState);
     const auth_token = await auth_state_user.getIdToken();
 
-    const response = await apiFetch<InviteRequestBody>('/api/email/invite', {
+    const { error } = await post_request<InviteRequestBody, null>('/api/email/invite', {
       auth_token,
       dictionaryId: dictionary.id,
       invite
     });
 
-    if (response.status !== 200) {
-      const body = await response.json();
-      throw new Error(body.message);
-    }
+    if (error)
+      throw new Error(error.message);
+
   } catch (err) {
     alert(`${t('misc.error')}: ${err}`);
     console.error(err);
