@@ -24,7 +24,7 @@ const fullSense: SupaSense = {
   definition: { en: 'I only show when I have a value'},
   sentences: [
     {
-      id: '',
+      id: 'sentence_1234',
       text: { default: 'Hello' },
       translation: {
         es: 'Hola'
