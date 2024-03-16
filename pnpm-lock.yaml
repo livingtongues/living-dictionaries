@@ -142,8 +142,8 @@ importers:
   packages/site:
     devDependencies:
       '@iconify/json':
-        specifier: ^2.2.186
-        version: 2.2.186
+        specifier: ^2.2.192
+        version: 2.2.192
       '@julr/unocss-preset-forms':
         specifier: ^0.0.5
         version: 0.0.5(unocss@0.58.5)
@@ -2775,8 +2775,8 @@ packages:
     resolution: {integrity: sha512-6EwiSjwWYP7pTckG6I5eyFANjPhmPjUX9JRLUSfNPC7FX7zK9gyZAfUEaECL6ALTpGX5AjnBq3C9XmVWPitNpw==}
     dev: true
 
-  /@iconify/json@2.2.186:
-    resolution: {integrity: sha512-Qcg7WA0fSOZJuBcNY5lZWbIZVLhdjYxI4kNxq1gWF5G5vFiBr2Xa1ScIKsvcKQwVSGax9E5tbTAHgdvgdr+IMQ==}
+  /@iconify/json@2.2.192:
+    resolution: {integrity: sha512-q03tWoVKoMRaTEUDOPWc8geSsKkMe+3D/kK4UZ7F7P3NYwr4h+GN/yT3+5Z68lnD0ajDmTuswfMKOi1DbVnEnw==}
     dependencies:
       '@iconify/types': 2.0.0
       pathe: 1.1.2

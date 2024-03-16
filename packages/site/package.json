@@ -22,7 +22,7 @@
     "local-kitbook": "link:../../../kitbook/packages/kitbook"
   },
   "devDependencies": {
-    "@iconify/json": "^2.2.186",
+    "@iconify/json": "^2.2.192",
     "@julr/unocss-preset-forms": "^0.0.5",
     "@living-dictionaries/types": "workspace:^1.0.0",
     "@playwright/test": "1.41.2",

@@ -10,7 +10,6 @@
   import { configure } from 'instantsearch.js/es/widgets/index.js';
   import { deleteImage } from '$lib/helpers/delete';
   import type { InstantSearch } from 'instantsearch.js';
-  import { updateFirestoreEntry } from '$lib/helpers/entry/update';
   import { navigating, page } from '$app/stores';
   import { save_scroll_point, restore_scroll_point } from '$lib/helpers/scrollPoint';
   import { browser } from '$app/environment';
@@ -49,8 +48,7 @@
           entry={convert_and_expand_entry(entry, $page.data.t)}
           videoAccess={$dictionary.videoAccess || $admin > 0}
           canEdit={$canEdit}
-          on:deleteImage={() => deleteImage(entry, $dictionary.id)}
-          on:valueupdate={({detail: { field, newValue}}) => updateFirestoreEntry({field, value: newValue, entryId: entry.id})} />
+          on:deleteImage={() => deleteImage(entry, $dictionary.id)} />
       </Doc>
     {/each}
   {:else}

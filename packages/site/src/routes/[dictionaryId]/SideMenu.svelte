@@ -1,7 +1,8 @@
 <script lang="ts">
+  import { dev } from '$app/environment';
   export let menuOpen: boolean;
   import { page } from '$app/stores';
-  import { dictionary_deprecated as dictionary, isManager } from '$lib/stores';
+  import { admin, dictionary_deprecated as dictionary, isManager } from '$lib/stores';
 </script>
 
 <div class="md:hidden">
@@ -14,7 +15,7 @@
 </div>
 <div on:click={() => (menuOpen = false)}>
   <a
-    class:active={$page.url.pathname.match(/entry|entries/)}
+    class:active={$page.url.pathname.match(/entry|entries\//)}
     href={`/${$dictionary.id}/entries/list`}>
     <i class="far fa-list fa-fw" />
     <span class="font-medium mx-2">
@@ -27,6 +28,16 @@
       {new Intl.NumberFormat().format($dictionary.entryCount || 0)}
     </span>
   </a>
+  {#if dev || $admin}
+    <a
+      class:active={$page.url.pathname.match(/entries-local/)}
+      href={`/${$dictionary.id}/entries-local/list`}>
+      <span class="i-fa6-solid-list " />
+      <span class="font-medium mx-2">
+        {$page.data.t('dictionary.entries')} (local)
+      </span>
+    </a>
+  {/if}
   <a
     href={'/' + $dictionary.id + '/about'}
     class:active={$page.url.pathname.includes('about')}>
