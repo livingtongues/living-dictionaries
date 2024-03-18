@@ -1,9 +1,11 @@
-import { updateSense } from '$lib/supabase/change/sense';
+import { update_sense } from '$lib/supabase/change/sense';
+import { update_sentence } from '$lib/supabase/change/sentence';
 import { updateFirestoreEntry } from '$lib/helpers/entry/update';
 
 export const dbOperations = {
   updateFirestoreEntry,
-  updateSense,
+  update_sense,
+  update_sentence,
 }
 
 export type DbOperations = typeof dbOperations

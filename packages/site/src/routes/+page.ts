@@ -13,6 +13,6 @@ export const load: PageLoad = async () => {
     ]);
     return { publicDictionaries };
   } catch (err) {
-    throw error(ResponseCodes.INTERNAL_SERVER_ERROR, err);
+    error(ResponseCodes.INTERNAL_SERVER_ERROR, err);
   }
 };

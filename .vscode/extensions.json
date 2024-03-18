@@ -2,23 +2,23 @@
   "recommendations": [
     // Svelte
     "svelte.svelte-vscode",
-    "fivethree.vscode-svelte-snippets",
     // Styles
     "antfu.iconify",
     "antfu.unocss",
     // Code quality
     "dbaeumer.vscode-eslint",
     // Git
-    "eamodio.gitlens",
     "github.vscode-pull-request-github",
-    // "cschleiden.vscode-github-actions",
     // i18n
     "lokalise.i18n-ally",
-    // ---- You should definitely install the ones above, the ones below are recommended
-    // Efficiency
-    "usernamehw.errorlens",
+    // Kitbook
     "yzhang.markdown-all-in-one",
-    // Jacob's Recommendations
+    "foam.foam-vscode",
+    // ---- You should definitely install the ones above, the ones below are recommended
+    // "denoland.vscode-deno", -- if editing Supabase Edge Functions
+    // "usernamehw.errorlens",
+    // "eamodio.gitlens",
+    // "cschleiden.vscode-github-actions",
     // "aaron-bond.better-comments",
     // "vscode-icons-team.vscode-icons",
     // "wallabyjs.quokka-vscode",

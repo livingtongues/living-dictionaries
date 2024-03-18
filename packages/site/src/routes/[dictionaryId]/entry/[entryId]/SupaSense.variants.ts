@@ -1,16 +1,17 @@
 import type { Variant, Viewport } from 'kitbook'
 import type Component from './SupaSense.svelte'
 import { logDbOperations } from '$lib/mocks/db'
+import type { SupaSense } from '$lib/supabase/database.types'
 
 export const viewports: Viewport[] = [{ width: 400, height: 400 }]
 
 const defaultProps = {
   entryId: 'entry1',
-  updateSense: logDbOperations.updateSense,
-  glossLanguages: ['en', 'fr', 'es']
+  glossLanguages: ['en', 'fr', 'es'],
+  ...logDbOperations,
 }
 
-const fullSense = {
+const fullSense: SupaSense = {
   id: 'sense1',
   glosses: {
     en: 'to be',
@@ -20,14 +21,23 @@ const fullSense = {
   parts_of_speech: ['n', 'v'],
   semantic_domains: ['1.1', '2.1'],
   write_in_semantic_domains: ['dinobots', 'autobots'],
-  definition_english_deprecated: 'I only show when I have a value'
+  definition: { en: 'I only show when I have a value'},
+  sentences: [
+    {
+      id: 'sentence_1234',
+      text: { default: 'Hello' },
+      translation: {
+        es: 'Hola'
+      }
+    }
+  ]
 }
 
 export const variants: Variant<Component>[] = [
   {
     props: {
       ...defaultProps,
-      canEdit: true,
+      can_edit: true,
       sense: fullSense,
     },
   },
@@ -35,7 +45,7 @@ export const variants: Variant<Component>[] = [
     name: 'empty',
     props: {
       ...defaultProps,
-      canEdit: true,
+      can_edit: true,
       sense: {
         id: 'sense1',
       },
