@@ -1,23 +1,17 @@
 import type { Variant } from 'kitbook';
 import type Component from './+page.svelte';
-import { readable, writable } from 'svelte/store';
+import { readable } from 'svelte/store';
 import { logDbOperations } from '$lib/mocks/db';
+import type { ComponentProps } from 'svelte';
+import { mockDictionaryLayoutData } from '$lib/mocks/layout';
 
-const defaultProps = {
-  locale: null,
-  t: null,
-  user: null,
-  admin: readable(0),
-  isManager: readable(false),
-  isContributor: readable(false),
-  canEdit: readable(false),
-  algoliaQueryParams: writable(''),
-  dictionary: writable({
-    name: 'test',
-    glossLanguages: []
-  }),
+const defaultProps: ComponentProps<Component>['data'] = {
+  ...mockDictionaryLayoutData,
   dbOperations: logDbOperations,
   supaEntry: null,
+  initialEntry: readable({
+    lx: 'test',
+  })
 }
 
 export const variants: Variant<Component>[] = [
@@ -42,11 +36,8 @@ export const variants: Variant<Component>[] = [
     props: {
       data: {
         ...defaultProps,
-        isManager: readable(true),
-        canEdit: readable(true),
-        initialEntry: readable({
-          lx: 'test',
-        })
+        is_manager: readable(true),
+        can_edit: readable(true),
       },
     },
   },
@@ -59,10 +50,7 @@ export const variants: Variant<Component>[] = [
       data: {
         ...defaultProps,
         admin: readable(2),
-        canEdit: readable(true),
-        initialEntry: readable({
-          lx: 'test',
-        })
+        can_edit: readable(true),
       },
     },
     tests: {

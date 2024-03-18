@@ -3,7 +3,6 @@
   import type { GoalDatabaseAudio, GoalDatabaseEntry } from '@living-dictionaries/types';
   import { updateOnline } from 'sveltefirets';
   import { getStorage, ref, uploadBytesResumable } from 'firebase/storage';
-  import { dictionary_deprecated as dictionary, user } from '$lib/stores';
   import { tweened } from 'svelte/motion';
   import { cubicOut } from 'svelte/easing';
 
@@ -30,8 +29,8 @@
     const fileTypeSuffix = file.type.split('/')[1];
 
     // const storagePath = `${_dictName}_${dictionary.id}/audio/{_lexeme}_${entryId}_${new Date().getTime()}.${fileTypeSuffix}`;
-    const storagePath = `${$dictionary.id}/audio/${entryId}_${new Date().getTime()}.${fileTypeSuffix}`;
-    const customMetadata = { uploadedBy: $user.displayName };
+    const storagePath = `${$page.data.dictionary.id}/audio/${entryId}_${new Date().getTime()}.${fileTypeSuffix}`;
+    const customMetadata = { uploadedBy: $page.data.user.displayName };
 
     // https://firebase.google.com/docs/storage/web/upload-files
     const storage = getStorage();
@@ -76,12 +75,12 @@
           const sf: GoalDatabaseAudio = {
             path: storagePath,
             ts: new Date().getTime(),
-            ab: $user.uid,
+            ab: $page.data.user.uid,
             sp: [speakerId],
           };
 
           await updateOnline<GoalDatabaseEntry>(
-            `dictionaries/${$dictionary.id}/words/${entryId}`,
+            `dictionaries/${$page.data.dictionary.id}/words/${entryId}`,
             { sfs: [sf] },
             { abbreviate: true }
           );

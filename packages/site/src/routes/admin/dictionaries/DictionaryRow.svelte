@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { admin } from '$lib/stores';
   import { printDate } from '$lib/helpers/time';
   import DictionaryFieldEdit from './DictionaryFieldEdit.svelte';
   import { BadgeArrayEmit, ShowHide, Button } from 'svelte-pieces';
@@ -9,6 +8,7 @@
   import RolesManagment from './RolesManagment.svelte';
   import type { DictionaryWithHelperStores } from './dictionaryWithHelpers';
   import LatLngDisplay from '$lib/components/maps/LatLngDisplay.svelte';
+  import { page } from '$app/stores';
 
   export let index: number;
   export let dictionary: DictionaryWithHelperStores;
@@ -172,6 +172,6 @@
 <td>
   <div style="width: 300px;" />
   {dictionary.conLangDescription ? dictionary.conLangDescription : ''}</td>
-{#if $admin > 1}
+{#if $page.data.admin > 1}
   <td class="cursor-pointer" title={JSON.stringify(dictionary, null, 1)}><span class="i-material-symbols-info-outline" /></td>
 {/if}

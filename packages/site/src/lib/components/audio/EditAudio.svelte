@@ -3,7 +3,6 @@
   import Waveform from '$lib/components/audio/Waveform.svelte';
   import SelectAudio from '$lib/components/audio/SelectAudio.svelte';
   import RecordAudio from '$lib/components/audio/RecordAudio.svelte';
-  import { dictionary_deprecated as dictionary, admin } from '$lib/stores';
   import { Modal, Button, JSON } from 'svelte-pieces';
   import { deleteAudio } from '$lib/helpers/delete';
   import type { ExpandedAudio, ExpandedEntry, GoalDatabaseEntry } from '@living-dictionaries/types';
@@ -42,7 +41,7 @@
       sp: [newSpeakerId]
     }
     await updateOnline<GoalDatabaseEntry>(
-      `dictionaries/${$dictionary.id}/words/${entry.id}`,
+      `dictionaries/${$page.data.dictionary.id}/words/${entry.id}`,
       { sfs: [sf] },
       { abbreviate: true }
     );
@@ -60,7 +59,7 @@
     <Waveform audioUrl={audio_url} />
   {:else}
     <SelectSpeaker
-      dictionaryId={$dictionary.id}
+      dictionaryId={$page.data.dictionary.id}
       initialSpeakerId={speaker_id}
       let:speakerId
       on:update={async ({ detail: {speakerId} }) => await updateSpeaker(speakerId)}>
@@ -103,7 +102,7 @@
 
   <div class="modal-footer">
     {#if sound_file}
-      {#if $admin > 1}
+      {#if $page.data.admin > 1}
         <JSON obj={sound_file} />
         <div class="w-1" />
       {/if}
@@ -116,7 +115,7 @@
       </Button>
       <div class="w-1" />
 
-      <Button onclick={() => deleteAudio(entry, $dictionary.id)} color="red">
+      <Button onclick={() => deleteAudio(entry, $page.data.dictionary.id)} color="red">
         <i class="far fa-trash-alt" />&nbsp;
         <span class="hidden sm:inline">{$page.data.t('misc.delete')}</span>
       </Button>

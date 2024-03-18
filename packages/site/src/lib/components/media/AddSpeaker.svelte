@@ -1,7 +1,6 @@
 <script lang="ts">
   import { page } from '$app/stores';
   import { createEventDispatcher } from 'svelte';
-  import { dictionary_deprecated as dictionary } from '$lib/stores';
   import { Button, Form, Modal } from 'svelte-pieces';
   import { addOnline } from 'sveltefirets';
   import type { ISpeaker } from '@living-dictionaries/types';
@@ -22,7 +21,7 @@
       birthplace: birthplace.trim(),
       decade,
       gender,
-      contributingTo: [$dictionary.id],
+      contributingTo: [$page.data.dictionary.id],
     };
 
     const { id } = await addOnline<ISpeaker>('speakers', speaker);

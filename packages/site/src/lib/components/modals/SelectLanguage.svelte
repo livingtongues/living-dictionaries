@@ -1,6 +1,5 @@
 <script lang="ts">
   import { Button, Modal } from 'svelte-pieces';
-  import { admin } from '$lib/stores';
   import { page } from '$app/stores'
   import { changeLocale, locales, unpublishedLocales } from '$lib/i18n/changeLocale';
 </script>
@@ -20,7 +19,7 @@
         {name}
       </Button>
     {/each}
-    {#if $admin}
+    {#if $page.data.admin}
       {#each unpublishedLocales as [bcp, name]}
         <Button
           class="mr-1 mb-1 !normal-case"

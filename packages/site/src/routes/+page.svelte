@@ -3,7 +3,6 @@
   import { getCollection } from 'sveltefirets';
   import { where } from 'firebase/firestore';
   import type { IDictionary } from '@living-dictionaries/types';
-  import { admin, myDictionaries } from '$lib/stores';
   import { ShowHide } from 'svelte-pieces';
   import Map from '$lib/components/maps/mapbox/map/Map.svelte';
   import ToggleStyle from '$lib/components/maps/mapbox/controls/ToggleStyle.svelte';
@@ -21,14 +20,14 @@
   let privateDictionaries: IDictionary[] = [];
   let selectedDictionaryId: string;
   let selectedDictionary: IDictionary;
-  $: dictionaries = [...publicDictionaries, ...privateDictionaries, ...$myDictionaries];
+  $: dictionaries = [...publicDictionaries, ...privateDictionaries, ...$page.data.my_dictionaries];
   $: if (selectedDictionaryId)
     selectedDictionary = dictionaries.find((d) => d.id === selectedDictionaryId);
   else
     selectedDictionary = null;
 
 
-  $: if (browser && $admin) {
+  $: if (browser && $page.data.admin) {
     getCollection<IDictionary>('dictionaries', [where('public', '!=', true)]).then(
       (docs) => (privateDictionaries = docs)
     );
@@ -77,7 +76,7 @@
           {/await}
         {/if}
       {/if}
-      {#if $admin}
+      {#if $page.data.admin}
         <ShowHide let:show={hide} let:toggle>
           <CustomControl position="bottom-right">
             <button type="button" class="whitespace-nowrap w-90px! px-2" on:click={toggle}>Toggle Private</button>
@@ -92,9 +91,9 @@
         </ShowHide>
       {/if}
       <DictionaryPoints dictionaries={publicDictionaries} bind:selectedDictionaryId />
-      {#if $myDictionaries.length}
+      {#if $page.data.my_dictionaries.length}
         <DictionaryPoints
-          dictionaries={$myDictionaries}
+          dictionaries={$page.data.my_dictionaries}
           type="personal"
           bind:selectedDictionaryId />
       {/if}

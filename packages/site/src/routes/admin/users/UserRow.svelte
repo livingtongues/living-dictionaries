@@ -1,14 +1,15 @@
 <script lang="ts">
-  import { admin } from '$lib/stores';
   import { updateOnline } from 'sveltefirets';
   import type { IUser } from '@living-dictionaries/types';
   import { printDate } from '$lib/helpers/time';
   import DictionariesHelping from '../dictionaries/DictionariesHelping.svelte';
   import { IntersectionObserverShared } from 'svelte-pieces';
+  import { page } from '$app/stores';
+
   export let user: IUser;
 </script>
 
-<tr title={$admin > 1 && JSON.stringify(user, null, 1)}>
+<tr title={$page.data.admin > 1 && JSON.stringify(user, null, 1)}>
   <td class="font-bold">
     {user.displayName}
   </td>

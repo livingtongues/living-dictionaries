@@ -1,8 +1,8 @@
 <script lang="ts">
-  import { admin } from '$lib/stores';
+  import { page } from '$app/stores';
 </script>
 
-{#if $admin}
+{#if $page.data.useradmin}
   <slot />
 {:else}
   <div class="p-3">Not logged in as admin.</div>

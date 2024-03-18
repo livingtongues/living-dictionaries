@@ -1,6 +1,5 @@
 <script lang="ts">
   import { page } from '$app/stores';
-  import { user } from '$lib/stores';
   import { tweened } from 'svelte/motion';
   import { cubicOut } from 'svelte/easing';
   import { getStorage, ref, uploadBytesResumable } from 'firebase/storage';
@@ -33,7 +32,7 @@
 
   function startUpload(storagePath: string) {
     const customMetadata = {
-      uploadedBy: $user.displayName,
+      uploadedBy: $page.data.user.displayName,
       originalFileName: file.name,
     };
 

@@ -1,15 +1,6 @@
 import { error, redirect } from '@sveltejs/kit';
 import type { ActualDatabaseEntry } from '@living-dictionaries/types';
 import { docStore, getDocument } from 'sveltefirets';
-import {
-  admin,
-  algoliaQueryParams,
-  canEdit,
-  dictionary_deprecated as dictionary,
-  isContributor,
-  isManager,
-  user,
-} from '$lib/stores';
 import { browser } from '$app/environment';
 import { readable } from 'svelte/store';
 import { ResponseCodes } from '$lib/constants';
@@ -55,13 +46,6 @@ export const load = async ({ params, depends }) => {
   return {
     initialEntry: entryStore,
     supaEntry,
-    admin,
-    algoliaQueryParams,
-    canEdit,
-    dictionary,
-    isContributor,
-    isManager,
-    user,
     dbOperations,
   };
 };

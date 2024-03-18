@@ -4,7 +4,6 @@
   import { flip } from 'svelte/animate';
   import { fade } from 'svelte/transition';
   import { Slideover } from 'svelte-pieces';
-  import { preferredColumns } from '$lib/stores';
   import type { IColumn } from '@living-dictionaries/types';
   import ColumnTitle from './ColumnTitle.svelte';
 
@@ -32,9 +31,9 @@
   }
 
   function move(i: number, direction: 'up' | 'down') {
-    const columnBeingMoved = $preferredColumns.splice(i, 1);
-    $preferredColumns.splice(direction === 'up' ? i - 1 : i + 1, 0, ...columnBeingMoved);
-    $preferredColumns = $preferredColumns; // trigger Svelte reactivity;
+    const columnBeingMoved = $page.data.preferred_table_columns.splice(i, 1);
+    $page.data.preferred_table_columns.splice(direction === 'up' ? i - 1 : i + 1, 0, ...columnBeingMoved);
+    $page.data.preferred_table_columns = $page.data.preferred_table_columns; // trigger Svelte reactivity;
   }
 </script>
 
@@ -42,7 +41,7 @@
   <span slot="title">{$page.data.t('column.adjust_columns')}</span>
 
   <ul class="divide-y divid-gray-200">
-    {#each $preferredColumns as column, i (column.field)}
+    {#each $page.data.preferred_table_columns as column, i (column.field)}
       <li
         animate:flip
         class="p-2 bg-white hover:bg-gray-100"
@@ -57,7 +56,7 @@
                 <span class="i-fa6-solid-chevron-up" />
               </button>
             {/if}
-            {#if i > 0 && i !== $preferredColumns.length - 1}
+            {#if i > 0 && i !== $page.data.preferred_table_columns.length - 1}
               <button
                 type="button"
                 on:click={() => move(i, 'down')}

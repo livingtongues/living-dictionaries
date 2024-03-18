@@ -1,6 +1,4 @@
-import { writable } from 'svelte/store';
 import type { IColumn } from '@living-dictionaries/types';
-import { browser } from '$app/environment';
 
 export const defaultColumns: IColumn[] = [
   // field must match those used for i18n (e.g. lx = entry.lx)
@@ -87,16 +85,3 @@ export const defaultColumns: IColumn[] = [
     width: 200,
   },
 ];
-
-let cachedColumns: IColumn[] = [];
-const tableCacheKey = 'table_columns_08.17.2023'; // rename when adding more columns to invalidate the user's cache
-if (browser)
-  cachedColumns = JSON.parse(localStorage.getItem(tableCacheKey));
-
-export const preferredColumns = writable(cachedColumns || defaultColumns);
-
-if (browser) {
-  preferredColumns.subscribe((selectedColumns) =>
-    localStorage.setItem(tableCacheKey, JSON.stringify(selectedColumns))
-  );
-}

@@ -13,9 +13,9 @@
 {#if $entries}
   {#each $entries as entry}
     <ListEntry
-      {dictionary}
+      dictionary={$dictionary}
       {entry}
-      videoAccess={dictionary.videoAccess}
+      videoAccess={$dictionary.videoAccess}
       canEdit
       on:deleteImage={() => alert('delete image not implemented yet')} />
   {/each}

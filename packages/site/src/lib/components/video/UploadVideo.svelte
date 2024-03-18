@@ -2,7 +2,6 @@
   import { onDestroy, onMount } from 'svelte';
   import { page } from '$app/stores';
   import type { GoalDatabaseVideo, IVideoCustomMetadata } from '@living-dictionaries/types';
-  import { dictionary_deprecated as dictionary, user } from '$lib/stores';
   import { getStorage, ref, uploadBytesResumable, type TaskState, type UploadTask, StorageError } from 'firebase/storage';
   import { addVideo } from '$lib/helpers/media/update';
   import { tweened } from 'svelte/motion';
@@ -27,11 +26,11 @@
 
     const fileTypeSuffix = file.type.split('/')[1].split(';')[0]; // turns 'video/webm;codecs=vp8,opus' to 'webm' and 'video/mp4' to 'mp4'
 
-    const storagePath = `${$dictionary.id}/videos/${entryId}_${new Date().getTime()}.${fileTypeSuffix}`;
+    const storagePath = `${$page.data.dictionary.id}/videos/${entryId}_${new Date().getTime()}.${fileTypeSuffix}`;
 
     const customMetadata: IVideoCustomMetadata & Record<string, string> = {
-      uploadedByUid: $user.uid,
-      uploadedByName: $user.displayName,
+      uploadedByUid: $page.data.user.uid,
+      uploadedByName: $page.data.user.displayName,
     };
 
     // https://firebase.google.com/docs/storage/web/upload-files
@@ -53,7 +52,7 @@
         try {
           const database_video: GoalDatabaseVideo = {
             path: storagePath,
-            ab: $user.uid,
+            ab: $page.data.user.uid,
             sp: [speakerId],
           };
           await addVideo(entryId, database_video);

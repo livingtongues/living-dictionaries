@@ -1,7 +1,6 @@
 <script lang="ts">
   import { page } from '$app/stores';
   import { Button, Modal, Form } from 'svelte-pieces';
-  import { user, dictionary_deprecated as dictionary } from '$lib/stores';
   import { goto } from '$app/navigation';
   import { createEventDispatcher } from 'svelte';
   import type { SupportRequestBody } from '$api/email/support/+server';
@@ -36,14 +35,14 @@
   let status: 'success' | 'fail';
 
   async function send() {
-    if ($dictionary && subject === 'request_access') {
+    if ($page.data.dictionary && subject === 'request_access') {
       const { error } = await post_request<RequestAccessBody, null>('/api/email/request_access', {
         message,
-        email: $user?.email || email,
-        name: $user?.displayName || 'Anonymous',
+        email: $page.data.user?.email || email,
+        name: $page.data.user?.displayName || 'Anonymous',
         url: window.location.href,
-        dictionaryId: $dictionary.id,
-        dictionaryName: $dictionary.name,
+        dictionaryId: $page.data.dictionary.id,
+        dictionaryName: $page.data.dictionary.name,
       });
 
       if (error) {
@@ -53,8 +52,8 @@
     } else {
       const { error } = await post_request<SupportRequestBody, null>('/api/email/support', {
         message,
-        email: $user?.email || email,
-        name: $user?.displayName || 'Anonymous',
+        email: $page.data.user?.email || email,
+        name: $page.data.user?.displayName || 'Anonymous',
         url: window.location.href,
         subject: enBase.contact[subject],
       });
@@ -127,7 +126,7 @@
         <div class="text-gray-500 ml-auto">{message.length}/1000</div>
       </div>
 
-      {#if !$user}
+      {#if !$page.data.user}
         <div class="mt-3">
           <label class="block uppercase text-gray-700 text-xs font-bold mb-2" for="email">
             {$page.data.t('contact.your_email_address')}

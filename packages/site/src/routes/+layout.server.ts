@@ -6,15 +6,15 @@ export const load: LayoutServerLoad = ({ cookies, request }) => {
   const chosenLocale = cookies.get('locale')
   const acceptedLanguage = findSupportedLocaleFromAcceptedLanguages(request.headers.get('accept-language'))
 
-  let user: IUser = null;
+  let user_from_cookies: IUser = null;
   try {
-    user = JSON.parse(cookies.get('user') || null) as IUser;
+    user_from_cookies = JSON.parse(cookies.get('user') || null) as IUser;
   } catch (err) {
     console.error(err);
   }
 
   return {
     serverLocale: chosenLocale || acceptedLanguage,
-    user,
+    user_from_cookies,
   };
 };

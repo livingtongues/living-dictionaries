@@ -34,14 +34,13 @@
   }
 
   async function saveImage(fb_storage_path: string, specifiable_image_url: string) {
-    const { user } = await import('$lib/stores');
-    const {displayName, uid} = get(user);
+    const $page = get(page);
     const pf: GoalDatabasePhoto = {
       path: fb_storage_path,
       gcs: specifiable_image_url,
       ts: new Date().getTime(),
-      cr: displayName,
-      ab: uid,
+      cr: $page.data.user.displayName,
+      ab: $page.data.user.uid,
     }
     await updateOnline<ActualDatabaseEntry>(`dictionaries/${dictionaryId}/words/${entryId}`, { pf } ,
       { abbreviate: true }

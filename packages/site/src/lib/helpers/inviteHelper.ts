@@ -1,7 +1,6 @@
 import type { IDictionary, IInvite } from '@living-dictionaries/types';
 import { get } from 'svelte/store';
 import { page } from '$app/stores';
-import { user } from '$lib/stores';
 import { authState } from 'sveltefirets';
 import type { InviteRequestBody } from '$api/email/invite/+server';
 import { post_request } from './get-post-requests';
@@ -10,8 +9,7 @@ export async function inviteHelper(
   role: 'manager' | 'contributor',
   dictionary: IDictionary,
 ) {
-  const { data: { t } } = get(page)
-  const inviter = get(user);
+  const { data: { t, user } } = get(page)
 
   const targetEmail = prompt(`${t('contact.email')}?`);
   if (!targetEmail) return;
@@ -23,8 +21,8 @@ export async function inviteHelper(
 
   try {
     const invite: IInvite = {
-      inviterEmail: inviter.email,
-      inviterName: inviter.displayName,
+      inviterEmail: user.email,
+      inviterName: user.displayName,
       dictionaryName: dictionary.name,
       targetEmail,
       role,

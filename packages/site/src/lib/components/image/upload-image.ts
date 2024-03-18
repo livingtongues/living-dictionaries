@@ -1,9 +1,9 @@
 import { getStorage, ref, uploadBytesResumable } from 'firebase/storage';
 import { firebaseConfig, authState } from 'sveltefirets';
 import { get, writable, type Readable } from 'svelte/store';
-import { user } from '$lib/stores';
 import type { ImageUrlRequestBody, ImageUrlResponseBody } from '$api/image_url/+server';
 import { post_request } from '$lib/helpers/get-post-requests';
+import { page } from '$app/stores';
 
 export interface ImageUploadStatus {
   progress: number;
@@ -20,9 +20,9 @@ export function upload_image({file, folder}: {file: File, folder: string}): Read
   const [file_type_including_period] = file.name.match(/\.[0-9a-z]+$/i);
   const storage_path = `${folder}/${new Date().getTime()}${file_type_including_period}`
 
-  const $user = get(user);
+  const $page = get(page);
   const customMetadata = {
-    uploadedBy: $user.displayName,
+    uploadedBy: $page.data.user.displayName,
     originalFileName: file.name,
   };
 

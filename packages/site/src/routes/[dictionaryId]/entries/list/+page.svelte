@@ -2,7 +2,6 @@
   // import SeoMetaTags from '$lib/components/SeoMetaTags.svelte';
   import { onMount, getContext, onDestroy } from 'svelte';
   import { Doc } from 'sveltefirets';
-  import { dictionary_deprecated as dictionary, canEdit, admin } from '$lib/stores';
   import ListEntry from './ListEntry.svelte';
   import { convert_and_expand_entry } from '$lib/transformers/convert_and_expand_entry';
   import Hits from '$lib/components/search/Hits.svelte';
@@ -14,6 +13,9 @@
   import { save_scroll_point, restore_scroll_point } from '$lib/helpers/scrollPoint';
   import { browser } from '$app/environment';
   import List from './List.svelte';
+
+  export let data
+  $: ({dictionary, can_edit, admin} = data)
 
   const search: InstantSearch = getContext('search');
   let pixels_from_top = 0;
@@ -37,7 +39,7 @@
 <svelte:window bind:scrollY={pixels_from_top} />
 
 <Hits {search} let:entries on_updated={restore_scroll_point}>
-  {#if $canEdit}
+  {#if $can_edit}
     {#each entries as algoliaEntry (algoliaEntry.id)}
       <Doc
         path="dictionaries/{$dictionary.id}/words/{algoliaEntry.id}"
@@ -47,7 +49,7 @@
           dictionary={$dictionary}
           entry={convert_and_expand_entry(entry, $page.data.t)}
           videoAccess={$dictionary.videoAccess || $admin > 0}
-          canEdit={$canEdit}
+          canEdit={$can_edit}
           on:deleteImage={() => deleteImage(entry, $dictionary.id)} />
       </Doc>
     {/each}
@@ -59,6 +61,6 @@
 
 <!-- <SeoMetaTags
   title={$page.data.t(''})}
-  dictionaryName={$dictionary.name}
+  dictionaryName={$page.data.dictionary.name}
   description={$page.data.t(''})}
   keywords="Endangered Languages, Language Documentation, Language Revitalization, Build a Dictionary, Online Dictionary, Digital Dictionary, Dictionary Software, Free Software, Online Dictionary Builder, Living Dictionaries, Living Dictionary, Edit a dictionary, Search a dictionary, Browse a dictionary, Explore a Dictionary" /> -->

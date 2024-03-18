@@ -2,8 +2,8 @@
   import type { InstantSearch } from 'instantsearch.js';
   import { connectPagination } from 'instantsearch.js/es/connectors';
   import { onMount } from 'svelte';
-  import { canEdit } from '$lib/stores';
   import PaginationButtons from './PaginationButtons.svelte';
+  import { page } from '$app/stores';
 
   export let search: InstantSearch;
   export let showAdd = true;
@@ -25,7 +25,7 @@
   }
 </script>
 
-{#if $canEdit && showAdd}
+{#if $page.data.can_edit && showAdd}
   {#await import('./AddEntry.svelte') then { default: AddEntry }}
     <AddEntry class="sticky bottom-3 z-10 md:hidden" />
   {/await}
@@ -33,7 +33,7 @@
 
 <nav class="md:sticky md:bottom-0 bg-white pt-2 pb-1 flex items-center print:hidden">
   <PaginationButtons pages={nbPages} current_page={currentRefinement + 1} {go_to_page}>
-    {#if $canEdit && showAdd}
+    {#if $page.data.can_edit && showAdd}
       {#await import('./AddEntry.svelte') then { default: AddEntry }}
         <AddEntry class="ml-3 hidden md:block" />
       {/await}

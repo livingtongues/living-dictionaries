@@ -7,7 +7,7 @@
   import { seo_description } from './seo_description';
   import { convert_and_expand_entry } from '$lib/transformers/convert_and_expand_entry';
   import { goto } from '$app/navigation';
-  import { lastEntriesUrl } from '$lib/stores/lastEntriesUrl';
+  import { lastEntriesUrl, algoliaQueryParams } from '$lib/stores/algolia';
   import { page } from '$app/stores';
 
   export let data;
@@ -15,11 +15,10 @@
     initialEntry,
     supaEntry,
     admin,
-    algoliaQueryParams,
-    canEdit,
+    can_edit,
     dictionary,
-    isContributor,
-    isManager,
+    is_contributor,
+    is_manager,
     user,
     dbOperations,
   } = data);
@@ -45,7 +44,7 @@
     {#if $admin > 1}
       <JSON obj={entry} />
     {/if}
-    {#if $isManager || ($isContributor && entry.cb === $user.uid)}
+    {#if $is_manager || ($is_contributor && entry.cb === $user.uid)}
       <Button
         color="red"
         form="simple"
@@ -70,7 +69,7 @@
   {supaEntry}
   dictionary={$dictionary}
   videoAccess={$dictionary.videoAccess || $admin > 0}
-  canEdit={$canEdit}
+  canEdit={$can_edit}
   {dbOperations}
   on:deleteImage={() => deleteImage(entry, $dictionary.id)}
   on:deleteVideo={() => deleteVideo(entry, $dictionary.id)}

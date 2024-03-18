@@ -2,12 +2,12 @@
   import { onMount, beforeUpdate } from 'svelte';
   import { connectHits } from 'instantsearch.js/es/connectors';
   import { limit, orderBy } from 'firebase/firestore';
-  import { dictionary_deprecated as dictionary } from '$lib/stores';
   import { mergeBy } from '$lib/helpers/array';
   import type { InstantSearch } from 'instantsearch.js';
   import { firebaseConfig } from 'sveltefirets';
   import type { ActualDatabaseEntry, LDAlgoliaHit } from '@living-dictionaries/types';
   import { Button, ShowHide } from 'svelte-pieces';
+  import { page } from '$app/stores';
 
   export let search: InstantSearch;
   export let on_updated: () => void = undefined
@@ -56,7 +56,7 @@
       </Button>
       {#await import('sveltefirets') then { Collection }}
         <Collection
-          path={`dictionaries/${$dictionary.id}/words`}
+          path={`dictionaries/${$page.data.dictionary.id}/words`}
           queryConstraints={[
             orderBy('ua', 'desc'),
             limit(10),
