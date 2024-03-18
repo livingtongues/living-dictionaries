@@ -63,9 +63,9 @@ export async function getTranslator(locale: LocaleCode) {
     const englishResult = loadedTranslations.en[section][item]
     if (englishResult)
       return interpolate(englishResult, options?.values)
-    const error = `Missing English for: ${key}`
+    // const error = `Missing English for: ${key}`
 
-    console.error(error)
+    // console.error(error)
     return options?.fallback || key
   }
 }

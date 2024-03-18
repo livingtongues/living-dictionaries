@@ -1,13 +1,17 @@
 <script lang="ts">
+  import { getContext } from 'svelte';
   import ListEntry from '../../entries/list/ListEntry.svelte';
+  import type { Writable } from 'svelte/store';
+  import type { ExpandedEntry } from '@living-dictionaries/types';
 
   export let data;
-  $: ({entries, dictionary, entries_page_count} = data)
-  $: entries_for_page = $entries?.slice(0, entries_page_count)
+  $: ({dictionary} = data)
+
+  const entries = getContext<Writable<ExpandedEntry[]>>('entries')
 </script>
 
-{#if entries_for_page}
-  {#each entries_for_page as entry}
+{#if $entries}
+  {#each $entries as entry}
     <ListEntry
       {dictionary}
       {entry}
@@ -16,5 +20,5 @@
       on:deleteImage={() => alert('delete image not implemented yet')} />
   {/each}
 {:else}
-  <p>Loading...</p>
+  <span class="i-svg-spinners-3-dots-fade align--4px" />
 {/if}
