@@ -9,7 +9,7 @@
     <h3
       class="mb-6 text-3xl leading-8 font-bold tracking-tight text-gray-900
         sm:text-4xl sm:leading-10">
-      {$page.data.t('import_page.import')}: {$page.data.dictionary.name}
+      {$page.data.t('import_page.import')}: {$dictionary.name}
     </h3>
 
     <p class="mb-3">

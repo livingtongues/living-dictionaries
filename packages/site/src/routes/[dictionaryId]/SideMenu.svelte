@@ -1,8 +1,11 @@
 <script lang="ts">
   import { dev } from '$app/environment';
   import { page } from '$app/stores';
+  import type { IDictionary } from '@living-dictionaries/types';
 
+  export let dictionary: IDictionary
   export let on_close: () => void;
+  $: ({admin, is_manager} = $page.data)
 </script>
 
 <div class="md:hidden">
@@ -10,13 +13,13 @@
     {$page.data.t('misc.LD')}
   </a>
   <h5 class="font-semibold uppercase tracking-wide mx-3 mb-2">
-    {$page.data.dictionary.name}
+    {dictionary.name}
   </h5>
 </div>
 <div on:click={on_close}>
   <a
     class:active={$page.url.pathname.match(/entry|entries\//)}
-    href={`/${$page.data.dictionary.id}/entries/list`}>
+    href={`/${dictionary.id}/entries/list`}>
     <i class="far fa-list fa-fw" />
     <span class="font-medium mx-2">
       {$page.data.t('dictionary.entries')}
@@ -25,13 +28,13 @@
     <span
       class="inline-block py-1 px-2 leading-none text-xs font-semibold
         text-gray-700 bg-gray-300 rounded-full">
-      {new Intl.NumberFormat().format($page.data.dictionary.entryCount || 0)}
+      {new Intl.NumberFormat().format(dictionary.entryCount || 0)}
     </span>
   </a>
-  {#if dev || $page.data.admin}
+  {#if dev || $admin}
     <a
       class:active={$page.url.pathname.match(/entries-local/)}
-      href={`/${$page.data.dictionary.id}/entries-local/list`}>
+      href={`/${dictionary.id}/entries-local/list`}>
       <span class="i-fa6-solid-list " />
       <span class="font-medium mx-2">
         {$page.data.t('dictionary.entries')} (local)
@@ -39,7 +42,7 @@
     </a>
   {/if}
   <a
-    href={'/' + $page.data.dictionary.id + '/about'}
+    href={'/' + dictionary.id + '/about'}
     class:active={$page.url.pathname.includes('about')}>
     <i class="far fa-info-circle fa-fw" />
     <span class="font-medium mx-2">
@@ -47,7 +50,7 @@
     </span>
   </a>
   <a
-    href={'/' + $page.data.dictionary.id + '/contributors'}
+    href={'/' + dictionary.id + '/contributors'}
     class:active={$page.url.pathname.includes('contributors')}>
     <i class="far fa-users fa-fw" />
     <span class="font-medium mx-2">
@@ -55,16 +58,16 @@
     </span>
   </a>
   <a
-    href={'/' + $page.data.dictionary.id + '/grammar'}
+    href={'/' + dictionary.id + '/grammar'}
     class:active={$page.url.pathname.includes('grammar')}>
     <i class="far fa-edit fa-fw" />
     <span class="font-medium mx-2">
       {$page.data.t('dictionary.grammar')}
     </span>
   </a>
-  {#if $page.data.is_manager}
+  {#if $is_manager}
     <a
-      href={'/' + $page.data.dictionary.id + '/import'}
+      href={'/' + dictionary.id + '/import'}
       class:active={$page.url.pathname.includes('import')}>
       <i class="far fa-file-import" />
       <span class="font-medium mx-2">
@@ -72,7 +75,7 @@
       </span>
     </a>
     <a
-      href={'/' + $page.data.dictionary.id + '/settings'}
+      href={'/' + dictionary.id + '/settings'}
       class:active={$page.url.pathname.includes('settings')}>
       <i class="far fa-cog fa-fw" />
       <span class="font-medium mx-2">
@@ -80,7 +83,7 @@
       </span>
     </a>
     <a
-      href={'/' + $page.data.dictionary.id + '/export'}
+      href={'/' + dictionary.id + '/export'}
       class:active={$page.url.pathname.includes('export')}>
       <i class="far fa-download" />
       <span class="font-medium mx-2">

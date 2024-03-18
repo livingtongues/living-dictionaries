@@ -11,6 +11,7 @@
   import { createEventDispatcher } from 'svelte';
   import { expand_video } from '$lib/transformers/expand_entry';
 
+  $: ({dictionary} = $page.data)
   const dispatch = createEventDispatcher();
   const close = () => dispatch('close');
 
@@ -21,7 +22,7 @@
 <Modal on:close>
   <span slot="heading"> <i class="far fa-film-alt text-sm" /> {entry.lexeme} </span>
 
-  <SelectSpeaker dictionaryId={$page.data.dictionary.id} let:speakerId>
+  <SelectSpeaker dictionaryId={$dictionary.id} let:speakerId>
     {#if database_video?.youtubeId || database_video?.vimeoId}
       <VideoIFrame video={expand_video(database_video)} />
       <div class="modal-footer">

@@ -17,8 +17,8 @@ export const mockDictionaryLayoutData: LayoutData = {
   is_contributor: readable(false),
   can_edit: readable(false),
   locale: null,
-  user_dictionaries: null,
+  my_dictionaries: null,
   preferred_table_columns: null,
   entries: null,
-  entries_page_count: null,
+  entries_per_page: null,
 }

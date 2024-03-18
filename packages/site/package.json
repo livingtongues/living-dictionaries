@@ -25,6 +25,7 @@
     "@iconify/json": "^2.2.192",
     "@julr/unocss-preset-forms": "^0.0.5",
     "@living-dictionaries/types": "workspace:^1.0.0",
+    "@orama/orama": "^2.0.11",
     "@playwright/test": "1.41.2",
     "@resvg/resvg-js": "^2.2.0",
     "@sentry/browser": "^6.18.2",

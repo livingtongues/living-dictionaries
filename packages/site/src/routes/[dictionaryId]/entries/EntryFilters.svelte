@@ -8,6 +8,7 @@
 
   export let showMobileFilters = false;
   export let search: InstantSearch;
+  $: ({is_manager} = $page.data)
 </script>
 
 <ResponsiveSlideover
@@ -113,7 +114,7 @@
             label={$page.data.t('entry.has_exists') + ' ' + $page.data.t('entry_field.semantic_domains')} />
         {/if}
 
-        {#if $page.data.is_manager}
+        {#if $is_manager}
           <Button class="mb-1" size="sm" onclick={toggle}>{$page.data.t('entry.switch_opposite')}</Button>
         {/if}
       </ShowHide>

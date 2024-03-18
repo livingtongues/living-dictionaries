@@ -24,23 +24,23 @@ export const load: LayoutLoad = async ({  url: { searchParams }, data: { serverL
     return $user?.roles?.admin || 0;
   });
 
-  const user_dictionaries = get_user_dictionaries(user_from_cookies, user);
+  const my_dictionaries = get_my_dictionaries(user_from_cookies, user);
 
   const columns_key = `table_columns_03.18.2024-${user_from_cookies?.uid}`; // rename when adding more columns to invalidate the user's cache
   const preferred_table_columns = createPersistedStore(columns_key, defaultColumns);
 
-  return { locale, t, user, admin, user_dictionaries, preferred_table_columns }
+  return { locale, t, user, admin, my_dictionaries, preferred_table_columns }
 };
 
 
-function get_user_dictionaries(user_from_cookies: IUser, user: Readable<IUser>) {
+function get_my_dictionaries(user_from_cookies: IUser, user: Readable<IUser>) {
   const key_from_cookie = `my_dictionaries-${user_from_cookies?.uid}`;
-  const user_dictionaries = derived<Readable<IUser>, IDictionary[]>(
+  const my_dictionaries = derived<Readable<IUser>, IDictionary[]>(
     user,
     ($user, set) => {
       if ($user) {
         const key_from_user = `my_dictionaries-${$user.uid}`;
-        load_user_dictionaries($user.uid)
+        load_my_dictionaries($user.uid)
           .then((dictionaries) => {
             set(dictionaries);
             localStorage.setItem(key_from_user, JSON.stringify(dictionaries));
@@ -52,10 +52,10 @@ function get_user_dictionaries(user_from_cookies: IUser, user: Readable<IUser>) 
     },
     browser && user_from_cookies ? JSON.parse(localStorage[key_from_cookie] || '[]') : []
   );
-  return user_dictionaries;
+  return my_dictionaries;
 }
 
-async function load_user_dictionaries(userId: string) {
+async function load_my_dictionaries(userId: string) {
   const dictionary_ids_with_role = [];
   const db = getDb();
 

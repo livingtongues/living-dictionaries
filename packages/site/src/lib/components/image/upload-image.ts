@@ -20,9 +20,10 @@ export function upload_image({file, folder}: {file: File, folder: string}): Read
   const [file_type_including_period] = file.name.match(/\.[0-9a-z]+$/i);
   const storage_path = `${folder}/${new Date().getTime()}${file_type_including_period}`
 
-  const $page = get(page);
+  const { data: { user }} = get(page);
+  const $user = get(user);
   const customMetadata = {
-    uploadedBy: $page.data.user.displayName,
+    uploadedBy: $user.displayName,
     originalFileName: file.name,
   };
 

@@ -10,6 +10,7 @@
   export let file: File | Blob
   export let entryId: string
   export let speakerId: string;
+  $: ({dictionary, user} = $page.data)
 
   let uploadTask: UploadTask;
   let taskState: TaskState;
@@ -26,11 +27,11 @@
 
     const fileTypeSuffix = file.type.split('/')[1].split(';')[0]; // turns 'video/webm;codecs=vp8,opus' to 'webm' and 'video/mp4' to 'mp4'
 
-    const storagePath = `${$page.data.dictionary.id}/videos/${entryId}_${new Date().getTime()}.${fileTypeSuffix}`;
+    const storagePath = `${$dictionary.id}/videos/${entryId}_${new Date().getTime()}.${fileTypeSuffix}`;
 
     const customMetadata: IVideoCustomMetadata & Record<string, string> = {
-      uploadedByUid: $page.data.user.uid,
-      uploadedByName: $page.data.user.displayName,
+      uploadedByUid: $user.uid,
+      uploadedByName: $user.displayName,
     };
 
     // https://firebase.google.com/docs/storage/web/upload-files
@@ -52,7 +53,7 @@
         try {
           const database_video: GoalDatabaseVideo = {
             path: storagePath,
-            ab: $page.data.user.uid,
+            ab: $user.uid,
             sp: [speakerId],
           };
           await addVideo(entryId, database_video);

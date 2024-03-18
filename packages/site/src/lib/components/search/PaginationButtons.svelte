@@ -1,7 +1,9 @@
 <script lang="ts">
   export let pages: number
-  export let current_page: number
+  export let page_from_url: number
   export let go_to_page: (page: number) => void
+
+  $: current_page = page_from_url || 1
 
   function center_current(node: HTMLElement, active = false) {
     if (active) center()

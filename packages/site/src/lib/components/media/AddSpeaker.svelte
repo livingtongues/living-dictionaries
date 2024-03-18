@@ -6,6 +6,7 @@
   import type { ISpeaker } from '@living-dictionaries/types';
   import { decades } from './ages';
 
+  $: ({dictionary} = $page.data)
   const dispatch = createEventDispatcher();
   const close = () => dispatch('close');
 
@@ -21,7 +22,7 @@
       birthplace: birthplace.trim(),
       decade,
       gender,
-      contributingTo: [$page.data.dictionary.id],
+      contributingTo: [$dictionary.id],
     };
 
     const { id } = await addOnline<ISpeaker>('speakers', speaker);

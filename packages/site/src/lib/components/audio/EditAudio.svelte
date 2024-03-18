@@ -13,6 +13,7 @@
 
   export let entry: ExpandedEntry;
   export let sound_file: ExpandedAudio;
+  $: ({ dictionary, admin } = $page.data)
 
   let readyToRecord: boolean;
   let showUploadAudio = true;
@@ -41,7 +42,7 @@
       sp: [newSpeakerId]
     }
     await updateOnline<GoalDatabaseEntry>(
-      `dictionaries/${$page.data.dictionary.id}/words/${entry.id}`,
+      `dictionaries/${$dictionary.id}/words/${entry.id}`,
       { sfs: [sf] },
       { abbreviate: true }
     );
@@ -59,7 +60,7 @@
     <Waveform audioUrl={audio_url} />
   {:else}
     <SelectSpeaker
-      dictionaryId={$page.data.dictionary.id}
+      dictionaryId={$dictionary.id}
       initialSpeakerId={speaker_id}
       let:speakerId
       on:update={async ({ detail: {speakerId} }) => await updateSpeaker(speakerId)}>
@@ -102,7 +103,7 @@
 
   <div class="modal-footer">
     {#if sound_file}
-      {#if $page.data.admin > 1}
+      {#if $admin > 1}
         <JSON obj={sound_file} />
         <div class="w-1" />
       {/if}
@@ -115,7 +116,7 @@
       </Button>
       <div class="w-1" />
 
-      <Button onclick={() => deleteAudio(entry, $page.data.dictionary.id)} color="red">
+      <Button onclick={() => deleteAudio(entry, $dictionary.id)} color="red">
         <i class="far fa-trash-alt" />&nbsp;
         <span class="hidden sm:inline">{$page.data.t('misc.delete')}</span>
       </Button>

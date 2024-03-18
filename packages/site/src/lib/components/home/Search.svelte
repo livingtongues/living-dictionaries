@@ -6,8 +6,10 @@
   import { createEventDispatcher } from 'svelte';
 
   export let dictionaries: IDictionary[] = [];
+  export let my_dictionaries: IDictionary[] = [];
   export let selectedDictionaryId: string;
   let currentDictionary: IDictionary;
+  $: ({admin} = $page.data)
 
   $: if (selectedDictionaryId) {
     currentDictionary = dictionaries.find((dictionary) => {
@@ -105,11 +107,11 @@
         </div>
       {/if}
 
-      {#if !searchString && $page.data.user_dictionaries && $page.data.user_dictionaries.length}
+      {#if !searchString && my_dictionaries?.length}
         <div class="text-sm font-semibold px-3 my-1">
           {$page.data.t('home.my_dictionaries')}
         </div>
-        {#each $page.data.user_dictionaries as dictionary}
+        {#each my_dictionaries as dictionary}
           <button
             type="button"
             class="text-left px-3 py-1 my-1 hover:bg-gray-200"
@@ -123,7 +125,7 @@
         <hr class="my-2" />
         <div class="text-sm font-semibold px-3 my-1">
           {$page.data.t('home.public_dictionaries')}
-          {#if $page.data.admin}
+          {#if $admin}
             (+ Private)
           {/if}
         </div>
@@ -152,8 +154,8 @@
       class="flex flex-wrap sm:flex-col overflow-y-auto
         overflow-x-hidden px-2 pb-2">
       <ShowHide let:show let:toggle>
-        {#if !searchFocused && $page.data.user_dictionaries}
-          {#each $page.data.user_dictionaries as dictionary, i}
+        {#if !searchFocused && my_dictionaries}
+          {#each my_dictionaries as dictionary, i}
             {#if show || i < 3}
               <button
                 type="button"
@@ -164,7 +166,7 @@
               <div class="w-2 sm:hidden" />
             {/if}
           {/each}
-          {#if $page.data.user_dictionaries.length > 3 && !show}
+          {#if my_dictionaries.length > 3 && !show}
             <button
               type="button"
               class="sm:hidden rounded px-3 py-2 bg-white mt-2"

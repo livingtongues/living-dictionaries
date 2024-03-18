@@ -9,6 +9,7 @@
   import { lastEntriesUrl, algoliaQueryParams } from '$lib/stores/algolia';
 
   let showMobileFilters = false;
+  $: ({dictionary, can_edit, admin} = $page.data)
 
   $: if ($algoliaQueryParams) {
     const { href, origin } = window.location
@@ -63,7 +64,7 @@
               {$page.data.t('entry.gallery')}
             </span>
           </a>
-          {#if $page.data.dictionary.printAccess || $page.data.can_edit}
+          {#if $dictionary.printAccess || $can_edit}
             <a
               href={'/' + $page.params.dictionaryId + '/entries/print'}
               class="{$page.url.pathname.includes('print')
@@ -93,11 +94,11 @@
 
 <!-- Workaround while we fix meta tags to correctly work in list, table, gallery and print pages -->
 <SeoMetaTags
-  admin={$page.data.admin > 0}
+  admin={$admin > 0}
   title="Entries"
-  dictionaryName={$page.data.dictionary.name}
-  gcsPath={$page.data.dictionary.featuredImage?.specifiable_image_url}
-  lng={$page.data.dictionary.coordinates?.longitude}
-  lat={$page.data.dictionary.coordinates?.latitude}
+  dictionaryName={$dictionary.name}
+  gcsPath={$dictionary.featuredImage?.specifiable_image_url}
+  lng={$dictionary.coordinates?.longitude}
+  lat={$dictionary.coordinates?.latitude}
   description="The entries in this Living Dictionary are displayed in a comprehensive list that visitors can easily browse by using the page tabs at the bottom of the screen, or search by using the powerful search bar located at the top of the page."
   keywords="Endangered Languages, Language Documentation, Language Revitalization, Build a Dictionary, Online Dictionary, Digital Dictionary, Dictionary Software, Free Software, Online Dictionary Builder, Living Dictionaries, Living Dictionary, Edit a dictionary, Search a dictionary, Browse a dictionary, Explore a Dictionary" />

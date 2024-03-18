@@ -61,6 +61,6 @@
 
 <!-- <SeoMetaTags
   title={$page.data.t(''})}
-  dictionaryName={$page.data.dictionary.name}
+  dictionaryName={$dictionary.name}
   description={$page.data.t(''})}
   keywords="Endangered Languages, Language Documentation, Language Revitalization, Build a Dictionary, Online Dictionary, Digital Dictionary, Dictionary Software, Free Software, Online Dictionary Builder, Living Dictionaries, Living Dictionary, Edit a dictionary, Search a dictionary, Browse a dictionary, Explore a Dictionary" /> -->

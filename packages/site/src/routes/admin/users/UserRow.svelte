@@ -7,9 +7,10 @@
   import { page } from '$app/stores';
 
   export let user: IUser;
+  $: ({admin} = $page.data)
 </script>
 
-<tr title={$page.data.admin > 1 && JSON.stringify(user, null, 1)}>
+<tr title={$admin > 1 && JSON.stringify(user, null, 1)}>
   <td class="font-bold">
     {user.displayName}
   </td>

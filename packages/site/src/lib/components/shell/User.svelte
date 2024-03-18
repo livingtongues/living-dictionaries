@@ -3,6 +3,7 @@
   import { logOut, firebaseConfig } from 'sveltefirets';
   import { Button, Menu, ShowHide, Avatar } from 'svelte-pieces';
 
+  $: ({user, admin} = $page.data)
   let show_menu = false
   function toggle_menu() {
     const state = show_menu
@@ -13,16 +14,16 @@
   }
 </script>
 
-{#if $page.data.user}
+{#if $user}
   <div class="relative flex-shrink-0">
     <button class="px-3 py-1" type="button" on:click={toggle_menu}>
-      <Avatar user={$page.data.user} />
+      <Avatar user={$user} />
     </button>
     {#if show_menu}
       <Menu portalTarget="#direction" class="right-2 rtl:left-2 top-11" onclickoutside={toggle_menu}>
-        <div class="px-4 py-2 text-xs font-semibold text-gray-600">{$page.data.user.displayName}</div>
-        <div class="px-4 py-2 -mt-3 text-xs text-gray-600 border-b">{$page.data.user.email}</div>
-        {#if $page.data.admin}
+        <div class="px-4 py-2 text-xs font-semibold text-gray-600">{$user.displayName}</div>
+        <div class="px-4 py-2 -mt-3 text-xs text-gray-600 border-b">{$user.email}</div>
+        {#if $admin}
           <a href="/admin">
             Admin Panel
             <i class="fas fa-key" />

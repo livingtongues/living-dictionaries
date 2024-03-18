@@ -4,11 +4,11 @@
   import { Button } from 'svelte-pieces';
 
   export let can_edit = false
-  export let current_page_number: number
+  export let page_from_url: number
   export let number_of_pages: number
 
   function go_to_page(one_based_page: number) {
-    current_page_number = one_based_page;
+    page_from_url = one_based_page;
     window.scrollTo({ top: 0 });
   }
 </script>
@@ -21,7 +21,7 @@
 {/if}
 
 <nav class="md:sticky md:bottom-0 bg-white pt-2 pb-1 flex items-center print:hidden">
-  <PaginationButtons pages={number_of_pages} current_page={current_page_number} {go_to_page}>
+  <PaginationButtons pages={number_of_pages} {page_from_url} {go_to_page}>
     {#if can_edit}
       <Button class="text-nowrap ml-3 hidden md:block" form="filled" href="./new">
         <span class="i-fa-solid-plus -mt-1" />

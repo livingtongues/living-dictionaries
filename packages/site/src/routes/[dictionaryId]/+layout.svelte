@@ -10,7 +10,7 @@
   $: ({dictionary} = data)
 </script>
 
-<ShowHide let:show let:toggle>
+<ShowHide let:show let:toggle let:set>
   <Header>
     <div
       slot="left"
@@ -37,11 +37,11 @@
     <ResponsiveSlideover
       side={$page.data.t('page.direction') === 'rtl' ? 'right' : 'left'}
       showWidth={'md'}
-      on_close={toggle}
+      on_close={() => set(false)}
       open={show}>
       <div
         class="h-full md:h-unset flex flex-col flex-shrink-0 md:top-12 md:sticky md:w-44 lg:w-48 print:hidden">
-        <SideMenu on_close={toggle} />
+        <SideMenu dictionary={$dictionary} on_close={() => set(false)} />
         <hr class="md:hidden" />
         <Button form="menu" class="text-left !md:hidden" onclick={toggle}>
           <i class="far fa-times fa-lg fa-fw" />

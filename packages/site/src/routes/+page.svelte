@@ -14,20 +14,23 @@
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte';
   import { browser } from '$app/environment';
   import type { PageData } from './$types';
+
   export let data: PageData;
+  $: ({ my_dictionaries, admin } = data)
+
 
   $: publicDictionaries = data.publicDictionaries || [];
   let privateDictionaries: IDictionary[] = [];
   let selectedDictionaryId: string;
   let selectedDictionary: IDictionary;
-  $: dictionaries = [...publicDictionaries, ...privateDictionaries, ...$page.data.my_dictionaries];
+  $: dictionaries = [...publicDictionaries, ...privateDictionaries, ...$my_dictionaries];
   $: if (selectedDictionaryId)
     selectedDictionary = dictionaries.find((d) => d.id === selectedDictionaryId);
   else
     selectedDictionary = null;
 
 
-  $: if (browser && $page.data.admin) {
+  $: if (browser && $admin) {
     getCollection<IDictionary>('dictionaries', [where('public', '!=', true)]).then(
       (docs) => (privateDictionaries = docs)
     );
@@ -45,6 +48,7 @@
   <div class="sm:w-72 max-h-full">
     <Search
       {dictionaries}
+      my_dictionaries={$my_dictionaries}
       bind:selectedDictionaryId
       on:selectedDictionary={({ detail }) => {
         const { coordinates } = detail;
@@ -76,7 +80,7 @@
           {/await}
         {/if}
       {/if}
-      {#if $page.data.admin}
+      {#if $admin}
         <ShowHide let:show={hide} let:toggle>
           <CustomControl position="bottom-right">
             <button type="button" class="whitespace-nowrap w-90px! px-2" on:click={toggle}>Toggle Private</button>
@@ -91,9 +95,9 @@
         </ShowHide>
       {/if}
       <DictionaryPoints dictionaries={publicDictionaries} bind:selectedDictionaryId />
-      {#if $page.data.my_dictionaries.length}
+      {#if $my_dictionaries.length}
         <DictionaryPoints
-          dictionaries={$page.data.my_dictionaries}
+          dictionaries={$my_dictionaries}
           type="personal"
           bind:selectedDictionaryId />
       {/if}

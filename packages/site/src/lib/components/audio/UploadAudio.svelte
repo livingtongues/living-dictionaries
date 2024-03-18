@@ -9,6 +9,7 @@
   export let file: File | Blob;
   export let entryId: string;
   export let speakerId: string;
+  $: ({dictionary, user} = $page.data)
 
   const progress = tweened(0, {
     duration: 2000,
@@ -29,8 +30,8 @@
     const fileTypeSuffix = file.type.split('/')[1];
 
     // const storagePath = `${_dictName}_${dictionary.id}/audio/{_lexeme}_${entryId}_${new Date().getTime()}.${fileTypeSuffix}`;
-    const storagePath = `${$page.data.dictionary.id}/audio/${entryId}_${new Date().getTime()}.${fileTypeSuffix}`;
-    const customMetadata = { uploadedBy: $page.data.user.displayName };
+    const storagePath = `${$dictionary.id}/audio/${entryId}_${new Date().getTime()}.${fileTypeSuffix}`;
+    const customMetadata = { uploadedBy: $user.displayName };
 
     // https://firebase.google.com/docs/storage/web/upload-files
     const storage = getStorage();
@@ -75,12 +76,12 @@
           const sf: GoalDatabaseAudio = {
             path: storagePath,
             ts: new Date().getTime(),
-            ab: $page.data.user.uid,
+            ab: $user.uid,
             sp: [speakerId],
           };
 
           await updateOnline<GoalDatabaseEntry>(
-            `dictionaries/${$page.data.dictionary.id}/words/${entryId}`,
+            `dictionaries/${$dictionary.id}/words/${entryId}`,
             { sfs: [sf] },
             { abbreviate: true }
           );

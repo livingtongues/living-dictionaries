@@ -11,6 +11,7 @@
 
   export let search: InstantSearch;
   export let on_updated: () => void = undefined
+  $: ({dictionary} = $page.data)
 
   let hits: LDAlgoliaHit[] = [];
   let recentlyUpdatedEntries: ActualDatabaseEntry[] = [];
@@ -56,7 +57,7 @@
       </Button>
       {#await import('sveltefirets') then { Collection }}
         <Collection
-          path={`dictionaries/${$page.data.dictionary.id}/words`}
+          path={`dictionaries/${$dictionary.id}/words`}
           queryConstraints={[
             orderBy('ua', 'desc'),
             limit(10),

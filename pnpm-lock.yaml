@@ -150,6 +150,9 @@ importers:
       '@living-dictionaries/types':
         specifier: workspace:^1.0.0
         version: link:../types
+      '@orama/orama':
+        specifier: ^2.0.11
+        version: 2.0.11
       '@playwright/test':
         specifier: 1.41.2
         version: 1.41.2
@@ -2958,6 +2961,11 @@ packages:
     resolution: {integrity: sha512-wU5J8rUoo32oSef/rFpOT1HIjLjAv3qIDHkw1QIhODV3OpAVHi5oVzlouozg9obUmZKtbZ0qUe/m7FP0y0yBzA==}
     engines: {node: '>=8.12.0'}
     dev: false
+
+  /@orama/orama@2.0.11:
+    resolution: {integrity: sha512-CUoXg7lHehzquU+oJR5NoQiFN5ZvaRVz7SSuWnCAsn8if889XumQQ4SJRu083d16X1M2p9YSAfxaxdl6+7e2LQ==}
+    engines: {node: '>= 16.0.0'}
+    dev: true
 
   /@pkgjs/parseargs@0.11.0:
     resolution: {integrity: sha512-+1VkjdD0QBLPodGrJUeqarH8VAIvQODIbwh9XpP5Syisf7YoQgsJKPNFoqqLQlu+VQ/tVSshMR6loPMn8U+dPg==}

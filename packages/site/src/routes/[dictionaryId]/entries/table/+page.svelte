@@ -16,7 +16,7 @@
   import { page } from '$app/stores';
 
   export let data
-  $: ({dictionary, preferred_table_columns} = data)
+  $: ({dictionary, preferred_table_columns, can_edit} = data)
 
   const search: InstantSearch = getContext('search');
 
@@ -42,11 +42,11 @@
     entries={$entries.map(entry => convert_and_expand_entry(entry, $page.data.t))}
     {columns}
     dictionaryId={$dictionary.id}
-    canEdit={$page.data.can_edit}
+    canEdit={$can_edit}
     on:deleteImage={({detail: {entryId}}) => deleteImage({id: entryId}, $dictionary.id)}
     on:valueupdate={({detail: { field, newValue, entryId }}) => updateFirestoreEntry({field, value: newValue, entryId })} />
 
-  {#if $page.data.can_edit}
+  {#if $can_edit}
     {#each algoliaEntries as algoliaEntry (algoliaEntry.id)}
       <Doc
         path="dictionaries/{$dictionary.id}/words/{algoliaEntry.id}"

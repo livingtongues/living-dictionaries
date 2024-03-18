@@ -13,6 +13,7 @@
   export let index: number;
   export let dictionary: DictionaryWithHelperStores;
   const { managers, contributors, writeInCollaborators, invites } = dictionary;
+  $: ({admin} = $page.data)
 
   const dispatch = createEventDispatcher<{
     addalternatename: string;
@@ -172,6 +173,6 @@
 <td>
   <div style="width: 300px;" />
   {dictionary.conLangDescription ? dictionary.conLangDescription : ''}</td>
-{#if $page.data.admin > 1}
+{#if $admin > 1}
   <td class="cursor-pointer" title={JSON.stringify(dictionary, null, 1)}><span class="i-material-symbols-info-outline" /></td>
 {/if}

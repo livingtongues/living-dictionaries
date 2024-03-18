@@ -11,6 +11,8 @@
 
   export let file: File;
   export let fileLocationPrefix: string;
+  $: ({user} = $page.data)
+
 
   const progress = tweened(0, {
     duration: 2000,
@@ -32,7 +34,7 @@
 
   function startUpload(storagePath: string) {
     const customMetadata = {
-      uploadedBy: $page.data.user.displayName,
+      uploadedBy: $user.displayName,
       originalFileName: file.name,
     };
 
