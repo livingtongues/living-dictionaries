@@ -44,7 +44,7 @@ async function fetchEntries(dictionaryId: string) {
   const snapshot = await db.collection(`dictionaries/${dictionaryId}/words`).get();
   for (const snap of snapshot.docs) {
     const entry: ActualDatabaseEntry = { id: snap.id, ...(snap.data() as ActualDatabaseEntry) };
-    await addSpeakerIdToEntry(dictionaryId, entry, {birthplace: 'USA', displayName: ''}, speakerRef);
+    await addSpeakerIdToEntry(dictionaryId, entry, {birthplace: 'USA', displayName: ''}, speakerRef); // Modify this line with real speaker Data
   }
 }
 
