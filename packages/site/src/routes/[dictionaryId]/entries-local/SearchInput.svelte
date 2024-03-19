@@ -2,7 +2,7 @@
   import { browser } from '$app/environment';
   import { page } from '$app/stores';
   import type { SearchParams } from './+layout';
-  import type { QueryParamStore } from 'svelte-pieces/stores/query-param-store.js';
+  import type { QueryParamStore } from 'svelte-pieces';
 
   export let on_show_filter_menu: () => void;
   export let search_params: QueryParamStore<SearchParams>;

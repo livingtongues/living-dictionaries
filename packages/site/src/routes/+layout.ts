@@ -1,7 +1,7 @@
 import type { LayoutLoad } from './$types';
 import { getTranslator } from '$lib/i18n'
 import { getSupportedLocale } from '$lib/i18n/locales'
-import { createUserStore, firebaseConfig, getDb, getDocument } from 'sveltefirets';
+import { createUserStore, getDb, getDocument, type IBaseUser } from 'sveltefirets';
 import { derived, type Readable } from 'svelte/store';
 import type { IUser, IDictionary } from '@living-dictionaries/types';
 import { browser } from '$app/environment';
@@ -14,26 +14,18 @@ export const load: LayoutLoad = async ({  url: { searchParams }, data: { serverL
   const locale = getSupportedLocale(urlLocale || serverLocale) || 'en'
   const t = await getTranslator(locale)
 
-  // TODO: update this to pass in user_from_cookies including admin role and then check in dictionaryId/layout.ts for admin to see if should create_entries_store
-  const user = createUserStore<IUser>({
-    userKey: `${firebaseConfig.projectId}_firebase_user`,
-    log: true,
-  });
-
-  const admin = derived(user, ($user) => {
-    return $user?.roles?.admin || 0;
-  });
-
+  const user = createUserStore<IUser>({ startWith: user_from_cookies });
+  const admin = derived(user, ($user) => $user?.roles?.admin || 0);
   const my_dictionaries = get_my_dictionaries(user_from_cookies, user);
 
   const columns_key = `table_columns_03.18.2024-${user_from_cookies?.uid}`; // rename when adding more columns to invalidate the user's cache
   const preferred_table_columns = createPersistedStore(columns_key, defaultColumns);
 
-  return { locale, t, user, admin, my_dictionaries, preferred_table_columns }
+  return { locale, t, user, admin, my_dictionaries, preferred_table_columns, user_from_cookies }
 };
 
 
-function get_my_dictionaries(user_from_cookies: IUser, user: Readable<IUser>) {
+function get_my_dictionaries(user_from_cookies: IBaseUser, user: Readable<IUser>) {
   const key_from_cookie = `my_dictionaries-${user_from_cookies?.uid}`;
   const my_dictionaries = derived<Readable<IUser>, IDictionary[]>(
     user,

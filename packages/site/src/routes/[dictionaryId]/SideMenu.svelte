@@ -5,7 +5,9 @@
 
   export let dictionary: IDictionary
   export let on_close: () => void;
-  $: ({admin, is_manager} = $page.data)
+  export let admin: number
+  export let is_manager: boolean
+  export let entry_count: number
 </script>
 
 <div class="md:hidden">
@@ -31,13 +33,19 @@
       {new Intl.NumberFormat().format(dictionary.entryCount || 0)}
     </span>
   </a>
-  {#if dev || $admin}
+  {#if dev || admin}
     <a
       class:active={$page.url.pathname.match(/entries-local/)}
       href={`/${dictionary.id}/entries-local/list`}>
-      <span class="i-fa6-solid-list " />
+      <!-- <span class="i-fa6-solid-list " /> -->
       <span class="font-medium mx-2">
         {$page.data.t('dictionary.entries')} (local)
+      </span>
+      <span class="flex-grow" />
+      <span
+        class="inline-block py-1 px-2 leading-none text-xs font-semibold
+          text-gray-700 bg-gray-300 rounded-full">
+        {new Intl.NumberFormat().format(entry_count || 0)}
       </span>
     </a>
   {/if}
@@ -65,7 +73,7 @@
       {$page.data.t('dictionary.grammar')}
     </span>
   </a>
-  {#if $is_manager}
+  {#if is_manager}
     <a
       href={'/' + dictionary.id + '/import'}
       class:active={$page.url.pathname.includes('import')}>
