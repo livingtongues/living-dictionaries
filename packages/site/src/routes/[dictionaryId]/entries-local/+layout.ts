@@ -1,5 +1,4 @@
-// import { createQueryParamStore } from 'svelte-pieces';
-import { createQueryParamStore } from './query-param-store';
+import { createQueryParamStore } from 'svelte-pieces';
 
 export interface SearchParams {
   page: number;

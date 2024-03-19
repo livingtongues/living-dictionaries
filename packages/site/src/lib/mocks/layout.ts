@@ -9,6 +9,7 @@ export const mockDictionaryLayoutData: LayoutData = {
   // supabase: null,
   // authResponse: null,
   user: readable(null),
+  user_from_cookies: null,
   dictionary: readable({
     name: 'test',
     glossLanguages: []

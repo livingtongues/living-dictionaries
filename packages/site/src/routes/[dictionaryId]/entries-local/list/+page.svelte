@@ -19,6 +19,4 @@
       canEdit
       on:deleteImage={() => alert('delete image not implemented yet')} />
   {/each}
-{:else}
-  <span class="i-svg-spinners-3-dots-fade align--4px" />
 {/if}

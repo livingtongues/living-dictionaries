@@ -10,6 +10,7 @@ export async function inviteHelper(
   dictionary: IDictionary,
 ) {
   const { data: { t, user } } = get(page)
+  const $user = get(user)
 
   const targetEmail = prompt(`${t('contact.email')}?`);
   if (!targetEmail) return;
@@ -21,8 +22,8 @@ export async function inviteHelper(
 
   try {
     const invite: IInvite = {
-      inviterEmail: user.email,
-      inviterName: user.displayName,
+      inviterEmail: $user.email,
+      inviterName: $user.displayName,
       dictionaryName: dictionary.name,
       targetEmail,
       role,

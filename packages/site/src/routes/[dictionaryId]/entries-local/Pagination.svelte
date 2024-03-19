@@ -21,7 +21,7 @@
 {/if}
 
 <nav class="md:sticky md:bottom-0 bg-white pt-2 pb-1 flex items-center print:hidden">
-  <PaginationButtons pages={number_of_pages} {page_from_url} {go_to_page}>
+  <PaginationButtons pages={number_of_pages} current_page={page_from_url || 1} {go_to_page}>
     {#if can_edit}
       <Button class="text-nowrap ml-3 hidden md:block" form="filled" href="./new">
         <span class="i-fa-solid-plus -mt-1" />
