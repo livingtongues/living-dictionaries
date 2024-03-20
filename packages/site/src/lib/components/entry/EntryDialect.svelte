@@ -24,7 +24,8 @@
     if (browser && fetchedDictionaryId !== dictionaryId) {
       try {
         const dialects = await fetchDialects()
-        $options = dialects.facetHits.map(({value}) => ({ name: value, value }));
+        if (dialects?.facetHits)
+          $options = dialects?.facetHits.map(({value}) => ({ name: value, value }));
       } catch (error) {
         console.error(error);
       }

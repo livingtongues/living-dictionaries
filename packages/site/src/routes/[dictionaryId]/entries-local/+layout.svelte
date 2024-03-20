@@ -81,7 +81,7 @@
       <slot />
       <Pagination bind:page_from_url={$search_params.page} {number_of_pages} />
     </div>
-    <div class="hidden md:block w-3 flex-shrink-0 print:hidden" />
+    <div class="hidden md:block w-2 flex-shrink-0 print:hidden" />
     <EntryFilters {search_params} {show_mobile_filters} on_close={toggle} {result_facets} />
   </div>
 </ShowHide>
