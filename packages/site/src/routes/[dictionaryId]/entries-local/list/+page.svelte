@@ -16,6 +16,31 @@
   const entries = getContext<Writable<ExpandedEntry[]>>('entries')
 
   let entry_page_data: EntryPageData
+
+  async function handle_entry_click(e: MouseEvent & { currentTarget: EventTarget & HTMLAnchorElement }, entry: ExpandedEntry) {
+    // bail if opening a new tab // or small screen  || window.innerWidth < 640
+    if (e.metaKey || e.ctrlKey) return;
+    e.preventDefault(); // prevent navigation
+
+    entry_page_data = {
+      ...data,
+      entry: readable(entry),
+      supa_entry: new Promise(() => ({})),
+      shallow: true,
+    }
+
+    const { href } = e.currentTarget;
+    const { search, hash } = window.location
+    pushState(`${href}${search}${hash}`, { entry_id: entry.id});
+
+    const result = await preloadData(href);
+    if (result.type === 'loaded' && result.status === ResponseCodes.OK) {
+      // @ts-ignore
+      entry_page_data = result.data
+    } else {
+      goto(href);
+    }
+  }
 </script>
 
 {#if $entries}
@@ -25,30 +50,7 @@
       {entry}
       videoAccess={$dictionary.videoAccess}
       can_edit={$can_edit}
-      on_click={async (e) => {
-        // bail if opening a new tab or small screen
-        if (e.metaKey || e.ctrlKey || window.innerWidth < 640) return;
-        e.preventDefault(); // prevent navigation
-
-        entry_page_data = {
-          ...data,
-          entry: readable(entry),
-          supa_entry: new Promise(() => ({})),
-          shallow: true,
-        }
-
-        const { href } = e.currentTarget;
-        const { search, hash } = window.location
-        pushState(`${href}${search}${hash}`, { entry_id: entry.id});
-
-        const result = await preloadData(href);
-        if (result.type === 'loaded' && result.status === ResponseCodes.OK) {
-          // @ts-ignore
-          entry_page_data = result.data
-        } else {
-          goto(href);
-        }
-      }}
+      on_click={(e) => {handle_entry_click(e, entry)}}
       {dbOperations} />
   {/each}
 {/if}

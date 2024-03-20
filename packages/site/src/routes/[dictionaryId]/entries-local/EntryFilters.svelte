@@ -19,7 +19,7 @@
   open={show_mobile_filters}
   {on_close}>
   <section
-    class="md:w-52 md:sticky md:top-24 h-100vh md:max-h-[calc(100vh-107px)] print:hidden p-4 pl-3 md:p-0 flex flex-col">
+    class="md:w-52 md:sticky md:top-24 h-100vh h-100dvh! md:max-h-[calc(100vh-107px)] print:hidden p-4 pl-3 md:p-0 flex flex-col">
     <header class="flex items-center justify-between space-x-3 mb-3 pl-1">
       <h2 class="text-lg leading-7 font-medium text-gray-900">
         {$page.data.t('entry.filters')}

@@ -16,9 +16,7 @@
   export let can_edit = false;
   export let videoAccess = false;
   export let dbOperations: DbOperations;
-  export let on_click: (e: MouseEvent & {
-    currentTarget: EventTarget & HTMLAnchorElement;
-  }) => void = undefined;
+  export let on_click: (e: MouseEvent & { currentTarget: EventTarget & HTMLAnchorElement }) => void = undefined;
 
   $: glosses = order_glosses({
     glosses: entry.senses?.[0]?.glosses,
