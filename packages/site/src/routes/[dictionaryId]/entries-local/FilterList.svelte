@@ -1,5 +1,6 @@
 <script lang="ts">
   import { page } from '$app/stores';
+  import { restore_spaces_from_underscores } from '$lib/search/augment-entry-for-search';
   import type { FilterListKeys, QueryParams } from '$lib/search/types';
   import { type QueryParamStore, ShowHide } from 'svelte-pieces';
 
@@ -11,7 +12,8 @@
 
   $: count = Object.values(values).length
   let search_value: string
-  $: filtered_values = Object.entries(values).filter(([item]) => search_value ? item.toLowerCase().includes(search_value.toLowerCase()) : true);
+  $: filtered_values = Object.entries(values).filter(([item]) => search_value ? restore_spaces_from_underscores(item).toLowerCase().includes(search_value.toLowerCase()) : true);
+  $: max_show = search_value ? 10 : 5
 
   function add_filter(item: string) {
     $search_params[search_param_key] = [...$search_params[search_param_key] || [], item]
@@ -20,8 +22,6 @@
   function remove_filter(item: string) {
     $search_params[search_param_key] = $search_params[search_param_key].filter((existing_item: string) => existing_item !== item)
   }
-
-  $: max_show = search_value ? 10 : 5
 </script>
 
 {#if count <= max_show}
@@ -58,7 +58,7 @@
             }} />
           <div class="w-2" />
           <label for={id} class="block text-sm text-gray-900">
-            {item}
+            {restore_spaces_from_underscores(item)}
             <span class="text-xs text-gray-600"> ({item_count}) </span>
           </label>
         </li>

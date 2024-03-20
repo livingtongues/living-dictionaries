@@ -60,7 +60,7 @@
     class="flex mb-1 items-center sticky top-0 md:top-12 pt-2 md:pt-0 pb-1
       bg-white z-20 print:hidden">
     <SearchInput {search_params} on_show_filter_menu={toggle} />
-    <JSON obj={$entries.slice(0, 50)} />
+    <JSON obj={$entries?.slice(0, 50)} />
   </div>
 
   <div class="flex">

@@ -1,10 +1,10 @@
 import { redirect, error } from '@sveltejs/kit';
 import type { IDictionary, ExpandedEntry, ActualDatabaseEntry } from '@living-dictionaries/types';
-import { incrementalCollectionStore, getDocument, docStore, docExists } from 'sveltefirets';
+import { incrementalCollectionStore, getDocument, docStore, docExists, firebaseConfig } from 'sveltefirets';
 import type { LayoutLoad } from './$types';
 import { ResponseCodes } from '$lib/constants';
 import { writable, type Readable, derived, type Unsubscriber } from 'svelte/store';
-import { browser, dev } from '$app/environment';
+import { browser } from '$app/environment';
 import { limit } from 'firebase/firestore';
 import { convert_and_expand_entry } from '$lib/transformers/convert_and_expand_entry';
 import type { TranslateFunction } from '$lib/i18n/types';
@@ -62,7 +62,7 @@ export const load: LayoutLoad = async ({ params: { dictionaryId }, parent }) => 
 };
 
 function create_entries_store({dictionary, is_admin, t, entries_per_page}: { dictionary: IDictionary, is_admin: boolean, t: TranslateFunction, entries_per_page: number}) {
-  const load_entries_locally = browser && (is_admin || dev)
+  const load_entries_locally = browser && (is_admin || firebaseConfig.projectId === 'talking-dictionaries-dev')
   if (!load_entries_locally) {
     const { subscribe } = writable<ExpandedEntry[]>(null);
     return { subscribe };

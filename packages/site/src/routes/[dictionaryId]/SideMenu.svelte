@@ -1,7 +1,7 @@
 <script lang="ts">
-  import { dev } from '$app/environment';
   import { page } from '$app/stores';
   import type { IDictionary } from '@living-dictionaries/types';
+  import { firebaseConfig } from 'sveltefirets';
 
   export let dictionary: IDictionary
   export let on_close: () => void;
@@ -33,7 +33,7 @@
       {new Intl.NumberFormat().format(dictionary.entryCount || 0)}
     </span>
   </a>
-  {#if dev || admin}
+  {#if firebaseConfig.projectId === 'talking-dictionaries-dev' || admin}
     <a
       class:active={$page.url.pathname.match(/entries-local/)}
       href={`/${dictionary.id}/entries-local/list`}>
