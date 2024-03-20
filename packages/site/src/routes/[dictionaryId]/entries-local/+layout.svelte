@@ -8,7 +8,7 @@
   import Pagination from './Pagination.svelte';
   import EntryFilters from './EntryFilters.svelte';
   import type { FacetResult } from '@orama/orama';
-  import type { SearchParams } from './+layout';
+  import type { QueryParams } from '$lib/search/types';
 
   export let data;
   $: ({entries, entries_per_page, search_params} = data)
@@ -29,7 +29,7 @@
 
   let initial_entries_sent_to_page = false
   $: if ($entries) {
-    if (!initial_entries_sent_to_page) {
+    if (!initial_entries_sent_to_page && $entries.length <= entries_per_page) {
       page_entries.set($entries)
       initial_entries_sent_to_page = true
     }
@@ -37,11 +37,11 @@
   }
 
   let search_inited_ms: number
-  async function search(query_params: SearchParams, page_index: number) {
+  async function search(query_params: QueryParams, page_index: number) {
     try {
       const time = Date.now()
       search_inited_ms = time
-      const {elapsed: { formatted }, count, hits, facets } = await entries.search(query_params, page_index)
+      const {elapsed: { formatted }, count, hits, facets } = await entries.search(query_params, page_index, entries_per_page)
       if (search_inited_ms !== time) return
       result_facets = facets
       search_results_count = count

@@ -5,7 +5,7 @@
   import type { ExpandedEntry } from '@living-dictionaries/types';
 
   export let data;
-  $: ({dictionary} = data)
+  $: ({dictionary, can_edit, dbOperations } = data)
 
   const entries = getContext<Writable<ExpandedEntry[]>>('entries')
 </script>
@@ -16,7 +16,7 @@
       dictionary={$dictionary}
       {entry}
       videoAccess={$dictionary.videoAccess}
-      canEdit
-      on:deleteImage={() => alert('delete image not implemented yet')} />
+      can_edit={$can_edit}
+      {dbOperations} />
   {/each}
 {/if}

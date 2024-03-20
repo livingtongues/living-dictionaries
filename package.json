@@ -30,7 +30,7 @@
 		"eslint-plugin-vitest": "^0.3.1",
 		"globals": "^13.20.0",
 		"lint-staged": "^13.2.2",
-		"simple-git-hooks": "^2.8.1",
+		"simple-git-hooks": "^2.11.0",
 		"start-server-and-test": "^2.0.3",
 		"supabase": "^1.145.4",
 		"svelte": "^4.2.12",

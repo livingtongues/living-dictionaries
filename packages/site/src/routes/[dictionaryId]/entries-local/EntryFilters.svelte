@@ -3,10 +3,10 @@
   import { Button, ResponsiveSlideover, type QueryParamStore } from 'svelte-pieces';
   import type { FacetResult } from '@orama/orama';
   import ToggleFacet from './ToggleFacet.svelte';
-  import type { SearchParams } from './+layout';
+  import type { QueryParams } from '$lib/search/types';
   import ClearFilters from './ClearFilters.svelte';
 
-  export let search_params: QueryParamStore<SearchParams>;
+  export let search_params: QueryParamStore<QueryParams>;
   export let show_mobile_filters = false;
   export let on_close: () => void
   export let result_facets: FacetResult

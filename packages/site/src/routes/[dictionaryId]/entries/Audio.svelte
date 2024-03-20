@@ -7,7 +7,7 @@
   export let entry: ExpandedEntry;
   // export let sound_file: ExpandedAudio; // TODO
   export let context: 'list' | 'table' | 'entry';
-  export let canEdit = false;
+  export let can_edit = false;
 
   $: sound_file = entry.sound_files?.[0];
 
@@ -35,7 +35,7 @@
       use:longpress={800}
       on:longpress={() => initAudio(sound_file.fb_storage_path)}
       on:click={() => {
-        if (canEdit)
+        if (can_edit)
           toggle();
         else
           initAudio(sound_file.fb_storage_path);
@@ -53,14 +53,14 @@
           class="i-material-symbols-hearing text-lg mb-1" />
         <div class="text-center text-xs">
           {$page.data.t('audio.listen')}
-          {#if canEdit}
+          {#if can_edit}
             +
             {$page.data.t('audio.edit_audio')}
           {/if}
         </div>
       {/if}
     </div>
-  {:else if canEdit}
+  {:else if can_edit}
     <div
       class="{$$props.class} hover:bg-gray-300 flex flex-col items-center
         justify-center cursor-pointer select-none"

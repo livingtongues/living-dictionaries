@@ -7,7 +7,6 @@
   import Hits from '$lib/components/search/Hits.svelte';
   import Pagination from '$lib/components/search/Pagination.svelte';
   import { configure } from 'instantsearch.js/es/widgets/index.js';
-  import { deleteImage } from '$lib/helpers/delete';
   import type { InstantSearch } from 'instantsearch.js';
   import { navigating, page } from '$app/stores';
   import { save_scroll_point, restore_scroll_point } from '$lib/helpers/scrollPoint';
@@ -15,7 +14,7 @@
   import List from './List.svelte';
 
   export let data
-  $: ({dictionary, can_edit, admin} = data)
+  $: ({dictionary, can_edit, admin, dbOperations} = data)
 
   const search: InstantSearch = getContext('search');
   let pixels_from_top = 0;
@@ -49,12 +48,12 @@
           dictionary={$dictionary}
           entry={convert_and_expand_entry(entry, $page.data.t)}
           videoAccess={$dictionary.videoAccess || $admin > 0}
-          canEdit={$can_edit}
-          on:deleteImage={() => deleteImage(entry, $dictionary.id)} />
+          can_edit={$can_edit}
+          {dbOperations} />
       </Doc>
     {/each}
   {:else}
-    <List {entries} dictionary={$dictionary} />
+    <List {entries} can_edit={false} dictionary={$dictionary} {dbOperations} />
   {/if}
 </Hits>
 <Pagination {search} />

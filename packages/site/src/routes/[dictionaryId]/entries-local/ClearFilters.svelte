@@ -1,8 +1,8 @@
 <script lang="ts">
   import type { QueryParamStore } from 'svelte-pieces';
-  import type { SearchParams } from './+layout';
+  import type { QueryParams } from '$lib/search/types';
 
-  export let search_params: QueryParamStore<SearchParams>;
+  export let search_params: QueryParamStore<QueryParams>;
   $: filtered = !!Object.keys($search_params).filter(k => k !== 'page' && k !== 'query').length;
 
   function clear_filters() {

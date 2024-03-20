@@ -1,11 +1,11 @@
 <script lang="ts">
   import { browser } from '$app/environment';
   import { page } from '$app/stores';
-  import type { SearchParams } from './+layout';
+  import type { QueryParams } from '$lib/search/types';
   import type { QueryParamStore } from 'svelte-pieces';
 
   export let on_show_filter_menu: () => void;
-  export let search_params: QueryParamStore<SearchParams>;
+  export let search_params: QueryParamStore<QueryParams>;
 </script>
 
 <div class="flex flex-grow rounded-md shadow-sm">

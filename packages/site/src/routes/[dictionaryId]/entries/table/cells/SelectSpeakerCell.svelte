@@ -1,17 +1,17 @@
 <script lang="ts">
   import type { ExpandedEntry } from '@living-dictionaries/types';
   export let entry: ExpandedEntry;
-  export let canEdit = false;
+  export let can_edit = false;
 
   $: first_sound_file = entry.sound_files?.[0];
 </script>
 
 <div
-  class:cursor-pointer={canEdit}
+  class:cursor-pointer={can_edit}
   class="h-full"
   style="padding: 0.1em 0.25em"
   on:click={() => {
-    if (canEdit) {
+    if (can_edit) {
       if (first_sound_file?.speaker_ids?.length) {
         alert(
           'Please edit the speaker by from the edit audio modal accessed by clicking on the ear.'

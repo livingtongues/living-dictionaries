@@ -111,7 +111,7 @@
   </div>
   {#if $dictionary.featuredImage}
     <Image
-      canEdit
+      can_edit
       height={300}
       title="{$dictionary.name} Featured Image"
       gcs={$dictionary.featuredImage.specifiable_image_url}

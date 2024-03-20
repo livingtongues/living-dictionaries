@@ -2,6 +2,7 @@ import { readable } from 'svelte/store'
 import type { LayoutData } from '../../routes/[dictionaryId]/$types'
 import type { IDictionary } from '@living-dictionaries/types'
 import type { docStore } from 'sveltefirets'
+import { logDbOperations } from './db'
 
 export const mockDictionaryLayoutData: LayoutData = {
   t: null,
@@ -22,4 +23,5 @@ export const mockDictionaryLayoutData: LayoutData = {
   preferred_table_columns: null,
   entries: null,
   entries_per_page: null,
+  dbOperations: logDbOperations,
 }

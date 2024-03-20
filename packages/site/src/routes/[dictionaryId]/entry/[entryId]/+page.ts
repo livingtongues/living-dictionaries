@@ -4,7 +4,7 @@ import { docStore, getDocument } from 'sveltefirets';
 import { browser } from '$app/environment';
 import { readable } from 'svelte/store';
 import { ResponseCodes } from '$lib/constants';
-import { ENTRY_UPDATED_LOAD_TRIGGER, dbOperations } from '$lib/dbOperations';
+import { ENTRY_UPDATED_LOAD_TRIGGER } from '$lib/dbOperations';
 import { getSupabase } from '$lib/supabase';
 import type { SupaEntry } from '$lib/supabase/database.types.js';
 
@@ -46,6 +46,5 @@ export const load = async ({ params, depends }) => {
   return {
     initialEntry: entryStore,
     supaEntry,
-    dbOperations,
   };
 };

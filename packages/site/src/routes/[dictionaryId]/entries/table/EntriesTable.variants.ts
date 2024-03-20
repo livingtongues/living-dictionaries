@@ -16,7 +16,7 @@ export const variants: Variant<Component>[] = [
     props: {
       columns,
       entries: [complex, simple, hasVideo],
-      canEdit: true,
+      can_edit: true,
       dictionaryId: basic_mock_dictionary.id,
     }
   }

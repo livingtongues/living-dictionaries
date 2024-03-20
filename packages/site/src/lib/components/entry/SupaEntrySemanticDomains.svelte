@@ -25,7 +25,7 @@
 <ModalEditableArray
   values={semantic_domain_keys || []}
   options={translated_semantic_domain_options}
-  canEdit={can_edit}
+  {can_edit}
   showPlus={show_plus}
   placeholder={$page.data.t('entry_field.semantic_domains')}
   {on_update}>

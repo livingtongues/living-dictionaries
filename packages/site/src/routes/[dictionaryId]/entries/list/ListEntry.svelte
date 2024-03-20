@@ -9,11 +9,13 @@
   import { ShowHide } from 'svelte-pieces';
   import sanitize from 'xss';
   import { page } from '$app/stores';
+  import type { DbOperations } from '$lib/dbOperations';
 
   export let entry: ExpandedEntry;
   export let dictionary: IDictionary;
-  export let canEdit = false;
+  export let can_edit = false;
   export let videoAccess = false;
+  export let dbOperations: DbOperations
 
   $: glosses = order_glosses({
     glosses: entry.senses?.[0]?.glosses,
@@ -28,8 +30,8 @@
   class:border-b-2={entry.ua?.toMillis?.() > minutesAgo(5)}
   class="flex rounded shadow my-1 overflow-hidden items-stretch border-green-300"
   style="margin-right: 2px;">
-  {#if entry.sound_files?.[0] || canEdit}
-    <Audio class="bg-gray-100 py-1.5 px-1 min-w-60px w-60px" {entry} {canEdit} context="list" />
+  {#if entry.sound_files?.[0] || can_edit}
+    <Audio class="bg-gray-100 py-1.5 px-1 min-w-60px w-60px" {entry} {can_edit} context="list" />
   {/if}
   <a
     href={'/' + dictionary.id + '/entry/' + entry.id}
@@ -112,8 +114,8 @@
     </div>
   </a>
   {#if entry.senses?.[0]?.video_files?.[0]}
-    <Video class="bg-gray-100 p-1.5 border-r-2" lexeme={entry.lexeme} video={entry.senses[0].video_files[0]} {canEdit} />
-  {:else if videoAccess && canEdit}
+    <Video class="bg-gray-100 p-1.5 border-r-2" lexeme={entry.lexeme} video={entry.senses[0].video_files[0]} {can_edit} />
+  {:else if videoAccess && can_edit}
     <ShowHide let:show let:toggle>
       <button
         type="button"
@@ -135,10 +137,10 @@
         square={128}
         title={entry.lexeme}
         gcs={entry.senses?.[0]?.photo_files?.[0].specifiable_image_url}
-        {canEdit}
-        on:deleteImage />
+        {can_edit}
+        on:deleteImage={() => dbOperations.deleteImage(entry, dictionary.id)} />
     </div>
-  {:else if canEdit}
+  {:else if can_edit}
     <AddImage dictionaryId={dictionary.id} entryId={entry.id} class="w-12 bg-gray-100">
       <div class="text-xs" slot="text">
         {$page.data.t('entry_field.photo')}

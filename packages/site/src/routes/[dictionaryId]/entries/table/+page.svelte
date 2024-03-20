@@ -42,7 +42,7 @@
     entries={$entries.map(entry => convert_and_expand_entry(entry, $page.data.t))}
     {columns}
     dictionaryId={$dictionary.id}
-    canEdit={$can_edit}
+    can_edit={$can_edit}
     on:deleteImage={({detail: {entryId}}) => deleteImage({id: entryId}, $dictionary.id)}
     on:valueupdate={({detail: { field, newValue, entryId }}) => updateFirestoreEntry({field, value: newValue, entryId })} />
 

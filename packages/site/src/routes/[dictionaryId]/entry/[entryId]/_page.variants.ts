@@ -1,13 +1,11 @@
 import type { Variant } from 'kitbook';
 import type Component from './+page.svelte';
 import { readable } from 'svelte/store';
-import { logDbOperations } from '$lib/mocks/db';
 import type { ComponentProps } from 'svelte';
 import { mockDictionaryLayoutData } from '$lib/mocks/layout';
 
 const defaultProps: ComponentProps<Component>['data'] = {
   ...mockDictionaryLayoutData,
-  dbOperations: logDbOperations,
   supaEntry: null,
   initialEntry: readable({
     lx: 'test',
