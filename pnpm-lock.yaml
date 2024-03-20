@@ -283,8 +283,8 @@ importers:
         specifier: 2.0.0-next.13
         version: 2.0.0-next.13(svelte@4.2.12)
       sveltefirets:
-        specifier: ^0.0.39
-        version: 0.0.39(firebase@10.9.0)(svelte@4.2.12)
+        specifier: 0.0.41
+        version: 0.0.41(firebase@10.9.0)(svelte@4.2.12)
       topojson-client:
         specifier: ^3.1.0
         version: 3.1.0
@@ -12234,6 +12234,16 @@ packages:
 
   /sveltefirets@0.0.39(firebase@10.9.0)(svelte@4.2.12):
     resolution: {integrity: sha512-o1AvK1FAvT4V4EKL+a/8zfkmIjhleux7yupgNppsfvm7MA1rLDEjXUN52hVMRW2rpOUWZ3xD3EcJW3BK6zT1bw==}
+    peerDependencies:
+      firebase: ^9.21.0 || ^10.0.0
+      svelte: ^3.58.0 || ^4.0.0 || ^5.0.0
+    dependencies:
+      firebase: 10.9.0
+      svelte: 4.2.12
+    dev: true
+
+  /sveltefirets@0.0.41(firebase@10.9.0)(svelte@4.2.12):
+    resolution: {integrity: sha512-EnZA9n/UYrRLvOlEdx/j2KxGxNd402Uuke3lOki9pIvB8YnR2eNcy3BMKexMMQzcKtkH7H74qMTWLtHfv92alQ==}
     peerDependencies:
       firebase: ^9.21.0 || ^10.0.0
       svelte: ^3.58.0 || ^4.0.0 || ^5.0.0

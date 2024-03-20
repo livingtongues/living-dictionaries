@@ -71,7 +71,7 @@
     "svelte": "^4.2.12",
     "svelte-check": "^3.6.8",
     "svelte-pieces": "2.0.0-next.13",
-    "sveltefirets": "^0.0.39",
+    "sveltefirets": "0.0.41",
     "topojson-client": "^3.1.0",
     "tslib": "^2.6.1",
     "type-fest": "^4.13.0",

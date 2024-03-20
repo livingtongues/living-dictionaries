@@ -1,19 +1,19 @@
 <script lang="ts">
   import { Button, JSON } from 'svelte-pieces';
   import { share } from '$lib/helpers/share';
-  import { deleteEntry, deleteImage, deleteVideo } from '$lib/helpers/delete';
   import EntryDisplay from './EntryDisplay.svelte';
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte';
   import { seo_description } from './seo_description';
   import { goto } from '$app/navigation';
   import { lastEntriesUrl, algoliaQueryParams } from '$lib/stores/algolia';
   import { page } from '$app/stores';
+  import type { SupaEntry } from '$lib/supabase/database.types';
+  import { browser } from '$app/environment';
 
   export let data;
   $: ({
     entry,
-    actualEntry, // presently does not exist when shall routing to entry - this is just needed for deleting entries on Firebase (not needed for deleting in Supabase)
-    supaEntry,
+    supa_entry,
     shallow,
     admin,
     can_edit,
@@ -23,6 +23,13 @@
     user,
     dbOperations,
   } = data);
+  let supaEntry: SupaEntry
+
+  $: if (browser && supa_entry) {
+    supa_entry.then(({data}) => {
+      supaEntry = data
+    })
+  }
 
   // saved algoliaQueryParams will be overwritten by the gallery view as it turns on the images only facet
   function backToEntries() {
@@ -44,19 +51,17 @@
       {#if $admin > 1}
         <JSON obj={entry} />
       {/if}
-      {#if actualEntry}
-        {#if $is_manager || ($is_contributor && $entry.cb === $user.uid)}
-          <Button
-            color="red"
-            form="simple"
-            onclick={() =>
-              deleteEntry(actualEntry, $dictionary.id, $algoliaQueryParams)}>
-            <span class="hidden md:inline">
-              {$page.data.t('misc.delete')}
-            </span>
-            <i class="fas fa-trash ml-1" />
-          </Button>
-        {/if}
+      {#if $is_manager || ($is_contributor && $entry.cb === $user.uid)}
+        <Button
+          color="red"
+          form="simple"
+          onclick={() =>
+            dbOperations.deleteEntry($entry.id, $dictionary.id, $algoliaQueryParams)}>
+          <span class="hidden md:inline">
+            {$page.data.t('misc.delete')}
+          </span>
+          <i class="fas fa-trash ml-1" />
+        </Button>
       {/if}
       <Button class="inline-flex items-center" form="simple" onclick={() => share($dictionary.id, $entry)}>
         <span>{$page.data.t('misc.share')}</span>
@@ -74,8 +79,8 @@
   videoAccess={$dictionary.videoAccess || $admin > 0}
   can_edit={$can_edit}
   {dbOperations}
-  on:deleteImage={() => deleteImage($entry, $dictionary.id)}
-  on:deleteVideo={() => deleteVideo($entry, $dictionary.id)}
+  on:deleteImage={() => dbOperations.deleteImage($entry, $dictionary.id)}
+  on:deleteVideo={() => dbOperations.deleteVideo($entry, $dictionary.id)}
   on:valueupdate={({ detail: { field, newValue } }) =>
     dbOperations.updateFirestoreEntry({
       field,

@@ -2,7 +2,7 @@ import type { LayoutLoad } from './$types';
 import { getTranslator } from '$lib/i18n'
 import { getSupportedLocale } from '$lib/i18n/locales'
 import { createUserStore, getDb, getDocument, type IBaseUser } from 'sveltefirets';
-import { derived, type Readable } from 'svelte/store';
+import { derived, readable, type Readable } from 'svelte/store';
 import type { IUser, IDictionary } from '@living-dictionaries/types';
 import { browser } from '$app/environment';
 import { collectionGroup, getDocs, query, where } from 'firebase/firestore';
@@ -24,9 +24,10 @@ export const load: LayoutLoad = async ({  url: { searchParams }, data: { serverL
   return { locale, t, user, admin, my_dictionaries, preferred_table_columns, user_from_cookies }
 };
 
-
 function get_my_dictionaries(user_from_cookies: IBaseUser, user: Readable<IUser>) {
+  if (!browser) return readable([]);
   const key_from_cookie = `my_dictionaries-${user_from_cookies?.uid}`;
+  const start_with = user_from_cookies ? JSON.parse(localStorage[key_from_cookie] || '[]') : [];
   const my_dictionaries = derived<Readable<IUser>, IDictionary[]>(
     user,
     ($user, set) => {
@@ -42,7 +43,7 @@ function get_my_dictionaries(user_from_cookies: IBaseUser, user: Readable<IUser>
       }
       set([]);
     },
-    browser && user_from_cookies ? JSON.parse(localStorage[key_from_cookie] || '[]') : []
+    start_with
   );
   return my_dictionaries;
 }
