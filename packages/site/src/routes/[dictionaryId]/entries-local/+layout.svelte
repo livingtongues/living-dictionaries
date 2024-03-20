@@ -63,7 +63,7 @@
     <JSON obj={$entries} />
   </div>
 
-  <div class="flex">
+  <div class="flex" data-sveltekit-preload-data="false" data-sveltekit-preload-code="hover">
     <div class="flex-grow w-0 relative">
       {#if $entries}
         <div class="print:hidden italic text-xs text-gray-500 mb-1">

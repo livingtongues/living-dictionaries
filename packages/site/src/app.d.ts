@@ -1,6 +1,7 @@
 // https://kit.svelte.dev/docs/types#app
 // import type { BaseUser } from '$lib/supabase/user'
 // import type { AuthResponse } from '@supabase/supabase-js'
+import type { ExpandedEntry } from '@living-dictionaries/types';
 import type { Readable } from 'svelte/store'
 // import type { Supabase } from '$lib/supabase/database.types'
 
@@ -18,6 +19,9 @@ declare global {
 			// supabase: Supabase
 			// authResponse: AuthResponse
     }
+		interface PageState {
+			entry?: ExpandedEntry
+		}
 		// interface Error {}
 		// interface Platform {}
 	}

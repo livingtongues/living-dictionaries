@@ -15,7 +15,10 @@
   export let dictionary: IDictionary;
   export let can_edit = false;
   export let videoAccess = false;
-  export let dbOperations: DbOperations
+  export let dbOperations: DbOperations;
+  export let on_click: (e: MouseEvent & {
+    currentTarget: EventTarget & HTMLAnchorElement;
+  }) => void = undefined;
 
   $: glosses = order_glosses({
     glosses: entry.senses?.[0]?.glosses,
@@ -35,6 +38,7 @@
   {/if}
   <a
     href={'/' + dictionary.id + '/entry/' + entry.id}
+    on:click={on_click}
     class="p-2 text-lg flex-grow flex flex-col justify-between hover:bg-gray-200">
     <div>
       <span class="font-semibold text-gray-900 mr-1">{entry.lexeme}</span>

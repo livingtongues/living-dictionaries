@@ -7,8 +7,9 @@ import { mockDictionaryLayoutData } from '$lib/mocks/layout';
 const defaultProps: ComponentProps<Component>['data'] = {
   ...mockDictionaryLayoutData,
   supaEntry: null,
-  initialEntry: readable({
-    lx: 'test',
+  actualEntry: null,
+  entry: readable({
+    lexeme: 'test',
   })
 }
 
@@ -19,11 +20,14 @@ export const variants: Variant<Component>[] = [
     props: {
       data: {
         ...defaultProps,
-        initialEntry: readable({
-          lx: 'test',
-          gl: {
-            'en': 'foo',
-          }
+        actualEntry: null,
+        entry: readable({
+          lexeme: 'test',
+          senses: [{
+            glosses: {
+              'en': 'foo',
+            }
+          }]
         })
       },
     },
