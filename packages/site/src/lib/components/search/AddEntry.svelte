@@ -44,8 +44,8 @@
     <EditFieldModal
       field="lexeme"
       display={$page.data.t('entry_field.lexeme')}
-      on:update={({detail}) => addNewEntry(detail)}
-      on:close={toggle}
+      on_update={new_value => addNewEntry(new_value)}
+      on_close={toggle}
       addingLexeme />
   {/if}
 </ShowHide>

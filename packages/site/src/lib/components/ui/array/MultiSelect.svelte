@@ -2,6 +2,7 @@
   import { fly } from 'svelte/transition';
   import type { SelectOption } from './select-options.interface'
   import { onMount } from 'svelte';
+  import { clickoutside } from 'svelte-pieces';
 
   export let selectedOptions: Record<string, SelectOption>;
   export let options: SelectOption[];
@@ -23,6 +24,8 @@
   $: if ((activeOption && !filtered.includes(activeOption)) || (!activeOption && inputValue))
     [activeOption] = filtered;
 
+  $: if (!showOptions && inputValue) setShowOptions(true)
+
   function add(option: SelectOption) {
     selectedOptions[option.value] = option;
     input.focus();
@@ -41,8 +44,11 @@
   }
 
   function handleKeydown(e: KeyboardEvent) {
-    if (e.key === 'Escape')
+    if (e.key === 'Escape' && showOptions) {
+      e.stopPropagation();
+      inputValue = '';
       setShowOptions(false)
+    }
     if (e.key === ' ' && activeOption)
       add(activeOption)
     if (e.key === 'Backspace' && !inputValue)
@@ -81,7 +87,13 @@
   }
 </script>
 
-<div class="multiselect">
+<div
+  class="multiselect"
+  use:clickoutside
+  on:clickoutside={() => {
+    inputValue = '';
+    setShowOptions(false)
+  }}>
   <div class="tokens" class:showOptions on:click={() => setShowOptions(true)}>
     {#each Object.values(selectedOptions) as option}
       <div
@@ -103,11 +115,9 @@
         autocomplete="off"
         bind:value={inputValue}
         bind:this={input}
-        on:keydown|stopPropagation={handleKeydown}
+        on:keydown={handleKeydown}
         on:focus={() => setShowOptions(true)}
-        on:blur={() => {
-          setShowOptions(false);
-          addWriteInIfApplicable()}}
+        on:blur={addWriteInIfApplicable}
         placeholder={Object.keys(selectedOptions).length ? '' : placeholder} />
       <span class="i-carbon-caret-down opacity-50" />
     </div>
@@ -121,7 +131,7 @@
         <li
           class:selected={selectedOptions[option.value]}
           class:active={activeOption === option}
-          on:click={() => selectOption(option)}>
+          on:click|preventDefault={() => selectOption(option)}>
           {option.name}
         </li>
       {/each}

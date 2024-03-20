@@ -24,7 +24,7 @@ test('composeAdminNotice returns', () => {
   };
   expect(notifyAdminsOnNewDictionary(dictionary, user)).toMatchInlineSnapshot(`
     "Hey Admins,
-    
+
       James Johnson created a new Living Dictionary named Test-Dictionary. Here's the details:
       
       URL: https://livingdictionaries.app/testID 
@@ -38,11 +38,11 @@ test('composeAdminNotice returns', () => {
       Public: Users can no longer make their dictionaries public.
       ISO 639-3: 
       Glottocode: 
-    
+
       Language Used By a Community: true
       Community Permission: yes
-      Author's Connection: \\"Something about how I know this community and more...\\"
-      ConLang Description: \\"undefined\\"
+      Author's Connection: "Something about how I know this community and more..."
+      ConLang Description: "undefined"
       
       We sent James Johnson an automatic dictionary-info email to jamesj@gmail.com, but you can also get in touch with them if needed.
       
