@@ -25,9 +25,9 @@
   } = data);
   let supaEntry: SupaEntry
 
-  $: if (browser && supa_entry) {
-    supa_entry.then(({data}) => {
-      supaEntry = data
+  $: if (browser) {
+    supa_entry?.then(({data: _data}) => {
+      supaEntry = _data
     })
   }
 

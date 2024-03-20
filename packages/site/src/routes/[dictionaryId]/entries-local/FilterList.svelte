@@ -24,7 +24,7 @@
   }
 </script>
 
-{#if count <= max_show}
+{#if !search_value && count <= max_show}
   <h4 class="text-sm font-semibold uppercase text-gray-700">{label}</h4>
 {:else}
   <div

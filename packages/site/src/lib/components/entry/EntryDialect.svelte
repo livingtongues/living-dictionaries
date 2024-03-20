@@ -25,7 +25,7 @@
       try {
         const dialects = await fetchDialects()
         if (dialects?.facetHits)
-          $options = dialects?.facetHits.map(({value}) => ({ name: value, value }));
+          $options = dialects.facetHits.map(({value}) => ({ name: value, value }));
       } catch (error) {
         console.error(error);
       }

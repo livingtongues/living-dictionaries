@@ -56,7 +56,7 @@
             ab: $user.uid,
             sp: [speakerId],
           };
-          await addVideo(entryId, database_video);
+          await addVideo(entryId, $dictionary.id, database_video);
 
           success = true;
         } catch (err) {

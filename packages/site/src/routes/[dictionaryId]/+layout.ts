@@ -1,6 +1,6 @@
 import { redirect, error } from '@sveltejs/kit';
 import type { IDictionary, ExpandedEntry, ActualDatabaseEntry } from '@living-dictionaries/types';
-import { incrementalCollectionStore, getDocument, docStore, docExists, firebaseConfig } from 'sveltefirets';
+import { incrementalCollectionStore, docExists, firebaseConfig, awaitableDocStore } from 'sveltefirets';
 import type { LayoutLoad } from './$types';
 import { ResponseCodes } from '$lib/constants';
 import { writable, type Readable, derived, type Unsubscriber } from 'svelte/store';
@@ -13,8 +13,13 @@ import { dbOperations } from '$lib/dbOperations';
 
 export const load: LayoutLoad = async ({ params: { dictionaryId }, parent }) => {
   try {
-    const dictionary_document = await getDocument<IDictionary>(`dictionaries/${dictionaryId}`);
-    const dictionary = docStore(`dictionaries/${dictionaryId}`, { startWith: dictionary_document });
+    const dictionary = await awaitableDocStore<IDictionary>(`dictionaries/${dictionaryId}`);
+    const { error: firestore_error, initial_doc } = dictionary
+    if (firestore_error)
+      error(ResponseCodes.INTERNAL_SERVER_ERROR, firestore_error);
+
+    if (!initial_doc)
+      redirect(ResponseCodes.MOVED_PERMANENTLY, '/');
 
     const { t, user, user_from_cookies } = await parent();
 
@@ -23,6 +28,7 @@ export const load: LayoutLoad = async ({ params: { dictionaryId }, parent }) => 
       ([$user, $dictionary], set) => {
         if (!$user) return set(false)
         if ($user.roles?.admin > 0) return set(true)
+        if (!browser) return set(false)
 
         docExists(`dictionaries/${$dictionary.id}/managers/${$user.uid}`)
           .then((exists) => set(exists))
@@ -36,6 +42,7 @@ export const load: LayoutLoad = async ({ params: { dictionaryId }, parent }) => 
       [user, dictionary],
       ([$user, $dictionary], set) => {
         if (!$user) return set(false)
+        if (!browser) return set(false)
         docExists(`dictionaries/${$dictionary.id}/contributors/${$user.uid}`)
           .then((exists) => set(exists))
           .catch((err) => {
@@ -49,16 +56,12 @@ export const load: LayoutLoad = async ({ params: { dictionaryId }, parent }) => 
     );
 
     const entries_per_page = 20
-    const entries = create_entries_store({dictionary: dictionary_document, is_admin: !!user_from_cookies?.roles?.admin, t, entries_per_page});
+    const entries = create_entries_store({dictionary: initial_doc, is_admin: !!user_from_cookies?.roles?.admin, t, entries_per_page});
 
-    if (dictionary_document)
-      return { dictionary, entries, entries_per_page, is_manager, is_contributor, can_edit, dbOperations };
+    return { dictionary, entries, entries_per_page, is_manager, is_contributor, can_edit, dbOperations };
   } catch (err) {
-    // only thrown if there was a db error
     error(ResponseCodes.INTERNAL_SERVER_ERROR, err);
   }
-  // reaches here if no dictionary
-  redirect(ResponseCodes.MOVED_PERMANENTLY, '/');
 };
 
 function create_entries_store({dictionary, is_admin, t, entries_per_page}: { dictionary: IDictionary, is_admin: boolean, t: TranslateFunction, entries_per_page: number}) {

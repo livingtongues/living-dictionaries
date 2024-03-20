@@ -30,7 +30,7 @@
           {$page.data.t('misc.cancel')}
         </Button>
         <div class="w-1" />
-        <Button onclick={async () => await addVideo(entry.id, database_video)} form="filled">
+        <Button onclick={async () => await addVideo(entry.id, $dictionary.id, database_video)} form="filled">
           {$page.data.t('misc.save')}
         </Button>
       </div>
