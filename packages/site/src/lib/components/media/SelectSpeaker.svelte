@@ -1,14 +1,13 @@
 <script lang="ts">
   import { page } from '$app/stores';
-  import { createEventDispatcher } from 'svelte';
+  import type { ISpeaker } from '@living-dictionaries/types';
 
+  export let speakers: ISpeaker[]
+  export let select_speaker: (speaker_id: string) => Promise<void> = undefined
   export let initialSpeakerId: string = undefined;
-  $: ({ speakers } = $page.data)
 
   const addSpeaker = 'AddSpeaker';
   $: speakerId = initialSpeakerId;
-
-  const dispatch = createEventDispatcher<{ update: { speakerId: string } }>();
 
   function autofocus(node: HTMLSelectElement) {
     setTimeout(() => node.focus(), 5);
@@ -34,14 +33,13 @@
     on:change={() => {
       // Currently means you can't remove a speaker
       if (speakerId && speakerId !== addSpeaker)
-        dispatch('update', { speakerId });
-
+        select_speaker?.(speakerId)
     }}
     class="block w-full pl-3 !rounded-none ltr:!rounded-r-md rtl:!rounded-l-md form-input hover:outline-blue-600">
     {#if !speakerId}
       <option />
     {/if}
-    {#each $speakers as speaker}
+    {#each speakers as speaker}
       <option value={speaker.id}>
         {speaker.displayName}
       </option>
@@ -61,7 +59,7 @@
       }}
       on:newSpeaker={(event) => {
         speakerId = event.detail.id;
-        dispatch('update', { speakerId });
+        select_speaker?.(speakerId);
       }} />
   {/await}
 {/if}

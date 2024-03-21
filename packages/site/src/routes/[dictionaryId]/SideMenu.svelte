@@ -7,7 +7,7 @@
   export let on_close: () => void;
   export let admin: number
   export let is_manager: boolean
-  export let entry_count: number
+  export let search_index_updated: boolean
 </script>
 
 <div class="md:hidden">
@@ -33,7 +33,7 @@
       {new Intl.NumberFormat().format(dictionary.entryCount || 0)}
     </span>
   </a>
-  {#if firebaseConfig.projectId === 'talking-dictionaries-dev' || admin}
+  {#if admin || firebaseConfig.projectId === 'talking-dictionaries-dev'}
     <a
       class:active={$page.url.pathname.match(/entries-local/)}
       href={`/${dictionary.id}/entries-local/list`}>
@@ -42,11 +42,13 @@
         {$page.data.t('dictionary.entries')} (local)
       </span>
       <span class="flex-grow" />
-      <span
-        class="inline-block py-1 px-2 leading-none text-xs font-semibold
-          text-gray-700 bg-gray-300 rounded-full">
-        {new Intl.NumberFormat().format(entry_count || 0)}
-      </span>
+      {#if search_index_updated}
+        <span
+          class="inline-block py-1 px-2 leading-none text-xs font-semibold
+            text-gray-700 bg-gray-300 rounded-full">
+          {new Intl.NumberFormat().format(dictionary.entryCount || 0)}
+        </span>
+      {/if}
     </a>
   {/if}
   <a

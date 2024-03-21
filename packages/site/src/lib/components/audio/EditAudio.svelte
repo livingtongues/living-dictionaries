@@ -13,7 +13,7 @@
 
   export let entry: ExpandedEntry;
   export let sound_file: ExpandedAudio;
-  $: ({ dictionary, admin } = $page.data)
+  $: ({ dictionary, admin, speakers } = $page.data)
 
   let readyToRecord: boolean;
   let showUploadAudio = true;
@@ -32,18 +32,27 @@
 
   $: speaker_id = sound_file?.speaker_ids?.[0]
 
-  async function updateSpeaker(newSpeakerId: string) {
+  // TODO: export this event to handle saving in the page
+  async function updateSpeaker(new_speaker_id: string) {
     if(!sound_file) return;
-    if (speaker_id === newSpeakerId) return;
+    if (speaker_id === new_speaker_id) return;
 
-    const sf = {
-      // @ts-ignore = TODO: export this event to handle saving in the page
-      ...entry.sfs[0],
-      sp: [newSpeakerId]
+    const data: GoalDatabaseEntry = {
+      sfs: [
+        {
+          path: sound_file.fb_storage_path,
+          sp: [new_speaker_id],
+          // @ts-expect-error
+          ts: entry.sfs[0].ts,
+          ab: sound_file.uid_added_by || null,
+          sc: sound_file.source || null,
+          speakerName: null,
+        }
+      ]
     }
     await updateOnline<GoalDatabaseEntry>(
       `dictionaries/${$dictionary.id}/words/${entry.id}`,
-      { sfs: [sf] },
+      data,
       { abbreviate: true }
     );
   }
@@ -60,9 +69,10 @@
     <Waveform audioUrl={audio_url} />
   {:else}
     <SelectSpeaker
+      speakers={$speakers}
       initialSpeakerId={speaker_id}
       let:speakerId
-      on:update={async ({ detail: {speakerId} }) => await updateSpeaker(speakerId)}>
+      select_speaker={updateSpeaker}>
       {#if sound_file}
         <div class="px-1">
           <Waveform audioUrl={audio_url} />

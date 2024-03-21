@@ -28,55 +28,57 @@
   $: if (browser) {
     supa_entry_promise?.then(({data: _data}) => {
       supaEntry = _data
+    }).catch(supa_err => {
+      console.info({supa_err})
     })
   }
 
   // saved algoliaQueryParams will be overwritten by the gallery view as it turns on the images only facet
   function backToEntries() {
-    if ($lastEntriesUrl)
+    if (!shallow && $lastEntriesUrl)
       goto($lastEntriesUrl);
     else
       history.back()
   }
 </script>
 
-{#if !shallow}
-  <div class="flex justify-between items-center mb-3 sticky top-0 z-30 bg-white pt-1">
-    <Button class="!px-2" color="black" form="simple" onclick={backToEntries}>
-      <i class="fas fa-arrow-left rtl-x-flip" />
-      {$page.data.t('misc.back')}
-    </Button>
+<div class="flex justify-between items-center mb-3 sticky top-0 z-30 bg-white pt-1">
+  <Button class="!px-2" color="black" form="simple" onclick={backToEntries}>
+    <i class="fas fa-arrow-left rtl-x-flip" />
+    {$page.data.t('misc.back')}
+  </Button>
 
-    <div>
-      {#if $admin > 1}
-        <JSON obj={entry} />
-      {/if}
-      {#if $is_manager || ($is_contributor && $entry.cb === $user.uid)}
-        <Button
-          color="red"
-          form="simple"
-          onclick={() =>
-            dbOperations.deleteEntry($entry.id, $dictionary.id, $algoliaQueryParams)}>
-          <span class="hidden md:inline">
-            {$page.data.t('misc.delete')}
-          </span>
-          <i class="fas fa-trash ml-1" />
-        </Button>
-      {/if}
+  <div>
+    {#if $admin > 1}
+      <JSON obj={$entry} />
+    {/if}
+    {#if $is_manager || ($is_contributor && $entry.cb === $user.uid)}
+      <Button
+        color="red"
+        form="simple"
+        onclick={() =>
+          dbOperations.deleteEntry($entry.id, $dictionary.id, $algoliaQueryParams)}>
+        <span class="hidden md:inline">
+          {$page.data.t('misc.delete')}
+        </span>
+        <i class="fas fa-trash ml-1" />
+      </Button>
+    {/if}
+    {#if !shallow}
       <Button class="inline-flex items-center" form="simple" onclick={() => share($dictionary.id, $entry)}>
         <span>{$page.data.t('misc.share')}</span>
         <div class="w-2"></div>
         <i class="fas fa-share-square rtl-x-flip" />
       </Button>
-    </div>
+    {/if}
   </div>
-{/if}
+</div>
 
 <EntryDisplay
   entry={$entry}
   {supaEntry}
   dictionary={$dictionary}
-  videoAccess={$dictionary.videoAccess || $admin > 0}
+  videoAccess={$dictionary?.videoAccess || $admin > 0}
   can_edit={$can_edit}
   {dbOperations}
   on:deleteImage={() => dbOperations.deleteImage($entry, $dictionary.id)}
