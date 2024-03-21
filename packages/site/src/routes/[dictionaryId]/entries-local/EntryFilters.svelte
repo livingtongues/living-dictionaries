@@ -6,11 +6,13 @@
   import type { QueryParams } from '$lib/search/types';
   import ClearFilters from './ClearFilters.svelte';
   import FilterList from './FilterList.svelte';
+  import type { ISpeaker } from '@living-dictionaries/types';
 
   export let search_params: QueryParamStore<QueryParams>;
   export let show_mobile_filters = false;
   export let on_close: () => void
   export let result_facets: FacetResult
+  export let speakers: ISpeaker[]
 </script>
 
 <ResponsiveSlideover
@@ -57,6 +59,10 @@
             {search_params}
             search_param_key="speakers"
             values={result_facets.speakers.values}
+            speaker_ids_to_names={speakers.reduce((acc, speaker) => {
+              acc[speaker.id] = speaker.displayName
+              return acc
+            }, {})}
             label={$page.data.t('entry_field.speaker')} />
         {/if}
         <hr />

@@ -15,6 +15,8 @@ describe(expand_entry, () => {
     const database_entry: GoalDatabaseEntry = {
       id: '1',
       lx: 'house',
+      // @ts-expect-error
+      lo: 'rogue form that should be ignored when lo1 also exists',
       lo1: 'lo1 form',
       lo2: 'lo2 form',
       lo3: 'lo3 form',

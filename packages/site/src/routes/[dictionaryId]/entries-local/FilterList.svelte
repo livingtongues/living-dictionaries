@@ -4,15 +4,15 @@
   import type { FilterListKeys, QueryParams } from '$lib/search/types';
   import { type QueryParamStore, ShowHide } from 'svelte-pieces';
 
-  // export let count: number; total available
   export let search_params: QueryParamStore<QueryParams>;
   export let search_param_key: FilterListKeys
   export let label: string;
   export let values: Record<string, number>; // keys are item name, numbers are count found
+  export let speaker_ids_to_names: Record<string, string> = undefined;
 
   $: count = Object.values(values).length
   let search_value: string
-  $: filtered_values = Object.entries(values).filter(([item]) => search_value ? restore_spaces_from_underscores(item).toLowerCase().includes(search_value.toLowerCase()) : true);
+  $: filtered_values = Object.entries(values).filter(([item]) => search_value ? make_item_readable(item).toLowerCase().includes(search_value.toLowerCase()) : true);
   $: max_show = search_value ? 10 : 5
 
   function add_filter(item: string) {
@@ -21,6 +21,12 @@
 
   function remove_filter(item: string) {
     $search_params[search_param_key] = $search_params[search_param_key].filter((existing_item: string) => existing_item !== item)
+  }
+
+  function make_item_readable(item: string) {
+    if (speaker_ids_to_names)
+      return speaker_ids_to_names[item] || restore_spaces_from_underscores(item)
+    return restore_spaces_from_underscores(item)
   }
 </script>
 
@@ -58,7 +64,7 @@
             }} />
           <div class="w-2 shrink-0" />
           <label for={id} class="block text-sm text-gray-900 max-w-85%" style="overflow-wrap: break-word;">
-            {restore_spaces_from_underscores(item)}
+            {make_item_readable(item)}
             <span class="text-xs text-gray-600"> ({item_count}) </span>
           </label>
         </li>

@@ -11,7 +11,7 @@
   import { writable } from 'svelte/store';
 
   export let data;
-  $: ({initial_entries, search_index_updated, search_entries, entries_per_page, search_params} = data)
+  $: ({initial_entries, search_index_updated, search_entries, entries_per_page, search_params, speakers} = data)
 
   $: current_page_index = $search_params.page - 1 || 0
   let search_time: string
@@ -76,6 +76,6 @@
       <Pagination bind:page_from_url={$search_params.page} {number_of_pages} />
     </div>
     <div class="hidden md:block w-2 flex-shrink-0 print:hidden" />
-    <EntryFilters {search_params} {show_mobile_filters} on_close={toggle} {result_facets} />
+    <EntryFilters {search_params} {show_mobile_filters} on_close={toggle} {result_facets} speakers={$speakers} />
   </div>
 </ShowHide>

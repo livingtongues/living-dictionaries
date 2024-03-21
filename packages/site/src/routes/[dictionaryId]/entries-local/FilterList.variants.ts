@@ -19,7 +19,6 @@ export const variants: Variant<Component>[] = [
       label: 'Dialect',
       search_params: writable({ dialects: ['north'] }) as QueryParamStore<QueryParams>,
       search_param_key: 'dialects',
-      // count: 3,
       values: {
         'west': 2,
         'east': 1,
@@ -33,7 +32,6 @@ export const variants: Variant<Component>[] = [
       label: 'Dialect',
       search_params: writable({ dialects: ['north'] }) as QueryParamStore<QueryParams>,
       search_param_key: 'dialects',
-      // count: 13,
       values: {
         'west': 2,
         'east': 1,
@@ -51,4 +49,27 @@ export const variants: Variant<Component>[] = [
       }
     },
   },
+  {
+    name: 'Speaker Ids mapped to speaker names',
+    description: 'Can search for Brim even though does not exist in the list of values.',
+    viewports: [
+      { width: 200, height: 200 },
+    ],
+    props: {
+      label: 'Speaker',
+      search_params: writable({ speakers: ['1'] }) as QueryParamStore<QueryParams>,
+      search_param_key: 'speakers',
+      values: {
+        '1234-------------------------1234': 2,
+        'Bob_Smith': 1,
+        'John_Boot': 10,
+        'John_Lee': 5,
+        'John_Lewis': 3,
+        'John_Littlejohn': 2,
+      },
+      speaker_ids_to_names: {
+        '1234-------------------------1234': 'John Brim',
+      }
+    },
+  }
 ]
