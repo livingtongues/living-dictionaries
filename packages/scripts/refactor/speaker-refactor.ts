@@ -1,5 +1,6 @@
 import { ActualDatabaseEntry, ISpeaker } from '@living-dictionaries/types';
 import { db } from '../config';
+import { Timestamp } from 'firebase/firestore';
 import { program } from 'commander';
 program
 //   .version('0.0.1')
@@ -43,12 +44,12 @@ async function fetchEntries(dictionaryId: string) {
   const snapshot = await db.collection(`dictionaries/${dictionaryId}/words`).get();
   for (const snap of snapshot.docs) {
     const entry: ActualDatabaseEntry = { id: snap.id, ...(snap.data() as ActualDatabaseEntry) };
-    await addSpeakerIdToEntry(dictionaryId, entry, {birthplace: 'USA', displayName: ''}); // Modify this line with real speaker Data
+    await addSpeakerIdToEntry(dictionaryId, entry, {birthplace: 'USA', displayName: ''}); // * Modify this line with real speaker Data
+
   }
 }
 
 const addSpeaker = async (speakerData: ISpeaker) => {
-
   const speaker = db.collection('speakers').doc();
   console.log(`Saving speaker... speaker id: ${speaker.id}`)
   if (!live) return speaker.id
@@ -65,7 +66,11 @@ const addSpeakerIdToEntry = async (dictionaryId: string, entry: ActualDatabaseEn
       speakerId = await addSpeaker({
         ...speakerData,
         displayName: entry.sf.speakerName,
-        contributingTo: [dictionaryId]
+        contributingTo: [dictionaryId],
+        createdAt: Timestamp.now(),
+        createdBy: developer_in_charge,
+        updatedAt: Timestamp.now(),
+        updatedBy: developer_in_charge
       });
       different_speakers.push({ [entry.sf.speakerName]: speakerId });
     }
