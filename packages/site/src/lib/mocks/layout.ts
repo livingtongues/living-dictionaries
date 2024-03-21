@@ -1,7 +1,7 @@
 import { readable } from 'svelte/store'
 import type { LayoutData } from '../../routes/[dictionaryId]/$types'
-import type { IDictionary } from '@living-dictionaries/types'
-import type { docStore } from 'sveltefirets'
+import { type IDictionary } from '@living-dictionaries/types'
+import type { awaitableDocStore } from 'sveltefirets'
 import { logDbOperations } from './db'
 
 export const mockDictionaryLayoutData: LayoutData = {
@@ -14,7 +14,8 @@ export const mockDictionaryLayoutData: LayoutData = {
   dictionary: readable({
     name: 'test',
     glossLanguages: []
-  }) as ReturnType<typeof docStore<IDictionary>>,
+  }) as Awaited<ReturnType<typeof awaitableDocStore<IDictionary>>>,
+  speakers: null,
   is_manager: readable(false),
   is_contributor: readable(false),
   can_edit: readable(false),

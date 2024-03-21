@@ -2,9 +2,32 @@ import { complex } from '$lib/mocks/entries';
 import { augment_entry_for_search } from './augment-entry-for-search';
 
 describe(augment_entry_for_search, () => {
+  test('does not choke on undefineds', () => {
+    augment_entry_for_search({senses: [{glosses: {}}]})
+    const result_from_nothing = augment_entry_for_search({})
+    expect(result_from_nothing).toMatchInlineSnapshot(`
+    {
+      "dialects": [],
+      "has_audio": false,
+      "has_image": false,
+      "has_noun_class": false,
+      "has_part_of_speech": false,
+      "has_plural_form": false,
+      "has_semantic_domain": false,
+      "has_speaker": false,
+      "has_video": false,
+      "parts_of_speech": [],
+      "semantic_domains": [],
+      "speakers": [],
+    }
+    `)
+  })
+
   test('underscores filters', () => {
     const result = augment_entry_for_search(complex)
     expect(result.dialects).toEqual(['Hill', 'Southern_Berm'])
+    expect(result.speakers).toEqual(['Budra_Raspeda', 'random_speaker_id_123'])
+    expect(result.semantic_domains).toEqual(['Animals', 'Insects_and_small_creatures', 'Flying_Mammals', 'Flying_Insects'])
     expect(result).toMatchInlineSnapshot(`
       {
         "coordinates": undefined,
@@ -42,8 +65,10 @@ describe(augment_entry_for_search, () => {
           "Graphium doson",
         ],
         "semantic_domains": [
-          "Universe_and_the_natural_world",
-          "Universe_and_the_natural_world",
+          "Animals",
+          "Insects_and_small_creatures",
+          "Flying_Mammals",
+          "Flying_Insects",
         ],
         "senses": [
           {
@@ -80,8 +105,8 @@ describe(augment_entry_for_search, () => {
               },
             ],
             "translated_ld_semantic_domains": [
-              "Universe and the natural world",
-              "Universe and the natural world",
+              "Animals",
+              "Insects and small creatures",
             ],
             "translated_parts_of_speech": [
               "noun",
@@ -103,11 +128,24 @@ describe(augment_entry_for_search, () => {
             "timestamp": 2020-02-04T23:49:08.537Z,
             "uid_added_by": undefined,
           },
+          {
+            "fb_storage_path": "gta/audio/local_import/Gta-Pkd-Dec13-Butterflies-common-jay-1580859671012.mp3",
+            "source": "local_import",
+            "speakerName": undefined,
+            "speaker_ids": [
+              "random_speaker_id_123",
+            ],
+            "timestamp": 2020-02-04T23:49:08.537Z,
+            "uid_added_by": undefined,
+          },
         ],
         "sources": [
           "Some cool guy in the village",
         ],
-        "speakers": [],
+        "speakers": [
+          "Budra_Raspeda",
+          "random_speaker_id_123",
+        ],
         "variant": undefined,
       }
     `);

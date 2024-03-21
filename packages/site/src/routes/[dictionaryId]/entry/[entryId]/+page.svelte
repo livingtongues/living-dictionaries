@@ -13,7 +13,7 @@
   export let data;
   $: ({
     entry,
-    supa_entry,
+    supa_entry: supa_entry_promise,
     shallow,
     admin,
     can_edit,
@@ -26,7 +26,7 @@
   let supaEntry: SupaEntry
 
   $: if (browser) {
-    supa_entry?.then(({data: _data}) => {
+    supa_entry_promise?.then(({data: _data}) => {
       supaEntry = _data
     })
   }

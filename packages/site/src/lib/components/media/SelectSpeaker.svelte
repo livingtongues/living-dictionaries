@@ -1,30 +1,19 @@
 <script lang="ts">
   import { page } from '$app/stores';
-  import { Collection } from 'sveltefirets';
-  import { where } from 'firebase/firestore';
+  import { createEventDispatcher } from 'svelte';
 
-  export let dictionaryId: string;
   export let initialSpeakerId: string = undefined;
+  $: ({ speakers } = $page.data)
 
   const addSpeaker = 'AddSpeaker';
   $: speakerId = initialSpeakerId;
 
-  import type { ISpeaker } from '@living-dictionaries/types';
-  let speakers: ISpeaker[] = [];
-
-  import { createEventDispatcher } from 'svelte';
   const dispatch = createEventDispatcher<{ update: { speakerId: string } }>();
 
   function autofocus(node: HTMLSelectElement) {
     setTimeout(() => node.focus(), 5);
   }
 </script>
-
-<Collection
-  path="speakers"
-  startWith={speakers}
-  on:data={(e) => (speakers = e.detail.data)}
-  queryConstraints={[where('contributingTo', 'array-contains', dictionaryId)]} />
 
 {#if !speakerId}
   <div class="text-sm font-medium leading-5 text-gray-600 mb-2">
@@ -52,7 +41,7 @@
     {#if !speakerId}
       <option />
     {/if}
-    {#each speakers as speaker}
+    {#each $speakers as speaker}
       <option value={speaker.id}>
         {speaker.displayName}
       </option>

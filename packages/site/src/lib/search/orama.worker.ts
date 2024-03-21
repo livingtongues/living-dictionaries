@@ -6,6 +6,7 @@ import { augment_entry_for_search } from './augment-entry-for-search';
 
 const entries_index_schema = {
   lexeme: 'string',
+  // simplified_lexeme: 'string',
   notes: 'string',
   dialects: 'string[]',
   parts_of_speech: 'string[]',
@@ -60,6 +61,7 @@ async function search_entries(query_params: QueryParams, page_index: number, ent
     offset: page_index * entries_per_page,
     boost: {
       lexeme: 2,
+      // simplified_lexeme: 1.5,
     },
     facets: {
       dialects: {
@@ -132,6 +134,9 @@ async function search_entries(query_params: QueryParams, page_index: number, ent
     sortBy: {
       property: 'lexeme',
     },
+    // sortBy: (a, b) => {
+    //   return a[2].some_tag - b[2].some_tag
+    // },
     threshold: 0.7, // 0-1 (1 default = 100% of related matches will also be returned, 0 = 0% of non-exact matches will be returned)
   }
 

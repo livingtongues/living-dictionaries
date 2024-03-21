@@ -30,7 +30,7 @@
       </Button>
     </header>
     {#if result_facets}
-      <div class="relative flex-1 overflow-y-auto pl-1">
+      <div class="relative flex-1 overflow-y-auto overflow-x-clip pl-1">
         {#if result_facets.parts_of_speech.count}
           <FilterList
             {search_params}

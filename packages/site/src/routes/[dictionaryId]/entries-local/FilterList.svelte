@@ -56,8 +56,8 @@
               else
                 add_filter(item)
             }} />
-          <div class="w-2" />
-          <label for={id} class="block text-sm text-gray-900">
+          <div class="w-2 shrink-0" />
+          <label for={id} class="block text-sm text-gray-900 max-w-85%" style="overflow-wrap: break-word;">
             {restore_spaces_from_underscores(item)}
             <span class="text-xs text-gray-600"> ({item_count}) </span>
           </label>

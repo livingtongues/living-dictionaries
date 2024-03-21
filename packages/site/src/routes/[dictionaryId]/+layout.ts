@@ -1,11 +1,11 @@
 import { redirect, error } from '@sveltejs/kit';
-import type { IDictionary, ExpandedEntry, ActualDatabaseEntry } from '@living-dictionaries/types';
-import { incrementalCollectionStore, docExists, firebaseConfig, awaitableDocStore } from 'sveltefirets';
+import type { IDictionary, ExpandedEntry, ActualDatabaseEntry, ISpeaker } from '@living-dictionaries/types';
+import { incrementalCollectionStore, docExists, firebaseConfig, awaitableDocStore, collectionStore } from 'sveltefirets';
 import type { LayoutLoad } from './$types';
 import { ResponseCodes } from '$lib/constants';
 import { writable, type Readable, derived, type Unsubscriber } from 'svelte/store';
 import { browser } from '$app/environment';
-import { limit } from 'firebase/firestore';
+import { limit, where } from 'firebase/firestore';
 import { convert_and_expand_entry } from '$lib/transformers/convert_and_expand_entry';
 import type { TranslateFunction } from '$lib/i18n/types';
 import { create_index, search_entries } from '$lib/search';
@@ -51,14 +51,14 @@ export const load: LayoutLoad = async ({ params: { dictionaryId }, parent }) => 
       }
     );
 
-    const can_edit: Readable<boolean> = derived([is_manager, is_contributor],
-      ([$is_manager, $is_contributor]) => $is_manager || $is_contributor
-    );
+    const can_edit: Readable<boolean> = derived([is_manager, is_contributor], ([$is_manager, $is_contributor]) => $is_manager || $is_contributor);
+
+    const speakers = collectionStore<ISpeaker>('speakers', [where('contributingTo', 'array-contains', dictionaryId)], { startWith: []})
 
     const entries_per_page = 20
     const entries = create_entries_store({dictionary: initial_doc, is_admin: !!user_from_cookies?.roles?.admin, t, entries_per_page});
 
-    return { dictionary, entries, entries_per_page, is_manager, is_contributor, can_edit, dbOperations };
+    return { dictionary, speakers, entries_per_page, entries, is_manager, is_contributor, can_edit, dbOperations };
   } catch (err) {
     error(ResponseCodes.INTERNAL_SERVER_ERROR, err);
   }

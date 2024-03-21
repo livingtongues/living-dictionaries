@@ -1,16 +1,11 @@
 import type { ExpandedEntry, GoalDatabaseEntry } from '@living-dictionaries/types';
 import { expand_entry } from './expand_entry';
-import type { TranslateFunction } from '$lib/i18n/types';
-import { en } from '$lib/i18n';
+import { english_translate } from '$lib/i18n';
 
 
 describe(expand_entry, () => {
   const now = new Date().getTime();
-
-  const t = (({dynamicKey: key}: { dynamicKey: string}) => {
-    const [section, item] = key.split('.')
-    return en[section][item];
-  }) as TranslateFunction
+  const t = english_translate
 
   test('returns an object with easily readable field names', () => {
     const part_of_speech_key = 'n';
@@ -86,7 +81,7 @@ describe(expand_entry, () => {
         parts_of_speech_keys: [part_of_speech_key],
         translated_parts_of_speech: ['noun'],
         ld_semantic_domains_keys: [sdn_key],
-        translated_ld_semantic_domains: ['Universe and the natural world'],
+        translated_ld_semantic_domains: ['Sky, weather and climate'],
         write_in_semantic_domains: [write_in_sd],
         example_sentences: [{ en: 'baz', vn: 'foo' }],
         photo_files: [{

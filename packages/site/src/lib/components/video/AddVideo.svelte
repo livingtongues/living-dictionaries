@@ -22,7 +22,7 @@
 <Modal on:close>
   <span slot="heading"> <i class="far fa-film-alt text-sm" /> {entry.lexeme} </span>
 
-  <SelectSpeaker dictionaryId={$dictionary.id} let:speakerId>
+  <SelectSpeaker let:speakerId>
     {#if database_video?.youtubeId || database_video?.vimeoId}
       <VideoIFrame video={expand_video(database_video)} />
       <div class="modal-footer">

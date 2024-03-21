@@ -60,7 +60,6 @@
     <Waveform audioUrl={audio_url} />
   {:else}
     <SelectSpeaker
-      dictionaryId={$dictionary.id}
       initialSpeakerId={speaker_id}
       let:speakerId
       on:update={async ({ detail: {speakerId} }) => await updateSpeaker(speakerId)}>

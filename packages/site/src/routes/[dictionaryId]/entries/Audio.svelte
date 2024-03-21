@@ -42,7 +42,7 @@
       }}>
       {#if context === 'list'}
         <span class:text-blue-700={playing} class="i-material-symbols-hearing text-xl mt-1" />
-        <div class="text-xs text-center line-clamp-1 break-all">
+        <div class="text-xs text-center line-clamp-1 w-full" style="overflow-wrap: break-word;">
           {$page.data.t('audio.listen')}
         </div>
       {:else if context === 'table'}

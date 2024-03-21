@@ -32,10 +32,10 @@
   class="flex rounded shadow my-1 overflow-hidden items-stretch border-green-300"
   style="margin-right: 2px;">
   {#if entry.sound_files?.[0] || can_edit}
-    <Audio class="bg-gray-100 py-1.5 px-1 min-w-60px w-60px" {entry} {can_edit} context="list" />
+    <Audio class="bg-gray-100 py-1.5 px-1 min-w-55px w-55px" {entry} {can_edit} context="list" />
   {/if}
   <a
-    href={'/' + dictionary.id + '/entry/' + entry.id}
+    href="/{dictionary.id}/entry/{entry.id}"
     on:click={on_click}
     class="p-2 text-lg flex-grow flex flex-col justify-between hover:bg-gray-200">
     <div>
