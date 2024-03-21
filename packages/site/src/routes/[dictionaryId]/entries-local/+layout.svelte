@@ -56,7 +56,7 @@
   <div
     class="flex mb-1 items-center sticky top-0 md:top-12 pt-2 md:pt-0 pb-1
       bg-white z-20 print:hidden">
-    <SearchInput {search_params} on_show_filter_menu={toggle} />
+    <SearchInput {search_params} index_ready={$search_index_updated} on_show_filter_menu={toggle} />
   </div>
 
   <div class="flex">

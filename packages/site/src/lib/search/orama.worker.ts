@@ -6,12 +6,21 @@ import { augment_entry_for_search } from './augment-entry-for-search';
 
 const entries_index_schema = {
   lexeme: 'string',
-  // simplified_lexeme: 'string',
+  lexeme_other: 'string[]', // includes local orthographies; includes lexeme with diacritics stripped and ipa characters replaced with common keyboard characters to make easier to type
+  glosses: 'string[]', // includes all glosses for all senses
+  sentences: 'string[]', // includes all sentences in all languages for all senses
+  phonetic: 'string',
   notes: 'string',
+  scientific_names: 'string[]',
+  sources: 'string[]',
+  interlinearization: 'string',
+  morphology: 'string',
+  plural_form: 'string',
+  // Filters
   dialects: 'string[]',
-  parts_of_speech: 'string[]',
-  semantic_domains: 'string[]',
-  speakers: 'string[]',
+  parts_of_speech: 'string[]', // augmented
+  semantic_domains: 'string[]', // augmented
+  speakers: 'string[]', // augmented
   has_audio: 'boolean',
   has_image: 'boolean',
   has_video: 'boolean',
@@ -53,16 +62,23 @@ async function search_entries(query_params: QueryParams, page_index: number, ent
   console.info('searching for', query_params.query)
   const index = await get_index()
 
-  // const where: Partial<WhereCondition<typeof entries_index_schema>> = {}
-
   const orama_search_params: OramaSearchParams<Orama<typeof entries_index_schema>> = {
     term: query_params.query,
     limit: entries_per_page,
     offset: page_index * entries_per_page,
+    threshold: 2, // Levenshtein edit distance from 'help' to 'holds' is 3 for example (change 2 letters and add 1)
     boost: {
       lexeme: 2,
-      // simplified_lexeme: 1.5,
+      lexeme_other: 1.5,
+      glosses: 1.2,
     },
+    sortBy: {
+      property: 'lexeme',
+    },
+    // Onondaga sortBy possibility
+    // sortBy: (a, b) => {
+    //   return a[2].elicitation_id - b[2].elicitation_id
+    // },
     facets: {
       dialects: {
         limit: 10,
@@ -131,13 +147,6 @@ async function search_entries(query_params: QueryParams, page_index: number, ent
       ...query_params.has_semantic_domain ? { has_semantic_domain: true }: {},
       ...query_params.no_semantic_domain ? { has_semantic_domain: false }: {},
     },
-    sortBy: {
-      property: 'lexeme',
-    },
-    // sortBy: (a, b) => {
-    //   return a[2].some_tag - b[2].some_tag
-    // },
-    threshold: 0.7, // 0-1 (1 default = 100% of related matches will also be returned, 0 = 0% of non-exact matches will be returned)
   }
 
   return await search(index, orama_search_params)

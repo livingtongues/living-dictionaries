@@ -1,11 +1,11 @@
 <script lang="ts">
-  import { browser } from '$app/environment';
   import { page } from '$app/stores';
   import type { QueryParams } from '$lib/search/types';
   import type { QueryParamStore } from 'svelte-pieces';
 
   export let on_show_filter_menu: () => void;
   export let search_params: QueryParamStore<QueryParams>;
+  export let index_ready = false
 </script>
 
 <div class="flex flex-grow rounded-md shadow-sm">
@@ -13,7 +13,7 @@
     <div
       class="absolute inset-y-0 left-0 pl-3 flex items-center
         pointer-events-none">
-      {#if browser}
+      {#if index_ready}
         <span class="i-carbon-search text-gray-500" />
       {:else}
         <span class="i-svg-spinners-3-dots-fade align--4px" />
