@@ -1,7 +1,6 @@
 import { ActualDatabaseEntry, ISpeaker } from '@living-dictionaries/types';
-import { db, timestamp } from '../config';
+import { db } from '../config';
 import { program } from 'commander';
-// import { CollectionReference } from 'firebase/firestore';
 program
 //   .version('0.0.1')
   .option('--id <value>', 'Dictionary Id')
@@ -38,26 +37,26 @@ async function speakerRefactor() {
 }
 
 async function fetchEntries(dictionaryId: string) {
-  const speakerRef = db.collection('speakers');
-  const dictionarySpeakerSnapshot = await speakerRef.where('contributingTo', 'array-contains', dictionaryId).get();
+  const speakerCollectionRef = db.collection('speakers');
+  const dictionarySpeakerSnapshot = await speakerCollectionRef.where('contributingTo', 'array-contains', dictionaryId).get();
   dictionarySpeakerSnapshot.docs.forEach((snap) => different_speakers.push({ [snap.data().displayName]: snap.id }));
   const snapshot = await db.collection(`dictionaries/${dictionaryId}/words`).get();
   for (const snap of snapshot.docs) {
     const entry: ActualDatabaseEntry = { id: snap.id, ...(snap.data() as ActualDatabaseEntry) };
-    await addSpeakerIdToEntry(dictionaryId, entry, {birthplace: 'USA', displayName: ''}, speakerRef); // Modify this line with real speaker Data
+    await addSpeakerIdToEntry(dictionaryId, entry, {birthplace: 'USA', displayName: ''}); // Modify this line with real speaker Data
   }
 }
 
-const addSpeaker = async (speakerData: ISpeaker, speakerRef: any) => {
+const addSpeaker = async (speakerData: ISpeaker) => {
 
-  const speakerId = speakerRef.doc().id;
-  console.log(`Saving speaker... speaker id: ${speakerId}`)
-  if (!live) return speakerId
-  await speakerRef.doc(speakerId).set(speakerData);
-  return speakerId;
+  const speaker = db.collection('speakers').doc();
+  console.log(`Saving speaker... speaker id: ${speaker.id}`)
+  if (!live) return speaker.id
+  await speaker.set(speakerData);
+  return speaker.id;
 }
 
-const addSpeakerIdToEntry = async (dictionaryId: string, entry: ActualDatabaseEntry, speakerData: ISpeaker, speakerRef: any) => {
+const addSpeakerIdToEntry = async (dictionaryId: string, entry: ActualDatabaseEntry, speakerData: ISpeaker) => {
   // let speakerId = null;
   const sfBefore = entry.sf;
   if (entry.sf?.speakerName) {
@@ -67,7 +66,7 @@ const addSpeakerIdToEntry = async (dictionaryId: string, entry: ActualDatabaseEn
         ...speakerData,
         displayName: entry.sf.speakerName,
         contributingTo: [dictionaryId]
-      }, speakerRef);
+      });
       different_speakers.push({ [entry.sf.speakerName]: speakerId });
     }
 
@@ -76,7 +75,7 @@ const addSpeakerIdToEntry = async (dictionaryId: string, entry: ActualDatabaseEn
       ab: developer_in_charge,
       sp: [speakerId],
       path: entry.sf.path,
-      ts: timestamp
+      ts: new Date().getTime()
     }]
     delete entry.sf;
     console.log(`After: sf-${JSON.stringify(entry?.sf)} sfs-${JSON.stringify(entry.sfs)}`);
