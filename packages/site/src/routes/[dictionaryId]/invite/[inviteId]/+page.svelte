@@ -1,12 +1,13 @@
 <script lang="ts">
   import { page } from '$app/stores';
   import type { IInvite, IHelper, IUser } from '@living-dictionaries/types';
-  import { isManager, isContributor, user, dictionary } from '$lib/stores';
   import { Button, ShowHide } from 'svelte-pieces';
   import { Doc, setOnline, updateOnline } from 'sveltefirets';
   import { serverTimestamp } from 'firebase/firestore/lite';
-  import type { PageData } from './$types';
-  export let data: PageData;
+
+  export let data;
+  $: ({user, dictionary, is_manager, is_contributor} = data)
+
   let inviteType: IInvite;
 
   async function acceptInvite(role: 'manager' | 'contributor') {
@@ -47,7 +48,7 @@
         {$page.data.t('invite.role')}: {invite.role}
       </p>
       {#if $user}
-        {#if $isManager}
+        {#if $is_manager}
           <p class="mb-2">
             You are already a manager.
           </p>
@@ -55,7 +56,7 @@
             {$page.data.t('dictionary.entries')}
             <span class="i-fa6-solid-chevron-right rtl-x-flip -mt-1" />
           </Button>
-        {:else if $isContributor && invite.role === 'contributor'}
+        {:else if $is_contributor && invite.role === 'contributor'}
           <p class="mb-2">
             You are already a contributor.
           </p>

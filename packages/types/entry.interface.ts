@@ -1,6 +1,6 @@
 import type { Timestamp } from 'firebase/firestore';
 import type { IFirestoreMetaDataAbbreviated } from 'sveltefirets';
-import type { IGloss } from './gloss.interface';
+import type { MultiString } from './gloss.interface';
 import type { IExampleSentence } from './exampe-sentence.interface';
 import type { GoalDatabaseAudio, ActualDatabaseAudio, ExpandedAudio } from './audio.interface';
 import type { GoalDatabasePhoto, ActualDatabasePhoto, ExpandedPhoto } from './photo.interface';
@@ -35,7 +35,7 @@ export interface ExpandedEntry extends IFirestoreMetaDataAbbreviated {
 }
 
 export interface ExpandedSense {
-  glosses?: IGloss;
+  glosses?: MultiString;
   parts_of_speech_keys?: string[];
   translated_parts_of_speech?: string[];
   ld_semantic_domains_keys?: string[];
@@ -49,7 +49,7 @@ export interface ExpandedSense {
 }
 
 export interface DatabaseSense {
-  gl?: IGloss;
+  gl?: MultiString;
   ps?: string[]; // parts_of_speech
   sdn?: string[]; // semantic domain number, simplified system modeled after SemDom (eg. 2.1.2.3)
   sd?: string[]; // semantic domain strings, only using for custom semantic domains brought in from imports
@@ -89,13 +89,14 @@ export interface GoalDatabaseEntry extends IFirestoreMetaDataAbbreviated {
   co?: Coordinates;
 }
 
-interface DeprecatedEntry extends Omit<DatabaseSense, 'ps' | 'xs' | 'pfs' | 'deletedPfs' | 'vfs'> {
+interface DeprecatedEntry extends Omit<DatabaseSense, 'ps' | 'xs' | 'pfs' | 'deletedPfs' | 'vfs' | 'sd'> {
   // as deprecated fields are removed from the database we can continue to Omit them here until nothing more from DatabaseSense is left
   lo?: string; // local_orthography_1
   sf?: ActualDatabaseAudio; // turned into array at sfs
   di?: string | string[]; // turned into array
   sr?: string | string[] // some dictionaries, e.g. Kalanga, have just a string
   scn?: string | string[]; // scientific_names
+  sd?: string | string[]; // old semantic domains from talking dictionaries site
 
   // placed into first sense
   ps?: string | string[]; // parts_of_speech

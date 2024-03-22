@@ -4,10 +4,11 @@
   import ToggleRefinement from '$lib/components/search/ToggleRefinement.svelte';
   import ClearRefinements from '$lib/components/search/ClearRefinements.svelte';
   import type { InstantSearch } from 'instantsearch.js';
-  import { Button, ResponsiveSlideover } from 'svelte-pieces';
+  import { Button, ResponsiveSlideover, ShowHide } from 'svelte-pieces';
 
   export let showMobileFilters = false;
   export let search: InstantSearch;
+  $: ({is_manager} = $page.data)
 </script>
 
 <ResponsiveSlideover
@@ -41,50 +42,82 @@
         label={$page.data.t('entry_field.speaker')} />
       <hr />
 
-      {#if !$page.url.pathname.includes('gallery')}
-        <ToggleRefinement
-          {search}
-          attribute="hasImage"
-          label={$page.data.t('entry.has_exists') +
-            ' ' +
-            $page.data.t('entry.image')} />
-      {/if}
-      <ToggleRefinement
-        {search}
-        attribute="hasAudio"
-        label={$page.data.t('entry.has_exists') +
-          ' ' +
-          $page.data.t('entry_field.audio')} />
-      <ToggleRefinement
-        {search}
-        attribute="hasSpeaker"
-        label={$page.data.t('entry.has_exists') +
-          ' ' +
-          $page.data.t('entry_field.speaker')} />
-      <ToggleRefinement
-        {search}
-        attribute="hasNounClass"
-        label={$page.data.t('entry.has_exists') +
-          ' ' +
-          $page.data.t('entry_field.noun_class')} />
-      <ToggleRefinement
-        {search}
-        attribute="hasPluralForm"
-        label={$page.data.t('entry.has_exists') +
-          ' ' +
-          $page.data.t('entry_field.plural_form')} />
-      <ToggleRefinement
-        {search}
-        attribute="hasPartOfSpeech"
-        label={$page.data.t('entry.has_exists') +
-          ' ' +
-          $page.data.t('entry_field.parts_of_speech')} />
-      <ToggleRefinement
-        {search}
-        attribute="hasSemanticDomain"
-        label={$page.data.t('entry.has_exists') +
-          ' ' +
-          $page.data.t('entry_field.semantic_domains')} />
+      <ShowHide let:show={show_negatives} let:toggle>
+        {#if show_negatives}
+          {#if !$page.url.pathname.includes('gallery')}
+            <ToggleRefinement
+              {search}
+              attribute="hasImage"
+              on={false}
+              label={$page.data.t('entry.does_not_exist') + ' ' + $page.data.t('entry.image')} />
+          {/if}
+          <ToggleRefinement
+            {search}
+            attribute="hasAudio"
+            on={false}
+            label={$page.data.t('entry.does_not_exist') + ' ' + $page.data.t('entry_field.audio')} />
+          <ToggleRefinement
+            {search}
+            attribute="hasSpeaker"
+            on={false}
+            label={$page.data.t('entry.does_not_exist') + ' ' + $page.data.t('entry_field.speaker')} />
+          <ToggleRefinement
+            {search}
+            attribute="hasNounClass"
+            on={false}
+            label={$page.data.t('entry.does_not_exist') + ' ' + $page.data.t('entry_field.noun_class')} />
+          <ToggleRefinement
+            {search}
+            attribute="hasPluralForm"
+            on={false}
+            label={$page.data.t('entry.does_not_exist') + ' ' + $page.data.t('entry_field.plural_form')} />
+          <ToggleRefinement
+            {search}
+            attribute="hasPartOfSpeech"
+            on={false}
+            label={$page.data.t('entry.does_not_exist') + ' ' + $page.data.t('entry_field.parts_of_speech')} />
+          <ToggleRefinement
+            {search}
+            attribute="hasSemanticDomain"
+            on={false}
+            label={$page.data.t('entry.does_not_exist') + ' ' + $page.data.t('entry_field.semantic_domains')} />
+        {:else}
+          {#if !$page.url.pathname.includes('gallery')}
+            <ToggleRefinement
+              {search}
+              attribute="hasImage"
+              label={$page.data.t('entry.has_exists') + ' ' + $page.data.t('entry.image')} />
+          {/if}
+          <ToggleRefinement
+            {search}
+            attribute="hasAudio"
+            label={$page.data.t('entry.has_exists') + ' ' + $page.data.t('entry_field.audio')} />
+          <ToggleRefinement
+            {search}
+            attribute="hasSpeaker"
+            label={$page.data.t('entry.has_exists') + ' ' + $page.data.t('entry_field.speaker')} />
+          <ToggleRefinement
+            {search}
+            attribute="hasNounClass"
+            label={$page.data.t('entry.has_exists') + ' ' + $page.data.t('entry_field.noun_class')} />
+          <ToggleRefinement
+            {search}
+            attribute="hasPluralForm"
+            label={$page.data.t('entry.has_exists') + ' ' + $page.data.t('entry_field.plural_form')} />
+          <ToggleRefinement
+            {search}
+            attribute="hasPartOfSpeech"
+            label={$page.data.t('entry.has_exists') + ' ' + $page.data.t('entry_field.parts_of_speech')} />
+          <ToggleRefinement
+            {search}
+            attribute="hasSemanticDomain"
+            label={$page.data.t('entry.has_exists') + ' ' + $page.data.t('entry_field.semantic_domains')} />
+        {/if}
+
+        {#if $is_manager}
+          <Button class="mb-1" size="sm" onclick={toggle}>{$page.data.t('entry.switch_opposite')}</Button>
+        {/if}
+      </ShowHide>
     </div>
     <a
       class="block mt-3 md:mb-3 ml-auto"
@@ -99,54 +132,3 @@
     </a>
   </section>
 </ResponsiveSlideover>
-
-<!-- {#if $isManager}
-    <ToggleRefinement
-      {search}
-      attribute="hasImage"
-      on={false}
-      label={$page.data.t('entry.does_not_exist', {
-        default: 'No',
-      }) + ' ' + $page.data.t('entry.image')} />
-    <hr />
-  {/if}
-   {#if $isManager}
-  <ToggleRefinement
-    {search}
-    attribute="hasAudio"
-    on={false}
-    label={$page.data.t('entry.does_not_exist', {
-      default: 'No',
-    }) + ' ' + $page.data.t('entry.audio')} />
-{/if}
- {#if $isManager}
-  <ToggleRefinement
-    {search}
-    attribute="hasSpeaker"
-    on={false}
-    label={$page.data.t('entry.does_not_exist', {
-      default: 'No',
-    }) + ' ' + $page.data.t('entry.speaker')} />
-  <hr />
-{/if}
- {#if $isManager}
-  <ToggleRefinement
-    {search}
-    attribute="hasPartOfSpeech"
-    on={false}
-    label={$page.data.t('entry.does_not_exist', {
-      default: 'No',
-    }) + ' ' + $page.data.t('entry.ps')} />
-  <hr />
-{/if}
- {#if $isManager}
-  <ToggleRefinement
-    {search}
-    attribute="hasSemanticDomain"
-    on={false}
-    label={$page.data.t('entry.does_not_exist', {
-      default: 'No',
-    }) + ' ' + $page.data.t('entry.sdn', {
-        default: 'Semantic Domain',
-      })} />
-{/if} -->

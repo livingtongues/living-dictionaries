@@ -2,18 +2,16 @@
   import { page } from '$app/stores';
   import { Collection } from 'sveltefirets';
   import { orderBy, where } from 'firebase/firestore';
-  import { admin } from '$lib/stores';
   import { Button, ResponsiveTable } from 'svelte-pieces';
   import Header from '$lib/components/shell/Header.svelte';
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte';
-
-  import type { PageData } from './$types';
   import { downloadObjectsAsCSV } from '$lib/export/csv';
-  import {
-    dictionary_headers,
-    prepareDictionaryForCsv,
-  } from '$lib/export/prepareDictionariesForCsv';
-  export let data: PageData;
+  import { dictionary_headers, prepareDictionaryForCsv } from '$lib/export/prepareDictionariesForCsv';
+
+  export let data
+  $: ({admin} = data)
+
+
   $: publicDictionaries = data.publicDictionaries || [];
 
   let queryConstraints = [orderBy('name'), where('public', '==', true)];

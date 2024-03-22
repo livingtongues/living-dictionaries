@@ -1,15 +1,15 @@
 <script lang="ts">
   import { page } from '$app/stores';
   import { Button, Modal, Form } from 'svelte-pieces';
-  import { user, dictionary } from '$lib/stores';
   import { goto } from '$app/navigation';
   import { createEventDispatcher } from 'svelte';
-  import { apiFetch } from '$lib/client/apiFetch';
-  import type { SupportRequestBody } from '../../../routes/api/email/support/+server';
-  import type { RequestAccessBody } from '../../../routes/api/email/request_access/+server';
+  import type { SupportRequestBody } from '$api/email/support/+server';
+  import type { RequestAccessBody } from '$api/email/request_access/+server';
   import enBase from '$lib/i18n/locales/en.json';
+  import { post_request } from '$lib/helpers/get-post-requests';
 
   export let subject: Subjects = undefined;
+  $: ({dictionary, user} = $page.data)
 
   const subjects = {
     'delete_dictionary': 'contact.delete_dictionary',
@@ -36,37 +36,36 @@
   let status: 'success' | 'fail';
 
   async function send() {
-    try {
-      let response: Response
-      if ($dictionary && subject === 'request_access') {
-        response = await apiFetch<RequestAccessBody>('/api/email/request_access', {
-          message,
-          email: $user?.email || email,
-          name: $user?.displayName || 'Anonymous',
-          url: window.location.href,
-          dictionaryId: $dictionary.id,
-          dictionaryName: $dictionary.name,
-        });
-      } else {
-        response = await apiFetch<SupportRequestBody>('/api/email/support', {
-          message,
-          email: $user?.email || email,
-          name: $user?.displayName || 'Anonymous',
-          url: window.location.href,
-          subject: enBase.contact[subject],
-        });
-      }
+    if ($dictionary && subject === 'request_access') {
+      const { error } = await post_request<RequestAccessBody, null>('/api/email/request_access', {
+        message,
+        email: $user?.email || email,
+        name: $user?.displayName || 'Anonymous',
+        url: window.location.href,
+        dictionaryId: $dictionary.id,
+        dictionaryName: $dictionary.name,
+      });
 
-      if (response.status !== 200) {
-        const body = await response.json();
-        throw new Error(body.message);
+      if (error) {
+        status = 'fail';
+        return alert(`${$page.data.t('misc.error')}: ${error.message}`);
       }
+    } else {
+      const { error } = await post_request<SupportRequestBody, null>('/api/email/support', {
+        message,
+        email: $user?.email || email,
+        name: $user?.displayName || 'Anonymous',
+        url: window.location.href,
+        subject: enBase.contact[subject],
+      });
 
-      status = 'success';
-    } catch (err) {
-      status = 'fail';
-      alert(`${$page.data.t('misc.error')}: ${err}`);
+      if (error) {
+        status = 'fail';
+        return alert(`${$page.data.t('misc.error')}: ${error.message}`);
+      }
     }
+
+    status = 'success';
   }
 </script>
 
@@ -165,8 +164,8 @@
   {:else if status == 'fail'}
     <h4 class="text-xl mt-1 mb-4">
       {$page.data.t('contact.message_failed')}
-      <a class="underline ml-1" href="mailto:annaluisa@livingtongues.org">
-        annaluisa@livingtongues.org
+      <a class="underline ml-1" href="mailto:dictionaries@livingtongues.org">
+        dictionaries@livingtongues.org
       </a>
     </h4>
   {/if}

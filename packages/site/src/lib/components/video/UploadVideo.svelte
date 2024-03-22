@@ -2,7 +2,6 @@
   import { onDestroy, onMount } from 'svelte';
   import { page } from '$app/stores';
   import type { GoalDatabaseVideo, IVideoCustomMetadata } from '@living-dictionaries/types';
-  import { dictionary, user } from '$lib/stores';
   import { getStorage, ref, uploadBytesResumable, type TaskState, type UploadTask, StorageError } from 'firebase/storage';
   import { addVideo } from '$lib/helpers/media/update';
   import { tweened } from 'svelte/motion';
@@ -11,6 +10,7 @@
   export let file: File | Blob
   export let entryId: string
   export let speakerId: string;
+  $: ({dictionary, user} = $page.data)
 
   let uploadTask: UploadTask;
   let taskState: TaskState;
@@ -56,7 +56,7 @@
             ab: $user.uid,
             sp: [speakerId],
           };
-          await addVideo(entryId, database_video);
+          await addVideo(entryId, $dictionary.id, database_video);
 
           success = true;
         } catch (err) {

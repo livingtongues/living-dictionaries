@@ -10,7 +10,7 @@ export function convert_entry_to_current_shape(actual: ActualDatabaseEntry): Goa
   for (const [key, value] of Object.entries(actual) as [keyof ActualDatabaseEntry, any][]) {
     if (!value) continue;
 
-    if (key === 'lo') {
+    if (key === 'lo' && !goal.lo1) {
       goal.lo1 = value;
       continue;
     }
@@ -35,7 +35,7 @@ export function convert_entry_to_current_shape(actual: ActualDatabaseEntry): Goa
     }
 
     // Sense related fields
-    if (['gl', 'sd', 'sdn', 'nc', 'de'].includes(key)) {
+    if (['gl', 'sdn', 'nc', 'de'].includes(key)) {
       first_sense_from_base[key] = value;
       continue;
     }
@@ -55,7 +55,13 @@ export function convert_entry_to_current_shape(actual: ActualDatabaseEntry): Goa
         first_sense_from_base.ps = [value];
       else
         first_sense_from_base.ps = value;
-
+      continue;
+    }
+    if (key === 'sd') {
+      if (typeof value === 'string')
+        first_sense_from_base.sd = [value];
+      else
+        first_sense_from_base.sd = value;
       continue;
     }
     if (key === 'xs') {

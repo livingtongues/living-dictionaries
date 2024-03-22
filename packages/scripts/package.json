@@ -15,8 +15,7 @@
     "updateIndex": "tsx algolia/updateIndex.ts -e prod",
     "copyAlgoliaIndexRecords": "tsx algolia/copyAlgoliaIndexRecords.js",
     "copyAlgoliaIndexSettings": "tsx algolia/copyAlgoliaIndexSettings.js",
-    "test": "vitest",
-    "test:ui": "vitest --ui"
+    "test": "vitest"
   },
   "devDependencies": {
     "@living-dictionaries/functions": "workspace:^0.0.1",
@@ -25,19 +24,18 @@
     "@supabase/supabase-js": "^2.38.4",
     "@types/node": "^18.11.18",
     "@types/pg": "^8.10.9",
-    "@vitest/ui": "^0.33.0",
     "algoliasearch": "^4.11.0",
     "commander": "^9.4.1",
     "csv-parse": "^5.3.0",
     "csvtojson": "^2.0.10",
     "dotenv": "^16.0.2",
-    "firebase": "^9.22.1",
+    "firebase": "^10.9.0",
     "firebase-admin": "^12.0.0",
     "node-fetch": "^3.1.0",
     "pg": "^8.11.3",
-    "tsx": "^3.12.7",
+    "tsx": "^4.7.1",
     "typescript": "~5.1.6",
-    "vitest": "^0.34.5"
+    "vitest": "^1.4.0"
   },
   "repository": {
     "type": "git",

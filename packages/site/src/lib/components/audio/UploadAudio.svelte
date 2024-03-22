@@ -3,13 +3,13 @@
   import type { GoalDatabaseAudio, GoalDatabaseEntry } from '@living-dictionaries/types';
   import { updateOnline } from 'sveltefirets';
   import { getStorage, ref, uploadBytesResumable } from 'firebase/storage';
-  import { dictionary, user } from '$lib/stores';
   import { tweened } from 'svelte/motion';
   import { cubicOut } from 'svelte/easing';
 
   export let file: File | Blob;
   export let entryId: string;
   export let speakerId: string;
+  $: ({dictionary, user} = $page.data)
 
   const progress = tweened(0, {
     duration: 2000,
@@ -24,7 +24,7 @@
     startUpload();
 
 
-  async function startUpload() {
+  function startUpload() {
     // const _dictName = dictionary.name.replace(/\s+/g, '_');
     // const _lexeme = lexeme.replace(/\s+/g, '_');
     const fileTypeSuffix = file.type.split('/')[1];

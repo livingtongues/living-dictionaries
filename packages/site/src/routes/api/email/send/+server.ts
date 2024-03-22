@@ -3,7 +3,7 @@ import type { RequestHandler } from './$types';
 import { sendEmail } from './mailChannels';
 import type { EmailParts, MailChannelsSendBody } from './mail-channels.interface';
 import { DKIM_PRIVATE_KEY, SEND_EMAIL_KEY } from '$env/static/private';
-import { annaAddress, noReplyAddress } from '../addresses';
+import { officialAddress, noReplyAddress } from '../addresses';
 import { ResponseCodes } from '$lib/constants';
 
 export interface SendRequestBody {
@@ -27,7 +27,7 @@ export const POST: RequestHandler = async ({ request, fetch }) => {
         dkim_private_key: DKIM_PRIVATE_KEY,
       }],
       from: noReplyAddress,
-      reply_to: reply_to || annaAddress,
+      reply_to: reply_to || officialAddress,
       subject,
       content: [{
         type,
@@ -44,6 +44,6 @@ export const POST: RequestHandler = async ({ request, fetch }) => {
   }
   catch (err: any) {
     console.error(`Error with email send request: ${err.message}`);
-    throw error(ResponseCodes.INTERNAL_SERVER_ERROR, `Error with email send request: ${err.message}`);
+    error(ResponseCodes.INTERNAL_SERVER_ERROR, `Error with email send request: ${err.message}`);
   }
 };

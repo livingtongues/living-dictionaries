@@ -1,13 +1,9 @@
-import { en } from '$lib/i18n';
-import type { TranslateFunction } from '$lib/i18n/types';
+import { english_translate } from '$lib/i18n';
 import { order_entry_and_dictionary_gloss_languages, order_glosses } from './glosses';
 import { remove_italic_tags } from './remove_italic_tags';
 
 describe(order_glosses, () => {
-  const t = (({dynamicKey: key, fallback}: { dynamicKey: string, fallback: string}) => {
-    const [section, item] = key.split('.')
-    return en[section][item] || fallback;
-  }) as TranslateFunction
+  const t = english_translate
 
   const glosses = {
     en: 'apple',

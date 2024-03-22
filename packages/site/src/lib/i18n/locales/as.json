@@ -161,7 +161,8 @@
     "link_copied": "লিংক নকল কৰা হৈছে",
     "copy_and_share": "নকল কৰক আৰু ভগাই দিয়ক",
     "print": "",
-    "id": ""
+    "id": "",
+    "switch_opposite": ""
   },
   "entry_field": {
     "photo": "ফটো বা আলোকচিত্ৰ",
@@ -324,7 +325,8 @@
     "instructions_1": "",
     "instructions_2": "",
     "instructions_3": "",
-    "instructions_4": ""
+    "instructions_4": "",
+    "no_imports": ""
   },
   "history": {
     "history": "",
@@ -341,5 +343,10 @@
     "history_search": "",
     "download_history": "",
     "empty": ""
+  },
+  "partnership": {
+    "title": "",
+    "button": "",
+    "name": ""
   }
 }

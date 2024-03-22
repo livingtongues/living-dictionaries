@@ -1,7 +1,13 @@
 <script lang="ts">
-  export let menuOpen: boolean;
   import { page } from '$app/stores';
-  import { dictionary, isManager } from '$lib/stores';
+  import type { IDictionary } from '@living-dictionaries/types';
+  import { firebaseConfig } from 'sveltefirets';
+
+  export let dictionary: IDictionary
+  export let on_close: () => void;
+  export let admin: number
+  export let is_manager: boolean
+  export let search_index_updated: boolean
 </script>
 
 <div class="md:hidden">
@@ -9,13 +15,13 @@
     {$page.data.t('misc.LD')}
   </a>
   <h5 class="font-semibold uppercase tracking-wide mx-3 mb-2">
-    {$dictionary.name}
+    {dictionary.name}
   </h5>
 </div>
-<div on:click={() => (menuOpen = false)}>
+<div on:click={on_close}>
   <a
-    class:active={$page.url.pathname.match(/entry|entries/)}
-    href={`/${$dictionary.id}/entries/list`}>
+    class:active={$page.url.pathname.match(/entry|entries\//)}
+    href={`/${dictionary.id}/entries/list`}>
     <i class="far fa-list fa-fw" />
     <span class="font-medium mx-2">
       {$page.data.t('dictionary.entries')}
@@ -24,11 +30,29 @@
     <span
       class="inline-block py-1 px-2 leading-none text-xs font-semibold
         text-gray-700 bg-gray-300 rounded-full">
-      {new Intl.NumberFormat().format($dictionary.entryCount || 0)}
+      {new Intl.NumberFormat().format(dictionary.entryCount || 0)}
     </span>
   </a>
+  {#if admin || firebaseConfig.projectId === 'talking-dictionaries-dev'}
+    <a
+      class:active={$page.url.pathname.match(/entries-local/)}
+      href={`/${dictionary.id}/entries-local/list`}>
+      <!-- <span class="i-fa6-solid-list " /> -->
+      <span class="font-medium mx-2">
+        {$page.data.t('dictionary.entries')} (local)
+      </span>
+      <span class="flex-grow" />
+      {#if search_index_updated}
+        <span
+          class="inline-block py-1 px-2 leading-none text-xs font-semibold
+            text-gray-700 bg-gray-300 rounded-full">
+          {new Intl.NumberFormat().format(dictionary.entryCount || 0)}
+        </span>
+      {/if}
+    </a>
+  {/if}
   <a
-    href={'/' + $dictionary.id + '/about'}
+    href={'/' + dictionary.id + '/about'}
     class:active={$page.url.pathname.includes('about')}>
     <i class="far fa-info-circle fa-fw" />
     <span class="font-medium mx-2">
@@ -36,7 +60,7 @@
     </span>
   </a>
   <a
-    href={'/' + $dictionary.id + '/contributors'}
+    href={'/' + dictionary.id + '/contributors'}
     class:active={$page.url.pathname.includes('contributors')}>
     <i class="far fa-users fa-fw" />
     <span class="font-medium mx-2">
@@ -44,16 +68,16 @@
     </span>
   </a>
   <a
-    href={'/' + $dictionary.id + '/grammar'}
+    href={'/' + dictionary.id + '/grammar'}
     class:active={$page.url.pathname.includes('grammar')}>
     <i class="far fa-edit fa-fw" />
     <span class="font-medium mx-2">
       {$page.data.t('dictionary.grammar')}
     </span>
   </a>
-  {#if $isManager}
+  {#if is_manager}
     <a
-      href={'/' + $dictionary.id + '/import'}
+      href={'/' + dictionary.id + '/import'}
       class:active={$page.url.pathname.includes('import')}>
       <i class="far fa-file-import" />
       <span class="font-medium mx-2">
@@ -61,7 +85,7 @@
       </span>
     </a>
     <a
-      href={'/' + $dictionary.id + '/settings'}
+      href={'/' + dictionary.id + '/settings'}
       class:active={$page.url.pathname.includes('settings')}>
       <i class="far fa-cog fa-fw" />
       <span class="font-medium mx-2">
@@ -69,7 +93,7 @@
       </span>
     </a>
     <a
-      href={'/' + $dictionary.id + '/export'}
+      href={'/' + dictionary.id + '/export'}
       class:active={$page.url.pathname.includes('export')}>
       <i class="far fa-download" />
       <span class="font-medium mx-2">

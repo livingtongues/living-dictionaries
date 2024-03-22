@@ -161,7 +161,8 @@
     "link_copied": "Kiungo kimenakiliwa",
     "copy_and_share": "Nakili na ushiriki",
     "print": "Chapisha",
-    "id": "Id"
+    "id": "Id",
+    "switch_opposite": "Badilika kinyume"
   },
   "entry_field": {
     "photo": "Picha",
@@ -324,7 +325,8 @@
     "instructions_1": "Ikiwa tayari unayo data ya lugha ambayo unataka kuingiza kwenye kamusi yako, tafadhali fuata hatua hapa chini.",
     "instructions_2": "Bonyeza kitufe cha \"Kiunga cha Kiolezo\" hapa chini. Pakua templeti kama faili ya Excel, au unda nakala kwenye Hati za Google. Hariri templeti kulingana na mahitaji ya mradi wako. Nakili na ubandike data yako kwenye lahajedwali.",
     "instructions_3": "Tumia \"Wasiliana Nasi\" hapa chini kuwasiliana nasi. Tujue kuwa una lahajedwali mpya ambayo iko tayari kwa kuagiza. Tuulize maswali yoyote unayo. Tutakujibu kwa barua pepe, halafu unaweza kututumia faili yako.",
-    "instructions_4": "Kututumia data iliyosafirishwa kutoka kwa laini za kamusi kama Flex, Lexique Pro, Sanduku la Viatu, tafadhali tumia kitufe cha \"Wasiliana Nasi\" hapa chini na tuambie maelezo ya mradi wako."
+    "instructions_4": "Kututumia data iliyosafirishwa kutoka kwa laini za kamusi kama Flex, Lexique Pro, Sanduku la Viatu, tafadhali tumia kitufe cha \"Wasiliana Nasi\" hapa chini na tuambie maelezo ya mradi wako.",
+    "no_imports": "Hivi sasa tunafanya kazi na jamii nyingi na mashirika ya washirika kuingiza idadi kubwa ya viingilio vya kamusi kwenye jukwaa hili. Tunafanya pia sasisho kubwa kwa hifadhidata yetu. Tutakubali uagizaji mpya wa data kuanzia Mei 1, 2024. Tunashukuru uvumilivu wako, na tunaomba radhi kwa usumbufu."
   },
   "history": {
     "history": "Historia",
@@ -341,5 +343,10 @@
     "history_search": "Tafuta viingilio, wahariri, uwanja na maadili",
     "download_history": "Pakua historia kama CSV",
     "empty": "Hakuna historia bado"
+  },
+  "partnership": {
+    "title": "Mashirika ya washirika",
+    "button": "Andika katika shirika la washirika",
+    "name": "Jina la shirika la mshirika"
   }
 }

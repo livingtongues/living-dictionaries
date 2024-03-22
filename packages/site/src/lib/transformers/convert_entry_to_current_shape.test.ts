@@ -40,10 +40,17 @@ describe(convert_entry_to_current_shape, () => {
     expect(convert_entry_to_current_shape({ ps })).toEqual(expected);
   });
 
-  test('converts lo to lo1', () => {
+  test('converts lo to lo1 if lo1 does not exist', () => {
     const lo = 'foo';
     const expected: GoalDatabaseEntry = { lo1: lo }
     expect(convert_entry_to_current_shape({ lo })).toEqual(expected);
+  });
+
+  test('ignores lo if lo1 exists', () => {
+    const lo = 'foo';
+    const lo1 = 'bar';
+    const expected: GoalDatabaseEntry = { lo1 }
+    expect(convert_entry_to_current_shape({ lo, lo1 })).toEqual(expected);
   });
 
   test('converts source string to array of strings', () => {
@@ -242,4 +249,16 @@ describe(convert_entry_to_current_shape, () => {
     }
     expect(convert_entry_to_current_shape(entry)).toEqual({});
   });
+
+  test('handles string semantic domains', () => {
+    const entry: ActualDatabaseEntry = {
+      sd: 'bird'
+    }
+    const expected: GoalDatabaseEntry = {
+      sn: [{
+        sd: ['bird']
+      }]
+    }
+    expect(convert_entry_to_current_shape(entry)).toEqual(expected)
+  })
 });

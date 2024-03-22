@@ -1,19 +1,23 @@
 <script lang="ts">
   // import SeoMetaTags from '$lib/components/SeoMetaTags.svelte';
-  import { onMount, getContext } from 'svelte';
+  import { onMount, getContext, onDestroy } from 'svelte';
   import { Doc } from 'sveltefirets';
-  import { dictionary, canEdit, admin } from '$lib/stores';
   import ListEntry from './ListEntry.svelte';
   import { convert_and_expand_entry } from '$lib/transformers/convert_and_expand_entry';
   import Hits from '$lib/components/search/Hits.svelte';
   import Pagination from '$lib/components/search/Pagination.svelte';
   import { configure } from 'instantsearch.js/es/widgets/index.js';
-  import { deleteImage } from '$lib/helpers/delete';
   import type { InstantSearch } from 'instantsearch.js';
-  import { updateFirestoreEntry } from '$lib/helpers/entry/update';
-  import { page } from '$app/stores';
+  import { navigating, page } from '$app/stores';
+  import { save_scroll_point, restore_scroll_point } from '$lib/helpers/scrollPoint';
+  import { browser } from '$app/environment';
+  import List from './List.svelte';
+
+  export let data
+  $: ({dictionary, can_edit, admin, dbOperations} = data)
 
   const search: InstantSearch = getContext('search');
+  let pixels_from_top = 0;
 
   onMount(() => {
     search.addWidgets([
@@ -23,10 +27,18 @@
       }),
     ]);
   });
+
+  onDestroy(() => {
+    if (!browser || !$navigating?.from?.url) return;
+    const { href } = $navigating.from.url;
+    save_scroll_point(href, pixels_from_top);
+  });
 </script>
 
-<Hits {search} let:entries>
-  {#if $canEdit}
+<svelte:window bind:scrollY={pixels_from_top} />
+
+<Hits {search} let:entries on_updated={restore_scroll_point}>
+  {#if $can_edit}
     {#each entries as algoliaEntry (algoliaEntry.id)}
       <Doc
         path="dictionaries/{$dictionary.id}/words/{algoliaEntry.id}"
@@ -36,15 +48,12 @@
           dictionary={$dictionary}
           entry={convert_and_expand_entry(entry, $page.data.t)}
           videoAccess={$dictionary.videoAccess || $admin > 0}
-          canEdit={$canEdit}
-          on:deleteImage={() => deleteImage(entry, $dictionary.id)}
-          on:valueupdate={({detail: { field, newValue}}) => updateFirestoreEntry({field, value: newValue, entryId: entry.id})} />
+          can_edit={$can_edit}
+          {dbOperations} />
       </Doc>
     {/each}
   {:else}
-    {#each entries as entry (entry.id)}
-      <ListEntry dictionary={$dictionary} entry={convert_and_expand_entry(entry, $page.data.t)} />
-    {/each}
+    <List {entries} can_edit={false} dictionary={$dictionary} {dbOperations} />
   {/if}
 </Hits>
 <Pagination {search} />

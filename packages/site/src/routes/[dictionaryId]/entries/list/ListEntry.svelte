@@ -9,11 +9,14 @@
   import { ShowHide } from 'svelte-pieces';
   import sanitize from 'xss';
   import { page } from '$app/stores';
+  import type { DbOperations } from '$lib/dbOperations';
 
   export let entry: ExpandedEntry;
   export let dictionary: IDictionary;
-  export let canEdit = false;
+  export let can_edit = false;
   export let videoAccess = false;
+  export let dbOperations: DbOperations;
+  export let on_click: (e: MouseEvent & { currentTarget: EventTarget & HTMLAnchorElement }) => void = undefined;
 
   $: glosses = order_glosses({
     glosses: entry.senses?.[0]?.glosses,
@@ -28,14 +31,12 @@
   class:border-b-2={entry.ua?.toMillis?.() > minutesAgo(5)}
   class="flex rounded shadow my-1 overflow-hidden items-stretch border-green-300"
   style="margin-right: 2px;">
-  {#if entry.sound_files?.[0] || canEdit}
-    <Audio class="bg-gray-100 p-2" {entry} {canEdit} minimal let:playing>
-      <span class:text-blue-700={playing} class="i-material-symbols-hearing text-2xl mt-1" />
-      {$page.data.t('audio.listen')}
-    </Audio>
+  {#if entry.sound_files?.[0] || can_edit}
+    <Audio class="bg-gray-100 py-1.5 px-1 min-w-55px w-55px" {entry} {can_edit} context="list" />
   {/if}
   <a
-    href={'/' + dictionary.id + '/entry/' + entry.id}
+    href="/{dictionary.id}/entry/{entry.id}"
+    on:click={on_click}
     class="p-2 text-lg flex-grow flex flex-col justify-between hover:bg-gray-200">
     <div>
       <span class="font-semibold text-gray-900 mr-1">{entry.lexeme}</span>
@@ -115,8 +116,8 @@
     </div>
   </a>
   {#if entry.senses?.[0]?.video_files?.[0]}
-    <Video class="bg-gray-100 p-1.5 border-r-2" lexeme={entry.lexeme} video={entry.senses[0].video_files[0]} {canEdit} />
-  {:else if videoAccess && canEdit}
+    <Video class="bg-gray-100 p-1.5 border-r-2" lexeme={entry.lexeme} video={entry.senses[0].video_files[0]} {can_edit} />
+  {:else if videoAccess && can_edit}
     <ShowHide let:show let:toggle>
       <button
         type="button"
@@ -138,10 +139,10 @@
         square={128}
         title={entry.lexeme}
         gcs={entry.senses?.[0]?.photo_files?.[0].specifiable_image_url}
-        {canEdit}
-        on:deleteImage />
+        {can_edit}
+        on:deleteImage={() => dbOperations.deleteImage(entry, dictionary.id)} />
     </div>
-  {:else if canEdit}
+  {:else if can_edit}
     <AddImage dictionaryId={dictionary.id} entryId={entry.id} class="w-12 bg-gray-100">
       <div class="text-xs" slot="text">
         {$page.data.t('entry_field.photo')}

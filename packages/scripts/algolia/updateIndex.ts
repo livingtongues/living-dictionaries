@@ -8,14 +8,12 @@ import * as prepare from '@living-dictionaries/functions/src/algolia/prepareData
 const prepareDataForIndex = prepare.default
   .prepareDataForIndex as typeof import('@living-dictionaries/functions/src/algolia/prepareDataForIndex').prepareDataForIndex; // b/c file is declared to be commonjs by its package.json
 
-
 async function updateMostRecentEntries(count: number, { dry = true }) {
   const entriesSnapshot = await db.collectionGroup('words').orderBy('ua', 'desc').limit(count).get();
   const entries = await prepareEntriesFromSnapshot(entriesSnapshot);
 
   if (!dry)
     await updateIndex(entries);
-
 }
 
 
@@ -26,7 +24,6 @@ async function updateIndexByField(fieldToIndex: string, { dry = true }) {
 
   if (!dry)
     await updateIndex(entries);
-
 }
 
 // eslint-disable-next-line no-undef
@@ -35,7 +32,8 @@ async function prepareEntriesFromSnapshot(entriesSnapshot: FirebaseFirestore.Que
     const dbEntry = doc.data() as ActualDatabaseEntry;
     const dictionaryId = doc.ref.parent.parent.id; // dictionary/words/entry-123 -> doc.ref: entry-123, doc.ref.parent: words, doc.ref.parent.parent: dictionary
     const algoliaEntry = await prepareDataForIndex(dbEntry, dictionaryId, db);
-    console.log({ dbEntry, algoliaEntry});
+    const time = dbEntry.ua.toDate();
+    console.log({ dbEntry, algoliaEntry, time });
     return { ...algoliaEntry, objectID: doc.id };
   });
 
@@ -44,4 +42,4 @@ async function prepareEntriesFromSnapshot(entriesSnapshot: FirebaseFirestore.Que
 }
 
 // updateIndexByField('nc', { dry: true });
-updateMostRecentEntries(100, { dry: true });
+updateMostRecentEntries(300, { dry: false });

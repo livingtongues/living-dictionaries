@@ -2,7 +2,6 @@
   import { page } from '$app/stores';
   import { add, deleteDocumentOnline, updateOnline, Collection } from 'sveltefirets';
   import { where } from 'firebase/firestore';
-  import { isManager, isContributor, dictionary, admin } from '$lib/stores';
   import type { IInvite, IHelper } from '@living-dictionaries/types';
   import { Button, ShowHide } from 'svelte-pieces';
   import { inviteHelper } from '$lib/helpers/inviteHelper';
@@ -10,6 +9,10 @@
   import ContributorInvitationStatus from '$lib/components/contributors/ContributorInvitationStatus.svelte';
   import Citation from './Citation.svelte';
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte';
+  import Partners from './Partners.svelte';
+
+  export let data
+  $: ({ partners, dictionary, is_manager, is_contributor, admin } = data)
 
   let helperType: IHelper[];
   let inviteType: IInvite[];
@@ -42,7 +45,7 @@
       </div>
     {/each}
   </Collection>
-  {#if $isManager}
+  {#if $is_manager}
     <Collection
       path={`dictionaries/${$dictionary.id}/invites`}
       queryConstraints={[where('role', '==', 'manager'), where('status', 'in', ['queued', 'sent'])]}
@@ -64,13 +67,14 @@
     </Collection>
   {/if}
 </div>
-{#if $isManager}
+{#if $is_manager}
   <Button onclick={() => inviteHelper('manager', $dictionary)} form="filled">
     <i class="far fa-envelope" />
     {$page.data.t('contributors.invite_manager')}
   </Button>
 {/if}
-<hr style="margin: 20px 0;" />
+
+<hr class="my-4" />
 <h3 class="font-semibold text-lg mb-1 mt-3">
   {$page.data.t('dictionary.contributors')}
 </h3>
@@ -84,7 +88,7 @@
         <div class="text-sm leading-5 font-medium text-gray-900">
           {contributor.name}
         </div>
-        {#if $isManager}
+        {#if $is_manager}
           <div class="w-1" />
           <Button
             onclick={() => {
@@ -100,7 +104,7 @@
       </div>
     {/each}
   </Collection>
-  {#if $isManager}
+  {#if $is_manager}
     <Collection
       path={`dictionaries/${$dictionary.id}/invites`}
       queryConstraints={[
@@ -127,7 +131,7 @@
       <i class="far fa-envelope" />
       {$page.data.t('contributors.invite_contributors')}
     </Button>
-  {:else if !$isContributor}
+  {:else if !$is_contributor}
     <ShowHide let:show let:toggle>
       <Button onclick={toggle} form="filled">
         {$page.data.t('contributors.request_access')}
@@ -140,7 +144,8 @@
     </ShowHide>
   {/if}
 </div>
-<hr style="margin: 20px 0;" />
+
+<hr class="my-4" />
 <h3 class="font-semibold text-lg mb-1 mt-3">
   {$page.data.t('contributors.other_contributors')}
 </h3>
@@ -154,7 +159,7 @@
         <div class="text-sm leading-5 font-medium text-gray-900">
           {collaborator.name}
         </div>
-        {#if $isManager}
+        {#if $is_manager}
           <div class="w-1" />
           <Button
             color="red"
@@ -173,25 +178,23 @@
   </Collection>
 </div>
 
-<!-- <div class="text-gray-600 my-1 text-sm">
-    {$page.data.t('dictionary.contributors')} = {$page.data.t(
-      'contributors.speakers_other_collaborators',
-      {
-        default: 'speakers and any other collaborators',
-      }
-    )}
-  </div> -->
+<!-- <div class="text-gray-600 mb-2 text-sm">
+  ({$page.data.t('contributors.speakers_other_collaborators')})
+</div> -->
 
-{#if $isManager}
+{#if $is_manager}
   <Button onclick={writeIn} form="filled">
     <i class="far fa-pencil" />
     {$page.data.t('contributors.write_in_contributor')}
   </Button>
 {/if}
 
+<hr class="my-4" />
+<Partners partners={$partners} can_edit={$is_manager} hideLivingTonguesLogo={$dictionary.hideLivingTonguesLogo} admin={$admin} {...data.partner_edits} />
+
 <!-- Not using contributors.request_to_add_manager -->
 
-<hr class="my-3" />
+<hr class="my-4" />
 
 {#if $dictionary.id != 'onondaga'}
   <h3 class="font-semibold mb-1 mt-3">
@@ -235,7 +238,7 @@
   {$page.data.t('contributors.how_to_cite_academics')}
 </h3>
 
-<Citation isManager={$isManager} dictionary={$dictionary} />
+<Citation isManager={$is_manager} dictionary={$dictionary} partners={$partners} />
 
 <div class="mb-12" />
 

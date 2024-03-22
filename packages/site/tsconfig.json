@@ -23,6 +23,12 @@
     ],
     // defining paths here and adding baseUrl for Playwright to work
     "paths": {
+      "$api": [
+				"./src/routes/api"
+			],
+			"$api/*": [
+				"./src/routes/api/*"
+			],
 			"$lib": [
 				"./src/lib"
 			],

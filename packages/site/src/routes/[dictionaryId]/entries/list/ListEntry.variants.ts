@@ -2,14 +2,16 @@ import type { Variant } from 'kitbook';
 import type Component from './ListEntry.svelte';
 import { basic_mock_dictionary } from '$lib/mocks/dictionaries';
 import { complex, simple } from '$lib/mocks/entries';
+import { logDbOperations } from '$lib/mocks/db';
 
 export const variants: Variant<Component>[] = [
   {
     name: 'complex',
     props: {
+      dbOperations: logDbOperations,
       dictionary: basic_mock_dictionary,
       entry: complex,
-      canEdit: true,
+      can_edit: true,
     }
   },
   {
@@ -17,9 +19,10 @@ export const variants: Variant<Component>[] = [
     languages: [],
     viewports: [{width: 400, height: 100}],
     props: {
+      dbOperations: logDbOperations,
       dictionary: basic_mock_dictionary,
       entry: simple,
-      canEdit: true,
+      can_edit: true,
       videoAccess: true,
     }
   },
@@ -27,13 +30,14 @@ export const variants: Variant<Component>[] = [
     name: 'jewish-neo-aramaic',
     description: 'This dictionary has an exception where we show dialects and example sentences in the list view.',
     props: {
+      dbOperations: logDbOperations,
       dictionary: {
         id: 'jewish-neo-aramaic',
         name: 'Jewish Neo-Aramaic',
         glossLanguages: ['en'],
       },
       entry: complex,
-      canEdit: true,
+      can_edit: true,
       videoAccess: true,
     }
   },
@@ -74,7 +78,7 @@ export const variants: Variant<Component>[] = [
 //         },
 //         'id': 'RdaOfXwRhP7uBVDvzzBd'
 //       },
-//       canEdit: true,
+//       can_edit: true,
 //     },
 //   },
 //   {

@@ -6,12 +6,12 @@
   import PasteVideoLink from './PasteVideoLink.svelte';
   import VideoIFrame from '$lib/components/video/VideoIFrame.svelte';
   import SelectSpeaker from '$lib/components/media/SelectSpeaker.svelte';
-  import { dictionary } from '$lib/stores';
   import type { ExpandedEntry, GoalDatabaseVideo } from '@living-dictionaries/types';
   import { addVideo } from '$lib/helpers/media/update';
   import { createEventDispatcher } from 'svelte';
   import { expand_video } from '$lib/transformers/expand_entry';
 
+  $: ({dictionary, speakers} = $page.data)
   const dispatch = createEventDispatcher();
   const close = () => dispatch('close');
 
@@ -22,7 +22,7 @@
 <Modal on:close>
   <span slot="heading"> <i class="far fa-film-alt text-sm" /> {entry.lexeme} </span>
 
-  <SelectSpeaker dictionaryId={$dictionary.id} let:speakerId>
+  <SelectSpeaker speakers={$speakers} let:speakerId>
     {#if database_video?.youtubeId || database_video?.vimeoId}
       <VideoIFrame video={expand_video(database_video)} />
       <div class="modal-footer">
@@ -30,7 +30,7 @@
           {$page.data.t('misc.cancel')}
         </Button>
         <div class="w-1" />
-        <Button onclick={async () => await addVideo(entry.id, database_video)} form="filled">
+        <Button onclick={async () => await addVideo(entry.id, $dictionary.id, database_video)} form="filled">
           {$page.data.t('misc.save')}
         </Button>
       </div>

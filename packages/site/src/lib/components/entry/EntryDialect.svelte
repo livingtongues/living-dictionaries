@@ -5,32 +5,27 @@
 
 <script lang="ts">
   import { page } from '$app/stores';
-  import { createEventDispatcher, onMount } from 'svelte';
-  import { EntryFields } from '@living-dictionaries/types';
+  import { onMount } from 'svelte';
   import ModalEditableArray from '../ui/array/ModalEditableArray.svelte';
   import type { SelectOption } from '../ui/array/select-options.interface';
   import { browser } from '$app/environment';
-  import { apiFetch } from '$lib/client/apiFetch';
   import { writable, type Writable } from 'svelte/store';
   import { PUBLIC_ALGOLIA_SEARCH_ONLY_API_KEY, PUBLIC_ALGOLIA_APPLICATION_ID } from '$env/static/public';
+  import { post_request } from '$lib/helpers/get-post-requests';
 
   export let dialects: string[] = [];
-  export let canEdit = false;
+  export let can_edit = false;
   export let dictionaryId: string;
   export let showPlus = true;
 
-  const dispatch = createEventDispatcher<{
-    valueupdate: {
-      field: EntryFields.dialects;
-      newValue: string[];
-    };
-  }>();
+  export let on_update: (new_value: string[]) => void;
 
   onMount(async () => {
     if (browser && fetchedDictionaryId !== dictionaryId) {
       try {
         const dialects = await fetchDialects()
-        $options = dialects.facetHits.map(({value}) => ({ name: value, value }));
+        if (dialects?.facetHits)
+          $options = dialects.facetHits.map(({value}) => ({ name: value, value }));
       } catch (error) {
         console.error(error);
       }
@@ -47,31 +42,29 @@
 
   async function fetchDialects(): Promise<IAlgoliaFacetsQuery> {
     fetchedDictionaryId = dictionaryId;
-    const data = {
-      facetFilters: [[`dictId:${dictionaryId}`]],
-      maxFacetHits: 100, // Algolia max possible https://www.algolia.com/doc/api-reference/api-parameters/maxFacetHits/
-    }
+
     const headers = {
       'X-Algolia-Application-Id': PUBLIC_ALGOLIA_APPLICATION_ID,
       'X-Algolia-API-Key': PUBLIC_ALGOLIA_SEARCH_ONLY_API_KEY,
     };
-    const response = await apiFetch(`https://${PUBLIC_ALGOLIA_APPLICATION_ID}.algolia.net/1/indexes/entries_prod/facets/di/query`,data, headers);
-    return await response.json();
+
+    const { data } = await post_request<any, IAlgoliaFacetsQuery>(`https://${PUBLIC_ALGOLIA_APPLICATION_ID}.algolia.net/1/indexes/entries_prod/facets/di/query`, { data: {
+      facetFilters: [[`dictId:${dictionaryId}`]],
+      maxFacetHits: 100, // Algolia max possible https://www.algolia.com/doc/api-reference/api-parameters/maxFacetHits/
+    }, headers});
+
+    if (data)
+      return data;
   }
 </script>
 
 <ModalEditableArray
   values={dialects}
   options={$options}
-  {canEdit}
+  {can_edit}
   canWriteIn
   {showPlus}
   placeholder={$page.data.t('entry_field.dialects')}
-  on:update={({ detail: newValue }) => {
-    dispatch('valueupdate', {
-      field: EntryFields.dialects,
-      newValue,
-    });
-  }}>
+  {on_update}>
   <span slot="heading">{$page.data.t('entry_field.dialects')}</span>
 </ModalEditableArray>

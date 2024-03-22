@@ -1,17 +1,18 @@
 <script lang="ts">
   import { page } from '$app/stores';
-  import { user } from '$lib/stores';
   import { tweened } from 'svelte/motion';
   import { cubicOut } from 'svelte/easing';
   import { getStorage, ref, uploadBytesResumable } from 'firebase/storage';
   import { firebaseConfig, authState } from 'sveltefirets';
-  import { apiFetch } from '$lib/client/apiFetch';
-  import type { ImageUrlRequestBody } from '../../../routes/api/image_url/+server';
+  import type { ImageUrlRequestBody, ImageUrlResponseBody } from '$api/image_url/+server';
   import { get } from 'svelte/store';
   import { createEventDispatcher, onMount } from 'svelte';
+  import { post_request } from '$lib/helpers/get-post-requests';
 
   export let file: File;
   export let fileLocationPrefix: string;
+  $: ({user} = $page.data)
+
 
   const progress = tweened(0, {
     duration: 2000,
@@ -74,17 +75,13 @@
 
       const auth_state_user = get(authState);
       const auth_token = await auth_state_user.getIdToken();
-      const response = await apiFetch<ImageUrlRequestBody>('/api/image_url', {
-        auth_token,
-        firebase_storage_location,
-      });
 
-      if (response.status !== 200)
-        throw new Error(`Error getting image serving url.`);
+      const { data, error } = await post_request<ImageUrlRequestBody, ImageUrlResponseBody>('/api/image_url', { auth_token, firebase_storage_location });
 
-      const gcsPath = await response.json() as string
+      if (error)
+        throw new Error(error.message);
 
-      dispatch('uploaded', { fb_storage_path: storagePath, specifiable_image_url: gcsPath})
+      dispatch('uploaded', { fb_storage_path: storagePath, specifiable_image_url: data.serving_url})
 
       success = true;
     } catch (err) {

@@ -1,7 +1,6 @@
 <script lang="ts">
   import { page } from '$app/stores';
-  import { user, admin, dictionary, isManager } from '$lib/stores';
-  import { updateOnline, getCollection, Doc } from 'sveltefirets';
+  import { updateOnline, getCollection } from 'sveltefirets';
   import { where, limit } from 'firebase/firestore';
   import { arrayRemove, arrayUnion, GeoPoint, type FieldValue } from 'firebase/firestore/lite';
   import { Button, ShowHide, JSON } from 'svelte-pieces';
@@ -16,10 +15,15 @@
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte';
   import Image from '$lib/components/image/Image.svelte';
   import ImageDropZone from '$lib/components/image/ImageDropZone.svelte';
+  import { invalidateAll } from '$app/navigation';
+
+  export let data
+  $: ({user, dictionary, admin, is_manager} = data)
 
   async function updateDictionary(change: Partial<IDictionary>) {
     try {
       await updateOnline<IDictionary>(`dictionaries/${$dictionary.id}`, change)
+      await invalidateAll()
     } catch (err) {
       alert(`${$page.data.t('misc.error')}: ${err}`);
     }
@@ -29,11 +33,6 @@
     await updateDictionary({ glossLanguages: change as unknown as string[] })
   }
 </script>
-
-<Doc
-  path={`dictionaries/${$dictionary.id}`}
-  startWith={$dictionary}
-  on:data={(e) => dictionary.set(e.detail.data)} />
 
 <div style="max-width: 700px">
   <h3 class="text-xl font-semibold mb-4">{$page.data.t('misc.settings')}</h3>
@@ -108,18 +107,18 @@
   <div class="mb-5" />
 
   <div class="text-sm font-medium text-gray-700 mb-2">
-    Featured Image
+    {$page.data.t('settings.featured_image')}
   </div>
   {#if $dictionary.featuredImage}
     <Image
-      canEdit
+      can_edit
       height={300}
       title="{$dictionary.name} Featured Image"
       gcs={$dictionary.featuredImage.specifiable_image_url}
       on:deleteImage={async () => await updateDictionary({ featuredImage: null })} />
   {:else}
     <ImageDropZone let:file class="p-3 rounded">
-      <span slot="label">Upload</span>
+      <span slot="label">{$page.data.t('misc.upload')}</span>
       {#if file}
         {#await import('$lib/components/image/UploadImage.svelte') then { default: UploadImage }}
           <div class="flex flex-col min-h-100px">
@@ -160,7 +159,7 @@
     }} />
   <div class="mb-5" />
 
-  {#if $isManager}
+  {#if $is_manager}
     <div>
       <ShowHide let:show let:toggle>
         <Button onclick={toggle} class="mb-5" color="red">
