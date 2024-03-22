@@ -11,8 +11,11 @@ program
 const dictionaryId = program.opts().id;
 const {live} = program.opts();
 
-type unique_speakers = Record<string, string>;
-const different_speakers: unique_speakers[] = [];
+interface unique_speakers {
+  id: string;
+  name: string;
+ }
+const all_speakers: unique_speakers[] = [];
 const developer_in_charge = 'qkTzJXH24Xfc57cZJRityS6OTn52'; // diego@livingtongues.org -> Diego Córdova Nieto;
 
 async function speakerRefactor() {
@@ -40,28 +43,37 @@ async function speakerRefactor() {
 async function fetchEntries(dictionaryId: string) {
   const speakerCollectionRef = db.collection('speakers');
   const dictionarySpeakerSnapshot = await speakerCollectionRef.where('contributingTo', 'array-contains', dictionaryId).get();
-  dictionarySpeakerSnapshot.docs.forEach((snap) => different_speakers.push({ [snap.data().displayName]: snap.id }));
+  dictionarySpeakerSnapshot.docs.forEach((snap) => all_speakers.push({ name: snap.data().displayName, id: snap.id }));
   const snapshot = await db.collection(`dictionaries/${dictionaryId}/words`).get();
   for (const snap of snapshot.docs) {
     const entry: ActualDatabaseEntry = { id: snap.id, ...(snap.data() as ActualDatabaseEntry) };
-    await addSpeakerIdToEntry(dictionaryId, entry, {birthplace: 'USA', displayName: ''}); // * Modify this line with real speaker Data
-
+    // await addSpeakerIdToEntry(dictionaryId, entry, {birthplace: 'USA', displayName: ''}); // * Modify this line with real speaker Data
+    await avoidSpeakerDuplication(dictionaryId, entry, 'nWDlCApU94zJ0jOm3ypL');
   }
 }
 
 const addSpeaker = async (speakerData: ISpeaker) => {
   const speaker = db.collection('speakers').doc();
   console.log(`Saving speaker... speaker id: ${speaker.id}`)
-  if (!live) return speaker.id
+  if (!live) return speaker.id;
   await speaker.set(speakerData);
   return speaker.id;
+}
+
+const createEntrySoundFiles = (entry: ActualDatabaseEntry, speakerId: string, path: string) => {
+  entry.sfs = [{
+    ab: developer_in_charge,
+    sp: [speakerId],
+    path,
+    ts: new Date().getTime()
+  }]
 }
 
 const addSpeakerIdToEntry = async (dictionaryId: string, entry: ActualDatabaseEntry, speakerData: ISpeaker) => {
   // let speakerId = null;
   const sfBefore = entry.sf;
   if (entry.sf?.speakerName) {
-    let speakerId = different_speakers.find(speaker => Object.keys(speaker).some(key => key === entry.sf.speakerName))?.[entry.sf.speakerName];
+    let speakerId = all_speakers.find(speaker => speaker.name === entry.sf.speakerName)?.id;
     if (!speakerId) {
       speakerId = await addSpeaker({
         ...speakerData,
@@ -72,21 +84,26 @@ const addSpeakerIdToEntry = async (dictionaryId: string, entry: ActualDatabaseEn
         updatedAt: Timestamp.now(),
         updatedBy: developer_in_charge
       });
-      different_speakers.push({ [entry.sf.speakerName]: speakerId });
+      all_speakers.push({ name: entry.sf.speakerName, id: speakerId });
     }
 
     console.log(`Before: sf-${JSON.stringify(sfBefore)} sfs-${JSON.stringify(entry?.sfs)}`);
-    entry.sfs = [{
-      ab: developer_in_charge,
-      sp: [speakerId],
-      path: entry.sf.path,
-      ts: new Date().getTime()
-    }]
+    createEntrySoundFiles(entry, speakerId, entry.sf.path);
     delete entry.sf;
     console.log(`After: sf-${JSON.stringify(entry?.sf)} sfs-${JSON.stringify(entry.sfs)}`);
   }
   if (!live) return;
   await db.collection(`dictionaries/${dictionaryId}/words`).doc(entry.id).set(entry);
+}
+
+const avoidSpeakerDuplication = async (dictionaryId: string, entry:ActualDatabaseEntry, speakerId: string) => {
+  if (entry.sfs) {
+    const selected_speaker = all_speakers.find(speaker => speaker.id === speakerId);
+    console.log(all_speakers)
+    console.log(selected_speaker)
+    // TODO Remove all other speakers that have the same name from speakers Collection
+    // TODO add only this speaker id to all other speaker.sfs that match this speaker id
+  }
 }
 
 speakerRefactor();
