@@ -1,13 +1,9 @@
 import type { ExpandedEntry } from '@living-dictionaries/types';
 import { seo_description } from './seo_description';
-import type { TranslateFunction } from '$lib/i18n/types';
-import { en } from '$lib/i18n';
+import { english_translate } from '$lib/i18n';
 
 describe('seo_description', () => {
-  const t = (({dynamicKey: key}: { dynamicKey: string}) => {
-    const [section, item] = key.split('.')
-    return en[section][item];
-  }) as TranslateFunction
+  const t = english_translate
 
   test('prints simple labeled english and spanish glosses', () => {
     const entry: Partial<ExpandedEntry> = {

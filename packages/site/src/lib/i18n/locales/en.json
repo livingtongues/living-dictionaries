@@ -167,6 +167,7 @@
   "entry_field": {
     "photo": "Photo",
     "audio": "Audio",
+    "video": "Video",
     "speaker": "Speaker",
     "lexeme": "Lexeme/Word/Phrase",
     "elicitation_id": "ID",
