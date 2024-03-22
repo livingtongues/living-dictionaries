@@ -1,4 +1,4 @@
-import { readable } from 'svelte/store'
+import { readable, writable } from 'svelte/store'
 import type { LayoutData } from '../../routes/[dictionaryId]/$types'
 import { type IDictionary } from '@living-dictionaries/types'
 import type { awaitableDocStore } from 'sveltefirets'
@@ -22,7 +22,9 @@ export const mockDictionaryLayoutData: LayoutData = {
   locale: null,
   my_dictionaries: null,
   preferred_table_columns: null,
-  entries: null,
+  initial_entries: writable(null),
+  search_entries: null,
+  search_index_updated: writable(false),
   entries_per_page: null,
   dbOperations: logDbOperations,
 }
