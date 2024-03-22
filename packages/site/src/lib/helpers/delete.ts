@@ -2,7 +2,7 @@ import { page } from '$app/stores';
 import { get } from 'svelte/store';
 import { goto } from '$app/navigation';
 import type { ActualDatabaseEntry, GoalDatabaseVideo } from '@living-dictionaries/types';
-import { updateOnline, deleteDocumentOnline, set } from 'sveltefirets';
+import { updateOnline, deleteDocumentOnline, set, getDocument } from 'sveltefirets';
 import { arrayUnion } from 'firebase/firestore/lite';
 import { serverTimestamp } from 'firebase/firestore';
 
@@ -51,18 +51,19 @@ export async function deleteVideo(entry: ActualDatabaseEntry, dictionaryId: stri
   }
 }
 
-export async function deleteEntry(entry: ActualDatabaseEntry, dictionaryId: string, algoliaQueryParams: string) {
+export async function deleteEntry(entry_id: string, dictionary_id: string, algoliaQueryParams: string) {
   const { data: { t } } = get(page)
   if (
     confirm(t('entry.delete_entry'))
   ) {
     try {
-      goto(`/${dictionaryId}/entries/list${algoliaQueryParams}`);
-      set<ActualDatabaseEntry>(`dictionaries/${dictionaryId}/deletedEntries/${entry.id}`, {
+      const entry = await getDocument<ActualDatabaseEntry>(`dictionaries/${dictionary_id}/words/${entry_id}`);
+      set<ActualDatabaseEntry>(`dictionaries/${dictionary_id}/deletedEntries/${entry.id}`, {
         ...entry,
         deletedAt: serverTimestamp(),
       }); // using cache based set to avoid conflicts w/ serverTimestamps loaded in from firestore normal and sent out via firestore lite, not awaiting in case internet is flaky - can go on to the delete operation.
-      await deleteDocumentOnline(`dictionaries/${dictionaryId}/words/${entry.id}`);
+      await deleteDocumentOnline(`dictionaries/${dictionary_id}/words/${entry.id}`);
+      goto(`/${dictionary_id}/entries/list${algoliaQueryParams}`);
     } catch (err) {
       alert(`${t('misc.error')}: ${err}`);
     }

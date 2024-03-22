@@ -25,7 +25,7 @@ export const variants: Variant<Component>[] = [
           },
         ],
       },
-      canEdit: true,
+      can_edit: true,
       glossLanguages: ['en', 'es'],
     },
   },
@@ -34,7 +34,7 @@ export const variants: Variant<Component>[] = [
     description: 'translation fields for example sentence do not show when there is no vernacular sentence',
     props: {
       sense: {},
-      canEdit: true,
+      can_edit: true,
       glossLanguages: ['en', 'es'],
     },
   },

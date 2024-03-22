@@ -5,8 +5,10 @@
   import LoadingIndicator from './LoadingIndicator.svelte';
 </script>
 
-{#if browser && $navigating}
-  <LoadingIndicator />
+{#if browser}
+  {#if $navigating}
+    <LoadingIndicator />
+  {/if}
 {/if}
 
 <div id="direction" dir={$page.data.t('page.direction')}>

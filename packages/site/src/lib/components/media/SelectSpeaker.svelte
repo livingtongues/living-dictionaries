@@ -1,30 +1,18 @@
 <script lang="ts">
   import { page } from '$app/stores';
-  import { Collection } from 'sveltefirets';
-  import { where } from 'firebase/firestore';
+  import type { ISpeaker } from '@living-dictionaries/types';
 
-  export let dictionaryId: string;
+  export let speakers: ISpeaker[]
+  export let select_speaker: (speaker_id: string) => Promise<void> = undefined
   export let initialSpeakerId: string = undefined;
 
   const addSpeaker = 'AddSpeaker';
   $: speakerId = initialSpeakerId;
 
-  import type { ISpeaker } from '@living-dictionaries/types';
-  let speakers: ISpeaker[] = [];
-
-  import { createEventDispatcher } from 'svelte';
-  const dispatch = createEventDispatcher<{ update: { speakerId: string } }>();
-
   function autofocus(node: HTMLSelectElement) {
     setTimeout(() => node.focus(), 5);
   }
 </script>
-
-<Collection
-  path="speakers"
-  startWith={speakers}
-  on:data={(e) => (speakers = e.detail.data)}
-  queryConstraints={[where('contributingTo', 'array-contains', dictionaryId)]} />
 
 {#if !speakerId}
   <div class="text-sm font-medium leading-5 text-gray-600 mb-2">
@@ -45,8 +33,7 @@
     on:change={() => {
       // Currently means you can't remove a speaker
       if (speakerId && speakerId !== addSpeaker)
-        dispatch('update', { speakerId });
-
+        select_speaker?.(speakerId)
     }}
     class="block w-full pl-3 !rounded-none ltr:!rounded-r-md rtl:!rounded-l-md form-input hover:outline-blue-600">
     {#if !speakerId}
@@ -72,7 +59,7 @@
       }}
       on:newSpeaker={(event) => {
         speakerId = event.detail.id;
-        dispatch('update', { speakerId });
+        select_speaker?.(speakerId);
       }} />
   {/await}
 {/if}

@@ -7,7 +7,7 @@
   export let htmlValue: string = undefined;
   export let field: EntryFieldValue;
   export let bcp: string = undefined;
-  export let canEdit = false;
+  export let can_edit = false;
   export let display: string;
   export let on_update: (new_value: string) => void;
 
@@ -16,11 +16,11 @@
 
 <ShowHide let:show let:toggle let:set>
   <div
-    class:cursor-pointer={canEdit}
+    class:cursor-pointer={can_edit}
     class:italic={field === 'scientific_names' && !value?.includes('<i>')}
     class="h-full"
     style="padding: 0.1em 0.25em"
-    on:click={() => set(canEdit)}>
+    on:click={() => set(can_edit)}>
     {@html sanitizedHtml}
     &nbsp;
   </div>

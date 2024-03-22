@@ -5,7 +5,6 @@
   import Pagination from '$lib/components/search/Pagination.svelte';
   import { configure } from 'instantsearch.js/es/widgets/index.js';
   import { connectToggleRefinement } from 'instantsearch.js/es/connectors';
-  import { dictionary_deprecated as dictionary, canEdit } from '$lib/stores';
   import GalleryEntry from './GalleryEntry.svelte';
   import { Doc } from 'sveltefirets';
   import { convert_and_expand_entry } from '$lib/transformers/convert_and_expand_entry';
@@ -13,6 +12,9 @@
   import { navigating, page } from '$app/stores';
   import { save_scroll_point, restore_scroll_point } from '$lib/helpers/scrollPoint';
   import { browser } from '$app/environment';
+
+  export let data
+  $: ({dictionary, can_edit} = data)
 
   const search: InstantSearch = getContext('search');
   let pixels_from_top = 0;
@@ -52,14 +54,14 @@
 
 <Hits {search} let:entries on_updated={restore_scroll_point}>
   <div class="gallery">
-    {#if $canEdit}
+    {#if $can_edit}
       {#each entries as algoliaEntry (algoliaEntry.id)}
         {#if algoliaEntry.pf}
           <Doc
             path="dictionaries/{$dictionary.id}/words/{algoliaEntry.id}"
             startWith={algoliaEntry}
             let:data={entry}>
-            <GalleryEntry dictionary={$dictionary} entry={convert_and_expand_entry(entry, $page.data.t)} canEdit={$canEdit} />
+            <GalleryEntry dictionary={$dictionary} entry={convert_and_expand_entry(entry, $page.data.t)} can_edit={$can_edit} />
           </Doc>
         {/if}
       {/each}

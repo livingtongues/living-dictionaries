@@ -39,7 +39,7 @@
 <ShowHide let:show let:toggle={toggleSelectUserModal}>
   <BadgeArrayEmit
     strings={helpers.map((h) => h.name)}
-    canEdit
+    can_edit
     addMessage="Add"
     on:itemclicked={(e) => alert(helpers[e.detail.index].id)}
     on:itemremoved={async (e) => await remove(helpers[e.detail.index], dictionary.id, role)}

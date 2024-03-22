@@ -6,7 +6,7 @@
 
   export let title: string;
   export let gcs: string;
-  export let canEdit = false;
+  export let can_edit = false;
   export let square: number = undefined;
   export let width: number = undefined;
   export let height: number = undefined;
@@ -86,7 +86,7 @@
         <span class="i-fa-solid-times p-3 cursor-pointer opacity-75 hover:opacity-100" />
       </div>
       <img class="object-contain max-h-full" alt="Image of {title}" src={fullscreenSource} />
-      {#if canEdit}
+      {#if can_edit}
         <div
           class="p-4 flex justify-between
             items-center absolute bottom-0 inset-x-0 bg-opacity-25 bg-black">

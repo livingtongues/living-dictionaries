@@ -1,9 +1,11 @@
 <script lang="ts">
   import { page } from '$app/stores';
-  import { user } from '$lib/stores';
   import Header from '$lib/components/shell/Header.svelte';
   import { logOut } from 'sveltefirets';
   import { Button, ShowHide } from 'svelte-pieces';
+
+  export let data
+  $: ({user} = data)
 </script>
 
 <svelte:head>

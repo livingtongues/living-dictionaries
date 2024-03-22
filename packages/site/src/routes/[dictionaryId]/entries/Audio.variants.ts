@@ -40,7 +40,7 @@ export const variants: Variant<Component>[] = [
     props: {
       entry,
       context: 'entry',
-      canEdit: true,
+      can_edit: true,
     },
   },
   {
@@ -48,7 +48,7 @@ export const variants: Variant<Component>[] = [
     props: {
       entry: {},
       context: 'list',
-      canEdit: true,
+      can_edit: true,
     },
   },
   {
@@ -56,7 +56,7 @@ export const variants: Variant<Component>[] = [
     props: {
       entry: {},
       context: 'table',
-      canEdit: true,
+      can_edit: true,
     },
   },
   {
@@ -64,7 +64,7 @@ export const variants: Variant<Component>[] = [
     props: {
       entry: {},
       context: 'entry',
-      canEdit: true,
+      can_edit: true,
     },
   },
 ]

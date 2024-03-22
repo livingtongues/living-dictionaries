@@ -10,7 +10,7 @@ export function convert_entry_to_current_shape(actual: ActualDatabaseEntry): Goa
   for (const [key, value] of Object.entries(actual) as [keyof ActualDatabaseEntry, any][]) {
     if (!value) continue;
 
-    if (key === 'lo') {
+    if (key === 'lo' && !goal.lo1) {
       goal.lo1 = value;
       continue;
     }

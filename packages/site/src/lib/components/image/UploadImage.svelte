@@ -1,6 +1,5 @@
 <script lang="ts">
   import { page } from '$app/stores';
-  import { user } from '$lib/stores';
   import { tweened } from 'svelte/motion';
   import { cubicOut } from 'svelte/easing';
   import { getStorage, ref, uploadBytesResumable } from 'firebase/storage';
@@ -12,6 +11,8 @@
 
   export let file: File;
   export let fileLocationPrefix: string;
+  $: ({user} = $page.data)
+
 
   const progress = tweened(0, {
     duration: 2000,

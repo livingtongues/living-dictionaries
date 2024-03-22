@@ -11,7 +11,7 @@
     connectInfiniteHits,
     connectToggleRefinement,
   } from 'instantsearch.js/es/connectors';
-  import { algoliaQueryParams } from '$lib/stores';
+  import { algoliaQueryParams } from '$lib/stores/algolia';
 
   const searchClient = algoliasearch(
     PUBLIC_ALGOLIA_APPLICATION_ID,

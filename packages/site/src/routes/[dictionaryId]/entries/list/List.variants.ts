@@ -1,6 +1,7 @@
 import type { Variant, Viewport } from 'kitbook'
 import type Component from './List.svelte'
 import { basic_mock_dictionary } from '$lib/mocks/dictionaries'
+import { logDbOperations } from '$lib/mocks/db'
 
 export const viewports: Viewport[] = [
   { width: 300, height: 150 },
@@ -11,6 +12,7 @@ export const variants: Variant<Component>[] = [
   {
     name: 'entry with audio vs entry without audio',
     props: {
+      dbOperations: logDbOperations,
       entries: [
         {
           id: '1',
@@ -26,13 +28,14 @@ export const variants: Variant<Component>[] = [
           lx: 'hi, I am here too',
         },
       ],
-      canEdit: true,
+      can_edit: true,
       dictionary: basic_mock_dictionary
     },
   },
   {
     name: 'entry with big amount of data vs entry with small amount',
     props: {
+      dbOperations: logDbOperations,
       entries: [
         {
           id: '1',
@@ -59,7 +62,7 @@ export const variants: Variant<Component>[] = [
           ],
         },
       ],
-      canEdit: true,
+      can_edit: true,
       dictionary: basic_mock_dictionary
     },
   },

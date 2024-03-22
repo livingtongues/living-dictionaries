@@ -6,7 +6,7 @@
   import { page } from '$app/stores';
 
   export let entry: ExpandedEntry;
-  export let canEdit = false;
+  export let can_edit = false;
   export let dictionary: IDictionary;
 
   $: glosses = order_glosses({
@@ -24,7 +24,7 @@
         square={480}
         title={entry.lexeme}
         gcs={entry.senses?.[0]?.photo_files?.[0].specifiable_image_url}
-        {canEdit}
+        {can_edit}
         on:deleteImage={() => deleteImage(entry, dictionary.id)} />
     </div>
     <a href={entry.id} style="background: #f3f3f3;" class="block p-[10px] h-60px">

@@ -59,7 +59,7 @@ const partialVariants: DeepPartial<Variant<Component>[]> = [
   {
     name: '2 senses',
     props: {
-      canEdit: true,
+      can_edit: true,
       videoAccess: true,
       entry: {
         id: 'entryId123',
@@ -117,7 +117,7 @@ const partialVariants: DeepPartial<Variant<Component>[]> = [
   {
     name: 'Custom imported semantic domain',
     props: {
-      canEdit: true,
+      can_edit: true,
       entry: {
         senses: [
           {
@@ -168,7 +168,7 @@ const partialVariants: DeepPartial<Variant<Component>[]> = [
         lexeme: 'Old world swallowtail',
         scientific_names: ['<i>Papilio machaon</i>, Dr. G.'],
       },
-      canEdit: true,
+      can_edit: true,
     },
   },
   {
@@ -176,7 +176,7 @@ const partialVariants: DeepPartial<Variant<Component>[]> = [
     description: 'temporarily using admin is true until edit senses is no longer behind a flag',
     languages: [],
     props: {
-      canEdit: true,
+      can_edit: true,
     },
   },
   {

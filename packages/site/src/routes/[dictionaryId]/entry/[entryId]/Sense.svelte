@@ -9,7 +9,7 @@
 
   export let sense: ExpandedSense
   export let glossLanguages: IDictionary['glossLanguages']
-  export let canEdit = false;
+  export let can_edit = false;
 
   const dispatch = createEventDispatcher<{
     valueupdate: { field: string; newValue: string | string[] };
@@ -24,7 +24,7 @@
     value={sense.glosses?.[bcp]}
     field="gloss"
     {bcp}
-    {canEdit}
+    {can_edit}
     display={`${$page.data.t({ dynamicKey: `gl.${bcp}`, fallback: bcp})}: ${$page.data.t('entry_field.gloss')}`}
     on_update={new_value => dispatch('valueupdate', { field: `gl.${bcp}`, newValue: new_value})} />
 {/each}
@@ -34,27 +34,27 @@
   <EntryField
     value={sense.definition_english}
     field="definition_english"
-    {canEdit}
+    {can_edit}
     display="Definition (deprecated)"
     on_update={new_value => dispatch('valueupdate', { field: EntryFields.definition_english, newValue: new_value})} />
 {/if}
 
-{#if sense.translated_parts_of_speech?.length || canEdit}
+{#if sense.translated_parts_of_speech?.length || can_edit}
   <div class="md:px-2" class:order-2={!sense.translated_parts_of_speech?.length}>
     <div class="rounded text-xs text-gray-500 mt-1 mb-2">{$page.data.t('entry_field.parts_of_speech')}</div>
     <EntryPartOfSpeech
       value={sense.translated_parts_of_speech}
-      {canEdit}
+      {can_edit}
       on_update={new_value => dispatch('valueupdate', { field: EntryFields.parts_of_speech, newValue: new_value})} />
     <div class="border-b-2 pb-1 mb-2 border-dashed" />
   </div>
 {/if}
 
-{#if hasSemanticDomain || canEdit}
+{#if hasSemanticDomain || can_edit}
   <div class="md:px-2" class:order-2={!hasSemanticDomain}>
     <div class="rounded text-xs text-gray-500 mt-1 mb-2">{$page.data.t('entry_field.semantic_domains')}</div>
     <SupaEntrySemanticDomains
-      can_edit={canEdit}
+      {can_edit}
       semantic_domain_keys={sense.ld_semantic_domains_keys}
       write_in_semantic_domains={sense.write_in_semantic_domains}
       on_update={new_value => dispatch('valueupdate', {
@@ -72,7 +72,7 @@
 <EntryField
   value={sense.noun_class}
   field="noun_class"
-  {canEdit}
+  {can_edit}
   display={$page.data.t('entry_field.noun_class')}
   on_update={new_value => dispatch('valueupdate', { field: EntryFields.noun_class, newValue: new_value})} />
 
@@ -81,7 +81,7 @@
     <EntryField
       value={sentence.vn}
       field="example_sentence"
-      {canEdit}
+      {can_edit}
       display={$page.data.t('entry_field.example_sentence')}
       on_update={new_value => dispatch('valueupdate', { field: 'xs.vn', newValue: new_value})} />
 
@@ -92,7 +92,7 @@
           value={sentence[bcp]}
           field="example_sentence"
           {bcp}
-          {canEdit}
+          {can_edit}
           display={`${$page.data.t({dynamicKey: `gl.${bcp}`, fallback: bcp})}: ${$page.data.t('entry_field.example_sentence')}`}
           on_update={new_value => dispatch('valueupdate', { field: `xs.${bcp}`, newValue: new_value})} />
       {/each}

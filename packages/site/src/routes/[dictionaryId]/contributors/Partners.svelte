@@ -79,7 +79,7 @@
     {#if partner.logo}
       <div class="max-w-400px">
         <Image
-          canEdit={can_edit}
+          {can_edit}
           width={400}
           title="{partner.name} Logo"
           gcs={partner.logo.specifiable_image_url}

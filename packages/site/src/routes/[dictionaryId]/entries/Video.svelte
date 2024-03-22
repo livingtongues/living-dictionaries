@@ -6,7 +6,7 @@
 
   export let lexeme: string;
   export let video: ExpandedVideo;
-  export let canEdit = false;
+  export let can_edit = false;
 </script>
 
 <ShowHide let:show let:toggle>
@@ -25,7 +25,7 @@
         {lexeme}
         {video}
         storageBucket={firebaseConfig.storageBucket}
-        {canEdit}
+        {can_edit}
         on:deleteVideo
         on:close={toggle} />
     {/await}

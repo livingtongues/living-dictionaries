@@ -2,7 +2,6 @@
   // import SeoMetaTags from '$lib/components/SeoMetaTags.svelte';
   import { onMount, getContext } from 'svelte';
   import { Doc } from 'sveltefirets';
-  import { canEdit, preferredColumns, dictionary_deprecated as dictionary } from '$lib/stores';
   import Hits from '$lib/components/search/Hits.svelte';
   import Pagination from '$lib/components/search/Pagination.svelte';
   import EntriesTable from './EntriesTable.svelte';
@@ -16,6 +15,9 @@
   import { setUpColumns } from './setUpColumns';
   import { page } from '$app/stores';
 
+  export let data
+  $: ({dictionary, preferred_table_columns, can_edit} = data)
+
   const search: InstantSearch = getContext('search');
 
   onMount(() => {
@@ -27,7 +29,7 @@
     ]);
   });
 
-  $: columns = setUpColumns($preferredColumns, $dictionary);
+  $: columns = setUpColumns($preferred_table_columns, $dictionary);
   const entries = writable<(ActualDatabaseEntry | LDAlgoliaHit)[]>([]);
 </script>
 
@@ -40,11 +42,11 @@
     entries={$entries.map(entry => convert_and_expand_entry(entry, $page.data.t))}
     {columns}
     dictionaryId={$dictionary.id}
-    canEdit={$canEdit}
+    can_edit={$can_edit}
     on:deleteImage={({detail: {entryId}}) => deleteImage({id: entryId}, $dictionary.id)}
     on:valueupdate={({detail: { field, newValue, entryId }}) => updateFirestoreEntry({field, value: newValue, entryId })} />
 
-  {#if $canEdit}
+  {#if $can_edit}
     {#each algoliaEntries as algoliaEntry (algoliaEntry.id)}
       <Doc
         path="dictionaries/{$dictionary.id}/words/{algoliaEntry.id}"

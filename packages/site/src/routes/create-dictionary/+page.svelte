@@ -1,7 +1,6 @@
 <script lang="ts">
   import { page } from '$app/stores';
   import { Button, Form } from 'svelte-pieces';
-  import { user } from '$lib/stores';
   import Header from '$lib/components/shell/Header.svelte';
   import type { IDictionary, IHelper, IPoint, IRegion, IUser } from '@living-dictionaries/types';
   import { docExists, setOnline, updateOnline, firebaseConfig, authState } from 'sveltefirets';
@@ -17,6 +16,9 @@
   import { convertToFriendlyUrl } from './convertToFriendlyUrl';
   import { debounce } from '$lib/helpers/debounce';
   import { post_request } from '$lib/helpers/get-post-requests';
+
+  export let data
+  $: ({user} = data)
 
   const MIN_URL_LENGTH = 3;
   const MAX_URL_LENGTH = 25;

@@ -13,7 +13,7 @@
   export let on_close: () => void;
 </script>
 
-<Modal noscroll on:close>
+<Modal noscroll class={field === 'phonetic' && 'wider-phonetic-modal'} on:close={on_close}>
   <span slot="heading">{display}</span>
   <EditField {on_close} {on_update} {value} {field} {bcp} {isSompeng} {addingLexeme} />
 </Modal>

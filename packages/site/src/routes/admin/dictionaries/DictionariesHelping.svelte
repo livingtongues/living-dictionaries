@@ -33,7 +33,7 @@
 <ShowHide let:show let:toggle>
   <BadgeArrayEmit
     strings={dictionaryIds}
-    canEdit
+    can_edit
     addMessage="Add"
     on:itemclicked={(e) => window.open(`/${e.detail.value}`, '_blank')}
     on:itemremoved={(e) => {

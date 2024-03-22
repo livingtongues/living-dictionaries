@@ -13,7 +13,7 @@ export const variants: Variant<Component>[] = [
   {
     name: 'can edit',
     props: {
-      canEdit: true,
+      can_edit: true,
       value: ['n', 'v'],
       on_update,
     },
@@ -32,7 +32,7 @@ export const variants: Variant<Component>[] = [
   {
     name: 'undefined - can edit',
     props: {
-      canEdit: true,
+      can_edit: true,
       value: undefined,
       on_update,
     },

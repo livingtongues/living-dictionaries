@@ -26,7 +26,7 @@
     value={sense.glosses?.[bcp]}
     field="gloss"
     {bcp}
-    canEdit={can_edit}
+    {can_edit}
     display={`${$page.data.t({ dynamicKey: `gl.${bcp}`, fallback: bcp})}: ${$page.data.t('entry_field.gloss')}`}
     on_update={new_value => update_sense({
       change: {
@@ -46,7 +46,7 @@
     value={sense.definition?.en}
     field="definition_english"
     display="Definition (deprecated)"
-    canEdit={can_edit}
+    {can_edit}
     on_update={new_value => update_sense({
       change: {
         definition: {
@@ -64,7 +64,7 @@
     <div class="rounded text-xs text-gray-500 mt-1 mb-2">{$page.data.t('entry_field.parts_of_speech')}</div>
     <EntryPartOfSpeech
       value={sense.parts_of_speech}
-      canEdit={can_edit}
+      {can_edit}
       on_update={new_value => update_sense({
         change: {
           parts_of_speech: {
@@ -113,7 +113,7 @@
 <EntryField
   value={sense.noun_class}
   field="noun_class"
-  canEdit={can_edit}
+  {can_edit}
   display={$page.data.t('entry_field.noun_class')}
   on_update={new_value => update_sense({
     change: {
@@ -133,7 +133,7 @@
       <EntryField
         value={sentence.text[orthography]}
         field="example_sentence"
-        canEdit={can_edit}
+        {can_edit}
         display={$page.data.t('entry_field.example_sentence')}
         on_update={new_value => update_sentence({
           change: {
@@ -154,7 +154,7 @@
           value={sentence.translation?.[bcp]}
           field="example_sentence"
           {bcp}
-          canEdit={can_edit}
+          {can_edit}
           display="{$page.data.t({dynamicKey: `gl.${bcp}`, fallback: bcp})}: {$page.data.t('entry_field.example_sentence')}"
           on_update={new_value => update_sentence({
             change: {

@@ -1,7 +1,6 @@
 <script lang="ts">
   import { page } from '$app/stores';
   import { Button, Modal, Form } from 'svelte-pieces';
-  import { user, dictionary_deprecated as dictionary } from '$lib/stores';
   import { goto } from '$app/navigation';
   import { createEventDispatcher } from 'svelte';
   import type { SupportRequestBody } from '$api/email/support/+server';
@@ -10,6 +9,7 @@
   import { post_request } from '$lib/helpers/get-post-requests';
 
   export let subject: Subjects = undefined;
+  $: ({dictionary, user} = $page.data)
 
   const subjects = {
     'delete_dictionary': 'contact.delete_dictionary',

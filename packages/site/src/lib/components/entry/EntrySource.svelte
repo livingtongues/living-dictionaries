@@ -2,7 +2,7 @@
   import { page } from '$app/stores';
   import { BadgeArray } from 'svelte-pieces';
   import { createEventDispatcher } from 'svelte';
-  export let canEdit = false;
+  export let can_edit = false;
   export let value: string[];
 
   const dispatch = createEventDispatcher<{
@@ -14,7 +14,7 @@
   <BadgeArray
     class="remove-button-mb"
     strings={value || []}
-    {canEdit}
+    {can_edit}
     promptMessage={$page.data.t('entry_field.sources')}
     addMessage=""
     on:valueupdated={(e) => dispatch('valueupdate', { field: 'sr', newValue: e.detail })}>

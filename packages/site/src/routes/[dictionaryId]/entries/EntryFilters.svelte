@@ -1,6 +1,5 @@
 <script lang="ts">
   import { page } from '$app/stores';
-  import { isManager } from '$lib/stores';
   import RefinementList from '$lib/components/search/RefinementList.svelte';
   import ToggleRefinement from '$lib/components/search/ToggleRefinement.svelte';
   import ClearRefinements from '$lib/components/search/ClearRefinements.svelte';
@@ -9,6 +8,7 @@
 
   export let showMobileFilters = false;
   export let search: InstantSearch;
+  $: ({is_manager} = $page.data)
 </script>
 
 <ResponsiveSlideover
@@ -114,7 +114,7 @@
             label={$page.data.t('entry.has_exists') + ' ' + $page.data.t('entry_field.semantic_domains')} />
         {/if}
 
-        {#if $isManager}
+        {#if $is_manager}
           <Button class="mb-1" size="sm" onclick={toggle}>{$page.data.t('entry.switch_opposite')}</Button>
         {/if}
       </ShowHide>

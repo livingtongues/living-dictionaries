@@ -38,7 +38,7 @@ export const variants: Variant<Component>[] = [
         { value: '1.4', name: 'wind' },
         { value: '1.5', name: 'fire' },
       ],
-      canEdit: true,
+      can_edit: true,
       on_update,
     }
   },
@@ -48,7 +48,7 @@ export const variants: Variant<Component>[] = [
       values: [],
       placeholder: 'Select elements',
       options: [],
-      canEdit: true,
+      can_edit: true,
       canWriteIn: true,
       on_update,
     }

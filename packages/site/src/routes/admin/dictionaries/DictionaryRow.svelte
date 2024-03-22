@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { admin } from '$lib/stores';
   import { printDate } from '$lib/helpers/time';
   import DictionaryFieldEdit from './DictionaryFieldEdit.svelte';
   import { BadgeArrayEmit, ShowHide, Button } from 'svelte-pieces';
@@ -9,10 +8,12 @@
   import RolesManagment from './RolesManagment.svelte';
   import type { DictionaryWithHelperStores } from './dictionaryWithHelpers';
   import LatLngDisplay from '$lib/components/maps/LatLngDisplay.svelte';
+  import { page } from '$app/stores';
 
   export let index: number;
   export let dictionary: DictionaryWithHelperStores;
   const { managers, contributors, writeInCollaborators, invites } = dictionary;
+  $: ({admin} = $page.data)
 
   const dispatch = createEventDispatcher<{
     addalternatename: string;
@@ -135,7 +136,7 @@
 <td>
   <div style="width: 300px;" />
   <BadgeArrayEmit
-    canEdit
+    can_edit
     addMessage={'Add'}
     strings={dictionary.alternateNames}
     on:additem={() => {

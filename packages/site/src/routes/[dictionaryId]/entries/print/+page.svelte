@@ -7,7 +7,6 @@
   import { Button, createPersistedStore } from 'svelte-pieces';
   import { defaultPrintFields } from './printFields';
   import PrintEntry from './PrintEntry.svelte';
-  import { dictionary_deprecated as dictionary, isManager, canEdit } from '$lib/stores';
   import { browser } from '$app/environment';
   import type { IPrintFields, ICitation } from '@living-dictionaries/types';
   import PrintFieldCheckboxes from './PrintFieldCheckboxes.svelte';
@@ -15,11 +14,15 @@
   import { truncateAuthors } from './truncateAuthors';
   import { convert_and_expand_entry } from '$lib/transformers/convert_and_expand_entry';
   import type { InstantSearch } from 'instantsearch.js';
+
+  export let data
+  $: ({dictionary, can_edit, is_manager} = data)
+
   const search: InstantSearch = getContext('search');
   const managerMaxEntries = 1000;
   const defaultMaxEntries = 300;
 
-  const hitsPerPage = createPersistedStore<number>('printHitsPerPage', ($isManager ? managerMaxEntries : defaultMaxEntries));
+  const hitsPerPage = createPersistedStore<number>('printHitsPerPage', ($is_manager ? managerMaxEntries : defaultMaxEntries));
   $: if (browser) {
     search.addWidgets([
       configure({
@@ -40,7 +43,7 @@
   const citationType: ICitation = { citation: '' };
 </script>
 
-{#if $dictionary.printAccess || $canEdit}
+{#if $dictionary.printAccess || $can_edit}
   <Hits {search} let:entries>
     <div class="print:hidden bg-white md:sticky z-1 md:top-22 py-3">
       <div class="flex flex-wrap mb-1">
@@ -56,7 +59,7 @@
             id="maxEntries"
             type="number"
             min="1"
-            max={$isManager ? managerMaxEntries : defaultMaxEntries}
+            max={$is_manager ? managerMaxEntries : defaultMaxEntries}
             bind:value={$hitsPerPage} />
           <!-- Algolia hard max per page is 1000 -->
         </div>
