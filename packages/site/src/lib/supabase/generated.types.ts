@@ -131,6 +131,7 @@ export interface Database {
           dictionary_id: string
           entry_id: string | null
           id: string
+          import_id: string | null
           photo_id: string | null
           sense_id: string | null
           sentence_id: string | null
@@ -147,6 +148,7 @@ export interface Database {
           dictionary_id: string
           entry_id?: string | null
           id: string
+          import_id?: string | null
           photo_id?: string | null
           sense_id?: string | null
           sentence_id?: string | null
@@ -163,6 +165,7 @@ export interface Database {
           dictionary_id?: string
           entry_id?: string | null
           id?: string
+          import_id?: string | null
           photo_id?: string | null
           sense_id?: string | null
           sentence_id?: string | null

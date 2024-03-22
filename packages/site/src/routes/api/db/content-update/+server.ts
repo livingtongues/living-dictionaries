@@ -61,8 +61,9 @@ export interface ContentUpdateRequestBody {
       }
       removed_from_sense?: boolean; // currently also deletes the sentence - later when a sentence can be connected to multiple sentences, use a deleted field to indicate the sentence is deleted everywhere
       // deleted?: boolean;
-    }
+    },
   };
+  import_id?: string;
   timestamp: string;
 }
 
@@ -70,7 +71,7 @@ export type ContentUpdateResponseBody = TablesInsert<'content_updates'>
 
 export const POST: RequestHandler = async ({ request }) => {
   try {
-    const { id, user_id_from_test, auth_token, table, dictionary_id, audio_id, entry_id, photo_id, speaker_id, text_id, video_id, sentence_id, sense_id, change, timestamp } = await request.json() as ContentUpdateRequestBody;
+    const { id, user_id_from_test, auth_token, table, dictionary_id, audio_id, entry_id, photo_id, speaker_id, text_id, video_id, sentence_id, sense_id, change, import_id, timestamp } = await request.json() as ContentUpdateRequestBody;
 
     if (audio_id)
       throw new Error('audio_id change not implemented')
@@ -198,6 +199,7 @@ export const POST: RequestHandler = async ({ request }) => {
       sense_id,
       timestamp,
       table,
+      import_id,
       change,
     })
       .select()

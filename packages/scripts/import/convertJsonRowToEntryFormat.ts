@@ -1,11 +1,9 @@
 import type { ActualDatabaseEntry } from '@living-dictionaries/types';
 import type { Timestamp } from 'firebase/firestore';
-import type { SenseColumns } from '@living-dictionaries/site/src/lib/supabase/change/types.js';
-import { stringifyArray } from '@living-dictionaries/site/src/lib/supabase/stringifyArray';
 import { randomUUID } from 'crypto';
 import { supabase } from '../config-supabase';
 
-interface StandartData {
+interface StandardData {
   row: Record<string, string>;
   dateStamp?: number;
   // eslint-disable-next-line no-undef
@@ -18,10 +16,10 @@ interface SenseData {
 }
 
 export function convertJsonRowToEntryFormat(
-  standart: StandartData,
+  standard: StandardData,
   senseData?: SenseData
 ): ActualDatabaseEntry {
-  const { row, dateStamp, timestamp } = standart;
+  const { row, dateStamp, timestamp } = standard;
   const entry: ActualDatabaseEntry = { lx: row.lexeme, gl: {}, xs: {} };
   const sense_regex = /^s\d+_/;
   let glossObject:Record<string, string> = {};
@@ -41,7 +39,7 @@ export function convertJsonRowToEntryFormat(
   if (row.semanticDomain_custom) entry.sd = [row.semanticDomain_custom];
   if (row.ID) entry.ei = row.ID;
 
-  if (row.localOrthography) entry.lo = row.localOrthography;
+  if (row.localOrthography) entry.lo1 = row.localOrthography;
   if (row.localOrthography2) entry.lo2 = row.localOrthography2;
   if (row.localOrthography3) entry.lo3 = row.localOrthography3;
   if (row.localOrthography4) entry.lo4 = row.localOrthography4;
