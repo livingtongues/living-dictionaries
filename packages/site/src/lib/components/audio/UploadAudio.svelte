@@ -1,6 +1,6 @@
 <script lang="ts">
   import { page } from '$app/stores';
-  import type { GoalDatabaseAudio, GoalDatabaseEntry } from '@living-dictionaries/types';
+  import type { GoalDatabaseAudio, GoalDatabaseEntry, IUser } from '@living-dictionaries/types';
   import { updateOnline } from 'sveltefirets';
   import { getStorage, ref, uploadBytesResumable } from 'firebase/storage';
   import { tweened } from 'svelte/motion';
@@ -9,7 +9,8 @@
   export let file: File | Blob;
   export let entryId: string;
   export let speakerId: string;
-  $: ({dictionary, user} = $page.data)
+  export let dictionary_id: string;
+  export let user: IUser;
 
   const progress = tweened(0, {
     duration: 2000,
@@ -25,13 +26,14 @@
 
 
   function startUpload() {
+
     // const _dictName = dictionary.name.replace(/\s+/g, '_');
     // const _lexeme = lexeme.replace(/\s+/g, '_');
     const fileTypeSuffix = file.type.split('/')[1];
 
     // const storagePath = `${_dictName}_${dictionary.id}/audio/{_lexeme}_${entryId}_${new Date().getTime()}.${fileTypeSuffix}`;
-    const storagePath = `${$dictionary.id}/audio/${entryId}_${new Date().getTime()}.${fileTypeSuffix}`;
-    const customMetadata = { uploadedBy: $user.displayName };
+    const storagePath = `${dictionary_id}/audio/${entryId}_${new Date().getTime()}.${fileTypeSuffix}`;
+    const customMetadata = { uploadedBy: user.displayName };
 
     // https://firebase.google.com/docs/storage/web/upload-files
     const storage = getStorage();
@@ -76,12 +78,12 @@
           const sf: GoalDatabaseAudio = {
             path: storagePath,
             ts: new Date().getTime(),
-            ab: $user.uid,
+            ab: user.uid,
             sp: [speakerId],
           };
 
           await updateOnline<GoalDatabaseEntry>(
-            `dictionaries/${$dictionary.id}/words/${entryId}`,
+            `dictionaries/${dictionary_id}/words/${entryId}`,
             { sfs: [sf] },
             { abbreviate: true }
           );

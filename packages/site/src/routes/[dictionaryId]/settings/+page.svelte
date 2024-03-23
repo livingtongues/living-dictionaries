@@ -125,6 +125,7 @@
             <UploadImage
               {file}
               fileLocationPrefix={`${$dictionary.id}/featured_images/`}
+              user={$user}
               on:uploaded={async ({detail: {fb_storage_path, specifiable_image_url}}) => await updateDictionary({
                 featuredImage: {
                   fb_storage_path,
