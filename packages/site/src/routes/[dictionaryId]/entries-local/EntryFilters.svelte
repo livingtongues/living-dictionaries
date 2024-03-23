@@ -59,7 +59,7 @@
             {search_params}
             search_param_key="speakers"
             values={result_facets.speakers.values}
-            speaker_ids_to_names={speakers.reduce((acc, speaker) => {
+            speaker_ids_to_names={speakers?.reduce((acc, speaker) => {
               acc[speaker.id] = speaker.displayName
               return acc
             }, {})}

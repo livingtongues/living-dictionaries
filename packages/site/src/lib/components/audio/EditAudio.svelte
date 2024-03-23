@@ -13,7 +13,7 @@
 
   export let entry: ExpandedEntry;
   export let sound_file: ExpandedAudio;
-  $: ({ dictionary, admin, speakers } = $page.data)
+  $: ({ dictionary, admin, speakers, user } = $page.data)
 
   let readyToRecord: boolean;
   let showUploadAudio = true;
@@ -58,6 +58,7 @@
   }
 </script>
 
+
 <Modal on:close>
   <span slot="heading"> <span class="i-material-symbols-hearing text-lg text-sm" /> {entry.lexeme} </span>
 
@@ -88,6 +89,8 @@
           {#if showUploadAudio}
             {#await import('$lib/components/audio/UploadAudio.svelte') then { default: UploadAudio }}
               <UploadAudio
+                dictionary_id={$dictionary.id}
+                user={$user}
                 file={file || audioBlob}
                 entryId={entry.id}
                 {speakerId}
