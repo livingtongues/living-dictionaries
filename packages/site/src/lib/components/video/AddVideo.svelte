@@ -11,7 +11,7 @@
   import { createEventDispatcher } from 'svelte';
   import { expand_video } from '$lib/transformers/expand_entry';
 
-  $: ({dictionary, speakers} = $page.data)
+  $: ({dictionary, speakers, user} = $page.data)
   const dispatch = createEventDispatcher();
   const close = () => dispatch('close');
 
@@ -44,7 +44,7 @@
 
           <SelectVideo let:file>
             {#await import('$lib/components/video/UploadVideo.svelte') then { default: UploadVideo }}
-              <UploadVideo {file} entryId={entry.id} {speakerId} />
+              <UploadVideo dictionary_id={$dictionary.id} user={$user} {file} entryId={entry.id} {speakerId} />
             {/await}
           </SelectVideo>
 
@@ -66,7 +66,7 @@
                 </div>
               {:else}
                 {#await import('$lib/components/video/UploadVideo.svelte') then { default: UploadVideo }}
-                  <UploadVideo file={videoBlob} entryId={entry.id} {speakerId} />
+                  <UploadVideo dictionary_id={$dictionary.id} user={$user} file={videoBlob} entryId={entry.id} {speakerId} />
                 {/await}
               {/if}
             </ShowHide>

@@ -79,6 +79,7 @@
     {#await import('$lib/components/image/UploadImage.svelte') then { default: UploadImage }}
       <UploadImage
         {file}
+        user={$user}
         fileLocationPrefix="{dictionaryId}/images/{entryId}_"
         on:uploaded={({detail: {fb_storage_path, specifiable_image_url}}) => saveImage(fb_storage_path, specifiable_image_url)} />
     {/await}
