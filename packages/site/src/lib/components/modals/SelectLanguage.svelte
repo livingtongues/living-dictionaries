@@ -1,8 +1,8 @@
 <script lang="ts">
   import { Button, Modal } from 'svelte-pieces';
-  import { admin } from '$lib/stores';
   import { page } from '$app/stores'
   import { changeLocale, locales, unpublishedLocales } from '$lib/i18n/changeLocale';
+  $: ({admin} = $page.data)
 </script>
 
 <Modal on:close>

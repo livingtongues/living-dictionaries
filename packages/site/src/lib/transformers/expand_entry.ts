@@ -7,7 +7,7 @@ import { translate_part_of_speech_to_current_language, translate_semantic_domain
 import type { TranslateFunction } from '$lib/i18n/types';
 
 export function expand_entry(database_entry: GoalDatabaseEntry, t: TranslateFunction): ExpandedEntry {
-  return {
+  const expanded_entry: ExpandedEntry = {
     id: database_entry.id,
     lexeme: database_entry.lx,
     local_orthography_1: database_entry.lo1,
@@ -30,10 +30,12 @@ export function expand_entry(database_entry: GoalDatabaseEntry, t: TranslateFunc
     scientific_names: database_entry.scn,
     coordinates: database_entry.co,
   }
+  Object.keys(expanded_entry).forEach(key => expanded_entry[key] === undefined && delete expanded_entry[key]);
+  return expanded_entry;
 }
 
 function expand_sense(sense: DatabaseSense, t: TranslateFunction): ExpandedSense {
-  return {
+  const expanded_sense: ExpandedSense = {
     glosses: sense.gl,
     parts_of_speech_keys: sense.ps,
     translated_parts_of_speech: sense.ps?.map(part => translate_part_of_speech_to_current_language(part, t)),
@@ -46,10 +48,12 @@ function expand_sense(sense: DatabaseSense, t: TranslateFunction): ExpandedSense
     noun_class: sense.nc,
     definition_english: sense.de,
   };
+  Object.keys(expanded_sense).forEach(key => expanded_sense[key] === undefined && delete expanded_sense[key]);
+  return expanded_sense;
 }
 
 function expand_photo(pf: GoalDatabasePhoto): ExpandedPhoto {
-  return {
+  const expanded_photo: ExpandedPhoto = {
     fb_storage_path: pf.path,
     specifiable_image_url: pf.gcs,
     uid_added_by: pf.ab,
@@ -57,10 +61,12 @@ function expand_photo(pf: GoalDatabasePhoto): ExpandedPhoto {
     source: pf.sc,
     photographer_credit: pf.cr,
   };
+  Object.keys(expanded_photo).forEach(key => expanded_photo[key] === undefined && delete expanded_photo[key]);
+  return expanded_photo;
 }
 
 export function expand_video(vf: GoalDatabaseVideo): ExpandedVideo {
-  return {
+  const expanded_video: ExpandedVideo = {
     fb_storage_path: vf.path,
     uid_added_by: vf.ab,
     timestamp: convert_timestamp_to_date_object(vf.ts),
@@ -70,16 +76,20 @@ export function expand_video(vf: GoalDatabaseVideo): ExpandedVideo {
     vimeoId: vf.vimeoId,
     start_at_seconds: vf.startAt,
   };
+  Object.keys(expanded_video).forEach(key => expanded_video[key] === undefined && delete expanded_video[key]);
+  return expanded_video;
 }
 
 function expand_audio(sf: GoalDatabaseAudio): ExpandedAudio {
-  return {
+  const expanded_audio: ExpandedAudio = {
     fb_storage_path: sf.path,
     uid_added_by: sf.ab,
     timestamp: convert_timestamp_to_date_object(sf.ts),
     speaker_ids: sf.sp,
     source: sf.sc,
     speakerName: sf.speakerName,
-  }
+  };
+  Object.keys(expanded_audio).forEach(key => expanded_audio[key] === undefined && delete expanded_audio[key]);
+  return expanded_audio;
 }
 

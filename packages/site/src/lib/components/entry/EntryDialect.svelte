@@ -14,7 +14,7 @@
   import { post_request } from '$lib/helpers/get-post-requests';
 
   export let dialects: string[] = [];
-  export let canEdit = false;
+  export let can_edit = false;
   export let dictionaryId: string;
   export let showPlus = true;
 
@@ -24,7 +24,8 @@
     if (browser && fetchedDictionaryId !== dictionaryId) {
       try {
         const dialects = await fetchDialects()
-        $options = dialects.facetHits.map(({value}) => ({ name: value, value }));
+        if (dialects?.facetHits)
+          $options = dialects.facetHits.map(({value}) => ({ name: value, value }));
       } catch (error) {
         console.error(error);
       }
@@ -60,7 +61,7 @@
 <ModalEditableArray
   values={dialects}
   options={$options}
-  {canEdit}
+  {can_edit}
   canWriteIn
   {showPlus}
   placeholder={$page.data.t('entry_field.dialects')}

@@ -7,7 +7,7 @@
   export let values: string[];
   export let options: SelectOption[];
   export let placeholder: string;
-  export let canEdit = false;
+  export let can_edit = false;
   export let showPlus = true;
   export let canWriteIn = false;
   export let on_update: (new_value: string[]) => void;
@@ -26,11 +26,11 @@
 
 <ShowHide let:show let:set let:toggle>
   <div
-    class:cursor-pointer={canEdit}
-    class:hover:bg-gray-100={canEdit}
+    class:cursor-pointer={can_edit}
+    class:hover:bg-gray-100={can_edit}
     class="w-full"
-    on:click={() => set(canEdit)}>
-    <div class="flex flex-wrap whitespace-nowrap" on:click={() => set(canEdit)}>
+    on:click={() => set(can_edit)}>
+    <div class="flex flex-wrap whitespace-nowrap" on:click={() => set(can_edit)}>
       {#each Object.values(selectedOptions) as { name }}
         <div class="px-2 py-1 leading-tight text-xs bg-blue-100 rounded mb-1">
           {name}
@@ -39,7 +39,7 @@
       {/each}
       <slot name="additional" />
       <slot name="plus">
-        {#if canEdit && showPlus && !values?.length}
+        {#if can_edit && showPlus && !values?.length}
           <span class="i-fa-solid-plus opacity-40 my-1" />
         {/if}
       </slot>

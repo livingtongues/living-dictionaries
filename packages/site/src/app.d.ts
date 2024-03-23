@@ -1,7 +1,7 @@
 // https://kit.svelte.dev/docs/types#app
 // import type { BaseUser } from '$lib/supabase/user'
 // import type { AuthResponse } from '@supabase/supabase-js'
-// import type { Readable } from 'svelte/store'
+import type { Readable } from 'svelte/store'
 // import type { Supabase } from '$lib/supabase/database.types'
 
 declare global {
@@ -13,11 +13,14 @@ declare global {
     interface PageData {
       locale: import('$lib/i18n/locales').LocaleCode;
       t: import('$lib/i18n/types.ts').TranslateFunction;
-      // user: import('@living-dictionaries/types').IUser;
+			user: Readable<import('@living-dictionaries/types').IUser>
+			admin: Readable<number>
 			// supabase: Supabase
 			// authResponse: AuthResponse
-			// user: Readable<BaseUser>
     }
+		interface PageState {
+			entry_id?: string
+		}
 		// interface Error {}
 		// interface Platform {}
 	}

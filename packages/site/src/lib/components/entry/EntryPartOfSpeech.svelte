@@ -9,7 +9,7 @@
   import type { SelectOption } from '../ui/array/select-options.interface';
 
   export let value: string[] = [];
-  export let canEdit = false;
+  export let can_edit = false;
   export let dictionaryId: string = undefined;
   export let showPlus = true;
   export let on_update: (new_value: string[]) => void;
@@ -36,7 +36,7 @@
 <ModalEditableArray
   values={value}
   {options}
-  {canEdit}
+  {can_edit}
   {showPlus}
   placeholder={$page.data.t('entry_field.parts_of_speech')}
   {on_update}>
