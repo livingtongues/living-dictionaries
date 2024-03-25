@@ -17,6 +17,8 @@ interface unique_speakers {
  }
 const all_speakers: unique_speakers[] = [];
 const developer_in_charge = 'qkTzJXH24Xfc57cZJRityS6OTn52'; // diego@livingtongues.org -> Diego Córdova Nieto;
+let speakers_to_remove: unique_speakers[];
+let speakerDuplicationHandled = false;
 
 async function speakerRefactor() {
   try {
@@ -50,6 +52,9 @@ async function fetchEntries(dictionaryId: string) {
     // await addSpeakerIdToEntry(dictionaryId, entry, {birthplace: 'USA', displayName: ''}); // * Modify this line with real speaker Data
     await avoidSpeakerDuplication(dictionaryId, entry, 'nWDlCApU94zJ0jOm3ypL');
   }
+  if (speakerDuplicationHandled)
+    deleteDuplicateSpeakers();
+
 }
 
 const addSpeaker = async (speakerData: ISpeaker) => {
@@ -99,10 +104,30 @@ const addSpeakerIdToEntry = async (dictionaryId: string, entry: ActualDatabaseEn
 const avoidSpeakerDuplication = async (dictionaryId: string, entry:ActualDatabaseEntry, speakerId: string) => {
   if (entry.sfs) {
     const selected_speaker = all_speakers.find(speaker => speaker.id === speakerId);
-    console.log(all_speakers)
-    console.log(selected_speaker)
-    // TODO Remove all other speakers that have the same name from speakers Collection
-    // TODO add only this speaker id to all other speaker.sfs that match this speaker id
+
+    if (!speakers_to_remove)
+      speakers_to_remove = all_speakers.filter(speaker => (speaker.name === selected_speaker.name && speaker.id != selected_speaker.id));
+
+    if (speakers_to_remove.length > 0) {
+      if (speakers_to_remove.some(speaker => speaker.id === entry.sfs[0].sp[0])) {
+        console.log(`before sfs-${JSON.stringify(entry?.sfs)}`);
+        entry.sfs[0].sp = [selected_speaker.id]
+        console.log(`after sfs-${JSON.stringify(entry?.sfs)}`);
+      }
+    }
+    speakerDuplicationHandled = true;
+    if (!live) return;
+    await db.collection(`dictionaries/${dictionaryId}/words`).doc(entry.id).set(entry);
+  }
+}
+
+const deleteDuplicateSpeakers = async () => {
+  if (speakers_to_remove.length > 0) {
+    for (const speaker of speakers_to_remove)
+      console.log(`deleting ${JSON.stringify(speaker)}`)
+    if (!live) return;
+    for (const speaker of speakers_to_remove)
+      await db.doc(`speakers/${speaker.id}`).delete();
   }
 }
 
