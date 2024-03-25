@@ -51,7 +51,9 @@ export async function importEntriesToFirebase(
     }
 
     const entryId = colRef.doc().id;
-    const entry = convertJsonRowToEntryFormat(row, dateStamp, timestamp);
+    // It's now duplicated
+    const sense_regex = /^s\d+_/;
+    const entry = Object.keys(row).some(key => sense_regex.test(key)) ? convertJsonRowToEntryFormat({row, dateStamp, timestamp}, {entry_id: entryId, dictionary_id: dictionaryId}) : convertJsonRowToEntryFormat({row, dateStamp, timestamp});
 
     if (row.photoFile) {
       const pf = await uploadImageFile(row.photoFile, entryId, dictionaryId, dry);
@@ -98,3 +100,16 @@ export async function importEntriesToFirebase(
   if (!dry) await batch.commit();
   return entries;
 }
+
+// Current flow:
+// Use Firebase to import entry as is already written (import-spreadsheet-v4.ts) including 1st sense, but check the import data for additional senses. If so then do the below flow at that point using a simple function call.
+// use that entry id to add additional senses to Supabase via entry_updates (seen in routes\api\db\change\entry\+server.ts and lib\supabase\change\sense.ts) - one update for ps, one for gloss
+// add example sentence to new table (Jacob will create, so it doesn't exist yet)
+// add another entry_update to connect that example sentence id to the sense
+
+
+// Future Supabase-only flow - ignore for now
+// Import entry into imports table, after which a trigger edge function will create the entry, get the entry id
+// use that entry id to add senses via entry_updates
+// add example sentence to new table (doesn't exist yet)
+// add entry_update to connect that example sentence to the sense

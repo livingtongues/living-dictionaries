@@ -96,6 +96,9 @@ importers:
       '@living-dictionaries/types':
         specifier: ^1.0.0
         version: link:../types
+      '@supabase/supabase-js':
+        specifier: ^2.38.4
+        version: 2.39.7
       '@types/node':
         specifier: ^18.11.18
         version: 18.11.18
@@ -4478,12 +4481,6 @@ packages:
     dependencies:
       undici-types: 5.26.5
 
-  /@types/node@20.11.20:
-    resolution: {integrity: sha512-7/rR21OS+fq8IyHTgtLkDK949uzsa6n8BkziAKtPVpugIkO6D+/ooXMvzXxDnZrmtXVfjb1bKQafYpb8s89LOg==}
-    dependencies:
-      undici-types: 5.26.5
-    dev: true
-
   /@types/parse5@6.0.3:
     resolution: {integrity: sha512-SuT16Q1K51EAVPz1K29DJ/sXjhSQ0zjvsypYJ6tlwVsRV9jwW5Adq2ch8Dq8kDBCkYnELS7N7VNCSB5nC56t/g==}
     dev: true
@@ -4578,7 +4575,7 @@ packages:
   /@types/ws@8.5.10:
     resolution: {integrity: sha512-vmQSUcfalpIq0R9q7uTo2lXs6eGIpt9wtnLdMv9LVpIjCA/+ufZRozlVoVelIYixx1ugCBKDhn89vnsEGOCx9A==}
     dependencies:
-      '@types/node': 20.11.20
+      '@types/node': 18.18.0
     dev: true
 
   /@types/yoga-layout@1.9.2:

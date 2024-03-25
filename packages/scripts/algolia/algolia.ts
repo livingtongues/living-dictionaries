@@ -1,5 +1,5 @@
 import algoliasearch from 'algoliasearch';
-import { projectId } from '../config';
+import { projectId } from '../config-firebase';
 import { adminKey } from './algolia-admin-key.json';
 import { AlgoliaEntry } from '@living-dictionaries/types';
 

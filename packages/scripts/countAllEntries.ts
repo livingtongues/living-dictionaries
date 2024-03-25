@@ -1,4 +1,4 @@
-import { db } from './config';
+import { db } from './config-firebase';
 
 export async function countAllEntries() {
   let overallEntryCount = 0;

@@ -1,13 +1,30 @@
 import type { ActualDatabaseEntry } from '@living-dictionaries/types';
 import type { Timestamp } from 'firebase/firestore';
+import { randomUUID } from 'crypto';
+import { supabase } from '../config-supabase';
+
+interface StandardData {
+  row: Record<string, string>;
+  dateStamp?: number;
+  // eslint-disable-next-line no-undef
+  timestamp?: FirebaseFirestore.FieldValue;
+}
+
+interface SenseData {
+  entry_id: string;
+  dictionary_id: string;
+}
 
 export function convertJsonRowToEntryFormat(
-  row: Record<string, string>,
-  dateStamp?: number,
-  // eslint-disable-next-line no-undef
-  timestamp?: FirebaseFirestore.FieldValue
+  standard: StandardData,
+  senseData?: SenseData
 ): ActualDatabaseEntry {
+  const { row, dateStamp, timestamp } = standard;
   const entry: ActualDatabaseEntry = { lx: row.lexeme, gl: {}, xs: {} };
+  const sense_regex = /^s\d+_/;
+  let glossObject:Record<string, string> = {};
+  let row_id = randomUUID();
+  let old_key = 2;
 
   if (row.phonetic) entry.ph = row.phonetic;
   if (row.morphology) entry.mr = row.morphology;
@@ -22,7 +39,7 @@ export function convertJsonRowToEntryFormat(
   if (row.semanticDomain_custom) entry.sd = [row.semanticDomain_custom];
   if (row.ID) entry.ei = row.ID;
 
-  if (row.localOrthography) entry.lo = row.localOrthography;
+  if (row.localOrthography) entry.lo1 = row.localOrthography;
   if (row.localOrthography2) entry.lo2 = row.localOrthography2;
   if (row.localOrthography3) entry.lo3 = row.localOrthography3;
   if (row.localOrthography4) entry.lo4 = row.localOrthography4;
@@ -34,8 +51,8 @@ export function convertJsonRowToEntryFormat(
     if (!value) continue;
 
     // gloss fields are labeled using bcp47 language codes followed by '_gloss' (e.g. es_gloss, tpi_gloss)
-    if (key.includes('_gloss')) {
-      const language = key.split('_gloss')[0];
+    if (key.includes('_gloss') && !sense_regex.test(key)) {
+      const [language] = key.split('_gloss');
       entry.gl[language] = value;
     }
 
@@ -46,8 +63,37 @@ export function convertJsonRowToEntryFormat(
 
     // example sentence fields are codes followed by '_exampleSentence'
     if (key.includes('_exampleSentence')) {
-      const language = key.split('_exampleSentence')[0];
+      const [language] = key.split('_exampleSentence');
       entry.xs[language] = value;
+    }
+
+    if (senseData) {
+      const { entry_id, dictionary_id } = senseData;
+      if (sense_regex.test(key)) {
+        if (key.includes('_gloss')) {
+          let language_key = key.replace(sense_regex, '');
+          language_key = language_key.replace('_gloss', '');
+
+          if (key === `s${old_key}_${language_key}_gloss`) {
+            glossObject[language_key] = row[key];
+          } else {
+            old_key++;
+            row_id = randomUUID();
+            glossObject = {};
+            glossObject[language_key] = row[key];
+          }
+          addAdditionalSensesToSupabase(entry_id, dictionary_id, glossObject, 'glosses', row_id);
+        }
+
+        if (key.includes('_partOfSpeech'))
+          addAdditionalSensesToSupabase(entry_id, dictionary_id, stringifyArray([row[key]]), 'parts_of_speech', row_id);
+
+        if (key.includes('_semanticDomains'))
+          addAdditionalSensesToSupabase(entry_id, dictionary_id, stringifyArray([row[key]]), 'semantic_domains', row_id);
+
+        if (key.includes('_nounClass'))
+          addAdditionalSensesToSupabase(entry_id, dictionary_id, row[key], 'noun_class', row_id);
+      }
     }
 
     const semanticDomain_FOLLOWED_BY_OPTIONAL_DIGIT = /^semanticDomain\d*$/; // semanticDomain, semanticDomain2, semanticDomain<#>, but not semanticDomain_custom
@@ -73,4 +119,33 @@ export function convertJsonRowToEntryFormat(
 
 export function returnArrayFromCommaSeparatedItems(string: string): string[] {
   return string?.split(',').map((item) => item.trim()) || [];
+}
+
+export async function addAdditionalSensesToSupabase(entry_id: string, dictionary_id: string, value: any, column: SenseColumns, row: string) {
+  try {
+    const { data, error } = await supabase
+      .from('entry_updates')
+      .insert([
+        {
+          user_id: 'diego@livingtongues.org',
+          id: randomUUID(),
+          dictionary_id,
+          entry_id,
+          table: 'senses',
+          column,
+          row,
+          new_value: value,
+        },
+      ])
+      .select();
+
+    if (error) {
+      console.error('Error inserting into Supabase: ', error);
+      throw error;
+    }
+
+    return data;
+  } catch (error) {
+    console.error('Error: ', error);
+  }
 }

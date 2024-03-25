@@ -1,6 +1,6 @@
 import { GeoPoint } from 'firebase-admin/firestore';
 import { IDictionary } from '@living-dictionaries/types';
-import { db } from '../config';
+import { db } from '../config-firebase';
 import { tdLocations } from './tdv1-dictionaries';
 
 (() => {

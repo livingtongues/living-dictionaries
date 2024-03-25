@@ -13,8 +13,9 @@ CREATE TABLE content_updates (
   photo_id uuid REFERENCES photos,
   speaker_id uuid REFERENCES speakers,
   "table" content_tables NOT NULL,
-  change jsonb NOT NULL, -- includes import_id
+  change jsonb NOT NULL,
   "timestamp" timestamp with time zone NOT NULL DEFAULT now()
+  -- import_id uuid -- added later
 );
 
 ALTER TABLE content_updates ENABLE ROW LEVEL SECURITY;
