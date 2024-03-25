@@ -35,6 +35,12 @@ html {
   transform: scale(-1, 1);
 }
 
+@media (min-width: 640px) {
+  .wider-phonetic-modal {
+    max-width: 850px;
+  }
+}
+
 .text-dark-shadow {
   text-shadow: -1px -1px 0 hsl(0, 0%, 25%), 1px -1px 0 hsl(0, 0%, 25%), -1px 1px 0 hsl(0, 0%, 25%),
     1px 1px 0 hsl(0, 0%, 25%);

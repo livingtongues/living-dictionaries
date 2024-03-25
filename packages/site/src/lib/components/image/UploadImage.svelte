@@ -1,6 +1,5 @@
 <script lang="ts">
   import { page } from '$app/stores';
-  import { user } from '$lib/stores';
   import { tweened } from 'svelte/motion';
   import { cubicOut } from 'svelte/easing';
   import { getStorage, ref, uploadBytesResumable } from 'firebase/storage';
@@ -9,9 +8,11 @@
   import { get } from 'svelte/store';
   import { createEventDispatcher, onMount } from 'svelte';
   import { post_request } from '$lib/helpers/get-post-requests';
+  import type { IUser } from '@living-dictionaries/types';
 
   export let file: File;
   export let fileLocationPrefix: string;
+  export let user: IUser;
 
   const progress = tweened(0, {
     duration: 2000,
@@ -33,7 +34,7 @@
 
   function startUpload(storagePath: string) {
     const customMetadata = {
-      uploadedBy: $user.displayName,
+      uploadedBy: user.displayName,
       originalFileName: file.name,
     };
 

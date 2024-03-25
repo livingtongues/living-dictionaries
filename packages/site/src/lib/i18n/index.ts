@@ -6,7 +6,7 @@ import enPartsOfSpeechAbbrev from './locales/psAbbrev/en.json' assert { type: 'j
 import enSemanticDomains from './locales/sd/en.json' assert { type: 'json' };
 
 import type { LocaleCode } from './locales'
-import type { TranslationKeys } from './types'
+import type { TranslateFunction, TranslationKeys } from './types'
 import { interpolate } from './interpolate'
 export const en = {
   ...enBase,
@@ -63,9 +63,9 @@ export async function getTranslator(locale: LocaleCode) {
     const englishResult = loadedTranslations.en[section][item]
     if (englishResult)
       return interpolate(englishResult, options?.values)
-    const error = `Missing English for: ${key}`
+    // const error = `Missing English for: ${key}`
 
-    console.error(error)
+    // console.error(error)
     return options?.fallback || key
   }
 }
@@ -89,3 +89,8 @@ if (import.meta.vitest) {
     });
   });
 }
+
+export const english_translate = (({dynamicKey: key, fallback}: { dynamicKey: string, fallback?: string}) => {
+  const [section, item] = splitByFirstPeriod(key)
+  return en[section][item] || fallback;
+}) as TranslateFunction

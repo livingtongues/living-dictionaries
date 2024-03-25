@@ -7,13 +7,13 @@
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte';
 
   export let data;
-  $: ({ isManager } = data)
+  $: ({ is_manager, dictionary } = data)
   let updated = '';
 
   async function save() {
     try {
-      await setOnline<IAbout>(`dictionaries/${data.dictionary.id}/info/about`, { about: updated });
-      window.location.replace(`/${data.dictionary.id}/about`);
+      await setOnline<IAbout>(`dictionaries/${$dictionary.id}/info/about`, { about: updated });
+      window.location.replace(`/${$dictionary.id}/about`);
     } catch (err) {
       alert(err);
     }
@@ -27,7 +27,7 @@
     {$page.data.t('header.about')}
   </h3>
 
-  {#if $isManager}
+  {#if $is_manager}
     {#if editing}
       <Button class="mb-2" onclick={() => (editing = false)}>{$page.data.t('misc.cancel')}</Button>
       <Button class="mb-2" form="filled" onclick={save}>{$page.data.t('misc.save')}</Button>
@@ -56,7 +56,7 @@
 
 <SeoMetaTags
   title={$page.data.t('header.about')}
-  dictionaryName={data.dictionary.name}
+  dictionaryName={$dictionary.name}
   description="Learn about the background and creation of this Living Dictionary."
   keywords="About this dictionary, background, creation, Endangered Languages, Language Documentation, Language Revitalization, Build a Dictionary, Online Dictionary, Digital Dictionary, Dictionary Software, Free Software, Online Dictionary Builder, Living Dictionaries, Living Dictionary" />
 

@@ -2,10 +2,10 @@
   import type { GoalDatabasePhoto, ActualDatabaseEntry } from '@living-dictionaries/types';
   import { page } from '$app/stores';
   import { updateOnline } from 'sveltefirets';
-  import { get } from 'svelte/store';
 
   export let entryId: string;
   export let dictionaryId: string;
+  $: ({user} = $page.data)
 
   let dragging = false;
   let file: File;
@@ -34,14 +34,12 @@
   }
 
   async function saveImage(fb_storage_path: string, specifiable_image_url: string) {
-    const { user } = await import('$lib/stores');
-    const {displayName, uid} = get(user);
     const pf: GoalDatabasePhoto = {
       path: fb_storage_path,
       gcs: specifiable_image_url,
       ts: new Date().getTime(),
-      cr: displayName,
-      ab: uid,
+      cr: $user.displayName,
+      ab: $user.uid,
     }
     await updateOnline<ActualDatabaseEntry>(`dictionaries/${dictionaryId}/words/${entryId}`, { pf } ,
       { abbreviate: true }
@@ -81,6 +79,7 @@
     {#await import('$lib/components/image/UploadImage.svelte') then { default: UploadImage }}
       <UploadImage
         {file}
+        user={$user}
         fileLocationPrefix="{dictionaryId}/images/{entryId}_"
         on:uploaded={({detail: {fb_storage_path, specifiable_image_url}}) => saveImage(fb_storage_path, specifiable_image_url)} />
     {/await}

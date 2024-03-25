@@ -1,3 +1,0 @@
-// import { derived } from 'svelte/store';
-
-// export const availableSpeakers = derived([dictionary, user])

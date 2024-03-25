@@ -8,7 +8,7 @@
 
   export let columns: IColumn[];
   export let entries: ExpandedEntry[] = [];
-  export let canEdit = false;
+  export let can_edit = false;
   export let dictionaryId: string;
 
   let selectedColumn: IColumn;
@@ -51,12 +51,12 @@
       <tr class="row-hover">
         {#each columns as column, i}
           <td
-            class:bg-green-100={canEdit && entry.ua?.toMillis?.() > minutesAgo(5)}
+            class:bg-green-100={can_edit && entry.ua?.toMillis?.() > minutesAgo(5)}
             class="{column.sticky ? 'sticky bg-white z-1' : ''} {isFirefox ? '' : 'h-0'}"
             style="{column.sticky
               ? 'left:' + getLeftValue(i) + 'px; --border-right-width: 3px;'
               : ''} --col-width: {entry.sources ? 'auto' : `${column.width}px`};">
-            <Cell {column} {entry} {canEdit} {dictionaryId} on:deleteImage={() => dispatch('deleteImage', { entryId: entry.id})} on:valueupdate={({detail: {field, newValue}}) => dispatch('valueupdate', { field, newValue, entryId: entry.id })} />
+            <Cell {column} {entry} {can_edit} {dictionaryId} on:deleteImage={() => dispatch('deleteImage', { entryId: entry.id})} on:valueupdate={({detail: {field, newValue}}) => dispatch('valueupdate', { field, newValue, entryId: entry.id })} />
           </td>
         {/each}
       </tr>
