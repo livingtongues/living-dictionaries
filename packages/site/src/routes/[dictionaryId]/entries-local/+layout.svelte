@@ -11,7 +11,7 @@
   import { writable } from 'svelte/store';
 
   export let data;
-  $: ({initial_entries, search_index_updated, search_entries, entries_per_page, search_params, speakers} = data)
+  $: ({entries, status, search_entries, entries_per_page, search_params, speakers} = data)
 
   $: current_page_index = $search_params.page - 1 || 0
   let search_time: string
@@ -27,10 +27,11 @@
   const page_entries = writable<ExpandedEntry[]>(null)
   setContext('entries', page_entries)
 
-  $: if ($initial_entries && !$page_entries)
-    page_entries.set($initial_entries)
+  $: if ($entries && !$page_entries)
+    page_entries.set(Array.from($entries.values()))
 
-  $: if ($search_index_updated)
+  $: search_index_ready = $status === 'Search index created'
+  $: if (search_index_ready)
     search($search_params, current_page_index)
 
   let search_inited_ms: number
@@ -56,7 +57,7 @@
   <div
     class="flex mb-1 items-center sticky top-0 md:top-12 pt-2 md:pt-0 pb-1
       bg-white z-20 print:hidden">
-    <SearchInput {search_params} index_ready={$search_index_updated} on_show_filter_menu={toggle} />
+    <SearchInput {search_params} index_ready={search_index_ready} on_show_filter_menu={toggle} />
   </div>
 
   <div class="flex">
@@ -68,7 +69,7 @@
           ({search_time.includes('μs') ? '<1ms' : search_time})
         {:else}
           {$page.data.t('dictionary.entries')}:
-          {$initial_entries?.length ? $initial_entries.length : ''}
+          {$page_entries?.length ? $page_entries.length : ''}
           <span class="i-svg-spinners-3-dots-fade align--4px" />
         {/if}
       </div>

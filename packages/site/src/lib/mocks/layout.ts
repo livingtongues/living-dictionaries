@@ -22,9 +22,9 @@ export const mockDictionaryLayoutData: LayoutData = {
   locale: null,
   my_dictionaries: null,
   preferred_table_columns: null,
-  initial_entries: writable(null),
+  entries: writable(null),
+  status: writable(false),
   search_entries: null,
-  search_index_updated: writable(false),
   entries_per_page: null,
   dbOperations: logDbOperations,
 }
