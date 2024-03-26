@@ -77,9 +77,9 @@ const addSpeakerIdToEntry = async (dictionaryId: string, entry: ActualDatabaseEn
   if (entry.sf?.speakerName) {
     let speakerId = all_speakers.find(speaker => speaker.name === entry.sf.speakerName)?.id;
     if (!speakerId && speakersData.some(speaker => speaker.displayName === entry.sf.speakerName)) {
-      const specificSpeaker = speakersData.find(speaker => speaker.displayName === entry.sf.speakerName)
+      const specificSpeakerData = speakersData.find(speaker => speaker.displayName === entry.sf.speakerName)
       speakerId = await addSpeaker({
-        ...specificSpeaker,
+        ...specificSpeakerData,
         displayName: entry.sf.speakerName,
         contributingTo: [dictionaryId],
         createdAt: timestamp,
@@ -134,13 +134,13 @@ const deleteDuplicateSpeakers = async () => {
 speakerRefactor();
 
 // Single Dictionary
-// `pnpm entryRefactor --id babanki` to log refactor in dev
-// `pnpm entryRefactor --id babanki --live` to do refactor in dev
-// `pnpm entryRefactor --id babanki -e prod` to log refactor in prod
-// `pnpm entryRefactor --id babanki --live -e prod` to do refactor in prod
+// `pnpm speakerRefactor --id babanki` to log refactor in dev
+// `pnpm speakerRefactor --id babanki --live` to do refactor in dev
+// `pnpm speakerRefactor --id babanki -e prod` to log refactor in prod
+// `pnpm speakerRefactor --id babanki --live -e prod` to do refactor in prod
 
 // All dictionaries
-// `pnpm entryRefactor` to log refactor in dev
-// `pnpm entryRefactor --live` to do refactor in dev
-// `pnpm entryRefactor -e prod` to log refactor in prod
-// `pnpm entryRefactor --live -e prod` to do refactor in prod
+// `pnpm speakerRefactor` to log refactor in dev
+// `pnpm speakerRefactor --live` to do refactor in dev
+// `pnpm speakerRefactor -e prod` to log refactor in prod
+// `pnpm speakerRefactor --live -e prod` to do refactor in prod
