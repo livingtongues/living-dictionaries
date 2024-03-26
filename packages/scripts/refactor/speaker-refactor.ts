@@ -48,8 +48,8 @@ async function fetchEntries(dictionaryId: string) {
   const snapshot = await db.collection(`dictionaries/${dictionaryId}/words`).get();
   for (const snap of snapshot.docs) {
     const entry: ActualDatabaseEntry = { id: snap.id, ...(snap.data() as ActualDatabaseEntry) };
-    await addSpeakerIdToEntry(dictionaryId, entry, {birthplace: 'US', gender: 'm', displayName: ''}); // * Modify this line with real speaker Data
-    // await avoidSpeakerDuplication(dictionaryId, entry, 'nWDlCApU94zJ0jOm3ypL');
+    // await addSpeakerIdToEntry(dictionaryId, entry, {birthplace: 'US', gender: 'm', displayName: ''}); // * Modify this line with real speaker Data
+    await avoidSpeakerDuplication(dictionaryId, entry, '9BtMqTEXpfWfUZ6jCXHG');
   }
   if (speakerDuplicationHandled)
     deleteDuplicateSpeakers();
@@ -89,6 +89,7 @@ const addSpeakerIdToEntry = async (dictionaryId: string, entry: ActualDatabaseEn
       all_speakers.push({ name: entry.sf.speakerName, id: speakerId });
     }
 
+    console.log(entry.id);
     console.log(`Before: sf-${JSON.stringify(sfBefore)} sfs-${JSON.stringify(entry?.sfs)}`);
     createEntrySoundFiles(entry, speakerId, entry.sf.path);
     delete entry.sf;
@@ -107,6 +108,7 @@ const avoidSpeakerDuplication = async (dictionaryId: string, entry:ActualDatabas
 
     if (speakers_to_remove.length > 0) {
       if (speakers_to_remove.some(speaker => speaker.id === entry.sfs[0].sp[0])) {
+        console.log(entry.id);
         console.log(`before sfs-${JSON.stringify(entry?.sfs)}`);
         entry.sfs[0].sp = [selected_speaker.id]
         console.log(`after sfs-${JSON.stringify(entry?.sfs)}`);
