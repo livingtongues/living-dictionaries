@@ -1,6 +1,5 @@
 import { ActualDatabaseEntry, ISpeaker } from '@living-dictionaries/types';
-import { db } from '../config';
-import { Timestamp } from 'firebase/firestore';
+import { db, timestamp } from '../config';
 import { program } from 'commander';
 program
 //   .version('0.0.1')
@@ -49,12 +48,11 @@ async function fetchEntries(dictionaryId: string) {
   const snapshot = await db.collection(`dictionaries/${dictionaryId}/words`).get();
   for (const snap of snapshot.docs) {
     const entry: ActualDatabaseEntry = { id: snap.id, ...(snap.data() as ActualDatabaseEntry) };
-    // await addSpeakerIdToEntry(dictionaryId, entry, {birthplace: 'USA', displayName: ''}); // * Modify this line with real speaker Data
-    await avoidSpeakerDuplication(dictionaryId, entry, 'nWDlCApU94zJ0jOm3ypL');
+    await addSpeakerIdToEntry(dictionaryId, entry, {birthplace: 'US', gender: 'm', displayName: ''}); // * Modify this line with real speaker Data
+    // await avoidSpeakerDuplication(dictionaryId, entry, 'nWDlCApU94zJ0jOm3ypL');
   }
   if (speakerDuplicationHandled)
     deleteDuplicateSpeakers();
-
 }
 
 const addSpeaker = async (speakerData: ISpeaker) => {
@@ -84,9 +82,9 @@ const addSpeakerIdToEntry = async (dictionaryId: string, entry: ActualDatabaseEn
         ...speakerData,
         displayName: entry.sf.speakerName,
         contributingTo: [dictionaryId],
-        createdAt: Timestamp.now(),
+        createdAt: timestamp,
         createdBy: developer_in_charge,
-        updatedAt: Timestamp.now(),
+        updatedAt: timestamp,
         updatedBy: developer_in_charge
       });
       all_speakers.push({ name: entry.sf.speakerName, id: speakerId });
