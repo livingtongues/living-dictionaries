@@ -48,7 +48,7 @@ async function fetchEntries(dictionaryId: string) {
   const snapshot = await db.collection(`dictionaries/${dictionaryId}/words`).get();
   for (const snap of snapshot.docs) {
     const entry: ActualDatabaseEntry = { id: snap.id, ...(snap.data() as ActualDatabaseEntry) };
-    await addSpeakerIdToEntry(dictionaryId, entry, [{gender: 'f', displayName: 'Dano'}, {gender: 'm', displayName: 'Ilo'}, {birthplace: 'Mexico', displayName: 'Cañitas'}]); // * Modify this line with real speaker Data
+    await addSpeakerIdToEntry(dictionaryId, entry, []); // * Modify this line with real speaker Data like [{birthplace: 'US', gender: 'm', displayName: 'Dano'}, {birthplace: 'US', gender: 'f', displayName: 'Ilo'}, {birthplace: 'Mexico', displayName: 'Cañitas'}]
     // await avoidSpeakerDuplication(dictionaryId, entry, '9BtMqTEXpfWfUZ6jCXHG');
   }
   if (speakerDuplicationHandled)
