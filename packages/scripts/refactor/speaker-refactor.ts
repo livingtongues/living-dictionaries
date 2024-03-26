@@ -48,7 +48,7 @@ async function fetchEntries(dictionaryId: string) {
   const snapshot = await db.collection(`dictionaries/${dictionaryId}/words`).get();
   for (const snap of snapshot.docs) {
     const entry: ActualDatabaseEntry = { id: snap.id, ...(snap.data() as ActualDatabaseEntry) };
-    await addSpeakerIdToEntry(dictionaryId, entry, {displayName: ''}); // * Modify this line with real speaker Data
+    await addSpeakerIdToEntry(dictionaryId, entry, [{gender: 'f', displayName: 'Dano'}, {gender: 'm', displayName: 'Ilo'}, {birthplace: 'Mexico', displayName: 'Cañitas'}]); // * Modify this line with real speaker Data
     // await avoidSpeakerDuplication(dictionaryId, entry, '9BtMqTEXpfWfUZ6jCXHG');
   }
   if (speakerDuplicationHandled)
@@ -72,13 +72,14 @@ const createEntrySoundFiles = (entry: ActualDatabaseEntry, speakerId: string, pa
   }]
 }
 
-const addSpeakerIdToEntry = async (dictionaryId: string, entry: ActualDatabaseEntry, speakerData: ISpeaker) => {
+const addSpeakerIdToEntry = async (dictionaryId: string, entry: ActualDatabaseEntry, speakersData: ISpeaker[]) => {
   const sfBefore = entry.sf;
   if (entry.sf?.speakerName) {
     let speakerId = all_speakers.find(speaker => speaker.name === entry.sf.speakerName)?.id;
-    if (!speakerId) {
+    if (!speakerId && speakersData.some(speaker => speaker.displayName === entry.sf.speakerName)) {
+      const specificSpeaker = speakersData.find(speaker => speaker.displayName === entry.sf.speakerName)
       speakerId = await addSpeaker({
-        ...speakerData,
+        ...specificSpeaker,
         displayName: entry.sf.speakerName,
         contributingTo: [dictionaryId],
         createdAt: timestamp,
