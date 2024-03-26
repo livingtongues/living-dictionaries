@@ -155,7 +155,7 @@ const notesToPluralForm = async (dictionaryId: string, entry: ActualDatabaseEntr
 
 const turnSoundFileToArray = async (dictionaryId: string, entry: ActualDatabaseEntry) => {
   const sfBefore = entry.sf;
-  if (entry.sf) {
+  if (entry.sf?.sp) {
     entry.sfs = [{...entry.sf, sp: [entry.sf.sp]}];
     delete entry.sf;
     console.log(`${entry.id}, sfBefore:${JSON.stringify(sfBefore)}, sfsAfter:${JSON.stringify(entry.sfs)}, sfNull:${entry.sf}`);
