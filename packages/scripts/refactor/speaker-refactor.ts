@@ -73,7 +73,6 @@ const createEntrySoundFiles = (entry: ActualDatabaseEntry, speakerId: string, pa
 }
 
 const addSpeakerIdToEntry = async (dictionaryId: string, entry: ActualDatabaseEntry, speakerData: ISpeaker) => {
-  // let speakerId = null;
   const sfBefore = entry.sf;
   if (entry.sf?.speakerName) {
     let speakerId = all_speakers.find(speaker => speaker.name === entry.sf.speakerName)?.id;
