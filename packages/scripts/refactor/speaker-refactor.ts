@@ -48,8 +48,8 @@ async function fetchEntries(dictionaryId: string) {
   const snapshot = await db.collection(`dictionaries/${dictionaryId}/words`).get();
   for (const snap of snapshot.docs) {
     const entry: ActualDatabaseEntry = { id: snap.id, ...(snap.data() as ActualDatabaseEntry) };
-    // await addSpeakerIdToEntry(dictionaryId, entry, {birthplace: 'US', gender: 'm', displayName: ''}); // * Modify this line with real speaker Data
-    await avoidSpeakerDuplication(dictionaryId, entry, '9BtMqTEXpfWfUZ6jCXHG');
+    await addSpeakerIdToEntry(dictionaryId, entry, {displayName: ''}); // * Modify this line with real speaker Data
+    // await avoidSpeakerDuplication(dictionaryId, entry, '9BtMqTEXpfWfUZ6jCXHG');
   }
   if (speakerDuplicationHandled)
     deleteDuplicateSpeakers();
