@@ -133,10 +133,11 @@ const deleteDuplicateSpeakers = async () => {
 }
 
 const changeSpeakerNames = async (dictionaryId:string, entry: ActualDatabaseEntry, old_names: string[], new_name: string) => {
-  const sfBefore = entry.sf;
   if (old_names.some(name => name === entry.sf?.speakerName)) {
+    console.log(entry.id);
+    console.log(`sfBefore${JSON.stringify(entry?.sf)}`);
     entry.sf.speakerName = new_name;
-    console.log(`${entry.id}, sfBefore:${JSON.stringify(sfBefore)}, sfAfter:${JSON.stringify(entry.sf)}`);
+    console.log(`sfAfter:${JSON.stringify(entry.sf)}`);
   }
   if (!live) return;
   await db.collection(`dictionaries/${dictionaryId}/words`).doc(entry.id).set(entry);
