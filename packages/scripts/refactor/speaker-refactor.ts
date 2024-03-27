@@ -48,8 +48,9 @@ async function fetchEntries(dictionaryId: string) {
   const snapshot = await db.collection(`dictionaries/${dictionaryId}/words`).get();
   for (const snap of snapshot.docs) {
     const entry: ActualDatabaseEntry = { id: snap.id, ...(snap.data() as ActualDatabaseEntry) };
-    await addSpeakerIdToEntry(dictionaryId, entry, []); // * Modify this line with real speaker Data like [{birthplace: 'US', gender: 'm', displayName: 'Dano'}, {birthplace: 'US', gender: 'f', displayName: 'Ilo'}, {birthplace: 'Mexico', displayName: 'Cañitas'}]
-    // await avoidSpeakerDuplication(dictionaryId, entry, '9BtMqTEXpfWfUZ6jCXHG');
+    // await addSpeakerIdToEntry(dictionaryId, entry, []); // * Modify this line with real speaker Data like [{birthplace: 'US', gender: 'm', displayName: 'Dano'}, {birthplace: 'US', gender: 'f', displayName: 'Ilo'}, {birthplace: 'Mexico', displayName: 'Cañitas'}]
+    // await avoidSpeakerDuplication(dictionaryId, entry, '');
+    // await changeSpeakerNames(dictionaryId, entry, [], '')
   }
   if (speakerDuplicationHandled)
     deleteDuplicateSpeakers();
@@ -129,6 +130,16 @@ const deleteDuplicateSpeakers = async () => {
     for (const speaker of speakers_to_remove)
       await db.doc(`speakers/${speaker.id}`).delete();
   }
+}
+
+const changeSpeakerNames = async (dictionaryId:string, entry: ActualDatabaseEntry, old_names: string[], new_name: string) => {
+  const sfBefore = entry.sf;
+  if (old_names.some(name => name === entry.sf?.speakerName)) {
+    entry.sf.speakerName = new_name;
+    console.log(`${entry.id}, sfBefore:${JSON.stringify(sfBefore)}, sfAfter:${JSON.stringify(entry.sf)}`);
+  }
+  if (!live) return;
+  await db.collection(`dictionaries/${dictionaryId}/words`).doc(entry.id).set(entry);
 }
 
 speakerRefactor();
