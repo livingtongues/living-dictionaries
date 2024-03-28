@@ -1,4 +1,4 @@
-lockfileVersion: '6.0'
+lockfileVersion: '6.1'
 
 settings:
   autoInstallPeers: true
@@ -322,8 +322,8 @@ importers:
         specifier: ^10.9.0
         version: 10.9.0
       sveltefirets:
-        specifier: ^0.0.39
-        version: 0.0.39(firebase@10.9.0)(svelte@4.2.12)
+        specifier: ^0.0.42
+        version: 0.0.42(firebase@10.9.0)(svelte@4.2.12)
 
 packages:
 
@@ -12232,8 +12232,8 @@ packages:
       periscopic: 3.1.0
     dev: true
 
-  /sveltefirets@0.0.39(firebase@10.9.0)(svelte@4.2.12):
-    resolution: {integrity: sha512-o1AvK1FAvT4V4EKL+a/8zfkmIjhleux7yupgNppsfvm7MA1rLDEjXUN52hVMRW2rpOUWZ3xD3EcJW3BK6zT1bw==}
+  /sveltefirets@0.0.41(firebase@10.9.0)(svelte@4.2.12):
+    resolution: {integrity: sha512-EnZA9n/UYrRLvOlEdx/j2KxGxNd402Uuke3lOki9pIvB8YnR2eNcy3BMKexMMQzcKtkH7H74qMTWLtHfv92alQ==}
     peerDependencies:
       firebase: ^9.21.0 || ^10.0.0
       svelte: ^3.58.0 || ^4.0.0 || ^5.0.0
@@ -12242,8 +12242,8 @@ packages:
       svelte: 4.2.12
     dev: true
 
-  /sveltefirets@0.0.41(firebase@10.9.0)(svelte@4.2.12):
-    resolution: {integrity: sha512-EnZA9n/UYrRLvOlEdx/j2KxGxNd402Uuke3lOki9pIvB8YnR2eNcy3BMKexMMQzcKtkH7H74qMTWLtHfv92alQ==}
+  /sveltefirets@0.0.42(firebase@10.9.0)(svelte@4.2.12):
+    resolution: {integrity: sha512-xmyOCYFa8x+CaeM/8YvZHRPv+M82fYHmXKZG9BGdwje/2bGUSho+RHepbJL+eZLj5IgXhMhaC3BoRRMqREEZiw==}
     peerDependencies:
       firebase: ^9.21.0 || ^10.0.0
       svelte: ^3.58.0 || ^4.0.0 || ^5.0.0

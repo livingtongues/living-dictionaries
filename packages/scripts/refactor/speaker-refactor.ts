@@ -83,8 +83,10 @@ const addSpeakerIdToEntry = async (dictionaryId: string, entry: ActualDatabaseEn
         ...specificSpeakerData,
         displayName: entry.sf.speakerName,
         contributingTo: [dictionaryId],
+        // @ts-ignore TODO remove once sveltefirets is updated
         createdAt: timestamp,
         createdBy: developer_in_charge,
+        // @ts-ignore TODO remove once sveltefirets is updated
         updatedAt: timestamp,
         updatedBy: developer_in_charge
       });
