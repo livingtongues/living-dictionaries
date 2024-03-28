@@ -23,15 +23,25 @@ export default defineConfig({
   },
   define: getReplacements(),
   optimizeDeps: {
-    include: [
+    include: [ // if the dependency is large with many internal modules or is CommonJS then include it
+      // 'firebase/functions',
+      // 'xss',
+      // 'kitbook',
+      // 'kitbook/viewer/load-viewer',
+      // 'firebase/firestore',
+      // 'firebase/app',
+      // 'firebase/firestore/lite',
+      // 'firebase/auth',
+      // 'firebase/performance',
+      // '@turf/turf',
+      // 'instantsearch.js/es/widgets/index.js', 'instantsearch.js/es/connectors',
       // 'algoliasearch',
-      // 'firebase/functions', // broke things when put in exclude - investigate later if it's helpful to put here when using Kitbook
+      // 'instantsearch.js',
     ],
-    exclude: [
+    exclude: [ // if the dependency is small, ESM, no CJS imports, then exclude and let the browser load directly - https://vitejs.dev/guide/dep-pre-bundling.html
       'sveltefirets',
       'svelte-pieces',
       '@sentry/browser',
-      // 'instantsearch.js', 'instantsearch.js/es/widgets/index.js', 'instantsearch.js/es/connectors',
     ],
   },
 });

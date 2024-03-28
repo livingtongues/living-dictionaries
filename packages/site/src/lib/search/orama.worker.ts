@@ -33,9 +33,10 @@ const entries_index_schema = {
 
 let orama_index: Orama<typeof entries_index_schema>
 
-async function create_index(entries: ExpandedEntry[]) {
+async function create_index(entries: Map<string, ExpandedEntry>) {
   console.time('Augment Entries Time');
-  const entries_augmented_for_search = entries.map(augment_entry_for_search)
+  const entriesArray = Array.from(entries.values());
+  const entries_augmented_for_search = entriesArray.map(augment_entry_for_search)
   console.timeEnd('Augment Entries Time');
 
   console.time('Index Entries Time');

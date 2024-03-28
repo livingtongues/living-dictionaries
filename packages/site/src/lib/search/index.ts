@@ -1,7 +1,7 @@
 import type { ExpandedEntry } from '@living-dictionaries/types';
 import type { QueryParams } from './types';
 
-export async function create_index(entries: ExpandedEntry[]) {
+export async function create_index(entries: Map<string, ExpandedEntry>) {
   const { api } = await import('./expose-orama-worker')
   api.create_index(entries)
 }
