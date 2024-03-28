@@ -43,7 +43,8 @@ async function fetchEntries(dictionaryId: string) {
     // await notesToPluralForm(dictionaryId, entry);
     // turnPOSintoArray(dictionaryId, entry); // not awaiting so operations can run in parallel otherwise the function errors after about 1400 iterations
     // reverese_semantic_domains_in_db(dictionaryId, entry);
-    turnDialectsIntoArray(dictionaryId, entry);
+    // turnDialectsIntoArray(dictionaryId, entry);
+    turnSoundFileToArray(dictionaryId, entry);
   }
 }
 
@@ -151,6 +152,18 @@ const notesToPluralForm = async (dictionaryId: string, entry: ActualDatabaseEntr
   await db.collection(`dictionaries/${dictionaryId}/words`).doc(entry.id).set(entry);
   return true;
 };
+
+const turnSoundFileToArray = async (dictionaryId: string, entry: ActualDatabaseEntry) => {
+  const sfBefore = entry.sf;
+  if (entry.sf?.sp) {
+    entry.sfs = [{...entry.sf, sp: [entry.sf.sp]}];
+    delete entry.sf;
+    console.log(`${entry.id}, sfBefore:${JSON.stringify(sfBefore)}, sfsAfter:${JSON.stringify(entry.sfs)}, sfNull:${entry.sf}`);
+  }
+  if (!live) return;
+  await db.collection(`dictionaries/${dictionaryId}/words`).doc(entry.id).set(entry);
+  return true;
+}
 
 entryRefactor();
 
