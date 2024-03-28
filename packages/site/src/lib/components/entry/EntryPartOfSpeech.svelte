@@ -5,22 +5,14 @@
     mayanPOS,
     mayanDictionaries,
   } from '$lib/mappings/parts-of-speech';
-  import { createEventDispatcher } from 'svelte';
   import ModalEditableArray from '../ui/array/ModalEditableArray.svelte';
   import type { SelectOption } from '../ui/array/select-options.interface';
-  import { EntryFields } from '@living-dictionaries/types';
 
   export let value: string[] = [];
-  export let canEdit = false;
+  export let can_edit = false;
   export let dictionaryId: string = undefined;
   export let showPlus = true;
-
-  const dispatch = createEventDispatcher<{
-    valueupdate: {
-      field: EntryFields.parts_of_speech;
-      newValue: string[];
-    };
-  }>();
+  export let on_update: (new_value: string[]) => void;
 
   $: parts_of_speech_options = partsOfSpeech.map(part => {
     return {
@@ -44,15 +36,10 @@
 <ModalEditableArray
   values={value}
   {options}
-  {canEdit}
+  {can_edit}
   {showPlus}
   placeholder={$page.data.t('entry_field.parts_of_speech')}
-  on:update={({ detail: newValue }) => {
-    dispatch('valueupdate', {
-      field: EntryFields.parts_of_speech,
-      newValue,
-    });
-  }}>
+  {on_update}>
   <span slot="heading">{$page.data.t('entry_field.parts_of_speech')}</span>
 </ModalEditableArray>
 

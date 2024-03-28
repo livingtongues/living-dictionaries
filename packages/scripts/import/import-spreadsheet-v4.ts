@@ -80,6 +80,7 @@ export async function importEntriesToFirebase(
       }
       const audioFilePath = await uploadAudioFile(row.soundFile, entryId, dictionaryId, dry);
       if (audioFilePath) {
+        // TODO change this
         entry.sf = {
           path: audioFilePath,
           ts: timestamp,

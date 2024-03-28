@@ -1,7 +1,6 @@
 <script lang="ts">
   import { page } from '$app/stores';
 // import { Button, ShowHide } from 'svelte-pieces';
-  // import { dictionary_deprecated as dictionary } from '$lib/stores';
 </script>
 
 <div class="max-w-screen-md ml-4">

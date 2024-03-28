@@ -1,6 +1,5 @@
 <script lang="ts">
   import { page } from '$app/stores';
-  import { user } from '$lib/stores';
   import { tweened } from 'svelte/motion';
   import { cubicOut } from 'svelte/easing';
   import { getStorage, ref, uploadBytesResumable } from 'firebase/storage';
@@ -8,10 +7,12 @@
   import type { ImageUrlRequestBody, ImageUrlResponseBody } from '$api/image_url/+server';
   import { get } from 'svelte/store';
   import { createEventDispatcher, onMount } from 'svelte';
-  import { post_request } from '$lib/client/get-post-requests';
+  import { post_request } from '$lib/helpers/get-post-requests';
+  import type { IUser } from '@living-dictionaries/types';
 
   export let file: File;
   export let fileLocationPrefix: string;
+  export let user: IUser;
 
   const progress = tweened(0, {
     duration: 2000,
@@ -33,7 +34,7 @@
 
   function startUpload(storagePath: string) {
     const customMetadata = {
-      uploadedBy: $user.displayName,
+      uploadedBy: user.displayName,
       originalFileName: file.name,
     };
 
@@ -75,10 +76,7 @@
       const auth_state_user = get(authState);
       const auth_token = await auth_state_user.getIdToken();
 
-      const { data, error } = await post_request<ImageUrlRequestBody, ImageUrlResponseBody>({
-        route: '/api/image_url',
-        data: { auth_token, firebase_storage_location },
-      });
+      const { data, error } = await post_request<ImageUrlRequestBody, ImageUrlResponseBody>('/api/image_url', { auth_token, firebase_storage_location });
 
       if (error)
         throw new Error(error.message);

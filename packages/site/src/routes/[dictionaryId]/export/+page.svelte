@@ -1,7 +1,6 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { page } from '$app/stores';
-  import { admin, dictionary_deprecated as dictionary, isManager } from '$lib/stores';
   import { Button, ShowHide } from 'svelte-pieces';
   import { partsOfSpeech } from '$lib/mappings/parts-of-speech';
   import type { ActualDatabaseEntry } from '@living-dictionaries/types';
@@ -14,6 +13,9 @@
   import { fetchSpeakers } from './fetchSpeakers';
   import { getCsvHeaders, formatCsvEntries, type EntryForCSV } from './prepareEntriesForCsv';
   import { downloadObjectsAsCSV } from '$lib/export/csv';
+
+  export let data
+  $: ({is_manager, dictionary, admin} = data)
 
   let includeImages = false;
   let includeAudio = false;
@@ -41,7 +43,7 @@
 </script>
 
 <h3 class="text-xl font-semibold mb-4">{$page.data.t('misc.export')}</h3>
-{#if $isManager}
+{#if $is_manager}
   <div class="mb-6">
     <div>
       <i class="far fa-check" />

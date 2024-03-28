@@ -1,7 +1,6 @@
 <script lang="ts">
   import { page } from '$app/stores';
   import { Button, Form } from 'svelte-pieces';
-  import { user } from '$lib/stores';
   import Header from '$lib/components/shell/Header.svelte';
   import type { IDictionary, IHelper, IPoint, IRegion, IUser } from '@living-dictionaries/types';
   import { docExists, setOnline, updateOnline, firebaseConfig, authState } from 'sveltefirets';
@@ -13,10 +12,13 @@
   import { glossingLanguages } from '$lib/glosses/glossing-languages';
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte';
   import type { NewDictionaryRequestBody } from '../api/email/new_dictionary/+server';
-  import { apiFetch } from '$lib/client/apiFetch';
   import { get } from 'svelte/store';
   import { convertToFriendlyUrl } from './convertToFriendlyUrl';
   import { debounce } from '$lib/helpers/debounce';
+  import { post_request } from '$lib/helpers/get-post-requests';
+
+  export let data
+  $: ({user} = data)
 
   const MIN_URL_LENGTH = 3;
   const MAX_URL_LENGTH = 25;
@@ -106,7 +108,7 @@
 
       const auth_state_user = get(authState);
       const auth_token = await auth_state_user.getIdToken();
-      await apiFetch<NewDictionaryRequestBody>('/api/email/new_dictionary', {
+      await post_request<NewDictionaryRequestBody, null>('/api/email/new_dictionary', {
         auth_token,
         dictionary: { ...prunedDictionary, id: urlToUse },
       });

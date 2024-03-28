@@ -3,13 +3,13 @@
   import SearchBox from '$lib/components/search/SearchBox.svelte';
   import Stats from '$lib/components/search/Stats.svelte';
   import EntryFilters from './EntryFilters.svelte';
-  import { dictionary_deprecated as dictionary, canEdit, admin, algoliaQueryParams } from '$lib/stores';
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte';
   import { page, navigating } from '$app/stores';
   import { browser } from '$app/environment';
-  import { lastEntriesUrl } from '$lib/stores/lastEntriesUrl';
+  import { lastEntriesUrl, algoliaQueryParams } from '$lib/stores/algolia';
 
   let showMobileFilters = false;
+  $: ({dictionary, can_edit, admin} = $page.data)
 
   $: if ($algoliaQueryParams) {
     const { href, origin } = window.location
@@ -64,7 +64,7 @@
               {$page.data.t('entry.gallery')}
             </span>
           </a>
-          {#if $dictionary.printAccess || $canEdit}
+          {#if $dictionary.printAccess || $can_edit}
             <a
               href={'/' + $page.params.dictionaryId + '/entries/print'}
               class="{$page.url.pathname.includes('print')

@@ -29,7 +29,7 @@ export const typescript = {
     ...tsEslintPlugin.configs.recommended?.rules,
     ...tsEslintPlugin.configs.stylistic?.rules,
     '@typescript-eslint/sort-type-constituents': 'off', // prefer logical rather than alphabetical sorting
-    'no-console': ['error', { allow: ['warn', 'error', 'info'] }],
+    'no-console': ['error', { allow: ['warn', 'error', 'info', 'time', 'timeEnd'] }],
     '@typescript-eslint/no-unused-vars': [ 'error', { 'argsIgnorePattern': '^_', 'caughtErrors': 'all', 'ignoreRestSiblings': true } ],
     '@typescript-eslint/quotes': ['error', 'single', { 'allowTemplateLiterals': true }],
     '@typescript-eslint/ban-ts-comment': 'off',

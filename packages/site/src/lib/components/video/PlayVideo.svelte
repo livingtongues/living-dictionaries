@@ -8,7 +8,7 @@
   export let lexeme: string;
   export let video: ExpandedVideo;
   export let storageBucket: string;
-  export let canEdit = false;
+  export let can_edit = false;
 
   const dispatch = createEventDispatcher<{
     close: boolean;
@@ -44,7 +44,7 @@
       {/if}
     {/if}
     <!-- <img class="object-contain max-h-full" alt="Image of {entry.lx}" {src} /> -->
-    {#if canEdit}
+    {#if can_edit}
       <div
         class="p-4 flex justify-between
           items-center absolute bottom-0 inset-x-0 bg-opacity-25 bg-black">

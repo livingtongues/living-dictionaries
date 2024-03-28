@@ -1,5 +1,6 @@
 <script lang="ts">
-  import { admin } from '$lib/stores';
+  import { page } from '$app/stores';
+  $: ({ admin } = $page.data);
 </script>
 
 {#if $admin}

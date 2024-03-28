@@ -4,7 +4,7 @@
   import { seoTitle } from './seo-title';
   const { compressToEncodedURIComponent: encode } = LZString;
 
-  const IMAGE_API = 'https://ld-parts.vercel.app/og';
+  const IMAGE_API = '/og';
   const DEFAULT_IMAGE =
     'https://firebasestorage.googleapis.com/v0/b/talking-dictionaries-alpha.appspot.com/o/livingdictionary%2Fimages%2FNEW_Living_Tongues_logo_with_white_around_it.png?alt=media'; // 1484 x 729
   const OG_IMAGE_VERSION = 4;

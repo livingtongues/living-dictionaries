@@ -1,5 +1,4 @@
-import { en } from '$lib/i18n';
-import type { TranslateFunction } from '$lib/i18n/types';
+import { english_translate } from '$lib/i18n';
 import { expand_entry } from '$lib/transformers/expand_entry';
 import type { ExpandedEntry, GoalDatabaseEntry } from '@living-dictionaries/types';
 
@@ -22,7 +21,7 @@ const complexData: GoalDatabaseEntry = {
       ps: ['n', 'v'],
       sdn: [
         '1.5',
-        '1.9'
+        '1.9',
       ],
       sd: ['Flying Mammals', 'Flying Insects'],
       pfs: [{
@@ -45,6 +44,12 @@ const complexData: GoalDatabaseEntry = {
     path: 'gta/audio/local_import/Gta-Pkd-Dec13-Butterflies-common-jay-1580859671012.mp3',
     ts: 1580860148537,
     speakerName: 'Budra Raspeda',
+    sc: 'local_import'
+  },
+  {
+    path: 'gta/audio/local_import/Gta-Pkd-Dec13-Butterflies-common-jay-1580859671012.mp3',
+    ts: 1580860148537,
+    sp: ['random_speaker_id_123'],
     sc: 'local_import'
   }],
   sr: ['Some cool guy in the village'],
@@ -73,10 +78,7 @@ const hebrewData: GoalDatabaseEntry = {
   id: '4', // for table
 }
 
-const t = (({dynamicKey: key}: { dynamicKey: string}) => {
-  const [section, item] = key.split('.')
-  return en[section][item];
-}) as TranslateFunction
+const t = english_translate
 
 export const complex: ExpandedEntry = expand_entry(complexData, t);
 

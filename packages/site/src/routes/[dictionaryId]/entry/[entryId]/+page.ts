@@ -1,65 +1,45 @@
 import { error, redirect } from '@sveltejs/kit';
-import type { ActualDatabaseEntry, SupaEntry } from '@living-dictionaries/types';
-import { docStore, getDocument } from 'sveltefirets';
-import {
-  admin,
-  algoliaQueryParams,
-  canEdit,
-  dictionary_deprecated as dictionary,
-  isContributor,
-  isManager,
-  user,
-} from '$lib/stores';
-import { browser } from '$app/environment';
-import { readable } from 'svelte/store';
+import type { ActualDatabaseEntry } from '@living-dictionaries/types';
+import { awaitableDocStore } from 'sveltefirets';
+import { derived } from 'svelte/store';
 import { ResponseCodes } from '$lib/constants';
-import { ENTRY_UPDATED_LOAD_TRIGGER, dbOperations } from '$lib/dbOperations';
+import { ENTRY_UPDATED_LOAD_TRIGGER } from '$lib/dbOperations';
 import { getSupabase } from '$lib/supabase';
+import type { SupaEntry } from '$lib/supabase/database.types.js';
+import { convert_and_expand_entry } from '$lib/transformers/convert_and_expand_entry';
+import type { PostgrestError } from '@supabase/supabase-js';
 
-export const load = async ({ params, depends }) => {
+export const load = async ({ params, depends, parent }) => {
   depends(ENTRY_UPDATED_LOAD_TRIGGER)
-
   const entryPath = `dictionaries/${params.dictionaryId}/words/${params.entryId}`;
 
-  let entry: ActualDatabaseEntry;
-  try {
-    entry = await getDocument<ActualDatabaseEntry>(entryPath);
-  } catch (err) {
-    throw error(ResponseCodes.INTERNAL_SERVER_ERROR, err);
-  }
+  const entry = await awaitableDocStore<ActualDatabaseEntry>(entryPath);
+  const { error: firestore_error, initial_doc } = entry
+  if (firestore_error)
+    error(ResponseCodes.INTERNAL_SERVER_ERROR, firestore_error);
 
-  if (!entry)
-    throw redirect(ResponseCodes.MOVED_PERMANENTLY, `/${params.dictionaryId}`);
+  if (!initial_doc)
+    redirect(ResponseCodes.MOVED_PERMANENTLY, `/${params.dictionaryId}`);
 
-  let entryStore = readable(entry)
-  if (browser) {
-    try {
-      entryStore = docStore<ActualDatabaseEntry>(entryPath, {startWith: entry})
-    } catch (err) {
-      throw error(ResponseCodes.INTERNAL_SERVER_ERROR, err);
-    }
-  }
+  const { t } = await parent()
+  const entry_expanded = derived(entry, $entry => convert_and_expand_entry($entry, t))
 
+  return {
+    entry: entry_expanded,
+    supa_entry: load_supa_entry(params.entryId),
+    shallow: false,
+  };
+};
+
+async function load_supa_entry(entry_id: string): Promise<{ data?: SupaEntry, error?: PostgrestError}> {
   const supabase = getSupabase()
-
   const { data, error: supaError } = await supabase
     .from('entries_view')
     .select()
-    .eq('id', params.entryId)
+    .eq('id', entry_id)
+    .returns<SupaEntry[]>()
 
-  const supaEntry = data?.[0]  as any as SupaEntry
+  const supaEntry = data?.[0]
   console.info({ supaEntry, supaError })
-
-  return {
-    initialEntry: entryStore,
-    supaEntry,
-    admin,
-    algoliaQueryParams,
-    canEdit,
-    dictionary,
-    isContributor,
-    isManager,
-    user,
-    dbOperations,
-  };
-};
+  return { data: supaEntry, error: supaError }
+}

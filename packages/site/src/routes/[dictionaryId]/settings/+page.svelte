@@ -1,6 +1,5 @@
 <script lang="ts">
   import { page } from '$app/stores';
-  import { user, admin, dictionary_deprecated as dictionary, isManager } from '$lib/stores';
   import { updateOnline, getCollection } from 'sveltefirets';
   import { where, limit } from 'firebase/firestore';
   import { arrayRemove, arrayUnion, GeoPoint, type FieldValue } from 'firebase/firestore/lite';
@@ -17,6 +16,9 @@
   import Image from '$lib/components/image/Image.svelte';
   import ImageDropZone from '$lib/components/image/ImageDropZone.svelte';
   import { invalidateAll } from '$app/navigation';
+
+  export let data
+  $: ({user, dictionary, admin, is_manager} = data)
 
   async function updateDictionary(change: Partial<IDictionary>) {
     try {
@@ -109,7 +111,7 @@
   </div>
   {#if $dictionary.featuredImage}
     <Image
-      canEdit
+      can_edit
       height={300}
       title="{$dictionary.name} Featured Image"
       gcs={$dictionary.featuredImage.specifiable_image_url}
@@ -123,6 +125,7 @@
             <UploadImage
               {file}
               fileLocationPrefix={`${$dictionary.id}/featured_images/`}
+              user={$user}
               on:uploaded={async ({detail: {fb_storage_path, specifiable_image_url}}) => await updateDictionary({
                 featuredImage: {
                   fb_storage_path,
@@ -157,7 +160,7 @@
     }} />
   <div class="mb-5" />
 
-  {#if $isManager}
+  {#if $is_manager}
     <div>
       <ShowHide let:show let:toggle>
         <Button onclick={toggle} class="mb-5" color="red">

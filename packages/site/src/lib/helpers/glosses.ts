@@ -1,9 +1,9 @@
 import type { TranslateFunction } from '$lib/i18n/types';
-import type { IGloss } from '@living-dictionaries/types';
+import type { MultiString } from '@living-dictionaries/types';
 
 export function order_glosses({ glosses, dictionary_gloss_languages, t, label = false }:
   {
-    glosses: IGloss;
+    glosses: MultiString;
     dictionary_gloss_languages: string[],
     t: TranslateFunction,
     label?: boolean
@@ -23,7 +23,7 @@ export function order_glosses({ glosses, dictionary_gloss_languages, t, label = 
 }
 
 export function order_entry_and_dictionary_gloss_languages(
-  glosses: IGloss,
+  glosses: MultiString,
   dictionary_gloss_languages: string[]
 ): string[] {
   const combined_glossing_languages = [...dictionary_gloss_languages, ...Object.keys(glosses || {})]
