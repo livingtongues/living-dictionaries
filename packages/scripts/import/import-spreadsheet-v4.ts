@@ -80,13 +80,12 @@ export async function importEntriesToFirebase(
       }
       const audioFilePath = await uploadAudioFile(row.soundFile, entryId, dictionaryId, dry);
       if (audioFilePath) {
-        // TODO change this
-        entry.sf = {
+        entry.sfs = [{
           path: audioFilePath,
           ts: timestamp,
-        };
+        }];
         if (speakerId)
-          entry.sf.sp = speakerId;
+          entry.sfs[0].sp = [speakerId];
         else
           entry.sf.speakerName = row.speakerName; // Keep that if for some reason we need the speakername as text only again.
 
