@@ -13,10 +13,13 @@
   export let data;
   $: ({entries, status, search_entries, entries_per_page, search_params, speakers} = data)
 
+  const page_entries = writable<ExpandedEntry[]>(null)
+  setContext('entries', page_entries)
+
   $: current_page_index = $search_params.page - 1 || 0
   let search_time: string
   let search_results_count: number
-  $: number_of_pages = entries_into_pages(search_results_count)
+  $: number_of_pages = entries_into_pages(search_results_count || $entries.size)
   let result_facets: FacetResult
 
   function entries_into_pages(count: number) {
@@ -24,14 +27,21 @@
     return Math.ceil(count / entries_per_page)
   }
 
-  const page_entries = writable<ExpandedEntry[]>(null)
-  setContext('entries', page_entries)
+  $: if ($entries.size && !cache_search_index_ready && !search_index_ready)
+    page_entries.set(Array.from($entries.values()).slice(current_page_index * entries_per_page, (current_page_index + 1) * entries_per_page))
 
-  $: if ($entries && !$page_entries)
-    page_entries.set(Array.from($entries.values()))
+  $: console.info({$entries, entry_count: $entries.size, $page_entries})
+  $: console.info({$status})
 
-  $: search_index_ready = $status === 'Search index created'
-  $: if (search_index_ready)
+  let cache_search_index_ready = false
+  $: if ($status === 'Cache search index created')
+    cache_search_index_ready = true
+
+  let search_index_ready = false
+  $: if ($status === 'Search index created')
+    search_index_ready = true
+
+  $: if (cache_search_index_ready || search_index_ready)
     search($search_params, current_page_index)
 
   let search_inited_ms: number
@@ -57,7 +67,7 @@
   <div
     class="flex mb-1 items-center sticky top-0 md:top-12 pt-2 md:pt-0 pb-1
       bg-white z-20 print:hidden">
-    <SearchInput {search_params} index_ready={search_index_ready} on_show_filter_menu={toggle} />
+    <SearchInput {search_params} index_ready={search_index_ready || cache_search_index_ready} on_show_filter_menu={toggle} />
   </div>
 
   <div class="flex">
@@ -69,8 +79,10 @@
           ({search_time.includes('μs') ? '<1ms' : search_time})
         {:else}
           {$page.data.t('dictionary.entries')}:
-          {$page_entries?.length ? $page_entries.length : ''}
-          <span class="i-svg-spinners-3-dots-fade align--4px" />
+          {$entries.size ? $entries.size : ''}
+        {/if}
+        {#if !search_index_ready}
+          <span class="i-svg-spinners-3-dots-fade align--4px" title="Ensure all entries are up to date" />
         {/if}
       </div>
       <slot />

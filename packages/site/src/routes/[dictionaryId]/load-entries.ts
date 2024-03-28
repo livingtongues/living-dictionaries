@@ -1,11 +1,32 @@
-import { QueryConstraint, limit, orderBy, startAt } from 'firebase/firestore';
+import { CollectionReference, FirestoreError, QueryConstraint, getDocs, getDocsFromCache, limit, orderBy, query, startAt } from 'firebase/firestore';
 import { convert_and_expand_entry } from '$lib/transformers/convert_and_expand_entry';
 import type { TranslateFunction } from '$lib/i18n/types';
 import { create_index, search_entries } from '$lib/search';
 import { browser } from '$app/environment';
 import type { IDictionary, ExpandedEntry, ActualDatabaseEntry } from '@living-dictionaries/types';
 import { writable } from 'svelte/store';
-import { firebaseConfig, getCollectionOrError } from 'sveltefirets';
+import { firebaseConfig, colRef } from 'sveltefirets';
+
+async function getCollectionOrError<T>(
+  path: string | CollectionReference<T>,
+  queryConstraints: QueryConstraint[] = [],
+  { fromCache } = { fromCache: false },
+): Promise<{ data?: T[], ref?: CollectionReference<T>, error?: FirestoreError }> {
+  try {
+    const _ref = typeof path === 'string' ? colRef<T>(path) : path;
+    const q = query(_ref, ...queryConstraints);
+    const collectionSnap = fromCache ? await getDocsFromCache(q) : await getDocs(q);
+    return {
+      data: collectionSnap.docs.map((docSnap) => ({
+        ...docSnap.data(),
+        id: docSnap.id,
+      })),
+      ref: _ref,
+    }
+  } catch (error) {
+    return { error };
+  }
+}
 
 export function create_entries_store({dictionary, is_admin, t, entries_per_page}: { dictionary: IDictionary, is_admin: boolean, t: TranslateFunction, entries_per_page: number}) {
   const _entries = new Map<string, ExpandedEntry>()
@@ -20,7 +41,7 @@ export function create_entries_store({dictionary, is_admin, t, entries_per_page}
       const expanded = convert_and_expand_entry(entry, t)
       _entries.set(entry.id, expanded)
     }
-    entries.set(_entries) // TODO: is this even needed because it's a map?
+    entries.set(_entries)
     console.info({ added_entries: db_entries.length, total_entries: _entries.size })
   }
 
@@ -38,11 +59,15 @@ export function create_entries_store({dictionary, is_admin, t, entries_per_page}
     }
     if (from_cache) {
       add(from_cache)
+      if (from_cache.length > 100 || from_cache.length > (dictionary.entryCount * .9)) {
+        create_index(_entries).then(() => {
+          status.set('Cache search index created');
+        })
+      }
       status.set(`Entries loaded: initial cache check found ${from_cache.length}`)
     }
 
     // then get all entries from the server starting with the first page size and then growing in bigger steps (this will also update the cache to the current moment)
-    const additional_step_size = 100
     async function get_page_from_server(page_size: number, start_at_lexeme?: string) {
       const queryConstraints: QueryConstraint[] = [limit(page_size), order_by_lexeme]
       if (start_at_lexeme)
@@ -55,6 +80,7 @@ export function create_entries_store({dictionary, is_admin, t, entries_per_page}
         add(page_from_server)
         status.set(`Entries loaded: went to server to fill page (${page_size}) and received ${page_from_server.length}`);
         const last_received_lexeme = page_from_server[page_from_server.length - 1].lx
+        const additional_step_size = 100
         await get_page_from_server(additional_step_size, last_received_lexeme) // recursively repeat until all pages loaded
       } else {
         status.set(`Creating index ${_entries.size} entries`);

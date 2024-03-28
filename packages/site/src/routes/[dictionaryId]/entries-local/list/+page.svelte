@@ -56,6 +56,10 @@
       on_click={(e) => {handle_entry_click(e, entry)}}
       {dbOperations} />
   {/each}
+
+  <!-- Gallery view -->
+  <!-- Table view -->
+  <!-- Print view -->
 {/if}
 
 {#if $page.state.entry_id}
