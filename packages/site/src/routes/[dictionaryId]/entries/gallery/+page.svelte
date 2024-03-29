@@ -14,7 +14,7 @@
   import { browser } from '$app/environment';
 
   export let data
-  $: ({dictionary, can_edit} = data)
+  $: ({dictionary, can_edit, dbOperations} = data)
 
   const search: InstantSearch = getContext('search');
   let pixels_from_top = 0;
@@ -61,14 +61,14 @@
             path="dictionaries/{$dictionary.id}/words/{algoliaEntry.id}"
             startWith={algoliaEntry}
             let:data={entry}>
-            <GalleryEntry dictionary={$dictionary} entry={convert_and_expand_entry(entry, $page.data.t)} can_edit={$can_edit} />
+            <GalleryEntry dictionary={$dictionary} entry={convert_and_expand_entry(entry, $page.data.t)} can_edit={$can_edit} deleteImage={dbOperations.deleteImage} />
           </Doc>
         {/if}
       {/each}
     {:else}
       {#each entries as entry (entry.id)}
         {#if entry.pf}
-          <GalleryEntry dictionary={$dictionary} entry={convert_and_expand_entry(entry, $page.data.t)} />
+          <GalleryEntry dictionary={$dictionary} entry={convert_and_expand_entry(entry, $page.data.t)} deleteImage={null} />
         {/if}
       {/each}
     {/if}

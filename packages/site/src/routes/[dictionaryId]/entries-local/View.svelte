@@ -11,6 +11,7 @@
   import type { PageData as EntriesPageData } from './$types';
   import type { View } from '$lib/search/types';
   import EntriesTable from '../entries/table/EntriesTable.svelte';
+  import EntriesGallery from './EntriesGallery.svelte';
 
   export let view: View
   export let entries: Map<string, ExpandedEntry>
@@ -67,10 +68,14 @@
       dictionary={$dictionary}
       can_edit={$can_edit}
       {dbOperations} />
+  {:else if view === 'gallery'}
+    <EntriesGallery
+      entries={Array.from(entries.values())}
+      dictionary={$dictionary}
+      deleteImage={dbOperations.deleteImage}
+      can_edit={$can_edit} />
   {:else if view === 'print'}
     Print view still coming
-  {:else if view === 'gallery'}
-    Gallery view still coming
   {/if}
 {/if}
 

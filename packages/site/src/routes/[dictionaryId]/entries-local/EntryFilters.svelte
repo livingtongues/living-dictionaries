@@ -67,7 +67,7 @@
         {/if}
         <hr />
 
-        {#if !$page.url.pathname.includes('gallery')}
+        {#if $search_params.view !== 'gallery'}
           {#if result_facets.has_image?.values.true}
             <ToggleFacet
               bind:checked={$search_params.has_image}

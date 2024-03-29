@@ -13,7 +13,7 @@
     type="button"
     on:click={() => view = null}
     class:active={!view}>
-    <i class="far fa-list" />
+    <span class="i-fa-solid-list -mt-1" />
     <span class="hidden md:inline">
       {$page.data.t('entry.list')}
     </span>
@@ -23,7 +23,7 @@
     type="button"
     on:click={() => view = 'table'}
     class:active={view === 'table'}>
-    <i class="fal fa-table" />
+    <span class="i-fa-table -mt-1" />
     <span class="hidden md:inline">
       {$page.data.t('entry.table')}
     </span>
