@@ -69,9 +69,30 @@ async function update_index_entry(entry: ExpandedEntry) {
   await update(index, entry.id, augment_entry_for_search(entry))
 }
 
-async function search_entries(query_params: QueryParams, page_index: number, entries_per_page: number) {
+export interface SearchEntriesOptions {
+  query_params: QueryParams,
+  page_index: number,
+  entries_per_page: number,
+  dictionary_id?: string
+}
+
+async function search_entries({ query_params, entries_per_page, page_index, dictionary_id } : SearchEntriesOptions) {
   console.info('searching for', query_params.query)
   const index = await get_index()
+
+  const lexemeSortBy = {
+    property: 'lexeme',
+  }
+
+  const onondagaSortBy = (a, b) => {
+    const a_id = a[2].elicitation_id || 'zz'
+    const b_id = b[2].elicitation_id || 'zz'
+    if (a_id !== b_id)
+      return a_id.localeCompare(b_id);
+    return a[2].lexeme.localeCompare(b[2].lexeme);
+  }
+
+  const sortBy = dictionary_id === 'onondaga' ? onondagaSortBy : lexemeSortBy
 
   const orama_search_params: OramaSearchParams<Orama<typeof entries_index_schema>> = {
     term: query_params.query,
@@ -83,13 +104,7 @@ async function search_entries(query_params: QueryParams, page_index: number, ent
       lexeme_other: 1.5,
       glosses: 1.2,
     },
-    sortBy: {
-      property: 'lexeme',
-    },
-    // Onondaga sortBy possibility
-    // sortBy: (a, b) => {
-    //   return a[2].elicitation_id - b[2].elicitation_id
-    // },
+    sortBy,
     facets: {
       dialects: {
         limit: 10,

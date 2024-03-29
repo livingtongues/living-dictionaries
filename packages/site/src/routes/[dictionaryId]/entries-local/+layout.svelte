@@ -11,7 +11,7 @@
   import { writable } from 'svelte/store';
 
   export let data;
-  $: ({entries, status, search_entries, entries_per_page, search_params, speakers} = data)
+  $: ({entries, status, search_entries, entries_per_page, search_params, speakers, dictionary} = data)
 
   const page_entries = writable<ExpandedEntry[]>(null)
   setContext('entries', page_entries)
@@ -49,7 +49,7 @@
     try {
       const time = Date.now()
       search_inited_ms = time
-      const {elapsed: { formatted }, count, hits, facets } = await search_entries(query_params, page_index, entries_per_page)
+      const {elapsed: { formatted }, count, hits, facets } = await search_entries({query_params, page_index, entries_per_page, dictionary_id: $dictionary.id})
       if (search_inited_ms !== time) return
       result_facets = facets
       search_results_count = count
