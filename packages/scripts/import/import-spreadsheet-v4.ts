@@ -7,7 +7,7 @@ import { convertJsonRowToEntryFormat } from './convertJsonRowToEntryFormat.js';
 
 const developer_in_charge = 'qkTzJXH24Xfc57cZJRityS6OTn52'; // diego@livingtongues.org -> Diego Córdova Nieto;
 type unique_speakers = Record<string, string>;
-const different_speakers: unique_speakers = {};
+const different_speakers: unique_speakers[] = [];
 
 export async function importFromSpreadsheet(dictionaryId: string, dry = false) {
   const dateStamp = Date.now();
@@ -36,7 +36,9 @@ export async function importEntriesToFirebase(
   let batchCount = 0;
   let batch = db.batch();
   const colRef = db.collection(`dictionaries/${dictionaryId}/words`);
-  let speakerRef;
+  const speakerRef = db.collection('speakers');
+  const dictionarySpeakerSnapshot = await speakerRef.where('contributingTo', 'array-contains', dictionaryId).get();
+  dictionarySpeakerSnapshot.docs.forEach((snap) => different_speakers.push({ [snap.data().displayName]: snap.id }));
   let speakerId;
 
   for (const row of rows) {
@@ -59,10 +61,10 @@ export async function importEntriesToFirebase(
     }
 
     if (row.soundFile) {
-      speakerRef = db.collection('speakers');
-      if (row.speakerName && (!speakerId || !(row.speakerName in different_speakers))) {
+      speakerId = different_speakers.find(speaker => Object.keys(speaker).some(key => key === row.speakerName))?.[row.speakerName];
+      if (row.speakerName && !speakerId) {
         speakerId = speakerRef.doc().id;
-        different_speakers[row.speakerName] = speakerId;
+        different_speakers.push({[row.speakerName]: speakerId});
         batch.create(speakerRef.doc(speakerId), {
           displayName: row.speakerName,
           birthplace: row.speakerHometown || '',
@@ -77,16 +79,14 @@ export async function importEntriesToFirebase(
       }
       const audioFilePath = await uploadAudioFile(row.soundFile, entryId, dictionaryId, dry);
       if (audioFilePath) {
-        // TODO change this
-        entry.sf = {
+        entry.sfs = [{
           path: audioFilePath,
-          ts: timestamp,
-        };
+          ts: new Date().getTime(),
+        }];
         if (speakerId)
-          entry.sf.sp = different_speakers[row.speakerName];
+          entry.sfs[0].sp = [speakerId];
         else
           entry.sf.speakerName = row.speakerName; // Keep that if for some reason we need the speakername as text only again.
-
       }
     }
 
