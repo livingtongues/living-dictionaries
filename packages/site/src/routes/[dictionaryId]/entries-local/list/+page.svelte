@@ -9,11 +9,14 @@
   import EntryPage from '../../entry/[entryId]/+page.svelte';
   import { ResponseCodes } from '$lib/constants';
   import type { PageData as EntryPageData } from '../../entry/[entryId]/$types';
+  import { convert_and_expand_entry } from '$lib/transformers/convert_and_expand_entry';
 
   export let data;
-  $: ({dictionary, can_edit, dbOperations } = data)
+  $: ({dictionary, can_edit, dbOperations, edited_entries } = data)
 
   const entries = getContext<Writable<ExpandedEntry[]>>('entries')
+  // $: if ($edited_entries?.length)
+  //   update_index_entries($edited_entries)
 
   let entry_page_data: EntryPageData
 
@@ -48,14 +51,20 @@
 
 {#if $entries}
   {#each $entries as entry}
+    {@const updated_entry = $edited_entries?.find(({id}) => id === entry.id)}
+    {@const expanded_entry = updated_entry && convert_and_expand_entry(updated_entry, $page.data.t)}
     <ListEntry
       dictionary={$dictionary}
-      {entry}
+      entry={expanded_entry || entry}
       videoAccess={$dictionary.videoAccess}
       can_edit={$can_edit}
       on_click={(e) => {handle_entry_click(e, entry)}}
       {dbOperations} />
   {/each}
+
+  <!-- Gallery view -->
+  <!-- Table view -->
+  <!-- Print view -->
 {/if}
 
 {#if $page.state.entry_id}

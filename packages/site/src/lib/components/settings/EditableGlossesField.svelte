@@ -36,7 +36,7 @@
   <BadgeArrayEmit
     strings={activeGlossingBcps}
     {minimum}
-    can_edit
+    canEdit
     addMessage={$page.data.t('misc.add')}
     on:itemremoved={(e) => {
       dispatch('remove', {
