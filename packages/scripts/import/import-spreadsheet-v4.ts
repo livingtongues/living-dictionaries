@@ -61,7 +61,6 @@ export async function importEntriesToFirebase(
     }
 
     if (row.soundFile) {
-      speakerId = null;
       speakerId = different_speakers.find(speaker => Object.keys(speaker).some(key => key === row.speakerName))?.[row.speakerName];
       if (row.speakerName && !speakerId) {
         speakerId = speakerRef.doc().id;
