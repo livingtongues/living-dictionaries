@@ -1,6 +1,9 @@
+export type View = 'list' | 'table' | 'print' | 'gallery'
+
 export interface QueryParams {
   page: number;
   query: string;
+  view?: View;
   // Array facets
   dialects?: string[];
   parts_of_speech?: string[];

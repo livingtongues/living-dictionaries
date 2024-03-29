@@ -1,22 +1,20 @@
 <script lang="ts">
-  import { getContext } from 'svelte';
-  import ListEntry from '../../entries/list/ListEntry.svelte';
-  import { readable, type Writable } from 'svelte/store';
+  import ListEntry from '../entries/list/ListEntry.svelte';
+  import { readable } from 'svelte/store';
   import type { ExpandedEntry } from '@living-dictionaries/types';
   import { page } from '$app/stores';
   import { Modal } from 'svelte-pieces';
   import { goto, preloadData, pushState } from '$app/navigation';
-  import EntryPage from '../../entry/[entryId]/+page.svelte';
+  import EntryPage from '../entry/[entryId]/+page.svelte';
   import { ResponseCodes } from '$lib/constants';
-  import type { PageData as EntryPageData } from '../../entry/[entryId]/$types';
-  import { convert_and_expand_entry } from '$lib/transformers/convert_and_expand_entry';
+  import type { PageData as EntryPageData } from '../entry/[entryId]/$types';
+  import type { PageData as EntriesPageData } from './$types';
+  import type { View } from '$lib/search/types';
 
-  export let data;
-  $: ({dictionary, can_edit, dbOperations, edited_entries } = data)
-
-  const entries = getContext<Writable<ExpandedEntry[]>>('entries')
-  // $: if ($edited_entries?.length)
-  //   update_index_entries($edited_entries)
+  export let view: View
+  export let entries: Map<string, ExpandedEntry>
+  export let page_data: EntriesPageData
+  $: ({ dictionary, can_edit} = page_data)
 
   let entry_page_data: EntryPageData
 
@@ -29,7 +27,7 @@
     console.info({opened: entry, lexeme_other: entry.lexeme_other?.join(', ')})
 
     entry_page_data = {
-      ...data,
+      ...page_data,
       entry: readable(entry),
       supa_entry: new Promise(() => ({})),
       shallow: true,
@@ -49,22 +47,25 @@
   }
 </script>
 
-{#if $entries}
-  {#each $entries as entry}
-    {@const updated_entry = $edited_entries?.find(({id}) => id === entry.id)}
-    {@const expanded_entry = updated_entry && convert_and_expand_entry(updated_entry, $page.data.t)}
-    <ListEntry
-      dictionary={$dictionary}
-      entry={expanded_entry || entry}
-      videoAccess={$dictionary.videoAccess}
-      can_edit={$can_edit}
-      on_click={(e) => {handle_entry_click(e, entry)}}
-      {dbOperations} />
-  {/each}
 
-  <!-- Gallery view -->
-  <!-- Table view -->
-  <!-- Print view -->
+{#if entries.size}
+  {#if !view}
+    {#each entries as [id, entry] (id)}
+      <ListEntry
+        dictionary={$dictionary}
+        {entry}
+        videoAccess={$dictionary.videoAccess}
+        can_edit={$can_edit}
+        on_click={(e) => {handle_entry_click(e, entry)}}
+        dbOperations={page_data.dbOperations} />
+    {/each}
+  {:else if view === 'table'}
+    Table view
+  {:else if view === 'print'}
+    Print view still coming
+  {:else if view === 'gallery'}
+    Gallery view still coming
+  {/if}
 {/if}
 
 {#if $page.state.entry_id}

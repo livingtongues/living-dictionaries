@@ -11,6 +11,9 @@
     page_from_url = one_based_page;
     window.scrollTo({ top: 0 });
   }
+
+  $: if (page_from_url === 1)
+    page_from_url = null
 </script>
 
 {#if can_edit}

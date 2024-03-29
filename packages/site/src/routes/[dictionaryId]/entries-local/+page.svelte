@@ -1,20 +1,21 @@
 <script lang="ts">
   import { ShowHide } from 'svelte-pieces';
   import SearchInput from './SearchInput.svelte';
-  import { setContext } from 'svelte';
   import type { ExpandedEntry } from '@living-dictionaries/types';
   import { page } from '$app/stores';
   import Pagination from './Pagination.svelte';
+  import SwitchView from './SwitchView.svelte';
   import EntryFilters from './EntryFilters.svelte';
   import type { FacetResult } from '@orama/orama';
   import type { QueryParams } from '$lib/search/types';
   import { writable } from 'svelte/store';
+  import View from './View.svelte';
+  import { convert_and_expand_entry } from '$lib/transformers/convert_and_expand_entry';
 
   export let data;
-  $: ({entries, status, search_entries, entries_per_page, search_params, speakers, dictionary} = data)
+  $: ({entries, status, search_entries, entries_per_page, search_params, speakers, dictionary, can_edit, edited_entries} = data)
 
   const page_entries = writable<ExpandedEntry[]>(null)
-  setContext('entries', page_entries)
 
   $: current_page_index = $search_params.page - 1 || 0
   let search_time: string
@@ -61,6 +62,18 @@
       console.error(err)
     }
   }
+
+  let updated_entries = new Map<string, ExpandedEntry>()
+
+  $: {
+    const combined_entries = new Map(($page_entries || []).map(entry => [entry.id, entry]));
+    ($edited_entries || []).forEach(entry => {
+      const expandedEntry = convert_and_expand_entry(entry, $page.data.t);
+      combined_entries.set(expandedEntry.id, expandedEntry);
+    // TODO: detect if change happened and then run update_index_entry(expandedEntry)
+    });
+    updated_entries = combined_entries
+  }
 </script>
 
 <ShowHide let:show={show_mobile_filters} let:toggle>
@@ -68,6 +81,8 @@
     class="flex mb-1 items-center sticky top-0 md:top-12 pt-2 md:pt-0 pb-1
       bg-white z-20 print:hidden">
     <SearchInput {search_params} index_ready={search_index_ready || cache_search_index_ready} on_show_filter_menu={toggle} />
+    <div class="w-1" />
+    <SwitchView bind:view={$search_params.view} can_print={$dictionary.printAccess || $can_edit} />
   </div>
 
   <div class="flex">
@@ -85,7 +100,7 @@
           <span class="i-svg-spinners-3-dots-fade align--4px" title="Ensure all entries are up to date" />
         {/if}
       </div>
-      <slot />
+      <View entries={updated_entries} view={$search_params.view} page_data={data} />
       <Pagination bind:page_from_url={$search_params.page} {number_of_pages} />
     </div>
     <div class="hidden md:block w-2 flex-shrink-0 print:hidden" />

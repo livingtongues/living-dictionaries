@@ -36,7 +36,7 @@
   {#if admin || firebaseConfig.projectId === 'talking-dictionaries-dev'}
     <a
       class:active={$page.url.pathname.match(/entries-local/)}
-      href={`/${dictionary.id}/entries-local/list`}>
+      href={`/${dictionary.id}/entries-local`}>
       <!-- <span class="i-fa6-solid-list " /> -->
       <span class="font-medium mx-2">
         {$page.data.t('dictionary.entries')} (local)
