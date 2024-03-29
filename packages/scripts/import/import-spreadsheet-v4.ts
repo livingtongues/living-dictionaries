@@ -82,13 +82,12 @@ export async function importEntriesToFirebase(
       if (audioFilePath) {
         entry.sfs = [{
           path: audioFilePath,
-          ts: timestamp,
+          ts: new Date().getTime(),
         }];
         if (speakerId)
           entry.sfs[0].sp = [speakerId];
         else
           entry.sf.speakerName = row.speakerName; // Keep that if for some reason we need the speakername as text only again.
-
       }
     }
 
