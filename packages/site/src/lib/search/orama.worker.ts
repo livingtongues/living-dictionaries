@@ -1,5 +1,5 @@
 import type { ExpandedEntry } from '@living-dictionaries/types';
-import { create, insertMultiple, search, type Orama, type SearchParams as OramaSearchParams } from '@orama/orama'
+import { create, insertMultiple, search, type Orama, type SearchParams as OramaSearchParams, update, updateMultiple } from '@orama/orama'
 import { expose } from 'comlink'
 import type { QueryParams } from './types';
 import { augment_entry_for_search } from './augment-entry-for-search';
@@ -33,9 +33,10 @@ const entries_index_schema = {
 
 let orama_index: Orama<typeof entries_index_schema>
 
-async function create_index(entries: ExpandedEntry[]) {
+async function create_index(entries: Map<string, ExpandedEntry>) {
   console.time('Augment Entries Time');
-  const entries_augmented_for_search = entries.map(augment_entry_for_search)
+  const entriesArray = Array.from(entries.values());
+  const entries_augmented_for_search = entriesArray.map(augment_entry_for_search)
   console.timeEnd('Augment Entries Time');
 
   console.time('Index Entries Time');
@@ -56,6 +57,16 @@ function get_index(): Promise<typeof orama_index> {
       }
     }, 50)
   })
+}
+
+async function update_index_entries(entries: ExpandedEntry[]) {
+  const index = await get_index()
+  await updateMultiple(index, entries.map(({id}) => id), entries.map(augment_entry_for_search))
+}
+
+async function update_index_entry(entry: ExpandedEntry) {
+  const index = await get_index()
+  await update(index, entry.id, augment_entry_for_search(entry))
 }
 
 async function search_entries(query_params: QueryParams, page_index: number, entries_per_page: number) {
@@ -154,6 +165,8 @@ async function search_entries(query_params: QueryParams, page_index: number, ent
 
 export const api = {
   create_index,
+  update_index_entries,
+  update_index_entry,
   search_entries,
 }
 

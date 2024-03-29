@@ -24,11 +24,13 @@
     t: $page.data.t,
     label: dictionary.id !== 'jewish-neo-aramaic',
   }).join(', ');
+
+  $: updated_within_last_5_minutes = (entry.ua?.toMillis?.() || (entry.ua?.seconds * 1000)) > minutesAgo(5)
 </script>
 
 <div
   dir="ltr"
-  class:border-b-2={entry.ua?.toMillis?.() > minutesAgo(5)}
+  class:border-b-2={updated_within_last_5_minutes}
   class="flex rounded shadow my-1 overflow-hidden items-stretch border-green-300"
   style="margin-right: 2px;">
   {#if entry.sound_files?.[0] || can_edit}
