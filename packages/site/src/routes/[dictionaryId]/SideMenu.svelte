@@ -7,7 +7,7 @@
   export let on_close: () => void;
   export let admin: number
   export let is_manager: boolean
-  export let search_index_updated: boolean
+  export let search_index_ready: boolean
 </script>
 
 <div class="md:hidden">
@@ -42,7 +42,7 @@
         {$page.data.t('dictionary.entries')} (local)
       </span>
       <span class="flex-grow" />
-      {#if search_index_updated}
+      {#if search_index_ready}
         <span
           class="inline-block py-1 px-2 leading-none text-xs font-semibold
             text-gray-700 bg-gray-300 rounded-full">
