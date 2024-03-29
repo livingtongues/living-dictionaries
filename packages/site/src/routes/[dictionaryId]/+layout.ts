@@ -8,6 +8,7 @@ import { browser } from '$app/environment';
 import { where } from 'firebase/firestore';
 import { dbOperations } from '$lib/dbOperations';
 import { create_entries_store } from './load-entries';
+import { search_entries, update_index_entries } from '$lib/search';
 
 export const load: LayoutLoad = async ({ params: { dictionaryId }, parent }) => {
   try {
@@ -54,9 +55,9 @@ export const load: LayoutLoad = async ({ params: { dictionaryId }, parent }) => 
     const speakers = collectionStore<ISpeaker>('speakers', [where('contributingTo', 'array-contains', dictionaryId)], { startWith: []})
 
     const entries_per_page = 20
-    const { entries, status, search_entries } = create_entries_store({dictionary: initial_doc, is_admin: !!user_from_cookies?.roles?.admin, t, entries_per_page});
+    const { entries, status, edited_entries } = create_entries_store({dictionary: initial_doc, is_admin: !!user_from_cookies?.roles?.admin, t, entries_per_page});
 
-    return { dictionary, speakers, entries_per_page, entries, status, search_entries, is_manager, is_contributor, can_edit, dbOperations };
+    return { dictionary, speakers, entries_per_page, entries, status, edited_entries, search_entries, update_index_entries, is_manager, is_contributor, can_edit, dbOperations };
   } catch (err) {
     error(ResponseCodes.INTERNAL_SERVER_ERROR, err);
   }

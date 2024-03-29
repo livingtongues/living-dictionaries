@@ -1,11 +1,11 @@
-import { CollectionReference, FirestoreError, QueryConstraint, getDocs, getDocsFromCache, limit, orderBy, query, startAt } from 'firebase/firestore';
+import { CollectionReference, FirestoreError, QueryConstraint, Timestamp, getDocs, getDocsFromCache, limit, orderBy, query, startAt, where } from 'firebase/firestore';
 import { convert_and_expand_entry } from '$lib/transformers/convert_and_expand_entry';
 import type { TranslateFunction } from '$lib/i18n/types';
-import { create_index, search_entries } from '$lib/search';
+import { create_index } from '$lib/search';
 import { browser } from '$app/environment';
 import type { IDictionary, ExpandedEntry, ActualDatabaseEntry } from '@living-dictionaries/types';
 import { writable } from 'svelte/store';
-import { firebaseConfig, colRef } from 'sveltefirets';
+import { firebaseConfig, colRef, collectionStore } from 'sveltefirets';
 
 async function getCollectionOrError<T>(
   path: string | CollectionReference<T>,
@@ -47,8 +47,8 @@ export function create_entries_store({dictionary, is_admin, t, entries_per_page}
 
   const status = writable('initing');
 
+  const path = `dictionaries/${dictionary.id}/words`
   async function incrementally_get_entries() {
-    const path = `dictionaries/${dictionary.id}/words`
     const order_by_lexeme = orderBy('lx', 'desc');
 
     // first get as many documents from cache as exist
@@ -92,6 +92,9 @@ export function create_entries_store({dictionary, is_admin, t, entries_per_page}
   }
   incrementally_get_entries()
 
-  return { entries, status, search_entries }
+  const entries_loaded_at = Timestamp.fromMillis(Date.now())
+  const edited_entries = collectionStore<ActualDatabaseEntry>(path, [where('ua', '>', entries_loaded_at)])
+
+  return { entries, status, edited_entries }
 }
 
