@@ -10,11 +10,12 @@
   import type { PageData as EntryPageData } from '../entry/[entryId]/$types';
   import type { PageData as EntriesPageData } from './$types';
   import type { View } from '$lib/search/types';
+  import EntriesTable from '../entries/table/EntriesTable.svelte';
 
   export let view: View
   export let entries: Map<string, ExpandedEntry>
   export let page_data: EntriesPageData
-  $: ({ dictionary, can_edit} = page_data)
+  $: ({ dictionary, can_edit, preferred_table_columns, dbOperations} = page_data)
 
   let entry_page_data: EntryPageData
 
@@ -57,10 +58,15 @@
         videoAccess={$dictionary.videoAccess}
         can_edit={$can_edit}
         on_click={(e) => {handle_entry_click(e, entry)}}
-        dbOperations={page_data.dbOperations} />
+        {dbOperations} />
     {/each}
   {:else if view === 'table'}
-    Table view
+    <EntriesTable
+      entries={Array.from(entries.values())}
+      preferred_table_columns={$preferred_table_columns}
+      dictionary={$dictionary}
+      can_edit={$can_edit}
+      {dbOperations} />
   {:else if view === 'print'}
     Print view still coming
   {:else if view === 'gallery'}

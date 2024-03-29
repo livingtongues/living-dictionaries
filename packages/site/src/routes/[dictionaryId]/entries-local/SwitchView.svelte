@@ -12,8 +12,7 @@
   <button
     type="button"
     on:click={() => view = null}
-    class="{!view ? 'bg-white shadow' : 'hover:bg-gray-100'}
-      px-2 py-1 rounded">
+    class:active={!view}>
     <i class="far fa-list" />
     <span class="hidden md:inline">
       {$page.data.t('entry.list')}
@@ -23,8 +22,7 @@
   <button
     type="button"
     on:click={() => view = 'table'}
-    class="{view === 'table' ? 'bg-white shadow' : 'hover:bg-gray-100'}
-      px-2 py-1 rounded">
+    class:active={view === 'table'}>
     <i class="fal fa-table" />
     <span class="hidden md:inline">
       {$page.data.t('entry.table')}
@@ -34,11 +32,8 @@
   <button
     type="button"
     on:click={() => view = 'gallery'}
-    class="{view === 'gallery'
-      ? 'bg-white shadow'
-      : 'hover:bg-gray-100'}
-      px-2 py-1 rounded">
-    <i class="fal fa-image" />
+    class:active={view === 'gallery'}>
+    <span class="i-ic-outline-image -mt-1 text-lg" />
     <span class="hidden md:inline">
       {$page.data.t('entry.gallery')}
     </span>
@@ -47,14 +42,20 @@
     <button
       type="button"
       on:click={() => view = 'print'}
-      class="{view === 'print'
-        ? 'bg-white shadow'
-        : 'hover:bg-gray-100'}
-        px-2 py-1 rounded">
-      <span class="i-fa-print" style="margin-top: -4px;" />
+      class:active={view === 'print'}>
+      <span class="i-fa-print -mt-1" />
       <span class="hidden md:inline">
         {$page.data.t('entry.print')}
       </span>
     </button>
   {/if}
 </div>
+
+<style>
+  button {
+    --at-apply: hover:bg-gray-100 px-2 py-1 rounded;
+  }
+  .active {
+    --at-apply: bg-white shadow;
+  }
+</style>
