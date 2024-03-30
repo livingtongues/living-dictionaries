@@ -1,27 +1,25 @@
 <script lang="ts">
-  import { createEventDispatcher } from 'svelte';
-  import type { ExpandedEntry, IColumn } from '@living-dictionaries/types';
+  import type { ExpandedEntry, IColumn, IDictionary } from '@living-dictionaries/types';
   import ColumnTitle from './ColumnTitle.svelte';
   import Cell from './Cell.svelte';
   import { minutesAgo } from '$lib/helpers/time';
   import { browser } from '$app/environment';
+  import { setUpColumns } from './setUpColumns';
+  import type { DbOperations } from '$lib/dbOperations';
 
-  export let columns: IColumn[];
   export let entries: ExpandedEntry[] = [];
   export let can_edit = false;
-  export let dictionaryId: string;
+  export let dictionary: IDictionary;
+  export let preferred_table_columns: IColumn[]
+  export let dbOperations: DbOperations;
 
+  $: columns = setUpColumns(preferred_table_columns, dictionary);
   let selectedColumn: IColumn;
 
   function getLeftValue(index: number) {
     if (index === 0) return 0;
     return columns[index - 1].width;
   }
-
-  const dispatch = createEventDispatcher<{
-    deleteImage: { entryId: string };
-    valueupdate: { field: string; newValue: string | string[]; entryId: string };
-  }>();
 
   const isFirefox = browser && /Firefox/i.test(navigator.userAgent);
 </script>
@@ -48,15 +46,22 @@
       {/each}
     </tr>
     {#each entries as entry (entry.id)}
+      {@const updated_within_last_5_minutes = can_edit && (entry.ua?.toMillis?.() || (entry.ua?.seconds * 1000)) > minutesAgo(5)}
       <tr class="row-hover">
         {#each columns as column, i}
           <td
-            class:bg-green-100={can_edit && entry.ua?.toMillis?.() > minutesAgo(5)}
+            class:bg-green-100={updated_within_last_5_minutes}
             class="{column.sticky ? 'sticky bg-white z-1' : ''} {isFirefox ? '' : 'h-0'}"
             style="{column.sticky
               ? 'left:' + getLeftValue(i) + 'px; --border-right-width: 3px;'
               : ''} --col-width: {entry.sources ? 'auto' : `${column.width}px`};">
-            <Cell {column} {entry} {can_edit} {dictionaryId} on:deleteImage={() => dispatch('deleteImage', { entryId: entry.id})} on:valueupdate={({detail: {field, newValue}}) => dispatch('valueupdate', { field, newValue, entryId: entry.id })} />
+            <Cell
+              {column}
+              {entry}
+              {can_edit}
+              dictionaryId={dictionary.id}
+              on:deleteImage={() => dbOperations.deleteImage(entry, dictionary.id)}
+              on:valueupdate={({detail: { field, newValue }}) => dbOperations.updateFirestoreEntry({field, value: newValue, entryId: entry.id })} />
           </td>
         {/each}
       </tr>

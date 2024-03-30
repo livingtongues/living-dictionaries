@@ -2,10 +2,8 @@ import type { Variant, Viewport } from 'kitbook';
 import type Component from './EntriesTable.svelte';
 import { complex, simple, hasVideo } from '$lib/mocks/entries';
 import { defaultColumns } from '$lib/stores/columns';
-import { setUpColumns } from './setUpColumns';
 import { basic_mock_dictionary } from '$lib/mocks/dictionaries';
-
-const columns = setUpColumns(defaultColumns, basic_mock_dictionary);
+import { logDbOperations } from '$lib/mocks/db';
 
 export const viewports: Viewport[] = [
   {width: 4500, height: 500},
@@ -14,10 +12,11 @@ export const viewports: Viewport[] = [
 export const variants: Variant<Component>[] = [
   {
     props: {
-      columns,
+      preferred_table_columns: defaultColumns,
       entries: [complex, simple, hasVideo],
       can_edit: true,
-      dictionaryId: basic_mock_dictionary.id,
+      dictionary: basic_mock_dictionary,
+      dbOperations: logDbOperations,
     }
   }
 ]

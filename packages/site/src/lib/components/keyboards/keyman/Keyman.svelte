@@ -45,7 +45,7 @@
     if (browser) {
       const root = document.documentElement;
       root.style.setProperty('--kmw-osk-pos', 'absolute');
-      kmw.detachFromControl(inputEl);
+      kmw?.detachFromControl(inputEl);
     }
   })
 

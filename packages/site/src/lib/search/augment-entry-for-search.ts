@@ -1,17 +1,17 @@
 import type { ExpandedEntry } from '@living-dictionaries/types';
 
 export function augment_entry_for_search(entry: ExpandedEntry) {
-  const dialects = entry.dialects || []
-  const parts_of_speech = entry.senses?.map(sense => sense.translated_parts_of_speech || []).flat() || []
-  const semantic_domains = entry.senses?.map(sense => [...(sense.translated_ld_semantic_domains || []), ...(sense.write_in_semantic_domains || [])]).flat() || []
-  const speakers = entry.sound_files?.map(audio => {
+  const _dialects = entry.dialects || []
+  const _parts_of_speech = entry.senses?.map(sense => sense.translated_parts_of_speech || []).flat() || []
+  const _semantic_domains = entry.senses?.map(sense => [...(sense.translated_ld_semantic_domains || []), ...(sense.write_in_semantic_domains || [])]).flat() || []
+  const _speakers = entry.sound_files?.map(audio => {
     if (audio.speaker_ids)
       return audio.speaker_ids
     if (audio.speakerName)
       return [audio.speakerName]
     return []}).flat() || []
 
-  const lexeme_other = [
+  const _lexeme_other = [
     entry.local_orthography_1,
     entry.local_orthography_2,
     entry.local_orthography_3,
@@ -20,25 +20,25 @@ export function augment_entry_for_search(entry: ExpandedEntry) {
     simplify_lexeme_for_search(entry.lexeme),
   ].filter(Boolean);
 
-  const glosses = entry.senses?.flatMap(sense => Object.values(sense.glosses || {}).filter(Boolean)) || [];
-  const sentences = entry.senses?.flatMap(sense =>
+  const _glosses = entry.senses?.flatMap(sense => Object.values(sense.glosses || {}).filter(Boolean)) || [];
+  const _sentences = entry.senses?.flatMap(sense =>
     sense.example_sentences?.flatMap(sentence => Object.values(sentence).filter(Boolean)) || []
   ) || [];
 
   return {
     ...entry,
-    lexeme_other,
-    glosses,
-    sentences,
+    _lexeme_other,
+    _glosses,
+    _sentences,
     // Filters
-    dialects: dialects.map(use_underscores_for_spaces),
-    parts_of_speech: parts_of_speech.map(use_underscores_for_spaces),
-    semantic_domains: semantic_domains.map(use_underscores_for_spaces),
-    speakers: speakers.map(use_underscores_for_spaces),
+    _dialects: _dialects.map(use_underscores_for_spaces),
+    _parts_of_speech: _parts_of_speech.map(use_underscores_for_spaces),
+    _semantic_domains: _semantic_domains.map(use_underscores_for_spaces),
+    _speakers: _speakers.map(use_underscores_for_spaces),
     has_audio: !!entry.sound_files?.length,
     has_image: !!entry.senses?.find(sense => sense.photo_files?.length),
     has_video: !!entry.senses?.find(sense => sense.video_files?.length),
-    has_speaker: !!speakers.length,
+    has_speaker: !!_speakers.length,
     has_noun_class: !!entry.senses?.find(sense => sense.noun_class),
     has_plural_form: !!entry.plural_form,
     has_part_of_speech: !!entry.senses?.find(sense => sense.parts_of_speech_keys?.length),

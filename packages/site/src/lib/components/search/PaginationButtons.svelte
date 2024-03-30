@@ -21,7 +21,7 @@
   const isMac = typeof navigator !== 'undefined' && /Mac|iPod|iPhone|iPad/.test(navigator.userAgent)
 </script>
 
-<div class="flex items-center max-w-full">
+<div class="flex items-center max-w-full grow-1">
   {#if current_page > 2}
     <button
       type="button"

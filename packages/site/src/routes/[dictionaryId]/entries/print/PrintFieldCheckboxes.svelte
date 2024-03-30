@@ -1,12 +1,12 @@
 <script lang="ts">
-  import type { Readable } from 'svelte/store';
   import { page } from '$app/stores';
   import { StandardPrintFields, type ExpandedEntry, type IPrintFields } from '@living-dictionaries/types';
+  import type { createPersistedStore } from 'svelte-pieces';
 
   export let entries: ExpandedEntry[];
-  export let preferredPrintFields: Readable<IPrintFields>;
-  export let showLabels: Readable<boolean>;
-  export let showQrCode: Readable<boolean>;
+  export let preferredPrintFields: ReturnType<typeof createPersistedStore<IPrintFields>>;
+  export let showLabels: ReturnType<typeof createPersistedStore<boolean>>;
+  export let showQrCode: ReturnType<typeof createPersistedStore<boolean>>;
 
   $: fieldsThatExist = (Object.keys($preferredPrintFields) as (keyof IPrintFields)[]).filter((field) => {
     if (field === 'gloss') return true;
