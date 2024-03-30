@@ -29,4 +29,5 @@ export const mockDictionaryLayoutData: LayoutData = {
   search_entries: null,
   default_entries_per_page: null,
   dbOperations: logDbOperations,
+  show_local_search: false,
 }

@@ -1,11 +1,10 @@
 <script lang="ts">
   import { page } from '$app/stores';
   import type { IDictionary } from '@living-dictionaries/types';
-  import { firebaseConfig } from 'sveltefirets';
 
   export let dictionary: IDictionary
   export let on_close: () => void;
-  export let admin: number
+  export let show_local_search: boolean
   export let is_manager: boolean
   export let search_index_ready: boolean
 </script>
@@ -33,7 +32,7 @@
       {new Intl.NumberFormat().format(dictionary.entryCount || 0)}
     </span>
   </a>
-  {#if admin || firebaseConfig.projectId === 'talking-dictionaries-dev'}
+  {#if show_local_search}
     <a
       class:active={$page.url.pathname.match(/entries-local/)}
       href={`/${dictionary.id}/entries-local`}>

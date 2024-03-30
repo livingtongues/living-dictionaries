@@ -10,7 +10,7 @@ import { dbOperations } from '$lib/dbOperations';
 import { create_entries_store } from './load-entries';
 import { search_entries, update_index_entries } from '$lib/search';
 
-export const load: LayoutLoad = async ({ params: { dictionaryId }, parent }) => {
+export const load: LayoutLoad = async ({ params: { dictionaryId }, parent, url }) => {
   try {
     const dictionary = await awaitableDocStore<IDictionary>(`dictionaries/${dictionaryId}`);
     const { error: firestore_error, initial_doc } = dictionary
@@ -54,10 +54,20 @@ export const load: LayoutLoad = async ({ params: { dictionaryId }, parent }) => 
 
     const speakers = collectionStore<ISpeaker>('speakers', [where('contributingTo', 'array-contains', dictionaryId)], { startWith: []})
 
-    const default_entries_per_page = 20
-    const { entries, status, edited_entries } = create_entries_store({dictionary: initial_doc, is_admin: !!user_from_cookies?.roles?.admin, t, entries_per_page: default_entries_per_page});
+    let user_accessed_local_search = browser && !!localStorage.getItem('user_accessed_local_search')
+    if (browser && !user_accessed_local_search) {
+      if (url.pathname.includes('entries-local')) {
+        user_accessed_local_search = true
+        localStorage.setItem('user_accessed_local_search', 'true')
+      }
+    }
 
-    return { dictionary, speakers, default_entries_per_page, entries, status, edited_entries, search_entries, update_index_entries, is_manager, is_contributor, can_edit, dbOperations };
+    const show_local_search = user_accessed_local_search || !!user_from_cookies?.roles?.admin
+
+    const default_entries_per_page = 20
+    const { entries, status, edited_entries } = create_entries_store({dictionary: initial_doc, show_local_search, t, entries_per_page: default_entries_per_page});
+
+    return { dictionary, speakers, default_entries_per_page, entries, status, edited_entries, search_entries, update_index_entries, is_manager, is_contributor, can_edit, dbOperations, show_local_search };
   } catch (err) {
     error(ResponseCodes.INTERNAL_SERVER_ERROR, err);
   }

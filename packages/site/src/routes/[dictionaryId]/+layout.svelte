@@ -7,7 +7,7 @@
   import './custom-fonts.css';
 
   export let data;
-  $: ({dictionary, admin, is_manager, status} = data)
+  $: ({dictionary, is_manager, status, show_local_search} = data)
 </script>
 
 <ShowHide let:show let:toggle let:set>
@@ -41,7 +41,7 @@
       open={show}>
       <div
         class="h-full md:h-unset flex flex-col flex-shrink-0 md:top-12 md:sticky md:w-44 lg:w-48 print:hidden">
-        <SideMenu dictionary={$dictionary} admin={$admin} is_manager={$is_manager} search_index_ready={$status === 'Search index created'} on_close={() => set(false)} />
+        <SideMenu dictionary={$dictionary} {show_local_search} is_manager={$is_manager} search_index_ready={$status === 'Search index created'} on_close={() => set(false)} />
         <hr class="md:hidden" />
         <Button form="menu" class="text-left !md:hidden" onclick={toggle}>
           <i class="far fa-times fa-lg fa-fw" />
