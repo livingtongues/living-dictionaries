@@ -1,13 +1,14 @@
 <script lang="ts">
   import type { ExpandedEntry, IDictionary } from '@living-dictionaries/types';
   import Image from '$lib/components/image/Image.svelte';
-  import { deleteImage } from '$lib/helpers/delete';
   import { order_glosses } from '$lib/helpers/glosses';
   import { page } from '$app/stores';
+  import type { DbOperations } from '$lib/dbOperations';
 
   export let entry: ExpandedEntry;
   export let can_edit = false;
   export let dictionary: IDictionary;
+  export let deleteImage: DbOperations['deleteImage']
 
   $: glosses = order_glosses({
     glosses: entry.senses?.[0]?.glosses,

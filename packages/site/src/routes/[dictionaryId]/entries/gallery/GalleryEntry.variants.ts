@@ -2,6 +2,7 @@ import type { Variant, Viewport } from 'kitbook'
 import type Component from './GalleryEntry.svelte'
 import { butterfly_google_storage_url } from '$lib/mocks/entries'
 import type { IDictionary } from '@living-dictionaries/types'
+import { logDbOperations } from '$lib/mocks/db'
 
 // optionally override your kitbook viewports for all variants in this file
 export const viewports: Viewport[] = [
@@ -21,6 +22,7 @@ export const variants: Variant<Component>[] = [
     description: 'Spanish should show because it is first',
     props: {
       dictionary,
+      deleteImage: logDbOperations.deleteImage,
       entry: {
         lexeme: 'tree',
         senses: [
@@ -46,6 +48,7 @@ export const variants: Variant<Component>[] = [
     description: 'Italian should show because Spanish it is not there',
     props: {
       dictionary,
+      deleteImage: logDbOperations.deleteImage,
       entry: {
         lexeme: 'lion',
         senses: [
@@ -70,6 +73,7 @@ export const variants: Variant<Component>[] = [
     description: 'Very long glosses are clamped to avoid having different card (or box) sizes',
     props: {
       dictionary,
+      deleteImage: logDbOperations.deleteImage,
       entry: {
         lexeme: 'Castle',
         senses: [
@@ -93,6 +97,7 @@ export const variants: Variant<Component>[] = [
     name: 'Entry without gloss',
     props: {
       dictionary,
+      deleteImage: logDbOperations.deleteImage,
       entry: {
         lexeme: 'Castle',
         senses: [

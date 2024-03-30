@@ -5,7 +5,7 @@ import { create_index } from '$lib/search';
 import { browser } from '$app/environment';
 import type { IDictionary, ExpandedEntry, ActualDatabaseEntry } from '@living-dictionaries/types';
 import { writable } from 'svelte/store';
-import { firebaseConfig, colRef, collectionStore } from 'sveltefirets';
+import { colRef, collectionStore } from 'sveltefirets';
 
 async function getCollectionOrError<T>(
   path: string | CollectionReference<T>,
@@ -28,11 +28,11 @@ async function getCollectionOrError<T>(
   }
 }
 
-export function create_entries_store({dictionary, is_admin, t, entries_per_page}: { dictionary: IDictionary, is_admin: boolean, t: TranslateFunction, entries_per_page: number}) {
+export function create_entries_store({dictionary, show_local_search, t, entries_per_page}: { dictionary: IDictionary, show_local_search: boolean, t: TranslateFunction, entries_per_page: number}) {
   const _entries = new Map<string, ExpandedEntry>()
   const entries = writable(_entries);
 
-  const load_entries_locally = browser && (is_admin || firebaseConfig.projectId === 'talking-dictionaries-dev')
+  const load_entries_locally = browser && show_local_search
   if (!load_entries_locally)
     return { entries };
 

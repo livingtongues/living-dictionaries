@@ -25,7 +25,7 @@
     label: dictionary.id !== 'jewish-neo-aramaic',
   }).join(', ');
 
-  $: updated_within_last_5_minutes = (entry.ua?.toMillis?.() || (entry.ua?.seconds * 1000)) > minutesAgo(5)
+  $: updated_within_last_5_minutes = can_edit && (entry.ua?.toMillis?.() || (entry.ua?.seconds * 1000)) > minutesAgo(5)
 </script>
 
 <div

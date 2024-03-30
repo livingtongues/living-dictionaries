@@ -2,6 +2,7 @@ import type { DbOperations } from '$lib/dbOperations'
 
 /* eslint-disable require-await */
 export const logDbOperations: DbOperations = {
+  addNewEntry: async (args) => { console.info({addNewEntry: args}) },
   deleteEntry: async (args) => { console.info({deleteEntry: args}) },
   deleteVideo: async (args) => { console.info({deleteVideo: args}) },
   deleteImage: async (args) => { console.info({deleteImage: args}) },

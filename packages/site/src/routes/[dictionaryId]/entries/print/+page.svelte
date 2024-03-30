@@ -16,7 +16,7 @@
   import type { InstantSearch } from 'instantsearch.js';
 
   export let data
-  $: ({dictionary, can_edit, is_manager} = data)
+  $: ({dictionary, can_edit, is_manager, dbOperations} = data)
 
   const search: InstantSearch = getContext('search');
   const managerMaxEntries = 1000;
@@ -147,7 +147,7 @@
       </Doc>
     </div>
   </Hits>
-  <Pagination showAdd={false} {search} />
+  <Pagination addNewEntry={dbOperations.addNewEntry} showAdd={false} {search} />
 {:else}
   <p>Print view is only available to dictionary managers and contributors</p>
 {/if}

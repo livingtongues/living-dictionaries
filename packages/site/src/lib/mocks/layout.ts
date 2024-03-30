@@ -27,6 +27,7 @@ export const mockDictionaryLayoutData: LayoutData = {
   edited_entries: readable(null) as ReturnType<typeof collectionStore<ActualDatabaseEntry>>,
   update_index_entries: null,
   search_entries: null,
-  entries_per_page: null,
+  default_entries_per_page: null,
   dbOperations: logDbOperations,
+  show_local_search: false,
 }

@@ -2,30 +2,9 @@
   import { page } from '$app/stores';
   import { Button, ShowHide } from 'svelte-pieces';
   import EditFieldModal from '$lib/components/entry/EditFieldModal.svelte';
-  import type { ActualDatabaseEntry } from '@living-dictionaries/types';
-  import { goto } from '$app/navigation';
-  import { addOnline } from 'sveltefirets';
+  import type { DbOperations } from '$lib/dbOperations';
 
-  async function addNewEntry(lexeme: string) {
-    if (!lexeme)
-      return alert(`Missing: ${$page.data.t('entry_field.lexeme')}`);
-
-    try {
-      const entryDoc = await addOnline<ActualDatabaseEntry>(
-        `dictionaries/${$page.params.dictionaryId}/words`,
-        {
-          lx: lexeme,
-          gl: {},
-        },
-        { abbreviate: true }
-      );
-      goto(`/${$page.params.dictionaryId}/entry/${entryDoc.id}`);
-    } catch (err) {
-      console.error(err);
-      alert(`${$page.data.t('misc.error')}: ${err}`);
-    }
-  }
-
+  export let addNewEntry: DbOperations['addNewEntry']
   let online = true;
 </script>
 
