@@ -6,9 +6,7 @@
   export let can_print = false
 </script>
 
-<div
-  class="flex md:p-1 border bg-gray-200 rounded-md text-gray-600
-    font-medium text-xl md:text-sm">
+<div class="flex text-gray-600 font-medium text-sm">
   <button
     type="button"
     on:click={() => view = null}
@@ -53,9 +51,9 @@
 
 <style>
   button {
-    --at-apply: hover:bg-gray-100 px-2 py-1 rounded;
+    --at-apply: hover:bg-gray-100 px-2 py-2 rounded;
   }
   .active {
-    --at-apply: bg-white shadow;
+    --at-apply: bg-gray-200 border;
   }
 </style>

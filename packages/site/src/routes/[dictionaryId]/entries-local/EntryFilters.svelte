@@ -22,16 +22,16 @@
   {on_close}>
   <section
     class="md:w-52 md:sticky md:top-24 h-100vh h-100dvh! md:max-h-[calc(100vh-107px)] print:hidden p-4 pl-3 md:p-0 flex flex-col">
-    <header class="flex items-center justify-between space-x-3 mb-3 pl-1">
-      <h2 class="text-lg leading-7 font-medium text-gray-900">
-        {$page.data.t('entry.filters')}
-      </h2>
-      <ClearFilters {search_params} />
-      <Button onclick={on_close} size="sm" form="filled" class="md:hidden">
-        {$page.data.t('entry.view_entries')}
-      </Button>
-    </header>
     {#if result_facets}
+      <header class="flex items-center justify-between space-x-3 mb-3 pl-1">
+        <h2 class="text-lg leading-7 font-medium text-gray-900">
+          {$page.data.t('entry.filters')}
+        </h2>
+        <ClearFilters {search_params} />
+        <Button onclick={on_close} size="sm" form="filled" class="md:hidden">
+          {$page.data.t('entry.view_entries')}
+        </Button>
+      </header>
       <div class="relative flex-1 overflow-y-auto overflow-x-clip pl-1">
         {#if result_facets.parts_of_speech.count}
           <FilterList

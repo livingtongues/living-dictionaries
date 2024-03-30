@@ -12,11 +12,12 @@
   import type { View } from '$lib/search/types';
   import EntriesTable from '../entries/table/EntriesTable.svelte';
   import EntriesGallery from './EntriesGallery.svelte';
+  import EntriesPrint from './EntriesPrint.svelte';
 
   export let view: View
   export let entries: Map<string, ExpandedEntry>
   export let page_data: EntriesPageData
-  $: ({ dictionary, can_edit, preferred_table_columns, dbOperations} = page_data)
+  $: ({ dictionary, admin, can_edit, preferred_table_columns, dbOperations, search_params} = page_data)
 
   let entry_page_data: EntryPageData
 
@@ -56,7 +57,7 @@
       <ListEntry
         dictionary={$dictionary}
         {entry}
-        videoAccess={$dictionary.videoAccess}
+        videoAccess={$dictionary.videoAccess || $admin > 0}
         can_edit={$can_edit}
         on_click={(e) => {handle_entry_click(e, entry)}}
         {dbOperations} />
@@ -75,7 +76,7 @@
       deleteImage={dbOperations.deleteImage}
       can_edit={$can_edit} />
   {:else if view === 'print'}
-    Print view still coming
+    <EntriesPrint bind:entries_per_page={$search_params.entries_per_page} entries={Array.from(entries.values())} dictionary={$dictionary} can_edit={$can_edit} />
   {/if}
 {/if}
 

@@ -74,7 +74,7 @@
     {/if}
   </div>
 </Hits>
-<Pagination {search} />
+<Pagination addNewEntry={dbOperations.addNewEntry} {search} />
 
 <!-- <SeoMetaTags
   title={$page.data.t(''})}

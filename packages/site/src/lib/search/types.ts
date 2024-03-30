@@ -3,6 +3,7 @@ export type View = 'list' | 'table' | 'print' | 'gallery'
 export interface QueryParams {
   page: number;
   query: string;
+  entries_per_page?: number;
   view?: View;
   // Array facets
   dialects?: string[];
