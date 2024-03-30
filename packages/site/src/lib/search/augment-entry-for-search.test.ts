@@ -7,8 +7,13 @@ describe(augment_entry_for_search, () => {
     const result_from_nothing = augment_entry_for_search({})
     expect(result_from_nothing).toMatchInlineSnapshot(`
       {
-        "dialects": [],
-        "glosses": [],
+        "_dialects": [],
+        "_glosses": [],
+        "_lexeme_other": [],
+        "_parts_of_speech": [],
+        "_semantic_domains": [],
+        "_sentences": [],
+        "_speakers": [],
         "has_audio": false,
         "has_image": false,
         "has_noun_class": false,
@@ -17,30 +22,51 @@ describe(augment_entry_for_search, () => {
         "has_semantic_domain": false,
         "has_speaker": false,
         "has_video": false,
-        "lexeme_other": [],
-        "parts_of_speech": [],
-        "semantic_domains": [],
-        "sentences": [],
-        "speakers": [],
       }
     `)
   })
 
   test('underscores filters', () => {
     const result = augment_entry_for_search(complex)
-    expect(result.dialects).toEqual(['Hill', 'Southern_Berm'])
-    expect(result.speakers).toEqual(['Budra_Raspeda', 'random_speaker_id_123'])
-    expect(result.semantic_domains).toEqual(['Animals', 'Insects_and_small_creatures', 'Flying_Mammals', 'Flying_Insects'])
+    expect(result._dialects).toEqual(['Hill', 'Southern_Berm'])
+    expect(result._speakers).toEqual(['Budra_Raspeda', 'random_speaker_id_123'])
+    expect(result._semantic_domains).toEqual(['Animals', 'Insects_and_small_creatures', 'Flying_Mammals', 'Flying_Insects'])
     expect(result).toMatchInlineSnapshot(`
       {
-        "dialects": [
+        "_dialects": [
           "Hill",
           "Southern_Berm",
         ],
-        "glosses": [
+        "_glosses": [
           "common jay butterfly",
           "papillon jay commun",
           "this is a very long gloss to simulate that sort of situation where it is ridiculously long",
+        ],
+        "_lexeme_other": [
+          "local way of writing",
+          "(h)ag-ko gag=tene nla?-pog",
+        ],
+        "_parts_of_speech": [
+          "noun",
+          "verb",
+        ],
+        "_semantic_domains": [
+          "Animals",
+          "Insects_and_small_creatures",
+          "Flying_Mammals",
+          "Flying_Insects",
+        ],
+        "_sentences": [
+          "Watch how the common jay butterfly flies.",
+          "A vernacular sentence.",
+        ],
+        "_speakers": [
+          "Budra_Raspeda",
+          "random_speaker_id_123",
+        ],
+        "dialects": [
+          "Hill",
+          "Southern Berm",
         ],
         "has_audio": true,
         "has_image": true,
@@ -53,26 +79,12 @@ describe(augment_entry_for_search, () => {
         "id": "1",
         "interlinearization": "3SG-POSS sit-PROG",
         "lexeme": "(h)æg-ko gag=tǝnǝ nlaʔ-pog",
-        "lexeme_other": [
-          "local way of writing",
-          "(h)ag-ko gag=tene nla?-pog",
-        ],
         "local_orthography_1": "local way of writing",
         "morphology": "morphology",
         "notes": "recorded in 1998, <img src=x" onerror="alert('XSS Attack will be sanitized')">",
-        "parts_of_speech": [
-          "noun",
-          "verb",
-        ],
         "phonetic": "hæg-ko gag=tǝnǝ nlaʔ-pog",
         "scientific_names": [
           "Graphium doson",
-        ],
-        "semantic_domains": [
-          "Animals",
-          "Insects_and_small_creatures",
-          "Flying_Mammals",
-          "Flying_Insects",
         ],
         "senses": [
           {
@@ -119,10 +131,6 @@ describe(augment_entry_for_search, () => {
             ],
           },
         ],
-        "sentences": [
-          "Watch how the common jay butterfly flies.",
-          "A vernacular sentence.",
-        ],
         "sound_files": [
           {
             "fb_storage_path": "gta/audio/local_import/Gta-Pkd-Dec13-Butterflies-common-jay-1580859671012.mp3",
@@ -141,10 +149,6 @@ describe(augment_entry_for_search, () => {
         ],
         "sources": [
           "Some cool guy in the village",
-        ],
-        "speakers": [
-          "Budra_Raspeda",
-          "random_speaker_id_123",
         ],
       }
     `);

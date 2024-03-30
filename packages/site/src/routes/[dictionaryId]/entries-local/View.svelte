@@ -26,9 +26,6 @@
     if (e.metaKey || e.ctrlKey) return;
     e.preventDefault(); // prevent navigation
 
-    // @ts-expect-error
-    console.info({opened: entry, lexeme_other: entry.lexeme_other?.join(', ')})
-
     entry_page_data = {
       ...page_data,
       entry: readable(entry),

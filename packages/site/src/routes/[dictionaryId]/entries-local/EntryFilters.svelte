@@ -33,32 +33,32 @@
         </Button>
       </header>
       <div class="relative flex-1 overflow-y-auto overflow-x-clip pl-1">
-        {#if result_facets.parts_of_speech.count}
+        {#if result_facets._parts_of_speech.count}
           <FilterList
             {search_params}
             search_param_key="parts_of_speech"
-            values={result_facets.parts_of_speech.values}
+            values={result_facets._parts_of_speech.values}
             label={$page.data.t('entry_field.parts_of_speech')} />
         {/if}
-        {#if result_facets.semantic_domains.count}
+        {#if result_facets._semantic_domains.count}
           <FilterList
             {search_params}
             search_param_key="semantic_domains"
-            values={result_facets.semantic_domains.values}
+            values={result_facets._semantic_domains.values}
             label={$page.data.t('entry_field.semantic_domains')} />
         {/if}
-        {#if result_facets.dialects.count}
+        {#if result_facets._dialects.count}
           <FilterList
             {search_params}
             search_param_key="dialects"
-            values={result_facets.dialects.values}
+            values={result_facets._dialects.values}
             label={$page.data.t('entry_field.dialects')} />
         {/if}
-        {#if result_facets.speakers.count}
+        {#if result_facets._speakers.count}
           <FilterList
             {search_params}
             search_param_key="speakers"
-            values={result_facets.speakers.values}
+            values={result_facets._speakers.values}
             speaker_ids_to_names={speakers?.reduce((acc, speaker) => {
               acc[speaker.id] = speaker.displayName
               return acc

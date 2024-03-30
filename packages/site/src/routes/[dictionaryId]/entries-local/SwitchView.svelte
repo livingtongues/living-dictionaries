@@ -37,6 +37,7 @@
     </span>
   </button>
   {#if can_print}
+    <div class="hidden md:block w-1" />
     <button
       type="button"
       on:click={() => view = 'print'}

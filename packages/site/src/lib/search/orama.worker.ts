@@ -6,9 +6,9 @@ import { augment_entry_for_search } from './augment-entry-for-search';
 
 const entries_index_schema = {
   lexeme: 'string',
-  lexeme_other: 'string[]', // includes local orthographies; includes lexeme with diacritics stripped and ipa characters replaced with common keyboard characters to make easier to type
-  glosses: 'string[]', // includes all glosses for all senses
-  sentences: 'string[]', // includes all sentences in all languages for all senses
+  _lexeme_other: 'string[]', // includes local orthographies; includes lexeme with diacritics stripped and ipa characters replaced with common keyboard characters to make easier to type
+  _glosses: 'string[]', // includes all glosses for all senses
+  _sentences: 'string[]', // includes all sentences in all languages for all senses
   phonetic: 'string',
   notes: 'string',
   scientific_names: 'string[]',
@@ -17,10 +17,10 @@ const entries_index_schema = {
   morphology: 'string',
   plural_form: 'string',
   // Filters
-  dialects: 'string[]',
-  parts_of_speech: 'string[]', // augmented
-  semantic_domains: 'string[]', // augmented
-  speakers: 'string[]', // augmented
+  _dialects: 'string[]', // underscored
+  _parts_of_speech: 'string[]', // augmented
+  _semantic_domains: 'string[]', // augmented
+  _speakers: 'string[]', // augmented
   has_audio: 'boolean',
   has_image: 'boolean',
   has_video: 'boolean',
@@ -101,21 +101,21 @@ async function search_entries({ query_params, entries_per_page, page_index, dict
     threshold: 2, // Levenshtein edit distance from 'help' to 'holds' is 3 for example (change 2 letters and add 1)
     boost: {
       lexeme: 2,
-      lexeme_other: 1.5,
-      glosses: 1.2,
+      _lexeme_other: 1.5,
+      _glosses: 1.2,
     },
     sortBy,
     facets: {
-      dialects: {
+      _dialects: {
         limit: 10,
       },
-      parts_of_speech: {
+      _parts_of_speech: {
         limit: 100,
       },
-      semantic_domains: {
+      _semantic_domains: {
         limit: 100,
       },
-      speakers: {
+      _speakers: {
         limit: 100,
       },
       has_audio: {
@@ -152,10 +152,10 @@ async function search_entries({ query_params, entries_per_page, page_index, dict
       },
     },
     where: {
-      ...query_params.dialects ? { dialects: query_params.dialects }: {},
-      ...query_params.parts_of_speech ? { parts_of_speech: query_params.parts_of_speech }: {},
-      ...query_params.semantic_domains ? { semantic_domains: query_params.semantic_domains }: {},
-      ...query_params.speakers ? { speakers: query_params.speakers }: {},
+      ...query_params.dialects ? { _dialects: query_params.dialects }: {},
+      ...query_params.parts_of_speech ? { _parts_of_speech: query_params.parts_of_speech }: {},
+      ...query_params.semantic_domains ? { _semantic_domains: query_params.semantic_domains }: {},
+      ...query_params.speakers ? { _speakers: query_params.speakers }: {},
       ...(query_params.has_image || query_params.view === 'gallery') ? { has_image: true }: {},
       ...(query_params.no_image && query_params.view !== 'gallery') ? { has_image: false }: {},
       ...query_params.has_audio ? { has_audio: true }: {},
