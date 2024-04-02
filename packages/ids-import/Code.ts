@@ -12,7 +12,7 @@ function prepareIDSDictionariesToBatchImport() {
       createIDToTSV(sheet);
       copyGlossToTSV({ idsDataSheet, tsvSheet: sheet }, { idsGlossColumn: 'SPANISH', glossName: 'es_gloss' });
       copyGlossToTSV({ idsDataSheet, tsvSheet: sheet }, { idsGlossColumn: 'FRENCH', glossName: 'fr_gloss' });
-      copyGlossToTSV({ idsDataSheet, tsvSheet: sheet }, { idsGlossColumn: 'PORTUGUESE', glossName: 'po_gloss' });
+      copyGlossToTSV({ idsDataSheet, tsvSheet: sheet }, { idsGlossColumn: 'PORTUGUESE', glossName: 'pt_gloss' });
       copyGlossToTSV({ idsDataSheet, tsvSheet: sheet }, { idsGlossColumn: 'RUSSIAN', glossName: 'ru_gloss' });
       copySemanticDomainsToTSV({ tsvSheet: sheet, semanticDomainsSheet });
       // style details
