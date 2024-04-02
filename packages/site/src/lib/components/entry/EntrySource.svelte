@@ -14,7 +14,7 @@
   <BadgeArray
     class="remove-button-mb"
     strings={value || []}
-    {can_edit}
+    canEdit={can_edit}
     promptMessage={$page.data.t('entry_field.sources')}
     addMessage=""
     on:valueupdated={(e) => dispatch('valueupdate', { field: 'sr', newValue: e.detail })}>

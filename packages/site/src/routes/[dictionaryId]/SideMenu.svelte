@@ -1,13 +1,12 @@
 <script lang="ts">
   import { page } from '$app/stores';
   import type { IDictionary } from '@living-dictionaries/types';
-  import { firebaseConfig } from 'sveltefirets';
 
   export let dictionary: IDictionary
   export let on_close: () => void;
-  export let admin: number
+  export let show_local_search: boolean
   export let is_manager: boolean
-  export let search_index_updated: boolean
+  export let search_index_ready: boolean
 </script>
 
 <div class="md:hidden">
@@ -22,7 +21,7 @@
   <a
     class:active={$page.url.pathname.match(/entry|entries\//)}
     href={`/${dictionary.id}/entries/list`}>
-    <i class="far fa-list fa-fw" />
+    <span class="i-fa-solid-list" />
     <span class="font-medium mx-2">
       {$page.data.t('dictionary.entries')}
     </span>
@@ -33,16 +32,16 @@
       {new Intl.NumberFormat().format(dictionary.entryCount || 0)}
     </span>
   </a>
-  {#if admin || firebaseConfig.projectId === 'talking-dictionaries-dev'}
+  {#if show_local_search}
     <a
       class:active={$page.url.pathname.match(/entries-local/)}
-      href={`/${dictionary.id}/entries-local/list`}>
-      <!-- <span class="i-fa6-solid-list " /> -->
+      href={`/${dictionary.id}/entries-local`}>
+      <span class="i-fa-solid-list" />
       <span class="font-medium mx-2">
         {$page.data.t('dictionary.entries')} (local)
       </span>
       <span class="flex-grow" />
-      {#if search_index_updated}
+      {#if search_index_ready}
         <span
           class="inline-block py-1 px-2 leading-none text-xs font-semibold
             text-gray-700 bg-gray-300 rounded-full">

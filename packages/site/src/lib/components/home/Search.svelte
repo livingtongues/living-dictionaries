@@ -190,7 +190,7 @@
           form="simple"
           class="mt-2 opacity-75 focus:opacity-100
             sm:opacity-100 bg-white sm:bg-transparent">
-          <i class="far fa-list" />
+          <span class="i-fa-solid-list -mt-1" />
           {$page.data.t('home.list_of_dictionaries')}
         </Button>
         <div class="w-2 sm:hidden" />

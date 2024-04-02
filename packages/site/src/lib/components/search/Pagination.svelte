@@ -4,9 +4,12 @@
   import { onMount } from 'svelte';
   import PaginationButtons from './PaginationButtons.svelte';
   import { page } from '$app/stores';
+  import type { DbOperations } from '$lib/dbOperations';
 
   export let search: InstantSearch;
   export let showAdd = true;
+  export let addNewEntry: DbOperations['addNewEntry']
+
   $: ({can_edit} = $page.data)
 
   let currentRefinement: number;
@@ -29,7 +32,7 @@
 
 {#if $can_edit && showAdd}
   {#await import('./AddEntry.svelte') then { default: AddEntry }}
-    <AddEntry class="sticky bottom-3 z-10 md:hidden" />
+    <AddEntry {addNewEntry} class="sticky bottom-3 z-10 md:hidden" />
   {/await}
 {/if}
 
@@ -37,7 +40,7 @@
   <PaginationButtons pages={nbPages} current_page={currentRefinement + 1} {go_to_page}>
     {#if $can_edit && showAdd}
       {#await import('./AddEntry.svelte') then { default: AddEntry }}
-        <AddEntry class="ml-3 hidden md:block" />
+        <AddEntry {addNewEntry} class="ml-3 hidden md:block" />
       {/await}
     {/if}
   </PaginationButtons>

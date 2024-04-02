@@ -15,7 +15,7 @@
 </div>
 <BadgeArray
   strings={alternateNames}
-  can_edit
+  canEdit
   promptMessage={$page.data.t('create.enter_alternate_name')}
   addMessage={$page.data.t('misc.add')}
   on:valueupdated={(e) => dispatch('update', { alternateNames: e.detail })} />

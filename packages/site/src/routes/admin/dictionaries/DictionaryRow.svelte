@@ -136,7 +136,7 @@
 <td>
   <div style="width: 300px;" />
   <BadgeArrayEmit
-    can_edit
+    canEdit
     addMessage={'Add'}
     strings={dictionary.alternateNames}
     on:additem={() => {
