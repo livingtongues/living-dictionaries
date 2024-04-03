@@ -1,51 +1,148 @@
 // To run automatically on commit, add `simple-git-hooks` and `lint-staged` then run `npx simple-git-hooks` once. After that all commits will be linted.
 
 // @ts-check
-import { defineFlatConfig } from 'eslint-define-config'
+import { antfu, svelte, typescript } from '@antfu/eslint-config'
 import jsEslintPlugin from '@eslint/js'
-import { typescript } from './lint/typescript.js'
-import { scriptExceptions } from './lint/allowScriptLogs.js'
-import { svelte } from './lint/svelte.js'
-import { vitest } from './lint/vitest.js'
-import { intercontinentalDictionarySeries } from './lint/ids.js'
+import tsEslintPlugin from '@typescript-eslint/eslint-plugin'
+import svelteStylistic from 'eslint-plugin-svelte-stylistic'
 
-const ignore = defineFlatConfig({
-  ignores: [
-    '**/node_modules/**',
-    '**/dist/**',
-    '**/functions/lib/**',
-    '.git/**',
-    '**/.svelte-kit**',
-    'packages/scripts/import/old**',
-    '**/route/kitbook/**',
-    '**/locales/**',
-    'supabase/functions/**'
-  ],
-})
-
-const universal = defineFlatConfig({
-  rules: {
-    ...jsEslintPlugin.configs.recommended.rules,
-    'indent': ['error', 2],
+// https://github.com/antfu/eslint-config
+// Inspect: npx @eslint/config-inspector
+export default antfu(
+  {
+    ignores: [
+      '**/.svelte-kit**',
+      '**/functions/lib/**',
+      '.eslintcache',
+      'packages/scripts/import/old**',
+      '**/route/kitbook/**',
+      '**/locales/**',
+      'supabase/functions/**',
+    ],
   },
-})
+  typescript({
+    // files: ['**/*.ts', '**/*.js', '**/*.svelte', '**/*.composition'],
+    componentExts: ['svelte', 'composition'],
+    overrides: {
+      // Need to check if duplicates in these
+      ...jsEslintPlugin.configs.recommended.rules,
+      ...tsEslintPlugin.configs.recommended.rules,
+      ...tsEslintPlugin.configs.stylistic.rules,
 
-// @ts-ignore
-export default defineFlatConfig([
-  ignore,
-  universal,
-  typescript,
-  svelte,
-  vitest,
-  scriptExceptions,
-  intercontinentalDictionarySeries,
-])
+      'prefer-destructuring': 'error',
+      'no-constant-binary-expression': 'error',
+      'ts/default-param-last': 'error',
+      'require-await': 'error',
+      'prefer-object-spread': 'error',
+      'no-useless-concat': 'error',
+      'no-else-return': 'error',
+      'no-console': ['error', { allow: ['warn', 'error', 'info', 'time', 'timeEnd'] }],
+      'require-atomic-updates': 'error',
+      'style/quotes': ['error', 'single', {
+        allowTemplateLiterals: true,
+        avoidEscape: true,
+      }],
+      'ts/no-unused-vars': ['error', {
+        argsIgnorePattern: '^_',
+        caughtErrors: 'all',
+        ignoreRestSiblings: true,
+        vars: 'all', // is this helpful?
+        varsIgnorePattern: '^\\$\\$Props$',
+      }],
 
-// ! You must manually restart ESLint for changes to imported files to take effect in the extension.
+      'ts/no-explicit-any': 'warn',
+      'prefer-named-capture-group': 'warn',
+      'no-undef': 'warn', // may just turn off as has lots of conflicts
+
+      'curly': 'off',
+      'no-alert': 'off',
+      'antfu/if-newline': 'off',
+      'ts/ban-ts-comment': 'off',
+      'ts/sort-type-constituents': 'off', // prefer logical rather than alphabetical sorting
+    },
+  }),
+  svelte({
+    files: ['**/*.svelte', '**/*.composition'],
+    typescript: true,
+    overrides: {
+      'svelte/valid-compile': ['error', { ignoreWarnings: true }], // throws error on a11y issues
+      'svelte/no-dom-manipulating': 'error',
+      'svelte/no-store-async': 'error', // causes issues with auto-unsubscribing features
+      'svelte/require-store-reactive-access': 'error',
+      'svelte/require-event-dispatcher-types': 'error',
+      'svelte/button-has-type': 'error',
+      'svelte/no-extra-reactive-curlies': 'error',
+      'svelte/mustache-spacing': 'error',
+      'svelte/html-closing-bracket-spacing': 'error',
+      'svelte/no-reactive-reassign': ['warn', { props: false }],
+
+      'svelte/html-quotes': 'off', // should it enforce double quotes?
+      'svelte/no-at-html-tags': 'off',
+      'no-unused-expressions': 'off',
+      'no-inner-declarations': 'off',
+      'style/space-infix-ops': 'off',
+    },
+    // what to do with languageOptions.globals.$$Generic: 'readonly'? - may not be needed with Svelte 5's move away from this
+  }),
+  {
+    name: 'jacob/svelte/stylistic',
+    files: ['**/*.svelte', '**/*.composition'],
+    plugins: {
+      'svelte-stylistic': svelteStylistic,
+    },
+    rules: {
+      'svelte-stylistic/brackets-same-line': 'error',
+      'svelte-stylistic/consistent-attribute-lines': 'error',
+    },
+  },
+  {
+    files: ['**/*.test.ts'],
+    rules: {
+      'test/consistent-test-it': ['error', { fn: 'test' }],
+      'test/no-commented-out-tests': 'error',
+      'test/no-disabled-tests': 'error',
+      'test/consistent-test-filename': 'error',
+      'test/expect-expect': 'error',
+      'test/no-alias-methods': 'error',
+      'test/no-conditional-expect': 'error',
+      'test/no-conditional-in-test': 'error',
+      'test/no-conditional-tests': 'error',
+      'test/no-duplicate-hooks': 'error',
+      'test/no-focused-tests': 'error',
+      'test/no-standalone-expect': 'error',
+      'test/no-test-return-statement': 'error',
+      'test/prefer-comparison-matcher': 'error',
+      'test/prefer-hooks-on-top': 'error',
+      'test/prefer-spy-on': 'error',
+      'test/prefer-to-be-falsy': 'error',
+      'test/prefer-to-be-truthy': 'error',
+      'test/prefer-to-contain': 'error',
+      'test/prefer-to-have-length': 'error',
+      'test/valid-describe-callback': 'error',
+      'test/valid-expect': 'error',
+    },
+  },
+  {
+    name: 'ld/script-exceptions',
+    files: ['packages/{scripts,functions}/**'],
+    rules: {
+      'no-console': 'off',
+      'ts/no-unused-vars': 'off',
+      'ts/no-var-requires': 'off',
+    },
+  },
+  {
+    name: 'ld/intercontinental-dictionaries-series',
+    files: ['**/ids-import/**'],
+    rules: {
+      'ts/no-unused-vars': 'off',
+      'no-undef': 'off',
+    },
+  },
+)
 
 // learn more
 // https://github.com/AndreaPontrandolfo/sheriff
-// https://github.dev/antfu/eslint-config
 // https://github.com/enso-org/enso/blob/b2c1f97437870fa7b7a4d7c2d3630e2d2bd6fc2c/app/ide-desktop/eslint.config.js
 // https://github.com/azat-io/eslint-config/blob/044959d8fef2acff50e252b8a238be933cd38eea/base/index.ts
 // https://github.com/darkobits/eslint-plugin/blob/f55a64dc9038148f3227cda7ae4543dffcb0b14e/src/config-sets/ts
