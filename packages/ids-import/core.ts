@@ -45,9 +45,9 @@ function highlightTargetedSemanticDomains(sheet: GoogleAppsScript.Spreadsheet.Sh
   }
 }
 
-function copyGlossToTSV(sheet_info: GlossesSheetData, gloss_data: GlossData): void {
+function copyGlossToTSV(sheet_info: SheetData, gloss_data: GlossData): void {
   const { idsGlossColumn, glossName } = gloss_data;
-  const { idsDataSheet, tsvSheet } = sheet_info;
+  const { objectSheet: idsDataSheet, tsvSheet } = sheet_info;
   const tsv_header_values = get_header_values(tsvSheet);
   const first_empty_column = get_first_empty_column(tsv_header_values);
   const [
@@ -111,8 +111,8 @@ function createIDToTSV(sheet: GoogleAppsScript.Spreadsheet.Sheet): void {
   sheet.getRange(1, first_empty_column, 1, 1).setValue('ID');
 }
 
-function copySemanticDomainsToTSV(sheet_info: SemanticDomainsSheetData): void {
-  const { semanticDomainsSheet, tsvSheet } = sheet_info;
+function copySemanticDomainsToTSV(sheet_info: SheetData): void {
+  const { objectSheet: semanticDomainsSheet , tsvSheet } = sheet_info;
   const first_empty_column = get_first_empty_column(get_header_values(tsvSheet));
   const [
     semantic_domains_label_column_values,

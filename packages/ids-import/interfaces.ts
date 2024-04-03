@@ -3,15 +3,15 @@ interface GlossData {
   glossName: string;
 }
 
-interface GlossesSheetData {
+interface SheetData {
   tsvSheet: GoogleAppsScript.Spreadsheet.Sheet;
-  idsDataSheet: GoogleAppsScript.Spreadsheet.Sheet;
+  objectSheet: GoogleAppsScript.Spreadsheet.Sheet;
 }
 
-interface SemanticDomainsSheetData {
-  tsvSheet: GoogleAppsScript.Spreadsheet.Sheet;
-  semanticDomainsSheet: GoogleAppsScript.Spreadsheet.Sheet;
-}
+// interface SemanticDomainsSheetData {
+//   tsvSheet: GoogleAppsScript.Spreadsheet.Sheet;
+//   semanticDomainsSheet: GoogleAppsScript.Spreadsheet.Sheet;
+// }
 
 interface ValuesFromColumns {
   from_sheet: GoogleAppsScript.Spreadsheet.Sheet,
