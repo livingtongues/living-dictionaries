@@ -41,6 +41,7 @@
     </div>
   {:else if can_edit}
     <AddImage
+      updateEntryOnline={dbOperations.updateEntryOnline}
       dictionaryId={dictionary.id}
       entryId={entry.id}
       class="rounded-md h-20 bg-gray-100 mb-2">

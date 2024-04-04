@@ -41,7 +41,7 @@
         square={60}
         on_delete_image={async () => await dbOperations.deleteImage(entry, dictionaryId)} />
     {:else if can_edit}
-      <AddImage {dictionaryId} entryId={entry.id} class="text-xs" />
+      <AddImage {dictionaryId} entryId={entry.id} class="text-xs" updateEntryOnline={dbOperations.updateEntryOnline} />
     {/if}
   {:else if column.field === 'speaker'}
     <SelectSpeakerCell {can_edit} {entry} />

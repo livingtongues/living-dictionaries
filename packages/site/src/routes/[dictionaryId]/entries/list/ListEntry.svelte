@@ -118,7 +118,12 @@
     </div>
   </a>
   {#if entry.senses?.[0]?.video_files?.[0]}
-    <Video class="bg-gray-100 p-1.5 border-r-2" lexeme={entry.lexeme} video={entry.senses[0].video_files[0]} {can_edit} />
+    <Video
+      class="bg-gray-100 p-1.5 border-r-2"
+      lexeme={entry.lexeme}
+      video={entry.senses[0].video_files[0]}
+      {can_edit}
+      on_delete_video={async () => await dbOperations.deleteVideo(entry, dictionary.id)} />
   {:else if videoAccess && can_edit}
     <ShowHide let:show let:toggle>
       <button
@@ -145,7 +150,7 @@
         on_delete_image={() => dbOperations.deleteImage(entry, dictionary.id)} />
     </div>
   {:else if can_edit}
-    <AddImage dictionaryId={dictionary.id} entryId={entry.id} class="w-12 bg-gray-100">
+    <AddImage dictionaryId={dictionary.id} entryId={entry.id} class="w-12 bg-gray-100" updateEntryOnline={dbOperations.updateEntryOnline}>
       <div class="text-xs" slot="text">
         {$page.data.t('entry_field.photo')}
       </div>

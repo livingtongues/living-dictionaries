@@ -6,6 +6,7 @@
   export let lexeme: string
   export let video: ExpandedVideo
   export let can_edit = false
+  export let on_delete_video: () => Promise<void>
 </script>
 
 <ShowHide let:show let:toggle>
@@ -24,8 +25,8 @@
         {lexeme}
         {video}
         {can_edit}
-        on:deleteVideo
-        on:close={toggle} />
+        {on_delete_video}
+        on_close={toggle} />
     {/await}
   {/if}
 </ShowHide>

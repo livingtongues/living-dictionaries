@@ -1,22 +1,18 @@
 <script lang="ts">
   import type { ExpandedVideo } from '@living-dictionaries/types'
   import { Button } from 'svelte-pieces'
-  import { createEventDispatcher } from 'svelte'
   import VideoThirdParty from './VideoThirdParty.svelte'
   import { page } from '$app/stores'
 
   export let lexeme: string
   export let video: ExpandedVideo
   export let can_edit = false
-
-  const dispatch = createEventDispatcher<{
-    close: boolean
-    deleteVideo: boolean
-  }>()
+  export let on_close: () => void
+  export let on_delete_video: () => Promise<void>
 </script>
 
 <div
-  on:click={() => dispatch('close')}
+  on:click={on_close}
   class="fixed inset-0 md:p-3 flex flex-col items-center justify-center"
   style="background: rgba(0, 0, 0, 0.85); z-index: 51; will-change: transform;">
   <div class="h-full flex flex-col justify-center">
@@ -48,10 +44,7 @@
           class="ml-auto"
           color="red"
           form="filled"
-          onclick={(e) => {
-            e.stopPropagation()
-            dispatch('deleteVideo')
-          }}>
+          onclick={on_delete_video}>
           <span class="i-fa-trash-o" style="margin: -1px 0 2px;" />
           {$page.data.t('misc.delete')}
         </Button>
