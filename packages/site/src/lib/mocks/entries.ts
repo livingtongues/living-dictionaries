@@ -79,9 +79,9 @@ const hebrewData: GoalDatabaseEntry = {
 
 const t = english_translate
 
-export const complex: ExpandedEntry = expand_entry(complexData, t)
+export const complex: ExpandedEntry = expand_entry(complexData, t, 'test-bucket')
 
-export const hebrew: ExpandedEntry = expand_entry(hebrewData, t)
+export const hebrew: ExpandedEntry = expand_entry(hebrewData, t, 'test-bucket')
 
 export const simple: ExpandedEntry = {
   lexeme: 'hello',

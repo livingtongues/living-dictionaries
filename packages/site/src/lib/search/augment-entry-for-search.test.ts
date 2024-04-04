@@ -1,9 +1,9 @@
-import { complex } from '$lib/mocks/entries';
-import { augment_entry_for_search, simplify_lexeme_for_search } from './augment-entry-for-search';
+import { augment_entry_for_search, simplify_lexeme_for_search } from './augment-entry-for-search'
+import { complex } from '$lib/mocks/entries'
 
 describe(augment_entry_for_search, () => {
   test('does not choke on undefineds', () => {
-    augment_entry_for_search({senses: [{glosses: {}}]})
+    augment_entry_for_search({ senses: [{ glosses: {} }] })
     const result_from_nothing = augment_entry_for_search({})
     expect(result_from_nothing).toMatchInlineSnapshot(`
       {
@@ -114,6 +114,7 @@ describe(augment_entry_for_search, () => {
                 "fb_storage_path": "gta/images/local_import/6-Common-jay-1580859671358.JPG",
                 "source": "local_import",
                 "specifiable_image_url": "LGuBKhg7vuv5-aJcOdnb_ucOXLSCIR1Kjxrh70xRlaIHqWo-mWqfWUcH3Xznz63QsFZmkeVmoNN0PEXzSc0Jh4g",
+                "storage_url": "https://firebasestorage.googleapis.com/v0/b/test-bucket/o/gta%2Fimages%2Flocal_import%2F6-Common-jay-1580859671358.JPG?alt=media",
                 "timestamp": null,
               },
             ],
@@ -136,6 +137,7 @@ describe(augment_entry_for_search, () => {
             "fb_storage_path": "gta/audio/local_import/Gta-Pkd-Dec13-Butterflies-common-jay-1580859671012.mp3",
             "source": "local_import",
             "speakerName": "Budra Raspeda",
+            "storage_url": "https://firebasestorage.googleapis.com/v0/b/test-bucket/o/gta%2Faudio%2Flocal_import%2FGta-Pkd-Dec13-Butterflies-common-jay-1580859671012.mp3?alt=media",
             "timestamp": 2020-02-04T23:49:08.537Z,
           },
           {
@@ -144,6 +146,7 @@ describe(augment_entry_for_search, () => {
             "speaker_ids": [
               "random_speaker_id_123",
             ],
+            "storage_url": "https://firebasestorage.googleapis.com/v0/b/test-bucket/o/gta%2Faudio%2Flocal_import%2FGta-Pkd-Dec13-Butterflies-common-jay-1580859671012.mp3?alt=media",
             "timestamp": 2020-02-04T23:49:08.537Z,
           },
         ],
@@ -151,13 +154,13 @@ describe(augment_entry_for_search, () => {
           "Some cool guy in the village",
         ],
       }
-    `);
-  });
-});
+    `)
+  })
+})
 
 describe(simplify_lexeme_for_search, () => {
   test('removes diacritics', () => {
-    expect(simplify_lexeme_for_search('põsret')).toEqual('posret');
-    expect(simplify_lexeme_for_search('akʰe:')).toEqual('akhe:');
-  });
-});
+    expect(simplify_lexeme_for_search('põsret')).toEqual('posret')
+    expect(simplify_lexeme_for_search('akʰe:')).toEqual('akhe:')
+  })
+})

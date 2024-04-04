@@ -87,7 +87,7 @@ describe(expand_entry, () => {
         example_sentences: [{ en: 'baz', vn: 'foo' }],
         photo_files: [{
           fb_storage_path: 'path',
-          storage_url: 'url',
+          storage_url: 'https://firebasestorage.googleapis.com/v0/b/text-bucket/o/path?alt=media',
           specifiable_image_url: 'gcs',
           uid_added_by: 'Bob',
           timestamp: new Date(now),
@@ -96,7 +96,7 @@ describe(expand_entry, () => {
         }],
         video_files: [{
           fb_storage_path: 'path',
-          storage_url: 'url',
+          storage_url: 'https://firebasestorage.googleapis.com/v0/b/text-bucket/o/path?alt=media',
           uid_added_by: 'Bob',
           timestamp: new Date(now),
           speaker_ids: ['sp1', 'sp2'],
@@ -116,7 +116,7 @@ describe(expand_entry, () => {
       sources: ['the source', 'another source'],
       sound_files: [{
         fb_storage_path: 'path',
-        storage_url: 'url',
+        storage_url: 'https://firebasestorage.googleapis.com/v0/b/text-bucket/o/path?alt=media',
         uid_added_by: 'Bob',
         timestamp: new Date(now),
         speaker_ids: ['sp1', 'sp2'],
@@ -127,7 +127,7 @@ describe(expand_entry, () => {
       coordinates: { points: [{ coordinates: { latitude: 23, longitude: -93 } }] },
     }
 
-    expect(expand_entry(database_entry, t)).toEqual(expanded_entry)
+    expect(expand_entry(database_entry, t, 'text-bucket')).toEqual(expanded_entry)
   })
 
   test('empty entry', () => {
@@ -135,7 +135,7 @@ describe(expand_entry, () => {
     const expanded_entry: ExpandedEntry = {
       senses: [{}],
     }
-    expect(expand_entry(database_entry, t)).toEqual(expanded_entry)
+    expect(expand_entry(database_entry, t, 'text-bucket')).toEqual(expanded_entry)
   })
 
   test('simple entry with sense but without custom sd', () => {
@@ -157,6 +157,6 @@ describe(expand_entry, () => {
         },
       ],
     }
-    expect(expand_entry(database_entry, t)).toEqual(expanded_entry)
+    expect(expand_entry(database_entry, t, 'text-bucket')).toEqual(expanded_entry)
   })
 })

@@ -2,7 +2,7 @@
   import type { ExpandedVideo } from '@living-dictionaries/types'
   import { Button } from 'svelte-pieces'
   import { createEventDispatcher } from 'svelte'
-  import VideoIFrame from './VideoIFrame.svelte'
+  import VideoThirdParty from './VideoThirdParty.svelte'
   import { page } from '$app/stores'
 
   export let lexeme: string
@@ -36,7 +36,7 @@
           <track kind="captions" />
         </video>
       {:else}
-        <VideoIFrame {video} />
+        <VideoThirdParty {video} />
       {/if}
     {/if}
     <!-- <img class="object-contain max-h-full" alt="Image of {entry.lx}" {src} /> -->

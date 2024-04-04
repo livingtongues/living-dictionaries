@@ -73,7 +73,7 @@
       </button>
       {#if show}
         {#await import('$lib/components/video/AddVideo.svelte') then { default: AddVideo }}
-          <AddVideo {entry} on:close={toggle} />
+          <AddVideo {entry} on_close={toggle} />
         {/await}
       {/if}
     </ShowHide>
