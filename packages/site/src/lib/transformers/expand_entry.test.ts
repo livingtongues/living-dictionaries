@@ -1,16 +1,15 @@
-import type { ExpandedEntry, GoalDatabaseEntry } from '@living-dictionaries/types';
-import { expand_entry } from './expand_entry';
-import { english_translate } from '$lib/i18n';
-
+import type { ExpandedEntry, GoalDatabaseEntry } from '@living-dictionaries/types'
+import { expand_entry } from './expand_entry'
+import { english_translate } from '$lib/i18n'
 
 describe(expand_entry, () => {
-  const now = new Date().getTime();
+  const now = new Date().getTime()
   const t = english_translate
 
   test('returns an object with easily readable field names', () => {
-    const part_of_speech_key = 'n';
-    const sdn_key = '1.1';
-    const write_in_sd = 'earth and sky';
+    const part_of_speech_key = 'n'
+    const sdn_key = '1.1'
+    const write_in_sd = 'earth and sky'
 
     const database_entry: GoalDatabaseEntry = {
       id: '1',
@@ -66,7 +65,7 @@ describe(expand_entry, () => {
       ei: 'ei12',
 
       scn: ['marmillion', '<i>leticus</i> Johnson'],
-      co: { points:[{coordinates: {latitude: 23, longitude: -93}}]}
+      co: { points: [{ coordinates: { latitude: 23, longitude: -93 } }] },
     }
 
     const expanded_entry: ExpandedEntry = {
@@ -88,6 +87,7 @@ describe(expand_entry, () => {
         example_sentences: [{ en: 'baz', vn: 'foo' }],
         photo_files: [{
           fb_storage_path: 'path',
+          storage_url: 'url',
           specifiable_image_url: 'gcs',
           uid_added_by: 'Bob',
           timestamp: new Date(now),
@@ -96,6 +96,7 @@ describe(expand_entry, () => {
         }],
         video_files: [{
           fb_storage_path: 'path',
+          storage_url: 'url',
           uid_added_by: 'Bob',
           timestamp: new Date(now),
           speaker_ids: ['sp1', 'sp2'],
@@ -115,6 +116,7 @@ describe(expand_entry, () => {
       sources: ['the source', 'another source'],
       sound_files: [{
         fb_storage_path: 'path',
+        storage_url: 'url',
         uid_added_by: 'Bob',
         timestamp: new Date(now),
         speaker_ids: ['sp1', 'sp2'],
@@ -122,39 +124,39 @@ describe(expand_entry, () => {
       }],
       elicitation_id: 'ei12',
       scientific_names: ['marmillion', '<i>leticus</i> Johnson'],
-      coordinates: {points:[{coordinates: {latitude: 23, longitude: -93}}]}
+      coordinates: { points: [{ coordinates: { latitude: 23, longitude: -93 } }] },
     }
 
-    expect(expand_entry(database_entry, t)).toEqual(expanded_entry);
-  });
+    expect(expand_entry(database_entry, t)).toEqual(expanded_entry)
+  })
 
   test('empty entry', () => {
-    const database_entry: GoalDatabaseEntry = {};
+    const database_entry: GoalDatabaseEntry = {}
     const expanded_entry: ExpandedEntry = {
       senses: [{}],
-    };
-    expect(expand_entry(database_entry, t)).toEqual(expanded_entry);
-  });
+    }
+    expect(expand_entry(database_entry, t)).toEqual(expanded_entry)
+  })
 
   test('simple entry with sense but without custom sd', () => {
     const database_entry: GoalDatabaseEntry = {
       sn: [
         {
           gl: {
-            en: 'Hi'
-          }
-        }
-      ]
-    };
+            en: 'Hi',
+          },
+        },
+      ],
+    }
     const expanded_entry: ExpandedEntry = {
       senses: [
         {
           glosses: {
             en: 'Hi',
           },
-        }
+        },
       ],
-    };
-    expect(expand_entry(database_entry, t)).toEqual(expanded_entry);
-  });
-});
+    }
+    expect(expand_entry(database_entry, t)).toEqual(expanded_entry)
+  })
+})

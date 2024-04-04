@@ -35,7 +35,7 @@
   "eslint.rules.customizations": [
     { "rule": "@stylistic/*", "severity": "off" },
     { "rule": "style*", "severity": "off" },
-    { "rule": "*-indent", "severity": "off" },
+    { "rule": "*indent", "severity": "off" },
     { "rule": "*-spacing", "severity": "off" },
     { "rule": "*-spaces", "severity": "off" },
     { "rule": "*-order", "severity": "off" },
@@ -43,6 +43,7 @@
     { "rule": "*-newline", "severity": "off" },
     { "rule": "*quotes", "severity": "off" },
     { "rule": "*semi", "severity": "off" },
+    { "rule": "import/newline-after-import", "severity": "off" },
     { "rule": "import/order", "severity": "off" },
     { "rule": "sort-imports", "severity": "off" },
     { "rule": "ts/no-empty-function", "severity": "off" }

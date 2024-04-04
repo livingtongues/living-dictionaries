@@ -1,25 +1,38 @@
-import { update } from 'sveltefirets';
-import { get } from 'svelte/store';
-import { page } from '$app/stores';
+import { update, updateOnline } from 'sveltefirets'
+import { get } from 'svelte/store'
+import type { GoalDatabaseEntry } from '@living-dictionaries/types'
+import { page } from '$app/stores'
 
-export function updateFirestoreEntry({
-  field,
-  value,
+export async function updateEntry({
+  data,
   entryId,
 }: {
-  field: string;
-  value: string | string[];
-  entryId: string,
-}
+  data: GoalDatabaseEntry
+  entryId: string
+},
 ) {
   const { data: { t }, params: { dictionaryId } } = get(page)
   try {
-    update(
-      `dictionaries/${dictionaryId}/words/${entryId}`,
-      { [field]: value },
-      { abbreviate: true }
-    );
-  } catch (err) {
-    alert(`${t('misc.error')}: ${err}`);
+    await update<GoalDatabaseEntry>(`dictionaries/${dictionaryId}/words/${entryId}`, data, { abbreviate: true })
+  }
+  catch (err) {
+    alert(`${t('misc.error')}: ${err}`)
+  }
+}
+
+export async function updateEntryOnline({
+  data,
+  entryId,
+}: {
+  data: GoalDatabaseEntry
+  entryId: string
+},
+) {
+  const { data: { t }, params: { dictionaryId } } = get(page)
+  try {
+    await updateOnline<GoalDatabaseEntry>(`dictionaries/${dictionaryId}/words/${entryId}`, data, { abbreviate: true })
+  }
+  catch (err) {
+    alert(`${t('misc.error')}: ${err}`)
   }
 }

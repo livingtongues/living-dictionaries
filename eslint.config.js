@@ -6,6 +6,12 @@ import jsEslintPlugin from '@eslint/js'
 import tsEslintPlugin from '@typescript-eslint/eslint-plugin'
 import svelteStylistic from 'eslint-plugin-svelte-stylistic'
 
+// /** @type import('@antfu/eslint-config').TypedFlatConfigItem['rules'] */
+// const typescript_overrides =
+// {
+//   ''
+// }
+
 // https://github.com/antfu/eslint-config
 // Inspect: npx @eslint/config-inspector
 export default antfu(
@@ -26,7 +32,7 @@ export default antfu(
     overrides: {
       // Need to check if duplicates in these
       ...jsEslintPlugin.configs.recommended.rules,
-      ...tsEslintPlugin.configs.recommended.rules,
+      // ...tsEslintPlugin.configs.recommended.rules, // cause the rest to break
       ...tsEslintPlugin.configs.stylistic.rules,
 
       'prefer-destructuring': 'error',
@@ -42,18 +48,19 @@ export default antfu(
         allowTemplateLiterals: true,
         avoidEscape: true,
       }],
-      'ts/no-unused-vars': ['error', {
+      'ts/no-unused-vars': ['warn', {
         argsIgnorePattern: '^_',
-        caughtErrors: 'all',
+        caughtErrors: 'none',
         ignoreRestSiblings: true,
-        vars: 'all', // is this helpful?
+        // vars: 'all', // is this helpful?
         varsIgnorePattern: '^\\$\\$Props$',
       }],
 
       'ts/no-explicit-any': 'warn',
       'prefer-named-capture-group': 'warn',
-      'no-undef': 'warn', // may just turn off as has lots of conflicts
 
+      'no-undef': 'off',
+      'no-unused-vars': 'off',
       'curly': 'off',
       'no-alert': 'off',
       'antfu/if-newline': 'off',
@@ -81,6 +88,8 @@ export default antfu(
       'no-unused-expressions': 'off',
       'no-inner-declarations': 'off',
       'style/space-infix-ops': 'off',
+      'no-undef-init': 'off',
+      'no-self-assign': 'off',
     },
     // what to do with languageOptions.globals.$$Generic: 'readonly'? - may not be needed with Svelte 5's move away from this
   }),

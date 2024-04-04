@@ -1,29 +1,29 @@
 <script lang="ts">
-  import Audio from '../Audio.svelte';
-  import Video from '../Video.svelte';
-  import Image from '$lib/components/image/Image.svelte';
-  import AddImage from '../AddImage.svelte';
-  import type { ExpandedEntry, IDictionary } from '@living-dictionaries/types';
-  import { order_glosses } from '$lib/helpers/glosses';
-  import { minutesAgo } from '$lib/helpers/time';
-  import { ShowHide } from 'svelte-pieces';
-  import sanitize from 'xss';
-  import { page } from '$app/stores';
-  import type { DbOperations } from '$lib/dbOperations';
+  import type { ExpandedEntry, IDictionary } from '@living-dictionaries/types'
+  import { ShowHide } from 'svelte-pieces'
+  import sanitize from 'xss'
+  import Audio from '../Audio.svelte'
+  import Video from '../Video.svelte'
+  import AddImage from '../AddImage.svelte'
+  import Image from '$lib/components/image/Image.svelte'
+  import { order_glosses } from '$lib/helpers/glosses'
+  import { minutesAgo } from '$lib/helpers/time'
+  import { page } from '$app/stores'
+  import type { DbOperations } from '$lib/dbOperations'
 
-  export let entry: ExpandedEntry;
-  export let dictionary: IDictionary;
-  export let can_edit = false;
-  export let videoAccess = false;
-  export let dbOperations: DbOperations;
-  export let on_click: (e: MouseEvent & { currentTarget: EventTarget & HTMLAnchorElement }) => void = undefined;
+  export let entry: ExpandedEntry
+  export let dictionary: IDictionary
+  export let can_edit = false
+  export let videoAccess = false
+  export let dbOperations: DbOperations
+  export let on_click: (e: MouseEvent & { currentTarget: EventTarget & HTMLAnchorElement }) => void = undefined
 
   $: glosses = order_glosses({
     glosses: entry.senses?.[0]?.glosses,
     dictionary_gloss_languages: dictionary.glossLanguages,
     t: $page.data.t,
     label: dictionary.id !== 'jewish-neo-aramaic',
-  }).join(', ');
+  }).join(', ')
 
   $: updated_within_last_5_minutes = can_edit && (entry.ua?.toMillis?.() || (entry.ua?.seconds * 1000)) > minutesAgo(5)
 </script>
@@ -34,7 +34,7 @@
   class="flex rounded shadow my-1 overflow-hidden items-stretch border-green-300"
   style="margin-right: 2px;">
   {#if entry.sound_files?.[0] || can_edit}
-    <Audio class="bg-gray-100 py-1.5 px-1 min-w-55px w-55px" {entry} {can_edit} context="list" />
+    <Audio class="bg-gray-100 py-1.5 px-1 min-w-55px w-55px" {entry} {can_edit} context="list" updateEntryOnline={dbOperations.updateEntryOnline} />
   {/if}
   <a
     href="/{dictionary.id}/entry/{entry.id}"
@@ -58,7 +58,7 @@
       <div class="text-xs text-gray-600 mr-auto mb-1">
         {#if entry.senses?.[0]?.translated_parts_of_speech}
           {#each entry.senses?.[0]?.parts_of_speech_keys as pos}
-            <i>{$page.data.t({ dynamicKey: 'psAbbrev.' + pos, fallback: pos })}, </i>
+            <i>{$page.data.t({ dynamicKey: `psAbbrev.${pos}`, fallback: pos })}, </i>
           {/each}
         {/if}
 
@@ -142,7 +142,7 @@
         title={entry.lexeme}
         gcs={entry.senses?.[0]?.photo_files?.[0].specifiable_image_url}
         {can_edit}
-        on:deleteImage={() => dbOperations.deleteImage(entry, dictionary.id)} />
+        on_delete_image={() => dbOperations.deleteImage(entry, dictionary.id)} />
     </div>
   {:else if can_edit}
     <AddImage dictionaryId={dictionary.id} entryId={entry.id} class="w-12 bg-gray-100">

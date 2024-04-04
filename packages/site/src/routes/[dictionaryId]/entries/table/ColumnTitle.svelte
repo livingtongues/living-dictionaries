@@ -1,11 +1,11 @@
 <script lang="ts">
-  import { page } from '$app/stores';
-  import type { IColumn, EntryFieldValue } from '@living-dictionaries/types';
+  import type { IColumn, i18nEntryFieldKey } from '@living-dictionaries/types'
+  import { page } from '$app/stores'
 
-  export let column: IColumn;
-  export let verbose = false;
+  export let column: IColumn
+  export let verbose = false
 
-  $: i18nKey = `entry_field.${column.field}` as `entry_field.${EntryFieldValue}`
+  $: i18nKey = `entry_field.${column.field}` as i18nEntryFieldKey
 </script>
 
 <span class:flex={!verbose}>

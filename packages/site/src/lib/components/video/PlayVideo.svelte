@@ -1,19 +1,18 @@
 <script lang="ts">
-  import { page } from '$app/stores';
-  import type { ExpandedVideo } from '@living-dictionaries/types';
-  import VideoIFrame from './VideoIFrame.svelte';
-  import { Button } from 'svelte-pieces';
-  import { createEventDispatcher } from 'svelte';
+  import type { ExpandedVideo } from '@living-dictionaries/types'
+  import { Button } from 'svelte-pieces'
+  import { createEventDispatcher } from 'svelte'
+  import VideoIFrame from './VideoIFrame.svelte'
+  import { page } from '$app/stores'
 
-  export let lexeme: string;
-  export let video: ExpandedVideo;
-  export let storageBucket: string;
-  export let can_edit = false;
+  export let lexeme: string
+  export let video: ExpandedVideo
+  export let can_edit = false
 
   const dispatch = createEventDispatcher<{
-    close: boolean;
-    deleteVideo: boolean;
-  }>();
+    close: boolean
+    deleteVideo: boolean
+  }>()
 </script>
 
 <div
@@ -33,10 +32,7 @@
           controls
           autoplay
           playsinline
-          src={`https://firebasestorage.googleapis.com/v0/b/${storageBucket}/o/${video.fb_storage_path.replace(
-            /\//g,
-            '%2F'
-          )}?alt=media`}>
+          src={video.storage_url}>
           <track kind="captions" />
         </video>
       {:else}
@@ -53,8 +49,8 @@
           color="red"
           form="filled"
           onclick={(e) => {
-            e.stopPropagation();
-            dispatch('deleteVideo');
+            e.stopPropagation()
+            dispatch('deleteVideo')
           }}>
           <span class="i-fa-trash-o" style="margin: -1px 0 2px;" />
           {$page.data.t('misc.delete')}
@@ -66,9 +62,7 @@
 
 <!-- {#if !video.youtubeId && !video.vimeoId}
         <Button
-          href={`https://firebasestorage.googleapis.com/v0/b/${
-            firebaseConfig.storageBucket
-          }/o/${video.path.replace(/\//g, '%2F')}?alt=media`}
+          href={video.storage_url}
           target="_blank">
           <i class="fas fa-download" />
           <span class="hidden sm:inline"

@@ -1,5 +1,7 @@
 import type { Variant, Viewport } from 'kitbook'
+import type { ExpandedEntry } from '@living-dictionaries/types'
 import type Component from './Audio.svelte'
+import { logDbOperations } from '$lib/mocks/db'
 
 export const viewports: Viewport[] = [
   { width: 80, height: 80 },
@@ -7,9 +9,9 @@ export const viewports: Viewport[] = [
 
 export const languages = []
 
-const entry = {
+const entry: ExpandedEntry = {
   sound_files: [
-    { fb_storage_path: '' }
+    { fb_storage_path: '', storage_url: '' },
   ],
 }
 
@@ -19,6 +21,7 @@ export const variants: Variant<Component>[] = [
     props: {
       entry,
       context: 'list',
+      updateEntryOnline: logDbOperations.updateEntryOnline,
     },
   },
   {
@@ -26,6 +29,7 @@ export const variants: Variant<Component>[] = [
     props: {
       entry,
       context: 'table',
+      updateEntryOnline: logDbOperations.updateEntryOnline,
     },
   },
   {
@@ -33,6 +37,7 @@ export const variants: Variant<Component>[] = [
     props: {
       entry,
       context: 'entry',
+      updateEntryOnline: logDbOperations.updateEntryOnline,
     },
   },
   {
@@ -41,6 +46,7 @@ export const variants: Variant<Component>[] = [
       entry,
       context: 'entry',
       can_edit: true,
+      updateEntryOnline: logDbOperations.updateEntryOnline,
     },
   },
   {
@@ -49,6 +55,7 @@ export const variants: Variant<Component>[] = [
       entry: {},
       context: 'list',
       can_edit: true,
+      updateEntryOnline: logDbOperations.updateEntryOnline,
     },
   },
   {
@@ -57,6 +64,7 @@ export const variants: Variant<Component>[] = [
       entry: {},
       context: 'table',
       can_edit: true,
+      updateEntryOnline: logDbOperations.updateEntryOnline,
     },
   },
   {
@@ -65,6 +73,7 @@ export const variants: Variant<Component>[] = [
       entry: {},
       context: 'entry',
       can_edit: true,
+      updateEntryOnline: logDbOperations.updateEntryOnline,
     },
   },
 ]

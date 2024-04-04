@@ -1,10 +1,8 @@
-import type { DatabaseSense, ExpandedEntry, ExpandedSense, GoalDatabaseEntry } from '@living-dictionaries/types';
-import type { ExpandedAudio, GoalDatabaseAudio } from '@living-dictionaries/types/audio.interface';
-import type { ExpandedPhoto, GoalDatabasePhoto } from '@living-dictionaries/types/photo.interface';
-import type { ExpandedVideo, GoalDatabaseVideo } from '@living-dictionaries/types/video.interface';
-import { convert_timestamp_to_date_object } from './timestamp_to_date';
-import { translate_part_of_speech_to_current_language, translate_semantic_domain_keys_to_current_language } from './translate_keys_to_current_language';
-import type { TranslateFunction } from '$lib/i18n/types';
+import type { DatabaseSense, ExpandedAudio, ExpandedEntry, ExpandedPhoto, ExpandedSense, ExpandedVideo, GoalDatabaseAudio, GoalDatabaseEntry, GoalDatabasePhoto, GoalDatabaseVideo } from '@living-dictionaries/types'
+import { firebaseConfig } from 'sveltefirets'
+import { convert_timestamp_to_date_object } from './timestamp_to_date'
+import { translate_part_of_speech_to_current_language, translate_semantic_domain_keys_to_current_language } from './translate_keys_to_current_language'
+import type { TranslateFunction } from '$lib/i18n/types'
 
 export function expand_entry(database_entry: GoalDatabaseEntry, t: TranslateFunction): ExpandedEntry {
   const expanded_entry: ExpandedEntry = {
@@ -30,8 +28,8 @@ export function expand_entry(database_entry: GoalDatabaseEntry, t: TranslateFunc
     scientific_names: database_entry.scn,
     coordinates: database_entry.co,
   }
-  Object.keys(expanded_entry).forEach(key => expanded_entry[key] === undefined && delete expanded_entry[key]);
-  return expanded_entry;
+  Object.keys(expanded_entry).forEach(key => expanded_entry[key] === undefined && delete expanded_entry[key])
+  return expanded_entry
 }
 
 function expand_sense(sense: DatabaseSense, t: TranslateFunction): ExpandedSense {
@@ -47,27 +45,29 @@ function expand_sense(sense: DatabaseSense, t: TranslateFunction): ExpandedSense
     video_files: sense.vfs?.map(expand_video),
     noun_class: sense.nc,
     definition_english: sense.de,
-  };
-  Object.keys(expanded_sense).forEach(key => expanded_sense[key] === undefined && delete expanded_sense[key]);
-  return expanded_sense;
+  }
+  Object.keys(expanded_sense).forEach(key => expanded_sense[key] === undefined && delete expanded_sense[key])
+  return expanded_sense
 }
 
 function expand_photo(pf: GoalDatabasePhoto): ExpandedPhoto {
   const expanded_photo: ExpandedPhoto = {
     fb_storage_path: pf.path,
+    storage_url: `https://firebasestorage.googleapis.com/v0/b/${firebaseConfig.storageBucket}/o/${encodeURIComponent(pf.path)}?alt=media`,
     specifiable_image_url: pf.gcs,
     uid_added_by: pf.ab,
     timestamp: convert_timestamp_to_date_object(pf.ts),
     source: pf.sc,
     photographer_credit: pf.cr,
-  };
-  Object.keys(expanded_photo).forEach(key => expanded_photo[key] === undefined && delete expanded_photo[key]);
-  return expanded_photo;
+  }
+  Object.keys(expanded_photo).forEach(key => expanded_photo[key] === undefined && delete expanded_photo[key])
+  return expanded_photo
 }
 
 export function expand_video(vf: GoalDatabaseVideo): ExpandedVideo {
   const expanded_video: ExpandedVideo = {
     fb_storage_path: vf.path,
+    storage_url: `https://firebasestorage.googleapis.com/v0/b/${firebaseConfig.storageBucket}/o/${encodeURIComponent(vf.path)}?alt=media`,
     uid_added_by: vf.ab,
     timestamp: convert_timestamp_to_date_object(vf.ts),
     speaker_ids: vf.sp,
@@ -75,21 +75,21 @@ export function expand_video(vf: GoalDatabaseVideo): ExpandedVideo {
     youtubeId: vf.youtubeId,
     vimeoId: vf.vimeoId,
     start_at_seconds: vf.startAt,
-  };
-  Object.keys(expanded_video).forEach(key => expanded_video[key] === undefined && delete expanded_video[key]);
-  return expanded_video;
+  }
+  Object.keys(expanded_video).forEach(key => expanded_video[key] === undefined && delete expanded_video[key])
+  return expanded_video
 }
 
 function expand_audio(sf: GoalDatabaseAudio): ExpandedAudio {
   const expanded_audio: ExpandedAudio = {
     fb_storage_path: sf.path,
+    storage_url: `https://firebasestorage.googleapis.com/v0/b/${firebaseConfig.storageBucket}/o/${encodeURIComponent(sf.path)}?alt=media`,
     uid_added_by: sf.ab,
     timestamp: convert_timestamp_to_date_object(sf.ts),
     speaker_ids: sf.sp,
     source: sf.sc,
     speakerName: sf.speakerName,
-  };
-  Object.keys(expanded_audio).forEach(key => expanded_audio[key] === undefined && delete expanded_audio[key]);
-  return expanded_audio;
+  }
+  Object.keys(expanded_audio).forEach(key => expanded_audio[key] === undefined && delete expanded_audio[key])
+  return expanded_audio
 }
-

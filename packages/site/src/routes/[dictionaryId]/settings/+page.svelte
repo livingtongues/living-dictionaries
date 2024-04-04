@@ -1,31 +1,32 @@
 <script lang="ts">
-  import { page } from '$app/stores';
-  import { updateOnline, getCollection } from 'sveltefirets';
-  import { where, limit } from 'firebase/firestore';
-  import { arrayRemove, arrayUnion, GeoPoint, type FieldValue } from 'firebase/firestore/lite';
-  import { Button, ShowHide, JSON } from 'svelte-pieces';
-  import EditString from '../EditString.svelte';
-  import type { IDictionary } from '@living-dictionaries/types';
-  import EditableGlossesField from '$lib/components/settings/EditableGlossesField.svelte';
-  import WhereSpoken from '$lib/components/settings/WhereSpoken.svelte';
-  import EditableAlternateNames from '$lib/components/settings/EditableAlternateNames.svelte';
-  import PublicCheckbox from '$lib/components/settings/PublicCheckbox.svelte'; // only used here - perhaps colocate
-  import PrintAccessCheckbox from '$lib/components/settings/PrintAccessCheckbox.svelte'; // only used here - perhaps colocate
-  import { glossingLanguages } from '$lib/glosses/glossing-languages';
-  import SeoMetaTags from '$lib/components/SeoMetaTags.svelte';
-  import Image from '$lib/components/image/Image.svelte';
-  import ImageDropZone from '$lib/components/image/ImageDropZone.svelte';
-  import { invalidateAll } from '$app/navigation';
+  import { getCollection, updateOnline } from 'sveltefirets'
+  import { limit, where } from 'firebase/firestore'
+  import { type FieldValue, GeoPoint, arrayRemove, arrayUnion } from 'firebase/firestore/lite'
+  import { Button, JSON, ShowHide } from 'svelte-pieces'
+  import type { IDictionary } from '@living-dictionaries/types'
+  import EditString from '../EditString.svelte'
+  import { page } from '$app/stores'
+  import EditableGlossesField from '$lib/components/settings/EditableGlossesField.svelte'
+  import WhereSpoken from '$lib/components/settings/WhereSpoken.svelte'
+  import EditableAlternateNames from '$lib/components/settings/EditableAlternateNames.svelte'
+  import PublicCheckbox from '$lib/components/settings/PublicCheckbox.svelte' // only used here - perhaps colocate
+  import PrintAccessCheckbox from '$lib/components/settings/PrintAccessCheckbox.svelte' // only used here - perhaps colocate
+  import { glossingLanguages } from '$lib/glosses/glossing-languages'
+  import SeoMetaTags from '$lib/components/SeoMetaTags.svelte'
+  import Image from '$lib/components/image/Image.svelte'
+  import ImageDropZone from '$lib/components/image/ImageDropZone.svelte'
+  import { invalidateAll } from '$app/navigation'
 
   export let data
-  $: ({user, dictionary, admin, is_manager} = data)
+  $: ({ user, dictionary, admin, is_manager } = data)
 
   async function updateDictionary(change: Partial<IDictionary>) {
     try {
       await updateOnline<IDictionary>(`dictionaries/${$dictionary.id}`, change)
       await invalidateAll()
-    } catch (err) {
-      alert(`${$page.data.t('misc.error')}: ${err}`);
+    }
+    catch (err) {
+      alert(`${$page.data.t('misc.error')}: ${err}`)
     }
   }
 
@@ -42,21 +43,21 @@
     minlength={2}
     required
     id="name"
-    save={async (name) => await updateDictionary({ name })}
+    save={async name => await updateDictionary({ name })}
     display={$page.data.t('settings.edit_dict_name')} />
   <div class="mb-5" />
 
   <EditString
     value={$dictionary.iso6393}
     id="iso6393"
-    save={async (iso6393) => await updateDictionary({ iso6393 })}
+    save={async iso6393 => await updateDictionary({ iso6393 })}
     display="ISO 639-3" />
   <div class="mb-5" />
 
   <EditString
     value={$dictionary.glottocode}
     id="glottocode"
-    save={async (glottocode) => await updateDictionary({ glottocode })}
+    save={async glottocode => await updateDictionary({ glottocode })}
     display="Glottocode" />
   <div class="mb-5" />
 
@@ -64,45 +65,48 @@
     minimum={1}
     availableLanguages={glossingLanguages}
     selectedLanguages={$dictionary.glossLanguages}
-    on:add={async ({detail: { languageId }}) => await updateGlossLanguages(arrayUnion(languageId))}
-    on:remove={async ({detail: { languageId }}) => {
+    on:add={async ({ detail: { languageId } }) => await updateGlossLanguages(arrayUnion(languageId))}
+    on:remove={async ({ detail: { languageId } }) => {
       try {
         const entriesUsingGlossLanguage = await getCollection(
           `dictionaries/${$dictionary.id}/words`,
-          [where(`gl.${languageId}`, '>', ''), limit(1)]
-        );
-        if (entriesUsingGlossLanguage.length == 0) {
-          await updateGlossLanguages(arrayRemove(languageId));
-        } else if ($admin) {
-          const removeGlossLanguageInUse = confirm('Remove as admin even though this glossing language is in use already? Know that regular editors get a message saying "Contact Us"')
-          if (removeGlossLanguageInUse) await updateGlossLanguages(arrayRemove(languageId));
-        } else {
-          alert($page.data.t('header.contact_us'));
+          [where(`gl.${languageId}`, '>', ''), limit(1)],
+        )
+        if (entriesUsingGlossLanguage.length === 0) {
+          await updateGlossLanguages(arrayRemove(languageId))
         }
-      } catch (err) {
-        return console.error(err);
+        else if ($admin) {
+          const removeGlossLanguageInUse = confirm('Remove as admin even though this glossing language is in use already? Know that regular editors get a message saying "Contact Us"')
+          if (removeGlossLanguageInUse) await updateGlossLanguages(arrayRemove(languageId))
+        }
+        else {
+          alert($page.data.t('header.contact_us'))
+        }
+      }
+      catch (err) {
+        return console.error(err)
       }
     }} />
   <div class="mb-5" />
 
   <EditableAlternateNames
     alternateNames={$dictionary.alternateNames}
-    on:update={async ({ detail: {alternateNames}}) => await updateDictionary({ alternateNames})} />
+    on_update={async new_value => await updateDictionary({ alternateNames: new_value })} />
   <div class="mb-5" />
 
   <WhereSpoken
     dictionary={$dictionary}
-    on:updateCoordinates={async ({ detail }) => await updateDictionary({ coordinates: new GeoPoint(detail.latitude, detail.longitude)})}
-    on:removeCoordinates={async () => await updateDictionary({ coordinates: null })}
-    on:updatePoints={async ({ detail }) => await updateDictionary({ points: detail })}
-    on:updateRegions={async ({ detail }) => await updateDictionary({ regions: detail})} />
+    on_update_coordinates={async coordinates => await updateDictionary({ coordinates: new GeoPoint(coordinates.latitude, coordinates.longitude) })}
+    on_remove_coordinates={async () => await updateDictionary({ coordinates: null })}
+    on_update_points={async points => await updateDictionary({ points })}
+    on_update_regions={async regions => await updateDictionary({ regions })} />
   <div class="mb-5" />
 
   <EditString
     value={$dictionary.location}
     maxlength={100}
     id="location"
-    save={async (location) => await updateDictionary({ location })}
+    save={async location => await updateDictionary({ location })}
     display={$page.data.t('dictionary.location')} />
   <div class="mb-5" />
 
@@ -115,7 +119,7 @@
       height={300}
       title="{$dictionary.name} Featured Image"
       gcs={$dictionary.featuredImage.specifiable_image_url}
-      on:deleteImage={async () => await updateDictionary({ featuredImage: null })} />
+      on_delete_image={async () => await updateDictionary({ featuredImage: null })} />
   {:else}
     <ImageDropZone let:file class="p-3 rounded">
       <span slot="label">{$page.data.t('misc.upload')}</span>
@@ -126,13 +130,13 @@
               {file}
               fileLocationPrefix={`${$dictionary.id}/featured_images/`}
               user={$user}
-              on:uploaded={async ({detail: {fb_storage_path, specifiable_image_url}}) => await updateDictionary({
+              on:uploaded={async ({ detail: { fb_storage_path, specifiable_image_url } }) => await updateDictionary({
                 featuredImage: {
                   fb_storage_path,
                   specifiable_image_url,
                   uid_added_by: $user.uid,
                   timestamp: new Date(),
-                }
+                },
               })} />
           </div>
         {/await}
@@ -150,12 +154,14 @@
     checked={$dictionary.public}
     on:changed={async ({ detail: { checked } }) => {
       if (!checked) {
-        await updateDictionary({ public: false });
-      } else if ($admin) {
-        await updateDictionary({ public: true });
-      } else {
+        await updateDictionary({ public: false })
+      }
+      else if ($admin) {
+        await updateDictionary({ public: true })
+      }
+      else {
         const communityAllowsOnline = confirm($page.data.t('settings.community_permission'))
-        if (communityAllowsOnline) alert($page.data.t('header.contact_us'));
+        if (communityAllowsOnline) alert($page.data.t('header.contact_us'))
       }
     }} />
   <div class="mb-5" />
