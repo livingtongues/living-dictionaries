@@ -26,6 +26,8 @@ function prepareIDSDictionariesToBatchImport() {
 function triggerManually() {
   const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
   const semanticDomainsAdjustmentsSheet = spreadsheet.getSheetByName('IDS Adjustments for semantic domains');
+  const idsDataSheet = spreadsheet.getSheetByName('IDS Data');
   const testTsvSheet = spreadsheet.getSheetByName('test_tsv');
-  adjustSemanticDomains({ objectSheet: semanticDomainsAdjustmentsSheet, tsvSheet: testTsvSheet })
+  adjustSemanticDomains({ objectSheet: semanticDomainsAdjustmentsSheet, tsvSheet: testTsvSheet }); //TODO change testTsvSheet for real tsv sheets
+  repairWrongTranslations({ objectSheet: idsDataSheet, tsvSheet: testTsvSheet }); //TODO change testTsvSheet for real tsv sheets
 }
