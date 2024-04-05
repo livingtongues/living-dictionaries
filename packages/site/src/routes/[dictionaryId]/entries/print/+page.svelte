@@ -1,46 +1,43 @@
 <script lang="ts">
-  import { page } from '$app/stores';
-  import { getContext } from 'svelte';
-  import { configure } from 'instantsearch.js/es/widgets/index.js';
-  import Hits from '$lib/components/search/Hits.svelte';
-  import Pagination from '$lib/components/search/Pagination.svelte';
-  import { Button, createPersistedStore } from 'svelte-pieces';
-  import { defaultPrintFields } from './printFields';
-  import PrintEntry from './PrintEntry.svelte';
-  import { browser } from '$app/environment';
-  import type { IPrintFields, ICitation } from '@living-dictionaries/types';
-  import PrintFieldCheckboxes from './PrintFieldCheckboxes.svelte';
-  import { Doc } from 'sveltefirets';
-  import { truncateAuthors } from './truncateAuthors';
-  import { convert_and_expand_entry } from '$lib/transformers/convert_and_expand_entry';
-  import type { InstantSearch } from 'instantsearch.js';
+  import { getContext } from 'svelte'
+  import { configure } from 'instantsearch.js/es/widgets/index.js'
+  import { Button, createPersistedStore } from 'svelte-pieces'
+  import type { IPrintFields } from '@living-dictionaries/types'
+  import type { InstantSearch } from 'instantsearch.js'
+  import { build_citation } from '../../contributors/build-citation'
+  import { defaultPrintFields } from './printFields'
+  import PrintEntry from './PrintEntry.svelte'
+  import PrintFieldCheckboxes from './PrintFieldCheckboxes.svelte'
+  import { truncateAuthors } from './truncateAuthors'
+  import Hits from '$lib/components/search/Hits.svelte'
+  import Pagination from '$lib/components/search/Pagination.svelte'
+  import { browser } from '$app/environment'
+  import { convert_and_expand_entry } from '$lib/transformers/convert_and_expand_entry'
+  import { page } from '$app/stores'
 
   export let data
-  $: ({dictionary, can_edit, is_manager, dbOperations} = data)
+  $: ({ dictionary, can_edit, is_manager, dbOperations, citation_promise, partners } = data)
 
-  const search: InstantSearch = getContext('search');
-  const managerMaxEntries = 1000;
-  const defaultMaxEntries = 300;
+  const search: InstantSearch = getContext('search')
+  const managerMaxEntries = 1000
+  const defaultMaxEntries = 300
 
-  const hitsPerPage = createPersistedStore<number>('printHitsPerPage', ($is_manager ? managerMaxEntries : defaultMaxEntries));
+  const hitsPerPage = createPersistedStore<number>('printHitsPerPage', ($is_manager ? managerMaxEntries : defaultMaxEntries))
   $: if (browser) {
     search.addWidgets([
       configure({
-        // @ts-ignore odd error in CI
         hitsPerPage: $hitsPerPage,
       }),
-    ]);
+    ])
   }
 
-  const preferredPrintFields = createPersistedStore<IPrintFields>('printFields_11.8.2023', defaultPrintFields);
-  const headwordSize = createPersistedStore<number>('printHeadwordSize', 12);
-  const fontSize = createPersistedStore<number>('printFontSize', 12);
-  const imagePercent = createPersistedStore<number>('printImagePercent', 50);
-  const columnCount = createPersistedStore<number>('printColumnCount', 2);
-  const showLabels = createPersistedStore<boolean>('printShowLabels', true);
-  const showQrCode = createPersistedStore<boolean>('showQrCode', false);
-
-  const citationType: ICitation = { citation: '' };
+  const preferredPrintFields = createPersistedStore<IPrintFields>('printFields_11.8.2023', defaultPrintFields)
+  const headwordSize = createPersistedStore<number>('printHeadwordSize', 12)
+  const fontSize = createPersistedStore<number>('printFontSize', 12)
+  const imagePercent = createPersistedStore<number>('printImagePercent', 50)
+  const columnCount = createPersistedStore<number>('printColumnCount', 2)
+  const showLabels = createPersistedStore<boolean>('printShowLabels', true)
+  const showQrCode = createPersistedStore<boolean>('showQrCode', false)
 </script>
 
 {#if $dictionary.printAccess || $can_edit}
@@ -128,23 +125,14 @@
             dictionary={$dictionary} />
         {/each}
       </div>
-      <Doc
-        path={`dictionaries/${$dictionary.id}/info/citation`}
-        startWith={citationType}
-        let:data={citation}>
-        {#if entries?.length}
-          <div
-            dir="ltr"
-            class="text-xs print:fixed print:text-center right-0 top-0 bottom-0"
-            style="writing-mode: tb; min-width: 0;">
-            {truncateAuthors(citation?.citation)}
-            {new Date().getFullYear()}.
-            {$dictionary.name}
-            <span>{$page.data.t('misc.LD_singular')}.</span>
-            Living Tongues Institute for Endangered Languages. https://livingdictionaries.app/{$dictionary.id}
-          </div>
-        {/if}
-      </Doc>
+      {#await citation_promise then document}
+        <div
+          dir="ltr"
+          class="text-xs print:fixed print:text-center right-0 top-0 bottom-0"
+          style="writing-mode: tb; min-width: 0;">
+          {build_citation({ t: $page.data.t, dictionary: $dictionary, custom_citation: truncateAuthors(document?.citation), partners: $partners })}
+        </div>
+      {/await}
     </div>
   </Hits>
   <Pagination addNewEntry={dbOperations.addNewEntry} showAdd={false} {search} />

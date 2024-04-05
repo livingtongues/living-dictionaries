@@ -1,18 +1,20 @@
 <script lang="ts">
-  import { page } from '$app/stores';
-  import { Button, createPersistedStore } from 'svelte-pieces';
-  import type { IPrintFields, ICitation, IDictionary, ExpandedEntry } from '@living-dictionaries/types';
-  import { Doc } from 'sveltefirets';
-  import PrintEntry from '../entries/print/PrintEntry.svelte';
-  import PrintFieldCheckboxes from '../entries/print/PrintFieldCheckboxes.svelte';
-  import { defaultPrintFields } from '../entries/print/printFields';
-  import { truncateAuthors } from '../entries/print/truncateAuthors';
-  import { onMount } from 'svelte';
+  import { Button, createPersistedStore } from 'svelte-pieces'
+  import type { Citation, ExpandedEntry, IDictionary, IPrintFields, Partner } from '@living-dictionaries/types'
+  import { onMount } from 'svelte'
+  import PrintEntry from '../entries/print/PrintEntry.svelte'
+  import PrintFieldCheckboxes from '../entries/print/PrintFieldCheckboxes.svelte'
+  import { defaultPrintFields } from '../entries/print/printFields'
+  import { truncateAuthors } from '../entries/print/truncateAuthors'
+  import { build_citation } from '../contributors/build-citation'
+  import { page } from '$app/stores'
 
-  export let entries: ExpandedEntry[] = [];
+  export let entries: ExpandedEntry[] = []
   export let dictionary: IDictionary
   export let can_edit = false
   export let entries_per_page: number
+  export let citation_promise: Promise<Citation>
+  export let partners: Partner[]
 
   const print_per_page = 30
 
@@ -21,17 +23,16 @@
     return () => entries_per_page = null
   })
 
-  const visitor_max_entries = 300;
+  const visitor_max_entries = 300
 
-  const preferredPrintFields = createPersistedStore<IPrintFields>('printFields_11.8.2023', defaultPrintFields);
-  const headwordSize = createPersistedStore<number>('printHeadwordSize', 12);
-  const fontSize = createPersistedStore<number>('printFontSize', 12);
-  const imagePercent = createPersistedStore<number>('printImagePercent', 50);
-  const columnCount = createPersistedStore<number>('printColumnCount', 2);
-  const showLabels = createPersistedStore<boolean>('printShowLabels', true);
-  const showQrCode = createPersistedStore<boolean>('showQrCode', false);
+  const preferredPrintFields = createPersistedStore<IPrintFields>('printFields_11.8.2023', defaultPrintFields)
+  const headwordSize = createPersistedStore<number>('printHeadwordSize', 12)
+  const fontSize = createPersistedStore<number>('printFontSize', 12)
+  const imagePercent = createPersistedStore<number>('printImagePercent', 50)
+  const columnCount = createPersistedStore<number>('printColumnCount', 2)
+  const showLabels = createPersistedStore<boolean>('printShowLabels', true)
+  const showQrCode = createPersistedStore<boolean>('showQrCode', false)
 
-  const citationType: ICitation = { citation: '' };
 </script>
 
 {#if dictionary.printAccess || can_edit}
@@ -117,23 +118,14 @@
           {dictionary} />
       {/each}
     </div>
-    <Doc
-      path={`dictionaries/${dictionary.id}/info/citation`}
-      startWith={citationType}
-      let:data={citation}>
-      {#if entries?.length}
-        <div
-          dir="ltr"
-          class="text-xs print:fixed print:text-center right-0 top-0 bottom-0"
-          style="writing-mode: tb; min-width: 0;">
-          {truncateAuthors(citation?.citation)}
-          {new Date().getFullYear()}.
-          {dictionary.name}
-          <span>{$page.data.t('misc.LD_singular')}.</span>
-          Living Tongues Institute for Endangered Languages. https://livingdictionaries.app/{dictionary.id}
-        </div>
-      {/if}
-    </Doc>
+    {#await citation_promise then document}
+      <div
+        dir="ltr"
+        class="text-xs print:fixed print:text-center right-0 top-0 bottom-0"
+        style="writing-mode: tb; min-width: 0;">
+        {build_citation({ t: $page.data.t, dictionary, custom_citation: truncateAuthors(document?.citation), partners })}
+      </div>
+    {/await}
   </div>
 {:else}
   <p>Print view is only available to dictionary managers and contributors</p>

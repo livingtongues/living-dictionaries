@@ -1,27 +1,27 @@
 <script lang="ts">
-  import { page } from '$app/stores';
-  import { add, deleteDocumentOnline, updateOnline, Collection } from 'sveltefirets';
-  import { where } from 'firebase/firestore';
-  import type { IInvite, IHelper } from '@living-dictionaries/types';
-  import { Button, ShowHide } from 'svelte-pieces';
-  import { inviteHelper } from '$lib/helpers/inviteHelper';
-  import { removeDictionaryContributor } from '$lib/helpers/dictionariesManaging';
-  import ContributorInvitationStatus from '$lib/components/contributors/ContributorInvitationStatus.svelte';
-  import Citation from './Citation.svelte';
-  import SeoMetaTags from '$lib/components/SeoMetaTags.svelte';
-  import Partners from './Partners.svelte';
+  import { Collection, deleteDocumentOnline, updateOnline } from 'sveltefirets'
+  import { where } from 'firebase/firestore'
+  import type { IHelper, IInvite } from '@living-dictionaries/types'
+  import { Button, ShowHide } from 'svelte-pieces'
+  import Citation from './Citation.svelte'
+  import Partners from './Partners.svelte'
+  import { inviteHelper } from '$lib/helpers/inviteHelper'
+  import { removeDictionaryContributor } from '$lib/helpers/dictionariesManaging'
+  import ContributorInvitationStatus from '$lib/components/contributors/ContributorInvitationStatus.svelte'
+  import SeoMetaTags from '$lib/components/SeoMetaTags.svelte'
+  import { page } from '$app/stores'
 
   export let data
-  $: ({ partners, dictionary, is_manager, is_contributor, admin } = data)
+  $: ({
+    dictionary,
+    is_manager,
+    is_contributor,
+    admin,
+    editor_edits,
+  } = data)
 
-  let helperType: IHelper[];
-  let inviteType: IInvite[];
-
-  function writeIn() {
-    const name = prompt(`${$page.data.t('speakers.name')}?`);
-    if (name)
-      add(`dictionaries/${$dictionary.id}/writeInCollaborators`, { name });
-  }
+  let helperType: IHelper[]
+  let inviteType: IInvite[]
 </script>
 
 <p class="mb-2">
@@ -92,8 +92,8 @@
           <div class="w-1" />
           <Button
             onclick={() => {
-              if (confirm($page.data.t('misc.delete') + '?'))
-                removeDictionaryContributor(contributor, $dictionary.id);
+              if (confirm(`${$page.data.t('misc.delete')}?`))
+                removeDictionaryContributor(contributor, $dictionary.id)
             }}
             color="red"
             size="sm">
@@ -150,10 +150,7 @@
   {$page.data.t('contributors.other_contributors')}
 </h3>
 <div class="divide-y divide-gray-200">
-  <Collection
-    path={`dictionaries/${$dictionary.id}/writeInCollaborators`}
-    startWith={helperType}
-    let:data={writeInCollaborators}>
+  {#await data.writeInCollaborators_promise then writeInCollaborators}
     {#each writeInCollaborators as collaborator}
       <div class="py-3 flex flex-wrap items-center">
         <div class="text-sm leading-5 font-medium text-gray-900">
@@ -165,17 +162,17 @@
             color="red"
             size="sm"
             onclick={() => {
-              if (confirm($page.data.t('misc.delete') + '?')) {
+              if (confirm(`${$page.data.t('misc.delete')}?`)) {
                 deleteDocumentOnline(
-                  `dictionaries/${$dictionary.id}/writeInCollaborators/${collaborator.id}`
-                );
+                  `dictionaries/${$dictionary.id}/writeInCollaborators/${collaborator.id}`,
+                )
               }
             }}>{$page.data.t('misc.delete')}
             <i class="fas fa-times" /></Button>
         {/if}
       </div>
     {/each}
-  </Collection>
+  {/await}
 </div>
 
 <!-- <div class="text-gray-600 mb-2 text-sm">
@@ -183,20 +180,22 @@
 </div> -->
 
 {#if $is_manager}
-  <Button onclick={writeIn} form="filled">
+  <Button onclick={editor_edits.writeIn} form="filled">
     <i class="far fa-pencil" />
     {$page.data.t('contributors.write_in_contributor')}
   </Button>
 {/if}
 
 <hr class="my-4" />
-<Partners partners={$partners} can_edit={$is_manager} hideLivingTonguesLogo={$dictionary.hideLivingTonguesLogo} admin={$admin} {...data.partner_edits} />
+{#await data.partners_promise then partners}
+  <Partners {partners} can_edit={$is_manager} hideLivingTonguesLogo={$dictionary.hideLivingTonguesLogo} admin={$admin} {...data.partner_edits} />
+{/await}
 
 <!-- Not using contributors.request_to_add_manager -->
 
 <hr class="my-4" />
 
-{#if $dictionary.id != 'onondaga'}
+{#if $dictionary.id !== 'onondaga'}
   <h3 class="font-semibold mb-1 mt-3">
     {$page.data.t('contributors.LD_team')}
   </h3>
@@ -238,7 +237,9 @@
   {$page.data.t('contributors.how_to_cite_academics')}
 </h3>
 
-<Citation isManager={$is_manager} dictionary={$dictionary} partners={$partners} />
+{#await Promise.all([data.partners_promise, data.citation_promise]) then [partners, document]}
+  <Citation isManager={$is_manager} dictionary={$dictionary} {partners} citation={document} update_citation={data.update_citation} />
+{/await}
 
 <div class="mb-12" />
 
