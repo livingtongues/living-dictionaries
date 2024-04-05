@@ -13,7 +13,7 @@
   import { convert_and_expand_entry } from '$lib/transformers/convert_and_expand_entry'
 
   export let data
-  $: ({ entries, status, search_entries, default_entries_per_page, search_params, speakers, dictionary, can_edit, edited_entries, dbOperations, citation_promise } = data)
+  $: ({ entries, status, search_entries, default_entries_per_page, search_params, speakers, dictionary, can_edit, edited_entries, dbOperations } = data)
 
   const page_entries = writable<ExpandedEntry[]>(null)
 
@@ -101,7 +101,7 @@
           <span class="i-svg-spinners-3-dots-fade align--4px" title="Ensure all entries are up to date" />
         {/if}
       </div>
-      <View entries={updated_entries} view={$search_params.view} page_data={data} {citation_promise} />
+      <View entries={updated_entries} view={$search_params.view} page_data={data} />
       <Pagination bind:page_from_url={$search_params.page} {number_of_pages} can_edit={$can_edit} addNewEntry={dbOperations.addNewEntry} />
     </div>
     <div class="hidden md:block w-2 flex-shrink-0 print:hidden" />

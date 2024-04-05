@@ -1,12 +1,8 @@
 <script lang="ts">
-  import { Collection, deleteDocumentOnline, updateOnline } from 'sveltefirets'
-  import { where } from 'firebase/firestore'
-  import type { IHelper, IInvite } from '@living-dictionaries/types'
+  import type { IInvite } from '@living-dictionaries/types'
   import { Button, ShowHide } from 'svelte-pieces'
   import Citation from './Citation.svelte'
   import Partners from './Partners.svelte'
-  import { inviteHelper } from '$lib/helpers/inviteHelper'
-  import { removeDictionaryContributor } from '$lib/helpers/dictionariesManaging'
   import ContributorInvitationStatus from '$lib/components/contributors/ContributorInvitationStatus.svelte'
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte'
   import { page } from '$app/stores'
@@ -20,8 +16,10 @@
     editor_edits,
   } = data)
 
-  let helperType: IHelper[]
-  let inviteType: IInvite[]
+  let invites: IInvite[] = []
+  $: data.invites_promise.then(_invites => invites = _invites)
+  $: manager_invites = invites.filter(invite => invite.role === 'manager')
+  $: contributor_invites = invites.filter(invite => invite.role === 'contributor')
 </script>
 
 <p class="mb-2">
@@ -33,10 +31,7 @@
 </h3>
 
 <div class="divide-y divide-gray-200">
-  <Collection
-    path={`dictionaries/${$dictionary.id}/managers`}
-    startWith={helperType}
-    let:data={managers}>
+  {#await data.managers_promise then managers}
     {#each managers as manager}
       <div class="py-3">
         <div class="text-sm leading-5 font-medium text-gray-900">
@@ -44,31 +39,22 @@
         </div>
       </div>
     {/each}
-  </Collection>
+  {/await}
   {#if $is_manager}
-    <Collection
-      path={`dictionaries/${$dictionary.id}/invites`}
-      queryConstraints={[where('role', '==', 'manager'), where('status', 'in', ['queued', 'sent'])]}
-      startWith={inviteType}
-      let:data={invites}>
-      {#each invites as invite}
-        <div class="my-1">
-          <ContributorInvitationStatus
-            admin={$admin > 0}
-            {invite}
-            on:delete={() =>
-              updateOnline(`dictionaries/${$dictionary.id}/invites/${invite.id}`, {
-                status: 'cancelled',
-              })}>
-            <i slot="prefix">{$page.data.t('contributors.invitation_sent')}:</i>
-          </ContributorInvitationStatus>
-        </div>
-      {/each}
-    </Collection>
+    {#each manager_invites as invite}
+      <div class="my-1">
+        <ContributorInvitationStatus
+          admin={$admin > 0}
+          {invite}
+          on_delete_invite={editor_edits.cancelInvite(invite.id)}>
+          <i slot="prefix">{$page.data.t('contributors.invitation_sent')}:</i>
+        </ContributorInvitationStatus>
+      </div>
+    {/each}
   {/if}
 </div>
 {#if $is_manager}
-  <Button onclick={() => inviteHelper('manager', $dictionary)} form="filled">
+  <Button onclick={async () => await editor_edits.inviteHelper('manager', $dictionary)} form="filled">
     <i class="far fa-envelope" />
     {$page.data.t('contributors.invite_manager')}
   </Button>
@@ -79,10 +65,7 @@
   {$page.data.t('dictionary.contributors')}
 </h3>
 <div class="divide-y divide-gray-200">
-  <Collection
-    path={`dictionaries/${$dictionary.id}/contributors`}
-    startWith={helperType}
-    let:data={contributors}>
+  {#await data.contributors_promise then contributors}
     {#each contributors as contributor}
       <div class="py-3 flex flex-wrap items-center">
         <div class="text-sm leading-5 font-medium text-gray-900">
@@ -91,10 +74,7 @@
         {#if $is_manager}
           <div class="w-1" />
           <Button
-            onclick={() => {
-              if (confirm(`${$page.data.t('misc.delete')}?`))
-                removeDictionaryContributor(contributor, $dictionary.id)
-            }}
+            onclick={editor_edits.removeContributor(contributor.id)}
             color="red"
             size="sm">
             {$page.data.t('misc.delete')}
@@ -103,31 +83,19 @@
         {/if}
       </div>
     {/each}
-  </Collection>
+  {/await}
   {#if $is_manager}
-    <Collection
-      path={`dictionaries/${$dictionary.id}/invites`}
-      queryConstraints={[
-        where('role', '==', 'contributor'),
-        where('status', 'in', ['queued', 'sent']),
-      ]}
-      startWith={inviteType}
-      let:data={invites}>
-      {#each invites as invite}
-        <div class="my-1">
-          <ContributorInvitationStatus
-            admin={$admin > 0}
-            {invite}
-            on:delete={() =>
-              updateOnline(`dictionaries/${$dictionary.id}/invites/${invite.id}`, {
-                status: 'cancelled',
-              })}>
-            <i slot="prefix">{$page.data.t('contributors.invitation_sent')}:</i>
-          </ContributorInvitationStatus>
-        </div>
-      {/each}
-    </Collection>
-    <Button onclick={() => inviteHelper('contributor', $dictionary)} form="filled">
+    {#each contributor_invites as invite}
+      <div class="my-1">
+        <ContributorInvitationStatus
+          admin={$admin > 0}
+          {invite}
+          on_delete_invite={editor_edits.cancelInvite(invite.id)}>
+          <i slot="prefix">{$page.data.t('contributors.invitation_sent')}:</i>
+        </ContributorInvitationStatus>
+      </div>
+    {/each}
+    <Button onclick={async () => await editor_edits.inviteHelper('contributor', $dictionary)} form="filled">
       <i class="far fa-envelope" />
       {$page.data.t('contributors.invite_contributors')}
     </Button>
@@ -161,13 +129,7 @@
           <Button
             color="red"
             size="sm"
-            onclick={() => {
-              if (confirm(`${$page.data.t('misc.delete')}?`)) {
-                deleteDocumentOnline(
-                  `dictionaries/${$dictionary.id}/writeInCollaborators/${collaborator.id}`,
-                )
-              }
-            }}>{$page.data.t('misc.delete')}
+            onclick={editor_edits.removeWriteInCollaborator(collaborator.id)}>{$page.data.t('misc.delete')}
             <i class="fas fa-times" /></Button>
         {/if}
       </div>
@@ -180,7 +142,7 @@
 </div> -->
 
 {#if $is_manager}
-  <Button onclick={editor_edits.writeIn} form="filled">
+  <Button onclick={editor_edits.writeInCollaborator} form="filled">
     <i class="far fa-pencil" />
     {$page.data.t('contributors.write_in_contributor')}
   </Button>

@@ -13,8 +13,8 @@
   export let dictionary: IDictionary
   export let can_edit = false
   export let entries_per_page: number
-  export let citation_promise: Promise<Citation>
-  export let partners: Partner[]
+  export let load_citation: () => Promise<Citation>
+  export let load_partners: () => Promise<Partner[]>
 
   const print_per_page = 30
 
@@ -118,12 +118,12 @@
           {dictionary} />
       {/each}
     </div>
-    {#await citation_promise then document}
+    {#await Promise.all([load_partners(), load_citation()]) then [partners, citation]}
       <div
         dir="ltr"
         class="text-xs print:fixed print:text-center right-0 top-0 bottom-0"
         style="writing-mode: tb; min-width: 0;">
-        {build_citation({ t: $page.data.t, dictionary, custom_citation: truncateAuthors(document?.citation), partners })}
+        {build_citation({ t: $page.data.t, dictionary, custom_citation: truncateAuthors(citation?.citation), partners })}
       </div>
     {/await}
   </div>

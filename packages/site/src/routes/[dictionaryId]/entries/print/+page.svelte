@@ -16,7 +16,7 @@
   import { page } from '$app/stores'
 
   export let data
-  $: ({ dictionary, can_edit, is_manager, dbOperations, citation_promise, partners } = data)
+  $: ({ dictionary, can_edit, is_manager, dbOperations, load_citation, load_partners } = data)
 
   const search: InstantSearch = getContext('search')
   const managerMaxEntries = 1000
@@ -125,12 +125,12 @@
             dictionary={$dictionary} />
         {/each}
       </div>
-      {#await citation_promise then document}
+      {#await Promise.all([load_partners(), load_citation()]) then [partners, citation]}
         <div
           dir="ltr"
           class="text-xs print:fixed print:text-center right-0 top-0 bottom-0"
           style="writing-mode: tb; min-width: 0;">
-          {build_citation({ t: $page.data.t, dictionary: $dictionary, custom_citation: truncateAuthors(document?.citation), partners: $partners })}
+          {build_citation({ t: $page.data.t, dictionary: $dictionary, custom_citation: truncateAuthors(citation?.citation), partners })}
         </div>
       {/await}
     </div>

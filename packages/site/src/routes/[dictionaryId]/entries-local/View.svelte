@@ -1,6 +1,6 @@
 <script lang="ts">
   import { readable } from 'svelte/store'
-  import type { Citation, ExpandedEntry } from '@living-dictionaries/types'
+  import type { ExpandedEntry } from '@living-dictionaries/types'
   import { Modal } from 'svelte-pieces'
   import ListEntry from '../entries/list/ListEntry.svelte'
   import EntryPage from '../entry/[entryId]/+page.svelte'
@@ -14,11 +14,10 @@
   import { page } from '$app/stores'
   import { ResponseCodes } from '$lib/constants'
 
-  export let citation_promise: Promise<Citation>
   export let view: View
   export let entries: Map<string, ExpandedEntry>
   export let page_data: EntriesPageData
-  $: ({ dictionary, admin, can_edit, preferred_table_columns, dbOperations, search_params, partners } = page_data)
+  $: ({ dictionary, admin, can_edit, preferred_table_columns, dbOperations, search_params, load_citation, load_partners } = page_data)
 
   let entry_page_data: EntryPageData
 
@@ -77,8 +76,8 @@
       bind:entries_per_page={$search_params.entries_per_page}
       entries={Array.from(entries.values())}
       dictionary={$dictionary}
-      {citation_promise}
-      partners={$partners}
+      {load_citation}
+      {load_partners}
       can_edit={$can_edit} />
   {/if}
 {/if}
