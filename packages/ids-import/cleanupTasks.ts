@@ -74,10 +74,14 @@ function repairWrongTranslations (sheet_info: SheetData): void {
       const new_portuguese_value = portuguese_values[matchIndex];
       const new_russian_value = russian_values[matchIndex];
       // set the new values to the target columns
-      tsvSheet.getRange(i + 2, spanish_column).setValue(new_spanish_value); // Not sure why I need to add two to the rows index, it might be due to the headers.
-      tsvSheet.getRange(i + 2, french_column).setValue(new_french_value); // Not sure why I need to add two to the rows index, it might be due to the headers.
-      tsvSheet.getRange(i + 2, portuguese_column).setValue(new_portuguese_value); // Not sure why I need to add two to the rows index, it might be due to the headers.
-      tsvSheet.getRange(i + 2, russian_column).setValue(new_russian_value); // Not sure why I need to add two to the rows index, it might be due to the headers.
+      if (spanish_column)
+        tsvSheet.getRange(i + 2, spanish_column).setValue(new_spanish_value); // Not sure why I need to add two to the rows index, it might be due to the headers.
+      if (french_column)
+        tsvSheet.getRange(i + 2, french_column).setValue(new_french_value); // Not sure why I need to add two to the rows index, it might be due to the headers.
+      if (portuguese_column)
+        tsvSheet.getRange(i + 2, portuguese_column).setValue(new_portuguese_value); // Not sure why I need to add two to the rows index, it might be due to the headers.
+      if (russian_column)
+        tsvSheet.getRange(i + 2, russian_column).setValue(new_russian_value); // Not sure why I need to add two to the rows index, it might be due to the headers.
     }
   });
 }
