@@ -8,11 +8,6 @@ interface SheetData {
   objectSheet: GoogleAppsScript.Spreadsheet.Sheet;
 }
 
-// interface SemanticDomainsSheetData {
-//   tsvSheet: GoogleAppsScript.Spreadsheet.Sheet;
-//   semanticDomainsSheet: GoogleAppsScript.Spreadsheet.Sheet;
-// }
-
 interface ValuesFromColumns {
   from_sheet: GoogleAppsScript.Spreadsheet.Sheet,
   columns: string[] | number[],

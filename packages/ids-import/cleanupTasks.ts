@@ -1,34 +1,45 @@
 function adjustSemanticDomains(sheet_info: SheetData): void {
   const { objectSheet: semanticDomainsAdjustmentsSheet, tsvSheet } = sheet_info;
+  const data = tsvSheet.getRange('A1:1').getValues(); // Assuming the header is in the first row
+  const tsv_semantic_domains_label_column_index = data[0].indexOf('semanticDomain') + 2; //* +2 because we need the second column: the one with the labels instead of the keys.
   const [
     english_gloss_sd_column_values,
+    semantic_domains_key_column_values,
     semantic_domains_label_column_values,
     english_gloss_tsv_column_values,
+    semantic_domains_tsv_column_values,
+    semantic_domains_tsv_column_range
   ] = getValuesFromColumns([
     {
       from_sheet: semanticDomainsAdjustmentsSheet,
-      columns: ['en_gloss', 'Semantic Domain Label']
+      columns: ['en_gloss', 'Semantic Domain Key', 'Semantic Domain Label']
     },
     {
       from_sheet: tsvSheet,
-      columns: ['en_gloss']
+      columns: ['en_gloss', 'semanticDomain']
+    },
+    {
+      from_sheet: tsvSheet,
+      columns: [tsv_semantic_domains_label_column_index],
+      are_columns_numbers: true,
+      is_range: true
     }
   ]);
 
+  let current_semantic_domain_index:number;
   english_gloss_tsv_column_values.forEach((cell, i) => {
     const matchIndex = english_gloss_sd_column_values.findIndex(value => {
       if (cell[0] === value[0]){
-        Logger.log(`cell: ${cell}`)
+        current_semantic_domain_index = i
         Logger.log(`value: ${value}`)
         return value;
       }
     });
-    if (matchIndex > -1) {
-      const tsvSemanticDomainIndex = tsvSheet.getRange('A1:1').getValues()[0].indexOf('semanticDomain') + 1;
+    if (matchIndex > -1 && (String(semantic_domains_tsv_column_values[current_semantic_domain_index] )!= String(semantic_domains_key_column_values[matchIndex]))) {
       const newValue = semantic_domains_label_column_values[matchIndex];
       Logger.log(`New Value: ${newValue}`)
       // Update the tsvSheet with the new value
-      tsvSheet.getRange(i + 2, tsvSemanticDomainIndex + 1).setValue(newValue); //* tsvSemanticDomainIndex + 1 because the semanticDomain is a merged header and the labels are in its second column
+      semantic_domains_tsv_column_range.getCell(current_semantic_domain_index + 1, 1).setValue(newValue); //* tsvSemanticDomainIndex + 1 because the semanticDomain is a merged header and the labels are in its second column
     }
   });
 }
@@ -43,6 +54,10 @@ function repairWrongTranslations (sheet_info: SheetData): void {
     portuguese_values,
     russian_values,
     english_gloss_values,
+    spanish_column_range,
+    french_column_range,
+    portuguese_column_range,
+    russian_column_range
   ] = getValuesFromColumns([
     {
       from_sheet: idsDataSheet,
@@ -51,37 +66,34 @@ function repairWrongTranslations (sheet_info: SheetData): void {
     {
       from_sheet: tsvSheet,
       columns: ['en_gloss']
+    },
+    {
+      from_sheet: tsvSheet,
+      columns: ['es_gloss', 'fr_gloss', 'pt_gloss', 'ru_gloss'],
+      is_range: true
     }
   ]);
 
+  let current_row_index:number;
   english_gloss_values.forEach((cell, i) => {
     const matchIndex = english_values.findIndex(value => {
       if ((cell[0] === value[0]) && WRONG_TRANSLATIONS.includes(value[0])){
-        Logger.log(`cell: ${cell}`)
-        Logger.log(`value: ${value}`)
+        Logger.log(`English value: ${value}`)
+        current_row_index = i;
         return value;
       }
     });
     if (matchIndex > -1) {
-      // get all columns to change
-      const spanish_column = tsvSheet.getRange('A1:1').getValues()[0].indexOf('es_gloss') + 1;
-      const french_column = tsvSheet.getRange('A1:1').getValues()[0].indexOf('fr_gloss') + 1;
-      const portuguese_column = tsvSheet.getRange('A1:1').getValues()[0].indexOf('pt_gloss') + 1;
-      const russian_column = tsvSheet.getRange('A1:1').getValues()[0].indexOf('ru_gloss') + 1;
       // get the new values
       const new_spanish_value = spanish_values[matchIndex];
       const new_french_value = french_values[matchIndex];
       const new_portuguese_value = portuguese_values[matchIndex];
       const new_russian_value = russian_values[matchIndex];
       // set the new values to the target columns
-      if (spanish_column)
-        tsvSheet.getRange(i + 2, spanish_column).setValue(new_spanish_value); // Not sure why I need to add two to the rows index, it might be due to the headers.
-      if (french_column)
-        tsvSheet.getRange(i + 2, french_column).setValue(new_french_value); // Not sure why I need to add two to the rows index, it might be due to the headers.
-      if (portuguese_column)
-        tsvSheet.getRange(i + 2, portuguese_column).setValue(new_portuguese_value); // Not sure why I need to add two to the rows index, it might be due to the headers.
-      if (russian_column)
-        tsvSheet.getRange(i + 2, russian_column).setValue(new_russian_value); // Not sure why I need to add two to the rows index, it might be due to the headers.
+      spanish_column_range?.getCell(current_row_index + 1, 1).setValue(new_spanish_value);
+      french_column_range?.getCell(current_row_index + 1, 1).setValue(new_french_value);
+      portuguese_column_range?.getCell(current_row_index + 1, 1).setValue(new_portuguese_value);
+      russian_column_range?.getCell(current_row_index + 1, 1).setValue(new_russian_value);
     }
   });
 }

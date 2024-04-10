@@ -12,15 +12,18 @@ function getValuesFromColumns(values_from_columns: ValuesFromColumns[]): string[
     const {from_sheet, columns, are_columns_numbers, is_range} = element;
     const header_values = get_header_values(from_sheet);
     columns.forEach((column) => {
-      const ranges = from_sheet.getRange(
-        2,
-        are_columns_numbers ? column : header_values.indexOf(column) + 1,
-        from_sheet.getLastRow() - 1,
-        1);
-      if(is_range)
-        values.push(ranges);
-      else
-        values.push(ranges.getValues());
+      const columnIndex = are_columns_numbers ? column : header_values.indexOf(column) + 1;
+      if (columnIndex > 0) {
+        const ranges = from_sheet.getRange(
+          2,
+          columnIndex,
+          from_sheet.getLastRow() - 1,
+          1);
+        if(is_range)
+          values.push(ranges);
+        else
+          values.push(ranges.getValues());
+      }
     });
   });
   return values;
