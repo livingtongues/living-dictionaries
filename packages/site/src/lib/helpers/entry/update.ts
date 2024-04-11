@@ -14,8 +14,7 @@ export async function updateEntry({
   const { data: { t }, params: { dictionaryId } } = get(page)
   try {
     await update<GoalDatabaseEntry>(`dictionaries/${dictionaryId}/words/${entryId}`, data, { abbreviate: true })
-  }
-  catch (err) {
+  } catch (err) {
     alert(`${t('misc.error')}: ${err}`)
   }
 }
@@ -31,8 +30,7 @@ export async function updateEntryOnline({
   const { data: { t }, params: { dictionaryId } } = get(page)
   try {
     await updateOnline<GoalDatabaseEntry | ActualDatabaseEntry>(`dictionaries/${dictionaryId}/words/${entryId}`, data, { abbreviate: true })
-  }
-  catch (err) {
+  } catch (err) {
     alert(`${t('misc.error')}: ${err}`)
   }
 }

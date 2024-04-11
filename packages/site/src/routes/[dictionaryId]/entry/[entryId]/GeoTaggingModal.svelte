@@ -43,16 +43,13 @@
       const [{ coordinates: { longitude, latitude } }] = coordinates.points
       lng = longitude
       lat = latitude
-    }
-    else if (coordinates?.regions?.[0]) {
+    } else if (coordinates?.regions?.[0]) {
       const [{ coordinates: [{ longitude, latitude }] }] = coordinates.regions
       lng = longitude
       lat = latitude
-    }
-    else if (initialCenter) {
+    } else if (initialCenter) {
       ({ longitude: lng, latitude: lat } = initialCenter)
-    }
-    else if (navigator.geolocation) {
+    } else if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition((position) => {
         lng = +position.coords.longitude.toFixed(GPS_DECIMAL_PRECISION)
         lat = +position.coords.latitude.toFixed(GPS_DECIMAL_PRECISION)

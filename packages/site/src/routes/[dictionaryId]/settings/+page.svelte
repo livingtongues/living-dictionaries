@@ -24,8 +24,7 @@
     try {
       await updateOnline<IDictionary>(`dictionaries/${$dictionary.id}`, change)
       await invalidateAll()
-    }
-    catch (err) {
+    } catch (err) {
       alert(`${$page.data.t('misc.error')}: ${err}`)
     }
   }
@@ -74,16 +73,13 @@
         )
         if (entriesUsingGlossLanguage.length === 0) {
           await updateGlossLanguages(arrayRemove(languageId))
-        }
-        else if ($admin) {
+        } else if ($admin) {
           const removeGlossLanguageInUse = confirm('Remove as admin even though this glossing language is in use already? Know that regular editors get a message saying "Contact Us"')
           if (removeGlossLanguageInUse) await updateGlossLanguages(arrayRemove(languageId))
-        }
-        else {
+        } else {
           alert($page.data.t('header.contact_us'))
         }
-      }
-      catch (err) {
+      } catch (err) {
         return console.error(err)
       }
     }} />
@@ -155,11 +151,9 @@
     on:changed={async ({ detail: { checked } }) => {
       if (!checked) {
         await updateDictionary({ public: false })
-      }
-      else if ($admin) {
+      } else if ($admin) {
         await updateDictionary({ public: true })
-      }
-      else {
+      } else {
         const communityAllowsOnline = confirm($page.data.t('settings.community_permission'))
         if (communityAllowsOnline) alert($page.data.t('header.contact_us'))
       }

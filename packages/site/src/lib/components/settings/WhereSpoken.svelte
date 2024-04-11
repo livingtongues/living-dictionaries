@@ -25,8 +25,7 @@
       }
       const points = (dictionary.points && [...dictionary.points, point]) || [point]
       on_update_points(points)
-    }
-    else {
+    } else {
       on_update_coordinates({ longitude: detail.lng, latitude: detail.lat })
     }
   }

@@ -24,8 +24,7 @@ async function getCollectionOrError<T>(
       })),
       ref: _ref,
     }
-  }
-  catch (error) {
+  } catch (error) {
     return { error }
   }
 }
@@ -82,10 +81,9 @@ export function create_entries_store({ dictionary, show_local_search, t, entries
         add(page_from_server)
         status.set(`Entries loaded: went to server to fill page (${page_size}) and received ${page_from_server.length}`)
         const last_received_lexeme = page_from_server[page_from_server.length - 1].lx
-        const additional_step_size = 100
+        const additional_step_size = 1000
         await get_page_from_server(additional_step_size, last_received_lexeme) // recursively repeat until all pages loaded
-      }
-      else {
+      } else {
         status.set(`Creating index ${_entries.size} entries`)
         await create_index(_entries)
         status.set('Search index created')

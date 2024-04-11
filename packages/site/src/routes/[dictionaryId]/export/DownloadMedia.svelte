@@ -30,15 +30,13 @@
         if (response.ok) {
           const blob = await response.blob()
           zip.folder(`${dictionary.id}_Images/`).file(entry.image_filename, blob, { binary: true })
-        }
-        else {
+        } else {
           errors = [
             ...errors,
             `Entry: ${entry.lexeme}, Id: ${entry.id}, File: ${image_file_path}, Error: ${response.statusText}`,
           ]
         }
-      }
-      catch (e) {
+      } catch (e) {
         errors = [...errors, `Entry: ${entry.id}, File: ${image_file_path}, ${e}`]
       }
       fetched++
@@ -52,15 +50,13 @@
         if (response.ok) {
           const blob = await response.blob()
           zip.folder(`${dictionary.id}_Audio/`).file(entry.sound_filename, blob, { binary: true })
-        }
-        else {
+        } else {
           errors = [
             ...errors,
             `Entry: ${entry.lexeme}, Id: ${entry.id}, File: ${sound_file_path}, Error: ${response.status} ${response.statusText}`,
           ]
         }
-      }
-      catch (e) {
+      } catch (e) {
         errors = [...errors, `Entry: ${entry.id}, File: ${sound_file_path}, ${e}`]
       }
       fetched++
