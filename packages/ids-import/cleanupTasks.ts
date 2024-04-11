@@ -37,7 +37,7 @@ function adjustSemanticDomains(sheet_info: SheetData): void {
     });
     if (matchIndex > -1 && (String(semantic_domains_tsv_column_values[current_semantic_domain_index] )!= String(semantic_domains_key_column_values[matchIndex]))) {
       const newValue = semantic_domains_label_column_values[matchIndex];
-      Logger.log(`New Value: ${newValue}`)
+      Logger.log(`New semantic domain value: ${newValue}`)
       // Update the tsvSheet with the new value
       semantic_domains_tsv_column_range.getCell(current_semantic_domain_index + 1, 1).setValue(newValue); //* tsvSemanticDomainIndex + 1 because the semanticDomain is a merged header and the labels are in its second column
     }
