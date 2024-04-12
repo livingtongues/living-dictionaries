@@ -7,15 +7,17 @@
     if (active) center()
 
     function center() {
-      node?.scrollIntoView({ behavior: 'instant', inline: 'center' })
-      window.scrollTo({ top: 0 });
+      setTimeout(() => {
+        node?.scrollIntoView({ behavior: 'instant', inline: 'center' })
+        window.scrollTo({ top: 0 })
+      }, 50)
     }
 
     return {
       update(active: boolean) {
         if (active) center()
       },
-    };
+    }
   }
 
   const isMac = typeof navigator !== 'undefined' && /Mac|iPod|iPhone|iPad/.test(navigator.userAgent)
@@ -38,7 +40,7 @@
   {/if}
 
   <div class="overflow-x-auto flex no-scrollbar shadow">
-    {#each {length: pages} as _, index}
+    {#each { length: pages } as _, index}
       {@const current = index + 1 === current_page}
       <button
         type="button"
