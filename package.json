@@ -16,6 +16,8 @@
     "test:e2e": "pnpm --filter=site test:e2e",
     "lint": "eslint . --cache --quiet",
     "lint:fix": "eslint . --cache --fix",
+    "lint:inspect": "npx @eslint/config-inspector",
+    "lint:inspect-future": "eslint --inspect-config",
     "reset-db": "pnpm --filter=site reset-db",
     "generate-types": "supabase gen types typescript --local --schema public > packages/site/src/lib/supabase/generated.types.ts",
     "check-packages": "pnpm update --interactive --recursive --latest"

@@ -1,7 +1,7 @@
 // To run automatically on commit, add `simple-git-hooks` and `lint-staged` then run `npx simple-git-hooks` once. After that all commits will be linted.
 
 // @ts-check
-import { antfu, stylistic, svelte, typescript } from '@antfu/eslint-config'
+import { antfu, svelte, typescript } from '@antfu/eslint-config'
 import jsEslintPlugin from '@eslint/js'
 import tsEslintPlugin from '@typescript-eslint/eslint-plugin'
 import svelteStylistic from 'eslint-plugin-svelte-stylistic'
@@ -25,12 +25,12 @@ export default antfu(
       '**/locales/**',
       'supabase/functions/**',
     ],
-  },
-  stylistic({
-    overrides: {
-      'style/brace-style': ['error', '1tbs', { allowSingleLine: true }],
+    stylistic: {
+      overrides: {
+        'style/brace-style': ['error', '1tbs', { allowSingleLine: true }],
+      },
     },
-  }),
+  },
   typescript({
     // files: ['**/*.ts', '**/*.js', '**/*.svelte', '**/*.composition'],
     componentExts: ['svelte', 'composition'],
