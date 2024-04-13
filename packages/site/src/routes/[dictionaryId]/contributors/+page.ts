@@ -22,7 +22,11 @@ export const load = (async ({ params: { dictionaryId }, parent, depends }) => {
   }
 
   const editor_edits = {
-    inviteHelper,
+    inviteHelper: (role: 'manager' | 'contributor', dictionary: IDictionary) => {
+      return async function () {
+        await performDbOperation(() => inviteHelper(role, dictionary))
+      }
+    },
     removeContributor: (id: string) => {
       return async function () {
         if (!confirm(`${t('misc.delete')}?`)) return

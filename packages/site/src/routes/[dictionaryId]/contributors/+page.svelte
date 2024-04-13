@@ -54,7 +54,7 @@
   {/if}
 </div>
 {#if $is_manager}
-  <Button onclick={async () => await editor_edits.inviteHelper('manager', $dictionary)} form="filled">
+  <Button onclick={editor_edits.inviteHelper('manager', $dictionary)} form="filled">
     <i class="far fa-envelope" />
     {$page.data.t('contributors.invite_manager')}
   </Button>
@@ -95,7 +95,7 @@
         </ContributorInvitationStatus>
       </div>
     {/each}
-    <Button onclick={async () => await editor_edits.inviteHelper('contributor', $dictionary)} form="filled">
+    <Button onclick={editor_edits.inviteHelper('contributor', $dictionary)} form="filled">
       <i class="far fa-envelope" />
       {$page.data.t('contributors.invite_contributors')}
     </Button>
