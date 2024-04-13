@@ -1,18 +1,19 @@
 <script lang="ts">
-  import { page } from '$app/stores';
-  import { restore_spaces_from_underscores } from '$lib/search/augment-entry-for-search';
-  import type { FilterListKeys, QueryParams } from '$lib/search/types';
-  import { type QueryParamStore, ShowHide } from 'svelte-pieces';
+  import { type QueryParamStore, ShowHide } from 'svelte-pieces'
+  import { slide } from 'svelte/transition'
+  import { page } from '$app/stores'
+  import { restore_spaces_from_underscores } from '$lib/search/augment-entry-for-search'
+  import type { FilterListKeys, QueryParams } from '$lib/search/types'
 
-  export let search_params: QueryParamStore<QueryParams>;
+  export let search_params: QueryParamStore<QueryParams>
   export let search_param_key: FilterListKeys
-  export let label: string;
-  export let values: Record<string, number>; // keys are item name, numbers are count found
-  export let speaker_ids_to_names: Record<string, string> = undefined;
+  export let label: string
+  export let values: Record<string, number> // keys are item name, numbers are count found
+  export let speaker_ids_to_names: Record<string, string> = undefined
 
   $: count = Object.values(values).length
   let search_value: string
-  $: filtered_values = Object.entries(values).filter(([item]) => search_value ? make_item_readable(item).toLowerCase().includes(search_value.toLowerCase()) : true);
+  $: filtered_values = Object.entries(values).filter(([item]) => search_value ? make_item_readable(item).toLowerCase().includes(search_value.toLowerCase()) : true)
   $: max_show = search_value ? 10 : 5
 
   function add_filter(item: string) {
@@ -45,13 +46,13 @@
 {/if}
 
 <ShowHide let:show let:toggle>
-  <ul>
-    {#each filtered_values as [item, item_count], index}
+  <ul transition:slide>
+    {#each filtered_values as [item, item_count], index (item)}
       {#if index < max_show || show}
         {@const cleaned_item = item.replace(' ', '')}
         {@const id = `${search_param_key}_${cleaned_item}`}
         {@const checked = $search_params[search_param_key]?.includes(item)}
-        <li class="flex my-1 items-center">
+        <li class="flex my-1 items-center" transition:slide>
           <input
             {id}
             type="checkbox"
