@@ -74,6 +74,13 @@ export default antfu(
     },
   },
   {
+    name: 'jacob/settings',
+    files: ['.vscode/*.json'],
+    rules: {
+      'jsonc/comma-dangle': ['error', 'always-multiline'],
+    },
+  },
+  {
     name: 'ld/script-exceptions',
     files: ['packages/{scripts,functions}/**'],
     rules: {

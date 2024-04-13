@@ -1,4 +1,4 @@
-name: Lint, Svelte Check, & Unit Test Push
+name: Svelte Check, & Unit Test Push
 
 on:
   push:
