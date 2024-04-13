@@ -1,30 +1,28 @@
 <script lang="ts">
-  import { page } from '$app/stores';
-  import { Button, Modal, ShowHide } from 'svelte-pieces';
-  import RecordVideo from '$lib/components/video/RecordVideo.svelte';
-  import SelectVideo from './SelectVideo.svelte';
-  import PasteVideoLink from './PasteVideoLink.svelte';
-  import VideoIFrame from '$lib/components/video/VideoIFrame.svelte';
-  import SelectSpeaker from '$lib/components/media/SelectSpeaker.svelte';
-  import type { ExpandedEntry, GoalDatabaseVideo } from '@living-dictionaries/types';
-  import { addVideo } from '$lib/helpers/media/update';
-  import { createEventDispatcher } from 'svelte';
-  import { expand_video } from '$lib/transformers/expand_entry';
+  import { Button, Modal, ShowHide } from 'svelte-pieces'
+  import type { ExpandedEntry, GoalDatabaseVideo } from '@living-dictionaries/types'
+  import SelectVideo from './SelectVideo.svelte'
+  import PasteVideoLink from './PasteVideoLink.svelte'
+  import { page } from '$app/stores'
+  import RecordVideo from '$lib/components/video/RecordVideo.svelte'
+  import VideoThirdParty from '$lib/components/video/VideoThirdParty.svelte'
+  import SelectSpeaker from '$lib/components/media/SelectSpeaker.svelte'
+  import { addVideo } from '$lib/helpers/media/update'
+  import { expand_video } from '$lib/transformers/expand_entry'
 
-  $: ({dictionary, speakers, user} = $page.data)
-  const dispatch = createEventDispatcher();
-  const close = () => dispatch('close');
+  $: ({ dictionary, speakers, user } = $page.data)
 
-  export let entry: ExpandedEntry;
-  let database_video: GoalDatabaseVideo;
+  export let on_close: () => void
+  export let entry: ExpandedEntry
+  let database_video: GoalDatabaseVideo
 </script>
 
-<Modal on:close>
+<Modal on:close={on_close}>
   <span slot="heading"> <i class="far fa-film-alt text-sm" /> {entry.lexeme} </span>
 
   <SelectSpeaker speakers={$speakers} let:speakerId>
     {#if database_video?.youtubeId || database_video?.vimeoId}
-      <VideoIFrame video={expand_video(database_video)} />
+      <VideoThirdParty video={expand_video(database_video, 'storage-bucket-irrelevant')} />
       <div class="modal-footer">
         <Button onclick={close} color="black">
           {$page.data.t('misc.cancel')}
@@ -39,7 +37,7 @@
         {#if !record}
           <PasteVideoLink
             on:update={({ detail }) => {
-              database_video = { ...detail, sp: [speakerId] };
+              database_video = { ...detail, sp: [speakerId] }
             }} />
 
           <SelectVideo let:file>

@@ -1,11 +1,10 @@
 <script lang="ts">
-  import { Button } from 'svelte-pieces';
-  import type { IInvite } from '@living-dictionaries/types';
-  export let invite: Partial<IInvite>;
-  export let admin = false;
+  import { Button } from 'svelte-pieces'
+  import type { IInvite } from '@living-dictionaries/types'
 
-  import { createEventDispatcher } from 'svelte';
-  const dispatch = createEventDispatcher<{ delete: { id: string } }>();
+  export let invite: Partial<IInvite>
+  export let admin = false
+  export let on_delete_invite: () => Promise<void>
 </script>
 
 <div title="Sent by {invite.inviterEmail}">
@@ -18,10 +17,7 @@
     <Button
       color="red"
       size="sm"
-      onclick={() => {
-        if (confirm('Are you sure you want to delete this invite?'))
-          dispatch('delete', { id: invite.id });
-      }}>
+      onclick={on_delete_invite}>
       <span class="i-fa-solid-times" />
       <span class="i-fa-key" />
     </Button>

@@ -1,55 +1,48 @@
 <script lang="ts">
-  import { page } from '$app/stores';
-  import { Button, Form } from 'svelte-pieces';
-  import Header from '$lib/components/shell/Header.svelte';
-  import type { IDictionary, IHelper, IPoint, IRegion, IUser } from '@living-dictionaries/types';
-  import { docExists, setOnline, updateOnline, firebaseConfig, authState } from 'sveltefirets';
-  import { arrayUnion, GeoPoint, serverTimestamp } from 'firebase/firestore/lite';
-  import { pruneObject } from '$lib/helpers/prune';
-  import EditableGlossesField from '$lib/components/settings/EditableGlossesField.svelte';
-  import WhereSpoken from '$lib/components/settings/WhereSpoken.svelte';
-  import EditableAlternateNames from '$lib/components/settings/EditableAlternateNames.svelte';
-  import { glossingLanguages } from '$lib/glosses/glossing-languages';
-  import SeoMetaTags from '$lib/components/SeoMetaTags.svelte';
-  import type { NewDictionaryRequestBody } from '../api/email/new_dictionary/+server';
-  import { get } from 'svelte/store';
-  import { convertToFriendlyUrl } from './convertToFriendlyUrl';
-  import { debounce } from '$lib/helpers/debounce';
-  import { post_request } from '$lib/helpers/get-post-requests';
+  import { Button, Form } from 'svelte-pieces'
+  import type { IPoint, IRegion } from '@living-dictionaries/types'
+  import { convertToFriendlyUrl } from './convertToFriendlyUrl'
+  import { page } from '$app/stores'
+  import Header from '$lib/components/shell/Header.svelte'
+  import EditableGlossesField from '$lib/components/settings/EditableGlossesField.svelte'
+  import WhereSpoken from '$lib/components/settings/WhereSpoken.svelte'
+  import EditableAlternateNames from '$lib/components/settings/EditableAlternateNames.svelte'
+  import { glossingLanguages } from '$lib/glosses/glossing-languages'
+  import SeoMetaTags from '$lib/components/SeoMetaTags.svelte'
+  import { debounce } from '$lib/helpers/debounce'
 
   export let data
-  $: ({user} = data)
+  $: ({ user } = data)
 
-  const MIN_URL_LENGTH = 3;
-  const MAX_URL_LENGTH = 25;
+  const MAX_URL_LENGTH = 25
 
-  let modal: 'auth' = null;
+  let modal: 'auth' = null
 
-  let name = '';
-  let glossLanguages = new Set(['en']);
-  let alternateNames = [];
-  let latitude = null;
-  let longitude = null;
-  let points: IPoint[] = [];
-  let regions: IRegion[] = [];
-  let iso6393 = '';
-  let glottocode = '';
-  let languageUsedByCommunity: boolean;
-  let communityPermission: 'yes' | 'no' | 'unknown';
-  let authorConnection = '';
-  let conLangDescription = '';
+  let name = ''
+  let glossLanguages = new Set(['en'])
+  let alternateNames: string[] = []
+  let latitude: number
+  let longitude: number
+  let points: IPoint[] = []
+  let regions: IRegion[] = []
+  let iso6393 = ''
+  let glottocode = ''
+  let languageUsedByCommunity: boolean
+  let communityPermission: 'yes' | 'no' | 'unknown'
+  let authorConnection = ''
+  let conLangDescription = ''
 
-  $: urlFromName = convertToFriendlyUrl(name, MAX_URL_LENGTH);
-  let customUrl: string;
-  $: urlToUse = customUrl || urlFromName;
-  let isUniqueURL = true;
-  $: if (urlToUse.length >= MIN_URL_LENGTH) debouncedCheckIfUniqueUrl(urlToUse)
+  $: urlFromName = convertToFriendlyUrl(name, MAX_URL_LENGTH)
+  let customUrl: string
+  $: urlToUse = customUrl || urlFromName
+  let isUniqueURL = true
 
-  const debouncedCheckIfUniqueUrl = debounce(checkIfUniqueUrl, 500);
+  const debouncedCheckIfUniqueUrl = debounce(checkIfUniqueUrl, 500)
+  $: if (urlToUse.length >= data.MIN_URL_LENGTH) debouncedCheckIfUniqueUrl(urlToUse)
 
   async function checkIfUniqueUrl(url: string): Promise<boolean> {
-    isUniqueURL = !(await docExists(`dictionaries/${url}`));
-    return isUniqueURL;
+    isUniqueURL = !(await data.dictionary_with_url_exists(url))
+    return isUniqueURL
   }
 
   function handleUrlKeyup(e: Event) {
@@ -58,75 +51,34 @@
       customUrl = convertToFriendlyUrl(newCustomUrl, MAX_URL_LENGTH)
   }
 
-  async function createNewDictionary() {
-    if (!$user) {
-      modal = 'auth';
-      return;
-    }
-    const isUnique = await checkIfUniqueUrl(urlToUse);
-    if (urlToUse.length < MIN_URL_LENGTH || !isUnique) {
-      return alert(
-        $page.data.t('create.choose_different_url')
-      );
-    }
-    try {
-      const dictionary: IDictionary = {
-        name: name.trim().replace(/^./, name[0].toUpperCase()),
-        glossLanguages: Array.from(glossLanguages),
-        alternateNames,
-        coordinates: latitude ? new GeoPoint(latitude, longitude) : null,
-        points,
-        regions,
-        entryCount: 0,
-        iso6393: iso6393.trim(),
-        glottocode: glottocode.trim(),
-        languageUsedByCommunity,
-        communityPermission,
-        authorConnection,
-        conLangDescription,
-      };
-      const prunedDictionary = pruneObject(dictionary);
-      if (firebaseConfig.projectId === 'talking-dictionaries-dev') {
-        console.info(prunedDictionary);
-        if (
-          !confirm(
-            'Dictionary value logged to console because in dev mode. Do you still want to create this dictionary?'
-          )
-        )
-          return;
-      }
-
-      await setOnline<IDictionary>(`dictionaries/${urlToUse}`, prunedDictionary);
-      await setOnline<IHelper>(`dictionaries/${urlToUse}/managers/${$user.uid}`, {
-        id: $user.uid,
-        name: $user.displayName,
-      });
-      await updateOnline<IUser>(`users/${$user.uid}`, {
-        managing: arrayUnion(urlToUse),
-        termsAgreement: serverTimestamp(),
-      });
-
-      const auth_state_user = get(authState);
-      const auth_token = await auth_state_user.getIdToken();
-      await post_request<NewDictionaryRequestBody, null>('/api/email/new_dictionary', {
-        auth_token,
-        dictionary: { ...prunedDictionary, id: urlToUse },
-      });
-
-      window.location.replace(`/${urlToUse}/entries/list`);
-    } catch (err) {
-      alert(`${$page.data.t('misc.error')}: ${err}`);
-    }
-  }
-
-  let online = true;
+  let online = true
 </script>
 
 <svelte:window bind:online />
 
 <Header>{$page.data.t('create.create_new_dictionary')}</Header>
 
-<Form let:loading onsubmit={createNewDictionary}>
+<Form
+  let:loading
+  onsubmit={async () => {
+    if (!$user) return modal = 'auth'
+
+    await data.createNewDictionary({
+      name: name.trim().replace(/^./, name[0].toUpperCase()),
+      glossLanguages: Array.from(glossLanguages),
+      alternateNames,
+      coordinates: latitude ? { latitude, longitude } : null,
+      points,
+      regions,
+      entryCount: 0,
+      iso6393: iso6393.trim(),
+      glottocode: glottocode.trim(),
+      languageUsedByCommunity,
+      communityPermission,
+      authorConnection,
+      conLangDescription,
+    }, urlToUse)
+  }}>
   <div class="flex-col justify-center p-4 max-w-md mx-auto">
     <label for="name" class="block text-xl font-medium text-gray-700">
       {$page.data.t('dictionary.name_of_language')}*
@@ -139,7 +91,7 @@
         autocorrect="off"
         spellcheck={false}
         autofocus
-        minlength={MIN_URL_LENGTH}
+        minlength={data.MIN_URL_LENGTH}
         required
         bind:value={name}
         class="form-input w-full" />
@@ -165,7 +117,7 @@
           value={customUrl || urlFromName}
           on:keyup={handleUrlKeyup}
           required
-          minlength={MIN_URL_LENGTH}
+          minlength={data.MIN_URL_LENGTH}
           maxlength={MAX_URL_LENGTH}
           autocomplete="off"
           autocorrect="off"
@@ -178,7 +130,7 @@
         {$page.data.t('create.permanent_url_msg')}
         {$page.data.t('create.only_letters_numbers')}
       </div>
-      {#if urlToUse.length >= MIN_URL_LENGTH && !isUniqueURL}
+      {#if urlToUse.length >= data.MIN_URL_LENGTH && !isUniqueURL}
         <div class="text-xs text-red-600 mt-1">
           {$page.data.t('create.choose_different_url')}
         </div>
@@ -190,12 +142,12 @@
         availableLanguages={glossingLanguages}
         selectedLanguages={Array.from(glossLanguages)}
         on:add={(e) => {
-          glossLanguages.add(e.detail.languageId);
-          glossLanguages = glossLanguages;
+          glossLanguages.add(e.detail.languageId)
+          glossLanguages = glossLanguages
         }}
         on:remove={(e) => {
-          glossLanguages.delete(e.detail.languageId);
-          glossLanguages = glossLanguages;
+          glossLanguages.delete(e.detail.languageId)
+          glossLanguages = glossLanguages
         }} />
       <!-- not used in web app presently -->
       <!-- placeholder={$page.data.t('create.languages')} -->
@@ -203,18 +155,18 @@
 
       <EditableAlternateNames
         {alternateNames}
-        on:update={({ detail }) => ({alternateNames} = detail)} />
+        on_update={new_value => alternateNames = new_value} />
       <div class="mb-6" />
 
       <WhereSpoken
         dictionary={{ coordinates: { latitude, longitude }, points, regions }}
-        on:updateCoordinates={({ detail }) => {
-          ({latitude} = detail);
-          ({longitude} = detail);
+        on_update_coordinates={coordinates => ({ latitude, longitude } = coordinates)}
+        on_remove_coordinates={() => {
+          latitude = null
+          longitude = null
         }}
-        on:removeCoordinates={() => ((latitude = null), (longitude = null))}
-        on:updatePoints={({ detail }) => (points = detail)}
-        on:updateRegions={({ detail }) => (regions = detail)} />
+        on_update_points={new_points => points = new_points}
+        on_update_regions={new_regions => regions = new_regions} />
       <div class="mb-6" />
 
       <div class="flex">
@@ -303,7 +255,7 @@
           type="radio"
           name="communityPermission"
           bind:group={communityPermission}
-          value={'yes'}
+          value="yes"
           required />
         {$page.data.t('misc.assertion')}
       </label>
@@ -313,7 +265,7 @@
           type="radio"
           name="communityPermission"
           bind:group={communityPermission}
-          value={'no'} />
+          value="no" />
         {$page.data.t('misc.negation')}
       </label>
 
@@ -322,7 +274,7 @@
           type="radio"
           name="communityPermission"
           bind:group={communityPermission}
-          value={'unknown'} />
+          value="unknown" />
         {$page.data.t('create.uncertainty')}
       </label>
       <div class="mb-6" />
@@ -379,7 +331,7 @@
     <AuthModal
       context="force"
       on:close={() => {
-        modal = null;
+        modal = null
       }} />
   {/await}
 {/if}

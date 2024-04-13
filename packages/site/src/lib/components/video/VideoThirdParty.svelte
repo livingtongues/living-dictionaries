@@ -1,8 +1,9 @@
 <script lang="ts">
-  import type { ExpandedVideo } from '@living-dictionaries/types';
-  export let video: ExpandedVideo;
+  import type { ExpandedVideo } from '@living-dictionaries/types'
 
-  let window_width: number;
+  export let video: Pick<ExpandedVideo, 'vimeoId' | 'youtubeId' | 'start_at_seconds'>
+
+  let window_width: number
 </script>
 
 <svelte:window bind:innerWidth={window_width} />

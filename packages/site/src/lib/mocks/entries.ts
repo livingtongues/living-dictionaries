@@ -1,6 +1,6 @@
-import { english_translate } from '$lib/i18n';
-import { expand_entry } from '$lib/transformers/expand_entry';
-import type { ExpandedEntry, GoalDatabaseEntry } from '@living-dictionaries/types';
+import type { ExpandedEntry, GoalDatabaseEntry } from '@living-dictionaries/types'
+import { english_translate } from '$lib/i18n'
+import { expand_entry } from '$lib/transformers/expand_entry'
 
 export const butterfly_google_storage_url = 'LGuBKhg7vuv5-aJcOdnb_ucOXLSCIR1Kjxrh70xRlaIHqWo-mWqfWUcH3Xznz63QsFZmkeVmoNN0PEXzSc0Jh4g'
 
@@ -27,16 +27,16 @@ const complexData: GoalDatabaseEntry = {
       pfs: [{
         path: 'gta/images/local_import/6-Common-jay-1580859671358.JPG',
         sc: 'local_import',
-        gcs: butterfly_google_storage_url
+        gcs: butterfly_google_storage_url,
       }],
       xs: [
         {
           en: 'Watch how the common jay butterfly flies.',
           vn: 'A vernacular sentence.',
-        }
+        },
       ],
-      nc: '1'
-    }
+      nc: '1',
+    },
   ],
   scn: ['Graphium doson'],
   di: ['Hill', 'Southern Berm'],
@@ -44,13 +44,12 @@ const complexData: GoalDatabaseEntry = {
     path: 'gta/audio/local_import/Gta-Pkd-Dec13-Butterflies-common-jay-1580859671012.mp3',
     ts: 1580860148537,
     speakerName: 'Budra Raspeda',
-    sc: 'local_import'
-  },
-  {
+    sc: 'local_import',
+  }, {
     path: 'gta/audio/local_import/Gta-Pkd-Dec13-Butterflies-common-jay-1580859671012.mp3',
     ts: 1580860148537,
     sp: ['random_speaker_id_123'],
-    sc: 'local_import'
+    sc: 'local_import',
   }],
   sr: ['Some cool guy in the village'],
   nt: `recorded in 1998, <img src=x" onerror="alert('XSS Attack will be sanitized')">`,
@@ -64,25 +63,25 @@ const hebrewData: GoalDatabaseEntry = {
     {
       gl: {
         en: 'hand',
-        he: 'יָד'
+        he: 'יָד',
       },
       xs: [
         {
           en: 'My hand does not reach.',
           he: 'הַיָּד שֶׁלִּי לֹא מַגִּיעָה',
           vn: 'אִילָא דִּידִי לָא מַתְיָא',
-        }
+        },
       ],
-    }
+    },
   ],
   id: '4', // for table
 }
 
 const t = english_translate
 
-export const complex: ExpandedEntry = expand_entry(complexData, t);
+export const complex: ExpandedEntry = expand_entry(complexData, t, 'test-bucket')
 
-export const hebrew: ExpandedEntry = expand_entry(hebrewData, t);
+export const hebrew: ExpandedEntry = expand_entry(hebrewData, t, 'test-bucket')
 
 export const simple: ExpandedEntry = {
   lexeme: 'hello',
@@ -96,9 +95,10 @@ export const hasVideo: ExpandedEntry = {
     {
       video_files: [{
         fb_storage_path: 'not-real-path',
+        storage_url: 'not-real-url',
         uid_added_by: '123',
       }],
-    }
+    },
   ],
   id: '3', // for table
 }

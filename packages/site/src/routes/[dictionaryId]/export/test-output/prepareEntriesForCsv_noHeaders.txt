@@ -5,7 +5,6 @@
     "en_example_sentence": "This is a banana",
     "en_gloss_language": "banana",
     "id": "12345qwerty",
-    "image_file_path": "https://database.com/image.png",
     "image_filename": "12345qwerty_foo.png",
     "lexeme": "xiangjiao",
     "local_orthography_2": "کیلا",
@@ -31,6 +30,7 @@
         "photo_files": [
           {
             "fb_storage_path": "https://database.com/image.png",
+            "storage_url": "https://database.com/image.png",
             "uid_added_by": "Diego",
           },
         ],
@@ -44,7 +44,6 @@
         ],
       },
     ],
-    "sound_file_path": "https://database.com/sound.mp3",
     "sound_filename": "12345qwerty_foo.mp3",
     "sound_files": [
       {
@@ -52,6 +51,7 @@
         "speaker_ids": [
           "123",
         ],
+        "storage_url": "https://database.com/sound.mp3",
       },
     ],
     "sources": "A book | www.mybook.com",
@@ -65,7 +65,6 @@
     "dialects": undefined,
     "es_gloss_language": "árbol",
     "id": "34qw",
-    "image_file_path": undefined,
     "image_filename": "",
     "lexeme": "tree",
     "local_orthography_1": "𑃐𑃥𑃝𑃢 𑃒𑃦𑃗𑃠𑃤",
@@ -81,7 +80,6 @@
         },
       },
     ],
-    "sound_file_path": undefined,
     "sound_filename": "",
     "sources": undefined,
     "speaker_birthplace": undefined,
