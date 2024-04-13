@@ -26,25 +26,26 @@
     <label for="names" class="block text-sm font-medium leading-5 text-gray-700 mt-4">
       {$page.data.t('contributors.how_to_cite_instructions')}
     </label>
-    <div class="mt-1 rounded-md shadow-sm">
+    <div class="mt-1 flex">
       <input
         dir="ltr"
         id="names"
         placeholder="Anderson, Gregory D. S."
         type="text"
-        class="form-input block w-full"
+        class="form-input w-full"
         value={citation?.citation}
-        on:change={(e) => {
+        on:input={(e) => {
           // @ts-expect-error
           value = e.target.value.trim()
         }} />
+      <div class="w-1" />
+      <Button class="shrink-0" {loading} type="submit">
+        {$page.data.t('misc.save')}
+      </Button>
     </div>
-    <Button class="my-1" {loading} type="submit">
-      {$page.data.t('misc.save')}
-    </Button>
   </Form>
 {/if}
 
 <div dir="ltr">
-  {build_citation({ t: $page.data.t, dictionary, custom_citation: citation?.citation, partners })}
+  {build_citation({ t: $page.data.t, dictionary, custom_citation: value || citation?.citation, partners })}
 </div>

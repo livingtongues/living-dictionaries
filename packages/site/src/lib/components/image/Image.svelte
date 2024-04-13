@@ -67,9 +67,7 @@
 
 {#if viewing}
   <div
-    on:click={() => {
-      viewing = false
-    }}
+    on:click={() => viewing = false}
     class="fixed inset-0 md:p-3 flex flex-col items-center justify-center"
     in:receive={{ key }}
     out:send={{ key }}
