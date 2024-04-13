@@ -28,6 +28,8 @@ export default antfu(
     stylistic: {
       overrides: {
         'style/brace-style': ['error', '1tbs', { allowSingleLine: true }],
+        'antfu/if-newline': 'off',
+        'curly': 'off',
       },
     },
     svelte: true,
@@ -122,9 +124,7 @@ export default antfu(
 
       'no-undef': 'off',
       'no-unused-vars': 'off',
-      'curly': 'off',
       'no-alert': 'off',
-      'antfu/if-newline': 'off',
       'ts/ban-ts-comment': 'off',
       'ts/sort-type-constituents': 'off', // prefer logical rather than alphabetical sorting
     },
