@@ -1,7 +1,7 @@
 <script lang="ts">
-  import type { IInvite } from '@living-dictionaries/types'
+  import type { Citation, IHelper, IInvite, Partner } from '@living-dictionaries/types'
   import { Button, ShowHide } from 'svelte-pieces'
-  import Citation from './Citation.svelte'
+  import CitationComponent from './Citation.svelte'
   import Partners from './Partners.svelte'
   import ContributorInvitationStatus from '$lib/components/contributors/ContributorInvitationStatus.svelte'
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte'
@@ -16,10 +16,20 @@
     editor_edits,
   } = data)
 
+  let managers: IHelper[] = []
+  $: data.managers_promise.then(_managers => managers = _managers)
+  let contributors: IHelper[] = []
+  $: data.contributors_promise.then(_contributors => contributors = _contributors)
+  let writeInCollaborators: IHelper[] = []
+  $: data.writeInCollaborators_promise.then(_writeInCollaborators => writeInCollaborators = _writeInCollaborators)
   let invites: IInvite[] = []
   $: data.invites_promise.then(_invites => invites = _invites)
   $: manager_invites = invites.filter(invite => invite.role === 'manager')
   $: contributor_invites = invites.filter(invite => invite.role === 'contributor')
+  let partners: Partner[] = []
+  $: data.partners_promise.then(_partners => partners = _partners)
+  let citation: Citation
+  $: data.citation_promise.then(_citation => citation = _citation)
 </script>
 
 <p class="mb-2">
@@ -31,15 +41,13 @@
 </h3>
 
 <div class="divide-y divide-gray-200">
-  {#await data.managers_promise then managers}
-    {#each managers as manager}
-      <div class="py-3">
-        <div class="text-sm leading-5 font-medium text-gray-900">
-          {manager.name}
-        </div>
+  {#each managers as manager}
+    <div class="py-3">
+      <div class="text-sm leading-5 font-medium text-gray-900">
+        {manager.name}
       </div>
-    {/each}
-  {/await}
+    </div>
+  {/each}
   {#if $is_manager}
     {#each manager_invites as invite}
       <div class="my-1">
@@ -65,25 +73,23 @@
   {$page.data.t('dictionary.contributors')}
 </h3>
 <div class="divide-y divide-gray-200">
-  {#await data.contributors_promise then contributors}
-    {#each contributors as contributor}
-      <div class="py-3 flex flex-wrap items-center">
-        <div class="text-sm leading-5 font-medium text-gray-900">
-          {contributor.name}
-        </div>
-        {#if $is_manager}
-          <div class="w-1" />
-          <Button
-            onclick={editor_edits.removeContributor(contributor.id)}
-            color="red"
-            size="sm">
-            {$page.data.t('misc.delete')}
-            <i class="fas fa-times" />
-          </Button>
-        {/if}
+  {#each contributors as contributor}
+    <div class="py-3 flex flex-wrap items-center">
+      <div class="text-sm leading-5 font-medium text-gray-900">
+        {contributor.name}
       </div>
-    {/each}
-  {/await}
+      {#if $is_manager}
+        <div class="w-1" />
+        <Button
+          onclick={editor_edits.removeContributor(contributor.id)}
+          color="red"
+          size="sm">
+          {$page.data.t('misc.delete')}
+          <i class="fas fa-times" />
+        </Button>
+      {/if}
+    </div>
+  {/each}
   {#if $is_manager}
     {#each contributor_invites as invite}
       <div class="my-1">
@@ -118,23 +124,21 @@
   {$page.data.t('contributors.other_contributors')}
 </h3>
 <div class="divide-y divide-gray-200">
-  {#await data.writeInCollaborators_promise then writeInCollaborators}
-    {#each writeInCollaborators as collaborator}
-      <div class="py-3 flex flex-wrap items-center">
-        <div class="text-sm leading-5 font-medium text-gray-900">
-          {collaborator.name}
-        </div>
-        {#if $is_manager}
-          <div class="w-1" />
-          <Button
-            color="red"
-            size="sm"
-            onclick={editor_edits.removeWriteInCollaborator(collaborator.id)}>{$page.data.t('misc.delete')}
-            <i class="fas fa-times" /></Button>
-        {/if}
+  {#each writeInCollaborators as collaborator}
+    <div class="py-3 flex flex-wrap items-center">
+      <div class="text-sm leading-5 font-medium text-gray-900">
+        {collaborator.name}
       </div>
-    {/each}
-  {/await}
+      {#if $is_manager}
+        <div class="w-1" />
+        <Button
+          color="red"
+          size="sm"
+          onclick={editor_edits.removeWriteInCollaborator(collaborator.id)}>{$page.data.t('misc.delete')}
+          <i class="fas fa-times" /></Button>
+      {/if}
+    </div>
+  {/each}
 </div>
 
 <!-- <div class="text-gray-600 mb-2 text-sm">
@@ -149,9 +153,7 @@
 {/if}
 
 <hr class="my-4" />
-{#await data.partners_promise then partners}
-  <Partners {partners} can_edit={$is_manager} hideLivingTonguesLogo={$dictionary.hideLivingTonguesLogo} admin={$admin} {...data.partner_edits} />
-{/await}
+<Partners {partners} can_edit={$is_manager} hideLivingTonguesLogo={$dictionary.hideLivingTonguesLogo} admin={$admin} {...data.partner_edits} />
 
 <!-- Not using contributors.request_to_add_manager -->
 
@@ -199,9 +201,7 @@
   {$page.data.t('contributors.how_to_cite_academics')}
 </h3>
 
-{#await Promise.all([data.partners_promise, data.citation_promise]) then [partners, document]}
-  <Citation isManager={$is_manager} dictionary={$dictionary} {partners} citation={document} update_citation={data.update_citation} />
-{/await}
+<CitationComponent isManager={$is_manager} dictionary={$dictionary} {partners} {citation} update_citation={data.update_citation} />
 
 <div class="mb-12" />
 

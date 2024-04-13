@@ -11,6 +11,7 @@
   export let update_citation: (citation: string) => Promise<void>
 
   let value = ''
+  let unsaved = false
 </script>
 
 {#if isManager}
@@ -19,6 +20,7 @@
     onsubmit={async () => {
       try {
         await update_citation(value.trim())
+        unsaved = false
       } catch (err) {
         alert(err)
       }
@@ -37,6 +39,7 @@
         on:input={(e) => {
           // @ts-expect-error
           value = e.target.value.trim()
+          unsaved = value !== citation?.citation
         }} />
       <div class="w-1" />
       <Button class="shrink-0" {loading} type="submit">
@@ -46,6 +49,6 @@
   </Form>
 {/if}
 
-<div dir="ltr">
+<div dir="ltr" class:text-orange={unsaved}>
   {build_citation({ t: $page.data.t, dictionary, custom_citation: value || citation?.citation, partners })}
 </div>
