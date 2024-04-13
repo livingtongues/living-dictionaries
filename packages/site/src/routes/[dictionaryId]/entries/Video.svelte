@@ -1,12 +1,12 @@
 <script lang="ts">
-  import { page } from '$app/stores';
-  import type { ExpandedVideo } from '@living-dictionaries/types';
-  import { ShowHide } from 'svelte-pieces';
-  import { firebaseConfig } from 'sveltefirets';
+  import type { ExpandedVideo } from '@living-dictionaries/types'
+  import { ShowHide } from 'svelte-pieces'
+  import { page } from '$app/stores'
 
-  export let lexeme: string;
-  export let video: ExpandedVideo;
-  export let can_edit = false;
+  export let lexeme: string
+  export let video: ExpandedVideo
+  export let can_edit = false
+  export let on_delete_video: () => Promise<void>
 </script>
 
 <ShowHide let:show let:toggle>
@@ -24,10 +24,9 @@
       <PlayVideo
         {lexeme}
         {video}
-        storageBucket={firebaseConfig.storageBucket}
         {can_edit}
-        on:deleteVideo
-        on:close={toggle} />
+        {on_delete_video}
+        on_close={toggle} />
     {/await}
   {/if}
 </ShowHide>

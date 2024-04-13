@@ -1,51 +1,47 @@
 <script lang="ts">
-  import { page } from '$app/stores';
-  import { crossfade, scale } from 'svelte/transition';
-  import { Button } from 'svelte-pieces';
-  import { createEventDispatcher } from 'svelte';
+  import { crossfade, scale } from 'svelte/transition'
+  import { Button } from 'svelte-pieces'
+  import { page } from '$app/stores'
 
-  export let title: string;
-  export let gcs: string;
-  export let can_edit = false;
-  export let square: number = undefined;
-  export let width: number = undefined;
-  export let height: number = undefined;
+  export let title: string
+  export let gcs: string
+  export let can_edit = false
+  export let square: number = undefined
+  export let width: number = undefined
+  export let height: number = undefined
+  export let on_delete_image: () => Promise<void>
 
   const [send, receive] = crossfade({
     duration: 200,
     fallback: scale,
-  });
+  })
 
-  let windowWidth: number;
-  let loading = false;
-  let viewing = false;
+  let windowWidth: number
+  let loading = false
+  let viewing = false
 
   $: isDesktop = windowWidth >= 768
-  $: fullscreenSource = `https://lh3.googleusercontent.com/${gcs}=w${isDesktop ? windowWidth - 24 : windowWidth}`;
+  $: fullscreenSource = `https://lh3.googleusercontent.com/${gcs}=w${isDesktop ? windowWidth - 24 : windowWidth}`
 
   function load() {
-    const timeout = setTimeout(() => (loading = true), 100);
-    const img = new Image();
+    const timeout = setTimeout(() => (loading = true), 100)
+    const img = new Image()
 
     img.onload = () => {
-      clearTimeout(timeout);
-      loading = false;
-      viewing = true;
-    };
+      clearTimeout(timeout)
+      loading = false
+      viewing = true
+    }
 
-    img.src = fullscreenSource;
+    img.src = fullscreenSource
   }
-  const key = {};
-
-  const dispatch = createEventDispatcher<{
-    deleteImage: boolean;
-  }>();
+  const key = {}
 </script>
 
 <svelte:window
   bind:innerWidth={windowWidth}
   on:keydown={(e) => {
-    if (e.key === 'Escape') viewing = false;
+    if (e.key === 'Escape') viewing = false
   }} />
 
 {#if !viewing}
@@ -71,9 +67,7 @@
 
 {#if viewing}
   <div
-    on:click={() => {
-      viewing = false;
-    }}
+    on:click={() => viewing = false}
     class="fixed inset-0 md:p-3 flex flex-col items-center justify-center"
     in:receive={{ key }}
     out:send={{ key }}
@@ -94,9 +88,9 @@
             class="ml-auto"
             color="red"
             form="filled"
-            onclick={(e) => {
-              e.stopPropagation();
-              dispatch('deleteImage');
+            onclick={async (e) => {
+              e.stopPropagation()
+              await on_delete_image()
             }}>
             <span class="i-fa-trash-o" style="margin: -1px 0 2px;" />
             {$page.data.t('misc.delete')}

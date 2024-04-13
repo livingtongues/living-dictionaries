@@ -1,18 +1,18 @@
 <script lang="ts">
-  import { Doc } from 'sveltefirets';
-  import type { IAbout, IDictionary } from '@living-dictionaries/types';
-  import { page } from '$app/stores';
-  import { Button } from 'svelte-pieces';
-  import sanitize from 'xss';
+  import { Doc } from 'sveltefirets'
+  import type { IAbout, IDictionary } from '@living-dictionaries/types'
+  import { Button } from 'svelte-pieces'
+  import sanitize from 'xss'
+  import { page } from '$app/stores'
 
-  export let dictionary: IDictionary;
-  let aboutType: IAbout;
+  export let dictionary: IDictionary
+  let aboutType: IAbout
 
   function truncateString(str, num) {
     if (str.length <= num)
-      return str;
+      return str
 
-    return str.slice(0, num).trim() + '...';
+    return `${str.slice(0, num).trim()}...`
   }
 </script>
 
@@ -36,7 +36,7 @@
   {#if dictionary.glossLanguages}
     <div class="mb-2">
       <i class="far fa-info-circle fa-fw" />
-      {dictionary.glossLanguages.map((bcp) => $page.data.t({dynamicKey: 'gl.' + bcp, fallback: bcp})).join(', ')}
+      {dictionary.glossLanguages.map(bcp => $page.data.t({ dynamicKey: `gl.${bcp}`, fallback: bcp })).join(', ')}
     </div>
   {/if}
 
@@ -78,7 +78,7 @@
       <div class="mb-2 text-sm inline-children-elements">
         {@html sanitize(truncateString(about, 200))}
         {#if about.length > 200}
-          <a class="hover:underline" href={dictionary.id + '/about'}>
+          <a class="hover:underline" href={`${dictionary.id}/about`}>
             {$page.data.t('home.read_more')}
           </a>
         {/if}

@@ -1,15 +1,15 @@
 <script lang="ts">
-  import { page } from '$app/stores';
-  import { Button, Form } from 'svelte-pieces';
+  import { Button, Form } from 'svelte-pieces'
+  import { page } from '$app/stores'
 
-  export let id: string;
-  export let display: string;
-  export let value: string;
-  export let minlength = 0;
-  export let maxlength = 30;
-  export let required = false;
+  export let id: string
+  export let display: string
+  export let value: string
+  export let minlength = 0
+  export let maxlength = 30
+  export let required = false
 
-  export let save: (value: string) => Promise<void>;
+  export let save: (value: string) => Promise<void>
 </script>
 
 <Form let:loading onsubmit={async () => await save(value.trim())}>
@@ -30,7 +30,7 @@
       class="form-input w-full"
       placeholder={display} />
     <div class="w-1" />
-    <Button class="flex-shrink-0" {loading} type="submit">
+    <Button class="shrink-0" {loading} type="submit">
       {$page.data.t('misc.save')}
     </Button>
   </div>

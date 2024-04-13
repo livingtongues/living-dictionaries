@@ -1,16 +1,16 @@
 <script lang="ts">
-  import { Button, JSON } from 'svelte-pieces';
-  import { share } from '$lib/helpers/share';
-  import EntryDisplay from './EntryDisplay.svelte';
-  import SeoMetaTags from '$lib/components/SeoMetaTags.svelte';
-  import { seo_description } from './seo_description';
-  import { goto } from '$app/navigation';
-  import { lastEntriesUrl, algoliaQueryParams } from '$lib/stores/algolia';
-  import { page } from '$app/stores';
-  import type { SupaEntry } from '$lib/supabase/database.types';
-  import { browser } from '$app/environment';
+  import { Button, JSON } from 'svelte-pieces'
+  import EntryDisplay from './EntryDisplay.svelte'
+  import { seo_description } from './seo_description'
+  import { share } from '$lib/helpers/share'
+  import SeoMetaTags from '$lib/components/SeoMetaTags.svelte'
+  import { goto } from '$app/navigation'
+  import { algoliaQueryParams, lastEntriesUrl } from '$lib/stores/algolia'
+  import { page } from '$app/stores'
+  import type { SupaEntry } from '$lib/supabase/database.types'
+  import { browser } from '$app/environment'
 
-  export let data;
+  export let data
   $: ({
     entry,
     supa_entry: supa_entry_promise,
@@ -22,21 +22,21 @@
     is_manager,
     user,
     dbOperations,
-  } = data);
+  } = data)
   let supaEntry: SupaEntry
 
   $: if (browser) {
-    supa_entry_promise?.then(({data: _data}) => {
+    supa_entry_promise?.then(({ data: _data }) => {
       supaEntry = _data
-    }).catch(supa_err => {
-      console.info({supa_err})
+    }).catch((supa_err) => {
+      console.info({ supa_err })
     })
   }
 
   // saved algoliaQueryParams will be overwritten by the gallery view as it turns on the images only facet
   function backToEntries() {
     if (!shallow && $lastEntriesUrl)
-      goto($lastEntriesUrl);
+      goto($lastEntriesUrl)
     else
       history.back()
   }
@@ -80,15 +80,7 @@
   dictionary={$dictionary}
   videoAccess={$dictionary?.videoAccess || $admin > 0}
   can_edit={$can_edit}
-  {dbOperations}
-  on:deleteImage={() => dbOperations.deleteImage($entry, $dictionary.id)}
-  on:deleteVideo={() => dbOperations.deleteVideo($entry, $dictionary.id)}
-  on:valueupdate={({ detail: { field, newValue } }) =>
-    dbOperations.updateFirestoreEntry({
-      field,
-      value: newValue,
-      entryId: $entry.id,
-    })} />
+  {dbOperations} />
 
 <SeoMetaTags
   imageTitle={$entry.lexeme}

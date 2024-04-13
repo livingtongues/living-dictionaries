@@ -1,7 +1,7 @@
-import type { QueryParams } from '$lib/search/types';
-import { createQueryParamStore } from 'svelte-pieces';
+import { createQueryParamStore } from 'svelte-pieces'
+import type { QueryParams } from '$lib/search/types'
 
-export const load = ({params: {dictionaryId}}) => {
+export function load({ params: { dictionaryId } }) {
   const default_params: QueryParams = {
     page: 1,
     query: '',
@@ -9,9 +9,11 @@ export const load = ({params: {dictionaryId}}) => {
   const search_params = createQueryParamStore({
     key: 'q',
     startWith: default_params,
-    storagePrefix: dictionaryId + '_',
+    storagePrefix: `${dictionaryId}_`,
     cleanFalseValues: true,
   })
 
-  return { search_params }
+  return {
+    search_params,
+  }
 }

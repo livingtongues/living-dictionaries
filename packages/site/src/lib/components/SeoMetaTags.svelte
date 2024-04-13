@@ -1,37 +1,38 @@
 <script lang="ts">
-  import { page } from '$app/stores';
-  import LZString from 'lz-string';
-  import { seoTitle } from './seo-title';
-  const { compressToEncodedURIComponent: encode } = LZString;
+  import LZString from 'lz-string'
+  import { seoTitle } from './seo-title'
+  import { page } from '$app/stores'
 
-  const IMAGE_API = '/og';
-  const DEFAULT_IMAGE =
-    'https://firebasestorage.googleapis.com/v0/b/talking-dictionaries-alpha.appspot.com/o/livingdictionary%2Fimages%2FNEW_Living_Tongues_logo_with_white_around_it.png?alt=media'; // 1484 x 729
-  const OG_IMAGE_VERSION = 4;
+  const { compressToEncodedURIComponent: encode } = LZString
 
-  export let admin = false;
-  export let dictionaryName: string = undefined;
-  export let title: string = undefined;
-  export let imageTitle: string = undefined;
-  export let description: string = undefined;
-  export let imageDescription: string = undefined;
-  export let keywords =
-    'Minority Languages, Language Documentation, Dictionary, Minority Community, Language Analysis, Language Education, Endangered Languages, Language Revitalization, Linguistics, Word Lists, Linguistic Analysis';
-  export let type: 'video' | 'website' = 'website'; // https://ogp.me/#types
-  export let norobots = false;
-  export let handle = 'livingtongues';
-  export let url = $page.url.toString();
+  const IMAGE_API = '/og'
+  const DEFAULT_IMAGE
+    = 'https://firebasestorage.googleapis.com/v0/b/talking-dictionaries-alpha.appspot.com/o/livingdictionary%2Fimages%2FNEW_Living_Tongues_logo_with_white_around_it.png?alt=media' // 1484 x 729
+  const OG_IMAGE_VERSION = 4
 
-  export let width = 1200;
-  export let height = 600;
-  export let gcsPath: string = undefined;
-  export let lng: number = undefined;
-  export let lat: number = undefined;
+  export let admin = false
+  export let dictionaryName: string = undefined
+  export let title: string = undefined
+  export let imageTitle: string = undefined
+  export let description: string = undefined
+  export let imageDescription: string = undefined
+  export let keywords
+    = 'Minority Languages, Language Documentation, Dictionary, Minority Community, Language Analysis, Language Education, Endangered Languages, Language Revitalization, Linguistics, Word Lists, Linguistic Analysis'
+  export let type: 'video' | 'website' = 'website' // https://ogp.me/#types
+  export let norobots = false
+  export let handle = 'livingtongues'
+  export let url = $page.url.toString()
+
+  export let width = 1200
+  export let height = 600
+  export let gcsPath: string = undefined
+  export let lng: number = undefined
+  export let lat: number = undefined
 
   $: expandedDictionaryName = dictionaryName
     ? `${dictionaryName} ${$page.data.t('misc.LD_singular')}`
-    : null;
-  $: textTitle = seoTitle({ title: title || imageTitle, dictionaryName: expandedDictionaryName, admin });
+    : null
+  $: textTitle = seoTitle({ title: title || imageTitle, dictionaryName: expandedDictionaryName, admin })
   $: textDescription = description || imageDescription || 'Language Documentation Web App - Speeding the availability of language resources for endangered languages. Using technology to shift how we think about endangered languages. Rather than perceiving them as being antiquated, difficult to learn and on the brink of vanishing, we see them as modern and easily accessible for learning online in text and audio formats.'
 
   $: imageProps = {
@@ -43,11 +44,11 @@
     lng,
     lat,
     gcsPath: gcsPath?.replace('\n', ''), // this slipped into the server response, can remove after database cleaned
-  };
-  $: encodedImageProps = encode(JSON.stringify(imageProps));
-  $: imageUrl = gcsPath ? `${IMAGE_API}?props=${encodedImageProps}&v=${OG_IMAGE_VERSION}` : DEFAULT_IMAGE;
-  $: imageWidth = dictionaryName ? width.toString() : '987';
-  $: imageHeight = dictionaryName ? width.toString() : '299';
+  }
+  $: encodedImageProps = encode(JSON.stringify(imageProps))
+  $: imageUrl = gcsPath ? `${IMAGE_API}?props=${encodedImageProps}&v=${OG_IMAGE_VERSION}` : DEFAULT_IMAGE
+  $: imageWidth = dictionaryName ? width.toString() : '987'
+  $: imageHeight = dictionaryName ? width.toString() : '299'
 </script>
 
 <svelte:head>

@@ -1,19 +1,15 @@
 <script lang="ts">
-  import { page } from '$app/stores';
-  import { EntryFields, type ExpandedSense, type IDictionary } from '@living-dictionaries/types';
-  import { order_entry_and_dictionary_gloss_languages } from '$lib/helpers/glosses';
-  import EntryPartOfSpeech from '$lib/components/entry/EntryPartOfSpeech.svelte';
-  import EntryField from './EntryField.svelte';
-  import { createEventDispatcher } from 'svelte';
-  import SupaEntrySemanticDomains from '$lib/components/entry/SupaEntrySemanticDomains.svelte';
+  import { type ActualDatabaseEntry, EntryFields, type ExpandedSense, type IDictionary } from '@living-dictionaries/types'
+  import EntryField from './EntryField.svelte'
+  import { page } from '$app/stores'
+  import { order_entry_and_dictionary_gloss_languages } from '$lib/helpers/glosses'
+  import EntryPartOfSpeech from '$lib/components/entry/EntryPartOfSpeech.svelte'
+  import SupaEntrySemanticDomains from '$lib/components/entry/SupaEntrySemanticDomains.svelte'
 
   export let sense: ExpandedSense
   export let glossLanguages: IDictionary['glossLanguages']
-  export let can_edit = false;
-
-  const dispatch = createEventDispatcher<{
-    valueupdate: { field: string; newValue: string | string[] };
-  }>();
+  export let can_edit = false
+  export let updateEntry: (data: ActualDatabaseEntry & { 'xs.vn'?: string }) => void
 
   $: glossingLanguages = order_entry_and_dictionary_gloss_languages(sense.glosses, glossLanguages)
   $: hasSemanticDomain = sense.translated_ld_semantic_domains?.length || sense.write_in_semantic_domains?.length
@@ -25,8 +21,8 @@
     field="gloss"
     {bcp}
     {can_edit}
-    display={`${$page.data.t({ dynamicKey: `gl.${bcp}`, fallback: bcp})}: ${$page.data.t('entry_field.gloss')}`}
-    on_update={new_value => dispatch('valueupdate', { field: `gl.${bcp}`, newValue: new_value})} />
+    display={`${$page.data.t({ dynamicKey: `gl.${bcp}`, fallback: bcp })}: ${$page.data.t('entry_field.gloss')}`}
+    on_update={new_value => updateEntry({ [`gl.${bcp}`]: new_value })} />
 {/each}
 
 <!-- Only in Bahasa Lani (id: jaRhn6MAZim4Blvr1iEv) -->
@@ -36,7 +32,7 @@
     field="definition_english"
     {can_edit}
     display="Definition (deprecated)"
-    on_update={new_value => dispatch('valueupdate', { field: EntryFields.definition_english, newValue: new_value})} />
+    on_update={new_value => updateEntry({ [EntryFields.definition_english]: new_value })} />
 {/if}
 
 {#if sense.translated_parts_of_speech?.length || can_edit}
@@ -45,7 +41,7 @@
     <EntryPartOfSpeech
       value={sense.translated_parts_of_speech}
       {can_edit}
-      on_update={new_value => dispatch('valueupdate', { field: EntryFields.parts_of_speech, newValue: new_value})} />
+      on_update={new_value => updateEntry({ [EntryFields.parts_of_speech]: new_value })} />
     <div class="border-b-2 pb-1 mb-2 border-dashed" />
   </div>
 {/if}
@@ -57,14 +53,8 @@
       {can_edit}
       semantic_domain_keys={sense.ld_semantic_domains_keys}
       write_in_semantic_domains={sense.write_in_semantic_domains}
-      on_update={new_value => dispatch('valueupdate', {
-        field: EntryFields.semantic_domains,
-        newValue: new_value,
-      })}
-      on_update_write_in={new_value => dispatch('valueupdate', {
-        field: 'sd',
-        newValue: new_value,
-      })} />
+      on_update={new_value => updateEntry({ [EntryFields.semantic_domains]: new_value })}
+      on_update_write_in={new_value => updateEntry({ sd: new_value })} />
     <div class="border-b-2 pb-1 mb-2 border-dashed" />
   </div>
 {/if}
@@ -74,7 +64,7 @@
   field="noun_class"
   {can_edit}
   display={$page.data.t('entry_field.noun_class')}
-  on_update={new_value => dispatch('valueupdate', { field: EntryFields.noun_class, newValue: new_value})} />
+  on_update={new_value => updateEntry({ [EntryFields.noun_class]: new_value })} />
 
 {#each sense.example_sentences || [{}] as sentence}
   <div class:order-2={!sentence.vn} class="flex flex-col">
@@ -83,7 +73,7 @@
       field="example_sentence"
       {can_edit}
       display={$page.data.t('entry_field.example_sentence')}
-      on_update={new_value => dispatch('valueupdate', { field: 'xs.vn', newValue: new_value})} />
+      on_update={new_value => updateEntry({ 'xs.vn': new_value })} />
 
     {#if sentence.vn}
       {#each glossingLanguages as bcp}
@@ -93,8 +83,8 @@
           field="example_sentence"
           {bcp}
           {can_edit}
-          display={`${$page.data.t({dynamicKey: `gl.${bcp}`, fallback: bcp})}: ${$page.data.t('entry_field.example_sentence')}`}
-          on_update={new_value => dispatch('valueupdate', { field: `xs.${bcp}`, newValue: new_value})} />
+          display={`${$page.data.t({ dynamicKey: `gl.${bcp}`, fallback: bcp })}: ${$page.data.t('entry_field.example_sentence')}`}
+          on_update={new_value => updateEntry({ [`xs.${bcp}`]: new_value })} />
       {/each}
     {/if}
   </div>

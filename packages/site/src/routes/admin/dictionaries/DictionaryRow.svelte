@@ -1,33 +1,33 @@
 <script lang="ts">
-  import { printDate } from '$lib/helpers/time';
-  import DictionaryFieldEdit from './DictionaryFieldEdit.svelte';
-  import { BadgeArrayEmit, ShowHide, Button } from 'svelte-pieces';
-  import { createEventDispatcher } from 'svelte';
-  import { updateOnline } from 'sveltefirets';
-  import ContributorInvitationStatus from '$lib/components/contributors/ContributorInvitationStatus.svelte';
-  import RolesManagment from './RolesManagment.svelte';
-  import type { DictionaryWithHelperStores } from './dictionaryWithHelpers';
-  import LatLngDisplay from '$lib/components/maps/LatLngDisplay.svelte';
-  import { page } from '$app/stores';
+  import { BadgeArrayEmit, Button, ShowHide } from 'svelte-pieces'
+  import { createEventDispatcher } from 'svelte'
+  import { updateOnline } from 'sveltefirets'
+  import DictionaryFieldEdit from './DictionaryFieldEdit.svelte'
+  import RolesManagment from './RolesManagment.svelte'
+  import type { DictionaryWithHelperStores } from './dictionaryWithHelpers'
+  import ContributorInvitationStatus from '$lib/components/contributors/ContributorInvitationStatus.svelte'
+  import { printDate } from '$lib/helpers/time'
+  import LatLngDisplay from '$lib/components/maps/LatLngDisplay.svelte'
+  import { page } from '$app/stores'
 
-  export let index: number;
-  export let dictionary: DictionaryWithHelperStores;
-  const { managers, contributors, writeInCollaborators, invites } = dictionary;
-  $: ({admin} = $page.data)
+  export let index: number
+  export let dictionary: DictionaryWithHelperStores
+  const { managers, contributors, writeInCollaborators, invites } = dictionary
+  $: ({ admin } = $page.data)
 
   const dispatch = createEventDispatcher<{
-    addalternatename: string;
-    removealternatename: string;
-    toggleprivacy: boolean;
-    togglevideoaccess: boolean;
-    updatecoordinates: { lat: number; lng: number };
-    removecoordinates: boolean;
-  }>();
+    addalternatename: string
+    removealternatename: string
+    toggleprivacy: boolean
+    togglevideoaccess: boolean
+    updatecoordinates: { lat: number, lng: number }
+    removecoordinates: boolean
+  }>()
 </script>
 
 <td class="relative">
   <span on:click={() => window.open(`/${dictionary.id}`)} class="absolute top-0 left-0 text-xs text-gray-400 cursor-pointer">{index + 1}</span>
-  <DictionaryFieldEdit field={'name'} value={dictionary.name} dictionaryId={dictionary.id} />
+  <DictionaryFieldEdit field="name" value={dictionary.name} dictionaryId={dictionary.id} />
 </td>
 <td>
   <Button
@@ -35,8 +35,7 @@
     size="sm"
     onclick={() => {
       if (confirm('Flip this dictionary\'s visibility?'))
-        dispatch('toggleprivacy');
-
+        dispatch('toggleprivacy')
     }}>
     {dictionary.public ? 'Public' : 'Private'}
   </Button>
@@ -56,7 +55,7 @@
         <ContributorInvitationStatus
           admin
           {invite}
-          on:delete={() =>
+          on_delete_invite={() =>
             updateOnline(`dictionaries/${dictionary.id}/invites/${invite.id}`, {
               status: 'cancelled',
             })}>
@@ -75,7 +74,7 @@
         <ContributorInvitationStatus
           admin
           {invite}
-          on:delete={() =>
+          on_delete_invite={() =>
             updateOnline(`dictionaries/${dictionary.id}/invites/${invite.id}`, {
               status: 'cancelled',
             })}>
@@ -91,13 +90,13 @@
 </td>
 <td>
   <DictionaryFieldEdit
-    field={'iso6393'}
+    field="iso6393"
     value={dictionary.iso6393}
     dictionaryId={dictionary.id} />
 </td>
 <td>
   <DictionaryFieldEdit
-    field={'glottocode'}
+    field="glottocode"
     value={dictionary.glottocode}
     dictionaryId={dictionary.id} />
 </td>
@@ -116,7 +115,7 @@
           lng={dictionary.coordinates ? dictionary.coordinates.longitude : undefined}
           lat={dictionary.coordinates ? dictionary.coordinates.latitude : undefined}
           on:update={({ detail: { lat, lng } }) => {
-            dispatch('updatecoordinates', { lat, lng });
+            dispatch('updatecoordinates', { lat, lng })
           }}
           on:remove={() => dispatch('removecoordinates')}
           on:close={toggle} />
@@ -126,7 +125,7 @@
 </td>
 <td>
   <DictionaryFieldEdit
-    field={'location'}
+    field="location"
     value={dictionary.location}
     dictionaryId={dictionary.id} />
 </td>
@@ -137,15 +136,14 @@
   <div style="width: 300px;" />
   <BadgeArrayEmit
     canEdit
-    addMessage={'Add'}
+    addMessage="Add"
     strings={dictionary.alternateNames}
     on:additem={() => {
-      const name = prompt('Enter alternate name:');
+      const name = prompt('Enter alternate name:')
       if (name)
-        dispatch('addalternatename', name);
-
+        dispatch('addalternatename', name)
     }}
-    on:itemremoved={(e) => dispatch('removealternatename', e.detail.value)} />
+    on:itemremoved={e => dispatch('removealternatename', e.detail.value)} />
 </td>
 <td>
   {dictionary.alternateOrthographies || ''}
@@ -158,7 +156,7 @@
     color={dictionary.videoAccess ? 'green' : 'orange'}
     size="sm"
     onclick={() => {
-      dispatch('togglevideoaccess');
+      dispatch('togglevideoaccess')
     }}>
     {dictionary.videoAccess ? 'Can Record' : 'Give Access'}
   </Button>

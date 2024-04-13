@@ -1,45 +1,43 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
-  import { page } from '$app/stores';
-  import { Button, ShowHide } from 'svelte-pieces';
-  import { partsOfSpeech } from '$lib/mappings/parts-of-speech';
-  import type { ActualDatabaseEntry } from '@living-dictionaries/types';
-  import { getCollection } from 'sveltefirets';
-  import Progress from '$lib/export/Progress.svelte';
-  import SeoMetaTags from '$lib/components/SeoMetaTags.svelte';
-  import { convert_entry_to_current_shape } from '$lib/transformers/convert_entry_to_current_shape';
-  import { expand_entry } from '$lib/transformers/expand_entry';
-  import DownloadMedia from './DownloadMedia.svelte';
-  import { fetchSpeakers } from './fetchSpeakers';
-  import { getCsvHeaders, formatCsvEntries, type EntryForCSV } from './prepareEntriesForCsv';
-  import { downloadObjectsAsCSV } from '$lib/export/csv';
+  import { onMount } from 'svelte'
+  import { Button, ShowHide } from 'svelte-pieces'
+  import type { ActualDatabaseEntry } from '@living-dictionaries/types'
+  import { getCollection } from 'sveltefirets'
+  import DownloadMedia from './DownloadMedia.svelte'
+  import { fetchSpeakers } from './fetchSpeakers'
+  import { type EntryForCSV, formatCsvEntries, getCsvHeaders } from './prepareEntriesForCsv'
+  import SeoMetaTags from '$lib/components/SeoMetaTags.svelte'
+  import Progress from '$lib/export/Progress.svelte'
+  import { partsOfSpeech } from '$lib/mappings/parts-of-speech'
+  import { page } from '$app/stores'
+  import { downloadObjectsAsCSV } from '$lib/export/csv'
+  import { convert_and_expand_entry } from '$lib/transformers/convert_and_expand_entry'
 
   export let data
-  $: ({is_manager, dictionary, admin} = data)
+  $: ({ is_manager, dictionary, admin } = data)
 
-  let includeImages = false;
-  let includeAudio = false;
+  let includeImages = false
+  let includeAudio = false
 
   let entryHeaders: EntryForCSV = {}
-  let formattedEntries: EntryForCSV[] = [];
-  let entriesWithImages: EntryForCSV[] = [];
-  let entriesWithAudio: EntryForCSV[] = [];
+  let formattedEntries: EntryForCSV[] = []
+  let entriesWithImages: EntryForCSV[] = []
+  let entriesWithAudio: EntryForCSV[] = []
 
-  let mounted = false;
+  let mounted = false
 
   onMount(async () => {
-    const database_entries = await getCollection<ActualDatabaseEntry>(`dictionaries/${$dictionary.id}/words`);
-    const converted_to_current_shaped_entries = database_entries.map(convert_entry_to_current_shape);
-    const expanded_entries = converted_to_current_shaped_entries.map(entry => expand_entry(entry, $page.data.t));
-    const speakers = await fetchSpeakers(expanded_entries);
+    const database_entries = await getCollection<ActualDatabaseEntry>(`dictionaries/${$dictionary.id}/words`)
+    const expanded_entries = database_entries.map(entry => convert_and_expand_entry(entry, $page.data.t))
+    const speakers = await fetchSpeakers(expanded_entries)
 
     entryHeaders = getCsvHeaders(expanded_entries, $dictionary)
     formattedEntries = formatCsvEntries(expanded_entries, speakers, partsOfSpeech)
-    entriesWithImages = formattedEntries.filter((entry) => entry.image_filename);
-    entriesWithAudio = formattedEntries.filter((entry) => entry.sound_filename);
+    entriesWithImages = formattedEntries.filter(entry => entry.image_filename)
+    entriesWithAudio = formattedEntries.filter(entry => entry.sound_filename)
 
-    mounted = true;
-  });
+    mounted = true
+  })
 </script>
 
 <h3 class="text-xl font-semibold mb-4">{$page.data.t('misc.export')}</h3>
@@ -124,7 +122,7 @@
     <Button
       loading={!formattedEntries.length}
       onclick={() => {
-        downloadObjectsAsCSV(entryHeaders, formattedEntries, $dictionary.id);
+        downloadObjectsAsCSV(entryHeaders, formattedEntries, $dictionary.id)
       }}
       form="filled">
       {$page.data.t('export.download_csv')}

@@ -3,7 +3,7 @@ import type Component from './Sense.svelte'
 
 export const viewports: Viewport[] = [
   { width: 800, height: 500 },
-  { width: 320, height: 580}
+  { width: 320, height: 580 },
 ]
 
 export const languages = []
@@ -27,6 +27,7 @@ export const variants: Variant<Component>[] = [
       },
       can_edit: true,
       glossLanguages: ['en', 'es'],
+      updateEntry: null,
     },
   },
   {
@@ -36,6 +37,7 @@ export const variants: Variant<Component>[] = [
       sense: {},
       can_edit: true,
       glossLanguages: ['en', 'es'],
+      updateEntry: null,
     },
   },
 ]

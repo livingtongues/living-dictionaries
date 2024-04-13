@@ -1,40 +1,36 @@
 <script lang="ts">
-  import { page } from '$app/stores';
-  import { Button, ShowHide } from 'svelte-pieces';
-  import type { IDictionary, IPoint, IRegion } from '@living-dictionaries/types';
-  import type { LngLat } from 'mapbox-gl';
-  import Map from '$lib/components/maps/mapbox/map/Map.svelte';
-  import Marker from '$lib/components/maps/mapbox/map/Marker.svelte';
-  import Popup from '$lib/components/maps/mapbox/map/Popup.svelte';
-  import Region from '$lib/components/maps/mapbox/map/Region.svelte';
-  import CoordinatesModal from '$lib/components/maps/CoordinatesModal.svelte';
-  import RegionModal from '$lib/components/maps/RegionModal.svelte';
-  import NavigationControl from '$lib/components/maps/mapbox/controls/NavigationControl.svelte';
-  import { createEventDispatcher } from 'svelte';
+  import { Button, ShowHide } from 'svelte-pieces'
+  import type { IDictionary, IPoint, IRegion } from '@living-dictionaries/types'
+  import type { LngLat } from 'mapbox-gl'
+  import { page } from '$app/stores'
+  import Map from '$lib/components/maps/mapbox/map/Map.svelte'
+  import Marker from '$lib/components/maps/mapbox/map/Marker.svelte'
+  import Popup from '$lib/components/maps/mapbox/map/Popup.svelte'
+  import Region from '$lib/components/maps/mapbox/map/Region.svelte'
+  import CoordinatesModal from '$lib/components/maps/CoordinatesModal.svelte'
+  import RegionModal from '$lib/components/maps/RegionModal.svelte'
+  import NavigationControl from '$lib/components/maps/mapbox/controls/NavigationControl.svelte'
 
-  const dispatch = createEventDispatcher<{
-    updateCoordinates: { longitude: number; latitude: number };
-    removeCoordinates: boolean;
-    updatePoints: IPoint[];
-    updateRegions: IRegion[];
-  }>();
+  export let on_update_coordinates: (coordinates: { longitude: number, latitude: number }) => void
+  export let on_remove_coordinates: () => void
+  export let on_update_points: (points: IPoint[]) => void
+  export let on_update_regions: (regions: IRegion[]) => void
+  export let dictionary: Partial<IDictionary>
+  $: hasCoordinates = dictionary.coordinates?.latitude
 
-  export let dictionary: Partial<IDictionary>;
-  $: hasCoordinates = dictionary.coordinates?.latitude;
-
-  function addCoordinates({ detail }: { detail: { lng: number; lat: number } }) {
+  function addCoordinates({ detail }: { detail: { lng: number, lat: number } }) {
     if (hasCoordinates) {
       const point = {
         coordinates: { longitude: detail.lng, latitude: detail.lat },
-      };
-      const points = (dictionary.points && [...dictionary.points, point]) || [point];
-      dispatch('updatePoints', points);
+      }
+      const points = (dictionary.points && [...dictionary.points, point]) || [point]
+      on_update_points(points)
     } else {
-      dispatch('updateCoordinates', { longitude: detail.lng, latitude: detail.lat });
+      on_update_coordinates({ longitude: detail.lng, latitude: detail.lat })
     }
   }
 
-  let mapClickCoordinates: LngLat;
+  let mapClickCoordinates: LngLat
 </script>
 
 <div class="text-sm font-medium text-gray-700 mb-2">
@@ -80,8 +76,8 @@
                 lat={dictionary.coordinates.latitude}
                 canRemove={!dictionary.points?.length && !dictionary.regions?.length}
                 on:update={({ detail }) =>
-                  dispatch('updateCoordinates', { longitude: detail.lng, latitude: detail.lat })}
-                on:remove={() => dispatch('removeCoordinates')}
+                  on_update_coordinates({ longitude: detail.lng, latitude: detail.lat })}
+                on:remove={on_remove_coordinates}
                 on:close={toggle} />
             {/if}
           </ShowHide>
@@ -100,16 +96,16 @@
                   lng={point.coordinates.longitude}
                   lat={point.coordinates.latitude}
                   on:update={({ detail }) => {
-                    const {points} = dictionary;
+                    const { points } = dictionary
                     points[index] = {
                       coordinates: { longitude: detail.lng, latitude: detail.lat },
-                    };
-                    dispatch('updatePoints', points);
+                    }
+                    on_update_points(points)
                   }}
                   on:remove={() => {
-                    const {points} = dictionary;
-                    points.splice(index, 1);
-                    dispatch('updatePoints', points);
+                    const { points } = dictionary
+                    points.splice(index, 1)
+                    on_update_points(points)
                   }}
                   on:close={toggle}>
                   <Marker
@@ -135,14 +131,14 @@
               <RegionModal
                 {region}
                 on:update={({ detail }) => {
-                  const {regions} = dictionary;
-                  regions[index] = detail;
-                  dispatch('updateRegions', regions);
+                  const { regions } = dictionary
+                  regions[index] = detail
+                  on_update_regions(regions)
                 }}
                 on:remove={() => {
-                  const {regions} = dictionary;
-                  regions.splice(index, 1);
-                  dispatch('updateRegions', regions);
+                  const { regions } = dictionary
+                  regions.splice(index, 1)
+                  on_update_regions(regions)
                 }}
                 on:close={toggle}>
                 <Marker
@@ -193,8 +189,8 @@
         <RegionModal
           region={null}
           on:update={({ detail }) => {
-            const regions = (dictionary.regions && [...dictionary.regions, detail]) || [detail];
-            dispatch('updateRegions', regions);
+            const regions = (dictionary.regions && [...dictionary.regions, detail]) || [detail]
+            on_update_regions(regions)
           }}
           on:close={toggle}>
           <Marker

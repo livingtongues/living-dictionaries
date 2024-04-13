@@ -1,49 +1,30 @@
 <script lang="ts">
-  import type { GoalDatabasePhoto, ActualDatabaseEntry } from '@living-dictionaries/types';
-  import { page } from '$app/stores';
-  import { updateOnline } from 'sveltefirets';
+  import { page } from '$app/stores'
+  import type { DbOperations } from '$lib/dbOperations'
 
-  export let entryId: string;
-  export let dictionaryId: string;
-  $: ({user} = $page.data)
+  export let entryId: string
+  export let dictionaryId: string
+  export let updateEntryOnline: DbOperations['updateEntryOnline']
+  $: ({ user } = $page.data)
 
-  let dragging = false;
-  let file: File;
+  let dragging = false
+  let file: File
 
   function handleImage(files: FileList) {
-    dragging = false;
+    dragging = false
 
-    const fileToCheck = files.item(0);
+    const fileToCheck = files.item(0)
 
     // Client-side validation: Must be an image and smaller than 10MB.
     if (fileToCheck.type.split('/')[0] !== 'image') {
-      return alert(
-        // @ts-ignore
-        `${$page.data.t('upload.error')}`
-      );
+      return alert(`${$page.data.t('upload.error')}`)
     }
-    const tenMB = 10485760; // http://www.unitconversion.org/data-storage/megabytes-to-bytes-conversion.html
+    const tenMB = 10485760 // http://www.unitconversion.org/data-storage/megabytes-to-bytes-conversion.html
     if (fileToCheck.size > tenMB) {
-      // @ts-ignore
-      return alert(
-        `${$page.data.t('upload.file_must_be_smaller')} 10MB`
-      );
+      return alert(`${$page.data.t('upload.file_must_be_smaller')} 10MB`)
     }
 
-    file = fileToCheck;
-  }
-
-  async function saveImage(fb_storage_path: string, specifiable_image_url: string) {
-    const pf: GoalDatabasePhoto = {
-      path: fb_storage_path,
-      gcs: specifiable_image_url,
-      ts: new Date().getTime(),
-      cr: $user.displayName,
-      ab: $user.uid,
-    }
-    await updateOnline<ActualDatabaseEntry>(`dictionaries/${dictionaryId}/words/${entryId}`, { pf } ,
-      { abbreviate: true }
-    )
+    file = fileToCheck
   }
 </script>
 
@@ -55,7 +36,7 @@
         h-full flex flex-col items-center justify-center border-2 border-dashed
         cursor-pointer"
       title="Add Photo to Entry"
-      on:drop|preventDefault={(e) => handleImage(e.dataTransfer.files)}
+      on:drop|preventDefault={e => handleImage(e.dataTransfer.files)}
       on:dragover|preventDefault={() => (dragging = true)}
       on:dragleave|preventDefault={() => (dragging = false)}>
       <input
@@ -63,8 +44,8 @@
         accept="image/*"
         class="hidden"
         on:input={(e) => {
-          // @ts-ignore
-          handleImage(e.target.files);
+          // @ts-expect-error
+          handleImage(e.target.files)
         }} />
       <span class="hidden md:inline">
         <span class="i-ic-outline-cloud-upload text-2xl" />
@@ -81,7 +62,13 @@
         {file}
         user={$user}
         fileLocationPrefix="{dictionaryId}/images/{entryId}_"
-        on:uploaded={({detail: {fb_storage_path, specifiable_image_url}}) => saveImage(fb_storage_path, specifiable_image_url)} />
+        on:uploaded={async ({ detail: { fb_storage_path, specifiable_image_url } }) => await updateEntryOnline({ data: { pf: {
+          path: fb_storage_path,
+          gcs: specifiable_image_url,
+          ts: new Date().getTime(),
+          cr: $user.displayName,
+          ab: $user.uid,
+        } }, entryId })} />
     {/await}
   {/if}
 </div>

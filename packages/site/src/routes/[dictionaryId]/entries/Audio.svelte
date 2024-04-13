@@ -1,27 +1,26 @@
 <script lang="ts">
-  import { page } from '$app/stores';
-  import { firebaseConfig } from 'sveltefirets';
-  import { ShowHide, longpress } from 'svelte-pieces';
-  import type { ExpandedEntry } from '@living-dictionaries/types';
+  import { ShowHide, longpress } from 'svelte-pieces'
+  import type { ExpandedEntry } from '@living-dictionaries/types'
+  import { page } from '$app/stores'
+  import type { DbOperations } from '$lib/dbOperations'
 
-  export let entry: ExpandedEntry;
+  export let entry: ExpandedEntry
   // export let sound_file: ExpandedAudio; // TODO
-  export let context: 'list' | 'table' | 'entry';
-  export let can_edit = false;
+  export let context: 'list' | 'table' | 'entry'
+  export let can_edit = false
+  export let updateEntryOnline: DbOperations['updateEntryOnline']
 
-  $: sound_file = entry.sound_files?.[0];
+  $: sound_file = entry.sound_files?.[0]
 
-  let playing = false;
+  let playing = false
 
-  function initAudio(audioPath: string) {
-    const convertedPath = audioPath.replace(/\//g, '%2F');
-    const url = `https://firebasestorage.googleapis.com/v0/b/${firebaseConfig.storageBucket}/o/${convertedPath}?alt=media`; // TODO: this conversion should be done upon receiving data from the server - it should not be the component's responsibility, then we can just use the path as is and don't need to depend on sveltefirets and don't need to lazy-load this component
-    const audio = new Audio(url);
-    audio.play();
-    playing = true;
+  function initAudio() {
+    const audio = new Audio(sound_file.storage_url)
+    audio.play()
+    playing = true
     audio.addEventListener('ended', () => {
-      playing = false;
-    });
+      playing = false
+    })
   // TODO: unsubscribe listener
   }
 </script>
@@ -33,12 +32,12 @@
         justify-center cursor-pointer select-none"
       title={$page.data.t('audio.listen')}
       use:longpress={800}
-      on:longpress={() => initAudio(sound_file.fb_storage_path)}
+      on:longpress={() => initAudio()}
       on:click={() => {
         if (can_edit)
-          toggle();
+          toggle()
         else
-          initAudio(sound_file.fb_storage_path);
+          initAudio()
       }}>
       {#if context === 'list'}
         <span class:text-blue-700={playing} class="i-material-symbols-hearing text-xl mt-1" />
@@ -76,7 +75,7 @@
 
   {#if show}
     {#await import('$lib/components/audio/EditAudio.svelte') then { default: EditAudio }}
-      <EditAudio {entry} sound_file={sound_file} on:close={toggle} />
+      <EditAudio {entry} sound_file={sound_file} on_close={toggle} {updateEntryOnline} />
     {/await}
   {/if}
 </ShowHide>

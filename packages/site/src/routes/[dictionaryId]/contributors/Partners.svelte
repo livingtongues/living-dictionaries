@@ -1,28 +1,28 @@
 <script lang="ts">
-  import { page } from '$app/stores';
-  import { Button } from 'svelte-pieces';
-  import type { Partner } from '@living-dictionaries/types';
-  import Image from '$lib/components/image/Image.svelte';
-  import ImageDropZone from '$lib/components/image/ImageDropZone.svelte';
-  import type { Readable } from 'svelte/store';
+  import { Button } from 'svelte-pieces'
+  import type { Partner } from '@living-dictionaries/types'
+  import type { Readable } from 'svelte/store'
+  import { page } from '$app/stores'
+  import Image from '$lib/components/image/Image.svelte'
+  import ImageDropZone from '$lib/components/image/ImageDropZone.svelte'
 
-  export let admin = 0;
-  export let can_edit = false;
-  export let partners: Partner[];
-  export let add_partner_name: (name: string) => Promise<void>;
-  export let delete_partner: (partner_id: string) => Promise<void>;
-  export let add_partner_image: (partner_id: string, file: File) => Readable<{ progress: number; error?: string, preview_url: string }>;
-  export let delete_partner_image: ({partner_id, fb_storage_path}: {partner_id: string, fb_storage_path: string}) => Promise<void>;
-  export let hide_living_tongues_logo: (allow: boolean) => Promise<void>;
-  export let hideLivingTonguesLogo = false;
+  export let admin = 0
+  export let can_edit = false
+  export let partners: Partner[]
+  export let add_partner_name: (name: string) => Promise<void>
+  export let delete_partner: (partner_id: string) => Promise<void>
+  export let add_partner_image: (partner_id: string, file: File) => Readable<{ progress: number, error?: string, preview_url: string }>
+  export let delete_partner_image: ({ partner_id, fb_storage_path }: { partner_id: string, fb_storage_path: string }) => Promise<void>
+  export let hide_living_tongues_logo: (allow: boolean) => Promise<void>
+  export let hideLivingTonguesLogo = false
 
-  const LIVING_TONGUES_LOGO =
-    'https://firebasestorage.googleapis.com/v0/b/talking-dictionaries-alpha.appspot.com/o/livingdictionary%2Fimages%2FLiving_Tongues_Logo_transparent%20300dpi.png?alt=media';
+  const LIVING_TONGUES_LOGO
+    = 'https://firebasestorage.googleapis.com/v0/b/talking-dictionaries-alpha.appspot.com/o/livingdictionary%2Fimages%2FLiving_Tongues_Logo_transparent%20300dpi.png?alt=media'
 
   async function ask_partner_name() {
-    const name = prompt($page.data.t('partnership.name'))?.trim();
+    const name = prompt($page.data.t('partnership.name'))?.trim()
     if (name)
-      await add_partner_name(name);
+      await add_partner_name(name)
   }
 </script>
 
@@ -42,7 +42,7 @@
           color="red"
           size="sm"
           onclick={async () => {
-            await hide_living_tongues_logo(true);
+            await hide_living_tongues_logo(true)
           }}>{$page.data.t('misc.delete')}
           <i class="fas fa-times" /></Button>
       {/if}
@@ -56,7 +56,7 @@
   {:else if admin}
     <Button
       onclick={async () => {
-        await hide_living_tongues_logo(false);
+        await hide_living_tongues_logo(false)
       }}>Show Living Tongues Logo</Button>
   {/if}
   {#each partners as partner}
@@ -70,8 +70,8 @@
           color="red"
           size="sm"
           onclick={async () => {
-            if (confirm($page.data.t('misc.delete') + '?'))
-              await delete_partner(partner.id);
+            if (confirm(`${$page.data.t('misc.delete')}?`))
+              await delete_partner(partner.id)
           }}>{$page.data.t('misc.delete')}
           <i class="fas fa-times" /></Button>
       {/if}
@@ -83,7 +83,7 @@
           width={400}
           title="{partner.name} Logo"
           gcs={partner.logo.specifiable_image_url}
-          on:deleteImage={() => delete_partner_image({fb_storage_path: partner.logo.fb_storage_path, partner_id: partner.id})} />
+          on_delete_image={() => delete_partner_image({ fb_storage_path: partner.logo.fb_storage_path, partner_id: partner.id })} />
       </div>
     {:else}
       {#if can_edit}
@@ -108,4 +108,3 @@
     </Button>
   {/if}
 </div>
-

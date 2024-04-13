@@ -1,36 +1,35 @@
 <script lang="ts">
-  import { EntryFields, type EntryFieldValue, type ExpandedEntry, type IDictionary } from '@living-dictionaries/types';
-  import { page } from '$app/stores';
-  import EntryField from './EntryField.svelte';
-  import { createEventDispatcher } from 'svelte';
-  import EntryDialect from '$lib/components/entry/EntryDialect.svelte';
-  import { DICTIONARIES_WITH_VARIANTS } from '$lib/constants';
-  import EntryMedia from './EntryMedia.svelte';
-  import SelectSource from '$lib/components/entry/EntrySource.svelte';
-  import { Button } from 'svelte-pieces';
-  import Sense from './Sense.svelte';
-  import SupaSense from './SupaSense.svelte';
-  import type { DbOperations } from '$lib/dbOperations';
-  import type { SupaEntry } from '$lib/supabase/database.types';
+  import { type ActualDatabaseEntry, type EntryFieldValue, EntryFields, type ExpandedEntry, type GoalDatabaseEntry, type IDictionary } from '@living-dictionaries/types'
+  import { Button } from 'svelte-pieces'
+  import EntryField from './EntryField.svelte'
+  import EntryMedia from './EntryMedia.svelte'
+  import Sense from './Sense.svelte'
+  import SupaSense from './SupaSense.svelte'
+  import { page } from '$app/stores'
+  import EntryDialect from '$lib/components/entry/EntryDialect.svelte'
+  import { DICTIONARIES_WITH_VARIANTS } from '$lib/constants'
+  import EntrySource from '$lib/components/entry/EntrySource.svelte'
+  import type { DbOperations } from '$lib/dbOperations'
+  import type { SupaEntry } from '$lib/supabase/database.types'
 
-  export let entry: ExpandedEntry;
-  export let supaEntry: SupaEntry;
-  export let dictionary: IDictionary;
-  export let can_edit = false;
-  export let videoAccess = false;
-  export let dbOperations: DbOperations;
+  export let entry: ExpandedEntry
+  export let supaEntry: SupaEntry
+  export let dictionary: IDictionary
+  export let can_edit = false
+  export let videoAccess = false
+  export let dbOperations: DbOperations
 
-  const dispatch = createEventDispatcher<{
-    valueupdate: { field: string; newValue: string | string[] };
-  }>();
-
-  const regularFields: EntryFieldValue[] = ['plural_form', 'morphology', 'interlinearization', 'notes']
+  const regularFields = ['plural_form', 'morphology', 'interlinearization', 'notes'] satisfies EntryFieldValue[]
 
   async function addSense() {
-    await dbOperations.update_sense({entry_id: entry.id, change: { glosses: { new: null }}, sense_id: window.crypto.randomUUID()})
+    await dbOperations.update_sense({ entry_id: entry.id, change: { glosses: { new: null } }, sense_id: window.crypto.randomUUID() })
   }
   async function deleteSense(sense_id: string) {
-    await dbOperations.update_sense({entry_id: entry.id, change: { deleted: true }, sense_id})
+    await dbOperations.update_sense({ entry_id: entry.id, change: { deleted: true }, sense_id })
+  }
+
+  function updateEntry(data: ActualDatabaseEntry) {
+    dbOperations.updateEntry({ data: data as GoalDatabaseEntry, entryId: entry.id })
   }
 </script>
 
@@ -41,11 +40,11 @@
       field="lexeme"
       {can_edit}
       display={$page.data.t('entry_field.lexeme')}
-      on_update={new_value => dispatch('valueupdate', { field: EntryFields.lexeme, newValue: new_value})} />
+      on_update={new_value => updateEntry({ [EntryFields.lexeme]: new_value })} />
   </div>
 
   <div style="grid-area: media;">
-    <EntryMedia {dictionary} {entry} {can_edit} {videoAccess} on:deleteImage on:deleteVideo on:valueupdate />
+    <EntryMedia {dictionary} {entry} {can_edit} {videoAccess} {dbOperations} />
   </div>
 
   <div class="flex flex-col grow" style="grid-area: content;">
@@ -56,13 +55,13 @@
         field="local_orthography"
         {can_edit}
         display={orthography}
-        on_update={new_value => dispatch('valueupdate', { field: `lo${orthographyIndex}`, newValue: new_value})} />
+        on_update={new_value => updateEntry({ [`lo${orthographyIndex}`]: new_value })} />
     {/each}
 
-    <EntryField value={entry.phonetic} field="phonetic" {can_edit} display={$page.data.t('entry_field.phonetic')} on_update={new_value => dispatch('valueupdate', { field: EntryFields.phonetic, newValue: new_value})} />
+    <EntryField value={entry.phonetic} field="phonetic" {can_edit} display={$page.data.t('entry_field.phonetic')} on_update={new_value => updateEntry({ [EntryFields.phonetic]: new_value })} />
 
     {#if !supaEntry?.senses?.length}
-      <Sense sense={entry.senses[0]} {can_edit} glossLanguages={dictionary.glossLanguages} on:valueupdate />
+      <Sense sense={entry.senses[0]} {can_edit} glossLanguages={dictionary.glossLanguages} {updateEntry} />
 
       {#if can_edit}
         <Button class="text-start p-2! mb-2 rounded order-2 hover:bg-gray-100! text-gray-600" form="menu" onclick={addSense}><span class="i-system-uicons-versions text-xl" /> Add Sense</Button>
@@ -75,7 +74,7 @@
           </div>
         </div>
         <div class="flex flex-col border-s-2 ps-3 ms-1">
-          <Sense sense={entry.senses[0]} {can_edit} glossLanguages={dictionary.glossLanguages} on:valueupdate />
+          <Sense sense={entry.senses[0]} {can_edit} glossLanguages={dictionary.glossLanguages} {updateEntry} />
         </div>
       </div>
 
@@ -108,7 +107,7 @@
     {#if entry.dialects?.length || can_edit}
       <div class="md:px-2" class:order-2={!entry.dialects?.length}>
         <div class="rounded text-xs text-gray-500 mt-1 mb-2">{$page.data.t('entry_field.dialects')}</div>
-        <EntryDialect {can_edit} dialects={entry.dialects} dictionaryId={dictionary.id} on_update={new_value => dispatch('valueupdate', { field: EntryFields.dialects, newValue: new_value })} />
+        <EntryDialect {can_edit} dialects={entry.dialects} dictionaryId={dictionary.id} on_update={new_value => updateEntry({ [EntryFields.dialects]: new_value })} />
         <div class="border-b-2 pb-1 mb-2 border-dashed" />
       </div>
     {/if}
@@ -119,7 +118,7 @@
       field="scientific_names"
       {can_edit}
       display={$page.data.t('entry_field.scientific_names')}
-      on_update={new_value => dispatch('valueupdate', { field: EntryFields.scientific_names, newValue: [new_value] })} />
+      on_update={new_value => updateEntry({ [EntryFields.scientific_names]: [new_value] })} />
 
     {#if DICTIONARIES_WITH_VARIANTS.includes(dictionary.id)}
       <EntryField
@@ -127,7 +126,7 @@
         field="variant"
         {can_edit}
         display={$page.data.t('entry_field.variant')}
-        on_update={new_value => dispatch('valueupdate', { field: EntryFields.variant, newValue: new_value})} />
+        on_update={new_value => updateEntry({ [EntryFields.variant]: new_value })} />
     {/if}
 
     {#each regularFields as field}
@@ -136,16 +135,16 @@
         {field}
         {can_edit}
         display={$page.data.t(`entry_field.${field}`)}
-        on_update={new_value => dispatch('valueupdate', { field: EntryFields[field], newValue: new_value})} />
+        on_update={new_value => updateEntry({ [EntryFields[field]]: new_value })} />
     {/each}
 
     {#if entry.sources?.length || can_edit}
       <div class="md:px-2" class:order-2={!entry.sources?.length}>
         <div class="rounded text-xs text-gray-500 mt-1 mb-2">{$page.data.t('entry_field.sources')}</div>
-        <SelectSource
+        <EntrySource
           {can_edit}
           value={entry.sources}
-          on:valueupdate />
+          on_update={new_value => updateEntry({ [EntryFields.sources]: new_value })} />
         <div class="border-b-2 pb-1 mb-2 border-dashed" />
       </div>
     {/if}

@@ -1,15 +1,16 @@
-import { update_sense } from '$lib/supabase/change/sense';
-import { update_sentence } from '$lib/supabase/change/sentence';
-import { updateFirestoreEntry } from '$lib/helpers/entry/update';
-import { deleteEntry, deleteImage, deleteVideo } from '$lib/helpers/delete';
-import { addNewEntry } from './helpers/entry/new';
+import { addNewEntry } from './helpers/entry/new'
+import { update_sense } from '$lib/supabase/change/sense'
+import { update_sentence } from '$lib/supabase/change/sentence'
+import { updateEntry, updateEntryOnline } from '$lib/helpers/entry/update'
+import { deleteEntry, deleteImage, deleteVideo } from '$lib/helpers/delete'
 
 export const dbOperations = {
   addNewEntry,
   deleteEntry,
   deleteImage,
   deleteVideo,
-  updateFirestoreEntry,
+  updateEntry,
+  updateEntryOnline,
   update_sense,
   update_sentence,
 }

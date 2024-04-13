@@ -1,13 +1,13 @@
 <script lang="ts">
-  import { page } from '$app/stores';
-  import SideMenu from './SideMenu.svelte';
-  import { algoliaQueryParams } from '$lib/stores/algolia';
-  import Header from '$lib/components/shell/Header.svelte';
-  import { Button, ResponsiveSlideover, ShowHide } from 'svelte-pieces';
-  import './custom-fonts.css';
+  import { Button, ResponsiveSlideover, ShowHide } from 'svelte-pieces'
+  import SideMenu from './SideMenu.svelte'
+  import { page } from '$app/stores'
+  import { algoliaQueryParams } from '$lib/stores/algolia'
+  import Header from '$lib/components/shell/Header.svelte'
+  import './custom-fonts.css'
 
-  export let data;
-  $: ({dictionary, is_manager, status, show_local_search} = data)
+  export let data
+  $: ({ dictionary, is_manager, status, show_local_search } = data)
 </script>
 
 <ShowHide let:show let:toggle let:set>
@@ -36,7 +36,7 @@
   <div class="flex px-3 print:px-0">
     <ResponsiveSlideover
       side={$page.data.t('page.direction') === 'rtl' ? 'right' : 'left'}
-      showWidth={'md'}
+      showWidth="md"
       on_close={() => set(false)}
       open={show}>
       <div

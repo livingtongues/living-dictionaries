@@ -1,11 +1,12 @@
 <script lang="ts">
-  import { onDestroy } from 'svelte';
+  import { onDestroy } from 'svelte'
+  import { slide } from 'svelte/transition'
 
-  export let checked: boolean;
-  export let uncheck_when_destroyed = false;
-  export let count: number;
-  export let label: string;
-  $: id = label.replace(' ', '');
+  export let checked: boolean
+  export let uncheck_when_destroyed = false
+  export let count: number
+  export let label: string
+  $: id = label.replace(' ', '')
 
   onDestroy(() => {
     if (uncheck_when_destroyed)
@@ -13,7 +14,7 @@
   })
 </script>
 
-<div class="flex items-center my-2">
+<div class="flex items-center my-2" transition:slide>
   <input
     {id}
     type="checkbox"

@@ -1,116 +1,92 @@
 <script lang="ts">
-  import { page } from '$app/stores';
-  import { Collection } from 'sveltefirets';
-  import { orderBy, where } from 'firebase/firestore';
-  import { Button, ResponsiveTable } from 'svelte-pieces';
-  import Header from '$lib/components/shell/Header.svelte';
-  import SeoMetaTags from '$lib/components/SeoMetaTags.svelte';
-  import { downloadObjectsAsCSV } from '$lib/export/csv';
-  import { dictionary_headers, prepareDictionaryForCsv } from '$lib/export/prepareDictionariesForCsv';
+  import { Button, ResponsiveTable } from 'svelte-pieces'
+  import { page } from '$app/stores'
+  import Header from '$lib/components/shell/Header.svelte'
+  import SeoMetaTags from '$lib/components/SeoMetaTags.svelte'
+  import { downloadObjectsAsCSV } from '$lib/export/csv'
+  import { dictionary_headers, prepareDictionaryForCsv } from '$lib/export/prepareDictionariesForCsv'
 
   export let data
-  $: ({admin} = data)
-
-
-  $: publicDictionaries = data.publicDictionaries || [];
-
-  let queryConstraints = [orderBy('name'), where('public', '==', true)];
-  $: if ($admin)
-    queryConstraints = [orderBy('name')];
-
+  $: ({ admin, dictionaries } = data)
 </script>
 
 <Header>{$page.data.t('home.list_of_dictionaries')}</Header>
 
 <div class="p-3 sticky top-0 relative z-2 h-screen flex flex-col bg-white">
-  <Collection
-    path="dictionaries"
-    startWith={publicDictionaries}
-    {queryConstraints}
-    let:data={dictionaries}>
-    <div>
-      <Button
-        form="filled"
-        color="black"
-        onclick={() =>
-          downloadObjectsAsCSV(
-            dictionary_headers,
-            dictionaries.map(prepareDictionaryForCsv),
-            'living-dictionaries-list'
-          )}>
-        <i class="fas fa-download mr-1" />
-        {$page.data.t('misc.download')}
-        (.csv)
+  <div>
+    <Button
+      form="filled"
+      color="black"
+      onclick={() =>
+        downloadObjectsAsCSV(
+          dictionary_headers,
+          dictionaries.map(prepareDictionaryForCsv),
+          'living-dictionaries-list',
+        )}>
+      <i class="fas fa-download mr-1" />
+      {$page.data.t('misc.download')}
+      (.csv)
+    </Button>
+    {#if $admin}
+      <Button href="/admin/dictionaries" color="black">
+        <i class="far fa-pencil mr-1" />
+        Edit
+        <i class="far fa-key fa-sm ml-1" />
       </Button>
-      {#if $admin}
-        <Button href="/admin/dictionaries" color="black">
-          <i class="far fa-pencil mr-1" />
-          Edit
-          <i class="far fa-key fa-sm ml-1" />
-        </Button>
-      {/if}
-    </div>
-    <ResponsiveTable stickyColumn stickyHeading class="my-1">
-      <thead>
-        <th>
-          {$page.data.t('dictionary.name_of_language')}
-        </th>
-        <th> {$page.data.t('about.entry_count')} </th>
-        <th> URL </th>
-        <th> ISO 639-3 </th>
-        <th> Glottocode </th>
-        <th>
-          {$page.data.t('dictionary.location')}
-        </th>
-        <th>
-          {$page.data.t('dictionary.latitude')}
-        </th>
-        <th>
-          {$page.data.t('dictionary.longitude')}
-        </th>
-      </thead>
-      {#each dictionaries as dictionary}
-        <tr>
-          <td class="font-semibold">
-            <a href={dictionary.url}>{dictionary.name}</a>
-          </td>
-          <td>
-            {dictionary.url?.startsWith('http://talkingdictionary') ? '' : dictionary.entryCount}
-          </td>
-          <td class="underline">
-            {#if dictionary.url}
-              <a href={dictionary.url} target="_blank" rel="noreferrer">{dictionary.url}</a>
-            {:else}
-              <a href={`/${dictionary.id}`}>https://livingdictionaries.app/{dictionary.id}</a>
-            {/if}
-          </td>
-          <td>
-            {dictionary.iso6393 ? dictionary.iso6393 : ''}
-          </td>
-          <td>
-            {dictionary.glottocode ? dictionary.glottocode : ''}
-          </td>
-          <td>
-            {dictionary.location ? dictionary.location : ''}
-          </td>
-          <td class="whitespace-nowrap">
-            {dictionary.coordinates
-              ? dictionary.coordinates.latitude +
-                '° ' +
-                (dictionary.coordinates.latitude < 0 ? 'S' : 'N')
-              : ''}
-          </td>
-          <td class="whitespace-nowrap">
-            {dictionary.coordinates
-              ? dictionary.coordinates.longitude +
-                '° ' +
-                (dictionary.coordinates.longitude < 0 ? 'W' : 'E')
-              : ''}
-          </td>
-        </tr>
-      {/each}
-    </ResponsiveTable>
-  </Collection>
+    {/if}
+  </div>
+  <ResponsiveTable stickyColumn stickyHeading class="my-1">
+    <thead>
+      <th>
+        {$page.data.t('dictionary.name_of_language')}
+      </th>
+      <th> {$page.data.t('about.entry_count')} </th>
+      <th> URL </th>
+      <th> ISO 639-3 </th>
+      <th> Glottocode </th>
+      <th>
+        {$page.data.t('dictionary.location')}
+      </th>
+      <th>
+        {$page.data.t('dictionary.latitude')}
+      </th>
+      <th>
+        {$page.data.t('dictionary.longitude')}
+      </th>
+    </thead>
+    {#each dictionaries as { id, url, name, entryCount, iso6393, glottocode, location, coordinates }}
+      <tr>
+        <td class="font-semibold">
+          <a href={url}>{name}</a>
+        </td>
+        <td>
+          {url?.startsWith('http://talkingdictionary') ? '' : entryCount}
+        </td>
+        <td class="underline">
+          {#if url}
+            <a href={url} target="_blank" rel="noreferrer">{url}</a>
+          {:else}
+            <a href={`/${id}`}>https://livingdictionaries.app/{id}</a>
+          {/if}
+        </td>
+        <td>
+          {iso6393 || ''}
+        </td>
+        <td>
+          {glottocode || ''}
+        </td>
+        <td>
+          {location || ''}
+        </td>
+        <td class="whitespace-nowrap">
+          {coordinates ? `${coordinates.latitude}° ${coordinates.latitude < 0 ? 'S' : 'N'}` : ''}
+        </td>
+        <td class="whitespace-nowrap">
+          {coordinates ? `${coordinates.longitude}° ${coordinates.longitude < 0 ? 'W' : 'E'}` : ''}
+        </td>
+      </tr>
+    {/each}
+  </ResponsiveTable>
 </div>
 
 <SeoMetaTags
