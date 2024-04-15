@@ -271,8 +271,8 @@ importers:
         specifier: ^3.6.8
         version: 3.6.8(@babel/core@7.23.9)(postcss@8.4.37)(svelte@4.2.12)
       svelte-pieces:
-        specifier: 2.0.0-next.13
-        version: 2.0.0-next.13(svelte@4.2.12)
+        specifier: 2.0.0-next.14
+        version: 2.0.0-next.14(svelte@4.2.12)
       sveltefirets:
         specifier: 0.0.42
         version: 0.0.42(firebase@10.9.0)(svelte@4.2.12)
@@ -13161,8 +13161,8 @@ packages:
       svelte: 4.2.12
     dev: true
 
-  /svelte-pieces@2.0.0-next.13(svelte@4.2.12):
-    resolution: {integrity: sha512-kT6e/OiXOmrvfaVzPFQ6nVcRB1Uj7CYMyEc/FcponNotPyGoCx1tZlz32GM90pNMz8Npa3Tt3PK12roXVuQlrA==}
+  /svelte-pieces@2.0.0-next.14(svelte@4.2.12):
+    resolution: {integrity: sha512-GPE9Qwo+dMyULMicvzAqaF1yrgzAljCgSphdJ6R9QDNrHbTadUJlF80t+P9T9EV8A025yu0G4hyMoPsMFA7IxQ==}
     peerDependencies:
       svelte: ^3.55.0 || ^4.0.0 || ^5.0.0
     dependencies:

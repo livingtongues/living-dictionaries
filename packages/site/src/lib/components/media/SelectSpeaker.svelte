@@ -1,16 +1,17 @@
 <script lang="ts">
-  import { page } from '$app/stores';
-  import type { ISpeaker } from '@living-dictionaries/types';
+  import type { ISpeaker } from '@living-dictionaries/types'
+  import { page } from '$app/stores'
 
   export let speakers: ISpeaker[]
   export let select_speaker: (speaker_id: string) => Promise<void> = undefined
-  export let initialSpeakerId: string = undefined;
+  export let add_speaker: (speaker: ISpeaker) => Promise<string>
+  export let initialSpeakerId: string = undefined
 
-  const addSpeaker = 'AddSpeaker';
-  $: speakerId = initialSpeakerId;
+  const addSpeaker = 'AddSpeaker'
+  $: speakerId = initialSpeakerId
 
   function autofocus(node: HTMLSelectElement) {
-    setTimeout(() => node.focus(), 5);
+    setTimeout(() => node.focus(), 5)
   }
 </script>
 
@@ -54,12 +55,12 @@
 {#if speakerId === addSpeaker}
   {#await import('$lib/components/media/AddSpeaker.svelte') then { default: AddSpeaker }}
     <AddSpeaker
-      on:close={() => {
-        speakerId = '';
+      on_close={() => {
+        speakerId = ''
       }}
-      on:newSpeaker={(event) => {
-        speakerId = event.detail.id;
-        select_speaker?.(speakerId);
+      on_add_speaker={async (speaker) => {
+        speakerId = await add_speaker(speaker)
+        select_speaker?.(speakerId)
       }} />
   {/await}
 {/if}

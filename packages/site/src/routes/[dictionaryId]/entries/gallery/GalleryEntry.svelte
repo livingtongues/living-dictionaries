@@ -26,7 +26,7 @@
         title={entry.lexeme}
         gcs={entry.senses?.[0]?.photo_files?.[0].specifiable_image_url}
         {can_edit}
-        on_delete_image={() => deleteImage(entry, dictionary.id)} />
+        on_delete_image={() => deleteImage(entry)} />
     </div>
     <a href={entry.id} style="background: #f3f3f3;" class="block p-[10px] h-60px">
       <div class="font-semibold">

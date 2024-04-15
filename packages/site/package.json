@@ -70,7 +70,7 @@
     "satori-html": "^0.3.0",
     "svelte": "^4.2.12",
     "svelte-check": "^3.6.8",
-    "svelte-pieces": "2.0.0-next.13",
+    "svelte-pieces": "2.0.0-next.14",
     "sveltefirets": "0.0.42",
     "topojson-client": "^3.1.0",
     "tslib": "^2.6.1",

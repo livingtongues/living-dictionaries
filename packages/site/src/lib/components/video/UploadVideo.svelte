@@ -1,54 +1,56 @@
 <script lang="ts">
-  import { onDestroy, onMount } from 'svelte';
-  import { page } from '$app/stores';
-  import type { GoalDatabaseVideo, IUser, IVideoCustomMetadata } from '@living-dictionaries/types';
-  import { getStorage, ref, uploadBytesResumable, type TaskState, type UploadTask, StorageError } from 'firebase/storage';
-  import { addVideo } from '$lib/helpers/media/update';
-  import { tweened } from 'svelte/motion';
-  import { cubicOut } from 'svelte/easing';
+  import { onDestroy, onMount } from 'svelte'
+  import type { GoalDatabaseVideo, IUser, IVideoCustomMetadata } from '@living-dictionaries/types'
+  import type { StorageError, TaskState, UploadTask } from 'firebase/storage'
+  import { getStorage, ref, uploadBytesResumable } from 'firebase/storage'
+  import { tweened } from 'svelte/motion'
+  import { cubicOut } from 'svelte/easing'
+  import { page } from '$app/stores'
+  import type { DbOperations } from '$lib/dbOperations'
 
   export let file: File | Blob
   export let entryId: string
-  export let speakerId: string;
-  export let dictionary_id: string;
-  export let user: IUser;
+  export let speakerId: string
+  export let dictionary_id: string
+  export let user: IUser
+  export let dbOperations: DbOperations
 
-  let uploadTask: UploadTask;
-  let taskState: TaskState;
-  let error: StorageError;
-  let success: boolean;
+  let uploadTask: UploadTask
+  let taskState: TaskState
+  let error: StorageError
+  let success: boolean
   const progress = tweened(0, {
     duration: 2000,
     easing: cubicOut,
-  });
-  $: percentage = Math.floor($progress * 100);
+  })
+  $: percentage = Math.floor($progress * 100)
 
   onMount(() => {
-    if (!file || !entryId) return;
+    if (!file || !entryId) return
 
-    const fileTypeSuffix = file.type.split('/')[1].split(';')[0]; // turns 'video/webm;codecs=vp8,opus' to 'webm' and 'video/mp4' to 'mp4'
+    const [fileTypeSuffix] = file.type.split('/')[1].split(';') // turns 'video/webm;codecs=vp8,opus' to 'webm' and 'video/mp4' to 'mp4'
 
-    const storagePath = `${dictionary_id}/videos/${entryId}_${new Date().getTime()}.${fileTypeSuffix}`;
+    const storagePath = `${dictionary_id}/videos/${entryId}_${new Date().getTime()}.${fileTypeSuffix}`
 
     const customMetadata: IVideoCustomMetadata & Record<string, string> = {
       uploadedByUid: user.uid,
       uploadedByName: user.displayName,
-    };
+    }
 
     // https://firebase.google.com/docs/storage/web/upload-files
-    const storage = getStorage();
-    const videoRef = ref(storage, storagePath);
-    uploadTask = uploadBytesResumable(videoRef, file, { customMetadata });
+    const storage = getStorage()
+    const videoRef = ref(storage, storagePath)
+    uploadTask = uploadBytesResumable(videoRef, file, { customMetadata })
     uploadTask.on(
       'state_changed',
       (snapshot) => {
-        const progressAmount = snapshot.bytesTransferred / snapshot.totalBytes;
-        progress.set(progressAmount);
-        taskState = snapshot.state;
+        const progressAmount = snapshot.bytesTransferred / snapshot.totalBytes
+        progress.set(progressAmount)
+        taskState = snapshot.state
       },
       (err) => {
-        alert(`${$page.data.t('misc.error')}: ${err}`);
-        error = err;
+        alert(`${$page.data.t('misc.error')}: ${err}`)
+        error = err
       },
       async () => {
         try {
@@ -56,22 +58,22 @@
             path: storagePath,
             ab: user.uid,
             sp: [speakerId],
-          };
-          await addVideo(entryId, dictionary_id, database_video);
+          }
+          await dbOperations.addVideo(entryId, database_video)
 
-          success = true;
+          success = true
         } catch (err) {
-          alert(`${$page.data.t('misc.error')}: ${err}`);
-          error = err;
+          alert(`${$page.data.t('misc.error')}: ${err}`)
+          error = err
         }
-      }
-    );
-  });
+      },
+    )
+  })
 
   onDestroy(() => {
-    if (taskState === 'paused') uploadTask.resume();
-    if (taskState === 'running') uploadTask?.cancel();
-  });
+    if (taskState === 'paused') uploadTask.resume()
+    if (taskState === 'running') uploadTask?.cancel()
+  })
 </script>
 
 {#if error}

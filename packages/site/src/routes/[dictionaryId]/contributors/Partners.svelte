@@ -4,7 +4,7 @@
   import type { Readable } from 'svelte/store'
   import { page } from '$app/stores'
   import Image from '$lib/components/image/Image.svelte'
-  import ImageDropZone from '$lib/components/image/ImageDropZone.svelte'
+  import AddImage from '$lib/components/image/AddImage.svelte'
 
   export let admin = 0
   export let can_edit = false
@@ -87,17 +87,9 @@
       </div>
     {:else}
       {#if can_edit}
-        <ImageDropZone class="p-3 rounded max-w-400px" let:file>
-          <span slot="label">{$page.data.t('misc.upload')}</span>
-          {#if file}
-            {@const image_upload_status = add_partner_image(partner.id, file)}
-            {#await import('$lib/components/image/UploadImageStatus.svelte') then { default: UploadImageStatus }}
-              <div class="flex flex-col min-h-200px max-w-400px">
-                <UploadImageStatus {image_upload_status} />
-              </div>
-            {/await}
-          {/if}
-        </ImageDropZone>
+        <div class="max-w-400px hover:bg-gray-100 h-100px flex flex-col">
+          <AddImage upload_image={file => add_partner_image(partner.id, file)} />
+        </div>
       {/if}
     {/if}
   {/each}
