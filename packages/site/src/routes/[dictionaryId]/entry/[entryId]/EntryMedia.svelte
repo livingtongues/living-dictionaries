@@ -1,28 +1,30 @@
 <script lang="ts">
-  import { page } from '$app/stores';
-  import { ShowHide } from 'svelte-pieces';
-  import type { ExpandedEntry, IDictionary } from '@living-dictionaries/types';
-  import AddImage from '../../entries/AddImage.svelte';
-  import Image from '$lib/components/image/Image.svelte';
-  import Video from '../../entries/Video.svelte';
-  import GeoTaggingModal from './GeoTaggingModal.svelte';
-  import InitableShowHide from './InitableShowHide.svelte';
-  import MapboxStatic from '$lib/components/maps/mapbox/static/MapboxStatic.svelte';
+  import { ShowHide } from 'svelte-pieces'
+  import { EntryFields, type ExpandedEntry, type IDictionary } from '@living-dictionaries/types'
+  import AddImage from '../../entries/AddImage.svelte'
+  import Video from '../../entries/Video.svelte'
+  import GeoTaggingModal from './GeoTaggingModal.svelte'
+  import InitableShowHide from './InitableShowHide.svelte'
+  import Image from '$lib/components/image/Image.svelte'
+  import { page } from '$app/stores'
+  import MapboxStatic from '$lib/components/maps/mapbox/static/MapboxStatic.svelte'
+  import type { DbOperations } from '$lib/dbOperations'
 
-  export let entry: ExpandedEntry;
-  export let dictionary: IDictionary;
-  export let videoAccess = false;
-  export let can_edit = false;
+  export let entry: ExpandedEntry
+  export let dictionary: IDictionary
+  export let videoAccess = false
+  export let can_edit = false
+  export let dbOperations: DbOperations
 
-  $: first_sound_file = entry.sound_files?.[0];
-  $: first_photo = entry.senses?.[0].photo_files?.[0];
-  $: first_video = entry.senses?.[0].video_files?.[0];
+  $: first_sound_file = entry.sound_files?.[0]
+  $: first_photo = entry.senses?.[0].photo_files?.[0]
+  $: first_video = entry.senses?.[0].video_files?.[0]
 </script>
 
 <div class="flex flex-col">
   {#if first_sound_file || can_edit}
     {#await import('../../entries/Audio.svelte') then { default: Audio }}
-      <Audio {entry} {can_edit} context="entry" class="h-20 mb-2 rounded-md bg-gray-100 !px-3" />
+      <Audio {entry} {can_edit} context="entry" class="h-20 mb-2 rounded-md bg-gray-100 !px-3" updateEntryOnline={dbOperations.updateEntryOnline} />
     {/await}
   {/if}
 
@@ -35,10 +37,11 @@
         title={entry.lexeme}
         gcs={first_photo.specifiable_image_url}
         {can_edit}
-        on:deleteImage />
+        on_delete_image={async () => await dbOperations.deleteImage(entry, dictionary.id)} />
     </div>
   {:else if can_edit}
     <AddImage
+      updateEntryOnline={dbOperations.updateEntryOnline}
       dictionaryId={dictionary.id}
       entryId={entry.id}
       class="rounded-md h-20 bg-gray-100 mb-2">
@@ -55,7 +58,7 @@
         lexeme={entry.lexeme}
         video={first_video}
         {can_edit}
-        on:deleteVideo />
+        on_delete_video={async () => await dbOperations.deleteVideo(entry, dictionary.id)} />
     </div>
   {:else if videoAccess && can_edit}
     <ShowHide let:show let:toggle>
@@ -71,7 +74,7 @@
       </button>
       {#if show}
         {#await import('$lib/components/video/AddVideo.svelte') then { default: AddVideo }}
-          <AddVideo {entry} on:close={toggle} />
+          <AddVideo {entry} on_close={toggle} />
         {/await}
       {/if}
     </ShowHide>
@@ -115,7 +118,7 @@
         coordinates={entry.coordinates}
         initialCenter={dictionary.coordinates}
         on:close={toggle}
-        on:valueupdate />
+        on_update={new_value => dbOperations.updateEntry({ data: { [EntryFields.coordinates]: new_value }, entryId: entry.id })} />
     {/if}
   </InitableShowHide>
 </div>

@@ -1,8 +1,8 @@
 <script lang="ts">
-  import { page } from '$app/stores';
-  import User from './User.svelte';
-  import { Button, ShowHide } from 'svelte-pieces';
-  import { firebaseConfig } from 'sveltefirets';
+  import { Button, ShowHide } from 'svelte-pieces'
+  import { firebaseConfig } from 'sveltefirets'
+  import User from './User.svelte'
+  import { page } from '$app/stores'
 </script>
 
 <header class="print:hidden sticky top-0 left-0 right-0 flex items-center bg-white h-12 z-2 whitespace-nowrap">
