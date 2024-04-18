@@ -1,18 +1,17 @@
 import type { Variant, Viewport } from 'kitbook'
+import type { IDictionary } from '@living-dictionaries/types'
 import type Component from './GalleryEntry.svelte'
 import { butterfly_google_storage_url } from '$lib/mocks/entries'
-import type { IDictionary } from '@living-dictionaries/types'
 import { logDbOperations } from '$lib/mocks/db'
 
 // optionally override your kitbook viewports for all variants in this file
 export const viewports: Viewport[] = [
-  { name: 'Mobile', width: 320, height: 380}
+  { name: 'Mobile', width: 320, height: 380 },
 ]
 
-export const languages = [];
+export const languages = []
 
-
-const dictionary:IDictionary = {
+const dictionary: IDictionary = {
   glossLanguages: ['es', 'it'],
 } as IDictionary
 
@@ -29,18 +28,19 @@ export const variants: Variant<Component>[] = [
           {
             glosses: {
               es: 'árbol',
-              it: 'albero'
+              it: 'albero',
             },
             photo_files: [
               {
                 specifiable_image_url: butterfly_google_storage_url,
                 fb_storage_path: null,
-                uid_added_by: null
-              }
-            ]
-          }
-        ]
-      }
+                storage_url: null,
+                uid_added_by: null,
+              },
+            ],
+          },
+        ],
+      },
     },
   },
   {
@@ -54,18 +54,19 @@ export const variants: Variant<Component>[] = [
         senses: [
           {
             glosses: {
-              it: 'leone'
+              it: 'leone',
             },
             photo_files: [
               {
                 specifiable_image_url: butterfly_google_storage_url,
                 fb_storage_path: null,
-                uid_added_by: null
-              }
-            ]
-          }
-        ]
-      }
+                storage_url: null,
+                uid_added_by: null,
+              },
+            ],
+          },
+        ],
+      },
     },
   },
   {
@@ -85,12 +86,13 @@ export const variants: Variant<Component>[] = [
               {
                 specifiable_image_url: butterfly_google_storage_url,
                 fb_storage_path: null,
-                uid_added_by: null
-              }
-            ]
-          }
-        ]
-      }
+                storage_url: null,
+                uid_added_by: null,
+              },
+            ],
+          },
+        ],
+      },
     },
   },
   {
@@ -106,12 +108,13 @@ export const variants: Variant<Component>[] = [
               {
                 specifiable_image_url: butterfly_google_storage_url,
                 fb_storage_path: null,
-                uid_added_by: null
-              }
-            ]
-          }
-        ]
-      }
+                storage_url: null,
+                uid_added_by: null,
+              },
+            ],
+          },
+        ],
+      },
     },
   },
 ]
