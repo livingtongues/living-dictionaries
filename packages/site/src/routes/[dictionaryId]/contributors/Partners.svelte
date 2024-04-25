@@ -88,7 +88,7 @@
     {:else}
       {#if can_edit}
         <div class="max-w-400px hover:bg-gray-100 h-100px flex flex-col">
-          <AddImage upload_image={file => add_partner_image(partner.id, file)} />
+          <AddImage border upload_image={file => add_partner_image(partner.id, file)} />
         </div>
       {/if}
     {/if}

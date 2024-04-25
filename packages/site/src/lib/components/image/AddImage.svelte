@@ -5,9 +5,10 @@
   import { page } from '$app/stores'
 
   export let upload_image: (file: File) => Readable<ImageUploadStatus>
+  export let border = false
 </script>
 
-<ImageDropZone class="p-3 rounded" let:file>
+<ImageDropZone {border} class="p-3 rounded" let:file>
   <svelte:fragment slot="label">
     <slot>{$page.data.t('misc.upload')}</slot>
   </svelte:fragment>

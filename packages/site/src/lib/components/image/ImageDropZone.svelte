@@ -1,6 +1,7 @@
 <script lang="ts">
   import { page } from '$app/stores'
 
+  export let border: boolean
   let dragging = false
   let file: File
 
@@ -29,8 +30,9 @@
 {#if !file}
   <label
     class:dragging
+    class:dashed-border={border}
     class="{$$props.class} text-gray-600
-      h-full grow-1 flex flex-col items-center justify-center border-2 border-dashed
+      h-full grow-1 flex flex-col items-center justify-center
       cursor-pointer"
     title="Add Photo"
     on:drop|preventDefault={e => handleImage(e.dataTransfer.files)}
@@ -60,5 +62,8 @@
 <style>
   .dragging {
     --at-apply: bg-blue-200 border-blue-300 text-blue-700;
+  }
+  .dashed-border {
+    --at-apply: border-2 border-dashed;
   }
 </style>

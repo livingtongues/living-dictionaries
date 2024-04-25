@@ -83,7 +83,7 @@
       on_delete_image={async () => await updateDictionary({ featuredImage: null })} />
   {:else}
     <div class="hover:bg-gray-100 min-h-150px flex flex-col">
-      <AddImage upload_image={add_featured_image} />
+      <AddImage border upload_image={add_featured_image} />
     </div>
   {/if}
   <div class="mb-5" />

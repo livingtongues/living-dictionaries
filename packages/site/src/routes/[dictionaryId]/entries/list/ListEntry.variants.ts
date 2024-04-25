@@ -1,47 +1,49 @@
-import type { DeprecatedVariant } from 'kitbook'
+import type { Variant, VariantMeta } from 'kitbook'
 import type Component from './ListEntry.svelte'
 import { basic_mock_dictionary } from '$lib/mocks/dictionaries'
 import { complex, simple } from '$lib/mocks/entries'
 import { logDbOperations } from '$lib/mocks/db'
 
-export const variants: DeprecatedVariant<Component>[] = [
-  {
-    name: 'complex',
-    props: {
-      dbOperations: logDbOperations,
-      dictionary: basic_mock_dictionary,
-      entry: complex,
-      can_edit: true,
-    },
-  },
-  {
-    name: 'video access',
+export const shared_meta: VariantMeta = {
+  viewports: [
+    { width: 400, height: 100 },
+  ],
+}
+
+const shared = {
+  dbOperations: logDbOperations,
+  dictionary: basic_mock_dictionary,
+  can_edit: true,
+} satisfies Partial<Variant<Component>>
+
+export const Complex: Variant<Component> = {
+  ...shared,
+  entry: complex,
+}
+
+export const Video_Access: Variant<Component> = {
+  ...shared,
+  entry: simple,
+  videoAccess: true,
+  _meta: {
     languages: [],
     viewports: [{ width: 400, height: 100 }],
-    props: {
-      dbOperations: logDbOperations,
-      dictionary: basic_mock_dictionary,
-      entry: simple,
-      can_edit: true,
-      videoAccess: true,
-    },
   },
-  {
-    name: 'jewish-neo-aramaic',
+}
+
+export const Jewish_Neo_Aramaic: Variant<Component> = {
+  ...shared,
+  dictionary: {
+    id: 'jewish-neo-aramaic',
+    name: 'Jewish Neo-Aramaic',
+    glossLanguages: ['en'],
+  },
+  entry: complex,
+  videoAccess: true,
+  _meta: {
     description: 'This dictionary has an exception where we show dialects and example sentences in the list view.',
-    props: {
-      dbOperations: logDbOperations,
-      dictionary: {
-        id: 'jewish-neo-aramaic',
-        name: 'Jewish Neo-Aramaic',
-        glossLanguages: ['en'],
-      },
-      entry: complex,
-      can_edit: true,
-      videoAccess: true,
-    },
   },
-]
+}
 
 // const extras = [
 //   {

@@ -39,9 +39,6 @@
   $: if ($entries.size && !cache_search_index_ready && !search_index_ready)
     page_entries.set(Array.from($entries.values()).slice(current_page_index * entries_per_page, (current_page_index + 1) * entries_per_page))
 
-  $: console.info({ $entries, entry_count: $entries.size, $page_entries })
-  $: console.info({ $status })
-
   $: if (cache_search_index_ready || search_index_ready)
     search($search_params, current_page_index)
 

@@ -150,7 +150,7 @@
         on_delete_image={() => dbOperations.deleteImage(entry)} />
     </div>
   {:else if can_edit}
-    <div class="w-12 bg-gray-100 flex flex-col h-full">
+    <div class="w-12 bg-gray-100 flex flex-col">
       <AddImage upload_image={file => dbOperations.addImage(entry.id, file)}>
         <div class="text-xs">
           {$page.data.t('entry_field.photo')}
