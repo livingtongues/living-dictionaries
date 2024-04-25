@@ -1,7 +1,12 @@
 {
   "name": "@living-dictionaries/functions",
-  "version": "0.0.1",
   "type": "commonjs",
+  "version": "0.0.1",
+  "private": true,
+  "main": "lib/index.js",
+  "engines": {
+    "node": "18"
+  },
   "scripts": {
     "build": "tsc",
     "build:watch": "tsc --watch",
@@ -14,10 +19,6 @@
     "logs": "firebase functions:log",
     "test": "vitest"
   },
-  "engines": {
-    "node": "18"
-  },
-  "main": "lib/index.js",
   "dependencies": {
     "algoliasearch": "^4.13.0",
     "firebase-admin": "^12.0.0",
@@ -30,6 +31,5 @@
     "node-fetch": "^2.6.7",
     "typescript": "^5.1.6",
     "vitest": "^1.4.0"
-  },
-  "private": true
+  }
 }
