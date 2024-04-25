@@ -1,4 +1,4 @@
-import type { Variant, Viewport } from 'kitbook'
+import type { DeprecatedVariant, Viewport } from 'kitbook'
 import type { ExpandedEntry } from '@living-dictionaries/types'
 import type Component from './Audio.svelte'
 import { logDbOperations } from '$lib/mocks/db'
@@ -15,7 +15,7 @@ const entry: ExpandedEntry = {
   ],
 }
 
-export const variants: Variant<Component>[] = [
+export const variants: DeprecatedVariant<Component>[] = [
   {
     name: 'List sound',
     props: {

@@ -1,4 +1,4 @@
-import type { Variant, Viewport } from 'kitbook'
+import type { DeepPartial, DeprecatedVariant, Viewport } from 'kitbook'
 import type { IDictionary } from '@living-dictionaries/types'
 import type Component from './EntryDisplay.svelte'
 import { logDbOperations } from '$lib/mocks/db'
@@ -15,10 +15,6 @@ export const viewports: Viewport[] = [
     height: 667,
   },
 ]
-
-type DeepPartial<T> = {
-  [P in keyof T]?: T[P] extends object ? DeepPartial<T[P]> : T[P];
-}
 
 const defaultDictionary: IDictionary = {
   name: 'Banange',
@@ -55,7 +51,7 @@ const defaultEntry = {
 //   ]
 // }
 
-const partialVariants: DeepPartial<Variant<Component>[]> = [
+const partialVariants: DeepPartial<DeprecatedVariant<Component>[]> = [
   {
     name: '2 senses',
     props: {
@@ -199,7 +195,7 @@ const partialVariants: DeepPartial<Variant<Component>[]> = [
   },
 ]
 
-export const variants: Variant<Component>[] = (partialVariants as Variant<Component>[]).map(variant => ({
+export const variants: DeprecatedVariant<Component>[] = (partialVariants as DeprecatedVariant<Component>[]).map(variant => ({
   ...variant,
   props: {
     ...variant.props,

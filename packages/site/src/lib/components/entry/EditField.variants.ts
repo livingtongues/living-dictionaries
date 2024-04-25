@@ -1,16 +1,16 @@
-import type { Variant, Viewport } from 'kitbook';
-import type Component from './EditField.svelte';
+import type { DeprecatedVariant, Viewport } from 'kitbook'
+import type Component from './EditField.svelte'
 
 export const viewports: Viewport[] = [{
   width: 700,
   height: 200,
 }]
 
-const on_update = (new_value: string) => {
+function on_update(new_value: string) {
   console.info('new_value', new_value)
 }
 
-export const variants: Variant<Component>[] = [
+export const variants: DeprecatedVariant<Component>[] = [
   {
     name: 'Assamese Gloss',
     description: 'should have keyboard icon',
@@ -73,7 +73,7 @@ export const variants: Variant<Component>[] = [
     languages: [],
     tests: {
       clientSideRendered: true, // let rich-text editor load in
-    }
+    },
   },
   {
     name: 'Phonetic',
@@ -90,6 +90,6 @@ export const variants: Variant<Component>[] = [
     },
     tests: {
       clientSideRendered: true, // so that keyboard can load in
-    }
+    },
   },
 ]

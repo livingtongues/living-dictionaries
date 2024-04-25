@@ -1,12 +1,15 @@
-import { sveltekit } from '@sveltejs/kit/vite';
-import { defineConfig, type Plugin } from 'vite';
-import UnoCSS from '@unocss/svelte-scoped/vite';
-import { kitbook } from 'kitbook/plugins/vite';
-import kitbookConfig from './kitbook.config';
-import { readFileSync } from 'fs';
+/* eslint-disable node/prefer-global/process */
+import { readFileSync } from 'node:fs'
+import { sveltekit } from '@sveltejs/kit/vite'
+import { type Plugin, defineConfig } from 'vite'
+import UnoCSS from '@unocss/svelte-scoped/vite'
+import { kitbook } from 'kitbook/plugins/vite'
+import kitbookConfig from './kitbook.config'
 
 export default defineConfig({
+  // @ts-expect-error - vite version types oddity
   plugins: [
+    // @ts-expect-error - vite version types oddity
     kitbook(kitbookConfig),
     UnoCSS({
       injectReset: '@unocss/reset/tailwind.css',
@@ -44,7 +47,7 @@ export default defineConfig({
       '@sentry/browser',
     ],
   },
-});
+})
 
 function getReplacements() {
   if (typeof process !== 'undefined' && process.env.VERCEL_ANALYTICS_ID) {
@@ -63,13 +66,13 @@ function rawFonts(extensions: string[]): Plugin {
   return {
     name: 'vite-plugin-raw-fonts',
     resolveId(id) {
-      return extensions.some((ext) => id.endsWith(ext)) ? id : null;
+      return extensions.some(ext => id.endsWith(ext)) ? id : null
     },
     transform(code, id) {
-      if (extensions.some((ext) => id.endsWith(ext))) {
-        const buffer = readFileSync(id);
-        return { code: `export default ${JSON.stringify(buffer)}`, map: null };
+      if (extensions.some(ext => id.endsWith(ext))) {
+        const buffer = readFileSync(id)
+        return { code: `export default ${JSON.stringify(buffer)}`, map: null }
       }
-    }
-  };
+    },
+  }
 }

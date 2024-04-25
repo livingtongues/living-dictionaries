@@ -1,10 +1,10 @@
-import type { Variant } from 'kitbook';
-import type Component from './ListEntry.svelte';
-import { basic_mock_dictionary } from '$lib/mocks/dictionaries';
-import { complex, simple } from '$lib/mocks/entries';
-import { logDbOperations } from '$lib/mocks/db';
+import type { DeprecatedVariant } from 'kitbook'
+import type Component from './ListEntry.svelte'
+import { basic_mock_dictionary } from '$lib/mocks/dictionaries'
+import { complex, simple } from '$lib/mocks/entries'
+import { logDbOperations } from '$lib/mocks/db'
 
-export const variants: Variant<Component>[] = [
+export const variants: DeprecatedVariant<Component>[] = [
   {
     name: 'complex',
     props: {
@@ -12,19 +12,19 @@ export const variants: Variant<Component>[] = [
       dictionary: basic_mock_dictionary,
       entry: complex,
       can_edit: true,
-    }
+    },
   },
   {
     name: 'video access',
     languages: [],
-    viewports: [{width: 400, height: 100}],
+    viewports: [{ width: 400, height: 100 }],
     props: {
       dbOperations: logDbOperations,
       dictionary: basic_mock_dictionary,
       entry: simple,
       can_edit: true,
       videoAccess: true,
-    }
+    },
   },
   {
     name: 'jewish-neo-aramaic',
@@ -39,9 +39,9 @@ export const variants: Variant<Component>[] = [
       entry: complex,
       can_edit: true,
       videoAccess: true,
-    }
+    },
   },
-];
+]
 
 // const extras = [
 //   {

@@ -1,4 +1,4 @@
-import type { Variant, Viewport } from 'kitbook'
+import type { DeprecatedVariant, Viewport } from 'kitbook'
 import { readable } from 'svelte/store'
 import type Component from './UploadAudioStatus.svelte'
 
@@ -6,7 +6,7 @@ export const viewports: Viewport[] = [
   { width: 400, height: 200 },
 ]
 
-export const variants: Variant<Component>[] = [
+export const variants: DeprecatedVariant<Component>[] = [
   {
     name: 'Uploading',
     props: {

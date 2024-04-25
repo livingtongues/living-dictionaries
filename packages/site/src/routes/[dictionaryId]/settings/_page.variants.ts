@@ -1,4 +1,4 @@
-import type { Variant, Viewport } from 'kitbook'
+import type { DeprecatedVariant, Viewport } from 'kitbook'
 import { readable } from 'svelte/store'
 import type Component from './+page.svelte'
 import { mockDictionaryLayoutData } from '$lib/mocks/layout'
@@ -7,7 +7,7 @@ export const viewports: Viewport[] = [
   { width: 600, height: 800 },
 ]
 
-export const variants: Variant<Component>[] = [
+export const variants: DeprecatedVariant<Component>[] = [
   {
     props: {
       data: {

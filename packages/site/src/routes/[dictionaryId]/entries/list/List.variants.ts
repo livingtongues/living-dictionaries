@@ -1,4 +1,4 @@
-import type { Variant, Viewport } from 'kitbook'
+import type { DeprecatedVariant, Viewport } from 'kitbook'
 import type Component from './List.svelte'
 import { basic_mock_dictionary } from '$lib/mocks/dictionaries'
 import { logDbOperations } from '$lib/mocks/db'
@@ -8,7 +8,7 @@ export const viewports: Viewport[] = [
   { width: 800, height: 150 },
 ]
 
-export const variants: Variant<Component>[] = [
+export const variants: DeprecatedVariant<Component>[] = [
   {
     name: 'entry with audio vs entry without audio',
     props: {
@@ -19,9 +19,9 @@ export const variants: Variant<Component>[] = [
           lx: 'hi - I have audio',
           sfs: [
             {
-              path: ''
-            }
-          ]
+              path: '',
+            },
+          ],
         },
         {
           id: '2',
@@ -29,7 +29,7 @@ export const variants: Variant<Component>[] = [
         },
       ],
       can_edit: true,
-      dictionary: basic_mock_dictionary
+      dictionary: basic_mock_dictionary,
     },
   },
   {
@@ -42,28 +42,28 @@ export const variants: Variant<Component>[] = [
           lx: 'hi - I have audio',
           gl: {
             es: 'Hola, tengo audio´',
-            no: 'hei, jeg har lyd'
+            no: 'hei, jeg har lyd',
           },
           ps: ['adj', 'v'],
           sfs: [
             {
-              path: ''
-            }
+              path: '',
+            },
           ],
-          sdn: ['1', '1.3', '2']
+          sdn: ['1', '1.3', '2'],
         },
         {
           id: '2',
           lx: 'hi, I am here too',
           sfs: [
             {
-              path: ''
-            }
+              path: '',
+            },
           ],
         },
       ],
       can_edit: true,
-      dictionary: basic_mock_dictionary
+      dictionary: basic_mock_dictionary,
     },
   },
 ]
