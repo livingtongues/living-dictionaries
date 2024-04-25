@@ -4,7 +4,7 @@
   import Textbox from './cells/Textbox.svelte'
   import SelectSpeakerCell from './cells/SelectSpeakerCell.svelte'
   import { page } from '$app/stores'
-  import SupaEntrySemanticDomains from '$lib/components/entry/SupaEntrySemanticDomains.svelte'
+  import EntrySemanticDomains from '$lib/components/entry/EntrySemanticDomains.svelte'
   import EntryPartOfSpeech from '$lib/components/entry/EntryPartOfSpeech.svelte'
   import EntryDialect from '$lib/components/entry/EntryDialect.svelte'
   import EntrySource from '$lib/components/entry/EntrySource.svelte'
@@ -57,7 +57,7 @@
       showPlus={false}
       on_update={new_value => updateEntry({ [EntryFields.parts_of_speech]: new_value })} />
   {:else if column.field === 'semantic_domains'}
-    <SupaEntrySemanticDomains
+    <EntrySemanticDomains
       {can_edit}
       show_plus={false}
       semantic_domain_keys={sense.ld_semantic_domains_keys}
