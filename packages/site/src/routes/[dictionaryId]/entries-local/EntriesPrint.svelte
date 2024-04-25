@@ -102,9 +102,9 @@
     {$page.data.t('misc.LD_singular')}
   </div>
 
-  <div class="flex overflow-x-hidden">
+  <div class="overflow-x-hidden">
     <div
-      class="print-columns pr-4 print:pr-9 max-w-full flex-grow"
+      class="print-columns pr-4 print:pr-9 max-w-full"
       style="--column-count: {$columnCount}">
       {#each entries as entry (entry.id)}
         <PrintEntry
