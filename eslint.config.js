@@ -95,6 +95,7 @@ export default antfu(
     rules: {
       'ts/no-unused-vars': 'off',
       'no-undef': 'off',
+      'unused-imports/no-unused-vars': 'off',
     },
   },
 ).overrides({
