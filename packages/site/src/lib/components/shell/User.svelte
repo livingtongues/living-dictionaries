@@ -1,9 +1,12 @@
 <script lang="ts">
-  import { page } from '$app/stores';
-  import { logOut, firebaseConfig } from 'sveltefirets';
-  import { Button, Menu, ShowHide, Avatar } from 'svelte-pieces';
+  import { authState, firebaseConfig, logOut } from 'sveltefirets'
+  import { Avatar, Button, Menu, ShowHide } from 'svelte-pieces'
+  import { get } from 'svelte/store'
+  import { page } from '$app/stores'
+  import { post_request } from '$lib/helpers/get-post-requests'
+  import type { UpdateDevAdminRoleRequestBody } from '$api/db/update-dev-admin-role/+server'
 
-  $: ({user, admin} = $page.data)
+  $: ({ user, admin } = $page.data)
   let show_menu = false
   function toggle_menu() {
     const state = show_menu
@@ -11,6 +14,17 @@
       if (state === show_menu)
         show_menu = !state
     }, 1)
+  }
+
+  async function setAdminRole() {
+    const role = +prompt('Enter 0, 1, or 2')
+    if (role !== 0 && role !== 1 && role !== 2)
+      return
+    const auth_state_user = get(authState)
+    const auth_token = await auth_state_user.getIdToken()
+    const { error } = await post_request<UpdateDevAdminRoleRequestBody, any>('/api/db/update-dev-admin-role', { role, auth_token })
+    if (error)
+      console.error(error)
   }
 </script>
 
@@ -34,16 +48,7 @@
         {#if firebaseConfig.projectId === 'talking-dictionaries-dev'}
           <button
             type="button"
-            on:click={async () => {
-              const roleNumber = +prompt('Enter 0, 1, or 2');
-              const { getFunctions, httpsCallable } = await import('firebase/functions');
-              await httpsCallable(
-                getFunctions(),
-                'updateDevAdminRole'
-              )({
-                role: roleNumber,
-              });
-            }}>
+            on:click={setAdminRole}>
             Set Admin Role Level (dev only)
           </button>
         {/if}
