@@ -141,12 +141,12 @@
         minimum={1}
         availableLanguages={glossingLanguages}
         selectedLanguages={Array.from(glossLanguages)}
-        on:add={(e) => {
-          glossLanguages.add(e.detail.languageId)
+        add_language={(languageId) => {
+          glossLanguages.add(languageId)
           glossLanguages = glossLanguages
         }}
-        on:remove={(e) => {
-          glossLanguages.delete(e.detail.languageId)
+        remove_language={(languageId) => {
+          glossLanguages.delete(languageId)
           glossLanguages = glossLanguages
         }} />
       <!-- not used in web app presently -->

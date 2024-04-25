@@ -1,39 +1,41 @@
 <script lang="ts">
-  import { page } from '$app/stores';
+  import { page } from '$app/stores'
 
-  let dragging = false;
-  let file: File;
+  export let border: boolean
+  let dragging = false
+  let file: File
 
   function handleImage(files: FileList) {
-    dragging = false;
+    dragging = false
 
-    const fileToCheck = files.item(0);
+    const fileToCheck = files.item(0)
 
     // Client-side validation: Must be an image (not SVG) and smaller than 10MB.
     if (fileToCheck.type.split('/')[0] !== 'image' || fileToCheck.type === 'image/svg+xml') {
       return alert(
-        `${$page.data.t('upload.error')}`
-      );
+        `${$page.data.t('upload.error')}`,
+      )
     }
-    // Must be smaller than 10MB, http://www.unitconversion.org/data-storage/megabytes-to-bytes-conversion.html
-    if (fileToCheck.size > 10485760) {
+    const tenMB = 10485760 // http://www.unitconversion.org/data-storage/megabytes-to-bytes-conversion.html
+    if (fileToCheck.size > tenMB) {
       return alert(
-        `${$page.data.t('upload.file_must_be_smaller')} 10MB`
-      );
+        `${$page.data.t('upload.file_must_be_smaller')} 10MB`,
+      )
     }
 
-    file = fileToCheck;
+    file = fileToCheck
   }
 </script>
 
 {#if !file}
   <label
     class:dragging
-    class="{$$props.class} hover:bg-gray-100 text-gray-600
-      h-full flex flex-col items-center justify-center border-2 border-dashed
+    class:dashed-border={border}
+    class="{$$props.class} text-gray-600
+      h-full grow-1 flex flex-col items-center justify-center
       cursor-pointer"
     title="Add Photo"
-    on:drop|preventDefault={(e) => handleImage(e.dataTransfer.files)}
+    on:drop|preventDefault={e => handleImage(e.dataTransfer.files)}
     on:dragover|preventDefault={() => (dragging = true)}
     on:dragleave|preventDefault={() => (dragging = false)}>
     <input
@@ -41,8 +43,8 @@
       accept="image/*"
       class="hidden"
       on:input={(e) => {
-        // @ts-ignore
-        handleImage(e.target.files);
+        // @ts-expect-error
+        handleImage(e.target.files)
       }} />
     <span class="hidden md:inline">
       <span class="i-ic-outline-cloud-upload text-2xl" />
@@ -60,5 +62,8 @@
 <style>
   .dragging {
     --at-apply: bg-blue-200 border-blue-300 text-blue-700;
+  }
+  .dashed-border {
+    --at-apply: border-2 border-dashed;
   }
 </style>

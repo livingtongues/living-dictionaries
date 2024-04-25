@@ -1,4 +1,4 @@
-import type { Variant, Viewport } from 'kitbook'
+import type { DeprecatedVariant, Viewport } from 'kitbook'
 import type Component from './SupaSense.svelte'
 import { logDbOperations } from '$lib/mocks/db'
 import type { SupaSense } from '$lib/supabase/database.types'
@@ -21,19 +21,19 @@ const fullSense: SupaSense = {
   parts_of_speech: ['n', 'v'],
   semantic_domains: ['1.1', '2.1'],
   write_in_semantic_domains: ['dinobots', 'autobots'],
-  definition: { en: 'I only show when I have a value'},
+  definition: { en: 'I only show when I have a value' },
   sentences: [
     {
       id: 'sentence_1234',
       text: { default: 'Hello' },
       translation: {
-        es: 'Hola'
-      }
-    }
-  ]
+        es: 'Hola',
+      },
+    },
+  ],
 }
 
-export const variants: Variant<Component>[] = [
+export const variants: DeprecatedVariant<Component>[] = [
   {
     props: {
       ...defaultProps,
@@ -69,4 +69,3 @@ export const variants: Variant<Component>[] = [
     },
   },
 ]
-

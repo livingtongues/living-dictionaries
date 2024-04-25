@@ -4,12 +4,12 @@
   import sanitize from 'xss'
   import Audio from '../Audio.svelte'
   import Video from '../Video.svelte'
-  import AddImage from '../AddImage.svelte'
   import Image from '$lib/components/image/Image.svelte'
   import { order_glosses } from '$lib/helpers/glosses'
   import { minutesAgo } from '$lib/helpers/time'
   import { page } from '$app/stores'
   import type { DbOperations } from '$lib/dbOperations'
+  import AddImage from '$lib/components/image/AddImage.svelte'
 
   export let entry: ExpandedEntry
   export let dictionary: IDictionary
@@ -123,7 +123,7 @@
       lexeme={entry.lexeme}
       video={entry.senses[0].video_files[0]}
       {can_edit}
-      on_delete_video={async () => await dbOperations.deleteVideo(entry, dictionary.id)} />
+      on_delete_video={async () => await dbOperations.deleteVideo(entry)} />
   {:else if videoAccess && can_edit}
     <ShowHide let:show let:toggle>
       <button
@@ -147,14 +147,16 @@
         title={entry.lexeme}
         gcs={entry.senses?.[0]?.photo_files?.[0].specifiable_image_url}
         {can_edit}
-        on_delete_image={() => dbOperations.deleteImage(entry, dictionary.id)} />
+        on_delete_image={() => dbOperations.deleteImage(entry)} />
     </div>
   {:else if can_edit}
-    <AddImage dictionaryId={dictionary.id} entryId={entry.id} class="w-12 bg-gray-100" updateEntryOnline={dbOperations.updateEntryOnline}>
-      <div class="text-xs" slot="text">
-        {$page.data.t('entry_field.photo')}
-      </div>
-    </AddImage>
+    <div class="w-12 bg-gray-100 flex flex-col">
+      <AddImage upload_image={file => dbOperations.addImage(entry.id, file)}>
+        <div class="text-xs">
+          {$page.data.t('entry_field.photo')}
+        </div>
+      </AddImage>
+    </div>
   {/if}
 </div>
 

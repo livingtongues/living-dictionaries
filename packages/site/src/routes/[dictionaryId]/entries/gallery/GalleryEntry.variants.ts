@@ -1,4 +1,4 @@
-import type { Variant, Viewport } from 'kitbook'
+import type { DeprecatedVariant, Viewport } from 'kitbook'
 import type { IDictionary } from '@living-dictionaries/types'
 import type Component from './GalleryEntry.svelte'
 import { butterfly_google_storage_url } from '$lib/mocks/entries'
@@ -15,7 +15,7 @@ const dictionary: IDictionary = {
   glossLanguages: ['es', 'it'],
 } as IDictionary
 
-export const variants: Variant<Component>[] = [
+export const variants: DeprecatedVariant<Component>[] = [
   {
     name: 'First gloss exists',
     description: 'Spanish should show because it is first',

@@ -1,7 +1,7 @@
 {
   "en": {
     "vernacularName": "English",
-    "internalName": "Keyboard_us"
+    "internalName": "us"
   },
   "ab": {
     "vernacularName": "аҧсуа бызшәа"
@@ -17,7 +17,7 @@
     "vernacularAlternate": "Afaraf"
   },
   "af": {
-    "internalName": "Keyboard_european"
+    "internalName": "european"
   },
   "ak": {
     "vernacularName": "Akan"
@@ -31,12 +31,12 @@
   "am": {
     "vernacularName": "አማርኛ",
     "vernacularAlternate": "Amarəñña",
-    "internalName": "Keyboard_gff_amharic",
+    "internalName": "gff_amharic",
     "showKeyboard": true
   },
   "ar": {
     "vernacularName": "العَرَبِيَّة‎",
-    "internalName": "Keyboard_sil_arabic_phonetic",
+    "internalName": "sil_arabic_phonetic",
     "showKeyboard": true
   },
   "hy": {
@@ -45,7 +45,7 @@
   "as": {
     "vernacularName": "অসমীয়া",
     "vernacularAlternate": "Asamiya",
-    "internalName": "Keyboard_isis_bangla",
+    "internalName": "isis_bangla",
     "showKeyboard": true
   },
   "av": {
@@ -54,7 +54,7 @@
   },
   "ay": {
     "vernacularName": "Aymar aru",
-    "internalName": "Keyboard_european2"
+    "internalName": "european2"
   },
   "az": {
     "vernacularName": "Azərbaycan dili/Aзәрбајҹан дили",
@@ -95,7 +95,7 @@
   "bn": {
     "vernacularName": "বাংলা",
     "vernacularAlternate": "Bangla",
-    "internalName": "Keyboard_bengali",
+    "internalName": "bengali",
     "showKeyboard": true
   },
   "bew": {
@@ -123,12 +123,12 @@
   "my": {
     "vernacularName": "မြန်မာစာ",
     "vernacularAlternate": "mranmabhasa",
-    "internalName": "Keyboard_burmese02",
+    "internalName": "burmese02",
     "showKeyboard": true
   },
   "yue": {
     "vernacularName": "广东话",
-    "internalName": "Keyboard_chinese",
+    "internalName": "chinese",
     "useKeyboard": "cmn",
     "showKeyboard": true
   },
@@ -173,7 +173,7 @@
   },
   "nl": {
     "vernacularName": "Nederlands",
-    "internalName": "Keyboard_dutch",
+    "internalName": "dutch",
     "showKeyboard": true
   },
   "dyu": {
@@ -215,7 +215,7 @@
   },
   "fr": {
     "vernacularName": "français",
-    "internalName": "Keyboard_french",
+    "internalName": "french",
     "showKeyboard": true
   },
   "fry": {
@@ -240,12 +240,12 @@
   "ka": {
     "vernacularName": "ქართული",
     "vernacularAlternate": "Kartuli",
-    "internalName": "Keyboard_georgian",
+    "internalName": "georgian",
     "showKeyboard": true
   },
   "de": {
     "vernacularName": "Deutsch",
-    "internalName": "Keyboard_european"
+    "internalName": "european"
   },
   "gjn": {
     "vernacularName": "Ngbanyito"
@@ -262,7 +262,7 @@
   "gn": {
     "vernacularName": "Guaraní",
     "vernacularAlternate": "avañe’ẽ",
-    "internalName": "Keyboard_european"
+    "internalName": "european"
   },
   "pov": {
     "vernacularName": "Crioulo"
@@ -273,7 +273,7 @@
   "ha": {
     "vernacularName": "Harshen Hausa",
     "vernacularAlternate": "هَرْشَن هَوْسَ",
-    "internalName": "Keyboard_naijanfd10",
+    "internalName": "naijanfd10",
     "showKeyboard": true
   },
   "he": {
@@ -285,7 +285,7 @@
   "hi": {
     "vernacularName": "हिन्दी",
     "vernacularAlternate": "Hindī",
-    "internalName": "Keyboard_dev_inscript",
+    "internalName": "dev_inscript",
     "showKeyboard": true
   },
   "ho": {
@@ -308,7 +308,7 @@
   },
   "ig": {
     "vernacularName": "Asụsụ Igbo",
-    "internalName": "Keyboard_naijanfd10",
+    "internalName": "naijanfd10",
     "showKeyboard": true
   },
   "ilo": {
@@ -317,7 +317,7 @@
   },
   "id": {
     "vernacularName": "Bahasa Indonesia",
-    "internalName": "Keyboard_basic_kbdus"
+    "internalName": "basic_kbdus"
   },
   "gle": {
     "vernacularName": "Gaeilge"
@@ -328,7 +328,7 @@
   "ja": {
     "vernacularName": "日本語",
     "vernacularAlternate": "Nihongo",
-    "internalName": "Keyboard_japanese",
+    "internalName": "japanese",
     "showKeyboard": true
   },
   "jav": {
@@ -380,7 +380,7 @@
   "km": {
     "vernacularName": "ភាសាខ្មែរ",
     "vernacularAlternate": "Cambodian",
-    "internalName": "Keyboard_khmer10",
+    "internalName": "khmer10",
     "showKeyboard": true
   },
   "khw": {
@@ -449,7 +449,7 @@
   "lo": {
     "vernacularName": "ພາສາລາວ",
     "vernacularAlternate": "phasa lao",
-    "internalName": "Keyboard_lao_2008_basic",
+    "internalName": "lao_2008_basic",
     "showKeyboard": true
   },
   "lv": {
@@ -512,7 +512,7 @@
   },
   "cmn": {
     "vernacularName": "中文",
-    "internalName": "Keyboard_chinese",
+    "internalName": "chinese",
     "showKeyboard": true
   },
   "mnk": {
@@ -532,7 +532,7 @@
   "mr": {
     "vernacularName": "मराठी",
     "vernacularAlternate": "Marāṭhī",
-    "internalName": "Keyboard_marathi",
+    "internalName": "marathi",
     "showKeyboard": true
   },
   "mah": {
@@ -572,7 +572,7 @@
   "ne": {
     "vernacularName": "नेपाली/खस कुरा",
     "vernacularAlternate": "Gorkhali, Khas-Kura",
-    "internalName": "Keyboard_dev_inscript",
+    "internalName": "dev_inscript",
     "useKeyboard": "hi",
     "showKeyboard": true
   },
@@ -613,7 +613,7 @@
   "or": {
     "vernacularName": "ଓଡ଼ିଆ",
     "vernacularAlternate": "Oṛiā, Odia",
-    "internalName": "Keyboard_isis_oriya",
+    "internalName": "isis_oriya",
     "showKeyboard": true
   },
   "om": {
@@ -635,7 +635,7 @@
   "fa": {
     "vernacularName": "فارسی",
     "vernacularAlternate": "Farsi",
-    "internalName": "Keyboard_dari_clra",
+    "internalName": "dari_clra",
     "showKeyboard": true
   },
   "pis": {
@@ -649,7 +649,7 @@
   },
   "pt": {
     "vernacularName": "português",
-    "internalName": "Keyboard_portuguese",
+    "internalName": "portuguese",
     "showKeyboard": true
   },
   "fuc": {
@@ -661,15 +661,15 @@
   "pa": {
     "vernacularName": "ਪੰਜਾਬੀ",
     "vernacularAlternate": "پن٘جابی",
-    "internalName": "Keyboard_isis_gurmukhi",
+    "internalName": "isis_gurmukhi",
     "showKeyboard": true
   },
   "qu": {
     "vernacularName": "Runa Simi",
-    "internalName": "Keyboard_european"
+    "internalName": "european"
   },
   "rki": {
-    "vernacularName": " ra.hkuing bhasa",
+    "vernacularName": "ra.hkuing bhasa",
     "vernacularAlternate": "ရခိုင်ဘာသာ"
   },
   "ron": {
@@ -681,7 +681,7 @@
   "ru": {
     "vernacularName": "русский",
     "vernacularAlternate": "язык",
-    "internalName": "Keyboard_russian",
+    "internalName": "russian",
     "showKeyboard": true
   },
   "sbl": {
@@ -720,7 +720,7 @@
   },
   "sn": {
     "vernacularName": "Shona",
-    "internalName": "Keyboard_us"
+    "internalName": "us"
   },
   "jiv": {
     "vernacularAlternate": "Jivaro"
@@ -762,7 +762,7 @@
   "es": {
     "vernacularName": "español",
     "vernacularAlternate": "castellano",
-    "internalName": "Keyboard_spanish",
+    "internalName": "spanish",
     "showKeyboard": true
   },
   "srn": {
@@ -773,7 +773,7 @@
   },
   "sw": {
     "vernacularName": "Kiswahili",
-    "internalName": "Keyboard_basic_kbdus"
+    "internalName": "basic_kbdus"
   },
   "ss": {
     "vernacularName": "siSwati"
@@ -783,7 +783,7 @@
   },
   "tl": {
     "vernacularName": "Wikang Tagalog",
-    "internalName": "Keyboard_basic_kbdus"
+    "internalName": "basic_kbdus"
   },
   "tg": {
     "vernacularName": "Тоҷики",
@@ -794,7 +794,7 @@
   },
   "ta": {
     "vernacularName": "தமிழ்",
-    "internalName": "Keyboard_tamil",
+    "internalName": "tamil",
     "showKeyboard": true
   },
   "tsg": {
@@ -802,7 +802,7 @@
   },
   "te": {
     "vernacularName": "తెలుగు",
-    "internalName": "Keyboard_telugu",
+    "internalName": "telugu",
     "showKeyboard": true
   },
   "tem": {
@@ -815,13 +815,13 @@
   "th": {
     "vernacularName": "ภาษาไทย",
     "vernacularAlternate": "Phasa Thai",
-    "internalName": "Keyboard_thai_kedmanee",
+    "internalName": "thai_kedmanee",
     "showKeyboard": true
   },
   "bo": {
     "vernacularName": "ལྷ་སའི་སྐད་",
     "vernacularAlternate": "བོད་སྐད",
-    "internalName": "Keyboard_basic_kbdtiprd",
+    "internalName": "basic_kbdtiprd",
     "useKeyboard": "bo-Tibt-CN",
     "showKeyboard": true
   },
@@ -838,7 +838,7 @@
   },
   "tpi": {
     "vernacularName": "Pijin",
-    "internalName": "Keyboard_european"
+    "internalName": "european"
   },
   "toi": {
     "vernacularName": "Chitonga"
@@ -878,11 +878,11 @@
   "umb": {},
   "ur": {
     "vernacularName": "اُردُو",
-    "internalName": "Keyboard_kbdurdu",
+    "internalName": "kbdurdu",
     "showKeyboard": true
   },
   "ug": {
-    "vernacularName": "ئۇيغۇرچە ",
+    "vernacularName": "ئۇيغۇرچە",
     "vernacularAlternate": "Уйғурчә / Uyghurche"
   },
   "uzb": {
@@ -893,7 +893,7 @@
   },
   "vi": {
     "vernacularName": "tiếng Việt",
-    "internalName": "Keyboard_vietnamese",
+    "internalName": "vietnamese",
     "showKeyboard": true
   },
   "war": {
@@ -908,7 +908,7 @@
   },
   "wuu": {
     "vernacularName": "吴语",
-    "internalName": "Keyboard_chinese",
+    "internalName": "chinese",
     "useKeyboard": "cmn",
     "showKeyboard": true
   },
@@ -929,7 +929,7 @@
   },
   "yo": {
     "vernacularName": "Èdè Yorùbá",
-    "internalName": "Keyboard_yorubadot",
+    "internalName": "yorubadot",
     "showKeyboard": true
   },
   "dje": {

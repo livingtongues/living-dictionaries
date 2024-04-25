@@ -1,27 +1,34 @@
 import { readable, writable } from 'svelte/store'
-import type { ActualDatabaseEntry, IDictionary } from '@living-dictionaries/types'
+import type { ActualDatabaseEntry, IDictionary, ISpeaker } from '@living-dictionaries/types'
 import type { awaitableDocStore, collectionStore } from 'sveltefirets'
-import type { LayoutData } from '../../routes/[dictionaryId]/$types'
+import type { LayoutData } from '../../routes/$types'
+import type { LayoutData as DictionaryLayoutData } from '../../routes/[dictionaryId]/$types'
 import { logDbOperations } from './db'
 
-export const mockDictionaryLayoutData: LayoutData = {
+export const mockAppLayoutData: LayoutData = {
   t: null,
+  locale: null,
   admin: readable(0),
   // supabase: null,
   // authResponse: null,
   user: readable(null),
   user_from_cookies: null,
+  my_dictionaries: null,
+  preferred_table_columns: null,
+}
+
+export const justMockDictionaryLayoutData = {
   dictionary: readable({
     name: 'test',
     glossLanguages: [],
   }) as Awaited<ReturnType<typeof awaitableDocStore<IDictionary>>>,
-  speakers: null,
+  speakers: readable<ISpeaker[]>([
+    { displayName: 'Bob', id: '1' },
+    { displayName: 'Bill', id: '2' },
+  ]) as Awaited<ReturnType<typeof collectionStore<ISpeaker>>>,
   is_manager: readable(false),
   is_contributor: readable(false),
   can_edit: readable(false),
-  locale: null,
-  my_dictionaries: null,
-  preferred_table_columns: null,
   entries: writable(null),
   status: writable(null),
   edited_entries: readable(null) as ReturnType<typeof collectionStore<ActualDatabaseEntry>>,
@@ -32,4 +39,9 @@ export const mockDictionaryLayoutData: LayoutData = {
   show_local_search: false,
   load_citation: null,
   load_partners: null,
+} satisfies Partial<DictionaryLayoutData>
+
+export const mockDictionaryLayoutData: DictionaryLayoutData = {
+  ...mockAppLayoutData,
+  ...justMockDictionaryLayoutData,
 }

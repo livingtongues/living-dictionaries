@@ -1,4 +1,4 @@
-import type { Variant, Viewport } from 'kitbook'
+import type { DeprecatedVariant, Viewport } from 'kitbook'
 import type Component from './Sense.svelte'
 
 export const viewports: Viewport[] = [
@@ -8,7 +8,7 @@ export const viewports: Viewport[] = [
 
 export const languages = []
 
-export const variants: Variant<Component>[] = [
+export const variants: DeprecatedVariant<Component>[] = [
   {
     props: {
       sense: {

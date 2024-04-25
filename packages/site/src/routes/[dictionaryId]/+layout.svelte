@@ -14,7 +14,7 @@
   <Header>
     <div
       slot="left"
-      class="font-semibold sm:text-xl overflow-x-auto md:overflow-hidden md:overflow-ellipsis">
+      class="font-semibold sm:text-xl overflow-x-auto md:overflow-hidden">
       <a
         class="p-3 hover:text-black hidden md:inline print:hidden"
         href="/"

@@ -1,9 +1,9 @@
-import type { Variant } from 'kitbook';
-import type Component from './PrintEntry.svelte';
-import type { IPrintFields } from '@living-dictionaries/types';
-import { complex, simple, hebrew } from '$lib/mocks/entries';
-import { basic_mock_dictionary } from '$lib/mocks/dictionaries';
-import { defaultPrintFields } from './printFields';
+import type { DeprecatedVariant } from 'kitbook'
+import type { IPrintFields } from '@living-dictionaries/types'
+import type Component from './PrintEntry.svelte'
+import { defaultPrintFields } from './printFields'
+import { complex, hebrew, simple } from '$lib/mocks/entries'
+import { basic_mock_dictionary } from '$lib/mocks/dictionaries'
 
 const selectedFields: IPrintFields = {
   ...defaultPrintFields,
@@ -18,12 +18,12 @@ const selectedFields: IPrintFields = {
   photo: true,
   speaker: true,
   sources: true,
-};
+}
 
-export const variants: Variant<Component>[] = [
+export const variants: DeprecatedVariant<Component>[] = [
   {
     name: 'complex',
-    viewports: [{width: 400, height: 700}],
+    viewports: [{ width: 400, height: 700 }],
     props: {
       dictionary: basic_mock_dictionary,
       selectedFields,
@@ -31,11 +31,11 @@ export const variants: Variant<Component>[] = [
       showQrCode: true,
       headwordSize: 20,
       showLabels: true,
-    }
+    },
   },
   {
     name: 'complex without labels',
-    viewports: [{width: 400, height: 700}],
+    viewports: [{ width: 400, height: 700 }],
     props: {
       dictionary: basic_mock_dictionary,
       selectedFields,
@@ -43,29 +43,29 @@ export const variants: Variant<Component>[] = [
       showQrCode: true,
       headwordSize: 20,
       showLabels: false,
-    }
+    },
   },
   {
     name: 'example with Hebrew text',
     description: 'This is an example where non-hebrew characters are mixed with hebrew characters in the same line.',
-    viewports: [{width: 400, height: 100}],
-    languages: [{name: 'english', code: 'en'}, {name: 'hebrew', code: 'he'}],
+    viewports: [{ width: 400, height: 100 }],
+    languages: [{ name: 'english', code: 'en' }, { name: 'hebrew', code: 'he' }],
     props: {
       dictionary: basic_mock_dictionary,
       selectedFields,
       entry: hebrew,
       headwordSize: 20,
-    }
+    },
   },
   {
     name: 'simple',
-    viewports: [{width: 400, height: 100}],
+    viewports: [{ width: 400, height: 100 }],
     languages: [],
     props: {
       dictionary: basic_mock_dictionary,
       selectedFields,
       entry: simple,
       headwordSize: 20,
-    }
-  }
+    },
+  },
 ]

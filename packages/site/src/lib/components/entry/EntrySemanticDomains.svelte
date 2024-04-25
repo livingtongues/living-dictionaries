@@ -1,24 +1,24 @@
 <script lang="ts">
-  import { page } from '$app/stores';
-  import { semanticDomains } from '$lib/mappings/semantic-domains';
-  import type { SelectOption } from '$lib/components/ui/array/select-options.interface';
-  import ModalEditableArray from '$lib/components/ui/array/ModalEditableArray.svelte';
+  import { page } from '$app/stores'
+  import { semanticDomains } from '$lib/mappings/semantic-domains'
+  import type { SelectOption } from '$lib/components/ui/array/select-options.interface'
+  import ModalEditableArray from '$lib/components/ui/array/ModalEditableArray.svelte'
 
-  export let semantic_domain_keys: string[];
-  export let write_in_semantic_domains: string[];
-  export let can_edit = false;
-  export let show_plus = true;
-  export let on_update: (new_value: string[]) => void;
-  export let on_update_write_in: (new_value: string[]) => void;
+  export let semantic_domain_keys: string[]
+  export let write_in_semantic_domains: string[]
+  export let can_edit = false
+  export let show_plus = true
+  export let on_update: (new_value: string[]) => void
+  export let on_update_write_in: (new_value: string[]) => void
 
-  $: translated_semantic_domain_options = semanticDomains.map((domain) => ({
+  $: translated_semantic_domain_options = semanticDomains.map(domain => ({
     value: domain.key,
-    name: $page.data.t({ dynamicKey: 'sd.' + domain.key, fallback: domain.name }),
-  })) as SelectOption[];
+    name: $page.data.t({ dynamicKey: `sd.${domain.key}`, fallback: domain.name }),
+  })) as SelectOption[]
 
   function deleteWriteIn(domain: string) {
-    if (!confirm($page.data.t('misc.delete') + '?')) return
-    on_update_write_in(write_in_semantic_domains.filter((d) => d !== domain))
+    if (!confirm(`${$page.data.t('misc.delete')}?`)) return
+    on_update_write_in(write_in_semantic_domains.filter(d => d !== domain))
   }
 </script>
 
@@ -53,4 +53,3 @@
     {/if}
   </svelte:fragment>
 </ModalEditableArray>
-

@@ -1,61 +1,61 @@
 <script lang="ts">
   // from https://github.com/beyonk-adventures/svelte-mapbox
   import {
-    setContext,
-    onDestroy,
     createEventDispatcher,
+    onDestroy,
     onMount,
+    setContext,
     tick,
-  } from 'svelte';
-  import { mapKey } from '../context';
-  import { loadScriptOnce, loadStylesOnce } from 'sveltefirets';
-  import { EventQueue } from '../queue';
+  } from 'svelte'
+  import { loadScriptOnce, loadStylesOnce } from 'svelte-pieces'
   import type {
-    LngLatLike,
-    MapboxOptions,
-    Map,
-    LngLat,
     ErrorEvent,
     EventData,
+    LngLat,
     LngLatBoundsLike,
-  } from 'mapbox-gl';
-  import { bindEvents } from '../event-bindings';
-  import { getTimeZoneLongitude } from '../../utils/getTimeZoneLongitude';
-  import { ADDED_FEATURE_ID_PREFIX } from '../../utils/randomId';
-  import { PUBLIC_mapboxAccessToken } from '$env/static/public';
+    LngLatLike,
+    Map,
+    MapboxOptions,
+  } from 'mapbox-gl'
+  import { mapKey } from '../context'
+  import { EventQueue } from '../queue'
+  import { bindEvents } from '../event-bindings'
+  import { getTimeZoneLongitude } from '../../utils/getTimeZoneLongitude'
+  import { ADDED_FEATURE_ID_PREFIX } from '../../utils/randomId'
+  import { PUBLIC_mapboxAccessToken } from '$env/static/public'
 
-  export let map: Map = null;
-  export let version = 'v2.9.2';
-  export let customStylesheetUrl: string = undefined;
-  export let accessToken = PUBLIC_mapboxAccessToken;
-  export let options: Partial<MapboxOptions> = {};
-  export let zoom = 4;
-  export let style = 'mapbox://styles/mapbox/streets-v11?optimize=true'; //'Mapbox Streets' // light-v8, light-v9, light-v10, dark-v10, satellite-v9, streets-v11
-  export let lng: number = undefined;
-  export let lat: number = undefined;
-  export let pointsToFit: number[][] = undefined;
+  export let map: Map = null
+  export let version = 'v2.9.2'
+  export let customStylesheetUrl: string = undefined
+  export let accessToken = PUBLIC_mapboxAccessToken
+  export let options: Partial<MapboxOptions> = {}
+  export let zoom = 4
+  export let style = 'mapbox://styles/mapbox/streets-v11?optimize=true' // 'Mapbox Streets' // light-v8, light-v9, light-v10, dark-v10, satellite-v9, streets-v11
+  export let lng: number = undefined
+  export let lat: number = undefined
+  export let pointsToFit: number[][] = undefined
 
-  let center: LngLatLike;
-  $: center = lng && lat ? [lng, lat] : [getTimeZoneLongitude() || -80, 10];
+  let center: LngLatLike
+  $: center = lng && lat ? [lng, lat] : [getTimeZoneLongitude() || -80, 10]
+
+  let container: HTMLDivElement
+  let mapbox: typeof import('mapbox-gl')
+  const queue = new EventQueue()
+  let ready = false
 
   setContext(mapKey, {
     getMap: () => map,
     getMapbox: () => mapbox,
-  });
-
-  let container: HTMLDivElement;
-  let mapbox: typeof import('mapbox-gl');
-  const queue = new EventQueue();
-  let ready = false;
+  })
 
   const dispatch = createEventDispatcher<{
-    ready: null;
-    dragend: LngLat;
-    moveend: LngLat;
-    click: LngLat;
-    zoomend: number;
-    error: ErrorEvent & EventData;
-  }>();
+    ready: null
+    dragend: LngLat
+    moveend: LngLat
+    click: LngLat
+    zoomend: number
+    error: ErrorEvent & EventData
+  }>()
 
   // More events at https://docs.mapbox.com/mapbox-gl-js/api/map/#map-events
   const handlers: Record<string, any> = {
@@ -65,94 +65,94 @@
       if (
         map
           .queryRenderedFeatures(e.point)
-          .filter((f) => f.source.startsWith(ADDED_FEATURE_ID_PREFIX))
+          .filter(f => f.source.startsWith(ADDED_FEATURE_ID_PREFIX))
           .length === 0
       )
-        dispatch('click', e.lngLat);
+        dispatch('click', e.lngLat)
     },
     zoomend: () => dispatch('zoomend', map.getZoom()),
     error: (e: ErrorEvent & EventData) => dispatch('error', e),
     load: () => dispatch('ready') && (ready = true),
   // drag: () => dispatch('drag', map.getCenter()),
-  };
-  let unbind = () => {};
+  }
+  let unbind: () => void
 
   onMount(async () => {
     await loadScriptOnce(
-      `//api.mapbox.com/mapbox-gl-js/${version}/mapbox-gl.js`
-    );
+      `//api.mapbox.com/mapbox-gl-js/${version}/mapbox-gl.js`,
+    )
     await loadStylesOnce(
-      `//api.mapbox.com/mapbox-gl-js/${version}/mapbox-gl.css`
-    );
-    customStylesheetUrl && (await loadStylesOnce(customStylesheetUrl));
+      `//api.mapbox.com/mapbox-gl-js/${version}/mapbox-gl.css`,
+    )
+    customStylesheetUrl && (await loadStylesOnce(customStylesheetUrl))
 
-    window.mapboxgl.accessToken = accessToken;
+    window.mapboxgl.accessToken = accessToken
     map = new window.mapboxgl.Map({
       ...options,
       container,
       style,
       center,
       zoom,
-    });
-    mapbox = window.mapboxgl;
-    queue.start(map);
+    })
+    mapbox = window.mapboxgl
+    queue.start(map)
 
-    unbind = bindEvents(map, handlers);
-  });
+    unbind = bindEvents(map, handlers)
+  })
 
   onDestroy(async () => {
-    unbind();
+    unbind?.()
 
-    queue.stop();
-    await tick(); // allow controls to remove themselves from the map
-    map?.remove?.();
-  });
+    queue.stop()
+    await tick() // allow controls to remove themselves from the map
+    map?.remove?.()
+  })
 
   // use via https://svelte.dev/tutorial/component-this
   export function fitBounds(bbox: LngLatBoundsLike, data = {}) {
-    queue.send('fitBounds', [bbox, data]);
+    queue.send('fitBounds', [bbox, data])
   }
 
   export function flyTo(destination, data = {}) {
-    queue.send('flyTo', [destination, data]);
+    queue.send('flyTo', [destination, data])
   }
 
   export function resize() {
-    queue.send('resize');
+    queue.send('resize')
   }
 
   export function setCenter(coords, data = {}) {
-    queue.send('setCenter', [coords, data]);
+    queue.send('setCenter', [coords, data])
   }
 
   export function setZoom(value, data = {}) {
-    queue.send('setZoom', [value, data]);
+    queue.send('setZoom', [value, data])
   }
 
   export function getMap() {
-    return map;
+    return map
   }
 
   export function getMapbox() {
-    return mapbox;
+    return mapbox
   }
 
-  $: if (zoom) setZoom(zoom);
-  $: if (center) setCenter(center);
+  $: if (zoom) setZoom(zoom)
+  $: if (center) setCenter(center)
   $: if (pointsToFit?.length) fitPoints()
 
   async function fitPoints() {
     if (pointsToFit.length === 1) {
-      setCenter(pointsToFit[0]);
-      return;
+      setCenter(pointsToFit[0])
+      return
     }
-    const { bbox, lineString } = await import('@turf/turf');
-    const line = lineString(pointsToFit);
-    const box = bbox(line) as LngLatBoundsLike;
+    const { bbox, lineString } = await import('@turf/turf')
+    const line = lineString(pointsToFit)
+    const box = bbox(line) as LngLatBoundsLike
     map.fitBounds(box, {
       padding: { top: 10, bottom: 10, left: 10, right: 10 },
       maxZoom: 6,
-    });
+    })
   }
 </script>
 

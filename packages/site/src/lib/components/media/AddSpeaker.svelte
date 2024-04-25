@@ -1,40 +1,33 @@
 <script lang="ts">
-  import { page } from '$app/stores';
-  import { createEventDispatcher } from 'svelte';
-  import { Button, Form, Modal } from 'svelte-pieces';
-  import { addOnline } from 'sveltefirets';
-  import type { ISpeaker } from '@living-dictionaries/types';
-  import { decades } from './ages';
+  import { Button, Form, Modal } from 'svelte-pieces'
+  import type { ISpeaker } from '@living-dictionaries/types'
+  import { decades } from './ages'
+  import { page } from '$app/stores'
 
-  $: ({dictionary} = $page.data)
-  const dispatch = createEventDispatcher();
-  const close = () => dispatch('close');
+  export let on_close: () => void
+  export let on_add_speaker: (speaker: ISpeaker) => Promise<void>
+  $: ({ dictionary } = $page.data)
 
-  let displayName = '';
-  let birthplace = '';
-  let decade = 4;
-  let gender: ISpeaker['gender'] = 'm';
-  let agreeToBeOnline = true;
+  let displayName = ''
+  let birthplace = ''
+  let decade = 4
+  let gender: ISpeaker['gender'] = 'm'
+  let agreeToBeOnline = true
+</script>
 
-  async function addSpeaker() {
-    const speaker = {
+<Modal on:close={on_close}>
+  <span slot="heading">{$page.data.t('speakers.add_new_speaker')}
+  </span>
+
+  <Form
+    let:loading
+    onsubmit={async () => await on_add_speaker({
       displayName: displayName.trim(),
       birthplace: birthplace.trim(),
       decade,
       gender,
       contributingTo: [$dictionary.id],
-    };
-
-    const { id } = await addOnline<ISpeaker>('speakers', speaker);
-    dispatch('newSpeaker', { id });
-  }
-</script>
-
-<Modal on:close>
-  <span slot="heading">{$page.data.t('speakers.add_new_speaker')}
-  </span>
-
-  <Form let:loading onsubmit={addSpeaker}>
+    })}>
     <label for="name" class="block text-sm font-medium leading-5 text-gray-700 mt-4">
       {$page.data.t('speakers.name')}
     </label>
@@ -116,7 +109,7 @@
     <!-- TODO: "The speaker is me" checkbox -->
 
     <div class="modal-footer space-x-1">
-      <Button onclick={close} form="simple" color="black">
+      <Button onclick={on_close} form="simple" color="black">
         {$page.data.t('misc.cancel')}
       </Button>
       <Button type="submit" form="filled" {loading}>

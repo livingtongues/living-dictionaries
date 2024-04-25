@@ -1,16 +1,16 @@
 <script lang="ts">
   import { type ActualDatabaseEntry, EntryFields, type ExpandedEntry, type GoalDatabaseEntry, type IColumn, type i18nEntryFieldKey } from '@living-dictionaries/types'
   import Audio from '../../entries/Audio.svelte'
-  import AddImage from '../AddImage.svelte'
   import Textbox from './cells/Textbox.svelte'
   import SelectSpeakerCell from './cells/SelectSpeakerCell.svelte'
   import { page } from '$app/stores'
-  import SupaEntrySemanticDomains from '$lib/components/entry/SupaEntrySemanticDomains.svelte'
+  import EntrySemanticDomains from '$lib/components/entry/EntrySemanticDomains.svelte'
   import EntryPartOfSpeech from '$lib/components/entry/EntryPartOfSpeech.svelte'
   import EntryDialect from '$lib/components/entry/EntryDialect.svelte'
   import EntrySource from '$lib/components/entry/EntrySource.svelte'
   import Image from '$lib/components/image/Image.svelte'
   import type { DbOperations } from '$lib/dbOperations'
+  import AddImage from '$lib/components/image/AddImage.svelte'
 
   export let column: IColumn
   export let entry: ExpandedEntry
@@ -39,9 +39,14 @@
         title={entry.lexeme}
         gcs={first_photo.specifiable_image_url}
         square={60}
-        on_delete_image={async () => await dbOperations.deleteImage(entry, dictionaryId)} />
+        on_delete_image={async () => await dbOperations.deleteImage(entry)} />
     {:else if can_edit}
-      <AddImage {dictionaryId} entryId={entry.id} class="text-xs" updateEntryOnline={dbOperations.updateEntryOnline} />
+      <!-- <div class="h-20 bg-gray-100 hover:bg-gray-300 mb-2 flex flex-col"> -->
+      <AddImage upload_image={file => dbOperations.addImage(entry.id, file)}>
+        <div class="text-xs">
+        </div>
+      </AddImage>
+      <!-- </div> -->
     {/if}
   {:else if column.field === 'speaker'}
     <SelectSpeakerCell {can_edit} {entry} />
@@ -52,7 +57,7 @@
       showPlus={false}
       on_update={new_value => updateEntry({ [EntryFields.parts_of_speech]: new_value })} />
   {:else if column.field === 'semantic_domains'}
-    <SupaEntrySemanticDomains
+    <EntrySemanticDomains
       {can_edit}
       show_plus={false}
       semantic_domain_keys={sense.ld_semantic_domains_keys}

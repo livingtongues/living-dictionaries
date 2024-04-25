@@ -1,7 +1,7 @@
-import type { Variant, Viewport } from 'kitbook';
-import type Component from './EntryDisplay.svelte';
-import type { IDictionary } from '@living-dictionaries/types';
-import { logDbOperations } from '$lib/mocks/db';
+import type { DeepPartial, DeprecatedVariant, Viewport } from 'kitbook'
+import type { IDictionary } from '@living-dictionaries/types'
+import type Component from './EntryDisplay.svelte'
+import { logDbOperations } from '$lib/mocks/db'
 
 export const viewports: Viewport[] = [
   {
@@ -13,24 +13,20 @@ export const viewports: Viewport[] = [
     name: 'Mobile',
     width: 375,
     height: 667,
-  }
+  },
 ]
-
-type DeepPartial<T> = {
-  [P in keyof T]?: T[P] extends object ? DeepPartial<T[P]> : T[P];
-};
 
 const defaultDictionary: IDictionary = {
   name: 'Banange',
   glossLanguages: ['en', 'es'],
-};
+}
 
 const defaultEntry = {
   lexeme: 'foo',
   senses: [
     {
       glosses: {},
-    }
+    },
   ],
 }
 
@@ -55,7 +51,7 @@ const defaultEntry = {
 //   ]
 // }
 
-const partialVariants: DeepPartial<Variant<Component>[]> = [
+const partialVariants: DeepPartial<DeprecatedVariant<Component>[]> = [
   {
     name: '2 senses',
     props: {
@@ -81,15 +77,15 @@ const partialVariants: DeepPartial<Variant<Component>[]> = [
                 vn: '请把这个嫩枝剪下来放进炖菜里。',
                 en: 'Please cut this shoot and put it in the stew.',
                 es: 'Por favor, corta este brote y ponlo en el guiso.',
-              }
-            ]
+              },
+            ],
           },
         ],
         local_orthography_1: 'संस्कृतम्',
         sources: ['someone'],
         coordinates: {
           // 'regions': [indiaBox],
-        }
+        },
       },
       supaEntry: {
         senses: [
@@ -100,19 +96,18 @@ const partialVariants: DeepPartial<Variant<Component>[]> = [
             },
             parts_of_speech: ['v'],
             semantic_domains: ['1.1'],
-          }
-        ]
+          },
+        ],
       },
-      dbOperations: logDbOperations,
       dictionary: {
         alternateOrthographies: [
           'Old Sanskrit',
-        ]
+        ],
       },
     },
     tests: {
       clientSideRendered: true,
-    }
+    },
   },
   {
     name: 'Custom imported semantic domain',
@@ -121,19 +116,19 @@ const partialVariants: DeepPartial<Variant<Component>[]> = [
       entry: {
         senses: [
           {
-            photo_files: [{ specifiable_image_url: 'LGuBKhg7vuv5-aJcOdnb_ucOXLSCIR1Kjxrh70xRlaIHqWo-mWqfWUcH3Xznz63QsFZmkeVmoNN0PEXzSc0Jh4g'}],
+            photo_files: [{ specifiable_image_url: 'LGuBKhg7vuv5-aJcOdnb_ucOXLSCIR1Kjxrh70xRlaIHqWo-mWqfWUcH3Xznz63QsFZmkeVmoNN0PEXzSc0Jh4g' }],
             write_in_semantic_domains: ['something-random-from-1992'],
             ld_semantic_domains_keys: ['1'],
-            translated_ld_semantic_domains: ['Universe and the natural world']
-          }
+            translated_ld_semantic_domains: ['Universe and the natural world'],
+          },
         ],
       },
-    }
+    },
   },
   {
     name: 'Local orthographies',
     languages: [],
-    viewports: [{width: 400, height: 300}],
+    viewports: [{ width: 400, height: 300 }],
     props: {
       entry: {
         lexeme: 'Hello',
@@ -144,14 +139,14 @@ const partialVariants: DeepPartial<Variant<Component>[]> = [
         alternateOrthographies: [
           'foobey',
           'foobar',
-        ]
+        ],
       },
     },
   },
   {
     name: 'Scientific Name',
     languages: [],
-    viewports: [{width: 400, height: 200}],
+    viewports: [{ width: 400, height: 200 }],
     props: {
       entry: {
         lexeme: 'Old world swallowtail',
@@ -187,21 +182,20 @@ const partialVariants: DeepPartial<Variant<Component>[]> = [
         lexeme: 'apple',
         phonetic: 'æpl',
         senses: [
-          { glosses: { 'en': 'a fruit' } },
-        ]
+          { glosses: { en: 'a fruit' } },
+        ],
       },
       supaEntry: {
         senses: [
-          { glosses: { 'en': 'a company' } },
-          { glosses: { 'en': 'a color' }, semantic_domains: ['1.6'] },
-        ]
+          { glosses: { en: 'a company' } },
+          { glosses: { en: 'a color' }, semantic_domains: ['1.6'] },
+        ],
       },
-      dbOperations: logDbOperations,
-    }
-  }
-];
+    },
+  },
+]
 
-export const variants: Variant<Component>[] = (partialVariants as Variant<Component>[]).map((variant) => ({
+export const variants: DeprecatedVariant<Component>[] = (partialVariants as DeprecatedVariant<Component>[]).map(variant => ({
   ...variant,
   props: {
     ...variant.props,
@@ -213,5 +207,6 @@ export const variants: Variant<Component>[] = (partialVariants as Variant<Compon
       ...defaultEntry,
       ...variant.props?.entry,
     },
+    dbOperations: logDbOperations,
   },
-}));
+}))

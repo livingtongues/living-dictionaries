@@ -1,6 +1,6 @@
 // @ts-check
-import { vitePreprocess } from '@sveltejs/vite-plugin-svelte';
-import adapter from '@sveltejs/adapter-auto';
+import { vitePreprocess } from '@sveltejs/vite-plugin-svelte'
+import adapter from '@sveltejs/adapter-auto'
 
 /** @type {import('@sveltejs/kit').Config} */
 const config = {
@@ -12,23 +12,17 @@ const config = {
   kit: {
     adapter: adapter(),
     alias: {
-      '$api': 'src/routes/api',
+      $api: 'src/routes/api',
     },
   },
 
   // https://github.com/sveltejs/language-tools/issues/650#issuecomment-1337317336
   onwarn: (warning, handler) => {
     if (warning.code.startsWith('a11y-'))
-      return;
+      return
 
-    handler(warning);
+    handler(warning)
   },
+}
 
-  vitePlugin: {
-    inspector: {
-      holdMode: true,
-    }
-  }
-};
-
-export default config;
+export default config

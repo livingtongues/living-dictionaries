@@ -1,26 +1,26 @@
 <script lang="ts">
-  import { page } from '$app/stores';
-  import { Button, Modal, ShowHide } from 'svelte-pieces';
-  import MultiSelect from './MultiSelect.svelte';
-  import type { SelectOption } from './select-options.interface';
+  import { Button, Modal, ShowHide } from 'svelte-pieces'
+  import MultiSelect from './MultiSelect.svelte'
+  import type { SelectOption } from './select-options.interface'
+  import { page } from '$app/stores'
 
-  export let values: string[];
-  export let options: SelectOption[];
-  export let placeholder: string;
-  export let can_edit = false;
-  export let showPlus = true;
-  export let canWriteIn = false;
-  export let on_update: (new_value: string[]) => void;
+  export let values: string[]
+  export let options: SelectOption[]
+  export let placeholder: string
+  export let can_edit = false
+  export let showPlus = true
+  export let canWriteIn = false
+  export let on_update: (new_value: string[]) => void
 
-  let selectedOptions: Record<string, SelectOption> = {};
-  $: prepareSelected(values, options);
+  let selectedOptions: Record<string, SelectOption> = {}
+  $: prepareSelected(values, options)
 
   function prepareSelected(values: string[], options: SelectOption[]) {
     selectedOptions = (values || []).reduce((accumlator, value) => {
-      const option = options.find((option) => option.value === value);
-      accumlator[value] = option || { value, name: value };
-      return accumlator;
-    }, {});
+      const option = options.find(option => option.value === value)
+      accumlator[value] = option || { value, name: value }
+      return accumlator
+    }, {})
   }
 </script>
 
@@ -50,15 +50,15 @@
     <Modal
       noscroll
       on:close={() => {
-        prepareSelected(values, options);
-        toggle();
+        prepareSelected(values, options)
+        toggle()
       }}>
       <span slot="heading"><slot name="heading">Select</slot></span>
 
       <form
-        on:submit={() => {
-          on_update(Object.keys(selectedOptions));
-          toggle();
+        on:submit|preventDefault={() => {
+          on_update(Object.keys(selectedOptions))
+          toggle()
         }}>
         <MultiSelect bind:selectedOptions {options} {placeholder} {canWriteIn} />
         <div class="min-h-[50vh]" />
@@ -66,8 +66,8 @@
         <div class="modal-footer space-x-1">
           <Button
             onclick={() => {
-              prepareSelected(values, options);
-              toggle();
+              prepareSelected(values, options)
+              toggle()
             }}
             form="simple"
             color="black">

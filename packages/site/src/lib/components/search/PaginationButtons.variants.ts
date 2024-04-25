@@ -1,4 +1,4 @@
-import type { Variant, Viewport } from 'kitbook'
+import type { DeprecatedVariant, Viewport } from 'kitbook'
 import type Component from './PaginationButtons.svelte'
 
 export const viewports: Viewport[] = [
@@ -6,9 +6,9 @@ export const viewports: Viewport[] = [
   { width: 320, height: 100 },
 ]
 
-export const languages= []
+export const languages = []
 
-export const variants: Variant<Component>[] = [
+export const variants: DeprecatedVariant<Component>[] = [
   {
     name: 'First page',
     props: {
@@ -51,10 +51,10 @@ export const variants: Variant<Component>[] = [
       pages: 7,
     },
   },
-].map((variant) => ({
+].map(variant => ({
   ...variant,
   props: {
     ...variant.props,
     go_to_page: (page: number) => alert(`Go to page ${page}`),
-  }
+  },
 }))

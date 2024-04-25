@@ -1,22 +1,22 @@
 <script lang="ts">
-  import GeoJSONSource from '$lib/components/maps/mapbox/sources/GeoJSONSource.svelte';
-  import Layer from '$lib/components/maps/mapbox/map/Layer.svelte';
-  import { dictionaryGeoJsonCollection } from '$lib/components/maps/utils/dictionaryGeoJsonCollection';
-  import type { IDictionary } from '@living-dictionaries/types';
-  import { getContext } from 'svelte';
+  import type { IDictionary } from '@living-dictionaries/types'
+  import { getContext } from 'svelte'
+  import GeoJSONSource from '$lib/components/maps/mapbox/sources/GeoJSONSource.svelte'
+  import Layer from '$lib/components/maps/mapbox/map/Layer.svelte'
+  import { dictionaryGeoJsonCollection } from '$lib/components/maps/utils/dictionaryGeoJsonCollection'
   import {
-    mapKey,
     type MapKeyContext,
-  } from '$lib/components/maps/mapbox/context';
+    mapKey,
+  } from '$lib/components/maps/mapbox/context'
 
-  export let dictionaries: IDictionary[] = [],
-    selectedDictionaryId: string = undefined,
-    type: 'public' | 'private' | 'personal' = 'public';
+  export let dictionaries: IDictionary[] = []
+  export let selectedDictionaryId: string = undefined
+  export let type: 'public' | 'private' | 'personal' = 'public'
 
-  const { getMap } = getContext<MapKeyContext>(mapKey);
-  const map = getMap();
+  const { getMap } = getContext<MapKeyContext>(mapKey)
+  const map = getMap()
 
-  const clustersId = `${type}_clusters`;
+  const clustersId = `${type}_clusters`
 
 // map.loadImage("/icons/favicon-32x32.png", function(error, image) {
   //   if (error) throw error;
@@ -53,16 +53,16 @@
     on:click={({ detail }) => {
       const features = map.queryRenderedFeatures(detail.point, {
         layers: [clustersId],
-      });
-      const clusterId = features[0].properties.cluster_id;
+      })
+      const clusterId = features[0].properties.cluster_id
       source.getClusterExpansionZoom(clusterId, (err, zoom) => {
-        if (err) return;
+        if (err) return
         map.easeTo({
-          // @ts-ignore
+          // @ts-expect-error
           center: features[0].geometry.coordinates,
           zoom,
-        });
-      });
+        })
+      })
     }}
     on:mouseenter={() => (map.getCanvas().style.cursor = 'pointer')}
     on:mouseleave={() => (map.getCanvas().style.cursor = '')} />
@@ -106,19 +106,19 @@
     }}
     on:click={({ detail }) => {
       // const point = detail.features[0].geometry as Point;
-      // @ts-ignore
-      const coordinates = detail.features[0].geometry.coordinates.slice();
+      // @ts-expect-error
+      const coordinates = detail.features[0].geometry.coordinates.slice()
 
       // Ensure that if the map is zoomed out such that multiple
       // copies of the feature are visible, the popup appears
       // over the copy being pointed to.
       while (Math.abs(detail.lngLat.lng - coordinates[0]) > 180)
-        coordinates[0] += detail.lngLat.lng > coordinates[0] ? 360 : -360;
+        coordinates[0] += detail.lngLat.lng > coordinates[0] ? 360 : -360
 
-      map.setCenter(coordinates);
+      map.setCenter(coordinates)
 
-      const { id } = detail.features[0].properties;
-      selectedDictionaryId = id;
+      const { id } = detail.features[0].properties
+      selectedDictionaryId = id
     }}
     on:mouseenter={() => (map.getCanvas().style.cursor = 'pointer')}
     on:mouseleave={() => (map.getCanvas().style.cursor = '')} />

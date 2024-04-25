@@ -1,14 +1,14 @@
-import type { Variant, Viewport } from 'kitbook'
-import type Component from './FilterList.svelte'
+import type { DeprecatedVariant, Viewport } from 'kitbook'
 import { writable } from 'svelte/store'
 import type { QueryParamStore } from 'svelte-pieces'
+import type Component from './FilterList.svelte'
 import type { QueryParams } from '$lib/search/types'
 
 export const viewports: Viewport[] = [
   { width: 200, height: 500 },
 ]
 
-export const variants: Variant<Component>[] = [
+export const variants: DeprecatedVariant<Component>[] = [
   // TODO: no search params variant
   {
     name: 'Few',
@@ -20,10 +20,10 @@ export const variants: Variant<Component>[] = [
       search_params: writable({ dialects: ['north'] }) as QueryParamStore<QueryParams>,
       search_param_key: 'dialects',
       values: {
-        'west': 2,
-        'east': 1,
-        'north': 10,
-      }
+        west: 2,
+        east: 1,
+        north: 10,
+      },
     },
   },
   {
@@ -46,7 +46,7 @@ export const variants: Variant<Component>[] = [
         'central east': 2,
         'northwest west': 1,
         'northeast west': 10,
-      }
+      },
     },
   },
   {
@@ -69,7 +69,7 @@ export const variants: Variant<Component>[] = [
       },
       speaker_ids_to_names: {
         '1234-------------------------1234': 'John Brim',
-      }
+      },
     },
-  }
+  },
 ]

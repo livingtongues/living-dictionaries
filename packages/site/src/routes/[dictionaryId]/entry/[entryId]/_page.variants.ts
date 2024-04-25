@@ -1,8 +1,8 @@
-import type { Variant } from 'kitbook';
-import type Component from './+page.svelte';
-import { readable } from 'svelte/store';
-import type { ComponentProps } from 'svelte';
-import { mockDictionaryLayoutData } from '$lib/mocks/layout';
+import type { DeprecatedVariant } from 'kitbook'
+import { readable } from 'svelte/store'
+import type { ComponentProps } from 'svelte'
+import type Component from './+page.svelte'
+import { mockDictionaryLayoutData } from '$lib/mocks/layout'
 
 const defaultProps: ComponentProps<Component>['data'] = {
   ...mockDictionaryLayoutData,
@@ -13,10 +13,10 @@ const defaultProps: ComponentProps<Component>['data'] = {
   shallow: false,
 }
 
-export const variants: Variant<Component>[] = [
+export const variants: DeprecatedVariant<Component>[] = [
   {
     name: 'Viewer',
-    viewports: [{ width: 500, height: 250}],
+    viewports: [{ width: 500, height: 250 }],
     props: {
       data: {
         ...defaultProps,
@@ -24,16 +24,16 @@ export const variants: Variant<Component>[] = [
           lexeme: 'test',
           senses: [{
             glosses: {
-              'en': 'foo',
-            }
-          }]
-        })
+              en: 'foo',
+            },
+          }],
+        }),
       },
     },
   },
   {
     name: 'Editor',
-    viewports: [{ width: 786, height: 500}],
+    viewports: [{ width: 786, height: 500 }],
     props: {
       data: {
         ...defaultProps,
@@ -46,7 +46,7 @@ export const variants: Variant<Component>[] = [
     name: 'Admin 2',
     description: 'Will show JSON viewer and Add Sense (as it is in beta)',
     languages: [],
-    viewports: [{ width: 786, height: 500}],
+    viewports: [{ width: 786, height: 500 }],
     props: {
       data: {
         ...defaultProps,
@@ -56,6 +56,6 @@ export const variants: Variant<Component>[] = [
     },
     tests: {
       skip: true,
-    }
+    },
   },
 ]

@@ -5,18 +5,13 @@
   import Waveform from '$lib/components/audio/Waveform.svelte'
   import SelectAudio from '$lib/components/audio/SelectAudio.svelte'
   import RecordAudio from '$lib/components/audio/RecordAudio.svelte'
-  import { deleteAudio } from '$lib/helpers/delete'
   import SelectSpeaker from '$lib/components/media/SelectSpeaker.svelte'
-  import type { DbOperations } from '$lib/dbOperations'
 
   export let on_close: () => void
   export let entry: ExpandedEntry
   export let sound_file: ExpandedAudio
-  export let updateEntryOnline: DbOperations['updateEntryOnline']
-  $: ({ dictionary, admin, speakers, user } = $page.data)
-
+  $: ({ admin, speakers, dbOperations } = $page.data)
   let readyToRecord: boolean
-  let showUploadAudio = true
 
   let file: File
   let audioBlob: Blob
@@ -28,7 +23,7 @@
 
   $: speaker_id = sound_file?.speaker_ids?.[0]
 
-  async function updateSpeaker(new_speaker_id: string) {
+  async function select_speaker(new_speaker_id: string) {
     if (!sound_file) return
     if (speaker_id === new_speaker_id) return
 
@@ -38,14 +33,14 @@
           path: sound_file.fb_storage_path,
           sp: [new_speaker_id],
           // @ts-expect-error
-          ts: entry.sfs[0].ts,
+          ts: entry.sfs?.[0].ts,
           ab: sound_file.uid_added_by || null,
           sc: sound_file.source || null,
           speakerName: null,
         },
       ],
     }
-    await updateEntryOnline({ data, entryId: entry.id })
+    await dbOperations.updateEntryOnline({ data, entryId: entry.id })
   }
 </script>
 
@@ -63,7 +58,8 @@
       speakers={$speakers}
       initialSpeakerId={speaker_id}
       let:speakerId
-      select_speaker={updateSpeaker}>
+      add_speaker={dbOperations.add_speaker}
+      {select_speaker}>
       {#if sound_file}
         <div class="px-1">
           <Waveform audioUrl={sound_file.storage_url} />
@@ -76,17 +72,10 @@
             <Waveform {audioBlob} />
           {/if}
           <div class="mb-3" />
-          {#if showUploadAudio}
-            {#await import('$lib/components/audio/UploadAudio.svelte') then { default: UploadAudio }}
-              <UploadAudio
-                dictionary_id={$dictionary.id}
-                user={$user}
-                file={file || audioBlob}
-                entryId={entry.id}
-                {speakerId}
-                on:close={() => {
-                  showUploadAudio = false
-                }} />
+          {#if file || audioBlob}
+            {@const upload_status = dbOperations.addAudio({ file: file || audioBlob, entryId: entry.id, speakerId })}
+            {#await import('$lib/components/audio/UploadAudioStatus.svelte') then { default: UploadAudioStatus }}
+              <UploadAudioStatus {upload_status} />
             {/await}
           {/if}
         {:else}
@@ -118,7 +107,7 @@
       </Button>
       <div class="w-1" />
 
-      <Button onclick={() => deleteAudio(entry, $dictionary.id)} color="red">
+      <Button onclick={async () => await dbOperations.deleteAudio(entry)} color="red">
         <i class="far fa-trash-alt" />&nbsp;
         <span class="hidden sm:inline">{$page.data.t('misc.delete')}</span>
       </Button>
