@@ -1,9 +1,9 @@
 <script lang="ts">
-  import { page } from '$app/stores';
-  import type { IDictionary } from '@living-dictionaries/types';
+  import type { IDictionary } from '@living-dictionaries/types'
+  import { page } from '$app/stores'
 
   export let dictionary: IDictionary
-  export let on_close: () => void;
+  export let on_close: () => void
   export let show_local_search: boolean
   export let is_manager: boolean
   export let search_index_ready: boolean
@@ -51,7 +51,7 @@
     </a>
   {/if}
   <a
-    href={'/' + dictionary.id + '/about'}
+    href={`/${dictionary.id}/about`}
     class:active={$page.url.pathname.includes('about')}>
     <i class="far fa-info-circle fa-fw" />
     <span class="font-medium mx-2">
@@ -59,7 +59,7 @@
     </span>
   </a>
   <a
-    href={'/' + dictionary.id + '/contributors'}
+    href={`/${dictionary.id}/contributors`}
     class:active={$page.url.pathname.includes('contributors')}>
     <i class="far fa-users fa-fw" />
     <span class="font-medium mx-2">
@@ -67,7 +67,7 @@
     </span>
   </a>
   <a
-    href={'/' + dictionary.id + '/grammar'}
+    href={`/${dictionary.id}/grammar`}
     class:active={$page.url.pathname.includes('grammar')}>
     <i class="far fa-edit fa-fw" />
     <span class="font-medium mx-2">
@@ -76,7 +76,7 @@
   </a>
   {#if is_manager}
     <a
-      href={'/' + dictionary.id + '/import'}
+      href={`/${dictionary.id}/import`}
       class:active={$page.url.pathname.includes('import')}>
       <i class="far fa-file-import" />
       <span class="font-medium mx-2">
@@ -84,7 +84,7 @@
       </span>
     </a>
     <a
-      href={'/' + dictionary.id + '/settings'}
+      href={`/${dictionary.id}/settings`}
       class:active={$page.url.pathname.includes('settings')}>
       <i class="far fa-cog fa-fw" />
       <span class="font-medium mx-2">
@@ -92,7 +92,7 @@
       </span>
     </a>
     <a
-      href={'/' + dictionary.id + '/export'}
+      href={`/${dictionary.id}/export`}
       class:active={$page.url.pathname.includes('export')}>
       <i class="far fa-download" />
       <span class="font-medium mx-2">

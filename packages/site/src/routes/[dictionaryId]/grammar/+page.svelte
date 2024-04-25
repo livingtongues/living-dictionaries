@@ -1,25 +1,14 @@
 <script lang="ts">
-  import { page } from '$app/stores';
-  import { setOnline } from 'sveltefirets';
-  import { Button } from 'svelte-pieces';
-  import type { IGrammar } from '@living-dictionaries/types';
-  import sanitize from 'xss';
-  import SeoMetaTags from '$lib/components/SeoMetaTags.svelte';
+  import { Button } from 'svelte-pieces'
+  import sanitize from 'xss'
+  import { page } from '$app/stores'
+  import SeoMetaTags from '$lib/components/SeoMetaTags.svelte'
 
-  export let data;
-  $: ({ is_manager, dictionary } = data)
-  let updated = '';
+  export let data
+  $: ({ is_manager, dictionary, update_grammar } = data)
+  let updated = ''
 
-  async function save() {
-    try {
-      await setOnline<IGrammar>(`dictionaries/${$dictionary.id}/info/grammar`, { grammar: updated });
-      window.location.replace(`/${$dictionary.id}/grammar`);
-    } catch (err) {
-      alert(err);
-    }
-  }
-
-  let editing = false;
+  let editing = false
 </script>
 
 <div class="grammar">
@@ -30,7 +19,7 @@
   {#if $is_manager}
     {#if editing}
       <Button class="mb-2" onclick={() => (editing = false)}>{$page.data.t('misc.cancel')}</Button>
-      <Button class="mb-2" form="filled" onclick={save}>{$page.data.t('misc.save')}</Button>
+      <Button class="mb-2" form="filled" onclick={async () => await update_grammar(updated)}>{$page.data.t('misc.save')}</Button>
     {:else}
       <Button class="mb-2" onclick={() => (editing = true)}>{$page.data.t('misc.edit')}</Button>
     {/if}

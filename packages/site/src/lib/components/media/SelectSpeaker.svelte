@@ -1,16 +1,21 @@
+<script context="module" lang="ts">
+  let last_selected_speaker_id: string
+</script>
+
 <script lang="ts">
-  import { page } from '$app/stores';
-  import type { ISpeaker } from '@living-dictionaries/types';
+  import type { ISpeaker } from '@living-dictionaries/types'
+  import { page } from '$app/stores'
 
   export let speakers: ISpeaker[]
   export let select_speaker: (speaker_id: string) => Promise<void> = undefined
-  export let initialSpeakerId: string = undefined;
+  export let add_speaker: (speaker: ISpeaker) => Promise<string>
+  export let initialSpeakerId: string = undefined
 
-  const addSpeaker = 'AddSpeaker';
-  $: speakerId = initialSpeakerId;
+  const addSpeaker = 'AddSpeaker'
+  $: speakerId = initialSpeakerId || last_selected_speaker_id
 
   function autofocus(node: HTMLSelectElement) {
-    setTimeout(() => node.focus(), 5);
+    setTimeout(() => node.focus(), 5)
   }
 </script>
 
@@ -32,8 +37,10 @@
     bind:value={speakerId}
     on:change={() => {
       // Currently means you can't remove a speaker
-      if (speakerId && speakerId !== addSpeaker)
+      if (speakerId && speakerId !== addSpeaker) {
+        last_selected_speaker_id = speakerId
         select_speaker?.(speakerId)
+      }
     }}
     class="block w-full pl-3 !rounded-none ltr:!rounded-r-md rtl:!rounded-l-md form-input hover:outline-blue-600">
     {#if !speakerId}
@@ -54,12 +61,12 @@
 {#if speakerId === addSpeaker}
   {#await import('$lib/components/media/AddSpeaker.svelte') then { default: AddSpeaker }}
     <AddSpeaker
-      on:close={() => {
-        speakerId = '';
+      on_close={() => {
+        speakerId = ''
       }}
-      on:newSpeaker={(event) => {
-        speakerId = event.detail.id;
-        select_speaker?.(speakerId);
+      on_add_speaker={async (speaker) => {
+        speakerId = await add_speaker(speaker)
+        select_speaker?.(speakerId)
       }} />
   {/await}
 {/if}

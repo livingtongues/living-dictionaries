@@ -65,7 +65,7 @@
       </Button>
     {/if}
     {#if !shallow}
-      <Button class="inline-flex items-center" form="simple" onclick={() => share($dictionary.id, $entry)}>
+      <Button class="inline-flex! items-center" form="simple" onclick={() => share($dictionary.id, $entry)}>
         <span>{$page.data.t('misc.share')}</span>
         <div class="w-2"></div>
         <i class="fas fa-share-square rtl-x-flip" />

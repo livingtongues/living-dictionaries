@@ -1,18 +1,17 @@
-
 <script lang="ts">
-  import { page } from '$app/stores';
-  import { onMount } from 'svelte';
-  import { firebaseConfig } from 'sveltefirets';
-  import { Button, ShowHide } from 'svelte-pieces';
-  import Header from '$lib/components/shell/Header.svelte';
+  import { onMount } from 'svelte'
+  import { Button, ShowHide } from 'svelte-pieces'
+  import { page } from '$app/stores'
+  import Header from '$lib/components/shell/Header.svelte'
+  import { dev } from '$app/environment'
 
   onMount(async () => {
-    const Sentry = await import('@sentry/browser');
-    const eventId = Sentry.captureException($page.error);
-    console.error('sent error', eventId);
+    const Sentry = await import('@sentry/browser')
+    const eventId = Sentry.captureException($page.error)
+    console.error('sent error', eventId)
   // https://docs.sentry.io/enriching-error-data/user-feedback
     // Sentry.showReportDialog({ eventId });
-  });
+  })
 </script>
 
 <svelte:head>
@@ -50,7 +49,7 @@
     {$page.error.message}
   </p>
 
-  {#if firebaseConfig.projectId === 'talking-dictionaries-dev' && $page.error.message}
+  {#if dev && $page.error.message}
     <div class="w-full overflow-x-auto">
       <pre>{JSON.stringify($page.error, null, 2)}</pre>
     </div>
