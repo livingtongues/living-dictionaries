@@ -8,13 +8,13 @@
 <header class="print:hidden sticky top-0 left-0 right-0 flex items-center bg-white h-12 z-2 whitespace-nowrap">
   {#if $$slots.default}
     <Button form="text" href="/"><i class="fas fa-home" /></Button>
-    <div class="text-lg font-semibold p-3 overflow-x-auto md:overflow-hidden md:overflow-ellipsis">
+    <div class="text-lg font-semibold p-3 overflow-x-auto md:overflow-hidden">
       <slot />
     </div>
   {:else if $$slots.left}
     <slot name="left" />
   {:else}
-    <div class="font-semibold sm:text-xl overflow-x-auto md:overflow-hidden md:overflow-ellipsis">
+    <div class="font-semibold sm:text-xl overflow-x-auto md:overflow-hidden">
       <a class="flex items-center hover:text-black" href="/">
         <img
           alt="logo"

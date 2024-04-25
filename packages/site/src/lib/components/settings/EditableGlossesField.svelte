@@ -1,31 +1,26 @@
 <script lang="ts">
-  import { page } from '$app/stores';
-  import type { IGlossLanguages } from '@living-dictionaries/types';
-  import { Button, ShowHide, BadgeArrayEmit, Modal } from 'svelte-pieces';
-  import Filter from '$lib/components/Filter.svelte';
+  import type { IGlossLanguages } from '@living-dictionaries/types'
+  import { BadgeArrayEmit, Button, Modal, ShowHide } from 'svelte-pieces'
+  import { page } from '$app/stores'
+  import Filter from '$lib/components/Filter.svelte'
 
-  export let availableLanguages: IGlossLanguages;
-  export let selectedLanguages: string[];
-
-  export let minimum = 1;
+  export let availableLanguages: IGlossLanguages
+  export let selectedLanguages: string[]
+  export let minimum = 1
+  export let add_language: (languageId: string) => void
+  export let remove_language: (languageId: string) => void
 
   $: activeGlossingBcps = Array.isArray(selectedLanguages)
-    ? selectedLanguages.map((bcp) =>
-      $page.data.t({ dynamicKey: 'gl.' + bcp, fallback: availableLanguages[bcp].vernacularName })
+    ? selectedLanguages.map(bcp =>
+      $page.data.t({ dynamicKey: `gl.${bcp}`, fallback: availableLanguages[bcp].vernacularName }),
     )
-    : [];
+    : []
   $: remainingGlossingLanguagesAsArray = Object.entries(availableLanguages)
-    .map((e) => ({
+    .map(e => ({
       bcp: e[0],
       ...e[1],
     }))
-    .filter((e) => !selectedLanguages.includes(e.bcp));
-
-  import { createEventDispatcher } from 'svelte';
-  const dispatch = createEventDispatcher<{
-    add: { languageId: string };
-    remove: { languageId: string; index: number };
-  }>();
+    .filter(e => !selectedLanguages.includes(e.bcp))
 </script>
 
 <div class="text-sm font-medium text-gray-700 mb-1">
@@ -38,12 +33,7 @@
     {minimum}
     canEdit
     addMessage={$page.data.t('misc.add')}
-    on:itemremoved={(e) => {
-      dispatch('remove', {
-        languageId: selectedLanguages[e.detail.index],
-        index: e.detail.index,
-      });
-    }}
+    on:itemremoved={({ detail: { index } }) => remove_language(selectedLanguages[index])}
     on:additem={toggle} />
   {#if show}
     <Modal on:close={toggle}>
@@ -57,18 +47,18 @@
         {#each filteredLanguages as language}
           <Button
             onclick={() => {
-              dispatch('add', { languageId: language.bcp });
-              toggle();
+              add_language(language.bcp)
+              toggle()
             }}
             color="green"
             form="simple"
             class="w-full !text-left">
-            {language.vernacularName || $page.data.t({ dynamicKey: 'gl.' + language.bcp, fallback: language.bcp })}
+            {language.vernacularName || $page.data.t({ dynamicKey: `gl.${language.bcp}`, fallback: language.bcp })}
             {#if language.vernacularAlternate}
               {language.vernacularAlternate}
             {/if}
             {#if language.vernacularName}
-              <small>({$page.data.t({ dynamicKey: 'gl.' + language.bcp, fallback: language.bcp })})</small>
+              <small>({$page.data.t({ dynamicKey: `gl.${language.bcp}`, fallback: language.bcp })})</small>
             {/if}
           </Button>
         {/each}

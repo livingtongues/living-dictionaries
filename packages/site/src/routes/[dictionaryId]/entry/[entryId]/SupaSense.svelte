@@ -1,19 +1,19 @@
 <script lang="ts">
-  import { page } from '$app/stores';
-  import type { IDictionary } from '@living-dictionaries/types';
-  import { order_entry_and_dictionary_gloss_languages } from '$lib/helpers/glosses';
-  import EntryPartOfSpeech from '$lib/components/entry/EntryPartOfSpeech.svelte';
-  import SupaEntrySemanticDomains from '$lib/components/entry/SupaEntrySemanticDomains.svelte';
-  import EntryField from './EntryField.svelte';
-  import type { DbOperations } from '$lib/dbOperations';
-  import type { SupaSense } from '$lib/supabase/database.types';
+  import type { IDictionary } from '@living-dictionaries/types'
+  import EntryField from './EntryField.svelte'
+  import { page } from '$app/stores'
+  import { order_entry_and_dictionary_gloss_languages } from '$lib/helpers/glosses'
+  import EntryPartOfSpeech from '$lib/components/entry/EntryPartOfSpeech.svelte'
+  import EntrySemanticDomains from '$lib/components/entry/EntrySemanticDomains.svelte'
+  import type { DbOperations } from '$lib/dbOperations'
+  import type { SupaSense } from '$lib/supabase/database.types'
 
-  export let entryId: string;
+  export let entryId: string
   export let sense: SupaSense
   export let glossLanguages: IDictionary['glossLanguages']
-  export let can_edit = false;
-  export let update_sense: DbOperations['update_sense'];
-  export let update_sentence: DbOperations['update_sentence'];
+  export let can_edit = false
+  export let update_sense: DbOperations['update_sense']
+  export let update_sentence: DbOperations['update_sentence']
 
   const writing_systems = ['default']
 
@@ -27,13 +27,13 @@
     field="gloss"
     {bcp}
     {can_edit}
-    display={`${$page.data.t({ dynamicKey: `gl.${bcp}`, fallback: bcp})}: ${$page.data.t('entry_field.gloss')}`}
+    display={`${$page.data.t({ dynamicKey: `gl.${bcp}`, fallback: bcp })}: ${$page.data.t('entry_field.gloss')}`}
     on_update={new_value => update_sense({
       change: {
         glosses: {
           new: { ...sense.glosses, [bcp]: new_value },
           old: sense.glosses,
-        }
+        },
       },
       entry_id: entryId,
       sense_id: sense.id,
@@ -50,9 +50,9 @@
     on_update={new_value => update_sense({
       change: {
         definition: {
-          new: new_value ? {en: new_value} : null,
+          new: new_value ? { en: new_value } : null,
           old: sense.definition,
-        }
+        },
       },
       entry_id: entryId,
       sense_id: sense.id,
@@ -70,7 +70,7 @@
           parts_of_speech: {
             new: new_value,
             old: sense.parts_of_speech,
-          }
+          },
         },
         entry_id: entryId,
         sense_id: sense.id,
@@ -82,7 +82,7 @@
 {#if hasSemanticDomain || can_edit}
   <div class="md:px-2" class:order-2={!hasSemanticDomain}>
     <div class="rounded text-xs text-gray-500 mt-1 mb-2">{$page.data.t('entry_field.semantic_domains')}</div>
-    <SupaEntrySemanticDomains
+    <EntrySemanticDomains
       {can_edit}
       semantic_domain_keys={sense.semantic_domains}
       write_in_semantic_domains={sense.write_in_semantic_domains}
@@ -91,7 +91,7 @@
           semantic_domains: {
             new: new_value,
             old: sense.semantic_domains,
-          }
+          },
         },
         entry_id: entryId,
         sense_id: sense.id,
@@ -101,7 +101,7 @@
           write_in_semantic_domains: {
             new: new_value,
             old: sense.write_in_semantic_domains,
-          }
+          },
         },
         entry_id: entryId,
         sense_id: sense.id,
@@ -120,13 +120,13 @@
       noun_class: {
         new: new_value || null,
         old: sense.noun_class || null,
-      }
+      },
     },
     entry_id: entryId,
     sense_id: sense.id,
   })} />
 
-{#each sense.sentences || [{text: {}, id: null, translation: null}] as sentence}
+{#each sense.sentences || [{ text: {}, id: null, translation: null }] as sentence}
   {@const has_sentences = Object.keys(sentence.text).length}
   <div class:order-2={!has_sentences} class="flex flex-col">
     {#each writing_systems as orthography}
@@ -140,7 +140,7 @@
             text: {
               new: { [orthography]: new_value || null },
               old: sentence.text?.[orthography] ? { default: sentence.text[orthography] } : null,
-            }
+            },
           },
           sentence_id: sentence.id || window.crypto.randomUUID(),
           sense_id: sense.id,
@@ -155,16 +155,16 @@
           field="example_sentence"
           {bcp}
           {can_edit}
-          display="{$page.data.t({dynamicKey: `gl.${bcp}`, fallback: bcp})}: {$page.data.t('entry_field.example_sentence')}"
+          display="{$page.data.t({ dynamicKey: `gl.${bcp}`, fallback: bcp })}: {$page.data.t('entry_field.example_sentence')}"
           on_update={new_value => update_sentence({
             change: {
               translation: {
                 new: {
                   ...sentence.translation,
-                  [bcp]: new_value
+                  [bcp]: new_value,
                 },
                 old: sentence.translation,
-              }
+              },
             },
             sentence_id: sentence.id,
             sense_id: sense.id,

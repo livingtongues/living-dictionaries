@@ -63,12 +63,13 @@ export const load = (async ({ params: { dictionaryId }, parent, depends }) => {
 
     add_partner_image: (partner_id: string, file: File) => {
       const status = upload_image({ file, folder: `${dictionaryId}/partners/${partner_id}/logo` })
-      status.subscribe(async ({ storage_path, serving_url }) => {
+      const unsubscribe = status.subscribe(async ({ storage_path, serving_url }) => {
         if (storage_path && serving_url) {
           await performDbOperation(() => updateOnline<Partner>(`dictionaries/${dictionaryId}/partners/${partner_id}`, { logo: {
             fb_storage_path: storage_path,
             specifiable_image_url: serving_url,
           } }))
+          unsubscribe()
         }
       })
       return status

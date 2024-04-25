@@ -4,7 +4,7 @@
   import { page } from '$app/stores'
   import { order_entry_and_dictionary_gloss_languages } from '$lib/helpers/glosses'
   import EntryPartOfSpeech from '$lib/components/entry/EntryPartOfSpeech.svelte'
-  import SupaEntrySemanticDomains from '$lib/components/entry/SupaEntrySemanticDomains.svelte'
+  import EntrySemanticDomains from '$lib/components/entry/EntrySemanticDomains.svelte'
 
   export let sense: ExpandedSense
   export let glossLanguages: IDictionary['glossLanguages']
@@ -49,7 +49,7 @@
 {#if hasSemanticDomain || can_edit}
   <div class="md:px-2" class:order-2={!hasSemanticDomain}>
     <div class="rounded text-xs text-gray-500 mt-1 mb-2">{$page.data.t('entry_field.semantic_domains')}</div>
-    <SupaEntrySemanticDomains
+    <EntrySemanticDomains
       {can_edit}
       semantic_domain_keys={sense.ld_semantic_domains_keys}
       write_in_semantic_domains={sense.write_in_semantic_domains}

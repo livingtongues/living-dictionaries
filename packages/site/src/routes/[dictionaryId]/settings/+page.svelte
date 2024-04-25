@@ -1,9 +1,5 @@
 <script lang="ts">
-  import { getCollection, updateOnline } from 'sveltefirets'
-  import { limit, where } from 'firebase/firestore'
-  import { type FieldValue, GeoPoint, arrayRemove, arrayUnion } from 'firebase/firestore/lite'
   import { Button, JSON, ShowHide } from 'svelte-pieces'
-  import type { IDictionary } from '@living-dictionaries/types'
   import EditString from '../EditString.svelte'
   import { page } from '$app/stores'
   import EditableGlossesField from '$lib/components/settings/EditableGlossesField.svelte'
@@ -14,24 +10,10 @@
   import { glossingLanguages } from '$lib/glosses/glossing-languages'
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte'
   import Image from '$lib/components/image/Image.svelte'
-  import ImageDropZone from '$lib/components/image/ImageDropZone.svelte'
-  import { invalidateAll } from '$app/navigation'
+  import AddImage from '$lib/components/image/AddImage.svelte'
 
   export let data
-  $: ({ user, dictionary, admin, is_manager } = data)
-
-  async function updateDictionary(change: Partial<IDictionary>) {
-    try {
-      await updateOnline<IDictionary>(`dictionaries/${$dictionary.id}`, change)
-      await invalidateAll()
-    } catch (err) {
-      alert(`${$page.data.t('misc.error')}: ${err}`)
-    }
-  }
-
-  async function updateGlossLanguages(change: FieldValue) {
-    await updateDictionary({ glossLanguages: change as unknown as string[] })
-  }
+  $: ({ dictionary, admin, is_manager, updateDictionary, add_gloss_language, remove_gloss_language, add_featured_image } = data)
 </script>
 
 <div style="max-width: 700px">
@@ -64,25 +46,8 @@
     minimum={1}
     availableLanguages={glossingLanguages}
     selectedLanguages={$dictionary.glossLanguages}
-    on:add={async ({ detail: { languageId } }) => await updateGlossLanguages(arrayUnion(languageId))}
-    on:remove={async ({ detail: { languageId } }) => {
-      try {
-        const entriesUsingGlossLanguage = await getCollection(
-          `dictionaries/${$dictionary.id}/words`,
-          [where(`gl.${languageId}`, '>', ''), limit(1)],
-        )
-        if (entriesUsingGlossLanguage.length === 0) {
-          await updateGlossLanguages(arrayRemove(languageId))
-        } else if ($admin) {
-          const removeGlossLanguageInUse = confirm('Remove as admin even though this glossing language is in use already? Know that regular editors get a message saying "Contact Us"')
-          if (removeGlossLanguageInUse) await updateGlossLanguages(arrayRemove(languageId))
-        } else {
-          alert($page.data.t('header.contact_us'))
-        }
-      } catch (err) {
-        return console.error(err)
-      }
-    }} />
+    add_language={async languageId => await add_gloss_language(languageId)}
+    remove_language={async languageId => await remove_gloss_language(languageId)} />
   <div class="mb-5" />
 
   <EditableAlternateNames
@@ -92,7 +57,7 @@
 
   <WhereSpoken
     dictionary={$dictionary}
-    on_update_coordinates={async coordinates => await updateDictionary({ coordinates: new GeoPoint(coordinates.latitude, coordinates.longitude) })}
+    on_update_coordinates={async coordinates => await updateDictionary({ coordinates })}
     on_remove_coordinates={async () => await updateDictionary({ coordinates: null })}
     on_update_points={async points => await updateDictionary({ points })}
     on_update_regions={async regions => await updateDictionary({ regions })} />
@@ -117,27 +82,9 @@
       gcs={$dictionary.featuredImage.specifiable_image_url}
       on_delete_image={async () => await updateDictionary({ featuredImage: null })} />
   {:else}
-    <ImageDropZone let:file class="p-3 rounded">
-      <span slot="label">{$page.data.t('misc.upload')}</span>
-      {#if file}
-        {#await import('$lib/components/image/UploadImage.svelte') then { default: UploadImage }}
-          <div class="flex flex-col min-h-100px">
-            <UploadImage
-              {file}
-              fileLocationPrefix={`${$dictionary.id}/featured_images/`}
-              user={$user}
-              on:uploaded={async ({ detail: { fb_storage_path, specifiable_image_url } }) => await updateDictionary({
-                featuredImage: {
-                  fb_storage_path,
-                  specifiable_image_url,
-                  uid_added_by: $user.uid,
-                  timestamp: new Date(),
-                },
-              })} />
-          </div>
-        {/await}
-      {/if}
-    </ImageDropZone>
+    <div class="hover:bg-gray-100 min-h-150px flex flex-col">
+      <AddImage border upload_image={add_featured_image} />
+    </div>
   {/if}
   <div class="mb-5" />
 

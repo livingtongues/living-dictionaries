@@ -1,8 +1,17 @@
 {
   "name": "@living-dictionaries/scripts",
+  "type": "module",
   "version": "0.0.1",
   "description": "Scripts for Living Dictionaries",
-  "type": "module",
+  "author": "Living Tongues Institute for Endangered Languages",
+  "homepage": "https://github.com/livingtongues/living-dictionaries#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/livingtongues/living-dictionaries.git"
+  },
+  "bugs": {
+    "url": "https://github.com/livingtongues/living-dictionaries/issues"
+  },
   "main": "index.ts",
   "scripts": {
     "migrate-users": "tsx migrate-to-supabase/auth.ts",
@@ -37,14 +46,5 @@
     "tsx": "^4.7.1",
     "typescript": "~5.1.6",
     "vitest": "^1.4.0"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/livingtongues/living-dictionaries.git"
-  },
-  "author": "Living Tongues Institute for Endangered Languages",
-  "bugs": {
-    "url": "https://github.com/livingtongues/living-dictionaries/issues"
-  },
-  "homepage": "https://github.com/livingtongues/living-dictionaries#readme"
+  }
 }
