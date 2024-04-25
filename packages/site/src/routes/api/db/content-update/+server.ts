@@ -1,77 +1,77 @@
-import { decodeToken } from '$lib/server/firebase-admin';
-import { json, error } from '@sveltejs/kit';
-import type { RequestHandler } from './$types';
-import { getAdminSupabaseClient } from '$lib/supabase/admin';
-import { ResponseCodes } from '$lib/constants';
-import type { Database, TablesInsert } from '$lib/supabase/generated.types';
-import { checkForPermission } from './check-dictionary-permission';
-import { dev } from '$app/environment';
-import type { MultiString } from '@living-dictionaries/types';
+import { error, json } from '@sveltejs/kit'
+import type { MultiString } from '@living-dictionaries/types'
+import type { RequestHandler } from './$types'
+import { checkForPermission } from './check-dictionary-permission'
+import { decodeToken } from '$lib/server/firebase-admin'
+import { getAdminSupabaseClient } from '$lib/supabase/admin'
+import { ResponseCodes } from '$lib/constants'
+import type { Database, TablesInsert } from '$lib/supabase/generated.types'
+import { dev } from '$app/environment'
 
 export interface ContentUpdateRequestBody {
-  id: string; // id of the change, a uuidv4 created on client to make things idempotent
-  user_id_from_test?: string;
-  auth_token: string;
-  dictionary_id: string;
-  entry_id?: string;
-  sense_id?: string;
-  sentence_id?: string;
-  text_id?: string;
-  audio_id?: string;
-  video_id?: string;
-  photo_id?: string;
-  speaker_id?: string;
-  table: Database['public']['Enums']['content_tables'];
+  id: string // id of the change, a uuidv4 created on client to make things idempotent
+  user_id_from_local?: string
+  auth_token: string
+  dictionary_id: string
+  entry_id?: string
+  sense_id?: string
+  sentence_id?: string
+  text_id?: string
+  audio_id?: string
+  video_id?: string
+  photo_id?: string
+  speaker_id?: string
+  table: Database['public']['Enums']['content_tables']
   change: {
     sense?: {
       glosses?: {
-        new: MultiString;
-        old?: MultiString;
+        new: MultiString
+        old?: MultiString
       }
       definition?: {
-        new: MultiString;
-        old?: MultiString;
+        new: MultiString
+        old?: MultiString
       }
       noun_class?: {
-        new: string;
-        old?: string;
+        new: string
+        old?: string
       }
       parts_of_speech?: {
-        new: string[];
-        old?: string[];
+        new: string[]
+        old?: string[]
       }
       semantic_domains?: {
-        new: string[];
-        old?: string[];
+        new: string[]
+        old?: string[]
       }
       write_in_semantic_domains?: {
-        new: string[];
-        old?: string[];
+        new: string[]
+        old?: string[]
       }
-      deleted?: boolean;
+      deleted?: boolean
     }
     sentence?: {
       text?: {
-        new: MultiString;
-        old?: MultiString;
+        new: MultiString
+        old?: MultiString
       }
       translation?: {
-        new: MultiString;
-        old?: MultiString;
+        new: MultiString
+        old?: MultiString
       }
-      removed_from_sense?: boolean; // currently also deletes the sentence - later when a sentence can be connected to multiple sentences, use a deleted field to indicate the sentence is deleted everywhere
+      removed_from_sense?: boolean // currently also deletes the sentence - later when a sentence can be connected to multiple sentences, use a deleted field to indicate the sentence is deleted everywhere
       // deleted?: boolean;
-    },
-  };
-  import_id?: string;
-  timestamp: string;
+    }
+  }
+  import_id?: string
+  timestamp: string
 }
 
 export type ContentUpdateResponseBody = TablesInsert<'content_updates'>
 
 export const POST: RequestHandler = async ({ request }) => {
   try {
-    const { id, user_id_from_test, auth_token, table, dictionary_id, audio_id, entry_id, photo_id, speaker_id, text_id, video_id, sentence_id, sense_id, change, import_id, timestamp } = await request.json() as ContentUpdateRequestBody;
+    const { id, user_id_from_local, auth_token, table, dictionary_id, audio_id, entry_id, photo_id, speaker_id, text_id, video_id, sentence_id, sense_id, change, import_id, timestamp } = await request.json() as ContentUpdateRequestBody
 
     if (audio_id)
       throw new Error('audio_id change not implemented')
@@ -84,24 +84,28 @@ export const POST: RequestHandler = async ({ request }) => {
     if (text_id)
       throw new Error('text_id change not implemented')
 
-    const adminSupabase = getAdminSupabaseClient();
+    const adminSupabase = getAdminSupabaseClient()
 
-    let user_id = user_id_from_test;
-    if (!dev || !user_id_from_test) {
-      const decodedToken = await decodeToken(auth_token);
+    let user_id = user_id_from_local
+    const is_deployed = !dev
+    if (is_deployed) {
+      const decodedToken = await decodeToken(auth_token)
       if (!decodedToken?.uid)
-        throw new Error('No user id found in token');
+        throw new Error('No user id found in token')
 
-      await checkForPermission(decodedToken.uid, dictionary_id);
-      user_id = decodedToken.uid;
+      await checkForPermission(decodedToken.uid, dictionary_id)
+      user_id = decodedToken.uid
       const { data } = await adminSupabase.from('user_emails')
         .select('id')
         .eq('email', decodedToken.email)
         .single()
       if (!data?.id)
-        throw new Error('No user id found in database');
+        throw new Error('No user id found in database')
       user_id = data.id
     }
+
+    if (!user_id)
+      throw new Error('No user id found. Pass it into the user_id_from_local field or use a valid auth_token.')
 
     const { data: dictionary } = await adminSupabase.from('dictionaries').select().eq('id', dictionary_id).single()
     if (!dictionary) {
@@ -152,7 +156,7 @@ export const POST: RequestHandler = async ({ request }) => {
         updated_by: user_id,
       }
 
-      const editing_sentence_in_sense = sentence_id && sense_id;
+      const editing_sentence_in_sense = sentence_id && sense_id
       if (change.sentence.text)
         sentence.text = change.sentence.text.new
       if (change.sentence.translation)
@@ -206,13 +210,11 @@ export const POST: RequestHandler = async ({ request }) => {
       .single()
 
     if (history_error)
-      throw new Error(history_error.message);
+      throw new Error(history_error.message)
 
-    return json(content_update satisfies ContentUpdateResponseBody);
+    return json(content_update satisfies ContentUpdateResponseBody)
+  } catch (err) {
+    console.error(`Error saving sentence: ${err.message}`)
+    error(ResponseCodes.INTERNAL_SERVER_ERROR, `Error saving sentence: ${err.message}`)
   }
-  catch (err) {
-    console.error(`Error saving sentence: ${err.message}`);
-    error(ResponseCodes.INTERNAL_SERVER_ERROR, `Error saving sentence: ${err.message}`);
-  }
-};
-
+}
