@@ -1,21 +1,21 @@
-import type { DeprecatedVariant, Viewport } from 'kitbook'
+import type { Variant, VariantMeta } from 'kitbook'
 import type Component from './ContributorInvitationStatus.svelte'
 
-export const viewports: Viewport[] = [
-  { width: 320, height: 100 },
-]
+export const shared_meta: VariantMeta = {
+  viewports: [
+    { width: 320, height: 100 },
+  ],
+  languages: [],
+}
 
-export const languages = []
+const shared = {} satisfies Partial<Variant<Component>>
 
-export const variants: DeprecatedVariant<Component>[] = [
-  {
-    props: {
-      invite: {
-        id: 'randomid1234',
-        targetEmail: 'jimbob@gmail.com',
-        inviterEmail: 'jimcousin@gmail.com',
-      },
-      on_delete_invite: null,
-    },
+export const First: Variant<Component> = {
+  ...shared,
+  invite: {
+    id: 'randomid1234',
+    targetEmail: 'jimbob@gmail.com',
+    inviterEmail: 'jimcousin@gmail.com',
   },
-]
+  on_delete_invite: null,
+}

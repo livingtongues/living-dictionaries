@@ -1,3 +1,7 @@
+<script context="module" lang="ts">
+  let last_selected_speaker_id: string
+</script>
+
 <script lang="ts">
   import type { ISpeaker } from '@living-dictionaries/types'
   import { page } from '$app/stores'
@@ -8,7 +12,7 @@
   export let initialSpeakerId: string = undefined
 
   const addSpeaker = 'AddSpeaker'
-  $: speakerId = initialSpeakerId
+  $: speakerId = initialSpeakerId || last_selected_speaker_id
 
   function autofocus(node: HTMLSelectElement) {
     setTimeout(() => node.focus(), 5)
@@ -33,8 +37,10 @@
     bind:value={speakerId}
     on:change={() => {
       // Currently means you can't remove a speaker
-      if (speakerId && speakerId !== addSpeaker)
+      if (speakerId && speakerId !== addSpeaker) {
+        last_selected_speaker_id = speakerId
         select_speaker?.(speakerId)
+      }
     }}
     class="block w-full pl-3 !rounded-none ltr:!rounded-r-md rtl:!rounded-l-md form-input hover:outline-blue-600">
     {#if !speakerId}

@@ -11,7 +11,6 @@
   export let entry: ExpandedEntry
   export let sound_file: ExpandedAudio
   $: ({ admin, speakers, dbOperations } = $page.data)
-
   let readyToRecord: boolean
 
   let file: File
@@ -34,7 +33,7 @@
           path: sound_file.fb_storage_path,
           sp: [new_speaker_id],
           // @ts-expect-error
-          ts: entry.sfs[0].ts,
+          ts: entry.sfs?.[0].ts,
           ab: sound_file.uid_added_by || null,
           sc: sound_file.source || null,
           speakerName: null,
@@ -73,7 +72,7 @@
             <Waveform {audioBlob} />
           {/if}
           <div class="mb-3" />
-          {#if file}
+          {#if file || audioBlob}
             {@const upload_status = dbOperations.addAudio({ file: file || audioBlob, entryId: entry.id, speakerId })}
             {#await import('$lib/components/audio/UploadAudioStatus.svelte') then { default: UploadAudioStatus }}
               <UploadAudioStatus {upload_status} />

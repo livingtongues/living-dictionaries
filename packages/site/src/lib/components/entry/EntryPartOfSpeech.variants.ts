@@ -1,41 +1,42 @@
-import type { DeprecatedVariant, Viewport } from 'kitbook'
+import type { Variant, VariantMeta } from 'kitbook'
 import type Component from './EntryPartOfSpeech.svelte'
 
-export const viewports: Viewport[] = [
-  { width: 300, height: 50 },
-]
-
-function on_update(new_value: string[]) {
-  console.info('new_value', new_value)
+export const shared_meta: VariantMeta = {
+  viewports: [
+    { width: 300, height: 50 },
+  ],
 }
 
-export const variants: DeprecatedVariant<Component>[] = [
-  {
-    name: 'can edit',
-    props: {
-      can_edit: true,
-      value: ['n', 'v'],
-      on_update,
-    },
+const shared = {
+  on_update: new_value => console.info('new_value', new_value),
+} satisfies Partial<Variant<Component>>
+
+export const Can_Edit: Variant<Component> = {
+  ...shared,
+  can_edit: true,
+  value: ['n', 'v'],
+  _meta: {
     viewports: [
       { width: 400, height: 300 },
     ],
   },
-  {
-    name: 'cannot edit',
-    props: {
-      value: ['n', 'v'],
-      on_update,
-    },
+}
+
+export const Cannot_Edit: Variant<Component> = {
+  ...shared,
+  value: ['n', 'v'],
+  _meta: {
     languages: [],
+
   },
-  {
-    name: 'undefined - can edit',
-    props: {
-      can_edit: true,
-      value: undefined,
-      on_update,
-    },
+}
+
+export const Undefined_Can_Edit: Variant<Component> = {
+  ...shared,
+  can_edit: true,
+  value: undefined,
+  _meta: {
     languages: [],
+
   },
-]
+}

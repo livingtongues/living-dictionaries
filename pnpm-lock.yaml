@@ -244,8 +244,8 @@ importers:
         specifier: ^3.7.1
         version: 3.8.0
       kitbook:
-        specifier: 1.0.0-beta.28
-        version: 1.0.0-beta.28(@lezer/common@1.2.1)(@sveltejs/kit@2.5.4)(svelte@4.2.12)
+        specifier: 1.0.0-beta.29
+        version: 1.0.0-beta.29(@lezer/common@1.2.1)(@sveltejs/kit@2.5.4)(svelte@4.2.12)
       logrocket:
         specifier: ^2.1.2
         version: 2.2.1
@@ -2329,8 +2329,8 @@ packages:
       unocss: 0.58.5(postcss@8.4.37)(vite@5.1.4)
     dev: true
 
-  /@kitbook/mdsvex-shiki-twoslash@1.0.0-beta.28(svelte@4.2.12)(typescript@5.4.5):
-    resolution: {integrity: sha512-nxM7M5QM9YHDJM34WcjJWiSDN7R5yE1+bbfSN6hZcuoCQQtmv+uBnwEDKVrqhMY3NA9K9n1FW1bc8VdnoLFOqA==}
+  /@kitbook/mdsvex-shiki-twoslash@1.0.0-beta.29(svelte@4.2.12)(typescript@5.4.5):
+    resolution: {integrity: sha512-xwAPAycDnh2eVweC8HkNLeWFtn1DudMQDYI7e72OJpniajMq2xuPErZ3OTP0o6yZeSi+1/jXWyeHWg8ins5XrQ==}
     dependencies:
       fenceparser: 2.2.0
       mdsvex: 0.11.0(svelte@4.2.12)
@@ -2342,8 +2342,8 @@ packages:
       - typescript
     dev: true
 
-  /@kitbook/rehype-display-link-titles@1.0.0-beta.28:
-    resolution: {integrity: sha512-jctIApVTZf5xkXLNEXoFMLbiMEzMDJKU2sM7cDmu4FadaSZA0Pi6rFTTerJqsSeCNdQoKfKX0y2695TmS9nqsw==}
+  /@kitbook/rehype-display-link-titles@1.0.0-beta.29:
+    resolution: {integrity: sha512-nHvOQ0p7S6nGjh1EkvrgxudzQBHirHhoUVf6KJL8yGZYKOJWQLe1sJTkjH9q1srt13gCZMl/IsP9URLqvFL2Pw==}
     dependencies:
       github-slugger: 2.0.0
       unist-util-visit: 4.1.2
@@ -9777,8 +9777,8 @@ packages:
       json-buffer: 3.0.1
     dev: true
 
-  /kitbook@1.0.0-beta.28(@lezer/common@1.2.1)(@sveltejs/kit@2.5.4)(svelte@4.2.12):
-    resolution: {integrity: sha512-9pDNN7o9G50Pg1AmelXCtRqz3E6hTrFcwZ+hZUjGAyntw0t5Fc6J3LIqz201nQD9KH0vtg/ulS5D9x3vcPZZSA==}
+  /kitbook@1.0.0-beta.29(@lezer/common@1.2.1)(@sveltejs/kit@2.5.4)(svelte@4.2.12):
+    resolution: {integrity: sha512-6/4yxXZzfC9Q/xQqmGMfC0vz2P56R4Rt4MUon4GfXsQZPf8/+BAnY1CiDBfPPOXDGkxMm5BE9TYxrOs7NvdYJQ==}
     peerDependencies:
       '@sveltejs/kit': ^1.13.0 || ^2.0.0
       svelte: ^3.55.0 || ^4.0.0
@@ -9790,8 +9790,8 @@ packages:
       '@codemirror/lint': 6.5.0
       '@codemirror/state': 6.4.1
       '@codemirror/view': 6.26.3
-      '@kitbook/mdsvex-shiki-twoslash': 1.0.0-beta.28(svelte@4.2.12)(typescript@5.4.5)
-      '@kitbook/rehype-display-link-titles': 1.0.0-beta.28
+      '@kitbook/mdsvex-shiki-twoslash': 1.0.0-beta.29(svelte@4.2.12)(typescript@5.4.5)
+      '@kitbook/rehype-display-link-titles': 1.0.0-beta.29
       '@lezer/highlight': 1.2.0
       '@sveltejs/kit': 2.5.4(@sveltejs/vite-plugin-svelte@3.0.2)(svelte@4.2.12)(vite@5.1.4)
       '@typescript/vfs': 1.5.0

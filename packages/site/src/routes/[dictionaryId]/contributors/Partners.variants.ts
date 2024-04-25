@@ -1,4 +1,4 @@
-import type { DeprecatedVariant, Viewport } from 'kitbook'
+import { type DeprecatedVariant, type Viewport, delay, sleep } from 'kitbook'
 import { writable } from 'svelte/store'
 import type Component from './Partners.svelte'
 import type { ImageUploadStatus } from '$lib/components/image/upload-image'
@@ -8,11 +8,6 @@ export const viewports: Viewport[] = [
 ]
 
 export const languages = []
-
-function delay<T>(value: T, delay_ms = 500): Promise<T> {
-  return new Promise(resolve => setTimeout(() => resolve(value), delay_ms))
-}
-const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
 
 const edits = {
   add_partner_name: (name: string) => delay(alert(name)),
