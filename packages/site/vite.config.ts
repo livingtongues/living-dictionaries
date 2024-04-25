@@ -7,9 +7,7 @@ import { kitbook } from 'kitbook/plugins/vite'
 import kitbookConfig from './kitbook.config'
 
 export default defineConfig({
-  // @ts-expect-error - vite version types oddity
   plugins: [
-    // @ts-expect-error - vite version types oddity
     kitbook(kitbookConfig),
     UnoCSS({
       injectReset: '@unocss/reset/tailwind.css',
