@@ -1,16 +1,19 @@
 interface GlossData {
-  idsGlossColumn: string;
-  glossName: string;
+  idsGlossColumn: string
+  glossName: string
 }
 
 interface SheetData {
-  tsvSheet: GoogleAppsScript.Spreadsheet.Sheet;
-  objectSheet: GoogleAppsScript.Spreadsheet.Sheet;
+  // @ts-expect-error - GoogleAppsScript magic
+  tsvSheet: GoogleAppsScript.Spreadsheet.Sheet
+  // @ts-expect-error - GoogleAppsScript magic
+  objectSheet: GoogleAppsScript.Spreadsheet.Sheet
 }
 
 interface ValuesFromColumns {
-  from_sheet: GoogleAppsScript.Spreadsheet.Sheet,
-  columns: string[] | number[],
-  are_columns_numbers?: boolean,
+  // @ts-expect-error - GoogleAppsScript magic
+  from_sheet: GoogleAppsScript.Spreadsheet.Sheet
+  columns: string[] | number[]
+  are_columns_numbers?: boolean
   is_range?: boolean
 }
