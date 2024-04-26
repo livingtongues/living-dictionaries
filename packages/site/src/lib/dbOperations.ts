@@ -1,14 +1,21 @@
-import { addNewEntry } from './helpers/entry/new'
+import { addNewEntry, add_speaker } from './helpers/entry/new'
 import { update_sense } from '$lib/supabase/change/sense'
 import { update_sentence } from '$lib/supabase/change/sentence'
 import { updateEntry, updateEntryOnline } from '$lib/helpers/entry/update'
-import { deleteEntry, deleteImage, deleteVideo } from '$lib/helpers/delete'
+import { addAudio, addImage, addVideo, deleteAudio, deleteEntry, deleteImage, deleteVideo } from '$lib/helpers/media'
 
 export const dbOperations = {
   addNewEntry,
-  deleteEntry,
-  deleteImage,
+  add_speaker,
+
+  addVideo,
+  addAudio,
   deleteVideo,
+  addImage,
+  deleteImage,
+  deleteAudio,
+  deleteEntry,
+
   updateEntry,
   updateEntryOnline,
   update_sense,

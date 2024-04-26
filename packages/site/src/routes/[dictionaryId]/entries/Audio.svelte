@@ -2,13 +2,11 @@
   import { ShowHide, longpress } from 'svelte-pieces'
   import type { ExpandedEntry } from '@living-dictionaries/types'
   import { page } from '$app/stores'
-  import type { DbOperations } from '$lib/dbOperations'
 
   export let entry: ExpandedEntry
   // export let sound_file: ExpandedAudio; // TODO
   export let context: 'list' | 'table' | 'entry'
   export let can_edit = false
-  export let updateEntryOnline: DbOperations['updateEntryOnline']
 
   $: sound_file = entry.sound_files?.[0]
 
@@ -75,7 +73,7 @@
 
   {#if show}
     {#await import('$lib/components/audio/EditAudio.svelte') then { default: EditAudio }}
-      <EditAudio {entry} sound_file={sound_file} on_close={toggle} {updateEntryOnline} />
+      <EditAudio {entry} sound_file={sound_file} on_close={toggle} />
     {/await}
   {/if}
 </ShowHide>
