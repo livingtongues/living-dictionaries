@@ -1,7 +1,8 @@
 import { randomUUID } from 'node:crypto'
 import type { ActualDatabaseEntry } from '@living-dictionaries/types'
 import type { Timestamp } from 'firebase/firestore'
-import { supabase } from '../config-supabase'
+import { post_request } from './post-request'
+import type { ContentUpdateRequestBody, ContentUpdateResponseBody } from './post-request'
 
 interface StandardData {
   row: Record<string, string>
@@ -15,6 +16,8 @@ interface SenseData {
   dictionary_id: string
 }
 
+const content_update_endpoint = 'http://localhost:3041/api/db/content-update'
+
 export function convertJsonRowToEntryFormat(
   standard: StandardData,
   senseData?: SenseData,
@@ -23,7 +26,7 @@ export function convertJsonRowToEntryFormat(
   const entry: ActualDatabaseEntry = { lx: row.lexeme, gl: {}, xs: {} }
   const sense_regex = /^s\d+_/
   let glossObject: Record<string, string> = {}
-  let row_id = randomUUID()
+  let sense_id = randomUUID()
   let old_key = 2
 
   if (row.phonetic) entry.ph = row.phonetic
@@ -78,21 +81,21 @@ export function convertJsonRowToEntryFormat(
             glossObject[language_key] = row[key]
           } else {
             old_key++
-            row_id = randomUUID()
+            sense_id = randomUUID()
             glossObject = {}
             glossObject[language_key] = row[key]
           }
-          addAdditionalSensesToSupabase(entry_id, dictionary_id, glossObject, 'glosses', row_id)
+          addAdditionalSensesToSupabase(entry_id, dictionary_id, { glosses: { new: glossObject } }, sense_id)
         }
 
-        // if (key.includes('_partOfSpeech'))
-        //   addAdditionalSensesToSupabase(entry_id, dictionary_id, stringifyArray([row[key]]), 'parts_of_speech', row_id)
+        if (key.includes('_partOfSpeech'))
+          addAdditionalSensesToSupabase(entry_id, dictionary_id, { parts_of_speech: { new: [row[key]] } }, sense_id)
 
-        // if (key.includes('_semanticDomains'))
-        //   addAdditionalSensesToSupabase(entry_id, dictionary_id, stringifyArray([row[key]]), 'semantic_domains', row_id)
+        if (key.includes('_semanticDomains'))
+          addAdditionalSensesToSupabase(entry_id, dictionary_id, { semantic_domains: { new: [row[key]] } }, sense_id)
 
         if (key.includes('_nounClass'))
-          addAdditionalSensesToSupabase(entry_id, dictionary_id, row[key], 'noun_class', row_id)
+          addAdditionalSensesToSupabase(entry_id, dictionary_id, { noun_class: { new: [row[key]] } }, sense_id)
       }
     }
 
@@ -120,31 +123,54 @@ export function returnArrayFromCommaSeparatedItems(string: string): string[] {
   return string?.split(',').map(item => item.trim()) || []
 }
 
-export async function addAdditionalSensesToSupabase(entry_id: string, dictionary_id: string, value: any, column: SenseColumns, row: string) {
-  try {
-    const { data, error } = await supabase
-      .from('entry_updates')
-      .insert([
-        {
-          user_id: 'diego@livingtongues.org',
-          id: randomUUID(),
-          dictionary_id,
-          entry_id,
-          table: 'senses',
-          column,
-          row,
-          new_value: value,
-        },
-      ])
-      .select()
+export async function addAdditionalSensesToSupabase(entry_id: string, dictionary_id: string, change: any, sense_id: string) {
+  const { error } = await post_request<ContentUpdateRequestBody, ContentUpdateResponseBody>(content_update_endpoint, {
+    id: randomUUID(),
+    auth_token: null,
+    user_id_from_local: '12345678-abcd-efab-cdef-123456789013',
+    dictionary_id,
+    entry_id,
+    sense_id,
+    table: 'senses',
+    change: {
+      sense: change,
+    },
+    timestamp: new Date().toISOString(),
+  })
 
-    if (error) {
-      console.error('Error inserting into Supabase: ', error)
-      throw error
-    }
-
-    return data
-  } catch (error) {
-    console.error('Error: ', error)
+  if (error) {
+    console.error('Error inserting into Supabase: ', error)
+    throw error
   }
+
+  return true
 }
+
+// export async function addAdditionalSensesToSupabase(entry_id: string, dictionary_id: string, value: any, column: SenseColumns, row: string) {
+//   try {
+//     const { data, error } = await supabase
+//       .from('entry_updates')
+//       .insert([
+//         {
+//           user_id: 'diego@livingtongues.org',
+//           id: randomUUID(),
+//           dictionary_id,
+//           entry_id,
+//           table: 'senses',
+//           column,
+//           row,
+//           new_value: value,
+//         },
+//       ])
+//       .select()
+
+//     if (error) {
+//       console.error('Error inserting into Supabase: ', error)
+//       throw error
+//     }
+
+//     return data
+//   } catch (error) {
+//     console.error('Error: ', error)
+//   }
+// }
