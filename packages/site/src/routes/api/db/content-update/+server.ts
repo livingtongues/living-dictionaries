@@ -88,7 +88,7 @@ export const POST: RequestHandler = async ({ request }) => {
 
     let user_id = user_id_from_local
     const is_deployed = !dev
-    if (is_deployed) {
+    if (is_deployed || auth_token) {
       const decodedToken = await decodeToken(auth_token)
       if (!decodedToken?.uid)
         throw new Error('No user id found in token')
