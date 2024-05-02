@@ -35,7 +35,7 @@
         placeholder="Anderson, Gregory D. S."
         type="text"
         class="form-input w-full"
-        value={citation?.citation}
+        value={citation?.citation || ''}
         on:input={(e) => {
           // @ts-expect-error
           value = e.target.value.trim()

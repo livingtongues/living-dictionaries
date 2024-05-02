@@ -1,4 +1,4 @@
-import { addOnline, deleteDocumentOnline, getCollection, updateOnline } from 'sveltefirets'
+import { addOnline, deleteDocumentOnline, getCollection, setOnline, updateOnline } from 'sveltefirets'
 import type { Citation, IDictionary, IHelper, IInvite, Partner } from '@living-dictionaries/types'
 import { where } from 'firebase/firestore'
 import type { PageLoad } from './$types'
@@ -89,7 +89,7 @@ export const load = (async ({ params: { dictionaryId }, parent, depends }) => {
   }
 
   async function update_citation(citation: string) {
-    await performDbOperation(() => updateOnline<Citation>(`dictionaries/${dictionaryId}/info/citation`, { citation }))
+    await performDbOperation(() => setOnline<Citation>(`dictionaries/${dictionaryId}/info/citation`, { citation }))
   }
 
   return {
