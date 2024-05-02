@@ -87,6 +87,8 @@ export default antfu(
       'no-console': 'off',
       'ts/no-unused-vars': 'off',
       'ts/no-var-requires': 'off',
+      'node/prefer-global/process': 'off',
+      'unused-imports/no-unused-vars': 'off',
     },
   },
   {

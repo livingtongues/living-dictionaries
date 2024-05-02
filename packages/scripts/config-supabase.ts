@@ -1,8 +1,9 @@
 import PG from 'pg'
-import { createClient } from '@supabase/supabase-js';
-import { Database } from '@living-dictionaries/site/src/lib/supabase/database.types';
-import * as dotenv from 'dotenv';
-dotenv.config({path: '.env.supabase'});
+import { createClient } from '@supabase/supabase-js'
+import type { Database } from '@living-dictionaries/site/src/lib/supabase/database.types'
+import * as dotenv from 'dotenv'
+
+dotenv.config({ path: '.env.supabase' })
 
 export const supabase = createClient<Database>(process.env.PUBLIC_SUPABASE_API_URL, process.env.SUPABASE_SERVICE_ROLE_KEY)
 
