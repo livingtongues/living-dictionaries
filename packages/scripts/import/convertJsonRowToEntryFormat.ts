@@ -17,6 +17,7 @@ interface SenseData {
 }
 
 const content_update_endpoint = 'http://localhost:3041/api/db/content-update'
+const developer_in_charge = '12345678-abcd-efab-cdef-123456789013' // in Supabase diego@livingtongues.org -> Diego Córdova Nieto;
 
 export function convertJsonRowToEntryFormat(
   standard: StandardData,
@@ -127,7 +128,7 @@ export async function addAdditionalSensesToSupabase(entry_id: string, dictionary
   const { error } = await post_request<ContentUpdateRequestBody, ContentUpdateResponseBody>(content_update_endpoint, {
     id: randomUUID(),
     auth_token: null,
-    user_id_from_local: '12345678-abcd-efab-cdef-123456789013',
+    user_id_from_local: developer_in_charge,
     dictionary_id,
     entry_id,
     sense_id,
@@ -145,32 +146,3 @@ export async function addAdditionalSensesToSupabase(entry_id: string, dictionary
 
   return true
 }
-
-// export async function addAdditionalSensesToSupabase(entry_id: string, dictionary_id: string, value: any, column: SenseColumns, row: string) {
-//   try {
-//     const { data, error } = await supabase
-//       .from('entry_updates')
-//       .insert([
-//         {
-//           user_id: 'diego@livingtongues.org',
-//           id: randomUUID(),
-//           dictionary_id,
-//           entry_id,
-//           table: 'senses',
-//           column,
-//           row,
-//           new_value: value,
-//         },
-//       ])
-//       .select()
-
-//     if (error) {
-//       console.error('Error inserting into Supabase: ', error)
-//       throw error
-//     }
-
-//     return data
-//   } catch (error) {
-//     console.error('Error: ', error)
-//   }
-// }
