@@ -27,6 +27,7 @@ export function convertJsonRowToEntryFormat(
   const entry: ActualDatabaseEntry = { lx: row.lexeme, gl: {}, xs: {} }
   const sense_regex = /^s\d+_/
   let glossObject: Record<string, string> = {}
+  const exampleSentenceObject: Record<string, string> = {}
   let sense_id = randomUUID()
   let old_key = 2
 
@@ -72,11 +73,15 @@ export function convertJsonRowToEntryFormat(
     }
 
     if (senseData) {
+      console.log(`key: ${key}`)
+      if (key === 'lexeme')
+        console.log(`lexeme: ${value}`)
       const { entry_id, dictionary_id } = senseData
       if (sense_regex.test(key)) {
         if (key.includes('_gloss')) {
           let language_key = key.replace(sense_regex, '')
           language_key = language_key.replace('_gloss', '')
+          console.log(`language key: ${language_key}`)
 
           if (key === `s${old_key}_${language_key}_gloss`) {
             glossObject[language_key] = row[key]
@@ -86,17 +91,55 @@ export function convertJsonRowToEntryFormat(
             glossObject = {}
             glossObject[language_key] = row[key]
           }
-          addAdditionalSensesToSupabase(entry_id, dictionary_id, { glosses: { new: glossObject } }, sense_id)
+          console.log(`old key: ${old_key}`)
+          console.log(`sense id: ${sense_id}`)
+          update_sense(entry_id, dictionary_id, { glosses: { new: glossObject } }, sense_id)
+          console.log(`gloss object: ${JSON.stringify(glossObject)}`)
         }
 
+        // if (key.includes('_vernacular_exampleSentence')) {
+        //   let sentence_id = randomUUID()
+        //   let writing_system = key.replace(sense_regex, '')
+        //   writing_system = writing_system.replace('_vernacular_exampleSentence', '')
+
+        //   if (key === `s${old_key}_${writing_system}_vernacular_exampleSentence`) {
+        //     exampleSentenceObject[writing_system] = row[key]
+        //     update_sentence(entry_id, dictionary_id, { sentence: { text: { new: exampleSentenceObject } } }, sense_id, sentence_id)
+        //   } else {
+        //     //* This must be instead for multiple sentences I guess
+        //     old_key++
+        //     sentence_id = randomUUID()
+        //     exampleSentenceObject = {}
+        //     exampleSentenceObject[writing_system] = row[key]
+        //   }
+        //   // continue
+        //   if (key.includes('_exampleSentence')) {
+        //     exampleSentenceObject = {}
+        //     let language_key = key.replace(sense_regex, '')
+        //     language_key = language_key.replace('_exampleSentence', '')
+
+        //     if (key === `s${old_key}_${language_key}_exampleSentence`) {
+        //       exampleSentenceObject[language_key] = row[key]
+        //     } else {
+        //       //* This must be instead for multiple sentences I guess
+        //       old_key++
+        //       sense_id = randomUUID()
+        //       exampleSentenceObject = {}
+        //       exampleSentenceObject[language_key] = row[key]
+        //     }
+        //     update_sentence(entry_id, dictionary_id, { translation: { new: exampleSentenceObject } }, sense_id, sentence_id)
+        //   }
+        // }
+
+        console.log(`sense id before pos: ${sense_id}`)
         if (key.includes('_partOfSpeech'))
-          addAdditionalSensesToSupabase(entry_id, dictionary_id, { parts_of_speech: { new: [row[key]] } }, sense_id)
+          update_sense(entry_id, dictionary_id, { parts_of_speech: { new: [row[key]] } }, sense_id)
 
         if (key.includes('_semanticDomains'))
-          addAdditionalSensesToSupabase(entry_id, dictionary_id, { semantic_domains: { new: [row[key]] } }, sense_id)
+          update_sense(entry_id, dictionary_id, { semantic_domains: { new: [row[key]] } }, sense_id)
 
         if (key.includes('_nounClass'))
-          addAdditionalSensesToSupabase(entry_id, dictionary_id, { noun_class: { new: [row[key]] } }, sense_id)
+          update_sense(entry_id, dictionary_id, { noun_class: { new: [row[key]] } }, sense_id)
       }
     }
 
@@ -124,7 +167,7 @@ export function returnArrayFromCommaSeparatedItems(string: string): string[] {
   return string?.split(',').map(item => item.trim()) || []
 }
 
-export async function addAdditionalSensesToSupabase(entry_id: string, dictionary_id: string, change: any, sense_id: string) {
+export async function update_sense(entry_id: string, dictionary_id: string, change: any, sense_id: string) {
   const { error } = await post_request<ContentUpdateRequestBody, ContentUpdateResponseBody>(content_update_endpoint, {
     id: randomUUID(),
     auth_token: null,
@@ -135,6 +178,30 @@ export async function addAdditionalSensesToSupabase(entry_id: string, dictionary
     table: 'senses',
     change: {
       sense: change,
+    },
+    timestamp: new Date().toISOString(),
+  })
+
+  if (error) {
+    console.error('Error inserting into Supabase: ', error)
+    throw error
+  }
+
+  return true
+}
+
+export async function update_sentence(entry_id: string, dictionary_id: string, change: any, sense_id: string, sentence_id: string) {
+  const { error } = await post_request<ContentUpdateRequestBody, ContentUpdateResponseBody>(content_update_endpoint, {
+    id: randomUUID(),
+    auth_token: null,
+    user_id_from_local: developer_in_charge,
+    dictionary_id,
+    entry_id,
+    sense_id,
+    sentence_id,
+    table: 'sentences',
+    change: {
+      sentence: change,
     },
     timestamp: new Date().toISOString(),
   })
