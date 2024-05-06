@@ -28,7 +28,9 @@ export function convertJsonRowToEntryFormat(
   const sense_regex = /^s\d+_/
   let glossObject: Record<string, string> = {}
   const exampleSentenceObject: Record<string, string> = {}
+  const exampleSentenceTranslationObject: Record<string, string> = {}
   let sense_id = randomUUID()
+  let sentence_id = randomUUID()
   let old_key = 2
 
   if (row.phonetic) entry.ph = row.phonetic
@@ -97,39 +99,27 @@ export function convertJsonRowToEntryFormat(
           console.log(`gloss object: ${JSON.stringify(glossObject)}`)
         }
 
-        // if (key.includes('_vernacular_exampleSentence')) {
-        //   let sentence_id = randomUUID()
-        //   let writing_system = key.replace(sense_regex, '')
-        //   writing_system = writing_system.replace('_vernacular_exampleSentence', '')
+        console.log(`sentence id before vernacular example sentence: ${sentence_id}`)
+        if (key.includes('_vn_ES')) {
+          let writing_system = key.replace(sense_regex, '')
+          writing_system = writing_system.replace('_vn_ES', '')
 
-        //   if (key === `s${old_key}_${writing_system}_vernacular_exampleSentence`) {
-        //     exampleSentenceObject[writing_system] = row[key]
-        //     update_sentence(entry_id, dictionary_id, { sentence: { text: { new: exampleSentenceObject } } }, sense_id, sentence_id)
-        //   } else {
-        //     //* This must be instead for multiple sentences I guess
-        //     old_key++
-        //     sentence_id = randomUUID()
-        //     exampleSentenceObject = {}
-        //     exampleSentenceObject[writing_system] = row[key]
-        //   }
-        //   // continue
-        //   if (key.includes('_exampleSentence')) {
-        //     exampleSentenceObject = {}
-        //     let language_key = key.replace(sense_regex, '')
-        //     language_key = language_key.replace('_exampleSentence', '')
+          if (key === `s${old_key}_${writing_system}_vn_ES`) {
+            sentence_id = randomUUID()
+            exampleSentenceObject[writing_system] = row[key]
+            update_sentence(entry_id, dictionary_id, { text: { new: exampleSentenceObject } }, sense_id, sentence_id)
+          }
+        }
+        console.log(`sentence id before translation example sentence: ${sentence_id}`)
+        if (key.includes('_GES')) {
+          let language_key = key.replace(sense_regex, '')
+          language_key = language_key.replace('_GES', '')
 
-        //     if (key === `s${old_key}_${language_key}_exampleSentence`) {
-        //       exampleSentenceObject[language_key] = row[key]
-        //     } else {
-        //       //* This must be instead for multiple sentences I guess
-        //       old_key++
-        //       sense_id = randomUUID()
-        //       exampleSentenceObject = {}
-        //       exampleSentenceObject[language_key] = row[key]
-        //     }
-        //     update_sentence(entry_id, dictionary_id, { translation: { new: exampleSentenceObject } }, sense_id, sentence_id)
-        //   }
-        // }
+          if (key === `s${old_key}_${language_key}_GES`) {
+            exampleSentenceTranslationObject[language_key] = row[key]
+            update_sentence(entry_id, dictionary_id, { translation: { new: exampleSentenceTranslationObject } }, sense_id, sentence_id)
+          }
+        }
 
         console.log(`sense id before pos: ${sense_id}`)
         if (key.includes('_partOfSpeech'))
