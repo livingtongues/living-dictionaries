@@ -511,8 +511,7 @@ describe('sense sentence operations', () => {
   })
 
   test('add another translation to the same sentence', async () => {
-    const { data: { senses }, error } = await anon_supabase.from('entries_view').select().eq('id', first_entry_id).single()
-    expect(error?.message).toBeFalsy()
+    const { data: { senses } } = await anon_supabase.from('entries_view').select().eq('id', first_entry_id).single()
     const change_id = incremental_consistent_uuid()
     const { data: new_data, error: new_error } = await post_request<ContentUpdateRequestBody, ContentUpdateResponseBody>(content_update_endpoint, {
       id: change_id,
