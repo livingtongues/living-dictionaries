@@ -511,9 +511,9 @@ describe('sense sentence operations', () => {
   })
 
   test('add another translation to the same sentence', async () => {
-    const { data: { senses } } = await anon_supabase.from('entries_view').select().eq('id', first_entry_id).single()
+    const { data: { senses: old_senses } } = await anon_supabase.from('entries_view').select().eq('id', first_entry_id).single()
     const change_id = incremental_consistent_uuid()
-    const { data: new_data, error: new_error } = await post_request<ContentUpdateRequestBody, ContentUpdateResponseBody>(content_update_endpoint, {
+    const { data, error } = await post_request<ContentUpdateRequestBody, ContentUpdateResponseBody>(content_update_endpoint, {
       id: change_id,
       auth_token: null,
       user_id_from_local: seeded_user_id_1,
@@ -525,7 +525,7 @@ describe('sense sentence operations', () => {
         sentence: {
           translation: {
             new: {
-              ...senses[0].sentences.translation,
+              ...old_senses[0].sentences[0].translation,
               es: 'Estoy hambriento',
             },
           },
@@ -534,36 +534,37 @@ describe('sense sentence operations', () => {
       timestamp: new Date('2024-03-09T00:44:04.600392+00:00').toISOString(),
     })
 
-    expect(new_error?.message).toBeFalsy()
-    //* Am i doing wrong?
-    expect(new_data).toEqual(
+    expect(error?.message).toBeFalsy()
+    expect(data.change).toMatchInlineSnapshot(`
       {
-        audio_id: null,
-        change: {
-          sentence: {
-            translation: {
-              new: {
-                en: 'I am hungry',
-                es: 'Estoy hambriento',
-              },
+        "sentence": {
+          "translation": {
+            "new": {
+              "en": "I am hungry",
+              "es": "Estoy hambriento",
             },
           },
         },
-        dictionary_id: 'dictionary1',
-        entry_id: null,
-        id: '11111111-1111-1111-1111-111111111112',
-        import_id: null,
-        photo_id: null,
-        sense_id: '11111111-1111-1111-1111-111111111100',
-        sentence_id: '11111111-1111-1111-1111-111111111103',
-        speaker_id: null,
-        table: 'sentences',
-        text_id: null,
-        timestamp: '2024-03-09T00:44:04.6+00:00',
-        user_id: '12345678-abcd-efab-cdef-123456789012',
-        video_id: null,
-      },
-    )
+      }
+    `)
+  })
+
+  test('see changes in entries_view ', async () => {
+    const { data: { senses } } = await anon_supabase.from('entries_view').select().eq('id', first_entry_id).single()
+    expect(senses[0].sentences).toMatchInlineSnapshot(`
+      [
+        {
+          "id": "11111111-1111-1111-1111-111111111103",
+          "text": {
+            "lo1": "abcd efgh",
+          },
+          "translation": {
+            "en": "I am hungry",
+            "es": "Estoy hambriento",
+          },
+        },
+      ]
+    `)
   })
 
   test('remove sentence from sense', async () => {
