@@ -510,6 +510,63 @@ describe('sense sentence operations', () => {
     `)
   })
 
+  test('add another translation to the same sentence', async () => {
+    const { data: { senses }, error } = await anon_supabase.from('entries_view').select().eq('id', first_entry_id).single()
+    expect(error?.message).toBeFalsy()
+    const change_id = incremental_consistent_uuid()
+    const { data: new_data, error: new_error } = await post_request<ContentUpdateRequestBody, ContentUpdateResponseBody>(content_update_endpoint, {
+      id: change_id,
+      auth_token: null,
+      user_id_from_local: seeded_user_id_1,
+      dictionary_id: seeded_dictionary_id,
+      sentence_id: first_sentence_id,
+      sense_id: first_entry_first_sense_id,
+      table: 'sentences',
+      change: {
+        sentence: {
+          translation: {
+            new: {
+              ...senses[0].sentences.translation,
+              es: 'Estoy hambriento',
+            },
+          },
+        },
+      },
+      timestamp: new Date('2024-03-09T00:44:04.600392+00:00').toISOString(),
+    })
+
+    expect(new_error?.message).toBeFalsy()
+    //* Am i doing wrong?
+    expect(new_data).toEqual(
+      {
+        audio_id: null,
+        change: {
+          sentence: {
+            translation: {
+              new: {
+                en: 'I am hungry',
+                es: 'Estoy hambriento',
+              },
+            },
+          },
+        },
+        dictionary_id: 'dictionary1',
+        entry_id: null,
+        id: '11111111-1111-1111-1111-111111111112',
+        import_id: null,
+        photo_id: null,
+        sense_id: '11111111-1111-1111-1111-111111111100',
+        sentence_id: '11111111-1111-1111-1111-111111111103',
+        speaker_id: null,
+        table: 'sentences',
+        text_id: null,
+        timestamp: '2024-03-09T00:44:04.6+00:00',
+        user_id: '12345678-abcd-efab-cdef-123456789012',
+        video_id: null,
+      },
+    )
+  })
+
   test('remove sentence from sense', async () => {
     const { error } = await post_request<ContentUpdateRequestBody, ContentUpdateResponseBody>(content_update_endpoint, {
       id: incremental_consistent_uuid(),
