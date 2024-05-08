@@ -115,10 +115,11 @@ export function convertJsonRowToEntryFormat(
           let language_key = key.replace(sense_regex, '')
           language_key = language_key.replace('_GES', '')
 
-          if (key === `s${old_key}_${language_key}_GES`) {
-            exampleSentenceTranslationObject[language_key] = row[key]
-            update_sentence(entry_id, dictionary_id, { translation: { new: exampleSentenceTranslationObject } }, sense_id, sentence_id)
-          }
+          exampleSentenceTranslationObject[language_key] = row[key]
+          // if (key === `s${old_key}_${language_key}_GES`) {
+          //   console.log('Is it getting here at all??')
+          // }
+          update_sentence(entry_id, dictionary_id, { translation: { new: exampleSentenceTranslationObject } }, sense_id, sentence_id)
         }
 
         console.log(`sense id before pos: ${sense_id}`)
