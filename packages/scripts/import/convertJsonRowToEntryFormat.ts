@@ -1,13 +1,10 @@
 import { randomUUID } from 'node:crypto'
 import type { ActualDatabaseEntry } from '@living-dictionaries/types'
 import type { Timestamp } from 'firebase/firestore'
-import { post_request } from './post-request'
-import type { ContentUpdateRequestBody, ContentUpdateResponseBody } from './post-request'
 
 interface StandardData {
   row: Record<string, string>
   dateStamp?: number
-
   timestamp?: FirebaseFirestore.FieldValue
 }
 
@@ -15,9 +12,6 @@ interface SenseData {
   entry_id: string
   dictionary_id: string
 }
-
-const content_update_endpoint = 'http://localhost:3041/api/db/content-update'
-const developer_in_charge = '12345678-abcd-efab-cdef-123456789013' // in Supabase diego@livingtongues.org -> Diego Córdova Nieto;
 
 export function convertJsonRowToEntryFormat(
   standard: StandardData,
@@ -156,51 +150,4 @@ export function convertJsonRowToEntryFormat(
 
 export function returnArrayFromCommaSeparatedItems(string: string): string[] {
   return string?.split(',').map(item => item.trim()) || []
-}
-
-export async function update_sense(entry_id: string, dictionary_id: string, change: any, sense_id: string) {
-  const { error } = await post_request<ContentUpdateRequestBody, ContentUpdateResponseBody>(content_update_endpoint, {
-    id: randomUUID(),
-    auth_token: null,
-    user_id_from_local: developer_in_charge,
-    dictionary_id,
-    entry_id,
-    sense_id,
-    table: 'senses',
-    change: {
-      sense: change,
-    },
-    timestamp: new Date().toISOString(),
-  })
-
-  if (error) {
-    console.error('Error inserting into Supabase: ', error)
-    throw error
-  }
-
-  return true
-}
-
-export async function update_sentence(entry_id: string, dictionary_id: string, change: any, sense_id: string, sentence_id: string) {
-  const { error } = await post_request<ContentUpdateRequestBody, ContentUpdateResponseBody>(content_update_endpoint, {
-    id: randomUUID(),
-    auth_token: null,
-    user_id_from_local: developer_in_charge,
-    dictionary_id,
-    entry_id,
-    sense_id,
-    sentence_id,
-    table: 'sentences',
-    change: {
-      sentence: change,
-    },
-    timestamp: new Date().toISOString(),
-  })
-
-  if (error) {
-    console.error('Error inserting into Supabase: ', error)
-    throw error
-  }
-
-  return true
 }

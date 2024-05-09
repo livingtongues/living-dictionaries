@@ -1,7 +1,7 @@
 import { program } from 'commander'
 
 // import { importFromSpreadsheet } from './import-spreadsheet-v4.js';
-import { importFromSpreadsheet } from './supabase-senses'
+import { importFromSpreadsheet } from './import-to-firebase-supabase'
 
 program
   //   .version('0.0.1')
