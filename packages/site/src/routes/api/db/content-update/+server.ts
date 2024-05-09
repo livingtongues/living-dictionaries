@@ -1,72 +1,14 @@
 import { error, json } from '@sveltejs/kit'
-import type { MultiString } from '@living-dictionaries/types'
+import type { ContentUpdateRequestBody } from '@living-dictionaries/types/supabase/content-update.interface'
 import type { RequestHandler } from './$types'
 import { checkForPermission } from './check-dictionary-permission'
 import { decodeToken } from '$lib/server/firebase-admin'
 import { getAdminSupabaseClient } from '$lib/supabase/admin'
 import { ResponseCodes } from '$lib/constants'
-import type { Database, TablesInsert } from '$lib/supabase/generated.types'
+import type { TablesInsert } from '$lib/supabase/generated.types'
 import { dev } from '$app/environment'
 
-export interface ContentUpdateRequestBody {
-  id: string // id of the change, a uuidv4 created on client to make things idempotent
-  user_id_from_local?: string
-  auth_token: string
-  dictionary_id: string
-  entry_id?: string
-  sense_id?: string
-  sentence_id?: string
-  text_id?: string
-  audio_id?: string
-  video_id?: string
-  photo_id?: string
-  speaker_id?: string
-  table: Database['public']['Enums']['content_tables']
-  change: {
-    sense?: {
-      glosses?: {
-        new: MultiString
-        old?: MultiString
-      }
-      definition?: {
-        new: MultiString
-        old?: MultiString
-      }
-      noun_class?: {
-        new: string
-        old?: string
-      }
-      parts_of_speech?: {
-        new: string[]
-        old?: string[]
-      }
-      semantic_domains?: {
-        new: string[]
-        old?: string[]
-      }
-      write_in_semantic_domains?: {
-        new: string[]
-        old?: string[]
-      }
-      deleted?: boolean
-    }
-    sentence?: {
-      text?: {
-        new: MultiString
-        old?: MultiString
-      }
-      translation?: {
-        new: MultiString
-        old?: MultiString
-      }
-      removed_from_sense?: boolean // currently also deletes the sentence - later when a sentence can be connected to multiple sentences, use a deleted field to indicate the sentence is deleted everywhere
-      // deleted?: boolean;
-    }
-  }
-  import_id?: string
-  timestamp: string
-}
-
+export type { ContentUpdateRequestBody }
 export type ContentUpdateResponseBody = TablesInsert<'content_updates'>
 
 export const POST: RequestHandler = async ({ request }) => {
