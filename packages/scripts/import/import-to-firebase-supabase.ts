@@ -4,7 +4,6 @@ import type { ActualDatabaseEntry, ContentUpdateRequestBody } from '@living-dict
 import { db, environment, timestamp } from '../config-firebase.js'
 import { uploadAudioFile, uploadImageFile } from './import-media.js'
 import { parseCSVFrom } from './parse-csv.js'
-import { convertJsonRowToEntryFormat } from './convertJsonRowToEntryFormat.js'
 import { post_request } from './post-request.js'
 import { convert_row_to_objects_for_databases } from './convert_row_to_objects_for_databases.js'
 
@@ -62,9 +61,9 @@ export async function importEntries(
     for (const { sense, sense_id } of supabase_senses) {
       await update_sense({ entry_id: universal_entry_id, dictionary_id, sense, sense_id, dry })
     }
-    for (const { sentence, sentence_id, sense_id } of supabase_sentences) {
-      await update_sentence({ entry_id: universal_entry_id, dictionary_id, sentence, sense_id, sentence_id, dry })
-    }
+    // for (const { sentence, sentence_id, sense_id } of supabase_sentences) {
+    //   await update_sentence({ entry_id: universal_entry_id, dictionary_id, sentence, sense_id, sentence_id, dry })
+    // }
 
     if (row.photoFile) {
       const pf = await uploadImageFile(row.photoFile, universal_entry_id, dictionary_id, dry)
@@ -124,7 +123,7 @@ export async function update_sense({
   sense_id: string
   dry: boolean
 }) {
-  if (!dry) return console.log({ dry_sense: sense })
+  if (dry) return console.log({ dry_sense: sense })
 
   const { error } = await post_request<ContentUpdateRequestBody>(supbase_content_update_endpoint, {
     id: randomUUID(),
@@ -164,7 +163,7 @@ export async function update_sentence({
   sentence_id: string
   dry: boolean
 }) {
-  if (!dry) return console.log({ dry_sense: sentence })
+  if (dry) return console.log({ dry_sense: sentence })
 
   const { error } = await post_request<ContentUpdateRequestBody>(supbase_content_update_endpoint, {
     id: randomUUID(),
