@@ -1,12 +1,23 @@
 <script lang="ts">
-  import { page } from '$app/stores';
-  import Header from '$lib/components/shell/Header.svelte';
-  import SeoMetaTags from '$lib/components/SeoMetaTags.svelte';
+  import { page } from '$app/stores'
+  import Header from '$lib/components/shell/Header.svelte'
+  import SeoMetaTags from '$lib/components/SeoMetaTags.svelte'
 </script>
 
 <Header>
   {$page.data.t('header.tutorials')}
 </Header>
+
+<div class="max-w-screen-md mx-auto p-3">
+  <h2 class="font-semibold">Project overview</h2>
+  <iframe
+    class="video mb-3"
+    src="https://www.youtube.com/embed/fkD-p5Kgefw?si=Q1uKakhwGiicfibB"
+    title="Project overview"
+    frameborder="0"
+    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+    allowfullscreen />
+</div>
 
 <div class="max-w-screen-md mx-auto p-3">
   <h2 class="font-semibold">English tutorials</h2>
