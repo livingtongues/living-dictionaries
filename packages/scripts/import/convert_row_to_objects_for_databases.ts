@@ -90,7 +90,6 @@ export function convert_row_to_objects_for_databases({ row, dateStamp, timestamp
       if (key.includes('_gloss')) {
         let language_key = key.replace(sense_regex, '')
         language_key = language_key.replace('_gloss', '')
-        console.log(`language key: ${language_key}`)
 
         if (key === `s${old_key}_${language_key}_gloss`) {
           supabase_sense.sense = { glosses: { new: { [language_key]: row[key] } } }
@@ -100,24 +99,26 @@ export function convert_row_to_objects_for_databases({ row, dateStamp, timestamp
           supabase_sense.sense = { glosses: { new: { [language_key]: row[key] } } }
         }
 
-        // if (key.includes('_vn_ES')) {
-        //   let writing_system = key.replace(sense_regex, '')
-        //   writing_system = writing_system.replace('_vn_ES', '')
+        if (key.includes('_vn_ES')) {
+          let writing_system = key.replace(sense_regex, '')
+          writing_system = writing_system.replace('_vn_ES', '')
 
-        //   if (key === `s${old_key}_${writing_system}_vn_ES`) {
-        //     supabase_sentence.sentence_id = randomUUID()
-        //     supabase_sentence.sentence.text.new[writing_system] = row[key]
-        //   }
-        // }
-        // if (key.includes('_GES')) {
-        //   let language_key = key.replace(sense_regex, '')
-        //   language_key = language_key.replace('_GES', '')
+          if (key === `s${old_key}_${writing_system}_vn_ES`) {
+            supabase_sentence.sentence_id = randomUUID()
+            supabase_sentence.sentence = { text: { new: { [writing_system]: row[key] } } }
+          }
+        }
+        if (key.includes('_GES')) {
+          let language_key = key.replace(sense_regex, '')
+          language_key = language_key.replace('_GES', '')
 
-        //   supabase_sentence.sentence.translation.new[language_key] = row[key]
-        //   // if (key === `s${old_key}_${language_key}_GES`) {
-        //   //   console.log('Is it getting here at all??')
-        //   // }
-        // }
+          supabase_sentence.sentence = { translation: { new: { [language_key]: row[key] } } }
+          // if (key === `s${old_key}_${language_key}_GES`) {
+          //   console.log('Is it getting here at all??')
+          // }
+        }
+        if (key.includes('_vn_ES') || key.includes('_GES'))
+          supabase_sentences.push(supabase_sentence)
 
         if (key.includes('_partOfSpeech'))
           supabase_sense.sense = { parts_of_speech: { new: [row[key]] } }
@@ -152,7 +153,7 @@ export function convert_row_to_objects_for_databases({ row, dateStamp, timestamp
   return {
     firebase_entry,
     supabase_senses,
-    supabase_sentences: [],
+    supabase_sentences,
   }
 }
 
