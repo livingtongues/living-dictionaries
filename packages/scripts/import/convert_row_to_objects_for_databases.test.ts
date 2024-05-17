@@ -5,7 +5,7 @@ import type { Timestamp } from 'firebase-admin/firestore'
 import { convert_row_to_objects_for_databases } from './convert_row_to_objects_for_databases.js'
 import { parseCSVFrom } from './parse-csv.js'
 
-describe('convertJsonRowToEntryFormat', () => {
+describe('convertJsonRowToEntryFormat without senses', () => {
   const fakeTimeStamp = 10101010 as unknown as Timestamp
   const fakeDateStamp = 1715819006966
 
@@ -371,6 +371,82 @@ describe('convertJsonRowToEntryFormat', () => {
             },
           },
           "supabase_senses": [],
+          "supabase_sentences": [],
+        },
+      ]
+    `)
+  })
+})
+
+describe('convertJsonRowToEntryFormat with senses', () => {
+  const fakeTimeStamp = 10101010 as unknown as Timestamp
+  const fakeDateStamp = 1715819006966
+
+  test('glosses with senses', () => {
+    const csv_rows_without_header: Record<string, any>[] = [
+      {
+        lexeme: '𒄧𒂸',
+        es_gloss: 'delfín',
+        en_gloss: 'dolphin',
+        s2_es_gloss: 'pez',
+        s2_en_gloss: 'fish',
+        s3_en_gloss: 'marine mammal',
+        s4_en_gloss: 'mythological creature',
+        s4_es_gloss: 'creatura mitológica',
+        s4_fr_gloss: 'créature mythologique',
+
+      },
+    ]
+    const entries = csv_rows_without_header.map(row => convert_row_to_objects_for_databases({ row, dateStamp: fakeDateStamp, timestamp: fakeTimeStamp }))
+
+    expect(entries).toMatchInlineSnapshot(`
+      [
+        {
+          "firebase_entry": {
+            "ca": 10101010,
+            "gl": {
+              "en": "dolphin",
+              "es": "delfín",
+            },
+            "ii": "v4-1715819006966",
+            "lx": "𒄧𒂸",
+            "ua": 10101010,
+          },
+          "supabase_senses": [
+            {
+              "sense": {
+                "glosses": {
+                  "new": {
+                    "en": "fish",
+                    "es": "pez",
+                  },
+                },
+              },
+              "sense_id": "a3695e53-37b6-444f-bcc1-6e6ac47e3528",
+            },
+            {
+              "sense": {
+                "glosses": {
+                  "new": {
+                    "en": "marine mammal",
+                  },
+                },
+              },
+              "sense_id": "e8cd66d6-b6a4-4370-92f0-3eb3fa95a362",
+            },
+            {
+              "sense": {
+                "glosses": {
+                  "new": {
+                    "en": "mythological creature",
+                    "es": "creatura mitológica",
+                    "fr": "créature mythologique",
+                  },
+                },
+              },
+              "sense_id": "6b12302a-c3c9-460c-8d73-48ee47f04cf6",
+            },
+          ],
           "supabase_sentences": [],
         },
       ]
