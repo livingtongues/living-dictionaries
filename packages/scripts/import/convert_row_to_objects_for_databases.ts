@@ -2,10 +2,11 @@ import { randomUUID } from 'node:crypto'
 import type { ActualDatabaseEntry, ContentUpdateRequestBody } from '@living-dictionaries/types'
 import type { Timestamp } from 'firebase/firestore'
 
-export function convert_row_to_objects_for_databases({ row, dateStamp, timestamp }: {
+export function convert_row_to_objects_for_databases({ row, dateStamp, timestamp, test = false }: {
   row: Record<string, string> // TODO: type this
   dateStamp?: number
   timestamp?: FirebaseFirestore.FieldValue
+  test?: boolean
 }): {
     firebase_entry: ActualDatabaseEntry
     supabase_senses: {
@@ -29,13 +30,18 @@ export function convert_row_to_objects_for_databases({ row, dateStamp, timestamp
     sense_id: string
     sentence: ContentUpdateRequestBody['change']['sentence']
   }
+  const uuid_template = '11111111-1111-1111-1111-111111111111'
+  let current_uuid_index = 0
+  function incremental_consistent_uuid() {
+    return test ? uuid_template.slice(0, -2) + (current_uuid_index++).toString().padStart(2, '0') : randomUUID()
+  }
   const supabase_sense: SupabaseSense = {
-    sense_id: randomUUID(),
+    sense_id: incremental_consistent_uuid(),
     sense: {},
   }
   const supabase_sentence: SupabaseSentence = {
-    sentence_id: randomUUID(),
-    sense_id: randomUUID(),
+    sentence_id: incremental_consistent_uuid(),
+    sense_id: incremental_consistent_uuid(),
     sentence: {},
   }
   const supabase_senses = []
@@ -89,7 +95,6 @@ export function convert_row_to_objects_for_databases({ row, dateStamp, timestamp
 
     if (sense_regex.test(key)) {
       if (key.includes('_gloss')) {
-        console.log(`key: ${key}`)
         let language_key = key.replace(sense_regex, '')
         language_key = language_key.replace('_gloss', '')
 
@@ -97,50 +102,55 @@ export function convert_row_to_objects_for_databases({ row, dateStamp, timestamp
           supabase_sense.sense = { glosses: { new: { ...supabase_sense.sense?.glosses?.new, [language_key]: row[key] } } }
         } else {
           old_key++
-          supabase_sense.sense_id = randomUUID()
+          supabase_sense.sense_id = incremental_consistent_uuid()
           supabase_sense.sense = { glosses: { ...supabase_sense.sense.glosses, new: { [language_key]: row[key] } } }
         }
-        console.log(`sense: ${JSON.stringify(supabase_sense.sense)}`)
-        console.log(`senses: ${JSON.stringify(supabase_senses)}`)
-
-        // if (key.includes('_vn_ES')) {
-        //   let writing_system = key.replace(sense_regex, '')
-        //   writing_system = writing_system.replace('_vn_ES', '')
-
-        //   if (key === `s${old_key}_${writing_system}_vn_ES`) {
-        //     supabase_sentence.sentence_id = randomUUID()
-        //     supabase_sentence.sentence = { text: { new: { [writing_system]: row[key] } } }
-        //   }
-        // }
-        // if (key.includes('_GES')) {
-        //   let language_key = key.replace(sense_regex, '')
-        //   language_key = language_key.replace('_GES', '')
-
-        //   supabase_sentence.sentence = { translation: { new: { [language_key]: row[key] } } }
-        //   // if (key === `s${old_key}_${language_key}_GES`) {
-        //   //   console.log('Is it getting here at all??')
-        //   // }
-        // }
-        // if (key.includes('_vn_ES') || key.includes('_GES'))
-        //   supabase_sentences.push(supabase_sentence)
-
-        // if (key.includes('_partOfSpeech'))
-        //   supabase_sense.sense = { parts_of_speech: { new: [row[key]] } }
-
-        // if (key.includes('_semanticDomains'))
-        //   supabase_sense.sense = { semantic_domains: { new: [row[key]] } }
-
-        // if (key.includes('_nounClass'))
-        //   supabase_sense.sense = { noun_class: { new: row[key] } }
       }
-      console.log(`senses before saving: ${JSON.stringify(supabase_senses)}`)
-      const index = supabase_senses.findIndex(sense => sense.sense_id === supabase_sense.sense_id)
+      if (key.includes('_vn_ES')) {
+        let writing_system = key.replace(sense_regex, '')
+        writing_system = writing_system.replace('_vn_ES', '')
+
+        if (key === `s${old_key}_${writing_system}_vn_ES`) {
+          supabase_sentence.sentence_id = incremental_consistent_uuid()
+          supabase_sentence.sentence = { text: { new: { ...supabase_sentence?.sentence?.text?.new, [writing_system]: row[key] } } }
+        }
+      }
+      if (key.includes('_GES')) {
+        let language_key = key.replace(sense_regex, '')
+        language_key = language_key.replace('_GES', '')
+
+        if (key === `s${old_key}_${language_key}_GES`) {
+          supabase_sentence.sentence = { ...supabase_sentence.sentence, translation: { new: { ...supabase_sentence?.sentence?.translation?.new, [language_key]: row[key] } } }
+        } else {
+          supabase_sentence.sentence = { ...supabase_sentence.sentence, translation: { ...supabase_sentence?.sentence?.translation, new: { [language_key]: row[key] } } }
+        }
+      }
+      if (key.includes('_vn_ES') || key.includes('_GES')) {
+        const sentence_index: number = supabase_sentences.findIndex(sentence => sentence.sentence_id === supabase_sentence.sentence_id)
+        if (sentence_index !== -1) {
+          supabase_sentences[sentence_index] = { ...supabase_sentence }
+        } else {
+          supabase_sentences.push({ ...supabase_sentence })
+        }
+      }
+
+      // if (key.includes('_partOfSpeech'))
+      //   supabase_sense.sense = { parts_of_speech: { new: [row[key]] } }
+
+      // if (key.includes('_semanticDomains'))
+      //   supabase_sense.sense = { semantic_domains: { new: [row[key]] } }
+
+      // if (key.includes('_nounClass'))
+      //   supabase_sense.sense = { noun_class: { new: row[key] } }
+    }
+
+    if (sense_regex.test(key)) {
+      const index: number = supabase_senses.findIndex(sense => sense.sense_id === supabase_sense.sense_id)
       if (index !== -1) {
         supabase_senses[index] = { ...supabase_sense }
       } else {
         supabase_senses.push({ ...supabase_sense })
       }
-      console.log(`senses after saving: ${JSON.stringify(supabase_senses)}`)
     }
 
     const semanticDomain_FOLLOWED_BY_OPTIONAL_DIGIT = /^semanticDomain\d*$/ // semanticDomain, semanticDomain2, semanticDomain<#>, but not semanticDomain_custom

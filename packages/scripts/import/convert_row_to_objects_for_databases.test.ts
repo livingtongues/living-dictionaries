@@ -382,8 +382,8 @@ describe('convertJsonRowToEntryFormat with senses', () => {
   const fakeTimeStamp = 10101010 as unknown as Timestamp
   const fakeDateStamp = 1715819006966
 
-  test('glosses with senses', () => {
-    const csv_rows_without_header: Record<string, any>[] = [
+  test('multiple senses (glosses))', () => {
+    const csv_rows_with_senses: Record<string, any>[] = [
       {
         lexeme: '𒄧𒂸',
         es_gloss: 'delfín',
@@ -397,7 +397,7 @@ describe('convertJsonRowToEntryFormat with senses', () => {
 
       },
     ]
-    const entries = csv_rows_without_header.map(row => convert_row_to_objects_for_databases({ row, dateStamp: fakeDateStamp, timestamp: fakeTimeStamp }))
+    const entries = csv_rows_with_senses.map(row => convert_row_to_objects_for_databases({ row, dateStamp: fakeDateStamp, timestamp: fakeTimeStamp, test: true }))
 
     expect(entries).toMatchInlineSnapshot(`
       [
@@ -422,7 +422,7 @@ describe('convertJsonRowToEntryFormat with senses', () => {
                   },
                 },
               },
-              "sense_id": "a3695e53-37b6-444f-bcc1-6e6ac47e3528",
+              "sense_id": "11111111-1111-1111-1111-111111111100",
             },
             {
               "sense": {
@@ -432,7 +432,7 @@ describe('convertJsonRowToEntryFormat with senses', () => {
                   },
                 },
               },
-              "sense_id": "e8cd66d6-b6a4-4370-92f0-3eb3fa95a362",
+              "sense_id": "11111111-1111-1111-1111-111111111103",
             },
             {
               "sense": {
@@ -444,10 +444,70 @@ describe('convertJsonRowToEntryFormat with senses', () => {
                   },
                 },
               },
-              "sense_id": "6b12302a-c3c9-460c-8d73-48ee47f04cf6",
+              "sense_id": "11111111-1111-1111-1111-111111111104",
             },
           ],
           "supabase_sentences": [],
+        },
+      ]
+    `)
+  })
+  test('senses with sentences', () => {
+    const csv_rows_with_sentences: Record<string, any>[] = [
+      {
+        lexeme: '𒄧𒂸',
+        en_gloss: 'dolphin',
+        s2_en_gloss: 'fish',
+        s2_default_vn_ES: '𒄧𒂸 𒄧 𒄧𒂸 𒂸𒂸𒄧',
+        s2_en_GES: 'The dolphin is swimmmimg',
+        s2_es_GES: 'El delfín está nadando',
+      },
+    ]
+    const entries = csv_rows_with_sentences.map(row => convert_row_to_objects_for_databases({ row, dateStamp: fakeDateStamp, timestamp: fakeTimeStamp, test: true }))
+
+    expect(entries).toMatchInlineSnapshot(`
+      [
+        {
+          "firebase_entry": {
+            "ca": 10101010,
+            "gl": {
+              "en": "dolphin",
+            },
+            "ii": "v4-1715819006966",
+            "lx": "𒄧𒂸",
+            "ua": 10101010,
+          },
+          "supabase_senses": [
+            {
+              "sense": {
+                "glosses": {
+                  "new": {
+                    "en": "fish",
+                  },
+                },
+              },
+              "sense_id": "11111111-1111-1111-1111-111111111100",
+            },
+          ],
+          "supabase_sentences": [
+            {
+              "sense_id": "11111111-1111-1111-1111-111111111102",
+              "sentence": {
+                "text": {
+                  "new": {
+                    "default": "𒄧𒂸 𒄧 𒄧𒂸 𒂸𒂸𒄧",
+                  },
+                },
+                "translation": {
+                  "new": {
+                    "en": "The dolphin is swimmmimg",
+                    "es": "El delfín está nadando",
+                  },
+                },
+              },
+              "sentence_id": "11111111-1111-1111-1111-111111111103",
+            },
+          ],
         },
       ]
     `)
