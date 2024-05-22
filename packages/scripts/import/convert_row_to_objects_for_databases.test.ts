@@ -432,7 +432,7 @@ describe('convertJsonRowToEntryFormat with senses', () => {
                   },
                 },
               },
-              "sense_id": "11111111-1111-1111-1111-111111111103",
+              "sense_id": "11111111-1111-1111-1111-111111111102",
             },
             {
               "sense": {
@@ -444,7 +444,7 @@ describe('convertJsonRowToEntryFormat with senses', () => {
                   },
                 },
               },
-              "sense_id": "11111111-1111-1111-1111-111111111104",
+              "sense_id": "11111111-1111-1111-1111-111111111103",
             },
           ],
           "supabase_sentences": [],
@@ -459,8 +459,8 @@ describe('convertJsonRowToEntryFormat with senses', () => {
         en_gloss: 'dolphin',
         s2_en_gloss: 'fish',
         s2_default_vn_ES: '𒄧𒂸 𒄧 𒄧𒂸 𒂸𒂸𒄧',
-        s2_en_GES: 'The dolphin is swimmmimg',
-        s2_es_GES: 'El delfín está nadando',
+        s2_en_GES: 'The fish is swimmmimg',
+        s2_es_GES: 'El pez está nadando',
       },
     ]
     const entries = csv_rows_with_sentences.map(row => convert_row_to_objects_for_databases({ row, dateStamp: fakeDateStamp, timestamp: fakeTimeStamp, test: true }))
@@ -491,7 +491,7 @@ describe('convertJsonRowToEntryFormat with senses', () => {
           ],
           "supabase_sentences": [
             {
-              "sense_id": "11111111-1111-1111-1111-111111111102",
+              "sense_id": "11111111-1111-1111-1111-111111111100",
               "sentence": {
                 "text": {
                   "new": {
@@ -500,14 +500,68 @@ describe('convertJsonRowToEntryFormat with senses', () => {
                 },
                 "translation": {
                   "new": {
-                    "en": "The dolphin is swimmmimg",
-                    "es": "El delfín está nadando",
+                    "en": "The fish is swimmmimg",
+                    "es": "El pez está nadando",
                   },
                 },
               },
-              "sentence_id": "11111111-1111-1111-1111-111111111103",
+              "sentence_id": "11111111-1111-1111-1111-111111111102",
             },
           ],
+        },
+      ]
+    `)
+  })
+  test('senses with the rest fields', () => {
+    const csv_rows_with_other_fields: Record<string, any>[] = [
+      {
+        lexeme: 'foo',
+        en_gloss: 'test',
+        s2_en_gloss: 'example',
+        s2_partOfSpeech: 'n',
+        s2_semanticDomains: '1.1',
+        s2_nounClass: 'S',
+      },
+    ]
+    const entries = csv_rows_with_other_fields.map(row => convert_row_to_objects_for_databases({ row, dateStamp: fakeDateStamp, timestamp: fakeTimeStamp, test: true }))
+    expect(entries).toMatchInlineSnapshot(`
+      [
+        {
+          "firebase_entry": {
+            "ca": 10101010,
+            "gl": {
+              "en": "test",
+            },
+            "ii": "v4-1715819006966",
+            "lx": "foo",
+            "ua": 10101010,
+          },
+          "supabase_senses": [
+            {
+              "sense": {
+                "glosses": {
+                  "new": {
+                    "en": "example",
+                  },
+                },
+                "noun_class": {
+                  "new": "S",
+                },
+                "parts_of_speech": {
+                  "new": [
+                    "n",
+                  ],
+                },
+                "semantic_domains": {
+                  "new": [
+                    "1.1",
+                  ],
+                },
+              },
+              "sense_id": "11111111-1111-1111-1111-111111111100",
+            },
+          ],
+          "supabase_sentences": [],
         },
       ]
     `)

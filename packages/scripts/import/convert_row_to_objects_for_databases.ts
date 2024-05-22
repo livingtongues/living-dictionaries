@@ -41,7 +41,7 @@ export function convert_row_to_objects_for_databases({ row, dateStamp, timestamp
   }
   const supabase_sentence: SupabaseSentence = {
     sentence_id: incremental_consistent_uuid(),
-    sense_id: incremental_consistent_uuid(),
+    sense_id: supabase_sense.sense_id,
     sentence: {},
   }
   const supabase_senses = []
@@ -134,14 +134,14 @@ export function convert_row_to_objects_for_databases({ row, dateStamp, timestamp
         }
       }
 
-      // if (key.includes('_partOfSpeech'))
-      //   supabase_sense.sense = { parts_of_speech: { new: [row[key]] } }
+      if (key.includes('_partOfSpeech'))
+        supabase_sense.sense = { ...supabase_sense.sense, parts_of_speech: { new: [row[key]] } }
 
-      // if (key.includes('_semanticDomains'))
-      //   supabase_sense.sense = { semantic_domains: { new: [row[key]] } }
+      if (key.includes('_semanticDomains'))
+        supabase_sense.sense = { ...supabase_sense.sense, semantic_domains: { new: [row[key]] } }
 
-      // if (key.includes('_nounClass'))
-      //   supabase_sense.sense = { noun_class: { new: row[key] } }
+      if (key.includes('_nounClass'))
+        supabase_sense.sense = { ...supabase_sense.sense, noun_class: { new: row[key] } }
     }
 
     if (sense_regex.test(key)) {
