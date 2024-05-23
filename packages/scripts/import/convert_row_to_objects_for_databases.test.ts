@@ -566,6 +566,599 @@ describe('convertJsonRowToEntryFormat with senses', () => {
       ]
     `)
   })
+
+  test('high-level conversion from csv with senses', () => {
+    const dictionaryId = 'example-v4-senses'
+    const file = readFileSync(path.join(__dirname, `./data/${dictionaryId}/${dictionaryId}.csv`), 'utf8')
+    const rows = parseCSVFrom(file)
+    const entries = rows.map(row => convert_row_to_objects_for_databases({ row, dateStamp: fakeDateStamp, timestamp: fakeTimeStamp, test: true }))
+
+    expect(entries).toMatchInlineSnapshot(`
+      [
+        {
+          "firebase_entry": {
+            "ca": 10101010,
+            "gl": {
+              "es": "sol",
+            },
+            "ii": "v4-1715819006966",
+            "lx": "kꞌahkꞌal",
+            "nt": "16/jul./2019. Bachajon",
+            "ps": [
+              "n",
+            ],
+            "ua": 10101010,
+            "va": "kꞌajkꞌal",
+            "xs": {
+              "es": "Ya salió el sol",
+              "vn": "Lokꞌix tal kꞌahkꞌal",
+            },
+          },
+          "supabase_senses": [
+            {
+              "sense": {
+                "glosses": {
+                  "new": {
+                    "es": "fiebre",
+                  },
+                },
+                "parts_of_speech": {
+                  "new": [
+                    "n",
+                  ],
+                },
+              },
+              "sense_id": "11111111-1111-1111-1111-111111111100",
+            },
+            {
+              "sense": {
+                "glosses": {
+                  "new": {
+                    "es": "día",
+                  },
+                },
+                "parts_of_speech": {
+                  "new": [
+                    "n",
+                  ],
+                },
+              },
+              "sense_id": "11111111-1111-1111-1111-111111111103",
+            },
+            {
+              "sense": {
+                "glosses": {
+                  "new": {
+                    "es": "calor",
+                  },
+                },
+                "parts_of_speech": {
+                  "new": [
+                    "n",
+                  ],
+                },
+              },
+              "sense_id": "11111111-1111-1111-1111-111111111105",
+            },
+          ],
+          "supabase_sentences": [
+            {
+              "sense_id": "11111111-1111-1111-1111-111111111100",
+              "sentence": {
+                "text": {
+                  "new": {
+                    "latin": "Ay ta kꞌahkꞌal te chꞌin alale",
+                  },
+                },
+                "translation": {
+                  "new": {
+                    "es": "El niño tiene fiebre",
+                  },
+                },
+              },
+              "sentence_id": "11111111-1111-1111-1111-111111111102",
+            },
+            {
+              "sense_id": "11111111-1111-1111-1111-111111111103",
+              "sentence": {
+                "text": {
+                  "new": {
+                    "latin": "Cheb kꞌahkꞌal ya x-aꞌtejotik",
+                  },
+                },
+                "translation": {
+                  "new": {
+                    "es": "Trabajaremos dos días",
+                  },
+                },
+              },
+              "sentence_id": "11111111-1111-1111-1111-111111111104",
+            },
+            {
+              "sense_id": "11111111-1111-1111-1111-111111111105",
+              "sentence": {
+                "text": {
+                  "new": {
+                    "latin": "Siento mucho calor",
+                  },
+                },
+                "translation": {
+                  "new": {
+                    "es": "Toyol kꞌahkꞌal ya kaꞌiy",
+                  },
+                },
+              },
+              "sentence_id": "11111111-1111-1111-1111-111111111106",
+            },
+          ],
+        },
+        {
+          "firebase_entry": {
+            "ca": 10101010,
+            "gl": {
+              "es": "sol",
+            },
+            "ii": "v4-1715819006966",
+            "lx": "kꞌaal",
+            "nt": "26/dic./2020",
+            "ps": [
+              "n",
+            ],
+            "ua": 10101010,
+            "va": "kꞌahkꞌal",
+            "xs": {
+              "es": "Que bueno, ya salió el sol",
+              "vn": "Jaꞌnix lek-a lokꞌix tel kꞌaal",
+            },
+          },
+          "supabase_senses": [
+            {
+              "sense": {
+                "glosses": {
+                  "new": {
+                    "es": "fiebre",
+                  },
+                },
+                "parts_of_speech": {
+                  "new": [
+                    "n",
+                  ],
+                },
+              },
+              "sense_id": "11111111-1111-1111-1111-111111111100",
+            },
+            {
+              "sense": {
+                "glosses": {
+                  "new": {
+                    "es": "día",
+                  },
+                },
+                "parts_of_speech": {
+                  "new": [
+                    "n",
+                  ],
+                },
+              },
+              "sense_id": "11111111-1111-1111-1111-111111111103",
+            },
+            {
+              "sense": {
+                "glosses": {
+                  "new": {
+                    "es": "calor",
+                  },
+                },
+                "parts_of_speech": {
+                  "new": [
+                    "n",
+                  ],
+                },
+              },
+              "sense_id": "11111111-1111-1111-1111-111111111105",
+            },
+          ],
+          "supabase_sentences": [
+            {
+              "sense_id": "11111111-1111-1111-1111-111111111100",
+              "sentence": {
+                "text": {
+                  "new": {
+                    "latin": "Ay bayal skꞌaal te chꞌin x-Ixchele",
+                  },
+                },
+                "translation": {
+                  "new": {
+                    "es": "Mi hijita Ixchel tiene mucha fiebre",
+                  },
+                },
+              },
+              "sentence_id": "11111111-1111-1111-1111-111111111102",
+            },
+            {
+              "sense_id": "11111111-1111-1111-1111-111111111103",
+              "sentence": {
+                "text": {
+                  "new": {
+                    "latin": ""Bajtꞌix kꞌaal mamtik, yorailix ichꞌ lewa"",
+                  },
+                },
+                "translation": {
+                  "new": {
+                    "es": "Ya transcurrió el día mi estimado señor, es momento de tomar un descanso",
+                  },
+                },
+              },
+              "sentence_id": "11111111-1111-1111-1111-111111111104",
+            },
+            {
+              "sense_id": "11111111-1111-1111-1111-111111111105",
+              "sentence": {
+                "text": {
+                  "new": {
+                    "latin": "Siento mucho calor",
+                  },
+                },
+                "translation": {
+                  "new": {
+                    "es": "Toyol kꞌaal ya jkaꞌiy",
+                  },
+                },
+              },
+              "sentence_id": "11111111-1111-1111-1111-111111111106",
+            },
+          ],
+        },
+        {
+          "firebase_entry": {
+            "ca": 10101010,
+            "gl": {
+              "es": "sol",
+            },
+            "ii": "v4-1715819006966",
+            "lx": "kꞌajkꞌal",
+            "nt": "14/dic./2019",
+            "ps": [
+              "n",
+            ],
+            "ua": 10101010,
+            "va": "kꞌahkꞌal",
+          },
+          "supabase_senses": [
+            {
+              "sense": {
+                "glosses": {
+                  "new": {
+                    "es": "día",
+                  },
+                },
+                "parts_of_speech": {
+                  "new": [
+                    "n",
+                  ],
+                },
+              },
+              "sense_id": "11111111-1111-1111-1111-111111111100",
+            },
+            {
+              "sense": {
+                "glosses": {
+                  "new": {
+                    "es": "calor",
+                  },
+                },
+                "parts_of_speech": {
+                  "new": [
+                    "n",
+                  ],
+                },
+              },
+              "sense_id": "11111111-1111-1111-1111-111111111102",
+            },
+            {
+              "sense": {
+                "glosses": {
+                  "new": {
+                    "es": "fiebre",
+                  },
+                },
+                "parts_of_speech": {
+                  "new": [
+                    "n",
+                  ],
+                },
+              },
+              "sense_id": "11111111-1111-1111-1111-111111111103",
+            },
+          ],
+          "supabase_sentences": [],
+        },
+        {
+          "firebase_entry": {
+            "ca": 10101010,
+            "gl": {
+              "es": "fuego",
+            },
+            "ii": "v4-1715819006966",
+            "lx": "kꞌajkꞌ",
+            "nt": "23/sep./2023",
+            "ps": [
+              "n",
+            ],
+            "ua": 10101010,
+            "va": "kꞌahkꞌ",
+            "xs": {
+              "es": "Ya hice el fuego",
+              "vn": "Tilix kuꞌun-i kꞌajkꞌi",
+            },
+          },
+          "supabase_senses": [
+            {
+              "sense": {
+                "glosses": {
+                  "new": {
+                    "es": "bravo",
+                  },
+                },
+                "parts_of_speech": {
+                  "new": [
+                    "adj",
+                  ],
+                },
+              },
+              "sense_id": "11111111-1111-1111-1111-111111111100",
+            },
+            {
+              "sense": {
+                "glosses": {
+                  "new": {
+                    "es": "fiebre",
+                  },
+                },
+                "parts_of_speech": {
+                  "new": [
+                    "n",
+                  ],
+                },
+              },
+              "sense_id": "11111111-1111-1111-1111-111111111103",
+            },
+            {
+              "sense": {
+                "glosses": {
+                  "new": {
+                    "es": "caliente",
+                  },
+                },
+                "parts_of_speech": {
+                  "new": [
+                    "adj",
+                  ],
+                },
+              },
+              "sense_id": "11111111-1111-1111-1111-111111111105",
+            },
+          ],
+          "supabase_sentences": [
+            {
+              "sense_id": "11111111-1111-1111-1111-111111111100",
+              "sentence": {
+                "text": {
+                  "new": {
+                    "latin": "Lom kꞌajkꞌ te mamal jkaxlane",
+                  },
+                },
+                "translation": {
+                  "new": {
+                    "es": "El mestizo es muy bravo",
+                  },
+                },
+              },
+              "sentence_id": "11111111-1111-1111-1111-111111111102",
+            },
+            {
+              "sense_id": "11111111-1111-1111-1111-111111111103",
+              "sentence": {
+                "text": {
+                  "new": {
+                    "latin": "Tsakbil ta kꞌajkꞌ te alale",
+                  },
+                },
+                "translation": {
+                  "new": {
+                    "es": "El bebé tiene mucha fiebre",
+                  },
+                },
+              },
+              "sentence_id": "11111111-1111-1111-1111-111111111104",
+            },
+            {
+              "sense_id": "11111111-1111-1111-1111-111111111105",
+              "sentence": {
+                "text": {
+                  "new": {
+                    "latin": "El café está caliente, tómalo despacio",
+                  },
+                },
+                "translation": {
+                  "new": {
+                    "es": "Kꞌajkꞌ te kajpele, kꞌume xa awuchꞌ",
+                  },
+                },
+              },
+              "sentence_id": "11111111-1111-1111-1111-111111111106",
+            },
+          ],
+        },
+        {
+          "firebase_entry": {
+            "ca": 10101010,
+            "gl": {
+              "es": "libro",
+            },
+            "ii": "v4-1715819006966",
+            "lx": "jun",
+            "nt": "26/sep./2023",
+            "ps": [
+              "n",
+            ],
+            "ua": 10101010,
+            "xs": {
+              "es": "¿Qué haces? - Estoy leyendo un libro",
+              "vn": "¿Beluk apas? - Yakalon ta skꞌoponel jun",
+            },
+          },
+          "supabase_senses": [
+            {
+              "sense": {
+                "glosses": {
+                  "new": {
+                    "es": "cuaderno",
+                  },
+                },
+                "parts_of_speech": {
+                  "new": [
+                    "n",
+                  ],
+                },
+              },
+              "sense_id": "11111111-1111-1111-1111-111111111100",
+            },
+            {
+              "sense": {
+                "glosses": {
+                  "new": {
+                    "es": "documento",
+                  },
+                },
+                "parts_of_speech": {
+                  "new": [
+                    "n",
+                  ],
+                },
+              },
+              "sense_id": "11111111-1111-1111-1111-111111111103",
+            },
+            {
+              "sense": {
+                "glosses": {
+                  "new": {
+                    "es": "papel",
+                  },
+                },
+                "parts_of_speech": {
+                  "new": [
+                    "n",
+                  ],
+                },
+              },
+              "sense_id": "11111111-1111-1111-1111-111111111105",
+            },
+          ],
+          "supabase_sentences": [
+            {
+              "sense_id": "11111111-1111-1111-1111-111111111100",
+              "sentence": {
+                "text": {
+                  "new": {
+                    "latin": "La jta ta kitsel te june",
+                  },
+                },
+                "translation": {
+                  "new": {
+                    "es": "Alcancé a rayar mi cuaderno",
+                  },
+                },
+              },
+              "sentence_id": "11111111-1111-1111-1111-111111111102",
+            },
+            {
+              "sense_id": "11111111-1111-1111-1111-111111111103",
+              "sentence": {
+                "text": {
+                  "new": {
+                    "latin": "Maꞌme xa awochꞌ te ajune",
+                  },
+                },
+                "translation": {
+                  "new": {
+                    "es": "No vayas a arrugar tu documento",
+                  },
+                },
+              },
+              "sentence_id": "11111111-1111-1111-1111-111111111104",
+            },
+            {
+              "sense_id": "11111111-1111-1111-1111-111111111105",
+              "sentence": {
+                "text": {
+                  "new": {
+                    "latin": "Zoe rompió el papel",
+                  },
+                },
+                "translation": {
+                  "new": {
+                    "es": "La schꞌiꞌ jun te Zoe",
+                  },
+                },
+              },
+              "sentence_id": "11111111-1111-1111-1111-111111111106",
+            },
+          ],
+        },
+        {
+          "firebase_entry": {
+            "ca": 10101010,
+            "gl": {
+              "es": "abierto",
+            },
+            "ii": "v4-1715819006966",
+            "lx": "jeꞌel",
+            "nt": "08/abr./2019",
+            "ps": [
+              "adj",
+            ],
+            "ua": 10101010,
+            "va": "makal",
+            "xs": {
+              "es": "La puerta de mi casa quedó abierta",
+              "vn": "Jeꞌel jilel stiꞌ jna",
+            },
+          },
+          "supabase_senses": [
+            {
+              "sense": {
+                "glosses": {
+                  "new": {
+                    "es": "abrir",
+                  },
+                },
+              },
+              "sense_id": "11111111-1111-1111-1111-111111111100",
+            },
+          ],
+          "supabase_sentences": [
+            {
+              "sense_id": "11111111-1111-1111-1111-111111111100",
+              "sentence": {
+                "text": {
+                  "new": {
+                    "latin": "Jeꞌa tel tebuk i tiꞌnai ay bayal kꞌaal",
+                  },
+                },
+                "translation": {
+                  "new": {
+                    "es": ""Abre un poco la puerta, hace mucho calor"",
+                  },
+                },
+              },
+              "sentence_id": "11111111-1111-1111-1111-111111111102",
+            },
+          ],
+        },
+      ]
+    `)
+  })
 })
 
 function removeHeaderRow(rows: any[]) {

@@ -88,7 +88,7 @@ export function convert_row_to_objects_for_databases({ row, dateStamp, timestamp
     }
 
     // example sentence fields are codes followed by '_exampleSentence'
-    if (key.includes('_exampleSentence')) {
+    if (key.includes('_exampleSentence') && !sense_regex.test(key)) {
       const [language] = key.split('_exampleSentence')
       firebase_entry.xs[language] = value
     }
@@ -111,6 +111,7 @@ export function convert_row_to_objects_for_databases({ row, dateStamp, timestamp
         writing_system = writing_system.replace('_vn_ES', '')
 
         if (key === `s${old_key}_${writing_system}_vn_ES`) {
+          supabase_sentence.sense_id = supabase_sense.sense_id
           supabase_sentence.sentence_id = incremental_consistent_uuid()
           supabase_sentence.sentence = { text: { new: { ...supabase_sentence?.sentence?.text?.new, [writing_system]: row[key] } } }
         }
