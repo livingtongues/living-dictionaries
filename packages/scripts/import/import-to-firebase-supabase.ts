@@ -7,7 +7,7 @@ import { parseCSVFrom } from './parse-csv.js'
 import { post_request } from './post-request.js'
 import { convert_row_to_objects_for_databases } from './convert_row_to_objects_for_databases.js'
 
-const supbase_content_update_endpoint = 'http://localhost:3041/api/db/content-update'
+const supabase_content_update_endpoint = 'http://localhost:3041/api/db/content-update'
 const developer_in_charge_supabase_uid = '12345678-abcd-efab-cdef-123456789013' // in Supabase diego@livingtongues.org -> Diego Córdova Nieto;
 const developer_in_charge_firebase_uid = 'qkTzJXH24Xfc57cZJRityS6OTn52' // diego@livingtongues.org -> Diego Córdova Nieto;
 type unique_speakers = Record<string, string>
@@ -125,7 +125,7 @@ export async function update_sense({
 }) {
   if (dry) return console.log({ dry_sense: sense })
 
-  const { error } = await post_request<ContentUpdateRequestBody>(supbase_content_update_endpoint, {
+  const error = await post_request<ContentUpdateRequestBody>(supabase_content_update_endpoint, {
     id: randomUUID(),
     auth_token: null,
     user_id_from_local: developer_in_charge_supabase_uid,
@@ -165,7 +165,7 @@ export async function update_sentence({
 }) {
   if (dry) return console.log({ dry_sense: sentence })
 
-  const { error } = await post_request<ContentUpdateRequestBody>(supbase_content_update_endpoint, {
+  const error = await post_request<ContentUpdateRequestBody>(supabase_content_update_endpoint, {
     id: randomUUID(),
     auth_token: null,
     user_id_from_local: developer_in_charge_supabase_uid,
