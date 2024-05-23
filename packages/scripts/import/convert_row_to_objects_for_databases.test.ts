@@ -452,6 +452,7 @@ describe('convertJsonRowToEntryFormat with senses', () => {
       ]
     `)
   })
+
   test('senses with sentences', () => {
     const csv_rows_with_sentences: Record<string, any>[] = [
       {
@@ -512,6 +513,7 @@ describe('convertJsonRowToEntryFormat with senses', () => {
       ]
     `)
   })
+
   test('senses with the rest fields', () => {
     const csv_rows_with_other_fields: Record<string, any>[] = [
       {
@@ -565,6 +567,63 @@ describe('convertJsonRowToEntryFormat with senses', () => {
         },
       ]
     `)
+  })
+
+  test('wrong order in senses', () => {
+    const csv_rows_with_senses: Record<string, any>[] = [
+      {
+        lexeme: '𒂸',
+        es_gloss: 'sopa',
+        en_gloss: 'soup',
+        s2_es_gloss: 'agua',
+        s3_es_gloss: 'líquido',
+        s3_en_gloss: 'liquid',
+        s2_en_gloss: 'water',
+      },
+    ]
+    const entries = csv_rows_with_senses.map(row => convert_row_to_objects_for_databases({ row, dateStamp: fakeDateStamp, timestamp: fakeTimeStamp, test: true }))
+
+    expect(entries).not.toEqual(
+      [
+        {
+          firebase_entry: {
+            ca: 10101010,
+            gl: {
+              en: 'soup',
+              es: 'sopa',
+            },
+            ii: 'v4-1715819006966',
+            lx: '𒂸',
+            ua: 10101010,
+          },
+          supabase_senses: [
+            {
+              sense: {
+                glosses: {
+                  new: {
+                    es: 'agua',
+                    en: 'water',
+                  },
+                },
+              },
+              sense_id: '11111111-1111-1111-1111-111111111100',
+            },
+            {
+              sense: {
+                glosses: {
+                  new: {
+                    en: 'liquid',
+                    es: 'líquido',
+                  },
+                },
+              },
+              sense_id: '11111111-1111-1111-1111-111111111102',
+            },
+          ],
+          supabase_sentences: [],
+        },
+      ],
+    )
   })
 
   test('high-level conversion from csv with senses', () => {
@@ -679,12 +738,12 @@ describe('convertJsonRowToEntryFormat with senses', () => {
               "sentence": {
                 "text": {
                   "new": {
-                    "latin": "Siento mucho calor",
+                    "latin": "Toyol kꞌahkꞌal ya kaꞌiy",
                   },
                 },
                 "translation": {
                   "new": {
-                    "es": "Toyol kꞌahkꞌal ya kaꞌiy",
+                    "es": "Siento mucho calor",
                   },
                 },
               },
@@ -796,12 +855,12 @@ describe('convertJsonRowToEntryFormat with senses', () => {
               "sentence": {
                 "text": {
                   "new": {
-                    "latin": "Siento mucho calor",
+                    "latin": "Toyol kꞌaal ya jkaꞌiy",
                   },
                 },
                 "translation": {
                   "new": {
-                    "es": "Toyol kꞌaal ya jkaꞌiy",
+                    "es": "Siento mucho calor",
                   },
                 },
               },

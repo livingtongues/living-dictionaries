@@ -61,9 +61,9 @@ export async function importEntries(
     for (const { sense, sense_id } of supabase_senses) {
       await update_sense({ entry_id: universal_entry_id, dictionary_id, sense, sense_id, dry })
     }
-    // for (const { sentence, sentence_id, sense_id } of supabase_sentences) {
-    //   await update_sentence({ entry_id: universal_entry_id, dictionary_id, sentence, sense_id, sentence_id, dry })
-    // }
+    for (const { sentence, sentence_id, sense_id } of supabase_sentences) {
+      await update_sentence({ entry_id: universal_entry_id, dictionary_id, sentence, sense_id, sentence_id, dry })
+    }
 
     if (row.photoFile) {
       const pf = await uploadImageFile(row.photoFile, universal_entry_id, dictionary_id, dry)

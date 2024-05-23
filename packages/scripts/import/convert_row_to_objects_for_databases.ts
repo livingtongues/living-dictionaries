@@ -46,10 +46,6 @@ export function convert_row_to_objects_for_databases({ row, dateStamp, timestamp
   }
   const supabase_senses = []
   const supabase_sentences = []
-  const lastGlosses = new Map()
-  // const exampleSentenceObject: Record<string, string> = {}
-  // const exampleSentenceTranslationObject: Record<string, string> = {}
-  // let sentence_id = randomUUID()
   let old_key = 2
 
   if (row.phonetic) firebase_entry.ph = row.phonetic
