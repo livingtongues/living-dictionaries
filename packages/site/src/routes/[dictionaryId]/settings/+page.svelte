@@ -13,46 +13,74 @@
   import AddImage from '$lib/components/image/AddImage.svelte'
 
   export let data
-  $: ({ dictionary, admin, is_manager, updateDictionary, add_gloss_language, remove_gloss_language, add_featured_image } = data)
+  $: ({ dictionary, admin, is_manager, updateDictionary, add_gloss_language, remove_gloss_language, add_featured_image, can_edit } = data)
 </script>
 
 <div style="max-width: 700px">
   <h3 class="text-xl font-semibold mb-4">{$page.data.t('misc.settings')}</h3>
 
-  <EditString
-    value={$dictionary.name}
-    minlength={2}
-    required
-    id="name"
-    save={async name => await updateDictionary({ name })}
-    display={$page.data.t('settings.edit_dict_name')} />
+  {#if $can_edit}
+    <EditString
+      value={$dictionary.name}
+      minlength={2}
+      required
+      id="name"
+      save={async name => await updateDictionary({ name })}
+      display={$page.data.t('settings.edit_dict_name')} />
+    <div class="mb-5" />
+  {/if}
+
+  {#if $can_edit}
+    <EditString
+      value={$dictionary.iso6393}
+      id="iso6393"
+      save={async iso6393 => await updateDictionary({ iso6393 })}
+      display="ISO 639-3" />
+  {:else}
+    <p>{$dictionary.iso6393 || ''}</p>
+  {/if}
   <div class="mb-5" />
 
-  <EditString
-    value={$dictionary.iso6393}
-    id="iso6393"
-    save={async iso6393 => await updateDictionary({ iso6393 })}
-    display="ISO 639-3" />
+  {#if $can_edit}
+    <EditString
+      value={$dictionary.glottocode}
+      id="glottocode"
+      save={async glottocode => await updateDictionary({ glottocode })}
+      display="Glottocode" />
+  {:else}
+    <p>{$dictionary.glottocode || ''}</p>
+  {/if}
   <div class="mb-5" />
 
-  <EditString
-    value={$dictionary.glottocode}
-    id="glottocode"
-    save={async glottocode => await updateDictionary({ glottocode })}
-    display="Glottocode" />
+  {#if $can_edit}
+    <EditableGlossesField
+      minimum={1}
+      availableLanguages={glossingLanguages}
+      selectedLanguages={$dictionary.glossLanguages}
+      add_language={async languageId => await add_gloss_language(languageId)}
+      remove_language={async languageId => await remove_gloss_language(languageId)} />
+  {:else}
+    <div class="text-sm font-medium text-gray-700 mb-1">{$page.data.t('entry_field.gloss')}</div>
+    {#if $dictionary.glossLanguages?.length > 0}
+      {#each $dictionary.glossLanguages as gloss}
+        <p>{glossingLanguages[gloss].vernacularName}</p>
+      {/each}
+    {/if}
+  {/if}
   <div class="mb-5" />
 
-  <EditableGlossesField
-    minimum={1}
-    availableLanguages={glossingLanguages}
-    selectedLanguages={$dictionary.glossLanguages}
-    add_language={async languageId => await add_gloss_language(languageId)}
-    remove_language={async languageId => await remove_gloss_language(languageId)} />
-  <div class="mb-5" />
-
-  <EditableAlternateNames
-    alternateNames={$dictionary.alternateNames}
-    on_update={async new_value => await updateDictionary({ alternateNames: new_value })} />
+  {#if $can_edit}
+    <EditableAlternateNames
+      alternateNames={$dictionary.alternateNames}
+      on_update={async new_value => await updateDictionary({ alternateNames: new_value })} />
+  {:else}
+    <div class="text-sm font-medium text-gray-700 mb-1">{$page.data.t('create.alternate_names')}</div>
+    {#if $dictionary.alternateNames?.length > 0}
+      {#each $dictionary.alternateNames as alternate_names}
+        <p>{alternate_names}</p>
+      {/each}
+    {/if}
+  {/if}
   <div class="mb-5" />
 
   <WhereSpoken
