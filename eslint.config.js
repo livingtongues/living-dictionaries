@@ -139,6 +139,7 @@ export default antfu(
       'ts/sort-type-constituents': 'off', // prefer logical rather than alphabetical sorting
       'curly': 'off',
       'antfu/if-newline': 'off',
+      'node/prefer-global/process': 'off',
     },
   },
   'antfu/svelte/rules': {
