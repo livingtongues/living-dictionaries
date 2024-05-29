@@ -186,7 +186,8 @@
     "gloss": "",
     "plural_form": "",
     "scientific_names": "",
-    "definition_english": ""
+    "definition_english": "",
+    "video": ""
   },
   "error": {
     "run_into_error": "আমি দুঃখিত, আমি এটা ত্ৰুটিত পৰিছো।",
@@ -240,7 +241,8 @@
     "upload": "",
     "assertion": "",
     "negation": "",
-    "clean": ""
+    "clean": "",
+    "map": ""
   },
   "settings": {
     "community_permission": "ভাষণ সম্প্ৰদায়ে এই ভাষাটো অনলাইন/ইণ্টাৰনেটত উপলব্ধ হ'বলৈ অনুমতি দিয়ে নেকি?",
@@ -250,7 +252,8 @@
     "optional_data_fields": "বৈকল্পিক ডাটা/তথ্য ফিল্ডসমূহ/ক্ষেত্ৰসমূহ",
     "unable_to_delete": "",
     "print_access_meaning": "",
-    "featured_image": ""
+    "featured_image": "",
+    "translations": ""
   },
   "speakers": {
     "add_new_speaker": "নতুন বক্তা যোগ কৰক",

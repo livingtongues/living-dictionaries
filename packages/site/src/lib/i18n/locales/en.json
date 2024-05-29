@@ -167,7 +167,6 @@
   "entry_field": {
     "photo": "Photo",
     "audio": "Audio",
-    "video": "Video",
     "speaker": "Speaker",
     "lexeme": "Lexeme/Word/Phrase",
     "elicitation_id": "ID",
@@ -187,7 +186,8 @@
     "gloss": "Translation",
     "plural_form": "Plural form",
     "scientific_names": "Scientific Name",
-    "definition_english": "Definition (deprecated)"
+    "definition_english": "Definition (deprecated)",
+    "video": "Video"
   },
   "error": {
     "run_into_error": "We're sorry, we've run into an error.",
@@ -241,7 +241,8 @@
     "upload": "Upload",
     "assertion": "yes",
     "negation": "no",
-    "clean": "Clean"
+    "clean": "Clean",
+    "map": "Map"
   },
   "settings": {
     "community_permission": "Does the speech community allow this language to be online?",
@@ -251,7 +252,8 @@
     "optional_data_fields": "Optional Data Fields",
     "unable_to_delete": "Note: you will not be able to delete these glossing languages later.",
     "print_access_meaning": "This gives the public the ability to download and print this Living Dictionary as a .PDF",
-    "featured_image": "Featured Image"
+    "featured_image": "Featured Image",
+    "translations": "Translations"
   },
   "speakers": {
     "add_new_speaker": "Add New Speaker",
