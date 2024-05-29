@@ -74,6 +74,14 @@
       {$page.data.t('dictionary.grammar')}
     </span>
   </a>
+  <a
+    href={`/${dictionary.id}/settings`}
+    class:active={$page.url.pathname.includes('settings')}>
+    <i class="far fa-cog fa-fw" />
+    <span class="font-medium mx-2">
+      {$page.data.t('misc.settings')}
+    </span>
+  </a>
   {#if is_manager}
     <a
       href={`/${dictionary.id}/import`}
@@ -81,14 +89,6 @@
       <i class="far fa-file-import" />
       <span class="font-medium mx-2">
         {$page.data.t('import_page.import')}
-      </span>
-    </a>
-    <a
-      href={`/${dictionary.id}/settings`}
-      class:active={$page.url.pathname.includes('settings')}>
-      <i class="far fa-cog fa-fw" />
-      <span class="font-medium mx-2">
-        {$page.data.t('misc.settings')}
       </span>
     </a>
     <a

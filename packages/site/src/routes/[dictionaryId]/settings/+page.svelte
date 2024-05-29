@@ -4,8 +4,6 @@
   import { page } from '$app/stores'
   import EditableGlossesField from '$lib/components/settings/EditableGlossesField.svelte'
   import WhereSpoken from '$lib/components/settings/WhereSpoken.svelte'
-  import Map from '$lib/components/maps/mapbox/map/Map.svelte'
-  import Marker from '$lib/components/maps/mapbox/map/Marker.svelte'
   import EditableAlternateNames from '$lib/components/settings/EditableAlternateNames.svelte'
   import PublicCheckbox from '$lib/components/settings/PublicCheckbox.svelte' // only used here - perhaps colocate
   import PrintAccessCheckbox from '$lib/components/settings/PrintAccessCheckbox.svelte' // only used here - perhaps colocate
@@ -53,60 +51,30 @@
     <div class="mb-5" />
   {/if}
 
-  {#if $dictionary.glossLanguages?.length > 0}
-    {#if $can_edit} <!-- TODO put can_edit inside the component -->
-      <EditableGlossesField
-        minimum={1}
-        availableLanguages={glossingLanguages}
-        selectedLanguages={$dictionary.glossLanguages}
-        add_language={async languageId => await add_gloss_language(languageId)}
-        remove_language={async languageId => await remove_gloss_language(languageId)} />
-    {:else}
-      <div class="text-sm font-medium text-gray-700 mb-1">{$page.data.t('entry_field.gloss')}</div>
-      {#if $dictionary.glossLanguages?.length > 0}
-        {$dictionary.glossLanguages.map(gl => glossingLanguages[gl].vernacularName).join(', ')}
-      {/if}
-    {/if}
-    <div class="mb-5" />
-  {/if}
+  <EditableGlossesField
+    minimum={1}
+    availableLanguages={glossingLanguages}
+    selectedLanguages={$dictionary.glossLanguages}
+    can_edit={$can_edit}
+    add_language={async languageId => await add_gloss_language(languageId)}
+    remove_language={async languageId => await remove_gloss_language(languageId)} />
+  <div class="mb-5" />
 
-  {#if $dictionary.alternateNames?.length > 0}
-    {#if $can_edit} <!-- TODO put can_edit inside the component -->
-      <EditableAlternateNames
-        alternateNames={$dictionary.alternateNames}
-        on_update={async new_value => await updateDictionary({ alternateNames: new_value })} />
-    {:else}
-      <div class="text-sm font-medium text-gray-700 mb-1">{$page.data.t('create.alternate_names')}</div>
-      {#if $dictionary.alternateNames?.length > 0}
-        {$dictionary.alternateNames.join(', ')}
-      {/if}
-    {/if}
-    <div class="mb-5" />
-  {/if}
+  <EditableAlternateNames
+    alternateNames={$dictionary.alternateNames}
+    can_edit={$can_edit}
+    on_update={async new_value => await updateDictionary({ alternateNames: new_value })} />
+  <div class="mb-5" />
 
-  {#if $dictionary.coordinates}
-    {#if $can_edit}
-      <WhereSpoken
-        dictionary={$dictionary}
-        on_update_coordinates={async coordinates => await updateDictionary({ coordinates })}
-        on_remove_coordinates={async () => await updateDictionary({ coordinates: null })}
-        on_update_points={async points => await updateDictionary({ points })}
-        on_update_regions={async regions => await updateDictionary({ regions })} />
-    {:else}
-      <div class="text-sm font-medium text-gray-700 mb-1">Map</div> <!-- TODO Translate -->
-      <div class="h-240px">
-        <Map
-          lat={$dictionary.coordinates?.latitude}
-          lng={$dictionary.coordinates?.longitude}>
-          <Marker
-            lat={$dictionary.coordinates?.latitude}
-            lng={$dictionary.coordinates?.longitude}
-            color="red" />
-        </Map>
-      </div>
-    {/if}
-    <div class="mb-5" />
-  {/if}
+  <WhereSpoken
+    dictionary={$dictionary}
+    can_edit={$can_edit}
+    on_update_coordinates={async coordinates => await updateDictionary({ coordinates })}
+    on_remove_coordinates={async () => await updateDictionary({ coordinates: null })}
+    on_update_points={async points => await updateDictionary({ points })}
+    on_update_regions={async regions => await updateDictionary({ regions })} />
+
+  <div class="mb-5" />
 
   {#if $dictionary.location}
     <EditString
@@ -119,24 +87,22 @@
     <div class="mb-5" />
   {/if}
 
+  <div class="text-sm font-medium text-gray-700 mb-2">
+    {$page.data.t('settings.featured_image')}
+  </div>
   {#if $dictionary.featuredImage}
-    <div class="text-sm font-medium text-gray-700 mb-2">
-      {$page.data.t('settings.featured_image')}
+    <Image
+      can_edit={$can_edit}
+      height={300}
+      title="{$dictionary.name} Featured Image"
+      gcs={$dictionary.featuredImage.specifiable_image_url}
+      on_delete_image={async () => await updateDictionary({ featuredImage: null })} />
+  {:else}
+    <div class="hover:bg-gray-100 min-h-150px flex flex-col">
+      <AddImage border upload_image={add_featured_image} />
     </div>
-    {#if $dictionary.featuredImage}
-      <Image
-        can_edit={$can_edit}
-        height={300}
-        title="{$dictionary.name} Featured Image"
-        gcs={$dictionary.featuredImage.specifiable_image_url}
-        on_delete_image={async () => await updateDictionary({ featuredImage: null })} />
-    {:else}
-      <div class="hover:bg-gray-100 min-h-150px flex flex-col">
-        <AddImage border upload_image={add_featured_image} />
-      </div>
-    {/if}
-    <div class="mb-5" />
   {/if}
+  <div class="mb-5" />
 
   {#if $can_edit}
     <PrintAccessCheckbox
