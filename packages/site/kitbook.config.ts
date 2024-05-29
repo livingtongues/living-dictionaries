@@ -17,4 +17,7 @@ export default defineConfig({
     params.set('lang', code)
     return `${path}?${params.toString()}`
   },
+  viewer: {
+    openToolsIn: 'popup',
+  },
 })
