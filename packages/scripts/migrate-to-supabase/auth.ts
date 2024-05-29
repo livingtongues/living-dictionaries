@@ -1,7 +1,7 @@
-import { UserRecord } from 'firebase-admin/auth';
+import type { UserRecord } from 'firebase-admin/auth'
 import { auth } from '../config'
-import { executeQuery } from './supabase-db';
-import { write_users_insert } from './write-users-insert';
+import { executeQuery } from './supabase-db'
+import { write_users_insert } from './write-users-insert'
 
 migrate_users()
 
@@ -35,6 +35,6 @@ async function get_users(): Promise<UserRecord[]> {
 
     return users
   } catch (error) {
-    console.log({list_error: error});
+    console.log({ list_error: error })
   }
 }
