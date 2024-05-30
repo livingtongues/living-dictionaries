@@ -459,9 +459,9 @@ describe('convertJsonRowToEntryFormat with senses', () => {
         lexeme: '𒄧𒂸',
         en_gloss: 'dolphin',
         s2_en_gloss: 'fish',
-        s2_default_vn_ES: '𒄧𒂸 𒄧 𒄧𒂸 𒂸𒂸𒄧',
-        s2_en_GES: 'The fish is swimmmimg',
-        s2_es_GES: 'El pez está nadando',
+        s2_default_vernacular_exampleSentence: '𒄧𒂸 𒄧 𒄧𒂸 𒂸𒂸𒄧',
+        s2_en_exampleSentence: 'The fish is swimmmimg',
+        s2_es_exampleSentence: 'El pez está nadando',
       },
     ]
     const entries = csv_rows_with_sentences.map(row => convert_row_to_objects_for_databases({ row, dateStamp: fakeDateStamp, timestamp: fakeTimeStamp, test: true }))

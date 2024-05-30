@@ -78,7 +78,7 @@ export function convert_row_to_objects_for_databases({ row, dateStamp, timestamp
       firebase_entry.gl[language] = value
     }
 
-    if (key.includes('vernacular_exampleSentence')) {
+    if (key.includes('vernacular_exampleSentence') && !sense_regex.test(key)) {
       firebase_entry.xs.vn = value
       continue // to keep next block from also adding
     }
@@ -102,27 +102,28 @@ export function convert_row_to_objects_for_databases({ row, dateStamp, timestamp
           supabase_sense.sense = { glosses: { ...supabase_sense.sense.glosses, new: { [language_key]: row[key] } } }
         }
       }
-      if (key.includes('_vn_ES')) {
+      if (key.includes('_vernacular_exampleSentence')) {
         let writing_system = key.replace(sense_regex, '')
-        writing_system = writing_system.replace('_vn_ES', '')
+        writing_system = writing_system.replace('_vernacular_exampleSentence', '')
 
-        if (key === `s${old_key}_${writing_system}_vn_ES`) {
+        if (key === `s${old_key}_${writing_system}_vernacular_exampleSentence`) {
           supabase_sentence.sense_id = supabase_sense.sense_id
           supabase_sentence.sentence_id = incremental_consistent_uuid()
           supabase_sentence.sentence = { text: { new: { ...supabase_sentence?.sentence?.text?.new, [writing_system]: row[key] } } }
+          continue // to keep next block from also adding
         }
       }
-      if (key.includes('_GES')) {
+      if (key.includes('_exampleSentence')) {
         let language_key = key.replace(sense_regex, '')
-        language_key = language_key.replace('_GES', '')
+        language_key = language_key.replace('_exampleSentence', '')
 
-        if (key === `s${old_key}_${language_key}_GES`) {
+        if (key === `s${old_key}_${language_key}_exampleSentence`) {
           supabase_sentence.sentence = { ...supabase_sentence.sentence, translation: { new: { ...supabase_sentence?.sentence?.translation?.new, [language_key]: row[key] } } }
         } else {
           supabase_sentence.sentence = { ...supabase_sentence.sentence, translation: { ...supabase_sentence?.sentence?.translation, new: { [language_key]: row[key] } } }
         }
       }
-      if (key.includes('_vn_ES') || key.includes('_GES')) {
+      if (key.includes('_vernacular_exampleSentence') || key.includes('_exampleSentence')) {
         const sentence_index: number = supabase_sentences.findIndex(sentence => sentence.sentence_id === supabase_sentence.sentence_id)
         if (sentence_index !== -1) {
           supabase_sentences[sentence_index] = { ...supabase_sentence }
