@@ -626,7 +626,7 @@ describe('convertJsonRowToEntryFormat with senses', () => {
     )
   })
 
-  test('senses with multiple sentences linked to the same sense', () => {
+  test('senses with multiple sentences and last vernacular sentence without its translations', () => {
     const csv_rows_with_sentences: Record<string, any>[] = [
       {
         lexeme: '𒄧𒂸',
