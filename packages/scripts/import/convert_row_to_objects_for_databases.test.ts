@@ -626,6 +626,119 @@ describe('convertJsonRowToEntryFormat with senses', () => {
     )
   })
 
+  test('senses with multiple sentences linked to the same sense', () => {
+    const csv_rows_with_sentences: Record<string, any>[] = [
+      {
+        lexeme: '𒄧𒂸',
+        en_gloss: 'dolphin',
+        s2_en_gloss: 'fish',
+        s2_default_vernacular_exampleSentence: '𒄧𒂸 𒄧 𒄧𒂸 𒂸𒂸𒄧',
+        s2_en_exampleSentence: 'The fish is swimmming',
+        s2_es_exampleSentence: 'El pez está nadando',
+        s3_en_gloss: 'swim',
+        s3_default_vernacular_exampleSentence: '𒂸𒂸𒄧',
+        s3_en_exampleSentence: 'I swim',
+        s4_en_gloss: 'test',
+        s4_default_vernacular_exampleSentence: '𒂸𒂸 𒂸𒂸 𒂸𒂸',
+      },
+    ]
+    const entries = csv_rows_with_sentences.map(row => convert_row_to_objects_for_databases({ row, dateStamp: fakeDateStamp, timestamp: fakeTimeStamp, test: true }))
+
+    expect(entries).toMatchInlineSnapshot(`
+      [
+        {
+          "firebase_entry": {
+            "ca": 10101010,
+            "gl": {
+              "en": "dolphin",
+            },
+            "ii": "v4-1715819006966",
+            "lx": "𒄧𒂸",
+            "ua": 10101010,
+          },
+          "supabase_senses": [
+            {
+              "sense": {
+                "glosses": {
+                  "new": {
+                    "en": "fish",
+                  },
+                },
+              },
+              "sense_id": "11111111-1111-1111-1111-111111111100",
+            },
+            {
+              "sense": {
+                "glosses": {
+                  "new": {
+                    "en": "swim",
+                  },
+                },
+              },
+              "sense_id": "11111111-1111-1111-1111-111111111103",
+            },
+            {
+              "sense": {
+                "glosses": {
+                  "new": {
+                    "en": "test",
+                  },
+                },
+              },
+              "sense_id": "11111111-1111-1111-1111-111111111105",
+            },
+          ],
+          "supabase_sentences": [
+            {
+              "sense_id": "11111111-1111-1111-1111-111111111100",
+              "sentence": {
+                "text": {
+                  "new": {
+                    "default": "𒄧𒂸 𒄧 𒄧𒂸 𒂸𒂸𒄧",
+                  },
+                },
+                "translation": {
+                  "new": {
+                    "en": "The fish is swimmming",
+                    "es": "El pez está nadando",
+                  },
+                },
+              },
+              "sentence_id": "11111111-1111-1111-1111-111111111102",
+            },
+            {
+              "sense_id": "11111111-1111-1111-1111-111111111103",
+              "sentence": {
+                "text": {
+                  "new": {
+                    "default": "𒂸𒂸𒄧",
+                  },
+                },
+                "translation": {
+                  "new": {
+                    "en": "I swim",
+                  },
+                },
+              },
+              "sentence_id": "11111111-1111-1111-1111-111111111104",
+            },
+            {
+              "sense_id": "11111111-1111-1111-1111-111111111105",
+              "sentence": {
+                "text": {
+                  "new": {
+                    "default": "𒂸𒂸 𒂸𒂸 𒂸𒂸",
+                  },
+                },
+              },
+              "sentence_id": "11111111-1111-1111-1111-111111111106",
+            },
+          ],
+        },
+      ]
+    `)
+  })
+
   test('high-level conversion from csv with senses', () => {
     const dictionaryId = 'example-v4-senses'
     const file = readFileSync(path.join(__dirname, `./data/${dictionaryId}/${dictionaryId}.csv`), 'utf8')
@@ -697,7 +810,7 @@ describe('convertJsonRowToEntryFormat with senses', () => {
                   ],
                 },
               },
-              "sense_id": "11111111-1111-1111-1111-111111111105",
+              "sense_id": "11111111-1111-1111-1111-111111111106",
             },
           ],
           "supabase_sentences": [
@@ -731,10 +844,10 @@ describe('convertJsonRowToEntryFormat with senses', () => {
                   },
                 },
               },
-              "sentence_id": "11111111-1111-1111-1111-111111111104",
+              "sentence_id": "11111111-1111-1111-1111-111111111105",
             },
             {
-              "sense_id": "11111111-1111-1111-1111-111111111105",
+              "sense_id": "11111111-1111-1111-1111-111111111106",
               "sentence": {
                 "text": {
                   "new": {
@@ -747,7 +860,7 @@ describe('convertJsonRowToEntryFormat with senses', () => {
                   },
                 },
               },
-              "sentence_id": "11111111-1111-1111-1111-111111111106",
+              "sentence_id": "11111111-1111-1111-1111-111111111108",
             },
           ],
         },
@@ -814,7 +927,7 @@ describe('convertJsonRowToEntryFormat with senses', () => {
                   ],
                 },
               },
-              "sense_id": "11111111-1111-1111-1111-111111111105",
+              "sense_id": "11111111-1111-1111-1111-111111111106",
             },
           ],
           "supabase_sentences": [
@@ -848,10 +961,10 @@ describe('convertJsonRowToEntryFormat with senses', () => {
                   },
                 },
               },
-              "sentence_id": "11111111-1111-1111-1111-111111111104",
+              "sentence_id": "11111111-1111-1111-1111-111111111105",
             },
             {
-              "sense_id": "11111111-1111-1111-1111-111111111105",
+              "sense_id": "11111111-1111-1111-1111-111111111106",
               "sentence": {
                 "text": {
                   "new": {
@@ -864,7 +977,7 @@ describe('convertJsonRowToEntryFormat with senses', () => {
                   },
                 },
               },
-              "sentence_id": "11111111-1111-1111-1111-111111111106",
+              "sentence_id": "11111111-1111-1111-1111-111111111108",
             },
           ],
         },
@@ -995,7 +1108,7 @@ describe('convertJsonRowToEntryFormat with senses', () => {
                   ],
                 },
               },
-              "sense_id": "11111111-1111-1111-1111-111111111105",
+              "sense_id": "11111111-1111-1111-1111-111111111106",
             },
           ],
           "supabase_sentences": [
@@ -1029,10 +1142,10 @@ describe('convertJsonRowToEntryFormat with senses', () => {
                   },
                 },
               },
-              "sentence_id": "11111111-1111-1111-1111-111111111104",
+              "sentence_id": "11111111-1111-1111-1111-111111111105",
             },
             {
-              "sense_id": "11111111-1111-1111-1111-111111111105",
+              "sense_id": "11111111-1111-1111-1111-111111111106",
               "sentence": {
                 "text": {
                   "new": {
@@ -1045,7 +1158,7 @@ describe('convertJsonRowToEntryFormat with senses', () => {
                   },
                 },
               },
-              "sentence_id": "11111111-1111-1111-1111-111111111106",
+              "sentence_id": "11111111-1111-1111-1111-111111111108",
             },
           ],
         },
@@ -1111,7 +1224,7 @@ describe('convertJsonRowToEntryFormat with senses', () => {
                   ],
                 },
               },
-              "sense_id": "11111111-1111-1111-1111-111111111105",
+              "sense_id": "11111111-1111-1111-1111-111111111106",
             },
           ],
           "supabase_sentences": [
@@ -1145,10 +1258,10 @@ describe('convertJsonRowToEntryFormat with senses', () => {
                   },
                 },
               },
-              "sentence_id": "11111111-1111-1111-1111-111111111104",
+              "sentence_id": "11111111-1111-1111-1111-111111111105",
             },
             {
-              "sense_id": "11111111-1111-1111-1111-111111111105",
+              "sense_id": "11111111-1111-1111-1111-111111111106",
               "sentence": {
                 "text": {
                   "new": {
@@ -1161,7 +1274,7 @@ describe('convertJsonRowToEntryFormat with senses', () => {
                   },
                 },
               },
-              "sentence_id": "11111111-1111-1111-1111-111111111106",
+              "sentence_id": "11111111-1111-1111-1111-111111111108",
             },
           ],
         },

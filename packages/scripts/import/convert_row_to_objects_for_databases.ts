@@ -20,6 +20,7 @@ export function convert_row_to_objects_for_databases({ row, dateStamp, timestamp
     }[]
   } {
   const sense_regex = /^s\d+_/
+  const multiple_sentence_regex = /_exampleSentence_\d+$/
   const firebase_entry: ActualDatabaseEntry = { lx: row.lexeme, gl: {}, xs: {} }
   interface SupabaseSense {
     sense_id: string
@@ -47,6 +48,8 @@ export function convert_row_to_objects_for_databases({ row, dateStamp, timestamp
   const supabase_senses = []
   const supabase_sentences = []
   let old_key = 2
+  let old_language_key
+  let new_language_key
 
   if (row.phonetic) firebase_entry.ph = row.phonetic
   if (row.morphology) firebase_entry.mr = row.morphology
@@ -110,28 +113,33 @@ export function convert_row_to_objects_for_databases({ row, dateStamp, timestamp
           supabase_sentence.sense_id = supabase_sense.sense_id
           supabase_sentence.sentence_id = incremental_consistent_uuid()
           supabase_sentence.sentence = { text: { new: { ...supabase_sentence?.sentence?.text?.new, [writing_system]: row[key] } } }
-          continue // to keep next block from also adding
+        }
+      }
+      if (key.includes('_exampleSentence') && !key.includes('_vernacular')) {
+        new_language_key = key.replace(sense_regex, '')
+        new_language_key = new_language_key.replace('_exampleSentence', '')
+        if (old_language_key && old_language_key === new_language_key) supabase_sentence.sentence_id = incremental_consistent_uuid()
+        if (!old_language_key) old_language_key = new_language_key
+
+        if (key === `s${old_key}_${new_language_key}_exampleSentence`) {
+          supabase_sentence.sentence = { ...supabase_sentence.sentence, translation: { new: { ...supabase_sentence?.sentence?.translation?.new, [new_language_key]: row[key] } } }
+        } else {
+          supabase_sentence.sentence = { ...supabase_sentence.sentence, translation: { ...supabase_sentence?.sentence?.translation, new: { [new_language_key]: row[key] } } }
         }
       }
       if (key.includes('_exampleSentence')) {
-        let language_key = key.replace(sense_regex, '')
-        language_key = language_key.replace('_exampleSentence', '')
-
-        if (key === `s${old_key}_${language_key}_exampleSentence`) {
-          supabase_sentence.sentence = { ...supabase_sentence.sentence, translation: { new: { ...supabase_sentence?.sentence?.translation?.new, [language_key]: row[key] } } }
-        } else {
-          supabase_sentence.sentence = { ...supabase_sentence.sentence, translation: { ...supabase_sentence?.sentence?.translation, new: { [language_key]: row[key] } } }
-        }
-      }
-      if (key.includes('_vernacular_exampleSentence') || key.includes('_exampleSentence')) {
         const sentence_index: number = supabase_sentences.findIndex(sentence => sentence.sentence_id === supabase_sentence.sentence_id)
-        if (sentence_index !== -1) {
+        const sense_index: number = supabase_sentences.findIndex(sentence => sentence.sense_id === supabase_sentence.sense_id)
+        // console.log(sense_index, JSON.stringify(supabase_sentence))
+        if (sense_index !== -1) {
+          supabase_sentences[sense_index] = { ...supabase_sentence }
+        } else if (sentence_index !== -1) {
           supabase_sentences[sentence_index] = { ...supabase_sentence }
         } else {
           supabase_sentences.push({ ...supabase_sentence })
         }
       }
-
+      old_language_key = new_language_key
       if (key.includes('_partOfSpeech'))
         supabase_sense.sense = { ...supabase_sense.sense, parts_of_speech: { new: [row[key]] } }
 
