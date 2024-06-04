@@ -18,7 +18,7 @@
 
   <DisplayString display="ISO 639-3" value={$dictionary.iso6393} />
   <DisplayString display="Glottocode" value={$dictionary.glottocode} />
-  <DisplayString display="Translations" value={activeGlossingBcps} />
+  <DisplayString display="{$page.data.t('settings.translations')}" value={activeGlossingBcps} />
   <DisplayString display="{$page.data.t('create.alternate_names')}" value={$dictionary.alternateNames} />
   <DisplayString display={$page.data.t('dictionary.location')} value={$dictionary.location} />
   <VisualMap coordinates={$dictionary.coordinates} />
