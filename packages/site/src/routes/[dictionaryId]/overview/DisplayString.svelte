@@ -3,7 +3,7 @@
   export let value: string | string[]
 </script>
 
-{#if value}
+{#if value?.length > 0}
   <div class="mb-5">
     <div class="text-sm font-medium text-gray-700 mb-2">
       {display}
