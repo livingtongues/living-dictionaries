@@ -738,6 +738,30 @@ describe('convertJsonRowToEntryFormat with senses', () => {
       ]
     `)
   })
+  // test.skip('whatever', () => {
+  //   const csv_rows_with_sentences: Record<string, any>[] = [
+  //     {
+  //       lexeme: '𒄧𒂸',
+  //       en_gloss: 'dolphin',
+  //       s2_en_gloss: 'fish',
+  //       s2_default_vernacular_exampleSentence: '𒄧𒂸 𒄧 𒄧𒂸 𒂸𒂸𒄧',
+  //       s2_en_exampleSentence: 'The fish is swimmming',
+  //       s2_es_exampleSentence: 'El pez está nadando',
+  //       s2_default_vernacular_exampleSentence_2: '𒂸 𒂸𒂸𒄧𒄧𒂸 𒄧 𒄧',
+  //       s3_en_gloss: 'swim',
+  //       s3_default_vernacular_exampleSentence: '𒂸𒂸𒄧',
+  //       s3_en_exampleSentence: 'I swim',
+  //       s3_default_vernacular_exampleSentence_2: '𒄧𒂸 𒂸𒄧',
+  //       s3_en_exampleSentence_2: 'He swam',
+  //       s3_es_exampleSentence_2: 'Él nadó',
+  //       s4_en_gloss: 'test',
+  //       s4_default_vernacular_exampleSentence: '𒂸𒂸 𒂸𒂸 𒂸𒂸',
+  //     },
+  //   ]
+  //   const entries = csv_rows_with_sentences.map(row => convert_row_to_objects_for_databases({ row, dateStamp: fakeDateStamp, timestamp: fakeTimeStamp, test: true }))
+
+  //   expect(entries).toMatchInlineSnapshot()
+  // })
 
   test('high-level conversion from csv with senses', () => {
     const dictionaryId = 'example-v4-senses'
