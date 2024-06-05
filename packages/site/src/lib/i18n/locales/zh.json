@@ -33,7 +33,7 @@
     "export_data": "导出数据（CSV、PDF 格式）",
     "import_export": "导入/导出（FLEx，标准格式）",
     "geo_tagging": "地理标记条目",
-    "flashcard_view": "面向语言学习者的抽认卡视图",
+    "flashcard_view": "语言学习者的抽认卡视图",
     "peer_review": "拼写同行评审",
     "suggestions_from_users": "用户的建议",
     "push_notifications": "向贡献者推送通知",
@@ -89,7 +89,7 @@
     "what_is_your_question": "您有什么问题或评论？",
     "message_failed": "消息发送失败。检查您的互联网连接或给我们发送电子邮件：",
     "delete_dictionary": "删除字典",
-    "public_dictionary": "公开字典",
+    "public_dictionary": "公开词典",
     "import_data": "导入数据",
     "request_access": "请求编辑权限",
     "report_problem": "报告一个问题",
@@ -122,7 +122,7 @@
     "con_lang_description": "这本词典是用于构建语言（近年来人类发明的语言，用于书籍或电影）吗？如果是，请简要描述。",
     "uncertainty": "我不知道",
     "select_region": "选择地区",
-    "secondary_coordinates": "辅助坐标",
+    "secondary_coordinates": "次要坐标",
     "map_instructions": "单击地图以添加辅助坐标。",
     "print_access": "允许查看者打印词典",
     "primary_coordinate": "主坐标"
@@ -252,8 +252,7 @@
     "optional_data_fields": "可选的数据字段",
     "unable_to_delete": "注意：您将无法删除这些语言标注",
     "print_access_meaning": "这使公众能够以 .PDF 格式下载和打印这本活生生的词典",
-    "featured_image": "特色图片",
-    "translations": "翻译"
+    "featured_image": "特色图片"
   },
   "speakers": {
     "add_new_speaker": "添加新的母语者",
@@ -351,5 +350,9 @@
     "title": "合作伙伴组织",
     "button": "写入合作伙伴组织",
     "name": "合作机构名称"
+  },
+  "synopsis": {
+    "translations": "翻译",
+    "name": "概要"
   }
 }

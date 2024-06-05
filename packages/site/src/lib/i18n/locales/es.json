@@ -252,8 +252,7 @@
     "optional_data_fields": "Campos de datos opcionales",
     "unable_to_delete": "Nota: no podrá eliminar las glosas de estas lenguas más tarde",
     "print_access_meaning": "Esto le da al público la capacidad de descargar e imprimir este diccionario vivo como un .pdf",
-    "featured_image": "Imagen principal",
-    "translations": "Traducciones"
+    "featured_image": "Imagen principal"
   },
   "speakers": {
     "add_new_speaker": "Agregar un nuevo hablante",
@@ -351,5 +350,9 @@
     "title": "Organizaciones asociadas",
     "button": "Escribir la organización asociada",
     "name": "Nombre de la organización asociada"
+  },
+  "synopsis": {
+    "translations": "Traducciones",
+    "name": "Sinopsis"
   }
 }

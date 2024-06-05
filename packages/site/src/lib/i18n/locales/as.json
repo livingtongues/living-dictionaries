@@ -252,8 +252,7 @@
     "optional_data_fields": "বৈকল্পিক ডাটা/তথ্য ফিল্ডসমূহ/ক্ষেত্ৰসমূহ",
     "unable_to_delete": "",
     "print_access_meaning": "",
-    "featured_image": "",
-    "translations": ""
+    "featured_image": ""
   },
   "speakers": {
     "add_new_speaker": "নতুন বক্তা যোগ কৰক",
@@ -350,6 +349,10 @@
   "partnership": {
     "title": "",
     "button": "",
+    "name": ""
+  },
+  "synopsis": {
+    "translations": "",
     "name": ""
   }
 }

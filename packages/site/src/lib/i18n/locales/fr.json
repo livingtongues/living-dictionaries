@@ -124,7 +124,7 @@
     "select_region": "Choisissez une région",
     "secondary_coordinates": "Coordonnées secondaires",
     "map_instructions": "Cliquez sur la carte pour ajouter des coordonnées secondaires.",
-    "print_access": "Autoriser les spectateurs à imprimer le dictionnaire",
+    "print_access": "Autoriser les téléspectateurs à imprimer le dictionnaire",
     "primary_coordinate": "Coordonnée principale"
   },
   "dictionary": {
@@ -252,8 +252,7 @@
     "optional_data_fields": "Champs de données facultatifs",
     "unable_to_delete": "Remarque : vous ne pourrez pas supprimer ces langues de glossisation ultérieurement.",
     "print_access_meaning": "Cela donne au public la possibilité de télécharger et d'imprimer ce dictionnaire vivant au format .PDF.",
-    "featured_image": "Image en vedette",
-    "translations": "Traductions"
+    "featured_image": "Image en vedette"
   },
   "speakers": {
     "add_new_speaker": "Ajouter un nouveau locuteur",
@@ -319,7 +318,7 @@
     "availability": "La vue Imprimer est uniquement disponible pour les gestionnaires de dictionnaires et les contributeurs.",
     "max_entries": "Nombre maximum d'entrées",
     "columns": "Colonnes",
-    "headword_size": "Taille du mot-clé",
+    "headword_size": "Taille du mot",
     "font_size": "Taille de police"
   },
   "import_page": {
@@ -351,5 +350,9 @@
     "title": "Organisations partenaires",
     "button": "Écrire dans l'organisation partenaire",
     "name": "Nom de l'organisation partenaire"
+  },
+  "synopsis": {
+    "translations": "Traductions",
+    "name": "Synopsis"
   }
 }

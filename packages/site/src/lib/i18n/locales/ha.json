@@ -33,7 +33,7 @@
     "export_data": "Bayanai na fitarwa (CSV, tsarin PDF)",
     "import_export": "Shigo da Fitarwa (FLEx, Daidaitaccen Tsarin)",
     "geo_tagging": "Geo-tagging shigarwar",
-    "flashcard_view": "Duba Katin Filasha don Masu Koyan Harshe",
+    "flashcard_view": "Duban Katin Flash don Masu Koyan Harshe",
     "peer_review": "Sharhin Tsari na Haruffa",
     "suggestions_from_users": "Shawarwari daga Masu amfani",
     "push_notifications": "Tura Sanarwa zuwa Masu Gudunmawa",
@@ -87,7 +87,7 @@
     "send_message": "aika sako",
     "message_sent": "Saƙon aika. Za mu amsa da zaran mun iya.",
     "what_is_your_question": "Mene ne tambaya ko comment?",
-    "message_failed": "aika sako ya kasa. Bincika haɗin Intanet ɗinku ko yi mana imel:",
+    "message_failed": "aika sako ya kasa. Bincika haɗin Intanet ɗin ku ko yi mana imel:",
     "delete_dictionary": "Share ƙamus",
     "public_dictionary": "Yi ƙamus na jama'a",
     "import_data": "Shigo da bayanai",
@@ -124,7 +124,7 @@
     "select_region": "Zaɓi Yanki",
     "secondary_coordinates": "Coordinates na Sakandare",
     "map_instructions": "Danna kan taswirar don ƙara daidaitawa na sakandare.",
-    "print_access": "Bada Masu kallo su Buga ƙamus",
+    "print_access": "Ba da damar Masu kallo su Buga ƙamus",
     "primary_coordinate": "Haɗin kai na farko"
   },
   "dictionary": {
@@ -252,8 +252,7 @@
     "optional_data_fields": "ZABI Data Fields",
     "unable_to_delete": "Lura: ba za ku iya share waɗannan yaruka masu sheki daga baya ba.",
     "print_access_meaning": "Wannan yana ba jama'a ikon saukewa da buga wannan Kamus na Rayuwa a matsayin .PDF",
-    "featured_image": "Siffar Hoton",
-    "translations": "Fassara"
+    "featured_image": "Siffar Hoton"
   },
   "speakers": {
     "add_new_speaker": "Add New Majalisa",
@@ -351,5 +350,9 @@
     "title": "Ƙungiyoyin Abokan Hulɗa",
     "button": "Rubuta a Ƙungiyar Abokin Hulɗa",
     "name": "Sunan Kungiyar Abokin Hulɗa"
+  },
+  "synopsis": {
+    "translations": "Fassara",
+    "name": "Takaitaccen bayani"
   }
 }

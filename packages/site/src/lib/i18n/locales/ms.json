@@ -252,8 +252,7 @@
     "optional_data_fields": "Bidang Data Tidak Wajib",
     "unable_to_delete": "Nota: anda tidak akan dapat memadamkan bahasa berkilat ini kemudian.",
     "print_access_meaning": "Ini memberi orang ramai keupayaan untuk memuat turun dan mencetak Kamus Hidup ini sebagai .PDF",
-    "featured_image": "Imej Pilihan",
-    "translations": "Terjemahan"
+    "featured_image": "Imej Pilihan"
   },
   "speakers": {
     "add_new_speaker": "Tambah Penutur Baharu",
@@ -341,7 +340,7 @@
     "old_value": "Nilai Bekas",
     "new_value": "Nilai Baru",
     "created": "Dicipta",
-    "edited": "Disunting",
+    "edited": "disunting",
     "deleted": "Dipadamkan",
     "history_search": "Cari entri, editor, medan dan nilai",
     "download_history": "Muat turun Sejarah sebagai CSV",
@@ -351,5 +350,9 @@
     "title": "Organisasi Rakan Kongsi",
     "button": "Tulis dalam Organisasi Rakan Kongsi",
     "name": "Nama Organisasi Rakan Kongsi"
+  },
+  "synopsis": {
+    "translations": "Terjemahan",
+    "name": "Sinopsis"
   }
 }

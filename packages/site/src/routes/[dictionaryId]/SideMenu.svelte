@@ -79,8 +79,7 @@
     class:active={$page.url.pathname.includes('synopsis')}>
     <i class="fal fa-file-alt fa-fw" />
     <span class="font-medium mx-2">
-      Synopsis
-      <!-- {$page.data.t('synopsis.name')} -->
+      {$page.data.t('synopsis.name')}
     </span>
   </a>
   {#if is_manager}

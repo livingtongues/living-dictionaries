@@ -252,8 +252,7 @@
     "optional_data_fields": "Các mục dữ liệu tùy chọn khác",
     "unable_to_delete": "Lưu ý: Sau này bạn sẽ không thể xóa các ngôn ngữ chú thích đã dùng",
     "print_access_meaning": "Việc này cho phép công chúng khả năng tải xuống và in Từ Điển này theo định dạng tệp PDF.",
-    "featured_image": "Hình ảnh nổi bật",
-    "translations": "Bản dịch"
+    "featured_image": "Hình ảnh nổi bật"
   },
   "speakers": {
     "add_new_speaker": "Thêm người nói mới",
@@ -351,5 +350,9 @@
     "title": "Tổ chức đối tác",
     "button": "Viết trong Tổ chức đối tác",
     "name": "Tên tổ chức đối tác"
+  },
+  "synopsis": {
+    "translations": "Bản dịch",
+    "name": "Tóm tắt"
   }
 }

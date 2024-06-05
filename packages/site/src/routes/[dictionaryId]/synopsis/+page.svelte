@@ -16,11 +16,10 @@
 </script>
 
 <div style="max-width: 700px">
-  <h3 class="text-xl font-semibold mb-4">Synopsis</h3> <!-- TODO translate -->
-
+  <h3 class="text-xl font-semibold mb-4">{$page.data.t('synopsis.name')}</h3>
   <DisplayString display="ISO 639-3" value={$dictionary.iso6393} />
   <DisplayString display="Glottocode" value={$dictionary.glottocode} />
-  <DisplayString display="{$page.data.t('settings.translations')}" value={activeGlossingBcps} />
+  <DisplayString display={$page.data.t('synopsis.translations')} value={activeGlossingBcps} />
   <DisplayString display="{$page.data.t('create.alternate_names')}" value={$dictionary.alternateNames} />
   <DisplayString display={$page.data.t('dictionary.location')} value={$dictionary.location} />
   <VisualMap coordinates={$dictionary.coordinates} />
@@ -40,7 +39,7 @@
 </div>
 
 <SeoMetaTags
-  title="Synopsis"
+  title={$page.data.t('synopsis.name')}
   dictionaryName={$dictionary.name}
-  description="Synopsis Description."
-  keywords="Parameters, ISO 639-3, Glottocde, glossing languages, alternate names, GPS, language medata, public dictionary, private dictionary, Endangered Languages, Language Documentation, Language Revitalization, Build a Dictionary, Online Dictionary, Digital Dictionary, Dictionary Software, Free Software, Online Dictionary Builder, Living Dictionaries, Living Dictionary, Edit a dictionary, Search a dictionary, Browse a dictionary, Explore a Dictionary" />
+  description="View the parameters of this Living Dictionary, such as its name, ISO 639-3 Code, Glottocode, the translation languages present within this dictionary, the alternate names for this language, the geo-coordinates for this language, and more."
+  keywords="Synopsis, Parameters, ISO 639-3, Glottocde, glossing languages, alternate names, GPS, language medata, public dictionary, private dictionary, Endangered Languages, Language Documentation, Language Revitalization, Build a Dictionary, Online Dictionary, Digital Dictionary, Dictionary Software, Free Software, Online Dictionary Builder, Living Dictionaries, Living Dictionary, Edit a dictionary, Search a dictionary, Browse a dictionary, Explore a Dictionary" />

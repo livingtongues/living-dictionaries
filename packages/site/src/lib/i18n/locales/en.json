@@ -252,8 +252,7 @@
     "optional_data_fields": "Optional Data Fields",
     "unable_to_delete": "Note: you will not be able to delete these glossing languages later.",
     "print_access_meaning": "This gives the public the ability to download and print this Living Dictionary as a .PDF",
-    "featured_image": "Featured Image",
-    "translations": "Translations"
+    "featured_image": "Featured Image"
   },
   "speakers": {
     "add_new_speaker": "Add New Speaker",
@@ -351,5 +350,9 @@
     "title": "Partner Organizations",
     "button": "Write in Partner Organization",
     "name": "Partner Organization Name"
+  },
+  "synopsis": {
+    "translations": "Translations",
+    "name": "Synopsis"
   }
 }

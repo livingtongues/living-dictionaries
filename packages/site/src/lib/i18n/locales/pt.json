@@ -252,8 +252,7 @@
     "optional_data_fields": "Campo de dados opcionais",
     "unable_to_delete": "NOTA: Você não poderá excluir esses idiomas de brilho posteriormente.",
     "print_access_meaning": "Isso dá ao público a capacidade de baixar e imprimir este Dicionário Vivo como um .PDF",
-    "featured_image": "Imagem em destaque",
-    "translations": "Traduções"
+    "featured_image": "Imagem em destaque"
   },
   "speakers": {
     "add_new_speaker": "Adicionar um falante novo",
@@ -351,5 +350,9 @@
     "title": "Organizações Parceiras",
     "button": "Escreva na organização parceira",
     "name": "Nome da organização parceira"
+  },
+  "synopsis": {
+    "translations": "Traduções",
+    "name": "Sinopse"
   }
 }

@@ -252,8 +252,7 @@
     "optional_data_fields": "Sehemu za Taarifa Mbadala",
     "unable_to_delete": "Kumbuka: hutaweza kufuta lugha hizi za kubainisha baadaye.",
     "print_access_meaning": "Hii inawapa umma uwezo wa kupakua na kuchapisha Kamusi hii Hai kama .PDF",
-    "featured_image": "Picha Iliyoangaziwa",
-    "translations": "Tafsiri"
+    "featured_image": "Picha Iliyoangaziwa"
   },
   "speakers": {
     "add_new_speaker": "Ongeza Mzungumzaji Mpya",
@@ -351,5 +350,9 @@
     "title": "Mashirika ya Washirika",
     "button": "Andika katika Shirika la Washirika",
     "name": "Jina la Shirika la Washirika"
+  },
+  "synopsis": {
+    "translations": "Tafsiri",
+    "name": "Muhtasari"
   }
 }

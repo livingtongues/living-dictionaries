@@ -252,8 +252,7 @@
     "optional_data_fields": "حقول بيانات اختيارية",
     "unable_to_delete": "ملحوظة: لن تتمكن من حذف هذه اللغات اللامعة لاحقًا.",
     "print_access_meaning": "هذا يمنح الجمهور القدرة على تنزيل وطباعة هذا القاموس الحي كـ .pdf",
-    "featured_image": "صورة مميزة",
-    "translations": "ترجمات"
+    "featured_image": "صورة مميزة"
   },
   "speakers": {
     "add_new_speaker": "إضافة متحدث جديد",
@@ -351,5 +350,9 @@
     "title": "المنظمات الشريكة",
     "button": "اكتب في المنظمة الشريكة",
     "name": "اسم المنظمة الشريكة"
+  },
+  "synopsis": {
+    "translations": "ترجمات",
+    "name": "ملخص"
   }
 }

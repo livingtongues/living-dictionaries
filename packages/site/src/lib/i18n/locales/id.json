@@ -252,8 +252,7 @@
     "optional_data_fields": "Opsional Bidang Data",
     "unable_to_delete": "CATATAN: Anda tidak akan dapat menghapus bahasa -bahasa yang memoles ini nanti.",
     "print_access_meaning": "Hal ini memberikan masyarakat kemampuan untuk mengunduh dan mencetak Kamus Hidup ini sebagai .PDF",
-    "featured_image": "Gambar Unggulan",
-    "translations": "Terjemahan"
+    "featured_image": "Gambar Unggulan"
   },
   "speakers": {
     "add_new_speaker": "Bidang Data Bersifat Pilihan ",
@@ -351,5 +350,9 @@
     "title": "Organisasi Mitra",
     "button": "Tulis di Organisasi Mitra",
     "name": "Nama Organisasi Mitra"
+  },
+  "synopsis": {
+    "translations": "Terjemahan",
+    "name": "Ringkasan"
   }
 }
