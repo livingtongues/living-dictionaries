@@ -42,7 +42,7 @@ CREATE TABLE entries ( -- TODO: migrate from Firestore
   plural_form text,
   variant text,
   dialects text[], -- TODO: remove this field by creating a dialects table and many-many table
-  notes text, -- TODO: should this be a MultiString?
+  notes text, -- TODO: change type to jsonb for a MultiString
   sources text[],
   -- elicitation_id text, -- TODO: save as a tag when migrating onondaga
   scientific_names text[],
