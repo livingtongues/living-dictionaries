@@ -16,7 +16,7 @@
 </script>
 
 <div style="max-width: 700px">
-  <h3 class="text-xl font-semibold mb-4">Overview</h3> <!-- TODO translate -->
+  <h3 class="text-xl font-semibold mb-4">Synopsis</h3> <!-- TODO translate -->
 
   <DisplayString display="ISO 639-3" value={$dictionary.iso6393} />
   <DisplayString display="Glottocode" value={$dictionary.glottocode} />
@@ -40,7 +40,7 @@
 </div>
 
 <SeoMetaTags
-  title="Overview"
+  title="Synopsis"
   dictionaryName={$dictionary.name}
-  description="Overview Description."
+  description="Synopsis Description."
   keywords="Parameters, ISO 639-3, Glottocde, glossing languages, alternate names, GPS, language medata, public dictionary, private dictionary, Endangered Languages, Language Documentation, Language Revitalization, Build a Dictionary, Online Dictionary, Digital Dictionary, Dictionary Software, Free Software, Online Dictionary Builder, Living Dictionaries, Living Dictionary, Edit a dictionary, Search a dictionary, Browse a dictionary, Explore a Dictionary" />
