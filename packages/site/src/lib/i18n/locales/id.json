@@ -354,5 +354,9 @@
   "synopsis": {
     "translations": "Terjemahan",
     "name": "Ringkasan"
+  },
+  "sense": {
+    "sense": "Nalar",
+    "add": "Tambahkan Rasa"
   }
 }
