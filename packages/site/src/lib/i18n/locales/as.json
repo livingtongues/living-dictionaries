@@ -186,7 +186,8 @@
     "gloss": "",
     "plural_form": "",
     "scientific_names": "",
-    "definition_english": ""
+    "definition_english": "",
+    "video": ""
   },
   "error": {
     "run_into_error": "আমি দুঃখিত, আমি এটা ত্ৰুটিত পৰিছো।",
@@ -240,7 +241,8 @@
     "upload": "",
     "assertion": "",
     "negation": "",
-    "clean": ""
+    "clean": "",
+    "map": ""
   },
   "settings": {
     "community_permission": "ভাষণ সম্প্ৰদায়ে এই ভাষাটো অনলাইন/ইণ্টাৰনেটত উপলব্ধ হ'বলৈ অনুমতি দিয়ে নেকি?",
@@ -347,6 +349,10 @@
   "partnership": {
     "title": "",
     "button": "",
+    "name": ""
+  },
+  "synopsis": {
+    "translations": "",
     "name": ""
   }
 }
