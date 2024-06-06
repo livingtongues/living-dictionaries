@@ -354,5 +354,9 @@
   "synopsis": {
     "translations": "Translations",
     "name": "Synopsis"
+  },
+  "sense": {
+    "sense": "Sense",
+    "add": "Add Sense"
   }
 }
