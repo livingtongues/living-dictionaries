@@ -354,5 +354,9 @@
   "synopsis": {
     "translations": "ትርጉሞች",
     "name": "ማጠቃለያ"
+  },
+  "sense": {
+    "sense": "ስሜት",
+    "add": "ስሜት ይጨምሩ"
   }
 }

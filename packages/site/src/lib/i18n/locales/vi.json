@@ -354,5 +354,9 @@
   "synopsis": {
     "translations": "Bản dịch",
     "name": "Tóm tắt"
+  },
+  "sense": {
+    "sense": "Giác quan",
+    "add": "Thêm ý nghĩa"
   }
 }

@@ -354,5 +354,9 @@
   "synopsis": {
     "translations": "Traduções",
     "name": "Sinopse"
+  },
+  "sense": {
+    "sense": "Senso",
+    "add": "Adicionar sentido"
   }
 }

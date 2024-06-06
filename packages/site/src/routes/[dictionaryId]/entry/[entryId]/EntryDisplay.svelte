@@ -64,13 +64,13 @@
       <Sense sense={entry.senses[0]} {can_edit} glossLanguages={dictionary.glossLanguages} {updateEntry} />
 
       {#if can_edit}
-        <Button class="text-start p-2! mb-2 rounded order-2 hover:bg-gray-100! text-gray-600" form="menu" onclick={addSense}><span class="i-system-uicons-versions text-xl" /> Add Sense</Button>
+        <Button class="text-start p-2! mb-2 rounded order-2 hover:bg-gray-100! text-gray-600" form="menu" onclick={addSense}><span class="i-system-uicons-versions text-xl" /> {$page.data.t('sense.add')}</Button>
       {/if}
     {:else}
       <div class="p-2 hover:bg-gray-50 rounded">
         <div class="font-semibold mb-2 flex">
           <div class="font-semibold">
-            Sense 1
+            {$page.data.t('sense.sense')} 1
           </div>
         </div>
         <div class="flex flex-col border-s-2 ps-3 ms-1">
@@ -82,7 +82,7 @@
         <div class="p-2 hover:bg-gray-50 rounded">
           <div class="font-semibold mb-2 flex">
             <div class="font-semibold">
-              Sense {index + 2}
+              {$page.data.t('sense.sense')} {index + 2}
             </div>
             <div class="mx-auto" />
             {#if can_edit}
