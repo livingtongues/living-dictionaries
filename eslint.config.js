@@ -104,6 +104,7 @@ export default antfu(
   'antfu/typescript/rules': {
     files: ['**/*.svelte', '**/*.composition'],
     rules: {
+      // Need to check if duplicates in these
       ...jsEslintPlugin.configs.recommended.rules,
       // ...tsEslintPlugin.configs.recommended.rules, // cause the rest to break
       ...tsEslintPlugin.configs.stylistic.rules,
@@ -131,12 +132,16 @@ export default antfu(
 
       'ts/no-explicit-any': 'warn',
       'prefer-named-capture-group': 'warn',
+      'eqeqeq': 'warn',
 
       'no-undef': 'off',
       'no-unused-vars': 'off',
       'no-alert': 'off',
       'ts/ban-ts-comment': 'off',
       'ts/sort-type-constituents': 'off', // prefer logical rather than alphabetical sorting
+      'curly': 'off',
+      'antfu/if-newline': 'off',
+      'node/prefer-global/process': 'off',
     },
   },
   'antfu/svelte/rules': {

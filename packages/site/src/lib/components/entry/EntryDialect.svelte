@@ -50,10 +50,10 @@
       'X-Algolia-API-Key': PUBLIC_ALGOLIA_SEARCH_ONLY_API_KEY,
     }
 
-    const { error, data } = await post_request<any, IAlgoliaFacetsQuery>(`https://${PUBLIC_ALGOLIA_APPLICATION_ID}.algolia.net/1/indexes/entries_prod/facets/di/query`, { data: {
+    const { error, data } = await post_request<{ facetFilters: string[][], maxFacetHits: number }, IAlgoliaFacetsQuery>(`https://${PUBLIC_ALGOLIA_APPLICATION_ID}.algolia.net/1/indexes/entries_prod/facets/di/query`, {
       facetFilters: [[`dictId:${dictionaryId}`]],
       maxFacetHits: 100, // Algolia max possible https://www.algolia.com/doc/api-reference/api-parameters/maxFacetHits/
-    }, headers })
+    }, { headers })
 
     if (error)
       console.error(error.message)

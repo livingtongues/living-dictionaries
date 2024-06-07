@@ -167,7 +167,6 @@
   "entry_field": {
     "photo": "Photo",
     "audio": "Audio",
-    "video": "Video",
     "speaker": "Speaker",
     "lexeme": "Lexeme/Word/Phrase",
     "elicitation_id": "ID",
@@ -187,7 +186,8 @@
     "gloss": "Translation",
     "plural_form": "Plural form",
     "scientific_names": "Scientific Name",
-    "definition_english": "Definition (deprecated)"
+    "definition_english": "Definition (deprecated)",
+    "video": "Video"
   },
   "error": {
     "run_into_error": "We're sorry, we've run into an error.",
@@ -241,7 +241,8 @@
     "upload": "Upload",
     "assertion": "yes",
     "negation": "no",
-    "clean": "Clean"
+    "clean": "Clean",
+    "map": "Map"
   },
   "settings": {
     "community_permission": "Does the speech community allow this language to be online?",
@@ -349,5 +350,13 @@
     "title": "Partner Organizations",
     "button": "Write in Partner Organization",
     "name": "Partner Organization Name"
+  },
+  "synopsis": {
+    "translations": "Translations",
+    "name": "Synopsis"
+  },
+  "sense": {
+    "sense": "Sense",
+    "add": "Add Sense"
   }
 }

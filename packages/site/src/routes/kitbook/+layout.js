@@ -1,6 +1,7 @@
 // @ts-expect-error - virtual import
 import { settings } from 'virtual:kitbook'
 import { groupColocatedModulesIntoPages, layoutLoad, pagesStore } from 'kitbook'
+
 /**
  * Vite glob patterns used for building your Kitbook. See https://vitejs.dev/guide/features.html#multiple-patterns.
  * Restrict these paths to be able to incrementally adopt Kitbook into your project.
