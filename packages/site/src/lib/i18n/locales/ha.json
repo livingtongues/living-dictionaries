@@ -124,7 +124,7 @@
     "select_region": "Zaɓi Yanki",
     "secondary_coordinates": "Coordinates na Sakandare",
     "map_instructions": "Danna kan taswirar don ƙara daidaitawa na sakandare.",
-    "print_access": "Ba da damar Masu kallo su Buga ƙamus",
+    "print_access": "Bada Masu kallo su Buga ƙamus",
     "primary_coordinate": "Haɗin kai na farko"
   },
   "dictionary": {
@@ -287,7 +287,7 @@
   },
   "export": {
     "csv_data": "Bayanai kamar .CSV",
-    "checking_images": "Dubawa idan fayilolin hoto sun wanzu",
+    "checking_images": "Dubawa idan fayilolin hoto suna wanzu",
     "no_images": "Babu fayilolin hoto",
     "checking_audios": "Dubawa idan fayilolin mai jiwuwa sun wanzu",
     "no_audios": "Babu fayilolin mai jiwuwa",
@@ -324,7 +324,7 @@
   "import_page": {
     "import": "Shigo da",
     "template_link": "Hanyar haɗi zuwa Samfura",
-    "instructions_1": "Idan kun riga kuna da bayanan harshe waɗanda kuke son shigo da su cikin ƙamus ɗin ku, da fatan za a bi matakan da ke ƙasa.",
+    "instructions_1": "Idan kun riga kuna da bayanan harshe waɗanda kuke son shigo da su cikin ƙamus ɗinku, da fatan za a bi matakan da ke ƙasa.",
     "instructions_2": "Danna maɓallin shuɗin \"Haɗin zuwa Samfura\" a ƙasa. Zazzage samfurin azaman fayil ɗin Excel, ko ƙirƙirar kwafi akan Google Docs. Shirya samfurin bisa ga bukatun aikin ku. Kwafi da liƙa bayanan ku a cikin maƙunsar bayanai.",
     "instructions_3": "Yi amfani da \"Contact Us\" da ke ƙasa don tuntuɓar mu. Bari mu san cewa kuna da sabon maƙunsar rubutu wanda ke shirye don shigo da kaya. Yi mana tambayoyi da kuke da su. Za mu amsa muku ta imel, sannan za ku iya aiko mana da fayil ɗin ku.",
     "instructions_4": "Don aiko mana da bayanan da aka fitar daga manhajojin ƙamus kamar FLEx, Lexique Pro, Shoebox, da fatan za a yi amfani da maɓallin “Contact Us” da ke ƙasa kuma gaya mana cikakkun bayanai na aikin ku.",

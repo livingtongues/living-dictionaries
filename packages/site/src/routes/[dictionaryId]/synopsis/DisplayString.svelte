@@ -5,7 +5,7 @@
 
 {#if value?.length > 0}
   <div class="mb-5">
-    <div class="text-sm font-medium text-gray-700 mb-2">
+    <div class="text-sm font-medium text-gray-700">
       {display}
     </div>
     {#if typeof value === 'string'}

@@ -118,11 +118,11 @@
     "add_gloss_msg": "您可以在“设置”下添加更多语言标注",
     "language_used_by_community": "这本词典是针对特定人类社区所说或手语的语言吗？",
     "community_permission": "语言界允许你制作这本词典吗？",
-    "author_connection": "请简要描述您如何了解这种语言以及为什么要为其创建一本活字典。您是使用这本生活词典的社区的成员吗？如果没有，你怎么知道这个社区？",
+    "author_connection": "请简要描述您如何了解这种语言以及为什么要为其创建一本活字典。您是使用这本生活词典的社区的成员吗？如果没有，你如何了解社区？",
     "con_lang_description": "这本词典是用于构建语言（近年来人类发明的语言，用于书籍或电影）吗？如果是，请简要描述。",
     "uncertainty": "我不知道",
     "select_region": "选择地区",
-    "secondary_coordinates": "辅助坐标",
+    "secondary_coordinates": "次要坐标",
     "map_instructions": "单击地图以添加辅助坐标。",
     "print_access": "允许查看者打印词典",
     "primary_coordinate": "主坐标"
