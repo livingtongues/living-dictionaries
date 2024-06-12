@@ -3,7 +3,7 @@ import type { ActualDatabaseEntry, ContentUpdateRequestBody } from '@living-dict
 import type { Timestamp } from 'firebase/firestore'
 
 export function convert_row_to_objects_for_databases({ row, dateStamp, timestamp, test = false }: {
-  row: Record<string, string> // TODO: type this
+  row: Record<string, string> // TODO: type this ===> how can I create a type for dynamic rows? starting with 's3_' in case it is sense three or ending with '_5' in case we had five example sentences that belong to the same sense.
   dateStamp?: number
   timestamp?: FirebaseFirestore.FieldValue
   test?: boolean
@@ -21,6 +21,7 @@ export function convert_row_to_objects_for_databases({ row, dateStamp, timestamp
   } {
   const sense_regex = /^s\d+_/
   const multiple_sentence_regex = /_exampleSentence_\d+$/
+  const has_multiple_sentence_regex_label = (key: string) => multiple_sentence_regex.test(key)
   const firebase_entry: ActualDatabaseEntry = { lx: row.lexeme, gl: {}, xs: {} }
   interface SupabaseSense {
     sense_id: string
@@ -108,36 +109,37 @@ export function convert_row_to_objects_for_databases({ row, dateStamp, timestamp
       if (key.includes('_vernacular_exampleSentence')) {
         let writing_system = key.replace(sense_regex, '')
         writing_system = writing_system.replace('_vernacular_exampleSentence', '')
-        if (multiple_sentence_regex.test(key)) writing_system = writing_system.slice(0, writing_system.lastIndexOf('_'))
+        if (has_multiple_sentence_regex_label(key)) writing_system = writing_system.slice(0, writing_system.lastIndexOf('_'))
 
-        if (key === `s${old_key}_${writing_system}_vernacular_exampleSentence` || multiple_sentence_regex.test(key)) {
+        if (key === `s${old_key}_${writing_system}_vernacular_exampleSentence` || has_multiple_sentence_regex_label(key)) {
           supabase_sentence.sense_id = supabase_sense.sense_id
           supabase_sentence.sentence_id = incremental_consistent_uuid()
-          if (key === `s${old_key}_${writing_system}_vernacular_exampleSentence` && !multiple_sentence_regex.test(key)) {
+          if (key === `s${old_key}_${writing_system}_vernacular_exampleSentence` && !has_multiple_sentence_regex_label(key)) {
             supabase_sentence.sentence = { text: { new: { ...supabase_sentence?.sentence?.text?.new, [writing_system]: row[key] } } }
-          } else if (multiple_sentence_regex.test(key)) {
+          } else if (has_multiple_sentence_regex_label(key)) {
             supabase_sentence.sentence = { text: { new: { [writing_system]: row[key] } } }
           }
         }
       }
-      if (key.includes('_exampleSentence') && !key.includes('_vernacular')) {
+      if (key.includes('_exampleSentence') && !key.includes('_vernacular')) { // when key is a translated example sentence
         new_language_key = key.replace(sense_regex, '')
         new_language_key = new_language_key.replace('_exampleSentence', '')
-        if (multiple_sentence_regex.test(key)) new_language_key = new_language_key.slice(0, new_language_key.lastIndexOf('_'))
-        if (old_language_key && old_language_key === new_language_key && !multiple_sentence_regex.test(key)) supabase_sentence.sentence_id = incremental_consistent_uuid()
+        if (has_multiple_sentence_regex_label(key)) new_language_key = new_language_key.slice(0, new_language_key.lastIndexOf('_'))
+        if (old_language_key && old_language_key === new_language_key && !has_multiple_sentence_regex_label(key)) supabase_sentence.sentence_id = incremental_consistent_uuid()
         if (!old_language_key) old_language_key = new_language_key
 
-        if (key === `s${old_key}_${new_language_key}_exampleSentence` || multiple_sentence_regex.test(key)) {
+        if (key === `s${old_key}_${new_language_key}_exampleSentence` || has_multiple_sentence_regex_label(key)) {
           supabase_sentence.sentence = { ...supabase_sentence.sentence, translation: { new: { ...supabase_sentence?.sentence?.translation?.new, [new_language_key]: row[key] } } }
         }
       }
-      console.log(`Sentence so far: ${JSON.stringify(supabase_sentence)}`)
-      if (key.includes('_exampleSentence')) {
+      if (key.includes('_exampleSentence')) { // in this case this includes verncaular and traslated example sentences
         const sentence_index: number = supabase_sentences.findIndex(sentence => sentence.sentence_id === supabase_sentence.sentence_id)
         const sense_index: number = supabase_sentences.findIndex(sentence => sentence.sense_id === supabase_sentence.sense_id)
-        if (sense_index !== -1 && !multiple_sentence_regex.test(key)) {
+        const sense_index_exists = sense_index !== -1
+        const sentence_index_exists = sentence_index !== -1
+        if (sense_index_exists && !has_multiple_sentence_regex_label(key)) {
           supabase_sentences[sense_index] = { ...supabase_sentence }
-        } else if (sentence_index !== -1) {
+        } else if (sentence_index_exists) {
           supabase_sentences[sentence_index] = { ...supabase_sentence }
         } else {
           supabase_sentences.push({ ...supabase_sentence })
@@ -156,7 +158,8 @@ export function convert_row_to_objects_for_databases({ row, dateStamp, timestamp
 
     if (sense_regex.test(key)) {
       const index: number = supabase_senses.findIndex(sense => sense.sense_id === supabase_sense.sense_id)
-      if (index !== -1) {
+      const sense_index_exists = index !== -1
+      if (sense_index_exists) {
         supabase_senses[index] = { ...supabase_sense }
       } else {
         supabase_senses.push({ ...supabase_sense })
