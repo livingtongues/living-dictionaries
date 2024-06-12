@@ -738,7 +738,7 @@ describe('convertJsonRowToEntryFormat with senses', () => {
       ]
     `)
   })
-  test('whatever', () => {
+  test('multiple vernacular and translations sentences that belongs to a same sense', () => {
     const csv_rows_with_sentences: Record<string, any>[] = [
       {
         lexeme: '𒄧𒂸',
@@ -747,7 +747,7 @@ describe('convertJsonRowToEntryFormat with senses', () => {
         s2_default_vernacular_exampleSentence: '𒄧𒂸 𒄧 𒄧𒂸 𒂸𒂸𒄧',
         s2_en_exampleSentence: 'The fish is swimmming',
         s2_es_exampleSentence: 'El pez está nadando',
-        s2_default_vernacular_exampleSentence_2: '𒂸 𒂸𒂸𒄧𒄧𒂸 𒄧 𒄧',
+        s2_default_vernacular_exampleSentence_2: '𒂸 𒂸𒂸𒂸 𒄧𒄧𒄧 𒄧',
         s3_en_gloss: 'swim',
         s3_default_vernacular_exampleSentence: '𒂸𒂸𒄧',
         s3_en_exampleSentence: 'I swim',
@@ -755,6 +755,9 @@ describe('convertJsonRowToEntryFormat with senses', () => {
         s3_en_exampleSentence_2: 'He swam',
         s3_es_exampleSentence_2: 'Él nadó',
         s3_it_exampleSentence_2: 'egli nuotava',
+        s3_default_vernacular_exampleSentence_3: '𒂸 𒄧𒄧 𒂸',
+        s3_es_exampleSentence_3: 'Él nadará',
+        s3_en_exampleSentence_3: 'He will swim',
         s4_en_gloss: 'test',
         s4_default_vernacular_exampleSentence: '𒂸𒂸 𒂸𒂸 𒂸𒂸',
       },
@@ -802,7 +805,7 @@ describe('convertJsonRowToEntryFormat with senses', () => {
                   },
                 },
               },
-              "sense_id": "11111111-1111-1111-1111-111111111107",
+              "sense_id": "11111111-1111-1111-1111-111111111108",
             },
           ],
           "supabase_sentences": [
@@ -828,7 +831,7 @@ describe('convertJsonRowToEntryFormat with senses', () => {
               "sentence": {
                 "text": {
                   "new": {
-                    "default": "𒂸 𒂸𒂸𒄧𒄧𒂸 𒄧 𒄧",
+                    "default": "𒂸 𒂸𒂸𒂸 𒄧𒄧𒄧 𒄧",
                   },
                 },
               },
@@ -869,7 +872,24 @@ describe('convertJsonRowToEntryFormat with senses', () => {
               "sentence_id": "11111111-1111-1111-1111-111111111106",
             },
             {
-              "sense_id": "11111111-1111-1111-1111-111111111107",
+              "sense_id": "11111111-1111-1111-1111-111111111104",
+              "sentence": {
+                "text": {
+                  "new": {
+                    "default": "𒂸 𒄧𒄧 𒂸",
+                  },
+                },
+                "translation": {
+                  "new": {
+                    "en": "He will swim",
+                    "es": "Él nadará",
+                  },
+                },
+              },
+              "sentence_id": "11111111-1111-1111-1111-111111111107",
+            },
+            {
+              "sense_id": "11111111-1111-1111-1111-111111111108",
               "sentence": {
                 "text": {
                   "new": {
@@ -877,7 +897,7 @@ describe('convertJsonRowToEntryFormat with senses', () => {
                   },
                 },
               },
-              "sentence_id": "11111111-1111-1111-1111-111111111108",
+              "sentence_id": "11111111-1111-1111-1111-111111111109",
             },
           ],
         },
