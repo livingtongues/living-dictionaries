@@ -108,30 +108,34 @@ export function convert_row_to_objects_for_databases({ row, dateStamp, timestamp
       if (key.includes('_vernacular_exampleSentence')) {
         let writing_system = key.replace(sense_regex, '')
         writing_system = writing_system.replace('_vernacular_exampleSentence', '')
+        if (multiple_sentence_regex.test(key)) writing_system = writing_system.slice(0, writing_system.lastIndexOf('_'))
 
-        if (key === `s${old_key}_${writing_system}_vernacular_exampleSentence`) {
+        if (key === `s${old_key}_${writing_system}_vernacular_exampleSentence` || multiple_sentence_regex.test(key)) {
           supabase_sentence.sense_id = supabase_sense.sense_id
           supabase_sentence.sentence_id = incremental_consistent_uuid()
-          supabase_sentence.sentence = { text: { new: { ...supabase_sentence?.sentence?.text?.new, [writing_system]: row[key] } } }
+          if (key === `s${old_key}_${writing_system}_vernacular_exampleSentence` && !multiple_sentence_regex.test(key)) {
+            supabase_sentence.sentence = { text: { new: { ...supabase_sentence?.sentence?.text?.new, [writing_system]: row[key] } } }
+          } else if (multiple_sentence_regex.test(key)) {
+            supabase_sentence.sentence = { text: { new: { [writing_system]: row[key] } } }
+          }
         }
       }
       if (key.includes('_exampleSentence') && !key.includes('_vernacular')) {
         new_language_key = key.replace(sense_regex, '')
         new_language_key = new_language_key.replace('_exampleSentence', '')
-        if (old_language_key && old_language_key === new_language_key) supabase_sentence.sentence_id = incremental_consistent_uuid()
+        if (multiple_sentence_regex.test(key)) new_language_key = new_language_key.slice(0, new_language_key.lastIndexOf('_'))
+        if (old_language_key && old_language_key === new_language_key && !multiple_sentence_regex.test(key)) supabase_sentence.sentence_id = incremental_consistent_uuid()
         if (!old_language_key) old_language_key = new_language_key
 
-        if (key === `s${old_key}_${new_language_key}_exampleSentence`) {
+        if (key === `s${old_key}_${new_language_key}_exampleSentence` || multiple_sentence_regex.test(key)) {
           supabase_sentence.sentence = { ...supabase_sentence.sentence, translation: { new: { ...supabase_sentence?.sentence?.translation?.new, [new_language_key]: row[key] } } }
-        } else {
-          supabase_sentence.sentence = { ...supabase_sentence.sentence, translation: { ...supabase_sentence?.sentence?.translation, new: { [new_language_key]: row[key] } } }
         }
       }
+      console.log(`Sentence so far: ${JSON.stringify(supabase_sentence)}`)
       if (key.includes('_exampleSentence')) {
         const sentence_index: number = supabase_sentences.findIndex(sentence => sentence.sentence_id === supabase_sentence.sentence_id)
         const sense_index: number = supabase_sentences.findIndex(sentence => sentence.sense_id === supabase_sentence.sense_id)
-        // console.log(sense_index, JSON.stringify(supabase_sentence))
-        if (sense_index !== -1) {
+        if (sense_index !== -1 && !multiple_sentence_regex.test(key)) {
           supabase_sentences[sense_index] = { ...supabase_sentence }
         } else if (sentence_index !== -1) {
           supabase_sentences[sentence_index] = { ...supabase_sentence }
