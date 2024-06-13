@@ -1,39 +1,40 @@
 <script lang="ts">
-  import { page } from '$app/stores';
-  import { Button, Modal, Form } from 'svelte-pieces';
-  import { goto } from '$app/navigation';
-  import { createEventDispatcher } from 'svelte';
-  import type { SupportRequestBody } from '$api/email/support/+server';
-  import type { RequestAccessBody } from '$api/email/request_access/+server';
-  import enBase from '$lib/i18n/locales/en.json';
-  import { post_request } from '$lib/helpers/get-post-requests';
+  import { Button, Form, Modal } from 'svelte-pieces'
+  import { createEventDispatcher } from 'svelte'
+  import { page } from '$app/stores'
+  import { goto } from '$app/navigation'
+  import type { SupportRequestBody } from '$api/email/support/+server'
+  import type { RequestAccessBody } from '$api/email/request_access/+server'
+  import enBase from '$lib/i18n/locales/en.json'
+  import { post_request } from '$lib/helpers/get-post-requests'
 
-  export let subject: Subjects = undefined;
-  $: ({dictionary, user} = $page.data)
+  export let subject: Subjects = undefined
+  $: ({ dictionary, user } = $page.data)
 
   const subjects = {
-    'delete_dictionary': 'contact.delete_dictionary',
-    'public_dictionary': 'contact.public_dictionary',
-    'import_data': 'contact.import_data',
-    'request_access': 'contact.request_access',
-    'report_problem': 'contact.report_problem',
-    'other': 'contact.other'
+    delete_dictionary: 'contact.delete_dictionary',
+    public_dictionary: 'contact.public_dictionary',
+    import_data: 'contact.import_data',
+    request_access: 'contact.request_access',
+    learning_materials: 'contact.learning',
+    report_problem: 'contact.report_problem',
+    other: 'contact.other',
   } as const
 
-  type Subjects = keyof typeof subjects;
-  type SubjectValues  = typeof subjects[Subjects];
-  const typedSubjects = Object.entries(subjects) as [Subjects, SubjectValues][];
+  type Subjects = keyof typeof subjects
+  type SubjectValues = typeof subjects[Subjects]
+  const typedSubjects = Object.entries(subjects) as [Subjects, SubjectValues][]
 
-  const dispatch = createEventDispatcher<{ close: boolean }>();
+  const dispatch = createEventDispatcher<{ close: boolean }>()
 
   function close() {
-    dispatch('close');
+    dispatch('close')
   }
 
-  let message = '';
-  let email = '';
+  let message = ''
+  let email = ''
 
-  let status: 'success' | 'fail';
+  let status: 'success' | 'fail'
 
   async function send() {
     if ($dictionary && subject === 'request_access') {
@@ -44,11 +45,11 @@
         url: window.location.href,
         dictionaryId: $dictionary.id,
         dictionaryName: $dictionary.name,
-      });
+      })
 
       if (error) {
-        status = 'fail';
-        return alert(`${$page.data.t('misc.error')}: ${error.message}`);
+        status = 'fail'
+        return alert(`${$page.data.t('misc.error')}: ${error.message}`)
       }
     } else {
       const { error } = await post_request<SupportRequestBody, null>('/api/email/support', {
@@ -57,15 +58,15 @@
         name: $user?.displayName || 'Anonymous',
         url: window.location.href,
         subject: enBase.contact[subject],
-      });
+      })
 
       if (error) {
-        status = 'fail';
-        return alert(`${$page.data.t('misc.error')}: ${error.message}`);
+        status = 'fail'
+        return alert(`${$page.data.t('misc.error')}: ${error.message}`)
       }
     }
 
-    status = 'success';
+    status = 'success'
   }
 </script>
 
@@ -76,8 +77,8 @@
   <div class="flex flex-col mb-5">
     <Button
       onclick={() => {
-        goto('/tutorials');
-        close();
+        goto('/tutorials')
+        close()
       }}
       class="mb-2">
       <span class="i-fluent-learning-app-24-regular -mt-2px" />
@@ -122,7 +123,7 @@
         maxlength="1000"
         bind:value={message}
         class="form-input bg-white w-full"
-        placeholder={$page.data.t('contact.enter_message') + '...'} />
+        placeholder={`${$page.data.t('contact.enter_message')}...`} />
       <div class="flex text-xs">
         <div class="text-gray-500 ml-auto">{message.length}/1000</div>
       </div>

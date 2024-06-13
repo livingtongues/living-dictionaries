@@ -95,7 +95,8 @@
     "report_problem": "Report a problem",
     "other": "Other topic",
     "select_topic": "Select a topic",
-    "data_fields": "Optional data fields"
+    "data_fields": "Optional data fields",
+    "learning": "Create language learning materials from my dictionary"
   },
   "create": {
     "select_coordinates": "Select Coordinates",
