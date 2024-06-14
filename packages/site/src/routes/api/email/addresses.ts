@@ -48,7 +48,7 @@ export function getSupportMessageRecipients({ dev }: { dev: boolean }): Address[
 
 export function getLanguageLearningMaterialsRecipients({ dev }: { dev: boolean }): Address[] {
   const recipients: Address[] = [
-    // { email: 'jacob@livingtongues.org' },
+    { email: 'jacob@livingtongues.org' },
     { email: 'diego@livingtongues.org' },
   ]
 

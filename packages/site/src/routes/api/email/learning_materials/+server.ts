@@ -21,7 +21,7 @@ export const POST: RequestHandler = async ({ request, fetch }) => {
   const emailParts: EmailParts = {
     to: getLanguageLearningMaterialsRecipients({ dev }),
     reply_to: { email },
-    subject: `Request for learning materials to ${dictionaryName || 'unknown'} Living Dictionary`,
+    subject: `Request for learning materials - ${dictionaryName || 'unknown'} Living Dictionary`,
     type: 'text/plain',
     body: `${message} 
 
