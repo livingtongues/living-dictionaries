@@ -95,7 +95,8 @@
     "report_problem": "Informar de un problema",
     "other": "Otro tema",
     "select_topic": "Seleccione un tema",
-    "data_fields": "Campos de datos opcionales"
+    "data_fields": "Campos de datos opcionales",
+    "learning": "Crear materiales de aprendizaje de idiomas de mi diccionario"
   },
   "create": {
     "select_coordinates": "Seleccione las coordenadas GPS",

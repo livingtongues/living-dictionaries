@@ -95,7 +95,8 @@
     "report_problem": "Báo cáo sự cố",
     "other": "Chủ đề khác",
     "select_topic": "Chọn một chủ đề",
-    "data_fields": "Các trường dữ liệu tùy chọn"
+    "data_fields": "Các trường dữ liệu tùy chọn",
+    "learning": "Tạo tài liệu học ngôn ngữ từ từ điển của tôi"
   },
   "create": {
     "select_coordinates": "Chọn tọa độ",
