@@ -95,7 +95,8 @@
     "report_problem": "Laporkan masalah",
     "other": "Topik lainnya",
     "select_topic": "Pilih topik",
-    "data_fields": "Bidang data opsional"
+    "data_fields": "Bidang data opsional",
+    "learning": "Buat materi pembelajaran bahasa dari kamus saya"
   },
   "create": {
     "select_coordinates": "Pilih Koordinat",

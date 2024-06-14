@@ -95,7 +95,8 @@
     "report_problem": "Signaler un problème",
     "other": "Autre sujet",
     "select_topic": "Choisissez un sujet",
-    "data_fields": "Champs de données facultatifs"
+    "data_fields": "Champs de données facultatifs",
+    "learning": "Créer du matériel d'apprentissage linguistique à partir de mon dictionnaire"
   },
   "create": {
     "select_coordinates": "Sélectionnez les coordonnées",
@@ -318,7 +319,7 @@
     "availability": "La vue Imprimer est uniquement disponible pour les gestionnaires de dictionnaires et les contributeurs.",
     "max_entries": "Nombre maximum d'entrées",
     "columns": "Colonnes",
-    "headword_size": "Taille du mot",
+    "headword_size": "Taille du mot-clé",
     "font_size": "Taille de police"
   },
   "import_page": {

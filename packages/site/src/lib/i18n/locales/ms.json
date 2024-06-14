@@ -95,7 +95,8 @@
     "report_problem": "Laporkan masalah",
     "other": "Topik lain",
     "select_topic": "Pilih topik",
-    "data_fields": "Medan data pilihan"
+    "data_fields": "Medan data pilihan",
+    "learning": "Cipta bahan pembelajaran bahasa daripada kamus saya"
   },
   "create": {
     "select_coordinates": "Pilih Koordinat",
@@ -340,7 +341,7 @@
     "old_value": "Nilai Bekas",
     "new_value": "Nilai Baru",
     "created": "Dicipta",
-    "edited": "Disunting",
+    "edited": "disunting",
     "deleted": "Dipadamkan",
     "history_search": "Cari entri, editor, medan dan nilai",
     "download_history": "Muat turun Sejarah sebagai CSV",

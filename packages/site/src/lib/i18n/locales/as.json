@@ -95,7 +95,8 @@
     "report_problem": "",
     "other": "",
     "select_topic": "",
-    "data_fields": ""
+    "data_fields": "",
+    "learning": ""
   },
   "create": {
     "select_coordinates": "স্থানাংক চয়ন কৰক",

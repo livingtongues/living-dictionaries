@@ -95,7 +95,8 @@
     "report_problem": "Reportar um problema",
     "other": "Outro tópico",
     "select_topic": "selecione um topico",
-    "data_fields": "Campos de dados opcionais"
+    "data_fields": "Campos de dados opcionais",
+    "learning": "Crie materiais de aprendizagem de idiomas a partir do meu dicionário"
   },
   "create": {
     "select_coordinates": "Seleccione coordenadas",
