@@ -329,7 +329,7 @@
     "instructions_2": "Klik pada butang biru \"Pautan ke Templat\" di bawah. Muat turun templat sebagai fail Excel atau buat salinan pada Dokumen Google. Edit templat mengikut keperluan projek anda. Salin dan tampal data anda ke dalam hamparan.",
     "instructions_3": "Gunakan \"Hubungi Kami\" di bawah untuk menghubungi kami. Beritahu kami bahawa anda mempunyai hamparan baharu yang sedia untuk diimport. Tanya kami apa-apa soalan yang anda ada. Kami akan membalas anda melalui e-mel, dan kemudian anda boleh menghantar fail anda kepada kami.",
     "instructions_4": "Untuk menghantar data yang dieksport kepada kami daripada perisian kamus seperti FLEx, Lexique Pro, Shoebox, sila gunakan butang \"Hubungi Kami\" di bawah dan beritahu kami butiran projek anda.",
-    "no_imports": "Kami sedang bekerjasama dengan banyak komuniti dan organisasi rakan kongsi untuk mengimport sejumlah besar entri kamus ke platform ini. Kami juga membuat kemas kini besar pada pangkalan data kami. Kami akan menerima import data baharu mulai 1 Mei 2024. Kami menghargai kesabaran anda dan kami memohon maaf atas kesulitan tersebut."
+    "no_imports": "Kami sedang bekerjasama dengan banyak komuniti dan organisasi rakan kongsi untuk mengimport sejumlah besar entri kamus ke platform ini. Kami juga membuat kemas kini besar pada pangkalan data kami. Kami akan menerima import data baharu mulai 1 Julai 2024. Kami menghargai kesabaran anda dan kami memohon maaf atas kesulitan tersebut."
   },
   "history": {
     "history": "Sejarah",
@@ -341,7 +341,7 @@
     "old_value": "Nilai Bekas",
     "new_value": "Nilai Baru",
     "created": "Dicipta",
-    "edited": "disunting",
+    "edited": "Disunting",
     "deleted": "Dipadamkan",
     "history_search": "Cari entri, editor, medan dan nilai",
     "download_history": "Muat turun Sejarah sebagai CSV",
