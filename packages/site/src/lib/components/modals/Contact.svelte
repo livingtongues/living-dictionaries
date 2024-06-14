@@ -4,6 +4,7 @@
   import { page } from '$app/stores'
   import { goto } from '$app/navigation'
   import type { SupportRequestBody } from '$api/email/support/+server'
+  import type { LearningMaterialsRequestBody } from '$api/email/learning_materials/+server'
   import type { RequestAccessBody } from '$api/email/request_access/+server'
   import enBase from '$lib/i18n/locales/en.json'
   import { post_request } from '$lib/helpers/get-post-requests'
@@ -45,6 +46,19 @@
         url: window.location.href,
         dictionaryId: $dictionary.id,
         dictionaryName: $dictionary.name,
+      })
+
+      if (error) {
+        status = 'fail'
+        return alert(`${$page.data.t('misc.error')}: ${error.message}`)
+      }
+    } else if (subject === 'learning_materials') {
+      const { error } = await post_request<LearningMaterialsRequestBody, null>('/api/email/learning_materials', {
+        message,
+        email: $user?.email || email,
+        name: $user?.displayName || 'Anonymous',
+        url: window.location.href,
+        dictionaryName: $dictionary?.name,
       })
 
       if (error) {
