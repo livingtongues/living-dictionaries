@@ -32,6 +32,7 @@
     "@living-dictionaries/functions": "workspace:^0.0.1",
     "@living-dictionaries/site": "workspace:^0.0.1",
     "@living-dictionaries/types": "^1.0.0",
+    "@supabase/supabase-js": "^2.38.4",
     "@types/node": "^18.11.18",
     "@types/pg": "^8.10.9",
     "algoliasearch": "^4.11.0",

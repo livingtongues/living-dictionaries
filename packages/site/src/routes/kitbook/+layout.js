@@ -1,7 +1,6 @@
 // @ts-expect-error - virtual import
 import { settings } from 'virtual:kitbook'
 import { groupColocatedModulesIntoPages, layoutLoad, pagesStore } from 'kitbook'
-import { justMockDictionaryLayoutData } from '$lib/mocks/layout'
 
 /**
  * Vite glob patterns used for building your Kitbook. See https://vitejs.dev/guide/features.html#multiple-patterns.
@@ -29,4 +28,4 @@ if (import.meta.hot) {
       pagesStore.set(module._pages)
   })
 }
-export const load = layoutLoad({ pages: _pages, settings, mockedPageData: justMockDictionaryLayoutData })
+export const load = layoutLoad({ pages: _pages, settings })

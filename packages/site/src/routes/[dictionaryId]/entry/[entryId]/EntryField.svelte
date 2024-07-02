@@ -1,14 +1,14 @@
 <script lang="ts">
-  import type { EntryFieldValue } from '@living-dictionaries/types';
-  import { ShowHide } from 'svelte-pieces';
-  import sanitize from 'xss';
+  import type { EntryFieldValue } from '@living-dictionaries/types'
+  import { ShowHide } from 'svelte-pieces'
+  import sanitize from 'xss'
 
-  export let value: string;
-  export let field: EntryFieldValue;
-  export let bcp: string = undefined;
-  export let display: string;
-  export let can_edit = false;
-  export let on_update: (new_value: string) => void;
+  export let value: string
+  export let field: EntryFieldValue
+  export let bcp: string = undefined
+  export let display: string
+  export let can_edit = false
+  export let on_update: (new_value: string) => void
 </script>
 
 {#if value || can_edit}
@@ -19,7 +19,7 @@
       class:hover:bg-gray-100={can_edit}
       class:cursor-pointer={can_edit}
       class:order-2={!value}>
-      {#if field != 'lexeme'}
+      {#if field !== 'lexeme'}
         <div class="text-xs text-gray-500 mt-1">{display}</div>
       {/if}
       <div

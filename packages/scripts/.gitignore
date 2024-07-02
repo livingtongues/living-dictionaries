@@ -2,3 +2,4 @@ logs
 service-account*
 .env
 sheets-viewer-SA.json
+.env.supabase

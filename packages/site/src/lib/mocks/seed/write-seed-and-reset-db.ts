@@ -1,5 +1,5 @@
+import { writeFileSync } from 'node:fs'
 import { execute_sql_query_on_db } from './postgres'
-import { writeFileSync } from 'fs'
 import { sql_file_string } from './to-sql-string'
 import { users } from './tables'
 
