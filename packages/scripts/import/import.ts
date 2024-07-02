@@ -1,7 +1,18 @@
 import { program } from 'commander'
+// @ts-expect-error
+import detect from 'detect-port'
 
 // import { importFromSpreadsheet } from './import-spreadsheet-v4.js';
 import { importFromSpreadsheet } from './import-to-firebase-supabase'
+
+await checkForDevServer()
+
+async function checkForDevServer() {
+  const port = await detect(3041) // will return 3041 if available, next available if it's not (so if 3041 is taken, it will return 3042, etc.)
+  const devServerRunning = port > 3041
+  if (devServerRunning) return
+  throw new Error('SvelteKit dev server not detected - run `pnpm dev` before running this import script to ensure the endpoint functions that save to Supabase are available.')
+}
 
 program
   //   .version('0.0.1')

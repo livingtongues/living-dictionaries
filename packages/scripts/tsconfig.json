@@ -4,30 +4,30 @@
     // Remove if you want ts-node to do typechecking.
     "transpileOnly": true,
     "files": true,
-    "esm": true,
+    "esm": true
     // "compilerOptions": {
-      // compilerOptions specified here will override those declared below,
-      // but *only* in ts-node.  Useful if you want ts-node and tsc to use
-      // different options with a single tsconfig.json.
+    // compilerOptions specified here will override those declared below,
+    // but *only* in ts-node.  Useful if you want ts-node and tsc to use
+    // different options with a single tsconfig.json.
     // }
   },
   "compilerOptions": {
+    "target": "esnext",
+    "lib": [
+      "esnext",
+      "DOM"
+    ],
+    "module": "esnext",
     "moduleResolution": "node",
-		"module": "es2020",
-		"lib": [
-			"es2020",
-			"DOM"
-		],
-		"target": "es2020",
-    "strict": true,
-    "strictNullChecks": false,
-    "esModuleInterop": true,
-    "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
     "types": [
       "vitest/globals",
       "vitest/importMeta"
-    ]
+    ],
+    "strict": true,
+    "strictNullChecks": false,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true
   }
 }

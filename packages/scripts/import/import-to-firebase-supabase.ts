@@ -25,7 +25,7 @@ export async function importFromSpreadsheet(dictionaryId: string, dry = false) {
       environment === 'dev' ? 'http://localhost:3041/' : 'livingdictionaries.app/'
     }${dictionaryId} in ${(Date.now() - dateStamp) / 1000} seconds`,
   )
-  console.log('')
+  console.log('') // line break
   return entries
 }
 
@@ -34,7 +34,7 @@ export async function importEntries(
   rows: any[],
   dateStamp: number,
   dry = false,
-) {
+): Promise<ActualDatabaseEntry[]> {
   const firebase_entries: ActualDatabaseEntry[] = []
   let entryCount = 0
   let batchCount = 0
