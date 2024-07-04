@@ -8,7 +8,7 @@ type Sense_Prefix = 's2' | 's3' | 's4' | 's5' | 's6' | 's7' | 's8' | 's9'
 type Fields = 'lexeme' | 'dialects' | 'ID' | 'soundFile' | 'speakerName' | 'scientificName' | 'speakerHometown' | 'speakerAge' | 'speakerGender' | 'notes' | 'source' | 'morphology' | 'interlinearization' | 'photoFile' | 'vernacular_exampleSentence' | 'pluralForm' | 'nounClass' | 'variant' | 'phonetic'
 type Special_Fields = 'localOrthography' | 'partOfSpeech' | 'semanticDomain'
 type Multiple_Fields = `${Special_Fields}${Suffix}`
-type Writing_Systems = 'default' | ''
+type Writing_Systems = 'default'
 type Translation_Fields = `${Glossing_Languages}_gloss` | `${Glossing_Languages}_exampleSentence` | `${Writing_Systems}_exampleSentence`
 type Suffix = '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9'
 
