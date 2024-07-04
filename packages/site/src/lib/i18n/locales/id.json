@@ -95,7 +95,8 @@
     "report_problem": "Laporkan masalah",
     "other": "Topik lainnya",
     "select_topic": "Pilih topik",
-    "data_fields": "Bidang data opsional"
+    "data_fields": "Bidang data opsional",
+    "learning": "Buat materi pembelajaran bahasa dari kamus saya"
   },
   "create": {
     "select_coordinates": "Pilih Koordinat",
@@ -328,7 +329,7 @@
     "instructions_2": "Klik tombol biru “Tautan ke Templat” di bawah. Unduh templat sebagai file Excel, atau buat salinannya di Google Dokumen. Edit template sesuai dengan kebutuhan proyek Anda. Salin dan tempel data Anda ke dalam spreadsheet.",
     "instructions_3": "Gunakan “Hubungi Kami” di bawah ini untuk menghubungi kami. Beri tahu kami bahwa Anda memiliki spreadsheet baru yang siap diimpor. Ajukan pertanyaan apa pun kepada kami. Kami akan membalas Anda melalui email, dan kemudian Anda dapat mengirimkan file Anda kepada kami.",
     "instructions_4": "Untuk mengirimkan kepada kami data yang diekspor dari perangkat lunak kamus seperti FLEx, Lexique Pro, Shoebox, silakan gunakan tombol “Hubungi Kami” di bawah dan beri tahu kami detail proyek Anda.",
-    "no_imports": "Saat ini kami bekerja sama dengan banyak komunitas dan organisasi mitra untuk mengimpor entri kamus dalam jumlah besar ke platform ini. Kami juga membuat pembaruan besar pada database kami. Kami akan menerima impor data baru mulai tanggal 1 Mei 2024. Kami menghargai kesabaran Anda, dan kami mohon maaf atas ketidaknyamanan ini."
+    "no_imports": "Saat ini kami bekerja sama dengan banyak komunitas dan organisasi mitra untuk mengimpor entri kamus dalam jumlah besar ke platform ini. Kami juga membuat pembaruan besar pada database kami. Kami akan menerima impor data baru mulai tanggal 1 Juli 2024. Kami menghargai kesabaran Anda, dan kami mohon maaf atas ketidaknyamanan ini."
   },
   "history": {
     "history": "Sejarah",

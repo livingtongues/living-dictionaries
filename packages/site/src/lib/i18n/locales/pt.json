@@ -95,7 +95,8 @@
     "report_problem": "Reportar um problema",
     "other": "Outro tópico",
     "select_topic": "selecione um topico",
-    "data_fields": "Campos de dados opcionais"
+    "data_fields": "Campos de dados opcionais",
+    "learning": "Crie materiais de aprendizagem de idiomas a partir do meu dicionário"
   },
   "create": {
     "select_coordinates": "Seleccione coordenadas",
@@ -328,7 +329,7 @@
     "instructions_2": "Clique no botão azul “Link para modelo” abaixo. Baixe o modelo como um arquivo Excel ou crie uma cópia no Google Docs. Edite o modelo de acordo com as necessidades do seu projeto. Copie e cole seus dados na planilha.",
     "instructions_3": "Utilize o “Fale Conosco” abaixo para entrar em contato conosco. Informe-nos que você tem uma nova planilha pronta para importação. Pergunte-nos qualquer dúvida que tiver. Responderemos por e-mail e você poderá nos enviar seu arquivo.",
     "instructions_4": "Para nos enviar dados exportados de softwares de dicionário como FLEx, Lexique Pro, Shoebox, utilize o botão “Fale Conosco” abaixo e conte-nos os detalhes do seu projeto.",
-    "no_imports": "Atualmente estamos trabalhando com muitas comunidades e organizações parceiras para importar um grande número de entradas de dicionário para esta plataforma. Também estamos fazendo grandes atualizações em nosso banco de dados. Aceitaremos novas importações de dados a partir de 1º de maio de 2024. Agradecemos sua paciência e pedimos desculpas pelo inconveniente."
+    "no_imports": "Atualmente estamos trabalhando com muitas comunidades e organizações parceiras para importar um grande número de entradas de dicionário para esta plataforma. Também estamos fazendo grandes atualizações em nosso banco de dados. Aceitaremos novas importações de dados a partir de 1º de julho de 2024. Agradecemos sua paciência e pedimos desculpas pelo inconveniente."
   },
   "history": {
     "history": "História",

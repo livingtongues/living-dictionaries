@@ -95,7 +95,8 @@
     "report_problem": "Signaler un problème",
     "other": "Autre sujet",
     "select_topic": "Choisissez un sujet",
-    "data_fields": "Champs de données facultatifs"
+    "data_fields": "Champs de données facultatifs",
+    "learning": "Créer du matériel d’apprentissage linguistique à partir de mon dictionnaire"
   },
   "create": {
     "select_coordinates": "Sélectionnez les coordonnées",
@@ -318,7 +319,7 @@
     "availability": "La vue Imprimer est uniquement disponible pour les gestionnaires de dictionnaires et les contributeurs.",
     "max_entries": "Nombre maximum d'entrées",
     "columns": "Colonnes",
-    "headword_size": "Taille du mot",
+    "headword_size": "Taille du mot-clé",
     "font_size": "Taille de police"
   },
   "import_page": {
@@ -328,7 +329,7 @@
     "instructions_2": "Cliquez sur le bouton bleu « Lien vers le modèle » ci-dessous. Téléchargez le modèle sous forme de fichier Excel ou créez une copie sur Google Docs. Modifiez le modèle en fonction des besoins de votre projet. Copiez et collez vos données dans la feuille de calcul.",
     "instructions_3": "Utilisez le « Contactez-nous » ci-dessous pour nous contacter. Faites-nous savoir que vous disposez d'une nouvelle feuille de calcul prête à être importée. Posez-nous toutes vos questions. Nous vous répondrons par email, puis vous pourrez nous envoyer votre dossier.",
     "instructions_4": "Pour nous envoyer des données exportées à partir de logiciels de dictionnaires comme FLEx, Lexique Pro, Shoebox, veuillez utiliser le bouton « Contactez-nous » ci-dessous et indiquez-nous les détails de votre projet.",
-    "no_imports": "Nous travaillons actuellement avec de nombreuses communautés et organisations partenaires pour importer un grand nombre d'entrées de dictionnaire sur cette plateforme. Nous effectuons également de grandes mises à jour de notre base de données. Nous accepterons de nouvelles importations de données à partir du 1er mai 2024. Nous apprécions votre patience et nous nous excusons pour la gêne occasionnée."
+    "no_imports": "Nous travaillons actuellement avec de nombreuses communautés et organisations partenaires pour importer un grand nombre d'entrées de dictionnaire sur cette plateforme. Nous effectuons également de grandes mises à jour de notre base de données. Nous accepterons de nouvelles importations de données à partir du 1er juillet 2024. Nous apprécions votre patience et nous nous excusons pour la gêne occasionnée."
   },
   "history": {
     "history": "Histoire",
