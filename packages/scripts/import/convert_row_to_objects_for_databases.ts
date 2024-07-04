@@ -9,7 +9,7 @@ type Fields = 'lexeme' | 'dialects' | 'ID' | 'soundFile' | 'speakerName' | 'scie
 type Special_Fields = 'localOrthography' | 'partOfSpeech' | 'semanticDomain'
 type Multiple_Fields = `${Special_Fields}${Suffix}`
 type Writing_Systems = 'default' | ''
-type Translation_Fields = `${Glossing_Languages}_gloss` | `${Glossing_Languages}_exampleSentence` | `${Glossing_Languages}_${Writing_Systems}_exampleSentence`
+type Translation_Fields = `${Glossing_Languages}_gloss` | `${Glossing_Languages}_exampleSentence` | `${Writing_Systems}_exampleSentence`
 type Suffix = '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9'
 
 type Normal_Row = `${Fields | Special_Fields | Multiple_Fields | Translation_Fields}`
@@ -21,7 +21,8 @@ export type Row = {
 const my_row: Row = {
   's3.es_gloss': 'hi',
   'semanticDomain4': '2.3',
-  's2.fr_default_exampleSentence.3': 'Bonjour docteur',
+  's2.fr_exampleSentence.3': 'Bonjour docteur',
+  's4.default_exampleSentence': 'foo bar',
 
 }
 
