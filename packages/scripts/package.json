@@ -21,6 +21,7 @@
     "speakerRefactor": "tsx refactor/speaker-refactor.ts",
     "updateLocales": "tsx locales/update-locales.ts",
     "importDictionary": "tsx import/import.ts",
+    "importDictionary:dev": "tsx import/import.ts --id example-v4-senses",
     "addDictionariesToIndex:dev": "tsx algolia/addDictionariesToIndex.ts dev",
     "addDictionariesToIndex:prod": "tsx algolia/addDictionariesToIndex.js prod",
     "updateIndex": "tsx algolia/updateIndex.ts -e prod",
