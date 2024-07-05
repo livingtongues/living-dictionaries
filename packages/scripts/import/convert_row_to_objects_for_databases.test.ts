@@ -386,15 +386,15 @@ describe('convertJsonRowToEntryFormat with senses', () => {
   test('multiple senses (glosses))', () => {
     const csv_rows_with_senses: Row[] = [
       {
-        lexeme: '𒄧𒂸',
-        es_gloss: 'delfín',
-        en_gloss: 'dolphin',
-        s2_es_gloss: 'pez',
-        s2_en_gloss: 'fish',
-        s3_en_gloss: 'marine mammal',
-        s4_en_gloss: 'mythological creature',
-        s4_es_gloss: 'creatura mitológica',
-        s4_fr_gloss: 'créature mythologique',
+        'lexeme': '𒄧𒂸',
+        'es_gloss': 'delfín',
+        'en_gloss': 'dolphin',
+        's2.es_gloss': 'pez',
+        's2.en_gloss': 'fish',
+        's3.en_gloss': 'marine mammal',
+        's4.en_gloss': 'mythological creature',
+        's4.es_gloss': 'creatura mitológica',
+        's4.fr_gloss': 'créature mythologique',
 
       },
     ]
@@ -457,12 +457,12 @@ describe('convertJsonRowToEntryFormat with senses', () => {
   test('senses with sentences', () => {
     const csv_rows_with_sentences: Row[] = [
       {
-        lexeme: '𒄧𒂸',
-        en_gloss: 'dolphin',
-        s2_en_gloss: 'fish',
-        s2_default_vernacular_exampleSentence: '𒄧𒂸 𒄧 𒄧𒂸 𒂸𒂸𒄧',
-        s2_en_exampleSentence: 'The fish is swimmmimg',
-        s2_es_exampleSentence: 'El pez está nadando',
+        'lexeme': '𒄧𒂸',
+        'en_gloss': 'dolphin',
+        's2.en_gloss': 'fish',
+        's2.default_vernacular_exampleSentence': '𒄧𒂸 𒄧 𒄧𒂸 𒂸𒂸𒄧',
+        's2.en_exampleSentence': 'The fish is swimmmimg',
+        's2.es_exampleSentence': 'El pez está nadando',
       },
     ]
     const entries = csv_rows_with_sentences.map(row => convert_row_to_objects_for_databases({ row, dateStamp: fakeDateStamp, timestamp: fakeTimeStamp, test: true }))
@@ -518,12 +518,12 @@ describe('convertJsonRowToEntryFormat with senses', () => {
   test('senses with the rest fields', () => {
     const csv_rows_with_other_fields: Row[] = [
       {
-        lexeme: 'foo',
-        en_gloss: 'test',
-        s2_en_gloss: 'example',
-        s2_partOfSpeech: 'n',
-        s2_semanticDomain: '1.1',
-        s2_nounClass: 'S',
+        'lexeme': 'foo',
+        'en_gloss': 'test',
+        's2.en_gloss': 'example',
+        's2.partOfSpeech': 'n',
+        's2.semanticDomain': '1.1',
+        's2.nounClass': 'S',
       },
     ]
     const entries = csv_rows_with_other_fields.map(row => convert_row_to_objects_for_databases({ row, dateStamp: fakeDateStamp, timestamp: fakeTimeStamp, test: true }))
@@ -573,13 +573,13 @@ describe('convertJsonRowToEntryFormat with senses', () => {
   test('wrong order in senses', () => {
     const csv_rows_with_senses: Row[] = [
       {
-        lexeme: '𒂸',
-        es_gloss: 'sopa',
-        en_gloss: 'soup',
-        s2_es_gloss: 'agua',
-        s3_es_gloss: 'líquido',
-        s3_en_gloss: 'liquid',
-        s2_en_gloss: 'water',
+        'lexeme': '𒂸',
+        'es_gloss': 'sopa',
+        'en_gloss': 'soup',
+        's2.es_gloss': 'agua',
+        's3.es_gloss': 'líquido',
+        's3.en_gloss': 'liquid',
+        's2.en_gloss': 'water',
       },
     ]
     const entries = csv_rows_with_senses.map(row => convert_row_to_objects_for_databases({ row, dateStamp: fakeDateStamp, timestamp: fakeTimeStamp, test: true }))
@@ -630,17 +630,17 @@ describe('convertJsonRowToEntryFormat with senses', () => {
   test('senses with multiple sentences and last vernacular sentence without its translations', () => {
     const csv_rows_with_sentences: Row[] = [
       {
-        lexeme: '𒄧𒂸',
-        en_gloss: 'dolphin',
-        s2_en_gloss: 'fish',
-        s2_default_vernacular_exampleSentence: '𒄧𒂸 𒄧 𒄧𒂸 𒂸𒂸𒄧',
-        s2_en_exampleSentence: 'The fish is swimmming',
-        s2_es_exampleSentence: 'El pez está nadando',
-        s3_en_gloss: 'swim',
-        s3_default_vernacular_exampleSentence: '𒂸𒂸𒄧',
-        s3_en_exampleSentence: 'I swim',
-        s4_en_gloss: 'test',
-        s4_default_vernacular_exampleSentence: '𒂸𒂸 𒂸𒂸 𒂸𒂸',
+        'lexeme': '𒄧𒂸',
+        'en_gloss': 'dolphin',
+        's2.en_gloss': 'fish',
+        's2.default_vernacular_exampleSentence': '𒄧𒂸 𒄧 𒄧𒂸 𒂸𒂸𒄧',
+        's2.en_exampleSentence': 'The fish is swimmming',
+        's2.es_exampleSentence': 'El pez está nadando',
+        's3.en_gloss': 'swim',
+        's3.default_vernacular_exampleSentence': '𒂸𒂸𒄧',
+        's3.en_exampleSentence': 'I swim',
+        's4.en_gloss': 'test',
+        's4.default_vernacular_exampleSentence': '𒂸𒂸 𒂸𒂸 𒂸𒂸',
       },
     ]
     const entries = csv_rows_with_sentences.map(row => convert_row_to_objects_for_databases({ row, dateStamp: fakeDateStamp, timestamp: fakeTimeStamp, test: true }))
@@ -742,25 +742,25 @@ describe('convertJsonRowToEntryFormat with senses', () => {
   test('multiple vernacular and translations sentences that belongs to a same sense', () => {
     const csv_rows_with_sentences: Row[] = [
       {
-        lexeme: '𒄧𒂸',
-        en_gloss: 'dolphin',
-        s2_en_gloss: 'fish',
-        s2_default_vernacular_exampleSentence: '𒄧𒂸 𒄧 𒄧𒂸 𒂸𒂸𒄧',
-        s2_en_exampleSentence: 'The fish is swimmming',
-        s2_es_exampleSentence: 'El pez está nadando',
-        s2_default_vernacular_exampleSentence_2: '𒂸 𒂸𒂸𒂸 𒄧𒄧𒄧 𒄧',
-        s3_en_gloss: 'swim',
-        s3_default_vernacular_exampleSentence: '𒂸𒂸𒄧',
-        s3_en_exampleSentence: 'I swim',
-        s3_default_vernacular_exampleSentence_2: '𒄧𒂸 𒂸𒄧',
-        s3_en_exampleSentence_2: 'He swam',
-        s3_es_exampleSentence_2: 'Él nadó',
-        s3_it_exampleSentence_2: 'egli nuotava',
-        s3_default_vernacular_exampleSentence_3: '𒂸 𒄧𒄧 𒂸',
-        s3_es_exampleSentence_3: 'Él nadará',
-        s3_en_exampleSentence_3: 'He will swim',
-        s4_en_gloss: 'test',
-        s4_default_vernacular_exampleSentence: '𒂸𒂸 𒂸𒂸 𒂸𒂸',
+        'lexeme': '𒄧𒂸',
+        'en_gloss': 'dolphin',
+        's2.en_gloss': 'fish',
+        's2.default_vernacular_exampleSentence': '𒄧𒂸 𒄧 𒄧𒂸 𒂸𒂸𒄧',
+        's2.en_exampleSentence': 'The fish is swimmming',
+        's2.es_exampleSentence': 'El pez está nadando',
+        's2.default_vernacular_exampleSentence.2': '𒂸 𒂸𒂸𒂸 𒄧𒄧𒄧 𒄧',
+        's3.en_gloss': 'swim',
+        's3.default_vernacular_exampleSentence': '𒂸𒂸𒄧',
+        's3.en_exampleSentence': 'I swim',
+        's3.default_vernacular_exampleSentence.2': '𒄧𒂸 𒂸𒄧',
+        's3.en_exampleSentence.2': 'He swam',
+        's3.es_exampleSentence.2': 'Él nadó',
+        's3.it_exampleSentence.2': 'egli nuotava',
+        's3.default_vernacular_exampleSentence.3': '𒂸 𒄧𒄧 𒂸',
+        's3.es_exampleSentence.3': 'Él nadará',
+        's3.en_exampleSentence.3': 'He will swim',
+        's4.en_gloss': 'test',
+        's4.default_vernacular_exampleSentence': '𒂸𒂸 𒂸𒂸 𒂸𒂸',
       },
     ]
     const entries = csv_rows_with_sentences.map(row => convert_row_to_objects_for_databases({ row, dateStamp: fakeDateStamp, timestamp: fakeTimeStamp, test: true }))
