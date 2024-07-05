@@ -3,6 +3,7 @@ import { readFileSync } from 'node:fs'
 import path from 'node:path'
 import type { Timestamp } from 'firebase-admin/firestore'
 import { convert_row_to_objects_for_databases } from './convert_row_to_objects_for_databases.js'
+import type { Row } from './convert_row_to_objects_for_databases.js'
 import { parseCSVFrom } from './parse-csv.js'
 
 describe('convertJsonRowToEntryFormat without senses', () => {
@@ -10,7 +11,7 @@ describe('convertJsonRowToEntryFormat without senses', () => {
   const fakeDateStamp = 1715819006966
 
   test('glosses', () => {
-    const csv_rows_without_header: Record<string, any>[] = [
+    const csv_rows_without_header: Row[] = [
       {
         lexeme: 'dolphin',
         es_gloss: 'delfín',
@@ -38,7 +39,7 @@ describe('convertJsonRowToEntryFormat without senses', () => {
   })
 
   test('example sentences', () => {
-    const csv_rows_without_header: Record<string, any>[] = [
+    const csv_rows_without_header: Row[] = [
       {
         lexeme: 'dolphin',
         es_exampleSentence: 'el delfín nada en el océano.',
@@ -67,7 +68,7 @@ describe('convertJsonRowToEntryFormat without senses', () => {
   })
 
   test('semantic domains', () => {
-    const csv_rows_without_header: Record<string, any>[] = [
+    const csv_rows_without_header: Row[] = [
       {
         lexeme: 'dolphins',
         semanticDomain: '5.15',
@@ -350,7 +351,7 @@ describe('convertJsonRowToEntryFormat without senses', () => {
   })
 
   test('does not duplicate vernacular', () => {
-    const csv_rows_without_header: Record<string, any>[] = [
+    const csv_rows_without_header: Row[] = [
       {
         vernacular_exampleSentence: 'Hello world',
       },
@@ -383,7 +384,7 @@ describe('convertJsonRowToEntryFormat with senses', () => {
   const fakeDateStamp = 1715819006966
 
   test('multiple senses (glosses))', () => {
-    const csv_rows_with_senses: Record<string, any>[] = [
+    const csv_rows_with_senses: Row[] = [
       {
         lexeme: '𒄧𒂸',
         es_gloss: 'delfín',
@@ -454,7 +455,7 @@ describe('convertJsonRowToEntryFormat with senses', () => {
   })
 
   test('senses with sentences', () => {
-    const csv_rows_with_sentences: Record<string, any>[] = [
+    const csv_rows_with_sentences: Row[] = [
       {
         lexeme: '𒄧𒂸',
         en_gloss: 'dolphin',
@@ -515,13 +516,13 @@ describe('convertJsonRowToEntryFormat with senses', () => {
   })
 
   test('senses with the rest fields', () => {
-    const csv_rows_with_other_fields: Record<string, any>[] = [
+    const csv_rows_with_other_fields: Row[] = [
       {
         lexeme: 'foo',
         en_gloss: 'test',
         s2_en_gloss: 'example',
         s2_partOfSpeech: 'n',
-        s2_semanticDomains: '1.1',
+        s2_semanticDomain: '1.1',
         s2_nounClass: 'S',
       },
     ]
@@ -570,7 +571,7 @@ describe('convertJsonRowToEntryFormat with senses', () => {
   })
 
   test('wrong order in senses', () => {
-    const csv_rows_with_senses: Record<string, any>[] = [
+    const csv_rows_with_senses: Row[] = [
       {
         lexeme: '𒂸',
         es_gloss: 'sopa',
@@ -627,7 +628,7 @@ describe('convertJsonRowToEntryFormat with senses', () => {
   })
 
   test('senses with multiple sentences and last vernacular sentence without its translations', () => {
-    const csv_rows_with_sentences: Record<string, any>[] = [
+    const csv_rows_with_sentences: Row[] = [
       {
         lexeme: '𒄧𒂸',
         en_gloss: 'dolphin',
@@ -739,7 +740,7 @@ describe('convertJsonRowToEntryFormat with senses', () => {
     `)
   })
   test('multiple vernacular and translations sentences that belongs to a same sense', () => {
-    const csv_rows_with_sentences: Record<string, any>[] = [
+    const csv_rows_with_sentences: Row[] = [
       {
         lexeme: '𒄧𒂸',
         en_gloss: 'dolphin',
@@ -985,7 +986,7 @@ describe('convertJsonRowToEntryFormat with senses', () => {
               "sentence": {
                 "text": {
                   "new": {
-                    "latin": "Ay ta kꞌahkꞌal te chꞌin alale",
+                    "default": "Ay ta kꞌahkꞌal te chꞌin alale",
                   },
                 },
                 "translation": {
@@ -1001,7 +1002,7 @@ describe('convertJsonRowToEntryFormat with senses', () => {
               "sentence": {
                 "text": {
                   "new": {
-                    "latin": "Cheb kꞌahkꞌal ya x-aꞌtejotik",
+                    "default": "Cheb kꞌahkꞌal ya x-aꞌtejotik",
                   },
                 },
                 "translation": {
@@ -1017,7 +1018,7 @@ describe('convertJsonRowToEntryFormat with senses', () => {
               "sentence": {
                 "text": {
                   "new": {
-                    "latin": "Toyol kꞌahkꞌal ya kaꞌiy",
+                    "default": "Toyol kꞌahkꞌal ya kaꞌiy",
                   },
                 },
                 "translation": {
@@ -1102,7 +1103,7 @@ describe('convertJsonRowToEntryFormat with senses', () => {
               "sentence": {
                 "text": {
                   "new": {
-                    "latin": "Ay bayal skꞌaal te chꞌin x-Ixchele",
+                    "default": "Ay bayal skꞌaal te chꞌin x-Ixchele",
                   },
                 },
                 "translation": {
@@ -1118,7 +1119,7 @@ describe('convertJsonRowToEntryFormat with senses', () => {
               "sentence": {
                 "text": {
                   "new": {
-                    "latin": ""Bajtꞌix kꞌaal mamtik, yorailix ichꞌ lewa"",
+                    "default": ""Bajtꞌix kꞌaal mamtik, yorailix ichꞌ lewa"",
                   },
                 },
                 "translation": {
@@ -1134,7 +1135,7 @@ describe('convertJsonRowToEntryFormat with senses', () => {
               "sentence": {
                 "text": {
                   "new": {
-                    "latin": "Toyol kꞌaal ya jkaꞌiy",
+                    "default": "Toyol kꞌaal ya jkaꞌiy",
                   },
                 },
                 "translation": {
@@ -1283,7 +1284,7 @@ describe('convertJsonRowToEntryFormat with senses', () => {
               "sentence": {
                 "text": {
                   "new": {
-                    "latin": "Lom kꞌajkꞌ te mamal jkaxlane",
+                    "default": "Lom kꞌajkꞌ te mamal jkaxlane",
                   },
                 },
                 "translation": {
@@ -1299,7 +1300,7 @@ describe('convertJsonRowToEntryFormat with senses', () => {
               "sentence": {
                 "text": {
                   "new": {
-                    "latin": "Tsakbil ta kꞌajkꞌ te alale",
+                    "default": "Tsakbil ta kꞌajkꞌ te alale",
                   },
                 },
                 "translation": {
@@ -1315,7 +1316,7 @@ describe('convertJsonRowToEntryFormat with senses', () => {
               "sentence": {
                 "text": {
                   "new": {
-                    "latin": "El café está caliente, tómalo despacio",
+                    "default": "El café está caliente, tómalo despacio",
                   },
                 },
                 "translation": {
@@ -1399,7 +1400,7 @@ describe('convertJsonRowToEntryFormat with senses', () => {
               "sentence": {
                 "text": {
                   "new": {
-                    "latin": "La jta ta kitsel te june",
+                    "default": "La jta ta kitsel te june",
                   },
                 },
                 "translation": {
@@ -1415,7 +1416,7 @@ describe('convertJsonRowToEntryFormat with senses', () => {
               "sentence": {
                 "text": {
                   "new": {
-                    "latin": "Maꞌme xa awochꞌ te ajune",
+                    "default": "Maꞌme xa awochꞌ te ajune",
                   },
                 },
                 "translation": {
@@ -1431,7 +1432,7 @@ describe('convertJsonRowToEntryFormat with senses', () => {
               "sentence": {
                 "text": {
                   "new": {
-                    "latin": "Zoe rompió el papel",
+                    "default": "Zoe rompió el papel",
                   },
                 },
                 "translation": {
@@ -1481,7 +1482,7 @@ describe('convertJsonRowToEntryFormat with senses', () => {
               "sentence": {
                 "text": {
                   "new": {
-                    "latin": "Jeꞌa tel tebuk i tiꞌnai ay bayal kꞌaal",
+                    "default": "Jeꞌa tel tebuk i tiꞌnai ay bayal kꞌaal",
                   },
                 },
                 "translation": {

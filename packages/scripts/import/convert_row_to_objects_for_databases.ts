@@ -3,31 +3,29 @@ import type { ActualDatabaseEntry, ContentUpdateRequestBody } from '@living-dict
 import type { Timestamp } from 'firebase/firestore'
 import type { Glossing_Languages } from '@living-dictionaries/site/src/lib/glosses/glossing-languages'
 
-// TODO improve Writing Systems field
 type Sense_Prefix = 's2' | 's3' | 's4' | 's5' | 's6' | 's7' | 's8' | 's9'
-type Fields = 'lexeme' | 'dialects' | 'ID' | 'soundFile' | 'speakerName' | 'scientificName' | 'speakerHometown' | 'speakerAge' | 'speakerGender' | 'notes' | 'source' | 'morphology' | 'interlinearization' | 'photoFile' | 'vernacular_exampleSentence' | 'pluralForm' | 'nounClass' | 'variant' | 'phonetic'
+type Fields = 'lexeme' | 'dialects' | 'ID' | 'soundFile' | 'speakerName' | 'scientificName' | 'speakerHometown' | 'speakerAge' | 'speakerGender' | 'notes' | 'source' | 'morphology' | 'interlinearization' | 'photoFile' | 'vernacular_exampleSentence' | 'pluralForm' | 'nounClass' | 'variant' | 'phonetic' | 'semanticDomain_custom'
 type Special_Fields = 'localOrthography' | 'partOfSpeech' | 'semanticDomain'
 type Multiple_Fields = `${Special_Fields}${Suffix}`
-type Writing_Systems = 'default'
-type Translation_Fields = `${Glossing_Languages}_gloss` | `${Glossing_Languages}_exampleSentence` | `${Writing_Systems}_exampleSentence`
+type Writing_Systems = 'default' // TODO improve Writing Systems field
+type Translation_Fields = `${Glossing_Languages}_gloss` | `${Glossing_Languages}_exampleSentence` | `${Writing_Systems}_vernacular_exampleSentence`
 type Suffix = '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9'
 
 type Normal_Row = `${Fields | Special_Fields | Multiple_Fields | Translation_Fields}`
-type Sense_Row = `${Sense_Prefix}.${Normal_Row}`
-type Sentence_Row = `${Sense_Prefix}.${Normal_Row}.${Suffix}`
+type Sense_Row = `${Sense_Prefix}_${Normal_Row}`
+type Sentence_Row = `${Sense_Prefix}_${Normal_Row}_${Suffix}`
 export type Row = {
   [key in (Sentence_Row | Sense_Row | Normal_Row)]?: string;
 }
-const my_row: Row = {
-  's3.es_gloss': 'hi',
-  'semanticDomain4': '2.3',
-  's2.fr_exampleSentence.3': 'Bonjour docteur',
-  's4.default_exampleSentence': 'foo bar',
-
-}
+// const my_row: Row = {
+//   s3_es_gloss: 'hi',
+//   semanticDomain4: '2.3',
+//   s2_fr_exampleSentence_3: 'Bonjour docteur',
+//   s4_default_vernacular_exampleSentence: 'foo bar',
+// }
 
 export function convert_row_to_objects_for_databases({ row, dateStamp, timestamp, test = false }: {
-  row: Record<string, string> // TODO: type this ===> how can I create a type for dynamic rows? starting with 's3_' in case it is sense three or ending with '_5' in case we had five example sentences that belong to the same sense.
+  row: Row
   dateStamp?: number
   timestamp?: FirebaseFirestore.FieldValue
   test?: boolean
@@ -123,10 +121,12 @@ export function convert_row_to_objects_for_databases({ row, dateStamp, timestamp
         language_key = language_key.replace('_gloss', '')
 
         if (key === `s${old_key}_${language_key}_gloss`) {
+          // @ts-expect-error
           supabase_sense.sense = { glosses: { new: { ...supabase_sense.sense?.glosses?.new, [language_key]: row[key] } } }
         } else {
           old_key++
           supabase_sense.sense_id = incremental_consistent_uuid()
+          // @ts-expect-error
           supabase_sense.sense = { glosses: { ...supabase_sense.sense.glosses, new: { [language_key]: row[key] } } }
         }
       }
@@ -139,8 +139,10 @@ export function convert_row_to_objects_for_databases({ row, dateStamp, timestamp
           supabase_sentence.sense_id = supabase_sense.sense_id
           supabase_sentence.sentence_id = incremental_consistent_uuid()
           if (key === `s${old_key}_${writing_system}_vernacular_exampleSentence` && !has_multiple_sentence_regex_label(key)) {
+            // @ts-expect-error
             supabase_sentence.sentence = { text: { new: { ...supabase_sentence?.sentence?.text?.new, [writing_system]: row[key] } } }
           } else if (has_multiple_sentence_regex_label(key)) {
+            // @ts-expect-error
             supabase_sentence.sentence = { text: { new: { [writing_system]: row[key] } } }
           }
         }
@@ -153,6 +155,7 @@ export function convert_row_to_objects_for_databases({ row, dateStamp, timestamp
         if (!old_language_key) old_language_key = new_language_key
 
         if (key === `s${old_key}_${new_language_key}_exampleSentence` || has_multiple_sentence_regex_label(key)) {
+          // @ts-expect-error
           supabase_sentence.sentence = { ...supabase_sentence.sentence, translation: { new: { ...supabase_sentence?.sentence?.translation?.new, [new_language_key]: row[key] } } }
         }
       }
@@ -171,12 +174,15 @@ export function convert_row_to_objects_for_databases({ row, dateStamp, timestamp
       }
       old_language_key = new_language_key
       if (key.includes('_partOfSpeech'))
+        // @ts-expect-error
         supabase_sense.sense = { ...supabase_sense.sense, parts_of_speech: { new: [row[key]] } }
 
-      if (key.includes('_semanticDomains'))
+      if (key.includes('_semanticDomain'))
+        // @ts-expect-error
         supabase_sense.sense = { ...supabase_sense.sense, semantic_domains: { new: [row[key]] } }
 
       if (key.includes('_nounClass'))
+        // @ts-expect-error
         supabase_sense.sense = { ...supabase_sense.sense, noun_class: { new: row[key] } }
     }
 
