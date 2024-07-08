@@ -95,7 +95,9 @@ export function convert_row_to_objects_for_databases({ row, dateStamp, timestamp
 
   if (row.notes) firebase_entry.nt = row.notes
 
-  for (const [key, value] of Object.entries(row)) {
+  for (const [k, v] of Object.entries(row)) {
+    const key: keyof Row = k as keyof Row
+    const value: string = v as string
     if (!value) continue
 
     // gloss fields are labeled using bcp47 language codes followed by '_gloss' (e.g. es_gloss, tpi_gloss)
@@ -121,12 +123,10 @@ export function convert_row_to_objects_for_databases({ row, dateStamp, timestamp
         language_key = language_key.replace('_gloss', '')
 
         if (key === `s${old_key}.${language_key}_gloss`) {
-          // @ts-expect-error
           supabase_sense.sense = { glosses: { new: { ...supabase_sense.sense?.glosses?.new, [language_key]: row[key] } } }
         } else {
           old_key++
           supabase_sense.sense_id = incremental_consistent_uuid()
-          // @ts-expect-error
           supabase_sense.sense = { glosses: { ...supabase_sense.sense.glosses, new: { [language_key]: row[key] } } }
         }
       }
@@ -139,10 +139,8 @@ export function convert_row_to_objects_for_databases({ row, dateStamp, timestamp
           supabase_sentence.sense_id = supabase_sense.sense_id
           supabase_sentence.sentence_id = incremental_consistent_uuid()
           if (key === `s${old_key}.${writing_system}_vernacular_exampleSentence` && !has_multiple_sentence_regex_label(key)) {
-            // @ts-expect-error
             supabase_sentence.sentence = { text: { new: { ...supabase_sentence?.sentence?.text?.new, [writing_system]: row[key] } } }
           } else if (has_multiple_sentence_regex_label(key)) {
-            // @ts-expect-error
             supabase_sentence.sentence = { text: { new: { [writing_system]: row[key] } } }
           }
         }
@@ -153,9 +151,7 @@ export function convert_row_to_objects_for_databases({ row, dateStamp, timestamp
         if (has_multiple_sentence_regex_label(key)) new_language_key = new_language_key.slice(0, new_language_key.lastIndexOf('.'))
         if (old_language_key && old_language_key === new_language_key && !has_multiple_sentence_regex_label(key)) supabase_sentence.sentence_id = incremental_consistent_uuid()
         if (!old_language_key) old_language_key = new_language_key
-
         if (key === `s${old_key}.${new_language_key}_exampleSentence` || has_multiple_sentence_regex_label(key)) {
-          // @ts-expect-error
           supabase_sentence.sentence = { ...supabase_sentence.sentence, translation: { new: { ...supabase_sentence?.sentence?.translation?.new, [new_language_key]: row[key] } } }
         }
       }
@@ -174,15 +170,12 @@ export function convert_row_to_objects_for_databases({ row, dateStamp, timestamp
       }
       old_language_key = new_language_key
       if (key.includes('.partOfSpeech'))
-        // @ts-expect-error
         supabase_sense.sense = { ...supabase_sense.sense, parts_of_speech: { new: [row[key]] } }
 
       if (key.includes('.semanticDomain'))
-        // @ts-expect-error
         supabase_sense.sense = { ...supabase_sense.sense, semantic_domains: { new: [row[key]] } }
 
       if (key.includes('.nounClass'))
-        // @ts-expect-error
         supabase_sense.sense = { ...supabase_sense.sense, noun_class: { new: row[key] } }
     }
 
