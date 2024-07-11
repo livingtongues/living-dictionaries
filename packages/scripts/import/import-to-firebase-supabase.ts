@@ -1,11 +1,13 @@
 import { readFileSync } from 'node:fs'
 import { randomUUID } from 'node:crypto'
-import type { ActualDatabaseEntry, ContentUpdateRequestBody } from '@living-dictionaries/types'
+import type { ActualDatabaseEntry, ContentUpdateRequestBody, ISpeaker } from '@living-dictionaries/types'
+import type { Timestamp } from 'firebase/firestore'
 import { db, environment, timestamp } from '../config-firebase.js'
 import { uploadAudioFile, uploadImageFile } from './import-media.js'
 import { parseCSVFrom } from './parse-csv.js'
 import { post_request } from './post-request.js'
 import { convert_row_to_objects_for_databases } from './convert_row_to_objects_for_databases.js'
+import type { Row } from './row.type'
 
 const supabase_content_update_endpoint = 'http://localhost:3041/api/db/content-update'
 const developer_in_charge_supabase_uid = '12345678-abcd-efab-cdef-123456789013' // in Supabase diego@livingtongues.org -> Diego Córdova Nieto;
@@ -17,12 +19,11 @@ export async function importFromSpreadsheet(dictionaryId: string, dry = false) {
   const dateStamp = Date.now()
 
   const file = readFileSync(`./import/data/${dictionaryId}/${dictionaryId}.csv`, 'utf8')
-  const rows = parseCSVFrom(file)
+  const rows = parseCSVFrom<Row>(file)
   const entries = await importEntries(dictionaryId, rows, dateStamp, dry)
 
   console.log(
-    `Finished ${dry ? 'emulating' : 'importing'} ${entries.length} entries to ${
-      environment === 'dev' ? 'http://localhost:3041/' : 'livingdictionaries.app/'
+    `Finished ${dry ? 'emulating' : 'importing'} ${entries.length} entries to ${environment === 'dev' ? 'http://localhost:3041/' : 'livingdictionaries.app/'
     }${dictionaryId} in ${(Date.now() - dateStamp) / 1000} seconds`,
   )
   console.log('') // line break
@@ -31,7 +32,7 @@ export async function importFromSpreadsheet(dictionaryId: string, dry = false) {
 
 export async function importEntries(
   dictionary_id: string,
-  rows: any[],
+  rows: Row[],
   dateStamp: number,
   dry = false,
 ): Promise<ActualDatabaseEntry[]> {
@@ -40,8 +41,11 @@ export async function importEntries(
   let batchCount = 0
   let batch = db.batch()
   const colRef = db.collection(`dictionaries/${dictionary_id}/words`)
-  let speakerRef
-  let speakerId
+
+  const speaker_snapshots = (await db.collection('speakers').where('contributingTo', 'array-contains', dictionary_id).get()).docs
+  const speakers = speaker_snapshots.map((snap) => {
+    return { id: snap.id, ...(snap.data() as ISpeaker) }
+  })
 
   for (const row of rows) {
     if (!row.lexeme || row.lexeme === '(word/phrase)')
@@ -56,7 +60,7 @@ export async function importEntries(
 
     const universal_entry_id = colRef.doc().id
 
-    const { firebase_entry, supabase_senses, supabase_sentences } = convert_row_to_objects_for_databases ({ row, dateStamp, timestamp })
+    const { firebase_entry, supabase_senses, supabase_sentences } = convert_row_to_objects_for_databases({ row, dateStamp, timestamp })
 
     for (const { sense, sense_id } of supabase_senses) {
       await update_sense({ entry_id: universal_entry_id, dictionary_id, sense, sense_id, dry })
@@ -71,32 +75,32 @@ export async function importEntries(
     }
 
     if (row.soundFile) {
-      speakerRef = db.collection('speakers')
-      if (row.speakerName && (!speakerId || !(row.speakerName in different_speakers))) {
-        speakerId = speakerRef.doc().id
-        different_speakers[row.speakerName] = speakerId
-        batch.create(speakerRef.doc(speakerId), {
-          displayName: row.speakerName,
-          birthplace: row.speakerHometown || '',
-          decade: Number.parseInt(row.speakerAge) || '',
-          gender: row.speakerGender || '',
-          contributingTo: [dictionary_id],
-          createdAt: timestamp,
-          createdBy: developer_in_charge_firebase_uid,
-          updatedAt: timestamp,
-          updatedBy: developer_in_charge_firebase_uid,
-        })
-      }
       const audioFilePath = await uploadAudioFile(row.soundFile, universal_entry_id, dictionary_id, dry)
-      if (audioFilePath) {
-        firebase_entry.sf = {
-          path: audioFilePath,
-          ts: timestamp,
+      firebase_entry.sf = {
+        path: audioFilePath,
+        ts: Date.now(),
+      }
+
+      if (row.speakerName) {
+        const speaker: ISpeaker = speakers.find(speaker => speaker.displayName === row.speakerName)
+        if (speaker) {
+          firebase_entry.sf.sp = speaker.id
+        } else {
+          const new_speaker: ISpeaker = {
+            displayName: row.speakerName,
+            birthplace: row.speakerHometown || '',
+            decade: Number.parseInt(row.speakerAge),
+            gender: row.speakerGender as 'm' | 'f' | 'o',
+            contributingTo: [dictionary_id],
+            createdAt: timestamp as Timestamp,
+            createdBy: developer_in_charge_firebase_uid,
+            updatedAt: timestamp as Timestamp,
+            updatedBy: developer_in_charge_firebase_uid,
+          }
+          const new_speaker_id = await db.collection('speakers').add(new_speaker).then(ref => ref.id)
+          firebase_entry.sf.sp = new_speaker_id
+          speakers.push({ id: new_speaker_id, ...new_speaker })
         }
-        if (speakerId)
-          firebase_entry.sf.sp = different_speakers[row.speakerName]
-        else
-          firebase_entry.sf.speakerName = row.speakerName // Keep that if for some reason we need the speakername as text only again.
       }
     }
 
@@ -105,6 +109,7 @@ export async function importEntries(
     batchCount++
     entryCount++
   }
+
   console.log(`Committing final batch of entries ending with: ${entryCount}`)
   if (!dry) await batch.commit()
   return firebase_entries
@@ -189,7 +194,7 @@ export async function update_sentence({
   return true
 }
 
-// Current flow:
+// Current flow: (out of date - needs updated)
 // Use Firebase to import entry as is already written (import-spreadsheet-v4.ts) including 1st sense, but check the import data for additional senses. If so then do the below flow at that point using a simple function call.
 // use that entry id to add additional senses to Supabase via entry_updates (seen in routes\api\db\change\entry\+server.ts and lib\supabase\change\sense.ts) - one update for ps, one for gloss
 // add example sentence to new table (Jacob will create, so it doesn't exist yet)

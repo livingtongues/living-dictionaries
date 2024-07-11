@@ -15,7 +15,7 @@
     "test:all": "pnpm --recursive --stream test -- --run",
     "test:e2e": "pnpm --filter=site test:e2e",
     "lint": "eslint . --cache --quiet",
-    "lint:fix": "eslint packages/scripts/import/supabase-senses.ts packages/scripts/algolia/addDictionariesToIndex.ts packages/scripts/algolia/algolia.ts packages/scripts/algolia/updateIndex.ts packages/scripts/countAllEntries.ts packages/scripts/import/convertJsonRowToEntryFormat.ts packages/scripts/import/import-media.ts packages/scripts/import/import-spreadsheet-v4.ts packages/scripts/import/import.ts packages/scripts/import/old/import-spreadsheet.ts packages/scripts/migrate-to-supabase/auth.ts packages/scripts/refactor/entry-refactor.ts packages/scripts/refactor/move-firestore-document.ts packages/scripts/refactor/upload-old-dictionaries.ts packages/site/src/db-tests/update-sense.test.ts packages/site/src/lib/mocks/seed/write-seed-and-reset-db.ts packages/site/src/lib/supabase/generated.types.ts packages/site/src/routes/api/db/content-update/+server.ts packages/site/src/routes/[dictionaryId]/entry/[entryId]/EntryField.svelte packages/site/src/routes/[dictionaryId]/entry/[entryId]/EntryMedia.svelte packages/scripts/package.json packages/scripts/config-firebase.ts packages/scripts/config-supabase.ts --fix",
+    "lint:fix": "eslint --fix",
     "lint:inspect": "npx @eslint/config-inspector",
     "lint:inspect-future": "eslint --inspect-config",
     "reset-db": "pnpm --filter=site reset-db",

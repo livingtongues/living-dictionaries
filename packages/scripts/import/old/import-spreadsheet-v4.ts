@@ -1,9 +1,9 @@
 import { readFileSync } from 'node:fs'
 import type { ActualDatabaseEntry } from '@living-dictionaries/types'
-import { db, environment, timestamp } from '../config-firebase.js'
-import { uploadAudioFile, uploadImageFile } from './import-media.js'
-import { parseCSVFrom } from './parse-csv.js'
-import { convertJsonRowToEntryFormat } from './convertJsonRowToEntryFormat.js'
+import { db, environment, timestamp } from '../../config-firebase.js'
+import { uploadAudioFile, uploadImageFile } from './../import-media.js'
+import { parseCSVFrom } from './../parse-csv.js'
+import { convertJsonRowToEntryFormat } from './../convertJsonRowToEntryFormat.js'
 
 const developer_in_charge = 'qkTzJXH24Xfc57cZJRityS6OTn52' // diego@livingtongues.org -> Diego Córdova Nieto;
 type unique_speakers = Record<string, string>

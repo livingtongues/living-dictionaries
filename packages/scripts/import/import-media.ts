@@ -38,10 +38,7 @@ export async function uploadAudioFile(
     }
     return uploadedAudioPath
   } catch (err) {
-    console.log(
-      `!!! Not adding audio ${audioFileName} as the server had trouble uploading it. Double-check the file to see if there is a problem with it or perhaps there is code/server/network-connection problem. Error: ${err}`,
-    )
-    return null
+    throw new Error(`Not adding audio ${audioFileName} as the server had trouble uploading it. Double-check the file to see if there is a problem with it or perhaps there is code/server/network-connection problem. Error: ${err}`)
   }
 }
 
@@ -76,8 +73,7 @@ export async function uploadImageFile(
     try {
       gcsPath = await getImageServingUrl(storagePath, environment)
     } catch (err) {
-      console.log(`!!! Error getting image serving URL: ${err}`)
-      gcsPath = ''
+      throw new Error(`!!! Error getting image serving URL: ${err}`)
     }
 
     return {
@@ -87,9 +83,6 @@ export async function uploadImageFile(
       // cr: // not yet included in import template
     }
   } catch (err) {
-    console.log(
-      `!!! Not adding image ${imageFileName} as the server had trouble digesting it. Double-check the file to see if it is just a corrupted jpg (as some are) or if the file is good and perhaps there is code/server/network-connection problem. Error: ${err}`,
-    )
-    return null
+    throw new Error(`!!! Not adding image ${imageFileName} as the server had trouble digesting it. Double-check the file to see if it is just a corrupted jpg (as some are) or if the file is good and perhaps there is code/server/network-connection problem. Error: ${err}`)
   }
 }

@@ -1,8 +1,6 @@
 import { program } from 'commander'
 // @ts-expect-error
 import detect from 'detect-port'
-
-// import { importFromSpreadsheet } from './import-spreadsheet-v4.js';
 import { importFromSpreadsheet } from './import-to-firebase-supabase'
 
 await checkForDevServer()

@@ -1,28 +1,7 @@
 import { randomUUID } from 'node:crypto'
 import type { ActualDatabaseEntry, ContentUpdateRequestBody } from '@living-dictionaries/types'
 import type { Timestamp } from 'firebase/firestore'
-import type { Glossing_Languages } from '@living-dictionaries/site/src/lib/glosses/glossing-languages'
-
-type Sense_Prefix = 's2' | 's3' | 's4' | 's5' | 's6' | 's7' | 's8' | 's9'
-type Fields = 'lexeme' | 'dialects' | 'ID' | 'soundFile' | 'speakerName' | 'scientificName' | 'speakerHometown' | 'speakerAge' | 'speakerGender' | 'notes' | 'source' | 'morphology' | 'interlinearization' | 'photoFile' | 'vernacular_exampleSentence' | 'pluralForm' | 'nounClass' | 'variant' | 'phonetic' | 'semanticDomain_custom'
-type Special_Fields = 'localOrthography' | 'partOfSpeech' | 'semanticDomain'
-type Multiple_Fields = `${Special_Fields}${Suffix}`
-type Writing_Systems = 'default' // TODO improve Writing Systems field
-type Translation_Fields = `${Glossing_Languages}_gloss` | `${Glossing_Languages}_exampleSentence` | `${Writing_Systems}_vernacular_exampleSentence`
-type Suffix = '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9'
-
-type Normal_Row = `${Fields | Special_Fields | Multiple_Fields | Translation_Fields}`
-type Sense_Row = `${Sense_Prefix}.${Normal_Row}`
-type Sentence_Row = `${Sense_Prefix}.${Normal_Row}.${Suffix}`
-export type Row = {
-  [key in (Sentence_Row | Sense_Row | Normal_Row)]?: string;
-}
-// const my_row: Row = {
-//   's3.es_gloss': 'hi',
-//   'semanticDomain4': '2.3',
-//   's2.fr_exampleSentence.3': 'Bonjour docteur',
-//   's4.default_vernacular_exampleSentence': 'foo bar',
-// }
+import type { Row } from './row.type'
 
 export function convert_row_to_objects_for_databases({ row, dateStamp, timestamp, test = false }: {
   row: Row
