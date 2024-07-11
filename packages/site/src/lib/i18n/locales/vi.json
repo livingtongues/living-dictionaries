@@ -88,14 +88,15 @@
     "message_sent": "Tin nhắn đã được gửi đi. Chúng tôi sẽ cố gắng phản hồi trong thời gian sớm nhất có thể.",
     "what_is_your_question": "Bạn có câu hỏi hay nhận xét gì hay không?",
     "message_failed": "Tin nhắn không được gửi. Xin vui lòng kiểm tra kết nối mạng của bạn hoặc gửi email cho chúng tôi tại: ",
-    "delete_dictionary": "Xóa một từ điển",
-    "public_dictionary": "Làm cho một từ điển công khai",
+    "delete_dictionary": "Xóa từ điển",
+    "public_dictionary": "Công khai từ điển",
     "import_data": "Nhập dữ liệu",
-    "request_access": "Yêu cầu chỉnh sửa truy cập",
-    "report_problem": "Báo cáo một vấn đề",
+    "request_access": "Yêu cầu quyền chỉnh sửa",
+    "report_problem": "Báo cáo sự cố",
     "other": "Chủ đề khác",
     "select_topic": "Chọn một chủ đề",
-    "data_fields": "Các trường dữ liệu tùy chọn"
+    "data_fields": "Các trường dữ liệu tùy chọn",
+    "learning": "Tạo tài liệu học ngôn ngữ từ từ điển của tôi"
   },
   "create": {
     "select_coordinates": "Chọn tọa độ",
@@ -186,7 +187,8 @@
     "gloss": "Dịch",
     "plural_form": "Dạng số phức",
     "scientific_names": "Tên khoa học",
-    "definition_english": ""
+    "definition_english": "",
+    "video": "Băng hình"
   },
   "error": {
     "run_into_error": "Lỗi đã xảy ra. Xin quý vị thông cảm.",
@@ -240,7 +242,8 @@
     "upload": "Tải lên",
     "assertion": "Có   ",
     "negation": "Không",
-    "clean": "Không lỗi"
+    "clean": "Không lỗi",
+    "map": "Bản đồ"
   },
   "settings": {
     "community_permission": "Cộng đồng có cho phép ngôn ngữ của họ được đăng tải trực tuyến hay không?",
@@ -321,12 +324,12 @@
   },
   "import_page": {
     "import": "Nhập khẩu",
-    "template_link": "Liên kết đến mẫu",
-    "instructions_1": "Nếu bạn đã có dữ liệu ngôn ngữ mà bạn muốn nhập vào từ điển của mình, vui lòng làm theo các bước dưới đây.",
-    "instructions_2": "Nhấp vào liên kết màu xanh lam đến nút Mẫu bên dưới. Tải xuống mẫu dưới dạng tệp Excel hoặc tạo bản sao trên Google Docs. Chỉnh sửa mẫu theo nhu cầu dự án của bạn. Sao chép và dán dữ liệu của bạn vào bảng tính.",
-    "instructions_3": "Sử dụng liên hệ với chúng tôi dưới đây để liên hệ với chúng tôi. Hãy cho chúng tôi biết rằng bạn có một bảng tính mới đã sẵn sàng để nhập. Hỏi chúng tôi bất kỳ câu hỏi bạn có. Chúng tôi sẽ trả lời bạn qua email và sau đó bạn có thể gửi cho chúng tôi tệp của bạn.",
-    "instructions_4": "Để gửi cho chúng tôi dữ liệu được xuất từ ​​các phần mềm từ điển như Flex, Lexique Pro, Shoebox, vui lòng sử dụng nút Liên hệ với chúng tôi bên dưới và cho chúng tôi biết chi tiết về dự án của bạn.",
-    "no_imports": "Chúng tôi hiện đang làm việc với nhiều cộng đồng và các tổ chức đối tác để nhập một số lượng lớn các mục từ điển vào nền tảng này. Chúng tôi cũng đang thực hiện các cập nhật lớn cho cơ sở dữ liệu của chúng tôi. Chúng tôi sẽ chấp nhận nhập dữ liệu mới bắt đầu vào ngày 1 tháng 5 năm 2024. Chúng tôi đánh giá cao sự kiên nhẫn của bạn và chúng tôi xin lỗi vì sự bất tiện này."
+    "template_link": "Liên kết tới Mẫu",
+    "instructions_1": "Nếu bạn đã có dữ liệu ngôn ngữ muốn nhập vào Từ điển của mình, vui lòng làm theo các bước bên dưới.",
+    "instructions_2": "Nhấp vào nút “Liên kết tới mẫu” màu xanh lam bên dưới. Tải xuống mẫu dưới dạng tệp Excel hoặc tạo bản sao trên Google Docs. Chỉnh sửa mẫu theo nhu cầu dự án của bạn. Sao chép và dán dữ liệu của bạn vào bảng tính.",
+    "instructions_3": "Sử dụng mục “Liên hệ với chúng tôi” bên dưới để liên hệ với chúng tôi. Hãy cho chúng tôi biết rằng bạn có bảng tính mới sẵn sàng để nhập. Hãy hỏi chúng tôi bất kỳ câu hỏi nào bạn có. Chúng tôi sẽ trả lời bạn qua email và sau đó bạn có thể gửi tệp của mình cho chúng tôi.",
+    "instructions_4": "Để gửi cho chúng tôi dữ liệu được xuất từ ​​các phần mềm từ điển như FLEx, Lexique Pro, Shoebox, vui lòng sử dụng nút “Liên hệ với chúng tôi” bên dưới và cho chúng tôi biết chi tiết về dự án của bạn.",
+    "no_imports": "Chúng tôi hiện đang làm việc với nhiều cộng đồng và tổ chức đối tác để nhập một số lượng lớn mục từ điển vào nền tảng này. Chúng tôi cũng đang thực hiện các cập nhật lớn cho cơ sở dữ liệu của mình. Chúng tôi sẽ chấp nhận hoạt động nhập dữ liệu mới bắt đầu từ ngày 1 tháng 7 năm 2024. Chúng tôi đánh giá cao sự kiên nhẫn của bạn và chúng tôi xin lỗi vì sự bất tiện này."
   },
   "history": {
     "history": "Lịch sử",
@@ -340,13 +343,21 @@
     "created": "Tạo",
     "edited": "Đã chỉnh sửa",
     "deleted": "Bị xóa",
-    "history_search": "Tìm kiếm các mục, trình soạn thảo, trường và giá trị",
-    "download_history": "Tải xuống lịch sử dưới dạng CSV",
+    "history_search": "Tìm kiếm mục, người chỉnh sửa, trường và giá trị",
+    "download_history": "Tải xuống Lịch sử dưới dạng CSV",
     "empty": "Chưa có lịch sử"
   },
   "partnership": {
-    "title": "Các tổ chức đối tác",
-    "button": "Viết trong tổ chức đối tác",
+    "title": "Tổ chức đối tác",
+    "button": "Viết trong Tổ chức đối tác",
     "name": "Tên tổ chức đối tác"
+  },
+  "synopsis": {
+    "translations": "Bản dịch",
+    "name": "Tóm tắt"
+  },
+  "sense": {
+    "sense": "Giác quan",
+    "add": "Thêm ý nghĩa"
   }
 }

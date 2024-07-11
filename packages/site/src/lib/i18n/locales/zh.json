@@ -30,13 +30,13 @@
     "translators": "翻译人员",
     "interns": "实习生",
     "video_upload": "视频上传",
-    "export_data": "导出数据（CSV，PDF格式）",
-    "import_export": "进出口（flex，标准格式）",
-    "geo_tagging": "地理标签条目",
+    "export_data": "导出数据（CSV、PDF 格式）",
+    "import_export": "导入/导出（FLEx，标准格式）",
+    "geo_tagging": "地理标记条目",
     "flashcard_view": "语言学习者的抽认卡视图",
-    "peer_review": "拼写的同行评论",
+    "peer_review": "拼写同行评审",
     "suggestions_from_users": "用户的建议",
-    "push_notifications": "向贡献者推动通知",
+    "push_notifications": "向贡献者推送通知",
     "contributor_awards": "贡献者社区奖"
   },
   "contributors": {
@@ -57,7 +57,7 @@
     "invitation_sent": "邀请已发送",
     "manager_contributor_distinction": "注意：字典管理员可以添加，编辑或删除内容。贡献者是项目协作者，也可以添加和编辑，但无法删除任何内容。",
     "other_contributors": "其他贡献者",
-    "how_to_cite_instructions": "添加该词典的作者以在引用中显示其名字"
+    "how_to_cite_instructions": "添加该词典的作者以在引文中显示他们的名字"
   },
   "account": {
     "account_settings": "帐号设定",
@@ -89,13 +89,14 @@
     "what_is_your_question": "您有什么问题或评论？",
     "message_failed": "消息发送失败。检查您的互联网连接或给我们发送电子邮件：",
     "delete_dictionary": "删除字典",
-    "public_dictionary": "公开词典",
+    "public_dictionary": "公开字典",
     "import_data": "导入数据",
-    "request_access": "请求编辑访问",
+    "request_access": "请求编辑权限",
     "report_problem": "报告一个问题",
     "other": "其他主题",
     "select_topic": "选择一个话题",
-    "data_fields": "可选数据字段"
+    "data_fields": "可选数据字段",
+    "learning": "从我的词典创建语言学习材料"
   },
   "create": {
     "select_coordinates": "选择坐标",
@@ -114,17 +115,17 @@
     "visible_to_public": "对所有人可见",
     "req_com_consent": "需要社区的同意",
     "create_dictionary": "创建字典",
-    "permanent_url_msg": "URL名称是永久的，以后无法更改。",
+    "permanent_url_msg": "URL 名称是永久性的，以后无法更改。",
     "add_gloss_msg": "您可以在“设置”下添加更多语言标注",
-    "language_used_by_community": "这本针对特定人类社区使用或签名的语言的字典吗？",
-    "community_permission": "语言社区是否允许您制作此词典？",
-    "author_connection": "请简要描述您如何知道这种语言以及为什么要为此创建活着的词典。您是否是将使用此Live词典的社区的一部分？如果没有，您怎么知道社区？",
-    "con_lang_description": "这本针对构造语言的字典（近年来人类发明的语言，一本书还是电影）？如果是，请简要描述。",
+    "language_used_by_community": "这本词典是针对特定人类社区所说或手语的语言吗？",
+    "community_permission": "语言界允许你制作这本词典吗？",
+    "author_connection": "请简要描述您如何了解这种语言以及为什么要为其创建一本活字典。您是使用这本生活词典的社区的成员吗？如果没有，你怎么知道这个社区？",
+    "con_lang_description": "这本词典是用于构建语言（近年来人类发明的语言，用于书籍或电影）吗？如果是，请简要描述。",
     "uncertainty": "我不知道",
-    "select_region": "选择区域",
+    "select_region": "选择地区",
     "secondary_coordinates": "次要坐标",
     "map_instructions": "单击地图以添加辅助坐标。",
-    "print_access": "允许观众打印词典",
+    "print_access": "允许查看者打印词典",
     "primary_coordinate": "主坐标"
   },
   "dictionary": {
@@ -137,8 +138,8 @@
     "contributors": "贡献者",
     "grammar": "语法",
     "entries": "词条",
-    "youtube_terms": "YouTube条款",
-    "google_terms": "Google术语",
+    "youtube_terms": "YouTube 条款",
+    "google_terms": "谷歌条款",
     "full_title": "{dictionary_name} 活字典"
   },
   "entry": {
@@ -162,7 +163,7 @@
     "copy_and_share": "复制并共享",
     "print": "打印",
     "id": "ID",
-    "switch_opposite": "切换到对面"
+    "switch_opposite": "切换到相反的位置"
   },
   "entry_field": {
     "photo": "照片",
@@ -181,12 +182,13 @@
     "notes": "笔记",
     "sources": "来源",
     "example_sentence": "例句",
-    "noun_class": "名词课",
+    "noun_class": "名词类",
     "variant": "变体",
     "gloss": "翻译",
     "plural_form": "复数形式",
     "scientific_names": "科学名称",
-    "definition_english": ""
+    "definition_english": "",
+    "video": "视频"
   },
   "error": {
     "run_into_error": "很抱歉，我们遇到了一个错误。",
@@ -240,7 +242,8 @@
     "upload": "上传",
     "assertion": "是的",
     "negation": "不",
-    "clean": "干净的"
+    "clean": "干净的",
+    "map": "地图"
   },
   "settings": {
     "community_permission": "此语言的语言社区允许这种语言通过网络传播吗？",
@@ -249,8 +252,8 @@
     "public_private_meaning": "公共意味着任何人都可以看到你的字典所以需要社区的同意。私人字典则是只有你和你的合作者可见。",
     "optional_data_fields": "可选的数据字段",
     "unable_to_delete": "注意：您将无法删除这些语言标注",
-    "print_access_meaning": "这使公众能够下载和打印本Living词典作为.pdf",
-    "featured_image": "特色图像"
+    "print_access_meaning": "这使公众能够以 .PDF 格式下载和打印这本活生生的词典",
+    "featured_image": "特色图片"
   },
   "speakers": {
     "add_new_speaker": "添加新的母语者",
@@ -289,44 +292,44 @@
     "no_images": "没有图像文件",
     "checking_audios": "检查是否存在音频文件",
     "no_audios": "没有音频文件",
-    "download_csv": "下载CSV",
-    "availability": "出口仅适用于字典经理",
+    "download_csv": "下载 CSV 文件",
+    "availability": "导出仅适用于字典管理员",
     "download_pdf": "下载PDF",
     "spreadsheet": "电子表格"
   },
   "video": {
-    "video_url": "视频URL",
+    "video_url": "视频网址",
     "video_credit": "视频来自",
-    "prepare_to_record_video": "准备用麦克风和相机记录",
+    "prepare_to_record_video": "准备使用麦克风和相机录制",
     "video_info": "There are two ways to have your videos displayed in a Living Dictionary: 1) You can record your videos right here, or upload your previously recorded videos to our platform. Advantages: easy and great for quick recordings. Disadvantages: You can only upload a video up to 100MB so it must only be short and low resolution. 2) Have your videos on a hosting service that specializes in video storage and link the URL to our site. Advantages: easy (as long as your videos are already uploaded on that platform), your videos can have the resolution and length you want. Disadvantages: if you want to record something unexpected or very simple, it might be too much effort to do it that way, and you may want to prioritize method 1.",
-    "paste_video_url": "粘贴YouTube或Vimeo链接",
+    "paste_video_url": "粘贴 YouTube 或 Vimeo 链接",
     "record_upload_video": "录制或上传视频",
     "view": "查看",
     "edit_video": "编辑视频",
     "add_video": "添加视频",
-    "accesing": "访问麦克风和相机",
+    "accesing": "访问麦克风和摄像头",
     "pause": "暂停",
     "unpause": "播放",
-    "previously_dismissed_msg": "如果您以前驳回了浏览器的请求，请重新加载并在浏览器要求许可时单击“是”。",
+    "previously_dismissed_msg": "如果您之前拒绝了浏览器的请求，请重新加载并在浏览器请求许可时单击“是”。",
     "permission_denied": "访问媒体的许可受限"
   },
   "print": {
-    "qr_code": "显示QR码",
+    "qr_code": "显示二维码",
     "labels": "显示标签",
-    "availability": "印刷视图仅适用于字典经理和贡献者",
-    "max_entries": "最大条目",
+    "availability": "打印视图仅适用于词典管理员和贡献者",
+    "max_entries": "最大条目数",
     "columns": "列",
-    "headword_size": "头词大小",
+    "headword_size": "词条大小",
     "font_size": "字体大小"
   },
   "import_page": {
     "import": "进口",
     "template_link": "链接到模板",
-    "instructions_1": "如果您已经有要导入到字典中的语言数据，请按照以下步骤操作。",
-    "instructions_2": "单击下面的蓝色“链接到模板”按钮。将模板作为Excel文件下载，或在Google文档上创建副本。根据您的项目的需求编辑模板。将数据复制并粘贴到电子表格中。",
-    "instructions_3": "使用下面的“联系我们”与我们联系。让我们知道，您有一个准备进口的新电子表格。问我们任何问题。我们将通过电子邮件回复您，然后您可以向我们发送您的文件。",
-    "instructions_4": "要向我们发送从Flex，Lexique Pro，Shoebox等字典软件导出的数据，请使用下面的“联系我们”按钮，并告诉我们您的项目的详细信息。",
-    "no_imports": "我们目前正在与许多社区和合作伙伴组织合作，以进口大量的词典条目。我们还对数据库进行了重大更新。我们将从2024年5月1日开始接受新的数据进口。我们感谢您的耐心，为您带来的不便，我们深表歉意。"
+    "instructions_1": "如果您已有想要导入词典的语言数据，请按照以下步骤操作。",
+    "instructions_2": "单击下面的蓝色“链接到模板”按钮。将模板下载为 Excel 文件，或在 Google 文档上创建副本。根据项目的需要编辑模板。将您的数据复制并粘贴到电子表格中。",
+    "instructions_3": "请使用下面的“联系我们”与我们联系。让我们知道您有一个可以导入的新电子表格。如果您有任何问题，请向我们询问。我们将通过电子邮件回复您，然后您可以将您的文件发送给我们。",
+    "instructions_4": "要将从 FLEx、Lexique Pro、Shoebox 等词典软件导出的数据发送给我们，请使用下面的“联系我们”按钮并告诉我们您项目的详细信息。",
+    "no_imports": "我们目前正在与许多社区和合作伙伴组织合作，将大量的词典条目导入到这个平台。我们还对我们的数据库进行了重大更新。我们将从 2024 年 7 月 1 日开始接受新的数据导入。感谢您的耐心等待，对于给您带来的不便，我们深表歉意。"
   },
   "history": {
     "history": "历史",
@@ -335,18 +338,26 @@
     "action": "行动",
     "field": "场地",
     "date": "日期",
-    "old_value": "以前的价值",
+    "old_value": "原值",
     "new_value": "新价值",
-    "created": "创建",
-    "edited": "编辑",
-    "deleted": "删除",
-    "history_search": "搜索条目，编辑，字段和值",
-    "download_history": "下载历史记录为CSV",
-    "empty": "还没有历史"
+    "created": "已创建",
+    "edited": "已编辑",
+    "deleted": "已删除",
+    "history_search": "搜索条目、编辑器、字段和值",
+    "download_history": "下载 CSV 格式的历史记录",
+    "empty": "还没有历史记录"
   },
   "partnership": {
     "title": "合作伙伴组织",
-    "button": "在合作伙伴组织中写信",
-    "name": "合作伙伴组织名称"
+    "button": "写入合作伙伴组织",
+    "name": "合作机构名称"
+  },
+  "synopsis": {
+    "translations": "翻译",
+    "name": "概要"
+  },
+  "sense": {
+    "sense": "感觉",
+    "add": "添加感知"
   }
 }

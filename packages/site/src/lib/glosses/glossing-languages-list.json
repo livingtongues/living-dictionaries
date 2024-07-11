@@ -962,5 +962,10 @@
   "mko": {
     "vernacularName": "Mingang Doso"
   },
+  "hbo-hebr": {
+    "vernacularName": "עִבְרִית",
+    "internalName": "sil_hebrew",
+    "showKeyboard": true
+  },
   "": {}
 }

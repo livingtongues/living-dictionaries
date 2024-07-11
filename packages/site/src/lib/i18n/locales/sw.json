@@ -29,15 +29,15 @@
     "with_your_help": "Kwa msaada wako, tunaweza kuendelea kuboresha programu yetu na kuifanya ipatikane kwa jamii yoyote inayopenda kuunda Kamusi Hai. Changia leo ili ulete mabadiliko!",
     "translators": "Watafsiri",
     "interns": "Wanafunzi wa ndani",
-    "video_upload": "Upakiaji wa video",
-    "export_data": "Takwimu za kuuza nje (CSV, fomati za PDF)",
-    "import_export": "Kuagiza/kuuza nje (kubadilika, muundo wa kawaida)",
-    "geo_tagging": "Viingilio vya Geo-Tagging",
-    "flashcard_view": "Mtazamo wa kadi ya flash kwa wanafunzi wa lugha",
-    "peer_review": "Mapitio ya rika ya herufi",
-    "suggestions_from_users": "Mapendekezo kutoka kwa watumiaji",
-    "push_notifications": "Arifa za kushinikiza kwa wachangiaji",
-    "contributor_awards": "Tuzo za Jumuiya ya Mchangiaji"
+    "video_upload": "Upakiaji wa Video",
+    "export_data": "Hamisha Data (CSV, muundo wa PDF)",
+    "import_export": "Ingiza/Hamisha (FLEx, Umbizo la Kawaida)",
+    "geo_tagging": "Maingizo ya kuweka tagi ya kijiografia",
+    "flashcard_view": "Mwonekano wa Flashcard kwa Wanafunzi wa Lugha",
+    "peer_review": "Uhakiki wa Rika wa Tahajia",
+    "suggestions_from_users": "Mapendekezo kutoka kwa Watumiaji",
+    "push_notifications": "Kushinikiza Arifa kwa Wachangiaji",
+    "contributor_awards": "Tuzo za Jumuiya ya Wachangiaji"
   },
   "contributors": {
     "invite_contributors": "Wakaribishe Wachangiaji",
@@ -56,8 +56,8 @@
     "write_in_contributor": "Andika jina la Mchangiaji",
     "invitation_sent": "Mwaliko umetumwa",
     "manager_contributor_distinction": "Kumbuka: \"Mameneja\" wa Kamusi wanaweza kuongeza, kuhariri au kufuta yaliyomo. \"Wachangiaji\" wanaweza pia kuongeza na kuhariri, lakini hawawezi kufuta yaliyomo yoyote.",
-    "other_contributors": "Wachangiaji wengine",
-    "how_to_cite_instructions": "Ongeza waandishi wa kamusi hii kuonyesha majina yao katika kunukuu"
+    "other_contributors": "Wachangiaji Wengine",
+    "how_to_cite_instructions": "Ongeza waandishi wa kamusi hii ili kuonyesha majina yao katika dondoo"
   },
   "account": {
     "account_settings": "Mipangilio ya Akaunti",
@@ -87,15 +87,16 @@
     "send_message": "Tuma ujumbe ",
     "message_sent": "Ujumbe umetumwa. Tutajibu haraka iwezekanavyo.",
     "what_is_your_question": "Je! Swali lako au maoni yako ni nini?",
-    "message_failed": "Ujumbe Tuma umeshindwa. Angalia unganisho lako la mtandao au tutumie barua pepe:",
+    "message_failed": "Imeshindwa kutuma ujumbe. Angalia muunganisho wako wa mtandao au tutumie barua pepe:",
     "delete_dictionary": "Futa kamusi",
-    "public_dictionary": "Fanya kamusi ya umma",
+    "public_dictionary": "Weka kamusi hadharani",
     "import_data": "Ingiza data",
-    "request_access": "Omba ufikiaji wa uhariri",
-    "report_problem": "Ripoti shida",
+    "request_access": "Omba ufikiaji wa kuhariri",
+    "report_problem": "Ripoti tatizo",
     "other": "Mada nyingine",
     "select_topic": "Chagua mada",
-    "data_fields": "Sehemu za data za hiari"
+    "data_fields": "Sehemu za data za hiari",
+    "learning": "Unda nyenzo za kujifunzia lugha kutoka kwa kamusi yangu"
   },
   "create": {
     "select_coordinates": "Chagua mahali kijiografia",
@@ -115,17 +116,17 @@
     "req_com_consent": "Inahitaji Ridhaa ya Jamii",
     "create_dictionary": "Tengeneza Kamusi  ",
     "permanent_url_msg": "Jina la URL ni la kudumu na haliwezi kubadilishwa baadaye.",
-    "add_gloss_msg": "Unaweza kuongeza lugha zaidi ya glossing baadaye katika Mipangilio.",
-    "language_used_by_community": "Je! Hii ni kamusi kwa lugha ambayo inazungumzwa au kusainiwa na jamii maalum ya wanadamu?",
-    "community_permission": "Je! Jumuiya ya lugha imekupa ruhusa ya kufanya kamusi hii?",
-    "author_connection": "Tafadhali eleza kwa kifupi jinsi unavyojua lugha hii na kwa nini unaunda kamusi hai kwa hiyo. Je! Wewe ni sehemu ya jamii ambayo itakuwa ikitumia kamusi hii hai? Ikiwa sivyo, unajuaje jamii?",
-    "con_lang_description": "Je! Hii ni kamusi ya lugha iliyojengwa (lugha iliyoundwa na wanadamu katika miaka ya hivi karibuni, kwa kitabu au sinema)? Ikiwa ndio, tafadhali eleza kwa kifupi.",
+    "add_gloss_msg": "Unaweza kuongeza lugha nyingi zaidi baadaye katika chini ya Mipangilio.",
+    "language_used_by_community": "Je, kamusi hii ni ya lugha inayozungumzwa au kutiwa sahihi na jamii mahususi ya binadamu?",
+    "community_permission": "Je, jumuiya ya lugha imekupa ruhusa ya kutengeneza kamusi hii?",
+    "author_connection": "Tafadhali eleza kwa ufupi jinsi unavyojua lugha hii na kwa nini unaiundia Kamusi Hai. Je, wewe ni sehemu ya jumuiya itakayotumia Kamusi hii Hai? Ikiwa sivyo, unaijuaje jamii?",
+    "con_lang_description": "Je, kamusi hii ni ya lugha iliyoundwa (lugha iliyobuniwa na wanadamu katika miaka ya hivi karibuni, kwa kitabu au sinema)? Kama ndiyo, tafadhali eleza kwa ufupi.",
     "uncertainty": "Sijui",
-    "select_region": "Chagua mkoa",
-    "secondary_coordinates": "Kuratibu za sekondari",
-    "map_instructions": "Bonyeza kwenye ramani ili kuongeza kuratibu za sekondari.",
-    "print_access": "Ruhusu watazamaji kuchapisha kamusi",
-    "primary_coordinate": "Kuratibu za msingi"
+    "select_region": "Chagua Mkoa",
+    "secondary_coordinates": "Viratibu vya Sekondari",
+    "map_instructions": "Bofya kwenye ramani ili kuongeza viwianishi vya pili.",
+    "print_access": "Ruhusu Watazamaji Kuchapisha Kamusi",
+    "primary_coordinate": "Kuratibu msingi"
   },
   "dictionary": {
     "latitude": "Latitudo",
@@ -137,7 +138,7 @@
     "contributors": "Wachangiaji",
     "grammar": "Sarufi",
     "entries": "Maingizo",
-    "youtube_terms": "Masharti ya YouTube",
+    "youtube_terms": "Masharti ya Youtube",
     "google_terms": "Masharti ya Google",
     "full_title": "{dictionary_name} Kamusi Hai"
   },
@@ -161,8 +162,8 @@
     "link_copied": "Kiungo kimenakiliwa",
     "copy_and_share": "Nakili na ushiriki",
     "print": "Chapisha",
-    "id": "Id",
-    "switch_opposite": "Badilika kinyume"
+    "id": "ID",
+    "switch_opposite": "Badilisha hadi kinyume"
   },
   "entry_field": {
     "photo": "Picha",
@@ -180,13 +181,14 @@
     "interlinearization": "Uchanganuzi wa maneno",
     "notes": "Nukuu",
     "sources": "Chanzo",
-    "example_sentence": "Sentensi ya mfano",
+    "example_sentence": "Mfano Sentensi",
     "noun_class": "Darasa la nomino",
     "variant": "Lahaja",
     "gloss": "Tafsiri",
     "plural_form": "Fomu ya wingi",
     "scientific_names": "Jina la kisayansi",
-    "definition_english": ""
+    "definition_english": "",
+    "video": "Video"
   },
   "error": {
     "run_into_error": "Samahani, tumepata hitilafu.",
@@ -202,7 +204,7 @@
     "donate": "Toa Msaada",
     "about": "Kuhusu  ",
     "faq": "Maswali yanayoulizwa mara kwa mara",
-    "tutorials": "Mafundisho"
+    "tutorials": "Mafunzo"
   },
   "home": {
     "list_of_dictionaries": "Orodha ya Kamusi",
@@ -232,15 +234,16 @@
     "edit": "Hariri",
     "invalid": "Halali",
     "next": "Ifuatayo",
-    "export": "Kuuza nje",
+    "export": "Hamisha",
     "images": "Picha",
-    "reset": "Rudisha",
-    "invalid_url": "Hii sio URL halali",
-    "downloading": "Kupakua",
+    "reset": "Weka upya",
+    "invalid_url": "Hii si URL halali",
+    "downloading": "Inapakua",
     "upload": "Pakia",
-    "assertion": "Ndio",
+    "assertion": "ndio",
     "negation": "Hapana",
-    "clean": "Safi"
+    "clean": "Safi",
+    "map": "Ramani"
   },
   "settings": {
     "community_permission": "Je, jamii ya wazungumzaji inaruhusu lugha hii kuwekwa mtandaoni?",
@@ -248,9 +251,9 @@
     "dict_name": "Jina la Kamusi",
     "public_private_meaning": "Je, jamii ya wazungumzaji inaruhusu lugha hii kuwekwa mtandaoni? Umma inamaanisha mtu yeyote anaweza kuona kamusi yako, suala ambalo linahitaji idhini ya jamii. Kamusi binafsi zinaonekana kwako tu na washirika wako.",
     "optional_data_fields": "Sehemu za Taarifa Mbadala",
-    "unable_to_delete": "Kumbuka: Hautaweza kufuta lugha hizi za glossing baadaye.",
-    "print_access_meaning": "Hii inatoa umma uwezo wa kupakua na kuchapisha kamusi hii hai kama .pdf",
-    "featured_image": "Picha iliyoangaziwa"
+    "unable_to_delete": "Kumbuka: hutaweza kufuta lugha hizi za kubainisha baadaye.",
+    "print_access_meaning": "Hii inawapa umma uwezo wa kupakua na kuchapisha Kamusi hii Hai kama .PDF",
+    "featured_image": "Picha Iliyoangaziwa"
   },
   "speakers": {
     "add_new_speaker": "Ongeza Mzungumzaji Mpya",
@@ -274,7 +277,7 @@
     "select_audio_file": "Chagua sauti",
     "success": "Mafanikio",
     "uploading": "Kupakia",
-    "select_video_file": "Chagua faili ya video"
+    "select_video_file": "Chagua Faili ya Video"
   },
   "invite": {
     "invitation_claimed": "Mwaliko umekubaliwa",
@@ -284,69 +287,77 @@
     "role": "Wajibu"
   },
   "export": {
-    "csv_data": "Data kama .csv",
+    "csv_data": "Data kama .CSV",
     "checking_images": "Kuangalia ikiwa faili za picha zipo",
     "no_images": "Hakuna faili za picha",
     "checking_audios": "Kuangalia ikiwa faili za sauti zipo",
     "no_audios": "Hakuna faili za sauti",
     "download_csv": "Pakua CSV",
-    "availability": "Usafirishaji unapatikana tu kwa wasimamizi wa kamusi",
-    "download_pdf": "Pakua pdf",
+    "availability": "Uhamishaji unapatikana kwa wasimamizi wa kamusi pekee",
+    "download_pdf": "Pakua PDF",
     "spreadsheet": "Lahajedwali"
   },
   "video": {
     "video_url": "URL ya video",
-    "video_credit": "Mkopo wa video",
-    "prepare_to_record_video": "Jitayarishe kurekodi na kipaza sauti na kamera",
-    "video_info": "Kuna njia mbili za video zako zionyeshwa kwenye kamusi ya kuishi: 1) Unaweza kurekodi video zako hapa, au kupakia video zako zilizorekodiwa hapo awali kwenye jukwaa letu. Manufaa: Rahisi na nzuri kwa rekodi za haraka. Hasara: Unaweza tu kupakia video hadi 100MB kwa hivyo lazima iwe fupi tu na azimio la chini. 2) Kuwa na video zako kwenye huduma ya mwenyeji ambayo inataalam katika uhifadhi wa video na unganisha URL kwenye wavuti yetu. Manufaa: Rahisi (mradi video zako tayari zimepakiwa kwenye jukwaa hilo), video zako zinaweza kuwa na azimio na urefu unaotaka. Hasara: Ikiwa unataka kurekodi kitu kisichotarajiwa au rahisi sana, inaweza kuwa juhudi nyingi kuifanya kwa njia hiyo, na unaweza kutaka kutanguliza njia 1.",
-    "paste_video_url": "Bandika YouTube au Vimeo Kiungo",
+    "video_credit": "Salio la video",
+    "prepare_to_record_video": "Jitayarishe Kurekodi kwa kutumia Maikrofoni na Kamera",
+    "video_info": "Kuna njia mbili za kufanya video zako zionyeshwe katika Kamusi Hai: 1) Unaweza kurekodi video zako papa hapa, au kupakia video zako zilizorekodiwa hapo awali kwenye jukwaa letu. Manufaa: rahisi na nzuri kwa rekodi za haraka. Hasara: Unaweza tu kupakia video hadi 100MB kwa hivyo lazima iwe tu na mwonekano mfupi na wa chini. 2) Kuwa na video zako kwenye huduma ya upangishaji inayobobea katika uhifadhi wa video na uunganishe URL kwenye tovuti yetu. Manufaa: rahisi ( mradi tu video zako zimepakiwa kwenye jukwaa hilo), video zako zinaweza kuwa na mwonekano na urefu unaotaka. Hasara: ikiwa unataka kurekodi jambo lisilotarajiwa au rahisi sana, inaweza kuwa juhudi nyingi kulifanya kwa njia hiyo, na unaweza kutaka kutanguliza njia ya 1.",
+    "paste_video_url": "Bandika kiungo cha YouTube au Vimeo",
     "record_upload_video": "Rekodi au pakia video",
-    "view": "Mtazamo",
-    "edit_video": "Hariri video",
-    "add_video": "Ongeza video",
-    "accesing": "Kupata kipaza sauti na kamera",
+    "view": "Tazama",
+    "edit_video": "Hariri Video",
+    "add_video": "Ongeza Video",
+    "accesing": "Kufikia Maikrofoni na Kamera",
     "pause": "Sitisha",
-    "unpause": "Bila sababu",
-    "previously_dismissed_msg": "Ikiwa hapo awali ulitupilia mbali ombi la kivinjari, tafadhali pakia tena na ubonyeze 'Ndio' wakati kivinjari chako kinauliza ruhusa.",
-    "permission_denied": "Ruhusa ya kupata media ilikataliwa."
+    "unpause": "Acha kusitisha",
+    "previously_dismissed_msg": "Ikiwa hapo awali ulitupilia mbali ombi la kivinjari, tafadhali pakia upya na ubofye 'Ndiyo' kivinjari chako kinapoomba ruhusa.",
+    "permission_denied": "Ruhusa ya kufikia midia ilikataliwa."
   },
   "print": {
-    "qr_code": "Onyesha nambari ya QR",
-    "labels": "Onyesha lebo",
-    "availability": "Mtazamo wa kuchapisha unapatikana tu kwa wasimamizi wa kamusi na wachangiaji",
-    "max_entries": "Max",
-    "columns": "Nguzo",
-    "headword_size": "Saizi ya kichwa",
-    "font_size": "Saizi ya fonti"
+    "qr_code": "Onyesha Msimbo wa QR",
+    "labels": "Onyesha Lebo",
+    "availability": "Mwonekano wa kuchapisha unapatikana kwa wasimamizi na wachangiaji wa kamusi pekee",
+    "max_entries": "Maingizo ya juu zaidi",
+    "columns": "Safu",
+    "headword_size": "Ukubwa wa neno la kichwa",
+    "font_size": "Ukubwa wa herufi"
   },
   "import_page": {
-    "import": "Kuagiza",
-    "template_link": "Unganisha kwa template",
-    "instructions_1": "Ikiwa tayari unayo data ya lugha ambayo unataka kuingiza kwenye kamusi yako, tafadhali fuata hatua hapa chini.",
-    "instructions_2": "Bonyeza kitufe cha \"Kiunga cha Kiolezo\" hapa chini. Pakua templeti kama faili ya Excel, au unda nakala kwenye Hati za Google. Hariri templeti kulingana na mahitaji ya mradi wako. Nakili na ubandike data yako kwenye lahajedwali.",
-    "instructions_3": "Tumia \"Wasiliana Nasi\" hapa chini kuwasiliana nasi. Tujue kuwa una lahajedwali mpya ambayo iko tayari kwa kuagiza. Tuulize maswali yoyote unayo. Tutakujibu kwa barua pepe, halafu unaweza kututumia faili yako.",
-    "instructions_4": "Kututumia data iliyosafirishwa kutoka kwa laini za kamusi kama Flex, Lexique Pro, Sanduku la Viatu, tafadhali tumia kitufe cha \"Wasiliana Nasi\" hapa chini na tuambie maelezo ya mradi wako.",
-    "no_imports": "Hivi sasa tunafanya kazi na jamii nyingi na mashirika ya washirika kuingiza idadi kubwa ya viingilio vya kamusi kwenye jukwaa hili. Tunafanya pia sasisho kubwa kwa hifadhidata yetu. Tutakubali uagizaji mpya wa data kuanzia Mei 1, 2024. Tunashukuru uvumilivu wako, na tunaomba radhi kwa usumbufu."
+    "import": "Ingiza",
+    "template_link": "Unganisha kwa Kiolezo",
+    "instructions_1": "Ikiwa tayari una data ya kiisimu ambayo ungependa kuingiza kwenye Kamusi yako, tafadhali fuata hatua zilizo hapa chini.",
+    "instructions_2": "Bofya kwenye kitufe cha bluu cha \"Unganisha kwa Kiolezo\" hapa chini. Pakua kiolezo kama faili ya Excel, au unda nakala kwenye Hati za Google. Badilisha kiolezo kulingana na mahitaji ya mradi wako. Nakili na ubandike data yako kwenye lahajedwali.",
+    "instructions_3": "Tumia \"Wasiliana Nasi\" hapa chini ili kuwasiliana nasi. Tujulishe kuwa una lahajedwali mpya ambayo iko tayari kuingizwa. Tuulize maswali yoyote uliyo nayo. Tutakujibu kwa barua pepe, na kisha unaweza kututumia faili yako.",
+    "instructions_4": "Ili kututumia data iliyosafirishwa kutoka kwa programu za kamusi kama vile FLEx, Lexique Pro, Shoebox, tafadhali tumia kitufe cha \"Wasiliana Nasi\" hapa chini na utuambie maelezo ya mradi wako.",
+    "no_imports": "Kwa sasa tunafanya kazi na jumuiya nyingi na mashirika washirika kuleta idadi kubwa ya maingizo ya kamusi kwenye jukwaa hili. Pia tunafanya masasisho makubwa kwenye hifadhidata yetu. Tutakubali uagizaji mpya wa data kuanzia tarehe 1 Julai 2024. Tunashukuru kwa subira yako, na tunaomba radhi kwa usumbufu."
   },
   "history": {
     "history": "Historia",
-    "entry": "Kiingilio",
+    "entry": "Kuingia",
     "editor": "Mhariri",
-    "action": "Hatua",
-    "field": "Uwanja",
+    "action": "Kitendo",
+    "field": "Shamba",
     "date": "Tarehe",
     "old_value": "Thamani ya zamani",
-    "new_value": "Thamani mpya",
+    "new_value": "Thamani Mpya",
     "created": "Imeundwa",
-    "edited": "Kuhaririwa",
-    "deleted": "Kufutwa",
-    "history_search": "Tafuta viingilio, wahariri, uwanja na maadili",
-    "download_history": "Pakua historia kama CSV",
+    "edited": "Imehaririwa",
+    "deleted": "Imefutwa",
+    "history_search": "Tafuta maingizo, wahariri, sehemu na thamani",
+    "download_history": "Pakua Historia kama CSV",
     "empty": "Hakuna historia bado"
   },
   "partnership": {
-    "title": "Mashirika ya washirika",
-    "button": "Andika katika shirika la washirika",
-    "name": "Jina la shirika la mshirika"
+    "title": "Mashirika ya Washirika",
+    "button": "Andika katika Shirika la Washirika",
+    "name": "Jina la Shirika la Washirika"
+  },
+  "synopsis": {
+    "translations": "Tafsiri",
+    "name": "Muhtasari"
+  },
+  "sense": {
+    "sense": "Hisia",
+    "add": "Ongeza Akili"
   }
 }

@@ -95,7 +95,8 @@
     "report_problem": "Report a problem",
     "other": "Other topic",
     "select_topic": "Select a topic",
-    "data_fields": "Optional data fields"
+    "data_fields": "Optional data fields",
+    "learning": "Create language learning materials from my dictionary"
   },
   "create": {
     "select_coordinates": "Select Coordinates",
@@ -167,7 +168,6 @@
   "entry_field": {
     "photo": "Photo",
     "audio": "Audio",
-    "video": "Video",
     "speaker": "Speaker",
     "lexeme": "Lexeme/Word/Phrase",
     "elicitation_id": "ID",
@@ -187,7 +187,8 @@
     "gloss": "Translation",
     "plural_form": "Plural form",
     "scientific_names": "Scientific Name",
-    "definition_english": "Definition (deprecated)"
+    "definition_english": "Definition (deprecated)",
+    "video": "Video"
   },
   "error": {
     "run_into_error": "We're sorry, we've run into an error.",
@@ -241,7 +242,8 @@
     "upload": "Upload",
     "assertion": "yes",
     "negation": "no",
-    "clean": "Clean"
+    "clean": "Clean",
+    "map": "Map"
   },
   "settings": {
     "community_permission": "Does the speech community allow this language to be online?",
@@ -327,7 +329,7 @@
     "instructions_2": "Click on the blue “Link to Template” button below. Download the template as an Excel file, or create a copy on Google Docs. Edit the template according to your project’s needs. Copy and paste your data into the spreadsheet.",
     "instructions_3": "Use the “Contact Us” below to contact us. Let us know that you have a new spreadsheet that is ready for import. Ask us any questions you have. We will respond to you by email, and then you can send us your file.",
     "instructions_4": "To send us data exported from dictionary softwares like FLEx, Lexique Pro, Shoebox, please use the “Contact Us” button below and tell us the details of your project.",
-    "no_imports": "We are currently working with many communities and partner organizations to import a large number of dictionary entries to this platform. We are also making big updates to our database. We will accept new data imports starting on May 1, 2024. We appreciate your patience, and we apologize for the inconvenience."
+    "no_imports": "We are currently working with many communities and partner organizations to import a large number of dictionary entries to this platform. We are also making big updates to our database. We will accept new data imports starting on July 1, 2024. We appreciate your patience, and we apologize for the inconvenience."
   },
   "history": {
     "history": "History",
@@ -349,5 +351,13 @@
     "title": "Partner Organizations",
     "button": "Write in Partner Organization",
     "name": "Partner Organization Name"
+  },
+  "synopsis": {
+    "translations": "Translations",
+    "name": "Synopsis"
+  },
+  "sense": {
+    "sense": "Sense",
+    "add": "Add Sense"
   }
 }
