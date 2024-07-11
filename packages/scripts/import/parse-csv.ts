@@ -1,13 +1,13 @@
-import { readFileSync } from 'fs';
-import { parse } from 'csv-parse/sync';
+import { readFileSync } from 'node:fs'
 import path from 'node:path'
+import { parse } from 'csv-parse/sync'
 
-export function parseCSVFrom(contents: string): Record<string, any>[] {
+export function parseCSVFrom<T = Record<string, any>>(contents: string): T[] {
   return parse(contents, {
     columns: true,
     skip_empty_lines: true,
     trim: true,
-  });
+  })
 }
 
 if (import.meta.vitest) {
@@ -15,19 +15,19 @@ if (import.meta.vitest) {
     const csv = `
 a ,the book ,c
 1,2 , 3
-`;
+`
     expect(parseCSVFrom(csv)).toEqual([
       {
         'a': '1',
         'the book': '2',
         'c': '3',
       },
-    ]);
-  });
+    ])
+  })
 
   test('parseCSV logs out example.csv as array', () => {
     const filepath = path.join(__dirname, './data/example-v4/example-v4.csv')
-    const file = readFileSync(filepath, 'utf8');
+    const file = readFileSync(filepath, 'utf8')
     expect(parseCSVFrom(file)).toMatchInlineSnapshot(`
       [
         {
@@ -283,6 +283,6 @@ a ,the book ,c
           "vernacular_exampleSentence": "",
         },
       ]
-    `);
-  });
+    `)
+  })
 }

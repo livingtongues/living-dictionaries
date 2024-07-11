@@ -91,6 +91,8 @@
     "a11y-no-noninteractive-element-interactions": "ignore",
   },
 
+  "comments.visible": false,
+
   "deno.enable": true,
   "deno.lint": true,
   "deno.enablePaths": [
