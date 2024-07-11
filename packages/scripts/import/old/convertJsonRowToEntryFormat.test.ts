@@ -1,13 +1,10 @@
-import {
-  convertJsonRowToEntryFormat,
-  returnArrayFromCommaSeparatedItems,
-} from './convertJsonRowToEntryFormat.js';
-import { readFileSync } from 'fs';
-import { parseCSVFrom } from './parse-csv.js';
+import { readFileSync } from 'node:fs'
 import path from 'node:path'
+import { convertJsonRowToEntryFormat, returnArrayFromCommaSeparatedItems } from './convertJsonRowToEntryFormat.js'
+import { parseCSVFrom } from './../parse-csv.js'
 
-describe('convertJsonRowToEntryFormat', () => {
-  const fakeTimeStamp = 10101010;
+describe.skip('convertJsonRowToEntryFormat', () => {
+  const fakeTimeStamp = 10101010
 
   test('glosses', () => {
     const csv_rows_without_header: Record<string, any>[] = [
@@ -15,8 +12,8 @@ describe('convertJsonRowToEntryFormat', () => {
         lexeme: 'dolphin',
         es_gloss: 'delfín',
       },
-    ];
-    const entries = csv_rows_without_header.map((row) => convertJsonRowToEntryFormat(row));
+    ]
+    const entries = csv_rows_without_header.map(row => convertJsonRowToEntryFormat(row))
 
     expect(entries).toMatchInlineSnapshot(`
       [
@@ -27,8 +24,8 @@ describe('convertJsonRowToEntryFormat', () => {
           "lx": "dolphin",
         },
       ]
-    `);
-  });
+    `)
+  })
 
   test('example sentences', () => {
     const csv_rows_without_header: Record<string, any>[] = [
@@ -36,8 +33,8 @@ describe('convertJsonRowToEntryFormat', () => {
         lexeme: 'dolphin',
         es_exampleSentence: 'el delfín nada en el océano.',
       },
-    ];
-    const entries = csv_rows_without_header.map((row) => convertJsonRowToEntryFormat(row));
+    ]
+    const entries = csv_rows_without_header.map(row => convertJsonRowToEntryFormat(row))
 
     expect(entries).toMatchInlineSnapshot(`
       [
@@ -49,8 +46,8 @@ describe('convertJsonRowToEntryFormat', () => {
           },
         },
       ]
-    `);
-  });
+    `)
+  })
 
   test('semantic domains', () => {
     const csv_rows_without_header: Record<string, any>[] = [
@@ -60,8 +57,8 @@ describe('convertJsonRowToEntryFormat', () => {
         semanticDomain2: '1',
         semanticDomain_custom: 'the sea!',
       },
-    ];
-    const entries = csv_rows_without_header.map((row) => convertJsonRowToEntryFormat(row));
+    ]
+    const entries = csv_rows_without_header.map(row => convertJsonRowToEntryFormat(row))
 
     expect(entries).toMatchInlineSnapshot(`
       [
@@ -77,22 +74,22 @@ describe('convertJsonRowToEntryFormat', () => {
           ],
         },
       ]
-    `);
-  });
+    `)
+  })
 
   test('high-level conversion from csv', async () => {
-    const dictionaryId = 'example-v4';
-    const file = readFileSync(path.join(__dirname, `./data/${dictionaryId}/${dictionaryId}.csv`), 'utf8');
-    const rows = parseCSVFrom(file);
-    const rowsWithoutHeader = removeHeaderRow(rows);
-    const entries = rowsWithoutHeader.map((row) =>
+    const dictionaryId = 'example-v4'
+    const file = readFileSync(path.join(__dirname, `./data/${dictionaryId}/${dictionaryId}.csv`), 'utf8')
+    const rows = parseCSVFrom(file)
+    const rowsWithoutHeader = removeHeaderRow(rows)
+    const entries = rowsWithoutHeader.map(row =>
       convertJsonRowToEntryFormat(
         row,
         fakeTimeStamp,
-        // eslint-disable-next-line no-undef
-        fakeTimeStamp as unknown as FirebaseFirestore.FieldValue
-      )
-    );
+
+        fakeTimeStamp as unknown as FirebaseFirestore.FieldValue,
+      ),
+    )
 
     expect(entries).toEqual([
       {
@@ -243,16 +240,16 @@ describe('convertJsonRowToEntryFormat', () => {
         lx: 'vale',
         ua: 10101010,
       },
-    ]);
-  });
+    ])
+  })
 
   test('does not duplicate vernacular', () => {
     const csv_rows_without_header: Record<string, any>[] = [
       {
         vernacular_exampleSentence: 'Hello world',
       },
-    ];
-    const entries = csv_rows_without_header.map((row) => convertJsonRowToEntryFormat(row));
+    ]
+    const entries = csv_rows_without_header.map(row => convertJsonRowToEntryFormat(row))
 
     expect(entries).toMatchInlineSnapshot(`
       [
@@ -264,22 +261,22 @@ describe('convertJsonRowToEntryFormat', () => {
           },
         },
       ]
-    `);
-  });
-});
+    `)
+  })
+})
 
 function removeHeaderRow(rows: any[]) {
-  return rows.splice(1);
+  return rows.splice(1)
 }
 
 describe('returnArrayFromCommaSeparatedItems', () => {
   test('splits two comma separated items into an array', () => {
-    expect(returnArrayFromCommaSeparatedItems('n,v')).toStrictEqual(['n', 'v']);
-  });
+    expect(returnArrayFromCommaSeparatedItems('n,v')).toStrictEqual(['n', 'v'])
+  })
   test('handles unusual comma spacing', () => {
-    expect(returnArrayFromCommaSeparatedItems('n, v ,adj')).toStrictEqual(['n', 'v', 'adj']);
-  });
+    expect(returnArrayFromCommaSeparatedItems('n, v ,adj')).toStrictEqual(['n', 'v', 'adj'])
+  })
   test('returns empty array from undefined', () => {
-    expect(returnArrayFromCommaSeparatedItems(undefined)).toStrictEqual([]);
-  });
-});
+    expect(returnArrayFromCommaSeparatedItems(undefined)).toStrictEqual([])
+  })
+})

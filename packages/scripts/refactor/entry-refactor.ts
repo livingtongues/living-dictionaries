@@ -1,7 +1,6 @@
-/* eslint-disable unused-imports/no-unused-vars */
 import type { ActualDatabaseEntry } from '@living-dictionaries/types'
 import { program } from 'commander'
-import { db } from '../config'
+import { db } from '../config-firebase'
 import { reverse_semantic_domains_mapping } from './reverse-semantic-domains-mapping'
 import { turn_dialect_strings_to_arrays } from './turn-dialects-to-arrays'
 

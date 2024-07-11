@@ -4,9 +4,9 @@
   import Video from '../../entries/Video.svelte'
   import GeoTaggingModal from './GeoTaggingModal.svelte'
   import InitableShowHide from './InitableShowHide.svelte'
+  import MapboxStatic from '$lib/components/maps/mapbox/static/MapboxStatic.svelte'
   import Image from '$lib/components/image/Image.svelte'
   import { page } from '$app/stores'
-  import MapboxStatic from '$lib/components/maps/mapbox/static/MapboxStatic.svelte'
   import type { DbOperations } from '$lib/dbOperations'
   import AddImage from '$lib/components/image/AddImage.svelte'
 
