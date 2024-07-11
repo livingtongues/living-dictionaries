@@ -15,7 +15,7 @@
     "test:all": "pnpm --recursive --stream test -- --run",
     "test:e2e": "pnpm --filter=site test:e2e",
     "lint": "eslint . --cache --quiet",
-    "lint:fix": "eslint --fix",
+    "lint:fix": "eslint . --cache --fix",
     "lint:inspect": "npx @eslint/config-inspector",
     "lint:inspect-future": "eslint --inspect-config",
     "reset-db": "pnpm --filter=site reset-db",
