@@ -89,17 +89,19 @@ export async function importEntries(
           const new_speaker: ISpeaker = {
             displayName: row.speakerName,
             birthplace: row.speakerHometown || '',
-            decade: Number.parseInt(row.speakerAge),
-            gender: row.speakerGender as 'm' | 'f' | 'o',
+            decade: Number.parseInt(row.speakerAge) || null,
+            gender: row.speakerGender as 'm' | 'f' | 'o' || null,
             contributingTo: [dictionary_id],
             createdAt: timestamp as Timestamp,
             createdBy: developer_in_charge_firebase_uid,
             updatedAt: timestamp as Timestamp,
             updatedBy: developer_in_charge_firebase_uid,
           }
-          const new_speaker_id = await db.collection('speakers').add(new_speaker).then(ref => ref.id)
-          firebase_entry.sf.sp = new_speaker_id
-          speakers.push({ id: new_speaker_id, ...new_speaker })
+          if (!dry) {
+            const new_speaker_id = await db.collection('speakers').add(new_speaker).then(ref => ref.id)
+            firebase_entry.sf.sp = new_speaker_id
+            speakers.push({ id: new_speaker_id, ...new_speaker })
+          }
         }
       }
     }
