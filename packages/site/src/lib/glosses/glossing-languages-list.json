@@ -17,6 +17,7 @@
     "vernacularAlternate": "Afaraf"
   },
   "af": {
+    "vernacularName": "Afrikaans",
     "internalName": "european"
   },
   "ak": {
@@ -36,6 +37,7 @@
   },
   "ar": {
     "vernacularName": "العَرَبِيَّة‎",
+    "vernacularAlternate": "Arabic",
     "internalName": "sil_arabic_phonetic",
     "showKeyboard": true
   },
@@ -84,7 +86,9 @@
   "eu": {
     "vernacularName": "Euskara"
   },
-  "bbc": {},
+  "bbc": {
+    "vernacularName": "Batak Toba"
+  },
   "be": {
     "vernacularName": "Беларуская мова",
     "vernacularAlternate": "Bielaruskaja mova"
@@ -109,7 +113,9 @@
     "vernacularName": "Bicol",
     "vernacularAlternate": "Bicol Naga"
   },
-  "bi": {},
+  "bi": {
+    "vernacularName": "Bislama"
+  },
   "brx": {
     "vernacularName": "बड़ो"
   },
@@ -119,7 +125,9 @@
   "bug": {
     "vernacularName": "Basa Ugi"
   },
-  "bg": {},
+  "bg": {
+    "vernacularName": "Bulgarian"
+  },
   "my": {
     "vernacularName": "မြန်မာစာ",
     "vernacularAlternate": "mranmabhasa",
@@ -141,7 +149,9 @@
   "nya": {
     "vernacularName": "Chicheŵa"
   },
-  "cjk": {},
+  "cjk": {
+    "vernacularName": "Chokwe"
+  },
   "chk": {
     "vernacularName": "Chuuk"
   },
@@ -161,9 +171,12 @@
     "vernacularName": "dansk"
   },
   "prs": {
-    "vernacularName": "درى"
+    "vernacularName": "درى",
+    "vernacularAlternate": "Dari"
   },
-  "dv": {},
+  "dv": {
+    "vernacularName": "Dhivehi"
+  },
   "din": {
     "vernacularName": "Thuɔŋjäŋ"
   },
@@ -179,9 +192,14 @@
   "dyu": {
     "vernacularName": "Julakan"
   },
-  "dz": {},
-  "efi": {},
+  "dz": {
+    "vernacularName": "Dzongkha"
+  },
+  "efi": {
+    "vernacularName": "Efik"
+  },
   "ekg": {
+    "vernacularName": "Ekari",
     "vernacularAlternate": "Kapauku"
   },
   "et": {
@@ -190,7 +208,9 @@
   "ee": {
     "vernacularName": "Eʋegbe"
   },
-  "ewo": {},
+  "ewo": {
+    "vernacularName": "Ewondo (Kolo)"
+  },
   "fan": {
     "vernacularName": "Pangwe",
     "vernacularAlternate": "Pahouin"
@@ -231,6 +251,7 @@
     "vernacularName": "lingua Galega"
   },
   "cab": {
+    "vernacularName": "Garifuna",
     "vernacularAlternate": "Kali'ina"
   },
   "gba": {
@@ -301,8 +322,12 @@
   "iba": {
     "vernacularName": "jaku Iban"
   },
-  "ibg": {},
-  "ibb": {},
+  "ibg": {
+    "vernacularName": "Ibanag"
+  },
+  "ibb": {
+    "vernacularName": "Ibibio"
+  },
   "is": {
     "vernacularName": "Íslenskt tungumál"
   },
@@ -352,20 +377,27 @@
   "kn": {
     "vernacularName": "ಕನ್ನಡ"
   },
-  "kr": {},
-  "pam": {},
+  "kr": {
+    "vernacularName": "Kanuri"
+  },
+  "pam": {
+    "vernacularName": "Kapampangan"
+  },
   "kaa": {
     "vernacularName": "Қарақалпақ тили / Qaraqalpaq tili",
     "vernacularAlternate": "قاراقالپاق تىلى"
   },
   "xsm": {
+    "vernacularName": "Kasem",
     "vernacularAlternate": "Kasena"
   },
   "ks": {
     "vernacularName": "कॉशुर ",
     "vernacularAlternate": "كٲشُر"
   },
-  "kmg": {},
+  "kmg": {
+    "vernacularName": "Kâte"
+  },
   "kk": {
     "vernacularName": "Қазақ тілі / Qazaq tili",
     "vernacularAlternate": "قازاق ٴتىلى"
@@ -389,7 +421,9 @@
   "ki": {
     "vernacularName": "Gĩkũyũ"
   },
-  "kmb": {},
+  "kmb": {
+    "vernacularName": "Kimbundu"
+  },
   "krj": {
     "vernacularName": "Kinaray-a"
   },
@@ -423,10 +457,18 @@
     "vernacularName": "Kusaie",
     "vernacularAlternate": "Kosrae"
   },
-  "kri": {},
-  "rop": {},
-  "bzj": {},
-  "kun": {},
+  "kri": {
+    "vernacularName": "Krio"
+  },
+  "rop": {
+    "vernacularName": "Kriol"
+  },
+  "bzj": {
+    "vernacularName": "Kriol (Belize)"
+  },
+  "kun": {
+    "vernacularName": "Kunama"
+  },
   "ku": {
     "vernacularName": "Kurdî",
     "vernacularAlternate": "کوردی"
@@ -445,7 +487,9 @@
   "lbj": {
     "vernacularName": "ལ་དྭགས་སྐད་"
   },
-  "slp": {},
+  "slp": {
+    "vernacularName": "Lamaholot"
+  },
   "lo": {
     "vernacularName": "ພາສາລາວ",
     "vernacularAlternate": "phasa lao",
@@ -469,6 +513,7 @@
     "vernacularName": "Oluganda"
   },
   "luo": {
+    "vernacularName": "Luo",
     "vernacularAlternate": "Dholuo"
   },
   "ltz": {
@@ -483,7 +528,9 @@
   "mad": {
     "vernacularName": "Basa Mathura"
   },
-  "mdh": {},
+  "mdh": {
+    "vernacularName": "Maguindanao"
+  },
   "mai": {
     "vernacularName": "मैथिलि"
   },
@@ -508,6 +555,7 @@
     "vernacularAlternate": "Minahasa Malay"
   },
   "tbf": {
+    "vernacularName": "Mandara",
     "vernacularAlternate": "Wandala"
   },
   "cmn": {
@@ -518,7 +566,9 @@
   "mnk": {
     "vernacularName": "Mandinka kango"
   },
-  "mqy": {},
+  "mqy": {
+    "vernacularName": "Manggarai"
+  },
   "mni": {
     "vernacularName": "Meeteilon ",
     "vernacularAlternate": "Meithei"
@@ -561,6 +611,7 @@
     "vernacularName": "монгол"
   },
   "mui": {
+    "vernacularName": "Musi",
     "vernacularAlternate": "Palembang"
   },
   "naq": {
@@ -582,10 +633,18 @@
   "nij": {
     "vernacularName": "Dayak Ngaju"
   },
-  "sba": {},
-  "yrl": {},
-  "nia": {},
-  "max": {},
+  "sba": {
+    "vernacularName": "Ngambay"
+  },
+  "yrl": {
+    "vernacularName": "Nheengatu"
+  },
+  "nia": {
+    "vernacularName": "Nias"
+  },
+  "max": {
+    "vernacularName": "North Maluku (Ternate) Malay"
+  },
   "nde": {
     "vernacularName": "Sindebele/isiNdebele"
   },
@@ -626,11 +685,15 @@
     "vernacularName": "Salitan Pangasinan"
   },
   "pap": {
+    "vernacularName": "Papiamento",
     "vernacularAlternate": "Papiamentu"
   },
-  "pmy": {},
+  "pmy": {
+    "vernacularName": "Papuan Malay"
+  },
   "ps": {
-    "vernacularName": "پښتو"
+    "vernacularName": "پښتو",
+    "vernacularAlternate": "Pashto"
   },
   "fa": {
     "vernacularName": "فارسی",
@@ -676,7 +739,7 @@
     "vernacularName": "limba română"
   },
   "rm": {
-    "vernacularName": "aka Rumantsch"
+    "vernacularName": "Rumantsch"
   },
   "ru": {
     "vernacularName": "русский",
@@ -693,7 +756,10 @@
   "sat": {
     "vernacularName": "hoɽ roɽ"
   },
-  "mwm": {},
+  "mwm": {
+    "vernacularName": "Sar",
+    "vernacularAlternate": "Sara"
+  },
   "srm": {
     "vernacularName": "Saamáka"
   },
@@ -723,6 +789,7 @@
     "internalName": "us"
   },
   "jiv": {
+    "vernacularName": "Shuar",
     "vernacularAlternate": "Jivaro"
   },
   "ii": {
@@ -808,7 +875,9 @@
   "tem": {
     "vernacularName": "KʌThemnɛ"
   },
-  "tft": {},
+  "tft": {
+    "vernacularName": "Ternate"
+  },
   "tet": {
     "vernacularName": "Lia-Tetun"
   },
@@ -825,13 +894,16 @@
     "useKeyboard": "bo-Tibt-CN",
     "showKeyboard": true
   },
-  "tvo": {},
+  "tvo": {
+    "vernacularName": "Tidore"
+  },
   "tig": {
     "vernacularName": "ትግረ / ትግሬ",
-    "vernacularAlternate": "ኻሳ"
+    "vernacularAlternate": "ኻሳ, Tigre"
   },
   "ti": {
-    "vernacularName": "ትግርኛ"
+    "vernacularName": "ትግርኛ",
+    "vernacularAlternate": "Tigrinya"
   },
   "tiv": {
     "vernacularName": "dzwa Tiv"
@@ -871,13 +943,18 @@
   "tvl": {
     "vernacularName": "Te 'gana Tūvalu"
   },
-  "tw": {},
+  "tw": {
+    "vernacularName": "Twi"
+  },
   "uk": {
     "vernacularName": "Українська мова"
   },
-  "umb": {},
+  "umb": {
+    "vernacularName": "Umbundu"
+  },
   "ur": {
     "vernacularName": "اُردُو",
+    "vernacularAlternate": "Urdu",
     "internalName": "kbdurdu",
     "showKeyboard": true
   },
@@ -902,7 +979,9 @@
   "cym": {
     "vernacularName": "Cymraeg"
   },
-  "wlo": {},
+  "wlo": {
+    "vernacularName": "Wolio (Butonese)"
+  },
   "wo": {
     "vernacularName": "Wollof"
   },
@@ -964,12 +1043,21 @@
   },
   "hbo-hebr": {
     "vernacularName": "עִבְרִית",
+    "vernacularAlternate": "Hebrew",
     "internalName": "sil_hebrew",
     "showKeyboard": true
   },
-  "ne-2": {},
+  "ne-2": {
+    "vernacularName": "Nepali (Romanization)"
+  },
   "apd": {
-    "vernacularName": "لهجة سودانية"
+    "vernacularName": "لهجة سودانية",
+    "vernacularAlternate": "Sudanese Arabic"
+  },
+  "hoi": {
+    "vernacularName": "Holikachuk",
+    "internalName": "holikachuk",
+    "showKeyboard": true
   },
   "": {}
 }
