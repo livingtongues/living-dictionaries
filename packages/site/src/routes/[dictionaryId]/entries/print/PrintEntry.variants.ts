@@ -18,9 +18,31 @@ const selectedFields: IPrintFields = {
   photo: true,
   speaker: true,
   sources: true,
+  example_sentence: true,
 }
 
 export const variants: DeprecatedVariant<Component>[] = [
+  {
+    name: 'Example Sentences',
+    viewports: [{ width: 400, height: 200 }],
+    props: {
+      dictionary: basic_mock_dictionary,
+      selectedFields,
+      entry: {
+        lexeme: '(h)æg-ko gag=tǝnǝ nlaʔ-pog',
+        senses: [{
+          example_sentences: [{
+            vn: 'test',
+            es: 'Esta es una oración de ejemplo',
+            en: 'This is an example sentence',
+          }],
+        }],
+      },
+      showQrCode: true,
+      headwordSize: 20,
+      showLabels: true,
+    },
+  },
   {
     name: 'complex',
     viewports: [{ width: 400, height: 700 }],

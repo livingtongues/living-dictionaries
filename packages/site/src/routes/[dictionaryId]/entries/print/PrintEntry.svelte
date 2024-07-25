@@ -1,25 +1,25 @@
 <script lang="ts">
-  import { page } from '$app/stores';
-  import { StandardPrintFields, type ExpandedEntry, type IDictionary, type IPrintFields } from '@living-dictionaries/types';
-  import { order_glosses } from '$lib/helpers/glosses';
-  import QrCode from './QrCode.svelte';
-  import sanitize from 'xss';
-  import { defaultPrintFields } from './printFields';
-  import { add_periods_and_comma_separate_parts_of_speech } from '$lib/helpers/entry/add_periods_and_comma_separate_parts_of_speech';
-  import { get_local_orthographies } from '$lib/helpers/entry/get_local_orthagraphies';
-  import { slashSeparateSentences } from './separateSentences';
-  import { tick } from 'svelte';
+  import { type ExpandedEntry, type IDictionary, type IPrintFields, StandardPrintFields } from '@living-dictionaries/types'
+  import sanitize from 'xss'
+  import { tick } from 'svelte'
+  import QrCode from './QrCode.svelte'
+  import { defaultPrintFields } from './printFields'
+  // import { slashSeparateSentences } from './separateSentences'
+  import { page } from '$app/stores'
+  import { order_example_sentences, order_glosses } from '$lib/helpers/glosses'
+  import { add_periods_and_comma_separate_parts_of_speech } from '$lib/helpers/entry/add_periods_and_comma_separate_parts_of_speech'
+  import { get_local_orthographies } from '$lib/helpers/entry/get_local_orthagraphies'
 
-  export let entry: ExpandedEntry;
-  export let selectedFields = defaultPrintFields;
-  export let imagePercent = 50;
-  export let fontSize = 12;
-  export let headwordSize = 12;
-  export let dictionary: IDictionary;
-  export let showLabels = false;
-  export let showQrCode = false;
+  export let entry: ExpandedEntry
+  export let selectedFields = defaultPrintFields
+  export let imagePercent = 50
+  export let fontSize = 12
+  export let headwordSize = 12
+  export let dictionary: IDictionary
+  export let showLabels = false
+  export let showQrCode = false
 
-  $: selectedPrintFields = (Object.keys(StandardPrintFields) as (keyof IPrintFields)[]).filter((key) => entry[key] && selectedFields[key])
+  $: selectedPrintFields = (Object.keys(StandardPrintFields) as (keyof IPrintFields)[]).filter(key => entry[key] && selectedFields[key])
 </script>
 
 <div style="font-size: {fontSize}pt;">
@@ -49,7 +49,11 @@
     {/if}
 
     {#if selectedFields.example_sentence}
-      <i>{slashSeparateSentences(sense.example_sentences)}</i>
+      <i>{order_example_sentences({
+        example_sentences: sense.example_sentences,
+        dictionary_gloss_languages: dictionary.glossLanguages,
+      }).join(' / ')}</i>
+      <!-- {slashSeparateSentences(sense.example_sentences)} -->
     {/if}
 
     {#if selectedFields.semantic_domains}
