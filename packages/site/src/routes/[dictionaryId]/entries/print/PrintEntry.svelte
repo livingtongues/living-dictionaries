@@ -50,7 +50,7 @@
 
     {#if selectedFields.example_sentence}
       <i>{order_example_sentences({
-        example_sentences: sense.example_sentences,
+        example_sentences: sense.example_sentences?.[0],
         dictionary_gloss_languages: dictionary.glossLanguages,
       }).join(' / ')}</i>
       <!-- {slashSeparateSentences(sense.example_sentences)} -->

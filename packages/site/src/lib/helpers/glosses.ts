@@ -24,14 +24,15 @@ export function order_glosses({ glosses, dictionary_gloss_languages, t, label = 
 
 export function order_example_sentences({ example_sentences, dictionary_gloss_languages }:
 {
-  example_sentences: IExampleSentence[]
+  example_sentences: IExampleSentence
   dictionary_gloss_languages: string[]
 },
 ): string[] {
-  if (!example_sentences) return []
+  if (!example_sentences || !example_sentences.vn) return []
 
-  const example_sentences_that_have_gloss = dictionary_gloss_languages.map(bcp => example_sentences[bcp])
-  example_sentences_that_have_gloss.unshift(example_sentences)
+  let example_sentences_that_have_gloss = dictionary_gloss_languages.map(bcp => example_sentences[bcp])
+  example_sentences_that_have_gloss = example_sentences_that_have_gloss.filter(Boolean)
+  example_sentences_that_have_gloss.unshift(example_sentences.vn)
 
   return example_sentences_that_have_gloss
 }

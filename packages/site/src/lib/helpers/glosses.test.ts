@@ -52,18 +52,25 @@ describe(order_glosses, () => {
 })
 
 describe('order example sentences', () => {
-  const example_sentences = [{
+  const example_sentences = {
     vn: 'hyn du ha',
     en: 'the apple is red',
     es: 'la manzana es roja',
-    empty: '',
-    null: null,
     de: 'der Apfel ist rot',
-  }]
+  }
   const dictionary_gloss_languages = ['de', 'es', 'en']
 
   test('orders based on vernacular first', () => {
     expect(order_example_sentences({ example_sentences, dictionary_gloss_languages }).join(' / ')).toEqual('hyn du ha / der Apfel ist rot / la manzana es roja / the apple is red')
+  })
+
+  test('order if some examples are empty strings, null or do not exist', () => {
+    const example_sentences = {
+      vn: 'hyn du ha',
+      en: '',
+      es: null,
+    }
+    expect(order_example_sentences({ example_sentences, dictionary_gloss_languages }).join(' / ')).toEqual('hyn du ha')
   })
 })
 
