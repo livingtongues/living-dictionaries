@@ -4,7 +4,6 @@
   import { tick } from 'svelte'
   import QrCode from './QrCode.svelte'
   import { defaultPrintFields } from './printFields'
-  // import { slashSeparateSentences } from './separateSentences'
   import { page } from '$app/stores'
   import { order_example_sentences, order_glosses } from '$lib/helpers/glosses'
   import { add_periods_and_comma_separate_parts_of_speech } from '$lib/helpers/entry/add_periods_and_comma_separate_parts_of_speech'
@@ -53,7 +52,6 @@
         example_sentences: sense.example_sentences?.[0],
         dictionary_gloss_languages: dictionary.glossLanguages,
       }).join(' / ')}</i>
-      <!-- {slashSeparateSentences(sense.example_sentences)} -->
     {/if}
 
     {#if selectedFields.semantic_domains}
