@@ -30,9 +30,8 @@ export function order_example_sentences({ example_sentences, dictionary_gloss_la
 ): string[] {
   if (!example_sentences || !example_sentences.vn) return []
 
-  let example_sentences_that_have_gloss = dictionary_gloss_languages.map(bcp => example_sentences[bcp])
-  example_sentences_that_have_gloss = example_sentences_that_have_gloss.filter(Boolean)
-  example_sentences_that_have_gloss.unshift(example_sentences.vn)
+  const example_sentences_that_have_gloss = dictionary_gloss_languages.map(bcp => example_sentences[bcp]).filter(Boolean)
+  example_sentences_that_have_gloss.unshift(example_sentences.vn) // vernacular example sentence should be always the first sentence
 
   return example_sentences_that_have_gloss
 }
