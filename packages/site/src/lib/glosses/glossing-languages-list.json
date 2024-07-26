@@ -91,7 +91,9 @@
   },
   "be": {
     "vernacularName": "Беларуская мова",
-    "vernacularAlternate": "Bielaruskaja mova"
+    "vernacularAlternate": "Bielaruskaja mova",
+    "internalName": "basic_kbdblr",
+    "showKeyboard": true
   },
   "bem": {
     "vernacularName": "ChiBemba"
