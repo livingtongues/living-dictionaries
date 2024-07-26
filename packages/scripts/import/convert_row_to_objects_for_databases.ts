@@ -67,10 +67,10 @@ export function convert_row_to_objects_for_databases({ row, dateStamp, timestamp
   if (row.ID) firebase_entry.ei = row.ID
 
   if (row.localOrthography) firebase_entry.lo1 = row.localOrthography
-  if (row.localOrthography2) firebase_entry.lo2 = row.localOrthography2
-  if (row.localOrthography3) firebase_entry.lo3 = row.localOrthography3
-  if (row.localOrthography4) firebase_entry.lo4 = row.localOrthography4
-  if (row.localOrthography5) firebase_entry.lo5 = row.localOrthography5
+  if (row['localOrthography.2']) firebase_entry.lo2 = row['localOrthography.2']
+  if (row['localOrthography.3']) firebase_entry.lo3 = row['localOrthography.3']
+  if (row['localOrthography.4']) firebase_entry.lo4 = row['localOrthography.4']
+  if (row['localOrthography.5']) firebase_entry.lo5 = row['localOrthography.5']
 
   if (row.notes) firebase_entry.nt = row.notes
 
@@ -168,7 +168,7 @@ export function convert_row_to_objects_for_databases({ row, dateStamp, timestamp
       }
     }
 
-    const semanticDomain_FOLLOWED_BY_OPTIONAL_DIGIT = /^semanticDomain\d*$/ // semanticDomain, semanticDomain2, semanticDomain<#>, but not semanticDomain_custom
+    const semanticDomain_FOLLOWED_BY_OPTIONAL_DIGIT = /^semanticDomain(?:\.\d)*$/ // semanticDomain, semanticDomain2, semanticDomain<#>, but not semanticDomain_custom
     if (semanticDomain_FOLLOWED_BY_OPTIONAL_DIGIT.test(key)) {
       if (!firebase_entry.sdn) firebase_entry.sdn = []
 
