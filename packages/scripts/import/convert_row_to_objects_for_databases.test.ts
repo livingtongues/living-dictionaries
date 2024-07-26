@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs'
 import path from 'node:path'
 import type { Timestamp } from 'firebase-admin/firestore'
 import { convert_row_to_objects_for_databases } from './convert_row_to_objects_for_databases.js'
-import type { Row } from './convert_row_to_objects_for_databases.js'
+import type { Row } from './row.type'
 import { parseCSVFrom } from './parse-csv.js'
 
 describe('convertJsonRowToEntryFormat without senses', () => {
@@ -395,7 +395,6 @@ describe('convertJsonRowToEntryFormat with senses', () => {
         's4.en_gloss': 'mythological creature',
         's4.es_gloss': 'creatura mitológica',
         's4.fr_gloss': 'créature mythologique',
-
       },
     ]
     const entries = csv_rows_with_senses.map(row => convert_row_to_objects_for_databases({ row, dateStamp: fakeDateStamp, timestamp: fakeTimeStamp, test: true }))
@@ -1500,6 +1499,6 @@ describe('convertJsonRowToEntryFormat with senses', () => {
   })
 })
 
-function removeHeaderRow(rows: any[]) {
+function removeHeaderRow(rows: Row[]) {
   return rows.splice(1)
 }
