@@ -17,7 +17,7 @@ type Sense = `${Sense_Prefix}${Sense_Fields}`
 type Sense_Fields = `${Glossing_Languages}_gloss` | `partOfSpeech${Number_Suffix}` | `semanticDomain${Number_Suffix}` | 'semanticDomain_custom' | 'nounClass' // en_gloss, s2.en_gloss, nounClass, s2.nounClass
 
 type Sentence = `${Sense_Prefix}${Sentence_Fields}` | `${Sense_Prefix}${Sentence_Fields}${Number_Suffix}`
-type Sentence_Fields = `${Glossing_Languages}_exampleSentence` | `${Writing_Systems}_vernacular_exampleSentence` | 'vernacular_exampleSentence'
+type Sentence_Fields = `${Glossing_Languages}_exampleSentence` | `default_vernacular_exampleSentence` | 'vernacular_exampleSentence'
 
 type Media = 'photoFile' | 'soundFile' | 'speakerName' | 'speakerHometown' | 'speakerAge' | 'speakerGender'
 
