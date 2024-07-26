@@ -13,8 +13,9 @@ describe('convertJsonRowToEntryFormat without senses', () => {
   test('glosses', () => {
     const csv_rows_without_header: Row[] = [
       {
-        lexeme: 'dolphin',
-        es_gloss: 'delfín',
+        'lexeme': 'dolphin',
+        'localOrthography.2': 'different script of dolphin',
+        'es_gloss': 'delfín',
       },
     ]
     const entries = csv_rows_without_header.map(row => convert_row_to_objects_for_databases({ row, dateStamp: fakeDateStamp, timestamp: fakeTimeStamp }))
@@ -28,6 +29,7 @@ describe('convertJsonRowToEntryFormat without senses', () => {
               "es": "delfín",
             },
             "ii": "v4-1715819006966",
+            "lo2": "different script of dolphin",
             "lx": "dolphin",
             "ua": 10101010,
           },
@@ -70,10 +72,10 @@ describe('convertJsonRowToEntryFormat without senses', () => {
   test('semantic domains', () => {
     const csv_rows_without_header: Row[] = [
       {
-        lexeme: 'dolphins',
-        semanticDomain: '5.15',
-        semanticDomain2: '1',
-        semanticDomain_custom: 'the sea!',
+        'lexeme': 'dolphins',
+        'semanticDomain': '5.15',
+        'semanticDomain.2': '1',
+        'semanticDomain_custom': 'the sea!',
       },
     ]
     const entries = csv_rows_without_header.map(row => convert_row_to_objects_for_databases({ row, dateStamp: fakeDateStamp, timestamp: fakeTimeStamp }))
