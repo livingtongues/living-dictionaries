@@ -2,7 +2,7 @@ import fs from 'node:fs'
 import path, { dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import type { ActualDatabaseEntry } from '@living-dictionaries/types'
-import { db } from '../config'
+import { db } from '../config-firebase'
 
 write_entries()
 
