@@ -371,6 +371,7 @@ export interface Database {
           coordinates: Json | null
           created_at: string
           created_by: string
+          elicitation_id: string | null
           deleted: string | null
           dialects: string[] | null
           dictionary_id: string
@@ -378,7 +379,7 @@ export interface Database {
           interlinearization: string | null
           lexeme: Json
           morphology: string | null
-          notes: string | null
+          notes: Json | null
           phonetic: string | null
           plural_form: string | null
           scientific_names: string[] | null
@@ -391,6 +392,7 @@ export interface Database {
           coordinates?: Json | null
           created_at?: string
           created_by: string
+          elicitation_id?: string | null
           deleted?: string | null
           dialects?: string[] | null
           dictionary_id: string
@@ -398,7 +400,7 @@ export interface Database {
           interlinearization?: string | null
           lexeme: Json
           morphology?: string | null
-          notes?: string | null
+          notes?: Json | null
           phonetic?: string | null
           plural_form?: string | null
           scientific_names?: string[] | null
@@ -411,6 +413,7 @@ export interface Database {
           coordinates?: Json | null
           created_at?: string
           created_by?: string
+          elicitation_id?: string | null
           deleted?: string | null
           dialects?: string[] | null
           dictionary_id?: string
@@ -418,7 +421,7 @@ export interface Database {
           interlinearization?: string | null
           lexeme?: Json
           morphology?: string | null
-          notes?: string | null
+          notes?: Json | null
           phonetic?: string | null
           plural_form?: string | null
           scientific_names?: string[] | null

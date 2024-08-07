@@ -42,11 +42,11 @@ CREATE TABLE entries ( -- TODO: migrate from Firestore
   plural_form text,
   variant text,
   dialects text[], -- TODO: remove this field by creating a dialects table and many-many table
-  notes text, -- TODO: change type to jsonb for a MultiString
+  notes text, -- changed to jsonb for a MultiString
   sources text[],
-  -- elicitation_id text, -- TODO: save as a tag when migrating onondaga
   scientific_names text[],
   coordinates jsonb, -- Coordinates
+  -- added elicitation_id text which was the elicitation id in Firebase, used for Onondaga custom sort
   created_at timestamp with time zone DEFAULT now() NOT NULL,
   created_by uuid NOT NULL REFERENCES auth.users,
   updated_at timestamp with time zone DEFAULT now() NOT NULL,
