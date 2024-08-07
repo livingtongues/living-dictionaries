@@ -46,7 +46,7 @@ CREATE TABLE entries ( -- TODO: migrate from Firestore
   sources text[],
   scientific_names text[],
   coordinates jsonb, -- Coordinates
-  -- added elicitation_id text which was the elicitation id in Firebase, used for Onondaga custom sort
+  -- added elicitation_id text
   created_at timestamp with time zone DEFAULT now() NOT NULL,
   created_by uuid NOT NULL REFERENCES auth.users,
   updated_at timestamp with time zone DEFAULT now() NOT NULL,
