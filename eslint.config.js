@@ -24,6 +24,7 @@ export default antfu(
       '**/route/kitbook/**',
       '**/locales/**',
       'supabase/functions/**',
+      '**.snap.json',
     ],
     stylistic: {
       overrides: {

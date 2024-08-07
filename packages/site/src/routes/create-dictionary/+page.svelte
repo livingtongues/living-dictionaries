@@ -301,7 +301,7 @@
       <textarea
         name="conLangDescription"
         rows="3"
-        minlength="40"
+        minlength="1"
         maxlength="1000"
         bind:value={conLangDescription}
         class="form-input w-full" />

@@ -31,4 +31,5 @@ interface DeprecatedAudio {
   previousFileName?: string // put into metadata
   size?: number // put into metadata
   mt?: string // media-token deprecated after updating storage security rules, add onto end of URL + path // WAS also url
+  cr?: string // credit
 }

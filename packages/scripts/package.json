@@ -14,7 +14,7 @@
   },
   "main": "index.ts",
   "scripts": {
-    "write-entries": "tsx migrate-to-supabase/entries.ts -e prod",
+    "fetch-entries": "tsx migrate-to-supabase/fetch-entries.ts -e prod",
     "migrate-users": "tsx migrate-to-supabase/auth.ts",
     "countAllEntries": "tsx countAllEntries.ts",
     "entryRefactor": "tsx refactor/entry-refactor.ts",
