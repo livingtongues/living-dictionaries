@@ -1,6 +1,7 @@
 // import { randomUUID } from 'node:crypto'
 import type { ActualDatabaseEntry } from '@living-dictionaries/types'
 import type { TablesInsert } from '../../site/src/lib/supabase/generated.types'
+import { log_once } from './log-once'
 
 let id_count = 0
 function randomUUID() {
@@ -13,6 +14,7 @@ const admin_uid_if_no_owner = 'de2d3715-6337-45a3-a81a-d82c3210b2a7' // jacob@li
 export function convert_entries(entries: typeof import('./entries.json')) {
   const success = []
   const todo = []
+  // const last_entry = entries[entries.length - 1]
   for (const entry of entries) {
     const [processed_fb_entry_remains, supa_data] = convert_entry(JSON.parse(JSON.stringify(entry)))
     if (Object.keys(processed_fb_entry_remains).length === 0) {
@@ -69,10 +71,13 @@ function convert_entry(_entry: Partial<ActualDatabaseEntry> & Record<string, any
       delete _entry.ab
     }
 
+    if (!entry.created_by)
+      entry.created_by = admin_uid_if_no_owner
+
     const first_sense_from_base: TablesInsert<'senses'> = {
       entry_id: _entry.id,
-      updated_by: entry.updated_by,
       created_by: entry.created_by,
+      updated_by: entry.updated_by || entry.created_by,
       id: randomUUID(),
     }
 
@@ -105,7 +110,12 @@ function convert_entry(_entry: Partial<ActualDatabaseEntry> & Record<string, any
           continue
         }
 
-        // TODO: ii, sdn sr - resume with pnpm t -- --ui convert-entries
+        if (key === 'ii') {
+          // TODO: create a history change with the ii - resume with pnpm t -- --ui convert-entries, https://supabase.com/dashboard/project/actkqboqpzniojhgtqzw/database/schemas
+          log_once(`TODO - ii:${value} in ${entry.dictionary_id}`)
+          delete _entry[key]
+          continue
+        }
 
         if (key === 'de') {
           first_sense_from_base.definition = {
@@ -170,10 +180,27 @@ function convert_entry(_entry: Partial<ActualDatabaseEntry> & Record<string, any
       }
 
       if (key === 'sd') {
-        if (Array.isArray(value))
+        if (Array.isArray(value)) {
           first_sense_from_base.write_in_semantic_domains = value
-        delete _entry[key]
-        continue
+          delete _entry[key]
+          continue
+        }
+      }
+
+      if (key === 'sdn') {
+        if (Array.isArray(value)) {
+          first_sense_from_base.semantic_domains = value
+          delete _entry[key]
+          continue
+        }
+      }
+
+      if (key === 'sr') {
+        if (Array.isArray(value)) {
+          entry.sources = value
+          delete _entry[key]
+          continue
+        }
       }
     }
 
@@ -191,8 +218,8 @@ function convert_entry(_entry: Partial<ActualDatabaseEntry> & Record<string, any
 
       const sentence: TablesInsert<'sentences'> = {
         id: sentence_id,
-        created_by: entry.created_by || admin_uid_if_no_owner,
-        updated_by: entry.updated_by || entry.created_by || admin_uid_if_no_owner,
+        created_by: entry.created_by,
+        updated_by: entry.updated_by || entry.created_by,
         dictionary_id: entry.dictionary_id,
         text: { default: _entry.xe },
       }
@@ -201,7 +228,7 @@ function convert_entry(_entry: Partial<ActualDatabaseEntry> & Record<string, any
       const sense_in_sentences: TablesInsert<'senses_in_sentences'> = {
         sentence_id,
         sense_id: first_sense_from_base.id,
-        created_by: entry.created_by || admin_uid_if_no_owner,
+        created_by: entry.created_by,
         ...(entry.created_at ? { created_at: entry.created_at } : {}),
       }
       senses_in_sentences.push(sense_in_sentences)
@@ -220,8 +247,8 @@ function convert_entry(_entry: Partial<ActualDatabaseEntry> & Record<string, any
         console.info(`No ab for ${_entry.id} sf`)
       const audio: TablesInsert<'audio'> = {
         id: audio_id,
-        created_by: ab || entry.created_by || admin_uid_if_no_owner,
-        updated_by: ab || entry.created_by || admin_uid_if_no_owner,
+        created_by: ab || entry.created_by,
+        updated_by: ab || entry.created_by,
         storage_path: path,
       }
       delete _entry.sf.ab
@@ -241,7 +268,7 @@ function convert_entry(_entry: Partial<ActualDatabaseEntry> & Record<string, any
         if (cr !== 'Jacob Bowdoin')
           audio.source = cr
         else
-          console.info(`Jacob Bowdoin audio credit for ${_entry.id}, dict:${entry.dictionary_id}`)
+          log_once(`Jacob given audio credit in dict:${entry.dictionary_id}`)
         delete _entry.sf.cr
       }
       audios.push(audio)
@@ -249,7 +276,7 @@ function convert_entry(_entry: Partial<ActualDatabaseEntry> & Record<string, any
         audio_speakers.push({
           audio_id,
           speaker_id: sp,
-          created_by: ab || entry.created_by || admin_uid_if_no_owner,
+          created_by: ab || entry.created_by,
           created_at: new Date(ts).toISOString(),
         })
         delete _entry.sf.sp
@@ -270,8 +297,8 @@ function convert_entry(_entry: Partial<ActualDatabaseEntry> & Record<string, any
         console.info(`No ab for ${_entry.id} pf`)
       const photo: TablesInsert<'photos'> = {
         id: photo_id,
-        created_by: ab || uploadedBy || entry.created_by || admin_uid_if_no_owner,
-        updated_by: ab || uploadedBy || entry.created_by || admin_uid_if_no_owner,
+        created_by: ab || uploadedBy || entry.created_by,
+        updated_by: ab || uploadedBy || entry.created_by,
         storage_path: path,
         serving_url: remove_newline_from_end(gcs),
         source: sc || source,
@@ -294,14 +321,14 @@ function convert_entry(_entry: Partial<ActualDatabaseEntry> & Record<string, any
         if (cr !== 'Jacob Bowdoin')
           photo.source = cr
         else
-          console.info(`Jacob Bowdoin photo credit for ${_entry.id}, dict:${entry.dictionary_id}`)
+          log_once(`Jacob given photo credit dict:${entry.dictionary_id}`)
         delete _entry.pf.cr
       }
       photos.push(photo)
       sense_photos.push({
         photo_id,
         sense_id: first_sense_from_base.id,
-        created_by: ab || entry.created_by || admin_uid_if_no_owner,
+        created_by: ab || entry.created_by,
         ...(photo.created_at ? { created_at: photo.created_at } : {}),
       })
       if (!Object.keys(_entry.pf).length)

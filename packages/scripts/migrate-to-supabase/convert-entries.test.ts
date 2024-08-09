@@ -31,8 +31,8 @@ test(convert_entries, () => {
   // 252 - lo and di field
   // 253 - pf
   // 254 - ua, ca, nc
-  // 255
-  const count = 255
+  // 255 - ei, ii, sdn, sr
+  const count = 423
   const { success, todo } = convert_entries(seconds_renamed_entries.slice(0, count))
   console.log({ success: `${success.length}/${count}`, todo: JSON.stringify(todo[0], null, 2), last_success: JSON.stringify(success[success.length - 1], null, 2) })
   expect(success).toHaveLength(count)
