@@ -11,22 +11,7 @@ function randomUUID() {
 
 const admin_uid_if_no_owner = 'de2d3715-6337-45a3-a81a-d82c3210b2a7' // jacob@livingtongues.org
 
-export function convert_entries(entries: typeof import('./entries.json')) {
-  const success = []
-  const todo = []
-  // const last_entry = entries[entries.length - 1]
-  for (const entry of entries) {
-    const [processed_fb_entry_remains, supa_data] = convert_entry(JSON.parse(JSON.stringify(entry)))
-    if (Object.keys(processed_fb_entry_remains).length === 0) {
-      success.push({ entry, supa_data })
-    } else {
-      todo.push({ fb_entry: processed_fb_entry_remains, supa_data })
-    }
-  }
-  return { success, todo }
-}
-
-function convert_entry(_entry: Partial<ActualDatabaseEntry> & Record<string, any>) {
+export function convert_entry(_entry: Partial<ActualDatabaseEntry> & Record<string, any>) {
   try {
     const entry: Partial<TablesInsert<'entries'>> = {
       id: _entry.id,
