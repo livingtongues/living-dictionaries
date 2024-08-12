@@ -45,7 +45,7 @@ import { convert_entry } from './convert-entries'
 // 251721 - dt = date and hm = homonym from FLEx - placing into unstructured
 // 253088 - semdom FLEx semantic domain - placing into unstructured
 // 266408 - deleted vfs date
-const to_snapshot = [229, 231, 235, 252, 253, 254, 255, 1228, 1718, 1759, 4577, 4609, 4945, 5377, 5394, 8005, 14072, 15715, 16141, 23958, 29994, 36138, 39845, 39858, 47304, 47829, 85363, 128736, 166042, 167017, 172023, 200582, 251721, 253088, 266408] // 248444
+const to_snapshot = [229, 231, 235, 252, 253, 254, 255, 1228, 1718, 1759, 4577, 4609, 4945, 5377, 5394, 8005, 14072, 15715, 16141, 23958, 29994, 36138, 39845, 39858, 47304, 47829, 85363, 128736, 166042, 167017, 172023, 200582, 248444, 251721, 253088, 266408]
 
 // pnpm t -- --ui convert-entries
 test(convert_entry, { timeout: 16000 }, async () => {
@@ -64,6 +64,7 @@ test(convert_entry, { timeout: 16000 }, async () => {
     pipeline.on('data', ({ value: entry }) => {
       try {
         const [processed_fb_entry_remains, supa_data] = convert_entry(JSON.parse(JSON.stringify(remove_seconds_underscore(entry))))
+        // accumlate results, create needed speakers, and then assign them. Then prepare to upload changes to database
         if (Object.keys(processed_fb_entry_remains).length === 0) {
           success.push({ entry, supa_data })
         } else {

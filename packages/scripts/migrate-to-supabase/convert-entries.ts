@@ -1,7 +1,7 @@
 // import { randomUUID } from 'node:crypto'
 import type { ActualDatabaseEntry } from '@living-dictionaries/types'
 import type { TablesInsert } from '../../site/src/lib/supabase/generated.types'
-import { log_once } from './log-once'
+// import { log_once } from './log-once'
 
 let id_count = 0
 function randomUUID() {
@@ -92,8 +92,8 @@ export function convert_entry(_entry: Partial<ActualDatabaseEntry> & Record<stri
     delete _entry.lx
 
     if (typeof _entry.ei === 'number') {
-      log_once('TODO: convert ei number to string')
-      // console.log(`ei is number in ${_entry.id} in ${_entry.dictionary_id}`)
+      // @ts-expect-error - errors because ei is not typed as a number
+      entry.elicitation_id = _entry.ei.toString()
       delete _entry.ei
     }
 
@@ -320,13 +320,13 @@ export function convert_entry(_entry: Partial<ActualDatabaseEntry> & Record<stri
       }
       if (typeof _entry.xs.xv === 'string') {
         if (vernacular_sentence)
-          log_once(`example verancular duplicate in ${entry.dictionary_id} - TODO: log lost values`)
+          throw new Error(`xs.vernacular and xs.xv in ${entry.dictionary_id}`)
         vernacular_sentence = _entry.xs.xv
         delete _entry.xs.xv
       }
       if (typeof _entry.xs.vn === 'string') {
-        if (vernacular_sentence)
-          log_once(`example verancular duplicate in ${entry.dictionary_id} - TODO: log lost values`)
+        // if (vernacular_sentence)
+        //   console.log(`xs.vernacular || xs.xv "${vernacular_sentence}" overwritten by xs.vn "${_entry.xs.vn}" for ${entry.id} in ${entry.dictionary_id}`)
         vernacular_sentence = _entry.xs.vn
         delete _entry.xs.vn
       }
@@ -369,14 +369,15 @@ export function convert_entry(_entry: Partial<ActualDatabaseEntry> & Record<stri
 
     const audios: TablesInsert<'audio'>[] = []
     const audio_speakers: TablesInsert<'audio_speakers'>[] = []
+    let new_speaker_name: string = null
 
     if (_entry.sf?.path || _entry.sfs?.[0].path) {
       const audio_id = randomUUID()
       const sf = _entry.sf?.path ? _entry.sf : _entry.sfs[0] as unknown as ActualDatabaseEntry['sf']
       const { ab, path, ts, cr, sp, speakerName, source } = sf
       if (typeof speakerName === 'string') {
-        log_once('TODO: create speaker')
-        // log_once(`TODO: create speaker:${speakerName} in ${entry.dictionary_id}`)
+        if (speakerName.trim())
+          new_speaker_name = speakerName.trim()
         delete sf.speakerName
       }
       delete sf.mt
@@ -568,7 +569,29 @@ export function convert_entry(_entry: Partial<ActualDatabaseEntry> & Record<stri
     delete _entry.id
     delete _entry.dictionary_id
     delete _entry.dictId
-    return [_entry, { entry, senses, sentences, senses_in_sentences, audios, audio_speakers, photos, sense_photos, videos, sense_videos, content_updates }]
+
+    const supa_data = {
+      entry,
+      senses,
+      sentences,
+      senses_in_sentences,
+      audios,
+      audio_speakers,
+      photos,
+      sense_photos,
+      videos,
+      sense_videos,
+      content_updates,
+      ...(new_speaker_name ? { new_speaker_name } : {}),
+    }
+
+    // Object.keys(supa_data).forEach((key) => {
+    //   if (Array.isArray(supa_data[key]) && supa_data[key].length === 0) {
+    //     delete supa_data[key]
+    //   }
+    // })
+
+    return [_entry, supa_data]
   } catch (e) {
     console.log(e, _entry)
     // @ts-expect-error
