@@ -21,11 +21,19 @@ import { convert_entry } from './convert-entries'
 // 4609 - photo.source
 // 4945 - mr
 // 5377 - pl
-// 5394 - xs.xv
-const to_snapshot = [1228, 1718, 1759, 4577, 4609, 4945, 5377, 5394, 8005]
+// 5394 - xs.vn
+// 8005 - translations of sentences (xs.en and xs.hi)
+// 14072 - in
+// 15715 - va
+// 16141 - xs.xv and xs.vn (both are vernacular and we are letting vn win)
+// 23958 - lo and lo1 (birhor has a BUNCH of this)
+// 29994 - co
+// 36138 - vfs
+const to_snapshot = [1228, 1718, 1759, 4577, 4609, 4945, 5377, 5394, 8005, 14072, 15715, 16141, 23958, 29994, 36138]
 
-test(convert_entry, { timeout: 10000 }, async () => {
-  const count = 8005
+// pnpm t -- --ui convert-entries
+test(convert_entry, { timeout: 12000 }, async () => {
+  const count = 36138
   const success: any[] = []
   const todo: any[] = []
 

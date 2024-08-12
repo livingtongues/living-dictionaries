@@ -70,10 +70,6 @@ export function convert_entry(_entry: Partial<ActualDatabaseEntry> & Record<stri
       id: randomUUID(),
     }
 
-    if (_entry.lo && _entry.lo1) {
-      throw new Error(`both lo and lo1 for ${_entry.id}`)
-    }
-
     if (!_entry.lx) {
       throw new Error(`no lx for ${_entry.id}`)
     }
@@ -100,8 +96,8 @@ export function convert_entry(_entry: Partial<ActualDatabaseEntry> & Record<stri
         }
 
         if (key === 'ii') {
-          // TODO: create a history change with the ii - resume with pnpm t -- --ui convert-entries, https://supabase.com/dashboard/project/actkqboqpzniojhgtqzw/database/schemas
-          log_once(`TODO - ii:${value} in ${entry.dictionary_id}`)
+          log_once(`TODO - create a history change with the ii`)
+          // log_once(`TODO - ii:${value} in ${entry.dictionary_id}`)
           delete _entry[key]
           continue
         }
@@ -132,13 +128,25 @@ export function convert_entry(_entry: Partial<ActualDatabaseEntry> & Record<stri
           continue
         }
 
+        if (key === 'in') {
+          entry.interlinearization = value
+          delete _entry[key]
+          continue
+        }
+
+        if (key === 'va') {
+          entry.variant = value
+          delete _entry[key]
+          continue
+        }
+
         if (key === 'pl') {
           entry.plural_form = value
           delete _entry[key]
           continue
         }
 
-        if (key === 'lo' || key === 'lo1') {
+        if (key === 'lo1') {
           entry.lexeme.lo1 = value
           delete _entry[key]
           continue
@@ -222,6 +230,22 @@ export function convert_entry(_entry: Partial<ActualDatabaseEntry> & Record<stri
           continue
         }
       }
+
+      if (key === 'co') {
+        entry.coordinates = value
+        delete _entry[key]
+        continue
+      }
+    }
+
+    if (_entry.lo) {
+      if (!entry.lexeme.lo1) {
+        entry.lexeme.lo1 = _entry.lo
+      } else {
+        log_once(`lo and lo1 in ${entry.dictionary_id} - TODO: log lost lo values`)
+        // console.log(`lo and lo1: ${_entry.lo} || ${entry.lexeme.lo1} : in ${entry.dictionary_id}`)
+      }
+      delete _entry.lo
     }
 
     if (typeof _entry.gl === 'object') {
@@ -240,13 +264,20 @@ export function convert_entry(_entry: Partial<ActualDatabaseEntry> & Record<stri
         vernacular_sentence = _entry.xs.vernacular
         delete _entry.xs.vernacular
       }
-      if (!vernacular_sentence && typeof _entry.xs.vn === 'string') {
+      if (typeof _entry.xs.xv === 'string') {
+        if (vernacular_sentence)
+          log_once(`example verancular duplicate in ${entry.dictionary_id} - TODO: log lost values`)
+        vernacular_sentence = _entry.xs.xv
+        delete _entry.xs.xv
+      }
+      if (typeof _entry.xs.vn === 'string') {
+        if (vernacular_sentence)
+          log_once(`example verancular duplicate in ${entry.dictionary_id} - TODO: log lost values`)
         vernacular_sentence = _entry.xs.vn
         delete _entry.xs.vn
       }
       for (const key of Object.keys(_entry.xs)) {
         translation = { ...(translation || {}), [key]: _entry.xs[key] }
-        log_once(`Example Sentence language: ${key}`)
       }
       delete _entry.xs
     }
@@ -287,8 +318,9 @@ export function convert_entry(_entry: Partial<ActualDatabaseEntry> & Record<stri
       const audio_id = randomUUID()
       const sf = _entry.sf || _entry.sfs[0] as unknown as ActualDatabaseEntry['sf']
       const { ab, path, ts, cr, sp, speakerName, source } = sf
-      if (speakerName) {
-        log_once(`TODO: create speaker:${speakerName} in ${entry.dictionary_id}`)
+      if (typeof speakerName === 'string') {
+        log_once('TODO: create speaker')
+        // log_once(`TODO: create speaker:${speakerName} in ${entry.dictionary_id}`)
         delete sf.speakerName
       }
       delete sf.mt
@@ -296,6 +328,7 @@ export function convert_entry(_entry: Partial<ActualDatabaseEntry> & Record<stri
         console.info(`No ab for ${_entry.id} sf`)
       const audio: TablesInsert<'audio'> = {
         id: audio_id,
+        entry_id: _entry.id,
         created_by: ab || entry.created_by,
         updated_by: ab || entry.created_by,
         storage_path: path,
@@ -353,7 +386,7 @@ export function convert_entry(_entry: Partial<ActualDatabaseEntry> & Record<stri
 
     if (_entry.pf) {
       const photo_id = randomUUID()
-      const { ab, path, ts, cr, gcs, sc, source, uploadedAt, uploadedBy } = _entry.pf
+      const { ab, path, ts, cr, gcs, source, uploadedAt, uploadedBy } = _entry.pf
       if (uploadedAt)
         console.info({ uploadedAt })
       if (!ab && !entry.created_by)
@@ -391,7 +424,6 @@ export function convert_entry(_entry: Partial<ActualDatabaseEntry> & Record<stri
           photo.source = source
         delete _entry.pf.source
       }
-      // also sc may turn up in photos
       photos.push(photo)
       sense_photos.push({
         photo_id,
@@ -405,6 +437,52 @@ export function convert_entry(_entry: Partial<ActualDatabaseEntry> & Record<stri
 
     const videos: TablesInsert<'videos'>[] = []
     const sense_videos: TablesInsert<'sense_videos'>[] = []
+    const video_speakers: TablesInsert<'video_speakers'>[] = []
+
+    if (_entry.vfs?.[0]) {
+      const video_id = randomUUID()
+      const [vf] = _entry.vfs
+      const { ts, ab, path, sp } = vf
+      if (!ab && !entry.created_by)
+        console.info(`No ab for ${_entry.id} vfs`)
+      const video: TablesInsert<'videos'> = {
+        id: video_id,
+        created_by: ab || entry.created_by,
+        updated_by: ab || entry.created_by,
+        storage_path: path,
+      }
+      delete vf.ab
+      delete vf.path
+      if (ts) {
+        if (ts.toString().length === 13)
+          video.created_at = new Date(ts).toISOString()
+        // // @ts-expect-error
+        // else if (typeof ts === 'object' && '_seconds' in ts)
+        //   // @ts-expect-error
+        //   video.created_at = seconds_to_timestamp_string(ts._seconds)
+        else
+          throw new Error(`odd timestamp for ${_entry.id}: ${ts}`)
+        delete vf.ts
+      }
+      videos.push(video)
+      sense_videos.push({
+        video_id,
+        sense_id: first_sense_from_base.id,
+        created_by: ab || entry.created_by,
+        ...(video.created_at ? { created_at: video.created_at } : {}),
+      })
+      if (sp) {
+        video_speakers.push({
+          video_id,
+          speaker_id: sp,
+          created_by: ab || entry.created_by,
+          ...(video.created_at ? { created_at: video.created_at } : {}),
+        })
+        delete vf.sp
+      }
+      if (!Object.keys(vf).length)
+        delete _entry.vfs
+    }
 
     delete _entry.id
     delete _entry.dictionary_id

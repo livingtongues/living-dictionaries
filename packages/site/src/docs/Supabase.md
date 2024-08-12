@@ -1,5 +1,9 @@
 # Local [Supabase](https://supabase.com/docs) dev
 
+Schema:
+https://supabase.com/dashboard/project/actkqboqpzniojhgtqzw/database/schemas
+https://drawsql.app/teams/ld-4/diagrams/entries-sentences-texts
+
 ## Setup
 1. [Install supabase cli locally](https://supabase.com/docs/guides/cli) *- you can skip this the first few times and just prepend `pnpx ` to the commands below, but after awhile you will tire of waiting for pnpx on each command*
 2. Install [Docker Desktop](https://www.docker.com/products/docker-desktop/) and make sure it is running

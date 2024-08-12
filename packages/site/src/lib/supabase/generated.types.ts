@@ -14,9 +14,12 @@ export interface Database {
           created_at: string
           created_by: string
           deleted: string | null
+          entry_id: string | null
           id: string
+          sentence_id: string | null
           source: string | null
           storage_path: string
+          text_id: string | null
           updated_at: string
           updated_by: string
         }
@@ -24,9 +27,12 @@ export interface Database {
           created_at?: string
           created_by: string
           deleted?: string | null
+          entry_id?: string | null
           id?: string
+          sentence_id?: string | null
           source?: string | null
           storage_path: string
+          text_id?: string | null
           updated_at?: string
           updated_by: string
         }
@@ -34,9 +40,12 @@ export interface Database {
           created_at?: string
           created_by?: string
           deleted?: string | null
+          entry_id?: string | null
           id?: string
+          sentence_id?: string | null
           source?: string | null
           storage_path?: string
+          text_id?: string | null
           updated_at?: string
           updated_by?: string
         }
@@ -53,6 +62,27 @@ export interface Database {
             columns: ['created_by']
             isOneToOne: false
             referencedRelation: 'users'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'audio_entry_id_fkey'
+            columns: ['entry_id']
+            isOneToOne: false
+            referencedRelation: 'entries'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'audio_sentence_id_fkey'
+            columns: ['sentence_id']
+            isOneToOne: false
+            referencedRelation: 'sentences'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'audio_text_id_fkey'
+            columns: ['text_id']
+            isOneToOne: false
+            referencedRelation: 'texts'
             referencedColumns: ['id']
           },
           {
@@ -371,10 +401,10 @@ export interface Database {
           coordinates: Json | null
           created_at: string
           created_by: string
-          elicitation_id: string | null
           deleted: string | null
           dialects: string[] | null
           dictionary_id: string
+          elicitation_id: string | null
           id: string
           interlinearization: string | null
           lexeme: Json
@@ -392,10 +422,10 @@ export interface Database {
           coordinates?: Json | null
           created_at?: string
           created_by: string
-          elicitation_id?: string | null
           deleted?: string | null
           dialects?: string[] | null
           dictionary_id: string
+          elicitation_id?: string | null
           id: string
           interlinearization?: string | null
           lexeme: Json
@@ -413,10 +443,10 @@ export interface Database {
           coordinates?: Json | null
           created_at?: string
           created_by?: string
-          elicitation_id?: string | null
           deleted?: string | null
           dialects?: string[] | null
           dictionary_id?: string
+          elicitation_id?: string | null
           id?: string
           interlinearization?: string | null
           lexeme?: Json
