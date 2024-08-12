@@ -10,6 +10,7 @@ function randomUUID() {
 }
 
 const admin_uid_if_no_owner = 'de2d3715-6337-45a3-a81a-d82c3210b2a7' // jacob@livingtongues.org
+const old_talking_dictionaries = '00000000-0000-0000-0000-000000000000' // TODO - decide what user to use or create one for attribution
 
 export function convert_entry(_entry: Partial<ActualDatabaseEntry> & Record<string, any>) {
   try {
@@ -58,6 +59,9 @@ export function convert_entry(_entry: Partial<ActualDatabaseEntry> & Record<stri
 
     if (!entry.created_by)
       entry.created_by = admin_uid_if_no_owner
+
+    if (entry.created_by === 'OTD')
+      entry.created_by = old_talking_dictionaries
 
     const first_sense_from_base: TablesInsert<'senses'> = {
       entry_id: _entry.id,
@@ -122,8 +126,14 @@ export function convert_entry(_entry: Partial<ActualDatabaseEntry> & Record<stri
           continue
         }
 
-        if (key === 'di') {
-          entry.dialects = [value]
+        if (key === 'mr') {
+          entry.morphology = value
+          delete _entry[key]
+          continue
+        }
+
+        if (key === 'pl') {
+          entry.plural_form = value
           delete _entry[key]
           continue
         }
@@ -155,6 +165,15 @@ export function convert_entry(_entry: Partial<ActualDatabaseEntry> & Record<stri
         // }
       }
 
+      if (key === 'di') {
+        if (typeof value === 'string')
+          entry.dialects = [value]
+        else if (Array.isArray(value))
+          entry.dialects = value
+        delete _entry[key]
+        continue
+      }
+
       if (key === 'ps') {
         if (typeof value === 'string')
           first_sense_from_base.parts_of_speech = [value]
@@ -167,6 +186,22 @@ export function convert_entry(_entry: Partial<ActualDatabaseEntry> & Record<stri
       if (key === 'sd') {
         if (Array.isArray(value)) {
           first_sense_from_base.write_in_semantic_domains = value
+          delete _entry[key]
+          continue
+        }
+      }
+
+      if (key === 'sd') {
+        if (Array.isArray(value)) {
+          first_sense_from_base.write_in_semantic_domains = value
+          delete _entry[key]
+          continue
+        }
+      }
+
+      if (key === 'scn') {
+        if (Array.isArray(value)) {
+          entry.scientific_names = value
           delete _entry[key]
           continue
         }
@@ -198,7 +233,29 @@ export function convert_entry(_entry: Partial<ActualDatabaseEntry> & Record<stri
     const sentences: TablesInsert<'sentences'>[] = []
     const senses_in_sentences: TablesInsert<'senses_in_sentences'>[] = []
 
-    if (typeof _entry.xe === 'string') {
+    let vernacular_sentence: string
+    let translation: Record<string, string> = null
+    if (_entry.xs) {
+      if (typeof _entry.xs.vernacular === 'string') {
+        vernacular_sentence = _entry.xs.vernacular
+        delete _entry.xs.vernacular
+      }
+      if (!vernacular_sentence && typeof _entry.xs.vn === 'string') {
+        vernacular_sentence = _entry.xs.vn
+        delete _entry.xs.vn
+      }
+      for (const key of Object.keys(_entry.xs)) {
+        translation = { ...(translation || {}), [key]: _entry.xs[key] }
+        log_once(`Example Sentence language: ${key}`)
+      }
+      delete _entry.xs
+    }
+    if (!vernacular_sentence && typeof _entry.xe === 'string') {
+      vernacular_sentence = _entry.xe
+      delete _entry.xe
+    }
+
+    if (vernacular_sentence) {
       const sentence_id = randomUUID()
 
       const sentence: TablesInsert<'sentences'> = {
@@ -206,7 +263,8 @@ export function convert_entry(_entry: Partial<ActualDatabaseEntry> & Record<stri
         created_by: entry.created_by,
         updated_by: entry.updated_by || entry.created_by,
         dictionary_id: entry.dictionary_id,
-        text: { default: _entry.xe },
+        text: { default: vernacular_sentence },
+        ...(translation ? { translation } : {}),
       }
       sentences.push(sentence)
 
@@ -217,17 +275,23 @@ export function convert_entry(_entry: Partial<ActualDatabaseEntry> & Record<stri
         ...(entry.created_at ? { created_at: entry.created_at } : {}),
       }
       senses_in_sentences.push(sense_in_sentences)
-      delete _entry.xe
     }
 
     const audios: TablesInsert<'audio'>[] = []
     const audio_speakers: TablesInsert<'audio_speakers'>[] = []
 
-    if (_entry.sf) {
+    if (_entry.sf && _entry.sfs?.length) {
+      throw new Error(`sf and sfs in ${entry.dictionary_id}`)
+    }
+    if (_entry.sf || _entry.sfs?.length === 1) {
       const audio_id = randomUUID()
-      // TODO: use speakerName
-      const { ab, path, ts, cr, sp, speakerName } = _entry.sf
-      delete _entry.sf.mt
+      const sf = _entry.sf || _entry.sfs[0] as unknown as ActualDatabaseEntry['sf']
+      const { ab, path, ts, cr, sp, speakerName, source } = sf
+      if (speakerName) {
+        log_once(`TODO: create speaker:${speakerName} in ${entry.dictionary_id}`)
+        delete sf.speakerName
+      }
+      delete sf.mt
       if (!ab && !entry.created_by)
         console.info(`No ab for ${_entry.id} sf`)
       const audio: TablesInsert<'audio'> = {
@@ -236,8 +300,8 @@ export function convert_entry(_entry: Partial<ActualDatabaseEntry> & Record<stri
         updated_by: ab || entry.created_by,
         storage_path: path,
       }
-      delete _entry.sf.ab
-      delete _entry.sf.path
+      delete sf.ab
+      delete sf.path
       if (ts) {
         if (ts.toString().length === 13)
           audio.created_at = new Date(ts).toISOString()
@@ -247,27 +311,41 @@ export function convert_entry(_entry: Partial<ActualDatabaseEntry> & Record<stri
           audio.created_at = seconds_to_timestamp_string(ts._seconds)
         else
           throw new Error(`odd timestamp for ${_entry.id}: ${ts}`)
-        delete _entry.sf.ts
+        delete sf.ts
       }
       if (cr) {
         if (cr !== 'Jacob Bowdoin')
           audio.source = cr
         else
           log_once(`Jacob given audio credit in dict:${entry.dictionary_id}`)
-        delete _entry.sf.cr
+        delete sf.cr
+      }
+      if (source && !cr) {
+        if (source !== 'local_import')
+          audio.source = source
+        delete sf.source
       }
       audios.push(audio)
-      if (sp) {
+      let speaker_id: string = null
+      if (Array.isArray(sp) && sp.length === 1) {
+        [speaker_id] = sp
+      }
+      if (typeof sp === 'string') {
+        speaker_id = sp
+      }
+      if (speaker_id) {
         audio_speakers.push({
           audio_id,
-          speaker_id: sp,
+          speaker_id,
           created_by: ab || entry.created_by,
-          created_at: new Date(ts).toISOString(),
+          ...(audio.created_at ? { created_at: audio.created_at } : {}),
         })
-        delete _entry.sf.sp
+        delete sf.sp
       }
-      if (!Object.keys(_entry.sf).length)
+      if (!Object.keys(sf).length) {
         delete _entry.sf
+        delete _entry.sfs
+      }
     }
 
     const photos: TablesInsert<'photos'>[] = []
@@ -286,7 +364,6 @@ export function convert_entry(_entry: Partial<ActualDatabaseEntry> & Record<stri
         updated_by: ab || uploadedBy || entry.created_by,
         storage_path: path,
         serving_url: remove_newline_from_end(gcs),
-        source: sc || source,
       }
       delete _entry.pf.ab
       delete _entry.pf.path
@@ -296,7 +373,7 @@ export function convert_entry(_entry: Partial<ActualDatabaseEntry> & Record<stri
           photo.created_at = new Date(ts).toISOString()
         // @ts-expect-error
         else if (typeof ts === 'object' && '_seconds' in ts)
-          // @ts-expect-error
+        // @ts-expect-error
           photo.created_at = seconds_to_timestamp_string(ts._seconds)
         else
           throw new Error(`odd timestamp for ${_entry.id}: ${ts}`)
@@ -309,6 +386,12 @@ export function convert_entry(_entry: Partial<ActualDatabaseEntry> & Record<stri
           log_once(`Jacob given photo credit dict:${entry.dictionary_id}`)
         delete _entry.pf.cr
       }
+      if (source && !photo.source) {
+        if (source !== 'local_import')
+          photo.source = source
+        delete _entry.pf.source
+      }
+      // also sc may turn up in photos
       photos.push(photo)
       sense_photos.push({
         photo_id,
