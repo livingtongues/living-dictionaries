@@ -6,13 +6,13 @@ import type { ActualDatabaseEntry } from '@living-dictionaries/types'
 import { convert_entry } from './convert-entries'
 
 // Snapshotting 1-255 and specific entries moving beyond that point
-// 229 - has write-in semantic domains
+// 229 - has write-in semantic domains (sd array)
 // 231 - has no ab for audio and sf.ts is an object with seconds and nanoseconds
-// 235 - has rare xe for vernacular example sentence
+// 235 - rare xe for vernacular example sentence
 // 252 - lo and di field
 // 253 - pf
 // 254 - ua, ca, nc
-// 255 - ei, ii, sdn, sr
+// 255 - ei, ii, sdn, sr (array)
 
 // 1228 - created by OTD, sf.source (local_import), sf.speakerName
 // 1718 - scn
@@ -29,11 +29,28 @@ import { convert_entry } from './convert-entries'
 // 23958 - lo and lo1 (birhor has a BUNCH of this)
 // 29994 - co
 // 36138 - vfs
-const to_snapshot = [1228, 1718, 1759, 4577, 4609, 4945, 5377, 5394, 8005, 14072, 15715, 16141, 23958, 29994, 36138]
+// 39845 - sr string
+// 39858 - xv
+// 47304 - vfs[0].youtubeId
+// 47829 - local_orthography_1 and . for lo1
+// 85363 - sfs with a null sc and speakerName
+// 128736 - sd string
+// 166042 - both xv and xs.vn
+// 166267 - has importId
+// 167017 - deletedVfs with youtubeId (ignoring all but 2 deletedVfs)
+// 172023 - source gives importId
+// 200582 - startAt (vfs youtube start seconds)
+// 234551 - useless pf.sc 'local_import' - skipping test
+// 248444 - ei is number
+// 251721 - dt = date and hm = homonym from FLEx - placing into unstructured
+// 253088 - semdom FLEx semantic domain - placing into unstructured
+// 266408 - deleted vfs date
+const to_snapshot = [229, 231, 235, 252, 253, 254, 255, 1228, 1718, 1759, 4577, 4609, 4945, 5377, 5394, 8005, 14072, 15715, 16141, 23958, 29994, 36138, 39845, 39858, 47304, 47829, 85363, 128736, 166042, 167017, 172023, 200582, 251721, 253088, 266408] // 248444
 
 // pnpm t -- --ui convert-entries
-test(convert_entry, { timeout: 12000 }, async () => {
-  const count = 36138
+test(convert_entry, { timeout: 16000 }, async () => {
+  // const count = 266408
+  const count = 278631 // total entries
   const success: any[] = []
   const todo: any[] = []
 
@@ -50,7 +67,7 @@ test(convert_entry, { timeout: 12000 }, async () => {
         if (Object.keys(processed_fb_entry_remains).length === 0) {
           success.push({ entry, supa_data })
         } else {
-          todo.push({ fb_entry: processed_fb_entry_remains, supa_data })
+          todo.push({ fb_entry: processed_fb_entry_remains, entry, supa_data })
         }
         if (success.length >= count || todo.length) {
           pipeline.destroy()
@@ -81,7 +98,7 @@ test(convert_entry, { timeout: 12000 }, async () => {
   const converted_entries = await result
   expect(converted_entries).toHaveLength(count)
 
-  const first_chunk = converted_entries.slice(0, 255)
+  const first_chunk = converted_entries.slice(0, 228)
   expect(first_chunk).toMatchFileSnapshot('convert-entries.snap.json')
 
   const specific_entries = converted_entries.filter((_, index) => to_snapshot.includes(index + 1))

@@ -1,3 +1,5 @@
+import type { HostedVideo, UnsupportedFields } from '@living-dictionaries/types'
+
 export type Json =
   | string
   | number
@@ -414,6 +416,7 @@ export interface Database {
           plural_form: string | null
           scientific_names: string[] | null
           sources: string[] | null
+          unsupported_fields: UnsupportedFields | null
           updated_at: string
           updated_by: string
           variant: string | null
@@ -435,6 +438,7 @@ export interface Database {
           plural_form?: string | null
           scientific_names?: string[] | null
           sources?: string[] | null
+          unsupported_fields?: UnsupportedFields | null
           updated_at?: string
           updated_by: string
           variant?: string | null
@@ -456,6 +460,7 @@ export interface Database {
           plural_form?: string | null
           scientific_names?: string[] | null
           sources?: string[] | null
+          unsupported_fields?: UnsupportedFields | null
           updated_at?: string
           updated_by?: string
           variant?: string | null
@@ -1215,9 +1220,11 @@ export interface Database {
           created_at: string
           created_by: string
           deleted: string | null
+          hosted_elsewhere: HostedVideo | null
           id: string
           source: string | null
-          storage_path: string
+          storage_path: string | null
+          text_id: string | null
           updated_at: string
           updated_by: string
           videographer: string | null
@@ -1226,9 +1233,11 @@ export interface Database {
           created_at?: string
           created_by: string
           deleted?: string | null
+          hosted_elsewhere?: HostedVideo | null
           id?: string
           source?: string | null
-          storage_path: string
+          storage_path?: string | null
+          text_id?: string | null
           updated_at?: string
           updated_by: string
           videographer?: string | null
@@ -1237,9 +1246,11 @@ export interface Database {
           created_at?: string
           created_by?: string
           deleted?: string | null
+          hosted_elsewhere?: HostedVideo | null
           id?: string
           source?: string | null
-          storage_path?: string
+          storage_path?: string | null
+          text_id?: string | null
           updated_at?: string
           updated_by?: string
           videographer?: string | null
@@ -1257,6 +1268,13 @@ export interface Database {
             columns: ['created_by']
             isOneToOne: false
             referencedRelation: 'users'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'videos_text_id_fkey'
+            columns: ['text_id']
+            isOneToOne: false
+            referencedRelation: 'texts'
             referencedColumns: ['id']
           },
           {

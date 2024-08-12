@@ -13,6 +13,22 @@ const admin_uid_if_no_owner = 'de2d3715-6337-45a3-a81a-d82c3210b2a7' // jacob@li
 const old_talking_dictionaries = '00000000-0000-0000-0000-000000000000' // TODO - decide what user to use or create one for attribution
 
 export function convert_entry(_entry: Partial<ActualDatabaseEntry> & Record<string, any>) {
+  // if (_entry.deletedVfs) {
+  //   console.log(`deletedVfs in ${_entry.id} in ${_entry.dictionary_id}, ${_entry.deletedVfs[0].youtubeId}`)
+  // }
+  // if (_entry.xv && _entry.xs?.vn)
+  //   console.log(`both xv ${_entry.xv} and xs.vn ${_entry.xs.vn} for ${_entry.id} in ${_entry.dictionary_id}`)
+  // if (_entry.lo && _entry.lo1 && _entry.lo !== _entry.lo1)
+  //   console.log(`lost lo: ${_entry.lo} in favor of lo1: ${_entry.lo1} for ${_entry.id} in ${_entry.dictionary_id}`)
+
+  // if (_entry.sf && _entry.sfs?.length) {
+  //   if (!_entry.sfs[0].sp.includes(_entry.sf.sp))
+  //     console.log(`${_entry.id} in ${_entry.dictionary_id} has speaker ${_entry.sf.sp} in sf and ${_entry.sfs[0].sp.join(', ')} sfs`)
+  // }
+  // if (_entry.source)
+  //   console.log(`source ${_entry.source} in ${_entry.id} in ${_entry.dictionary_id}`)
+  // return [{}, {}]
+
   try {
     const entry: Partial<TablesInsert<'entries'>> = {
       id: _entry.id,
@@ -63,6 +79,8 @@ export function convert_entry(_entry: Partial<ActualDatabaseEntry> & Record<stri
     if (entry.created_by === 'OTD')
       entry.created_by = old_talking_dictionaries
 
+    const content_updates: TablesInsert<'content_updates'>[] = []
+
     const first_sense_from_base: TablesInsert<'senses'> = {
       entry_id: _entry.id,
       created_by: entry.created_by,
@@ -70,11 +88,14 @@ export function convert_entry(_entry: Partial<ActualDatabaseEntry> & Record<stri
       id: randomUUID(),
     }
 
-    if (!_entry.lx) {
-      throw new Error(`no lx for ${_entry.id}`)
-    }
-    entry.lexeme = { default: _entry.lx }
+    entry.lexeme = { default: _entry.lx || '' }
     delete _entry.lx
+
+    if (typeof _entry.ei === 'number') {
+      log_once('TODO: convert ei number to string')
+      // console.log(`ei is number in ${_entry.id} in ${_entry.dictionary_id}`)
+      delete _entry.ei
+    }
 
     for (const [key, value] of Object.entries(_entry) as [keyof ActualDatabaseEntry, any][]) {
       if (!value || isEmptyArray(value) || isEmptyObject(value)) {
@@ -95,9 +116,43 @@ export function convert_entry(_entry: Partial<ActualDatabaseEntry> & Record<stri
           continue
         }
 
-        if (key === 'ii') {
-          log_once(`TODO - create a history change with the ii`)
-          // log_once(`TODO - ii:${value} in ${entry.dictionary_id}`)
+        // @ts-expect-error - not typed
+        if (key === 'hm') {
+          entry.unsupported_fields ??= {}
+          entry.unsupported_fields.hm = value
+          delete _entry[key]
+          continue
+        }
+
+        // @ts-expect-error - not typed
+        if (key === 'dt') {
+          entry.unsupported_fields ??= {}
+          entry.unsupported_fields.dt = value
+          delete _entry[key]
+          continue
+        }
+
+        // @ts-expect-error - not typed
+        if (key === 'semdom') {
+          entry.unsupported_fields ??= {}
+          entry.unsupported_fields.semdom = value
+          delete _entry[key]
+          continue
+        }
+
+        // @ts-expect-error - doesn't have importId typed
+        if (key === 'ii' || key === 'importId' || key === 'source') {
+          // @ts-expect-error
+          const import_id = key === 'source' ? value.replace('import: ', '') : value
+          content_updates.push({
+            id: randomUUID(),
+            dictionary_id: _entry.dictionary_id,
+            user_id: entry.created_by,
+            table: 'entries',
+            change: {},
+            ...(entry.created_at ? { timestamp: entry.created_at } : {}),
+            import_id,
+          })
           delete _entry[key]
           continue
         }
@@ -151,26 +206,28 @@ export function convert_entry(_entry: Partial<ActualDatabaseEntry> & Record<stri
           delete _entry[key]
           continue
         }
-        // if (key === 'lo2') {
-        //   entry.lexeme.lo2 = value
-        //   delete _entry[key]
-        //   continue
-        // }
-        // if (key === 'lo3') {
-        //   entry.lexeme.lo3 = value
-        //   delete _entry[key]
-        //   continue
-        // }
-        // if (key === 'lo4') {
-        //   entry.lexeme.lo4 = value
-        //   delete _entry[key]
-        //   continue
-        // }
-        // if (key === 'lo5') {
-        //   entry.lexeme.lo5 = value
-        //   delete _entry[key]
-        //   continue
-        // }
+        if (key === 'lo2') {
+          entry.lexeme.lo2 = value
+          delete _entry[key]
+          continue
+        }
+
+        // lo3, lo4, lo5 are not used yet
+        if (key === 'lo3') {
+          entry.lexeme.lo3 = value
+          delete _entry[key]
+          continue
+        }
+        if (key === 'lo4') {
+          entry.lexeme.lo4 = value
+          delete _entry[key]
+          continue
+        }
+        if (key === 'lo5') {
+          entry.lexeme.lo5 = value
+          delete _entry[key]
+          continue
+        }
       }
 
       if (key === 'di') {
@@ -192,19 +249,13 @@ export function convert_entry(_entry: Partial<ActualDatabaseEntry> & Record<stri
       }
 
       if (key === 'sd') {
-        if (Array.isArray(value)) {
+        if (typeof value === 'string') {
+          first_sense_from_base.write_in_semantic_domains = [value]
+        } else if (Array.isArray(value)) {
           first_sense_from_base.write_in_semantic_domains = value
-          delete _entry[key]
-          continue
         }
-      }
-
-      if (key === 'sd') {
-        if (Array.isArray(value)) {
-          first_sense_from_base.write_in_semantic_domains = value
-          delete _entry[key]
-          continue
-        }
+        delete _entry[key]
+        continue
       }
 
       if (key === 'scn') {
@@ -224,11 +275,13 @@ export function convert_entry(_entry: Partial<ActualDatabaseEntry> & Record<stri
       }
 
       if (key === 'sr') {
-        if (Array.isArray(value)) {
+        if (typeof value === 'string') {
+          entry.sources = [value]
+        } else if (Array.isArray(value)) {
           entry.sources = value
-          delete _entry[key]
-          continue
         }
+        delete _entry[key]
+        continue
       }
 
       if (key === 'co') {
@@ -241,11 +294,12 @@ export function convert_entry(_entry: Partial<ActualDatabaseEntry> & Record<stri
     if (_entry.lo) {
       if (!entry.lexeme.lo1) {
         entry.lexeme.lo1 = _entry.lo
-      } else {
-        log_once(`lo and lo1 in ${entry.dictionary_id} - TODO: log lost lo values`)
-        // console.log(`lo and lo1: ${_entry.lo} || ${entry.lexeme.lo1} : in ${entry.dictionary_id}`)
       }
       delete _entry.lo
+    }
+    if (_entry.local_orthography_1) {
+      entry.lexeme.lo1 = _entry.local_orthography_1 // only 4 times in garifuna and lo1 is just a period in each so we overwrite that one
+      delete _entry.local_orthography_1
     }
 
     if (typeof _entry.gl === 'object') {
@@ -285,6 +339,11 @@ export function convert_entry(_entry: Partial<ActualDatabaseEntry> & Record<stri
       vernacular_sentence = _entry.xe
       delete _entry.xe
     }
+    if (typeof _entry.xv === 'string') {
+      if (!vernacular_sentence)
+        vernacular_sentence = _entry.xv
+      delete _entry.xv
+    }
 
     if (vernacular_sentence) {
       const sentence_id = randomUUID()
@@ -311,12 +370,9 @@ export function convert_entry(_entry: Partial<ActualDatabaseEntry> & Record<stri
     const audios: TablesInsert<'audio'>[] = []
     const audio_speakers: TablesInsert<'audio_speakers'>[] = []
 
-    if (_entry.sf && _entry.sfs?.length) {
-      throw new Error(`sf and sfs in ${entry.dictionary_id}`)
-    }
-    if (_entry.sf || _entry.sfs?.length === 1) {
+    if (_entry.sf?.path || _entry.sfs?.[0].path) {
       const audio_id = randomUUID()
-      const sf = _entry.sf || _entry.sfs[0] as unknown as ActualDatabaseEntry['sf']
+      const sf = _entry.sf?.path ? _entry.sf : _entry.sfs[0] as unknown as ActualDatabaseEntry['sf']
       const { ab, path, ts, cr, sp, speakerName, source } = sf
       if (typeof speakerName === 'string') {
         log_once('TODO: create speaker')
@@ -349,8 +405,6 @@ export function convert_entry(_entry: Partial<ActualDatabaseEntry> & Record<stri
       if (cr) {
         if (cr !== 'Jacob Bowdoin')
           audio.source = cr
-        else
-          log_once(`Jacob given audio credit in dict:${entry.dictionary_id}`)
         delete sf.cr
       }
       if (source && !cr) {
@@ -375,6 +429,11 @@ export function convert_entry(_entry: Partial<ActualDatabaseEntry> & Record<stri
         })
         delete sf.sp
       }
+      if (sf.sc && sf.sc !== 'local_import')
+        throw new Error(`unexpected sc in ${_entry.id}: ${sf.sc}`)
+      delete sf.sc
+      if (!sf.speakerName)
+        delete sf.speakerName
       if (!Object.keys(sf).length) {
         delete _entry.sf
         delete _entry.sfs
@@ -386,7 +445,7 @@ export function convert_entry(_entry: Partial<ActualDatabaseEntry> & Record<stri
 
     if (_entry.pf) {
       const photo_id = randomUUID()
-      const { ab, path, ts, cr, gcs, source, uploadedAt, uploadedBy } = _entry.pf
+      const { ab, path, ts, sc, cr, gcs, source, uploadedAt, uploadedBy } = _entry.pf
       if (uploadedAt)
         console.info({ uploadedAt })
       if (!ab && !entry.created_by)
@@ -415,8 +474,6 @@ export function convert_entry(_entry: Partial<ActualDatabaseEntry> & Record<stri
       if (cr) {
         if (cr !== 'Jacob Bowdoin')
           photo.source = cr
-        else
-          log_once(`Jacob given photo credit dict:${entry.dictionary_id}`)
         delete _entry.pf.cr
       }
       if (source && !photo.source) {
@@ -424,6 +481,10 @@ export function convert_entry(_entry: Partial<ActualDatabaseEntry> & Record<stri
           photo.source = source
         delete _entry.pf.source
       }
+      if (sc && sc !== 'local_import')
+        throw new Error(`unexpected sc in ${_entry.id}: ${sc}`)
+      delete _entry.pf.sc
+
       photos.push(photo)
       sense_photos.push({
         photo_id,
@@ -439,20 +500,38 @@ export function convert_entry(_entry: Partial<ActualDatabaseEntry> & Record<stri
     const sense_videos: TablesInsert<'sense_videos'>[] = []
     const video_speakers: TablesInsert<'video_speakers'>[] = []
 
-    if (_entry.vfs?.[0]) {
+    if (_entry.deletedVfs?.[0].youtubeId) // only keep if a record of stored deleted video
+      delete _entry.deletedVfs
+
+    if (_entry.vfs?.[0] || _entry.deletedVfs?.[0]) {
       const video_id = randomUUID()
-      const [vf] = _entry.vfs
-      const { ts, ab, path, sp } = vf
+      const [vf] = _entry.vfs || _entry.deletedVfs
+      const { ts, ab, path, sp, youtubeId, deleted, startAt } = vf
       if (!ab && !entry.created_by)
         console.info(`No ab for ${_entry.id} vfs`)
       const video: TablesInsert<'videos'> = {
         id: video_id,
         created_by: ab || entry.created_by,
         updated_by: ab || entry.created_by,
-        storage_path: path,
       }
       delete vf.ab
-      delete vf.path
+      if (path) {
+        video.storage_path = path
+        delete vf.path
+      }
+      if (youtubeId) {
+        video.hosted_elsewhere = {
+          type: 'youtube',
+          video_id: youtubeId,
+          ...(startAt ? { start_at_seconds: startAt } : {}),
+        }
+        delete vf.youtubeId
+        delete vf.startAt
+      }
+      if (deleted) {
+        video.deleted = new Date(deleted).toISOString()
+        delete vf.deleted
+      }
       if (ts) {
         if (ts.toString().length === 13)
           video.created_at = new Date(ts).toISOString()
@@ -480,15 +559,16 @@ export function convert_entry(_entry: Partial<ActualDatabaseEntry> & Record<stri
         })
         delete vf.sp
       }
-      if (!Object.keys(vf).length)
+      if (!Object.keys(vf).length) {
         delete _entry.vfs
+        delete _entry.deletedVfs
+      }
     }
 
     delete _entry.id
     delete _entry.dictionary_id
     delete _entry.dictId
-
-    return [_entry, { entry, senses, sentences, senses_in_sentences, audios, audio_speakers, photos, sense_photos, videos, sense_videos }]
+    return [_entry, { entry, senses, sentences, senses_in_sentences, audios, audio_speakers, photos, sense_photos, videos, sense_videos, content_updates }]
   } catch (e) {
     console.log(e, _entry)
     // @ts-expect-error
