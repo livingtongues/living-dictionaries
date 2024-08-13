@@ -7,10 +7,10 @@
   let displayed_speaker_name: string
 
   $: first_sound_file = entry?.sound_files?.[0]
-  $: if (first_sound_file?.speaker_ids?.length) {
-    displayed_speaker_name = speakers.find(speaker => speaker.uid === first_sound_file.speaker_ids[0])?.displayName
+  $: if (speakers?.length && first_sound_file?.speaker_ids?.length) {
+    displayed_speaker_name = speakers.find(speaker => speaker.id === first_sound_file.speaker_ids[0])?.displayName
     if (!displayed_speaker_name) {
-      console.error(`Missing speaker ID: ${first_sound_file.speaker_ids[0]}`)
+      console.warn(`Missing speaker ID: ${first_sound_file.speaker_ids[0]}`)
     }
   } else {
     displayed_speaker_name = first_sound_file?.speakerName

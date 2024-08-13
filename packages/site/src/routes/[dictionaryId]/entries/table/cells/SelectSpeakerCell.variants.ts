@@ -11,7 +11,7 @@ const shared = {
   speakers: [
     {
       displayName: 'Anatoli',
-      uid: '123',
+      id: '123',
     },
   ],
 } satisfies Partial<Variant<Component>>
