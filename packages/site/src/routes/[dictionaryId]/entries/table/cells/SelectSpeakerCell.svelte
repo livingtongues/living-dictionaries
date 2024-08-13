@@ -4,8 +4,15 @@
   export let entry: ExpandedEntry
   export let can_edit = false
   export let speakers: ISpeaker[]
+  let displayed_speaker_name: string
 
-  $: first_sound_file = entry.sound_files?.[0]
+  $: first_sound_file = entry?.sound_files?.[0]
+  $: if (first_sound_file.speaker_ids) {
+    displayed_speaker_name = speakers.find(speaker => speaker.uid === first_sound_file.speaker_ids?.[0])?.displayName
+    if (!displayed_speaker_name) {
+      console.error(`Missing speaker ID: ${first_sound_file.speaker_ids?.[0]}`)
+    }
+  }
 </script>
 
 <div
@@ -25,7 +32,7 @@
   }}>
   {#if first_sound_file}
     {#if first_sound_file.speaker_ids?.length}
-      {speakers.find(speaker => speaker.uid === first_sound_file.speaker_ids[0]).displayName}
+      {displayed_speaker_name || ''}
     {:else}
       {first_sound_file.speakerName || ''}
     {/if}
