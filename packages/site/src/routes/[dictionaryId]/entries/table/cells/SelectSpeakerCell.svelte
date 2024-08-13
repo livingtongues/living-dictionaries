@@ -12,6 +12,8 @@
     if (!displayed_speaker_name) {
       console.error(`Missing speaker ID: ${first_sound_file.speaker_ids[0]}`)
     }
+  } else {
+    displayed_speaker_name = first_sound_file.speakerName
   }
 </script>
 
@@ -30,12 +32,6 @@
       }
     }
   }}>
-  {#if first_sound_file}
-    {#if first_sound_file.speaker_ids?.length}
-      {displayed_speaker_name || ''}
-    {:else}
-      {first_sound_file.speakerName || ''}
-    {/if}
-  {/if}
+  {displayed_speaker_name || ''}
   &nbsp;
 </div>
