@@ -13,7 +13,7 @@
       console.error(`Missing speaker ID: ${first_sound_file.speaker_ids[0]}`)
     }
   } else {
-    displayed_speaker_name = first_sound_file.speakerName
+    displayed_speaker_name = first_sound_file?.speakerName
   }
 </script>
 
