@@ -20,7 +20,6 @@
 
   $: i18nKey = `entry_field.${column.field}` as i18nEntryFieldKey
   $: sense = entry.senses?.[0] || {}
-  $: ({ speakers } = $page.data)
 
   function updateEntry(data: ActualDatabaseEntry) {
     dbOperations.updateEntry({ data: data as GoalDatabaseEntry, entryId: entry.id })
@@ -50,7 +49,7 @@
       <!-- </div> -->
     {/if}
   {:else if column.field === 'speaker'}
-    <SelectSpeakerCell speakers={$speakers} {can_edit} {entry} />
+    <SelectSpeakerCell {can_edit} {entry} />
   {:else if column.field === 'parts_of_speech'}
     <EntryPartOfSpeech
       {can_edit}
