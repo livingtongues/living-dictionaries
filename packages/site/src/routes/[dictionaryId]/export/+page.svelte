@@ -12,9 +12,10 @@
   import { page } from '$app/stores'
   import { downloadObjectsAsCSV } from '$lib/export/csv'
   import { convert_and_expand_entry } from '$lib/transformers/convert_and_expand_entry'
+  // import type { SupaEntry } from '$lib/supabase/database.types'
 
   export let data
-  $: ({ is_manager, dictionary, admin } = data)
+  $: ({ is_manager, dictionary, admin, get_supa_entries } = data)
 
   let includeImages = false
   let includeAudio = false
@@ -29,6 +30,14 @@
   onMount(async () => {
     const database_entries = await getCollection<ActualDatabaseEntry>(`dictionaries/${$dictionary.id}/words`)
     const expanded_entries = database_entries.map(entry => convert_and_expand_entry(entry, $page.data.t))
+    const _supa_entries = await get_supa_entries($dictionary.id)
+    console.info({ db_not_yet_working: _supa_entries })
+    // mock entries for time being
+    // const supa_entries: SupaEntry[] = [
+    //   { id: '11' },
+    // ]
+    // merge supa_entries with expanded_entries
+    // const expanded_entries_with_additional_senses = function_to_be_written(expanded_entries, supa_entries)
     const speakers = await fetchSpeakers(expanded_entries)
 
     entryHeaders = getCsvHeaders(expanded_entries, $dictionary)

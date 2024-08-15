@@ -7,7 +7,7 @@ import type {
 import { StandardEntryCSVFields, formatCsvEntries, getCsvHeaders } from './prepareEntriesForCsv'
 import { objectsToCsvByHeaders } from '$lib/export/csv'
 
-describe('prepareEntriesForCsv', () => {
+describe(formatCsvEntries, () => {
   const speakers: ISpeaker[] = [
     {
       displayName: 'John Smith',
