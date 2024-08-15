@@ -1,8 +1,11 @@
 # Local [Supabase](https://supabase.com/docs) dev
 
 Schema:
-https://supabase.com/dashboard/project/actkqboqpzniojhgtqzw/database/schemas
 https://drawsql.app/teams/ld-4/diagrams/entries-sentences-texts
+https://supabase.com/dashboard/project/actkqboqpzniojhgtqzw/database/schemas
+http://127.0.0.1:54323/project/default/database/schemas
+
+Handle speakers id being uuid and lots of connections with FB speaker ids not matching, 20240222001122_media-tables.sql
 
 ## Setup
 1. [Install supabase cli locally](https://supabase.com/docs/guides/cli) *- you can skip this the first few times and just prepend `pnpx ` to the commands below, but after awhile you will tire of waiting for pnpx on each command*
