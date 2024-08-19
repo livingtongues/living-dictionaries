@@ -37,7 +37,13 @@
     "peer_review": "Bình duyệt về chính tả và cách phát âm",
     "suggestions_from_users": "Phản hồi và góp ý từ người dùng",
     "push_notifications": "Thông báo đẩy (push notification) cho những người đóng góp và cộng tác viên",
-    "contributor_awards": "Khen thưởng thành tích"
+    "contributor_awards": "Khen thưởng thành tích",
+    "question_1": "Vui lòng cung cấp một số thông tin cơ bản về ngôn ngữ này. Nó được nói ở đâu? Cộng đồng nào nói ngôn ngữ này? Ngôn ngữ này có bị đe dọa không?",
+    "question_2": "Tên của những người xây dựng từ điển này là gì? Tiếng nói của ai trong từ điển này?",
+    "question_3": "Dữ liệu trong từ điển này đến từ đâu? Vui lòng mô tả nếu bạn tự mình thu thập dữ liệu. Nếu bạn sử dụng bất kỳ nguồn tham khảo nào đã được xuất bản, vui lòng liệt kê chúng.",
+    "question_4": "Ai sẽ sử dụng từ điển này? Nó sẽ được sử dụng trong bất kỳ dự án giáo dục nào?",
+    "question_5": "Nếu bạn muốn công chúng liên hệ với bạn về dự án này, vui lòng cung cấp thông tin liên hệ của bạn hoặc liên kết đến nơi mọi người có thể tìm hiểu thêm. Đây là tùy chọn.",
+    "message": "Trước khi công khai từ điển của bạn, vui lòng hoàn thành phần Giới thiệu."
   },
   "contributors": {
     "invite_contributors": "Mời cộng tác viên",

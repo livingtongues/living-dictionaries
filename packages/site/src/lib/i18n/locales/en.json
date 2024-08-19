@@ -37,7 +37,13 @@
     "peer_review": "Peer Review of Spellings",
     "suggestions_from_users": "Suggestions from Users",
     "push_notifications": "Push Notifications to Contributors",
-    "contributor_awards": "Contributor Community Awards"
+    "contributor_awards": "Contributor Community Awards",
+    "question_1": "Please provide some background information about this language. Where is it spoken? What communities speak this language? Is this language endangered?",
+    "question_2": "What are the names of the people who built this dictionary? Whose voices are in this dictionary?",
+    "question_3": "Where did the data in this dictionary come from? Please describe if you collected the data yourself. If you used any published reference sources, please list them.",
+    "question_4": "Who will be using this dictionary? Will it be used in any educational projects?",
+    "question_5": "If you want the public to contact you about this project, please provide your contact information, or a link to where people can learn more. This is optional.",
+    "message": "Before making your dictionary public, please complete the About section."
   },
   "contributors": {
     "invite_contributors": "Invite Contributors",

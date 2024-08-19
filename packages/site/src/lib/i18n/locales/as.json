@@ -37,7 +37,13 @@
     "peer_review": "",
     "suggestions_from_users": "",
     "push_notifications": "",
-    "contributor_awards": ""
+    "contributor_awards": "",
+    "question_1": "",
+    "question_2": "",
+    "question_3": "",
+    "question_4": "",
+    "question_5": "",
+    "message": ""
   },
   "contributors": {
     "invite_contributors": "অৱদানকাৰীসকলক আমন্ত্ৰণ কৰক",

@@ -37,7 +37,13 @@
     "peer_review": "Revisão de ortografia por pares",
     "suggestions_from_users": "Sugestões de usuários",
     "push_notifications": "Notificações push para colaboradores",
-    "contributor_awards": "Prêmios da comunidade de colaboradores"
+    "contributor_awards": "Prêmios da comunidade de colaboradores",
+    "question_1": "Por favor, forneça algumas informações básicas sobre este idioma. Onde é falado? Que comunidades falam esta língua? Esta língua está em perigo?",
+    "question_2": "Quais são os nomes das pessoas que construíram este dicionário? De quem são as vozes neste dicionário?",
+    "question_3": "De onde vieram os dados deste dicionário? Descreva se você mesmo coletou os dados. Se você usou alguma fonte de referência publicada, liste-a.",
+    "question_4": "Quem usará este dicionário? Será utilizado em algum projeto educacional?",
+    "question_5": "Se você deseja que o público entre em contato com você sobre este projeto, forneça suas informações de contato ou um link onde as pessoas possam saber mais. Isso é opcional.",
+    "message": "Antes de tornar seu dicionário público, preencha a seção Sobre."
   },
   "contributors": {
     "invite_contributors": "Convidar Contribuintes",
@@ -92,9 +98,9 @@
     "public_dictionary": "Tornar um dicionário público",
     "import_data": "Importar dados",
     "request_access": "Solicitar acesso de edição",
-    "report_problem": "Reportar um problema",
+    "report_problem": "Informar um problema",
     "other": "Outro tópico",
-    "select_topic": "selecione um topico",
+    "select_topic": "Selecione um tópico",
     "data_fields": "Campos de dados opcionais",
     "learning": "Crie materiais de aprendizagem de idiomas a partir do meu dicionário"
   },
@@ -105,7 +111,7 @@
     "at_least_one_lang": "Escolha pelo menos 1 língua através da qual pretende disponibilizar o dicionário.",
     "only_letters_numbers": "Permite-se apenas letras e números (sem espaços ou caracteres especiais)",
     "choose_different_url": "Escolha uma URL diferente",
-    "gloss_dictionary_clarification": "Língua(s) na qual pretende traduzir as entradas",
+    "gloss_dictionary_clarification": "Língua(s) na qual pretende traduzir as entradas.",
     "create_new_dictionary": "Criar um novo Dicionário",
     "name_clarification": "Este será o nome do Dicionário.",
     "gloss_dictionary_in": "Tornar o Dicionário disponível em...",
@@ -186,7 +192,7 @@
     "variant": "Variante",
     "gloss": "Tradução",
     "plural_form": "Forma plural",
-    "scientific_names": "Nome científico",
+    "scientific_names": "Nome Científico",
     "definition_english": "",
     "video": "Vídeo"
   },
@@ -294,7 +300,7 @@
     "no_audios": "Não há arquivos de áudio",
     "download_csv": "Baixar CSV",
     "availability": "A exportação está disponível apenas para gerentes de dicionário",
-    "download_pdf": "baixar PDF",
+    "download_pdf": "Baixar PDF",
     "spreadsheet": "Planilha"
   },
   "video": {
@@ -334,13 +340,13 @@
   "history": {
     "history": "História",
     "entry": "Entrada",
-    "editor": "editor",
+    "editor": "Editor",
     "action": "Ação",
     "field": "Campo",
     "date": "Data",
     "old_value": "Valor anterior",
     "new_value": "Novo valor",
-    "created": "Criada",
+    "created": "Criado",
     "edited": "Editado",
     "deleted": "Excluído",
     "history_search": "Entradas de pesquisa, editores, campos e valores",
