@@ -10,7 +10,11 @@
   import { post_request } from '$lib/helpers/get-post-requests'
 
   export let subject: Subjects = undefined
-  $: ({ dictionary, user } = $page.data)
+  $: ({ dictionary, user, about_content } = $page.data)
+  $: if ($dictionary && subject === 'public_dictionary' && (!$about_content || $about_content.about?.length < 200)) {
+    close()
+    goto(`/${$dictionary.id}/about`)
+  }
 
   const subjects = {
     delete_dictionary: 'contact.delete_dictionary',
