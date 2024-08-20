@@ -3,7 +3,6 @@
   import { createEventDispatcher, onDestroy, onMount } from 'svelte'
   import type { Editor } from '@ckeditor/ckeditor5-core'
   import type { EditorConfig } from '@ckeditor/ckeditor5-core/src/editor/editorconfig'
-  import { page } from '$app/stores'
 
   export let editor: typeof Editor
   export let editorConfig: EditorConfig
@@ -52,9 +51,4 @@
   })
 </script>
 
-<p class="text-gray-5">{$page.data.t('about.question_1')}</p>
-<p class="text-gray-5">{$page.data.t('about.question_2')}</p>
-<p class="text-gray-5">{$page.data.t('about.question_3')}</p>
-<p class="text-gray-5">{$page.data.t('about.question_4')}</p>
-<p class="text-gray-5">{$page.data.t('about.question_5')}</p>
 <div bind:this={editorEl} contenteditable bind:innerHTML={value} />

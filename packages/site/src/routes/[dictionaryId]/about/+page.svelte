@@ -1,6 +1,7 @@
 <script lang="ts">
   import { Button } from 'svelte-pieces'
   import sanitize from 'xss'
+  import UserGuide from './UserGuide.svelte'
   import { page } from '$app/stores'
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte'
 
@@ -25,6 +26,9 @@
     {/if}
   {/if}
 
+  {#if editing}
+    <UserGuide />
+  {/if}
   <div class="flex">
     {#if editing}
       <div class="max-w-screen-md tw-prose prose-lg">
