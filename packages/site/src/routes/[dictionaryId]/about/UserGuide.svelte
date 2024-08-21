@@ -5,9 +5,9 @@
   let hide_questions = false
 </script>
 
-<div class="max-w-[600px] ml-7">
+<div class="w-5/6 sm:max-w-[550px] ml-7">
   {#if !hide_questions}
-    <div class="text-justify" transition:slide={{ duration: 300 }}>
+    <div class="" transition:slide={{ duration: 300 }}>
       <ul class="list-disc">
         <li class="text-gray-5">{$page.data.t('about.question_1')}</li>
         <li class="text-gray-5">{$page.data.t('about.question_2')}</li>
