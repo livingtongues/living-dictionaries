@@ -13,7 +13,7 @@
   $: ({ dictionary, user, about_content } = $page.data)
   $: if ($dictionary && subject === 'public_dictionary' && (!$about_content || $about_content.about?.length < 200)) {
     close()
-    goto(`/${$dictionary.id}/about`)
+    goto(`/${$dictionary.id}/about`, { state: { from_component: 'contact' } })
   }
 
   const subjects = {

@@ -27,6 +27,7 @@ declare global {
     }
     interface PageState {
       entry_id?: string
+      from_component?: string
     }
     // interface Error {}
     // interface Platform {}

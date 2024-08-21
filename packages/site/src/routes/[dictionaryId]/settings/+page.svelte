@@ -11,9 +11,10 @@
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte'
   import Image from '$lib/components/image/Image.svelte'
   import AddImage from '$lib/components/image/AddImage.svelte'
+  import { goto } from '$app/navigation'
 
   export let data
-  $: ({ dictionary, admin, is_manager, updateDictionary, add_gloss_language, remove_gloss_language, add_featured_image } = data)
+  $: ({ dictionary, admin, is_manager, updateDictionary, add_gloss_language, remove_gloss_language, add_featured_image, about_content } = data)
 </script>
 
 <div style="max-width: 700px">
@@ -100,6 +101,8 @@
         await updateDictionary({ public: false })
       } else if ($admin) {
         await updateDictionary({ public: true })
+      } else if (!$about_content || $about_content.about?.length < 200) {
+        goto(`/${$dictionary.id}/about`, { state: { from_component: 'settings' } })
       } else {
         const communityAllowsOnline = confirm($page.data.t('settings.community_permission'))
         if (communityAllowsOnline) alert($page.data.t('header.contact_us'))
