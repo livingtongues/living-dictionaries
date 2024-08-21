@@ -170,7 +170,7 @@
         </Button>
       </div>
     </Form>
-  {:else if status == 'success'}
+  {:else if status === 'success'}
     <h4 class="text-lg mt-3 mb-4">
       <i class="fas fa-check" />
       {$page.data.t('contact.message_sent')}
@@ -180,7 +180,7 @@
         {$page.data.t('misc.close')}
       </Button>
     </div>
-  {:else if status == 'fail'}
+  {:else if status === 'fail'}
     <h4 class="text-xl mt-1 mb-4">
       {$page.data.t('contact.message_failed')}
       <a class="underline ml-1" href="mailto:dictionaries@livingtongues.org">
