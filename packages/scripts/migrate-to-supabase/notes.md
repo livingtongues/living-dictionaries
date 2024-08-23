@@ -1,4 +1,30 @@
-Need to create shell speakers for the speaker ids coming in before they are migrated. Need to update them to just text, not uuid - or figure out how to translate from Firebase
+# Migrate Entries and Speakers from Firestore to Supabase
+
+## TODO
+- Move off Algolia fully onto local Orama + using Orama Cloud for (100K max*3 indexes) for large, public dictionaries + Onondaga
+  - solve bugs
+  - flip usage to using the new search but make Algolia still available as a second option
+- On a new migration branch
+  - Make sure all items from "clean-up" below are being actively logged again as they are run into
+  - update migration script to migrate speakers across as they are needed, when one is found, save into speakers table, then create a map of firestore speaker id to supabase speaker id, in future times when this Firestore speaker id comes up, check the map first to see if speaker already exists
+  - figure out how different user ids (creater of speaker) between Firestore and Firebase will be handled and document
+  - run tests on migration
+  - visual inspection of the results locally - should work similar to current prod
+  - update saving functions
+  - make all types of edits
+- Run migration process below
+
+## Migration Process
+- post notice on logged-in users a week ahead of time
+- send email notice a week ahead of time
+- Lock down Firestore dictionary words and speakers using security rules (tell admins not to edit anything)
+- Make Supabase backup
+- Migrate data
+- Test viewing
+- Merge new saving methods code (this will be a natural unblock)
+- Test editing entries
+- Remove notice
+- Email letting everyone know editing is available again
 
 ## Clean-up
 
@@ -53,31 +79,32 @@ g9BOz1gS14TgBfuBUeAE in iipay-aa has speaker Ter4NIjPbVE0t0NyAoVR in sf and RfcN
 kUPCcmZsidSJxQDVINOi in iipay-aa has speaker Ter4NIjPbVE0t0NyAoVR in sf and OHlCRcVbVX4IyK5Nm1YM sfs
 
 6TAQVjmhlNzuyknysKwJ in kalmyk has speaker Lur4JgdzVlvJHNkIokQn in sf and JcNuxm033COULRzLwkRw sfs
-AAuFBDAEN4ziOIIGzrg2 in kalmyk has speaker vtm0hI5JpMtGtpVih28T in sf and JcNuxm033COULRzLwkRw sfs
 DI9fNDwGkTqQTCCAVN2V in kalmyk has speaker Lur4JgdzVlvJHNkIokQn in sf and JcNuxm033COULRzLwkRw sfs
 Fc95nVZfeXKmRDy6OiFO in kalmyk has speaker Lur4JgdzVlvJHNkIokQn in sf and JcNuxm033COULRzLwkRw sfs
 GzhIOax4MoDyV8dWAwyH in kalmyk has speaker Lur4JgdzVlvJHNkIokQn in sf and JcNuxm033COULRzLwkRw sfs
-Ip0kEAlLWgL268cAnUo9 in kalmyk has speaker vtm0hI5JpMtGtpVih28T in sf and JcNuxm033COULRzLwkRw sfs
-KV4Awv9NJ4Us4w4brtxu in kalmyk has speaker vtm0hI5JpMtGtpVih28T in sf and JcNuxm033COULRzLwkRw sfs
 MNogRfA6nybGtfBTzebW in kalmyk has speaker Lur4JgdzVlvJHNkIokQn in sf and JcNuxm033COULRzLwkRw sfs
-MhreZz0NQe8p5nmv5aOt in kalmyk has speaker vtm0hI5JpMtGtpVih28T in sf and JcNuxm033COULRzLwkRw sfs
-NY48uxISRlJXdJcnOsuU in kalmyk has speaker vtm0hI5JpMtGtpVih28T in sf and JcNuxm033COULRzLwkRw sfs
-NiNNOh0w1gg87OP6CbQ0 in kalmyk has speaker vtm0hI5JpMtGtpVih28T in sf and JcNuxm033COULRzLwkRw sfs
 NjVUmkjw4kjApEOa3gat in kalmyk has speaker Lur4JgdzVlvJHNkIokQn in sf and JcNuxm033COULRzLwkRw sfs
 OMGxE3LXoO6RJ4nMtdaP in kalmyk has speaker Lur4JgdzVlvJHNkIokQn in sf and JcNuxm033COULRzLwkRw sfs
 PCUxoa7bYvU6aTeLVKaw in kalmyk has speaker Lur4JgdzVlvJHNkIokQn in sf and JcNuxm033COULRzLwkRw sfs
 QBNp8eZf7d9JCTHjS36I in kalmyk has speaker Lur4JgdzVlvJHNkIokQn in sf and JcNuxm033COULRzLwkRw sfs
-RwOgDYi1HfzXxToreQqI in kalmyk has speaker vtm0hI5JpMtGtpVih28T in sf and JcNuxm033COULRzLwkRw sfs
 ScH8gcPrUjsP5hvND2tb in kalmyk has speaker Lur4JgdzVlvJHNkIokQn in sf and JcNuxm033COULRzLwkRw sfs
-V7Yd159L4K4aaku9mnKs in kalmyk has speaker vtm0hI5JpMtGtpVih28T in sf and JcNuxm033COULRzLwkRw sfs
-Zb0Ff7exOC8kxwb6dlZp in kalmyk has speaker vtm0hI5JpMtGtpVih28T in sf and JcNuxm033COULRzLwkRw sfs
 cNAjcrhax9hsHBobhHzZ in kalmyk has speaker Lur4JgdzVlvJHNkIokQn in sf and JcNuxm033COULRzLwkRw sfs
-gZFTm1qnc1xSANcROhoo in kalmyk has speaker vtm0hI5JpMtGtpVih28T in sf and JcNuxm033COULRzLwkRw sfs
 hbxdPqbVRkyztmEOzHe8 in kalmyk has speaker Lur4JgdzVlvJHNkIokQn in sf and JcNuxm033COULRzLwkRw sfs
 hxVQaY3XNyAZjedhQ8jv in kalmyk has speaker Lur4JgdzVlvJHNkIokQn in sf and JcNuxm033COULRzLwkRw sfs
 pTd8WDjW5qSnFHQd8pMV in kalmyk has speaker Lur4JgdzVlvJHNkIokQn in sf and JcNuxm033COULRzLwkRw sfs
-q4VagShEMZqhJj7EKLGS in kalmyk has speaker vtm0hI5JpMtGtpVih28T in sf and JcNuxm033COULRzLwkRw sfs
 sj65w0e0S86iY9TK8auQ in kalmyk has speaker Lur4JgdzVlvJHNkIokQn in sf and JcNuxm033COULRzLwkRw sfs
+
+Ip0kEAlLWgL268cAnUo9 in kalmyk has speaker vtm0hI5JpMtGtpVih28T in sf and JcNuxm033COULRzLwkRw sfs
+AAuFBDAEN4ziOIIGzrg2 in kalmyk has speaker vtm0hI5JpMtGtpVih28T in sf and JcNuxm033COULRzLwkRw sfs
+KV4Awv9NJ4Us4w4brtxu in kalmyk has speaker vtm0hI5JpMtGtpVih28T in sf and JcNuxm033COULRzLwkRw sfs
+MhreZz0NQe8p5nmv5aOt in kalmyk has speaker vtm0hI5JpMtGtpVih28T in sf and JcNuxm033COULRzLwkRw sfs
+NY48uxISRlJXdJcnOsuU in kalmyk has speaker vtm0hI5JpMtGtpVih28T in sf and JcNuxm033COULRzLwkRw sfs
+NiNNOh0w1gg87OP6CbQ0 in kalmyk has speaker vtm0hI5JpMtGtpVih28T in sf and JcNuxm033COULRzLwkRw sfs
+RwOgDYi1HfzXxToreQqI in kalmyk has speaker vtm0hI5JpMtGtpVih28T in sf and JcNuxm033COULRzLwkRw sfs
+V7Yd159L4K4aaku9mnKs in kalmyk has speaker vtm0hI5JpMtGtpVih28T in sf and JcNuxm033COULRzLwkRw sfs
+Zb0Ff7exOC8kxwb6dlZp in kalmyk has speaker vtm0hI5JpMtGtpVih28T in sf and JcNuxm033COULRzLwkRw sfs
+gZFTm1qnc1xSANcROhoo in kalmyk has speaker vtm0hI5JpMtGtpVih28T in sf and JcNuxm033COULRzLwkRw sfs
+q4VagShEMZqhJj7EKLGS in kalmyk has speaker vtm0hI5JpMtGtpVih28T in sf and JcNuxm033COULRzLwkRw sfs
 tziPBlaykrYOryMjaicM in kalmyk has speaker vtm0hI5JpMtGtpVih28T in sf and JcNuxm033COULRzLwkRw sfs
 vLNwhXMtDwHfJVvEcjo0 in kalmyk has speaker vtm0hI5JpMtGtpVih28T in sf and JcNuxm033COULRzLwkRw sfs
 yHXwW4LAOW11K1miBdN9 in kalmyk has speaker vtm0hI5JpMtGtpVih28T in sf and JcNuxm033COULRzLwkRw sfs
