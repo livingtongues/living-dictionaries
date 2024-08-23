@@ -24,6 +24,7 @@ export async function updateIndex(entries: AlgoliaEntry[]) {
 
       const { objectIDs } = await index.saveObjects(chunk)
       console.log(`Entries indexed: ${objectIDs.length}`)
+      // await new Promise(resolve => setTimeout(resolve, 10000)) // extra caution to avoid rate limiting when doing large batches
     }
   } catch (err) {
     console.log(err)
