@@ -1,7 +1,6 @@
 <script lang="ts">
   import { Button } from 'svelte-pieces'
   import sanitize from 'xss'
-  import { onMount } from 'svelte'
   import UserGuide from './UserGuide.svelte'
   import { page } from '$app/stores'
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte'
@@ -11,12 +10,6 @@
   let updated = ''
 
   let editing = false
-
-  onMount(() => {
-    if ($page.state.from_component === 'contact' || $page.state.from_component === 'settings') {
-      alert($page.data.t('about.message'))
-    }
-  })
 </script>
 
 <div class="about">

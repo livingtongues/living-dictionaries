@@ -12,6 +12,7 @@
   import Image from '$lib/components/image/Image.svelte'
   import AddImage from '$lib/components/image/AddImage.svelte'
   import { goto } from '$app/navigation'
+  import { MINIMUM_ABOUT_LENGTH } from '$lib/constants'
 
   export let data
   $: ({ dictionary, admin, is_manager, updateDictionary, add_gloss_language, remove_gloss_language, add_featured_image, about_content } = data)
@@ -101,8 +102,9 @@
         await updateDictionary({ public: false })
       } else if ($admin) {
         await updateDictionary({ public: true })
-      } else if (!$about_content || $about_content.about?.length < 200) {
-        goto(`/${$dictionary.id}/about`, { state: { from_component: 'settings' } })
+      } else if (!$about_content || $about_content.about?.length < MINIMUM_ABOUT_LENGTH) {
+        alert($page.data.t('about.message'))
+        goto(`/${$dictionary.id}/about`)
       } else {
         const communityAllowsOnline = confirm($page.data.t('settings.community_permission'))
         if (communityAllowsOnline) alert($page.data.t('header.contact_us'))
