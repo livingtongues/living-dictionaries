@@ -39,9 +39,10 @@ export const justMockDictionaryLayoutData = {
   show_local_search: false,
   load_citation: null,
   load_partners: null,
-  about_content: readable({
-    about: 'this is just a small example',
-  }) as Awaited<ReturnType<typeof awaitableDocStore<IAbout>>>,
+  about_content: readable(null) as Awaited<ReturnType<typeof awaitableDocStore<IAbout>>>,
+  // about_content: readable({
+  //   about: 'this is just a small example',
+  // }) as Awaited<ReturnType<typeof awaitableDocStore<IAbout>>>,
 } satisfies Partial<DictionaryLayoutData>
 
 export const mockDictionaryLayoutData: DictionaryLayoutData = {
