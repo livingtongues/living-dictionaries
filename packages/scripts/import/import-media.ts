@@ -2,8 +2,8 @@ import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 import * as fs from 'node:fs'
-import type { GoalDatabasePhoto } from '@living-dictionaries/types/photo.interface.js'
-import { environment, storage, timestamp } from '../config-firebase.js'
+import type { GoalDatabasePhoto } from '@living-dictionaries/types'
+import { environment, storage } from '../config-firebase.js'
 import { getImageServingUrl } from './getImageServingUrl.js'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
@@ -14,7 +14,7 @@ export async function uploadAudioFile(
   audioFileName: string,
   entryId: string,
   dictionaryId: string,
-  dry = false,
+  live = false,
 ): Promise<string> {
   const audioDir = join(__dirname, `data/${dictionaryId}/audio`)
   const audioFilePath = join(audioDir, audioFileName)
@@ -28,7 +28,7 @@ export async function uploadAudioFile(
     const [fileTypeSuffix] = audioFileName.match(/\.[0-9a-z]+$/i)
     const uploadedAudioPath = `${dictionaryId}/audio/${entryId}_${new Date().getTime()}${fileTypeSuffix}`
 
-    if (!dry) {
+    if (live) {
       await storage.bucket(fileBucket).upload(audioFilePath, {
         destination: uploadedAudioPath,
         metadata: {
@@ -46,7 +46,7 @@ export async function uploadImageFile(
   imageFileName: string,
   entryId: string,
   dictionaryId: string,
-  dry = false,
+  live = false,
 ): Promise<GoalDatabasePhoto> {
   const imageDir = join(__dirname, `data/${dictionaryId}/images`)
   const imageFilePath = join(imageDir, imageFileName)
@@ -59,7 +59,7 @@ export async function uploadImageFile(
   try {
     const [fileTypeSuffix] = imageFileName.match(/\.[0-9a-z]+$/i)
     const storagePath = `${dictionaryId}/images/${entryId}_${new Date().getTime()}${fileTypeSuffix}`
-    if (dry)
+    if (!live)
       return { path: storagePath, gcs: 'no-path-bc-dry-run' }
 
     await storage.bucket(fileBucket).upload(imageFilePath, {
@@ -79,7 +79,7 @@ export async function uploadImageFile(
     return {
       path: storagePath,
       gcs: gcsPath,
-      ts: timestamp,
+      ts: new Date().getTime(),
       // cr: // not yet included in import template
     }
   } catch (err) {
