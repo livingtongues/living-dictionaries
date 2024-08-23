@@ -17,6 +17,7 @@
     "write-entries": "tsx migrate-to-supabase/entries.ts -e prod",
     "migrate-users": "tsx migrate-to-supabase/auth.ts",
     "countAllEntries": "tsx countAllEntries.ts",
+    "getEmails": "tsx refactor/get-email.ts -e prod",
     "entryRefactor": "tsx refactor/entry-refactor.ts",
     "speakerRefactor": "tsx refactor/speaker-refactor.ts",
     "updateLocales": "tsx locales/update-locales.ts",
