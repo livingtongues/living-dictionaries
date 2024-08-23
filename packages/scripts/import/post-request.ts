@@ -1,15 +1,15 @@
 import { ResponseCodes } from '@living-dictionaries/site/src/lib/constants'
 
+const default_headers: RequestInit['headers'] = {
+  'content-type': 'application/json',
+}
+
 type Return<ExpectedResponse> = {
   data: ExpectedResponse
   error: null
 } | {
   data: null
   error: { status: number, message: string }
-}
-
-const default_headers: RequestInit['headers'] = {
-  'content-type': 'application/json',
 }
 
 export async function post_request<T extends Record<string, any>, ExpectedResponse extends Record<string, any> = any>(route: string, data: T, options?: {
@@ -41,7 +41,11 @@ async function handleResponse<ExpectedResponse extends Record<string, any>>(resp
         return { data: null, error: { status, message: textBody } }
       }
     } catch (err) {
+      // @ts-expect-error
       return { data: null, error: { status, message: err.message } }
     }
   }
+
+  const body = await response.json() as ExpectedResponse
+  return { data: body, error: null }
 }

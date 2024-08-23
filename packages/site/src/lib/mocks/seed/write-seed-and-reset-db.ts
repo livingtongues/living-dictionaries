@@ -14,7 +14,6 @@ export async function reset_db() {
   console.info('reseting db from seed sql')
 
   await execute_sql_query_on_db(`truncate table auth.users cascade;`)
-  // await execute_sql_query_on_db('truncate table entry_updates;')
   await execute_sql_query_on_db('truncate table senses cascade;')
 
   const seed_sql = sql_string_for_all_seeded_tables()
