@@ -21,13 +21,12 @@
     "entryRefactor": "tsx refactor/entry-refactor.ts",
     "speakerRefactor": "tsx refactor/speaker-refactor.ts",
     "updateLocales": "tsx locales/update-locales.ts",
-    "importDictionary": "tsx import/import.ts",
-    "importDictionary:dev": "tsx import/import.ts --id example-v4-senses",
+    "importDictionary:dev:dry": "tsx import/import.ts --id tseltal",
+    "importDictionary:dev:live": "tsx import/import.ts --id tseltal --live",
+    "importDictionary:prod:live": "tsx import/import.ts --id tseltal -e prod --live",
     "addDictionariesToIndex:dev": "tsx algolia/addDictionariesToIndex.ts dev",
     "addDictionariesToIndex:prod": "tsx algolia/addDictionariesToIndex.js prod",
     "updateIndex": "tsx algolia/updateIndex.ts -e prod",
-    "copyAlgoliaIndexRecords": "tsx algolia/copyAlgoliaIndexRecords.js",
-    "copyAlgoliaIndexSettings": "tsx algolia/copyAlgoliaIndexSettings.js",
     "test": "vitest"
   },
   "devDependencies": {

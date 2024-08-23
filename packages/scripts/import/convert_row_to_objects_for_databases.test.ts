@@ -6,10 +6,10 @@ import { convert_row_to_objects_for_databases } from './convert_row_to_objects_f
 import type { Row } from './row.type'
 import { parseCSVFrom } from './parse-csv.js'
 
-describe('convertJsonRowToEntryFormat without senses', () => {
-  const fakeTimeStamp = 10101010 as unknown as Timestamp
-  const fakeDateStamp = 1715819006966
+const fakeTimeStamp = 10101010 as unknown as Timestamp
+const import_id = `v4-1715819006966`
 
+describe('convertJsonRowToEntryFormat without senses', () => {
   test('glosses', () => {
     const csv_rows_without_header: Row[] = [
       {
@@ -18,7 +18,7 @@ describe('convertJsonRowToEntryFormat without senses', () => {
         'es_gloss': 'delfín',
       },
     ]
-    const entries = csv_rows_without_header.map(row => convert_row_to_objects_for_databases({ row, dateStamp: fakeDateStamp, timestamp: fakeTimeStamp }))
+    const entries = csv_rows_without_header.map(row => convert_row_to_objects_for_databases({ row, import_id, timestamp: fakeTimeStamp }))
 
     expect(entries).toMatchInlineSnapshot(`
       [
@@ -47,7 +47,7 @@ describe('convertJsonRowToEntryFormat without senses', () => {
         es_exampleSentence: 'el delfín nada en el océano.',
       },
     ]
-    const entries = csv_rows_without_header.map(row => convert_row_to_objects_for_databases({ row, dateStamp: fakeDateStamp, timestamp: fakeTimeStamp }))
+    const entries = csv_rows_without_header.map(row => convert_row_to_objects_for_databases({ row, import_id, timestamp: fakeTimeStamp }))
 
     expect(entries).toMatchInlineSnapshot(`
       [
@@ -78,7 +78,7 @@ describe('convertJsonRowToEntryFormat without senses', () => {
         'semanticDomain_custom': 'the sea!',
       },
     ]
-    const entries = csv_rows_without_header.map(row => convert_row_to_objects_for_databases({ row, dateStamp: fakeDateStamp, timestamp: fakeTimeStamp }))
+    const entries = csv_rows_without_header.map(row => convert_row_to_objects_for_databases({ row, import_id, timestamp: fakeTimeStamp }))
 
     expect(entries).toMatchInlineSnapshot(`
       [
@@ -109,7 +109,7 @@ describe('convertJsonRowToEntryFormat without senses', () => {
     const file = readFileSync(path.join(__dirname, `./data/${dictionaryId}/${dictionaryId}.csv`), 'utf8')
     const rows = parseCSVFrom(file)
     const rowsWithoutHeader = removeHeaderRow(rows)
-    const entries = rowsWithoutHeader.map(row => convert_row_to_objects_for_databases({ row, dateStamp: fakeDateStamp, timestamp: fakeTimeStamp }))
+    const entries = rowsWithoutHeader.map(row => convert_row_to_objects_for_databases({ row, import_id, timestamp: fakeTimeStamp }))
 
     expect(entries).toEqual(
       [
@@ -358,7 +358,7 @@ describe('convertJsonRowToEntryFormat without senses', () => {
         vernacular_exampleSentence: 'Hello world',
       },
     ]
-    const entries = csv_rows_without_header.map(row => convert_row_to_objects_for_databases({ row, dateStamp: fakeDateStamp, timestamp: fakeTimeStamp }))
+    const entries = csv_rows_without_header.map(row => convert_row_to_objects_for_databases({ row, import_id, timestamp: fakeTimeStamp }))
 
     expect(entries).toMatchInlineSnapshot(`
       [
@@ -399,7 +399,7 @@ describe('convertJsonRowToEntryFormat with senses', () => {
         's4.fr_gloss': 'créature mythologique',
       },
     ]
-    const entries = csv_rows_with_senses.map(row => convert_row_to_objects_for_databases({ row, dateStamp: fakeDateStamp, timestamp: fakeTimeStamp, test: true }))
+    const entries = csv_rows_with_senses.map(row => convert_row_to_objects_for_databases({ row, import_id, timestamp: fakeTimeStamp, test: true }))
 
     expect(entries).toMatchInlineSnapshot(`
       [
@@ -466,7 +466,7 @@ describe('convertJsonRowToEntryFormat with senses', () => {
         's2.es_exampleSentence': 'El pez está nadando',
       },
     ]
-    const entries = csv_rows_with_sentences.map(row => convert_row_to_objects_for_databases({ row, dateStamp: fakeDateStamp, timestamp: fakeTimeStamp, test: true }))
+    const entries = csv_rows_with_sentences.map(row => convert_row_to_objects_for_databases({ row, import_id, timestamp: fakeTimeStamp, test: true }))
 
     expect(entries).toMatchInlineSnapshot(`
       [
@@ -527,7 +527,7 @@ describe('convertJsonRowToEntryFormat with senses', () => {
         's2.nounClass': 'S',
       },
     ]
-    const entries = csv_rows_with_other_fields.map(row => convert_row_to_objects_for_databases({ row, dateStamp: fakeDateStamp, timestamp: fakeTimeStamp, test: true }))
+    const entries = csv_rows_with_other_fields.map(row => convert_row_to_objects_for_databases({ row, import_id, timestamp: fakeTimeStamp, test: true }))
     expect(entries).toMatchInlineSnapshot(`
       [
         {
@@ -583,7 +583,7 @@ describe('convertJsonRowToEntryFormat with senses', () => {
         's2.en_gloss': 'water',
       },
     ]
-    const entries = csv_rows_with_senses.map(row => convert_row_to_objects_for_databases({ row, dateStamp: fakeDateStamp, timestamp: fakeTimeStamp, test: true }))
+    const entries = csv_rows_with_senses.map(row => convert_row_to_objects_for_databases({ row, import_id, timestamp: fakeTimeStamp, test: true }))
 
     expect(entries).not.toEqual(
       [
@@ -644,7 +644,7 @@ describe('convertJsonRowToEntryFormat with senses', () => {
         's4.default_vernacular_exampleSentence': '𒂸𒂸 𒂸𒂸 𒂸𒂸',
       },
     ]
-    const entries = csv_rows_with_sentences.map(row => convert_row_to_objects_for_databases({ row, dateStamp: fakeDateStamp, timestamp: fakeTimeStamp, test: true }))
+    const entries = csv_rows_with_sentences.map(row => convert_row_to_objects_for_databases({ row, import_id, timestamp: fakeTimeStamp, test: true }))
 
     expect(entries).toMatchInlineSnapshot(`
       [
@@ -764,7 +764,7 @@ describe('convertJsonRowToEntryFormat with senses', () => {
         's4.default_vernacular_exampleSentence': '𒂸𒂸 𒂸𒂸 𒂸𒂸',
       },
     ]
-    const entries = csv_rows_with_sentences.map(row => convert_row_to_objects_for_databases({ row, dateStamp: fakeDateStamp, timestamp: fakeTimeStamp, test: true }))
+    const entries = csv_rows_with_sentences.map(row => convert_row_to_objects_for_databases({ row, import_id, timestamp: fakeTimeStamp, test: true }))
 
     expect(entries).toMatchInlineSnapshot(`
       [
@@ -911,7 +911,7 @@ describe('convertJsonRowToEntryFormat with senses', () => {
     const dictionaryId = 'example-v4-senses'
     const file = readFileSync(path.join(__dirname, `./data/${dictionaryId}/${dictionaryId}.csv`), 'utf8')
     const rows = parseCSVFrom(file)
-    const entries = rows.map(row => convert_row_to_objects_for_databases({ row, dateStamp: fakeDateStamp, timestamp: fakeTimeStamp, test: true }))
+    const entries = rows.map(row => convert_row_to_objects_for_databases({ row, import_id, timestamp: fakeTimeStamp, test: true }))
 
     expect(entries).toMatchInlineSnapshot(`
       [
