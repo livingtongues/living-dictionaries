@@ -13,7 +13,6 @@ async function checkForDevServer() {
 }
 
 program
-  //   .version('0.0.1')
   .option('-e, --environment [dev/prod]', 'Database Project', 'dev')
   .option('--id <value>', 'Dictionary Id')
   .option('--live', 'By default only values are logged, run with live flag to upload data and media')

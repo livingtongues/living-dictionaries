@@ -3,6 +3,7 @@ import { randomUUID } from 'node:crypto'
 import type { ActualDatabaseEntry, ContentUpdateRequestBody, ISpeaker } from '@living-dictionaries/types'
 import type { Timestamp } from 'firebase/firestore'
 import { db, environment, timestamp } from '../config-firebase.js'
+import type { ContentUpdateResponseBody } from '../../site/src/routes/api/db/content-update/+server'
 import { uploadAudioFile, uploadImageFile } from './import-media.js'
 import { parseCSVFrom } from './parse-csv.js'
 import { post_request } from './post-request.js'
@@ -10,17 +11,19 @@ import { convert_row_to_objects_for_databases } from './convert_row_to_objects_f
 import type { Row } from './row.type'
 
 const supabase_content_update_endpoint = 'http://localhost:3041/api/db/content-update'
-const developer_in_charge_supabase_uid = '12345678-abcd-efab-cdef-123456789013' // in Supabase diego@livingtongues.org -> Diego Córdova Nieto;
+const dev_developer_in_charge_supabase_uid = '12345678-abcd-efab-cdef-123456789013' // in Supabase diego@livingtongues.org -> Diego Córdova Nieto;
+const prod_developer_in_charge_supabase_uid = 'be43b1dd-6c64-494d-b5da-10d70c384433' // in Supabase diego@livingtongues.org -> Diego Córdova Nieto;
+const user_id_from_local = environment === 'dev' ? dev_developer_in_charge_supabase_uid : prod_developer_in_charge_supabase_uid
+
 const developer_in_charge_firebase_uid = 'qkTzJXH24Xfc57cZJRityS6OTn52' // diego@livingtongues.org -> Diego Córdova Nieto;
-type unique_speakers = Record<string, string>
-// const different_speakers: unique_speakers = {}
 
 export async function importFromSpreadsheet({ dictionaryId, live }: { dictionaryId: string, live: boolean }) {
   const dateStamp = Date.now()
+  const import_id = `v4-${dateStamp}`
 
   const file = readFileSync(`./import/data/${dictionaryId}/${dictionaryId}.csv`, 'utf8')
   const rows = parseCSVFrom<Row>(file)
-  const entries = await importEntries(dictionaryId, rows, dateStamp, live)
+  const entries = await importEntries(dictionaryId, rows, import_id, live)
 
   console.log(
     `Finished ${live ? 'importing' : 'emulating'} ${entries.length} entries to ${environment === 'dev' ? 'http://localhost:3041/' : 'livingdictionaries.app/'
@@ -33,7 +36,7 @@ export async function importFromSpreadsheet({ dictionaryId, live }: { dictionary
 export async function importEntries(
   dictionary_id: string,
   rows: Row[],
-  dateStamp: number,
+  import_id: string,
   live = false,
 ): Promise<ActualDatabaseEntry[]> {
   const firebase_entries: ActualDatabaseEntry[] = []
@@ -60,13 +63,13 @@ export async function importEntries(
 
     const universal_entry_id = colRef.doc().id
 
-    const { firebase_entry, supabase_senses, supabase_sentences } = convert_row_to_objects_for_databases({ row, dateStamp, timestamp })
+    const { firebase_entry, supabase_senses, supabase_sentences } = convert_row_to_objects_for_databases({ row, import_id, timestamp })
 
     for (const { sense, sense_id } of supabase_senses) {
-      await update_sense({ entry_id: universal_entry_id, dictionary_id, sense, sense_id, live })
+      await update_sense({ entry_id: universal_entry_id, dictionary_id, sense, sense_id, live, import_id })
     }
     for (const { sentence, sentence_id, sense_id } of supabase_sentences) {
-      await update_sentence({ entry_id: universal_entry_id, dictionary_id, sentence, sense_id, sentence_id, live })
+      await update_sentence({ entry_id: universal_entry_id, dictionary_id, sentence, sense_id, sentence_id, live, import_id })
     }
 
     if (row.photoFile) {
@@ -123,19 +126,21 @@ export async function update_sense({
   sense,
   sense_id,
   live,
+  import_id,
 }: {
   entry_id: string
   dictionary_id: string
   sense: ContentUpdateRequestBody['change']['sense']
   sense_id: string
   live: boolean
+  import_id: string
 }) {
   if (!live) return console.log({ dry_sense: sense })
 
-  const error = await post_request<ContentUpdateRequestBody>(supabase_content_update_endpoint, {
+  const { data, error } = await post_request<ContentUpdateRequestBody, ContentUpdateResponseBody>(supabase_content_update_endpoint, {
     id: randomUUID(),
     auth_token: null,
-    user_id_from_local: developer_in_charge_supabase_uid,
+    user_id_from_local,
     dictionary_id,
     entry_id,
     timestamp: new Date().toISOString(),
@@ -144,13 +149,15 @@ export async function update_sense({
     change: {
       sense,
     },
-    import_id: null, // TODO: add this - should match the one used in firebase entries
+    import_id,
   })
 
   if (error) {
     console.error('Error inserting into Supabase: ', error)
-    throw error
+    throw new Error(error.message)
   }
+
+  console.log({ data })
 
   return true
 }
@@ -162,6 +169,7 @@ export async function update_sentence({
   sense_id,
   sentence_id,
   live,
+  import_id,
 }: {
   entry_id: string
   dictionary_id: string
@@ -169,13 +177,14 @@ export async function update_sentence({
   sense_id: string
   sentence_id: string
   live: boolean
+  import_id: string
 }) {
   if (!live) return console.log({ dry_sense: sentence })
 
-  const error = await post_request<ContentUpdateRequestBody>(supabase_content_update_endpoint, {
+  const { data, error } = await post_request<ContentUpdateRequestBody, ContentUpdateResponseBody>(supabase_content_update_endpoint, {
     id: randomUUID(),
     auth_token: null,
-    user_id_from_local: developer_in_charge_supabase_uid,
+    user_id_from_local,
     dictionary_id,
     entry_id,
     timestamp: new Date().toISOString(),
@@ -185,13 +194,15 @@ export async function update_sentence({
     change: {
       sentence,
     },
-    import_id: null, // TODO: add this - should match the one used in firebase entries
+    import_id,
   })
 
   if (error) {
     console.error('Error inserting into Supabase: ', error)
-    throw error
+    throw new Error(error.message)
   }
+
+  console.log({ data })
 
   return true
 }
