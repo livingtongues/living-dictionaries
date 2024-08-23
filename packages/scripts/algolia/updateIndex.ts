@@ -2,6 +2,7 @@ import type { ActualDatabaseEntry } from '@living-dictionaries/types'
 import * as prepare from '@living-dictionaries/functions/src/algolia/prepareDataForIndex'
 import { db } from '../config-firebase'
 import { updateIndex } from './algolia'
+// import { Timestamp } from 'firebase-admin/firestore'
 
 // import { prepareDataForIndex } from '@living-dictionaries/functions/src/algolia/prepareDataForIndex';
 // @ts-expect-error
@@ -10,6 +11,10 @@ const prepareDataForIndex = prepare.default
 
 async function updateMostRecentEntries(count: number, { dry = true }) {
   const entriesSnapshot = await db.collectionGroup('words').orderBy('ua', 'desc').limit(count).get()
+  // const seconds_from_ua = 1723019612
+  // const a_day_before_last_edited = new Timestamp(seconds_from_ua, 0)
+  // const entriesSnapshot = await db.collectionGroup('words').orderBy('ua', 'desc').where('ua', '>', a_day_before_last_edited).get()
+  // console.log({ length: entriesSnapshot.size })
   const entries = await prepareEntriesFromSnapshot(entriesSnapshot)
 
   if (!dry)
@@ -40,4 +45,4 @@ async function prepareEntriesFromSnapshot(entriesSnapshot: FirebaseFirestore.Que
 }
 
 // updateIndexByField('nc', { dry: true });
-updateMostRecentEntries(300, { dry: false })
+updateMostRecentEntries(300, { dry: true })
