@@ -3,6 +3,7 @@ import { randomUUID } from 'node:crypto'
 import type { ActualDatabaseEntry, ContentUpdateRequestBody, ISpeaker } from '@living-dictionaries/types'
 import type { Timestamp } from 'firebase/firestore'
 import { db, environment, timestamp } from '../config-firebase.js'
+import type { ContentUpdateResponseBody } from '../../site/src/routes/api/db/content-update/+server'
 import { uploadAudioFile, uploadImageFile } from './import-media.js'
 import { parseCSVFrom } from './parse-csv.js'
 import { post_request } from './post-request.js'
@@ -10,20 +11,22 @@ import { convert_row_to_objects_for_databases } from './convert_row_to_objects_f
 import type { Row } from './row.type'
 
 const supabase_content_update_endpoint = 'http://localhost:3041/api/db/content-update'
-const developer_in_charge_supabase_uid = '12345678-abcd-efab-cdef-123456789013' // in Supabase diego@livingtongues.org -> Diego Córdova Nieto;
-const developer_in_charge_firebase_uid = 'qkTzJXH24Xfc57cZJRityS6OTn52' // diego@livingtongues.org -> Diego Córdova Nieto;
-type unique_speakers = Record<string, string>
-const different_speakers: unique_speakers = {}
+const dev_developer_in_charge_supabase_uid = '12345678-abcd-efab-cdef-123456789013' // in Supabase diego@livingtongues.org -> Diego Córdova Nieto;
+const prod_developer_in_charge_supabase_uid = 'be43b1dd-6c64-494d-b5da-10d70c384433' // in Supabase diego@livingtongues.org -> Diego Córdova Nieto;
+const user_id_from_local = environment === 'dev' ? dev_developer_in_charge_supabase_uid : prod_developer_in_charge_supabase_uid
 
-export async function importFromSpreadsheet(dictionaryId: string, dry = false) {
+const developer_in_charge_firebase_uid = 'qkTzJXH24Xfc57cZJRityS6OTn52' // diego@livingtongues.org -> Diego Córdova Nieto;
+
+export async function importFromSpreadsheet({ dictionaryId, live }: { dictionaryId: string, live: boolean }) {
   const dateStamp = Date.now()
+  const import_id = `v4-${dateStamp}`
 
   const file = readFileSync(`./import/data/${dictionaryId}/${dictionaryId}.csv`, 'utf8')
   const rows = parseCSVFrom<Row>(file)
-  const entries = await importEntries(dictionaryId, rows, dateStamp, dry)
+  const entries = await importEntries(dictionaryId, rows, import_id, live)
 
   console.log(
-    `Finished ${dry ? 'emulating' : 'importing'} ${entries.length} entries to ${environment === 'dev' ? 'http://localhost:3041/' : 'livingdictionaries.app/'
+    `Finished ${live ? 'importing' : 'emulating'} ${entries.length} entries to ${environment === 'dev' ? 'http://localhost:3041/' : 'livingdictionaries.app/'
     }${dictionaryId} in ${(Date.now() - dateStamp) / 1000} seconds`,
   )
   console.log('') // line break
@@ -33,8 +36,8 @@ export async function importFromSpreadsheet(dictionaryId: string, dry = false) {
 export async function importEntries(
   dictionary_id: string,
   rows: Row[],
-  dateStamp: number,
-  dry = false,
+  import_id: string,
+  live = false,
 ): Promise<ActualDatabaseEntry[]> {
   const firebase_entries: ActualDatabaseEntry[] = []
   let entryCount = 0
@@ -51,7 +54,7 @@ export async function importEntries(
     if (!row.lexeme || row.lexeme === '(word/phrase)')
       continue
 
-    if (!dry && batchCount === 200) {
+    if (live && batchCount === 200) {
       console.log('Committing batch of entries ending with: ', entryCount)
       await batch.commit()
       batch = db.batch()
@@ -60,22 +63,22 @@ export async function importEntries(
 
     const universal_entry_id = colRef.doc().id
 
-    const { firebase_entry, supabase_senses, supabase_sentences } = convert_row_to_objects_for_databases({ row, dateStamp, timestamp })
+    const { firebase_entry, supabase_senses, supabase_sentences } = convert_row_to_objects_for_databases({ row, import_id, timestamp })
 
     for (const { sense, sense_id } of supabase_senses) {
-      await update_sense({ entry_id: universal_entry_id, dictionary_id, sense, sense_id, dry })
+      await update_sense({ entry_id: universal_entry_id, dictionary_id, sense, sense_id, live, import_id })
     }
     for (const { sentence, sentence_id, sense_id } of supabase_sentences) {
-      await update_sentence({ entry_id: universal_entry_id, dictionary_id, sentence, sense_id, sentence_id, dry })
+      await update_sentence({ entry_id: universal_entry_id, dictionary_id, sentence, sense_id, sentence_id, live, import_id })
     }
 
     if (row.photoFile) {
-      const pf = await uploadImageFile(row.photoFile, universal_entry_id, dictionary_id, dry)
+      const pf = await uploadImageFile(row.photoFile, universal_entry_id, dictionary_id, live)
       if (pf) firebase_entry.pf = pf
     }
 
     if (row.soundFile) {
-      const audioFilePath = await uploadAudioFile(row.soundFile, universal_entry_id, dictionary_id, dry)
+      const audioFilePath = await uploadAudioFile(row.soundFile, universal_entry_id, dictionary_id, live)
       firebase_entry.sf = {
         path: audioFilePath,
         ts: Date.now(),
@@ -97,7 +100,7 @@ export async function importEntries(
             updatedAt: timestamp as Timestamp,
             updatedBy: developer_in_charge_firebase_uid,
           }
-          if (!dry) {
+          if (live) {
             const new_speaker_id = await db.collection('speakers').add(new_speaker).then(ref => ref.id)
             firebase_entry.sf.sp = new_speaker_id
             speakers.push({ id: new_speaker_id, ...new_speaker })
@@ -113,7 +116,7 @@ export async function importEntries(
   }
 
   console.log(`Committing final batch of entries ending with: ${entryCount}`)
-  if (!dry) await batch.commit()
+  if (live) await batch.commit()
   return firebase_entries
 }
 
@@ -122,20 +125,22 @@ export async function update_sense({
   dictionary_id,
   sense,
   sense_id,
-  dry,
+  live,
+  import_id,
 }: {
   entry_id: string
   dictionary_id: string
   sense: ContentUpdateRequestBody['change']['sense']
   sense_id: string
-  dry: boolean
+  live: boolean
+  import_id: string
 }) {
-  if (dry) return console.log({ dry_sense: sense })
+  if (!live) return console.log({ dry_sense: sense })
 
-  const error = await post_request<ContentUpdateRequestBody>(supabase_content_update_endpoint, {
+  const { data, error } = await post_request<ContentUpdateRequestBody, ContentUpdateResponseBody>(supabase_content_update_endpoint, {
     id: randomUUID(),
     auth_token: null,
-    user_id_from_local: developer_in_charge_supabase_uid,
+    user_id_from_local,
     dictionary_id,
     entry_id,
     timestamp: new Date().toISOString(),
@@ -144,13 +149,15 @@ export async function update_sense({
     change: {
       sense,
     },
-    import_id: null, // TODO: add this - should match the one used in firebase entries
+    import_id,
   })
 
   if (error) {
     console.error('Error inserting into Supabase: ', error)
-    throw error
+    throw new Error(error.message)
   }
+
+  console.log({ data })
 
   return true
 }
@@ -161,21 +168,23 @@ export async function update_sentence({
   sentence,
   sense_id,
   sentence_id,
-  dry,
+  live,
+  import_id,
 }: {
   entry_id: string
   dictionary_id: string
   sentence: ContentUpdateRequestBody['change']['sentence']
   sense_id: string
   sentence_id: string
-  dry: boolean
+  live: boolean
+  import_id: string
 }) {
-  if (dry) return console.log({ dry_sense: sentence })
+  if (!live) return console.log({ dry_sense: sentence })
 
-  const error = await post_request<ContentUpdateRequestBody>(supabase_content_update_endpoint, {
+  const { data, error } = await post_request<ContentUpdateRequestBody, ContentUpdateResponseBody>(supabase_content_update_endpoint, {
     id: randomUUID(),
     auth_token: null,
-    user_id_from_local: developer_in_charge_supabase_uid,
+    user_id_from_local,
     dictionary_id,
     entry_id,
     timestamp: new Date().toISOString(),
@@ -185,13 +194,15 @@ export async function update_sentence({
     change: {
       sentence,
     },
-    import_id: null, // TODO: add this - should match the one used in firebase entries
+    import_id,
   })
 
   if (error) {
     console.error('Error inserting into Supabase: ', error)
-    throw error
+    throw new Error(error.message)
   }
+
+  console.log({ data })
 
   return true
 }
