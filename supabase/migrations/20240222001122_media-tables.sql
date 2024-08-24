@@ -15,7 +15,7 @@ ALTER TABLE photos ENABLE ROW LEVEL SECURITY;
 
 CREATE TABLE videos (
   id uuid primary key default uuid_generate_v4(),
-  storage_path text NOT NULL,
+  storage_path text NOT NULL, -- made nullable and added hosted_elsewhere column
   source text,
   videographer text,
   created_at timestamp with time zone DEFAULT now() NOT NULL,
