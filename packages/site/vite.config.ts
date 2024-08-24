@@ -1,4 +1,3 @@
-/* eslint-disable node/prefer-global/process */
 import { readFileSync } from 'node:fs'
 import { sveltekit } from '@sveltejs/kit/vite'
 import { type Plugin, defineConfig } from 'vite'
