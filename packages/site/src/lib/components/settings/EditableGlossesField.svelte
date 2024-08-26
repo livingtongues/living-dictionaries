@@ -71,6 +71,6 @@
 </ShowHide>
 
 <div class="text-xs text-gray-600 mt-1">
-  {$page.data.t('create.gloss_dictionary_clarification')}.
+  {$page.data.t('create.gloss_dictionary_clarification')}
   {$page.data.t('settings.unable_to_delete')}
 </div>
