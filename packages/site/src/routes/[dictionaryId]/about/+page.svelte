@@ -26,9 +26,7 @@
     {/if}
   {/if}
 
-  {#if editing}
-    <UserGuide />
-  {/if}
+  <UserGuide />
   <div class="flex">
     {#if editing}
       <div class="max-w-screen-md tw-prose prose-lg">

@@ -5,24 +5,24 @@
   let hide_questions = false
 </script>
 
-<div class="w-5/6 sm:max-w-[550px] ml-7">
+<div class="w-5/6 sm:max-w-[550px] ml-7 mb-3 border-2 border-slate-200 p-3 pl-8 text-gray-5">
+  <div class="flex justify-between">
+    <h4 class="mb-3 text-lg">Guidance</h4> <!-- TODO translate -->
+    <button on:click={() => hide_questions = !hide_questions} type="button" class="h-0">
+      {#if hide_questions}
+        <span class="i-carbon-caret-down opacity-50 text-2xl" />
+      {:else}
+        <span class="i-carbon-caret-up opacity-50 text-2xl" />
+      {/if}
+    </button>
+  </div>
   {#if !hide_questions}
-    <div class="" transition:slide={{ duration: 300 }}>
-      <ul class="list-disc">
-        <li class="text-gray-5">{$page.data.t('about.question_1')}</li>
-        <li class="text-gray-5">{$page.data.t('about.question_2')}</li>
-        <li class="text-gray-5">{$page.data.t('about.question_3')}</li>
-        <li class="text-gray-5">{$page.data.t('about.question_4')}</li>
-        <li class="text-gray-5">{$page.data.t('about.question_5')}</li>
-      </ul>
-      <div class="flex justify-end">
-        <button on:click={() => hide_questions = true} type="button"><i class="fal fa-sort-up" /></button>
-      </div>
-    </div>
-  {/if}
-  {#if hide_questions}
-    <div class="flex justify-end">
-      <button on:click={() => hide_questions = false} type="button"><i class="fal fa-sort-down" /></button>
-    </div>
+    <ul class="list-disc" transition:slide={{ duration: 300 }}>
+      <li>{$page.data.t('about.question_1')}</li>
+      <li>{$page.data.t('about.question_2')}</li>
+      <li>{$page.data.t('about.question_3')}</li>
+      <li>{$page.data.t('about.question_4')}</li>
+      <li>{$page.data.t('about.question_5')}</li>
+    </ul>
   {/if}
 </div>
