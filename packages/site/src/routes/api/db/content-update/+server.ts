@@ -61,6 +61,21 @@ export const POST: RequestHandler = async ({ request }) => {
         throw new Error(add_dictionary_error.message)
     }
 
+    if (entry_id) {
+      const { data: entry } = await adminSupabase.from('entries').select().eq('id', entry_id).single()
+      if (!entry) {
+        const { error: add_entry_error } = await adminSupabase.from('entries').insert({
+          id: entry_id,
+          dictionary_id,
+          lexeme: {},
+          created_by: user_id,
+          updated_by: user_id,
+        })
+        if (add_entry_error)
+          throw new Error(add_entry_error.message)
+      }
+    }
+
     if (table === 'senses') {
       const sense: TablesInsert<'senses'> = {
         id: sense_id,
@@ -140,6 +155,7 @@ export const POST: RequestHandler = async ({ request }) => {
     const { data: content_update, error: history_error } = await adminSupabase.from('content_updates').insert({
       id,
       user_id,
+      entry_id,
       dictionary_id,
       sentence_id,
       sense_id,

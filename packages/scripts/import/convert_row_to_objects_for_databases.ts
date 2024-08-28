@@ -3,9 +3,9 @@ import type { ActualDatabaseEntry, ContentUpdateRequestBody } from '@living-dict
 import type { Timestamp } from 'firebase/firestore'
 import type { Row } from './row.type'
 
-export function convert_row_to_objects_for_databases({ row, dateStamp, timestamp, test = false }: {
+export function convert_row_to_objects_for_databases({ row, import_id, timestamp, test = false }: {
   row: Row
-  dateStamp?: number
+  import_id: string
   timestamp?: FirebaseFirestore.FieldValue
   test?: boolean
 }): {
@@ -179,9 +179,7 @@ export function convert_row_to_objects_for_databases({ row, dateStamp, timestamp
   if (Object.keys(firebase_entry.xs).length === 0)
     delete firebase_entry.xs
 
-  // if (!dateStamp) return firebase_entry
-
-  firebase_entry.ii = `v4-${dateStamp}`
+  firebase_entry.ii = import_id
   firebase_entry.ca = timestamp as Timestamp
   firebase_entry.ua = timestamp as Timestamp
 

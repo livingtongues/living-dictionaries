@@ -1,5 +1,12 @@
 # Local [Supabase](https://supabase.com/docs) dev
 
+Schema:
+https://drawsql.app/teams/ld-4/diagrams/entries-sentences-texts
+https://supabase.com/dashboard/project/actkqboqpzniojhgtqzw/database/schemas
+http://127.0.0.1:54323/project/default/database/schemas
+
+Handle speakers id being uuid and lots of connections with FB speaker ids not matching, 20240222001122_media-tables.sql
+
 ## Setup
 1. [Install supabase cli locally](https://supabase.com/docs/guides/cli) *- you can skip this the first few times and just prepend `pnpx ` to the commands below, but after awhile you will tire of waiting for pnpx on each command*
 2. Install [Docker Desktop](https://www.docker.com/products/docker-desktop/) and make sure it is running
@@ -8,6 +15,7 @@
 
 - `supabase start` to start a local instance of supabase, including POSTGres, Storage, Email, Functions, etc...
 - `supabase migration new <feature-name>` to write a new sql migration that will edit the database. Changes are saved in version control under supabase/migrations.
+- `supabase migration up` to apply pending migrations to local database (prefer running `supabase db reset` instead)
 - `supabase db reset` to wipe the database, run each migration sequentially and then finally the `seed.sql` file.
 - `supabase stop` to close down the Docker containers. State will be saved and restored the next time you run `supabase start`
 
@@ -25,7 +33,8 @@ See [pgTAP docs](https://pgtap.org/documentation.html) and https://supabase.com/
 - `supabase test new <name>` to create a new test file
 - `supabase test db` to run tests
 
-## Push changes to cloud project
+## Push config changes and new migrations to cloud project
+You can check current prod migrations at https://supabase.com/dashboard/project/actkqboqpzniojhgtqzw/database/migrations
 
 - `supabase login`
 - `supabase link --project-ref=actkqboqpzniojhgtqzw --password=<DB password>`
