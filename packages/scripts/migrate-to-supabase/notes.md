@@ -22,7 +22,7 @@
 - Make Supabase backup (manually trigger)
 - Migrate data
 - Test viewing
-- Merge new saving methods code (this will be a natural unblock)
+- Merge new saving methods code (this will be a natural unblock) and hide Algolia search results
 - Test editing entries
 - Remove notice
 - Email letting everyone know editing is available again
