@@ -11,9 +11,10 @@
   import type { QueryParams } from '$lib/search/types'
   import { page } from '$app/stores'
   import { convert_and_expand_entry } from '$lib/transformers/convert_and_expand_entry'
+  import SeoMetaTags from '$lib/components/SeoMetaTags.svelte'
 
   export let data
-  $: ({ entries, status, search_entries, default_entries_per_page, search_params, speakers, dictionary, can_edit, edited_entries, dbOperations } = data)
+  $: ({ entries, admin, status, search_entries, default_entries_per_page, search_params, speakers, dictionary, can_edit, edited_entries, dbOperations } = data)
 
   const page_entries = writable<ExpandedEntry[]>(null)
 
@@ -105,3 +106,13 @@
     <EntryFilters {search_params} {show_mobile_filters} on_close={toggle} {result_facets} speakers={$speakers} />
   </div>
 </ShowHide>
+
+<SeoMetaTags
+  admin={$admin > 0}
+  title="Entries"
+  dictionaryName={$dictionary.name}
+  gcsPath={$dictionary.featuredImage?.specifiable_image_url}
+  lng={$dictionary.coordinates?.longitude}
+  lat={$dictionary.coordinates?.latitude}
+  description="The entries in this Living Dictionary are displayed in a comprehensive list that visitors can easily browse by using the page tabs at the bottom of the screen, or search by using the powerful search bar located at the top of the page."
+  keywords="Endangered Languages, Language Documentation, Language Revitalization, Build a Dictionary, Online Dictionary, Digital Dictionary, Dictionary Software, Free Software, Online Dictionary Builder, Living Dictionaries, Living Dictionary, Edit a dictionary, Search a dictionary, Browse a dictionary, Explore a Dictionary" />

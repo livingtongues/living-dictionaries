@@ -24,9 +24,6 @@
     "importDictionary:dev:dry": "tsx import/import.ts --id tseltal",
     "importDictionary:dev:live": "tsx import/import.ts --id tseltal --live",
     "importDictionary:prod:live": "tsx import/import.ts --id tseltal -e prod --live",
-    "addDictionariesToIndex:dev": "tsx algolia/addDictionariesToIndex.ts dev",
-    "addDictionariesToIndex:prod": "tsx algolia/addDictionariesToIndex.js prod",
-    "updateIndex": "tsx algolia/updateIndex.ts -e prod",
     "test": "vitest"
   },
   "devDependencies": {

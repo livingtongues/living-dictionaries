@@ -1,11 +1,11 @@
 <script lang="ts">
-  import { page } from '$app/stores';
-  import { Button, ShowHide } from 'svelte-pieces';
-  import EditFieldModal from '$lib/components/entry/EditFieldModal.svelte';
-  import type { DbOperations } from '$lib/dbOperations';
+  import { Button, ShowHide } from 'svelte-pieces'
+  import { page } from '$app/stores'
+  import EditFieldModal from '$lib/components/entry/EditFieldModal.svelte'
+  import type { DbOperations } from '$lib/dbOperations'
 
   export let addNewEntry: DbOperations['addNewEntry']
-  let online = true;
+  let online = true
 </script>
 
 <svelte:window bind:online />

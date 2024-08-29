@@ -68,7 +68,7 @@ export async function deleteVideo(entry: ActualDatabaseEntry) {
   await updateEntryOnline({ data: { vfs: null, deletedVfs: [...(entry.deletedVfs || []), deletedVideo] }, entryId: entry.id })
 }
 
-export async function deleteEntry(entry_id: string, dictionary_id: string, algoliaQueryParams: string) {
+export async function deleteEntry(entry_id: string, dictionary_id: string) {
   const { data: { t } } = get(page)
   if (
     confirm(t('entry.delete_entry'))
@@ -80,7 +80,7 @@ export async function deleteEntry(entry_id: string, dictionary_id: string, algol
         deletedAt: serverTimestamp(),
       }) // using cache based set to avoid conflicts w/ serverTimestamps loaded in from firestore normal and sent out via firestore lite, not awaiting in case internet is flaky - can go on to the delete operation.
       await deleteDocumentOnline(`dictionaries/${dictionary_id}/words/${entry.id}`)
-      goto(`/${dictionary_id}/entries/list${algoliaQueryParams}`)
+      goto(`/${dictionary_id}/entries`)
     } catch (err) {
       alert(`${t('misc.error')}: ${err}`)
     }

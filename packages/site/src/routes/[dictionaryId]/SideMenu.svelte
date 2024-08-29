@@ -17,7 +17,7 @@
 </div>
 <div on:click={on_close}>
   <a
-    class:active={$page.url.pathname.match(/entry|entries/) && !$page.url.pathname.includes('entries-algolia')}
+    class:active={$page.url.pathname.match(/entry|entries/)}
     href={`/${dictionary.id}/entries`}>
     <span class="i-fa-solid-list" />
     <span class="font-medium mx-2">
@@ -29,15 +29,6 @@
         text-gray-700 bg-gray-300 rounded-full">
       {new Intl.NumberFormat().format(dictionary.entryCount || 0)}
     </span>
-  </a>
-  <a
-    class:active={$page.url.pathname.includes('entries-algolia')}
-    href={`/${dictionary.id}/entries-algolia/list`}>
-    <span class="i-fa-solid-list" />
-    <span class="font-medium mx-2">
-      {$page.data.t('dictionary.entries')} (old)
-    </span>
-    <span class="flex-grow" />
   </a>
   {#if !is_manager}
     <a

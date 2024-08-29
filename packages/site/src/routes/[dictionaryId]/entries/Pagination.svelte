@@ -1,5 +1,5 @@
 <script lang="ts">
-  import PaginationButtons from '$lib/components/search/PaginationButtons.svelte'
+  import PaginationButtons from './PaginationButtons.svelte'
   import type { DbOperations } from '$lib/dbOperations'
 
   export let addNewEntry: DbOperations['addNewEntry']
@@ -17,7 +17,7 @@
 </script>
 
 {#if can_edit}
-  {#await import('$lib/components/search/AddEntry.svelte') then { default: AddEntry }}
+  {#await import('./AddEntry.svelte') then { default: AddEntry }}
     <AddEntry {addNewEntry} class="text-nowrap sticky bottom-3 z-10 !md:hidden !print:hidden" />
   {/await}
 {/if}
@@ -26,7 +26,7 @@
   <PaginationButtons pages={number_of_pages} current_page={page_from_url || 1} {go_to_page}>
     {#if can_edit}
       <div class="w-3 mr-auto" />
-      {#await import('$lib/components/search/AddEntry.svelte') then { default: AddEntry }}
+      {#await import('./AddEntry.svelte') then { default: AddEntry }}
         <AddEntry {addNewEntry} class="text-nowrap hidden md:block" />
       {/await}
     {/if}

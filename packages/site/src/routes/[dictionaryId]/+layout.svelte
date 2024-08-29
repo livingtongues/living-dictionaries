@@ -2,7 +2,6 @@
   import { Button, ResponsiveSlideover, ShowHide } from 'svelte-pieces'
   import SideMenu from './SideMenu.svelte'
   import { page } from '$app/stores'
-  import { algoliaQueryParams } from '$lib/stores/algolia'
   import Header from '$lib/components/shell/Header.svelte'
   import './custom-fonts.css'
 
@@ -17,8 +16,7 @@
       class="font-semibold sm:text-xl overflow-x-auto md:overflow-hidden">
       <a
         class="p-3 hover:text-black hidden md:inline print:hidden"
-        href="/"
-        on:click={() => ($algoliaQueryParams = '')}>
+        href="/">
         <i class="fas fa-home" />
       </a>
       <div class="w-2 hidden md:inline" />

@@ -1,20 +1,23 @@
 # Migrate Entries and Speakers from Firestore to Supabase
 
 ## TODO
+- edit dictionary via endpoint function (can do this on its own branch)
+- look at print, table, gallery, and list page files history to make sure there are no missed improvements - check github history too
+- Supabase sense updates show immediately
+- Get dialects from Supabase to EntryDialect.svelte - first create a dialects table and a many-to-many table for entry-dialects
 - solve Orama bugs
   - replaceState in createQueryParamStore? look into improving the history to change for view and page changes but not for the others
-  - Supabase sense updates show immediately
-- On a new migration branch
-  - Make sure all items from "clean-up" below are being actively logged again as they are run into
-  - update migration script to migrate speakers across as they are needed, when one is found, save into speakers table, then create a map of firestore speaker id to supabase speaker id, in future times when this Firestore speaker id comes up, check the map first to see if speaker already exists
-  - figure out how different user ids (creater of speaker) between Firestore and Firebase will be handled and document
-  - run tests on migration
-  - visual inspection of the results locally - should work similar to current prod
-  - migrate auth
-  - update saving functions << is a little big
-  - make all types of edits
+- Make sure all items from "clean-up" below are being actively logged again as they are run into
+- update migration script to migrate speakers across as they are needed, when one is found, save into speakers table, then create a map of firestore speaker id to supabase speaker id, in future times when this Firestore speaker id comes up, check the map first to see if speaker already exists
+- figure out how different user ids (creater of speaker) between Firestore and Firebase will be handled and document
+- run tests on migration
+- visual inspection of the results locally - should work similar to current prod
+- migrate auth
+- update saving functions << is a little big
+- make all types of edits
 - Run migration process below
 - Handle clean-up below
+- Remove algolia keys from vercel
 
 ## Migration Process
 - post notice on logged-in users a week ahead of time
