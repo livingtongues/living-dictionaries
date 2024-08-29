@@ -249,7 +249,8 @@
     "assertion": "yes",
     "negation": "no",
     "clean": "Clean",
-    "map": "Map"
+    "map": "Map",
+    "guidance": "Guidance"
   },
   "settings": {
     "community_permission": "Does the speech community allow this language to be online?",

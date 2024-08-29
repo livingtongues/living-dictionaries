@@ -249,7 +249,8 @@
     "assertion": "sí",
     "negation": "no",
     "clean": "Limpiar",
-    "map": "Mapa"
+    "map": "Mapa",
+    "guidance": "Guía de uso"
   },
   "settings": {
     "community_permission": "¿Permite la comunidad lingüística que este idioma esté en línea?",

@@ -249,7 +249,8 @@
     "assertion": "ndio",
     "negation": "hapana",
     "clean": "Safi",
-    "map": "Ramani"
+    "map": "Ramani",
+    "guidance": "Mwongozo"
   },
   "settings": {
     "community_permission": "Je, jamii ya wazungumzaji inaruhusu lugha hii kuwekwa mtandaoni?",

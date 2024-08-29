@@ -249,7 +249,8 @@
     "assertion": "ya",
     "negation": "tidak",
     "clean": "Bersih",
-    "map": "Peta"
+    "map": "Peta",
+    "guidance": "Bimbingan"
   },
   "settings": {
     "community_permission": "Adakah masyarakat penutur membenarkan bahasa ini berada dalam talian?",
@@ -347,7 +348,7 @@
     "old_value": "Nilai Bekas",
     "new_value": "Nilai Baru",
     "created": "Dicipta",
-    "edited": "disunting",
+    "edited": "Disunting",
     "deleted": "Dipadamkan",
     "history_search": "Cari entri, editor, medan dan nilai",
     "download_history": "Muat turun Sejarah sebagai CSV",
@@ -363,7 +364,7 @@
     "name": "Sinopsis"
   },
   "sense": {
-    "sense": "rasa",
+    "sense": "Rasa",
     "add": "Tambah Sense"
   }
 }

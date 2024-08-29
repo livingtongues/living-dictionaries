@@ -249,7 +249,8 @@
     "assertion": "Có   ",
     "negation": "Không",
     "clean": "Không lỗi",
-    "map": "Bản đồ"
+    "map": "Bản đồ",
+    "guidance": "hướng dẫn"
   },
   "settings": {
     "community_permission": "Cộng đồng có cho phép ngôn ngữ của họ được đăng tải trực tuyến hay không?",

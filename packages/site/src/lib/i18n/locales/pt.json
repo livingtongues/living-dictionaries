@@ -249,7 +249,8 @@
     "assertion": "sim",
     "negation": "não",
     "clean": "Limpar",
-    "map": "Mapa"
+    "map": "Mapa",
+    "guidance": "Orientação"
   },
   "settings": {
     "community_permission": "A comunidade falante permite que esta língua esteja on-line?",
