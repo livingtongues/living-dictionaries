@@ -9,12 +9,10 @@
   import type { PageData as EntriesPageData } from './$types'
   import EntriesGallery from './EntriesGallery.svelte'
   import EntriesPrint from './EntriesPrint.svelte'
-  import type { View } from '$lib/search/types'
   import { goto, preloadData, pushState } from '$app/navigation'
   import { page } from '$app/stores'
   import { ResponseCodes } from '$lib/constants'
 
-  export let view: View
   export let entries: Map<string, ExpandedEntry>
   export let page_data: EntriesPageData
   $: ({ dictionary, admin, can_edit, preferred_table_columns, dbOperations, search_params, load_citation, load_partners } = page_data)
@@ -48,7 +46,7 @@
 </script>
 
 {#if entries.size}
-  {#if !view}
+  {#if !$search_params.view}
     {#each entries as [id, entry] (id)}
       <ListEntry
         dictionary={$dictionary}
@@ -58,22 +56,22 @@
         on_click={(e) => { handle_entry_click(e, entry) }}
         {dbOperations} />
     {/each}
-  {:else if view === 'table'}
+  {:else if $search_params.view === 'table'}
     <EntriesTable
       entries={Array.from(entries.values())}
       preferred_table_columns={$preferred_table_columns}
       dictionary={$dictionary}
       can_edit={$can_edit}
       {dbOperations} />
-  {:else if view === 'gallery'}
+  {:else if $search_params.view === 'gallery'}
     <EntriesGallery
       entries={Array.from(entries.values())}
       dictionary={$dictionary}
       deleteImage={dbOperations.deleteImage}
       can_edit={$can_edit} />
-  {:else if view === 'print'}
+  {:else if $search_params.view === 'print'}
     <EntriesPrint
-      bind:entries_per_page={$search_params.entries_per_page}
+      {search_params}
       entries={Array.from(entries.values())}
       dictionary={$dictionary}
       {load_citation}

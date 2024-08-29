@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Button, createPersistedStore } from 'svelte-pieces'
+  import { Button, type QueryParamStore, createPersistedStore } from 'svelte-pieces'
   import type { Citation, ExpandedEntry, IDictionary, IPrintFields, Partner } from '@living-dictionaries/types'
   import { onMount } from 'svelte'
   import PrintEntry from '../entries-algolia/print/PrintEntry.svelte'
@@ -8,19 +8,21 @@
   import { truncateAuthors } from '../entries-algolia/print/truncateAuthors'
   import { build_citation } from '../contributors/build-citation'
   import { page } from '$app/stores'
+  import type { QueryParams } from '$lib/search/types'
 
+  export let search_params: QueryParamStore<QueryParams>
   export let entries: ExpandedEntry[] = []
   export let dictionary: IDictionary
   export let can_edit = false
-  export let entries_per_page: number
   export let load_citation: () => Promise<Citation>
   export let load_partners: () => Promise<Partner[]>
 
-  const print_per_page = 30
+  const print_per_page = 100
 
   onMount(() => {
-    entries_per_page = print_per_page
-    return () => entries_per_page = null
+    $search_params.page = 1
+    $search_params.entries_per_page = print_per_page
+    return () => $search_params.entries_per_page = null
   })
 
   const visitor_max_entries = 300
@@ -51,7 +53,7 @@
           type="number"
           min="1"
           max={can_edit ? 1000000 : visitor_max_entries}
-          bind:value={entries_per_page} />
+          bind:value={$search_params.entries_per_page} />
       </div>
       <div class="mb-1 mr-2">
         <label class="font-medium text-gray-700" for="columnCount">{$page.data.t('print.columns')}</label>

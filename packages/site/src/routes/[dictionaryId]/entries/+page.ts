@@ -11,6 +11,7 @@ export function load({ params: { dictionaryId } }) {
     startWith: default_params,
     storagePrefix: `${dictionaryId}_`,
     cleanFalseValues: true,
+    // replaceState: false,
   })
 
   return {

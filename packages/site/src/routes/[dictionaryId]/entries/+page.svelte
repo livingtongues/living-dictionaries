@@ -98,7 +98,7 @@
           <span class="i-svg-spinners-3-dots-fade align--4px" title="Ensure all entries are up to date" />
         {/if}
       </div>
-      <View entries={updated_entries} view={$search_params.view} page_data={data} />
+      <View entries={updated_entries} page_data={data} />
       <Pagination bind:page_from_url={$search_params.page} {number_of_pages} can_edit={$can_edit} addNewEntry={dbOperations.addNewEntry} />
     </div>
     <div class="hidden md:block w-2 flex-shrink-0 print:hidden" />
