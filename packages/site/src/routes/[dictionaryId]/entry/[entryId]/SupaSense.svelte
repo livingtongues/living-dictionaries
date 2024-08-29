@@ -150,7 +150,6 @@
     {#if has_sentences}
       {#each glossingLanguages as bcp}
         <EntryField
-          class="ml-3"
           value={sentence.translation?.[bcp]}
           field="example_sentence"
           {bcp}
