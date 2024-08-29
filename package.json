@@ -3,6 +3,7 @@
   "type": "module",
   "scripts": {
     "dev": "pnpm --filter=site dev",
+    "prod": "pnpm --filter=site prod",
     "dev:open": "pnpm --filter=site dev --open",
     "build": "pnpm --filter=site build",
     "preview": "pnpm --filter=site preview",
@@ -34,7 +35,7 @@
     "supabase": "^1.145.4",
     "svelte": "^4.2.12",
     "typescript": "~5.1.6",
-    "vitest": "^1.4.0"
+    "vitest": "^2.0.5"
   },
   "simple-git-hooks": {
     "pre-commit": "pnpm lint-staged"

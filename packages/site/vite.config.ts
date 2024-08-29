@@ -25,18 +25,10 @@ export default defineConfig({
   optimizeDeps: {
     include: [ // if the dependency is large with many internal modules or is CommonJS then include it
       'xss',
-      // 'firebase/functions',
+      'typescript', // bc kitbook uses it
       // 'kitbook',
       // 'kitbook/viewer/load-viewer',
-      // 'firebase/firestore',
-      // 'firebase/app',
-      // 'firebase/firestore/lite',
-      // 'firebase/auth',
-      // 'firebase/performance',
       // '@turf/turf',
-      // 'instantsearch.js/es/widgets/index.js', 'instantsearch.js/es/connectors',
-      // 'algoliasearch',
-      // 'instantsearch.js',
     ],
     exclude: [ // if the dependency is small, ESM, no CJS imports, then exclude and let the browser load directly - https://vitejs.dev/guide/dep-pre-bundling.html
       'comlink',
