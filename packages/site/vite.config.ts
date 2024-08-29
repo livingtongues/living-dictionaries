@@ -24,8 +24,8 @@ export default defineConfig({
   define: getReplacements(),
   optimizeDeps: {
     include: [ // if the dependency is large with many internal modules or is CommonJS then include it
+      'xss',
       // 'firebase/functions',
-      // 'xss',
       // 'kitbook',
       // 'kitbook/viewer/load-viewer',
       // 'firebase/firestore',
@@ -39,6 +39,11 @@ export default defineConfig({
       // 'instantsearch.js',
     ],
     exclude: [ // if the dependency is small, ESM, no CJS imports, then exclude and let the browser load directly - https://vitejs.dev/guide/dep-pre-bundling.html
+      'comlink',
+      '@orama/orama',
+      '@turf/helpers',
+      '@turf/center',
+      '@turf/turf',
       'sveltefirets',
       'svelte-pieces',
       '@sentry/browser',
