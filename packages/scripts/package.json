@@ -35,7 +35,7 @@
     "@living-dictionaries/types": "^1.0.0",
     "@supabase/supabase-js": "^2.38.4",
     "@types/node": "^18.11.18",
-    "@types/pg": "^8.10.9",
+    "@types/pg": "^8.11.8",
     "@types/stream-chain": "^2.1.0",
     "@types/stream-json": "^1.7.7",
     "algoliasearch": "^4.11.0",
@@ -50,7 +50,7 @@
     "pg": "^8.11.3",
     "stream-chain": "^2.2.5",
     "stream-json": "^1.8.0",
-    "tsx": "^4.7.1",
+    "tsx": "^4.19.0",
     "typescript": "~5.1.6",
     "vitest": "^1.4.0"
   }
