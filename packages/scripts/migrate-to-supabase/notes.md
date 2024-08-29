@@ -10,15 +10,16 @@
   - figure out how different user ids (creater of speaker) between Firestore and Firebase will be handled and document
   - run tests on migration
   - visual inspection of the results locally - should work similar to current prod
-  - update saving functions
+  - update saving functions << is a little big
   - make all types of edits
 - Run migration process below
+- Handle clean-up below
 
 ## Migration Process
 - post notice on logged-in users a week ahead of time
 - send email notice a week ahead of time
 - Lock down Firestore dictionary words and speakers using security rules (tell admins not to edit anything)
-- Make Supabase backup
+- Make Supabase backup (manually trigger)
 - Migrate data
 - Test viewing
 - Merge new saving methods code (this will be a natural unblock)
