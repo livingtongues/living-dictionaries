@@ -1,6 +1,6 @@
 <script lang="ts">
   import { type ActualDatabaseEntry, EntryFields, type ExpandedEntry, type GoalDatabaseEntry, type IColumn, type i18nEntryFieldKey } from '@living-dictionaries/types'
-  import Audio from '../../entries-algolia/Audio.svelte'
+  import Audio from '../components/Audio.svelte'
   import Textbox from './cells/Textbox.svelte'
   import SelectSpeakerCell from './cells/SelectSpeakerCell.svelte'
   import { page } from '$app/stores'

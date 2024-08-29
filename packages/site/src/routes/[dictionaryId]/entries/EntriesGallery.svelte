@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { ExpandedEntry, IDictionary } from '@living-dictionaries/types'
-  import GalleryEntry from '../entries-algolia/gallery/GalleryEntry.svelte'
+  import GalleryEntry from './gallery/GalleryEntry.svelte'
   import type { DbOperations } from '$lib/dbOperations'
 
   export let entries: ExpandedEntry[] = []
