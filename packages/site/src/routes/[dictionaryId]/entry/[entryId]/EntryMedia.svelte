@@ -1,7 +1,7 @@
 <script lang="ts">
   import { ShowHide } from 'svelte-pieces'
   import { EntryFields, type ExpandedEntry, type IDictionary } from '@living-dictionaries/types'
-  import Video from '../../entries/Video.svelte'
+  import Video from '../../entries-algolia/Video.svelte'
   import GeoTaggingModal from './GeoTaggingModal.svelte'
   import InitableShowHide from './InitableShowHide.svelte'
   import MapboxStatic from '$lib/components/maps/mapbox/static/MapboxStatic.svelte'
@@ -23,7 +23,7 @@
 
 <div class="flex flex-col">
   {#if first_sound_file || can_edit}
-    {#await import('../../entries/Audio.svelte') then { default: Audio }}
+    {#await import('../../entries-algolia/Audio.svelte') then { default: Audio }}
       <Audio {entry} {can_edit} context="entry" class="h-20 mb-2 rounded-md bg-gray-100 !px-3" updateEntryOnline={dbOperations.updateEntryOnline} />
     {/await}
   {/if}

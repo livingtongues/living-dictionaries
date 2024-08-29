@@ -1,15 +1,16 @@
-import type { ExpandedEntry } from '@living-dictionaries/types';
+import type { ExpandedEntry } from '@living-dictionaries/types'
 
 export function augment_entry_for_search(entry: ExpandedEntry) {
   const _dialects = entry.dialects || []
   const _parts_of_speech = entry.senses?.map(sense => sense.translated_parts_of_speech || []).flat() || []
   const _semantic_domains = entry.senses?.map(sense => [...(sense.translated_ld_semantic_domains || []), ...(sense.write_in_semantic_domains || [])]).flat() || []
-  const _speakers = entry.sound_files?.map(audio => {
+  const _speakers = entry.sound_files?.map((audio) => {
     if (audio.speaker_ids)
       return audio.speaker_ids
     if (audio.speakerName)
       return [audio.speakerName]
-    return []}).flat() || []
+    return []
+  }).flat() || []
 
   const _lexeme_other = [
     entry.local_orthography_1,
@@ -18,12 +19,12 @@ export function augment_entry_for_search(entry: ExpandedEntry) {
     entry.local_orthography_4,
     entry.local_orthography_5,
     simplify_lexeme_for_search(entry.lexeme),
-  ].filter(Boolean);
+  ].filter(Boolean)
 
-  const _glosses = entry.senses?.flatMap(sense => Object.values(sense.glosses || {}).filter(Boolean)) || [];
+  const _glosses = entry.senses?.flatMap(sense => Object.values(sense.glosses || {}).filter(Boolean)) || []
   const _sentences = entry.senses?.flatMap(sense =>
-    sense.example_sentences?.flatMap(sentence => Object.values(sentence).filter(Boolean)) || []
-  ) || [];
+    sense.example_sentences?.flatMap(sentence => Object.values(sentence).filter(Boolean)) || [],
+  ) || []
 
   return {
     ...entry,
@@ -55,49 +56,49 @@ export function restore_spaces_from_underscores(string: string) {
 }
 
 const ipa_to_common_keyboard = {
-  'ɛ': 'e',
-  'ɘ': 'e',
-  'ǝ': 'e',
-  'ɪ': 'i',
-  'ɔ': 'o',
-  'ø': 'o',
-  'ɑ': 'a',
-  'æ': 'a',
-  'ʊ': 'u',
-  'ʃ': 's',
-  'ʒ': 'z',
-  'ʐ': 'z',
-  'ɡ': 'g',
-  'ɢ': 'g',
-  'ɣ': 'g',
-  'χ': 'x',
-  'ʡ': '?',
-  'ʔ': '?',
-  'ʕ': '?',
-  'ʁ': 'r',
-  'ɹ': 'r',
-  'ɚ': 'r',
-  'ð': 'd',
-  'ɖ': 'd',
-  'θ': 't',
-  'ʈ': 't',
-  'ʌ': 'v',
-  'ɱ': 'm',
-  'ŋ': 'n',
-  'ɲ': 'n',
-  'ɳ': 'n',
-  'ɴ': 'n',
-  'ʰ': 'h',
+  ɛ: 'e',
+  ɘ: 'e',
+  ǝ: 'e',
+  ɪ: 'i',
+  ɔ: 'o',
+  ø: 'o',
+  ɑ: 'a',
+  æ: 'a',
+  ʊ: 'u',
+  ʃ: 's',
+  ʒ: 'z',
+  ʐ: 'z',
+  ɡ: 'g',
+  ɢ: 'g',
+  ɣ: 'g',
+  χ: 'x',
+  ʡ: '?',
+  ʔ: '?',
+  ʕ: '?',
+  ʁ: 'r',
+  ɹ: 'r',
+  ɚ: 'r',
+  ð: 'd',
+  ɖ: 'd',
+  θ: 't',
+  ʈ: 't',
+  ʌ: 'v',
+  ɱ: 'm',
+  ŋ: 'n',
+  ɲ: 'n',
+  ɳ: 'n',
+  ɴ: 'n',
+  ʰ: 'h',
 }
 
 export function simplify_lexeme_for_search(lexeme: string) {
-  if (!lexeme) return;
-  const simplified = lexeme?.normalize('NFD').replace(/[\u0300-\u036f]/g, ''); // removes diacritics
+  if (!lexeme) return
+  const simplified = lexeme?.normalize('NFD').replace(/[\u0300-\u036F]/g, '') // removes diacritics
 
-  let result = '';
+  let result = ''
   for (const char of simplified)
-    result += ipa_to_common_keyboard[char] || char;
+    result += ipa_to_common_keyboard[char] || char
 
-  if (result === lexeme) return;
-  return result;
+  if (result === lexeme) return
+  return result
 }

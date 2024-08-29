@@ -4,9 +4,7 @@
 
   export let dictionary: IDictionary
   export let on_close: () => void
-  export let show_local_search: boolean
   export let is_manager: boolean
-  export let search_index_ready: boolean
 </script>
 
 <div class="md:hidden">
@@ -20,7 +18,7 @@
 <div on:click={on_close}>
   <a
     class:active={$page.url.pathname.match(/entry|entries\//)}
-    href={`/${dictionary.id}/entries/list`}>
+    href={`/${dictionary.id}/entries`}>
     <span class="i-fa-solid-list" />
     <span class="font-medium mx-2">
       {$page.data.t('dictionary.entries')}
@@ -32,24 +30,15 @@
       {new Intl.NumberFormat().format(dictionary.entryCount || 0)}
     </span>
   </a>
-  {#if show_local_search}
-    <a
-      class:active={$page.url.pathname.match(/entries-local/)}
-      href={`/${dictionary.id}/entries-local`}>
-      <span class="i-fa-solid-list" />
-      <span class="font-medium mx-2">
-        {$page.data.t('dictionary.entries')} (local)
-      </span>
-      <span class="flex-grow" />
-      {#if search_index_ready}
-        <span
-          class="inline-block py-1 px-2 leading-none text-xs font-semibold
-            text-gray-700 bg-gray-300 rounded-full">
-          {new Intl.NumberFormat().format(dictionary.entryCount || 0)}
-        </span>
-      {/if}
-    </a>
-  {/if}
+  <a
+    class:active={$page.url.pathname.match(/entries-algolia/)}
+    href={`/${dictionary.id}/entries-algolia/list`}>
+    <span class="i-fa-solid-list" />
+    <span class="font-medium mx-2">
+      {$page.data.t('dictionary.entries')} (old)
+    </span>
+    <span class="flex-grow" />
+  </a>
   {#if !is_manager}
     <a
       href={`/${dictionary.id}/synopsis`}

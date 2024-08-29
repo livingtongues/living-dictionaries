@@ -36,7 +36,6 @@ export const justMockDictionaryLayoutData = {
   search_entries: null,
   default_entries_per_page: null,
   dbOperations: logDbOperations,
-  show_local_search: false,
   load_citation: null,
   load_partners: null,
 } satisfies Partial<DictionaryLayoutData>

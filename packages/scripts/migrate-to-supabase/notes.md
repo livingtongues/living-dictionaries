@@ -4,12 +4,14 @@
 - Move off Algolia fully onto local Orama + using Orama Cloud for (100K max*3 indexes) for large, public dictionaries + Onondaga
   - solve bugs
   - flip usage to using the new search but make Algolia still available as a second option
+  - Handle goto(`/${dictionary_id}/entries/list${algoliaQueryParams}`) in media.ts with a proper url
 - On a new migration branch
   - Make sure all items from "clean-up" below are being actively logged again as they are run into
   - update migration script to migrate speakers across as they are needed, when one is found, save into speakers table, then create a map of firestore speaker id to supabase speaker id, in future times when this Firestore speaker id comes up, check the map first to see if speaker already exists
   - figure out how different user ids (creater of speaker) between Firestore and Firebase will be handled and document
   - run tests on migration
   - visual inspection of the results locally - should work similar to current prod
+  - migrate auth
   - update saving functions << is a little big
   - make all types of edits
 - Run migration process below
