@@ -70,11 +70,15 @@
 
 <svelte:window
   on:keydown={(event) => {
-    if (event.key === 'j' && (isMac ? event.metaKey : event.ctrlKey)) {
+    const ctrl = isMac ? event.metaKey : event.ctrlKey
+    if (event.key === 'j' && ctrl) {
       event.preventDefault()
       const page = prompt('Go to page:')
       if (page) go_to_page(+page)
     }
+  // Requires way to keep keystrokes from spilling out of modal before using
+    // if (event.key === 'ArrowLeft' && event.altKey && current_page > 1) go_to_page(current_page - 1)
+    // if (event.key === 'ArrowRight' && event.altKey && current_page < pages) go_to_page(current_page + 1)
   }} />
 
 <style>

@@ -42,7 +42,10 @@
   }
 </script>
 
-<div class="flex justify-between items-center mb-3 sticky top-0 z-30 bg-white pt-1">
+<div
+  class:pt-1={!shallow}
+  class:!-top-6={shallow}
+  class="flex justify-between items-center mb-3 sticky  top-0 z-30 bg-white">
   <Button class="!px-2" color="black" form="simple" onclick={backToEntries}>
     <i class="fas fa-arrow-left rtl-x-flip" />
     {$page.data.t('misc.back')}

@@ -17,7 +17,7 @@
 </div>
 <div on:click={on_close}>
   <a
-    class:active={$page.url.pathname.match(/entry|entries\//)}
+    class:active={$page.url.pathname.match(/entry|entries/) && !$page.url.pathname.includes('entries-algolia')}
     href={`/${dictionary.id}/entries`}>
     <span class="i-fa-solid-list" />
     <span class="font-medium mx-2">
@@ -31,7 +31,7 @@
     </span>
   </a>
   <a
-    class:active={$page.url.pathname.match(/entries-algolia/)}
+    class:active={$page.url.pathname.includes('entries-algolia')}
     href={`/${dictionary.id}/entries-algolia/list`}>
     <span class="i-fa-solid-list" />
     <span class="font-medium mx-2">

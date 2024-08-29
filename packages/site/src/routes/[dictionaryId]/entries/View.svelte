@@ -83,7 +83,7 @@
 {/if}
 
 {#if $page.state.entry_id}
-  <Modal noscroll class="sm:max-w-95vw xl:max-w-1100px" on:close={() => history.back()}>
+  <Modal noscroll class="sm:max-w-95vw xl:max-w-1100px" on_close={() => history.back()} show_x={false}>
     <EntryPage
       data={{
         ...entry_page_data,

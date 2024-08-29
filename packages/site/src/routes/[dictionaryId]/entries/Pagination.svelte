@@ -18,7 +18,7 @@
 
 {#if can_edit}
   {#await import('$lib/components/search/AddEntry.svelte') then { default: AddEntry }}
-    <AddEntry {addNewEntry} class="text-nowrap sticky bottom-3 z-10 md:hidden print:hidden" />
+    <AddEntry {addNewEntry} class="text-nowrap sticky bottom-3 z-10 !md:hidden !print:hidden" />
   {/await}
 {/if}
 
