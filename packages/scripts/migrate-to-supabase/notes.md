@@ -1,24 +1,23 @@
 # Migrate Entries and Speakers from Firestore to Supabase
 
 ## TODO
-- edit dictionary via endpoint function (can do this on its own branch)
-- Supabase sense updates show immediately in preview modal from list view
 - Get dialects from Supabase to EntryDialect.svelte - first create a dialects table and a many-to-many table for entry-dialects
 - Make sure all items from "clean-up" below are being actively logged again as they are run into
 - update migration script to migrate speakers across as they are needed, when one is found, save into speakers table, then create a map of firestore speaker id to supabase speaker id, in future times when this Firestore speaker id comes up, check the map first to see if speaker already exists
-- figure out how different user ids (creater of speaker) between Firestore and Firebase will be handled and document
-- run tests on migration
-- solve Orama bugs
+- when saving speakers and all fields, figure out proper user ID via conversion from Firestore to Supabase
+- run through migration, and add tests to ensure it looks good locally
+- Orama search refinement and completion
+  - Use `pnpm mixed` to run Firebase prod and Supabase local
   - replaceState in createQueryParamStore? look into improving the history to change for view and page changes but not for the others
+  - create materialized view daily for entries and then pull last day's entries from that view
 - visual inspection of the results locally - should work similar to current prod
-- migrate auth
 - update saving functions << is a little big
 - make all types of edits
+- Supabase sense updates+all others show immediately in preview modal from list view
 - look at print, table, gallery, and list page files history to make sure there are no missed improvements - check github history too
 - Run migration process below
 - Handle clean-up below
 - Remove algolia keys from vercel
-- make plan to make dictionary data
 
 ## Migration Process
 - post notice on logged-in users a week ahead of time
