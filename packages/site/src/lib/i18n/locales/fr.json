@@ -37,7 +37,13 @@
     "peer_review": "Examen par les pairs de l'orthographe",
     "suggestions_from_users": "Suggestions des utilisateurs",
     "push_notifications": "Notifications push aux contributeurs",
-    "contributor_awards": "Récompenses de la communauté des contributeurs"
+    "contributor_awards": "Récompenses de la communauté des contributeurs",
+    "question_1": "Veuillez fournir quelques informations générales sur cette langue. Où est-il parlé ? Quelles communautés parlent cette langue ? Cette langue est-elle en danger ?",
+    "question_2": "Quels sont les noms des personnes qui ont construit ce dictionnaire ? À qui appartiennent les voix de ce dictionnaire ?",
+    "question_3": "D’où proviennent les données de ce dictionnaire ? Veuillez décrire si vous avez collecté les données vous-même. Si vous avez utilisé des sources de référence publiées, veuillez les énumérer.",
+    "question_4": "Qui utilisera ce dictionnaire ? Sera-t-il utilisé dans des projets éducatifs ?",
+    "question_5": "Si vous souhaitez que le public vous contacte à propos de ce projet, veuillez fournir vos coordonnées ou un lien vers où les gens peuvent en savoir plus. Ceci est facultatif.",
+    "message": "Avant de rendre votre dictionnaire public, veuillez remplir la section À propos."
   },
   "contributors": {
     "invite_contributors": "Inviter des contributeurs",
@@ -94,7 +100,7 @@
     "request_access": "Demander un accès en édition",
     "report_problem": "Signaler un problème",
     "other": "Autre sujet",
-    "select_topic": "Choisissez un sujet",
+    "select_topic": "Sélectionnez un sujet",
     "data_fields": "Champs de données facultatifs",
     "learning": "Créer du matériel d’apprentissage linguistique à partir de mon dictionnaire"
   },
@@ -105,7 +111,7 @@
     "at_least_one_lang": "Choisissez au moins une langue dans laquelle ce dictionnaire sera disponible.",
     "only_letters_numbers": "Seules les lettres et les chiffres sont permis (pas d'espaces ni de caractères spéciaux)",
     "choose_different_url": "Choisissez une URL différente",
-    "gloss_dictionary_clarification": "Langue(s) dans laquelle/lesquelles vous souhaitez traduire les entrées de votre dictionnaire",
+    "gloss_dictionary_clarification": "Langue(s) dans laquelle/lesquelles vous souhaitez traduire les entrées de votre dictionnaire.",
     "create_new_dictionary": "Créer un nouveau dictionnaire",
     "name_clarification": "Ce sera le nom du dictionnaire",
     "gloss_dictionary_in": "Ce dictionnaire sera disponible en...",
@@ -122,10 +128,10 @@
     "author_connection": "Veuillez décrire brièvement comment vous connaissez cette langue et pourquoi vous créez un dictionnaire vivant pour elle. Faites-vous partie de la communauté qui utilisera ce dictionnaire vivant ? Si non, comment connaissez-vous la communauté ?",
     "con_lang_description": "Ce dictionnaire est-il destiné à un langage construit (un langage inventé par les humains ces dernières années, pour un livre ou un film) ? Si oui, veuillez décrire brièvement.",
     "uncertainty": "Je ne sais pas",
-    "select_region": "Choisissez une région",
+    "select_region": "Sélectionnez une région",
     "secondary_coordinates": "Coordonnées secondaires",
     "map_instructions": "Cliquez sur la carte pour ajouter des coordonnées secondaires.",
-    "print_access": "Autoriser les spectateurs à imprimer le dictionnaire",
+    "print_access": "Autoriser les téléspectateurs à imprimer le dictionnaire",
     "primary_coordinate": "Coordonnée principale"
   },
   "dictionary": {
@@ -183,9 +189,9 @@
     "sources": "Source",
     "example_sentence": "exemple de phrase",
     "noun_class": "Classe de noms",
-    "variant": "Une variante",
+    "variant": "Variante",
     "gloss": "Traduction",
-    "plural_form": "Forme pluriel",
+    "plural_form": "Forme plurielle",
     "scientific_names": "Nom scientifique",
     "definition_english": "",
     "video": "Vidéo"
@@ -243,7 +249,8 @@
     "assertion": "Oui",
     "negation": "Non",
     "clean": "Faire le ménage",
-    "map": "Carte"
+    "map": "Carte",
+    "guidance": "Conseils"
   },
   "settings": {
     "community_permission": "La communauté linguistique permet-elle à cette langue d'être en ligne ?",
@@ -305,7 +312,7 @@
     "paste_video_url": "Coller le lien YouTube ou Vimeo",
     "record_upload_video": "Enregistrer ou télécharger une vidéo",
     "view": "Voir",
-    "edit_video": "Éditer vidéo",
+    "edit_video": "Modifier la vidéo",
     "add_video": "Ajouter une vidéo",
     "accesing": "Accéder au microphone et à la caméra",
     "pause": "Pause",
@@ -319,8 +326,8 @@
     "availability": "La vue Imprimer est uniquement disponible pour les gestionnaires de dictionnaires et les contributeurs.",
     "max_entries": "Nombre maximum d'entrées",
     "columns": "Colonnes",
-    "headword_size": "Taille du mot-clé",
-    "font_size": "Taille de police"
+    "headword_size": "Taille du mot",
+    "font_size": "Taille de la police"
   },
   "import_page": {
     "import": "Importer",
@@ -329,7 +336,7 @@
     "instructions_2": "Cliquez sur le bouton bleu « Lien vers le modèle » ci-dessous. Téléchargez le modèle sous forme de fichier Excel ou créez une copie sur Google Docs. Modifiez le modèle en fonction des besoins de votre projet. Copiez et collez vos données dans la feuille de calcul.",
     "instructions_3": "Utilisez le « Contactez-nous » ci-dessous pour nous contacter. Faites-nous savoir que vous disposez d'une nouvelle feuille de calcul prête à être importée. Posez-nous toutes vos questions. Nous vous répondrons par email, puis vous pourrez nous envoyer votre dossier.",
     "instructions_4": "Pour nous envoyer des données exportées à partir de logiciels de dictionnaires comme FLEx, Lexique Pro, Shoebox, veuillez utiliser le bouton « Contactez-nous » ci-dessous et indiquez-nous les détails de votre projet.",
-    "no_imports": "Nous travaillons actuellement avec de nombreuses communautés et organisations partenaires pour importer un grand nombre d'entrées de dictionnaire sur cette plateforme. Nous effectuons également de grandes mises à jour de notre base de données. Nous accepterons de nouvelles importations de données à partir du 1er juillet 2024. Nous apprécions votre patience et nous nous excusons pour la gêne occasionnée."
+    "no_imports": "Nous travaillons actuellement avec de nombreuses communautés et organisations partenaires pour importer un grand nombre d'entrées de dictionnaire sur cette plateforme. Nous effectuons également de grandes mises à jour de notre base de données. Nous accepterons de nouvelles importations de données à partir du 1er juillet 2024. Nous apprécions votre patience et nous nous excusons pour la gêne occasionnée."
   },
   "history": {
     "history": "Histoire",

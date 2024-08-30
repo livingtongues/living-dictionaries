@@ -10,3 +10,5 @@ export enum ResponseCodes {
   TEMPORARY_REDIRECT = 307,
   MOVED_PERMANENTLY_PRESERVE_REQUEST = 308,
 }
+
+export const MINIMUM_ABOUT_LENGTH = 200

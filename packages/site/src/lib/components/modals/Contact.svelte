@@ -8,9 +8,15 @@
   import type { RequestAccessBody } from '$api/email/request_access/+server'
   import enBase from '$lib/i18n/locales/en.json'
   import { post_request } from '$lib/helpers/get-post-requests'
+  import { MINIMUM_ABOUT_LENGTH } from '$lib/constants'
 
   export let subject: Subjects = undefined
-  $: ({ dictionary, user } = $page.data)
+  $: ({ dictionary, user, about_content } = $page.data)
+  $: if ($dictionary && subject === 'public_dictionary' && (!$about_content || $about_content.about?.length < MINIMUM_ABOUT_LENGTH)) {
+    close()
+    alert($page.data.t('about.message'))
+    goto(`/${$dictionary.id}/about`)
+  }
 
   const subjects = {
     delete_dictionary: 'contact.delete_dictionary',
@@ -25,6 +31,12 @@
   type Subjects = keyof typeof subjects
   type SubjectValues = typeof subjects[Subjects]
   const typedSubjects = Object.entries(subjects) as [Subjects, SubjectValues][]
+  $: filteredSubjects = typedSubjects.filter((subjects) => {
+    if (!$dictionary && subjects[0] === 'public_dictionary') {
+      return false
+    }
+    return true
+  })
 
   const dispatch = createEventDispatcher<{ close: boolean }>()
 
@@ -121,8 +133,7 @@
       <div class="my-2">
         <select class="w-full" bind:value={subject}>
           <option disabled selected value="">{$page.data.t('contact.select_topic')}:</option>
-
-          {#each typedSubjects as [key, value]}
+          {#each filteredSubjects as [key, value]}
             <option value={key}>{$page.data.t(value)}</option>
           {/each}
         </select>
@@ -166,7 +177,7 @@
         </Button>
       </div>
     </Form>
-  {:else if status == 'success'}
+  {:else if status === 'success'}
     <h4 class="text-lg mt-3 mb-4">
       <i class="fas fa-check" />
       {$page.data.t('contact.message_sent')}
@@ -176,7 +187,7 @@
         {$page.data.t('misc.close')}
       </Button>
     </div>
-  {:else if status == 'fail'}
+  {:else if status === 'fail'}
     <h4 class="text-xl mt-1 mb-4">
       {$page.data.t('contact.message_failed')}
       <a class="underline ml-1" href="mailto:dictionaries@livingtongues.org">

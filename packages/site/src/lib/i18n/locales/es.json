@@ -37,7 +37,13 @@
     "peer_review": "Revisión conjunta de ortografía",
     "suggestions_from_users": "Sugerencias de usuarios",
     "push_notifications": "Notificaciones a colaboradores",
-    "contributor_awards": "Premios a la comunidad de colaboradores"
+    "contributor_awards": "Premios a la comunidad de colaboradores",
+    "question_1": "Proporcione información general sobre este idioma. ¿Dónde se habla? ¿Qué comunidades hablan este idioma? ¿Está esta lengua en peligro de extinción?",
+    "question_2": "¿Cuáles son los nombres de las personas que construyeron este diccionario? ¿De quién son las voces en este diccionario?",
+    "question_3": "¿De dónde provienen los datos de este diccionario? Describa si recopiló los datos usted mismo. Si utilizó alguna fuente de referencia publicada, indíquela.",
+    "question_4": "¿Quién utilizará este diccionario? ¿Se utilizará en algún proyecto educativo?",
+    "question_5": "Si desea que el público se comunique con usted sobre este proyecto, proporcione su información de contacto o un enlace donde las personas puedan obtener más información. Esto es opcional.",
+    "message": "Antes de hacer público su diccionario, complete la sección de Acerca de."
   },
   "contributors": {
     "invite_contributors": "Invitar colaboradores",
@@ -105,7 +111,7 @@
     "at_least_one_lang": "Elegir por lo menos un idioma en que este diccionario estará disponible.",
     "only_letters_numbers": "Sólo se permiten letras y números (sin espacios ni caracteres especiales).",
     "choose_different_url": "Elegir una URL diferente",
-    "gloss_dictionary_clarification": "Idioma(s) en que desea traducir las entradas del diccionario",
+    "gloss_dictionary_clarification": "Idioma(s) en que desea traducir las entradas del diccionario.",
     "create_new_dictionary": "Crear un nuevo diccionario",
     "name_clarification": "Este será el nombre del diccionario",
     "gloss_dictionary_in": "Hacer el diccionario disponible en ...",
@@ -243,7 +249,8 @@
     "assertion": "sí",
     "negation": "no",
     "clean": "Limpiar",
-    "map": "Mapa"
+    "map": "Mapa",
+    "guidance": "Guía de uso"
   },
   "settings": {
     "community_permission": "¿Permite la comunidad lingüística que este idioma esté en línea?",

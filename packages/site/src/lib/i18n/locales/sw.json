@@ -37,7 +37,13 @@
     "peer_review": "Uhakiki wa Rika wa Tahajia",
     "suggestions_from_users": "Mapendekezo kutoka kwa Watumiaji",
     "push_notifications": "Kushinikiza Arifa kwa Wachangiaji",
-    "contributor_awards": "Tuzo za Jumuiya ya Wachangiaji"
+    "contributor_awards": "Tuzo za Jumuiya ya Wachangiaji",
+    "question_1": "Tafadhali toa maelezo ya usuli kuhusu lugha hii. Inazungumzwa wapi? Je! ni jumuiya gani zinazozungumza lugha hii? Je, lugha hii iko hatarini?",
+    "question_2": "Je! ni majina ya watu gani waliounda kamusi hii? Ni sauti za nani katika kamusi hii?",
+    "question_3": "Je, data katika kamusi hii ilitoka wapi? Tafadhali eleza ikiwa ulikusanya data mwenyewe. Ikiwa ulitumia vyanzo vyovyote vya marejeleo vilivyochapishwa, tafadhali viorodheshe.",
+    "question_4": "Nani atatumia kamusi hii? Je, itatumika katika miradi yoyote ya elimu?",
+    "question_5": "Iwapo unataka umma kuwasiliana nawe kuhusu mradi huu, tafadhali toa maelezo yako ya mawasiliano, au kiungo ambacho watu wanaweza kujifunza zaidi. Hii ni hiari.",
+    "message": "Kabla ya kufanya kamusi yako hadharani, tafadhali kamilisha sehemu ya Kuhusu."
   },
   "contributors": {
     "invite_contributors": "Wakaribishe Wachangiaji",
@@ -105,7 +111,7 @@
     "at_least_one_lang": "Chagua walau lugha 1 ili kufanya kamusi hiyo ipatikane katika hiyo lugha.",
     "only_letters_numbers": "Herufi na namba tu ndizo zinazoruhusiwa (hakuna nafasi au herufi maalum)",
     "choose_different_url": "Chagua URL tofauti",
-    "gloss_dictionary_clarification": "Utataka kutafsiri vidahizo kwenda lugha zipi",
+    "gloss_dictionary_clarification": "Utataka kutafsiri vidahizo kwenda lugha zipi.",
     "create_new_dictionary": "Tengeneza Kamusi Mpya",
     "name_clarification": "Hili litakuwa jina la kamusi.",
     "gloss_dictionary_in": "Fanya kamusi ipatikane kwa lugha...",
@@ -121,7 +127,7 @@
     "community_permission": "Je, jumuiya ya lugha imekupa ruhusa ya kutengeneza kamusi hii?",
     "author_connection": "Tafadhali eleza kwa ufupi jinsi unavyojua lugha hii na kwa nini unaiundia Kamusi Hai. Je, wewe ni sehemu ya jumuiya itakayotumia Kamusi hii Hai? Ikiwa sivyo, unaijuaje jamii?",
     "con_lang_description": "Je, kamusi hii ni ya lugha iliyoundwa (lugha iliyobuniwa na wanadamu katika miaka ya hivi karibuni, kwa kitabu au sinema)? Kama ndiyo, tafadhali eleza kwa ufupi.",
-    "uncertainty": "Sijui",
+    "uncertainty": "sijui",
     "select_region": "Chagua Mkoa",
     "secondary_coordinates": "Viratibu vya Sekondari",
     "map_instructions": "Bofya kwenye ramani ili kuongeza viwianishi vya pili.",
@@ -241,9 +247,10 @@
     "downloading": "Inapakua",
     "upload": "Pakia",
     "assertion": "ndio",
-    "negation": "Hapana",
+    "negation": "hapana",
     "clean": "Safi",
-    "map": "Ramani"
+    "map": "Ramani",
+    "guidance": "Mwongozo"
   },
   "settings": {
     "community_permission": "Je, jamii ya wazungumzaji inaruhusu lugha hii kuwekwa mtandaoni?",
