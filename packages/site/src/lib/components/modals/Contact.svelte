@@ -31,6 +31,12 @@
   type Subjects = keyof typeof subjects
   type SubjectValues = typeof subjects[Subjects]
   const typedSubjects = Object.entries(subjects) as [Subjects, SubjectValues][]
+  $: filteredSubjects = typedSubjects.filter((subjects) => {
+    if (!$dictionary && subjects[0] === 'public_dictionary') {
+      return false
+    }
+    return true
+  })
 
   const dispatch = createEventDispatcher<{ close: boolean }>()
 
@@ -127,8 +133,7 @@
       <div class="my-2">
         <select class="w-full" bind:value={subject}>
           <option disabled selected value="">{$page.data.t('contact.select_topic')}:</option>
-
-          {#each typedSubjects as [key, value]}
+          {#each filteredSubjects as [key, value]}
             <option value={key}>{$page.data.t(value)}</option>
           {/each}
         </select>
