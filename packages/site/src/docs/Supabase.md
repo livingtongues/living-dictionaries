@@ -43,3 +43,38 @@ You can check current prod migrations at https://supabase.com/dashboard/project/
 ## Misc
 
 - `supabase status` check status and get local urls
+
+## Use data from a `pg_dump` backup locally
+
+These four commands are run daily to backup the production database:
+- `supabase db dump --db-url "$supabase_db_url" -f roles.sql --role-only`
+- `supabase db dump --db-url "$supabase_db_url" -f schema.sql`
+- `supabase db dump --db-url "$supabase_db_url" -f data.sql --data-only --use-copy`
+- `supabase db dump --db-url "$supabase_db_url" -f data.sql --data-only`
+
+To make the local DB match the current production download just download the data as the schema already matches production (or is a step ahead):
+- Get the DB url by pasting the password into here: postgresql://postgres.actkqboqpzniojhgtqzw:[YOUR-PASSWORD]@aws-0-us-west-1.pooler.supabase.com:6543/postgres
+- Run `supabase db dump --db-url "your-db-url" -f supabase/seed.sql --data-only` but using the db url above
+- Remove the `is_anonymous` column in auth.users and find-replace `, false),` for `),` (and don't forget the last row with a semi-colon) because `is_anonymous` doesn't exist in local db.
+- Run `supabase db reset` to build the db with the production data
+
+## Other `pg_dump` notes that did not pan out but may be useful in other situations
+
+- Read how to migrate a project: https://supabase.com/docs/guides/platform/migrating-and-upgrading-projects#migrate-your-project
+- The dump file produced by pg_dump does not contain the statistics used by the optimizer to make query planning decisions. Therefore, it is wise to run ANALYZE after restoring from a dump file to ensure good performance. (source: https://www.postgresql.org/docs/8.0/app-pgdump.html) `psql -d 'postgres://supabase_admin:postgres@127.0.0.1:54322/postgres' -c 'ANALYZE;'`
+- comment out `COPY "auth"."flow_state"...` block
+- reset db with no migrations
+
+psql \
+  --single-transaction \
+  --file roles.sql \
+  --file schema.sql \
+  --command 'SET session_replication_role = replica' \
+  --file data.sql \
+  --dbname "postgresql://postgres:postgres@127.0.0.1:54322/postgres"
+
+Other options
+  --variable ON_ERROR_STOP=1 \ - not using because of syntax errors
+
+- `psql postgresql://postgres:postgres@127.0.0.1:54322/postgres -f live-db-dump.sql`
+- `psql -d database -f data.sql` to restore the data from a dump file obtained from Supabase's automatic backup. -d database: Specifies the name of the database to connect to.
