@@ -20,7 +20,7 @@
   }
 </style>
 
-<div class="w-5/6 sm:max-w-[550px] ml-7 mb-3 border-2 border-slate-200 p-3 pl-8 text-gray-5">
+<div class="w-5/6 sm:max-w-[550px] ml-7 mb-3 border-2 border-slate-200 p-3 pl-8 text-gray-5 rounded">
   <div class="flex justify-between" bind:this={parentElement}>
     <h4 class="mb-3 text-lg center-h4" bind:this={h4Element} style={`margin-left: ${hide_questions ? centerMargin : '0px'}`}>{$page.data.t('misc.guidance')}</h4>
     <button on:click={() => hide_questions = !hide_questions} type="button" class="h-0">
