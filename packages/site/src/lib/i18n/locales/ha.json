@@ -37,7 +37,13 @@
     "peer_review": "Sharhin Tsari na Haruffa",
     "suggestions_from_users": "Shawarwari daga Masu amfani",
     "push_notifications": "Tura Sanarwa zuwa Masu Gudunmawa",
-    "contributor_awards": "Kyautar Al'umma Mai Ba da gudummawa"
+    "contributor_awards": "Kyautar Al'umma Mai Ba da gudummawa",
+    "question_1": "Da fatan za a ba da wasu bayanan baya game da wannan harshe. A ina ake magana? Wadanne al'ummomi ne ke jin wannan yare? Shin wannan harshe yana cikin haɗari?",
+    "question_2": "Menene sunayen mutanen da suka gina wannan ƙamus? Muryoyin wa ke cikin wannan ƙamus?",
+    "question_3": "Daga ina bayanan da ke cikin wannan ƙamus suka fito? Da fatan za a kwatanta idan kun tattara bayanan da kanku. Idan kun yi amfani da wasu hanyoyin da aka buga, da fatan za a jera su.",
+    "question_4": "Wanene zai yi amfani da wannan ƙamus? Za a yi amfani da shi a cikin kowane ayyukan ilimi?",
+    "question_5": "Idan kana son jama'a su tuntube ka game da wannan aikin, da fatan za a ba da bayanan tuntuɓar ku, ko hanyar haɗi zuwa inda mutane za su iya ƙarin koyo. Wannan na zaɓi ne.",
+    "message": "Kafin bayyana ƙamus ɗin ku ga jama'a, da fatan za a cika sashin Game da."
   },
   "contributors": {
     "invite_contributors": "Gayyato da gudummuwa",
@@ -105,7 +111,7 @@
     "at_least_one_lang": "Zabi akalla 1 harshen da ya sa ƙamus samuwa a.",
     "only_letters_numbers": "Kawai haruffa da lambobi yarda (babu fili ko haruffa na musamman)",
     "choose_different_url": "Zabi wani daban-daban URL",
-    "gloss_dictionary_clarification": "Harshe (s) kana so ka fassara shigarwar cikin",
+    "gloss_dictionary_clarification": "Harshe (s) kana so ka fassara shigarwar cikin.",
     "create_new_dictionary": "Create New Dictionary",
     "name_clarification": "Wannan zai zama sunan da kamus.",
     "gloss_dictionary_in": "Make kamus samuwa a ...",
@@ -125,7 +131,7 @@
     "select_region": "Zaɓi Yanki",
     "secondary_coordinates": "Coordinates na Sakandare",
     "map_instructions": "Danna kan taswirar don ƙara daidaitawa na sakandare.",
-    "print_access": "Ba da damar Masu kallo su Buga ƙamus",
+    "print_access": "Bada Masu kallo su Buga ƙamus",
     "primary_coordinate": "Haɗin kai na farko"
   },
   "dictionary": {
@@ -236,14 +242,15 @@
     "next": "Na gaba",
     "export": "fitarwa",
     "images": "Hotuna",
-    "reset": "Sake saiti",
+    "reset": "Sake saitin",
     "invalid_url": "Wannan ba ingantaccen URL bane",
     "downloading": "Ana saukewa",
     "upload": "Loda",
     "assertion": "iya",
     "negation": "a'a",
     "clean": "Tsaftace",
-    "map": "Taswira"
+    "map": "Taswira",
+    "guidance": "Jagoranci"
   },
   "settings": {
     "community_permission": "Shin magana al'umma damar wannan harshe ya zama online?",
@@ -325,7 +332,7 @@
   "import_page": {
     "import": "Shigo da",
     "template_link": "Hanyar haɗi zuwa Samfura",
-    "instructions_1": "Idan kun riga kuna da bayanan harshe waɗanda kuke son shigo da su cikin ƙamus ɗin ku, da fatan za a bi matakan da ke ƙasa.",
+    "instructions_1": "Idan kun riga kuna da bayanan harshe waɗanda kuke son shigo da su cikin ƙamus ɗinku, da fatan za a bi matakan da ke ƙasa.",
     "instructions_2": "Danna maɓallin shuɗin \"Haɗin zuwa Samfura\" a ƙasa. Zazzage samfurin azaman fayil ɗin Excel, ko ƙirƙirar kwafi akan Google Docs. Shirya samfurin bisa ga bukatun aikin ku. Kwafi da liƙa bayanan ku a cikin maƙunsar bayanai.",
     "instructions_3": "Yi amfani da \"Contact Us\" da ke ƙasa don tuntuɓar mu. Bari mu san cewa kuna da sabon maƙunsar rubutu wanda ke shirye don shigo da kaya. Yi mana tambayoyi da kuke da su. Za mu amsa muku ta imel, sannan za ku iya aiko mana da fayil ɗin ku.",
     "instructions_4": "Don aiko mana da bayanan da aka fitar daga manhajojin ƙamus kamar FLEx, Lexique Pro, Shoebox, da fatan za a yi amfani da maɓallin “Contact Us” da ke ƙasa kuma gaya mana cikakkun bayanai na aikin ku.",

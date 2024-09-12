@@ -1,5 +1,5 @@
 import { error, redirect } from '@sveltejs/kit'
-import type { Citation, IDictionary, ISpeaker, Partner } from '@living-dictionaries/types'
+import type { Citation, IAbout, IDictionary, ISpeaker, Partner } from '@living-dictionaries/types'
 import { awaitableDocStore, collectionStore, docExists, getCollection, getDocument } from 'sveltefirets'
 import { type Readable, derived } from 'svelte/store'
 import { where } from 'firebase/firestore'
@@ -12,6 +12,7 @@ import { search_entries, update_index_entries } from '$lib/search'
 
 export const load: LayoutLoad = async ({ params: { dictionaryId }, parent }) => {
   try {
+    const about_content = await awaitableDocStore<IAbout>(`dictionaries/${dictionaryId}/info/about`)
     const dictionary = await awaitableDocStore<IDictionary>(`dictionaries/${dictionaryId}`)
     const { error: firestore_error, initial_doc } = dictionary
     if (firestore_error)
@@ -60,6 +61,7 @@ export const load: LayoutLoad = async ({ params: { dictionaryId }, parent }) => 
     return {
       dictionary,
       speakers,
+      about_content,
       default_entries_per_page,
       entries,
       status,

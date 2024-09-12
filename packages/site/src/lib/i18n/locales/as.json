@@ -37,7 +37,13 @@
     "peer_review": "",
     "suggestions_from_users": "",
     "push_notifications": "",
-    "contributor_awards": ""
+    "contributor_awards": "",
+    "question_1": "",
+    "question_2": "",
+    "question_3": "",
+    "question_4": "",
+    "question_5": "",
+    "message": ""
   },
   "contributors": {
     "invite_contributors": "অৱদানকাৰীসকলক আমন্ত্ৰণ কৰক",
@@ -243,7 +249,8 @@
     "assertion": "",
     "negation": "",
     "clean": "",
-    "map": ""
+    "map": "",
+    "guidance": ""
   },
   "settings": {
     "community_permission": "ভাষণ সম্প্ৰদায়ে এই ভাষাটো অনলাইন/ইণ্টাৰনেটত উপলব্ধ হ'বলৈ অনুমতি দিয়ে নেকি?",
