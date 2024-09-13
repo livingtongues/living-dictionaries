@@ -1,5 +1,5 @@
-import type { Database } from '$lib/supabase/generated.types';
-import { createClient } from '@supabase/supabase-js';
+import { createClient } from '@supabase/supabase-js'
+import type { Database } from '$lib/supabase/database.types'
 
 // local keys from .env.development - ok to commit
 const PUBLIC_SUPABASE_API_URL = 'http://127.0.0.1:54321'

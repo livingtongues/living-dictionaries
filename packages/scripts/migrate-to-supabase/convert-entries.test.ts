@@ -47,17 +47,16 @@ import { convert_entry } from './convert-entries'
 // 266408 - deleted vfs date
 const to_snapshot = [229, 231, 235, 252, 253, 254, 255, 1228, 1718, 1759, 4577, 4609, 4945, 5377, 5394, 8005, 14072, 15715, 16141, 23958, 29994, 36138, 39845, 39858, 47304, 47829, 85363, 128736, 166042, 167017, 172023, 200582, 248444, 251721, 253088, 266408]
 
-// pnpm t -- --ui convert-entries
-// eslint-disable-next-line test/no-disabled-tests -- only run locally and not in CI because data does not exist in repo
-test.skip(convert_entry, { timeout: 16000 }, async () => {
-  // const count = 266408
+// pnpm -F scripts test:migration convert-entries -- --ui
+test(convert_entry, { timeout: 16000 }, async () => {
+  // const count = 300
   const count = 278631 // total entries
   const success: any[] = []
   const todo: any[] = []
 
   const result: Promise<any[]> = new Promise<any[]>((resolve, reject) => {
     const pipeline = chain([
-      fs.createReadStream('./packages/scripts/migrate-to-supabase/entries_full.json'),
+      fs.createReadStream('./migrate-to-supabase/entries_full.json'),
       parser(),
       streamArray(),
     ])

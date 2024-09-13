@@ -1,4 +1,4 @@
-import type { Database } from '$lib/supabase/generated.types'
+import type { Database } from '$lib/supabase/database.types'
 
 function convert_to_sql_string(value: string | number | object) {
   if (typeof value === 'boolean')
@@ -28,7 +28,7 @@ export function sql_file_string(table_name: keyof Database['public']['Tables'] |
   const column_names = Object.keys(rows[0]).sort()
   const column_names_string = `"${column_names.join('", "')}"`
 
-  const values_string = rows.map(row => {
+  const values_string = rows.map((row) => {
     const values = column_names.map(column => convert_to_sql_string(row[column]))
     return `(${values.join(', ')})`
   }).join(',\n')
@@ -44,18 +44,18 @@ if (import.meta.vitest) {
         boolean: true,
         real: 12.4,
         int: 2,
-        array: [1,2],
+        array: [1, 2],
         jsonb: {
           a: {
-            b: 1
-          }
+            b: 1,
+          },
         },
         jsonb_array: [
           {
             a: {
-              b: 'it\'s'
-            }
-          }
+              b: 'it\'s',
+            },
+          },
         ],
       },
       {
@@ -65,11 +65,11 @@ if (import.meta.vitest) {
         int: 0,
         array: [],
         jsonb: {
-          array: []
+          array: [],
         },
       },
       {
-      }
+      },
     ]
     expect(sql_file_string('everything' as 'entry_updates', everything_mock)).toMatchFileSnapshot('./to-sql-string.test.sql')
   })

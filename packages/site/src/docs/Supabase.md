@@ -23,7 +23,7 @@ Once you have run `supabase start` you can open the Studio URL to explore your l
 
 ## Generate Types
 
-- `supabase gen types typescript --local --schema public > packages/site/src/lib/supabase/generated.types.ts`
+- `pnpm generate-types` to run `supabase gen types typescript --local --schema public > packages/types/supabase/generated.types.ts`
 - `supabase gen types typescript --project-id=actkqboqpzniojhgtqzw --schema public > packages/site/src/lib/supabase/generated.types.ts`
 
 ## Tests

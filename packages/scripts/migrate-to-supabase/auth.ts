@@ -1,6 +1,6 @@
 import type { UserRecord } from 'firebase-admin/auth'
 import { auth } from '../config-firebase'
-import { executeQuery } from '../config-supabase'
+import { execute_query } from '../config-supabase'
 import { write_users_insert } from './write-users-insert'
 
 migrate_users()
@@ -14,7 +14,7 @@ async function migrate_users() {
     console.log(user.toJSON())
   const sql = write_users_insert(users)
   console.log(sql)
-  await executeQuery(sql)
+  await execute_query(sql)
 }
 
 const BATCH_SIZE = 1000

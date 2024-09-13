@@ -1,6 +1,5 @@
 // import { randomUUID } from 'node:crypto'
-import type { ActualDatabaseEntry } from '@living-dictionaries/types'
-import type { TablesInsert } from '../../site/src/lib/supabase/generated.types'
+import type { ActualDatabaseEntry, TablesInsert } from '@living-dictionaries/types'
 // import { log_once } from './log-once'
 
 let id_count = 0
@@ -80,6 +79,7 @@ export function convert_entry(_entry: Partial<ActualDatabaseEntry> & Record<stri
       entry.created_by = old_talking_dictionaries
 
     const content_updates: TablesInsert<'content_updates'>[] = []
+    const dialects: Record<string, Record<string, string>> = {} // map of dictionaries with their dialects
 
     const first_sense_from_base: TablesInsert<'senses'> = {
       entry_id: _entry.id,
@@ -190,13 +190,13 @@ export function convert_entry(_entry: Partial<ActualDatabaseEntry> & Record<stri
         }
 
         if (key === 'va') {
-          entry.variant = value
+          first_sense_from_base.variant = value
           delete _entry[key]
           continue
         }
 
         if (key === 'pl') {
-          entry.plural_form = value
+          first_sense_from_base.plural_form = value
           delete _entry[key]
           continue
         }
@@ -231,10 +231,15 @@ export function convert_entry(_entry: Partial<ActualDatabaseEntry> & Record<stri
       }
 
       if (key === 'di') {
+        let dialects: string[]
         if (typeof value === 'string')
+          // @ts-expect-error
           entry.dialects = [value]
+        // dialects = [value]
         else if (Array.isArray(value))
+          // @ts-expect-error
           entry.dialects = value
+          // dialects = value
         delete _entry[key]
         continue
       }
@@ -536,10 +541,6 @@ export function convert_entry(_entry: Partial<ActualDatabaseEntry> & Record<stri
       if (ts) {
         if (ts.toString().length === 13)
           video.created_at = new Date(ts).toISOString()
-        // // @ts-expect-error
-        // else if (typeof ts === 'object' && '_seconds' in ts)
-        //   // @ts-expect-error
-        //   video.created_at = seconds_to_timestamp_string(ts._seconds)
         else
           throw new Error(`odd timestamp for ${_entry.id}: ${ts}`)
         delete vf.ts
@@ -552,8 +553,11 @@ export function convert_entry(_entry: Partial<ActualDatabaseEntry> & Record<stri
         ...(video.created_at ? { created_at: video.created_at } : {}),
       })
       if (sp) {
+        if (Array.isArray(sp))
+          console.log(`video speaker ids array in ${_entry.id} in ${_entry.dictionary_id}`)
         video_speakers.push({
           video_id,
+          // @ts-expect-error - TODO: look into this
           speaker_id: sp,
           created_by: ab || entry.created_by,
           ...(video.created_at ? { created_at: video.created_at } : {}),

@@ -324,6 +324,9 @@ importers:
       sveltefirets:
         specifier: 0.0.42
         version: 0.0.42(firebase@10.9.0)(svelte@4.2.19)
+      type-fest:
+        specifier: ^4.13.0
+        version: 4.13.0
 
 packages:
 
@@ -11029,7 +11032,7 @@ snapshots:
       pathe: 1.1.2
       sirv: 2.0.4
       tinyrainbow: 1.2.0
-      vitest: 2.0.5(@types/node@18.11.18)(@vitest/ui@2.0.5)
+      vitest: 2.0.5(@types/node@22.5.1)(@vitest/ui@2.0.5)
 
   '@vitest/utils@2.0.5':
     dependencies:

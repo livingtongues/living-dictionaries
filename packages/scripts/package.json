@@ -24,7 +24,8 @@
     "importDictionary:dev:dry": "tsx import/import.ts --id tseltal",
     "importDictionary:dev:live": "tsx import/import.ts --id tseltal --live",
     "importDictionary:prod:live": "tsx import/import.ts --id tseltal -e prod --live",
-    "test": "vitest"
+    "test": "vitest",
+    "test:migration": "vitest --config ./vitest.config.migration.ts"
   },
   "devDependencies": {
     "@living-dictionaries/functions": "workspace:^0.0.1",

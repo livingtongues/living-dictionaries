@@ -1,7 +1,14 @@
 # Migrate Entries and Speakers from Firestore to Supabase
 
 ## TODO
-- Get dialects from Supabase to EntryDialect.svelte - first create a dialects table and a many-to-many table for entry-dialects
+- commit progress and see if we can use MergeDeep in types project without breaking type-checking in main project
+- get db-tests type of thing running for migration
+  - modify current db tests to remove need to add a shell entry if it doesn't exist
+- Run through entries from oldest created to newest created so that first person to add a dialect gets the created_by credit
+- update migration script to emit array of needed dialects and test addition
+- pull down speakers from Firebase, get names
+- run test migration into local database using db-tests, and make sure the speaker and dialects are being saved correctly
+- get dialects from Supabase to EntryDialect.svelte
 - Make sure all items from "clean-up" below are being actively logged again as they are run into
 - update migration script to migrate speakers across as they are needed, when one is found, save into speakers table, then create a map of firestore speaker id to supabase speaker id, in future times when this Firestore speaker id comes up, check the map first to see if speaker already exists
 - when saving speakers and all fields, figure out proper user ID via conversion from Firestore to Supabase

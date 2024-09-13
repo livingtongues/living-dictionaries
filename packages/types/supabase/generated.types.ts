@@ -1,4 +1,4 @@
-import type { HostedVideo, UnsupportedFields } from '@living-dictionaries/types'
+import type { HostedVideo, UnsupportedFields } from '../.'
 
 export type Json =
   | string
@@ -159,10 +159,12 @@ export interface Database {
       content_updates: {
         Row: {
           audio_id: string | null
-          change: Json
+          change: Json | null
+          dialect_id: string | null
           dictionary_id: string
           entry_id: string | null
           id: string
+          import: Json | null
           import_id: string | null
           photo_id: string | null
           sense_id: string | null
@@ -176,10 +178,12 @@ export interface Database {
         }
         Insert: {
           audio_id?: string | null
-          change: Json
+          change?: Json | null
+          dialect_id?: string | null
           dictionary_id: string
           entry_id?: string | null
           id: string
+          import?: Json | null
           import_id?: string | null
           photo_id?: string | null
           sense_id?: string | null
@@ -193,10 +197,12 @@ export interface Database {
         }
         Update: {
           audio_id?: string | null
-          change?: Json
+          change?: Json | null
+          dialect_id?: string | null
           dictionary_id?: string
           entry_id?: string | null
           id?: string
+          import?: Json | null
           import_id?: string | null
           photo_id?: string | null
           sense_id?: string | null
@@ -214,6 +220,13 @@ export interface Database {
             columns: ['audio_id']
             isOneToOne: false
             referencedRelation: 'audio'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'content_updates_dialect_id_fkey'
+            columns: ['dialect_id']
+            isOneToOne: false
+            referencedRelation: 'dialects'
             referencedColumns: ['id']
           },
           {
@@ -284,6 +297,75 @@ export interface Database {
             columns: ['video_id']
             isOneToOne: false
             referencedRelation: 'videos'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+      dialects: {
+        Row: {
+          created_at: string
+          created_by: string
+          deleted: string | null
+          dictionary_id: string
+          id: string
+          name: Json
+          updated_at: string
+          updated_by: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          deleted?: string | null
+          dictionary_id: string
+          id: string
+          name: Json
+          updated_at?: string
+          updated_by: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          deleted?: string | null
+          dictionary_id?: string
+          id?: string
+          name?: Json
+          updated_at?: string
+          updated_by?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'dialects_created_by_fkey'
+            columns: ['created_by']
+            isOneToOne: false
+            referencedRelation: 'user_emails'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'dialects_created_by_fkey'
+            columns: ['created_by']
+            isOneToOne: false
+            referencedRelation: 'users'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'dialects_dictionary_id_fkey'
+            columns: ['dictionary_id']
+            isOneToOne: false
+            referencedRelation: 'dictionaries'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'dialects_updated_by_fkey'
+            columns: ['updated_by']
+            isOneToOne: false
+            referencedRelation: 'user_emails'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'dialects_updated_by_fkey'
+            columns: ['updated_by']
+            isOneToOne: false
+            referencedRelation: 'users'
             referencedColumns: ['id']
           },
         ]
@@ -404,7 +486,6 @@ export interface Database {
           created_at: string
           created_by: string
           deleted: string | null
-          dialects: string[] | null
           dictionary_id: string
           elicitation_id: string | null
           id: string
@@ -413,20 +494,17 @@ export interface Database {
           morphology: string | null
           notes: Json | null
           phonetic: string | null
-          plural_form: string | null
           scientific_names: string[] | null
           sources: string[] | null
           unsupported_fields: UnsupportedFields | null
           updated_at: string
           updated_by: string
-          variant: string | null
         }
         Insert: {
           coordinates?: Json | null
           created_at?: string
           created_by: string
           deleted?: string | null
-          dialects?: string[] | null
           dictionary_id: string
           elicitation_id?: string | null
           id: string
@@ -435,20 +513,17 @@ export interface Database {
           morphology?: string | null
           notes?: Json | null
           phonetic?: string | null
-          plural_form?: string | null
           scientific_names?: string[] | null
           sources?: string[] | null
           unsupported_fields?: UnsupportedFields | null
           updated_at?: string
           updated_by: string
-          variant?: string | null
         }
         Update: {
           coordinates?: Json | null
           created_at?: string
           created_by?: string
           deleted?: string | null
-          dialects?: string[] | null
           dictionary_id?: string
           elicitation_id?: string | null
           id?: string
@@ -457,13 +532,11 @@ export interface Database {
           morphology?: string | null
           notes?: Json | null
           phonetic?: string | null
-          plural_form?: string | null
           scientific_names?: string[] | null
           sources?: string[] | null
-          unsupported_fields?: UnsupportedFields | null
+          unsupported_fields?: Json | null
           updated_at?: string
           updated_by?: string
-          variant?: string | null
         }
         Relationships: [
           {
@@ -499,6 +572,59 @@ export interface Database {
             columns: ['updated_by']
             isOneToOne: false
             referencedRelation: 'users'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+      entry_dialects: {
+        Row: {
+          created_at: string
+          created_by: string
+          deleted: string | null
+          dialect_id: string
+          entry_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          deleted?: string | null
+          dialect_id: string
+          entry_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          deleted?: string | null
+          dialect_id?: string
+          entry_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'entry_dialects_created_by_fkey'
+            columns: ['created_by']
+            isOneToOne: false
+            referencedRelation: 'user_emails'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'entry_dialects_created_by_fkey'
+            columns: ['created_by']
+            isOneToOne: false
+            referencedRelation: 'users'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'entry_dialects_dialect_id_fkey'
+            columns: ['dialect_id']
+            isOneToOne: false
+            referencedRelation: 'dialects'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'entry_dialects_entry_id_fkey'
+            columns: ['entry_id']
+            isOneToOne: false
+            referencedRelation: 'entries'
             referencedColumns: ['id']
           },
         ]
@@ -727,9 +853,11 @@ export interface Database {
           id: string
           noun_class: string | null
           parts_of_speech: string[] | null
+          plural_form: Json | null
           semantic_domains: string[] | null
           updated_at: string
           updated_by: string
+          variant: Json | null
           write_in_semantic_domains: string[] | null
         }
         Insert: {
@@ -742,9 +870,11 @@ export interface Database {
           id: string
           noun_class?: string | null
           parts_of_speech?: string[] | null
+          plural_form?: Json | null
           semantic_domains?: string[] | null
           updated_at?: string
           updated_by: string
+          variant?: Json | null
           write_in_semantic_domains?: string[] | null
         }
         Update: {
@@ -757,9 +887,11 @@ export interface Database {
           id?: string
           noun_class?: string | null
           parts_of_speech?: string[] | null
+          plural_form?: Json | null
           semantic_domains?: string[] | null
           updated_at?: string
           updated_by?: string
+          variant?: Json | null
           write_in_semantic_domains?: string[] | null
         }
         Relationships: []
@@ -1345,6 +1477,7 @@ export interface Database {
         | 'sentence_videos'
         | 'sense_photos'
         | 'sentence_photos'
+        | 'dialects'
       entry_columns:
         | 'deleted'
         | 'glosses'

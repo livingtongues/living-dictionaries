@@ -1,7 +1,6 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
-import type { Database as DatabaseGenerated, Tables } from './generated.types'
 import type { Merge } from 'type-fest'
-import type { MultiString } from '@living-dictionaries/types'
+import type { DatabaseGenerated, MultiString, Tables } from '@living-dictionaries/types'
 
 export type Database = DatabaseGenerated
 // export type Database = MergeDeep<DatabaseGenerated, {
@@ -85,29 +84,29 @@ export interface GoogleAuthUserMetaData {
   // "name": string,
   // "email": string,
   // "picture": string, // duplicate of avatar_url
-  full_name?: string,
-  avatar_url?: string,
+  full_name?: string
+  avatar_url?: string
   // "provider_id": string,
   // "email_verified": boolean,
   // "phone_verified": boolean
 }
 
-export type SupaEntry = Merge<Tables<'entries_view'>, { senses: SupaSense[]}>
+export type SupaEntry = Merge<Tables<'entries_view'>, { senses: SupaSense[] }>
 // export type SupaEntry = Database['public']['Views']['entries_view']['Row']
 
 export interface SupaSense {
-  id: string;
-  glosses?: MultiString;
-  parts_of_speech?: string[];
-  semantic_domains?: string[];
-  write_in_semantic_domains?: string[];
-  noun_class?: string;
-  definition?: MultiString; // these will not exist until the Firestore migration; works same as glosses, based on language - right now only have English ones in db
-  sentences?: Sentence[];
+  id: string
+  glosses?: MultiString
+  parts_of_speech?: string[]
+  semantic_domains?: string[]
+  write_in_semantic_domains?: string[]
+  noun_class?: string
+  definition?: MultiString // these will not exist until the Firestore migration; works same as glosses, based on language - right now only have English ones in db
+  sentences?: Sentence[]
 }
 
 export interface Sentence {
-  id: string;
-  text: MultiString;
-  translation: MultiString;
+  id: string
+  text: MultiString
+  translation: MultiString
 }

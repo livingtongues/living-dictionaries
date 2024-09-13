@@ -1,4 +1,6 @@
+import type { Merge } from 'type-fest'
 import type { MultiString } from '../.'
+import type { Database, TablesInsert } from './generated.types'
 
 export interface ContentUpdateRequestBody {
   id: string // id of the change, a uuidv4 created on client to make things idempotent
@@ -13,8 +15,9 @@ export interface ContentUpdateRequestBody {
   video_id?: string
   photo_id?: string
   speaker_id?: string
-  table: 'entries' | 'senses' | 'sentences' | 'senses_in_sentences' | 'texts' | 'audio' | 'video' | 'photo' | 'speakers' | 'audio_speakers' | 'video_speakers' | 'sense_videos' | 'sentence_videos' | 'sense_photos' | 'sentence_photos' // handcopied from Database['public']['Enums']['content_tables'] so Supabase types may need brought into @livingdictionaries/types
-  change: {
+  dialect_id?: string
+  table: Database['public']['Enums']['content_tables']
+  change?: {
     sense?: {
       glosses?: {
         new: MultiString
@@ -51,9 +54,12 @@ export interface ContentUpdateRequestBody {
         new: MultiString
         old?: MultiString
       }
-      removed_from_sense?: boolean // currently also deletes the sentence - later when a sentence can be connected to multiple sentences, use a deleted field to indicate the sentence is deleted everywhere
+      removed_from_sense?: boolean // currently also deletes the sentence - later when a sentence can be connected to multiple senses, use a deleted field to indicate the sentence is deleted everywhere
       // deleted?: boolean;
     }
+  }
+  addition?: {
+    dialects?: Merge<TablesInsert<'dialects'>, { name: MultiString }>
   }
   import_id?: string
   timestamp: string

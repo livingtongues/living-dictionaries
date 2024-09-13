@@ -60,6 +60,7 @@
     "yaml",
     "toml",
   ],
+  "eslint.experimental.useFlatConfig": true,
 
   "unocss.root": "packages/site",
 

@@ -1,4 +1,4 @@
-import type { TablesInsert } from '$lib/supabase/generated.types'
+import type { TablesInsert } from '@living-dictionaries/types'
 
 export const seeded_user_id_1 = '12345678-abcd-efab-cdef-123456789012'
 export const seeded_user_id_2 = '12345678-abcd-efab-cdef-123456789013'
@@ -31,7 +31,7 @@ export const seed_dictionaries: TablesInsert<'dictionaries'>[] = [{
 }]
 
 export const first_entry_id = 'entry1'
-const second_entry_id = 'entry2';
+const second_entry_id = 'entry2'
 
 export const seed_entries: TablesInsert<'entries'>[] = [
   {
