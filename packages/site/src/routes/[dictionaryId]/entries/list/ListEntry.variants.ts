@@ -41,7 +41,7 @@ export const Jewish_Neo_Aramaic: Variant<Component> = {
   entry: complex,
   videoAccess: true,
   _meta: {
-    description: 'This dictionary has an exception where we show dialects and example sentences in the list view.',
+    description: 'This dictionary has an exception where we show example sentences in the list view.',
   },
 }
 
