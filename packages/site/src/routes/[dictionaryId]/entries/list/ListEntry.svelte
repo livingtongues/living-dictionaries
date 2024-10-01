@@ -77,10 +77,11 @@
           {/if}
         {/if}
 
+        {#if entry.dialects}<p class="text-xs">
+          <i class="mr-1">{$page.data.t('entry_field.dialects')}: {entry.dialects.join(', ')}</i>
+        </p>{/if}
+
         {#if dictionary.id === 'jewish-neo-aramaic'}
-          {#if entry.dialects}<p class="text-xs">
-            <i class="mr-1">{$page.data.t('entry_field.dialects')}: {entry.dialects.join(', ')}</i>
-          </p>{/if}
           {#each entry.senses?.[0]?.example_sentences || [{}] as sentence}
             {#each Object.entries(sentence) as [bcp, content]}
               <p>
