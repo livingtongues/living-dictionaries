@@ -1844,7 +1844,7 @@ export interface Database {
       entries_view: {
         Row: {
           dictionary_id: string | null
-          entry: Tables<'entries'>
+          main: Tables<'entries'>
           id: string | null
           senses: SenseWithSentences[] | null
         }

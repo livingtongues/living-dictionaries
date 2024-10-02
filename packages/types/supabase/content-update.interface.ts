@@ -9,6 +9,9 @@ export type ContentUpdateRequestBody =
   | Upsert_Entry
   | Upsert_Dialect
   | Upsert_Sense
+  | Add_Sentence
+  | Update_Sentence
+  | Remove_Sentence
 
 interface ContentUpdateBase {
   update_id: string // id of the change, a uuidv4 created on client to make things idempotent
@@ -38,6 +41,27 @@ interface Upsert_Sense extends ContentUpdateBase {
   entry_id: string
 }
 
+interface Add_Sentence extends ContentUpdateBase {
+  type: 'add_sentence'
+  data: TablesUpdate<'sentences'>
+  sentence_id: string
+  sense_id: string
+}
+
+interface Update_Sentence extends ContentUpdateBase {
+  type: 'update_sentence'
+  data: TablesUpdate<'sentences'>
+  sentence_id: string
+}
+
+/** currently also deletes the sentence - later when a sentence can be connected to multiple senses, use a deleted field to indicate the sentence is deleted everywhere */
+interface Remove_Sentence extends ContentUpdateBase {
+  type: 'remove_sentence'
+  sentence_id: string
+  sense_id: string
+  data?: null
+}
+
 // interface Add_Audio extends ContentUpdateBase {
 //   type: 'add_audio'
 //   data: TablesUpdate<'audio'>
@@ -48,6 +72,3 @@ interface Upsert_Sense extends ContentUpdateBase {
 //   data: TablesUpdate<'audio'>
 //   audio_id: string
 // }
-
-// Sentence
-// removed_from_sense?: boolean // currently also deletes the sentence - later when a sentence can be connected to multiple senses, use a deleted field to indicate the sentence is deleted everywhere

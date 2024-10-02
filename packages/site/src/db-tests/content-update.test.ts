@@ -1,10 +1,12 @@
+import type { ContentUpdateRequestBody } from '@living-dictionaries/types'
 import { admin_supabase, anon_supabase, uuid_template } from './clients'
-import type { ContentUpdateRequestBody, ContentUpdateResponseBody } from '$api/db/content-update/+server'
+import type { ContentUpdateResponseBody } from '$api/db/content-update/+server'
 import { post_request } from '$lib/helpers/get-post-requests'
 import { first_entry_id, seeded_dictionary_id, seeded_user_id_1, seeded_user_id_2 } from '$lib/mocks/seed/tables'
 import { reset_db } from '$lib/mocks/seed/write-seed-and-reset-db'
 
 const content_update_endpoint = 'http://localhost:3041/api/db/content-update'
+const timestamp = new Date('2024-03-08T00:44:04.600392+00:00').toISOString()
 
 beforeAll(async () => {
   await reset_db()
@@ -22,21 +24,17 @@ const first_entry_third_sense_id = incremental_consistent_uuid()
 describe('sense operations', () => {
   test('add sense with noun class to first entry', async () => {
     const { error } = await post_request<ContentUpdateRequestBody, ContentUpdateResponseBody>(content_update_endpoint, {
-      id: incremental_consistent_uuid(),
+      update_id: incremental_consistent_uuid(),
       auth_token: null,
       user_id_from_local: seeded_user_id_1,
       dictionary_id: seeded_dictionary_id,
       entry_id: first_entry_id,
       sense_id: first_entry_first_sense_id,
-      table: 'senses',
-      change: {
-        sense: {
-          noun_class: {
-            new: '2',
-          },
-        },
+      type: 'upsert_sense',
+      data: {
+        noun_class: '2',
       },
-      timestamp: new Date('2024-03-08T00:44:04.600392+00:00').toISOString(),
+      timestamp,
     })
     expect(error?.message).toBeFalsy()
     const { data } = await anon_supabase.from('entries_view').select()
@@ -58,21 +56,17 @@ describe('sense operations', () => {
   describe('different user add parts of speech to first sense in first entry', () => {
     test('noun class remains (upsert)', async () => {
       const { error } = await post_request<ContentUpdateRequestBody, ContentUpdateResponseBody>(content_update_endpoint, {
-        id: incremental_consistent_uuid(),
+        update_id: incremental_consistent_uuid(),
         auth_token: null,
         user_id_from_local: seeded_user_id_2,
         dictionary_id: seeded_dictionary_id,
         entry_id: first_entry_id,
         sense_id: first_entry_first_sense_id,
-        table: 'senses',
-        change: {
-          sense: {
-            parts_of_speech: {
-              new: ['n', 'v'],
-            },
-          },
+        type: 'upsert_sense',
+        data: {
+          parts_of_speech: ['n', 'v'],
         },
-        timestamp: new Date('2024-03-08T00:44:04.600392+00:00').toISOString(),
+        timestamp,
       })
       expect(error?.message).toBeFalsy()
       const { data } = await anon_supabase.from('entries_view').select()
@@ -104,24 +98,20 @@ describe('sense operations', () => {
 
   test('adds glosses field to second sense in first entry', async () => {
     const { error } = await post_request<ContentUpdateRequestBody, ContentUpdateResponseBody>(content_update_endpoint, {
-      id: incremental_consistent_uuid(),
+      update_id: incremental_consistent_uuid(),
       auth_token: null,
       user_id_from_local: seeded_user_id_1,
       dictionary_id: seeded_dictionary_id,
       entry_id: first_entry_id,
       sense_id: first_entry_second_sense_id,
-      table: 'senses',
-      change: {
-        sense: {
-          glosses: {
-            new: {
-              en: 'Hi',
-              es: 'Hola',
-            },
-          },
+      type: 'upsert_sense',
+      data: {
+        glosses: {
+          en: 'Hi',
+          es: 'Hola',
         },
       },
-      timestamp: new Date('2024-03-08T00:44:04.600392+00:00').toISOString(),
+      timestamp,
     })
 
     expect(error?.message).toBeFalsy()
@@ -154,21 +144,17 @@ describe('sense operations', () => {
 
   test('add a third sense to first entry with a glosses field', async () => {
     const { error } = await post_request<ContentUpdateRequestBody, ContentUpdateResponseBody>(content_update_endpoint, {
-      id: incremental_consistent_uuid(),
+      update_id: incremental_consistent_uuid(),
       auth_token: null,
       user_id_from_local: seeded_user_id_1,
       dictionary_id: seeded_dictionary_id,
       entry_id: first_entry_id,
       sense_id: first_entry_third_sense_id,
-      table: 'senses',
-      change: {
-        sense: {
-          semantic_domains: {
-            new: ['1', '2'],
-          },
-        },
+      type: 'upsert_sense',
+      data: {
+        semantic_domains: ['1', '2'],
       },
-      timestamp: new Date('2024-03-08T00:44:04.600392+00:00').toISOString(),
+      timestamp,
     })
     expect(error?.message).toBeFalsy()
     const { data } = await anon_supabase.from('entries_view').select()
@@ -207,19 +193,17 @@ describe('sense operations', () => {
 
   test('delete the third sense from the first entry', async () => {
     const { error } = await post_request<ContentUpdateRequestBody, ContentUpdateResponseBody>(content_update_endpoint, {
-      id: incremental_consistent_uuid(),
+      update_id: incremental_consistent_uuid(),
       auth_token: null,
       user_id_from_local: seeded_user_id_1,
       dictionary_id: seeded_dictionary_id,
       entry_id: first_entry_id,
       sense_id: first_entry_third_sense_id,
-      table: 'senses',
-      change: {
-        sense: {
-          deleted: true,
-        },
+      type: 'upsert_sense',
+      data: {
+        deleted: timestamp,
       },
-      timestamp: new Date('2024-03-08T00:44:04.600392+00:00').toISOString(),
+      timestamp,
     })
     expect(error?.message).toBeFalsy()
     const { data } = await anon_supabase.from('entries_view').select()
@@ -258,24 +242,19 @@ describe('sense sentence operations', () => {
 
     test('post to endpoint', async () => {
       const { data, error } = await post_request<ContentUpdateRequestBody, ContentUpdateResponseBody>(content_update_endpoint, {
-        id: change_id,
+        update_id: change_id,
         auth_token: null,
         user_id_from_local: seeded_user_id_1,
         dictionary_id: seeded_dictionary_id,
-        entry_id: first_entry_id,
         sentence_id: first_sentence_id,
         sense_id: first_entry_first_sense_id,
-        table: 'sentences',
-        change: {
-          sentence: {
-            text: {
-              new: {
-                lo1: 'abcd efgh ijkl',
-              },
-            },
+        type: 'add_sentence',
+        data: {
+          text: {
+            lo1: 'abcd efgh ijkl',
           },
         },
-        timestamp: new Date('2024-03-08T00:44:04.600392+00:00').toISOString(),
+        timestamp,
       })
 
       expect(error?.message).toBeFalsy()
@@ -395,21 +374,15 @@ describe('sense sentence operations', () => {
 
     test('post to endpoint', async () => {
       const { data, error } = await post_request<ContentUpdateRequestBody, ContentUpdateResponseBody>(content_update_endpoint, {
-        id: change_id,
+        update_id: change_id,
         auth_token: null,
         user_id_from_local: seeded_user_id_1,
         dictionary_id: seeded_dictionary_id,
-        entry_id: first_entry_id,
         sentence_id: first_sentence_id,
-        sense_id: first_entry_first_sense_id,
-        table: 'sentences',
-        change: {
-          sentence: {
-            translation: {
-              new: {
-                en: 'I am hungry',
-              },
-            },
+        type: 'update_sentence',
+        data: {
+          translation: {
+            en: 'I am hungry',
           },
         },
         timestamp: new Date('2024-03-09T00:44:04.600392+00:00').toISOString(),
@@ -473,23 +446,15 @@ describe('sense sentence operations', () => {
   test('update sentence text updates just the text and leaves translation alone', async () => {
     const change_id = incremental_consistent_uuid()
     await post_request<ContentUpdateRequestBody, ContentUpdateResponseBody>(content_update_endpoint, {
-      id: change_id,
+      update_id: change_id,
       auth_token: null,
       user_id_from_local: seeded_user_id_1,
       dictionary_id: seeded_dictionary_id,
       sentence_id: first_sentence_id,
-      sense_id: first_entry_first_sense_id,
-      table: 'sentences',
-      change: {
-        sentence: {
-          text: {
-            new: {
-              lo1: 'abcd efgh',
-            },
-            old: {
-              lo1: 'abcd efgh ijkl',
-            },
-          },
+      type: 'update_sentence',
+      data: {
+        text: {
+          lo1: 'abcd efgh',
         },
       },
       timestamp: new Date('2024-03-09T00:44:04.600392+00:00').toISOString(),
@@ -516,21 +481,16 @@ describe('sense sentence operations', () => {
     const { data: { senses: old_senses } } = await anon_supabase.from('entries_view').select().eq('id', first_entry_id).single()
     const change_id = incremental_consistent_uuid()
     const { data, error } = await post_request<ContentUpdateRequestBody, ContentUpdateResponseBody>(content_update_endpoint, {
-      id: change_id,
+      update_id: change_id,
       auth_token: null,
       user_id_from_local: seeded_user_id_1,
       dictionary_id: seeded_dictionary_id,
       sentence_id: first_sentence_id,
-      sense_id: first_entry_first_sense_id,
-      table: 'sentences',
-      change: {
-        sentence: {
-          translation: {
-            new: {
-              ...old_senses[0].sentences[0].translation,
-              es: 'Estoy hambriento',
-            },
-          },
+      type: 'update_sentence',
+      data: {
+        translation: {
+          ...old_senses[0].sentences[0].translation,
+          es: 'Estoy hambriento',
         },
       },
       timestamp: new Date('2024-03-09T00:44:04.600392+00:00').toISOString(),
@@ -571,19 +531,14 @@ describe('sense sentence operations', () => {
 
   test('remove sentence from sense', async () => {
     const { error } = await post_request<ContentUpdateRequestBody, ContentUpdateResponseBody>(content_update_endpoint, {
-      id: incremental_consistent_uuid(),
+      update_id: incremental_consistent_uuid(),
       auth_token: null,
       user_id_from_local: seeded_user_id_1,
       dictionary_id: seeded_dictionary_id,
       sentence_id: first_sentence_id,
       sense_id: first_entry_first_sense_id,
-      table: 'sentences',
-      change: {
-        sentence: {
-          removed_from_sense: true,
-        },
-      },
-      timestamp: new Date('2024-03-08T00:44:04.600392+00:00').toISOString(),
+      type: 'remove_sentence',
+      timestamp,
     })
     expect(error?.message).toBeFalsy()
 

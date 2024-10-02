@@ -34,7 +34,7 @@ SELECT
       'created_at', entries.created_at,
       'updated_at', entries.updated_at
     )
-  ) AS entry,
+  ) AS main,
   CASE 
     WHEN COUNT(senses.id) > 0 THEN jsonb_agg(
       jsonb_strip_nulls(

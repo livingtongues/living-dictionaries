@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { IDictionary, SenseWithSentences } from '@living-dictionaries/types'
+  import type { IDictionary, SenseWithSentences, TablesUpdate } from '@living-dictionaries/types'
   import EntryField from './EntryField.svelte'
   import { page } from '$app/stores'
   import { order_entry_and_dictionary_gloss_languages } from '$lib/helpers/glosses'
@@ -14,6 +14,10 @@
   export let update_sense: DbOperations['update_sense']
   export let update_sentence: DbOperations['update_sentence']
 
+  function update(sense: TablesUpdate<'senses'>) {
+    update_sense({ sense, entry_id: entryId, sense_id: sense.id })
+  }
+
   const writing_systems = ['default']
 
   $: glossingLanguages = order_entry_and_dictionary_gloss_languages(sense.glosses, glossLanguages)
@@ -27,15 +31,8 @@
     {bcp}
     {can_edit}
     display={`${$page.data.t({ dynamicKey: `gl.${bcp}`, fallback: bcp })}: ${$page.data.t('entry_field.gloss')}`}
-    on_update={new_value => update_sense({
-      change: {
-        glosses: {
-          new: { ...sense.glosses, [bcp]: new_value },
-          old: sense.glosses,
-        },
-      },
-      entry_id: entryId,
-      sense_id: sense.id,
+    on_update={new_value => update({
+      glosses: { ...sense.glosses, [bcp]: new_value },
     })} />
 {/each}
 
@@ -46,15 +43,8 @@
     field="definition_english"
     display="Definition (deprecated)"
     {can_edit}
-    on_update={new_value => update_sense({
-      change: {
-        definition: {
-          new: new_value ? { en: new_value } : null,
-          old: sense.definition,
-        },
-      },
-      entry_id: entryId,
-      sense_id: sense.id,
+    on_update={new_value => update({
+      definition: new_value ? { en: new_value } : null,
     })} />
 {/if}
 
@@ -64,15 +54,8 @@
     <EntryPartOfSpeech
       value={sense.parts_of_speech}
       {can_edit}
-      on_update={new_value => update_sense({
-        change: {
-          parts_of_speech: {
-            new: new_value,
-            old: sense.parts_of_speech,
-          },
-        },
-        entry_id: entryId,
-        sense_id: sense.id,
+      on_update={new_value => update({
+        parts_of_speech: new_value,
       })} />
     <div class="border-b-2 pb-1 mb-2 border-dashed" />
   </div>
@@ -85,25 +68,11 @@
       {can_edit}
       semantic_domain_keys={sense.semantic_domains}
       write_in_semantic_domains={sense.write_in_semantic_domains}
-      on_update={new_value => update_sense({
-        change: {
-          semantic_domains: {
-            new: new_value,
-            old: sense.semantic_domains,
-          },
-        },
-        entry_id: entryId,
-        sense_id: sense.id,
+      on_update={new_value => update({
+        semantic_domains: new_value,
       })}
-      on_update_write_in={new_value => update_sense({
-        change: {
-          write_in_semantic_domains: {
-            new: new_value,
-            old: sense.write_in_semantic_domains,
-          },
-        },
-        entry_id: entryId,
-        sense_id: sense.id,
+      on_update_write_in={new_value => update({
+        write_in_semantic_domains: new_value,
       })} />
     <div class="border-b-2 pb-1 mb-2 border-dashed" />
   </div>
@@ -114,15 +83,8 @@
   field="noun_class"
   {can_edit}
   display={$page.data.t('entry_field.noun_class')}
-  on_update={new_value => update_sense({
-    change: {
-      noun_class: {
-        new: new_value || null,
-        old: sense.noun_class || null,
-      },
-    },
-    entry_id: entryId,
-    sense_id: sense.id,
+  on_update={new_value => update({
+    noun_class: new_value || null,
   })} />
 
 {#each sense.sentences || [{ text: {}, id: null, translation: null }] as sentence}
@@ -135,12 +97,7 @@
         {can_edit}
         display={$page.data.t('entry_field.example_sentence')}
         on_update={new_value => update_sentence({
-          change: {
-            text: {
-              new: { [orthography]: new_value || null },
-              old: sentence.text?.[orthography] ? { default: sentence.text[orthography] } : null,
-            },
-          },
+          sentence: { [orthography]: new_value || null },
           sentence_id: sentence.id || window.crypto.randomUUID(),
           sense_id: sense.id,
         })} />
@@ -155,13 +112,10 @@
           {can_edit}
           display="{$page.data.t({ dynamicKey: `gl.${bcp}`, fallback: bcp })}: {$page.data.t('entry_field.example_sentence')}"
           on_update={new_value => update_sentence({
-            change: {
+            sentence: {
               translation: {
-                new: {
-                  ...sentence.translation,
-                  [bcp]: new_value,
-                },
-                old: sentence.translation,
+                ...sentence.translation,
+                [bcp]: new_value,
               },
             },
             sentence_id: sentence.id,

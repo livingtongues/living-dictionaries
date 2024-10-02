@@ -1,12 +1,12 @@
-import fs from 'node:fs'
+// import fs from 'node:fs'
 import * as ts from 'typescript'
 
 const generated_file_path = 'packages/types/supabase/generated.types.ts'
 const augments_file_path = 'packages/types/supabase/augments.types.ts'
 
-function read_file(file_path: string): string {
-  return fs.readFileSync(file_path, 'utf8')
-}
+// function read_file(file_path: string): string {
+//   return fs.readFileSync(file_path, 'utf8')
+// }
 
 function parse_file_to_ast(file_name: string, file_content: string): ts.SourceFile {
   return ts.createSourceFile(
@@ -192,14 +192,15 @@ export interface Database {}`
     `)
   })
 
-  test('update actual types', () => {
-    const generated_content = read_file(generated_file_path)
-    const augments_content = read_file(augments_file_path)
-    const output = merge_content(generated_content, augments_content)
+  // TODO: turn this into a CLI
+  // test('update actual types', () => {
+  //   const generated_content = read_file(generated_file_path)
+  //   const augments_content = read_file(augments_file_path)
+  //   const output = merge_content(generated_content, augments_content)
 
-    const imports_regex = /^(import type.+)/gm
-    const import_blocks = augments_content.match(imports_regex)
-    const augmented_import_blocks = import_blocks!.join('\n')
-    expect(`${augmented_import_blocks}\n\n${output}`).toMatchFileSnapshot(`combined.types.ts`)
-  })
+  //   const imports_regex = /^(import type.+)/gm
+  //   const import_blocks = augments_content.match(imports_regex)
+  //   const augmented_import_blocks = import_blocks!.join('\n')
+  //   expect(`${augmented_import_blocks}\n\n${output}`).toMatchFileSnapshot(`combined.types.ts`)
+  // })
 })

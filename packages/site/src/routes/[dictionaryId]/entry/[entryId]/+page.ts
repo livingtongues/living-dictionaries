@@ -2,11 +2,9 @@ import { error, redirect } from '@sveltejs/kit'
 import type { ActualDatabaseEntry } from '@living-dictionaries/types'
 import { awaitableDocStore } from 'sveltefirets'
 import { derived } from 'svelte/store'
-import type { PostgrestError } from '@supabase/supabase-js'
 import { ResponseCodes } from '$lib/constants'
 import { ENTRY_UPDATED_LOAD_TRIGGER } from '$lib/dbOperations'
 import { getSupabase } from '$lib/supabase'
-import type { SupaEntry } from '$lib/supabase/database.types.js'
 import { convert_and_expand_entry } from '$lib/transformers/convert_and_expand_entry'
 
 export async function load({ params, depends, parent }) {
@@ -31,13 +29,12 @@ export async function load({ params, depends, parent }) {
   }
 }
 
-async function load_supa_entry(entry_id: string): Promise<{ data?: SupaEntry, error?: PostgrestError }> {
+async function load_supa_entry(entry_id: string) {
   const supabase = getSupabase()
   const { data, error: supaError } = await supabase
     .from('entries_view')
     .select()
     .eq('id', entry_id)
-    .returns<SupaEntry[]>()
 
   const supaEntry = data?.[0]
   console.info({ supaEntry, supaError })

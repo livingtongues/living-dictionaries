@@ -5,7 +5,6 @@
   import { share } from '$lib/helpers/share'
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte'
   import { page } from '$app/stores'
-  import type { SupaEntry } from '$lib/supabase/database.types'
   import { browser } from '$app/environment'
 
   export let data
@@ -21,7 +20,7 @@
     user,
     dbOperations,
   } = data)
-  let supaEntry: SupaEntry
+  let supaEntry: any // TODO: type this
 
   $: if (browser) {
     supa_entry_promise?.then(({ data: _data }) => {

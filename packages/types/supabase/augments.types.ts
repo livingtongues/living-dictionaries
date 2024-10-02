@@ -136,7 +136,7 @@ export interface DatabaseAugments {
       entries_view: {
         Row: {
           // @ts-expect-error
-          entry: Tables<'entries'>
+          main: Tables<'entries'>
           senses: SenseWithSentences[] | null
         }
       }
