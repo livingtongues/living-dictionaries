@@ -1,9 +1,12 @@
 # Migrate Entries and Speakers from Firestore to Supabase
 
 ## TODO
-- commit progress and see if we can use MergeDeep in types project without breaking type-checking in main project
-- get db-tests type of thing running for migration
-  - modify current db tests to remove need to add a shell entry if it doesn't exist
+- resolve issue whereby sense_id is sent with sentence update
+- drop content_updates' table column
+- type SupaEntry in [entryId].svelte
+- add entries, then enforce senses to entry relationships
+- consider if I should make a function that updates the updated_at timestamp on an entry when anything connected is updated, because I need that on the view for sorting - I could calculate it in the view or do it ahead of time - maybe it doesn't matter with materialized views but if they get too slow then I should actually change the data
+- pnpm -F scripts test:migration
 - Run through entries from oldest created to newest created so that first person to add a dialect gets the created_by credit
 - update migration script to emit array of needed dialects and test addition
 - pull down speakers from Firebase, get names

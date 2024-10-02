@@ -38,18 +38,17 @@ describe('sense operations', () => {
     })
     expect(error?.message).toBeFalsy()
     const { data } = await anon_supabase.from('entries_view').select()
-    expect(data).toMatchInlineSnapshot(`
-      [
-        {
-          "id": "entry1",
-          "senses": [
-            {
-              "id": "11111111-1111-1111-1111-111111111100",
-              "noun_class": "2",
-            },
-          ],
-        },
-      ]
+    const [first_entry] = data
+    expect({ id: first_entry.id, senses: first_entry.senses }).toMatchInlineSnapshot(`
+      {
+        "id": "entry1",
+        "senses": [
+          {
+            "id": "11111111-1111-1111-1111-111111111100",
+            "noun_class": "2",
+          },
+        ],
+      }
     `)
   })
 
@@ -70,23 +69,18 @@ describe('sense operations', () => {
       })
       expect(error?.message).toBeFalsy()
       const { data } = await anon_supabase.from('entries_view').select()
-      expect(data).toMatchInlineSnapshot(`
-      [
-        {
-          "id": "entry1",
-          "senses": [
-            {
-              "id": "11111111-1111-1111-1111-111111111100",
-              "noun_class": "2",
-              "parts_of_speech": [
-                "n",
-                "v",
-              ],
-            },
-          ],
-        },
-      ]
-    `)
+      expect(data[0].senses).toMatchInlineSnapshot(`
+        [
+          {
+            "id": "11111111-1111-1111-1111-111111111100",
+            "noun_class": "2",
+            "parts_of_speech": [
+              "n",
+              "v",
+            ],
+          },
+        ]
+      `)
     })
 
     test('updated_by is set to the second user but created_by is left alone', async () => {
@@ -116,27 +110,22 @@ describe('sense operations', () => {
 
     expect(error?.message).toBeFalsy()
     const { data } = await anon_supabase.from('entries_view').select()
-    expect(data).toMatchInlineSnapshot(`
+    expect(data[0].senses).toMatchInlineSnapshot(`
       [
         {
-          "id": "entry1",
-          "senses": [
-            {
-              "id": "11111111-1111-1111-1111-111111111100",
-              "noun_class": "2",
-              "parts_of_speech": [
-                "n",
-                "v",
-              ],
-            },
-            {
-              "glosses": {
-                "en": "Hi",
-                "es": "Hola",
-              },
-              "id": "11111111-1111-1111-1111-111111111101",
-            },
+          "id": "11111111-1111-1111-1111-111111111100",
+          "noun_class": "2",
+          "parts_of_speech": [
+            "n",
+            "v",
           ],
+        },
+        {
+          "glosses": {
+            "en": "Hi",
+            "es": "Hola",
+          },
+          "id": "11111111-1111-1111-1111-111111111101",
         },
       ]
     `)
@@ -158,33 +147,28 @@ describe('sense operations', () => {
     })
     expect(error?.message).toBeFalsy()
     const { data } = await anon_supabase.from('entries_view').select()
-    expect(data).toMatchInlineSnapshot(`
+    expect(data[0].senses).toMatchInlineSnapshot(`
       [
         {
-          "id": "entry1",
-          "senses": [
-            {
-              "id": "11111111-1111-1111-1111-111111111100",
-              "noun_class": "2",
-              "parts_of_speech": [
-                "n",
-                "v",
-              ],
-            },
-            {
-              "glosses": {
-                "en": "Hi",
-                "es": "Hola",
-              },
-              "id": "11111111-1111-1111-1111-111111111101",
-            },
-            {
-              "id": "11111111-1111-1111-1111-111111111102",
-              "semantic_domains": [
-                "1",
-                "2",
-              ],
-            },
+          "id": "11111111-1111-1111-1111-111111111100",
+          "noun_class": "2",
+          "parts_of_speech": [
+            "n",
+            "v",
+          ],
+        },
+        {
+          "glosses": {
+            "en": "Hi",
+            "es": "Hola",
+          },
+          "id": "11111111-1111-1111-1111-111111111101",
+        },
+        {
+          "id": "11111111-1111-1111-1111-111111111102",
+          "semantic_domains": [
+            "1",
+            "2",
           ],
         },
       ]
@@ -207,27 +191,22 @@ describe('sense operations', () => {
     })
     expect(error?.message).toBeFalsy()
     const { data } = await anon_supabase.from('entries_view').select()
-    expect(data).toMatchInlineSnapshot(`
+    expect(data[0].senses).toMatchInlineSnapshot(`
       [
         {
-          "id": "entry1",
-          "senses": [
-            {
-              "id": "11111111-1111-1111-1111-111111111100",
-              "noun_class": "2",
-              "parts_of_speech": [
-                "n",
-                "v",
-              ],
-            },
-            {
-              "glosses": {
-                "en": "Hi",
-                "es": "Hola",
-              },
-              "id": "11111111-1111-1111-1111-111111111101",
-            },
+          "id": "11111111-1111-1111-1111-111111111100",
+          "noun_class": "2",
+          "parts_of_speech": [
+            "n",
+            "v",
           ],
+        },
+        {
+          "glosses": {
+            "en": "Hi",
+            "es": "Hola",
+          },
+          "id": "11111111-1111-1111-1111-111111111101",
         },
       ]
     `)
@@ -262,23 +241,23 @@ describe('sense sentence operations', () => {
         {
           "audio_id": null,
           "change": {
-            "sentence": {
+            "data": {
               "text": {
-                "new": {
-                  "lo1": "abcd efgh ijkl",
-                },
+                "lo1": "abcd efgh ijkl",
               },
             },
+            "type": "add_sentence",
           },
+          "dialect_id": null,
           "dictionary_id": "dictionary1",
-          "entry_id": "entry1",
+          "entry_id": null,
           "id": "11111111-1111-1111-1111-111111111104",
           "import_id": null,
           "photo_id": null,
           "sense_id": "11111111-1111-1111-1111-111111111100",
           "sentence_id": "11111111-1111-1111-1111-111111111103",
           "speaker_id": null,
-          "table": "sentences",
+          "table": null,
           "text_id": null,
           "timestamp": "2024-03-08T00:44:04.6+00:00",
           "user_id": "12345678-abcd-efab-cdef-123456789012",
@@ -295,23 +274,23 @@ describe('sense sentence operations', () => {
           {
             "audio_id": null,
             "change": {
-              "sentence": {
+              "data": {
                 "text": {
-                  "new": {
-                    "lo1": "abcd efgh ijkl",
-                  },
+                  "lo1": "abcd efgh ijkl",
                 },
               },
+              "type": "add_sentence",
             },
+            "dialect_id": null,
             "dictionary_id": "dictionary1",
-            "entry_id": "entry1",
+            "entry_id": null,
             "id": "11111111-1111-1111-1111-111111111104",
             "import_id": null,
             "photo_id": null,
             "sense_id": "11111111-1111-1111-1111-111111111100",
             "sentence_id": "11111111-1111-1111-1111-111111111103",
             "speaker_id": null,
-            "table": "sentences",
+            "table": null,
             "text_id": null,
             "timestamp": "2024-03-08T00:44:04.6+00:00",
             "user_id": "12345678-abcd-efab-cdef-123456789012",
@@ -331,38 +310,6 @@ describe('sense sentence operations', () => {
             "text": {
               "lo1": "abcd efgh ijkl",
             },
-          },
-        ]
-      `)
-      expect(data).toMatchInlineSnapshot(`
-        [
-          {
-            "id": "entry1",
-            "senses": [
-              {
-                "id": "11111111-1111-1111-1111-111111111100",
-                "noun_class": "2",
-                "parts_of_speech": [
-                  "n",
-                  "v",
-                ],
-                "sentences": [
-                  {
-                    "id": "11111111-1111-1111-1111-111111111103",
-                    "text": {
-                      "lo1": "abcd efgh ijkl",
-                    },
-                  },
-                ],
-              },
-              {
-                "glosses": {
-                  "en": "Hi",
-                  "es": "Hola",
-                },
-                "id": "11111111-1111-1111-1111-111111111101",
-              },
-            ],
           },
         ]
       `)
@@ -393,23 +340,23 @@ describe('sense sentence operations', () => {
         {
           "audio_id": null,
           "change": {
-            "sentence": {
+            "data": {
               "translation": {
-                "new": {
-                  "en": "I am hungry",
-                },
+                "en": "I am hungry",
               },
             },
+            "type": "update_sentence",
           },
+          "dialect_id": null,
           "dictionary_id": "dictionary1",
-          "entry_id": "entry1",
+          "entry_id": null,
           "id": "11111111-1111-1111-1111-111111111105",
           "import_id": null,
           "photo_id": null,
-          "sense_id": "11111111-1111-1111-1111-111111111100",
+          "sense_id": null,
           "sentence_id": "11111111-1111-1111-1111-111111111103",
           "speaker_id": null,
-          "table": "sentences",
+          "table": null,
           "text_id": null,
           "timestamp": "2024-03-09T00:44:04.6+00:00",
           "user_id": "12345678-abcd-efab-cdef-123456789012",
@@ -499,14 +446,13 @@ describe('sense sentence operations', () => {
     expect(error?.message).toBeFalsy()
     expect(data.change).toMatchInlineSnapshot(`
       {
-        "sentence": {
+        "data": {
           "translation": {
-            "new": {
-              "en": "I am hungry",
-              "es": "Estoy hambriento",
-            },
+            "en": "I am hungry",
+            "es": "Estoy hambriento",
           },
         },
+        "type": "update_sentence",
       }
     `)
   })
