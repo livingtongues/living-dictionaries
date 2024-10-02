@@ -1,15 +1,14 @@
 <script lang="ts">
-  import type { IDictionary } from '@living-dictionaries/types'
+  import type { IDictionary, SenseWithSentences } from '@living-dictionaries/types'
   import EntryField from './EntryField.svelte'
   import { page } from '$app/stores'
   import { order_entry_and_dictionary_gloss_languages } from '$lib/helpers/glosses'
   import EntryPartOfSpeech from '$lib/components/entry/EntryPartOfSpeech.svelte'
   import EntrySemanticDomains from '$lib/components/entry/EntrySemanticDomains.svelte'
   import type { DbOperations } from '$lib/dbOperations'
-  import type { SupaSense } from '$lib/supabase/database.types'
 
   export let entryId: string
-  export let sense: SupaSense
+  export let sense: Partial<SenseWithSentences>
   export let glossLanguages: IDictionary['glossLanguages']
   export let can_edit = false
   export let update_sense: DbOperations['update_sense']

@@ -1,4 +1,4 @@
-import type { Database } from '$lib/supabase/database.types'
+import type { Database } from '@living-dictionaries/types'
 
 function convert_to_sql_string(value: string | number | object) {
   if (typeof value === 'boolean')

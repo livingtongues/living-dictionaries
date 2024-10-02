@@ -22,6 +22,10 @@ CREATE TABLE dialects (
 
 ALTER TABLE dialects ENABLE ROW LEVEL SECURITY;
 
+CREATE POLICY "Anyone can view dialects"
+ON dialects 
+FOR SELECT USING (true);
+
 CREATE TABLE entry_dialects (
   entry_id text NOT NULL REFERENCES entries ON DELETE CASCADE,
   dialect_id uuid NOT NULL REFERENCES dialects ON DELETE CASCADE,
@@ -38,12 +42,9 @@ BEFORE UPDATE ON dialects
 FOR EACH ROW
 EXECUTE FUNCTION set_created_by();
 
-ALTER TYPE content_tables ADD VALUE 'dialects';
-
 ALTER TABLE content_updates
-ADD COLUMN dialect_id uuid REFERENCES dialects,
-ADD COLUMN addition jsonb,
-ALTER COLUMN change DROP NOT NULL;
+ALTER COLUMN "table" DROP NOT NULL,
+ADD COLUMN dialect_id uuid REFERENCES dialects;
 
 ------------------
 

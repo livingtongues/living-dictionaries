@@ -1,8 +1,8 @@
 CREATE TABLE senses (
   id uuid unique primary key NOT NULL, -- generated on client so users can create a sense offline and keep editing it
-  entry_id text NOT NULL, -- TODO: add trigger that adds entry placeholder if not existing, deploy, then add entry_id placeholders for all existing senses, then add REFERENCES entries
-  glosses jsonb, -- MultiString
+  entry_id text NOT NULL, -- TODO: add trigger that adds entry placeholder if not existing, deploy, then add entry_id placeholders for all existing senses, then add REFERENCES entries (added REFERENCES entries)
   "definition" jsonb, -- MultiString
+  glosses jsonb, -- MultiString
   parts_of_speech text[],
   semantic_domains text[],
   write_in_semantic_domains text[],
@@ -12,6 +12,8 @@ CREATE TABLE senses (
   updated_at timestamp with time zone DEFAULT now() NOT NULL,
   updated_by text NOT NULL, -- TODO: go through existing senses and connect to user_id, then change to uuid and add REFERENCES auth.users
   deleted timestamp with time zone
+  -- added plural_form jsonb, -- MultiString
+  -- added variant jsonb -- MultiString
 );
 
 ALTER TABLE senses ENABLE ROW LEVEL SECURITY;

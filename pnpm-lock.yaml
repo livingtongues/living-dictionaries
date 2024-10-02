@@ -85,8 +85,8 @@ importers:
         specifier: workspace:^0.0.1
         version: link:../site
       '@living-dictionaries/types':
-        specifier: ^1.0.0
-        version: 1.0.0
+        specifier: workspace:^1.0.0
+        version: link:../types
       '@supabase/supabase-js':
         specifier: ^2.38.4
         version: 2.39.7
@@ -291,9 +291,6 @@ importers:
       tslib:
         specifier: ^2.6.1
         version: 2.6.1
-      type-fest:
-        specifier: ^4.13.0
-        version: 4.13.0
       typescript:
         specifier: ^5.1.6
         version: 5.1.6
@@ -324,9 +321,12 @@ importers:
       sveltefirets:
         specifier: 0.0.42
         version: 0.0.42(firebase@10.9.0)(svelte@4.2.19)
-      type-fest:
-        specifier: ^4.13.0
-        version: 4.13.0
+      typescript:
+        specifier: ^5.6.2
+        version: 5.6.2
+      vitest:
+        specifier: ^2.0.5
+        version: 2.0.5(@types/node@22.5.1)(@vitest/ui@2.0.5)
 
 packages:
 
@@ -7076,10 +7076,6 @@ packages:
     resolution: {integrity: sha512-tLq3bSNx+xSpwvAJnzrK0Ep5CLNWjvFTOp71URMaAEWBfRb9nnJiBoUe0tF8bI4ZFO3omgBR6NvnbzVUT3Ly4g==}
     engines: {node: '>=14.16'}
 
-  type-fest@4.13.0:
-    resolution: {integrity: sha512-nKO1N9IFeTec3jnNe/3nZlX+RzwZsvT3c4akWC3IlhYGQbRSPFMBe87vmoaymS3hW2l/rs+4ptDDTxzcbqAcmA==}
-    engines: {node: '>=16'}
-
   type-is@1.6.18:
     resolution: {integrity: sha512-TkRKr9sUTxEH8MdfuCSP7VizJyzRNMjj2J2do2Jr3Kym598JVdEksuzPQCnlFPW4ky9Q+iA+ma9BGm06XQBy8g==}
     engines: {node: '>= 0.6'}
@@ -7089,6 +7085,11 @@ packages:
 
   typescript@5.1.6:
     resolution: {integrity: sha512-zaWCozRZ6DLEWAWFrVDz1H6FVXzUSfTy5FUMWsQlU8Ym5JP9eO4xkTIROFCQvhQf61z6O/G6ugw3SgAnvvm+HA==}
+    engines: {node: '>=14.17'}
+    hasBin: true
+
+  typescript@5.6.2:
+    resolution: {integrity: sha512-NW8ByodCSNCwZeghjN3o+JX5OFH0Ojg6sadjEKY4huZ52TqbJTJnDo5+Tw98lSy63NZvi4n+ez5m2u5d4PkZyw==}
     engines: {node: '>=14.17'}
     hasBin: true
 
@@ -11032,7 +11033,7 @@ snapshots:
       pathe: 1.1.2
       sirv: 2.0.4
       tinyrainbow: 1.2.0
-      vitest: 2.0.5(@types/node@22.5.1)(@vitest/ui@2.0.5)
+      vitest: 2.0.5(@types/node@18.11.18)(@vitest/ui@2.0.5)
 
   '@vitest/utils@2.0.5':
     dependencies:
@@ -16309,8 +16310,6 @@ snapshots:
 
   type-fest@3.13.1: {}
 
-  type-fest@4.13.0: {}
-
   type-is@1.6.18:
     dependencies:
       media-typer: 0.3.0
@@ -16321,6 +16320,8 @@ snapshots:
       is-typedarray: 1.0.0
 
   typescript@5.1.6: {}
+
+  typescript@5.6.2: {}
 
   uc.micro@1.0.6: {}
 

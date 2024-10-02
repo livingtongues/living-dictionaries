@@ -1,17 +1,26 @@
-// import { randomUUID } from 'node:crypto'
+import { randomUUID } from 'node:crypto'
 import type { ActualDatabaseEntry, TablesInsert } from '@living-dictionaries/types'
+import type { ActualDatabaseVideo } from '@living-dictionaries/types/video.interface'
+import { jacob_ld_user_id } from '../config-supabase'
 // import { log_once } from './log-once'
 
-let id_count = 0
-function randomUUID() {
-  id_count++
-  return `use-crypto-uuid-in-real-thing_${id_count}`
+interface DataForSupabase {
+  entry: TablesInsert<'entries'>
+  senses: TablesInsert<'senses'>[]
+  sentences: TablesInsert<'sentences'>[]
+  senses_in_sentences: TablesInsert<'senses_in_sentences'>[]
+  audios: TablesInsert<'audio'>[]
+  audio_speakers: TablesInsert<'audio_speakers'>[]
+  photos: TablesInsert<'photos'>[]
+  sense_photos: TablesInsert<'sense_photos'>[]
+  videos: TablesInsert<'videos'>[]
+  sense_videos: TablesInsert<'sense_videos'>[]
+  dialects: string[]
+  new_speaker_name?: string
+  prior_import_id: string | null
 }
 
-const admin_uid_if_no_owner = 'de2d3715-6337-45a3-a81a-d82c3210b2a7' // jacob@livingtongues.org
-const old_talking_dictionaries = '00000000-0000-0000-0000-000000000000' // TODO - decide what user to use or create one for attribution
-
-export function convert_entry(_entry: Partial<ActualDatabaseEntry> & Record<string, any>) {
+export function convert_entry(_entry: ActualDatabaseEntry & Record<string, any>, uuid: () => string = randomUUID): [any, DataForSupabase] {
   // if (_entry.deletedVfs) {
   //   console.log(`deletedVfs in ${_entry.id} in ${_entry.dictionary_id}, ${_entry.deletedVfs[0].youtubeId}`)
   // }
@@ -29,10 +38,11 @@ export function convert_entry(_entry: Partial<ActualDatabaseEntry> & Record<stri
   // return [{}, {}]
 
   try {
-    const entry: Partial<TablesInsert<'entries'>> = {
-      id: _entry.id,
+    const entry: TablesInsert<'entries'> = {
+      id: _entry.id!,
       dictionary_id: _entry.dictionary_id,
-    }
+    } as TablesInsert<'entries'>
+    let prior_import_id = null
 
     if (typeof _entry.updatedAt?.seconds === 'number') {
       entry.updated_at = seconds_to_timestamp_string(_entry.updatedAt.seconds)
@@ -73,19 +83,20 @@ export function convert_entry(_entry: Partial<ActualDatabaseEntry> & Record<stri
     }
 
     if (!entry.created_by)
-      entry.created_by = admin_uid_if_no_owner
+      entry.created_by = jacob_ld_user_id
 
     if (entry.created_by === 'OTD')
-      entry.created_by = old_talking_dictionaries
+      entry.created_by = jacob_ld_user_id
 
-    const content_updates: TablesInsert<'content_updates'>[] = []
-    const dialects: Record<string, Record<string, string>> = {} // map of dictionaries with their dialects
+    const dialects = new Set<string>()
 
     const first_sense_from_base: TablesInsert<'senses'> = {
       entry_id: _entry.id,
       created_by: entry.created_by,
+      created_at: entry.created_at,
       updated_by: entry.updated_by || entry.created_by,
-      id: randomUUID(),
+      updated_at: entry.updated_at || entry.created_at,
+      id: uuid(),
     }
 
     entry.lexeme = { default: _entry.lx || '' }
@@ -143,16 +154,7 @@ export function convert_entry(_entry: Partial<ActualDatabaseEntry> & Record<stri
         // @ts-expect-error - doesn't have importId typed
         if (key === 'ii' || key === 'importId' || key === 'source') {
           // @ts-expect-error
-          const import_id = key === 'source' ? value.replace('import: ', '') : value
-          content_updates.push({
-            id: randomUUID(),
-            dictionary_id: _entry.dictionary_id,
-            user_id: entry.created_by,
-            table: 'entries',
-            change: {},
-            ...(entry.created_at ? { timestamp: entry.created_at } : {}),
-            import_id,
-          })
+          prior_import_id = key === 'source' ? value.replace('import: ', '') : value
           delete _entry[key]
           continue
         }
@@ -190,13 +192,13 @@ export function convert_entry(_entry: Partial<ActualDatabaseEntry> & Record<stri
         }
 
         if (key === 'va') {
-          first_sense_from_base.variant = value
+          first_sense_from_base.variant = { default: value }
           delete _entry[key]
           continue
         }
 
         if (key === 'pl') {
-          first_sense_from_base.plural_form = value
+          first_sense_from_base.plural_form = { default: value }
           delete _entry[key]
           continue
         }
@@ -231,15 +233,10 @@ export function convert_entry(_entry: Partial<ActualDatabaseEntry> & Record<stri
       }
 
       if (key === 'di') {
-        let dialects: string[]
         if (typeof value === 'string')
-          // @ts-expect-error
-          entry.dialects = [value]
-        // dialects = [value]
+          dialects.add(value)
         else if (Array.isArray(value))
-          // @ts-expect-error
-          entry.dialects = value
-          // dialects = value
+          value.forEach(d => dialects.add(d))
         delete _entry[key]
         continue
       }
@@ -351,7 +348,7 @@ export function convert_entry(_entry: Partial<ActualDatabaseEntry> & Record<stri
     }
 
     if (vernacular_sentence) {
-      const sentence_id = randomUUID()
+      const sentence_id = uuid()
 
       const sentence: TablesInsert<'sentences'> = {
         id: sentence_id,
@@ -377,9 +374,9 @@ export function convert_entry(_entry: Partial<ActualDatabaseEntry> & Record<stri
     let new_speaker_name: string = null
 
     if (_entry.sf?.path || _entry.sfs?.[0].path) {
-      const audio_id = randomUUID()
-      const sf = _entry.sf?.path ? _entry.sf : _entry.sfs[0] as unknown as ActualDatabaseEntry['sf']
-      const { ab, path, ts, cr, sp, speakerName, source } = sf
+      const audio_id = uuid()
+      const sf = _entry.sf?.path ? _entry.sf : _entry.sfs![0] as unknown as ActualDatabaseEntry['sf']
+      const { ab, path, ts, cr, sp, speakerName, source } = sf!
       if (typeof speakerName === 'string') {
         if (speakerName.trim())
           new_speaker_name = speakerName.trim()
@@ -400,12 +397,13 @@ export function convert_entry(_entry: Partial<ActualDatabaseEntry> & Record<stri
       if (ts) {
         if (ts.toString().length === 13)
           audio.created_at = new Date(ts).toISOString()
-        // @ts-expect-error
+          // @ts-expect-error
         else if (typeof ts === 'object' && '_seconds' in ts)
           // @ts-expect-error
           audio.created_at = seconds_to_timestamp_string(ts._seconds)
         else
           throw new Error(`odd timestamp for ${_entry.id}: ${ts}`)
+        audio.updated_at = audio.created_at
         delete sf.ts
       }
       if (cr) {
@@ -450,7 +448,7 @@ export function convert_entry(_entry: Partial<ActualDatabaseEntry> & Record<stri
     const sense_photos: TablesInsert<'sense_photos'>[] = []
 
     if (_entry.pf) {
-      const photo_id = randomUUID()
+      const photo_id = uuid()
       const { ab, path, ts, sc, cr, gcs, source, uploadedAt, uploadedBy } = _entry.pf
       if (uploadedAt)
         console.info({ uploadedAt })
@@ -510,8 +508,8 @@ export function convert_entry(_entry: Partial<ActualDatabaseEntry> & Record<stri
       delete _entry.deletedVfs
 
     if (_entry.vfs?.[0] || _entry.deletedVfs?.[0]) {
-      const video_id = randomUUID()
-      const [vf] = _entry.vfs || _entry.deletedVfs
+      const video_id = uuid()
+      const [vf] = (_entry.vfs || _entry.deletedVfs) as ActualDatabaseVideo[]
       const { ts, ab, path, sp, youtubeId, deleted, startAt } = vf
       if (!ab && !entry.created_by)
         console.info(`No ab for ${_entry.id} vfs`)
@@ -557,7 +555,6 @@ export function convert_entry(_entry: Partial<ActualDatabaseEntry> & Record<stri
           console.log(`video speaker ids array in ${_entry.id} in ${_entry.dictionary_id}`)
         video_speakers.push({
           video_id,
-          // @ts-expect-error - TODO: look into this
           speaker_id: sp,
           created_by: ab || entry.created_by,
           ...(video.created_at ? { created_at: video.created_at } : {}),
@@ -574,7 +571,7 @@ export function convert_entry(_entry: Partial<ActualDatabaseEntry> & Record<stri
     delete _entry.dictionary_id
     delete _entry.dictId
 
-    const supa_data = {
+    const supa_data: DataForSupabase = {
       entry,
       senses,
       sentences,
@@ -585,8 +582,9 @@ export function convert_entry(_entry: Partial<ActualDatabaseEntry> & Record<stri
       sense_photos,
       videos,
       sense_videos,
-      content_updates,
+      dialects: Array.from(dialects),
       ...(new_speaker_name ? { new_speaker_name } : {}),
+      prior_import_id,
     }
 
     // Object.keys(supa_data).forEach((key) => {

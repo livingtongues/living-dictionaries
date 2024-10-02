@@ -1,6 +1,6 @@
 import PG from 'pg'
 import { createClient } from '@supabase/supabase-js'
-import type { Database } from '@living-dictionaries/site/src/lib/supabase/database.types'
+import type { Database } from '@living-dictionaries/types'
 import * as dotenv from 'dotenv'
 
 // TODO: change to .env.development and .env.production

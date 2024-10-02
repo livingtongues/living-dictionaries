@@ -4,8 +4,26 @@ import { parser } from 'stream-json'
 import { streamArray } from 'stream-json/streamers/StreamArray'
 import type { ActualDatabaseEntry } from '@living-dictionaries/types'
 import { convert_entry } from './convert-entries'
+import entries_to_test from './entries_to_test.json'
 
-// Snapshotting 1-255 and specific entries moving beyond that point
+let id_count = 0
+function randomUUID() {
+  id_count++
+  return `use-crypto-uuid-in-real-thing_${id_count}`
+}
+
+test(convert_entry, () => {
+  const converted_entries = entries_to_test.map((entry) => {
+    const [processed_fb_entry_remains, supa_data] = convert_entry(JSON.parse(JSON.stringify(entry)), randomUUID)
+    if (Object.keys(processed_fb_entry_remains).length !== 0)
+      throw new Error('Entry not fully converted')
+    return { entry, supa_data }
+  },
+  )
+  expect(converted_entries).toMatchFileSnapshot('convert-entries-to-test.snap.json')
+})
+
+// Snapshotting 1-228 and specific entries moving beyond that point
 // 229 - has write-in semantic domains (sd array)
 // 231 - has no ab for audio and sf.ts is an object with seconds and nanoseconds
 // 235 - rare xe for vernacular example sentence
@@ -48,13 +66,13 @@ import { convert_entry } from './convert-entries'
 const to_snapshot = [229, 231, 235, 252, 253, 254, 255, 1228, 1718, 1759, 4577, 4609, 4945, 5377, 5394, 8005, 14072, 15715, 16141, 23958, 29994, 36138, 39845, 39858, 47304, 47829, 85363, 128736, 166042, 167017, 172023, 200582, 248444, 251721, 253088, 266408]
 
 // pnpm -F scripts test:migration convert-entries -- --ui
-test(convert_entry, { timeout: 16000 }, async () => {
+test.todo(convert_entry, { timeout: 16000 }, async () => {
   // const count = 300
   const count = 278631 // total entries
-  const success: any[] = []
+  const success: { entry: any, supa_data: any }[] = []
   const todo: any[] = []
 
-  const result: Promise<any[]> = new Promise<any[]>((resolve, reject) => {
+  const result = new Promise<{ entry: any, supa_data: any }[]>((resolve, reject) => {
     const pipeline = chain([
       fs.createReadStream('./migrate-to-supabase/entries_full.json'),
       parser(),
@@ -104,9 +122,12 @@ test(convert_entry, { timeout: 16000 }, async () => {
 
   const specific_entries = converted_entries.filter((_, index) => to_snapshot.includes(index + 1))
   expect(specific_entries).toMatchFileSnapshot('convert-entries.specific.snap.json')
+
+  // const entries_to_test = [...first_chunk, ...specific_entries].map(({ entry }) => entry)
+  // fs.writeFileSync('entries_to_test.json', JSON.stringify(entries_to_test, null, 2))
 })
 
-function remove_seconds_underscore(entry: Partial<ActualDatabaseEntry> & Record<string, any>) {
+function remove_seconds_underscore(entry: ActualDatabaseEntry & Record<string, any>) {
   // @ts-expect-error
   if (entry.updatedAt?._seconds) {
     // @ts-expect-error
