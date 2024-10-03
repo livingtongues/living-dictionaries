@@ -1461,9 +1461,10 @@ export interface Database {
       entries_view: {
         Row: {
           dictionary_id: string | null
-          entry: Json | null
+          main: Json | null
           id: string | null
           senses: Json | null
+          audios: Json | null
         }
         Relationships: [
           {

@@ -138,6 +138,8 @@ export interface DatabaseAugments {
           // @ts-expect-error
           main: Tables<'entries'>
           senses: SenseWithSentences[] | null
+          // @ts-expect-error
+          audios: Tables<'audio'>[] | null
         }
       }
     }

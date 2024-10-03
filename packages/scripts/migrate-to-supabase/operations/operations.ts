@@ -83,3 +83,102 @@ export function upsert_dialect({
     timestamp,
   })
 }
+
+export function upsert_audio({
+  dictionary_id,
+  audio,
+  entry_id,
+  import_id,
+}: {
+  dictionary_id: string
+  audio: TablesUpdate<'audio'>
+  entry_id: string
+  import_id?: string
+}) {
+  return post_request<ContentUpdateRequestBody, ContentUpdateResponseBody>(content_update_endpoint, {
+    update_id: randomUUID(),
+    auth_token: null,
+    user_id_from_local: jacob_ld_user_id,
+    dictionary_id,
+    entry_id,
+    type: 'upsert_audio',
+    data: audio,
+    import_id,
+    timestamp,
+  })
+}
+
+export function upsert_sentence({
+  dictionary_id,
+  sense_id,
+  sentence,
+  import_id,
+}: {
+  dictionary_id: string
+  sense_id: string
+  sentence: TablesUpdate<'sentences'>
+  import_id?: string
+}) {
+  return post_request<ContentUpdateRequestBody, ContentUpdateResponseBody>(content_update_endpoint, {
+    update_id: randomUUID(),
+    auth_token: null,
+    user_id_from_local: jacob_ld_user_id,
+    dictionary_id,
+    sentence_id: randomUUID(),
+    sense_id,
+    type: 'insert_sentence',
+    data: sentence,
+    import_id,
+    timestamp,
+  })
+}
+
+export function upsert_photo({
+  dictionary_id,
+  photo,
+  sense_id,
+  import_id,
+}: {
+  dictionary_id: string
+  photo: TablesUpdate<'photos'>
+  sense_id: string
+  import_id?: string
+}) {
+  return post_request<ContentUpdateRequestBody, ContentUpdateResponseBody>(content_update_endpoint, {
+    update_id: randomUUID(),
+    auth_token: null,
+    user_id_from_local: jacob_ld_user_id,
+    dictionary_id,
+    sense_id,
+    photo_id: randomUUID(),
+    type: 'upsert_photo',
+    data: photo,
+    import_id,
+    timestamp,
+  })
+}
+
+export function upsert_video({
+  dictionary_id,
+  video,
+  sense_id,
+  import_id,
+}: {
+  dictionary_id: string
+  video: TablesUpdate<'videos'>
+  sense_id: string
+  import_id?: string
+}) {
+  return post_request<ContentUpdateRequestBody, ContentUpdateResponseBody>(content_update_endpoint, {
+    update_id: randomUUID(),
+    auth_token: null,
+    user_id_from_local: jacob_ld_user_id,
+    dictionary_id,
+    sense_id,
+    video_id: randomUUID(),
+    type: 'upsert_video',
+    data: video,
+    import_id,
+    timestamp,
+  })
+}

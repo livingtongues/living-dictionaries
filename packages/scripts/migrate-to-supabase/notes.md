@@ -1,6 +1,7 @@
 # Migrate Entries and Speakers from Firestore to Supabase
 
 ## TODO
+- resolve in UI where photo is edited and relationship is added again (also for videos)
 - resolve issue whereby sense_id is sent with sentence update
 - drop content_updates' table column
 - type SupaEntry in [entryId].svelte

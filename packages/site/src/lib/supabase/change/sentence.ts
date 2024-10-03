@@ -8,7 +8,7 @@ import { post_request } from '$lib/helpers/get-post-requests'
 import type { ContentUpdateResponseBody } from '$api/db/content-update/+server'
 
 /** Add a sense_id when adding sentence */
-export async function update_sentence({
+export async function upsert_sentence({
   sentence,
   sentence_id,
   sense_id,
@@ -29,7 +29,7 @@ export async function update_sentence({
       dictionary_id,
       sentence_id,
       sense_id,
-      type: sense_id ? 'add_sentence' : 'update_sentence',
+      type: sense_id ? 'insert_sentence' : 'update_sentence',
       data: sentence,
       timestamp: new Date().toISOString(),
     })

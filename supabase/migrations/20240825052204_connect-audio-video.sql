@@ -48,15 +48,32 @@ SELECT
           'definition', senses.definition,
           'plural_form', senses.plural_form,
           'variant', senses.variant,
-          'sentences', sentence_agg.sentences
+          'sentences', aggregated_sentences.sentences,
+          'photos', aggregated_photos.photos,
+          'videos', aggregated_videos.videos
         )
       )
       ORDER BY senses.created_at
     )
     ELSE NULL
-  END AS senses
+  END AS senses,
+  CASE 
+    WHEN COUNT(audio.id) > 0 THEN jsonb_agg(
+      jsonb_strip_nulls(
+        jsonb_build_object(
+          'id', audio.id,
+          'storage_path', audio.storage_path,
+          'source', audio.source
+          -- 'speakers', aggregated_speakers.speakers // we will do this client-side for now
+        )
+      )
+      ORDER BY audio.created_at
+    )
+    ELSE NULL
+  END AS audios
 FROM entries
 LEFT JOIN senses ON senses.entry_id = entries.id AND senses.deleted IS NULL
+LEFT JOIN audio ON audio.entry_id = entries.id AND audio.deleted IS NULL
 LEFT JOIN (
   SELECT
     senses_in_sentences.sense_id,
@@ -73,6 +90,43 @@ LEFT JOIN (
   JOIN sentences ON sentences.id = senses_in_sentences.sentence_id
   WHERE sentences.deleted IS NULL AND senses_in_sentences.deleted IS NULL
   GROUP BY senses_in_sentences.sense_id
-) AS sentence_agg ON sentence_agg.sense_id = senses.id
+) AS aggregated_sentences ON aggregated_sentences.sense_id = senses.id
+LEFT JOIN (
+  SELECT
+    sense_photos.sense_id,
+    jsonb_agg(
+      jsonb_strip_nulls(
+        jsonb_build_object(
+          'id', photos.id,
+          'serving_url', photos.serving_url,
+          'source', photos.source,
+          'photographer', photos.photographer
+        )
+      )
+    ) AS photos
+  FROM sense_photos
+  JOIN photos ON photos.id = sense_photos.photo_id
+  WHERE photos.deleted IS NULL AND sense_photos.deleted IS NULL
+  GROUP BY sense_photos.sense_id
+) AS aggregated_photos ON aggregated_photos.sense_id = senses.id
+LEFT JOIN (
+  SELECT
+    sense_videos.sense_id,
+    jsonb_agg(
+      jsonb_strip_nulls(
+        jsonb_build_object(
+          'id', videos.id,
+          'storage_path', videos.storage_path,
+          'source', videos.source,
+          'videographer', videos.videographer,
+          'hosted_elsewhere', videos.hosted_elsewhere
+        )
+      )
+    ) AS videos
+  FROM sense_videos
+  JOIN videos ON videos.id = sense_videos.video_id
+  WHERE videos.deleted IS NULL AND sense_videos.deleted IS NULL
+  GROUP BY sense_videos.sense_id
+) AS aggregated_videos ON aggregated_videos.sense_id = senses.id
 WHERE entries.deleted IS NULL
 GROUP BY entries.id;

@@ -473,6 +473,7 @@ export function convert_entry(_entry: ActualDatabaseEntry & Record<string, any>,
           photo.created_at = seconds_to_timestamp_string(ts._seconds)
         else
           throw new Error(`odd timestamp for ${_entry.id}: ${ts}`)
+        photo.updated_at = photo.created_at
         delete _entry.pf.ts
       }
       if (cr) {

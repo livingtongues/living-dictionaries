@@ -9,9 +9,12 @@ export type ContentUpdateRequestBody =
   | Upsert_Entry
   | Upsert_Dialect
   | Upsert_Sense
-  | Add_Sentence
+  | Insert_Sentence
   | Update_Sentence
   | Remove_Sentence
+  | Upsert_Audio
+  | Upsert_Photo
+  | Upsert_Video
 
 interface ContentUpdateBase {
   update_id: string // id of the change, a uuidv4 created on client to make things idempotent
@@ -41,8 +44,8 @@ interface Upsert_Sense extends ContentUpdateBase {
   entry_id: string
 }
 
-interface Add_Sentence extends ContentUpdateBase {
-  type: 'add_sentence'
+interface Insert_Sentence extends ContentUpdateBase {
+  type: 'insert_sentence'
   data: TablesUpdate<'sentences'>
   sentence_id: string
   sense_id: string
@@ -62,13 +65,23 @@ interface Remove_Sentence extends ContentUpdateBase {
   data?: null
 }
 
-// interface Add_Audio extends ContentUpdateBase {
-//   type: 'add_audio'
-//   data: TablesUpdate<'audio'>
-// }
+interface Upsert_Audio extends ContentUpdateBase {
+  type: 'upsert_audio'
+  data: TablesUpdate<'audio'>
+  audio_id?: string
+  entry_id: string
+}
 
-// interface Edit_Audio extends ContentUpdateBase {
-//   type: 'edit_audio'
-//   data: TablesUpdate<'audio'>
-//   audio_id: string
-// }
+interface Upsert_Photo extends ContentUpdateBase {
+  type: 'upsert_photo'
+  data: TablesUpdate<'photos'>
+  photo_id?: string
+  sense_id: string
+}
+
+interface Upsert_Video extends ContentUpdateBase {
+  type: 'upsert_video'
+  data: TablesUpdate<'videos'>
+  video_id?: string
+  sense_id: string
+}

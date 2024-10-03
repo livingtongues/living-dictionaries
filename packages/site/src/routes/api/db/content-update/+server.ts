@@ -58,8 +58,8 @@ export const POST: RequestHandler = async ({ request }) => {
     if (type === 'upsert_entry') {
       const { error } = await admin_supabase.from('entries')
         .upsert({
-          ...data,
           ...user_meta,
+          ...data,
           dictionary_id,
           id: body.entry_id,
           ...(data.deleted && { deleted: timestamp }),
@@ -71,8 +71,8 @@ export const POST: RequestHandler = async ({ request }) => {
     if (type === 'upsert_sense') {
       const { error } = await admin_supabase.from('senses')
         .upsert({
-          ...data,
           ...user_meta,
+          ...data,
           id: body.sense_id,
           entry_id: body.entry_id,
           ...(data.deleted && { deleted: timestamp }),
@@ -84,8 +84,8 @@ export const POST: RequestHandler = async ({ request }) => {
     if (type === 'upsert_dialect') {
       const { error } = await admin_supabase.from('dialects')
         .upsert({
-          ...data,
           ...user_meta,
+          ...data,
           dictionary_id,
           id: body.dialect_id,
           ...(data.deleted && { deleted: timestamp }),
@@ -94,11 +94,11 @@ export const POST: RequestHandler = async ({ request }) => {
         throw new Error(error.message)
     }
 
-    if (type === 'add_sentence' || type === 'update_sentence') {
+    if (type === 'insert_sentence' || type === 'update_sentence') {
       const { error } = await admin_supabase.from('sentences')
         .upsert({
-          ...data,
           ...user_meta,
+          ...data,
           dictionary_id,
           id: body.sentence_id,
           ...(data.deleted && { deleted: timestamp }),
@@ -107,7 +107,7 @@ export const POST: RequestHandler = async ({ request }) => {
         throw new Error(error.message)
     }
 
-    if (type === 'add_sentence') {
+    if (type === 'insert_sentence') {
       const { error } = await admin_supabase.from('senses_in_sentences')
         .insert({
           sentence_id: body.sentence_id,
@@ -131,6 +131,61 @@ export const POST: RequestHandler = async ({ request }) => {
         .eq('id', body.sentence_id)
       if (update_error)
         throw new Error(update_error.message)
+    }
+
+    if (type === 'upsert_audio') {
+      const { error } = await admin_supabase.from('audio')
+        .upsert({
+          ...user_meta,
+          ...data,
+          id: body.audio_id,
+          entry_id: body.entry_id,
+          ...(data.deleted && { deleted: timestamp }),
+        } as TablesInsert<'audio'>)
+      if (error)
+        throw new Error(error.message)
+    }
+
+    if (type === 'upsert_photo') {
+      const { error } = await admin_supabase.from('photos')
+        .upsert({
+          ...user_meta,
+          ...data,
+          id: body.photo_id,
+          ...(data.deleted && { deleted: timestamp }),
+        } as TablesInsert<'photos'>)
+      if (error)
+        throw new Error(error.message)
+
+      const { error: connect_error } = await admin_supabase.from('sense_photos')
+        .insert({
+          photo_id: body.photo_id,
+          sense_id: body.sense_id,
+          created_by: user_id,
+        })
+      if (connect_error)
+        throw new Error(connect_error.message)
+    }
+
+    if (type === 'upsert_video') {
+      const { error } = await admin_supabase.from('videos')
+        .upsert({
+          ...user_meta,
+          ...data,
+          id: body.video_id,
+          ...(data.deleted && { deleted: timestamp }),
+        } as TablesInsert<'videos'>)
+      if (error)
+        throw new Error(error.message)
+
+      const { error: connect_error } = await admin_supabase.from('sense_videos')
+        .insert({
+          video_id: body.video_id,
+          sense_id: body.sense_id,
+          created_by: user_id,
+        })
+      if (connect_error)
+        throw new Error(connect_error.message)
     }
 
     const { data: content_update, error } = await admin_supabase.from('content_updates').insert({

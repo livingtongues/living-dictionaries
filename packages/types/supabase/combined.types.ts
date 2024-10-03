@@ -1847,6 +1847,7 @@ export interface Database {
           main: Tables<'entries'>
           id: string | null
           senses: SenseWithSentences[] | null
+          audios: Tables<'audio'>[] | null
         }
         Relationships: [
           {

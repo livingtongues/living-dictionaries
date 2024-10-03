@@ -227,7 +227,7 @@ describe('sense sentence operations', () => {
         dictionary_id: seeded_dictionary_id,
         sentence_id: first_sentence_id,
         sense_id: first_entry_first_sense_id,
-        type: 'add_sentence',
+        type: 'insert_sentence',
         data: {
           text: {
             lo1: 'abcd efgh ijkl',
