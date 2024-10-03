@@ -1,7 +1,7 @@
 import type { TablesUpdate } from '@living-dictionaries/types'
 import { anon_supabase } from '../../config-supabase'
 import { reset_db } from '../reset-db'
-import { upsert_audio, upsert_dialect, upsert_entry, upsert_photo, upsert_sense, upsert_sentence, upsert_video } from './operations'
+import { assign_dialect, upsert_audio, upsert_dialect, upsert_entry, upsert_photo, upsert_sense, upsert_sentence, upsert_video } from './operations'
 import { dictionary_id, timestamp } from './constants'
 
 vi.mock('node:crypto', () => {
@@ -35,6 +35,7 @@ describe('entries and senses', () => {
       expect(entry_view).toMatchInlineSnapshot(`
         {
           "audios": null,
+          "dialect_ids": null,
           "dictionary_id": "import_dictionary",
           "id": "11111111-1111-1111-1111-111111111101",
           "main": {
@@ -73,7 +74,7 @@ describe('entries and senses', () => {
 describe(upsert_dialect, () => {
   beforeAll(reset_db)
 
-  test('adds to dialects table, edits dialect', async () => {
+  test('adds to dialects table, edits dialect, and connects to entry', async () => {
     const name = 'Eastern'
     const { data } = await upsert_dialect({ dictionary_id, name, import_id: '1' })
     expect(data?.import_id).toEqual('1')
@@ -85,6 +86,11 @@ describe(upsert_dialect, () => {
     await upsert_dialect({ dictionary_id, name: edited_name, dialect_id: data.dialect_id })
     const { data: edited_dialect } = await anon_supabase.from('dialects').select('name').eq('id', data.dialect_id).single()
     expect(edited_dialect.name.default).toEqual(edited_name)
+
+    const { entry_id } = await seed_entry_and_sense()
+    await assign_dialect({ dictionary_id, dialect_id: data.dialect_id, entry_id })
+    const { data: entry_view } = await anon_supabase.from('entries_view').select().eq('id', entry_id).single()
+    expect(entry_view.dialect_ids).toEqual([data.dialect_id])
   })
 })
 
@@ -123,7 +129,7 @@ describe(upsert_sentence, () => {
     expect(entry_view.senses[0].sentences).toMatchInlineSnapshot(`
       [
         {
-          "id": "11111111-1111-1111-1111-111111111118",
+          "id": "11111111-1111-1111-1111-111111111123",
           "text": {
             "default": "hello, this is my sentence",
           },
@@ -144,7 +150,7 @@ describe(upsert_photo, () => {
     expect(entry_view.senses[0].photos).toMatchInlineSnapshot(`
       [
         {
-          "id": "11111111-1111-1111-1111-111111111124",
+          "id": "11111111-1111-1111-1111-111111111129",
           "serving_url": "foo",
           "source": "Bob",
         },
@@ -158,15 +164,13 @@ describe(upsert_video, () => {
 
   test('adds video and links to sense', async () => {
     const { entry_id, sense_id } = await seed_entry_and_sense()
-    const { error } = await upsert_video({ dictionary_id, video: { source: 'Bob', storage_path: 'baz.wbm' }, sense_id })
-    console.log({ error })
-    expect(error).toBeNull()
+    await upsert_video({ dictionary_id, video: { source: 'Bob', storage_path: 'baz.wbm' }, sense_id })
 
     const { data: entry_view } = await anon_supabase.from('entries_view').select().eq('id', entry_id).single()
     expect(entry_view.senses[0].videos).toMatchInlineSnapshot(`
       [
         {
-          "id": "11111111-1111-1111-1111-111111111130",
+          "id": "11111111-1111-1111-1111-111111111135",
           "source": "Bob",
           "storage_path": "baz.wbm",
         },

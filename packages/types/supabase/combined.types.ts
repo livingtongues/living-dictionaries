@@ -1843,11 +1843,12 @@ export interface Database {
     Views: {
       entries_view: {
         Row: {
-          dictionary_id: string | null
-          main: Tables<'entries'>
-          id: string | null
-          senses: SenseWithSentences[] | null
           audios: Tables<'audio'>[] | null
+          dialect_ids: string[] | null
+          dictionary_id: string | null
+          id: string | null
+          main: Tables<'entries'>
+          senses: SenseWithSentences[] | null
         }
         Relationships: [
           {

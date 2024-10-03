@@ -1,6 +1,8 @@
 # Migrate Entries and Speakers from Firestore to Supabase
 
 ## TODO
+- load down dialects and speakers separately in UI then stitch them together
+- when a many-many relationship is cut off by setting "deleted" to a value, then if that relationship is ever wanted again, it will be a failed insert because the unique constraint is still there. In case of a failed insert, I need a function to just set the deleted property to null
 - resolve in UI where photo is edited and relationship is added again (also for videos)
 - resolve issue whereby sense_id is sent with sentence update
 - drop content_updates' table column

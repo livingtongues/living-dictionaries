@@ -1460,11 +1460,12 @@ export interface Database {
     Views: {
       entries_view: {
         Row: {
-          dictionary_id: string | null
-          main: Json | null
-          id: string | null
-          senses: Json | null
           audios: Json | null
+          dialect_ids: Json | null
+          dictionary_id: string | null
+          id: string | null
+          main: Json | null
+          senses: Json | null
         }
         Relationships: [
           {

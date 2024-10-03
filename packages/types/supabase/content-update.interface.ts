@@ -8,6 +8,8 @@ export interface Change {
 export type ContentUpdateRequestBody =
   | Upsert_Entry
   | Upsert_Dialect
+  | Assign_Dialect
+  | Unassign_Dialect
   | Upsert_Sense
   | Insert_Sentence
   | Update_Sentence
@@ -35,6 +37,20 @@ interface Upsert_Dialect extends ContentUpdateBase {
   type: 'upsert_dialect'
   data: TablesUpdate<'dialects'>
   dialect_id: string
+}
+
+interface Assign_Dialect extends ContentUpdateBase {
+  type: 'assign_dialect'
+  data?: null
+  dialect_id: string
+  entry_id: string
+}
+
+interface Unassign_Dialect extends ContentUpdateBase {
+  type: 'unassign_dialect'
+  data?: null
+  dialect_id: string
+  entry_id: string
 }
 
 interface Upsert_Sense extends ContentUpdateBase {

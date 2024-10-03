@@ -70,10 +70,15 @@ SELECT
       ORDER BY audio.created_at
     )
     ELSE NULL
-  END AS audios
+  END AS audios,
+  CASE
+    WHEN COUNT(entry_dialects.dialect_id) > 0 THEN jsonb_agg(entry_dialects.dialect_id)
+    ELSE NULL
+  END AS dialect_ids
 FROM entries
 LEFT JOIN senses ON senses.entry_id = entries.id AND senses.deleted IS NULL
 LEFT JOIN audio ON audio.entry_id = entries.id AND audio.deleted IS NULL
+LEFT JOIN entry_dialects ON entry_dialects.entry_id = entries.id AND entry_dialects.deleted IS NULL
 LEFT JOIN (
   SELECT
     senses_in_sentences.sense_id,

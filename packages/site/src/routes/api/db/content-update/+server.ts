@@ -94,6 +94,17 @@ export const POST: RequestHandler = async ({ request }) => {
         throw new Error(error.message)
     }
 
+    if (type === 'assign_dialect') {
+      const { error } = await admin_supabase.from('entry_dialects')
+        .insert({
+          dialect_id: body.dialect_id,
+          entry_id: body.entry_id,
+          created_by: user_id,
+        })
+      if (error)
+        throw new Error(error.message)
+    }
+
     if (type === 'insert_sentence' || type === 'update_sentence') {
       const { error } = await admin_supabase.from('sentences')
         .upsert({

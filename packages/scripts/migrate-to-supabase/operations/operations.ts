@@ -84,6 +84,31 @@ export function upsert_dialect({
   })
 }
 
+export function assign_dialect({
+  dictionary_id,
+  dialect_id,
+  entry_id,
+  import_id,
+}: {
+  dictionary_id: string
+  dialect_id: string
+  entry_id: string
+  import_id?: string
+}) {
+  return post_request<ContentUpdateRequestBody, ContentUpdateResponseBody>(content_update_endpoint, {
+    update_id: randomUUID(),
+    auth_token: null,
+    user_id_from_local: jacob_ld_user_id, // TODO: this needs to be set to the user who made the change in import
+    dictionary_id,
+    dialect_id,
+    entry_id,
+    type: 'assign_dialect',
+    data: null,
+    import_id,
+    timestamp,
+  })
+}
+
 export function upsert_audio({
   dictionary_id,
   audio,

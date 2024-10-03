@@ -140,6 +140,7 @@ export interface DatabaseAugments {
           senses: SenseWithSentences[] | null
           // @ts-expect-error
           audios: Tables<'audio'>[] | null
+          dialect_ids: string[] | null
         }
       }
     }

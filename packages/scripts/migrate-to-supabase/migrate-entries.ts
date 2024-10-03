@@ -1,6 +1,6 @@
 import { convert_entry } from './convert-entries'
 import entries_to_test from './entries_to_test.json'
-import { upsert_audio, upsert_dialect, upsert_entry, upsert_photo, upsert_sense, upsert_sentence, upsert_video } from './operations/operations'
+import { assign_dialect, upsert_audio, upsert_dialect, upsert_entry, upsert_photo, upsert_sense, upsert_sentence, upsert_video } from './operations/operations'
 
 const import_id = 'fb_sb_migration'
 
@@ -37,11 +37,13 @@ async function migrate_entries() {
 
     for (const dialect of dialects) {
       // TODO: if dialect is not in dialects table, add it:
-      const { error } = await upsert_dialect({ dictionary_id, name: dialect, import_id })
+      const { data, error } = await upsert_dialect({ dictionary_id, name: dialect, import_id })
       if (error)
         throw new Error(error.message)
 
-      // TODO: connect dialect to entry
+      const { error: assign_error } = await assign_dialect({ dictionary_id, dialect_id: data.dialect_id, entry_id, import_id })
+      if (assign_error)
+        throw new Error(assign_error.message)
     }
 
     for (const sense of senses) {
