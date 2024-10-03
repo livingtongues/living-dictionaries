@@ -105,6 +105,40 @@ export const POST: RequestHandler = async ({ request }) => {
         throw new Error(error.message)
     }
 
+    if (type === 'upsert_speaker') {
+      const { error } = await admin_supabase.from('speakers')
+        .upsert({
+          ...user_meta,
+          ...data,
+          id: body.speaker_id,
+          ...(data.deleted && { deleted: timestamp }),
+        } as TablesInsert<'speakers'>)
+      if (error)
+        throw new Error(error.message)
+    }
+
+    if (type === 'assign_speaker' && body.audio_id) {
+      const { error } = await admin_supabase.from('audio_speakers')
+        .insert({
+          speaker_id: body.speaker_id,
+          audio_id: body.audio_id,
+          created_by: user_id,
+        })
+      if (error)
+        throw new Error(error.message)
+    }
+
+    if (type === 'assign_speaker' && body.video_id) {
+      const { error } = await admin_supabase.from('video_speakers')
+        .insert({
+          speaker_id: body.speaker_id,
+          video_id: body.video_id,
+          created_by: user_id,
+        })
+      if (error)
+        throw new Error(error.message)
+    }
+
     if (type === 'insert_sentence' || type === 'update_sentence') {
       const { error } = await admin_supabase.from('sentences')
         .upsert({

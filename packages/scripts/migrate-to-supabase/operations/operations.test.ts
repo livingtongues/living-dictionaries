@@ -1,7 +1,7 @@
 import type { TablesUpdate } from '@living-dictionaries/types'
 import { anon_supabase } from '../../config-supabase'
 import { reset_db } from '../reset-db'
-import { assign_dialect, upsert_audio, upsert_dialect, upsert_entry, upsert_photo, upsert_sense, upsert_sentence, upsert_video } from './operations'
+import { assign_dialect, assign_speaker, upsert_audio, upsert_dialect, upsert_entry, upsert_photo, upsert_sense, upsert_sentence, upsert_speaker, upsert_video } from './operations'
 import { dictionary_id, timestamp } from './constants'
 
 vi.mock('node:crypto', () => {
@@ -129,7 +129,7 @@ describe(upsert_sentence, () => {
     expect(entry_view.senses[0].sentences).toMatchInlineSnapshot(`
       [
         {
-          "id": "11111111-1111-1111-1111-111111111123",
+          "id": "11111111-1111-1111-1111-111111111124",
           "text": {
             "default": "hello, this is my sentence",
           },
@@ -150,7 +150,7 @@ describe(upsert_photo, () => {
     expect(entry_view.senses[0].photos).toMatchInlineSnapshot(`
       [
         {
-          "id": "11111111-1111-1111-1111-111111111129",
+          "id": "11111111-1111-1111-1111-111111111130",
           "serving_url": "foo",
           "source": "Bob",
         },
@@ -170,11 +170,30 @@ describe(upsert_video, () => {
     expect(entry_view.senses[0].videos).toMatchInlineSnapshot(`
       [
         {
-          "id": "11111111-1111-1111-1111-111111111135",
+          "id": "11111111-1111-1111-1111-111111111136",
           "source": "Bob",
           "storage_path": "baz.wbm",
         },
       ]
     `)
+  })
+})
+
+describe(upsert_speaker, () => {
+  beforeAll(reset_db)
+
+  test('adds speaker to audio and to video', async () => {
+    const { entry_id, sense_id } = await seed_entry_and_sense()
+    const { data: speaker_change } = await upsert_speaker({ dictionary_id, speaker: { name: 'Bob' } })
+
+    const { data: audio_change } = await upsert_audio({ dictionary_id, entry_id, audio: { storage_path: 'foo.mp3' } })
+    await assign_speaker({ dictionary_id, speaker_id: speaker_change.speaker_id, media_id: audio_change.audio_id, media: 'audio' })
+
+    const { data: video_change } = await upsert_video({ dictionary_id, video: { source: 'Bob Family', storage_path: 'baz.wbm' }, sense_id })
+    await assign_speaker({ dictionary_id, speaker_id: speaker_change.speaker_id, media_id: video_change.video_id, media: 'video' })
+
+    const { data: entry_view } = await anon_supabase.from('entries_view').select().eq('id', entry_id).single()
+    expect(entry_view.audios[0].speaker_ids).toEqual([speaker_change.speaker_id])
+    expect(entry_view.senses[0].videos[0].speaker_ids).toEqual([speaker_change.speaker_id])
   })
 })

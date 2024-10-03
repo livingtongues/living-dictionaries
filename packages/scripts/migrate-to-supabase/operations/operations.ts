@@ -109,6 +109,54 @@ export function assign_dialect({
   })
 }
 
+export function upsert_speaker({
+  dictionary_id,
+  speaker,
+  import_id,
+}: {
+  dictionary_id: string
+  speaker: TablesUpdate<'speakers'>
+  import_id?: string
+}) {
+  return post_request<ContentUpdateRequestBody, ContentUpdateResponseBody>(content_update_endpoint, {
+    update_id: randomUUID(),
+    auth_token: null,
+    user_id_from_local: jacob_ld_user_id,
+    dictionary_id,
+    speaker_id: randomUUID(),
+    type: 'upsert_speaker',
+    data: speaker,
+    import_id,
+    timestamp,
+  })
+}
+
+export function assign_speaker({
+  dictionary_id,
+  speaker_id,
+  media_id,
+  media,
+  import_id,
+}: {
+  dictionary_id: string
+  speaker_id: string
+  media_id: string
+  media: 'audio' | 'video'
+  import_id?: string
+}) {
+  return post_request<ContentUpdateRequestBody, ContentUpdateResponseBody>(content_update_endpoint, {
+    update_id: randomUUID(),
+    auth_token: null,
+    user_id_from_local: jacob_ld_user_id,
+    dictionary_id,
+    speaker_id,
+    ...(media === 'audio' ? { audio_id: media_id } : { video_id: media_id }),
+    type: 'assign_speaker',
+    import_id,
+    timestamp,
+  })
+}
+
 export function upsert_audio({
   dictionary_id,
   audio,
@@ -126,6 +174,7 @@ export function upsert_audio({
     user_id_from_local: jacob_ld_user_id,
     dictionary_id,
     entry_id,
+    audio_id: randomUUID(),
     type: 'upsert_audio',
     data: audio,
     import_id,

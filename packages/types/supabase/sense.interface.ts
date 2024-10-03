@@ -5,6 +5,8 @@ export type SenseWithSentences = (
   & {
     sentences: Pick<Tables<'sentences'>, 'id' | 'text' | 'translation'>[]
     photos: Pick<Tables<'photos'>, 'id' | 'source' | 'photographer' | 'serving_url'>[]
-    videos: Pick<Tables<'videos'>, 'id' | 'source' | 'videographer' | 'storage_path' | 'hosted_elsewhere'>[]
+    videos: (Pick<Tables<'videos'>, 'id' | 'source' | 'videographer' | 'storage_path' | 'hosted_elsewhere'> & { speaker_ids: string[] })[]
   }
 )
+
+export type AudioWithSpeakerIds = Tables<'audio'> & { speaker_ids: string[] }

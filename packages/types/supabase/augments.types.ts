@@ -3,6 +3,7 @@ import type { Coordinates } from '../coordinates.interface'
 import type { DictionaryPhoto } from '../photo.interface'
 import type { HostedVideo, SenseWithSentences, UnsupportedFields } from '../.'
 import type { Change } from './content-update.interface'
+import type { AudioWithSpeakerIds } from './sense.interface'
 
 export interface DatabaseAugments {
   public: {
@@ -138,8 +139,7 @@ export interface DatabaseAugments {
           // @ts-expect-error
           main: Tables<'entries'>
           senses: SenseWithSentences[] | null
-          // @ts-expect-error
-          audios: Tables<'audio'>[] | null
+          audios: AudioWithSpeakerIds[] | null
           dialect_ids: string[] | null
         }
       }

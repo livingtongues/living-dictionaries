@@ -63,8 +63,8 @@ SELECT
         jsonb_build_object(
           'id', audio.id,
           'storage_path', audio.storage_path,
-          'source', audio.source
-          -- 'speakers', aggregated_speakers.speakers // we will do this client-side for now
+          'source', audio.source,
+          'speaker_ids', audio_speakers.speaker_ids
         )
       )
       ORDER BY audio.created_at
@@ -78,6 +78,14 @@ SELECT
 FROM entries
 LEFT JOIN senses ON senses.entry_id = entries.id AND senses.deleted IS NULL
 LEFT JOIN audio ON audio.entry_id = entries.id AND audio.deleted IS NULL
+LEFT JOIN (
+  SELECT
+    audio_id,
+    jsonb_agg(speaker_id) AS speaker_ids
+  FROM audio_speakers
+  WHERE deleted IS NULL
+  GROUP BY audio_id
+) AS audio_speakers ON audio_speakers.audio_id = audio.id
 LEFT JOIN entry_dialects ON entry_dialects.entry_id = entries.id AND entry_dialects.deleted IS NULL
 LEFT JOIN (
   SELECT
@@ -124,12 +132,21 @@ LEFT JOIN (
           'storage_path', videos.storage_path,
           'source', videos.source,
           'videographer', videos.videographer,
-          'hosted_elsewhere', videos.hosted_elsewhere
+          'hosted_elsewhere', videos.hosted_elsewhere,
+          'speaker_ids', video_speakers.speaker_ids
         )
       )
     ) AS videos
   FROM sense_videos
   JOIN videos ON videos.id = sense_videos.video_id
+  LEFT JOIN (
+    SELECT
+      video_id,
+      jsonb_agg(speaker_id) AS speaker_ids
+    FROM video_speakers
+    WHERE deleted IS NULL
+    GROUP BY video_id
+  ) AS video_speakers ON video_speakers.video_id = videos.id
   WHERE videos.deleted IS NULL AND sense_videos.deleted IS NULL
   GROUP BY sense_videos.sense_id
 ) AS aggregated_videos ON aggregated_videos.sense_id = senses.id

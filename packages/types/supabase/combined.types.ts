@@ -3,6 +3,7 @@ import type { Coordinates } from '../coordinates.interface'
 import type { DictionaryPhoto } from '../photo.interface'
 import type { HostedVideo, SenseWithSentences, UnsupportedFields } from '../.'
 import type { Change } from './content-update.interface'
+import type { AudioWithSpeakerIds } from './sense.interface'
 
 export interface Database {
   public: {
@@ -1843,7 +1844,7 @@ export interface Database {
     Views: {
       entries_view: {
         Row: {
-          audios: Tables<'audio'>[] | null
+          audios: AudioWithSpeakerIds[] | null
           dialect_ids: string[] | null
           dictionary_id: string | null
           id: string | null

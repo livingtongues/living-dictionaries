@@ -7,16 +7,22 @@ export interface Change {
 
 export type ContentUpdateRequestBody =
   | Upsert_Entry
-  | Upsert_Dialect
-  | Assign_Dialect
-  | Unassign_Dialect
   | Upsert_Sense
-  | Insert_Sentence
-  | Update_Sentence
-  | Remove_Sentence
   | Upsert_Audio
   | Upsert_Photo
   | Upsert_Video
+
+  | Upsert_Speaker
+  | Assign_Speaker
+  | Unassign_Speaker
+
+  | Upsert_Dialect
+  | Assign_Dialect
+  | Unassign_Dialect
+
+  | Insert_Sentence
+  | Update_Sentence
+  | Remove_Sentence
 
 interface ContentUpdateBase {
   update_id: string // id of the change, a uuidv4 created on client to make things idempotent
@@ -51,6 +57,37 @@ interface Unassign_Dialect extends ContentUpdateBase {
   data?: null
   dialect_id: string
   entry_id: string
+}
+
+interface Upsert_Speaker extends ContentUpdateBase {
+  type: 'upsert_speaker'
+  data: TablesUpdate<'speakers'>
+  speaker_id: string
+}
+
+interface Assign_Speaker_Base extends ContentUpdateBase {
+  type: 'assign_speaker'
+  data?: null
+  speaker_id: string
+}
+
+interface Assign_Speaker_With_Audio extends Assign_Speaker_Base {
+  audio_id: string
+  video_id?: never
+}
+
+interface Assign_Speaker_With_Video extends Assign_Speaker_Base {
+  video_id: string
+  audio_id?: never
+}
+
+type Assign_Speaker = Assign_Speaker_With_Audio | Assign_Speaker_With_Video
+
+interface Unassign_Speaker extends ContentUpdateBase {
+  type: 'unassign_speaker'
+  data: { media: 'audio' | 'video' }
+  speaker_id: string
+  media_id: string
 }
 
 interface Upsert_Sense extends ContentUpdateBase {

@@ -1,16 +1,18 @@
+import type { Tables } from '@living-dictionaries/types'
 import { convert_entry } from './convert-entries'
 import entries_to_test from './entries_to_test.json'
-import { assign_dialect, upsert_audio, upsert_dialect, upsert_entry, upsert_photo, upsert_sense, upsert_sentence, upsert_video } from './operations/operations'
+import { assign_dialect, assign_speaker, upsert_audio, upsert_dialect, upsert_entry, upsert_photo, upsert_sense, upsert_sentence, upsert_speaker, upsert_video } from './operations/operations'
 
 const import_id = 'fb_sb_migration'
 
-async function migrate_entries() {
-  // track dictionary-to-dialects already added and store their id
-  // track dictionary-to-speakers already added and store their id in a map [dictionary_id--speaker_name]: id
+// TODO: import speakers from Firebase first
+async function migrate_entries(speakers: Tables<'speakers'>[]) {
+  // TODO: track dictionary-to-dialects already added and store their id
+  // TODO: track dictionary-to-speakers already added from new_speaker_name and store their id in a map [dictionary_id--speaker_name]: id
 
   for (const fb_entry of entries_to_test) {
     const [_, supa_data] = convert_entry(fb_entry as any)
-    const { entry, audio_speakers, audios, dialects, photos, sense_photos, sense_videos, senses, senses_in_sentences, sentences, videos, new_speaker_name, prior_import_id } = supa_data
+    const { entry, audio_speakers, audios, dialects, photos, sense_photos, sense_videos, senses, senses_in_sentences, sentences, videos, video_speakers, new_speaker_name, prior_import_id } = supa_data
     console.log(supa_data.entry)
 
     const { id: entry_id, dictionary_id } = entry
@@ -28,11 +30,18 @@ async function migrate_entries() {
       const { error } = await upsert_audio({ dictionary_id, entry_id, audio, import_id })
       if (error)
         throw new Error(error.message)
+
+      if (new_speaker_name) {
+        const { error: speaker_error } = await upsert_speaker({ dictionary_id, speaker: { name: new_speaker_name }, import_id })
+        if (speaker_error)
+          throw new Error(speaker_error.message)
+      }
     }
 
-    // TODO: import speakers from Firebase first
     for (const audio_speaker of audio_speakers) {
-      // TODO: connect
+      const { error } = await assign_speaker({ dictionary_id, speaker_id: audio_speaker.speaker_id, media_id: audio_speaker.audio_id, media: 'audio', import_id })
+      if (error)
+        throw new Error(error.message)
     }
 
     for (const dialect of dialects) {
@@ -78,7 +87,11 @@ async function migrate_entries() {
       if (error)
         throw new Error(error.message)
     }
+
+    for (const video_speaker of video_speakers) {
+      const { error } = await assign_speaker({ dictionary_id, speaker_id: video_speaker.speaker_id, media_id: video_speaker.video_id, media: 'video', import_id })
+      if (error)
+        throw new Error(error.message)
+    }
   }
 }
-
-migrate_entries()

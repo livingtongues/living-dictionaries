@@ -14,6 +14,7 @@ interface DataForSupabase {
   photos: TablesInsert<'photos'>[]
   sense_photos: TablesInsert<'sense_photos'>[]
   videos: TablesInsert<'videos'>[]
+  video_speakers: TablesInsert<'video_speakers'>[]
   sense_videos: TablesInsert<'sense_videos'>[]
   dialects: string[]
   new_speaker_name?: string
@@ -582,6 +583,7 @@ export function convert_entry(_entry: ActualDatabaseEntry & Record<string, any>,
       photos,
       sense_photos,
       videos,
+      video_speakers,
       sense_videos,
       dialects: Array.from(dialects),
       ...(new_speaker_name ? { new_speaker_name } : {}),
