@@ -52,22 +52,18 @@ describe(migrate_entries, () => {
     expect(entry_view[0].audios[0].speaker_ids[0]).toMatchInlineSnapshot(`"11111111-1111-1111-1111-111111102943"`)
     expect(entry_view[0].audios[0].speaker_ids[0]).toEqual(entry_view[1].audios[0].speaker_ids[0])
 
-    const { data: speakers } = await anon_supabase.from('speakers').select()
+    const { data: speakers } = await anon_supabase.from('speakers_view').select()
     expect(speakers).toMatchInlineSnapshot(`
       [
         {
           "birthplace": null,
           "created_at": "2024-03-08T00:44:04.6+00:00",
-          "created_by": "de2d3715-6337-45a3-a81a-d82c3210b2a7",
           "decade": null,
-          "deleted": null,
           "dictionary_id": "create-me",
           "gender": null,
           "id": "11111111-1111-1111-1111-111111102943",
           "name": "Write-in Speaker Name not in db",
           "updated_at": "2024-03-08T00:44:04.6+00:00",
-          "updated_by": "de2d3715-6337-45a3-a81a-d82c3210b2a7",
-          "user_id": null,
         },
       ]
     `)

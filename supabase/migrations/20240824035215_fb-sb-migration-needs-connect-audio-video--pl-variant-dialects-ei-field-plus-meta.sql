@@ -26,10 +26,6 @@ CREATE POLICY "Anyone can view dialects"
 ON dialects 
 FOR SELECT USING (true);
 
-CREATE POLICY "Anyone can view speakers"
-ON speakers 
-FOR SELECT USING (true);
-
 CREATE TABLE entry_dialects (
   entry_id text NOT NULL REFERENCES entries ON DELETE CASCADE,
   dialect_id uuid NOT NULL REFERENCES dialects ON DELETE CASCADE,
@@ -73,6 +69,19 @@ FOREIGN KEY (entry_id) REFERENCES entries(id);
 
 ALTER TABLE speakers
 ADD COLUMN dictionary_id text NOT NULL REFERENCES dictionaries;
+
+CREATE OR REPLACE VIEW speakers_view AS
+SELECT
+  speakers.id AS id,
+  speakers.dictionary_id AS dictionary_id,
+  speakers.name AS "name",
+  speakers.decade AS decade,
+  speakers.gender AS gender,
+  speakers.birthplace AS birthplace,
+  speakers.created_at AS created_at,
+  speakers.updated_at AS updated_at
+FROM speakers
+WHERE speakers.deleted IS NULL;
 
 DROP VIEW IF EXISTS entries_view;
 
