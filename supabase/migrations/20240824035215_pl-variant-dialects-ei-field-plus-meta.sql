@@ -26,6 +26,10 @@ CREATE POLICY "Anyone can view dialects"
 ON dialects 
 FOR SELECT USING (true);
 
+CREATE POLICY "Anyone can view speakers"
+ON speakers 
+FOR SELECT USING (true);
+
 CREATE TABLE entry_dialects (
   entry_id text NOT NULL REFERENCES entries ON DELETE CASCADE,
   dialect_id uuid NOT NULL REFERENCES dialects ON DELETE CASCADE,

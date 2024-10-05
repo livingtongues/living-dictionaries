@@ -1,36 +1,31 @@
 # Migrate Entries and Speakers from Firestore to Supabase
+- pnpm -F scripts test:migration
+
+## Remember
+- may get an error on Emiliano Cruz Santiago (speaker id M0ZhQv50lxvJxHZYCbxn) not being a speaker on import-tutelo-test but that dictionary shouldn't exist, removed my test speaker of 2PELJgjxMHXEOcuZfv9MtGyiXdE3 from array
 
 ## TODO
-- load down dialects and speakers separately in UI then stitch them together
-- when a many-many relationship is cut off by setting "deleted" to a value, then if that relationship is ever wanted again, it will be a failed insert because the unique constraint is still there. In case of a failed insert, I need a function to just set the deleted property to null
-- resolve in UI where photo is edited and relationship is added again (also for videos)
-- resolve issue whereby sense_id is sent with sentence update
-- drop content_updates' table column
-- type SupaEntry in [entryId].svelte
-- add entries, then enforce senses to entry relationships
-- consider if I should make a function that updates the updated_at timestamp on an entry when anything connected is updated, because I need that on the view for sorting - I could calculate it in the view or do it ahead of time - maybe it doesn't matter with materialized views but if they get too slow then I should actually change the data
-- pnpm -F scripts test:migration
+- use actual user ids for created_by and updated_by
 - Run through entries from oldest created to newest created so that first person to add a dialect gets the created_by credit
-- update migration script to emit array of needed dialects and test addition
-- pull down speakers from Firebase, get names
-- run test migration into local database using db-tests, and make sure the speaker and dialects are being saved correctly
-- get dialects from Supabase to EntryDialect.svelte
+- consider if I should make a function that updates the updated_at timestamp on an entry when anything connected is updated, because I need that on the view for sorting - I could calculate it in the view or do it ahead of time - maybe it doesn't matter with materialized views but if they get too slow then I should actually change the data
+- create materialized view and learn how to refresh it hourly, `refresh materialized view transcripts;`
+- when a many-many relationship is cut off by setting "deleted" to a value, then if that relationship is ever wanted again, it will be a failed insert because the unique constraint is still there. In case of a failed insert, I need a function to just set the deleted property to null
+- resolve in UI where photo is edited and relationship is added again (also for videos); resolve issue whereby sense_id is sent with sentence update and will result in a conflict on re-adding the relationship
 - Make sure all items from "clean-up" below are being actively logged again as they are run into
-- update migration script to migrate speakers across as they are needed, when one is found, save into speakers table, then create a map of firestore speaker id to supabase speaker id, in future times when this Firestore speaker id comes up, check the map first to see if speaker already exists
-- when saving speakers and all fields, figure out proper user ID via conversion from Firestore to Supabase
-- run through migration, and add tests to ensure it looks good locally
+- do a local run of the migration script
+
+## UI Tasks
+- type SupaEntry in [entryId].svelte
+- get dialects from Supabase to EntryDialect.svelte
+- make all types of edits
+- Supabase sense updates+all others show immediately in preview modal from list view
+- load down dialects and speakers separately in UI then stitch them together
 - Orama search refinement and completion
   - Use `pnpm mixed` to run Firebase prod and Supabase local
   - replaceState in createQueryParamStore? look into improving the history to change for view and page changes but not for the others
-  - create materialized view daily for entries and then pull last day's entries from that view
-- visual inspection of the results locally - should work similar to current prod
-- update saving functions << is a little big
-- make all types of edits
-- Supabase sense updates+all others show immediately in preview modal from list view
+  - use materialized view daily for entries and then pull last day's entries from that view
 - look at print, table, gallery, and list page files history to make sure there are no missed improvements - check github history too
-- Run migration process below
-- Handle clean-up below
-- Remove algolia keys from vercel
+- visual inspection of the results locally - should work similar to current prod
 
 ## Migration Process
 - post notice on logged-in users a week ahead of time
@@ -38,13 +33,20 @@
 - Lock down Firestore dictionary words and speakers using security rules (tell admins not to edit anything)
 - Make Supabase backup (manually trigger)
 - Migrate data
+  - add placeholder entries for all current senses in live db
+  - run sql migrations to prod db
+  - download speakers, entries, and supabase user data locally
+  - run migration script
 - Test viewing
 - Merge new saving methods code (this will be a natural unblock) and hide Algolia search results
 - Test editing entries
 - Remove notice
 - Email letting everyone know editing is available again
+- Remove algolia keys from vercel
 
 ## Clean-up
+- drop content_updates' table column
+- clean up old history data and tables
 
 ### No lexeme
 no lx for 0svukh699MsB4svuCDdO in ho

@@ -1175,6 +1175,7 @@ export interface Database {
           created_by: string
           decade: number | null
           deleted: string | null
+          dictionary_id: string
           gender: Database['public']['Enums']['gender'] | null
           id: string
           name: string
@@ -1188,6 +1189,7 @@ export interface Database {
           created_by: string
           decade?: number | null
           deleted?: string | null
+          dictionary_id: string
           gender?: Database['public']['Enums']['gender'] | null
           id?: string
           name: string
@@ -1201,6 +1203,7 @@ export interface Database {
           created_by?: string
           decade?: number | null
           deleted?: string | null
+          dictionary_id?: string
           gender?: Database['public']['Enums']['gender'] | null
           id?: string
           name?: string
@@ -1221,6 +1224,13 @@ export interface Database {
             columns: ['created_by']
             isOneToOne: false
             referencedRelation: 'users'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'speakers_dictionary_id_fkey'
+            columns: ['dictionary_id']
+            isOneToOne: false
+            referencedRelation: 'dictionaries'
             referencedColumns: ['id']
           },
           {

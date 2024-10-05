@@ -43,6 +43,7 @@ ALTER TABLE audio ENABLE ROW LEVEL SECURITY;
 CREATE TYPE gender AS ENUM ('m', 'f', 'o');
 CREATE TABLE speakers (
   id uuid primary key default uuid_generate_v4(),
+  -- added dictionary_id text NOT NULL REFERENCES dictionaries,
   user_id uuid REFERENCES auth.users, -- only if speaker has an account
   name text NOT NULL,
   decade integer,

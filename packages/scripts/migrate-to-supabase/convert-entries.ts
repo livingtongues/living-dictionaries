@@ -2,7 +2,6 @@ import { randomUUID } from 'node:crypto'
 import type { ActualDatabaseEntry, TablesInsert } from '@living-dictionaries/types'
 import type { ActualDatabaseVideo } from '@living-dictionaries/types/video.interface'
 import { jacob_ld_user_id } from '../config-supabase'
-// import { log_once } from './log-once'
 
 interface DataForSupabase {
   entry: TablesInsert<'entries'>
@@ -34,9 +33,6 @@ export function convert_entry(_entry: ActualDatabaseEntry & Record<string, any>,
   //   if (!_entry.sfs[0].sp.includes(_entry.sf.sp))
   //     console.log(`${_entry.id} in ${_entry.dictionary_id} has speaker ${_entry.sf.sp} in sf and ${_entry.sfs[0].sp.join(', ')} sfs`)
   // }
-  // if (_entry.source)
-  //   console.log(`source ${_entry.source} in ${_entry.id} in ${_entry.dictionary_id}`)
-  // return [{}, {}]
 
   try {
     const entry: TablesInsert<'entries'> = {
@@ -54,11 +50,11 @@ export function convert_entry(_entry: ActualDatabaseEntry & Record<string, any>,
       delete _entry.ua
     }
     if (typeof _entry.updatedBy === 'string') {
-      entry.updated_by = _entry.updatedBy
+      entry.updated_by = get_supabase_user_id_from_firebase_uid(_entry.updatedBy)
       delete _entry.updatedBy
     }
     if (typeof _entry.ub === 'string') {
-      entry.updated_by = _entry.ub
+      entry.updated_by = get_supabase_user_id_from_firebase_uid(_entry.ub)
       delete _entry.ub
     }
     if (typeof _entry.createdAt?.seconds === 'number') {
@@ -70,24 +66,23 @@ export function convert_entry(_entry: ActualDatabaseEntry & Record<string, any>,
       delete _entry.ca
     }
     if (typeof _entry.createdBy === 'string') {
-      entry.created_by = _entry.createdBy
+      entry.created_by = get_supabase_user_id_from_firebase_uid(_entry.createdBy)
       delete _entry.createdBy
     }
     if (typeof _entry.cb === 'string') {
-      entry.created_by = _entry.cb
+      entry.created_by = get_supabase_user_id_from_firebase_uid(_entry.cb)
       delete _entry.cb
     }
     if (typeof _entry.ab === 'string') {
       if (!entry.created_by)
-        entry.created_by = _entry.ab
+        entry.created_by = get_supabase_user_id_from_firebase_uid(_entry.ab)
       delete _entry.ab
     }
 
-    if (!entry.created_by)
+    if (entry.created_by === 'OTD' || !entry.created_by)
       entry.created_by = jacob_ld_user_id
-
-    if (entry.created_by === 'OTD')
-      entry.created_by = jacob_ld_user_id
+    if (!entry.updated_by)
+      entry.updated_by = entry.created_by
 
     const dialects = new Set<string>()
 
@@ -155,7 +150,7 @@ export function convert_entry(_entry: ActualDatabaseEntry & Record<string, any>,
         // @ts-expect-error - doesn't have importId typed
         if (key === 'ii' || key === 'importId' || key === 'source') {
           // @ts-expect-error
-          prior_import_id = key === 'source' ? value.replace('import: ', '') : value
+          prior_import_id = key === 'source' ? value.replace('import: ', '') : value // source key found in miahuatec-zapotec
           delete _entry[key]
           continue
         }
@@ -389,8 +384,8 @@ export function convert_entry(_entry: ActualDatabaseEntry & Record<string, any>,
       const audio: TablesInsert<'audio'> = {
         id: audio_id,
         entry_id: _entry.id,
-        created_by: ab || entry.created_by,
-        updated_by: ab || entry.created_by,
+        created_by: get_supabase_user_id_from_firebase_uid(ab) || entry.created_by,
+        updated_by: get_supabase_user_id_from_firebase_uid(ab) || entry.created_by,
         storage_path: path,
       }
       delete sf.ab
@@ -413,7 +408,7 @@ export function convert_entry(_entry: ActualDatabaseEntry & Record<string, any>,
         delete sf.cr
       }
       if (source && !cr) {
-        if (source !== 'local_import')
+        if (source !== 'local_import' && !source.startsWith('import:'))
           audio.source = source
         delete sf.source
       }
@@ -429,7 +424,7 @@ export function convert_entry(_entry: ActualDatabaseEntry & Record<string, any>,
         audio_speakers.push({
           audio_id,
           speaker_id,
-          created_by: ab || entry.created_by,
+          created_by: get_supabase_user_id_from_firebase_uid(ab) || entry.created_by,
           ...(audio.created_at ? { created_at: audio.created_at } : {}),
         })
         delete sf.sp
@@ -455,10 +450,12 @@ export function convert_entry(_entry: ActualDatabaseEntry & Record<string, any>,
         console.info({ uploadedAt })
       if (!ab && !entry.created_by)
         console.info(`No ab for ${_entry.id} pf`)
+
+      const created_by = get_supabase_user_id_from_firebase_uid(ab) || get_supabase_user_id_from_firebase_uid(uploadedBy) || entry.created_by
       const photo: TablesInsert<'photos'> = {
         id: photo_id,
-        created_by: ab || uploadedBy || entry.created_by,
-        updated_by: ab || uploadedBy || entry.created_by,
+        created_by,
+        updated_by: created_by,
         storage_path: path,
         serving_url: remove_newline_from_end(gcs),
       }
@@ -483,7 +480,7 @@ export function convert_entry(_entry: ActualDatabaseEntry & Record<string, any>,
         delete _entry.pf.cr
       }
       if (source && !photo.source) {
-        if (source !== 'local_import')
+        if (source !== 'local_import' && !source.startsWith('import:'))
           photo.source = source
         delete _entry.pf.source
       }
@@ -495,7 +492,7 @@ export function convert_entry(_entry: ActualDatabaseEntry & Record<string, any>,
       sense_photos.push({
         photo_id,
         sense_id: first_sense_from_base.id,
-        created_by: ab || entry.created_by,
+        created_by: get_supabase_user_id_from_firebase_uid(ab) || entry.created_by,
         ...(photo.created_at ? { created_at: photo.created_at } : {}),
       })
       if (!Object.keys(_entry.pf).length)
@@ -515,10 +512,11 @@ export function convert_entry(_entry: ActualDatabaseEntry & Record<string, any>,
       const { ts, ab, path, sp, youtubeId, deleted, startAt } = vf
       if (!ab && !entry.created_by)
         console.info(`No ab for ${_entry.id} vfs`)
+      const created_by = get_supabase_user_id_from_firebase_uid(ab) || entry.created_by
       const video: TablesInsert<'videos'> = {
         id: video_id,
-        created_by: ab || entry.created_by,
-        updated_by: ab || entry.created_by,
+        created_by,
+        updated_by: created_by,
       }
       delete vf.ab
       if (path) {
@@ -549,7 +547,7 @@ export function convert_entry(_entry: ActualDatabaseEntry & Record<string, any>,
       sense_videos.push({
         video_id,
         sense_id: first_sense_from_base.id,
-        created_by: ab || entry.created_by,
+        created_by: get_supabase_user_id_from_firebase_uid(ab) || entry.created_by,
         ...(video.created_at ? { created_at: video.created_at } : {}),
       })
       if (sp) {
@@ -558,7 +556,7 @@ export function convert_entry(_entry: ActualDatabaseEntry & Record<string, any>,
         video_speakers.push({
           video_id,
           speaker_id: sp,
-          created_by: ab || entry.created_by,
+          created_by: get_supabase_user_id_from_firebase_uid(ab) || entry.created_by,
           ...(video.created_at ? { created_at: video.created_at } : {}),
         })
         delete vf.sp
@@ -604,8 +602,13 @@ export function convert_entry(_entry: ActualDatabaseEntry & Record<string, any>,
   }
 }
 
-function seconds_to_timestamp_string(seconds: number): string {
+export function seconds_to_timestamp_string(seconds: number): string {
   return new Date(seconds * 1000).toISOString()
+}
+
+export function get_supabase_user_id_from_firebase_uid(uid: string): string {
+  // TODO: uid to user_id
+  return jacob_ld_user_id
 }
 
 function isEmptyArray(value: any): boolean {

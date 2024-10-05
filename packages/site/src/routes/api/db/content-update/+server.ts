@@ -110,6 +110,7 @@ export const POST: RequestHandler = async ({ request }) => {
         .upsert({
           ...user_meta,
           ...data,
+          dictionary_id,
           id: body.speaker_id,
           ...(data.deleted && { deleted: timestamp }),
         } as TablesInsert<'speakers'>)

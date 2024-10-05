@@ -12,6 +12,9 @@ ALTER TABLE senses
 ADD CONSTRAINT foreign_key_entries
 FOREIGN KEY (entry_id) REFERENCES entries(id);
 
+ALTER TABLE speakers
+ADD COLUMN dictionary_id text NOT NULL REFERENCES dictionaries;
+
 DROP VIEW IF EXISTS entries_view;
 
 CREATE OR REPLACE VIEW entries_view AS
