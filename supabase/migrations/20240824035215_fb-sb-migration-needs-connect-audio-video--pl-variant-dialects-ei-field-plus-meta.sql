@@ -223,3 +223,19 @@ LEFT JOIN (
 ) AS aggregated_videos ON aggregated_videos.sense_id = senses.id
 WHERE entries.deleted IS NULL
 GROUP BY entries.id;
+
+CREATE MATERIALIZED VIEW materialized_entries_view AS
+SELECT * FROM entries_view; -- DROP MATERIALIZED VIEW materialized_entries_view;
+
+CREATE UNIQUE INDEX idx_materialized_entries_view_id ON materialized_entries_view (id); -- When you refresh data for a materialized view, PostgreSQL locks the underlying tables. To avoid this, use the CONCURRENTLY option so that PostgreSQL creates a temporary updated version of the materialized view, compares two versions, and performs INSERT and UPDATE on only the differences. To use CONCURRENTLY the materialized view must have a UNIQUE index:
+
+CREATE EXTENSION IF NOT EXISTS pg_cron WITH SCHEMA extensions;
+GRANT USAGE ON SCHEMA cron TO postgres;
+GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA cron TO postgres;
+
+SELECT cron.schedule (
+    'refresh-materialized_entries_view', -- Job name
+    '0 * * * *', -- Every hour, you can re-run this SQL with a new time amount to change the frequency
+    $$ REFRESH MATERIALIZED VIEW CONCURRENTLY materialized_entries_view $$
+); -- SELECT cron.unschedule('refresh-materialized_entries_view');
+
