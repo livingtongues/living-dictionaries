@@ -3,7 +3,7 @@ import type { Coordinates } from '../coordinates.interface'
 import type { DictionaryPhoto } from '../photo.interface'
 import type { HostedVideo, SenseWithSentences, UnsupportedFields } from '../.'
 import type { Change } from './content-update.interface'
-import type { AudioWithSpeakerIds } from './sense.interface'
+import type { AudioWithSpeakerIds, EntryMainFields } from './sense.interface'
 
 export interface DatabaseAugments {
   public: {
@@ -136,11 +136,24 @@ export interface DatabaseAugments {
     Views: {
       entries_view: {
         Row: {
-          // @ts-expect-error
-          main: Tables<'entries'>
+          main: EntryMainFields
           senses: SenseWithSentences[] | null
           audios: AudioWithSpeakerIds[] | null
           dialect_ids: string[] | null
+        }
+      }
+      materialized_entries_view: {
+        Row: {
+          main: EntryMainFields
+          senses: SenseWithSentences[] | null
+          audios: AudioWithSpeakerIds[] | null
+          dialect_ids: string[] | null
+        }
+      }
+      videos_view: {
+        Row: {
+          hosted_elsewhere: HostedVideo | null
+          speaker_ids: string[] | null
         }
       }
     }

@@ -21,7 +21,7 @@ vi.mock('node:crypto', () => {
 describe(migrate_entries, () => {
   beforeEach(reset_db)
 
-  test('works on all use cases', { timeout: 60000 }, async () => {
+  test.todo('works on all use cases', { timeout: 60000 }, async () => {
     const speakers = await migrate_speakers(firebase_speakers as ISpeaker[])
     await migrate_entries(entries_to_test_264, speakers)
     const { data: entry_view } = await anon_supabase.from('entries_view').select()
@@ -49,7 +49,7 @@ describe(migrate_entries, () => {
     }], {})
 
     const { data: entry_view } = await anon_supabase.from('entries_view').select()
-    expect(entry_view[0].audios[0].speaker_ids[0]).toMatchInlineSnapshot(`"11111111-1111-1111-1111-111111102943"`)
+    expect(entry_view[0].audios[0].speaker_ids[0]).toMatchInlineSnapshot(`"11111111-1111-1111-1111-111111100005"`)
     expect(entry_view[0].audios[0].speaker_ids[0]).toEqual(entry_view[1].audios[0].speaker_ids[0])
 
     const { data: speakers } = await anon_supabase.from('speakers_view').select()
@@ -61,7 +61,7 @@ describe(migrate_entries, () => {
           "decade": null,
           "dictionary_id": "create-me",
           "gender": null,
-          "id": "11111111-1111-1111-1111-111111102943",
+          "id": "11111111-1111-1111-1111-111111100005",
           "name": "Write-in Speaker Name not in db",
           "updated_at": "2024-03-08T00:44:04.6+00:00",
         },

@@ -35,18 +35,17 @@ describe('entries and senses', () => {
       expect(entry_view).toMatchInlineSnapshot(`
         {
           "audios": null,
+          "created_at": "2024-03-08T00:44:04.6+00:00",
           "dialect_ids": null,
           "dictionary_id": "import_dictionary",
           "id": "11111111-1111-1111-1111-111111111101",
           "main": {
-            "created_at": "2024-03-08T00:44:04.6+00:00",
-            "id": "11111111-1111-1111-1111-111111111101",
             "lexeme": {
               "default": "hi",
             },
-            "updated_at": "2024-03-08T00:44:04.6+00:00",
           },
           "senses": null,
+          "updated_at": "2024-03-08T00:44:04.6+00:00",
         }
       `)
       const { data: sense_save } = await upsert_sense({ dictionary_id, entry_id: data.entry_id, sense: {
@@ -123,19 +122,10 @@ describe(upsert_sentence, () => {
 
   test('adds sentence and links to sense', async () => {
     const { entry_id, sense_id } = await seed_entry_and_sense()
-    await upsert_sentence({ dictionary_id, sense_id, sentence: { text: { default: 'hello, this is my sentence' } }, import_id: '1' })
+    const { data } = await upsert_sentence({ dictionary_id, sense_id, sentence: { text: { default: 'hello, this is my sentence' } }, import_id: '1' })
 
     const { data: entry_view } = await anon_supabase.from('entries_view').select().eq('id', entry_id).single()
-    expect(entry_view.senses[0].sentences).toMatchInlineSnapshot(`
-      [
-        {
-          "id": "11111111-1111-1111-1111-111111111124",
-          "text": {
-            "default": "hello, this is my sentence",
-          },
-        },
-      ]
-    `)
+    expect(entry_view.senses[0].sentence_ids).toEqual([data.sentence_id])
   })
 })
 
@@ -144,18 +134,13 @@ describe(upsert_photo, () => {
 
   test('adds photo and links to sense', async () => {
     const { entry_id, sense_id } = await seed_entry_and_sense()
-    await upsert_photo({ dictionary_id, photo: { serving_url: 'foo', source: 'Bob', storage_path: 'bee/images/baz.jpeg' }, sense_id })
+    const storage_path = 'bee/images/baz.jpeg'
+    const { data } = await upsert_photo({ dictionary_id, photo: { serving_url: 'foo', source: 'Bob', storage_path }, sense_id })
 
     const { data: entry_view } = await anon_supabase.from('entries_view').select().eq('id', entry_id).single()
-    expect(entry_view.senses[0].photos).toMatchInlineSnapshot(`
-      [
-        {
-          "id": "11111111-1111-1111-1111-111111111130",
-          "serving_url": "foo",
-          "source": "Bob",
-        },
-      ]
-    `)
+    expect(entry_view.senses[0].photo_ids).toEqual([data.photo_id])
+    const { data: photo } = await anon_supabase.from('photos').select().eq('id', data.photo_id).single()
+    expect(photo.storage_path).toEqual(storage_path)
   })
 })
 
@@ -164,18 +149,10 @@ describe(upsert_video, () => {
 
   test('adds video and links to sense', async () => {
     const { entry_id, sense_id } = await seed_entry_and_sense()
-    await upsert_video({ dictionary_id, video: { source: 'Bob', storage_path: 'baz.wbm' }, sense_id })
+    const { data } = await upsert_video({ dictionary_id, video: { source: 'Bob', storage_path: 'baz.wbm' }, sense_id })
 
     const { data: entry_view } = await anon_supabase.from('entries_view').select().eq('id', entry_id).single()
-    expect(entry_view.senses[0].videos).toMatchInlineSnapshot(`
-      [
-        {
-          "id": "11111111-1111-1111-1111-111111111136",
-          "source": "Bob",
-          "storage_path": "baz.wbm",
-        },
-      ]
-    `)
+    expect(entry_view.senses[0].video_ids).toEqual([data.video_id])
   })
 })
 
@@ -194,6 +171,7 @@ describe(upsert_speaker, () => {
 
     const { data: entry_view } = await anon_supabase.from('entries_view').select().eq('id', entry_id).single()
     expect(entry_view.audios[0].speaker_ids).toEqual([speaker_change.speaker_id])
-    expect(entry_view.senses[0].videos[0].speaker_ids).toEqual([speaker_change.speaker_id])
+    const { data: videos_view } = await anon_supabase.from('videos_view').select().eq('id', video_change.video_id).single()
+    expect(videos_view.speaker_ids).toEqual([speaker_change.speaker_id])
   })
 })

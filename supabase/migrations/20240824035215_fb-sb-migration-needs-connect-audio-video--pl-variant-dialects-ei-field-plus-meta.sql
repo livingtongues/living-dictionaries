@@ -83,15 +83,68 @@ SELECT
 FROM speakers
 WHERE speakers.deleted IS NULL;
 
+CREATE POLICY "Anyone can view sentences"
+ON sentences 
+FOR SELECT USING (true);
+
+CREATE POLICY "Anyone can view photos"
+ON photos 
+FOR SELECT USING (true);
+
+-- CREATE OR REPLACE VIEW sentences_view AS
+-- SELECT
+--   sentences.id AS id,
+--   sentences.text AS "text",
+--   sentences.translation AS translation,
+--   sentences.text_id AS text_id,
+--   sentences.created_at AS created_at,
+--   sentences.updated_at AS updated_at
+-- FROM sentences
+-- WHERE sentences.deleted IS NULL;
+
+-- CREATE OR REPLACE VIEW photos_view AS
+-- SELECT
+--   photos.id AS id,
+--   photos.serving_url AS serving_url,
+--   photos.source AS source,
+--   photos.photographer AS photographer,
+--   photos.created_at AS created_at,
+--   photos.updated_at AS updated_at
+-- FROM photos
+-- WHERE photos.deleted IS NULL;
+
+CREATE OR REPLACE VIEW videos_view AS
+SELECT
+  videos.id AS id,
+  videos.storage_path AS storage_path,
+  videos.source AS source,
+  videos.videographer AS videographer,
+  videos.hosted_elsewhere AS hosted_elsewhere,
+  videos.text_id AS text_id,
+  video_speakers.speaker_ids AS speaker_ids,
+  videos.created_at AS created_at,
+  videos.updated_at AS updated_at
+FROM videos
+LEFT JOIN (
+  SELECT
+    video_id,
+    jsonb_agg(speaker_id) AS speaker_ids
+  FROM video_speakers
+  WHERE deleted IS NULL
+  GROUP BY video_id
+) AS video_speakers ON video_speakers.video_id = videos.id
+WHERE videos.deleted IS NULL;
+
 DROP VIEW IF EXISTS entries_view;
 
 CREATE OR REPLACE VIEW entries_view AS
 SELECT
   entries.id AS id,
   entries.dictionary_id AS dictionary_id,
+  entries.created_at,
+  entries.updated_at,
   jsonb_strip_nulls(
     jsonb_build_object(
-      'id', entries.id,
       'lexeme', entries.lexeme,
       'phonetic', entries.phonetic,
       'interlinearization', entries.interlinearization,
@@ -101,9 +154,7 @@ SELECT
       'scientific_names', entries.scientific_names,
       'coordinates', entries.coordinates,
       'unsupported_fields', entries.unsupported_fields,
-      'elicitation_id', entries.elicitation_id,
-      'created_at', entries.created_at,
-      'updated_at', entries.updated_at
+      'elicitation_id', entries.elicitation_id
     )
   ) AS main,
   CASE 
@@ -119,9 +170,9 @@ SELECT
           'definition', senses.definition,
           'plural_form', senses.plural_form,
           'variant', senses.variant,
-          'sentences', aggregated_sentences.sentences,
-          'photos', aggregated_photos.photos,
-          'videos', aggregated_videos.videos
+          'sentence_ids', sentence_ids,
+          'photo_ids', photo_ids,
+          'video_ids', video_ids
         )
       )
       ORDER BY senses.created_at
@@ -161,66 +212,30 @@ LEFT JOIN entry_dialects ON entry_dialects.entry_id = entries.id AND entry_diale
 LEFT JOIN (
   SELECT
     senses_in_sentences.sense_id,
-    jsonb_agg(
-      jsonb_strip_nulls(
-        jsonb_build_object(
-          'id', sentences.id,
-          'text', sentences.text,
-          'translation', sentences.translation
-        )
-      )
-    ) AS sentences
+    jsonb_agg(senses_in_sentences.sentence_id) AS sentence_ids
   FROM senses_in_sentences
   JOIN sentences ON sentences.id = senses_in_sentences.sentence_id
   WHERE sentences.deleted IS NULL AND senses_in_sentences.deleted IS NULL
   GROUP BY senses_in_sentences.sense_id
-) AS aggregated_sentences ON aggregated_sentences.sense_id = senses.id
+) AS sense_sentences ON sense_sentences.sense_id = senses.id
 LEFT JOIN (
   SELECT
     sense_photos.sense_id,
-    jsonb_agg(
-      jsonb_strip_nulls(
-        jsonb_build_object(
-          'id', photos.id,
-          'serving_url', photos.serving_url,
-          'source', photos.source,
-          'photographer', photos.photographer
-        )
-      )
-    ) AS photos
+    jsonb_agg(sense_photos.photo_id) AS photo_ids
   FROM sense_photos
   JOIN photos ON photos.id = sense_photos.photo_id
   WHERE photos.deleted IS NULL AND sense_photos.deleted IS NULL
   GROUP BY sense_photos.sense_id
-) AS aggregated_photos ON aggregated_photos.sense_id = senses.id
+) AS aggregated_photo_ids ON aggregated_photo_ids.sense_id = senses.id
 LEFT JOIN (
   SELECT
     sense_videos.sense_id,
-    jsonb_agg(
-      jsonb_strip_nulls(
-        jsonb_build_object(
-          'id', videos.id,
-          'storage_path', videos.storage_path,
-          'source', videos.source,
-          'videographer', videos.videographer,
-          'hosted_elsewhere', videos.hosted_elsewhere,
-          'speaker_ids', video_speakers.speaker_ids
-        )
-      )
-    ) AS videos
+    jsonb_agg(sense_videos.video_id) AS video_ids
   FROM sense_videos
   JOIN videos ON videos.id = sense_videos.video_id
-  LEFT JOIN (
-    SELECT
-      video_id,
-      jsonb_agg(speaker_id) AS speaker_ids
-    FROM video_speakers
-    WHERE deleted IS NULL
-    GROUP BY video_id
-  ) AS video_speakers ON video_speakers.video_id = videos.id
   WHERE videos.deleted IS NULL AND sense_videos.deleted IS NULL
   GROUP BY sense_videos.sense_id
-) AS aggregated_videos ON aggregated_videos.sense_id = senses.id
+) AS aggregated_video_ids ON aggregated_video_ids.sense_id = senses.id
 WHERE entries.deleted IS NULL
 GROUP BY entries.id;
 
@@ -239,3 +254,27 @@ SELECT cron.schedule (
     $$ REFRESH MATERIALIZED VIEW CONCURRENTLY materialized_entries_view $$
 ); -- SELECT cron.unschedule('refresh-materialized_entries_view');
 
+CREATE OR REPLACE FUNCTION update_entries_updated_at()
+RETURNS TRIGGER AS $$
+DECLARE
+  entry_id_to_use INTEGER;
+BEGIN
+  entry_id_to_use := COALESCE(NEW.entry_id, OLD.entry_id); -- TODO: test this by adding a sense and then updating it with a later date
+  
+  UPDATE entries
+  SET updated_at = COALESCE(NEW.updated_at, NEW.created_at, NOW())
+  WHERE id = entry_id_to_use;
+  
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- CREATE TRIGGER update_entries_updated_at_senses
+-- AFTER INSERT OR UPDATE OR DELETE ON senses
+-- FOR EACH ROW
+-- EXECUTE FUNCTION update_entries_updated_at();
+
+-- CREATE TRIGGER update_entries_updated_at_audio
+-- AFTER INSERT OR UPDATE OR DELETE ON audio
+-- FOR EACH ROW
+-- EXECUTE FUNCTION update_entries_updated_at();

@@ -3,7 +3,7 @@ import type { Coordinates } from '../coordinates.interface'
 import type { DictionaryPhoto } from '../photo.interface'
 import type { HostedVideo, SenseWithSentences, UnsupportedFields } from '../.'
 import type { Change } from './content-update.interface'
-import type { AudioWithSpeakerIds } from './sense.interface'
+import type { AudioWithSpeakerIds, EntryMainFields } from './sense.interface'
 
 export interface Database {
   public: {
@@ -89,6 +89,17 @@ export interface Database {
             ]
             isOneToOne: false
             referencedRelation: 'entries_view'
+            referencedColumns: [
+              'id',
+            ]
+          },
+          {
+            foreignKeyName: 'audio_entry_id_fkey'
+            columns: [
+              'entry_id',
+            ]
+            isOneToOne: false
+            referencedRelation: 'materialized_entries_view'
             referencedColumns: [
               'id',
             ]
@@ -202,6 +213,17 @@ export interface Database {
             ]
             isOneToOne: false
             referencedRelation: 'speakers'
+            referencedColumns: [
+              'id',
+            ]
+          },
+          {
+            foreignKeyName: 'audio_speakers_speaker_id_fkey'
+            columns: [
+              'speaker_id',
+            ]
+            isOneToOne: false
+            referencedRelation: 'speakers_view'
             referencedColumns: [
               'id',
             ]
@@ -320,6 +342,17 @@ export interface Database {
             ]
           },
           {
+            foreignKeyName: 'content_updates_entry_id_fkey'
+            columns: [
+              'entry_id',
+            ]
+            isOneToOne: false
+            referencedRelation: 'materialized_entries_view'
+            referencedColumns: [
+              'id',
+            ]
+          },
+          {
             foreignKeyName: 'content_updates_photo_id_fkey'
             columns: [
               'photo_id',
@@ -364,6 +397,17 @@ export interface Database {
             ]
           },
           {
+            foreignKeyName: 'content_updates_speaker_id_fkey'
+            columns: [
+              'speaker_id',
+            ]
+            isOneToOne: false
+            referencedRelation: 'speakers_view'
+            referencedColumns: [
+              'id',
+            ]
+          },
+          {
             foreignKeyName: 'content_updates_text_id_fkey'
             columns: [
               'text_id',
@@ -403,6 +447,17 @@ export interface Database {
             ]
             isOneToOne: false
             referencedRelation: 'videos'
+            referencedColumns: [
+              'id',
+            ]
+          },
+          {
+            foreignKeyName: 'content_updates_video_id_fkey'
+            columns: [
+              'video_id',
+            ]
+            isOneToOne: false
+            referencedRelation: 'videos_view'
             referencedColumns: [
               'id',
             ]
@@ -818,6 +873,17 @@ export interface Database {
               'id',
             ]
           },
+          {
+            foreignKeyName: 'entry_dialects_entry_id_fkey'
+            columns: [
+              'entry_id',
+            ]
+            isOneToOne: false
+            referencedRelation: 'materialized_entries_view'
+            referencedColumns: [
+              'id',
+            ]
+          },
         ]
       }
       entry_updates: {
@@ -1080,6 +1146,17 @@ export interface Database {
               'id',
             ]
           },
+          {
+            foreignKeyName: 'sense_videos_video_id_fkey'
+            columns: [
+              'video_id',
+            ]
+            isOneToOne: false
+            referencedRelation: 'videos_view'
+            referencedColumns: [
+              'id',
+            ]
+          },
         ]
       }
       senses: {
@@ -1153,6 +1230,17 @@ export interface Database {
             ]
             isOneToOne: false
             referencedRelation: 'entries_view'
+            referencedColumns: [
+              'id',
+            ]
+          },
+          {
+            foreignKeyName: 'foreign_key_entries'
+            columns: [
+              'entry_id',
+            ]
+            isOneToOne: false
+            referencedRelation: 'materialized_entries_view'
             referencedColumns: [
               'id',
             ]
@@ -1360,6 +1448,17 @@ export interface Database {
             ]
             isOneToOne: false
             referencedRelation: 'videos'
+            referencedColumns: [
+              'id',
+            ]
+          },
+          {
+            foreignKeyName: 'sentence_videos_video_id_fkey'
+            columns: [
+              'video_id',
+            ]
+            isOneToOne: false
+            referencedRelation: 'videos_view'
             referencedColumns: [
               'id',
             ]
@@ -1744,12 +1843,34 @@ export interface Database {
             ]
           },
           {
+            foreignKeyName: 'video_speakers_speaker_id_fkey'
+            columns: [
+              'speaker_id',
+            ]
+            isOneToOne: false
+            referencedRelation: 'speakers_view'
+            referencedColumns: [
+              'id',
+            ]
+          },
+          {
             foreignKeyName: 'video_speakers_video_id_fkey'
             columns: [
               'video_id',
             ]
             isOneToOne: false
             referencedRelation: 'videos'
+            referencedColumns: [
+              'id',
+            ]
+          },
+          {
+            foreignKeyName: 'video_speakers_video_id_fkey'
+            columns: [
+              'video_id',
+            ]
+            isOneToOne: false
+            referencedRelation: 'videos_view'
             referencedColumns: [
               'id',
             ]
@@ -1859,15 +1980,87 @@ export interface Database {
       entries_view: {
         Row: {
           audios: AudioWithSpeakerIds[] | null
+          created_at: string | null
           dialect_ids: string[] | null
           dictionary_id: string | null
           id: string | null
-          main: Tables<'entries'>
+          main: EntryMainFields
           senses: SenseWithSentences[] | null
+          updated_at: string | null
         }
         Relationships: [
           {
             foreignKeyName: 'entries_dictionary_id_fkey'
+            columns: [
+              'dictionary_id',
+            ]
+            isOneToOne: false
+            referencedRelation: 'dictionaries'
+            referencedColumns: [
+              'id',
+            ]
+          },
+        ]
+      }
+      materialized_entries_view: {
+        Row: {
+          audios: AudioWithSpeakerIds[] | null
+          created_at: string | null
+          dialect_ids: string[] | null
+          dictionary_id: string | null
+          id: string | null
+          main: EntryMainFields
+          senses: SenseWithSentences[] | null
+          updated_at: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'entries_dictionary_id_fkey'
+            columns: [
+              'dictionary_id',
+            ]
+            isOneToOne: false
+            referencedRelation: 'dictionaries'
+            referencedColumns: [
+              'id',
+            ]
+          },
+        ]
+      }
+      speakers_view: {
+        Row: {
+          birthplace: string | null
+          created_at: string | null
+          decade: number | null
+          dictionary_id: string | null
+          gender: Database['public']['Enums']['gender'] | null
+          id: string | null
+          name: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          birthplace?: string | null
+          created_at?: string | null
+          decade?: number | null
+          dictionary_id?: string | null
+          gender?: Database['public']['Enums']['gender'] | null
+          id?: string | null
+          name?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          birthplace?: string | null
+          created_at?: string | null
+          decade?: number | null
+          dictionary_id?: string | null
+          gender?: Database['public']['Enums']['gender'] | null
+          id?: string | null
+          name?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'speakers_dictionary_id_fkey'
             columns: [
               'dictionary_id',
             ]
@@ -1899,6 +2092,32 @@ export interface Database {
           last_sign_in_at?: string | null
         }
         Relationships: [
+        ]
+      }
+      videos_view: {
+        Row: {
+          created_at: string | null
+          hosted_elsewhere: HostedVideo | null
+          id: string | null
+          source: string | null
+          speaker_ids: string[] | null
+          storage_path: string | null
+          text_id: string | null
+          updated_at: string | null
+          videographer: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'videos_text_id_fkey'
+            columns: [
+              'text_id',
+            ]
+            isOneToOne: false
+            referencedRelation: 'texts'
+            referencedColumns: [
+              'id',
+            ]
+          },
         ]
       }
     }
