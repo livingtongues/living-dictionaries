@@ -1,8 +1,9 @@
 import type { TablesUpdate } from '@living-dictionaries/types'
-import { anon_supabase } from '../../config-supabase'
+import { anon_supabase, jacob_ld_user_id } from '../../config-supabase'
 import { reset_db } from '../reset-db'
-import { assign_dialect, assign_speaker, upsert_audio, upsert_dialect, upsert_entry, upsert_photo, upsert_sense, upsert_sentence, upsert_speaker, upsert_video } from './operations'
-import { dictionary_id, timestamp } from './constants'
+import { assign_dialect, assign_speaker, insert_sentence, upsert_audio, upsert_dialect, upsert_entry, upsert_photo, upsert_sense, upsert_speaker, upsert_video } from './operations'
+import { dictionary_id } from './constants'
+import { test_timestamp } from './test-timestamp'
 
 vi.mock('node:crypto', () => {
   const uuid_template = '11111111-1111-1111-1111-111111111111'
@@ -17,9 +18,11 @@ vi.mock('node:crypto', () => {
   }
 })
 
+const import_id = '1'
+
 async function seed_entry_and_sense() {
-  const { data } = await upsert_entry({ dictionary_id, entry: { lexeme: { default: 'hi' } } })
-  const { data: sense_data } = await upsert_sense({ dictionary_id, entry_id: data.entry_id, sense: { glosses: { en: 'hello' } } })
+  const { data } = await upsert_entry({ dictionary_id, entry: { lexeme: { default: 'hi' } }, entry_id: '1', import_id })
+  const { data: sense_data } = await upsert_sense({ dictionary_id, entry_id: data.entry_id, sense: { glosses: { en: 'hello' } }, import_id })
   return { entry_id: data.entry_id, sense_id: sense_data.sense_id }
 }
 
@@ -28,44 +31,24 @@ describe('entries and senses', () => {
 
   describe(upsert_entry, () => {
     test('adds entry, adds sense, and deletes sense', async () => {
-      const { data } = await upsert_entry({ dictionary_id, entry: { lexeme: { default: 'hi' } }, import_id: '1' })
+      const lexeme = { default: 'hi' }
+      const { data } = await upsert_entry({ dictionary_id, entry: { lexeme }, import_id, entry_id: '1' })
       expect(data?.import_id).toEqual('1')
       const { data: entry_view } = await anon_supabase.from('entries_view').select().eq('id', data.entry_id).single()
       expect(entry_view.dictionary_id).toEqual(dictionary_id)
-      expect(entry_view).toMatchInlineSnapshot(`
-        {
-          "audios": null,
-          "created_at": "2024-03-08T00:44:04.6+00:00",
-          "dialect_ids": null,
-          "dictionary_id": "import_dictionary",
-          "id": "11111111-1111-1111-1111-111111111101",
-          "main": {
-            "lexeme": {
-              "default": "hi",
-            },
-          },
-          "senses": null,
-          "updated_at": "2024-03-08T00:44:04.6+00:00",
-        }
-      `)
+      expect(entry_view.dictionary_id).toEqual(dictionary_id)
+      expect(entry_view.main.lexeme).toEqual(lexeme)
+      expect(entry_view.senses).toBeNull()
+      const glosses = { en: 'hello' }
       const { data: sense_save } = await upsert_sense({ dictionary_id, entry_id: data.entry_id, sense: {
-        glosses: { en: 'hello' },
+        glosses,
       }, import_id: '1' })
       const { data: entry_view2 } = await anon_supabase.from('entries_view').select().eq('id', data.entry_id).single()
-      expect(entry_view2?.senses).toMatchInlineSnapshot(`
-      [
-        {
-          "glosses": {
-            "en": "hello",
-          },
-          "id": "11111111-1111-1111-1111-111111111103",
-        },
-      ]
-    `)
+      expect(entry_view2.senses[0].glosses).toEqual(glosses)
 
-      await upsert_sense({ dictionary_id, entry_id: data.entry_id, sense: { deleted: timestamp }, sense_id: sense_save.sense_id })
+      await upsert_sense({ dictionary_id, entry_id: data.entry_id, sense: { deleted: 'true' }, sense_id: sense_save.sense_id, import_id })
       const { data: entry_view3 } = await anon_supabase.from('entries_view').select().eq('id', data.entry_id).single()
-      expect(entry_view3?.senses).toBeNull()
+      expect(entry_view3.senses).toBeNull()
     })
   })
 })
@@ -75,19 +58,19 @@ describe(upsert_dialect, () => {
 
   test('adds to dialects table, edits dialect, and connects to entry', async () => {
     const name = 'Eastern'
-    const { data } = await upsert_dialect({ dictionary_id, name, import_id: '1' })
+    const { data } = await upsert_dialect({ dictionary_id, name, import_id, user_id: jacob_ld_user_id, timestamp: test_timestamp })
     expect(data?.import_id).toEqual('1')
     const { data: dialect } = await anon_supabase.from('dialects').select('*').eq('id', data.dialect_id).single()
     expect(dialect.name.default).toEqual(name)
     expect(dialect.dictionary_id).toEqual(dictionary_id)
 
     const edited_name = 'Western'
-    await upsert_dialect({ dictionary_id, name: edited_name, dialect_id: data.dialect_id })
+    await upsert_dialect({ dictionary_id, name: edited_name, dialect_id: data.dialect_id, import_id, user_id: jacob_ld_user_id, timestamp: test_timestamp })
     const { data: edited_dialect } = await anon_supabase.from('dialects').select('name').eq('id', data.dialect_id).single()
     expect(edited_dialect.name.default).toEqual(edited_name)
 
     const { entry_id } = await seed_entry_and_sense()
-    await assign_dialect({ dictionary_id, dialect_id: data.dialect_id, entry_id })
+    await assign_dialect({ dictionary_id, dialect_id: data.dialect_id, entry_id, import_id, user_id: jacob_ld_user_id, timestamp: test_timestamp })
     const { data: entry_view } = await anon_supabase.from('entries_view').select().eq('id', entry_id).single()
     expect(entry_view.dialect_ids).toEqual([data.dialect_id])
   })
@@ -101,7 +84,7 @@ describe(upsert_audio, () => {
 
     const audio: TablesUpdate<'audio'> = {
       created_at: '2019-08-27T05:06:40.796Z',
-      // created_by: 'Wr77x8C4e0PI3TMqOnJnJ7VmlLF3', // TODO: get this working
+      // created_by: 'Wr77x8C4e0PI3TMqOnJnJ7VmlLF3',
       entry_id,
       id: 'use-crypto-uuid-in-real-thing_2',
       source: 'javier domingo',
@@ -117,12 +100,12 @@ describe(upsert_audio, () => {
   })
 })
 
-describe(upsert_sentence, () => {
+describe(insert_sentence, () => {
   beforeAll(reset_db)
 
   test('adds sentence and links to sense', async () => {
     const { entry_id, sense_id } = await seed_entry_and_sense()
-    const { data } = await upsert_sentence({ dictionary_id, sense_id, sentence: { text: { default: 'hello, this is my sentence' } }, import_id: '1' })
+    const { data } = await insert_sentence({ dictionary_id, sense_id, sentence: { text: { default: 'hello, this is my sentence' } }, import_id: '1' })
 
     const { data: entry_view } = await anon_supabase.from('entries_view').select().eq('id', entry_id).single()
     expect(entry_view.senses[0].sentence_ids).toEqual([data.sentence_id])
@@ -161,17 +144,70 @@ describe(upsert_speaker, () => {
 
   test('adds speaker to audio and to video', async () => {
     const { entry_id, sense_id } = await seed_entry_and_sense()
-    const { data: speaker_change } = await upsert_speaker({ dictionary_id, speaker: { name: 'Bob' } })
+    const { data: speaker_change } = await upsert_speaker({ dictionary_id, speaker: { name: 'Bob', created_at: test_timestamp, created_by: jacob_ld_user_id }, import_id })
 
     const { data: audio_change } = await upsert_audio({ dictionary_id, entry_id, audio: { storage_path: 'foo.mp3' } })
-    await assign_speaker({ dictionary_id, speaker_id: speaker_change.speaker_id, media_id: audio_change.audio_id, media: 'audio' })
+    await assign_speaker({ dictionary_id, speaker_id: speaker_change.speaker_id, media_id: audio_change.audio_id, media: 'audio', import_id, user_id: jacob_ld_user_id, timestamp: test_timestamp })
 
     const { data: video_change } = await upsert_video({ dictionary_id, video: { source: 'Bob Family', storage_path: 'baz.wbm' }, sense_id })
-    await assign_speaker({ dictionary_id, speaker_id: speaker_change.speaker_id, media_id: video_change.video_id, media: 'video' })
+    await assign_speaker({ dictionary_id, speaker_id: speaker_change.speaker_id, media_id: video_change.video_id, media: 'video', import_id, user_id: jacob_ld_user_id, timestamp: test_timestamp })
 
     const { data: entry_view } = await anon_supabase.from('entries_view').select().eq('id', entry_id).single()
     expect(entry_view.audios[0].speaker_ids).toEqual([speaker_change.speaker_id])
     const { data: videos_view } = await anon_supabase.from('videos_view').select().eq('id', video_change.video_id).single()
     expect(videos_view.speaker_ids).toEqual([speaker_change.speaker_id])
+  })
+})
+
+describe('entries have their updated_at timestamp updated whenever nested properties change', () => {
+  beforeEach(reset_db)
+
+  describe('values which are props', () => {
+    test('audio', async () => {
+      const { entry_id } = await seed_entry_and_sense()
+      const { data: audio_change } = await upsert_audio({ dictionary_id, entry_id, audio: { storage_path: 'foo.mp3' } })
+      const { data: entry_view } = await anon_supabase.from('entries_view').select().eq('id', entry_id).single()
+      expect(entry_view.updated_at).not.toEqual(entry_view.created_at)
+      expect(entry_view.updated_at).toEqual(audio_change.timestamp)
+    })
+
+    test('sense', async () => {
+      const { entry_id, sense_id } = await seed_entry_and_sense()
+      const { data: sense_change } = await upsert_sense({ dictionary_id, entry_id, sense_id, sense: { glosses: { en: 'hi, again' } }, import_id })
+      const { data: entry_view } = await anon_supabase.from('entries_view').select().eq('id', entry_id).single()
+      expect(entry_view.updated_at).toEqual(sense_change.timestamp)
+    })
+
+    test('dialect ids', async () => {
+      const { entry_id } = await seed_entry_and_sense()
+      const { data: dialect_addition } = await upsert_dialect({ dictionary_id, name: 'Eastern', import_id, user_id: jacob_ld_user_id, timestamp: test_timestamp })
+      const { data: dialect_assign } = await assign_dialect({ dictionary_id, dialect_id: dialect_addition.dialect_id, entry_id, import_id, user_id: jacob_ld_user_id, timestamp: test_timestamp })
+      const { data: entry_view } = await anon_supabase.from('entries_view').select().eq('id', entry_id).single()
+      console.log({ entry_view, dialect_addition, dialect_assign })
+      expect(entry_view.updated_at).toEqual(dialect_assign.timestamp)
+    })
+  })
+
+  describe('id-related fields', () => {
+    test('sentence', async () => {
+      const { entry_id, sense_id } = await seed_entry_and_sense()
+      const { data: sentence_change } = await insert_sentence({ dictionary_id, sense_id, sentence: { text: { default: 'hi, this is my sentence' } } })
+      const { data: entry_view } = await anon_supabase.from('entries_view').select().eq('id', entry_id).single()
+      expect(entry_view.updated_at).toEqual(sentence_change.timestamp)
+    })
+
+    test('photo', async () => {
+      const { entry_id, sense_id } = await seed_entry_and_sense()
+      const { data: photo_change } = await upsert_photo({ dictionary_id, photo: { serving_url: 'foo', source: 'Bob', storage_path: 'bee/images/baz.jpeg' }, sense_id })
+      const { data: entry_view } = await anon_supabase.from('entries_view').select().eq('id', entry_id).single()
+      expect(entry_view.updated_at).toEqual(photo_change.timestamp)
+    })
+
+    test('video', async () => {
+      const { entry_id, sense_id } = await seed_entry_and_sense()
+      const { data: video_change } = await upsert_video({ dictionary_id, video: { source: 'Bob', storage_path: 'baz.wbm' }, sense_id })
+      const { data: entry_view } = await anon_supabase.from('entries_view').select().eq('id', entry_id).single()
+      expect(entry_view.updated_at).toEqual(video_change.timestamp)
+    })
   })
 })

@@ -2,6 +2,7 @@ import { randomUUID } from 'node:crypto'
 import type { ActualDatabaseEntry, TablesInsert } from '@living-dictionaries/types'
 import type { ActualDatabaseVideo } from '@living-dictionaries/types/video.interface'
 import { jacob_ld_user_id } from '../config-supabase'
+import { get_supabase_user_id_from_firebase_uid } from './get-user-id'
 
 interface DataForSupabase {
   entry: TablesInsert<'entries'>
@@ -21,18 +22,19 @@ interface DataForSupabase {
 }
 
 export function convert_entry(_entry: ActualDatabaseEntry & Record<string, any>, uuid: () => string = randomUUID): [any, DataForSupabase] {
-  // if (_entry.deletedVfs) {
-  //   console.log(`deletedVfs in ${_entry.id} in ${_entry.dictionary_id}, ${_entry.deletedVfs[0].youtubeId}`)
-  // }
-  // if (_entry.xv && _entry.xs?.vn)
-  //   console.log(`both xv ${_entry.xv} and xs.vn ${_entry.xs.vn} for ${_entry.id} in ${_entry.dictionary_id}`)
-  // if (_entry.lo && _entry.lo1 && _entry.lo !== _entry.lo1)
-  //   console.log(`lost lo: ${_entry.lo} in favor of lo1: ${_entry.lo1} for ${_entry.id} in ${_entry.dictionary_id}`)
+  const dict_entry_id = `${_entry.dictionary_id}:${_entry.id}`
+  if (_entry.deletedVfs) {
+    console.log(`deletedVfs in ${dict_entry_id} - youtubeId: ${_entry.deletedVfs[0].youtubeId}`)
+  }
+  if (_entry.xv && _entry.xs?.vn)
+    console.log(`both xv ${_entry.xv} and xs.vn ${_entry.xs.vn} for ${dict_entry_id}`)
+  if (_entry.lo && _entry.lo1 && _entry.lo !== _entry.lo1)
+    console.log(`lost lo: ${_entry.lo} in favor of lo1: ${_entry.lo1} for ${dict_entry_id}`)
 
-  // if (_entry.sf && _entry.sfs?.length) {
-  //   if (!_entry.sfs[0].sp.includes(_entry.sf.sp))
-  //     console.log(`${_entry.id} in ${_entry.dictionary_id} has speaker ${_entry.sf.sp} in sf and ${_entry.sfs[0].sp.join(', ')} sfs`)
-  // }
+  if (_entry.sf && _entry.sfs?.length) {
+    if (!_entry.sfs[0].sp.includes(_entry.sf.sp))
+      console.log(`different speakers in ${dict_entry_id} - ${_entry.sf.sp} in sf and ${_entry.sfs[0].sp.join(', ')} sfs`)
+  }
 
   try {
     const entry: TablesInsert<'entries'> = {
@@ -95,6 +97,8 @@ export function convert_entry(_entry: ActualDatabaseEntry & Record<string, any>,
       id: uuid(),
     }
 
+    if (!_entry.lx)
+      console.log(`no lexeme for ${dict_entry_id}`)
     entry.lexeme = { default: _entry.lx || '' }
     delete _entry.lx
 
@@ -369,6 +373,8 @@ export function convert_entry(_entry: ActualDatabaseEntry & Record<string, any>,
     const audio_speakers: TablesInsert<'audio_speakers'>[] = []
     let new_speaker_name: string = null
 
+    if (_entry.sf && !_entry.sf.path)
+      delete _entry.sf
     if (_entry.sf?.path || _entry.sfs?.[0].path) {
       const audio_id = uuid()
       const sf = _entry.sf?.path ? _entry.sf : _entry.sfs![0] as unknown as ActualDatabaseEntry['sf']
@@ -543,6 +549,7 @@ export function convert_entry(_entry: ActualDatabaseEntry & Record<string, any>,
           throw new Error(`odd timestamp for ${_entry.id}: ${ts}`)
         delete vf.ts
       }
+      video.updated_at = video.created_at
       videos.push(video)
       sense_videos.push({
         video_id,
@@ -551,11 +558,9 @@ export function convert_entry(_entry: ActualDatabaseEntry & Record<string, any>,
         ...(video.created_at ? { created_at: video.created_at } : {}),
       })
       if (sp) {
-        if (Array.isArray(sp))
-          console.log(`video speaker ids array in ${_entry.id} in ${_entry.dictionary_id}`)
         video_speakers.push({
           video_id,
-          speaker_id: sp,
+          speaker_id: Array.isArray(sp) ? sp[0] : sp,
           created_by: get_supabase_user_id_from_firebase_uid(ab) || entry.created_by,
           ...(video.created_at ? { created_at: video.created_at } : {}),
         })
@@ -604,11 +609,6 @@ export function convert_entry(_entry: ActualDatabaseEntry & Record<string, any>,
 
 export function seconds_to_timestamp_string(seconds: number): string {
   return new Date(seconds * 1000).toISOString()
-}
-
-export function get_supabase_user_id_from_firebase_uid(uid: string): string {
-  // TODO: uid to user_id
-  return jacob_ld_user_id
 }
 
 function isEmptyArray(value: any): boolean {

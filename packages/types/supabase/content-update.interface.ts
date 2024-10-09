@@ -26,11 +26,14 @@ export type ContentUpdateRequestBody =
 
 interface ContentUpdateBase {
   update_id: string // id of the change, a uuidv4 created on client to make things idempotent
-  user_id_from_local?: string
   auth_token: string
   dictionary_id: string
   import_id?: string
-  timestamp: string
+
+  import_meta?: {
+    user_id?: string
+    timestamp?: string
+  }
 }
 
 interface Upsert_Entry extends ContentUpdateBase {

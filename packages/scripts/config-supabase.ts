@@ -2,6 +2,7 @@ import PG from 'pg'
 import { createClient } from '@supabase/supabase-js'
 import type { Database } from '@living-dictionaries/types'
 import * as dotenv from 'dotenv'
+import './record-logs'
 
 // TODO: change to .env.development and .env.production
 dotenv.config({ path: '.env.supabase' }) // local project variables
@@ -32,3 +33,6 @@ export async function execute_query(query: string) {
     })
   }
 }
+
+const environment = 'dev'
+console.log(`Supabase running on ${environment}`)

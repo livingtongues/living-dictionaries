@@ -18,6 +18,12 @@ vi.mock('node:crypto', () => {
   }
 })
 
+vi.mock('./test-timestamp', () => {
+  return {
+    test_timestamp: new Date('2024-03-08T00:44:04.600392+00:00').toISOString(),
+  }
+})
+
 describe(migrate_entries, () => {
   beforeEach(reset_db)
 
@@ -53,19 +59,7 @@ describe(migrate_entries, () => {
     expect(entry_view[0].audios[0].speaker_ids[0]).toEqual(entry_view[1].audios[0].speaker_ids[0])
 
     const { data: speakers } = await anon_supabase.from('speakers_view').select()
-    expect(speakers).toMatchInlineSnapshot(`
-      [
-        {
-          "birthplace": null,
-          "created_at": "2024-03-08T00:44:04.6+00:00",
-          "decade": null,
-          "dictionary_id": "create-me",
-          "gender": null,
-          "id": "11111111-1111-1111-1111-111111100005",
-          "name": "Write-in Speaker Name not in db",
-          "updated_at": "2024-03-08T00:44:04.6+00:00",
-        },
-      ]
-    `)
+    expect(speakers).toHaveLength(1)
+    expect(speakers[0].name).toEqual(speakerName)
   })
 })

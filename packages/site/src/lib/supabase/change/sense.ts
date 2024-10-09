@@ -30,7 +30,6 @@ export async function update_sense({
       sense_id,
       type: 'upsert_sense',
       data: sense,
-      timestamp: new Date().toISOString(),
     })
 
     if (error)

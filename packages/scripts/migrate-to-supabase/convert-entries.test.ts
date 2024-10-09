@@ -2,9 +2,9 @@ import fs from 'node:fs'
 import { chain } from 'stream-chain'
 import { parser } from 'stream-json'
 import { streamArray } from 'stream-json/streamers/StreamArray'
-import type { ActualDatabaseEntry } from '@living-dictionaries/types'
 import { convert_entry } from './convert-entries'
 import entries_to_test from './entries_to_test.json'
+import { remove_seconds_underscore } from './utils/remove-seconds-underscore'
 
 let id_count = 0
 function randomUUID() {
@@ -66,7 +66,7 @@ test(convert_entry, () => {
 const to_snapshot = [229, 231, 235, 252, 253, 254, 255, 1228, 1718, 1759, 4577, 4609, 4945, 5377, 5394, 8005, 14072, 15715, 16141, 23958, 29994, 36138, 39845, 39858, 47304, 47829, 85363, 128736, 166042, 167017, 172023, 200582, 248444, 251721, 253088, 266408]
 
 // pnpm -F scripts test:migration convert-entries -- --ui
-test.todo(convert_entry, { timeout: 26000 }, async () => {
+test(convert_entry, { timeout: 26000 }, async () => {
   // const count = 300
   const count = 278631 // total entries
   const success: { entry: any, supa_data: any }[] = []
@@ -126,39 +126,3 @@ test.todo(convert_entry, { timeout: 26000 }, async () => {
   // const entries_to_test = [...first_chunk, ...specific_entries].map(({ entry }) => entry)
   // fs.writeFileSync('entries_to_test.json', JSON.stringify(entries_to_test, null, 2))
 })
-
-function remove_seconds_underscore(entry: ActualDatabaseEntry & Record<string, any>) {
-  // @ts-expect-error
-  if (entry.updatedAt?._seconds) {
-    // @ts-expect-error
-    entry.updatedAt = {
-      // @ts-expect-error
-      seconds: entry.updatedAt._seconds,
-    }
-  }
-  // @ts-expect-error
-  if (entry.createdAt?._seconds) {
-    // @ts-expect-error
-    entry.createdAt = {
-      // @ts-expect-error
-      seconds: entry.createdAt._seconds,
-    }
-  }
-  // @ts-expect-error
-  if (entry.ua?._seconds) {
-    // @ts-expect-error
-    entry.ua = {
-      // @ts-expect-error
-      seconds: entry.ua._seconds,
-    }
-  }
-  // @ts-expect-error
-  if (entry.ca?._seconds) {
-    // @ts-expect-error
-    entry.ca = {
-      // @ts-expect-error
-      seconds: entry.ca._seconds,
-    }
-  }
-  return entry
-}

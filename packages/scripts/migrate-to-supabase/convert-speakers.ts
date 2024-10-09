@@ -1,5 +1,6 @@
 import type { ISpeaker, TablesUpdate } from '@living-dictionaries/types'
-import { get_supabase_user_id_from_firebase_uid, seconds_to_timestamp_string } from './convert-entries'
+import { seconds_to_timestamp_string } from './convert-entries'
+import { get_supabase_user_id_from_firebase_uid } from './get-user-id'
 
 export function convert_speaker(fb_speaker: ISpeaker): { id: string, speaker: TablesUpdate<'speakers'> } {
   const {
@@ -21,8 +22,11 @@ export function convert_speaker(fb_speaker: ISpeaker): { id: string, speaker: Ta
   }
 
   if (contributingTo.length > 1) {
-    console.warn(`Speaker ${displayName} has multiple contributingTo`)
+    console.log(`Speaker ${displayName} has multiple contributingTo`)
   }
+
+  if (!createdBy)
+    console.log(`Speaker ${displayName} has no createdBy`)
 
   const created_by = get_supabase_user_id_from_firebase_uid(createdBy)
 

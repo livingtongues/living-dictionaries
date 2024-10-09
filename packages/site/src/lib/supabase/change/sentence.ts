@@ -31,7 +31,6 @@ export async function upsert_sentence({
       sense_id,
       type: sense_id ? 'insert_sentence' : 'update_sentence',
       data: sentence,
-      timestamp: new Date().toISOString(),
     })
 
     if (error)

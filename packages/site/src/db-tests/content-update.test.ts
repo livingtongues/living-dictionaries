@@ -6,7 +6,7 @@ import { first_entry_id, seeded_dictionary_id, seeded_user_id_1, seeded_user_id_
 import { reset_db } from '$lib/mocks/seed/write-seed-and-reset-db'
 
 const content_update_endpoint = 'http://localhost:3041/api/db/content-update'
-const timestamp = new Date('2024-03-08T00:44:04.600392+00:00').toISOString()
+const test_timestamp = new Date('2024-03-08T00:44:04.600392+00:00').toISOString()
 
 beforeAll(async () => {
   await reset_db()
@@ -34,7 +34,7 @@ describe('sense operations', () => {
       data: {
         noun_class: '2',
       },
-      timestamp,
+      test_timestamp,
     })
     expect(error?.message).toBeFalsy()
     const { data } = await anon_supabase.from('entries_view').select()
@@ -65,7 +65,7 @@ describe('sense operations', () => {
         data: {
           parts_of_speech: ['n', 'v'],
         },
-        timestamp,
+        test_timestamp,
       })
       expect(error?.message).toBeFalsy()
       const { data } = await anon_supabase.from('entries_view').select()
@@ -105,7 +105,7 @@ describe('sense operations', () => {
           es: 'Hola',
         },
       },
-      timestamp,
+      test_timestamp,
     })
 
     expect(error?.message).toBeFalsy()
@@ -143,7 +143,7 @@ describe('sense operations', () => {
       data: {
         semantic_domains: ['1', '2'],
       },
-      timestamp,
+      test_timestamp,
     })
     expect(error?.message).toBeFalsy()
     const { data } = await anon_supabase.from('entries_view').select()
@@ -185,9 +185,9 @@ describe('sense operations', () => {
       sense_id: first_entry_third_sense_id,
       type: 'upsert_sense',
       data: {
-        deleted: timestamp,
+        deleted: 'true',
       },
-      timestamp,
+      test_timestamp,
     })
     expect(error?.message).toBeFalsy()
     const { data } = await anon_supabase.from('entries_view').select()
@@ -233,7 +233,7 @@ describe('sense sentence operations', () => {
             lo1: 'abcd efgh ijkl',
           },
         },
-        timestamp,
+        test_timestamp,
       })
 
       expect(error?.message).toBeFalsy()
@@ -332,7 +332,7 @@ describe('sense sentence operations', () => {
             en: 'I am hungry',
           },
         },
-        timestamp: new Date('2024-03-09T00:44:04.600392+00:00').toISOString(),
+        test_timestamp: new Date('2024-03-09T00:44:04.600392+00:00').toISOString(),
       })
 
       expect(error?.message).toBeFalsy()
@@ -404,7 +404,7 @@ describe('sense sentence operations', () => {
           lo1: 'abcd efgh',
         },
       },
-      timestamp: new Date('2024-03-09T00:44:04.600392+00:00').toISOString(),
+      test_timestamp: new Date('2024-03-09T00:44:04.600392+00:00').toISOString(),
     })
 
     const { data: { senses }, error } = await anon_supabase.from('entries_view').select().eq('id', first_entry_id).single()
@@ -440,7 +440,7 @@ describe('sense sentence operations', () => {
           es: 'Estoy hambriento',
         },
       },
-      timestamp: new Date('2024-03-09T00:44:04.600392+00:00').toISOString(),
+      test_timestamp: new Date('2024-03-09T00:44:04.600392+00:00').toISOString(),
     })
 
     expect(error?.message).toBeFalsy()
@@ -484,7 +484,7 @@ describe('sense sentence operations', () => {
       sentence_id: first_sentence_id,
       sense_id: first_entry_first_sense_id,
       type: 'remove_sentence',
-      timestamp,
+      test_timestamp,
     })
     expect(error?.message).toBeFalsy()
 

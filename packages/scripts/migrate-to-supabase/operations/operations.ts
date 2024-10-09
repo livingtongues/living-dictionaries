@@ -3,7 +3,13 @@ import type { ContentUpdateRequestBody, TablesUpdate } from '@living-dictionarie
 import type { ContentUpdateResponseBody } from '../../../site/src/routes/api/db/content-update/+server'
 import { jacob_ld_user_id } from '../../config-supabase'
 import { post_request } from '../../import/post-request'
-import { content_update_endpoint, timestamp } from './constants'
+import { content_update_endpoint } from './constants'
+import { test_timestamp } from './test-timestamp'
+
+const import_meta = {
+  user_id: jacob_ld_user_id,
+  timestamp: test_timestamp,
+}
 
 export function upsert_entry({
   dictionary_id,
@@ -13,19 +19,18 @@ export function upsert_entry({
 }: {
   dictionary_id: string
   entry: TablesUpdate<'entries'>
-  entry_id?: string
-  import_id?: string
+  entry_id: string
+  import_id: string
 }) {
   return post_request<ContentUpdateRequestBody, ContentUpdateResponseBody>(content_update_endpoint, {
     update_id: randomUUID(),
     auth_token: null,
-    user_id_from_local: jacob_ld_user_id,
+    import_meta,
     dictionary_id,
     entry_id: entry_id || randomUUID(),
     type: 'upsert_entry',
     data: entry,
     import_id,
-    timestamp,
   })
 }
 
@@ -40,19 +45,18 @@ export function upsert_sense({
   entry_id: string
   sense: TablesUpdate<'senses'>
   sense_id?: string
-  import_id?: string
+  import_id: string
 }) {
   return post_request<ContentUpdateRequestBody, ContentUpdateResponseBody>(content_update_endpoint, {
     update_id: randomUUID(),
     auth_token: null,
-    user_id_from_local: jacob_ld_user_id,
+    import_meta,
     dictionary_id,
     entry_id,
     sense_id: sense_id || randomUUID(),
     type: 'upsert_sense',
     data: sense,
     import_id,
-    timestamp,
   })
 }
 
@@ -61,16 +65,23 @@ export function upsert_dialect({
   name,
   dialect_id,
   import_id,
+  user_id,
+  timestamp,
 }: {
   dictionary_id: string
   name: string
   dialect_id?: string
-  import_id?: string
+  import_id: string
+  user_id: string
+  timestamp: string
 }) {
   return post_request<ContentUpdateRequestBody, ContentUpdateResponseBody>(content_update_endpoint, {
     update_id: randomUUID(),
     auth_token: null,
-    user_id_from_local: jacob_ld_user_id,
+    import_meta: {
+      user_id,
+      timestamp,
+    },
     dictionary_id,
     dialect_id: dialect_id || randomUUID(),
     type: 'upsert_dialect',
@@ -80,7 +91,6 @@ export function upsert_dialect({
       },
     },
     import_id,
-    timestamp,
   })
 }
 
@@ -89,23 +99,29 @@ export function assign_dialect({
   dialect_id,
   entry_id,
   import_id,
+  user_id,
+  timestamp,
 }: {
   dictionary_id: string
   dialect_id: string
   entry_id: string
-  import_id?: string
+  import_id: string
+  user_id: string
+  timestamp: string
 }) {
   return post_request<ContentUpdateRequestBody, ContentUpdateResponseBody>(content_update_endpoint, {
     update_id: randomUUID(),
     auth_token: null,
-    user_id_from_local: jacob_ld_user_id, // TODO: this needs to be set to the user who made the change in import
+    import_meta: {
+      user_id,
+      timestamp,
+    },
     dictionary_id,
     dialect_id,
     entry_id,
     type: 'assign_dialect',
     data: null,
     import_id,
-    timestamp,
   })
 }
 
@@ -118,18 +134,16 @@ export function upsert_speaker({
   dictionary_id: string
   speaker: TablesUpdate<'speakers'>
   speaker_id?: string
-  import_id?: string
+  import_id: string
 }) {
   return post_request<ContentUpdateRequestBody, ContentUpdateResponseBody>(content_update_endpoint, {
     update_id: randomUUID(),
     auth_token: null,
-    user_id_from_local: jacob_ld_user_id,
     dictionary_id,
     speaker_id: speaker_id || randomUUID(),
     type: 'upsert_speaker',
     data: speaker,
     import_id,
-    timestamp,
   })
 }
 
@@ -139,23 +153,29 @@ export function assign_speaker({
   media_id,
   media,
   import_id,
+  user_id,
+  timestamp,
 }: {
   dictionary_id: string
   speaker_id: string
   media_id: string
   media: 'audio' | 'video'
-  import_id?: string
+  import_id: string
+  user_id: string
+  timestamp: string
 }) {
   return post_request<ContentUpdateRequestBody, ContentUpdateResponseBody>(content_update_endpoint, {
     update_id: randomUUID(),
     auth_token: null,
-    user_id_from_local: jacob_ld_user_id,
+    import_meta: {
+      user_id,
+      timestamp,
+    },
     dictionary_id,
     speaker_id,
     ...(media === 'audio' ? { audio_id: media_id } : { video_id: media_id }),
     type: 'assign_speaker',
     import_id,
-    timestamp,
   })
 }
 
@@ -175,18 +195,17 @@ export function upsert_audio({
   return post_request<ContentUpdateRequestBody, ContentUpdateResponseBody>(content_update_endpoint, {
     update_id: randomUUID(),
     auth_token: null,
-    user_id_from_local: jacob_ld_user_id,
+    import_meta,
     dictionary_id,
     entry_id,
     audio_id: audio_id || randomUUID(),
     type: 'upsert_audio',
     data: audio,
     import_id,
-    timestamp,
   })
 }
 
-export function upsert_sentence({
+export function insert_sentence({
   dictionary_id,
   sense_id,
   sentence,
@@ -202,14 +221,16 @@ export function upsert_sentence({
   return post_request<ContentUpdateRequestBody, ContentUpdateResponseBody>(content_update_endpoint, {
     update_id: randomUUID(),
     auth_token: null,
-    user_id_from_local: jacob_ld_user_id,
+    import_meta: {
+      user_id: sentence.created_by || jacob_ld_user_id,
+      timestamp: sentence.created_at || test_timestamp,
+    },
     dictionary_id,
     sentence_id: sentence_id || randomUUID(),
     sense_id,
     type: 'insert_sentence',
     data: sentence,
     import_id,
-    timestamp,
   })
 }
 
@@ -229,14 +250,16 @@ export function upsert_photo({
   return post_request<ContentUpdateRequestBody, ContentUpdateResponseBody>(content_update_endpoint, {
     update_id: randomUUID(),
     auth_token: null,
-    user_id_from_local: jacob_ld_user_id,
+    import_meta: {
+      user_id: photo.created_by || jacob_ld_user_id,
+      timestamp: photo.created_at || test_timestamp,
+    },
     dictionary_id,
     sense_id,
     photo_id: photo_id || randomUUID(),
     type: 'upsert_photo',
     data: photo,
     import_id,
-    timestamp,
   })
 }
 
@@ -256,13 +279,15 @@ export function upsert_video({
   return post_request<ContentUpdateRequestBody, ContentUpdateResponseBody>(content_update_endpoint, {
     update_id: randomUUID(),
     auth_token: null,
-    user_id_from_local: jacob_ld_user_id,
+    import_meta: {
+      user_id: video.created_by || jacob_ld_user_id,
+      timestamp: video.created_at || test_timestamp,
+    },
     dictionary_id,
     sense_id,
     video_id: video_id || randomUUID(),
     type: 'upsert_video',
     data: video,
     import_id,
-    timestamp,
   })
 }

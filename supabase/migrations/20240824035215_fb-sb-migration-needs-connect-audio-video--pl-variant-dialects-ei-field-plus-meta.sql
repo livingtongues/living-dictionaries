@@ -1,13 +1,13 @@
-ALTER TABLE entries
-DROP COLUMN plural_form,
-DROP COLUMN variant;
+-- ALTER TABLE entries
+-- DROP COLUMN plural_form,
+-- DROP COLUMN variant;
 
 ALTER TABLE senses
 ADD COLUMN plural_form jsonb, -- MultiString
 ADD COLUMN variant jsonb; -- MultiString
 
-ALTER TABLE entries
-DROP COLUMN dialects;
+-- ALTER TABLE entries
+-- DROP COLUMN dialects;
 
 CREATE TABLE dialects (
   id uuid unique primary key NOT NULL,
@@ -90,28 +90,6 @@ FOR SELECT USING (true);
 CREATE POLICY "Anyone can view photos"
 ON photos 
 FOR SELECT USING (true);
-
--- CREATE OR REPLACE VIEW sentences_view AS
--- SELECT
---   sentences.id AS id,
---   sentences.text AS "text",
---   sentences.translation AS translation,
---   sentences.text_id AS text_id,
---   sentences.created_at AS created_at,
---   sentences.updated_at AS updated_at
--- FROM sentences
--- WHERE sentences.deleted IS NULL;
-
--- CREATE OR REPLACE VIEW photos_view AS
--- SELECT
---   photos.id AS id,
---   photos.serving_url AS serving_url,
---   photos.source AS source,
---   photos.photographer AS photographer,
---   photos.created_at AS created_at,
---   photos.updated_at AS updated_at
--- FROM photos
--- WHERE photos.deleted IS NULL;
 
 CREATE OR REPLACE VIEW videos_view AS
 SELECT
@@ -236,8 +214,11 @@ LEFT JOIN (
   WHERE videos.deleted IS NULL AND sense_videos.deleted IS NULL
   GROUP BY sense_videos.sense_id
 ) AS aggregated_video_ids ON aggregated_video_ids.sense_id = senses.id
-WHERE entries.deleted IS NULL
+WHERE entries.deleted IS NULL -- TODO: Remove this and do it in the client when needed to give full control
 GROUP BY entries.id;
+
+-- Entries loading plan:
+-- When Jim loads entries for the first time on client, the client and NOT the view needs to check WHERE entries.deleted IS NULL. Then in the future if Bob deletes 1 entry, and Jim visits again, Jim will have 20 cached entries. He then loads fresh entries without the WHERE entries.deleted IS NULL when he comes today so that he gets Bob's deleted change. Then Jim's knows to remove that deleted entry from the cache
 
 CREATE MATERIALIZED VIEW materialized_entries_view AS
 SELECT * FROM entries_view; -- DROP MATERIALIZED VIEW materialized_entries_view;
@@ -254,27 +235,74 @@ SELECT cron.schedule (
     $$ REFRESH MATERIALIZED VIEW CONCURRENTLY materialized_entries_view $$
 ); -- SELECT cron.unschedule('refresh-materialized_entries_view');
 
-CREATE OR REPLACE FUNCTION update_entries_updated_at()
+CREATE OR REPLACE FUNCTION update_entry_updated_at()
 RETURNS TRIGGER AS $$
 DECLARE
-  entry_id_to_use INTEGER;
+  entry_id_to_use text;
+  new_updated_at timestamp with time zone;
 BEGIN
-  entry_id_to_use := COALESCE(NEW.entry_id, OLD.entry_id); -- TODO: test this by adding a sense and then updating it with a later date
+  entry_id_to_use := COALESCE(NEW.entry_id, OLD.entry_id);
+  
+  BEGIN
+    new_updated_at := NEW.updated_at;
+  EXCEPTION
+    WHEN others THEN
+      new_updated_at := NULL;
+  END;
   
   UPDATE entries
-  SET updated_at = COALESCE(NEW.updated_at, NEW.created_at, NOW())
+  SET updated_at = COALESCE(new_updated_at, NEW.created_at, NOW())
   WHERE id = entry_id_to_use;
   
   RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
 
--- CREATE TRIGGER update_entries_updated_at_senses
--- AFTER INSERT OR UPDATE OR DELETE ON senses
--- FOR EACH ROW
--- EXECUTE FUNCTION update_entries_updated_at();
+CREATE TRIGGER update_entry_updated_at_senses
+AFTER INSERT OR UPDATE OR DELETE ON senses
+FOR EACH ROW
+EXECUTE FUNCTION update_entry_updated_at();
 
--- CREATE TRIGGER update_entries_updated_at_audio
--- AFTER INSERT OR UPDATE OR DELETE ON audio
--- FOR EACH ROW
--- EXECUTE FUNCTION update_entries_updated_at();
+CREATE TRIGGER update_entry_updated_at_audio
+AFTER INSERT OR UPDATE OR DELETE ON audio
+FOR EACH ROW
+EXECUTE FUNCTION update_entry_updated_at();
+
+CREATE TRIGGER update_entry_updated_at_entry_dialects
+AFTER INSERT OR UPDATE OR DELETE ON entry_dialects
+FOR EACH ROW
+EXECUTE FUNCTION update_entry_updated_at();
+
+CREATE OR REPLACE FUNCTION update_sense_updated_at()
+RETURNS TRIGGER AS $$
+BEGIN
+  UPDATE senses
+  SET updated_at = COALESCE(NEW.created_at, OLD.created_at, NOW())
+  WHERE id = NEW.sense_id;
+  
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER update_sense_updated_at_senses_in_sentences
+AFTER INSERT OR UPDATE ON senses_in_sentences
+FOR EACH ROW
+EXECUTE FUNCTION update_sense_updated_at();
+
+CREATE TRIGGER update_sense_updated_at_sense_photos
+AFTER INSERT OR UPDATE ON sense_photos
+FOR EACH ROW
+EXECUTE FUNCTION update_sense_updated_at();
+
+CREATE TRIGGER update_sense_updated_at_sense_videos
+AFTER INSERT OR UPDATE ON sense_videos
+FOR EACH ROW
+EXECUTE FUNCTION update_sense_updated_at();
+
+------------------
+
+DROP TRIGGER IF EXISTS on_entry_updates ON entry_updates;
+DROP FUNCTION IF EXISTS apply_entry_updates();
+
+DROP TRIGGER IF EXISTS convert_email_to_id_before_insert ON entry_updates;
+DROP FUNCTION IF EXISTS convert_firebase_email_to_supabase_user_id();
