@@ -1,32 +1,53 @@
 # Migrate Entries and Speakers from Firestore to Supabase
+- pnpm -F scripts test:migration
 
 ## TODO
-- Move off Algolia fully onto local Orama + using Orama Cloud for (100K max*3 indexes) for large, public dictionaries + Onondaga
-  - solve bugs
-  - flip usage to using the new search but make Algolia still available as a second option
-- On a new migration branch
-  - Make sure all items from "clean-up" below are being actively logged again as they are run into
-  - update migration script to migrate speakers across as they are needed, when one is found, save into speakers table, then create a map of firestore speaker id to supabase speaker id, in future times when this Firestore speaker id comes up, check the map first to see if speaker already exists
-  - figure out how different user ids (creater of speaker) between Firestore and Firebase will be handled and document
-  - run tests on migration
-  - visual inspection of the results locally - should work similar to current prod
-  - update saving functions
-  - make all types of edits
-- Run migration process below
+- use full user seed locally from ld-backup repo and then run data into it
+  - check audio created_by is correct
+
+## UI Tasks
+- `WHERE entries.deleted IS NULL` Remove this from entries_view and do it in the client when needed to give full control
+- stich entries together client-side with videos, photos, sentences, dialects, speakers, using ids in the entries_view
+- when a many-many relationship is cut off by setting "deleted" to a value, then if that relationship is ever wanted again, it will be a failed insert because the unique constraint is still there. In case of a failed insert, I need a function to just set the deleted property to null
+- resolve in UI where photo is edited and relationship is added again (also for videos); resolve issue whereby sense_id is sent with sentence update and will result in a conflict on re-adding the relationship
+- type SupaEntry in [entryId].svelte
+- get dialects from Supabase to EntryDialect.svelte
+- make all types of edits
+- Supabase sense updates+all others show immediately in preview modal from list view
+- load down dialects and speakers separately in UI then stitch them together
+- Orama search refinement and completion
+  - Use `pnpm mixed` to run Firebase prod and Supabase local
+  - replaceState in createQueryParamStore? look into improving the history to change for view and page changes but not for the others
+  - use materialized view daily for entries and then pull last day's entries from that view
+- look at print, table, gallery, and list page files history to make sure there are no missed improvements - check github history too
+- visual inspection of the results locally - should work similar to current prod
 
 ## Migration Process
 - post notice on logged-in users a week ahead of time
 - send email notice a week ahead of time
+- Sort entries from oldest created to newest created so that first person to add a dialect gets the created_by credit
+- Make sure all items from "clean-up" below are being actively logged again as they are run into
 - Lock down Firestore dictionary words and speakers using security rules (tell admins not to edit anything)
-- Make Supabase backup
 - Migrate data
+  - ensure all auth users are brought over
+  - add placeholder entries for all current senses in live db
+  - Make Supabase backup (manually trigger) and place as seed
+  - ensure there are placeholder entries for all current senses in prod db before pushing migration
+  - push sql migrations to prod db (making sure the 3 entries dropped columns are uncommented)
+  - run `pnpm -F scripts save-firestore-data` to download Firestore speakers, entries, and users data locally
+  - run migration script
 - Test viewing
-- Merge new saving methods code (this will be a natural unblock)
+- Merge new saving methods code (this will be a natural unblock) and hide Algolia search results
 - Test editing entries
 - Remove notice
 - Email letting everyone know editing is available again
+- Remove algolia keys from vercel
 
 ## Clean-up
+- drop content_updates' table column
+- drop entry_updates
+- clean up old history data in content_updates
+- make alternate writing systems of the sentence translations as different bcp keys (same as for glosses)
 
 ### No lexeme
 no lx for 0svukh699MsB4svuCDdO in ho

@@ -1,10 +1,11 @@
 <script lang="ts">
-  import { browser } from '$app/environment';
-  import { page } from '$app/stores';
-  $: ({can_edit} = $page.data)
+  import { browser } from '$app/environment'
+  import { page } from '$app/stores'
 
-  export let column;
-  export let row;
+  $: ({ can_edit } = $page.data)
+
+  export let column
+  export let row
 </script>
 
 {#if browser}

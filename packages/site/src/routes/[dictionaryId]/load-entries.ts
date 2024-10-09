@@ -29,12 +29,11 @@ async function getCollectionOrError<T>(
   }
 }
 
-export function create_entries_store({ dictionary, show_local_search, t, entries_per_page }: { dictionary: IDictionary, show_local_search: boolean, t: TranslateFunction, entries_per_page: number }) {
+export function create_entries_store({ dictionary, t, entries_per_page }: { dictionary: IDictionary, t: TranslateFunction, entries_per_page: number }) {
   const _entries = new Map<string, ExpandedEntry>()
   const entries = writable(_entries)
 
-  const load_entries_locally = browser && show_local_search
-  if (!load_entries_locally)
+  if (!browser)
     return { entries }
 
   function add(db_entries: ActualDatabaseEntry[]) {

@@ -12,7 +12,8 @@ CREATE TABLE content_updates (
   video_id uuid REFERENCES videos,
   photo_id uuid REFERENCES photos,
   speaker_id uuid REFERENCES speakers,
-  "table" content_tables NOT NULL,
+  -- dialect_id uuid REFERENCES dialects, -- added later
+  "table" content_tables NOT NULL, -- made nullable later as no longer using - will drop down the road
   change jsonb NOT NULL,
   "timestamp" timestamp with time zone NOT NULL DEFAULT now()
   -- import_id uuid -- added later

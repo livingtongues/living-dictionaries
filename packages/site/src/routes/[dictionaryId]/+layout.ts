@@ -10,7 +10,7 @@ import { browser } from '$app/environment'
 import { dbOperations } from '$lib/dbOperations'
 import { search_entries, update_index_entries } from '$lib/search'
 
-export const load: LayoutLoad = async ({ params: { dictionaryId }, parent, url }) => {
+export const load: LayoutLoad = async ({ params: { dictionaryId }, parent }) => {
   try {
     const about_content = await awaitableDocStore<IAbout>(`dictionaries/${dictionaryId}/info/about`)
     const dictionary = await awaitableDocStore<IDictionary>(`dictionaries/${dictionaryId}`)
@@ -21,7 +21,7 @@ export const load: LayoutLoad = async ({ params: { dictionaryId }, parent, url }
     if (!initial_doc)
       redirect(ResponseCodes.MOVED_PERMANENTLY, '/')
 
-    const { t, user, user_from_cookies } = await parent()
+    const { t, user } = await parent()
 
     const is_manager: Readable<boolean> = derived(
       [user, dictionary],
@@ -55,18 +55,8 @@ export const load: LayoutLoad = async ({ params: { dictionaryId }, parent, url }
 
     const speakers = collectionStore<ISpeaker>('speakers', [where('contributingTo', 'array-contains', dictionaryId)], { startWith: [] })
 
-    let user_accessed_local_search = browser && !!localStorage.getItem('user_accessed_local_search')
-    if (browser && !user_accessed_local_search) {
-      if (url.pathname.includes('entries-local')) {
-        user_accessed_local_search = true
-        localStorage.setItem('user_accessed_local_search', 'true')
-      }
-    }
-
-    const show_local_search = user_accessed_local_search || !!user_from_cookies?.roles?.admin
-
     const default_entries_per_page = 20
-    const { entries, status, edited_entries } = create_entries_store({ dictionary: initial_doc, show_local_search, t, entries_per_page: default_entries_per_page })
+    const { entries, status, edited_entries } = create_entries_store({ dictionary: initial_doc, t, entries_per_page: default_entries_per_page })
 
     return {
       dictionary,
@@ -82,7 +72,6 @@ export const load: LayoutLoad = async ({ params: { dictionaryId }, parent, url }
       is_contributor,
       can_edit,
       dbOperations,
-      show_local_search,
       load_partners: async () => await getCollection<Partner>(`dictionaries/${dictionaryId}/partners`),
       load_citation: async () => await getDocument<Citation>(`dictionaries/${dictionaryId}/info/citation`),
     }

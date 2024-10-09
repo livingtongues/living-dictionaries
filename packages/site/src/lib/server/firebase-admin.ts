@@ -1,21 +1,22 @@
-import { type ServiceAccount, cert, getApps, initializeApp, type App } from 'firebase-admin/app'
+import { type App, type ServiceAccount, cert, getApps, initializeApp } from 'firebase-admin/app'
 import { getAuth } from 'firebase-admin/auth'
-import { Firestore, getFirestore } from 'firebase-admin/firestore'
+import type { Firestore } from 'firebase-admin/firestore'
+import { getFirestore } from 'firebase-admin/firestore'
 import { FIREBASE_SERVICE_ACCOUNT_CREDENTIALS } from '$env/static/private'
 
 const SERVICE_ACCOUNT: ServiceAccount & { project_id?: string } = JSON.parse(FIREBASE_SERVICE_ACCOUNT_CREDENTIALS || '{}') // Firebase Admin typings use camelCase but Google Cloud Service Account credentials use snake_case oddly enough
 
-let firebaseAdminApp: App = null;
-let db: Firestore = null;
+let firebaseAdminApp: App = null
+let db: Firestore = null
 
 export function getFirebaseAdminApp(): App {
   if (firebaseAdminApp)
-    return firebaseAdminApp;
+    return firebaseAdminApp
 
-  const currentApps = getApps();
+  const currentApps = getApps()
   if (currentApps.length) {
-    [firebaseAdminApp] = currentApps;
-    return firebaseAdminApp;
+    [firebaseAdminApp] = currentApps
+    return firebaseAdminApp
   }
 
   firebaseAdminApp = initializeApp({
@@ -23,17 +24,17 @@ export function getFirebaseAdminApp(): App {
     databaseURL: `https://${SERVICE_ACCOUNT.project_id}.firebaseio.com`,
   })
 
-  console.info('Firebase Admin initialized on server');
+  console.info('Firebase Admin initialized on server')
 
-  return firebaseAdminApp;
+  return firebaseAdminApp
 }
 
 export function getDb(): Firestore {
   if (db)
-    return db;
+    return db
 
-  db = getFirestore(getFirebaseAdminApp());
-  return db;
+  db = getFirestore(getFirebaseAdminApp())
+  return db
 }
 
 export async function decodeToken(token: string) {
@@ -42,12 +43,10 @@ export async function decodeToken(token: string) {
 
   try {
     return await getAuth(getFirebaseAdminApp()).verifyIdToken(token)
-  }
-  catch (err) {
+  } catch (err) {
     console.error(err)
     throw new Error(`Trouble initializing Firebase and verifying token: ${err}`)
   }
 }
-
 
 // see https://github.com/ManuelDeLeon/sveltekit-firebase-ssr for other possible backend firebase-admin use-cases

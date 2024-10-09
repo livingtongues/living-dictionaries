@@ -1,7 +1,7 @@
 import type { DeprecatedVariant, Viewport } from 'kitbook'
+import type { SenseWithSentences } from '@living-dictionaries/types'
 import type Component from './SupaSense.svelte'
 import { logDbOperations } from '$lib/mocks/db'
-import type { SupaSense } from '$lib/supabase/database.types'
 
 export const viewports: Viewport[] = [{ width: 400, height: 400 }]
 
@@ -11,7 +11,7 @@ const defaultProps = {
   ...logDbOperations,
 }
 
-const fullSense: SupaSense = {
+const full_sense: SenseWithSentences = {
   id: 'sense1',
   glosses: {
     en: 'to be',
@@ -22,6 +22,8 @@ const fullSense: SupaSense = {
   semantic_domains: ['1.1', '2.1'],
   write_in_semantic_domains: ['dinobots', 'autobots'],
   definition: { en: 'I only show when I have a value' },
+  plural_form: null,
+  variant: null,
   sentences: [
     {
       id: 'sentence_1234',
@@ -38,7 +40,7 @@ export const variants: DeprecatedVariant<Component>[] = [
     props: {
       ...defaultProps,
       can_edit: true,
-      sense: fullSense,
+      sense: full_sense,
     },
   },
   {
@@ -55,7 +57,7 @@ export const variants: DeprecatedVariant<Component>[] = [
     name: 'cannot edit, full',
     props: {
       ...defaultProps,
-      sense: fullSense,
+      sense: full_sense,
     },
   },
   {

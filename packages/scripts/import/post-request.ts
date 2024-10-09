@@ -16,6 +16,9 @@ export async function post_request<T extends Record<string, any>, ExpectedRespon
   fetch?: typeof fetch
   headers?: RequestInit['headers']
 }): Promise<Return<ExpectedResponse>> {
+  // for running through data without db involved
+  // return { data: { speaker_id: data?.speaker_id, dialect_id: data?.dialect_id }, error: null }
+
   const fetch_to_use = options?.fetch || fetch
 
   const response = await fetch_to_use(route, {

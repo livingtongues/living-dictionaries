@@ -1,13 +1,13 @@
 import { writeFileSync } from 'node:fs'
 import { execute_sql_query_on_db } from './postgres'
 import { sql_file_string } from './to-sql-string'
-import { users } from './tables'
+import { seed_dictionaries, seed_entries, users } from './tables'
 
 function sql_string_for_all_seeded_tables() {
   return `${sql_file_string('auth.users', users)}
+  ${sql_file_string('dictionaries', seed_dictionaries)}
+  ${sql_file_string('entries', seed_entries)}
   `
-  // ${sql_file_string('dictionaries', seed_dictionaries)}
-// ${sql_file_string('entries', seed_entries)}
 }
 
 export async function reset_db() {

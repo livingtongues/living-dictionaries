@@ -33,9 +33,9 @@
   },
   // Silence stylistic rules in IDE, but still auto fix them
   "eslint.rules.customizations": [
-    { "rule": "@stylistic/*", "severity": "off" },
-    { "rule": "style*", "severity": "off" },
-    { "rule": "*indent", "severity": "off" },
+    { "rule": "style/*", "severity": "off" },
+    { "rule": "format/*", "severity": "off" },
+    { "rule": "*-indent", "severity": "off" },
     { "rule": "*-spacing", "severity": "off" },
     { "rule": "*-spaces", "severity": "off" },
     { "rule": "*-order", "severity": "off" },
@@ -47,6 +47,7 @@
     { "rule": "import/order", "severity": "off" },
     { "rule": "sort-imports", "severity": "off" },
     { "rule": "ts/no-empty-function", "severity": "off" },
+    { "rule": "svelte/indent", "severity": "off" },
   ],
   "eslint.validate": [
     "javascript",

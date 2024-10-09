@@ -1,60 +1,143 @@
-import type { MultiString } from '../.'
+import type { TablesUpdate } from './combined.types'
 
-export interface ContentUpdateRequestBody {
-  id: string // id of the change, a uuidv4 created on client to make things idempotent
-  user_id_from_local?: string
+export interface Change {
+  type: string
+  data: Record<string, any>
+}
+
+export type ContentUpdateRequestBody =
+  | Upsert_Entry
+  | Upsert_Sense
+  | Upsert_Audio
+  | Upsert_Photo
+  | Upsert_Video
+
+  | Upsert_Speaker
+  | Assign_Speaker
+  | Unassign_Speaker
+
+  | Upsert_Dialect
+  | Assign_Dialect
+  | Unassign_Dialect
+
+  | Insert_Sentence
+  | Update_Sentence
+  | Remove_Sentence
+
+interface ContentUpdateBase {
+  update_id: string // id of the change, a uuidv4 created on client to make things idempotent
   auth_token: string
   dictionary_id: string
-  entry_id?: string
-  sense_id?: string
-  sentence_id?: string
-  text_id?: string
-  audio_id?: string
-  video_id?: string
-  photo_id?: string
-  speaker_id?: string
-  table: 'entries' | 'senses' | 'sentences' | 'senses_in_sentences' | 'texts' | 'audio' | 'video' | 'photo' | 'speakers' | 'audio_speakers' | 'video_speakers' | 'sense_videos' | 'sentence_videos' | 'sense_photos' | 'sentence_photos' // handcopied from Database['public']['Enums']['content_tables'] so Supabase types may need brought into @livingdictionaries/types
-  change: {
-    sense?: {
-      glosses?: {
-        new: MultiString
-        old?: MultiString
-      }
-      definition?: {
-        new: MultiString
-        old?: MultiString
-      }
-      noun_class?: {
-        new: string
-        old?: string
-      }
-      parts_of_speech?: {
-        new: string[]
-        old?: string[]
-      }
-      semantic_domains?: {
-        new: string[]
-        old?: string[]
-      }
-      write_in_semantic_domains?: {
-        new: string[]
-        old?: string[]
-      }
-      deleted?: boolean
-    }
-    sentence?: {
-      text?: {
-        new: MultiString
-        old?: MultiString
-      }
-      translation?: {
-        new: MultiString
-        old?: MultiString
-      }
-      removed_from_sense?: boolean // currently also deletes the sentence - later when a sentence can be connected to multiple sentences, use a deleted field to indicate the sentence is deleted everywhere
-      // deleted?: boolean;
-    }
-  }
   import_id?: string
-  timestamp: string
+
+  import_meta?: {
+    user_id?: string
+    timestamp?: string
+  }
+}
+
+interface Upsert_Entry extends ContentUpdateBase {
+  type: 'upsert_entry'
+  data: TablesUpdate<'entries'>
+  entry_id: string
+}
+
+interface Upsert_Dialect extends ContentUpdateBase {
+  type: 'upsert_dialect'
+  data: TablesUpdate<'dialects'>
+  dialect_id: string
+}
+
+interface Assign_Dialect extends ContentUpdateBase {
+  type: 'assign_dialect'
+  data?: null
+  dialect_id: string
+  entry_id: string
+}
+
+interface Unassign_Dialect extends ContentUpdateBase {
+  type: 'unassign_dialect'
+  data?: null
+  dialect_id: string
+  entry_id: string
+}
+
+interface Upsert_Speaker extends ContentUpdateBase {
+  type: 'upsert_speaker'
+  data: TablesUpdate<'speakers'>
+  speaker_id: string
+}
+
+interface Assign_Speaker_Base extends ContentUpdateBase {
+  type: 'assign_speaker'
+  data?: null
+  speaker_id: string
+}
+
+interface Assign_Speaker_With_Audio extends Assign_Speaker_Base {
+  audio_id: string
+  video_id?: never
+}
+
+interface Assign_Speaker_With_Video extends Assign_Speaker_Base {
+  video_id: string
+  audio_id?: never
+}
+
+type Assign_Speaker = Assign_Speaker_With_Audio | Assign_Speaker_With_Video
+
+interface Unassign_Speaker extends ContentUpdateBase {
+  type: 'unassign_speaker'
+  data: { media: 'audio' | 'video' }
+  speaker_id: string
+  media_id: string
+}
+
+interface Upsert_Sense extends ContentUpdateBase {
+  type: 'upsert_sense'
+  data: TablesUpdate<'senses'>
+  sense_id: string
+  entry_id: string
+}
+
+interface Insert_Sentence extends ContentUpdateBase {
+  type: 'insert_sentence'
+  data: TablesUpdate<'sentences'>
+  sentence_id: string
+  sense_id: string
+}
+
+interface Update_Sentence extends ContentUpdateBase {
+  type: 'update_sentence'
+  data: TablesUpdate<'sentences'>
+  sentence_id: string
+}
+
+/** currently also deletes the sentence - later when a sentence can be connected to multiple senses, use a deleted field to indicate the sentence is deleted everywhere */
+interface Remove_Sentence extends ContentUpdateBase {
+  type: 'remove_sentence'
+  sentence_id: string
+  sense_id: string
+  data?: null
+}
+
+interface Upsert_Audio extends ContentUpdateBase {
+  type: 'upsert_audio'
+  data: TablesUpdate<'audio'>
+  audio_id?: string
+  entry_id: string
+}
+
+interface Upsert_Photo extends ContentUpdateBase {
+  type: 'upsert_photo'
+  data: TablesUpdate<'photos'>
+  photo_id?: string
+  sense_id: string
+}
+
+interface Upsert_Video extends ContentUpdateBase {
+  type: 'upsert_video'
+  data: TablesUpdate<'videos'>
+  video_id?: string
+  sense_id: string
 }

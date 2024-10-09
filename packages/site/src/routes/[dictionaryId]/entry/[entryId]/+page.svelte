@@ -4,10 +4,7 @@
   import { seo_description } from './seo_description'
   import { share } from '$lib/helpers/share'
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte'
-  import { goto } from '$app/navigation'
-  import { algoliaQueryParams, lastEntriesUrl } from '$lib/stores/algolia'
   import { page } from '$app/stores'
-  import type { SupaEntry } from '$lib/supabase/database.types'
   import { browser } from '$app/environment'
 
   export let data
@@ -23,7 +20,7 @@
     user,
     dbOperations,
   } = data)
-  let supaEntry: SupaEntry
+  let supaEntry: any // TODO: type this
 
   $: if (browser) {
     supa_entry_promise?.then(({ data: _data }) => {
@@ -32,18 +29,13 @@
       console.info({ supa_err })
     })
   }
-
-  // saved algoliaQueryParams will be overwritten by the gallery view as it turns on the images only facet
-  function backToEntries() {
-    if (!shallow && $lastEntriesUrl)
-      goto($lastEntriesUrl)
-    else
-      history.back()
-  }
 </script>
 
-<div class="flex justify-between items-center mb-3 sticky top-0 z-30 bg-white pt-1">
-  <Button class="!px-2" color="black" form="simple" onclick={backToEntries}>
+<div
+  class:pt-1={!shallow}
+  class:!-top-6={shallow}
+  class="flex justify-between items-center mb-3 sticky  top-0 z-30 bg-white">
+  <Button class="!px-2" color="black" form="simple" onclick={history.back}>
     <i class="fas fa-arrow-left rtl-x-flip" />
     {$page.data.t('misc.back')}
   </Button>
@@ -57,7 +49,7 @@
         color="red"
         form="simple"
         onclick={() =>
-          dbOperations.deleteEntry($entry.id, $dictionary.id, $algoliaQueryParams)}>
+          dbOperations.deleteEntry($entry.id, $dictionary.id)}>
         <span class="hidden md:inline">
           {$page.data.t('misc.delete')}
         </span>

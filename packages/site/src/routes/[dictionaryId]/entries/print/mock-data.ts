@@ -1,6 +1,6 @@
-import type { ActualDatabaseEntry, ISpeaker } from '@living-dictionaries/types';
+import type { ActualDatabaseEntry, ISpeaker } from '@living-dictionaries/types'
 
-const gender: 'm' | 'f' | 'o' = 'f';
+const gender: 'm' | 'f' | 'o' = 'f'
 
 export const speakers: ISpeaker[] = [
   {
@@ -11,7 +11,7 @@ export const speakers: ISpeaker[] = [
     gender,
     uid: 'uwNgSHCEeRaJAUPsmZok1uMRXzO2',
   },
-];
+]
 
 export const entries: ActualDatabaseEntry[] = [
   {
@@ -224,7 +224,7 @@ export const entries: ActualDatabaseEntry[] = [
     },
     id: 'cY1McfcmkJyv6EqHeynb',
   },
-];
+]
 
 export const entriesWithSemanticDomains: ActualDatabaseEntry[] = [
   {
@@ -271,7 +271,7 @@ export const entriesWithSemanticDomains: ActualDatabaseEntry[] = [
     gl: null,
     sdn: [],
   },
-];
+]
 
 export const entriesWithAlternateOrthographies: ActualDatabaseEntry[] = [
   {
@@ -292,7 +292,7 @@ export const entriesWithAlternateOrthographies: ActualDatabaseEntry[] = [
     lo2: '안녕',
     lo3: 'αντίο',
   },
-];
+]
 
 export const entriesWithPhonetics: ActualDatabaseEntry[] = [
   {
@@ -306,7 +306,7 @@ export const entriesWithPhonetics: ActualDatabaseEntry[] = [
     lx: 'Quiet',
     gl: null,
   },
-];
+]
 
 export const entriesWithPartsOfSpeech: ActualDatabaseEntry[] = [
   {
@@ -321,7 +321,7 @@ export const entriesWithPartsOfSpeech: ActualDatabaseEntry[] = [
     gl: null,
     ps: 'pref',
   },
-];
+]
 
 export const entriesWithGlosses: ActualDatabaseEntry[] = [
   {
@@ -345,7 +345,7 @@ export const entriesWithGlosses: ActualDatabaseEntry[] = [
     lx: 'Happy',
     gl: { fi: 'Onnellinen' },
   },
-];
+]
 
 export const entriesWithExampleSentences: ActualDatabaseEntry[] = [
   {
@@ -381,4 +381,4 @@ export const entriesWithExampleSentences: ActualDatabaseEntry[] = [
       vn: 'to witness that even when mind and strength had gone, gratitude and a mutual tenderness still lived on in the heart of men.',
     },
   },
-];
+]

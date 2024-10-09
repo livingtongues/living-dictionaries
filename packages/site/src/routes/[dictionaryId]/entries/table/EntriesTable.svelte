@@ -36,7 +36,7 @@
             selectedColumn = column
           }}
           class:z-10={column.sticky}
-          class="cursor-pointer bg-gray-100 top-0 sticky
+          class="cursor-pointer bg-gray-100 top-0 sticky z-1
             hover:bg-gray-200 active:bg-gray-300 text-xs font-semibold"
           style="{column.sticky
             ? `left:${getLeftValue(i)}px; --border-right-width: 3px;`

@@ -10,10 +10,9 @@
   import { DICTIONARIES_WITH_VARIANTS } from '$lib/constants'
   import EntrySource from '$lib/components/entry/EntrySource.svelte'
   import type { DbOperations } from '$lib/dbOperations'
-  import type { SupaEntry } from '$lib/supabase/database.types'
 
   export let entry: ExpandedEntry
-  export let supaEntry: SupaEntry
+  export let supaEntry: any
   export let dictionary: IDictionary
   export let can_edit = false
   export let videoAccess = false
@@ -22,10 +21,10 @@
   const regularFields = ['plural_form', 'morphology', 'interlinearization', 'notes'] satisfies EntryFieldValue[]
 
   async function addSense() {
-    await dbOperations.update_sense({ entry_id: entry.id, change: { glosses: { new: null } }, sense_id: window.crypto.randomUUID() })
+    await dbOperations.update_sense({ entry_id: entry.id, sense: { glosses: null }, sense_id: window.crypto.randomUUID() })
   }
   async function deleteSense(sense_id: string) {
-    await dbOperations.update_sense({ entry_id: entry.id, change: { deleted: true }, sense_id })
+    await dbOperations.update_sense({ entry_id: entry.id, sense: { deleted: 'yes' }, sense_id })
   }
 
   function updateEntry(data: ActualDatabaseEntry) {

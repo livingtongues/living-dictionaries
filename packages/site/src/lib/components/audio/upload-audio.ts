@@ -16,6 +16,7 @@ export function upload_audio({ file, folder }: { file: File | Blob, folder: stri
   const $user = get(user)
   const customMetadata = {
     uploadedBy: $user.displayName,
+    // @ts-ignore
     originalFileName: file.name,
   }
   // https://firebase.google.com/docs/storage/web/upload-files

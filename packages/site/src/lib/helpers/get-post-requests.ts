@@ -1,19 +1,17 @@
 import { ResponseCodes } from '$lib/constants'
 
-const default_headers: RequestInit['headers'] = {
-  'content-type': 'application/json',
-};
+const default_headers: RequestInit['headers'] = { 'content-type': 'application/json' }
 
 type Return<ExpectedResponse> = {
-  data: ExpectedResponse,
+  data: ExpectedResponse
   error: null
 } | {
-  data: null,
+  data: null
   error: { status: number, message: string }
 }
 
 export async function post_request<T extends Record<string, any>, ExpectedResponse extends Record<string, any>>(route: string, data: T, options?: {
-  fetch?: typeof fetch,
+  fetch?: typeof fetch
   headers?: RequestInit['headers']
 }): Promise<Return<ExpectedResponse>> {
   const fetch_to_use = options?.fetch || fetch
