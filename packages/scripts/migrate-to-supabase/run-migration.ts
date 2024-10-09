@@ -31,23 +31,33 @@ async function run_migration_part_2() {
 async function migrate_all_entries(speakers: AllSpeakerData) {
   const dictionary_dialects: Record<string, Record<string, string>> = {}
   const dictionary_new_speakers: Record<string, Record<string, string>> = {}
+
   const pipeline = Chain.chain([
     fs.createReadStream('./migrate-to-supabase/firestore-data/firestore-entries.json'),
     Parser.parser(),
     StreamArray.streamArray(),
   ])
 
+  const batch = 0 // 0-based index
+  const batch_size = 10000
+  const start_index = batch * batch_size
+  const end_index = start_index + batch_size
   let index = 0
+  let current_entry_id = ''
   try {
     for await (const { value: fb_entry } of pipeline) {
-      const seconds_corrected_entry = remove_seconds_underscore(fb_entry)
-      await migrate_entry(seconds_corrected_entry, speakers, dictionary_dialects, dictionary_new_speakers)
+      if (index >= start_index && index < end_index) {
+        current_entry_id = fb_entry.id
+        const seconds_corrected_entry = remove_seconds_underscore(fb_entry)
+        await migrate_entry(seconds_corrected_entry, speakers, dictionary_dialects, dictionary_new_speakers)
+        if (index % 100 === 0)
+          console.log(`${index}::${current_entry_id}`)
+      }
       index++
-      if (index % 10000 === 0)
-        console.log(`migrated ${index} entries`)
     }
     console.log('finished')
   } catch (err) {
+    console.log(`error at index ${index}, entry: ${current_entry_id}, ${err}`)
     console.error(err)
     pipeline.destroy()
     pipeline.input.destroy()
