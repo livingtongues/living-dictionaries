@@ -1,4 +1,5 @@
 import type { ISpeaker, TablesUpdate } from '@living-dictionaries/types'
+import { jacob_ld_user_id } from '../config-supabase'
 import { seconds_to_timestamp_string } from './convert-entries'
 import { get_supabase_user_id_from_firebase_uid } from './get-user-id'
 
@@ -28,7 +29,7 @@ export function convert_speaker(fb_speaker: ISpeaker): { id: string, speaker: Ta
   if (!createdBy)
     console.log(`Speaker ${displayName} has no createdBy`)
 
-  const created_by = get_supabase_user_id_from_firebase_uid(createdBy)
+  const created_by = get_supabase_user_id_from_firebase_uid(createdBy) || jacob_ld_user_id
 
   const decade_number = (typeof decade === 'string' && decade.trim() !== '')
     ? Number.parseInt(decade)
@@ -43,8 +44,8 @@ export function convert_speaker(fb_speaker: ISpeaker): { id: string, speaker: Ta
     decade: decade_number,
     gender: gender ? gender.trim() as 'm' | 'f' | 'o' : null,
     created_by,
-    updated_by: updatedBy ? get_supabase_user_id_from_firebase_uid(updatedBy) : created_by,
-    user_id: uid ? get_supabase_user_id_from_firebase_uid(uid) : null,
+    updated_by: get_supabase_user_id_from_firebase_uid(updatedBy) || created_by,
+    user_id: get_supabase_user_id_from_firebase_uid(uid) || null,
   }
 
   if (createdAt?.seconds) {

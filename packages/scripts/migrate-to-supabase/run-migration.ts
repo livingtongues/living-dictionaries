@@ -13,19 +13,19 @@ import { remove_seconds_underscore } from './utils/remove-seconds-underscore'
 
 const FOLDER = 'firestore-data'
 
-run_migration_part_1()
+// pnpm -F scripts run-migration
+run_migration_part_2()
 
 async function run_migration_part_1() {
   await seed_local_db_with_production_data() // only on local test runs
   await write_fb_sb_mappings()
-  // console.log(get_supabase_user_id_from_firebase_uid('ywIQgPV2uvdQ4hMjwBCUpLIaV7E2'))
 }
 
 // separate because migrate_speakers imports a file that the first part hasn't yet written
 async function run_migration_part_2() {
   const speakers = await migrate_speakers(firebase_speakers as ISpeaker[])
   // await migrate_entries(entries_to_test, speakers)
-  migrate_all_entries(speakers)
+  await migrate_all_entries(speakers)
 }
 
 async function migrate_all_entries(speakers: AllSpeakerData) {
@@ -38,26 +38,25 @@ async function migrate_all_entries(speakers: AllSpeakerData) {
     StreamArray.streamArray(),
   ])
 
-  const batch = 0 // 0-based index
-  const batch_size = 10000
-  const start_index = batch * batch_size
-  const end_index = start_index + batch_size
+  const start_index = 148000
+  // const end_index = start_index + batch_size
   let index = 0
   let current_entry_id = ''
   try {
     for await (const { value: fb_entry } of pipeline) {
-      if (index >= start_index && index < end_index) {
-        current_entry_id = fb_entry.id
+      // if (index >= start_index && index < end_index) {
+      if (index >= start_index) {
+        current_entry_id = `${fb_entry.dictionary_id}/${fb_entry.id}`
         const seconds_corrected_entry = remove_seconds_underscore(fb_entry)
         await migrate_entry(seconds_corrected_entry, speakers, dictionary_dialects, dictionary_new_speakers)
-        if (index % 100 === 0)
-          console.log(`${index}::${current_entry_id}`)
+        if (index % 500 === 0)
+          console.log(`import reached ${index}`)
       }
       index++
     }
     console.log('finished')
   } catch (err) {
-    console.log(`error at index ${index}, entry: ${current_entry_id}, ${err}`)
+    console.log(`error at index ${index}: _ROOT_/${current_entry_id}, ${err}`)
     console.error(err)
     pipeline.destroy()
     pipeline.input.destroy()

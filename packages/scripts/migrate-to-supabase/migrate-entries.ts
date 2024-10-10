@@ -37,12 +37,24 @@ export async function migrate_entries(entries_to_test: any[], speakers: AllSpeak
   }
 }
 
+// let not_jacob_count = 0
+// let jacob_count = 0
+
 export async function migrate_entry(fb_entry: any, speakers: AllSpeakerData, dictionary_dialects: Record<string, Record<string, string>>, dictionary_new_speakers: Record<string, Record<string, string>>) {
   const [processed_fb_entry_remains, supa_data] = convert_entry(JSON.parse(JSON.stringify(fb_entry)))
   if (Object.keys(processed_fb_entry_remains).length > 0) {
     console.log({ fb_entry, processed_fb_entry_remains, supa_data })
     throw new Error('processed_fb_entry_remains not empty')
   }
+
+  // if (supa_data.audios?.[0]) {
+  //   if (supa_data.audios[0].created_by === jacob_ld_user_id)
+  //     jacob_count++
+  //   else if (supa_data.audios[0].created_by)
+  //     not_jacob_count++
+
+  //   console.log({ jacob_count, not_jacob_count })
+  // }
 
   const { entry, audio_speakers, audios, dialects, photos, sense_photos, sense_videos, senses, senses_in_sentences, sentences, videos, video_speakers, new_speaker_name, prior_import_id } = supa_data
 

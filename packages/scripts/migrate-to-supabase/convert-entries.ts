@@ -387,11 +387,12 @@ export function convert_entry(_entry: ActualDatabaseEntry & Record<string, any>,
       delete sf.mt
       if (!ab && !entry.created_by)
         console.info(`No ab for ${_entry.id} sf`)
+      const created_by = get_supabase_user_id_from_firebase_uid(ab) || entry.created_by
       const audio: TablesInsert<'audio'> = {
         id: audio_id,
         entry_id: _entry.id,
-        created_by: get_supabase_user_id_from_firebase_uid(ab) || entry.created_by,
-        updated_by: get_supabase_user_id_from_firebase_uid(ab) || entry.created_by,
+        created_by,
+        updated_by: created_by,
         storage_path: path,
       }
       delete sf.ab
@@ -430,8 +431,12 @@ export function convert_entry(_entry: ActualDatabaseEntry & Record<string, any>,
         audio_speakers.push({
           audio_id,
           speaker_id,
-          created_by: get_supabase_user_id_from_firebase_uid(ab) || entry.created_by,
-          ...(audio.created_at ? { created_at: audio.created_at } : {}),
+          created_by,
+          ...(audio.created_at
+            ? { created_at: audio.created_at }
+            : entry.created_at
+              ? { created_at: entry.created_at }
+              : {}),
         })
         delete sf.sp
       }
@@ -498,8 +503,12 @@ export function convert_entry(_entry: ActualDatabaseEntry & Record<string, any>,
       sense_photos.push({
         photo_id,
         sense_id: first_sense_from_base.id,
-        created_by: get_supabase_user_id_from_firebase_uid(ab) || entry.created_by,
-        ...(photo.created_at ? { created_at: photo.created_at } : {}),
+        created_by,
+        ...(photo.created_at
+          ? { created_at: photo.created_at }
+          : entry.created_at
+            ? { created_at: entry.created_at }
+            : {}),
       })
       if (!Object.keys(_entry.pf).length)
         delete _entry.pf
@@ -554,15 +563,23 @@ export function convert_entry(_entry: ActualDatabaseEntry & Record<string, any>,
       sense_videos.push({
         video_id,
         sense_id: first_sense_from_base.id,
-        created_by: get_supabase_user_id_from_firebase_uid(ab) || entry.created_by,
-        ...(video.created_at ? { created_at: video.created_at } : {}),
+        created_by,
+        ...(video.created_at
+          ? { created_at: video.created_at }
+          : entry.created_at
+            ? { created_at: entry.created_at }
+            : {}),
       })
       if (sp) {
         video_speakers.push({
           video_id,
           speaker_id: Array.isArray(sp) ? sp[0] : sp,
-          created_by: get_supabase_user_id_from_firebase_uid(ab) || entry.created_by,
-          ...(video.created_at ? { created_at: video.created_at } : {}),
+          created_by,
+          ...(video.created_at
+            ? { created_at: video.created_at }
+            : entry.created_at
+              ? { created_at: entry.created_at }
+              : {}),
         })
         delete vf.sp
       }

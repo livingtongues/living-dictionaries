@@ -2,8 +2,7 @@
 - pnpm -F scripts test:migration
 
 ## TODO
-- use full user seed locally from ld-backup repo and then run data into it in batches
-  - check audio created_by is correct
+- continue running data in batches from 148K+
 - `WHERE entries.deleted IS NULL` Remove this from entries_view and do it in the client when needed to give full control
 - stich entries together client-side with videos, photos, sentences, dialects, speakers, using ids in the entries_view
 - when a many-many relationship is cut off by setting "deleted" to a value, then if that relationship is ever wanted again, it will be a failed insert because the unique constraint is still there. In case of a failed insert, I need a function to just set the deleted property to null
