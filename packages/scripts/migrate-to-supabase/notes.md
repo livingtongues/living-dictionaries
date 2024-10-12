@@ -2,9 +2,12 @@
 - pnpm -F scripts test:migration
 
 ## TODO
-- continue running data in batches from 148K+
-- `WHERE entries.deleted IS NULL` Remove this from entries_view and do it in the client when needed to give full control
+- handle media firebaseConfig.storageBucket
+- delete dialect also updates entry's updated_at? - run tests
+- create indexes using help from index_advisor https://supabase.com/docs/guides/database/extensions/index_advisor
 - stich entries together client-side with videos, photos, sentences, dialects, speakers, using ids in the entries_view
+- dictionary counts
+- continue running data in batches from 148K+
 - when a many-many relationship is cut off by setting "deleted" to a value, then if that relationship is ever wanted again, it will be a failed insert because the unique constraint is still there. In case of a failed insert, I need a function to just set the deleted property to null
 - resolve in UI where photo is edited and relationship is added again (also for videos); resolve issue whereby sense_id is sent with sentence update and will result in a conflict on re-adding the relationship
 - type SupaEntry in [entryId].svelte

@@ -2,10 +2,7 @@
 // import type { BaseUser } from '$lib/supabase/user'
 // import type { AuthResponse } from '@supabase/supabase-js'
 import type { Readable } from 'svelte/store'
-import type { collectionStore } from 'sveltefirets'
-import type { ISpeaker } from '@living-dictionaries/types'
 import type { DbOperations } from '$lib/dbOperations'
-
 // import type { Supabase } from '$lib/supabase/database.types'
 
 declare global {
@@ -18,12 +15,12 @@ declare global {
       t: import('$lib/i18n/types.ts').TranslateFunction
       user: Readable<import('@living-dictionaries/types').IUser>
       admin: Readable<number>
-      // supabase: Supabase
       // authResponse: AuthResponse
 
       // From dictionary layout so all optional
+      // supabase?: Supabase
       dbOperations?: DbOperations
-      speakers?: Awaited<ReturnType<typeof collectionStore<ISpeaker>>>
+      // speakers?: Awaited<ReturnType<typeof collectionStore<ISpeaker>>>
     }
     interface PageState {
       entry_id?: string

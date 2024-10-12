@@ -121,6 +121,7 @@ SELECT
   entries.dictionary_id AS dictionary_id,
   entries.created_at,
   entries.updated_at,
+  entries.deleted,
   jsonb_strip_nulls(
     jsonb_build_object(
       'lexeme', entries.lexeme,
@@ -214,7 +215,6 @@ LEFT JOIN (
   WHERE videos.deleted IS NULL AND sense_videos.deleted IS NULL
   GROUP BY sense_videos.sense_id
 ) AS aggregated_video_ids ON aggregated_video_ids.sense_id = senses.id
-WHERE entries.deleted IS NULL -- TODO: Remove this and do it in the client when needed to give full control
 GROUP BY entries.id;
 
 -- Entries loading plan:
@@ -277,7 +277,7 @@ CREATE OR REPLACE FUNCTION update_sense_updated_at()
 RETURNS TRIGGER AS $$
 BEGIN
   UPDATE senses
-  SET updated_at = COALESCE(NEW.created_at, OLD.created_at, NOW())
+  SET updated_at = COALESCE(NEW.created_at, NOW())
   WHERE id = NEW.sense_id;
   
   RETURN NEW;
@@ -298,6 +298,24 @@ CREATE TRIGGER update_sense_updated_at_sense_videos
 AFTER INSERT OR UPDATE ON sense_videos
 FOR EACH ROW
 EXECUTE FUNCTION update_sense_updated_at();
+
+-- TODO: test these and also test the OLD.created_at above when deleting relationships (shouldn't use OLD.created_at)
+
+CREATE OR REPLACE FUNCTION update_audio_updated_at()
+RETURNS TRIGGER AS $$
+BEGIN
+  UPDATE audio
+  SET updated_at = COALESCE(NEW.created_at, NOW())
+  WHERE id = NEW.audio_id;
+  
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER update_audio_updated_at_audio_speakers
+AFTER INSERT OR UPDATE ON audio_speakers
+FOR EACH ROW
+EXECUTE FUNCTION update_audio_updated_at();
 
 ------------------
 

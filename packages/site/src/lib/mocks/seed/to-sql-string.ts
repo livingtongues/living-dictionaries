@@ -24,16 +24,29 @@ function convert_to_sql_string(value: string | number | object) {
   throw new Error(`${value} has an unexpected value type: ${typeof value}`)
 }
 
-export function sql_file_string(table_name: keyof Database['public']['Tables'] | 'auth.users', rows: object[]) {
+export function sql_file_string(table_name: keyof Database['public']['Tables'] | 'auth.users', rows: {
+  id?: number | string
+  [key: string]: any
+}[], operation: 'INSERT' | 'UPSERT' | 'UPDATE' = 'INSERT') {
   const column_names = Object.keys(rows[0]).sort()
   const column_names_string = `"${column_names.join('", "')}"`
 
-  const values_string = rows.map((row) => {
-    const values = column_names.map(column => convert_to_sql_string(row[column]))
-    return `(${values.join(', ')})`
-  }).join(',\n')
+  if (operation === 'INSERT' || operation === 'UPSERT') {
+    const values_string = rows.map((row) => {
+      const values = column_names.map(column => convert_to_sql_string(row[column]))
+      return `(${values.join(', ')})`
+    }).join(',\n')
 
-  return `INSERT INTO ${table_name} (${column_names_string}) VALUES\n${values_string};`
+    return `${operation} INTO ${table_name} (${column_names_string}) VALUES\n${values_string};`
+  } else if (operation === 'UPDATE') {
+    const update_statements = rows.map((row) => {
+      const set_clause = column_names.map(column => `"${column}" = ${convert_to_sql_string(row[column])}`).join(', ')
+      const where_clause = `"id" = ${convert_to_sql_string(row.id)}`
+      return `UPDATE ${table_name} SET ${set_clause} WHERE ${where_clause};`
+    }).join('\n')
+
+    return update_statements
+  }
 }
 
 if (import.meta.vitest) {

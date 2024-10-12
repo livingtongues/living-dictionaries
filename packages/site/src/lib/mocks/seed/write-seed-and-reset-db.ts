@@ -11,7 +11,7 @@ function sql_string_for_all_seeded_tables() {
 }
 
 export async function reset_db() {
-  console.info('reseting db from seed sql')
+  console.info('reseting db')
 
   await execute_sql_query_on_db(`truncate table auth.users cascade;`)
   await execute_sql_query_on_db('truncate table senses cascade;')
