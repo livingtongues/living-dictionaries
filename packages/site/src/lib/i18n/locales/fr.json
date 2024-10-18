@@ -40,7 +40,7 @@
     "contributor_awards": "Récompenses de la communauté des contributeurs",
     "question_1": "Veuillez fournir quelques informations générales sur cette langue. Où est-il parlé ? Quelles communautés parlent cette langue ? Cette langue est-elle en danger ?",
     "question_2": "Quels sont les noms des personnes qui ont construit ce dictionnaire ? À qui appartiennent les voix de ce dictionnaire ?",
-    "question_3": "D’où proviennent les données de ce dictionnaire ? Veuillez décrire si vous avez collecté les données vous-même. Si vous avez utilisé des sources de référence publiées, veuillez les énumérer.",
+    "question_3": "D’où viennent les données de ce dictionnaire ? Veuillez décrire si vous avez collecté les données vous-même. Si vous avez utilisé des sources de référence publiées, veuillez les énumérer.",
     "question_4": "Qui utilisera ce dictionnaire ? Sera-t-il utilisé dans des projets éducatifs ?",
     "question_5": "Si vous souhaitez que le public vous contacte à propos de ce projet, veuillez fournir vos coordonnées ou un lien vers où les gens peuvent en savoir plus. Ceci est facultatif.",
     "message": "Avant de rendre votre dictionnaire public, veuillez remplir la section À propos."
@@ -131,7 +131,7 @@
     "select_region": "Sélectionnez une région",
     "secondary_coordinates": "Coordonnées secondaires",
     "map_instructions": "Cliquez sur la carte pour ajouter des coordonnées secondaires.",
-    "print_access": "Autoriser les téléspectateurs à imprimer le dictionnaire",
+    "print_access": "Autoriser les spectateurs à imprimer le dictionnaire",
     "primary_coordinate": "Coordonnée principale"
   },
   "dictionary": {
@@ -366,5 +366,9 @@
   "sense": {
     "sense": "Sens",
     "add": "Ajouter un sens"
+  },
+  "banner": {
+    "message": "Nous apportons des améliorations à notre base de données le 22 octobre à partir de 19 heures, heure de l'Est (New York), pendant 24 heures. Les capacités d'édition ne seront pas disponibles pendant cette période. Désolé pour le dérangement.",
+    "attention": "Attention"
   }
 }

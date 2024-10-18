@@ -366,5 +366,9 @@
   "sense": {
     "sense": "",
     "add": ""
+  },
+  "banner": {
+    "message": "",
+    "attention": ""
   }
 }
