@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto'
 import { json, error as kit_error } from '@sveltejs/kit'
 import type { ContentUpdateRequestBody, TablesInsert } from '@living-dictionaries/types'
 import type { RequestHandler } from './$types'
@@ -58,6 +59,15 @@ export const POST: RequestHandler = async ({ request }) => {
       created_at: timestamp,
     }
 
+    const u_meta = {
+      updated_by: user_id,
+      updated_at: timestamp,
+    }
+
+    if (data?.deleted) {
+      data.deleted = timestamp
+    }
+
     const { data: dictionary } = await admin_supabase.from('dictionaries').select().eq('id', dictionary_id).single()
     if (!dictionary) {
       const { error } = await admin_supabase.from('dictionaries').insert({
@@ -71,29 +81,52 @@ export const POST: RequestHandler = async ({ request }) => {
       }
     }
 
-    if (type === 'upsert_entry') {
-      const { error } = await admin_supabase.from('entries')
-        .upsert({
-          ...c_u_meta,
-          ...data,
-          dictionary_id,
-          id: body.entry_id,
-          ...(data.deleted && { deleted: timestamp }),
-        } as TablesInsert<'entries'>)
+    if (type === 'insert_entry') {
+      const { error } = await admin_supabase.from('entries').insert({
+        ...c_u_meta,
+        ...data,
+        dictionary_id,
+        id: body.entry_id,
+      })
+      if (error) {
+        console.info({ body })
+        throw new Error(error.message)
+      }
+
+      if (!import_id) {
+        const { data: sense_data, error: sense_error } = await admin_supabase.from('senses')
+          .insert({
+            ...c_u_meta,
+            id: randomUUID(),
+            entry_id: body.entry_id,
+          })
+        if (sense_error) {
+          console.info({ body })
+          throw new Error(sense_error.message)
+        }
+        // @ts-expect-error
+        body.sense_id = sense_data?.id
+      }
+    }
+
+    if (type === 'update_entry') {
+      const { error } = await admin_supabase.from('entries').update({
+        ...u_meta,
+        ...data,
+      }).eq('id', body.entry_id)
       if (error) {
         console.info({ body })
         throw new Error(error.message)
       }
     }
 
-    if (type === 'upsert_sense') {
+    if (type === 'insert_sense') {
       const { error } = await admin_supabase.from('senses')
-        .upsert({
+        .insert({
           ...c_u_meta,
           ...data,
-          id: body.sense_id,
+          id: body.sense_id || randomUUID(),
           entry_id: body.entry_id,
-          ...(data.deleted && { deleted: timestamp }),
         })
       if (error) {
         console.info({ body })
@@ -101,15 +134,25 @@ export const POST: RequestHandler = async ({ request }) => {
       }
     }
 
-    if (type === 'upsert_dialect') {
+    if (type === 'update_sense') {
+      const { error } = await admin_supabase.from('senses').update({
+        ...u_meta,
+        ...data,
+      }).eq('id', body.sense_id)
+      if (error) {
+        console.info({ body })
+        throw new Error(error.message)
+      }
+    }
+
+    if (type === 'insert_dialect') {
       const { error } = await admin_supabase.from('dialects')
-        .upsert({
+        .insert({
           ...c_u_meta,
           ...data,
           dictionary_id,
           id: body.dialect_id,
-          ...(data.deleted && { deleted: timestamp }),
-        } as TablesInsert<'dialects'>)
+        })
       if (error) {
         console.info({ body })
         throw new Error(error.message)
@@ -118,10 +161,11 @@ export const POST: RequestHandler = async ({ request }) => {
 
     if (type === 'assign_dialect') {
       const { error } = await admin_supabase.from('entry_dialects')
-        .insert({
+        .upsert({
           ...c_meta,
           dialect_id: body.dialect_id,
           entry_id: body.entry_id,
+          deleted: data?.deleted ? timestamp : null,
         })
       if (error) {
         console.info({ body })
@@ -136,7 +180,6 @@ export const POST: RequestHandler = async ({ request }) => {
           ...data,
           dictionary_id,
           id: body.speaker_id,
-          ...(data.deleted && { deleted: timestamp }),
         } as TablesInsert<'speakers'>)
       if (error) {
         console.info({ body })
@@ -146,10 +189,11 @@ export const POST: RequestHandler = async ({ request }) => {
 
     if (type === 'assign_speaker' && body.audio_id) {
       const { error } = await admin_supabase.from('audio_speakers')
-        .insert({
+        .upsert({
           ...c_meta,
           speaker_id: body.speaker_id,
           audio_id: body.audio_id,
+          deleted: data?.deleted ? timestamp : null,
         })
       if (error) {
         console.info({ body })
@@ -159,25 +203,11 @@ export const POST: RequestHandler = async ({ request }) => {
 
     if (type === 'assign_speaker' && body.video_id) {
       const { error } = await admin_supabase.from('video_speakers')
-        .insert({
+        .upsert({
           ...c_meta,
           speaker_id: body.speaker_id,
           video_id: body.video_id,
-        })
-      if (error) {
-        console.info({ body })
-        throw new Error(error.message)
-      }
-    }
-
-    if (type === 'insert_sentence' || type === 'update_sentence') {
-      const { error } = await admin_supabase.from('sentences')
-        .upsert({
-          ...c_u_meta,
-          ...data,
-          dictionary_id,
-          id: body.sentence_id,
-          ...(data.deleted && { deleted: timestamp }),
+          deleted: data?.deleted ? timestamp : null,
         })
       if (error) {
         console.info({ body })
@@ -186,56 +216,77 @@ export const POST: RequestHandler = async ({ request }) => {
     }
 
     if (type === 'insert_sentence') {
-      const { error } = await admin_supabase.from('senses_in_sentences')
+      const { error } = await admin_supabase.from('sentences')
         .insert({
-          ...c_meta,
-          sentence_id: body.sentence_id,
-          sense_id: body.sense_id,
+          ...c_u_meta,
+          ...data,
+          dictionary_id,
+          id: body.sentence_id,
         })
       if (error) {
         console.info({ body })
         throw new Error(error.message)
       }
+
+      const { error: connect_error } = await admin_supabase.from('senses_in_sentences')
+        .insert({
+          ...c_meta,
+          sentence_id: body.sentence_id,
+          sense_id: body.sense_id,
+        })
+      if (connect_error) {
+        console.info({ body })
+        throw new Error(connect_error.message)
+      }
     }
 
-    if (type === 'remove_sentence') {
-      const { error: delete_error } = await admin_supabase.from('senses_in_sentences')
-        .update({ deleted: timestamp })
-        .eq('sentence_id', body.sentence_id)
-        .eq('sense_id', body.sense_id)
-      if (delete_error)
-        throw new Error(delete_error.message)
-
-      const { error: update_error } = await admin_supabase.from('sentences')
-        .update({ deleted: timestamp })
-        .eq('id', body.sentence_id)
-      if (update_error)
-        throw new Error(update_error.message)
-    }
-
-    if (type === 'upsert_audio') {
-      const { error } = await admin_supabase.from('audio')
-        .upsert({
-          ...c_u_meta,
+    if (type === 'update_sentence') {
+      const { error } = await admin_supabase.from('sentences')
+        .update({
+          ...u_meta,
           ...data,
-          id: body.audio_id,
-          entry_id: body.entry_id,
-          ...(data.deleted && { deleted: timestamp }),
-        } as TablesInsert<'audio'>)
+        })
+        .eq('id', body.sentence_id)
       if (error) {
         console.info({ body })
         throw new Error(error.message)
       }
     }
 
-    if (type === 'upsert_photo') {
-      const { error } = await admin_supabase.from('photos')
-        .upsert({
+    if (type === 'upsert_audio') {
+      if (body.entry_id) {
+        const { error } = await admin_supabase.from('audio').upsert({
           ...c_u_meta,
           ...data,
+          dictionary_id,
+          id: body.audio_id,
+          entry_id: body.entry_id,
+        } as TablesInsert<'audio'>)
+        if (error) {
+          console.info({ body })
+          throw new Error(error.message)
+        }
+      } else {
+        const { error } = await admin_supabase.from('audio').update({
+          ...u_meta,
+          ...data,
+        })
+          .eq('id', body.audio_id)
+        if (error) {
+          console.info({ body })
+          throw new Error(error.message)
+        }
+      }
+    }
+
+    if (type === 'insert_photo') {
+      const { error } = await admin_supabase.from('photos')
+        .insert({
+          ...c_u_meta,
+          ...data,
+          dictionary_id,
           id: body.photo_id,
-          ...(data.deleted && { deleted: timestamp }),
-        } as TablesInsert<'photos'>)
+        })
       if (error) {
         console.info({ body })
         throw new Error(error.message)
@@ -251,14 +302,27 @@ export const POST: RequestHandler = async ({ request }) => {
         throw new Error(connect_error.message)
     }
 
-    if (type === 'upsert_video') {
+    if (type === 'update_photo') {
+      const { error } = await admin_supabase.from('photos')
+        .update({
+          ...u_meta,
+          ...data,
+        })
+        .eq('id', body.photo_id)
+      if (error) {
+        console.info({ body })
+        throw new Error(error.message)
+      }
+    }
+
+    if (type === 'insert_video') {
       const { error } = await admin_supabase.from('videos')
-        .upsert({
+        .insert({
           ...c_u_meta,
           ...data,
+          dictionary_id,
           id: body.video_id,
-          ...(data.deleted && { deleted: timestamp }),
-        } as TablesInsert<'videos'>)
+        })
       if (error) {
         console.info({ body })
         throw new Error(error.message)
@@ -272,6 +336,19 @@ export const POST: RequestHandler = async ({ request }) => {
         })
       if (connect_error)
         throw new Error(connect_error.message)
+    }
+
+    if (type === 'update_video') {
+      const { error } = await admin_supabase.from('videos')
+        .update({
+          ...u_meta,
+          ...data,
+        })
+        .eq('id', body.video_id)
+      if (error) {
+        console.info({ body })
+        throw new Error(error.message)
+      }
     }
 
     const { data: content_update, error } = await admin_supabase.from('content_updates').insert({
@@ -303,7 +380,7 @@ export const POST: RequestHandler = async ({ request }) => {
       // @ts-expect-error
       ...(body.video_id && { video_id: body.video_id }),
       // This is the properly typed version but much more verbose as requires one for each change type
-      // ...(type === 'upsert_sense' && { sense_id: body.sense_id, entry_id: body.entry_id }),
+      // ...(type === 'insert_sense' && { sense_id: body.sense_id, entry_id: body.entry_id }),
     })
       .select()
       .single()

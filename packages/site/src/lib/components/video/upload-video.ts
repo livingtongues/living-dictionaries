@@ -1,28 +1,30 @@
 import { getStorage, ref, uploadBytesResumable } from 'firebase/storage'
 import { type Readable, get, writable } from 'svelte/store'
+import type { IVideoCustomMetadata } from '@living-dictionaries/types'
 import { page } from '$app/stores'
 
-export interface AudioVideoUploadStatus {
+export interface VideoUploadStatus {
   progress: number
   error?: string
   storage_path?: string
 }
 
-export function upload_audio({ file, folder }: { file: File | Blob, folder: string }): Readable<AudioVideoUploadStatus> {
-  const { set, subscribe } = writable<AudioVideoUploadStatus>({ progress: 0 })
-  const [,fileTypeSuffix] = file.type.split('/')
+export function upload_video({ file, folder }: { file: File | Blob, folder: string }): Readable<VideoUploadStatus> {
+  const { set, subscribe } = writable<VideoUploadStatus>({ progress: 0 })
+  const [fileTypeSuffix] = file.type.split('/')[1].split(';') // turns 'video/webm;codecs=vp8,opus' to 'webm' and 'video/mp4' to 'mp4'
   const storage_path = `${folder}/${new Date().getTime()}.${fileTypeSuffix}`
   const { data: { user } } = get(page)
   const $user = get(user)
-  const customMetadata = {
-    uploadedBy: $user.displayName,
+  const customMetadata: IVideoCustomMetadata & Record<string, string> = {
+    uploadedByUid: $user.uid,
+    uploadedByName: $user.displayName,
     // @ts-ignore
     originalFileName: file.name,
   }
   // https://firebase.google.com/docs/storage/web/upload-files
   const storage = getStorage()
-  const audioRef = ref(storage, storage_path)
-  const uploadTask = uploadBytesResumable(audioRef, file, { customMetadata })
+  const videoRef = ref(storage, storage_path)
+  const uploadTask = uploadBytesResumable(videoRef, file, { customMetadata })
 
   uploadTask.on(
     'state_changed',

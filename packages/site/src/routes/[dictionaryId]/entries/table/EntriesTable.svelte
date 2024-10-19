@@ -3,7 +3,7 @@
   import ColumnTitle from './ColumnTitle.svelte'
   import Cell from './Cell.svelte'
   import { setUpColumns } from './setUpColumns'
-  import { minutesAgo } from '$lib/helpers/time'
+  import { minutes_ago_in_ms } from '$lib/helpers/time'
   import { browser } from '$app/environment'
   import type { DbOperations } from '$lib/dbOperations'
 
@@ -46,7 +46,7 @@
       {/each}
     </tr>
     {#each entries as entry (entry.id)}
-      {@const updated_within_last_5_minutes = can_edit && (entry.ua?.toMillis?.() || (entry.ua?.seconds * 1000)) > minutesAgo(5)}
+      {@const updated_within_last_5_minutes = can_edit && (entry.ua?.toMillis?.() || (entry.ua?.seconds * 1000)) > minutes_ago_in_ms(5)}
       <tr class="row-hover">
         {#each columns as column, i}
           <td

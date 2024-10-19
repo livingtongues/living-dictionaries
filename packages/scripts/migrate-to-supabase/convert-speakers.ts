@@ -1,4 +1,5 @@
-import type { ISpeaker, TablesUpdate } from '@living-dictionaries/types'
+import type { TablesUpdate } from '@living-dictionaries/types'
+import type { ISpeaker } from '@living-dictionaries/types/speaker.interface'
 import { jacob_ld_user_id } from '../config-supabase'
 import { seconds_to_timestamp_string } from './convert-entries'
 import { get_supabase_user_id_from_firebase_uid } from './get-user-id'

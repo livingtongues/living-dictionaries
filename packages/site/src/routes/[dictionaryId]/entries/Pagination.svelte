@@ -2,7 +2,7 @@
   import PaginationButtons from './PaginationButtons.svelte'
   import type { DbOperations } from '$lib/dbOperations'
 
-  export let addNewEntry: DbOperations['addNewEntry']
+  export let add_entry: DbOperations['insert_entry']
   export let can_edit = false
   export let page_from_url: number
   export let number_of_pages: number
@@ -18,7 +18,7 @@
 
 {#if can_edit}
   {#await import('./AddEntry.svelte') then { default: AddEntry }}
-    <AddEntry {addNewEntry} class="text-nowrap sticky bottom-3 z-10 !md:hidden !print:hidden" />
+    <AddEntry {add_entry} class="text-nowrap sticky bottom-3 z-10 !md:hidden !print:hidden" />
   {/await}
 {/if}
 
@@ -27,7 +27,7 @@
     {#if can_edit}
       <div class="w-3 mr-auto" />
       {#await import('./AddEntry.svelte') then { default: AddEntry }}
-        <AddEntry {addNewEntry} class="text-nowrap hidden md:block" />
+        <AddEntry {add_entry} class="text-nowrap hidden md:block" />
       {/await}
     {/if}
   </PaginationButtons>

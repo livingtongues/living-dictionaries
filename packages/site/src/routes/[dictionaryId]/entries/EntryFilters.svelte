@@ -1,7 +1,7 @@
 <script lang="ts">
   import { Button, type QueryParamStore, ResponsiveSlideover } from 'svelte-pieces'
   import type { FacetResult } from '@orama/orama'
-  import type { ISpeaker } from '@living-dictionaries/types'
+  import type { Tables } from '@living-dictionaries/types'
   import ToggleFacet from './ToggleFacet.svelte'
   import ClearFilters from './ClearFilters.svelte'
   import FilterList from './FilterList.svelte'
@@ -12,7 +12,7 @@
   export let show_mobile_filters = false
   export let on_close: () => void
   export let result_facets: FacetResult
-  export let speakers: ISpeaker[]
+  export let speakers: Tables<'speakers_view'>[]
 </script>
 
 <ResponsiveSlideover
@@ -60,7 +60,7 @@
             search_param_key="speakers"
             values={result_facets._speakers.values}
             speaker_ids_to_names={speakers?.reduce((acc, speaker) => {
-              acc[speaker.id] = speaker.displayName
+              acc[speaker.id] = speaker.name
               return acc
             }, {})}
             label={$page.data.t('entry_field.speaker')} />

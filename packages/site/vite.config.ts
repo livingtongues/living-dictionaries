@@ -29,6 +29,8 @@ export default defineConfig({
       // 'kitbook',
       // 'kitbook/viewer/load-viewer',
       // '@turf/turf',
+      'wavesurfer.js',
+      'recordrtc',
     ],
     exclude: [ // if the dependency is small, ESM, no CJS imports, then exclude and let the browser load directly - https://vitejs.dev/guide/dep-pre-bundling.html
       'comlink',

@@ -14,6 +14,7 @@ export interface Database {
           created_at: string
           created_by: string
           deleted: string | null
+          dictionary_id: string
           entry_id: string | null
           id: string
           sentence_id: string | null
@@ -27,6 +28,7 @@ export interface Database {
           created_at?: string
           created_by: string
           deleted?: string | null
+          dictionary_id: string
           entry_id?: string | null
           id?: string
           sentence_id?: string | null
@@ -40,6 +42,7 @@ export interface Database {
           created_at?: string
           created_by?: string
           deleted?: string | null
+          dictionary_id?: string
           entry_id?: string | null
           id?: string
           sentence_id?: string | null
@@ -62,6 +65,13 @@ export interface Database {
             columns: ['created_by']
             isOneToOne: false
             referencedRelation: 'users'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'audio_dictionary_id_fkey'
+            columns: ['dictionary_id']
+            isOneToOne: false
+            referencedRelation: 'dictionaries'
             referencedColumns: ['id']
           },
           {
@@ -731,6 +741,7 @@ export interface Database {
           created_at: string
           created_by: string
           deleted: string | null
+          dictionary_id: string
           id: string
           photographer: string | null
           serving_url: string
@@ -743,6 +754,7 @@ export interface Database {
           created_at?: string
           created_by: string
           deleted?: string | null
+          dictionary_id: string
           id?: string
           photographer?: string | null
           serving_url: string
@@ -755,6 +767,7 @@ export interface Database {
           created_at?: string
           created_by?: string
           deleted?: string | null
+          dictionary_id?: string
           id?: string
           photographer?: string | null
           serving_url?: string
@@ -776,6 +789,13 @@ export interface Database {
             columns: ['created_by']
             isOneToOne: false
             referencedRelation: 'users'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'photos_dictionary_id_fkey'
+            columns: ['dictionary_id']
+            isOneToOne: false
+            referencedRelation: 'dictionaries'
             referencedColumns: ['id']
           },
           {
@@ -1470,6 +1490,7 @@ export interface Database {
           created_at: string
           created_by: string
           deleted: string | null
+          dictionary_id: string
           hosted_elsewhere: Json | null
           id: string
           source: string | null
@@ -1483,6 +1504,7 @@ export interface Database {
           created_at?: string
           created_by: string
           deleted?: string | null
+          dictionary_id: string
           hosted_elsewhere?: Json | null
           id?: string
           source?: string | null
@@ -1496,6 +1518,7 @@ export interface Database {
           created_at?: string
           created_by?: string
           deleted?: string | null
+          dictionary_id?: string
           hosted_elsewhere?: Json | null
           id?: string
           source?: string | null
@@ -1518,6 +1541,13 @@ export interface Database {
             columns: ['created_by']
             isOneToOne: false
             referencedRelation: 'users'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'videos_dictionary_id_fkey'
+            columns: ['dictionary_id']
+            isOneToOne: false
+            referencedRelation: 'dictionaries'
             referencedColumns: ['id']
           },
           {
@@ -1549,6 +1579,7 @@ export interface Database {
         Row: {
           audios: Json | null
           created_at: string | null
+          deleted: string | null
           dialect_ids: Json | null
           dictionary_id: string | null
           id: string | null
@@ -1570,6 +1601,7 @@ export interface Database {
         Row: {
           audios: Json | null
           created_at: string | null
+          deleted: string | null
           dialect_ids: Json | null
           dictionary_id: string | null
           id: string | null
@@ -1592,6 +1624,7 @@ export interface Database {
           birthplace: string | null
           created_at: string | null
           decade: number | null
+          deleted: string | null
           dictionary_id: string | null
           gender: Database['public']['Enums']['gender'] | null
           id: string | null
@@ -1602,6 +1635,7 @@ export interface Database {
           birthplace?: string | null
           created_at?: string | null
           decade?: number | null
+          deleted?: string | null
           dictionary_id?: string | null
           gender?: Database['public']['Enums']['gender'] | null
           id?: string | null
@@ -1612,6 +1646,7 @@ export interface Database {
           birthplace?: string | null
           created_at?: string | null
           decade?: number | null
+          deleted?: string | null
           dictionary_id?: string | null
           gender?: Database['public']['Enums']['gender'] | null
           id?: string | null
@@ -1652,6 +1687,8 @@ export interface Database {
       videos_view: {
         Row: {
           created_at: string | null
+          deleted: string | null
+          dictionary_id: string | null
           hosted_elsewhere: Json | null
           id: string | null
           source: string | null
@@ -1662,6 +1699,13 @@ export interface Database {
           videographer: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: 'videos_dictionary_id_fkey'
+            columns: ['dictionary_id']
+            isOneToOne: false
+            referencedRelation: 'dictionaries'
+            referencedColumns: ['id']
+          },
           {
             foreignKeyName: 'videos_text_id_fkey'
             columns: ['text_id']

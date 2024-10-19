@@ -1,9 +1,9 @@
 import type { MultiString } from '../gloss.interface'
 import type { Coordinates } from '../coordinates.interface'
 import type { DictionaryPhoto } from '../photo.interface'
-import type { HostedVideo, SenseWithSentences, UnsupportedFields } from '../.'
+import type { HostedVideo, UnsupportedFields } from '../.'
 import type { Change } from './content-update.interface'
-import type { AudioWithSpeakerIds, EntryMainFields } from './sense.interface'
+import type { AudioWithSpeakerIds, EntryMainFields, SenseWithSentences } from './entry.interface'
 
 export interface DatabaseAugments {
   public: {

@@ -1,19 +1,19 @@
 <script lang="ts">
   import { ShowHide, longpress } from 'svelte-pieces'
-  import type { ExpandedEntry } from '@living-dictionaries/types'
+  import type { EntryView } from '@living-dictionaries/types'
   import { page } from '$app/stores'
 
-  export let entry: ExpandedEntry
-  // export let sound_file: ExpandedAudio; // TODO
+  export let entry: EntryView
   export let context: 'list' | 'table' | 'entry'
   export let can_edit = false
+  $: ({ url_from_storage_path } = $page.data)
 
-  $: sound_file = entry.sound_files?.[0]
+  $: sound_file = entry.audios?.[0]
 
   let playing = false
 
   function initAudio() {
-    const audio = new Audio(sound_file.storage_url)
+    const audio = new Audio(url_from_storage_path(sound_file.storage_path))
     audio.play()
     playing = true
     audio.addEventListener('ended', () => {

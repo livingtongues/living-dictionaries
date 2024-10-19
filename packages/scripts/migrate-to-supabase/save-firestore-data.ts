@@ -1,7 +1,9 @@
 import fs from 'node:fs'
 import path, { dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import type { ActualDatabaseEntry, ISpeaker, IUser } from '@living-dictionaries/types'
+import type { IUser } from '@living-dictionaries/types'
+import type { ActualDatabaseEntry } from '@living-dictionaries/types/entry.interface'
+import type { ISpeaker } from '@living-dictionaries/types/speaker.interface'
 import { db } from '../config-firebase'
 
 const FOLDER = 'firestore-data'

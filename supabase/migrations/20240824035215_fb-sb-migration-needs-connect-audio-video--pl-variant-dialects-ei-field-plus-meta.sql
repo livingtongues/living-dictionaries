@@ -53,13 +53,18 @@ ALTER COLUMN notes TYPE jsonb USING notes::jsonb, -- MultiString (was text previ
 ADD COLUMN unsupported_fields jsonb, -- to place fields from imports like FLEx that don't fit into the current fields
 ADD COLUMN elicitation_id text; -- Elicitation Id for Munda languages or Swadesh Composite number list from Comparalex, used for Onondaga custom sort
 
+ALTER TABLE photos
+ADD COLUMN dictionary_id text NOT NULL REFERENCES dictionaries ON DELETE CASCADE;
+
 ALTER TABLE audio
+ADD COLUMN dictionary_id text NOT NULL REFERENCES dictionaries ON DELETE CASCADE,
 ADD COLUMN entry_id text REFERENCES entries,
 ADD COLUMN sentence_id uuid REFERENCES sentences,
 ADD COLUMN text_id uuid REFERENCES texts;
 
 ALTER TABLE videos
 ALTER COLUMN storage_path DROP NOT NULL,
+ADD COLUMN dictionary_id text NOT NULL REFERENCES dictionaries ON DELETE CASCADE,
 ADD COLUMN hosted_elsewhere jsonb, -- Hosted elsewhere (e.g. YouTube, Vimeo, etc.)
 ADD COLUMN text_id uuid REFERENCES texts;
 
@@ -68,20 +73,20 @@ ADD CONSTRAINT foreign_key_entries
 FOREIGN KEY (entry_id) REFERENCES entries(id);
 
 ALTER TABLE speakers
-ADD COLUMN dictionary_id text NOT NULL REFERENCES dictionaries;
+ADD COLUMN dictionary_id text NOT NULL REFERENCES dictionaries ON DELETE CASCADE;
 
 CREATE OR REPLACE VIEW speakers_view AS
 SELECT
-  speakers.id AS id,
-  speakers.dictionary_id AS dictionary_id,
-  speakers.name AS "name",
-  speakers.decade AS decade,
-  speakers.gender AS gender,
-  speakers.birthplace AS birthplace,
-  speakers.created_at AS created_at,
-  speakers.updated_at AS updated_at
-FROM speakers
-WHERE speakers.deleted IS NULL;
+  id,
+  dictionary_id,
+  name,
+  decade,
+  gender,
+  birthplace,
+  created_at,
+  updated_at,
+  deleted
+FROM speakers;
 
 CREATE POLICY "Anyone can view sentences"
 ON sentences 
@@ -94,6 +99,7 @@ FOR SELECT USING (true);
 CREATE OR REPLACE VIEW videos_view AS
 SELECT
   videos.id AS id,
+  videos.dictionary_id AS dictionary_id,
   videos.storage_path AS storage_path,
   videos.source AS source,
   videos.videographer AS videographer,
@@ -101,7 +107,8 @@ SELECT
   videos.text_id AS text_id,
   video_speakers.speaker_ids AS speaker_ids,
   videos.created_at AS created_at,
-  videos.updated_at AS updated_at
+  videos.updated_at AS updated_at,
+  videos.deleted AS deleted
 FROM videos
 LEFT JOIN (
   SELECT
@@ -110,8 +117,7 @@ LEFT JOIN (
   FROM video_speakers
   WHERE deleted IS NULL
   GROUP BY video_id
-) AS video_speakers ON video_speakers.video_id = videos.id
-WHERE videos.deleted IS NULL;
+) AS video_speakers ON video_speakers.video_id = videos.id;
 
 DROP VIEW IF EXISTS entries_view;
 
@@ -172,10 +178,7 @@ SELECT
     )
     ELSE NULL
   END AS audios,
-  CASE
-    WHEN COUNT(entry_dialects.dialect_id) > 0 THEN jsonb_agg(entry_dialects.dialect_id)
-    ELSE NULL
-  END AS dialect_ids
+  dialect_ids.dialect_ids
 FROM entries
 LEFT JOIN senses ON senses.entry_id = entries.id AND senses.deleted IS NULL
 LEFT JOIN audio ON audio.entry_id = entries.id AND audio.deleted IS NULL
@@ -187,7 +190,14 @@ LEFT JOIN (
   WHERE deleted IS NULL
   GROUP BY audio_id
 ) AS audio_speakers ON audio_speakers.audio_id = audio.id
-LEFT JOIN entry_dialects ON entry_dialects.entry_id = entries.id AND entry_dialects.deleted IS NULL
+LEFT JOIN (
+  SELECT
+    entry_id,
+    jsonb_agg(dialect_id) AS dialect_ids
+  FROM entry_dialects
+  WHERE deleted IS NULL
+  GROUP BY entry_id
+) AS dialect_ids ON dialect_ids.entry_id = entries.id
 LEFT JOIN (
   SELECT
     senses_in_sentences.sense_id,
@@ -215,7 +225,7 @@ LEFT JOIN (
   WHERE videos.deleted IS NULL AND sense_videos.deleted IS NULL
   GROUP BY sense_videos.sense_id
 ) AS aggregated_video_ids ON aggregated_video_ids.sense_id = senses.id
-GROUP BY entries.id;
+GROUP BY entries.id, dialect_ids.dialect_ids;
 
 -- Entries loading plan:
 -- When Jim loads entries for the first time on client, the client and NOT the view needs to check WHERE entries.deleted IS NULL. Then in the future if Bob deletes 1 entry, and Jim visits again, Jim will have 20 cached entries. He then loads fresh entries without the WHERE entries.deleted IS NULL when he comes today so that he gets Bob's deleted change. Then Jim's knows to remove that deleted entry from the cache
@@ -259,17 +269,17 @@ END;
 $$ LANGUAGE plpgsql;
 
 CREATE TRIGGER update_entry_updated_at_senses
-AFTER INSERT OR UPDATE OR DELETE ON senses
+AFTER INSERT OR UPDATE ON senses
 FOR EACH ROW
 EXECUTE FUNCTION update_entry_updated_at();
 
 CREATE TRIGGER update_entry_updated_at_audio
-AFTER INSERT OR UPDATE OR DELETE ON audio
+AFTER INSERT OR UPDATE ON audio
 FOR EACH ROW
 EXECUTE FUNCTION update_entry_updated_at();
 
 CREATE TRIGGER update_entry_updated_at_entry_dialects
-AFTER INSERT OR UPDATE OR DELETE ON entry_dialects
+AFTER INSERT OR UPDATE ON entry_dialects
 FOR EACH ROW
 EXECUTE FUNCTION update_entry_updated_at();
 
@@ -277,7 +287,7 @@ CREATE OR REPLACE FUNCTION update_sense_updated_at()
 RETURNS TRIGGER AS $$
 BEGIN
   UPDATE senses
-  SET updated_at = COALESCE(NEW.created_at, NOW())
+  SET updated_at = COALESCE(NEW.deleted, NEW.created_at, NOW())
   WHERE id = NEW.sense_id;
   
   RETURN NEW;
@@ -298,6 +308,57 @@ CREATE TRIGGER update_sense_updated_at_sense_videos
 AFTER INSERT OR UPDATE ON sense_videos
 FOR EACH ROW
 EXECUTE FUNCTION update_sense_updated_at();
+
+CREATE OR REPLACE FUNCTION update_sense_sentences_when_sentence_deleted()
+RETURNS TRIGGER AS $$
+BEGIN
+  IF NEW.deleted IS NOT NULL THEN
+    UPDATE sense_sentences
+    SET deleted = NEW.deleted
+    WHERE sentence_id = NEW.id;
+  END IF;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER update_sense_updated_at_sense_sentences
+AFTER UPDATE ON sentences
+FOR EACH ROW
+EXECUTE FUNCTION update_sense_sentences_when_sentence_deleted();
+
+CREATE OR REPLACE FUNCTION update_sense_photos_when_photo_deleted()
+RETURNS TRIGGER AS $$
+BEGIN
+  IF NEW.deleted IS NOT NULL THEN
+    UPDATE sense_photos
+    SET deleted = NEW.deleted
+    WHERE photo_id = NEW.id;
+  END IF;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER update_sense_updated_at_sense_photos
+AFTER UPDATE ON photos
+FOR EACH ROW
+EXECUTE FUNCTION update_sense_photos_when_photo_deleted();
+
+CREATE OR REPLACE FUNCTION update_sense_videos_when_video_deleted()
+RETURNS TRIGGER AS $$
+BEGIN
+  IF NEW.deleted IS NOT NULL THEN
+    UPDATE sense_videos
+    SET deleted = NEW.deleted
+    WHERE video_id = NEW.id;
+  END IF;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER update_sense_updated_at_sense_videos
+AFTER UPDATE ON videos
+FOR EACH ROW
+EXECUTE FUNCTION update_sense_videos_when_video_deleted();
 
 -- TODO: test these and also test the OLD.created_at above when deleting relationships (shouldn't use OLD.created_at)
 

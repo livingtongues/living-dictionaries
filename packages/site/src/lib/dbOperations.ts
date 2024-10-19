@@ -1,25 +1,33 @@
-import { addNewEntry, add_speaker } from './helpers/entry/new'
-import { update_sense } from '$lib/supabase/change/sense'
-import { upsert_sentence } from '$lib/supabase/change/sentence'
-import { updateEntry, updateEntryOnline } from '$lib/helpers/entry/update'
-import { addAudio, addImage, addVideo, deleteAudio, deleteEntry, deleteImage, deleteVideo } from '$lib/helpers/media'
+import { assign_dialect, assign_speaker, insert_dialect, insert_entry, insert_photo, insert_sense, insert_sentence, insert_video, update_entry, update_photo, update_sense, update_sentence, update_video, upsert_audio, upsert_speaker } from '$lib/supabase/operations'
+import { addAudio, addImage, uploadVideo } from '$lib/helpers/media'
 
 export const dbOperations = {
-  addNewEntry,
-  add_speaker,
+  insert_entry,
+  update_entry,
 
-  addVideo,
-  addAudio,
-  deleteVideo,
-  addImage,
-  deleteImage,
-  deleteAudio,
-  deleteEntry,
-
-  updateEntry,
-  updateEntryOnline,
+  insert_sense,
   update_sense,
-  update_sentence: upsert_sentence,
+
+  insert_sentence,
+  update_sentence,
+
+  upsert_audio,
+
+  upsert_speaker,
+  assign_speaker,
+
+  insert_dialect,
+  assign_dialect,
+
+  insert_photo,
+  update_photo,
+
+  insert_video,
+  update_video,
+
+  addAudio,
+  addImage,
+  uploadVideo,
 }
 
 export type DbOperations = typeof dbOperations

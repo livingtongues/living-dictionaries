@@ -1,4 +1,4 @@
-import type { ISpeaker } from '@living-dictionaries/types'
+import type { ISpeaker } from '@living-dictionaries/types/speaker.interface'
 import { anon_supabase } from '../config-supabase'
 import { migrate_entries, migrate_speakers } from './migrate-entries'
 import entries_to_test_264 from './entries_to_test.json'

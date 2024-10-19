@@ -67,11 +67,10 @@
       on_update_write_in={new_value => updateEntry({ sd: new_value })} />
   {:else if column.field === 'dialects'}
     <EntryDialect
+      entry_id={entry.id}
       {can_edit}
       showPlus={false}
-      {dictionaryId}
-      dialects={entry.dialects}
-      on_update={new_value => updateEntry({ [EntryFields.dialects]: new_value })} />
+      dialect_ids={entry.dialect_ids || []} />
   {:else if column.field === 'sources'}
     <EntrySource
       {can_edit}

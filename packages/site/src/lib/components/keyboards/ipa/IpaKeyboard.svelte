@@ -1,47 +1,36 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
-  import { Button } from 'svelte-pieces';
-  import vowelTrapezoid from './vowel-trapezoid.gif';
+  import { Button } from 'svelte-pieces'
+  import vowelTrapezoid from './vowel-trapezoid.gif'
 
-  export let target: string | HTMLInputElement | HTMLTextAreaElement = undefined;
-  let activeTable = 'consonants';
-  let wrapperEl: HTMLDivElement;
-  let inputEl: HTMLInputElement | HTMLTextAreaElement;
-
-  onMount(() => {
-    if (target) {
-      // @ts-ignore
-      if (typeof target === 'string')
-        inputEl = document.querySelector(target);
-      else
-        inputEl = target;
-
-    } else {
-      inputEl = wrapperEl.firstElementChild as HTMLInputElement | HTMLTextAreaElement;
-    }
-  });
+  export let on_ipa_change: (new_value: string) => void
+  let activeTable = 'consonants'
+  let wrapperEl: HTMLDivElement
 
   function addSelectedLetter(e) {
-    if (!inputEl) return;
-    const target = e.target as EventTarget & HTMLDivElement;
+    const input_element = wrapperEl.firstElementChild as HTMLInputElement
+    if (!input_element) return
+    const target = e.target as EventTarget & HTMLDivElement
     if (target.tagName.toLowerCase() === 'span') {
-      const letter = target.innerHTML.replace(/◌/g, '');
-      const cursorPosition = inputEl.selectionEnd;
-      inputEl.value =
-        inputEl.value.substring(0, cursorPosition) +
-        letter +
-        inputEl.value.substring(cursorPosition);
-      inputEl.selectionEnd = cursorPosition + letter.length;
+      const letter = target.innerHTML.replace(/◌/g, '')
+      const cursorPosition = input_element.selectionEnd
+      input_element.value
+        = input_element.value.substring(0, cursorPosition)
+        + letter
+        + input_element.value.substring(cursorPosition)
+      input_element.selectionEnd = cursorPosition + letter.length
+      on_ipa_change(input_element.value)
     }
   }
 
   function backSpace() {
-    if (!inputEl) return;
-    const cursorPosition = inputEl.selectionEnd;
-    inputEl.value =
-      inputEl.value.substring(0, cursorPosition - 1) +
-      inputEl.value.substring(cursorPosition, inputEl.value.length);
-    setTimeout(() => (inputEl.selectionEnd = cursorPosition - 1), 50);
+    const input_element = wrapperEl.firstElementChild as HTMLInputElement
+    if (!input_element) return
+    const cursorPosition = input_element.selectionEnd
+    input_element.value
+      = input_element.value.substring(0, cursorPosition - 1)
+      + input_element.value.substring(cursorPosition, input_element.value.length)
+    on_ipa_change(input_element.value)
+    setTimeout(() => (input_element.selectionEnd = cursorPosition - 1), 50)
   }
 </script>
 

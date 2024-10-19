@@ -1,7 +1,7 @@
-import type { ExpandedEntry } from '@living-dictionaries/types';
-import type { SearchEntriesOptions } from './orama.worker';
+import type { EntryView } from '@living-dictionaries/types'
+import type { SearchEntriesOptions } from './orama.worker'
 
-export async function create_index(entries: Map<string, ExpandedEntry>) {
+export async function create_index(entries: EntryView[]) {
   const { api } = await import('./expose-orama-worker')
   api.create_index(entries)
 }
@@ -11,12 +11,12 @@ export async function search_entries(options: SearchEntriesOptions) {
   return api.search_entries(options)
 }
 
-export async function update_index_entries(entries: ExpandedEntry[]) {
+export async function update_index_entries(entries: EntryView[]) {
   const { api } = await import('./expose-orama-worker')
   return api.update_index_entries(entries)
 }
 
-export async function update_index_entry(entry: ExpandedEntry) {
+export async function update_index_entry(entry: EntryView) {
   const { api } = await import('./expose-orama-worker')
   return api.update_index_entry(entry)
 }

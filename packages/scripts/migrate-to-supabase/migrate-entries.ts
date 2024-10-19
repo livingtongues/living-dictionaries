@@ -1,7 +1,8 @@
 import { randomUUID } from 'node:crypto'
-import type { ISpeaker, TablesUpdate } from '@living-dictionaries/types'
+import type { TablesUpdate } from '@living-dictionaries/types'
+import type { ISpeaker } from '@living-dictionaries/types/speaker.interface'
 import { convert_entry } from './convert-entries'
-import { assign_dialect, assign_speaker, insert_sentence, upsert_audio, upsert_dialect, upsert_entry, upsert_photo, upsert_sense, upsert_speaker, upsert_video } from './operations/operations'
+import { assign_dialect, assign_speaker, insert_entry, insert_photo, insert_sense, insert_sentence, upsert_audio, upsert_dialect, upsert_speaker, upsert_video } from './operations/operations'
 import { convert_speaker } from './convert-speakers'
 import { log_once } from './log-once'
 
@@ -60,7 +61,7 @@ export async function migrate_entry(fb_entry: any, speakers: AllSpeakerData, dic
 
   const { id: entry_id, dictionary_id } = entry
 
-  const { error: entry_error } = await upsert_entry({
+  const { error: entry_error } = await insert_entry({
     dictionary_id,
     entry,
     entry_id,
@@ -142,7 +143,7 @@ export async function migrate_entry(fb_entry: any, speakers: AllSpeakerData, dic
   }
 
   for (const sense of senses) {
-    const { error } = await upsert_sense({ dictionary_id, entry_id, sense, sense_id: sense.id, import_id })
+    const { error } = await insert_sense({ dictionary_id, entry_id, sense, sense_id: sense.id, import_id })
     if (error)
       throw new Error(error.message)
   }
@@ -160,7 +161,7 @@ export async function migrate_entry(fb_entry: any, speakers: AllSpeakerData, dic
     const { sense_id } = sense_photos.find(s => s.photo_id === photo.id)
     if (!sense_id)
       throw new Error('sense_id not found')
-    const { error } = await upsert_photo({ dictionary_id, sense_id, photo, photo_id: photo.id, import_id })
+    const { error } = await insert_photo({ dictionary_id, sense_id, photo, photo_id: photo.id, import_id })
     if (error)
       throw new Error(error.message)
   }

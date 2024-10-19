@@ -1,5 +1,6 @@
 import { randomUUID } from 'node:crypto'
-import type { ActualDatabaseEntry, TablesInsert } from '@living-dictionaries/types'
+import type { TablesInsert } from '@living-dictionaries/types'
+import type { ActualDatabaseEntry } from '@living-dictionaries/types/entry.interface'
 import type { ActualDatabaseVideo } from '@living-dictionaries/types/video.interface'
 import { jacob_ld_user_id } from '../config-supabase'
 import { get_supabase_user_id_from_firebase_uid } from './get-user-id'

@@ -1,9 +1,9 @@
 <script lang="ts">
   import type { Readable } from 'svelte/store'
-  import type { AudioUploadStatus } from './upload-audio'
+  import type { AudioVideoUploadStatus } from './upload-audio'
   import { page } from '$app/stores'
 
-  export let upload_status: Readable<AudioUploadStatus>
+  export let upload_status: Readable<AudioVideoUploadStatus>
 </script>
 
 {#if $upload_status.error}

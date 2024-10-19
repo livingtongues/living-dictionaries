@@ -2,24 +2,15 @@
 - pnpm -F scripts test:migration
 
 ## TODO
-- handle media firebaseConfig.storageBucket
-- delete dialect also updates entry's updated_at? - run tests
-- create indexes using help from index_advisor https://supabase.com/docs/guides/database/extensions/index_advisor
-- stich entries together client-side with videos, photos, sentences, dialects, speakers, using ids in the entries_view
+- handle dialect_ids in ListEntry.svelte
+- make all types of edits
+- translate parts of speech and semantic domains in the UI
 - dictionary counts
 - continue running data in batches from 148K+
-- when a many-many relationship is cut off by setting "deleted" to a value, then if that relationship is ever wanted again, it will be a failed insert because the unique constraint is still there. In case of a failed insert, I need a function to just set the deleted property to null
-- resolve in UI where photo is edited and relationship is added again (also for videos); resolve issue whereby sense_id is sent with sentence update and will result in a conflict on re-adding the relationship
-- type SupaEntry in [entryId].svelte
-- get dialects from Supabase to EntryDialect.svelte
-- make all types of edits
-- Supabase sense updates+all others show immediately in preview modal from list view
-- load down dialects and speakers separately in UI then stitch them together
 - Orama search refinement and completion
+  - async load down saved index from Vercel KV
   - Use `pnpm mixed` to run Firebase prod and Supabase local
   - replaceState in createQueryParamStore? look into improving the history to change for view and page changes but not for the others
-  - use materialized view daily for entries and then pull last day's entries from that view
-- look at print, table, gallery, and list page files history to make sure there are no missed improvements - check github history too
 - visual inspection of the results locally - should work similar to current prod
 
 ## Migration Process
@@ -44,10 +35,12 @@
 - Remove algolia keys from vercel
 
 ## Clean-up
+- create indexes using help from index_advisor https://supabase.com/docs/guides/database/extensions/index_advisor
 - drop content_updates' table column
 - drop entry_updates
 - clean up old history data in content_updates
 - make alternate writing systems of the sentence translations as different bcp keys (same as for glosses)
+- look at print, table, gallery, and list page files history to make sure there are no missed improvements - check github history too
 
 ### No lexeme
 no lx for 0svukh699MsB4svuCDdO in ho

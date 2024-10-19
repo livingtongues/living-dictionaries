@@ -3,6 +3,7 @@
   import { page } from '$app/stores'
 
   export let dictionary: IDictionary
+  export let entry_count: number
   export let on_close: () => void
   export let is_manager: boolean
 </script>
@@ -24,11 +25,13 @@
       {$page.data.t('dictionary.entries')}
     </span>
     <span class="flex-grow" />
-    <span
-      class="inline-block py-1 px-2 leading-none text-xs font-semibold
-        text-gray-700 bg-gray-300 rounded-full">
-      {new Intl.NumberFormat().format(dictionary.entryCount || 0)}
-    </span>
+    {#if entry_count}
+      <span
+        class="inline-block py-1 px-2 leading-none text-xs font-semibold
+          text-gray-700 bg-gray-300 rounded-full">
+        {new Intl.NumberFormat().format(entry_count)}
+      </span>
+    {/if}
   </a>
   {#if !is_manager}
     <a

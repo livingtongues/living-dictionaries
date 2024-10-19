@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Button } from 'svelte-pieces'
+  import { Button, Form } from 'svelte-pieces'
   import sanitize from 'xss'
   import type { EntryFieldValue } from '@living-dictionaries/types'
   import Keyman from '$lib/components/keyboards/keyman/Keyman.svelte'
@@ -10,14 +10,14 @@
   export let isSompeng = false
   export let addingLexeme = false
   export let bcp: string = undefined
-  export let on_update: (new_value: string) => void
+  export let on_update: (new_value: string) => void | Promise<void>
   export let on_close: () => void
 
   let inputEl: HTMLInputElement
 
-  function save() {
+  async function save() {
     value = inputEl?.value || value // IpaKeyboard modifies input's value from outside this component so the bound value here doesn't update. This is hacky and the alternative is to emit events from the IpaKeyboard rather than bind to any neighboring element. This makes the adding and backspacing functions potentially needing to be applied in every context where the IPA keyboard is used. Until we know more how the IPA keyboard will be used, this line here is sufficient.
-    on_update(value.trim())
+    await on_update(value.trim())
     on_close()
   }
 
@@ -111,7 +111,7 @@
   }
 </script>
 
-<form on:submit|preventDefault={save}>
+<Form let:loading onsubmit={save}>
   <div class="rounded-md shadow-sm">
     {#if field === 'notes'}
       {#await import('$lib/components/editor/ClassicCustomized.svelte') then { default: ClassicCustomized }}
@@ -142,6 +142,19 @@
           class:sompeng={isSompeng}
           class="form-input block w-full pr-9" />
       </Keyman>
+    {:else if field === 'phonetic'}
+      {#await import('$lib/components/keyboards/ipa/IpaKeyboard.svelte') then { default: IpaKeyboard }}
+        <div class="mt-2">
+          <IpaKeyboard on_ipa_change={new_value => value = new_value}>
+            <input
+              dir="ltr"
+              type="text"
+              use:autofocus
+              bind:value
+              class="form-input block w-full" />
+          </IpaKeyboard>
+        </div>
+      {/await}
     {:else}
       <input
         bind:this={inputEl}
@@ -150,14 +163,6 @@
         use:autofocus
         bind:value
         class="form-input block w-full" />
-    {/if}
-
-    {#if field === 'phonetic'}
-      {#await import('$lib/components/keyboards/ipa/IpaKeyboard.svelte') then { default: IpaKeyboard }}
-        <div class="mt-2">
-          <IpaKeyboard target={inputEl} />
-        </div>
-      {/await}
     {/if}
 
     {#if field === 'interlinearization'}
@@ -184,22 +189,22 @@
   </div>
 
   <div class="modal-footer">
-    <Button onclick={on_close} form="simple" color="black">
+    <Button disabled={loading} onclick={on_close} form="simple" color="black">
       {$page.data.t('misc.cancel')}
     </Button>
     <div class="w-1" />
     {#if addingLexeme}
-      <Button type="submit" form="filled">
+      <Button {loading} type="submit" form="filled">
         {$page.data.t('misc.next')}
         <span class="i-fa6-solid-chevron-right rtl-x-flip -mt-.5" />
       </Button>
     {:else}
-      <Button type="submit" form="filled">
+      <Button {loading} type="submit" form="filled">
         {$page.data.t('misc.save')}
       </Button>
     {/if}
   </div>
-</form>
+</Form>
 
 <style>
   :global(.ck-editor__editable_inline) {

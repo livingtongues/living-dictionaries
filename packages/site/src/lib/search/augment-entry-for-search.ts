@@ -1,49 +1,48 @@
-import type { ExpandedEntry } from '@living-dictionaries/types'
+import type { EntryView } from '@living-dictionaries/types'
 
-export function augment_entry_for_search(entry: ExpandedEntry) {
-  const _dialects = entry.dialects || []
-  const _parts_of_speech = entry.senses?.map(sense => sense.translated_parts_of_speech || []).flat() || []
-  const _semantic_domains = entry.senses?.map(sense => [...(sense.translated_ld_semantic_domains || []), ...(sense.write_in_semantic_domains || [])]).flat() || []
-  const _speakers = entry.sound_files?.map((audio) => {
-    if (audio.speaker_ids)
-      return audio.speaker_ids
-    if (audio.speakerName)
-      return [audio.speakerName]
-    return []
-  }).flat() || []
+export function augment_entry_for_search(entry: EntryView) {
+  const senses = entry.senses || []
 
-  const _lexeme_other = [
-    entry.local_orthography_1,
-    entry.local_orthography_2,
-    entry.local_orthography_3,
-    entry.local_orthography_4,
-    entry.local_orthography_5,
-    simplify_lexeme_for_search(entry.lexeme),
+  const _dialects = entry.dialect_ids || []
+  const _parts_of_speech = senses.map(sense => sense.parts_of_speech || []).flat()
+  const _semantic_domains = senses.map(sense => [...(sense.semantic_domains || []), ...(sense.write_in_semantic_domains || [])]).flat()
+  const _speakers = entry.audios?.map(audio => audio.speaker_ids || []).flat() || []
+
+  const lexeme_in_all_orthographies = Object.values(entry.main.lexeme)
+  const _lexeme = [
+    ...lexeme_in_all_orthographies,
+    ...lexeme_in_all_orthographies.map(simplify_lexeme_for_search),
   ].filter(Boolean)
 
-  const _glosses = entry.senses?.flatMap(sense => Object.values(sense.glosses || {}).filter(Boolean)) || []
-  const _sentences = entry.senses?.flatMap(sense =>
-    sense.example_sentences?.flatMap(sentence => Object.values(sentence).filter(Boolean)) || [],
-  ) || []
+  const _glosses = senses.flatMap(sense => Object.values(sense.glosses || {}).filter(Boolean))
+  // const _sentences = senses.flatMap(sense =>
+  //   sense.example_sentences?.flatMap(sentence => Object.values(sentence).filter(Boolean)) || [],
+  // )
+
+  const plural_forms = senses.flatMap(sense => Object.values(sense.plural_form || {}).filter(Boolean))
+
+  const _other: string[] = [entry.main.phonetic, Object.values(entry.main.notes || {}), entry.main.scientific_names, entry.main.sources, entry.main.interlinearization, entry.main.morphology, plural_forms].flat().filter(Boolean)
 
   return {
     ...entry,
-    _lexeme_other,
+    _lexeme,
     _glosses,
-    _sentences,
+    _other,
+    // _sentences, // TODO: search these in a separate interface
     // Filters
-    _dialects: _dialects.map(use_underscores_for_spaces),
+    _dialects,
     _parts_of_speech: _parts_of_speech.map(use_underscores_for_spaces),
     _semantic_domains: _semantic_domains.map(use_underscores_for_spaces),
     _speakers: _speakers.map(use_underscores_for_spaces),
-    has_audio: !!entry.sound_files?.length,
-    has_image: !!entry.senses?.find(sense => sense.photo_files?.length),
-    has_video: !!entry.senses?.find(sense => sense.video_files?.length),
+    has_audio: !!entry.audios?.length,
+    // has_sentences: !!entry.senses?.find(sense => sense.sentence_ids?.length), // not used yet
+    has_image: !!entry.senses?.find(sense => sense.photo_ids?.length),
+    has_video: !!entry.senses?.find(sense => sense.video_ids?.length),
     has_speaker: !!_speakers.length,
     has_noun_class: !!entry.senses?.find(sense => sense.noun_class),
-    has_plural_form: !!entry.plural_form,
-    has_part_of_speech: !!entry.senses?.find(sense => sense.parts_of_speech_keys?.length),
-    has_semantic_domain: !!entry.senses?.find(sense => sense.ld_semantic_domains_keys?.length || sense.write_in_semantic_domains?.length),
+    has_plural_form: !!entry.senses?.find(sense => sense.plural_form),
+    has_part_of_speech: !!entry.senses?.find(sense => sense.parts_of_speech?.length),
+    has_semantic_domain: !!entry.senses?.find(sense => sense.semantic_domains?.length || sense.write_in_semantic_domains?.length),
   }
 }
 

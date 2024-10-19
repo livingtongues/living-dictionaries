@@ -1,4 +1,4 @@
-import type { ActualDatabaseEntry } from '@living-dictionaries/types'
+import type { ActualDatabaseEntry } from '@living-dictionaries/types/entry.interface'
 
 export function remove_seconds_underscore(entry: ActualDatabaseEntry & Record<string, any>) {
   // @ts-expect-error

@@ -1,6 +1,6 @@
 import type { Variant, VariantMeta } from 'kitbook'
 import { readable } from 'svelte/store'
-import type Component from './UploadAudioStatus.svelte'
+import type Component from './UploadProgressBarStatus.svelte'
 
 export const shared_meta: VariantMeta = {
   viewports: [

@@ -4,7 +4,7 @@
   import EditFieldModal from '$lib/components/entry/EditFieldModal.svelte'
   import type { DbOperations } from '$lib/dbOperations'
 
-  export let addNewEntry: DbOperations['addNewEntry']
+  export let add_entry: DbOperations['insert_entry']
   let online = true
 </script>
 
@@ -23,7 +23,11 @@
     <EditFieldModal
       field="lexeme"
       display={$page.data.t('entry_field.lexeme')}
-      on_update={new_value => addNewEntry(new_value)}
+      on_update={async (new_value) => {
+        if (new_value) {
+          await add_entry({ default: new_value })
+        }
+      }}
       on_close={toggle}
       addingLexeme />
   {/if}

@@ -1,4 +1,4 @@
-import type { TablesUpdate } from './combined.types'
+import type { TablesInsert, TablesUpdate } from './combined.types'
 
 export interface Change {
   type: string
@@ -6,23 +6,28 @@ export interface Change {
 }
 
 export type ContentUpdateRequestBody =
-  | Upsert_Entry
-  | Upsert_Sense
+  | Insert_Entry
+  | Update_Entry
+
+  | Insert_Sense
+  | Update_Sense
+
   | Upsert_Audio
-  | Upsert_Photo
-  | Upsert_Video
+
+  | Insert_Photo
+  | Update_Photo
+
+  | Insert_Video
+  | Update_Video
 
   | Upsert_Speaker
   | Assign_Speaker
-  | Unassign_Speaker
 
-  | Upsert_Dialect
+  | Insert_Dialect
   | Assign_Dialect
-  | Unassign_Dialect
 
   | Insert_Sentence
   | Update_Sentence
-  | Remove_Sentence
 
 interface ContentUpdateBase {
   update_id: string // id of the change, a uuidv4 created on client to make things idempotent
@@ -36,28 +41,27 @@ interface ContentUpdateBase {
   }
 }
 
-interface Upsert_Entry extends ContentUpdateBase {
-  type: 'upsert_entry'
+interface Insert_Entry extends ContentUpdateBase {
+  type: 'insert_entry'
+  data: Omit<TablesInsert<'entries'>, 'created_by' | 'updated_by' | 'dictionary_id' | 'id'>
+  entry_id: string
+}
+
+interface Update_Entry extends ContentUpdateBase {
+  type: 'update_entry'
   data: TablesUpdate<'entries'>
   entry_id: string
 }
 
-interface Upsert_Dialect extends ContentUpdateBase {
-  type: 'upsert_dialect'
-  data: TablesUpdate<'dialects'>
-  dialect_id: string
+interface Insert_Dialect extends ContentUpdateBase {
+  type: 'insert_dialect'
+  data: Omit<TablesInsert<'dialects'>, 'created_by' | 'updated_by' | 'dictionary_id' | 'id'>
+  dialect_id?: string
 }
 
 interface Assign_Dialect extends ContentUpdateBase {
   type: 'assign_dialect'
-  data?: null
-  dialect_id: string
-  entry_id: string
-}
-
-interface Unassign_Dialect extends ContentUpdateBase {
-  type: 'unassign_dialect'
-  data?: null
+  data?: null | { deleted: string }
   dialect_id: string
   entry_id: string
 }
@@ -70,7 +74,7 @@ interface Upsert_Speaker extends ContentUpdateBase {
 
 interface Assign_Speaker_Base extends ContentUpdateBase {
   type: 'assign_speaker'
-  data?: null
+  data?: null | { deleted: string }
   speaker_id: string
 }
 
@@ -86,24 +90,23 @@ interface Assign_Speaker_With_Video extends Assign_Speaker_Base {
 
 type Assign_Speaker = Assign_Speaker_With_Audio | Assign_Speaker_With_Video
 
-interface Unassign_Speaker extends ContentUpdateBase {
-  type: 'unassign_speaker'
-  data: { media: 'audio' | 'video' }
-  speaker_id: string
-  media_id: string
+interface Insert_Sense extends ContentUpdateBase {
+  type: 'insert_sense'
+  data: Omit<TablesInsert<'senses'>, 'created_by' | 'updated_by' | 'dictionary_id' | 'id' | 'entry_id'>
+  sense_id: string | null
+  entry_id: string
 }
 
-interface Upsert_Sense extends ContentUpdateBase {
-  type: 'upsert_sense'
+interface Update_Sense extends ContentUpdateBase {
+  type: 'update_sense'
   data: TablesUpdate<'senses'>
   sense_id: string
-  entry_id: string
 }
 
 interface Insert_Sentence extends ContentUpdateBase {
   type: 'insert_sentence'
-  data: TablesUpdate<'sentences'>
-  sentence_id: string
+  data: Omit<TablesInsert<'sentences'>, 'created_by' | 'updated_by' | 'dictionary_id' | 'id'>
+  sentence_id?: string
   sense_id: string
 }
 
@@ -113,12 +116,17 @@ interface Update_Sentence extends ContentUpdateBase {
   sentence_id: string
 }
 
-/** currently also deletes the sentence - later when a sentence can be connected to multiple senses, use a deleted field to indicate the sentence is deleted everywhere */
-interface Remove_Sentence extends ContentUpdateBase {
-  type: 'remove_sentence'
-  sentence_id: string
+interface Insert_Photo extends ContentUpdateBase {
+  type: 'insert_photo'
+  data: Omit<TablesInsert<'photos'>, 'created_by' | 'updated_by' | 'dictionary_id' | 'id'>
+  photo_id?: string
   sense_id: string
-  data?: null
+}
+
+interface Update_Photo extends ContentUpdateBase {
+  type: 'update_photo'
+  data: TablesUpdate<'photos'>
+  photo_id: string
 }
 
 interface Upsert_Audio extends ContentUpdateBase {
@@ -128,16 +136,15 @@ interface Upsert_Audio extends ContentUpdateBase {
   entry_id: string
 }
 
-interface Upsert_Photo extends ContentUpdateBase {
-  type: 'upsert_photo'
-  data: TablesUpdate<'photos'>
-  photo_id?: string
+interface Insert_Video extends ContentUpdateBase {
+  type: 'insert_video'
+  data: Omit<TablesInsert<'videos'>, 'created_by' | 'updated_by' | 'dictionary_id' | 'id'>
+  video_id?: string
   sense_id: string
 }
 
-interface Upsert_Video extends ContentUpdateBase {
-  type: 'upsert_video'
+interface Update_Video extends ContentUpdateBase {
+  type: 'update_video'
   data: TablesUpdate<'videos'>
-  video_id?: string
-  sense_id: string
+  video_id: string
 }

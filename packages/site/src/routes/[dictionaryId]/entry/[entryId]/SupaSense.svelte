@@ -1,27 +1,26 @@
 <script lang="ts">
   import type { IDictionary, SenseWithSentences, TablesUpdate } from '@living-dictionaries/types'
   import EntryField from './EntryField.svelte'
+  import EntrySentence from './EntrySentence.svelte'
   import { page } from '$app/stores'
   import { order_entry_and_dictionary_gloss_languages } from '$lib/helpers/glosses'
   import EntryPartOfSpeech from '$lib/components/entry/EntryPartOfSpeech.svelte'
   import EntrySemanticDomains from '$lib/components/entry/EntrySemanticDomains.svelte'
-  import type { DbOperations } from '$lib/dbOperations'
+  import { DICTIONARIES_WITH_VARIANTS } from '$lib/constants'
 
-  export let entryId: string
-  export let sense: Partial<SenseWithSentences>
+  export let sense: SenseWithSentences
   export let glossLanguages: IDictionary['glossLanguages']
   export let can_edit = false
-  export let update_sense: DbOperations['update_sense']
-  export let update_sentence: DbOperations['update_sentence']
 
-  function update(sense: TablesUpdate<'senses'>) {
-    update_sense({ sense, entry_id: entryId, sense_id: sense.id })
+  $: ({ sentences, dictionary, dbOperations } = $page.data)
+
+  function update(update: TablesUpdate<'senses'>) {
+    dbOperations.update_sense({ sense: update, sense_id: sense.id })
   }
-
-  const writing_systems = ['default']
 
   $: glossingLanguages = order_entry_and_dictionary_gloss_languages(sense.glosses, glossLanguages)
   $: hasSemanticDomain = sense.semantic_domains?.length || sense.write_in_semantic_domains?.length
+
 </script>
 
 {#each glossingLanguages as bcp}
@@ -31,9 +30,10 @@
     {bcp}
     {can_edit}
     display={`${$page.data.t({ dynamicKey: `gl.${bcp}`, fallback: bcp })}: ${$page.data.t('entry_field.gloss')}`}
-    on_update={new_value => update({
-      glosses: { ...sense.glosses, [bcp]: new_value },
-    })} />
+    on_update={(new_value) => {
+      sense.glosses = { ...sense.glosses, [bcp]: new_value }
+      update({ glosses: sense.glosses })
+    }} />
 {/each}
 
 <!-- Only in Bahasa Lani (id: jaRhn6MAZim4Blvr1iEv) -->
@@ -43,9 +43,12 @@
     field="definition_english"
     display="Definition (deprecated)"
     {can_edit}
-    on_update={new_value => update({
-      definition: new_value ? { en: new_value } : null,
-    })} />
+    on_update={(new_value) => {
+      sense.definition = new_value ? { en: new_value } : null
+      update({
+        definition: sense.definition,
+      })
+    }} />
 {/if}
 
 {#if sense.parts_of_speech?.length || can_edit}
@@ -54,9 +57,10 @@
     <EntryPartOfSpeech
       value={sense.parts_of_speech}
       {can_edit}
-      on_update={new_value => update({
-        parts_of_speech: new_value,
-      })} />
+      on_update={(new_value) => {
+        sense.parts_of_speech = new_value
+        update({ parts_of_speech: new_value })
+      }} />
     <div class="border-b-2 pb-1 mb-2 border-dashed" />
   </div>
 {/if}
@@ -68,12 +72,14 @@
       {can_edit}
       semantic_domain_keys={sense.semantic_domains}
       write_in_semantic_domains={sense.write_in_semantic_domains}
-      on_update={new_value => update({
-        semantic_domains: new_value,
-      })}
-      on_update_write_in={new_value => update({
-        write_in_semantic_domains: new_value,
-      })} />
+      on_update={(new_value) => {
+        sense.semantic_domains = new_value
+        update({ semantic_domains: new_value })
+      }}
+      on_update_write_in={(new_value) => {
+        sense.write_in_semantic_domains = new_value
+        update({ write_in_semantic_domains: new_value })
+      }} />
     <div class="border-b-2 pb-1 mb-2 border-dashed" />
   </div>
 {/if}
@@ -83,45 +89,31 @@
   field="noun_class"
   {can_edit}
   display={$page.data.t('entry_field.noun_class')}
-  on_update={new_value => update({
-    noun_class: new_value || null,
-  })} />
+  on_update={(new_value) => {
+    sense.noun_class = new_value
+    update({ noun_class: new_value })
+  }} />
 
-{#each sense.sentences || [{ text: {}, id: null, translation: null }] as sentence}
-  {@const has_sentences = Object.keys(sentence.text).length}
-  <div class:order-2={!has_sentences} class="flex flex-col">
-    {#each writing_systems as orthography}
-      <EntryField
-        value={sentence.text[orthography]}
-        field="example_sentence"
-        {can_edit}
-        display={$page.data.t('entry_field.example_sentence')}
-        on_update={new_value => update_sentence({
-          sentence: { [orthography]: new_value || null },
-          sentence_id: sentence.id || window.crypto.randomUUID(),
-          sense_id: sense.id,
-        })} />
-    {/each}
+{#if sense.sentence_ids?.length}
+  {#each sense.sentence_ids as sentence_id}
+    {@const sentence = $sentences.length && $sentences.find(sentence => sentence.id === sentence_id)}
 
-    {#if has_sentences}
-      {#each glossingLanguages as bcp}
-        <EntryField
-          value={sentence.translation?.[bcp]}
-          field="example_sentence"
-          {bcp}
-          {can_edit}
-          display="{$page.data.t({ dynamicKey: `gl.${bcp}`, fallback: bcp })}: {$page.data.t('entry_field.example_sentence')}"
-          on_update={new_value => update_sentence({
-            sentence: {
-              translation: {
-                ...sentence.translation,
-                [bcp]: new_value,
-              },
-            },
-            sentence_id: sentence.id,
-            sense_id: sense.id,
-          })} />
-      {/each}
+    {#if sentence}
+      <EntrySentence {sentence} {can_edit} sense_id={sense.id} glossingLanguages={glossingLanguages} />
     {/if}
-  </div>
-{/each}
+  {/each}
+
+{:else}
+  <EntrySentence sentence={{ text: {}, id: null, translation: null }} {can_edit} sense_id={sense.id} glossingLanguages={glossingLanguages} />
+{/if}
+
+<div>TODO: 'plural_form' is MultiString</div>
+
+{#if DICTIONARIES_WITH_VARIANTS.includes($dictionary.id)}
+  <EntryField
+    value={sense.variant.default}
+    field="variant"
+    {can_edit}
+    display={$page.data.t('entry_field.variant')}
+    on_update={new_value => update({ variant: { ...sense.variant, default: new_value } })} />
+{/if}

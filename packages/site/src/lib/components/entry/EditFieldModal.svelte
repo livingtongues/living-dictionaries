@@ -9,7 +9,7 @@
   export let bcp: string = undefined
   export let isSompeng = false
   export let addingLexeme = false
-  export let on_update: (new_value: string) => void
+  export let on_update: (new_value: string) => void | Promise<void>
   export let on_close: () => void
 </script>
 
