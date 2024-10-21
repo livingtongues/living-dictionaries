@@ -308,7 +308,7 @@
     "video_url": "URL Video",
     "video_credit": "Kredit Video",
     "prepare_to_record_video": "Bersiaplah untuk Merekam dengan Mikrofon & Kamera",
-    "video_info": "Ada dua cara agar video Anda ditampilkan di Kamus Hidup: 1) Anda dapat merekam video Anda di sini, atau mengunggah video yang Anda rekam sebelumnya ke platform kami. Keuntungan: mudah dan bagus untuk perekaman cepat. Kekurangan: Anda hanya bisa mengupload video maksimal 100MB sehingga harus berdurasi pendek dan beresolusi rendah saja. 2) Miliki video Anda di layanan hosting yang berspesialisasi dalam penyimpanan video dan tautkan URL ke situs kami. Kelebihannya: mudah (selama video Anda sudah diupload di platform tersebut), video Anda bisa memiliki resolusi dan durasi yang Anda inginkan. Kekurangan: jika Anda ingin merekam sesuatu yang tidak terduga atau sangat sederhana, mungkin akan terlalu banyak usaha untuk melakukannya, dan Anda mungkin ingin memprioritaskan metode 1.",
+    "video_info": "Ada dua cara agar video Anda ditampilkan di Kamus Hidup: 1) Anda dapat merekam video Anda di sini, atau mengunggah video yang Anda rekam sebelumnya ke platform kami. Keuntungan: mudah dan bagus untuk perekaman cepat. Kekurangan: Anda hanya bisa mengupload video maksimal 100MB sehingga harus berdurasi pendek dan beresolusi rendah saja. 2) Miliki video Anda di layanan hosting yang berspesialisasi dalam penyimpanan video dan tautkan URL ke situs kami. Kelebihan: mudah (asalkan video Anda sudah diupload di platform tersebut), video Anda bisa memiliki resolusi dan durasi yang Anda inginkan. Kekurangan: jika Anda ingin merekam sesuatu yang tidak terduga atau sangat sederhana, mungkin akan terlalu banyak usaha untuk melakukannya, dan Anda mungkin ingin memprioritaskan metode 1.",
     "paste_video_url": "Tempel tautan YouTube atau Vimeo",
     "record_upload_video": "Rekam atau unggah video",
     "view": "Melihat",
@@ -366,5 +366,9 @@
   "sense": {
     "sense": "Nalar",
     "add": "Tambahkan Rasa"
+  },
+  "banner": {
+    "message": "Kami melakukan perbaikan pada database kami pada tanggal 22 Oktober mulai pukul 19.00 Waktu Bagian Timur (New York), selama 24 jam. Kemampuan pengeditan tidak akan tersedia selama periode tersebut. Maaf atas ketidaknyamanan ini.",
+    "attention": "Perhatian"
   }
 }

@@ -1,14 +1,23 @@
 <script lang="ts">
-  import './global.css';
-  import { navigating, page } from '$app/stores';
-  import { browser } from '$app/environment';
-  import LoadingIndicator from './LoadingIndicator.svelte';
+  import './global.css'
+  import LoadingIndicator from './LoadingIndicator.svelte'
+  import { navigating, page } from '$app/stores'
+  import { browser } from '$app/environment'
+
+  export let data
+  $: ({ user } = data)
 </script>
 
 {#if browser}
   {#if $navigating}
     <LoadingIndicator />
   {/if}
+{/if}
+
+{#if $user}
+  {#await import('./Banner.svelte') then { default: Banner }}
+    <Banner />
+  {/await}
 {/if}
 
 <div id="direction" dir={$page.data.t('page.direction')}>
