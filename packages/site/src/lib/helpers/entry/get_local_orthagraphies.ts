@@ -1,6 +1,7 @@
 import type { MultiString } from '@living-dictionaries/types'
 
 export function get_local_orthographies(lexeme: MultiString): string[] {
+  if (!lexeme) return []
   return Object.entries(lexeme)
     .filter(([key]) => key !== 'default')
     .map(([, value]) => value)

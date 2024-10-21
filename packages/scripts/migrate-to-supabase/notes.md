@@ -2,8 +2,7 @@
 - pnpm -F scripts test:migration
 
 ## PREP TODO
-- search for ExpandedEntry
-- run tests and get PR passing
+- run db tests, pnpm check, and get PR passing
 - continue running data in batches from 148K+
 - Use `pnpm mixed` to run Firebase prod and Supabase local and preview everything
 - Using mixed look through local orthographies - especially in the table view
@@ -42,6 +41,8 @@
 - make alternate writing systems of the sentence translations as different bcp keys (same as for glosses)
 - look at print, table, gallery, and list page files history to make sure there are no missed improvements - check github history too
 - see how seo_description made the transition
+- get exports working again
+- get failed tests working again
 
 ### No lexeme
 no lx for 0svukh699MsB4svuCDdO in ho
