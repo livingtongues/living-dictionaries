@@ -366,5 +366,9 @@
   "sense": {
     "sense": "Sentido",
     "add": "Añadir sentido"
+  },
+  "banner": {
+    "message": "Realizaremos mejoras en nuestra base de datos el 22 de octubre a partir de las 7 p. m., hora del este (Nueva York), durante 24 horas. Las capacidades de edición no estarán disponibles durante ese período. Disculpen los inconvenientes.",
+    "attention": "Atención"
   }
 }

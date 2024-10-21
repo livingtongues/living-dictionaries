@@ -366,5 +366,9 @@
   "sense": {
     "sense": "Hisia",
     "add": "Ongeza Akili"
+  },
+  "banner": {
+    "message": "Tunaboresha hifadhidata yetu tarehe 22 Oktoba kuanzia saa 7PM kwa Saa za Mashariki (New York), kwa saa 24. Uwezo wa kuhariri hautapatikana katika kipindi hicho. Pole kwa usumbufu.",
+    "attention": "Tahadhari"
   }
 }

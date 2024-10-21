@@ -334,9 +334,9 @@
     "template_link": "Hanyar haɗi zuwa Samfura",
     "instructions_1": "Idan kun riga kuna da bayanan harshe waɗanda kuke son shigo da su cikin ƙamus ɗinku, da fatan za a bi matakan da ke ƙasa.",
     "instructions_2": "Danna maɓallin shuɗin \"Haɗin zuwa Samfura\" a ƙasa. Zazzage samfurin azaman fayil ɗin Excel, ko ƙirƙirar kwafi akan Google Docs. Shirya samfurin bisa ga bukatun aikin ku. Kwafi da liƙa bayanan ku a cikin maƙunsar bayanai.",
-    "instructions_3": "Yi amfani da \"Contact Us\" da ke ƙasa don tuntuɓar mu. Bari mu san cewa kuna da sabon maƙunsar rubutu wanda ke shirye don shigo da kaya. Yi mana tambayoyi da kuke da su. Za mu amsa muku ta imel, sannan za ku iya aiko mana da fayil ɗin ku.",
+    "instructions_3": "Yi amfani da \"Contact Us\" da ke ƙasa don tuntuɓar mu. Bari mu san cewa kuna da sabon maƙunsar rubutu wanda ke shirye don shigo da kaya. Yi mana duk wata tambaya da kuke da ita. Za mu amsa muku ta imel, sannan za ku iya aiko mana da fayil ɗin ku.",
     "instructions_4": "Don aiko mana da bayanan da aka fitar daga manhajojin ƙamus kamar FLEx, Lexique Pro, Shoebox, da fatan za a yi amfani da maɓallin “Contact Us” da ke ƙasa kuma gaya mana cikakkun bayanai na aikin ku.",
-    "no_imports": "A halin yanzu muna aiki tare da al'ummomi da yawa da ƙungiyoyin haɗin gwiwa don shigo da adadi mai yawa na shigarwar ƙamus zuwa wannan dandali. Har ila yau, muna yin babban sabuntawa ga bayanan mu. Za mu karɓi sabbin shigo da bayanai daga ranar 1 ga Yuli, 2024. Muna godiya da haƙurin ku, kuma muna ba da hakuri kan rashin jin daɗi."
+    "no_imports": "A halin yanzu muna aiki tare da al'ummomi da yawa da ƙungiyoyin haɗin gwiwa don shigo da adadi mai yawa na shigarwar ƙamus zuwa wannan dandali. Har ila yau, muna yin babban sabuntawa ga bayanan mu. Za mu karɓi sabbin bayanai daga shigo da bayanai daga ranar 1 ga Yuli, 2024. Muna godiya da haƙurin ku, kuma muna ba da hakuri kan rashin jin daɗi."
   },
   "history": {
     "history": "Tarihi",
@@ -366,5 +366,9 @@
   "sense": {
     "sense": "Hankali",
     "add": "Ƙara Hankali"
+  },
+  "banner": {
+    "message": "Muna yin gyare-gyare ga bayananmu a ranar 22 ga Oktoba daga karfe 7 na yamma agogon Gabas (New York), na awanni 24. Ba za a sami damar gyarawa ba a lokacin. Yi hakuri da cikas.",
+    "attention": "Hankali"
   }
 }
