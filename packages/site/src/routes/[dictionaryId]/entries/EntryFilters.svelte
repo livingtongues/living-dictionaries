@@ -1,7 +1,6 @@
 <script lang="ts">
   import { Button, type QueryParamStore, ResponsiveSlideover } from 'svelte-pieces'
   import type { FacetResult } from '@orama/orama'
-  import type { Tables } from '@living-dictionaries/types'
   import ToggleFacet from './ToggleFacet.svelte'
   import ClearFilters from './ClearFilters.svelte'
   import FilterList from './FilterList.svelte'
@@ -12,7 +11,8 @@
   export let show_mobile_filters = false
   export let on_close: () => void
   export let result_facets: FacetResult
-  export let speakers: Tables<'speakers_view'>[]
+
+  $: ({ dialects, speakers } = $page.data)
 </script>
 
 <ResponsiveSlideover
@@ -38,6 +38,10 @@
             {search_params}
             search_param_key="parts_of_speech"
             values={result_facets._parts_of_speech.values}
+            keys_to_values={Object.keys(result_facets._parts_of_speech.values).reduce((acc, key) => {
+              acc[key] = $page.data.t({ dynamicKey: `ps.${key}`, fallback: key })
+              return acc
+            }, {})}
             label={$page.data.t('entry_field.parts_of_speech')} />
         {/if}
         {#if result_facets._semantic_domains.count}
@@ -45,6 +49,10 @@
             {search_params}
             search_param_key="semantic_domains"
             values={result_facets._semantic_domains.values}
+            keys_to_values={Object.keys(result_facets._semantic_domains.values).reduce((acc, key) => {
+              acc[key] = $page.data.t({ dynamicKey: `sd.${key}`, fallback: key })
+              return acc
+            }, {})}
             label={$page.data.t('entry_field.semantic_domains')} />
         {/if}
         {#if result_facets._dialects.count}
@@ -52,6 +60,10 @@
             {search_params}
             search_param_key="dialects"
             values={result_facets._dialects.values}
+            keys_to_values={$dialects?.reduce((acc, dialect) => {
+              acc[dialect.id] = dialect.name.default
+              return acc
+            }, {})}
             label={$page.data.t('entry_field.dialects')} />
         {/if}
         {#if result_facets._speakers.count}
@@ -59,7 +71,7 @@
             {search_params}
             search_param_key="speakers"
             values={result_facets._speakers.values}
-            speaker_ids_to_names={speakers?.reduce((acc, speaker) => {
+            keys_to_values={$speakers?.reduce((acc, speaker) => {
               acc[speaker.id] = speaker.name
               return acc
             }, {})}

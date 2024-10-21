@@ -1,16 +1,13 @@
 # Migrate Entries and Speakers from Firestore to Supabase
 - pnpm -F scripts test:migration
 
-## TODO
-- handle dialect_ids in ListEntry.svelte
-- make all types of edits
-- translate parts of speech and semantic domains in the UI
-- dictionary counts
+## PREP TODO
+- search for ExpandedEntry
+- run tests and get PR passing
 - continue running data in batches from 148K+
-- Orama search refinement and completion
-  - async load down saved index from Vercel KV
-  - Use `pnpm mixed` to run Firebase prod and Supabase local
-  - replaceState in createQueryParamStore? look into improving the history to change for view and page changes but not for the others
+- Use `pnpm mixed` to run Firebase prod and Supabase local and preview everything
+- Using mixed look through local orthographies - especially in the table view
+- Orama: async load down saved index from Vercel KV
 - visual inspection of the results locally - should work similar to current prod
 
 ## Migration Process
@@ -32,15 +29,19 @@
 - Test editing entries
 - Remove notice
 - Email letting everyone know editing is available again
-- Remove algolia keys from vercel
 
 ## Clean-up
+- dictionary counts
+- get semantic domains working in filters ( currently just filters out entries without a semantic domain)
+- Remove algolia keys from vercel
+- Orama: replaceState in createQueryParamStore? look into improving the history to change for view and page changes but not for the others
 - create indexes using help from index_advisor https://supabase.com/docs/guides/database/extensions/index_advisor
 - drop content_updates' table column
 - drop entry_updates
 - clean up old history data in content_updates
 - make alternate writing systems of the sentence translations as different bcp keys (same as for glosses)
 - look at print, table, gallery, and list page files history to make sure there are no missed improvements - check github history too
+- see how seo_description made the transition
 
 ### No lexeme
 no lx for 0svukh699MsB4svuCDdO in ho

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { type EntryView, type IDictionary, type IPrintFields, StandardPrintFields } from '@living-dictionaries/types'
+  import type { EntryView, IDictionary } from '@living-dictionaries/types'
   import sanitize from 'xss'
   import { tick } from 'svelte'
   import QrCode from './QrCode.svelte'
@@ -18,16 +18,23 @@
   export let showLabels = false
   export let showQrCode = false
 
-  $: selectedPrintFields = (Object.keys(StandardPrintFields) as (keyof IPrintFields)[]).filter(key => entry[key] && selectedFields[key])
+  $: ({ photos, sentences, dialects, speakers } = $page.data)
+
+  $: first_sense = entry.senses?.[0]
+  $: first_photo_id = first_sense?.photo_ids?.[0]
+  $: first_photo = (first_photo_id && $photos.length) ? $photos.find(photo => photo.id === first_photo_id) : null
+
+  $: first_audio = entry.audios?.[0]
+  $: speaker_name = ($speakers?.length && first_audio?.speaker_ids?.length) ? $speakers.find(speaker => speaker.id === first_audio.speaker_ids[0])?.name : ''
+
+  $: first_sentence = $sentences?.find(sentence => sentence.id === first_sense?.sentence_ids?.[0])
 </script>
 
 <div style="font-size: {fontSize}pt;">
   <b style="font-size: {headwordSize}pt;">{entry.main.lexeme.default}</b>
 
   {#if selectedFields.local_orthography}
-    {#each get_local_orthographies(entry) as orthography}
-      <b>{orthography}, </b>
-    {/each}
+    <b>{get_local_orthographies(entry.main.lexeme).join(', ')}</b>
   {/if}
 
   {#if selectedFields.phonetic && entry.main.phonetic}
@@ -47,15 +54,15 @@
       </span>
     {/if}
 
-    {#if selectedFields.example_sentence}
+    {#if selectedFields.example_sentence && first_sentence}
       <i>{order_example_sentences({
-        example_sentences: sense.sentence_ids?.[0],
+        sentence: first_sentence,
         dictionary_gloss_languages: dictionary.glossLanguages,
       }).join(' / ')}</i>
     {/if}
 
     {#if selectedFields.semantic_domains}
-      {@const semantic_domains = [...sense.translated_ld_semantic_domains || [], ...sense.write_in_semantic_domains || []]}
+      {@const semantic_domains = [...sense.semantic_domains || [], ...sense.write_in_semantic_domains || []]}
       {#if semantic_domains.length}
         <div>
           {#if showLabels}
@@ -63,37 +70,74 @@
               {$page.data.t('entry_field.semantic_domains')}:
             </span>
           {/if}
-          {semantic_domains.join(', ')}
+          {semantic_domains.map(domain => $page.data.t({ dynamicKey: `sd.${domain}`, fallback: domain })).join(', ')}
         </div>
       {/if}
     {/if}
 
     {#if selectedFields.noun_class && sense.noun_class}
-      <p>
+      <div>
         {#if showLabels}
           <span class="italic text-[80%]">{$page.data.t('entry_field.noun_class')}: </span>
         {/if}
         {sense.noun_class}
-      </p>
+      </div>
+    {/if}
+
+    {#if selectedFields.plural_form && sense.plural_form}
+      <div>
+        {#if showLabels}
+          <span class="italic text-[80%]">{$page.data.t('entry_field.plural_form')}: </span>
+        {/if}
+        {sense.plural_form?.default}
+      </div>
+    {/if}
+
+    {#if selectedFields.variant && sense.variant}
+      <div>
+        {#if showLabels}
+          <span class="italic text-[80%]">{$page.data.t('entry_field.variant')}: </span>
+        {/if}
+        {sense.variant?.default}
+      </div>
     {/if}
   {/each}
 
-  <div>
-    {#each selectedPrintFields as key}
-      <p>
-        {#if showLabels}
-          <span class="italic text-[80%]">{$page.data.t(`entry_field.${key}`)}:</span>
-        {/if}
-        {#if key === 'notes'}
-          {@html sanitize(entry[key])}
-        {:else if key === 'dialects'}
-          {entry[key].join(', ')}
-        {:else}
-          {entry[key]}
-        {/if}
-      </p>
-    {/each}
-  </div>
+  {#if selectedFields.notes && entry.main.notes}
+    <div>
+      {#if showLabels}
+        <span class="italic text-[80%]">{$page.data.t('entry_field.notes')}: </span>
+      {/if}
+      {@html sanitize(entry.main.notes.default)}
+    </div>
+  {/if}
+
+  {#if selectedFields.dialects && entry.dialect_ids?.length}
+    <div>
+      {#if showLabels}
+        <span class="italic text-[80%]">{$page.data.t(`entry_field.dialects`)}:</span>
+      {/if}
+      {$dialects.filter(dialect => entry.dialect_ids.includes(dialect.id)).map(dialect => dialect.name.default).join(', ')}
+    </div>
+  {/if}
+
+  {#if selectedFields.interlinearization && entry.main.interlinearization}
+    <div>
+      {#if showLabels}
+        <span class="italic text-[80%]">{$page.data.t(`entry_field.interlinearization`)}:</span>
+      {/if}
+      {entry.main.interlinearization}
+    </div>
+  {/if}
+
+  {#if selectedFields.morphology && entry.main.morphology}
+    <div>
+      {#if showLabels}
+        <span class="italic text-[80%]">{$page.data.t(`entry_field.morphology`)}:</span>
+      {/if}
+      {entry.main.morphology}
+    </div>
+  {/if}
 
   {#if selectedFields.sources && entry.main.sources}
     <div>
@@ -104,23 +148,22 @@
     </div>
   {/if}
 
-  <!-- TODO: get speaker names from speaker_ids -->
-  <!-- {#if selectedFields.speaker && entry.audios?.[0]}
+  {#if selectedFields.speaker && speaker_name}
     <div>
       {#if showLabels}
         <span class="italic text-[80%]">{$page.data.t('entry_field.speaker')}: </span>
       {/if}
-      speaker name here
+      {speaker_name}
     </div>
-  {/if} -->
+  {/if}
 </div>
 
-{#if selectedFields.photo && entry.senses?.[0]?.photo_ids?.[0]}
+{#if selectedFields.photo && first_photo}
   <!-- max-height keeps tall images from spilling onto 2nd page when printing single column w/ images at 100% width; -->
   <img
     class="block mb-1 mt-1px"
     style="width:{imagePercent}%; max-height: 100vh;"
-    src="https://lh3.googleusercontent.com/{entry.senses[0].photo_files[0].specifiable_image_url}"
+    src="https://lh3.googleusercontent.com/{first_photo.serving_url}"
     alt={entry.main.lexeme.default} />
 {/if}
 

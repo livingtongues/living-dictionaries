@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { EntryFieldValue, EntryView, IDictionary } from '@living-dictionaries/types'
+  import type { EntryFieldValue, EntryView, IDictionary, TablesUpdate } from '@living-dictionaries/types'
   import { Button } from 'svelte-pieces'
   import EntryField from './EntryField.svelte'
   import EntryMedia from './EntryMedia.svelte'
@@ -16,6 +16,10 @@
   export let dbOperations: DbOperations
 
   const text_fields = ['morphology', 'interlinearization'] satisfies EntryFieldValue[]
+
+  function update_entry(entry: TablesUpdate<'entries'>) {
+    dbOperations.update_entry({ entry })
+  }
 </script>
 
 <div class="flex flex-col md:grid mb-3 media-on-right-grid grid-gap-2">
@@ -28,7 +32,7 @@
       on_update={(new_value) => {
         if (new_value) {
           entry.main.lexeme.default = new_value
-          dbOperations.update_entry({ entry: { lexeme: entry.main.lexeme } })
+          update_entry({ lexeme: entry.main.lexeme })
         }
       }} />
   </div>
@@ -47,7 +51,7 @@
         display={orthography}
         on_update={(new_value) => {
           entry.main.lexeme[orthography_field] = new_value
-          dbOperations.update_entry({ entry: { lexeme: entry.main.lexeme } })
+          update_entry({ lexeme: entry.main.lexeme })
         }} />
     {/each}
 
@@ -58,7 +62,7 @@
       display={$page.data.t('entry_field.phonetic')}
       on_update={(new_value) => {
         entry.main.phonetic = new_value
-        dbOperations.update_entry({ entry: { phonetic: new_value } })
+        update_entry({ phonetic: new_value })
       }} />
 
     {#each entry.senses as sense, index}
@@ -66,7 +70,7 @@
         <Sense {sense} glossLanguages={dictionary.glossLanguages} {can_edit} />
 
         {#if can_edit}
-          <Button class="text-start p-2! mb-2 rounded order-2 hover:bg-gray-100! text-gray-600" form="menu" onclick={async () => await dbOperations.insert_sense({ sense: {}, entry_id: entry.id })}><span class="i-system-uicons-versions text-xl" /> {$page.data.t('sense.add')}</Button>
+          <Button class="text-start p-2! mb-2 rounded order-2 hover:bg-gray-100! text-gray-600 text-start!" form="menu" onclick={async () => await dbOperations.insert_sense({ sense: {}, entry_id: entry.id })}><span class="i-system-uicons-versions text-xl" /> {$page.data.t('sense.add')}</Button>
         {/if}
       {:else}
         <div class="p-2 hover:bg-gray-50 rounded">
@@ -103,7 +107,7 @@
       display={$page.data.t('entry_field.scientific_names')}
       on_update={(new_value) => {
         entry.main.scientific_names = [new_value]
-        dbOperations.update_entry({ entry: { scientific_names: entry.main.scientific_names } })
+        update_entry({ scientific_names: entry.main.scientific_names })
       }} />
 
     {#each text_fields as field}
@@ -114,7 +118,7 @@
         display={$page.data.t(`entry_field.${field}`)}
         on_update={(new_value) => {
           entry.main[field] = new_value
-          dbOperations.update_entry({ entry: { [field]: new_value } })
+          update_entry({ [field]: new_value })
         }} />
     {/each}
 
@@ -125,7 +129,7 @@
       display={$page.data.t('entry_field.notes')}
       on_update={(new_value) => {
         entry.main.notes = { default: new_value }
-        dbOperations.update_entry({ entry: { notes: entry.main.notes } })
+        update_entry({ notes: entry.main.notes })
       }} />
 
     {#if entry.main.sources?.length || can_edit}
@@ -136,7 +140,7 @@
           value={entry.main.sources}
           on_update={(new_value) => {
             entry.main.sources = new_value
-            dbOperations.update_entry({ entry: { sources: new_value } })
+            update_entry({ sources: new_value })
           }} />
         <div class="border-b-2 pb-1 mb-2 border-dashed" />
       </div>

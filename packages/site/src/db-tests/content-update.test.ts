@@ -30,7 +30,7 @@ describe('sense operations', () => {
       dictionary_id: seeded_dictionary_id,
       entry_id: first_entry_id,
       sense_id: first_entry_first_sense_id,
-      type: 'upsert_sense',
+      type: 'insert_sense',
       data: {
         noun_class: '2',
       },
@@ -61,7 +61,7 @@ describe('sense operations', () => {
         dictionary_id: seeded_dictionary_id,
         entry_id: first_entry_id,
         sense_id: first_entry_first_sense_id,
-        type: 'upsert_sense',
+        type: 'insert_sense',
         data: {
           parts_of_speech: ['n', 'v'],
         },
@@ -98,7 +98,7 @@ describe('sense operations', () => {
       dictionary_id: seeded_dictionary_id,
       entry_id: first_entry_id,
       sense_id: first_entry_second_sense_id,
-      type: 'upsert_sense',
+      type: 'insert_sense',
       data: {
         glosses: {
           en: 'Hi',
@@ -139,7 +139,7 @@ describe('sense operations', () => {
       dictionary_id: seeded_dictionary_id,
       entry_id: first_entry_id,
       sense_id: first_entry_third_sense_id,
-      type: 'upsert_sense',
+      type: 'insert_sense',
       data: {
         semantic_domains: ['1', '2'],
       },
@@ -183,7 +183,7 @@ describe('sense operations', () => {
       dictionary_id: seeded_dictionary_id,
       entry_id: first_entry_id,
       sense_id: first_entry_third_sense_id,
-      type: 'upsert_sense',
+      type: 'insert_sense',
       data: {
         deleted: 'true',
       },

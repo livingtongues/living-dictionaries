@@ -13,7 +13,7 @@
   import { browser, dev } from '$app/environment'
 
   export let data
-  $: ({ entries, admin, search_entries, default_entries_per_page, search_params, speakers, dictionary, can_edit, dbOperations, reset_caches } = data)
+  $: ({ entries, admin, search_entries, default_entries_per_page, search_params, dictionary, can_edit, dbOperations, reset_caches } = data)
   $: ({ loading, updated_item } = entries)
 
   let page_entries: EntryView[] = []
@@ -93,7 +93,7 @@
       <Pagination bind:page_from_url={$search_params.page} {number_of_pages} can_edit={$can_edit} add_entry={dbOperations.insert_entry} />
     </div>
     <div class="hidden md:block w-2 flex-shrink-0 print:hidden" />
-    <EntryFilters {search_params} {show_mobile_filters} on_close={toggle} {result_facets} speakers={$speakers} />
+    <EntryFilters {search_params} {show_mobile_filters} on_close={toggle} {result_facets} />
   </div>
 </ShowHide>
 

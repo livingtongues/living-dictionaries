@@ -14,13 +14,12 @@
 
   $: ({ sentences, dictionary, dbOperations } = $page.data)
 
-  function update(update: TablesUpdate<'senses'>) {
+  function update_sense(update: TablesUpdate<'senses'>) {
     dbOperations.update_sense({ sense: update, sense_id: sense.id })
   }
 
   $: glossingLanguages = order_entry_and_dictionary_gloss_languages(sense.glosses, glossLanguages)
   $: hasSemanticDomain = sense.semantic_domains?.length || sense.write_in_semantic_domains?.length
-
 </script>
 
 {#each glossingLanguages as bcp}
@@ -32,7 +31,7 @@
     display={`${$page.data.t({ dynamicKey: `gl.${bcp}`, fallback: bcp })}: ${$page.data.t('entry_field.gloss')}`}
     on_update={(new_value) => {
       sense.glosses = { ...sense.glosses, [bcp]: new_value }
-      update({ glosses: sense.glosses })
+      update_sense({ glosses: sense.glosses })
     }} />
 {/each}
 
@@ -45,7 +44,7 @@
     {can_edit}
     on_update={(new_value) => {
       sense.definition = new_value ? { en: new_value } : null
-      update({
+      update_sense({
         definition: sense.definition,
       })
     }} />
@@ -59,7 +58,7 @@
       {can_edit}
       on_update={(new_value) => {
         sense.parts_of_speech = new_value
-        update({ parts_of_speech: new_value })
+        update_sense({ parts_of_speech: new_value })
       }} />
     <div class="border-b-2 pb-1 mb-2 border-dashed" />
   </div>
@@ -74,11 +73,11 @@
       write_in_semantic_domains={sense.write_in_semantic_domains}
       on_update={(new_value) => {
         sense.semantic_domains = new_value
-        update({ semantic_domains: new_value })
+        update_sense({ semantic_domains: new_value })
       }}
       on_update_write_in={(new_value) => {
         sense.write_in_semantic_domains = new_value
-        update({ write_in_semantic_domains: new_value })
+        update_sense({ write_in_semantic_domains: new_value })
       }} />
     <div class="border-b-2 pb-1 mb-2 border-dashed" />
   </div>
@@ -91,7 +90,7 @@
   display={$page.data.t('entry_field.noun_class')}
   on_update={(new_value) => {
     sense.noun_class = new_value
-    update({ noun_class: new_value })
+    update_sense({ noun_class: new_value })
   }} />
 
 {#if sense.sentence_ids?.length}
@@ -107,7 +106,15 @@
   <EntrySentence sentence={{ text: {}, id: null, translation: null }} {can_edit} sense_id={sense.id} glossingLanguages={glossingLanguages} />
 {/if}
 
-<div>TODO: 'plural_form' is MultiString</div>
+<EntryField
+  value={sense.plural_form?.default}
+  field="plural_form"
+  {can_edit}
+  display={$page.data.t('entry_field.plural_form')}
+  on_update={(new_value) => {
+    sense.plural_form = { default: new_value }
+    update_sense({ plural_form: sense.plural_form })
+  }} />
 
 {#if DICTIONARIES_WITH_VARIANTS.includes($dictionary.id)}
   <EntryField
@@ -115,5 +122,5 @@
     field="variant"
     {can_edit}
     display={$page.data.t('entry_field.variant')}
-    on_update={new_value => update({ variant: { ...sense.variant, default: new_value } })} />
+    on_update={new_value => update_sense({ variant: { ...sense.variant, default: new_value } })} />
 {/if}

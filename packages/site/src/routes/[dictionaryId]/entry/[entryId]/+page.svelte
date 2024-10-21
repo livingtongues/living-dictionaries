@@ -10,6 +10,7 @@
   $: ({
     entry,
     photos,
+    dialects,
     shallow,
     dictionary,
     admin,
@@ -78,7 +79,7 @@
 
 <SeoMetaTags
   imageTitle={entry.main.lexeme.default}
-  imageDescription={seo_description(entry, $dictionary.glossLanguages, $page.data.t)}
+  imageDescription={seo_description({ entry, dialects: $dialects, gloss_languages: $dictionary.glossLanguages, t: $page.data.t })}
   dictionaryName={$dictionary.name}
   lat={$dictionary.coordinates?.latitude}
   lng={$dictionary.coordinates?.longitude}

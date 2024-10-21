@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { ExpandedEntry, IColumn, IDictionary } from '@living-dictionaries/types'
+  import type { EntryView, IColumn, IDictionary } from '@living-dictionaries/types'
   import ColumnTitle from './ColumnTitle.svelte'
   import Cell from './Cell.svelte'
   import { setUpColumns } from './setUpColumns'
@@ -7,7 +7,7 @@
   import { browser } from '$app/environment'
   import type { DbOperations } from '$lib/dbOperations'
 
-  export let entries: ExpandedEntry[] = []
+  export let entries: EntryView[] = []
   export let can_edit = false
   export let dictionary: IDictionary
   export let preferred_table_columns: IColumn[]
@@ -46,20 +46,19 @@
       {/each}
     </tr>
     {#each entries as entry (entry.id)}
-      {@const updated_within_last_5_minutes = can_edit && (entry.ua?.toMillis?.() || (entry.ua?.seconds * 1000)) > minutes_ago_in_ms(5)}
+      {@const updated_within_last_5_minutes = can_edit && new Date(entry.updated_at).getTime() > minutes_ago_in_ms(5)}
       <tr class="row-hover">
         {#each columns as column, i}
           <td
-            class:bg-green-100={updated_within_last_5_minutes}
+            class:bg-green-100!={updated_within_last_5_minutes}
             class="{column.sticky ? 'sticky bg-white z-1' : ''} {isFirefox ? '' : 'h-0'}"
             style="{column.sticky
               ? `left:${getLeftValue(i)}px; --border-right-width: 3px;`
-              : ''} --col-width: {entry.sources ? 'auto' : `${column.width}px`};">
+              : ''} --col-width: {entry.main.sources ? 'auto' : `${column.width}px`};">
             <Cell
               {column}
               {entry}
               {can_edit}
-              dictionaryId={dictionary.id}
               {dbOperations} />
           </td>
         {/each}

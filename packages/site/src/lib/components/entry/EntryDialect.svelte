@@ -1,33 +1,45 @@
-<script lang="ts" context="module">
-  import { type Writable, writable } from 'svelte/store'
-  import type { SelectOption } from '../ui/array/select-options.interface'
-
-  const options: Writable<SelectOption[]> = writable([])
-// let fetchedDictionaryId: string
-</script>
-
 <script lang="ts">
-  import ModalEditableArray from '../ui/array/ModalEditableArray.svelte'
+  import type { SelectOption } from '$lib/components/ui/array/select-options.interface'
+  import ModalEditableArray from '$lib/components/ui/array/ModalEditableArray.svelte'
   import { page } from '$app/stores'
-  // import { onMount } from 'svelte'
-  // import { browser } from '$app/environment'
 
-  export let dialects: string[] = []
+  export let dialect_ids: string[]
+  export let entry_id: string
   export let can_edit = false
-  export let dictionaryId: string
   export let showPlus = true
 
-  export let on_update: (new_value: string[]) => void
+  $: ({ dialects, dbOperations } = $page.data)
+  $: active_dialects = $dialects.filter(dialect => dialect_ids.includes(dialect.id)).map(dialect => dialect.id)
+  $: options = $dialects.map(dialect => ({ value: dialect.id, name: dialect.name.default })) satisfies SelectOption[]
 
-// onMount(() => {
-  //   if (browser && fetchedDictionaryId !== dictionaryId) {
-  //   }
-  // })
+  async function on_update(new_values: string[]) {
+    // go through current dialect_ids and check if they are in the new_values, if not remove them
+    for (const dialect_id of dialect_ids) {
+      const value_is_removed = !new_values.includes(dialect_id)
+      if (value_is_removed) {
+        await dbOperations.assign_dialect({ dialect_id, entry_id, remove: true })
+      }
+    }
+
+    for (const dialect_id of new_values) {
+      if (dialect_ids.includes(dialect_id)) continue // everything is already set - this value wasn't changed
+
+      // need to assign dialect
+      if ($dialects.find(({ id }) => id === dialect_id)) {
+        // if the value is in the dialects, assign it to this entry
+        await dbOperations.assign_dialect({ dialect_id, entry_id })
+      } else {
+        // if a value is not in the dictionary's dialects first add the dialect to the dictionary
+        const data = await dbOperations.insert_dialect({ dialect: { name: { default: dialect_id } } })
+        await dbOperations.assign_dialect({ dialect_id: data.dialect_id, entry_id })
+      }
+    }
+  }
 </script>
 
 <ModalEditableArray
-  values={dialects}
-  options={$options}
+  values={active_dialects}
+  {options}
   {can_edit}
   canWriteIn
   {showPlus}

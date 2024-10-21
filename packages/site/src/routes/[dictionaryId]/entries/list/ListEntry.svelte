@@ -18,7 +18,7 @@
   export let dbOperations: DbOperations
   export let on_click: (e: MouseEvent & { currentTarget: EventTarget & HTMLAnchorElement }) => void = undefined
 
-  $: ({ photos, videos, sentences } = $page.data)
+  $: ({ photos, videos, sentences, dialects } = $page.data)
 
   $: glosses = order_glosses({
     glosses: entry.senses?.[0]?.glosses,
@@ -85,8 +85,8 @@
           {/if}
         {/if}
 
-        {#if entry.dialects}<p class="text-xs">
-          <i class="mr-1">{$page.data.t('entry_field.dialects')}: {entry.dialects.join(', ')}</i>
+        {#if entry.dialect_ids?.length}<p class="text-xs">
+          <i class="mr-1">{$page.data.t('entry_field.dialects')}: {$dialects.filter(dialect => entry.dialect_ids.includes(dialect.id)).map(dialect => dialect.name.default).join(', ')}</i>
         </p>{/if}
 
         {#if dictionary.id === 'jewish-neo-aramaic'}

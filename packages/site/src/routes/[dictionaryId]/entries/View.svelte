@@ -59,7 +59,6 @@
     <EntriesGallery
       {entries}
       dictionary={$dictionary}
-      deleteImage={dbOperations.deleteImage}
       can_edit={$can_edit} />
   {:else if $search_params.view === 'print'}
     <EntriesPrint

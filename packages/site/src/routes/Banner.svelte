@@ -1,9 +1,7 @@
 <script lang='ts'>
-  import { Button, ShowHide } from 'svelte-pieces'
-  import { page } from '$app/stores'
 </script>
 
-<ShowHide let:show={hide} let:toggle>
+<!-- <ShowHide let:show={hide} let:toggle>
   {#if !hide}
     <div class='bg-amber-400 fixed top-3 left-3 right-3 rounded z-20 p-2 flex'>
       <div>
@@ -13,4 +11,4 @@
       <Button form="simple" color="black" onclick={toggle}><span class="i-fa-solid-times" /></Button>
     </div>
   {/if}
-</ShowHide>
+</ShowHide> -->

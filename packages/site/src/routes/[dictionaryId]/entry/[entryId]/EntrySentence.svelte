@@ -4,7 +4,7 @@
   import { page } from '$app/stores'
 
   export let glossingLanguages: string[]
-  export let sentence: Tables<'sentences'>
+  export let sentence: Partial<Tables<'sentences'>>
   export let can_edit = false
   export let sense_id: string
 

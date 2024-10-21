@@ -74,7 +74,7 @@
 
   function addWriteInIfApplicable() {
     if (!canWriteIn) return
-    const value = inputValue.trim()
+    const value = inputValue?.trim()
     if (value)
       add({ name: value, value })
   }

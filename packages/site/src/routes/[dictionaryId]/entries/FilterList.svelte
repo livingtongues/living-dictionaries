@@ -8,8 +8,8 @@
   export let search_params: QueryParamStore<QueryParams>
   export let search_param_key: FilterListKeys
   export let label: string
-  export let values: Record<string, number> // keys are item name, numbers are count found
-  export let speaker_ids_to_names: Record<string, string> = undefined
+  export let values: Record<string, number> // keys are item key, numbers are count found
+  export let keys_to_values: Record<string, string>
 
   $: count = Object.values(values).length
   let search_value: string
@@ -25,9 +25,7 @@
   }
 
   function make_item_readable(item: string) {
-    if (speaker_ids_to_names)
-      return speaker_ids_to_names[item] || restore_spaces_from_underscores(item)
-    return restore_spaces_from_underscores(item)
+    return keys_to_values?.[item] || restore_spaces_from_underscores(item)
   }
 </script>
 
