@@ -2,7 +2,7 @@ import { randomUUID } from 'node:crypto'
 import type { TablesUpdate } from '@living-dictionaries/types'
 import type { ISpeaker } from '@living-dictionaries/types/speaker.interface'
 import { convert_entry } from './convert-entries'
-import { assign_dialect, assign_speaker, insert_entry, insert_photo, insert_sense, insert_sentence, upsert_audio, upsert_dialect, upsert_speaker, upsert_video } from './operations/operations'
+import { assign_dialect, assign_speaker, insert_dialect, insert_entry, insert_photo, insert_sense, insert_sentence, insert_video, upsert_audio, upsert_speaker } from './operations/operations'
 import { convert_speaker } from './convert-speakers'
 import { log_once } from './log-once'
 
@@ -125,7 +125,7 @@ export async function migrate_entry(fb_entry: any, speakers: AllSpeakerData, dic
     let dialect_id = dictionary_dialects[dictionary_id]?.[dialect]
 
     if (!dialect_id) {
-      const { data, error } = await upsert_dialect({ dictionary_id, name: dialect, import_id, user_id: entry.created_by, timestamp: entry.created_at })
+      const { data, error } = await insert_dialect({ dictionary_id, name: dialect, import_id, user_id: entry.created_by, timestamp: entry.created_at })
       if (error)
         throw new Error(error.message)
 
@@ -170,7 +170,7 @@ export async function migrate_entry(fb_entry: any, speakers: AllSpeakerData, dic
     const { sense_id } = sense_videos.find(s => s.video_id === video.id)
     if (!sense_id)
       throw new Error('sense_id not found')
-    const { error } = await upsert_video({ dictionary_id, sense_id, video, video_id: video.id, import_id })
+    const { error } = await insert_video({ dictionary_id, sense_id, video, video_id: video.id, import_id })
     if (error)
       throw new Error(error.message)
   }

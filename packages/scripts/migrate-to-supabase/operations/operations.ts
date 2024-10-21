@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto'
-import type { ContentUpdateRequestBody, TablesUpdate } from '@living-dictionaries/types'
+import type { ContentUpdateRequestBody, TablesInsert, TablesUpdate } from '@living-dictionaries/types'
 import type { ContentUpdateResponseBody } from '../../../site/src/routes/api/db/content-update/+server'
 import { jacob_ld_user_id } from '../../config-supabase'
 import { post_request } from '../../import/post-request'
@@ -11,7 +11,7 @@ const import_meta = {
   timestamp: test_timestamp,
 }
 
-export function upsert_entry({
+export function insert_entry({
   dictionary_id,
   entry,
   entry_id,
@@ -28,13 +28,13 @@ export function upsert_entry({
     import_meta,
     dictionary_id,
     entry_id: entry_id || randomUUID(),
-    type: 'upsert_entry',
-    data: entry,
+    type: 'insert_entry',
+    data: entry as TablesInsert<'entries'>,
     import_id,
   })
 }
 
-export function upsert_sense({
+export function insert_sense({
   dictionary_id,
   entry_id,
   sense,
@@ -54,13 +54,13 @@ export function upsert_sense({
     dictionary_id,
     entry_id,
     sense_id: sense_id || randomUUID(),
-    type: 'upsert_sense',
+    type: 'insert_sense',
     data: sense,
     import_id,
   })
 }
 
-export function upsert_dialect({
+export function insert_dialect({
   dictionary_id,
   name,
   dialect_id,
@@ -84,7 +84,7 @@ export function upsert_dialect({
     },
     dictionary_id,
     dialect_id: dialect_id || randomUUID(),
-    type: 'upsert_dialect',
+    type: 'insert_dialect',
     data: {
       name: {
         default: name,
@@ -234,7 +234,7 @@ export function insert_sentence({
   })
 }
 
-export function upsert_photo({
+export function insert_photo({
   dictionary_id,
   photo,
   sense_id,
@@ -242,7 +242,7 @@ export function upsert_photo({
   import_id,
 }: {
   dictionary_id: string
-  photo: TablesUpdate<'photos'>
+  photo: Omit<TablesInsert<'photos'>, 'updated_by' | 'dictionary_id' | 'id'>
   sense_id: string
   photo_id?: string
   import_id?: string
@@ -257,13 +257,13 @@ export function upsert_photo({
     dictionary_id,
     sense_id,
     photo_id: photo_id || randomUUID(),
-    type: 'upsert_photo',
+    type: 'insert_photo',
     data: photo,
     import_id,
   })
 }
 
-export function upsert_video({
+export function insert_video({
   dictionary_id,
   video,
   sense_id,
@@ -286,7 +286,7 @@ export function upsert_video({
     dictionary_id,
     sense_id,
     video_id: video_id || randomUUID(),
-    type: 'upsert_video',
+    type: 'insert_video',
     data: video,
     import_id,
   })

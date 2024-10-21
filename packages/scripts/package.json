@@ -29,7 +29,6 @@
     "test:migration": "vitest --config ./vitest.config.migration.ts"
   },
   "devDependencies": {
-    "@living-dictionaries/functions": "workspace:^0.0.1",
     "@living-dictionaries/site": "workspace:^0.0.1",
     "@living-dictionaries/types": "workspace:^1.0.0",
     "@supabase/supabase-js": "^2.38.4",
