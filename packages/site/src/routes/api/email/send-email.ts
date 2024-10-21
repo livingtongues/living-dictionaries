@@ -10,6 +10,9 @@ export async function send_email({ from, to, cc, bcc, reply_to, subject, body, t
   if (!DKIM_PRIVATE_KEY)
     throw new Error('DKIM_PRIVATE_KEY env variable not configured')
 
+  if (to.length + (cc?.length || 0) + (bcc?.length || 0) > 1000)
+    throw new Error('Maximum of 1000 recipients allowed')
+
   const mail_channels_send_body: MailChannelsSendBody = {
     personalizations: [{
       to,

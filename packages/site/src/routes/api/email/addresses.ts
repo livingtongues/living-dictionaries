@@ -8,6 +8,7 @@ export const no_reply_address = {
 }
 
 export const dictionary_address = { email: 'dictionaries@livingtongues.org' }
+export const jacobAddress = { email: 'jacob@livingtongues.org' }
 const gregAddress = { email: 'livingtongues@gmail.com' }
 const languages7000 = { email: 'info@7000.org' }
 
@@ -18,7 +19,7 @@ export function getAdminRecipients(initiatorEmail: string): Address[] {
   }
 
   const recipients: Address[] = [
-    { email: 'jacob@livingtongues.org' },
+    jacobAddress,
     { email: 'diego@livingtongues.org' },
   ]
 

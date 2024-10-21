@@ -1,0 +1,19 @@
+<script context="module" lang="ts">
+  import { defineComposition } from 'kitbook'
+
+  export const config = defineComposition({
+    viewports: [{ width: 600, height: 800 }],
+    csr: false,
+  })
+</script>
+
+<script lang="ts">
+  import { render_component_to_html } from '../render-component-to-html'
+  import MigrationClosure from './MigrationClosure.svelte'
+
+  const html = render_component_to_html({
+    component: MigrationClosure,
+  })
+</script>
+
+<iframe srcdoc={html} class="w-full h-full" />
