@@ -366,5 +366,9 @@
   "sense": {
     "sense": "Sense",
     "add": "Add Sense"
+  },
+  "banner": {
+    "message": "We are making improvements to our database on October 22 starting at 7PM Eastern Time (New York), for 24 hours. Editing capabilities will not be available during that period. Sorry for the inconvenience.",
+    "attention": "Attention"
   }
 }

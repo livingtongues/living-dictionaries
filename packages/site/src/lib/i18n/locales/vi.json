@@ -366,5 +366,9 @@
   "sense": {
     "sense": "Giác quan",
     "add": "Thêm ý nghĩa"
+  },
+  "banner": {
+    "message": "Chúng tôi đang cải tiến cơ sở dữ liệu của mình vào ngày 22 tháng 10, bắt đầu lúc 7 giờ tối theo giờ Miền Đông (New York), trong 24 giờ. Khả năng chỉnh sửa sẽ không có sẵn trong thời gian đó. Xin lỗi vì sự bất tiện này.",
+    "attention": "Chú ý"
   }
 }

@@ -85,6 +85,10 @@
           {/if}
         {/if}
 
+        {#if entry.dialects}<p class="text-xs">
+          <i class="mr-1">{$page.data.t('entry_field.dialects')}: {entry.dialects.join(', ')}</i>
+        </p>{/if}
+
         {#if dictionary.id === 'jewish-neo-aramaic'}
           {#if entry.dialect_ids}<p class="text-xs">
             <i class="mr-1">{$page.data.t('entry_field.dialects')}: {entry.dialect_ids.join(', ')}</i>
