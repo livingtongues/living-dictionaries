@@ -1,9 +1,11 @@
 <script lang="ts">
   import './global.css'
   import LoadingIndicator from './LoadingIndicator.svelte'
-  import Banner from './Banner.svelte'
   import { navigating, page } from '$app/stores'
   import { browser } from '$app/environment'
+
+  export let data
+  $: ({ user } = data)
 </script>
 
 {#if browser}
@@ -12,7 +14,11 @@
   {/if}
 {/if}
 
-<Banner />
+{#if $user}
+  {#await import('./Banner.svelte') then { default: Banner }}
+    <Banner />
+  {/await}
+{/if}
 
 <div id="direction" dir={$page.data.t('page.direction')}>
   <slot />
