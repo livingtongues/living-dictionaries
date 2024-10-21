@@ -3,12 +3,14 @@
 
 ## PREP TODO
 - Sort entries from oldest created to newest created so that first person to add a dialect gets the created_by credit
-- continue running data in batches from 148K+ (make the migration script a one pass through, not 2, with a method to do imports in batches without repeating speakers)
+- make the migration script a one pass through, not 2, with a method to do imports in batches without repeating speakers
+
+- continue running data in batches from 148K+
 - Use `pnpm mixed` to run Firebase prod and Supabase local and preview everything
 - Using mixed to look through local orthographies - especially in the table view
-- Orama: async load down saved index from Vercel KV
 - visual inspection of the results locally - should work similar to current prod
 - Make sure all items from "clean-up" below are being actively logged again as they are run into
+- Use cached Orama indexes from Vercel KV on page open (may get bumped to tail end of  migration)
 
 ## Migration Process
 - Lock down writes (but not reads!) of Firestore dictionary words and speakers using security rules
@@ -20,7 +22,7 @@
   - Make Supabase prod backup (manually trigger)
   - run `pnpm -F scripts save-firestore-data` to download Firestore speakers, entries, and users data locally
   - run migration script
-- Test viewing and editing on local using `pnpm mixed`
+- Test viewing and editing on local using `pnpm prod`
 - Merge PR to unblock
 - Test editing entries on live site
 - Remove notice
