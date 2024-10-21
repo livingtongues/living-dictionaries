@@ -1,7 +1,7 @@
 import { writeFileSync } from 'node:fs'
-import { execute_sql_query_on_db } from './postgres'
 import { sql_file_string } from './to-sql-string'
 import { seed_dictionaries, seed_entries, users } from './tables'
+import { postgres } from '$lib/mocks/seed/postgres'
 
 function sql_string_for_all_seeded_tables() {
   return `${sql_file_string('auth.users', users)}
@@ -13,11 +13,11 @@ function sql_string_for_all_seeded_tables() {
 export async function reset_db() {
   console.info('reseting db')
 
-  await execute_sql_query_on_db(`truncate table auth.users cascade;`)
-  await execute_sql_query_on_db('truncate table senses cascade;')
+  await postgres.execute_query(`truncate table auth.users cascade;`)
+  await postgres.execute_query('truncate table senses cascade;')
 
   const seed_sql = sql_string_for_all_seeded_tables()
-  await execute_sql_query_on_db(seed_sql)
+  await postgres.execute_query(seed_sql)
 }
 
 export function write_seed() {
