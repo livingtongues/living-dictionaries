@@ -2,30 +2,27 @@
 - pnpm -F scripts test:migration
 
 ## PREP TODO
-- run db tests, pnpm check, and get PR passing
-- continue running data in batches from 148K+
+- Sort entries from oldest created to newest created so that first person to add a dialect gets the created_by credit
+- continue running data in batches from 148K+ (make the migration script a one pass through, not 2, with a method to do imports in batches without repeating speakers)
 - Use `pnpm mixed` to run Firebase prod and Supabase local and preview everything
-- Using mixed look through local orthographies - especially in the table view
+- Using mixed to look through local orthographies - especially in the table view
 - Orama: async load down saved index from Vercel KV
 - visual inspection of the results locally - should work similar to current prod
+- Make sure all items from "clean-up" below are being actively logged again as they are run into
 
 ## Migration Process
-- post notice on logged-in users a week ahead of time
-- send email notice a week ahead of time
-- Sort entries from oldest created to newest created so that first person to add a dialect gets the created_by credit
-- Make sure all items from "clean-up" below are being actively logged again as they are run into
-- Lock down Firestore dictionary words and speakers using security rules (tell admins not to edit anything)
+- Lock down writes (but not reads!) of Firestore dictionary words and speakers using security rules
 - Migrate data
   - ensure all auth users are brought over
-  - add placeholder entries for all current senses in live db
-  - Make Supabase backup (manually trigger) and place as seed
-  - ensure there are placeholder entries for all current senses in prod db before pushing migration
+  - Make Supabase prod backup (manually trigger) and place as seed
+  - ensure-there-are/add placeholder entries for all current senses in prod db
   - push sql migrations to prod db (making sure the 3 entries dropped columns are uncommented)
+  - Make Supabase prod backup (manually trigger)
   - run `pnpm -F scripts save-firestore-data` to download Firestore speakers, entries, and users data locally
   - run migration script
-- Test viewing
-- Merge new saving methods code (this will be a natural unblock) and hide Algolia search results
-- Test editing entries
+- Test viewing and editing on local using `pnpm mixed`
+- Merge PR to unblock
+- Test editing entries on live site
 - Remove notice
 - Email letting everyone know editing is available again
 
@@ -43,6 +40,7 @@
 - see how seo_description made the transition
 - get exports working again
 - get failed tests working again
+- bring back in variants and tests that relied on old forms of test data
 
 ### No lexeme
 no lx for 0svukh699MsB4svuCDdO in ho
