@@ -7,8 +7,9 @@ import type { ISpeaker } from '@living-dictionaries/types/speaker.interface'
 import { db } from '../config-firebase'
 
 const FOLDER = 'firestore-data'
+const __dirname = dirname(fileURLToPath(import.meta.url))
 
-async function write_entries() {
+export async function write_entries() {
   const entries: ActualDatabaseEntry[] = []
 
   const dict_snapshot = await db.collection('dictionaries').get()
@@ -28,11 +29,10 @@ async function write_entries() {
 
   console.log(`Done fetching ${entries.length} entries from ${dict_snapshot.docs.length} dictionaries.`)
 
-  const __dirname = dirname(fileURLToPath(import.meta.url))
   fs.writeFileSync(path.resolve(__dirname, FOLDER, 'firestore-entries.json'), JSON.stringify(entries, null, 2))
 }
 
-async function write_speakers() {
+export async function write_speakers() {
   const speakers: ISpeaker[] = []
 
   const speaker_snapshots = await db.collection('speakers').get()
@@ -44,11 +44,10 @@ async function write_speakers() {
 
   console.log(`Done fetching ${speakers.length} speakers.`)
 
-  const __dirname = dirname(fileURLToPath(import.meta.url))
   fs.writeFileSync(path.resolve(__dirname, FOLDER, 'firestore-speakers.json'), JSON.stringify(speakers, null, 2))
 }
 
-async function write_users() {
+export async function write_users() {
   const users: IUser[] = []
 
   const user_snapshots = await db.collection('users').get()
@@ -60,10 +59,5 @@ async function write_users() {
 
   console.log(`Done fetching ${users.length} users.`)
 
-  const __dirname = dirname(fileURLToPath(import.meta.url))
   fs.writeFileSync(path.resolve(__dirname, FOLDER, 'firestore-users.json'), JSON.stringify(users, null, 2))
 }
-
-await write_entries()
-await write_speakers()
-await write_users()

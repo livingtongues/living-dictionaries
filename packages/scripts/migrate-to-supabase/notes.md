@@ -2,26 +2,23 @@
 - pnpm -F scripts test:migration
 
 ## PREP TODO
-- Sort entries from oldest created to newest created so that first person to add a dialect gets the created_by credit
-- make the migration script a one pass through, not 2, with a method to do imports in batches without repeating speakers
-
 - continue running data in batches from 148K+
 - Use `pnpm mixed` to run Firebase prod and Supabase local and preview everything
 - Using mixed to look through local orthographies - especially in the table view
 - visual inspection of the results locally - should work similar to current prod
 - Make sure all items from "clean-up" below are being actively logged again as they are run into
 - Use cached Orama indexes from Vercel KV on page open (may get bumped to tail end of  migration)
+- Sort entries from oldest created to newest created so that first person to add a dialect gets the created_by credit
+- ensure-there-are/add placeholder entries for all current senses in prod db
 
 ## Migration Process
-- Lock down writes (but not reads!) of Firestore dictionary words and speakers using security rules
+- Lock down Firestore dictionary words and speakers writes security rules
 - Migrate data
-  - ensure all auth users are brought over
-  - Make Supabase prod backup (manually trigger) and place as seed
   - ensure-there-are/add placeholder entries for all current senses in prod db
+  - ensure all auth users are brought over
   - push sql migrations to prod db (making sure the 3 entries dropped columns are uncommented)
-  - Make Supabase prod backup (manually trigger)
-  - run `pnpm -F scripts save-firestore-data` to download Firestore speakers, entries, and users data locally
-  - run migration script
+  - Make Supabase prod backup (manually trigger) and place as seed
+  - run `pnpm -F scripts run-migration`
 - Test viewing and editing on local using `pnpm prod`
 - Merge PR to unblock
 - Test editing entries on live site
@@ -31,18 +28,18 @@
 ## Clean-up
 - dictionary counts
 - get semantic domains working in filters ( currently just filters out entries without a semantic domain)
+- get exports working again
 - Remove algolia keys from vercel
 - Orama: replaceState in createQueryParamStore? look into improving the history to change for view and page changes but not for the others
 - create indexes using help from index_advisor https://supabase.com/docs/guides/database/extensions/index_advisor
+- look at print, table, gallery, and list page files history to make sure there are no missed improvements - check github history too
 - drop content_updates' table column
 - drop entry_updates
 - clean up old history data in content_updates
 - make alternate writing systems of the sentence translations as different bcp keys (same as for glosses)
-- look at print, table, gallery, and list page files history to make sure there are no missed improvements - check github history too
-- see how seo_description made the transition
-- get exports working again
 - get failed tests working again
 - bring back in variants and tests that relied on old forms of test data
+- look at deletedEntries to see if they should be saved somewhere
 
 ### No lexeme
 no lx for 0svukh699MsB4svuCDdO in ho

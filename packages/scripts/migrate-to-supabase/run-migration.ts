@@ -1,35 +1,62 @@
 import fs, { readFileSync } from 'node:fs'
-import path, { dirname } from 'node:path'
+import path from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { access } from 'node:fs/promises'
 import type { GoogleAuthUserMetaData, IUser } from '@living-dictionaries/types'
-import type { ISpeaker } from '@living-dictionaries/types/speaker.interface'
 import Chain from 'stream-chain'
 import Parser from 'stream-json'
 import StreamArray from 'stream-json/streamers/StreamArray'
 import { admin_supabase, execute_query } from '../config-supabase'
-import firebase_speakers from './firestore-data/firestore-speakers.json'
 import type { AllSpeakerData } from './migrate-entries'
-import { migrate_entry, migrate_speakers } from './migrate-entries'
+import { load_speakers, migrate_entry, migrate_speakers } from './migrate-entries'
 import { remove_seconds_underscore } from './utils/remove-seconds-underscore'
+import { write_entries, write_speakers, write_users } from './save-firestore-data'
+import { load_fb_to_sb_user_ids } from './get-user-id'
 
 const FOLDER = 'firestore-data'
 
-// pnpm -F scripts run-migration
-run_migration_part_2()
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
-async function run_migration_part_1() {
-  await seed_local_db_with_production_data() // only on local test runs
-  await write_fb_sb_mappings()
+function local_filepath(filename: string): string {
+  return path.join(__dirname, FOLDER, filename)
 }
 
-// separate because migrate_speakers imports a file that the first part hasn't yet written
-async function run_migration_part_2() {
-  const speakers = await migrate_speakers(firebase_speakers as ISpeaker[])
-  // await migrate_entries(entries_to_test, speakers)
-  await migrate_all_entries(speakers)
+async function file_exists(filename: string): Promise<boolean> {
+  try {
+    await access(local_filepath(filename), fs.constants.F_OK)
+    return true
+  } catch {
+    return false
+  }
 }
 
-async function migrate_all_entries(speakers: AllSpeakerData) {
+run_migration({ local_db: true, start_index: 0 })
+
+async function run_migration({ local_db, start_index }: { local_db: boolean, start_index: number }) {
+  if (local_db && start_index === 0)
+    await seed_local_db_with_production_data()
+
+  const entries_downloaded = await file_exists('firestore-entries.json')
+  if (!entries_downloaded)
+    await write_entries()
+  const speakers_downloaded = await file_exists('firestore-speakers.json')
+  if (!speakers_downloaded)
+    await write_speakers()
+  const users_downloaded = await file_exists('firestore-users.json')
+  if (!users_downloaded)
+    await write_users()
+
+  if (start_index === 0) {
+    await migrate_speakers() // speaker mappings
+    await write_fb_sb_mappings() // user mappings
+  }
+
+  const speakers = await load_speakers()
+  await load_fb_to_sb_user_ids()
+  await migrate_all_entries(speakers, start_index)
+}
+
+async function migrate_all_entries(speakers: AllSpeakerData, start_index: number) {
   const dictionary_dialects: Record<string, Record<string, string>> = {}
   const dictionary_new_speakers: Record<string, Record<string, string>> = {}
 
@@ -39,7 +66,6 @@ async function migrate_all_entries(speakers: AllSpeakerData) {
     StreamArray.streamArray(),
   ])
 
-  const start_index = 148000
   // const end_index = start_index + batch_size
   let index = 0
   let current_entry_id = ''
@@ -65,9 +91,11 @@ async function migrate_all_entries(speakers: AllSpeakerData) {
 }
 
 async function seed_local_db_with_production_data() {
-  const seedFilePath = '../../supabase/seeds/from-backup.sql'
+  const seedFilePath = '../../supabase/seeds/1-from-backup.sql'
   const seed_sql = readFileSync(seedFilePath, 'utf8')
   await execute_query(seed_sql)
+  const updateFilePath = '../../supabase/seeds/2-catch-db-up.sql'
+  await execute_query(readFileSync(updateFilePath, 'utf8'))
 }
 
 async function write_fb_sb_mappings() {
@@ -95,7 +123,6 @@ async function write_fb_sb_mappings() {
 
   console.log({ unmatched_firebase: unmatched_firebase.length, sb_users: sb_users.length, firebase_users: firebase_users.length, supabase_users_not_in_firebase: supabase_users_not_in_firebase.size })
 
-  const __dirname = dirname(fileURLToPath(import.meta.url))
   fs.writeFileSync(path.resolve(__dirname, FOLDER, 'fb-sb-user-ids.json'), JSON.stringify(firebase_uid_to_supabase_user_id, null, 2))
 }
 

@@ -1,4 +1,7 @@
 import { randomUUID } from 'node:crypto'
+import fs from 'node:fs'
+import path, { dirname } from 'node:path'
+import { fileURLToPath } from 'node:url'
 import type { TablesUpdate } from '@living-dictionaries/types'
 import type { ISpeaker } from '@living-dictionaries/types/speaker.interface'
 import { convert_entry } from './convert-entries'
@@ -7,11 +10,15 @@ import { convert_speaker } from './convert-speakers'
 import { log_once } from './log-once'
 
 const import_id = 'fb_sb_migration'
+const FOLDER = 'firestore-data'
+const __dirname = dirname(fileURLToPath(import.meta.url))
 
 export type AllSpeakerData = Record<string, { supabase_id: string, speaker: TablesUpdate<'speakers'> }>
 
-export async function migrate_speakers(firebase_speakers: ISpeaker[]) {
+export async function migrate_speakers() {
   const converted_speakers: AllSpeakerData = {}
+
+  const firebase_speakers = (await import('./firestore-data/firestore-speakers.json')).default as ISpeaker[]
 
   for (const fb_speaker of firebase_speakers) {
     const { id: firebase_id, speaker } = convert_speaker(JSON.parse(JSON.stringify(fb_speaker)))
@@ -19,15 +26,20 @@ export async function migrate_speakers(firebase_speakers: ISpeaker[]) {
     if (firebase_id === jacob_test_speaker_id)
       continue
 
-    const supabase_id = randomUUID()
-    const { error } = await upsert_speaker({ dictionary_id: speaker.dictionary_id, speaker, speaker_id: supabase_id, import_id })
+    const supabase_speaker_id = randomUUID()
+    const { error } = await upsert_speaker({ dictionary_id: speaker.dictionary_id, speaker, speaker_id: supabase_speaker_id, import_id })
     if (error)
       throw new Error(error.message)
 
-    converted_speakers[firebase_id] = { supabase_id, speaker }
+    converted_speakers[firebase_id] = { supabase_id: supabase_speaker_id, speaker }
   }
 
-  return converted_speakers
+  fs.writeFileSync(path.resolve(__dirname, FOLDER, 'fb-to-sb-speakers-mapping.json'), JSON.stringify(converted_speakers, null, 2))
+}
+
+export async function load_speakers() {
+  const speakers = (await import('./firestore-data/fb-to-sb-speakers-mapping.json')).default as AllSpeakerData
+  return speakers
 }
 
 export async function migrate_entries(entries_to_test: any[], speakers: AllSpeakerData) {
