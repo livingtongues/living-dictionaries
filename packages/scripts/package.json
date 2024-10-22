@@ -14,8 +14,7 @@
   },
   "main": "index.ts",
   "scripts": {
-    "run-migration": "tsx migrate-to-supabase/run-migration.ts",
-    "save-firestore-data": "tsx migrate-to-supabase/save-firestore-data.ts -e prod",
+    "run-migration": "tsx migrate-to-supabase/run-migration.ts -e prod",
     "migrate-users": "tsx migrate-to-supabase/auth.ts",
     "countAllEntries": "tsx countAllEntries.ts",
     "getEmails": "tsx refactor/get-email.ts -e prod",

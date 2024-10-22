@@ -24,18 +24,17 @@ interface DataForSupabase {
 
 export function convert_entry(_entry: ActualDatabaseEntry & Record<string, any>, uuid: () => string = randomUUID): [any, DataForSupabase] {
   const dict_entry_id = `${_entry.dictionary_id}:${_entry.id}`
-  if (_entry.deletedVfs) {
+  if (_entry.deletedVfs)
     console.log(`deletedVfs in ${dict_entry_id} - youtubeId: ${_entry.deletedVfs[0].youtubeId}`)
-  }
+
   if (_entry.xv && _entry.xs?.vn)
     console.log(`both xv ${_entry.xv} and xs.vn ${_entry.xs.vn} for ${dict_entry_id}`)
+
   if (_entry.lo && _entry.lo1 && _entry.lo !== _entry.lo1)
     console.log(`lost lo: ${_entry.lo} in favor of lo1: ${_entry.lo1} for ${dict_entry_id}`)
 
-  if (_entry.sf && _entry.sfs?.length) {
-    if (!_entry.sfs[0].sp.includes(_entry.sf.sp))
-      console.log(`different speakers in ${dict_entry_id} - ${_entry.sf.sp} in sf and ${_entry.sfs[0].sp.join(', ')} sfs`)
-  }
+  if (_entry.sf && _entry.sfs?.length && !_entry.sfs[0].sp.includes(_entry.sf.sp))
+    console.log(`different speakers in ${dict_entry_id} - ${_entry.sf.sp} in sf and ${_entry.sfs[0].sp.join(', ')} sfs`)
 
   try {
     const entry: TablesInsert<'entries'> = {

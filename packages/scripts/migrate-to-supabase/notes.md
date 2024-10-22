@@ -2,13 +2,11 @@
 - pnpm -F scripts test:migration
 
 ## PREP TODO
+- Use cached Orama indexes from Vercel KV on page open (may get bumped to tail end of  migration)
 - continue running data in batches from 148K+
 - Use `pnpm mixed` to run Firebase prod and Supabase local and preview everything
 - Using mixed to look through local orthographies - especially in the table view
 - visual inspection of the results locally - should work similar to current prod
-- Make sure all items from "clean-up" below are being actively logged again as they are run into
-- Use cached Orama indexes from Vercel KV on page open (may get bumped to tail end of  migration)
-- Sort entries from oldest created to newest created so that first person to add a dialect gets the created_by credit
 - ensure-there-are/add placeholder entries for all current senses in prod db
 
 ## Migration Process

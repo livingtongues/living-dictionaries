@@ -30,9 +30,29 @@ async function file_exists(filename: string): Promise<boolean> {
   }
 }
 
-run_migration({ local_db: true, start_index: 0 })
+// 0, 20000
+// 20000
+// 40000
+// 60000
+// 80000
+// 100000
+// 120000
+// 140000
+// 160000
+// 180000
+// 200000
+// 220000
+// 240000
+// 260000
+// 280000
+// 300000
+// 320000
+// 340000
+// 360000
+// 380000
+run_migration({ local_db: true, start_index: 165597, batch_size: 1 })
 
-async function run_migration({ local_db, start_index }: { local_db: boolean, start_index: number }) {
+async function run_migration({ local_db, start_index, batch_size }: { local_db: boolean, start_index: number, batch_size: number }) {
   if (local_db && start_index === 0)
     await seed_local_db_with_production_data()
 
@@ -47,16 +67,20 @@ async function run_migration({ local_db, start_index }: { local_db: boolean, sta
     await write_users()
 
   if (start_index === 0) {
-    await migrate_speakers() // speaker mappings
     await write_fb_sb_mappings() // user mappings
   }
 
-  const speakers = await load_speakers()
   await load_fb_to_sb_user_ids()
-  await migrate_all_entries(speakers, start_index)
+
+  if (start_index === 0) {
+    await migrate_speakers() // speaker mappings
+  }
+
+  const speakers = await load_speakers()
+  await migrate_all_entries({ speakers, start_index, batch_size })
 }
 
-async function migrate_all_entries(speakers: AllSpeakerData, start_index: number) {
+async function migrate_all_entries({ speakers, start_index, batch_size }: { speakers: AllSpeakerData, start_index: number, batch_size: number }) {
   const dictionary_dialects: Record<string, Record<string, string>> = {}
   const dictionary_new_speakers: Record<string, Record<string, string>> = {}
 
@@ -66,17 +90,16 @@ async function migrate_all_entries(speakers: AllSpeakerData, start_index: number
     StreamArray.streamArray(),
   ])
 
-  // const end_index = start_index + batch_size
+  const end_index = start_index + batch_size
   let index = 0
   let current_entry_id = ''
   try {
     for await (const { value: fb_entry } of pipeline) {
-      // if (index >= start_index && index < end_index) {
-      if (index >= start_index) {
+      if (index >= start_index && index < end_index) {
         current_entry_id = `${fb_entry.dictionary_id}/${fb_entry.id}`
         const seconds_corrected_entry = remove_seconds_underscore(fb_entry)
         await migrate_entry(seconds_corrected_entry, speakers, dictionary_dialects, dictionary_new_speakers)
-        if (index % 500 === 0)
+        if (index % 200 === 0)
           console.log(`import reached ${index}`)
       }
       index++
@@ -91,14 +114,18 @@ async function migrate_all_entries(speakers: AllSpeakerData, start_index: number
 }
 
 async function seed_local_db_with_production_data() {
-  const seedFilePath = '../../supabase/seeds/1-from-backup.sql'
-  const seed_sql = readFileSync(seedFilePath, 'utf8')
-  await execute_query(seed_sql)
-  const updateFilePath = '../../supabase/seeds/2-catch-db-up.sql'
-  await execute_query(readFileSync(updateFilePath, 'utf8'))
+  console.log('Seeding local db with production data')
+  await execute_query(`truncate table auth.users cascade;`)
+  await execute_query('truncate table senses cascade;')
+  await execute_query('truncate table entry_updates cascade;')
+
+  await execute_query(readFileSync('../../supabase/seeds/0-add-columns-back-in-to-restart.sql', 'utf8'))
+  await execute_query(readFileSync('../../supabase/seeds/1-from-backup.sql', 'utf8'))
+  await execute_query(readFileSync('../../supabase/seeds/2-catch-db-up.sql', 'utf8'))
 }
 
 async function write_fb_sb_mappings() {
+  console.log('writing user mappings')
   const firebase_uid_to_supabase_user_id: Record<string, string> = {}
   const { data: sb_users } = await admin_supabase.from('user_emails')
     .select('id, email')

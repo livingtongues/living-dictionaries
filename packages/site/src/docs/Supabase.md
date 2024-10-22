@@ -60,7 +60,7 @@ These four commands are run daily to backup the production database:
 To make the local DB match the current production download just download the data as the schema already matches production (or is a step ahead):
 - Get the DB url by pasting the password into here: postgresql://postgres.actkqboqpzniojhgtqzw:[YOUR-PASSWORD]@aws-0-us-west-1.pooler.supabase.com:6543/postgres
 - Run `supabase db dump --db-url "your-db-url" -f supabase/seed.sql --data-only` but using the db url above
-- Remove the `is_anonymous` column in auth.users and find-replace `, false),` for `),` (and don't forget the last row with a semi-colon) because `is_anonymous` doesn't exist in local db.
+- Remove the `is_anonymous` column in auth.users and find-replace `, false),` for `),` (and don't forget the last row with a semi-colon) because `is_anonymous` doesn't exist in local db. Remove the audit_log block if using a reset sql script instead of fully resetting the db.
 - Run `supabase db reset` to build the db with the production data
 
 ## Other `pg_dump` notes that did not pan out but may be useful in other situations
