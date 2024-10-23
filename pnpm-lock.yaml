@@ -126,7 +126,10 @@ importers:
         specifier: workspace:^1.0.0
         version: link:../types
       '@orama/orama':
-        specifier: ^2.0.23
+        specifier: 2.0.23
+        version: 2.0.23
+      '@orama/plugin-data-persistence':
+        specifier: 2.0.23
         version: 2.0.23
       '@playwright/test':
         specifier: 1.41.2
@@ -1420,6 +1423,10 @@ packages:
   '@lezer/lr@1.4.0':
     resolution: {integrity: sha512-Wst46p51km8gH0ZUmeNrtpRYmdlRHUpN1DQd3GFAyKANi8WVz8c2jHYTf1CVScFaCjQw1iO3ZZdqGDxQPRErTg==}
 
+  '@msgpack/msgpack@2.8.0':
+    resolution: {integrity: sha512-h9u4u/jiIRKbq25PM+zymTyW6bhTzELvOoUd+AvYriWOAKpLGnIamaET3pnHYoI5iYphAHBI4ayx0MehR+VVPQ==}
+    engines: {node: '>= 10'}
+
   '@nodelib/fs.scandir@2.1.5':
     resolution: {integrity: sha512-vq24Bq3ym5HEQm2NKCr3yXDwjc7vTsEThRDnkp2DK9p1uqLR+DHurm/NOTo0KG7HYHU7eppKZj3MyqYuMBf62g==}
     engines: {node: '>= 8'}
@@ -1435,6 +1442,9 @@ packages:
   '@orama/orama@2.0.23':
     resolution: {integrity: sha512-hb99eZAKW0KBaTyf8f7iV1yFIniQtkcs3sV5pooQ7mh33DCjTyeB39qUW8IHyBDFSs2rjLoePjW0CROvhb3rkw==}
     engines: {node: '>= 16.0.0'}
+
+  '@orama/plugin-data-persistence@2.0.23':
+    resolution: {integrity: sha512-xKEZMgHuyKSIWJzOfXWnpkr4Mx97U5bEqUmWRG1jX4WESry2cszHjp2e2KCLbZaZFHgqJZgESzp0yPcMesiAqQ==}
 
   '@pkgr/core@0.1.1':
     resolution: {integrity: sha512-cq8o4cWH0ibXh9VGi5P20Tu9XF/0fFXl9EUinr9QfTM7a7p0oTA4iJRCQWppXR1Pg8dSM0UCItCkPwsk9qWWYA==}
@@ -3258,6 +3268,9 @@ packages:
   dotenv@16.0.2:
     resolution: {integrity: sha512-JvpYKUmzQhYoIFgK2MOnF3bciIZoItIIoryihy0rIA+H4Jy0FmgyKYAHCTN98P5ybGSJcIFbh6QKeJdtZd1qhA==}
     engines: {node: '>=12'}
+
+  dpack@0.6.22:
+    resolution: {integrity: sha512-WGPNlW2OAE7Bj0eODMpAHUcEqxrlg01e9OFZDxQodminIgC194/cRHT7K04Z1j7AUEWTeeplYGrIv/xRdwU9Hg==}
 
   duplexer@0.1.2:
     resolution: {integrity: sha512-jtD6YG370ZCIi/9GTaJKQxWTZD045+4R4hTk/x1UyoqadyJ9x9CgSi1RlVDQF8U2sxLLSnFkCaMihqljHIWgMg==}
@@ -7421,6 +7434,8 @@ snapshots:
     dependencies:
       '@lezer/common': 1.2.1
 
+  '@msgpack/msgpack@2.8.0': {}
+
   '@nodelib/fs.scandir@2.1.5':
     dependencies:
       '@nodelib/fs.stat': 2.0.5
@@ -7434,6 +7449,12 @@ snapshots:
       fastq: 1.17.1
 
   '@orama/orama@2.0.23': {}
+
+  '@orama/plugin-data-persistence@2.0.23':
+    dependencies:
+      '@msgpack/msgpack': 2.8.0
+      '@orama/orama': 2.0.23
+      dpack: 0.6.22
 
   '@pkgr/core@0.1.1': {}
 
@@ -9974,6 +9995,8 @@ snapshots:
       esutils: 2.0.3
 
   dotenv@16.0.2: {}
+
+  dpack@0.6.22: {}
 
   duplexer@0.1.2: {}
 

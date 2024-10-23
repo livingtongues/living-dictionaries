@@ -2,8 +2,8 @@
 - pnpm -F scripts test:migration
 
 ## PREP TODO
-- Use cached Orama indexes from Vercel KV on page open (may get bumped to tail end of  migration)
-- continue running data in batches from 148K+
+- Use cached Orama indexes from static folder (then Cloudflare R2) if it exists
+- continue running data in batches
 - Use `pnpm mixed` to run Firebase prod and Supabase local and preview everything
 - Using mixed to look through local orthographies - especially in the table view
 - visual inspection of the results locally - should work similar to current prod
@@ -18,12 +18,14 @@
   - Make Supabase prod backup (manually trigger) and place as seed
   - run `pnpm -F scripts run-migration`
 - Test viewing and editing on local using `pnpm prod`
+- change insert_entry back to insert in server endpoint
 - Merge PR to unblock
 - Test editing entries on live site
 - Remove notice
 - Email letting everyone know editing is available again
 
 ## Clean-up
+- build Orama indexes in the static folder over 1000
 - dictionary counts
 - get semantic domains working in filters ( currently just filters out entries without a semantic domain)
 - get exports working again

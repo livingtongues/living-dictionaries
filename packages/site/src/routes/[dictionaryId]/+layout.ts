@@ -6,14 +6,13 @@ import type { LayoutLoad } from './$types'
 import { ResponseCodes } from '$lib/constants'
 import { browser } from '$app/environment'
 import { dbOperations } from '$lib/dbOperations'
-import { create_index, search_entries, update_index_entry } from '$lib/search'
+import { create_index, load_cached_index, search_entries, update_index_entry } from '$lib/search'
 import { cached_data_store } from '$lib/supabase/cached-data'
 import { getSupabase } from '$lib/supabase'
 import { url_from_storage_path } from '$lib/helpers/media'
 
 export const load: LayoutLoad = async ({ params: { dictionaryId }, parent }) => {
   try {
-    const about_content = await awaitableDocStore<IAbout>(`dictionaries/${dictionaryId}/info/about`)
     const dictionary = await awaitableDocStore<IDictionary>(`dictionaries/${dictionaryId}`)
     const { error: firestore_error, initial_doc: initial_dictionary } = dictionary
     if (firestore_error)
@@ -21,6 +20,9 @@ export const load: LayoutLoad = async ({ params: { dictionaryId }, parent }) => 
 
     if (!initial_dictionary)
       redirect(ResponseCodes.MOVED_PERMANENTLY, '/')
+
+    const dictionary_id = initial_dictionary.id
+    load_cached_index(dictionary_id)
 
     const { user } = await parent()
 
@@ -52,13 +54,10 @@ export const load: LayoutLoad = async ({ params: { dictionaryId }, parent }) => 
       },
     )
 
-    // TODO: async load down saved index from Vercel KV
-
     const can_edit: Readable<boolean> = derived([is_manager, is_contributor], ([$is_manager, $is_contributor]) => $is_manager || $is_contributor)
 
     const default_entries_per_page = 20
 
-    const dictionary_id = initial_dictionary.id
     const supabase = getSupabase()
     const entries = cached_data_store({ materialized_view: 'materialized_entries_view', table: 'entries_view', dictionary_id, supabase, log: true })
     const speakers = cached_data_store({ table: 'speakers_view', dictionary_id, supabase })
@@ -87,6 +86,9 @@ export const load: LayoutLoad = async ({ params: { dictionaryId }, parent }) => 
         sentences.reset(),
       ])
     }
+
+    // TODO: make non-blocking
+    const about_content = await awaitableDocStore<IAbout>(`dictionaries/${dictionaryId}/info/about`)
 
     return {
       supabase,

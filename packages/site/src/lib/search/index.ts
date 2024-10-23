@@ -20,3 +20,8 @@ export async function update_index_entry(entry: EntryView) {
   const { api } = await import('./expose-orama-worker')
   return api.update_index_entry(entry)
 }
+
+export async function load_cached_index(dictionary_id: string) {
+  const { api } = await import('./expose-orama-worker')
+  return api.load_cached_index(dictionary_id)
+}
