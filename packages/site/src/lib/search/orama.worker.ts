@@ -4,7 +4,7 @@ import { expose } from 'comlink'
 import type { QueryParams } from './types'
 import { augment_entry_for_search } from './augment-entry-for-search'
 
-const entries_index_schema = {
+export const entries_index_schema = {
   _lexeme: 'string[]', // all orthographies as they are and a simplified version (diacritics stripped and ipa characters replaced with common keyboard characters to make easier to type)
   _glosses: 'string[]', // includes all glosses for all senses
   // _sentences: 'string[]', // includes all sentences in all languages for all senses
@@ -50,6 +50,12 @@ function get_index(): Promise<typeof orama_index> {
       }
     }, 50)
   })
+}
+
+async function load_cached_index(_dictionary_id: string) {
+  // const cached_index = null
+  // if (!orama_index)
+  // orama_index = cached_index
 }
 
 async function update_index_entries(entries: EntryView[]) {
@@ -180,6 +186,7 @@ export const api = {
   update_index_entries,
   update_index_entry,
   search_entries,
+  load_cached_index,
 }
 
 expose(api)

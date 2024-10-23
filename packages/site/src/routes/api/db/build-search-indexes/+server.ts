@@ -9,7 +9,7 @@ import { ResponseCodes } from '$lib/constants'
 import { dev } from '$app/environment'
 import { getAdminSupabaseClient } from '$lib/supabase/admin'
 import { augment_entry_for_search } from '$lib/search/augment-entry-for-search'
-import { entries_index_schema } from '$lib/search/orama.worker'
+// import { entries_index_schema } from '$lib/search/orama.worker'
 // import { persist } from '@orama/plugin-data-persistence'
 
 // Open to build: http://localhost:3041/api/db/build-search-indexes
@@ -76,7 +76,8 @@ async function create_index(entries: EntryView[], dictionary_id: string) {
   console.info({ [dictionary_id]: entries.length })
   console.time(dictionary_id)
   const entries_augmented_for_search = entries.map(augment_entry_for_search)
-  const new_index = await create({ schema: entries_index_schema })
+  const new_index = await create({ schema: null })
+  // const new_index = await create({ schema: entries_index_schema })
   await insertMultiple(new_index, entries_augmented_for_search)
   console.timeEnd(dictionary_id)
   return new_index

@@ -13,7 +13,7 @@
 
   $: count = Object.values(values).length
   let search_value: string
-  $: filtered_values = Object.entries(values).filter(([item]) => search_value ? make_item_readable(item).toLowerCase().includes(search_value.toLowerCase()) : true)
+  $: filtered_values = Object.entries(values).filter(([item]) => search_value ? make_item_readable(item, keys_to_values).toLowerCase().includes(search_value.toLowerCase()) : true)
   $: max_show = search_value ? 10 : 5
 
   function add_filter(item: string) {
@@ -24,7 +24,7 @@
     $search_params[search_param_key] = $search_params[search_param_key].filter((existing_item: string) => existing_item !== item)
   }
 
-  function make_item_readable(item: string) {
+  function make_item_readable(item: string, keys_to_values: Record<string, string>) {
     return keys_to_values?.[item] || restore_spaces_from_underscores(item)
   }
 </script>
@@ -63,7 +63,7 @@
             }} />
           <div class="w-2 shrink-0" />
           <label for={id} class="block text-sm text-gray-900 max-w-85%" style="overflow-wrap: break-word;">
-            {make_item_readable(item)}
+            {make_item_readable(item, keys_to_values)}
             <span class="text-xs text-gray-600"> ({item_count}) </span>
           </label>
         </li>

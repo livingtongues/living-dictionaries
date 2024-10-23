@@ -1,6 +1,18 @@
+import fs from 'node:fs'
 import type { ContentImportBody } from '@living-dictionaries/types/supabase/content-import.interface'
 import { jacob_ld_user_id } from '../config-supabase'
 import { sql_file_string } from './to-sql-string'
+
+const content_update_file = fs.createWriteStream(`./logs/${Date.now()}_content-updates.json`, { flags: 'w' }) // 'a' to append, 'w' to truncate the file every time the process starts.
+content_update_file.write('[\n')
+
+const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000)
+let milliseconds_to_add = 0
+
+function millisecond_incrementing_timestamp(): string {
+  milliseconds_to_add += 1
+  return new Date(yesterday.getTime() + milliseconds_to_add).toISOString()
+}
 
 export function prepare_sql(body: ContentImportBody) {
   console.info(body)
@@ -9,7 +21,7 @@ export function prepare_sql(body: ContentImportBody) {
 
   const { update_id, dictionary_id, import_id, type, data } = body
 
-  const created_at = data?.created_at || new Date().toISOString()
+  const created_at = data?.created_at || millisecond_incrementing_timestamp()
   // @ts-expect-error
   const updated_at = data?.updated_at || created_at
 
@@ -169,16 +181,14 @@ export function prepare_sql(body: ContentImportBody) {
   delete data_without_ids.updated_at
   delete data_without_ids.updated_by
 
-  const sql = sql_file_string('content_updates', {
+  const content_update = {
     id: update_id,
     user_id: updated_by,
     dictionary_id,
     timestamp: updated_at,
     import_id,
-    change: {
-      type,
-      ...(Object.keys(data_without_ids)?.length && { data: data_without_ids }),
-    },
+    type,
+    data: Object.keys(data_without_ids)?.length ? data_without_ids : null,
     // @ts-expect-error - avoiding verbosity but requires manual type checking
     ...(body.audio_id && { audio_id: body.audio_id }),
     // @ts-expect-error
@@ -199,8 +209,8 @@ export function prepare_sql(body: ContentImportBody) {
     ...(body.video_id && { video_id: body.video_id }),
     // This is the properly typed version but much more verbose as requires one for each change type
     // ...(type === 'insert_sense' && { sense_id: body.sense_id, entry_id: body.entry_id }),
-  })
-  sql_statements += `\n${sql}`
+  }
+  content_update_file.write(`${JSON.stringify(content_update)},\n`)
 
   return sql_statements
 }

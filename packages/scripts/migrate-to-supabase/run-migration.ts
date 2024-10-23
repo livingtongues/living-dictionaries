@@ -33,7 +33,7 @@ async function file_exists(filename: string): Promise<boolean> {
 
 // 0
 // 20000
-const next_starting_point = 241297
+const next_starting_point = 0
 // 60000
 // 80000
 // 100000
@@ -52,7 +52,7 @@ const next_starting_point = 241297
 // 360000
 // 380000
 const already_done = 2233
-run_migration({ start_index: already_done + next_starting_point, batch_size: 150000 })
+run_migration({ start_index: already_done + next_starting_point, batch_size: 1000 })
 
 async function run_migration({ start_index, batch_size }: { start_index: number, batch_size: number }) {
   console.log({ start_index, batch_size })
@@ -139,7 +139,7 @@ async function migrate_all_entries({ fb_to_sb_speakers, start_index, batch_size 
   sql_query += '\nCOMMIT;' // End the transaction
 
   try {
-    writeFileSync(`./logs/${start_index}-${start_index + batch_size}-query.sql`, sql_query)
+    writeFileSync(`./logs/${Date.now()}_${start_index}-${start_index + batch_size}-query.sql`, sql_query)
     console.log('executing sql query')
     await postgres.execute_query(sql_query)
     console.log('finished')

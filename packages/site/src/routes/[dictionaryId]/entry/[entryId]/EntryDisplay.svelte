@@ -65,7 +65,7 @@
         update_entry({ phonetic: new_value })
       }} />
 
-    {#each entry.senses as sense, index}
+    {#each entry.senses || [] as sense, index}
       {#if entry.senses.length === 1}
         <Sense {sense} glossLanguages={dictionary.glossLanguages} {can_edit} />
 

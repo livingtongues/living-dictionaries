@@ -22,7 +22,9 @@ export const load: LayoutLoad = async ({ params: { dictionaryId }, parent }) => 
       redirect(ResponseCodes.MOVED_PERMANENTLY, '/')
 
     const dictionary_id = initial_dictionary.id
-    load_cached_index(dictionary_id)
+
+    if (browser)
+      load_cached_index(dictionary_id)
 
     const { user } = await parent()
 

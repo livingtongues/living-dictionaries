@@ -5,6 +5,7 @@
   import { share } from '$lib/helpers/share'
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte'
   import { page } from '$app/stores'
+  import { dev } from '$app/environment'
 
   export let data
   $: ({
@@ -42,7 +43,7 @@
   </Button>
 
   <div>
-    {#if $admin > 1}
+    {#if dev || $admin > 1}
       <JSON obj={entry} />
     {/if}
     {#if $can_edit}
