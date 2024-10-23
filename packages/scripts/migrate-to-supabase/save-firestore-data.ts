@@ -1,10 +1,10 @@
 import fs from 'node:fs'
 import path, { dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import type { IUser } from '@living-dictionaries/types'
 import type { ActualDatabaseEntry } from '@living-dictionaries/types/entry.interface'
 import type { ISpeaker } from '@living-dictionaries/types/speaker.interface'
 import { db } from '../config-firebase'
+import { get_users } from './auth'
 
 const FOLDER = 'firestore-data'
 const __dirname = dirname(fileURLToPath(import.meta.url))
@@ -48,14 +48,7 @@ export async function write_speakers() {
 }
 
 export async function write_users() {
-  const users: IUser[] = []
-
-  const user_snapshots = await db.collection('users').get()
-
-  for (const user_snap of user_snapshots.docs) {
-    const user = { id: user_snap.id, ...(user_snap.data() as IUser) }
-    users.push(user)
-  }
+  const users = await get_users()
 
   console.log(`Done fetching ${users.length} users.`)
 

@@ -1,4 +1,4 @@
-import fs, { readFileSync } from 'node:fs'
+import fs, { readFileSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { access } from 'node:fs/promises'
@@ -6,12 +6,13 @@ import type { GoogleAuthUserMetaData, IUser } from '@living-dictionaries/types'
 import Chain from 'stream-chain'
 import Parser from 'stream-json'
 import StreamArray from 'stream-json/streamers/StreamArray'
-import { admin_supabase, execute_query } from '../config-supabase'
+import type { UserRecord } from 'firebase-admin/auth'
+import { admin_supabase, postgres } from '../config-supabase'
 import type { AllSpeakerData } from './migrate-entries'
-import { load_speakers, migrate_entry, migrate_speakers } from './migrate-entries'
+import { load_speakers, migrate_entry } from './migrate-entries'
 import { remove_seconds_underscore } from './utils/remove-seconds-underscore'
-import { write_entries, write_speakers, write_users } from './save-firestore-data'
 import { load_fb_to_sb_user_ids } from './get-user-id'
+import { write_users_insert } from './write-users-insert'
 
 const FOLDER = 'firestore-data'
 
@@ -30,9 +31,9 @@ async function file_exists(filename: string): Promise<boolean> {
   }
 }
 
-// 0, 20000
+// 0
 // 20000
-// 40000
+const next_starting_point = 241297
 // 60000
 // 80000
 // 100000
@@ -50,39 +51,57 @@ async function file_exists(filename: string): Promise<boolean> {
 // 340000
 // 360000
 // 380000
-run_migration({ local_db: true, start_index: 165597, batch_size: 1 })
+const already_done = 2233
+run_migration({ start_index: already_done + next_starting_point, batch_size: 150000 })
 
-async function run_migration({ local_db, start_index, batch_size }: { local_db: boolean, start_index: number, batch_size: number }) {
-  if (local_db && start_index === 0)
-    await seed_local_db_with_production_data()
+async function run_migration({ start_index, batch_size }: { start_index: number, batch_size: number }) {
+  console.log({ start_index, batch_size })
 
-  const entries_downloaded = await file_exists('firestore-entries.json')
-  if (!entries_downloaded)
-    await write_entries()
-  const speakers_downloaded = await file_exists('firestore-speakers.json')
-  if (!speakers_downloaded)
-    await write_speakers()
-  const users_downloaded = await file_exists('firestore-users.json')
-  if (!users_downloaded)
-    await write_users()
+  // if (next_starting_point === 0)
+  //   await seed_local_db_with_production_data()
 
-  if (start_index === 0) {
-    await write_fb_sb_mappings() // user mappings
-  }
+  // const entries_downloaded = await file_exists('firestore-entries.json')
+  // if (!entries_downloaded)
+  //   await write_entries()
+  // const speakers_downloaded = await file_exists('firestore-speakers.json')
+  // if (!speakers_downloaded)
+  //   await write_speakers()
+  // const users_downloaded = await file_exists('firestore-users.json')
+  // if (!users_downloaded)
+  //   await write_users()
+
+  // if (start_index === 0) {
+  //   await write_fb_sb_mappings() // user mappings
+  // }
 
   await load_fb_to_sb_user_ids()
 
-  if (start_index === 0) {
-    await migrate_speakers() // speaker mappings
-  }
+  // if (start_index === 0) {
+  //   await migrate_speakers() // speaker mappings
+  // }
 
-  const speakers = await load_speakers()
-  await migrate_all_entries({ speakers, start_index, batch_size })
+  const fb_to_sb_speakers = await load_speakers()
+  await migrate_all_entries({ fb_to_sb_speakers, start_index, batch_size })
 }
 
-async function migrate_all_entries({ speakers, start_index, batch_size }: { speakers: AllSpeakerData, start_index: number, batch_size: number }) {
-  const dictionary_dialects: Record<string, Record<string, string>> = {}
-  const dictionary_new_speakers: Record<string, Record<string, string>> = {}
+async function migrate_all_entries({ fb_to_sb_speakers, start_index, batch_size }: { fb_to_sb_speakers: AllSpeakerData, start_index: number, batch_size: number }) {
+  const { data: dialects } = await admin_supabase.from('dialects').select('id, name, dictionary_id')
+  const dictionary_dialects: Record<string, Record<string, string>> = dialects.reduce((acc: Record<string, Record<string, string>>, { id, name, dictionary_id }) => {
+    if (!acc[dictionary_id]) {
+      acc[dictionary_id] = {}
+    }
+    acc[dictionary_id][name.default] = id
+    return acc
+  }, {})
+
+  const { data: speakers_added_to_sb_by_name } = await admin_supabase.from('speakers').select('id, name, dictionary_id')
+  const dictionary_new_speakers: Record<string, Record<string, string>> = speakers_added_to_sb_by_name.reduce((acc: Record<string, Record<string, string>>, { id, name, dictionary_id }) => {
+    if (!acc[dictionary_id]) {
+      acc[dictionary_id] = {}
+    }
+    acc[dictionary_id][name] = id
+    return acc
+  }, {})
 
   const pipeline = Chain.chain([
     fs.createReadStream('./migrate-to-supabase/firestore-data/firestore-entries.json'),
@@ -92,44 +111,64 @@ async function migrate_all_entries({ speakers, start_index, batch_size }: { spea
 
   const end_index = start_index + batch_size
   let index = 0
-  let current_entry_id = ''
+  let current_dictionary_entry_id = ''
+  let sql_query = 'BEGIN;' // Start a transaction
+
   try {
     for await (const { value: fb_entry } of pipeline) {
       if (index >= start_index && index < end_index) {
-        current_entry_id = `${fb_entry.dictionary_id}/${fb_entry.id}`
+        current_dictionary_entry_id = `${fb_entry.dictionary_id}/${fb_entry.id}`
         const seconds_corrected_entry = remove_seconds_underscore(fb_entry)
-        await migrate_entry(seconds_corrected_entry, speakers, dictionary_dialects, dictionary_new_speakers)
-        if (index % 200 === 0)
+        console.info(index)
+        const sql_statements = migrate_entry(seconds_corrected_entry, fb_to_sb_speakers, dictionary_dialects, dictionary_new_speakers)
+        sql_query += `${sql_statements}\n`
+
+        if (index % 500 === 0)
           console.log(`import reached ${index}`)
       }
       index++
     }
-    console.log('finished')
   } catch (err) {
-    console.log(`error at index ${index}: _ROOT_/${current_entry_id}, ${err}`)
+    console.log(`error at index ${index}: _ROOT_/${current_dictionary_entry_id}, ${err}`)
     console.error(err)
+  } finally {
     pipeline.destroy()
     pipeline.input.destroy()
+  }
+
+  sql_query += '\nCOMMIT;' // End the transaction
+
+  try {
+    writeFileSync(`./logs/${start_index}-${start_index + batch_size}-query.sql`, sql_query)
+    console.log('executing sql query')
+    await postgres.execute_query(sql_query)
+    console.log('finished')
+  } catch (err) {
+    console.error(err)
+    await postgres.execute_query('ROLLBACK;') // Rollback the transaction in case of error
   }
 }
 
 async function seed_local_db_with_production_data() {
   console.log('Seeding local db with production data')
-  await execute_query(`truncate table auth.users cascade;`)
-  await execute_query('truncate table senses cascade;')
-  await execute_query('truncate table entry_updates cascade;')
-
-  await execute_query(readFileSync('../../supabase/seeds/0-add-columns-back-in-to-restart.sql', 'utf8'))
-  await execute_query(readFileSync('../../supabase/seeds/1-from-backup.sql', 'utf8'))
-  await execute_query(readFileSync('../../supabase/seeds/2-catch-db-up.sql', 'utf8'))
+  await postgres.execute_query(`truncate table auth.users cascade;`)
+  await postgres.execute_query('truncate table entry_updates cascade;')
+  await postgres.execute_query(readFileSync('../../supabase/seeds/backup-after-2232-imported.sql', 'utf8'))
 }
 
 async function write_fb_sb_mappings() {
   console.log('writing user mappings')
   const firebase_uid_to_supabase_user_id: Record<string, string> = {}
-  const { data: sb_users } = await admin_supabase.from('user_emails')
+  const { data: sb_users_1 } = await admin_supabase.from('user_emails')
     .select('id, email')
-    .limit(2000)
+    .order('id', { ascending: true })
+    .range(0, 999)
+  const { data: sb_users_2 } = await admin_supabase.from('user_emails')
+    .select('id, email')
+    .order('id', { ascending: true })
+    .range(1000, 1999)
+
+  const sb_users = [...sb_users_1, ...sb_users_2]
 
   const supabase_users_not_in_firebase = new Set(sb_users.map(sb_user => sb_user.email))
   const unmatched_firebase = []
@@ -143,8 +182,12 @@ async function write_fb_sb_mappings() {
       firebase_uid_to_supabase_user_id[fb_user.uid] = matching_sb_user.id
       supabase_users_not_in_firebase.delete(matching_sb_user.email)
     } else {
-      const new_sb_user_id = await save_user_to_supabase(fb_user as IUser)
-      firebase_uid_to_supabase_user_id[fb_user.uid] = new_sb_user_id
+      const sql = write_users_insert([fb_user as UserRecord])
+      console.log(sql)
+      // await execute_query(sql)
+
+      // const new_sb_user_id = await save_user_to_supabase(fb_user as UserRecord)
+      // firebase_uid_to_supabase_user_id[fb_user.uid] = new_sb_user_id
     }
   }
 
@@ -153,10 +196,10 @@ async function write_fb_sb_mappings() {
   fs.writeFileSync(path.resolve(__dirname, FOLDER, 'fb-sb-user-ids.json'), JSON.stringify(firebase_uid_to_supabase_user_id, null, 2))
 }
 
-async function save_user_to_supabase(user: IUser): Promise<string> {
+async function save_user_to_supabase(user: UserRecord): Promise<string> {
   const { data, error } = await admin_supabase.auth.admin.createUser({
     email: user.email,
-    email_confirm: true,
+    email_confirm: user.emailVerified,
     app_metadata: { fb_uid: user.uid },
     user_metadata: get_firebase_user_meta_data(user),
   })

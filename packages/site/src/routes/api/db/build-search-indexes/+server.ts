@@ -29,9 +29,6 @@ export const GET: RequestHandler = async () => {
       const entries: EntryView[] = []
       let timestamp_from_which_to_fetch_data = '1971-01-01T00:00:00Z'
 
-      if (dictionary_id !== 'kuman')
-        continue
-
       while (true) {
         if (entries.length)
           timestamp_from_which_to_fetch_data = entries[entries.length - 1][order_field] as string

@@ -1,15 +1,6 @@
 import { randomUUID } from 'node:crypto'
-import type { ContentUpdateRequestBody, TablesInsert, TablesUpdate } from '@living-dictionaries/types'
-import type { ContentUpdateResponseBody } from '../../../site/src/routes/api/db/content-update/+server'
-import { jacob_ld_user_id } from '../../config-supabase'
-import { post_request } from '../../import/post-request'
-import { content_update_endpoint } from './constants'
-import { test_timestamp } from './test-timestamp'
-
-const import_meta = {
-  user_id: jacob_ld_user_id,
-  timestamp: test_timestamp,
-}
+import type { TablesInsert, TablesUpdate } from '@living-dictionaries/types'
+import { prepare_sql } from '../save-content-update'
 
 export function insert_entry({
   dictionary_id,
@@ -18,18 +9,17 @@ export function insert_entry({
   import_id,
 }: {
   dictionary_id: string
-  entry: TablesUpdate<'entries'>
+  entry: Omit<TablesInsert<'entries'>, 'dictionary_id' | 'id'>
   entry_id: string
   import_id: string
 }) {
-  return post_request<ContentUpdateRequestBody, ContentUpdateResponseBody>(content_update_endpoint, {
+  return prepare_sql({
     update_id: randomUUID(),
     auth_token: null,
-    import_meta,
     dictionary_id,
-    entry_id: entry_id || randomUUID(),
+    entry_id,
     type: 'insert_entry',
-    data: entry as TablesInsert<'entries'>,
+    data: entry,
     import_id,
   })
 }
@@ -43,17 +33,16 @@ export function insert_sense({
 }: {
   dictionary_id: string
   entry_id: string
-  sense: TablesUpdate<'senses'>
-  sense_id?: string
+  sense: Omit<TablesInsert<'senses'>, 'dictionary_id' | 'id' | 'entry_id'>
+  sense_id: string
   import_id: string
 }) {
-  return post_request<ContentUpdateRequestBody, ContentUpdateResponseBody>(content_update_endpoint, {
+  return prepare_sql({
     update_id: randomUUID(),
     auth_token: null,
-    import_meta,
     dictionary_id,
     entry_id,
-    sense_id: sense_id || randomUUID(),
+    sense_id,
     type: 'insert_sense',
     data: sense,
     import_id,
@@ -70,25 +59,23 @@ export function insert_dialect({
 }: {
   dictionary_id: string
   name: string
-  dialect_id?: string
+  dialect_id: string
   import_id: string
   user_id: string
   timestamp: string
 }) {
-  return post_request<ContentUpdateRequestBody, ContentUpdateResponseBody>(content_update_endpoint, {
+  return prepare_sql({
     update_id: randomUUID(),
     auth_token: null,
-    import_meta: {
-      user_id,
-      timestamp,
-    },
     dictionary_id,
-    dialect_id: dialect_id || randomUUID(),
+    dialect_id,
     type: 'insert_dialect',
     data: {
       name: {
         default: name,
       },
+      created_by: user_id,
+      created_at: timestamp,
     },
     import_id,
   })
@@ -109,18 +96,17 @@ export function assign_dialect({
   user_id: string
   timestamp: string
 }) {
-  return post_request<ContentUpdateRequestBody, ContentUpdateResponseBody>(content_update_endpoint, {
+  return prepare_sql({
     update_id: randomUUID(),
     auth_token: null,
-    import_meta: {
-      user_id,
-      timestamp,
-    },
     dictionary_id,
     dialect_id,
     entry_id,
     type: 'assign_dialect',
-    data: null,
+    data: {
+      created_by: user_id,
+      created_at: timestamp,
+    },
     import_id,
   })
 }
@@ -132,15 +118,15 @@ export function upsert_speaker({
   import_id,
 }: {
   dictionary_id: string
-  speaker: TablesUpdate<'speakers'>
-  speaker_id?: string
+  speaker: Omit<TablesInsert<'speakers'>, 'updated_by' | 'dictionary_id' | 'id'>
+  speaker_id: string
   import_id: string
 }) {
-  return post_request<ContentUpdateRequestBody, ContentUpdateResponseBody>(content_update_endpoint, {
+  return prepare_sql({
     update_id: randomUUID(),
     auth_token: null,
     dictionary_id,
-    speaker_id: speaker_id || randomUUID(),
+    speaker_id,
     type: 'upsert_speaker',
     data: speaker,
     import_id,
@@ -164,12 +150,12 @@ export function assign_speaker({
   user_id: string
   timestamp: string
 }) {
-  return post_request<ContentUpdateRequestBody, ContentUpdateResponseBody>(content_update_endpoint, {
+  return prepare_sql({
     update_id: randomUUID(),
     auth_token: null,
-    import_meta: {
-      user_id,
-      timestamp,
+    data: {
+      created_by: user_id,
+      created_at: timestamp,
     },
     dictionary_id,
     speaker_id,
@@ -187,18 +173,17 @@ export function upsert_audio({
   import_id,
 }: {
   dictionary_id: string
-  audio: TablesUpdate<'audio'>
+  audio: Omit<TablesInsert<'audio'>, 'updated_by' | 'dictionary_id' | 'id'>
   entry_id: string
-  audio_id?: string
-  import_id?: string
+  audio_id: string
+  import_id: string
 }) {
-  return post_request<ContentUpdateRequestBody, ContentUpdateResponseBody>(content_update_endpoint, {
+  return prepare_sql({
     update_id: randomUUID(),
     auth_token: null,
-    import_meta,
     dictionary_id,
     entry_id,
-    audio_id: audio_id || randomUUID(),
+    audio_id,
     type: 'upsert_audio',
     data: audio,
     import_id,
@@ -214,19 +199,15 @@ export function insert_sentence({
 }: {
   dictionary_id: string
   sense_id: string
-  sentence: TablesUpdate<'sentences'>
-  sentence_id?: string
-  import_id?: string
+  sentence: TablesInsert<'sentences'>
+  sentence_id: string
+  import_id: string
 }) {
-  return post_request<ContentUpdateRequestBody, ContentUpdateResponseBody>(content_update_endpoint, {
+  return prepare_sql({
     update_id: randomUUID(),
     auth_token: null,
-    import_meta: {
-      user_id: sentence.created_by || jacob_ld_user_id,
-      timestamp: sentence.created_at || test_timestamp,
-    },
     dictionary_id,
-    sentence_id: sentence_id || randomUUID(),
+    sentence_id,
     sense_id,
     type: 'insert_sentence',
     data: sentence,
@@ -244,19 +225,15 @@ export function insert_photo({
   dictionary_id: string
   photo: Omit<TablesInsert<'photos'>, 'updated_by' | 'dictionary_id' | 'id'>
   sense_id: string
-  photo_id?: string
-  import_id?: string
+  photo_id: string
+  import_id: string
 }) {
-  return post_request<ContentUpdateRequestBody, ContentUpdateResponseBody>(content_update_endpoint, {
+  return prepare_sql({
     update_id: randomUUID(),
     auth_token: null,
-    import_meta: {
-      user_id: photo.created_by || jacob_ld_user_id,
-      timestamp: photo.created_at || test_timestamp,
-    },
     dictionary_id,
     sense_id,
-    photo_id: photo_id || randomUUID(),
+    photo_id,
     type: 'insert_photo',
     data: photo,
     import_id,
@@ -273,19 +250,15 @@ export function insert_video({
   dictionary_id: string
   video: TablesUpdate<'videos'>
   sense_id: string
-  video_id?: string
-  import_id?: string
+  video_id: string
+  import_id: string
 }) {
-  return post_request<ContentUpdateRequestBody, ContentUpdateResponseBody>(content_update_endpoint, {
+  return prepare_sql({
     update_id: randomUUID(),
     auth_token: null,
-    import_meta: {
-      user_id: video.created_by || jacob_ld_user_id,
-      timestamp: video.created_at || test_timestamp,
-    },
     dictionary_id,
     sense_id,
-    video_id: video_id || randomUUID(),
+    video_id,
     type: 'insert_video',
     data: video,
     import_id,

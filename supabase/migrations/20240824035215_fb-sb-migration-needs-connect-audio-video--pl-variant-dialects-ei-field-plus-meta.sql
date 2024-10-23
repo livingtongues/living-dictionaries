@@ -1,13 +1,11 @@
--- ALTER TABLE entries
--- DROP COLUMN plural_form,
--- DROP COLUMN variant;
-
 ALTER TABLE senses
 ADD COLUMN plural_form jsonb, -- MultiString
 ADD COLUMN variant jsonb; -- MultiString
 
--- ALTER TABLE entries
--- DROP COLUMN dialects;
+ALTER TABLE entries
+DROP COLUMN plural_form,
+DROP COLUMN variant,
+DROP COLUMN dialects;
 
 CREATE TABLE dialects (
   id uuid unique primary key NOT NULL,
@@ -359,8 +357,6 @@ CREATE TRIGGER update_sense_updated_at_sense_videos
 AFTER UPDATE ON videos
 FOR EACH ROW
 EXECUTE FUNCTION update_sense_videos_when_video_deleted();
-
--- TODO: test these and also test the OLD.created_at above when deleting relationships (shouldn't use OLD.created_at)
 
 CREATE OR REPLACE FUNCTION update_audio_updated_at()
 RETURNS TRIGGER AS $$

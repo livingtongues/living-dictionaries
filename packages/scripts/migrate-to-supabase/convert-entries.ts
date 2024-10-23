@@ -90,8 +90,8 @@ export function convert_entry(_entry: ActualDatabaseEntry & Record<string, any>,
 
     const first_sense_from_base: TablesInsert<'senses'> = {
       entry_id: _entry.id,
-      created_by: entry.created_by,
-      created_at: entry.created_at,
+      created_by: entry.created_by || entry.updated_by,
+      created_at: entry.created_at || entry.updated_at,
       updated_by: entry.updated_by || entry.created_by,
       updated_at: entry.updated_at || entry.created_at,
       id: uuid(),
@@ -390,6 +390,7 @@ export function convert_entry(_entry: ActualDatabaseEntry & Record<string, any>,
       const created_by = get_supabase_user_id_from_firebase_uid(ab) || entry.created_by
       const audio: TablesInsert<'audio'> = {
         id: audio_id,
+        dictionary_id: entry.dictionary_id,
         entry_id: _entry.id,
         created_by,
         updated_by: created_by,
@@ -465,6 +466,7 @@ export function convert_entry(_entry: ActualDatabaseEntry & Record<string, any>,
       const created_by = get_supabase_user_id_from_firebase_uid(ab) || get_supabase_user_id_from_firebase_uid(uploadedBy) || entry.created_by
       const photo: TablesInsert<'photos'> = {
         id: photo_id,
+        dictionary_id: entry.dictionary_id,
         created_by,
         updated_by: created_by,
         storage_path: path,
@@ -530,6 +532,7 @@ export function convert_entry(_entry: ActualDatabaseEntry & Record<string, any>,
       const created_by = get_supabase_user_id_from_firebase_uid(ab) || entry.created_by
       const video: TablesInsert<'videos'> = {
         id: video_id,
+        dictionary_id: entry.dictionary_id,
         created_by,
         updated_by: created_by,
       }
