@@ -95,9 +95,9 @@ export function cached_data_store<Name extends keyof (Database['public']['Tables
           .limit(1000)
           .order(order_field, { ascending: true })
           .gt(order_field, timestamp_from_which_to_fetch_data)
-        if (!cached_or_materialized?.length) {
-          query.is('deleted', null)
-        }
+      }
+      if (!cached_or_materialized?.length) {
+        query.is('deleted', null)
       }
 
       const { data: batch, error } = await query
