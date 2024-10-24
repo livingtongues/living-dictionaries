@@ -23,7 +23,7 @@ export async function load({ params, depends, parent }) {
 
   const { supabase } = await parent()
   const { data: entries, error: load_error } = await supabase
-    .from('entries_view')
+    .from('materialized_entries_view')
     .select()
     .eq('id', params.entryId)
 

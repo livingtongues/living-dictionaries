@@ -60,7 +60,8 @@ export function cached_data_store<Name extends keyof (Database['public']['Tables
       if (error) {
         if (log)
           console.error(error.message)
-        return store_error.set(error.message)
+        store_error.set(error.message)
+        break
       }
       if (batch?.length) {
         if (log)
@@ -106,7 +107,7 @@ export function cached_data_store<Name extends keyof (Database['public']['Tables
           console.error(error.message)
         store_error.set(error.message)
         loading.set(false)
-        return
+        break
       }
       if (batch?.length) {
         if (log)

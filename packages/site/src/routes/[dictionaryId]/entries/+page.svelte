@@ -14,7 +14,7 @@
 
   export let data
   $: ({ entries, admin, search_entries, default_entries_per_page, search_params, dictionary, can_edit, dbOperations, reset_caches } = data)
-  $: ({ loading, updated_item } = entries)
+  $: ({ loading, updated_item, error: entries_error } = entries)
 
   let page_entries: EntryView[] = []
 
@@ -89,6 +89,9 @@
           <span class="i-svg-spinners-3-dots-fade align--4px" title="Ensuring all entries are up to date" />
         {/if}
       </div>
+      {#if $entries_error}
+        <div class="text-red text-sm">Loading error: {$entries_error}</div>
+      {/if}
       <View entries={page_entries} page_data={data} />
       <Pagination bind:page_from_url={$search_params.page} {number_of_pages} can_edit={$can_edit} add_entry={dbOperations.insert_entry} />
     </div>

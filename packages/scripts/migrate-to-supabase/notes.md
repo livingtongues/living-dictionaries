@@ -34,6 +34,7 @@
 - remove `pnpm mixed`
 - remove `pnpm -F scripts test:migration`
 - Remove algolia keys from vercel
+- cleaner format for content-updates and refactor current ones
 
 ## Notes
 - 1st manual backup was before any action
