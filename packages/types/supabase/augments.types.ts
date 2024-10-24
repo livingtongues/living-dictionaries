@@ -157,5 +157,19 @@ export interface DatabaseAugments {
         }
       }
     }
+    Functions: {
+      entries_from_timestamp: {
+        Args: {
+          get_newer_than: string
+          dict_id: string
+        }
+        Returns: {
+          main: EntryMainFields
+          senses: SenseWithSentences[] | null
+          audios: AudioWithSpeakerIds[] | null
+          dialect_ids: string[] | null
+        }
+      }
+    }
   }
 }

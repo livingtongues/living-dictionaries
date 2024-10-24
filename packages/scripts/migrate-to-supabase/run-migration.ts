@@ -1,4 +1,4 @@
-import fs, { readFileSync, writeFileSync } from 'node:fs'
+import fs, { writeFileSync } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { access } from 'node:fs/promises'
@@ -31,34 +31,13 @@ async function file_exists(filename: string): Promise<boolean> {
   }
 }
 
-// 0
-// 20000
-const next_starting_point = 0
-// 60000
-// 80000
-// 100000
-// 120000
-// 140000
-// 160000
-// 180000
-// 200000
-// 220000
-// 240000
-// 260000
-// 280000
-// 300000
-// 320000
-// 340000
-// 360000
-// 380000
-const already_done = 2233
-run_migration({ start_index: already_done + next_starting_point, batch_size: 1000 })
+// run_migration({ start_index: 2233, batch_size: 47767 })
 
 async function run_migration({ start_index, batch_size }: { start_index: number, batch_size: number }) {
   console.log({ start_index, batch_size })
 
-  // if (next_starting_point === 0)
-  //   await seed_local_db_with_production_data()
+  // if local
+  // await seed_local_db_with_production_data()
 
   // const entries_downloaded = await file_exists('firestore-entries.json')
   // if (!entries_downloaded)
@@ -149,12 +128,12 @@ async function migrate_all_entries({ fb_to_sb_speakers, start_index, batch_size 
   }
 }
 
-async function seed_local_db_with_production_data() {
-  console.log('Seeding local db with production data')
-  await postgres.execute_query(`truncate table auth.users cascade;`)
-  await postgres.execute_query('truncate table entry_updates cascade;')
-  await postgres.execute_query(readFileSync('../../supabase/seeds/backup-after-2232-imported.sql', 'utf8'))
-}
+// async function seed_local_db_with_production_data() {
+//   console.log('Seeding local db with production data')
+//   await postgres.execute_query(`truncate table auth.users cascade;`)
+//   await postgres.execute_query('truncate table entry_updates cascade;')
+//   await postgres.execute_query(readFileSync('../../supabase/seeds/backup-after-2232-imported-ready-for-local.sql', 'utf8'))
+// }
 
 async function write_fb_sb_mappings() {
   console.log('writing user mappings')

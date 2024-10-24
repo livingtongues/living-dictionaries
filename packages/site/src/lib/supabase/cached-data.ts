@@ -57,8 +57,11 @@ export function cached_data_store<Name extends keyof (Database['public']['Tables
         query.is('deleted', null)
       }
       const { data: batch, error } = await query
-      if (error)
+      if (error) {
+        if (log)
+          console.error(error.message)
         return store_error.set(error.message)
+      }
       if (batch?.length) {
         if (log)
           console.info({ [`materialized from db: ${cache_key}`]: batch.length })
@@ -72,19 +75,31 @@ export function cached_data_store<Name extends keyof (Database['public']['Tables
     }
 
     let data_coming_in = cached_or_materialized
+
     while (true) {
       if (data_coming_in.length)
         // eslint-disable-next-line require-atomic-updates
         timestamp_from_which_to_fetch_data = data_coming_in[data_coming_in.length - 1][order_field] as string
-      const query = supabase.from(table)
-        .select()
-        .eq('dictionary_id', dictionary_id)
-        .limit(1000)
-        .order(order_field, { ascending: true })
-        .gt(order_field, timestamp_from_which_to_fetch_data)
-      if (!cached_or_materialized?.length) {
-        query.is('deleted', null)
+
+      let query
+
+      if (table === 'entries_view') {
+        query = supabase.rpc('entries_from_timestamp', {
+          get_newer_than: timestamp_from_which_to_fetch_data,
+          dict_id: dictionary_id,
+        }).limit(1000)
+      } else {
+        query = supabase.from(table)
+          .select()
+          .eq('dictionary_id', dictionary_id)
+          .limit(1000)
+          .order(order_field, { ascending: true })
+          .gt(order_field, timestamp_from_which_to_fetch_data)
+        if (!cached_or_materialized?.length) {
+          query.is('deleted', null)
+        }
       }
+
       const { data: batch, error } = await query
       if (error) {
         if (log)

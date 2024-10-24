@@ -54,8 +54,8 @@ You can check current prod migrations at https://supabase.com/dashboard/project/
 These four commands are run daily to backup the production database:
 - `supabase db dump --db-url "$supabase_db_url" -f roles.sql --role-only`
 - `supabase db dump --db-url "$supabase_db_url" -f schema.sql`
-- `supabase db dump --db-url "$supabase_db_url" -f data.sql --data-only --use-copy`
-- `supabase db dump --db-url "$supabase_db_url" -f data.sql --data-only`
+- `supabase db dump --db-url "$supabase_db_url" -f data-copy.sql --data-only --use-copy`
+- `supabase db dump --db-url "$supabase_db_url" -f data-insert.sql --data-only`
 
 To make the local DB match the current production download just download the data as the schema already matches production (or is a step ahead):
 - Get the DB url by pasting the password into here: postgresql://postgres.actkqboqpzniojhgtqzw:[YOUR-PASSWORD]@aws-0-us-west-1.pooler.supabase.com:6543/postgres

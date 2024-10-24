@@ -1,47 +1,46 @@
 # Migrate Entries and Speakers from Firestore to Supabase
-- run `pnpm -F scripts run-migration`
-- `REFRESH MATERIALIZED VIEW materialized_entries_view`
-- Test viewing and editing on local using `pnpm prod`
-  - look through local orthographies - especially in the table view, `/birhor/entries?q=%7B"query"%3A"horomsi"%2C"view"%3A"table"%7D`
+- Push migration
 - Merge PR to unblock
 - Test editing entries on live site
-- Remove notice
-- build Orama indexes in the static folder over 1000
-- Use cached Orama indexes from static folder (then Cloudflare R2) if it exists
-- Email letting everyone know editing is available again
+- Remove banner
+- build Orama indexes in Cloudflare R2 for dictionaries over 1000 entries (try dictionaries from phone and test load speeds)
+  - run size check query on prod to get a few dictionaries
+- Use cached Orama indexes from Cloudflare R2 if it exists
 
 ## Clean-up
-- Check in on entry index 2232 that was interrupted
-  - {"update_id":"3369f8c8-c89b-4ee8-8839-f267d46377a1","auth_token":null,"import_meta":{"user_id":"de2d3715-6337-45a3-a81a-d82c3210b2a7","timestamp":null},"dictionary_id":"aghul","entry_id":"CQnofe6hVu3uEIkN6OUI","type":"insert_entry","data":{"id":"CQnofe6hVu3uEIkN6OUI","dictionary_id":"aghul","updated_at":"2023-08-28T18:46:25.000Z","created_at":"2023-08-28T18:46:25.000Z","created_by":"de2d3715-6337-45a3-a81a-d82c3210b2a7","updated_by":"de2d3715-6337-45a3-a81a-d82c3210b2a7","lexeme":{"default":"тІинкІ-тІинкІ гьатас"},"elicitation_id":"10-240","phonetic":"tʼinkʼ-tʼinkʼ hatas","sources":["Madzhid Khalilov. 2023. Aghul dictionary. In: Key, Mary Ritchie & Comrie, Bernard (eds.) The Intercontinental Dictionary Series. Leipzig: Max Planck Institute for Evolutionary Anthropology. (Available online at http://ids.clld.org/contributions/61, Accessed on 2023-08-22.)"]},"import_id":"v4-1693248386654"}
-  - {"update_id":"0b49ad39-7144-46f3-94fe-c140372d790c","auth_token":null,"import_meta":{"user_id":"de2d3715-6337-45a3-a81a-d82c3210b2a7","timestamp":null},"dictionary_id":"aghul","entry_id":"CQnofe6hVu3uEIkN6OUI","sense_id":"f2a677a4-070e-46ab-a111-44ecc8693f28","type":"insert_sense","data":{"entry_id":"CQnofe6hVu3uEIkN6OUI","created_by":"de2d3715-6337-45a3-a81a-d82c3210b2a7","created_at":"2023-08-28T18:46:25.000Z","updated_by":"de2d3715-6337-45a3-a81a-d82c3210b2a7","updated_at":"2023-08-28T18:46:25.000Z","id":"f2a677a4-070e-46ab-a111-44ecc8693f28","semantic_domains":["6.2"],"glosses":{"ru":"лить по каплям","en":"drip"}},"import_id":"fb_sb_migration"}
-- dictionary counts
-- check view if audio file does not have a speaker
-- cached_data_store should probably set store value from cached items instead of waiting until all load is done.
+- optimize searching for entries in the dictionary layout page (and error handling)
+- check how the view is if an audio file does not have a speaker
+- Delayed email letting everyone know editing is available again
+- migrate dictionaries and setup materialized view with entry counts
+- cached_data_store should set store value from cached items instead of waiting until all load is done.
 - get semantic domains working in filters ( currently just filters out entries without a semantic domain)
 - get exports working again
-- Remove algolia keys from vercel
-- Orama: replaceState in createQueryParamStore? look into improving the history to change for view and page changes but not for the others
 - create indexes using help from index_advisor https://supabase.com/docs/guides/database/extensions/index_advisor
+- Orama: replaceState in createQueryParamStore? look into improving the history to change for view and page changes but not for the others
 - look at print, table, gallery, and list page files history to make sure there are no missed improvements - check github history too
 - drop content_updates' table column
 - drop entry_updates
+- ensure all auth users are brought over
 - clean up old history data in content_updates
 - make alternate writing systems of the sentence translations as different bcp keys (same as for glosses)
 - get failed tests working again
 - bring back in variants and tests that relied on old forms of test data
 - look at deletedEntries to see if they should be saved somewhere
 - rework about content loading in dictionary layout page
-- remove `pnpm mixed`
-- remove `pnpm -F scripts test:migration`
 - test new db triggers, especially when deleting relationships
 - change cb/ub ids on old senses from firebase ids to user_ids and then connect relationships
 - look at how the quotes came through in arrays with strings (like sources in https://livingdictionaries.app/canichana/entry/ehRKCec3J4flzJhscXiQ) https://www.postgresql.org/message-id/CAEs%3D6DnhWbh5QfbZAZy6BdoGdLJ28MCoU1T6pAiZhw6Ze4gMUw%40mail.gmail.com
 - search enzi in http://localhost:3041/sora/entries?q=%7B%22query%22%3A%22enz%22%2C%22view%22%3A%22gallery%22%7D will show no results and then pagination goes full bore
+- remove `pnpm mixed`
+- remove `pnpm -F scripts test:migration`
+- Remove algolia keys from vercel
 
 ## Notes
 - 1st manual backup was before any action
 - 11:37 at 50, 13:54 at 100 = 2 min 17 seconds for 50 entries, 387000/50 = 7740 chunks, 7740 * 2:17 = 17492 minutes = 12 days (1440 minutes in a day), 18:30 at 200
 - didn't add 331 megabytes of content_updates to db just yet, rather save those sql queries aside for now to avoid upgrading to the $25/month
+- `pnpm -F scripts run-migration`
+- look through local orthographies - especially in the table view, `/birhor/entries?q=%7B"query"%3A"horomsi"%2C"view"%3A"table"%7D`
 
 ### No lexeme
 no lx for 0svukh699MsB4svuCDdO in ho

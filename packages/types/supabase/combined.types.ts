@@ -108,17 +108,6 @@ export interface Database {
             ]
           },
           {
-            foreignKeyName: 'audio_entry_id_fkey'
-            columns: [
-              'entry_id',
-            ]
-            isOneToOne: false
-            referencedRelation: 'materialized_entries_view'
-            referencedColumns: [
-              'id',
-            ]
-          },
-          {
             foreignKeyName: 'audio_sentence_id_fkey'
             columns: [
               'sentence_id',
@@ -351,17 +340,6 @@ export interface Database {
             ]
             isOneToOne: false
             referencedRelation: 'entries_view'
-            referencedColumns: [
-              'id',
-            ]
-          },
-          {
-            foreignKeyName: 'content_updates_entry_id_fkey'
-            columns: [
-              'entry_id',
-            ]
-            isOneToOne: false
-            referencedRelation: 'materialized_entries_view'
             referencedColumns: [
               'id',
             ]
@@ -887,17 +865,6 @@ export interface Database {
               'id',
             ]
           },
-          {
-            foreignKeyName: 'entry_dialects_entry_id_fkey'
-            columns: [
-              'entry_id',
-            ]
-            isOneToOne: false
-            referencedRelation: 'materialized_entries_view'
-            referencedColumns: [
-              'id',
-            ]
-          },
         ]
       }
       entry_updates: {
@@ -1258,17 +1225,6 @@ export interface Database {
             ]
             isOneToOne: false
             referencedRelation: 'entries_view'
-            referencedColumns: [
-              'id',
-            ]
-          },
-          {
-            foreignKeyName: 'foreign_key_entries'
-            columns: [
-              'entry_id',
-            ]
-            isOneToOne: false
-            referencedRelation: 'materialized_entries_view'
             referencedColumns: [
               'id',
             ]
@@ -2058,17 +2014,6 @@ export interface Database {
           updated_at: string | null
         }
         Relationships: [
-          {
-            foreignKeyName: 'entries_dictionary_id_fkey'
-            columns: [
-              'dictionary_id',
-            ]
-            isOneToOne: false
-            referencedRelation: 'dictionaries'
-            referencedColumns: [
-              'id',
-            ]
-          },
         ]
       }
       speakers_view: {
@@ -2182,7 +2127,23 @@ export interface Database {
       }
     }
     Functions: {
-      [_ in never]: never;
+      entries_from_timestamp: {
+        Args: {
+          get_newer_than: string
+          dict_id: string
+        }
+        Returns: {
+          id: string
+          dictionary_id: string
+          created_at: string
+          updated_at: string
+          deleted: string
+          main: EntryMainFields
+          senses: SenseWithSentences[] | null
+          audios: AudioWithSpeakerIds[] | null
+          dialect_ids: string[] | null
+        }[]
+      }
     }
     Enums: {
       certainty: 'yes' | 'no' | 'unknown'
