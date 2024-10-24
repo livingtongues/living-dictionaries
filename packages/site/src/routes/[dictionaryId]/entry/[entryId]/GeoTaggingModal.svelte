@@ -1,7 +1,7 @@
 <script lang="ts">
   import { Button, Modal, ShowHide } from 'svelte-pieces'
   import type { Coordinates, IPoint, IRegion } from '@living-dictionaries/types'
-  import { createEventDispatcher, onMount } from 'svelte'
+  import { onMount } from 'svelte'
   import type { LngLatFull } from '@living-dictionaries/types/coordinates.interface'
   import InitableShowHide from './InitableShowHide.svelte'
   import { flattenCoordinates } from './flattenCoordinates'
@@ -19,15 +19,12 @@
   export let initialCenter: LngLatFull | undefined
   export let addPoint = false
   export let addRegion = false
-  export let on_update: (new_value: Coordinates) => void
+  export let on_update: (new_value: Coordinates) => Promise<void>
+  export let on_close: () => void
 
   let lng: number
   let lat: number
   const GPS_DECIMAL_PRECISION = 4
-
-  const dispatch = createEventDispatcher<{
-    close: boolean
-  }>()
 
   function savePoints(points: IPoint[]) {
     on_update({ ...coordinates, points })
@@ -59,7 +56,7 @@
   })
 </script>
 
-<Modal on:close noscroll>
+<Modal on:close={on_close} noscroll>
   <div class="h-sm">
     <Map pointsToFit={flattenCoordinates(coordinates)} {lng} {lat} zoom={6}>
       <NavigationControl />
@@ -168,7 +165,7 @@
   </div>
 
   <div class="modal-footer">
-    <Button onclick={() => dispatch('close')} form="simple" color="black">
+    <Button onclick={on_close} form="simple" color="black">
       {$page.data.t('misc.close')}
     </Button>
   </div>

@@ -1,17 +1,17 @@
 <script lang="ts">
   import { Button, Form, Modal } from 'svelte-pieces'
-  import type { ISpeaker } from '@living-dictionaries/types'
+  import type { Tables } from '@living-dictionaries/types'
   import { decades } from './ages'
   import { page } from '$app/stores'
 
   export let on_close: () => void
-  export let on_add_speaker: (speaker: ISpeaker) => Promise<void>
-  $: ({ dictionary } = $page.data)
+  export let on_speaker_added: (speaker_id: string) => void
+  $: ({ dbOperations } = $page.data)
 
   let displayName = ''
   let birthplace = ''
   let decade = 4
-  let gender: ISpeaker['gender'] = 'm'
+  let gender: Tables<'speakers'>['gender'] = 'm'
   let agreeToBeOnline = true
 </script>
 
@@ -21,13 +21,15 @@
 
   <Form
     let:loading
-    onsubmit={async () => await on_add_speaker({
-      displayName: displayName.trim(),
-      birthplace: birthplace.trim(),
-      decade,
-      gender,
-      contributingTo: [$dictionary.id],
-    })}>
+    onsubmit={async () => {
+      const speaker_id = await dbOperations.upsert_speaker({ speaker: {
+        name: displayName.trim(),
+        birthplace: birthplace.trim(),
+        decade,
+        gender,
+      } })
+      on_speaker_added(speaker_id)
+    }}>
     <label for="name" class="block text-sm font-medium leading-5 text-gray-700 mt-4">
       {$page.data.t('speakers.name')}
     </label>
@@ -109,7 +111,7 @@
     <!-- TODO: "The speaker is me" checkbox -->
 
     <div class="modal-footer space-x-1">
-      <Button onclick={on_close} form="simple" color="black">
+      <Button disabled={loading} onclick={on_close} form="simple" color="black">
         {$page.data.t('misc.cancel')}
       </Button>
       <Button type="submit" form="filled" {loading}>

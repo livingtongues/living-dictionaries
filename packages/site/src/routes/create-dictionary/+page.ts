@@ -27,12 +27,9 @@ export const load = (({ parent }) => {
       const prunedDictionary = pruneObject(dictionary)
       if (firebaseConfig.projectId === 'talking-dictionaries-dev') {
         console.info(prunedDictionary)
-        if (
-          !confirm(
-            'Dictionary value logged to console because in dev mode. Do you still want to create this dictionary?',
-          )
-        )
+        if (!confirm('Dictionary value logged to console because in dev mode. Do you still want to create this dictionary?')) {
           return
+        }
       }
 
       await setOnline<IDictionary>(`dictionaries/${url}`, prunedDictionary)
@@ -52,7 +49,7 @@ export const load = (({ parent }) => {
         dictionary: { ...prunedDictionary, id: url },
       })
 
-      window.location.replace(`/${url}/entries/list`)
+      window.location.replace(`/${url}/entries`)
     } catch (err) {
       alert(`${t('misc.error')}: ${err}`)
     }

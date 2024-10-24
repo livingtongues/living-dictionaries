@@ -24,7 +24,7 @@
 
     for (const entry of entriesWithImages) {
       if (destroyed) return
-      const image_file_path = entry.senses[0].photo_files[0].storage_url
+      const image_file_path = 'TODO'
       try {
         const response = await fetch(image_file_path)
         if (response.ok) {
@@ -44,7 +44,7 @@
 
     for (const entry of entriesWithAudio) {
       if (destroyed) return
-      const sound_file_path = entry.sound_files[0].storage_url
+      const sound_file_path = 'TODO'
       try {
         const response = await fetch(sound_file_path)
         if (response.ok) {

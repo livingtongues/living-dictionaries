@@ -1,11 +1,9 @@
 import type { UserRecord } from 'firebase-admin/auth'
 import { auth } from '../config-firebase'
-import { executeQuery } from '../config-supabase'
+import { postgres } from '../config-supabase'
 import { write_users_insert } from './write-users-insert'
 
-migrate_users()
-
-async function migrate_users() {
+export async function migrate_users() {
   const users = await get_users()
   console.log({ total_users: users.length })
   for (const user of users)
@@ -14,12 +12,12 @@ async function migrate_users() {
     console.log(user.toJSON())
   const sql = write_users_insert(users)
   console.log(sql)
-  await executeQuery(sql)
+  await postgres.execute_query(sql)
 }
 
 const BATCH_SIZE = 1000
 
-async function get_users(): Promise<UserRecord[]> {
+export async function get_users(): Promise<UserRecord[]> {
   try {
     const listUsersResult = await auth.listUsers()
     const { users, pageToken } = listUsersResult
@@ -29,7 +27,7 @@ async function get_users(): Promise<UserRecord[]> {
     if (pageToken) {
       const listUsersResult = await auth.listUsers(BATCH_SIZE, pageToken)
       const { users: nextUsers } = listUsersResult
-      // const nextUsers = await get_users(pageToken)
+      // const nextUsers = await get_users(pageToken) // had issue
       return [...users, ...nextUsers]
     }
 

@@ -1,71 +1,45 @@
-<script lang="ts" context="module">
-  import { type Writable, writable } from 'svelte/store'
-
-  const options: Writable<SelectOption[]> = writable([])
-  let fetchedDictionaryId: string
-</script>
-
 <script lang="ts">
-  import { onMount } from 'svelte'
-  import ModalEditableArray from '../ui/array/ModalEditableArray.svelte'
-  import type { SelectOption } from '../ui/array/select-options.interface'
+  import type { SelectOption } from '$lib/components/ui/array/select-options.interface'
+  import ModalEditableArray from '$lib/components/ui/array/ModalEditableArray.svelte'
   import { page } from '$app/stores'
-  import { browser } from '$app/environment'
-  import { PUBLIC_ALGOLIA_APPLICATION_ID, PUBLIC_ALGOLIA_SEARCH_ONLY_API_KEY } from '$env/static/public'
-  import { post_request } from '$lib/helpers/get-post-requests'
 
-  export let dialects: string[] = []
+  export let dialect_ids: string[]
+  export let entry_id: string
   export let can_edit = false
-  export let dictionaryId: string
   export let showPlus = true
 
-  export let on_update: (new_value: string[]) => void
+  $: ({ dialects, dbOperations } = $page.data)
+  $: active_dialects = $dialects.filter(dialect => dialect_ids.includes(dialect.id)).map(dialect => dialect.id)
+  $: options = $dialects.map(dialect => ({ value: dialect.id, name: dialect.name.default })) satisfies SelectOption[]
 
-  onMount(async () => {
-    if (browser && fetchedDictionaryId !== dictionaryId) {
-      try {
-        const dialects = await fetchDialects()
-        if (dialects?.facetHits) {
-          $options = dialects.facetHits.map(({ value }) => ({ name: value, value }))
-        }
-      } catch (error) {
-        console.error(error)
+  async function on_update(new_values: string[]) {
+    // go through current dialect_ids and check if they are in the new_values, if not remove them
+    for (const dialect_id of dialect_ids) {
+      const value_is_removed = !new_values.includes(dialect_id)
+      if (value_is_removed) {
+        await dbOperations.assign_dialect({ dialect_id, entry_id, remove: true })
       }
     }
-  })
 
-  interface IAlgoliaFacetsQuery {
-    facetHits: {
-      value: string
-    }[]
-    exhaustiveFacetsCount: boolean
-    processingTimeMS: number
-  }
+    for (const dialect_id of new_values) {
+      if (dialect_ids.includes(dialect_id)) continue // everything is already set - this value wasn't changed
 
-  async function fetchDialects(): Promise<IAlgoliaFacetsQuery> {
-    fetchedDictionaryId = dictionaryId
-
-    const headers = {
-      'X-Algolia-Application-Id': PUBLIC_ALGOLIA_APPLICATION_ID,
-      'X-Algolia-API-Key': PUBLIC_ALGOLIA_SEARCH_ONLY_API_KEY,
+      // need to assign dialect
+      if ($dialects.find(({ id }) => id === dialect_id)) {
+        // if the value is in the dialects, assign it to this entry
+        await dbOperations.assign_dialect({ dialect_id, entry_id })
+      } else {
+        // if a value is not in the dictionary's dialects first add the dialect to the dictionary
+        const data = await dbOperations.insert_dialect({ dialect: { name: { default: dialect_id } } })
+        await dbOperations.assign_dialect({ dialect_id: data.dialect_id, entry_id })
+      }
     }
-
-    const { error, data } = await post_request<{ facetFilters: string[][], maxFacetHits: number }, IAlgoliaFacetsQuery>(`https://${PUBLIC_ALGOLIA_APPLICATION_ID}.algolia.net/1/indexes/entries_prod/facets/di/query`, {
-      facetFilters: [[`dictId:${dictionaryId}`]],
-      maxFacetHits: 100, // Algolia max possible https://www.algolia.com/doc/api-reference/api-parameters/maxFacetHits/
-    }, { headers })
-
-    if (error)
-      console.error(error.message)
-
-    if (data)
-      return data
   }
 </script>
 
 <ModalEditableArray
-  values={dialects}
-  options={$options}
+  values={active_dialects}
+  {options}
   {can_edit}
   canWriteIn
   {showPlus}

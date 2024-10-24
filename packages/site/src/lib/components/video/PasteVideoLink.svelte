@@ -1,21 +1,19 @@
 <script lang="ts">
-  import { page } from '$app/stores';
-  import { Button } from 'svelte-pieces';
-  import { parseVideoData } from './parseVideoData';
-  import { createEventDispatcher } from 'svelte';
-  import type { GoalDatabaseVideo } from '@living-dictionaries/types';
-  const dispatch = createEventDispatcher<{ update: GoalDatabaseVideo }>();
+  import { Button } from 'svelte-pieces'
+  import type { HostedVideo } from '@living-dictionaries/types'
+  import { parse_hosted_video_url } from './parse-hosted-video-url'
+  import { page } from '$app/stores'
 
-  let url: string;
+  let url: string
+  export let on_pasted_valid_url: (hosted_video: HostedVideo) => void
 
   function handle() {
-    const video = parseVideoData(url);
+    const video = parse_hosted_video_url(url)
     if (!video) {
-      alert($page.data.t('misc.invalid_url'));
-      url = '';
-      return;
+      alert($page.data.t('misc.invalid_url'))
+      url = ''
     }
-    dispatch('update', video);
+    on_pasted_valid_url(video)
   }
 </script>
 
@@ -39,5 +37,4 @@
       {$page.data.t('misc.add')}
     </Button>
   </div>
-  <!-- {$page.data.t('video.video_credit')} -->
 </form>

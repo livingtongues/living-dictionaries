@@ -1,23 +1,24 @@
-import type { ExpandedEntry } from '@living-dictionaries/types';
-import { seo_description } from './seo_description';
-import { english_translate } from '$lib/i18n';
+import type { PartialEntryView } from '@living-dictionaries/types/supabase/entry.interface'
+import type { Tables } from '@living-dictionaries/types'
+import { seo_description } from './seo_description'
+import { english_translate } from '$lib/i18n'
 
 describe('seo_description', () => {
   const t = english_translate
 
   test('prints simple labeled english and spanish glosses', () => {
-    const entry: Partial<ExpandedEntry> = {
+    const entry: PartialEntryView = {
       senses: [{
         glosses: { en: 'hello', es: 'hola' },
-      }]
-    };
-    const dictionary_gloss_languages = ['es'];
-    const result = seo_description(entry, dictionary_gloss_languages, t);
-    expect(result).toMatchInlineSnapshot('"Spanish: hola, English: hello"');
-  });
+      }],
+    }
+    const gloss_languages = ['es']
+    const result = seo_description({ entry, gloss_languages, t, dialects: [] })
+    expect(result).toMatchInlineSnapshot('"Spanish: hola, English: hello"')
+  })
 
   test('properly orders glosses according to dictionary gloss languages order', () => {
-    const entry: Partial<ExpandedEntry> = {
+    const entry: PartialEntryView = {
       senses: [{
         glosses: {
           en: 'goats',
@@ -31,52 +32,60 @@ describe('seo_description', () => {
           hi: 'बकरियाँ',
         },
       }],
-    };
-    const dictionary_gloss_languages = ['hi', 'or', 'as', 'en', 'fr', 'es', 'it', 'de', 'pt'];
-    const result = seo_description(entry, dictionary_gloss_languages, t);
-    expect(result).toMatchInlineSnapshot('"Hindi: बकरियाँ, Oriya: ଛେଳି ଗୁଡିକ, Assamese: ছাগল কেইতা, English: goats, French: chèvres, Spanish: cabras, Italian: capre, German: Ziegen, Portuguese: cabras"');
-  });
+    }
+    const gloss_languages = ['hi', 'or', 'as', 'en', 'fr', 'es', 'it', 'de', 'pt']
+    const result = seo_description({ entry, gloss_languages, t, dialects: [] })
+    expect(result).toMatchInlineSnapshot('"Hindi: बकरियाँ, Oriya: ଛେଳି ଗୁଡିକ, Assamese: ছাগল কেইতা, English: goats, French: chèvres, Spanish: cabras, Italian: capre, German: Ziegen, Portuguese: cabras"')
+  })
 
-  test('places local orthographies first', () => {
-    const entry: Partial<ExpandedEntry> = {
-      local_orthography_1: 'امتحان',
-      local_orthography_2: 'Ölçek',
-      local_orthography_3: 'परीक्षा',
-      local_orthography_4: '시험',
-      local_orthography_5: 'מִבְחָן',
+  test('places local orthographies before glosses', () => {
+    const entry: PartialEntryView = {
+      main: {
+        lexeme: {
+          lo1: 'امتحان',
+          lo2: 'Ölçek',
+          lo3: 'परीक्षा',
+          lo4: '시험',
+          lo5: 'מִבְחָן',
+        },
+      },
       senses: [{
         glosses: { en: 'test' },
       }],
-    };
-    const no_dictionary_gloss_languages = [];
-    const result = seo_description(entry, no_dictionary_gloss_languages, t);
-    expect(result).toMatchInlineSnapshot('"امتحان, Ölçek, परीक्षा, 시험, מִבְחָן, English: test"');
-  });
+    }
+    const no_gloss_languages = []
+    const result = seo_description({ entry, gloss_languages: no_gloss_languages, t, dialects: [] })
+    expect(result).toMatchInlineSnapshot('"امتحان, Ölçek, परीक्षा, 시험, מִבְחָן, English: test"')
+  })
 
   test('handles local orthagraphies, phonetic, glosses, parts of speech, and dialect', () => {
-    const entry: Partial<ExpandedEntry> = {
-      local_orthography_1: 'আৰচি',
-      local_orthography_2: '𑃢𑃝𑃐𑃤',
-      phonetic: 'arsi',
+    const entry: PartialEntryView = {
+      main: {
+        lexeme: {
+          lo1: 'আৰচি',
+          lo2: '𑃢𑃝𑃐𑃤',
+        },
+        phonetic: 'arsi',
+      },
       senses: [{
         glosses: { or: 'କଳା ମୁହାଁ ମାଙ୍କଡ', as: 'ক’লা মুখ\'ৰ বান্দৰ', en: 'black faced monkey' },
-        parts_of_speech_keys: ['n', 'adj'],
+        parts_of_speech: ['n', 'adj'],
       }],
-      dialects: ['West Bengal Sabar'],
-    };
-    const dictionary_gloss_languages = ['as', 'en', 'or', 'hi'];
-    const result = seo_description(entry, dictionary_gloss_languages, t);
+      dialect_ids: ['1'],
+    }
+    const gloss_languages = ['as', 'en', 'or', 'hi']
+    const result = seo_description({ entry, gloss_languages, t, dialects: [{ id: '1', name: { default: 'West Bengal Sabar' } } as unknown as Tables<'dialects'>] })
     expect(result).toMatchInlineSnapshot(
-      '"আৰচি, 𑃢𑃝𑃐𑃤, [arsi], n., adj., Assamese: ক’লা মুখ\'ৰ বান্দৰ, English: black faced monkey, Oriya: କଳା ମୁହାଁ ମାଙ୍କଡ, West Bengal Sabar"'
-    );
-  });
+      '"আৰচি, 𑃢𑃝𑃐𑃤, [arsi], n., adj., Assamese: ক’লা মুখ\'ৰ বান্দৰ, English: black faced monkey, Oriya: କଳା ମୁହାଁ ମାଙ୍କଡ, West Bengal Sabar"',
+    )
+  })
 
   test('handles no gloss field', () => {
-    const dictionary_gloss_languages = ['en'];
-    const result = seo_description({ lexeme: 'foo' }, dictionary_gloss_languages, t);
-    expect(result).toEqual('');
-  });
-});
+    const gloss_languages = ['en']
+    const result = seo_description({ entry: { main: { lexeme: { default: 'foo' } } }, gloss_languages, t, dialects: [] })
+    expect(result).toEqual('')
+  })
+})
 
 // describe('removeLineBreaks', () => {
 //   test('keeps one space between words when newlines come after a space', () => {

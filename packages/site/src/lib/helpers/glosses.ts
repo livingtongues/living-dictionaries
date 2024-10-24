@@ -1,4 +1,4 @@
-import type { IExampleSentence, MultiString } from '@living-dictionaries/types'
+import type { MultiString, Tables } from '@living-dictionaries/types'
 import type { TranslateFunction } from '$lib/i18n/types'
 
 export function order_glosses({ glosses, dictionary_gloss_languages, t, label = false }:
@@ -22,18 +22,16 @@ export function order_glosses({ glosses, dictionary_gloss_languages, t, label = 
   })
 }
 
-export function order_example_sentences({ example_sentences, dictionary_gloss_languages }:
+export function order_example_sentences({ sentence, dictionary_gloss_languages }:
 {
-  example_sentences: IExampleSentence
+  sentence: Partial<Tables<'sentences'>>
   dictionary_gloss_languages: string[]
 },
 ): string[] {
-  if (!example_sentences || !example_sentences.vn) return []
+  if (!sentence?.text?.default) return []
 
-  const sorted_example_sentences = dictionary_gloss_languages.map(bcp => example_sentences[bcp]).filter(Boolean)
-  sorted_example_sentences.unshift(example_sentences.vn) // vernacular example sentence should be always the first sentence
-
-  return sorted_example_sentences
+  const sorted_sentence_translations = dictionary_gloss_languages.map(bcp => sentence.translation?.[bcp]).filter(Boolean)
+  return [sentence.text.default, sorted_sentence_translations].flat()
 }
 
 export function order_entry_and_dictionary_gloss_languages(
