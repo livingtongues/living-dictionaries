@@ -31,8 +31,9 @@ export async function insert_entry(lexeme: MultiString) {
     if (error)
       throw new Error(error.message)
 
-    goto(`/${dictionary_id}/entry/${data.entry_id}`)
-    refresh_entries()
+    await refresh_entries()
+    const href = `/${dictionary_id}/entry/${data.entry_id}`
+    goto(href)
   } catch (err) {
     alert(err)
     console.error(err)
