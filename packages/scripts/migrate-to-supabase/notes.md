@@ -1,11 +1,10 @@
 # Migrate Entries and Speakers from Firestore to Supabase
-- Push migration
-- Merge PR to unblock
 - Test editing entries on live site
 - Remove banner
-- build Orama indexes in Cloudflare R2 for dictionaries over 1000 entries (try dictionaries from phone and test load speeds)
+- build Orama indexes in Cloudflare R2 for all dictionaries (try dictionaries from phone and test load speeds)
   - run size check query on prod to get a few dictionaries
 - Use cached Orama indexes from Cloudflare R2 if it exists
+- continue to build new Orama indexes every hour after materialized view is updated
 
 ## Clean-up
 - optimize searching for entries in the dictionary layout page (and error handling)
@@ -35,6 +34,7 @@
 - remove `pnpm -F scripts test:migration`
 - Remove algolia keys from vercel
 - cleaner format for content-updates and refactor current ones
+- prefetching dictionary will cause entry store value to run twice
 
 ## Notes
 - 1st manual backup was before any action
