@@ -14,7 +14,7 @@
 
   export let data
   $: ({ entries, admin, search_entries, default_entries_per_page, search_params, dictionary, can_edit, dbOperations, reset_caches } = data)
-  $: ({ loading, updated_item, error: entries_error } = entries)
+  $: ({ loading, updated_item, search_index_updated, error: entries_error } = entries)
 
   let page_entries: EntryView[] = []
 
@@ -29,7 +29,7 @@
   })()
   let result_facets: FacetResult
 
-  $: if (browser || $updated_item) {
+  $: if (browser || $updated_item || $search_index_updated) {
     search($search_params, current_page_index)
   }
 

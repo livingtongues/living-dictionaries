@@ -1,10 +1,6 @@
 # Migrate Entries and Speakers from Firestore to Supabase
 
-## Optimization
-- try dictionaries from phone and test load speeds)
 - optimize searching for entries in the dictionary layout page (and error handling)
-
-## Clean-up
 - build Orama indexes manually daily
 - continue to build new Orama indexes every hour after materialized view is updated
 - check how the view is if an audio file does not have a speaker
@@ -35,16 +31,6 @@
 - cleaner format for content-updates and refactor current ones
 - prefetching dictionary will cause entry store value to run twice
 - save backup files to cloud bucket instead of github repo
-- learn more about R2 cache
-    [
-  {
-    "ExposeHeaders": [
-      "Content-Length",
-      "ETag"
-    ],
-    "MaxAgeSeconds": 3000
-  }
-]
 
 ## Notes
 - 1st manual backup was before any action
