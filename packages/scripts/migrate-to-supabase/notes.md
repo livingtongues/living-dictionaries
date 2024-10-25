@@ -1,13 +1,12 @@
 # Migrate Entries and Speakers from Firestore to Supabase
-- Test editing entries on live site
-- Remove banner
-- build Orama indexes in Cloudflare R2 for all dictionaries (try dictionaries from phone and test load speeds)
-  - run size check query on prod to get a few dictionaries
-- Use cached Orama indexes from Cloudflare R2 if it exists
-- continue to build new Orama indexes every hour after materialized view is updated
+
+## Optimization
+- try dictionaries from phone and test load speeds)
+- optimize searching for entries in the dictionary layout page (and error handling)
 
 ## Clean-up
-- optimize searching for entries in the dictionary layout page (and error handling)
+- build Orama indexes manually daily
+- continue to build new Orama indexes every hour after materialized view is updated
 - check how the view is if an audio file does not have a speaker
 - Delayed email letting everyone know editing is available again
 - migrate dictionaries and setup materialized view with entry counts
@@ -35,6 +34,17 @@
 - Remove algolia keys from vercel
 - cleaner format for content-updates and refactor current ones
 - prefetching dictionary will cause entry store value to run twice
+- save backup files to cloud bucket instead of github repo
+- learn more about R2 cache
+    [
+  {
+    "ExposeHeaders": [
+      "Content-Length",
+      "ETag"
+    ],
+    "MaxAgeSeconds": 3000
+  }
+]
 
 ## Notes
 - 1st manual backup was before any action

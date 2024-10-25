@@ -25,11 +25,10 @@
     "local-sveltefirets": "link:../../../sveltefirets"
   },
   "devDependencies": {
-    "@iconify/json": "^2.2.242",
+    "@iconify/json": "^2.2.263",
     "@julr/unocss-preset-forms": "^0.0.5",
     "@living-dictionaries/types": "workspace:^1.0.0",
-    "@orama/orama": "2.0.23",
-    "@orama/plugin-data-persistence": "2.0.23",
+    "@orama/orama": "3.0.1",
     "@playwright/test": "1.41.2",
     "@resvg/resvg-js": "^2.2.0",
     "@sentry/browser": "^6.18.2",
@@ -64,7 +63,7 @@
     "jszip": "^3.7.1",
     "kitbook": "1.0.0-beta.31",
     "logrocket": "^2.1.2",
-    "pg": "^8.11.3",
+    "pg": "^8.13.1",
     "recordrtc": "^5.6.2",
     "satori": "^0.0.44",
     "satori-html": "^0.3.0",

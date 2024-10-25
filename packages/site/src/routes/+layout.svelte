@@ -4,8 +4,8 @@
   import { navigating, page } from '$app/stores'
   import { browser } from '$app/environment'
 
-  export let data
-  $: ({ user } = data)
+// export let data
+  // $: ({ user } = data)
 </script>
 
 {#if browser}
@@ -14,11 +14,11 @@
   {/if}
 {/if}
 
-{#if $user}
+<!-- {#if $user}
   {#await import('./Banner.svelte') then { default: Banner }}
     <Banner />
   {/await}
-{/if}
+{/if} -->
 
 <div id="direction" dir={$page.data.t('page.direction')}>
   <slot />
