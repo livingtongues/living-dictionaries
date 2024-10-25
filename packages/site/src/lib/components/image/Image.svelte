@@ -9,7 +9,7 @@
   export let square: number = undefined
   export let width: number = undefined
   export let height: number = undefined
-  export let on_delete_image: () => Promise<void>
+  export let on_delete_image: () => Promise<any>
 
   const [send, receive] = crossfade({
     duration: 200,

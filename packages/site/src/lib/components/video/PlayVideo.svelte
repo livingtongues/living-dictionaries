@@ -1,14 +1,15 @@
 <script lang="ts">
-  import type { ExpandedVideo } from '@living-dictionaries/types'
+  import type { Tables } from '@living-dictionaries/types'
   import { Button } from 'svelte-pieces'
   import VideoThirdParty from './VideoThirdParty.svelte'
   import { page } from '$app/stores'
 
+  $: ({ dbOperations, url_from_storage_path } = $page.data)
+
   export let lexeme: string
-  export let video: ExpandedVideo
+  export let video: Tables<'videos_view'>
   export let can_edit = false
   export let on_close: () => void
-  export let on_delete_video: () => Promise<void>
 </script>
 
 <div
@@ -22,20 +23,17 @@
       <span on:click|stopPropagation>{lexeme}</span>
       <span class="i-fa-solid-times p-3 cursor-pointer" />
     </div>
-    {#if video}
-      {#if !video.youtubeId && !video.vimeoId}
-        <video
-          controls
-          autoplay
-          playsinline
-          src={video.storage_url}>
-          <track kind="captions" />
-        </video>
-      {:else}
-        <VideoThirdParty {video} />
-      {/if}
+    {#if video.storage_path}
+      <video
+        controls
+        autoplay
+        playsinline
+        src={url_from_storage_path(video.storage_path)}>
+        <track kind="captions" />
+      </video>
+    {:else if video.hosted_elsewhere}
+      <VideoThirdParty hosted_video={video.hosted_elsewhere} />
     {/if}
-    <!-- <img class="object-contain max-h-full" alt="Image of {entry.lx}" {src} /> -->
     {#if can_edit}
       <div
         class="p-4 flex justify-between
@@ -44,7 +42,7 @@
           class="ml-auto"
           color="red"
           form="filled"
-          onclick={on_delete_video}>
+          onclick={async () => await dbOperations.update_video({ video: { deleted: 'true' }, video_id: video.id })}>
           <span class="i-fa-trash-o" style="margin: -1px 0 2px;" />
           {$page.data.t('misc.delete')}
         </Button>

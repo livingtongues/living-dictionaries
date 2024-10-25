@@ -1,9 +1,7 @@
 <script lang="ts">
-  import LZString from 'lz-string'
+  import { compressToEncodedURIComponent as encode } from 'kitbook'
   import { seoTitle } from './seo-title'
   import { page } from '$app/stores'
-
-  const { compressToEncodedURIComponent: encode } = LZString
 
   const IMAGE_API = '/og'
   const DEFAULT_IMAGE

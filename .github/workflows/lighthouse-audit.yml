@@ -21,7 +21,7 @@ jobs:
         with:
           urls: |
             ${{ github.event.deployment_status.target_url }}
-            ${{ github.event.deployment_status.target_url }}/achi/entries/list
+            ${{ github.event.deployment_status.target_url }}/achi/entries
             ${{ github.event.deployment_status.target_url }}/jaRhn6MAZim4Blvr1iEv/entry/yt9ja7ymh9xgba5i
           # configPath: './.github/lighthouserc.json' # https://github.com/GoogleChrome/lighthouse-ci/blob/main/docs/getting-started.md https://github.com/GoogleChrome/lighthouse-ci/blob/main/docs/configuration.md#assert
           uploadArtifacts: true

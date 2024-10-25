@@ -2,12 +2,11 @@
   import { Button, ResponsiveSlideover, ShowHide } from 'svelte-pieces'
   import SideMenu from './SideMenu.svelte'
   import { page } from '$app/stores'
-  import { algoliaQueryParams } from '$lib/stores/algolia'
   import Header from '$lib/components/shell/Header.svelte'
   import './custom-fonts.css'
 
   export let data
-  $: ({ dictionary, is_manager, status, show_local_search } = data)
+  $: ({ dictionary, is_manager, entries } = data)
 </script>
 
 <ShowHide let:show let:toggle let:set>
@@ -17,8 +16,7 @@
       class="font-semibold sm:text-xl overflow-x-auto md:overflow-hidden">
       <a
         class="p-3 hover:text-black hidden md:inline print:hidden"
-        href="/"
-        on:click={() => ($algoliaQueryParams = '')}>
+        href="/">
         <i class="fas fa-home" />
       </a>
       <div class="w-2 hidden md:inline" />
@@ -41,7 +39,7 @@
       open={show}>
       <div
         class="h-full md:h-unset flex flex-col flex-shrink-0 md:top-12 md:sticky md:w-44 lg:w-48 print:hidden">
-        <SideMenu dictionary={$dictionary} {show_local_search} is_manager={$is_manager} search_index_ready={$status === 'Search index created'} on_close={() => set(false)} />
+        <SideMenu dictionary={$dictionary} is_manager={$is_manager} entry_count={$entries?.length} on_close={() => set(false)} />
         <hr class="md:hidden" />
         <Button form="menu" class="text-left !md:hidden" onclick={toggle}>
           <i class="far fa-times fa-lg fa-fw" />

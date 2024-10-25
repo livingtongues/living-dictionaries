@@ -1,32 +1,47 @@
 # Migrate Entries and Speakers from Firestore to Supabase
-
-## TODO
-- Move off Algolia fully onto local Orama + using Orama Cloud for (100K max*3 indexes) for large, public dictionaries + Onondaga
-  - solve bugs
-  - flip usage to using the new search but make Algolia still available as a second option
-- On a new migration branch
-  - Make sure all items from "clean-up" below are being actively logged again as they are run into
-  - update migration script to migrate speakers across as they are needed, when one is found, save into speakers table, then create a map of firestore speaker id to supabase speaker id, in future times when this Firestore speaker id comes up, check the map first to see if speaker already exists
-  - figure out how different user ids (creater of speaker) between Firestore and Firebase will be handled and document
-  - run tests on migration
-  - visual inspection of the results locally - should work similar to current prod
-  - update saving functions
-  - make all types of edits
-- Run migration process below
-
-## Migration Process
-- post notice on logged-in users a week ahead of time
-- send email notice a week ahead of time
-- Lock down Firestore dictionary words and speakers using security rules (tell admins not to edit anything)
-- Make Supabase backup
-- Migrate data
-- Test viewing
-- Merge new saving methods code (this will be a natural unblock)
-- Test editing entries
-- Remove notice
-- Email letting everyone know editing is available again
+- Push migration
+- Merge PR to unblock
+- Test editing entries on live site
+- Remove banner
+- build Orama indexes in Cloudflare R2 for dictionaries over 1000 entries (try dictionaries from phone and test load speeds)
+  - run size check query on prod to get a few dictionaries
+- Use cached Orama indexes from Cloudflare R2 if it exists
 
 ## Clean-up
+- optimize searching for entries in the dictionary layout page (and error handling)
+- check how the view is if an audio file does not have a speaker
+- Delayed email letting everyone know editing is available again
+- migrate dictionaries and setup materialized view with entry counts
+- cached_data_store should set store value from cached items instead of waiting until all load is done.
+- get semantic domains working in filters ( currently just filters out entries without a semantic domain)
+- get exports working again
+- create indexes using help from index_advisor https://supabase.com/docs/guides/database/extensions/index_advisor
+- Orama: replaceState in createQueryParamStore? look into improving the history to change for view and page changes but not for the others
+- look at print, table, gallery, and list page files history to make sure there are no missed improvements - check github history too
+- drop content_updates' table column
+- drop entry_updates
+- ensure all auth users are brought over
+- clean up old history data in content_updates
+- make alternate writing systems of the sentence translations as different bcp keys (same as for glosses)
+- get failed tests working again
+- bring back in variants and tests that relied on old forms of test data
+- look at deletedEntries to see if they should be saved somewhere
+- rework about content loading in dictionary layout page
+- test new db triggers, especially when deleting relationships
+- change cb/ub ids on old senses from firebase ids to user_ids and then connect relationships
+- look at how the quotes came through in arrays with strings (like sources in https://livingdictionaries.app/canichana/entry/ehRKCec3J4flzJhscXiQ) https://www.postgresql.org/message-id/CAEs%3D6DnhWbh5QfbZAZy6BdoGdLJ28MCoU1T6pAiZhw6Ze4gMUw%40mail.gmail.com
+- search enzi in http://localhost:3041/sora/entries?q=%7B%22query%22%3A%22enz%22%2C%22view%22%3A%22gallery%22%7D will show no results and then pagination goes full bore
+- remove `pnpm mixed`
+- remove `pnpm -F scripts test:migration`
+- Remove algolia keys from vercel
+- cleaner format for content-updates and refactor current ones
+
+## Notes
+- 1st manual backup was before any action
+- 11:37 at 50, 13:54 at 100 = 2 min 17 seconds for 50 entries, 387000/50 = 7740 chunks, 7740 * 2:17 = 17492 minutes = 12 days (1440 minutes in a day), 18:30 at 200
+- didn't add 331 megabytes of content_updates to db just yet, rather save those sql queries aside for now to avoid upgrading to the $25/month
+- `pnpm -F scripts run-migration`
+- look through local orthographies - especially in the table view, `/birhor/entries?q=%7B"query"%3A"horomsi"%2C"view"%3A"table"%7D`
 
 ### No lexeme
 no lx for 0svukh699MsB4svuCDdO in ho

@@ -32,17 +32,17 @@ CREATE TABLE dictionaries ( -- TODO: migrate from Firestore
 
 ALTER TABLE dictionaries ENABLE ROW LEVEL SECURITY;
 
-CREATE TABLE entries ( -- TODO: migrate from Firestore
+CREATE TABLE entries (
   id text unique primary key NOT NULL, -- generated on client so users can create an entry offline and keep editing it
   dictionary_id text NOT NULL REFERENCES dictionaries,
   lexeme jsonb NOT NULL, -- MultiString
   phonetic text,
   interlinearization text,
   morphology text,
-  plural_form text,
-  variant text,
-  dialects text[], -- TODO: remove this field by creating a dialects table and many-many table
-  notes text, -- changed to jsonb for a MultiString
+  plural_form text, -- moved to senses table
+  variant text, -- moved to senses table
+  dialects text[], -- removed in favor of dialects table and entry_dialects many-many join
+  notes text, -- changed to jsonb MultiString
   sources text[],
   scientific_names text[],
   coordinates jsonb, -- Coordinates

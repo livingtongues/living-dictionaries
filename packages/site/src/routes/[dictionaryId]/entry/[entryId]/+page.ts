@@ -1,45 +1,42 @@
 import { error, redirect } from '@sveltejs/kit'
-import type { ActualDatabaseEntry } from '@living-dictionaries/types'
-import { awaitableDocStore } from 'sveltefirets'
-import { derived } from 'svelte/store'
-import type { PostgrestError } from '@supabase/supabase-js'
+import { get } from 'svelte/store'
 import { ResponseCodes } from '$lib/constants'
 import { ENTRY_UPDATED_LOAD_TRIGGER } from '$lib/dbOperations'
-import { getSupabase } from '$lib/supabase'
-import type { SupaEntry } from '$lib/supabase/database.types.js'
-import { convert_and_expand_entry } from '$lib/transformers/convert_and_expand_entry'
+import { browser } from '$app/environment'
 
 export async function load({ params, depends, parent }) {
   depends(ENTRY_UPDATED_LOAD_TRIGGER)
-  const entryPath = `dictionaries/${params.dictionaryId}/words/${params.entryId}`
 
-  const entry = await awaitableDocStore<ActualDatabaseEntry>(entryPath)
-  const { error: firestore_error, initial_doc } = entry
-  if (firestore_error)
-    error(ResponseCodes.INTERNAL_SERVER_ERROR, firestore_error)
+  if (browser) {
+    const { entries } = await parent()
+    if (!get(entries.loading)) {
+      const entry = get(entries).find(entry => entry.id === params.entryId)
 
-  if (!initial_doc)
+      if (entry) {
+        return {
+          entry,
+          shallow: false,
+        }
+      }
+    }
+  }
+
+  const { supabase } = await parent()
+  const { data: entries, error: load_error } = await supabase
+    .from('materialized_entries_view')
+    .select()
+    .eq('id', params.entryId)
+
+  if (load_error)
+    error(ResponseCodes.INTERNAL_SERVER_ERROR, load_error)
+
+  const [entry] = entries
+
+  if (!entry || entry.deleted)
     redirect(ResponseCodes.MOVED_PERMANENTLY, `/${params.dictionaryId}`)
 
-  const { t } = await parent()
-  const entry_expanded = derived(entry, $entry => convert_and_expand_entry($entry, t))
-
   return {
-    entry: entry_expanded,
-    supa_entry: load_supa_entry(params.entryId),
+    entry,
     shallow: false,
   }
-}
-
-async function load_supa_entry(entry_id: string): Promise<{ data?: SupaEntry, error?: PostgrestError }> {
-  const supabase = getSupabase()
-  const { data, error: supaError } = await supabase
-    .from('entries_view')
-    .select()
-    .eq('id', entry_id)
-    .returns<SupaEntry[]>()
-
-  const supaEntry = data?.[0]
-  console.info({ supaEntry, supaError })
-  return { data: supaEntry, error: supaError }
 }

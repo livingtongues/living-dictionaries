@@ -1,5 +1,6 @@
 CREATE TABLE photos (
   id uuid primary key default uuid_generate_v4(),
+  -- added dictionary_id text NOT NULL REFERENCES dictionaries ON DELETE CASCADE,
   storage_path text NOT NULL,
   serving_url text NOT NULL,
   source text,
@@ -15,6 +16,7 @@ ALTER TABLE photos ENABLE ROW LEVEL SECURITY;
 
 CREATE TABLE videos (
   id uuid primary key default uuid_generate_v4(),
+  -- added dictionary_id text NOT NULL REFERENCES dictionaries ON DELETE CASCADE,
   storage_path text NOT NULL, -- made nullable and added hosted_elsewhere column
   source text,
   videographer text,
@@ -29,6 +31,7 @@ ALTER TABLE videos ENABLE ROW LEVEL SECURITY;
 
 CREATE TABLE audio (
   id uuid primary key default uuid_generate_v4(),
+  -- added dictionary_id text NOT NULL REFERENCES dictionaries ON DELETE CASCADE,
   storage_path text NOT NULL,
   source text,
   created_at timestamp with time zone DEFAULT now() NOT NULL,
@@ -41,8 +44,10 @@ CREATE TABLE audio (
 ALTER TABLE audio ENABLE ROW LEVEL SECURITY;
 
 CREATE TYPE gender AS ENUM ('m', 'f', 'o');
+
 CREATE TABLE speakers (
   id uuid primary key default uuid_generate_v4(),
+  -- added dictionary_id text NOT NULL REFERENCES dictionaries ON DELETE CASCADE,
   user_id uuid REFERENCES auth.users, -- only if speaker has an account
   name text NOT NULL,
   decade integer,

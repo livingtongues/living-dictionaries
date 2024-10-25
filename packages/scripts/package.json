@@ -14,7 +14,7 @@
   },
   "main": "index.ts",
   "scripts": {
-    "fetch-entries": "tsx migrate-to-supabase/fetch-entries.ts -e prod",
+    "run-migration": "tsx migrate-to-supabase/run-migration.ts -e prod",
     "migrate-users": "tsx migrate-to-supabase/auth.ts",
     "countAllEntries": "tsx countAllEntries.ts",
     "getEmails": "tsx refactor/get-email.ts -e prod",
@@ -24,18 +24,15 @@
     "importDictionary:dev:dry": "tsx import/import.ts --id tseltal",
     "importDictionary:dev:live": "tsx import/import.ts --id tseltal --live",
     "importDictionary:prod:live": "tsx import/import.ts --id tseltal -e prod --live",
-    "addDictionariesToIndex:dev": "tsx algolia/addDictionariesToIndex.ts dev",
-    "addDictionariesToIndex:prod": "tsx algolia/addDictionariesToIndex.js prod",
-    "updateIndex": "tsx algolia/updateIndex.ts -e prod",
-    "test": "vitest"
+    "test": "vitest",
+    "test:migration": "vitest --config ./vitest.config.migration.ts"
   },
   "devDependencies": {
-    "@living-dictionaries/functions": "workspace:^0.0.1",
     "@living-dictionaries/site": "workspace:^0.0.1",
-    "@living-dictionaries/types": "^1.0.0",
+    "@living-dictionaries/types": "workspace:^1.0.0",
     "@supabase/supabase-js": "^2.38.4",
     "@types/node": "^18.11.18",
-    "@types/pg": "^8.10.9",
+    "@types/pg": "^8.11.8",
     "@types/stream-chain": "^2.1.0",
     "@types/stream-json": "^1.7.7",
     "algoliasearch": "^4.11.0",
@@ -50,8 +47,8 @@
     "pg": "^8.11.3",
     "stream-chain": "^2.2.5",
     "stream-json": "^1.8.0",
-    "tsx": "^4.7.1",
+    "tsx": "^4.19.0",
     "typescript": "~5.1.6",
-    "vitest": "^1.4.0"
+    "vitest": "^2.1.3"
   }
 }

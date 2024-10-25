@@ -11,8 +11,9 @@ export default defineConfig({
     poolOptions: {
       threads: {
         singleThread: true,
-      }
+      },
     },
+    fileParallelism: false,
     include: ['src/db-tests/**/*.test.ts'],
   },
 })
