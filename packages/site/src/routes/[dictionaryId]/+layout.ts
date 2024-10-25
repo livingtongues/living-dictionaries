@@ -69,9 +69,10 @@ export const load: LayoutLoad = async ({ params: { dictionaryId }, parent }) => 
     const sentences = cached_data_store({ table: 'sentences', dictionary_id, supabase })
 
     // maybe need to make data null and then just subscribe to data and when it is an array (empty or with items) then create_index so that if the entries are refreshed or updated the index can be updated
-    const unsub = entries.loading.subscribe((loading) => {
+    const unsub = entries.loading.subscribe(async (loading) => {
       if (!loading) {
-        create_index(get(entries), dictionary_id)
+        await create_index(get(entries), dictionary_id)
+        entries.search_index_updated.set(true)
         unsub()
       }
     })

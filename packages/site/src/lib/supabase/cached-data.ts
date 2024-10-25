@@ -23,9 +23,10 @@ export function cached_data_store<Name extends keyof (Database['public']['Tables
   const store_error = writable<string>(null)
   const loading = writable(true)
   const order_field = 'updated_at'
+  const search_index_updated = writable(false)
 
   if (!browser)
-    return { subscribe: data.subscribe, error: store_error, loading, refresh: null, updated_item, reset: null }
+    return { subscribe: data.subscribe, error: store_error, loading, refresh: null, updated_item, reset: null, search_index_updated }
 
   const { dictionary_id, table, materialized_view, supabase, log } = options
 
@@ -149,5 +150,5 @@ export function cached_data_store<Name extends keyof (Database['public']['Tables
     await get_data_from_cache_then_db()
   }
 
-  return { subscribe: data.subscribe, error: store_error, loading, refresh: () => get_data_from_cache_then_db(true), updated_item, reset }
+  return { subscribe: data.subscribe, error: store_error, loading, refresh: () => get_data_from_cache_then_db(true), updated_item, reset, search_index_updated }
 }
