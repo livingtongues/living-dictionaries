@@ -1,31 +1,13 @@
 import type { EntryView } from '@living-dictionaries/types'
-import { type Orama, type SearchParams as OramaSearchParams, create, insertMultiple, remove, search, update } from '@orama/orama'
+import { type Orama, type SearchParams as OramaSearchParams, create, insertMultiple, load, remove, search, update } from '@orama/orama'
 import { expose } from 'comlink'
 import type { QueryParams } from './types'
 import { augment_entry_for_search } from './augment-entry-for-search'
+import { entries_index_schema } from './entries-schema'
 
-export const entries_index_schema = {
-  _lexeme: 'string[]', // all orthographies as they are and a simplified version (diacritics stripped and ipa characters replaced with common keyboard characters to make easier to type)
-  _glosses: 'string[]', // includes all glosses for all senses
-  // _sentences: 'string[]', // includes all sentences in all languages for all senses
-  _other: 'string[]', // phonetic, notes, scientific_names, sources, interlinearization,morphology, plural_form,
+type EntriesIndex = Orama<typeof entries_index_schema>
 
-  // Filters
-  _dialects: 'string[]', // underscored
-  _parts_of_speech: 'string[]', // augmented
-  _semantic_domains: 'string[]', // augmented
-  _speakers: 'string[]', // augmented
-  has_audio: 'boolean',
-  has_image: 'boolean',
-  has_video: 'boolean',
-  has_speaker: 'boolean',
-  has_noun_class: 'boolean',
-  has_plural_form: 'boolean',
-  has_part_of_speech: 'boolean',
-  has_semantic_domain: 'boolean',
-} as const
-
-let orama_index: Record<string, Orama<typeof entries_index_schema>>
+let orama_index: Record<string, EntriesIndex>
 
 async function create_index(entries: EntryView[], dictionary_id: string) {
   console.time('Augment Entries Time')
@@ -33,13 +15,13 @@ async function create_index(entries: EntryView[], dictionary_id: string) {
   console.timeEnd('Augment Entries Time')
 
   console.time('Index Entries Time')
-  const new_index = await create({ schema: entries_index_schema })
+  const new_index = create({ schema: entries_index_schema })
   await insertMultiple(new_index, entries_augmented_for_search)
   orama_index = { [dictionary_id]: new_index }
   console.timeEnd('Index Entries Time')
 }
 
-function get_index(dictionary_id: string): Promise<Orama<typeof entries_index_schema>> {
+function get_index(dictionary_id: string): Promise<EntriesIndex> {
   return new Promise((resolve) => {
     const index = orama_index?.[dictionary_id]
     if (index) return resolve(index)
@@ -54,10 +36,30 @@ function get_index(dictionary_id: string): Promise<Orama<typeof entries_index_sc
   })
 }
 
-async function load_cached_index(_dictionary_id: string) {
-  // const cached_index = null
-  // if (!orama_index)
-  // orama_index = cached_index
+async function load_cached_index(dictionary_id: string) {
+  const url = `https://index.livingdictionaries.app/indexes/${dictionary_id}.json`
+  try {
+    console.info('loading cached index')
+    const response = await fetch(url)
+    if (!response.ok) {
+      console.info('cached index not found')
+      return
+    }
+    const serialized_json = await response.text()
+    console.info('got cached index')
+    const deserialized = JSON.parse(serialized_json)
+    console.info('parsed cached index')
+    const cached_index = create({ schema: entries_index_schema })
+    load(cached_index, deserialized)
+    console.info('loaded cached index')
+
+    if (!orama_index?.[dictionary_id]) {
+      orama_index = { [dictionary_id]: cached_index }
+      console.info('Search index loaded Clouflare')
+    }
+  } catch (err) {
+    console.error('Error loading cached index', err)
+  }
 }
 
 // async function update_index_entries(entries: EntryView[]) {

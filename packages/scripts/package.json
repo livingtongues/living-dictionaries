@@ -14,6 +14,7 @@
   },
   "main": "index.ts",
   "scripts": {
+    "create-indexes": "tsx create-indexes/add-to-cloudflare.ts",
     "run-migration": "tsx migrate-to-supabase/run-migration.ts -e prod",
     "migrate-users": "tsx migrate-to-supabase/auth.ts",
     "countAllEntries": "tsx countAllEntries.ts",
@@ -28,8 +29,10 @@
     "test:migration": "vitest --config ./vitest.config.migration.ts"
   },
   "devDependencies": {
+    "@aws-sdk/client-s3": "^3.679.0",
     "@living-dictionaries/site": "workspace:^0.0.1",
     "@living-dictionaries/types": "workspace:^1.0.0",
+    "@orama/orama": "3.0.1",
     "@supabase/supabase-js": "^2.38.4",
     "@types/node": "^18.11.18",
     "@types/pg": "^8.11.8",
@@ -44,7 +47,7 @@
     "firebase": "^10.9.0",
     "firebase-admin": "^12.0.0",
     "node-fetch": "^3.1.0",
-    "pg": "^8.11.3",
+    "pg": "^8.13.1",
     "stream-chain": "^2.2.5",
     "stream-json": "^1.8.0",
     "tsx": "^4.19.0",

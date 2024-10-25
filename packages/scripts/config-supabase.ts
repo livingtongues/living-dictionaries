@@ -3,10 +3,21 @@ import { createClient } from '@supabase/supabase-js'
 import type { Database } from '@living-dictionaries/types'
 import * as dotenv from 'dotenv'
 import './record-logs'
+import { program } from 'commander'
 
-// TODO: change to .env.development and .env.production
-dotenv.config({ path: '.env.supabase' }) // local project variables
-// dotenv.config({ path: '.env.production.supabase' }) // production project variables
+program
+  .option('-e, --environment [dev/prod]', 'Firebase/Supabase Project', 'dev')
+  .allowUnknownOption() // because config is shared by multiple scripts
+  .parse(process.argv)
+
+export const environment = program.opts().environment === 'prod' ? 'prod' : 'dev'
+console.log(`Supabase running on ${environment}`)
+
+if (environment === 'dev') {
+  dotenv.config({ path: '.env.supabase' }) // local project variables
+} else {
+  dotenv.config({ path: '.env.production.supabase' })
+}
 
 export const admin_supabase = createClient<Database>(process.env.PUBLIC_SUPABASE_API_URL, process.env.SUPABASE_SERVICE_ROLE_KEY)
 export const anon_supabase = createClient<Database>(process.env.PUBLIC_SUPABASE_API_URL, process.env.PUBLIC_SUPABASE_ANON_KEY)
@@ -16,18 +27,21 @@ class DB {
   private pool: PG.Pool
 
   private config: PG.PoolConfig = {
-    user: 'postgres',
-    host: '127.0.0.1',
-    database: 'postgres',
-    password: 'postgres',
-    port: 54322,
-
-    // user: 'postgres.actkqboqpzniojhgtqzw',
-    // host: 'aws-0-us-west-1.pooler.supabase.com',
-    // database: 'postgres',
-    // password: '**',
-    // port: 6543,
-
+    ...(environment === 'dev'
+      ? {
+          user: 'postgres',
+          host: '127.0.0.1',
+          database: 'postgres',
+          password: 'postgres',
+          port: 54322,
+        }
+      : {
+          user: 'postgres.actkqboqpzniojhgtqzw',
+          host: 'aws-0-us-west-1.pooler.supabase.com',
+          database: 'postgres',
+          password: process.env.PUBLIC_SUPABASE_DB_PASSWORD,
+          port: 6543,
+        }),
     max: 10,
     idleTimeoutMillis: 30000,
     connectionTimeoutMillis: 5000,
@@ -58,6 +72,3 @@ class DB {
 }
 
 export const postgres = new DB()
-
-const environment = 'dev'
-console.log(`Supabase running on ${environment}`)
