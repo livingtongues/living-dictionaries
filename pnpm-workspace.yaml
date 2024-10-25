@@ -1,4 +1,5 @@
 packages:
-  - "packages/*"
-  - "e2e"
-  - "!packages/ids-import"
+  - 'packages/*'
+  - e2e
+  - '!packages/ids-import'
+  - '!packages/functions'

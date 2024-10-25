@@ -3,6 +3,8 @@
   "type": "module",
   "scripts": {
     "dev": "pnpm --filter=site dev",
+    "prod": "pnpm --filter=site prod",
+    "mixed": "pnpm --filter=site mixed",
     "dev:open": "pnpm --filter=site dev --open",
     "build": "pnpm --filter=site build",
     "preview": "pnpm --filter=site preview",
@@ -19,22 +21,22 @@
     "lint:inspect": "npx @eslint/config-inspector",
     "lint:inspect-future": "eslint --inspect-config",
     "reset-db": "pnpm --filter=site reset-db",
-    "generate-types": "supabase gen types typescript --local --schema public > packages/site/src/lib/supabase/generated.types.ts",
+    "generate-types": "supabase gen types typescript --local --schema public > packages/types/supabase/generated.types.ts",
     "check-packages": "pnpm update --interactive --recursive --latest"
   },
   "devDependencies": {
-    "@antfu/eslint-config": "^2.12.1",
-    "@typescript-eslint/eslint-plugin": "6.21.0",
-    "eslint": "^8.56.0",
-    "eslint-plugin-svelte": "^2.33.2",
+    "@antfu/eslint-config": "^2.27.3",
+    "@typescript-eslint/eslint-plugin": "8.3.0",
+    "eslint": "^9.9.1",
+    "eslint-plugin-svelte": "^2.43.0",
     "eslint-plugin-svelte-stylistic": "^0.0.4",
-    "lint-staged": "^13.2.2",
-    "simple-git-hooks": "^2.11.0",
-    "start-server-and-test": "^2.0.3",
+    "lint-staged": "^15.2.9",
+    "simple-git-hooks": "^2.11.1",
+    "start-server-and-test": "^2.0.5",
     "supabase": "^1.145.4",
     "svelte": "^4.2.12",
     "typescript": "~5.1.6",
-    "vitest": "^1.4.0"
+    "vitest": "^2.1.3"
   },
   "simple-git-hooks": {
     "pre-commit": "pnpm lint-staged"

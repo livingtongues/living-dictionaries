@@ -1,8 +1,8 @@
 <script lang="ts">
-  import { page } from '$app/stores'
-  import { semanticDomains } from '$lib/mappings/semantic-domains'
   import type { SelectOption } from '$lib/components/ui/array/select-options.interface'
   import ModalEditableArray from '$lib/components/ui/array/ModalEditableArray.svelte'
+  import { page } from '$app/stores'
+  import { semanticDomains } from '$lib/mappings/semantic-domains'
 
   export let semantic_domain_keys: string[]
   export let write_in_semantic_domains: string[]
@@ -14,7 +14,7 @@
   $: translated_semantic_domain_options = semanticDomains.map(domain => ({
     value: domain.key,
     name: $page.data.t({ dynamicKey: `sd.${domain.key}`, fallback: domain.name }),
-  })) as SelectOption[]
+  })) satisfies SelectOption[]
 
   function deleteWriteIn(domain: string) {
     if (!confirm(`${$page.data.t('misc.delete')}?`)) return

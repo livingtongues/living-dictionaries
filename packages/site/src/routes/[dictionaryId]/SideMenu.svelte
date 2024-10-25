@@ -3,10 +3,9 @@
   import { page } from '$app/stores'
 
   export let dictionary: IDictionary
+  export let entry_count: number
   export let on_close: () => void
-  export let show_local_search: boolean
   export let is_manager: boolean
-  export let search_index_ready: boolean
 </script>
 
 <div class="md:hidden">
@@ -19,37 +18,21 @@
 </div>
 <div on:click={on_close}>
   <a
-    class:active={$page.url.pathname.match(/entry|entries\//)}
-    href={`/${dictionary.id}/entries/list`}>
+    class:active={$page.url.pathname.match(/entry|entries/)}
+    href={`/${dictionary.id}/entries`}>
     <span class="i-fa-solid-list" />
     <span class="font-medium mx-2">
       {$page.data.t('dictionary.entries')}
     </span>
     <span class="flex-grow" />
-    <span
-      class="inline-block py-1 px-2 leading-none text-xs font-semibold
-        text-gray-700 bg-gray-300 rounded-full">
-      {new Intl.NumberFormat().format(dictionary.entryCount || 0)}
-    </span>
-  </a>
-  {#if show_local_search}
-    <a
-      class:active={$page.url.pathname.match(/entries-local/)}
-      href={`/${dictionary.id}/entries-local`}>
-      <span class="i-fa-solid-list" />
-      <span class="font-medium mx-2">
-        {$page.data.t('dictionary.entries')} (local)
+    {#if entry_count}
+      <span
+        class="inline-block py-1 px-2 leading-none text-xs font-semibold
+          text-gray-700 bg-gray-300 rounded-full">
+        {new Intl.NumberFormat().format(entry_count)}
       </span>
-      <span class="flex-grow" />
-      {#if search_index_ready}
-        <span
-          class="inline-block py-1 px-2 leading-none text-xs font-semibold
-            text-gray-700 bg-gray-300 rounded-full">
-          {new Intl.NumberFormat().format(dictionary.entryCount || 0)}
-        </span>
-      {/if}
-    </a>
-  {/if}
+    {/if}
+  </a>
   {#if !is_manager}
     <a
       href={`/${dictionary.id}/synopsis`}

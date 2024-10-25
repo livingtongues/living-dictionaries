@@ -1,6 +1,6 @@
 // these values are never used - this could be simplified to not use enums
 
-enum CustomPrintFields {
+enum _CustomPrintFields {
   // lexeme always shows
   gloss = 'Glosses',
   local_orthography = 'Alternate Orthographies', // lo, lo2, lo3, lo4, lo5
@@ -15,7 +15,7 @@ enum CustomPrintFields {
 
 // displayed with labels, no custom logic
 export enum StandardPrintFields {
-  semantic_domains = 'Semantic Domains', // sdn || sd
+  semantic_domains = 'Semantic Domains',
   interlinearization = 'Interlinearization',
   morphology = 'Morphology',
   plural_form = 'Plural Form',
@@ -25,8 +25,8 @@ export enum StandardPrintFields {
   notes = 'Notes',
 }
 
-type PrintFieldKeys = keyof typeof CustomPrintFields | keyof typeof StandardPrintFields;
+type PrintFieldKeys = keyof typeof _CustomPrintFields | keyof typeof StandardPrintFields
 
 export type IPrintFields = {
   [key in PrintFieldKeys]?: boolean;
-};
+}

@@ -1,41 +1,41 @@
 <script lang="ts">
-  import { page } from '$app/stores';
-  import { onMount } from 'svelte';
-  import { flip } from 'svelte/animate';
-  import { fade } from 'svelte/transition';
-  import { Slideover } from 'svelte-pieces';
-  import type { IColumn } from '@living-dictionaries/types';
-  import ColumnTitle from './ColumnTitle.svelte';
+  import { onMount } from 'svelte'
+  import { flip } from 'svelte/animate'
+  import { fade } from 'svelte/transition'
+  import { Slideover } from 'svelte-pieces'
+  import type { IColumn } from '@living-dictionaries/types'
+  import ColumnTitle from './ColumnTitle.svelte'
+  import { page } from '$app/stores'
 
-  export let selectedColumn: IColumn;
-  $: ({preferred_table_columns} = $page.data)
+  export let selectedColumn: IColumn
+  $: ({ preferred_table_columns } = $page.data)
 
-  let selectedColumnElement: HTMLElement;
-  let widthToDisplay: string;
-  let widthDisplayTimeout;
+  let selectedColumnElement: HTMLElement
+  let widthToDisplay: string
+  let widthDisplayTimeout
 
   onMount(() => {
     if (selectedColumnElement) {
       selectedColumnElement.scrollIntoView({
         behavior: 'smooth',
         block: 'center',
-      });
+      })
     }
-  });
+  })
 
   function showWidth(e) {
-    const {target} = e;
-    widthToDisplay = target.value;
-    clearTimeout(widthDisplayTimeout);
+    const { target } = e
+    widthToDisplay = target.value
+    clearTimeout(widthDisplayTimeout)
     widthDisplayTimeout = setTimeout(() => {
-      widthToDisplay = null;
-    }, 2000);
+      widthToDisplay = null
+    }, 2000)
   }
 
   function move(i: number, direction: 'up' | 'down') {
-    const columnBeingMoved = $preferred_table_columns.splice(i, 1);
-    $preferred_table_columns.splice(direction === 'up' ? i - 1 : i + 1, 0, ...columnBeingMoved);
-    $preferred_table_columns = $preferred_table_columns; // trigger Svelte reactivity;
+    const columnBeingMoved = $preferred_table_columns.splice(i, 1)
+    $preferred_table_columns.splice(direction === 'up' ? i - 1 : i + 1, 0, ...columnBeingMoved)
+    $preferred_table_columns = $preferred_table_columns // trigger Svelte reactivity;
   }
 </script>
 

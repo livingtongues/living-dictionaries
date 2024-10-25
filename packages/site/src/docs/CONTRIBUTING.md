@@ -3,14 +3,11 @@
 ## Set Up Dev Environment
 
 - Install the recommended VSCode extensions.
-- Install [pnpm](https://pnpm.io/) globaly using `npm install -g pnpm` if you don't have it yet. 
+- Install [pnpm](https://pnpm.io/) globaly using `npm install -g pnpm` if you don't have it yet.
 - Then install dependencies with `pnpm i` and run `pnpm dev`. Each command will start up a Vite dev server which will give you a link to open on localhost. Changes will hot reload almost instantly (consider using auto-save if you want to).
-
-Note that you will need to ask for our dev Mapbox and Firebase API keys or bring your own by adding `PUBLIC_mapboxAccessToken=...` and
-`PUBLIC_FIREBASE_CONFIG=...` to a `.env.local` file on the root level.
+...notes outdated and incomplete
 
 \*_Note that on localhost you will not see the live (prod) site's data, but rather the data from the dev database, which allows us to develop and make changes freely without worrying about deleting or corrupting important data._
-
 
 ## Git methodology
 

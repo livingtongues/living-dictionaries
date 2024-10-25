@@ -2,11 +2,8 @@
 // import type { BaseUser } from '$lib/supabase/user'
 // import type { AuthResponse } from '@supabase/supabase-js'
 import type { Readable } from 'svelte/store'
-import type { collectionStore } from 'sveltefirets'
-import type { ISpeaker } from '@living-dictionaries/types'
-import type { DbOperations } from '$lib/dbOperations'
-
-// import type { Supabase } from '$lib/supabase/database.types'
+import type { LayoutData as DictionaryLayoutData } from './routes/[dictionaryId]/$types'
+import type { Supabase } from '$lib/supabase/database.types'
 
 declare global {
   namespace App {
@@ -18,12 +15,19 @@ declare global {
       t: import('$lib/i18n/types.ts').TranslateFunction
       user: Readable<import('@living-dictionaries/types').IUser>
       admin: Readable<number>
-      // supabase: Supabase
       // authResponse: AuthResponse
 
       // From dictionary layout so all optional
-      dbOperations?: DbOperations
-      speakers?: Awaited<ReturnType<typeof collectionStore<ISpeaker>>>
+      supabase?: Supabase
+      dictionary?: DictionaryLayoutData['dictionary']
+      dbOperations?: DictionaryLayoutData['dbOperations']
+      url_from_storage_path?: DictionaryLayoutData['url_from_storage_path']
+      entries?: DictionaryLayoutData['entries']
+      speakers?: DictionaryLayoutData['speakers']
+      dialects?: DictionaryLayoutData['dialects']
+      photos?: DictionaryLayoutData['photos']
+      videos?: DictionaryLayoutData['videos']
+      sentences?: DictionaryLayoutData['sentences']
     }
     interface PageState {
       entry_id?: string
