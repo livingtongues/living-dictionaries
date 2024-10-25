@@ -71,12 +71,12 @@ export const load: LayoutLoad = async ({ params: { dictionaryId }, parent }) => 
     // maybe need to make data null and then just subscribe to data and when it is an array (empty or with items) then create_index so that if the entries are refreshed or updated the index can be updated
     const unsub = entries.loading.subscribe((loading) => {
       if (!loading) {
-        create_index(get(entries))
+        create_index(get(entries), dictionary_id)
         unsub()
       }
     })
 
-    entries.updated_item.subscribe(entry => entry && update_index_entry(entry))
+    entries.updated_item.subscribe(entry => entry && update_index_entry(entry, dictionary_id))
 
     async function reset_caches() {
       await Promise.all([

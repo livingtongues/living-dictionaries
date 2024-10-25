@@ -1,5 +1,5 @@
 import type { EntryView } from '@living-dictionaries/types'
-import { type Orama, type SearchParams as OramaSearchParams, create, insertMultiple, remove, search, update, updateMultiple } from '@orama/orama'
+import { type Orama, type SearchParams as OramaSearchParams, create, insertMultiple, remove, search, update } from '@orama/orama'
 import { expose } from 'comlink'
 import type { QueryParams } from './types'
 import { augment_entry_for_search } from './augment-entry-for-search'
@@ -25,9 +25,9 @@ export const entries_index_schema = {
   has_semantic_domain: 'boolean',
 } as const
 
-let orama_index: Orama<typeof entries_index_schema>
+let orama_index: Record<string, Orama<typeof entries_index_schema>>
 
-async function create_index(entries: EntryView[]) {
+async function create_index(entries: EntryView[], dictionary_id: string) {
   console.time('Augment Entries Time')
   const entries_augmented_for_search = entries.map(augment_entry_for_search)
   console.timeEnd('Augment Entries Time')
@@ -35,18 +35,20 @@ async function create_index(entries: EntryView[]) {
   console.time('Index Entries Time')
   const new_index = await create({ schema: entries_index_schema })
   await insertMultiple(new_index, entries_augmented_for_search)
-  orama_index = new_index
+  orama_index = { [dictionary_id]: new_index }
   console.timeEnd('Index Entries Time')
 }
 
-function get_index(): Promise<typeof orama_index> {
+function get_index(dictionary_id: string): Promise<Orama<typeof entries_index_schema>> {
   return new Promise((resolve) => {
-    if (orama_index) return resolve(orama_index)
+    const index = orama_index?.[dictionary_id]
+    if (index) return resolve(index)
 
     const interval = setInterval(() => {
-      if (orama_index) {
+      const index = orama_index?.[dictionary_id]
+      if (index) {
         clearInterval(interval)
-        resolve(orama_index)
+        resolve(index)
       }
     }, 50)
   })
@@ -58,13 +60,13 @@ async function load_cached_index(_dictionary_id: string) {
   // orama_index = cached_index
 }
 
-async function update_index_entries(entries: EntryView[]) {
-  const index = await get_index()
-  await updateMultiple(index, entries.map(({ id }) => id), entries.map(augment_entry_for_search))
-}
+// async function update_index_entries(entries: EntryView[]) {
+//   const index = await get_index()
+//   await updateMultiple(index, entries.map(({ id }) => id), entries.map(augment_entry_for_search))
+// }
 
-async function update_index_entry(entry: EntryView) {
-  const index = await get_index()
+async function update_index_entry(entry: EntryView, dictionary_id: string) {
+  const index = await get_index(dictionary_id)
   if (entry.deleted)
     await remove(index, entry.id)
   else
@@ -80,7 +82,7 @@ export interface SearchEntriesOptions {
 
 async function search_entries({ query_params, entries_per_page, page_index, dictionary_id }: SearchEntriesOptions) {
   console.info('searching for', query_params.query)
-  const index = await get_index()
+  const index = await get_index(dictionary_id)
 
   const lexemeSortBy = (a, b) => {
     const a_lx = a[2]._lexeme[0] || 'zz'
@@ -183,7 +185,7 @@ async function search_entries({ query_params, entries_per_page, page_index, dict
 
 export const api = {
   create_index,
-  update_index_entries,
+  // update_index_entries,
   update_index_entry,
   search_entries,
   load_cached_index,
