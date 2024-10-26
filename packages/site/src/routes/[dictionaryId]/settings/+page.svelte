@@ -12,10 +12,10 @@
   import Image from '$lib/components/image/Image.svelte'
   import AddImage from '$lib/components/image/AddImage.svelte'
   import { goto } from '$app/navigation'
-  import { MINIMUM_ABOUT_LENGTH } from '$lib/constants'
 
   export let data
-  $: ({ dictionary, admin, is_manager, updateDictionary, add_gloss_language, remove_gloss_language, add_featured_image, about_content } = data)
+  $: ({ dictionary, admin, is_manager, updateDictionary, add_gloss_language, remove_gloss_language, add_featured_image, about_is_too_short } = data)
+
 </script>
 
 <div style="max-width: 700px">
@@ -102,7 +102,7 @@
         await updateDictionary({ public: false })
       } else if ($admin) {
         await updateDictionary({ public: true })
-      } else if (!$about_content || $about_content.about?.length < MINIMUM_ABOUT_LENGTH) {
+      } else if (await about_is_too_short()) {
         alert($page.data.t('about.message'))
         goto(`/${$dictionary.id}/about`)
       } else {

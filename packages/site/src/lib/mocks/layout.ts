@@ -1,5 +1,5 @@
 import { readable } from 'svelte/store'
-import type { IAbout, IDictionary } from '@living-dictionaries/types'
+import type { IDictionary } from '@living-dictionaries/types'
 import type { awaitableDocStore } from 'sveltefirets'
 import type { LayoutData } from '../../routes/$types'
 import type { LayoutData as DictionaryLayoutData } from '../../routes/[dictionaryId]/$types'
@@ -32,7 +32,7 @@ export const justMockDictionaryLayoutData = {
   dbOperations: logDbOperations,
   load_citation: null,
   load_partners: null,
-  about_content: readable(null) as Awaited<ReturnType<typeof awaitableDocStore<IAbout>>>,
+  // about_content: readable(null) as Awaited<ReturnType<typeof awaitableDocStore<IAbout>>>,
   // about_content: readable({
   //   about: 'this is just a small example',
   // }) as Awaited<ReturnType<typeof awaitableDocStore<IAbout>>>,

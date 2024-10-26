@@ -23,7 +23,7 @@
   let search_time: string
   let search_results_count: number
   $: number_of_pages = (() => {
-    const count = search_results_count || $entries.length
+    const count = search_results_count ?? $entries.length
     if (!count) return 0
     return Math.ceil(count / entries_per_page)
   })()
@@ -64,13 +64,14 @@
   <div class="flex">
     <div class="flex-grow w-0 relative">
       <div class="print:hidden italic text-xs text-gray-500 mb-1 flex">
-        {#if search_results_count !== 0}
-          {#if typeof search_results_count === 'number'}
+        {#if typeof search_results_count !== 'undefined'}
+          {#if search_results_count > 0}
             {$page.data.t('dictionary.entries')}: {current_page_index * entries_per_page + 1}-{Math.min((current_page_index + 1) * entries_per_page, search_results_count)} /
             {search_results_count}
             ({search_time.includes('μs') ? '<1ms' : search_time})
-          {:else if $entries.length}
+          {:else}
             {$page.data.t('dictionary.entries')}:
+            0 /
             {$entries.length}
           {/if}
           {#if dev || $admin}
@@ -90,7 +91,7 @@
         {/if}
       </div>
       {#if $entries_error}
-        <div class="text-red text-sm">Loading error: {$entries_error}</div>
+        <div class="text-red text-sm">Entries loading error: {$entries_error} (reload page if results are not working properly.)</div>
       {/if}
       <View entries={page_entries} page_data={data} />
       <Pagination bind:page_from_url={$search_params.page} {number_of_pages} can_edit={$can_edit} add_entry={dbOperations.insert_entry} />

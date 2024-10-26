@@ -8,14 +8,17 @@
   import type { RequestAccessBody } from '$api/email/request_access/+server'
   import enBase from '$lib/i18n/locales/en.json'
   import { post_request } from '$lib/helpers/get-post-requests'
-  import { MINIMUM_ABOUT_LENGTH } from '$lib/constants'
 
   export let subject: Subjects = undefined
-  $: ({ dictionary, user, about_content } = $page.data)
-  $: if ($dictionary && subject === 'public_dictionary' && (!$about_content || $about_content.about?.length < MINIMUM_ABOUT_LENGTH)) {
-    close()
-    alert($page.data.t('about.message'))
-    goto(`/${$dictionary.id}/about`)
+  $: ({ dictionary, user, about_is_too_short } = $page.data)
+  $: if ($dictionary && subject === 'public_dictionary') warn_if_about_too_short()
+
+  async function warn_if_about_too_short() {
+    if (await about_is_too_short()) {
+      close()
+      alert($page.data.t('about.message'))
+      goto(`/${$dictionary.id}/about`)
+    }
   }
 
   const subjects = {
