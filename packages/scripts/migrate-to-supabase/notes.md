@@ -1,10 +1,10 @@
 # Migrate Entries and Speakers from Firestore to Supabase
 
-- get exports working again
 - Monday: Delayed email letting everyone know editing is available again
 - migrate dictionaries and setup materialized view with entry counts
 - get semantic domains working in filters (currently just filters out entries without a semantic domain)
 - build new Orama indexes every hour after materialized view is updated
+- get exports working again
 
 - If an audio file does not have a speaker still let it play even though speaker needs chosen
 - ensure all auth users are brought over
@@ -30,6 +30,7 @@
 - 1st manual backup was before any action
 - 11:37 at 50, 13:54 at 100 = 2 min 17 seconds for 50 entries, 387000/50 = 7740 chunks, 7740 * 2:17 = 17492 minutes = 12 days (1440 minutes in a day), 18:30 at 200
 - `pnpm -F scripts run-migration`
+- relocate tip: Google's Magic Image serving url reference: https://medium.com/google-cloud/uploading-resizing-and-serving-images-with-google-cloud-platform-ca9631a2c556
 
 ### No lexeme
 no lx for 0svukh699MsB4svuCDdO in ho

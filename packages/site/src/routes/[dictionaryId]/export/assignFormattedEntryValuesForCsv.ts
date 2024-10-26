@@ -1,7 +1,7 @@
-import type { EntryView, IPartOfSpeech, Tables } from '@living-dictionaries/types'
+import type { EntryView, PartOfSpeech, Tables } from '@living-dictionaries/types'
 
 export function find_part_of_speech_abbreviation(
-  global_parts_of_speech: IPartOfSpeech[],
+  global_parts_of_speech: PartOfSpeech[],
   part_of_speech: string,
 ): string {
   return global_parts_of_speech.find(({ enName }) => enName === part_of_speech)?.enAbbrev
