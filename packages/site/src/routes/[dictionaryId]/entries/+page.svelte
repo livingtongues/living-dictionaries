@@ -23,7 +23,7 @@
   let search_time: string
   let search_results_count: number
   $: number_of_pages = (() => {
-    const count = search_results_count || $entries.length
+    const count = search_results_count ?? $entries.length
     if (!count) return 0
     return Math.ceil(count / entries_per_page)
   })()
@@ -64,13 +64,14 @@
   <div class="flex">
     <div class="flex-grow w-0 relative">
       <div class="print:hidden italic text-xs text-gray-500 mb-1 flex">
-        {#if search_results_count !== 0}
-          {#if typeof search_results_count === 'number'}
+        {#if typeof search_results_count !== 'undefined'}
+          {#if search_results_count > 0}
             {$page.data.t('dictionary.entries')}: {current_page_index * entries_per_page + 1}-{Math.min((current_page_index + 1) * entries_per_page, search_results_count)} /
             {search_results_count}
             ({search_time.includes('μs') ? '<1ms' : search_time})
-          {:else if $entries.length}
+          {:else}
             {$page.data.t('dictionary.entries')}:
+            0 /
             {$entries.length}
           {/if}
           {#if dev || $admin}
