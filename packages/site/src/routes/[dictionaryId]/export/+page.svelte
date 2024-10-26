@@ -1,23 +1,156 @@
 <script lang="ts">
+  import { Button, ShowHide } from 'svelte-pieces'
+  import DownloadMedia from './DownloadMedia.svelte'
+  import { type EntryForCSV, formatCsvEntries, getCsvHeaders } from './prepareEntriesForCsv'
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte'
+  import Progress from '$lib/export/Progress.svelte'
   import { page } from '$app/stores'
+  import { downloadObjectsAsCSV } from '$lib/export/csv'
+  import { translate_part_of_speech, translate_part_of_speech_abbreviation, translate_semantic_domain_keys } from '$lib/transformers/translate_keys_to_current_language'
 
   export let data
-  $: ({ is_manager, dictionary } = data)
+  $: ({ is_manager, dictionary, admin, entries, speakers, dialects, photos } = data)
+  $: ({ loading: entries_loading } = entries)
+  $: ({ loading: speakers_loading } = speakers)
+
+  let includeImages = false
+  let includeAudio = false
+
+  let entryHeaders: EntryForCSV = {}
+  let formattedEntries: EntryForCSV[] = []
+  const entriesWithImages: EntryForCSV[] = []
+  const entriesWithAudio: EntryForCSV[] = []
+
+  let ready = false
+
+  $: if (!$entries_loading && !$speakers_loading) {
+    const translated_entries = $entries.map((entry) => {
+      const senses = entry.senses.map(sense => ({
+        ...sense,
+        parts_of_speech: sense.parts_of_speech.map(pos => translate_part_of_speech(pos, $page.data.t)),
+        parts_of_speech_abbreviations: sense.parts_of_speech.map(pos => translate_part_of_speech_abbreviation(pos, $page.data.t)), // TODO: this is not part of the EntryView type but we need it for the CSV export
+        semantic_domains: sense.semantic_domains.map(domain => translate_semantic_domain_keys(domain, $page.data.t)),
+        photo_urls: sense.photo_ids.map(photo_id => $photos.find(photo => photo.id === photo_id).serving_url), // TODO: use these urls and convert using friendlyName(...)
+      }))
+
+      return {
+        ...entry,
+        dialects: entry.dialect_ids.map(dialect_id => $dialects.find(dialect => dialect.id === dialect_id).name.default),
+        senses,
+      }
+    })
+    entryHeaders = getCsvHeaders(translated_entries, $dictionary)
+    formattedEntries = formatCsvEntries(translated_entries, $speakers)
+    console.info({ translated_entries, entryHeaders })
+    // entriesWithImages = formattedEntries.filter(entry => entry.image_filename)
+    // entriesWithAudio = formattedEntries.filter(entry => entry.sound_filename)
+
+    ready = true
+  }
 </script>
 
 <h3 class="text-xl font-semibold mb-4">{$page.data.t('misc.export')}</h3>
-{#if $is_manager}
+{#if !$admin}
   The export feature is temporarily disabled while we make some database improvements. Please check back later.
+{:else}
+  Admins: the below page will not work but it shows for you until Diego has opportunity to get it working again with exporting multiple senses.
+{/if}
+{#if $is_manager}
+  <div class="mb-6">
+    <div>
+      <i class="far fa-check" />
+      {$page.data.t('export.csv_data')})
+    </div>
+    <div
+      class="flex items-center mt-2 {entriesWithImages.length
+        ? ''
+        : 'opacity-50 cursor-not-allowed'}">
+      <input
+        disabled={!entriesWithImages.length}
+        id="images"
+        type="checkbox"
+        bind:checked={includeImages} />
+      <label for="images" class="mx-2 block leading-5 text-gray-900">
+        {$page.data.t('misc.images')} ({entriesWithImages.length})</label>
+    </div>
+    {#if !ready}
+      <p class="text-xs italic text-orange-400 p-2">
+        {$page.data.t('export.checking_images')}
+      </p>
+    {:else if !entriesWithImages.length}
+      <p class="text-sm text-red-700 p-3">
+        {$page.data.t('export.no_images')}
+      </p>
+    {/if}
+
+    <div
+      class="flex items-center mt-2 {entriesWithAudio.length
+        ? ''
+        : 'opacity-50 cursor-not-allowed'}">
+      <input id="audio" type="checkbox" bind:checked={includeAudio} />
+      <label for="audio" class="mx-2 block leading-5 text-gray-900">
+        {$page.data.t('entry_field.audio')} ({entriesWithAudio.length})</label>
+    </div>
+    {#if !ready}
+      <p class="text-xs italic text-orange-400 p-2">
+        {$page.data.t('export.checking_audios')}
+      </p>
+    {:else if !entriesWithAudio.length}
+      <p class="text-sm text-red-700 p-3">
+        {$page.data.t('export.no_audios')}
+      </p>
+    {/if}
+  </div>
+
+  {#if includeImages || includeAudio}
+    <ShowHide let:show let:toggle>
+      {#if !show}
+        <Button onclick={toggle} form="filled">
+          {$page.data.t('export.download_csv')}
+          {#if includeImages}
+            + {$page.data.t('misc.images')}
+          {/if}
+          {#if includeAudio}
+            + {$page.data.t('entry_field.audio')}
+          {/if}
+        </Button>
+      {:else}
+        <DownloadMedia
+          dictionary={$dictionary}
+          {entryHeaders}
+          finalizedEntries={formattedEntries}
+          entriesWithImages={includeImages ? entriesWithImages : []}
+          entriesWithAudio={includeAudio ? entriesWithAudio : []}
+          on:completed={toggle}
+          let:progress>
+          <Progress {progress} />
+          {#if progress < 1}
+            <Button onclick={toggle} color="red">{$page.data.t('misc.cancel')}</Button>
+          {:else}
+            <Button onclick={toggle}>{$page.data.t('misc.reset')}</Button>
+          {/if}
+        </DownloadMedia>
+      {/if}
+    </ShowHide>
+  {:else}
+    <Button
+      loading={!formattedEntries.length}
+      onclick={() => {
+        downloadObjectsAsCSV(entryHeaders, formattedEntries, $dictionary.id)
+      }}
+      form="filled">
+      {$page.data.t('export.download_csv')}
+    </Button>
+  {/if}
 {:else}
   <p>{$page.data.t('export.availability')}</p>
 {/if}
 
-<!-- {#if $admin}
+{#if $admin}
   <div class="mt-5">
     <Button form="filled" href="entries/print">{$page.data.t('export.download_pdf')}</Button>
   </div>
-{/if} -->
+{/if}
 
 <SeoMetaTags
   title={$page.data.t('misc.export')}

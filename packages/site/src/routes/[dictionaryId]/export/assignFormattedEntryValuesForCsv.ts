@@ -1,7 +1,4 @@
-import type { IPartOfSpeech } from '@living-dictionaries/types'
-
-type ISpeaker = any
-type ExpandedEntry = any
+import type { EntryView, IPartOfSpeech, Tables } from '@living-dictionaries/types'
 
 export function find_part_of_speech_abbreviation(
   global_parts_of_speech: IPartOfSpeech[],
@@ -11,10 +8,10 @@ export function find_part_of_speech_abbreviation(
 }
 
 export function get_first_speaker_from_first_sound_file(
-  entry: ExpandedEntry,
-  speakers: ISpeaker[],
-): ISpeaker {
-  return speakers.find(speaker => speaker?.id === entry.sound_files?.[0].speaker_ids?.[0])
+  entry: EntryView,
+  speakers: Tables<'speakers_view'>[],
+) {
+  return speakers.find(speaker => speaker?.id === entry.audios?.[0].speaker_ids?.[0])
 }
 
 export function display_speaker_gender(speaker_gender: string): string {
