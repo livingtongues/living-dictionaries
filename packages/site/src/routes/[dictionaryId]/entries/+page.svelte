@@ -91,7 +91,7 @@
         {/if}
       </div>
       {#if $entries_error}
-        <div class="text-red text-sm">Loading error: {$entries_error}</div>
+        <div class="text-red text-sm">Entries loading error: {$entries_error} (reload page if results are not working properly.)</div>
       {/if}
       <View entries={page_entries} page_data={data} />
       <Pagination bind:page_from_url={$search_params.page} {number_of_pages} can_edit={$can_edit} add_entry={dbOperations.insert_entry} />

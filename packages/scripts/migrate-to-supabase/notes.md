@@ -1,12 +1,10 @@
 # Migrate Entries and Speakers from Firestore to Supabase
 
-- build new Orama indexes every hour after materialized view is updated
-- optimize entries loading error handling
+- get exports working again
 - Monday: Delayed email letting everyone know editing is available again
 - migrate dictionaries and setup materialized view with entry counts
 - get semantic domains working in filters (currently just filters out entries without a semantic domain)
-- get exports working again
-- rework about content loading in dictionary layout page
+- build new Orama indexes every hour after materialized view is updated
 
 - If an audio file does not have a speaker still let it play even though speaker needs chosen
 - ensure all auth users are brought over
@@ -15,6 +13,8 @@
 - get failed tests working again
 - bring back in variants and tests that relied on old forms of test data
 - save backup files to cloud bucket instead of github repo (Cloudflare R2 has 10GB free/mo)
+- optimize entries loading error handling
+
 - clean up old history data in content_updates
 - look at deletedEntries to see if they should be saved somewhere
 - cleaner format for content-updates and refactor current ones
