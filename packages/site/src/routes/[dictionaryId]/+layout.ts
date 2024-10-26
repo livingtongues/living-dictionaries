@@ -3,7 +3,7 @@ import type { Citation, IAbout, IDictionary, Partner } from '@living-dictionarie
 import { awaitableDocStore, docExists, firebaseConfig, getCollection, getDocument } from 'sveltefirets'
 import { type Readable, derived, get } from 'svelte/store'
 import type { LayoutLoad } from './$types'
-import { ResponseCodes } from '$lib/constants'
+import { MINIMUM_ABOUT_LENGTH, ResponseCodes } from '$lib/constants'
 import { browser } from '$app/environment'
 import { dbOperations } from '$lib/dbOperations'
 import { create_index, load_cached_index, search_entries, update_index_entry } from '$lib/search'
@@ -90,8 +90,11 @@ export const load: LayoutLoad = async ({ params: { dictionaryId }, parent }) => 
       ])
     }
 
-    // TODO: make non-blocking
-    const about_content = await awaitableDocStore<IAbout>(`dictionaries/${dictionaryId}/info/about`)
+    async function about_is_too_short() {
+      const about_content = await getDocument<IAbout>(`dictionaries/${dictionaryId}/info/about`)
+      const about_length = about_content.about?.length || 0
+      return about_length < MINIMUM_ABOUT_LENGTH
+    }
 
     return {
       supabase,
@@ -105,12 +108,12 @@ export const load: LayoutLoad = async ({ params: { dictionaryId }, parent }) => 
       videos,
       sentences,
       reset_caches,
-      about_content,
       default_entries_per_page,
       search_entries,
       is_manager,
       is_contributor,
       can_edit,
+      about_is_too_short,
       load_partners: async () => await getCollection<Partner>(`dictionaries/${dictionaryId}/partners`),
       load_citation: async () => await getDocument<Citation>(`dictionaries/${dictionaryId}/info/citation`),
     }
