@@ -118,7 +118,7 @@
 
 {#if DICTIONARIES_WITH_VARIANTS.includes($dictionary.id)}
   <EntryField
-    value={sense.variant?.default}
+    value={sense.variant.default}
     field="variant"
     {can_edit}
     display={$page.data.t('entry_field.variant')}
