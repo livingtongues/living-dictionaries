@@ -106,12 +106,13 @@ async function search_entries({ query_params, entries_per_page, page_index, dict
     term: query_params.query,
     limit: entries_per_page,
     offset: page_index * entries_per_page,
-    threshold: 2, // Levenshtein edit distance from 'help' to 'holds' is 3 for example (change 2 letters and add 1)
+    tolerance: query_params.tolerance || 1, // Levenshtein edit distance from 'help' to 'holds' is 3 for example (change 2 letters and add 1), https://docs.orama.com/open-source/usage/search/introduction#typo-tolerance
     boost: {
-      _lexeme: 1.5,
-      _glosses: 1.2,
+      _lexeme: 6,
+      _glosses: 2,
     },
-    sortBy,
+    // threshold: 0.8,
+    ...query_params.query ? { } : { sortBy },
     facets: {
       _dialects: {
         limit: 10,
