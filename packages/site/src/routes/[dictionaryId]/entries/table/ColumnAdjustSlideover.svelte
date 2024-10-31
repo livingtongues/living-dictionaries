@@ -96,7 +96,7 @@
               </button>
             </div>
             <!-- Source range input shouldn't be here because we need to show complete sources and they can be very long -->
-            {#if column.field != 'sources'}
+            {#if column.field !== 'sources'}
               <input
                 class="w-full"
                 type="range"
