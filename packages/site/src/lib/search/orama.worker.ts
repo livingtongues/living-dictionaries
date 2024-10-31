@@ -113,7 +113,7 @@ async function search_entries({ query_params, entries_per_page, page_index, dict
     },
     // threshold: 0.8,
     ...query_params.query ? { } : { sortBy },
-    facets: {
+    facets: { // to generate applicable filters options in the side menu
       _dialects: {
         limit: 10,
       },
@@ -159,7 +159,7 @@ async function search_entries({ query_params, entries_per_page, page_index, dict
         false: true,
       },
     },
-    where: {
+    where: { // to actually filter
       ...query_params.dialects ? { _dialects: query_params.dialects } : {},
       ...query_params.parts_of_speech ? { _parts_of_speech: query_params.parts_of_speech } : {},
       ...query_params.semantic_domains ? { _semantic_domains: query_params.semantic_domains } : {},

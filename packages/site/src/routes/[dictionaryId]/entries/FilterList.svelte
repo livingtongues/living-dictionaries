@@ -2,7 +2,7 @@
   import { type QueryParamStore, ShowHide } from 'svelte-pieces'
   import { slide } from 'svelte/transition'
   import { page } from '$app/stores'
-  import { restore_spaces_from_underscores } from '$lib/search/augment-entry-for-search'
+  import { restore_spaces_periods_from_underscores } from '$lib/search/augment-entry-for-search'
   import type { FilterListKeys, QueryParams } from '$lib/search/types'
 
   export let search_params: QueryParamStore<QueryParams>
@@ -24,8 +24,9 @@
     $search_params[search_param_key] = $search_params[search_param_key].filter((existing_item: string) => existing_item !== item)
   }
 
-  function make_item_readable(item: string, keys_to_values: Record<string, string>) {
-    return keys_to_values?.[item] || restore_spaces_from_underscores(item)
+  function make_item_readable(_item: string, keys_to_values: Record<string, string>) {
+    const item = restore_spaces_periods_from_underscores(_item)
+    return keys_to_values?.[item] || item
   }
 </script>
 

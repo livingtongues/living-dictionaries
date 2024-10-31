@@ -6,6 +6,7 @@
   import FilterList from './FilterList.svelte'
   import type { QueryParams } from '$lib/search/types'
   import { page } from '$app/stores'
+  import { restore_spaces_periods_from_underscores } from '$lib/search/augment-entry-for-search'
 
   export let search_params: QueryParamStore<QueryParams>
   export let show_mobile_filters = false
@@ -38,7 +39,8 @@
             {search_params}
             search_param_key="parts_of_speech"
             values={result_facets._parts_of_speech.values}
-            keys_to_values={Object.keys(result_facets._parts_of_speech.values).reduce((acc, key) => {
+            keys_to_values={Object.keys(result_facets._parts_of_speech.values).reduce((acc, _key) => {
+              const key = restore_spaces_periods_from_underscores(_key)
               acc[key] = $page.data.t({ dynamicKey: `ps.${key}`, fallback: key })
               return acc
             }, {})}
@@ -49,7 +51,8 @@
             {search_params}
             search_param_key="semantic_domains"
             values={result_facets._semantic_domains.values}
-            keys_to_values={Object.keys(result_facets._semantic_domains.values).reduce((acc, key) => {
+            keys_to_values={Object.keys(result_facets._semantic_domains.values).reduce((acc, _key) => {
+              const key = restore_spaces_periods_from_underscores(_key)
               acc[key] = $page.data.t({ dynamicKey: `sd.${key}`, fallback: key })
               return acc
             }, {})}
