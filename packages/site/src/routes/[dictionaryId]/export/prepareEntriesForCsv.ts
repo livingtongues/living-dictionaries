@@ -28,6 +28,7 @@ export enum StandardEntryCSVFields {
   parts_of_speech_abbreviation = 'Part of Speech abbreviation', // TODO: this is now part of senses and is string[]
   parts_of_speech = 'Part of Speech', // TODO: this is now part of senses and is string[]
   image_filename = 'Image filename', // TODO: part of the 1st sense, additional sense can not yet have media
+  sound_source = 'Audio source',
   sound_filename = 'Audio filename',
   speaker_name = 'Speaker name',
   speaker_birthplace = 'Speaker birthplace',
@@ -71,8 +72,8 @@ export function formatCsvEntries(
       ...entry,
       notes: stripHTMLTags(entry.main.notes?.default),
       sources: entry.main.sources?.join(' | '),
-      sound_source: url_from_storage_path(entry.audios?.[0]?.storage_path), // TODO: use to pull audio down
-      sound_filename: friendlyName(entry, entry.audios?.[0]?.storage_path), // TODO: goal filename for user to find in zip
+      sound_source: entry.audios ? url_from_storage_path(entry.audios?.[0]?.storage_path) : null, // TODO: use to pull audio down
+      sound_filename: entry.audios ? friendlyName(entry, entry.audios?.[0]?.storage_path) : null, // TODO: goal filename for user to find in zip
       speaker_name: speaker?.name,
       speaker_birthplace: speaker?.birthplace,
       speaker_decade: decades[speaker?.decade],
