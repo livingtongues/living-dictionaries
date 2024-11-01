@@ -38,9 +38,9 @@ export function augment_entry_for_search(entry: EntryView) {
     // _sentences, // TODO: search these in a separate interface
     // Filters
     _dialects,
-    _parts_of_speech: _parts_of_speech.map(use_underscores_for_spaces),
-    _semantic_domains: _semantic_domains.map(use_underscores_for_spaces),
-    _speakers: _speakers.map(use_underscores_for_spaces),
+    _parts_of_speech: _parts_of_speech.map(use_underscores_for_spaces_periods),
+    _semantic_domains: _semantic_domains.map(use_underscores_for_spaces_periods),
+    _speakers,
     has_audio: !!entry.audios?.length,
     // has_sentences: !!entry.senses?.find(sense => sense.sentence_ids?.length), // not used yet
     has_image: !!entry.senses?.find(sense => sense.photo_ids?.length),
@@ -53,12 +53,16 @@ export function augment_entry_for_search(entry: EntryView) {
   }
 }
 
-function use_underscores_for_spaces(string: string) {
-  return string.replace(/ /g, '_')
+function use_underscores_for_spaces_periods(string: string) {
+  return string
+    .replace(/ /g, '_')
+    .replace(/\./g, '__')
 }
 
-export function restore_spaces_from_underscores(string: string) {
-  return string.replace(/_/g, ' ')
+export function restore_spaces_periods_from_underscores(string: string) {
+  return string
+    .replace(/__/g, '.')
+    .replace(/_/g, ' ')
 }
 
 const ipa_to_common_keyboard = {

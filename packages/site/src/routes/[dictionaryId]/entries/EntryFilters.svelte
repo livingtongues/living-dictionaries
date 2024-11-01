@@ -6,6 +6,7 @@
   import FilterList from './FilterList.svelte'
   import type { QueryParams } from '$lib/search/types'
   import { page } from '$app/stores'
+  import { restore_spaces_periods_from_underscores } from '$lib/search/augment-entry-for-search'
 
   export let search_params: QueryParamStore<QueryParams>
   export let show_mobile_filters = false
@@ -38,7 +39,8 @@
             {search_params}
             search_param_key="parts_of_speech"
             values={result_facets._parts_of_speech.values}
-            keys_to_values={Object.keys(result_facets._parts_of_speech.values).reduce((acc, key) => {
+            keys_to_values={Object.keys(result_facets._parts_of_speech.values).reduce((acc, _key) => {
+              const key = restore_spaces_periods_from_underscores(_key)
               acc[key] = $page.data.t({ dynamicKey: `ps.${key}`, fallback: key })
               return acc
             }, {})}
@@ -49,7 +51,8 @@
             {search_params}
             search_param_key="semantic_domains"
             values={result_facets._semantic_domains.values}
-            keys_to_values={Object.keys(result_facets._semantic_domains.values).reduce((acc, key) => {
+            keys_to_values={Object.keys(result_facets._semantic_domains.values).reduce((acc, _key) => {
+              const key = restore_spaces_periods_from_underscores(_key)
               acc[key] = $page.data.t({ dynamicKey: `sd.${key}`, fallback: key })
               return acc
             }, {})}
@@ -178,7 +181,41 @@
             count={result_facets.has_semantic_domain.values.false}
             label={`${$page.data.t('entry.does_not_exist')} ${$page.data.t('entry_field.semantic_domains')}`} />
         {/if}
+        <hr />
+        <h4 class="text-sm font-semibold uppercase text-gray-700 mt-1">Typo Tolerance</h4>
+        <input
+          class="w-full"
+          type="range"
+          value={$search_params.tolerance || 1}
+          on:input={(e) => {
+            // @ts-ignore
+            const { value } = e.target
+            $search_params.tolerance = value === '1' ? null : value
+          }}
+          min="0"
+          max="5"
+          step="1"
+          list="tickmarks" />
+
+        <datalist class="flex text-xs w-full px-.25 justify-between -mt-1" id="tickmarks">
+          <option value="0" label="0"></option>
+          <option value="1" label="1"></option>
+          <option value="2" label="2"></option>
+          <option value="3" label="3"></option>
+          <option value="4" label="4"></option>
+          <option value="5" label="5"></option>
+        </datalist>
       </div>
     {/if}
   </section>
 </ResponsiveSlideover>
+
+<style>
+  datalist option {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 1em;
+    height: 1em;
+  }
+</style>

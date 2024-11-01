@@ -1,11 +1,9 @@
 # Migrate Entries and Speakers from Firestore to Supabase
 
-- Monday: Delayed email letting everyone know editing is available again
-- migrate dictionaries and setup materialized view with entry counts
-- get semantic domains working in filters (currently just filters out entries without a semantic domain)
+- email letting everyone know editing is available again
 - build new Orama indexes every hour after materialized view is updated
+- migrate dictionaries and setup materialized view with entry counts
 - get exports working again
-
 - If an audio file does not have a speaker still let it play even though speaker needs chosen
 - ensure all auth users are brought over
 - Orama: replaceState in createQueryParamStore? look into improving the history to change for view and page changes but not for the others
@@ -25,6 +23,7 @@
 - Remove algolia keys from vercel
 - change old senses created_by/updated_by from firebase ids to user_ids and then connect relationships and change type to uuid
 - add 331 megabytes of content_updates to db, saved a  sql queries to avoid upgrading to the $25/month
+- think about find-replacing the "pn/v": "prenoun / preverb", and one other pos with dash when filtering by pos
 
 ## Notes
 - 1st manual backup was before any action
