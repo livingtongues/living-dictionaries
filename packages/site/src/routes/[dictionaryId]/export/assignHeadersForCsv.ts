@@ -14,6 +14,7 @@ export function get_local_orthography_headers(
   return headers
 }
 
+// TODO: this needs done separately for each sense position. So you need to see what the max semantic domain count for sense 1 is, and then also for sense 2, etc... depending on the max sense count for all entries
 export function get_semantic_domain_headers(entries: EntryView[]) {
   const headers: EntryForCSV = {}
 
@@ -48,7 +49,7 @@ export function get_example_sentence_headers(
   dictionary_name: string,
 ) {
   const headers: EntryForCSV = {}
-  // TODO
+  // TODO, the vernacular is now sentence.text?.default and the languages are at sentence.translation[bcp]
   const _vernacular_example_sentence_header = `Example sentence in ${dictionary_name}`
   if (gloss_languages) {
     gloss_languages.forEach((bcp) => {

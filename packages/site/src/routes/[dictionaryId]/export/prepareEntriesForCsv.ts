@@ -62,6 +62,7 @@ export function getCsvHeaders(entries: EntryView[], { alternateOrthographies, gl
 export function formatCsvEntries(
   entries: EntryView[],
   speakers: Tables<'speakers_view'>[],
+  url_from_storage_path: (path: string) => string,
 ): EntryForCSV[] {
   return entries.map((entry) => {
     const speaker = get_first_speaker_from_first_sound_file(entry, speakers)
@@ -70,7 +71,8 @@ export function formatCsvEntries(
       ...entry,
       notes: stripHTMLTags(entry.main.notes?.default),
       sources: entry.main.sources?.join(' | '),
-      sound_filename: friendlyName(entry, entry.audios?.[0]?.storage_path),
+      sound_source: url_from_storage_path(entry.audios?.[0]?.storage_path), // TODO: use to pull audio down
+      sound_filename: friendlyName(entry, entry.audios?.[0]?.storage_path), // TODO: goal filename for user to find in zip
       speaker_name: speaker?.name,
       speaker_birthplace: speaker?.birthplace,
       speaker_decade: decades[speaker?.decade],

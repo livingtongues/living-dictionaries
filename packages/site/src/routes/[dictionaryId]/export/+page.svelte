@@ -9,9 +9,12 @@
   import { translate_part_of_speech, translate_part_of_speech_abbreviation, translate_semantic_domain_keys } from '$lib/transformers/translate_keys_to_current_language'
 
   export let data
-  $: ({ is_manager, dictionary, admin, entries, speakers, dialects, photos } = data)
+  $: ({ is_manager, dictionary, admin, entries, speakers, dialects, photos, sentences, url_from_storage_path } = data)
   $: ({ loading: entries_loading } = entries)
   $: ({ loading: speakers_loading } = speakers)
+  $: ({ loading: dialects_loading } = dialects)
+  $: ({ loading: photos_loading } = photos)
+  $: ({ loading: sentences_loading } = sentences)
 
   let includeImages = false
   let includeAudio = false
@@ -23,38 +26,39 @@
 
   let ready = false
 
-  $: if (!$entries_loading && !$speakers_loading) {
+  $: if (!$entries_loading && !$speakers_loading && !$dialects_loading && !$photos_loading && !$sentences_loading) {
     const translated_entries = $entries.map((entry) => {
       const senses = entry.senses.map(sense => ({
         ...sense,
-        parts_of_speech: sense.parts_of_speech.map(pos => translate_part_of_speech(pos, $page.data.t)),
-        parts_of_speech_abbreviations: sense.parts_of_speech.map(pos => translate_part_of_speech_abbreviation(pos, $page.data.t)), // TODO: this is not part of the EntryView type but we need it for the CSV export
-        semantic_domains: sense.semantic_domains.map(domain => translate_semantic_domain_keys(domain, $page.data.t)),
-        photo_urls: sense.photo_ids.map(photo_id => $photos.find(photo => photo.id === photo_id).serving_url), // TODO: use these urls and convert using friendlyName(...)
+        parts_of_speech: sense.parts_of_speech?.map(pos => translate_part_of_speech(pos, $page.data.t)),
+        parts_of_speech_abbreviations: sense.parts_of_speech?.map(pos => translate_part_of_speech_abbreviation(pos, $page.data.t)), // TODO: this is not part of the EntryView type but we need it for the CSV export
+        semantic_domains: sense.semantic_domains?.map(domain => translate_semantic_domain_keys(domain, $page.data.t)),
+        photo_urls: sense.photo_ids?.map((photo_id) => {
+          const { storage_path } = $photos.find(photo => photo.id === photo_id)
+          return url_from_storage_path(storage_path)
+        }),
+        sentences: sense.sentence_ids?.map(sentence_id => $sentences.find(sentence => sentence.id === sentence_id)),
       }))
 
       return {
         ...entry,
-        dialects: entry.dialect_ids.map(dialect_id => $dialects.find(dialect => dialect.id === dialect_id).name.default),
+        dialects: entry.dialect_ids?.map(dialect_id => $dialects.find(dialect => dialect.id === dialect_id).name.default),
         senses,
       }
     })
     entryHeaders = getCsvHeaders(translated_entries, $dictionary)
-    formattedEntries = formatCsvEntries(translated_entries, $speakers)
+    formattedEntries = formatCsvEntries(translated_entries, $speakers, url_from_storage_path)
     console.info({ translated_entries, entryHeaders })
-    // entriesWithImages = formattedEntries.filter(entry => entry.image_filename)
-    // entriesWithAudio = formattedEntries.filter(entry => entry.sound_filename)
+    // entriesWithImages = formattedEntries.filter(entry => entry.image_filename) // TODO: bring these back in - but you can do this in whatever manner you decide best
+    // entriesWithAudio = formattedEntries.filter(entry => entry.sound_filename) // TODO: same
 
     ready = true
   }
 </script>
 
 <h3 class="text-xl font-semibold mb-4">{$page.data.t('misc.export')}</h3>
-{#if !$admin}
-  The export feature is temporarily disabled while we make some database improvements. Please check back later.
-{:else}
-  Admins: the below page will not work but it shows for you until Diego has opportunity to get it working again with exporting multiple senses.
-{/if}
+<pre>{JSON.stringify(formattedEntries, null, 2)}</pre>
+
 {#if $is_manager}
   <div class="mb-6">
     <div>
