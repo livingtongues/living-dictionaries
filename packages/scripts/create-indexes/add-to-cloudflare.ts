@@ -30,11 +30,7 @@ async function write_indexes() {
   try {
     const { data: dictionary_ids } = await admin_supabase.from('dictionaries').select('id').order('id')
 
-    // 2024-10-25 06:53:24.672152+00
-
     for (const { id: dictionary_id } of dictionary_ids) {
-      if (dictionary_id !== 'hmoob-dawb') continue
-
       const format = 'json'
       const folder = './search-indexes'
       const filename = `${dictionary_id}.${format}`
@@ -45,6 +41,28 @@ async function write_indexes() {
       // }
 
       current_dict = dictionary_id
+
+      // first modified 2024-10-25 06:53:24.672152+00
+      // next last modified 2024-11-01
+      const indexes_last_updated = '2024-11-01T00:00:00Z'
+      const { data: fresh_entries, error: fresh_entries_error } = await admin_supabase
+        .from('materialized_entries_view')
+        .select('id')
+        .limit(1)
+        .eq('dictionary_id', dictionary_id)
+        .is('deleted', null)
+        .order(order_field, { ascending: true })
+        .gt(order_field, indexes_last_updated)
+      if (fresh_entries_error) {
+        console.error({ fresh_entries_error })
+        throw fresh_entries_error
+      }
+      if (fresh_entries?.length) {
+        console.log(`${dictionary_id} being updated...`)
+      } else {
+        console.log(`   Skipping ${dictionary_id}, no fresh entries`)
+        continue
+      }
 
       const entries: EntryView[] = []
       let timestamp_from_which_to_fetch_data = '1970-01-01T00:00:00Z'
