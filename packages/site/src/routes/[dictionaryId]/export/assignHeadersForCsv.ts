@@ -1,4 +1,4 @@
-import type { EntryView } from '@living-dictionaries/types'
+import type { EntryView, SenseWithSentences } from '@living-dictionaries/types'
 import type { EntryForCSV } from './prepareEntriesForCsv'
 import { glossingLanguages } from '$lib/glosses/glossing-languages'
 
@@ -8,10 +8,19 @@ export function get_local_orthography_headers(
   const headers: EntryForCSV = {}
   if (alternate_orthographies) {
     alternate_orthographies.forEach((lo, index) => {
-      headers[`local_orthography_${index + 1}`] = lo
+      if (index > 0) {
+        headers[`localOrthography.${index + 1}`] = lo
+      } else {
+        // @ts-ignore
+        headers.localOrthography = lo
+      }
     })
   }
   return headers
+}
+
+export function get_sense_headers(senses: SenseWithSentences[]) {
+  console.info(JSON.stringify(senses))
 }
 
 // TODO: this needs done separately for each sense position. So you need to see what the max semantic domain count for sense 1 is, and then also for sense 2, etc... depending on the max sense count for all entries
