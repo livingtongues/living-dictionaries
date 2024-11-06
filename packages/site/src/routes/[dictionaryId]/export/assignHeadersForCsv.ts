@@ -19,27 +19,39 @@ export function get_local_orthography_headers(
   return headers
 }
 
-export function get_sense_headers(senses: SenseWithSentences[]) {
-  console.info(JSON.stringify(senses))
+export function get_sense_headers(entries: EntryView[]) {
+  let headers: EntryForCSV = {}
+
+  // Using for of loop for a slightly better performance
+  for (const entry of entries) {
+    console.info(`Entry: ${JSON.stringify(entry)}`)
+    headers = { ...headers, ...get_semantic_domain_headers(entry.senses) }
+    // for (const sense of entry.senses) {
+    //   console.log(`sense: ${sense}`)
+    // }
+  }
+
+  // if (max_senses_in_dictionary > 0) {
+  //   for (let index = 0; index <= max_senses_in_dictionary; index++) {
+  //     headers = { ...headers, ...get_semantic_domain_headers(entries[index].senses, index) }
+  //   }
+  // }
+
+  return headers
 }
 
-// TODO: this needs done separately for each sense position. So you need to see what the max semantic domain count for sense 1 is, and then also for sense 2, etc... depending on the max sense count for all entries
-export function get_semantic_domain_headers(entries: EntryView[]) {
+export function get_semantic_domain_headers(senses: SenseWithSentences[]) {
   const headers: EntryForCSV = {}
 
-  let max_semantic_domains = 0
-  for (const entry of entries) {
-    for (const sense of entry.senses || []) {
-      if (sense.semantic_domains) {
-        max_semantic_domains = Math.max(max_semantic_domains, sense.semantic_domains.length)
+  for (const [sense_index, sense] of Array.from(senses).entries()) {
+    if (sense.semantic_domains) {
+      // max_semantic_domains = Math.max(max_semantic_domains, sense.semantic_domains.length)
+      for (let index = 0; index < sense.semantic_domains.length; index++) {
+        headers[`${sense_index > 0 ? `s${sense_index + 1}.` : ''}semanticDomain${index > 0 ? `.${index + 1}` : ''}`] = `Semantic domain ${index + 1}`
       }
     }
   }
 
-  if (max_semantic_domains > 0) {
-    for (let index = 0; index < max_semantic_domains; index++)
-      headers[`semantic_domain_${index + 1}`] = `Semantic domain ${index + 1}`
-  }
   return headers
 }
 
