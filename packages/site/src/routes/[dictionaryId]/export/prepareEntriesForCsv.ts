@@ -27,11 +27,6 @@ export enum StandardEntryCSVFields {
   speakerHometown = 'Speaker birthplace',
   speakerAge = 'Speaker decade',
   speakerGender = 'Speaker gender',
-  // noun_class = 'Noun class', // TODO: this is now part of senses
-  // plural_form = 'Plural form', // TODO: this is now part of senses
-  // parts_of_speech_abbreviation = 'Part of Speech abbreviation', // TODO: this is now part of senses and is string[]
-  // parts_of_speech = 'Part of Speech', // TODO: this is now part of senses and is string[]
-  // image_filename = 'Image filename', // TODO: part of the 1st sense, additional sense can not yet have media
 }
 
 export type EntryForCSVKeys = keyof typeof StandardEntryCSVFields
@@ -43,17 +38,10 @@ export type EntryForCSV = {
 export function getCsvHeaders(entries: EntryView[], { alternateOrthographies }: IDictionary): EntryForCSV {
   const headers: EntryForCSV = { ...StandardEntryCSVFields }
 
-  // TODO: variants are on senses so this is no longer a one-off column
-  // const has_variants = entries.some(entry => entry.senses?.some(sense => sense.variant))
-  // if (has_variants)
-  //   headers.variant = 'Variant'
-
   return {
     ...headers,
     ...get_local_orthography_headers(alternateOrthographies),
     ...get_sense_headers(entries),
-    // TODO: these are all part of senses now, so they will need reworked according to each sense
-    // ...get_example_sentence_headers(glossLanguages, dictionaryName),
   }
 }
 
@@ -66,7 +54,14 @@ export function formatCsvEntries(
     const speaker = get_first_speaker_from_first_sound_file(entry, speakers)
 
     const formatted_entry = {
-      ...entry,
+      // ...entry,
+      ID: entry.id,
+      lexeme: entry.main.lexeme?.default,
+      phonetic: entry.main?.phonetic,
+      interlinearization: entry.main?.interlinearization,
+      morphology: entry.main?.morphology,
+      // @ts-ignore
+      dialects: entry?.dialects?.join(', '),
       notes: stripHTMLTags(entry.main.notes?.default),
       source: entry.main.sources?.join(' | '),
       soundSource: entry.audios ? url_from_storage_path(entry.audios?.[0]?.storage_path) : null, // TODO: use to pull audio down
