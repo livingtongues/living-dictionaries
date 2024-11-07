@@ -32,6 +32,20 @@ export function get_sense_headers(entries: EntryView[]) {
       //* get parts of speech headers
       // @ts-ignore
       headers = { ...headers, ...get_parts_of_speech_headers(sense.parts_of_speech_abbreviations, sense.parts_of_speech, sense_index) }
+      if (sense.noun_class) {
+        // @ts-ignore
+        headers.nounClass = 'Noun class'
+      }
+      if (sense.variant) {
+        // @ts-ignore
+        headers.variant = 'Variant'
+      }
+      if (sense.plural_form) {
+        // @ts-ignore
+        headers.pluralForm = 'Plural form'
+      }
+      //* get image files headers
+      headers = { ...headers, ...get_image_files_headers(sense?.photo_ids?.[0], sense_index) }
       //* get example sentences headers
       // @ts-ignore
       if (sense.sentences) {
@@ -92,4 +106,13 @@ export function get_example_sentence_headers(
   return headers
 }
 
-// TODO variant, noun class and plural form
+export function get_image_files_headers(image_storage_path: string, sense_index: number) {
+  const headers: EntryForCSV = {}
+
+  if (image_storage_path) {
+    headers[`${sense_index > 0 ? `s${sense_index + 1}.` : ''}photoFile`] = 'Image filename'
+    headers[`${sense_index > 0 ? `s${sense_index + 1}.` : ''}photoSource`] = 'Source of image'
+  }
+
+  return headers
+}

@@ -48,7 +48,7 @@
     })
     entryHeaders = getCsvHeaders(translated_entries, $dictionary)
     formattedEntries = formatCsvEntries(translated_entries, $speakers, url_from_storage_path)
-    console.info({ translated_entries, entryHeaders })
+    console.info({ translated_entries, entryHeaders, formattedEntries })
     // entriesWithImages = formattedEntries.filter(entry => entry.image_filename) // TODO: bring these back in - but you can do this in whatever manner you decide best
     // entriesWithAudio = formattedEntries.filter(entry => entry.sound_filename) // TODO: same
 
