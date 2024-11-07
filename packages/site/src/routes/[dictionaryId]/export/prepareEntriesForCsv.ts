@@ -51,10 +51,8 @@ export function getCsvHeaders(entries: EntryView[], { alternateOrthographies }: 
   return {
     ...headers,
     ...get_local_orthography_headers(alternateOrthographies),
-    // TODO: these 3 are all part of senses now, so they will need reworked according to each sense
     ...get_sense_headers(entries),
-    // ...get_semantic_domain_headers(entries),
-    // ...get_gloss_language_headers(glossLanguages),
+    // TODO: these are all part of senses now, so they will need reworked according to each sense
     // ...get_example_sentence_headers(glossLanguages, dictionaryName),
   }
 }

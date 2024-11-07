@@ -29,6 +29,15 @@ export function get_sense_headers(entries: EntryView[]) {
       headers = { ...headers, ...get_gloss_language_headers(sense.glosses, sense_index) }
       //* get semantic domains headers
       headers = { ...headers, ...get_semantic_domain_headers(sense.semantic_domains, sense_index) }
+      //* get parts of speech headers
+      // @ts-ignore
+      headers = { ...headers, ...get_parts_of_speech_headers(sense.parts_of_speech_abbreviations, sense.parts_of_speech, sense_index) }
+      //* get example sentences headers
+      // @ts-ignore
+      if (sense.sentences) {
+        // @ts-ignore
+        headers = { ...headers, ...get_example_sentence_headers(sense.sentences[0], sense_index) }
+      }
     }
   }
 
@@ -55,19 +64,32 @@ export function get_semantic_domain_headers(semantic_domains: string[], sense_in
   return headers
 }
 
-// export function get_example_sentence_headers(
-//   gloss_languages: string[],
-//   dictionary_name: string,
-// ) {
-//   const headers: EntryForCSV = {}
-//   // TODO, the vernacular is now sentence.text?.default and the languages are at sentence.translation[bcp]
-//   const _vernacular_example_sentence_header = `Example sentence in ${dictionary_name}`
-//   if (gloss_languages) {
-//     gloss_languages.forEach((bcp) => {
-//       headers[`${bcp}_example_sentence`] = `Example sentence in ${
-//         glossingLanguages[bcp].vernacularName || bcp
-//       }`
-//     })
-//   }
-//   return headers
-// }
+export function get_parts_of_speech_headers(parts_of_speech_abbreviations: string[], parts_of_speech: string[], sense_index: number) {
+  const headers: EntryForCSV = {}
+  if (parts_of_speech) {
+    for (let index = 0; index < parts_of_speech_abbreviations.length; index++) {
+      headers[`${sense_index > 0 ? `s${sense_index + 1}.` : ''}partOfSpeech${index > 0 ? `.${index + 1}` : ''}`] = `Part of speech ${index + 1} (abbreviation)`
+      headers[`${sense_index > 0 ? `s${sense_index + 1}.` : ''}partOfSpeech fullname${index > 0 ? `.${index + 1}` : ''}`] = `Part of speech ${index + 1}`
+    }
+  }
+  return headers
+}
+
+export function get_example_sentence_headers(
+  sentence: MultiString,
+  sense_index: number,
+) {
+  const headers: EntryForCSV = {}
+  if (sentence?.text) {
+    headers[`${sense_index > 0 ? `s${sense_index + 1}.` : ''}vernacular_exampleSentence`] = `Example sentence in ${sentence?.dictionary_id}`
+  }
+  if (sentence?.translation) {
+    Object.keys(sentence?.translation).forEach((bcp) => {
+      headers[`${sense_index > 0 ? `s${sense_index + 1}.` : ''}${bcp}_exampleSentence`] = `Example sentence in ${glossingLanguages[bcp].vernacularName || bcp}`
+    })
+  }
+
+  return headers
+}
+
+// TODO variant, noun class and plural form
