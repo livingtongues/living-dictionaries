@@ -32,18 +32,12 @@ export function get_sense_headers(entries: EntryView[]) {
       //* get parts of speech headers
       // @ts-ignore
       headers = { ...headers, ...get_parts_of_speech_headers(sense.parts_of_speech_abbreviations, sense.parts_of_speech, sense_index) }
-      if (sense.noun_class) {
-        // @ts-ignore
-        headers.nounClass = 'Noun class'
-      }
-      if (sense.variant) {
-        // @ts-ignore
-        headers.variant = 'Variant'
-      }
-      if (sense.plural_form) {
-        // @ts-ignore
-        headers.pluralForm = 'Plural form'
-      }
+      //* get noun class headers
+      headers = { ...headers, ...get_noun_class_headers(sense.noun_class, sense_index) }
+      //* get variant headers
+      headers = { ...headers, ...get_variant_headers(sense.variant, sense_index) }
+      //* get plural form headers
+      headers = { ...headers, ...get_plural_form_headers(sense.plural_form, sense_index) }
       //* get image files headers
       headers = { ...headers, ...get_image_files_headers(sense?.photo_ids?.[0], sense_index) }
       //* get example sentences headers
@@ -114,5 +108,27 @@ export function get_image_files_headers(image_storage_path: string, sense_index:
     headers[`${sense_index > 0 ? `s${sense_index + 1}.` : ''}photoSource`] = 'Source of image'
   }
 
+  return headers
+}
+
+export function get_noun_class_headers(noun_class: string, sense_index: number) {
+  const headers: EntryForCSV = {}
+  if (noun_class) {
+    headers[`${sense_index > 0 ? `s${sense_index + 1}.` : ''}nounClass`] = 'Noun class'
+  }
+  return headers
+}
+export function get_variant_headers(variant: MultiString, sense_index: number) {
+  const headers: EntryForCSV = {}
+  if (variant?.default) {
+    headers[`${sense_index > 0 ? `s${sense_index + 1}.` : ''}variant`] = 'Variant'
+  }
+  return headers
+}
+export function get_plural_form_headers(plural_form: MultiString, sense_index: number) {
+  const headers: EntryForCSV = {}
+  if (plural_form?.default) {
+    headers[`${sense_index > 0 ? `s${sense_index + 1}.` : ''}pluralForm`] = 'Plural form'
+  }
   return headers
 }

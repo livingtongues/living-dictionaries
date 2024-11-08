@@ -8,7 +8,7 @@ import {
   get_local_orthography_headers,
   get_sense_headers,
 } from './assignHeadersForCsv'
-import { display_speaker_gender, get_first_speaker_from_first_sound_file } from './assignFormattedEntryValuesForCsv'
+import { display_speaker_gender, format_senses, get_first_speaker_from_first_sound_file } from './assignFormattedEntryValuesForCsv'
 import { stripHTMLTags } from './stripHTMLTags'
 import { decades } from '$lib/components/media/ages'
 
@@ -53,6 +53,7 @@ export function formatCsvEntries(
   return entries.map((entry) => {
     const speaker = get_first_speaker_from_first_sound_file(entry, speakers)
 
+    // TODO change to an empty string for null or undefined values
     const formatted_entry = {
       // ...entry,
       ID: entry.id,
@@ -61,7 +62,7 @@ export function formatCsvEntries(
       interlinearization: entry.main?.interlinearization,
       morphology: entry.main?.morphology,
       // @ts-ignore
-      dialects: entry?.dialects?.join(', '),
+      dialects: entry.dialects?.join(', '),
       notes: stripHTMLTags(entry.main.notes?.default),
       source: entry.main.sources?.join(' | '),
       soundSource: entry.audios ? url_from_storage_path(entry.audios?.[0]?.storage_path) : null, // TODO: use to pull audio down
@@ -74,6 +75,7 @@ export function formatCsvEntries(
 
     return {
       ...formatted_entry,
+      ...format_senses(entry),
       // TODO: these are all part of senses now, so they will need reworked according to each sense
       // ...format_semantic_domains(entry),
       // ...format_gloss_languages(entry),
