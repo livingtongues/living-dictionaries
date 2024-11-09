@@ -1,5 +1,6 @@
 import type { EntryView, MultiString, PartOfSpeech, Tables } from '@living-dictionaries/types'
 import type { EntryForCSV } from './prepareEntriesForCsv'
+import { friendlyName } from './friendlyName'
 
 export function find_part_of_speech_abbreviation(
   global_parts_of_speech: PartOfSpeech[],
@@ -36,6 +37,12 @@ export function format_senses(entry: EntryView) {
     formatted_domains = { ...formatted_domains, ...format_variant(sense.variant, sense_index) }
     //* plural form
     formatted_domains = { ...formatted_domains, ...format_plural_form(sense.plural_form, sense_index) }
+    //* Images
+    // @ts-ignore
+    formatted_domains = { ...formatted_domains, ...format_image_files(entry, sense.photo_urls?.[0], sense_index) }
+    //* example sentences
+    // @ts-ignore
+    formatted_domains = { ...formatted_domains, ...format_example_sentence(sense.sentences?.[0], sense_index) }
   }
 
   return formatted_domains
@@ -48,6 +55,7 @@ export function format_glosses(glosses: MultiString, sense_index: number) {
       formatted_domains[`${sense_index > 0 ? `s${sense_index + 1}.` : ''}${bcp}_gloss`] = value
     })
   }
+
   return formatted_domains
 }
 
@@ -91,6 +99,35 @@ export function format_plural_form(plural_form: MultiString, sense_index: number
     formatted_domains[`${sense_index > 0 ? `s${sense_index + 1}.` : ''}pluralForm`] = plural_form.default
   }
   return formatted_domains
+}
+
+export function format_image_files(entry: EntryView, image_storage_path: string, sense_index: number) {
+  const formatted_domains: EntryForCSV = {}
+
+  if (image_storage_path) {
+    formatted_domains[`${sense_index > 0 ? `s${sense_index + 1}.` : ''}photoFile`] = friendlyName(entry, image_storage_path)
+    formatted_domains[`${sense_index > 0 ? `s${sense_index + 1}.` : ''}photoSource`] = image_storage_path
+  }
+
+  return formatted_domains
+}
+
+export function format_example_sentence(
+  sentence: MultiString,
+  sense_index: number,
+) {
+  const headers: EntryForCSV = {}
+  if (sentence?.text) {
+    // @ts-ignore
+    headers[`${sense_index > 0 ? `s${sense_index + 1}.` : ''}vernacular_exampleSentence`] = sentence.text?.default
+  }
+  if (sentence?.translation) {
+    Object.keys(sentence?.translation).forEach((bcp) => {
+      headers[`${sense_index > 0 ? `s${sense_index + 1}.` : ''}${bcp}_exampleSentence`] = sentence.translation?.[bcp]
+    })
+  }
+
+  return headers
 }
 // export function format_semantic_domains(
 //   entry: ExpandedEntry,

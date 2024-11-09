@@ -24,3 +24,9 @@ test('friendlyName simplifies complicated glosses and strips out non a-z charact
     friendlyName({ id: '1234', senses: [{ glosses: { en: 'How was your day?' } }] }, 'e3j3jsi.jpg'),
   ).toBe('1234_How_was_your_day.jpg')
 })
+
+test('friendlyName removes all queries after the extension', () => {
+  expect(
+    friendlyName({ id: '1234', senses: [{ glosses: { en: 'end' } }] }, 'e3j3jsi.jpg?alt=media'),
+  ).toBe('1234_end.jpg')
+})
