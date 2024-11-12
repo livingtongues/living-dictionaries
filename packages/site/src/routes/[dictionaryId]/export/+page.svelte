@@ -21,8 +21,8 @@
 
   let entryHeaders: EntryForCSV = {}
   let formattedEntries: EntryForCSV[] = []
-  const entriesWithImages: EntryForCSV[] = []
-  const entriesWithAudio: EntryForCSV[] = []
+  let entriesWithImages: EntryForCSV[] = []
+  let entriesWithAudio: EntryForCSV[] = []
 
   let ready = false
 
@@ -49,15 +49,15 @@
     entryHeaders = getCsvHeaders(translated_entries, $dictionary)
     formattedEntries = formatCsvEntries(translated_entries, $speakers, url_from_storage_path)
     console.info({ translated_entries, entryHeaders, formattedEntries })
-    // entriesWithImages = formattedEntries.filter(entry => entry.image_filename) // TODO: bring these back in - but you can do this in whatever manner you decide best
-    // entriesWithAudio = formattedEntries.filter(entry => entry.sound_filename) // TODO: same
+    // @ts-ignore
+    entriesWithImages = formattedEntries.filter(entry => entry?.photoSource)
+    entriesWithAudio = formattedEntries.filter(entry => entry?.soundSource)
 
     ready = true
   }
 </script>
 
 <h3 class="text-xl font-semibold mb-4">{$page.data.t('misc.export')}</h3>
-<pre>{JSON.stringify(formattedEntries, null, 2)}</pre>
 
 {#if $is_manager}
   <div class="mb-6">
