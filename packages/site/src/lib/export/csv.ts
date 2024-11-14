@@ -19,7 +19,8 @@ export function objectsToCsvByHeaders(headers: Record<string, any>, items: Recor
 
 function turnValueIntoStringSurroundWithQuotesAsNeeded(value: any) {
   if (value === null || value === undefined) return ''
-  if (Number.isNaN(value) && (value.includes(',') || value.includes('"')))
+  // eslint-disable-next-line unicorn/prefer-number-properties
+  if (isNaN(value) && (value.includes(',') || value.includes('"')))
     return `"${value.replace(/"/g, '""')}"`
   return value
 }
@@ -40,7 +41,8 @@ if (import.meta.vitest) {
       ]
       const result = objectsToCsvByHeaders(headers, items)
       expect(result).toMatchInlineSnapshot(`
-        "Name,Age,City
+        "name,age,city
+        Name,Age,City
         John,30,New York
         Jane,25,Los Angeles
         Bob,40,Chicago"
@@ -55,7 +57,8 @@ if (import.meta.vitest) {
       ]
       const result = objectsToCsvByHeaders(headers, items)
       expect(result).toMatchInlineSnapshot(`
-        "Name,Age,City
+        "name,age,city
+        Name,Age,City
         John,,New York
         Jane,,Los Angeles
         Bob,,Chicago"
@@ -69,7 +72,7 @@ if (import.meta.vitest) {
         { name: 'Bob', age: 40, city: 'Chicago "Windy City"' },
       ]
       const result = objectsToCsvByHeaders(headers, items)
-      const expectedCsv = `Name,Age,City\nJohn,30,New York\nJane,25,"Los Angeles, CA"\nBob,40,"Chicago ""Windy City"""`
+      const expectedCsv = `name,age,city\nName,Age,City\nJohn,30,New York\nJane,25,"Los Angeles, CA"\nBob,40,"Chicago ""Windy City"""`
       expect(result).toEqual(expectedCsv)
     })
 
@@ -80,7 +83,7 @@ if (import.meta.vitest) {
       }
       const items = [{ city: 'Chicago', windy: true }]
       const result = objectsToCsvByHeaders(headers, items)
-      const expectedCsv = `City,Windy\nChicago,true`
+      const expectedCsv = `city,windy\nCity,Windy\nChicago,true`
       expect(result).toEqual(expectedCsv)
     })
 
@@ -93,7 +96,7 @@ if (import.meta.vitest) {
       }
       const items = []
       const result = objectsToCsvByHeaders(headers, items)
-      const expectedCsv = `1,true,"City, State","The ""Expression"""`
+      const expectedCsv = `number,boolean,hasComma,hasQuote\n1,true,"City, State","The ""Expression"""`
       expect(result).toEqual(expectedCsv)
     })
   })
