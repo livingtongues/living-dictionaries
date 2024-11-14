@@ -1,7 +1,7 @@
 // import type {
 //   ExpandedEntry,
 //   IDictionary,
-//   IPartOfSpeech,
+//   PartOfSpeech,
 //   ISpeaker,
 // } from '@living-dictionaries/types'
 // import { StandardEntryCSVFields, formatCsvEntries, getCsvHeaders } from './prepareEntriesForCsv'
@@ -17,7 +17,7 @@
 //       gender: 'm',
 //     },
 //   ]
-//   const partsOfSpeech: IPartOfSpeech[] = [{ enAbbrev: 'n', enName: 'noun' }] // TODO: after updated expanded entries to include abbreviations, this will no longer be needed in prepareEntriesForCsv
+//   const partsOfSpeech: PartOfSpeech[] = [{ enAbbrev: 'n', enName: 'noun' }] // TODO: after updated expanded entries to include abbreviations, this will no longer be needed in prepareEntriesForCsv
 
 //   test('everything', () => {
 //     const dictionary: IDictionary = {

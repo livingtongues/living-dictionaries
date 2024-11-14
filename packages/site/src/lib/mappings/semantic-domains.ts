@@ -1,6 +1,6 @@
-import type { ISemanticDomain } from '@living-dictionaries/types';
+import type { SemanticDomain } from '@living-dictionaries/types'
 
-export const semanticDomains: ISemanticDomain[] = [
+export const semanticDomains: SemanticDomain[] = [
   { key: '1', name: 'Universe and the natural world' },
   { key: '1.1', name: 'Sky, weather and climate' },
   { key: '1.2', name: 'Earth, geology and landscape' },
@@ -70,4 +70,4 @@ export const semanticDomains: ISemanticDomain[] = [
   { key: '10.7', name: 'Ideophones, Expressives & Onomatopoeia' },
   { key: '10.8', name: 'Classifiers' },
   { key: '10.9', name: 'Pro-forms' },
-];
+]

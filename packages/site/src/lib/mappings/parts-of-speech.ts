@@ -1,6 +1,6 @@
-import type { IPartOfSpeech } from '@living-dictionaries/types';
+import type { PartOfSpeech } from '@living-dictionaries/types'
 
-export const partsOfSpeech: IPartOfSpeech[] = [
+export const partsOfSpeech: PartOfSpeech[] = [
   { enAbbrev: 'n', enName: 'noun' },
   { enAbbrev: 'pro', enName: 'pronoun' },
   { enAbbrev: 'v', enName: 'verb' },
@@ -96,7 +96,7 @@ export const partsOfSpeech: IPartOfSpeech[] = [
   // { unofficial: true, enAbbrev: 'inal.n', enName: 'inalienable noun' },
   // { unofficial: true, enAbbrev: 'rel.n', enName: 'relational noun' },
   // { unofficial: true, enAbbrev: 'v.n', enName: 'verbal noun' },
-];
+]
 
 export const mayanPOS = [
   'sustantivo generalmente no poseido',
@@ -111,14 +111,14 @@ export const mayanPOS = [
   'adverbio de negación',
   'adverbios de cantidad',
   'sustantivo complejo',
-  //TODO to review
+  // TODO to review
   'término de parentesco',
   'número',
   'tiempo',
   'marcador de tiempo',
   'marcador de cantidad',
   'derivación posicional',
-];
+]
 
 export const mayanDictionaries = [
   'achi',
@@ -139,4 +139,4 @@ export const mayanDictionaries = [
   'qanjobal',
   'tzutujil',
   'uspanteko',
-];
+]

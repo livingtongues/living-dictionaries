@@ -1,6 +1,5 @@
-// Primary purpose is to give a readable way to dispatch database updates, the left is the readable, the right is the database value
-// Secondary purpose is i18n entry field keys
-export enum EntryFields {
+// eslint-disable-next-line unused-imports/no-unused-vars
+enum EntryFields {
   lexeme = 'lx',
   phonetic = 'ph',
   notes = 'nt',

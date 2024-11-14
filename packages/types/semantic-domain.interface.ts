@@ -1,4 +1,4 @@
-export interface ISemanticDomain {
-    key?: string;
-    name: string;
+export interface SemanticDomain {
+  key?: string
+  name: string
 }

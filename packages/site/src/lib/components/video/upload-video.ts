@@ -1,6 +1,6 @@
 import { getStorage, ref, uploadBytesResumable } from 'firebase/storage'
 import { type Readable, get, writable } from 'svelte/store'
-import type { IVideoCustomMetadata } from '@living-dictionaries/types'
+import type { VideoCustomMetadata } from '@living-dictionaries/types'
 import { page } from '$app/stores'
 
 export interface VideoUploadStatus {
@@ -15,7 +15,7 @@ export function upload_video({ file, folder }: { file: File | Blob, folder: stri
   const storage_path = `${folder}/${new Date().getTime()}.${fileTypeSuffix}`
   const { data: { user } } = get(page)
   const $user = get(user)
-  const customMetadata: IVideoCustomMetadata & Record<string, string> = {
+  const customMetadata: VideoCustomMetadata & Record<string, string> = {
     uploadedByUid: $user.uid,
     uploadedByName: $user.displayName,
     // @ts-ignore
