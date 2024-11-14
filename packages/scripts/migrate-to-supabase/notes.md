@@ -1,6 +1,5 @@
 # Migrate Entries and Speakers from Firestore to Supabase
 
-- email letting everyone know editing is available again
 - build new Orama indexes every hour after materialized view is updated
 - migrate dictionaries and setup materialized view with entry counts
 - get exports working again
@@ -20,7 +19,6 @@
 - drop content_updates' table column
 - drop entry_updates
 - make alternate writing systems of the sentence translations as different bcp keys (same as for glosses)
-- Remove algolia keys from vercel
 - change old senses created_by/updated_by from firebase ids to user_ids and then connect relationships and change type to uuid
 - add 331 megabytes of content_updates to db, saved a  sql queries to avoid upgrading to the $25/month
 - think about find-replacing the "pn/v": "prenoun / preverb", and one other pos with dash when filtering by pos
