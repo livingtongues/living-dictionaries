@@ -1,3 +1,4 @@
+import type { EntryView, Tables } from '@living-dictionaries/types'
 import {
   display_speaker_gender,
   find_part_of_speech_abbreviation,
@@ -6,9 +7,6 @@ import {
   // format_semantic_domains,
   get_first_speaker_from_first_sound_file,
 } from './assignFormattedEntryValuesForCsv'
-
-type ISpeaker = any
-type ExpandedEntry = any
 
 describe(find_part_of_speech_abbreviation, () => {
   const global_parts_of_speech = [
@@ -33,34 +31,34 @@ describe(find_part_of_speech_abbreviation, () => {
 
 describe(get_first_speaker_from_first_sound_file, () => {
   test('gets speaker', () => {
-    const speakers: ISpeaker[] = [
+    const speakers: Tables<'speakers_view'>[] = [
       {
-        displayName: 'Arthur Morgan',
+        name: 'Arthur Morgan',
         id: 'rdr2',
         birthplace: 'New Hanover',
         decade: 3,
         gender: 'm',
       },
-    ]
-    const entry: ExpandedEntry = {
-      sound_files: [{
-        fb_storage_path: 'https://database.com/example.mp3',
-        storage_url: 'https://database.com/example.mp3',
+    ] as Tables<'speakers_view'>[]
+    const entry: EntryView = {
+      audios: [{
+        storage_path: 'https://database.com/example.mp3',
+        // storage_url: 'https://database.com/example.mp3',
         speaker_ids: ['rdr2'],
       }],
-    }
+    } as EntryView
     expect(get_first_speaker_from_first_sound_file(entry, speakers)).toEqual(speakers[0])
   })
 
   test('returns undefined if no speaker', () => {
-    const speakers: ISpeaker[] = []
-    const entry: ExpandedEntry = {
-      sound_files: [{
-        fb_storage_path: 'https://database.com/example.mp3',
-        storage_url: 'https://database.com/example.mp3',
+    const speakers: Tables<'speakers_view'>[] = []
+    const entry: EntryView = {
+      audios: [{
+        storage_path: 'https://database.com/example.mp3',
+        // storage_url: 'https://database.com/example.mp3',
         speaker_ids: ['rdr2'],
       }],
-    }
+    } as EntryView
     expect(get_first_speaker_from_first_sound_file(entry, speakers)).toEqual(undefined)
   })
 })
