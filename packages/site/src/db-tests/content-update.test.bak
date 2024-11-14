@@ -266,7 +266,7 @@ describe('sense sentence operations', () => {
           "table": null,
           "text_id": null,
           "timestamp": "2024-03-08T00:44:04.6+00:00",
-          "user_id": "12345678-abcd-efab-cdef-123456789012",
+          "user_id": "de2d3715-6337-45a3-a81a-d82c3210b2a7",
           "video_id": null,
         }
       `)
@@ -299,7 +299,7 @@ describe('sense sentence operations', () => {
             "table": null,
             "text_id": null,
             "timestamp": "2024-03-08T00:44:04.6+00:00",
-            "user_id": "12345678-abcd-efab-cdef-123456789012",
+            "user_id": "de2d3715-6337-45a3-a81a-d82c3210b2a7",
             "video_id": null,
           },
         ]
@@ -365,7 +365,7 @@ describe('sense sentence operations', () => {
           "table": null,
           "text_id": null,
           "timestamp": "2024-03-09T00:44:04.6+00:00",
-          "user_id": "12345678-abcd-efab-cdef-123456789012",
+          "user_id": "de2d3715-6337-45a3-a81a-d82c3210b2a7",
           "video_id": null,
         }
       `)

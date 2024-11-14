@@ -14,15 +14,15 @@
   },
   "main": "index.ts",
   "scripts": {
+    "import-dictionary:dev:dry": "tsx import/import.ts --id tseltal",
+    "import-dictionary:dev:live": "tsx import/import.ts --id tseltal --live",
+    "import-dictionary:prod:live": "tsx import/import.ts --id tseltal -e prod --live",
+    "update-locales": "tsx locales/update-locales.ts",
     "create-indexes": "tsx create-indexes/add-to-cloudflare.ts",
     "migrate-users": "tsx migrate-to-supabase/auth.ts",
-    "getEmails": "tsx refactor/get-email.ts -e prod",
-    "updateLocales": "tsx locales/update-locales.ts",
-    "importDictionary:dev:dry": "tsx import/import.ts --id tseltal",
-    "importDictionary:dev:live": "tsx import/import.ts --id tseltal --live",
-    "importDictionary:prod:live": "tsx import/import.ts --id tseltal -e prod --live",
+    "get-emails": "tsx refactor/get-email.ts -e prod",
     "test": "vitest",
-    "test:migration": "vitest --config ./vitest.config.migration.ts"
+    "test:import": "vitest --config ./vitest.config.import.ts"
   },
   "devDependencies": {
     "@aws-sdk/client-s3": "^3.679.0",
@@ -37,7 +37,6 @@
     "commander": "^9.4.1",
     "csv-parse": "^5.3.0",
     "csvtojson": "^2.0.10",
-    "detect-port": "^1.6.1",
     "dotenv": "^16.0.2",
     "firebase": "^10.9.0",
     "firebase-admin": "^12.0.0",

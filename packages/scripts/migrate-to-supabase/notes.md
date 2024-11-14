@@ -2,7 +2,6 @@
 
 - build new Orama indexes every hour after materialized view is updated
 - migrate dictionaries and setup materialized view with entry counts (looking for type: "tdv1" and other fields beside the known ones)
-- get exports working again
 - If an audio file does not have a speaker still let it play even though speaker needs chosen
 - ensure all auth users are brought over
 - Orama: replaceState in createQueryParamStore? look into improving the history to change for view and page changes but not for the others

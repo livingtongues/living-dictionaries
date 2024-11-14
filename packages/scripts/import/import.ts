@@ -1,16 +1,8 @@
+import { readFileSync } from 'node:fs'
 import { program } from 'commander'
-// @ts-expect-error
-import detect from 'detect-port'
-import { importFromSpreadsheet } from './import-to-firebase-supabase'
-
-await checkForDevServer()
-
-async function checkForDevServer() {
-  const port = await detect(3041) // will return 3041 if available, next available if it's not (so if 3041 is taken, it will return 3042, etc.)
-  const devServerRunning = port > 3041
-  if (devServerRunning) return
-  throw new Error('SvelteKit dev server not detected - run `pnpm dev` (or `pnpm -F site prod` if deploying to production) before running this import script to ensure the endpoint functions that save to Supabase are available.')
-}
+import { parseCSVFrom } from './parse-csv.js'
+import type { Row } from './row.type'
+import { import_data } from './import-data.js'
 
 program
   .option('-e, --environment [dev/prod]', 'Database Project', 'dev')
@@ -18,12 +10,30 @@ program
   .option('--live', 'By default only values are logged, run with live flag to upload data and media')
   .parse(process.argv)
 
-const dictionaryId = program.opts().id
-const { live } = program.opts()
-if (live)
-  console.log('Live run, everything is happening!')
-else
-  console.log('Dry run, no data will be uploaded')
+const { live, id: dictionary_id, environment } = program.opts()
 
-console.log(`Importing ${dictionaryId} to ${program.opts().environment}.`)
-importFromSpreadsheet({ dictionaryId, live }).then(entries => console.log(entries))
+await import_from_spreadsheet({ dictionary_id, live })
+
+async function import_from_spreadsheet({ dictionary_id, live }: { dictionary_id: string, live: boolean }) {
+  if (live)
+    console.log('Live run, everything is happening!')
+  else
+    console.log('Dry run, no data will be uploaded')
+
+  console.log(`Importing ${dictionary_id} to ${environment}.`)
+
+  const dateStamp = Date.now()
+  const import_id = `v4-${dateStamp}`
+
+  const file = readFileSync(`./import/data/${dictionary_id}/${dictionary_id}.csv`, 'utf8')
+  const rows = parseCSVFrom<Row>(file)
+  rows.shift() // remove header row
+  await import_data({ dictionary_id, rows, import_id, live })
+  // todo: import media
+
+  console.log(
+    `Finished ${live ? 'importing' : 'emulating'} ${rows.length} entries to ${environment === 'dev' ? 'http://localhost:3041/' : 'livingdictionaries.app/'
+    }${dictionary_id} in ${(Date.now() - dateStamp) / 1000} seconds`,
+  )
+  console.log('') // line break
+}
