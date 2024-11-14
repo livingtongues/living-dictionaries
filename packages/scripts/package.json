@@ -15,12 +15,8 @@
   "main": "index.ts",
   "scripts": {
     "create-indexes": "tsx create-indexes/add-to-cloudflare.ts",
-    "run-migration": "tsx migrate-to-supabase/run-migration.ts -e prod",
     "migrate-users": "tsx migrate-to-supabase/auth.ts",
-    "countAllEntries": "tsx countAllEntries.ts",
     "getEmails": "tsx refactor/get-email.ts -e prod",
-    "entryRefactor": "tsx refactor/entry-refactor.ts",
-    "speakerRefactor": "tsx refactor/speaker-refactor.ts",
     "updateLocales": "tsx locales/update-locales.ts",
     "importDictionary:dev:dry": "tsx import/import.ts --id tseltal",
     "importDictionary:dev:live": "tsx import/import.ts --id tseltal --live",

@@ -1,6 +1,6 @@
 import { db } from '../config-firebase'
 
-const dictionary_ids = ['shauki', 'nongtrai', 'eyak', 'early-assamese', 'werikyana', 'nambya', 'garifuna', 'arvanitika', 'awakateko', 'marma', 'birhor', 'kihunde', 'ngiwa---popoloca', 'memoni', 'judeo-iraqi-arabic', 'namtrik-de-totoro', 'belarusian', 'seniwan', 'zapotec']
+const dictionary_ids = ['shauki', 'nongtrai']
 
 get_emails(dictionary_ids)
 

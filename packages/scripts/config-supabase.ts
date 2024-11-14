@@ -1,9 +1,9 @@
+import { program } from 'commander'
 import PG from 'pg'
 import { createClient } from '@supabase/supabase-js'
 import type { Database } from '@living-dictionaries/types'
 import * as dotenv from 'dotenv'
 import './record-logs'
-import { program } from 'commander'
 
 program
   .option('-e, --environment [dev/prod]', 'Firebase/Supabase Project', 'dev')
@@ -14,7 +14,7 @@ export const environment = program.opts().environment === 'prod' ? 'prod' : 'dev
 console.log(`Supabase running on ${environment}`)
 
 if (environment === 'dev') {
-  dotenv.config({ path: '.env.supabase' }) // local project variables
+  dotenv.config({ path: '../site/.env.development' })
 } else {
   dotenv.config({ path: '.env.production.supabase' })
 }
@@ -39,7 +39,7 @@ class DB {
           user: 'postgres.actkqboqpzniojhgtqzw',
           host: 'aws-0-us-west-1.pooler.supabase.com',
           database: 'postgres',
-          password: process.env.PUBLIC_SUPABASE_DB_PASSWORD,
+          password: process.env.SUPABASE_DB_PASSWORD,
           port: 6543,
         }),
     max: 10,
@@ -64,6 +64,7 @@ class DB {
       await client.query(query)
     } catch (error) {
       console.error('Error executing query:', error)
+      // @ts-expect-error
       throw new Error(error)
     } finally {
       client.release()

@@ -1,7 +1,7 @@
 # Migrate Entries and Speakers from Firestore to Supabase
 
 - build new Orama indexes every hour after materialized view is updated
-- migrate dictionaries and setup materialized view with entry counts
+- migrate dictionaries and setup materialized view with entry counts (looking for type: "tdv1" and other fields beside the known ones)
 - get exports working again
 - If an audio file does not have a speaker still let it play even though speaker needs chosen
 - ensure all auth users are brought over
