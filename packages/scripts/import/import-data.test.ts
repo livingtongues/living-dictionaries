@@ -1,6 +1,9 @@
-import { anon_supabase, test_dictionary_id } from '../config-supabase'
+import { readFileSync } from 'node:fs'
+import { anon_supabase, test_dictionary_id as dictionary_id, diego_ld_user_id, postgres } from '../config-supabase'
 import { reset_local_db } from '../reset-local-db'
 import { import_data } from './import-data'
+import { parseCSVFrom } from './parse-csv'
+import type { Row } from './row.type'
 
 const import_id = `v4-test`
 
@@ -27,7 +30,7 @@ describe(import_data, () => {
   beforeEach(reset_local_db)
 
   test('imports simple entry', async () => {
-    await import_data({ dictionary_id: test_dictionary_id, rows: [{ lexeme: 'hi', en_gloss: 'hi' }], import_id, live: true })
+    await import_data({ dictionary_id, rows: [{ lexeme: 'hi', en_gloss: 'hi', pluralForm: '', nounClass: '' }], import_id, live: true })
     const { data: entry_view } = await anon_supabase.from('entries_view').select()
     expect(entry_view).toMatchInlineSnapshot(`
       [
@@ -42,7 +45,6 @@ describe(import_data, () => {
             "lexeme": {
               "default": "hi",
             },
-            "scientific_names": [],
           },
           "senses": [
             {
@@ -62,7 +64,7 @@ describe(import_data, () => {
   })
 
   test('imports complex entry', async () => {
-    await import_data({ dictionary_id: test_dictionary_id, rows: [{
+    await import_data({ dictionary_id, rows: [{
       'lexeme': 'hi',
       'localOrthography': 'lo1',
       'localOrthography.2': 'lo2',
@@ -140,5 +142,20 @@ describe(import_data, () => {
         },
       ]
     `)
+  })
+
+  test('imports from CSV', async () => {
+    const dictionary_id = 'example-v4-senses'
+    const add_dictionary_sql = `INSERT INTO "public"."dictionaries" ("id", "name", "created_at", "created_by", "updated_at", "updated_by") VALUES
+('${dictionary_id}', 'Test Dictionary', '2024-03-18 14:16:22.367188+00', '${diego_ld_user_id}', '2024-03-18 14:16:22.367188+00', '${diego_ld_user_id}');`
+    await postgres.execute_query(add_dictionary_sql)
+
+    const file = readFileSync(`./import/data/${dictionary_id}/${dictionary_id}.csv`, 'utf8')
+    const rows = parseCSVFrom<Row>(file)
+    rows.shift() // remove header row
+    await import_data({ dictionary_id, rows, import_id, live: true })
+    const { data: entry_view } = await anon_supabase.from('entries_view').select()
+    const { data: sentences } = await anon_supabase.from('sentences').select()
+    expect({ entry_view, sentences }).toMatchFileSnapshot('import-data.snap.json')
   })
 })

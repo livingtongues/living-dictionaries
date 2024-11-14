@@ -1,0 +1,253 @@
+{
+  "entry_view": [
+    {
+      "audios": null,
+      "created_at": "2024-03-08T00:44:04.6+00:00",
+      "deleted": null,
+      "dialect_ids": null,
+      "dictionary_id": "example-v4-senses",
+      "id": "11111111-1111-1111-1111-111111100006",
+      "main": {
+        "lexeme": {
+          "default": "kꞌaal"
+        },
+        "notes": {
+          "default": "26/dic./2020"
+        }
+      },
+      "senses": [
+        {
+          "glosses": {
+            "es": "sol"
+          },
+          "id": "11111111-1111-1111-1111-111111100007",
+          "parts_of_speech": [
+            "n"
+          ],
+          "sentence_ids": [
+            "11111111-1111-1111-1111-111111100008"
+          ],
+          "variant": {
+            "default": "kꞌahkꞌal"
+          }
+        }
+      ],
+      "updated_at": "2024-03-08T00:44:04.6+00:00"
+    },
+    {
+      "audios": null,
+      "created_at": "2024-03-08T00:44:04.6+00:00",
+      "deleted": null,
+      "dialect_ids": null,
+      "dictionary_id": "example-v4-senses",
+      "id": "11111111-1111-1111-1111-111111100009",
+      "main": {
+        "lexeme": {
+          "default": "kꞌajkꞌal"
+        },
+        "notes": {
+          "default": "14/dic./2019"
+        }
+      },
+      "senses": [
+        {
+          "glosses": {
+            "es": "sol"
+          },
+          "id": "11111111-1111-1111-1111-111111100010",
+          "parts_of_speech": [
+            "n"
+          ],
+          "sentence_ids": [
+            "11111111-1111-1111-1111-111111100011"
+          ],
+          "variant": {
+            "default": "kꞌahkꞌal"
+          }
+        }
+      ],
+      "updated_at": "2024-03-08T00:44:04.6+00:00"
+    },
+    {
+      "audios": null,
+      "created_at": "2024-03-08T00:44:04.6+00:00",
+      "deleted": null,
+      "dialect_ids": null,
+      "dictionary_id": "example-v4-senses",
+      "id": "11111111-1111-1111-1111-111111100012",
+      "main": {
+        "lexeme": {
+          "default": "kꞌajkꞌ"
+        },
+        "notes": {
+          "default": "23/sep./2023"
+        }
+      },
+      "senses": [
+        {
+          "glosses": {
+            "es": "fuego"
+          },
+          "id": "11111111-1111-1111-1111-111111100013",
+          "parts_of_speech": [
+            "n"
+          ],
+          "sentence_ids": [
+            "11111111-1111-1111-1111-111111100014"
+          ],
+          "variant": {
+            "default": "kꞌahkꞌ"
+          }
+        }
+      ],
+      "updated_at": "2024-03-08T00:44:04.6+00:00"
+    },
+    {
+      "audios": null,
+      "created_at": "2024-03-08T00:44:04.6+00:00",
+      "deleted": null,
+      "dialect_ids": null,
+      "dictionary_id": "example-v4-senses",
+      "id": "11111111-1111-1111-1111-111111100015",
+      "main": {
+        "lexeme": {
+          "default": "jun"
+        },
+        "notes": {
+          "default": "26/sep./2023"
+        }
+      },
+      "senses": [
+        {
+          "glosses": {
+            "es": "libro"
+          },
+          "id": "11111111-1111-1111-1111-111111100016",
+          "parts_of_speech": [
+            "n"
+          ],
+          "sentence_ids": [
+            "11111111-1111-1111-1111-111111100017"
+          ]
+        }
+      ],
+      "updated_at": "2024-03-08T00:44:04.6+00:00"
+    },
+    {
+      "audios": null,
+      "created_at": "2024-03-08T00:44:04.6+00:00",
+      "deleted": null,
+      "dialect_ids": null,
+      "dictionary_id": "example-v4-senses",
+      "id": "11111111-1111-1111-1111-111111100018",
+      "main": {
+        "lexeme": {
+          "default": "jeꞌel"
+        },
+        "notes": {
+          "default": "08/abr./2019"
+        }
+      },
+      "senses": [
+        {
+          "glosses": {
+            "es": "abierto"
+          },
+          "id": "11111111-1111-1111-1111-111111100019",
+          "parts_of_speech": [
+            "adj"
+          ],
+          "sentence_ids": [
+            "11111111-1111-1111-1111-111111100020"
+          ],
+          "variant": {
+            "default": "makal"
+          }
+        }
+      ],
+      "updated_at": "2024-03-08T00:44:04.6+00:00"
+    }
+  ],
+  "sentences": [
+    {
+      "created_at": "2024-03-08T00:44:04.6+00:00",
+      "created_by": "be43b1dd-6c64-494d-b5da-10d70c384433",
+      "deleted": null,
+      "dictionary_id": "example-v4-senses",
+      "id": "11111111-1111-1111-1111-111111100008",
+      "text": {
+        "default": "I am the vernacular"
+      },
+      "text_id": null,
+      "translation": {
+        "en": "I am the translation"
+      },
+      "updated_at": "2024-03-08T00:44:04.6+00:00",
+      "updated_by": "be43b1dd-6c64-494d-b5da-10d70c384433"
+    },
+    {
+      "created_at": "2024-03-08T00:44:04.6+00:00",
+      "created_by": "be43b1dd-6c64-494d-b5da-10d70c384433",
+      "deleted": null,
+      "dictionary_id": "example-v4-senses",
+      "id": "11111111-1111-1111-1111-111111100011",
+      "text": {
+        "default": "I am the vernacular"
+      },
+      "text_id": null,
+      "translation": {
+        "en": "I am the translation"
+      },
+      "updated_at": "2024-03-08T00:44:04.6+00:00",
+      "updated_by": "be43b1dd-6c64-494d-b5da-10d70c384433"
+    },
+    {
+      "created_at": "2024-03-08T00:44:04.6+00:00",
+      "created_by": "be43b1dd-6c64-494d-b5da-10d70c384433",
+      "deleted": null,
+      "dictionary_id": "example-v4-senses",
+      "id": "11111111-1111-1111-1111-111111100014",
+      "text": {
+        "default": "I am the vernacular"
+      },
+      "text_id": null,
+      "translation": {
+        "en": "I am the translation"
+      },
+      "updated_at": "2024-03-08T00:44:04.6+00:00",
+      "updated_by": "be43b1dd-6c64-494d-b5da-10d70c384433"
+    },
+    {
+      "created_at": "2024-03-08T00:44:04.6+00:00",
+      "created_by": "be43b1dd-6c64-494d-b5da-10d70c384433",
+      "deleted": null,
+      "dictionary_id": "example-v4-senses",
+      "id": "11111111-1111-1111-1111-111111100017",
+      "text": {
+        "default": "I am the vernacular"
+      },
+      "text_id": null,
+      "translation": {
+        "en": "I am the translation"
+      },
+      "updated_at": "2024-03-08T00:44:04.6+00:00",
+      "updated_by": "be43b1dd-6c64-494d-b5da-10d70c384433"
+    },
+    {
+      "created_at": "2024-03-08T00:44:04.6+00:00",
+      "created_by": "be43b1dd-6c64-494d-b5da-10d70c384433",
+      "deleted": null,
+      "dictionary_id": "example-v4-senses",
+      "id": "11111111-1111-1111-1111-111111100020",
+      "text": {
+        "default": "I am the vernacular"
+      },
+      "text_id": null,
+      "translation": {
+        "en": "I am the translation"
+      },
+      "updated_at": "2024-03-08T00:44:04.6+00:00",
+      "updated_by": "be43b1dd-6c64-494d-b5da-10d70c384433"
+    }
+  ]
+}

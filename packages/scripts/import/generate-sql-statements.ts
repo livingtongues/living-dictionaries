@@ -37,14 +37,14 @@ export function generate_sql_statements({ row, dictionary_id, import_id, speaker
         ...(row['localOrthography.4'] && { lo4: row['localOrthography.4'] }),
         ...(row['localOrthography.5'] && { lo5: row['localOrthography.5'] }),
       },
-      phonetic: row.phonetic,
-      morphology: row.morphology,
-      interlinearization: row.interlinearization,
-      sources: row.source?.split('|').map(source => source.trim()),
-      scientific_names: [row.scientificName],
-      elicitation_id: row.ID,
-      notes: row.notes && { default: row.notes },
     }
+    if (row.phonetic) entry.phonetic = row.phonetic
+    if (row.morphology) entry.morphology = row.morphology
+    if (row.source) entry.sources = row.source.split('|').map(source => source.trim())
+    if (row.scientificName) entry.scientific_names = [row.scientificName]
+    if (row.ID) entry.elicitation_id = row.ID
+    if (row.notes) entry.notes = { default: row.notes }
+
     sql_statements += sql_file_string('entries', entry, 'INSERT')
 
     // TODO: Jacob will continue working on dialects and speakers and media
@@ -55,17 +55,19 @@ export function generate_sql_statements({ row, dictionary_id, import_id, speaker
     const senses_in_sentences: TablesInsert<'senses_in_sentences'>[] = []
 
     const sense_id = randomUUID()
+    if (row.lexeme === 'jun')
+      console.log({ var: row.variant })
     const first_sense: TablesInsert<'senses'> = {
       entry_id,
       ...c_u_meta,
       id: sense_id,
       glosses: { },
-      noun_class: row.nounClass,
-      parts_of_speech: returnArrayFromCommaSeparatedItems(row.partOfSpeech),
-      variant: row.variant && { default: row.variant },
-      plural_form: row.pluralForm && { default: row.pluralForm },
-      write_in_semantic_domains: row.semanticDomain_custom && [row.semanticDomain_custom],
     }
+    if (row.nounClass) first_sense.noun_class = row.nounClass
+    if (row.partOfSpeech) first_sense.parts_of_speech = returnArrayFromCommaSeparatedItems(row.partOfSpeech)
+    if (row.semanticDomain_custom) first_sense.write_in_semantic_domains = [row.semanticDomain_custom]
+    if (row.variant) first_sense.variant = { default: row.variant }
+    if (row.pluralForm) first_sense.plural_form = { default: row.pluralForm }
 
     // TODO: detect additional senses from the CSV row data
     for (const [key, value] of Object.entries(row) as [keyof Row, string][]) {
