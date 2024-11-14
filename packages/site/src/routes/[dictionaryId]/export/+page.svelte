@@ -132,9 +132,9 @@
 {/if}
 
 {#if $admin}
-  <div class="mt-5">
+  <!-- <div class="mt-5">
     <Button form="filled" href="entries/print">{$page.data.t('export.download_pdf')}</Button>
-  </div>
+  </div> -->
 {/if}
 
 <SeoMetaTags
