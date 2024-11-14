@@ -1,5 +1,5 @@
 import type { EntryView } from '@living-dictionaries/types'
-import type { SearchEntriesOptions } from './orama.worker'
+import type { SearchEntriesOptions } from './search-entries'
 
 export async function create_index(entries: EntryView[], dictionary_id: string) {
   const { api } = await import('./expose-orama-worker')
