@@ -21,31 +21,26 @@ export function display_speaker_gender(speaker_gender: string): string {
 }
 
 export function format_senses(entry: EntryView) {
-  let formatted_domains = {}
+  let formatted_senses = {}
 
   for (const [sense_index, sense] of Array.from(entry.senses).entries()) {
-    //* glosses
-    formatted_domains = { ...formatted_domains, ...format_glosses(sense.glosses, sense_index) }
-    //* sematic domains
-    formatted_domains = { ...formatted_domains, ...format_semantic_domain(sense.semantic_domains, sense_index) }
-    //* parts of speech
-    // @ts-ignore
-    formatted_domains = { ...formatted_domains, ...format_parts_of_speech(sense.parts_of_speech_abbreviations, sense.parts_of_speech, sense_index) }
-    //* noun class
-    formatted_domains = { ...formatted_domains, ...format_noun_class(sense.noun_class, sense_index) }
-    //* variant
-    formatted_domains = { ...formatted_domains, ...format_variant(sense.variant, sense_index) }
-    //* plural form
-    formatted_domains = { ...formatted_domains, ...format_plural_form(sense.plural_form, sense_index) }
-    //* Images
-    // @ts-ignore
-    formatted_domains = { ...formatted_domains, ...format_image_files(entry, sense.photo_urls?.[0], sense_index) }
-    //* example sentences
-    // @ts-ignore
-    formatted_domains = { ...formatted_domains, ...format_example_sentence(sense.sentences?.[0], sense_index) }
+    formatted_senses = {
+      ...formatted_senses,
+      ...format_glosses(sense.glosses, sense_index),
+      ...format_semantic_domain(sense.semantic_domains, sense_index),
+      // @ts-ignore
+      ...format_parts_of_speech(sense.parts_of_speech_abbreviations, sense.parts_of_speech, sense_index),
+      ...format_noun_class(sense.noun_class, sense_index),
+      ...format_variant(sense.variant, sense_index),
+      ...format_plural_form(sense.plural_form, sense_index),
+      // @ts-ignore
+      ...format_image_files(entry, sense.photo_urls?.[0], sense_index),
+      // @ts-ignore
+      ...format_example_sentence(sense.sentences?.[0], sense_index),
+    }
   }
 
-  return formatted_domains
+  return formatted_senses
 }
 
 export function format_glosses(glosses: MultiString, sense_index: number) {

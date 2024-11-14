@@ -1,5 +1,4 @@
-// import type { ExpandedEntry } from '@living-dictionaries/types'
-import type { MultiString } from '@living-dictionaries/types'
+import type { Tables } from '@living-dictionaries/types'
 import {
   get_example_sentence_headers,
   get_gloss_language_headers,
@@ -119,7 +118,7 @@ describe(get_example_sentence_headers, () => {
   const first_sense_index = 0
   test('assigns vernacular and translations', () => {
     // @ts-ignore
-    const sentences: MultiString = { dictionary_id: 'example', text: { default: 'vernacular example sentence' }, translation: { en: 'English example sentence', es: 'Oración de ejemplo en español' } }
+    const sentences: Tables<'sentences'> = { dictionary_id: 'example', text: { default: 'vernacular example sentence' }, translation: { en: 'English example sentence', es: 'Oración de ejemplo en español' } }
     expect(get_example_sentence_headers(sentences, first_sense_index)).toEqual({
       vernacular_exampleSentence: 'Example sentence in example',
       en_exampleSentence: 'Example sentence in English',
@@ -128,7 +127,7 @@ describe(get_example_sentence_headers, () => {
   })
   test('assigns vernacular and translations in fourth sense', () => {
     // @ts-ignore
-    const sentences: MultiString = { dictionary_id: 'example', text: { default: 'vernacular example sentence' }, translation: { en: 'English example sentence', es: 'Oración de ejemplo en español' } }
+    const sentences: Tables<'sentences'> = { dictionary_id: 'example', text: { default: 'vernacular example sentence' }, translation: { en: 'English example sentence', es: 'Oración de ejemplo en español' } }
     const fourth_sense_index = 3
     expect(get_example_sentence_headers(sentences, fourth_sense_index)).toEqual({
       's4.vernacular_exampleSentence': 'Example sentence in example',
@@ -138,14 +137,13 @@ describe(get_example_sentence_headers, () => {
   })
   test('assigns only verncular', () => {
     // @ts-ignore
-    const sentences: MultiString = { dictionary_id: 'example', text: { default: 'vernacular example sentence' } }
+    const sentences: Tables<'sentences'> = { dictionary_id: 'example', text: { default: 'vernacular example sentence' } }
     expect(get_example_sentence_headers(sentences, first_sense_index)).toEqual({
       vernacular_exampleSentence: 'Example sentence in example',
     })
   })
   test('doesn\'t assign anything if null', () => {
-    const sentences: MultiString = {}
-    expect(get_example_sentence_headers(sentences, first_sense_index)).toEqual({})
+    expect(get_example_sentence_headers(null, first_sense_index)).toEqual({})
   })
 })
 

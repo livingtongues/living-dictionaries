@@ -1,5 +1,5 @@
-import type { EntryView, MultiString } from '@living-dictionaries/types'
-import type { EntryForCSV } from './prepareEntriesForCsv'
+import type { MultiString, Tables } from '@living-dictionaries/types'
+import type { EntryForCSV, translate_entries } from './prepareEntriesForCsv'
 import { glossingLanguages } from '$lib/glosses/glossing-languages'
 
 export function get_local_orthography_headers(
@@ -19,32 +19,21 @@ export function get_local_orthography_headers(
   return headers
 }
 
-export function get_sense_headers(entries: EntryView[]) {
+export function get_sense_headers(entries: ReturnType<typeof translate_entries>) {
   let headers: EntryForCSV = {}
 
-  // Using for of loops for a slightly better performance
   for (const entry of entries) {
     for (const [sense_index, sense] of Array.from(entry.senses).entries()) {
-      //* get glosses headers
-      headers = { ...headers, ...get_gloss_language_headers(sense.glosses, sense_index) }
-      //* get semantic domains headers
-      headers = { ...headers, ...get_semantic_domain_headers(sense.semantic_domains, sense_index) }
-      //* get parts of speech headers
-      // @ts-ignore
-      headers = { ...headers, ...get_parts_of_speech_headers(sense.parts_of_speech_abbreviations, sense.parts_of_speech, sense_index) }
-      //* get noun class headers
-      headers = { ...headers, ...get_noun_class_headers(sense.noun_class, sense_index) }
-      //* get variant headers
-      headers = { ...headers, ...get_variant_headers(sense.variant, sense_index) }
-      //* get plural form headers
-      headers = { ...headers, ...get_plural_form_headers(sense.plural_form, sense_index) }
-      //* get image files headers
-      headers = { ...headers, ...get_image_files_headers(sense?.photo_ids?.[0], sense_index) }
-      //* get example sentences headers
-      // @ts-ignore
-      if (sense.sentences) {
-        // @ts-ignore
-        headers = { ...headers, ...get_example_sentence_headers(sense.sentences[0], sense_index) }
+      headers = {
+        ...headers,
+        ...get_gloss_language_headers(sense.glosses, sense_index),
+        ...get_semantic_domain_headers(sense.semantic_domains, sense_index),
+        ...get_parts_of_speech_headers(sense.parts_of_speech_abbreviations, sense.parts_of_speech, sense_index),
+        ...get_noun_class_headers(sense.noun_class, sense_index),
+        ...get_variant_headers(sense.variant, sense_index),
+        ...get_plural_form_headers(sense.plural_form, sense_index),
+        ...get_image_files_headers(sense?.photo_ids?.[0], sense_index),
+        ...(sense.sentences ? get_example_sentence_headers(sense.sentences[0], sense_index) : {}),
       }
     }
   }
@@ -84,7 +73,7 @@ export function get_parts_of_speech_headers(parts_of_speech_abbreviations: strin
 }
 
 export function get_example_sentence_headers(
-  sentence: MultiString,
+  sentence: Tables<'sentences'>,
   sense_index: number,
 ) {
   const headers: EntryForCSV = {}
