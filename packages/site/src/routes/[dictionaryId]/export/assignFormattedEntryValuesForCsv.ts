@@ -58,7 +58,7 @@ export function format_semantic_domain(semantic_domains: string[], sense_index: 
   const formatted_domains: EntryForCSV = {}
   if (semantic_domains) {
     for (let index = 0; index < semantic_domains.length; index++) {
-      formatted_domains[`${sense_index > 0 ? `s${sense_index + 1}.` : ''}semanticDomain${index > 0 ? `.${index + 1}` : ''}`] = `"${semantic_domains[index]}"` // TODO should I do this for all fields?
+      formatted_domains[`${sense_index > 0 ? `s${sense_index + 1}.` : ''}semanticDomain${index > 0 ? `.${index + 1}` : ''}`] = semantic_domains[index]
     }
   }
   return formatted_domains
