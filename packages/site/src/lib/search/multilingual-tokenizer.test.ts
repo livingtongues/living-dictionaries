@@ -2,20 +2,17 @@ import { tokenize } from './multilingual-tokenizer'
 
 describe(tokenize, () => {
   test('lexemes are searchable starting at any letter', () => {
-    expect(tokenize('esotmïn', null, '_lexeme')).toMatchInlineSnapshot(`
+    expect(tokenize('esïtmon', null, '_lexeme')).toMatchInlineSnapshot(`
       [
-        "esotmïn",
-        "esotmin",
-        "sotmïn",
-        "sotmin",
-        "otmïn",
-        "otmin",
-        "tmïn",
-        "tmin",
-        "mïn",
-        "min",
-        "ïn",
-        "in",
+        "esïtmon",
+        "esitmon",
+        "sïtmon",
+        "sitmon",
+        "ïtmon",
+        "itmon",
+        "tmon",
+        "mon",
+        "on",
       ]
     `)
   })
