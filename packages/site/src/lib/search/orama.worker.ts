@@ -4,6 +4,7 @@ import { expose } from 'comlink'
 import { augment_entry_for_search } from './augment-entry-for-search'
 import { type EntriesIndex, entries_index_schema } from './entries-schema'
 import { type SearchEntriesOptions, search_entries } from './search-entries'
+import { createMultilingualTokenizer } from './multilingual-tokenizer'
 
 let orama_index: Record<string, EntriesIndex>
 
@@ -13,9 +14,12 @@ async function create_index(entries: EntryView[], dictionary_id: string) {
   console.timeEnd('Augment Entries Time')
 
   console.time('Index Entries Time')
-  const new_index = create({ schema: entries_index_schema })
-  await insertMultiple(new_index, entries_augmented_for_search)
-  orama_index = { [dictionary_id]: new_index }
+  const index = create({
+    schema: entries_index_schema,
+    components: { tokenizer: createMultilingualTokenizer() },
+  })
+  await insertMultiple(index, entries_augmented_for_search)
+  orama_index = { [dictionary_id]: index }
   console.timeEnd('Index Entries Time')
 }
 

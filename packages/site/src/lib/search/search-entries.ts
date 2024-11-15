@@ -31,6 +31,7 @@ export async function search_entries({ query_params, entries_per_page, page_inde
   const orama_search_params: OramaSearchParams<EntriesIndex> = {
     term: query_params.query,
     limit: entries_per_page,
+    // properties: ['_lexeme'], // can use this in the future to target which fields to search in
     offset: page_index * entries_per_page,
     tolerance: query_params.tolerance || 1, // Levenshtein edit distance from 'help' to 'holds' is 3 for example (change 2 letters and add 1), https://docs.orama.com/open-source/usage/search/introduction#typo-tolerance
     boost: {

@@ -113,9 +113,12 @@ async function write_indexes() {
 async function create_index(entries: EntryView[], dictionary_id: string) {
   console.log({ [dictionary_id]: entries.length })
   const entries_augmented_for_search = entries.map(augment_entry_for_search)
-  const new_index = create({ schema: entries_index_schema })
-  await insertMultiple(new_index, entries_augmented_for_search)
-  return new_index
+  const index = create({
+    schema: entries_index_schema,
+    components: { tokenizer: createMultilingualTokenizer() },
+  })
+  await insertMultiple(index, entries_augmented_for_search)
+  return index
 }
 
 async function file_exists(filepath: string): Promise<boolean> {
@@ -142,4 +145,7 @@ async function upload_to_cloudflare(filename: string, index_json_string: string)
   } catch (err) {
     console.error(`Error uploading ${filename} to Cloudflare R2: ${err}`)
   }
+}
+function createMultilingualTokenizer(): import('@orama/orama').Tokenizer | import('@orama/orama').DefaultTokenizerConfig {
+  throw new Error('Function not implemented.')
 }
