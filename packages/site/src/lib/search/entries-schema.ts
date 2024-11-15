@@ -1,3 +1,7 @@
+import type { Orama } from '@orama/orama'
+
+export type EntriesIndex = Orama<typeof entries_index_schema>
+
 export const entries_index_schema = {
   _lexeme: 'string[]', // all orthographies as they are and a simplified version (diacritics stripped and ipa characters replaced with common keyboard characters to make easier to type)
   _glosses: 'string[]', // includes all glosses for all senses

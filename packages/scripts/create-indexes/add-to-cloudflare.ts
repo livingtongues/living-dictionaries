@@ -6,6 +6,7 @@ import { create, insertMultiple, save } from '@orama/orama'
 import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3'
 import { augment_entry_for_search } from '../../site/src/lib/search/augment-entry-for-search'
 import { entries_index_schema } from '../../site/src/lib/search/entries-schema'
+import { createMultilingualTokenizer } from '../../site/src/lib/search/multilingual-tokenizer'
 import { admin_supabase } from '../config-supabase'
 
 const r2_account_id = process.env.CLOUDFLARE_R2_ACCOUNT_ID
@@ -23,18 +24,17 @@ const search_index_client = new S3Client({
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const order_field = 'updated_at'
 
-await write_indexes()
+const date_for_updating_all_indexs = '1970-01-01T00:00:00Z'
+const indexes_last_updated = date_for_updating_all_indexs
+// const indexes_last_updated = '2024-11-15T00:00:00Z' // do this next time
 
+await write_indexes()
 async function write_indexes() {
   let current_dict = ''
   try {
     const { data: dictionary_ids } = await admin_supabase.from('dictionaries').select('id').order('id')
 
-    // 2024-10-25 06:53:24.672152+00
-
     for (const { id: dictionary_id } of dictionary_ids) {
-      if (dictionary_id !== 'hmoob-dawb') continue
-
       const format = 'json'
       const folder = './search-indexes'
       const filename = `${dictionary_id}.${format}`
@@ -45,6 +45,27 @@ async function write_indexes() {
       // }
 
       current_dict = dictionary_id
+
+      const { data: fresh_entries, error: fresh_entries_error } = await admin_supabase
+        .from('materialized_entries_view')
+        .select('id')
+        .limit(1)
+        .eq('dictionary_id', dictionary_id)
+        .is('deleted', null)
+        .order(order_field, { ascending: true })
+        .gt(order_field, indexes_last_updated)
+      if (fresh_entries_error) {
+        console.error({ fresh_entries_error })
+        throw fresh_entries_error
+      }
+      if (indexes_last_updated !== date_for_updating_all_indexs) {
+        if (fresh_entries?.length) {
+          console.log(`${dictionary_id} being updated...`)
+        } else {
+          console.log(`   Skipping ${dictionary_id}, no fresh entries`)
+          continue
+        }
+      }
 
       const entries: EntryView[] = []
       let timestamp_from_which_to_fetch_data = '1970-01-01T00:00:00Z'
@@ -95,9 +116,12 @@ async function write_indexes() {
 async function create_index(entries: EntryView[], dictionary_id: string) {
   console.log({ [dictionary_id]: entries.length })
   const entries_augmented_for_search = entries.map(augment_entry_for_search)
-  const new_index = create({ schema: entries_index_schema })
-  await insertMultiple(new_index, entries_augmented_for_search)
-  return new_index
+  const index = create({
+    schema: entries_index_schema,
+    components: { tokenizer: createMultilingualTokenizer() },
+  })
+  await insertMultiple(index, entries_augmented_for_search)
+  return index
 }
 
 async function file_exists(filepath: string): Promise<boolean> {
