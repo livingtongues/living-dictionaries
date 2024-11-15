@@ -34,6 +34,32 @@
         </Button>
       </header>
       <div class="relative flex-1 overflow-y-auto overflow-x-clip pl-1">
+        <h4 class="text-sm font-semibold uppercase text-gray-700">Typo Tolerance</h4>
+        <input
+          class="w-full"
+          type="range"
+          value={$search_params.tolerance || 1}
+          on:input={(e) => {
+            // @ts-ignore
+            const { value } = e.target
+            $search_params.tolerance = value === '1' ? null : value
+          }}
+          min="0"
+          max="5"
+          step="1"
+          list="tickmarks" />
+
+        <datalist class="flex text-xs w-full px-.25 justify-between -mt-1" id="tickmarks">
+          <option value="0" label="0"></option>
+          <option value="1" label="1"></option>
+          <option value="2" label="2"></option>
+          <option value="3" label="3"></option>
+          <option value="4" label="4"></option>
+          <option value="5" label="5"></option>
+        </datalist>
+
+        <hr class="my-2" />
+
         {#if result_facets._parts_of_speech.count}
           <FilterList
             {search_params}
@@ -181,30 +207,6 @@
             count={result_facets.has_semantic_domain.values.false}
             label={`${$page.data.t('entry.does_not_exist')} ${$page.data.t('entry_field.semantic_domains')}`} />
         {/if}
-        <hr />
-        <h4 class="text-sm font-semibold uppercase text-gray-700 mt-1">Typo Tolerance</h4>
-        <input
-          class="w-full"
-          type="range"
-          value={$search_params.tolerance || 1}
-          on:input={(e) => {
-            // @ts-ignore
-            const { value } = e.target
-            $search_params.tolerance = value === '1' ? null : value
-          }}
-          min="0"
-          max="5"
-          step="1"
-          list="tickmarks" />
-
-        <datalist class="flex text-xs w-full px-.25 justify-between -mt-1" id="tickmarks">
-          <option value="0" label="0"></option>
-          <option value="1" label="1"></option>
-          <option value="2" label="2"></option>
-          <option value="3" label="3"></option>
-          <option value="4" label="4"></option>
-          <option value="5" label="5"></option>
-        </datalist>
       </div>
     {/if}
   </section>
