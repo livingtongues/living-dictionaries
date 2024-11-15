@@ -1,5 +1,4 @@
-import type { MaybePromise } from '@sveltejs/kit'
-
+/* eslint-disable require-await */
 interface RequestOptions {
   locals?: App.Locals
   params?: Record<string, string>
@@ -13,6 +12,8 @@ interface RequestOptions {
   headers?: Record<string, string>
   body?: Record<string, any>
 }
+
+type MaybePromise<T> = T | Promise<T>
 
 // : ReturnType<typeof handler>
 export function request(handler, options: RequestOptions = {}): MaybePromise<Response> {
@@ -39,7 +40,7 @@ export function request(handler, options: RequestOptions = {}): MaybePromise<Res
     },
     async formData() {
       return formData
-    }
+    },
   }
   const event = { locals, params, cookies, request, url }
 

@@ -24,40 +24,42 @@
 
     for (const entry of entriesWithImages) {
       if (destroyed) return
-      const image_file_path = 'TODO'
+      // @ts-ignore
+      const image_file_path = entry.photoSource
       try {
         const response = await fetch(image_file_path)
         if (response.ok) {
           const blob = await response.blob()
-          zip.folder(`${dictionary.id}_Images/`).file(entry.image_filename, blob, { binary: true })
+          // @ts-ignore
+          zip.folder(`${dictionary.id}_Images/`).file(entry?.photoFile, blob, { binary: true })
         } else {
           errors = [
             ...errors,
-            `Entry: ${entry.lexeme}, Id: ${entry.id}, File: ${image_file_path}, Error: ${response.statusText}`,
+            `Entry: ${entry.lexeme}, Id: ${entry.ID}, File: ${image_file_path}, Error: ${response.statusText}`,
           ]
         }
       } catch (e) {
-        errors = [...errors, `Entry: ${entry.id}, File: ${image_file_path}, ${e}`]
+        errors = [...errors, `Entry: ${entry.ID}, File: ${image_file_path}, ${e}`]
       }
       fetched++
     }
 
     for (const entry of entriesWithAudio) {
       if (destroyed) return
-      const sound_file_path = 'TODO'
+      const sound_file_path = entry.soundSource
       try {
         const response = await fetch(sound_file_path)
         if (response.ok) {
           const blob = await response.blob()
-          zip.folder(`${dictionary.id}_Audio/`).file(entry.sound_filename, blob, { binary: true })
+          zip.folder(`${dictionary.id}_Audio/`).file(entry.soundFile, blob, { binary: true })
         } else {
           errors = [
             ...errors,
-            `Entry: ${entry.lexeme}, Id: ${entry.id}, File: ${sound_file_path}, Error: ${response.status} ${response.statusText}`,
+            `Entry: ${entry.lexeme}, Id: ${entry.ID}, File: ${sound_file_path}, Error: ${response.status} ${response.statusText}`,
           ]
         }
       } catch (e) {
-        errors = [...errors, `Entry: ${entry.id}, File: ${sound_file_path}, ${e}`]
+        errors = [...errors, `Entry: ${entry.ID}, File: ${sound_file_path}, ${e}`]
       }
       fetched++
     }
