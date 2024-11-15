@@ -8,18 +8,14 @@ export function augment_entry_for_search(entry: EntryView) {
   const _semantic_domains = senses.map(sense => [...(sense.semantic_domains || []), ...(sense.write_in_semantic_domains || [])]).flat()
   const _speakers = entry.audios?.map(audio => audio.speaker_ids || []).flat() || []
 
-  const lexeme_in_all_orthographies = Object.entries(entry.main.lexeme)
+  const _lexeme = Object.entries(entry.main.lexeme)
     .sort(([key_a], [key_b]) => {
       if (key_a === 'default') return -1
       if (key_b === 'default') return 1
       return key_a.localeCompare(key_b)
     })
     .map(([_, lexeme]) => lexeme)
-
-  const _lexeme = [
-    ...lexeme_in_all_orthographies,
-    ...lexeme_in_all_orthographies.map(simplify_lexeme_for_search),
-  ].filter(Boolean)
+    .filter(Boolean)
 
   const _glosses = senses.flatMap(sense => Object.values(sense.glosses || {}).filter(Boolean))
   // const _sentences = senses.flatMap(sense =>
