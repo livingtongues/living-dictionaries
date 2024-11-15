@@ -26,6 +26,7 @@
 - 1st manual backup was before any action
 - 11:37 at 50, 13:54 at 100 = 2 min 17 seconds for 50 entries, 387000/50 = 7740 chunks, 7740 * 2:17 = 17492 minutes = 12 days (1440 minutes in a day), 18:30 at 200
 - `pnpm -F scripts run-migration`
+- relocate tip: Google's Magic Image serving url reference: https://medium.com/google-cloud/uploading-resizing-and-serving-images-with-google-cloud-platform-ca9631a2c556
 
 ### No lexeme
 no lx for 0svukh699MsB4svuCDdO in ho

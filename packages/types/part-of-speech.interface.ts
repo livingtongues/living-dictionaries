@@ -1,5 +1,5 @@
-export interface IPartOfSpeech {
-    unofficial?: boolean;
-    enAbbrev: string;
-    enName: string;
+export interface PartOfSpeech {
+  unofficial?: boolean
+  enAbbrev: string
+  enName: string
 }
