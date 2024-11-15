@@ -6,6 +6,7 @@ import { create, insertMultiple, save } from '@orama/orama'
 import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3'
 import { augment_entry_for_search } from '../../site/src/lib/search/augment-entry-for-search'
 import { entries_index_schema } from '../../site/src/lib/search/entries-schema'
+import { createMultilingualTokenizer } from '../../site/src/lib/search/multilingual-tokenizer'
 import { admin_supabase } from '../config-supabase'
 
 const r2_account_id = process.env.CLOUDFLARE_R2_ACCOUNT_ID
@@ -23,8 +24,11 @@ const search_index_client = new S3Client({
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const order_field = 'updated_at'
 
-await write_indexes()
+const date_for_updating_all_indexs = '1970-01-01T00:00:00Z'
+const indexes_last_updated = date_for_updating_all_indexs
+// const indexes_last_updated = '2024-11-15T00:00:00Z' // do this next time
 
+await write_indexes()
 async function write_indexes() {
   let current_dict = ''
   try {
@@ -42,9 +46,6 @@ async function write_indexes() {
 
       current_dict = dictionary_id
 
-      // first modified 2024-10-25 06:53:24.672152+00
-      // next last modified 2024-11-01
-      const indexes_last_updated = '2024-11-01T00:00:00Z'
       const { data: fresh_entries, error: fresh_entries_error } = await admin_supabase
         .from('materialized_entries_view')
         .select('id')
@@ -57,11 +58,13 @@ async function write_indexes() {
         console.error({ fresh_entries_error })
         throw fresh_entries_error
       }
-      if (fresh_entries?.length) {
-        console.log(`${dictionary_id} being updated...`)
-      } else {
-        console.log(`   Skipping ${dictionary_id}, no fresh entries`)
-        continue
+      if (indexes_last_updated !== date_for_updating_all_indexs) {
+        if (fresh_entries?.length) {
+          console.log(`${dictionary_id} being updated...`)
+        } else {
+          console.log(`   Skipping ${dictionary_id}, no fresh entries`)
+          continue
+        }
       }
 
       const entries: EntryView[] = []
@@ -101,7 +104,7 @@ async function write_indexes() {
       const index_json = save(search_index)
       const index_json_string = JSON.stringify(index_json)
       await writeFile(filepath, index_json_string)
-      await upload_to_cloudflare(filename, index_json_string)
+      // await upload_to_cloudflare(filename, index_json_string)
     }
 
     console.log({ result: dictionary_ids })
@@ -145,7 +148,4 @@ async function upload_to_cloudflare(filename: string, index_json_string: string)
   } catch (err) {
     console.error(`Error uploading ${filename} to Cloudflare R2: ${err}`)
   }
-}
-function createMultilingualTokenizer(): import('@orama/orama').Tokenizer | import('@orama/orama').DefaultTokenizerConfig {
-  throw new Error('Function not implemented.')
 }
