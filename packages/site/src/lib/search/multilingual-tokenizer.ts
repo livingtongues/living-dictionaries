@@ -36,7 +36,6 @@ export function tokenize(input: string, language?: string, prop = '', _withCache
     tokens = words
       .filter(Boolean)
   }
-  console.info({ input, tokens, prop })
 
   return Array.from(new Set(tokens))
 }

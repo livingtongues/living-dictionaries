@@ -104,7 +104,7 @@ async function write_indexes() {
       const index_json = save(search_index)
       const index_json_string = JSON.stringify(index_json)
       await writeFile(filepath, index_json_string)
-      // await upload_to_cloudflare(filename, index_json_string)
+      await upload_to_cloudflare(filename, index_json_string)
     }
 
     console.log({ result: dictionary_ids })
