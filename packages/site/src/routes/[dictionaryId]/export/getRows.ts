@@ -1,4 +1,5 @@
 import type { EntryView, MultiString, Tables } from '@living-dictionaries/types'
+import type { DeepPartial } from 'kitbook'
 import type { EntryForCSV } from './prepareEntriesForCsv'
 import { friendlyName } from './friendlyName'
 import { glossingLanguages } from '$lib/glosses/glossing-languages'
@@ -84,7 +85,7 @@ export function get_example_sentence(
   return formatted_data
 }
 
-export function get_image_files(image_storage_path: string, metadata: ExportMetaData, entry: EntryView = null) {
+export function get_image_files(image_storage_path: string, metadata: ExportMetaData, entry: DeepPartial<EntryView> = null) {
   const { sense_index, position } = metadata
   const formatted_data: EntryForCSV = {}
 
@@ -117,7 +118,7 @@ export function get_variant(variant: MultiString, metadata: ExportMetaData) {
   if (variant?.default) {
     formatted_data[`${count_sense(sense_index)}variant`] = position === 'header'
       ? `${get_readable_sense(sense_index)}Variant`
-      : variant
+      : variant.default
   }
   return formatted_data
 }
@@ -128,7 +129,7 @@ export function get_plural_form(plural_form: MultiString, metadata: ExportMetaDa
   if (plural_form?.default) {
     formatted_data[`${count_sense(sense_index)}pluralForm`] = position === 'header'
       ? `${get_readable_sense(sense_index)}Plural form`
-      : plural_form
+      : plural_form.default
   }
   return formatted_data
 }

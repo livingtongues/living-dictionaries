@@ -28,8 +28,7 @@
   $: if (!$entries_loading && !$speakers_loading && !$dialects_loading && !$photos_loading && !$sentences_loading) {
     const translated_entries = translate_entries({ entries: $entries, photos: $photos, sentences: $sentences, dialects: $dialects })
     entryHeaders = getCsvHeaders(translated_entries, $dictionary)
-    formattedEntries = formatCsvEntries(translated_entries, $speakers, url_from_storage_path)
-    console.info({ translated_entries, entryHeaders, formattedEntries })
+    formattedEntries = formatCsvEntries(translated_entries, $speakers, url_from_storage_path, $dictionary)
     // @ts-ignore
     entriesWithImages = formattedEntries.filter(entry => entry?.photoSource)
     entriesWithAudio = formattedEntries.filter(entry => entry?.soundSource)
