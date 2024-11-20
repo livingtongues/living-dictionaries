@@ -28,8 +28,7 @@
   $: if (!$entries_loading && !$speakers_loading && !$dialects_loading && !$photos_loading && !$sentences_loading) {
     const translated_entries = translate_entries({ entries: $entries, photos: $photos, sentences: $sentences, dialects: $dialects })
     entryHeaders = getCsvHeaders(translated_entries, $dictionary)
-    formattedEntries = formatCsvEntries(translated_entries, $speakers, url_from_storage_path)
-    console.info({ translated_entries, entryHeaders, formattedEntries })
+    formattedEntries = formatCsvEntries(translated_entries, $speakers, url_from_storage_path, $dictionary)
     // @ts-ignore
     entriesWithImages = formattedEntries.filter(entry => entry?.photoSource)
     entriesWithAudio = formattedEntries.filter(entry => entry?.soundSource)
@@ -132,9 +131,9 @@
 {/if}
 
 {#if $admin}
-  <!-- <div class="mt-5">
-    <Button form="filled" href="entries/print">{$page.data.t('export.download_pdf')}</Button>
-  </div> -->
+  <div class="mt-5">
+    <Button form="filled" href='entries?q=%7B"view"%3A"print"%2C"entries_per_page"%3A100%7D'>{$page.data.t('export.download_pdf')}</Button>
+  </div>
 {/if}
 
 <SeoMetaTags
