@@ -71,12 +71,55 @@ export function generate_sql_statements({ row, dictionary_id, import_id, speaker
 
     // TODO: detect additional senses from the CSV row data
     for (const [key, value] of Object.entries(row) as [keyof Row, string][]) {
+      let old_key = 2
+
       if (!value) continue
 
       // gloss fields are labeled using bcp47 language codes followed by '_gloss' (e.g. es_gloss, tpi_gloss)
       if (key.includes('_gloss') && !sense_regex.test(key)) {
         const [language] = key.split('_gloss')
         first_sense.glosses[language] = value
+      }
+
+      if (sense_regex.test(key)) {
+        const sense_id = randomUUID()
+
+        const new_sense: TablesInsert<'senses'> = {
+          entry_id,
+          ...c_u_meta,
+          id: sense_id,
+          glosses: { },
+        }
+
+        if (key.includes('_gloss')) {
+          let language_key = key.replace(sense_regex, '')
+          language_key = language_key.replace('_gloss', '')
+
+          if (key === `s${old_key}.${language_key}_gloss`) {
+            new_sense.glosses[language_key] = value
+          } else {
+            old_key++
+            new_sense.id = randomUUID()
+            new_sense.glosses[language_key] = value
+          }
+        }
+
+        // if (row.nounClass) new_sense.noun_class = row.nounClass
+
+        // if (row.semanticDomain_custom) new_sense.write_in_semantic_domains = [row.semanticDomain_custom]
+        // if (row.variant) new_sense.variant = { default: row.variant }
+        // if (row.pluralForm) new_sense.plural_form = { default: row.pluralForm }
+        // old_language_key = new_language_key
+        // if (key.includes('.partOfSpeech'))
+        //   supabase_sense.sense = { ...supabase_sense.sense, parts_of_speech: { new: [row[key]] } }
+
+        // if (key.includes('.semanticDomain'))
+        //   supabase_sense.sense = { ...supabase_sense.sense, semantic_domains: { new: [row[key]] } }
+
+        // if (key.includes('.nounClass'))
+        //   supabase_sense.sense = { ...supabase_sense.sense, noun_class: { new: row[key] } }
+        // }
+        senses.push(new_sense)
       }
 
       // TODO: Diego, the below code is copied over from old method, please update to new format that can handle many senses and many example sentences

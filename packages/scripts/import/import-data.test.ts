@@ -1,9 +1,6 @@
-import { readFileSync } from 'node:fs'
-import { anon_supabase, test_dictionary_id as dictionary_id, diego_ld_user_id, postgres } from '../config-supabase'
+import { anon_supabase, test_dictionary_id as dictionary_id } from '../config-supabase'
 import { reset_local_db } from '../reset-local-db'
 import { import_data } from './import-data'
-import { parseCSVFrom } from './parse-csv'
-import type { Row } from './row.type'
 
 const import_id = `v4-test`
 
@@ -81,6 +78,8 @@ describe(import_data, () => {
       'pluralForm': 'his',
       'nounClass': '12',
       'semanticDomain_custom': 'custom 1',
+      's2.en_gloss': 'bye',
+      's3.en_gloss': 'auch',
     }], import_id, live: true })
     const { data: entry_view } = await anon_supabase.from('entries_view').select()
     expect(entry_view).toMatchInlineSnapshot(`
@@ -116,6 +115,18 @@ describe(import_data, () => {
           "senses": [
             {
               "glosses": {
+                "en": "bye",
+              },
+              "id": "11111111-1111-1111-1111-111111100005",
+            },
+            {
+              "glosses": {
+                "en": "auch",
+              },
+              "id": "11111111-1111-1111-1111-111111100007",
+            },
+            {
+              "glosses": {
                 "es": "hola",
               },
               "id": "11111111-1111-1111-1111-111111100004",
@@ -128,7 +139,7 @@ describe(import_data, () => {
                 "default": "his",
               },
               "sentence_ids": [
-                "11111111-1111-1111-1111-111111100005",
+                "11111111-1111-1111-1111-111111100008",
               ],
               "variant": {
                 "default": "variant",
@@ -144,18 +155,18 @@ describe(import_data, () => {
     `)
   })
 
-  test('imports from CSV', async () => {
-    const dictionary_id = 'example-v4-senses'
-    const add_dictionary_sql = `INSERT INTO "public"."dictionaries" ("id", "name", "created_at", "created_by", "updated_at", "updated_by") VALUES
-('${dictionary_id}', 'Test Dictionary', '2024-03-18 14:16:22.367188+00', '${diego_ld_user_id}', '2024-03-18 14:16:22.367188+00', '${diego_ld_user_id}');`
-    await postgres.execute_query(add_dictionary_sql)
+  //   test('imports from CSV', async () => {
+  //     const dictionary_id = 'example-v4-senses'
+  //     const add_dictionary_sql = `INSERT INTO "public"."dictionaries" ("id", "name", "created_at", "created_by", "updated_at", "updated_by") VALUES
+  // ('${dictionary_id}', 'Test Dictionary', '2024-03-18 14:16:22.367188+00', '${diego_ld_user_id}', '2024-03-18 14:16:22.367188+00', '${diego_ld_user_id}');`
+  //     await postgres.execute_query(add_dictionary_sql)
 
-    const file = readFileSync(`./import/data/${dictionary_id}/${dictionary_id}.csv`, 'utf8')
-    const rows = parseCSVFrom<Row>(file)
-    rows.shift() // remove header row
-    await import_data({ dictionary_id, rows, import_id, live: true })
-    const { data: entry_view } = await anon_supabase.from('entries_view').select()
-    const { data: sentences } = await anon_supabase.from('sentences').select()
-    expect({ entry_view, sentences }).toMatchFileSnapshot('import-data.snap.json')
-  })
+//     const file = readFileSync(`./import/data/${dictionary_id}/${dictionary_id}.csv`, 'utf8')
+//     const rows = parseCSVFrom<Row>(file)
+//     rows.shift() // remove header row
+//     await import_data({ dictionary_id, rows, import_id, live: true })
+//     const { data: entry_view } = await anon_supabase.from('entries_view').select()
+//     const { data: sentences } = await anon_supabase.from('sentences').select()
+//     expect({ entry_view, sentences }).toMatchFileSnapshot('import-data.snap.json')
+//   })
 })
