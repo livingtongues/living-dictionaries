@@ -54,13 +54,6 @@
       </span>
     {/if}
 
-    {#if selectedFields.example_sentence && first_sentence}
-      <i>{order_example_sentences({
-        sentence: first_sentence,
-        dictionary_gloss_languages: dictionary.glossLanguages,
-      }).join(' / ')}</i>
-    {/if}
-
     {#if selectedFields.semantic_domains}
       {@const semantic_domains = [...sense.semantic_domains || [], ...sense.write_in_semantic_domains || []]}
       {#if semantic_domains.length}
@@ -102,6 +95,13 @@
       </div>
     {/if}
   {/each}
+
+  {#if selectedFields.example_sentence && first_sentence}
+    <i>{order_example_sentences({
+      sentence: first_sentence,
+      dictionary_gloss_languages: dictionary.glossLanguages,
+    }).join(' / ')}</i>
+  {/if}
 
   {#if selectedFields.notes && entry.main.notes}
     <div>
