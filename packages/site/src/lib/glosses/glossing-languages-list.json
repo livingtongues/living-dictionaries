@@ -890,11 +890,7 @@
     "showKeyboard": true
   },
   "bo": {
-    "vernacularName": "ལྷ་སའི་སྐད་",
-    "vernacularAlternate": "བོད་སྐད",
-    "internalName": "basic_kbdtiprd",
-    "useKeyboard": "bo-Tibt-CN",
-    "showKeyboard": true
+    "vernacularName": "Tibetan"
   },
   "tvo": {
     "vernacularName": "Tidore"
@@ -1060,6 +1056,19 @@
     "vernacularName": "Holikachuk",
     "internalName": "holikachuk",
     "showKeyboard": true
+  },
+  "mzh": {
+    "vernacularName": "Wichí",
+    "vernacularAlternate": "Wiznay, Mataco, Mataco Güisnay, Mataco Pilcomayo, Matako, Wichí, Pilcomayo Wichí"
+  },
+  "mtq": {
+    "vernacularName": "Mường",
+    "useKeyboard": "basic_kbdvntc",
+    "showKeyboard": true
+  },
+  "cag": {
+    "vernacularName": "Nivaclé",
+    "vernacularAlternate": "Nivaklé, Niwaklé, Chulupí, Chunupí, Churupí, Choropí, Ashluslay, Ashluslé, Axluxlay, Suhin, Sujín"
   },
   "": {}
 }
