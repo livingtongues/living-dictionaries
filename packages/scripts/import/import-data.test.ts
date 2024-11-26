@@ -1,6 +1,9 @@
-import { anon_supabase, test_dictionary_id as dictionary_id } from '../config-supabase'
+import { readFileSync } from 'node:fs'
+import { anon_supabase, test_dictionary_id as dictionary_id, diego_ld_user_id, postgres } from '../config-supabase'
 import { reset_local_db } from '../reset-local-db'
 import { import_data } from './import-data'
+import { parseCSVFrom } from './parse-csv'
+import type { Row } from './row.type'
 
 const import_id = `v4-test`
 
@@ -49,9 +52,6 @@ describe(import_data, () => {
                 "en": "hi",
               },
               "id": "11111111-1111-1111-1111-111111100001",
-              "sentence_ids": [
-                "11111111-1111-1111-1111-111111100002",
-              ],
             },
           ],
           "updated_at": "2024-03-08T00:44:04.6+00:00",
@@ -72,14 +72,25 @@ describe(import_data, () => {
       'scientificName': 'scientific name',
       'ID': 'A1',
       'notes': 'notes',
+      // first sense
       'es_gloss': 'hola',
-      'partOfSpeech': 'n,v',
+      'partOfSpeech': 'n,v', // TODO: is this comma separation the plan
       'variant': 'variant',
       'pluralForm': 'his',
       'nounClass': '12',
       'semanticDomain_custom': 'custom 1',
+      'default_vernacular_exampleSentence': 'we say hi like this',
+      'en_exampleSentence': 'this is the english hi translation',
+      // second sense
       's2.en_gloss': 'bye',
-      's3.en_gloss': 'auch',
+      's2.semanticDomain': '2',
+      's2.semanticDomain.2': '2.3', // TODO: or is this number suffix the plan (cf. partOfSpeech above) - see the code for how to handle each type, but we should settle on one or the other method
+      // third sense
+      's3.fr_gloss': 'auch',
+      's3.default_vernacular_exampleSentence': 'hi doc',
+      's3.fr_exampleSentence': 'Bonjour docteur',
+      's3.default_vernacular_exampleSentence.2': 'bye doc',
+      's3.fr_exampleSentence.2': 'Au revoir docteur',
     }], import_id, live: true })
     const { data: entry_view } = await anon_supabase.from('entries_view').select()
     expect(entry_view).toMatchInlineSnapshot(`
@@ -90,7 +101,7 @@ describe(import_data, () => {
           "deleted": null,
           "dialect_ids": null,
           "dictionary_id": "test_dictionary_id",
-          "id": "11111111-1111-1111-1111-111111100003",
+          "id": "11111111-1111-1111-1111-111111100002",
           "main": {
             "elicitation_id": "A1",
             "lexeme": {
@@ -118,18 +129,26 @@ describe(import_data, () => {
                 "en": "bye",
               },
               "id": "11111111-1111-1111-1111-111111100005",
+              "semantic_domains": [
+                "2",
+                "2.3",
+              ],
             },
             {
               "glosses": {
-                "en": "auch",
+                "fr": "auch",
               },
-              "id": "11111111-1111-1111-1111-111111100007",
+              "id": "11111111-1111-1111-1111-111111100006",
+              "sentence_ids": [
+                "11111111-1111-1111-1111-111111100007",
+                "11111111-1111-1111-1111-111111100008",
+              ],
             },
             {
               "glosses": {
                 "es": "hola",
               },
-              "id": "11111111-1111-1111-1111-111111100004",
+              "id": "11111111-1111-1111-1111-111111100003",
               "noun_class": "12",
               "parts_of_speech": [
                 "n",
@@ -139,7 +158,7 @@ describe(import_data, () => {
                 "default": "his",
               },
               "sentence_ids": [
-                "11111111-1111-1111-1111-111111100008",
+                "11111111-1111-1111-1111-111111100004",
               ],
               "variant": {
                 "default": "variant",
@@ -153,20 +172,50 @@ describe(import_data, () => {
         },
       ]
     `)
+    const { data: sentences } = await anon_supabase.from('sentences').select('id, text, translation')
+    expect(sentences).toMatchInlineSnapshot(`
+      [
+        {
+          "id": "11111111-1111-1111-1111-111111100004",
+          "text": {
+            "default": "we say hi like this",
+          },
+          "translation": {
+            "en": "this is the english hi translation",
+          },
+        },
+        {
+          "id": "11111111-1111-1111-1111-111111100007",
+          "text": {
+            "default": "hi doc",
+          },
+          "translation": {
+            "fr": "Bonjour docteur",
+          },
+        },
+        {
+          "id": "11111111-1111-1111-1111-111111100008",
+          "text": {
+            "default": "bye doc",
+          },
+          "translation": null,
+        },
+      ]
+    `)
   })
 
-  //   test('imports from CSV', async () => {
-  //     const dictionary_id = 'example-v4-senses'
-  //     const add_dictionary_sql = `INSERT INTO "public"."dictionaries" ("id", "name", "created_at", "created_by", "updated_at", "updated_by") VALUES
-  // ('${dictionary_id}', 'Test Dictionary', '2024-03-18 14:16:22.367188+00', '${diego_ld_user_id}', '2024-03-18 14:16:22.367188+00', '${diego_ld_user_id}');`
-  //     await postgres.execute_query(add_dictionary_sql)
+  test('imports from CSV', async () => {
+    const dictionary_id = 'example-v4-senses'
+    const add_dictionary_sql = `INSERT INTO "public"."dictionaries" ("id", "name", "created_at", "created_by", "updated_at", "updated_by") VALUES
+  ('${dictionary_id}', 'Test Dictionary', '2024-03-18 14:16:22.367188+00', '${diego_ld_user_id}', '2024-03-18 14:16:22.367188+00', '${diego_ld_user_id}');`
+    await postgres.execute_query(add_dictionary_sql)
 
-//     const file = readFileSync(`./import/data/${dictionary_id}/${dictionary_id}.csv`, 'utf8')
-//     const rows = parseCSVFrom<Row>(file)
-//     rows.shift() // remove header row
-//     await import_data({ dictionary_id, rows, import_id, live: true })
-//     const { data: entry_view } = await anon_supabase.from('entries_view').select()
-//     const { data: sentences } = await anon_supabase.from('sentences').select()
-//     expect({ entry_view, sentences }).toMatchFileSnapshot('import-data.snap.json')
-//   })
+    const file = readFileSync(`./import/data/${dictionary_id}/${dictionary_id}.csv`, 'utf8')
+    const rows = parseCSVFrom<Row>(file)
+    rows.shift() // remove header row
+    await import_data({ dictionary_id, rows, import_id, live: true })
+    const { data: entry_view } = await anon_supabase.from('entries_view').select()
+    const { data: sentences } = await anon_supabase.from('sentences').select()
+    expect({ entry_view, sentences }).toMatchFileSnapshot('import-data.snap.json')
+  })
 })
