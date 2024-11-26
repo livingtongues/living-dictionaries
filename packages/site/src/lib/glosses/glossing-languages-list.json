@@ -890,7 +890,11 @@
     "showKeyboard": true
   },
   "bo": {
-    "vernacularName": "Tibetan"
+    "vernacularName": "ལྷ་སའི་སྐད་",
+    "vernacularAlternate": "བོད་སྐད",
+    "internalName": "basic_kbdtiprd",
+    "useKeyboard": "bo-Tibt-CN",
+    "showKeyboard": true
   },
   "tvo": {
     "vernacularName": "Tidore"
