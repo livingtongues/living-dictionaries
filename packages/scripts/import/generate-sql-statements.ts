@@ -5,7 +5,6 @@ import type { Row } from './row.type'
 import { sql_file_string } from './to-sql-string'
 import { millisecond_incrementing_timestamp } from './incrementing-timestamp'
 
-const sense_regex = /^s\d+\./
 // const multiple_sentence_regex = /_exampleSentence\.\d+$/
 // const has_multiple_sentence_regex_label = (key: string) => multiple_sentence_regex.test(key)
 
@@ -54,185 +53,191 @@ export function generate_sql_statements({ row, dictionary_id, import_id, speaker
     const sentences: TablesInsert<'sentences'>[] = []
     const senses_in_sentences: TablesInsert<'senses_in_sentences'>[] = []
 
-    const sense_id = randomUUID()
-    if (row.lexeme === 'jun')
-      console.log({ var: row.variant })
-    const first_sense: TablesInsert<'senses'> = {
-      entry_id,
-      ...c_u_meta,
-      id: sense_id,
-      glosses: { },
+    const sense_counts = new Set(['s1']) // always have at least one sense
+    const sense_regex = /^(?<sense_index>s\d+)\./
+    for (const key of Object.keys(row)) {
+      const match = key.match(sense_regex)
+      if (match) sense_counts.add(match.groups.sense_index)
     }
-    if (row.nounClass) first_sense.noun_class = row.nounClass
-    if (row.partOfSpeech) first_sense.parts_of_speech = returnArrayFromCommaSeparatedItems(row.partOfSpeech)
-    if (row.semanticDomain_custom) first_sense.write_in_semantic_domains = [row.semanticDomain_custom]
-    if (row.variant) first_sense.variant = { default: row.variant }
-    if (row.pluralForm) first_sense.plural_form = { default: row.pluralForm }
 
-    // TODO: detect additional senses from the CSV row data
-    for (const [key, value] of Object.entries(row) as [keyof Row, string][]) {
-      let old_key = 2
+    // if (row.nounClass) first_sense.noun_class = row.nounClass
+    // if (row.partOfSpeech) first_sense.parts_of_speech = returnArrayFromCommaSeparatedItems(row.partOfSpeech)
+    // if (row.semanticDomain_custom) first_sense.write_in_semantic_domains = [row.semanticDomain_custom]
+    // if (row.variant) first_sense.variant = { default: row.variant }
+    // if (row.pluralForm) first_sense.plural_form = { default: row.pluralForm }
 
-      if (!value) continue
+    // for (const [key, value] of Object.entries(row) as [keyof Row, string][]) {
+    //   let old_key = 2
 
-      // gloss fields are labeled using bcp47 language codes followed by '_gloss' (e.g. es_gloss, tpi_gloss)
-      if (key.includes('_gloss') && !sense_regex.test(key)) {
-        const [language] = key.split('_gloss')
-        first_sense.glosses[language] = value
+    //   if (!value) continue
+
+    //   // gloss fields are labeled using bcp47 language codes followed by '_gloss' (e.g. es_gloss, tpi_gloss)
+    //   if (key.includes('_gloss') && !sense_regex.test(key)) {
+    //     const [language] = key.split('_gloss')
+    //     first_sense.glosses[language] = value
+    //   }
+
+    //   if (sense_regex.test(key)) {
+    //     const sense_id = randomUUID()
+
+    //     const new_sense: TablesInsert<'senses'> = {
+    //       entry_id,
+    //       ...c_u_meta,
+    //       id: sense_id,
+    //       glosses: { },
+    //     }
+
+    //     if (key.includes('_gloss')) {
+    //       let language_key = key.replace(sense_regex, '')
+    //       language_key = language_key.replace('_gloss', '')
+
+    //       if (key === `s${old_key}.${language_key}_gloss`) {
+    //         new_sense.glosses[language_key] = value
+    //       } else {
+    //         old_key++
+    //         new_sense.id = randomUUID()
+    //         new_sense.glosses[language_key] = value
+    //       }
+    //     }
+
+    //     // if (row.nounClass) new_sense.noun_class = row.nounClass
+
+    //     // if (row.semanticDomain_custom) new_sense.write_in_semantic_domains = [row.semanticDomain_custom]
+    //     // if (row.variant) new_sense.variant = { default: row.variant }
+    //     // if (row.pluralForm) new_sense.plural_form = { default: row.pluralForm }
+    //     // old_language_key = new_language_key
+    //     // if (key.includes('.partOfSpeech'))
+    //     //   supabase_sense.sense = { ...supabase_sense.sense, parts_of_speech: { new: [row[key]] } }
+
+    //     // if (key.includes('.semanticDomain'))
+    //     //   supabase_sense.sense = { ...supabase_sense.sense, semantic_domains: { new: [row[key]] } }
+
+    //     // if (key.includes('.nounClass'))
+    //     //   supabase_sense.sense = { ...supabase_sense.sense, noun_class: { new: row[key] } }
+    //     // }
+    //     senses.push(new_sense)
+    //   }
+
+    //   // TODO: Diego, the below code is copied over from old method, please update to new format that can handle many senses and many example sentences
+
+    //   // if (key.includes('vernacular_exampleSentence') && !sense_regex.test(key)) {
+    //   //   firebase_entry.xs.vn = value
+    //   //   continue // to keep next block from also adding
+    //   // }
+
+    //   // // example sentence fields are codes followed by '_exampleSentence'
+    //   // if (key.includes('_exampleSentence') && !sense_regex.test(key)) {
+    //   //   const [language] = key.split('_exampleSentence')
+    //   //   firebase_entry.xs[language] = value
+    //   // }
+
+    //   // if (sense_regex.test(key)) {
+    //   //   if (key.includes('_gloss')) {
+    //   //     let language_key = key.replace(sense_regex, '')
+    //   //     language_key = language_key.replace('_gloss', '')
+
+    //   //     if (key === `s${old_key}.${language_key}_gloss`) {
+    //   //       supabase_sense.sense = { glosses: { new: { ...supabase_sense.sense?.glosses?.new, [language_key]: row[key] } } }
+    //   //     } else {
+    //   //       old_key++
+    //   //       supabase_sense.sense_id = incremental_consistent_uuid()
+    //   //       supabase_sense.sense = { glosses: { ...supabase_sense.sense.glosses, new: { [language_key]: row[key] } } }
+    //   //     }
+    //   //   }
+    //   //   if (key.includes('_vernacular_exampleSentence')) {
+    //   //     let writing_system = key.replace(sense_regex, '')
+    //   //     writing_system = writing_system.replace('_vernacular_exampleSentence', '')
+    //   //     if (has_multiple_sentence_regex_label(key)) writing_system = writing_system.slice(0, writing_system.lastIndexOf('.'))
+
+    //   //     if (key === `s${old_key}.${writing_system}_vernacular_exampleSentence` || has_multiple_sentence_regex_label(key)) {
+    //   //       supabase_sentence.sense_id = supabase_sense.sense_id
+    //   //       supabase_sentence.sentence_id = incremental_consistent_uuid()
+    //   //       if (key === `s${old_key}.${writing_system}_vernacular_exampleSentence` && !has_multiple_sentence_regex_label(key)) {
+    //   //         supabase_sentence.sentence = { text: { new: { ...supabase_sentence?.sentence?.text?.new, [writing_system]: row[key] } } }
+    //   //       } else if (has_multiple_sentence_regex_label(key)) {
+    //   //         supabase_sentence.sentence = { text: { new: { [writing_system]: row[key] } } }
+    //   //       }
+    //   //     }
+    //   //   }
+    //   //   if (key.includes('_exampleSentence') && !key.includes('_vernacular')) { // when key is a translated example sentence
+    //   //     new_language_key = key.replace(sense_regex, '')
+    //   //     new_language_key = new_language_key.replace('_exampleSentence', '')
+    //   //     if (has_multiple_sentence_regex_label(key)) new_language_key = new_language_key.slice(0, new_language_key.lastIndexOf('.'))
+    //   //     if (old_language_key && old_language_key === new_language_key && !has_multiple_sentence_regex_label(key)) supabase_sentence.sentence_id = incremental_consistent_uuid()
+    //   //     if (!old_language_key) old_language_key = new_language_key
+    //   //     if (key === `s${old_key}.${new_language_key}_exampleSentence` || has_multiple_sentence_regex_label(key)) {
+    //   //       supabase_sentence.sentence = { ...supabase_sentence.sentence, translation: { new: { ...supabase_sentence?.sentence?.translation?.new, [new_language_key]: row[key] } } }
+    //   //     }
+    //   //   }
+    //   //   if (key.includes('_exampleSentence')) { // in this case this includes verncaular and traslated example sentences
+    //   //     const sentence_index: number = supabase_sentences.findIndex(sentence => sentence.sentence_id === supabase_sentence.sentence_id)
+    //   //     const sense_index: number = supabase_sentences.findIndex(sentence => sentence.sense_id === supabase_sentence.sense_id)
+    //   //     const sense_index_exists = sense_index !== -1
+    //   //     const sentence_index_exists = sentence_index !== -1
+    //   //     if (sense_index_exists && !has_multiple_sentence_regex_label(key)) {
+    //   //       supabase_sentences[sense_index] = { ...supabase_sentence }
+    //   //     } else if (sentence_index_exists) {
+    //   //       supabase_sentences[sentence_index] = { ...supabase_sentence }
+    //   //     } else {
+    //   //       supabase_sentences.push({ ...supabase_sentence })
+    //   //     }
+    //   //   }
+    //   //   old_language_key = new_language_key
+    //   //   if (key.includes('.partOfSpeech'))
+    //   //     supabase_sense.sense = { ...supabase_sense.sense, parts_of_speech: { new: [row[key]] } }
+
+    //   //   if (key.includes('.semanticDomain'))
+    //   //     supabase_sense.sense = { ...supabase_sense.sense, semantic_domains: { new: [row[key]] } }
+
+    //   //   if (key.includes('.nounClass'))
+    //   //     supabase_sense.sense = { ...supabase_sense.sense, noun_class: { new: row[key] } }
+    //   // }
+
+    //   // if (sense_regex.test(key)) {
+    //   //   const index: number = supabase_senses.findIndex(sense => sense.sense_id === supabase_sense.sense_id)
+    //   //   const sense_index_exists = index !== -1
+    //   //   if (sense_index_exists) {
+    //   //     supabase_senses[index] = { ...supabase_sense }
+    //   //   } else {
+    //   //     supabase_senses.push({ ...supabase_sense })
+    //   //   }
+    //   // }
+
+    //   // const semanticDomain_FOLLOWED_BY_OPTIONAL_DIGIT = /^semanticDomain(?:\.\d)*$/ // semanticDomain, semanticDomain2, semanticDomain<#>, but not semanticDomain_custom
+    //   // if (semanticDomain_FOLLOWED_BY_OPTIONAL_DIGIT.test(key)) {
+    //   //   if (!firebase_entry.sdn) firebase_entry.sdn = []
+
+    //   //   firebase_entry.sdn.push(value.toString())
+    //   // }
+    // }
+    for (const sense_index of sense_counts) {
+      const sense_id = randomUUID()
+      const blank_sense: TablesInsert<'senses'> = {
+        entry_id,
+        ...c_u_meta,
+        id: sense_id,
+        glosses: { en: sense_index },
       }
+      senses.push(blank_sense)
 
-      if (sense_regex.test(key)) {
-        const sense_id = randomUUID()
-
-        const new_sense: TablesInsert<'senses'> = {
-          entry_id,
-          ...c_u_meta,
-          id: sense_id,
-          glosses: { },
-        }
-
-        if (key.includes('_gloss')) {
-          let language_key = key.replace(sense_regex, '')
-          language_key = language_key.replace('_gloss', '')
-
-          if (key === `s${old_key}.${language_key}_gloss`) {
-            new_sense.glosses[language_key] = value
-          } else {
-            old_key++
-            new_sense.id = randomUUID()
-            new_sense.glosses[language_key] = value
-          }
-        }
-
-        // if (row.nounClass) new_sense.noun_class = row.nounClass
-
-        // if (row.semanticDomain_custom) new_sense.write_in_semantic_domains = [row.semanticDomain_custom]
-        // if (row.variant) new_sense.variant = { default: row.variant }
-        // if (row.pluralForm) new_sense.plural_form = { default: row.pluralForm }
-        // old_language_key = new_language_key
-        // if (key.includes('.partOfSpeech'))
-        //   supabase_sense.sense = { ...supabase_sense.sense, parts_of_speech: { new: [row[key]] } }
-
-        // if (key.includes('.semanticDomain'))
-        //   supabase_sense.sense = { ...supabase_sense.sense, semantic_domains: { new: [row[key]] } }
-
-        // if (key.includes('.nounClass'))
-        //   supabase_sense.sense = { ...supabase_sense.sense, noun_class: { new: row[key] } }
-        // }
-        senses.push(new_sense)
-      }
-
-      // TODO: Diego, the below code is copied over from old method, please update to new format that can handle many senses and many example sentences
-
-      // if (key.includes('vernacular_exampleSentence') && !sense_regex.test(key)) {
-      //   firebase_entry.xs.vn = value
-      //   continue // to keep next block from also adding
-      // }
-
-      // // example sentence fields are codes followed by '_exampleSentence'
-      // if (key.includes('_exampleSentence') && !sense_regex.test(key)) {
-      //   const [language] = key.split('_exampleSentence')
-      //   firebase_entry.xs[language] = value
-      // }
-
-      // if (sense_regex.test(key)) {
-      //   if (key.includes('_gloss')) {
-      //     let language_key = key.replace(sense_regex, '')
-      //     language_key = language_key.replace('_gloss', '')
-
-      //     if (key === `s${old_key}.${language_key}_gloss`) {
-      //       supabase_sense.sense = { glosses: { new: { ...supabase_sense.sense?.glosses?.new, [language_key]: row[key] } } }
-      //     } else {
-      //       old_key++
-      //       supabase_sense.sense_id = incremental_consistent_uuid()
-      //       supabase_sense.sense = { glosses: { ...supabase_sense.sense.glosses, new: { [language_key]: row[key] } } }
-      //     }
-      //   }
-      //   if (key.includes('_vernacular_exampleSentence')) {
-      //     let writing_system = key.replace(sense_regex, '')
-      //     writing_system = writing_system.replace('_vernacular_exampleSentence', '')
-      //     if (has_multiple_sentence_regex_label(key)) writing_system = writing_system.slice(0, writing_system.lastIndexOf('.'))
-
-      //     if (key === `s${old_key}.${writing_system}_vernacular_exampleSentence` || has_multiple_sentence_regex_label(key)) {
-      //       supabase_sentence.sense_id = supabase_sense.sense_id
-      //       supabase_sentence.sentence_id = incremental_consistent_uuid()
-      //       if (key === `s${old_key}.${writing_system}_vernacular_exampleSentence` && !has_multiple_sentence_regex_label(key)) {
-      //         supabase_sentence.sentence = { text: { new: { ...supabase_sentence?.sentence?.text?.new, [writing_system]: row[key] } } }
-      //       } else if (has_multiple_sentence_regex_label(key)) {
-      //         supabase_sentence.sentence = { text: { new: { [writing_system]: row[key] } } }
-      //       }
-      //     }
-      //   }
-      //   if (key.includes('_exampleSentence') && !key.includes('_vernacular')) { // when key is a translated example sentence
-      //     new_language_key = key.replace(sense_regex, '')
-      //     new_language_key = new_language_key.replace('_exampleSentence', '')
-      //     if (has_multiple_sentence_regex_label(key)) new_language_key = new_language_key.slice(0, new_language_key.lastIndexOf('.'))
-      //     if (old_language_key && old_language_key === new_language_key && !has_multiple_sentence_regex_label(key)) supabase_sentence.sentence_id = incremental_consistent_uuid()
-      //     if (!old_language_key) old_language_key = new_language_key
-      //     if (key === `s${old_key}.${new_language_key}_exampleSentence` || has_multiple_sentence_regex_label(key)) {
-      //       supabase_sentence.sentence = { ...supabase_sentence.sentence, translation: { new: { ...supabase_sentence?.sentence?.translation?.new, [new_language_key]: row[key] } } }
-      //     }
-      //   }
-      //   if (key.includes('_exampleSentence')) { // in this case this includes verncaular and traslated example sentences
-      //     const sentence_index: number = supabase_sentences.findIndex(sentence => sentence.sentence_id === supabase_sentence.sentence_id)
-      //     const sense_index: number = supabase_sentences.findIndex(sentence => sentence.sense_id === supabase_sentence.sense_id)
-      //     const sense_index_exists = sense_index !== -1
-      //     const sentence_index_exists = sentence_index !== -1
-      //     if (sense_index_exists && !has_multiple_sentence_regex_label(key)) {
-      //       supabase_sentences[sense_index] = { ...supabase_sentence }
-      //     } else if (sentence_index_exists) {
-      //       supabase_sentences[sentence_index] = { ...supabase_sentence }
-      //     } else {
-      //       supabase_sentences.push({ ...supabase_sentence })
-      //     }
-      //   }
-      //   old_language_key = new_language_key
-      //   if (key.includes('.partOfSpeech'))
-      //     supabase_sense.sense = { ...supabase_sense.sense, parts_of_speech: { new: [row[key]] } }
-
-      //   if (key.includes('.semanticDomain'))
-      //     supabase_sense.sense = { ...supabase_sense.sense, semantic_domains: { new: [row[key]] } }
-
-      //   if (key.includes('.nounClass'))
-      //     supabase_sense.sense = { ...supabase_sense.sense, noun_class: { new: row[key] } }
-      // }
-
-      // if (sense_regex.test(key)) {
-      //   const index: number = supabase_senses.findIndex(sense => sense.sense_id === supabase_sense.sense_id)
-      //   const sense_index_exists = index !== -1
-      //   if (sense_index_exists) {
-      //     supabase_senses[index] = { ...supabase_sense }
-      //   } else {
-      //     supabase_senses.push({ ...supabase_sense })
-      //   }
-      // }
-
-      // const semanticDomain_FOLLOWED_BY_OPTIONAL_DIGIT = /^semanticDomain(?:\.\d)*$/ // semanticDomain, semanticDomain2, semanticDomain<#>, but not semanticDomain_custom
-      // if (semanticDomain_FOLLOWED_BY_OPTIONAL_DIGIT.test(key)) {
-      //   if (!firebase_entry.sdn) firebase_entry.sdn = []
-
-      //   firebase_entry.sdn.push(value.toString())
-      // }
+      const sentence_id = randomUUID()
+      sentences.push({
+        dictionary_id,
+        ...c_u_meta,
+        id: sentence_id,
+        text: { default: 'I am the vernacular' },
+        translation: { en: 'I am the translation' },
+      })
+      senses_in_sentences.push({
+        ...c_meta,
+        sentence_id,
+        sense_id,
+      })
     }
-    senses.push(first_sense)
 
     for (const sense of senses) {
       sql_statements += sql_file_string('senses', sense, 'INSERT')
     }
-
-    const sentence_id = randomUUID()
-    sentences.push({
-      dictionary_id,
-      ...c_u_meta,
-      id: sentence_id,
-      text: { default: 'I am the vernacular' },
-      translation: { en: 'I am the translation' },
-    })
-    senses_in_sentences.push({
-      ...c_meta,
-      sentence_id,
-      sense_id,
-    })
 
     for (const sentence of sentences) {
       sql_statements += sql_file_string('sentences', sentence, 'INSERT')
