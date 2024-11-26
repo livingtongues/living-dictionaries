@@ -60,6 +60,16 @@ describe(import_data, () => {
     `)
   })
 
+  test('imports two entries with same dialect', async () => {
+    await import_data({ dictionary_id, rows: [
+      { lexeme: 'hi', dialects: 'dialect 1' },
+      { lexeme: 'world', dialects: 'dialect 1' },
+    ], import_id, live: true })
+    const { data: entry_view } = await anon_supabase.from('entries_view').select()
+    expect(entry_view[0].dialect_ids).toHaveLength(1)
+    expect(entry_view[0].dialect_ids).toEqual(entry_view[1].dialect_ids)
+  })
+
   test('imports complex entry', async () => {
     await import_data({ dictionary_id, rows: [{
       'lexeme': 'hi',
@@ -72,19 +82,20 @@ describe(import_data, () => {
       'scientificName': 'scientific name',
       'ID': 'A1',
       'notes': 'notes',
+      'dialects': 'dialect 1, dialect 2', // TODO, is this comma separation the plan? The code handles this.
       // first sense
       'es_gloss': 'hola',
-      'partOfSpeech': 'n,v', // TODO: is this comma separation the plan
+      'partOfSpeech': 'n,v', // TODO: is this comma separation the plan? The code handles this.
       'variant': 'variant',
       'pluralForm': 'his',
       'nounClass': '12',
-      'semanticDomain_custom': 'custom 1',
+      'semanticDomain_custom': 'custom 1', // TODO: spreadsheet allows for pipe separation here but actual code does not
       'default_vernacular_exampleSentence': 'we say hi like this',
       'en_exampleSentence': 'this is the english hi translation',
       // second sense
       's2.en_gloss': 'bye',
       's2.semanticDomain': '2',
-      's2.semanticDomain.2': '2.3', // TODO: or is this number suffix the plan (cf. partOfSpeech above) - see the code for how to handle each type, but we should settle on one or the other method
+      's2.semanticDomain.2': '2.3', // TODO: or is this number suffix the plan (cf. partOfSpeech above) - see the code for how to handle each type, but we should settle on one or the other method - code is not currently handling this column
       // third sense
       's3.fr_gloss': 'auch',
       's3.default_vernacular_exampleSentence': 'hi doc',
@@ -99,9 +110,12 @@ describe(import_data, () => {
           "audios": null,
           "created_at": "2024-03-08T00:44:04.6+00:00",
           "deleted": null,
-          "dialect_ids": null,
+          "dialect_ids": [
+            "11111111-1111-1111-1111-111111100008",
+            "11111111-1111-1111-1111-111111100009",
+          ],
           "dictionary_id": "test_dictionary_id",
-          "id": "11111111-1111-1111-1111-111111100002",
+          "id": "11111111-1111-1111-1111-111111100007",
           "main": {
             "elicitation_id": "A1",
             "lexeme": {
@@ -126,29 +140,9 @@ describe(import_data, () => {
           "senses": [
             {
               "glosses": {
-                "en": "bye",
-              },
-              "id": "11111111-1111-1111-1111-111111100005",
-              "semantic_domains": [
-                "2",
-                "2.3",
-              ],
-            },
-            {
-              "glosses": {
-                "fr": "auch",
-              },
-              "id": "11111111-1111-1111-1111-111111100006",
-              "sentence_ids": [
-                "11111111-1111-1111-1111-111111100007",
-                "11111111-1111-1111-1111-111111100008",
-              ],
-            },
-            {
-              "glosses": {
                 "es": "hola",
               },
-              "id": "11111111-1111-1111-1111-111111100003",
+              "id": "11111111-1111-1111-1111-111111100010",
               "noun_class": "12",
               "parts_of_speech": [
                 "n",
@@ -158,13 +152,33 @@ describe(import_data, () => {
                 "default": "his",
               },
               "sentence_ids": [
-                "11111111-1111-1111-1111-111111100004",
+                "11111111-1111-1111-1111-111111100011",
               ],
               "variant": {
                 "default": "variant",
               },
               "write_in_semantic_domains": [
                 "custom 1",
+              ],
+            },
+            {
+              "glosses": {
+                "fr": "auch",
+              },
+              "id": "11111111-1111-1111-1111-111111100013",
+              "sentence_ids": [
+                "11111111-1111-1111-1111-111111100014",
+                "11111111-1111-1111-1111-111111100015",
+              ],
+            },
+            {
+              "glosses": {
+                "en": "bye",
+              },
+              "id": "11111111-1111-1111-1111-111111100012",
+              "semantic_domains": [
+                "2",
+                "2.3",
               ],
             },
           ],
@@ -176,7 +190,7 @@ describe(import_data, () => {
     expect(sentences).toMatchInlineSnapshot(`
       [
         {
-          "id": "11111111-1111-1111-1111-111111100004",
+          "id": "11111111-1111-1111-1111-111111100011",
           "text": {
             "default": "we say hi like this",
           },
@@ -185,7 +199,7 @@ describe(import_data, () => {
           },
         },
         {
-          "id": "11111111-1111-1111-1111-111111100007",
+          "id": "11111111-1111-1111-1111-111111100014",
           "text": {
             "default": "hi doc",
           },
@@ -194,7 +208,7 @@ describe(import_data, () => {
           },
         },
         {
-          "id": "11111111-1111-1111-1111-111111100008",
+          "id": "11111111-1111-1111-1111-111111100015",
           "text": {
             "default": "bye doc",
           },

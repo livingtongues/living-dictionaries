@@ -44,10 +44,33 @@ export function generate_sql_statements({ row, dictionary_id, import_id, speaker
     if (row.ID) entry.elicitation_id = row.ID
     if (row.notes) entry.notes = { default: row.notes }
 
-    sql_statements += sql_file_string('entries', entry, 'INSERT')
+    let entry_dialects_sql_statements = ''
+    if (row.dialects) {
+      const dialect_strings = row.dialects.split(',').map(dialect => dialect.trim())
+      for (const dialect_to_assign of dialect_strings) {
+        let dialect_id = dialects.find(({ name }) => name.default === dialect_to_assign)?.id
+        if (!dialect_id) {
+          dialect_id = randomUUID()
+          const dialect: TablesInsert<'dialects'> = {
+            id: dialect_id,
+            ...c_u_meta,
+            dictionary_id,
+            name: { default: dialect_to_assign },
+          }
+          sql_statements += sql_file_string('dialects', dialect)
+          dialects.push({ id: dialect.id, name: dialect.name })
+        }
 
-    // TODO: Jacob will continue working on dialects and speakers and media
-    // if (row.dialects) dialects = row.dialects.split(',').map(dialect => dialect.trim())
+        entry_dialects_sql_statements += sql_file_string('entry_dialects', {
+          ...c_meta,
+          dialect_id,
+          entry_id,
+        })
+      }
+    }
+
+    sql_statements += sql_file_string('entries', entry)
+    sql_statements += entry_dialects_sql_statements
 
     const senses: TablesInsert<'senses'>[] = []
     const sentences: TablesInsert<'sentences'>[] = []
@@ -131,7 +154,7 @@ export function generate_sql_statements({ row, dictionary_id, import_id, speaker
           dictionary_id,
           ...c_u_meta,
           id: sentence_id,
-          text: { },
+          text: {},
         }
 
         for (const [key, value] of Object.entries(row) as [keyof Row, string][]) {
@@ -175,15 +198,15 @@ export function generate_sql_statements({ row, dictionary_id, import_id, speaker
     }
 
     for (const sense of senses) {
-      sql_statements += sql_file_string('senses', sense, 'INSERT')
+      sql_statements += sql_file_string('senses', sense)
     }
 
     for (const sentence of sentences) {
-      sql_statements += sql_file_string('sentences', sentence, 'INSERT')
+      sql_statements += sql_file_string('sentences', sentence)
     }
 
     for (const connection of senses_in_sentences) {
-      sql_statements += sql_file_string('senses_in_sentences', connection, 'INSERT')
+      sql_statements += sql_file_string('senses_in_sentences', connection)
     }
 
     // TODO: Jacob continue to pull from packages\scripts\migrate-to-supabase\save-content-update.ts for these
