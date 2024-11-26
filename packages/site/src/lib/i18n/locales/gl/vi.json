@@ -250,7 +250,7 @@
     "tft": "tiếng Ternate",
     "tet": "tiếng Tetum / Fehan Tetun",
     "th": "tiếng Thái",
-    "bo": "tiếng Tây Tạng",
+    "bo": "",
     "tvo": "tiếng Tidore",
     "tig": "tiếng Tigre",
     "ti": "tiếng Tigrinya",
@@ -297,6 +297,9 @@
     "hbo-hebr": "",
     "ne-2": "",
     "apd": "",
-    "hoi": ""
+    "hoi": "",
+    "mzh": "",
+    "mtq": "",
+    "cag": ""
   }
 }
