@@ -250,7 +250,7 @@
     "tft": "Ternate",
     "tet": "Tétum",
     "th": "Tailandês ",
-    "bo": "Tibetano",
+    "bo": "tibetano",
     "tvo": "Tidore",
     "tig": "Tigré",
     "ti": "Tigrínia",
@@ -297,6 +297,9 @@
     "hbo-hebr": "hebraico",
     "ne-2": "Nepalês (romanização)",
     "apd": "Árabe sudanês",
-    "hoi": "Holikachuk"
+    "hoi": "Holikachuk",
+    "mzh": "Wichí Lhamtés Güisnay",
+    "mtq": "Muong",
+    "cag": "Nivacle"
   }
 }
