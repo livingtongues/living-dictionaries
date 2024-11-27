@@ -98,17 +98,6 @@ export interface Database {
             ]
           },
           {
-            foreignKeyName: 'audio_entry_id_fkey'
-            columns: [
-              'entry_id',
-            ]
-            isOneToOne: false
-            referencedRelation: 'entries_view'
-            referencedColumns: [
-              'id',
-            ]
-          },
-          {
             foreignKeyName: 'audio_sentence_id_fkey'
             columns: [
               'sentence_id',
@@ -249,6 +238,7 @@ export interface Database {
           sentence_id: string | null
           speaker_id: string | null
           table: string | null
+          tag_id: string | null
           text_id: string | null
           timestamp: string
           type: ImportContentUpdate['type'] | null
@@ -269,6 +259,7 @@ export interface Database {
           sentence_id?: string | null
           speaker_id?: string | null
           table?: string | null
+          tag_id?: string | null
           text_id?: string | null
           timestamp?: string
           type?: ImportContentUpdate['type'] | null
@@ -289,6 +280,7 @@ export interface Database {
           sentence_id?: string | null
           speaker_id?: string | null
           table?: string | null
+          tag_id?: string | null
           text_id?: string | null
           timestamp?: string
           type?: ImportContentUpdate['type'] | null
@@ -336,17 +328,6 @@ export interface Database {
             ]
             isOneToOne: false
             referencedRelation: 'entries'
-            referencedColumns: [
-              'id',
-            ]
-          },
-          {
-            foreignKeyName: 'content_updates_entry_id_fkey'
-            columns: [
-              'entry_id',
-            ]
-            isOneToOne: false
-            referencedRelation: 'entries_view'
             referencedColumns: [
               'id',
             ]
@@ -402,6 +383,17 @@ export interface Database {
             ]
             isOneToOne: false
             referencedRelation: 'speakers_view'
+            referencedColumns: [
+              'id',
+            ]
+          },
+          {
+            foreignKeyName: 'content_updates_tag_id_fkey'
+            columns: [
+              'tag_id',
+            ]
+            isOneToOne: false
+            referencedRelation: 'tags'
             referencedColumns: [
               'id',
             ]
@@ -861,13 +853,71 @@ export interface Database {
               'id',
             ]
           },
+        ]
+      }
+      entry_tags: {
+        Row: {
+          created_at: string
+          created_by: string
+          deleted: string | null
+          entry_id: string
+          tag_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          deleted?: string | null
+          entry_id: string
+          tag_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          deleted?: string | null
+          entry_id?: string
+          tag_id?: string
+        }
+        Relationships: [
           {
-            foreignKeyName: 'entry_dialects_entry_id_fkey'
+            foreignKeyName: 'entry_tags_created_by_fkey'
+            columns: [
+              'created_by',
+            ]
+            isOneToOne: false
+            referencedRelation: 'user_emails'
+            referencedColumns: [
+              'id',
+            ]
+          },
+          {
+            foreignKeyName: 'entry_tags_created_by_fkey'
+            columns: [
+              'created_by',
+            ]
+            isOneToOne: false
+            referencedRelation: 'users'
+            referencedColumns: [
+              'id',
+            ]
+          },
+          {
+            foreignKeyName: 'entry_tags_entry_id_fkey'
             columns: [
               'entry_id',
             ]
             isOneToOne: false
-            referencedRelation: 'entries_view'
+            referencedRelation: 'entries'
+            referencedColumns: [
+              'id',
+            ]
+          },
+          {
+            foreignKeyName: 'entry_tags_tag_id_fkey'
+            columns: [
+              'tag_id',
+            ]
+            isOneToOne: false
+            referencedRelation: 'tags'
             referencedColumns: [
               'id',
             ]
@@ -1221,17 +1271,6 @@ export interface Database {
             ]
             isOneToOne: false
             referencedRelation: 'entries'
-            referencedColumns: [
-              'id',
-            ]
-          },
-          {
-            foreignKeyName: 'foreign_key_entries'
-            columns: [
-              'entry_id',
-            ]
-            isOneToOne: false
-            referencedRelation: 'entries_view'
             referencedColumns: [
               'id',
             ]
@@ -1685,6 +1724,98 @@ export interface Database {
           },
         ]
       }
+      tags: {
+        Row: {
+          created_at: string
+          created_by: string
+          deleted: string | null
+          dictionary_id: string
+          id: string
+          name: string
+          private: boolean | null
+          updated_at: string
+          updated_by: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          deleted?: string | null
+          dictionary_id: string
+          id: string
+          name: string
+          private?: boolean | null
+          updated_at?: string
+          updated_by: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          deleted?: string | null
+          dictionary_id?: string
+          id?: string
+          name?: string
+          private?: boolean | null
+          updated_at?: string
+          updated_by?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'tags_created_by_fkey'
+            columns: [
+              'created_by',
+            ]
+            isOneToOne: false
+            referencedRelation: 'user_emails'
+            referencedColumns: [
+              'id',
+            ]
+          },
+          {
+            foreignKeyName: 'tags_created_by_fkey'
+            columns: [
+              'created_by',
+            ]
+            isOneToOne: false
+            referencedRelation: 'users'
+            referencedColumns: [
+              'id',
+            ]
+          },
+          {
+            foreignKeyName: 'tags_dictionary_id_fkey'
+            columns: [
+              'dictionary_id',
+            ]
+            isOneToOne: false
+            referencedRelation: 'dictionaries'
+            referencedColumns: [
+              'id',
+            ]
+          },
+          {
+            foreignKeyName: 'tags_updated_by_fkey'
+            columns: [
+              'updated_by',
+            ]
+            isOneToOne: false
+            referencedRelation: 'user_emails'
+            referencedColumns: [
+              'id',
+            ]
+          },
+          {
+            foreignKeyName: 'tags_updated_by_fkey'
+            columns: [
+              'updated_by',
+            ]
+            isOneToOne: false
+            referencedRelation: 'users'
+            referencedColumns: [
+              'id',
+            ]
+          },
+        ]
+      }
       texts: {
         Row: {
           created_at: string
@@ -1992,20 +2123,10 @@ export interface Database {
           id: string | null
           main: EntryMainFields
           senses: SenseWithSentences[] | null
+          tag_ids: string[] | null
           updated_at: string | null
         }
         Relationships: [
-          {
-            foreignKeyName: 'entries_dictionary_id_fkey'
-            columns: [
-              'dictionary_id',
-            ]
-            isOneToOne: false
-            referencedRelation: 'dictionaries'
-            referencedColumns: [
-              'id',
-            ]
-          },
         ]
       }
       materialized_entries_view: {
@@ -2018,6 +2139,7 @@ export interface Database {
           id: string | null
           main: EntryMainFields
           senses: SenseWithSentences[] | null
+          tag_ids: string[] | null
           updated_at: string | null
         }
         Relationships: [
@@ -2149,6 +2271,24 @@ export interface Database {
           senses: SenseWithSentences[] | null
           audios: AudioWithSpeakerIds[] | null
           dialect_ids: string[] | null
+          tag_ids: string[] | null
+        }[]
+      }
+      entry_by_id: {
+        Args: {
+          passed_entry_id: string
+        }
+        Returns: {
+          id: string
+          dictionary_id: string
+          created_at: string
+          updated_at: string
+          deleted: string
+          main: EntryMainFields
+          senses: SenseWithSentences[] | null
+          audios: AudioWithSpeakerIds[] | null
+          dialect_ids: string[] | null
+          tag_ids: string[] | null
         }[]
       }
     }

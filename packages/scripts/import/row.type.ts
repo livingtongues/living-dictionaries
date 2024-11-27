@@ -14,7 +14,7 @@ export type Row = {
 export type Sense_Prefix = '' | 's2.' | 's3.' | 's4.' | 's5.' | 's6.' | 's7.' | 's8.' | 's9.'
 export type Number_Suffix = '' | '.2' | '.3' | '.4' | '.5' | '.6' | '.7' | '.8' | '.9'
 
-type Entry_Fields = 'lexeme' | `localOrthography${Number_Suffix}` | 'phonetic' | 'dialects' | 'ID' | 'notes' | 'source' | 'morphology' | 'interlinearization' | 'scientificName'
+type Entry_Fields = 'lexeme' | `localOrthography${Number_Suffix}` | 'phonetic' | 'dialects' | 'tags' | 'ID' | 'notes' | 'source' | 'morphology' | 'interlinearization' | 'scientificName'
 
 type Prefixed_Sense_Fields = `${Sense_Prefix}${Sense_Fields}`
 type Sense_Fields = `${Glossing_Languages}_gloss` | `partOfSpeech${Number_Suffix}` | `semanticDomain${Number_Suffix}` | 'semanticDomain_custom' | 'nounClass' | 'pluralForm' | 'variant' // en_gloss, s2.en_gloss, nounClass, s2.nounClass

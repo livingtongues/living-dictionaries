@@ -18,6 +18,7 @@ export async function generate_sql_statements({
   import_id,
   speakers,
   dialects,
+  tags,
   upload_operations: {
     upload_photo,
     upload_audio,
@@ -29,6 +30,7 @@ export async function generate_sql_statements({
   import_id: string
   speakers: { id: string, name: string }[]
   dialects: { id: string, name: MultiString }[]
+  tags: { id: string, name: string }[]
   upload_operations: Upload_Operations
 }) {
   try {
@@ -86,7 +88,7 @@ export async function generate_sql_statements({
     }
     if (row.phonetic) entry.phonetic = row.phonetic
     if (row.morphology) entry.morphology = row.morphology
-    if (row.source) entry.sources = row.source.split('|').map(source => source.trim())
+    if (row.source) entry.sources = row.source.split('|').map(source => source.trim()).filter(Boolean)
     if (row.scientificName) entry.scientific_names = [row.scientificName]
     if (row.ID) entry.elicitation_id = row.ID
     if (row.notes) entry.notes = { default: row.notes }
@@ -95,7 +97,7 @@ export async function generate_sql_statements({
     sql_statements += sql_file_string('content_updates', assemble_content_update({ type: 'insert_entry', entry_id, data: entry }))
 
     if (row.dialects) {
-      const dialect_strings = row.dialects.split(',').map(dialect => dialect.trim())
+      const dialect_strings = row.dialects.split('|').map(dialect => dialect.trim()).filter(Boolean)
       for (const dialect_to_assign of dialect_strings) {
         let dialect_id = dialects.find(({ name }) => name.default === dialect_to_assign)?.id
         if (!dialect_id) {
@@ -113,6 +115,30 @@ export async function generate_sql_statements({
         sql_statements += sql_file_string('entry_dialects', {
           ...c_meta,
           dialect_id,
+          entry_id,
+        })
+      }
+    }
+
+    if (row.tags) {
+      const tag_strings = row.tags.split('|').map(tag => tag.trim()).filter(Boolean)
+      for (const tag_to_assign of tag_strings) {
+        let tag_id = tags.find(({ name }) => name === tag_to_assign)?.id
+        if (!tag_id) {
+          tag_id = randomUUID()
+          const tag: TablesInsert<'tags'> = {
+            id: tag_id,
+            ...c_u_meta,
+            dictionary_id,
+            name: tag_to_assign,
+          }
+          sql_statements += sql_file_string('tags', tag)
+          tags.push({ id: tag.id, name: tag.name })
+        }
+
+        sql_statements += sql_file_string('entry_tags', {
+          ...c_meta,
+          tag_id,
           entry_id,
         })
       }
@@ -154,16 +180,14 @@ export async function generate_sql_statements({
         }
 
         if (key.endsWith('nounClass')) sense.noun_class = value
-        if (key.endsWith('partOfSpeech')) sense.parts_of_speech = returnArrayFromCommaSeparatedItems(value)
         if (key.endsWith('variant')) sense.variant = { default: value }
         if (key.endsWith('pluralForm')) sense.plural_form = { default: value }
 
+        if (key.includes('partOfSpeech')) {
+          if (!sense.parts_of_speech) sense.parts_of_speech = []
+          sense.parts_of_speech.push(value)
+        }
         if (key.includes('semanticDomain')) {
-          if (key.endsWith('semanticDomain_custom')) {
-            sense.write_in_semantic_domains = [value]
-            continue
-          }
-
           if (!sense.semantic_domains) sense.semantic_domains = []
           sense.semantic_domains.push(value)
         }
