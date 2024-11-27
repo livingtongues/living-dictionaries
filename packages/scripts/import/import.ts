@@ -28,12 +28,32 @@ async function import_from_spreadsheet({ dictionary_id, live }: { dictionary_id:
   const file = readFileSync(`./import/data/${dictionary_id}/${dictionary_id}.csv`, 'utf8')
   const rows = parseCSVFrom<Row>(file)
   rows.shift() // remove header row
-  await import_data({ dictionary_id, rows, import_id, live })
-  // todo: import media
+  await import_data({ dictionary_id, rows, import_id, live, upload_operations: { upload_photo, upload_audio, upload_video } })
 
   console.log(
     `Finished ${live ? 'importing' : 'emulating'} ${rows.length} entries to ${environment === 'dev' ? 'http://localhost:3041/' : 'livingdictionaries.app/'
     }${dictionary_id} in ${(Date.now() - dateStamp) / 1000} seconds`,
   )
   console.log('') // line break
+}
+
+async function upload_photo(filepath: string) {
+  // TODO
+  console.log({ dictionary_id })
+  await new Promise(resolve => setTimeout(resolve, 0))
+  return { storage_path: filepath, serving_url: filepath }
+}
+
+async function upload_audio(filepath: string) {
+  // TODO
+  console.log({ dictionary_id })
+  await new Promise(resolve => setTimeout(resolve, 0))
+  return { storage_path: filepath }
+}
+
+async function upload_video(filepath: string) {
+  // TODO
+  console.log({ dictionary_id })
+  await new Promise(resolve => setTimeout(resolve, 0))
+  return { storage_path: filepath }
 }

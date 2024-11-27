@@ -1,5 +1,6 @@
 import { writeFileSync } from 'node:fs'
 import { admin_supabase, postgres } from '../config-supabase'
+import type { Upload_Operations } from './generate-sql-statements'
 import { generate_sql_statements } from './generate-sql-statements'
 import type { Row } from './row.type'
 
@@ -7,11 +8,13 @@ export async function import_data({
   dictionary_id,
   rows,
   import_id,
+  upload_operations,
   live = false,
 }: {
   dictionary_id: string
   rows: Row[]
   import_id: string
+  upload_operations: Upload_Operations
   live: boolean
 }) {
   const { data: dialects } = await admin_supabase.from('dialects').select('id, name').eq('dictionary_id', dictionary_id)
@@ -28,7 +31,7 @@ export async function import_data({
 
     if (index >= start_index && index < end_index) {
       console.info(index)
-      const sql_statements = generate_sql_statements({ row, dictionary_id, import_id, speakers, dialects })
+      const sql_statements = await generate_sql_statements({ row, dictionary_id, import_id, speakers, dialects, upload_operations })
       sql_query += `${sql_statements}\n`
 
       if (index % 500 === 0)
@@ -51,4 +54,6 @@ export async function import_data({
       await postgres.execute_query('ROLLBACK;') // Rollback the transaction in case of error
     }
   }
+
+  return sql_query
 }

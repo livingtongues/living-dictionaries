@@ -5,10 +5,31 @@ import type { Number_Suffix, Row, Sense_Prefix } from './row.type'
 import { sql_file_string } from './to-sql-string'
 import { millisecond_incrementing_timestamp } from './incrementing-timestamp'
 
-// const multiple_sentence_regex = /_exampleSentence\.\d+$/
-// const has_multiple_sentence_regex_label = (key: string) => multiple_sentence_regex.test(key)
+export interface Upload_Operations {
+  upload_photo: (filepath: string) => Promise<{ storage_path: string, serving_url: string }>
+  upload_audio: (filepath: string) => Promise<{ storage_path: string }>
+  upload_video: (filepath: string) => Promise<{ storage_path: string }>
+}
 
-export function generate_sql_statements({ row, dictionary_id, import_id, speakers, dialects }: { row: Row, dictionary_id: string, import_id: string, speakers: { id: string, name: string }[], dialects: { id: string, name: MultiString }[] }) {
+export async function generate_sql_statements({
+  row,
+  dictionary_id,
+  import_id,
+  speakers,
+  dialects,
+  upload_operations: {
+    upload_photo,
+    upload_audio,
+    // upload_video,
+  },
+}: {
+  row: Row
+  dictionary_id: string
+  import_id: string
+  speakers: { id: string, name: string }[]
+  dialects: { id: string, name: MultiString }[]
+  upload_operations: Upload_Operations
+}) {
   try {
     let sql_statements = ''
 
@@ -44,7 +65,8 @@ export function generate_sql_statements({ row, dictionary_id, import_id, speaker
     if (row.ID) entry.elicitation_id = row.ID
     if (row.notes) entry.notes = { default: row.notes }
 
-    let entry_dialects_sql_statements = ''
+    sql_statements += sql_file_string('entries', entry)
+
     if (row.dialects) {
       const dialect_strings = row.dialects.split(',').map(dialect => dialect.trim())
       for (const dialect_to_assign of dialect_strings) {
@@ -61,16 +83,13 @@ export function generate_sql_statements({ row, dictionary_id, import_id, speaker
           dialects.push({ id: dialect.id, name: dialect.name })
         }
 
-        entry_dialects_sql_statements += sql_file_string('entry_dialects', {
+        sql_statements += sql_file_string('entry_dialects', {
           ...c_meta,
           dialect_id,
           entry_id,
         })
       }
     }
-
-    sql_statements += sql_file_string('entries', entry)
-    sql_statements += entry_dialects_sql_statements
 
     const senses: TablesInsert<'senses'>[] = []
     const sentences: TablesInsert<'sentences'>[] = []
@@ -209,14 +228,68 @@ export function generate_sql_statements({ row, dictionary_id, import_id, speaker
       sql_statements += sql_file_string('senses_in_sentences', connection)
     }
 
-    // TODO: Jacob continue to pull from packages\scripts\migrate-to-supabase\save-content-update.ts for these
-    // photos: TablesInsert<'photos'>[]
-    // sense_photos: TablesInsert<'sense_photos'>[]
-    // audios: TablesInsert<'audio'>[]
-    // audio_speakers: TablesInsert<'audio_speakers'>[]
-    // videos: TablesInsert<'videos'>[]
-    // video_speakers: TablesInsert<'video_speakers'>[]
-    // sense_videos: TablesInsert<'sense_videos'>[]
+    if (row.soundFile) {
+      const { storage_path } = await upload_audio(row.soundFile)
+      const audio_id = randomUUID()
+      const audio: TablesInsert<'audio'> = {
+        ...c_u_meta,
+        id: audio_id,
+        dictionary_id,
+        entry_id,
+        storage_path,
+      }
+      sql_statements += sql_file_string('audio', audio)
+
+      if (row.speakerName) {
+        let speaker_id = speakers.find(({ name }) => name === row.speakerName)?.id
+        if (!speaker_id) {
+          speaker_id = randomUUID()
+
+          const speaker: TablesInsert<'speakers'> = {
+            ...c_u_meta,
+            id: speaker_id,
+            dictionary_id,
+            name: row.speakerName,
+            birthplace: row.speakerHometown || '',
+            decade: Number.parseInt(row.speakerAge) || null,
+            gender: row.speakerGender as 'm' | 'f' | 'o' || null,
+          }
+
+          sql_statements += sql_file_string('speakers', speaker)
+          speakers.push({ id: speaker_id, name: row.speakerName })
+        }
+
+        sql_statements += sql_file_string('audio_speakers', {
+          ...c_meta,
+          audio_id,
+          speaker_id,
+        })
+      }
+    }
+
+    if (row.photoFile) {
+      const { storage_path, serving_url } = await upload_photo(row.photoFile)
+      const photo_id = randomUUID()
+      const photo: TablesInsert<'photos'> = {
+        ...c_u_meta,
+        id: photo_id,
+        dictionary_id,
+        storage_path,
+        serving_url,
+      }
+      sql_statements += sql_file_string('photos', photo)
+
+      const sense_photo: TablesInsert<'sense_photos'> = {
+        ...c_meta,
+        photo_id,
+        sense_id: senses[0].id,
+      }
+      sql_statements += sql_file_string('sense_photos', sense_photo)
+    }
+
+    // TablesInsert<'videos'>
+    // TablesInsert<'video_speakers'>
+    // TablesInsert<'sense_videos'>
 
     return `${sql_statements}\n`
   } catch (err) {
@@ -228,41 +301,3 @@ export function generate_sql_statements({ row, dictionary_id, import_id, speaker
 function returnArrayFromCommaSeparatedItems(string: string): string[] {
   return string?.split(',').map(item => item.trim()) || null
 }
-
-// TODO: placed here for Jacob to continue working on
-// if (row.photoFile) {
-//   const pf = await uploadImageFile(row.photoFile, universal_entry_id, dictionary_id, live)
-//   if (pf) firebase_entry.pf = pf
-// }
-
-// if (row.soundFile) {
-//   const audioFilePath = await uploadAudioFile(row.soundFile, universal_entry_id, dictionary_id, live)
-//   firebase_entry.sf = {
-//     path: audioFilePath,
-//     ts: Date.now(),
-//   }
-
-//   if (row.speakerName) {
-//     const speaker: ISpeaker = speakers.find(speaker => speaker.displayName === row.speakerName)
-//     if (speaker) {
-//       firebase_entry.sf.sp = speaker.id
-//     } else {
-//       const new_speaker: ISpeaker = {
-//         displayName: row.speakerName,
-//         birthplace: row.speakerHometown || '',
-//         decade: Number.parseInt(row.speakerAge) || null,
-//         gender: row.speakerGender as 'm' | 'f' | 'o' || null,
-//         contributingTo: [dictionary_id],
-//         createdAt: timestamp as Timestamp,
-//         createdBy: developer_in_charge_firebase_uid,
-//         updatedAt: timestamp as Timestamp,
-//         updatedBy: developer_in_charge_firebase_uid,
-//       }
-//       if (live) {
-//         const new_speaker_id = await db.collection('speakers').add(new_speaker).then(ref => ref.id)
-//         firebase_entry.sf.sp = new_speaker_id
-//         speakers.push({ id: new_speaker_id, ...new_speaker })
-//       }
-//     }
-//   }
-// }

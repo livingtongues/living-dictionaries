@@ -1,7 +1,8 @@
+/* eslint-disable require-await */
 import { readFileSync } from 'node:fs'
-import { anon_supabase, test_dictionary_id as dictionary_id, diego_ld_user_id, postgres } from '../config-supabase'
+import { anon_supabase, diego_ld_user_id, postgres, test_dictionary_id } from '../config-supabase'
 import { reset_local_db } from '../reset-local-db'
-import { import_data } from './import-data'
+import { import_data as _import_data } from './import-data'
 import { parseCSVFrom } from './parse-csv'
 import type { Row } from './row.type'
 
@@ -26,11 +27,25 @@ vi.mock('./incrementing-timestamp', () => {
   }
 })
 
+async function import_data(rows: Row[], dictionary_id = test_dictionary_id) {
+  return await _import_data({
+    dictionary_id,
+    rows,
+    import_id,
+    upload_operations: {
+      upload_photo: async (filepath: string) => ({ storage_path: filepath, serving_url: filepath }),
+      upload_audio: async (filepath: string) => ({ storage_path: filepath }),
+      upload_video: async (filepath: string) => ({ storage_path: filepath }),
+    },
+    live: true,
+  })
+}
+
 describe(import_data, () => {
   beforeEach(reset_local_db)
 
   test('imports simple entry', async () => {
-    await import_data({ dictionary_id, rows: [{ lexeme: 'hi', en_gloss: 'hi', pluralForm: '', nounClass: '' }], import_id, live: true })
+    await import_data([{ lexeme: 'hi', en_gloss: 'hi', pluralForm: '', nounClass: '' }])
     const { data: entry_view } = await anon_supabase.from('entries_view').select()
     expect(entry_view).toMatchInlineSnapshot(`
       [
@@ -61,17 +76,39 @@ describe(import_data, () => {
   })
 
   test('imports two entries with same dialect', async () => {
-    await import_data({ dictionary_id, rows: [
+    await import_data([
       { lexeme: 'hi', dialects: 'dialect 1' },
       { lexeme: 'world', dialects: 'dialect 1' },
-    ], import_id, live: true })
+    ])
     const { data: entry_view } = await anon_supabase.from('entries_view').select()
     expect(entry_view[0].dialect_ids).toHaveLength(1)
     expect(entry_view[0].dialect_ids).toEqual(entry_view[1].dialect_ids)
   })
 
+  test('imports audio for two entries with same speaker', async () => {
+    await import_data([
+      { lexeme: 'hi', soundFile: '1.mp3', speakerName: 'speaker 1' },
+      { lexeme: 'world', soundFile: '2.mp3', speakerName: 'speaker 1' },
+    ])
+    const { data: entry_view } = await anon_supabase.from('entries_view').select()
+    expect(entry_view[0].audios[0].speaker_ids).toHaveLength(1)
+    expect(entry_view[0].audios[0].speaker_ids).toEqual(entry_view[1].audios[0].speaker_ids)
+  })
+
+  test('imports photos', async () => {
+    await import_data([
+      { lexeme: 'hi', photoFile: 'hello.jpg' },
+    ])
+    const { data: entry_view } = await anon_supabase.from('entries_view').select()
+    expect(entry_view[0].senses[0].photo_ids).toMatchInlineSnapshot(`
+      [
+        "11111111-1111-1111-1111-111111100016",
+      ]
+    `)
+  })
+
   test('imports complex entry', async () => {
-    await import_data({ dictionary_id, rows: [{
+    await import_data([{
       'lexeme': 'hi',
       'localOrthography': 'lo1',
       'localOrthography.2': 'lo2',
@@ -102,7 +139,7 @@ describe(import_data, () => {
       's3.fr_exampleSentence': 'Bonjour docteur',
       's3.default_vernacular_exampleSentence.2': 'bye doc',
       's3.fr_exampleSentence.2': 'Au revoir docteur',
-    }], import_id, live: true })
+    }])
     const { data: entry_view } = await anon_supabase.from('entries_view').select()
     expect(entry_view).toMatchInlineSnapshot(`
       [
@@ -111,11 +148,11 @@ describe(import_data, () => {
           "created_at": "2024-03-08T00:44:04.6+00:00",
           "deleted": null,
           "dialect_ids": [
-            "11111111-1111-1111-1111-111111100008",
-            "11111111-1111-1111-1111-111111100009",
+            "11111111-1111-1111-1111-111111100018",
+            "11111111-1111-1111-1111-111111100019",
           ],
           "dictionary_id": "test_dictionary_id",
-          "id": "11111111-1111-1111-1111-111111100007",
+          "id": "11111111-1111-1111-1111-111111100017",
           "main": {
             "elicitation_id": "A1",
             "lexeme": {
@@ -142,7 +179,7 @@ describe(import_data, () => {
               "glosses": {
                 "es": "hola",
               },
-              "id": "11111111-1111-1111-1111-111111100010",
+              "id": "11111111-1111-1111-1111-111111100020",
               "noun_class": "12",
               "parts_of_speech": [
                 "n",
@@ -152,7 +189,7 @@ describe(import_data, () => {
                 "default": "his",
               },
               "sentence_ids": [
-                "11111111-1111-1111-1111-111111100011",
+                "11111111-1111-1111-1111-111111100021",
               ],
               "variant": {
                 "default": "variant",
@@ -163,22 +200,22 @@ describe(import_data, () => {
             },
             {
               "glosses": {
-                "fr": "auch",
+                "en": "bye",
               },
-              "id": "11111111-1111-1111-1111-111111100013",
-              "sentence_ids": [
-                "11111111-1111-1111-1111-111111100014",
-                "11111111-1111-1111-1111-111111100015",
+              "id": "11111111-1111-1111-1111-111111100022",
+              "semantic_domains": [
+                "2",
+                "2.3",
               ],
             },
             {
               "glosses": {
-                "en": "bye",
+                "fr": "auch",
               },
-              "id": "11111111-1111-1111-1111-111111100012",
-              "semantic_domains": [
-                "2",
-                "2.3",
+              "id": "11111111-1111-1111-1111-111111100023",
+              "sentence_ids": [
+                "11111111-1111-1111-1111-111111100024",
+                "11111111-1111-1111-1111-111111100025",
               ],
             },
           ],
@@ -190,7 +227,7 @@ describe(import_data, () => {
     expect(sentences).toMatchInlineSnapshot(`
       [
         {
-          "id": "11111111-1111-1111-1111-111111100011",
+          "id": "11111111-1111-1111-1111-111111100021",
           "text": {
             "default": "we say hi like this",
           },
@@ -199,7 +236,7 @@ describe(import_data, () => {
           },
         },
         {
-          "id": "11111111-1111-1111-1111-111111100014",
+          "id": "11111111-1111-1111-1111-111111100024",
           "text": {
             "default": "hi doc",
           },
@@ -208,7 +245,7 @@ describe(import_data, () => {
           },
         },
         {
-          "id": "11111111-1111-1111-1111-111111100015",
+          "id": "11111111-1111-1111-1111-111111100025",
           "text": {
             "default": "bye doc",
           },
@@ -227,7 +264,7 @@ describe(import_data, () => {
     const file = readFileSync(`./import/data/${dictionary_id}/${dictionary_id}.csv`, 'utf8')
     const rows = parseCSVFrom<Row>(file)
     rows.shift() // remove header row
-    await import_data({ dictionary_id, rows, import_id, live: true })
+    await import_data(rows, dictionary_id)
     const { data: entry_view } = await anon_supabase.from('entries_view').select()
     const { data: sentences } = await anon_supabase.from('sentences').select()
     expect({ entry_view, sentences }).toMatchFileSnapshot('import-data.snap.json')
