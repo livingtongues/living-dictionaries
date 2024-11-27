@@ -35,7 +35,7 @@ async function import_data(rows: Row[], dictionary_id = test_dictionary_id) {
     upload_operations: {
       upload_photo: async (filepath: string) => ({ storage_path: filepath, serving_url: filepath }),
       upload_audio: async (filepath: string) => ({ storage_path: filepath }),
-      upload_video: async (filepath: string) => ({ storage_path: filepath }),
+      // upload_video: async (filepath: string) => ({ storage_path: filepath }),
     },
     live: true,
   })
@@ -87,11 +87,25 @@ describe(import_data, () => {
 
   test('imports audio for two entries with same speaker', async () => {
     await import_data([
-      { lexeme: 'hi', soundFile: '1.mp3', speakerName: 'speaker 1' },
+      { lexeme: 'hi', soundFile: '1.mp3', speakerName: 'speaker 1', speakerHometown: 'Whoville', speakerAge: '12', speakerGender: 'm' },
       { lexeme: 'world', soundFile: '2.mp3', speakerName: 'speaker 1' },
     ])
     const { data: entry_view } = await anon_supabase.from('entries_view').select()
-    expect(entry_view[0].audios[0].speaker_ids).toHaveLength(1)
+    const { data: speakers } = await anon_supabase.from('speakers_view').select()
+    expect(speakers[0]).toMatchInlineSnapshot(`
+      {
+        "birthplace": "Whoville",
+        "created_at": "2024-03-08T00:44:04.6+00:00",
+        "decade": 12,
+        "deleted": null,
+        "dictionary_id": "test_dictionary_id",
+        "gender": "m",
+        "id": "11111111-1111-1111-1111-111111100010",
+        "name": "speaker 1",
+        "updated_at": "2024-03-08T00:44:04.6+00:00",
+      }
+    `)
+    expect(entry_view[0].audios[0].speaker_ids[0]).toEqual(speakers[0].id)
     expect(entry_view[0].audios[0].speaker_ids).toEqual(entry_view[1].audios[0].speaker_ids)
   })
 
