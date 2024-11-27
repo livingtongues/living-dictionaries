@@ -30,5 +30,3 @@ jobs:
         run: pnpm test:db:ci
 
       - run: pnpm -F scripts test:import
-        env:
-          CI: true

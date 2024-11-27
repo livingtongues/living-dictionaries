@@ -42,7 +42,9 @@ export async function import_data({
   sql_query += '\nCOMMIT;' // End the transaction
 
   try {
-    writeFileSync(`./logs/${Date.now()}_${dictionary_id}-${start_index}-query.sql`, sql_query)
+    if (!process.env.CI) {
+      writeFileSync(`./logs/${Date.now()}_${dictionary_id}-${start_index}-query.sql`, sql_query)
+    }
     if (live) {
       console.log('executing sql query')
       await postgres.execute_query(sql_query)
