@@ -6,9 +6,9 @@ import { sql_file_string } from './to-sql-string'
 import { millisecond_incrementing_timestamp } from './incrementing-timestamp'
 
 export interface Upload_Operations {
-  upload_photo: (filepath: string) => Promise<{ storage_path: string, serving_url: string }>
-  upload_audio: (filepath: string) => Promise<{ storage_path: string }>
-  upload_video: (filepath: string) => Promise<{ storage_path: string }>
+  upload_photo: (filepath: string, entry_id: string) => Promise<{ storage_path: string, serving_url: string }>
+  upload_audio: (filepath: string, entry_id: string) => Promise<{ storage_path: string }>
+  // upload_video: (filepath: string) => Promise<{ storage_path: string }>
 }
 
 export async function generate_sql_statements({
@@ -229,7 +229,7 @@ export async function generate_sql_statements({
     }
 
     if (row.soundFile) {
-      const { storage_path } = await upload_audio(row.soundFile)
+      const { storage_path } = await upload_audio(row.soundFile, entry_id)
       const audio_id = randomUUID()
       const audio: TablesInsert<'audio'> = {
         ...c_u_meta,
@@ -268,7 +268,7 @@ export async function generate_sql_statements({
     }
 
     if (row.photoFile) {
-      const { storage_path, serving_url } = await upload_photo(row.photoFile)
+      const { storage_path, serving_url } = await upload_photo(row.photoFile, entry_id)
       const photo_id = randomUUID()
       const photo: TablesInsert<'photos'> = {
         ...c_u_meta,

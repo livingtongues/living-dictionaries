@@ -1,3 +1,2 @@
 - test speakerHometown, speakerAge, speakerGender in csv
 - history updates, pull from packages\scripts\migrate-to-supabase\save-content-update.ts to save content updates properly
-- media uploads
