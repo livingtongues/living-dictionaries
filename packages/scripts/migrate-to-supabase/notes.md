@@ -1,5 +1,6 @@
 # Migrate Entries and Speakers from Firestore to Supabase
 
+- deal with content-update and content-import interface differences
 - build new Orama indexes every hour after materialized view is updated
 - migrate dictionaries and setup materialized view with entry counts (looking for type: "tdv1" and other fields beside the known ones)
 - If an audio file does not have a speaker still let it play even though speaker needs chosen
@@ -19,7 +20,7 @@
 - drop entry_updates
 - make alternate writing systems of the sentence translations as different bcp keys (same as for glosses)
 - change old senses created_by/updated_by from firebase ids to user_ids and then connect relationships and change type to uuid
-- add 331 megabytes of content_updates to db, saved a  sql queries to avoid upgrading to the $25/month
+- add 331 megabytes of content_updates to db, saved sql queries to avoid upgrading to the $25/month
 - think about find-replacing the "pn/v": "prenoun / preverb", and one other pos with dash when filtering by pos
 
 ## Notes

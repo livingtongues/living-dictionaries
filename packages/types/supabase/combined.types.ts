@@ -4,6 +4,7 @@ import type { DictionaryPhoto } from '../photo.interface'
 import type { HostedVideo, UnsupportedFields } from '../.'
 import type { Change } from './content-update.interface'
 import type { AudioWithSpeakerIds, EntryMainFields, SenseWithSentences } from './entry.interface'
+import type { ImportContentUpdate } from './content-import.interface'
 
 export interface Database {
   public: {
@@ -236,7 +237,8 @@ export interface Database {
       content_updates: {
         Row: {
           audio_id: string | null
-          change: Change
+          change: Change | null
+          data: ImportContentUpdate['data'] | null
           dialect_id: string | null
           dictionary_id: string
           entry_id: string | null
@@ -249,12 +251,14 @@ export interface Database {
           table: string | null
           text_id: string | null
           timestamp: string
+          type: ImportContentUpdate['type'] | null
           user_id: string
           video_id: string | null
         }
         Insert: {
           audio_id?: string | null
-          change: Change
+          change?: Change | null
+          data?: ImportContentUpdate['data'] | null
           dialect_id?: string | null
           dictionary_id: string
           entry_id?: string | null
@@ -267,12 +271,14 @@ export interface Database {
           table?: string | null
           text_id?: string | null
           timestamp?: string
+          type?: ImportContentUpdate['type'] | null
           user_id?: string
           video_id?: string | null
         }
         Update: {
           audio_id?: string | null
-          change?: Change
+          change?: Change | null
+          data?: ImportContentUpdate['data'] | null
           dialect_id?: string | null
           dictionary_id?: string
           entry_id?: string | null
@@ -285,6 +291,7 @@ export interface Database {
           table?: string | null
           text_id?: string | null
           timestamp?: string
+          type?: ImportContentUpdate['type'] | null
           user_id?: string
           video_id?: string | null
         }

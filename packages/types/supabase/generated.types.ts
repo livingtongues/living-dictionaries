@@ -181,7 +181,8 @@ export interface Database {
       content_updates: {
         Row: {
           audio_id: string | null
-          change: Json
+          change: Json | null
+          data: Json | null
           dialect_id: string | null
           dictionary_id: string
           entry_id: string | null
@@ -194,12 +195,14 @@ export interface Database {
           table: Database['public']['Enums']['content_tables'] | null
           text_id: string | null
           timestamp: string
+          type: string | null
           user_id: string
           video_id: string | null
         }
         Insert: {
           audio_id?: string | null
-          change: Json
+          change?: Json | null
+          data?: Json | null
           dialect_id?: string | null
           dictionary_id: string
           entry_id?: string | null
@@ -212,12 +215,14 @@ export interface Database {
           table?: Database['public']['Enums']['content_tables'] | null
           text_id?: string | null
           timestamp?: string
+          type?: string | null
           user_id?: string
           video_id?: string | null
         }
         Update: {
           audio_id?: string | null
-          change?: Json
+          change?: Json | null
+          data?: Json | null
           dialect_id?: string | null
           dictionary_id?: string
           entry_id?: string | null
@@ -230,6 +235,7 @@ export interface Database {
           table?: Database['public']['Enums']['content_tables'] | null
           text_id?: string | null
           timestamp?: string
+          type?: string | null
           user_id?: string
           video_id?: string | null
         }

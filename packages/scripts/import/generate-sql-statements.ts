@@ -1,5 +1,6 @@
 import { randomUUID } from 'node:crypto'
 import type { MultiString, TablesInsert } from '@living-dictionaries/types'
+import type { ImportContentUpdate } from '@living-dictionaries/types/supabase/content-import.interface'
 import { diego_ld_user_id } from '../config-supabase'
 import type { Number_Suffix, Row, Sense_Prefix } from './row.type'
 import { sql_file_string } from './to-sql-string'
@@ -41,8 +42,33 @@ export async function generate_sql_statements({
     }
     const c_u_meta = {
       ...c_meta,
-      updated_by: diego_ld_user_id,
-      updated_at: millisecond_incrementing_timestamp(),
+      updated_by: c_meta.created_by,
+      updated_at: c_meta.created_at,
+    }
+    const assemble_content_update = ({ data, ...rest }: ImportContentUpdate) => {
+      const data_without_meta = { ...data }
+      // @ts-expect-error
+      delete data_without_meta.id
+      // @ts-expect-error
+      delete data_without_meta.dictionary_id
+      delete data_without_meta.created_at
+      // @ts-expect-error
+      delete data_without_meta.created_by
+      // @ts-expect-error
+      delete data_without_meta.updated_at
+      // @ts-expect-error
+      delete data_without_meta.updated_by
+
+      const content_update: TablesInsert<'content_updates'> = {
+        ...rest,
+        id: randomUUID(),
+        import_id,
+        dictionary_id,
+        user_id: c_meta.created_by,
+        timestamp: c_meta.created_at,
+        data: data_without_meta,
+      }
+      return content_update
     }
 
     const entry: TablesInsert<'entries'> = {
@@ -66,6 +92,7 @@ export async function generate_sql_statements({
     if (row.notes) entry.notes = { default: row.notes }
 
     sql_statements += sql_file_string('entries', entry)
+    sql_statements += sql_file_string('content_updates', assemble_content_update({ type: 'insert_entry', entry_id, data: entry }))
 
     if (row.dialects) {
       const dialect_strings = row.dialects.split(',').map(dialect => dialect.trim())
@@ -80,6 +107,8 @@ export async function generate_sql_statements({
             name: { default: dialect_to_assign },
           }
           sql_statements += sql_file_string('dialects', dialect)
+          sql_statements += sql_file_string('content_updates', assemble_content_update({ type: 'insert_dialect', dialect_id, data: dialect }))
+
           dialects.push({ id: dialect.id, name: dialect.name })
         }
 
@@ -218,6 +247,7 @@ export async function generate_sql_statements({
 
     for (const sense of senses) {
       sql_statements += sql_file_string('senses', sense)
+      sql_statements += sql_file_string('content_updates', assemble_content_update({ type: 'insert_sense', entry_id, sense_id: sense.id, data: sense }))
     }
 
     for (const sentence of sentences) {
@@ -226,6 +256,7 @@ export async function generate_sql_statements({
 
     for (const connection of senses_in_sentences) {
       sql_statements += sql_file_string('senses_in_sentences', connection)
+      sql_statements += sql_file_string('content_updates', assemble_content_update({ type: 'insert_sentence', sentence_id: connection.sentence_id, sense_id: connection.sense_id, data: sentences.find(({ id }) => id === connection.sentence_id) }))
     }
 
     if (row.soundFile) {
@@ -239,6 +270,7 @@ export async function generate_sql_statements({
         storage_path,
       }
       sql_statements += sql_file_string('audio', audio)
+      sql_statements += sql_file_string('content_updates', assemble_content_update({ type: 'insert_audio', entry_id, audio_id: audio.id, data: audio }))
 
       if (row.speakerName) {
         let speaker_id = speakers.find(({ name }) => name === row.speakerName)?.id
@@ -256,6 +288,7 @@ export async function generate_sql_statements({
           }
 
           sql_statements += sql_file_string('speakers', speaker)
+          sql_statements += sql_file_string('content_updates', assemble_content_update({ type: 'insert_speaker', speaker_id: speaker.id, data: speaker }))
           speakers.push({ id: speaker_id, name: row.speakerName })
         }
 
@@ -278,11 +311,13 @@ export async function generate_sql_statements({
         serving_url,
       }
       sql_statements += sql_file_string('photos', photo)
+      const sense_id = senses[0].id
+      sql_statements += sql_file_string('content_updates', assemble_content_update({ type: 'insert_photo', sense_id, photo_id: photo.id, data: photo }))
 
       const sense_photo: TablesInsert<'sense_photos'> = {
         ...c_meta,
         photo_id,
-        sense_id: senses[0].id,
+        sense_id,
       }
       sql_statements += sql_file_string('sense_photos', sense_photo)
     }

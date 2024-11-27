@@ -1,6 +1,6 @@
 /* eslint-disable require-await */
 import { readFileSync } from 'node:fs'
-import { anon_supabase, diego_ld_user_id, postgres, test_dictionary_id } from '../config-supabase'
+import { admin_supabase, anon_supabase, diego_ld_user_id, postgres, test_dictionary_id } from '../config-supabase'
 import { reset_local_db } from '../reset-local-db'
 import { import_data as _import_data } from './import-data'
 import { parseCSVFrom } from './parse-csv'
@@ -66,10 +66,64 @@ describe(import_data, () => {
               "glosses": {
                 "en": "hi",
               },
-              "id": "11111111-1111-1111-1111-111111100001",
+              "id": "11111111-1111-1111-1111-111111100002",
             },
           ],
           "updated_at": "2024-03-08T00:44:04.6+00:00",
+        },
+      ]
+    `)
+    const { data: content_updates } = await admin_supabase.from('content_updates').select()
+    expect(content_updates).toMatchInlineSnapshot(`
+      [
+        {
+          "audio_id": null,
+          "change": null,
+          "data": {
+            "lexeme": {
+              "default": "hi",
+            },
+          },
+          "dialect_id": null,
+          "dictionary_id": "test_dictionary_id",
+          "entry_id": "11111111-1111-1111-1111-111111100000",
+          "id": "11111111-1111-1111-1111-111111100001",
+          "import_id": "v4-test",
+          "photo_id": null,
+          "sense_id": null,
+          "sentence_id": null,
+          "speaker_id": null,
+          "table": null,
+          "text_id": null,
+          "timestamp": "2024-03-08T00:44:04.6+00:00",
+          "type": "insert_entry",
+          "user_id": "be43b1dd-6c64-494d-b5da-10d70c384433",
+          "video_id": null,
+        },
+        {
+          "audio_id": null,
+          "change": null,
+          "data": {
+            "entry_id": "11111111-1111-1111-1111-111111100000",
+            "glosses": {
+              "en": "hi",
+            },
+          },
+          "dialect_id": null,
+          "dictionary_id": "test_dictionary_id",
+          "entry_id": "11111111-1111-1111-1111-111111100000",
+          "id": "11111111-1111-1111-1111-111111100003",
+          "import_id": "v4-test",
+          "photo_id": null,
+          "sense_id": "11111111-1111-1111-1111-111111100002",
+          "sentence_id": null,
+          "speaker_id": null,
+          "table": null,
+          "text_id": null,
+          "timestamp": "2024-03-08T00:44:04.6+00:00",
+          "type": "insert_sense",
+          "user_id": "be43b1dd-6c64-494d-b5da-10d70c384433",
+          "video_id": null,
         },
       ]
     `)
@@ -100,7 +154,7 @@ describe(import_data, () => {
         "deleted": null,
         "dictionary_id": "test_dictionary_id",
         "gender": "m",
-        "id": "11111111-1111-1111-1111-111111100010",
+        "id": "11111111-1111-1111-1111-111111100020",
         "name": "speaker 1",
         "updated_at": "2024-03-08T00:44:04.6+00:00",
       }
@@ -116,7 +170,7 @@ describe(import_data, () => {
     const { data: entry_view } = await anon_supabase.from('entries_view').select()
     expect(entry_view[0].senses[0].photo_ids).toMatchInlineSnapshot(`
       [
-        "11111111-1111-1111-1111-111111100016",
+        "11111111-1111-1111-1111-111111100032",
       ]
     `)
   })
@@ -162,11 +216,11 @@ describe(import_data, () => {
           "created_at": "2024-03-08T00:44:04.6+00:00",
           "deleted": null,
           "dialect_ids": [
-            "11111111-1111-1111-1111-111111100018",
-            "11111111-1111-1111-1111-111111100019",
+            "11111111-1111-1111-1111-111111100036",
+            "11111111-1111-1111-1111-111111100038",
           ],
           "dictionary_id": "test_dictionary_id",
-          "id": "11111111-1111-1111-1111-111111100017",
+          "id": "11111111-1111-1111-1111-111111100034",
           "main": {
             "elicitation_id": "A1",
             "lexeme": {
@@ -191,9 +245,19 @@ describe(import_data, () => {
           "senses": [
             {
               "glosses": {
+                "fr": "auch",
+              },
+              "id": "11111111-1111-1111-1111-111111100043",
+              "sentence_ids": [
+                "11111111-1111-1111-1111-111111100044",
+                "11111111-1111-1111-1111-111111100045",
+              ],
+            },
+            {
+              "glosses": {
                 "es": "hola",
               },
-              "id": "11111111-1111-1111-1111-111111100020",
+              "id": "11111111-1111-1111-1111-111111100040",
               "noun_class": "12",
               "parts_of_speech": [
                 "n",
@@ -203,7 +267,7 @@ describe(import_data, () => {
                 "default": "his",
               },
               "sentence_ids": [
-                "11111111-1111-1111-1111-111111100021",
+                "11111111-1111-1111-1111-111111100041",
               ],
               "variant": {
                 "default": "variant",
@@ -216,20 +280,10 @@ describe(import_data, () => {
               "glosses": {
                 "en": "bye",
               },
-              "id": "11111111-1111-1111-1111-111111100022",
+              "id": "11111111-1111-1111-1111-111111100042",
               "semantic_domains": [
                 "2",
                 "2.3",
-              ],
-            },
-            {
-              "glosses": {
-                "fr": "auch",
-              },
-              "id": "11111111-1111-1111-1111-111111100023",
-              "sentence_ids": [
-                "11111111-1111-1111-1111-111111100024",
-                "11111111-1111-1111-1111-111111100025",
               ],
             },
           ],
@@ -241,7 +295,7 @@ describe(import_data, () => {
     expect(sentences).toMatchInlineSnapshot(`
       [
         {
-          "id": "11111111-1111-1111-1111-111111100021",
+          "id": "11111111-1111-1111-1111-111111100041",
           "text": {
             "default": "we say hi like this",
           },
@@ -250,7 +304,7 @@ describe(import_data, () => {
           },
         },
         {
-          "id": "11111111-1111-1111-1111-111111100024",
+          "id": "11111111-1111-1111-1111-111111100044",
           "text": {
             "default": "hi doc",
           },
@@ -259,7 +313,7 @@ describe(import_data, () => {
           },
         },
         {
-          "id": "11111111-1111-1111-1111-111111100025",
+          "id": "11111111-1111-1111-1111-111111100045",
           "text": {
             "default": "bye doc",
           },

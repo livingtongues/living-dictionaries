@@ -4,22 +4,29 @@ import type { DictionaryPhoto } from '../photo.interface'
 import type { HostedVideo, UnsupportedFields } from '../.'
 import type { Change } from './content-update.interface'
 import type { AudioWithSpeakerIds, EntryMainFields, SenseWithSentences } from './entry.interface'
+import type { ImportContentUpdate } from './content-import.interface'
 
 export interface DatabaseAugments {
   public: {
     Tables: {
       content_updates: {
         Row: {
-          change: Change
+          change: Change | null
           table: string | null
+          type: ImportContentUpdate['type'] | null
+          data: ImportContentUpdate['data'] | null
         }
         Insert: {
-          change: Change
+          change?: Change | null
           table?: string | null
+          type?: ImportContentUpdate['type'] | null
+          data?: ImportContentUpdate['data'] | null
         }
         Update: {
-          change?: Change
+          change?: Change | null
           table?: string | null
+          type?: ImportContentUpdate['type'] | null
+          data?: ImportContentUpdate['data'] | null
         }
       }
       dialects: {
