@@ -9,7 +9,7 @@ import {
   get_local_orthography_headers,
   get_sense_headers,
 } from './assignHeadersForCsv'
-import { display_speaker_gender, format_senses, get_first_speaker_from_first_sound_file } from './assignFormattedEntryValuesForCsv'
+import { display_speaker_gender, format_local_orthographies, format_senses, get_first_speaker_from_first_sound_file } from './assignFormattedEntryValuesForCsv'
 import { stripHTMLTags } from './stripHTMLTags'
 import { decades } from '$lib/components/media/ages'
 import { translate_part_of_speech, translate_part_of_speech_abbreviation, translate_semantic_domain_keys } from '$lib/transformers/translate_keys_to_current_language'
@@ -76,6 +76,7 @@ export function formatCsvEntries(
   entries: ReturnType<typeof translate_entries>,
   speakers: Tables<'speakers_view'>[],
   url_from_storage_path: (path: string) => string,
+  { alternateOrthographies }: IDictionary,
 ): EntryForCSV[] {
   return entries.map((entry) => {
     const speaker = get_first_speaker_from_first_sound_file(entry, speakers)
@@ -99,6 +100,7 @@ export function formatCsvEntries(
 
     return {
       ...formatted_entry,
+      ...format_local_orthographies(alternateOrthographies, entry?.main?.lexeme),
       ...format_senses(entry),
     }
   })
