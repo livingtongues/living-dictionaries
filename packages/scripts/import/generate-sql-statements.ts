@@ -148,6 +148,9 @@ export async function generate_sql_statements({
     const sentences: TablesInsert<'sentences'>[] = []
     const senses_in_sentences: TablesInsert<'senses_in_sentences'>[] = []
 
+    const row_entries = (Object.entries(row) as [keyof Row, string][])
+      .sort(([keyA], [keyB]) => keyA.localeCompare(keyB))
+
     const first_sense_label = 's1'
     const sense_labels = new Set([first_sense_label]) // always have at least one sense
     const sense_regex = /^(?<sense_index>s\d+)\./
@@ -169,7 +172,7 @@ export async function generate_sql_statements({
       const currently_on_first_sense = sense_label === first_sense_label
       const sense_prefix = currently_on_first_sense ? '' : `${sense_label}.` as Sense_Prefix
 
-      for (const [key, value] of Object.entries(row) as [keyof Row, string][]) {
+      for (const [key, value] of row_entries) {
         if (!value) continue
 
         if (currently_on_first_sense) {
@@ -203,9 +206,9 @@ export async function generate_sql_statements({
 
       const sense_sentence_number_suffix = new Set<Number_Suffix>()
 
-      for (const [key, value] of Object.entries(row) as [keyof Row, string][]) {
-        if (!value) continue
+      for (const [key, value] of row_entries) {
         if (!key.includes('_exampleSentence')) continue
+        if (!value) continue
 
         if (currently_on_first_sense) {
           const key_has_secondary_sense_label = !!key.match(sense_regex)
@@ -227,9 +230,9 @@ export async function generate_sql_statements({
           text: {},
         }
 
-        for (const [key, value] of Object.entries(row) as [keyof Row, string][]) {
-          if (!value) continue
+        for (const [key, value] of row_entries) {
           if (!key.includes('_exampleSentence')) continue
+          if (!value) continue
 
           // ensure key has sense_prefix
           if (currently_on_first_sense) {
@@ -279,8 +282,11 @@ export async function generate_sql_statements({
       sql_statements += sql_file_string('senses_in_sentences', connection)
     }
 
-    if (row.soundFile) {
-      const { storage_path } = await upload_audio(row.soundFile, entry_id)
+    for (const [key, value] of row_entries) {
+      if (!key.includes('soundFile')) continue
+      if (!value) continue
+
+      const { storage_path } = await upload_audio(value, entry_id)
       const audio_id = randomUUID()
       const audio: TablesInsert<'audio'> = {
         ...c_u_meta,
@@ -291,6 +297,8 @@ export async function generate_sql_statements({
       }
       sql_statements += sql_file_string('audio', audio)
 
+      // TODO: the code above will properly import multiple audio files to the same entry but the code below will only import the metadata from the first audio file. Late on when adding multiple audio import ability, use the next line to get the number suffix from the key
+      // const number_suffix_with_period = key.replace('soundFile', '') as Number_Suffix
       if (row.speakerName) {
         let speaker_id = speakers.find(({ name }) => name === row.speakerName)?.id
         if (!speaker_id) {

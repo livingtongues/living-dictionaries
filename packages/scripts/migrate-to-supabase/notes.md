@@ -1,5 +1,6 @@
 # Migrate Entries and Speakers from Firestore to Supabase
 
+- deploy tags and update indexes
 - deal with content-update and content-import interface differences
 - build new Orama indexes every hour after materialized view is updated
 - migrate dictionaries and setup materialized view with entry counts (looking for type: "tdv1" and other fields beside the known ones)

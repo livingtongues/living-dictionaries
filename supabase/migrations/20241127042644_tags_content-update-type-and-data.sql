@@ -41,8 +41,6 @@ ADD COLUMN tag_id uuid REFERENCES tags;
 CREATE INDEX idx_entry_tags_entry_id ON entry_tags (entry_id);
 CREATE INDEX idx_entry_tags_non_deleted ON entry_tags (entry_id) WHERE deleted IS NULL;
 
--- TODO: fix sentences bug
-
 DROP FUNCTION entries_from_timestamp(timestamp with time zone, text) CASCADE; -- must drop and recreate if changing the shape of the function
 CREATE FUNCTION entries_from_timestamp(
   get_newer_than timestamp with time zone,
@@ -59,6 +57,31 @@ CREATE FUNCTION entries_from_timestamp(
   dialect_ids jsonb,
   tag_ids jsonb
 ) AS $$
+  WITH aggregated_audio AS (
+    SELECT
+      audio.entry_id,
+      jsonb_agg(
+        jsonb_strip_nulls(
+          jsonb_build_object(
+            'id', audio.id,
+            'storage_path', audio.storage_path,
+            'source', audio.source,
+            'speaker_ids', audio_speakers.speaker_ids
+          )
+        )
+      ORDER BY audio.created_at) AS audios
+    FROM audio
+    LEFT JOIN (
+      SELECT
+        audio_id,
+        jsonb_agg(speaker_id) AS speaker_ids
+      FROM audio_speakers
+      WHERE deleted IS NULL
+      GROUP BY audio_id
+    ) AS audio_speakers ON audio_speakers.audio_id = audio.id
+    WHERE audio.deleted IS NULL
+    GROUP BY audio.entry_id
+  )
   SELECT
     entries.id AS id,
     entries.dictionary_id AS dictionary_id,
@@ -101,33 +124,12 @@ CREATE FUNCTION entries_from_timestamp(
       )
       ELSE NULL
     END AS senses,
-    CASE 
-      WHEN COUNT(audio.id) > 0 THEN jsonb_agg(
-        jsonb_strip_nulls(
-          jsonb_build_object(
-            'id', audio.id,
-            'storage_path', audio.storage_path,
-            'source', audio.source,
-            'speaker_ids', audio_speakers.speaker_ids
-          )
-        )
-        ORDER BY audio.created_at
-      )
-      ELSE NULL
-    END AS audios,
+    aggregated_audio.audios,
     dialect_ids.dialect_ids,
     tag_ids.tag_ids
   FROM entries
   LEFT JOIN senses ON senses.entry_id = entries.id AND senses.deleted IS NULL
-  LEFT JOIN audio ON audio.entry_id = entries.id AND audio.deleted IS NULL
-  LEFT JOIN (
-    SELECT
-      audio_id,
-      jsonb_agg(speaker_id) AS speaker_ids
-    FROM audio_speakers
-    WHERE deleted IS NULL
-    GROUP BY audio_id
-  ) AS audio_speakers ON audio_speakers.audio_id = audio.id
+  LEFT JOIN aggregated_audio ON aggregated_audio.entry_id = entries.id
   LEFT JOIN (
     SELECT
       entry_id,
@@ -172,7 +174,7 @@ CREATE FUNCTION entries_from_timestamp(
     GROUP BY sense_videos.sense_id
   ) AS aggregated_video_ids ON aggregated_video_ids.sense_id = senses.id
   WHERE entries.updated_at > get_newer_than AND (dict_id = '' OR entries.dictionary_id = dict_id)
-  GROUP BY entries.id, dialect_ids.dialect_ids, tag_ids.tag_ids
+  GROUP BY entries.id, aggregated_audio.audios, dialect_ids.dialect_ids, tag_ids.tag_ids
   ORDER BY entries.updated_at ASC;
 $$ LANGUAGE SQL SECURITY DEFINER;
 
@@ -205,6 +207,31 @@ CREATE FUNCTION entry_by_id(
   dialect_ids jsonb,
   tag_ids jsonb
 ) AS $$
+  WITH aggregated_audio AS (
+    SELECT
+      audio.entry_id,
+      jsonb_agg(
+        jsonb_strip_nulls(
+          jsonb_build_object(
+            'id', audio.id,
+            'storage_path', audio.storage_path,
+            'source', audio.source,
+            'speaker_ids', audio_speakers.speaker_ids
+          )
+        )
+      ORDER BY audio.created_at) AS audios
+    FROM audio
+    LEFT JOIN (
+      SELECT
+        audio_id,
+        jsonb_agg(speaker_id) AS speaker_ids
+      FROM audio_speakers
+      WHERE deleted IS NULL
+      GROUP BY audio_id
+    ) AS audio_speakers ON audio_speakers.audio_id = audio.id
+    WHERE audio.deleted IS NULL
+    GROUP BY audio.entry_id
+  )
   SELECT
     entries.id AS id,
     entries.dictionary_id AS dictionary_id,
@@ -247,33 +274,12 @@ CREATE FUNCTION entry_by_id(
       )
       ELSE NULL
     END AS senses,
-    CASE 
-      WHEN COUNT(audio.id) > 0 THEN jsonb_agg(
-        jsonb_strip_nulls(
-          jsonb_build_object(
-            'id', audio.id,
-            'storage_path', audio.storage_path,
-            'source', audio.source,
-            'speaker_ids', audio_speakers.speaker_ids
-          )
-        )
-        ORDER BY audio.created_at
-      )
-      ELSE NULL
-    END AS audios,
+    aggregated_audio.audios,
     dialect_ids.dialect_ids,
     tag_ids.tag_ids
   FROM entries
   LEFT JOIN senses ON senses.entry_id = entries.id AND senses.deleted IS NULL
-  LEFT JOIN audio ON audio.entry_id = entries.id AND audio.deleted IS NULL
-  LEFT JOIN (
-    SELECT
-      audio_id,
-      jsonb_agg(speaker_id) AS speaker_ids
-    FROM audio_speakers
-    WHERE deleted IS NULL
-    GROUP BY audio_id
-  ) AS audio_speakers ON audio_speakers.audio_id = audio.id
+  LEFT JOIN aggregated_audio ON aggregated_audio.entry_id = entries.id
   LEFT JOIN (
     SELECT
       entry_id,
@@ -318,6 +324,6 @@ CREATE FUNCTION entry_by_id(
     GROUP BY sense_videos.sense_id
   ) AS aggregated_video_ids ON aggregated_video_ids.sense_id = senses.id
   WHERE entries.id = passed_entry_id
-  GROUP BY entries.id, dialect_ids.dialect_ids, tag_ids.tag_ids
+  GROUP BY entries.id, aggregated_audio.audios, dialect_ids.dialect_ids, tag_ids.tag_ids
   ORDER BY entries.updated_at ASC;
 $$ LANGUAGE SQL SECURITY DEFINER;
