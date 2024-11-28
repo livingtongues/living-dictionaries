@@ -287,15 +287,18 @@ export async function generate_sql_statements({
       if (!value) continue
 
       const { storage_path } = await upload_audio(value, entry_id)
-      const audio_id = randomUUID()
-      const audio: TablesInsert<'audio'> = {
-        ...c_u_meta,
-        id: audio_id,
-        dictionary_id,
-        entry_id,
-        storage_path,
+      let audio_id: string
+      if (storage_path) {
+        audio_id = randomUUID()
+        const audio: TablesInsert<'audio'> = {
+          ...c_u_meta,
+          id: audio_id,
+          dictionary_id,
+          entry_id,
+          storage_path,
+        }
+        sql_statements += sql_file_string('audio', audio)
       }
-      sql_statements += sql_file_string('audio', audio)
 
       // TODO: the code above will properly import multiple audio files to the same entry but the code below will only import the metadata from the first audio file. Late on when adding multiple audio import ability, use the next line to get the number suffix from the key
       // const number_suffix_with_period = key.replace('soundFile', '') as Number_Suffix
@@ -327,23 +330,26 @@ export async function generate_sql_statements({
     }
 
     if (row.photoFile) {
-      const { storage_path, serving_url } = await upload_photo(row.photoFile, entry_id)
-      const photo_id = randomUUID()
-      const photo: TablesInsert<'photos'> = {
-        ...c_u_meta,
-        id: photo_id,
-        dictionary_id,
-        storage_path,
-        serving_url,
+      const photo_media_result = await upload_photo(row.photoFile, entry_id)
+      if (photo_media_result) {
+        const { storage_path, serving_url } = photo_media_result
+        const photo_id = randomUUID()
+        const photo: TablesInsert<'photos'> = {
+          ...c_u_meta,
+          id: photo_id,
+          dictionary_id,
+          storage_path,
+          serving_url,
+        }
+        sql_statements += sql_file_string('photos', photo)
+        const sense_id = senses[0].id
+        const sense_photo: TablesInsert<'sense_photos'> = {
+          ...c_meta,
+          photo_id,
+          sense_id,
+        }
+        sql_statements += sql_file_string('sense_photos', sense_photo)
       }
-      sql_statements += sql_file_string('photos', photo)
-      const sense_id = senses[0].id
-      const sense_photo: TablesInsert<'sense_photos'> = {
-        ...c_meta,
-        photo_id,
-        sense_id,
-      }
-      sql_statements += sql_file_string('sense_photos', sense_photo)
     }
 
     // TablesInsert<'videos'>
