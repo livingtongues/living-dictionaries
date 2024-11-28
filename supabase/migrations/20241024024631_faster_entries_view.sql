@@ -1,7 +1,7 @@
 -- '2024-03-09 16:35:50+00', birhor should get a bit more than 1000 entries
 CREATE INDEX ON entries USING btree ("updated_at", "dictionary_id");
 
--- DROP FUNCTION entries_from_timestamp(timestamp with time zone, text) CASCADE;
+-- function updated in newer migration
 CREATE OR REPLACE FUNCTION entries_from_timestamp(
   get_newer_than timestamp with time zone,
   dict_id text

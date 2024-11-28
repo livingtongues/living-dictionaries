@@ -1,6 +1,6 @@
 import { type SearchParams as OramaSearchParams, search } from '@orama/orama'
 import type { QueryParams } from './types'
-import type { EntriesIndex } from './entries-schema'
+import type { EntriesIndex, Indexed_Entry } from './entries-schema'
 
 export interface SearchEntriesOptions {
   query_params: QueryParams
@@ -9,24 +9,26 @@ export interface SearchEntriesOptions {
   dictionary_id: string
 }
 
+const last_alphabetical = 'zz'
+
 export async function search_entries({ query_params, entries_per_page, page_index, dictionary_id }: SearchEntriesOptions, index: EntriesIndex) {
   console.info('searching for', query_params.query)
 
-  const lexemeSortBy = (a, b) => {
-    const a_lx = a[2]._lexeme[0] || 'zz'
-    const b_lx = b[2]._lexeme[0] || 'zz'
+  const sortBy = (a, b) => {
+    const [_a_id, _a_score, a_document] = a as [string, number, Indexed_Entry]
+    const [_b_id, _b_score, b_document] = b as [string, number, Indexed_Entry]
+
+    if (dictionary_id === 'onondaga') {
+      const a_id = a_document.main.elicitation_id || last_alphabetical
+      const b_id = b_document.main.elicitation_id || last_alphabetical
+      if (a_id !== b_id)
+        return a_id.localeCompare(b_id)
+    }
+
+    const a_lx = a_document._lexeme[0] || last_alphabetical
+    const b_lx = b_document._lexeme[0] || last_alphabetical
     return a_lx.localeCompare(b_lx)
   }
-
-  const onondagaSortBy = (a, b) => {
-    const a_id = a[2].elicitation_id || 'zz'
-    const b_id = b[2].elicitation_id || 'zz'
-    if (a_id !== b_id)
-      return a_id?.localeCompare(b_id)
-    return a[2].lexeme?.localeCompare(b[2].lexeme)
-  }
-
-  const sortBy = dictionary_id === 'onondaga' ? onondagaSortBy : lexemeSortBy
 
   const orama_search_params: OramaSearchParams<EntriesIndex> = {
     term: query_params.query,

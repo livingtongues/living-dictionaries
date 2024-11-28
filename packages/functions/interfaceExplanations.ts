@@ -38,4 +38,4 @@ export const entryInterface = {
   ca: 'created at',
   ua: 'updated at',
   ei: 'Elicitation Id',
-};
+}

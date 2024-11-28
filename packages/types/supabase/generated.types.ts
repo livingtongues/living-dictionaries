@@ -82,13 +82,6 @@ export interface Database {
             referencedColumns: ['id']
           },
           {
-            foreignKeyName: 'audio_entry_id_fkey'
-            columns: ['entry_id']
-            isOneToOne: false
-            referencedRelation: 'entries_view'
-            referencedColumns: ['id']
-          },
-          {
             foreignKeyName: 'audio_sentence_id_fkey'
             columns: ['sentence_id']
             isOneToOne: false
@@ -181,7 +174,8 @@ export interface Database {
       content_updates: {
         Row: {
           audio_id: string | null
-          change: Json
+          change: Json | null
+          data: Json | null
           dialect_id: string | null
           dictionary_id: string
           entry_id: string | null
@@ -192,14 +186,17 @@ export interface Database {
           sentence_id: string | null
           speaker_id: string | null
           table: Database['public']['Enums']['content_tables'] | null
+          tag_id: string | null
           text_id: string | null
           timestamp: string
+          type: string | null
           user_id: string
           video_id: string | null
         }
         Insert: {
           audio_id?: string | null
-          change: Json
+          change?: Json | null
+          data?: Json | null
           dialect_id?: string | null
           dictionary_id: string
           entry_id?: string | null
@@ -210,14 +207,17 @@ export interface Database {
           sentence_id?: string | null
           speaker_id?: string | null
           table?: Database['public']['Enums']['content_tables'] | null
+          tag_id?: string | null
           text_id?: string | null
           timestamp?: string
+          type?: string | null
           user_id?: string
           video_id?: string | null
         }
         Update: {
           audio_id?: string | null
-          change?: Json
+          change?: Json | null
+          data?: Json | null
           dialect_id?: string | null
           dictionary_id?: string
           entry_id?: string | null
@@ -228,8 +228,10 @@ export interface Database {
           sentence_id?: string | null
           speaker_id?: string | null
           table?: Database['public']['Enums']['content_tables'] | null
+          tag_id?: string | null
           text_id?: string | null
           timestamp?: string
+          type?: string | null
           user_id?: string
           video_id?: string | null
         }
@@ -260,13 +262,6 @@ export interface Database {
             columns: ['entry_id']
             isOneToOne: false
             referencedRelation: 'entries'
-            referencedColumns: ['id']
-          },
-          {
-            foreignKeyName: 'content_updates_entry_id_fkey'
-            columns: ['entry_id']
-            isOneToOne: false
-            referencedRelation: 'entries_view'
             referencedColumns: ['id']
           },
           {
@@ -302,6 +297,13 @@ export interface Database {
             columns: ['speaker_id']
             isOneToOne: false
             referencedRelation: 'speakers_view'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'content_updates_tag_id_fkey'
+            columns: ['tag_id']
+            isOneToOne: false
+            referencedRelation: 'tags'
             referencedColumns: ['id']
           },
           {
@@ -667,11 +669,57 @@ export interface Database {
             referencedRelation: 'entries'
             referencedColumns: ['id']
           },
+        ]
+      }
+      entry_tags: {
+        Row: {
+          created_at: string
+          created_by: string
+          deleted: string | null
+          entry_id: string
+          tag_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          deleted?: string | null
+          entry_id: string
+          tag_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          deleted?: string | null
+          entry_id?: string
+          tag_id?: string
+        }
+        Relationships: [
           {
-            foreignKeyName: 'entry_dialects_entry_id_fkey'
+            foreignKeyName: 'entry_tags_created_by_fkey'
+            columns: ['created_by']
+            isOneToOne: false
+            referencedRelation: 'user_emails'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'entry_tags_created_by_fkey'
+            columns: ['created_by']
+            isOneToOne: false
+            referencedRelation: 'users'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'entry_tags_entry_id_fkey'
             columns: ['entry_id']
             isOneToOne: false
-            referencedRelation: 'entries_view'
+            referencedRelation: 'entries'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'entry_tags_tag_id_fkey'
+            columns: ['tag_id']
+            isOneToOne: false
+            referencedRelation: 'tags'
             referencedColumns: ['id']
           },
         ]
@@ -964,13 +1012,6 @@ export interface Database {
             columns: ['entry_id']
             isOneToOne: false
             referencedRelation: 'entries'
-            referencedColumns: ['id']
-          },
-          {
-            foreignKeyName: 'foreign_key_entries'
-            columns: ['entry_id']
-            isOneToOne: false
-            referencedRelation: 'entries_view'
             referencedColumns: ['id']
           },
         ]
@@ -1318,6 +1359,78 @@ export interface Database {
           },
         ]
       }
+      tags: {
+        Row: {
+          created_at: string
+          created_by: string
+          deleted: string | null
+          dictionary_id: string
+          id: string
+          name: string
+          private: boolean | null
+          updated_at: string
+          updated_by: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          deleted?: string | null
+          dictionary_id: string
+          id: string
+          name: string
+          private?: boolean | null
+          updated_at?: string
+          updated_by: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          deleted?: string | null
+          dictionary_id?: string
+          id?: string
+          name?: string
+          private?: boolean | null
+          updated_at?: string
+          updated_by?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'tags_created_by_fkey'
+            columns: ['created_by']
+            isOneToOne: false
+            referencedRelation: 'user_emails'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'tags_created_by_fkey'
+            columns: ['created_by']
+            isOneToOne: false
+            referencedRelation: 'users'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'tags_dictionary_id_fkey'
+            columns: ['dictionary_id']
+            isOneToOne: false
+            referencedRelation: 'dictionaries'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'tags_updated_by_fkey'
+            columns: ['updated_by']
+            isOneToOne: false
+            referencedRelation: 'user_emails'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'tags_updated_by_fkey'
+            columns: ['updated_by']
+            isOneToOne: false
+            referencedRelation: 'users'
+            referencedColumns: ['id']
+          },
+        ]
+      }
       texts: {
         Row: {
           created_at: string
@@ -1557,17 +1670,10 @@ export interface Database {
           id: string | null
           main: Json | null
           senses: Json | null
+          tag_ids: Json | null
           updated_at: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: 'entries_dictionary_id_fkey'
-            columns: ['dictionary_id']
-            isOneToOne: false
-            referencedRelation: 'dictionaries'
-            referencedColumns: ['id']
-          },
-        ]
+        Relationships: []
       }
       materialized_entries_view: {
         Row: {
@@ -1579,6 +1685,7 @@ export interface Database {
           id: string | null
           main: Json | null
           senses: Json | null
+          tag_ids: Json | null
           updated_at: string | null
         }
         Relationships: []
@@ -1696,6 +1803,24 @@ export interface Database {
           senses: Json
           audios: Json
           dialect_ids: Json
+          tag_ids: Json
+        }[]
+      }
+      entry_by_id: {
+        Args: {
+          passed_entry_id: string
+        }
+        Returns: {
+          id: string
+          dictionary_id: string
+          created_at: string
+          updated_at: string
+          deleted: string
+          main: Json
+          senses: Json
+          audios: Json
+          dialect_ids: Json
+          tag_ids: Json
         }[]
       }
     }

@@ -1,5 +1,5 @@
 import fs from 'node:fs'
-import type { ContentImportBody } from '@living-dictionaries/types/supabase/content-import.interface'
+import type { ImportContentUpdate } from '@living-dictionaries/types/supabase/content-import.interface'
 import { jacob_ld_user_id } from '../config-supabase'
 import { sql_file_string } from './to-sql-string'
 
@@ -14,7 +14,7 @@ function millisecond_incrementing_timestamp(): string {
   return new Date(yesterday.getTime() + milliseconds_to_add).toISOString()
 }
 
-export function prepare_sql(body: ContentImportBody) {
+export function prepare_sql(body: ImportContentUpdate) {
   console.info(body)
 
   let sql_statements = ''

@@ -1,24 +1,27 @@
 import type { Glossing_Languages } from '@living-dictionaries/site/src/lib/glosses/glossing-languages'
 
 export type Row = {
-  [key in (Entry | Sense | Sentence | Media)]?: string;
+  [key in (Entry_Fields | Prefixed_Sense_Fields | Prefixed_Sentence_Fields | Media)]?: string;
 }
 // 's3.es_gloss': 'hi',
 // 'semanticDomain4': '2.3',
-// 's2.fr_exampleSentence.3': 'Bonjour docteur',
+// 's4.fr_exampleSentence': 'Bonjour docteur',
 // 's4.default_vernacular_exampleSentence': 'foo bar',
+// 's4.logogram_vernacular_exampleSentence': '富吧',
+// 's4.fr_exampleSentence.2': 'Bonjour docteur 2',
+// 's4.default_vernacular_exampleSentence.2': 'foo bar 2',
 
-type Sense_Prefix = '' | 's2.' | 's3.' | 's4.' | 's5.' | 's6.' | 's7.' | 's8.' | 's9.'
-type Number_Suffix = '' | '.2' | '.3' | '.4' | '.5' | '.6' | '.7' | '.8' | '.9'
+export type Sense_Prefix = '' | 's2.' | 's3.' | 's4.' | 's5.' | 's6.' | 's7.' | 's8.' | 's9.'
+export type Number_Suffix = '' | '.2' | '.3' | '.4' | '.5' | '.6' | '.7' | '.8' | '.9'
 
-type Entry = 'lexeme' | `localOrthography${Number_Suffix}` | 'phonetic' | 'dialects' | 'ID' | 'notes' | 'source' | 'morphology' | 'interlinearization' | 'scientificName' | 'pluralForm' | 'variant'
+type Entry_Fields = 'lexeme' | `localOrthography${Number_Suffix}` | 'phonetic' | 'dialects' | 'tags' | 'ID' | 'notes' | 'source' | 'morphology' | 'interlinearization' | 'scientificName'
 
-type Sense = `${Sense_Prefix}${Sense_Fields}`
-type Sense_Fields = `${Glossing_Languages}_gloss` | `partOfSpeech${Number_Suffix}` | `semanticDomain${Number_Suffix}` | 'semanticDomain_custom' | 'nounClass' // en_gloss, s2.en_gloss, nounClass, s2.nounClass
+type Prefixed_Sense_Fields = `${Sense_Prefix}${Sense_Fields}`
+type Sense_Fields = `${Glossing_Languages}_gloss` | `partOfSpeech${Number_Suffix}` | `semanticDomain${Number_Suffix}` | 'semanticDomain_custom' | 'nounClass' | 'pluralForm' | 'variant' // en_gloss, s2.en_gloss, nounClass, s2.nounClass
 
-type Sentence = `${Sense_Prefix}${Sentence_Fields}` | `${Sense_Prefix}${Sentence_Fields}${Number_Suffix}`
-type Sentence_Fields = `${Glossing_Languages}_exampleSentence` | `default_vernacular_exampleSentence` | 'vernacular_exampleSentence'
+type Writing_Systems = 'default' // TODO improve Writing Systems field
+type Prefixed_Sentence_Fields = `${Sense_Prefix}${Sentence_Fields}${Number_Suffix}`
+type Sentence_Fields = `${Writing_Systems}_vernacular_exampleSentence` | `${Glossing_Languages}_exampleSentence`
 
-type Media = 'photoFile' | 'soundFile' | 'speakerName' | 'speakerHometown' | 'speakerAge' | 'speakerGender'
-
-// type Writing_Systems = 'default' // TODO improve Writing Systems field
+type Media = 'photoFile' | 'soundFile' | 'speakerName' | 'speakerHometown' | 'speakerAge' | 'speakerGender' // in the future photo and video will also need sense prefixes once multiple media is allowed in the UI
+// all media will need number suffixes once multiple media is allowed in the UI

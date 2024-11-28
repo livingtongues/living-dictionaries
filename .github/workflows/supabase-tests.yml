@@ -1,7 +1,7 @@
 name: Supabase DB Vitest Tests
 on:
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   build:
@@ -28,3 +28,5 @@ jobs:
 
       - name: Run DB Tests
         run: pnpm test:db:ci
+
+      # - run: pnpm -F scripts test:import # TODO: ordering needs made deterministic before we can run this

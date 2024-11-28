@@ -2,8 +2,7 @@
 
 **Requires** files not checked into GitHub:
 - `packages/scripts/.env`
-- `packages/scripts/service-account-dev.json`
-- `packages/scripts/service-account-prod.json`
+- `packages/scripts/service-accounts.ts`
 
 - Create a new folder in `packages/scripts/import/data` right next to the `example` folder and name it using the dictionary ID of your intended upload. We'll use `kalinago` as an demo in these instructions. Do note that the `example` folder will stay checked in to git but your data won't be because we don't want it in our repo.
 - Download the CSV from Google Sheets online and place it into your newly created folder. Name it using the dictionary ID, `kalinago.csv` for example.

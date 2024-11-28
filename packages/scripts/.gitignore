@@ -1,6 +1,5 @@
 logs
-service-account*
+service-accounts.ts
 .env
 sheets-viewer-SA.json
-.env.supabase
 .env.production.supabase

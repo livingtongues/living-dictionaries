@@ -5,9 +5,6 @@ import { db } from '../config-firebase'
 // copyDoc(`dictionaries/olùkùmi`, `dictionaries/olukumi`, {}, true);
 // moveDoc(`dictionaries/olùkùmi`, `dictionaries/olukumi`);
 
-// note that entryCount will be doubled since importing entries (words) will fire off the incrementing function
-// note that Algolia index will be wiped out after deleting the old dictionary since the objectIds are identical
-
 // from https://leechy.dev/firestore-move
 export async function moveDoc(
   oldDocPath: string,
