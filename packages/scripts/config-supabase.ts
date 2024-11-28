@@ -1,9 +1,9 @@
+import { program } from 'commander'
 import PG from 'pg'
 import { createClient } from '@supabase/supabase-js'
 import type { Database } from '@living-dictionaries/types'
 import * as dotenv from 'dotenv'
 import './record-logs'
-import { program } from 'commander'
 
 program
   .option('-e, --environment [dev/prod]', 'Firebase/Supabase Project', 'dev')
@@ -14,7 +14,7 @@ export const environment = program.opts().environment === 'prod' ? 'prod' : 'dev
 console.log(`Supabase running on ${environment}`)
 
 if (environment === 'dev') {
-  dotenv.config({ path: '.env.supabase' }) // local project variables
+  dotenv.config({ path: '../site/.env.development' })
 } else {
   dotenv.config({ path: '.env.production.supabase' })
 }
@@ -22,6 +22,8 @@ if (environment === 'dev') {
 export const admin_supabase = createClient<Database>(process.env.PUBLIC_SUPABASE_API_URL, process.env.SUPABASE_SERVICE_ROLE_KEY)
 export const anon_supabase = createClient<Database>(process.env.PUBLIC_SUPABASE_API_URL, process.env.PUBLIC_SUPABASE_ANON_KEY)
 export const jacob_ld_user_id = 'de2d3715-6337-45a3-a81a-d82c3210b2a7'
+export const diego_ld_user_id = 'be43b1dd-6c64-494d-b5da-10d70c384433'
+export const test_dictionary_id = 'test_dictionary_id'
 
 class DB {
   private pool: PG.Pool
@@ -39,7 +41,7 @@ class DB {
           user: 'postgres.actkqboqpzniojhgtqzw',
           host: 'aws-0-us-west-1.pooler.supabase.com',
           database: 'postgres',
-          password: process.env.PUBLIC_SUPABASE_DB_PASSWORD,
+          password: process.env.SUPABASE_DB_PASSWORD,
           port: 6543,
         }),
     max: 10,
@@ -64,6 +66,7 @@ class DB {
       await client.query(query)
     } catch (error) {
       console.error('Error executing query:', error)
+      // @ts-expect-error
       throw new Error(error)
     } finally {
       client.release()
