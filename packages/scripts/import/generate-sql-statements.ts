@@ -202,7 +202,7 @@ export async function generate_sql_statements({
         }
       }
 
-      if (Object.keys(sense.glosses).length > 0) senses.push(sense) //* It only adds a sense if it has any glosses, otherwise it won't be added
+      if (Object.keys(sense.glosses).length > 0 || sense_label[1] === '1') senses.push(sense) //* It only adds an additional sense if it has any glosses, otherwise it won't be added
 
       const sense_sentence_number_suffix = new Set<Number_Suffix>()
 
