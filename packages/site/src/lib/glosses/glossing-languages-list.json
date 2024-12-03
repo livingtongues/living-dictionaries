@@ -1061,5 +1061,14 @@
     "internalName": "holikachuk",
     "showKeyboard": true
   },
+  "mtq": {
+    "vernacularName": "Mường",
+    "useKeyboard": "basic_kbdvntc",
+    "showKeyboard": true
+  },
+  "cag": {
+    "vernacularName": "Nivaclé",
+    "vernacularAlternate": "Nivaklé"
+  },
   "": {}
 }

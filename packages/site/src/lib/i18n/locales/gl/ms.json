@@ -250,7 +250,7 @@
     "tft": "Bahasa Ternate",
     "tet": "Bahasa Tetum",
     "th": "Bahasa Thai",
-    "bo": "Bahasa Tibet",
+    "bo": "",
     "tvo": "Bahasa Tidore",
     "tig": "Bahasa Tigre",
     "ti": "Bahasa Tigrinya",
@@ -297,6 +297,8 @@
     "hbo-hebr": "",
     "ne-2": "",
     "apd": "",
-    "hoi": ""
+    "hoi": "",
+    "mtq": "",
+    "cag": ""
   }
 }

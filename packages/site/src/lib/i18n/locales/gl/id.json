@@ -250,7 +250,7 @@
     "tft": "Bahasa Ternate",
     "tet": "Bahasa Tetum / Fehan Tetun",
     "th": "Bahasa Thai",
-    "bo": "Bahasa Tibet",
+    "bo": "Tibet",
     "tvo": "Bahasa Tidore",
     "tig": "Bahasa Tigre",
     "ti": "Bahasa Tigrinya",
@@ -297,6 +297,8 @@
     "hbo-hebr": "Ibrani",
     "ne-2": "Nepal (Romanisasi)",
     "apd": "Arab Sudan",
-    "hoi": "Holikachuk"
+    "hoi": "Holikachuk",
+    "mtq": "Muong",
+    "cag": "Nivacle"
   }
 }

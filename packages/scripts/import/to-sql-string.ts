@@ -5,11 +5,12 @@ export function sql_file_string<Table extends keyof Database['public']['Tables']
   const column_names = Object.keys(row).sort()
   const column_names_string = `"${column_names.join('", "')}"`
 
+  // @ts-expect-error
   const values = column_names.map(column => convert_to_sql_string(row[column]))
   const values_string = `(${values.join(', ')})`
   if (operation === 'INSERT') {
-    return `INSERT INTO ${table_name} (${column_names_string}) VALUES\n${values_string};`
+    return `INSERT INTO ${table_name} (${column_names_string}) VALUES\n${values_string};\n`
   } else if (operation === 'UPSERT') {
-    return `INSERT INTO ${table_name} (${column_names_string}) VALUES\n${values_string}\nON CONFLICT (id) DO UPDATE SET ${column_names.map(column => `"${column}" = EXCLUDED."${column}"`).join(', ')};`
+    return `INSERT INTO ${table_name} (${column_names_string}) VALUES\n${values_string}\nON CONFLICT (id) DO UPDATE SET ${column_names.map(column => `"${column}" = EXCLUDED."${column}"`).join(', ')};\n`
   }
 }

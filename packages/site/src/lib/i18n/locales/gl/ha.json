@@ -287,7 +287,7 @@
     "yo": "Yoruba",
     "dje": "Zarma",
     "zu": "Zulu",
-    "tri": "Tiriyó",
+    "tri": "Tiriya",
     "hix": "Hixkaryana",
     "waw": "Waiwai",
     "way": "Wayana",
@@ -297,6 +297,8 @@
     "hbo-hebr": "Ibrananci",
     "ne-2": "Nepali (Romaniyanci)",
     "apd": "Larabcin Sudan",
-    "hoi": "Holikachuk"
+    "hoi": "Holikachuk",
+    "mtq": "Muong",
+    "cag": "Nivaclé"
   }
 }
