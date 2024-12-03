@@ -92,6 +92,18 @@
       {/if}
     {/each}
 
+    {#if entry.main.elicitation_id || can_edit}
+      <EntryField
+        value={entry.main.elicitation_id}
+        field="ID"
+        {can_edit}
+        display="ID"
+        on_update={(new_value) => {
+          entry.main.elicitation_id = new_value
+          update_entry({ elicitation_id: new_value })
+        }} />
+    {/if}
+
     {#if entry.dialect_ids?.length || can_edit}
       <div class="md:px-2" class:order-2={!entry.dialect_ids?.length}>
         <div class="rounded text-xs text-gray-500 mt-1 mb-2">{$page.data.t('entry_field.dialects')}</div>
