@@ -42,8 +42,8 @@
   {/if}
 
   {#each entry.senses || [] as sense, index}
-    <!-- TODO translate sense -->
-    {#if index > 0}<div><b>Sense {index + 1}:</b></div>{/if}
+    <div />
+    {#if index > 0}<span class="text-sm"><b>{$page.data.t('sense.sense')} {index + 1}:</b></span>{/if}
     {#if selectedFields.parts_of_speech && sense.parts_of_speech}<i>{add_periods_and_comma_separate_parts_of_speech(sense.parts_of_speech)}</i>{/if}
     {#if selectedFields.gloss && sense.glosses}
       <span>
