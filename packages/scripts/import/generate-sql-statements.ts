@@ -1,6 +1,5 @@
 import { randomUUID } from 'node:crypto'
 import type { MultiString, TablesInsert } from '@living-dictionaries/types'
-import type { ImportContentUpdate } from '@living-dictionaries/types/supabase/content-import.interface'
 import { diego_ld_user_id } from '../config-supabase'
 import type { Number_Suffix, Row, Sense_Prefix } from './row.type'
 import { sql_file_string } from './to-sql-string'
@@ -52,31 +51,6 @@ export async function generate_sql_statements({
         updated_at: meta.created_at,
       }
     }
-    const assemble_content_update = ({ data, ...rest }: ImportContentUpdate) => {
-      const data_without_meta = { ...data }
-      // @ts-expect-error
-      delete data_without_meta.id
-      // @ts-expect-error
-      delete data_without_meta.dictionary_id
-      delete data_without_meta.created_at
-      // @ts-expect-error
-      delete data_without_meta.created_by
-      // @ts-expect-error
-      delete data_without_meta.updated_at
-      // @ts-expect-error
-      delete data_without_meta.updated_by
-
-      const content_update: TablesInsert<'content_updates'> = {
-        ...rest,
-        id: randomUUID(),
-        import_id,
-        dictionary_id,
-        user_id: c_meta().created_by,
-        timestamp: c_meta().created_at,
-        data: data_without_meta,
-      }
-      return content_update
-    }
 
     const entry: TablesInsert<'entries'> = {
       id: entry_id,
@@ -99,7 +73,6 @@ export async function generate_sql_statements({
     if (row.notes) entry.notes = { default: row.notes }
 
     sql_statements += sql_file_string('entries', entry)
-    sql_statements += sql_file_string('content_updates', assemble_content_update({ type: 'insert_entry', entry_id, data: entry }))
 
     if (row.dialects) {
       const dialect_strings = row.dialects.split('|').map(dialect => dialect.trim()).filter(Boolean)
@@ -125,28 +98,28 @@ export async function generate_sql_statements({
       }
     }
 
-    if (row.tags) {
-      const tag_strings = row.tags.split('|').map(tag => tag.trim()).filter(Boolean)
-      for (const tag_to_assign of tag_strings) {
-        let tag_id = tags.find(({ name }) => name === tag_to_assign)?.id
-        if (!tag_id) {
-          tag_id = randomUUID()
-          const tag: TablesInsert<'tags'> = {
-            id: tag_id,
-            ...c_u_meta(),
-            dictionary_id,
-            name: tag_to_assign,
-          }
-          sql_statements += sql_file_string('tags', tag)
-          tags.push({ id: tag.id, name: tag.name })
+    const tag_strings = (row.tags || '').split('|').map(tag => tag.trim()).filter(Boolean)
+    tag_strings.push(import_id)
+    for (const tag_to_assign of tag_strings) {
+      let tag_id = tags.find(({ name }) => name === tag_to_assign)?.id
+      if (!tag_id) {
+        tag_id = randomUUID()
+        const tag: TablesInsert<'tags'> = {
+          id: tag_id,
+          ...c_u_meta(),
+          dictionary_id,
+          ...(tag_to_assign === import_id && { private: true }),
+          name: tag_to_assign,
         }
-
-        sql_statements += sql_file_string('entry_tags', {
-          ...c_meta(),
-          tag_id,
-          entry_id,
-        })
+        sql_statements += sql_file_string('tags', tag)
+        tags.push({ id: tag.id, name: tag.name })
       }
+
+      sql_statements += sql_file_string('entry_tags', {
+        ...c_meta(),
+        tag_id,
+        entry_id,
+      })
     }
 
     const senses: TablesInsert<'senses'>[] = []

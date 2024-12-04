@@ -2,11 +2,11 @@
   "entries": [
     {
       "audios": null,
-      "created_at": "2024-03-08T00:44:04.666+00:00",
+      "created_at": "2024-03-08T00:44:04.664+00:00",
       "deleted": null,
       "dialect_ids": null,
       "dictionary_id": "example-v4-senses",
-      "id": "11111111-1111-1111-1111-111111100042",
+      "id": "11111111-1111-1111-1111-111111100040",
       "main": {
         "lexeme": {
           "default": "kꞌaal",
@@ -20,12 +20,12 @@
           "glosses": {
             "es": "sol",
           },
-          "id": "11111111-1111-1111-1111-111111100044",
+          "id": "11111111-1111-1111-1111-111111100042",
           "parts_of_speech": [
             "n",
           ],
           "sentence_ids": [
-            "11111111-1111-1111-1111-111111100045",
+            "11111111-1111-1111-1111-111111100043",
           ],
           "variant": {
             "default": "kꞌahkꞌal",
@@ -34,6 +34,18 @@
         {
           "glosses": {
             "es": "fiebre",
+          },
+          "id": "11111111-1111-1111-1111-111111100044",
+          "parts_of_speech": [
+            "n",
+          ],
+          "sentence_ids": [
+            "11111111-1111-1111-1111-111111100045",
+          ],
+        },
+        {
+          "glosses": {
+            "es": "día",
           },
           "id": "11111111-1111-1111-1111-111111100046",
           "parts_of_speech": [
@@ -45,7 +57,7 @@
         },
         {
           "glosses": {
-            "es": "día",
+            "es": "calor",
           },
           "id": "11111111-1111-1111-1111-111111100048",
           "parts_of_speech": [
@@ -55,29 +67,19 @@
             "11111111-1111-1111-1111-111111100049",
           ],
         },
-        {
-          "glosses": {
-            "es": "calor",
-          },
-          "id": "11111111-1111-1111-1111-111111100050",
-          "parts_of_speech": [
-            "n",
-          ],
-          "sentence_ids": [
-            "11111111-1111-1111-1111-111111100051",
-          ],
-        },
       ],
-      "tag_ids": null,
-      "updated_at": "2024-03-08T00:44:04.68+00:00",
+      "tag_ids": [
+        "11111111-1111-1111-1111-111111100041",
+      ],
+      "updated_at": "2024-03-08T00:44:04.678+00:00",
     },
     {
       "audios": null,
-      "created_at": "2024-03-08T00:44:04.681+00:00",
+      "created_at": "2024-03-08T00:44:04.679+00:00",
       "deleted": null,
       "dialect_ids": null,
       "dictionary_id": "example-v4-senses",
-      "id": "11111111-1111-1111-1111-111111100052",
+      "id": "11111111-1111-1111-1111-111111100050",
       "main": {
         "lexeme": {
           "default": "kꞌajkꞌal",
@@ -91,7 +93,7 @@
           "glosses": {
             "es": "sol",
           },
-          "id": "11111111-1111-1111-1111-111111100054",
+          "id": "11111111-1111-1111-1111-111111100051",
           "parts_of_speech": [
             "n",
           ],
@@ -103,7 +105,7 @@
           "glosses": {
             "es": "día",
           },
-          "id": "11111111-1111-1111-1111-111111100055",
+          "id": "11111111-1111-1111-1111-111111100052",
           "parts_of_speech": [
             "n",
           ],
@@ -112,7 +114,7 @@
           "glosses": {
             "es": "calor",
           },
-          "id": "11111111-1111-1111-1111-111111100056",
+          "id": "11111111-1111-1111-1111-111111100053",
           "parts_of_speech": [
             "n",
           ],
@@ -121,22 +123,24 @@
           "glosses": {
             "es": "fiebre",
           },
-          "id": "11111111-1111-1111-1111-111111100057",
+          "id": "11111111-1111-1111-1111-111111100054",
           "parts_of_speech": [
             "n",
           ],
         },
       ],
-      "tag_ids": null,
-      "updated_at": "2024-03-08T00:44:04.687+00:00",
+      "tag_ids": [
+        "11111111-1111-1111-1111-111111100041",
+      ],
+      "updated_at": "2024-03-08T00:44:04.684+00:00",
     },
     {
       "audios": null,
-      "created_at": "2024-03-08T00:44:04.688+00:00",
+      "created_at": "2024-03-08T00:44:04.685+00:00",
       "deleted": null,
       "dialect_ids": null,
       "dictionary_id": "example-v4-senses",
-      "id": "11111111-1111-1111-1111-111111100058",
+      "id": "11111111-1111-1111-1111-111111100055",
       "main": {
         "lexeme": {
           "default": "kꞌajkꞌ",
@@ -150,12 +154,12 @@
           "glosses": {
             "es": "fuego",
           },
-          "id": "11111111-1111-1111-1111-111111100060",
+          "id": "11111111-1111-1111-1111-111111100056",
           "parts_of_speech": [
             "n",
           ],
           "sentence_ids": [
-            "11111111-1111-1111-1111-111111100061",
+            "11111111-1111-1111-1111-111111100057",
           ],
           "variant": {
             "default": "kꞌahkꞌ",
@@ -165,6 +169,30 @@
           "glosses": {
             "es": "bravo",
           },
+          "id": "11111111-1111-1111-1111-111111100058",
+          "parts_of_speech": [
+            "adj",
+          ],
+          "sentence_ids": [
+            "11111111-1111-1111-1111-111111100059",
+          ],
+        },
+        {
+          "glosses": {
+            "es": "fiebre",
+          },
+          "id": "11111111-1111-1111-1111-111111100060",
+          "parts_of_speech": [
+            "n",
+          ],
+          "sentence_ids": [
+            "11111111-1111-1111-1111-111111100061",
+          ],
+        },
+        {
+          "glosses": {
+            "es": "caliente",
+          },
           "id": "11111111-1111-1111-1111-111111100062",
           "parts_of_speech": [
             "adj",
@@ -173,41 +201,19 @@
             "11111111-1111-1111-1111-111111100063",
           ],
         },
-        {
-          "glosses": {
-            "es": "fiebre",
-          },
-          "id": "11111111-1111-1111-1111-111111100064",
-          "parts_of_speech": [
-            "n",
-          ],
-          "sentence_ids": [
-            "11111111-1111-1111-1111-111111100065",
-          ],
-        },
-        {
-          "glosses": {
-            "es": "caliente",
-          },
-          "id": "11111111-1111-1111-1111-111111100066",
-          "parts_of_speech": [
-            "adj",
-          ],
-          "sentence_ids": [
-            "11111111-1111-1111-1111-111111100067",
-          ],
-        },
       ],
-      "tag_ids": null,
-      "updated_at": "2024-03-08T00:44:04.702+00:00",
+      "tag_ids": [
+        "11111111-1111-1111-1111-111111100041",
+      ],
+      "updated_at": "2024-03-08T00:44:04.698+00:00",
     },
     {
       "audios": null,
-      "created_at": "2024-03-08T00:44:04.703+00:00",
+      "created_at": "2024-03-08T00:44:04.699+00:00",
       "deleted": null,
       "dialect_ids": null,
       "dictionary_id": "example-v4-senses",
-      "id": "11111111-1111-1111-1111-111111100068",
+      "id": "11111111-1111-1111-1111-111111100064",
       "main": {
         "lexeme": {
           "default": "jun",
@@ -221,61 +227,63 @@
           "glosses": {
             "es": "libro",
           },
-          "id": "11111111-1111-1111-1111-111111100070",
+          "id": "11111111-1111-1111-1111-111111100065",
           "parts_of_speech": [
             "n",
           ],
           "sentence_ids": [
-            "11111111-1111-1111-1111-111111100071",
+            "11111111-1111-1111-1111-111111100066",
           ],
         },
         {
           "glosses": {
             "es": "cuaderno",
           },
-          "id": "11111111-1111-1111-1111-111111100072",
+          "id": "11111111-1111-1111-1111-111111100067",
           "parts_of_speech": [
             "n",
           ],
           "sentence_ids": [
-            "11111111-1111-1111-1111-111111100073",
+            "11111111-1111-1111-1111-111111100068",
           ],
         },
         {
           "glosses": {
             "es": "documento",
           },
-          "id": "11111111-1111-1111-1111-111111100074",
+          "id": "11111111-1111-1111-1111-111111100069",
           "parts_of_speech": [
             "n",
           ],
           "sentence_ids": [
-            "11111111-1111-1111-1111-111111100075",
+            "11111111-1111-1111-1111-111111100070",
           ],
         },
         {
           "glosses": {
             "es": "papel",
           },
-          "id": "11111111-1111-1111-1111-111111100076",
+          "id": "11111111-1111-1111-1111-111111100071",
           "parts_of_speech": [
             "n",
           ],
           "sentence_ids": [
-            "11111111-1111-1111-1111-111111100077",
+            "11111111-1111-1111-1111-111111100072",
           ],
         },
       ],
-      "tag_ids": null,
-      "updated_at": "2024-03-08T00:44:04.717+00:00",
+      "tag_ids": [
+        "11111111-1111-1111-1111-111111100041",
+      ],
+      "updated_at": "2024-03-08T00:44:04.712+00:00",
     },
     {
       "audios": null,
-      "created_at": "2024-03-08T00:44:04.718+00:00",
+      "created_at": "2024-03-08T00:44:04.713+00:00",
       "deleted": null,
       "dialect_ids": null,
       "dictionary_id": "example-v4-senses",
-      "id": "11111111-1111-1111-1111-111111100078",
+      "id": "11111111-1111-1111-1111-111111100073",
       "main": {
         "lexeme": {
           "default": "jeꞌel",
@@ -289,12 +297,12 @@
           "glosses": {
             "es": "abierto",
           },
-          "id": "11111111-1111-1111-1111-111111100080",
+          "id": "11111111-1111-1111-1111-111111100074",
           "parts_of_speech": [
             "adj",
           ],
           "sentence_ids": [
-            "11111111-1111-1111-1111-111111100081",
+            "11111111-1111-1111-1111-111111100075",
           ],
           "variant": {
             "default": "makal",
@@ -304,23 +312,25 @@
           "glosses": {
             "es": "abrir",
           },
-          "id": "11111111-1111-1111-1111-111111100082",
+          "id": "11111111-1111-1111-1111-111111100076",
           "sentence_ids": [
-            "11111111-1111-1111-1111-111111100083",
+            "11111111-1111-1111-1111-111111100077",
           ],
         },
       ],
-      "tag_ids": null,
-      "updated_at": "2024-03-08T00:44:04.726+00:00",
+      "tag_ids": [
+        "11111111-1111-1111-1111-111111100041",
+      ],
+      "updated_at": "2024-03-08T00:44:04.72+00:00",
     },
   ],
   "sentences": [
     {
-      "created_at": "2024-03-08T00:44:04.67+00:00",
+      "created_at": "2024-03-08T00:44:04.668+00:00",
       "created_by": "be43b1dd-6c64-494d-b5da-10d70c384433",
       "deleted": null,
       "dictionary_id": "example-v4-senses",
-      "id": "11111111-1111-1111-1111-111111100045",
+      "id": "11111111-1111-1111-1111-111111100043",
       "text": {
         "default": "Jaꞌnix lek-a lokꞌix tel kꞌaal",
       },
@@ -328,15 +338,15 @@
       "translation": {
         "es": "Que bueno, ya salió el sol",
       },
-      "updated_at": "2024-03-08T00:44:04.67+00:00",
+      "updated_at": "2024-03-08T00:44:04.668+00:00",
       "updated_by": "be43b1dd-6c64-494d-b5da-10d70c384433",
     },
     {
-      "created_at": "2024-03-08T00:44:04.673+00:00",
+      "created_at": "2024-03-08T00:44:04.671+00:00",
       "created_by": "be43b1dd-6c64-494d-b5da-10d70c384433",
       "deleted": null,
       "dictionary_id": "example-v4-senses",
-      "id": "11111111-1111-1111-1111-111111100047",
+      "id": "11111111-1111-1111-1111-111111100045",
       "text": {
         "default": "Ay bayal skꞌaal te chꞌin x-Ixchele",
       },
@@ -344,15 +354,15 @@
       "translation": {
         "es": "Mi hijita Ixchel tiene mucha fiebre",
       },
-      "updated_at": "2024-03-08T00:44:04.673+00:00",
+      "updated_at": "2024-03-08T00:44:04.671+00:00",
       "updated_by": "be43b1dd-6c64-494d-b5da-10d70c384433",
     },
     {
-      "created_at": "2024-03-08T00:44:04.676+00:00",
+      "created_at": "2024-03-08T00:44:04.674+00:00",
       "created_by": "be43b1dd-6c64-494d-b5da-10d70c384433",
       "deleted": null,
       "dictionary_id": "example-v4-senses",
-      "id": "11111111-1111-1111-1111-111111100049",
+      "id": "11111111-1111-1111-1111-111111100047",
       "text": {
         "default": "Bajtix kaal mamtik, yorailix ich lewa",
       },
@@ -360,15 +370,15 @@
       "translation": {
         "es": "Ya transcurrió el día mi estimado señor, es momento de tomar un descanso",
       },
-      "updated_at": "2024-03-08T00:44:04.676+00:00",
+      "updated_at": "2024-03-08T00:44:04.674+00:00",
       "updated_by": "be43b1dd-6c64-494d-b5da-10d70c384433",
     },
     {
-      "created_at": "2024-03-08T00:44:04.679+00:00",
+      "created_at": "2024-03-08T00:44:04.677+00:00",
       "created_by": "be43b1dd-6c64-494d-b5da-10d70c384433",
       "deleted": null,
       "dictionary_id": "example-v4-senses",
-      "id": "11111111-1111-1111-1111-111111100051",
+      "id": "11111111-1111-1111-1111-111111100049",
       "text": {
         "default": "Toyol kꞌaal ya jkaꞌiy",
       },
@@ -376,15 +386,15 @@
       "translation": {
         "es": "Siento mucho calor",
       },
-      "updated_at": "2024-03-08T00:44:04.679+00:00",
+      "updated_at": "2024-03-08T00:44:04.677+00:00",
       "updated_by": "be43b1dd-6c64-494d-b5da-10d70c384433",
     },
     {
-      "created_at": "2024-03-08T00:44:04.692+00:00",
+      "created_at": "2024-03-08T00:44:04.688+00:00",
       "created_by": "be43b1dd-6c64-494d-b5da-10d70c384433",
       "deleted": null,
       "dictionary_id": "example-v4-senses",
-      "id": "11111111-1111-1111-1111-111111100061",
+      "id": "11111111-1111-1111-1111-111111100057",
       "text": {
         "default": "Tilix kuꞌun-i kꞌajkꞌi",
       },
@@ -392,15 +402,15 @@
       "translation": {
         "es": "Ya hice el fuego",
       },
-      "updated_at": "2024-03-08T00:44:04.692+00:00",
+      "updated_at": "2024-03-08T00:44:04.688+00:00",
       "updated_by": "be43b1dd-6c64-494d-b5da-10d70c384433",
     },
     {
-      "created_at": "2024-03-08T00:44:04.695+00:00",
+      "created_at": "2024-03-08T00:44:04.691+00:00",
       "created_by": "be43b1dd-6c64-494d-b5da-10d70c384433",
       "deleted": null,
       "dictionary_id": "example-v4-senses",
-      "id": "11111111-1111-1111-1111-111111100063",
+      "id": "11111111-1111-1111-1111-111111100059",
       "text": {
         "default": "Lom kꞌajkꞌ te mamal jkaxlane",
       },
@@ -408,15 +418,15 @@
       "translation": {
         "es": "El mestizo es muy bravo",
       },
-      "updated_at": "2024-03-08T00:44:04.695+00:00",
+      "updated_at": "2024-03-08T00:44:04.691+00:00",
       "updated_by": "be43b1dd-6c64-494d-b5da-10d70c384433",
     },
     {
-      "created_at": "2024-03-08T00:44:04.698+00:00",
+      "created_at": "2024-03-08T00:44:04.694+00:00",
       "created_by": "be43b1dd-6c64-494d-b5da-10d70c384433",
       "deleted": null,
       "dictionary_id": "example-v4-senses",
-      "id": "11111111-1111-1111-1111-111111100065",
+      "id": "11111111-1111-1111-1111-111111100061",
       "text": {
         "default": "Tsakbil ta kꞌajkꞌ te alale",
       },
@@ -424,15 +434,15 @@
       "translation": {
         "es": "El bebé tiene mucha fiebre",
       },
-      "updated_at": "2024-03-08T00:44:04.698+00:00",
+      "updated_at": "2024-03-08T00:44:04.694+00:00",
       "updated_by": "be43b1dd-6c64-494d-b5da-10d70c384433",
     },
     {
-      "created_at": "2024-03-08T00:44:04.701+00:00",
+      "created_at": "2024-03-08T00:44:04.697+00:00",
       "created_by": "be43b1dd-6c64-494d-b5da-10d70c384433",
       "deleted": null,
       "dictionary_id": "example-v4-senses",
-      "id": "11111111-1111-1111-1111-111111100067",
+      "id": "11111111-1111-1111-1111-111111100063",
       "text": {
         "default": "El café está caliente, tómalo despacio",
       },
@@ -440,15 +450,15 @@
       "translation": {
         "es": "Kꞌajkꞌ te kajpele, kꞌume xa awuchꞌ",
       },
-      "updated_at": "2024-03-08T00:44:04.701+00:00",
+      "updated_at": "2024-03-08T00:44:04.697+00:00",
       "updated_by": "be43b1dd-6c64-494d-b5da-10d70c384433",
     },
     {
-      "created_at": "2024-03-08T00:44:04.707+00:00",
+      "created_at": "2024-03-08T00:44:04.702+00:00",
       "created_by": "be43b1dd-6c64-494d-b5da-10d70c384433",
       "deleted": null,
       "dictionary_id": "example-v4-senses",
-      "id": "11111111-1111-1111-1111-111111100071",
+      "id": "11111111-1111-1111-1111-111111100066",
       "text": {
         "default": "¿Beluk apas? - Yakalon ta skꞌoponel jun",
       },
@@ -456,15 +466,15 @@
       "translation": {
         "es": "¿Qué haces? - Estoy leyendo un libro",
       },
-      "updated_at": "2024-03-08T00:44:04.707+00:00",
+      "updated_at": "2024-03-08T00:44:04.702+00:00",
       "updated_by": "be43b1dd-6c64-494d-b5da-10d70c384433",
     },
     {
-      "created_at": "2024-03-08T00:44:04.71+00:00",
+      "created_at": "2024-03-08T00:44:04.705+00:00",
       "created_by": "be43b1dd-6c64-494d-b5da-10d70c384433",
       "deleted": null,
       "dictionary_id": "example-v4-senses",
-      "id": "11111111-1111-1111-1111-111111100073",
+      "id": "11111111-1111-1111-1111-111111100068",
       "text": {
         "default": "La jta ta kitsel te june",
       },
@@ -472,15 +482,15 @@
       "translation": {
         "es": "Alcancé a rayar mi cuaderno",
       },
-      "updated_at": "2024-03-08T00:44:04.71+00:00",
+      "updated_at": "2024-03-08T00:44:04.705+00:00",
       "updated_by": "be43b1dd-6c64-494d-b5da-10d70c384433",
     },
     {
-      "created_at": "2024-03-08T00:44:04.713+00:00",
+      "created_at": "2024-03-08T00:44:04.708+00:00",
       "created_by": "be43b1dd-6c64-494d-b5da-10d70c384433",
       "deleted": null,
       "dictionary_id": "example-v4-senses",
-      "id": "11111111-1111-1111-1111-111111100075",
+      "id": "11111111-1111-1111-1111-111111100070",
       "text": {
         "default": "Maꞌme xa awochꞌ te ajune",
       },
@@ -488,15 +498,15 @@
       "translation": {
         "es": "No vayas a arrugar tu documento",
       },
-      "updated_at": "2024-03-08T00:44:04.713+00:00",
+      "updated_at": "2024-03-08T00:44:04.708+00:00",
       "updated_by": "be43b1dd-6c64-494d-b5da-10d70c384433",
     },
     {
-      "created_at": "2024-03-08T00:44:04.716+00:00",
+      "created_at": "2024-03-08T00:44:04.711+00:00",
       "created_by": "be43b1dd-6c64-494d-b5da-10d70c384433",
       "deleted": null,
       "dictionary_id": "example-v4-senses",
-      "id": "11111111-1111-1111-1111-111111100077",
+      "id": "11111111-1111-1111-1111-111111100072",
       "text": {
         "default": "Zoe rompió el papel",
       },
@@ -504,15 +514,15 @@
       "translation": {
         "es": "La schꞌiꞌ jun te Zoe",
       },
-      "updated_at": "2024-03-08T00:44:04.716+00:00",
+      "updated_at": "2024-03-08T00:44:04.711+00:00",
       "updated_by": "be43b1dd-6c64-494d-b5da-10d70c384433",
     },
     {
-      "created_at": "2024-03-08T00:44:04.722+00:00",
+      "created_at": "2024-03-08T00:44:04.716+00:00",
       "created_by": "be43b1dd-6c64-494d-b5da-10d70c384433",
       "deleted": null,
       "dictionary_id": "example-v4-senses",
-      "id": "11111111-1111-1111-1111-111111100081",
+      "id": "11111111-1111-1111-1111-111111100075",
       "text": {
         "default": "Jeꞌel jilel stiꞌ jna",
       },
@@ -520,15 +530,15 @@
       "translation": {
         "es": "La puerta de mi casa quedó abierta",
       },
-      "updated_at": "2024-03-08T00:44:04.722+00:00",
+      "updated_at": "2024-03-08T00:44:04.716+00:00",
       "updated_by": "be43b1dd-6c64-494d-b5da-10d70c384433",
     },
     {
-      "created_at": "2024-03-08T00:44:04.725+00:00",
+      "created_at": "2024-03-08T00:44:04.719+00:00",
       "created_by": "be43b1dd-6c64-494d-b5da-10d70c384433",
       "deleted": null,
       "dictionary_id": "example-v4-senses",
-      "id": "11111111-1111-1111-1111-111111100083",
+      "id": "11111111-1111-1111-1111-111111100077",
       "text": {
         "default": "Jeꞌa tel tebuk i tiꞌnai ay bayal kꞌaal",
       },
@@ -536,7 +546,7 @@
       "translation": {
         "es": "Abre un poco la puerta, hace mucho calor",
       },
-      "updated_at": "2024-03-08T00:44:04.725+00:00",
+      "updated_at": "2024-03-08T00:44:04.719+00:00",
       "updated_by": "be43b1dd-6c64-494d-b5da-10d70c384433",
     },
   ],
