@@ -7,9 +7,11 @@ import { sql_file_string } from './to-sql-string'
 import { millisecond_incrementing_timestamp } from './incrementing-timestamp'
 
 export interface Upload_Operations {
-  upload_photo: (filepath: string, entry_id: string) => Promise<{ storage_path: string, serving_url: string }>
-  upload_audio: (filepath: string, entry_id: string) => Promise<{ storage_path: string }>
-  // upload_video: (filepath: string) => Promise<{ storage_path: string }>
+  upload_photo: (filepath: string, entry_id: string) => Promise<
+  { storage_path: string, serving_url: string, error: null } | { storage_path: null, serving_url: null, error: string }
+  >
+  upload_audio: (filepath: string, entry_id: string) => Promise<{ storage_path: string, error: null } | { storage_path: null, error: string }>
+  // upload_video: (filepath: string) => Promise<{ storage_path: string, error: null } | { storage_path: null, error: string }>
 }
 
 export async function generate_sql_statements({
@@ -38,14 +40,17 @@ export async function generate_sql_statements({
 
     const entry_id = randomUUID()
 
-    const c_meta = {
+    const c_meta = () => ({
       created_by: diego_ld_user_id,
       created_at: millisecond_incrementing_timestamp(),
-    }
-    const c_u_meta = {
-      ...c_meta,
-      updated_by: c_meta.created_by,
-      updated_at: c_meta.created_at,
+    })
+    const c_u_meta = () => {
+      const meta = c_meta()
+      return {
+        ...meta,
+        updated_by: meta.created_by,
+        updated_at: meta.created_at,
+      }
     }
     const assemble_content_update = ({ data, ...rest }: ImportContentUpdate) => {
       const data_without_meta = { ...data }
@@ -66,8 +71,8 @@ export async function generate_sql_statements({
         id: randomUUID(),
         import_id,
         dictionary_id,
-        user_id: c_meta.created_by,
-        timestamp: c_meta.created_at,
+        user_id: c_meta().created_by,
+        timestamp: c_meta().created_at,
         data: data_without_meta,
       }
       return content_update
@@ -76,7 +81,7 @@ export async function generate_sql_statements({
     const entry: TablesInsert<'entries'> = {
       id: entry_id,
       dictionary_id,
-      ...c_u_meta,
+      ...c_u_meta(),
       lexeme: {
         default: row.lexeme,
         ...(row.localOrthography && { lo1: row.localOrthography }),
@@ -104,7 +109,7 @@ export async function generate_sql_statements({
           dialect_id = randomUUID()
           const dialect: TablesInsert<'dialects'> = {
             id: dialect_id,
-            ...c_u_meta,
+            ...c_u_meta(),
             dictionary_id,
             name: { default: dialect_to_assign },
           }
@@ -113,7 +118,7 @@ export async function generate_sql_statements({
         }
 
         sql_statements += sql_file_string('entry_dialects', {
-          ...c_meta,
+          ...c_meta(),
           dialect_id,
           entry_id,
         })
@@ -128,7 +133,7 @@ export async function generate_sql_statements({
           tag_id = randomUUID()
           const tag: TablesInsert<'tags'> = {
             id: tag_id,
-            ...c_u_meta,
+            ...c_u_meta(),
             dictionary_id,
             name: tag_to_assign,
           }
@@ -137,7 +142,7 @@ export async function generate_sql_statements({
         }
 
         sql_statements += sql_file_string('entry_tags', {
-          ...c_meta,
+          ...c_meta(),
           tag_id,
           entry_id,
         })
@@ -151,12 +156,13 @@ export async function generate_sql_statements({
     const row_entries = (Object.entries(row) as [keyof Row, string][])
       .sort(([keyA], [keyB]) => keyA.localeCompare(keyB))
 
+    type Sense_Label = 's1' | 's2' | 's3' | 's4'// etc, for type-safety we just need a few here
     const first_sense_label = 's1'
-    const sense_labels = new Set([first_sense_label]) // always have at least one sense
+    const sense_labels = new Set<Sense_Label>([first_sense_label]) // always have at least one sense
     const sense_regex = /^(?<sense_index>s\d+)\./
     for (const key of Object.keys(row)) {
       const match = key.match(sense_regex)
-      if (match) sense_labels.add(match.groups.sense_index)
+      if (match) sense_labels.add(match.groups.sense_index as Sense_Label)
     }
 
     for (const sense_label of sense_labels) {
@@ -164,7 +170,7 @@ export async function generate_sql_statements({
 
       const sense: TablesInsert<'senses'> = {
         entry_id,
-        ...c_u_meta,
+        ...c_u_meta(),
         id: sense_id,
         glosses: {},
       }
@@ -202,7 +208,7 @@ export async function generate_sql_statements({
         }
       }
 
-      if (Object.keys(sense.glosses).length > 0 || sense_label[1] === '1') senses.push(sense) //* It only adds an additional sense if it has any glosses, otherwise it won't be added
+      if (sense_label === 's1' || Object.keys(sense.glosses).length > 0) senses.push(sense) //* It only adds an additional sense if it has any glosses, otherwise it won't be added
 
       const sense_sentence_number_suffix = new Set<Number_Suffix>()
 
@@ -225,7 +231,7 @@ export async function generate_sql_statements({
         const sentence_id = randomUUID()
         const sentence: TablesInsert<'sentences'> = {
           dictionary_id,
-          ...c_u_meta,
+          ...c_u_meta(),
           id: sentence_id,
           text: {},
         }
@@ -263,7 +269,7 @@ export async function generate_sql_statements({
 
         sentences.push(sentence)
         senses_in_sentences.push({
-          ...c_meta,
+          ...c_meta(),
           sentence_id,
           sense_id,
         })
@@ -286,70 +292,76 @@ export async function generate_sql_statements({
       if (!key.includes('soundFile')) continue
       if (!value) continue
 
-      const { storage_path } = await upload_audio(value, entry_id)
-      let audio_id: string
-      if (storage_path) {
-        audio_id = randomUUID()
-        const audio: TablesInsert<'audio'> = {
-          ...c_u_meta,
-          id: audio_id,
-          dictionary_id,
-          entry_id,
-          storage_path,
-        }
-        sql_statements += sql_file_string('audio', audio)
+      const { storage_path, error } = await upload_audio(value, entry_id)
+      if (error) {
+        console.log(error)
+        continue
+      }
 
-        // TODO: the code above will properly import multiple audio files to the same entry but the code below will only import the metadata from the first audio file. Late on when adding multiple audio import ability, use the next line to get the number suffix from the key
-        // const number_suffix_with_period = key.replace('soundFile', '') as Number_Suffix
-        if (row.speakerName) {
-          let speaker_id = speakers.find(({ name }) => name === row.speakerName)?.id
-          if (!speaker_id) {
-            speaker_id = randomUUID()
+      const audio_id = randomUUID()
+      const audio: TablesInsert<'audio'> = {
+        ...c_u_meta(),
+        id: audio_id,
+        dictionary_id,
+        entry_id,
+        storage_path,
+      }
+      sql_statements += sql_file_string('audio', audio)
 
-            const speaker: TablesInsert<'speakers'> = {
-              ...c_u_meta,
-              id: speaker_id,
-              dictionary_id,
-              name: row.speakerName,
-              birthplace: row.speakerHometown || '',
-              decade: Number.parseInt(row.speakerAge) || null,
-              gender: row.speakerGender as 'm' | 'f' | 'o' || null,
-            }
+      // TODO: the code above will properly import multiple audio files to the same entry but the code below will only import the metadata from the first audio file. Late on when adding multiple audio import ability, use the next line to get the number suffix from the key
+      // const number_suffix_with_period = key.replace('soundFile', '') as Number_Suffix
+      if (row.speakerName) {
+        let speaker_id = speakers.find(({ name }) => name === row.speakerName)?.id
+        if (!speaker_id) {
+          speaker_id = randomUUID()
 
-            sql_statements += sql_file_string('speakers', speaker)
-            speakers.push({ id: speaker_id, name: row.speakerName })
+          const speaker: TablesInsert<'speakers'> = {
+            ...c_u_meta(),
+            id: speaker_id,
+            dictionary_id,
+            name: row.speakerName,
+            birthplace: row.speakerHometown || '',
+            decade: Number.parseInt(row.speakerAge) || null,
+            gender: row.speakerGender as 'm' | 'f' | 'o' || null,
           }
 
-          sql_statements += sql_file_string('audio_speakers', {
-            ...c_meta,
-            audio_id,
-            speaker_id,
-          })
+          sql_statements += sql_file_string('speakers', speaker)
+          speakers.push({ id: speaker_id, name: row.speakerName })
         }
+
+        sql_statements += sql_file_string('audio_speakers', {
+          ...c_meta(),
+          audio_id,
+          speaker_id,
+        })
       }
     }
 
-    if (row.photoFile) {
-      const photo_media_result = await upload_photo(row.photoFile, entry_id)
-      if (photo_media_result) {
-        const { storage_path, serving_url } = photo_media_result
-        const photo_id = randomUUID()
-        const photo: TablesInsert<'photos'> = {
-          ...c_u_meta,
-          id: photo_id,
-          dictionary_id,
-          storage_path,
-          serving_url,
-        }
-        sql_statements += sql_file_string('photos', photo)
-        const sense_id = senses[0].id
-        const sense_photo: TablesInsert<'sense_photos'> = {
-          ...c_meta,
-          photo_id,
-          sense_id,
-        }
-        sql_statements += sql_file_string('sense_photos', sense_photo)
+    for (const [key, value] of row_entries) {
+      if (!key.includes('photoFile')) continue
+      if (!value) continue
+
+      const { storage_path, serving_url, error } = await upload_photo(value, entry_id)
+      if (error) {
+        console.log(error)
+        continue
       }
+      const photo_id = randomUUID()
+      const photo: TablesInsert<'photos'> = {
+        ...c_u_meta(),
+        id: photo_id,
+        dictionary_id,
+        storage_path,
+        serving_url,
+      }
+      sql_statements += sql_file_string('photos', photo)
+      const sense_id = senses[0].id
+      const sense_photo: TablesInsert<'sense_photos'> = {
+        ...c_meta(),
+        photo_id,
+        sense_id,
+      }
+      sql_statements += sql_file_string('sense_photos', sense_photo)
     }
 
     // TablesInsert<'videos'>
@@ -361,8 +373,4 @@ export async function generate_sql_statements({
     console.log(`error with: ${row}: ${err}`)
     console.error(err)
   }
-}
-
-function returnArrayFromCommaSeparatedItems(string: string): string[] {
-  return string?.split(',').map(item => item.trim()) || null
 }

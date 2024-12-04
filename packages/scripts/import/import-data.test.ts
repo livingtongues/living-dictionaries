@@ -23,8 +23,14 @@ vi.mock('node:crypto', () => {
 })
 
 vi.mock('./incrementing-timestamp', () => {
+  const yesterday = new Date('2024-03-08T00:44:04.600392+00:00')
+  let milliseconds_to_add = 0
+
   return {
-    millisecond_incrementing_timestamp: () => new Date('2024-03-08T00:44:04.600392+00:00').toISOString(),
+    millisecond_incrementing_timestamp: () => {
+      milliseconds_to_add += 1
+      return new Date(yesterday.getTime() + milliseconds_to_add).toISOString()
+    },
   }
 })
 
@@ -76,7 +82,7 @@ describe(import_data, () => {
               "storage_path": "2.mp3",
             },
           ],
-          "created_at": "2024-03-08T00:44:04.6+00:00",
+          "created_at": "2024-03-08T00:44:04.601+00:00",
           "deleted": null,
           "dialect_ids": null,
           "dictionary_id": "test_dictionary_id",
@@ -98,7 +104,7 @@ describe(import_data, () => {
             },
           ],
           "tag_ids": null,
-          "updated_at": "2024-03-08T00:44:04.6+00:00",
+          "updated_at": "2024-03-08T00:44:04.608+00:00",
         },
       ]
     `)
@@ -110,7 +116,7 @@ describe(import_data, () => {
       [
         {
           "audios": null,
-          "created_at": "2024-03-08T00:44:04.6+00:00",
+          "created_at": "2024-03-08T00:44:04.609+00:00",
           "deleted": null,
           "dialect_ids": null,
           "dictionary_id": "test_dictionary_id",
@@ -129,7 +135,7 @@ describe(import_data, () => {
             },
           ],
           "tag_ids": null,
-          "updated_at": "2024-03-08T00:44:04.6+00:00",
+          "updated_at": "2024-03-08T00:44:04.612+00:00",
         },
       ]
     `)
@@ -156,7 +162,7 @@ describe(import_data, () => {
           "table": null,
           "tag_id": null,
           "text_id": null,
-          "timestamp": "2024-03-08T00:44:04.6+00:00",
+          "timestamp": "2024-03-08T00:44:04.611+00:00",
           "type": "insert_entry",
           "user_id": "be43b1dd-6c64-494d-b5da-10d70c384433",
           "video_id": null,
@@ -185,14 +191,14 @@ describe(import_data, () => {
     expect(speakers[0]).toMatchInlineSnapshot(`
       {
         "birthplace": "Whoville",
-        "created_at": "2024-03-08T00:44:04.6+00:00",
+        "created_at": "2024-03-08T00:44:04.632+00:00",
         "decade": 12,
         "deleted": null,
         "dictionary_id": "test_dictionary_id",
         "gender": "m",
         "id": "11111111-1111-1111-1111-111111100021",
         "name": "speaker 1",
-        "updated_at": "2024-03-08T00:44:04.6+00:00",
+        "updated_at": "2024-03-08T00:44:04.632+00:00",
       }
     `)
     expect(entries[0].audios[0].speaker_ids[0]).toEqual(speakers[0].id)
@@ -251,7 +257,7 @@ describe(import_data, () => {
       [
         {
           "audios": null,
-          "created_at": "2024-03-08T00:44:04.6+00:00",
+          "created_at": "2024-03-08T00:44:04.646+00:00",
           "deleted": null,
           "dialect_ids": [
             "11111111-1111-1111-1111-111111100032",
@@ -303,16 +309,6 @@ describe(import_data, () => {
             },
             {
               "glosses": {
-                "fr": "auch",
-              },
-              "id": "11111111-1111-1111-1111-111111100039",
-              "sentence_ids": [
-                "11111111-1111-1111-1111-111111100040",
-                "11111111-1111-1111-1111-111111100041",
-              ],
-            },
-            {
-              "glosses": {
                 "en": "bye",
               },
               "id": "11111111-1111-1111-1111-111111100038",
@@ -321,12 +317,22 @@ describe(import_data, () => {
                 "2.3",
               ],
             },
+            {
+              "glosses": {
+                "fr": "auch",
+              },
+              "id": "11111111-1111-1111-1111-111111100039",
+              "sentence_ids": [
+                "11111111-1111-1111-1111-111111100040",
+                "11111111-1111-1111-1111-111111100041",
+              ],
+            },
           ],
           "tag_ids": [
             "11111111-1111-1111-1111-111111100034",
             "11111111-1111-1111-1111-111111100035",
           ],
-          "updated_at": "2024-03-08T00:44:04.6+00:00",
+          "updated_at": "2024-03-08T00:44:04.665+00:00",
         },
       ]
     `)
