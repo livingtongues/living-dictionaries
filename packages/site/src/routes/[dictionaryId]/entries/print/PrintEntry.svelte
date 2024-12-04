@@ -43,7 +43,7 @@
 
   {#each entry.senses || [] as sense, index}
     <div />
-    {#if entry.senses.length > 1}<span class="text-sm"><b>{$page.data.t('sense.sense')} {index + 1}:</b></span>{/if}
+    {#if entry.senses.length > 1}<span class="text-sm">{index + 1}.</span>{/if}
     {#if selectedFields.parts_of_speech && sense.parts_of_speech}<i>{add_periods_and_comma_separate_parts_of_speech(sense.parts_of_speech)}</i>{/if}
     {#if selectedFields.gloss && sense.glosses}
       <span>
