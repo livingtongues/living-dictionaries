@@ -26,8 +26,6 @@
 
   $: first_audio = entry.audios?.[0]
   $: speaker_name = ($speakers?.length && first_audio?.speaker_ids?.length) ? $speakers.find(speaker => speaker.id === first_audio.speaker_ids[0])?.name : ''
-
-  $: first_sentence = $sentences?.find(sentence => sentence.id === first_sense?.sentence_ids?.[0])
 </script>
 
 <div style="font-size: {fontSize}pt;">
@@ -41,9 +39,10 @@
     [{entry.main.phonetic}]
   {/if}
 
-  {#each entry.senses || [] as sense}
+  {#each entry.senses || [] as sense, index}
+    <div />
+    {#if entry.senses.length > 1}<span class="text-sm">{index + 1}.</span>{/if}
     {#if selectedFields.parts_of_speech && sense.parts_of_speech}<i>{add_periods_and_comma_separate_parts_of_speech(sense.parts_of_speech)}</i>{/if}
-
     {#if selectedFields.gloss && sense.glosses}
       <span>
         {@html sanitize(order_glosses({
@@ -52,13 +51,6 @@
           t: $page.data.t,
         }).join(', '))}{selectedFields.example_sentence && sense.sentence_ids?.length > 0 ? ';' : ''}
       </span>
-    {/if}
-
-    {#if selectedFields.example_sentence && first_sentence}
-      <i>{order_example_sentences({
-        sentence: first_sentence,
-        dictionary_gloss_languages: dictionary.glossLanguages,
-      }).join(' / ')}</i>
     {/if}
 
     {#if selectedFields.semantic_domains}
@@ -100,6 +92,13 @@
         {/if}
         {sense.variant?.default}
       </div>
+    {/if}
+
+    {#if selectedFields.example_sentence && $sentences}
+      <i>{order_example_sentences({
+        sentence: $sentences?.find(sentence => sentence.id === sense?.sentence_ids?.[0]),
+        dictionary_gloss_languages: dictionary.glossLanguages,
+      }).join(' / ')}</i>
     {/if}
   {/each}
 
