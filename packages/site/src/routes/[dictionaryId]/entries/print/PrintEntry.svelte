@@ -26,8 +26,6 @@
 
   $: first_audio = entry.audios?.[0]
   $: speaker_name = ($speakers?.length && first_audio?.speaker_ids?.length) ? $speakers.find(speaker => speaker.id === first_audio.speaker_ids[0])?.name : ''
-
-// $: first_sentence = $sentences?.find(sentence => sentence.id === first_sense?.sentence_ids?.[0])
 </script>
 
 <div style="font-size: {fontSize}pt;">
