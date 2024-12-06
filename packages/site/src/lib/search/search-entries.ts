@@ -46,6 +46,9 @@ export async function search_entries({ query_params, entries_per_page, page_inde
       _dialects: {
         limit: 10,
       },
+      _tags: {
+        limit: 10,
+      },
       _parts_of_speech: {
         limit: 100,
       },
@@ -90,6 +93,7 @@ export async function search_entries({ query_params, entries_per_page, page_inde
     },
     where: { // to actually filter
       ...query_params.dialects ? { _dialects: query_params.dialects } : {},
+      ...query_params.tags ? { _tags: query_params.tags } : {},
       ...query_params.parts_of_speech ? { _parts_of_speech: query_params.parts_of_speech } : {},
       ...query_params.semantic_domains ? { _semantic_domains: query_params.semantic_domains } : {},
       ...query_params.speakers ? { _speakers: query_params.speakers } : {},

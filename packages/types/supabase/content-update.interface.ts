@@ -23,6 +23,9 @@ export type ContentUpdateRequestBody =
   | Upsert_Speaker
   | Assign_Speaker
 
+  | Insert_Tag
+  | Assign_Tag
+
   | Insert_Dialect
   | Assign_Dialect
 
@@ -50,6 +53,19 @@ interface Insert_Entry extends ContentUpdateBase {
 interface Update_Entry extends ContentUpdateBase {
   type: 'update_entry'
   data: TablesUpdate<'entries'>
+  entry_id: string
+}
+
+interface Insert_Tag extends ContentUpdateBase {
+  type: 'insert_tag'
+  data: Omit<TablesInsert<'tags'>, 'created_by' | 'updated_by' | 'dictionary_id' | 'id'>
+  tag_id?: string
+}
+
+interface Assign_Tag extends ContentUpdateBase {
+  type: 'assign_tag'
+  data?: null | { deleted: string }
+  tag_id: string
   entry_id: string
 }
 

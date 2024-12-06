@@ -10,6 +10,7 @@ export const entries_index_schema = {
   _other: 'string[]', // phonetic, notes, scientific_names, sources, interlinearization,morphology, plural_form,
 
   // Filters
+  _tags: 'string[]', // underscored
   _dialects: 'string[]', // underscored
   _parts_of_speech: 'string[]', // augmented
   _semantic_domains: 'string[]', // augmented

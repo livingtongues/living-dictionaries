@@ -1,4 +1,4 @@
-import { assign_dialect, assign_speaker, insert_dialect, insert_entry, insert_photo, insert_sense, insert_sentence, insert_video, update_entry, update_photo, update_sense, update_sentence, update_video, upsert_audio, upsert_speaker } from '$lib/supabase/operations'
+import { assign_dialect, assign_speaker, assign_tag, insert_dialect, insert_entry, insert_photo, insert_sense, insert_sentence, insert_tag, insert_video, update_entry, update_photo, update_sense, update_sentence, update_video, upsert_audio, upsert_speaker } from '$lib/supabase/operations'
 import { addAudio, addImage, uploadVideo } from '$lib/helpers/media'
 
 export const dbOperations = {
@@ -15,6 +15,9 @@ export const dbOperations = {
 
   upsert_speaker,
   assign_speaker,
+
+  insert_tag,
+  assign_tag,
 
   insert_dialect,
   assign_dialect,

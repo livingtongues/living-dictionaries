@@ -24,6 +24,7 @@ declare global {
       url_from_storage_path?: DictionaryLayoutData['url_from_storage_path']
       entries?: DictionaryLayoutData['entries']
       speakers?: DictionaryLayoutData['speakers']
+      tags?: DictionaryLayoutData['tags']
       dialects?: DictionaryLayoutData['dialects']
       photos?: DictionaryLayoutData['photos']
       videos?: DictionaryLayoutData['videos']

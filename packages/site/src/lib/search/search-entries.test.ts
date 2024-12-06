@@ -69,11 +69,11 @@ describe(search_entries, () => {
     expect(results.hits).toHaveLength(1)
   })
 
-  // eslint-disable-next-line test/no-disabled-tests
-  test.skip('inspect tokens', () => {
+  test('inspect tokens', () => {
     const index_json = get_index_json([
       { main: { lexeme: { default: 'esotman taki' } }, senses: [{ glosses: { pt: 'fácil', tri: 'wamekatota' } }] },
     ])
+    delete index_json.internalDocumentIDStore
     expect(index_json).toMatchInlineSnapshot(`
       {
         "docs": {
@@ -92,6 +92,7 @@ describe(search_entries, () => {
               "_parts_of_speech": [],
               "_semantic_domains": [],
               "_speakers": [],
+              "_tags": [],
               "has_audio": false,
               "has_image": false,
               "has_noun_class": false,
@@ -125,6 +126,7 @@ describe(search_entries, () => {
             "_parts_of_speech": 0,
             "_semantic_domains": 0,
             "_speakers": 0,
+            "_tags": 0,
           },
           "fieldLengths": {
             "_dialects": {},
@@ -138,6 +140,7 @@ describe(search_entries, () => {
             "_parts_of_speech": {},
             "_semantic_domains": {},
             "_speakers": {},
+            "_tags": {},
           },
           "frequencies": {
             "_dialects": {},
@@ -163,6 +166,7 @@ describe(search_entries, () => {
             "_parts_of_speech": {},
             "_semantic_domains": {},
             "_speakers": {},
+            "_tags": {},
           },
           "indexes": {
             "_dialects": {
@@ -418,6 +422,18 @@ describe(search_entries, () => {
               },
               "type": "Radix",
             },
+            "_tags": {
+              "isArray": true,
+              "node": {
+                "c": [],
+                "d": [],
+                "e": false,
+                "k": "",
+                "s": "",
+                "w": "",
+              },
+              "type": "Radix",
+            },
             "has_audio": {
               "isArray": false,
               "node": {
@@ -503,6 +519,7 @@ describe(search_entries, () => {
             "_lexeme",
             "_glosses",
             "_other",
+            "_tags",
             "_dialects",
             "_parts_of_speech",
             "_semantic_domains",
@@ -524,6 +541,7 @@ describe(search_entries, () => {
             "_parts_of_speech": "string[]",
             "_semantic_domains": "string[]",
             "_speakers": "string[]",
+            "_tags": "string[]",
             "has_audio": "boolean",
             "has_image": "boolean",
             "has_noun_class": "boolean",
@@ -554,13 +572,9 @@ describe(search_entries, () => {
             "_parts_of_speech": {},
             "_semantic_domains": {},
             "_speakers": {},
+            "_tags": {},
           },
           "vectorIndexes": {},
-        },
-        "internalDocumentIDStore": {
-          "internalIdToId": [
-            "61635640-8",
-          ],
         },
         "language": "multi",
         "sorting": {

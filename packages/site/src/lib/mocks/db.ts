@@ -47,6 +47,8 @@ export const logDbOperations: DbOperations = {
   upsert_audio: log_args,
   upsert_speaker: log_args,
   assign_speaker: log_args,
+  insert_tag: log_args,
+  assign_tag: log_args,
   insert_dialect: log_args,
   assign_dialect: log_args,
   insert_photo: log_args,

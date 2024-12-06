@@ -11,6 +11,7 @@ enum EntryFields {
   local_orthography = 'alternateOrthographies', // not actual db value
   scientific_names = 'scn',
   noun_class = 'nc',
+  tag = 'tag', // not sure if these right side values are used anymore?
   dialects = 'di',
   variant = 'va',
   sources = 'sr',
