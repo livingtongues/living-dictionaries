@@ -23,8 +23,14 @@ vi.mock('node:crypto', () => {
 })
 
 vi.mock('./incrementing-timestamp', () => {
+  const yesterday = new Date('2024-03-08T00:44:04.600392+00:00')
+  let milliseconds_to_add = 0
+
   return {
-    millisecond_incrementing_timestamp: () => new Date('2024-03-08T00:44:04.600392+00:00').toISOString(),
+    millisecond_incrementing_timestamp: () => {
+      milliseconds_to_add += 1
+      return new Date(yesterday.getTime() + milliseconds_to_add).toISOString()
+    },
   }
 })
 
@@ -34,9 +40,9 @@ async function import_data(rows: Row[], dictionary_id = test_dictionary_id) {
     rows,
     import_id,
     upload_operations: {
-      upload_photo: async (filepath: string) => ({ storage_path: filepath, serving_url: filepath }),
-      upload_audio: async (filepath: string) => ({ storage_path: filepath }),
-      // upload_video: async (filepath: string) => ({ storage_path: filepath }),
+      upload_photo: async (filepath: string) => ({ storage_path: filepath, serving_url: filepath, error: null }),
+      upload_audio: async (filepath: string) => ({ storage_path: filepath, error: null }),
+      // upload_video: async (filepath: string) => ({ storage_path: filepath, error: null }),
     },
     live: true,
   })
@@ -76,7 +82,7 @@ describe(import_data, () => {
               "storage_path": "2.mp3",
             },
           ],
-          "created_at": "2024-03-08T00:44:04.6+00:00",
+          "created_at": "2024-03-08T00:44:04.601+00:00",
           "deleted": null,
           "dialect_ids": null,
           "dictionary_id": "test_dictionary_id",
@@ -97,8 +103,10 @@ describe(import_data, () => {
               ],
             },
           ],
-          "tag_ids": null,
-          "updated_at": "2024-03-08T00:44:04.6+00:00",
+          "tag_ids": [
+            "11111111-1111-1111-1111-111111100001",
+          ],
+          "updated_at": "2024-03-08T00:44:04.608+00:00",
         },
       ]
     `)
@@ -110,7 +118,7 @@ describe(import_data, () => {
       [
         {
           "audios": null,
-          "created_at": "2024-03-08T00:44:04.6+00:00",
+          "created_at": "2024-03-08T00:44:04.609+00:00",
           "deleted": null,
           "dialect_ids": null,
           "dictionary_id": "test_dictionary_id",
@@ -128,38 +136,26 @@ describe(import_data, () => {
               "id": "11111111-1111-1111-1111-111111100008",
             },
           ],
-          "tag_ids": null,
-          "updated_at": "2024-03-08T00:44:04.6+00:00",
+          "tag_ids": [
+            "11111111-1111-1111-1111-111111100007",
+          ],
+          "updated_at": "2024-03-08T00:44:04.612+00:00",
         },
       ]
     `)
-    const { data: content_updates } = await admin_supabase.from('content_updates').select()
-    expect(content_updates).toMatchInlineSnapshot(`
+    const { data: tags } = await admin_supabase.from('tags').select()
+    expect(tags).toMatchInlineSnapshot(`
       [
         {
-          "audio_id": null,
-          "change": null,
-          "data": {
-            "lexeme": {
-              "default": "hi",
-            },
-          },
-          "dialect_id": null,
+          "created_at": "2024-03-08T00:44:04.61+00:00",
+          "created_by": "be43b1dd-6c64-494d-b5da-10d70c384433",
+          "deleted": null,
           "dictionary_id": "test_dictionary_id",
-          "entry_id": "11111111-1111-1111-1111-111111100006",
           "id": "11111111-1111-1111-1111-111111100007",
-          "import_id": "v4-test",
-          "photo_id": null,
-          "sense_id": null,
-          "sentence_id": null,
-          "speaker_id": null,
-          "table": null,
-          "tag_id": null,
-          "text_id": null,
-          "timestamp": "2024-03-08T00:44:04.6+00:00",
-          "type": "insert_entry",
-          "user_id": "be43b1dd-6c64-494d-b5da-10d70c384433",
-          "video_id": null,
+          "name": "v4-test",
+          "private": true,
+          "updated_at": "2024-03-08T00:44:04.61+00:00",
+          "updated_by": "be43b1dd-6c64-494d-b5da-10d70c384433",
         },
       ]
     `)
@@ -171,7 +167,7 @@ describe(import_data, () => {
       { lexeme: 'world', dialects: 'dialect 1', tags: 'archaic' },
     ])
     expect(entries[0].dialect_ids).toHaveLength(1)
-    expect(entries[0].tag_ids).toHaveLength(1)
+    expect(entries[0].tag_ids).toHaveLength(2) // also have import tag
     expect(entries[0].dialect_ids).toEqual(entries[1].dialect_ids)
     expect(entries[0].tag_ids).toEqual(entries[1].tag_ids)
   })
@@ -185,14 +181,14 @@ describe(import_data, () => {
     expect(speakers[0]).toMatchInlineSnapshot(`
       {
         "birthplace": "Whoville",
-        "created_at": "2024-03-08T00:44:04.6+00:00",
+        "created_at": "2024-03-08T00:44:04.631+00:00",
         "decade": 12,
         "deleted": null,
         "dictionary_id": "test_dictionary_id",
         "gender": "m",
-        "id": "11111111-1111-1111-1111-111111100021",
+        "id": "11111111-1111-1111-1111-111111100020",
         "name": "speaker 1",
-        "updated_at": "2024-03-08T00:44:04.6+00:00",
+        "updated_at": "2024-03-08T00:44:04.631+00:00",
       }
     `)
     expect(entries[0].audios[0].speaker_ids[0]).toEqual(speakers[0].id)
@@ -205,7 +201,7 @@ describe(import_data, () => {
     ])
     expect(entries[0].senses[0].photo_ids).toMatchInlineSnapshot(`
       [
-        "11111111-1111-1111-1111-111111100029",
+        "11111111-1111-1111-1111-111111100027",
       ]
     `)
   })
@@ -251,14 +247,14 @@ describe(import_data, () => {
       [
         {
           "audios": null,
-          "created_at": "2024-03-08T00:44:04.6+00:00",
+          "created_at": "2024-03-08T00:44:04.644+00:00",
           "deleted": null,
           "dialect_ids": [
-            "11111111-1111-1111-1111-111111100032",
-            "11111111-1111-1111-1111-111111100033",
+            "11111111-1111-1111-1111-111111100029",
+            "11111111-1111-1111-1111-111111100030",
           ],
           "dictionary_id": "test_dictionary_id",
-          "id": "11111111-1111-1111-1111-111111100030",
+          "id": "11111111-1111-1111-1111-111111100028",
           "main": {
             "elicitation_id": "A1",
             "lexeme": {
@@ -285,7 +281,7 @@ describe(import_data, () => {
               "glosses": {
                 "es": "hola",
               },
-              "id": "11111111-1111-1111-1111-111111100036",
+              "id": "11111111-1111-1111-1111-111111100034",
               "noun_class": "12",
               "parts_of_speech": [
                 "n",
@@ -295,7 +291,7 @@ describe(import_data, () => {
                 "default": "his",
               },
               "sentence_ids": [
-                "11111111-1111-1111-1111-111111100037",
+                "11111111-1111-1111-1111-111111100035",
               ],
               "variant": {
                 "default": "variant",
@@ -303,30 +299,31 @@ describe(import_data, () => {
             },
             {
               "glosses": {
-                "fr": "auch",
-              },
-              "id": "11111111-1111-1111-1111-111111100039",
-              "sentence_ids": [
-                "11111111-1111-1111-1111-111111100040",
-                "11111111-1111-1111-1111-111111100041",
-              ],
-            },
-            {
-              "glosses": {
                 "en": "bye",
               },
-              "id": "11111111-1111-1111-1111-111111100038",
+              "id": "11111111-1111-1111-1111-111111100036",
               "semantic_domains": [
                 "2",
                 "2.3",
               ],
             },
+            {
+              "glosses": {
+                "fr": "auch",
+              },
+              "id": "11111111-1111-1111-1111-111111100037",
+              "sentence_ids": [
+                "11111111-1111-1111-1111-111111100038",
+                "11111111-1111-1111-1111-111111100039",
+              ],
+            },
           ],
           "tag_ids": [
-            "11111111-1111-1111-1111-111111100034",
-            "11111111-1111-1111-1111-111111100035",
+            "11111111-1111-1111-1111-111111100031",
+            "11111111-1111-1111-1111-111111100032",
+            "11111111-1111-1111-1111-111111100033",
           ],
-          "updated_at": "2024-03-08T00:44:04.6+00:00",
+          "updated_at": "2024-03-08T00:44:04.663+00:00",
         },
       ]
     `)
@@ -334,7 +331,7 @@ describe(import_data, () => {
     expect(sentences).toMatchInlineSnapshot(`
       [
         {
-          "id": "11111111-1111-1111-1111-111111100037",
+          "id": "11111111-1111-1111-1111-111111100035",
           "text": {
             "default": "we say hi like this",
           },
@@ -343,7 +340,7 @@ describe(import_data, () => {
           },
         },
         {
-          "id": "11111111-1111-1111-1111-111111100040",
+          "id": "11111111-1111-1111-1111-111111100038",
           "text": {
             "default": "hi doc",
           },
@@ -352,7 +349,7 @@ describe(import_data, () => {
           },
         },
         {
-          "id": "11111111-1111-1111-1111-111111100041",
+          "id": "11111111-1111-1111-1111-111111100039",
           "text": {
             "default": "bye doc",
           },
