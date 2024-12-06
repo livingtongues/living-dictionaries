@@ -1,15 +1,16 @@
 import { randomUUID } from 'node:crypto'
 import type { MultiString, TablesInsert } from '@living-dictionaries/types'
-import type { ImportContentUpdate } from '@living-dictionaries/types/supabase/content-import.interface'
 import { diego_ld_user_id } from '../config-supabase'
 import type { Number_Suffix, Row, Sense_Prefix } from './row.type'
 import { sql_file_string } from './to-sql-string'
 import { millisecond_incrementing_timestamp } from './incrementing-timestamp'
 
 export interface Upload_Operations {
-  upload_photo: (filepath: string, entry_id: string) => Promise<{ storage_path: string, serving_url: string }>
-  upload_audio: (filepath: string, entry_id: string) => Promise<{ storage_path: string }>
-  // upload_video: (filepath: string) => Promise<{ storage_path: string }>
+  upload_photo: (filepath: string, entry_id: string) => Promise<
+  { storage_path: string, serving_url: string, error: null } | { storage_path: null, serving_url: null, error: string }
+  >
+  upload_audio: (filepath: string, entry_id: string) => Promise<{ storage_path: string, error: null } | { storage_path: null, error: string }>
+  // upload_video: (filepath: string) => Promise<{ storage_path: string, error: null } | { storage_path: null, error: string }>
 }
 
 export async function generate_sql_statements({
@@ -38,45 +39,23 @@ export async function generate_sql_statements({
 
     const entry_id = randomUUID()
 
-    const c_meta = {
+    const c_meta = () => ({
       created_by: diego_ld_user_id,
       created_at: millisecond_incrementing_timestamp(),
-    }
-    const c_u_meta = {
-      ...c_meta,
-      updated_by: c_meta.created_by,
-      updated_at: c_meta.created_at,
-    }
-    const assemble_content_update = ({ data, ...rest }: ImportContentUpdate) => {
-      const data_without_meta = { ...data }
-      // @ts-expect-error
-      delete data_without_meta.id
-      // @ts-expect-error
-      delete data_without_meta.dictionary_id
-      delete data_without_meta.created_at
-      // @ts-expect-error
-      delete data_without_meta.created_by
-      // @ts-expect-error
-      delete data_without_meta.updated_at
-      // @ts-expect-error
-      delete data_without_meta.updated_by
-
-      const content_update: TablesInsert<'content_updates'> = {
-        ...rest,
-        id: randomUUID(),
-        import_id,
-        dictionary_id,
-        user_id: c_meta.created_by,
-        timestamp: c_meta.created_at,
-        data: data_without_meta,
+    })
+    const c_u_meta = () => {
+      const meta = c_meta()
+      return {
+        ...meta,
+        updated_by: meta.created_by,
+        updated_at: meta.created_at,
       }
-      return content_update
     }
 
     const entry: TablesInsert<'entries'> = {
       id: entry_id,
       dictionary_id,
-      ...c_u_meta,
+      ...c_u_meta(),
       lexeme: {
         default: row.lexeme,
         ...(row.localOrthography && { lo1: row.localOrthography }),
@@ -94,7 +73,6 @@ export async function generate_sql_statements({
     if (row.notes) entry.notes = { default: row.notes }
 
     sql_statements += sql_file_string('entries', entry)
-    sql_statements += sql_file_string('content_updates', assemble_content_update({ type: 'insert_entry', entry_id, data: entry }))
 
     if (row.dialects) {
       const dialect_strings = row.dialects.split('|').map(dialect => dialect.trim()).filter(Boolean)
@@ -104,7 +82,7 @@ export async function generate_sql_statements({
           dialect_id = randomUUID()
           const dialect: TablesInsert<'dialects'> = {
             id: dialect_id,
-            ...c_u_meta,
+            ...c_u_meta(),
             dictionary_id,
             name: { default: dialect_to_assign },
           }
@@ -113,35 +91,35 @@ export async function generate_sql_statements({
         }
 
         sql_statements += sql_file_string('entry_dialects', {
-          ...c_meta,
+          ...c_meta(),
           dialect_id,
           entry_id,
         })
       }
     }
 
-    if (row.tags) {
-      const tag_strings = row.tags.split('|').map(tag => tag.trim()).filter(Boolean)
-      for (const tag_to_assign of tag_strings) {
-        let tag_id = tags.find(({ name }) => name === tag_to_assign)?.id
-        if (!tag_id) {
-          tag_id = randomUUID()
-          const tag: TablesInsert<'tags'> = {
-            id: tag_id,
-            ...c_u_meta,
-            dictionary_id,
-            name: tag_to_assign,
-          }
-          sql_statements += sql_file_string('tags', tag)
-          tags.push({ id: tag.id, name: tag.name })
+    const tag_strings = (row.tags || '').split('|').map(tag => tag.trim()).filter(Boolean)
+    tag_strings.push(import_id)
+    for (const tag_to_assign of tag_strings) {
+      let tag_id = tags.find(({ name }) => name === tag_to_assign)?.id
+      if (!tag_id) {
+        tag_id = randomUUID()
+        const tag: TablesInsert<'tags'> = {
+          id: tag_id,
+          ...c_u_meta(),
+          dictionary_id,
+          ...(tag_to_assign === import_id && { private: true }),
+          name: tag_to_assign,
         }
-
-        sql_statements += sql_file_string('entry_tags', {
-          ...c_meta,
-          tag_id,
-          entry_id,
-        })
+        sql_statements += sql_file_string('tags', tag)
+        tags.push({ id: tag.id, name: tag.name })
       }
+
+      sql_statements += sql_file_string('entry_tags', {
+        ...c_meta(),
+        tag_id,
+        entry_id,
+      })
     }
 
     const senses: TablesInsert<'senses'>[] = []
@@ -151,12 +129,13 @@ export async function generate_sql_statements({
     const row_entries = (Object.entries(row) as [keyof Row, string][])
       .sort(([keyA], [keyB]) => keyA.localeCompare(keyB))
 
+    type Sense_Label = 's1' | 's2' | 's3' | 's4'// etc, for type-safety we just need a few here
     const first_sense_label = 's1'
-    const sense_labels = new Set([first_sense_label]) // always have at least one sense
+    const sense_labels = new Set<Sense_Label>([first_sense_label]) // always have at least one sense
     const sense_regex = /^(?<sense_index>s\d+)\./
     for (const key of Object.keys(row)) {
       const match = key.match(sense_regex)
-      if (match) sense_labels.add(match.groups.sense_index)
+      if (match) sense_labels.add(match.groups.sense_index as Sense_Label)
     }
 
     for (const sense_label of sense_labels) {
@@ -164,7 +143,7 @@ export async function generate_sql_statements({
 
       const sense: TablesInsert<'senses'> = {
         entry_id,
-        ...c_u_meta,
+        ...c_u_meta(),
         id: sense_id,
         glosses: {},
       }
@@ -202,7 +181,7 @@ export async function generate_sql_statements({
         }
       }
 
-      senses.push(sense)
+      if (sense_label === 's1' || Object.keys(sense.glosses).length > 0) senses.push(sense) //* It only adds an additional sense if it has any glosses, otherwise it won't be added
 
       const sense_sentence_number_suffix = new Set<Number_Suffix>()
 
@@ -225,7 +204,7 @@ export async function generate_sql_statements({
         const sentence_id = randomUUID()
         const sentence: TablesInsert<'sentences'> = {
           dictionary_id,
-          ...c_u_meta,
+          ...c_u_meta(),
           id: sentence_id,
           text: {},
         }
@@ -263,7 +242,7 @@ export async function generate_sql_statements({
 
         sentences.push(sentence)
         senses_in_sentences.push({
-          ...c_meta,
+          ...c_meta(),
           sentence_id,
           sense_id,
         })
@@ -286,10 +265,15 @@ export async function generate_sql_statements({
       if (!key.includes('soundFile')) continue
       if (!value) continue
 
-      const { storage_path } = await upload_audio(value, entry_id)
+      const { storage_path, error } = await upload_audio(value, entry_id)
+      if (error) {
+        console.log(error)
+        continue
+      }
+
       const audio_id = randomUUID()
       const audio: TablesInsert<'audio'> = {
-        ...c_u_meta,
+        ...c_u_meta(),
         id: audio_id,
         dictionary_id,
         entry_id,
@@ -305,7 +289,7 @@ export async function generate_sql_statements({
           speaker_id = randomUUID()
 
           const speaker: TablesInsert<'speakers'> = {
-            ...c_u_meta,
+            ...c_u_meta(),
             id: speaker_id,
             dictionary_id,
             name: row.speakerName,
@@ -319,18 +303,25 @@ export async function generate_sql_statements({
         }
 
         sql_statements += sql_file_string('audio_speakers', {
-          ...c_meta,
+          ...c_meta(),
           audio_id,
           speaker_id,
         })
       }
     }
 
-    if (row.photoFile) {
-      const { storage_path, serving_url } = await upload_photo(row.photoFile, entry_id)
+    for (const [key, value] of row_entries) {
+      if (!key.includes('photoFile')) continue
+      if (!value) continue
+
+      const { storage_path, serving_url, error } = await upload_photo(value, entry_id)
+      if (error) {
+        console.log(error)
+        continue
+      }
       const photo_id = randomUUID()
       const photo: TablesInsert<'photos'> = {
-        ...c_u_meta,
+        ...c_u_meta(),
         id: photo_id,
         dictionary_id,
         storage_path,
@@ -339,7 +330,7 @@ export async function generate_sql_statements({
       sql_statements += sql_file_string('photos', photo)
       const sense_id = senses[0].id
       const sense_photo: TablesInsert<'sense_photos'> = {
-        ...c_meta,
+        ...c_meta(),
         photo_id,
         sense_id,
       }
@@ -355,8 +346,4 @@ export async function generate_sql_statements({
     console.log(`error with: ${row}: ${err}`)
     console.error(err)
   }
-}
-
-function returnArrayFromCommaSeparatedItems(string: string): string[] {
-  return string?.split(',').map(item => item.trim()) || null
 }

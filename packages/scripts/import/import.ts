@@ -28,7 +28,7 @@ async function import_from_spreadsheet({ dictionary_id, live }: { dictionary_id:
 
   const file = readFileSync(`./import/data/${dictionary_id}/${dictionary_id}.csv`, 'utf8')
   const rows = parseCSVFrom<Row>(file)
-  rows.shift() // remove header row
+  if (rows[0].lexeme.includes('word/phrase')) rows.shift() // remove header row
   await import_data({ dictionary_id, rows, import_id, live, upload_operations: { upload_photo, upload_audio } })
 
   console.log(
