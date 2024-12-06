@@ -16,6 +16,7 @@
   import Image from '$lib/components/image/Image.svelte'
   import type { DbOperations } from '$lib/dbOperations'
   import AddImage from '$lib/components/image/AddImage.svelte'
+  import EntryTag from '$lib/components/entry/EntryTag.svelte'
 
   export let column: IColumn
   export let entry: EntryView
@@ -97,6 +98,12 @@
       {can_edit}
       showPlus={false}
       dialect_ids={entry.dialect_ids || []} />
+  {:else if column.field === 'tag'}
+    <EntryTag
+      entry_id={entry.id}
+      {can_edit}
+      showPlus={false}
+      tag_ids={entry.tag_ids || []} />
   {:else if column.field === 'sources'}
     <EntrySource
       {can_edit}

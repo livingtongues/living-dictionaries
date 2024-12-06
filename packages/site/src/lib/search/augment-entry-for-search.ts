@@ -3,6 +3,7 @@ import type { EntryView } from '@living-dictionaries/types'
 export function augment_entry_for_search(entry: EntryView) {
   const senses = entry.senses || []
 
+  const _tags = entry.tag_ids || []
   const _dialects = entry.dialect_ids || []
   const _parts_of_speech = senses.map(sense => sense.parts_of_speech || []).flat()
   const _semantic_domains = senses.map(sense => [...(sense.semantic_domains || []), ...(sense.write_in_semantic_domains || [])]).flat()
@@ -33,6 +34,7 @@ export function augment_entry_for_search(entry: EntryView) {
     _other,
     // _sentences, // TODO: search these in a separate interface
     // Filters
+    _tags,
     _dialects,
     _parts_of_speech: _parts_of_speech.map(use_underscores_for_spaces_periods),
     _semantic_domains: _semantic_domains.map(use_underscores_for_spaces_periods),

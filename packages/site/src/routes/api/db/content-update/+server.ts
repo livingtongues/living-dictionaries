@@ -145,6 +145,34 @@ export const POST: RequestHandler = async ({ request }) => {
       }
     }
 
+    if (type === 'insert_tag') {
+      const { error } = await admin_supabase.from('tags')
+        .insert({
+          ...c_u_meta,
+          ...data,
+          dictionary_id,
+          id: body.tag_id,
+        })
+      if (error) {
+        console.info({ body })
+        throw new Error(error.message)
+      }
+    }
+
+    if (type === 'assign_tag') {
+      const { error } = await admin_supabase.from('entry_tags')
+        .upsert({
+          ...c_meta,
+          tag_id: body.tag_id,
+          entry_id: body.entry_id,
+          deleted: data?.deleted ? timestamp : null,
+        })
+      if (error) {
+        console.info({ body })
+        throw new Error(error.message)
+      }
+    }
+
     if (type === 'insert_dialect') {
       const { error } = await admin_supabase.from('dialects')
         .insert({
@@ -363,6 +391,8 @@ export const POST: RequestHandler = async ({ request }) => {
       },
       // @ts-expect-error - avoiding verbosity but requires manual type checking
       ...(body.audio_id && { audio_id: body.audio_id }),
+      // @ts-expect-error
+      ...(body.tag_id && { tag_id: body.tag_id }),
       // @ts-expect-error
       ...(body.dialect_id && { dialect_id: body.dialect_id }),
       // @ts-expect-error
