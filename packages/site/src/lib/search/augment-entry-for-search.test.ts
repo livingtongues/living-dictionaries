@@ -14,6 +14,7 @@ describe(augment_entry_for_search, () => {
         "_parts_of_speech": [],
         "_semantic_domains": [],
         "_speakers": [],
+        "_tags": [],
         "has_audio": false,
         "has_image": false,
         "has_noun_class": false,

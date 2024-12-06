@@ -13,8 +13,8 @@ async function get_pieces() {
   const auth_state_user = get(authState)
   const auth_token = await auth_state_user.getIdToken()
 
-  const { params: { dictionaryId: dictionary_id, entryId: entry_id_from_url }, state: { entry_id: entry_id_from_state }, data: { entries, photos, videos, sentences, dialects, speakers } } = get(page)
-  return { auth_token, dictionary_id, entry_id_from_url: entry_id_from_url || entry_id_from_state, refresh_entries: entries.refresh, refresh_photos: photos.refresh, refresh_videos: videos.refresh, refresh_sentences: sentences.refresh, refresh_dialects: dialects.refresh, refresh_speakers: speakers.refresh }
+  const { params: { dictionaryId: dictionary_id, entryId: entry_id_from_url }, state: { entry_id: entry_id_from_state }, data: { entries, photos, videos, sentences, tags, dialects, speakers } } = get(page)
+  return { auth_token, dictionary_id, entry_id_from_url: entry_id_from_url || entry_id_from_state, refresh_entries: entries.refresh, refresh_photos: photos.refresh, refresh_videos: videos.refresh, refresh_sentences: sentences.refresh, refresh_dialects: dialects.refresh, refresh_speakers: speakers.refresh, refresh_tags: tags.refresh }
 }
 
 export async function insert_entry(lexeme: MultiString) {
@@ -284,6 +284,67 @@ export async function assign_speaker({
     if (media === 'video') {
       await refresh_videos()
     }
+    await refresh_entries()
+    await invalidate(ENTRY_UPDATED_LOAD_TRIGGER)
+
+    return data
+  } catch (err) {
+    alert(err)
+    console.error(err)
+  }
+}
+
+export async function insert_tag({
+  tag,
+  tag_id,
+}: {
+  tag: TablesUpdate<'tags'> & Pick<TablesInsert<'tags'>, 'name'>
+  tag_id?: string
+}) {
+  try {
+    const { auth_token, dictionary_id, refresh_tags } = await get_pieces()
+    const { data, error } = await content_update({
+      auth_token,
+      update_id: randomUUID(),
+      dictionary_id,
+      tag_id: tag_id || randomUUID(),
+      type: 'insert_tag',
+      data: tag,
+    })
+    if (error)
+      throw new Error(error.message)
+
+    await refresh_tags()
+    return data
+  } catch (err) {
+    alert(err)
+    console.error(err)
+  }
+}
+
+export async function assign_tag({
+  tag_id,
+  entry_id,
+  remove,
+}: {
+  tag_id: string
+  entry_id: string
+  remove?: boolean
+}) {
+  try {
+    const { auth_token, dictionary_id, refresh_entries } = await get_pieces()
+    const { data, error } = await content_update({
+      auth_token,
+      update_id: randomUUID(),
+      dictionary_id,
+      tag_id,
+      entry_id,
+      ...(remove ? { data: { deleted: 'true' } } : { }),
+      type: 'assign_tag',
+    })
+    if (error)
+      throw new Error(error.message)
+
     await refresh_entries()
     await invalidate(ENTRY_UPDATED_LOAD_TRIGGER)
 

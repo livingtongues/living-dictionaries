@@ -1,4 +1,4 @@
-import type { IColumn } from '@living-dictionaries/types';
+import type { IColumn } from '@living-dictionaries/types'
 
 export const defaultColumns: IColumn[] = [
   // field must match those used for i18n (e.g. lx = entry.lx)
@@ -53,6 +53,10 @@ export const defaultColumns: IColumn[] = [
     width: 150, // SelectSpeakerCell
   },
   {
+    field: 'tag',
+    width: 130,
+  },
+  {
     field: 'dialects',
     width: 130,
   },
@@ -84,4 +88,4 @@ export const defaultColumns: IColumn[] = [
     field: 'sources',
     width: 200,
   },
-];
+]
