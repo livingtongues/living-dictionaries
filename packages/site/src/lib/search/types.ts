@@ -7,6 +7,7 @@ export interface QueryParams {
   view?: View
   tolerance?: number
   // Array facets
+  tags?: string[]
   dialects?: string[]
   parts_of_speech?: string[]
   semantic_domains?: string[]
@@ -30,5 +31,5 @@ export interface QueryParams {
   no_semantic_domain?: boolean
 }
 
-type ArrayFilters = 'dialects' | 'parts_of_speech' | 'semantic_domains' | 'speakers'
+type ArrayFilters = 'tags' | 'dialects' | 'parts_of_speech' | 'semantic_domains' | 'speakers'
 export type FilterListKeys = ArrayFilters & keyof QueryParams

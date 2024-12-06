@@ -63,6 +63,7 @@ export const load: LayoutLoad = async ({ params: { dictionaryId }, parent }) => 
     const supabase = getSupabase()
     const entries = cached_data_store({ materialized_view: 'materialized_entries_view', table: 'entries_view', dictionary_id, supabase, log: true })
     const speakers = cached_data_store({ table: 'speakers_view', dictionary_id, supabase })
+    const tags = cached_data_store({ table: 'tags', dictionary_id, supabase })
     const dialects = cached_data_store({ table: 'dialects', dictionary_id, supabase })
     const photos = cached_data_store({ table: 'photos', dictionary_id, supabase })
     const videos = cached_data_store({ table: 'videos_view', dictionary_id, supabase })
@@ -103,6 +104,7 @@ export const load: LayoutLoad = async ({ params: { dictionaryId }, parent }) => 
       url_from_storage_path: (path: string) => url_from_storage_path(path, firebaseConfig.storageBucket),
       entries,
       speakers,
+      tags,
       dialects,
       photos,
       videos,
