@@ -154,6 +154,18 @@
         <div class="border-b-2 pb-1 mb-2 border-dashed" />
       </div>
     {/if}
+
+    {#if entry.main.elicitation_id || can_edit}
+      <EntryField
+        value={entry.main.elicitation_id}
+        field="ID"
+        {can_edit}
+        display="ID"
+        on_update={(new_value) => {
+          entry.main.elicitation_id = new_value
+          update_entry({ elicitation_id: new_value })
+        }} />
+    {/if}
   </div>
 </div>
 

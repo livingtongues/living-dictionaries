@@ -23,9 +23,10 @@ enum EntryFields {
   photo = 'pf',
   audio = 'sf',
   coordinates = 'co', // not known in i18n
+  ID = 'id', // not i18n required
 }
 
 export type EntryFieldValue = keyof typeof EntryFields
 // export type EntryFieldKey = `${EntryFields}`;
 
-export type i18nEntryFieldKey = `entry_field.${Exclude<EntryFieldValue, 'coordinates'>}`
+export type i18nEntryFieldKey = `entry_field.${Exclude<EntryFieldValue, 'coordinates' | 'ID'>}`
