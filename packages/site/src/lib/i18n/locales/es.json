@@ -194,7 +194,8 @@
     "plural_form": "Forma plural",
     "scientific_names": "Nombre científico",
     "definition_english": "",
-    "video": "Video"
+    "video": "Video",
+    "custom_tags": "Etiquetas personalizadas"
   },
   "error": {
     "run_into_error": "Lo sentimos, hay un error.",

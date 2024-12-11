@@ -98,7 +98,7 @@
       {can_edit}
       showPlus={false}
       dialect_ids={entry.dialect_ids || []} />
-  {:else if column.field === 'tag'}
+  {:else if column.field === 'custom_tags'}
     <EntryTag
       entry_id={entry.id}
       {can_edit}

@@ -43,7 +43,7 @@
   {can_edit}
   canWriteIn
   {showPlus}
-  placeholder={$page.data.t('entry_field.tag')}
+  placeholder={$page.data.t('entry_field.custom_tags')}
   {on_update}>
-  <span slot="heading">{$page.data.t('entry_field.tag')}</span>
+  <span slot="heading">{$page.data.t('entry_field.custom_tags')}</span>
 </ModalEditableArray>

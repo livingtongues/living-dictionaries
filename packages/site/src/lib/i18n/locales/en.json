@@ -184,7 +184,6 @@
     "parts_of_speech": "Part of Speech",
     "phonetic": "Phonetic",
     "dialects": "Dialect",
-    "tag": "Tag",
     "interlinearization": "Interlinearization",
     "notes": "Notes",
     "sources": "Source",
@@ -195,7 +194,8 @@
     "plural_form": "Plural form",
     "scientific_names": "Scientific Name",
     "definition_english": "Definition (deprecated)",
-    "video": "Video"
+    "video": "Video",
+    "custom_tags": "Custom tags"
   },
   "error": {
     "run_into_error": "We're sorry, we've run into an error.",

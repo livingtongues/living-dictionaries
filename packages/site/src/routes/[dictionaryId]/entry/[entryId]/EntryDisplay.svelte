@@ -103,7 +103,7 @@
 
     {#if entry.tag_ids?.length || can_edit}
       <div class="md:px-2" class:order-2={!entry.tag_ids?.length}>
-        <div class="rounded text-xs text-gray-500 mt-1 mb-2">{$page.data.t('entry_field.tag')}</div>
+        <div class="rounded text-xs text-gray-500 mt-1 mb-2">{$page.data.t('entry_field.custom_tags')}</div>
         <EntryTag entry_id={entry.id} {can_edit} tag_ids={entry.tag_ids || []} />
         <div class="border-b-2 pb-1 mb-2 border-dashed" />
       </div>

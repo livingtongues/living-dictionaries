@@ -33,7 +33,7 @@
     "export_data": "导出数据（CSV、PDF 格式）",
     "import_export": "导入/导出（FLEx，标准格式）",
     "geo_tagging": "地理标记条目",
-    "flashcard_view": "语言学习者的抽认卡视图",
+    "flashcard_view": "面向语言学习者的抽认卡视图",
     "peer_review": "拼写同行评审",
     "suggestions_from_users": "用户的建议",
     "push_notifications": "向贡献者推送通知",
@@ -42,7 +42,7 @@
     "question_2": "编写这本词典的人叫什么名字？这本词典里有谁的声音？",
     "question_3": "这本词典中的数据是从哪里来的呢？请说明这些数据是否是您自己收集的。如果您使用任何已发布的参考来源，请列出它们。",
     "question_4": "谁将使用这本词典？它会用于任何教育项目吗？",
-    "question_5": "如果您希望公众就该项目与您联系，请提供您的联系信息或人们可以了解更多信息的链接。这是可选的。",
+    "question_5": "如果您希望公众就该项目与您联系，请提供您的联系信息，或人们可以了解更多信息的链接。这是可选的。",
     "message": "在公开您的词典之前，请填写“关于”部分。"
   },
   "contributors": {
@@ -194,7 +194,8 @@
     "plural_form": "复数形式",
     "scientific_names": "学名",
     "definition_english": "",
-    "video": "视频"
+    "video": "视频",
+    "custom_tags": "自定义标签"
   },
   "error": {
     "run_into_error": "很抱歉，我们遇到了一个错误。",
