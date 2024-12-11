@@ -60,17 +60,6 @@
 
         <hr class="my-2" />
 
-        {#if result_facets._tags.count}
-          <FilterList
-            {search_params}
-            search_param_key="tags"
-            values={result_facets._tags.values}
-            keys_to_values={$tags?.reduce((acc, tag) => {
-              acc[tag.id] = tag.name
-              return acc
-            }, {})}
-            label={$page.data.t('entry_field.tag')} />
-        {/if}
         {#if result_facets._parts_of_speech.count}
           <FilterList
             {search_params}
@@ -106,6 +95,17 @@
             }, {})}
             label={$page.data.t('entry_field.dialects')} />
         {/if}
+        {#if result_facets._tags.count}
+          <FilterList
+            {search_params}
+            search_param_key="tags"
+            values={result_facets._tags.values}
+            keys_to_values={$tags?.reduce((acc, tag) => {
+              acc[tag.id] = tag.name
+              return acc
+            }, {})}
+            label={$page.data.t('entry_field.custom_tags')} />
+        {/if}
         {#if result_facets._speakers.count}
           <FilterList
             {search_params}
@@ -117,6 +117,7 @@
             }, {})}
             label={$page.data.t('entry_field.speaker')} />
         {/if}
+
         <hr />
 
         {#if $search_params.view !== 'gallery'}

@@ -194,7 +194,8 @@
     "plural_form": "Bentuk jamak",
     "scientific_names": "Nama Ilmiah",
     "definition_english": "",
-    "video": "Video"
+    "video": "Video",
+    "custom_tags": "Tag khusus"
   },
   "error": {
     "run_into_error": "Maaf, sistem kami mengalami masalah",
