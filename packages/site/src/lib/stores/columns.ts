@@ -53,7 +53,7 @@ export const defaultColumns: IColumn[] = [
     width: 150, // SelectSpeakerCell
   },
   {
-    field: 'tag',
+    field: 'custom_tags',
     width: 130,
   },
   {
