@@ -1,18 +1,55 @@
-import { program } from 'commander';
+import { readFileSync } from 'node:fs'
+import { program } from 'commander'
+import { parseCSVFrom } from './parse-csv.js'
+import type { Row } from './row.type'
+import { import_data } from './import-data.js'
+import { upload_audio_to_gcs, upload_photo_to_gcs } from './import-media.js'
 
 program
-  //   .version('0.0.1')
-  .option('-e, --environment [dev/prod]', 'Firebase Project', 'dev')
+  .option('-e, --environment [dev/prod]', 'Database Project', 'dev')
   .option('--id <value>', 'Dictionary Id')
-  .option('--dry', 'Only log values, do not upload data and media')
-  .parse(process.argv);
+  .option('--live', 'By default only values are logged, run with live flag to upload data and media')
+  .parse(process.argv)
 
-import { importFromSpreadsheet } from './import-spreadsheet-v4.js';
+const { live, id: dictionary_id, environment } = program.opts()
 
-const dictionaryId = program.opts().id;
-const {dry} = program.opts();
-if (dry)
-  console.log('Dry run, no data will be uploaded');
+await import_from_spreadsheet({ dictionary_id, live })
 
-console.log(`Importing ${dictionaryId} to ${program.opts().environment}.`);
-importFromSpreadsheet(dictionaryId, dry).then((entries) => console.log(entries));
+async function import_from_spreadsheet({ dictionary_id, live }: { dictionary_id: string, live: boolean }) {
+  if (live)
+    console.log('Live run, everything is happening!')
+  else
+    console.log('Dry run, no data will be uploaded')
+
+  console.log(`Importing ${dictionary_id} to ${environment}.`)
+
+  const dateStamp = Date.now()
+  const import_id = `v4-${dateStamp}`
+
+  const file = readFileSync(`./import/data/${dictionary_id}/${dictionary_id}.csv`, 'utf8')
+  const rows = parseCSVFrom<Row>(file)
+  if (rows[0].lexeme.includes('word/phrase')) rows.shift() // remove header row
+  await import_data({ dictionary_id, rows, import_id, live, upload_operations: { upload_photo, upload_audio } })
+
+  console.log(
+    `Finished ${live ? 'importing' : 'emulating'} ${rows.length} entries to ${environment === 'dev' ? 'http://localhost:3041/' : 'livingdictionaries.app/'
+    }${dictionary_id} in ${(Date.now() - dateStamp) / 1000} seconds`,
+  )
+  console.log('') // line break
+}
+
+async function upload_photo(filepath: string, entry_id: string) {
+  return await upload_photo_to_gcs({ dictionary_id, filepath, entry_id, live })
+}
+
+async function upload_audio(filepath: string, entry_id: string) {
+  const storage_path = await upload_audio_to_gcs({ dictionary_id, filepath, entry_id, live })
+  return { storage_path }
+}
+
+// async function upload_video(filepath: string) {
+//   // TODO
+//   console.log({ dictionary_id })
+//   await new Promise(resolve => setTimeout(resolve, 0))
+//   return { storage_path: filepath }
+// }

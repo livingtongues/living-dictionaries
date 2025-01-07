@@ -10,7 +10,7 @@
       entry={{lexeme: 'foo'}}
       video={null}
       storageBucket={'change'}
-      canEdit
+      can_edit
       on:close={toggle}
       on:deleteVideo={() => alert('delete clicked')} /> -->
   {/if}

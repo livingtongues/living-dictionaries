@@ -37,7 +37,13 @@
     "peer_review": "Bình duyệt về chính tả và cách phát âm",
     "suggestions_from_users": "Phản hồi và góp ý từ người dùng",
     "push_notifications": "Thông báo đẩy (push notification) cho những người đóng góp và cộng tác viên",
-    "contributor_awards": "Khen thưởng thành tích"
+    "contributor_awards": "Khen thưởng thành tích",
+    "question_1": "Vui lòng cung cấp một số thông tin cơ bản về ngôn ngữ này. Nó được nói ở đâu? Cộng đồng nào nói ngôn ngữ này? Ngôn ngữ này có bị đe dọa không?",
+    "question_2": "Tên của những người xây dựng từ điển này là gì? Tiếng nói của ai trong từ điển này?",
+    "question_3": "Dữ liệu trong từ điển này đến từ đâu? Vui lòng mô tả nếu bạn tự mình thu thập dữ liệu. Nếu bạn sử dụng bất kỳ nguồn tham khảo nào đã được xuất bản, vui lòng liệt kê chúng.",
+    "question_4": "Ai sẽ sử dụng từ điển này? Nó sẽ được sử dụng trong bất kỳ dự án giáo dục nào?",
+    "question_5": "Nếu bạn muốn công chúng liên hệ với bạn về dự án này, vui lòng cung cấp thông tin liên hệ của bạn hoặc liên kết đến nơi mọi người có thể tìm hiểu thêm. Đây là tùy chọn.",
+    "message": "Trước khi công khai từ điển của bạn, vui lòng hoàn thành phần Giới thiệu."
   },
   "contributors": {
     "invite_contributors": "Mời cộng tác viên",
@@ -88,14 +94,15 @@
     "message_sent": "Tin nhắn đã được gửi đi. Chúng tôi sẽ cố gắng phản hồi trong thời gian sớm nhất có thể.",
     "what_is_your_question": "Bạn có câu hỏi hay nhận xét gì hay không?",
     "message_failed": "Tin nhắn không được gửi. Xin vui lòng kiểm tra kết nối mạng của bạn hoặc gửi email cho chúng tôi tại: ",
-    "delete_dictionary": "Xóa một từ điển",
-    "public_dictionary": "Làm cho một từ điển công khai",
+    "delete_dictionary": "Xóa từ điển",
+    "public_dictionary": "Công khai từ điển",
     "import_data": "Nhập dữ liệu",
-    "request_access": "Yêu cầu chỉnh sửa truy cập",
-    "report_problem": "Báo cáo một vấn đề",
+    "request_access": "Yêu cầu quyền chỉnh sửa",
+    "report_problem": "Báo cáo sự cố",
     "other": "Chủ đề khác",
     "select_topic": "Chọn một chủ đề",
-    "data_fields": "Các trường dữ liệu tùy chọn"
+    "data_fields": "Các trường dữ liệu tùy chọn",
+    "learning": "Tạo tài liệu học ngôn ngữ từ từ điển của tôi"
   },
   "create": {
     "select_coordinates": "Chọn tọa độ",
@@ -161,7 +168,8 @@
     "link_copied": "Đường link đã được sao chép",
     "copy_and_share": "Sao chép và chia sẻ ",
     "print": "In",
-    "id": "Thông tin định dạng"
+    "id": "Thông tin định dạng",
+    "switch_opposite": "Chuyển sang đối diện"
   },
   "entry_field": {
     "photo": "Hình ảnh",
@@ -185,7 +193,9 @@
     "gloss": "Dịch",
     "plural_form": "Dạng số phức",
     "scientific_names": "Tên khoa học",
-    "definition_english": ""
+    "definition_english": "",
+    "video": "Băng hình",
+    "custom_tags": "Thẻ tùy chỉnh"
   },
   "error": {
     "run_into_error": "Lỗi đã xảy ra. Xin quý vị thông cảm.",
@@ -239,7 +249,9 @@
     "upload": "Tải lên",
     "assertion": "Có   ",
     "negation": "Không",
-    "clean": "Không lỗi"
+    "clean": "Không lỗi",
+    "map": "Bản đồ",
+    "guidance": "hướng dẫn"
   },
   "settings": {
     "community_permission": "Cộng đồng có cho phép ngôn ngữ của họ được đăng tải trực tuyến hay không?",
@@ -318,13 +330,14 @@
     "headword_size": "Kích thước tiêu đề",
     "font_size": "Kích cỡ chữ"
   },
-  "import": {
+  "import_page": {
     "import": "Nhập khẩu",
-    "template_link": "Liên kết đến mẫu",
-    "instructions_1": "Nếu bạn đã có dữ liệu ngôn ngữ mà bạn muốn nhập vào từ điển của mình, vui lòng làm theo các bước dưới đây.",
-    "instructions_2": "Nhấp vào liên kết màu xanh lam đến nút Mẫu bên dưới. Tải xuống mẫu dưới dạng tệp Excel hoặc tạo bản sao trên Google Docs. Chỉnh sửa mẫu theo nhu cầu dự án của bạn. Sao chép và dán dữ liệu của bạn vào bảng tính.",
-    "instructions_3": "Sử dụng liên hệ với chúng tôi dưới đây để liên hệ với chúng tôi. Hãy cho chúng tôi biết rằng bạn có một bảng tính mới đã sẵn sàng để nhập. Hỏi chúng tôi bất kỳ câu hỏi bạn có. Chúng tôi sẽ trả lời bạn qua email và sau đó bạn có thể gửi cho chúng tôi tệp của bạn.",
-    "instructions_4": "Để gửi cho chúng tôi dữ liệu được xuất từ ​​các phần mềm từ điển như Flex, Lexique Pro, Shoebox, vui lòng sử dụng nút Liên hệ với chúng tôi bên dưới và cho chúng tôi biết chi tiết về dự án của bạn."
+    "template_link": "Liên kết tới Mẫu",
+    "instructions_1": "Nếu bạn đã có dữ liệu ngôn ngữ muốn nhập vào Từ điển của mình, vui lòng làm theo các bước bên dưới.",
+    "instructions_2": "Nhấp vào nút “Liên kết tới mẫu” màu xanh lam bên dưới. Tải xuống mẫu dưới dạng tệp Excel hoặc tạo bản sao trên Google Docs. Chỉnh sửa mẫu theo nhu cầu dự án của bạn. Sao chép và dán dữ liệu của bạn vào bảng tính.",
+    "instructions_3": "Sử dụng mục “Liên hệ với chúng tôi” bên dưới để liên hệ với chúng tôi. Hãy cho chúng tôi biết rằng bạn có bảng tính mới sẵn sàng để nhập. Hãy hỏi chúng tôi bất kỳ câu hỏi nào bạn có. Chúng tôi sẽ trả lời bạn qua email và sau đó bạn có thể gửi tệp của mình cho chúng tôi.",
+    "instructions_4": "Để gửi cho chúng tôi dữ liệu được xuất từ ​​các phần mềm từ điển như FLEx, Lexique Pro, Shoebox, vui lòng sử dụng nút “Liên hệ với chúng tôi” bên dưới và cho chúng tôi biết chi tiết về dự án của bạn.",
+    "no_imports": "Chúng tôi hiện đang làm việc với nhiều cộng đồng và tổ chức đối tác để nhập một số lượng lớn mục từ điển vào nền tảng này. Chúng tôi cũng đang thực hiện các cập nhật lớn cho cơ sở dữ liệu của mình. Chúng tôi sẽ chấp nhận hoạt động nhập dữ liệu mới bắt đầu từ ngày 1 tháng 7 năm 2024. Chúng tôi đánh giá cao sự kiên nhẫn của bạn và chúng tôi xin lỗi vì sự bất tiện này."
   },
   "history": {
     "history": "Lịch sử",
@@ -338,8 +351,25 @@
     "created": "Tạo",
     "edited": "Đã chỉnh sửa",
     "deleted": "Bị xóa",
-    "history_search": "Tìm kiếm các mục, biên tập viên, trường và giá trị",
-    "download_history": "Tải xuống lịch sử dưới dạng CSV",
+    "history_search": "Tìm kiếm mục, người chỉnh sửa, trường và giá trị",
+    "download_history": "Tải xuống Lịch sử dưới dạng CSV",
     "empty": "Chưa có lịch sử"
+  },
+  "partnership": {
+    "title": "Tổ chức đối tác",
+    "button": "Viết trong Tổ chức đối tác",
+    "name": "Tên tổ chức đối tác"
+  },
+  "synopsis": {
+    "translations": "Bản dịch",
+    "name": "Tóm tắt"
+  },
+  "sense": {
+    "sense": "Giác quan",
+    "add": "Thêm ý nghĩa"
+  },
+  "banner": {
+    "message": "Chúng tôi đang cải tiến cơ sở dữ liệu của mình vào ngày 22 tháng 10, bắt đầu lúc 7 giờ tối theo giờ Miền Đông (New York), trong 24 giờ. Khả năng chỉnh sửa sẽ không có sẵn trong thời gian đó. Xin lỗi vì sự bất tiện này.",
+    "attention": "Chú ý"
   }
 }

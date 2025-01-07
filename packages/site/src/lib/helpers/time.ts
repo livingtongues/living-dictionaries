@@ -1,11 +1,11 @@
 export function formatTime(seconds: number) {
-  const mm = Math.floor(seconds / 60);
-  const ss = zeroPadded(seconds % 60);
-  return `${mm}:${ss}`;
+  const mm = Math.floor(seconds / 60)
+  const ss = zeroPadded(seconds % 60)
+  return `${mm}:${ss}`
 }
 
 function zeroPadded(number: number) {
-  return number >= 10 ? number.toString() : `0${number}`;
+  return number >= 10 ? number.toString() : `0${number}`
 }
 
 export function printDate(date: Date | number): string {
@@ -13,7 +13,7 @@ export function printDate(date: Date | number): string {
     year: 'numeric',
     month: 'short',
     day: 'numeric',
-  }).format(date);
+  }).format(date)
 }
 
 export function printDateTime(date: Date | number): string {
@@ -33,10 +33,10 @@ export function printDateWithWeekday(date: Date | number): string {
     year: 'numeric',
     month: 'short',
     day: 'numeric',
-  }).format(date);
+  }).format(date)
 }
 
-export function minutesAgo(minutes: number) {
-  return Date.now() - minutes * 1000 * 60;
-  // return Timestamp.fromMillis(Date.now() - minutes * 1000 * 60);
+export function minutes_ago_in_ms(minutes: number): number {
+  const milliseconds = minutes * 60 * 1000
+  return Date.now() - milliseconds
 }

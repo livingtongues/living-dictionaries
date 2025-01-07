@@ -1,42 +1,38 @@
 <script lang="ts">
-  import { page } from '$app/stores';
-  import { getCollection } from 'sveltefirets';
-  import { where } from 'firebase/firestore';
-  import type { IDictionary } from '@living-dictionaries/types';
-  import { admin, myDictionaries } from '$lib/stores';
-  import { ShowHide } from 'svelte-pieces';
-  import Map from '$lib/components/maps/mapbox/map/Map.svelte';
-  import ToggleStyle from '$lib/components/maps/mapbox/controls/ToggleStyle.svelte';
-  import NavigationControl from '$lib/components/maps/mapbox/controls/NavigationControl.svelte';
-  import CustomControl from '$lib/components/maps/mapbox/controls/CustomControl.svelte';
-  import DictionaryPoints from '$lib/components/home/DictionaryPoints.svelte';
-  import Search from '$lib/components/home/Search.svelte';
-  import Header from '$lib/components/shell/Header.svelte';
-  import SeoMetaTags from '$lib/components/SeoMetaTags.svelte';
-  import { browser } from '$app/environment';
-  import type { PageData } from './$types';
-  export let data: PageData;
+  import type { IDictionary } from '@living-dictionaries/types'
+  import { ShowHide } from 'svelte-pieces'
+  import type { PageData } from './$types'
+  import { page } from '$app/stores'
+  import Map from '$lib/components/maps/mapbox/map/Map.svelte'
+  import ToggleStyle from '$lib/components/maps/mapbox/controls/ToggleStyle.svelte'
+  import NavigationControl from '$lib/components/maps/mapbox/controls/NavigationControl.svelte'
+  import CustomControl from '$lib/components/maps/mapbox/controls/CustomControl.svelte'
+  import DictionaryPoints from '$lib/components/home/DictionaryPoints.svelte'
+  import Search from '$lib/components/home/Search.svelte'
+  import Header from '$lib/components/shell/Header.svelte'
+  import SeoMetaTags from '$lib/components/SeoMetaTags.svelte'
+  import { browser } from '$app/environment'
 
-  $: publicDictionaries = data.publicDictionaries || [];
-  let privateDictionaries: IDictionary[] = [];
-  let selectedDictionaryId: string;
-  let selectedDictionary: IDictionary;
-  $: dictionaries = [...publicDictionaries, ...privateDictionaries, ...$myDictionaries];
+  export let data: PageData
+  $: ({ my_dictionaries, admin, get_private_dictionaries } = data)
+
+  $: publicDictionaries = data.publicDictionaries || []
+  let privateDictionaries: IDictionary[] = []
+  let selectedDictionaryId: string
+  let selectedDictionary: IDictionary
+  $: dictionaries = [...publicDictionaries, ...privateDictionaries, ...$my_dictionaries]
   $: if (selectedDictionaryId)
-    selectedDictionary = dictionaries.find((d) => d.id === selectedDictionaryId);
+    selectedDictionary = dictionaries.find(d => d.id === selectedDictionaryId)
   else
-    selectedDictionary = null;
-
+    selectedDictionary = null
 
   $: if (browser && $admin) {
-    getCollection<IDictionary>('dictionaries', [where('public', '!=', true)]).then(
-      (docs) => (privateDictionaries = docs)
-    );
+    get_private_dictionaries().then(_dictionaries => privateDictionaries = _dictionaries)
   } else {
-    privateDictionaries = [];
+    privateDictionaries = []
   }
 
-  let mapComponent: Map;
+  let mapComponent: Map
 </script>
 
 <Header />
@@ -46,12 +42,13 @@
   <div class="sm:w-72 max-h-full">
     <Search
       {dictionaries}
+      my_dictionaries={$my_dictionaries}
       bind:selectedDictionaryId
       on:selectedDictionary={({ detail }) => {
-        const { coordinates } = detail;
+        const { coordinates } = detail
         if (coordinates) {
-          mapComponent.setZoom(7);
-          mapComponent.setCenter([coordinates.longitude, coordinates.latitude]);
+          mapComponent.setZoom(7)
+          mapComponent.setCenter([coordinates.longitude, coordinates.latitude])
         }
       }} />
   </div>
@@ -92,9 +89,9 @@
         </ShowHide>
       {/if}
       <DictionaryPoints dictionaries={publicDictionaries} bind:selectedDictionaryId />
-      {#if $myDictionaries.length}
+      {#if $my_dictionaries.length}
         <DictionaryPoints
-          dictionaries={$myDictionaries}
+          dictionaries={$my_dictionaries}
           type="personal"
           bind:selectedDictionaryId />
       {/if}

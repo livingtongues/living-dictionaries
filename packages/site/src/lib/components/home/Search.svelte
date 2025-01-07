@@ -1,14 +1,15 @@
 <script lang="ts">
   import { page } from '$app/stores';
   import type { IDictionary } from '@living-dictionaries/types';
-  import { admin, myDictionaries } from '$lib/stores';
   import { fly } from 'svelte/transition';
-  import { Button } from 'svelte-pieces';
+  import { Button, ShowHide } from 'svelte-pieces';
   import { createEventDispatcher } from 'svelte';
 
   export let dictionaries: IDictionary[] = [];
+  export let my_dictionaries: IDictionary[] = [];
   export let selectedDictionaryId: string;
   let currentDictionary: IDictionary;
+  $: ({admin} = $page.data)
 
   $: if (selectedDictionaryId) {
     currentDictionary = dictionaries.find((dictionary) => {
@@ -56,8 +57,6 @@
   function clearDictionary() {
     selectedDictionaryId = null;
   }
-
-  let showAllMyDictionaries = false;
 
   $: active = searchString || searchFocused || currentDictionary;
 </script>
@@ -108,11 +107,11 @@
         </div>
       {/if}
 
-      {#if !searchString && $myDictionaries && $myDictionaries.length}
+      {#if !searchString && my_dictionaries?.length}
         <div class="text-sm font-semibold px-3 my-1">
           {$page.data.t('home.my_dictionaries')}
         </div>
-        {#each $myDictionaries as dictionary}
+        {#each my_dictionaries as dictionary}
           <button
             type="button"
             class="text-left px-3 py-1 my-1 hover:bg-gray-200"
@@ -154,28 +153,30 @@
     <div
       class="flex flex-wrap sm:flex-col overflow-y-auto
         overflow-x-hidden px-2 pb-2">
-      {#if !searchFocused && $myDictionaries}
-        {#each $myDictionaries as dictionary, i}
-          {#if showAllMyDictionaries || i < 3}
+      <ShowHide let:show let:toggle>
+        {#if !searchFocused && my_dictionaries}
+          {#each my_dictionaries as dictionary, i}
+            {#if show || i < 3}
+              <button
+                type="button"
+                class="sm:hidden rounded px-3 py-2 bg-white mt-2"
+                on:click={() => setCurrentDictionary(dictionary)}>
+                {dictionary?.name}
+              </button>
+              <div class="w-2 sm:hidden" />
+            {/if}
+          {/each}
+          {#if my_dictionaries.length > 3 && !show}
             <button
               type="button"
               class="sm:hidden rounded px-3 py-2 bg-white mt-2"
-              on:click={() => setCurrentDictionary(dictionary)}>
-              {dictionary?.name}
+              on:click={toggle}>
+              {$page.data.t('home.show_all_my_dictionaries')}
             </button>
             <div class="w-2 sm:hidden" />
           {/if}
-        {/each}
-        {#if $myDictionaries.length > 3 && !showAllMyDictionaries}
-          <button
-            type="button"
-            class="sm:hidden rounded px-3 py-2 bg-white mt-2"
-            on:click={() => (showAllMyDictionaries = true)}>
-            {$page.data.t('home.show_all_my_dictionaries')}
-          </button>
-          <div class="w-2 sm:hidden" />
         {/if}
-      {/if}
+      </ShowHide>
       {#if !(searchFocused && filteredDictionaries.length > 3)}
         <Button href="/create-dictionary" class="mt-2" color="black" form="filled">
           <span class="i-fa-solid-plus -mt-1.25" />
@@ -189,7 +190,7 @@
           form="simple"
           class="mt-2 opacity-75 focus:opacity-100
             sm:opacity-100 bg-white sm:bg-transparent">
-          <i class="far fa-list" />
+          <span class="i-fa-solid-list -mt-1" />
           {$page.data.t('home.list_of_dictionaries')}
         </Button>
         <div class="w-2 sm:hidden" />

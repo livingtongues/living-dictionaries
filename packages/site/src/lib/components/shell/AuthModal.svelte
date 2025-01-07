@@ -8,9 +8,9 @@
   } from 'sveltefirets';
   import { Modal } from 'svelte-pieces';
   import { createEventDispatcher } from 'svelte';
-  import { apiFetch } from '$lib/client/apiFetch';
-  import type { NewUserRequestBody } from '../../../routes/api/email/new_user/+server';
+  import type { NewUserRequestBody } from '$api/email/new_user/+server';
   import { page } from '$app/stores';
+  import { post_request } from '$lib/helpers/get-post-requests';
 
   let languageCode: LanguageCode = 'en';
 
@@ -32,17 +32,15 @@
       saveUserData(detail);
       if (detail.additionalUserInfo.isNewUser) {
         const auth_token = await detail.user.getIdToken();
-        const response = await apiFetch<NewUserRequestBody>('/api/email/new_user', {
+        const { error } = await post_request<NewUserRequestBody, null>('/api/email/new_user', {
           auth_token,
           user: {
             email: detail.user.email,
             displayName: detail.user.displayName || detail.user.email,
           },
         });
-        if (response.status !== 200) {
-          const body = await response.json();
-          throw new Error(body.message);
-        }
+        if (error)
+          throw new Error(error.message);
       }
     } catch (err) {
       alert(`${$page.data.t('misc.error')}: ${err}`);

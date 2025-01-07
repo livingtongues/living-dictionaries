@@ -1,51 +1,57 @@
-import type { ExpandedEntry, ISpeaker, IPartOfSpeech } from '@living-dictionaries/types';
-import type { EntryForCSV } from './prepareEntriesForCsv';
+import type { EntryView, MultiString, PartOfSpeech, Tables } from '@living-dictionaries/types'
+import type { EntryForCSV } from './prepareEntriesForCsv'
+import { get_example_sentence, get_glosses, get_image_files, get_noun_class, get_parts_of_speech, get_plural_form, get_semantic_domain, get_variant } from './getRows'
 
 export function find_part_of_speech_abbreviation(
-  global_parts_of_speech: IPartOfSpeech[],
-  part_of_speech: string
+  global_parts_of_speech: PartOfSpeech[],
+  part_of_speech: string,
 ): string {
-  return global_parts_of_speech.find(({ enName }) => enName === part_of_speech)?.enAbbrev;
+  return global_parts_of_speech.find(({ enName }) => enName === part_of_speech)?.enAbbrev
 }
 
 export function get_first_speaker_from_first_sound_file(
-  entry: ExpandedEntry,
-  speakers: ISpeaker[]
-): ISpeaker {
-  return speakers.find((speaker) => speaker?.id === entry.sound_files?.[0].speaker_ids?.[0]);
+  entry: EntryView,
+  speakers: Tables<'speakers_view'>[],
+) {
+  return speakers.find(speaker => speaker?.id === entry.audios?.[0].speaker_ids?.[0])
 }
 
 export function display_speaker_gender(speaker_gender: string): string {
-  if (speaker_gender) return speaker_gender === 'f' ? 'female' : 'male';
+  if (speaker_gender) return speaker_gender === 'f' ? 'female' : 'male'
 }
 
-export function format_semantic_domains(
-  entry: ExpandedEntry,
-): EntryForCSV {
-  const domains = {};
-  for (const [index, domain] of (entry.senses?.[0].translated_ld_semantic_domains || []).entries())
-    domains[`semantic_domain_${index + 1}`] = domain;
-  return domains;
-}
-
-export function format_gloss_languages(
-  entry: ExpandedEntry,
-): EntryForCSV {
-  const gloss_languages = {};
-  for (const [bcp, value] of Object.entries(entry.senses?.[0].glosses || {}))
-    gloss_languages[`${bcp}_gloss_language`] = value
-  return gloss_languages;
-}
-
-export function format_example_sentences(
-  entry: ExpandedEntry,
-): EntryForCSV {
-  const example_sentences: EntryForCSV = {};
-  for (const [bcp, value] of Object.entries(entry.senses?.[0].example_sentences?.[0] || {})) {
-    if (bcp === 'vn')
-      example_sentences.vernacular_example_sentence = value;
-    else
-      example_sentences[`${bcp}_example_sentence`] = value;
+export function format_local_orthographies(
+  alternate_orthographies: string[],
+  lexeme: MultiString,
+) {
+  const formatted_data: EntryForCSV = {}
+  if (alternate_orthographies) {
+    alternate_orthographies.forEach((_, index) => {
+      formatted_data[`${index > 0 ? `localOrthography.${index + 1}` : 'localOrthography'}`] = lexeme[`lo${index + 1}`]
+    })
   }
-  return example_sentences;
+  return formatted_data
+}
+
+export function format_senses(entry: EntryView) {
+  let formatted_senses = {}
+
+  for (const [sense_index, sense] of Array.from(entry.senses).entries()) {
+    formatted_senses = {
+      ...formatted_senses,
+      ...get_glosses(sense.glosses, { sense_index, position: 'value' }),
+      ...get_semantic_domain(sense.semantic_domains, { sense_index, position: 'value' }),
+      // @ts-ignore
+      ...get_parts_of_speech(sense.parts_of_speech_abbreviations, sense.parts_of_speech, { sense_index, position: 'value' }),
+      ...get_noun_class(sense.noun_class, { sense_index, position: 'value' }),
+      ...get_variant(sense.variant, { sense_index, position: 'value' }),
+      ...get_plural_form(sense.plural_form, { sense_index, position: 'value' }),
+      // @ts-ignore
+      ...get_image_files(sense.photo_urls?.[0], { sense_index, position: 'value' }, entry),
+      // @ts-ignore
+      ...get_example_sentence(sense.sentences?.[0], { sense_index, position: 'value' }),
+    }
+  }
+
+  return formatted_senses
 }

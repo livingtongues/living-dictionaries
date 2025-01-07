@@ -250,7 +250,7 @@
     "tft": "Ternate-Tidore",
     "tet": "Tetum / Fehan Tetun",
     "th": "Kithai",
-    "bo": "Kitibeti",
+    "bo": "Tibetani",
     "tvo": "Tukang Besi",
     "tig": "Tigre",
     "ti": "Kitigrinya",
@@ -292,7 +292,13 @@
     "waw": "Waiwai",
     "way": "Wayana",
     "apy": "Apalaí",
-    "jen": "DZA",
-    "mko": "Mingang Doso"
+    "jen": "Dza",
+    "mko": "Mingang Doso",
+    "hbo-hebr": "Kiebrania",
+    "ne-2": "Kinepali (Kirumi)",
+    "apd": "Kiarabu cha Sudan",
+    "hoi": "Holikachuk",
+    "mtq": "Muong",
+    "cag": "Nivacle"
   }
 }

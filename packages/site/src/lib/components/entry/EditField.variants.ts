@@ -1,78 +1,76 @@
-import type { Variant, Viewport } from 'kitbook';
-import type Component from './EditField.svelte';
+import type { Variant, VariantMeta } from 'kitbook'
+import type Component from './EditField.svelte'
 
-export const viewports: Viewport[] = [{
-  width: 700,
-  height: 200,
-}]
+export const shared_meta: VariantMeta = {
+  viewports: [{ width: 700, height: 200 }],
+}
 
+const shared = {
+  on_update: (new_value: string) => console.info('new_value', new_value),
+  on_close: null,
+} satisfies Partial<Variant<Component>>
 
-export const variants: Variant<Component>[] = [
-  {
-    name: 'Assamese Gloss',
+export const Assamese_Gloss: Variant<Component> = {
+  ...shared,
+  field: 'gloss',
+  bcp: 'as',
+  _meta: {
     description: 'should have keyboard icon',
-    props: {
-      field: 'gloss',
-      bcp: 'as',
-    },
     languages: [],
   },
-  {
-    name: 'Italicized Gloss',
-    props: {
-      field: 'gloss',
-      bcp: 'as',
-      value: 'red <i>tomato</i>',
-    },
+}
+
+export const Italicized_Gloss: Variant<Component> = {
+  ...shared,
+  field: 'gloss',
+  bcp: 'as',
+  value: 'red <i>tomato</i>',
+  _meta: {
     languages: [],
   },
-  {
-    name: 'Interlinear',
-    description: 'has small caps toggle option (needs translation)',
-    props: {
-      field: 'interlinearization',
-      value: '3p.sɢ.ind',
-    },
-  },
-  {
-    name: 'Morphology',
-    props: {
-      field: 'morphology',
-    },
+}
+
+export const Interlinear: Variant<Component> = {
+  ...shared,
+  field: 'interlinearization',
+  value: '3p.sɢ.ind',
+}
+
+export const Morphology: Variant<Component> = {
+  ...shared,
+  field: 'morphology',
+}
+
+export const Lexeme: Variant<Component> = {
+  ...shared,
+  field: 'lexeme',
+  value: 'banana',
+  _meta: {
     languages: [],
   },
-  {
-    name: 'Lexeme',
-    props: {
-      field: 'lexeme',
-      value: 'banana',
-    },
-    languages: [],
-  },
-  {
-    name: 'Notes',
-    props: {
-      field: 'notes',
-      value: 'hello',
-    },
+}
+
+export const Notes: Variant<Component> = {
+  ...shared,
+  field: 'notes',
+  value: 'hello',
+  _meta: {
     languages: [],
     tests: {
       clientSideRendered: true, // let rich-text editor load in
-    }
-  },
-  {
-    name: 'Phonetic',
-    description: 'needs translation, needs modal width to max-width of 60rem',
-    viewports: [{
-      width: 750,
-      height: 600,
-    }],
-    props: {
-      field: 'phonetic',
-      value: 'banana',
     },
+  },
+}
+
+export const Phonetic: Variant<Component> = {
+  ...shared,
+  field: 'phonetic',
+  value: 'banana',
+  _meta: {
+    viewports: [{ width: 750, height: 600 }],
+    description: 'needs translation, needs modal width to max-width of 60rem',
     tests: {
       clientSideRendered: true, // so that keyboard can load in
-    }
+    },
   },
-]
+}

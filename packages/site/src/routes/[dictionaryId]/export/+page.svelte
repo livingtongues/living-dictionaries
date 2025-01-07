@@ -1,47 +1,45 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
-  import { page } from '$app/stores';
-  import { admin, dictionary, isManager } from '$lib/stores';
-  import { Button, ShowHide } from 'svelte-pieces';
-  import { partsOfSpeech } from '$lib/mappings/parts-of-speech';
-  import type { ActualDatabaseEntry } from '@living-dictionaries/types';
-  import { getCollection } from 'sveltefirets';
-  import Progress from '$lib/export/Progress.svelte';
-  import SeoMetaTags from '$lib/components/SeoMetaTags.svelte';
-  import { convert_entry_to_current_shape } from '$lib/transformers/convert_entry_to_current_shape';
-  import { expand_entry } from '$lib/transformers/expand_entry';
-  import DownloadMedia from './DownloadMedia.svelte';
-  import { fetchSpeakers } from './fetchSpeakers';
-  import { getCsvHeaders, formatCsvEntries, type EntryForCSV } from './prepareEntriesForCsv';
-  import { downloadObjectsAsCSV } from '$lib/export/csv';
+  import { Button, ShowHide } from 'svelte-pieces'
+  import DownloadMedia from './DownloadMedia.svelte'
+  import { type EntryForCSV, formatCsvEntries, getCsvHeaders, translate_entries } from './prepareEntriesForCsv'
+  import SeoMetaTags from '$lib/components/SeoMetaTags.svelte'
+  import Progress from '$lib/export/Progress.svelte'
+  import { page } from '$app/stores'
+  import { downloadObjectsAsCSV } from '$lib/export/csv'
 
-  let includeImages = false;
-  let includeAudio = false;
+  export let data
+  $: ({ is_manager, dictionary, admin, entries, speakers, dialects, photos, sentences, url_from_storage_path } = data)
+  $: ({ loading: entries_loading } = entries)
+  $: ({ loading: speakers_loading } = speakers)
+  $: ({ loading: dialects_loading } = dialects)
+  $: ({ loading: photos_loading } = photos)
+  $: ({ loading: sentences_loading } = sentences)
+
+  let includeImages = false
+  let includeAudio = false
 
   let entryHeaders: EntryForCSV = {}
-  let formattedEntries: EntryForCSV[] = [];
-  let entriesWithImages: EntryForCSV[] = [];
-  let entriesWithAudio: EntryForCSV[] = [];
+  let formattedEntries: EntryForCSV[] = []
+  let entriesWithImages: EntryForCSV[] = []
+  let entriesWithAudio: EntryForCSV[] = []
 
-  let mounted = false;
+  let ready = false
 
-  onMount(async () => {
-    const database_entries = await getCollection<ActualDatabaseEntry>(`dictionaries/${$dictionary.id}/words`);
-    const converted_to_current_shaped_entries = database_entries.map(convert_entry_to_current_shape);
-    const expanded_entries = converted_to_current_shaped_entries.map(entry => expand_entry(entry, $page.data.t));
-    const speakers = await fetchSpeakers(expanded_entries);
+  $: if (!$entries_loading && !$speakers_loading && !$dialects_loading && !$photos_loading && !$sentences_loading) {
+    const translated_entries = translate_entries({ entries: $entries, photos: $photos, sentences: $sentences, dialects: $dialects })
+    entryHeaders = getCsvHeaders(translated_entries, $dictionary)
+    formattedEntries = formatCsvEntries(translated_entries, $speakers, url_from_storage_path, $dictionary)
+    // @ts-ignore
+    entriesWithImages = formattedEntries.filter(entry => entry?.photoSource)
+    entriesWithAudio = formattedEntries.filter(entry => entry?.soundSource)
 
-    entryHeaders = getCsvHeaders(expanded_entries, $dictionary)
-    formattedEntries = formatCsvEntries(expanded_entries, speakers, partsOfSpeech)
-    entriesWithImages = formattedEntries.filter((entry) => entry.image_filename);
-    entriesWithAudio = formattedEntries.filter((entry) => entry.sound_filename);
-
-    mounted = true;
-  });
+    ready = true
+  }
 </script>
 
 <h3 class="text-xl font-semibold mb-4">{$page.data.t('misc.export')}</h3>
-{#if $isManager}
+
+{#if $is_manager}
   <div class="mb-6">
     <div>
       <i class="far fa-check" />
@@ -59,7 +57,7 @@
       <label for="images" class="mx-2 block leading-5 text-gray-900">
         {$page.data.t('misc.images')} ({entriesWithImages.length})</label>
     </div>
-    {#if !mounted}
+    {#if !ready}
       <p class="text-xs italic text-orange-400 p-2">
         {$page.data.t('export.checking_images')}
       </p>
@@ -77,7 +75,7 @@
       <label for="audio" class="mx-2 block leading-5 text-gray-900">
         {$page.data.t('entry_field.audio')} ({entriesWithAudio.length})</label>
     </div>
-    {#if !mounted}
+    {#if !ready}
       <p class="text-xs italic text-orange-400 p-2">
         {$page.data.t('export.checking_audios')}
       </p>
@@ -122,7 +120,7 @@
     <Button
       loading={!formattedEntries.length}
       onclick={() => {
-        downloadObjectsAsCSV(entryHeaders, formattedEntries, $dictionary.id);
+        downloadObjectsAsCSV(entryHeaders, formattedEntries, $dictionary.id)
       }}
       form="filled">
       {$page.data.t('export.download_csv')}
@@ -134,7 +132,7 @@
 
 {#if $admin}
   <div class="mt-5">
-    <Button form="filled" href="entries/print">{$page.data.t('export.download_pdf')}</Button>
+    <Button form="filled" href='entries?q=%7B"view"%3A"print"%2C"entries_per_page"%3A100%7D'>{$page.data.t('export.download_pdf')}</Button>
   </div>
 {/if}
 

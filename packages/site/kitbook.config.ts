@@ -1,5 +1,5 @@
-import { Locales } from './src/lib/i18n/locales'
 import { defineConfig } from 'kitbook/defineConfig'
+import { Locales } from './src/lib/i18n/locales'
 
 export default defineConfig({
   title: 'Living Dictionaries',
@@ -11,10 +11,13 @@ export default defineConfig({
     { name: 'desktop', width: 786, height: 400 },
   ],
   languages: Object.entries(Locales).map(([code, name]) => ({ code, name })),
-  addLanguageToUrl: ({code, url}) => {
+  addLanguageToUrl: ({ code, url }) => {
     const [path, search] = url.split('?')
     const params = new URLSearchParams(search)
     params.set('lang', code)
     return `${path}?${params.toString()}`
-  }
+  },
+  viewer: {
+    openToolsIn: 'popup',
+  },
 })

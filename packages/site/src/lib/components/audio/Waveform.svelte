@@ -1,15 +1,15 @@
 <script lang="ts">
-  import { onMount, onDestroy } from 'svelte';
-  import { Button } from 'svelte-pieces';
+  import { onDestroy, onMount } from 'svelte'
+  import { Button } from 'svelte-pieces'
 
   export let audioUrl: string = undefined
-  export let audioBlob = undefined;
-  let wavesurfer;
-  let waveform;
-  let playing = false;
+  export let audioBlob = undefined
+  let wavesurfer
+  let waveform
+  let playing = false
 
   onMount(async () => {
-    const WaveSurfer = (await import('wavesurfer.js')).default;
+    const WaveSurfer = (await import('wavesurfer.js')).default
     wavesurfer = WaveSurfer.create({
       // http://wavesurfer-js.org/docs/options.html
       container: waveform,
@@ -19,33 +19,33 @@
       height: 90,
       responsive: true,
       normalize: true,
-    });
+    })
 
     wavesurfer.on('finish', () => {
-      playing = false;
-    });
+      playing = false
+    })
 
     if (audioUrl) {
       // use https://firebase.google.com/docs/storage/web/download-files#cors_configuration to make this work
-      wavesurfer.load(audioUrl);
+      wavesurfer.load(audioUrl)
     } else if (audioBlob) {
-      wavesurfer.loadBlob(audioBlob);
+      wavesurfer.loadBlob(audioBlob)
     }
-  });
+  })
 
   function startStop() {
     if (playing)
-      wavesurfer.stop();
+      wavesurfer.stop()
     else
-      wavesurfer.play();
+      wavesurfer.play()
 
-    playing = !playing;
+    playing = !playing
   }
 
   onDestroy(() => {
     // wavesurfer.unAll();
-    wavesurfer.destroy();
-  });
+    wavesurfer?.destroy()
+  })
 </script>
 
 <div class="flex items-center" style="direction: ltr;">

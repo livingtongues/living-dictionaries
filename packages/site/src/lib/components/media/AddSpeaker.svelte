@@ -1,40 +1,35 @@
 <script lang="ts">
-  import { page } from '$app/stores';
-  import { createEventDispatcher } from 'svelte';
-  import { dictionary } from '$lib/stores';
-  import { Button, Form, Modal } from 'svelte-pieces';
-  import { addOnline } from 'sveltefirets';
-  import type { ISpeaker } from '@living-dictionaries/types';
-  import { decades } from './ages';
+  import { Button, Form, Modal } from 'svelte-pieces'
+  import type { Tables } from '@living-dictionaries/types'
+  import { decades } from './ages'
+  import { page } from '$app/stores'
 
-  const dispatch = createEventDispatcher();
-  const close = () => dispatch('close');
+  export let on_close: () => void
+  export let on_speaker_added: (speaker_id: string) => void
+  $: ({ dbOperations } = $page.data)
 
-  let displayName = '';
-  let birthplace = '';
-  let decade = 4;
-  let gender: ISpeaker['gender'] = 'm';
-  let agreeToBeOnline = true;
-
-  async function addSpeaker() {
-    const speaker = {
-      displayName: displayName.trim(),
-      birthplace: birthplace.trim(),
-      decade,
-      gender,
-      contributingTo: [$dictionary.id],
-    };
-
-    const { id } = await addOnline<ISpeaker>('speakers', speaker);
-    dispatch('newSpeaker', { id });
-  }
+  let displayName = ''
+  let birthplace = ''
+  let decade = 4
+  let gender: Tables<'speakers'>['gender'] = 'm'
+  let agreeToBeOnline = true
 </script>
 
-<Modal on:close>
+<Modal on:close={on_close}>
   <span slot="heading">{$page.data.t('speakers.add_new_speaker')}
   </span>
 
-  <Form let:loading onsubmit={addSpeaker}>
+  <Form
+    let:loading
+    onsubmit={async () => {
+      const speaker_id = await dbOperations.upsert_speaker({ speaker: {
+        name: displayName.trim(),
+        birthplace: birthplace.trim(),
+        decade,
+        gender,
+      } })
+      on_speaker_added(speaker_id)
+    }}>
     <label for="name" class="block text-sm font-medium leading-5 text-gray-700 mt-4">
       {$page.data.t('speakers.name')}
     </label>
@@ -116,7 +111,7 @@
     <!-- TODO: "The speaker is me" checkbox -->
 
     <div class="modal-footer space-x-1">
-      <Button onclick={close} form="simple" color="black">
+      <Button disabled={loading} onclick={on_close} form="simple" color="black">
         {$page.data.t('misc.cancel')}
       </Button>
       <Button type="submit" form="filled" {loading}>

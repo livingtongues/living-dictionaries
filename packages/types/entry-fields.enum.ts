@@ -1,30 +1,32 @@
-// Primary purpose is to give a readable way to dispatch database updates, the left is the readable, the right is the database value
-export enum EntryFields {
-  'lexeme' = 'lx',
-  'phonetic' = 'ph',
-  'notes' = 'nt',
-  'interlinearization' = 'in',
-  'morphology' = 'mr',
-  'plural_form' = 'pl',
-  'gloss' = 'gloss', // not actual db value
-  'example_sentence' = 'example_sentence', // not actual db value
-  'local_orthography' = 'alternateOrthographies', // not actual db value
-  'scientific_names' = 'scn',
-  'noun_class' = 'nc',
-  'dialects' = 'di',
-  'variant' = 'va',
-  'sources' = 'sr',
-  'elicitation_id' = 'ei',
-  'parts_of_speech' = 'ps',
-  'semantic_domains' = 'sdn',
-  'speaker' = 'speaker',
-  'definition_english' = 'de', // only Bahasa Lani
-  'photo' = 'pf',
-  'audio' = 'sf',
+// eslint-disable-next-line unused-imports/no-unused-vars
+enum EntryFields {
+  lexeme = 'lx',
+  phonetic = 'ph',
+  notes = 'nt',
+  interlinearization = 'in',
+  morphology = 'mr',
+  plural_form = 'pl',
+  gloss = 'gloss', // not actual db value
+  example_sentence = 'example_sentence', // not actual db value
+  local_orthography = 'alternateOrthographies', // not actual db value
+  scientific_names = 'scn',
+  noun_class = 'nc',
+  custom_tags = 'tag', // not sure if these right side values are used anymore?
+  dialects = 'di',
+  variant = 'va',
+  sources = 'sr',
+  elicitation_id = 'ei',
+  parts_of_speech = 'ps',
+  semantic_domains = 'sdn',
+  speaker = 'speaker',
+  definition_english = 'de', // only Bahasa Lani
+  photo = 'pf',
+  audio = 'sf',
+  coordinates = 'co', // not known in i18n
+  ID = 'id', // not i18n required
 }
 
-
-export type EntryFieldValue = keyof typeof EntryFields;
+export type EntryFieldValue = keyof typeof EntryFields
 // export type EntryFieldKey = `${EntryFields}`;
 
-// i18n keys are `entry_field.${EntryFieldValue}` (using the left column values)
+export type i18nEntryFieldKey = `entry_field.${Exclude<EntryFieldValue, 'coordinates' | 'ID'>}`

@@ -1,40 +1,41 @@
 <script lang="ts">
-  import { page } from '$app/stores';
-  import { onMount } from 'svelte';
-  import { flip } from 'svelte/animate';
-  import { fade } from 'svelte/transition';
-  import { Slideover } from 'svelte-pieces';
-  import { preferredColumns } from '$lib/stores';
-  import type { IColumn } from '@living-dictionaries/types';
-  import ColumnTitle from './ColumnTitle.svelte';
+  import { onMount } from 'svelte'
+  import { flip } from 'svelte/animate'
+  import { fade } from 'svelte/transition'
+  import { Slideover } from 'svelte-pieces'
+  import type { IColumn } from '@living-dictionaries/types'
+  import ColumnTitle from './ColumnTitle.svelte'
+  import { page } from '$app/stores'
 
-  export let selectedColumn: IColumn;
-  let selectedColumnElement: HTMLElement;
-  let widthToDisplay: string;
-  let widthDisplayTimeout;
+  export let selectedColumn: IColumn
+  $: ({ preferred_table_columns } = $page.data)
+
+  let selectedColumnElement: HTMLElement
+  let widthToDisplay: string
+  let widthDisplayTimeout
 
   onMount(() => {
     if (selectedColumnElement) {
       selectedColumnElement.scrollIntoView({
         behavior: 'smooth',
         block: 'center',
-      });
+      })
     }
-  });
+  })
 
   function showWidth(e) {
-    const {target} = e;
-    widthToDisplay = target.value;
-    clearTimeout(widthDisplayTimeout);
+    const { target } = e
+    widthToDisplay = target.value
+    clearTimeout(widthDisplayTimeout)
     widthDisplayTimeout = setTimeout(() => {
-      widthToDisplay = null;
-    }, 2000);
+      widthToDisplay = null
+    }, 2000)
   }
 
   function move(i: number, direction: 'up' | 'down') {
-    const columnBeingMoved = $preferredColumns.splice(i, 1);
-    $preferredColumns.splice(direction === 'up' ? i - 1 : i + 1, 0, ...columnBeingMoved);
-    $preferredColumns = $preferredColumns; // trigger Svelte reactivity;
+    const columnBeingMoved = $preferred_table_columns.splice(i, 1)
+    $preferred_table_columns.splice(direction === 'up' ? i - 1 : i + 1, 0, ...columnBeingMoved)
+    $preferred_table_columns = $preferred_table_columns // trigger Svelte reactivity;
   }
 </script>
 
@@ -42,7 +43,7 @@
   <span slot="title">{$page.data.t('column.adjust_columns')}</span>
 
   <ul class="divide-y divid-gray-200">
-    {#each $preferredColumns as column, i (column.field)}
+    {#each $preferred_table_columns as column, i (column.field)}
       <li
         animate:flip
         class="p-2 bg-white hover:bg-gray-100"
@@ -57,7 +58,7 @@
                 <span class="i-fa6-solid-chevron-up" />
               </button>
             {/if}
-            {#if i > 0 && i !== $preferredColumns.length - 1}
+            {#if i > 0 && i !== $preferred_table_columns.length - 1}
               <button
                 type="button"
                 on:click={() => move(i, 'down')}
@@ -95,7 +96,7 @@
               </button>
             </div>
             <!-- Source range input shouldn't be here because we need to show complete sources and they can be very long -->
-            {#if column.field != 'sources'}
+            {#if column.field !== 'sources'}
               <input
                 class="w-full"
                 type="range"

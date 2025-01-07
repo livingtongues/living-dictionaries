@@ -1,80 +1,76 @@
+<script context="module" lang="ts">
+  let last_selected_speaker_id: string
+</script>
+
 <script lang="ts">
-  import { page } from '$app/stores';
-  import { Collection } from 'sveltefirets';
-  import { where } from 'firebase/firestore';
+  import { Button } from 'svelte-pieces'
+  import { page } from '$app/stores'
 
-  export let dictionaryId: string;
-  export let initialSpeakerId: string = undefined;
+  export let select_speaker: (speaker_id: string) => Promise<void> = undefined
+  export let initialSpeakerId: string = undefined
 
-  const addSpeaker = 'AddSpeaker';
-  $: speakerId = initialSpeakerId;
+  $: ({ speakers } = $page.data)
 
-  import type { ISpeaker } from '@living-dictionaries/types';
-  let speakers: ISpeaker[] = [];
-
-  import { createEventDispatcher } from 'svelte';
-  const dispatch = createEventDispatcher<{ update: { speakerId: string } }>();
+  const addSpeaker = 'AddSpeaker'
+  $: speaker_id = initialSpeakerId || last_selected_speaker_id
 
   function autofocus(node: HTMLSelectElement) {
-    setTimeout(() => node.focus(), 5);
+    setTimeout(() => node.focus(), 5)
   }
 </script>
 
-<Collection
-  path="speakers"
-  startWith={speakers}
-  on:data={(e) => (speakers = e.detail.data)}
-  queryConstraints={[where('contributingTo', 'array-contains', dictionaryId)]} />
-
-{#if !speakerId}
+{#if !speaker_id}
   <div class="text-sm font-medium leading-5 text-gray-600 mb-2">
     {$page.data.t('audio.select_speaker')}
   </div>
 {/if}
 
-<div class="flex rounded-md shadow-sm mb-4">
-  <label
-    for="speaker"
-    class="inline-flex items-center px-3 ltr:rounded-l-md rtl:rounded-r-md border
-      border-gray-300 bg-gray-50 text-gray-500">
-    {$page.data.t('entry_field.speaker')}
-  </label>
-  <select
-    use:autofocus
-    bind:value={speakerId}
-    on:change={() => {
-      // Currently means you can't remove a speaker
-      if (speakerId && speakerId !== addSpeaker)
-        dispatch('update', { speakerId });
-
-    }}
-    class="block w-full pl-3 !rounded-none ltr:!rounded-r-md rtl:!rounded-l-md form-input hover:outline-blue-600">
-    {#if !speakerId}
-      <option />
-    {/if}
-    {#each speakers as speaker}
-      <option value={speaker.id}>
-        {speaker.displayName}
-      </option>
-    {/each}
-    <option value={addSpeaker}>
-      +
-      {$page.data.t('misc.add')}
-    </option>
-  </select>
-</div>
-
-{#if speakerId === addSpeaker}
-  {#await import('$lib/components/media/AddSpeaker.svelte') then { default: AddSpeaker }}
-    <AddSpeaker
-      on:close={() => {
-        speakerId = '';
+{#if !$speakers?.length}
+  <Button onclick={() => speaker_id = addSpeaker} form="filled"><span class="i-fa-solid-plus -mt-1" /> {$page.data.t('misc.add')}</Button>
+{:else}
+  <div class="flex rounded-md shadow-sm mb-4">
+    <label
+      for="speaker"
+      class="inline-flex items-center px-3 ltr:rounded-l-md rtl:rounded-r-md border
+        border-gray-300 bg-gray-50 text-gray-500">
+      {$page.data.t('entry_field.speaker')}
+    </label>
+    <select
+      use:autofocus
+      bind:value={speaker_id}
+      on:change={() => {
+        // Currently means you can't remove a speaker
+        if (speaker_id && speaker_id !== addSpeaker) {
+          last_selected_speaker_id = speaker_id
+          select_speaker?.(speaker_id)
+        }
       }}
-      on:newSpeaker={(event) => {
-        speakerId = event.detail.id;
-        dispatch('update', { speakerId });
-      }} />
-  {/await}
+      class="block w-full pl-3 !rounded-none ltr:!rounded-r-md rtl:!rounded-l-md form-input hover:outline-blue-600">
+      {#if !speaker_id}
+        <option />
+      {/if}
+      {#each $speakers as speaker}
+        <option value={speaker.id}>
+          {speaker.name}
+        </option>
+      {/each}
+      <option value={addSpeaker}>
+        +
+        {$page.data.t('misc.add')}
+      </option>
+    </select>
+  </div>
 {/if}
 
-<slot {speakerId} />
+{#if speaker_id === addSpeaker}
+  {#await import('$lib/components/media/AddSpeaker.svelte') then { default: AddSpeaker }}
+    <AddSpeaker
+      on_close={() => speaker_id = ''}
+      on_speaker_added={(new_speaker_id) => {
+        speaker_id = new_speaker_id
+        select_speaker?.(new_speaker_id)
+      }} />
+  {/await}
+{:else if speaker_id}
+  <slot {speaker_id} />
+{/if}

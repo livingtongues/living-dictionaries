@@ -1,28 +1,27 @@
 <script lang="ts">
-  import { createEventDispatcher } from 'svelte';
-  import type { ExpandedEntry, IColumn } from '@living-dictionaries/types';
-  import ColumnTitle from './ColumnTitle.svelte';
-  import Cell from './Cell.svelte';
-  import { minutesAgo } from '$lib/helpers/time';
+  import type { EntryView, IColumn, IDictionary } from '@living-dictionaries/types'
+  import ColumnTitle from './ColumnTitle.svelte'
+  import Cell from './Cell.svelte'
+  import { setUpColumns } from './setUpColumns'
+  import { minutes_ago_in_ms } from '$lib/helpers/time'
+  import { browser } from '$app/environment'
+  import type { DbOperations } from '$lib/dbOperations'
 
-  export let columns: IColumn[];
-  export let entries: ExpandedEntry[] = [];
-  export let canEdit = false;
-  export let dictionaryId: string;
+  export let entries: EntryView[] = []
+  export let can_edit = false
+  export let dictionary: IDictionary
+  export let preferred_table_columns: IColumn[]
+  export let dbOperations: DbOperations
 
-  let selectedColumn: IColumn;
+  $: columns = setUpColumns(preferred_table_columns, dictionary)
+  let selectedColumn: IColumn
 
   function getLeftValue(index: number) {
-    if (index === 0) return 0;
-    return columns[index - 1].width;
+    if (index === 0) return 0
+    return columns[index - 1].width
   }
 
-  const dispatch = createEventDispatcher<{
-    deleteImage: { entryId: string };
-    valueupdate: { field: string; newValue: string | string[]; entryId: string };
-  }>();
-
-  const isFirefox = /Firefox/i.test(navigator.userAgent);
+  const isFirefox = browser && /Firefox/i.test(navigator.userAgent)
 </script>
 
 <div
@@ -34,28 +33,33 @@
       {#each columns as column, i}
         <th
           on:click={() => {
-            selectedColumn = column;
+            selectedColumn = column
           }}
           class:z-10={column.sticky}
-          class="cursor-pointer bg-gray-100 top-0 sticky
+          class="cursor-pointer bg-gray-100 top-0 sticky z-1
             hover:bg-gray-200 active:bg-gray-300 text-xs font-semibold"
           style="{column.sticky
-            ? 'left:' + getLeftValue(i) + 'px; --border-right-width: 3px;'
+            ? `left:${getLeftValue(i)}px; --border-right-width: 3px;`
             : ''} --col-width: {column.width}px;">
           <ColumnTitle {column} />
         </th>
       {/each}
     </tr>
     {#each entries as entry (entry.id)}
+      {@const updated_within_last_5_minutes = can_edit && new Date(entry.updated_at).getTime() > minutes_ago_in_ms(5)}
       <tr class="row-hover">
         {#each columns as column, i}
           <td
-            class:bg-green-100={canEdit && entry.ua?.toMillis?.() > minutesAgo(5)}
+            class:bg-green-100!={updated_within_last_5_minutes}
             class="{column.sticky ? 'sticky bg-white z-1' : ''} {isFirefox ? '' : 'h-0'}"
             style="{column.sticky
-              ? 'left:' + getLeftValue(i) + 'px; --border-right-width: 3px;'
-              : ''} --col-width: {entry.sources ? 'auto' : `${column.width}px`};">
-            <Cell {column} {entry} {canEdit} {dictionaryId} on:deleteImage={() => dispatch('deleteImage', { entryId: entry.id})} on:valueupdate={({detail: {field, newValue}}) => dispatch('valueupdate', { field, newValue, entryId: entry.id })} />
+              ? `left:${getLeftValue(i)}px; --border-right-width: 3px;`
+              : ''} --col-width: {entry.main.sources ? 'auto' : `${column.width}px`};">
+            <Cell
+              {column}
+              {entry}
+              {can_edit}
+              {dbOperations} />
           </td>
         {/each}
       </tr>
@@ -68,7 +72,7 @@
     <ColumnAdjustSlideover
       {selectedColumn}
       on:close={() => {
-        selectedColumn = null;
+        selectedColumn = null
       }} />
   {/await}
 {/if}

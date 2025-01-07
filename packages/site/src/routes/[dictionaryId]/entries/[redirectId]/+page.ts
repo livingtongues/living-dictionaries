@@ -1,6 +1,7 @@
-import { redirect } from '@sveltejs/kit';
+import { redirect } from '@sveltejs/kit'
+import type { PageLoad } from './$types'
+import { ResponseCodes } from '$lib/constants'
 
-import type { PageLoad } from './$types';
 export const load: PageLoad = ({ params }) => {
-  throw redirect(308, `/${params.dictionaryId}/entry/${params.redirectId}`);
-};
+  redirect(ResponseCodes.MOVED_PERMANENTLY_PRESERVE_REQUEST, `/${params.dictionaryId}/entry/${params.redirectId}`)
+}

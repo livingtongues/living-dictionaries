@@ -1,105 +1,75 @@
 <script lang="ts">
-  import { page } from '$app/stores';
-  import Waveform from '$lib/components/audio/Waveform.svelte';
-  import SelectAudio from '$lib/components/audio/SelectAudio.svelte';
-  import RecordAudio from '$lib/components/audio/RecordAudio.svelte';
-  import { dictionary, admin } from '$lib/stores';
-  import { Modal, Button, JSON } from 'svelte-pieces';
-  import { deleteAudio } from '$lib/helpers/delete';
-  import type { ExpandedAudio, ExpandedEntry, GoalDatabaseEntry } from '@living-dictionaries/types';
-  import SelectSpeaker from '$lib/components/media/SelectSpeaker.svelte';
-  import { updateOnline, firebaseConfig } from 'sveltefirets';
-  import { createEventDispatcher } from 'svelte';
-  const dispatch = createEventDispatcher<{close: boolean}>();
+  import { Button, JSON, Modal } from 'svelte-pieces'
+  import type { AudioWithSpeakerIds, EntryView } from '@living-dictionaries/types'
+  import { page } from '$app/stores'
+  import Waveform from '$lib/components/audio/Waveform.svelte'
+  import SelectAudio from '$lib/components/audio/SelectAudio.svelte'
+  import RecordAudio from '$lib/components/audio/RecordAudio.svelte'
+  import SelectSpeaker from '$lib/components/media/SelectSpeaker.svelte'
 
-  export let entry: ExpandedEntry;
-  export let sound_file: ExpandedAudio;
+  export let on_close: () => void
+  export let entry: EntryView
+  export let sound_file: AudioWithSpeakerIds
+  $: ({ admin, dbOperations, url_from_storage_path } = $page.data)
+  let readyToRecord: boolean
 
-  let readyToRecord: boolean;
-  let showUploadAudio = true;
-
-  let file: File;
-  let audioBlob: Blob;
+  let file: File
+  let audioBlob: Blob
 
   $: if (sound_file) {
-    file = undefined;
-    audioBlob = undefined;
+    file = undefined
+    audioBlob = undefined
   }
 
-  $: audio_url = sound_file?.fb_storage_path
-    ? `https://firebasestorage.googleapis.com/v0/b/${firebaseConfig.storageBucket}/o/${encodeURIComponent(sound_file.fb_storage_path)}?alt=media`
-    : undefined;
+  $: initial_speaker_id = sound_file?.speaker_ids?.[0]
 
-  $: speaker_id = sound_file?.speaker_ids?.[0]
+  async function select_speaker(new_speaker_id: string) {
+    if (!sound_file) return
+    if (initial_speaker_id === new_speaker_id) return
 
-  async function updateSpeaker(newSpeakerId: string) {
-    if(!sound_file) return;
-    if (speaker_id === newSpeakerId) return;
-
-    const sf = {
-      // @ts-ignore = TODO: export this event to handle saving in the page
-      ...entry.sfs[0],
-      sp: [newSpeakerId]
-    }
-    await updateOnline<GoalDatabaseEntry>(
-      `dictionaries/${$dictionary.id}/words/${entry.id}`,
-      { sfs: [sf] },
-      { abbreviate: true }
-    );
+    if (initial_speaker_id)
+      await dbOperations.assign_speaker({ speaker_id: initial_speaker_id, media: 'audio', media_id: sound_file.id, remove: true })
+    await dbOperations.assign_speaker({ speaker_id: new_speaker_id, media: 'audio', media_id: sound_file.id })
   }
 </script>
 
-<Modal on:close>
-  <span slot="heading"> <span class="i-material-symbols-hearing text-lg text-sm" /> {entry.lexeme} </span>
+<Modal on:close={on_close}>
+  <span slot="heading"> <span class="i-material-symbols-hearing text-lg text-sm" /> {entry.main.lexeme.default} </span>
 
-  {#if sound_file?.speakerName}
-    <div class="mb-4">
-      {$page.data.t('entry_field.speaker')}:
-      {sound_file.speakerName}
-    </div>
-    <Waveform audioUrl={audio_url} />
-  {:else}
-    <SelectSpeaker
-      dictionaryId={$dictionary.id}
-      initialSpeakerId={speaker_id}
-      let:speakerId
-      on:update={async ({ detail: {speakerId} }) => await updateSpeaker(speakerId)}>
-      {#if sound_file}
-        <div class="px-1">
-          <Waveform audioUrl={audio_url} />
-        </div>
-      {:else if speakerId}
-        {#if file || audioBlob}
-          {#if file}
-            <Waveform audioUrl={URL.createObjectURL(file)} />
-          {:else}
-            <Waveform {audioBlob} />
-          {/if}
-          <div class="mb-3" />
-          {#if showUploadAudio}
-            {#await import('$lib/components/audio/UploadAudio.svelte') then { default: UploadAudio }}
-              <UploadAudio
-                file={file || audioBlob}
-                entryId={entry.id}
-                {speakerId}
-                on:close={() => {
-                  showUploadAudio = false;
-                }} />
-            {/await}
-          {/if}
+  <SelectSpeaker
+    initialSpeakerId={initial_speaker_id}
+    let:speaker_id
+    {select_speaker}>
+    {#if sound_file}
+      <div class="px-1">
+        <Waveform audioUrl={url_from_storage_path(sound_file.storage_path)} />
+      </div>
+    {:else if speaker_id}
+      {#if file || audioBlob}
+        {#if file}
+          <Waveform audioUrl={URL.createObjectURL(file)} />
         {:else}
-          <div class="flex flex-col">
-            <div class="mb-2">
-              <RecordAudio bind:audioBlob bind:permissionGranted={readyToRecord} />
-            </div>
-            {#if !readyToRecord}
-              <SelectAudio bind:file />
-            {/if}
-          </div>
+          <Waveform {audioBlob} />
         {/if}
+        <div class="mb-3" />
+        {#if file || audioBlob}
+          {@const upload_status = dbOperations.addAudio({ file: file || audioBlob, entry_id: entry.id, speaker_id })}
+          {#await import('$lib/components/audio/UploadProgressBarStatus.svelte') then { default: UploadProgressBarStatus }}
+            <UploadProgressBarStatus {upload_status} />
+          {/await}
+        {/if}
+      {:else}
+        <div class="flex flex-col">
+          <div class="mb-2">
+            <RecordAudio bind:audioBlob bind:permissionGranted={readyToRecord} />
+          </div>
+          {#if !readyToRecord}
+            <SelectAudio bind:file />
+          {/if}
+        </div>
       {/if}
-    </SelectSpeaker>
-  {/if}
+    {/if}
+  </SelectSpeaker>
 
   <div class="modal-footer">
     {#if sound_file}
@@ -109,21 +79,21 @@
       {/if}
 
       <Button
-        href={audio_url}
+        href={url_from_storage_path(sound_file.storage_path)}
         target="_blank">
         <i class="fas fa-download" />
         <span class="hidden sm:inline">{$page.data.t('misc.download')}</span>
       </Button>
       <div class="w-1" />
 
-      <Button onclick={() => deleteAudio(entry, $dictionary.id)} color="red">
+      <Button onclick={async () => await dbOperations.upsert_audio({ audio: { deleted: 'true' }, audio_id: sound_file.id, refresh_entry: true })} color="red">
         <i class="far fa-trash-alt" />&nbsp;
         <span class="hidden sm:inline">{$page.data.t('misc.delete')}</span>
       </Button>
       <div class="w-1" />
     {/if}
 
-    <Button onclick={() => dispatch('close')} color="black">
+    <Button onclick={on_close} color="black">
       {$page.data.t('misc.close')}
     </Button>
   </div>

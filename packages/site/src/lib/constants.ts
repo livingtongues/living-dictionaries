@@ -1,5 +1,4 @@
-/* eslint-disable no-magic-numbers */
-export const DICTIONARIES_WITH_VARIANTS = ['babanki', 'torwali', 'ksingmul', 'tutelo-saponi']
+export const DICTIONARIES_WITH_VARIANTS = ['babanki', 'torwali', 'ksingmul', 'tutelo-saponi', 'tseltal', 'namtrik-de-totoro']
 
 export enum ResponseCodes {
   OK = 200,
@@ -9,4 +8,7 @@ export enum ResponseCodes {
   UNAUTHORIZED = 401,
   MOVED_PERMANENTLY = 301,
   TEMPORARY_REDIRECT = 307,
+  MOVED_PERMANENTLY_PRESERVE_REQUEST = 308,
 }
+
+export const MINIMUM_ABOUT_LENGTH = 200

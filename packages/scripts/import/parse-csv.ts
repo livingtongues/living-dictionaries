@@ -1,13 +1,13 @@
-import { readFileSync } from 'fs';
-import { parse } from 'csv-parse/sync';
+import { readFileSync } from 'node:fs'
 import path from 'node:path'
+import { parse } from 'csv-parse/sync'
 
-export function parseCSVFrom(contents: string): Record<string, any>[] {
+export function parseCSVFrom<T = Record<string, any>>(contents: string): T[] {
   return parse(contents, {
     columns: true,
     skip_empty_lines: true,
     trim: true,
-  });
+  })
 }
 
 if (import.meta.vitest) {
@@ -15,24 +15,24 @@ if (import.meta.vitest) {
     const csv = `
 a ,the book ,c
 1,2 , 3
-`;
+`
     expect(parseCSVFrom(csv)).toEqual([
       {
         'a': '1',
         'the book': '2',
         'c': '3',
       },
-    ]);
-  });
+    ])
+  })
 
   test('parseCSV logs out example.csv as array', () => {
     const filepath = path.join(__dirname, './data/example-v4/example-v4.csv')
-    const file = readFileSync(filepath, 'utf8');
+    const file = readFileSync(filepath, 'utf8')
     expect(parseCSVFrom(file)).toMatchInlineSnapshot(`
       [
         {
           "": "",
-          "dialect": "",
+          "dialects": "",
           "en_exampleSentence": "English",
           "en_gloss": "English",
           "es_exampleSentence": "Spanish",
@@ -48,7 +48,7 @@ a ,the book ,c
           "pluralForm": "",
           "scientificName": "",
           "semanticDomain": "key",
-          "semanticDomain2": "key",
+          "semanticDomain.2": "key",
           "semanticDomain_custom": "(try not to use, separate multiples with a |)",
           "soundFile": "",
           "source": "",
@@ -60,7 +60,7 @@ a ,the book ,c
         },
         {
           "": "Daily life",
-          "dialect": "Modern Parisian French",
+          "dialects": "Modern Parisian French",
           "en_exampleSentence": "I drive my car",
           "en_gloss": "car",
           "es_exampleSentence": "Conduzco mi auto",
@@ -76,7 +76,7 @@ a ,the book ,c
           "pluralForm": "",
           "scientificName": "",
           "semanticDomain": "5.15",
-          "semanticDomain2": "5",
+          "semanticDomain.2": "5",
           "semanticDomain_custom": "vehicle|cars",
           "soundFile": "helloworld.mp3",
           "source": "",
@@ -88,7 +88,7 @@ a ,the book ,c
         },
         {
           "": "Earth, geology and landscape",
-          "dialect": "Modern Parisian French",
+          "dialects": "Modern Parisian French, Quebec French",
           "en_exampleSentence": "The tree gives us shade",
           "en_gloss": "tree",
           "es_exampleSentence": "El árbol nos da sombra",
@@ -104,7 +104,7 @@ a ,the book ,c
           "pluralForm": "",
           "scientificName": "Acer rubrum",
           "semanticDomain": "1.4",
-          "semanticDomain2": "1.2",
+          "semanticDomain.2": "1.2",
           "semanticDomain_custom": "",
           "soundFile": "missing.mp3",
           "source": "",
@@ -116,7 +116,7 @@ a ,the book ,c
         },
         {
           "": "",
-          "dialect": "Modern Parisian French",
+          "dialects": "Modern Parisian French",
           "en_exampleSentence": "The water goes through the tubes",
           "en_gloss": "tube",
           "es_exampleSentence": "El agua pasa a través de los tubos",
@@ -132,7 +132,7 @@ a ,the book ,c
           "pluralForm": "tubes",
           "scientificName": "",
           "semanticDomain": "5.9",
-          "semanticDomain2": "",
+          "semanticDomain.2": "",
           "semanticDomain_custom": "plumbing",
           "soundFile": "",
           "source": "",
@@ -144,7 +144,7 @@ a ,the book ,c
         },
         {
           "": "",
-          "dialect": "Quebec French",
+          "dialects": "Quebec French",
           "en_exampleSentence": "I drive my car",
           "en_gloss": "car",
           "es_exampleSentence": "Conduzco mi auto",
@@ -160,7 +160,7 @@ a ,the book ,c
           "pluralForm": "",
           "scientificName": "",
           "semanticDomain": "5.15",
-          "semanticDomain2": "",
+          "semanticDomain.2": "",
           "semanticDomain_custom": "vehicle",
           "soundFile": "",
           "source": "testing sources",
@@ -172,7 +172,7 @@ a ,the book ,c
         },
         {
           "": "",
-          "dialect": "Quebec French",
+          "dialects": "Quebec French",
           "en_exampleSentence": "My room is painted with a neutral color.",
           "en_gloss": "neutral",
           "es_exampleSentence": "Mi habitación está pintada con un color neutro.",
@@ -188,7 +188,7 @@ a ,the book ,c
           "pluralForm": "",
           "scientificName": "",
           "semanticDomain": "",
-          "semanticDomain2": "",
+          "semanticDomain.2": "",
           "semanticDomain_custom": "",
           "soundFile": "0005-neutre.mp3",
           "source": "",
@@ -200,7 +200,7 @@ a ,the book ,c
         },
         {
           "": "",
-          "dialect": "Quebec French",
+          "dialects": "Quebec French",
           "en_exampleSentence": "We will really party tonight",
           "en_gloss": "to celebrate",
           "es_exampleSentence": "Vamos a celebrar esta noche",
@@ -216,7 +216,7 @@ a ,the book ,c
           "pluralForm": "",
           "scientificName": "",
           "semanticDomain": "",
-          "semanticDomain2": "",
+          "semanticDomain.2": "",
           "semanticDomain_custom": "",
           "soundFile": "0006-feter.mp3",
           "source": "test source|with multiples sources, test|https://example.com",
@@ -228,7 +228,7 @@ a ,the book ,c
         },
         {
           "": "",
-          "dialect": "Central Luganda",
+          "dialects": "Central Luganda",
           "en_exampleSentence": "",
           "en_gloss": "I will see you",
           "es_exampleSentence": "",
@@ -244,7 +244,7 @@ a ,the book ,c
           "pluralForm": "",
           "scientificName": "",
           "semanticDomain": "",
-          "semanticDomain2": "",
+          "semanticDomain.2": "",
           "semanticDomain_custom": "",
           "soundFile": "751-I-will-see-you.mp3",
           "source": "",
@@ -256,7 +256,7 @@ a ,the book ,c
         },
         {
           "": "",
-          "dialect": "",
+          "dialects": "",
           "en_exampleSentence": "",
           "en_gloss": "bye",
           "es_exampleSentence": "",
@@ -272,7 +272,7 @@ a ,the book ,c
           "pluralForm": "",
           "scientificName": "",
           "semanticDomain": "",
-          "semanticDomain2": "",
+          "semanticDomain.2": "",
           "semanticDomain_custom": "",
           "soundFile": "",
           "source": "",
@@ -283,6 +283,6 @@ a ,the book ,c
           "vernacular_exampleSentence": "",
         },
       ]
-    `);
-  });
+    `)
+  })
 }

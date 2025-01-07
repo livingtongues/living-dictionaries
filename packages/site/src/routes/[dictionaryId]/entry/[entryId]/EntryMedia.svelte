@@ -1,43 +1,34 @@
 <script lang="ts">
-  import { page } from '$app/stores';
-  import { ShowHide } from 'svelte-pieces';
-  import type { ExpandedEntry, IDictionary } from '@living-dictionaries/types';
-  import AddImage from '../../entries/AddImage.svelte';
-  import Image from '$lib/components/image/Image.svelte';
-  import Video from '../../entries/Video.svelte';
-  import GeoTaggingModal from './GeoTaggingModal.svelte';
-  import InitableShowHide from './InitableShowHide.svelte';
-  import MapboxStatic from '$lib/components/maps/mapbox/static/MapboxStatic.svelte';
+  import { ShowHide } from 'svelte-pieces'
+  import type { EntryView, IDictionary } from '@living-dictionaries/types'
+  import Video from '../../entries/components/Video.svelte'
+  import GeoTaggingModal from './GeoTaggingModal.svelte'
+  import InitableShowHide from './InitableShowHide.svelte'
+  import MapboxStatic from '$lib/components/maps/mapbox/static/MapboxStatic.svelte'
+  import Image from '$lib/components/image/Image.svelte'
+  import { page } from '$app/stores'
+  import type { DbOperations } from '$lib/dbOperations'
+  import AddImage from '$lib/components/image/AddImage.svelte'
 
-  export let entry: ExpandedEntry;
-  export let dictionary: IDictionary;
-  export let videoAccess = false;
-  export let canEdit = false;
+  export let entry: EntryView
+  export let dictionary: IDictionary
+  export let videoAccess = false
+  export let can_edit = false
+  export let dbOperations: DbOperations
 
-  $: first_sound_file = entry.sound_files?.[0];
-  $: first_photo = entry.senses?.[0].photo_files?.[0];
-  $: first_video = entry.senses?.[0].video_files?.[0];
+  $: ({ photos, videos } = $page.data)
+
+  $: first_sound_file = entry?.audios?.[0]
+  $: first_photo_id = entry?.senses?.[0].photo_ids?.[0]
+  $: first_photo = (first_photo_id && $photos.length) ? $photos.find(photo => photo.id === first_photo_id) : null
+  $: first_video_id = entry?.senses?.[0].video_ids?.[0]
+  $: first_video = (first_video_id && $videos.length) ? $videos.find(video => video.id === first_video_id) : null
 </script>
 
 <div class="flex flex-col">
-  {#if first_sound_file || canEdit}
-    {#await import('../../entries/Audio.svelte') then { default: Audio }}
-      <Audio
-        {entry}
-        {canEdit}
-        class="h-20 mb-2 rounded-md bg-gray-100 !px-3"
-        let:playing>
-        <span
-          class:text-blue-700={playing}
-          class="i-material-symbols-hearing text-2xl mt-1" />
-        <div class="text-gray-600 text-sm mt-1">
-          {$page.data.t('audio.listen')}
-          {#if canEdit}
-            +
-            {$page.data.t('audio.edit_audio')}
-          {/if}
-        </div>
-      </Audio>
+  {#if first_sound_file || can_edit}
+    {#await import('../../entries/components/Audio.svelte') then { default: Audio }}
+      <Audio {entry} {can_edit} context="entry" class="h-20 mb-2 rounded-md bg-gray-100 !px-3" />
     {/await}
   {/if}
 
@@ -47,32 +38,30 @@
       style="height: 25vh;">
       <Image
         width={400}
-        title={entry.lexeme}
-        gcs={first_photo.specifiable_image_url}
-        {canEdit}
-        on:deleteImage />
+        title={entry.main.lexeme.default}
+        gcs={first_photo.serving_url}
+        {can_edit}
+        on_delete_image={async () => await dbOperations.update_photo({ photo: { deleted: 'true' }, photo_id: first_photo_id })} />
     </div>
-  {:else if canEdit}
-    <AddImage
-      dictionaryId={dictionary.id}
-      entryId={entry.id}
-      class="rounded-md h-20 bg-gray-100 mb-2">
-      <div class="text-xs" slot="text">
-        {$page.data.t('entry.upload_photo')}
-      </div>
-    </AddImage>
+  {:else if can_edit}
+    <div class="h-20 bg-gray-100 hover:bg-gray-300 mb-2 flex flex-col">
+      <AddImage upload_image={file => dbOperations.addImage({ file, sense_id: entry.senses[0].id })}>
+        <div class="text-xs">
+          {$page.data.t('entry.upload_photo')}
+        </div>
+      </AddImage>
+    </div>
   {/if}
 
   {#if first_video}
     <div class="w-full overflow-hidden rounded relative mb-2">
       <Video
         class="bg-gray-100 p-3 border-r-2"
-        lexeme={entry.lexeme}
+        lexeme={entry.main.lexeme.default}
         video={first_video}
-        {canEdit}
-        on:deleteVideo />
+        {can_edit} />
     </div>
-  {:else if videoAccess && canEdit}
+  {:else if videoAccess && can_edit}
     <ShowHide let:show let:toggle>
       <button
         type="button"
@@ -86,22 +75,22 @@
       </button>
       {#if show}
         {#await import('$lib/components/video/AddVideo.svelte') then { default: AddVideo }}
-          <AddVideo {entry} on:close={toggle} />
+          <AddVideo {entry} on_close={toggle} />
         {/await}
       {/if}
     </ShowHide>
   {/if}
 
   <InitableShowHide let:show let:toggle let:set>
-    {#if entry.coordinates?.points?.length || entry.coordinates?.regions?.length}
+    {#if entry?.main.coordinates?.points?.length || entry?.main.coordinates?.regions?.length}
       <div
         class="rounded overflow-hidden cursor-pointer"
-        on:click={() => set(canEdit)}>
+        on:click={() => set(can_edit)}>
         <MapboxStatic
-          points={entry.coordinates.points}
-          regions={entry.coordinates.regions} />
+          points={entry.main.coordinates.points}
+          regions={entry.main.coordinates.regions} />
       </div>
-    {:else if canEdit}
+    {:else if can_edit}
       <button
         on:click={() => set('point')}
         type="button"
@@ -127,10 +116,10 @@
       <GeoTaggingModal
         addPoint={show === 'point'}
         addRegion={show === 'region'}
-        coordinates={entry.coordinates}
+        coordinates={entry.main.coordinates}
         initialCenter={dictionary.coordinates}
-        on:close={toggle}
-        on:valueupdate />
+        on_close={toggle}
+        on_update={async new_value => await dbOperations.update_entry({ entry: { coordinates: new_value } })} />
     {/if}
   </InitableShowHide>
 </div>

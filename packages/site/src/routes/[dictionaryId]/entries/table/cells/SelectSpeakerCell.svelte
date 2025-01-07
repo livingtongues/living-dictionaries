@@ -1,32 +1,30 @@
 <script lang="ts">
-  import type { ExpandedEntry } from '@living-dictionaries/types';
-  export let entry: ExpandedEntry;
-  export let canEdit = false;
+  import type { EntryView } from '@living-dictionaries/types'
+  import { ShowHide } from 'svelte-pieces'
+  import { page } from '$app/stores'
 
-  $: first_sound_file = entry.sound_files?.[0];
+  export let entry: EntryView
+  export let can_edit = false
+
+  $: ({ speakers } = $page.data)
+
+  $: first_audio = entry?.audios?.[0]
+  $: speaker_name = ($speakers?.length && first_audio?.speaker_ids?.length) ? $speakers.find(speaker => speaker.id === first_audio.speaker_ids[0])?.name : ''
 </script>
 
-<div
-  class:cursor-pointer={canEdit}
-  class="h-full"
-  style="padding: 0.1em 0.25em"
-  on:click={() => {
-    if (canEdit) {
-      if (first_sound_file?.speaker_ids?.length) {
-        alert(
-          'Please edit the speaker by from the edit audio modal accessed by clicking on the ear.'
-        );
-      } else {
-        alert('Edit speaker feature is still in progress');
-      }
-    }
-  }}>
-  {#if first_sound_file}
-    {#if first_sound_file.speaker_ids?.length}
-      {first_sound_file.speaker_ids[0]}
-    {:else}
-      {first_sound_file.speakerName || ''}
-    {/if}
+<ShowHide let:show let:set let:toggle>
+  <div
+    class:cursor-pointer={can_edit}
+    class="h-full"
+    style="padding: 0.1em 0.25em"
+    on:click={() => set(can_edit)}>
+    {speaker_name}
+    &nbsp;
+  </div>
+
+  {#if show}
+    {#await import('$lib/components/audio/EditAudio.svelte') then { default: EditAudio }}
+      <EditAudio {entry} sound_file={first_audio} on_close={toggle} />
+    {/await}
   {/if}
-  &nbsp;
-</div>
+</ShowHide>

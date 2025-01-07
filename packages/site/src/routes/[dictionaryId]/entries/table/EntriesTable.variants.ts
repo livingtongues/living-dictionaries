@@ -1,24 +1,22 @@
-import type { Variant, Viewport } from 'kitbook';
-import type Component from './EntriesTable.svelte';
-import { complex, simple, hasVideo } from '$lib/mocks/entries';
-import { defaultColumns } from '$lib/stores/columns';
-import { setUpColumns } from './setUpColumns';
-import { basic_mock_dictionary } from '$lib/mocks/dictionaries';
+// import type { DeprecatedVariant, Viewport } from 'kitbook'
+// import type Component from './EntriesTable.svelte'
+// import { complex, hasVideo, simple } from '$lib/mocks/entries'
+// import { defaultColumns } from '$lib/stores/columns'
+// import { basic_mock_dictionary } from '$lib/mocks/dictionaries'
+// import { logDbOperations } from '$lib/mocks/db'
 
-const columns = setUpColumns(defaultColumns, basic_mock_dictionary);
+// export const viewports: Viewport[] = [
+//   { width: 4500, height: 500 },
+// ]
 
-export const viewports: Viewport[] = [
-  {width: 4500, height: 500},
-]
-
-export const variants: Variant<Component>[] = [
-  {
-    props: {
-      columns,
-      entries: [complex, simple, hasVideo],
-      canEdit: true,
-      dictionaryId: basic_mock_dictionary.id,
-    }
-  }
-]
-
+// export const variants: DeprecatedVariant<Component>[] = [
+//   {
+//     props: {
+//       preferred_table_columns: defaultColumns,
+//       entries: [complex, simple, hasVideo],
+//       can_edit: true,
+//       dictionary: basic_mock_dictionary,
+//       dbOperations: logDbOperations,
+//     },
+//   },
+// ]

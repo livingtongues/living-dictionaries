@@ -1,65 +1,55 @@
-import { error, redirect } from '@sveltejs/kit';
-import type { ActualDatabaseEntry, SupaEntry } from '@living-dictionaries/types';
-import { docStore, getDocument } from 'sveltefirets';
-import {
-  admin,
-  algoliaQueryParams,
-  canEdit,
-  dictionary,
-  isContributor,
-  isManager,
-  user,
-} from '$lib/stores';
-import { browser } from '$app/environment';
-import { readable } from 'svelte/store';
-import { ResponseCodes } from '$lib/constants';
-import { ENTRY_UPDATED_LOAD_TRIGGER, dbOperations } from '$lib/dbOperations';
-import { getSupabase } from '$lib/supabase';
+import { error, redirect } from '@sveltejs/kit'
+import { get } from 'svelte/store'
+import type { Tables } from '@living-dictionaries/types'
+import { ResponseCodes } from '$lib/constants'
+import { ENTRY_UPDATED_LOAD_TRIGGER } from '$lib/dbOperations'
+import { browser } from '$app/environment'
 
-export const load = async ({ params, depends }) => {
+export async function load({ params: { dictionaryId: dictionary_id, entryId: entry_id }, depends, parent }) {
   depends(ENTRY_UPDATED_LOAD_TRIGGER)
 
-  const entryPath = `dictionaries/${params.dictionaryId}/words/${params.entryId}`;
-
-  let entry: ActualDatabaseEntry;
-  try {
-    entry = await getDocument<ActualDatabaseEntry>(entryPath);
-  } catch (err) {
-    throw error(ResponseCodes.INTERNAL_SERVER_ERROR, err);
-  }
-
-  if (!entry)
-    throw redirect(ResponseCodes.MOVED_PERMANENTLY, `/${params.dictionaryId}`);
-
-  let entryStore = readable(entry)
   if (browser) {
-    try {
-      entryStore = docStore<ActualDatabaseEntry>(entryPath, {startWith: entry})
-    } catch (err) {
-      throw error(ResponseCodes.INTERNAL_SERVER_ERROR, err);
+    const { entries } = await parent()
+    if (!get(entries.loading)) {
+      const entry = get(entries).find(entry => entry.id === entry_id)
+
+      if (entry) {
+        return {
+          entry,
+          shallow: false,
+        }
+      }
     }
   }
 
-  const supabase = getSupabase()
+  const { supabase } = await parent()
+  let entry: Tables<'entries_view'>
 
-  const { data: supaEntry, error: supaError } = await supabase
-    .from('entries_view')
-    .select('*')
-    .eq('id', params.entryId)
-    .single()
+  const { data: entries, error: load_error } = await supabase
+    .rpc('entry_by_id', {
+      passed_entry_id: entry_id,
+    })
 
-  console.info({ supaEntry, supaError })
+  if (!load_error) {
+    [entry] = entries
+  } else {
+    const { data: materialized_entries, error: materialized_load_error } = await supabase
+      .from('materialized_entries_view')
+      .select()
+      .eq('id', entry_id)
+
+    if (materialized_load_error) {
+      error(ResponseCodes.INTERNAL_SERVER_ERROR, materialized_load_error)
+    }
+
+    [entry] = materialized_entries
+  }
+
+  if (!entry || entry.deleted)
+    redirect(ResponseCodes.MOVED_PERMANENTLY, `/${dictionary_id}`)
 
   return {
-    initialEntry: entryStore,
-    supaEntry: supaEntry as any as SupaEntry,
-    admin,
-    algoliaQueryParams,
-    canEdit,
-    dictionary,
-    isContributor,
-    isManager,
-    user,
-    dbOperations,
-  };
-};
+    entry,
+    shallow: false,
+  }
+}

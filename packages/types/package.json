@@ -1,20 +1,22 @@
 {
   "name": "@living-dictionaries/types",
+  "type": "module",
   "version": "1.0.0",
   "description": "Types for Living Dictionaries",
-  "type": "module",
-  "main": "index.ts",
-  "devDependencies": {
-    "firebase": "^9.21.0",
-    "sveltefirets": "^0.0.36"
-  },
+  "author": "Living Tongues Institute for Endangered Languages",
+  "homepage": "https://github.com/livingtongues/living-dictionaries#readme",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/livingtongues/living-dictionaries.git"
   },
-  "author": "Living Tongues Institute for Endangered Languages",
   "bugs": {
     "url": "https://github.com/livingtongues/living-dictionaries/issues"
   },
-  "homepage": "https://github.com/livingtongues/living-dictionaries#readme"
+  "main": "index.ts",
+  "devDependencies": {
+    "firebase": "^10.9.0",
+    "sveltefirets": "0.0.42",
+    "typescript": "^5.6.2",
+    "vitest": "^2.1.4"
+  }
 }

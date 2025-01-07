@@ -287,12 +287,18 @@
     "yo": "Yoruba",
     "dje": "Zarma",
     "zu": "Zulu",
-    "tri": "Tiriyó",
-    "hix": "Hixincharyana",
+    "tri": "Tiriya",
+    "hix": "Hixkaryana",
     "waw": "Waiwai",
-    "way": "Hanya",
-    "apy": "Shafi apalaí",
-    "jen": "DZA",
-    "mko": "Mingang Doso"
+    "way": "Wayana",
+    "apy": "Apalaí",
+    "jen": "Dza",
+    "mko": "Mingang Doso",
+    "hbo-hebr": "Ibrananci",
+    "ne-2": "Nepali (Romaniyanci)",
+    "apd": "Larabcin Sudan",
+    "hoi": "Holikachuk",
+    "mtq": "Muong",
+    "cag": "Nivaclé"
   }
 }

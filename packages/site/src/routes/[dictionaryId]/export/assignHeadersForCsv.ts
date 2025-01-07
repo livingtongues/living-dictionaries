@@ -1,55 +1,41 @@
-import type { ExpandedEntry } from '@living-dictionaries/types';
-import { glossingLanguages } from '$lib/glosses/glossing-languages';
-import type { EntryForCSV } from './prepareEntriesForCsv';
+import type { EntryForCSV, translate_entries } from './prepareEntriesForCsv'
+import { get_example_sentence, get_glosses, get_image_files, get_noun_class, get_parts_of_speech, get_plural_form, get_semantic_domain, get_variant } from './getRows'
 
 export function get_local_orthography_headers(
-  alternate_orthographies: string[]
-): EntryForCSV {
-  const headers: EntryForCSV = {};
+  alternate_orthographies: string[],
+) {
+  const headers: EntryForCSV = {}
   if (alternate_orthographies) {
     alternate_orthographies.forEach((lo, index) => {
-      headers[`local_orthography_${index + 1}`] = lo;
-    });
+      if (index > 0) {
+        headers[`localOrthography.${index + 1}`] = lo
+      } else {
+        // @ts-ignore
+        headers.localOrthography = lo
+      }
+    })
   }
-  return headers;
+  return headers
 }
 
-export function get_semantic_domain_headers(entries: ExpandedEntry[]): EntryForCSV {
-  const headers = {};
+export function get_sense_headers(entries: ReturnType<typeof translate_entries>) {
+  let headers: EntryForCSV = {}
 
-  const max_semantic_domains = Math.max(
-    ...entries.map((entry) => entry.senses?.[0]?.translated_ld_semantic_domains?.length || 0)
-  );
-
-  if (max_semantic_domains > 0) {
-    for (let index = 0; index < max_semantic_domains; index++)
-      headers[`semantic_domain_${index + 1}`] = `Semantic domain ${index + 1}`;
+  for (const entry of entries) {
+    for (const [sense_index, sense] of Array.from(entry.senses).entries()) {
+      headers = {
+        ...headers,
+        ...get_glosses(sense.glosses, { sense_index, position: 'header' }),
+        ...get_semantic_domain(sense.semantic_domains, { sense_index, position: 'header' }),
+        ...get_parts_of_speech(sense.parts_of_speech_abbreviations, sense.parts_of_speech, { sense_index, position: 'header' }),
+        ...get_noun_class(sense.noun_class, { sense_index, position: 'header' }),
+        ...get_variant(sense.variant, { sense_index, position: 'header' }),
+        ...get_plural_form(sense.plural_form, { sense_index, position: 'header' }),
+        ...get_image_files(sense?.photo_ids?.[0], { sense_index, position: 'header' }),
+        ...(sense.sentences ? get_example_sentence(sense.sentences[0], { sense_index, position: 'header' }) : {}),
+      }
+    }
   }
-  return headers;
-}
 
-export function get_gloss_language_headers(gloss_languages: string[]): EntryForCSV {
-  const headers = {};
-  if (gloss_languages) {
-    gloss_languages.forEach((bcp) => {
-      headers[`${bcp}_gloss_language`] = `${glossingLanguages[bcp].vernacularName || bcp} Gloss`;
-    });
-  }
-  return headers;
-}
-
-export function get_example_sentence_headers(
-  gloss_languages: string[],
-  dictionary_name: string
-): EntryForCSV {
-  const headers: EntryForCSV = {};
-  headers.vernacular_example_sentence = `Example sentence in ${dictionary_name}`;
-  if (gloss_languages) {
-    gloss_languages.forEach((bcp) => {
-      headers[`${bcp}_example_sentence`] = `Example sentence in ${
-        glossingLanguages[bcp].vernacularName || bcp
-      }`;
-    });
-  }
-  return headers;
+  return headers
 }

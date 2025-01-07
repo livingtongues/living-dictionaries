@@ -1,7 +1,12 @@
 <script lang="ts">
-  export let menuOpen: boolean;
-  import { canEdit, dictionary, isManager } from '$lib/stores';
-  import { page } from '$app/stores';
+  import type { IDictionary } from '@living-dictionaries/types'
+  import { page } from '$app/stores'
+
+  export let dictionary: IDictionary
+  export let entry_count: number
+  export let on_close: () => void
+  export let is_manager: boolean
+  $: ({can_edit} = $page.data)
 </script>
 
 <div class="md:hidden">
@@ -9,26 +14,38 @@
     {$page.data.t('misc.LD')}
   </a>
   <h5 class="font-semibold uppercase tracking-wide mx-3 mb-2">
-    {$dictionary.name}
+    {dictionary.name}
   </h5>
 </div>
-<div on:click={() => (menuOpen = false)}>
+<div on:click={on_close}>
   <a
     class:active={$page.url.pathname.match(/entry|entries/)}
-    href={`/${$dictionary.id}/entries/list`}>
-    <i class="far fa-list fa-fw" />
+    href={`/${dictionary.id}/entries`}>
+    <span class="i-fa-solid-list" />
     <span class="font-medium mx-2">
       {$page.data.t('dictionary.entries')}
     </span>
     <span class="flex-grow" />
-    <span
-      class="inline-block py-1 px-2 leading-none text-xs font-semibold
-        text-gray-700 bg-gray-300 rounded-full">
-      {new Intl.NumberFormat().format($dictionary.entryCount || 0)}
-    </span>
+    {#if entry_count}
+      <span
+        class="inline-block py-1 px-2 leading-none text-xs font-semibold
+          text-gray-700 bg-gray-300 rounded-full">
+        {new Intl.NumberFormat().format(entry_count)}
+      </span>
+    {/if}
   </a>
+  {#if !is_manager}
+    <a
+      href={`/${dictionary.id}/synopsis`}
+      class:active={$page.url.pathname.includes('synopsis')}>
+      <i class="fal fa-file-alt fa-fw" />
+      <span class="font-medium mx-2">
+        {$page.data.t('synopsis.name')}
+      </span>
+    </a>
+  {/if}
   <a
-    href={'/' + $dictionary.id + '/about'}
+    href={`/${dictionary.id}/about`}
     class:active={$page.url.pathname.includes('about')}>
     <i class="far fa-info-circle fa-fw" />
     <span class="font-medium mx-2">
@@ -36,14 +53,14 @@
     </span>
   </a>
   <a
-    href={'/' + $dictionary.id + '/contributors'}
+    href={`/${dictionary.id}/contributors`}
     class:active={$page.url.pathname.includes('contributors')}>
     <i class="far fa-users fa-fw" />
     <span class="font-medium mx-2">
       {$page.data.t('dictionary.contributors')}
     </span>
   </a>
-  {#if $canEdit}
+  {#if $can_edit}
     <a
       href={'/' + $dictionary.id + '/history'}
       class:active={$page.url.pathname.includes('history')}>
@@ -54,24 +71,24 @@
     </a>
   {/if}
   <a
-    href={'/' + $dictionary.id + '/grammar'}
+    href={`/${dictionary.id}/grammar`}
     class:active={$page.url.pathname.includes('grammar')}>
     <i class="far fa-edit fa-fw" />
     <span class="font-medium mx-2">
       {$page.data.t('dictionary.grammar')}
     </span>
   </a>
-  {#if $isManager}
+  {#if is_manager}
     <a
-      href={'/' + $dictionary.id + '/import'}
+      href={`/${dictionary.id}/import`}
       class:active={$page.url.pathname.includes('import')}>
       <i class="far fa-file-import" />
       <span class="font-medium mx-2">
-        {$page.data.t('import.import')}
+        {$page.data.t('import_page.import')}
       </span>
     </a>
     <a
-      href={'/' + $dictionary.id + '/settings'}
+      href={`/${dictionary.id}/settings`}
       class:active={$page.url.pathname.includes('settings')}>
       <i class="far fa-cog fa-fw" />
       <span class="font-medium mx-2">
@@ -79,7 +96,7 @@
       </span>
     </a>
     <a
-      href={'/' + $dictionary.id + '/export'}
+      href={`/${dictionary.id}/export`}
       class:active={$page.url.pathname.includes('export')}>
       <i class="far fa-download" />
       <span class="font-medium mx-2">

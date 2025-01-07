@@ -1,87 +1,99 @@
 <script lang="ts">
-  import { fly } from 'svelte/transition';
+  import { fly } from 'svelte/transition'
+  import { onMount } from 'svelte'
+  import { clickoutside } from 'svelte-pieces'
   import type { SelectOption } from './select-options.interface'
-  import { onMount } from 'svelte';
 
-  export let selectedOptions: Record<string, SelectOption>;
-  export let options: SelectOption[];
-  export let placeholder = 'Select...';
-  export let canWriteIn = false;
+  export let selectedOptions: Record<string, SelectOption>
+  export let options: SelectOption[]
+  export let placeholder = 'Select...'
+  export let canWriteIn = false
 
-  let input: HTMLInputElement;
-  let inputValue: string;
-  let activeOption: SelectOption;
-  let showOptions = false;
+  let input: HTMLInputElement
+  let inputValue: string
+  let activeOption: SelectOption
+  let showOptions = false
 
   onMount(() => {
-    input.focus();
+    input.focus()
   })
 
-  $: filtered = options.filter((o) =>
-    inputValue ? o.name.toLowerCase().includes(inputValue.trim().toLowerCase()) : o
-  );
+  $: filtered = options.filter(o =>
+    inputValue ? o.name.toLowerCase().includes(inputValue.trim().toLowerCase()) : o,
+  )
   $: if ((activeOption && !filtered.includes(activeOption)) || (!activeOption && inputValue))
-    [activeOption] = filtered;
+    [activeOption] = filtered
+
+  $: if (!showOptions && inputValue) setShowOptions(true)
 
   function add(option: SelectOption) {
-    selectedOptions[option.value] = option;
-    input.focus();
-    inputValue = '';
+    selectedOptions[option.value] = option
+    input.focus()
+    inputValue = ''
   }
 
   function remove(value: string) {
-    const { [value]: option, ...restOfOptions } = selectedOptions;
-    selectedOptions = restOfOptions;
+    const { [value]: _option, ...restOfOptions } = selectedOptions
+    selectedOptions = restOfOptions
   }
 
   function setShowOptions(show: boolean) {
-    showOptions = show;
-    if (show) input.focus();
-    if (!show) activeOption = undefined;
+    showOptions = show
+    if (show) input.focus()
+    if (!show) activeOption = undefined
   }
 
   function handleKeydown(e: KeyboardEvent) {
-    if (e.key === 'Escape')
+    if (e.key === 'Escape' && showOptions) {
+      e.stopPropagation()
+      inputValue = ''
       setShowOptions(false)
+    }
     if (e.key === ' ' && activeOption)
       add(activeOption)
     if (e.key === 'Backspace' && !inputValue)
-      remove(Object.keys(selectedOptions).pop());
+      remove(Object.keys(selectedOptions).pop())
     if (e.key === 'Enter') {
-      e.preventDefault(); // keep form from submitting and closing modal
+      e.preventDefault() // keep form from submitting and closing modal
       if (activeOption)
         selectOption(activeOption)
       else
         addWriteInIfApplicable()
     }
     if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
-      const increment = e.key === 'ArrowUp' ? -1 : 1;
-      const calcIndex = filtered.indexOf(activeOption) + increment;
-      activeOption =
-        calcIndex < 0
+      const increment = e.key === 'ArrowUp' ? -1 : 1
+      const calcIndex = filtered.indexOf(activeOption) + increment
+      activeOption
+        = calcIndex < 0
           ? filtered[filtered.length - 1]
           : calcIndex === filtered.length
           ? filtered[0]
-          : filtered[calcIndex];
+          : filtered[calcIndex]
     }
   }
 
   function addWriteInIfApplicable() {
     if (!canWriteIn) return
-    const value = inputValue.trim();
+    const value = inputValue?.trim()
     if (value)
-      add({name: value, value})
+      add({ name: value, value })
   }
 
   function selectOption(option: SelectOption) {
     if (selectedOptions[option.value])
-      remove(option.value);
+      remove(option.value)
     else
-      add(option);
+      add(option)
   }
 </script>
 
-<div class="multiselect">
+<div
+  class="multiselect"
+  use:clickoutside
+  on:clickoutside={() => {
+    inputValue = ''
+    setShowOptions(false)
+  }}>
   <div class="tokens" class:showOptions on:click={() => setShowOptions(true)}>
     {#each Object.values(selectedOptions) as option}
       <div
@@ -103,11 +115,9 @@
         autocomplete="off"
         bind:value={inputValue}
         bind:this={input}
-        on:keydown|stopPropagation={handleKeydown}
+        on:keydown={handleKeydown}
         on:focus={() => setShowOptions(true)}
-        on:blur={() => {
-          setShowOptions(false);
-          addWriteInIfApplicable()}}
+        on:blur={addWriteInIfApplicable}
         placeholder={Object.keys(selectedOptions).length ? '' : placeholder} />
       <span class="i-carbon-caret-down opacity-50" />
     </div>
@@ -121,7 +131,7 @@
         <li
           class:selected={selectedOptions[option.value]}
           class:active={activeOption === option}
-          on:click={() => selectOption(option)}>
+          on:click|preventDefault={() => selectOption(option)}>
           {option.name}
         </li>
       {/each}

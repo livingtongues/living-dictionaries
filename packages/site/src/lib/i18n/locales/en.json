@@ -37,7 +37,13 @@
     "peer_review": "Peer Review of Spellings",
     "suggestions_from_users": "Suggestions from Users",
     "push_notifications": "Push Notifications to Contributors",
-    "contributor_awards": "Contributor Community Awards"
+    "contributor_awards": "Contributor Community Awards",
+    "question_1": "Please provide some background information about this language. Where is it spoken? What communities speak this language? Is this language endangered?",
+    "question_2": "What are the names of the people who built this dictionary? Whose voices are in this dictionary?",
+    "question_3": "Where did the data in this dictionary come from? Please describe if you collected the data yourself. If you used any published reference sources, please list them.",
+    "question_4": "Who will be using this dictionary? Will it be used in any educational projects?",
+    "question_5": "If you want the public to contact you about this project, please provide your contact information, or a link to where people can learn more. This is optional.",
+    "message": "Before making your dictionary public, please complete the About section."
   },
   "contributors": {
     "invite_contributors": "Invite Contributors",
@@ -95,7 +101,8 @@
     "report_problem": "Report a problem",
     "other": "Other topic",
     "select_topic": "Select a topic",
-    "data_fields": "Optional data fields"
+    "data_fields": "Optional data fields",
+    "learning": "Create language learning materials from my dictionary"
   },
   "create": {
     "select_coordinates": "Select Coordinates",
@@ -161,7 +168,8 @@
     "link_copied": "Link copied",
     "copy_and_share": "Copy and share",
     "print": "Print",
-    "id": "ID"
+    "id": "ID",
+    "switch_opposite": "Switch to opposite"
   },
   "entry_field": {
     "photo": "Photo",
@@ -185,7 +193,9 @@
     "gloss": "Translation",
     "plural_form": "Plural form",
     "scientific_names": "Scientific Name",
-    "definition_english": "Definition (deprecated)"
+    "definition_english": "Definition (deprecated)",
+    "video": "Video",
+    "custom_tags": "Custom tags"
   },
   "error": {
     "run_into_error": "We're sorry, we've run into an error.",
@@ -239,7 +249,9 @@
     "upload": "Upload",
     "assertion": "yes",
     "negation": "no",
-    "clean": "Clean"
+    "clean": "Clean",
+    "map": "Map",
+    "guidance": "Guidance"
   },
   "settings": {
     "community_permission": "Does the speech community allow this language to be online?",
@@ -318,13 +330,14 @@
     "headword_size": "Headword size",
     "font_size": "Font size"
   },
-  "import": {
+  "import_page": {
     "import": "Import",
     "template_link": "Link to Template",
     "instructions_1": "If you already have linguistic data that you want to import into your Dictionary, please follow the steps below.",
     "instructions_2": "Click on the blue “Link to Template” button below. Download the template as an Excel file, or create a copy on Google Docs. Edit the template according to your project’s needs. Copy and paste your data into the spreadsheet.",
     "instructions_3": "Use the “Contact Us” below to contact us. Let us know that you have a new spreadsheet that is ready for import. Ask us any questions you have. We will respond to you by email, and then you can send us your file.",
-    "instructions_4": "To send us data exported from dictionary softwares like FLEx, Lexique Pro, Shoebox, please use the “Contact Us” button below and tell us the details of your project."
+    "instructions_4": "To send us data exported from dictionary softwares like FLEx, Lexique Pro, Shoebox, please use the “Contact Us” button below and tell us the details of your project.",
+    "no_imports": "We are currently working with many communities and partner organizations to import a large number of dictionary entries to this platform. We are also making big updates to our database. We will accept new data imports starting on July 1, 2024. We appreciate your patience, and we apologize for the inconvenience."
   },
   "history": {
     "history": "History",
@@ -341,5 +354,22 @@
     "history_search": "Search entries, editors, fields and values",
     "download_history": "Download History as CSV",
     "empty": "No history yet"
+  },
+  "partnership": {
+    "title": "Partner Organizations",
+    "button": "Write in Partner Organization",
+    "name": "Partner Organization Name"
+  },
+  "synopsis": {
+    "translations": "Translations",
+    "name": "Synopsis"
+  },
+  "sense": {
+    "sense": "Sense",
+    "add": "Add Sense"
+  },
+  "banner": {
+    "message": "We are making improvements to our database on October 22 starting at 7PM Eastern Time (New York), for 24 hours. Editing capabilities will not be available during that period. Sorry for the inconvenience.",
+    "attention": "Attention"
   }
 }

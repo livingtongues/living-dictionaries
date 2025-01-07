@@ -1,46 +1,65 @@
-import { dev } from '$app/environment';
-import type { Address } from './send/mail-channels.interface';
-import { firebaseConfig } from 'sveltefirets';
+import { firebaseConfig } from 'sveltefirets'
+import type { Address } from './send-email'
+import { dev } from '$app/environment'
 
-export const noReplyAddress = {
+export const no_reply_address = {
   email: 'no-reply@livingdictionaries.app',
   name: 'Living Tongues Institute for Endangered Languages',
-};
+}
 
-export const annaAddress = { email: 'annaluisa@livingtongues.org' };
-const gregAddress = { email: 'livingtongues@gmail.com' };
+export const dictionary_address = { email: 'dictionaries@livingtongues.org' }
+export const jacobAddress = { email: 'jacob@livingtongues.org' }
+const gregAddress = { email: 'livingtongues@gmail.com' }
+const languages7000 = { email: 'info@7000.org' }
 
 export function getAdminRecipients(initiatorEmail: string): Address[] {
   if (initiatorEmail === 'jacob@livingtongues.org'
-    || initiatorEmail === 'diego@livingtongues.org')
-    return [{ email: initiatorEmail }];
+    || initiatorEmail === 'diego@livingtongues.org') {
+    return [{ email: initiatorEmail }]
+  }
 
   const recipients: Address[] = [
-    { email: 'jacob@livingtongues.org' },
+    jacobAddress,
     { email: 'diego@livingtongues.org' },
-  ];
+  ]
 
   if (dev || firebaseConfig.projectId === 'talking-dictionaries-dev')
-    return recipients;
+    return recipients
 
   return [
     ...recipients,
-    annaAddress,
+    dictionary_address,
     gregAddress,
-  ];
+  ]
 }
 
 export function getSupportMessageRecipients({ dev }: { dev: boolean }): Address[] {
   const recipients: Address[] = [
     { email: 'jacob@livingtongues.org' },
     { email: 'diego@livingtongues.org' },
-  ];
+  ]
 
   if (dev || firebaseConfig.projectId === 'talking-dictionaries-dev')
-    return recipients;
+    return recipients
 
   return [
     ...recipients,
-    annaAddress,
-  ];
+    dictionary_address,
+  ]
+}
+
+export function getLanguageLearningMaterialsRecipients({ dev }: { dev: boolean }): Address[] {
+  const recipients: Address[] = [
+    { email: 'jacob@livingtongues.org' },
+    { email: 'diego@livingtongues.org' },
+  ]
+
+  if (dev || firebaseConfig.projectId === 'talking-dictionaries-dev')
+    return recipients
+
+  return [
+    ...recipients,
+    dictionary_address,
+    languages7000,
+  ]
 }

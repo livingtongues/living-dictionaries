@@ -37,7 +37,13 @@
     "peer_review": "Revisión conjunta de ortografía",
     "suggestions_from_users": "Sugerencias de usuarios",
     "push_notifications": "Notificaciones a colaboradores",
-    "contributor_awards": "Premios a la comunidad de colaboradores"
+    "contributor_awards": "Premios a la comunidad de colaboradores",
+    "question_1": "Proporcione información general sobre este idioma. ¿Dónde se habla? ¿Qué comunidades hablan este idioma? ¿Está esta lengua en peligro de extinción?",
+    "question_2": "¿Cuáles son los nombres de las personas que construyeron este diccionario? ¿De quién son las voces en este diccionario?",
+    "question_3": "¿De dónde provienen los datos de este diccionario? Describa si recopiló los datos usted mismo. Si utilizó alguna fuente de referencia publicada, indíquela.",
+    "question_4": "¿Quién utilizará este diccionario? ¿Se utilizará en algún proyecto educativo?",
+    "question_5": "Si desea que el público se comunique con usted sobre este proyecto, proporcione su información de contacto o un enlace donde las personas puedan obtener más información. Esto es opcional.",
+    "message": "Antes de hacer público su diccionario, complete la sección de Acerca de."
   },
   "contributors": {
     "invite_contributors": "Invitar colaboradores",
@@ -95,7 +101,8 @@
     "report_problem": "Informar de un problema",
     "other": "Otro tema",
     "select_topic": "Seleccione un tema",
-    "data_fields": "Campos de datos opcionales"
+    "data_fields": "Campos de datos opcionales",
+    "learning": "Crear materiales de aprendizaje de idiomas de mi diccionario"
   },
   "create": {
     "select_coordinates": "Seleccione las coordenadas GPS",
@@ -104,7 +111,7 @@
     "at_least_one_lang": "Elegir por lo menos un idioma en que este diccionario estará disponible.",
     "only_letters_numbers": "Sólo se permiten letras y números (sin espacios ni caracteres especiales).",
     "choose_different_url": "Elegir una URL diferente",
-    "gloss_dictionary_clarification": "Idioma(s) en que desea traducir las entradas del diccionario",
+    "gloss_dictionary_clarification": "Idioma(s) en que desea traducir las entradas del diccionario.",
     "create_new_dictionary": "Crear un nuevo diccionario",
     "name_clarification": "Este será el nombre del diccionario",
     "gloss_dictionary_in": "Hacer el diccionario disponible en ...",
@@ -161,7 +168,8 @@
     "link_copied": "Enlace copiado",
     "copy_and_share": "Copiar y compartir",
     "print": "Imprimir",
-    "id": "ID"
+    "id": "ID",
+    "switch_opposite": "Cambiar a lo opuesto"
   },
   "entry_field": {
     "photo": "Foto",
@@ -180,12 +188,14 @@
     "notes": "Notas",
     "sources": "Fuente",
     "example_sentence": "Oración de ejemplo",
-    "noun_class": "Clase sustantiva",
+    "noun_class": "clase sustantiva",
     "variant": "Variante",
     "gloss": "Traducción",
     "plural_form": "Forma plural",
     "scientific_names": "Nombre científico",
-    "definition_english": ""
+    "definition_english": "",
+    "video": "Video",
+    "custom_tags": "Etiquetas personalizadas"
   },
   "error": {
     "run_into_error": "Lo sentimos, hay un error.",
@@ -239,7 +249,9 @@
     "upload": "Subir",
     "assertion": "sí",
     "negation": "no",
-    "clean": "Limpiar"
+    "clean": "Limpiar",
+    "map": "Mapa",
+    "guidance": "Guía de uso"
   },
   "settings": {
     "community_permission": "¿Permite la comunidad lingüística que este idioma esté en línea?",
@@ -318,13 +330,14 @@
     "headword_size": "Tamaño de la palabra principal",
     "font_size": "Tamaño de la fuente"
   },
-  "import": {
+  "import_page": {
     "import": "Importar",
     "template_link": "Enlace a la plantilla",
     "instructions_1": "Si ya tiene datos lingüísticos que desea importar a su diccionario, siga los pasos a continuación.",
     "instructions_2": "Haga clic en el botón azul \"Enlace a plantilla\" a continuación. Descargue la plantilla como un archivo de Excel, o cree una copia en Google Docs. Edite la plantilla de acuerdo con las necesidades de su proyecto. Copie y pegue sus datos en la hoja de cálculo.",
     "instructions_3": "Use el \"Contáctenos\" a continuación para contactarnos. Háganos saber que tiene una nueva hoja de cálculo que está lista para la importación. Háganos cualquier pregunta que tenga. Le responderemos por correo electrónico, y luego puede enviarnos su archivo.",
-    "instructions_4": "Para enviarnos datos exportados desde softwares de diccionarios como Flex, Lexique Pro, Shobox, use el botón \"Contáctenos\" a continuación y cuéntenos los detalles de su proyecto."
+    "instructions_4": "Para enviarnos datos exportados desde softwares de diccionarios como Flex, Lexique Pro, Shobox, use el botón \"Contáctenos\" a continuación y cuéntenos los detalles de su proyecto.",
+    "no_imports": "Actualmente estamos trabajando con muchas comunidades y organizaciones asociadas para importar una gran cantidad de entradas de diccionario a esta plataforma. También estamos realizando grandes actualizaciones en nuestra base de datos. Aceptaremos nuevas importaciones de datos a partir del 1 de julio de 2024. Agradecemos su paciencia y nos disculpamos por las molestias."
   },
   "history": {
     "history": "Historial",
@@ -339,7 +352,24 @@
     "edited": "Editado",
     "deleted": "Eliminado",
     "history_search": "Buscar entradas, editores, campos y valores",
-    "download_history": "Descargar historia como CSV",
+    "download_history": "Descargar historial como CSV",
     "empty": "No hay historial todavía"
+  },
+  "partnership": {
+    "title": "Organizaciones asociadas",
+    "button": "Escribir la organización asociada",
+    "name": "Nombre de la organización asociada"
+  },
+  "synopsis": {
+    "translations": "Traducciones",
+    "name": "Sinopsis"
+  },
+  "sense": {
+    "sense": "Sentido",
+    "add": "Añadir sentido"
+  },
+  "banner": {
+    "message": "Realizaremos mejoras en nuestra base de datos el 22 de octubre a partir de las 7 p. m., hora del este (Nueva York), durante 24 horas. Las capacidades de edición no estarán disponibles durante ese período. Disculpen los inconvenientes.",
+    "attention": "Atención"
   }
 }

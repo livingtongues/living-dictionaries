@@ -1,24 +1,21 @@
-export type { ExpandedAudio, GoalDatabaseAudio, IAudio } from './audio.interface';
-export type { ExpandedVideo, GoalDatabaseVideo, IVideo, IVideoCustomMetadata } from './video.interface';
-export type { IDialect } from './dialect.interface';
-export type { IAbout, IDictionary, IGrammar, ICitation } from './dictionary.interface';
-export type { Coordinates, IPoint, IRegion } from './coordinates.interface';
-export type { ActualDatabaseEntry, ExpandedEntry, GoalDatabaseEntry, DatabaseSense, ExpandedSense, LDAlgoliaHit } from './entry.interface';
-export type { IGlossLanguages, IGlossLanguage } from './gloss-language.interface';
-export type { IGloss } from './gloss.interface';
-export type { IExampleSentence } from './exampe-sentence.interface';
-export type { IImport } from './import.interface';
-export type { ExpandedPhoto, GoalDatabasePhoto, IPhoto, DictionaryPhoto } from './photo.interface';
-export type { ISemanticDomain } from './semantic-domain.interface';
-export type { ISpeaker } from './speaker.interface';
-export type { IUser } from './user.interface';
-export type { IInvite } from './invite.interface';
-export type { IDictionarySettings } from './dictionary-settings.interface';
-export type { IPartOfSpeech } from './part-of-speech.interface';
-export type { IColumn } from './column.interface';
-export type { HelperRoles, IHelper } from './helper.interface';
-export type { AlgoliaEntry } from './entry.algolia.interface';
-export { type IPrintFields, StandardPrintFields } from './print-entry.interface';
-export { EntryFields, type EntryFieldValue } from './entry-fields.enum';
+export type { EntryView, SenseWithSentences, AudioWithSpeakerIds } from './supabase/entry.interface'
+export type { VideoCustomMetadata, HostedVideo } from './video.interface'
+export type { IAbout, IDictionary, IGrammar, Citation, Partner } from './dictionary.interface'
+export type { Coordinates, IPoint, IRegion } from './coordinates.interface'
+export type { IGlossLanguages, IGlossLanguage } from './gloss-language.interface'
+export type { MultiString } from './gloss.interface'
+export type { IExampleSentence } from './example-sentence.interface'
+export type { DictionaryPhoto, PartnerPhoto } from './photo.interface'
+export type { SemanticDomain } from './semantic-domain.interface'
+export type { IUser, GoogleAuthUserMetaData } from './user.interface'
+export type { IInvite } from './invite.interface'
+export type { IDictionarySettings } from './dictionary-settings.interface'
+export type { PartOfSpeech } from './part-of-speech.interface'
+export type { IColumn } from './column.interface'
+export type { HelperRoles, IHelper } from './helper.interface'
+export { type IPrintFields, StandardPrintFields } from './print-entry.interface'
+export { type EntryFieldValue, type i18nEntryFieldKey } from './entry-fields.enum'
+export type { ContentUpdateRequestBody } from './supabase/content-update.interface'
+export type { UnsupportedFields } from './supabase/unsupported.interface'
 export type { Change } from './change.interface';
-export type { SupaEntry } from './supabase/entry.interface';
+export type { Database, Tables, TablesInsert, TablesUpdate } from './supabase/combined.types'

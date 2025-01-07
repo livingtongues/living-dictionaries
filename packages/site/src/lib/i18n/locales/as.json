@@ -37,7 +37,13 @@
     "peer_review": "",
     "suggestions_from_users": "",
     "push_notifications": "",
-    "contributor_awards": ""
+    "contributor_awards": "",
+    "question_1": "",
+    "question_2": "",
+    "question_3": "",
+    "question_4": "",
+    "question_5": "",
+    "message": ""
   },
   "contributors": {
     "invite_contributors": "অৱদানকাৰীসকলক আমন্ত্ৰণ কৰক",
@@ -95,7 +101,8 @@
     "report_problem": "",
     "other": "",
     "select_topic": "",
-    "data_fields": ""
+    "data_fields": "",
+    "learning": ""
   },
   "create": {
     "select_coordinates": "স্থানাংক চয়ন কৰক",
@@ -161,7 +168,8 @@
     "link_copied": "লিংক নকল কৰা হৈছে",
     "copy_and_share": "নকল কৰক আৰু ভগাই দিয়ক",
     "print": "",
-    "id": ""
+    "id": "",
+    "switch_opposite": ""
   },
   "entry_field": {
     "photo": "ফটো বা আলোকচিত্ৰ",
@@ -185,7 +193,9 @@
     "gloss": "",
     "plural_form": "",
     "scientific_names": "",
-    "definition_english": ""
+    "definition_english": "",
+    "video": "",
+    "custom_tags": ""
   },
   "error": {
     "run_into_error": "আমি দুঃখিত, আমি এটা ত্ৰুটিত পৰিছো।",
@@ -239,7 +249,9 @@
     "upload": "",
     "assertion": "",
     "negation": "",
-    "clean": ""
+    "clean": "",
+    "map": "",
+    "guidance": ""
   },
   "settings": {
     "community_permission": "ভাষণ সম্প্ৰদায়ে এই ভাষাটো অনলাইন/ইণ্টাৰনেটত উপলব্ধ হ'বলৈ অনুমতি দিয়ে নেকি?",
@@ -318,13 +330,14 @@
     "headword_size": "",
     "font_size": ""
   },
-  "import": {
+  "import_page": {
     "import": "",
     "template_link": "",
     "instructions_1": "",
     "instructions_2": "",
     "instructions_3": "",
-    "instructions_4": ""
+    "instructions_4": "",
+    "no_imports": ""
   },
   "history": {
     "history": "",
@@ -341,5 +354,22 @@
     "history_search": "",
     "download_history": "",
     "empty": ""
+  },
+  "partnership": {
+    "title": "",
+    "button": "",
+    "name": ""
+  },
+  "synopsis": {
+    "translations": "",
+    "name": ""
+  },
+  "sense": {
+    "sense": "",
+    "add": ""
+  },
+  "banner": {
+    "message": "",
+    "attention": ""
   }
 }

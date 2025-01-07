@@ -1,156 +1,173 @@
 <script lang="ts">
-  import { EntryFields, type EntryFieldValue, type ExpandedEntry, type IDictionary, type SupaEntry, type Change } from '@living-dictionaries/types';
-  import { page } from '$app/stores';
-  import EntryField from './EntryField.svelte';
-  import { createEventDispatcher } from 'svelte';
-  import EntryDialect from '$lib/components/entry/EntryDialect.svelte';
-  import { DICTIONARIES_WITH_VARIANTS } from '$lib/constants';
-  import EntryMedia from './EntryMedia.svelte';
-  import SelectSource from '$lib/components/entry/EntrySource.svelte';
-  import EntryHistory from './EntryHistory.svelte';
-  import { Button } from 'svelte-pieces';
-  import Sense from './Sense.svelte';
-  import SupaSense from './SupaSense.svelte';
-  import type { DbOperations } from '$lib/dbOperations';
+  import type { EntryFieldValue, EntryView, IDictionary, TablesUpdate, Change } from '@living-dictionaries/types'
+  import { Button } from 'svelte-pieces'
+  import EntryField from './EntryField.svelte'
+  import EntryMedia from './EntryMedia.svelte'
+  import EntryHistory from './EntryHistory.svelte'
+  import Sense from './SupaSense.svelte'
+  import { page } from '$app/stores'
+  import EntryDialect from '$lib/components/entry/EntryDialect.svelte'
+  import EntrySource from '$lib/components/entry/EntrySource.svelte'
+  import type { DbOperations } from '$lib/dbOperations'
+  import EntryTag from '$lib/components/entry/EntryTag.svelte'
 
-  export let entry: ExpandedEntry;
-  export let supaEntry: SupaEntry;
-  export let dictionary: IDictionary;
-  export let canEdit = false;
-  export let videoAccess = false;
-  export let history: Change[] = undefined;
-  export let admin: number;
-  export let dbOperations: DbOperations;
+  export let entry: EntryView
+  export let dictionary: IDictionary
+  export let can_edit = false
+  export let videoAccess = false
+  export let dbOperations: DbOperations
+  export let history: Change[] = undefined
 
-  const dispatch = createEventDispatcher<{
-    valueupdate: { field: string; newValue: string | string[] };
-  }>();
+  const text_fields = ['morphology', 'interlinearization'] satisfies EntryFieldValue[]
 
-  const regularFields: EntryFieldValue[] = ['plural_form', 'morphology', 'interlinearization', 'notes']
-
-  async function addSense() {
-    await dbOperations.updateSense({entry_id: entry.id, column: 'glosses', new_value: null, sense_id: window.crypto.randomUUID()})
-  }
-  async function deleteSense(sense_id: string) {
-    await dbOperations.updateSense({entry_id: entry.id, column: 'deleted', new_value: new Date().toISOString(), sense_id})
+  function update_entry(entry: TablesUpdate<'entries'>) {
+    dbOperations.update_entry({ entry })
   }
 </script>
 
 <div class="flex flex-col md:grid mb-3 media-on-right-grid grid-gap-2">
   <div dir="ltr" style="grid-area: title;">
     <EntryField
-      value={entry.lexeme}
+      value={entry.main.lexeme.default}
       field="lexeme"
-      {canEdit}
+      {can_edit}
       display={$page.data.t('entry_field.lexeme')}
-      on:update={({detail}) => dispatch('valueupdate', { field: EntryFields.lexeme, newValue: detail})} />
+      on_update={(new_value) => {
+        if (new_value) {
+          entry.main.lexeme.default = new_value
+          update_entry({ lexeme: entry.main.lexeme })
+        }
+      }} />
   </div>
 
   <div style="grid-area: media;">
-    <EntryMedia {dictionary} {entry} {canEdit} {videoAccess} on:deleteImage on:deleteVideo on:valueupdate />
-    {#if history?.length > 0}<EntryHistory {history} {canEdit} class="mt-5 hidden md:block" />{/if}
+    <EntryMedia {dictionary} {entry} {can_edit} {videoAccess} {dbOperations} />
+    {#if history?.length > 0}<EntryHistory {history} {can_edit} class="mt-5 hidden md:block" />{/if}
   </div>
 
   <div class="flex flex-col grow" style="grid-area: content;">
     {#each dictionary.alternateOrthographies || [] as orthography, index}
-      {@const orthographyIndex = `local_orthography_${index + 1}`}
+      {@const orthography_field = `lo${index + 1}`}
       <EntryField
-        value={entry[orthographyIndex]}
+        value={entry.main.lexeme[orthography_field]}
         field="local_orthography"
-        {canEdit}
+        {can_edit}
         display={orthography}
-        on:update={({detail}) => dispatch('valueupdate', { field: orthographyIndex, newValue: detail})} />
+        on_update={(new_value) => {
+          entry.main.lexeme[orthography_field] = new_value
+          update_entry({ lexeme: entry.main.lexeme })
+        }} />
     {/each}
 
-    <EntryField value={entry.phonetic} field="phonetic" {canEdit} display={$page.data.t('entry_field.phonetic')} on:update={({detail}) => dispatch('valueupdate', { field: EntryFields.phonetic, newValue: detail})} />
+    <EntryField
+      value={entry.main.phonetic}
+      field="phonetic"
+      {can_edit}
+      display={$page.data.t('entry_field.phonetic')}
+      on_update={(new_value) => {
+        entry.main.phonetic = new_value
+        update_entry({ phonetic: new_value })
+      }} />
 
-    {#if !supaEntry?.senses?.length}
-      <Sense sense={entry.senses[0]} {canEdit} glossLanguages={dictionary.glossLanguages} on:valueupdate />
+    {#each entry.senses || [] as sense, index}
+      {#if entry.senses.length === 1}
+        <Sense {sense} glossLanguages={dictionary.glossLanguages} {can_edit} />
 
-      {#if canEdit}
-        <Button class="text-start p-2! mb-2 rounded order-2 hover:bg-gray-100! text-gray-600" form="menu" onclick={addSense}><span class="i-system-uicons-versions text-xl" /> Add Sense</Button>
-      {/if}
-    {:else}
-      <div class="p-2 hover:bg-gray-50 rounded">
-        <div class="font-semibold mb-2 flex">
-          <div class="font-semibold">
-            Sense 1
-          </div>
-        </div>
-        <div class="flex flex-col border-s-2 ps-3 ms-1">
-          <Sense sense={entry.senses[0]} {canEdit} glossLanguages={dictionary.glossLanguages} on:valueupdate />
-        </div>
-      </div>
-
-      {#each supaEntry.senses as sense, index}
+        {#if can_edit}
+          <Button class="text-start p-2! mb-2 rounded order-2 hover:bg-gray-100! text-gray-600 text-start!" form="menu" onclick={async () => await dbOperations.insert_sense({ sense: {}, entry_id: entry.id })}><span class="i-system-uicons-versions text-xl" /> {$page.data.t('sense.add')}</Button>
+        {/if}
+      {:else}
         <div class="p-2 hover:bg-gray-50 rounded">
           <div class="font-semibold mb-2 flex">
             <div class="font-semibold">
-              Sense {index + 2}
+              {$page.data.t('sense.sense')} {index + 1}
             </div>
             <div class="mx-auto" />
-            {#if canEdit}
-              <!-- {#if index > 0}
-              <Button size="sm" form="menu" onclick={() => alert('Re-ordering not ready yet.')}><span class="i-fa-chevron-up -mt-1" /></Button>
-            {/if}
-            {#if index < entry.senses.length - 1}
-              <Button size="sm" form="menu" onclick={() => alert('Re-ordering not ready yet.')}><span class="i-fa-chevron-down -mt-1" /></Button>
-            {/if} -->
-              <Button class="text-gray-500!" size="sm" form="menu" onclick={() => deleteSense(sense.id)}><span class="i-fa-solid-times -mt-1" /></Button>
-              <Button class="text-gray-500!" size="sm" form="menu" onclick={addSense}><span class="i-fa-solid-plus -mt-1" /></Button>
+            {#if can_edit}
+              <Button class="text-gray-500!" size="sm" form="menu" onclick={async () => await dbOperations.update_sense({ sense: { deleted: 'true' }, sense_id: sense.id })}><span class="i-fa-solid-times -mt-1" /></Button>
+              <Button class="text-gray-500!" size="sm" form="menu" onclick={async () => await dbOperations.insert_sense({ sense: {}, entry_id: entry.id })}><span class="i-fa-solid-plus -mt-1" /></Button>
             {/if}
           </div>
 
           <div class="flex flex-col border-s-2 ps-3 ms-1">
-            <SupaSense entryId={entry.id} updateSense={dbOperations.updateSense} {sense} glossLanguages={dictionary.glossLanguages} {canEdit} />
+            <Sense {sense} glossLanguages={dictionary.glossLanguages} {can_edit} />
           </div>
         </div>
-      {/each}
-    {/if}
-
-    {#if entry.dialects?.length || canEdit}
-      <div class="md:px-2" class:order-2={!entry.dialects?.length}>
-        <div class="rounded text-xs text-gray-500 mt-1 mb-2">{$page.data.t('entry_field.dialects')}</div>
-        <EntryDialect {canEdit} dialects={entry.dialects} dictionaryId={dictionary.id} on:valueupdate />
-        <div class="border-b-2 pb-1 mb-2 border-dashed" />
-      </div>
-    {/if}
-
-    <!-- TODO: make multiple with generic component -->
-    <EntryField
-      value={entry.scientific_names?.[0]}
-      field="scientific_names"
-      {canEdit}
-      display={$page.data.t('entry_field.scientific_names')}
-      on:update={({ detail }) => dispatch('valueupdate', { field: EntryFields.scientific_names, newValue: [detail] })} />
-
-    {#if DICTIONARIES_WITH_VARIANTS.includes(dictionary.id)}
-      <EntryField
-        value={entry.variant}
-        field="variant"
-        {canEdit}
-        display={$page.data.t('entry_field.variant')}
-        on:update={({detail}) => dispatch('valueupdate', { field: EntryFields.variant, newValue: detail})} />
-    {/if}
-
-    {#each regularFields as field}
-      <EntryField
-        value={entry[field]}
-        {field}
-        {canEdit}
-        display={$page.data.t(`entry_field.${field}`)}
-        on:update={({detail}) => dispatch('valueupdate', { field: EntryFields[field], newValue: detail})} />
+      {/if}
     {/each}
 
-    {#if entry.sources?.length || canEdit}
-      <div class="md:px-2" class:order-2={!entry.sources?.length}>
-        <div class="rounded text-xs text-gray-500 mt-1 mb-2">{$page.data.t('entry_field.sources')}</div>
-        <SelectSource
-          {canEdit}
-          value={entry.sources}
-          on:valueupdate />
+    {#if entry.dialect_ids?.length || can_edit}
+      <div class="md:px-2" class:order-2={!entry.dialect_ids?.length}>
+        <div class="rounded text-xs text-gray-500 mt-1 mb-2">{$page.data.t('entry_field.dialects')}</div>
+        <EntryDialect entry_id={entry.id} {can_edit} dialect_ids={entry.dialect_ids || []} />
         <div class="border-b-2 pb-1 mb-2 border-dashed" />
       </div>
+    {/if}
+
+    {#if entry.tag_ids?.length || can_edit}
+      <div class="md:px-2" class:order-2={!entry.tag_ids?.length}>
+        <div class="rounded text-xs text-gray-500 mt-1 mb-2">{$page.data.t('entry_field.custom_tags')}</div>
+        <EntryTag entry_id={entry.id} {can_edit} tag_ids={entry.tag_ids || []} />
+        <div class="border-b-2 pb-1 mb-2 border-dashed" />
+      </div>
+    {/if}
+
+    <EntryField
+      value={entry.main.scientific_names?.[0]}
+      field="scientific_names"
+      {can_edit}
+      display={$page.data.t('entry_field.scientific_names')}
+      on_update={(new_value) => {
+        entry.main.scientific_names = [new_value]
+        update_entry({ scientific_names: entry.main.scientific_names })
+      }} />
+
+    {#each text_fields as field}
+      <EntryField
+        value={entry.main[field]}
+        {field}
+        {can_edit}
+        display={$page.data.t(`entry_field.${field}`)}
+        on_update={(new_value) => {
+          entry.main[field] = new_value
+          update_entry({ [field]: new_value })
+        }} />
+    {/each}
+
+    <EntryField
+      value={entry.main.notes?.default}
+      field="notes"
+      {can_edit}
+      display={$page.data.t('entry_field.notes')}
+      on_update={(new_value) => {
+        entry.main.notes = { default: new_value }
+        update_entry({ notes: entry.main.notes })
+      }} />
+
+    {#if entry.main.sources?.length || can_edit}
+      <div class="md:px-2" class:order-2={!entry.main.sources?.length}>
+        <div class="rounded text-xs text-gray-500 mt-1 mb-2">{$page.data.t('entry_field.sources')}</div>
+        <EntrySource
+          {can_edit}
+          value={entry.main.sources}
+          on_update={(new_value) => {
+            entry.main.sources = new_value
+            update_entry({ sources: new_value })
+          }} />
+        <div class="border-b-2 pb-1 mb-2 border-dashed" />
+      </div>
+    {/if}
+
+    {#if entry.main.elicitation_id || can_edit}
+      <EntryField
+        value={entry.main.elicitation_id}
+        field="ID"
+        {can_edit}
+        display="ID"
+        on_update={(new_value) => {
+          entry.main.elicitation_id = new_value
+          update_entry({ elicitation_id: new_value })
+        }} />
     {/if}
   </div>
 </div>

@@ -1,17 +1,21 @@
-import type { Variant, Viewport } from 'kitbook';
-import type Component from './ModalEditableArray.svelte';
+import type { DeprecatedVariant, Viewport } from 'kitbook'
+import type Component from './ModalEditableArray.svelte'
 
 export const viewports: Viewport[] = [
-  { width: 400, height: 600}
+  { width: 400, height: 600 },
 ]
 
 export const languages = []
 
-export const variants: Variant<Component>[] = [
+function on_update(new_value) {
+  console.info('new_value', new_value)
+}
+
+export const variants: DeprecatedVariant<Component>[] = [
   {
     name: 'cannot edit',
     viewports: [
-      { width: 300, height: 50}
+      { width: 300, height: 50 },
     ],
     props: {
       values: ['1.2'],
@@ -20,7 +24,8 @@ export const variants: Variant<Component>[] = [
         { value: '1.2', name: 'sky' },
         { value: '1.3', name: 'water' },
       ],
-    }
+      on_update,
+    },
   },
   {
     name: 'can edit',
@@ -33,8 +38,9 @@ export const variants: Variant<Component>[] = [
         { value: '1.4', name: 'wind' },
         { value: '1.5', name: 'fire' },
       ],
-      canEdit: true,
-    }
+      can_edit: true,
+      on_update,
+    },
   },
   {
     name: 'can write-in',
@@ -42,8 +48,9 @@ export const variants: Variant<Component>[] = [
       values: [],
       placeholder: 'Select elements',
       options: [],
-      canEdit: true,
+      can_edit: true,
       canWriteIn: true,
-    }
+      on_update,
+    },
   },
 ]

@@ -1,34 +1,42 @@
-import type { Variant, Viewport } from 'kitbook';
-import type Component from './EntryPartOfSpeech.svelte';
+import type { Variant, VariantMeta } from 'kitbook'
+import type Component from './EntryPartOfSpeech.svelte'
 
-export const viewports: Viewport[] = [
-  { width: 300, height: 50}
-]
+export const shared_meta: VariantMeta = {
+  viewports: [
+    { width: 300, height: 50 },
+  ],
+}
 
-export const variants: Variant<Component>[] = [
-  {
-    name: 'can edit',
-    props: {
-      canEdit: true,
-      value: ['n', 'v'],
-    },
+const shared = {
+  on_update: new_value => console.info('new_value', new_value),
+} satisfies Partial<Variant<Component>>
+
+export const Can_Edit: Variant<Component> = {
+  ...shared,
+  can_edit: true,
+  value: ['n', 'v'],
+  _meta: {
     viewports: [
-      { width: 400, height: 300}
-    ]
+      { width: 400, height: 300 },
+    ],
   },
-  {
-    name: 'cannot edit',
-    props: {
-      value: ['n', 'v'],
-    },
+}
+
+export const Cannot_Edit: Variant<Component> = {
+  ...shared,
+  value: ['n', 'v'],
+  _meta: {
     languages: [],
+
   },
-  {
-    name: 'undefined - can edit',
-    props: {
-      canEdit: true,
-      value: undefined,
-    },
+}
+
+export const Undefined_Can_Edit: Variant<Component> = {
+  ...shared,
+  can_edit: true,
+  value: undefined,
+  _meta: {
     languages: [],
+
   },
-]
+}

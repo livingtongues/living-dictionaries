@@ -289,10 +289,16 @@
     "zu": "zulú",
     "tri": "Tiriyó",
     "hix": "Hixkaryana",
-    "waw": "Waiwai",
-    "way": "Wayana",
+    "waw": "waiwai",
+    "way": "wayana",
     "apy": "Apalaí",
-    "jen": "DZA",
-    "mko": "Mingang Doso"
+    "jen": "Dza",
+    "mko": "Mingang Doso",
+    "hbo-hebr": "hebreo",
+    "ne-2": "Nepalí (romanización)",
+    "apd": "árabe sudanés",
+    "hoi": "Holikachuk",
+    "mtq": "Muong",
+    "cag": "Nivaclé"
   }
 }

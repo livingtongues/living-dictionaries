@@ -1,25 +1,15 @@
 <script lang="ts">
-  import { page } from '$app/stores';
-  import { setOnline } from 'sveltefirets';
-  import { Button } from 'svelte-pieces';
-  import type { IAbout } from '@living-dictionaries/types';
-  import sanitize from 'xss';
-  import SeoMetaTags from '$lib/components/SeoMetaTags.svelte';
+  import { Button } from 'svelte-pieces'
+  import sanitize from 'xss'
+  import UserGuide from './UserGuide.svelte'
+  import { page } from '$app/stores'
+  import SeoMetaTags from '$lib/components/SeoMetaTags.svelte'
 
-  export let data;
-  $: ({ isManager } = data)
-  let updated = '';
+  export let data
+  $: ({ is_manager, dictionary, update_about } = data)
+  let updated = ''
 
-  async function save() {
-    try {
-      await setOnline<IAbout>(`dictionaries/${data.dictionary.id}/info/about`, { about: updated });
-      window.location.replace(`/${data.dictionary.id}/about`);
-    } catch (err) {
-      alert(err);
-    }
-  }
-
-  let editing = false;
+  let editing = false
 </script>
 
 <div class="about">
@@ -27,15 +17,16 @@
     {$page.data.t('header.about')}
   </h3>
 
-  {#if $isManager}
+  {#if $is_manager}
     {#if editing}
       <Button class="mb-2" onclick={() => (editing = false)}>{$page.data.t('misc.cancel')}</Button>
-      <Button class="mb-2" form="filled" onclick={save}>{$page.data.t('misc.save')}</Button>
+      <Button class="mb-2" form="filled" onclick={async () => await update_about(updated)}>{$page.data.t('misc.save')}</Button>
     {:else}
       <Button class="mb-2" onclick={() => (editing = true)}>{$page.data.t('misc.edit')}</Button>
     {/if}
   {/if}
 
+  <UserGuide />
   <div class="flex">
     {#if editing}
       <div class="max-w-screen-md tw-prose prose-lg">
@@ -56,7 +47,7 @@
 
 <SeoMetaTags
   title={$page.data.t('header.about')}
-  dictionaryName={data.dictionary.name}
+  dictionaryName={$dictionary.name}
   description="Learn about the background and creation of this Living Dictionary."
   keywords="About this dictionary, background, creation, Endangered Languages, Language Documentation, Language Revitalization, Build a Dictionary, Online Dictionary, Digital Dictionary, Dictionary Software, Free Software, Online Dictionary Builder, Living Dictionaries, Living Dictionary" />
 

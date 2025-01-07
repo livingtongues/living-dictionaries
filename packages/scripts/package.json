@@ -1,47 +1,51 @@
 {
   "name": "@living-dictionaries/scripts",
+  "type": "module",
   "version": "0.0.1",
   "description": "Scripts for Living Dictionaries",
-  "type": "module",
-  "main": "index.ts",
-  "scripts": {
-    "countAllEntries": "tsx countAllEntries.ts",
-    "entryRefactor": "tsx refactor/entry-refactor.ts",
-    "updateLocales": "tsx locales/update-locales.ts",
-    "importDictionary": "tsx import/import.ts",
-    "addDictionariesToIndex:dev": "tsx algolia/addDictionariesToIndex.ts dev",
-    "addDictionariesToIndex:prod": "tsx algolia/addDictionariesToIndex.js prod",
-    "updateIndex": "tsx algolia/updateIndex.ts -e prod",
-    "copyAlgoliaIndexRecords": "tsx algolia/copyAlgoliaIndexRecords.js",
-    "copyAlgoliaIndexSettings": "tsx algolia/copyAlgoliaIndexSettings.js",
-    "test": "vitest",
-    "test:ui": "vitest --ui"
-  },
-  "devDependencies": {
-    "@living-dictionaries/functions": "workspace:^0.0.1",
-    "@living-dictionaries/site": "workspace:^0.0.1",
-    "@living-dictionaries/types": "^1.0.0",
-    "@types/node": "^18.11.18",
-    "@vitest/ui": "^0.33.0",
-    "algoliasearch": "^4.11.0",
-    "commander": "^9.4.1",
-    "csv-parse": "^5.3.0",
-    "csvtojson": "^2.0.10",
-    "dotenv": "^16.0.2",
-    "firebase": "^9.22.1",
-    "firebase-admin": "^11.10.1",
-    "node-fetch": "^3.1.0",
-    "tsx": "^3.12.7",
-    "typescript": "~5.1.6",
-    "vitest": "^0.34.5"
-  },
+  "author": "Living Tongues Institute for Endangered Languages",
+  "homepage": "https://github.com/livingtongues/living-dictionaries#readme",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/livingtongues/living-dictionaries.git"
   },
-  "author": "Living Tongues Institute for Endangered Languages",
   "bugs": {
     "url": "https://github.com/livingtongues/living-dictionaries/issues"
   },
-  "homepage": "https://github.com/livingtongues/living-dictionaries#readme"
+  "main": "index.ts",
+  "scripts": {
+    "import-dictionary:dev:dry": "tsx import/import.ts --id example-v4",
+    "import-dictionary:dev:live": "tsx import/import.ts --id example-v4 --live",
+    "import-dictionary:prod:live": "tsx import/import.ts --id example-v4 -e prod --live",
+    "update-locales": "tsx locales/update-locales.ts",
+    "create-indexes": "tsx create-indexes/add-to-cloudflare.ts",
+    "migrate-users": "tsx migrate-to-supabase/auth.ts",
+    "get-emails": "tsx refactor/get-email.ts -e prod",
+    "test": "vitest",
+    "test:import": "vitest --config ./vitest.config.import.ts"
+  },
+  "devDependencies": {
+    "@aws-sdk/client-s3": "^3.679.0",
+    "@living-dictionaries/site": "workspace:^0.0.1",
+    "@living-dictionaries/types": "workspace:^1.0.0",
+    "@orama/orama": "3.0.1",
+    "@supabase/supabase-js": "^2.38.4",
+    "@types/node": "^18.11.18",
+    "@types/pg": "^8.11.8",
+    "@types/stream-chain": "^2.1.0",
+    "@types/stream-json": "^1.7.7",
+    "commander": "^9.4.1",
+    "csv-parse": "^5.3.0",
+    "csvtojson": "^2.0.10",
+    "dotenv": "^16.0.2",
+    "firebase": "^10.9.0",
+    "firebase-admin": "^12.7.0",
+    "node-fetch": "^3.1.0",
+    "pg": "^8.13.1",
+    "stream-chain": "^2.2.5",
+    "stream-json": "^1.8.0",
+    "tsx": "^4.19.0",
+    "typescript": "~5.1.6",
+    "vitest": "^2.1.4"
+  }
 }

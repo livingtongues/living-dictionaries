@@ -1,72 +1,61 @@
-import type { Variant } from 'kitbook';
-import type Component from './+page.svelte';
-import { readable, writable } from 'svelte/store';
-import { logDbOperations } from '$lib/mocks/db';
+// import type { DeprecatedVariant } from 'kitbook'
+// import { readable } from 'svelte/store'
+// import type { ComponentProps } from 'svelte'
+// import type Component from './+page.svelte'
+// import { mockDictionaryLayoutData } from '$lib/mocks/layout'
 
-const defaultProps = {
-  locale: null,
-  t: null,
-  user: null,
-  admin: readable(0),
-  isManager: readable(false),
-  isContributor: readable(false),
-  canEdit: readable(false),
-  algoliaQueryParams: writable(''),
-  dictionary: writable({
-    name: 'test',
-    glossLanguages: []
-  }),
-  dbOperations: logDbOperations,
-  supaEntry: null,
-}
+// const defaultProps: ComponentProps<Component>['data'] = {
+//   ...mockDictionaryLayoutData,
+//   supa_entry: null,
+//   entry: readable({
+//     lexeme: 'test',
+//   }),
+//   shallow: false,
+// }
 
-export const variants: Variant<Component>[] = [
-  {
-    name: 'Viewer',
-    viewports: [{ width: 500, height: 250}],
-    props: {
-      data: {
-        ...defaultProps,
-        initialEntry: readable({
-          lx: 'test',
-          gl: {
-            'en': 'foo',
-          }
-        })
-      },
-    },
-  },
-  {
-    name: 'Editor',
-    viewports: [{ width: 786, height: 500}],
-    props: {
-      data: {
-        ...defaultProps,
-        isManager: readable(true),
-        canEdit: readable(true),
-        initialEntry: readable({
-          lx: 'test',
-        })
-      },
-    },
-  },
-  {
-    name: 'Admin 2',
-    description: 'Will show JSON viewer and Add Sense (as it is in beta)',
-    languages: [],
-    viewports: [{ width: 786, height: 500}],
-    props: {
-      data: {
-        ...defaultProps,
-        admin: readable(2),
-        canEdit: readable(true),
-        initialEntry: readable({
-          lx: 'test',
-        })
-      },
-    },
-    tests: {
-      skip: true,
-    }
-  },
-]
+// export const variants: DeprecatedVariant<Component>[] = [
+//   {
+//     name: 'Viewer',
+//     viewports: [{ width: 500, height: 250 }],
+//     props: {
+//       data: {
+//         ...defaultProps,
+//         entry: readable({
+//           lexeme: 'test',
+//           senses: [{
+//             glosses: {
+//               en: 'foo',
+//             },
+//           }],
+//         }),
+//       },
+//     },
+//   },
+//   {
+//     name: 'Editor',
+//     viewports: [{ width: 786, height: 500 }],
+//     props: {
+//       data: {
+//         ...defaultProps,
+//         is_manager: readable(true),
+//         can_edit: readable(true),
+//       },
+//     },
+//   },
+//   {
+//     name: 'Admin 2',
+//     description: 'Will show JSON viewer and Add Sense (as it is in beta)',
+//     languages: [],
+//     viewports: [{ width: 786, height: 500 }],
+//     props: {
+//       data: {
+//         ...defaultProps,
+//         admin: readable(2),
+//         can_edit: readable(true),
+//       },
+//     },
+//     tests: {
+//       skip: true,
+//     },
+//   },
+// ]

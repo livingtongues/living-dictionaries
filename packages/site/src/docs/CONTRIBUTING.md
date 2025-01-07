@@ -1,8 +1,17 @@
 # Contributing to Living Dictionaries
 
+## Set Up Dev Environment
+
+- Install the recommended VSCode extensions.
+- Install [pnpm](https://pnpm.io/) globaly using `npm install -g pnpm` if you don't have it yet.
+- Then install dependencies with `pnpm i` and run `pnpm dev`. Each command will start up a Vite dev server which will give you a link to open on localhost. Changes will hot reload almost instantly (consider using auto-save if you want to).
+...notes outdated and incomplete
+
+\*_Note that on localhost you will not see the live (prod) site's data, but rather the data from the dev database, which allows us to develop and make changes freely without worrying about deleting or corrupting important data._
+
 ## Git methodology
 
-We follow [Github flow](https://guides.github.com/introduction/flow/). Changes are made on feature branches and then pull requests are submitted to the main branch. Be sure to read through the GitHub flow article as it gives important information on how often to commit.
+We follow [Github flow](https://guides.github.com/introduction/flow/). Changes are made on feature branches and then pull requests are submitted to the main branch. The main branch code is automatically deployed to production. Be sure to read through the GitHub flow article as it gives important information on how often to commit.
 
 ### Example workflow using VS Code's GUI for Git
 

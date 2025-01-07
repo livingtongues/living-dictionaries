@@ -1,72 +1,101 @@
 <script lang="ts">
-  import { page } from '$app/stores';
-  import { Button, Modal, Form } from 'svelte-pieces';
-  import { user, dictionary } from '$lib/stores';
-  import { goto } from '$app/navigation';
-  import { createEventDispatcher } from 'svelte';
-  import { apiFetch } from '$lib/client/apiFetch';
-  import type { SupportRequestBody } from '../../../routes/api/email/support/+server';
-  import type { RequestAccessBody } from '../../../routes/api/email/request_access/+server';
-  import enBase from '$lib/i18n/locales/en.json';
+  import { Button, Form, Modal } from 'svelte-pieces'
+  import { createEventDispatcher } from 'svelte'
+  import { page } from '$app/stores'
+  import { goto } from '$app/navigation'
+  import type { SupportRequestBody } from '$api/email/support/+server'
+  import type { LearningMaterialsRequestBody } from '$api/email/learning_materials/+server'
+  import type { RequestAccessBody } from '$api/email/request_access/+server'
+  import enBase from '$lib/i18n/locales/en.json'
+  import { post_request } from '$lib/helpers/get-post-requests'
 
-  export let subject: Subjects = undefined;
+  export let subject: Subjects = undefined
+  $: ({ dictionary, user, about_is_too_short } = $page.data)
+  $: if ($dictionary && subject === 'public_dictionary') warn_if_about_too_short()
 
-  const subjects = {
-    'delete_dictionary': 'contact.delete_dictionary',
-    'public_dictionary': 'contact.public_dictionary',
-    'import_data': 'contact.import_data',
-    'request_access': 'contact.request_access',
-    'report_problem': 'contact.report_problem',
-    'other': 'contact.other'
-  } as const
-
-  type Subjects = keyof typeof subjects;
-  type SubjectValues  = typeof subjects[Subjects];
-  const typedSubjects = Object.entries(subjects) as [Subjects, SubjectValues][];
-
-  const dispatch = createEventDispatcher<{ close: boolean }>();
-
-  function close() {
-    dispatch('close');
+  async function warn_if_about_too_short() {
+    if (await about_is_too_short()) {
+      close()
+      alert($page.data.t('about.message'))
+      goto(`/${$dictionary.id}/about`)
+    }
   }
 
-  let message = '';
-  let email = '';
+  const subjects = {
+    delete_dictionary: 'contact.delete_dictionary',
+    public_dictionary: 'contact.public_dictionary',
+    import_data: 'contact.import_data',
+    request_access: 'contact.request_access',
+    learning_materials: 'contact.learning',
+    report_problem: 'contact.report_problem',
+    other: 'contact.other',
+  } as const
 
-  let status: 'success' | 'fail';
+  type Subjects = keyof typeof subjects
+  type SubjectValues = typeof subjects[Subjects]
+  const typedSubjects = Object.entries(subjects) as [Subjects, SubjectValues][]
+  $: filteredSubjects = typedSubjects.filter((subjects) => {
+    if (!$dictionary && subjects[0] === 'public_dictionary') {
+      return false
+    }
+    return true
+  })
+
+  const dispatch = createEventDispatcher<{ close: boolean }>()
+
+  function close() {
+    dispatch('close')
+  }
+
+  let message = ''
+  let email = ''
+
+  let status: 'success' | 'fail'
 
   async function send() {
-    try {
-      let response: Response
-      if ($dictionary && subject === 'request_access') {
-        response = await apiFetch<RequestAccessBody>('/api/email/request_access', {
-          message,
-          email: $user?.email || email,
-          name: $user?.displayName || 'Anonymous',
-          url: window.location.href,
-          dictionaryId: $dictionary.id,
-          dictionaryName: $dictionary.name,
-        });
-      } else {
-        response = await apiFetch<SupportRequestBody>('/api/email/support', {
-          message,
-          email: $user?.email || email,
-          name: $user?.displayName || 'Anonymous',
-          url: window.location.href,
-          subject: enBase.contact[subject],
-        });
-      }
+    if ($dictionary && subject === 'request_access') {
+      const { error } = await post_request<RequestAccessBody, null>('/api/email/request_access', {
+        message,
+        email: $user?.email || email,
+        name: $user?.displayName || 'Anonymous',
+        url: window.location.href,
+        dictionaryId: $dictionary.id,
+        dictionaryName: $dictionary.name,
+      })
 
-      if (response.status !== 200) {
-        const body = await response.json();
-        throw new Error(body.message);
+      if (error) {
+        status = 'fail'
+        return alert(`${$page.data.t('misc.error')}: ${error.message}`)
       }
+    } else if (subject === 'learning_materials') {
+      const { error } = await post_request<LearningMaterialsRequestBody, null>('/api/email/learning_materials', {
+        message,
+        email: $user?.email || email,
+        name: $user?.displayName || 'Anonymous',
+        url: window.location.href,
+        dictionaryName: $dictionary?.name,
+      })
 
-      status = 'success';
-    } catch (err) {
-      status = 'fail';
-      alert(`${$page.data.t('misc.error')}: ${err}`);
+      if (error) {
+        status = 'fail'
+        return alert(`${$page.data.t('misc.error')}: ${error.message}`)
+      }
+    } else {
+      const { error } = await post_request<SupportRequestBody, null>('/api/email/support', {
+        message,
+        email: $user?.email || email,
+        name: $user?.displayName || 'Anonymous',
+        url: window.location.href,
+        subject: enBase.contact[subject],
+      })
+
+      if (error) {
+        status = 'fail'
+        return alert(`${$page.data.t('misc.error')}: ${error.message}`)
+      }
     }
+
+    status = 'success'
   }
 </script>
 
@@ -77,8 +106,8 @@
   <div class="flex flex-col mb-5">
     <Button
       onclick={() => {
-        goto('/tutorials');
-        close();
+        goto('/tutorials')
+        close()
       }}
       class="mb-2">
       <span class="i-fluent-learning-app-24-regular -mt-2px" />
@@ -107,8 +136,7 @@
       <div class="my-2">
         <select class="w-full" bind:value={subject}>
           <option disabled selected value="">{$page.data.t('contact.select_topic')}:</option>
-
-          {#each typedSubjects as [key, value]}
+          {#each filteredSubjects as [key, value]}
             <option value={key}>{$page.data.t(value)}</option>
           {/each}
         </select>
@@ -123,7 +151,7 @@
         maxlength="1000"
         bind:value={message}
         class="form-input bg-white w-full"
-        placeholder={$page.data.t('contact.enter_message') + '...'} />
+        placeholder={`${$page.data.t('contact.enter_message')}...`} />
       <div class="flex text-xs">
         <div class="text-gray-500 ml-auto">{message.length}/1000</div>
       </div>
@@ -152,7 +180,7 @@
         </Button>
       </div>
     </Form>
-  {:else if status == 'success'}
+  {:else if status === 'success'}
     <h4 class="text-lg mt-3 mb-4">
       <i class="fas fa-check" />
       {$page.data.t('contact.message_sent')}
@@ -162,11 +190,11 @@
         {$page.data.t('misc.close')}
       </Button>
     </div>
-  {:else if status == 'fail'}
+  {:else if status === 'fail'}
     <h4 class="text-xl mt-1 mb-4">
       {$page.data.t('contact.message_failed')}
-      <a class="underline ml-1" href="mailto:annaluisa@livingtongues.org">
-        annaluisa@livingtongues.org
+      <a class="underline ml-1" href="mailto:dictionaries@livingtongues.org">
+        dictionaries@livingtongues.org
       </a>
     </h4>
   {/if}

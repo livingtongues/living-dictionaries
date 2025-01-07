@@ -1,50 +1,50 @@
 <script lang="ts">
-  import { page } from '$app/stores';
-  import { Button, Modal, ShowHide } from 'svelte-pieces';
-  import RecordVideo from '$lib/components/video/RecordVideo.svelte';
-  import SelectVideo from './SelectVideo.svelte';
-  import PasteVideoLink from './PasteVideoLink.svelte';
-  import VideoIFrame from '$lib/components/video/VideoIFrame.svelte';
-  import SelectSpeaker from '$lib/components/media/SelectSpeaker.svelte';
-  import { dictionary } from '$lib/stores';
-  import type { ExpandedEntry, GoalDatabaseVideo } from '@living-dictionaries/types';
-  import { addVideo } from '$lib/helpers/media/update';
-  import { createEventDispatcher } from 'svelte';
-  import { expand_video } from '$lib/transformers/expand_entry';
+  import { Button, Modal, ShowHide } from 'svelte-pieces'
+  import type { EntryView, HostedVideo } from '@living-dictionaries/types'
+  import SelectVideo from './SelectVideo.svelte'
+  import PasteVideoLink from './PasteVideoLink.svelte'
+  import { page } from '$app/stores'
+  import RecordVideo from '$lib/components/video/RecordVideo.svelte'
+  import VideoThirdParty from '$lib/components/video/VideoThirdParty.svelte'
+  import SelectSpeaker from '$lib/components/media/SelectSpeaker.svelte'
 
-  const dispatch = createEventDispatcher();
-  const close = () => dispatch('close');
+  $: ({ dbOperations } = $page.data)
 
-  export let entry: ExpandedEntry;
-  let database_video: GoalDatabaseVideo;
+  export let on_close: () => void
+  export let entry: EntryView
+
+  let hosted_video: HostedVideo
 </script>
 
-<Modal on:close>
-  <span slot="heading"> <i class="far fa-film-alt text-sm" /> {entry.lexeme} </span>
+<Modal on:close={on_close}>
+  <span slot="heading"> <i class="far fa-film-alt text-sm" /> {entry.main.lexeme.default} </span>
 
-  <SelectSpeaker dictionaryId={$dictionary.id} let:speakerId>
-    {#if database_video?.youtubeId || database_video?.vimeoId}
-      <VideoIFrame video={expand_video(database_video)} />
+  <SelectSpeaker let:speaker_id>
+    {#if hosted_video}
+      <VideoThirdParty {hosted_video} />
       <div class="modal-footer">
-        <Button onclick={close} color="black">
+        <Button onclick={() => hosted_video = null} color="black">
           {$page.data.t('misc.cancel')}
         </Button>
         <div class="w-1" />
-        <Button onclick={async () => await addVideo(entry.id, database_video)} form="filled">
+        <Button
+          onclick={async () => {
+            const data = await dbOperations.insert_video({ sense_id: entry.senses[0].id, video: { hosted_elsewhere: hosted_video } })
+            await dbOperations.assign_speaker({ speaker_id, media: 'video', media_id: data.video_id })
+          }}
+          form="filled">
           {$page.data.t('misc.save')}
         </Button>
       </div>
-    {:else if speakerId}
+    {:else if speaker_id}
       <ShowHide let:show={record} let:toggle>
         {#if !record}
-          <PasteVideoLink
-            on:update={({ detail }) => {
-              database_video = { ...detail, sp: [speakerId] };
-            }} />
+          <PasteVideoLink on_pasted_valid_url={video_info => hosted_video = video_info} />
 
           <SelectVideo let:file>
-            {#await import('$lib/components/video/UploadVideo.svelte') then { default: UploadVideo }}
-              <UploadVideo {file} entryId={entry.id} {speakerId} />
+            {@const upload_status = dbOperations.uploadVideo({ file, sense_id: entry.senses[0].id, speaker_id })}
+            {#await import('$lib/components/audio/UploadProgressBarStatus.svelte') then { default: UploadProgressBarStatus }}
+              <UploadProgressBarStatus {upload_status} />
             {/await}
           </SelectVideo>
 
@@ -65,8 +65,9 @@
                   <Button onclick={toggle} color="green" form="filled"><i class="fas fa-upload" /> {$page.data.t('misc.upload')}</Button>
                 </div>
               {:else}
-                {#await import('$lib/components/video/UploadVideo.svelte') then { default: UploadVideo }}
-                  <UploadVideo file={videoBlob} entryId={entry.id} {speakerId} />
+                {@const upload_status = dbOperations.uploadVideo({ file: videoBlob, sense_id: entry.senses[0].id, speaker_id })}
+                {#await import('$lib/components/audio/UploadProgressBarStatus.svelte') then { default: UploadProgressBarStatus }}
+                  <UploadProgressBarStatus {upload_status} />
                 {/await}
               {/if}
             </ShowHide>

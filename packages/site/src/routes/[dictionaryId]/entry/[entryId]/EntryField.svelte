@@ -1,29 +1,25 @@
 <script lang="ts">
-  import type { EntryFieldValue } from '@living-dictionaries/types';
-  import { ShowHide } from 'svelte-pieces';
-  import sanitize from 'xss';
+  import type { EntryFieldValue } from '@living-dictionaries/types'
+  import { ShowHide } from 'svelte-pieces'
+  import sanitize from 'xss'
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  interface $$Events {
-    update: CustomEvent<string>;
-  }
-
-  export let value: string;
-  export let field: EntryFieldValue;
-  export let bcp: string = undefined;
-  export let display: string;
-  export let canEdit = false;
+  export let value: string
+  export let field: EntryFieldValue
+  export let bcp: string = undefined
+  export let display: string
+  export let can_edit = false
+  export let on_update: (new_value: string) => void
 </script>
 
-{#if value || canEdit}
+{#if value || can_edit}
   <ShowHide let:show let:set let:toggle>
     <div
-      class="md:px-2 rounded"
-      on:click={() => set(canEdit)}
-      class:hover:bg-gray-100={canEdit}
-      class:cursor-pointer={canEdit}
+      class="md:px-2 rounded {$$props.class}"
+      on:click={() => set(can_edit)}
+      class:hover:bg-gray-100={can_edit}
+      class:cursor-pointer={can_edit}
       class:order-2={!value}>
-      {#if field != 'lexeme'}
+      {#if field !== 'lexeme'}
         <div class="text-xs text-gray-500 mt-1">{display}</div>
       {/if}
       <div
@@ -51,7 +47,7 @@
     </div>
     {#if show}
       {#await import('$lib/components/entry/EditFieldModal.svelte') then { default: EditFieldModal }}
-        <EditFieldModal on:update {value} {field} {display} {bcp} on:close={toggle} />
+        <EditFieldModal {on_update} {value} {field} {display} {bcp} on_close={toggle} />
       {/await}
     {/if}
   </ShowHide>

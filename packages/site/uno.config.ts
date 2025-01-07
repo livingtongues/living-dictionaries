@@ -1,5 +1,5 @@
-import { defineConfig, presetIcons, presetTypography, presetUno } from 'unocss';
-import { presetForms } from '@julr/unocss-preset-forms';
+import { defineConfig, presetIcons, presetTypography, presetUno } from 'unocss'
+import { presetForms } from '@julr/unocss-preset-forms'
 
 export default defineConfig({
   presets: [
@@ -22,7 +22,9 @@ export default defineConfig({
     },
   },
   shortcuts: [
-    { 'form-input': 'border-gray-300 rounded-md focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50' },
+    {
+      'form-input': 'border-gray-300 rounded-md focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50',
+    },
   ],
-  safelist: ['tw-prose']
-});
+  safelist: ['tw-prose'],
+})
