@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { EntryFieldValue, EntryView, IDictionary, TablesUpdate, Change } from '@living-dictionaries/types'
+  import type { Change, EntryFieldValue, EntryView, IDictionary, TablesUpdate } from '@living-dictionaries/types'
   import { Button } from 'svelte-pieces'
   import EntryField from './EntryField.svelte'
   import EntryMedia from './EntryMedia.svelte'
@@ -172,7 +172,7 @@
   </div>
 </div>
 
-{#if history?.length > 0}<EntryHistory {history} {canEdit} class="mt-3 md:hidden" />{/if}
+{#if history?.length > 0}<EntryHistory {history} {can_edit} class="mt-3 md:hidden" />{/if}
 <style>
   .media-on-right-grid {
       grid-template-columns: 3fr 1fr;

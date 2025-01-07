@@ -6,7 +6,7 @@
   export let entry_count: number
   export let on_close: () => void
   export let is_manager: boolean
-  $: ({can_edit} = $page.data)
+  $: ({ can_edit } = $page.data)
 </script>
 
 <div class="md:hidden">
@@ -62,7 +62,7 @@
   </a>
   {#if $can_edit}
     <a
-      href={'/' + $dictionary.id + '/history'}
+      href={`/${dictionary.id}/history`}
       class:active={$page.url.pathname.includes('history')}>
       <i class="far fa-history fa-fw" />
       <span class="font-medium mx-2">

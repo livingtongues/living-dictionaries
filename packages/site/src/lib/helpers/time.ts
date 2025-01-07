@@ -24,7 +24,7 @@ export function printDateTime(date: Date | number): string {
     hour: 'numeric',
     minute: 'numeric',
     second: 'numeric',
-  }).format(date);
+  }).format(date)
 }
 
 export function printDateWithWeekday(date: Date | number): string {

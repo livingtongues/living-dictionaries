@@ -1,8 +1,8 @@
 <script lang="ts">
-  import type { Change } from '@living-dictionaries/types';
+  import type { Change } from '@living-dictionaries/types'
 
-  export let history: Change[];
-  export let canEdit = false;
+  export let history: Change[]
+  export let canEdit = false
 
   const formatter = new Intl.DateTimeFormat('en-US', {
     year: 'numeric',
@@ -11,8 +11,8 @@
     hour: '2-digit',
     minute: '2-digit',
     second: '2-digit',
-    timeZoneName: 'short'
-  });
+    timeZoneName: 'short',
+  })
 </script>
 
 <div class="{$$props.class} text-gray-500">
