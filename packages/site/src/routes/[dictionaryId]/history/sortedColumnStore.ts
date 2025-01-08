@@ -1,3 +1,3 @@
-import { writable } from 'svelte/store';
+import { writable } from 'svelte/store'
 
-export const sortedColumn = writable('');
+export const sortedColumn = writable('')

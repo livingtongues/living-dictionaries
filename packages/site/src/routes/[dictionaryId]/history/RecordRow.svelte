@@ -1,13 +1,13 @@
 <script lang="ts">
-  import type { Change } from '@living-dictionaries/types';
-  import { printDateTime } from '$lib/helpers/time';
-  import { getActionValue } from './getActionValue';
-  import { page } from '$app/stores';
-  import { sortedColumn } from './sortedColumnStore';
+  import type { Change } from '@living-dictionaries/types'
+  import { getActionValue } from './getActionValue'
+  import { sortedColumn } from './sortedColumnStore'
+  import { printDateTime } from '$lib/helpers/time'
+  import { page } from '$app/stores'
 
-  export let record: Change;
-  const maxNumChar = 50;
-  const htmlRegex = /<[^>]*>/g;
+  export let record: Change
+  const maxNumChar = 50
+  const htmlRegex = /<[^>]*>/g
 </script>
 
 <tr>
