@@ -1,16 +1,16 @@
 <script lang="ts">
-  import { canEdit } from '$lib/stores';
-  import type { Change } from '@living-dictionaries/types';
-  import RecordRow from './RecordRow.svelte';
-  import Filter from '$lib/components/Filter.svelte';
-  import { downloadObjectsAsCSV } from '$lib/export/csv';
-  import { Button, ResponsiveTable } from 'svelte-pieces';
-  import SortRecords from './sortRecords.svelte';
-  import { getActionValue } from './getActionValue';
-  import { printDateTime } from '$lib/helpers/time';
-  import { page } from '$app/stores';
+  import type { Change } from '@living-dictionaries/types'
+  import { Button, ResponsiveTable } from 'svelte-pieces'
+  import RecordRow from './RecordRow.svelte'
+  import SortRecords from './sortRecords.svelte'
+  import { getActionValue } from './getActionValue'
+  import Filter from '$lib/components/Filter.svelte'
+  import { downloadObjectsAsCSV } from '$lib/export/csv'
+  import { printDateTime } from '$lib/helpers/time'
+  import { page } from '$app/stores'
 
-  export let data;
+  export let data
+  $: ({ dictionary, can_edit } = data)
 
   function exportHistoryAsCSV(records: Change[]) {
     const headers = {
@@ -21,7 +21,7 @@
       currentValue: $page.data.t('history.new_value'),
       field: $page.data.t('history.field'),
       date: $page.data.t('history.date'),
-    };
+    }
 
     const formattedUsers = records.map((record) => {
       return {
@@ -31,15 +31,15 @@
         previousValue: JSON.stringify(record.previousValue),
         currentValue: JSON.stringify(record.currentValue),
         field: $page.data.t(`entry_field.${record.field}`),
-        date: printDateTime(record.updatedAtMs)
-      };
-    });
+        date: printDateTime(record.updatedAtMs),
+      }
+    })
 
-    downloadObjectsAsCSV(headers, formattedUsers, `${data.dictionary.id}-history`);
+    downloadObjectsAsCSV(headers, formattedUsers, `${$dictionary.id}-history`)
   }
 </script>
 
-{#if canEdit}
+{#if can_edit}
   {#if data.history?.length > 0}
     <div class="sticky top-0 h-[calc(100vh-1.5rem)] z-2 relative flex flex-col">
       <Filter items={data.history} let:filteredItems={filteredRecords} placeholder={$page.data.t('history.history_search')}>

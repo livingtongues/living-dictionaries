@@ -5,6 +5,7 @@
   import sanitize from 'xss'
   import { page } from '$app/stores'
 
+  export let lastFieldUpdatedAt: number = undefined
   export let dictionary: IDictionary
   let aboutType: IAbout
 
