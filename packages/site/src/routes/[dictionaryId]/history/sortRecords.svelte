@@ -1,61 +1,53 @@
 <script lang="ts">
-  import { page } from '$app/stores';
-  import { getActionValue } from './getActionValue';
-  import type { Change } from '@living-dictionaries/types';
-  import { sortedColumn } from './sortedColumnStore';
+  import type { Change } from '@living-dictionaries/types'
+  import { getActionValue } from './getActionValue'
+  import { sortedColumn } from './sortedColumnStore'
+  import { HistoryFields } from './historyFields'
+  import { page } from '$app/stores'
 
-  export let history: Change[] = [];
-  enum HistoryFields {
-    entryName = 'entry',
-    updatedName = 'editor',
-    action = 'action',
-    previousValue = 'old_value',
-    currentValue = 'new_value',
-    field = 'field',
-    date = 'date',
-  }
+  export let history: Change[] = []
 
-  type SortFields = keyof typeof HistoryFields;
-  //@ts-ignore
+  type SortFields = keyof typeof HistoryFields
+  // @ts-ignore
   const historyFields: {
-    key: SortFields;
-    value: HistoryFields;
+    key: SortFields
+    value: HistoryFields
   }[] = Object.entries(HistoryFields).map(([key, value]) => {
-    return { key, value };
+    return { key, value }
   })
 
-  let sortKey: SortFields = 'date';
-  let sortDescending = true;
+  let sortKey: SortFields = 'date'
+  let sortDescending = true
 
-  $: sortedColumn.set(sortKey);
+  $: sortedColumn.set(sortKey)
 
   $: sortedRecords = history.sort((a, b) => {
-    let valueA: string | number;
-    let valueB: string | number;
+    let valueA: string | number
+    let valueB: string | number
 
     // prettier-ignore
     switch (sortKey) {
       case 'date':
-        valueA = String(a.updatedAtMs || 0);
-        valueB = String(b.updatedAtMs || 0);
-        break;
+        valueA = String(a.updatedAtMs || 0)
+        valueB = String(b.updatedAtMs || 0)
+        break
       case 'action':
-        valueA = getActionValue(a);
-        valueB = getActionValue(b);
-        break;
+        valueA = getActionValue(a)
+        valueB = getActionValue(b)
+        break
       default:
-        valueA = a[sortKey] ? JSON.stringify(a[sortKey]).toUpperCase() : 'zz';
-        valueB = b[sortKey] ? JSON.stringify(b[sortKey]).toUpperCase() : 'zz';
+        valueA = a[sortKey] ? JSON.stringify(a[sortKey]).toUpperCase() : 'zz'
+        valueB = b[sortKey] ? JSON.stringify(b[sortKey]).toUpperCase() : 'zz'
     }
-    return sortDescending ? valueB.localeCompare(valueA) : valueA.localeCompare(valueB);
-  });
+    return sortDescending ? valueB.localeCompare(valueA) : valueA.localeCompare(valueB)
+  })
 
   function setSortSettings(paraSortKey: SortFields) {
-    //Changes the key if the sort wasn't based on the button before, and if it was, change the direction
+    // Changes the key if the sort wasn't based on the button before, and if it was, change the direction
     if (sortKey === paraSortKey)
-      sortDescending = !sortDescending;
+      sortDescending = !sortDescending
     else
-      sortKey = paraSortKey;
+      sortKey = paraSortKey
   }
 </script>
 
