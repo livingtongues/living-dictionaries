@@ -36,27 +36,27 @@ if (import.meta.vitest) {
   describe(build_citation, () => {
     test('default', () => {
       const citation = build_citation({ t, dictionary })
-      expect(citation).toEqual('2024. Trabajar Living Dictionary. Living Tongues Institute for Endangered Languages. https://livingdictionaries.app/traba')
+      expect(citation).toEqual('2025. Trabajar Living Dictionary. Living Tongues Institute for Endangered Languages. https://livingdictionaries.app/traba')
     })
 
     test('custom citation', () => {
       const citation = build_citation({ t, dictionary, custom_citation: 'Hoctur, B.J.' })
-      expect(citation).toEqual('Hoctur, B.J. 2024. Trabajar Living Dictionary. Living Tongues Institute for Endangered Languages. https://livingdictionaries.app/traba')
+      expect(citation).toEqual('Hoctur, B.J. 2025. Trabajar Living Dictionary. Living Tongues Institute for Endangered Languages. https://livingdictionaries.app/traba')
     })
 
     test('two partners', () => {
       const citation = build_citation({ t, dictionary, partners: [{ name: 'The Language Team' }, { name: 'Hawaiian Linguistic Club' }] })
-      expect(citation).toEqual('2024. Trabajar Living Dictionary. Living Tongues Institute for Endangered Languages, The Language Team, Hawaiian Linguistic Club. https://livingdictionaries.app/traba')
+      expect(citation).toEqual('2025. Trabajar Living Dictionary. Living Tongues Institute for Endangered Languages, The Language Team, Hawaiian Linguistic Club. https://livingdictionaries.app/traba')
     })
 
     test('one partner, hide Living Tongues', () => {
       const citation = build_citation({ t, dictionary: { ...dictionary, hideLivingTonguesLogo: true }, partners: [{ name: 'The Language Team' }] })
-      expect(citation).toEqual('2024. Trabajar Living Dictionary. The Language Team. https://livingdictionaries.app/traba')
+      expect(citation).toEqual('2025. Trabajar Living Dictionary. The Language Team. https://livingdictionaries.app/traba')
     })
 
     test('hide Living Tongues', () => {
       const citation = build_citation({ t, dictionary: { ...dictionary, hideLivingTonguesLogo: true } })
-      expect(citation).toEqual('2024. Trabajar Living Dictionary. https://livingdictionaries.app/traba')
+      expect(citation).toEqual('2025. Trabajar Living Dictionary. https://livingdictionaries.app/traba')
     })
   })
 }
