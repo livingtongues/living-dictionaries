@@ -17,5 +17,5 @@ export { type IPrintFields, StandardPrintFields } from './print-entry.interface'
 export { type EntryFieldValue, type i18nEntryFieldKey } from './entry-fields.enum'
 export type { ContentUpdateRequestBody } from './supabase/content-update.interface'
 export type { UnsupportedFields } from './supabase/unsupported.interface'
-export type { Change } from './change.interface';
+export type { Change } from './change.interface'
 export type { Database, Tables, TablesInsert, TablesUpdate } from './supabase/combined.types'
