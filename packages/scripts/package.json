@@ -19,7 +19,7 @@
     "import-dictionary:prod:live": "tsx import/import.ts --id example-v4 -e prod --live",
     "update-locales": "tsx locales/update-locales.ts",
     "create-indexes": "tsx create-indexes/add-to-cloudflare.ts",
-    "migrate-dictionaries": "tsx migrate-to-supabase/dictionaries.ts",
+    "migrate-dictionaries": "tsx migrate-to-supabase/dictionaries.ts -e prod",
     "migrate-users": "tsx migrate-to-supabase/auth.ts",
     "get-emails": "tsx refactor/get-email.ts -e prod",
     "test": "vitest",

@@ -1,7 +1,7 @@
 # Migrate Entries and Speakers from Firestore to Supabase
 
 - migrate dictionaries
-  - download dictionaries on prod
+  - download dictionaries on prod (`pnpm -F scripts migrate-dictionaries`)
   - go through all fields, making sure each is accounted for
     - (looking for type: "tdv1" and other fields beside the known ones)
   - update front end to pull from new data

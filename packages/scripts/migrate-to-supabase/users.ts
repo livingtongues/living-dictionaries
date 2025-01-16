@@ -43,7 +43,7 @@ async function get_users(): Promise<UserRecord[]> {
 const FOLDER = 'firestore-data'
 const __dirname = dirname(fileURLToPath(import.meta.url))
 
-export async function write_users() {
+export async function write_users_to_disk() {
   const users = await get_users()
 
   console.log(`Done fetching ${users.length} users.`)
@@ -51,7 +51,7 @@ export async function write_users() {
   fs.writeFileSync(path.resolve(__dirname, FOLDER, 'firestore-users.json'), JSON.stringify(users, null, 2))
 }
 
-async function write_fb_sb_mappings() {
+export async function sync_users_across_and_write_fb_sb_mappings() {
   console.log('writing user mappings')
   const firebase_uid_to_supabase_user_id: Record<string, string> = {}
   const { data: sb_users_1 } = await admin_supabase.from('user_emails')
