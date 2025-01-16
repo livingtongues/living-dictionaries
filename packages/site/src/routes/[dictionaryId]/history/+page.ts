@@ -1,13 +1,19 @@
-import { getCollection } from 'sveltefirets'
-import type { Change } from '@living-dictionaries/types'
-
 export async function load({ params, parent }) {
-  await parent()
+  const { supabase } = await parent()
   try {
-    const history = await getCollection<Change>(`dictionaries/${params.dictionaryId}/history`)
-    return { history }
+    const { data: content_updates, error } = await supabase.from('content_updates')
+      .select('*')
+      .eq('dictionary_id', params.dictionaryId)
+      .order('timestamp', { ascending: false })
+      .limit(200)
+
+    if (error) {
+      console.error(error)
+      return { content_updates: null }
+    }
+    return { content_updates }
   } catch (err) {
     console.error(err)
-    return { history: null }
+    return { content_updates: null }
   }
 }

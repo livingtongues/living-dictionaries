@@ -1,9 +1,8 @@
 <script lang="ts">
-  import type { Change, EntryFieldValue, EntryView, IDictionary, TablesUpdate } from '@living-dictionaries/types'
+  import type { EntryFieldValue, EntryView, IDictionary, TablesUpdate } from '@living-dictionaries/types'
   import { Button } from 'svelte-pieces'
   import EntryField from './EntryField.svelte'
   import EntryMedia from './EntryMedia.svelte'
-  import EntryHistory from './EntryHistory.svelte'
   import Sense from './SupaSense.svelte'
   import { page } from '$app/stores'
   import EntryDialect from '$lib/components/entry/EntryDialect.svelte'
@@ -16,7 +15,6 @@
   export let can_edit = false
   export let videoAccess = false
   export let dbOperations: DbOperations
-  export let history: Change[] = undefined
 
   const text_fields = ['morphology', 'interlinearization'] satisfies EntryFieldValue[]
 
@@ -42,7 +40,11 @@
 
   <div style="grid-area: media;">
     <EntryMedia {dictionary} {entry} {can_edit} {videoAccess} {dbOperations} />
-    {#if history?.length > 0}<EntryHistory {history} {can_edit} class="mt-5 hidden md:block" />{/if}
+    {#if can_edit}
+      {#await import('./EntryHistory.svelte') then { default: EntryHistory }}
+        <EntryHistory {can_edit} entry_id={entry.id} class="mt-5 hidden md:block" />
+      {/await}
+    {/if}
   </div>
 
   <div class="flex flex-col grow" style="grid-area: content;">
@@ -172,7 +174,6 @@
   </div>
 </div>
 
-{#if history?.length > 0}<EntryHistory {history} {can_edit} class="mt-3 md:hidden" />{/if}
 <style>
   .media-on-right-grid {
       grid-template-columns: 3fr 1fr;

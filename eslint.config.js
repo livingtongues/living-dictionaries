@@ -158,6 +158,8 @@ export default antfu(
       'svelte/mustache-spacing': 'error',
       'svelte/html-closing-bracket-spacing': 'error',
       'svelte/no-reactive-reassign': ['warn', { props: false }],
+      'no-unused-vars': 'warn',
+      'unused-imports/no-unused-vars': 'warn',
 
       'svelte/html-quotes': 'off', // should it enforce double quotes?
       'svelte/no-at-html-tags': 'off',
@@ -166,6 +168,7 @@ export default antfu(
       'style/space-infix-ops': 'off',
       'no-undef-init': 'off',
       'no-self-assign': 'off',
+      'import/no-self-import': 'off',
     },
   },
 })

@@ -6,7 +6,6 @@
   export let entry_count: number
   export let on_close: () => void
   export let is_manager: boolean
-  $: ({ can_edit } = $page.data)
 </script>
 
 <div class="md:hidden">
@@ -38,7 +37,7 @@
     <a
       href={`/${dictionary.id}/synopsis`}
       class:active={$page.url.pathname.includes('synopsis')}>
-      <i class="fal fa-file-alt fa-fw" />
+      <span class="i-fa6-solid-file-lines" />
       <span class="font-medium mx-2">
         {$page.data.t('synopsis.name')}
       </span>
@@ -47,58 +46,56 @@
   <a
     href={`/${dictionary.id}/about`}
     class:active={$page.url.pathname.includes('about')}>
-    <i class="far fa-info-circle fa-fw" />
+    <span class="i-fa6-solid-circle-info mx-.25" />
     <span class="font-medium mx-2">
       {$page.data.t('header.about')}
     </span>
   </a>
   <a
-    href={`/${dictionary.id}/contributors`}
-    class:active={$page.url.pathname.includes('contributors')}>
-    <i class="far fa-users fa-fw" />
-    <span class="font-medium mx-2">
-      {$page.data.t('dictionary.contributors')}
-    </span>
-  </a>
-  {#if $can_edit}
-    <a
-      href={`/${dictionary.id}/history`}
-      class:active={$page.url.pathname.includes('history')}>
-      <i class="far fa-history fa-fw" />
-      <span class="font-medium mx-2">
-        {$page.data.t('history.history')}
-      </span>
-    </a>
-  {/if}
-  <a
     href={`/${dictionary.id}/grammar`}
     class:active={$page.url.pathname.includes('grammar')}>
-    <i class="far fa-edit fa-fw" />
+    <span class="i-tabler-text-grammar text-lg" />
     <span class="font-medium mx-2">
       {$page.data.t('dictionary.grammar')}
     </span>
   </a>
+  <a
+    href={`/${dictionary.id}/contributors`}
+    class:active={$page.url.pathname.includes('contributors')}>
+    <span class="i-fa6-solid-users text-lg" />
+    <span class="font-medium mx-2">
+      {$page.data.t('dictionary.contributors')}
+    </span>
+  </a>
   {#if is_manager}
     <a
-      href={`/${dictionary.id}/import`}
-      class:active={$page.url.pathname.includes('import')}>
-      <i class="far fa-file-import" />
+      href={`/${dictionary.id}/history`}
+      class:active={$page.url.pathname.includes('history')}>
+      <span class="i-mdi-history text-xl" />
       <span class="font-medium mx-2">
-        {$page.data.t('import_page.import')}
+        {$page.data.t('history.history')}
       </span>
     </a>
     <a
       href={`/${dictionary.id}/settings`}
       class:active={$page.url.pathname.includes('settings')}>
-      <i class="far fa-cog fa-fw" />
+      <span class="i-fa6-solid-gear mx-.5" />
       <span class="font-medium mx-2">
         {$page.data.t('misc.settings')}
       </span>
     </a>
     <a
+      href={`/${dictionary.id}/import`}
+      class:active={$page.url.pathname.includes('import')}>
+      <span class="i-fa6-solid-file-import mx-.5" />
+      <span class="font-medium mx-2">
+        {$page.data.t('import_page.import')}
+      </span>
+    </a>
+    <a
       href={`/${dictionary.id}/export`}
       class:active={$page.url.pathname.includes('export')}>
-      <i class="far fa-download" />
+      <span class="i-fa6-solid-file-export ml-1" />
       <span class="font-medium mx-2">
         {$page.data.t('misc.export')}
       </span>
