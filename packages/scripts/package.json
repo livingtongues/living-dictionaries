@@ -19,10 +19,12 @@
     "import-dictionary:prod:live": "tsx import/import.ts --id tseltal -e prod --live",
     "update-locales": "tsx locales/update-locales.ts",
     "create-indexes": "tsx create-indexes/add-to-cloudflare.ts",
+    "migrate-dictionaries": "tsx migrate-to-supabase/dictionaries.ts",
     "migrate-users": "tsx migrate-to-supabase/auth.ts",
     "get-emails": "tsx refactor/get-email.ts -e prod",
     "test": "vitest",
-    "test:import": "vitest --config ./vitest.config.import.ts"
+    "test:import": "vitest --config ./vitest.config.import.ts",
+    "merge-types": "tsx merge-types.ts"
   },
   "devDependencies": {
     "@aws-sdk/client-s3": "^3.679.0",
@@ -45,7 +47,7 @@
     "stream-chain": "^2.2.5",
     "stream-json": "^1.8.0",
     "tsx": "^4.19.0",
-    "typescript": "~5.1.6",
+    "typescript": "~5.7.2",
     "vitest": "^2.1.4"
   }
 }
