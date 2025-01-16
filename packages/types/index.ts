@@ -4,7 +4,7 @@ export type { IAbout, IDictionary, IGrammar, Citation, Partner } from './diction
 export type { Coordinates, IPoint, IRegion } from './coordinates.interface'
 export type { IGlossLanguages, IGlossLanguage } from './gloss-language.interface'
 export type { MultiString } from './gloss.interface'
-export type { IExampleSentence } from './exampe-sentence.interface'
+export type { IExampleSentence } from './example-sentence.interface'
 export type { DictionaryPhoto, PartnerPhoto } from './photo.interface'
 export type { SemanticDomain } from './semantic-domain.interface'
 export type { IUser, GoogleAuthUserMetaData } from './user.interface'

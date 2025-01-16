@@ -194,7 +194,8 @@
     "plural_form": "Dạng số phức",
     "scientific_names": "Tên khoa học",
     "definition_english": "",
-    "video": "Băng hình"
+    "video": "Băng hình",
+    "custom_tags": "Thẻ tùy chỉnh"
   },
   "error": {
     "run_into_error": "Lỗi đã xảy ra. Xin quý vị thông cảm.",

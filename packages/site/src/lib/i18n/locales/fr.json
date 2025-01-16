@@ -194,7 +194,8 @@
     "plural_form": "Forme plurielle",
     "scientific_names": "Nom scientifique",
     "definition_english": "",
-    "video": "Vidéo"
+    "video": "Vidéo",
+    "custom_tags": "Balises personnalisées"
   },
   "error": {
     "run_into_error": "Nous sommes désolés, il y a une erreur.",
@@ -326,7 +327,7 @@
     "availability": "La vue Imprimer est uniquement disponible pour les gestionnaires de dictionnaires et les contributeurs.",
     "max_entries": "Nombre maximum d'entrées",
     "columns": "Colonnes",
-    "headword_size": "Taille du mot",
+    "headword_size": "Taille du mot-clé",
     "font_size": "Taille de la police"
   },
   "import_page": {
