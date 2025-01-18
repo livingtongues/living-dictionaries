@@ -6,6 +6,7 @@ import type { Change } from './content-update.interface'
 import type { AudioWithSpeakerIds, EntryMainFields, SenseWithSentences } from './entry.interface'
 import type { ImportContentUpdate } from './content-import.interface'
 import type { Orthography } from './orthography.interface'
+import type { DictionaryMetadata } from './dictionary.types'
 
 export interface DatabaseAugments {
   public: {
@@ -45,19 +46,19 @@ export interface DatabaseAugments {
         Row: {
           coordinates: Coordinates | null
           featured_image: DictionaryPhoto | null
-          metadata: Record<string, any> | null
+          metadata: DictionaryMetadata | null
           orthographies: Orthography[] | null
         }
         Insert: {
           coordinates?: Coordinates | null
           featured_image?: DictionaryPhoto | null
-          metadata?: Record<string, any> | null
+          metadata?: DictionaryMetadata | null
           orthographies?: Orthography[] | null
         }
         Update: {
           coordinates?: Coordinates | null
           featured_image?: DictionaryPhoto | null
-          metadata?: Record<string, any> | null
+          metadata?: DictionaryMetadata | null
           orthographies?: Orthography[] | null
         }
       }
@@ -146,7 +147,7 @@ export interface DatabaseAugments {
         Row: {
           coordinates: Coordinates | null
           featured_image: DictionaryPhoto | null
-          metadata: Record<string, any> | null
+          metadata: DictionaryMetadata | null
           orthographies: Orthography[] | null
         }
       }
@@ -162,7 +163,7 @@ export interface DatabaseAugments {
       materialized_dictionaries_view: {
         Row: {
           coordinates: Coordinates | null
-          metadata: Record<string, any> | null
+          metadata: DictionaryMetadata | null
         }
       }
       materialized_entries_view: {

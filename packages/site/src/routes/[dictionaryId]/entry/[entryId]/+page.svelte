@@ -74,7 +74,6 @@
 <EntryDisplay
   {entry}
   dictionary={$dictionary}
-  videoAccess={$dictionary?.videoAccess || $admin > 0}
   can_edit={$can_edit}
   {dbOperations} />
 

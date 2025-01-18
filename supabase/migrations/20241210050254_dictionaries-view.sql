@@ -11,11 +11,12 @@ SELECT
   public,
   dictionaries.metadata,
   COUNT(entries.id) AS entry_count,
-  -- just for admin table, below not included in the materialized view
+  -- Below is just for the admin table, only the above is included in the materialized view
   orthographies,
   featured_image,
   author_connection,
   community_permission,
+  language_used_by_community,
   con_language_description,
   copyright,
   dictionaries.created_at,
@@ -23,7 +24,7 @@ SELECT
   dictionaries.updated_at,
   dictionaries.updated_by
 FROM dictionaries
-  LEFT JOIN entries ON entries.dictionary_id = dictionaries.id AND entries.deleted IS NULL -- take out the LEFT to eliminate dictionaries with 0 entries
+  LEFT JOIN entries ON entries.dictionary_id = dictionaries.id AND entries.deleted IS NULL -- can take out the LEFT to eliminate dictionaries with 0 entries
 WHERE dictionaries.deleted IS NULL
 GROUP BY dictionaries.id;
 

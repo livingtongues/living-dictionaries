@@ -29,7 +29,7 @@ export const POST: RequestHandler = async ({ request }) => {
         throw new Error('No user id found in token')
 
       await checkForPermission(decoded_token.uid, dictionary_id)
-      user_id = decoded_token.uid
+
       const { data } = await admin_supabase.from('user_emails')
         .select('id')
         .eq('email', decoded_token.email!)

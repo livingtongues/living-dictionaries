@@ -1,15 +1,12 @@
 <script lang="ts">
-  import type { IDictionary } from '@living-dictionaries/types'
   import { getContext } from 'svelte'
+  import type { Tables } from '@living-dictionaries/types'
   import GeoJSONSource from '$lib/components/maps/mapbox/sources/GeoJSONSource.svelte'
   import Layer from '$lib/components/maps/mapbox/map/Layer.svelte'
   import { dictionaryGeoJsonCollection } from '$lib/components/maps/utils/dictionaryGeoJsonCollection'
-  import {
-    type MapKeyContext,
-    mapKey,
-  } from '$lib/components/maps/mapbox/context'
+  import { type MapKeyContext, mapKey } from '$lib/components/maps/mapbox/context'
 
-  export let dictionaries: IDictionary[] = []
+  export let dictionaries: Tables<'dictionaries_view'>[] = []
   export let selectedDictionaryId: string = undefined
   export let type: 'public' | 'private' | 'personal' = 'public'
 

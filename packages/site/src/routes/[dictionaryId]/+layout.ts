@@ -1,5 +1,5 @@
 import { error, redirect } from '@sveltejs/kit'
-import type { Citation, IAbout, IDictionary, Partner } from '@living-dictionaries/types'
+import type { Citation, IAbout, Partner } from '@living-dictionaries/types'
 import { awaitableDocStore, docExists, firebaseConfig, getCollection, getDocument } from 'sveltefirets'
 import { type Readable, derived, get } from 'svelte/store'
 import type { LayoutLoad } from './$types'
@@ -8,7 +8,6 @@ import { browser } from '$app/environment'
 import { dbOperations } from '$lib/dbOperations'
 import { create_index, load_cached_index, search_entries, update_index_entry } from '$lib/search'
 import { cached_data_store } from '$lib/supabase/cached-data'
-import { getSupabase } from '$lib/supabase'
 import { url_from_storage_path } from '$lib/helpers/media'
 
 export const load: LayoutLoad = async ({ params: { dictionaryId }, parent }) => {
@@ -26,7 +25,7 @@ export const load: LayoutLoad = async ({ params: { dictionaryId }, parent }) => 
     if (browser)
       load_cached_index(dictionary_id)
 
-    const { user } = await parent()
+    const { supabase, user } = await parent()
 
     const is_manager: Readable<boolean> = derived(
       [user, dictionary],
@@ -60,7 +59,6 @@ export const load: LayoutLoad = async ({ params: { dictionaryId }, parent }) => 
 
     const default_entries_per_page = 20
 
-    const supabase = getSupabase()
     const entries = cached_data_store({ materialized_view: 'materialized_entries_view', table: 'entries_view', dictionary_id, supabase, log: true })
     const speakers = cached_data_store({ table: 'speakers_view', dictionary_id, supabase })
     const tags = cached_data_store({ table: 'tags', dictionary_id, supabase })
@@ -98,7 +96,6 @@ export const load: LayoutLoad = async ({ params: { dictionaryId }, parent }) => 
     }
 
     return {
-      supabase,
       dictionary,
       dbOperations,
       url_from_storage_path: (path: string) => url_from_storage_path(path, firebaseConfig.storageBucket),

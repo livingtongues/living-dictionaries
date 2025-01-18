@@ -14,7 +14,6 @@
   export let entry: EntryView
   export let dictionary: IDictionary
   export let can_edit = false
-  export let videoAccess = false
   export let dbOperations: DbOperations
   export let on_click: (e: MouseEvent & { currentTarget: EventTarget & HTMLAnchorElement }) => void = undefined
 
@@ -136,7 +135,7 @@
       lexeme={entry.main.lexeme.default}
       video={first_video}
       {can_edit} />
-  {:else if videoAccess && can_edit}
+  {:else if can_edit}
     <ShowHide let:show let:toggle>
       <button
         type="button"

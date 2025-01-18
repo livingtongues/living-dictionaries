@@ -6,6 +6,7 @@ import type { Change } from './content-update.interface'
 import type { AudioWithSpeakerIds, EntryMainFields, SenseWithSentences } from './entry.interface'
 import type { ImportContentUpdate } from './content-import.interface'
 import type { Orthography } from './orthography.interface'
+import type { DictionaryMetadata } from './dictionary.types'
 
 export interface Database {
   public: {
@@ -630,7 +631,7 @@ export interface Database {
           iso_639_3: string | null
           language_used_by_community: boolean | null
           location: string | null
-          metadata: Record<string, any> | null
+          metadata: DictionaryMetadata | null
           name: string
           orthographies: Orthography[] | null
           print_access: boolean | null
@@ -656,7 +657,7 @@ export interface Database {
           iso_639_3?: string | null
           language_used_by_community?: boolean | null
           location?: string | null
-          metadata?: Record<string, any> | null
+          metadata?: DictionaryMetadata | null
           name: string
           orthographies?: Orthography[] | null
           print_access?: boolean | null
@@ -682,7 +683,7 @@ export interface Database {
           iso_639_3?: string | null
           language_used_by_community?: boolean | null
           location?: string | null
-          metadata?: Record<string, any> | null
+          metadata?: DictionaryMetadata | null
           name?: string
           orthographies?: Orthography[] | null
           print_access?: boolean | null
@@ -2350,8 +2351,9 @@ export interface Database {
           glottocode: string | null
           id: string | null
           iso_639_3: string | null
+          language_used_by_community: boolean | null
           location: string | null
-          metadata: Record<string, any> | null
+          metadata: DictionaryMetadata | null
           name: string | null
           orthographies: Orthography[] | null
           public: boolean | null
@@ -2431,7 +2433,7 @@ export interface Database {
           id: string | null
           iso_639_3: string | null
           location: string | null
-          metadata: Record<string, any> | null
+          metadata: DictionaryMetadata | null
           name: string | null
           public: boolean | null
         }

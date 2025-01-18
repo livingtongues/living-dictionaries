@@ -13,7 +13,6 @@
   export let entry: EntryView
   export let dictionary: IDictionary
   export let can_edit = false
-  export let videoAccess = false
   export let dbOperations: DbOperations
 
   const text_fields = ['morphology', 'interlinearization'] satisfies EntryFieldValue[]
@@ -39,7 +38,7 @@
   </div>
 
   <div style="grid-area: media;">
-    <EntryMedia {dictionary} {entry} {can_edit} {videoAccess} {dbOperations} />
+    <EntryMedia {dictionary} {entry} {can_edit} {dbOperations} />
   </div>
 
   <div class="flex flex-col grow" style="grid-area: content;">

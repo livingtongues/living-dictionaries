@@ -12,7 +12,7 @@
 
   export let entries: EntryView[]
   export let page_data: EntriesPageData
-  $: ({ dictionary, admin, can_edit, preferred_table_columns, dbOperations, search_params, load_citation, load_partners } = page_data)
+  $: ({ dictionary, can_edit, preferred_table_columns, dbOperations, search_params, load_citation, load_partners } = page_data)
 
   function handle_entry_click(e: MouseEvent & { currentTarget: EventTarget & HTMLAnchorElement }, entry: EntryView) {
     // bail if opening a new tab
@@ -32,7 +32,6 @@
       <ListEntry
         dictionary={$dictionary}
         {entry}
-        videoAccess={$dictionary.videoAccess || $admin > 0}
         can_edit={$can_edit}
         on_click={(e) => { handle_entry_click(e, entry) }}
         {dbOperations} />

@@ -1816,6 +1816,7 @@ export interface Database {
           glottocode: string | null
           id: string | null
           iso_639_3: string | null
+          language_used_by_community: boolean | null
           location: string | null
           metadata: Json | null
           name: string | null

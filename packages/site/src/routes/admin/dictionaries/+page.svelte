@@ -1,58 +1,58 @@
 <script lang="ts">
-  import type { IDictionary, IHelper, IInvite } from '@living-dictionaries/types';
-  import { updateOnline, collectionStore, getCollection } from 'sveltefirets';
-  import { arrayRemove, arrayUnion, deleteField, GeoPoint } from 'firebase/firestore/lite';
-  import Filter from '$lib/components/Filter.svelte';
-  import { Button, ResponsiveTable, IntersectionObserverShared } from 'svelte-pieces';
-  import DictionaryRow from './DictionaryRow.svelte';
-  import SortDictionaries from './SortDictionaries.svelte';
-  import { where } from 'firebase/firestore';
-  import type { DictionaryWithHelperStores } from './dictionaryWithHelpers';
-  import { exportAdminDictionariesAsCSV } from './export';
+  import type { IDictionary, IHelper, IInvite } from '@living-dictionaries/types'
+  import { collectionStore, getCollection, updateOnline } from 'sveltefirets'
+  import { GeoPoint, arrayRemove, arrayUnion, deleteField } from 'firebase/firestore/lite'
+  import { Button, IntersectionObserverShared, ResponsiveTable } from 'svelte-pieces'
+  import { where } from 'firebase/firestore'
+  import DictionaryRow from './DictionaryRow.svelte'
+  import SortDictionaries from './SortDictionaries.svelte'
+  import type { DictionaryWithHelperStores } from './dictionaryWithHelpers'
+  import { exportAdminDictionariesAsCSV } from './export'
+  import Filter from '$lib/components/Filter.svelte'
 
   const dictionaries = collectionStore<IDictionary>('dictionaries', [], {
     startWith: [],
     log: true,
-  });
+  })
 
-  const noopConstraints = [];
-  const inviteQueryConstraints = [where('status', 'in', ['queued', 'sent'])];
+  const noopConstraints = []
+  const inviteQueryConstraints = [where('status', 'in', ['queued', 'sent'])]
 
-  let dictionariesAndHelpers: DictionaryWithHelperStores[] = [];
+  let dictionariesAndHelpers: DictionaryWithHelperStores[] = []
   $: dictionariesAndHelpers = $dictionaries.map((dictionary) => {
     return {
       ...dictionary,
       managers: collectionStore<IHelper>(
         `dictionaries/${dictionary.id}/managers`,
         noopConstraints,
-        { log: true }
+        { log: true },
       ),
       contributors: collectionStore<IHelper>(
         `dictionaries/${dictionary.id}/contributors`,
         noopConstraints,
-        { log: true }
+        { log: true },
       ),
       writeInCollaborators: collectionStore<IHelper>(
         `dictionaries/${dictionary.id}/writeInCollaborators`,
         noopConstraints,
-        { log: true }
+        { log: true },
       ),
       invites: collectionStore<IInvite>(
         `dictionaries/${dictionary.id}/invites`,
         inviteQueryConstraints,
-        { log: true }
+        { log: true },
       ),
       getManagers: getCollection<IHelper>(`dictionaries/${dictionary.id}/managers`),
       getContributors: getCollection<IHelper>(`dictionaries/${dictionary.id}/managers`),
       getWriteInCollaborators: getCollection<IHelper>(
-        `dictionaries/${dictionary.id}/writeInCollaborators`
+        `dictionaries/${dictionary.id}/writeInCollaborators`,
       ),
       getInvites: getCollection<IInvite>(
         `dictionaries/${dictionary.id}/invites`,
-        inviteQueryConstraints
+        inviteQueryConstraints,
       ),
-    };
-  });
+    }
+  })
 </script>
 
 <div class="mb-2 text-xs text-gray-600">
@@ -88,55 +88,46 @@
                     try {
                       updateOnline(`dictionaries/${dictionary.id}`, {
                         public: !dictionary.public,
-                      });
+                      })
                     } catch (err) {
-                      alert(err);
-                    }
-                  }}
-                  on:togglevideoaccess={() => {
-                    try {
-                      updateOnline(`dictionaries/${dictionary.id}`, {
-                        videoAccess: !dictionary.videoAccess,
-                      });
-                    } catch (err) {
-                      alert(err);
+                      alert(err)
                     }
                   }}
                   on:addalternatename={(event) => {
                     try {
                       updateOnline(`dictionaries/${dictionary.id}`, {
                         alternateNames: arrayUnion(event.detail),
-                      });
+                      })
                     } catch (err) {
-                      alert(err);
+                      alert(err)
                     }
                   }}
                   on:removealternatename={(event) => {
                     try {
                       updateOnline(`dictionaries/${dictionary.id}`, {
                         alternateNames: arrayRemove(event.detail),
-                      });
+                      })
                     } catch (err) {
-                      alert(err);
+                      alert(err)
                     }
                   }}
                   on:updatecoordinates={({ detail: { lat, lng } }) => {
                     try {
-                      const location = new GeoPoint(lat, lng);
+                      const location = new GeoPoint(lat, lng)
                       updateOnline(`dictionaries/${dictionary.id}`, {
                         coordinates: location,
-                      });
+                      })
                     } catch (err) {
-                      alert(err);
+                      alert(err)
                     }
                   }}
                   on:removecoordinates={() => {
                     try {
                       updateOnline(`dictionaries/${dictionary.id}`, {
                         coordinates: deleteField(),
-                      });
+                      })
                     } catch (err) {
-                      alert(err);
+                      alert(err)
                     }
                   }} />
               {:else}

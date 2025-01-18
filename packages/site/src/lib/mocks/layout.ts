@@ -1,5 +1,5 @@
 import { readable } from 'svelte/store'
-import type { IDictionary } from '@living-dictionaries/types'
+import type { DictionaryView } from '@living-dictionaries/types'
 import type { awaitableDocStore } from 'sveltefirets'
 import type { LayoutData } from '../../routes/$types'
 import type { LayoutData as DictionaryLayoutData } from '../../routes/[dictionaryId]/$types'
@@ -20,8 +20,8 @@ export const mockAppLayoutData: LayoutData = {
 export const justMockDictionaryLayoutData = {
   dictionary: readable({
     name: 'test',
-    glossLanguages: [],
-  }) as Awaited<ReturnType<typeof awaitableDocStore<IDictionary>>>,
+    gloss_languages: [],
+  }) as Awaited<ReturnType<typeof awaitableDocStore<DictionaryView>>>,
   speakers: null,
   is_manager: readable(false),
   is_contributor: readable(false),

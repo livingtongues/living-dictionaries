@@ -1,10 +1,9 @@
-import type { GeoPoint } from 'firebase/firestore'
 import type { IFirestoreMetaData } from 'sveltefirets'
 import type { LngLatFull } from './coordinates.interface'
 import type { DictionaryPhoto, IPoint, IRegion, PartnerPhoto } from '.'
 
 export interface IDictionary extends IFirestoreMetaData {
-  // allContribute?: boolean; // deprecated
+  allContribute?: boolean // deprecated
   alternateNames?: string[]
   glossLanguages: string[]
   name: string
@@ -12,7 +11,10 @@ export interface IDictionary extends IFirestoreMetaData {
   iso6393?: string
   glottocode?: string
 
-  coordinates?: GeoPoint | LngLatFull // primary coordinate when displayed w/ many other dictionaries
+  coordinates?: {
+    _longitude: number
+    _latitude: number
+  } | LngLatFull // primary coordinate when displayed w/ many other dictionaries
   points?: IPoint[] // other coordinate points where language spoken
   regions?: IRegion[] // regions where language spoken
 
@@ -22,7 +24,7 @@ export interface IDictionary extends IFirestoreMetaData {
   copyright?: string // Allow custom copyright in case "Copyright _______ community" isn't appropriate for dictionary (eg. Tehuelche)
   alternateOrthographies?: string[] // Alternate Orthography titles (first item corresponds to entry.lo, then entry.lo2, entry.lo3) - used to be called Local Orthography but that is a misnomer it's turning out
 
-  videoAccess?: boolean
+  videoAccess?: boolean // deprecated
 
   languageUsedByCommunity?: boolean
   communityPermission?: 'yes' | 'no' | 'unknown'

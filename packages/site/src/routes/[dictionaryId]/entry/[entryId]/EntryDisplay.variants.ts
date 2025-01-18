@@ -56,7 +56,6 @@
 //     name: '2 senses',
 //     props: {
 //       can_edit: true,
-//       videoAccess: true,
 //       entry: {
 //         id: 'entryId123',
 //         lexeme: 'shoot',

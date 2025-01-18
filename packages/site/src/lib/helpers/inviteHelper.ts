@@ -1,24 +1,23 @@
-import type { IDictionary, IInvite } from '@living-dictionaries/types';
-import { get } from 'svelte/store';
-import { page } from '$app/stores';
-import { authState } from 'sveltefirets';
-import type { InviteRequestBody } from '$api/email/invite/+server';
-import { post_request } from './get-post-requests';
+import type { DictionaryView, IInvite } from '@living-dictionaries/types'
+import { get } from 'svelte/store'
+import { authState } from 'sveltefirets'
+import { post_request } from './get-post-requests'
+import { page } from '$app/stores'
+import type { InviteRequestBody } from '$api/email/invite/+server'
 
 export async function inviteHelper(
   role: 'manager' | 'contributor',
-  dictionary: IDictionary,
+  dictionary: DictionaryView,
 ) {
   const { data: { t, user } } = get(page)
   const $user = get(user)
 
-  const targetEmail = prompt(`${t('contact.email')}?`);
-  if (!targetEmail) return;
+  const targetEmail = prompt(`${t('contact.email')}?`)
+  if (!targetEmail) return
 
-  const isEmail = /^\S+@\S+\.\S+$/.test(targetEmail);
+  const isEmail = /^\S[^\s@]*@\S[^\s.]*\.\S+$/.test(targetEmail)
   if (!isEmail)
-    return alert(t('misc.invalid'));
-
+    return alert(t('misc.invalid'))
 
   try {
     const invite: IInvite = {
@@ -28,22 +27,21 @@ export async function inviteHelper(
       targetEmail,
       role,
       status: 'queued',
-    };
+    }
 
-    const auth_state_user = get(authState);
-    const auth_token = await auth_state_user.getIdToken();
+    const auth_state_user = get(authState)
+    const auth_token = await auth_state_user.getIdToken()
 
     const { error } = await post_request<InviteRequestBody, null>('/api/email/invite', {
       auth_token,
       dictionaryId: dictionary.id,
-      invite
-    });
+      invite,
+    })
 
     if (error)
-      throw new Error(error.message);
-
+      throw new Error(error.message)
   } catch (err) {
-    alert(`${t('misc.error')}: ${err}`);
-    console.error(err);
+    alert(`${t('misc.error')}: ${err}`)
+    console.error(err)
   }
 }

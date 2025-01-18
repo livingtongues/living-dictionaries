@@ -59,8 +59,6 @@
 
   <WhereSpoken
     dictionary={$dictionary}
-    on_update_coordinates={async coordinates => await updateDictionary({ coordinates })}
-    on_remove_coordinates={async () => await updateDictionary({ coordinates: null })}
     on_update_points={async points => await updateDictionary({ points })}
     on_update_regions={async regions => await updateDictionary({ regions })} />
   <div class="mb-5" />
