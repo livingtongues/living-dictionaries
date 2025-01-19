@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { EntryView, IDictionary, SenseWithSentences } from '@living-dictionaries/types'
+  import type { EntryView, SenseWithSentences, Tables } from '@living-dictionaries/types'
   import { ShowHide } from 'svelte-pieces'
   import sanitize from 'xss'
   import Audio from '../components/Audio.svelte'
@@ -12,7 +12,7 @@
   import AddImage from '$lib/components/image/AddImage.svelte'
 
   export let entry: EntryView
-  export let dictionary: IDictionary
+  export let dictionary: Tables<'dictionaries'>
   export let can_edit = false
   export let dbOperations: DbOperations
   export let on_click: (e: MouseEvent & { currentTarget: EventTarget & HTMLAnchorElement }) => void = undefined
@@ -21,7 +21,7 @@
 
   $: glosses = order_glosses({
     glosses: entry.senses?.[0]?.glosses,
-    dictionary_gloss_languages: dictionary.glossLanguages,
+    dictionary_gloss_languages: dictionary.gloss_languages,
     t: $page.data.t,
     label: dictionary.id !== 'jewish-neo-aramaic',
   }).join(', ')

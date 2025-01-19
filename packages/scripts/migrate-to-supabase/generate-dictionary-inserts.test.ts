@@ -1,4 +1,4 @@
-import type { IDictionary } from '@living-dictionaries/types'
+import type { IDictionary } from '@living-dictionaries/types/dictionary.interface'
 import firebase_dictionaries from './firestore-data/firestore-dictionaries-prod.json'
 import { generate_dictionary_inserts } from './generate-dictionary-inserts'
 

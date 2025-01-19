@@ -20,5 +20,6 @@ export { type EntryFieldValue, type i18nEntryFieldKey } from './entry-fields.enu
 export type { ContentUpdateRequestBody } from './supabase/content-update.interface'
 export type { UnsupportedFields } from './supabase/unsupported.interface'
 export type { Database, Tables, TablesInsert, TablesUpdate } from './supabase/combined.types'
+export type { Orthography } from './supabase/orthography.interface'
 
 export type DictionaryView = Tables<'dictionaries_view'>

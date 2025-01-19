@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { IDictionary, SenseWithSentences, TablesUpdate } from '@living-dictionaries/types'
+  import type { SenseWithSentences, Tables, TablesUpdate } from '@living-dictionaries/types'
   import EntryField from './EntryField.svelte'
   import EntrySentence from './EntrySentence.svelte'
   import { page } from '$app/stores'
@@ -9,7 +9,7 @@
   import { DICTIONARIES_WITH_VARIANTS } from '$lib/constants'
 
   export let sense: SenseWithSentences
-  export let glossLanguages: IDictionary['glossLanguages']
+  export let glossLanguages: Tables<'dictionaries'>['gloss_languages']
   export let can_edit = false
 
   $: ({ sentences, dictionary, dbOperations } = $page.data)
@@ -116,7 +116,7 @@
     update_sense({ plural_form: sense.plural_form })
   }} />
 
-{#if DICTIONARIES_WITH_VARIANTS.includes($dictionary.id)}
+{#if DICTIONARIES_WITH_VARIANTS.includes(dictionary.id)}
   <EntryField
     value={sense.variant?.default}
     field="variant"

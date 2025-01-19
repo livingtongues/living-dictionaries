@@ -1,3 +1,7 @@
+CREATE POLICY "Enable read access for dictionaries"
+  ON dictionaries
+  FOR SELECT USING(true);
+
 CREATE VIEW dictionaries_view AS
 SELECT
   dictionaries.id,
@@ -9,9 +13,10 @@ SELECT
   iso_639_3,
   glottocode,
   public,
+  print_access,
   dictionaries.metadata,
   COUNT(entries.id) AS entry_count,
-  -- Below is just for the admin table, only the above is included in the materialized view
+  -- Below is just for the admin table, only the above is included in the materialized view which is used on the homepage and the dictionaries listing page
   orthographies,
   featured_image,
   author_connection,
@@ -26,7 +31,8 @@ SELECT
 FROM dictionaries
   LEFT JOIN entries ON entries.dictionary_id = dictionaries.id AND entries.deleted IS NULL -- can take out the LEFT to eliminate dictionaries with 0 entries
 WHERE dictionaries.deleted IS NULL
-GROUP BY dictionaries.id;
+GROUP BY dictionaries.id
+ORDER BY name;
 
 CREATE MATERIALIZED VIEW materialized_dictionaries_view AS
 SELECT 

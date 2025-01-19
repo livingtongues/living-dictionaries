@@ -1,6 +1,6 @@
 <script lang="ts">
   import { Button, type QueryParamStore, createPersistedStore } from 'svelte-pieces'
-  import type { Citation, EntryView, IDictionary, IPrintFields, Partner } from '@living-dictionaries/types'
+  import type { Citation, EntryView, IPrintFields, Partner, Tables } from '@living-dictionaries/types'
   import { onMount } from 'svelte'
   import { build_citation } from '../contributors/build-citation'
   import PrintEntry from './print/PrintEntry.svelte'
@@ -12,7 +12,7 @@
 
   export let search_params: QueryParamStore<QueryParams>
   export let entries: EntryView[] = []
-  export let dictionary: IDictionary
+  export let dictionary: Tables<'dictionaries'>
   export let can_edit = false
   export let load_citation: () => Promise<Citation>
   export let load_partners: () => Promise<Partner[]>
@@ -36,7 +36,7 @@
   const showQrCode = createPersistedStore<boolean>('showQrCode', false)
 </script>
 
-{#if dictionary.printAccess || can_edit}
+{#if dictionary.print_access || can_edit}
   <div class="print:hidden bg-white md:sticky z-1 md:top-22 py-3">
     <div class="flex flex-wrap mb-1">
       <Button class="mb-1 mr-2" form="filled" type="button" onclick={() => window.print()}>

@@ -8,25 +8,25 @@
 
   export let data
   const { dictionary } = data
-  $: activeGlossingBcps = Array.isArray($dictionary.glossLanguages)
-    ? $dictionary.glossLanguages.map(bcp =>
+  $: activeGlossingBcps = Array.isArray(dictionary.gloss_languages)
+    ? dictionary.gloss_languages.map(bcp =>
       $page.data.t({ dynamicKey: `gl.${bcp}`, fallback: glossingLanguages[bcp].vernacularName }),
     )
     : []
 
-  const { name, iso6393, glottocode, alternateNames, location, coordinates, featuredImage } = $dictionary
+  const { name, iso_639_3, glottocode, alternate_names, location, coordinates, featured_image } = dictionary
 </script>
 
 <div style="max-width: 700px">
   <h3 class="text-xl font-semibold mb-4">{$page.data.t('synopsis.name')}</h3>
-  <DisplayString display="ISO 639-3" value={iso6393} />
+  <DisplayString display="ISO 639-3" value={iso_639_3} />
   <DisplayString display="Glottocode" value={glottocode} />
   <DisplayString display={$page.data.t('synopsis.translations')} value={activeGlossingBcps} />
-  <DisplayString display="{$page.data.t('create.alternate_names')}" value={alternateNames} />
+  <DisplayString display="{$page.data.t('create.alternate_names')}" value={alternate_names} />
   <DisplayString display={$page.data.t('dictionary.location')} value={location} />
-  <VisualMap coordinates={coordinates} />
+  <VisualMap {coordinates} />
   <div class="mb-5" />
-  {#if featuredImage}
+  {#if featured_image}
     <div class="text-sm font-medium text-gray-700 mb-2">
       {$page.data.t('settings.featured_image')}
     </div>
@@ -34,10 +34,10 @@
       can_edit={false}
       height={300}
       title="{name} Featured Image"
-      gcs={featuredImage.specifiable_image_url}
+      gcs={featured_image.specifiable_image_url}
       on_delete_image={null} />
   {/if}
-  {#if !iso6393 && !glottocode && activeGlossingBcps?.length === 0 && !alternateNames && !location && !coordinates && !featuredImage}
+  {#if !iso_639_3 && !glottocode && activeGlossingBcps?.length === 0 && !alternate_names && !location && !coordinates && !featured_image}
     <i> {$page.data.t('home.no_results')} </i>
   {/if}
   <div class="mb-5" />

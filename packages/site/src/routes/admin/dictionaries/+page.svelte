@@ -1,58 +1,59 @@
 <script lang="ts">
-  import type { IDictionary, IHelper, IInvite } from '@living-dictionaries/types'
-  import { collectionStore, getCollection, updateOnline } from 'sveltefirets'
-  import { GeoPoint, arrayRemove, arrayUnion, deleteField } from 'firebase/firestore/lite'
+  import type { IHelper, IInvite, TablesUpdate } from '@living-dictionaries/types'
+  import { collectionStore, getCollection } from 'sveltefirets'
   import { Button, IntersectionObserverShared, ResponsiveTable } from 'svelte-pieces'
   import { where } from 'firebase/firestore'
+  import { onMount } from 'svelte'
   import DictionaryRow from './DictionaryRow.svelte'
   import SortDictionaries from './SortDictionaries.svelte'
   import type { DictionaryWithHelperStores } from './dictionaryWithHelpers'
   import { exportAdminDictionariesAsCSV } from './export'
+  import type { PageData } from './$types'
   import Filter from '$lib/components/Filter.svelte'
+  import { api_update_dictionary } from '$api/db/update-dictionary/_call'
 
-  const dictionaries = collectionStore<IDictionary>('dictionaries', [], {
-    startWith: [],
-    log: true,
-  })
+  export let data: PageData
 
   const noopConstraints = []
   const inviteQueryConstraints = [where('status', 'in', ['queued', 'sent'])]
 
   let dictionariesAndHelpers: DictionaryWithHelperStores[] = []
-  $: dictionariesAndHelpers = $dictionaries.map((dictionary) => {
-    return {
-      ...dictionary,
-      managers: collectionStore<IHelper>(
-        `dictionaries/${dictionary.id}/managers`,
-        noopConstraints,
-        { log: true },
-      ),
-      contributors: collectionStore<IHelper>(
-        `dictionaries/${dictionary.id}/contributors`,
-        noopConstraints,
-        { log: true },
-      ),
-      writeInCollaborators: collectionStore<IHelper>(
-        `dictionaries/${dictionary.id}/writeInCollaborators`,
-        noopConstraints,
-        { log: true },
-      ),
-      invites: collectionStore<IInvite>(
-        `dictionaries/${dictionary.id}/invites`,
-        inviteQueryConstraints,
-        { log: true },
-      ),
-      getManagers: getCollection<IHelper>(`dictionaries/${dictionary.id}/managers`),
-      getContributors: getCollection<IHelper>(`dictionaries/${dictionary.id}/managers`),
-      getWriteInCollaborators: getCollection<IHelper>(
-        `dictionaries/${dictionary.id}/writeInCollaborators`,
-      ),
-      getInvites: getCollection<IInvite>(
-        `dictionaries/${dictionary.id}/invites`,
-        inviteQueryConstraints,
-      ),
-    }
+
+  onMount(async () => {
+    dictionariesAndHelpers = await get_dictionaries_with_helpers()
   })
+
+  async function get_dictionaries_with_helpers() {
+    const { data: dictionaries, error } = await data.supabase.from('dictionaries_view')
+      .select()
+    if (error) {
+      console.error(error)
+      alert(error.message)
+      return []
+    }
+    return dictionaries.map((dictionary) => {
+      return {
+        ...dictionary,
+        managers: collectionStore<IHelper>(`dictionaries/${dictionary.id}/managers`, noopConstraints),
+        contributors: collectionStore<IHelper>(`dictionaries/${dictionary.id}/contributors`, noopConstraints),
+        writeInCollaborators: collectionStore<IHelper>(`dictionaries/${dictionary.id}/writeInCollaborators`, noopConstraints),
+        invites: collectionStore<IInvite>(`dictionaries/${dictionary.id}/invites`, inviteQueryConstraints),
+        getManagers: getCollection<IHelper>(`dictionaries/${dictionary.id}/managers`),
+        getContributors: getCollection<IHelper>(`dictionaries/${dictionary.id}/managers`),
+        getWriteInCollaborators: getCollection<IHelper>(`dictionaries/${dictionary.id}/writeInCollaborators`),
+        getInvites: getCollection<IInvite>(`dictionaries/${dictionary.id}/invites`, inviteQueryConstraints),
+      }
+    })
+  }
+
+  async function update_dictionary(change: TablesUpdate<'dictionaries'> & { id: string }) {
+    try {
+      await api_update_dictionary(change)
+      dictionariesAndHelpers = await get_dictionaries_with_helpers()
+    } catch (err) {
+      alert(`Error: ${err}`)
+    }
+  }
 </script>
 
 <div class="mb-2 text-xs text-gray-600">
@@ -85,50 +86,42 @@
                   {index}
                   {dictionary}
                   on:toggleprivacy={() => {
-                    try {
-                      updateOnline(`dictionaries/${dictionary.id}`, {
-                        public: !dictionary.public,
-                      })
-                    } catch (err) {
-                      alert(err)
-                    }
+                    update_dictionary({
+                      id: dictionary.id,
+                      public: !dictionary.public,
+                    })
                   }}
                   on:addalternatename={(event) => {
-                    try {
-                      updateOnline(`dictionaries/${dictionary.id}`, {
-                        alternateNames: arrayUnion(event.detail),
-                      })
-                    } catch (err) {
-                      alert(err)
-                    }
+                    update_dictionary({
+                      id: dictionary.id,
+                      alternate_names: [...(dictionary.alternate_names || []), event.detail],
+                    })
                   }}
                   on:removealternatename={(event) => {
-                    try {
-                      updateOnline(`dictionaries/${dictionary.id}`, {
-                        alternateNames: arrayRemove(event.detail),
-                      })
-                    } catch (err) {
-                      alert(err)
-                    }
+                    update_dictionary({
+                      id: dictionary.id,
+                      alternate_names: dictionary.alternate_names.filter(name => name !== event.detail),
+                    })
                   }}
                   on:updatecoordinates={({ detail: { lat, lng } }) => {
-                    try {
-                      const location = new GeoPoint(lat, lng)
-                      updateOnline(`dictionaries/${dictionary.id}`, {
-                        coordinates: location,
-                      })
-                    } catch (err) {
-                      alert(err)
-                    }
+                    const [, ...rest] = dictionary.coordinates?.points || []
+                    update_dictionary({
+                      id: dictionary.id,
+                      coordinates: {
+                        points: [{ coordinates: { latitude: lat, longitude: lng } }, ...rest],
+                        regions: dictionary.coordinates?.regions,
+                      },
+                    })
                   }}
                   on:removecoordinates={() => {
-                    try {
-                      updateOnline(`dictionaries/${dictionary.id}`, {
-                        coordinates: deleteField(),
-                      })
-                    } catch (err) {
-                      alert(err)
-                    }
+                    const [, ...rest] = dictionary.coordinates?.points || []
+                    update_dictionary({
+                      id: dictionary.id,
+                      coordinates: {
+                        points: rest,
+                        regions: dictionary.coordinates?.regions,
+                      },
+                    })
                   }} />
               {:else}
                 <td colspan="30"> Loading... </td>

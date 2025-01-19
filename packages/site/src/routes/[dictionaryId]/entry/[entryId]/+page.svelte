@@ -35,7 +35,7 @@
       if (history.length > 1) {
         history.back()
       } else {
-        window.location.href = `/${$dictionary.id}/entries`
+        window.location.href = `/${dictionary.id}/entries`
       }
     }}>
     <i class="fas fa-arrow-left rtl-x-flip" />
@@ -62,7 +62,7 @@
       </Button>
     {/if}
     {#if !shallow}
-      <Button class="inline-flex! items-center" form="simple" onclick={() => share($dictionary.id, entry)}>
+      <Button class="inline-flex! items-center" form="simple" onclick={() => share(dictionary.id, entry)}>
         <span>{$page.data.t('misc.share')}</span>
         <div class="w-2"></div>
         <i class="fas fa-share-square rtl-x-flip" />
@@ -73,16 +73,16 @@
 
 <EntryDisplay
   {entry}
-  dictionary={$dictionary}
+  {dictionary}
   can_edit={$can_edit}
   {dbOperations} />
 
 <SeoMetaTags
   imageTitle={entry.main.lexeme.default}
-  imageDescription={seo_description({ entry, dialects: $dialects, gloss_languages: $dictionary.glossLanguages, t: $page.data.t })}
-  dictionaryName={$dictionary.name}
-  lat={$dictionary.coordinates?.latitude}
-  lng={$dictionary.coordinates?.longitude}
-  url="https://livingdictionaries.app/{$dictionary.id}/entry/{entry.id}"
+  imageDescription={seo_description({ entry, dialects: $dialects, gloss_languages: dictionary.gloss_languages, t: $page.data.t })}
+  dictionaryName={dictionary.name}
+  lng={dictionary.coordinates?.points?.[0]?.coordinates.longitude}
+  lat={dictionary.coordinates?.points?.[0]?.coordinates.latitude}
+  url="https://livingdictionaries.app/{dictionary.id}/entry/{entry.id}"
   gcsPath={first_photo?.serving_url}
   keywords="Minority Languages, Indigenous Languages, Language Documentation, Dictionary, Minority Community, Language Analysis, Language Education, Endangered Languages, Language Revitalization, Linguistics, Word Lists, Linguistic Analysis, Dictionaries, Living Dictionaries, Living Tongues, Under-represented Languages, Tech Resources, Language Sustainability, Language Resources, Diaspora Languages, Elicitation, Language Archives, Ancient Languages, World Languages, Obscure Languages, Little Known languages, Digital Dictionary, Dictionary Software, Free Software, Online Dictionary Builder" />

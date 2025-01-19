@@ -11,7 +11,6 @@ export const load: PageLoad = ({ parent }) => {
     const { data: public_dictionaries, error } = await supabase.from('materialized_dictionaries_view')
       .select()
       .eq('public', true)
-    // order by name
     if (error) {
       console.error(error)
     }
@@ -23,7 +22,6 @@ export const load: PageLoad = ({ parent }) => {
     const { data: private_dictionaries, error } = await supabase.from('materialized_dictionaries_view')
       .select()
       .neq('public', true)
-    // order by name
     if (error) {
       console.error(error)
     }

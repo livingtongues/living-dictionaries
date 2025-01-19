@@ -1,4 +1,4 @@
-import { authState, docExists, firebaseConfig, setOnline, updateOnline } from 'sveltefirets'
+import { docExists, firebaseConfig, setOnline, updateOnline } from 'sveltefirets'
 import { arrayUnion, serverTimestamp } from 'firebase/firestore/lite'
 import type { IHelper, IUser, TablesInsert } from '@living-dictionaries/types'
 import { get } from 'svelte/store'
@@ -31,9 +31,7 @@ export const load = (({ parent }) => {
         }
       }
 
-      const auth_state_user = get(authState)
-      const auth_token = await auth_state_user.getIdToken()
-      const { error } = await api_create_dictionary({ auth_token, dictionary: pruned_dictionary, fb_user: $user })
+      const { error } = await api_create_dictionary({ dictionary: pruned_dictionary, fb_user: $user })
       if (error)
         throw new Error(error.message)
 

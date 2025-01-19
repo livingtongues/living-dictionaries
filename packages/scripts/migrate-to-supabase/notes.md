@@ -1,13 +1,9 @@
 # Migrate Entries and Speakers from Firestore to Supabase
 
 - migrate dictionaries `pnpm -F scripts migrate-dictionaries`
-  - create dictionary using supabase endpoint
-  - save dictionary changes to supabase using endpoint
-  - in WhereSpoken.svelte update to not be able to remove primary point - just change it
-  - update front end to pull from supabase data
-    - delete dictionary interface
-    - figure out entry count
+  - run tests, user test all
   - make sure all users are in supabase and mapping, then run `pnpm -F scripts migrate-dictionaries` and merge to main
+  - delete dictionary interface
 - deal with content-update and content-import interface differences
 - setup materialized view with entry counts
 - build new Orama indexes every hour after materialized view is updated

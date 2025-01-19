@@ -30,7 +30,7 @@
   {#if !$search_params.view}
     {#each entries as entry (entry.id)}
       <ListEntry
-        dictionary={$dictionary}
+        {dictionary}
         {entry}
         can_edit={$can_edit}
         on_click={(e) => { handle_entry_click(e, entry) }}
@@ -51,19 +51,19 @@
     <EntriesTable
       {entries}
       preferred_table_columns={$preferred_table_columns}
-      dictionary={$dictionary}
+      {dictionary}
       can_edit={$can_edit}
       {dbOperations} />
   {:else if $search_params.view === 'gallery'}
     <EntriesGallery
       {entries}
-      dictionary={$dictionary}
+      {dictionary}
       can_edit={$can_edit} />
   {:else if $search_params.view === 'print'}
     <EntriesPrint
       {search_params}
       {entries}
-      dictionary={$dictionary}
+      {dictionary}
       {load_citation}
       {load_partners}
       can_edit={$can_edit} />
