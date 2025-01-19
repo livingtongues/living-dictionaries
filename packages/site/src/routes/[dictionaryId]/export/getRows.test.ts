@@ -1,4 +1,4 @@
-import type { Tables } from '@living-dictionaries/types'
+import type { Orthography, Tables } from '@living-dictionaries/types'
 import {
   get_example_sentence,
   get_glosses,
@@ -12,8 +12,12 @@ import { format_orthographies } from './assignFormattedEntryValuesForCsv'
 
 describe(get_orthography_headers, () => {
   test('assigns alternate orthography headrers if any exists', () => {
-    const alternate_orthographies = ['native-1', 'native-2', 'native-3']
-    expect(get_orthography_headers(alternate_orthographies)).toEqual({
+    const orthographies: Orthography[] = [
+      { bcp: '', name: { default: 'native-1' } },
+      { bcp: '', name: { default: 'native-2' } },
+      { bcp: '', name: { default: 'native-3' } },
+    ]
+    expect(get_orthography_headers(orthographies)).toEqual({
       'localOrthography': 'native-1',
       'localOrthography.2': 'native-2',
       'localOrthography.3': 'native-3',
@@ -31,9 +35,12 @@ describe(get_orthography_headers, () => {
 
 describe(format_orthographies, () => {
   test('assigns formatted alterante orthographies', () => {
-    const alternate_orthographies = ['native-1', 'native-2']
+    const orthographies: Orthography[] = [
+      { bcp: '', name: { default: 'native-1' } },
+      { bcp: '', name: { default: 'native-2' } },
+    ]
     const lexeme = { default: 'foo', lo1: 'פו', lo2: 'ཕུ།' }
-    expect(format_orthographies(alternate_orthographies, lexeme)).toEqual(
+    expect(format_orthographies(orthographies, lexeme)).toEqual(
       {
         'localOrthography': 'פו',
         'localOrthography.2': 'ཕུ།',

@@ -1,7 +1,7 @@
 # Migrate Entries and Speakers from Firestore to Supabase
 
 - migrate dictionaries `pnpm -F scripts migrate-dictionaries`
-  - run tests, user test all
+  - user test all
   - make sure all users are in supabase and mapping, then run `pnpm -F scripts migrate-dictionaries` and merge to main
   - delete dictionary interface
 - deal with content-update and content-import interface differences

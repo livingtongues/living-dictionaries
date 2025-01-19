@@ -1,8 +1,8 @@
 <script lang="ts">
-  import type { DictionaryView } from '@living-dictionaries/types'
+  import type { Tables } from '@living-dictionaries/types'
   import { page } from '$app/stores'
 
-  export let dictionary: DictionaryView
+  export let dictionary: Tables<'dictionaries'>
   export let entry_count: number
   export let on_close: () => void
   export let is_manager: boolean

@@ -1,4 +1,4 @@
-import type { IInvite, Tables } from '@living-dictionaries/types'
+import type { DictionaryView, IInvite, Tables } from '@living-dictionaries/types'
 import { get } from 'svelte/store'
 import { authState } from 'sveltefirets'
 import { post_request } from './get-post-requests'
@@ -7,7 +7,7 @@ import type { InviteRequestBody } from '$api/email/invite/+server'
 
 export async function inviteHelper(
   role: 'manager' | 'contributor',
-  dictionary: Tables<'dictionaries'>,
+  dictionary: Tables<'dictionaries'> | DictionaryView,
 ) {
   const { data: { t, user } } = get(page)
   const $user = get(user)

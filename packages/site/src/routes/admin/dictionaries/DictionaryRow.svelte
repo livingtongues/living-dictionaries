@@ -6,7 +6,7 @@
   import RolesManagment from './RolesManagment.svelte'
   import type { DictionaryWithHelperStores } from './dictionaryWithHelpers'
   import ContributorInvitationStatus from '$lib/components/contributors/ContributorInvitationStatus.svelte'
-  import { printDate } from '$lib/helpers/time'
+  import { supabase_date_to_friendly } from '$lib/helpers/time'
   import LatLngDisplay from '$lib/components/maps/LatLngDisplay.svelte'
   import { page } from '$app/stores'
 
@@ -42,7 +42,7 @@
 </td>
 <td>
   <Button title="View Entries" size="sm" form="simple" href="/{dictionary.id}">
-    {dictionary.entryCount}
+    {dictionary.entry_count}
     <!-- <span class="i-tabler-external-link" style="vertical-align: -1px;" /> -->
   </Button>
 </td>
@@ -91,7 +91,7 @@
 <td>
   <DictionaryFieldEdit
     field="iso6393"
-    value={dictionary.iso6393}
+    value={dictionary.iso_639_3}
     dictionaryId={dictionary.id} />
 </td>
 <td>
@@ -103,17 +103,17 @@
 <td>
   <ShowHide let:show let:toggle>
     <Button size="sm" form="simple" onclick={toggle}>
-      {#if dictionary.coordinates}
+      {#if dictionary.coordinates?.points?.length}
         <LatLngDisplay
-          lat={dictionary.coordinates.latitude}
-          lng={dictionary.coordinates.longitude} />
+          lat={dictionary.coordinates.points[0].coordinates.latitude}
+          lng={dictionary.coordinates.points[0].coordinates.longitude} />
       {:else}<b>Add</b>{/if}
     </Button>
     {#if show}
       {#await import('$lib/components/maps/CoordinatesModal.svelte') then { default: CoordinatesModal }}
         <CoordinatesModal
-          lng={dictionary.coordinates ? dictionary.coordinates.longitude : undefined}
-          lat={dictionary.coordinates ? dictionary.coordinates.latitude : undefined}
+          lat={dictionary.coordinates?.points?.length ? dictionary.coordinates.points[0].coordinates.latitude : undefined}
+          lng={dictionary.coordinates?.points?.length ? dictionary.coordinates.points[0].coordinates.longitude : undefined}
           on:update={({ detail: { lat, lng } }) => {
             dispatch('updatecoordinates', { lat, lng })
           }}
@@ -130,14 +130,14 @@
     dictionaryId={dictionary.id} />
 </td>
 <td>
-  <BadgeArrayEmit addMessage="Add" strings={dictionary.glossLanguages} />
+  <BadgeArrayEmit addMessage="Add" strings={dictionary.gloss_languages} />
 </td>
 <td>
   <div style="width: 300px;" />
   <BadgeArrayEmit
     canEdit
     addMessage="Add"
-    strings={dictionary.alternateNames}
+    strings={dictionary.alternate_names}
     on:additem={() => {
       const name = prompt('Enter alternate name:')
       if (name)
@@ -146,21 +146,21 @@
     on:itemremoved={e => dispatch('removealternatename', e.detail.value)} />
 </td>
 <td>
-  {dictionary.alternateOrthographies || ''}
+  {dictionary.orthographies?.length? dictionary.orthographies.map(({ name }) => name.default) : ''}
 </td>
 <td class="whitespace-nowrap">
-  {#if dictionary.createdAt}{printDate(dictionary.createdAt.toDate())}{/if}
+  {#if dictionary.created_at}{supabase_date_to_friendly(dictionary.created_at)}{/if}
 </td>
-<td>{dictionary.languageUsedByCommunity !== undefined
-  ? dictionary.languageUsedByCommunity
+<td>{dictionary.language_used_by_community !== undefined
+  ? dictionary.language_used_by_community
   : ''}</td>
-<td>{dictionary.communityPermission ? dictionary.communityPermission : ''}</td>
+<td>{dictionary.community_permission ? dictionary.community_permission : ''}</td>
 
 <td><div style="width: 300px;" />
-  {dictionary.authorConnection ? dictionary.authorConnection : ''}</td>
+  {dictionary.author_connection ? dictionary.author_connection : ''}</td>
 <td>
   <div style="width: 300px;" />
-  {dictionary.conLangDescription ? dictionary.conLangDescription : ''}</td>
+  {dictionary.con_language_description ? dictionary.con_language_description : ''}</td>
 {#if $admin > 1}
   <td class="cursor-pointer" title={JSON.stringify(dictionary, null, 1)}><span class="i-material-symbols-info-outline" /></td>
 {/if}
