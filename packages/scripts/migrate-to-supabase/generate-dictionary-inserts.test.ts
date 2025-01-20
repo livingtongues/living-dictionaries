@@ -1,6 +1,6 @@
-import type { IDictionary } from '@living-dictionaries/types/dictionary.interface'
 import firebase_dictionaries from './firestore-data/firestore-dictionaries-prod.json'
 import { generate_dictionary_inserts } from './generate-dictionary-inserts'
+import type { IDictionary } from './types'
 
 test(generate_dictionary_inserts, () => {
   const sql = generate_dictionary_inserts(firebase_dictionaries as IDictionary[])

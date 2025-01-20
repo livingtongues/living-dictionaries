@@ -2,13 +2,12 @@ import fs, { writeFileSync } from 'node:fs'
 import path, { dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { access } from 'node:fs/promises'
-import type { IDictionary } from '@living-dictionaries/types/dictionary.interface'
 import { db } from '../config-firebase'
 import { postgres } from '../config-supabase'
-import { reset_local_db } from '../reset-local-db'
 import { sync_users_across_and_write_fb_sb_mappings, write_users_to_disk } from './users'
 import { generate_dictionary_inserts } from './generate-dictionary-inserts'
 import { load_fb_to_sb_user_ids } from './get-user-id'
+import type { IDictionary } from './types'
 
 migrate_dictionaries()
 
@@ -30,9 +29,10 @@ async function file_exists(filename: string): Promise<boolean> {
 }
 
 async function migrate_dictionaries() {
-  await reset_local_db()
+  // await reset_local_db()
   await write_users_to_disk()
-  await sync_users_across_and_write_fb_sb_mappings()
+  await sync_users_across_and_write_fb_sb_mappings() // needs run twice, first to sync users, then to load them into memory
+  await sync_users_across_and_write_fb_sb_mappings() // needs run twice, first to sync users, then to load them into memory
 
   const dictionaries = await get_dictionaries()
   await load_fb_to_sb_user_ids()
@@ -54,19 +54,19 @@ async function migrate_dictionaries() {
 }
 
 async function get_dictionaries() {
-  const dictionaries_downloaded = await file_exists(dictionaries_filename)
+  // const dictionaries_downloaded = await file_exists(dictionaries_filename)
 
-  if (dictionaries_downloaded) {
-    const firebase_dictionaries = (await import('./firestore-data/firestore-dictionaries-prod.json')).default as IDictionary[]
-    return firebase_dictionaries
-  }
+  // if (dictionaries_downloaded) {
+  //   const firebase_dictionaries = (await import('./firestore-data/firestore-dictionaries-prod.json')).default as IDictionary[]
+  //   return firebase_dictionaries
+  // }
 
   const fb_dictionaries: IDictionary[] = []
 
   const dict_snapshot = await db.collection('dictionaries').get()
 
   for (const dictionary of dict_snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as IDictionary))) {
-    console.log(dictionary.id)
+    console.info(dictionary.id)
     fb_dictionaries.push(dictionary)
   }
 

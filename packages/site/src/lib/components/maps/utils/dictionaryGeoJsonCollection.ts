@@ -1,4 +1,4 @@
-import type { Tables } from '@living-dictionaries/types'
+import type { DictionaryView } from '@living-dictionaries/types'
 import type { GeoJSONSourceOptions } from 'mapbox-gl'
 
 // leaving for reference
@@ -11,7 +11,7 @@ import type { GeoJSONSourceOptions } from 'mapbox-gl'
 //   CentralAmerica: [-80, 5],
 // };
 
-export function dictionaryGeoJsonCollection(dictionaries: Tables<'dictionaries_view'>[]): GeoJSONSourceOptions['data'] {
+export function dictionaryGeoJsonCollection(dictionaries: DictionaryView[]): GeoJSONSourceOptions['data'] {
   return {
     type: 'FeatureCollection',
     features: dictionaries

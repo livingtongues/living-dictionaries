@@ -35,8 +35,8 @@ export function prepareDictionaryForCsv(dictionary: DictionaryView): StandardDic
     iso6393: dictionary.iso_639_3,
     glottocode: dictionary.glottocode,
     location: cleanedLocation,
-    latitude: dictionary.coordinates?.points?.[0].coordinates.latitude,
-    longitude: dictionary.coordinates?.points?.[0].coordinates.longitude,
+    latitude: dictionary.coordinates?.points?.[0]?.coordinates.latitude,
+    longitude: dictionary.coordinates?.points?.[0]?.coordinates.longitude,
     thumbnail: dictionary.metadata?.thumbnail,
   }
 }

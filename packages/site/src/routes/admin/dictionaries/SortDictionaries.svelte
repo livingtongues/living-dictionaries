@@ -72,8 +72,8 @@
         valueB = b.entry_count || 0
         break
       case 'coordinates':
-        valueA = a.coordinates?.points?.[0].coordinates.latitude || 0
-        valueB = b.coordinates?.points?.[0].coordinates.latitude || 0
+        valueA = a.coordinates?.points?.[0]?.coordinates.latitude || 0
+        valueB = b.coordinates?.points?.[0]?.coordinates.latitude || 0
         break
       case 'gloss_languages':
         valueA = a.gloss_languages?.length || 0

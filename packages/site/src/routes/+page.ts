@@ -57,7 +57,7 @@ export const load: PageLoad = ({ parent }) => {
         const dictionaries = await Promise.all(dictionary_ids_with_role.map(async ({ id }) => {
           const { data: dictionary, error } = await supabase.from('dictionaries_view').select().eq('id', id).single()
           if (error) {
-            console.error(error)
+            console.error(`Could not fetch my-dictionary: ${id}`)
             return null
           }
           return dictionary

@@ -1,7 +1,7 @@
 import type { TablesInsert } from '@living-dictionaries/types'
-import type { IDictionary } from '@living-dictionaries/types/dictionary.interface'
 import { sql_file_string } from '../import/to-sql-string'
 import { jacob_ld_user_id } from '../constants'
+import type { IDictionary } from './types'
 import { get_supabase_user_id_from_firebase_uid } from './get-user-id'
 
 export function generate_dictionary_inserts(dictionaries: IDictionary[]): string {
@@ -12,7 +12,8 @@ export function generate_dictionary_inserts(dictionaries: IDictionary[]): string
 
     const created_by = get_supabase_user_id_from_firebase_uid(createdBy) || jacob_ld_user_id
     // @ts-expect-error
-    const created_at = createdAt?._seconds ? seconds_to_timestamp_string(createdAt._seconds) : null
+    const created_at_seconds = createdAt?._seconds || updatedAt?._seconds
+    const created_at = created_at_seconds ? seconds_to_timestamp_string(created_at_seconds) : new Date().toISOString()
 
     let metadata: TablesInsert<'dictionaries'>['metadata'] = null
     if (publishYear
@@ -88,7 +89,7 @@ export function generate_dictionary_inserts(dictionaries: IDictionary[]): string
       language_used_by_community: languageUsedByCommunity,
       metadata,
       print_access: printAccess,
-      public: is_public,
+      public: !!is_public,
       created_at,
       created_by,
       // @ts-expect-error

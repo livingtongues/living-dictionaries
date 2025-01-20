@@ -6,18 +6,6 @@ import { auth } from '../config-firebase'
 import { admin_supabase, postgres } from '../config-supabase'
 import { write_users_insert } from './write-users-insert'
 
-export async function migrate_users() {
-  const users = await get_users()
-  console.log({ total_users: users.length })
-  for (const user of users)
-    console.log(user.email)
-  for (const user of users)
-    console.log(user.toJSON())
-  const sql = write_users_insert(users)
-  console.log(sql)
-  await postgres.execute_query(sql)
-}
-
 const BATCH_SIZE = 1000
 
 async function get_users(): Promise<UserRecord[]> {
@@ -77,8 +65,9 @@ export async function sync_users_across_and_write_fb_sb_mappings() {
       firebase_uid_to_supabase_user_id[fb_user.uid] = matching_sb_user.id
       supabase_users_not_in_firebase.delete(matching_sb_user.email)
     } else {
+      unmatched_firebase.push(fb_user)
       const sql = write_users_insert([fb_user as UserRecord])
-      console.log(sql)
+      console.info(sql)
       await postgres.execute_query(sql)
     }
   }
@@ -87,3 +76,15 @@ export async function sync_users_across_and_write_fb_sb_mappings() {
 
   fs.writeFileSync(path.resolve(__dirname, FOLDER, 'fb-sb-user-ids.json'), JSON.stringify(firebase_uid_to_supabase_user_id, null, 2))
 }
+
+// export async function migrate_users() {
+//   const users = await get_users()
+//   console.log({ total_users: users.length })
+//   for (const user of users)
+//     console.log(user.email)
+//   for (const user of users)
+//     console.log(user.toJSON())
+//   const sql = write_users_insert(users)
+//   console.log(sql)
+//   await postgres.execute_query(sql)
+// }
