@@ -1,8 +1,6 @@
-import { getStorage, ref, uploadBytesResumable } from 'firebase/storage'
-import { authState, firebaseConfig } from 'sveltefirets'
 import { type Readable, get, writable } from 'svelte/store'
-import type { ImageUrlRequestBody, ImageUrlResponseBody } from '$api/image_url/+server'
-import { post_request } from '$lib/helpers/get-post-requests'
+import { api_gcs_serving_url } from '$api/gcs_serving_url/_call'
+import { api_upload } from '$api/upload/_call'
 import { page } from '$app/stores'
 
 export interface ImageUploadStatus {
@@ -15,61 +13,62 @@ export interface ImageUploadStatus {
 
 export function upload_image({ file, folder }: { file: File, folder: string }): Readable<ImageUploadStatus> {
   const preview_url = URL.createObjectURL(file)
-  const { set, subscribe } = writable<ImageUploadStatus>({ progress: 0, preview_url })
+  const { set, subscribe } = writable<ImageUploadStatus>({ progress: 0, preview_url });
 
-  const [file_type_including_period] = file.name.match(/\.[0-9a-z]+$/i)
-  const storage_path = `${folder}/${new Date().getTime()}${file_type_including_period}`
+  (async () => {
+    const { data: { dictionary } } = get(page)
+    const { data: { presigned_upload_url, bucket, object_key }, error } = await api_upload({ folder, dictionary_id: dictionary.id, file_name: file.name, file_type: file.type })
+    if (error) {
+      console.error(error)
+      set({ preview_url, progress: 0, error: error.message })
+    }
 
-  const { data: { user } } = get(page)
-  const $user = get(user)
-  const customMetadata = {
-    uploadedBy: $user.displayName,
-    originalFileName: file.name,
+    await upload_file(file, presigned_upload_url)
+
+    const { data, error: serving_url_error } = await api_gcs_serving_url({ storage_path: `${bucket}/${object_key}` })
+
+    if (serving_url_error) {
+      console.error(serving_url_error)
+      set({ preview_url, progress: 0, error: serving_url_error.message })
+    }
+
+    if (data) {
+      set({ preview_url, progress: 100, storage_path: object_key, serving_url: data.serving_url })
+    }
+  })()
+
+  function upload_file(file: File, url: string) {
+    return new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest()
+      console.info({ file, url })
+
+      xhr.upload.addEventListener('progress', (event) => {
+        if (event.lengthComputable) {
+          const progress = Math.round((event.loaded / event.total) * 100)
+          console.info(`Upload progress: ${progress}%`)
+          set({ preview_url, progress })
+        }
+      })
+
+      xhr.addEventListener('load', () => {
+        if (xhr.status >= 200 && xhr.status < 300) {
+          set({ preview_url, progress: 99 })
+          resolve(xhr.response)
+        } else {
+          set({ preview_url, progress: 0, error: 'Failed to upload file.' })
+        }
+      })
+
+      xhr.addEventListener('error', () => {
+        set({ preview_url, progress: 0, error: 'Failed to upload file.' })
+        reject(xhr.statusText)
+      })
+
+      xhr.open('PUT', url)
+      xhr.setRequestHeader('Content-Type', file.type)
+      xhr.send(file)
+    })
   }
-
-  // https://firebase.google.com/docs/storage/web/upload-files
-  const storage = getStorage()
-  const imageRef = ref(storage, storage_path)
-  const uploadTask = uploadBytesResumable(imageRef, file, { customMetadata })
-
-  uploadTask.on(
-    'state_changed',
-    (snapshot) => {
-      const decimal_based_percentage = snapshot.bytesTransferred / snapshot.totalBytes
-      const progress = Math.floor(decimal_based_percentage * 100)
-      console.info(`Upload is ${progress}% done`)
-      set({ preview_url, progress })
-
-      switch (snapshot.state) {
-        case 'paused':
-          console.info('Upload is paused')
-          break
-        case 'running':
-          console.info('Upload is running')
-          break
-      }
-    },
-    // https://firebase.google.com/docs/storage/web/handle-errors
-    (err) => {
-      console.error(err)
-      set({ preview_url, progress: 0, error: err.message })
-    },
-    async () => {
-      const firebase_storage_location = `${firebaseConfig.storageBucket}/${storage_path}`
-
-      const auth_state_user = get(authState)
-      const auth_token = await auth_state_user.getIdToken()
-      const { data, error } = await post_request<ImageUrlRequestBody, ImageUrlResponseBody>('/api/image_url', { auth_token, firebase_storage_location })
-
-      if (error) {
-        console.error(error)
-        set({ preview_url, progress: 0, error: error.message })
-      }
-
-      if (data)
-        set({ preview_url, progress: 100, storage_path, serving_url: data.serving_url })
-    },
-  )
 
   return { subscribe }
 }
