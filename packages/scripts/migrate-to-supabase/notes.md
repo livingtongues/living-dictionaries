@@ -1,8 +1,5 @@
 # Migrate Entries and Speakers from Firestore to Supabase
 
-- migrate dictionaries
-  - merge to main
-  - team test, checking view speeds on my dictionaries and refreshing materialized view, entry_count
 - build new Orama indexes every hour offset after materialized view is updated
 - Remove extra row in dictionary downloads csv and entries download csv
 - deal with content-update and content-import interface differences
