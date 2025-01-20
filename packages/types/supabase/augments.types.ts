@@ -5,6 +5,8 @@ import type { HostedVideo, UnsupportedFields } from '../.'
 import type { Change } from './content-update.interface'
 import type { AudioWithSpeakerIds, EntryMainFields, SenseWithSentences } from './entry.interface'
 import type { ImportContentUpdate } from './content-import.interface'
+import type { Orthography } from './orthography.interface'
+import type { DictionaryMetadata } from './dictionary.types'
 
 export interface DatabaseAugments {
   public: {
@@ -44,20 +46,20 @@ export interface DatabaseAugments {
         Row: {
           coordinates: Coordinates | null
           featured_image: DictionaryPhoto | null
-          metadata: Record<string, string> | null
-          orthographies: any[] | null
+          metadata: DictionaryMetadata | null
+          orthographies: Orthography[] | null
         }
         Insert: {
           coordinates?: Coordinates | null
           featured_image?: DictionaryPhoto | null
-          metadata?: Record<string, string> | null
-          orthographies?: any[] | null
+          metadata?: DictionaryMetadata | null
+          orthographies?: Orthography[] | null
         }
         Update: {
           coordinates?: Coordinates | null
           featured_image?: DictionaryPhoto | null
-          metadata?: Record<string, string> | null
-          orthographies?: any[] | null
+          metadata?: DictionaryMetadata | null
+          orthographies?: Orthography[] | null
         }
       }
       entries: {
@@ -141,6 +143,14 @@ export interface DatabaseAugments {
       }
     }
     Views: {
+      dictionaries_view: {
+        Row: {
+          coordinates: Coordinates | null
+          featured_image: DictionaryPhoto | null
+          metadata: DictionaryMetadata | null
+          orthographies: Orthography[] | null
+        }
+      }
       entries_view: {
         Row: {
           main: EntryMainFields
@@ -148,6 +158,12 @@ export interface DatabaseAugments {
           audios: AudioWithSpeakerIds[] | null
           dialect_ids: string[] | null
           tag_ids: string[] | null
+        }
+      }
+      materialized_dictionaries_view: {
+        Row: {
+          coordinates: Coordinates | null
+          metadata: DictionaryMetadata | null
         }
       }
       materialized_entries_view: {

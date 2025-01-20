@@ -1,5 +1,4 @@
 // import type { DeepPartial, DeprecatedVariant, Viewport } from 'kitbook'
-// import type { IDictionary } from '@living-dictionaries/types'
 // import type Component from './EntryDisplay.svelte'
 // import { logDbOperations } from '$lib/mocks/db'
 
@@ -16,7 +15,7 @@
 //   },
 // ]
 
-// const defaultDictionary: IDictionary = {
+// const defaultDictionary = {
 //   name: 'Banange',
 //   glossLanguages: ['en', 'es'],
 // }
@@ -56,7 +55,6 @@
 //     name: '2 senses',
 //     props: {
 //       can_edit: true,
-//       videoAccess: true,
 //       entry: {
 //         id: 'entryId123',
 //         lexeme: 'shoot',

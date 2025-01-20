@@ -45,7 +45,7 @@
 
 <SeoMetaTags
   title={$page.data.t('dictionary.grammar')}
-  dictionaryName={$dictionary.name}
+  dictionaryName={dictionary.name}
   description="Learn about the grammar of the language in this Living Dictionary."
   keywords="Grammar of a language, grammatical, Endangered Languages, Language Documentation, Language Revitalization, Build a Dictionary, Online Dictionary, Digital Dictionary, Dictionary Software, Free Software, Online Dictionary Builder, Living Dictionaries, Living Dictionary, Bibliography" />
 

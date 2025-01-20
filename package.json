@@ -21,7 +21,7 @@
     "lint:inspect": "npx @eslint/config-inspector",
     "lint:inspect-future": "eslint --inspect-config",
     "reset-db": "pnpm --filter=site reset-db",
-    "generate-types": "supabase gen types typescript --local --schema public > packages/types/supabase/generated.types.ts",
+    "generate-types": "supabase gen types typescript --local --schema public > packages/types/supabase/generated.types.ts && eslint --fix packages/types/supabase/generated.types.ts && pnpm -F scripts merge-types && eslint --fix packages/types/supabase/combined.types.ts",
     "check-packages": "pnpm update --interactive --recursive --latest"
   },
   "devDependencies": {

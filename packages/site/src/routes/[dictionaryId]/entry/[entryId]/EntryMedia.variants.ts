@@ -10,7 +10,6 @@
 //   {
 //     props: {
 //       can_edit: true,
-//       videoAccess: true,
 //       dbOperations: logDbOperations,
 //       entry: {},
 //       dictionary: null,

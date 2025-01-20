@@ -1,18 +1,18 @@
 <script lang="ts">
-  import type { EntryView, IDictionary } from '@living-dictionaries/types'
+  import type { EntryView, Tables } from '@living-dictionaries/types'
   import Image from '$lib/components/image/Image.svelte'
   import { order_glosses } from '$lib/helpers/glosses'
   import { page } from '$app/stores'
 
   export let entry: EntryView
   export let can_edit = false
-  export let dictionary: IDictionary
+  export let dictionary: Tables<'dictionaries'>
 
   $: ({ dbOperations, photos } = $page.data)
 
   $: glosses = order_glosses({
     glosses: entry.senses?.[0]?.glosses,
-    dictionary_gloss_languages: dictionary.glossLanguages,
+    dictionary_gloss_languages: dictionary.gloss_languages,
     t: $page.data.t,
     label: true,
   })

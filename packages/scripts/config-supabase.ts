@@ -21,9 +21,6 @@ if (environment === 'dev') {
 
 export const admin_supabase = createClient<Database>(process.env.PUBLIC_SUPABASE_API_URL, process.env.SUPABASE_SERVICE_ROLE_KEY)
 export const anon_supabase = createClient<Database>(process.env.PUBLIC_SUPABASE_API_URL, process.env.PUBLIC_SUPABASE_ANON_KEY)
-export const jacob_ld_user_id = 'de2d3715-6337-45a3-a81a-d82c3210b2a7'
-export const diego_ld_user_id = 'be43b1dd-6c64-494d-b5da-10d70c384433'
-export const test_dictionary_id = 'test_dictionary_id'
 
 class DB {
   private pool: PG.Pool

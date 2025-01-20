@@ -1,5 +1,4 @@
 // import type { DeprecatedVariant, Viewport } from 'kitbook'
-// import type { IDictionary } from '@living-dictionaries/types'
 // import type Component from './GalleryEntry.svelte'
 // import { butterfly_google_storage_url } from '$lib/mocks/entries'
 // import { logDbOperations } from '$lib/mocks/db'
@@ -11,9 +10,9 @@
 
 // export const languages = []
 
-// const dictionary: IDictionary = {
+// const dictionary = {
 //   glossLanguages: ['es', 'it'],
-// } as IDictionary
+// }
 
 // export const variants: DeprecatedVariant<Component>[] = [
 //   {

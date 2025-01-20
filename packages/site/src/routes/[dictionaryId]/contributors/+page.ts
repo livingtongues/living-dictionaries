@@ -1,10 +1,12 @@
 import { addOnline, deleteDocumentOnline, getCollection, setOnline, updateOnline } from 'sveltefirets'
-import type { Citation, IDictionary, IHelper, IInvite, Partner } from '@living-dictionaries/types'
+import type { Citation, IHelper, IInvite, Partner, Tables } from '@living-dictionaries/types'
 import { where } from 'firebase/firestore'
 import type { PageLoad } from './$types'
 import { upload_image } from '$lib/components/image/upload-image'
 import { invalidate } from '$app/navigation'
 import { inviteHelper } from '$lib/helpers/inviteHelper'
+import { DICTIONARY_UPDATED_LOAD_TRIGGER } from '$lib/dbOperations'
+import { api_update_dictionary } from '$api/db/update-dictionary/_call'
 
 const CONTRIBUTORS_UPDATED_LOAD_TRIGGER = 'contributors:updated'
 
@@ -22,7 +24,7 @@ export const load = (async ({ params: { dictionaryId }, parent, depends }) => {
   }
 
   const editor_edits = {
-    inviteHelper: (role: 'manager' | 'contributor', dictionary: IDictionary) => {
+    inviteHelper: (role: 'manager' | 'contributor', dictionary: Tables<'dictionaries'>) => {
       return async function () {
         await performDbOperation(() => inviteHelper(role, dictionary))
       }
@@ -84,7 +86,8 @@ export const load = (async ({ params: { dictionaryId }, parent, depends }) => {
     },
 
     hide_living_tongues_logo: async (hide: boolean) => {
-      await performDbOperation(() => updateOnline<IDictionary>(`dictionaries/${dictionaryId}`, { hideLivingTonguesLogo: hide }))
+      await api_update_dictionary({ hide_living_tongues_logo: hide, id: dictionaryId })
+      await invalidate(DICTIONARY_UPDATED_LOAD_TRIGGER)
     },
   }
 

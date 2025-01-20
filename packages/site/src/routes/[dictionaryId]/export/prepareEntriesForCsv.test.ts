@@ -1,6 +1,5 @@
 // import type {
 //   ExpandedEntry,
-//   IDictionary,
 //   PartOfSpeech,
 //   ISpeaker,
 // } from '@living-dictionaries/types'
@@ -20,7 +19,7 @@
 //   const partsOfSpeech: PartOfSpeech[] = [{ enAbbrev: 'n', enName: 'noun' }] // TODO: after updated expanded entries to include abbreviations, this will no longer be needed in prepareEntriesForCsv
 
 //   test('everything', () => {
-//     const dictionary: IDictionary = {
+//     const dictionary = {
 //       name: 'TestLang',
 //       id: 'testDictionary',
 //       glossLanguages: ['ar', 'en', 'es'],
@@ -93,7 +92,7 @@
 
 //   describe('variant column', () => {
 //     test('added when entries have variants', () => {
-//       const dictionary = {} as IDictionary
+//       const dictionary = {}
 //       const entries: ExpandedEntry[] = [
 //         {
 //           lexeme: 'foo',
@@ -113,7 +112,7 @@
 //     })
 
 //     test('not added when entries do not have variants', () => {
-//       const dictionary = {} as IDictionary
+//       const dictionary = {}
 //       const entries: ExpandedEntry[] = [{ lexeme: 'foo' }]
 //       const { variant } = getCsvHeaders(entries, dictionary)
 //       expect(variant).toBeFalsy()

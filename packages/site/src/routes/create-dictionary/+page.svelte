@@ -19,18 +19,16 @@
   let modal: 'auth' = null
 
   let name = ''
-  let glossLanguages = new Set(['en'])
-  let alternateNames: string[] = []
-  let latitude: number
-  let longitude: number
+  let gloss_languages = new Set(['en'])
+  let alternate_names: string[] = []
   let points: IPoint[] = []
   let regions: IRegion[] = []
-  let iso6393 = ''
+  let iso_639_3 = ''
   let glottocode = ''
-  let languageUsedByCommunity: boolean
-  let communityPermission: 'yes' | 'no' | 'unknown'
-  let authorConnection = ''
-  let conLangDescription = ''
+  let language_used_by_community: boolean
+  let community_permission: 'yes' | 'no' | 'unknown'
+  let author_connection = ''
+  let con_language_description = ''
 
   $: urlFromName = convertToFriendlyUrl(name, MAX_URL_LENGTH)
   let customUrl: string
@@ -63,21 +61,19 @@
   onsubmit={async () => {
     if (!$user) return modal = 'auth'
 
-    await data.createNewDictionary({
+    await data.create_dictionary({
+      id: urlToUse,
       name: name.trim().replace(/^./, name[0].toUpperCase()),
-      glossLanguages: Array.from(glossLanguages),
-      alternateNames,
-      coordinates: latitude ? { latitude, longitude } : null,
-      points,
-      regions,
-      entryCount: 0,
-      iso6393: iso6393.trim(),
+      gloss_languages: Array.from(gloss_languages),
+      alternate_names,
+      coordinates: points || regions ? { points, regions } : null,
+      iso_639_3: iso_639_3.trim(),
       glottocode: glottocode.trim(),
-      languageUsedByCommunity,
-      communityPermission,
-      authorConnection,
-      conLangDescription,
-    }, urlToUse)
+      language_used_by_community,
+      community_permission,
+      author_connection,
+      con_language_description,
+    })
   }}>
   <div class="flex-col justify-center p-4 max-w-md mx-auto">
     <label for="name" class="block text-xl font-medium text-gray-700">
@@ -140,31 +136,26 @@
       <EditableGlossesField
         minimum={1}
         availableLanguages={glossingLanguages}
-        selectedLanguages={Array.from(glossLanguages)}
+        selectedLanguages={Array.from(gloss_languages)}
         add_language={(languageId) => {
-          glossLanguages.add(languageId)
-          glossLanguages = glossLanguages
+          gloss_languages.add(languageId)
+          gloss_languages = gloss_languages
         }}
         remove_language={(languageId) => {
-          glossLanguages.delete(languageId)
-          glossLanguages = glossLanguages
+          gloss_languages.delete(languageId)
+          gloss_languages = gloss_languages
         }} />
       <!-- not used in web app presently -->
       <!-- placeholder={$page.data.t('create.languages')} -->
       <div class="mb-6" />
 
       <EditableAlternateNames
-        {alternateNames}
-        on_update={new_value => alternateNames = new_value} />
+        alternateNames={alternate_names}
+        on_update={new_value => alternate_names = new_value} />
       <div class="mb-6" />
 
       <WhereSpoken
-        dictionary={{ coordinates: { latitude, longitude }, points, regions }}
-        on_update_coordinates={coordinates => ({ latitude, longitude } = coordinates)}
-        on_remove_coordinates={() => {
-          latitude = null
-          longitude = null
-        }}
+        dictionary={{ coordinates: { points, regions } }}
         on_update_points={new_points => points = new_points}
         on_update_regions={new_regions => regions = new_regions} />
       <div class="mb-6" />
@@ -190,7 +181,7 @@
               spellcheck={false}
               minlength="3"
               maxlength="30"
-              bind:value={iso6393}
+              bind:value={iso_639_3}
               class="form-input w-full" />
           </div>
         </div>
@@ -230,7 +221,7 @@
         <input
           type="radio"
           name="languageUsedByCommunity"
-          bind:group={languageUsedByCommunity}
+          bind:group={language_used_by_community}
           value={true}
           required />
         {$page.data.t('misc.assertion')}
@@ -240,7 +231,7 @@
         <input
           type="radio"
           name="languageUsedByCommunity"
-          bind:group={languageUsedByCommunity}
+          bind:group={language_used_by_community}
           value={false} />
         {$page.data.t('misc.negation')}
       </label>
@@ -254,7 +245,7 @@
         <input
           type="radio"
           name="communityPermission"
-          bind:group={communityPermission}
+          bind:group={community_permission}
           value="yes"
           required />
         {$page.data.t('misc.assertion')}
@@ -264,7 +255,7 @@
         <input
           type="radio"
           name="communityPermission"
-          bind:group={communityPermission}
+          bind:group={community_permission}
           value="no" />
         {$page.data.t('misc.negation')}
       </label>
@@ -273,7 +264,7 @@
         <input
           type="radio"
           name="communityPermission"
-          bind:group={communityPermission}
+          bind:group={community_permission}
           value="unknown" />
         {$page.data.t('create.uncertainty')}
       </label>
@@ -288,10 +279,10 @@
         rows="5"
         minlength="100"
         maxlength="2500"
-        bind:value={authorConnection}
+        bind:value={author_connection}
         class="form-input w-full" />
       <div class="flex text-xs">
-        <div class="text-gray-500 ml-auto">{authorConnection.length}/2500</div>
+        <div class="text-gray-500 ml-auto">{author_connection.length}/2500</div>
       </div>
       <div class="mb-6" />
 
@@ -303,10 +294,10 @@
         rows="3"
         minlength="1"
         maxlength="1000"
-        bind:value={conLangDescription}
+        bind:value={con_language_description}
         class="form-input w-full" />
       <div class="flex text-xs">
-        <div class="text-gray-500 ml-auto">{conLangDescription.length}/1000</div>
+        <div class="text-gray-500 ml-auto">{con_language_description.length}/1000</div>
       </div>
       <div class="mb-6" />
 

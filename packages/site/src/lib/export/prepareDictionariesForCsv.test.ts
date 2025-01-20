@@ -1,73 +1,67 @@
-import type { IDictionary } from '@living-dictionaries/types';
-import { prepareDictionaryForCsv, timestamp_to_string_date } from './prepareDictionariesForCsv';
-import type { Timestamp } from 'firebase/firestore';
+import type { DictionaryView } from '@living-dictionaries/types'
+import { prepareDictionaryForCsv } from './prepareDictionariesForCsv'
 
-const timestamp = {
-  seconds: 1591088635,
-  nanoseconds: 880000000,
-} as Timestamp;
+const timestamp = new Date('2021-08-02T14:00:00.000Z').toISOString()
 
-describe('timestamp_to_string_date', () => {
-  test('converts createdAt to readable string', () => {
-    expect(timestamp_to_string_date(timestamp)).toEqual('Tue Jun 02 2020');
-  });
-
-  test('returns an empty string if timestamp is falsy', () => {
-    expect(timestamp_to_string_date(undefined)).toEqual(undefined);
-  });
-});
-
-describe('prepareDictionaryForCsv', () => {
-  const dictionaries: IDictionary[] = [
+describe(prepareDictionaryForCsv, () => {
+  const dictionaries: Partial<DictionaryView>[] = [
     {
       glottocode: 'badh1238',
-      glossLanguages: ['en', 'hi', 'pa'],
-      createdAt: timestamp,
-      createdBy: 'OeVwHacvXMTW0ocKuidCWxBrCIP2',
-      updatedBy: 'OeVwHacvXMTW0ocKuidCWxBrCIP2',
+      gloss_languages: ['en', 'hi', 'pa'],
+      created_at: timestamp,
+      created_by: 'OeVwHacvXMTW0ocKuidCWxBrCIP2',
+      updated_by: 'OeVwHacvXMTW0ocKuidCWxBrCIP2',
       name: '<xaxdeleted>',
-      entryCount: 0,
+      entry_count: 0,
       public: false,
-      alternateNames: [],
+      alternate_names: [],
       coordinates: {
-        latitude: 30.133,
-        longitude: 79.539,
+        points: [{
+          coordinates: {
+            latitude: 30.133,
+            longitude: 79.539,
+          },
+        }],
       },
-      iso6393: '',
+      iso_639_3: '',
       id: 'badhani',
     },
     {
-      createdBy: 'qoP1VCYTaEWb9i3CEH16TcpoUNI3',
-      updatedBy: 'T4qikh1eTafizvpmHNcG29uRQ2j1',
+      created_by: 'qoP1VCYTaEWb9i3CEH16TcpoUNI3',
+      updated_by: 'T4qikh1eTafizvpmHNcG29uRQ2j1',
       coordinates: {
-        latitude: 51.833,
-        longitude: 107.616,
+        points: [{
+          coordinates: {
+            latitude: 51.833,
+            longitude: 107.616,
+          },
+        }],
       },
-      glossLanguages: ['en', 'ru', 'mn', 'cmn'],
+      gloss_languages: ['en', 'ru', 'mn', 'cmn'],
       public: false,
-      entryCount: 1,
-      iso6393: 'bua',
+      entry_count: 1,
+      iso_639_3: 'bua',
       glottocode: 'buri1258',
-      alternateNames: ['Buriat', 'Buriad', 'Bargu'],
+      alternate_names: ['Buriat', 'Buriad', 'Bargu'],
       name: 'Buryat',
       id: 'buryat',
     },
     {
-      alternateNames: null,
-      updatedBy: 'FtP0LHfC9SMzyfcWN48HaNclSxC3',
-      glossLanguages: ['ig'],
+      alternate_names: null,
+      updated_by: 'FtP0LHfC9SMzyfcWN48HaNclSxC3',
+      gloss_languages: ['ig'],
       name: ' IGBO LANGUAGE (ASUSU IGBO)',
       public: false,
       location: 'South Eastern States of Nigeria, West Africa',
-      createdBy: 'vLfYz1Fja8SlL5dSIV7spGeFCXj1',
-      entryCount: 1,
+      created_by: 'vLfYz1Fja8SlL5dSIV7spGeFCXj1',
+      entry_count: 1,
       id: 'igbo-language-(asusu-igb',
     },
-  ];
+  ]
 
   dictionaries.forEach((dictionary, index) => {
     test(`dictionary example ${index + 1}`, () => {
-      expect(prepareDictionaryForCsv(dictionary)).toMatchSnapshot();
-    });
-  });
-});
+      expect(prepareDictionaryForCsv(dictionary as DictionaryView)).toMatchSnapshot()
+    })
+  })
+})

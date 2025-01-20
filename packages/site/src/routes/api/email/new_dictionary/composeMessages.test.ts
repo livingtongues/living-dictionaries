@@ -1,27 +1,23 @@
-import type { IDictionary, IUser } from '@living-dictionaries/types';
-import { notifyAdminsOnNewDictionary } from './composeMessages';
+import type { IUser, Tables } from '@living-dictionaries/types'
+import { notifyAdminsOnNewDictionary } from './composeMessages'
 
 test('composeAdminNotice returns', () => {
-  const dictionary: IDictionary = {
+  const dictionary = {
     id: 'testID',
-    glossLanguages: ['en', 'es'],
+    gloss_languages: ['en', 'es'],
     name: 'Test-Dictionary',
-    entryCount: 0,
-    alternateNames: ['foo', 'bar'],
-    languageUsedByCommunity: true,
-    communityPermission: 'yes', // 'no' | 'unknown'
-    authorConnection: 'Something about how I know this community and more...',
-
-    // @ts-ignore
+    alternate_names: ['foo', 'bar'],
+    language_used_by_community: true,
+    community_permission: 'yes', // 'no' | 'unknown'
+    author_connection: 'Something about how I know this community and more...',
     coordinates: {
-      latitude: 1,
-      longitude: 2,
+      points: [{ coordinates: { latitude: 1, longitude: 2 } }],
     },
-  };
+  } as Tables<'dictionaries'>
   const user: IUser = {
     displayName: 'James Johnson',
     email: 'jamesj@gmail.com',
-  };
+  }
   expect(notifyAdminsOnNewDictionary(dictionary, user)).toMatchInlineSnapshot(`
     "Hey Admins,
 
@@ -50,5 +46,5 @@ test('composeAdminNotice returns', () => {
       Our automatic Vercel Function
       
       https://livingdictionaries.app"
-  `);
-});
+  `)
+})

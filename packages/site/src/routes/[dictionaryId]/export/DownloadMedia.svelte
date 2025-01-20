@@ -1,12 +1,12 @@
 <script lang="ts">
   import JSZip from 'jszip'
-  import type { IDictionary } from '@living-dictionaries/types'
+  import type { Tables } from '@living-dictionaries/types'
   import { createEventDispatcher, onDestroy, onMount } from 'svelte'
   import type { EntryForCSV } from './prepareEntriesForCsv'
   import { objectsToCsvByHeaders } from '$lib/export/csv'
   import { downloadBlob } from '$lib/export/downloadBlob'
 
-  export let dictionary: IDictionary
+  export let dictionary: Tables<'dictionaries'>
   export let entryHeaders: EntryForCSV
   export let finalizedEntries: EntryForCSV[]
   export let entriesWithImages: EntryForCSV[] = []

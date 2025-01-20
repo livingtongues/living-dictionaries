@@ -1,18 +1,18 @@
-import type { IColumn, IDictionary } from '@living-dictionaries/types'
+import type { IColumn, Tables } from '@living-dictionaries/types'
 import { get } from 'svelte/store'
 import { page } from '$app/stores'
 import { vernacularName } from '$lib/helpers/vernacularName'
 import { DICTIONARIES_WITH_VARIANTS } from '$lib/constants'
 import { browser } from '$app/environment'
 
-export function setUpColumns(columns: IColumn[], dictionary: IDictionary): IColumn[] {
+export function setUpColumns(columns: IColumn[], dictionary: Tables<'dictionaries'>): IColumn[] {
   const cols = columns.filter(column => !column.hidden)
 
   const glossIndex = cols.findIndex(col => col.field === 'gloss')
   if (browser && glossIndex >= 0) {
     const { data } = get(page)
     const glossColumns: IColumn[] = []
-    dictionary.glossLanguages.forEach((bcp) => {
+    dictionary.gloss_languages.forEach((bcp) => {
       glossColumns.push({
         field: 'gloss',
         bcp,
@@ -37,7 +37,7 @@ export function setUpColumns(columns: IColumn[], dictionary: IDictionary): IColu
         display: data?.t('entry_field.example_sentence'),
       },
     ]
-    dictionary.glossLanguages.forEach((bcp) => {
+    dictionary.gloss_languages.forEach((bcp) => {
       exampleSentenceColumns.push({
         field: 'example_sentence',
         bcp,
@@ -52,12 +52,12 @@ export function setUpColumns(columns: IColumn[], dictionary: IDictionary): IColu
   const orthographyIndex = cols.findIndex(({ field }) => field === 'local_orthography')
   if (orthographyIndex >= 0) {
     const alternateOrthographyColumns: IColumn[] = []
-    if (dictionary.alternateOrthographies) {
-      for (const [index, orthography] of dictionary.alternateOrthographies.entries()) {
+    if (dictionary.orthographies) {
+      for (const [index, orthography] of dictionary.orthographies.entries()) {
         alternateOrthographyColumns.push({
           field: 'local_orthography',
           width: 170,
-          display: orthography,
+          display: orthography.name.default,
           orthography_index: index + 1,
         })
       }

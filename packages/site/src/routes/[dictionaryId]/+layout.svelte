@@ -23,10 +23,10 @@
 
       <button type="button" class="p-3 md:hidden print:p-0" on:click={toggle}>
         <i class="far fa-bars print:hidden" />
-        {$dictionary.name}
+        {dictionary.name}
       </button>
-      <a class="hover:text-black hidden md:inline" href="/{$dictionary.id}">
-        {$dictionary.name}
+      <a class="hover:text-black hidden md:inline" href="/{dictionary.id}">
+        {dictionary.name}
       </a>
     </div>
   </Header>
@@ -39,7 +39,7 @@
       open={show}>
       <div
         class="h-full md:h-unset flex flex-col flex-shrink-0 md:top-12 md:sticky md:w-44 lg:w-48 print:hidden">
-        <SideMenu dictionary={$dictionary} is_manager={$is_manager} entry_count={$entries?.length} on_close={() => set(false)} />
+        <SideMenu {dictionary} is_manager={$is_manager} entry_count={$entries?.length} on_close={() => set(false)} />
         <hr class="md:hidden" />
         <Button form="menu" class="text-left !md:hidden" onclick={toggle}>
           <i class="far fa-times fa-lg fa-fw" />

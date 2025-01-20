@@ -1,6 +1,7 @@
 <script lang="ts">
-  import type { IDictionary } from '@living-dictionaries/types'
   import { ShowHide } from 'svelte-pieces'
+  import type { DictionaryView } from '@living-dictionaries/types'
+  import { onMount } from 'svelte'
   import type { PageData } from './$types'
   import { page } from '$app/stores'
   import Map from '$lib/components/maps/mapbox/map/Map.svelte'
@@ -14,22 +15,28 @@
   import { browser } from '$app/environment'
 
   export let data: PageData
-  $: ({ my_dictionaries, admin, get_private_dictionaries } = data)
+  $: ({ admin, user, get_private_dictionaries, get_public_dictionaries, get_my_dictionaries } = data)
 
-  $: publicDictionaries = data.publicDictionaries || []
-  let privateDictionaries: IDictionary[] = []
+  let public_dictionaries: DictionaryView[] = []
+  let private_dictionaries: DictionaryView[] = []
+  $: my_dictionaries = get_my_dictionaries($user?.uid)
+
+  onMount(() => {
+    get_public_dictionaries().then(_dictionaries => public_dictionaries = _dictionaries)
+  })
+
   let selectedDictionaryId: string
-  let selectedDictionary: IDictionary
-  $: dictionaries = [...publicDictionaries, ...privateDictionaries, ...$my_dictionaries]
+  let selectedDictionary: DictionaryView
+  $: dictionaries = [...public_dictionaries, ...private_dictionaries, ...$my_dictionaries]
   $: if (selectedDictionaryId)
     selectedDictionary = dictionaries.find(d => d.id === selectedDictionaryId)
   else
     selectedDictionary = null
 
   $: if (browser && $admin) {
-    get_private_dictionaries().then(_dictionaries => privateDictionaries = _dictionaries)
+    get_private_dictionaries().then(_dictionaries => private_dictionaries = _dictionaries)
   } else {
-    privateDictionaries = []
+    private_dictionaries = []
   }
 
   let mapComponent: Map
@@ -44,31 +51,26 @@
       {dictionaries}
       my_dictionaries={$my_dictionaries}
       bind:selectedDictionaryId
-      on:selectedDictionary={({ detail }) => {
-        const { coordinates } = detail
-        if (coordinates) {
+      on_selected_dictionary_point={(point) => {
+        if (point) {
           mapComponent.setZoom(7)
-          mapComponent.setCenter([coordinates.longitude, coordinates.latitude])
+          mapComponent.setCenter([point.coordinates.longitude, point.coordinates.latitude])
         }
       }} />
   </div>
   <div class="relative flex-1">
     <Map bind:this={mapComponent} style="mapbox://styles/mapbox/light-v10?optimize=true" zoom={2}>
-      {#if selectedDictionary?.coordinates?.latitude}
-        {#await import('$lib/components/maps/mapbox/map/Marker.svelte') then { default: Marker }}
-          <Marker
-            lat={selectedDictionary.coordinates.latitude}
-            lng={selectedDictionary.coordinates.longitude}
-            color="blue" />
-          {#if selectedDictionary.points}
-            {#each selectedDictionary.points as point (point)}
-              <Marker lat={point.coordinates.latitude} lng={point.coordinates.longitude} />
+      {#if selectedDictionary?.coordinates}
+        {#if selectedDictionary.coordinates.points}
+          {#await import('$lib/components/maps/mapbox/map/Marker.svelte') then { default: Marker }}
+            {#each selectedDictionary.coordinates.points as point, index (point)}
+              <Marker lat={point.coordinates.latitude} lng={point.coordinates.longitude} color={index === 0 ? 'blue' : 'black'} />
             {/each}
-          {/if}
-        {/await}
-        {#if selectedDictionary.regions}
+          {/await}
+        {/if}
+        {#if selectedDictionary.coordinates.regions}
           {#await import('$lib/components/maps/mapbox/map/Region.svelte') then { default: Region }}
-            {#each selectedDictionary.regions as region (region)}
+            {#each selectedDictionary.coordinates.regions as region (region)}
               <Region {region} />
             {/each}
           {/await}
@@ -80,15 +82,15 @@
             <button type="button" class="whitespace-nowrap w-90px! px-2" on:click={toggle}>Toggle Private</button>
           </CustomControl>
 
-          {#if !hide && privateDictionaries.length}
+          {#if !hide && private_dictionaries.length}
             <DictionaryPoints
-              dictionaries={privateDictionaries}
+              dictionaries={private_dictionaries}
               type="private"
               bind:selectedDictionaryId />
           {/if}
         </ShowHide>
       {/if}
-      <DictionaryPoints dictionaries={publicDictionaries} bind:selectedDictionaryId />
+      <DictionaryPoints dictionaries={public_dictionaries} bind:selectedDictionaryId />
       {#if $my_dictionaries.length}
         <DictionaryPoints
           dictionaries={$my_dictionaries}

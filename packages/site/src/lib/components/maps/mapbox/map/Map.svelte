@@ -1,22 +1,8 @@
 <script lang="ts">
   // from https://github.com/beyonk-adventures/svelte-mapbox
-  import {
-    createEventDispatcher,
-    onDestroy,
-    onMount,
-    setContext,
-    tick,
-  } from 'svelte'
+  import { createEventDispatcher, onDestroy, onMount, setContext, tick } from 'svelte'
   import { loadScriptOnce, loadStylesOnce } from 'svelte-pieces'
-  import type {
-    ErrorEvent,
-    EventData,
-    LngLat,
-    LngLatBoundsLike,
-    LngLatLike,
-    Map,
-    MapboxOptions,
-  } from 'mapbox-gl'
+  import type { ErrorEvent, EventData, LngLat, LngLatBoundsLike, LngLatLike, Map, MapboxOptions } from 'mapbox-gl'
   import { mapKey } from '../context'
   import { EventQueue } from '../queue'
   import { bindEvents } from '../event-bindings'
@@ -67,8 +53,9 @@
           .queryRenderedFeatures(e.point)
           .filter(f => f.source.startsWith(ADDED_FEATURE_ID_PREFIX))
           .length === 0
-      )
+      ) {
         dispatch('click', e.lngLat)
+      }
     },
     zoomend: () => dispatch('zoomend', map.getZoom()),
     error: (e: ErrorEvent & EventData) => dispatch('error', e),
@@ -84,7 +71,9 @@
     await loadStylesOnce(
       `//api.mapbox.com/mapbox-gl-js/${version}/mapbox-gl.css`,
     )
-    customStylesheetUrl && (await loadStylesOnce(customStylesheetUrl))
+    if (customStylesheetUrl) {
+      await loadStylesOnce(customStylesheetUrl)
+    }
 
     window.mapboxgl.accessToken = accessToken
     map = new window.mapboxgl.Map({

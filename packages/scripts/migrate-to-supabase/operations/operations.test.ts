@@ -1,6 +1,7 @@
 import type { TablesUpdate } from '@living-dictionaries/types'
-import { anon_supabase, jacob_ld_user_id } from '../../config-supabase'
-import { reset_db } from '../reset-db'
+import { anon_supabase } from '../../config-supabase'
+import { reset_local_db } from '../../reset-local-db'
+import { jacob_ld_user_id } from '../../constants'
 import { assign_dialect, assign_speaker, insert_dialect, insert_entry, insert_photo, insert_sense, insert_sentence, insert_video, upsert_audio, upsert_speaker } from './operations'
 import { dictionary_id } from './constants'
 import { test_timestamp } from './test-timestamp'
@@ -27,7 +28,7 @@ async function seed_entry_and_sense() {
 }
 
 describe('entries and senses', () => {
-  beforeAll(reset_db)
+  beforeAll(reset_local_db)
 
   describe(insert_entry, () => {
     test('adds entry, adds sense, and deletes sense', async () => {
@@ -54,7 +55,7 @@ describe('entries and senses', () => {
 })
 
 describe(insert_dialect, () => {
-  beforeAll(reset_db)
+  beforeAll(reset_local_db)
 
   test('adds to dialects table, edits dialect, and connects to entry', async () => {
     const name = 'Eastern'
@@ -77,7 +78,7 @@ describe(insert_dialect, () => {
 })
 
 describe(upsert_audio, () => {
-  beforeAll(reset_db)
+  beforeAll(reset_local_db)
 
   test('adds audio and displays properly in view', async () => {
     const { entry_id } = await seed_entry_and_sense()
@@ -101,7 +102,7 @@ describe(upsert_audio, () => {
 })
 
 describe(insert_sentence, () => {
-  beforeAll(reset_db)
+  beforeAll(reset_local_db)
 
   test('adds sentence and links to sense', async () => {
     const { entry_id, sense_id } = await seed_entry_and_sense()
@@ -113,7 +114,7 @@ describe(insert_sentence, () => {
 })
 
 describe(insert_photo, () => {
-  beforeAll(reset_db)
+  beforeAll(reset_local_db)
 
   test('adds photo and links to sense', async () => {
     const { entry_id, sense_id } = await seed_entry_and_sense()
@@ -128,7 +129,7 @@ describe(insert_photo, () => {
 })
 
 describe(insert_video, () => {
-  beforeAll(reset_db)
+  beforeAll(reset_local_db)
 
   test('adds video and links to sense', async () => {
     const { entry_id, sense_id } = await seed_entry_and_sense()
@@ -140,7 +141,7 @@ describe(insert_video, () => {
 })
 
 describe(upsert_speaker, () => {
-  beforeAll(reset_db)
+  beforeAll(reset_local_db)
 
   test('adds speaker to audio and to video', async () => {
     const { entry_id, sense_id } = await seed_entry_and_sense()
@@ -160,7 +161,7 @@ describe(upsert_speaker, () => {
 })
 
 describe('entries have their updated_at timestamp updated whenever nested properties change', () => {
-  beforeEach(reset_db)
+  beforeEach(reset_local_db)
 
   describe('values which are props', () => {
     test('audio', async () => {

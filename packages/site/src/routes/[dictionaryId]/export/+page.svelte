@@ -27,8 +27,8 @@
 
   $: if (!$entries_loading && !$speakers_loading && !$dialects_loading && !$photos_loading && !$sentences_loading) {
     const translated_entries = translate_entries({ entries: $entries, photos: $photos, sentences: $sentences, dialects: $dialects })
-    entryHeaders = getCsvHeaders(translated_entries, $dictionary)
-    formattedEntries = formatCsvEntries(translated_entries, $speakers, url_from_storage_path, $dictionary)
+    entryHeaders = getCsvHeaders(translated_entries, dictionary)
+    formattedEntries = formatCsvEntries(translated_entries, $speakers, url_from_storage_path, dictionary)
     // @ts-ignore
     entriesWithImages = formattedEntries.filter(entry => entry?.photoSource)
     entriesWithAudio = formattedEntries.filter(entry => entry?.soundSource)
@@ -100,7 +100,7 @@
         </Button>
       {:else}
         <DownloadMedia
-          dictionary={$dictionary}
+          {dictionary}
           {entryHeaders}
           finalizedEntries={formattedEntries}
           entriesWithImages={includeImages ? entriesWithImages : []}
@@ -120,7 +120,7 @@
     <Button
       loading={!formattedEntries.length}
       onclick={() => {
-        downloadObjectsAsCSV(entryHeaders, formattedEntries, $dictionary.id)
+        downloadObjectsAsCSV(entryHeaders, formattedEntries, dictionary.id)
       }}
       form="filled">
       {$page.data.t('export.download_csv')}
@@ -138,6 +138,6 @@
 
 <SeoMetaTags
   title={$page.data.t('misc.export')}
-  dictionaryName={$dictionary.name}
+  dictionaryName={dictionary.name}
   description="Dictionary managers can easily export their Living Dictionary\'s text data as a .CSV spreadsheet as well as export their images and audio files in convenient ZIP folders."
   keywords="How to print a dictionary, How to create lessons for endangered languages, Language Documentation, Language Revitalization, Build a Dictionary, Online Dictionary, Digital Dictionary, Dictionary Software, Free Software, Online Dictionary Builder, Living Dictionaries, Living Dictionary, Edit a dictionary, Search a dictionary, Browse a dictionary, Explore a Dictionary" />

@@ -1,5 +1,5 @@
-import type { IDictionary } from '@living-dictionaries/types';
-import type { GeoJSONSourceOptions } from 'mapbox-gl';
+import type { DictionaryView } from '@living-dictionaries/types'
+import type { GeoJSONSourceOptions } from 'mapbox-gl'
 
 // leaving for reference
 // const startCoordinates: {
@@ -11,17 +11,17 @@ import type { GeoJSONSourceOptions } from 'mapbox-gl';
 //   CentralAmerica: [-80, 5],
 // };
 
-export function dictionaryGeoJsonCollection(dictionaries: IDictionary[]): GeoJSONSourceOptions['data'] {
+export function dictionaryGeoJsonCollection(dictionaries: DictionaryView[]): GeoJSONSourceOptions['data'] {
   return {
     type: 'FeatureCollection',
     features: dictionaries
-      .filter((dict) => dict.coordinates)
+      .filter(dict => dict.coordinates?.points?.length)
       .map((dict) => {
         return {
           type: 'Feature',
           geometry: {
             type: 'Point',
-            coordinates: [dict.coordinates.longitude, dict.coordinates.latitude],
+            coordinates: [dict.coordinates.points[0].coordinates.longitude, dict.coordinates.points[0].coordinates.latitude],
           },
           properties: {
             name: dict.name,
@@ -29,7 +29,7 @@ export function dictionaryGeoJsonCollection(dictionaries: IDictionary[]): GeoJSO
             // icon: dict.public ? 'logo' : 'library-15', // only new Living Dictionaries have public attribute
             // thumbnail: dict.thumbnail,
           },
-        };
+        }
       }),
-  };
+  }
 }

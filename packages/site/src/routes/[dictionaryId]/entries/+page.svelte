@@ -38,7 +38,7 @@
     try {
       const time = Date.now()
       search_inited_ms = time
-      const { elapsed: { formatted }, count, hits, facets } = await search_entries({ query_params, page_index, entries_per_page, dictionary_id: $dictionary.id })
+      const { elapsed: { formatted }, count, hits, facets } = await search_entries({ query_params, page_index, entries_per_page, dictionary_id: dictionary.id })
       if (search_inited_ms !== time) return
       result_facets = facets
       search_results_count = count
@@ -58,7 +58,7 @@
 
     <SearchInput {search_params} index_ready={!$loading} on_show_filter_menu={toggle} />
     <div class="w-1" />
-    <SwitchView bind:view={$search_params.view} can_print={$dictionary.printAccess || $can_edit} />
+    <SwitchView bind:view={$search_params.view} can_print={dictionary.print_access || $can_edit} />
   </div>
 
   <div class="flex">
@@ -104,9 +104,9 @@
 <SeoMetaTags
   admin={$admin > 0}
   title="Entries"
-  dictionaryName={$dictionary.name}
-  gcsPath={$dictionary.featuredImage?.specifiable_image_url}
-  lng={$dictionary.coordinates?.longitude}
-  lat={$dictionary.coordinates?.latitude}
+  dictionaryName={dictionary.name}
+  gcsPath={dictionary.featured_image?.specifiable_image_url}
+  lng={dictionary.coordinates?.points?.[0]?.coordinates.longitude}
+  lat={dictionary.coordinates?.points?.[0]?.coordinates.latitude}
   description="The entries in this Living Dictionary are displayed in a comprehensive list that visitors can easily browse by using the page tabs at the bottom of the screen, or search by using the powerful search bar located at the top of the page."
   keywords="Endangered Languages, Language Documentation, Language Revitalization, Build a Dictionary, Online Dictionary, Digital Dictionary, Dictionary Software, Free Software, Online Dictionary Builder, Living Dictionaries, Living Dictionary, Edit a dictionary, Search a dictionary, Browse a dictionary, Explore a Dictionary" />

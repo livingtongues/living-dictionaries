@@ -8,13 +8,7 @@
   import { page } from '$app/stores'
 
   export let data
-  $: ({
-    dictionary,
-    is_manager,
-    is_contributor,
-    admin,
-    editor_edits,
-  } = data)
+  $: ({ dictionary, is_manager, is_contributor, admin, editor_edits } = data)
 
   let managers: IHelper[] = []
   $: data.managers_promise.then(_managers => managers = _managers)
@@ -62,7 +56,7 @@
   {/if}
 </div>
 {#if $is_manager}
-  <Button onclick={editor_edits.inviteHelper('manager', $dictionary)} form="filled">
+  <Button onclick={editor_edits.inviteHelper('manager', dictionary)} form="filled">
     <i class="far fa-envelope" />
     {$page.data.t('contributors.invite_manager')}
   </Button>
@@ -101,7 +95,7 @@
         </ContributorInvitationStatus>
       </div>
     {/each}
-    <Button onclick={editor_edits.inviteHelper('contributor', $dictionary)} form="filled">
+    <Button onclick={editor_edits.inviteHelper('contributor', dictionary)} form="filled">
       <i class="far fa-envelope" />
       {$page.data.t('contributors.invite_contributors')}
     </Button>
@@ -153,13 +147,13 @@
 {/if}
 
 <hr class="my-4" />
-<Partners {partners} can_edit={$is_manager} hideLivingTonguesLogo={$dictionary.hideLivingTonguesLogo} admin={$admin} {...data.partner_edits} />
+<Partners {partners} can_edit={$is_manager} hideLivingTonguesLogo={dictionary.hide_living_tongues_logo} admin={$admin} {...data.partner_edits} />
 
 <!-- Not using contributors.request_to_add_manager -->
 
 <hr class="my-4" />
 
-{#if $dictionary.id !== 'onondaga'}
+{#if dictionary.id !== 'onondaga'}
   <h3 class="font-semibold mb-1 mt-3">
     {$page.data.t('contributors.LD_team')}
   </h3>
@@ -201,12 +195,12 @@
   {$page.data.t('contributors.how_to_cite_academics')}
 </h3>
 
-<CitationComponent isManager={$is_manager} dictionary={$dictionary} {partners} {citation} update_citation={data.update_citation} />
+<CitationComponent isManager={$is_manager} {dictionary} {partners} {citation} update_citation={data.update_citation} />
 
 <div class="mb-12" />
 
 <SeoMetaTags
   title={$page.data.t('dictionary.contributors')}
-  dictionaryName={$dictionary.name}
+  dictionaryName={dictionary.name}
   description="Learn about the people who are building and managing this Living Dictionary."
   keywords="Contributors, Managers, Writers, Editors, Dictionary builders, Endangered Languages, Language Documentation, Language Revitalization, Build a Dictionary, Online Dictionary, Digital Dictionary, Dictionary Software, Free Software, Online Dictionary Builder, Living Dictionaries, Living Dictionary, Edit a dictionary, Search a dictionary, Browse a dictionary, Explore a Dictionary, Print a dictionary" />

@@ -1,104 +1,116 @@
 <script lang="ts">
-  import type { DictionaryWithHelperStores } from './dictionaryWithHelpers';
+  import type { DictionaryWithHelperStores } from './dictionaryWithHelpers'
 
-  export let dictionaries: DictionaryWithHelperStores[] = [];
+  export let dictionaries: DictionaryWithHelperStores[] = []
 
   enum DictionaryFields {
+    // eslint-disable-next-line no-unused-vars
     name = 'Dictionary Name',
+    // eslint-disable-next-line no-unused-vars
     public = 'Public',
-    entryCount = 'Entries',
+    // eslint-disable-next-line no-unused-vars
+    entry_count = 'Entries',
+    // eslint-disable-next-line no-unused-vars
     managers = 'Managers',
+    // eslint-disable-next-line no-unused-vars
     contributors = 'Contributors',
+    // eslint-disable-next-line no-unused-vars
     collaborators = 'Other Contributors',
-    iso6393 = 'ISO 639-3',
+    // eslint-disable-next-line no-unused-vars
+    iso_639_3 = 'ISO 639-3',
+    // eslint-disable-next-line no-unused-vars
     glottocode = 'Glottocode',
+    // eslint-disable-next-line no-unused-vars
     coordinates = 'Coordinates',
+    // eslint-disable-next-line no-unused-vars
     location = 'Location',
-    glossLanguages = 'Gloss Languages',
-    alternateNames = 'Alternate Names',
-    alternateOrthographies = 'Alternate Orthographies',
-    createdAt = 'Created At',
-    videoAccess = 'Video Access',
-    languageUsedByCommunity = 'Language Used by Community',
-    communityPermission = 'Community Permission',
-    authorConnection = 'Author Connection',
-    conLangDescription = 'Conlang Description',
+    // eslint-disable-next-line no-unused-vars
+    gloss_languages = 'Gloss Languages',
+    // eslint-disable-next-line no-unused-vars
+    alternate_names = 'Alternate Names',
+    // eslint-disable-next-line no-unused-vars
+    orthographies = 'Alternate Orthographies',
+    // eslint-disable-next-line no-unused-vars
+    created_at = 'Created At',
+    // eslint-disable-next-line no-unused-vars
+    language_used_by_community = 'Language Used by Community',
+    // eslint-disable-next-line no-unused-vars
+    community_permission = 'Community Permission',
+    // eslint-disable-next-line no-unused-vars
+    author_connection = 'Author Connection',
+    // eslint-disable-next-line no-unused-vars
+    con_language_description = 'Conlang Description',
   }
 
-  type SortFields = keyof typeof DictionaryFields;
-  //@ts-ignore
+  type SortFields = keyof typeof DictionaryFields
+  // @ts-ignore
   const userFields: {
-    key: SortFields;
-    value: DictionaryFields;
+    key: SortFields
+    value: DictionaryFields
   }[] = Object.entries(DictionaryFields).map(([key, value]) => {
-    return { key, value };
-  });
+    return { key, value }
+  })
 
-  let sortKey: SortFields = 'name';
-  let sortDescending = true;
+  let sortKey: SortFields = 'name'
+  let sortDescending = true
 
   $: sortedDictionaries = dictionaries.sort((a, b) => {
-    let valueA: string | number;
-    let valueB: string | number;
+    let valueA: string | number
+    let valueB: string | number
     // prettier-ignore
     switch (sortKey) {
       case 'public':
-        valueA = a.public?.toString() || '';
-        valueB = b.public?.toString() || '';
-        break;
-      case 'languageUsedByCommunity': // should add a test and try to combine these first two cases with the default case, boolean and strings should be able to be handled in one case
-        valueA = a.public?.toString() || '';
-        valueB = b.public?.toString() || '';
-        break;
-      case 'videoAccess':
-        valueA = a.videoAccess?.toString() || '';
-        valueB = b.videoAccess?.toString() || '';
-        break;
-      case 'entryCount':
-        valueA = a.entryCount || 0;
-        valueB = b.entryCount || 0;
-        break;
+        valueA = a.public?.toString() || ''
+        valueB = b.public?.toString() || ''
+        break
+      case 'language_used_by_community': // should add a test and try to combine these first two cases with the default case, boolean and strings should be able to be handled in one case
+        valueA = a.public?.toString() || ''
+        valueB = b.public?.toString() || ''
+        break
+      case 'entry_count':
+        valueA = a.entry_count || 0
+        valueB = b.entry_count || 0
+        break
       case 'coordinates':
-        valueA = a.coordinates?.latitude || 0;
-        valueB = b.coordinates?.latitude || 0;
-        break;
-      case 'glossLanguages':
-        valueA = a.glossLanguages?.length || 0;
-        valueB = b.glossLanguages?.length || 0;
-        break;
-      case 'alternateNames':
-        valueA = a.alternateNames?.length || 0;
-        valueB = b.alternateNames?.length || 0;
-        break;
-      case 'alternateOrthographies':
-        valueA = a.alternateOrthographies?.length || 0;
-        valueB = b.alternateOrthographies?.length || 0;
-        break;
-      case 'createdAt':
-        valueA = a.createdAt?.seconds || 0;
-        valueB = b.createdAt?.seconds || 0;
-        break;
+        valueA = a.coordinates?.points?.[0]?.coordinates.latitude || 0
+        valueB = b.coordinates?.points?.[0]?.coordinates.latitude || 0
+        break
+      case 'gloss_languages':
+        valueA = a.gloss_languages?.length || 0
+        valueB = b.gloss_languages?.length || 0
+        break
+      case 'alternate_names':
+        valueA = a.alternate_names?.length || 0
+        valueB = b.alternate_names?.length || 0
+        break
+      case 'orthographies':
+        valueA = a.orthographies?.length || 0
+        valueB = b.orthographies?.length || 0
+        break
+      case 'created_at':
+        valueA = a.created_at || 0
+        valueB = b.created_at || 0
+        break
       default:
-        valueA = a[sortKey] ? a[sortKey].toUpperCase() : 'zz'; // if we ever have missing names or email, then pass 'zz' when the sortKey is undefined
-        valueB = b[sortKey] ? b[sortKey].toUpperCase() : 'zz';
+        valueA = a[sortKey] ? a[sortKey].toUpperCase() : 'zz' // if we ever have missing names or email, then pass 'zz' when the sortKey is undefined
+        valueB = b[sortKey] ? b[sortKey].toUpperCase() : 'zz'
     // a[sortKey].localeCompare(b[sortKey])
     }
     if (valueA < valueB)
-      return sortDescending ? -1 : 1;
+      return sortDescending ? -1 : 1
 
     if (valueA > valueB)
-      return sortDescending ? 1 : -1;
+      return sortDescending ? 1 : -1
 
-    return 0;
-  });
+    return 0
+  })
 
   function setSortSettings(paraSortKey: SortFields) {
-    //Changes the key if the sort wasn't based on the button before, and if it was, change the direction
+    // Changes the key if the sort wasn't based on the button before, and if it was, change the direction
     if (sortKey === paraSortKey)
-      sortDescending = !sortDescending;
+      sortDescending = !sortDescending
     else
-      sortKey = paraSortKey;
-
+      sortKey = paraSortKey
   }
 </script>
 

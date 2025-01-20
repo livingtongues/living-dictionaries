@@ -47,7 +47,7 @@
 
 <SeoMetaTags
   title={$page.data.t('header.about')}
-  dictionaryName={$dictionary.name}
+  dictionaryName={dictionary.name}
   description="Learn about the background and creation of this Living Dictionary."
   keywords="About this dictionary, background, creation, Endangered Languages, Language Documentation, Language Revitalization, Build a Dictionary, Online Dictionary, Digital Dictionary, Dictionary Software, Free Software, Online Dictionary Builder, Living Dictionaries, Living Dictionary" />
 

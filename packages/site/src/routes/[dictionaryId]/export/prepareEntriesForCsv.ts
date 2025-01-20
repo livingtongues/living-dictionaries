@@ -1,15 +1,8 @@
-import type {
-  EntryView,
-  IDictionary,
-  Tables,
-} from '@living-dictionaries/types'
+import type { EntryView, Tables } from '@living-dictionaries/types'
 import { get } from 'svelte/store'
 import { friendlyName } from './friendlyName'
-import {
-  get_local_orthography_headers,
-  get_sense_headers,
-} from './assignHeadersForCsv'
-import { display_speaker_gender, format_local_orthographies, format_senses, get_first_speaker_from_first_sound_file } from './assignFormattedEntryValuesForCsv'
+import { get_orthography_headers, get_sense_headers } from './assignHeadersForCsv'
+import { display_speaker_gender, format_orthographies, format_senses, get_first_speaker_from_first_sound_file } from './assignFormattedEntryValuesForCsv'
 import { stripHTMLTags } from './stripHTMLTags'
 import { decades } from '$lib/components/media/ages'
 import { translate_part_of_speech, translate_part_of_speech_abbreviation, translate_semantic_domain_keys } from '$lib/transformers/translate_keys_to_current_language'
@@ -62,12 +55,12 @@ export function translate_entries({ entries, photos, sentences, dialects }: { en
   })
 }
 
-export function getCsvHeaders(entries: ReturnType<typeof translate_entries>, { alternateOrthographies }: IDictionary): EntryForCSV {
+export function getCsvHeaders(entries: ReturnType<typeof translate_entries>, { orthographies }: Tables<'dictionaries'>): EntryForCSV {
   const headers: EntryForCSV = { ...StandardEntryCSVFields }
 
   return {
     ...headers,
-    ...get_local_orthography_headers(alternateOrthographies),
+    ...get_orthography_headers(orthographies),
     ...get_sense_headers(entries),
   }
 }
@@ -76,7 +69,7 @@ export function formatCsvEntries(
   entries: ReturnType<typeof translate_entries>,
   speakers: Tables<'speakers_view'>[],
   url_from_storage_path: (path: string) => string,
-  { alternateOrthographies }: IDictionary,
+  { orthographies }: Tables<'dictionaries'>,
 ): EntryForCSV[] {
   return entries.map((entry) => {
     const speaker = get_first_speaker_from_first_sound_file(entry, speakers)
@@ -100,7 +93,7 @@ export function formatCsvEntries(
 
     return {
       ...formatted_entry,
-      ...format_local_orthographies(alternateOrthographies, entry?.main?.lexeme),
+      ...format_orthographies(orthographies, entry?.main?.lexeme),
       ...format_senses(entry),
     }
   })

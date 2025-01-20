@@ -1,10 +1,10 @@
 <script lang="ts">
   import { Button, Form } from 'svelte-pieces'
-  import type { Citation, IDictionary, Partner } from '@living-dictionaries/types'
+  import type { Citation, Partner, Tables } from '@living-dictionaries/types'
   import { build_citation } from './build-citation'
   import { page } from '$app/stores'
 
-  export let dictionary: IDictionary
+  export let dictionary: Tables<'dictionaries'>
   export let isManager = false
   export let partners: Partner[]
   export let citation: Citation

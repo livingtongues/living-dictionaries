@@ -16,6 +16,15 @@ export function printDate(date: Date | number): string {
   }).format(date)
 }
 
+export function supabase_date_to_friendly(supabase_date: string): string {
+  const date = new Date(supabase_date)
+  return new Intl.DateTimeFormat('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+  }).format(date)
+}
+
 export function printDateWithWeekday(date: Date | number): string {
   return new Intl.DateTimeFormat('en-US', {
     weekday: 'long',

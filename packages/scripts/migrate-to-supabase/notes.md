@@ -1,9 +1,11 @@
 # Migrate Entries and Speakers from Firestore to Supabase
 
-- deploy tags and update indexes
+- migrate dictionaries
+  - merge to main
+  - team test, checking view speeds on my dictionaries and refreshing materialized view, entry_count
+- build new Orama indexes every hour offset after materialized view is updated
+- Remove extra row in dictionary downloads csv and entries download csv
 - deal with content-update and content-import interface differences
-- build new Orama indexes every hour after materialized view is updated
-- migrate dictionaries and setup materialized view with entry counts (looking for type: "tdv1" and other fields beside the known ones)
 - If an audio file does not have a speaker still let it play even though speaker needs chosen
 - ensure all auth users are brought over
 - Orama: replaceState in createQueryParamStore? look into improving the history to change for view and page changes but not for the others

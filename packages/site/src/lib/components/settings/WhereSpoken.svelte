@@ -1,6 +1,6 @@
 <script lang="ts">
   import { Button, ShowHide } from 'svelte-pieces'
-  import type { IDictionary, IPoint, IRegion } from '@living-dictionaries/types'
+  import type { DictionaryView, IPoint, IRegion } from '@living-dictionaries/types'
   import type { LngLat } from 'mapbox-gl'
   import { page } from '$app/stores'
   import Map from '$lib/components/maps/mapbox/map/Map.svelte'
@@ -11,23 +11,17 @@
   import RegionModal from '$lib/components/maps/RegionModal.svelte'
   import NavigationControl from '$lib/components/maps/mapbox/controls/NavigationControl.svelte'
 
-  export let on_update_coordinates: (coordinates: { longitude: number, latitude: number }) => void
-  export let on_remove_coordinates: () => void
   export let on_update_points: (points: IPoint[]) => void
   export let on_update_regions: (regions: IRegion[]) => void
-  export let dictionary: Partial<IDictionary>
-  $: hasCoordinates = dictionary.coordinates?.latitude
+  export let dictionary: Partial<DictionaryView>
 
-  function addCoordinates({ detail }: { detail: { lng: number, lat: number } }) {
-    if (hasCoordinates) {
-      const point = {
-        coordinates: { longitude: detail.lng, latitude: detail.lat },
-      }
-      const points = (dictionary.points && [...dictionary.points, point]) || [point]
-      on_update_points(points)
-    } else {
-      on_update_coordinates({ longitude: detail.lng, latitude: detail.lat })
-    }
+  $: first_longitude = dictionary.coordinates?.points?.[0]?.coordinates?.longitude
+  $: first_latitude = dictionary.coordinates?.points?.[0]?.coordinates?.latitude
+
+  function addCoordinates({ detail: { lng, lat } }: { detail: { lng: number, lat: number } }) {
+    const point: IPoint = { coordinates: { longitude: lng, latitude: lat } }
+    const points = (dictionary.coordinates?.points && [...dictionary.coordinates.points, point]) || [point]
+    on_update_points(points)
   }
 
   let mapClickCoordinates: LngLat
@@ -37,14 +31,14 @@
   {$page.data.t('create.where_spoken')}
 </div>
 
-{#if hasCoordinates}
+{#if first_longitude}
   <div class="text-xs text-gray-600 mb-2">
     {$page.data.t('create.map_instructions')}
   </div>
   <div class="h-240px">
     <Map
-      lng={dictionary.coordinates.longitude}
-      lat={dictionary.coordinates.latitude}
+      lng={first_longitude}
+      lat={first_latitude}
       on:click={({ detail }) => (mapClickCoordinates = detail)}>
       <NavigationControl />
       {#if mapClickCoordinates}
@@ -53,67 +47,39 @@
           lat={+mapClickCoordinates.lat.toFixed(4)}
           on:update={addCoordinates}
           on:close={() => (mapClickCoordinates = null)}>
-          <Marker
-            lng={dictionary.coordinates.longitude}
-            lat={dictionary.coordinates.latitude}
-            color="blue">
-            <Popup offset={30} open>{$page.data.t('create.primary_coordinate')}</Popup>
-          </Marker>
         </CoordinatesModal>
       {/if}
-      <Marker
-        lat={dictionary.coordinates.latitude}
-        lng={dictionary.coordinates.longitude}
-        color="blue">
-        <Popup>
-          <ShowHide let:show let:toggle>
-            <Button form="simple" size="sm" onclick={toggle}>
-              <span class="i-octicon-pencil" />
-            </Button>
-            {#if show}
-              <CoordinatesModal
-                lng={dictionary.coordinates.longitude}
-                lat={dictionary.coordinates.latitude}
-                canRemove={!dictionary.points?.length && !dictionary.regions?.length}
-                on:update={({ detail }) =>
-                  on_update_coordinates({ longitude: detail.lng, latitude: detail.lat })}
-                on:remove={on_remove_coordinates}
-                on:close={toggle} />
-            {/if}
-          </ShowHide>
-        </Popup>
-      </Marker>
 
-      {#each dictionary.points || [] as point, index (point)}
-        <Marker lat={point.coordinates.latitude} lng={point.coordinates.longitude}>
+      {#each dictionary.coordinates.points || [] as point, index (point)}
+        <Marker
+          color={index === 0 ? 'blue' : 'black'}
+          lat={point.coordinates.latitude}
+          lng={point.coordinates.longitude}>
           <Popup>
             <ShowHide let:show let:toggle>
               <Button form="simple" size="sm" onclick={toggle}>
                 <span class="i-octicon-pencil" />
+                {#if index === 0}
+                  {$page.data.t('create.primary_coordinate')}
+                {/if}
               </Button>
               {#if show}
                 <CoordinatesModal
                   lng={point.coordinates.longitude}
                   lat={point.coordinates.latitude}
                   on:update={({ detail }) => {
-                    const { points } = dictionary
+                    const { points } = dictionary.coordinates
                     points[index] = {
                       coordinates: { longitude: detail.lng, latitude: detail.lat },
                     }
                     on_update_points(points)
                   }}
                   on:remove={() => {
-                    const { points } = dictionary
+                    const { points } = dictionary.coordinates
                     points.splice(index, 1)
                     on_update_points(points)
                   }}
                   on:close={toggle}>
-                  <Marker
-                    lng={dictionary.coordinates.longitude}
-                    lat={dictionary.coordinates.latitude}
-                    color="blue">
-                    <Popup offset={30}>Primary coordinate</Popup>
-                  </Marker>
                 </CoordinatesModal>
               {/if}
             </ShowHide>
@@ -121,7 +87,7 @@
         </Marker>
       {/each}
 
-      {#each dictionary.regions || [] as region, index (region)}
+      {#each dictionary.coordinates.regions || [] as region, index (region)}
         <Region {region}>
           <ShowHide let:show let:toggle>
             <Button form="simple" size="sm" onclick={toggle}>
@@ -131,22 +97,16 @@
               <RegionModal
                 {region}
                 on:update={({ detail }) => {
-                  const { regions } = dictionary
+                  const { regions } = dictionary.coordinates
                   regions[index] = detail
                   on_update_regions(regions)
                 }}
                 on:remove={() => {
-                  const { regions } = dictionary
+                  const { regions } = dictionary.coordinates
                   regions.splice(index, 1)
                   on_update_regions(regions)
                 }}
                 on:close={toggle}>
-                <Marker
-                  lng={dictionary.coordinates.longitude}
-                  lat={dictionary.coordinates.latitude}
-                  color="blue">
-                  <Popup offset={30}>Primary coordinate</Popup>
-                </Marker>
               </RegionModal>
             {/if}
           </ShowHide>
@@ -160,26 +120,20 @@
   <ShowHide let:show let:toggle>
     <Button
       onclick={toggle}
-      color={hasCoordinates ? 'black' : 'primary'}
-      size={hasCoordinates ? 'sm' : 'md'}>
+      color={first_longitude ? 'black' : 'primary'}
+      size={first_longitude ? 'sm' : 'md'}>
       <span class="i-mdi-map-marker-plus mr-1" style="margin-top: -3px;" />
       {$page.data.t('create.select_coordinates')}
     </Button>
     {#if show}
-      <CoordinatesModal lng={dictionary?.coordinates?.longitude} lat={dictionary?.coordinates?.latitude} on:update={addCoordinates} on:close={toggle}>
-        {#if hasCoordinates}
-          <Marker
-            lng={dictionary.coordinates.longitude}
-            lat={dictionary.coordinates.latitude}
-            color="blue">
-            <Popup offset={30} open>{$page.data.t('create.map_instructions')}</Popup>
-          </Marker>
-        {/if}
-      </CoordinatesModal>
+      <CoordinatesModal
+        initialCenter={{ ...(first_longitude && { longitude: first_longitude, latitude: first_latitude }) }}
+        on:update={addCoordinates}
+        on:close={toggle} />
     {/if}
   </ShowHide>
 
-  {#if hasCoordinates}
+  {#if first_longitude}
     <ShowHide let:show let:toggle>
       <Button onclick={toggle} color="black" size="sm">
         <span class="i-mdi-map-marker-path mr-1" style="margin-top: -2px;" />
@@ -187,19 +141,13 @@
       </Button>
       {#if show}
         <RegionModal
+          initialCenter={{ longitude: first_longitude, latitude: first_latitude }}
           region={null}
           on:update={({ detail }) => {
-            const regions = (dictionary.regions && [...dictionary.regions, detail]) || [detail]
+            const regions = (dictionary.coordinates.regions && [...dictionary.coordinates.regions, detail]) || [detail]
             on_update_regions(regions)
           }}
-          on:close={toggle}>
-          <Marker
-            lng={dictionary.coordinates.longitude}
-            lat={dictionary.coordinates.latitude}
-            color="blue">
-            <Popup offset={30} open>{$page.data.t('create.map_instructions')}</Popup>
-          </Marker>
-        </RegionModal>
+          on:close={toggle} />
       {/if}
     </ShowHide>
   {/if}

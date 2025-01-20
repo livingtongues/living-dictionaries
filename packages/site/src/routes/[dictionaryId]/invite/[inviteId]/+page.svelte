@@ -19,7 +19,7 @@
         <p class="mb-2">
           You are already a manager.
         </p>
-        <Button href={`/${$dictionary.id}/entries`}>
+        <Button href={`/${dictionary.id}/entries`}>
           {$page.data.t('dictionary.entries')}
           <span class="i-fa6-solid-chevron-right rtl-x-flip -mt-1" />
         </Button>
@@ -27,7 +27,7 @@
         <p class="mb-2">
           You are already a contributor.
         </p>
-        <Button href={`/${$dictionary.id}/entries`}>
+        <Button href={`/${dictionary.id}/entries`}>
           {$page.data.t('dictionary.entries')}
           <span class="i-fa6-solid-chevron-right rtl-x-flip -mt-1" />
         </Button>
@@ -67,7 +67,7 @@
       })}
     </p>
 
-    <Button href={`/${$dictionary.id}/entries`}>
+    <Button href={`/${dictionary.id}/entries`}>
       {$page.data.t('dictionary.entries')}
       <span class="i-fa6-solid-chevron-right rtl-x-flip -mt-1" />
     </Button>

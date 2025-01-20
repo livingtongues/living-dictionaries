@@ -1,8 +1,8 @@
 import { randomUUID } from 'node:crypto'
 import { json, error as kit_error } from '@sveltejs/kit'
 import type { ContentUpdateRequestBody, TablesInsert } from '@living-dictionaries/types'
+import { check_can_edit } from '../check-permission'
 import type { RequestHandler } from './$types'
-import { checkForPermission } from './check-dictionary-permission'
 import { decodeToken } from '$lib/server/firebase-admin'
 import { getAdminSupabaseClient } from '$lib/supabase/admin'
 import { ResponseCodes } from '$lib/constants'
@@ -28,8 +28,8 @@ export const POST: RequestHandler = async ({ request }) => {
       if (!decoded_token?.uid)
         throw new Error('No user id found in token')
 
-      await checkForPermission(decoded_token.uid, dictionary_id)
-      user_id = decoded_token.uid
+      await check_can_edit(decoded_token.uid, dictionary_id)
+
       const { data } = await admin_supabase.from('user_emails')
         .select('id')
         .eq('email', decoded_token.email!)

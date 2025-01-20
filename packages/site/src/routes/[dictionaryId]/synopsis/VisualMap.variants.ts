@@ -8,7 +8,9 @@ export const shared_meta: VariantMeta = {
 }
 
 export const With_Coordinates: Variant<Component> = {
-  coordinates: { latitude: 49, longitude: 87 },
+  coordinates: {
+    points: [{ coordinates: { latitude: 49, longitude: 87 } }],
+  },
 }
 
 export const Without_Coordinates: Variant<Component> = {

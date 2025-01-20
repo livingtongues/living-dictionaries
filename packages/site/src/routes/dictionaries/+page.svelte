@@ -54,23 +54,25 @@
         {$page.data.t('dictionary.longitude')}
       </th>
     </thead>
-    {#each dictionaries as { id, url, name, entryCount, iso6393, glottocode, location, coordinates }}
+    {#each dictionaries as { id, metadata, name, entry_count, iso_639_3, glottocode, location, coordinates }}
+      {@const first_latitude = coordinates?.points?.[0]?.coordinates.latitude}
+      {@const first_longitude = coordinates?.points?.[0]?.coordinates.longitude}
       <tr>
         <td class="font-semibold">
-          <a href={url}>{name}</a>
+          {name}
         </td>
         <td>
-          {url?.startsWith('http://talkingdictionary') ? '' : entryCount}
+          {metadata?.url?.startsWith('http://talkingdictionary') ? '' : entry_count}
         </td>
         <td class="underline">
-          {#if url}
-            <a href={url} target="_blank" rel="noreferrer">{url}</a>
+          {#if metadata?.url}
+            <a href={metadata.url} target="_blank" rel="noreferrer">{metadata.url}</a>
           {:else}
             <a href={`/${id}`}>https://livingdictionaries.app/{id}</a>
           {/if}
         </td>
         <td>
-          {iso6393 || ''}
+          {iso_639_3 || ''}
         </td>
         <td>
           {glottocode || ''}
@@ -79,10 +81,10 @@
           {location || ''}
         </td>
         <td class="whitespace-nowrap">
-          {coordinates ? `${coordinates.latitude}° ${coordinates.latitude < 0 ? 'S' : 'N'}` : ''}
+          {first_latitude ? `${first_latitude}° ${first_latitude < 0 ? 'S' : 'N'}` : ''}
         </td>
         <td class="whitespace-nowrap">
-          {coordinates ? `${coordinates.longitude}° ${coordinates.longitude < 0 ? 'W' : 'E'}` : ''}
+          {first_longitude ? `${first_longitude}° ${first_longitude < 0 ? 'W' : 'E'}` : ''}
         </td>
       </tr>
     {/each}

@@ -1,18 +1,12 @@
-import type { EntryView, MultiString, PartOfSpeech, Tables } from '@living-dictionaries/types'
+import type { EntryView, MultiString, Orthography, PartOfSpeech, Tables } from '@living-dictionaries/types'
 import type { EntryForCSV } from './prepareEntriesForCsv'
 import { get_example_sentence, get_glosses, get_image_files, get_noun_class, get_parts_of_speech, get_plural_form, get_semantic_domain, get_variant } from './getRows'
 
-export function find_part_of_speech_abbreviation(
-  global_parts_of_speech: PartOfSpeech[],
-  part_of_speech: string,
-): string {
+export function find_part_of_speech_abbreviation(global_parts_of_speech: PartOfSpeech[], part_of_speech: string): string {
   return global_parts_of_speech.find(({ enName }) => enName === part_of_speech)?.enAbbrev
 }
 
-export function get_first_speaker_from_first_sound_file(
-  entry: EntryView,
-  speakers: Tables<'speakers_view'>[],
-) {
+export function get_first_speaker_from_first_sound_file(entry: EntryView, speakers: Tables<'speakers_view'>[]) {
   return speakers.find(speaker => speaker?.id === entry.audios?.[0].speaker_ids?.[0])
 }
 
@@ -20,13 +14,10 @@ export function display_speaker_gender(speaker_gender: string): string {
   if (speaker_gender) return speaker_gender === 'f' ? 'female' : 'male'
 }
 
-export function format_local_orthographies(
-  alternate_orthographies: string[],
-  lexeme: MultiString,
-) {
+export function format_orthographies(orthographies: Orthography[], lexeme: MultiString) {
   const formatted_data: EntryForCSV = {}
-  if (alternate_orthographies) {
-    alternate_orthographies.forEach((_, index) => {
+  if (orthographies?.length) {
+    orthographies.forEach((_, index) => {
       formatted_data[`${index > 0 ? `localOrthography.${index + 1}` : 'localOrthography'}`] = lexeme[`lo${index + 1}`]
     })
   }
