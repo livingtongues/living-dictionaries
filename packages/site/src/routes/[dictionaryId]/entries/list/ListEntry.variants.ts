@@ -24,7 +24,6 @@
 // export const Video_Access: Variant<Component> = {
 //   ...shared,
 //   entry: simple,
-//   videoAccess: true,
 //   _meta: {
 //     languages: [],
 //     viewports: [{ width: 400, height: 100 }],
@@ -39,7 +38,6 @@
 //     glossLanguages: ['en'],
 //   },
 //   entry: complex,
-//   videoAccess: true,
 //   _meta: {
 //     description: 'This dictionary has an exception where we show example sentences in the list view.',
 //   },

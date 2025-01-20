@@ -1,8 +1,10 @@
 import fs from 'node:fs'
 import * as ts from 'typescript'
 
-const generated_file_path = 'packages/types/supabase/generated.types.ts'
-const augments_file_path = 'packages/types/supabase/augments.types.ts'
+const folder = '../types/supabase'
+const generated_file_path = `${folder}/generated.types.ts`
+const augments_file_path = `${folder}/augments.types.ts`
+const combined_file_path = `${folder}/combined.types.ts`
 
 function read_file(file_path: string): string {
   return fs.readFileSync(file_path, 'utf8')
@@ -21,7 +23,8 @@ function get_interface(source_file: ts.SourceFile, interface_name: string): ts.I
   let type_interface: ts.InterfaceDeclaration
 
   function visit(node: ts.Node) {
-    if (type_interface) return
+    if (type_interface)
+      return
 
     if (!type_interface && ts.isInterfaceDeclaration(node) && node.name.text === interface_name) {
       type_interface = node
@@ -102,7 +105,7 @@ function print_ast(ast: ts.SourceFile, modified_interface: ts.InterfaceDeclarati
   return result
 }
 
-function merge_content(generated_content: string, augments_content: string): string {
+export function merge_content(generated_content: string, augments_content: string): string {
   const generated_ast = parse_file_to_ast(generated_file_path, generated_content)
   const augments_ast = parse_file_to_ast(augments_file_path, augments_content)
 
@@ -113,94 +116,21 @@ function merge_content(generated_content: string, augments_content: string): str
   return print_ast(generated_ast, modified_interface, 'Database')
 }
 
-describe(merge_content, () => {
-  test('merges types and keeps string literals', () => {
-    const generated_content = `
-export interface Database {
-  public: { 
-    Tables: {
-      entries: {
-        Row: {
-          bar: Json
-          foo: string
-          bee: Json
-        }
-      }
-      updates: {
-        Row: {
-          date: string
-          foreignKeyName: 'videos_created_by_fkey'
-          columns: ['created_by']
-        }
-      }
-    }
-  }
-}`
+function run_the_merge() {
+  const generated_content = read_file(generated_file_path)
+  const augments_content = read_file(augments_file_path)
+  const output = merge_content(generated_content, augments_content)
 
-    const augments_content = `
-export interface DatabaseAugments {
-  public: { 
-    Tables: {
-      entries: {
-        Row: {
-          bar: Bajinga
-          bee: Hiya
-        }
-      }
-    }
-  }
-}`
+  const imports_regex = /^(import type.+)/gm
+  const import_blocks = augments_content.match(imports_regex)
+  const augmented_import_blocks = import_blocks!.join('\n')
 
-    expect(merge_content(generated_content, augments_content)).toMatchInlineSnapshot(`
-      "export interface Database {
-          public: {
-              Tables: {
-                  entries: {
-                      Row: {
-                          bar: Bajinga;
-                          foo: string;
-                          bee: Hiya;
-                      };
-                  };
-                  updates: {
-                      Row: {
-                          date: string;
-                          foreignKeyName: 'videos_created_by_fkey';
-                          columns: [
-                              'created_by'
-                          ];
-                      };
-                  };
-              };
-          };
-      }
-      "
-    `)
-  })
+  const combined_types = `${augmented_import_blocks}\n\n${output}`
+  fs.writeFileSync(combined_file_path, combined_types)
 
-  test('strips out Json type', () => {
-    const generated_content = `
-export type Json = string | number
-export interface Database {}`
+  console.log('Merged types successfully')
+}
 
-    const augments_content = `export interface DatabaseAugments {}`
-
-    expect(merge_content(generated_content, augments_content)).toMatchInlineSnapshot(`
-      "export interface Database {
-      }
-      "
-    `)
-  })
-
-  // TODO: turn this into a CLI
-  test.todo('update actual types', () => {
-    const generated_content = read_file(generated_file_path)
-    const augments_content = read_file(augments_file_path)
-    const output = merge_content(generated_content, augments_content)
-
-    const imports_regex = /^(import type.+)/gm
-    const import_blocks = augments_content.match(imports_regex)
-    const augmented_import_blocks = import_blocks!.join('\n')
-    expect(`${augmented_import_blocks}\n\n${output}`).toMatchFileSnapshot(`combined.types.ts`)
-  })
-})
+if (!process.env.VITEST) {
+  run_the_merge()
+}

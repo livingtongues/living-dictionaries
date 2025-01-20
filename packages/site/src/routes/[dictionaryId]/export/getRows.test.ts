@@ -1,4 +1,4 @@
-import type { Tables } from '@living-dictionaries/types'
+import type { Orthography, Tables } from '@living-dictionaries/types'
 import {
   get_example_sentence,
   get_glosses,
@@ -7,13 +7,17 @@ import {
   get_semantic_domain,
 } from './getRows'
 
-import { get_local_orthography_headers } from './assignHeadersForCsv'
-import { format_local_orthographies } from './assignFormattedEntryValuesForCsv'
+import { get_orthography_headers } from './assignHeadersForCsv'
+import { format_orthographies } from './assignFormattedEntryValuesForCsv'
 
-describe(get_local_orthography_headers, () => {
+describe(get_orthography_headers, () => {
   test('assigns alternate orthography headrers if any exists', () => {
-    const alternate_orthographies = ['native-1', 'native-2', 'native-3']
-    expect(get_local_orthography_headers(alternate_orthographies)).toEqual({
+    const orthographies: Orthography[] = [
+      { bcp: '', name: { default: 'native-1' } },
+      { bcp: '', name: { default: 'native-2' } },
+      { bcp: '', name: { default: 'native-3' } },
+    ]
+    expect(get_orthography_headers(orthographies)).toEqual({
       'localOrthography': 'native-1',
       'localOrthography.2': 'native-2',
       'localOrthography.3': 'native-3',
@@ -21,19 +25,22 @@ describe(get_local_orthography_headers, () => {
   })
   test('doesn\'t assign alternate_orthographies if empty array', () => {
     const alternate_orthographies = []
-    expect(get_local_orthography_headers(alternate_orthographies)).toEqual({})
+    expect(get_orthography_headers(alternate_orthographies)).toEqual({})
   })
   test('doesn\'t assign alternate_orthographies if null', () => {
     const alternate_orthographies = null
-    expect(get_local_orthography_headers(alternate_orthographies)).toEqual({})
+    expect(get_orthography_headers(alternate_orthographies)).toEqual({})
   })
 })
 
-describe(format_local_orthographies, () => {
+describe(format_orthographies, () => {
   test('assigns formatted alterante orthographies', () => {
-    const alternate_orthographies = ['native-1', 'native-2']
+    const orthographies: Orthography[] = [
+      { bcp: '', name: { default: 'native-1' } },
+      { bcp: '', name: { default: 'native-2' } },
+    ]
     const lexeme = { default: 'foo', lo1: 'פו', lo2: 'ཕུ།' }
-    expect(format_local_orthographies(alternate_orthographies, lexeme)).toEqual(
+    expect(format_orthographies(orthographies, lexeme)).toEqual(
       {
         'localOrthography': 'פו',
         'localOrthography.2': 'ཕུ།',

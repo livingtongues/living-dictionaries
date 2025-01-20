@@ -1,11 +1,11 @@
 <script lang="ts">
   import { Doc } from 'sveltefirets'
-  import type { IAbout, IDictionary } from '@living-dictionaries/types'
+  import type { DictionaryView, IAbout } from '@living-dictionaries/types'
   import { Button } from 'svelte-pieces'
   import sanitize from 'xss'
   import { page } from '$app/stores'
 
-  export let dictionary: IDictionary
+  export let dictionary: DictionaryView
   let aboutType: IAbout
 
   function truncateString(str, num) {
@@ -19,9 +19,9 @@
 <div>
   <div class="mb-2">
     <h2 class="text-3xl font-semibold">{dictionary.name}</h2>
-    {#if dictionary.alternateNames?.length}
+    {#if dictionary.alternate_names?.length}
       <div class="text-gray-600">
-        ({dictionary.alternateNames.join(', ')})
+        ({dictionary.alternate_names.join(', ')})
       </div>
     {/if}
   </div>
@@ -33,28 +33,28 @@
     </div>
   {/if}
 
-  {#if dictionary.glossLanguages}
+  {#if dictionary.gloss_languages}
     <div class="mb-2">
       <i class="far fa-info-circle fa-fw" />
-      {dictionary.glossLanguages.map(bcp => $page.data.t({ dynamicKey: `gl.${bcp}`, fallback: bcp })).join(', ')}
+      {dictionary.gloss_languages.map(bcp => $page.data.t({ dynamicKey: `gl.${bcp}`, fallback: bcp })).join(', ')}
     </div>
   {/if}
 
-  {#if dictionary.entryCount}
+  {#if dictionary.entry_count}
     <span
       class="mb-2 mr-2 inline-flex items-center px-2 py-1 rounded-full
         text-xs font-medium leading-4 bg-gray-200 text-gray-800">
       {$page.data.t('dictionary.entries')}:&nbsp;
-      <b>{dictionary.entryCount}</b>
+      <b>{dictionary.entry_count}</b>
     </span>
   {/if}
 
-  {#if dictionary.iso6393}
+  {#if dictionary.iso_639_3}
     <span
       style="direction: ltr"
       class="mb-2 mr-2 inline-flex items-center px-2 py-1 rounded-full
         text-xs font-medium leading-4 bg-gray-200 text-gray-800">
-      ISO 639-3:&nbsp; <b>{dictionary.iso6393}</b>
+      ISO 639-3:&nbsp; <b>{dictionary.iso_639_3}</b>
     </span>
   {/if}
   {#if dictionary.glottocode}
@@ -66,8 +66,8 @@
     </span>
   {/if}
 
-  {#if dictionary.type === 'tdv1'}
-    <Button target="_blank" class="mt-1 w-full" form="filled" color="black" href={dictionary.url}>
+  {#if dictionary.metadata?.url}
+    <Button target="_blank" class="mt-1 w-full" form="filled" color="black" href={dictionary.metadata.url}>
       {$page.data.t('home.open_dictionary')}
     </Button>
   {:else}

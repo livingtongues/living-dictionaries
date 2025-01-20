@@ -1,20 +1,25 @@
 import { error } from '@sveltejs/kit'
-import type { IDictionary } from '@living-dictionaries/types'
-import { getCollection } from 'sveltefirets'
-import { orderBy, where } from 'firebase/firestore'
 import type { PageLoad } from './$types'
 import { ResponseCodes } from '$lib/constants'
 
 export const load: PageLoad = async ({ parent }) => {
-  const { user_from_cookies } = await parent()
+  const { user_from_cookies, supabase } = await parent()
   const admin = !!user_from_cookies?.roles?.admin
 
-  let queryConstraints = [orderBy('name'), where('public', '==', true)]
-  if (admin)
-    queryConstraints = [orderBy('name')]
+  const query = supabase.from('materialized_dictionaries_view')
+    .select()
 
   try {
-    const dictionaries = await getCollection<IDictionary>('dictionaries', queryConstraints)
+    if (admin) {
+      const { data: dictionaries, error: dictionaries_error } = await query
+      if (dictionaries_error)
+        throw new Error (dictionaries_error.message)
+      return { dictionaries }
+    }
+    const { data: dictionaries, error: dictionaries_error } = await query
+      .eq('public', true)
+    if (dictionaries_error)
+      throw new Error (dictionaries_error.message)
     return { dictionaries }
   } catch (err) {
     error(ResponseCodes.INTERNAL_SERVER_ERROR, err)
