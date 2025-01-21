@@ -1,11 +1,10 @@
 <script lang="ts">
-  import type { Change } from '@living-dictionaries/types'
+  import type { Tables } from '@living-dictionaries/types'
   import { getActionValue } from './getActionValue'
   import { sortedColumn } from './sortedColumnStore'
   import { HistoryFields } from './historyFields'
-  import { page } from '$app/stores'
 
-  export let history: Change[] = []
+  export let history: Tables<'content_updates'>[] = []
 
   type SortFields = keyof typeof HistoryFields
   // @ts-ignore
@@ -28,8 +27,8 @@
     // prettier-ignore
     switch (sortKey) {
       case 'date':
-        valueA = String(a.updatedAtMs || 0)
-        valueB = String(b.updatedAtMs || 0)
+        valueA = String(a.timestamp || 0)
+        valueB = String(b.timestamp || 0)
         break
       case 'action':
         valueA = getActionValue(a)
@@ -57,7 +56,7 @@
       class="cursor-pointer"
       on:click={() => setSortSettings(field.key)}
       title="Click to sort asc/desc">
-      {$page.data.t(`history.${field.value}`)}
+      <!-- {$page.data.t(`history.${field.value}`)} -->
       {#if sortKey === field.key}
         {#if sortDescending}
           <i class="fas fa-sort-amount-down" />
