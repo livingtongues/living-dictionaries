@@ -11,13 +11,13 @@
 
   export let subject: Subjects = undefined
   $: ({ dictionary, user, about_is_too_short } = $page.data)
-  $: if ($dictionary && subject === 'public_dictionary') warn_if_about_too_short()
+  $: if (dictionary && subject === 'public_dictionary') warn_if_about_too_short()
 
   async function warn_if_about_too_short() {
     if (await about_is_too_short()) {
       close()
       alert($page.data.t('about.message'))
-      goto(`/${$dictionary.id}/about`)
+      goto(`/${dictionary.id}/about`)
     }
   }
 
@@ -35,7 +35,7 @@
   type SubjectValues = typeof subjects[Subjects]
   const typedSubjects = Object.entries(subjects) as [Subjects, SubjectValues][]
   $: filteredSubjects = typedSubjects.filter((subjects) => {
-    if (!$dictionary && subjects[0] === 'public_dictionary') {
+    if (!dictionary && subjects[0] === 'public_dictionary') {
       return false
     }
     return true
@@ -53,14 +53,14 @@
   let status: 'success' | 'fail'
 
   async function send() {
-    if ($dictionary && subject === 'request_access') {
+    if (dictionary && subject === 'request_access') {
       const { error } = await post_request<RequestAccessBody, null>('/api/email/request_access', {
         message,
         email: $user?.email || email,
         name: $user?.displayName || 'Anonymous',
         url: window.location.href,
-        dictionaryId: $dictionary.id,
-        dictionaryName: $dictionary.name,
+        dictionaryId: dictionary.id,
+        dictionaryName: dictionary.name,
       })
 
       if (error) {
@@ -73,7 +73,7 @@
         email: $user?.email || email,
         name: $user?.displayName || 'Anonymous',
         url: window.location.href,
-        dictionaryName: $dictionary?.name,
+        dictionaryName: dictionary?.name,
       })
 
       if (error) {

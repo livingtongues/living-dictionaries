@@ -24,9 +24,7 @@ Once you have run `supabase start` you can open the Studio URL to explore your l
 ## Generate Types
 
 Local:
-- `pnpm generate-types` to run `supabase gen types typescript --local --schema public > packages/types/supabase/generated.types.ts`
-- save the file to have lint fix auto-run
-- Uncomment out the last todo test in `merge-types.test.ts` and run `pnpm t merge-types` to merge the generated types with the manually written types (need to make this a CLI)
+- Run `pnpm generate-types` which will do `supabase gen types typescript --local --schema public > packages/types/supabase/generated.types.ts` and lint and take your `augments.types.ts` to output a `combined.types.ts` with type information for all the `jsonb` fields.
 
 Deployed (we don't use this):
 - `supabase gen types typescript --project-id=actkqboqpzniojhgtqzw --schema public > packages/site/src/lib/supabase/generated.types.ts`

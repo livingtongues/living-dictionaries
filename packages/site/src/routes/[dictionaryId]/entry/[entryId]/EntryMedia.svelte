@@ -1,6 +1,6 @@
 <script lang="ts">
   import { ShowHide } from 'svelte-pieces'
-  import type { EntryView, IDictionary } from '@living-dictionaries/types'
+  import type { EntryView, Tables } from '@living-dictionaries/types'
   import Video from '../../entries/components/Video.svelte'
   import GeoTaggingModal from './GeoTaggingModal.svelte'
   import InitableShowHide from './InitableShowHide.svelte'
@@ -11,8 +11,7 @@
   import AddImage from '$lib/components/image/AddImage.svelte'
 
   export let entry: EntryView
-  export let dictionary: IDictionary
-  export let videoAccess = false
+  export let dictionary: Tables<'dictionaries'>
   export let can_edit = false
   export let dbOperations: DbOperations
 
@@ -61,7 +60,7 @@
         video={first_video}
         {can_edit} />
     </div>
-  {:else if videoAccess && can_edit}
+  {:else if can_edit}
     <ShowHide let:show let:toggle>
       <button
         type="button"
@@ -117,7 +116,7 @@
         addPoint={show === 'point'}
         addRegion={show === 'region'}
         coordinates={entry.main.coordinates}
-        initialCenter={dictionary.coordinates}
+        initialCenter={dictionary.coordinates?.points?.[0]?.coordinates}
         on_close={toggle}
         on_update={async new_value => await dbOperations.update_entry({ entry: { coordinates: new_value } })} />
     {/if}

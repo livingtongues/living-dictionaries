@@ -1,36 +1,31 @@
 <script lang="ts">
-  import { createEventDispatcher } from 'svelte';
-  const dispatch = createEventDispatcher();
-  const close = () => dispatch('close');
-  import {
-    addDictionaryContributor,
-    addDictionaryManager,
-  } from '$lib/helpers/dictionariesManaging';
-  import type { IDictionary, IUser } from '@living-dictionaries/types';
-  import { Button, Modal } from 'svelte-pieces';
-  import { Collection } from 'sveltefirets';
-  import Filter from '$lib/components/Filter.svelte';
+  import type { DictionaryView, IUser } from '@living-dictionaries/types'
+  import { Button, Modal } from 'svelte-pieces'
+  import { Collection } from 'sveltefirets'
+  import { addDictionaryContributor, addDictionaryManager } from '$lib/helpers/dictionariesManaging'
+  import Filter from '$lib/components/Filter.svelte'
 
-  export let user: IUser;
-  export let role: 'manager' | 'contributor';
+  export let user: IUser
+  export let role: 'manager' | 'contributor'
+  export let on_close: () => void
 
-  let dictionariesType: IDictionary[];
+  let dictionariesType: DictionaryView[]
 
   async function add(dictionaryId: string) {
     try {
       if (role === 'manager')
-        await addDictionaryManager({ id: user.uid, name: user.displayName }, dictionaryId);
+        await addDictionaryManager({ id: user.uid, name: user.displayName }, dictionaryId)
       else
-        await addDictionaryContributor({ id: user.uid, name: user.displayName }, dictionaryId);
+        await addDictionaryContributor({ id: user.uid, name: user.displayName }, dictionaryId)
 
-      close();
+      on_close()
     } catch (err) {
-      alert(`Error: ${err}`);
+      alert(`Error: ${err}`)
     }
   }
 </script>
 
-<Modal on:close>
+<Modal on:close={on_close}>
   <span slot="heading">
     Select Dictionary to let {user.displayName} be a {role}
   </span>
@@ -48,7 +43,7 @@
       {/each}
 
       <div class="modal-footer space-x-1">
-        <Button onclick={close} color="black">Cancel</Button>
+        <Button onclick={on_close} color="black">Cancel</Button>
       </div>
     </Filter>
   </Collection>

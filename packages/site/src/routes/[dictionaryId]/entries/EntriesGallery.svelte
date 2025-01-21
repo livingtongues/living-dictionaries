@@ -1,9 +1,9 @@
 <script lang="ts">
-  import type { EntryView, IDictionary } from '@living-dictionaries/types'
+  import type { EntryView, Tables } from '@living-dictionaries/types'
   import GalleryEntry from './gallery/GalleryEntry.svelte'
 
   export let entries: EntryView[] = []
-  export let dictionary: IDictionary
+  export let dictionary: Tables<'dictionaries'>
   export let can_edit = false
 </script>
 

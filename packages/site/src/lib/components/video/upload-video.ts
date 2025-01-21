@@ -1,7 +1,6 @@
-import { getStorage, ref, uploadBytesResumable } from 'firebase/storage'
 import { type Readable, get, writable } from 'svelte/store'
-import type { VideoCustomMetadata } from '@living-dictionaries/types'
 import { page } from '$app/stores'
+import { api_upload } from '$api/upload/_call'
 
 export interface VideoUploadStatus {
   progress: number
@@ -10,48 +9,56 @@ export interface VideoUploadStatus {
 }
 
 export function upload_video({ file, folder }: { file: File | Blob, folder: string }): Readable<VideoUploadStatus> {
-  const { set, subscribe } = writable<VideoUploadStatus>({ progress: 0 })
-  const [fileTypeSuffix] = file.type.split('/')[1].split(';') // turns 'video/webm;codecs=vp8,opus' to 'webm' and 'video/mp4' to 'mp4'
-  const storage_path = `${folder}/${new Date().getTime()}.${fileTypeSuffix}`
-  const { data: { user } } = get(page)
-  const $user = get(user)
-  const customMetadata: VideoCustomMetadata & Record<string, string> = {
-    uploadedByUid: $user.uid,
-    uploadedByName: $user.displayName,
-    // @ts-ignore
-    originalFileName: file.name,
+  const { set, subscribe } = writable<VideoUploadStatus>({ progress: 0 });
+
+  (async () => {
+    const is_blob = file instanceof Blob && !(file instanceof File)
+    const [extension] = file.type.split('/')[1].split(';') // turns 'video/webm;codecs=vp8,opus' to 'webm' and 'video/mp4' to 'mp4'
+    const file_name = is_blob ? `video.${extension}` : file.name
+    const { data: { dictionary } } = get(page)
+    const { data: { presigned_upload_url, object_key }, error } = await api_upload({ folder, dictionary_id: dictionary.id, file_name, file_type: file.type })
+    if (error) {
+      console.error(error)
+      set({ progress: 0, error: error.message })
+    }
+
+    await upload_file(file, presigned_upload_url)
+
+    set({ progress: 100, storage_path: object_key })
+  })()
+
+  function upload_file(file: File | Blob, url: string) {
+    return new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest()
+      console.info({ file, url })
+
+      xhr.upload.addEventListener('progress', (event) => {
+        if (event.lengthComputable) {
+          const progress = Math.round((event.loaded / event.total) * 100)
+          console.info(`Upload progress: ${progress}%`)
+          set({ progress })
+        }
+      })
+
+      xhr.addEventListener('load', () => {
+        if (xhr.status >= 200 && xhr.status < 300) {
+          set({ progress: 99 })
+          resolve(xhr.response)
+        } else {
+          set({ progress: 0, error: 'Failed to upload file.' })
+        }
+      })
+
+      xhr.addEventListener('error', () => {
+        set({ progress: 0, error: 'Failed to upload file.' })
+        reject(xhr.statusText)
+      })
+
+      xhr.open('PUT', url)
+      xhr.setRequestHeader('Content-Type', file.type)
+      xhr.send(file)
+    })
   }
-  // https://firebase.google.com/docs/storage/web/upload-files
-  const storage = getStorage()
-  const videoRef = ref(storage, storage_path)
-  const uploadTask = uploadBytesResumable(videoRef, file, { customMetadata })
-
-  uploadTask.on(
-    'state_changed',
-    (snapshot) => {
-      const decimal_based_percentage = snapshot.bytesTransferred / snapshot.totalBytes
-      const progress = Math.floor(decimal_based_percentage * 100)
-      console.info(`Upload is ${progress}% done`)
-      set({ progress })
-
-      switch (snapshot.state) {
-        case 'paused':
-          console.info('Upload is paused')
-          break
-        case 'running':
-          console.info('Upload is running')
-          break
-      }
-    },
-    // https://firebase.google.com/docs/storage/web/handle-errors
-    (err) => {
-      console.error(err)
-      set({ progress: 0, error: err.message })
-    },
-    () => {
-      set({ progress: 100, storage_path })
-    },
-  )
 
   return { subscribe }
 }

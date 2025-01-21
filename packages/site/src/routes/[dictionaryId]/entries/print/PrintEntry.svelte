@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { EntryView, IDictionary } from '@living-dictionaries/types'
+  import type { EntryView, Tables } from '@living-dictionaries/types'
   import sanitize from 'xss'
   import { tick } from 'svelte'
   import QrCode from './QrCode.svelte'
@@ -14,7 +14,7 @@
   export let imagePercent = 50
   export let fontSize = 12
   export let headwordSize = 12
-  export let dictionary: IDictionary
+  export let dictionary: Tables<'dictionaries'>
   export let showLabels = false
   export let showQrCode = false
 
@@ -47,7 +47,7 @@
       <span>
         {@html sanitize(order_glosses({
           glosses: sense.glosses,
-          dictionary_gloss_languages: dictionary.glossLanguages,
+          dictionary_gloss_languages: dictionary.gloss_languages,
           t: $page.data.t,
         }).join(', '))}{selectedFields.example_sentence && sense.sentence_ids?.length > 0 ? ';' : ''}
       </span>
@@ -97,7 +97,7 @@
     {#if selectedFields.example_sentence && $sentences}
       <i>{order_example_sentences({
         sentence: $sentences?.find(sentence => sentence.id === sense?.sentence_ids?.[0]),
-        dictionary_gloss_languages: dictionary.glossLanguages,
+        dictionary_gloss_languages: dictionary.gloss_languages,
       }).join(' / ')}</i>
     {/if}
   {/each}

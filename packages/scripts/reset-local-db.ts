@@ -1,5 +1,6 @@
 // import { readFileSync } from 'node:fs'
-import { diego_ld_user_id, environment, jacob_ld_user_id, postgres, test_dictionary_id } from './config-supabase'
+import { environment, postgres } from './config-supabase'
+import { diego_ld_user_id, jacob_ld_user_id, test_dictionary_id } from './constants'
 
 export async function reset_local_db() {
   if (environment === 'prod') {

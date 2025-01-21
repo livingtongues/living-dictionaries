@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { EntryFieldValue, EntryView, IDictionary, TablesUpdate } from '@living-dictionaries/types'
+  import type { EntryFieldValue, EntryView, Tables, TablesUpdate } from '@living-dictionaries/types'
   import { Button } from 'svelte-pieces'
   import EntryField from './EntryField.svelte'
   import EntryMedia from './EntryMedia.svelte'
@@ -11,9 +11,8 @@
   import EntryTag from '$lib/components/entry/EntryTag.svelte'
 
   export let entry: EntryView
-  export let dictionary: IDictionary
+  export let dictionary: Tables<'dictionaries'>
   export let can_edit = false
-  export let videoAccess = false
   export let dbOperations: DbOperations
 
   const text_fields = ['morphology', 'interlinearization'] satisfies EntryFieldValue[]
@@ -39,7 +38,7 @@
   </div>
 
   <div style="grid-area: media;">
-    <EntryMedia {dictionary} {entry} {can_edit} {videoAccess} {dbOperations} />
+    <EntryMedia {dictionary} {entry} {can_edit} {dbOperations} />
     {#if can_edit}
       {#await import('./EntryHistory.svelte') then { default: EntryHistory }}
         <EntryHistory {can_edit} entry_id={entry.id} class="mt-5 hidden md:block" />
@@ -48,13 +47,13 @@
   </div>
 
   <div class="flex flex-col grow" style="grid-area: content;">
-    {#each dictionary.alternateOrthographies || [] as orthography, index}
+    {#each dictionary.orthographies || [] as orthography, index}
       {@const orthography_field = `lo${index + 1}`}
       <EntryField
         value={entry.main.lexeme[orthography_field]}
         field="local_orthography"
         {can_edit}
-        display={orthography}
+        display={orthography.name.default}
         on_update={(new_value) => {
           entry.main.lexeme[orthography_field] = new_value
           update_entry({ lexeme: entry.main.lexeme })
@@ -73,7 +72,7 @@
 
     {#each entry.senses || [] as sense, index}
       {#if entry.senses.length === 1}
-        <Sense {sense} glossLanguages={dictionary.glossLanguages} {can_edit} />
+        <Sense {sense} glossLanguages={dictionary.gloss_languages} {can_edit} />
 
         {#if can_edit}
           <Button class="text-start p-2! mb-2 rounded order-2 hover:bg-gray-100! text-gray-600 text-start!" form="menu" onclick={async () => await dbOperations.insert_sense({ sense: {}, entry_id: entry.id })}><span class="i-system-uicons-versions text-xl" /> {$page.data.t('sense.add')}</Button>
@@ -92,7 +91,7 @@
           </div>
 
           <div class="flex flex-col border-s-2 ps-3 ms-1">
-            <Sense {sense} glossLanguages={dictionary.glossLanguages} {can_edit} />
+            <Sense {sense} glossLanguages={dictionary.gloss_languages} {can_edit} />
           </div>
         </div>
       {/if}

@@ -13,7 +13,6 @@ export const variants: DeprecatedVariant<Component>[] = [
       data: {
         ...mockDictionaryLayoutData,
         updateDictionary: null,
-        add_gloss_language: null,
         remove_gloss_language: null,
         add_featured_image: (file: File) => {
           console.info('Uploading image', file)

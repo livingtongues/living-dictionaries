@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { EntryView, IColumn, IDictionary } from '@living-dictionaries/types'
+  import type { EntryView, IColumn, Tables } from '@living-dictionaries/types'
   import ColumnTitle from './ColumnTitle.svelte'
   import Cell from './Cell.svelte'
   import { setUpColumns } from './setUpColumns'
@@ -9,7 +9,7 @@
 
   export let entries: EntryView[] = []
   export let can_edit = false
-  export let dictionary: IDictionary
+  export let dictionary: Tables<'dictionaries'>
   export let preferred_table_columns: IColumn[]
   export let dbOperations: DbOperations
 

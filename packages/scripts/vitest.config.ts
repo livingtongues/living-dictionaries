@@ -5,6 +5,6 @@ export default defineProject({
     name: 'scripts:unit',
     globals: true,
     includeSource: ['./import/**/*.ts', './refactor/**/*.ts', './spreadsheet_helpers/**/*.ts'],
-    exclude: [...defaultExclude, 'migrate-to-supabase/**', 'import/**'],
+    exclude: [...defaultExclude, 'migrate-to-supabase/operations/**', 'import/**'],
   },
 })

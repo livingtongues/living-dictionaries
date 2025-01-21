@@ -1,64 +1,65 @@
 <script lang="ts">
-  import { page } from '$app/stores';
-  import type { IDictionary } from '@living-dictionaries/types';
-  import { fly } from 'svelte/transition';
-  import { Button, ShowHide } from 'svelte-pieces';
-  import { createEventDispatcher } from 'svelte';
+  import type { DictionaryView, IPoint } from '@living-dictionaries/types'
+  import { fly } from 'svelte/transition'
+  import { Button, ShowHide } from 'svelte-pieces'
+  import { page } from '$app/stores'
 
-  export let dictionaries: IDictionary[] = [];
-  export let my_dictionaries: IDictionary[] = [];
-  export let selectedDictionaryId: string;
-  let currentDictionary: IDictionary;
-  $: ({admin} = $page.data)
+  export let dictionaries: DictionaryView[] = []
+  export let my_dictionaries: DictionaryView[] = []
+  export let selectedDictionaryId: string
+  export let on_selected_dictionary_point: (point: IPoint) => void
+
+  let currentDictionary: DictionaryView
+  $: ({ admin } = $page.data)
 
   $: if (selectedDictionaryId) {
     currentDictionary = dictionaries.find((dictionary) => {
-      return selectedDictionaryId === dictionary.id;
-    });
+      return selectedDictionaryId === dictionary.id
+    })
   } else {
-    currentDictionary = null;
+    currentDictionary = null
   }
 
-  let searchFocused = false;
-  let searchString = '';
+  let searchFocused = false
+  let searchString = ''
 
-  let filteredDictionaries: IDictionary[] = [];
+  let filteredDictionaries: DictionaryView[] = []
   $: filteredDictionaries = dictionaries
     .filter((dictionary) => {
       return Object.keys(dictionary).some((k) => {
         return (
-          typeof dictionary[k] === 'string' &&
-            dictionary[k].toLowerCase().includes(searchString.toLowerCase())
-        );
-      });
+          typeof dictionary[k] === 'string'
+          && dictionary[k].toLowerCase().includes(searchString.toLowerCase())
+        )
+      })
     })
     .reduce((acc, dictionary) => {
-      return acc.find((e) => e.id === dictionary.id) ? [...acc] : [...acc, dictionary];
-    }, []);
+      return acc.find(e => e.id === dictionary.id) ? [...acc] : [...acc, dictionary]
+    }, [])
 
-  let searchBlurTimeout;
+  let searchBlurTimeout
   function delayedSearchClose() {
     searchBlurTimeout = setTimeout(() => {
-      searchFocused = false;
-    }, 200);
+      searchFocused = false
+    }, 200)
   }
 
   function keepSearchOpen() {
-    clearTimeout(searchBlurTimeout);
+    clearTimeout(searchBlurTimeout)
   }
 
-  const dispatch = createEventDispatcher<{ selectedDictionary: IDictionary }>();
-  function setCurrentDictionary(dictionary: IDictionary) {
-    selectedDictionaryId = dictionary.id;
-    dispatch('selectedDictionary', dictionary);
-    searchString = '';
+  function setCurrentDictionary(dictionary: DictionaryView) {
+    selectedDictionaryId = dictionary.id
+    if (dictionary.coordinates?.points?.[0])
+      on_selected_dictionary_point(dictionary.coordinates.points[0])
+    searchString = ''
   }
 
   function clearDictionary() {
-    selectedDictionaryId = null;
+    selectedDictionaryId = null
   }
 
-  $: active = searchString || searchFocused || currentDictionary;
+  $: active = searchString || searchFocused || currentDictionary
 </script>
 
 <!-- To Consider: for longer dictionaries on mobile, if we want to make the map still show when showing dictionary details, we need to add a media query (less than md) which sets this div's max-height: 75vh and adds overflow-y-auto -->
