@@ -28,7 +28,7 @@
         // previousValue: JSON.stringify(record.previousValue),
         // currentValue: JSON.stringify(record.currentValue),
         // field: $page.data.t(`entry_field.${record.field}`),
-        // date: printDateTime(record.updatedAtMs),
+        // date: supabase_date_to_friendly(record.updatedAtMs),
       }
     })
 
@@ -39,7 +39,7 @@
 {#if $can_edit}
   {#if content_updates?.length > 0}
     <!-- <pre>{JSON.stringify(content_updates, null, 2)}</pre> -->
-    <div class="sticky top-0 h-[calc(100vh-1.5rem)] z-2 relative flex flex-col">
+    <div class="sticky top-0 h-[calc(100vh-1.5rem)] flex flex-col">
       <Filter items={content_updates} let:filteredItems={filteredRecords} placeholder={$page.data.t('history.history_search')}>
         <div slot="right">
           <Button form="filled" color="black" class="flex items-center space-x-1" onclick={() => console.info('exportHistoryAsCSV(filteredRecords) will be exported')}>

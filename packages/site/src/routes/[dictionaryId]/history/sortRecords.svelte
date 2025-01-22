@@ -1,6 +1,5 @@
 <script lang="ts">
   import type { Tables } from '@living-dictionaries/types'
-  import { getActionValue } from './getActionValue'
   import { sortedColumn } from './sortedColumnStore'
   import { HistoryFields } from './historyFields'
 
@@ -30,10 +29,10 @@
         valueA = String(a.timestamp || 0)
         valueB = String(b.timestamp || 0)
         break
-      case 'action':
-        valueA = getActionValue(a)
-        valueB = getActionValue(b)
-        break
+      // case 'action':
+      //   valueA = getActionValue(a)
+      //   valueB = getActionValue(b)
+      //   break
       default:
         valueA = a[sortKey] ? JSON.stringify(a[sortKey]).toUpperCase() : 'zz'
         valueB = b[sortKey] ? JSON.stringify(b[sortKey]).toUpperCase() : 'zz'

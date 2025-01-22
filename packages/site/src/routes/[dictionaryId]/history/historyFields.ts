@@ -1,7 +1,7 @@
 export enum HistoryFields {
   entryName = 'entry',
   updatedName = 'editor',
-  action = 'action',
+  // action = 'action',
   // previousValue = 'old_value',
   // currentValue = 'new_value',
   change = 'change',
