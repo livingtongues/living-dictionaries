@@ -38,7 +38,7 @@ export function order_entry_and_dictionary_gloss_languages(
   glosses: MultiString,
   dictionary_gloss_languages: string[],
 ): string[] {
-  const combined_glossing_languages = [...dictionary_gloss_languages, ...Object.keys(glosses || {})]
+  const combined_glossing_languages = [...dictionary_gloss_languages || [], ...Object.keys(glosses || {})]
   const deduplicated_glossing_languages = [...new Set(combined_glossing_languages)]
   return deduplicated_glossing_languages
 }
