@@ -76,60 +76,68 @@
       </Button>
     </div>
     <div class="mb-1" />
-    <ResponsiveTable stickyHeading stickyColumn>
-      <SortDictionaries dictionaries={filteredDictionaries} let:sortedDictionaries>
-        {#each sortedDictionaries as dictionary, index (dictionary.id)}
-          <IntersectionObserverShared bottom={2000} let:intersecting once>
-            <tr>
-              {#if intersecting}
-                <DictionaryRow
-                  {index}
-                  {dictionary}
-                  on:toggleprivacy={() => {
-                    update_dictionary({
-                      id: dictionary.id,
-                      public: !dictionary.public,
-                    })
-                  }}
-                  on:addalternatename={(event) => {
-                    update_dictionary({
-                      id: dictionary.id,
-                      alternate_names: [...(dictionary.alternate_names || []), event.detail],
-                    })
-                  }}
-                  on:removealternatename={(event) => {
-                    update_dictionary({
-                      id: dictionary.id,
-                      alternate_names: dictionary.alternate_names.filter(name => name !== event.detail),
-                    })
-                  }}
-                  on:updatecoordinates={({ detail: { lat, lng } }) => {
-                    const [, ...rest] = dictionary.coordinates?.points || []
-                    update_dictionary({
-                      id: dictionary.id,
-                      coordinates: {
-                        points: [{ coordinates: { latitude: lat, longitude: lng } }, ...rest],
-                        regions: dictionary.coordinates?.regions,
-                      },
-                    })
-                  }}
-                  on:removecoordinates={() => {
-                    const [, ...rest] = dictionary.coordinates?.points || []
-                    update_dictionary({
-                      id: dictionary.id,
-                      coordinates: {
-                        points: rest,
-                        regions: dictionary.coordinates?.regions,
-                      },
-                    })
-                  }} />
-              {:else}
-                <td colspan="30"> Loading... </td>
-              {/if}
-            </tr>
-          </IntersectionObserverShared>
-        {/each}
-      </SortDictionaries>
-    </ResponsiveTable>
+    <div class="custom-scrollbar">
+      <ResponsiveTable class="!overflow-unset" stickyHeading stickyColumn>
+        <SortDictionaries dictionaries={filteredDictionaries} let:sortedDictionaries>
+          {#each sortedDictionaries as dictionary, index (dictionary.id)}
+            <IntersectionObserverShared bottom={2000} let:intersecting once>
+              <tr>
+                {#if intersecting}
+                  <DictionaryRow
+                    {index}
+                    {dictionary}
+                    on:toggleprivacy={() => {
+                      update_dictionary({
+                        id: dictionary.id,
+                        public: !dictionary.public,
+                      })
+                    }}
+                    on:addalternatename={(event) => {
+                      update_dictionary({
+                        id: dictionary.id,
+                        alternate_names: [...(dictionary.alternate_names || []), event.detail],
+                      })
+                    }}
+                    on:removealternatename={(event) => {
+                      update_dictionary({
+                        id: dictionary.id,
+                        alternate_names: dictionary.alternate_names.filter(name => name !== event.detail),
+                      })
+                    }}
+                    on:updatecoordinates={({ detail: { lat, lng } }) => {
+                      const [, ...rest] = dictionary.coordinates?.points || []
+                      update_dictionary({
+                        id: dictionary.id,
+                        coordinates: {
+                          points: [{ coordinates: { latitude: lat, longitude: lng } }, ...rest],
+                          regions: dictionary.coordinates?.regions,
+                        },
+                      })
+                    }}
+                    on:removecoordinates={() => {
+                      const [, ...rest] = dictionary.coordinates?.points || []
+                      update_dictionary({
+                        id: dictionary.id,
+                        coordinates: {
+                          points: rest,
+                          regions: dictionary.coordinates?.regions,
+                        },
+                      })
+                    }} />
+                {:else}
+                  <td colspan="30"> Loading... </td>
+                {/if}
+              </tr>
+            </IntersectionObserverShared>
+          {/each}
+        </SortDictionaries>
+      </ResponsiveTable>
+    </div>
   </Filter>
 </div>
+
+<style>
+  .custom-scrollbar {
+    scrollbar-width: thin !important;
+  }
+</style>
