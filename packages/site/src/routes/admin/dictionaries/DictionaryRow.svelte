@@ -22,6 +22,7 @@
     togglevideoaccess: boolean
     updatecoordinates: { lat: number, lng: number }
     removecoordinates: boolean
+    toggleconlang: boolean
   }>()
 </script>
 
@@ -161,6 +162,17 @@
 <td>
   <div style="width: 300px;" />
   {dictionary.con_language_description ? dictionary.con_language_description : ''}</td>
+<td>
+  <Button
+    color={dictionary.con_language_description ? 'green' : 'orange'}
+    size="sm"
+    onclick={() => {
+      if (confirm('Flip this dictionary\'s visibility?'))
+        dispatch('toggleconlang')
+    }}>
+    {dictionary.con_language_description ? 'YES' : 'NO'}
+  </Button>
+</td>
 {#if $admin > 1}
   <td class="cursor-pointer" title={JSON.stringify(dictionary, null, 1)}><span class="i-material-symbols-info-outline" /></td>
 {/if}
