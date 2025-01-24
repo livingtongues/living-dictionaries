@@ -36,7 +36,7 @@
         </Button>
       </div>
       <div class="mb-1" />
-      <ResponsiveTable class="!overflow-unset" stickyColumn stickyHeading>
+      <ResponsiveTable class="md:!overflow-unset" stickyColumn stickyHeading>
         <SortUsers users={filteredUsers} let:sortedUsers>
           {#each sortedUsers as user (user.uid)}
             <UserRow {user} />
