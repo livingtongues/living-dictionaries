@@ -122,6 +122,12 @@
                         regions: dictionary.coordinates?.regions,
                       },
                     })
+                  }}
+                  on:toggleconlang={() => {
+                    update_dictionary({
+                      id: dictionary.id,
+                      con_language_description: !dictionary.con_language_description ? 'YES' : null,
+                    })
                   }} />
               {:else}
                 <td colspan="30"> Loading... </td>
