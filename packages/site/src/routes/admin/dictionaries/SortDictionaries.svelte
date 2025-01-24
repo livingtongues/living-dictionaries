@@ -40,6 +40,8 @@
     author_connection = 'Author Connection',
     // eslint-disable-next-line no-unused-vars
     con_language_description = 'Conlang Description',
+    // eslint-disable-next-line no-unused-vars
+    conlang = 'Conlang',
   }
 
   type SortFields = keyof typeof DictionaryFields
@@ -90,6 +92,10 @@
       case 'created_at':
         valueA = a.created_at || 0
         valueB = b.created_at || 0
+        break
+      case 'conlang':
+        valueA = a.con_language_description?.toString() || ''
+        valueB = b.con_language_description?.toString() || ''
         break
       default:
         valueA = a[sortKey] ? a[sortKey].toUpperCase() : 'zz' // if we ever have missing names or email, then pass 'zz' when the sortKey is undefined

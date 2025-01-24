@@ -76,7 +76,7 @@
       </Button>
     </div>
     <div class="mb-1" />
-    <ResponsiveTable stickyHeading stickyColumn>
+    <ResponsiveTable class="md:!overflow-unset" stickyHeading stickyColumn>
       <SortDictionaries dictionaries={filteredDictionaries} let:sortedDictionaries>
         {#each sortedDictionaries as dictionary, index (dictionary.id)}
           <IntersectionObserverShared bottom={2000} let:intersecting once>
@@ -121,6 +121,12 @@
                         points: rest,
                         regions: dictionary.coordinates?.regions,
                       },
+                    })
+                  }}
+                  on:toggleconlang={() => {
+                    update_dictionary({
+                      id: dictionary.id,
+                      con_language_description: !dictionary.con_language_description ? 'YES' : null,
                     })
                   }} />
               {:else}
