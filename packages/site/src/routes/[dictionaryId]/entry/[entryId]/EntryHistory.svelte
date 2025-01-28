@@ -21,12 +21,12 @@
     <strong>Lexeme history:</strong>
     {#await get_entry_history(entry_id)}
       Loading...
-    {:then { entry_content_updates, error }}
-      <!-- <pre>{JSON.stringify(entry_content_updates, null, 2)}</pre>
-      <pre>{JSON.stringify(error, null, 2)}</pre> -->
+    {:then { entry_content_updates }}
       {#each entry_content_updates as record}
-        <p class="m-3">{record.user_id} edited this entry on {formatter.format(new Date(record.timestamp))}</p>
+        <p class="m-3">A user edited this entry on {formatter.format(new Date(record.timestamp))}</p>
       {/each}
+    {:catch error}
+      <p class="m-3">Error: {error.message}</p>
     {/await}
   {:else}
     <p class="m-3">Last edited on {new Date(history[0].updatedAtMs).toDateString()}</p>

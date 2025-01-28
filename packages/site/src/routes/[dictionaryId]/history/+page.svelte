@@ -7,6 +7,13 @@
   import Filter from '$lib/components/Filter.svelte'
 
   export let data
+  const { entries } = $page.data
+  // eslint-disable-next-line svelte/no-reactive-functions
+  $: get_lexeme = (record) => {
+    const [lexeme] = $entries.filter(entry =>
+      entry.id === record.entry_id || entry.senses.some(sense => sense.id === record.sense_id))
+    return lexeme
+  }
   $: ({ dictionary, can_edit, content_updates } = data)
 
   function exportHistoryAsCSV(records: Change[]) {
@@ -51,7 +58,7 @@
         <ResponsiveTable stickyColumn stickyHeading>
           <SortRecords history={filteredRecords} let:sortedRecords>
             {#each sortedRecords as record}
-              <RecordRow {record} />
+              <RecordRow {record} entry={get_lexeme(record)} />
             {/each}
           </SortRecords>
         </ResponsiveTable>
