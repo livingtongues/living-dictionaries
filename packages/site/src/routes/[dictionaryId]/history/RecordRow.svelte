@@ -12,7 +12,7 @@
     <a class="underline hover:no-underline text-blue-500 visited:text-purple-500" href="entry/{record.entry_id}" target="_blank">{entry?.main.lexeme.default}</a>
   </td>
   <td class:font-bold={$sortedColumn === 'type'}>
-    {`${JSON.stringify(record.change.type)}` || ''}
+    {`${String(record.change.type)}` || ''}
   </td>
   <td class:font-bold={$sortedColumn === 'field'}>
     {`${JSON.stringify(record.change.data)}` || ''}

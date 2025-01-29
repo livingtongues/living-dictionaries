@@ -2,6 +2,7 @@
   import type { Tables } from '@living-dictionaries/types'
   import { sortedColumn } from './sortedColumnStore'
   import { HistoryFields } from './historyFields'
+  import { page } from '$app/stores'
 
   export let history: Tables<'content_updates'>[] = []
 
@@ -25,6 +26,14 @@
 
     // prettier-ignore
     switch (sortKey) {
+      case 'entryName':
+        valueA = String(a.change.data?.lexeme?.default || 0)
+        valueB = String(b.change.data?.lexeme?.default || 0)
+        break
+      case 'type':
+        valueA = String(a.change.type || 0)
+        valueB = String(b.change.type || 0)
+        break
       case 'date':
         valueA = String(a.timestamp || 0)
         valueB = String(b.timestamp || 0)
@@ -55,7 +64,7 @@
       class="cursor-pointer"
       on:click={() => setSortSettings(field.key)}
       title="Click to sort asc/desc">
-      <!-- {$page.data.t(`history.${field.value}`)} -->
+      {$page.data.t(`history.${field.value}`)}
       {#if sortKey === field.key}
         {#if sortDescending}
           <i class="fas fa-sort-amount-down" />

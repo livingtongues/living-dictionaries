@@ -1,10 +1,11 @@
 <script lang="ts">
-  import type { Change } from '@living-dictionaries/types'
   import { Button, ResponsiveTable } from 'svelte-pieces'
   import RecordRow from './RecordRow.svelte'
   import SortRecords from './sortRecords.svelte'
   import { page } from '$app/stores'
   import Filter from '$lib/components/Filter.svelte'
+  import { downloadObjectsAsCSV } from '$lib/export/csv'
+  import { supabase_date_to_friendly } from '$lib/helpers/time'
 
   export let data
   const { entries } = $page.data
@@ -16,40 +17,33 @@
   }
   $: ({ dictionary, can_edit, content_updates } = data)
 
-  function exportHistoryAsCSV(records: Change[]) {
+  function exportHistoryAsCSV() {
     const headers = {
       entryName: $page.data.t('history.entry'),
-      updatedName: $page.data.t('history.editor'),
-      action: $page.data.t('history.action'),
-      previousValue: $page.data.t('history.old_value'),
-      currentValue: $page.data.t('history.new_value'),
-      field: $page.data.t('history.field'),
+      change: $page.data.t('history.change'),
+      type: $page.data.t('history.type'),
       date: $page.data.t('history.date'),
     }
 
     const formattedUsers = content_updates.map((record) => {
       return {
-        entryName: record.entry_id,
-      // updatedName: record.updatedName,
-        // action: $page.data.t(`history.${getActionValue(record)}`),
-        // previousValue: JSON.stringify(record.previousValue),
-        // currentValue: JSON.stringify(record.currentValue),
-        // field: $page.data.t(`entry_field.${record.field}`),
-        // date: supabase_date_to_friendly(record.updatedAtMs),
+        entryName: get_lexeme(record)?.main.lexeme.default,
+        type: JSON.stringify(record.change.type),
+        change: JSON.stringify(record.change.data),
+        date: supabase_date_to_friendly(new Date(record.timestamp)),
       }
     })
 
-  // downloadObjectsAsCSV(headers, formattedUsers, `${$dictionary.id}-history`)
+    downloadObjectsAsCSV(headers, formattedUsers, `${dictionary.id}-history`)
   }
 </script>
 
 {#if $can_edit}
   {#if content_updates?.length > 0}
-    <!-- <pre>{JSON.stringify(content_updates, null, 2)}</pre> -->
     <div class="sticky top-0 h-[calc(100vh-1.5rem)] flex flex-col">
       <Filter items={content_updates} let:filteredItems={filteredRecords} placeholder={$page.data.t('history.history_search')}>
         <div slot="right">
-          <Button form="filled" color="black" class="flex items-center space-x-1" onclick={() => console.info('exportHistoryAsCSV(filteredRecords) will be exported')}>
+          <Button form="filled" color="black" class="flex items-center space-x-1" onclick={() => exportHistoryAsCSV()}>
             <i class="fas fa-download" />
             <span class="hidden sm:inline">{$page.data.t('history.download_history')}</span>
           </Button>

@@ -343,17 +343,17 @@
     "history": "Historia",
     "entry": "Kuingia",
     "editor": "Mhariri",
-    "action": "Kitendo",
+    "entry_history": "Historia ya kuingia",
     "field": "Shamba",
     "date": "Tarehe",
     "old_value": "Thamani ya zamani",
     "new_value": "Thamani Mpya",
-    "created": "Imeundwa",
-    "edited": "Imehaririwa",
-    "deleted": "Imefutwa",
+    "entry_message": "Mtumiaji alihariri ingizo hili ",
     "history_search": "Tafuta maingizo, wahariri, sehemu na thamani",
     "download_history": "Pakua Historia kama CSV",
-    "empty": "Hakuna historia bado"
+    "empty": "Hakuna historia bado",
+    "type": "aina",
+    "change": "mabadiliko_ya_historia"
   },
   "partnership": {
     "title": "Mashirika ya Washirika",
