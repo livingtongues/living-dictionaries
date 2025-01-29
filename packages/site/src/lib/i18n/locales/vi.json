@@ -349,6 +349,7 @@
     "old_value": "Giá trị cũ",
     "new_value": "Giá trị mới",
     "entry_message": "Một người dùng đã chỉnh sửa mục này trên ",
+    "edited": "Chỉnh sửa lần cuối vào",
     "history_search": "Tìm kiếm mục, người chỉnh sửa, trường và giá trị",
     "download_history": "Tải xuống Lịch sử dưới dạng CSV",
     "empty": "Chưa có lịch sử",

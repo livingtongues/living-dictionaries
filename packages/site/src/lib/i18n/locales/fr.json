@@ -40,7 +40,7 @@
     "contributor_awards": "Récompenses de la communauté des contributeurs",
     "question_1": "Veuillez fournir quelques informations générales sur cette langue. Où est-il parlé ? Quelles communautés parlent cette langue ? Cette langue est-elle en danger ?",
     "question_2": "Quels sont les noms des personnes qui ont construit ce dictionnaire ? À qui appartiennent les voix de ce dictionnaire ?",
-    "question_3": "D’où viennent les données de ce dictionnaire ? Veuillez décrire si vous avez collecté les données vous-même. Si vous avez utilisé des sources de référence publiées, veuillez les énumérer.",
+    "question_3": "D’où proviennent les données de ce dictionnaire ? Veuillez décrire si vous avez collecté les données vous-même. Si vous avez utilisé des sources de référence publiées, veuillez les énumérer.",
     "question_4": "Qui utilisera ce dictionnaire ? Sera-t-il utilisé dans des projets éducatifs ?",
     "question_5": "Si vous souhaitez que le public vous contacte à propos de ce projet, veuillez fournir vos coordonnées ou un lien vers où les gens peuvent en savoir plus. Ceci est facultatif.",
     "message": "Avant de rendre votre dictionnaire public, veuillez remplir la section À propos."
@@ -131,7 +131,7 @@
     "select_region": "Sélectionnez une région",
     "secondary_coordinates": "Coordonnées secondaires",
     "map_instructions": "Cliquez sur la carte pour ajouter des coordonnées secondaires.",
-    "print_access": "Autoriser les téléspectateurs à imprimer le dictionnaire",
+    "print_access": "Autoriser les spectateurs à imprimer le dictionnaire",
     "primary_coordinate": "Coordonnée principale"
   },
   "dictionary": {
@@ -327,7 +327,7 @@
     "availability": "La vue Imprimer est uniquement disponible pour les gestionnaires de dictionnaires et les contributeurs.",
     "max_entries": "Nombre maximum d'entrées",
     "columns": "Colonnes",
-    "headword_size": "Taille du mot",
+    "headword_size": "Taille du mot-clé",
     "font_size": "Taille de la police"
   },
   "import_page": {
@@ -337,7 +337,7 @@
     "instructions_2": "Cliquez sur le bouton bleu « Lien vers le modèle » ci-dessous. Téléchargez le modèle sous forme de fichier Excel ou créez une copie sur Google Docs. Modifiez le modèle en fonction des besoins de votre projet. Copiez et collez vos données dans la feuille de calcul.",
     "instructions_3": "Utilisez le « Contactez-nous » ci-dessous pour nous contacter. Faites-nous savoir que vous disposez d'une nouvelle feuille de calcul prête à être importée. Posez-nous toutes vos questions. Nous vous répondrons par email, puis vous pourrez nous envoyer votre dossier.",
     "instructions_4": "Pour nous envoyer des données exportées à partir de logiciels de dictionnaires comme FLEx, Lexique Pro, Shoebox, veuillez utiliser le bouton « Contactez-nous » ci-dessous et indiquez-nous les détails de votre projet.",
-    "no_imports": "Nous travaillons actuellement avec de nombreuses communautés et organisations partenaires pour importer un grand nombre d'entrées de dictionnaire sur cette plateforme. Nous effectuons également de grandes mises à jour de notre base de données. Nous accepterons les nouvelles importations de données à partir du 1er juillet 2024. Nous apprécions votre patience et nous nous excusons pour la gêne occasionnée."
+    "no_imports": "Nous travaillons actuellement avec de nombreuses communautés et organisations partenaires pour importer un grand nombre d'entrées de dictionnaire sur cette plateforme. Nous effectuons également de grandes mises à jour de notre base de données. Nous accepterons de nouvelles importations de données à partir du 1er juillet 2024. Nous apprécions votre patience et nous nous excusons pour la gêne occasionnée."
   },
   "history": {
     "history": "Histoire",
@@ -349,6 +349,7 @@
     "old_value": "Valeur précédente",
     "new_value": "Nouvelle valeur",
     "entry_message": "Un utilisateur a modifié cette entrée le ",
+    "edited": "Dernière modification le",
     "history_search": "Rechercher des entrées, des éditeurs, des champs et des valeurs",
     "download_history": "Télécharger l'historique au format CSV",
     "empty": "Pas encore d'historique",

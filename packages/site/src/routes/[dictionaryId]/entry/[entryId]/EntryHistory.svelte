@@ -1,35 +1,25 @@
 <script lang="ts">
   import { get_entry_history } from '$lib/supabase/history'
   import { page } from '$app/stores'
+  import { supabase_date_to_friendly } from '$lib/helpers/time'
 
   export let can_edit = false
   export let entry_id: string
-
-  const formatter = new Intl.DateTimeFormat('en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
-    timeZoneName: 'short',
-  })
 </script>
 
 <div class="{$$props.class} text-gray-500">
-  {#if can_edit}
-    <!-- TODO translate -->
-    <strong>{$page.data.t('history.entry_history')}:</strong>
-    {#await get_entry_history(entry_id)}
-      Loading...
-    {:then { entry_content_updates }}
+  <strong>{$page.data.t('history.entry_history')}:</strong>
+  {#await get_entry_history(entry_id)}
+    Loading...
+  {:then { entry_content_updates }}
+    {#if can_edit}
       {#each entry_content_updates as record}
-        <p class="m-3">{$page.data.t('history.entry_message')} {formatter.format(new Date(record.timestamp))}</p>
+        <p class="m-3">{$page.data.t('history.entry_message')} {supabase_date_to_friendly(new Date(record.timestamp))}</p>
       {/each}
-    {:catch error}
-      <p class="m-3">Error: {error.message}</p>
-    {/await}
-  {:else}
-    <p class="m-3">Last edited on {new Date(history[0].updatedAtMs).toDateString()}</p>
-  {/if}
+    {:else}
+      <p class="m-3">{$page.data.t('history.edited')} {new Date(entry_content_updates[0].timestamp).toDateString()}</p>
+    {/if}
+  {:catch error}
+    <p class="m-3">Error: {error.message}</p>
+  {/await}
 </div>

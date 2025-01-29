@@ -349,6 +349,7 @@
     "old_value": "Valor anterior",
     "new_value": "Nuevo valor",
     "entry_message": "Un usuario editó esta entrada el ",
+    "edited": "Última edición el",
     "history_search": "Buscar entradas, editores, campos y valores",
     "download_history": "Descargar historial como CSV",
     "empty": "No hay historial todavía",

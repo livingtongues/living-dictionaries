@@ -349,6 +349,7 @@
     "old_value": "Nilai Bekas",
     "new_value": "Nilai Baru",
     "entry_message": "Seorang pengguna mengedit entri ini pada ",
+    "edited": "Terakhir diedit pada",
     "history_search": "Cari entri, editor, medan dan nilai",
     "download_history": "Muat turun Sejarah sebagai CSV",
     "empty": "Tiada sejarah lagi",
@@ -369,7 +370,7 @@
     "add": "Tambah Sense"
   },
   "banner": {
-    "message": "Kami sedang membuat penambahbaikan pada pangkalan data kami pada 22 Oktober bermula jam 7 malam Waktu Timur (New York), selama 24 jam. Keupayaan mengedit tidak akan tersedia dalam tempoh tersebut. Maaf atas kesulitan.",
+    "message": "Kami sedang membuat penambahbaikan pada pangkalan data kami pada 22 Oktober bermula jam 7 malam Waktu Timur (New York), selama 24 jam. Keupayaan mengedit tidak akan tersedia dalam tempoh tersebut. Maaf atas kesulitan ini.",
     "attention": "Perhatian"
   }
 }
