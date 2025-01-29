@@ -16,8 +16,8 @@ export function printDate(date: Date | number): string {
   }).format(date)
 }
 
-export function supabase_date_to_friendly(date: Date | number): string {
-  return new Intl.DateTimeFormat('en-US', {
+export function supabase_date_to_friendly(date: Date | number, language_code = 'en-US'): string {
+  return new Intl.DateTimeFormat(language_code, {
     year: 'numeric',
     month: 'short',
     day: 'numeric',

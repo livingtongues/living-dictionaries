@@ -14,7 +14,7 @@
   {:then { entry_content_updates }}
     {#if can_edit}
       {#each entry_content_updates as record}
-        <p class="m-3">{$page.data.t('history.entry_message')} {supabase_date_to_friendly(new Date(record.timestamp))}</p>
+        <p class="m-3">{$page.data.t('history.entry_message')} {supabase_date_to_friendly(new Date(record.timestamp), $page.data.locale)}</p>
       {/each}
     {:else}
       <p class="m-3">{$page.data.t('history.edited')} {new Date(entry_content_updates[0].timestamp).toDateString()}</p>

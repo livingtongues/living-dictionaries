@@ -2,6 +2,7 @@
   import type { EntryView, Tables } from '@living-dictionaries/types'
   import { sortedColumn } from './sortedColumnStore'
   import { supabase_date_to_friendly } from '$lib/helpers/time'
+  import { page } from '$app/stores'
 
   export let record: Tables<'content_updates'>
   export let entry: EntryView
@@ -18,6 +19,6 @@
     {`${JSON.stringify(record.change.data)}` || ''}
   </td>
   <td class:font-bold={$sortedColumn === 'date'}>
-    {supabase_date_to_friendly(new Date(record.timestamp)) || ''}
+    {supabase_date_to_friendly(new Date(record.timestamp), $page.data.locale) || ''}
   </td>
 </tr>
