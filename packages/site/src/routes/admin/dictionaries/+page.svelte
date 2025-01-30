@@ -1,9 +1,8 @@
 <script lang="ts">
-  import type { IHelper, IInvite, TablesUpdate } from '@living-dictionaries/types'
+  import type { DictionaryView, IHelper, IInvite, TablesUpdate } from '@living-dictionaries/types'
   import { collectionStore, getCollection } from 'sveltefirets'
   import { Button, IntersectionObserverShared, ResponsiveTable } from 'svelte-pieces'
   import { where } from 'firebase/firestore'
-  import { onMount } from 'svelte'
   import DictionaryRow from './DictionaryRow.svelte'
   import SortDictionaries from './SortDictionaries.svelte'
   import type { DictionaryWithHelperStores } from './dictionaryWithHelpers'
@@ -11,6 +10,8 @@
   import type { PageData } from './$types'
   import Filter from '$lib/components/Filter.svelte'
   import { api_update_dictionary } from '$api/db/update-dictionary/_call'
+  import { browser } from '$app/environment'
+  import { page } from '$app/stores'
 
   export let data: PageData
 
@@ -19,18 +20,24 @@
 
   let dictionariesAndHelpers: DictionaryWithHelperStores[] = []
 
-  onMount(async () => {
-    dictionariesAndHelpers = await get_dictionaries_with_helpers()
-  })
+  $: active_section = $page.url.searchParams.get('filter') as 'public' | 'private' | 'other'
 
-  async function get_dictionaries_with_helpers() {
-    const { data: dictionaries, error } = await data.supabase.from('dictionaries_view')
-      .select()
-    if (error) {
-      console.error(error)
-      alert(error.message)
-      return []
+  $: if (browser) {
+    get_dictionaries_with_helpers(active_section).then(dictionaries => dictionariesAndHelpers = dictionaries)
+  }
+
+  async function get_dictionaries_with_helpers(section: 'public' | 'private' | 'other') {
+    let dictionaries: DictionaryView[]
+    if (section === 'public') {
+      dictionaries = await data.get_public_dictionaries()
+    } else if (section === 'private') {
+      dictionaries = await data.get_private_dictionaries()
+    } else if (section === 'other') {
+      dictionaries = await data.get_other_dictionaries()
+    } else {
+      dictionaries = await data.get_public_dictionaries()
     }
+
     return dictionaries.map((dictionary) => {
       return {
         ...dictionary,
@@ -49,7 +56,7 @@
   async function update_dictionary(change: TablesUpdate<'dictionaries'> & { id: string }) {
     try {
       await api_update_dictionary(change)
-      dictionariesAndHelpers = await get_dictionaries_with_helpers()
+      dictionariesAndHelpers = await get_dictionaries_with_helpers(active_section)
     } catch (err) {
       alert(`Error: ${err}`)
     }
@@ -82,53 +89,7 @@
           <IntersectionObserverShared bottom={2000} let:intersecting once>
             <tr>
               {#if intersecting}
-                <DictionaryRow
-                  {index}
-                  {dictionary}
-                  on:toggleprivacy={() => {
-                    update_dictionary({
-                      id: dictionary.id,
-                      public: !dictionary.public,
-                    })
-                  }}
-                  on:addalternatename={(event) => {
-                    update_dictionary({
-                      id: dictionary.id,
-                      alternate_names: [...(dictionary.alternate_names || []), event.detail],
-                    })
-                  }}
-                  on:removealternatename={(event) => {
-                    update_dictionary({
-                      id: dictionary.id,
-                      alternate_names: dictionary.alternate_names.filter(name => name !== event.detail),
-                    })
-                  }}
-                  on:updatecoordinates={({ detail: { lat, lng } }) => {
-                    const [, ...rest] = dictionary.coordinates?.points || []
-                    update_dictionary({
-                      id: dictionary.id,
-                      coordinates: {
-                        points: [{ coordinates: { latitude: lat, longitude: lng } }, ...rest],
-                        regions: dictionary.coordinates?.regions,
-                      },
-                    })
-                  }}
-                  on:removecoordinates={() => {
-                    const [, ...rest] = dictionary.coordinates?.points || []
-                    update_dictionary({
-                      id: dictionary.id,
-                      coordinates: {
-                        points: rest,
-                        regions: dictionary.coordinates?.regions,
-                      },
-                    })
-                  }}
-                  on:toggleconlang={() => {
-                    update_dictionary({
-                      id: dictionary.id,
-                      con_language_description: !dictionary.con_language_description ? 'YES' : null,
-                    })
-                  }} />
+                <DictionaryRow {index} {dictionary} {update_dictionary} />
               {:else}
                 <td colspan="30"> Loading... </td>
               {/if}

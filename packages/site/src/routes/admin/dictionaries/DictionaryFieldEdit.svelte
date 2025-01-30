@@ -1,30 +1,27 @@
 <script lang="ts">
-  import { updateOnline } from 'sveltefirets';
-  export let field;
-  export let value;
-  export let dictionaryId;
+  import type { TablesUpdate } from '@living-dictionaries/types'
 
-  let debouncedSaveTimer;
-  let unsaved = false;
+  export let field: keyof TablesUpdate<'dictionaries'>
+  export let value: string
+  export let dictionary_id: string
+  export let update_dictionary: (change: TablesUpdate<'dictionaries'> & { id: string }) => Promise<void>
+
+  let debouncedSaveTimer: NodeJS.Timeout
+  let unsaved = false
+
   function valueChanged() {
-    unsaved = true;
-    clearTimeout(debouncedSaveTimer);
-    debouncedSaveTimer = setTimeout(save, 2000);
+    unsaved = true
+    clearTimeout(debouncedSaveTimer)
+    debouncedSaveTimer = setTimeout(save, 2000)
   }
 
   async function save() {
     try {
-      await updateOnline(`dictionaries/${dictionaryId}`, { [field]: value });
-      unsaved = false;
+      await update_dictionary({ id: dictionary_id, [field]: value })
+      unsaved = false
     } catch (err) {
-      alert(err);
+      alert(err)
     }
-  // const data = await db.collection('dictionaries').doc(dictionaryId).get();
-    // if (data.exists) {
-    //   console.log(data.data());
-    // } else {
-    //   this.error("no data");
-    // }
   }
 </script>
 

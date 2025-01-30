@@ -22,6 +22,8 @@ export const load: PageLoad = ({ parent }) => {
     const { data: private_dictionaries, error } = await supabase.from('materialized_dictionaries_view')
       .select()
       .neq('public', true)
+      .is('con_language_description', null)
+
     if (error) {
       console.error(error)
     }

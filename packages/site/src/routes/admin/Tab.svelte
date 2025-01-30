@@ -1,12 +1,14 @@
 <script lang="ts">
-  export let link = '';
-  import { page } from '$app/stores';
+  import { page } from '$app/stores'
+
+  export let link: string
+  export let label: string
 </script>
 
 <a
   href={`/admin/${link}`}
-  class={$page.url.pathname.match(/(\w+)$/)[0] === link ? 'active' : 'inactive'}>
-  {link}
+  class={$page.url.href.split('/').pop() === link ? 'active' : 'inactive'}>
+  {label}
 </a>
 
 <style>
