@@ -343,17 +343,18 @@
     "history": "",
     "entry": "",
     "editor": "",
-    "action": "",
+    "entry_history": "",
     "field": "",
     "date": "",
     "old_value": "",
     "new_value": "",
-    "created": "",
+    "entry_message": "",
     "edited": "",
-    "deleted": "",
     "history_search": "",
     "download_history": "",
-    "empty": ""
+    "empty": "",
+    "type": "",
+    "change": ""
   },
   "partnership": {
     "title": "",

@@ -343,17 +343,18 @@
     "history": "Lịch sử",
     "entry": "Lối vào",
     "editor": "Biên tập viên",
-    "action": "Hoạt động",
+    "entry_history": "Lịch sử nhập cảnh",
     "field": "Cánh đồng",
     "date": "Ngày",
     "old_value": "Giá trị cũ",
     "new_value": "Giá trị mới",
-    "created": "Tạo",
-    "edited": "Đã chỉnh sửa",
-    "deleted": "Bị xóa",
+    "entry_message": "Một người dùng đã chỉnh sửa mục này trên ",
+    "edited": "Chỉnh sửa lần cuối vào",
     "history_search": "Tìm kiếm mục, người chỉnh sửa, trường và giá trị",
     "download_history": "Tải xuống Lịch sử dưới dạng CSV",
-    "empty": "Chưa có lịch sử"
+    "empty": "Chưa có lịch sử",
+    "type": "kiểu",
+    "change": "lịch sử_thay đổi"
   },
   "partnership": {
     "title": "Tổ chức đối tác",

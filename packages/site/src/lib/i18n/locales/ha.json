@@ -33,12 +33,12 @@
     "export_data": "Bayanai na fitarwa (CSV, tsarin PDF)",
     "import_export": "Shigo da Fitarwa (FLEx, Daidaitaccen Tsarin)",
     "geo_tagging": "Geo-tagging shigarwar",
-    "flashcard_view": "Duba Katin Filasha don Masu Koyan Harshe",
+    "flashcard_view": "Duban Katin Flash don Masu Koyan Harshe",
     "peer_review": "Sharhin Tsari na Haruffa",
     "suggestions_from_users": "Shawarwari daga Masu amfani",
     "push_notifications": "Tura Sanarwa zuwa Masu Gudunmawa",
     "contributor_awards": "Kyautar Al'umma masu Ba da gudummawa",
-    "question_1": "Da fatan za a ba da wasu bayanan baya game da wannan harshe. A ina ake magana? Wadanne al'ummomi ne ke jin wannan yare? Shin wannan yare yana cikin haɗari?",
+    "question_1": "Da fatan za a ba da wasu bayanan baya game da wannan harshe. A ina ake magana? Wadanne al'ummomi ne ke jin wannan yare? Shin wannan harshe yana cikin haɗari?",
     "question_2": "Menene sunayen mutanen da suka gina wannan ƙamus? Muryoyin wa ke cikin wannan ƙamus?",
     "question_3": "Daga ina bayanan da ke cikin wannan ƙamus suka fito? Da fatan za a kwatanta idan kun tattara bayanan da kanku. Idan kun yi amfani da wasu hanyoyin da aka buga, da fatan za a jera su.",
     "question_4": "Wanene zai yi amfani da wannan ƙamus? Za a yi amfani da shi a cikin kowane ayyukan ilimi?",
@@ -93,7 +93,7 @@
     "send_message": "aika sako",
     "message_sent": "Saƙon aika. Za mu amsa da zaran mun iya.",
     "what_is_your_question": "Mene ne tambaya ko comment?",
-    "message_failed": "aika sako ya kasa. Bincika haɗin Intanet ɗin ku ko yi mana imel:",
+    "message_failed": "aika sako ya kasa. Bincika haɗin Intanet ɗinku ko yi mana imel:",
     "delete_dictionary": "Share ƙamus",
     "public_dictionary": "Yi ƙamus na jama'a",
     "import_data": "Shigo da bayanai",
@@ -131,7 +131,7 @@
     "select_region": "Zaɓi Yanki",
     "secondary_coordinates": "Coordinates na Sakandare",
     "map_instructions": "Danna kan taswirar don ƙara daidaitawa na sakandare.",
-    "print_access": "Ba da damar Masu kallo su Buga ƙamus",
+    "print_access": "Bada Masu kallo su Buga ƙamus",
     "primary_coordinate": "Haɗin kai na farko"
   },
   "dictionary": {
@@ -243,7 +243,7 @@
     "next": "Na gaba",
     "export": "fitarwa",
     "images": "Hotuna",
-    "reset": "Sake saiti",
+    "reset": "Sake saitin",
     "invalid_url": "Wannan ba ingantaccen URL bane",
     "downloading": "Ana saukewa",
     "upload": "Loda",
@@ -333,7 +333,7 @@
   "import_page": {
     "import": "Shigo da",
     "template_link": "Hanyar haɗi zuwa Samfura",
-    "instructions_1": "Idan kun riga kuna da bayanan harshe waɗanda kuke son shigo da su cikin ƙamus ɗin ku, da fatan za a bi matakan da ke ƙasa.",
+    "instructions_1": "Idan kun riga kuna da bayanan harshe waɗanda kuke son shigo da su cikin ƙamus ɗinku, da fatan za a bi matakan da ke ƙasa.",
     "instructions_2": "Danna maɓallin shuɗin \"Haɗin zuwa Samfura\" a ƙasa. Zazzage samfurin azaman fayil ɗin Excel, ko ƙirƙirar kwafi akan Google Docs. Shirya samfurin bisa ga bukatun aikin ku. Kwafi da liƙa bayanan ku a cikin maƙunsar bayanai.",
     "instructions_3": "Yi amfani da \"Contact Us\" da ke ƙasa don tuntuɓar mu. Bari mu san cewa kuna da sabon maƙunsar rubutu wanda ke shirye don shigo da kaya. Yi mana tambayoyi da kuke da su. Za mu amsa muku ta imel, sannan za ku iya aiko mana da fayil ɗin ku.",
     "instructions_4": "Don aiko mana da bayanan da aka fitar daga manhajojin ƙamus kamar FLEx, Lexique Pro, Shoebox, da fatan za a yi amfani da maɓallin “Contact Us” da ke ƙasa kuma gaya mana cikakkun bayanai na aikin ku.",
@@ -343,17 +343,18 @@
     "history": "Tarihi",
     "entry": "Shiga",
     "editor": "Edita",
-    "action": "Aiki",
+    "entry_history": "Tarihin shigarwa",
     "field": "Filin",
     "date": "Kwanan wata",
     "old_value": "Tsohon Daraja",
     "new_value": "Sabon Daraja",
-    "created": "Ƙirƙiri",
-    "edited": "Gyara",
-    "deleted": "An share",
+    "entry_message": "Mai amfani ya gyara wannan shigarwa akan ",
+    "edited": "An gyara na ƙarshe",
     "history_search": "Bincika shigarwar, masu gyara, filaye da ƙima",
     "download_history": "Zazzage Tarihi azaman CSV",
-    "empty": "Babu tarihi tukuna"
+    "empty": "Babu tarihi tukuna",
+    "type": "nau'in",
+    "change": "tarihi_canza"
   },
   "partnership": {
     "title": "Ƙungiyoyin Abokan Hulɗa",
@@ -369,7 +370,7 @@
     "add": "Ƙara Hankali"
   },
   "banner": {
-    "message": "Muna yin gyare-gyare ga bayananmu a ranar 22 ga Oktoba daga karfe 7 na yamma agogon Gabas (New York), na awanni 24. Ba za a sami damar gyarawa ba a lokacin. Yi hakuri da cikas.",
+    "message": "Muna ci gaba da inganta bayanan mu a ranar 22 ga Oktoba daga karfe 7 na yamma agogon Gabas (New York), na awanni 24. Ba za a sami damar gyarawa ba a lokacin. Yi hakuri da cikas.",
     "attention": "Hankali"
   }
 }

@@ -343,17 +343,18 @@
     "history": "Historial",
     "entry": "Entrada",
     "editor": "Editor",
-    "action": "Acción",
+    "entry_history": "Historial de entrada",
     "field": "Campo",
     "date": "Fecha",
     "old_value": "Valor anterior",
     "new_value": "Nuevo valor",
-    "created": "Creado",
-    "edited": "Editado",
-    "deleted": "Eliminado",
+    "entry_message": "Un usuario editó esta entrada el ",
+    "edited": "Última edición el",
     "history_search": "Buscar entradas, editores, campos y valores",
     "download_history": "Descargar historial como CSV",
-    "empty": "No hay historial todavía"
+    "empty": "No hay historial todavía",
+    "type": "tipo",
+    "change": "Historial de cambio"
   },
   "partnership": {
     "title": "Organizaciones asociadas",
