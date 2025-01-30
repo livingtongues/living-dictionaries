@@ -343,17 +343,18 @@
     "history": "Sejarah",
     "entry": "Pintu masuk",
     "editor": "Editor",
-    "action": "Tindakan",
+    "entry_history": "Sejarah masuk",
     "field": "Bidang",
     "date": "Tanggal",
     "old_value": "Nilai Sebelumnya",
     "new_value": "Nilai Baru",
-    "created": "Dibuat",
-    "edited": "Diedit",
-    "deleted": "Dihapus",
+    "entry_message": "Seorang pengguna mengedit entri ini ",
+    "edited": "Terakhir diedit pada",
     "history_search": "Entri pencarian, editor, bidang dan nilai",
     "download_history": "Unduh Riwayat sebagai CSV",
-    "empty": "Belum ada sejarah"
+    "empty": "Belum ada sejarah",
+    "type": "jenis",
+    "change": "sejarah_perubahan"
   },
   "partnership": {
     "title": "Organisasi Mitra",

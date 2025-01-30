@@ -89,6 +89,7 @@
       <span class="i-fa6-solid-chevron-right rtl-x-flip -mt-1" />
     </Button>
   {/if}
+  <!-- {#if lastFieldUpdatedAt}<p class="mt-3 text-xs text-gray-500">This dictionary was last updated on {new Date(lastFieldUpdatedAt).toString()}</p>{/if} -->
 </div>
 
 <style>

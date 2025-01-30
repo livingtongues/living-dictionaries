@@ -40,7 +40,7 @@
     "contributor_awards": "Récompenses de la communauté des contributeurs",
     "question_1": "Veuillez fournir quelques informations générales sur cette langue. Où est-il parlé ? Quelles communautés parlent cette langue ? Cette langue est-elle en danger ?",
     "question_2": "Quels sont les noms des personnes qui ont construit ce dictionnaire ? À qui appartiennent les voix de ce dictionnaire ?",
-    "question_3": "D’où viennent les données de ce dictionnaire ? Veuillez décrire si vous avez collecté les données vous-même. Si vous avez utilisé des sources de référence publiées, veuillez les énumérer.",
+    "question_3": "D’où proviennent les données de ce dictionnaire ? Veuillez décrire si vous avez collecté les données vous-même. Si vous avez utilisé des sources de référence publiées, veuillez les énumérer.",
     "question_4": "Qui utilisera ce dictionnaire ? Sera-t-il utilisé dans des projets éducatifs ?",
     "question_5": "Si vous souhaitez que le public vous contacte à propos de ce projet, veuillez fournir vos coordonnées ou un lien vers où les gens peuvent en savoir plus. Ceci est facultatif.",
     "message": "Avant de rendre votre dictionnaire public, veuillez remplir la section À propos."
@@ -343,17 +343,18 @@
     "history": "Histoire",
     "entry": "Entrée",
     "editor": "Éditeur",
-    "action": "Action",
+    "entry_history": "Historique des entrées",
     "field": "Champ",
     "date": "Date",
     "old_value": "Valeur précédente",
     "new_value": "Nouvelle valeur",
-    "created": "Créé",
-    "edited": "Édité",
-    "deleted": "Supprimé",
+    "entry_message": "Un utilisateur a modifié cette entrée le ",
+    "edited": "Dernière modification le",
     "history_search": "Rechercher des entrées, des éditeurs, des champs et des valeurs",
     "download_history": "Télécharger l'historique au format CSV",
-    "empty": "Pas encore d'historique"
+    "empty": "Pas encore d'historique",
+    "type": "taper",
+    "change": "historique_change"
   },
   "partnership": {
     "title": "Organisations partenaires",
