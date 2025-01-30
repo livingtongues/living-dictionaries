@@ -1,17 +1,11 @@
 <script lang="ts">
-  import type { Tables } from '@living-dictionaries/types'
+  import type { EntryView, Tables } from '@living-dictionaries/types'
   import { sortedColumn } from './sortedColumnStore'
   import { HistoryFields } from './historyFields'
   import { page } from '$app/stores'
 
   export let history: Tables<'content_updates'>[] = []
-  const { entries } = $page.data
-  // TODO make it generic
-  const get_lexeme = (entry_id, sense_id) => {
-    const [lexeme] = $entries.filter(entry =>
-      entry.id === entry_id || entry.senses.some(sense => sense.id === sense_id))
-    return lexeme
-  }
+  export let get_entry: (record: Tables<'content_updates'>) => EntryView
 
   type SortFields = keyof typeof HistoryFields
   // @ts-ignore
@@ -34,8 +28,8 @@
     // prettier-ignore
     switch (sortKey) {
       case 'entryName':
-        valueA = String(get_lexeme(a.entry_id, a.sense_id)?.id || '')
-        valueB = String(get_lexeme(b.entry_id, b.sense_id)?.id || '')
+        valueA = String(get_entry(a) || 'zz')
+        valueB = String(get_entry(b) || 'zz')
         break
       case 'type':
         valueA = String(a.change.type || 0)

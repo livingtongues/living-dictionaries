@@ -1,21 +1,22 @@
 <script lang="ts">
   import { Button, ResponsiveTable } from 'svelte-pieces'
+  import type { EntryView, Tables } from '@living-dictionaries/types'
   import RecordRow from './RecordRow.svelte'
   import SortRecords from './sortRecords.svelte'
+  import type { PageData } from './$types'
   import { page } from '$app/stores'
   import Filter from '$lib/components/Filter.svelte'
   import { downloadObjectsAsCSV } from '$lib/export/csv'
   import { supabase_date_to_friendly } from '$lib/helpers/time'
 
-  export let data
+  export let data: PageData
   const { entries } = $page.data
-  // eslint-disable-next-line svelte/no-reactive-functions
-  $: get_lexeme = (record) => {
-    const [lexeme] = $entries.filter(entry =>
-      entry.id === record.entry_id || entry.senses.some(sense => sense.id === record.sense_id))
-    return lexeme
-  }
   $: ({ dictionary, can_edit, content_updates } = data)
+
+  function get_entry(record: Tables<'content_updates'>): EntryView {
+    return $entries.find(entry =>
+      entry.id === record.entry_id || entry.senses.some(sense => sense.id === record.sense_id))
+  }
 
   function exportHistoryAsCSV() {
     const headers = {
@@ -27,7 +28,7 @@
 
     const formattedUsers = content_updates.map((record) => {
       return {
-        entryName: get_lexeme(record)?.main.lexeme.default,
+        entryName: get_entry(record)?.main.lexeme.default,
         type: JSON.stringify(record.change.type),
         change: JSON.stringify(record.change.data),
         date: supabase_date_to_friendly(new Date(record.timestamp)),
@@ -50,9 +51,9 @@
         </div>
         <div class="mb-1" />
         <ResponsiveTable stickyColumn stickyHeading>
-          <SortRecords history={filteredRecords} let:sortedRecords>
+          <SortRecords history={filteredRecords} let:sortedRecords {get_entry}>
             {#each sortedRecords as record}
-              <RecordRow {record} entry={get_lexeme(record)} />
+              <RecordRow {record} {get_entry} />
             {/each}
           </SortRecords>
         </ResponsiveTable>

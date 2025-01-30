@@ -5,12 +5,12 @@
   import { page } from '$app/stores'
 
   export let record: Tables<'content_updates'>
-  export let entry: EntryView
+  export let get_entry: (record: Tables<'content_updates'>) => EntryView
 </script>
 
 <tr>
   <td class:font-bold={$sortedColumn === 'entryName'}>
-    <a class="underline hover:no-underline text-blue-500 visited:text-purple-500" href="entry/{record.entry_id}" target="_blank">{entry?.main.lexeme.default}</a>
+    <a class="underline hover:no-underline text-blue-500 visited:text-purple-500" href="entry/{record.entry_id}" target="_blank">{get_entry(record)?.main.lexeme.default || '__'}</a>
   </td>
   <td class:font-bold={$sortedColumn === 'type'}>
     {`${String(record.change.type)}` || ''}
