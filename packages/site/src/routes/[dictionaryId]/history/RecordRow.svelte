@@ -19,6 +19,6 @@
     {`${JSON.stringify(record.change.data)}` || ''}
   </td>
   <td class:font-bold={$sortedColumn === 'date'}>
-    {supabase_date_to_friendly(new Date(record.timestamp), $page.data.locale) || ''}
+    {supabase_date_to_friendly(record.timestamp, $page.data.locale) || ''}
   </td>
 </tr>

@@ -150,7 +150,7 @@
   {dictionary.orthographies?.length? dictionary.orthographies.map(({ name }) => name.default) : ''}
 </td>
 <td class="whitespace-nowrap">
-  {#if dictionary.created_at}{supabase_date_to_friendly(new Date(dictionary.created_at))}{/if}
+  {#if dictionary.created_at}{supabase_date_to_friendly(dictionary.created_at)}{/if}
 </td>
 <td>{dictionary.language_used_by_community !== undefined
   ? dictionary.language_used_by_community

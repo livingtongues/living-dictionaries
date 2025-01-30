@@ -31,7 +31,7 @@
         entryName: get_entry(record)?.main.lexeme.default,
         type: JSON.stringify(record.change.type),
         change: JSON.stringify(record.change.data),
-        date: supabase_date_to_friendly(new Date(record.timestamp)),
+        date: supabase_date_to_friendly(record.timestamp),
       }
     })
 
