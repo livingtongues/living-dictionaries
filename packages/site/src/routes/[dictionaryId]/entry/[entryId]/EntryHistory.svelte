@@ -8,7 +8,7 @@
 </script>
 
 <div class="{$$props.class} text-gray-500">
-  <strong>{$page.data.t('history.entry_history')}:</strong>
+  <strong>{$page.data.t('history.entry_history')} (work in progress):</strong>
   {#await get_entry_history(entry_id)}
     Loading...
   {:then { entry_content_updates }}
@@ -17,7 +17,7 @@
         <p class="m-3">{$page.data.t('history.entry_message')} {supabase_date_to_friendly(record.timestamp, $page.data.locale)}</p>
       {/each}
     {:else}
-      <p class="m-3">{$page.data.t('history.edited')} {new Date(entry_content_updates[0].timestamp).toDateString()}</p>
+      <p class="m-3">{$page.data.t('history.edited')} {supabase_date_to_friendly(entry_content_updates[0].timestamp, $page.data.locale)}</p>
     {/if}
   {:catch error}
     <p class="m-3">Error: {error.message}</p>
