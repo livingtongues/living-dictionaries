@@ -1,7 +1,7 @@
 <script lang="ts">
   import { BadgeArrayEmit, Button, ShowHide } from 'svelte-pieces'
-  import { createEventDispatcher } from 'svelte'
   import { updateOnline } from 'sveltefirets'
+  import type { TablesUpdate } from '@living-dictionaries/types'
   import DictionaryFieldEdit from './DictionaryFieldEdit.svelte'
   import RolesManagment from './RolesManagment.svelte'
   import type { DictionaryWithHelperStores } from './dictionaryWithHelpers'
@@ -12,31 +12,27 @@
 
   export let index: number
   export let dictionary: DictionaryWithHelperStores
+  export let update_dictionary: (change: TablesUpdate<'dictionaries'> & { id: string }) => Promise<void>
+
   const { managers, contributors, writeInCollaborators, invites } = dictionary
   $: ({ admin } = $page.data)
-
-  const dispatch = createEventDispatcher<{
-    addalternatename: string
-    removealternatename: string
-    toggleprivacy: boolean
-    togglevideoaccess: boolean
-    updatecoordinates: { lat: number, lng: number }
-    removecoordinates: boolean
-    toggleconlang: boolean
-  }>()
 </script>
 
 <td class="relative">
   <span on:click={() => window.open(`/${dictionary.id}`)} class="absolute top-0 left-0 text-xs text-gray-400 cursor-pointer">{index + 1}</span>
-  <DictionaryFieldEdit field="name" value={dictionary.name} dictionaryId={dictionary.id} />
+  <DictionaryFieldEdit field="name" value={dictionary.name} dictionary_id={dictionary.id} {update_dictionary} />
 </td>
 <td>
   <Button
     color={dictionary.public ? 'green' : 'orange'}
     size="sm"
-    onclick={() => {
-      if (confirm('Flip this dictionary\'s visibility?'))
-        dispatch('toggleprivacy')
+    onclick={async () => {
+      if (confirm('Flip this dictionary\'s visibility?')) {
+        await update_dictionary({
+          id: dictionary.id,
+          public: !dictionary.public,
+        })
+      }
     }}>
     {dictionary.public ? 'Public' : 'Private'}
   </Button>
@@ -91,15 +87,17 @@
 </td>
 <td>
   <DictionaryFieldEdit
-    field="iso6393"
+    field="iso_639_3"
     value={dictionary.iso_639_3}
-    dictionaryId={dictionary.id} />
+    dictionary_id={dictionary.id}
+    {update_dictionary} />
 </td>
 <td>
   <DictionaryFieldEdit
     field="glottocode"
     value={dictionary.glottocode}
-    dictionaryId={dictionary.id} />
+    dictionary_id={dictionary.id}
+    {update_dictionary} />
 </td>
 <td>
   <ShowHide let:show let:toggle>
@@ -116,9 +114,25 @@
           lat={dictionary.coordinates?.points?.length ? dictionary.coordinates.points[0].coordinates.latitude : undefined}
           lng={dictionary.coordinates?.points?.length ? dictionary.coordinates.points[0].coordinates.longitude : undefined}
           on:update={({ detail: { lat, lng } }) => {
-            dispatch('updatecoordinates', { lat, lng })
+            const [, ...rest] = dictionary.coordinates?.points || []
+            update_dictionary({
+              id: dictionary.id,
+              coordinates: {
+                points: [{ coordinates: { latitude: lat, longitude: lng } }, ...rest],
+                regions: dictionary.coordinates?.regions,
+              },
+            })
           }}
-          on:remove={() => dispatch('removecoordinates')}
+          on:remove={() => {
+            const [, ...rest] = dictionary.coordinates?.points || []
+            update_dictionary({
+              id: dictionary.id,
+              coordinates: {
+                points: rest,
+                regions: dictionary.coordinates?.regions,
+              },
+            })
+          }}
           on:close={toggle} />
       {/await}
     {/if}
@@ -128,7 +142,8 @@
   <DictionaryFieldEdit
     field="location"
     value={dictionary.location}
-    dictionaryId={dictionary.id} />
+    dictionary_id={dictionary.id}
+    {update_dictionary} />
 </td>
 <td>
   <BadgeArrayEmit addMessage="Add" strings={dictionary.gloss_languages} />
@@ -141,10 +156,19 @@
     strings={dictionary.alternate_names}
     on:additem={() => {
       const name = prompt('Enter alternate name:')
-      if (name)
-        dispatch('addalternatename', name)
+      if (name) {
+        update_dictionary({
+          id: dictionary.id,
+          alternate_names: [...(dictionary.alternate_names || []), name],
+        })
+      }
     }}
-    on:itemremoved={e => dispatch('removealternatename', e.detail.value)} />
+    on:itemremoved={({ detail: { value } }) => {
+      update_dictionary({
+        id: dictionary.id,
+        alternate_names: dictionary.alternate_names.filter(name => name !== value),
+      })
+    }} />
 </td>
 <td>
   {dictionary.orthographies?.length? dictionary.orthographies.map(({ name }) => name.default) : ''}
@@ -167,8 +191,12 @@
     color={dictionary.con_language_description ? 'green' : 'orange'}
     size="sm"
     onclick={() => {
-      if (confirm('Flip this dictionary\'s visibility?'))
-        dispatch('toggleconlang')
+      if (confirm('Toggle con lang status?')) {
+        update_dictionary({
+          id: dictionary.id,
+          con_language_description: !dictionary.con_language_description ? 'YES' : null,
+        })
+      }
     }}>
     {dictionary.con_language_description ? 'YES' : 'NO'}
   </Button>
