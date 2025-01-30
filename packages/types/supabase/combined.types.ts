@@ -2356,6 +2356,7 @@ export interface Database {
           metadata: DictionaryMetadata | null
           name: string | null
           orthographies: Orthography[] | null
+          print_access: boolean | null
           public: boolean | null
           updated_at: string | null
           updated_by: string | null
@@ -2426,6 +2427,7 @@ export interface Database {
       materialized_dictionaries_view: {
         Row: {
           alternate_names: string[] | null
+          con_language_description: string | null
           coordinates: Coordinates | null
           entry_count: number | null
           gloss_languages: string[] | null

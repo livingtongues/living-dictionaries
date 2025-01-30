@@ -1821,6 +1821,7 @@ export interface Database {
           metadata: Json | null
           name: string | null
           orthographies: Json[] | null
+          print_access: boolean | null
           public: boolean | null
           updated_at: string | null
           updated_by: string | null
@@ -1874,6 +1875,7 @@ export interface Database {
       materialized_dictionaries_view: {
         Row: {
           alternate_names: string[] | null
+          con_language_description: string | null
           coordinates: Json | null
           entry_count: number | null
           gloss_languages: string[] | null
