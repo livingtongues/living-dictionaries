@@ -5,6 +5,13 @@
   import { page } from '$app/stores'
 
   export let history: Tables<'content_updates'>[] = []
+  const { entries } = $page.data
+  // TODO make it generic
+  const get_lexeme = (entry_id, sense_id) => {
+    const [lexeme] = $entries.filter(entry =>
+      entry.id === entry_id || entry.senses.some(sense => sense.id === sense_id))
+    return lexeme
+  }
 
   type SortFields = keyof typeof HistoryFields
   // @ts-ignore
@@ -27,8 +34,8 @@
     // prettier-ignore
     switch (sortKey) {
       case 'entryName':
-        valueA = String(a.change.data?.lexeme?.default || 0)
-        valueB = String(b.change.data?.lexeme?.default || 0)
+        valueA = String(get_lexeme(a.entry_id, a.sense_id)?.id || '')
+        valueB = String(get_lexeme(b.entry_id, b.sense_id)?.id || '')
         break
       case 'type':
         valueA = String(a.change.type || 0)
@@ -38,10 +45,6 @@
         valueA = String(a.timestamp || 0)
         valueB = String(b.timestamp || 0)
         break
-      // case 'action':
-      //   valueA = getActionValue(a)
-      //   valueB = getActionValue(b)
-      //   break
       default:
         valueA = a[sortKey] ? JSON.stringify(a[sortKey]).toUpperCase() : 'zz'
         valueB = b[sortKey] ? JSON.stringify(b[sortKey]).toUpperCase() : 'zz'
