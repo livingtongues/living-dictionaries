@@ -37,7 +37,7 @@
     "peer_review": "Sharhin Tsari na Haruffa",
     "suggestions_from_users": "Shawarwari daga Masu amfani",
     "push_notifications": "Tura Sanarwa zuwa Masu Gudunmawa",
-    "contributor_awards": "Kyautar Al'umma masu Ba da gudummawa",
+    "contributor_awards": "Kyautar Al'umma Mai Ba da gudummawa",
     "question_1": "Da fatan za a ba da wasu bayanan baya game da wannan harshe. A ina ake magana? Wadanne al'ummomi ne ke jin wannan yare? Shin wannan harshe yana cikin haɗari?",
     "question_2": "Menene sunayen mutanen da suka gina wannan ƙamus? Muryoyin wa ke cikin wannan ƙamus?",
     "question_3": "Daga ina bayanan da ke cikin wannan ƙamus suka fito? Da fatan za a kwatanta idan kun tattara bayanan da kanku. Idan kun yi amfani da wasu hanyoyin da aka buga, da fatan za a jera su.",
@@ -251,7 +251,9 @@
     "negation": "a'a",
     "clean": "Tsaftace",
     "map": "Taswira",
-    "guidance": "Jagoranci"
+    "guidance": "Jagoranci",
+    "out_of_service": "Na gode da ziyartar gidan yanar gizon mu! Ana kan gina wannan shafin na ɗan lokaci.\nBa zai kasance tsakanin Fabrairu 3 da Fabrairu 12, 2025 ba.\nDa fatan za a sake ziyartar wannan shafin a ranar 13 ga Fabrairu, 2025.\nZa ku iya ƙirƙirar sabbin ƙamus na Rayuwa a lokacin.\nYi hakuri da rashin jin daɗi, kuma na gode da haƙurin ku.\nA halin yanzu, sauran dandamali suna aiki akai-akai.",
+    "transmitter": "Da gaske, ƙungiyar Kamus na Rayuwa"
   },
   "settings": {
     "community_permission": "Shin magana al'umma damar wannan harshe ya zama online?",
@@ -309,7 +311,7 @@
     "video_url": "URL na bidiyo",
     "video_credit": "Bidiyo bashi",
     "prepare_to_record_video": "Shirya don yin rikodi da Makirufo & Kamara",
-    "video_info": "Akwai hanyoyi guda biyu don nuna bidiyon ku a cikin Kamus na Rayuwa: 1) Kuna iya yin rikodin bidiyonku nan, ko loda bidiyon ku da aka yi rikodi a dandali. Abũbuwan amfãni: mai sauƙi kuma mai girma don rikodin sauri. Hasara: Kuna iya loda bidiyo har zuwa 100MB kawai don haka dole ne ya zama gajere kuma mara nauyi. 2) Samun bidiyon ku akan sabis na talla wanda ya ƙware a ajiyar bidiyo da haɗa URL zuwa rukunin yanar gizon mu. Abũbuwan amfãni: mai sauƙi (idan dai an riga an ɗora bidiyon ku akan wannan dandamali), bidiyon ku na iya samun ƙuduri da tsawon da kuke so. Rashin hasara: idan kuna son yin rikodin wani abu na bazata ko kuma mai sauqi qwarai, yana iya zama ƙoƙari da yawa don yin haka, kuma kuna iya fifita hanya ta 1.",
+    "video_info": "Akwai hanyoyi guda biyu don nuna bidiyon ku a cikin Kamus na Rayuwa: 1) Kuna iya yin rikodin bidiyonku nan, ko loda bidiyon ku da aka yi rikodi a dandali. Abũbuwan amfãni: mai sauƙi kuma mai girma don rikodin sauri. Hasara: Kuna iya loda bidiyo har zuwa 100MB kawai don haka dole ne ya zama gajere kuma mara nauyi. 2) Samun bidiyon ku akan sabis na talla wanda ya ƙware a ajiyar bidiyo da haɗa URL zuwa rukunin yanar gizon mu. Abũbuwan amfãni: mai sauƙi (idan dai an riga an ɗora bidiyon ku akan wannan dandamali), bidiyon ku na iya samun ƙuduri da tsawon da kuke so. Hasara: idan kuna son yin rikodin wani abu na bazata ko kuma mai sauqi qwarai, yana iya zama ƙoƙari da yawa don yin haka, kuma kuna iya fifita hanya ta 1.",
     "paste_video_url": "Manna hanyar haɗin YouTube ko Vimeo",
     "record_upload_video": "Yi rikodin ko loda bidiyo",
     "view": "Duba",

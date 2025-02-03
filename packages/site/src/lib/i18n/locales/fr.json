@@ -131,7 +131,7 @@
     "select_region": "Sélectionnez une région",
     "secondary_coordinates": "Coordonnées secondaires",
     "map_instructions": "Cliquez sur la carte pour ajouter des coordonnées secondaires.",
-    "print_access": "Autoriser les spectateurs à imprimer le dictionnaire",
+    "print_access": "Autoriser les téléspectateurs à imprimer le dictionnaire",
     "primary_coordinate": "Coordonnée principale"
   },
   "dictionary": {
@@ -251,7 +251,9 @@
     "negation": "Non",
     "clean": "Faire le ménage",
     "map": "Carte",
-    "guidance": "Conseils"
+    "guidance": "Conseils",
+    "out_of_service": "Merci d'avoir visité notre site Web! Cette page est temporairement en construction.\nIl ne sera pas disponible entre le 3 et le 12 février 2025.\nVeuillez visiter à nouveau cette page le 13 février 2025.\nVous pourrez alors créer de nouveaux dictionnaires vivants.\nDésolé pour le désagrément et merci pour votre patience.\nEn attendant, le reste de la plateforme fonctionne normalement.",
+    "transmitter": "Cordialement, l'équipe de Living Dictionaries"
   },
   "settings": {
     "community_permission": "La communauté linguistique permet-elle à cette langue d'être en ligne ?",
@@ -327,7 +329,7 @@
     "availability": "La vue Imprimer est uniquement disponible pour les gestionnaires de dictionnaires et les contributeurs.",
     "max_entries": "Nombre maximum d'entrées",
     "columns": "Colonnes",
-    "headword_size": "Taille du mot-clé",
+    "headword_size": "Taille du mot",
     "font_size": "Taille de la police"
   },
   "import_page": {
