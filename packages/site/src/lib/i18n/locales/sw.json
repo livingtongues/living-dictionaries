@@ -251,7 +251,9 @@
     "negation": "hapana",
     "clean": "Safi",
     "map": "Ramani",
-    "guidance": "Mwongozo"
+    "guidance": "Mwongozo",
+    "out_of_service": "Asante kwa kutembelea tovuti yetu! Ukurasa huu unajengwa kwa muda.\nHaitapatikana kati ya Februari 3 na Februari 12, 2025.\nTafadhali tembelea ukurasa huu tena tarehe 13 Februari 2025.\nUtaweza kuunda Kamusi mpya Hai kwa wakati huo.\nPole kwa usumbufu, na asante kwa uvumilivu wako.\nKwa sasa, jukwaa lingine linafanya kazi kama kawaida.",
+    "transmitter": "Kwa dhati, timu ya Kamusi Hai"
   },
   "settings": {
     "community_permission": "Je, jamii ya wazungumzaji inaruhusu lugha hii kuwekwa mtandaoni?",
