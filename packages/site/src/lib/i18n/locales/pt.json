@@ -251,7 +251,9 @@
     "negation": "não",
     "clean": "Limpar",
     "map": "Mapa",
-    "guidance": "Orientação"
+    "guidance": "Orientação",
+    "out_of_service": "Obrigado por visitar nosso site! Esta página está temporariamente em construção.\nNão estará disponível entre 3 e 12 de fevereiro de 2025.\nVisite esta página novamente em 13 de fevereiro de 2025.\nVocê poderá criar novos Dicionários Vivos nesse momento.\nDesculpe pelo inconveniente e obrigado pela sua paciência.\nEnquanto isso, o restante da plataforma funciona normalmente.",
+    "transmitter": "Atenciosamente, a equipe do Living Dictionaries"
   },
   "settings": {
     "community_permission": "A comunidade falante permite que esta língua esteja on-line?",

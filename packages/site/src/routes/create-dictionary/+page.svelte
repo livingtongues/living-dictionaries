@@ -1,13 +1,7 @@
 <script lang="ts">
-  import { Button, Form } from 'svelte-pieces'
-  import type { IPoint, IRegion } from '@living-dictionaries/types'
   import { convertToFriendlyUrl } from './convertToFriendlyUrl'
   import { page } from '$app/stores'
   import Header from '$lib/components/shell/Header.svelte'
-  import EditableGlossesField from '$lib/components/settings/EditableGlossesField.svelte'
-  import WhereSpoken from '$lib/components/settings/WhereSpoken.svelte'
-  import EditableAlternateNames from '$lib/components/settings/EditableAlternateNames.svelte'
-  import { glossingLanguages } from '$lib/glosses/glossing-languages'
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte'
   import { debounce } from '$lib/helpers/debounce'
 
@@ -18,17 +12,17 @@
 
   let modal: 'auth' = null
 
-  let name = ''
-  let gloss_languages = new Set(['en'])
-  let alternate_names: string[] = []
-  let points: IPoint[] = []
-  let regions: IRegion[] = []
-  let iso_639_3 = ''
-  let glottocode = ''
-  let language_used_by_community: boolean
-  let community_permission: 'yes' | 'no' | 'unknown'
-  let author_connection = ''
-  let con_language_description = ''
+  const name = ''
+  // const gloss_languages = new Set(['en'])
+  // const alternate_names: string[] = []
+  // const points: IPoint[] = []
+  // const regions: IRegion[] = []
+  // const iso_639_3 = ''
+  // const glottocode = ''
+  // let language_used_by_community: boolean
+  // let community_permission: 'yes' | 'no' | 'unknown'
+  // const author_connection = ''
+  // const con_language_description = ''
 
   $: urlFromName = convertToFriendlyUrl(name, MAX_URL_LENGTH)
   let customUrl: string
@@ -56,7 +50,15 @@
 
 <Header>{$page.data.t('create.create_new_dictionary')}</Header>
 
-<Form
+<div class="flex justify-center my-[50px] mx-6 md:mx-auto md:w-[35%] text-justify">
+  <strong>
+    <p>{$page.data.t('misc.out_of_service')}</p>
+    <br />
+    <p>{$page.data.t('misc.transmitter')}</p>
+  </strong>
+</div>
+
+<!-- <Form
   let:loading
   onsubmit={async () => {
     if (!$user) return modal = 'auth'
@@ -144,10 +146,10 @@
         remove_language={(languageId) => {
           gloss_languages.delete(languageId)
           gloss_languages = gloss_languages
-        }} />
-      <!-- not used in web app presently -->
-      <!-- placeholder={$page.data.t('create.languages')} -->
-      <div class="mb-6" />
+        }} /> -->
+<!-- not used in web app presently -->
+<!-- placeholder={$page.data.t('create.languages')} -->
+<!-- <div class="mb-6" />
 
       <EditableAlternateNames
         alternateNames={alternate_names}
@@ -238,9 +240,9 @@
       <div class="mb-6" />
 
       <div class="mb-2 text-sm font-medium text-gray-700">
-        {$page.data.t('create.community_permission')}*
-        <!-- Similar to create.speech_community_permission but not the same -->
-      </div>
+        {$page.data.t('create.community_permission')}* -->
+<!-- Similar to create.speech_community_permission but not the same -->
+<!-- </div>
       <label class="block">
         <input
           type="radio"
@@ -315,7 +317,7 @@
       <div class="mb-6" />
     {/if}
   </div>
-</Form>
+</Form> -->
 
 {#if modal === 'auth'}
   {#await import('$lib/components/shell/AuthModal.svelte') then { default: AuthModal }}
