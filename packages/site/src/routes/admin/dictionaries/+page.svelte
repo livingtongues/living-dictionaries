@@ -77,7 +77,7 @@
       <Button
         form="filled"
         color="black"
-        onclick={async () => await exportAdminDictionariesAsCSV(filteredDictionaries)}>
+        onclick={async () => await exportAdminDictionariesAsCSV(filteredDictionaries, active_section)}>
         <i class="fas fa-download mr-1" />
         Download {filteredDictionaries.length} Dictionaries as CSV
       </Button>

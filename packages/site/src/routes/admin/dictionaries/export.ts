@@ -25,7 +25,7 @@ type AdminDictionaryForCSV = {
 
 const admin_headers: AdminDictionaryForCSV = { ...AdminDictionaryCSVFields }
 
-export async function exportAdminDictionariesAsCSV(dictionariesAndHelpers: DictionaryWithHelperStores[]) {
+export async function exportAdminDictionariesAsCSV(dictionariesAndHelpers: DictionaryWithHelperStores[], section: 'public' | 'private' | 'other') {
   const dictionaries = await getAllDictionariesAndHelpers(dictionariesAndHelpers)
 
   const formatted_dictionaries: (StandardDictionaryForCSV & AdminDictionaryForCSV)[] = dictionaries.map((dictionary) => {
@@ -58,7 +58,7 @@ export async function exportAdminDictionariesAsCSV(dictionariesAndHelpers: Dicti
   downloadObjectsAsCSV(
     { ...standard_headers, ...admin_headers },
     formatted_dictionaries,
-    'living-dictionaries-public-private',
+    `living-dictionaries-${section}`,
   )
 }
 
