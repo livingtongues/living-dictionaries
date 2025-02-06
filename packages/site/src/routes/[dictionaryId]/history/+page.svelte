@@ -17,10 +17,10 @@
 
   let content_updates: Tables<'content_updates'>[] = []
   onMount(() => {
-    const usnub = entries.loading.subscribe(async (loading) => {
+    const unsub = entries.loading.subscribe(async (loading) => {
       if (!loading) {
         content_updates = await get_content_updates()
-        usnub()
+        unsub()
       }
       loading_content_updates = loading
     })
