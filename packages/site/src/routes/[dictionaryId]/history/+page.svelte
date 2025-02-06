@@ -1,6 +1,7 @@
 <script lang="ts">
   import { Button, ResponsiveTable } from 'svelte-pieces'
   import type { EntryView, Tables } from '@living-dictionaries/types'
+  import { onMount } from 'svelte'
   import RecordRow from './RecordRow.svelte'
   import SortRecords from './sortRecords.svelte'
   import type { PageData } from './$types'
@@ -10,8 +11,20 @@
   import { supabase_date_to_friendly } from '$lib/helpers/time'
 
   export let data: PageData
+  let loading_content_updates = true
   const { entries } = $page.data
-  $: ({ dictionary, can_edit, content_updates } = data)
+  $: ({ dictionary, can_edit, get_content_updates } = data)
+
+  let content_updates: Tables<'content_updates'>[] = []
+  onMount(() => {
+    const usnub = entries.loading.subscribe(async (loading) => {
+      loading_content_updates = loading
+      if (!loading) {
+        content_updates = await get_content_updates()
+        usnub()
+      }
+    })
+  })
 
   function get_entry(record: Tables<'content_updates'>): EntryView {
     return $entries.find(entry =>
@@ -59,6 +72,8 @@
         </ResponsiveTable>
       </Filter>
     </div>
+  {:else if loading_content_updates}
+    {$page.data.t('misc.loading')}...
   {:else}
     {$page.data.t('history.empty')}
   {/if}
