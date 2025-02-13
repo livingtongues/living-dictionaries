@@ -252,7 +252,7 @@
     "clean": "Faire le ménage",
     "map": "Carte",
     "guidance": "Conseils",
-    "out_of_service": "Merci d'avoir visité notre site Web! Cette page est temporairement en construction.\nIl ne sera pas disponible entre le 3 et le 12 février 2025.\nVeuillez visiter à nouveau cette page le 13 février 2025.\nVous pourrez créer de nouveaux dictionnaires vivants à ce moment-là.\nNous sommes désolés des désagréments causés cette pause, et merci pour votre patience.\nEn attendant, le reste de la plateforme fonctionne normalement.",
+    "out_of_service": "Merci d'avoir visité notre site Web! Cette page est temporairement en construction.\nIl ne sera pas disponible entre le 3 et le 16 février 2025.\nVeuillez visiter à nouveau cette page le 17 février 2025.\nVous pourrez créer de nouveaux dictionnaires vivants à ce moment-là.\nNous sommes désolés des désagréments causés cette pause, et merci pour votre patience.\nEn attendant, le reste de la plateforme fonctionne normalement.",
     "transmitter": "Cordialement, l'équipe de Living Dictionaries"
   },
   "settings": {
@@ -329,7 +329,7 @@
     "availability": "La vue Imprimer est uniquement disponible pour les gestionnaires de dictionnaires et les contributeurs.",
     "max_entries": "Nombre maximum d'entrées",
     "columns": "Colonnes",
-    "headword_size": "Taille du mot",
+    "headword_size": "Taille du mot-clé",
     "font_size": "Taille de la police"
   },
   "import_page": {
