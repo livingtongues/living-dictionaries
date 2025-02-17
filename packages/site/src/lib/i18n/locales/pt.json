@@ -252,7 +252,7 @@
     "clean": "Limpar",
     "map": "Mapa",
     "guidance": "Orientação",
-    "out_of_service": "Obrigado por visitar nosso site! Esta página está temporariamente em construção.\nNão estará disponível entre 3 e 16 de fevereiro de 2025.\nVisite esta página novamente em 17 de fevereiro de 2025.\nVocê poderá criar novos Dicionários Vivos nesse momento.\nDesculpe pelo inconveniente e obrigado pela sua paciência.\nEnquanto isso, o restante da plataforma funciona normalmente.",
+    "out_of_service": "Obrigado por visitar nosso site! Esta página está temporariamente em construção.\nNão estará disponível entre 3 e 28 de fevereiro de 2025.\nVisite esta página novamente em 1º de março de 2025.\nVocê poderá criar novos Dicionários Vivos nesse momento.\nDesculpe pelo inconveniente e obrigado pela sua paciência.\nEnquanto isso, o restante da plataforma funciona normalmente.",
     "transmitter": "Atenciosamente, a equipe do Living Dictionaries"
   },
   "settings": {
@@ -345,7 +345,7 @@
     "history": "História",
     "entry": "Entrada",
     "editor": "Editor",
-    "entry_history": "Histórico de entrada",
+    "entry_history": "Histórico de entradas",
     "field": "Campo",
     "date": "Data",
     "old_value": "Valor anterior",
