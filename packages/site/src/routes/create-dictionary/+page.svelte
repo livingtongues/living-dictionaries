@@ -1,7 +1,13 @@
 <script lang="ts">
+  import { Button, Form } from 'svelte-pieces'
+  import type { IPoint, IRegion } from '@living-dictionaries/types'
   import { convertToFriendlyUrl } from './convertToFriendlyUrl'
   import { page } from '$app/stores'
   import Header from '$lib/components/shell/Header.svelte'
+  import EditableGlossesField from '$lib/components/settings/EditableGlossesField.svelte'
+  import WhereSpoken from '$lib/components/settings/WhereSpoken.svelte'
+  import EditableAlternateNames from '$lib/components/settings/EditableAlternateNames.svelte'
+  import { glossingLanguages } from '$lib/glosses/glossing-languages'
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte'
   import { debounce } from '$lib/helpers/debounce'
 
@@ -12,17 +18,23 @@
 
   let modal: 'auth' = null
 
-  const name = ''
-  // const gloss_languages = new Set(['en'])
-  // const alternate_names: string[] = []
-  // const points: IPoint[] = []
-  // const regions: IRegion[] = []
-  // const iso_639_3 = ''
-  // const glottocode = ''
-  // let language_used_by_community: boolean
-  // let community_permission: 'yes' | 'no' | 'unknown'
-  // const author_connection = ''
-  // const con_language_description = ''
+  let name = ''
+  let gloss_languages = new Set(['en'])
+  let alternate_names: string[] = []
+  let points: IPoint[] = []
+  let regions: IRegion[] = []
+  let iso_639_3 = ''
+  let glottocode = ''
+  let conlang: boolean
+  let language_used_by_community: boolean
+  let community_permission: 'yes' | 'no' | 'unknown'
+  let author_connection = ''
+  let agreement: boolean
+  let cite_agreement: boolean
+  let non_commercial_agreement: boolean
+  let conlang_info = ''
+  let conlang_use = ''
+  const con_language_description = ''
 
   $: urlFromName = convertToFriendlyUrl(name, MAX_URL_LENGTH)
   let customUrl: string
@@ -50,15 +62,7 @@
 
 <Header>{$page.data.t('create.create_new_dictionary')}</Header>
 
-<div class="flex justify-center my-[50px] mx-6 md:mx-auto md:w-[35%] text-justify">
-  <strong>
-    <p>{$page.data.t('misc.out_of_service')}</p>
-    <br />
-    <p>{$page.data.t('misc.transmitter')}</p>
-  </strong>
-</div>
-
-<!-- <Form
+<Form
   let:loading
   onsubmit={async () => {
     if (!$user) return modal = 'auth'
@@ -135,95 +139,15 @@
       {/if}
       <div class="mb-6" />
 
-      <EditableGlossesField
-        minimum={1}
-        availableLanguages={glossingLanguages}
-        selectedLanguages={Array.from(gloss_languages)}
-        add_language={(languageId) => {
-          gloss_languages.add(languageId)
-          gloss_languages = gloss_languages
-        }}
-        remove_language={(languageId) => {
-          gloss_languages.delete(languageId)
-          gloss_languages = gloss_languages
-        }} /> -->
-<!-- not used in web app presently -->
-<!-- placeholder={$page.data.t('create.languages')} -->
-<!-- <div class="mb-6" />
-
-      <EditableAlternateNames
-        alternateNames={alternate_names}
-        on_update={new_value => alternate_names = new_value} />
-      <div class="mb-6" />
-
-      <WhereSpoken
-        dictionary={{ coordinates: { points, regions } }}
-        on_update_points={new_points => points = new_points}
-        on_update_regions={new_regions => regions = new_regions} />
-      <div class="mb-6" />
-
-      <div class="flex">
-        <div class="w-1/2">
-          <label for="isocode" class="block text-sm font-medium text-gray-700">
-            ISO 639-3
-            <a
-              href="https://en.wikipedia.org/wiki/ISO_639-3"
-              target="_blank"
-              rel="noreferrer"
-              class="text-gray-600 hover:text-gray:800">
-              <i class="far fa-info-circle" />
-            </a>
-          </label>
-          <div class="mt-1 rounded-md shadow-sm">
-            <input
-              id="isocode"
-              type="text"
-              autocomplete="off"
-              autocorrect="off"
-              spellcheck={false}
-              minlength="3"
-              maxlength="30"
-              bind:value={iso_639_3}
-              class="form-input w-full" />
-          </div>
-        </div>
-        <div class="w-1" />
-        <div class="w-1/2">
-          <label for="glottocode" class="block text-sm font-medium text-gray-700">
-            Glottocode
-            <a
-              href="https://en.wikipedia.org/wiki/Glottolog"
-              target="_blank"
-              rel="noreferrer"
-              class="text-gray-600 hover:text-gray:800">
-              <i class="far fa-info-circle" />
-            </a>
-          </label>
-          <div class="mt-1 rounded-md shadow-sm">
-            <input
-              id="glottocode"
-              type="text"
-              autocomplete="off"
-              autocorrect="off"
-              spellcheck={false}
-              minlength="3"
-              maxlength="30"
-              bind:value={glottocode}
-              class="form-input w-full" />
-          </div>
-        </div>
-      </div>
-      <div class="mb-6" />
-
       <div class="mb-2 text-sm font-medium text-gray-700">
-        {$page.data.t('create.language_used_by_community')}*
+        Is this a constructed language or an artificial language?
       </div>
 
       <label class="block">
         <input
           type="radio"
-          name="languageUsedByCommunity"
-          bind:group={language_used_by_community}
+          name="conlang"
+          bind:group={conlang}
           value={true}
           required />
         {$page.data.t('misc.assertion')}
@@ -232,63 +156,231 @@
       <label class="block">
         <input
           type="radio"
-          name="languageUsedByCommunity"
-          bind:group={language_used_by_community}
+          name="conlang"
+          bind:group={conlang}
           value={false} />
         {$page.data.t('misc.negation')}
       </label>
       <div class="mb-6" />
 
-      <div class="mb-2 text-sm font-medium text-gray-700">
-        {$page.data.t('create.community_permission')}* -->
-<!-- Similar to create.speech_community_permission but not the same -->
-<!-- </div>
-      <label class="block">
-        <input
-          type="radio"
-          name="communityPermission"
-          bind:group={community_permission}
-          value="yes"
-          required />
-        {$page.data.t('misc.assertion')}
-      </label>
+      {#if conlang === true}
+        <div>
+          <p>
+            <em>
+              Since our mission focuses on documenting endangered and minority natural human languages, we do not offer technical support for constructed languages (conlangs) or artificial languages. Due to our small team and limited hours of operation, we do not offer data imports for conlangs.
+            </em>
+          </p>
+          <p>
+            <em>
+              Living Dictionaries for constructed languages will not be made public on our website or available on our homepage map. If we see derogatory content in this Living Dictionary, we also reserve the right to delete it.
+            </em>
+          </p>
+        </div>
+        <div class="mb-6" />
+        <div>
+          <input type="checkbox" id="agreement" name="agreement" bind:checked={agreement} />
+          <label for="agreement">I agree to the above.</label>
+        </div>
+        <div>
+          <input type="checkbox" id="citeAgreement" name="citeAgreement" bind:checked={cite_agreement} />
+          <label for="citeAgreement">I agree to cite any relevant published works within dictionary entries.</label>
+        </div>
+        <div>
+          <input type="checkbox" id="non-commercialAgreement" name="non-commercialAgreement" bind:checked={non_commercial_agreement} />
+          <label for="non-commercialAgreement">I agree that this work is non-commercial.</label>
+        </div>
+        <div class="mb-6" />
 
-      <label class="block">
-        <input
-          type="radio"
-          name="communityPermission"
-          bind:group={community_permission}
-          value="no" />
-        {$page.data.t('misc.negation')}
-      </label>
+        <label class="block mb-2 text-sm font-medium text-gray-700" for="conlangInfo">
+          Where did the data in this dictionary come from? Please describe if you collected the data yourself. If you used any published reference sources, please list them here.
+        </label>
+        <textarea
+          name="conlangInfo"
+          required
+          rows="5"
+          minlength="100"
+          maxlength="2500"
+          bind:value={conlang_info}
+          class="form-input w-full" />
+        <div class="flex text-xs">
+          <div class="text-gray-500 ml-auto">{conlang_info.length}/2500</div>
+        </div>
+        <div class="mb-6" />
 
-      <label class="block">
-        <input
-          type="radio"
-          name="communityPermission"
-          bind:group={community_permission}
-          value="unknown" />
-        {$page.data.t('create.uncertainty')}
-      </label>
-      <div class="mb-6" />
+        <label class="block mb-2 text-sm font-medium text-gray-700" for="conlangUse">
+          Who will be using this dictionary? Will it be used in any educational or media projects?
+        </label>
+        <textarea
+          name="conlangUse"
+          required
+          rows="5"
+          minlength="100"
+          maxlength="2500"
+          bind:value={conlang_use}
+          class="form-input w-full" />
+        <div class="flex text-xs">
+          <div class="text-gray-500 ml-auto">{conlang_use.length}/2500</div>
+        </div>
+        <div class="mb-6" />
+      {/if}
 
-      <label class="block mb-2 text-sm font-medium text-gray-700" for="authorConnection">
-        {$page.data.t('create.author_connection')}*
-      </label>
-      <textarea
-        name="authorConnection"
-        required
-        rows="5"
-        minlength="100"
-        maxlength="2500"
-        bind:value={author_connection}
-        class="form-input w-full" />
-      <div class="flex text-xs">
-        <div class="text-gray-500 ml-auto">{author_connection.length}/2500</div>
-      </div>
-      <div class="mb-6" />
+      {#if conlang != null}
+        <EditableGlossesField
+          minimum={1}
+          availableLanguages={glossingLanguages}
+          selectedLanguages={Array.from(gloss_languages)}
+          add_language={(languageId) => {
+            gloss_languages.add(languageId)
+            gloss_languages = gloss_languages
+          }}
+          remove_language={(languageId) => {
+            gloss_languages.delete(languageId)
+            gloss_languages = gloss_languages
+          }} />
+        <!-- not used in web app presently -->
+        <!-- placeholder={$page.data.t('create.languages')} -->
+        <div class="mb-6" />
 
-      <label class="block mb-2 text-sm font-medium text-gray-700" for="conLangDescription">
+        <EditableAlternateNames
+          alternateNames={alternate_names}
+          on_update={new_value => alternate_names = new_value} />
+        <div class="mb-6" />
+
+        <!-- <div class="mb-2 text-sm font-medium text-gray-700">
+          {$page.data.t('create.language_used_by_community')}*
+        </div>
+
+        <label class="block">
+          <input
+            type="radio"
+            name="languageUsedByCommunity"
+            bind:group={language_used_by_community}
+            value={true}
+            required />
+          {$page.data.t('misc.assertion')}
+        </label>
+
+        <label class="block">
+          <input
+            type="radio"
+            name="languageUsedByCommunity"
+            bind:group={language_used_by_community}
+            value={false} />
+          {$page.data.t('misc.negation')}
+        </label>
+        <div class="mb-6" /> -->
+
+      {/if}
+      {#if conlang === false}
+        <WhereSpoken
+          dictionary={{ coordinates: { points, regions } }}
+          on_update_points={new_points => points = new_points}
+          on_update_regions={new_regions => regions = new_regions} />
+        <div class="mb-6" />
+
+        <div class="flex">
+          <div class="w-1/2">
+            <label for="isocode" class="block text-sm font-medium text-gray-700">
+              ISO 639-3
+              <a
+                href="https://en.wikipedia.org/wiki/ISO_639-3"
+                target="_blank"
+                rel="noreferrer"
+                class="text-gray-600 hover:text-gray:800">
+                <i class="far fa-info-circle" />
+              </a>
+            </label>
+            <div class="mt-1 rounded-md shadow-sm">
+              <input
+                id="isocode"
+                type="text"
+                autocomplete="off"
+                autocorrect="off"
+                spellcheck={false}
+                minlength="3"
+                maxlength="30"
+                bind:value={iso_639_3}
+                class="form-input w-full" />
+            </div>
+          </div>
+          <div class="w-1" />
+          <div class="w-1/2">
+            <label for="glottocode" class="block text-sm font-medium text-gray-700">
+              Glottocode
+              <a
+                href="https://en.wikipedia.org/wiki/Glottolog"
+                target="_blank"
+                rel="noreferrer"
+                class="text-gray-600 hover:text-gray:800">
+                <i class="far fa-info-circle" />
+              </a>
+            </label>
+            <div class="mt-1 rounded-md shadow-sm">
+              <input
+                id="glottocode"
+                type="text"
+                autocomplete="off"
+                autocorrect="off"
+                spellcheck={false}
+                minlength="3"
+                maxlength="30"
+                bind:value={glottocode}
+                class="form-input w-full" />
+            </div>
+          </div>
+        </div>
+        <div class="mb-6" />
+
+        <div class="mb-2 text-sm font-medium text-gray-700">
+          {$page.data.t('create.community_permission')}*
+          <!-- Similar to create.speech_community_permission but not the same -->
+        </div>
+        <label class="block">
+          <input
+            type="radio"
+            name="communityPermission"
+            bind:group={community_permission}
+            value="yes"
+            required />
+          {$page.data.t('misc.assertion')}
+        </label>
+
+        <label class="block">
+          <input
+            type="radio"
+            name="communityPermission"
+            bind:group={community_permission}
+            value="no" />
+          {$page.data.t('misc.negation')}
+        </label>
+
+        <label class="block">
+          <input
+            type="radio"
+            name="communityPermission"
+            bind:group={community_permission}
+            value="unknown" />
+          {$page.data.t('create.uncertainty')}
+        </label>
+        <div class="mb-6" />
+
+        <label class="block mb-2 text-sm font-medium text-gray-700" for="authorConnection">
+          {$page.data.t('create.author_connection')}*
+        </label>
+        <textarea
+          name="authorConnection"
+          required
+          rows="5"
+          minlength="100"
+          maxlength="2500"
+          bind:value={author_connection}
+          class="form-input w-full" />
+        <div class="flex text-xs">
+          <div class="text-gray-500 ml-auto">{author_connection.length}/2500</div>
+        </div>
+        <div class="mb-6" />
+
+        <!-- <label class="block mb-2 text-sm font-medium text-gray-700" for="conLangDescription">
         {$page.data.t('create.con_lang_description')}
       </label>
       <textarea
@@ -301,23 +393,37 @@
       <div class="flex text-xs">
         <div class="text-gray-500 ml-auto">{con_language_description.length}/1000</div>
       </div>
-      <div class="mb-6" />
+      <div class="mb-6" /> -->
 
-      <Button type="submit" class="w-full" form="filled" disabled={!online} {loading}>
-        {#if !online}
-          Return online to
-        {/if}
-        {$page.data.t('create.create_dictionary')}
-      </Button>
+        <!-- TODO Translate these -->
+        <div>
+          <input type="checkbox" id="citeAgreement" name="citeAgreement" bind:checked={cite_agreement} />
+          <label for="citeAgreement">I agree to cite any relevant published works within dictionary entries.</label>
+        </div>
+        <div>
+          <input type="checkbox" id="non-commercialAgreement" name="non-commercialAgreement" bind:checked={non_commercial_agreement} />
+          <label for="non-commercialAgreement">I agree that this work is non-commercial.</label>
+        </div>
+        <div class="mb-6" />
+      {/if}
 
-      <div class="mt-2 text-sm text-gray-600">
-        {$page.data.t('terms.agree_by_submit')}
-        <a href="/terms" class="underline" target="_blank">{$page.data.t('dictionary.terms_of_use')}</a>.
-      </div>
-      <div class="mb-6" />
+      {#if (conlang && agreement && cite_agreement && non_commercial_agreement) || (!conlang && cite_agreement && non_commercial_agreement)}
+        <Button type="submit" class="w-full" form="filled" disabled={!online} {loading}>
+          {#if !online}
+            Return online to
+          {/if}
+          {$page.data.t('create.create_dictionary')}
+        </Button>
+
+        <div class="mt-2 text-sm text-gray-600">
+          {$page.data.t('terms.agree_by_submit')}
+          <a href="/terms" class="underline" target="_blank">{$page.data.t('dictionary.terms_of_use')}</a>.
+        </div>
+        <div class="mb-6" />
+      {/if}
     {/if}
   </div>
-</Form> -->
+</Form>
 
 {#if modal === 'auth'}
   {#await import('$lib/components/shell/AuthModal.svelte') then { default: AuthModal }}
