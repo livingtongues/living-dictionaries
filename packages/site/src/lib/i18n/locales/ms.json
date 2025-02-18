@@ -34,7 +34,7 @@
     "import_export": "Import/Eksport (FLEx, Format Standard)",
     "geo_tagging": "Entri penandaan geo",
     "flashcard_view": "Paparan Kad Imbas untuk Pelajar Bahasa",
-    "peer_review": "Tinjauan Rakan Sebaya terhadap Ejaan",
+    "peer_review": "Tinjauan Rakan Sebaya Ejaan",
     "suggestions_from_users": "Cadangan daripada Pengguna",
     "push_notifications": "Pemberitahuan Tolak kepada Penyumbang",
     "contributor_awards": "Anugerah Komuniti Penyumbang",
@@ -252,7 +252,7 @@
     "clean": "Bersih",
     "map": "Peta",
     "guidance": "Bimbingan",
-    "out_of_service": "Terima kasih kerana melawat laman web kami! Halaman ini sedang dalam pembinaan buat sementara waktu.\nIa tidak akan tersedia antara 3 Februari dan 16 Februari 2025.\nSila lawati halaman ini sekali lagi pada 17 Februari 2025.\nAnda akan dapat mencipta Kamus Hidup baharu pada masa itu.\nMaaf atas kesulitan ini, dan terima kasih atas kesabaran anda.\nSementara itu, seluruh platform berfungsi seperti biasa.",
+    "out_of_service": "Terima kasih kerana melawat laman web kami! Halaman ini sedang dalam pembinaan buat sementara waktu.\nIa tidak akan tersedia antara 3 Februari dan 28 Februari 2025.\nSila lawati halaman ini sekali lagi pada 1 Mac 2025.\nAnda akan dapat mencipta Kamus Hidup baharu pada masa itu.\nMaaf atas kesulitan ini, dan terima kasih atas kesabaran anda.\nSementara itu, seluruh platform berfungsi seperti biasa.",
     "transmitter": "Yang benar, pasukan Kamus Hidup"
   },
   "settings": {
@@ -335,7 +335,7 @@
   "import_page": {
     "import": "Import",
     "template_link": "Pautan ke Templat",
-    "instructions_1": "Jika anda sudah mempunyai data linguistik yang ingin anda import ke dalam Kamus anda, sila ikuti langkah di bawah.",
+    "instructions_1": "Jika anda sudah mempunyai data linguistik yang ingin anda import ke dalam Kamus anda, sila ikut langkah di bawah.",
     "instructions_2": "Klik pada butang biru \"Pautan ke Templat\" di bawah. Muat turun templat sebagai fail Excel atau buat salinan pada Dokumen Google. Edit templat mengikut keperluan projek anda. Salin dan tampal data anda ke dalam hamparan.",
     "instructions_3": "Gunakan \"Hubungi Kami\" di bawah untuk menghubungi kami. Beritahu kami bahawa anda mempunyai hamparan baharu yang sedia untuk diimport. Tanya kami apa-apa soalan yang anda ada. Kami akan membalas anda melalui e-mel, dan kemudian anda boleh menghantar fail anda kepada kami.",
     "instructions_4": "Untuk menghantar data yang dieksport kepada kami daripada perisian kamus seperti FLEx, Lexique Pro, Shoebox, sila gunakan butang \"Hubungi Kami\" di bawah dan beritahu kami butiran projek anda.",
@@ -348,7 +348,7 @@
     "entry_history": "sejarah kemasukan",
     "field": "Padang",
     "date": "tarikh",
-    "old_value": "Nilai Dahulu",
+    "old_value": "Nilai Bekas",
     "new_value": "Nilai Baru",
     "entry_message": "Seorang pengguna mengedit entri ini pada ",
     "edited": "Terakhir diedit pada",
