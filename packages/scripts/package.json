@@ -14,6 +14,7 @@
   },
   "main": "index.ts",
   "scripts": {
+    "download-audio": "tsx download-audio -e prod",
     "import-dictionary:dev:dry": "tsx import/import.ts --id example-v4",
     "import-dictionary:dev:live": "tsx import/import.ts --id example-v4 --live",
     "import-dictionary:prod:live": "tsx import/import.ts --id example-v4 -e prod --live",
