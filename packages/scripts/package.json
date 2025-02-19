@@ -14,9 +14,9 @@
   },
   "main": "index.ts",
   "scripts": {
-    "import-dictionary:dev:dry": "tsx import/import.ts --id test-004",
-    "import-dictionary:dev:live": "tsx import/import.ts --id test-004 --live",
-    "import-dictionary:prod:live": "tsx import/import.ts --id test-004 -e prod --live",
+    "import-dictionary:dev:dry": "tsx import/import.ts --id example-v4",
+    "import-dictionary:dev:live": "tsx import/import.ts --id example-v4 --live",
+    "import-dictionary:prod:live": "tsx import/import.ts --id example-v4 -e prod --live",
     "update-locales": "tsx locales/update-locales.ts",
     "create-indexes": "tsx create-indexes/add-to-cloudflare.ts",
     "migrate-dictionaries": "tsx migrate-to-supabase/dictionaries.ts -e prod",
@@ -46,7 +46,6 @@
     "pg": "^8.13.1",
     "stream-chain": "^2.2.5",
     "stream-json": "^1.8.0",
-    "sveltefirets": "0.0.42",
     "tsx": "^4.19.0",
     "typescript": "~5.7.2",
     "vitest": "^2.1.4"

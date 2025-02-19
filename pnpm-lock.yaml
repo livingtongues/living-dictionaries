@@ -104,9 +104,6 @@ importers:
       stream-json:
         specifier: ^1.8.0
         version: 1.8.0
-      sveltefirets:
-        specifier: 0.0.42
-        version: 0.0.42(firebase@10.9.0)(svelte@4.2.19)
       tsx:
         specifier: ^4.19.0
         version: 4.19.0
