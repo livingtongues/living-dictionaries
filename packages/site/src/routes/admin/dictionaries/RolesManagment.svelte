@@ -1,47 +1,26 @@
 <script lang="ts">
   import { BadgeArrayEmit, ShowHide } from 'svelte-pieces'
-  import { addOnline } from 'sveltefirets'
-  import type { DictionaryView, HelperRoles, IHelper } from '@living-dictionaries/types'
-  import { removeDictionaryCollaborator, removeDictionaryContributor, removeDictionaryManager } from '$lib/helpers/dictionariesManaging'
+  import type { UserWithDictionaryRoles } from '@living-dictionaries/types/supabase/users.types'
 
-  export let helpers: IHelper[] = []
-  export let dictionary: DictionaryView
-  export let role: HelperRoles
-
-  async function remove(helper: IHelper, dictionary_id: string, role: HelperRoles) {
-    try {
-      if (role === 'manager')
-        await removeDictionaryManager(helper, dictionary_id)
-
-      if (role === 'writeInCollaborator')
-        await removeDictionaryCollaborator(helper, dictionary_id)
-
-      if (role === 'contributor')
-        await removeDictionaryContributor(helper, dictionary_id)
-    } catch (err) {
-      alert(`Error: ${err}`)
-    }
-  }
-
-  async function addWriteInCollaborator() {
-    const name = prompt('Name?')
-    if (name)
-      await addOnline(`dictionaries/${dictionary.id}/writeInCollaborators`, { name })
-  }
+  export let users: UserWithDictionaryRoles[] = []
+  export let editors: UserWithDictionaryRoles[] = []
+  export let remove_editor: (user_id: string) => Promise<void>
+  export let add_editor: (user_id: string) => Promise<void>
+  export let invite_editor: () => Promise<void>
 </script>
 
-<ShowHide let:show let:toggle={toggleSelectUserModal}>
+<ShowHide let:show let:toggle>
   <BadgeArrayEmit
-    strings={helpers.map(h => h.name)}
+    strings={editors.map(({ full_name, email }) => full_name || email)}
     canEdit
     addMessage="Add"
-    on:itemclicked={e => alert(helpers[e.detail.index].id)}
-    on:itemremoved={async e => await remove(helpers[e.detail.index], dictionary.id, role)}
-    on:additem={role === 'writeInCollaborator' ? addWriteInCollaborator : toggleSelectUserModal} />
+    on:itemclicked={e => alert(editors[e.detail.index].id)}
+    on:itemremoved={async e => await remove_editor(editors[e.detail.index].id)}
+    on:additem={toggle} />
 
-  {#if show && role !== 'writeInCollaborator'}
-    {#await import('../users/SelectUserModal.svelte') then { default: SelectUserModal }}
-      <SelectUserModal {dictionary} {role} on_close={toggleSelectUserModal} />
+  {#if show}
+    {#await import('./SelectUserModal.svelte') then { default: SelectUserModal }}
+      <SelectUserModal {users} {add_editor} {invite_editor} on_close={toggle} />
     {/await}
   {/if}
 </ShowHide>

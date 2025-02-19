@@ -1,6 +1,7 @@
 <script lang="ts">
   import { Button, ResponsiveTable } from 'svelte-pieces'
   import type { EntryView, Tables } from '@living-dictionaries/types'
+  import { onMount } from 'svelte'
   import RecordRow from './RecordRow.svelte'
   import SortRecords from './sortRecords.svelte'
   import type { PageData } from './$types'
@@ -11,7 +12,17 @@
 
   export let data: PageData
   const { entries } = $page.data
-  $: ({ dictionary, can_edit, content_updates } = data)
+  $: ({ dictionary, can_edit, get_content_updates } = data)
+
+  let content_updates: Tables<'content_updates'>[] = []
+  onMount(() => {
+    const unsub = entries.loading.subscribe(async (loading) => {
+      if (!loading) {
+        content_updates = await get_content_updates()
+        unsub()
+      }
+    })
+  })
 
   function get_entry(record: Tables<'content_updates'>): EntryView {
     return $entries.find(entry =>

@@ -1,4 +1,3 @@
-import { authState } from 'sveltefirets'
 import { get } from 'svelte/store'
 import type { MultiString, TablesInsert, TablesUpdate } from '@living-dictionaries/types'
 import { page } from '$app/stores'
@@ -9,19 +8,15 @@ import { content_update } from '$api/db/content-update/_call'
 function randomUUID() {
   return window.crypto.randomUUID()
 }
-async function get_pieces() {
-  const auth_state_user = get(authState)
-  const auth_token = await auth_state_user.getIdToken()
-
+function get_pieces() {
   const { params: { dictionaryId: dictionary_id, entryId: entry_id_from_url }, state: { entry_id: entry_id_from_state }, data: { entries, photos, videos, sentences, tags, dialects, speakers } } = get(page)
-  return { auth_token, dictionary_id, entry_id_from_url: entry_id_from_url || entry_id_from_state, refresh_entries: entries.refresh, refresh_photos: photos.refresh, refresh_videos: videos.refresh, refresh_sentences: sentences.refresh, refresh_dialects: dialects.refresh, refresh_speakers: speakers.refresh, refresh_tags: tags.refresh }
+  return { dictionary_id, entry_id_from_url: entry_id_from_url || entry_id_from_state, refresh_entries: entries.refresh, refresh_photos: photos.refresh, refresh_videos: videos.refresh, refresh_sentences: sentences.refresh, refresh_dialects: dialects.refresh, refresh_speakers: speakers.refresh, refresh_tags: tags.refresh }
 }
 
 export async function insert_entry(lexeme: MultiString) {
   try {
-    const { auth_token, dictionary_id, refresh_entries } = await get_pieces()
+    const { dictionary_id, refresh_entries } = get_pieces()
     const { data, error } = await content_update({
-      auth_token,
       update_id: randomUUID(),
       dictionary_id,
       entry_id: randomUUID(),
@@ -48,9 +43,8 @@ export async function update_entry({
   entry_id?: string
 }) {
   try {
-    const { auth_token, dictionary_id, entry_id_from_url, refresh_entries } = await get_pieces()
+    const { dictionary_id, entry_id_from_url, refresh_entries } = get_pieces()
     const { error } = await content_update({
-      auth_token,
       update_id: randomUUID(),
       dictionary_id,
       entry_id: entry_id_from_function || entry_id_from_url || randomUUID(),
@@ -78,10 +72,9 @@ export async function insert_sense({
   sense_id?: string
 }) {
   try {
-    const { auth_token, dictionary_id, refresh_entries } = await get_pieces()
+    const { dictionary_id, refresh_entries } = get_pieces()
 
     const { error } = await content_update({
-      auth_token,
       update_id: randomUUID(),
       dictionary_id,
       entry_id,
@@ -109,9 +102,8 @@ export async function update_sense({
   sense_id: string
 }) {
   try {
-    const { auth_token, dictionary_id, refresh_entries } = await get_pieces()
+    const { dictionary_id, refresh_entries } = get_pieces()
     const { error } = await content_update({
-      auth_token,
       update_id: randomUUID(),
       dictionary_id,
       sense_id,
@@ -139,9 +131,9 @@ export async function insert_sentence({
   sense_id: string
 }) {
   try {
-    const { auth_token, dictionary_id, refresh_entries, refresh_sentences } = await get_pieces()
+    const { dictionary_id, refresh_entries, refresh_sentences } = get_pieces()
     const { data, error } = await content_update({
-      auth_token,
+
       update_id: randomUUID(),
       dictionary_id,
       sense_id,
@@ -170,9 +162,8 @@ export async function update_sentence({
   sentence_id: string
 }) {
   try {
-    const { auth_token, dictionary_id, refresh_entries, refresh_sentences } = await get_pieces()
+    const { dictionary_id, refresh_entries, refresh_sentences } = get_pieces()
     const { data, error } = await content_update({
-      auth_token,
       update_id: randomUUID(),
       dictionary_id,
       sentence_id,
@@ -204,9 +195,8 @@ export async function upsert_audio({
   refresh_entry?: boolean
 }) {
   try {
-    const { auth_token, dictionary_id, refresh_entries } = await get_pieces()
+    const { dictionary_id, refresh_entries } = get_pieces()
     const { data, error } = await content_update({
-      auth_token,
       update_id: randomUUID(),
       dictionary_id,
       entry_id,
@@ -236,9 +226,8 @@ export async function upsert_speaker({
   speaker_id?: string
 }) {
   try {
-    const { auth_token, dictionary_id, refresh_speakers } = await get_pieces()
+    const { dictionary_id, refresh_speakers } = get_pieces()
     const { data, error } = await content_update({
-      auth_token,
       update_id: randomUUID(),
       dictionary_id,
       speaker_id: speaker_id || randomUUID(),
@@ -268,9 +257,8 @@ export async function assign_speaker({
   remove?: boolean
 }) {
   try {
-    const { auth_token, dictionary_id, refresh_entries, refresh_videos } = await get_pieces()
+    const { dictionary_id, refresh_entries, refresh_videos } = get_pieces()
     const { data, error } = await content_update({
-      auth_token,
       update_id: randomUUID(),
       dictionary_id,
       speaker_id,
@@ -302,9 +290,8 @@ export async function insert_tag({
   tag_id?: string
 }) {
   try {
-    const { auth_token, dictionary_id, refresh_tags } = await get_pieces()
+    const { dictionary_id, refresh_tags } = get_pieces()
     const { data, error } = await content_update({
-      auth_token,
       update_id: randomUUID(),
       dictionary_id,
       tag_id: tag_id || randomUUID(),
@@ -332,9 +319,8 @@ export async function assign_tag({
   remove?: boolean
 }) {
   try {
-    const { auth_token, dictionary_id, refresh_entries } = await get_pieces()
+    const { dictionary_id, refresh_entries } = get_pieces()
     const { data, error } = await content_update({
-      auth_token,
       update_id: randomUUID(),
       dictionary_id,
       tag_id,
@@ -363,9 +349,8 @@ export async function insert_dialect({
   dialect_id?: string
 }) {
   try {
-    const { auth_token, dictionary_id, refresh_dialects } = await get_pieces()
+    const { dictionary_id, refresh_dialects } = get_pieces()
     const { data, error } = await content_update({
-      auth_token,
       update_id: randomUUID(),
       dictionary_id,
       dialect_id: dialect_id || randomUUID(),
@@ -393,9 +378,8 @@ export async function assign_dialect({
   remove?: boolean
 }) {
   try {
-    const { auth_token, dictionary_id, refresh_entries } = await get_pieces()
+    const { dictionary_id, refresh_entries } = get_pieces()
     const { data, error } = await content_update({
-      auth_token,
       update_id: randomUUID(),
       dictionary_id,
       dialect_id,
@@ -426,9 +410,8 @@ export async function insert_photo({
   sense_id: string
 }) {
   try {
-    const { auth_token, dictionary_id, refresh_entries, refresh_photos } = await get_pieces()
+    const { dictionary_id, refresh_entries, refresh_photos } = get_pieces()
     const { data, error } = await content_update({
-      auth_token,
       update_id: randomUUID(),
       dictionary_id,
       sense_id,
@@ -457,9 +440,8 @@ export async function update_photo({
   photo_id: string
 }) {
   try {
-    const { auth_token, dictionary_id, refresh_entries, refresh_photos } = await get_pieces()
+    const { dictionary_id, refresh_entries, refresh_photos } = get_pieces()
     const { data, error } = await content_update({
-      auth_token,
       update_id: randomUUID(),
       dictionary_id,
       photo_id,
@@ -487,9 +469,8 @@ export async function insert_video({
   sense_id: string
 }) {
   try {
-    const { auth_token, dictionary_id, refresh_entries, refresh_videos } = await get_pieces()
+    const { dictionary_id, refresh_entries, refresh_videos } = get_pieces()
     const { data, error } = await content_update({
-      auth_token,
       update_id: randomUUID(),
       dictionary_id,
       sense_id,
@@ -518,9 +499,8 @@ export async function update_video({
   video_id: string
 }) {
   try {
-    const { auth_token, dictionary_id, refresh_entries, refresh_videos } = await get_pieces()
+    const { dictionary_id, refresh_entries, refresh_videos } = get_pieces()
     const { data, error } = await content_update({
-      auth_token,
       update_id: randomUUID(),
       dictionary_id,
       video_id,

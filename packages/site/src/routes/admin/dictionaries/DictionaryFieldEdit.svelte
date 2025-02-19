@@ -3,8 +3,7 @@
 
   export let field: keyof TablesUpdate<'dictionaries'>
   export let value: string
-  export let dictionary_id: string
-  export let update_dictionary: (change: TablesUpdate<'dictionaries'> & { id: string }) => Promise<void>
+  export let update_dictionary: (change: TablesUpdate<'dictionaries'>) => Promise<void>
 
   let debouncedSaveTimer: NodeJS.Timeout
   let unsaved = false
@@ -17,7 +16,7 @@
 
   async function save() {
     try {
-      await update_dictionary({ id: dictionary_id, [field]: value })
+      await update_dictionary({ [field]: value })
       unsaved = false
     } catch (err) {
       alert(err)

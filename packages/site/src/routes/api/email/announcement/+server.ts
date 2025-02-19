@@ -1,5 +1,4 @@
 import { error, json } from '@sveltejs/kit'
-import type { IUser } from '@living-dictionaries/types'
 import { send_email } from '../send-email'
 import { render_component_to_html } from '../render-component-to-html'
 import { jacobAddress, no_reply_address } from '../addresses'
@@ -7,7 +6,6 @@ import type { RequestHandler } from './$types'
 import MigrationClosure from './MigrationClosure.svelte'
 import { ResponseCodes } from '$lib/constants'
 import { dev } from '$app/environment'
-import { getDb } from '$lib/server/firebase-admin'
 
 const batchSize = 50
 
@@ -16,10 +14,8 @@ export const GET: RequestHandler = async () => {
     error(ResponseCodes.INTERNAL_SERVER_ERROR, { message: 'Not allowed' })
 
   try {
-    const db = getDb()
-    const userSnapshots = await db.collection('users').get()
-    const users = userSnapshots.docs.map(doc => doc.data() as IUser)
-    const user_emails = users.map(user => ({ email: user.email }))
+    // const user_emails = users.map(user => ({ email: user.email }))
+    const user_emails = [] // TODO: get from supabase next time using 'user_emails' view
 
     // return json({ emails_to_send: users.map(user => user.email).splice(received) })
 

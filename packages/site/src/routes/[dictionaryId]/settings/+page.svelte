@@ -106,7 +106,7 @@
         await updateDictionary({ public: false })
       } else if ($admin) {
         await updateDictionary({ public: true })
-      } else if (await about_is_too_short()) {
+      } else if (about_is_too_short()) {
         alert($page.data.t('about.message'))
         goto(`/${dictionary.id}/about`)
       } else {

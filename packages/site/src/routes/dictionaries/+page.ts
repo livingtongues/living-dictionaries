@@ -3,8 +3,7 @@ import type { PageLoad } from './$types'
 import { ResponseCodes } from '$lib/constants'
 
 export const load: PageLoad = async ({ parent }) => {
-  const { user_from_cookies, supabase } = await parent()
-  const admin = !!user_from_cookies?.roles?.admin
+  const { admin, supabase } = await parent()
 
   const query = supabase.from('materialized_dictionaries_view')
     .select()

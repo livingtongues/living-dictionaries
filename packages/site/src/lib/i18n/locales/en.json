@@ -66,8 +66,11 @@
     "how_to_cite_instructions": "Add the authors of this dictionary to show their names in the citation"
   },
   "account": {
+    "your_name": "Your Name",
     "account_settings": "Account Settings",
-    "log_out": "Log Out"
+    "log_out": "Log Out",
+    "send_code": "Send Code",
+    "enter_6_digit_code_sent_to": "Enter the 6-digit code sent to"
   },
   "audio": {
     "tapToStopRecording": "Then you will tap to stop recording",
@@ -345,7 +348,6 @@
     "history": "History",
     "entry": "Entry",
     "editor": "Editor",
-    "entry_history": "Entry history",
     "field": "Field",
     "date": "Date",
     "old_value": "Former Value",

@@ -179,6 +179,9 @@ importers:
       '@types/geojson':
         specifier: ^7946.0.10
         version: 7946.0.10
+      '@types/google-one-tap':
+        specifier: ^1.2.6
+        version: 1.2.6
       '@types/mapbox-gl':
         specifier: ^2.7.6
         version: 2.7.6
@@ -218,12 +221,6 @@ importers:
       file-saver:
         specifier: ^2.0.5
         version: 2.0.5
-      firebase:
-        specifier: ^10.9.0
-        version: 10.9.0
-      firebase-admin:
-        specifier: ^12.7.0
-        version: 12.7.0(encoding@0.1.13)
       idb-keyval:
         specifier: ^6.2.1
         version: 6.2.1
@@ -257,9 +254,6 @@ importers:
       svelte-pieces:
         specifier: 2.0.0-next.16
         version: 2.0.0-next.16(svelte@4.2.12)
-      sveltefirets:
-        specifier: 0.0.42
-        version: 0.0.42(firebase@10.9.0)(svelte@4.2.12)
       topojson-client:
         specifier: ^3.1.0
         version: 3.1.0
@@ -2985,6 +2979,9 @@ packages:
 
   '@types/geojson@7946.0.8':
     resolution: {integrity: sha512-1rkryxURpr6aWP7R786/UQOkJ3PcpQiWkAXBmdWc7ryFWqN6a4xfK7BtjXvFBKO9LjQ+MWQSWxYeZX1OApnArA==}
+
+  '@types/google-one-tap@1.2.6':
+    resolution: {integrity: sha512-REmJsXVHvKb/sgI8DF+7IesMbDbcsEokHBqxU01ENZ8d98UPWdRLhUCtxEm9bhNFFg6PJGy7PNFdvovp0hK3jA==}
 
   '@types/hast@2.3.10':
     resolution: {integrity: sha512-McWspRw8xx8J9HurkVBfYj0xKoE25tOFlHGdx4MJ5xORQrMGZNqJhVQWaIbm6Oyla5kYOXtDiopzKRJzEOkwJw==}
@@ -11126,6 +11123,8 @@ snapshots:
 
   '@types/geojson@7946.0.8': {}
 
+  '@types/google-one-tap@1.2.6': {}
+
   '@types/hast@2.3.10':
     dependencies:
       '@types/unist': 2.0.10
@@ -15070,11 +15069,6 @@ snapshots:
       locate-character: 3.0.0
       magic-string: 0.30.12
       periscopic: 3.1.0
-
-  sveltefirets@0.0.42(firebase@10.9.0)(svelte@4.2.12):
-    dependencies:
-      firebase: 10.9.0
-      svelte: 4.2.12
 
   sveltefirets@0.0.42(firebase@10.9.0)(svelte@4.2.19):
     dependencies:

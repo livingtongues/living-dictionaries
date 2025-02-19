@@ -21,8 +21,7 @@
     "test:components": "playwright test kitbook",
     "reset-db": "pnpx tsx ./src/lib/mocks/seed/write-seed-and-reset-db-script.ts",
     "local-kitbook": "link:../../../kitbook/packages/kitbook",
-    "local-svelte-pieces": "link:../../../svelte-pieces",
-    "local-sveltefirets": "link:../../../sveltefirets"
+    "local-svelte-pieces": "link:../../../svelte-pieces"
   },
   "devDependencies": {
     "@aws-sdk/client-s3": "^3.693.0",
@@ -46,6 +45,7 @@
     "@types/d3-geo": "^3.1.0",
     "@types/file-saver": "^2.0.4",
     "@types/geojson": "^7946.0.10",
+    "@types/google-one-tap": "^1.2.6",
     "@types/mapbox-gl": "^2.7.6",
     "@types/mapbox__mapbox-gl-geocoder": "^4.7.3",
     "@types/pg": "^8.11.8",
@@ -59,8 +59,6 @@
     "d3-dsv": "^3.0.1",
     "d3-geo": "^3.1.0",
     "file-saver": "^2.0.5",
-    "firebase": "^10.9.0",
-    "firebase-admin": "^12.7.0",
     "idb-keyval": "^6.2.1",
     "jszip": "^3.7.1",
     "kitbook": "1.0.0-beta.31",
@@ -72,7 +70,6 @@
     "svelte": "^4.2.12",
     "svelte-check": "^3.6.8",
     "svelte-pieces": "2.0.0-next.16",
-    "sveltefirets": "0.0.42",
     "topojson-client": "^3.1.0",
     "tslib": "^2.6.1",
     "typescript": "^5.1.6",

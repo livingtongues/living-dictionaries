@@ -1,6 +1,7 @@
-import type { DictionaryWithHelperStores, DictionaryWithHelpers } from './dictionaryWithHelpers'
+import type { DictionaryWithHelpers } from './dictionaryWithHelpers.types'
 import { downloadObjectsAsCSV } from '$lib/export/csv'
-import { type StandardDictionaryForCSV, prepareDictionaryForCsv, dictionary_headers as standard_headers, timestamp_to_string_date } from '$lib/export/prepareDictionariesForCsv'
+import { type StandardDictionaryForCSV, prepareDictionaryForCsv, dictionary_headers as standard_headers } from '$lib/export/prepareDictionariesForCsv'
+import { supabase_date_to_friendly } from '$lib/helpers/time'
 
 enum AdminDictionaryCSVFields {
   entryCount = 'Entries',
@@ -14,7 +15,6 @@ enum AdminDictionaryCSVFields {
   conLangDescription = 'Conlang Description',
   managers = 'Managers',
   contributors = 'Contributors',
-  writeInCollaborators = 'Write-In Collaborators',
   invites = 'Pending Invites',
 }
 
@@ -25,9 +25,7 @@ type AdminDictionaryForCSV = {
 
 const admin_headers: AdminDictionaryForCSV = { ...AdminDictionaryCSVFields }
 
-export async function exportAdminDictionariesAsCSV(dictionariesAndHelpers: DictionaryWithHelperStores[]) {
-  const dictionaries = await getAllDictionariesAndHelpers(dictionariesAndHelpers)
-
+export function exportAdminDictionariesAsCSV(dictionaries: DictionaryWithHelpers[]) {
   const formatted_dictionaries: (StandardDictionaryForCSV & AdminDictionaryForCSV)[] = dictionaries.map((dictionary) => {
     const standard_dictionary = prepareDictionaryForCsv(dictionary)
     const admin_dictionary: AdminDictionaryForCSV = {
@@ -43,12 +41,10 @@ export async function exportAdminDictionariesAsCSV(dictionariesAndHelpers: Dicti
       alternate_orthographies: dictionary.orthographies?.map(({ name }) => name.default)?.join(', '),
       created_at: dictionary.created_at,
 
-      // data from subcollections
-      managers: dictionary.managers.map(({ name }) => name).join(', '),
-      contributors: dictionary.contributors.map(({ name }) => name).join(', '),
-      writeInCollaborators: dictionary.writeInCollaborators.map(({ name }) => name).join(', '),
+      managers: dictionary.editors.filter(({ dictionary_roles }) => dictionary_roles.some(({ role }) => role === 'manager')).map(({ full_name, email }) => full_name || email).join(', '),
+      contributors: dictionary.editors.filter(({ dictionary_roles }) => dictionary_roles.some(({ role }) => role === 'contributor')).map(({ full_name, email }) => full_name || email).join(', '),
       invites: dictionary.invites.map((invite) => {
-        return `${invite.inviterName} (${invite.inviterEmail}) invited ${invite.targetEmail} as ${invite.role} on ${timestamp_to_string_date(invite.createdAt)}`
+        return `${invite.inviter_email} invited ${invite.target_email} as ${invite.role} on ${supabase_date_to_friendly(invite.created_at)}`
       }).join(', '),
     }
 
@@ -60,20 +56,4 @@ export async function exportAdminDictionariesAsCSV(dictionariesAndHelpers: Dicti
     formatted_dictionaries,
     'living-dictionaries-public-private',
   )
-}
-
-async function getAllDictionariesAndHelpers(
-  dictionariesAndHelpers: DictionaryWithHelperStores[],
-): Promise<DictionaryWithHelpers[]> {
-  const dictionaries: DictionaryWithHelpers[] = []
-  for (const dictionary of dictionariesAndHelpers) {
-    dictionaries.push({
-      ...dictionary,
-      managers: await dictionary.getManagers,
-      contributors: await dictionary.getContributors,
-      writeInCollaborators: await dictionary.getWriteInCollaborators,
-      invites: await dictionary.getInvites,
-    })
-  }
-  return dictionaries
 }

@@ -1,4 +1,4 @@
-import type { IUser, Tables } from '@living-dictionaries/types'
+import type { Tables } from '@living-dictionaries/types'
 import { notifyAdminsOnNewDictionary } from './composeMessages'
 
 test('composeAdminNotice returns', () => {
@@ -14,11 +14,10 @@ test('composeAdminNotice returns', () => {
       points: [{ coordinates: { latitude: 1, longitude: 2 } }],
     },
   } as Tables<'dictionaries'>
-  const user: IUser = {
-    displayName: 'James Johnson',
+  const user = {
     email: 'jamesj@gmail.com',
   }
-  expect(notifyAdminsOnNewDictionary(dictionary, user)).toMatchInlineSnapshot(`
+  expect(notifyAdminsOnNewDictionary(dictionary, user.email)).toMatchInlineSnapshot(`
     "Hey Admins,
 
       James Johnson created a new Living Dictionary named Test-Dictionary. Here's the details:

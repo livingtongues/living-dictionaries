@@ -14,6 +14,7 @@
   export let dictionary: Tables<'dictionaries'>
   export let can_edit = false
   export let dbOperations: DbOperations
+  export let entry_history: Tables<'content_updates'>[]
 
   const text_fields = ['morphology', 'interlinearization'] satisfies EntryFieldValue[]
 
@@ -40,7 +41,7 @@
   <div style="grid-area: media;">
     <EntryMedia {dictionary} {entry} {can_edit} {dbOperations} />
     {#await import('./EntryHistory.svelte') then { default: EntryHistory }}
-      <EntryHistory {can_edit} entry_id={entry.id} class="mt-5 hidden md:block" />
+      <EntryHistory {entry_history} {can_edit} class="mt-5 hidden md:block" />
     {/await}
   </div>
 

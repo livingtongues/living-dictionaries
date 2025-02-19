@@ -1,6 +1,6 @@
 <script lang="ts">
-  import type { Citation, IHelper, IInvite, Partner } from '@living-dictionaries/types'
   import { Button, ShowHide } from 'svelte-pieces'
+  import type { PartnerWithPhoto, Tables } from '@living-dictionaries/types'
   import CitationComponent from './Citation.svelte'
   import Partners from './Partners.svelte'
   import ContributorInvitationStatus from '$lib/components/contributors/ContributorInvitationStatus.svelte'
@@ -8,22 +8,18 @@
   import { page } from '$app/stores'
 
   export let data
-  $: ({ dictionary, is_manager, is_contributor, admin, editor_edits } = data)
+  $: ({ dictionary, is_manager, is_contributor, admin, editor_edits, dictionary_info, dictionary_editors } = data)
 
-  let managers: IHelper[] = []
-  $: data.managers_promise.then(_managers => managers = _managers)
-  let contributors: IHelper[] = []
-  $: data.contributors_promise.then(_contributors => contributors = _contributors)
-  let writeInCollaborators: IHelper[] = []
-  $: data.writeInCollaborators_promise.then(_writeInCollaborators => writeInCollaborators = _writeInCollaborators)
-  let invites: IInvite[] = []
+  $: managers = $dictionary_editors.filter(editor => editor.role === 'manager')
+  $: contributors = $dictionary_editors.filter(editor => editor.role === 'contributor')
+
+  let invites: Tables<'invites'>[] = []
   $: data.invites_promise.then(_invites => invites = _invites)
   $: manager_invites = invites.filter(invite => invite.role === 'manager')
   $: contributor_invites = invites.filter(invite => invite.role === 'contributor')
-  let partners: Partner[] = []
+
+  let partners: PartnerWithPhoto[] = []
   $: data.partners_promise.then(_partners => partners = _partners)
-  let citation: Citation
-  $: data.citation_promise.then(_citation => citation = _citation)
 </script>
 
 <p class="mb-2">
@@ -38,7 +34,11 @@
   {#each managers as manager}
     <div class="py-3">
       <div class="text-sm leading-5 font-medium text-gray-900">
-        {manager.name}
+        {#if manager.full_name}
+          {manager.full_name}
+        {:else}
+          Anonymous
+        {/if}
       </div>
     </div>
   {/each}
@@ -56,7 +56,7 @@
   {/if}
 </div>
 {#if $is_manager}
-  <Button onclick={editor_edits.inviteHelper('manager', dictionary)} form="filled">
+  <Button onclick={editor_edits.inviteHelper('manager')} form="filled">
     <i class="far fa-envelope" />
     {$page.data.t('contributors.invite_manager')}
   </Button>
@@ -70,12 +70,16 @@
   {#each contributors as contributor}
     <div class="py-3 flex flex-wrap items-center">
       <div class="text-sm leading-5 font-medium text-gray-900">
-        {contributor.name}
+        {#if contributor.full_name}
+          {contributor.full_name}
+        {:else}
+          Anonymous
+        {/if}
       </div>
       {#if $is_manager}
         <div class="w-1" />
         <Button
-          onclick={editor_edits.removeContributor(contributor.id)}
+          onclick={editor_edits.removeContributor(contributor.user_id)}
           color="red"
           size="sm">
           {$page.data.t('misc.delete')}
@@ -95,7 +99,7 @@
         </ContributorInvitationStatus>
       </div>
     {/each}
-    <Button onclick={editor_edits.inviteHelper('contributor', dictionary)} form="filled">
+    <Button onclick={editor_edits.inviteHelper('contributor')} form="filled">
       <i class="far fa-envelope" />
       {$page.data.t('contributors.invite_contributors')}
     </Button>
@@ -118,17 +122,17 @@
   {$page.data.t('contributors.other_contributors')}
 </h3>
 <div class="divide-y divide-gray-200">
-  {#each writeInCollaborators as collaborator}
+  {#each $dictionary_info?.write_in_collaborators || [] as collaborator}
     <div class="py-3 flex flex-wrap items-center">
       <div class="text-sm leading-5 font-medium text-gray-900">
-        {collaborator.name}
+        {collaborator}
       </div>
       {#if $is_manager}
         <div class="w-1" />
         <Button
           color="red"
           size="sm"
-          onclick={editor_edits.removeWriteInCollaborator(collaborator.id)}>{$page.data.t('misc.delete')}
+          onclick={editor_edits.removeWriteInCollaborator($dictionary_info?.write_in_collaborators || [], collaborator)}>{$page.data.t('misc.delete')}
           <i class="fas fa-times" /></Button>
       {/if}
     </div>
@@ -140,7 +144,7 @@
 </div> -->
 
 {#if $is_manager}
-  <Button onclick={editor_edits.writeInCollaborator} form="filled">
+  <Button onclick={async () => await editor_edits.writeInCollaborator($dictionary_info?.write_in_collaborators || [])} form="filled">
     <i class="far fa-pencil" />
     {$page.data.t('contributors.write_in_contributor')}
   </Button>
@@ -195,7 +199,7 @@
   {$page.data.t('contributors.how_to_cite_academics')}
 </h3>
 
-<CitationComponent isManager={$is_manager} {dictionary} {partners} {citation} update_citation={data.update_citation} />
+<CitationComponent isManager={$is_manager} {dictionary} {partners} citation={$dictionary_info.citation} update_citation={data.update_citation} />
 
 <div class="mb-12" />
 

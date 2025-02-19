@@ -1,19 +1,28 @@
 <script lang="ts">
-  import { Doc } from 'sveltefirets'
-  import type { DictionaryView, IAbout } from '@living-dictionaries/types'
+  import type { DictionaryView } from '@living-dictionaries/types'
   import { Button } from 'svelte-pieces'
   import sanitize from 'xss'
+  import { onMount } from 'svelte'
   import { page } from '$app/stores'
 
   export let dictionary: DictionaryView
-  let aboutType: IAbout
+  let about = ''
 
-  function truncateString(str, num) {
+  function truncateString(str: string, num: number) {
+    if (!str) return ''
+
     if (str.length <= num)
       return str
 
     return `${str.slice(0, num).trim()}...`
   }
+
+  onMount(async () => {
+    const { data } = await $page.data.supabase.from('dictionary_info').select().eq('dictionary_id', dictionary.id).single()
+    if (data?.about) {
+      ({ about } = data)
+    }
+  })
 </script>
 
 <div>
@@ -71,19 +80,14 @@
       {$page.data.t('home.open_dictionary')}
     </Button>
   {:else}
-    <Doc
-      path={`dictionaries/${dictionary.id}/info/about`}
-      startWith={aboutType}
-      let:data={{ about }}>
-      <div class="mb-2 text-sm inline-children-elements">
-        {@html sanitize(truncateString(about, 200))}
-        {#if about.length > 200}
-          <a class="hover:underline" href={`${dictionary.id}/about`}>
-            {$page.data.t('home.read_more')}
-          </a>
-        {/if}
-      </div>
-    </Doc>
+    <div class="mb-2 text-sm inline-children-elements">
+      {@html sanitize(truncateString(about, 200))}
+      {#if about.length > 200}
+        <a class="hover:underline" href={`${dictionary.id}/about`}>
+          {$page.data.t('home.read_more')}
+        </a>
+      {/if}
+    </div>
     <Button class="mt-1 w-full" form="filled" color="black" href={dictionary.id}>
       {$page.data.t('home.open_dictionary')}
       <span class="i-fa6-solid-chevron-right rtl-x-flip -mt-1" />

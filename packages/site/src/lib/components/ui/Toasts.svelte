@@ -1,43 +1,47 @@
-<script lang="ts">
-  import { onMount } from 'svelte';
-  import { fade, fly } from 'svelte/transition';
-  import { backOut } from 'svelte/easing';
+<script context="module" lang="ts">
+  import { writable } from 'svelte/store'
 
-  let toasts = [];
-  const retainMs = 2000;
+  interface IToast {
+    message: string
+    id?: number
+  }
 
-  let toastId = 0;
-  const pushToast = (msg = '') => {
-    toasts = [
-      ...toasts,
-      {
-        _id: ++toastId,
-        msg,
-      },
-    ];
+  function createToastsStore() {
+    const { subscribe, update } = writable<IToast[]>([])
+    return {
+      subscribe,
+      push: (toast: IToast) => update(toasts => [...toasts, toast]),
+      remove: (id: number) => update(toasts => toasts.filter(toast => toast.id !== id)),
+    }
+  }
+  const toasts = createToastsStore()
+
+  export function toast(message: string, duration = 2500) {
+    const id = Date.now()
+    toasts.push({
+      id,
+      message,
+    })
     setTimeout(() => {
-      unshiftToast();
-    }, retainMs);
-  };
-
-  const unshiftToast = () => {
-    toasts = toasts.filter((a, i) => i > 0);
-  };
-
-  onMount(() => {
-    //@ts-ignore
-    window.pushToast = pushToast;
-  });
+      toasts.remove(id)
+    }, duration)
+  }
 </script>
 
-<div class="fixed z-50 inset-x-0 bottom-0 flex flex-col items-center p-2">
-  {#each toasts as toast (toast._id)}
+<script lang="ts">
+  import { backOut } from 'svelte/easing'
+  import { fade, fly } from 'svelte/transition'
+</script>
+
+<div class="fixed z-500 inset-x-2 bottom-2 flex flex-col items-center">
+  {#each $toasts as toast (toast.id)}
     <div
-      class="bg-black bg-opacity-75 text-white mt-2 p-3 rounded max-w-sm"
+      class="bg-black bg-opacity-75 text-white mt-2 px-3 py-2 rounded max-w-sm"
       in:fly={{ delay: 0, duration: 300, x: 0, y: 50, opacity: 0.1, easing: backOut }}
       out:fade={{ duration: 500 }}>
-      {toast.msg}
+      {toast.message}
     </div>
   {/each}
 </div>
-<!-- Look at https://github.com/beyonk-adventures/svelte-notifications also -->
+
+<!-- Look at https://github.com/beyonk-adventures/svelte-notifications to improve -->

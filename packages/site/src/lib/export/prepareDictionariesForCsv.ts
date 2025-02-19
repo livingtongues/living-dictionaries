@@ -1,5 +1,4 @@
 import type { DictionaryView } from '@living-dictionaries/types'
-import type { Timestamp } from 'firebase/firestore'
 
 enum StandardDictionaryCSVFields {
   name = 'Dictionary Name',
@@ -38,14 +37,6 @@ export function prepareDictionaryForCsv(dictionary: DictionaryView): StandardDic
     latitude: dictionary.coordinates?.points?.[0]?.coordinates.latitude,
     longitude: dictionary.coordinates?.points?.[0]?.coordinates.longitude,
     thumbnail: dictionary.metadata?.thumbnail,
-  }
-}
-
-export function timestamp_to_string_date(timestamp: Timestamp): string {
-  if (timestamp) {
-    const milliseconds = timestamp.seconds * 1000 + Math.floor(timestamp.nanoseconds / 1000000)
-    const date = new Date(milliseconds)
-    return date.toDateString()
   }
 }
 
