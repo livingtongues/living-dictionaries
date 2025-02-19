@@ -3,7 +3,7 @@ import { program } from 'commander'
 import { parseCSVFrom } from './parse-csv.js'
 import type { Row } from './row.type'
 import { import_data } from './import-data.js'
-import { upload_audio_to_gcs, upload_photo_to_gcs } from './import-media.js'
+import { upload_audio_to_gcs } from './import-media.js'
 
 program
   .option('-e, --environment [dev/prod]', 'Database Project', 'dev')
@@ -29,7 +29,7 @@ async function import_from_spreadsheet({ dictionary_id, live }: { dictionary_id:
   const file = readFileSync(`./import/data/${dictionary_id}/${dictionary_id}.csv`, 'utf8')
   const rows = parseCSVFrom<Row>(file)
   if (rows[0].lexeme.includes('word/phrase')) rows.shift() // remove header row
-  await import_data({ dictionary_id, rows, import_id, live, upload_operations: { upload_photo, upload_audio } })
+  await import_data({ dictionary_id, rows, import_id, live, upload_operations: { upload_audio } })
 
   console.log(
     `Finished ${live ? 'importing' : 'emulating'} ${rows.length} entries to ${environment === 'dev' ? 'http://localhost:3041/' : 'livingdictionaries.app/'
@@ -38,9 +38,9 @@ async function import_from_spreadsheet({ dictionary_id, live }: { dictionary_id:
   console.log('') // line break
 }
 
-async function upload_photo(filepath: string, entry_id: string) {
-  return await upload_photo_to_gcs({ dictionary_id, filepath, entry_id, live })
-}
+// async function upload_photo(filepath: string, entry_id: string) {
+//   return await upload_photo_to_gcs({ dictionary_id, filepath, entry_id, live })
+// }
 
 async function upload_audio(filepath: string, entry_id: string) {
   const storage_path = await upload_audio_to_gcs({ dictionary_id, filepath, entry_id, live })
