@@ -20,7 +20,7 @@ test('composeAdminNotice returns', () => {
   expect(notifyAdminsOnNewDictionary(dictionary, user.email)).toMatchInlineSnapshot(`
     "Hey Admins,
 
-      James Johnson created a new Living Dictionary named Test-Dictionary. Here's the details:
+      jamesj@gmail.com created a new Living Dictionary named Test-Dictionary. Here's the details:
       
       URL: https://livingdictionaries.app/testID 
       
@@ -39,7 +39,7 @@ test('composeAdminNotice returns', () => {
       Author's Connection: "Something about how I know this community and more..."
       ConLang Description: "undefined"
       
-      We sent James Johnson an automatic dictionary-info email to jamesj@gmail.com, but you can also get in touch with them if needed.
+      We sent an automatic dictionary-info email to jamesj@gmail.com, but you can also get in touch with them if needed.
       
       Thanks,
       Our automatic Vercel Function
