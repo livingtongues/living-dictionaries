@@ -33,7 +33,7 @@
     "export_data": "导出数据（CSV、PDF 格式）",
     "import_export": "导入/导出（FLEx，标准格式）",
     "geo_tagging": "地理标记条目",
-    "flashcard_view": "语言学习者的抽认卡视图",
+    "flashcard_view": "面向语言学习者的抽认卡视图",
     "peer_review": "拼写同行评审",
     "suggestions_from_users": "用户的建议",
     "push_notifications": "向贡献者推送通知",
@@ -95,7 +95,7 @@
     "what_is_your_question": "您有什么问题或评论？",
     "message_failed": "消息发送失败。检查您的互联网连接或给我们发送电子邮件：",
     "delete_dictionary": "删除字典",
-    "public_dictionary": "公开字典",
+    "public_dictionary": "公开词典",
     "import_data": "导入数据",
     "request_access": "请求编辑权限",
     "report_problem": "报告问题",
@@ -125,11 +125,11 @@
     "add_gloss_msg": "您可以在“设置”下添加更多语言标注",
     "language_used_by_community": "这本词典是针对特定人类社区所说或手语的语言吗？",
     "community_permission": "语言界允许你制作这本词典吗？",
-    "author_connection": "请简要描述您如何了解这种语言以及为什么要为其创建一本活字典。您是使用这本生活词典的社区的成员吗？如果没有，你怎么知道这个社区？",
+    "author_connection": "请简要描述您如何了解这种语言以及为什么要为其创建一本动态词典。您是使用这本生活词典的社区的成员吗？如果没有，你怎么知道这个社区？",
     "con_lang_description": "这本词典是用于构建语言（近年来人类发明的语言，用于书籍或电影）吗？如果是，请简要描述。",
     "uncertainty": "我不知道",
     "select_region": "选择地区",
-    "secondary_coordinates": "次要坐标",
+    "secondary_coordinates": "辅助坐标",
     "map_instructions": "单击地图以添加辅助坐标。",
     "print_access": "允许查看者打印词典",
     "primary_coordinate": "主坐标"
@@ -252,8 +252,8 @@
     "clean": "干净的",
     "map": "地图",
     "guidance": "指导",
-    "out_of_service": "感谢您访问我们的网站！该页面暂时正在建设中。\n2025 年 2 月 3 日至 2 月 12 日期间不可用。\n请于 2025 年 2 月 13 日再次访问此页面。\n那时您将能够创建新的生活词典。\n对于给您带来的不便，我们深表歉意，并感谢您的耐心等待。\n与此同时，平台的其余部分工作正常。",
-    "transmitter": "此致 Living Dictionaries 团队 "
+    "out_of_service": "感谢您访问我们的网站！该页面暂时正在建设中。\n2025 年 2 月 3 日至 2 月 28 日期间不可用。\n请于 2025 年 3 月 1 日再次访问此页面。\n那时您将能够创建新的生活词典。\n对于给您带来的不便，我们深表歉意，并感谢您的耐心等待。\n与此同时，平台的其余部分工作正常。",
+    "transmitter": "此致， Living Dictionaries 团队 "
   },
   "settings": {
     "community_permission": "此语言的语言社区允许这种语言通过网络传播吗？",

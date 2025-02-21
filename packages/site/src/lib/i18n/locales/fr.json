@@ -40,7 +40,7 @@
     "contributor_awards": "Récompenses de la communauté des contributeurs",
     "question_1": "Veuillez fournir quelques informations générales sur cette langue. Où est-il parlé ? Quelles communautés parlent cette langue ? Cette langue est-elle en danger ?",
     "question_2": "Quels sont les noms des personnes qui ont construit ce dictionnaire ? À qui appartiennent les voix de ce dictionnaire ?",
-    "question_3": "D’où proviennent les données de ce dictionnaire ? Veuillez décrire si vous avez collecté les données vous-même. Si vous avez utilisé des sources de référence publiées, veuillez les énumérer.",
+    "question_3": "D’où viennent les données de ce dictionnaire ? Veuillez décrire si vous avez collecté les données vous-même. Si vous avez utilisé des sources de référence publiées, veuillez les énumérer.",
     "question_4": "Qui utilisera ce dictionnaire ? Sera-t-il utilisé dans des projets éducatifs ?",
     "question_5": "Si vous souhaitez que le public vous contacte à propos de ce projet, veuillez fournir vos coordonnées ou un lien vers où les gens peuvent en savoir plus. Ceci est facultatif.",
     "message": "Avant de rendre votre dictionnaire public, veuillez remplir la section À propos."
@@ -252,7 +252,7 @@
     "clean": "Faire le ménage",
     "map": "Carte",
     "guidance": "Conseils",
-    "out_of_service": "Merci d'avoir visité notre site Web! Cette page est temporairement en construction.\nIl ne sera pas disponible entre le 3 et le 12 février 2025.\nVeuillez visiter à nouveau cette page le 13 février 2025.\nVous pourrez créer de nouveaux dictionnaires vivants à ce moment-là.\nNous sommes désolés des désagréments causés cette pause, et merci pour votre patience.\nEn attendant, le reste de la plateforme fonctionne normalement.",
+    "out_of_service": "Merci d'avoir visité notre site Web! Cette page est temporairement en construction.\nIl ne sera pas disponible entre le 3 et le 28 février 2025.\nVeuillez visiter à nouveau cette page le 1er mars 2025.\nVous pourrez créer de nouveaux dictionnaires vivants à ce moment-là.\nNous sommes désolés des désagréments causés cette pause, et merci pour votre patience.\nEn attendant, le reste de la plateforme fonctionne normalement.",
     "transmitter": "Cordialement, l'équipe de Living Dictionaries"
   },
   "settings": {

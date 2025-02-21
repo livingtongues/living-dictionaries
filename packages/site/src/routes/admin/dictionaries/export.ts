@@ -25,7 +25,7 @@ type AdminDictionaryForCSV = {
 
 const admin_headers: AdminDictionaryForCSV = { ...AdminDictionaryCSVFields }
 
-export function exportAdminDictionariesAsCSV(dictionaries: DictionaryWithHelpers[]) {
+export function exportAdminDictionariesAsCSV(dictionaries: DictionaryWithHelpers[], section: 'public' | 'private' | 'other') {
   const formatted_dictionaries: (StandardDictionaryForCSV & AdminDictionaryForCSV)[] = dictionaries.map((dictionary) => {
     const standard_dictionary = prepareDictionaryForCsv(dictionary)
     const admin_dictionary: AdminDictionaryForCSV = {
@@ -54,6 +54,6 @@ export function exportAdminDictionariesAsCSV(dictionaries: DictionaryWithHelpers
   downloadObjectsAsCSV(
     { ...standard_headers, ...admin_headers },
     formatted_dictionaries,
-    'living-dictionaries-public-private',
+    `living-dictionaries-${section}`,
   )
 }

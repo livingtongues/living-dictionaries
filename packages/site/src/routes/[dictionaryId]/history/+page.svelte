@@ -11,6 +11,7 @@
   import { supabase_date_to_friendly } from '$lib/helpers/time'
 
   export let data: PageData
+  let loading_content_updates = true
   const { entries } = $page.data
   $: ({ dictionary, can_edit, get_content_updates } = data)
 
@@ -21,6 +22,7 @@
         content_updates = await get_content_updates()
         unsub()
       }
+      loading_content_updates = loading
     })
   })
 
@@ -70,6 +72,8 @@
         </ResponsiveTable>
       </Filter>
     </div>
+  {:else if loading_content_updates}
+    {$page.data.t('misc.loading')}...
   {:else}
     {$page.data.t('history.empty')}
   {/if}
