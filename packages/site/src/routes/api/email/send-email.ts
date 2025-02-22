@@ -1,69 +1,18 @@
+// import { DKIM_PRIVATE_KEY, MAILCHANNELS_API_KEY } from '$env/static/private'
+import { SESClient, SendEmailCommand, type SendEmailCommandOutput } from '@aws-sdk/client-ses'
 import { dictionary_address, no_reply_address } from './addresses'
-import { DKIM_PRIVATE_KEY, MAILCHANNELS_API_KEY } from '$env/static/private'
+import { AWS_SES_ACCESS_KEY_ID, AWS_SES_REGION, AWS_SES_SECRET_ACCESS_KEY } from '$env/static/private'
 
-const MAILCHANNELS_API_URL = 'https://api.mailchannels.net/tx/v1/send'
-
-export async function send_email({ from, to, cc, bcc, reply_to, subject, body, type, dry_run }: EmailParts) {
-  if (!MAILCHANNELS_API_KEY)
-    throw new Error('MAILCHANNELS_API_KEY env variable not configured')
-
-  if (!DKIM_PRIVATE_KEY)
-    throw new Error('DKIM_PRIVATE_KEY env variable not configured')
-
-  if (to.length + (cc?.length || 0) + (bcc?.length || 0) > 1000)
-    throw new Error('Maximum of 1000 recipients allowed')
-
-  const mail_channels_send_body: MailChannelsSendBody = {
-    personalizations: [{
-      to,
-      cc: cc || [],
-      bcc: bcc || [],
-      dkim_domain: 'livingdictionaries.app',
-      dkim_selector: 'notification',
-      dkim_private_key: DKIM_PRIVATE_KEY,
-    }],
-    from: from || no_reply_address,
-    reply_to: reply_to || dictionary_address,
-    subject,
-    content: [{
-      type,
-      value: body,
-    }],
-  }
-
-  const url = dry_run ? `${MAILCHANNELS_API_URL}?dry-run=true` : MAILCHANNELS_API_URL
-
-  const response = await fetch(url, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'X-API-Key': MAILCHANNELS_API_KEY,
-    },
-    body: JSON.stringify(mail_channels_send_body),
-  })
-
-  // receives status 202 from MailChannels to indicate send pending
-  if (!response.status.toString().startsWith('2')) {
-    const body = await response.json()
-    throw new Error(`MailChannels error: ${response.status} ${body.errors?.[0]}`)
-  }
-  return response
-}
-
-/** See https://api.mailchannels.net/tx/v1/documentation */
 export interface EmailParts {
   from?: Address
-  /** 1-1000 */
   to: Address[]
-  /** 0-1000 */
   cc?: Address[]
-  /** 0-1000 */
   bcc?: Address[]
   reply_to?: Address
   subject: string
   body: string
   type: 'text/plain' | 'text/html'
-  /** Defaults to false, when setting true the message will not be sent. Instead, the fully rendered message is returned from MailChannels. */
+  /** Defaults to false, when setting true the message will not be sent. */
   dry_run?: boolean
 }
 
@@ -72,34 +21,89 @@ export interface Address {
   name?: string
 }
 
-/** Source https://api.mailchannels.net/tx/v1/documentation */
-interface MailChannelsSendBody {
-  subject: string
-  content: {
-    /** The mime type of the content you are including in your email */
-    type: 'text/plain' | 'text/html'
-    /** The actual content of the specified mime type that you are including in the message */
-    value: string
-  }[]
-  from: Address
-  personalizations: {
-    /** 1-1000 */
-    to: Address[]
-    from?: Address
-    reply_to?: Address
-    /** 0-1000 */
-    cc?: Address[]
-    /** 0-1000 */
-    bcc?: Address[]
-    subject?: string
-    /* see https://mailchannels.zendesk.com/hc/en-us/articles/7122849237389-Adding-a-DKIM-Signature */
-    dkim_domain: string
-    /* Encoded in Base64 */
-    dkim_private_key: string
-    dkim_selector: string
-    headers?: Record<string, string> // same as other headers
-  }[] // (0...1000)
-  reply_to?: Address
-  /** A JSON object containing key/value pairs of header names and the value to substitute for them. The Key/value pairs must be strings. You must ensure these are properly encoded if they contain unicode characters. Must not be one of the reserved headers (received, dkim-signature, Content-Type, Content-Transfer-Encoding, To, From, Subject, Reply-To, CC, BCC). */
-  headers?: Record<string, string>
+function format_address({ name, email }: Address): string {
+  return name ? `${name} <${email}>` : email
+}
+
+// Rate-limiting variables
+let sent_timestamps: number[] = [] // Tracks timestamps of sent emails
+let sending_promise = Promise.resolve() as unknown as Promise<SendEmailCommandOutput | {
+  message: string
+}> // Ensures sequential sending
+
+export function send_email({ from, to, cc, bcc, reply_to, subject, body, type, dry_run }: EmailParts) {
+  const send_single_email = async (recipient: Address) => {
+    if (dry_run) {
+      console.info('Dry run: email not sent')
+      console.info('From:', format_address(from || no_reply_address))
+      console.info('To:', format_address(recipient))
+      if (cc)
+        console.info('CC:', cc.map(format_address).join(', '))
+      if (bcc)
+        console.info('BCC:', bcc.map(format_address).join(', '))
+      console.info('Reply-To:', format_address(reply_to || dictionary_address))
+      console.info('Subject:', subject)
+      console.info('Body:', body)
+      return { message: 'Dry run completed, email not sent' }
+    }
+
+    // Remove timestamps older than 1 second
+    const now = Date.now()
+    sent_timestamps = sent_timestamps.filter(ts => now - ts < 1000)
+    // If 7 or more emails were sent in the last second, wait
+    if (sent_timestamps.length >= 7) {
+      const [oldest] = sent_timestamps
+      const waitTime = oldest + 1000 - now
+      if (waitTime > 0) {
+        await new Promise(resolve => setTimeout(resolve, waitTime))
+      }
+    }
+
+    if (!AWS_SES_ACCESS_KEY_ID || !AWS_SES_REGION || !AWS_SES_SECRET_ACCESS_KEY) {
+      throw new Error('AWS_SES credentials not configured')
+    }
+
+    const sesClient = new SESClient({
+      region: AWS_SES_REGION,
+      credentials: {
+        accessKeyId: AWS_SES_ACCESS_KEY_ID,
+        secretAccessKey: AWS_SES_SECRET_ACCESS_KEY,
+      },
+    })
+
+    try {
+      const command = new SendEmailCommand({
+        Source: format_address(from || no_reply_address),
+        Destination: {
+          ToAddresses: [format_address(recipient)], // Single recipient per email
+          CcAddresses: cc?.map(format_address) || [],
+          BccAddresses: bcc?.map(format_address) || [],
+        },
+        Message: {
+          Subject: { Data: subject },
+          Body: {
+            [type === 'text/plain' ? 'Text' : 'Html']: { Data: body },
+          },
+        },
+        ReplyToAddresses: [format_address(reply_to || dictionary_address)],
+      })
+
+      const response = await sesClient.send(command)
+      console.info('Email sent successfully to', recipient.email, 'Message ID:', response.MessageId)
+      // Record timestamp after successful send
+      sent_timestamps.push(Date.now())
+      return response
+    } catch (error) {
+      console.error('Error sending email to', recipient.email, ':', error)
+      throw new Error(`Failed to send email to ${recipient.email}: ${error.message}`)
+    }
+  }
+
+  // Chain email sends for all recipients sequentially
+  for (const recipient of to) {
+    sending_promise = sending_promise.then(() => send_single_email(recipient))
+  }
+
+  // Return the promise chain so the caller can await completion
+  return sending_promise
 }

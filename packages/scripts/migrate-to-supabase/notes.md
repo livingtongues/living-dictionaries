@@ -10,7 +10,6 @@
   - citation
   - partners
   - featured dictionary images
-- Use SES because now we are sending email codes
 - lock firebase
 - push sql to prod
 - run all data-migrations on prod
