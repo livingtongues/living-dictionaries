@@ -16,7 +16,7 @@ console.log(`Supabase running on ${environment}`)
 if (environment === 'dev') {
   dotenv.config({ path: '../site/.env.development' })
 } else {
-  dotenv.config({ path: '.env.production.supabase' })
+  dotenv.config({ path: '../site/.env.production.local' })
 }
 
 export const admin_supabase = createClient<Database>(process.env.PUBLIC_SUPABASE_API_URL, process.env.SUPABASE_SERVICE_ROLE_KEY)

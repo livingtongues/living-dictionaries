@@ -833,8 +833,8 @@ export interface Database {
           citation: string | null
           created_at: string
           created_by: string
-          dictionary_id: string
           grammar: string | null
+          id: string
           updated_at: string
           updated_by: string
           write_in_collaborators: string[] | null
@@ -844,8 +844,8 @@ export interface Database {
           citation?: string | null
           created_at?: string
           created_by?: string
-          dictionary_id: string
           grammar?: string | null
+          id: string
           updated_at?: string
           updated_by?: string
           write_in_collaborators?: string[] | null
@@ -855,8 +855,8 @@ export interface Database {
           citation?: string | null
           created_at?: string
           created_by?: string
-          dictionary_id?: string
           grammar?: string | null
+          id?: string
           updated_at?: string
           updated_by?: string
           write_in_collaborators?: string[] | null
@@ -896,9 +896,9 @@ export interface Database {
             ]
           },
           {
-            foreignKeyName: 'dictionary_info_dictionary_id_fkey'
+            foreignKeyName: 'dictionary_info_id_fkey'
             columns: [
-              'dictionary_id',
+              'id',
             ]
             isOneToOne: true
             referencedRelation: 'dictionaries'
@@ -907,9 +907,9 @@ export interface Database {
             ]
           },
           {
-            foreignKeyName: 'dictionary_info_dictionary_id_fkey'
+            foreignKeyName: 'dictionary_info_id_fkey'
             columns: [
-              'dictionary_id',
+              'id',
             ]
             isOneToOne: true
             referencedRelation: 'dictionaries_view'
@@ -918,9 +918,9 @@ export interface Database {
             ]
           },
           {
-            foreignKeyName: 'dictionary_info_dictionary_id_fkey'
+            foreignKeyName: 'dictionary_info_id_fkey'
             columns: [
-              'dictionary_id',
+              'id',
             ]
             isOneToOne: true
             referencedRelation: 'materialized_dictionaries_view'
@@ -3638,10 +3638,6 @@ export interface Database {
       }
     }
     Functions: {
-      am_i_admin: {
-        Args: Record<PropertyKey, never>
-        Returns: boolean
-      }
       entries_from_timestamp: {
         Args: {
           get_newer_than: string

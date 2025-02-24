@@ -1,23 +1,21 @@
 # Migrate Auth
-- test admin works right (two api endpoints especially)
-  - test admin rls, alternative is auth.jwt() read https://supabase.com/docs/guides/database/postgres/row-level-security#authjwt to see if better
-- data migrations local run
-  - supabase missing users
-  - managers + contributors + write_in_collaborators `dictionaries/${dictionary.id}/writeInCollaborators`
+- commit, check, test
+- push sql to prod
+- lock firebase
+- run all data-migrations
+  - partners `dictionaries/${dictionary.id}/partners`
+  - invites `dictionaries/${dictionary.id}/invites`
+  - managers `dictionaries/${dictionary.id}/managers`
+  - contributors `dictionaries/${dictionary.id}/contributors`
+  - write_in_collaborators `dictionaries/${dictionary.id}/writeInCollaborators`
   - about: `dictionaries/${dictionary.id}/info/about`
   - grammar `dictionaries/${dictionary.id}/info/grammar`
-  - invites
-  - citation
-  - partners
-  - featured dictionary images
-- lock firebase
-- push sql to prod
-- run all data-migrations on prod
+  - citation `dictionaries/${dictionary.id}/info/citation`
 - push code live
-- Diego: AuthModal.svelte translations
-- test create dictionary sends emails
 ## Clean Up
 - entry history from pop-up entry modal
+- test admin rls, alternative is auth.jwt() read https://supabase.com/docs/guides/database/postgres/row-level-security#authjwt to see if better
+- Diego: AuthModal.svelte translations
 - review updated_by triggers across all tables
 - review created_by forcers to see which tables need set_created_by
   - audio_speakers
@@ -29,8 +27,8 @@
 - remove Entry History i18n
 - remove firebase vercel credentials
 - remove import_meta from content update endpoint
-- don't use endpoint dictionary update but use access roles to check if permission
 - remove firebase in SQL
+- remove firebase in scripts
 - remove unneeded urls from https://console.cloud.google.com/auth/clients/215143435444-fugm4gpav71r3l89n6i0iath4m436qnv.apps.googleusercontent.com?inv=1&invt=AboyXQ&project=talking-dictionaries-alpha
 - move featured images to photos table and make a connection to the dictionary
 - use line-clamp instead of truncateString in SelectedDict.svelte and also look at inline-children-elements purpose

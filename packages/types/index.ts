@@ -17,6 +17,7 @@ export type { ContentUpdateRequestBody } from './supabase/content-update.interfa
 export type { UnsupportedFields } from './supabase/unsupported.interface'
 export type { Database, Tables, TablesInsert, TablesUpdate } from './supabase/combined.types'
 export type { Orthography } from './supabase/orthography.interface'
+export type { IFirestoreMetaData } from 'sveltefirets'
 
 export type DictionaryView = Tables<'dictionaries_view'>
 export interface PartnerWithPhoto {

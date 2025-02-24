@@ -71,7 +71,7 @@ export const load: LayoutLoad = async ({ params: { dictionaryId: dictionary_id }
 
     const dictionary_info = readable<Tables<'dictionary_info'>>({} as Tables<'dictionary_info'>, (set) => {
       (async () => {
-        const { data } = await supabase.from('dictionary_info').select().eq('dictionary_id', dictionary_id).single()
+        const { data } = await supabase.from('dictionary_info').select().eq('id', dictionary_id).single()
         if (data) set(data)
       })()
     })

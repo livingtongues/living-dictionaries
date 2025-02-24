@@ -1,5 +1,5 @@
 CREATE TABLE dictionary_info (
-  dictionary_id text NOT NULL REFERENCES dictionaries ON DELETE CASCADE,
+  id text NOT NULL REFERENCES dictionaries ON DELETE CASCADE,
   about text,
   grammar text,
   citation text,
@@ -8,7 +8,7 @@ CREATE TABLE dictionary_info (
   created_by uuid NOT NULL REFERENCES auth.users default auth.uid(),
   updated_at timestamp with time zone DEFAULT now() NOT NULL,
   updated_by uuid NOT NULL REFERENCES auth.users default auth.uid(),
-  PRIMARY KEY (dictionary_id)
+  PRIMARY KEY (id)
 );
 
 ALTER TABLE dictionary_info ENABLE ROW LEVEL SECURITY;
@@ -20,7 +20,7 @@ WITH CHECK (
   EXISTS (
     SELECT 1
     FROM dictionary_roles
-    WHERE dictionary_roles.dictionary_id = dictionary_info.dictionary_id
+    WHERE dictionary_roles.dictionary_id = dictionary_info.id
       AND dictionary_roles.user_id = auth.uid()
       AND dictionary_roles.role = 'manager'
   )
@@ -33,7 +33,7 @@ USING (
   EXISTS (
     SELECT 1
     FROM dictionary_roles
-    WHERE dictionary_roles.dictionary_id = dictionary_info.dictionary_id
+    WHERE dictionary_roles.dictionary_id = dictionary_info.id
       AND dictionary_roles.user_id = auth.uid()
       AND dictionary_roles.role = 'manager'
   )

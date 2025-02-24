@@ -40,9 +40,11 @@
 
   <div style="grid-area: media;">
     <EntryMedia {dictionary} {entry} {can_edit} {dbOperations} />
-    {#await import('./EntryHistory.svelte') then { default: EntryHistory }}
-      <EntryHistory {entry_history} {can_edit} class="mt-5 hidden md:block" />
-    {/await}
+    {#if entry_history?.length}
+      {#await import('./EntryHistory.svelte') then { default: EntryHistory }}
+        <EntryHistory {entry_history} {can_edit} class="mt-5 hidden md:block" />
+      {/await}
+    {/if}
   </div>
 
   <div class="flex flex-col grow" style="grid-area: content;">

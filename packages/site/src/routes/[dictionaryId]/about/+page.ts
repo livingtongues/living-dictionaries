@@ -7,8 +7,8 @@ export function load({ params: { dictionaryId }, parent }) {
       const { error } = await supabase
         .from('dictionary_info')
         .upsert([
-          { dictionary_id: dictionaryId, about: updated },
-        ], { onConflict: 'dictionary_id' })
+          { id: dictionaryId, about: updated },
+        ], { onConflict: 'id' })
       if (error) {
         console.error(error)
         throw error.message

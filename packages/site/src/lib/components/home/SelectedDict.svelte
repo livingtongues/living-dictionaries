@@ -18,7 +18,7 @@
   }
 
   onMount(async () => {
-    const { data } = await $page.data.supabase.from('dictionary_info').select().eq('dictionary_id', dictionary.id).single()
+    const { data } = await $page.data.supabase.from('dictionary_info').select().eq('id', dictionary.id).single()
     if (data?.about) {
       ({ about } = data)
     }

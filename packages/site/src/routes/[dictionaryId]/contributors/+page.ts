@@ -43,8 +43,8 @@ export const load = (async ({ params: { dictionaryId: dictionary_id }, parent, d
         const { error } = await supabase
           .from('dictionary_info')
           .upsert([
-            { dictionary_id, write_in_collaborators: [...current_collaborators, name] },
-          ], { onConflict: 'dictionary_id' })
+            { id: dictionary_id, write_in_collaborators: [...current_collaborators, name] },
+          ], { onConflict: 'id' })
         if (error) throw new Error(error.message)
       })
     },
@@ -55,8 +55,8 @@ export const load = (async ({ params: { dictionaryId: dictionary_id }, parent, d
           const { error } = await supabase
             .from('dictionary_info')
             .upsert([
-              { dictionary_id, write_in_collaborators: current_collaborators.filter(n => n !== name) },
-            ], { onConflict: 'dictionary_id' })
+              { id: dictionary_id, write_in_collaborators: current_collaborators.filter(n => n !== name) },
+            ], { onConflict: 'id' })
           if (error) throw new Error(error.message)
         })
       }
@@ -140,8 +140,8 @@ export const load = (async ({ params: { dictionaryId: dictionary_id }, parent, d
       const { error } = await supabase
         .from('dictionary_info')
         .upsert([
-          { dictionary_id, citation },
-        ], { onConflict: 'dictionary_id' })
+          { id: dictionary_id, citation },
+        ], { onConflict: 'id' })
       if (error) throw new Error(error.message)
     })
   }
