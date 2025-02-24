@@ -80,10 +80,8 @@ SELECT
   dictionary_roles.role,
   profiles_view.full_name,
   profiles_view.avatar_url
-FROM 
-  dictionary_roles
-JOIN 
-  profiles_view ON dictionary_roles.user_id = profiles_view.id;
+FROM dictionary_roles
+JOIN profiles_view ON dictionary_roles.user_id = profiles_view.id;
 
 CREATE TYPE status_enum AS ENUM ('queued', 'sent', 'claimed', 'cancelled');
 
