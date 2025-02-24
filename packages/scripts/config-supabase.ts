@@ -4,6 +4,7 @@ import { createClient } from '@supabase/supabase-js'
 import type { Database } from '@living-dictionaries/types'
 import * as dotenv from 'dotenv'
 import './record-logs'
+import { S3Client } from '@aws-sdk/client-s3'
 
 program
   .option('-e, --environment [dev/prod]', 'Firebase/Supabase Project', 'dev')
@@ -14,9 +15,10 @@ export const environment = program.opts().environment === 'prod' ? 'prod' : 'dev
 console.log(`Supabase running on ${environment}`)
 
 if (environment === 'dev') {
-  dotenv.config({ path: '../site/.env.development' })
+  dotenv.config({ path: '../site/.env.development' }) // Supabase local service key
+  dotenv.config({ path: '../site/.env.local' }) // for dev cloud storage bucket
 } else {
-  dotenv.config({ path: '../site/.env.production.local' })
+  dotenv.config({ path: '../site/.env.production.local' }) // Supabase production service key and cloud storage bucket
 }
 
 export const admin_supabase = createClient<Database>(process.env.PUBLIC_SUPABASE_API_URL, process.env.SUPABASE_SERVICE_ROLE_KEY)
@@ -72,3 +74,13 @@ class DB {
 }
 
 export const postgres = new DB()
+
+export const GCLOUD_MEDIA_BUCKET_S3 = new S3Client({
+  region: 'us',
+  endpoint: `https://storage.googleapis.com`,
+  credentials: {
+    accessKeyId: process.env.GCLOUD_MEDIA_BUCKET_ACCESS_KEY_ID,
+    secretAccessKey: process.env.GCLOUD_MEDIA_BUCKET_SECRET_ACCESS_KEY,
+  },
+})
+export const storage_bucket = `talking-dictionaries-${environment === 'prod' ? 'alpha' : 'dev'}.appspot.com`

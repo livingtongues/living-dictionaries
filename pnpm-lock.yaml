@@ -402,6 +402,7 @@ packages:
   '@aws-sdk/client-s3@3.731.1':
     resolution: {integrity: sha512-Ab2PA/8Th6JkurCkxnQJZHPE/JnnSsX/XHQzirkQb+JpKOyWMRC/YZUBfAaiwhxqX65RHgklrwil+UbFl4TtAQ==}
     engines: {node: '>=18.0.0'}
+    deprecated: Please upgrade to >=3.735.0, which contains fixes for checksum validation in S3 getObject calls. Details https://github.com/aws/aws-sdk-js-v3/issues/6827
 
   '@aws-sdk/client-ses@3.750.0':
     resolution: {integrity: sha512-0apX2PEzT/09XiO42jNHjkszz/k2RLcIiaLbl1ngcKY1lWzMzIiGIqXw7Emei8iye2o6EsWuBG1p3k30iSyjhg==}
@@ -552,6 +553,7 @@ packages:
   '@aws-sdk/middleware-flexible-checksums@3.731.0':
     resolution: {integrity: sha512-LMs/rndovYjYSntSYyPE/PIl4iHNiquaU0lpDqpQc9iTgQcNbjdriSUWpibgu1jXlGBpBYCqttNkxmEThbbWxA==}
     engines: {node: '>=18.0.0'}
+    deprecated: Please upgrade to >=3.735.0, which contains fixes for checksum validation in S3 getObject calls. Details https://github.com/aws/aws-sdk-js-v3/issues/6827
 
   '@aws-sdk/middleware-host-header@3.679.0':
     resolution: {integrity: sha512-y176HuQ8JRY3hGX8rQzHDSbCl9P5Ny9l16z4xmaiLo+Qfte7ee4Yr3yaAKd7GFoJ3/Mhud2XZ37fR015MfYl2w==}
@@ -1818,6 +1820,7 @@ packages:
   '@playwright/test@1.41.2':
     resolution: {integrity: sha512-qQB9h7KbibJzrDpkXkYvsmiDJK14FULCCZgEcoe2AvFAS64oCirWTwzTlAYEbKaRxWs5TFesE1Na6izMv3HfGg==}
     engines: {node: '>=16'}
+    deprecated: Please update to the latest version of Playwright to test up-to-date browsers.
     hasBin: true
 
   '@polka/url@1.0.0-next.28':

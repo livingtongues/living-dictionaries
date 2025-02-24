@@ -1,13 +1,12 @@
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
-
 import * as fs from 'node:fs'
-import { environment, storage } from '../config-firebase.js'
-import { getImageServingUrl } from './getImageServingUrl.js'
+
+import { PutObjectCommand } from '@aws-sdk/client-s3'
+import { GCLOUD_MEDIA_BUCKET_S3, storage_bucket } from '../config-supabase'
+import { getImageServingUrl } from './getImageServingUrl'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
-
-const fileBucket = `talking-dictionaries-${environment === 'prod' ? 'alpha' : 'dev'}.appspot.com`
 
 export async function upload_audio_to_gcs({
   filepath,
@@ -30,16 +29,30 @@ export async function upload_audio_to_gcs({
   }
 
   try {
-    const [fileTypeSuffix] = filepath.match(/\.[0-9a-z]+$/i)
-    const storage_path = `${dictionary_id}/audio/${entry_id}_${new Date().getTime()}${fileTypeSuffix}`
+    const extension = filepath.split('.').pop()
+    const storage_path = `${dictionary_id}/audio/${entry_id}_${new Date().getTime()}.${extension}`
 
     if (live) {
-      await storage.bucket(fileBucket).upload(audioFilePath, {
-        destination: storage_path,
-        metadata: {
-          originalFileName: filepath,
-        },
-      })
+      const fileStream = fs.createReadStream(audioFilePath)
+
+      const mimeTypes: Record<string, string> = {
+        mp3: 'audio/mpeg',
+        wav: 'audio/wav',
+        ogg: 'audio/ogg',
+        m4a: 'audio/mp4',
+        aac: 'audio/aac',
+        flac: 'audio/flac',
+        wma: 'audio/x-ms-wma',
+      }
+
+      const file_type = mimeTypes[extension] || 'application/octet-stream'
+
+      await GCLOUD_MEDIA_BUCKET_S3.send(new PutObjectCommand({
+        Bucket: storage_bucket,
+        Key: storage_path,
+        Body: fileStream,
+        ContentType: file_type,
+      }))
     }
     return {
       storage_path,
@@ -71,19 +84,32 @@ export async function upload_photo_to_gcs({
     }
   }
 
-  const [fileTypeSuffix] = filepath.match(/\.[0-9a-z]+$/i)
-  const storage_path = `${dictionary_id}/images/${entry_id}_${new Date().getTime()}${fileTypeSuffix}`
+  const extension = filepath.split('.').pop()
+  const storage_path = `${dictionary_id}/images/${entry_id}_${new Date().getTime()}.${extension}`
 
   if (!live)
     return { storage_path, serving_url: 'no-serving_url-bc-dry-run' }
 
   try {
-    await storage.bucket(fileBucket).upload(imageFilePath, {
-      destination: storage_path,
-      metadata: {
-        originalFileName: filepath,
-      },
-    })
+    const fileStream = fs.createReadStream(imageFilePath)
+
+    const mimeTypes: Record<string, string> = {
+      jpg: 'image/jpeg',
+      jpeg: 'image/jpeg',
+      png: 'image/png',
+      gif: 'image/gif',
+      webp: 'image/webp',
+      svg: 'image/svg+xml',
+    }
+
+    const file_type = mimeTypes[extension] || 'application/octet-stream'
+
+    await GCLOUD_MEDIA_BUCKET_S3.send(new PutObjectCommand({
+      Bucket: storage_bucket,
+      Key: storage_path,
+      Body: fileStream,
+      ContentType: file_type,
+    }))
   } catch (err) {
     return {
       error: `!!! Trouble uploading ${filepath}. Double-check the file to see if it is just a corrupted jpg (as some are) or if the file is good and perhaps there is code/server/network-connection problem. Error: ${err}`,
@@ -91,7 +117,8 @@ export async function upload_photo_to_gcs({
   }
 
   try {
-    const serving_url = await getImageServingUrl(storage_path, environment)
+    const bucket_and_storage_path = `${storage_bucket}/${storage_path}`
+    const serving_url = await getImageServingUrl(bucket_and_storage_path)
     return {
       storage_path,
       serving_url,

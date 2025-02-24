@@ -1,16 +1,15 @@
 import { randomUUID } from 'node:crypto'
 import type { MultiString, TablesInsert } from '@living-dictionaries/types'
-import { diego_ld_user_id } from '../config-supabase'
+import { diego_ld_user_id } from '../constants'
 import type { Number_Suffix, Row, Sense_Prefix } from './row.type'
 import { sql_file_string } from './to-sql-string'
 import { millisecond_incrementing_timestamp } from './incrementing-timestamp'
 
 export interface Upload_Operations {
   upload_photo: (filepath: string, entry_id: string) => Promise<
-  { storage_path: string, serving_url: string, error: null } | { storage_path: null, serving_url: null, error: string }
+  { storage_path: string, serving_url: string, error?: null } | { storage_path?: null, serving_url?: null, error: string }
   >
-  upload_audio: (filepath: string, entry_id: string) => Promise<{ storage_path: string, error: null } | { storage_path: null, error: string }>
-  // upload_video: (filepath: string) => Promise<{ storage_path: string, error: null } | { storage_path: null, error: string }>
+  upload_audio: (filepath: string, entry_id: string) => Promise<{ storage_path: string, error?: null } | { storage_path?: null, error: string }>
 }
 
 export async function generate_sql_statements({
