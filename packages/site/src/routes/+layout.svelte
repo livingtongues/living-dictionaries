@@ -18,11 +18,11 @@
   <Toasts />
 {/await}
 
-<!-- {#if $user}
-  {#await import('./Banner.svelte') then { default: Banner }}
-    <Banner />
-  {/await}
-{/if} -->
+<!-- {#if $user} -->
+{#await import('./Banner.svelte') then { default: Banner }}
+  <Banner />
+{/await}
+<!-- {/if} -->
 
 <div id="direction" dir={$page.data.t('page.direction')}>
   <slot />
