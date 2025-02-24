@@ -14,7 +14,6 @@
 - remove firebase vercel credentials
 - remove import_meta from content update endpoint
 - remove firebase in SQL
-- remove firebase in scripts
 - remove unneeded urls from https://console.cloud.google.com/auth/clients/215143435444-fugm4gpav71r3l89n6i0iath4m436qnv.apps.googleusercontent.com?inv=1&invt=AboyXQ&project=talking-dictionaries-alpha
 - move featured images to photos table and make a connection to the dictionary
 - use line-clamp instead of truncateString in SelectedDict.svelte and also look at inline-children-elements purpose
