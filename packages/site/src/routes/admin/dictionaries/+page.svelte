@@ -1,62 +1,52 @@
 <script lang="ts">
-  import type { DictionaryView, IHelper, IInvite, TablesUpdate } from '@living-dictionaries/types'
-  import { collectionStore, getCollection } from 'sveltefirets'
+  import type { TablesUpdate } from '@living-dictionaries/types'
   import { Button, IntersectionObserverShared, ResponsiveTable } from 'svelte-pieces'
-  import { where } from 'firebase/firestore'
+  import type { UserWithDictionaryRoles } from '@living-dictionaries/types/supabase/users.types'
   import DictionaryRow from './DictionaryRow.svelte'
   import SortDictionaries from './SortDictionaries.svelte'
-  import type { DictionaryWithHelperStores } from './dictionaryWithHelpers'
   import { exportAdminDictionariesAsCSV } from './export'
   import type { PageData } from './$types'
+  import type { DictionaryWithHelpers } from './dictionaryWithHelpers.types'
   import Filter from '$lib/components/Filter.svelte'
-  import { api_update_dictionary } from '$api/db/update-dictionary/_call'
   import { browser } from '$app/environment'
   import { page } from '$app/stores'
 
   export let data: PageData
 
-  const noopConstraints = []
-  const inviteQueryConstraints = [where('status', 'in', ['queued', 'sent'])]
-
-  let dictionariesAndHelpers: DictionaryWithHelperStores[] = []
+  let dictionaries_with_editors_invites: DictionaryWithHelpers[] = []
+  let users: UserWithDictionaryRoles[] = []
 
   $: active_section = $page.url.searchParams.get('filter') as 'public' | 'private' | 'other'
 
   $: if (browser) {
-    get_dictionaries_with_helpers(active_section).then(dictionaries => dictionariesAndHelpers = dictionaries)
+    get_dictionaries_with_editors_invites(active_section).then(dictionaries => dictionaries_with_editors_invites = dictionaries)
   }
 
-  async function get_dictionaries_with_helpers(section: 'public' | 'private' | 'other') {
-    let dictionaries: DictionaryView[]
-    if (section === 'public') {
-      dictionaries = await data.get_public_dictionaries()
-    } else if (section === 'private') {
-      dictionaries = await data.get_private_dictionaries()
-    } else if (section === 'other') {
-      dictionaries = await data.get_other_dictionaries()
-    } else {
-      dictionaries = await data.get_public_dictionaries()
-    }
+  async function get_dictionaries_with_editors_invites(section: 'public' | 'private' | 'other') {
+    const dictionaries_function = section === 'private' ? data.get_private_dictionaries : section === 'other' ? data.get_other_dictionaries : data.get_public_dictionaries
+
+    const [dictionaries, users_with_roles, invites] = await Promise.all([
+      dictionaries_function(),
+      data.get_users_with_roles(),
+      data.get_invites(),
+    ])
+    users = users_with_roles
 
     return dictionaries.map((dictionary) => {
       return {
         ...dictionary,
-        managers: collectionStore<IHelper>(`dictionaries/${dictionary.id}/managers`, noopConstraints),
-        contributors: collectionStore<IHelper>(`dictionaries/${dictionary.id}/contributors`, noopConstraints),
-        writeInCollaborators: collectionStore<IHelper>(`dictionaries/${dictionary.id}/writeInCollaborators`, noopConstraints),
-        invites: collectionStore<IInvite>(`dictionaries/${dictionary.id}/invites`, inviteQueryConstraints),
-        getManagers: getCollection<IHelper>(`dictionaries/${dictionary.id}/managers`),
-        getContributors: getCollection<IHelper>(`dictionaries/${dictionary.id}/managers`),
-        getWriteInCollaborators: getCollection<IHelper>(`dictionaries/${dictionary.id}/writeInCollaborators`),
-        getInvites: getCollection<IInvite>(`dictionaries/${dictionary.id}/invites`, inviteQueryConstraints),
+        editors: users_with_roles.filter(user => user.dictionary_roles.some(role => role.dictionary_id === dictionary.id)),
+        invites: invites.filter(invite => invite.dictionary_id === dictionary.id),
       }
     })
   }
 
-  async function update_dictionary(change: TablesUpdate<'dictionaries'> & { id: string }) {
+  async function update_dictionary(change: TablesUpdate<'dictionaries'>, dictionary_id: string) {
     try {
-      await api_update_dictionary(change)
-      dictionariesAndHelpers = await get_dictionaries_with_helpers(active_section)
+      const { error } = await data.supabase.from('dictionaries').update(change)
+        .eq('id', dictionary_id)
+      if (error) throw new Error(error.message)
+      dictionaries_with_editors_invites = await get_dictionaries_with_editors_invites(active_section)
     } catch (err) {
       alert(`Error: ${err}`)
     }
@@ -70,14 +60,14 @@
 
 <div class="sticky top-0 h-[calc(100vh-1.5rem)] z-2 relative flex flex-col">
   <Filter
-    items={dictionariesAndHelpers}
+    items={dictionaries_with_editors_invites}
     let:filteredItems={filteredDictionaries}
     placeholder="Search dictionaries">
     <div slot="right" let:filteredItems={filteredDictionaries}>
       <Button
         form="filled"
         color="black"
-        onclick={async () => await exportAdminDictionariesAsCSV(filteredDictionaries, active_section)}>
+        onclick={() => exportAdminDictionariesAsCSV(filteredDictionaries, active_section)}>
         <i class="fas fa-download mr-1" />
         Download {filteredDictionaries.length} Dictionaries as CSV
       </Button>
@@ -89,7 +79,14 @@
           <IntersectionObserverShared bottom={2000} let:intersecting once>
             <tr>
               {#if intersecting}
-                <DictionaryRow {index} {dictionary} {update_dictionary} />
+                <DictionaryRow
+                  {index}
+                  {dictionary}
+                  {users}
+                  update_dictionary={change => update_dictionary(change, dictionary.id)}
+                  load_data={async () => {
+                    dictionaries_with_editors_invites = await get_dictionaries_with_editors_invites(active_section)
+                  }} />
               {:else}
                 <td colspan="30"> Loading... </td>
               {/if}

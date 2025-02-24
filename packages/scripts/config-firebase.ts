@@ -7,14 +7,14 @@ import { firebase_dev_service_account, firebase_prod_service_account } from './s
 import './record-logs'
 
 program
-  .option('-e, --environment [dev/prod]', 'Firebase/Supabase Project', 'dev')
+  .option('-fb, --firebase [dev/prod]', 'Firebase Project', 'dev')
   .allowUnknownOption() // because config is shared by multiple scripts
   .parse(process.argv)
 
-export const environment = program.opts().environment === 'prod' ? 'prod' : 'dev'
-console.log(`Firebase running on ${environment}`)
+export const firebase_environment = program.opts().firebase === 'prod' ? 'prod' : 'dev'
+console.log(`Firebase running on ${firebase_environment}`)
 
-const serviceAccount = environment === 'dev' ? firebase_dev_service_account : firebase_prod_service_account
+const serviceAccount = firebase_environment === 'dev' ? firebase_dev_service_account : firebase_prod_service_account
 export const projectId = serviceAccount.project_id
 
 initializeApp({

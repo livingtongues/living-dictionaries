@@ -1,18 +1,17 @@
 <script lang="ts">
-  type T = $$Generic;
-  export let items: T[];
-  export let placeholder = 'Search';
+  type T = $$Generic
+  export let items: T[]
+  export let placeholder = 'Search'
 
-  let value = '';
+  let value = ''
 
   $: filteredItems = items.filter((item) => {
-    const itemStr = JSON.stringify(item);
-    if (itemStr.toLowerCase().indexOf(value.toLowerCase()) !== -1)
-      return true;
-  });
+    const itemStr = JSON.stringify(item)
+    return itemStr.toLowerCase().includes(value.toLowerCase())
+  })
 
   function autofocus(node: HTMLInputElement) {
-    setTimeout(() => node.focus(), 15);
+    setTimeout(() => node.focus(), 15)
   }
 </script>
 

@@ -1,11 +1,10 @@
-import type { IHelper, IUser } from '@living-dictionaries/types'
 import { error, json } from '@sveltejs/kit'
 import { getSupportMessageRecipients } from '../addresses'
 import { type Address, send_email } from '../send-email'
 import type { RequestHandler } from './$types'
 import { dev } from '$app/environment'
-import { getDb } from '$lib/server/firebase-admin'
 import { ResponseCodes } from '$lib/constants'
+import { getAdminSupabaseClient } from '$lib/supabase/admin'
 
 export interface RequestAccessBody {
   email: string
@@ -16,17 +15,27 @@ export interface RequestAccessBody {
   dictionaryName: string
 }
 
-async function getManagerAddresses(dictionaryId: string): Promise<Address[]> {
-  const db = getDb()
-  const managers = (await db.collection(`dictionaries/${dictionaryId}/managers`).get()).docs.map(doc => doc.data() as IHelper)
-  const userPromises = managers.map((manager) => {
-    return db.doc(`users/${manager.id}`).get()
-  })
-  const users = (await Promise.all(userPromises)).map(doc => doc.data() as IUser)
-  return users.map((user) => {
+async function get_manager_addresses(dictionary_id: string): Promise<Address[]> {
+  const admin_supabase = getAdminSupabaseClient()
+
+  const { data: managers, error: manager_error } = await admin_supabase.from('dictionary_roles')
+    .select(`
+      dictionary_id,
+      user_id,
+      role,
+      profile:profiles_view (
+        full_name,
+        email
+      )
+      `)
+    .eq('role', 'manager')
+    .eq('dictionary_id', dictionary_id)
+  if (manager_error) throw new Error(manager_error.message)
+
+  return managers.map((manager) => {
     return {
-      name: user.displayName,
-      email: user.email,
+      name: manager.profile.full_name,
+      email: manager.profile.email,
     }
   })
 }
@@ -35,7 +44,7 @@ export const POST: RequestHandler = async ({ request }) => {
   try {
     const { email, message, name, url, dictionaryId, dictionaryName } = await request.json() as RequestAccessBody
 
-    const managerAddresses = await getManagerAddresses(dictionaryId)
+    const managerAddresses = await get_manager_addresses(dictionaryId)
     await send_email({
       to: [...getSupportMessageRecipients({ dev }), ...managerAddresses],
       reply_to: { email },

@@ -1,7 +1,7 @@
 import { writable } from 'svelte/store'
 import { del as del_idb, get as get_idb, set as set_idb } from 'idb-keyval'
 import type { Database, Tables } from '@living-dictionaries/types'
-import type { Supabase } from './database.types'
+import type { Supabase } from '.'
 import { browser } from '$app/environment'
 
 export interface CachedDataStoreOptions<Name> {

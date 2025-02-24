@@ -1,8 +1,8 @@
 <script lang="ts">
   import { Button, ShowHide } from 'svelte-pieces'
-  import { firebaseConfig } from 'sveltefirets'
   import User from './User.svelte'
   import { page } from '$app/stores'
+  import { mode } from '$lib/supabase'
 </script>
 
 <header class="print:hidden sticky top-0 left-0 right-0 flex items-center bg-white h-12 z-2 whitespace-nowrap">
@@ -22,7 +22,7 @@
           class="mr-2 ml-2"
           style="height: 30px; width: 30px; filter: invert(100%);" />
         {$page.data.t('misc.LD')}
-        {#if firebaseConfig.projectId === 'talking-dictionaries-dev'}
+        {#if mode === 'development'}
           <span class="ml-1 text-xs opacity-50">(dev)</span>
         {/if}
       </a>

@@ -1,5 +1,5 @@
 import { error, redirect } from '@sveltejs/kit'
-import { get } from 'svelte/store'
+import { get, readable } from 'svelte/store'
 import type { Tables } from '@living-dictionaries/types'
 import { ResponseCodes } from '$lib/constants'
 import { ENTRY_UPDATED_LOAD_TRIGGER } from '$lib/dbOperations'
@@ -7,6 +7,21 @@ import { browser } from '$app/environment'
 
 export async function load({ params: { dictionaryId: dictionary_id, entryId: entry_id }, depends, parent }) {
   depends(ENTRY_UPDATED_LOAD_TRIGGER)
+
+  const entry_history = readable<Tables<'content_updates'>[]>([], (set) => {
+    (async () => {
+      const { supabase } = await parent()
+      const { data: entry_content_updates, error } = await supabase.from('content_updates')
+        .select('*')
+        .eq('entry_id', entry_id)
+        .order('timestamp', { ascending: false })
+      if (error) {
+        console.error(error)
+        return []
+      }
+      if (entry_content_updates.length) set(entry_content_updates)
+    })()
+  })
 
   if (browser) {
     const { entries } = await parent()
@@ -17,6 +32,7 @@ export async function load({ params: { dictionaryId: dictionary_id, entryId: ent
         return {
           entry,
           shallow: false,
+          entry_history,
         }
       }
     }
@@ -51,5 +67,6 @@ export async function load({ params: { dictionaryId: dictionary_id, entryId: ent
   return {
     entry,
     shallow: false,
+    entry_history,
   }
 }

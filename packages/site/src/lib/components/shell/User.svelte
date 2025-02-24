@@ -1,10 +1,11 @@
 <script lang="ts">
-  import { authState, firebaseConfig, logOut } from 'sveltefirets'
-  import { Avatar, Button, Menu, ShowHide } from 'svelte-pieces'
-  import { get } from 'svelte/store'
+  import { Button, Menu, ShowHide } from 'svelte-pieces'
+  import { onMount } from 'svelte'
+  import { display_one_tap_popover, sign_out } from '$lib/supabase/auth'
   import { page } from '$app/stores'
-  import { post_request } from '$lib/helpers/get-post-requests'
-  import type { UpdateDevAdminRoleRequestBody } from '$api/db/update-dev-admin-role/+server'
+  import { mode } from '$lib/supabase'
+  import { api_update_dev_admin_role } from '$api/db/update-dev-admin-role/_call'
+  import { invalidateAll } from '$app/navigation'
 
   $: ({ user, admin } = $page.data)
   let show_menu = false
@@ -17,26 +18,52 @@
   }
 
   async function setAdminRole() {
-    const role = +prompt('Enter 0, 1, or 2')
-    if (role !== 0 && role !== 1 && role !== 2)
+    const role_level = +prompt('Enter 0, 1, or 2')
+    if (role_level !== 0 && role_level !== 1 && role_level !== 2)
       return
-    const auth_state_user = get(authState)
-    const auth_token = await auth_state_user.getIdToken()
-    const { error } = await post_request<UpdateDevAdminRoleRequestBody, any>('/api/db/update-dev-admin-role', { role, auth_token })
-    if (error)
+    const { error } = await api_update_dev_admin_role({ role_level })
+    if (error) {
       console.error(error)
+    } else {
+      invalidateAll()
+    }
   }
+
+  onMount(() => {
+    if (location.origin.includes('vercel.app'))
+      return
+    if ($user)
+      return
+    if (!$page.data.supabase)
+      return
+    display_one_tap_popover()
+  })
+
+  let broken_avatar_image = false
 </script>
 
 {#if $user}
   <div class="relative flex-shrink-0">
     <button class="px-3 py-1" type="button" on:click={toggle_menu}>
-      <Avatar user={$user} />
+      {#if $user.user_metadata?.avatar_url && !broken_avatar_image}
+        <img
+          class="w-34px h-34px rounded-full"
+          alt={$user.email[0]}
+          src={$user.user_metadata.avatar_url}
+          on:error={() => broken_avatar_image = true} />
+      {:else}
+        <div
+          class="w-34px h-34px rounded-full flex items-center justify-center font-semibold bg-gray-100 hover:bg-gray-200 uppercase">
+          {($user.user_metadata?.full_name || $user.email)[0]}
+        </div>
+      {/if}
     </button>
     {#if show_menu}
       <Menu portalTarget="#direction" class="right-2 rtl:left-2 top-11" onclickoutside={toggle_menu}>
-        <div class="px-4 py-2 text-xs font-semibold text-gray-600">{$user.displayName}</div>
-        <div class="px-4 py-2 -mt-3 text-xs text-gray-600 border-b">{$user.email}</div>
+        <div class="px-4 py-2 text-xs font-semibold text-gray-600">{$user.user_metadata?.full_name || $user.email}</div>
+        {#if $user.user_metadata?.full_name}
+          <div class="px-4 py-2 -mt-3 text-xs text-gray-600 border-b">{$user.email}</div>
+        {/if}
         {#if $admin}
           <a href="/admin">
             Admin Panel
@@ -44,12 +71,12 @@
           </a>
         {/if}
         <a href="/account"> {$page.data.t('account.account_settings')} </a>
-        <button type="button" on:click={logOut}>{$page.data.t('account.log_out')}</button>
-        {#if firebaseConfig.projectId === 'talking-dictionaries-dev'}
+        <button type="button" on:click={sign_out}>{$page.data.t('account.log_out')}</button>
+        {#if mode === 'development'}
           <button
             type="button"
             on:click={setAdminRole}>
-            Set Admin Role Level (dev only)
+            Dev: Set Admin Role Level (currently {$user.app_metadata.admin})
           </button>
         {/if}
       </Menu>
@@ -65,7 +92,7 @@
     </Button>
     {#if show}
       {#await import('$lib/components/shell/AuthModal.svelte') then { default: AuthModal }}
-        <AuthModal on:close={toggle} />
+        <AuthModal on_close={toggle} />
       {/await}
     {/if}
   </ShowHide>

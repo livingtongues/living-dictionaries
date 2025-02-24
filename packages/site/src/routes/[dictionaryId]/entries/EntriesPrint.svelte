@@ -1,6 +1,6 @@
 <script lang="ts">
   import { Button, type QueryParamStore, createPersistedStore } from 'svelte-pieces'
-  import type { Citation, EntryView, IPrintFields, Partner, Tables } from '@living-dictionaries/types'
+  import type { EntryView, IPrintFields, PartnerWithPhoto, Tables } from '@living-dictionaries/types'
   import { onMount } from 'svelte'
   import { build_citation } from '../contributors/build-citation'
   import PrintEntry from './print/PrintEntry.svelte'
@@ -14,12 +14,13 @@
   export let entries: EntryView[] = []
   export let dictionary: Tables<'dictionaries'>
   export let can_edit = false
-  export let load_citation: () => Promise<Citation>
-  export let load_partners: () => Promise<Partner[]>
 
   const print_per_page = 100
+  let partners: PartnerWithPhoto[] = []
+  $: ({ dictionary_info } = $page.data)
 
   onMount(() => {
+    $page.data.load_partners().then(data => partners = data)
     $search_params.page = 1
     $search_params.entries_per_page = print_per_page
     return () => $search_params.entries_per_page = null
@@ -119,14 +120,12 @@
           {dictionary} />
       {/each}
     </div>
-    {#await Promise.all([load_partners(), load_citation()]) then [partners, citation]}
-      <div
-        dir="ltr"
-        class="text-xs print:fixed print:text-center right-0 top-0 bottom-0"
-        style="writing-mode: tb; min-width: 0;">
-        {build_citation({ t: $page.data.t, dictionary, custom_citation: truncateAuthors(citation?.citation), partners })}
-      </div>
-    {/await}
+    <div
+      dir="ltr"
+      class="text-xs print:fixed print:text-center right-0 top-0 bottom-0"
+      style="writing-mode: tb; min-width: 0;">
+      {build_citation({ t: $page.data.t, dictionary, custom_citation: truncateAuthors($dictionary_info.citation), partners })}
+    </div>
   </div>
 {:else}
   <p>Print view is only available to dictionary managers and contributors</p>
