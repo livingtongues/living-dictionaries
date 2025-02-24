@@ -4,26 +4,22 @@ import { fileURLToPath } from 'node:url'
 import type { IHelper, IInvite } from '@living-dictionaries/types/invite.interface'
 import type { Citation, IAbout, IGrammar, Partner } from '@living-dictionaries/types/dictionary.interface'
 import { db } from '../config-firebase'
-import { admin_supabase, environment, postgres } from '../config-supabase'
-import { reset_local_db } from '../reset-local-db'
-import { sql_file_string } from '../import/to-sql-string'
-import { jacob_ld_user_id } from '../constants'
-import { sync_users_across_and_write_fb_sb_mappings, write_users_to_disk } from './users'
+import { admin_supabase, postgres } from '../config-supabase'
 import { load_fb_to_sb_user_ids } from './get-user-id'
 import { generate_inserts } from './generate-inserts'
 
 migrate_the_rest()
 
 async function migrate_the_rest() {
-  if (environment === 'dev') {
-    await reset_local_db()
-  }
-  // if (environment === 'prod') {
-  //   await save_dictionaries()
+  // if (environment === 'dev') {
+  //   await reset_local_db()
   // }
-  await write_users_to_disk() // just do once when testing, and once when final run
-  await sync_users_across_and_write_fb_sb_mappings() // needs run twice, first to sync users, then to save them to disk
-  await sync_users_across_and_write_fb_sb_mappings() // needs run twice, first to sync users, then to save them to disk
+  // if (environment === 'prod') {
+  //   await save_dictionaries() // just do once
+  // }
+  // await write_users_to_disk() // just do once
+  // await sync_users_across_and_write_fb_sb_mappings() // needs run twice, first to sync users, then to save them to disk
+  // await sync_users_across_and_write_fb_sb_mappings() // needs run twice, first to sync users, then to save them to disk
   await load_fb_to_sb_user_ids()
 
   const dictionaries = await load_saved_dictionaries()
@@ -36,12 +32,12 @@ async function migrate_the_rest() {
   const fb_dictionary_infos = await get_info_by_dictionary_id()
 
   let sql_query = 'BEGIN;' // Start a transaction
-  if (environment === 'dev') {
-    for (const { id, name } of dictionaries) {
-      const dictionary_sql = sql_file_string('dictionaries', { id, name, created_by: jacob_ld_user_id, updated_by: jacob_ld_user_id })
-      sql_query += `${dictionary_sql}\n`
-    }
-  }
+  // if (environment === 'dev') {
+  //   for (const { id, name } of dictionaries) {
+  //     const dictionary_sql = sql_file_string('dictionaries', { id, name, created_by: jacob_ld_user_id, updated_by: jacob_ld_user_id })
+  //     sql_query += `${dictionary_sql}\n`
+  //   }
+  // }
 
   const sql = generate_inserts({
     dictionary_ids: dictionaries.map(({ id }) => id),
