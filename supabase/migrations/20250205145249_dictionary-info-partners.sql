@@ -43,6 +43,7 @@ CREATE POLICY "Anyone can view dictionary info."
 ON dictionary_info FOR SELECT
 USING (true);
 
+------------------------
 
 CREATE TABLE dictionary_partners (
   id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),

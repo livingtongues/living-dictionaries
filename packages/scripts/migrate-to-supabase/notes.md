@@ -1,17 +1,3 @@
-# Migrate Auth
-- commit, check, test
-- push sql to prod
-- lock firebase
-- run all data-migrations
-  - partners `dictionaries/${dictionary.id}/partners`
-  - invites `dictionaries/${dictionary.id}/invites`
-  - managers `dictionaries/${dictionary.id}/managers`
-  - contributors `dictionaries/${dictionary.id}/contributors`
-  - write_in_collaborators `dictionaries/${dictionary.id}/writeInCollaborators`
-  - about: `dictionaries/${dictionary.id}/info/about`
-  - grammar `dictionaries/${dictionary.id}/info/grammar`
-  - citation `dictionaries/${dictionary.id}/info/citation`
-- push code live
 ## Clean Up
 - entry history from pop-up entry modal
 - test admin rls, alternative is auth.jwt() read https://supabase.com/docs/guides/database/postgres/row-level-security#authjwt to see if better
@@ -32,6 +18,8 @@
 - remove unneeded urls from https://console.cloud.google.com/auth/clients/215143435444-fugm4gpav71r3l89n6i0iath4m436qnv.apps.googleusercontent.com?inv=1&invt=AboyXQ&project=talking-dictionaries-alpha
 - move featured images to photos table and make a connection to the dictionary
 - use line-clamp instead of truncateString in SelectedDict.svelte and also look at inline-children-elements purpose
+- delete dev Firebase project and create new gcs dev bucket
+- adjust user migration to set these fields to empty strings and not null to avoid db errors: `confirmation_token`, `recovery_token`, `email_change_token_new`, `email_change`
 
 # Migrate Entries and Speakers from Firestore to Supabase
 
