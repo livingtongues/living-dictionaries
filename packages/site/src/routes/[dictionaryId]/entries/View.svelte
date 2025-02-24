@@ -1,6 +1,7 @@
 <script lang="ts">
   import type { EntryView } from '@living-dictionaries/types'
   import { Modal } from 'svelte-pieces'
+  import { readable } from 'svelte/store'
   import EntryPage from '../entry/[entryId]/+page.svelte'
   import ListEntry from './list/ListEntry.svelte'
   import EntriesTable from './table/EntriesTable.svelte'
@@ -12,7 +13,7 @@
 
   export let entries: EntryView[]
   export let page_data: EntriesPageData
-  $: ({ dictionary, can_edit, preferred_table_columns, dbOperations, search_params, load_citation, load_partners } = page_data)
+  $: ({ dictionary, can_edit, preferred_table_columns, dbOperations, search_params } = page_data)
 
   function handle_entry_click(e: MouseEvent & { currentTarget: EventTarget & HTMLAnchorElement }, entry: EntryView) {
     // bail if opening a new tab
@@ -43,6 +44,7 @@
               ...page_data,
               entry,
               shallow: true,
+              entry_history: readable([]),
             }} />
         </Modal>
       {/if}
@@ -64,8 +66,6 @@
       {search_params}
       {entries}
       {dictionary}
-      {load_citation}
-      {load_partners}
       can_edit={$can_edit} />
   {/if}
 {/if}

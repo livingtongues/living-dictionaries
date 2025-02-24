@@ -1,6 +1,5 @@
 # Environment Variables
 
-- Ask for the .env.local to get the unrestricted Mapbox key and Firebase dev api key for working on localhost
-- For Vercel deployment, putting each line from the contents of a private .env file into an environment variable will work also (e.g. PUBLIC_FIREBASE_CONFIG=<stringifiedconfig>)
+- Ask for the .env.local to get the unrestricted Mapbox key and other dev api keys for working on localhost
 
 - The dictionary import script in /functions requires a .env file.

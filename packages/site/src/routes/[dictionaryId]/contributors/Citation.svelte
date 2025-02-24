@@ -1,13 +1,13 @@
 <script lang="ts">
   import { Button, Form } from 'svelte-pieces'
-  import type { Citation, Partner, Tables } from '@living-dictionaries/types'
+  import type { PartnerWithPhoto, Tables } from '@living-dictionaries/types'
   import { build_citation } from './build-citation'
   import { page } from '$app/stores'
 
   export let dictionary: Tables<'dictionaries'>
   export let isManager = false
-  export let partners: Partner[]
-  export let citation: Citation
+  export let partners: PartnerWithPhoto[]
+  export let citation: string
   export let update_citation: (citation: string) => Promise<void>
 
   let value = ''
@@ -35,11 +35,11 @@
         placeholder="Anderson, Gregory D. S."
         type="text"
         class="form-input w-full"
-        value={citation?.citation || ''}
+        value={citation || ''}
         on:input={(e) => {
           // @ts-expect-error
           value = e.target.value.trim()
-          unsaved = value !== citation?.citation
+          unsaved = value !== citation
         }} />
       <div class="w-1" />
       <Button class="shrink-0" {loading} type="submit">
@@ -50,5 +50,5 @@
 {/if}
 
 <div dir="ltr" class:text-orange={unsaved}>
-  {build_citation({ t: $page.data.t, dictionary, custom_citation: value || citation?.citation, partners })}
+  {build_citation({ t: $page.data.t, dictionary, custom_citation: value || citation, partners })}
 </div>

@@ -4,14 +4,14 @@ import type { LayoutData } from '../../routes/$types'
 import type { LayoutData as DictionaryLayoutData } from '../../routes/[dictionaryId]/$types'
 import { logDbOperations } from './db'
 
+// @ts-expect-error
 export const mockAppLayoutData: LayoutData = {
   t: null,
   locale: null,
   admin: readable(0),
   supabase: null,
-  // authResponse: null,
+  authResponse: null,
   user: readable(null),
-  user_from_cookies: null,
   preferred_table_columns: null,
 }
 
@@ -29,7 +29,6 @@ export const justMockDictionaryLayoutData = {
   search_entries: null,
   default_entries_per_page: null,
   dbOperations: logDbOperations,
-  load_citation: null,
   load_partners: null,
   // about_content: readable(null) as Awaited<ReturnType<typeof awaitableDocStore<IAbout>>>,
   // about_content: readable({

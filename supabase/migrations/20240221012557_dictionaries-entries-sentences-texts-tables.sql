@@ -1,6 +1,6 @@
 CREATE TYPE certainty AS ENUM ('yes', 'no', 'unknown');
 
-CREATE TABLE dictionaries ( -- TODO: migrate from Firestore
+CREATE TABLE dictionaries (
   id text unique primary key NOT NULL,
   name text NOT NULL,
   alternate_names text[],

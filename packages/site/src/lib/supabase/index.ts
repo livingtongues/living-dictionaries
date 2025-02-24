@@ -1,9 +1,10 @@
-import { type AuthResponse, createClient } from '@supabase/supabase-js'
+import { type AuthResponse, type SupabaseClient, createClient } from '@supabase/supabase-js'
 import type { Database } from '@living-dictionaries/types'
-import type { Supabase } from './database.types'
-import { PUBLIC_STUDIO_URL, PUBLIC_SUPABASE_ANON_KEY, PUBLIC_SUPABASE_API_URL } from '$env/static/public'
+import { PUBLIC_MODE, PUBLIC_STUDIO_URL, PUBLIC_SUPABASE_ANON_KEY, PUBLIC_SUPABASE_API_URL } from '$env/static/public'
 
 // https://supabase.com/docs/reference/javascript/typescript-support
+export type Supabase = SupabaseClient<Database>
+export const mode = PUBLIC_MODE as 'development' | 'production'
 
 const browser = typeof window !== 'undefined'
 let supabase: Supabase | undefined

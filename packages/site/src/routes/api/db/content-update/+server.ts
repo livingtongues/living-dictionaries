@@ -3,49 +3,29 @@ import { json, error as kit_error } from '@sveltejs/kit'
 import type { ContentUpdateRequestBody, TablesInsert } from '@living-dictionaries/types'
 import { check_can_edit } from '../check-permission'
 import type { RequestHandler } from './$types'
-import { decodeToken } from '$lib/server/firebase-admin'
 import { getAdminSupabaseClient } from '$lib/supabase/admin'
 import { ResponseCodes } from '$lib/constants'
-import { dev } from '$app/environment'
 
 export type ContentUpdateResponseBody = TablesInsert<'content_updates'>
 
-export const POST: RequestHandler = async ({ request }) => {
+export const POST: RequestHandler = async ({ request, locals: { getSession } }) => {
   try {
     const body = await request.json() as ContentUpdateRequestBody
-    const { update_id, import_meta, auth_token, dictionary_id, import_id, type, data } = body
+    const { update_id, dictionary_id, import_id, type, data } = body
 
     const admin_supabase = getAdminSupabaseClient()
 
-    let user_id: string
+    const { data: session_data, error: _error, supabase } = await getSession()
+    if (_error || !session_data?.user)
+      kit_error(ResponseCodes.UNAUTHORIZED, { message: _error.message || 'Unauthorized' })
+    const user_id = session_data.user.id
 
-    if (dev)
-      // @ts-expect-error
-      user_id = import_meta?.user_id || data?.updated_by || data?.created_by
-
-    if (auth_token) {
-      const decoded_token = await decodeToken(auth_token)
-      if (!decoded_token?.uid)
-        throw new Error('No user id found in token')
-
-      await check_can_edit(decoded_token.uid, dictionary_id)
-
-      const { data } = await admin_supabase.from('user_emails')
-        .select('id')
-        .eq('email', decoded_token.email!)
-        .single()
-      if (!data?.id)
-        throw new Error('No user id found in database')
-      user_id = data.id
+    if (!session_data.user.app_metadata.admin) {
+      await check_can_edit(supabase, dictionary_id)
     }
 
-    if (!user_id)
-      throw new Error('No user id found. Pass it into the user_id_from_local field or use a valid auth_token.')
-
-    const timestamp = dev
     // @ts-expect-error
-      ? import_meta?.timestamp || data?.updated_at || data?.created_at || new Date().toISOString()
-      : new Date().toISOString()
+    const timestamp = data?.updated_at || data?.created_at || new Date().toISOString()
 
     const c_u_meta = {
       created_by: user_id,

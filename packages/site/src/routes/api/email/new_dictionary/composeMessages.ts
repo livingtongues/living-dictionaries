@@ -1,9 +1,9 @@
-import type { IUser, Tables } from '@living-dictionaries/types'
+import type { Tables } from '@living-dictionaries/types'
 
-export function notifyAdminsOnNewDictionary(dictionary: Tables<'dictionaries'>, user: IUser) {
+export function notifyAdminsOnNewDictionary(dictionary: Tables<'dictionaries'>, email: string) {
   return `Hey Admins,
 
-  ${user.displayName} created a new Living Dictionary named ${dictionary.name}. Here's the details:
+  ${email} created a new Living Dictionary named ${dictionary.name}. Here's the details:
   
   URL: https://livingdictionaries.app/${dictionary.id} 
   
@@ -26,9 +26,7 @@ export function notifyAdminsOnNewDictionary(dictionary: Tables<'dictionaries'>, 
   Author's Connection: "${dictionary.author_connection}"
   ConLang Description: "${dictionary.con_language_description}"
   
-  We sent ${user.displayName} an automatic dictionary-info email to ${
-  user.email
-}, but you can also get in touch with them if needed.
+  We sent an automatic dictionary-info email to ${email}, but you can also get in touch with them if needed.
   
   Thanks,
   Our automatic Vercel Function

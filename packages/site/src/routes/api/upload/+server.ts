@@ -1,14 +1,12 @@
 import { PutObjectCommand } from '@aws-sdk/client-s3'
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
-import { error, json } from '@sveltejs/kit'
-import { firebaseConfig } from 'sveltefirets'
+import { type RequestHandler, error, json } from '@sveltejs/kit'
 import { check_can_edit } from '$api/db/check-permission'
 import { ResponseCodes } from '$lib/constants'
 import { GCLOUD_MEDIA_BUCKET_S3 } from '$lib/server/gcloud'
-import { decodeToken } from '$lib/server/firebase-admin'
+import { mode } from '$lib/supabase'
 
 export interface UploadRequestBody {
-  auth_token: string
   folder: string
   dictionary_id: string
   file_name: string
@@ -22,18 +20,17 @@ export interface UploadResponseBody {
   item_id: string
 }
 
-export async function POST({ request }) {
+export const POST: RequestHandler = async ({ request, locals: { getSession } }) => {
+  const { data: session_data, error: _error, supabase } = await getSession()
+  if (_error || !session_data?.user)
+    error(ResponseCodes.UNAUTHORIZED, { message: _error.message || 'Unauthorized' })
+
   try {
-    const { auth_token, folder, dictionary_id, file_name, file_type } = await request.json() as UploadRequestBody
+    const { folder, dictionary_id, file_name, file_type } = await request.json() as UploadRequestBody
 
-    if (!auth_token)
-      throw new Error('missing auth_token')
-
-    const decoded_token = await decodeToken(auth_token)
-    if (!decoded_token?.uid)
-      throw new Error('No user id found in token')
-
-    await check_can_edit(decoded_token.uid, dictionary_id)
+    if (!session_data.user.app_metadata.admin) {
+      await check_can_edit(supabase, dictionary_id)
+    }
 
     if (!folder)
       throw new Error('Missing folder')
@@ -42,7 +39,7 @@ export async function POST({ request }) {
     if (!file_type?.trim())
       throw new Error('Missing file_type')
 
-    const bucket = firebaseConfig.storageBucket
+    const bucket = mode === 'development' ? 'talking-dictionaries-dev.appspot.com' : 'talking-dictionaries-alpha.appspot.com'
     const extension = file_name.split('.').pop()
     const item_id = Date.now().toString()
     const object_key = `${folder}/${item_id}.${extension}`
@@ -58,7 +55,7 @@ export async function POST({ request }) {
 
     return json({ presigned_upload_url, bucket, object_key, item_id } satisfies UploadResponseBody)
   } catch (err) {
-    console.error(`Error creating dictionary: ${err.message}`)
-    error(ResponseCodes.INTERNAL_SERVER_ERROR, `Error creating dictionary: ${err.message}`)
+    console.error(`Error uploading: ${err.message}`)
+    error(ResponseCodes.INTERNAL_SERVER_ERROR, `Error uploading: ${err.message}`)
   }
 }

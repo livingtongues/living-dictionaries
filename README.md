@@ -7,7 +7,7 @@ A mobile-first community focused dictionary-building web app built by [Living To
 [<img src="https://img.shields.io/badge/Svelte-4-orange.svg"></a>](https://svelte.dev/)
 [<img src="https://img.shields.io/badge/SvelteKit-2-orange.svg"></a>](https://kit.svelte.dev/)
 [<img src="https://img.shields.io/badge/UnoCSS-Svelte_Scoped-blue.svg"></a>](https://unocss.dev/integrations/svelte-scoped)
-[<img src="https://img.shields.io/badge/Supabase-Auth_Database-teal.svg"></a>](https://firebase.google.com/)
+[<img src="https://img.shields.io/badge/Supabase-Auth_Database-teal.svg"></a>](https://supabase.com/)
 [<img src="https://img.shields.io/badge/Vercel-SSR-black.svg"></a>](https://vercel.com/)
 [<img src="https://img.shields.io/badge/Orama-Search-purple.svg"></a>](https://www.orama.com/)
 [<img src="https://img.shields.io/badge/GCP-Storage-blue.svg"></a>](https://cloud.google.com/storage)

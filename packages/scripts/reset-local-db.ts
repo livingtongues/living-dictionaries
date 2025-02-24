@@ -11,7 +11,6 @@ export async function reset_local_db() {
   console.info('reseting db from seed sql')
 
   await postgres.execute_query(`truncate table auth.users cascade;`)
-  await postgres.execute_query('truncate table entry_updates cascade;')
 
   // const seedFilePath = '../../supabase/seed.sql'
   // const seed_sql = readFileSync(seedFilePath, 'utf8')

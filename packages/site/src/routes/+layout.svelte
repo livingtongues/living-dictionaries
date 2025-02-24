@@ -14,6 +14,10 @@
   {/if}
 {/if}
 
+{#await import('$lib/components/ui/Toasts.svelte') then { default: Toasts }}
+  <Toasts />
+{/await}
+
 <!-- {#if $user}
   {#await import('./Banner.svelte') then { default: Banner }}
     <Banner />

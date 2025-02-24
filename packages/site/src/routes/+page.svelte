@@ -15,11 +15,10 @@
   import { browser } from '$app/environment'
 
   export let data: PageData
-  $: ({ admin, user, get_private_dictionaries, get_public_dictionaries, get_my_dictionaries } = data)
+  $: ({ admin, get_private_dictionaries, get_public_dictionaries, my_dictionaries } = data)
 
   let public_dictionaries: DictionaryView[] = []
   let private_dictionaries: DictionaryView[] = []
-  $: my_dictionaries = get_my_dictionaries($user?.uid)
 
   onMount(() => {
     get_public_dictionaries().then(_dictionaries => public_dictionaries = _dictionaries)

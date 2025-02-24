@@ -1,67 +1,117 @@
 <script lang="ts">
-  import {
-    FirebaseUiAuth,
-    saveUserData,
-    type LanguageCode,
-    languagesWithTranslations,
-    type AuthResult,
-  } from 'sveltefirets';
-  import { Modal } from 'svelte-pieces';
-  import { createEventDispatcher } from 'svelte';
-  import type { NewUserRequestBody } from '$api/email/new_user/+server';
-  import { page } from '$app/stores';
-  import { post_request } from '$lib/helpers/get-post-requests';
+  import { Button, Form, Modal } from 'svelte-pieces'
+  import { onMount } from 'svelte'
+  import { toast } from '../ui/Toasts.svelte'
+  import { handle_sign_in_response } from '../../supabase/sign_in'
+  import { display_one_tap_button } from '$lib/supabase/auth'
+  import { page } from '$app/stores'
+  import { dev } from '$app/environment'
+  import { api_email_otp } from '$api/email/otp/_call'
 
-  let languageCode: LanguageCode = 'en';
+  export let context: 'force' = undefined
+  export let on_close: () => void
 
-  let localeAbbrev: string = $page.data.locale;
-  if (localeAbbrev === 'he') localeAbbrev = 'iw';
-  if (!Object.values(languagesWithTranslations).includes(localeAbbrev))
-    localeAbbrev = 'en'; // Malay 'ms' and Assamese 'as' not yet available
+  let email = dev ? 'manual@mock.com' : ''
+  let sixDigitCodeSent = false
+  let sixDigitCode: string
+  const TEN_SECONDS = 10000
+  const FOUR_SECONDS = 4000
 
-  languageCode = localeAbbrev as LanguageCode;
+  async function sendCode() {
+    const { data, error } = await api_email_otp({ email })
 
-  export let context: 'force' = undefined;
-
-  const dispatch = createEventDispatcher<{
-    close: boolean;
-  }>();
-
-  async function handleAuthResult({ detail }: CustomEvent<AuthResult>) {
-    try {
-      saveUserData(detail);
-      if (detail.additionalUserInfo.isNewUser) {
-        const auth_token = await detail.user.getIdToken();
-        const { error } = await post_request<NewUserRequestBody, null>('/api/email/new_user', {
-          auth_token,
-          user: {
-            email: detail.user.email,
-            displayName: detail.user.displayName || detail.user.email,
-          },
-        });
-        if (error)
-          throw new Error(error.message);
-      }
-    } catch (err) {
-      alert(`${$page.data.t('misc.error')}: ${err}`);
-      console.error(err);
+    if (data?.otp) {
+      sixDigitCode = data.otp
+      return
     }
-    dispatch('close');
+
+    console.info({ data, error })
+    if (error)
+      return toast(error.message, TEN_SECONDS)
+    toast(`Sent code to: ${email}`, FOUR_SECONDS)
+    sixDigitCodeSent = true
   }
+
+  let submitting_code = false
+  async function handleOTP(code: string) {
+    submitting_code = true
+    const { data, error } = await $page.data.supabase.auth.verifyOtp({
+      email,
+      token: code.toString(),
+      type: 'email',
+    })
+
+    sixDigitCode = null
+    submitting_code = false
+    handle_sign_in_response({ user: data?.user, error, supabase: $page.data.supabase })
+    if (!error)
+      on_close()
+  }
+
+  $: code_is_6_digits = /^\d{6}$/.test(sixDigitCode)
+  $: if (code_is_6_digits && !submitting_code) {
+    handleOTP(sixDigitCode)
+  }
+
+  function autofocus(node: HTMLInputElement) {
+    setTimeout(() => node.focus(), 15)
+  }
+
+  let button_parent: HTMLDivElement
+  const can_google_authenticate = !location.origin.includes('vercel.app')
+  onMount(() => {
+    if (can_google_authenticate && button_parent)
+      display_one_tap_button(button_parent)
+  })
 </script>
 
-<Modal on:close>
-  <span slot="heading">{$page.data.t('header.login')}</span>
+<svelte:head>
+  {#if can_google_authenticate}
+    <script src="https://accounts.google.com/gsi/client" async></script>
+  {/if}
+</svelte:head>
+
+<Modal on:close={on_close}>
+  <span slot="heading">{$page.data.t('header.login')}
+    {#if submitting_code}
+      <span class="i-svg-spinners-3-dots-fade align--4px"></span>
+    {/if}
+  </span>
   {#if context === 'force'}
-    <h4 class="text-lg text-center">
+    <h4 class="text-green-700 mb-4">
       {$page.data.t('header.please_create_account')}
     </h4>
   {/if}
 
-  <FirebaseUiAuth
-    continueUrl="/account"
-    signInWith={{ google: true, emailPasswordless: true }}
-    tosUrl="https://livingdictionaries.app/terms"
-    {languageCode}
-    on:authresult={handleAuthResult} />
+  {#if !sixDigitCodeSent}
+    {#if can_google_authenticate}
+      <div class="mb-3" bind:this={button_parent}></div>
+
+      <div class="mb-3 text-gray-500/80 text-sm font-semibold">
+        OR
+      </div>
+    {/if}
+    <Form onsubmit={sendCode} let:loading>
+      <div class="flex">
+        <input
+          type="email"
+          use:autofocus
+          placeholder={$page.data.t('contact.email')}
+          class="border border-gray-400 p-2 rounded w-full"
+          required
+          bind:value={email} />
+        <Button class="text-nowrap ml-1" {loading} form="filled" type="submit">{$page.data.t('account.send_code')}</Button>
+      </div>
+    </Form>
+  {:else}
+    <div class="mb-2">
+      {$page.data.t('account.enter_6_digit_code_sent_to')}: {email}
+    </div>
+    <input
+      type="text"
+      placeholder="_ _ _ _ _ _"
+      class="border border-gray-400 p-2 rounded w-full"
+      maxlength="6"
+      bind:value={sixDigitCode} />
+  {/if}
 </Modal>

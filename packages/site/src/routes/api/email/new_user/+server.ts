@@ -1,55 +1,47 @@
 import { error, json } from '@sveltejs/kit'
-import type { IUser } from '@living-dictionaries/types'
 import { getAdminRecipients } from '../addresses'
 import newUserWelcome from '../html/newUserWelcome'
 import { send_email } from '../send-email'
-import { save_user_to_supabase } from './save-user-to-supabase'
 import type { RequestHandler } from './$types'
 import { ResponseCodes } from '$lib/constants'
-import { decodeToken } from '$lib/server/firebase-admin'
 
-export interface NewUserRequestBody {
-  auth_token: string
-  user: IUser
+export interface NewUserEmailRequestBody {
+  // language: LanguageCode
 }
 
-export const POST: RequestHandler = async ({ request }) => {
-  const { auth_token, user } = await request.json() as NewUserRequestBody
-
-  const decodedToken = await decodeToken(auth_token)
-  if (!decodedToken?.uid)
-    error(ResponseCodes.UNAUTHORIZED, { message: 'Unauthorized' })
-  if (user.email !== decodedToken.email)
-    error(ResponseCodes.BAD_REQUEST, { message: 'token email does not match user email' })
+export const POST: RequestHandler = async ({ locals: { getSession } }) => {
+  const { data: session_data, error: _error, supabase } = await getSession()
+  if (_error || !session_data?.user)
+    error(ResponseCodes.UNAUTHORIZED, { message: _error.message || 'Unauthorized' })
 
   try {
     await send_email({
-      to: [{ email: user.email }],
+      to: [{ email: session_data.user.email }],
       subject: 'Thank you for creating a Living Dictionaries account!',
       type: 'text/html',
       body: newUserWelcome,
     })
 
-    const supabase_user_id = await save_user_to_supabase(user)
-    console.info({ supabase_user_id })
-
     await send_email({
-      to: getAdminRecipients(decodedToken.email),
-      subject: `New Living Dictionaries user: ${user.displayName}`,
+      to: getAdminRecipients(session_data.user.email),
+      subject: `New Living Dictionaries user: ${session_data.user.email}`,
       type: 'text/plain',
       body: `Hey Admins,
 
-${user.displayName} has just created a Living Dictionaries account, and we sent an automatic welcome email to ${user.email}
+${session_data.user.email} has just created a Living Dictionaries account, and we sent them an automatic welcome email.
 
-Thanks,
-Our automatic Vercel Function
+~ Our automatic Vercel Function
 
 https://livingdictionaries.app`,
     })
 
-    return json('success')
+    const { error: updating_welcome_email_error } = await supabase.from('user_data').update({ welcome_email_sent: new Date().toISOString() }).eq('id', session_data.user.id)
+    if (updating_welcome_email_error)
+      console.error({ updating_welcome_email_error })
+
+    return json({ result: 'success' })
   } catch (err) {
-    console.error(`Error with email send request: ${err.message}`)
-    error(ResponseCodes.INTERNAL_SERVER_ERROR, `Error with email send request: ${err.message}`)
+    console.error(`Error with welcome email send request: ${err.message}`)
+    error(ResponseCodes.INTERNAL_SERVER_ERROR, `Error with welcome email send request: ${err.message}`)
   }
 }

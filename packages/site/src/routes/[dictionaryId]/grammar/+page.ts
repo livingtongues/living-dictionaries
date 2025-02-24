@@ -1,25 +1,24 @@
-import { getDocument, setOnline } from 'sveltefirets'
-import type { IGrammar } from '@living-dictionaries/types'
 import { invalidateAll } from '$app/navigation'
 
-export async function load({ params: { dictionaryId }, parent }) {
-  const path = `dictionaries/${dictionaryId}/info/grammar`
-
+export function load({ params: { dictionaryId }, parent }) {
   async function update_grammar(updated: string) {
-    const { t } = await parent()
+    const { t, supabase } = await parent()
     try {
-      await setOnline<IGrammar>(path, { grammar: updated })
+      const { error } = await supabase
+        .from('dictionary_info')
+        .upsert([
+          { id: dictionaryId, grammar: updated },
+        ], { onConflict: 'id' })
+      if (error) {
+        console.error(error)
+        throw error.message
+      }
+
       await invalidateAll()
     } catch (err) {
       alert(`${t('misc.error')}: ${err}`)
     }
   }
 
-  try {
-    const grammarDoc = await getDocument<IGrammar>(path)
-    return { update_grammar, grammar: grammarDoc?.grammar }
-  } catch (err) {
-    console.error(err)
-    return { update_grammar, grammar: null }
-  }
+  return { update_grammar }
 }

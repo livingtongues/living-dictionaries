@@ -12,7 +12,7 @@ export interface IUser extends IBaseUser {
 
 export interface IRoles {
   // editor?: boolean; // can edit and delete any content
-  admin?: number // 1 controls content; 2 controls user roles also (both can turn off admin role to view as normal user until page refresh)
+  admin?: number // 1 controls content; 2 controls user roles also
 }
 
 export interface GoogleAuthUserMetaData {

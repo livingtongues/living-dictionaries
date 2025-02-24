@@ -1,5 +1,5 @@
 import type { IFirestoreMetaData } from 'sveltefirets'
-import type { PartnerPhoto } from '.'
+import type { PartnerPhoto } from './photo.interface'
 
 export interface IAbout extends IFirestoreMetaData {
   about: string

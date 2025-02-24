@@ -17,6 +17,7 @@
     admin,
     can_edit,
     dbOperations,
+    entry_history,
   } = data)
 
   $: first_photo_id = entry?.senses?.[0].photo_ids?.[0]
@@ -73,6 +74,7 @@
 
 <EntryDisplay
   {entry}
+  entry_history={$entry_history}
   {dictionary}
   can_edit={$can_edit}
   {dbOperations} />

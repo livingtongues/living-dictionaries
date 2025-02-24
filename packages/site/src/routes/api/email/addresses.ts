@@ -1,4 +1,3 @@
-import { firebaseConfig } from 'sveltefirets'
 import type { Address } from './send-email'
 import { dev } from '$app/environment'
 
@@ -23,7 +22,7 @@ export function getAdminRecipients(initiatorEmail: string): Address[] {
     { email: 'diego@livingtongues.org' },
   ]
 
-  if (dev || firebaseConfig.projectId === 'talking-dictionaries-dev')
+  if (dev)
     return recipients
 
   return [
@@ -39,7 +38,7 @@ export function getSupportMessageRecipients({ dev }: { dev: boolean }): Address[
     { email: 'diego@livingtongues.org' },
   ]
 
-  if (dev || firebaseConfig.projectId === 'talking-dictionaries-dev')
+  if (dev)
     return recipients
 
   return [
@@ -54,7 +53,7 @@ export function getLanguageLearningMaterialsRecipients({ dev }: { dev: boolean }
     { email: 'diego@livingtongues.org' },
   ]
 
-  if (dev || firebaseConfig.projectId === 'talking-dictionaries-dev')
+  if (dev)
     return recipients
 
   return [

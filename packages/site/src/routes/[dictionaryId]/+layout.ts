@@ -1,7 +1,7 @@
 import { error, redirect } from '@sveltejs/kit'
-import type { Citation, IAbout, Partner } from '@living-dictionaries/types'
-import { docExists, firebaseConfig, getCollection, getDocument } from 'sveltefirets'
+import type { Tables, TablesUpdate } from '@living-dictionaries/types'
 import { type Readable, derived, get } from 'svelte/store'
+import { readable } from 'svelte/store'
 import type { LayoutLoad } from './$types'
 import { MINIMUM_ABOUT_LENGTH, ResponseCodes } from '$lib/constants'
 import { browser } from '$app/environment'
@@ -9,12 +9,14 @@ import { DICTIONARY_UPDATED_LOAD_TRIGGER, dbOperations } from '$lib/dbOperations
 import { create_index, load_cached_index, search_entries, update_index_entry } from '$lib/search'
 import { cached_data_store } from '$lib/supabase/cached-data'
 import { url_from_storage_path } from '$lib/helpers/media'
+import { PUBLIC_STORAGE_BUCKET } from '$env/static/public'
+import { invalidate } from '$app/navigation'
 
 export const load: LayoutLoad = async ({ params: { dictionaryId: dictionary_id }, parent, depends }) => {
   depends(DICTIONARY_UPDATED_LOAD_TRIGGER)
 
   try {
-    const { supabase, user } = await parent()
+    const { supabase, admin, my_dictionaries } = await parent()
     const { data: dictionary, error: dictionary_error } = await supabase.from('dictionaries').select().eq('id', dictionary_id).single()
 
     if (dictionary_error)
@@ -23,27 +25,15 @@ export const load: LayoutLoad = async ({ params: { dictionaryId: dictionary_id }
     if (browser)
       load_cached_index(dictionary_id)
 
-    const is_manager: Readable<boolean> = derived(user, ($user, set) => {
-      if (!$user) return set(false)
-      if ($user.roles?.admin > 0) return set(true)
-      if (!browser) return set(false)
+    const is_manager: Readable<boolean> = derived([admin, my_dictionaries], ([$admin, $my_dictionaries], set) => {
+      if ($admin > 0) return set(true)
+      if ($my_dictionaries.find(({ id, role }) => id === dictionary_id && role === 'manager')) return set(true)
+    }, false)
 
-      docExists(`dictionaries/${dictionary_id}/managers/${$user.uid}`)
-        .then(exists => set(exists))
-        .catch((err) => {
-          console.error('Manager checking error: ', err)
-        })
-    })
-
-    const is_contributor: Readable<boolean> = derived(user, ($user, set) => {
-      if (!$user) return set(false)
-      if (!browser) return set(false)
-      docExists(`dictionaries/${dictionary_id}/contributors/${$user.uid}`)
-        .then(exists => set(exists))
-        .catch((err) => {
-          console.error('Contributor checking error: ', err)
-        })
-    })
+    const is_contributor: Readable<boolean> = derived([admin, my_dictionaries], ([$admin, $my_dictionaries], set) => {
+      if ($admin > 0) return set(true)
+      if ($my_dictionaries.find(({ id, role }) => id === dictionary_id && role === 'contributor')) return set(true)
+    }, false)
 
     const can_edit: Readable<boolean> = derived([is_manager, is_contributor], ([$is_manager, $is_contributor]) => $is_manager || $is_contributor)
 
@@ -79,16 +69,58 @@ export const load: LayoutLoad = async ({ params: { dictionaryId: dictionary_id }
       ])
     }
 
-    async function about_is_too_short() {
-      const about_content = await getDocument<IAbout>(`dictionaries/${dictionary_id}/info/about`)
-      const about_length = about_content.about?.length || 0
+    const dictionary_info = readable<Tables<'dictionary_info'>>({} as Tables<'dictionary_info'>, (set) => {
+      (async () => {
+        const { data } = await supabase.from('dictionary_info').select().eq('id', dictionary_id).single()
+        if (data) set(data)
+      })()
+    })
+
+    function about_is_too_short() {
+      const { about } = get(dictionary_info)
+      const about_length = about?.length || 0
       return about_length < MINIMUM_ABOUT_LENGTH
+    }
+
+    const dictionary_editors = readable<Tables<'dictionary_roles_with_profiles'>[]>([], (set) => {
+      (async () => {
+        const { data: editors, error } = await supabase.from('dictionary_roles_with_profiles')
+          .select()
+          .eq('dictionary_id', dictionary_id)
+        if (error) {
+          console.error(error)
+          return []
+        }
+        if (editors.length) set(editors)
+      })()
+    })
+
+    async function load_partners() {
+      const { data } = await supabase.from('dictionary_partners')
+        .select(`
+        id,
+        name,
+        photo:photos(
+          id,
+          storage_path,
+          serving_url
+        )
+      `)
+        .eq('dictionary_id', dictionary_id)
+      return data
+    }
+
+    async function update_dictionary(change: TablesUpdate<'dictionaries'>) {
+      const { error } = await supabase.from('dictionaries').update(change)
+        .eq('id', dictionary.id)
+      if (error) throw new Error(error.message)
+      await invalidate(DICTIONARY_UPDATED_LOAD_TRIGGER)
     }
 
     return {
       dictionary,
       dbOperations,
-      url_from_storage_path: (path: string) => url_from_storage_path(path, firebaseConfig.storageBucket),
+      url_from_storage_path: (path: string) => url_from_storage_path(path, PUBLIC_STORAGE_BUCKET),
       entries,
       speakers,
       tags,
@@ -102,9 +134,11 @@ export const load: LayoutLoad = async ({ params: { dictionaryId: dictionary_id }
       is_manager,
       is_contributor,
       can_edit,
+      dictionary_info,
       about_is_too_short,
-      load_partners: async () => await getCollection<Partner>(`dictionaries/${dictionary_id}/partners`),
-      load_citation: async () => await getDocument<Citation>(`dictionaries/${dictionary_id}/info/citation`),
+      dictionary_editors,
+      load_partners,
+      update_dictionary,
     }
   } catch (err) {
     error(ResponseCodes.INTERNAL_SERVER_ERROR, err)

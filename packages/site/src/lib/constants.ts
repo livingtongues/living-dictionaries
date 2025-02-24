@@ -12,3 +12,8 @@ export enum ResponseCodes {
 }
 
 export const MINIMUM_ABOUT_LENGTH = 200
+
+export const ACCESS_TOKEN_COOKIE_NAME = 'sb-access-token'
+export const REFRESH_TOKEN_COOKIE_NAME = 'sb-refresh-token'
+
+export const USER_LOCAL_STORAGE_KEY = 'ld_user'

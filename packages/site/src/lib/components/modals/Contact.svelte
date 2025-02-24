@@ -5,16 +5,16 @@
   import { goto } from '$app/navigation'
   import type { SupportRequestBody } from '$api/email/support/+server'
   import type { LearningMaterialsRequestBody } from '$api/email/learning_materials/+server'
-  import type { RequestAccessBody } from '$api/email/request_access/+server'
   import enBase from '$lib/i18n/locales/en.json'
   import { post_request } from '$lib/helpers/get-post-requests'
+  import { api_request_access } from '$api/email/request_access/_call'
 
   export let subject: Subjects = undefined
   $: ({ dictionary, user, about_is_too_short } = $page.data)
   $: if (dictionary && subject === 'public_dictionary') warn_if_about_too_short()
 
-  async function warn_if_about_too_short() {
-    if (await about_is_too_short()) {
+  function warn_if_about_too_short() {
+    if (about_is_too_short()) {
       close()
       alert($page.data.t('about.message'))
       goto(`/${dictionary.id}/about`)
@@ -54,10 +54,10 @@
 
   async function send() {
     if (dictionary && subject === 'request_access') {
-      const { error } = await post_request<RequestAccessBody, null>('/api/email/request_access', {
+      const { error } = await api_request_access({
         message,
         email: $user?.email || email,
-        name: $user?.displayName || 'Anonymous',
+        name: $user?.user_metadata.full_name || 'Anonymous',
         url: window.location.href,
         dictionaryId: dictionary.id,
         dictionaryName: dictionary.name,
@@ -71,7 +71,7 @@
       const { error } = await post_request<LearningMaterialsRequestBody, null>('/api/email/learning_materials', {
         message,
         email: $user?.email || email,
-        name: $user?.displayName || 'Anonymous',
+        name: $user?.user_metadata.full_name || 'Anonymous',
         url: window.location.href,
         dictionaryName: dictionary?.name,
       })
@@ -84,7 +84,7 @@
       const { error } = await post_request<SupportRequestBody, null>('/api/email/support', {
         message,
         email: $user?.email || email,
-        name: $user?.displayName || 'Anonymous',
+        name: $user?.user_metadata.full_name || 'Anonymous',
         url: window.location.href,
         subject: enBase.contact[subject],
       })
