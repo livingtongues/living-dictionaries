@@ -1,5 +1,5 @@
-## Clean Up
-- entry history from pop-up entry modal
+## Final Migration cleanup
+- show entry history from pop-up entry modal
 - test admin rls, alternative is auth.jwt() read https://supabase.com/docs/guides/database/postgres/row-level-security#authjwt to see if better
 - Diego: AuthModal.svelte translations
 - review updated_by triggers across all tables
