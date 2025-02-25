@@ -3,6 +3,7 @@ import type { RequestHandler } from './$types'
 import { ResponseCodes } from '$lib/constants'
 import { mode } from '$lib/supabase'
 import { getAdminSupabaseClient } from '$lib/supabase/admin'
+import { dev } from '$app/environment'
 
 export interface UpdateDevAdminRoleRequestBody {
   role_level: number
@@ -11,8 +12,10 @@ export interface UpdateDevAdminRoleRequestBody {
 export const POST: RequestHandler = async ({ request, locals: { getSession } }) => {
   const { role_level } = await request.json() as UpdateDevAdminRoleRequestBody
 
-  if (mode !== 'development')
-    error(ResponseCodes.BAD_REQUEST, `Only works on dev`)
+  if (!dev) {
+    if (mode !== 'development')
+      error(ResponseCodes.BAD_REQUEST, `Only works on dev`)
+  }
 
   if (typeof role_level !== 'number')
     error(ResponseCodes.BAD_REQUEST, `Role must be a number`)
