@@ -6,6 +6,7 @@
   import { mode } from '$lib/supabase'
   import { api_update_dev_admin_role } from '$api/db/update-dev-admin-role/_call'
   import { invalidateAll } from '$app/navigation'
+  import { dev } from '$app/environment'
 
   $: ({ user, admin } = $page.data)
   let show_menu = false
@@ -72,7 +73,7 @@
         {/if}
         <a href="/account"> {$page.data.t('account.account_settings')} </a>
         <button type="button" on:click={sign_out}>{$page.data.t('account.log_out')}</button>
-        {#if mode === 'development'}
+        {#if dev || mode === 'development'}
           <button
             type="button"
             on:click={setAdminRole}>

@@ -19,8 +19,8 @@
 
   $: ({ admin, supabase, add_editor, remove_editor, inviteHelper } = $page.data as PageData)
 
-  $: managers = dictionary.editors.filter(({ dictionary_roles }) => dictionary_roles.some(({ role }) => role === 'manager'))
-  $: contributors = dictionary.editors.filter(({ dictionary_roles }) => dictionary_roles.some(({ role }) => role === 'contributor'))
+  $: managers = dictionary.editors.filter(({ dictionary_roles }) => dictionary_roles.some(({ role, dictionary_id }) => role === 'manager' && dictionary_id === dictionary.id))
+  $: contributors = dictionary.editors.filter(({ dictionary_roles }) => dictionary_roles.some(({ role, dictionary_id }) => role === 'contributor' && dictionary_id === dictionary.id))
 </script>
 
 <td class="relative">
