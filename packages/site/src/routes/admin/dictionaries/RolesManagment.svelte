@@ -19,8 +19,9 @@
     on:additem={toggle} />
 
   {#if show}
+    {@const users_without_editors = users.filter(({ id: user_id }) => !editors.some(({ id: editor_id }) => editor_id === user_id))}
     {#await import('./SelectUserModal.svelte') then { default: SelectUserModal }}
-      <SelectUserModal {users} {add_editor} {invite_editor} on_close={toggle} />
+      <SelectUserModal users={users_without_editors} {add_editor} {invite_editor} on_close={toggle} />
     {/await}
   {/if}
 </ShowHide>

@@ -62,7 +62,7 @@
   <Filter
     items={dictionaries_with_editors_invites}
     let:filteredItems={filteredDictionaries}
-    placeholder="Search dictionaries">
+    placeholder="Search dictionaries and users">
     <div slot="right" let:filteredItems={filteredDictionaries}>
       <Button
         form="filled"
