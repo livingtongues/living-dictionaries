@@ -2,7 +2,6 @@
   import { Button, ResponsiveTable } from 'svelte-pieces'
   import { onMount } from 'svelte'
   import type { UserWithDictionaryRoles } from '@living-dictionaries/types/supabase/users.types'
-  import type { DictionaryView } from '@living-dictionaries/types'
   import UserRow from './UserRow.svelte'
   import SortUsers from './SortUsers.svelte'
   import type { PageData } from './$types'
@@ -10,21 +9,15 @@
   import Filter from '$lib/components/Filter.svelte'
 
   export let data: PageData
+  $: ({ public_dictionaries, private_dictionaries, other_dictionaries } = data)
 
   let users: UserWithDictionaryRoles[] = []
-  let dictionaries: DictionaryView[] = []
+  $: dictionaries = [...$public_dictionaries, ...$private_dictionaries, ...$other_dictionaries]
 
   onMount(load_data)
 
   async function load_data() {
-    const [users_with_roles, privateDictionaries, publicDictionaries] = await Promise.all([
-      data.get_users_with_roles(),
-      data.get_private_dictionaries(),
-      data.get_public_dictionaries(),
-    ])
-
-    users = users_with_roles
-    dictionaries = [...privateDictionaries, ...publicDictionaries]
+    users = await data.get_users_with_roles()
   }
 
   function exportUsersAsCSV(users: UserWithDictionaryRoles[]) {

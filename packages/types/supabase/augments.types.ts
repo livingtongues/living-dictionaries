@@ -152,6 +152,20 @@ export interface DatabaseAugments {
           orthographies: Orthography[] | null
         }
       }
+      materialized_admin_dictionaries_view: {
+        Row: {
+          coordinates: Coordinates | null
+          featured_image: DictionaryPhoto | null
+          metadata: DictionaryMetadata | null
+          orthographies: Orthography[] | null
+        }
+      }
+      materialized_dictionaries_view: {
+        Row: {
+          coordinates: Coordinates | null
+          metadata: DictionaryMetadata | null
+        }
+      }
       entries_view: {
         Row: {
           main: EntryMainFields
@@ -159,12 +173,6 @@ export interface DatabaseAugments {
           audios: AudioWithSpeakerIds[] | null
           dialect_ids: string[] | null
           tag_ids: string[] | null
-        }
-      }
-      materialized_dictionaries_view: {
-        Row: {
-          coordinates: Coordinates | null
-          metadata: DictionaryMetadata | null
         }
       }
       materialized_entries_view: {
@@ -184,15 +192,6 @@ export interface DatabaseAugments {
       }
     }
     Functions: {
-      // dictionaries_with_editors: {
-      //   Returns: {
-      //     coordinates: Coordinates
-      //     featured_image: DictionaryPhoto
-      //     metadata: DictionaryMetadata
-      //     orthographies: Orthography[]
-      //     editors: any[]
-      //   }[]
-      // }
       entries_from_timestamp: {
         Returns: {
           main: EntryMainFields

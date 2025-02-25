@@ -17,8 +17,9 @@
     on:itemremoved={async e => await remove_dictionary(e.detail.value)}
     on:additem={toggle} />
   {#if show}
+    {@const dictionaries_not_already_editing = dictionaries.filter(({ id }) => !dictionary_ids.includes(id))}
     {#await import('./SelectDictionaryModal.svelte') then { default: SelectDictionaryModal }}
-      <SelectDictionaryModal {dictionaries} {add_dictionary} on_close={toggle} />
+      <SelectDictionaryModal dictionaries={dictionaries_not_already_editing} {add_dictionary} on_close={toggle} />
     {/await}
   {/if}
 </ShowHide>

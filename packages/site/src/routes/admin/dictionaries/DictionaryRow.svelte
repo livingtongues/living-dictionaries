@@ -15,7 +15,7 @@
   export let dictionary: DictionaryWithHelpers
   export let users: UserWithDictionaryRoles[]
   export let update_dictionary: (change: TablesUpdate<'dictionaries'>) => Promise<void>
-  export let load_data: () => Promise<void>
+  export let load_extras: () => Promise<void>
 
   $: ({ admin, supabase, add_editor, remove_editor, inviteHelper } = $page.data as PageData)
 
@@ -53,15 +53,15 @@
     editors={managers}
     add_editor={async (user_id) => {
       await add_editor({ role: 'manager', user_id, dictionary_id: dictionary.id })
-      await load_data()
+      await load_extras()
     }}
     remove_editor={async (user_id) => {
       await remove_editor({ user_id, dictionary_id: dictionary.id })
-      await load_data()
+      await load_extras()
     }}
     invite_editor={async () => {
       await inviteHelper('manager', dictionary.id)
-      await load_data()
+      await load_extras()
     }}
     {users} />
   {#each dictionary.invites as invite}
@@ -76,7 +76,7 @@
               alert(error.message)
               console.error(error)
             } else {
-              await load_data()
+              await load_extras()
             }
           }}>
           <span class="i-mdi-email-send" slot="prefix" />
@@ -91,15 +91,15 @@
     editors={contributors}
     add_editor={async (user_id) => {
       await add_editor({ role: 'contributor', user_id, dictionary_id: dictionary.id })
-      await load_data()
+      await load_extras()
     }}
     remove_editor={async (user_id) => {
       await remove_editor({ user_id, dictionary_id: dictionary.id })
-      await load_data()
+      await load_extras()
     }}
     invite_editor={async () => {
       await inviteHelper('contributor', dictionary.id)
-      await load_data()
+      await load_extras()
     }}
     {users} />
   {#each dictionary.invites as invite}
@@ -114,7 +114,7 @@
               alert(error.message)
               console.error(error)
             } else {
-              await load_data()
+              await load_extras()
             }
           }}>
           <span class="i-mdi-email-send" slot="prefix" />
