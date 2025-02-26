@@ -1,29 +1,31 @@
 import { writable } from 'svelte/store'
 import { del as del_idb, get as get_idb, set as set_idb } from 'idb-keyval'
-import { browser } from '$app/environment'
+import { mode } from '.'
+import { browser, dev } from '$app/environment'
 
 interface CachedDataStoreOptions {
   key: string
-  materialized_query: any
+  materialized_query?: any
   live_query: any
   log?: boolean
+  order_field?: string
+  id_fields?: string[]
 }
 
-export function cached_query_data_store<T extends { id: string, deleted?: string }>(options: CachedDataStoreOptions) {
+export function cached_query_data_store<T extends { id?: string, user_id?: string, deleted?: string }>(options: CachedDataStoreOptions) {
   const data = writable<T[]>([])
   const updated_item = writable<T>(null)
   const store_error = writable<string>(null)
   const loading = writable(true)
-  const order_field = 'updated_at'
   const search_index_updated = writable(false)
 
   if (!browser)
     return { subscribe: data.subscribe, error: store_error, loading, refresh: null, updated_item, reset: null, search_index_updated }
 
-  const { key, materialized_query, live_query, log } = options
+  const { key, materialized_query, live_query, log = dev, order_field = 'updated_at', id_fields = ['id'] } = options
 
   const month_year = new Date().toLocaleDateString('default', { month: '2-digit', year: 'numeric' }).replace('/', '.')
-  const cache_key = `${key}_${month_year}`
+  const cache_key = `${key}_${mode}_${month_year}`
   let timestamp_from_which_to_fetch_data = '1971-01-01T00:00:00Z'
 
   async function get_data_from_cache_then_db(refresh = false) {
@@ -37,7 +39,7 @@ export function cached_query_data_store<T extends { id: string, deleted?: string
 
     let cached_or_materialized = cached_data
     // eslint-disable-next-line no-unmodified-loop-condition
-    while (!refresh) {
+    while (materialized_query && !refresh) {
       if (cached_or_materialized.length)
         timestamp_from_which_to_fetch_data = cached_or_materialized[cached_or_materialized.length - 1][order_field] as string
       const query = materialized_query
@@ -108,7 +110,17 @@ export function cached_query_data_store<T extends { id: string, deleted?: string
     if (cached_or_materialized?.length) {
       data_coming_in = data_coming_in
         .reverse()
-        .filter((value, index, self) => index === self.findIndex(v => v.id === value.id))
+        .filter((value, index, self) => index === self.findIndex((v) => {
+          let id = ''
+          for (const field of id_fields) {
+            id += value[field]
+          }
+          let value_id = ''
+          for (const field of id_fields) {
+            value_id += v[field]
+          }
+          return id === value_id
+        }))
         .filter(value => !value.deleted)
         .reverse()
     }

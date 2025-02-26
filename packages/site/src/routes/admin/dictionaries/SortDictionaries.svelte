@@ -42,13 +42,9 @@
     let valueB: string | number
     // prettier-ignore
     switch (sortKey) {
-      case 'public':
-        valueA = a.public?.toString() || ''
-        valueB = b.public?.toString() || ''
-        break
-      case 'language_used_by_community': // should add a test and try to combine these first two cases with the default case, boolean and strings should be able to be handled in one case
-        valueA = a.public?.toString() || ''
-        valueB = b.public?.toString() || ''
+      case 'language_used_by_community':
+        valueA = a.language_used_by_community?.toString() || ''
+        valueB = b.language_used_by_community?.toString() || ''
         break
       case 'entry_count':
         valueA = a.entry_count || 0

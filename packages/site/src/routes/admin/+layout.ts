@@ -1,4 +1,5 @@
-import type { DictionaryView } from '@living-dictionaries/types'
+import type { DictionaryView, Tables } from '@living-dictionaries/types'
+import type { UserForAdminTable } from '@living-dictionaries/types/supabase/users.types'
 import type { LayoutLoad } from './$types'
 import { inviteHelper } from '$lib/helpers/inviteHelper'
 import { cached_query_data_store } from '$lib/supabase/cached-query-data'
@@ -14,7 +15,6 @@ export const load = (async ({ parent }) => {
       .select()
       .eq('public', true),
     key: 'public_dictionaries',
-    log: true,
   })
 
   const private_dictionaries = cached_query_data_store<DictionaryView>({
@@ -27,7 +27,6 @@ export const load = (async ({ parent }) => {
       .neq('public', true)
       .is('con_language_description', null),
     key: 'private_dictionaries',
-    log: true,
   })
 
   const other_dictionaries = cached_query_data_store<DictionaryView>({
@@ -40,26 +39,27 @@ export const load = (async ({ parent }) => {
       .neq('public', true)
       .not('con_language_description', 'is', null),
     key: 'other_dictionaries',
-    log: true,
   })
 
-  async function get_dictionary_roles() {
-    const { supabase } = await parent()
-    const { data: dictionary_roles, error } = await supabase.from('dictionary_roles')
-      .select()
+  const users = cached_query_data_store<UserForAdminTable>({
+    live_query: supabase.rpc('users_for_admin_table')
+      .select(),
+    key: 'users',
+  })
 
-    if (error) {
-      console.error(error)
-      alert(error.message)
-      return []
-    }
-    return dictionary_roles
-  }
+  const dictionary_roles = cached_query_data_store<Tables<'dictionary_roles'>>({
+    live_query: supabase.from('dictionary_roles')
+      .select(),
+    key: 'dictionary_roles',
+    order_field: 'created_at',
+    id_fields: ['dictionary_id', 'user_id'],
+  })
 
   async function get_invites() {
     const { supabase } = await parent()
     const { data: invites, error } = await supabase.from('invites')
       .select()
+      .in('status', ['queued', 'sent'])
 
     if (error) {
       console.error(error)
@@ -67,18 +67,6 @@ export const load = (async ({ parent }) => {
       return []
     }
     return invites
-  }
-
-  async function get_users_with_roles() {
-    const { supabase } = await parent()
-    const { data: users_with_dictionary_ids, error } = await supabase.rpc('users_with_dictionary_roles')
-      .select()
-    if (error) {
-      console.error(error)
-      alert(error.message)
-      return []
-    }
-    return users_with_dictionary_ids
   }
 
   async function add_editor({ role, dictionary_id, user_id }: { role: 'manager' | 'contributor', dictionary_id: string, user_id: string }) {
@@ -107,11 +95,11 @@ export const load = (async ({ parent }) => {
     public_dictionaries,
     private_dictionaries,
     other_dictionaries,
-    get_users_with_roles,
+    users,
+    dictionary_roles,
+    get_invites,
     add_editor,
     remove_editor,
-    get_dictionary_roles,
-    get_invites,
     inviteHelper,
   }
 }) satisfies LayoutLoad

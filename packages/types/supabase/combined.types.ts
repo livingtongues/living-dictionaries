@@ -7,7 +7,6 @@ import type { AudioWithSpeakerIds, EntryMainFields, SenseWithSentences } from '.
 import type { ImportContentUpdate } from './content-import.interface'
 import type { Orthography } from './orthography.interface'
 import type { DictionaryMetadata } from './dictionary.types'
-import type { DictionaryRolesWithoutUser } from './users.types'
 
 export interface Database {
   public: {
@@ -3965,7 +3964,7 @@ export interface Database {
         Args: Record<PropertyKey, never>
         Returns: boolean
       }
-      users_with_dictionary_roles: {
+      users_for_admin_table: {
         Args: Record<PropertyKey, never>
         Returns: {
           id: string
@@ -3975,8 +3974,7 @@ export interface Database {
           last_sign_in_at: string
           created_at: string
           unsubscribed_from_emails: string
-          terms_agreement: string
-          dictionary_roles: DictionaryRolesWithoutUser[]
+          updated_at: string
         }[]
       }
     }

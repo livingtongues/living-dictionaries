@@ -1,7 +1,6 @@
 <script lang="ts">
   import type { Tables, TablesUpdate } from '@living-dictionaries/types'
   import { Button, IntersectionObserverShared, ResponsiveTable } from 'svelte-pieces'
-  import type { UserWithDictionaryRoles } from '@living-dictionaries/types/supabase/users.types'
   import { writable } from 'svelte/store'
   import { onMount } from 'svelte'
   import DictionaryRow from './DictionaryRow.svelte'
@@ -12,6 +11,14 @@
   import { page } from '$app/stores'
 
   export let data: PageData
+  $: ({ users, dictionary_roles } = data)
+
+  $: users_with_roles = $users.map((user) => {
+    return {
+      ...user,
+      dictionary_roles: $dictionary_roles.filter(role => role.user_id === user.id),
+    }
+  })
 
   $: active_section = $page.url.searchParams.get('filter') as 'public' | 'private' | 'other'
 
@@ -22,13 +29,12 @@
     ? data.other_dictionaries
     : data.public_dictionaries
 
-  const users = writable<UserWithDictionaryRoles[]>([])
   const invites = writable<Tables<'invites'>[]>([])
 
   $: dictionaries_with_editors_invites = $dictionaries.map((dictionary) => {
     return {
       ...dictionary,
-      editors: $users.filter(user => user.dictionary_roles.some(role => role.dictionary_id === dictionary.id)),
+      editors: users_with_roles.filter(user => user.dictionary_roles.some(role => role.dictionary_id === dictionary.id)),
       invites: $invites.filter(invite => invite.dictionary_id === dictionary.id),
     }
   })
@@ -38,12 +44,9 @@
   })
 
   async function load_extras() {
-    const [_users, _invites] = await Promise.all([
-      data.get_users_with_roles(),
-      data.get_invites(),
-    ])
-    users.set(_users)
+    const _invites = await data.get_invites()
     invites.set(_invites)
+    dictionary_roles.refresh()
   }
 
   async function update_dictionary(change: TablesUpdate<'dictionaries'>, dictionary_id: string) {
@@ -63,18 +66,6 @@
     Changed data autosaves after 2 seconds. Green cells = data that's not saved. Use "tab" to quickly
     move between cells.
   </div>
-
-  <Button
-    type="button"
-    class="ml-auto !py-1 -mt-1"
-    size="sm"
-    form="simple"
-    onclick={async () => {
-      await data.private_dictionaries.reset()
-      await data.public_dictionaries.reset()
-      await data.other_dictionaries.reset()
-      location.reload()
-    }}>Reset cache (after public/private toggle)</Button>
 </div>
 
 <div class="sticky top-0 h-[calc(100vh-1.5rem)] z-2 relative flex flex-col">
@@ -92,16 +83,17 @@
       </Button>
     </div>
     <div class="mb-1" />
-    <ResponsiveTable class="md:!overflow-unset" stickyHeading stickyColumn>
+    <ResponsiveTable class="" stickyHeading stickyColumn>
       <SortDictionaries dictionaries={filteredDictionaries} let:sortedDictionaries>
         {#each sortedDictionaries as dictionary, index (dictionary.id)}
-          <IntersectionObserverShared bottom={2000} let:intersecting once>
+          <IntersectionObserverShared bottom={4000} let:intersecting once>
             <tr>
               {#if intersecting}
                 <DictionaryRow
                   {index}
                   {dictionary}
-                  users={$users}
+                  users={users_with_roles}
+                  is_public={active_section === 'public'}
                   update_dictionary={change => update_dictionary(change, dictionary.id)}
                   {load_extras} />
               {:else}

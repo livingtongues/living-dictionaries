@@ -7,7 +7,6 @@ import type { AudioWithSpeakerIds, EntryMainFields, SenseWithSentences } from '.
 import type { ImportContentUpdate } from './content-import.interface'
 import type { Orthography } from './orthography.interface'
 import type { DictionaryMetadata } from './dictionary.types'
-import type { DictionaryRolesWithoutUser } from './users.types'
 
 export interface DatabaseAugments {
   public: {
@@ -212,11 +211,6 @@ export interface DatabaseAugments {
       }
       get_my_claim: {
         Returns: any
-      }
-      users_with_dictionary_roles: {
-        Returns: {
-          dictionary_roles: DictionaryRolesWithoutUser[]
-        }[]
       }
     }
   }

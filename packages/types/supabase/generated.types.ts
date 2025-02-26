@@ -2984,7 +2984,7 @@ export interface Database {
         Args: Record<PropertyKey, never>
         Returns: boolean
       }
-      users_with_dictionary_roles: {
+      users_for_admin_table: {
         Args: Record<PropertyKey, never>
         Returns: {
           id: string
@@ -2994,8 +2994,7 @@ export interface Database {
           last_sign_in_at: string
           created_at: string
           unsubscribed_from_emails: string
-          terms_agreement: string
-          dictionary_roles: Json
+          updated_at: string
         }[]
       }
     }

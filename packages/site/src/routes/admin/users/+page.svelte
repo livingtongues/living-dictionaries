@@ -1,6 +1,5 @@
 <script lang="ts">
   import { Button, ResponsiveTable } from 'svelte-pieces'
-  import { onMount } from 'svelte'
   import type { UserWithDictionaryRoles } from '@living-dictionaries/types/supabase/users.types'
   import UserRow from './UserRow.svelte'
   import SortUsers from './SortUsers.svelte'
@@ -9,16 +8,15 @@
   import Filter from '$lib/components/Filter.svelte'
 
   export let data: PageData
-  $: ({ public_dictionaries, private_dictionaries, other_dictionaries } = data)
+  $: ({ public_dictionaries, private_dictionaries, other_dictionaries, users, dictionary_roles } = data)
 
-  let users: UserWithDictionaryRoles[] = []
+  $: users_with_roles = $users.map((user) => {
+    return {
+      ...user,
+      dictionary_roles: $dictionary_roles.filter(role => role.user_id === user.id),
+    }
+  })
   $: dictionaries = [...$public_dictionaries, ...$private_dictionaries, ...$other_dictionaries]
-
-  onMount(load_data)
-
-  async function load_data() {
-    users = await data.get_users_with_roles()
-  }
 
   function exportUsersAsCSV(users: UserWithDictionaryRoles[]) {
     const headers = {
@@ -38,7 +36,7 @@
 </script>
 
 <div class="sticky top-0 h-[calc(100vh-1.5rem)] z-2 relative flex flex-col">
-  <Filter items={users} let:filteredItems={filteredUsers} placeholder="Search names, emails, and dictionary ids">
+  <Filter items={users_with_roles} let:filteredItems={filteredUsers} placeholder="Search names, emails, and dictionary ids">
     <div slot="right" let:filteredItems={filteredUsers}>
       <Button form="filled" color="black" onclick={() => exportUsersAsCSV(filteredUsers)}>
         <i class="fas fa-download mr-1" />
@@ -46,10 +44,18 @@
       </Button>
     </div>
     <div class="mb-1" />
-    <ResponsiveTable class="md:!overflow-unset" stickyColumn stickyHeading>
+    <ResponsiveTable class="" stickyColumn stickyHeading>
       <SortUsers users={filteredUsers} let:sortedUsers>
         {#each sortedUsers as user (user.id)}
-          <UserRow {load_data} {dictionaries} {user} />
+          <UserRow
+            load_data={async () => {
+              await Promise.all([
+                users.refresh(),
+                dictionary_roles.refresh(),
+              ])
+            }}
+            {dictionaries}
+            {user} />
         {/each}
       </SortUsers>
     </ResponsiveTable>
