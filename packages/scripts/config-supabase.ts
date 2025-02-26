@@ -7,7 +7,7 @@ import './record-logs'
 import { S3Client } from '@aws-sdk/client-s3'
 
 program
-  .option('-e, --environment [dev/prod]', 'Firebase/Supabase Project', 'dev')
+  .option('-e, --environment [dev/prod]', 'Supabase Project', 'dev')
   .allowUnknownOption() // because config is shared by multiple scripts
   .parse(process.argv)
 
