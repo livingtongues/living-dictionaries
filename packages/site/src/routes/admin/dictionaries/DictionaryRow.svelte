@@ -184,8 +184,8 @@
     {update_dictionary} />
 </td>
 <td>
-  <BadgeArrayEmit addMessage="Add" strings={dictionary.gloss_languages.slice(0, 8)} />
-  {#if dictionary.gloss_languages.length > 8}
+  <BadgeArrayEmit addMessage="Add" strings={dictionary.gloss_languages?.slice(0, 8)} />
+  {#if dictionary.gloss_languages?.length > 8}
     <span class="text-xs text-gray-400">+{dictionary.gloss_languages.length - 8}</span>
   {/if}
 </td>
