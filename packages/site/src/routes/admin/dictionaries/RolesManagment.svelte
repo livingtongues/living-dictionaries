@@ -14,7 +14,7 @@
     strings={editors.map(({ full_name, email }) => full_name || email)}
     canEdit
     addMessage="Add"
-    on:itemclicked={e => alert(editors[e.detail.index].id)}
+    on:itemclicked={e => alert(`email: ${editors[e.detail.index].email}, id: ${editors[e.detail.index].id}`)}
     on:itemremoved={async e => await remove_editor(editors[e.detail.index].id)}
     on:additem={toggle} />
 

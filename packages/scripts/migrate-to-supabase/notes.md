@@ -21,7 +21,7 @@
 - adjust user migration to set these fields to empty strings and not null to avoid db errors: `confirmation_token`, `recovery_token`, `email_change_token_new`, `email_change`
 
 # Migrate Entries and Speakers from Firestore to Supabase
-
+- don't show my dictionaries that are private in the public dictionaries listing to avoid confusion
 - unpack content-update to be handle client-sides after adding RLS policies for photos, audio, video
 - build new Orama indexes every hour offset after materialized view is updated
 - Remove extra row in dictionary downloads csv and entries download csv

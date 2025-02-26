@@ -7,7 +7,6 @@ import type { AudioWithSpeakerIds, EntryMainFields, SenseWithSentences } from '.
 import type { ImportContentUpdate } from './content-import.interface'
 import type { Orthography } from './orthography.interface'
 import type { DictionaryMetadata } from './dictionary.types'
-import type { DictionaryRolesWithoutUser } from './users.types'
 
 export interface DatabaseAugments {
   public: {
@@ -152,6 +151,20 @@ export interface DatabaseAugments {
           orthographies: Orthography[] | null
         }
       }
+      materialized_admin_dictionaries_view: {
+        Row: {
+          coordinates: Coordinates | null
+          featured_image: DictionaryPhoto | null
+          metadata: DictionaryMetadata | null
+          orthographies: Orthography[] | null
+        }
+      }
+      materialized_dictionaries_view: {
+        Row: {
+          coordinates: Coordinates | null
+          metadata: DictionaryMetadata | null
+        }
+      }
       entries_view: {
         Row: {
           main: EntryMainFields
@@ -159,12 +172,6 @@ export interface DatabaseAugments {
           audios: AudioWithSpeakerIds[] | null
           dialect_ids: string[] | null
           tag_ids: string[] | null
-        }
-      }
-      materialized_dictionaries_view: {
-        Row: {
-          coordinates: Coordinates | null
-          metadata: DictionaryMetadata | null
         }
       }
       materialized_entries_view: {
@@ -184,15 +191,6 @@ export interface DatabaseAugments {
       }
     }
     Functions: {
-      // dictionaries_with_editors: {
-      //   Returns: {
-      //     coordinates: Coordinates
-      //     featured_image: DictionaryPhoto
-      //     metadata: DictionaryMetadata
-      //     orthographies: Orthography[]
-      //     editors: any[]
-      //   }[]
-      // }
       entries_from_timestamp: {
         Returns: {
           main: EntryMainFields
@@ -213,11 +211,6 @@ export interface DatabaseAugments {
       }
       get_my_claim: {
         Returns: any
-      }
-      users_with_dictionary_roles: {
-        Returns: {
-          dictionary_roles: DictionaryRolesWithoutUser[]
-        }[]
       }
     }
   }

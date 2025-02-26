@@ -12,10 +12,11 @@
   import { page } from '$app/stores'
 
   export let index: number
+  export let is_public: boolean
   export let dictionary: DictionaryWithHelpers
   export let users: UserWithDictionaryRoles[]
   export let update_dictionary: (change: TablesUpdate<'dictionaries'>) => Promise<void>
-  export let load_data: () => Promise<void>
+  export let load_extras: () => Promise<void>
 
   $: ({ admin, supabase, add_editor, remove_editor, inviteHelper } = $page.data as PageData)
 
@@ -53,37 +54,39 @@
     editors={managers}
     add_editor={async (user_id) => {
       await add_editor({ role: 'manager', user_id, dictionary_id: dictionary.id })
-      await load_data()
+      await load_extras()
     }}
     remove_editor={async (user_id) => {
       await remove_editor({ user_id, dictionary_id: dictionary.id })
-      await load_data()
+      await load_extras()
     }}
     invite_editor={async () => {
       await inviteHelper('manager', dictionary.id)
-      await load_data()
+      await load_extras()
     }}
     {users} />
-  {#each dictionary.invites as invite}
-    {#if invite.role === 'manager'}
-      <div class="my-1">
-        <ContributorInvitationStatus
-          admin
-          {invite}
-          on_delete_invite={async () => {
-            const { error } = await supabase.from('invites').update({ status: 'cancelled' }).eq('id', invite.id)
-            if (error) {
-              alert(error.message)
-              console.error(error)
-            } else {
-              await load_data()
-            }
-          }}>
-          <span class="i-mdi-email-send" slot="prefix" />
-        </ContributorInvitationStatus>
-      </div>
-    {/if}
-  {/each}
+  <div class="max-h-150px overflow-y-auto">
+    {#each dictionary.invites as invite}
+      {#if invite.role === 'manager'}
+        <div class="my-1">
+          <ContributorInvitationStatus
+            admin
+            {invite}
+            on_delete_invite={async () => {
+              const { error } = await supabase.from('invites').update({ status: 'cancelled' }).eq('id', invite.id)
+              if (error) {
+                alert(error.message)
+                console.error(error)
+              } else {
+                await load_extras()
+              }
+            }}>
+            <span class="i-mdi-email-send" slot="prefix" />
+          </ContributorInvitationStatus>
+        </div>
+      {/if}
+    {/each}
+  </div>
 </td>
 <td>
   <div style="width: 300px;" />
@@ -91,37 +94,39 @@
     editors={contributors}
     add_editor={async (user_id) => {
       await add_editor({ role: 'contributor', user_id, dictionary_id: dictionary.id })
-      await load_data()
+      await load_extras()
     }}
     remove_editor={async (user_id) => {
       await remove_editor({ user_id, dictionary_id: dictionary.id })
-      await load_data()
+      await load_extras()
     }}
     invite_editor={async () => {
       await inviteHelper('contributor', dictionary.id)
-      await load_data()
+      await load_extras()
     }}
     {users} />
-  {#each dictionary.invites as invite}
-    {#if invite.role === 'contributor'}
-      <div class="my-1">
-        <ContributorInvitationStatus
-          admin
-          {invite}
-          on_delete_invite={async () => {
-            const { error } = await supabase.from('invites').update({ status: 'cancelled' }).eq('id', invite.id)
-            if (error) {
-              alert(error.message)
-              console.error(error)
-            } else {
-              await load_data()
-            }
-          }}>
-          <span class="i-mdi-email-send" slot="prefix" />
-        </ContributorInvitationStatus>
-      </div>
-    {/if}
-  {/each}
+  <div class="max-h-150px overflow-y-auto">
+    {#each dictionary.invites as invite}
+      {#if invite.role === 'contributor'}
+        <div class="my-1">
+          <ContributorInvitationStatus
+            admin
+            {invite}
+            on_delete_invite={async () => {
+              const { error } = await supabase.from('invites').update({ status: 'cancelled' }).eq('id', invite.id)
+              if (error) {
+                alert(error.message)
+                console.error(error)
+              } else {
+                await load_extras()
+              }
+            }}>
+            <span class="i-mdi-email-send" slot="prefix" />
+          </ContributorInvitationStatus>
+        </div>
+      {/if}
+    {/each}
+  </div>
 </td>
 <td>
   <DictionaryFieldEdit
@@ -137,7 +142,7 @@
 </td>
 <td>
   <ShowHide let:show let:toggle>
-    <Button size="sm" form="simple" onclick={toggle}>
+    <Button class="text-nowrap -ml-2" size="sm" form="simple" onclick={toggle}>
       {#if dictionary.coordinates?.points?.length}
         <LatLngDisplay
           lat={dictionary.coordinates.points[0].coordinates.latitude}
@@ -179,14 +184,17 @@
     {update_dictionary} />
 </td>
 <td>
-  <BadgeArrayEmit addMessage="Add" strings={dictionary.gloss_languages} />
+  <BadgeArrayEmit addMessage="Add" strings={dictionary.gloss_languages?.slice(0, 8)} />
+  {#if dictionary.gloss_languages?.length > 8}
+    <span class="text-xs text-gray-400">+{dictionary.gloss_languages.length - 8}</span>
+  {/if}
 </td>
 <td>
   <div style="width: 300px;" />
   <BadgeArrayEmit
     canEdit
     addMessage="Add"
-    strings={dictionary.alternate_names}
+    strings={dictionary.alternate_names?.slice(0, 8)}
     on:additem={() => {
       const name = prompt('Enter alternate name:')
       if (name) {
@@ -200,6 +208,9 @@
         alternate_names: dictionary.alternate_names.filter(name => name !== value),
       })
     }} />
+  {#if dictionary.alternate_names?.length > 8}
+    <span class="text-xs text-gray-400">+{dictionary.alternate_names.length - 8}</span>
+  {/if}
 </td>
 <td>
   {dictionary.orthographies?.length? dictionary.orthographies.map(({ name }) => name.default) : ''}
@@ -207,29 +218,36 @@
 <td class="whitespace-nowrap">
   {#if dictionary.created_at}{supabase_date_to_friendly(dictionary.created_at)}{/if}
 </td>
-<td>{dictionary.language_used_by_community !== undefined
+<td>{typeof dictionary.language_used_by_community === 'boolean'
   ? dictionary.language_used_by_community
   : ''}</td>
 <td>{dictionary.community_permission ? dictionary.community_permission : ''}</td>
 
-<td><div style="width: 300px;" />
-  {dictionary.author_connection ? dictionary.author_connection : ''}</td>
+<td class="w-300px max-w-300px">
+  <div class="w-300px line-clamp-5" title={dictionary.author_connection}>
+    {dictionary.author_connection ? dictionary.author_connection : ''}
+  </div>
+</td>
+<td class="w-300px max-w-300px">
+  <div class="w-300px line-clamp-5" title={dictionary.con_language_description}>
+    {dictionary.con_language_description ? dictionary.con_language_description : ''}
+  </div>
+</td>
 <td>
-  <div style="width: 300px;" />
-  {dictionary.con_language_description ? dictionary.con_language_description : ''}</td>
-<td>
-  <Button
-    color={dictionary.con_language_description ? 'green' : 'orange'}
-    size="sm"
-    onclick={() => {
-      if (confirm('Toggle con lang status?')) {
-        update_dictionary({
-          con_language_description: !dictionary.con_language_description ? 'YES' : null,
-        })
-      }
-    }}>
-    {dictionary.con_language_description ? 'YES' : 'NO'}
-  </Button>
+  {#if !is_public}
+    <Button
+      color={dictionary.con_language_description ? 'green' : 'orange'}
+      size="sm"
+      onclick={() => {
+        if (confirm('Toggle con lang status?')) {
+          update_dictionary({
+            con_language_description: !dictionary.con_language_description ? 'YES' : null,
+          })
+        }
+      }}>
+      {dictionary.con_language_description ? 'YES' : 'NO'}
+    </Button>
+  {/if}
 </td>
 {#if $admin > 1}
   <td class="cursor-pointer" title={JSON.stringify(dictionary, null, 1)}><span class="i-material-symbols-info-outline" /></td>

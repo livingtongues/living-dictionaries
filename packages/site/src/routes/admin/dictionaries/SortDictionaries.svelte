@@ -42,13 +42,17 @@
     let valueB: string | number
     // prettier-ignore
     switch (sortKey) {
-      case 'public':
-        valueA = a.public?.toString() || ''
-        valueB = b.public?.toString() || ''
+      case 'managers':
+        valueA = a.editors?.filter(({ dictionary_roles }) => dictionary_roles.some(({ role }) => role === 'manager')).length || 0
+        valueB = b.editors?.filter(({ dictionary_roles }) => dictionary_roles.some(({ role }) => role === 'manager')).length || 0
         break
-      case 'language_used_by_community': // should add a test and try to combine these first two cases with the default case, boolean and strings should be able to be handled in one case
-        valueA = a.public?.toString() || ''
-        valueB = b.public?.toString() || ''
+      case 'contributors':
+        valueA = a.editors?.filter(({ dictionary_roles }) => dictionary_roles.some(({ role }) => role === 'contributor')).length || 0
+        valueB = b.editors?.filter(({ dictionary_roles }) => dictionary_roles.some(({ role }) => role === 'contributor')).length || 0
+        break
+      case 'language_used_by_community':
+        valueA = a.language_used_by_community?.toString() || ''
+        valueB = b.language_used_by_community?.toString() || ''
         break
       case 'entry_count':
         valueA = a.entry_count || 0
@@ -79,8 +83,8 @@
         valueB = b.con_language_description?.toString() || ''
         break
       default:
-        valueA = a[sortKey] ? a[sortKey].toUpperCase() : 'zz' // if we ever have missing names or email, then pass 'zz' when the sortKey is undefined
-        valueB = b[sortKey] ? b[sortKey].toUpperCase() : 'zz'
+        valueA = typeof a[sortKey] === 'string' ? (a[sortKey] as string).toUpperCase() : 'zz' // if we ever have missing names or email, then pass 'zz' when the sortKey is undefined
+        valueB = typeof b[sortKey] === 'string' ? (b[sortKey] as string).toUpperCase() : 'zz'
     // a[sortKey].localeCompare(b[sortKey])
     }
     if (valueA < valueB)

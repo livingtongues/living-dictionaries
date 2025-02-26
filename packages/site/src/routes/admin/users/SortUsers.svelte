@@ -5,7 +5,7 @@
   enum UserFields {
     email = 'Email',
     full_name = 'Name',
-    dictionary_roles = 'Manager',
+    manager = 'Manager',
     contributor = 'Contributor',
     last_sign_in_at = 'Last Visit',
     created_at = 'Created At',
@@ -30,9 +30,13 @@
     let valueB: string | number
     // prettier-ignore
     switch (sortKey) {
-      case 'dictionary_roles':
-        valueA = a.dictionary_roles?.length
-        valueB = b.dictionary_roles?.length
+      case 'manager':
+        valueA = a.dictionary_roles?.filter(({ role }) => role === 'manager').length
+        valueB = b.dictionary_roles?.filter(({ role }) => role === 'manager').length
+        break
+      case 'contributor':
+        valueA = a.dictionary_roles?.filter(({ role }) => role === 'contributor').length
+        valueB = b.dictionary_roles?.filter(({ role }) => role === 'contributor').length
         break
       case 'last_sign_in_at':
         valueA = a.last_sign_in_at ? new Date(a.last_sign_in_at).getTime() : keep_null_date_at_end

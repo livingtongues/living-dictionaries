@@ -1,68 +1,65 @@
-import type { DictionaryView } from '@living-dictionaries/types'
+import type { DictionaryView, Tables } from '@living-dictionaries/types'
+import type { UserForAdminTable } from '@living-dictionaries/types/supabase/users.types'
 import type { LayoutLoad } from './$types'
 import { inviteHelper } from '$lib/helpers/inviteHelper'
+import { cached_query_data_store } from '$lib/supabase/cached-query-data'
 
-export const load = (({ parent }) => {
-  async function get_public_dictionaries() {
-    const { supabase } = await parent()
-    const { data: public_dictionaries, error } = await supabase.from('dictionaries_view')
+export const load = (async ({ parent }) => {
+  const { supabase } = await parent()
+
+  const public_dictionaries = cached_query_data_store<DictionaryView>({
+    materialized_query: supabase.from('materialized_admin_dictionaries_view')
       .select()
-      .eq('public', true)
-    if (error) {
-      console.error(error)
-      alert(error.message)
-      return []
-    }
-    return public_dictionaries as DictionaryView[]
-  }
-
-  async function get_private_dictionaries() {
-    const { supabase } = await parent()
-    const { data: private_dictionaries, error } = await supabase.from('dictionaries_view')
+      .eq('public', true),
+    live_query: supabase.from('dictionaries_view')
       .select()
-      .neq('public', true)
-      .is('con_language_description', null)
+      .eq('public', true),
+    key: 'public_dictionaries',
+  })
 
-    if (error) {
-      console.error(error)
-      alert(error.message)
-      return []
-    }
-    return private_dictionaries as DictionaryView[]
-  }
-
-  async function get_other_dictionaries() {
-    const { supabase } = await parent()
-    const { data: private_dictionaries, error } = await supabase.from('dictionaries_view')
+  const private_dictionaries = cached_query_data_store<DictionaryView>({
+    materialized_query: supabase.from('materialized_admin_dictionaries_view')
       .select()
       .neq('public', true)
-      .not('con_language_description', 'is', null)
-
-    if (error) {
-      console.error(error)
-      alert(error.message)
-      return []
-    }
-    return private_dictionaries as DictionaryView[]
-  }
-
-  async function get_dictionary_roles() {
-    const { supabase } = await parent()
-    const { data: dictionary_roles, error } = await supabase.from('dictionary_roles')
+      .is('con_language_description', null),
+    live_query: supabase.from('dictionaries_view')
       .select()
+      .neq('public', true)
+      .is('con_language_description', null),
+    key: 'private_dictionaries',
+  })
 
-    if (error) {
-      console.error(error)
-      alert(error.message)
-      return []
-    }
-    return dictionary_roles
-  }
+  const other_dictionaries = cached_query_data_store<DictionaryView>({
+    materialized_query: supabase.from('materialized_admin_dictionaries_view')
+      .select()
+      .neq('public', true)
+      .not('con_language_description', 'is', null),
+    live_query: supabase.from('dictionaries_view')
+      .select()
+      .neq('public', true)
+      .not('con_language_description', 'is', null),
+    key: 'other_dictionaries',
+  })
+
+  const users = cached_query_data_store<UserForAdminTable>({
+    live_query: supabase.rpc('users_for_admin_table')
+      .select(),
+    key: 'users',
+  })
+
+  const dictionary_roles = cached_query_data_store<Tables<'dictionary_roles'>>({
+    live_query: supabase.from('dictionary_roles')
+      .select(),
+    key: 'dictionary_roles',
+    order_field: 'created_at',
+    id_fields: ['dictionary_id', 'user_id'],
+  })
 
   async function get_invites() {
     const { supabase } = await parent()
     const { data: invites, error } = await supabase.from('invites')
       .select()
+      .in('status', ['queued', 'sent'])
 
     if (error) {
       console.error(error)
@@ -70,18 +67,6 @@ export const load = (({ parent }) => {
       return []
     }
     return invites
-  }
-
-  async function get_users_with_roles() {
-    const { supabase } = await parent()
-    const { data: users_with_dictionary_ids, error } = await supabase.rpc('users_with_dictionary_roles')
-      .select()
-    if (error) {
-      console.error(error)
-      alert(error.message)
-      return []
-    }
-    return users_with_dictionary_ids
   }
 
   async function add_editor({ role, dictionary_id, user_id }: { role: 'manager' | 'contributor', dictionary_id: string, user_id: string }) {
@@ -107,14 +92,14 @@ export const load = (({ parent }) => {
   }
 
   return {
-    get_public_dictionaries,
-    get_private_dictionaries,
-    get_other_dictionaries,
-    get_users_with_roles,
+    public_dictionaries,
+    private_dictionaries,
+    other_dictionaries,
+    users,
+    dictionary_roles,
+    get_invites,
     add_editor,
     remove_editor,
-    get_dictionary_roles,
-    get_invites,
     inviteHelper,
   }
 }) satisfies LayoutLoad

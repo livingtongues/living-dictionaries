@@ -1,44 +1,52 @@
 <script lang="ts">
-  import type { TablesUpdate } from '@living-dictionaries/types'
+  import type { Tables, TablesUpdate } from '@living-dictionaries/types'
   import { Button, IntersectionObserverShared, ResponsiveTable } from 'svelte-pieces'
-  import type { UserWithDictionaryRoles } from '@living-dictionaries/types/supabase/users.types'
+  import { writable } from 'svelte/store'
+  import { onMount } from 'svelte'
   import DictionaryRow from './DictionaryRow.svelte'
   import SortDictionaries from './SortDictionaries.svelte'
   import { exportAdminDictionariesAsCSV } from './export'
   import type { PageData } from './$types'
-  import type { DictionaryWithHelpers } from './dictionaryWithHelpers.types'
   import Filter from '$lib/components/Filter.svelte'
-  import { browser } from '$app/environment'
   import { page } from '$app/stores'
 
   export let data: PageData
+  $: ({ users, dictionary_roles } = data)
 
-  let dictionaries_with_editors_invites: DictionaryWithHelpers[] = []
-  let users: UserWithDictionaryRoles[] = []
+  $: users_with_roles = $users.map((user) => {
+    return {
+      ...user,
+      dictionary_roles: $dictionary_roles.filter(role => role.user_id === user.id),
+    }
+  })
 
   $: active_section = $page.url.searchParams.get('filter') as 'public' | 'private' | 'other'
 
-  $: if (browser) {
-    get_dictionaries_with_editors_invites(active_section).then(dictionaries => dictionaries_with_editors_invites = dictionaries)
-  }
+  let dictionaries = data.public_dictionaries
+  $: dictionaries = active_section === 'private'
+    ? data.private_dictionaries
+    : active_section === 'other'
+    ? data.other_dictionaries
+    : data.public_dictionaries
 
-  async function get_dictionaries_with_editors_invites(section: 'public' | 'private' | 'other') {
-    const dictionaries_function = section === 'private' ? data.get_private_dictionaries : section === 'other' ? data.get_other_dictionaries : data.get_public_dictionaries
+  const invites = writable<Tables<'invites'>[]>([])
 
-    const [dictionaries, users_with_roles, invites] = await Promise.all([
-      dictionaries_function(),
-      data.get_users_with_roles(),
-      data.get_invites(),
-    ])
-    users = users_with_roles
+  $: dictionaries_with_editors_invites = $dictionaries.map((dictionary) => {
+    return {
+      ...dictionary,
+      editors: users_with_roles.filter(user => user.dictionary_roles.some(role => role.dictionary_id === dictionary.id)),
+      invites: $invites.filter(invite => invite.dictionary_id === dictionary.id),
+    }
+  })
 
-    return dictionaries.map((dictionary) => {
-      return {
-        ...dictionary,
-        editors: users_with_roles.filter(user => user.dictionary_roles.some(role => role.dictionary_id === dictionary.id)),
-        invites: invites.filter(invite => invite.dictionary_id === dictionary.id),
-      }
-    })
+  onMount(() => {
+    load_extras()
+  })
+
+  async function load_extras() {
+    const _invites = await data.get_invites()
+    invites.set(_invites)
+    dictionary_roles.refresh()
   }
 
   async function update_dictionary(change: TablesUpdate<'dictionaries'>, dictionary_id: string) {
@@ -46,21 +54,23 @@
       const { error } = await data.supabase.from('dictionaries').update(change)
         .eq('id', dictionary_id)
       if (error) throw new Error(error.message)
-      dictionaries_with_editors_invites = await get_dictionaries_with_editors_invites(active_section)
+      await dictionaries.refresh()
     } catch (err) {
       alert(`Error: ${err}`)
     }
   }
 </script>
 
-<div class="mb-2 text-xs text-gray-600">
-  Changed data autosaves after 2 seconds. Green cells = data that's not saved. Use "tab" to quickly
-  move between cells.
+<div class="mb-2 text-xs text-gray-600 flex">
+  <div>
+    Changed data autosaves after 2 seconds. Green cells = data that's not saved. Use "tab" to quickly
+    move between cells.
+  </div>
 </div>
 
 <div class="sticky top-0 h-[calc(100vh-1.5rem)] z-2 relative flex flex-col">
   <Filter
-    items={dictionaries_with_editors_invites}
+    items={dictionaries_with_editors_invites || []}
     let:filteredItems={filteredDictionaries}
     placeholder="Search dictionaries and users">
     <div slot="right" let:filteredItems={filteredDictionaries}>
@@ -73,20 +83,19 @@
       </Button>
     </div>
     <div class="mb-1" />
-    <ResponsiveTable class="md:!overflow-unset" stickyHeading stickyColumn>
+    <ResponsiveTable class="" stickyHeading stickyColumn>
       <SortDictionaries dictionaries={filteredDictionaries} let:sortedDictionaries>
         {#each sortedDictionaries as dictionary, index (dictionary.id)}
-          <IntersectionObserverShared bottom={2000} let:intersecting once>
+          <IntersectionObserverShared bottom={4000} let:intersecting once>
             <tr>
               {#if intersecting}
                 <DictionaryRow
                   {index}
                   {dictionary}
-                  {users}
+                  users={users_with_roles}
+                  is_public={active_section === 'public'}
                   update_dictionary={change => update_dictionary(change, dictionary.id)}
-                  load_data={async () => {
-                    dictionaries_with_editors_invites = await get_dictionaries_with_editors_invites(active_section)
-                  }} />
+                  {load_extras} />
               {:else}
                 <td colspan="30"> Loading... </td>
               {/if}
