@@ -29,7 +29,7 @@
           await data.public_dictionaries.reset()
           await data.other_dictionaries.reset()
           await data.dictionary_roles.reset()
-          await data.users.refresh()
+          await data.users.reset()
           location.reload()
         }}>Reset cache (after public/private toggle, remove editor)</Button>
     </nav>

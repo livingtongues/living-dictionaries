@@ -27,6 +27,8 @@ export function cached_query_data_store<T extends { id?: string, user_id?: strin
   const month_year = new Date().toLocaleDateString('default', { month: '2-digit', year: 'numeric' }).replace('/', '.')
   const cache_key = `${key}_${mode}_${month_year}`
   let timestamp_from_which_to_fetch_data = '1971-01-01T00:00:00Z'
+  let range_start = 0
+  const limit = 1000
 
   async function get_data_from_cache_then_db(refresh = false) {
     if (log)
@@ -44,7 +46,13 @@ export function cached_query_data_store<T extends { id?: string, user_id?: strin
         timestamp_from_which_to_fetch_data = cached_or_materialized[cached_or_materialized.length - 1][order_field] as string
       const query = materialized_query
         .order(order_field, { ascending: true })
-        .gt(order_field, timestamp_from_which_to_fetch_data)
+
+      if (order_field === 'id') {
+        query.range(range_start, range_start + limit)
+        range_start += limit
+      } else {
+        query.gt(order_field, timestamp_from_which_to_fetch_data)
+      }
       // if (!cached_data?.length) {
       //   query.is('deleted', null)
       // }
@@ -77,7 +85,14 @@ export function cached_query_data_store<T extends { id?: string, user_id?: strin
       const query = live_query
         .limit(1000)
         .order(order_field, { ascending: true })
-        .gt(order_field, timestamp_from_which_to_fetch_data)
+
+      if (order_field === 'id') {
+        query.range(range_start, range_start + limit)
+        range_start += limit
+      } else {
+        query.gt(order_field, timestamp_from_which_to_fetch_data)
+      }
+
       // if (!cached_or_materialized?.length) {
       //   query.is('deleted', null)
       // }
