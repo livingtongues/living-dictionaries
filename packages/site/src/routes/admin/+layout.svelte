@@ -1,8 +1,11 @@
 <script lang="ts">
+  import { Button } from 'svelte-pieces'
   import Tab from './Tab.svelte'
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte'
   import Header from '$lib/components/shell/Header.svelte'
   import AdminGuard from '$lib/components/ui/AdminGuard.svelte'
+
+  export let data
 </script>
 
 <SeoMetaTags title="Admin Panel" />
@@ -16,6 +19,19 @@
       <Tab link="dictionaries?filter=public" label="public dictionaries" />
       <Tab link="dictionaries?filter=private" label="private dictionaries" />
       <Tab link="dictionaries?filter=other" label="other dictionaries" />
+      <Button
+        type="button"
+        class="ml-auto my-1"
+        size="sm"
+        form="simple"
+        onclick={async () => {
+          await data.private_dictionaries.reset()
+          await data.public_dictionaries.reset()
+          await data.other_dictionaries.reset()
+          await data.dictionary_roles.reset()
+          await data.users.refresh()
+          location.reload()
+        }}>Reset cache (after public/private toggle, remove editor)</Button>
     </nav>
   </div>
 
