@@ -45,6 +45,7 @@ export const load = (async ({ parent }) => {
     live_query: supabase.rpc('users_for_admin_table')
       .select(),
     key: 'users',
+    order_field: 'id',
   })
 
   const dictionary_roles = cached_query_data_store<Tables<'dictionary_roles'>>({

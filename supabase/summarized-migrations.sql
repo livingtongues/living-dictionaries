@@ -723,7 +723,7 @@ FROM auth.users;
 REVOKE ALL ON public.profiles_view FROM anon, authenticated, public;
 
 CREATE TABLE user_data (
-  id uuid references auth.users not null primary key,
+  id uuid references auth.users not null primary key ON DELETE CASCADE,
   updated_at timestamp with time zone DEFAULT now() NOT NULL,
   welcome_email_sent timestamp with time zone,
   unsubscribed_from_emails timestamp with time zone,
