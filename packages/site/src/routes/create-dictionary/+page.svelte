@@ -1,6 +1,7 @@
 <script lang="ts">
   import { Button, Form } from 'svelte-pieces'
   import type { IPoint, IRegion } from '@living-dictionaries/types'
+  import { onMount } from 'svelte'
   import { convertToFriendlyUrl } from './convertToFriendlyUrl'
   import { page } from '$app/stores'
   import Header from '$lib/components/shell/Header.svelte'
@@ -10,6 +11,7 @@
   import { glossingLanguages } from '$lib/glosses/glossing-languages'
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte'
   import { debounce } from '$lib/helpers/debounce'
+  import { browser, dev } from '$app/environment'
 
   export let data
   $: ({ user } = data)
@@ -40,12 +42,13 @@
   let customUrl: string
   $: urlToUse = customUrl || urlFromName
   let isUniqueURL = true
+  const online = true
 
   const debouncedCheckIfUniqueUrl = debounce(checkIfUniqueUrl, 500)
   $: if (urlToUse.length >= data.MIN_URL_LENGTH) debouncedCheckIfUniqueUrl(urlToUse)
 
   async function checkIfUniqueUrl(url: string): Promise<boolean> {
-    isUniqueURL = !(await data.dictionary_with_url_exists(url))
+    isUniqueURL = !(await data.dictionary_id_exists(url))
     return isUniqueURL
   }
 
@@ -55,10 +58,15 @@
       customUrl = convertToFriendlyUrl(newCustomUrl, MAX_URL_LENGTH)
   }
 
-  let online = true
+  onMount(() => {
+    if (dev && browser) {
+      name = `Test${Date.now()}`
+      language_used_by_community = false
+      community_permission = 'no'
+      author_connection = 'a'.repeat(100)
+    }
+  })
 </script>
-
-<svelte:window bind:online />
 
 <Header>{$page.data.t('create.create_new_dictionary')}</Header>
 
@@ -115,18 +123,16 @@
           livingdictionaries.app/
         </span>
         <input
-          id="url"
-          value={customUrl || urlFromName}
-          on:keyup={handleUrlKeyup}
-          required
-          minlength={data.MIN_URL_LENGTH}
-          maxlength={MAX_URL_LENGTH}
+          id="name"
+          type="text"
           autocomplete="off"
           autocorrect="off"
           spellcheck={false}
-          class="form-input flex-1 block w-full px-2 sm:px-3 py-2 rounded-none
-            rounded-r-md sm:text-sm border"
-          placeholder="url" />
+          autofocus
+          minlength={data.MIN_URL_LENGTH}
+          required
+          bind:value={name}
+          class="form-input w-full" />
       </div>
       <div class="text-xs text-gray-600 mt-1">
         {$page.data.t('create.permanent_url_msg')}
@@ -429,7 +435,7 @@
   {#await import('$lib/components/shell/AuthModal.svelte') then { default: AuthModal }}
     <AuthModal
       context="force"
-      on:close={() => {
+      on_close={() => {
         modal = null
       }} />
   {/await}

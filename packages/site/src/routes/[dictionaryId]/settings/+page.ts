@@ -1,18 +1,14 @@
 import type { TablesUpdate } from '@living-dictionaries/types'
 import { get } from 'svelte/store'
 import type { PageLoad } from './$types'
-import { invalidate } from '$app/navigation'
 import { upload_image } from '$lib/components/image/upload-image'
-import { DICTIONARY_UPDATED_LOAD_TRIGGER } from '$lib/dbOperations'
-import { api_update_dictionary } from '$api/db/update-dictionary/_call'
 
 export const load: PageLoad = async ({ params: { dictionaryId }, parent }) => {
-  const { t, admin, user, dictionary } = await parent()
+  const { t, admin, user, dictionary, update_dictionary } = await parent()
 
   async function updateDictionary(change: TablesUpdate<'dictionaries'>) {
     try {
-      await api_update_dictionary({ ...change, id: dictionaryId })
-      await invalidate(DICTIONARY_UPDATED_LOAD_TRIGGER)
+      await update_dictionary(change)
     } catch (err) {
       alert(`${t('misc.error')}: ${err}`)
     }
@@ -43,7 +39,7 @@ export const load: PageLoad = async ({ params: { dictionaryId }, parent }) => {
         await updateDictionary({ featured_image: {
           fb_storage_path: storage_path,
           specifiable_image_url: serving_url,
-          uid_added_by: $user.uid,
+          uid_added_by: $user.id,
           timestamp: new Date(),
         } })
         unsubscribe()

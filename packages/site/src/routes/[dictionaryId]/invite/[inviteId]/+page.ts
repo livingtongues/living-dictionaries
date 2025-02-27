@@ -1,41 +1,39 @@
-import { setOnline, updateOnline } from 'sveltefirets'
-import { getDocumentOrError } from 'sveltefirets/firestore/firestore.js'
-import { serverTimestamp } from 'firebase/firestore/lite'
-import type { IHelper, IInvite, IUser } from '@living-dictionaries/types'
+export async function load({ params: { inviteId }, parent }) {
+  const { t, supabase, authResponse } = await parent()
 
-import { get } from 'svelte/store'
+  if (!authResponse?.data?.user) {
+    return { invite: null, accept_invite: null }
+  }
 
-export async function load({ params: { inviteId, dictionaryId }, parent }) {
-  async function accept_invite(role: 'manager' | 'contributor') {
-    const { t, user } = await parent()
+  const { data: invite, error: invite_error } = await supabase.from('invites').select().eq('id', inviteId).single()
 
+  if (invite_error) {
+    console.error({ invite_error })
+    return { invite: null, accept_invite: null }
+  }
+
+  async function accept_invite() {
     try {
-      const $user = get(user)
-      const contributor: IHelper = {
-        id: $user.uid,
-        name: $user.displayName,
+      const { error: role_error } = await supabase.from('dictionary_roles').insert({
+        dictionary_id: invite.dictionary_id,
+        role: invite.role,
+      })
+      if (role_error) {
+        throw new Error(role_error.message)
       }
 
-      const collectionPath = `dictionaries/${dictionaryId}/${
-        role === 'manager' ? 'managers' : 'contributors'
-      }/${$user.uid}`
-      await setOnline<IHelper>(collectionPath, contributor)
+      const { error: update_error } = await supabase.from('invites').update({ status: 'claimed' }).eq('id', inviteId)
+      if (update_error) {
+        throw new Error(update_error.message)
+      }
 
-      await updateOnline<IInvite>(`dictionaries/${dictionaryId}/invites/${inviteId}`, {
-        status: 'claimed',
-      })
-
-      await updateOnline<IUser>(`users/${$user.uid}`, {
-        termsAgreement: serverTimestamp(),
-      })
+      const { error } = await supabase.from('user_data').update({ terms_agreement: new Date().toISOString() }).eq('id', authResponse.data.user.id)
+      if (error) {
+        throw new Error(error.message)
+      }
     } catch (err) {
       alert(`${t('misc.error')}: ${err}`)
     }
-  }
-
-  const { data: invite, error } = await getDocumentOrError<IInvite>(`dictionaries/${dictionaryId}/invites/${inviteId}`)
-  if (error) {
-    console.error(error)
   }
 
   return { invite, accept_invite }

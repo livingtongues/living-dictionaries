@@ -66,8 +66,11 @@
     "how_to_cite_instructions": "Add the authors of this dictionary to show their names in the citation"
   },
   "account": {
+    "your_name": "Your Name",
     "account_settings": "Account Settings",
-    "log_out": "Log Out"
+    "log_out": "Log Out",
+    "send_code": "Send Code",
+    "enter_6_digit_code_sent_to": "Enter the 6-digit code sent to"
   },
   "audio": {
     "tapToStopRecording": "Then you will tap to stop recording",
@@ -252,7 +255,7 @@
     "clean": "Clean",
     "map": "Map",
     "guidance": "Guidance",
-    "out_of_service": "Thank you for visiting our website! This page is temporarily under construction.\nIt will not be available between February 3 and February 16, 2025.\nPlease visit this page again on February 17, 2025.\nYou will be able to create new Living Dictionaries at that time.\nSorry for the inconvenience, and thank you for your patience.\nIn the meantime, the rest of the platform is working normally.",
+    "out_of_service": "Thank you for visiting our website! This page is temporarily under construction.\nIt will not be available between February 3 and February 28, 2025.\nPlease visit this page again on March 1, 2025.\nYou will be able to create new Living Dictionaries at that time.\nSorry for the inconvenience, and thank you for your patience.\nIn the meantime, the rest of the platform is working normally.",
     "transmitter": "Sincerely, the Living Dictionaries team"
   },
   "settings": {
@@ -345,7 +348,6 @@
     "history": "History",
     "entry": "Entry",
     "editor": "Editor",
-    "entry_history": "Entry history",
     "field": "Field",
     "date": "Date",
     "old_value": "Former Value",

@@ -1,52 +1,32 @@
 <script lang="ts">
-  import type { DictionaryWithHelperStores } from './dictionaryWithHelpers'
+  import type { DictionaryWithHelpers } from './dictionaryWithHelpers.types'
 
-  export let dictionaries: DictionaryWithHelperStores[] = []
+  export let dictionaries: DictionaryWithHelpers[] = []
 
   enum DictionaryFields {
-    // eslint-disable-next-line no-unused-vars
     name = 'Dictionary Name',
-    // eslint-disable-next-line no-unused-vars
     public = 'Public',
-    // eslint-disable-next-line no-unused-vars
     entry_count = 'Entries',
-    // eslint-disable-next-line no-unused-vars
     managers = 'Managers',
-    // eslint-disable-next-line no-unused-vars
     contributors = 'Contributors',
-    // eslint-disable-next-line no-unused-vars
-    collaborators = 'Other Contributors',
-    // eslint-disable-next-line no-unused-vars
     iso_639_3 = 'ISO 639-3',
-    // eslint-disable-next-line no-unused-vars
     glottocode = 'Glottocode',
-    // eslint-disable-next-line no-unused-vars
     coordinates = 'Coordinates',
-    // eslint-disable-next-line no-unused-vars
     location = 'Location',
-    // eslint-disable-next-line no-unused-vars
     gloss_languages = 'Gloss Languages',
-    // eslint-disable-next-line no-unused-vars
     alternate_names = 'Alternate Names',
-    // eslint-disable-next-line no-unused-vars
     orthographies = 'Alternate Orthographies',
-    // eslint-disable-next-line no-unused-vars
     created_at = 'Created At',
-    // eslint-disable-next-line no-unused-vars
     language_used_by_community = 'Language Used by Community',
-    // eslint-disable-next-line no-unused-vars
     community_permission = 'Community Permission',
-    // eslint-disable-next-line no-unused-vars
     author_connection = 'Author Connection',
-    // eslint-disable-next-line no-unused-vars
     con_language_description = 'Conlang Description',
-    // eslint-disable-next-line no-unused-vars
     conlang = 'Conlang',
   }
 
   type SortFields = keyof typeof DictionaryFields
   // @ts-ignore
-  const userFields: {
+  const dictionary_fields: {
     key: SortFields
     value: DictionaryFields
   }[] = Object.entries(DictionaryFields).map(([key, value]) => {
@@ -55,19 +35,24 @@
 
   let sortKey: SortFields = 'name'
   let sortDescending = true
+  $: keep_null_date_at_end = sortDescending ? Number.MAX_SAFE_INTEGER : Number.MIN_SAFE_INTEGER
 
   $: sortedDictionaries = dictionaries.sort((a, b) => {
     let valueA: string | number
     let valueB: string | number
     // prettier-ignore
     switch (sortKey) {
-      case 'public':
-        valueA = a.public?.toString() || ''
-        valueB = b.public?.toString() || ''
+      case 'managers':
+        valueA = a.editors?.filter(({ dictionary_roles }) => dictionary_roles.some(({ role }) => role === 'manager')).length || 0
+        valueB = b.editors?.filter(({ dictionary_roles }) => dictionary_roles.some(({ role }) => role === 'manager')).length || 0
         break
-      case 'language_used_by_community': // should add a test and try to combine these first two cases with the default case, boolean and strings should be able to be handled in one case
-        valueA = a.public?.toString() || ''
-        valueB = b.public?.toString() || ''
+      case 'contributors':
+        valueA = a.editors?.filter(({ dictionary_roles }) => dictionary_roles.some(({ role }) => role === 'contributor')).length || 0
+        valueB = b.editors?.filter(({ dictionary_roles }) => dictionary_roles.some(({ role }) => role === 'contributor')).length || 0
+        break
+      case 'language_used_by_community':
+        valueA = a.language_used_by_community?.toString() || ''
+        valueB = b.language_used_by_community?.toString() || ''
         break
       case 'entry_count':
         valueA = a.entry_count || 0
@@ -90,16 +75,16 @@
         valueB = b.orthographies?.length || 0
         break
       case 'created_at':
-        valueA = a.created_at || 0
-        valueB = b.created_at || 0
+        valueA = a.created_at ? new Date(a.created_at).getTime() : keep_null_date_at_end
+        valueB = b.created_at ? new Date(b.created_at).getTime() : keep_null_date_at_end
         break
       case 'conlang':
         valueA = a.con_language_description?.toString() || ''
         valueB = b.con_language_description?.toString() || ''
         break
       default:
-        valueA = a[sortKey] ? a[sortKey].toUpperCase() : 'zz' // if we ever have missing names or email, then pass 'zz' when the sortKey is undefined
-        valueB = b[sortKey] ? b[sortKey].toUpperCase() : 'zz'
+        valueA = typeof a[sortKey] === 'string' ? (a[sortKey] as string).toUpperCase() : 'zz' // if we ever have missing names or email, then pass 'zz' when the sortKey is undefined
+        valueB = typeof b[sortKey] === 'string' ? (b[sortKey] as string).toUpperCase() : 'zz'
     // a[sortKey].localeCompare(b[sortKey])
     }
     if (valueA < valueB)
@@ -121,7 +106,7 @@
 </script>
 
 <thead>
-  {#each userFields as field}
+  {#each dictionary_fields as field}
     <th
       class="cursor-pointer"
       on:click={() => setSortSettings(field.key)}

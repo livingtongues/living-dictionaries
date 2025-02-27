@@ -18,13 +18,13 @@ export function printDate(date: Date | number): string {
 
 export function supabase_date_to_friendly(supabase_date: string, language_code = 'en-US'): string {
   const date = new Date(supabase_date)
+  const is_this_year = date.getFullYear() === new Date().getFullYear()
   return new Intl.DateTimeFormat(language_code, {
-    year: 'numeric',
+    year: is_this_year ? undefined : 'numeric',
     month: 'short',
     day: 'numeric',
     hour: 'numeric',
     minute: 'numeric',
-    second: 'numeric',
   }).format(date)
 }
 

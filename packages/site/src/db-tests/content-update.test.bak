@@ -25,7 +25,7 @@ describe('sense operations', () => {
   test('add sense with noun class to first entry', async () => {
     const { error } = await post_request<ContentUpdateRequestBody, ContentUpdateResponseBody>(content_update_endpoint, {
       update_id: incremental_consistent_uuid(),
-      auth_token: null,
+      
       import_meta: {
         user_id: seeded_user_id_1,
         timestamp: test_timestamp,
@@ -58,7 +58,7 @@ describe('sense operations', () => {
     // test.fails('noun class remains (upsert)', async () => {
     //   const { error } = await post_request<ContentUpdateRequestBody, ContentUpdateResponseBody>(content_update_endpoint, {
     //     update_id: incremental_consistent_uuid(),
-    //     auth_token: null,
+    //     
     //     import_meta: {
     //       user_id: seeded_user_id_2,
     //       timestamp: test_timestamp,
@@ -97,7 +97,7 @@ describe('sense operations', () => {
   test('adds glosses field to second sense in first entry', async () => {
     const { error } = await post_request<ContentUpdateRequestBody, ContentUpdateResponseBody>(content_update_endpoint, {
       update_id: incremental_consistent_uuid(),
-      auth_token: null,
+      
       import_meta: {
         user_id: seeded_user_id_1,
         timestamp: test_timestamp,
@@ -140,7 +140,7 @@ describe('sense operations', () => {
   test('add a third sense to first entry with a glosses field', async () => {
     const { error } = await post_request<ContentUpdateRequestBody, ContentUpdateResponseBody>(content_update_endpoint, {
       update_id: incremental_consistent_uuid(),
-      auth_token: null,
+      
       user_id_from_local: seeded_user_id_1,
       dictionary_id: seeded_dictionary_id,
       entry_id: first_entry_id,
@@ -184,7 +184,7 @@ describe('sense operations', () => {
   test('delete the third sense from the first entry', async () => {
     const { error } = await post_request<ContentUpdateRequestBody, ContentUpdateResponseBody>(content_update_endpoint, {
       update_id: incremental_consistent_uuid(),
-      auth_token: null,
+      
       user_id_from_local: seeded_user_id_1,
       dictionary_id: seeded_dictionary_id,
       entry_id: first_entry_id,
@@ -228,7 +228,7 @@ describe('sense sentence operations', () => {
     test('post to endpoint', async () => {
       const { data, error } = await post_request<ContentUpdateRequestBody, ContentUpdateResponseBody>(content_update_endpoint, {
         update_id: change_id,
-        auth_token: null,
+        
         user_id_from_local: seeded_user_id_1,
         dictionary_id: seeded_dictionary_id,
         sentence_id: first_sentence_id,
@@ -328,7 +328,7 @@ describe('sense sentence operations', () => {
     test('post to endpoint', async () => {
       const { data, error } = await post_request<ContentUpdateRequestBody, ContentUpdateResponseBody>(content_update_endpoint, {
         update_id: change_id,
-        auth_token: null,
+        
         user_id_from_local: seeded_user_id_1,
         dictionary_id: seeded_dictionary_id,
         sentence_id: first_sentence_id,
@@ -400,7 +400,7 @@ describe('sense sentence operations', () => {
     const change_id = incremental_consistent_uuid()
     await post_request<ContentUpdateRequestBody, ContentUpdateResponseBody>(content_update_endpoint, {
       update_id: change_id,
-      auth_token: null,
+      
       user_id_from_local: seeded_user_id_1,
       dictionary_id: seeded_dictionary_id,
       sentence_id: first_sentence_id,
@@ -435,7 +435,7 @@ describe('sense sentence operations', () => {
     const change_id = incremental_consistent_uuid()
     const { data, error } = await post_request<ContentUpdateRequestBody, ContentUpdateResponseBody>(content_update_endpoint, {
       update_id: change_id,
-      auth_token: null,
+      
       user_id_from_local: seeded_user_id_1,
       dictionary_id: seeded_dictionary_id,
       sentence_id: first_sentence_id,
@@ -484,7 +484,7 @@ describe('sense sentence operations', () => {
   test('remove sentence from sense', async () => {
     const { error } = await post_request<ContentUpdateRequestBody, ContentUpdateResponseBody>(content_update_endpoint, {
       update_id: incremental_consistent_uuid(),
-      auth_token: null,
+      
       user_id_from_local: seeded_user_id_1,
       dictionary_id: seeded_dictionary_id,
       sentence_id: first_sentence_id,

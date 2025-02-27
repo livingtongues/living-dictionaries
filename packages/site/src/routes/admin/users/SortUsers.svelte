@@ -1,66 +1,75 @@
 <script lang="ts">
-  import type { IUser } from '@living-dictionaries/types';
-  export let users: IUser[] = [];
+  import type { UserWithDictionaryRoles } from '@living-dictionaries/types/supabase/users.types'
+
+  export let users: UserWithDictionaryRoles[] = []
   enum UserFields {
-    displayName = 'Name',
     email = 'Email',
-    dictionariesManaging = 'Managing',
-    dictionariesContributing = 'Contributing To',
-    lastVisit = 'Last Visit',
-    createdAt = 'Created At',
-    unsubscribe = 'Unsubscribed',
+    full_name = 'Name',
+    manager = 'Manager',
+    contributor = 'Contributor',
+    last_sign_in_at = 'Last Visit',
+    created_at = 'Created At',
+    unsubscribed_from_emails = 'Unsubscribed',
   }
 
-  type SortFields = keyof typeof UserFields;
-  //@ts-ignore
+  type SortFields = keyof typeof UserFields
+  // @ts-ignore
   const userFields: {
-    key: SortFields;
-    value: UserFields;
+    key: SortFields
+    value: UserFields
   }[] = Object.entries(UserFields).map(([key, value]) => {
-    return { key, value };
-  });
+    return { key, value }
+  })
 
-  let sortKey: SortFields = 'displayName';
-  let sortDescending = true;
+  let sortKey: SortFields = 'email'
+  let sortDescending = true
+  $: keep_null_date_at_end = sortDescending ? Number.MAX_SAFE_INTEGER : Number.MIN_SAFE_INTEGER
 
   $: sortedUsers = users.sort((a, b) => {
-    let valueA: string | number;
-    let valueB: string | number;
+    let valueA: string | number
+    let valueB: string | number
     // prettier-ignore
     switch (sortKey) {
-      case 'createdAt':
-        valueA = a.createdAt?.seconds || 0;
-        valueB = b.createdAt?.seconds || 0;
-        break;
-      case 'lastVisit':
-        valueA = a.lastVisit?.seconds || 0;
-        valueB = b.lastVisit?.seconds || 0;
-        break;
-      case 'unsubscribe':
-        valueA = a.unsubscribe?.seconds || 0;
-        valueB = b.unsubscribe?.seconds || 0;
-        break;
+      case 'manager':
+        valueA = a.dictionary_roles?.filter(({ role }) => role === 'manager').length
+        valueB = b.dictionary_roles?.filter(({ role }) => role === 'manager').length
+        break
+      case 'contributor':
+        valueA = a.dictionary_roles?.filter(({ role }) => role === 'contributor').length
+        valueB = b.dictionary_roles?.filter(({ role }) => role === 'contributor').length
+        break
+      case 'last_sign_in_at':
+        valueA = a.last_sign_in_at ? new Date(a.last_sign_in_at).getTime() : keep_null_date_at_end
+        valueB = b.last_sign_in_at ? new Date(b.last_sign_in_at).getTime() : keep_null_date_at_end
+        break
+      case 'created_at':
+        valueA = a.created_at ? new Date(a.created_at).getTime() : keep_null_date_at_end
+        valueB = b.created_at ? new Date(b.created_at).getTime() : keep_null_date_at_end
+        break
+      case 'unsubscribed_from_emails':
+        valueA = a.unsubscribed_from_emails ? new Date(a.unsubscribed_from_emails).getTime() : keep_null_date_at_end
+        valueB = b.unsubscribed_from_emails ? new Date(b.unsubscribed_from_emails).getTime() : keep_null_date_at_end
+        break
       default:
-        valueA = a[sortKey] ? a[sortKey].toUpperCase() : 'zz'; // if we ever have missing names or email, then pass 'zz' when the sortKey is undefined
-        valueB = b[sortKey] ? b[sortKey].toUpperCase() : 'zz';
+        valueA = a[sortKey] ? a[sortKey].toUpperCase() : 'zz' // if we ever have missing names or email, then pass 'zz' when the sortKey is undefined
+        valueB = b[sortKey] ? b[sortKey].toUpperCase() : 'zz'
     // a[sortKey].localeCompare(b[sortKey])
     }
     if (valueA < valueB)
-      return sortDescending ? -1 : 1;
+      return sortDescending ? -1 : 1
 
     if (valueA > valueB)
-      return sortDescending ? 1 : -1;
+      return sortDescending ? 1 : -1
 
-    return 0;
-  });
+    return 0
+  })
 
   function setSortSettings(paraSortKey: SortFields) {
-    //Changes the key if the sort wasn't based on the button before, and if it was, change the direction
+    // Changes the key if the sort wasn't based on the button before, and if it was, change the direction
     if (sortKey === paraSortKey)
-      sortDescending = !sortDescending;
+      sortDescending = !sortDescending
     else
-      sortKey = paraSortKey;
-
+      sortKey = paraSortKey
   }
 </script>
 

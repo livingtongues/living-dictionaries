@@ -15,7 +15,7 @@ export function insert_entry({
 }) {
   return prepare_sql({
     update_id: randomUUID(),
-    auth_token: null,
+
     dictionary_id,
     entry_id,
     type: 'insert_entry',
@@ -39,7 +39,7 @@ export function insert_sense({
 }) {
   return prepare_sql({
     update_id: randomUUID(),
-    auth_token: null,
+
     dictionary_id,
     entry_id,
     sense_id,
@@ -66,7 +66,7 @@ export function insert_dialect({
 }) {
   return prepare_sql({
     update_id: randomUUID(),
-    auth_token: null,
+
     dictionary_id,
     dialect_id,
     type: 'insert_dialect',
@@ -98,7 +98,7 @@ export function assign_dialect({
 }) {
   return prepare_sql({
     update_id: randomUUID(),
-    auth_token: null,
+
     dictionary_id,
     dialect_id,
     entry_id,
@@ -124,7 +124,7 @@ export function upsert_speaker({
 }) {
   return prepare_sql({
     update_id: randomUUID(),
-    auth_token: null,
+
     dictionary_id,
     speaker_id,
     type: 'upsert_speaker',
@@ -152,7 +152,7 @@ export function assign_speaker({
 }) {
   return prepare_sql({
     update_id: randomUUID(),
-    auth_token: null,
+
     data: {
       created_by: user_id,
       created_at: timestamp,
@@ -180,7 +180,7 @@ export function upsert_audio({
 }) {
   return prepare_sql({
     update_id: randomUUID(),
-    auth_token: null,
+
     dictionary_id,
     entry_id,
     audio_id,
@@ -205,7 +205,7 @@ export function insert_sentence({
 }) {
   return prepare_sql({
     update_id: randomUUID(),
-    auth_token: null,
+
     dictionary_id,
     sentence_id,
     sense_id,
@@ -230,7 +230,7 @@ export function insert_photo({
 }) {
   return prepare_sql({
     update_id: randomUUID(),
-    auth_token: null,
+
     dictionary_id,
     sense_id,
     photo_id,
@@ -255,7 +255,7 @@ export function insert_video({
 }) {
   return prepare_sql({
     update_id: randomUUID(),
-    auth_token: null,
+
     dictionary_id,
     sense_id,
     video_id,
