@@ -7,7 +7,6 @@
   "scripts": {
     "dev": "vite dev",
     "prod": "vite dev --mode production",
-    "mixed": "vite dev --mode mixed",
     "build": "vite build",
     "preview": "vite preview",
     "sync": "svelte-kit sync",

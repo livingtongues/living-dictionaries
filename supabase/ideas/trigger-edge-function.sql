@@ -1,26 +1,3 @@
-CREATE FUNCTION before_apply_content_updates()
-RETURNS TRIGGER AS $$
-DECLARE
-    fetched_user_id UUID;
-BEGIN
-  SELECT id INTO fetched_user_id
-  FROM auth.users
-  WHERE email = NEW.firebase_email;
-
-  IF fetched_user_id IS NOT NULL THEN
-      NEW.user_id := fetched_user_id;
-  END IF;
-
-  RETURN NEW;
-END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
-
-CREATE TRIGGER before_apply_content_updates -- will fire before the next trigger because postgres executes triggers in alphabetical order
-BEFORE INSERT ON content_updates
-FOR EACH ROW 
-EXECUTE FUNCTION before_apply_content_updates();
-
-
 -- CREATE EXTENSION IF NOT EXISTS http WITH SCHEMA extensions;
 CREATE EXTENSION IF NOT EXISTS pg_net WITH SCHEMA extensions;
 

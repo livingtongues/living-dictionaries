@@ -1,6 +1,6 @@
 # Media Urls for exporting
 
-Audio urls are made by taking the path string, converting `/` to `%2F` and then plugging the `convertedPath` into 
+Audio urls are made by taking the path string, converting `/` to `%2F` and then plugging the `convertedPath` into
 ```
 https://firebasestorage.googleapis.com/v0/b/${firebaseConfig.storageBucket}/o/${convertedPath}?alt=media
 ```
@@ -9,5 +9,5 @@ resulting in something like https://firebasestorage.googleapis.com/v0/b/talking-
 Photo urls are formed by the path and plugging it into the path below to come up with something like https://firebasestorage.googleapis.com/v0/b/talking-dictionaries-alpha.appspot.com/o/images%2Fmandarin-practice%2FmogAtD3lTCtkuwj7tLDD_1630105898118.jpg?alt=media
 
 ```
-https://firebasestorage.googleapis.com/v0/b/${firebaseConfig.storageBucket}/o/${convertedPath}?alt=media
+https://firebasestorage.googleapis.com/v0/b/${storageBucket}/o/${convertedPath}?alt=media
 ```

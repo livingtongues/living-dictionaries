@@ -18,7 +18,6 @@ export default antfu(
   {
     ignores: [
       '**/.svelte-kit**',
-      '**/functions/lib/**',
       '.eslintcache',
       'packages/scripts/import/old**',
       '**/route/kitbook/**',
@@ -83,7 +82,7 @@ export default antfu(
   },
   {
     name: 'ld/script-exceptions',
-    files: ['packages/{scripts,functions}/**'],
+    files: ['packages/scripts/**'],
     rules: {
       'no-console': 'off',
       'ts/no-unused-vars': 'off',
