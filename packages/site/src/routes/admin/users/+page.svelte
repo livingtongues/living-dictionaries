@@ -44,7 +44,7 @@
       </Button>
     </div>
     <div class="mb-1" />
-    <ResponsiveTable class="" stickyColumn stickyHeading>
+    <ResponsiveTable stickyColumn stickyHeading>
       <SortUsers users={filteredUsers} let:sortedUsers>
         {#each sortedUsers as user (user.id)}
           <UserRow
