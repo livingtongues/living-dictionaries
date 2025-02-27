@@ -132,7 +132,15 @@
     "secondary_coordinates": "Tọa độ thứ cấp",
     "map_instructions": "Nhấp trên bản đồ để thêm tọa độ thứ cấp",
     "print_access": "Cho phép người xem in Từ Điển",
-    "primary_coordinate": "Tọa độ chính"
+    "primary_coordinate": "Tọa độ chính",
+    "conlang_question": "Đây là ngôn ngữ được xây dựng hay ngôn ngữ nhân tạo?",
+    "conlang_info_1": "Vì sứ mệnh của chúng tôi tập trung vào việc ghi lại các ngôn ngữ tự nhiên của con người có nguy cơ tuyệt chủng và thiểu số nên chúng tôi không cung cấp hỗ trợ kỹ thuật cho các ngôn ngữ được xây dựng (conlang) hoặc ngôn ngữ nhân tạo. Do đội ngũ nhỏ và số giờ hoạt động hạn chế nên chúng tôi không cung cấp tính năng nhập dữ liệu cho conlang.",
+    "conlang_info_2": "Từ điển Sống cho các ngôn ngữ được xây dựng sẽ không được công khai trên trang web của chúng tôi hoặc có sẵn trên bản đồ trang chủ của chúng tôi. Nếu chúng tôi thấy nội dung xúc phạm trong Từ điển sống này, chúng tôi cũng có quyền xóa nội dung đó.",
+    "agree_above": "Tôi đồng ý với những điều trên.",
+    "agree_to_cite": "Tôi đồng ý trích dẫn mọi tác phẩm đã xuất bản có liên quan trong các mục từ điển.",
+    "agree_for_non-commercial": "Tôi đồng ý rằng công việc này là phi thương mại.",
+    "source_question": "Dữ liệu trong từ điển này đến từ đâu? Vui lòng mô tả nếu bạn tự mình thu thập dữ liệu. Nếu bạn sử dụng bất kỳ nguồn tham khảo nào đã được xuất bản, vui lòng liệt kê chúng ở đây.",
+    "use_question": "Ai sẽ sử dụng từ điển này? Nó sẽ được sử dụng trong bất kỳ dự án giáo dục hoặc truyền thông nào?"
   },
   "dictionary": {
     "latitude": "Vĩ độ",

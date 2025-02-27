@@ -132,7 +132,15 @@
     "secondary_coordinates": "Koordinat Sekunder",
     "map_instructions": "Klik pada peta untuk menambahkan koordinat sekunder.",
     "print_access": "Izinkan Pemirsa untuk Mencetak Kamus",
-    "primary_coordinate": "Koordinat utama"
+    "primary_coordinate": "Koordinat utama",
+    "conlang_question": "Apakah ini bahasa buatan atau bahasa buatan?",
+    "conlang_info_1": "Karena misi kami berfokus pada pendokumentasian bahasa alami manusia yang terancam punah dan minoritas, kami tidak menawarkan dukungan teknis untuk bahasa buatan (conlangs) atau bahasa buatan. Karena tim kami yang kecil dan jam operasional yang terbatas, kami tidak menawarkan impor data untuk conlang.",
+    "conlang_info_2": "Kamus Hidup untuk bahasa buatan tidak akan dipublikasikan di situs web kami atau tersedia di peta beranda kami. Jika kami melihat konten yang menghina dalam Kamus Hidup ini, kami juga berhak menghapusnya.",
+    "agree_above": "Saya setuju dengan hal di atas.",
+    "agree_to_cite": "Saya setuju untuk mengutip karya terbitan relevan apa pun dalam entri kamus.",
+    "agree_for_non-commercial": "Saya setuju bahwa karya ini bersifat non-komersial.",
+    "source_question": "Dari manakah data dalam kamus ini berasal? Tolong jelaskan jika Anda sendiri yang mengumpulkan datanya. Jika Anda menggunakan sumber referensi yang diterbitkan, harap cantumkan di sini.",
+    "use_question": "Siapa yang akan menggunakan kamus ini? Apakah ini akan digunakan dalam proyek pendidikan atau media?"
   },
   "dictionary": {
     "latitude": "Garis Lintang",

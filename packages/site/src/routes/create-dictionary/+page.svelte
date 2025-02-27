@@ -149,7 +149,7 @@ Use: ${conlang_use.trim()}`
       <div class="mb-6" />
 
       <div class="mb-2 text-sm font-medium text-gray-700">
-        Is this a constructed language or an artificial language?
+        {$page.data.t('create.conlang_question')}
       </div>
 
       <label class="block">
@@ -174,28 +174,28 @@ Use: ${conlang_use.trim()}`
 
       {#if conlang === true}
         <div class="mb-3 font-italic">
-          Since our mission focuses on documenting endangered and minority natural human languages, we do not offer technical support for constructed languages (conlangs) or artificial languages. Due to our small team and limited hours of operation, we do not offer data imports for conlangs.
+          {$page.data.t('create.conlang_info_1')}
         </div>
         <div class="mb-3 font-italic">
-          Living Dictionaries for constructed languages will not be made public on our website or available on our homepage map. If we see derogatory content in this Living Dictionary, we also reserve the right to delete it.
+          {$page.data.t('create.conlang_info_2')}
         </div>
         <div class="mb-6" />
         <div>
           <input type="checkbox" id="agreement" name="agreement" required />
-          <label for="agreement">I agree to the above.</label>
+          <label for="agreement">{$page.data.t('create.agree_above')}</label>
         </div>
         <div>
           <input type="checkbox" id="citeAgreement" name="citeAgreement" required />
-          <label for="citeAgreement">I agree to cite any relevant published works within dictionary entries.</label>
+          <label for="citeAgreement">{$page.data.t('create.agree_to_cite')}</label>
         </div>
         <div>
           <input type="checkbox" id="non-commercialAgreement" name="non-commercialAgreement" required />
-          <label for="non-commercialAgreement">I agree that this work is non-commercial.</label>
+          <label for="non-commercialAgreement">{$page.data.t('create.agree_for_non-commercial')}</label>
         </div>
         <div class="mb-6" />
 
         <label class="block mb-2 text-sm font-medium text-gray-700" for="conlangInfo">
-          Where did the data in this dictionary come from? Please describe if you collected the data yourself. If you used any published reference sources, please list them here.
+          {$page.data.t('create.source_question')}
         </label>
         <textarea
           name="conlangInfo"
@@ -211,7 +211,7 @@ Use: ${conlang_use.trim()}`
         <div class="mb-6" />
 
         <label class="block mb-2 text-sm font-medium text-gray-700" for="conlangUse">
-          Who will be using this dictionary? Will it be used in any educational or media projects?
+          {$page.data.t('create.use_question')}
         </label>
         <textarea
           name="conlangUse"
@@ -382,11 +382,11 @@ Use: ${conlang_use.trim()}`
 
         <div>
           <input type="checkbox" id="citeAgreement" name="citeAgreement" required />
-          <label for="citeAgreement">I agree to cite any relevant published works within dictionary entries.</label>
+          <label for="citeAgreement">{$page.data.t('create.agree_to_cite')}</label>
         </div>
         <div>
           <input type="checkbox" id="non-commercialAgreement" name="non-commercialAgreement" required />
-          <label for="non-commercialAgreement">I agree that this work is non-commercial.</label>
+          <label for="non-commercialAgreement">{$page.data.t('create.agree_for_non-commercial')}</label>
         </div>
         <div class="mb-6" />
       {/if}

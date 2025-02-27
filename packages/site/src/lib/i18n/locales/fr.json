@@ -40,7 +40,7 @@
     "contributor_awards": "Récompenses de la communauté des contributeurs",
     "question_1": "Veuillez fournir quelques informations générales sur cette langue. Où est-il parlé ? Quelles communautés parlent cette langue ? Cette langue est-elle en danger ?",
     "question_2": "Quels sont les noms des personnes qui ont construit ce dictionnaire ? À qui appartiennent les voix de ce dictionnaire ?",
-    "question_3": "D’où viennent les données de ce dictionnaire ? Veuillez décrire si vous avez collecté les données vous-même. Si vous avez utilisé des sources de référence publiées, veuillez les énumérer.",
+    "question_3": "D’où proviennent les données de ce dictionnaire ? Veuillez décrire si vous avez collecté les données vous-même. Si vous avez utilisé des sources de référence publiées, veuillez les énumérer.",
     "question_4": "Qui utilisera ce dictionnaire ? Sera-t-il utilisé dans des projets éducatifs ?",
     "question_5": "Si vous souhaitez que le public vous contacte à propos de ce projet, veuillez fournir vos coordonnées ou un lien vers où les gens peuvent en savoir plus. Ceci est facultatif.",
     "message": "Avant de rendre votre dictionnaire public, veuillez remplir la section À propos."
@@ -132,7 +132,15 @@
     "secondary_coordinates": "Coordonnées secondaires",
     "map_instructions": "Cliquez sur la carte pour ajouter des coordonnées secondaires.",
     "print_access": "Autoriser les téléspectateurs à imprimer le dictionnaire",
-    "primary_coordinate": "Coordonnée principale"
+    "primary_coordinate": "Coordonnée principale",
+    "conlang_question": "Est-ce un langage construit ou un langage artificiel ?",
+    "conlang_info_1": "Puisque notre mission se concentre sur la documentation des langues humaines naturelles en voie de disparition et minoritaires, nous n'offrons pas de support technique pour les langues construites (conlangs) ou les langues artificielles. En raison de notre petite équipe et de nos heures d'ouverture limitées, nous ne proposons pas d'importation de données pour les conlangs.",
+    "conlang_info_2": "Les dictionnaires vivants pour les langues construites ne seront pas rendus publics sur notre site Web ni disponibles sur la carte de notre page d'accueil. Si nous constatons du contenu désobligeant dans ce Living Dictionary, nous nous réservons également le droit de le supprimer.",
+    "agree_above": "J'accepte ce qui précède.",
+    "agree_to_cite": "J'accepte de citer tous les ouvrages publiés pertinents dans les entrées du dictionnaire.",
+    "agree_for_non-commercial": "Je suis d'accord que ce travail n'est pas commercial.",
+    "source_question": "D’où proviennent les données de ce dictionnaire ? Veuillez décrire si vous avez collecté les données vous-même. Si vous avez utilisé des sources de référence publiées, veuillez les énumérer ici.",
+    "use_question": "Qui utilisera ce dictionnaire ? Sera-t-il utilisé dans des projets éducatifs ou médiatiques ?"
   },
   "dictionary": {
     "latitude": "Latitude",
@@ -329,7 +337,7 @@
     "availability": "La vue Imprimer est uniquement disponible pour les gestionnaires de dictionnaires et les contributeurs.",
     "max_entries": "Nombre maximum d'entrées",
     "columns": "Colonnes",
-    "headword_size": "Taille du mot",
+    "headword_size": "Taille du mot-clé",
     "font_size": "Taille de la police"
   },
   "import_page": {

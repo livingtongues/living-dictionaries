@@ -135,7 +135,15 @@
     "secondary_coordinates": "Secondary Coordinates",
     "map_instructions": "Click on the map to add secondary coordinates.",
     "print_access": "Allow Viewers to Print Dictionary",
-    "primary_coordinate": "Primary coordinate"
+    "primary_coordinate": "Primary coordinate",
+    "conlang_question": "Is this a constructed language or an artificial language?",
+    "conlang_info_1": "Since our mission focuses on documenting endangered and minority natural human languages, we do not offer technical support for constructed languages (conlangs) or artificial languages. Due to our small team and limited hours of operation, we do not offer data imports for conlangs.",
+    "conlang_info_2": "Living Dictionaries for constructed languages will not be made public on our website or available on our homepage map. If we see derogatory content in this Living Dictionary, we also reserve the right to delete it.",
+    "agree_above": "I agree to the above.",
+    "agree_to_cite": "I agree to cite any relevant published works within dictionary entries.",
+    "agree_for_non-commercial": "I agree that this work is non-commercial.",
+    "source_question": "Where did the data in this dictionary come from? Please describe if you collected the data yourself. If you used any published reference sources, please list them here.",
+    "use_question": "Who will be using this dictionary? Will it be used in any educational or media projects?"
   },
   "dictionary": {
     "latitude": "Latitude",
@@ -348,6 +356,7 @@
     "history": "History",
     "entry": "Entry",
     "editor": "Editor",
+    "entry_history": "Entry history",
     "field": "Field",
     "date": "Date",
     "old_value": "Former Value",

@@ -132,7 +132,15 @@
     "secondary_coordinates": "Coordenadas secundarias",
     "map_instructions": "Haga clic en el mapa para agregar coordenadas secundarias.",
     "print_access": "Permitir a los espectadores imprimir el diccionario",
-    "primary_coordinate": "Coordenada principal"
+    "primary_coordinate": "Coordenada principal",
+    "conlang_question": "¿Es este un lenguaje construido o un lenguaje artificial?",
+    "conlang_info_1": "Dado que nuestra misión se centra en documentar lenguas humanas naturales minoritarias y en peligro de extinción, no ofrecemos soporte técnico para lenguas construidas (conlangs) o lenguas artificiales. Debido a nuestro pequeño equipo y nuestro horario de atención limitado, no ofrecemos importaciones de datos para conlangs.",
+    "conlang_info_2": "Los diccionarios vivientes para lenguas construidas no se harán públicos en nuestro sitio web ni estarán disponibles en el mapa de nuestra página de inicio. Si vemos contenido despectivo en este Diccionario Viviente, también nos reservamos el derecho de eliminarlo.",
+    "agree_above": "Estoy de acuerdo con lo anterior.",
+    "agree_to_cite": "Acepto citar cualquier trabajo publicado relevante dentro de las entradas del diccionario.",
+    "agree_for_non-commercial": "Acepto que este trabajo no es para uso comercial.",
+    "source_question": "¿De dónde provienen los datos de este diccionario? Describa si recopiló los datos usted mismo. Si utilizó alguna fuente de referencia publicada, indíquela aquí.",
+    "use_question": "¿Quién utilizará este diccionario? ¿Se utilizará en algún proyecto educativo o de medios de comunicación?"
   },
   "dictionary": {
     "latitude": "Latitud",

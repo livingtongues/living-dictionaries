@@ -132,7 +132,15 @@
     "secondary_coordinates": "",
     "map_instructions": "",
     "print_access": "",
-    "primary_coordinate": ""
+    "primary_coordinate": "",
+    "conlang_question": "",
+    "conlang_info_1": "",
+    "conlang_info_2": "",
+    "agree_above": "",
+    "agree_to_cite": "",
+    "agree_for_non-commercial": "",
+    "source_question": "",
+    "use_question": ""
   },
   "dictionary": {
     "latitude": "অক্ষাংশ",
