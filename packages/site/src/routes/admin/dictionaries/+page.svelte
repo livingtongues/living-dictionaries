@@ -83,7 +83,7 @@
       </Button>
     </div>
     <div class="mb-1" />
-    <ResponsiveTable class="" stickyHeading stickyColumn>
+    <ResponsiveTable stickyHeading stickyColumn>
       <SortDictionaries dictionaries={filteredDictionaries} let:sortedDictionaries>
         {#each sortedDictionaries as dictionary, index (dictionary.id)}
           <IntersectionObserverShared bottom={4000} let:intersecting once>
