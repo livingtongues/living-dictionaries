@@ -28,21 +28,15 @@
   let iso_639_3 = ''
   let glottocode = ''
   let conlang: boolean
-  let language_used_by_community: boolean
   let community_permission: 'yes' | 'no' | 'unknown'
   let author_connection = ''
-  let agreement: boolean
-  let cite_agreement: boolean
-  let non_commercial_agreement: boolean
-  let conlang_info = ''
+  let conlang_source = ''
   let conlang_use = ''
-  const con_language_description = ''
 
   $: urlFromName = convertToFriendlyUrl(name, MAX_URL_LENGTH)
   let customUrl: string
   $: urlToUse = customUrl || urlFromName
   let isUniqueURL = true
-  const online = true
 
   const debouncedCheckIfUniqueUrl = debounce(checkIfUniqueUrl, 500)
   $: if (urlToUse.length >= data.MIN_URL_LENGTH) debouncedCheckIfUniqueUrl(urlToUse)
@@ -61,9 +55,8 @@
   onMount(() => {
     if (dev && browser) {
       name = `Test${Date.now()}`
-      language_used_by_community = false
       community_permission = 'no'
-      author_connection = 'a'.repeat(100)
+      author_connection = 'aaaaa '.repeat(10)
     }
   })
 </script>
@@ -83,10 +76,13 @@
       coordinates: points || regions ? { points, regions } : null,
       iso_639_3: iso_639_3.trim(),
       glottocode: glottocode.trim(),
-      language_used_by_community,
       community_permission,
       author_connection,
-      con_language_description,
+      con_language_description: conlang
+        ? `Source: ${conlang_source.trim()}
+
+Use: ${conlang_use.trim()}`
+        : null,
     })
   }}>
   <div class="flex-col justify-center p-4 max-w-md mx-auto">
@@ -112,6 +108,11 @@
     <div class="mb-6" />
 
     {#if name.length > 2}
+      {#if dev}
+        <Button type="submit" class="mb-5 w-full" color="red">
+          Dev: Add Test Dictionary Immediately
+        </Button>
+      {/if}
       <div class="flex justify-between items-center" style="direction: ltr">
         <label for="url" class="text-sm font-medium text-gray-700"> URL </label>
       </div>
@@ -123,16 +124,18 @@
           livingdictionaries.app/
         </span>
         <input
-          id="name"
-          type="text"
+          id="url"
+          value={customUrl || urlFromName}
+          on:keyup={handleUrlKeyup}
+          required
+          minlength={data.MIN_URL_LENGTH}
+          maxlength={MAX_URL_LENGTH}
           autocomplete="off"
           autocorrect="off"
           spellcheck={false}
-          autofocus
-          minlength={data.MIN_URL_LENGTH}
-          required
-          bind:value={name}
-          class="form-input w-full" />
+          class="form-input flex-1 block w-full px-2 sm:px-3 py-2 rounded-none
+            rounded-r-md sm:text-sm border"
+          placeholder="url" />
       </div>
       <div class="text-xs text-gray-600 mt-1">
         {$page.data.t('create.permanent_url_msg')}
@@ -170,29 +173,23 @@
       <div class="mb-6" />
 
       {#if conlang === true}
-        <div>
-          <p>
-            <em>
-              Since our mission focuses on documenting endangered and minority natural human languages, we do not offer technical support for constructed languages (conlangs) or artificial languages. Due to our small team and limited hours of operation, we do not offer data imports for conlangs.
-            </em>
-          </p>
-          <p>
-            <em>
-              Living Dictionaries for constructed languages will not be made public on our website or available on our homepage map. If we see derogatory content in this Living Dictionary, we also reserve the right to delete it.
-            </em>
-          </p>
+        <div class="mb-3 font-italic">
+          Since our mission focuses on documenting endangered and minority natural human languages, we do not offer technical support for constructed languages (conlangs) or artificial languages. Due to our small team and limited hours of operation, we do not offer data imports for conlangs.
+        </div>
+        <div class="mb-3 font-italic">
+          Living Dictionaries for constructed languages will not be made public on our website or available on our homepage map. If we see derogatory content in this Living Dictionary, we also reserve the right to delete it.
         </div>
         <div class="mb-6" />
         <div>
-          <input type="checkbox" id="agreement" name="agreement" bind:checked={agreement} />
+          <input type="checkbox" id="agreement" name="agreement" required />
           <label for="agreement">I agree to the above.</label>
         </div>
         <div>
-          <input type="checkbox" id="citeAgreement" name="citeAgreement" bind:checked={cite_agreement} />
+          <input type="checkbox" id="citeAgreement" name="citeAgreement" required />
           <label for="citeAgreement">I agree to cite any relevant published works within dictionary entries.</label>
         </div>
         <div>
-          <input type="checkbox" id="non-commercialAgreement" name="non-commercialAgreement" bind:checked={non_commercial_agreement} />
+          <input type="checkbox" id="non-commercialAgreement" name="non-commercialAgreement" required />
           <label for="non-commercialAgreement">I agree that this work is non-commercial.</label>
         </div>
         <div class="mb-6" />
@@ -206,10 +203,10 @@
           rows="5"
           minlength="100"
           maxlength="2500"
-          bind:value={conlang_info}
+          bind:value={conlang_source}
           class="form-input w-full" />
         <div class="flex text-xs">
-          <div class="text-gray-500 ml-auto">{conlang_info.length}/2500</div>
+          <div class="text-gray-500 ml-auto">{conlang_source.length}/2500</div>
         </div>
         <div class="mb-6" />
 
@@ -243,8 +240,6 @@
             gloss_languages.delete(languageId)
             gloss_languages = gloss_languages
           }} />
-        <!-- not used in web app presently -->
-        <!-- placeholder={$page.data.t('create.languages')} -->
         <div class="mb-6" />
 
         <EditableAlternateNames
@@ -275,8 +270,8 @@
           {$page.data.t('misc.negation')}
         </label>
         <div class="mb-6" /> -->
-
       {/if}
+
       {#if conlang === false}
         <WhereSpoken
           dictionary={{ coordinates: { points, regions } }}
@@ -339,7 +334,6 @@
 
         <div class="mb-2 text-sm font-medium text-gray-700">
           {$page.data.t('create.community_permission')}*
-          <!-- Similar to create.speech_community_permission but not the same -->
         </div>
         <label class="block">
           <input
@@ -386,48 +380,29 @@
         </div>
         <div class="mb-6" />
 
-        <!-- <label class="block mb-2 text-sm font-medium text-gray-700" for="conLangDescription">
-        {$page.data.t('create.con_lang_description')}
-      </label>
-      <textarea
-        name="conLangDescription"
-        rows="3"
-        minlength="1"
-        maxlength="1000"
-        bind:value={con_language_description}
-        class="form-input w-full" />
-      <div class="flex text-xs">
-        <div class="text-gray-500 ml-auto">{con_language_description.length}/1000</div>
-      </div>
-      <div class="mb-6" /> -->
-
-        <!-- TODO Translate these -->
         <div>
-          <input type="checkbox" id="citeAgreement" name="citeAgreement" bind:checked={cite_agreement} />
+          <input type="checkbox" id="citeAgreement" name="citeAgreement" required />
           <label for="citeAgreement">I agree to cite any relevant published works within dictionary entries.</label>
         </div>
         <div>
-          <input type="checkbox" id="non-commercialAgreement" name="non-commercialAgreement" bind:checked={non_commercial_agreement} />
+          <input type="checkbox" id="non-commercialAgreement" name="non-commercialAgreement" required />
           <label for="non-commercialAgreement">I agree that this work is non-commercial.</label>
         </div>
         <div class="mb-6" />
       {/if}
 
-      {#if (conlang && agreement && cite_agreement && non_commercial_agreement) || (!conlang && cite_agreement && non_commercial_agreement)}
-        <Button type="submit" class="w-full" form="filled" disabled={!online} {loading}>
-          {#if !online}
-            Return online to
-          {/if}
-          {$page.data.t('create.create_dictionary')}
-        </Button>
+      <!-- {#if (conlang && agreement && cite_agreement && non_commercial_agreement) || (!conlang && cite_agreement && non_commercial_agreement)} -->
+      <Button type="submit" class="w-full" form="filled" {loading}>
+        {$page.data.t('create.create_dictionary')}
+      </Button>
 
-        <div class="mt-2 text-sm text-gray-600">
-          {$page.data.t('terms.agree_by_submit')}
-          <a href="/terms" class="underline" target="_blank">{$page.data.t('dictionary.terms_of_use')}</a>.
-        </div>
-        <div class="mb-6" />
-      {/if}
+      <div class="mt-2 text-sm text-gray-600">
+        {$page.data.t('terms.agree_by_submit')}
+        <a href="/terms" class="underline" target="_blank">{$page.data.t('dictionary.terms_of_use')}</a>.
+      </div>
+      <div class="mb-6" />
     {/if}
+    <!-- {/if} -->
   </div>
 </Form>
 
