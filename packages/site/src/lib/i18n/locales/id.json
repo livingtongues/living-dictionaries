@@ -140,7 +140,8 @@
     "agree_to_cite": "Saya setuju untuk mengutip karya terbitan relevan apa pun dalam entri kamus.",
     "agree_for_non-commercial": "Saya setuju bahwa karya ini bersifat non-komersial.",
     "source_question": "Dari manakah data dalam kamus ini berasal? Tolong jelaskan jika Anda sendiri yang mengumpulkan datanya. Jika Anda menggunakan sumber referensi yang diterbitkan, harap cantumkan di sini.",
-    "use_question": "Siapa yang akan menggunakan kamus ini? Apakah ini akan digunakan dalam proyek pendidikan atau media?"
+    "use_question": "Siapa yang akan menggunakan kamus ini? Apakah ini akan digunakan dalam proyek pendidikan atau media?",
+    "conlang_warning": "Jika kamus ini ditujukan untuk bahasa buatan (atau buatan), dan Anda tidak menyatakannya, kami berhak menghapusnya."
   },
   "dictionary": {
     "latitude": "Garis Lintang",
