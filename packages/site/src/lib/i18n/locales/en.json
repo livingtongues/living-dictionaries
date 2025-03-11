@@ -67,7 +67,9 @@
   },
   "account": {
     "account_settings": "Account Settings",
-    "log_out": "Log Out"
+    "log_out": "Log Out",
+    "send_code": "Send Code",
+    "enter_6_digit_code_sent_to": "Enter the 6-digit code sent to"
   },
   "audio": {
     "tapToStopRecording": "Then you will tap to stop recording",
