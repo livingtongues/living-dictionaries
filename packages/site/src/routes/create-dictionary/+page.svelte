@@ -55,6 +55,7 @@
   onMount(() => {
     if (dev && browser) {
       name = `Test${Date.now()}`
+      conlang = false
       community_permission = 'no'
       author_connection = 'aaaaa '.repeat(10)
     }
@@ -391,7 +392,6 @@ Use: ${conlang_use.trim()}`
         <div class="mb-6" />
       {/if}
 
-      <!-- {#if (conlang && agreement && cite_agreement && non_commercial_agreement) || (!conlang && cite_agreement && non_commercial_agreement)} -->
       <Button type="submit" class="w-full" form="filled" {loading}>
         {$page.data.t('create.create_dictionary')}
       </Button>
@@ -402,7 +402,6 @@ Use: ${conlang_use.trim()}`
       </div>
       <div class="mb-6" />
     {/if}
-    <!-- {/if} -->
   </div>
 </Form>
 

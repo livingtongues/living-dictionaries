@@ -9,6 +9,89 @@ export type Json =
 export interface Database {
   public: {
     Tables: {
+      api_keys: {
+        Row: {
+          can_write: boolean | null
+          created_at: string
+          created_by: string
+          dictionary_id: string
+          id: string
+          last_read_at: string | null
+          last_write_at: string | null
+          use_count: number
+        }
+        Insert: {
+          can_write?: boolean | null
+          created_at?: string
+          created_by?: string
+          dictionary_id: string
+          id?: string
+          last_read_at?: string | null
+          last_write_at?: string | null
+          use_count?: number
+        }
+        Update: {
+          can_write?: boolean | null
+          created_at?: string
+          created_by?: string
+          dictionary_id?: string
+          id?: string
+          last_read_at?: string | null
+          last_write_at?: string | null
+          use_count?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'api_keys_created_by_fkey'
+            columns: ['created_by']
+            isOneToOne: false
+            referencedRelation: 'profiles_view'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'api_keys_created_by_fkey'
+            columns: ['created_by']
+            isOneToOne: false
+            referencedRelation: 'user_emails'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'api_keys_created_by_fkey'
+            columns: ['created_by']
+            isOneToOne: false
+            referencedRelation: 'users'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'api_keys_dictionary_id_fkey'
+            columns: ['dictionary_id']
+            isOneToOne: false
+            referencedRelation: 'dictionaries'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'api_keys_dictionary_id_fkey'
+            columns: ['dictionary_id']
+            isOneToOne: false
+            referencedRelation: 'dictionaries_view'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'api_keys_dictionary_id_fkey'
+            columns: ['dictionary_id']
+            isOneToOne: false
+            referencedRelation: 'materialized_admin_dictionaries_view'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'api_keys_dictionary_id_fkey'
+            columns: ['dictionary_id']
+            isOneToOne: false
+            referencedRelation: 'materialized_dictionaries_view'
+            referencedColumns: ['id']
+          },
+        ]
+      }
       audio: {
         Row: {
           created_at: string
