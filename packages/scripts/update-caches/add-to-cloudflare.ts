@@ -133,16 +133,17 @@ async function file_exists(filepath: string): Promise<boolean> {
   }
 }
 
-async function upload_to_cloudflare(filename: string, index_json_string: string) {
-  const params = {
-    Bucket: 'search-index',
-    Key: `indexes/${filename}`,
-    Body: index_json_string,
-    ContentType: 'application/json',
-  }
-
+async function upload_to_cloudflare(filename: string, json_string: string) {
+  const MINUTES_TO_WAIT_BEFORE_REVALIDATION = 10
   try {
-    const command = new PutObjectCommand(params)
+    const command = new PutObjectCommand({
+      Bucket: 'cache',
+      Key: `entries/${filename}`,
+      Body: json_string,
+      ContentType: 'application/json',
+      CacheControl: `max-age=${MINUTES_TO_WAIT_BEFORE_REVALIDATION * 60}`,
+      // CacheControl: 'no-cache', // revalidate on every request
+    })
     await search_index_client.send(command)
     console.log(`Uploaded ${filename} to Cloudflare R2`)
   } catch (err) {

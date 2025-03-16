@@ -19,7 +19,7 @@
     "import-dictionary:dev:live": "tsx import/import.ts --id example-v4 --live",
     "import-dictionary:prod:live": "tsx import/import.ts --id example-v4 -e prod --live",
     "update-locales": "tsx locales/update-locales.ts",
-    "create-indexes": "tsx create-indexes/add-to-cloudflare.ts",
+    "update-caches": "tsx update-caches/add-to-cloudflare.ts",
     "get-emails": "tsx refactor/get-email.ts -e prod",
     "test": "vitest",
     "test:import": "vitest --config ./vitest.config.import.ts",
