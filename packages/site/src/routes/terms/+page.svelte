@@ -1,7 +1,7 @@
 <script lang="ts">
-  import { page } from '$app/stores';
-  import Header from '$lib/components/shell/Header.svelte';
-  import SeoMetaTags from '$lib/components/SeoMetaTags.svelte';
+  import { page } from '$app/stores'
+  import Header from '$lib/components/shell/Header.svelte'
+  import SeoMetaTags from '$lib/components/SeoMetaTags.svelte'
 </script>
 
 <Header>
@@ -285,7 +285,7 @@
         you automatically grant, and you represent and warrant that you have the right to grant, to
         us an unrestricted, unlimited, irrevocable, perpetual, non-exclusive, transferable,
         royalty-free, fully-paid, worldwide right, and license to host, use, copy, reproduce,
-        disclose, sell, resell, publish, broadcast, retitle, archive, store, cache, publicly
+        disclose, publish, broadcast, retitle, archive, store, cache, publicly
         perform, publicly display, reformat, translate, transmit, excerpt (in whole or in part), and
         distribute such Contributions (including, without limitation, your image and voice) for any
         purpose, commercial, advertising, or otherwise, and to prepare derivative works of, or
