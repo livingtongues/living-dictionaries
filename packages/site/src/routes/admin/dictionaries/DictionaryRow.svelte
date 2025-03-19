@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { BadgeArrayEmit, Button, ShowHide } from 'svelte-pieces'
+  import { BadgeArrayEmit, Button, JSON, ShowHide } from 'svelte-pieces'
   import type { TablesUpdate } from '@living-dictionaries/types'
   import type { UserWithDictionaryRoles } from '@living-dictionaries/types/supabase/users.types'
   import DictionaryFieldEdit from './DictionaryFieldEdit.svelte'
@@ -240,9 +240,7 @@
       size="sm"
       onclick={() => {
         if (confirm('Toggle con lang status?')) {
-          update_dictionary({
-            con_language_description: !dictionary.con_language_description ? 'YES' : null,
-          })
+          update_dictionary({ con_language_description: dictionary.con_language_description ? null : 'YES' })
         }
       }}>
       {dictionary.con_language_description ? 'YES' : 'NO'}
@@ -250,5 +248,7 @@
   {/if}
 </td>
 {#if $admin > 1}
-  <td class="cursor-pointer" title={JSON.stringify(dictionary, null, 1)}><span class="i-material-symbols-info-outline" /></td>
+  <td class="cursor-pointer">
+    <JSON obj={dictionary} />
+  </td>
 {/if}

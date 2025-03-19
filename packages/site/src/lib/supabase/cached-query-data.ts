@@ -33,6 +33,8 @@ export function cached_query_data_store<T extends { id?: string, user_id?: strin
   async function get_data_from_cache_then_db(refresh = false) {
     if (log)
       console.info({ cache_key })
+    if (log && refresh)
+      console.info({ [`refreshing: ${cache_key}`]: true })
 
     const cached_data = await get_idb<T[]>(cache_key) || []
     if (cached_data.length && log) {
@@ -142,6 +144,8 @@ export function cached_query_data_store<T extends { id?: string, user_id?: strin
     data.set(data_coming_in)
     set_idb(cache_key, data_coming_in)
     loading.set(false)
+    // eslint-disable-next-line require-atomic-updates
+    range_start = 0
   }
   get_data_from_cache_then_db()
 
