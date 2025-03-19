@@ -12,15 +12,25 @@ import { url_from_storage_path } from '$lib/helpers/media'
 import { PUBLIC_STORAGE_BUCKET } from '$env/static/public'
 import { invalidate } from '$app/navigation'
 
-export const load: LayoutLoad = async ({ params: { dictionaryId: dictionary_id }, parent, depends }) => {
+export const load: LayoutLoad = async ({ params: { dictionaryId: dictionary_url }, parent, depends }) => {
   depends(DICTIONARY_UPDATED_LOAD_TRIGGER)
 
   try {
     const { supabase, admin, my_dictionaries } = await parent()
-    const { data: dictionary, error: dictionary_error } = await supabase.from('dictionaries').select().eq('id', dictionary_id).single()
 
-    if (dictionary_error)
-      redirect(ResponseCodes.MOVED_PERMANENTLY, '/')
+    let dictionary: Tables<'dictionaries'>
+    const { data: url_dictionary, error: url_dictionary_error } = await supabase.from('dictionaries').select().eq('url', dictionary_url).single()
+    if (url_dictionary_error) {
+      const { data: id_dictionary, error: dictionary_id_error } = await supabase.from('dictionaries').select().eq('id', dictionary_url).single()
+      if (dictionary_id_error) {
+        redirect(ResponseCodes.MOVED_PERMANENTLY, '/')
+      }
+      dictionary = id_dictionary
+    } else {
+      dictionary = url_dictionary
+    }
+
+    const dictionary_id = dictionary.id
 
     if (browser)
       load_cached_index(dictionary_id)

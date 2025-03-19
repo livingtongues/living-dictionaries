@@ -5,7 +5,7 @@ import { ResponseCodes } from '$lib/constants'
 import { ENTRY_UPDATED_LOAD_TRIGGER } from '$lib/dbOperations'
 import { browser } from '$app/environment'
 
-export async function load({ params: { dictionaryId: dictionary_id, entryId: entry_id }, depends, parent }) {
+export async function load({ params: { entryId: entry_id }, depends, parent }) {
   depends(ENTRY_UPDATED_LOAD_TRIGGER)
 
   const entry_history = readable<Tables<'content_updates'>[]>([], (set) => {
@@ -38,7 +38,7 @@ export async function load({ params: { dictionaryId: dictionary_id, entryId: ent
     }
   }
 
-  const { supabase } = await parent()
+  const { supabase, dictionary } = await parent()
   let entry: Tables<'entries_view'>
 
   const { data: entries, error: load_error } = await supabase
@@ -62,7 +62,7 @@ export async function load({ params: { dictionaryId: dictionary_id, entryId: ent
   }
 
   if (!entry || entry.deleted)
-    redirect(ResponseCodes.MOVED_PERMANENTLY, `/${dictionary_id}`)
+    redirect(ResponseCodes.MOVED_PERMANENTLY, `/${dictionary.id}`)
 
   return {
     entry,
