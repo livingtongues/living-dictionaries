@@ -26,6 +26,7 @@ export const seeded_dictionary_id = 'dictionary1'
 
 export const seed_dictionaries: TablesInsert<'dictionaries'>[] = [{
   id: seeded_dictionary_id,
+  url: seeded_dictionary_id,
   name: 'Test Dictionary',
   created_by: seeded_user_id_1,
   updated_by: seeded_user_id_1,

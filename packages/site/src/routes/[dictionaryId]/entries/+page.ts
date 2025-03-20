@@ -9,7 +9,6 @@ export function load() {
   const search_params = createQueryParamStore({
     key: 'q',
     startWith: default_params,
-    // storagePrefix: `${dictionaryId}_`,
     cleanFalseValues: true,
     // replaceState: false,
   })
