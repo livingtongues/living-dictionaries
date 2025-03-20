@@ -25,7 +25,7 @@
         <i class="far fa-bars print:hidden" />
         {dictionary.name}
       </button>
-      <a class="hover:text-black hidden md:inline" href="/{dictionary.id}">
+      <a class="hover:text-black hidden md:inline" href="/{dictionary.url}">
         {dictionary.name}
       </a>
     </div>

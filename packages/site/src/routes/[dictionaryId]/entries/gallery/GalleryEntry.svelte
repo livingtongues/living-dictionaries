@@ -32,7 +32,7 @@
           {can_edit}
           on_delete_image={async () => await dbOperations.update_photo({ photo: { deleted: 'true' }, photo_id: first_photo_id })} />
       </div>
-      <a href="/{dictionary.id}/entry/{entry.id}" style="background: #f3f3f3;" class="block p-[10px] h-60px">
+      <a href="/{dictionary.url}/entry/{entry.id}" style="background: #f3f3f3;" class="block p-[10px] h-60px">
         <div class="font-semibold">
           {entry.main.lexeme.default}
         </div>
