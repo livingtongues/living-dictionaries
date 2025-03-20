@@ -11,7 +11,7 @@
   import { page } from '$app/stores'
 
   export let data: PageData
-  $: ({ users, dictionary_roles } = data)
+  $: ({ users, dictionary_roles, dictionaries } = data)
 
   $: users_with_roles = $users.map((user) => {
     return {
@@ -22,22 +22,22 @@
 
   $: active_section = $page.url.searchParams.get('filter') as 'public' | 'private' | 'other'
 
-  let dictionaries = data.public_dictionaries
-  $: dictionaries = active_section === 'private'
-    ? data.private_dictionaries
-    : active_section === 'other'
-    ? data.other_dictionaries
-    : data.public_dictionaries
-
   const invites = writable<Tables<'invites'>[]>([])
 
-  $: dictionaries_with_editors_invites = $dictionaries.map((dictionary) => {
-    return {
-      ...dictionary,
-      editors: users_with_roles.filter(user => user.dictionary_roles.some(role => role.dictionary_id === dictionary.id)),
-      invites: $invites.filter(invite => invite.dictionary_id === dictionary.id),
-    }
-  })
+  $: dictionaries_with_editors_invites = $dictionaries
+    // eslint-disable-next-line array-callback-return
+    .filter((dictionary) => {
+      if (active_section === 'public') return dictionary.public
+      if (active_section === 'private') return !dictionary.public && !dictionary.con_language_description
+      if (active_section === 'other') return !dictionary.public && dictionary.con_language_description
+    })
+    .map((dictionary) => {
+      return {
+        ...dictionary,
+        editors: users_with_roles.filter(user => user.dictionary_roles.some(role => role.dictionary_id === dictionary.id)),
+        invites: $invites.filter(invite => invite.dictionary_id === dictionary.id),
+      }
+    })
 
   onMount(() => {
     load_extras()
@@ -54,7 +54,7 @@
       const { error } = await data.supabase.from('dictionaries').update(change)
         .eq('id', dictionary_id)
       if (error) throw new Error(error.message)
-      await dictionaries.refresh()
+      await data.dictionaries.refresh()
     } catch (err) {
       alert(`Error: ${err}`)
     }
@@ -94,7 +94,7 @@
                   {dictionary}
                   users={users_with_roles}
                   is_public={active_section === 'public'}
-                  update_dictionary={change => update_dictionary(change, dictionary.id)}
+                  update_dictionary={async change => await update_dictionary(change, dictionary.id)}
                   {load_extras} />
               {:else}
                 <td colspan="30"> Loading... </td>
