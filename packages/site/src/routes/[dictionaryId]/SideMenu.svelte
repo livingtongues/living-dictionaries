@@ -19,7 +19,7 @@
 <div on:click={on_close}>
   <a
     class:active={$page.url.pathname.match(/entry|entries/)}
-    href={`/${dictionary.id}/entries`}>
+    href={`/${dictionary.url}/entries`}>
     <span class="i-fa-solid-list" />
     <span class="font-medium mx-2">
       {$page.data.t('dictionary.entries')}
@@ -35,7 +35,7 @@
   </a>
   {#if !is_manager}
     <a
-      href={`/${dictionary.id}/synopsis`}
+      href={`/${dictionary.url}/synopsis`}
       class:active={$page.url.pathname.includes('synopsis')}>
       <span class="i-fa6-solid-file-lines" />
       <span class="font-medium mx-2">
@@ -44,7 +44,7 @@
     </a>
   {/if}
   <a
-    href={`/${dictionary.id}/about`}
+    href={`/${dictionary.url}/about`}
     class:active={$page.url.pathname.includes('about')}>
     <span class="i-fa6-solid-circle-info mx-.25" />
     <span class="font-medium mx-2">
@@ -52,7 +52,7 @@
     </span>
   </a>
   <a
-    href={`/${dictionary.id}/grammar`}
+    href={`/${dictionary.url}/grammar`}
     class:active={$page.url.pathname.includes('grammar')}>
     <span class="i-tabler-text-grammar text-lg" />
     <span class="font-medium mx-2">
@@ -60,7 +60,7 @@
     </span>
   </a>
   <a
-    href={`/${dictionary.id}/contributors`}
+    href={`/${dictionary.url}/contributors`}
     class:active={$page.url.pathname.includes('contributors')}>
     <span class="i-fa6-solid-users text-lg" />
     <span class="font-medium mx-2">
@@ -69,7 +69,7 @@
   </a>
   {#if is_manager}
     <a
-      href={`/${dictionary.id}/history`}
+      href={`/${dictionary.url}/history`}
       class:active={$page.url.pathname.includes('history')}>
       <span class="i-mdi-history text-xl" />
       <span class="font-medium mx-2">
@@ -77,7 +77,7 @@
       </span>
     </a>
     <a
-      href={`/${dictionary.id}/settings`}
+      href={`/${dictionary.url}/settings`}
       class:active={$page.url.pathname.includes('settings')}>
       <span class="i-fa6-solid-gear mx-.5" />
       <span class="font-medium mx-2">
@@ -85,7 +85,7 @@
       </span>
     </a>
     <a
-      href={`/${dictionary.id}/import`}
+      href={`/${dictionary.url}/import`}
       class:active={$page.url.pathname.includes('import')}>
       <span class="i-fa6-solid-file-import mx-.5" />
       <span class="font-medium mx-2">
@@ -93,7 +93,7 @@
       </span>
     </a>
     <a
-      href={`/${dictionary.id}/export`}
+      href={`/${dictionary.url}/export`}
       class:active={$page.url.pathname.includes('export')}>
       <span class="i-fa6-solid-file-export ml-1" />
       <span class="font-medium mx-2">
