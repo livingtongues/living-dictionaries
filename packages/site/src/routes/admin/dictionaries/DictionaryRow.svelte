@@ -43,7 +43,7 @@
   </Button>
 </td>
 <td>
-  <Button title="View Entries" size="sm" form="simple" href="/{dictionary.id}">
+  <Button title="View Entries" size="sm" form="simple" href="/{dictionary.url}">
     {dictionary.entry_count}
     <!-- <span class="i-tabler-external-link" style="vertical-align: -1px;" /> -->
   </Button>

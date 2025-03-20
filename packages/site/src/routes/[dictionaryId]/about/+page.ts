@@ -1,13 +1,13 @@
 import { invalidateAll } from '$app/navigation'
 
-export function load({ params: { dictionaryId }, parent }) {
+export function load({ parent }) {
   async function update_about(updated: string) {
-    const { t, supabase } = await parent()
+    const { t, supabase, dictionary } = await parent()
     try {
       const { error } = await supabase
         .from('dictionary_info')
         .upsert([
-          { id: dictionaryId, about: updated },
+          { id: dictionary.id, about: updated },
         ], { onConflict: 'id' })
       if (error) {
         console.error(error)

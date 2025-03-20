@@ -40,6 +40,7 @@ CREATE TYPE certainty AS ENUM ('yes', 'no', 'unknown');
 
 CREATE TABLE dictionaries (
   id text unique primary key NOT NULL,
+  url text unique NOT NULL,
   name text NOT NULL,
   alternate_names text[],
   orthographies jsonb[], -- defaults to latin first, but other bcp codes or custom orthographies can be added, these are the keys for MultiString used by each dictionary
@@ -649,6 +650,7 @@ EXECUTE FUNCTION update_audio_updated_at();
 CREATE VIEW dictionaries_view AS
 SELECT
   dictionaries.id,
+  url,
   name,
   alternate_names,
   gloss_languages,
@@ -690,6 +692,7 @@ SELECT cron.schedule (
 CREATE MATERIALIZED VIEW materialized_dictionaries_view AS
 SELECT 
   id,
+  url,
   name,
   alternate_names,
   gloss_languages,

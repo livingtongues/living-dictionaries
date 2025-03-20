@@ -54,7 +54,7 @@
         {$page.data.t('dictionary.longitude')}
       </th>
     </thead>
-    {#each dictionaries as { id, metadata, name, entry_count, iso_639_3, glottocode, location, coordinates }}
+    {#each dictionaries as { url, metadata, name, entry_count, iso_639_3, glottocode, location, coordinates }}
       {@const first_latitude = coordinates?.points?.[0]?.coordinates.latitude}
       {@const first_longitude = coordinates?.points?.[0]?.coordinates.longitude}
       <tr>
@@ -68,7 +68,7 @@
           {#if metadata?.url}
             <a href={metadata.url} target="_blank" rel="noreferrer">{metadata.url}</a>
           {:else}
-            <a href={`/${id}`}>https://livingdictionaries.app/{id}</a>
+            <a href={`/${url}`}>https://livingdictionaries.app/{url}</a>
           {/if}
         </td>
         <td>

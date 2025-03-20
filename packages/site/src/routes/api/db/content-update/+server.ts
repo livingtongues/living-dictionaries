@@ -50,15 +50,8 @@ export const POST: RequestHandler = async ({ request, locals: { getSession } }) 
 
     const { data: dictionary } = await admin_supabase.from('dictionaries').select().eq('id', dictionary_id).single()
     if (!dictionary) {
-      const { error } = await admin_supabase.from('dictionaries').insert({
-        ...c_u_meta,
-        id: dictionary_id,
-        name: 'CHANGE',
-      })
-      if (error) {
-        console.info({ body })
-        throw new Error(error.message)
-      }
+      console.info({ body })
+      throw new Error('No dictionary found')
     }
 
     if (type === 'insert_entry') {

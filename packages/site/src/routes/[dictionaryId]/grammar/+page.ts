@@ -1,13 +1,13 @@
 import { invalidateAll } from '$app/navigation'
 
-export function load({ params: { dictionaryId }, parent }) {
+export function load({ parent }) {
   async function update_grammar(updated: string) {
-    const { t, supabase } = await parent()
+    const { t, supabase, dictionary } = await parent()
     try {
       const { error } = await supabase
         .from('dictionary_info')
         .upsert([
-          { id: dictionaryId, grammar: updated },
+          { id: dictionary.id, grammar: updated },
         ], { onConflict: 'id' })
       if (error) {
         console.error(error)

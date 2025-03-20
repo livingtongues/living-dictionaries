@@ -3,7 +3,7 @@ import { get } from 'svelte/store'
 import type { PageLoad } from './$types'
 import { upload_image } from '$lib/components/image/upload-image'
 
-export const load: PageLoad = async ({ params: { dictionaryId }, parent }) => {
+export const load: PageLoad = async ({ parent }) => {
   const { t, admin, user, dictionary, update_dictionary } = await parent()
 
   async function updateDictionary(change: TablesUpdate<'dictionaries'>) {
@@ -33,7 +33,7 @@ export const load: PageLoad = async ({ params: { dictionaryId }, parent }) => {
 
   function add_featured_image(file: File) {
     const $user = get(user)
-    const status = upload_image({ file, folder: `${dictionaryId}/featured_images` })
+    const status = upload_image({ file, folder: `${dictionary.id}/featured_images` })
     const unsubscribe = status.subscribe(async ({ storage_path, serving_url }) => {
       if (storage_path && serving_url) {
         await updateDictionary({ featured_image: {

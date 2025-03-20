@@ -543,6 +543,7 @@ export interface Database {
           public: boolean
           updated_at: string
           updated_by: string
+          url: string
         }
         Insert: {
           alternate_names?: string[] | null
@@ -569,6 +570,7 @@ export interface Database {
           public?: boolean
           updated_at?: string
           updated_by?: string
+          url: string
         }
         Update: {
           alternate_names?: string[] | null
@@ -595,6 +597,7 @@ export interface Database {
           public?: boolean
           updated_at?: string
           updated_by?: string
+          url?: string
         }
         Relationships: [
           {
@@ -2554,6 +2557,7 @@ export interface Database {
           public: boolean | null
           updated_at: string | null
           updated_by: string | null
+          url: string | null
         }
         Relationships: [
           {
@@ -2700,6 +2704,7 @@ export interface Database {
           public: boolean | null
           updated_at: string | null
           updated_by: string | null
+          url: string | null
         }
         Relationships: [
           {
@@ -2760,6 +2765,7 @@ export interface Database {
           metadata: Json | null
           name: string | null
           public: boolean | null
+          url: string | null
         }
         Relationships: []
       }

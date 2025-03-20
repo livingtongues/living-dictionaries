@@ -9,8 +9,8 @@ function randomUUID() {
   return window.crypto.randomUUID()
 }
 function get_pieces() {
-  const { params: { dictionaryId: dictionary_id, entryId: entry_id_from_url }, state: { entry_id: entry_id_from_state }, data: { entries, photos, videos, sentences, tags, dialects, speakers } } = get(page)
-  return { dictionary_id, entry_id_from_url: entry_id_from_url || entry_id_from_state, refresh_entries: entries.refresh, refresh_photos: photos.refresh, refresh_videos: videos.refresh, refresh_sentences: sentences.refresh, refresh_dialects: dialects.refresh, refresh_speakers: speakers.refresh, refresh_tags: tags.refresh }
+  const { params: { entryId: entry_id_from_url }, state: { entry_id: entry_id_from_state }, data: { entries, photos, videos, sentences, tags, dialects, speakers, dictionary } } = get(page)
+  return { dictionary_id: dictionary.id, entry_id_from_url: entry_id_from_url || entry_id_from_state, refresh_entries: entries.refresh, refresh_photos: photos.refresh, refresh_videos: videos.refresh, refresh_sentences: sentences.refresh, refresh_dialects: dialects.refresh, refresh_speakers: speakers.refresh, refresh_tags: tags.refresh }
 }
 
 export async function insert_entry(lexeme: MultiString) {

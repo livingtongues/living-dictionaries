@@ -70,6 +70,7 @@
 
     await data.create_dictionary({
       id: urlToUse,
+      url: urlToUse,
       name: name.trim().replace(/^./, name[0].toUpperCase()),
       gloss_languages: Array.from(gloss_languages),
       alternate_names,
