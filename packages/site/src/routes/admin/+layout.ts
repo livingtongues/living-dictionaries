@@ -7,38 +7,12 @@ import { cached_query_data_store } from '$lib/supabase/cached-query-data'
 export const load = (async ({ parent }) => {
   const { supabase } = await parent()
 
-  const public_dictionaries = cached_query_data_store<DictionaryView>({
+  const dictionaries = cached_query_data_store<DictionaryView>({
     materialized_query: supabase.from('materialized_admin_dictionaries_view')
-      .select()
-      .eq('public', true),
+      .select(),
     live_query: supabase.from('dictionaries_view')
-      .select()
-      .eq('public', true),
-    key: 'public_dictionaries',
-  })
-
-  const private_dictionaries = cached_query_data_store<DictionaryView>({
-    materialized_query: supabase.from('materialized_admin_dictionaries_view')
-      .select()
-      .neq('public', true)
-      .is('con_language_description', null),
-    live_query: supabase.from('dictionaries_view')
-      .select()
-      .neq('public', true)
-      .is('con_language_description', null),
-    key: 'private_dictionaries',
-  })
-
-  const other_dictionaries = cached_query_data_store<DictionaryView>({
-    materialized_query: supabase.from('materialized_admin_dictionaries_view')
-      .select()
-      .neq('public', true)
-      .not('con_language_description', 'is', null),
-    live_query: supabase.from('dictionaries_view')
-      .select()
-      .neq('public', true)
-      .not('con_language_description', 'is', null),
-    key: 'other_dictionaries',
+      .select(),
+    key: 'dictionaries',
   })
 
   const users = cached_query_data_store<UserForAdminTable>({
@@ -93,9 +67,7 @@ export const load = (async ({ parent }) => {
   }
 
   return {
-    public_dictionaries,
-    private_dictionaries,
-    other_dictionaries,
+    dictionaries,
     users,
     dictionary_roles,
     get_invites,

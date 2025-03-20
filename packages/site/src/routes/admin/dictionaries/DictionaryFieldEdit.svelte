@@ -24,10 +24,10 @@
   }
 </script>
 
-<input bind:value on:input={valueChanged} class:unsaved />
+<input bind:value on:input={valueChanged} class:unsaved={unsaved} />
 
 <style>
-  input.unsaved {
+  .unsaved {
     outline: solid 1px #00cc00;
   }
 </style>

@@ -1,6 +1,7 @@
 <script lang="ts">
   import type { UserWithDictionaryRoles } from '@living-dictionaries/types/supabase/users.types'
   import type { DictionaryView } from '@living-dictionaries/types'
+  import { Button } from 'svelte-pieces'
   import DictionariesHelping from './DictionariesHelping.svelte'
   import type { PageData } from './$types'
   import { supabase_date_to_friendly } from '$lib/helpers/time'
@@ -56,11 +57,13 @@
   </td>
   <td>
     {#if user.unsubscribed_from_emails}
-      <button
-        type="button"
+      <Button
         title="Click to re-subscribe"
-        class="hover:underline text-red-600"
-        on:click={async () => {
+        color="red"
+        form="simple"
+        size="sm"
+        class="-ml-2"
+        onclick={async () => {
           if (confirm('Re-subscribe user?')) {
             const { error } = await supabase.from('user_data').update({ unsubscribed_from_emails: null }).eq('id', user.id)
             if (error) {
@@ -70,12 +73,14 @@
               await load_data()
             }
           }
-        }}>{supabase_date_to_friendly(user.unsubscribed_from_emails)}</button>
+        }}>{supabase_date_to_friendly(user.unsubscribed_from_emails)}</Button>
     {:else}
-      <button
-        type="button"
-        class="text-xs hover:underline text-gray-700"
-        on:click={async () => {
+      <Button
+        color="black"
+        form="simple"
+        size="sm"
+        class="-ml-2"
+        onclick={async () => {
           const { error } = await supabase.from('user_data').update({ unsubscribed_from_emails: new Date().toISOString() }).eq('id', user.id)
           if (error) {
             alert(error.message)
@@ -83,7 +88,7 @@
           } else {
             await load_data()
           }
-        }}>Mark Unsubscribed</button>
+        }}>Mark Unsubscribed</Button>
     {/if}
   </td>
 </tr>

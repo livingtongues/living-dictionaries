@@ -8,7 +8,7 @@
   import Filter from '$lib/components/Filter.svelte'
 
   export let data: PageData
-  $: ({ public_dictionaries, private_dictionaries, other_dictionaries, users, dictionary_roles } = data)
+  $: ({ dictionaries, users, dictionary_roles } = data)
 
   $: users_with_roles = $users.map((user) => {
     return {
@@ -16,7 +16,6 @@
       dictionary_roles: $dictionary_roles.filter(role => role.user_id === user.id),
     }
   })
-  $: dictionaries = [...$public_dictionaries, ...$private_dictionaries, ...$other_dictionaries]
 
   function exportUsersAsCSV(users: UserWithDictionaryRoles[]) {
     const headers = {
@@ -51,10 +50,10 @@
             load_data={async () => {
               await Promise.all([
                 users.refresh(),
-                dictionary_roles.refresh(),
+                dictionary_roles.reset(),
               ])
             }}
-            {dictionaries}
+            dictionaries={$dictionaries}
             {user} />
         {/each}
       </SortUsers>

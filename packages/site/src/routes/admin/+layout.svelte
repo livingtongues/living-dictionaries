@@ -25,12 +25,10 @@
         size="sm"
         form="simple"
         onclick={async () => {
-          await data.private_dictionaries.reset()
-          await data.public_dictionaries.reset()
-          await data.other_dictionaries.reset()
+          await data.dictionaries.reset()
           await data.dictionary_roles.reset()
           await data.users.reset()
-          location.reload()
+        // location.reload()
         }}>Reset cache (after public/private toggle, remove editor)</Button>
     </nav>
   </div>
