@@ -137,10 +137,11 @@
     "conlang_info_1": "Como a nossa missão se concentra na documentação de línguas humanas naturais ameaçadas e minoritárias, não oferecemos suporte técnico para línguas construídas (conlangs) ou línguas artificiais. Devido à nossa pequena equipe e horário de funcionamento limitado, não oferecemos importações de dados para conlangs.",
     "conlang_info_2": "Os Dicionários Vivos para línguas construídas não serão tornados públicos em nosso site ou disponibilizados no mapa de nossa página inicial. Se encontrarmos conteúdo depreciativo neste Dicionário Vivo, também nos reservamos o direito de excluí-lo.",
     "agree_above": "Eu concordo com o acima.",
-    "agree_to_cite": "Concordo em citar quaisquer trabalhos relevantes publicados nas entradas do dicionário.",
+    "agree_to_cite": "Concordo em citar quaisquer trabalhos publicados relevantes nas entradas do dicionário.",
     "agree_for_non-commercial": "Concordo que este trabalho não é comercial.",
     "source_question": "De onde vieram os dados deste dicionário? Descreva se você mesmo coletou os dados. Se você usou alguma fonte de referência publicada, liste-a aqui.",
-    "use_question": "Quem usará este dicionário? Será usado em algum projeto educacional ou de mídia?"
+    "use_question": "Quem usará este dicionário? Será usado em algum projeto educacional ou de mídia?",
+    "conlang_warning": "Se este dicionário for para uma linguagem construída (ou artificial) e você não indicar isso, nos reservamos o direito de removê-lo."
   },
   "dictionary": {
     "latitude": "Latitude",
@@ -353,7 +354,7 @@
     "history": "História",
     "entry": "Entrada",
     "editor": "Editor",
-    "entry_history": "Histórico de entradas",
+    "entry_history": "Histórico de entrada",
     "field": "Campo",
     "date": "Data",
     "old_value": "Valor anterior",

@@ -173,6 +173,13 @@ Use: ${conlang_use.trim()}`
       </label>
       <div class="mb-6" />
 
+      {#if !conlang}
+        <div class="mb-3 font-semibold">
+          {$page.data.t('create.conlang_warning')}
+        </div>
+        <div class="mb-6" />
+      {/if}
+
       {#if conlang === true}
         <div class="mb-3 font-italic">
           {$page.data.t('create.conlang_info_1')}

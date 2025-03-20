@@ -143,7 +143,8 @@
     "agree_to_cite": "I agree to cite any relevant published works within dictionary entries.",
     "agree_for_non-commercial": "I agree that this work is non-commercial.",
     "source_question": "Where did the data in this dictionary come from? Please describe if you collected the data yourself. If you used any published reference sources, please list them here.",
-    "use_question": "Who will be using this dictionary? Will it be used in any educational or media projects?"
+    "use_question": "Who will be using this dictionary? Will it be used in any educational or media projects?",
+    "conlang_warning": "If this dictionary is for a constructed (or artificial) language, and you do not indicate that, we reserve the right to remove it."
   },
   "dictionary": {
     "latitude": "Latitude",

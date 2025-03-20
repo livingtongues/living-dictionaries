@@ -140,7 +140,8 @@
     "agree_to_cite": "Acepto citar cualquier trabajo publicado relevante dentro de las entradas del diccionario.",
     "agree_for_non-commercial": "Acepto que este trabajo no es para uso comercial.",
     "source_question": "¿De dónde provienen los datos de este diccionario? Describa si recopiló los datos usted mismo. Si utilizó alguna fuente de referencia publicada, indíquela aquí.",
-    "use_question": "¿Quién utilizará este diccionario? ¿Se utilizará en algún proyecto educativo o de medios de comunicación?"
+    "use_question": "¿Quién utilizará este diccionario? ¿Se utilizará en algún proyecto educativo o de medios de comunicación?",
+    "conlang_warning": "Si este diccionario es para un lenguaje construido (o artificial) y usted no lo indica, nos reservamos el derecho de eliminarlo."
   },
   "dictionary": {
     "latitude": "Latitud",
