@@ -140,7 +140,8 @@
     "agree_to_cite": "Tôi đồng ý trích dẫn mọi tác phẩm đã xuất bản có liên quan trong các mục từ điển.",
     "agree_for_non-commercial": "Tôi đồng ý rằng công việc này là phi thương mại.",
     "source_question": "Dữ liệu trong từ điển này đến từ đâu? Vui lòng mô tả nếu bạn tự mình thu thập dữ liệu. Nếu bạn sử dụng bất kỳ nguồn tham khảo nào đã được xuất bản, vui lòng liệt kê chúng ở đây.",
-    "use_question": "Ai sẽ sử dụng từ điển này? Nó sẽ được sử dụng trong bất kỳ dự án giáo dục hoặc truyền thông nào?"
+    "use_question": "Ai sẽ sử dụng từ điển này? Nó sẽ được sử dụng trong bất kỳ dự án giáo dục hoặc truyền thông nào?",
+    "conlang_warning": "Nếu từ điển này dành cho ngôn ngữ được xây dựng (hoặc nhân tạo) và bạn không chỉ ra điều đó, chúng tôi có quyền xóa nó."
   },
   "dictionary": {
     "latitude": "Vĩ độ",
