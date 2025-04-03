@@ -2,8 +2,8 @@
   import { page } from '$app/stores'
 
   export let border: boolean
+  export let on_file_added: (file: File) => void = undefined
   let dragging = false
-  let file: File
 
   function handleImage(files: FileList) {
     dragging = false
@@ -23,41 +23,37 @@
       )
     }
 
-    file = fileToCheck
+    on_file_added?.(fileToCheck)
   }
 </script>
 
-{#if !file}
-  <label
-    class:dragging
-    class:dashed-border={border}
-    class="{$$props.class} text-gray-600
-      h-full grow-1 flex flex-col items-center justify-center
-      cursor-pointer"
-    title="Add Photo"
-    on:drop|preventDefault={e => handleImage(e.dataTransfer.files)}
-    on:dragover|preventDefault={() => (dragging = true)}
-    on:dragleave|preventDefault={() => (dragging = false)}>
-    <input
-      type="file"
-      accept="image/*"
-      class="hidden"
-      on:input={(e) => {
-        // @ts-expect-error
-        handleImage(e.target.files)
-      }} />
-    <span class="hidden md:inline">
-      <span class="i-ic-outline-cloud-upload text-2xl" />
-    </span>
-    <span class="md:hidden">
-      <span class="i-ic-outline-camera-alt text-xl" />
-    </span>
+<label
+  class:dragging
+  class:dashed-border={border}
+  class="{$$props.class} text-gray-600
+    h-full grow-1 flex flex-col items-center justify-center
+    cursor-pointer"
+  title="Add Photo"
+  on:drop|preventDefault={e => handleImage(e.dataTransfer.files)}
+  on:dragover|preventDefault={() => (dragging = true)}
+  on:dragleave|preventDefault={() => (dragging = false)}>
+  <input
+    type="file"
+    accept="image/*"
+    class="hidden"
+    on:input={(e) => {
+      // @ts-expect-error
+      handleImage(e.target.files)
+    }} />
+  <span class="hidden md:inline">
+    <span class="i-ic-outline-cloud-upload text-2xl" />
+  </span>
+  <span class="md:hidden">
+    <span class="i-ic-outline-camera-alt text-xl" />
+  </span>
 
-    <slot name="label" />
-  </label>
-{:else}
-  <slot {file} />
-{/if}
+  <slot name="label" />
+</label>
 
 <style>
   .dragging {

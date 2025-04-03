@@ -8,7 +8,15 @@ export interface VideoUploadStatus {
   storage_path?: string
 }
 
-export function upload_video({ file, folder }: { file: File | Blob, folder: string }): Readable<VideoUploadStatus> {
+export function upload_video({
+  file,
+  folder,
+  on_success,
+}: {
+  file: File | Blob
+  folder: string
+  on_success?: () => void
+}): Readable<VideoUploadStatus> {
   const { set, subscribe } = writable<VideoUploadStatus>({ progress: 0 });
 
   (async () => {
@@ -20,11 +28,12 @@ export function upload_video({ file, folder }: { file: File | Blob, folder: stri
     if (error) {
       console.error(error)
       set({ progress: 0, error: error.message })
+    } else {
+      await upload_file(file, presigned_upload_url)
+
+      set({ progress: 100, storage_path: object_key })
+      on_success?.()
     }
-
-    await upload_file(file, presigned_upload_url)
-
-    set({ progress: 100, storage_path: object_key })
   })()
 
   function upload_file(file: File | Blob, url: string) {

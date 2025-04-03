@@ -18,10 +18,12 @@
   $: ({ photos, videos } = $page.data)
 
   $: first_sound_file = entry?.audios?.[0]
-  $: first_photo_id = entry?.senses?.[0].photo_ids?.[0]
-  $: first_photo = (first_photo_id && $photos.length) ? $photos.find(photo => photo.id === first_photo_id) : null
+  $: photo_ids = entry?.senses?.map(({ photo_ids }) => photo_ids).flat()
+  $: sense_photos = $photos.filter(photo => photo_ids.includes(photo.id))
   $: first_video_id = entry?.senses?.[0].video_ids?.[0]
   $: first_video = (first_video_id && $videos.length) ? $videos.find(video => video.id === first_video_id) : null
+// $: video_ids = entry?.senses?.map(({ video_ids }) => video_ids).flat()
+  // $: sense_videos = $videos.filter(video => video_ids.includes(video.id))
 </script>
 
 <div class="flex flex-col">
@@ -31,18 +33,19 @@
     {/await}
   {/if}
 
-  {#if first_photo}
+  {#each sense_photos as photo (photo.id)}
     <div
       class="w-full overflow-hidden rounded relative mb-2"
       style="height: 25vh;">
       <Image
         width={400}
         title={entry.main.lexeme.default}
-        gcs={first_photo.serving_url}
+        gcs={photo.serving_url}
         {can_edit}
-        on_delete_image={async () => await dbOperations.update_photo({ photo: { deleted: 'true' }, photo_id: first_photo_id })} />
+        on_delete_image={async () => await dbOperations.update_photo({ photo: { deleted: 'true' }, photo_id: photo.id })} />
     </div>
-  {:else if can_edit}
+  {/each}
+  {#if can_edit}
     <div class="h-20 bg-gray-100 hover:bg-gray-300 mb-2 flex flex-col">
       <AddImage upload_image={file => dbOperations.addImage({ file, sense_id: entry.senses[0].id })}>
         <div class="text-xs">
@@ -52,6 +55,7 @@
     </div>
   {/if}
 
+  <!-- {#each sense_videos as video (video.id)} -->
   {#if first_video}
     <div class="w-full overflow-hidden rounded relative mb-2">
       <Video
