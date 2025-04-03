@@ -4,6 +4,10 @@
   import { page } from '$app/stores'
 
   export let upload_status: Readable<ImageUploadStatus>
+  export let on_finish: () => void
+  $: if ($upload_status.storage_path) {
+    on_finish()
+  }
 </script>
 
 <div
