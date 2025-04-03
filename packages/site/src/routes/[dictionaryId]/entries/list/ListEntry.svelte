@@ -29,8 +29,8 @@
   $: updated_within_last_5_minutes = can_edit && new Date(entry.updated_at).getTime() > minutes_ago_in_ms(5)
 
   $: first_sense = entry.senses?.[0] || {} as SenseWithSentences
-  $: first_photo_id = first_sense.photo_ids?.[0]
-  $: first_photo = (first_photo_id && $photos.length) ? $photos.find(photo => photo.id === first_photo_id) : null
+  $: photo_ids = entry?.senses?.map(({ photo_ids }) => photo_ids).flat()
+  $: sense_photos = $photos.filter(photo => photo_ids.includes(photo.id))
   $: first_video_id = entry?.senses?.[0].video_ids?.[0]
   $: first_video = (first_video_id && $videos.length) ? $videos.find(video => video.id === first_video_id) : null
 </script>
@@ -151,14 +151,20 @@
       {/if}
     </ShowHide>
   {/if}
-  {#if first_photo}
+  <!-- {#each sense_photos as photo (photo.id)} -->
+
+  {#if sense_photos.length}
+    {@const [first_photo] = sense_photos}
     <div class="media-block bg-gray-300 relative">
       <Image
         square={128}
         title={entry.main.lexeme.default}
         gcs={first_photo.serving_url}
         {can_edit}
-        on_delete_image={() => dbOperations.update_photo({ photo: { deleted: 'true' }, photo_id: first_photo_id })} />
+        on_delete_image={() => dbOperations.update_photo({ photo: { deleted: 'true' }, photo_id: first_photo.id })} />
+      {#if sense_photos.length > 1}
+        <span class="i-fluent-image-stack-20-regular text-white absolute bottom-1 right-1 text-xl" />
+      {/if}
     </div>
   {:else if can_edit}
     <div class="w-12 bg-gray-100 flex flex-col">

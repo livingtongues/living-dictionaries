@@ -171,6 +171,8 @@
           update_entry({ elicitation_id: new_value })
         }} />
     {/if}
+
+    <!-- <div class="grow-1 order-last"></div> -->
   </div>
 </div>
 
@@ -179,6 +181,7 @@
       grid-template-columns: 3fr 1fr;
       grid-template-areas:
         'title media'
-        'content media';
+        'content media'
+        'here_to_push_title_and_content_up media';
     }
 </style>
