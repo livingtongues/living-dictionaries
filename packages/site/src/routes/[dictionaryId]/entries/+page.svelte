@@ -102,6 +102,7 @@
 </ShowHide>
 
 <SeoMetaTags
+  norobots={!dictionary.public}
   admin={$admin > 0}
   title="Entries"
   dictionaryName={dictionary.name}

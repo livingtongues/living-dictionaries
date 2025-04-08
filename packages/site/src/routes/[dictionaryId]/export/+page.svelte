@@ -137,6 +137,7 @@
 {/if}
 
 <SeoMetaTags
+  norobots={!dictionary.public}
   title={$page.data.t('misc.export')}
   dictionaryName={dictionary.name}
   description="Dictionary managers can easily export their Living Dictionary\'s text data as a .CSV spreadsheet as well as export their images and audio files in convenient ZIP folders."

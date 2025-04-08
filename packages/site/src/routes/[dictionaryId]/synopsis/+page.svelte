@@ -44,6 +44,7 @@
 </div>
 
 <SeoMetaTags
+  norobots={!dictionary.public}
   title={$page.data.t('synopsis.name')}
   dictionaryName={name}
   description="View the parameters of this Living Dictionary, such as its name, ISO 639-3 Code, Glottocode, the translation languages present within this dictionary, the alternate names for this language, the geo-coordinates for this language, and more."
