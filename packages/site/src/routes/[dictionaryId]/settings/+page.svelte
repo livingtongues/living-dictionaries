@@ -140,6 +140,7 @@
 </div>
 
 <SeoMetaTags
+  norobots={!dictionary.public}
   title={$page.data.t('misc.settings')}
   dictionaryName={dictionary.name}
   description="Under Settings, dictionary managers can edit the dictionary\'s parameters such as its name, ISO 639-3 Code, Glottocode, translation languages, alternate names, geo-coordinates, and other information. They can also toggle on or off the ability to make the dictionary public, and the ability to make the dictionary printable to viewers."

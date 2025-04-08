@@ -50,6 +50,7 @@
 </div>
 
 <SeoMetaTags
+  norobots={!dictionary.public}
   title={$page.data.t('dictionary.grammar')}
   dictionaryName={dictionary.name}
   description="Learn about the grammar of the language in this Living Dictionary."

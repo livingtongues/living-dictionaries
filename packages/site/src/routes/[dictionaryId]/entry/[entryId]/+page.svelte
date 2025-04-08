@@ -80,6 +80,7 @@
   {dbOperations} />
 
 <SeoMetaTags
+  norobots={!dictionary.public}
   imageTitle={entry.main.lexeme.default}
   imageDescription={seo_description({ entry, dialects: $dialects, gloss_languages: dictionary.gloss_languages, t: $page.data.t })}
   dictionaryName={dictionary.name}

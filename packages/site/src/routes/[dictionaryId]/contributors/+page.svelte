@@ -204,6 +204,7 @@
 <div class="mb-12" />
 
 <SeoMetaTags
+  norobots={!dictionary.public}
   title={$page.data.t('dictionary.contributors')}
   dictionaryName={dictionary.name}
   description="Learn about the people who are building and managing this Living Dictionary."
