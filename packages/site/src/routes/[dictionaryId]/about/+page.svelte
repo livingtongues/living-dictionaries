@@ -52,6 +52,7 @@
 </div>
 
 <SeoMetaTags
+  norobots={!dictionary.public}
   title={$page.data.t('header.about')}
   dictionaryName={dictionary.name}
   description="Learn about the background and creation of this Living Dictionary."
