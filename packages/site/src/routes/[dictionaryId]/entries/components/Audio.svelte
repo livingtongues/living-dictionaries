@@ -1,14 +1,15 @@
 <script lang="ts">
   import { ShowHide, longpress } from 'svelte-pieces'
-  import type { EntryView } from '@living-dictionaries/types'
+  import type { AudioWithSpeakerIds, EntryView } from '@living-dictionaries/types'
   import { page } from '$app/stores'
 
   export let entry: EntryView
   export let context: 'list' | 'table' | 'entry'
+  export let sound_file: AudioWithSpeakerIds = undefined
   export let can_edit = false
   $: ({ url_from_storage_path } = $page.data)
 
-  $: sound_file = entry.audios?.[0]
+  // $: sound_file = entry.audios?.[0]
 
   let playing = false
 
@@ -73,7 +74,7 @@
 
   {#if show}
     {#await import('$lib/components/audio/EditAudio.svelte') then { default: EditAudio }}
-      <EditAudio {entry} sound_file={sound_file} on_close={toggle} />
+      <EditAudio {entry} {sound_file} on_close={toggle} />
     {/await}
   {/if}
 </ShowHide>

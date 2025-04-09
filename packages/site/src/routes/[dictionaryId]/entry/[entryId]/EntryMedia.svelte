@@ -17,7 +17,7 @@
 
   $: ({ photos, videos } = $page.data)
 
-  $: first_sound_file = entry?.audios?.[0]
+  // $: first_sound_file = entry?.audios?.[0]
   $: photo_ids = entry?.senses?.map(({ photo_ids }) => photo_ids).flat()
   $: sense_photos = $photos.filter(photo => photo_ids.includes(photo.id))
   $: first_video_id = entry?.senses?.[0].video_ids?.[0]
@@ -27,9 +27,15 @@
 </script>
 
 <div class="flex flex-col">
-  {#if first_sound_file || can_edit}
+  {#if entry.audios?.length > 0 || can_edit}
     {#await import('../../entries/components/Audio.svelte') then { default: Audio }}
-      <Audio {entry} {can_edit} context="entry" class="h-20 mb-2 rounded-md bg-gray-100 !px-3" />
+      {#if entry.audios?.length > 0}
+        {#each entry.audios as sound_file}
+          <Audio {entry} {sound_file} {can_edit} context="entry" class="h-20 mb-2 rounded-md bg-gray-100 !px-3" />
+        {/each}
+      {:else}
+        <Audio {entry} {can_edit} context="entry" class="h-20 mb-2 rounded-md bg-gray-100 !px-3" />
+      {/if}
     {/await}
   {/if}
 
