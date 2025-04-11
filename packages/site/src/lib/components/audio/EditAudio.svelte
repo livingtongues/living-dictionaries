@@ -10,6 +10,7 @@
   export let on_close: () => void
   export let entry: EntryView
   export let sound_file: AudioWithSpeakerIds
+  let upload_triggered = false
   $: ({ admin, dbOperations, url_from_storage_path } = $page.data)
   let readyToRecord: boolean
 
@@ -22,6 +23,11 @@
   }
 
   $: initial_speaker_id = sound_file?.speaker_ids?.[0]
+
+  function startUpload(speaker_id: string) {
+    upload_triggered = true
+    return dbOperations.addAudio({ file: file || audioBlob, entry_id: entry.id, speaker_id })
+  }
 
   async function select_speaker(new_speaker_id: string) {
     if (!sound_file) return
@@ -52,11 +58,26 @@
           <Waveform {audioBlob} />
         {/if}
         <div class="mb-3" />
-        {#if file || audioBlob}
-          {@const upload_status = dbOperations.addAudio({ file: file || audioBlob, entry_id: entry.id, speaker_id })}
+        {#if !upload_triggered && (file || audioBlob)}
+          {@const upload_status = startUpload(speaker_id)}
           {#await import('$lib/components/audio/UploadProgressBarStatus.svelte') then { default: UploadProgressBarStatus }}
             <UploadProgressBarStatus {upload_status} />
           {/await}
+
+          <!-- {#await (async () => {
+            upload_triggered = true // Mark upload as triggered
+            return await dbOperations.addAudio({ file: file || audioBlob, entry_id: entry.id, speaker_id })
+          })() then upload_status}
+            {#await import('$lib/components/audio/UploadProgressBarStatus.svelte') then { default: UploadProgressBarStatus }}
+              <UploadProgressBarStatus
+                {upload_status}
+                on:complete={() => {
+                  upload_triggered = false // Reset upload state
+                  file = undefined
+                  audioBlob = undefined
+                }} />
+            {/await}
+          {/await} -->
         {/if}
       {:else}
         <div class="flex flex-col">

@@ -27,14 +27,17 @@
 </script>
 
 <div class="flex flex-col">
+  {#await import('../../entries/components/Audio.svelte') then { default: Audio }}
+    <Audio {entry} {can_edit} context="entry" class="h-20 mb-2 rounded-md bg-gray-100 !px-3" />
+  {/await}
   {#if entry.audios?.length > 0 || can_edit}
     {#await import('../../entries/components/Audio.svelte') then { default: Audio }}
       {#if entry.audios?.length > 0}
         {#each entry.audios as sound_file}
           <Audio {entry} {sound_file} {can_edit} context="entry" class="h-20 mb-2 rounded-md bg-gray-100 !px-3" />
         {/each}
-      {:else}
-        <Audio {entry} {can_edit} context="entry" class="h-20 mb-2 rounded-md bg-gray-100 !px-3" />
+        <!-- {:else}
+        <Audio {entry} {can_edit} context="entry" class="h-20 mb-2 rounded-md bg-gray-100 !px-3" /> -->
       {/if}
     {/await}
   {/if}
