@@ -106,7 +106,12 @@
       </Button>
       <div class="w-1" />
 
-      <Button onclick={async () => await dbOperations.upsert_audio({ audio: { deleted: 'true' }, audio_id: sound_file.id, refresh_entry: true })} color="red">
+      <Button
+        onclick={async () => {
+          await dbOperations.upsert_audio({ audio: { deleted: 'true' }, audio_id: sound_file.id, refresh_entry: true })
+          on_close()
+        }}
+        color="red">
         <i class="far fa-trash-alt" />&nbsp;
         <span class="hidden sm:inline">{$page.data.t('misc.delete')}</span>
       </Button>
