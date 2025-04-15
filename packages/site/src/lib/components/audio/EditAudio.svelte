@@ -1,6 +1,8 @@
 <script lang="ts">
   import { Button, JSON, Modal } from 'svelte-pieces'
   import type { AudioWithSpeakerIds, EntryView } from '@living-dictionaries/types'
+  import type { Readable } from 'svelte/motion'
+  import type { AudioVideoUploadStatus } from './upload-audio'
   import { page } from '$app/stores'
   import Waveform from '$lib/components/audio/Waveform.svelte'
   import SelectAudio from '$lib/components/audio/SelectAudio.svelte'
@@ -24,9 +26,21 @@
 
   $: initial_speaker_id = sound_file?.speaker_ids?.[0]
 
-  function startUpload(speaker_id: string) {
-    upload_triggered = true
-    return dbOperations.addAudio({ file: file || audioBlob, entry_id: entry.id, speaker_id })
+  function startUpload(speaker_id: string): Readable<AudioVideoUploadStatus> {
+    const uploadStore = dbOperations.addAudio({
+      file: file || audioBlob,
+      entry_id: entry.id,
+      speaker_id,
+    })
+
+    const unsubscribe = uploadStore.subscribe((status) => {
+      if (status?.progress === 100) {
+        upload_triggered = true
+        unsubscribe()
+      }
+    })
+
+    return uploadStore
   }
 
   async function select_speaker(new_speaker_id: string) {
@@ -63,21 +77,6 @@
           {#await import('$lib/components/audio/UploadProgressBarStatus.svelte') then { default: UploadProgressBarStatus }}
             <UploadProgressBarStatus {upload_status} />
           {/await}
-
-          <!-- {#await (async () => {
-            upload_triggered = true // Mark upload as triggered
-            return await dbOperations.addAudio({ file: file || audioBlob, entry_id: entry.id, speaker_id })
-          })() then upload_status}
-            {#await import('$lib/components/audio/UploadProgressBarStatus.svelte') then { default: UploadProgressBarStatus }}
-              <UploadProgressBarStatus
-                {upload_status}
-                on:complete={() => {
-                  upload_triggered = false // Reset upload state
-                  file = undefined
-                  audioBlob = undefined
-                }} />
-            {/await}
-          {/await} -->
         {/if}
       {:else}
         <div class="flex flex-col">
