@@ -1,6 +1,8 @@
 <script lang="ts">
   import { Button, JSON, Modal } from 'svelte-pieces'
   import type { AudioWithSpeakerIds, EntryView } from '@living-dictionaries/types'
+  import type { Readable } from 'svelte/motion'
+  import type { AudioVideoUploadStatus } from './upload-audio'
   import { page } from '$app/stores'
   import Waveform from '$lib/components/audio/Waveform.svelte'
   import SelectAudio from '$lib/components/audio/SelectAudio.svelte'
@@ -10,6 +12,7 @@
   export let on_close: () => void
   export let entry: EntryView
   export let sound_file: AudioWithSpeakerIds
+  let upload_triggered = false
   $: ({ admin, dbOperations, url_from_storage_path } = $page.data)
   let readyToRecord: boolean
 
@@ -22,6 +25,23 @@
   }
 
   $: initial_speaker_id = sound_file?.speaker_ids?.[0]
+
+  function startUpload(speaker_id: string): Readable<AudioVideoUploadStatus> {
+    const uploadStore = dbOperations.addAudio({
+      file: file || audioBlob,
+      entry_id: entry.id,
+      speaker_id,
+    })
+
+    const unsubscribe = uploadStore.subscribe((status) => {
+      if (status?.progress === 100) {
+        upload_triggered = true
+        unsubscribe()
+      }
+    })
+
+    return uploadStore
+  }
 
   async function select_speaker(new_speaker_id: string) {
     if (!sound_file) return
@@ -52,8 +72,8 @@
           <Waveform {audioBlob} />
         {/if}
         <div class="mb-3" />
-        {#if file || audioBlob}
-          {@const upload_status = dbOperations.addAudio({ file: file || audioBlob, entry_id: entry.id, speaker_id })}
+        {#if !upload_triggered && (file || audioBlob)}
+          {@const upload_status = startUpload(speaker_id)}
           {#await import('$lib/components/audio/UploadProgressBarStatus.svelte') then { default: UploadProgressBarStatus }}
             <UploadProgressBarStatus {upload_status} />
           {/await}
@@ -86,7 +106,12 @@
       </Button>
       <div class="w-1" />
 
-      <Button onclick={async () => await dbOperations.upsert_audio({ audio: { deleted: 'true' }, audio_id: sound_file.id, refresh_entry: true })} color="red">
+      <Button
+        onclick={async () => {
+          await dbOperations.upsert_audio({ audio: { deleted: 'true' }, audio_id: sound_file.id, refresh_entry: true })
+          on_close()
+        }}
+        color="red">
         <i class="far fa-trash-alt" />&nbsp;
         <span class="hidden sm:inline">{$page.data.t('misc.delete')}</span>
       </Button>
