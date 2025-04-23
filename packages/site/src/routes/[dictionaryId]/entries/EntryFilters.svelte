@@ -38,7 +38,7 @@
         <input
           class="w-full"
           type="range"
-          value={$search_params.tolerance || 1}
+          value={$search_params.tolerance || 0}
           on:input={(e) => {
             // @ts-ignore
             const { value } = e.target
