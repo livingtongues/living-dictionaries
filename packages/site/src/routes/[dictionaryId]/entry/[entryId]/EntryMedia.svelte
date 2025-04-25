@@ -17,18 +17,20 @@
 
   $: ({ photos, videos } = $page.data)
 
-  $: first_sound_file = entry?.audios?.[0]
   $: photo_ids = entry?.senses?.map(({ photo_ids }) => photo_ids).flat()
   $: sense_photos = $photos.filter(photo => photo_ids.includes(photo.id))
-  $: first_video_id = entry?.senses?.[0].video_ids?.[0]
-  $: first_video = (first_video_id && $videos.length) ? $videos.find(video => video.id === first_video_id) : null
-// $: video_ids = entry?.senses?.map(({ video_ids }) => video_ids).flat()
-  // $: sense_videos = $videos.filter(video => video_ids.includes(video.id))
+  $: video_ids = entry?.senses?.map(({ video_ids }) => video_ids).flat()
+  $: sense_videos = $videos.filter(video => video_ids.includes(video.id))
 </script>
 
 <div class="flex flex-col">
-  {#if first_sound_file || can_edit}
+  {#if entry.audios?.length > 0 || can_edit}
     {#await import('../../entries/components/Audio.svelte') then { default: Audio }}
+      {#if entry.audios?.length > 0}
+        {#each entry.audios as sound_file}
+          <Audio {entry} {sound_file} {can_edit} context="entry" class="h-20 mb-2 rounded-md bg-gray-100 !px-3" />
+        {/each}
+      {/if}
       <Audio {entry} {can_edit} context="entry" class="h-20 mb-2 rounded-md bg-gray-100 !px-3" />
     {/await}
   {/if}
@@ -55,16 +57,16 @@
     </div>
   {/if}
 
-  <!-- {#each sense_videos as video (video.id)} -->
-  {#if first_video}
+  {#each sense_videos as video (video.id)}
     <div class="w-full overflow-hidden rounded relative mb-2">
       <Video
         class="bg-gray-100 p-3 border-r-2"
         lexeme={entry.main.lexeme.default}
-        video={first_video}
+        {video}
         {can_edit} />
     </div>
-  {:else if can_edit}
+  {/each}
+  {#if can_edit}
     <ShowHide let:show let:toggle>
       <button
         type="button"

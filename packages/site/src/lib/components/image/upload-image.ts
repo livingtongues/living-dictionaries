@@ -55,7 +55,7 @@ export function upload_image({
         if (event.lengthComputable) {
           const progress = Math.round((event.loaded / event.total) * 100)
           console.info(`Upload progress: ${progress}%`)
-          set({ preview_url, progress })
+          set({ preview_url, progress: Math.min(progress, 99) })
         }
       })
 
