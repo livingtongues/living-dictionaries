@@ -19,8 +19,6 @@
 
   $: photo_ids = entry?.senses?.map(({ photo_ids }) => photo_ids).flat()
   $: sense_photos = $photos.filter(photo => photo_ids.includes(photo.id))
-  // $: first_video_id = entry?.senses?.[0].video_ids?.[0]
-  // $: first_video = (first_video_id && $videos.length) ? $videos.find(video => video.id === first_video_id) : null
   $: video_ids = entry?.senses?.map(({ video_ids }) => video_ids).flat()
   $: sense_videos = $videos.filter(video => video_ids.includes(video.id))
 </script>
@@ -33,11 +31,9 @@
           <Audio {entry} {sound_file} {can_edit} context="entry" class="h-20 mb-2 rounded-md bg-gray-100 !px-3" />
         {/each}
       {/if}
+      <Audio {entry} {can_edit} context="entry" class="h-20 mb-2 rounded-md bg-gray-100 !px-3" />
     {/await}
   {/if}
-  {#await import('../../entries/components/Audio.svelte') then { default: Audio }}
-    <Audio {entry} {can_edit} context="entry" class="h-20 mb-2 rounded-md bg-gray-100 !px-3" />
-  {/await}
 
   {#each sense_photos as photo (photo.id)}
     <div
