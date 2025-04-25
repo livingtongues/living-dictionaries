@@ -44,7 +44,7 @@ export function upload_audio({
         if (event.lengthComputable) {
           const progress = Math.round((event.loaded / event.total) * 100)
           console.info(`Upload progress: ${progress}%`)
-          set({ progress })
+          set({ progress: Math.min(progress, 99) })
         }
       })
 

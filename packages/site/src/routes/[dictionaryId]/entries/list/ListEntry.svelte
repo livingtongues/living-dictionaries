@@ -41,7 +41,7 @@
   class="flex rounded shadow my-1 overflow-hidden items-stretch border-green-300"
   style="margin-right: 2px;">
   {#if entry.audios?.[0] || can_edit}
-    <Audio class="bg-gray-100 py-1.5 px-1 min-w-55px w-55px" {entry} {can_edit} context="list" />
+    <Audio class="bg-gray-100 py-1.5 px-1 min-w-55px w-55px" {entry} sound_file={entry.audios?.[0] || null} {can_edit} context="list" />
   {/if}
   <a
     href="/{dictionary.url}/entry/{entry.id}"

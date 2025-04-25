@@ -45,7 +45,7 @@
   class:sompeng={column.display === 'Sompeng'}
   class="h-full w-full flex cell">
   {#if column.field === 'audio'}
-    <Audio class="h-full text-sm" context="table" {can_edit} {entry} />
+    <Audio class="h-full text-sm" context="table" {can_edit} sound_file={entry.audios?.[0] || null} {entry} />
   {:else if column.field === 'photo'}
     {#if first_photo}
       <Image
