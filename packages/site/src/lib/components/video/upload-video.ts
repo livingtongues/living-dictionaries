@@ -45,7 +45,7 @@ export function upload_video({
         if (event.lengthComputable) {
           const progress = Math.round((event.loaded / event.total) * 100)
           console.info(`Upload progress: ${progress}%`)
-          set({ progress })
+          set({ progress: Math.min(progress, 99) })
         }
       })
 
