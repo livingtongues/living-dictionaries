@@ -30,7 +30,7 @@ export function get_sense_headers(entries: ReturnType<typeof translate_entries>)
         ...get_noun_class(sense.noun_class, { sense_index, position: 'header' }),
         ...get_variant(sense.variant, { sense_index, position: 'header' }),
         ...get_plural_form(sense.plural_form, { sense_index, position: 'header' }),
-        ...get_image_files(sense?.photo_ids?.[0], { sense_index, position: 'header' }),
+        ...get_image_files(sense?.photo_urls?.[0], { sense_index, position: 'header' }),
         ...(sense.sentences ? get_example_sentence(sense.sentences[0], { sense_index, position: 'header' }) : {}),
       }
     }

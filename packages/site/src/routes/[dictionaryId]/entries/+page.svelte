@@ -1,35 +1,34 @@
 <script lang="ts">
   import { Button, ShowHide } from 'svelte-pieces'
-  import type { EntryView } from '@living-dictionaries/types'
   import type { FacetResult } from '@orama/orama'
   import Pagination from './Pagination.svelte'
   import SwitchView from './SwitchView.svelte'
   import EntryFilters from './EntryFilters.svelte'
   import SearchInput from './SearchInput.svelte'
   import View from './View.svelte'
-  import type { QueryParams } from '$lib/search/types'
+  import type { EntryData, QueryParams } from '$lib/search/types'
   import { page } from '$app/stores'
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte'
   import { browser, dev } from '$app/environment'
 
   export let data
-  $: ({ entries, admin, search_entries, default_entries_per_page, search_params, dictionary, can_edit, dbOperations, reset_caches } = data)
-  $: ({ loading, updated_item, search_index_updated, error: entries_error } = entries)
+  $: ({ entries_data, admin, search_entries, default_entries_per_page, search_params, dictionary, can_edit, dbOperations, reset_caches, search_index_updated } = data)
+  $: ({ loading, error: entries_error } = entries_data)
 
-  let page_entries: EntryView[] = []
+  let page_entries: EntryData[] = []
 
   $: current_page_index = $search_params.page - 1 || 0
   $: entries_per_page = $search_params.entries_per_page || default_entries_per_page
   let search_time: string
   let search_results_count: number
   $: number_of_pages = (() => {
-    const count = search_results_count ?? $entries.length
+    const count = search_results_count ?? $entries_data.length
     if (!count) return 0
     return Math.ceil(count / entries_per_page)
   })()
   let result_facets: FacetResult
 
-  $: if (browser || $updated_item || $search_index_updated) {
+  $: if (browser || $search_index_updated) {
     search($search_params, current_page_index)
   }
 
@@ -44,7 +43,7 @@
       search_results_count = count
       search_time = formatted
       console.info({ facets, hits, count })
-      page_entries = hits.map(hit => hit.document) as unknown as EntryView[]
+      page_entries = hits.map(hit => hit.document) as unknown as EntryData[]
     } catch (err) {
       console.error(err)
     }
@@ -72,7 +71,7 @@
           {:else}
             {$page.data.t('dictionary.entries')}:
             0 /
-            {$entries.length}
+            {$entries_data.length}
           {/if}
           {#if dev || $admin}
             <div class="grow"></div>

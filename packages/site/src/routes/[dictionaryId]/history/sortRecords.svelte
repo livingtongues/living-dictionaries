@@ -1,11 +1,12 @@
 <script lang="ts">
-  import type { EntryView, Tables } from '@living-dictionaries/types'
+  import type { Tables } from '@living-dictionaries/types'
   import { sortedColumn } from './sortedColumnStore'
   import { HistoryFields } from './historyFields'
   import { page } from '$app/stores'
+  import type { EntryData } from '$lib/search/types'
 
   export let history: Tables<'content_updates'>[] = []
-  export let get_entry: (record: Tables<'content_updates'>) => EntryView
+  export let get_entry: (record: Tables<'content_updates'>) => EntryData
 
   type SortFields = keyof typeof HistoryFields
   // @ts-ignore

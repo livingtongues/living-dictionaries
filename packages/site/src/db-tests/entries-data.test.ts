@@ -2,7 +2,7 @@
 import { get as getStore } from 'svelte/store'
 import type { Database } from '@living-dictionaries/types'
 import { createClient } from '@supabase/supabase-js'
-import { PUBLIC_SUPABASE_ANON_KEY, PUBLIC_SUPABASE_API_URL, SUPABASE_SERVICE_ROLE_KEY } from './clients'
+import { PASSWORD, PUBLIC_SUPABASE_ANON_KEY, PUBLIC_SUPABASE_API_URL, SUPABASE_SERVICE_ROLE_KEY, incremental_consistent_uuid, reset_db_sql } from './clients'
 import { postgres } from '$lib/mocks/seed/postgres'
 import { create_entries_data_store } from '$lib/supabase/entries-data-store'
 
@@ -25,12 +25,6 @@ vi.mock('idb-keyval', () => {
   }
 })
 
-function incremental_consistent_uuid(index: number) {
-  return '22222222-2222-2222-2222-222222222222'.slice(0, -6) + (index).toString().padStart(6, '0')
-}
-
-const reset_db_sql = `truncate table auth.users cascade;`
-
 function wait_for_entries_data(_entries_data: ReturnType<typeof create_entries_data_store>) {
   return new Promise((r) => {
     const unsub = _entries_data.loading.subscribe((loading) => {
@@ -47,9 +41,6 @@ describe(create_entries_data_store, () => {
 
   const USER_1_ID = incremental_consistent_uuid(0) // crypto.randomUUID()
   const USER_1_EMAIL = `user1-${USER_1_ID}@test.com`
-  const USER_2_ID = incremental_consistent_uuid(1)
-  const USER_2_EMAIL = `user2-${USER_2_ID}@test.com`
-  const PASSWORD = 'password123'
   const dictionary_id = incremental_consistent_uuid(1) // crypto.randomUUID()
   const ENTRY_1_ID = incremental_consistent_uuid(0)
   const ENTRY_2_ID = incremental_consistent_uuid(1)
@@ -64,13 +55,6 @@ describe(create_entries_data_store, () => {
       // @ts-expect-error
       id: USER_1_ID,
       email: USER_1_EMAIL,
-      password: PASSWORD,
-      email_confirm: true,
-    })
-    await admin_supabase.auth.admin.createUser({
-      // @ts-expect-error
-      id: USER_2_ID,
-      email: USER_2_EMAIL,
       password: PASSWORD,
       email_confirm: true,
     })

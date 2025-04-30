@@ -1,9 +1,10 @@
-import { error, redirect } from '@sveltejs/kit'
+import { redirect } from '@sveltejs/kit'
 import { get, readable } from 'svelte/store'
 import type { Tables } from '@living-dictionaries/types'
 import { ResponseCodes } from '$lib/constants'
 import { ENTRY_UPDATED_LOAD_TRIGGER } from '$lib/dbOperations'
 import { browser } from '$app/environment'
+import type { EntryData } from '$lib/search/types.js'
 
 export async function load({ params: { entryId: entry_id }, depends, parent }) {
   depends(ENTRY_UPDATED_LOAD_TRIGGER)
@@ -24,9 +25,9 @@ export async function load({ params: { entryId: entry_id }, depends, parent }) {
   })
 
   if (browser) {
-    const { entries } = await parent()
-    if (!get(entries.loading)) {
-      const entry = get(entries).find(entry => entry.id === entry_id)
+    const { entries_data } = await parent()
+    if (!get(entries_data.loading)) {
+      const entry = get(entries_data).find(entry => entry.id === entry_id)
 
       if (entry) {
         return {
@@ -38,31 +39,12 @@ export async function load({ params: { entryId: entry_id }, depends, parent }) {
     }
   }
 
-  const { supabase, dictionary } = await parent()
-  let entry: Tables<'entries_view'>
+  const entry = { senses: [{}] } as EntryData // TODO: load this in
 
-  const { data: entries, error: load_error } = await supabase
-    .rpc('entry_by_id', {
-      passed_entry_id: entry_id,
-    })
-
-  if (!load_error) {
-    [entry] = entries
-  } else {
-    const { data: materialized_entries, error: materialized_load_error } = await supabase
-      .from('materialized_entries_view')
-      .select()
-      .eq('id', entry_id)
-
-    if (materialized_load_error) {
-      error(ResponseCodes.INTERNAL_SERVER_ERROR, materialized_load_error)
-    }
-
-    [entry] = materialized_entries
-  }
-
-  if (!entry || entry.deleted)
+  if (!entry || entry.deleted) {
+    const { dictionary } = await parent()
     redirect(ResponseCodes.MOVED_PERMANENTLY, `/${dictionary.id}`)
+  }
 
   return {
     entry,

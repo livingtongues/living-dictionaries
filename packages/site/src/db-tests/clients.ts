@@ -10,3 +10,9 @@ export const admin_supabase = createClient<Database>(PUBLIC_SUPABASE_API_URL, SU
 export const anon_supabase = createClient<Database>(PUBLIC_SUPABASE_API_URL, PUBLIC_SUPABASE_ANON_KEY)
 
 export const uuid_template = '11111111-1111-1111-1111-111111111111'
+
+export function incremental_consistent_uuid(index: number) {
+  return '22222222-2222-2222-2222-222222222222'.slice(0, -6) + (index).toString().padStart(6, '0')
+}
+export const reset_db_sql = `truncate table auth.users cascade;`
+export const PASSWORD = 'password123'

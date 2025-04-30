@@ -1,14 +1,14 @@
-import type { EntryView } from '@living-dictionaries/types'
 import { create, insertMultiple, load, remove, update } from '@orama/orama'
 import { expose } from 'comlink'
 import { augment_entry_for_search } from './augment-entry-for-search'
 import { type EntriesIndex, entries_index_schema } from './entries-schema'
 import { type SearchEntriesOptions, search_entries } from './search-entries'
 import { createMultilingualTokenizer } from './multilingual-tokenizer'
+import type { EntryData } from './types'
 
 let orama_index: Record<string, EntriesIndex>
 
-async function create_index(entries: EntryView[], dictionary_id: string) {
+async function create_index(entries: EntryData[], dictionary_id: string) {
   console.time('Augment Entries Time')
   const entries_augmented_for_search = entries.map(augment_entry_for_search)
   console.timeEnd('Augment Entries Time')
@@ -64,12 +64,12 @@ async function load_cached_index(dictionary_id: string) {
   }
 }
 
-// async function update_index_entries(entries: EntryView[]) {
+// async function update_index_entries(entries: EntryData[]) {
 //   const index = await get_index()
 //   await updateMultiple(index, entries.map(({ id }) => id), entries.map(augment_entry_for_search))
 // }
 
-async function update_index_entry(entry: EntryView, dictionary_id: string) {
+async function update_index_entry(entry: EntryData, dictionary_id: string) {
   const index = await get_index(dictionary_id)
   if (entry.deleted)
     await remove(index, entry.id)

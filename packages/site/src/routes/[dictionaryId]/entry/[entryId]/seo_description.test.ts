@@ -1,24 +1,24 @@
-import type { PartialEntryView } from '@living-dictionaries/types/supabase/entry.interface'
-import type { Tables } from '@living-dictionaries/types'
+import type { DeepPartial } from 'kitbook'
 import { seo_description } from './seo_description'
 import { english_translate } from '$lib/i18n'
+import type { EntryData } from '$lib/search/types'
 
 describe('seo_description', () => {
   const t = english_translate
 
   test('prints simple labeled english and spanish glosses', () => {
-    const entry: PartialEntryView = {
+    const entry: DeepPartial<EntryData> = {
       senses: [{
         glosses: { en: 'hello', es: 'hola' },
       }],
     }
     const gloss_languages = ['es']
-    const result = seo_description({ entry, gloss_languages, t, dialects: [] })
+    const result = seo_description({ entry, gloss_languages, t })
     expect(result).toMatchInlineSnapshot('"Spanish: hola, English: hello"')
   })
 
   test('properly orders glosses according to dictionary gloss languages order', () => {
-    const entry: PartialEntryView = {
+    const entry: DeepPartial<EntryData> = {
       senses: [{
         glosses: {
           en: 'goats',
@@ -34,12 +34,12 @@ describe('seo_description', () => {
       }],
     }
     const gloss_languages = ['hi', 'or', 'as', 'en', 'fr', 'es', 'it', 'de', 'pt']
-    const result = seo_description({ entry, gloss_languages, t, dialects: [] })
+    const result = seo_description({ entry, gloss_languages, t })
     expect(result).toMatchInlineSnapshot('"Hindi: बकरियाँ, Oriya: ଛେଳି ଗୁଡିକ, Assamese: ছাগল কেইতা, English: goats, French: chèvres, Spanish: cabras, Italian: capre, German: Ziegen, Portuguese: cabras"')
   })
 
   test('places local orthographies before glosses', () => {
-    const entry: PartialEntryView = {
+    const entry: DeepPartial<EntryData> = {
       main: {
         lexeme: {
           lo1: 'امتحان',
@@ -54,12 +54,12 @@ describe('seo_description', () => {
       }],
     }
     const no_gloss_languages = []
-    const result = seo_description({ entry, gloss_languages: no_gloss_languages, t, dialects: [] })
+    const result = seo_description({ entry, gloss_languages: no_gloss_languages, t })
     expect(result).toMatchInlineSnapshot('"امتحان, Ölçek, परीक्षा, 시험, מִבְחָן, English: test"')
   })
 
   test('handles local orthagraphies, phonetic, glosses, parts of speech, and dialect', () => {
-    const entry: PartialEntryView = {
+    const entry: DeepPartial<EntryData> = {
       main: {
         lexeme: {
           lo1: 'আৰচি',
@@ -71,10 +71,10 @@ describe('seo_description', () => {
         glosses: { or: 'କଳା ମୁହାଁ ମାଙ୍କଡ', as: 'ক’লা মুখ\'ৰ বান্দৰ', en: 'black faced monkey' },
         parts_of_speech: ['n', 'adj'],
       }],
-      dialect_ids: ['1'],
+      dialects: [{ id: '1', name: { default: 'West Bengal Sabar' } }],
     }
     const gloss_languages = ['as', 'en', 'or', 'hi']
-    const result = seo_description({ entry, gloss_languages, t, dialects: [{ id: '1', name: { default: 'West Bengal Sabar' } } as unknown as Tables<'dialects'>] })
+    const result = seo_description({ entry, gloss_languages, t })
     expect(result).toMatchInlineSnapshot(
       '"আৰচি, 𑃢𑃝𑃐𑃤, [arsi], n., adj., Assamese: ক’লা মুখ\'ৰ বান্দৰ, English: black faced monkey, Oriya: କଳା ମୁହାଁ ମାଙ୍କଡ, West Bengal Sabar"',
     )
@@ -82,7 +82,7 @@ describe('seo_description', () => {
 
   test('handles no gloss field', () => {
     const gloss_languages = ['en']
-    const result = seo_description({ entry: { main: { lexeme: { default: 'foo' } } }, gloss_languages, t, dialects: [] })
+    const result = seo_description({ entry: { main: { lexeme: { default: 'foo' } } }, gloss_languages, t })
     expect(result).toEqual('')
   })
 })

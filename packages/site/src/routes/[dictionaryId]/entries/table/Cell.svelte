@@ -1,8 +1,6 @@
 <script lang="ts">
   import type {
-    EntryView,
     IColumn,
-    SenseWithSentences,
     TablesUpdate,
   } from '@living-dictionaries/types'
   import Audio from '../components/Audio.svelte'
@@ -17,21 +15,15 @@
   import type { DbOperations } from '$lib/dbOperations'
   import AddImage from '$lib/components/image/AddImage.svelte'
   import EntryTag from '$lib/components/entry/EntryTag.svelte'
+  import type { EntryData } from '$lib/search/types'
 
   export let column: IColumn
-  export let entry: EntryView
+  export let entry: EntryData
   export let can_edit = false
   export let dbOperations: DbOperations
 
-  $: ({ photos, sentences } = $page.data)
-
-  $: sense = entry.senses?.[0] || ({} as SenseWithSentences)
-
-  $: first_photo_id = entry?.senses?.[0].photo_ids?.[0]
-  $: first_photo
-    = first_photo_id && $photos.length
-      ? $photos.find(photo => photo.id === first_photo_id)
-      : null
+  $: sense = entry.senses?.[0]
+  $: first_photo = entry.senses?.[0]?.photos?.[0]
 
   function update_entry(update: TablesUpdate<'entries'>) {
     dbOperations.update_entry({ entry: update, entry_id: entry.id })
@@ -56,7 +48,7 @@
         on_delete_image={async () =>
           await dbOperations.update_photo({
             photo: { deleted: 'true' },
-            photo_id: first_photo_id,
+            photo_id: first_photo.id,
           })} />
     {:else if can_edit}
       <!-- <div class="h-20 bg-gray-100 hover:bg-gray-300 mb-2 flex flex-col"> -->
@@ -97,13 +89,13 @@
       entry_id={entry.id}
       {can_edit}
       showPlus={false}
-      dialect_ids={entry.dialect_ids || []} />
+      dialects={entry.dialects || []} />
   {:else if column.field === 'custom_tags'}
     <EntryTag
       entry_id={entry.id}
       {can_edit}
       showPlus={false}
-      tag_ids={entry.tag_ids || []} />
+      tags={entry.tags || []} />
   {:else if column.field === 'sources'}
     <EntrySource
       {can_edit}
@@ -122,8 +114,7 @@
         update_sense({ glosses: sense.glosses })
       }} />
   {:else if column.field === 'example_sentence'}
-    {@const sentence_id = sense.sentence_ids?.[0]}
-    {@const sentence = $sentences.length && $sentences.find(sentence => sentence.id === sentence_id)}
+    {@const sentence = sense.sentences?.[0]}
     {#if column.bcp === 'vn'}
       <Textbox
         field={column.field}

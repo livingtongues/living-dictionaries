@@ -32,6 +32,7 @@ export const load: LayoutLoad = async ({ params: { dictionaryId: dictionary_url 
     const dictionary_id = dictionary.id
 
     // if (browser)
+    // TODO: bring cache back in
     //   load_cached_index(dictionary_id)
 
     const is_manager: Readable<boolean> = derived([admin, my_dictionaries], ([$admin, $my_dictionaries], set) => {
@@ -48,20 +49,21 @@ export const load: LayoutLoad = async ({ params: { dictionaryId: dictionary_url 
 
     const default_entries_per_page = 20
 
-    // TODO: bring in entry_data and later also sentence_videos, sentence_photos, texts
+    // TODO later: bring in sentence_videos, sentence_photos, texts
     const entries_data = create_entries_data_store({ dictionary_id, supabase, log: true })
     const search_index_updated = writable(false)
 
-    // maybe need to make data null and then just subscribe to data and when it is an array (empty or with items) then create_index so that if the entries are refreshed or updated the index can be updated
     const unsub = entries_data.loading.subscribe(async (loading) => {
       if (!loading) {
         await create_index(get(entries_data), dictionary_id)
         search_index_updated.set(true)
         unsub()
+        search_index_updated.set(false)
       }
     })
 
-    // entries.updated_item.subscribe(entry => entry && update_index_entry(entry, dictionary_id))
+    // TODO: figure out how to update just the index of the changed entry
+    // entries_data.updated_item.subscribe(entry => entry && update_index_entry(entry, dictionary_id))
 
     const dictionary_info = readable<Tables<'dictionary_info'>>({} as Tables<'dictionary_info'>, (set) => {
       (async () => {
@@ -126,6 +128,7 @@ export const load: LayoutLoad = async ({ params: { dictionaryId: dictionary_url 
       default_entries_per_page,
       search_entries,
       is_manager,
+      search_index_updated,
       is_contributor,
       can_edit,
       dictionary_info,

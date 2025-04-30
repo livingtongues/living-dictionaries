@@ -1,16 +1,17 @@
 <script lang="ts">
-  import type { EntryFieldValue, EntryView, Tables, TablesUpdate } from '@living-dictionaries/types'
+  import type { EntryFieldValue, Tables, TablesUpdate } from '@living-dictionaries/types'
   import { Button } from 'svelte-pieces'
   import EntryField from './EntryField.svelte'
   import EntryMedia from './EntryMedia.svelte'
-  import Sense from './SupaSense.svelte'
+  import Sense from './Sense.svelte'
   import { page } from '$app/stores'
   import EntryDialect from '$lib/components/entry/EntryDialect.svelte'
   import EntrySource from '$lib/components/entry/EntrySource.svelte'
   import type { DbOperations } from '$lib/dbOperations'
   import EntryTag from '$lib/components/entry/EntryTag.svelte'
+  import type { EntryData } from '$lib/search/types'
 
-  export let entry: EntryView
+  export let entry: EntryData
   export let dictionary: Tables<'dictionaries'>
   export let can_edit = false
   export let dbOperations: DbOperations
@@ -98,18 +99,24 @@
       {/if}
     {/each}
 
-    {#if entry.dialect_ids?.length || can_edit}
-      <div class="md:px-2" class:order-2={!entry.dialect_ids?.length}>
+    {#if entry.dialects?.length || can_edit}
+      <div class="md:px-2" class:order-2={!entry.dialects?.length}>
         <div class="rounded text-xs text-gray-500 mt-1 mb-2">{$page.data.t('entry_field.dialects')}</div>
-        <EntryDialect entry_id={entry.id} {can_edit} dialect_ids={entry.dialect_ids || []} />
+        <EntryDialect
+          entry_id={entry.id}
+          {can_edit}
+          dialects={entry.dialects || []} />
         <div class="border-b-2 pb-1 mb-2 border-dashed" />
       </div>
     {/if}
 
-    {#if entry.tag_ids?.length || can_edit}
-      <div class="md:px-2" class:order-2={!entry.tag_ids?.length}>
+    {#if entry.tags?.length || can_edit}
+      <div class="md:px-2" class:order-2={!entry.tags?.length}>
         <div class="rounded text-xs text-gray-500 mt-1 mb-2">{$page.data.t('entry_field.custom_tags')}</div>
-        <EntryTag entry_id={entry.id} {can_edit} tag_ids={entry.tag_ids || []} />
+        <EntryTag
+          entry_id={entry.id}
+          {can_edit}
+          tags={entry.tags || []} />
         <div class="border-b-2 pb-1 mb-2 border-dashed" />
       </div>
     {/if}

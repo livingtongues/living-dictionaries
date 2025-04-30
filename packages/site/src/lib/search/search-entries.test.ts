@@ -1,12 +1,12 @@
 import { create, insertMultiple, save } from '@orama/orama'
-import type { EntryView } from '@living-dictionaries/types'
 import type { DeepPartial } from 'kitbook'
 import { search_entries } from './search-entries'
 import { entries_index_schema } from './entries-schema'
 import { augment_entry_for_search } from './augment-entry-for-search'
 import { createMultilingualTokenizer } from './multilingual-tokenizer'
+import type { EntryData } from './types'
 
-function search(entries: DeepPartial<EntryView>[], query: string) {
+function search(entries: DeepPartial<EntryData>[], query: string) {
   const index = create({
     schema: entries_index_schema,
     components: { tokenizer: createMultilingualTokenizer() },
@@ -25,7 +25,7 @@ function search(entries: DeepPartial<EntryView>[], query: string) {
   }, index)
 }
 
-function get_index_json(entries: DeepPartial<EntryView>[]) {
+function get_index_json(entries: DeepPartial<EntryData>[]) {
   const index = create({
     schema: entries_index_schema,
     components: { tokenizer: createMultilingualTokenizer() },
@@ -63,8 +63,14 @@ describe(search_entries, () => {
 
   test('diacritics in gloss do not split words', async () => {
     const results = await search([
-      { main: { lexeme: { default: 'esotman taki' } }, senses: [{ glosses: { pt: 'fácil', tri: 'wamekatota' } }] },
-      { main: { lexeme: { default: 'etxmatohu' } }, senses: [{ glosses: { en: 'blow (something, like a flute)' } }, { glosses: { pt: 'fumar' } }] },
+      {
+        main: { lexeme: { default: 'esotman taki' } },
+        senses: [{ glosses: { pt: 'fácil', tri: 'wamekatota' } }],
+      },
+      {
+        main: { lexeme: { default: 'etxmatohu' } },
+        senses: [{ glosses: { en: 'blow (something, like a flute)' } }, { glosses: { pt: 'fumar' } }],
+      },
     ], 'fácil')
     expect(results.hits).toHaveLength(1)
   })
@@ -99,6 +105,7 @@ describe(search_entries, () => {
               "has_part_of_speech": false,
               "has_plural_form": false,
               "has_semantic_domain": false,
+              "has_sentence": false,
               "has_speaker": false,
               "has_video": false,
               "main": {
@@ -494,6 +501,16 @@ describe(search_entries, () => {
               },
               "type": "Bool",
             },
+            "has_sentence": {
+              "isArray": false,
+              "node": {
+                "false": [
+                  1,
+                ],
+                "true": [],
+              },
+              "type": "Bool",
+            },
             "has_speaker": {
               "isArray": false,
               "node": {
@@ -525,6 +542,7 @@ describe(search_entries, () => {
             "_semantic_domains",
             "_speakers",
             "has_audio",
+            "has_sentence",
             "has_image",
             "has_video",
             "has_speaker",
@@ -548,6 +566,7 @@ describe(search_entries, () => {
             "has_part_of_speech": "boolean",
             "has_plural_form": "boolean",
             "has_semantic_domain": "boolean",
+            "has_sentence": "boolean",
             "has_speaker": "boolean",
             "has_video": "boolean",
           },
@@ -583,6 +602,7 @@ describe(search_entries, () => {
           "language": "multi",
           "sortableProperties": [
             "has_audio",
+            "has_sentence",
             "has_image",
             "has_video",
             "has_speaker",
@@ -598,6 +618,7 @@ describe(search_entries, () => {
             "has_part_of_speech": "boolean",
             "has_plural_form": "boolean",
             "has_semantic_domain": "boolean",
+            "has_sentence": "boolean",
             "has_speaker": "boolean",
             "has_video": "boolean",
           },
@@ -663,6 +684,18 @@ describe(search_entries, () => {
               "type": "boolean",
             },
             "has_semantic_domain": {
+              "docs": {
+                "1": 0,
+              },
+              "orderedDocs": [
+                [
+                  1,
+                  false,
+                ],
+              ],
+              "type": "boolean",
+            },
+            "has_sentence": {
               "docs": {
                 "1": 0,
               },

@@ -1,11 +1,11 @@
 <script lang="ts">
   import { ShowHide, longpress } from 'svelte-pieces'
-  import type { AudioWithSpeakerIds, EntryView } from '@living-dictionaries/types'
   import { page } from '$app/stores'
+  import type { EntryData } from '$lib/search/types'
 
-  export let entry: EntryView
+  export let entry: EntryData
   export let context: 'list' | 'table' | 'entry'
-  export let sound_file: AudioWithSpeakerIds = undefined
+  export let sound_file: EntryData['audios'][0] = undefined
   export let can_edit = false
   $: ({ url_from_storage_path } = $page.data)
 

@@ -1,6 +1,10 @@
 import { type SearchParams as OramaSearchParams, search } from '@orama/orama'
-import type { QueryParams } from './types'
-import type { EntriesIndex, Indexed_Entry } from './entries-schema'
+import type { EntryData, QueryParams } from './types'
+import type { EntriesIndex } from './entries-schema'
+
+type Indexed_Entry = {
+  _lexeme: string[]
+} & EntryData
 
 export interface SearchEntriesOptions {
   query_params: QueryParams
@@ -62,6 +66,10 @@ export async function search_entries({ query_params, entries_per_page, page_inde
         true: true,
         false: true,
       },
+      has_sentence: {
+        true: true,
+        false: true,
+      },
       has_image: {
         true: true,
         false: true,
@@ -101,6 +109,8 @@ export async function search_entries({ query_params, entries_per_page, page_inde
       ...(query_params.no_image && query_params.view !== 'gallery') ? { has_image: false } : {},
       ...query_params.has_audio ? { has_audio: true } : {},
       ...query_params.no_audio ? { has_audio: false } : {},
+      ...query_params.has_sentence ? { has_sentence: true } : {},
+      ...query_params.no_sentence ? { has_sentence: false } : {},
       ...query_params.has_video ? { has_video: true } : {},
       ...query_params.no_video ? { has_video: false } : {},
       ...query_params.has_speaker ? { has_speaker: true } : {},

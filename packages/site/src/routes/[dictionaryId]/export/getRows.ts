@@ -1,8 +1,9 @@
-import type { EntryView, MultiString, Tables } from '@living-dictionaries/types'
+import type { MultiString, Tables } from '@living-dictionaries/types'
 import type { DeepPartial } from 'kitbook'
-import type { EntryForCSV } from './prepareEntriesForCsv'
+import type { EntryForCSV, translate_entries } from './prepareEntriesForCsv'
 import { friendlyName } from './friendlyName'
 import { glossingLanguages } from '$lib/glosses/glossing-languages'
+import type { EntryData } from '$lib/search/types'
 
 interface ExportMetaData {
   sense_index: number
@@ -85,13 +86,13 @@ export function get_example_sentence(
   return formatted_data
 }
 
-export function get_image_files(image_storage_path: string, metadata: ExportMetaData, entry: DeepPartial<EntryView> = null) {
+export function get_image_files(image_storage_path: string, metadata: ExportMetaData, entry: DeepPartial<ReturnType<typeof translate_entries>[0]> = null) {
   const { sense_index, position } = metadata
   const formatted_data: EntryForCSV = {}
 
   if (image_storage_path) {
     formatted_data[`${count_sense(sense_index)}photoFile`] = position === 'value' && entry
-      ? friendlyName(entry, image_storage_path)
+      ? friendlyName(entry as unknown as EntryData, image_storage_path)
       : `${get_readable_sense(sense_index)}Image filename`
     formatted_data[`${count_sense(sense_index)}photoSource`] = position === 'header'
       ? `${get_readable_sense(sense_index)}Source of image`

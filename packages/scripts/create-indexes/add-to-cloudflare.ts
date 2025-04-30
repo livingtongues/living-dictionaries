@@ -1,9 +1,9 @@
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { access, constants, writeFile } from 'node:fs/promises'
-import type { EntryView } from '@living-dictionaries/types'
 import { create, insertMultiple, save } from '@orama/orama'
 import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3'
+import type { EntryData } from '../../site/src/lib/search/types'
 import { augment_entry_for_search } from '../../site/src/lib/search/augment-entry-for-search'
 import { entries_index_schema } from '../../site/src/lib/search/entries-schema'
 import { createMultilingualTokenizer } from '../../site/src/lib/search/multilingual-tokenizer'
@@ -67,7 +67,7 @@ async function write_indexes() {
         }
       }
 
-      const entries: EntryView[] = []
+      const entries: EntryData[] = []
       let timestamp_from_which_to_fetch_data = '1970-01-01T00:00:00Z'
 
       while (true) {
@@ -113,7 +113,7 @@ async function write_indexes() {
   }
 }
 
-async function create_index(entries: EntryView[], dictionary_id: string) {
+async function create_index(entries: EntryData[], dictionary_id: string) {
   console.log({ [dictionary_id]: entries.length })
   const entries_augmented_for_search = entries.map(augment_entry_for_search)
   const index = create({

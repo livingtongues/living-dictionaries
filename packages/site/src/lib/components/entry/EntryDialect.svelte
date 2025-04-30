@@ -2,15 +2,17 @@
   import type { SelectOption } from '$lib/components/ui/array/select-options.interface'
   import ModalEditableArray from '$lib/components/ui/array/ModalEditableArray.svelte'
   import { page } from '$app/stores'
+  import type { EntryData } from '$lib/search/types'
 
-  export let dialect_ids: string[]
+  export let dialects: EntryData['dialects']
   export let entry_id: string
   export let can_edit = false
   export let showPlus = true
 
-  $: ({ dialects, dbOperations } = $page.data)
-  $: active_dialects = $dialects.filter(dialect => dialect_ids.includes(dialect.id)).map(dialect => dialect.id)
-  $: options = $dialects.map(dialect => ({ value: dialect.id, name: dialect.name.default })) satisfies SelectOption[]
+  $: ({ dialects: dictionary_dialects, dbOperations } = $page.data)
+  $: dialect_ids = dialects.map(dialect => dialect.id)
+  $: active_dialects = $dictionary_dialects.filter(dialect => dialect_ids.includes(dialect.id)).map(dialect => dialect.id)
+  $: options = $dictionary_dialects.map(dialect => ({ value: dialect.id, name: dialect.name.default })) satisfies SelectOption[]
 
   async function on_update(new_values: string[]) {
     // go through current dialect_ids and check if they are in the new_values, if not remove them
@@ -25,7 +27,7 @@
       if (dialect_ids.includes(dialect_id)) continue // everything is already set - this value wasn't changed
 
       // need to assign dialect
-      if ($dialects.find(({ id }) => id === dialect_id)) {
+      if ($dictionary_dialects.find(({ id }) => id === dialect_id)) {
         // if the value is in the dialects, assign it to this entry
         await dbOperations.assign_dialect({ dialect_id, entry_id })
       } else {

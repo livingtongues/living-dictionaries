@@ -3,7 +3,6 @@ import type { Coordinates } from '../coordinates.interface'
 import type { DictionaryPhoto } from '../photo.interface'
 import type { HostedVideo, UnsupportedFields } from '../.'
 import type { Change } from './content-update.interface'
-import type { AudioWithSpeakerIds, EntryMainFields, SenseWithSentences } from './entry.interface'
 import type { ImportContentUpdate } from './content-import.interface'
 import type { Orthography } from './orthography.interface'
 import type { DictionaryMetadata } from './dictionary.types'
@@ -4038,22 +4037,6 @@ export interface Database {
           },
         ]
       }
-      entries_view: {
-        Row: {
-          audios: AudioWithSpeakerIds[] | null
-          created_at: string | null
-          deleted: string | null
-          dialect_ids: string[] | null
-          dictionary_id: string | null
-          id: string | null
-          main: EntryMainFields
-          senses: SenseWithSentences[] | null
-          tag_ids: string[] | null
-          updated_at: string | null
-        }
-        Relationships: [
-        ]
-      }
       materialized_admin_dictionaries_view: {
         Row: {
           alternate_names: string[] | null
@@ -4169,22 +4152,6 @@ export interface Database {
         Relationships: [
         ]
       }
-      materialized_entries_view: {
-        Row: {
-          audios: AudioWithSpeakerIds[] | null
-          created_at: string | null
-          deleted: string | null
-          dialect_ids: string[] | null
-          dictionary_id: string | null
-          id: string | null
-          main: EntryMainFields
-          senses: SenseWithSentences[] | null
-          tag_ids: string[] | null
-          updated_at: string | null
-        }
-        Relationships: [
-        ]
-      }
       profiles_view: {
         Row: {
           avatar_url: string | null
@@ -4231,41 +4198,6 @@ export interface Database {
       }
     }
     Functions: {
-      entries_from_timestamp: {
-        Args: {
-          get_newer_than: string
-          dict_id: string
-        }
-        Returns: {
-          id: string
-          dictionary_id: string
-          created_at: string
-          updated_at: string
-          deleted: string
-          main: EntryMainFields
-          senses: SenseWithSentences[] | null
-          audios: AudioWithSpeakerIds[] | null
-          dialect_ids: string[] | null
-          tag_ids: string[] | null
-        }[]
-      }
-      entry_by_id: {
-        Args: {
-          passed_entry_id: string
-        }
-        Returns: {
-          id: string
-          dictionary_id: string
-          created_at: string
-          updated_at: string
-          deleted: string
-          main: EntryMainFields
-          senses: SenseWithSentences[] | null
-          audios: AudioWithSpeakerIds[] | null
-          dialect_ids: string[] | null
-          tag_ids: string[] | null
-        }[]
-      }
       get_my_claim: {
         Args: {
           claim: string

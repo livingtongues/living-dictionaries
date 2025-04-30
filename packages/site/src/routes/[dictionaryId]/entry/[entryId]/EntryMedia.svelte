@@ -1,6 +1,6 @@
 <script lang="ts">
   import { ShowHide } from 'svelte-pieces'
-  import type { EntryView, Tables } from '@living-dictionaries/types'
+  import type { Tables } from '@living-dictionaries/types'
   import Video from '../../entries/components/Video.svelte'
   import GeoTaggingModal from './GeoTaggingModal.svelte'
   import InitableShowHide from './InitableShowHide.svelte'
@@ -9,18 +9,15 @@
   import { page } from '$app/stores'
   import type { DbOperations } from '$lib/dbOperations'
   import AddImage from '$lib/components/image/AddImage.svelte'
+  import type { EntryData } from '$lib/search/types'
 
-  export let entry: EntryView
+  export let entry: EntryData
   export let dictionary: Tables<'dictionaries'>
   export let can_edit = false
   export let dbOperations: DbOperations
 
-  $: ({ photos, videos } = $page.data)
-
-  $: photo_ids = entry?.senses?.map(({ photo_ids }) => photo_ids).flat()
-  $: sense_photos = $photos.filter(photo => photo_ids.includes(photo.id))
-  $: video_ids = entry?.senses?.map(({ video_ids }) => video_ids).flat()
-  $: sense_videos = $videos.filter(video => video_ids.includes(video.id))
+  $: photos = entry?.senses?.map(({ photos }) => photos).flat()
+  $: videos = entry?.senses?.map(({ videos }) => videos).flat()
 </script>
 
 <div class="flex flex-col">
@@ -35,7 +32,7 @@
     {/await}
   {/if}
 
-  {#each sense_photos as photo (photo.id)}
+  {#each photos as photo (photo.id)}
     <div
       class="w-full overflow-hidden rounded relative mb-2"
       style="height: 25vh;">
@@ -57,7 +54,7 @@
     </div>
   {/if}
 
-  {#each sense_videos as video (video.id)}
+  {#each videos as video (video.id)}
     <div class="w-full overflow-hidden rounded relative mb-2">
       <Video
         class="bg-gray-100 p-3 border-r-2"

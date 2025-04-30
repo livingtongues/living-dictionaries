@@ -66,13 +66,17 @@ export function create_entries_data_store({
       const dialect_ids = $entry_dialects.filter(entry_dialect => entry_dialect.entry_id === entry.id).map(entry_dialect => entry_dialect.dialect_id)
       const dialects_for_entry = $dialects.filter(dialect => dialect_ids.includes(dialect.id))
 
+      const { id, deleted, dictionary_id, created_at, created_by, updated_by, updated_at, ...main } = entry
+
       return {
-        id: entry.id,
-        main: entry,
+        id,
+        main,
+        updated_at,
         senses: senses_for_entry,
         ...(audios_for_entry.length ? { audios: audios_for_entry } : {}),
         ...(tags_for_entry.length ? { tags: tags_for_entry } : {}),
         ...(dialects_for_entry.length ? { dialects: dialects_for_entry } : {}),
+        ...(deleted ? { deleted } : {}),
       }
     })
   }, [])

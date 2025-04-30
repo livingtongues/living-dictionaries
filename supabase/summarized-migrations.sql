@@ -993,302 +993,299 @@ END $$;
 
 --- entries views ---
 
--- DROP FUNCTION entries_from_timestamp(timestamp with time zone, text) CASCADE; -- must drop and recreate if changing the shape of the function
-CREATE FUNCTION entries_from_timestamp(
-  get_newer_than timestamp with time zone,
-  dict_id text
-) RETURNS TABLE(
-  id text,
-  dictionary_id text,
-  created_at timestamp with time zone,
-  updated_at timestamp with time zone,
-  deleted timestamp with time zone,
-  main jsonb,
-  senses jsonb,
-  audios jsonb,
-  dialect_ids jsonb,
-  tag_ids jsonb
-) AS $$
-  WITH aggregated_audio AS (
-    SELECT
-      audio.entry_id,
-      jsonb_agg(
-        jsonb_strip_nulls(
-          jsonb_build_object(
-            'id', audio.id,
-            'storage_path', audio.storage_path,
-            'source', audio.source,
-            'speaker_ids', audio_speakers.speaker_ids
-          )
-        )
-      ORDER BY audio.created_at) AS audios
-    FROM audio
-    LEFT JOIN (
-      SELECT
-        audio_id,
-        jsonb_agg(speaker_id) AS speaker_ids
-      FROM audio_speakers
-      WHERE deleted IS NULL
-      GROUP BY audio_id
-    ) AS audio_speakers ON audio_speakers.audio_id = audio.id
-    WHERE audio.deleted IS NULL
-    GROUP BY audio.entry_id
-  )
-  SELECT
-    entries.id AS id,
-    entries.dictionary_id AS dictionary_id,
-    entries.created_at,
-    entries.updated_at,
-    entries.deleted,
-    jsonb_strip_nulls(
-      jsonb_build_object(
-        'lexeme', entries.lexeme,
-        'phonetic', entries.phonetic,
-        'interlinearization', entries.interlinearization,
-        'morphology', entries.morphology,
-        'notes', entries.notes,
-        'sources', entries.sources,
-        'scientific_names', entries.scientific_names,
-        'coordinates', entries.coordinates,
-        'unsupported_fields', entries.unsupported_fields,
-        'elicitation_id', entries.elicitation_id
-      )
-    ) AS main,
-    CASE 
-      WHEN COUNT(senses.id) > 0 THEN jsonb_agg(
-        jsonb_strip_nulls(
-          jsonb_build_object(
-            'id', senses.id,
-            'glosses', senses.glosses,
-            'parts_of_speech', senses.parts_of_speech,
-            'semantic_domains', senses.semantic_domains,
-            'write_in_semantic_domains', senses.write_in_semantic_domains,
-            'noun_class', senses.noun_class,
-            'definition', senses.definition,
-            'plural_form', senses.plural_form,
-            'variant', senses.variant,
-            'sentence_ids', sentence_ids,
-            'photo_ids', photo_ids,
-            'video_ids', video_ids
-          )
-        )
-        ORDER BY senses.created_at
-      )
-      ELSE NULL
-    END AS senses,
-    aggregated_audio.audios,
-    dialect_ids.dialect_ids,
-    tag_ids.tag_ids
-  FROM entries
-  LEFT JOIN senses ON senses.entry_id = entries.id AND senses.deleted IS NULL
-  LEFT JOIN aggregated_audio ON aggregated_audio.entry_id = entries.id
-  LEFT JOIN (
-    SELECT
-      entry_id,
-      jsonb_agg(dialect_id) AS dialect_ids
-    FROM entry_dialects
-    WHERE deleted IS NULL
-    GROUP BY entry_id
-  ) AS dialect_ids ON dialect_ids.entry_id = entries.id
-  LEFT JOIN (
-    SELECT
-      entry_id,
-      jsonb_agg(tag_id) AS tag_ids
-    FROM entry_tags
-    WHERE deleted IS NULL
-    GROUP BY entry_id
-  ) AS tag_ids ON tag_ids.entry_id = entries.id
-  LEFT JOIN (
-    SELECT
-      senses_in_sentences.sense_id,
-      jsonb_agg(senses_in_sentences.sentence_id) AS sentence_ids
-    FROM senses_in_sentences
-    JOIN sentences ON sentences.id = senses_in_sentences.sentence_id
-    WHERE sentences.deleted IS NULL AND senses_in_sentences.deleted IS NULL
-    GROUP BY senses_in_sentences.sense_id
-  ) AS sense_sentences ON sense_sentences.sense_id = senses.id
-  LEFT JOIN (
-    SELECT
-      sense_photos.sense_id,
-      jsonb_agg(sense_photos.photo_id) AS photo_ids
-    FROM sense_photos
-    JOIN photos ON photos.id = sense_photos.photo_id
-    WHERE photos.deleted IS NULL AND sense_photos.deleted IS NULL
-    GROUP BY sense_photos.sense_id
-  ) AS aggregated_photo_ids ON aggregated_photo_ids.sense_id = senses.id
-  LEFT JOIN (
-    SELECT
-      sense_videos.sense_id,
-      jsonb_agg(sense_videos.video_id) AS video_ids
-    FROM sense_videos
-    JOIN videos ON videos.id = sense_videos.video_id
-    WHERE videos.deleted IS NULL AND sense_videos.deleted IS NULL
-    GROUP BY sense_videos.sense_id
-  ) AS aggregated_video_ids ON aggregated_video_ids.sense_id = senses.id
-  WHERE entries.updated_at > get_newer_than AND (dict_id = '' OR entries.dictionary_id = dict_id)
-  GROUP BY entries.id, aggregated_audio.audios, dialect_ids.dialect_ids, tag_ids.tag_ids
-  ORDER BY entries.updated_at ASC;
-$$ LANGUAGE SQL SECURITY DEFINER;
+-- -- DROP FUNCTION entries_from_timestamp(timestamp with time zone, text) CASCADE; -- must drop and recreate if changing the shape of the function
+-- CREATE FUNCTION entries_from_timestamp(
+--   get_newer_than timestamp with time zone,
+--   dict_id text
+-- ) RETURNS TABLE(
+--   id text,
+--   dictionary_id text,
+--   created_at timestamp with time zone,
+--   updated_at timestamp with time zone,
+--   deleted timestamp with time zone,
+--   main jsonb,
+--   senses jsonb,
+--   audios jsonb,
+--   dialect_ids jsonb,
+--   tag_ids jsonb
+-- ) AS $$
+--   WITH aggregated_audio AS (
+--     SELECT
+--       audio.entry_id,
+--       jsonb_agg(
+--         jsonb_strip_nulls(
+--           jsonb_build_object(
+--             'id', audio.id,
+--             'storage_path', audio.storage_path,
+--             'source', audio.source,
+--             'speaker_ids', audio_speakers.speaker_ids
+--           )
+--         )
+--       ORDER BY audio.created_at) AS audios
+--     FROM audio
+--     LEFT JOIN (
+--       SELECT
+--         audio_id,
+--         jsonb_agg(speaker_id) AS speaker_ids
+--       FROM audio_speakers
+--       WHERE deleted IS NULL
+--       GROUP BY audio_id
+--     ) AS audio_speakers ON audio_speakers.audio_id = audio.id
+--     WHERE audio.deleted IS NULL
+--     GROUP BY audio.entry_id
+--   )
+--   SELECT
+--     entries.id AS id,
+--     entries.dictionary_id AS dictionary_id,
+--     entries.created_at,
+--     entries.updated_at,
+--     entries.deleted,
+--     jsonb_strip_nulls(
+--       jsonb_build_object(
+--         'lexeme', entries.lexeme,
+--         'phonetic', entries.phonetic,
+--         'interlinearization', entries.interlinearization,
+--         'morphology', entries.morphology,
+--         'notes', entries.notes,
+--         'sources', entries.sources,
+--         'scientific_names', entries.scientific_names,
+--         'coordinates', entries.coordinates,
+--         'unsupported_fields', entries.unsupported_fields,
+--         'elicitation_id', entries.elicitation_id
+--       )
+--     ) AS main,
+--     CASE 
+--       WHEN COUNT(senses.id) > 0 THEN jsonb_agg(
+--         jsonb_strip_nulls(
+--           jsonb_build_object(
+--             'id', senses.id,
+--             'glosses', senses.glosses,
+--             'parts_of_speech', senses.parts_of_speech,
+--             'semantic_domains', senses.semantic_domains,
+--             'write_in_semantic_domains', senses.write_in_semantic_domains,
+--             'noun_class', senses.noun_class,
+--             'definition', senses.definition,
+--             'plural_form', senses.plural_form,
+--             'variant', senses.variant,
+--             'sentence_ids', sentence_ids,
+--             'photo_ids', photo_ids,
+--             'video_ids', video_ids
+--           )
+--         )
+--         ORDER BY senses.created_at
+--       )
+--       ELSE NULL
+--     END AS senses,
+--     aggregated_audio.audios,
+--     dialect_ids.dialect_ids,
+--     tag_ids.tag_ids
+--   FROM entries
+--   LEFT JOIN senses ON senses.entry_id = entries.id AND senses.deleted IS NULL
+--   LEFT JOIN aggregated_audio ON aggregated_audio.entry_id = entries.id
+--   LEFT JOIN (
+--     SELECT
+--       entry_id,
+--       jsonb_agg(dialect_id) AS dialect_ids
+--     FROM entry_dialects
+--     WHERE deleted IS NULL
+--     GROUP BY entry_id
+--   ) AS dialect_ids ON dialect_ids.entry_id = entries.id
+--   LEFT JOIN (
+--     SELECT
+--       entry_id,
+--       jsonb_agg(tag_id) AS tag_ids
+--     FROM entry_tags
+--     WHERE deleted IS NULL
+--     GROUP BY entry_id
+--   ) AS tag_ids ON tag_ids.entry_id = entries.id
+--   LEFT JOIN (
+--     SELECT
+--       senses_in_sentences.sense_id,
+--       jsonb_agg(senses_in_sentences.sentence_id) AS sentence_ids
+--     FROM senses_in_sentences
+--     JOIN sentences ON sentences.id = senses_in_sentences.sentence_id
+--     WHERE sentences.deleted IS NULL AND senses_in_sentences.deleted IS NULL
+--     GROUP BY senses_in_sentences.sense_id
+--   ) AS sense_sentences ON sense_sentences.sense_id = senses.id
+--   LEFT JOIN (
+--     SELECT
+--       sense_photos.sense_id,
+--       jsonb_agg(sense_photos.photo_id) AS photo_ids
+--     FROM sense_photos
+--     JOIN photos ON photos.id = sense_photos.photo_id
+--     WHERE photos.deleted IS NULL AND sense_photos.deleted IS NULL
+--     GROUP BY sense_photos.sense_id
+--   ) AS aggregated_photo_ids ON aggregated_photo_ids.sense_id = senses.id
+--   LEFT JOIN (
+--     SELECT
+--       sense_videos.sense_id,
+--       jsonb_agg(sense_videos.video_id) AS video_ids
+--     FROM sense_videos
+--     JOIN videos ON videos.id = sense_videos.video_id
+--     WHERE videos.deleted IS NULL AND sense_videos.deleted IS NULL
+--     GROUP BY sense_videos.sense_id
+--   ) AS aggregated_video_ids ON aggregated_video_ids.sense_id = senses.id
+--   WHERE entries.updated_at > get_newer_than AND (dict_id = '' OR entries.dictionary_id = dict_id)
+--   GROUP BY entries.id, aggregated_audio.audios, dialect_ids.dialect_ids, tag_ids.tag_ids
+--   ORDER BY entries.updated_at ASC;
+-- $$ LANGUAGE SQL SECURITY DEFINER;
 
--- duplicate of above with a different where clause for use in the entry page
-CREATE FUNCTION entry_by_id(
-  passed_entry_id text
-) RETURNS TABLE(
-  id text,
-  dictionary_id text,
-  created_at timestamp with time zone,
-  updated_at timestamp with time zone,
-  deleted timestamp with time zone,
-  main jsonb,
-  senses jsonb,
-  audios jsonb,
-  dialect_ids jsonb,
-  tag_ids jsonb
-) AS $$
-  WITH aggregated_audio AS (
-    SELECT
-      audio.entry_id,
-      jsonb_agg(
-        jsonb_strip_nulls(
-          jsonb_build_object(
-            'id', audio.id,
-            'storage_path', audio.storage_path,
-            'source', audio.source,
-            'speaker_ids', audio_speakers.speaker_ids
-          )
-        )
-      ORDER BY audio.created_at) AS audios
-    FROM audio
-    LEFT JOIN (
-      SELECT
-        audio_id,
-        jsonb_agg(speaker_id) AS speaker_ids
-      FROM audio_speakers
-      WHERE deleted IS NULL
-      GROUP BY audio_id
-    ) AS audio_speakers ON audio_speakers.audio_id = audio.id
-    WHERE audio.deleted IS NULL
-    GROUP BY audio.entry_id
-  )
-  SELECT
-    entries.id AS id,
-    entries.dictionary_id AS dictionary_id,
-    entries.created_at,
-    entries.updated_at,
-    entries.deleted,
-    jsonb_strip_nulls(
-      jsonb_build_object(
-        'lexeme', entries.lexeme,
-        'phonetic', entries.phonetic,
-        'interlinearization', entries.interlinearization,
-        'morphology', entries.morphology,
-        'notes', entries.notes,
-        'sources', entries.sources,
-        'scientific_names', entries.scientific_names,
-        'coordinates', entries.coordinates,
-        'unsupported_fields', entries.unsupported_fields,
-        'elicitation_id', entries.elicitation_id
-      )
-    ) AS main,
-    CASE 
-      WHEN COUNT(senses.id) > 0 THEN jsonb_agg(
-        jsonb_strip_nulls(
-          jsonb_build_object(
-            'id', senses.id,
-            'glosses', senses.glosses,
-            'parts_of_speech', senses.parts_of_speech,
-            'semantic_domains', senses.semantic_domains,
-            'write_in_semantic_domains', senses.write_in_semantic_domains,
-            'noun_class', senses.noun_class,
-            'definition', senses.definition,
-            'plural_form', senses.plural_form,
-            'variant', senses.variant,
-            'sentence_ids', sentence_ids,
-            'photo_ids', photo_ids,
-            'video_ids', video_ids
-          )
-        )
-        ORDER BY senses.created_at
-      )
-      ELSE NULL
-    END AS senses,
-    aggregated_audio.audios,
-    dialect_ids.dialect_ids,
-    tag_ids.tag_ids
-  FROM entries
-  LEFT JOIN senses ON senses.entry_id = entries.id AND senses.deleted IS NULL
-  LEFT JOIN aggregated_audio ON aggregated_audio.entry_id = entries.id
-  LEFT JOIN (
-    SELECT
-      entry_id,
-      jsonb_agg(dialect_id) AS dialect_ids
-    FROM entry_dialects
-    WHERE deleted IS NULL
-    GROUP BY entry_id
-  ) AS dialect_ids ON dialect_ids.entry_id = entries.id
-  LEFT JOIN (
-    SELECT
-      entry_id,
-      jsonb_agg(tag_id) AS tag_ids
-    FROM entry_tags
-    WHERE deleted IS NULL
-    GROUP BY entry_id
-  ) AS tag_ids ON tag_ids.entry_id = entries.id
-  LEFT JOIN (
-    SELECT
-      senses_in_sentences.sense_id,
-      jsonb_agg(senses_in_sentences.sentence_id) AS sentence_ids
-    FROM senses_in_sentences
-    JOIN sentences ON sentences.id = senses_in_sentences.sentence_id
-    WHERE sentences.deleted IS NULL AND senses_in_sentences.deleted IS NULL
-    GROUP BY senses_in_sentences.sense_id
-  ) AS sense_sentences ON sense_sentences.sense_id = senses.id
-  LEFT JOIN (
-    SELECT
-      sense_photos.sense_id,
-      jsonb_agg(sense_photos.photo_id) AS photo_ids
-    FROM sense_photos
-    JOIN photos ON photos.id = sense_photos.photo_id
-    WHERE photos.deleted IS NULL AND sense_photos.deleted IS NULL
-    GROUP BY sense_photos.sense_id
-  ) AS aggregated_photo_ids ON aggregated_photo_ids.sense_id = senses.id
-  LEFT JOIN (
-    SELECT
-      sense_videos.sense_id,
-      jsonb_agg(sense_videos.video_id) AS video_ids
-    FROM sense_videos
-    JOIN videos ON videos.id = sense_videos.video_id
-    WHERE videos.deleted IS NULL AND sense_videos.deleted IS NULL
-    GROUP BY sense_videos.sense_id
-  ) AS aggregated_video_ids ON aggregated_video_ids.sense_id = senses.id
-  WHERE entries.id = passed_entry_id
-  GROUP BY entries.id, aggregated_audio.audios, dialect_ids.dialect_ids, tag_ids.tag_ids
-  ORDER BY entries.updated_at ASC;
-$$ LANGUAGE SQL SECURITY DEFINER;
+-- -- duplicate of above with a different where clause for use in the entry page
+-- CREATE FUNCTION entry_by_id(
+--   passed_entry_id text
+-- ) RETURNS TABLE(
+--   id text,
+--   dictionary_id text,
+--   created_at timestamp with time zone,
+--   updated_at timestamp with time zone,
+--   deleted timestamp with time zone,
+--   main jsonb,
+--   senses jsonb,
+--   audios jsonb,
+--   dialect_ids jsonb,
+--   tag_ids jsonb
+-- ) AS $$
+--   WITH aggregated_audio AS (
+--     SELECT
+--       audio.entry_id,
+--       jsonb_agg(
+--         jsonb_strip_nulls(
+--           jsonb_build_object(
+--             'id', audio.id,
+--             'storage_path', audio.storage_path,
+--             'source', audio.source,
+--             'speaker_ids', audio_speakers.speaker_ids
+--           )
+--         )
+--       ORDER BY audio.created_at) AS audios
+--     FROM audio
+--     LEFT JOIN (
+--       SELECT
+--         audio_id,
+--         jsonb_agg(speaker_id) AS speaker_ids
+--       FROM audio_speakers
+--       WHERE deleted IS NULL
+--       GROUP BY audio_id
+--     ) AS audio_speakers ON audio_speakers.audio_id = audio.id
+--     WHERE audio.deleted IS NULL
+--     GROUP BY audio.entry_id
+--   )
+--   SELECT
+--     entries.id AS id,
+--     entries.dictionary_id AS dictionary_id,
+--     entries.created_at,
+--     entries.updated_at,
+--     entries.deleted,
+--     jsonb_strip_nulls(
+--       jsonb_build_object(
+--         'lexeme', entries.lexeme,
+--         'phonetic', entries.phonetic,
+--         'interlinearization', entries.interlinearization,
+--         'morphology', entries.morphology,
+--         'notes', entries.notes,
+--         'sources', entries.sources,
+--         'scientific_names', entries.scientific_names,
+--         'coordinates', entries.coordinates,
+--         'unsupported_fields', entries.unsupported_fields,
+--         'elicitation_id', entries.elicitation_id
+--       )
+--     ) AS main,
+--     CASE 
+--       WHEN COUNT(senses.id) > 0 THEN jsonb_agg(
+--         jsonb_strip_nulls(
+--           jsonb_build_object(
+--             'id', senses.id,
+--             'glosses', senses.glosses,
+--             'parts_of_speech', senses.parts_of_speech,
+--             'semantic_domains', senses.semantic_domains,
+--             'write_in_semantic_domains', senses.write_in_semantic_domains,
+--             'noun_class', senses.noun_class,
+--             'definition', senses.definition,
+--             'plural_form', senses.plural_form,
+--             'variant', senses.variant,
+--             'sentence_ids', sentence_ids,
+--             'photo_ids', photo_ids,
+--             'video_ids', video_ids
+--           )
+--         )
+--         ORDER BY senses.created_at
+--       )
+--       ELSE NULL
+--     END AS senses,
+--     aggregated_audio.audios,
+--     dialect_ids.dialect_ids,
+--     tag_ids.tag_ids
+--   FROM entries
+--   LEFT JOIN senses ON senses.entry_id = entries.id AND senses.deleted IS NULL
+--   LEFT JOIN aggregated_audio ON aggregated_audio.entry_id = entries.id
+--   LEFT JOIN (
+--     SELECT
+--       entry_id,
+--       jsonb_agg(dialect_id) AS dialect_ids
+--     FROM entry_dialects
+--     WHERE deleted IS NULL
+--     GROUP BY entry_id
+--   ) AS dialect_ids ON dialect_ids.entry_id = entries.id
+--   LEFT JOIN (
+--     SELECT
+--       entry_id,
+--       jsonb_agg(tag_id) AS tag_ids
+--     FROM entry_tags
+--     WHERE deleted IS NULL
+--     GROUP BY entry_id
+--   ) AS tag_ids ON tag_ids.entry_id = entries.id
+--   LEFT JOIN (
+--     SELECT
+--       senses_in_sentences.sense_id,
+--       jsonb_agg(senses_in_sentences.sentence_id) AS sentence_ids
+--     FROM senses_in_sentences
+--     JOIN sentences ON sentences.id = senses_in_sentences.sentence_id
+--     WHERE sentences.deleted IS NULL AND senses_in_sentences.deleted IS NULL
+--     GROUP BY senses_in_sentences.sense_id
+--   ) AS sense_sentences ON sense_sentences.sense_id = senses.id
+--   LEFT JOIN (
+--     SELECT
+--       sense_photos.sense_id,
+--       jsonb_agg(sense_photos.photo_id) AS photo_ids
+--     FROM sense_photos
+--     JOIN photos ON photos.id = sense_photos.photo_id
+--     WHERE photos.deleted IS NULL AND sense_photos.deleted IS NULL
+--     GROUP BY sense_photos.sense_id
+--   ) AS aggregated_photo_ids ON aggregated_photo_ids.sense_id = senses.id
+--   LEFT JOIN (
+--     SELECT
+--       sense_videos.sense_id,
+--       jsonb_agg(sense_videos.video_id) AS video_ids
+--     FROM sense_videos
+--     JOIN videos ON videos.id = sense_videos.video_id
+--     WHERE videos.deleted IS NULL AND sense_videos.deleted IS NULL
+--     GROUP BY sense_videos.sense_id
+--   ) AS aggregated_video_ids ON aggregated_video_ids.sense_id = senses.id
+--   WHERE entries.id = passed_entry_id
+--   GROUP BY entries.id, aggregated_audio.audios, dialect_ids.dialect_ids, tag_ids.tag_ids
+--   ORDER BY entries.updated_at ASC;
+-- $$ LANGUAGE SQL SECURITY DEFINER;
 
--- Entries loading plan:
--- When Jim loads entries for the first time on client, the client and NOT the view needs to check WHERE entries.deleted IS NULL. Then in the future if Bob deletes 1 entry, and Jim visits again, Jim will have 20 cached entries. He then loads fresh entries without the WHERE entries.deleted IS NULL when he comes today so that he gets Bob's deleted change. Then Jim's knows to remove that deleted entry from the cache
+-- -- use entries_from_timestamp rpc function in app to get entries in a more efficient manner but still keeping the view that calls the function for easy dashboard inspection
+-- -- DROP VIEW IF EXISTS entries_view;
+-- CREATE VIEW entries_view AS
+-- SELECT * FROM entries_from_timestamp('1970-01-01 01:00:00+00', ''); 
 
--- use entries_from_timestamp rpc function in app to get entries in a more efficient manner but still keeping the view that calls the function for easy dashboard inspection
--- DROP VIEW IF EXISTS entries_view;
-CREATE VIEW entries_view AS
-SELECT * FROM entries_from_timestamp('1970-01-01 01:00:00+00', ''); 
+-- -- DROP MATERIALIZED VIEW IF EXISTS materialized_entries_view CASCADE;
+-- CREATE MATERIALIZED VIEW materialized_entries_view AS
+-- SELECT * FROM entries_from_timestamp('1970-01-01 01:00:00+00', ''); 
 
--- DROP MATERIALIZED VIEW IF EXISTS materialized_entries_view CASCADE;
-CREATE MATERIALIZED VIEW materialized_entries_view AS
-SELECT * FROM entries_from_timestamp('1970-01-01 01:00:00+00', ''); 
+-- CREATE UNIQUE INDEX idx_materialized_entries_view_id ON materialized_entries_view (id); -- When you refresh data for a materialized view, PostgreSQL locks the underlying tables. To avoid this, use the CONCURRENTLY option so that PostgreSQL creates a temporary updated version of the materialized view, compares two versions, and performs INSERT and UPDATE on only the differences. To use CONCURRENTLY the materialized view must have a UNIQUE index:
+-- REFRESH MATERIALIZED VIEW CONCURRENTLY materialized_entries_view;
 
-CREATE UNIQUE INDEX idx_materialized_entries_view_id ON materialized_entries_view (id); -- When you refresh data for a materialized view, PostgreSQL locks the underlying tables. To avoid this, use the CONCURRENTLY option so that PostgreSQL creates a temporary updated version of the materialized view, compares two versions, and performs INSERT and UPDATE on only the differences. To use CONCURRENTLY the materialized view must have a UNIQUE index:
-REFRESH MATERIALIZED VIEW CONCURRENTLY materialized_entries_view;
+-- CREATE INDEX idx_materialized_entries_view_updated_at_dictionary_id 
+-- ON materialized_entries_view (updated_at, dictionary_id);
 
-CREATE INDEX idx_materialized_entries_view_updated_at_dictionary_id 
-ON materialized_entries_view (updated_at, dictionary_id);
-
-SELECT cron.schedule (
-    'refresh-materialized_entries_view', -- Job name
-    '0 * * * *', -- Every hour, you can re-run this SQL with a new time amount to change the frequency
-    $$ REFRESH MATERIALIZED VIEW CONCURRENTLY materialized_entries_view $$
-); -- SELECT cron.unschedule('refresh-materialized_entries_view');
+-- SELECT cron.schedule (
+--     'refresh-materialized_entries_view', -- Job name
+--     '0 * * * *', -- Every hour, you can re-run this SQL with a new time amount to change the frequency
+--     $$ REFRESH MATERIALIZED VIEW CONCURRENTLY materialized_entries_view $$
+-- ); -- SELECT cron.unschedule('refresh-materialized_entries_view');
 
 
 --- auto modify timestamps ---

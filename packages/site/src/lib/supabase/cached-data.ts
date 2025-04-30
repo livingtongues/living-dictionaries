@@ -43,7 +43,7 @@ export function cached_data_store<Name extends DataTableName, T extends Tables<N
 
   async function get_data_from_cache_then_db(refresh = false) {
     if (log)
-      console.info({ cache_key })
+      console.info({ cache_key, refresh })
 
     const cached_data = await get_idb<T[]>(cache_key) || []
     if (cached_data.length && log) {
@@ -148,66 +148,67 @@ export function cached_data_store<Name extends DataTableName, T extends Tables<N
   }
 
   async function update(item_to_update: UpdateData) {
-    let current_item: T
-    let deleted_index: number
+    let current_items: T[]
     data.update((items) => {
+      current_items = items
       if (item_to_update.deleted) {
-        return items.filter((item, index) => {
+        return items.filter((item) => {
           if (item.id !== item_to_update.id) {
             return true
           }
-          current_item = item
-          deleted_index = index
           return false
         })
       }
-      return items.map((item) => {
-        if (item.id === item_to_update.id) {
-          current_item = item
-          return {
-            ...item,
-            ...item_to_update,
-          }
+
+      const index = items.findIndex(item => item.id === item_to_update.id)
+      if (index !== -1) {
+        // Create the updated item by merging the original with updates
+        const updated = {
+          ...items[index],
+          ...item_to_update,
         }
-        return item
-      })
+
+        // Create new array: copy items before target, skip target, copy items after target
+        const new_data = [
+          ...items.slice(0, index),
+          ...items.slice(index + 1),
+          updated,
+        ]
+
+        return new_data
+      }
+
+      return items
     })
     const { data: updated_item, error } = await supabase.from(table)
       .update(item_to_update)
       .eq('id', item_to_update.id)
+      .select()
       .single()
     if (error) {
-      // if (log)
       console.error(error.message)
       store_error.set(error.message)
-      if (item_to_update.deleted) {
-        data.update((items) => {
-          items.splice(deleted_index, 0, current_item)
-          return items
-        })
-      } else {
-        data.update((items) => {
-          return items.map((item) => {
-            if (item.id === item_to_update.id) {
-              return current_item
-            }
-            return item
-          })
-        })
-      }
+      data.set(current_items)
     } else {
       data.update((items) => {
-        const new_data = items.map((item) => {
-          if (item.id === item_to_update.id) {
-            return {
-              ...item,
-              ...updated_item as T,
-            }
+        const index = items.findIndex(item => item.id === item_to_update.id)
+        if (index !== -1) { // if it was deleted, it won't be found
+          const updated = {
+            ...items[index],
+            ...updated_item as T,
           }
-          return item
-        })
-        set_idb(cache_key, new_data)
-        return new_data
+
+          const new_data = [
+            ...items.slice(0, index),
+            ...items.slice(index + 1),
+            updated,
+          ]
+
+          set_idb(cache_key, new_data)
+          return new_data
+        }
+
+        return items
       })
     }
   }

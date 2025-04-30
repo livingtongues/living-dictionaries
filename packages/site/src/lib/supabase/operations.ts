@@ -3,7 +3,6 @@ import type { MultiString, TablesInsert, TablesUpdate } from '@living-dictionari
 import { page } from '$app/stores'
 import { goto, invalidate } from '$app/navigation'
 import { ENTRY_UPDATED_LOAD_TRIGGER } from '$lib/dbOperations'
-import { content_update } from '$api/db/content-update/_call'
 
 function randomUUID() {
   return window.crypto.randomUUID()

@@ -1,12 +1,13 @@
-import type { EntryView, Tables } from '@living-dictionaries/types'
+import type { Tables } from '@living-dictionaries/types'
 import { get } from 'svelte/store'
 import { friendlyName } from './friendlyName'
 import { get_orthography_headers, get_sense_headers } from './assignHeadersForCsv'
-import { display_speaker_gender, format_orthographies, format_senses, get_first_speaker_from_first_sound_file } from './assignFormattedEntryValuesForCsv'
+import { display_speaker_gender, format_orthographies, format_senses } from './assignFormattedEntryValuesForCsv'
 import { stripHTMLTags } from './stripHTMLTags'
 import { decades } from '$lib/components/media/ages'
 import { translate_part_of_speech, translate_part_of_speech_abbreviation, translate_semantic_domain_keys } from '$lib/transformers/translate_keys_to_current_language'
 import { page } from '$app/stores'
+import type { EntryData } from '$lib/search/types'
 
 export enum StandardEntryCSVFields {
   ID = 'Entry Id',
@@ -31,7 +32,7 @@ export type EntryForCSV = {
   [key in EntryForCSVKeys]?: string; // TODO: where type problems exist, update using row.type.ts as a reference
 }
 
-export function translate_entries({ entries, photos, sentences, dialects }: { entries: EntryView[], photos: Tables<'photos'>[], sentences: Tables<'sentences'>[], dialects: Tables<'dialects'>[] }) {
+export function translate_entries({ entries }: { entries: EntryData[] }) {
   const $page = get(page)
 
   return entries.map((entry) => {
@@ -40,16 +41,14 @@ export function translate_entries({ entries, photos, sentences, dialects }: { en
       parts_of_speech: sense.parts_of_speech?.map(pos => translate_part_of_speech(pos, $page.data.t)),
       parts_of_speech_abbreviations: sense.parts_of_speech?.map(pos => translate_part_of_speech_abbreviation(pos, $page.data.t)),
       semantic_domains: sense.semantic_domains?.map(domain => translate_semantic_domain_keys(domain, $page.data.t)),
-      photo_urls: sense.photo_ids?.map((photo_id) => {
-        const { storage_path } = photos.find(photo => photo.id === photo_id)
+      photo_urls: (sense.photos || []).map(({ storage_path }) => {
         return $page.data.url_from_storage_path(storage_path)
       }),
-      sentences: sense.sentence_ids?.map(sentence_id => sentences.find(sentence => sentence.id === sentence_id)),
     }))
 
     return {
       ...entry,
-      dialects: entry.dialect_ids?.map(dialect_id => dialects.find(dialect => dialect.id === dialect_id).name.default),
+      dialects: (entry.dialects).map(({ name }) => name.default),
       senses,
     }
   })
@@ -67,12 +66,11 @@ export function getCsvHeaders(entries: ReturnType<typeof translate_entries>, { o
 
 export function formatCsvEntries(
   entries: ReturnType<typeof translate_entries>,
-  speakers: Tables<'speakers'>[],
   url_from_storage_path: (path: string) => string,
   { orthographies }: Tables<'dictionaries'>,
 ): EntryForCSV[] {
   return entries.map((entry) => {
-    const speaker = get_first_speaker_from_first_sound_file(entry, speakers)
+    const speaker = entry.audios?.[0].speakers?.[0]
 
     const formatted_entry: EntryForCSV = {
       ID: entry.id,
@@ -84,7 +82,7 @@ export function formatCsvEntries(
       notes: stripHTMLTags(entry.main.notes?.default),
       source: entry.main.sources?.join(' | '),
       soundSource: entry.audios ? url_from_storage_path(entry.audios?.[0]?.storage_path) : null,
-      soundFile: entry.audios ? friendlyName(entry, entry.audios?.[0]?.storage_path) : null,
+      soundFile: entry.audios ? friendlyName(entry as unknown as EntryData, entry.audios?.[0]?.storage_path) : null,
       speakerName: speaker?.name,
       speakerHometown: speaker?.birthplace,
       speakerAge: decades[speaker?.decade],

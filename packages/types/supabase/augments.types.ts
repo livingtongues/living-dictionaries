@@ -3,7 +3,6 @@ import type { Coordinates } from '../coordinates.interface'
 import type { DictionaryPhoto } from '../photo.interface'
 import type { HostedVideo, UnsupportedFields } from '../.'
 import type { Change } from './content-update.interface'
-import type { AudioWithSpeakerIds, EntryMainFields, SenseWithSentences } from './entry.interface'
 import type { ImportContentUpdate } from './content-import.interface'
 import type { Orthography } from './orthography.interface'
 import type { DictionaryMetadata } from './dictionary.types'
@@ -165,44 +164,8 @@ export interface DatabaseAugments {
           metadata: DictionaryMetadata | null
         }
       }
-      entries_view: {
-        Row: {
-          main: EntryMainFields
-          senses: SenseWithSentences[] | null
-          audios: AudioWithSpeakerIds[] | null
-          dialect_ids: string[] | null
-          tag_ids: string[] | null
-        }
-      }
-      materialized_entries_view: {
-        Row: {
-          main: EntryMainFields
-          senses: SenseWithSentences[] | null
-          audios: AudioWithSpeakerIds[] | null
-          dialect_ids: string[] | null
-          tag_ids: string[] | null
-        }
-      }
     }
     Functions: {
-      entries_from_timestamp: {
-        Returns: {
-          main: EntryMainFields
-          senses: SenseWithSentences[] | null
-          audios: AudioWithSpeakerIds[] | null
-          dialect_ids: string[] | null
-          tag_ids: string[] | null
-        }
-      }
-      entry_by_id: {
-        Returns: {
-          main: EntryMainFields
-          senses: SenseWithSentences[] | null
-          audios: AudioWithSpeakerIds[] | null
-          dialect_ids: string[] | null
-          tag_ids: string[] | null
-        }[]
-      }
       get_my_claim: {
         Returns: any
       }

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { SenseWithSentences, Tables, TablesUpdate } from '@living-dictionaries/types'
+  import type { Tables, TablesUpdate } from '@living-dictionaries/types'
   import EntryField from './EntryField.svelte'
   import EntrySentence from './EntrySentence.svelte'
   import { page } from '$app/stores'
@@ -7,8 +7,9 @@
   import EntryPartOfSpeech from '$lib/components/entry/EntryPartOfSpeech.svelte'
   import EntrySemanticDomains from '$lib/components/entry/EntrySemanticDomains.svelte'
   import { DICTIONARIES_WITH_VARIANTS } from '$lib/constants'
+  import type { EntryData } from '$lib/search/types'
 
-  export let sense: SenseWithSentences
+  export let sense: EntryData['senses'][0]
   export let glossLanguages: Tables<'dictionaries'>['gloss_languages']
   export let can_edit = false
 
@@ -93,15 +94,10 @@
     update_sense({ noun_class: new_value })
   }} />
 
-{#if sense.sentence_ids?.length}
-  {#each sense.sentence_ids as sentence_id}
-    {@const sentence = $sentences.length && $sentences.find(sentence => sentence.id === sentence_id)}
-
-    {#if sentence}
-      <EntrySentence {sentence} {can_edit} sense_id={sense.id} glossingLanguages={glossingLanguages} />
-    {/if}
+{#if sense.sentences?.length}
+  {#each sense.sentences as sentence}
+    <EntrySentence {sentence} {can_edit} sense_id={sense.id} glossingLanguages={glossingLanguages} />
   {/each}
-
 {:else}
   <EntrySentence sentence={{ text: {}, id: null, translation: null }} {can_edit} sense_id={sense.id} glossingLanguages={glossingLanguages} />
 {/if}

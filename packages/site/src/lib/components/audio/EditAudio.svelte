@@ -1,6 +1,5 @@
 <script lang="ts">
   import { Button, JSON, Modal } from 'svelte-pieces'
-  import type { AudioWithSpeakerIds, EntryView } from '@living-dictionaries/types'
   import type { Readable } from 'svelte/motion'
   import type { AudioVideoUploadStatus } from './upload-audio'
   import { page } from '$app/stores'
@@ -8,10 +7,11 @@
   import SelectAudio from '$lib/components/audio/SelectAudio.svelte'
   import RecordAudio from '$lib/components/audio/RecordAudio.svelte'
   import SelectSpeaker from '$lib/components/media/SelectSpeaker.svelte'
+  import type { EntryData } from '$lib/search/types'
 
   export let on_close: () => void
-  export let entry: EntryView
-  export let sound_file: AudioWithSpeakerIds
+  export let entry: EntryData
+  export let sound_file: EntryData['audios'][0]
   let upload_triggered = false
   $: ({ admin, dbOperations, url_from_storage_path } = $page.data)
   let readyToRecord: boolean
@@ -24,7 +24,7 @@
     audioBlob = undefined
   }
 
-  $: initial_speaker_id = sound_file?.speaker_ids?.[0]
+  $: initial_speaker_id = sound_file?.speakers?.[0].id
 
   function startUpload(speaker_id: string): Readable<AudioVideoUploadStatus> {
     const uploadStore = dbOperations.addAudio({

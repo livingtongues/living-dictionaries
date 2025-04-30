@@ -1,5 +1,5 @@
 import type { Unsubscriber } from 'svelte/store'
-import type { LayoutData as DictionaryLayoutData } from '../../routes/[dictionaryId]/$types'
+import type { create_entries_data_store } from '$lib/supabase/entries-data-store'
 
 export type View = 'list' | 'table' | 'print' | 'gallery'
 
@@ -18,6 +18,8 @@ export interface QueryParams {
   // Boolean facets
   has_audio?: boolean
   no_audio?: boolean
+  has_sentence?: boolean
+  no_sentence?: boolean
   has_image?: boolean
   no_image?: boolean
   has_video?: boolean
@@ -39,5 +41,5 @@ export type FilterListKeys = ArrayFilters & keyof QueryParams
 
 export type StoreValue<T> = T extends { subscribe: (run: (value: infer R) => void) => Unsubscriber } ? R : never
 
-export type EntriesData = StoreValue<DictionaryLayoutData['entries_data']>
+type EntriesData = StoreValue<ReturnType<typeof create_entries_data_store>>
 export type EntryData = EntriesData[number]

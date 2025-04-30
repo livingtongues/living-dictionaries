@@ -1,14 +1,15 @@
 <script lang="ts">
-  import type { EntryView, Tables } from '@living-dictionaries/types'
+  import type { Tables } from '@living-dictionaries/types'
   import Image from '$lib/components/image/Image.svelte'
   import { order_glosses } from '$lib/helpers/glosses'
   import { page } from '$app/stores'
+  import type { EntryData } from '$lib/search/types'
 
-  export let entry: EntryView
+  export let entry: EntryData
   export let can_edit = false
   export let dictionary: Tables<'dictionaries'>
 
-  $: ({ dbOperations, photos } = $page.data)
+  $: ({ dbOperations } = $page.data)
 
   $: glosses = order_glosses({
     glosses: entry.senses?.[0]?.glosses,
@@ -17,8 +18,7 @@
     label: true,
   })
 
-  $: first_photo_id = entry.senses[0].photo_ids?.[0]
-  $: first_photo = (first_photo_id && $photos.length) ? $photos.find(photo => photo.id === first_photo_id) : null
+  $: first_photo = entry.senses?.[0]?.photos?.[0]
 </script>
 
 {#if first_photo}
@@ -30,7 +30,7 @@
           title={entry.main.lexeme.default}
           gcs={first_photo.serving_url}
           {can_edit}
-          on_delete_image={async () => await dbOperations.update_photo({ photo: { deleted: 'true' }, photo_id: first_photo_id })} />
+          on_delete_image={async () => await dbOperations.update_photo({ photo: { deleted: 'true' }, photo_id: first_photo.id })} />
       </div>
       <a href="/{dictionary.url}/entry/{entry.id}" style="background: #f3f3f3;" class="block p-[10px] h-60px">
         <div class="font-semibold">
