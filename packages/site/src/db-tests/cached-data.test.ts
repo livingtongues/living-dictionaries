@@ -379,7 +379,7 @@ describe(cached_data_store, () => {
     expect(updated_items).toHaveLength(1)
   })
 
-  test('speakers_view', async () => {
+  test('speakers', async () => {
     const speakers: TablesInsert<'speakers'>[] = [{
       id: incremental_consistent_uuid(0),
       dictionary_id,
@@ -393,7 +393,7 @@ describe(cached_data_store, () => {
 
     const store = cached_data_store({
       dictionary_id,
-      table: 'speakers_view',
+      table: 'speakers',
       supabase: anon_supabase,
       log,
     })
@@ -424,12 +424,12 @@ describe(cached_data_store, () => {
       ]
     `)
 
-    const { data: speakers_view } = await anon_supabase.from('speakers_view')
+    const { data: _speakers } = await anon_supabase.from('speakers')
       .select()
       .limit(1000)
       .order('updated_at', { ascending: true })
       .gt('updated_at', '1971-01-01T00:00:00Z')
-    expect(speakers_view).toEqual($store)
+    expect(_speakers).toEqual($store)
   })
 })
 

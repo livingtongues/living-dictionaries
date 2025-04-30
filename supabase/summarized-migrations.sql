@@ -1,6 +1,7 @@
 CREATE TABLE senses (
   id uuid unique primary key NOT NULL, -- generated on client so users can create a sense offline and keep editing it
   entry_id text NOT NULL REFERENCES entries,
+  dictionary_id text NOT NULL REFERENCES dictionaries ON DELETE CASCADE,
   "definition" jsonb, -- MultiString
   glosses jsonb, -- MultiString
   parts_of_speech text[],
@@ -8,9 +9,9 @@ CREATE TABLE senses (
   write_in_semantic_domains text[],
   noun_class character varying,
   created_at timestamp with time zone DEFAULT now() NOT NULL,
-  created_by text NOT NULL, -- TODO: go through existing senses and connect to user_id, then change to uuid and add REFERENCES auth.users
+  created_by uuid NOT NULL DEFAULT auth.uid() REFERENCES auth.users,
   updated_at timestamp with time zone DEFAULT now() NOT NULL,
-  updated_by text NOT NULL, -- TODO: go through existing senses and connect to user_id, then change to uuid and add REFERENCES auth.users
+  updated_by uuid NOT NULL DEFAULT auth.uid() REFERENCES auth.users,
   deleted timestamp with time zone,
   plural_form jsonb, -- MultiString
   variant jsonb -- MultiString
@@ -89,9 +90,9 @@ CREATE TABLE entries (
   unsupported_fields jsonb, -- to place fields from imports like FLEx that don't fit into the current fields
   elicitation_id text, -- Elicitation Id for Munda languages or Swadesh Composite number list from Comparalex, used for Onondaga custom sort
   created_at timestamp with time zone DEFAULT now() NOT NULL,
-  created_by uuid NOT NULL REFERENCES auth.users,
+  created_by uuid NOT NULL DEFAULT auth.uid() REFERENCES auth.users,
   updated_at timestamp with time zone DEFAULT now() NOT NULL,
-  updated_by uuid NOT NULL REFERENCES auth.users,
+  updated_by uuid NOT NULL DEFAULT auth.uid() REFERENCES auth.users,
   deleted timestamp with time zone
 );
 
@@ -103,9 +104,9 @@ CREATE TABLE texts (
   title jsonb NOT NULL, -- MultiString
   sentences jsonb NOT NULL, -- array of sentence ids to be able to know order, also includes paragraph breaks
   created_at timestamp with time zone DEFAULT now() NOT NULL,
-  created_by uuid NOT NULL REFERENCES auth.users,
+  created_by uuid NOT NULL DEFAULT auth.uid() REFERENCES auth.users,
   updated_at timestamp with time zone DEFAULT now() NOT NULL,
-  updated_by uuid NOT NULL REFERENCES auth.users,
+  updated_by uuid NOT NULL DEFAULT auth.uid() REFERENCES auth.users,
   deleted timestamp with time zone
 );
 
@@ -118,9 +119,9 @@ CREATE TABLE sentences (
   translation jsonb, -- MultiString
   text_id uuid REFERENCES texts, -- if part of a text
   created_at timestamp with time zone DEFAULT now() NOT NULL,
-  created_by uuid NOT NULL REFERENCES auth.users,
+  created_by uuid NOT NULL DEFAULT auth.uid() REFERENCES auth.users,
   updated_at timestamp with time zone DEFAULT now() NOT NULL,
-  updated_by uuid NOT NULL REFERENCES auth.users,
+  updated_by uuid NOT NULL DEFAULT auth.uid() REFERENCES auth.users,
   deleted timestamp with time zone
 );
 
@@ -129,9 +130,10 @@ ALTER TABLE sentences ENABLE ROW LEVEL SECURITY;
 CREATE TABLE senses_in_sentences (
   sense_id uuid NOT NULL REFERENCES senses ON DELETE CASCADE,
   sentence_id uuid NOT NULL REFERENCES sentences ON DELETE CASCADE,
-  created_by uuid NOT NULL REFERENCES auth.users,
+  created_by uuid NOT NULL DEFAULT auth.uid() REFERENCES auth.users,
   created_at timestamp with time zone NOT NULL DEFAULT now(),
   deleted timestamp with time zone,
+  dictionary_id text NOT NULL REFERENCES dictionaries ON DELETE CASCADE,
   PRIMARY KEY (sense_id, sentence_id)
 );
 
@@ -162,9 +164,9 @@ CREATE TABLE videos (
   source text,
   videographer text,
   created_at timestamp with time zone DEFAULT now() NOT NULL,
-  created_by uuid NOT NULL REFERENCES auth.users,
+  created_by uuid NOT NULL DEFAULT auth.uid() REFERENCES auth.users,
   updated_at timestamp with time zone DEFAULT now() NOT NULL,
-  updated_by uuid NOT NULL REFERENCES auth.users,
+  updated_by uuid NOT NULL DEFAULT auth.uid() REFERENCES auth.users,
   deleted timestamp with time zone
 );
 
@@ -179,9 +181,9 @@ CREATE TABLE audio (
   storage_path text NOT NULL,
   source text,
   created_at timestamp with time zone DEFAULT now() NOT NULL,
-  created_by uuid NOT NULL REFERENCES auth.users,
+  created_by uuid NOT NULL DEFAULT auth.uid() REFERENCES auth.users,
   updated_at timestamp with time zone DEFAULT now() NOT NULL,
-  updated_by uuid NOT NULL REFERENCES auth.users,
+  updated_by uuid NOT NULL DEFAULT auth.uid() REFERENCES auth.users,
   deleted timestamp with time zone
 );
 
@@ -198,9 +200,9 @@ CREATE TABLE speakers (
   gender gender,
   birthplace text,
   created_at timestamp with time zone DEFAULT now() NOT NULL,
-  created_by uuid NOT NULL REFERENCES auth.users,
+  created_by uuid NOT NULL DEFAULT auth.uid() REFERENCES auth.users,
   updated_at timestamp with time zone DEFAULT now() NOT NULL,
-  updated_by uuid NOT NULL REFERENCES auth.users,
+  updated_by uuid NOT NULL DEFAULT auth.uid() REFERENCES auth.users,
   deleted timestamp with time zone
 );
 
@@ -212,8 +214,9 @@ CREATE TABLE audio_speakers (
   audio_id uuid NOT NULL REFERENCES audio ON DELETE CASCADE,
   speaker_id uuid NOT NULL REFERENCES speakers ON DELETE CASCADE,
   created_at timestamp with time zone DEFAULT now() NOT NULL,
-  created_by uuid NOT NULL REFERENCES auth.users,
+  created_by uuid NOT NULL DEFAULT auth.uid() REFERENCES auth.users,
   deleted timestamp with time zone,
+  dictionary_id text NOT NULL REFERENCES dictionaries ON DELETE CASCADE,
   PRIMARY KEY (audio_id, speaker_id)
 );
 
@@ -223,8 +226,9 @@ CREATE TABLE video_speakers (
   video_id uuid NOT NULL REFERENCES videos ON DELETE CASCADE,
   speaker_id uuid NOT NULL REFERENCES speakers ON DELETE CASCADE,
   created_at timestamp with time zone DEFAULT now() NOT NULL,
-  created_by uuid NOT NULL REFERENCES auth.users,
+  created_by uuid NOT NULL DEFAULT auth.uid() REFERENCES auth.users,
   deleted timestamp with time zone,
+  dictionary_id text NOT NULL REFERENCES dictionaries ON DELETE CASCADE,
   PRIMARY KEY (video_id, speaker_id)
 );
 
@@ -234,8 +238,9 @@ CREATE TABLE sense_videos (
   sense_id uuid NOT NULL REFERENCES senses ON DELETE CASCADE,
   video_id uuid NOT NULL REFERENCES videos ON DELETE CASCADE,
   created_at timestamp with time zone DEFAULT now() NOT NULL,
-  created_by uuid NOT NULL REFERENCES auth.users,
+  created_by uuid NOT NULL DEFAULT auth.uid() REFERENCES auth.users,
   deleted timestamp with time zone,
+  dictionary_id text NOT NULL REFERENCES dictionaries ON DELETE CASCADE,
   PRIMARY KEY (sense_id, video_id)
 );
 
@@ -245,8 +250,9 @@ CREATE TABLE sentence_videos (
   sentence_id uuid NOT NULL REFERENCES sentences ON DELETE CASCADE,
   video_id uuid NOT NULL REFERENCES videos ON DELETE CASCADE,
   created_at timestamp with time zone DEFAULT now() NOT NULL,
-  created_by uuid NOT NULL REFERENCES auth.users,
+  created_by uuid NOT NULL DEFAULT auth.uid() REFERENCES auth.users,
   deleted timestamp with time zone,
+  dictionary_id text NOT NULL REFERENCES dictionaries ON DELETE CASCADE,
   PRIMARY KEY (sentence_id, video_id)
 );
 
@@ -256,8 +262,9 @@ CREATE TABLE sense_photos (
   sense_id uuid NOT NULL REFERENCES senses ON DELETE CASCADE,
   photo_id uuid NOT NULL REFERENCES photos ON DELETE CASCADE,
   created_at timestamp with time zone DEFAULT now() NOT NULL,
-  created_by uuid NOT NULL REFERENCES auth.users,
+  created_by uuid NOT NULL DEFAULT auth.uid() REFERENCES auth.users,
   deleted timestamp with time zone,
+  dictionary_id text NOT NULL REFERENCES dictionaries ON DELETE CASCADE,
   PRIMARY KEY (sense_id, photo_id)
 );
 
@@ -267,8 +274,9 @@ CREATE TABLE sentence_photos (
   sentence_id uuid NOT NULL REFERENCES sentences ON DELETE CASCADE,
   photo_id uuid NOT NULL REFERENCES photos ON DELETE CASCADE,
   created_at timestamp with time zone DEFAULT now() NOT NULL,
-  created_by uuid NOT NULL REFERENCES auth.users,
+  created_by uuid NOT NULL DEFAULT auth.uid() REFERENCES auth.users,
   deleted timestamp with time zone,
+  dictionary_id text NOT NULL REFERENCES dictionaries ON DELETE CASCADE,
   PRIMARY KEY (sentence_id, photo_id)
 );
 
@@ -366,9 +374,9 @@ CREATE TABLE dialects (
   dictionary_id text NOT NULL REFERENCES dictionaries ON DELETE CASCADE,
   name jsonb NOT NULL, -- MultiString
   created_at timestamp with time zone DEFAULT now() NOT NULL,
-  created_by uuid NOT NULL REFERENCES auth.users,
+  created_by uuid NOT NULL DEFAULT auth.uid() REFERENCES auth.users,
   updated_at timestamp with time zone DEFAULT now() NOT NULL,
-  updated_by uuid NOT NULL REFERENCES auth.users,
+  updated_by uuid NOT NULL DEFAULT auth.uid() REFERENCES auth.users,
   deleted timestamp with time zone
 );
 
@@ -381,9 +389,10 @@ FOR SELECT USING (true);
 CREATE TABLE entry_dialects (
   entry_id text NOT NULL REFERENCES entries ON DELETE CASCADE,
   dialect_id uuid NOT NULL REFERENCES dialects ON DELETE CASCADE,
-  created_by uuid NOT NULL REFERENCES auth.users,
+  created_by uuid NOT NULL DEFAULT auth.uid() REFERENCES auth.users,
   created_at timestamp with time zone DEFAULT now() NOT NULL,
   deleted timestamp with time zone,
+  dictionary_id text NOT NULL REFERENCES dictionaries ON DELETE CASCADE,
   PRIMARY KEY (entry_id, dialect_id)
 );
 
@@ -394,19 +403,6 @@ BEFORE UPDATE ON dialects
 FOR EACH ROW
 EXECUTE FUNCTION set_created_by();
 
-CREATE VIEW speakers_view AS
-SELECT
-  id,
-  dictionary_id,
-  name,
-  decade,
-  gender,
-  birthplace,
-  created_at,
-  updated_at,
-  deleted
-FROM speakers;
-
 CREATE POLICY "Anyone can view sentences"
 ON sentences 
 FOR SELECT USING (true);
@@ -414,29 +410,6 @@ FOR SELECT USING (true);
 CREATE POLICY "Anyone can view photos"
 ON photos 
 FOR SELECT USING (true);
-
-CREATE VIEW videos_view AS
-SELECT
-  videos.id AS id,
-  videos.dictionary_id AS dictionary_id,
-  videos.storage_path AS storage_path,
-  videos.source AS source,
-  videos.videographer AS videographer,
-  videos.hosted_elsewhere AS hosted_elsewhere,
-  videos.text_id AS text_id,
-  video_speakers.speaker_ids AS speaker_ids,
-  videos.created_at AS created_at,
-  videos.updated_at AS updated_at,
-  videos.deleted AS deleted
-FROM videos
-LEFT JOIN (
-  SELECT
-    video_id,
-    jsonb_agg(speaker_id) AS speaker_ids
-  FROM video_speakers
-  WHERE deleted IS NULL
-  GROUP BY video_id
-) AS video_speakers ON video_speakers.video_id = videos.id;
 
 CREATE EXTENSION IF NOT EXISTS pg_cron WITH SCHEMA pg_catalog;
 GRANT USAGE ON SCHEMA cron TO postgres;
@@ -479,9 +452,9 @@ CREATE TABLE tags (
   name text NOT NULL,
   private boolean,
   created_at timestamp with time zone DEFAULT now() NOT NULL,
-  created_by uuid NOT NULL REFERENCES auth.users,
+  created_by uuid NOT NULL DEFAULT auth.uid() REFERENCES auth.users,
   updated_at timestamp with time zone DEFAULT now() NOT NULL,
-  updated_by uuid NOT NULL REFERENCES auth.users,
+  updated_by uuid NOT NULL DEFAULT auth.uid() REFERENCES auth.users,
   deleted timestamp with time zone
 );
 
@@ -494,9 +467,10 @@ FOR SELECT USING (true);
 CREATE TABLE entry_tags (
   entry_id text NOT NULL REFERENCES entries ON DELETE CASCADE,
   tag_id uuid NOT NULL REFERENCES tags ON DELETE CASCADE,
-  created_by uuid NOT NULL REFERENCES auth.users,
+  created_by uuid NOT NULL DEFAULT auth.uid() REFERENCES auth.users,
   created_at timestamp with time zone DEFAULT now() NOT NULL,
   deleted timestamp with time zone,
+  dictionary_id text NOT NULL REFERENCES dictionaries ON DELETE CASCADE,
   PRIMARY KEY (entry_id, tag_id)
 );
 
@@ -775,7 +749,7 @@ CREATE TYPE role_enum AS ENUM ('manager', 'contributor');
 
 CREATE TABLE dictionary_roles (
   dictionary_id text NOT NULL REFERENCES dictionaries ON DELETE CASCADE,
-  user_id uuid NOT NULL REFERENCES auth.users ON DELETE CASCADE DEFAULT auth.uid(),
+  user_id uuid NOT NULL DEFAULT auth.uid() REFERENCES auth.users ON DELETE CASCADE,
   role role_enum NOT NULL,
   created_at timestamp with time zone NOT NULL DEFAULT now(),
   invited_by uuid REFERENCES auth.users,
@@ -849,7 +823,7 @@ CREATE TABLE invites (
   role role_enum NOT NULL,
   status status_enum NOT NULL,
   created_at timestamp with time zone NOT NULL DEFAULT now(),
-  created_by uuid NOT NULL REFERENCES auth.users default auth.uid()
+  created_by uuid NOT NULL default auth.uid() REFERENCES auth.users
 );
 
 ALTER TABLE invites ENABLE ROW LEVEL SECURITY;
@@ -909,9 +883,9 @@ CREATE TABLE dictionary_info (
   citation text,
   write_in_collaborators text[],
   created_at timestamp with time zone DEFAULT now() NOT NULL,
-  created_by uuid NOT NULL REFERENCES auth.users default auth.uid(),
+  created_by uuid NOT NULL default auth.uid() REFERENCES auth.users,
   updated_at timestamp with time zone DEFAULT now() NOT NULL,
-  updated_by uuid NOT NULL REFERENCES auth.users default auth.uid(),
+  updated_by uuid NOT NULL default auth.uid() REFERENCES auth.users,
   PRIMARY KEY (id)
 );
 
@@ -1358,3 +1332,540 @@ BEGIN
     GROUP BY auth.users.id, user_data.unsubscribed_from_emails, user_data.updated_at;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
+
+CREATE INDEX IF NOT EXISTS idx_senses_dictionary_id ON senses (dictionary_id);
+CREATE INDEX IF NOT EXISTS idx_audio_speakers_dictionary_id ON audio_speakers (dictionary_id);
+CREATE INDEX IF NOT EXISTS idx_video_speakers_dictionary_id ON video_speakers (dictionary_id);
+CREATE INDEX IF NOT EXISTS idx_entry_tags_dictionary_id ON entry_tags (dictionary_id);
+CREATE INDEX IF NOT EXISTS idx_entry_dialects_dictionary_id ON entry_dialects (dictionary_id);
+CREATE INDEX IF NOT EXISTS idx_sense_photos_dictionary_id ON sense_photos (dictionary_id);
+CREATE INDEX IF NOT EXISTS idx_sense_videos_dictionary_id ON sense_videos (dictionary_id);
+CREATE INDEX IF NOT EXISTS idx_senses_in_sentences_dictionary_id ON senses_in_sentences (dictionary_id);
+CREATE INDEX IF NOT EXISTS idx_sentence_videos_dictionary_id ON sentence_videos (dictionary_id);
+CREATE INDEX IF NOT EXISTS idx_sentence_photos_dictionary_id ON sentence_photos (dictionary_id);
+CREATE INDEX IF NOT EXISTS idx_texts_dictionary_id ON texts (dictionary_id);
+
+CREATE POLICY "Anyone can view entries"
+ON entries
+FOR SELECT USING(true);
+
+CREATE POLICY "Anyone can view senses"
+ON senses
+FOR SELECT USING(true);
+
+CREATE POLICY "Anyone can view audio"
+ON audio
+FOR SELECT USING(true);
+
+CREATE POLICY "Anyone can view speakers"
+ON speakers
+FOR SELECT USING(true);
+
+CREATE POLICY "Anyone can view audio_speakers"
+ON audio_speakers
+FOR SELECT USING(true);
+
+CREATE POLICY "Anyone can view videos"
+ON videos
+FOR SELECT USING(true);
+
+CREATE POLICY "Anyone can view entry_tags"
+ON entry_tags
+FOR SELECT USING(true);
+
+CREATE POLICY "Anyone can view entry_dialects"
+ON entry_dialects
+FOR SELECT USING(true);
+
+CREATE POLICY "Anyone can view sense_photos"
+ON sense_photos
+FOR SELECT USING(true);
+
+CREATE POLICY "Anyone can view sense_videos"
+ON sense_videos
+FOR SELECT USING(true);
+
+CREATE POLICY "Anyone can view senses_in_sentences"
+ON senses_in_sentences
+FOR SELECT USING(true);
+
+CREATE POLICY "Anyone can view sentence_photos"
+ON sentence_photos
+FOR SELECT USING(true);
+
+CREATE POLICY "Anyone can view sentence_videos"
+ON sentence_videos
+FOR SELECT USING(true);
+
+CREATE POLICY "Anyone can view texts"
+ON texts
+FOR SELECT USING(true);
+
+CREATE POLICY "Managers and contributors can insert entries."
+ON entries FOR INSERT
+TO authenticated
+WITH CHECK (
+  EXISTS (
+    SELECT 1
+    FROM dictionary_roles
+    WHERE dictionary_roles.dictionary_id = entries.dictionary_id
+      AND dictionary_roles.user_id = auth.uid()
+      AND dictionary_roles.role IN ('manager', 'contributor')
+  )
+);
+
+CREATE POLICY "Managers and contributors can update entries."
+ON entries FOR UPDATE
+TO authenticated
+USING (
+  EXISTS (
+    SELECT 1
+    FROM dictionary_roles
+    WHERE dictionary_roles.dictionary_id = entries.dictionary_id
+      AND dictionary_roles.user_id = auth.uid()
+      AND dictionary_roles.role IN ('manager', 'contributor')
+  )
+);
+
+CREATE POLICY "Managers and contributors can insert senses."
+ON senses FOR INSERT
+TO authenticated
+WITH CHECK (
+  EXISTS (
+    SELECT 1
+    FROM dictionary_roles
+    WHERE dictionary_roles.dictionary_id = senses.dictionary_id
+      AND dictionary_roles.user_id = auth.uid()
+      AND dictionary_roles.role IN ('manager', 'contributor')
+  )
+);
+
+CREATE POLICY "Managers and contributors can update senses."
+ON senses FOR UPDATE
+TO authenticated
+USING (
+  EXISTS (
+    SELECT 1
+    FROM dictionary_roles
+    WHERE dictionary_roles.dictionary_id = senses.dictionary_id
+      AND dictionary_roles.user_id = auth.uid()
+      AND dictionary_roles.role IN ('manager', 'contributor')
+  )
+);
+
+CREATE POLICY "Managers and contributors can insert audio."
+ON audio FOR INSERT
+TO authenticated
+WITH CHECK (
+  EXISTS (
+    SELECT 1
+    FROM dictionary_roles
+    WHERE dictionary_roles.dictionary_id = audio.dictionary_id
+      AND dictionary_roles.user_id = auth.uid()
+      AND dictionary_roles.role IN ('manager', 'contributor')
+  )
+);
+
+CREATE POLICY "Managers and contributors can update audio."
+ON audio FOR UPDATE
+TO authenticated
+USING (
+  EXISTS (
+    SELECT 1
+    FROM dictionary_roles
+    WHERE dictionary_roles.dictionary_id = audio.dictionary_id
+      AND dictionary_roles.user_id = auth.uid()
+      AND dictionary_roles.role IN ('manager', 'contributor')
+  )
+);
+
+CREATE POLICY "Managers and contributors can insert speakers."
+ON speakers FOR INSERT
+TO authenticated
+WITH CHECK (
+  EXISTS (
+    SELECT 1
+    FROM dictionary_roles
+    WHERE dictionary_roles.dictionary_id = speakers.dictionary_id
+      AND dictionary_roles.user_id = auth.uid()
+      AND dictionary_roles.role IN ('manager', 'contributor')
+  )
+);
+
+CREATE POLICY "Managers and contributors can update speakers."
+ON speakers FOR UPDATE
+TO authenticated
+USING (
+  EXISTS (
+    SELECT 1
+    FROM dictionary_roles
+    WHERE dictionary_roles.dictionary_id = speakers.dictionary_id
+      AND dictionary_roles.user_id = auth.uid()
+      AND dictionary_roles.role IN ('manager', 'contributor')
+  )
+);
+
+CREATE POLICY "Managers and contributors can insert audio_speakers."
+ON audio_speakers FOR INSERT
+TO authenticated
+WITH CHECK (
+  EXISTS (
+    SELECT 1
+    FROM dictionary_roles
+    WHERE dictionary_roles.dictionary_id = audio_speakers.dictionary_id
+      AND dictionary_roles.user_id = auth.uid()
+      AND dictionary_roles.role IN ('manager', 'contributor')
+  )
+);
+
+CREATE POLICY "Managers and contributors can update audio_speakers."
+ON audio_speakers FOR UPDATE
+TO authenticated
+USING (
+  EXISTS (
+    SELECT 1
+    FROM dictionary_roles
+    WHERE dictionary_roles.dictionary_id = audio_speakers.dictionary_id
+      AND dictionary_roles.user_id = auth.uid()
+      AND dictionary_roles.role IN ('manager', 'contributor')
+  )
+);
+
+CREATE POLICY "Managers and contributors can insert tags."
+ON tags FOR INSERT
+TO authenticated
+WITH CHECK (
+  EXISTS (
+    SELECT 1
+    FROM dictionary_roles
+    WHERE dictionary_roles.dictionary_id = tags.dictionary_id
+      AND dictionary_roles.user_id = auth.uid()
+      AND dictionary_roles.role IN ('manager', 'contributor')
+  )
+);
+
+CREATE POLICY "Managers and contributors can update tags."
+ON tags FOR UPDATE
+TO authenticated
+USING (
+  EXISTS (
+    SELECT 1
+    FROM dictionary_roles
+    WHERE dictionary_roles.dictionary_id = tags.dictionary_id
+      AND dictionary_roles.user_id = auth.uid()
+      AND dictionary_roles.role IN ('manager', 'contributor')
+  )
+);
+
+CREATE POLICY "Managers and contributors can insert entry_tags."
+ON entry_tags FOR INSERT
+TO authenticated
+WITH CHECK (
+  EXISTS (
+    SELECT 1
+    FROM dictionary_roles
+    WHERE dictionary_roles.dictionary_id = entry_tags.dictionary_id
+      AND dictionary_roles.user_id = auth.uid()
+      AND dictionary_roles.role IN ('manager', 'contributor')
+  )
+);
+
+CREATE POLICY "Managers and contributors can update entry_tags."
+ON entry_tags FOR UPDATE
+TO authenticated
+USING (
+  EXISTS (
+    SELECT 1
+    FROM dictionary_roles
+    WHERE dictionary_roles.dictionary_id = entry_tags.dictionary_id
+      AND dictionary_roles.user_id = auth.uid()
+      AND dictionary_roles.role IN ('manager', 'contributor')
+  )
+);
+
+CREATE POLICY "Managers and contributors can insert dialects."
+ON dialects FOR INSERT
+TO authenticated
+WITH CHECK (
+  EXISTS (
+    SELECT 1
+    FROM dictionary_roles
+    WHERE dictionary_roles.dictionary_id = dialects.dictionary_id
+      AND dictionary_roles.user_id = auth.uid()
+      AND dictionary_roles.role IN ('manager', 'contributor')
+  )
+);
+
+CREATE POLICY "Managers and contributors can update dialects."
+ON dialects FOR UPDATE
+TO authenticated
+USING (
+  EXISTS (
+    SELECT 1
+    FROM dictionary_roles
+    WHERE dictionary_roles.dictionary_id = dialects.dictionary_id
+      AND dictionary_roles.user_id = auth.uid()
+      AND dictionary_roles.role IN ('manager', 'contributor')
+  )
+);
+
+CREATE POLICY "Managers and contributors can insert entry_dialects."
+ON entry_dialects FOR INSERT
+TO authenticated
+WITH CHECK (
+  EXISTS (
+    SELECT 1
+    FROM dictionary_roles
+    WHERE dictionary_roles.dictionary_id = entry_dialects.dictionary_id
+      AND dictionary_roles.user_id = auth.uid()
+      AND dictionary_roles.role IN ('manager', 'contributor')
+  )
+);
+
+CREATE POLICY "Managers and contributors can update entry_dialects."
+ON entry_dialects FOR UPDATE
+TO authenticated
+USING (
+  EXISTS (
+    SELECT 1
+    FROM dictionary_roles
+    WHERE dictionary_roles.dictionary_id = entry_dialects.dictionary_id
+      AND dictionary_roles.user_id = auth.uid()
+      AND dictionary_roles.role IN ('manager', 'contributor')
+  )
+);
+
+CREATE POLICY "Managers and contributors can insert photos."
+ON photos FOR INSERT
+TO authenticated
+WITH CHECK (
+  EXISTS (
+    SELECT 1
+    FROM dictionary_roles
+    WHERE dictionary_roles.dictionary_id = photos.dictionary_id
+      AND dictionary_roles.user_id = auth.uid()
+      AND dictionary_roles.role IN ('manager', 'contributor')
+  )
+);
+
+CREATE POLICY "Managers and contributors can update photos."
+ON photos FOR UPDATE
+TO authenticated
+USING (
+  EXISTS (
+    SELECT 1
+    FROM dictionary_roles
+    WHERE dictionary_roles.dictionary_id = photos.dictionary_id
+      AND dictionary_roles.user_id = auth.uid()
+      AND dictionary_roles.role IN ('manager', 'contributor')
+  )
+);
+
+CREATE POLICY "Managers and contributors can insert sense_photos."
+ON sense_photos FOR INSERT
+TO authenticated
+WITH CHECK (
+  EXISTS (
+    SELECT 1
+    FROM dictionary_roles
+    WHERE dictionary_roles.dictionary_id = sense_photos.dictionary_id
+      AND dictionary_roles.user_id = auth.uid()
+      AND dictionary_roles.role IN ('manager', 'contributor')
+  )
+);
+
+CREATE POLICY "Managers and contributors can update sense_photos."
+ON sense_photos FOR UPDATE
+TO authenticated
+USING (
+  EXISTS (
+    SELECT 1
+    FROM dictionary_roles
+    WHERE dictionary_roles.dictionary_id = sense_photos.dictionary_id
+      AND dictionary_roles.user_id = auth.uid()
+      AND dictionary_roles.role IN ('manager', 'contributor')
+  )
+);
+
+CREATE POLICY "Managers and contributors can insert videos."
+ON videos FOR INSERT
+TO authenticated
+WITH CHECK (
+  EXISTS (
+    SELECT 1
+    FROM dictionary_roles
+    WHERE dictionary_roles.dictionary_id = videos.dictionary_id
+      AND dictionary_roles.user_id = auth.uid()
+      AND dictionary_roles.role IN ('manager', 'contributor')
+  )
+);
+
+CREATE POLICY "Managers and contributors can update videos."
+ON videos FOR UPDATE
+TO authenticated
+USING (
+  EXISTS (
+    SELECT 1
+    FROM dictionary_roles
+    WHERE dictionary_roles.dictionary_id = videos.dictionary_id
+      AND dictionary_roles.user_id = auth.uid()
+      AND dictionary_roles.role IN ('manager', 'contributor')
+  )
+);
+
+CREATE POLICY "Managers and contributors can insert sense_videos."
+ON sense_videos FOR INSERT
+TO authenticated
+WITH CHECK (
+  EXISTS (
+    SELECT 1
+    FROM dictionary_roles
+    WHERE dictionary_roles.dictionary_id = sense_videos.dictionary_id
+      AND dictionary_roles.user_id = auth.uid()
+      AND dictionary_roles.role IN ('manager', 'contributor')
+  )
+);
+
+CREATE POLICY "Managers and contributors can update sense_videos."
+ON sense_videos FOR UPDATE
+TO authenticated
+USING (
+  EXISTS (
+    SELECT 1
+    FROM dictionary_roles
+    WHERE dictionary_roles.dictionary_id = sense_videos.dictionary_id
+      AND dictionary_roles.user_id = auth.uid()
+      AND dictionary_roles.role IN ('manager', 'contributor')
+  )
+);
+
+CREATE POLICY "Managers and contributors can insert sentences."
+ON sentences FOR INSERT
+TO authenticated
+WITH CHECK (
+  EXISTS (
+    SELECT 1
+    FROM dictionary_roles
+    WHERE dictionary_roles.dictionary_id = sentences.dictionary_id
+      AND dictionary_roles.user_id = auth.uid()
+      AND dictionary_roles.role IN ('manager', 'contributor')
+  )
+);
+
+CREATE POLICY "Managers and contributors can update sentences."
+ON sentences FOR UPDATE
+TO authenticated
+USING (
+  EXISTS (
+    SELECT 1
+    FROM dictionary_roles
+    WHERE dictionary_roles.dictionary_id = sentences.dictionary_id
+      AND dictionary_roles.user_id = auth.uid()
+      AND dictionary_roles.role IN ('manager', 'contributor')
+  )
+);
+
+CREATE POLICY "Managers and contributors can insert senses_in_sentences."
+ON senses_in_sentences FOR INSERT
+TO authenticated
+WITH CHECK (
+  EXISTS (
+    SELECT 1
+    FROM dictionary_roles
+    WHERE dictionary_roles.dictionary_id = senses_in_sentences.dictionary_id
+      AND dictionary_roles.user_id = auth.uid()
+      AND dictionary_roles.role IN ('manager', 'contributor')
+  )
+);
+
+CREATE POLICY "Managers and contributors can update senses_in_sentences."
+ON senses_in_sentences FOR UPDATE
+TO authenticated
+USING (
+  EXISTS (
+    SELECT 1
+    FROM dictionary_roles
+    WHERE dictionary_roles.dictionary_id = senses_in_sentences.dictionary_id
+      AND dictionary_roles.user_id = auth.uid()
+      AND dictionary_roles.role IN ('manager', 'contributor')
+  )
+);
+
+CREATE POLICY "Managers and contributors can insert sentence_videos."
+ON sentence_videos FOR INSERT
+TO authenticated
+WITH CHECK (
+  EXISTS (
+    SELECT 1
+    FROM dictionary_roles
+    WHERE dictionary_roles.dictionary_id = sentence_videos.dictionary_id
+      AND dictionary_roles.user_id = auth.uid()
+      AND dictionary_roles.role IN ('manager', 'contributor')
+  )
+);
+
+CREATE POLICY "Managers and contributors can update sentence_videos."
+ON sentence_videos FOR UPDATE
+TO authenticated
+USING (
+  EXISTS (
+    SELECT 1
+    FROM dictionary_roles
+    WHERE dictionary_roles.dictionary_id = sentence_videos.dictionary_id
+      AND dictionary_roles.user_id = auth.uid()
+      AND dictionary_roles.role IN ('manager', 'contributor')
+  )
+);
+
+CREATE POLICY "Managers and contributors can insert sentence_photos."
+ON sentence_photos FOR INSERT
+TO authenticated
+WITH CHECK (
+  EXISTS (
+    SELECT 1
+    FROM dictionary_roles
+    WHERE dictionary_roles.dictionary_id = sentence_photos.dictionary_id
+      AND dictionary_roles.user_id = auth.uid()
+      AND dictionary_roles.role IN ('manager', 'contributor')
+  )
+);
+
+CREATE POLICY "Managers and contributors can update sentence_photos."
+ON sentence_photos FOR UPDATE
+TO authenticated
+USING (
+  EXISTS (
+    SELECT 1
+    FROM dictionary_roles
+    WHERE dictionary_roles.dictionary_id = sentence_photos.dictionary_id
+      AND dictionary_roles.user_id = auth.uid()
+      AND dictionary_roles.role IN ('manager', 'contributor')
+  )
+);
+
+CREATE POLICY "Managers and contributors can insert texts."
+ON texts FOR INSERT
+TO authenticated
+WITH CHECK (
+  EXISTS (
+    SELECT 1
+    FROM dictionary_roles
+    WHERE dictionary_roles.dictionary_id = texts.dictionary_id
+      AND dictionary_roles.user_id = auth.uid()
+      AND dictionary_roles.role IN ('manager', 'contributor')
+  )
+);
+
+CREATE POLICY "Managers and contributors can update texts."
+ON texts FOR UPDATE
+TO authenticated
+USING (
+  EXISTS (
+    SELECT 1
+    FROM dictionary_roles
+    WHERE dictionary_roles.dictionary_id = texts.dictionary_id
+      AND dictionary_roles.user_id = auth.uid()
+      AND dictionary_roles.role IN ('manager', 'contributor')
+  )
+);
+

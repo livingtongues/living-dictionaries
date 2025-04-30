@@ -1,3 +1,6 @@
+import type { Unsubscriber } from 'svelte/store'
+import type { LayoutData as DictionaryLayoutData } from '../../routes/[dictionaryId]/$types'
+
 export type View = 'list' | 'table' | 'print' | 'gallery'
 
 export interface QueryParams {
@@ -33,3 +36,8 @@ export interface QueryParams {
 
 type ArrayFilters = 'tags' | 'dialects' | 'parts_of_speech' | 'semantic_domains' | 'speakers'
 export type FilterListKeys = ArrayFilters & keyof QueryParams
+
+export type StoreValue<T> = T extends { subscribe: (run: (value: infer R) => void) => Unsubscriber } ? R : never
+
+export type EntriesData = StoreValue<DictionaryLayoutData['entries_data']>
+export type EntryData = EntriesData[number]

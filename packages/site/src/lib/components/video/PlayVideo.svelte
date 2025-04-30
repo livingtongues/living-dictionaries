@@ -7,7 +7,7 @@
   $: ({ dbOperations, url_from_storage_path } = $page.data)
 
   export let lexeme: string
-  export let video: Tables<'videos_view'>
+  export let video: Tables<'videos'>
   export let can_edit = false
   export let on_close: () => void
 </script>

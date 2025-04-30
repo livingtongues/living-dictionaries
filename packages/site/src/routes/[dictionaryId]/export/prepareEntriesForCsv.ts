@@ -67,7 +67,7 @@ export function getCsvHeaders(entries: ReturnType<typeof translate_entries>, { o
 
 export function formatCsvEntries(
   entries: ReturnType<typeof translate_entries>,
-  speakers: Tables<'speakers_view'>[],
+  speakers: Tables<'speakers'>[],
   url_from_storage_path: (path: string) => string,
   { orthographies }: Tables<'dictionaries'>,
 ): EntryForCSV[] {

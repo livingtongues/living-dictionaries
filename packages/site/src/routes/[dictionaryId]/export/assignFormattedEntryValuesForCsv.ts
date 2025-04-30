@@ -6,7 +6,7 @@ export function find_part_of_speech_abbreviation(global_parts_of_speech: PartOfS
   return global_parts_of_speech.find(({ enName }) => enName === part_of_speech)?.enAbbrev
 }
 
-export function get_first_speaker_from_first_sound_file(entry: EntryView, speakers: Tables<'speakers_view'>[]) {
+export function get_first_speaker_from_first_sound_file(entry: EntryView, speakers: Tables<'speakers'>[]) {
   return speakers.find(speaker => speaker?.id === entry.audios?.[0].speaker_ids?.[0])
 }
 

@@ -183,12 +183,6 @@ export interface DatabaseAugments {
           tag_ids: string[] | null
         }
       }
-      videos_view: {
-        Row: {
-          hosted_elsewhere: HostedVideo | null
-          speaker_ids: string[] | null
-        }
-      }
     }
     Functions: {
       entries_from_timestamp: {

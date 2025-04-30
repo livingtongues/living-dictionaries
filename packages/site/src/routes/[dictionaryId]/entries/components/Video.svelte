@@ -4,7 +4,7 @@
   import { page } from '$app/stores'
 
   export let lexeme: string
-  export let video: Tables<'videos_view'>
+  export let video: Tables<'videos'>
   export let can_edit = false
 </script>
 

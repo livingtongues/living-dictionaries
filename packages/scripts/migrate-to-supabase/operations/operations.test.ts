@@ -155,8 +155,8 @@ describe(upsert_speaker, () => {
 
     const { data: entry_view } = await anon_supabase.from('entries_view').select().eq('id', entry_id).single()
     expect(entry_view.audios[0].speaker_ids).toEqual([speaker_change.speaker_id])
-    const { data: videos_view } = await anon_supabase.from('videos_view').select().eq('id', video_change.video_id).single()
-    expect(videos_view.speaker_ids).toEqual([speaker_change.speaker_id])
+    const { data: videos } = await anon_supabase.from('videos').select().eq('id', video_change.video_id).single()
+    expect(videos.speaker_ids).toEqual([speaker_change.speaker_id])
   })
 })
 
