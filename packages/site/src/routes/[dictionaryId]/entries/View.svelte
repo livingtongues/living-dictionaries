@@ -42,7 +42,7 @@
           <EntryPage
             data={{
               ...page_data,
-              entry,
+              entry_from_page: entry,
               shallow: true,
               entry_history: readable([]),
             }} />

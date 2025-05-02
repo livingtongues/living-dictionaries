@@ -108,7 +108,7 @@
 
       <Button
         onclick={async () => {
-          await dbOperations.upsert_audio({ audio: { deleted: 'true' }, audio_id: sound_file.id, refresh_entry: true })
+          await dbOperations.update_audio({ deleted: new Date().toISOString(), id: sound_file.id })
           on_close()
         }}
         color="red">

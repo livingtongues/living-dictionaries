@@ -13,10 +13,10 @@
   export let glossLanguages: Tables<'dictionaries'>['gloss_languages']
   export let can_edit = false
 
-  $: ({ sentences, dictionary, dbOperations } = $page.data)
+  $: ({ dictionary, dbOperations } = $page.data)
 
   function update_sense(update: TablesUpdate<'senses'>) {
-    dbOperations.update_sense({ sense: update, sense_id: sense.id })
+    dbOperations.update_sense({ ...update, id: sense.id })
   }
 
   $: glossingLanguages = order_entry_and_dictionary_gloss_languages(sense.glosses, glossLanguages)
@@ -31,8 +31,7 @@
     {can_edit}
     display={`${$page.data.t({ dynamicKey: `gl.${bcp}`, fallback: bcp })}: ${$page.data.t('entry_field.gloss')}`}
     on_update={(new_value) => {
-      sense.glosses = { ...sense.glosses, [bcp]: new_value }
-      update_sense({ glosses: sense.glosses })
+      update_sense({ glosses: { ...sense.glosses, [bcp]: new_value } })
     }} />
 {/each}
 
@@ -44,9 +43,8 @@
     display="Definition (deprecated)"
     {can_edit}
     on_update={(new_value) => {
-      sense.definition = new_value ? { en: new_value } : null
       update_sense({
-        definition: sense.definition,
+        definition: new_value ? { en: new_value } : null,
       })
     }} />
 {/if}
@@ -58,7 +56,6 @@
       value={sense.parts_of_speech}
       {can_edit}
       on_update={(new_value) => {
-        sense.parts_of_speech = new_value
         update_sense({ parts_of_speech: new_value })
       }} />
     <div class="border-b-2 pb-1 mb-2 border-dashed" />
@@ -73,11 +70,9 @@
       semantic_domain_keys={sense.semantic_domains}
       write_in_semantic_domains={sense.write_in_semantic_domains}
       on_update={(new_value) => {
-        sense.semantic_domains = new_value
         update_sense({ semantic_domains: new_value })
       }}
       on_update_write_in={(new_value) => {
-        sense.write_in_semantic_domains = new_value
         update_sense({ write_in_semantic_domains: new_value })
       }} />
     <div class="border-b-2 pb-1 mb-2 border-dashed" />
@@ -90,7 +85,6 @@
   {can_edit}
   display={$page.data.t('entry_field.noun_class')}
   on_update={(new_value) => {
-    sense.noun_class = new_value
     update_sense({ noun_class: new_value })
   }} />
 
@@ -108,8 +102,7 @@
   {can_edit}
   display={$page.data.t('entry_field.plural_form')}
   on_update={(new_value) => {
-    sense.plural_form = { default: new_value }
-    update_sense({ plural_form: sense.plural_form })
+    update_sense({ plural_form: { default: new_value } })
   }} />
 
 {#if DICTIONARIES_WITH_VARIANTS.includes(dictionary.id)}

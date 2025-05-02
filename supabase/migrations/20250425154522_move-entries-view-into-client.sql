@@ -176,6 +176,10 @@ CREATE POLICY "Anyone can view audio_speakers"
 ON audio_speakers
 FOR SELECT USING(true);
 
+CREATE POLICY "Anyone can view video_speakers"
+ON audio_speakers
+FOR SELECT USING(true);
+
 CREATE POLICY "Anyone can view videos"
 ON videos
 FOR SELECT USING(true);
@@ -337,6 +341,32 @@ USING (
     SELECT 1
     FROM dictionary_roles
     WHERE dictionary_roles.dictionary_id = audio_speakers.dictionary_id
+      AND dictionary_roles.user_id = auth.uid()
+      AND dictionary_roles.role IN ('manager', 'contributor')
+  )
+);
+
+CREATE POLICY "Managers and contributors can insert video_speakers."
+ON video_speakers FOR INSERT
+TO authenticated
+WITH CHECK (
+  EXISTS (
+    SELECT 1
+    FROM dictionary_roles
+    WHERE dictionary_roles.dictionary_id = video_speakers.dictionary_id
+      AND dictionary_roles.user_id = auth.uid()
+      AND dictionary_roles.role IN ('manager', 'contributor')
+  )
+);
+
+CREATE POLICY "Managers and contributors can update video_speakers."
+ON video_speakers FOR UPDATE
+TO authenticated
+USING (
+  EXISTS (
+    SELECT 1
+    FROM dictionary_roles
+    WHERE dictionary_roles.dictionary_id = video_speakers.dictionary_id
       AND dictionary_roles.user_id = auth.uid()
       AND dictionary_roles.role IN ('manager', 'contributor')
   )

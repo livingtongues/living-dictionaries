@@ -156,7 +156,7 @@
         title={entry.main.lexeme.default}
         gcs={first_photo.serving_url}
         {can_edit}
-        on_delete_image={() => dbOperations.update_photo({ photo: { deleted: 'true' }, photo_id: first_photo.id })} />
+        on_delete_image={() => dbOperations.update_photo({ deleted: new Date().toISOString(), id: first_photo.id })} />
       {#if first_sense.photos.length > 1}
         <span class="i-fluent-image-stack-20-regular text-white absolute bottom-1 right-1 text-xl" />
       {/if}

@@ -5,7 +5,7 @@ import { readable } from 'svelte/store'
 import type { LayoutLoad } from './$types'
 import { MINIMUM_ABOUT_LENGTH, ResponseCodes } from '$lib/constants'
 import { DICTIONARY_UPDATED_LOAD_TRIGGER, dbOperations } from '$lib/dbOperations'
-import { create_index, search_entries } from '$lib/search'
+import { search_entries } from '$lib/search'
 import { url_from_storage_path } from '$lib/helpers/media'
 import { PUBLIC_STORAGE_BUCKET } from '$env/static/public'
 import { invalidate } from '$app/navigation'
@@ -52,18 +52,6 @@ export const load: LayoutLoad = async ({ params: { dictionaryId: dictionary_url 
     // TODO later: bring in sentence_videos, sentence_photos, texts
     const entries_data = create_entries_data_store({ dictionary_id, supabase, log: true })
     const search_index_updated = writable(false)
-
-    const unsub = entries_data.loading.subscribe(async (loading) => {
-      if (!loading) {
-        await create_index(get(entries_data), dictionary_id)
-        search_index_updated.set(true)
-        unsub()
-        search_index_updated.set(false)
-      }
-    })
-
-    // TODO: figure out how to update just the index of the changed entry
-    // entries_data.updated_item.subscribe(entry => entry && update_index_entry(entry, dictionary_id))
 
     const dictionary_info = readable<Tables<'dictionary_info'>>({} as Tables<'dictionary_info'>, (set) => {
       (async () => {

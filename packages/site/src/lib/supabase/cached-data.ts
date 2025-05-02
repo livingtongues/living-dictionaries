@@ -1,6 +1,7 @@
-import { get, writable } from 'svelte/store'
+import { writable } from 'svelte/store'
 import { del as del_idb, get as get_idb, set as set_idb } from 'idb-keyval'
 import type { Tables, TablesInsert, TablesUpdate } from '@living-dictionaries/types'
+import type { PostgrestError } from '@supabase/supabase-js'
 import type { Supabase } from '.'
 import { browser } from '$app/environment'
 
@@ -23,7 +24,7 @@ interface CachedJoinStoreOptions<Name, FieldName> {
 
 type DataTableName = 'entries' | 'senses' | 'audio' | 'speakers' | 'tags' | 'dialects' | 'photos' | 'videos' | 'sentences'
 
-type JoinTableName = 'audio_speakers' | 'entry_tags' | 'entry_dialects' | 'sense_photos' | 'sense_videos' | 'senses_in_sentences'
+type JoinTableName = 'audio_speakers' | 'video_speakers' | 'entry_tags' | 'entry_dialects' | 'sense_photos' | 'sense_videos' | 'senses_in_sentences'
 
 export function cached_data_store<Name extends DataTableName, T extends Tables<Name>, InsertData extends TablesInsert<Name>, UpdateData extends TablesUpdate<Name>>(options: CachedDataStoreOptions<Name, keyof T>) {
   const data = writable<T[]>([])
@@ -107,12 +108,6 @@ export function cached_data_store<Name extends DataTableName, T extends Tables<N
         .filter(value => !value.deleted)
         .reverse()
     }
-    // data_coming_in = data_coming_in.map((item) => {
-    //   delete item.dictionary_id
-    //   delete item.created_at
-    //   delete item.created_by
-    //   return item
-    // })
     data.set(data_coming_in)
     set_idb(cache_key, data_coming_in)
     loading.set(false)
@@ -128,13 +123,16 @@ export function cached_data_store<Name extends DataTableName, T extends Tables<N
     await get_data_from_cache_then_db()
   }
 
-  async function insert(item_to_insert: InsertData) {
+  async function insert(item_to_insert: InsertData): Promise<{ data: T | null, error: PostgrestError | null }> {
     data.update((items) => {
       return [...items, item_to_insert as unknown as T]
     })
-    const { error } = await supabase.from(table)
+
+    const { data: inserted_item, error } = await supabase.from(table)
       .insert(item_to_insert as any)
+      .select()
       .single()
+
     if (error) {
       if (log)
         console.error(error.message)
@@ -142,13 +140,37 @@ export function cached_data_store<Name extends DataTableName, T extends Tables<N
       data.update((items) => {
         return items.filter(item => item.id !== item_to_insert.id)
       })
-    } else {
-      set_idb(cache_key, get(data))
+      return { data: null, error }
     }
+
+    data.update((items) => {
+      const index = items.findIndex(item => item.id === item_to_insert.id)
+      if (index !== -1) {
+        const inserted = {
+          ...items[index],
+          ...inserted_item as T,
+        }
+
+        const new_data = [
+          ...items.slice(0, index),
+          ...items.slice(index + 1),
+          inserted,
+        ]
+
+        set_idb(cache_key, new_data)
+        return new_data
+      }
+      return items
+    })
+    return { data: inserted_item as T, error: null }
   }
 
-  async function update(item_to_update: UpdateData) {
+  async function update(item_to_update: UpdateData): Promise<{ data: T | null, error: PostgrestError | null }> {
+    if (log)
+      console.info({ item_to_update })
+
     let current_items: T[]
+
     data.update((items) => {
       current_items = items
       if (item_to_update.deleted) {
@@ -180,37 +202,41 @@ export function cached_data_store<Name extends DataTableName, T extends Tables<N
 
       return items
     })
+
     const { data: updated_item, error } = await supabase.from(table)
       .update(item_to_update)
       .eq('id', item_to_update.id)
       .select()
       .single()
     if (error) {
-      console.error(error.message)
+      if (log)
+        console.error(error.message)
       store_error.set(error.message)
       data.set(current_items)
-    } else {
-      data.update((items) => {
-        const index = items.findIndex(item => item.id === item_to_update.id)
-        if (index !== -1) { // if it was deleted, it won't be found
-          const updated = {
-            ...items[index],
-            ...updated_item as T,
-          }
+      return { data: null, error }
+    }
 
-          const new_data = [
-            ...items.slice(0, index),
-            ...items.slice(index + 1),
-            updated,
-          ]
-
-          set_idb(cache_key, new_data)
-          return new_data
+    data.update((items) => {
+      const index = items.findIndex(item => item.id === item_to_update.id)
+      if (index !== -1) { // if it was deleted, it won't be found
+        const updated = {
+          ...items[index],
+          ...updated_item as T,
         }
 
-        return items
-      })
-    }
+        const new_data = [
+          ...items.slice(0, index),
+          ...items.slice(index + 1),
+          updated,
+        ]
+
+        set_idb(cache_key, new_data)
+        return new_data
+      }
+
+      return items
+    })
+    return { data: updated_item as T, error: null }
   }
 
   return { subscribe: data.subscribe, error: store_error, loading, refresh: () => get_data_from_cache_then_db(true), updated_item, reset, insert, update }
@@ -311,13 +337,16 @@ export function cached_join_store<Name extends JoinTableName, T extends Tables<N
     await get_data_from_cache_then_db()
   }
 
-  async function insert(item_to_insert: InsertData) {
+  async function insert(item_to_insert: InsertData): Promise<{ data: T | null, error: PostgrestError | null }> {
     data.update((items) => {
       return [...items, item_to_insert as unknown as T]
     })
-    const { error } = await supabase.from(table)
+
+    const { data: inserted_item, error } = await supabase.from(table)
       .insert(item_to_insert as any)
+      .select()
       .single()
+
     if (error) {
       if (log)
         console.error(error.message)
@@ -325,37 +354,69 @@ export function cached_join_store<Name extends JoinTableName, T extends Tables<N
       data.update((items) => {
         return items.filter(item => !(item[id_field_1] === (item_to_insert as unknown as T)[id_field_1] && item[id_field_2] === (item_to_insert as unknown as T)[id_field_2]))
       })
-    } else {
-      set_idb(cache_key, get(data))
+      return { data: null, error }
     }
-  }
-
-  async function update(item_to_update: UpdateData) {
-    let current_item: T
-    let deleted_index: number
 
     data.update((items) => {
+      const index = items.findIndex(item => (item[id_field_1] === (item_to_insert as unknown as T)[id_field_1] && item[id_field_2] === (item_to_insert as unknown as T)[id_field_2]))
+      if (index !== -1) {
+        const inserted = {
+          ...items[index],
+          ...inserted_item as T,
+        }
+
+        const new_data = [
+          ...items.slice(0, index),
+          ...items.slice(index + 1),
+          inserted,
+        ]
+
+        set_idb(cache_key, new_data)
+        return new_data
+      }
+      return items
+    })
+    return { data: inserted_item as T, error: null }
+  }
+
+  async function update(item_to_update: UpdateData): Promise<{ data: T | null, error: PostgrestError | null }> {
+    if (log)
+      console.info({ item_to_update })
+
+    let current_items: T[]
+
+    data.update((items) => {
+      current_items = items
+
       if (item_to_update.deleted) {
-        return items.filter((item, index) => {
+        return items.filter((item) => {
           if (!(item[id_field_1] === (item_to_update as unknown as T)[id_field_1] && item[id_field_2] === (item_to_update as unknown as T)[id_field_2])) {
             return true
           }
-          current_item = item
-          deleted_index = index
           return false
         })
       }
-      return items.map((item) => {
-        if (item[id_field_1] === (item_to_update as unknown as T)[id_field_1] && item[id_field_2] === (item_to_update as unknown as T)[id_field_2]) {
-          current_item = item
-          return {
-            ...item,
-            ...item_to_update,
-          }
+
+      const index = items.findIndex(item => item[id_field_1] === (item_to_update as unknown as T)[id_field_1] && item[id_field_2] === (item_to_update as unknown as T)[id_field_2])
+
+      if (index !== -1) {
+        const updated = {
+          ...items[index],
+          ...item_to_update,
         }
-        return item
-      })
+
+        const new_data = [
+          ...items.slice(0, index),
+          ...items.slice(index + 1),
+          updated,
+        ]
+
+        return new_data
+      }
+
+      return items
     })
+
     const { data: updated_item, error } = await supabase.from(table)
       .update(item_to_update)
       // @ts-ignore
@@ -367,36 +428,31 @@ export function cached_join_store<Name extends JoinTableName, T extends Tables<N
       if (log)
         console.error(error.message)
       store_error.set(error.message)
-      if (item_to_update.deleted) {
-        data.update((items) => {
-          items.splice(deleted_index, 0, current_item)
-          return items
-        })
-      } else {
-        data.update((items) => {
-          return items.map((item) => {
-            if (item[id_field_1] === (item_to_update as unknown as T)[id_field_1] && item[id_field_2] === (item_to_update as unknown as T)[id_field_2]) {
-              return current_item
-            }
-            return item
-          })
-        })
-      }
-    } else {
-      data.update((items) => {
-        const new_data = items.map((item) => {
-          if (item[id_field_1] === (item_to_update as unknown as T)[id_field_1] && item[id_field_2] === (item_to_update as unknown as T)[id_field_2]) {
-            return {
-              ...item,
-              ...updated_item as T,
-            }
-          }
-          return item
-        })
+      data.set(current_items)
+      return { data: null, error }
+    }
+
+    data.update((items) => {
+      const index = items.findIndex(item => (item[id_field_1] === (item_to_update as unknown as T)[id_field_1] && item[id_field_2] === (item_to_update as unknown as T)[id_field_2]))
+      if (index !== -1) { // if it was deleted, it won't be found
+        const updated = {
+          ...items[index],
+          ...updated_item as T,
+        }
+
+        const new_data = [
+          ...items.slice(0, index),
+          ...items.slice(index + 1),
+          updated,
+        ]
+
         set_idb(cache_key, new_data)
         return new_data
-      })
-    }
+      }
+
+      return items
+    })
+    return { data: updated_item as T, error: null }
   }
 
   return { subscribe: data.subscribe, error: store_error, loading, refresh: () => get_data_from_cache_then_db(true), updated_item, reset, insert, update }

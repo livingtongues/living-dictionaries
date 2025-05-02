@@ -6,7 +6,7 @@
   import EntryFilters from './EntryFilters.svelte'
   import SearchInput from './SearchInput.svelte'
   import View from './View.svelte'
-  import type { EntryData, QueryParams } from '$lib/search/types'
+  import type { QueryParams } from '$lib/search/types'
   import { page } from '$app/stores'
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte'
   import { browser, dev } from '$app/environment'
@@ -15,7 +15,8 @@
   $: ({ entries_data, admin, search_entries, default_entries_per_page, search_params, dictionary, can_edit, dbOperations, reset_caches, search_index_updated } = data)
   $: ({ loading, error: entries_error } = entries_data)
 
-  let page_entries: EntryData[] = []
+  // let page_entries: EntryData[] = []
+  let _hits = []
 
   $: current_page_index = $search_params.page - 1 || 0
   $: entries_per_page = $search_params.entries_per_page || default_entries_per_page
@@ -33,6 +34,7 @@
   }
 
   let search_inited_ms: number
+
   async function search(query_params: QueryParams, page_index: number) {
     try {
       const time = Date.now()
@@ -43,11 +45,12 @@
       search_results_count = count
       search_time = formatted
       console.info({ facets, hits, count })
-      page_entries = hits.map(hit => hit.document) as unknown as EntryData[]
+      _hits = hits
     } catch (err) {
       console.error(err)
     }
   }
+  $: page_entries = $entries_data.filter(entry => _hits.some(hit => hit.id === entry.id))
 </script>
 
 <ShowHide let:show={show_mobile_filters} let:toggle>

@@ -42,7 +42,7 @@
           class="ml-auto"
           color="red"
           form="filled"
-          onclick={async () => await dbOperations.update_video({ video: { deleted: 'true' }, video_id: video.id })}>
+          onclick={async () => await dbOperations.update_video({ deleted: new Date().toISOString(), id: video.id })}>
           <span class="i-fa-trash-o" style="margin: -1px 0 2px;" />
           {$page.data.t('misc.delete')}
         </Button>

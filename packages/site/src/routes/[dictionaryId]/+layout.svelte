@@ -4,9 +4,24 @@
   import { page } from '$app/stores'
   import Header from '$lib/components/shell/Header.svelte'
   import './custom-fonts.css'
+  import { create_index } from '$lib/search'
+  import type { EntryData } from '$lib/search/types'
 
   export let data
-  $: ({ dictionary, is_manager, entries_data } = data)
+  $: ({ dictionary, is_manager, entries_data, search_index_updated } = data)
+  $: ({ loading } = entries_data)
+
+  $: if (!$loading) {
+    index_from_entries($entries_data)
+  }
+
+  async function index_from_entries(entries: EntryData[]) {
+    await create_index(entries, dictionary.id)
+    if (!$page.state.entry_id) {
+      search_index_updated.set(true)
+      search_index_updated.set(false)
+    }
+  }
 </script>
 
 <ShowHide let:show let:toggle let:set>

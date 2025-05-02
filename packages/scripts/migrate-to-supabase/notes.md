@@ -1,4 +1,18 @@
+## Better data sync
+- try all edits in table and gallery, open print view
+- push 1st migration to database after checking that all sense created_by/updated_by are an actual user_id
+- Pull down all data and run through each dictionary in a script function (that can later be run in GitHub Actions) to save one cached entries view json in cloudflare
+- load that cached json in +layout.ts and create an Orama index for it
+- figure out how to load a single cached entry fast on server for entry page
+- push code and try it in production
+- stress test on large dictionaries
+- get cloudflare caches updating on a cron job every hour
+- push migration to remove entry views
+- make plan for cleaning up connected senses and join tables for deleted entries
+- debug why green recent update quirky in list view
+
 ## Final Migration cleanup
+- remove content-import.interface.ts code after getting new history method working
 - use line-clamp instead of truncateString in SelectedDict.svelte and also look at inline-children-elements purpose
 - show entry history from pop-up entry modal
 - test admin rls, alternative is auth.jwt() read https://supabase.com/docs/guides/database/postgres/row-level-security#authjwt to see if better

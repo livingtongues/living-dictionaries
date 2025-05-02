@@ -32,8 +32,8 @@
         await dbOperations.assign_tag({ tag_id, entry_id })
       } else {
         // if a value is not in the dictionary's tags first add the tag to the dictionary
-        const data = await dbOperations.insert_tag({ tag: { name: tag_id } })
-        await dbOperations.assign_tag({ tag_id: data.tag_id, entry_id })
+        const data = await dbOperations.insert_tag({ name: tag_id })
+        await dbOperations.assign_tag({ tag_id: data.id, entry_id })
       }
     }
   }

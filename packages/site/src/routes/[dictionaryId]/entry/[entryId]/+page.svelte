@@ -9,7 +9,8 @@
 
   export let data
   $: ({
-    entry,
+    entry_from_page,
+    derived_entry,
     shallow,
     dictionary,
     admin,
@@ -17,6 +18,8 @@
     dbOperations,
     entry_history,
   } = data)
+
+  $: entry = entry_from_page || $derived_entry
 </script>
 
 <div
@@ -47,7 +50,7 @@
         color="red"
         form="simple"
         onclick={async () => {
-          await dbOperations.update_entry({ entry: { deleted: 'true' } })
+          await dbOperations.update_entry({ deleted: new Date().toISOString() })
           history.back()
         }}>
 

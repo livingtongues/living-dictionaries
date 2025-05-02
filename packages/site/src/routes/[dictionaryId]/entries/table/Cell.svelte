@@ -26,10 +26,10 @@
   $: first_photo = entry.senses?.[0]?.photos?.[0]
 
   function update_entry(update: TablesUpdate<'entries'>) {
-    dbOperations.update_entry({ entry: update, entry_id: entry.id })
+    dbOperations.update_entry({ ...update, id: entry.id })
   }
   function update_sense(update: TablesUpdate<'senses'>) {
-    dbOperations.update_sense({ sense: update, sense_id: sense.id })
+    dbOperations.update_sense({ ...update, id: sense.id })
   }
 </script>
 
@@ -47,8 +47,8 @@
         {can_edit}
         on_delete_image={async () =>
           await dbOperations.update_photo({
-            photo: { deleted: 'true' },
-            photo_id: first_photo.id,
+            deleted: new Date().toISOString(),
+            id: first_photo.id,
           })} />
     {:else if can_edit}
       <!-- <div class="h-20 bg-gray-100 hover:bg-gray-300 mb-2 flex flex-col"> -->
@@ -128,8 +128,8 @@
             })
           } else {
             await dbOperations.update_sentence({
-              sentence: { text: { default: new_value } },
-              sentence_id: sentence.id,
+              text: { default: new_value },
+              id: sentence.id,
             })
           }
         }} />
@@ -141,11 +141,11 @@
           display="{$page.data.t({ dynamicKey: `gl.${column.bcp}`, fallback: column.bcp })}: {$page.data.t('entry_field.example_sentence')}"
           on_update={async (new_value) => {
             await dbOperations.update_sentence({
-              sentence: { translation: {
+              translation: {
                 ...sentence?.translation,
                 [column.bcp]: new_value,
-              } },
-              sentence_id: sentence.id,
+              },
+              id: sentence.id,
             })
           }} />
       {:else}

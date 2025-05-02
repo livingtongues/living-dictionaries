@@ -16,8 +16,8 @@
   export let can_edit = false
   export let dbOperations: DbOperations
 
-  $: photos = entry?.senses?.map(({ photos }) => photos).flat()
-  $: videos = entry?.senses?.map(({ videos }) => videos).flat()
+  $: photos = entry?.senses?.map(({ photos }) => photos).filter(Boolean).flat()
+  $: videos = entry?.senses?.map(({ videos }) => videos).filter(Boolean).flat()
 </script>
 
 <div class="flex flex-col">
@@ -31,7 +31,6 @@
       <Audio {entry} {can_edit} context="entry" class="h-20 mb-2 rounded-md bg-gray-100 !px-3" />
     {/await}
   {/if}
-
   {#each photos as photo (photo.id)}
     <div
       class="w-full overflow-hidden rounded relative mb-2"
@@ -41,7 +40,7 @@
         title={entry.main.lexeme.default}
         gcs={photo.serving_url}
         {can_edit}
-        on_delete_image={async () => await dbOperations.update_photo({ photo: { deleted: 'true' }, photo_id: photo.id })} />
+        on_delete_image={async () => await dbOperations.update_photo({ deleted: new Date().toISOString(), id: photo.id })} />
     </div>
   {/each}
   {#if can_edit}
@@ -121,7 +120,7 @@
         coordinates={entry.main.coordinates}
         initialCenter={dictionary.coordinates?.points?.[0]?.coordinates}
         on_close={toggle}
-        on_update={async new_value => await dbOperations.update_entry({ entry: { coordinates: new_value } })} />
+        on_update={async new_value => await dbOperations.update_entry({ coordinates: new_value })} />
     {/if}
   </InitableShowHide>
 </div>

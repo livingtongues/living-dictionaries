@@ -32,8 +32,8 @@
         await dbOperations.assign_dialect({ dialect_id, entry_id })
       } else {
         // if a value is not in the dictionary's dialects first add the dialect to the dictionary
-        const data = await dbOperations.insert_dialect({ dialect: { name: { default: dialect_id } } })
-        await dbOperations.assign_dialect({ dialect_id: data.dialect_id, entry_id })
+        const data = await dbOperations.insert_dialect({ name: { default: dialect_id } })
+        await dbOperations.assign_dialect({ dialect_id: data.id, entry_id })
       }
     }
   }
