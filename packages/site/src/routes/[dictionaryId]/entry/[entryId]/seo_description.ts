@@ -24,7 +24,7 @@ export function seo_description({ entry, gloss_languages, t }: {
     label: true,
   }).join(', ')
   const glosses = remove_italic_tags(ordered_and_labeled_glosses)
-  const dialect_string = (entry.dialects || []).map(({ name }) => name).join(', ')
+  const dialect_string = (entry.dialects || []).map(({ name }) => name.default).join(', ')
   const items_for_description = [local_orthographies, phonetic, parts_of_speech, glosses, dialect_string]
   const items_with_values = items_for_description.filter(item => item)
   const trimmed_items = items_with_values.map(item => item.trim())
