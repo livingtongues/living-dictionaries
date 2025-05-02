@@ -1,3 +1,6 @@
+DROP VIEW IF EXISTS speakers_view;
+DROP VIEW IF EXISTS videos_view;
+
 SELECT cron.unschedule('refresh-materialized_entries_view');
 DROP FUNCTION entries_from_timestamp(timestamp with time zone, text) CASCADE;
 DROP FUNCTION entry_by_id(text) CASCADE;

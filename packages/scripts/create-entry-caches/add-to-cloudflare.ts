@@ -1,3 +1,4 @@
+// pnpm -F scripts create-entry-caches
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { access, constants, writeFile } from 'node:fs/promises'

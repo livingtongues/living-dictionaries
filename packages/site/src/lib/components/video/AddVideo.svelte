@@ -46,6 +46,7 @@
           onclick={async () => {
             const data = await dbOperations.insert_video({ sense_id: entry.senses[0].id, video: { hosted_elsewhere: hosted_video } })
             await dbOperations.assign_speaker({ speaker_id, media: 'video', media_id: data.id })
+            on_close()
           }}
           form="filled">
           {$page.data.t('misc.save')}

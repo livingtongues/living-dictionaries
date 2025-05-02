@@ -1,15 +1,18 @@
 ## Better data sync
-- try all edits in table and gallery, open print view
-- push 1st migration to database after checking that all sense created_by/updated_by are an actual user_id
-- Pull down all data and run through each dictionary in a script function (that can later be run in GitHub Actions) to save one cached entries view json in cloudflare
-- load that cached json in +layout.ts and create an Orama index for it
+- Pull down all data and run through each dictionary in a script function to save cached entries view json in cloudflare
+- pnpm prod: load that cached json in +layout.ts and create an Orama index for it
 - figure out how to load a single cached entry fast on server for entry page
-- push code and try it in production
-- stress test on large dictionaries
-- get cloudflare caches updating on a cron job every hour
+- push code and try it in production on large dictionaries
+- push last migration that forces dictionary_id to be set on all tables (but first rerun sql that makes sure all is set)
+- solve the circular typescript issue
+- get cloudflare caches updating on a cron job every hour in GitHub actions (see backup repo for example)
 - push migration to remove entry views
-- make plan for cleaning up connected senses and join tables for deleted entries
 - debug why green recent update quirky in list view
+- make plan for cleaning up connected senses and join tables for deleted entries
+- look at missing indexes for dictionary_id and updated_at or created_at
+- Make it better: make entry updated_at change based on any change to all connected tables
+  - audio should change based on speakers
+  - when tables that have join tables, the join tables should be consulted and then all related table rows should be changed
 
 ## Final Migration cleanup
 - remove content-import.interface.ts code after getting new history method working

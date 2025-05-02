@@ -1,26 +1,5 @@
-CREATE TABLE senses (
-  id uuid unique primary key NOT NULL, -- generated on client so users can create a sense offline and keep editing it
-  entry_id text NOT NULL REFERENCES entries,
-  dictionary_id text NOT NULL REFERENCES dictionaries ON DELETE CASCADE,
-  "definition" jsonb, -- MultiString
-  glosses jsonb, -- MultiString
-  parts_of_speech text[],
-  semantic_domains text[],
-  write_in_semantic_domains text[],
-  noun_class character varying,
-  created_at timestamp with time zone DEFAULT now() NOT NULL,
-  created_by uuid NOT NULL DEFAULT auth.uid() REFERENCES auth.users,
-  updated_at timestamp with time zone DEFAULT now() NOT NULL,
-  updated_by uuid NOT NULL DEFAULT auth.uid() REFERENCES auth.users,
-  deleted timestamp with time zone,
-  plural_form jsonb, -- MultiString
-  variant jsonb -- MultiString
-);
-
-ALTER TABLE senses ENABLE ROW LEVEL SECURITY;
-
-CREATE TYPE entry_tables AS ENUM ('senses'); -- not using
-CREATE TYPE entry_columns AS ENUM ('deleted', 'glosses', 'parts_of_speech', 'semantic_domains', 'write_in_semantic_domains', 'noun_class', 'definition'); -- not using
+CREATE TYPE entry_tables AS ENUM ('senses'); -- TODO: drop (not using)
+CREATE TYPE entry_columns AS ENUM ('deleted', 'glosses', 'parts_of_speech', 'semantic_domains', 'write_in_semantic_domains', 'noun_class', 'definition'); -- TODO: drop (not using)
 
 CREATE TABLE entry_updates ( -- TODO: drop this table
   id uuid unique primary key NOT NULL,
@@ -97,6 +76,27 @@ CREATE TABLE entries (
 );
 
 ALTER TABLE entries ENABLE ROW LEVEL SECURITY;
+
+CREATE TABLE senses (
+  id uuid unique primary key NOT NULL, -- generated on client so users can create a sense offline and keep editing it
+  entry_id text NOT NULL REFERENCES entries,
+  dictionary_id text NOT NULL REFERENCES dictionaries ON DELETE CASCADE,
+  "definition" jsonb, -- MultiString
+  glosses jsonb, -- MultiString
+  parts_of_speech text[],
+  semantic_domains text[],
+  write_in_semantic_domains text[],
+  noun_class character varying,
+  created_at timestamp with time zone DEFAULT now() NOT NULL,
+  created_by uuid NOT NULL DEFAULT auth.uid() REFERENCES auth.users,
+  updated_at timestamp with time zone DEFAULT now() NOT NULL,
+  updated_by uuid NOT NULL DEFAULT auth.uid() REFERENCES auth.users,
+  deleted timestamp with time zone,
+  plural_form jsonb, -- MultiString
+  variant jsonb -- MultiString
+);
+
+ALTER TABLE senses ENABLE ROW LEVEL SECURITY;
 
 CREATE TABLE texts (
   id uuid unique primary key NOT NULL, -- generated on client so users can create a text offline and keep editing it
@@ -1363,7 +1363,7 @@ ON audio_speakers
 FOR SELECT USING(true);
 
 CREATE POLICY "Anyone can view video_speakers"
-ON audio_speakers
+ON video_speakers
 FOR SELECT USING(true);
 
 CREATE POLICY "Anyone can view videos"

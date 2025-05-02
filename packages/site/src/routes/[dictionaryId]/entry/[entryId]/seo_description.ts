@@ -14,10 +14,10 @@ export function seo_description({ entry, gloss_languages, t }: {
 ) {
   const local_orthographies = get_local_orthographies(entry.main?.lexeme).join(', ')
   const phonetic = entry.main?.phonetic && `[${entry.main.phonetic}]`
-  const parts_of_speech = add_periods_and_comma_separate_parts_of_speech(entry.senses?.[0].parts_of_speech) // TODO: use all senses and use parts of speech abbrevs for current language once routing allows for that
+  const parts_of_speech = add_periods_and_comma_separate_parts_of_speech(entry.senses?.[0]?.parts_of_speech) // TODO: use all senses and use parts of speech abbrevs for current language once routing allows for that
 
   const ordered_and_labeled_glosses = order_glosses({
-    glosses: entry.senses?.[0].glosses,
+    glosses: entry.senses?.[0]?.glosses,
     // glosses: entry.senses.map(sense => sense.glosses).flat(), // TODO: use all senses
     dictionary_gloss_languages: gloss_languages,
     t,
