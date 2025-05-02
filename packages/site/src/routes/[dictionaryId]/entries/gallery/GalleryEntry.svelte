@@ -1,9 +1,8 @@
 <script lang="ts">
-  import type { Tables } from '@living-dictionaries/types'
+  import type { EntryData, Tables } from '@living-dictionaries/types'
   import Image from '$lib/components/image/Image.svelte'
   import { order_glosses } from '$lib/helpers/glosses'
   import { page } from '$app/stores'
-  import type { EntryData } from '$lib/search/types'
 
   export let entry: EntryData
   export let can_edit = false

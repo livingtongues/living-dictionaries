@@ -1,8 +1,8 @@
 <script lang="ts">
+  import type { EntryData } from '@living-dictionaries/types'
   import type { SelectOption } from '$lib/components/ui/array/select-options.interface'
   import ModalEditableArray from '$lib/components/ui/array/ModalEditableArray.svelte'
   import { page } from '$app/stores'
-  import type { EntryData } from '$lib/search/types'
 
   export let tags: EntryData['tags']
   export let entry_id: string

@@ -1,6 +1,6 @@
 <script lang="ts">
   import { Button, Modal, ShowHide } from 'svelte-pieces'
-  import type { HostedVideo } from '@living-dictionaries/types'
+  import type { EntryData, HostedVideo } from '@living-dictionaries/types'
   import type { Readable } from 'svelte/motion'
   import SelectVideo from './SelectVideo.svelte'
   import PasteVideoLink from './PasteVideoLink.svelte'
@@ -9,7 +9,6 @@
   import RecordVideo from '$lib/components/video/RecordVideo.svelte'
   import VideoThirdParty from '$lib/components/video/VideoThirdParty.svelte'
   import SelectSpeaker from '$lib/components/media/SelectSpeaker.svelte'
-  import type { EntryData } from '$lib/search/types'
 
   $: ({ dbOperations } = $page.data)
 

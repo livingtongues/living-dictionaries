@@ -1,7 +1,7 @@
 <script lang="ts">
   import { ShowHide, longpress } from 'svelte-pieces'
+  import type { EntryData } from '@living-dictionaries/types'
   import { page } from '$app/stores'
-  import type { EntryData } from '$lib/search/types'
 
   export let entry: EntryData
   export let context: 'list' | 'table' | 'entry'

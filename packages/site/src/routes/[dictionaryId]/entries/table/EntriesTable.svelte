@@ -1,12 +1,11 @@
 <script lang="ts">
-  import type { IColumn, Tables } from '@living-dictionaries/types'
+  import type { EntryData, IColumn, Tables } from '@living-dictionaries/types'
   import ColumnTitle from './ColumnTitle.svelte'
   import Cell from './Cell.svelte'
   import { setUpColumns } from './setUpColumns'
   import { minutes_ago_in_ms } from '$lib/helpers/time'
   import { browser } from '$app/environment'
   import type { DbOperations } from '$lib/dbOperations'
-  import type { EntryData } from '$lib/search/types'
 
   export let entries: EntryData[] = []
   export let can_edit = false

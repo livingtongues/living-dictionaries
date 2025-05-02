@@ -1,11 +1,11 @@
 <script lang="ts">
   import { Button, ResponsiveSlideover, ShowHide } from 'svelte-pieces'
+  import type { EntryData } from '@living-dictionaries/types'
   import SideMenu from './SideMenu.svelte'
   import { page } from '$app/stores'
   import Header from '$lib/components/shell/Header.svelte'
   import './custom-fonts.css'
   import { create_index } from '$lib/search'
-  import type { EntryData } from '$lib/search/types'
 
   export let data
   $: ({ dictionary, is_manager, entries_data, search_index_updated } = data)

@@ -1,6 +1,6 @@
 <script lang="ts">
   import { ShowHide } from 'svelte-pieces'
-  import type { Tables } from '@living-dictionaries/types'
+  import type { EntryData, Tables } from '@living-dictionaries/types'
   import Video from '../../entries/components/Video.svelte'
   import GeoTaggingModal from './GeoTaggingModal.svelte'
   import InitableShowHide from './InitableShowHide.svelte'
@@ -9,7 +9,6 @@
   import { page } from '$app/stores'
   import type { DbOperations } from '$lib/dbOperations'
   import AddImage from '$lib/components/image/AddImage.svelte'
-  import type { EntryData } from '$lib/search/types'
 
   export let entry: EntryData
   export let dictionary: Tables<'dictionaries'>

@@ -1,4 +1,4 @@
-import type { EntryData } from './types'
+import type { EntryData } from '@living-dictionaries/types'
 
 export function augment_entry_for_search(entry: EntryData) {
   const senses = entry.senses || []

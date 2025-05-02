@@ -1,5 +1,5 @@
 import type { DeepPartial } from 'kitbook'
-import type { EntryData } from '$lib/search/types'
+import type { EntryData } from '@living-dictionaries/types'
 
 export function friendlyName(entry: DeepPartial<EntryData>, path: string) {
   if (path) {

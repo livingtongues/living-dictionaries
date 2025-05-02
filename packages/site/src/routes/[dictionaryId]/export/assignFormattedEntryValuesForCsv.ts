@@ -20,7 +20,7 @@ export function format_orthographies(orthographies: Orthography[], lexeme: Multi
   return formatted_data
 }
 
-export function format_senses(entry: ReturnType<typeof translate_entries>[0]) {
+export function format_senses(entry: ReturnType<typeof translate_entries>[0], dictionary_id: string) {
   let formatted_senses = {}
 
   for (const [sense_index, sense] of Array.from(entry.senses).entries()) {
@@ -33,7 +33,7 @@ export function format_senses(entry: ReturnType<typeof translate_entries>[0]) {
       ...get_variant(sense.variant, { sense_index, position: 'value' }),
       ...get_plural_form(sense.plural_form, { sense_index, position: 'value' }),
       ...get_image_files(sense.photo_urls?.[0], { sense_index, position: 'value' }, entry),
-      ...get_example_sentence(sense.sentences?.[0], { sense_index, position: 'value' }),
+      ...get_example_sentence(sense.sentences?.[0], { sense_index, position: 'value', dictionary_id }),
     }
   }
 

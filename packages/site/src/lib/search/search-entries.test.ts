@@ -1,10 +1,10 @@
 import { create, insertMultiple, save } from '@orama/orama'
 import type { DeepPartial } from 'kitbook'
+import type { EntryData } from '@living-dictionaries/types'
 import { search_entries } from './search-entries'
 import { entries_index_schema } from './entries-schema'
 import { augment_entry_for_search } from './augment-entry-for-search'
 import { createMultilingualTokenizer } from './multilingual-tokenizer'
-import type { EntryData } from './types'
 
 function search(entries: DeepPartial<EntryData>[], query: string) {
   const index = create({

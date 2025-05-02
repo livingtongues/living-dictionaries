@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { Tables } from '@living-dictionaries/types'
+  import type { EntryData, Tables } from '@living-dictionaries/types'
   import { ShowHide } from 'svelte-pieces'
   import sanitize from 'xss'
   import Audio from '../components/Audio.svelte'
@@ -10,7 +10,6 @@
   import { page } from '$app/stores'
   import type { DbOperations } from '$lib/dbOperations'
   import AddImage from '$lib/components/image/AddImage.svelte'
-  import type { EntryData } from '$lib/search/types'
 
   export let entry: EntryData
   export let dictionary: Tables<'dictionaries'>

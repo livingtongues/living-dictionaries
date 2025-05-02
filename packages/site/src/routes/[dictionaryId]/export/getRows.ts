@@ -1,9 +1,8 @@
-import type { MultiString, Tables } from '@living-dictionaries/types'
+import type { EntryData, MultiString } from '@living-dictionaries/types'
 import type { DeepPartial } from 'kitbook'
 import type { EntryForCSV, translate_entries } from './prepareEntriesForCsv'
 import { friendlyName } from './friendlyName'
 import { glossingLanguages } from '$lib/glosses/glossing-languages'
-import type { EntryData } from '$lib/search/types'
 
 interface ExportMetaData {
   sense_index: number
@@ -65,14 +64,14 @@ export function get_parts_of_speech(parts_of_speech_abbreviations: string[], par
 }
 
 export function get_example_sentence(
-  sentence: Tables<'sentences'>,
-  metadata: ExportMetaData,
+  sentence: EntryData['senses'][0]['sentences'][0],
+  metadata: ExportMetaData & { dictionary_id: string },
 ) {
   const { sense_index, position } = metadata
   const formatted_data: EntryForCSV = {}
   if (sentence?.text) {
     formatted_data[`${count_sense(sense_index)}vernacular_exampleSentence`] = position === 'header'
-      ? `${get_readable_sense(sense_index)}Example sentence in ${sentence?.dictionary_id}`
+      ? `${get_readable_sense(sense_index)}Example sentence in ${metadata.dictionary_id}`
       : sentence.text?.default
   }
   if (sentence?.translation) {

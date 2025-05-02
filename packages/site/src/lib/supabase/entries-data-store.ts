@@ -1,4 +1,5 @@
 import { derived } from 'svelte/store'
+import type { EntryData } from '@living-dictionaries/types'
 import { cached_data_store, cached_join_store } from './cached-data'
 import type { Supabase } from '.'
 
@@ -20,7 +21,7 @@ export function create_entries_data_store({
   const entry_tags = cached_join_store({ table: 'entry_tags', id_field_1: 'entry_id', id_field_2: 'tag_id', dictionary_id, supabase })
   const dialects = cached_data_store({ table: 'dialects', include: ['name'], dictionary_id, supabase })
   const entry_dialects = cached_join_store({ table: 'entry_dialects', id_field_1: 'entry_id', id_field_2: 'dialect_id', dictionary_id, supabase })
-  const photos = cached_data_store({ table: 'photos', include: ['photographer', 'serving_url', 'source'], dictionary_id, supabase })
+  const photos = cached_data_store({ table: 'photos', include: ['photographer', 'storage_path', 'serving_url', 'source'], dictionary_id, supabase })
   const sense_photos = cached_join_store({ table: 'sense_photos', id_field_1: 'sense_id', id_field_2: 'photo_id', dictionary_id, supabase })
   const videos = cached_data_store({ table: 'videos', include: ['hosted_elsewhere', 'source', 'storage_path', 'videographer'], dictionary_id, supabase })
   const video_speakers = cached_join_store({ table: 'video_speakers', id_field_1: 'video_id', id_field_2: 'speaker_id', dictionary_id, supabase, log })
@@ -53,8 +54,10 @@ export function create_entries_data_store({
                 ...(speakers_for_video.length ? { speakers: speakers_for_video } : {}),
               }
             })
+
+          const { entry_id, ...sense_to_include } = sense
           return {
-            ...sense,
+            ...sense_to_include,
             ...(sentences_for_sense.length ? { sentences: sentences_for_sense } : {}),
             ...(photos_for_sense.length ? { photos: photos_for_sense } : {}),
             ...(videos_for_sense.length ? { videos: videos_for_sense } : {}),
@@ -89,7 +92,7 @@ export function create_entries_data_store({
         ...(tags_for_entry.length ? { tags: tags_for_entry } : {}),
         ...(dialects_for_entry.length ? { dialects: dialects_for_entry } : {}),
         ...(deleted ? { deleted } : {}),
-      }
+      } satisfies EntryData
     })
   }, [])
 
@@ -239,3 +242,21 @@ export function create_entries_data_store({
     senses_in_sentences,
   }
 }
+
+// async function load_cache(dictionary_id: string) {
+//   const url = `https://cache.livingdictionaries.app/entries_data/${dictionary_id}.json`
+//   try {
+//     console.info('loading cached entries_data')
+//     const response = await fetch(url)
+//     if (!response.ok) {
+//       console.info('cached entries_data not found')
+//       return
+//     }
+//     const serialized_json = await response.text()
+//     console.info('got cached entries_data')
+//     const deserialized = JSON.parse(serialized_json)
+//     console.info('parsed cached entries_data')
+//   } catch (err) {
+//     console.error('Error loading cached index', err)
+//   }
+// }

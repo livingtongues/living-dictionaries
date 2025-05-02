@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url'
 import { access, constants, writeFile } from 'node:fs/promises'
 import { create, insertMultiple, save } from '@orama/orama'
 import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3'
-import type { EntryData } from '../../site/src/lib/search/types'
+import type { EntryData } from '@living-dictionaries/types'
 import { augment_entry_for_search } from '../../site/src/lib/search/augment-entry-for-search'
 import { entries_index_schema } from '../../site/src/lib/search/entries-schema'
 import { createMultilingualTokenizer } from '../../site/src/lib/search/multilingual-tokenizer'
@@ -13,12 +13,12 @@ import { admin_supabase } from '../config-supabase'
 const r2_account_id = process.env.CLOUDFLARE_R2_ACCOUNT_ID
 const s3_api = `https://${r2_account_id}.r2.cloudflarestorage.com`
 
-const search_index_client = new S3Client({
+const cache_client = new S3Client({
   region: 'auto',
   endpoint: s3_api,
   credentials: {
-    accessKeyId: process.env.CLOUDFLARE_R2_SEARCH_INDEX_ACCESS_KEY_ID,
-    secretAccessKey: process.env.CLOUDFLARE_R2_SEARCH_INDEX_BUCKET_SECRET_ACCESS_KEY,
+    accessKeyId: process.env.CLOUDFLARE_R2_CACHE_ACCESS_KEY_ID,
+    secretAccessKey: process.env.CLOUDFLARE_R2_CACHE_SECRET_ACCESS_KEY,
   },
 })
 
@@ -29,8 +29,8 @@ const date_for_updating_all_indexs = '1970-01-01T00:00:00Z'
 const indexes_last_updated = date_for_updating_all_indexs
 // const indexes_last_updated = '2024-11-15T00:00:00Z' // do this next time
 
-await write_indexes()
-async function write_indexes() {
+await write_caches()
+async function write_caches() {
   let current_dict = ''
   try {
     const { data: dictionary_ids } = await admin_supabase.from('dictionaries').select('id').order('id')
@@ -144,7 +144,7 @@ async function upload_to_cloudflare(filename: string, index_json_string: string)
 
   try {
     const command = new PutObjectCommand(params)
-    await search_index_client.send(command)
+    await cache_client.send(command)
     console.log(`Uploaded ${filename} to Cloudflare R2`)
   } catch (err) {
     console.error(`Error uploading ${filename} to Cloudflare R2: ${err}`)

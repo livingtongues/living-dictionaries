@@ -1,6 +1,6 @@
 <script lang="ts">
   import { Button, ResponsiveTable } from 'svelte-pieces'
-  import type { Tables } from '@living-dictionaries/types'
+  import type { EntryData, Tables } from '@living-dictionaries/types'
   import { onMount } from 'svelte'
   import RecordRow from './RecordRow.svelte'
   import SortRecords from './sortRecords.svelte'
@@ -9,7 +9,6 @@
   import Filter from '$lib/components/Filter.svelte'
   import { downloadObjectsAsCSV } from '$lib/export/csv'
   import { supabase_date_to_friendly } from '$lib/helpers/time'
-  import type { EntryData } from '$lib/search/types'
 
   export let data: PageData
   let loading_content_updates = true

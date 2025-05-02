@@ -1,8 +1,8 @@
 <script lang="ts">
-  import { type IPrintFields, StandardPrintFields } from '@living-dictionaries/types'
+  import { type EntryData, type IPrintFields, StandardPrintFields } from '@living-dictionaries/types'
+
   import type { createPersistedStore } from 'svelte-pieces'
   import { page } from '$app/stores'
-  import type { EntryData } from '$lib/search/types'
 
   export let entries: EntryData[]
   export let preferredPrintFields: ReturnType<typeof createPersistedStore<IPrintFields>>

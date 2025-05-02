@@ -31,10 +31,6 @@ export const load: LayoutLoad = async ({ params: { dictionaryId: dictionary_url 
 
     const dictionary_id = dictionary.id
 
-    // if (browser)
-    // TODO: bring cache back in
-    //   load_cached_index(dictionary_id)
-
     const is_manager: Readable<boolean> = derived([admin, my_dictionaries], ([$admin, $my_dictionaries], set) => {
       if ($admin > 0) return set(true)
       if ($my_dictionaries.find(({ id, role }) => id === dictionary_id && role === 'manager')) return set(true)

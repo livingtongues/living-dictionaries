@@ -1,4 +1,4 @@
-import type { Tables } from '@living-dictionaries/types'
+import type { EntryData, Tables } from '@living-dictionaries/types'
 import { get } from 'svelte/store'
 import { friendlyName } from './friendlyName'
 import { get_orthography_headers, get_sense_headers } from './assignHeadersForCsv'
@@ -7,7 +7,6 @@ import { stripHTMLTags } from './stripHTMLTags'
 import { decades } from '$lib/components/media/ages'
 import { translate_part_of_speech, translate_part_of_speech_abbreviation, translate_semantic_domain_keys } from '$lib/transformers/translate_keys_to_current_language'
 import { page } from '$app/stores'
-import type { EntryData } from '$lib/search/types'
 
 export enum StandardEntryCSVFields {
   ID = 'Entry Id',
@@ -54,20 +53,20 @@ export function translate_entries({ entries }: { entries: EntryData[] }) {
   })
 }
 
-export function getCsvHeaders(entries: ReturnType<typeof translate_entries>, { orthographies }: Tables<'dictionaries'>): EntryForCSV {
+export function getCsvHeaders(entries: ReturnType<typeof translate_entries>, { orthographies, id: dictionary_id }: Tables<'dictionaries'>): EntryForCSV {
   const headers: EntryForCSV = { ...StandardEntryCSVFields }
 
   return {
     ...headers,
     ...get_orthography_headers(orthographies),
-    ...get_sense_headers(entries),
+    ...get_sense_headers(entries, dictionary_id),
   }
 }
 
 export function formatCsvEntries(
   entries: ReturnType<typeof translate_entries>,
   url_from_storage_path: (path: string) => string,
-  { orthographies }: Tables<'dictionaries'>,
+  { orthographies, id: dictionary_id }: Tables<'dictionaries'>,
 ): EntryForCSV[] {
   return entries.map((entry) => {
     const speaker = entry.audios?.[0].speakers?.[0]
@@ -92,7 +91,7 @@ export function formatCsvEntries(
     return {
       ...formatted_entry,
       ...format_orthographies(orthographies, entry?.main?.lexeme),
-      ...format_senses(entry),
+      ...format_senses(entry, dictionary_id),
     }
   })
 }

@@ -1,6 +1,3 @@
-import type { Unsubscriber } from 'svelte/store'
-import type { create_entries_data_store } from '$lib/supabase/entries-data-store'
-
 export type View = 'list' | 'table' | 'print' | 'gallery'
 
 export interface QueryParams {
@@ -39,7 +36,4 @@ export interface QueryParams {
 type ArrayFilters = 'tags' | 'dialects' | 'parts_of_speech' | 'semantic_domains' | 'speakers'
 export type FilterListKeys = ArrayFilters & keyof QueryParams
 
-export type StoreValue<T> = T extends { subscribe: (run: (value: infer R) => void) => Unsubscriber } ? R : never
-
-type EntriesData = StoreValue<ReturnType<typeof create_entries_data_store>>
-export type EntryData = EntriesData[number]
+// export type StoreValue<T> = T extends { subscribe: (run: (value: infer R) => void) => Unsubscriber } ? R : never

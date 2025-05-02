@@ -1,7 +1,7 @@
 import type { DeepPartial } from 'kitbook'
+import type { EntryData } from '@living-dictionaries/types'
 import { seo_description } from './seo_description'
 import { english_translate } from '$lib/i18n'
-import type { EntryData } from '$lib/search/types'
 
 describe('seo_description', () => {
   const t = english_translate

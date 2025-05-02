@@ -1,6 +1,6 @@
 <script lang="ts">
   import { ShowHide } from 'svelte-pieces'
-  import type { EntryData } from '$lib/search/types'
+  import type { EntryData } from '@living-dictionaries/types'
 
   export let entry: EntryData
   export let can_edit = false

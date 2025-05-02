@@ -1,10 +1,10 @@
 import type { DeepPartial } from 'kitbook'
+import type { EntryData } from '@living-dictionaries/types'
 import { order_glosses } from '$lib/helpers/glosses'
 import { add_periods_and_comma_separate_parts_of_speech } from '$lib/helpers/entry/add_periods_and_comma_separate_parts_of_speech'
 import { remove_italic_tags } from '$lib/helpers/remove_italic_tags'
 import { get_local_orthographies } from '$lib/helpers/entry/get_local_orthagraphies'
 import type { TranslateFunction } from '$lib/i18n/types'
-import type { EntryData } from '$lib/search/types'
 
 export function seo_description({ entry, gloss_languages, t }: {
   entry: DeepPartial<EntryData>

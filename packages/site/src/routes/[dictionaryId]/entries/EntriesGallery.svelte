@@ -1,7 +1,6 @@
 <script lang="ts">
-  import type { Tables } from '@living-dictionaries/types'
+  import type { EntryData, Tables } from '@living-dictionaries/types'
   import GalleryEntry from './gallery/GalleryEntry.svelte'
-  import type { EntryData } from '$lib/search/types'
 
   export let entries: EntryData[] = []
   export let dictionary: Tables<'dictionaries'>

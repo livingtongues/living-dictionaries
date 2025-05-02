@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { Tables, TablesUpdate } from '@living-dictionaries/types'
+  import type { EntryData, Tables, TablesUpdate } from '@living-dictionaries/types'
   import EntryField from './EntryField.svelte'
   import EntrySentence from './EntrySentence.svelte'
   import { page } from '$app/stores'
@@ -7,7 +7,6 @@
   import EntryPartOfSpeech from '$lib/components/entry/EntryPartOfSpeech.svelte'
   import EntrySemanticDomains from '$lib/components/entry/EntrySemanticDomains.svelte'
   import { DICTIONARIES_WITH_VARIANTS } from '$lib/constants'
-  import type { EntryData } from '$lib/search/types'
 
   export let sense: EntryData['senses'][0]
   export let glossLanguages: Tables<'dictionaries'>['gloss_languages']

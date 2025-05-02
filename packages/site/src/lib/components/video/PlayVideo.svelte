@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { Tables } from '@living-dictionaries/types'
+  import type { EntryData } from '@living-dictionaries/types'
   import { Button } from 'svelte-pieces'
   import VideoThirdParty from './VideoThirdParty.svelte'
   import { page } from '$app/stores'
@@ -7,7 +7,7 @@
   $: ({ dbOperations, url_from_storage_path } = $page.data)
 
   export let lexeme: string
-  export let video: Tables<'videos'>
+  export let video: EntryData['senses'][0]['videos'][0]
   export let can_edit = false
   export let on_close: () => void
 </script>

@@ -1,6 +1,7 @@
 <script lang="ts">
   import { Modal } from 'svelte-pieces'
   import { readable } from 'svelte/store'
+  import type { EntryData } from '@living-dictionaries/types'
   import EntryPage from '../entry/[entryId]/+page.svelte'
   import ListEntry from './list/ListEntry.svelte'
   import EntriesTable from './table/EntriesTable.svelte'
@@ -9,7 +10,6 @@
   import EntriesPrint from './EntriesPrint.svelte'
   import { pushState } from '$app/navigation'
   import { page } from '$app/stores'
-  import type { EntryData } from '$lib/search/types'
 
   export let entries: EntryData[]
   export let page_data: EntriesPageData

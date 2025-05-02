@@ -1,13 +1,13 @@
 <script lang="ts">
   import { Button, JSON, Modal } from 'svelte-pieces'
   import type { Readable } from 'svelte/motion'
+  import type { EntryData } from '@living-dictionaries/types'
   import type { AudioVideoUploadStatus } from './upload-audio'
   import { page } from '$app/stores'
   import Waveform from '$lib/components/audio/Waveform.svelte'
   import SelectAudio from '$lib/components/audio/SelectAudio.svelte'
   import RecordAudio from '$lib/components/audio/RecordAudio.svelte'
   import SelectSpeaker from '$lib/components/media/SelectSpeaker.svelte'
-  import type { EntryData } from '$lib/search/types'
 
   export let on_close: () => void
   export let entry: EntryData

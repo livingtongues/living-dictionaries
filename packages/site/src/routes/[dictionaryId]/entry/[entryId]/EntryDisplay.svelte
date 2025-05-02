@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { EntryFieldValue, Tables, TablesUpdate } from '@living-dictionaries/types'
+  import type { EntryData, EntryFieldValue, Tables, TablesUpdate } from '@living-dictionaries/types'
   import { Button } from 'svelte-pieces'
   import EntryField from './EntryField.svelte'
   import EntryMedia from './EntryMedia.svelte'
@@ -9,7 +9,6 @@
   import EntrySource from '$lib/components/entry/EntrySource.svelte'
   import type { DbOperations } from '$lib/dbOperations'
   import EntryTag from '$lib/components/entry/EntryTag.svelte'
-  import type { EntryData } from '$lib/search/types'
 
   export let entry: EntryData
   export let dictionary: Tables<'dictionaries'>

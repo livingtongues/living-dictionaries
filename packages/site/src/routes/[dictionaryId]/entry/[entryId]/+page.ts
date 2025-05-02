@@ -1,9 +1,8 @@
 import { redirect } from '@sveltejs/kit'
 import { derived, readable } from 'svelte/store'
-import type { Tables } from '@living-dictionaries/types'
+import type { EntryData, Tables } from '@living-dictionaries/types'
 import { ResponseCodes } from '$lib/constants'
 import { browser } from '$app/environment'
-import type { EntryData } from '$lib/search/types.js'
 
 export async function load({ params: { entryId: entry_id }, parent }) {
   const entry_history = readable<Tables<'content_updates'>[]>([], (set) => {

@@ -1,5 +1,6 @@
 <script lang="ts">
   import type {
+    EntryData,
     IColumn,
     TablesUpdate,
   } from '@living-dictionaries/types'
@@ -15,7 +16,6 @@
   import type { DbOperations } from '$lib/dbOperations'
   import AddImage from '$lib/components/image/AddImage.svelte'
   import EntryTag from '$lib/components/entry/EntryTag.svelte'
-  import type { EntryData } from '$lib/search/types'
 
   export let column: IColumn
   export let entry: EntryData
