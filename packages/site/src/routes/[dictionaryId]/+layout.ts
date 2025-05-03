@@ -46,7 +46,7 @@ export const load: LayoutLoad = async ({ params: { dictionaryId: dictionary_url 
     const default_entries_per_page = 20
 
     // TODO later: bring in sentence_videos, sentence_photos, texts
-    const entries_data = create_entries_data_store({ dictionary_id, supabase, log: true })
+    const entries_data = create_entries_data_store({ dictionary_id, supabase, log: false })
     const search_index_updated = writable(false)
 
     const dictionary_info = readable<Tables<'dictionary_info'>>({} as Tables<'dictionary_info'>, (set) => {

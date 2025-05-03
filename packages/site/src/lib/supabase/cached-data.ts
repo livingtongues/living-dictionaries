@@ -38,6 +38,9 @@ export function cached_data_store<Name extends DataTableName, T extends Tables<N
 
   const { dictionary_id, table, supabase, log, include } = options
 
+  // if (!log)
+  //   return { subscribe: data.subscribe, error: store_error, loading, refresh: null, updated_item, reset: () => {} }
+
   const month_year = new Date().toLocaleDateString('default', { month: '2-digit', year: 'numeric' }).replace('/', '.')
   const cache_key = `${table}_${dictionary_id}_${month_year}`
   let timestamp_from_which_to_fetch_data = '1971-01-01T00:00:00Z'
@@ -253,6 +256,9 @@ export function cached_join_store<Name extends JoinTableName, T extends Tables<N
     return { subscribe: data.subscribe, error: store_error, loading, refresh: null, updated_item, reset: null }
 
   const { dictionary_id, table, supabase, log, id_field_1, id_field_2 } = options
+
+  // if (!log)
+  //   return { subscribe: data.subscribe, error: store_error, loading, refresh: null, updated_item, reset: () => {} }
 
   const month_year = new Date().toLocaleDateString('default', { month: '2-digit', year: 'numeric' }).replace('/', '.')
   const cache_key = `${table}_${dictionary_id}_${month_year}`

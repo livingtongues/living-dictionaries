@@ -28,7 +28,7 @@ export function augment_entry_for_search(entry: EntryData) {
   const _other: string[] = [entry.main.phonetic, Object.values(entry.main.notes || {}), entry.main.scientific_names, entry.main.sources, entry.main.interlinearization, entry.main.morphology, plural_forms, entry.main.elicitation_id, sentences].flat().filter(Boolean)
 
   return {
-    ...entry,
+    id: entry.id,
     _lexeme,
     _glosses,
     _other,

@@ -1,10 +1,9 @@
 ## Better data sync
-- Pull down all data and run through each dictionary in a script function to save cached entries view json in cloudflare
-- pnpm prod: load that cached json in +layout.ts and create an Orama index for it
-- figure out how to load a single cached entry fast on server for entry page
-- push code and try it in production on large dictionaries
-- push last migration that forces dictionary_id to be set on all tables (but first rerun sql that makes sure all is set)
+- `pnpm prod`: solve jank on large dictionaries by loading in 1 chunk at a time if an editor
+- save single cached entries, then load a single cached entry fast on server for entry page
 - solve the circular typescript issue
+- push code
+- push last migration that forces dictionary_id to be set on all tables (but first rerun sql that makes sure all is set)
 - get cloudflare caches updating on a cron job every hour in GitHub actions (see backup repo for example)
 - push migration to remove entry views
 - debug why green recent update quirky in list view

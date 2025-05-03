@@ -58,7 +58,7 @@
     class="flex mb-1 items-center sticky top-0 md:top-12 pt-2 md:pt-0 pb-1
       bg-white z-20 print:hidden">
 
-    <SearchInput {search_params} index_ready={!$loading} on_show_filter_menu={toggle} />
+    <SearchInput {search_params} index_ready={$entries_data.length} on_show_filter_menu={toggle} />
     <div class="w-1" />
     <SwitchView bind:view={$search_params.view} can_print={dictionary.print_access || $can_edit} />
   </div>
@@ -89,7 +89,7 @@
           {/if}
         {/if}
         {#if $loading}
-          <span class="i-svg-spinners-3-dots-fade align--4px" title="Ensuring all entries are up to date" />
+          <span class="i-svg-spinners-3-dots-fade align--4px md:hidden" title="Ensuring all entries are up to date" />
         {/if}
       </div>
       {#if $entries_error}

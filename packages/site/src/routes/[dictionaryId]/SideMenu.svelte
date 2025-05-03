@@ -6,6 +6,7 @@
   export let entry_count: number
   export let on_close: () => void
   export let is_manager: boolean
+  export let loading: boolean
 </script>
 
 <div class="md:hidden">
@@ -25,6 +26,9 @@
       {$page.data.t('dictionary.entries')}
     </span>
     <span class="flex-grow" />
+    {#if loading}
+      <span class="i-svg-spinners-3-dots-fade align--4px mx-1" />
+    {/if}
     {#if entry_count}
       <span
         class="inline-block py-1 px-2 leading-none text-xs font-semibold
