@@ -10,6 +10,7 @@ import { url_from_storage_path } from '$lib/helpers/media'
 import { PUBLIC_STORAGE_BUCKET } from '$env/static/public'
 import { invalidate } from '$app/navigation'
 import { create_entries_data_store } from '$lib/supabase/entries-data-store'
+import { browser } from '$app/environment'
 
 export const load: LayoutLoad = async ({ params: { dictionaryId: dictionary_url }, parent, depends }) => {
   depends(DICTIONARY_UPDATED_LOAD_TRIGGER)
@@ -41,12 +42,12 @@ export const load: LayoutLoad = async ({ params: { dictionaryId: dictionary_url 
       if ($my_dictionaries.find(({ id, role }) => id === dictionary_id && role === 'contributor')) return set(true)
     }, false)
 
-    const can_edit: Readable<boolean> = derived([is_manager, is_contributor], ([$is_manager, $is_contributor]) => $is_manager || $is_contributor)
+    const can_edit = derived([is_manager, is_contributor], ([$is_manager, $is_contributor]) => $is_manager || $is_contributor)
 
     const default_entries_per_page = 20
 
     // TODO later: bring in sentence_videos, sentence_photos, texts
-    const entries_data = create_entries_data_store({ dictionary_id, supabase, log: false })
+    const entries_data = create_entries_data_store({ dictionary_id, supabase, log: false, can_edit: browser && get(can_edit) })
     const search_index_updated = writable(false)
 
     const dictionary_info = readable<Tables<'dictionary_info'>>({} as Tables<'dictionary_info'>, (set) => {

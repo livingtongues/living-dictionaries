@@ -1,4 +1,4 @@
-import { writable } from 'svelte/store'
+import { readable, writable } from 'svelte/store'
 import { del as del_idb, get as get_idb, set as set_idb } from 'idb-keyval'
 import type { Tables, TablesInsert, TablesUpdate } from '@living-dictionaries/types'
 import type { PostgrestError } from '@supabase/supabase-js'
@@ -10,6 +10,7 @@ interface CachedDataStoreOptions<Name, FieldName> {
   table: Name
   include: FieldName[]
   supabase: Supabase
+  can_edit?: boolean
   log?: boolean
 }
 
@@ -19,6 +20,7 @@ interface CachedJoinStoreOptions<Name, FieldName> {
   id_field_1: FieldName
   id_field_2: FieldName
   supabase: Supabase
+  can_edit?: boolean
   log?: boolean
 }
 
@@ -28,26 +30,24 @@ type JoinTableName = 'audio_speakers' | 'video_speakers' | 'entry_tags' | 'entry
 
 export function cached_data_store<Name extends DataTableName, T extends Tables<Name>, InsertData extends TablesInsert<Name>, UpdateData extends TablesUpdate<Name>>(options: CachedDataStoreOptions<Name, keyof T>) {
   const data = writable<T[]>([])
-  const updated_item = writable<T>(null)
   const store_error = writable<string>(null)
   const loading = writable(true)
   const order_field = 'updated_at'
 
   if (!browser)
-    return { subscribe: data.subscribe, error: store_error, loading, refresh: null, updated_item, reset: null }
+    return { subscribe: data.subscribe, error: store_error, loading, refresh: null, reset: null }
+  if (!options.can_edit)
+    return { subscribe: data.subscribe, error: store_error, loading: readable(false), refresh: null, reset: null }
 
   const { dictionary_id, table, supabase, log, include } = options
-
-  // if (!log)
-  //   return { subscribe: data.subscribe, error: store_error, loading, refresh: null, updated_item, reset: () => {} }
 
   const month_year = new Date().toLocaleDateString('default', { month: '2-digit', year: 'numeric' }).replace('/', '.')
   const cache_key = `${table}_${dictionary_id}_${month_year}`
   let timestamp_from_which_to_fetch_data = '1971-01-01T00:00:00Z'
 
-  async function get_data_from_cache_then_db(refresh = false) {
+  async function get_data_from_cache_then_db() {
     if (log)
-      console.info({ cache_key, refresh })
+      console.info({ cache_key })
 
     const cached_data = await get_idb<T[]>(cache_key) || []
     if (cached_data.length && log) {
@@ -55,6 +55,7 @@ export function cached_data_store<Name extends DataTableName, T extends Tables<N
     }
 
     let data_coming_in = cached_data
+    let new_data_found = false
 
     while (true) {
       if (data_coming_in.length)
@@ -81,6 +82,8 @@ export function cached_data_store<Name extends DataTableName, T extends Tables<N
         break
       }
       if (batch?.length) {
+        new_data_found = true
+
         if (log)
           console.info({ [`latest from db: ${cache_key}`]: batch.length })
         const batch_without_nulls = batch.map((item) => {
@@ -88,12 +91,6 @@ export function cached_data_store<Name extends DataTableName, T extends Tables<N
             Object.entries(item).filter(([_, value]) => value !== null),
           ) as T
         })
-
-        if (refresh) {
-          for (const item of batch_without_nulls) {
-            updated_item.set(item)
-          }
-        }
 
         data_coming_in = data_coming_in.concat(batch_without_nulls)
         if (batch.length < 1000) {
@@ -104,15 +101,17 @@ export function cached_data_store<Name extends DataTableName, T extends Tables<N
       }
     }
 
-    if (cached_data?.length) {
-      data_coming_in = data_coming_in
-        .reverse()
-        .filter((value, index, self) => index === self.findIndex(v => v.id === value.id))
-        .filter(value => !value.deleted)
-        .reverse()
+    if (new_data_found) {
+      if (cached_data?.length) {
+        data_coming_in = data_coming_in
+          .reverse()
+          .filter((value, index, self) => index === self.findIndex(v => v.id === value.id))
+          .filter(value => !value.deleted)
+          .reverse()
+      }
+      set_idb(cache_key, data_coming_in)
     }
     data.set(data_coming_in)
-    set_idb(cache_key, data_coming_in)
     loading.set(false)
   }
   get_data_from_cache_then_db()
@@ -120,7 +119,6 @@ export function cached_data_store<Name extends DataTableName, T extends Tables<N
   async function reset() {
     await del_idb(cache_key)
     data.set([])
-    updated_item.set(null)
     store_error.set(null)
     loading.set(true)
     await get_data_from_cache_then_db()
@@ -242,29 +240,27 @@ export function cached_data_store<Name extends DataTableName, T extends Tables<N
     return { data: updated_item as T, error: null }
   }
 
-  return { subscribe: data.subscribe, error: store_error, loading, refresh: () => get_data_from_cache_then_db(true), updated_item, reset, insert, update }
+  return { subscribe: data.subscribe, error: store_error, loading, refresh: () => get_data_from_cache_then_db(), reset, insert, update }
 }
 
 export function cached_join_store<Name extends JoinTableName, T extends Tables<Name>, InsertData extends TablesInsert<Name>, UpdateData extends TablesUpdate<Name>>(options: CachedJoinStoreOptions<Name, keyof T>) {
   const data = writable<T[]>([])
-  const updated_item = writable<T>(null)
   const store_error = writable<string>(null)
   const loading = writable(true)
   const order_field = 'created_at'
 
-  if (!browser)
-    return { subscribe: data.subscribe, error: store_error, loading, refresh: null, updated_item, reset: null }
+  if (!browser || !options.can_edit)
+    return { subscribe: data.subscribe, error: store_error, loading, refresh: null, reset: null }
+  if (!options.can_edit)
+    return { subscribe: data.subscribe, error: store_error, loading: readable(false), refresh: null, reset: null }
 
   const { dictionary_id, table, supabase, log, id_field_1, id_field_2 } = options
-
-  // if (!log)
-  //   return { subscribe: data.subscribe, error: store_error, loading, refresh: null, updated_item, reset: () => {} }
 
   const month_year = new Date().toLocaleDateString('default', { month: '2-digit', year: 'numeric' }).replace('/', '.')
   const cache_key = `${table}_${dictionary_id}_${month_year}`
   let timestamp_from_which_to_fetch_data = '1971-01-01T00:00:00Z'
 
-  async function get_data_from_cache_then_db(refresh = false) {
+  async function get_data_from_cache_then_db() {
     if (log)
       console.info({ cache_key })
 
@@ -274,6 +270,7 @@ export function cached_join_store<Name extends JoinTableName, T extends Tables<N
     }
 
     let data_coming_in = cached_data
+    let new_data_found = false
 
     while (true) {
       if (data_coming_in.length)
@@ -298,13 +295,10 @@ export function cached_join_store<Name extends JoinTableName, T extends Tables<N
         break
       }
       if (batch?.length) {
+        new_data_found = true
+
         if (log)
           console.info({ [`latest from db: ${cache_key}`]: batch.length })
-        if (refresh) {
-          for (const item of batch) {
-            updated_item.set(item as T)
-          }
-        }
 
         data_coming_in = data_coming_in.concat(batch as T[])
         if (batch.length < 1000) {
@@ -325,11 +319,15 @@ export function cached_join_store<Name extends JoinTableName, T extends Tables<N
       store_error.set(error.message)
     }
     if (deleted_items?.length) {
+      new_data_found = true
+
       data_coming_in = data_coming_in.filter(item => !deleted_items.find(deleted_item => (deleted_item as T)[id_field_1] === item[id_field_1] && (deleted_item as T)[id_field_2] === item[id_field_2]))
     }
 
+    if (new_data_found) {
+      set_idb(cache_key, data_coming_in)
+    }
     data.set(data_coming_in)
-    set_idb(cache_key, data_coming_in)
     loading.set(false)
   }
   get_data_from_cache_then_db()
@@ -337,7 +335,6 @@ export function cached_join_store<Name extends JoinTableName, T extends Tables<N
   async function reset() {
     await del_idb(cache_key)
     data.set([])
-    updated_item.set(null)
     store_error.set(null)
     loading.set(true)
     await get_data_from_cache_then_db()
@@ -461,5 +458,5 @@ export function cached_join_store<Name extends JoinTableName, T extends Tables<N
     return { data: updated_item as T, error: null }
   }
 
-  return { subscribe: data.subscribe, error: store_error, loading, refresh: () => get_data_from_cache_then_db(true), updated_item, reset, insert, update }
+  return { subscribe: data.subscribe, error: store_error, loading, refresh: () => get_data_from_cache_then_db(), reset, insert, update }
 }

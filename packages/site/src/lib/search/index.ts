@@ -20,3 +20,8 @@ export async function update_index_entry(entry: EntryData, dictionary_id: string
   const { api } = await import('./expose-orama-worker')
   return api.update_index_entry(entry, dictionary_id)
 }
+
+export async function process_entries(data) {
+  const { api } = await import('./expose-entry-worker')
+  return api.process_entries(data)
+}
