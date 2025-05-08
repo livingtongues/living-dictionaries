@@ -54,6 +54,7 @@ export const load: LayoutLoad = async ({ params: { dictionaryId: dictionary_url 
     const tags = cached_data_store({ table: 'tags', dictionary_id, supabase })
     const dialects = cached_data_store({ table: 'dialects', dictionary_id, supabase })
     const photos = cached_data_store({ table: 'photos', dictionary_id, supabase })
+    const audios = cached_data_store({ table: 'audio', dictionary_id, supabase })
     const videos = cached_data_store({ table: 'videos_view', dictionary_id, supabase })
     const sentences = cached_data_store({ table: 'sentences', dictionary_id, supabase })
 
@@ -74,6 +75,7 @@ export const load: LayoutLoad = async ({ params: { dictionaryId: dictionary_url 
         speakers.reset(),
         dialects.reset(),
         photos.reset(),
+        audios.reset(),
         videos.reset(),
         sentences.reset(),
       ])
@@ -136,6 +138,7 @@ export const load: LayoutLoad = async ({ params: { dictionaryId: dictionary_url 
       tags,
       dialects,
       photos,
+      audios,
       videos,
       sentences,
       reset_caches,

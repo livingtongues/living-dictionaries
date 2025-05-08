@@ -2,12 +2,21 @@
   import { ShowHide, longpress } from 'svelte-pieces'
   import type { AudioWithSpeakerIds, EntryView } from '@living-dictionaries/types'
   import { page } from '$app/stores'
+  import { minutes_ago_in_ms } from '$lib/helpers/time'
 
   export let entry: EntryView
   export let context: 'list' | 'table' | 'entry'
   export let sound_file: AudioWithSpeakerIds = undefined
   export let can_edit = false
-  $: ({ url_from_storage_path } = $page.data)
+  let updated_within_last_5_minutes = false
+  $: ({ url_from_storage_path, audios, photos } = $page.data)
+
+  $: if (sound_file) {
+    const audio = $audios?.find(audio => audio.id === sound_file.id) // It's taking too long to update the audio
+    if (audio) {
+      updated_within_last_5_minutes = can_edit && new Date(audio.updated_at).getTime() > minutes_ago_in_ms(5)
+    }
+  }
 
   let playing = false
 
@@ -25,8 +34,10 @@
 <ShowHide let:show let:toggle>
   {#if sound_file}
     <div
+      class:border-b-2={updated_within_last_5_minutes}
+      class:text-green={updated_within_last_5_minutes}
       class="{$$props.class} hover:bg-gray-200 flex flex-col items-center
-        justify-center cursor-pointer select-none"
+        justify-center cursor-pointer select-none border-green-300"
       title={$page.data.t('audio.listen')}
       use:longpress={800}
       on:longpress={() => initAudio()}

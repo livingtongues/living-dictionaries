@@ -30,6 +30,7 @@ declare global {
       dialects?: DictionaryLayoutData['dialects']
       photos?: DictionaryLayoutData['photos']
       videos?: DictionaryLayoutData['videos']
+      audios?: DictionaryLayoutData['audios']
       sentences?: DictionaryLayoutData['sentences']
       dictionary_info?: DictionaryLayoutData['dictionary_info']
       dictionary_editors?: DictionaryLayoutData['dictionary_editors']

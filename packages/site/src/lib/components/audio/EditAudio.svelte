@@ -36,6 +36,8 @@
     const unsubscribe = uploadStore.subscribe((status) => {
       if (status?.progress === 100) {
         upload_triggered = true
+        $page.data.audios.refresh()
+        $page.data.entries.refresh()
         unsubscribe()
       }
     })
