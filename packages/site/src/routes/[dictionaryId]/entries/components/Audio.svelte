@@ -1,22 +1,23 @@
 <script lang="ts">
   import { ShowHide, longpress } from 'svelte-pieces'
   import type { AudioWithSpeakerIds, EntryView } from '@living-dictionaries/types'
+  import type { PageData } from '../$types'
   import { page } from '$app/stores'
-  import { minutes_ago_in_ms } from '$lib/helpers/time'
 
+  export let data: PageData
   export let entry: EntryView
   export let context: 'list' | 'table' | 'entry'
   export let sound_file: AudioWithSpeakerIds = undefined
   export let can_edit = false
-  let updated_within_last_5_minutes = false
-  $: ({ url_from_storage_path, audios, photos } = $page.data)
+  const updated_within_last_5_minutes = false
+  $: ({ url_from_storage_path, audio_store } = $page.data)
 
-  $: if (sound_file) {
-    const audio = $audios?.find(audio => audio.id === sound_file.id) // It's taking too long to update the audio
-    if (audio) {
-      updated_within_last_5_minutes = can_edit && new Date(audio.updated_at).getTime() > minutes_ago_in_ms(5)
-    }
-  }
+  // $: console.log('audio store', $audio_store)
+  // $: if (sound_file) {
+  //   if (audio) {
+  //     updated_within_last_5_minutes = can_edit && new Date(audio.updated_at).getTime() > minutes_ago_in_ms(5)
+  //   }
+  // }
 
   let playing = false
 
