@@ -18,7 +18,7 @@ export async function import_data({
   live: boolean
 }) {
   const { data: dialects } = await anon_supabase.from('dialects').select('id, name').eq('dictionary_id', dictionary_id)
-  const { data: speakers } = await anon_supabase.from('speakers_view').select('id, name').eq('dictionary_id', dictionary_id)
+  const { data: speakers } = await anon_supabase.from('speakers').select('id, name').eq('dictionary_id', dictionary_id)
   const { data: tags } = await anon_supabase.from('tags').select('id, name').eq('dictionary_id', dictionary_id)
 
   const start_index = 0

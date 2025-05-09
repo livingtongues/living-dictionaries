@@ -1,16 +1,16 @@
 <script lang="ts">
-  import type { EntryFieldValue, EntryView, Tables, TablesUpdate } from '@living-dictionaries/types'
+  import type { EntryData, EntryFieldValue, Tables, TablesUpdate } from '@living-dictionaries/types'
   import { Button } from 'svelte-pieces'
   import EntryField from './EntryField.svelte'
   import EntryMedia from './EntryMedia.svelte'
-  import Sense from './SupaSense.svelte'
+  import Sense from './Sense.svelte'
   import { page } from '$app/stores'
   import EntryDialect from '$lib/components/entry/EntryDialect.svelte'
   import EntrySource from '$lib/components/entry/EntrySource.svelte'
   import type { DbOperations } from '$lib/dbOperations'
   import EntryTag from '$lib/components/entry/EntryTag.svelte'
 
-  export let entry: EntryView
+  export let entry: EntryData
   export let dictionary: Tables<'dictionaries'>
   export let can_edit = false
   export let dbOperations: DbOperations
@@ -18,8 +18,8 @@
 
   const text_fields = ['morphology', 'interlinearization'] satisfies EntryFieldValue[]
 
-  function update_entry(entry: TablesUpdate<'entries'>) {
-    dbOperations.update_entry({ entry })
+  function update_entry(update: TablesUpdate<'entries'>) {
+    dbOperations.update_entry(update)
   }
 </script>
 
@@ -32,8 +32,7 @@
       display={$page.data.t('entry_field.lexeme')}
       on_update={(new_value) => {
         if (new_value) {
-          entry.main.lexeme.default = new_value
-          update_entry({ lexeme: entry.main.lexeme })
+          update_entry({ lexeme: { ...entry.main.lexeme, default: new_value } })
         }
       }} />
   </div>
@@ -56,8 +55,7 @@
         {can_edit}
         display={orthography.name.default}
         on_update={(new_value) => {
-          entry.main.lexeme[orthography_field] = new_value
-          update_entry({ lexeme: entry.main.lexeme })
+          update_entry({ lexeme: { ...entry.main.lexeme, [orthography_field]: new_value } })
         }} />
     {/each}
 
@@ -67,7 +65,6 @@
       {can_edit}
       display={$page.data.t('entry_field.phonetic')}
       on_update={(new_value) => {
-        entry.main.phonetic = new_value
         update_entry({ phonetic: new_value })
       }} />
 
@@ -76,7 +73,7 @@
         <Sense {sense} glossLanguages={dictionary.gloss_languages} {can_edit} />
 
         {#if can_edit}
-          <Button class="text-start p-2! mb-2 rounded order-2 hover:bg-gray-100! text-gray-600 text-start!" form="menu" onclick={async () => await dbOperations.insert_sense({ sense: {}, entry_id: entry.id })}><span class="i-system-uicons-versions text-xl" /> {$page.data.t('sense.add')}</Button>
+          <Button class="text-start p-2! mb-2 rounded order-2 hover:bg-gray-100! text-gray-600 text-start!" form="menu" onclick={async () => await dbOperations.insert_sense(entry.id)}><span class="i-system-uicons-versions text-xl" /> {$page.data.t('sense.add')}</Button>
         {/if}
       {:else}
         <div class="p-2 hover:bg-gray-50 rounded">
@@ -86,8 +83,8 @@
             </div>
             <div class="mx-auto" />
             {#if can_edit}
-              <Button class="text-gray-500!" size="sm" form="menu" onclick={async () => await dbOperations.update_sense({ sense: { deleted: 'true' }, sense_id: sense.id })}><span class="i-fa-solid-times -mt-1" /></Button>
-              <Button class="text-gray-500!" size="sm" form="menu" onclick={async () => await dbOperations.insert_sense({ sense: {}, entry_id: entry.id })}><span class="i-fa-solid-plus -mt-1" /></Button>
+              <Button class="text-gray-500!" size="sm" form="menu" onclick={async () => await dbOperations.update_sense({ deleted: new Date().toISOString(), id: sense.id })}><span class="i-fa-solid-times -mt-1" /></Button>
+              <Button class="text-gray-500!" size="sm" form="menu" onclick={async () => await dbOperations.insert_sense(entry.id)}><span class="i-fa-solid-plus -mt-1" /></Button>
             {/if}
           </div>
 
@@ -98,18 +95,24 @@
       {/if}
     {/each}
 
-    {#if entry.dialect_ids?.length || can_edit}
-      <div class="md:px-2" class:order-2={!entry.dialect_ids?.length}>
+    {#if entry.dialects?.length || can_edit}
+      <div class="md:px-2" class:order-2={!entry.dialects?.length}>
         <div class="rounded text-xs text-gray-500 mt-1 mb-2">{$page.data.t('entry_field.dialects')}</div>
-        <EntryDialect entry_id={entry.id} {can_edit} dialect_ids={entry.dialect_ids || []} />
+        <EntryDialect
+          entry_id={entry.id}
+          {can_edit}
+          dialects={entry.dialects || []} />
         <div class="border-b-2 pb-1 mb-2 border-dashed" />
       </div>
     {/if}
 
-    {#if entry.tag_ids?.length || can_edit}
-      <div class="md:px-2" class:order-2={!entry.tag_ids?.length}>
+    {#if entry.tags?.length || can_edit}
+      <div class="md:px-2" class:order-2={!entry.tags?.length}>
         <div class="rounded text-xs text-gray-500 mt-1 mb-2">{$page.data.t('entry_field.custom_tags')}</div>
-        <EntryTag entry_id={entry.id} {can_edit} tag_ids={entry.tag_ids || []} />
+        <EntryTag
+          entry_id={entry.id}
+          {can_edit}
+          tags={entry.tags || []} />
         <div class="border-b-2 pb-1 mb-2 border-dashed" />
       </div>
     {/if}
@@ -120,8 +123,7 @@
       {can_edit}
       display={$page.data.t('entry_field.scientific_names')}
       on_update={(new_value) => {
-        entry.main.scientific_names = [new_value]
-        update_entry({ scientific_names: entry.main.scientific_names })
+        update_entry({ scientific_names: [new_value] })
       }} />
 
     {#each text_fields as field}
@@ -131,7 +133,6 @@
         {can_edit}
         display={$page.data.t(`entry_field.${field}`)}
         on_update={(new_value) => {
-          entry.main[field] = new_value
           update_entry({ [field]: new_value })
         }} />
     {/each}
@@ -142,8 +143,7 @@
       {can_edit}
       display={$page.data.t('entry_field.notes')}
       on_update={(new_value) => {
-        entry.main.notes = { default: new_value }
-        update_entry({ notes: entry.main.notes })
+        update_entry({ notes: { default: new_value } })
       }} />
 
     {#if entry.main.sources?.length || can_edit}
@@ -153,7 +153,6 @@
           {can_edit}
           value={entry.main.sources}
           on_update={(new_value) => {
-            entry.main.sources = new_value
             update_entry({ sources: new_value })
           }} />
         <div class="border-b-2 pb-1 mb-2 border-dashed" />
@@ -167,7 +166,6 @@
         {can_edit}
         display="ID"
         on_update={(new_value) => {
-          entry.main.elicitation_id = new_value
           update_entry({ elicitation_id: new_value })
         }} />
     {/if}

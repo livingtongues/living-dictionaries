@@ -1,4 +1,20 @@
+## Better data sync
+- `pnpm prod`: solve jank on large dictionaries by loading in 1 chunk at a time if an editor
+- save single cached entries, then load a single cached entry fast on server for entry page
+- solve the circular typescript issue
+- push code
+- push last migration that forces dictionary_id to be set on all tables (but first rerun sql that makes sure all is set)
+- get cloudflare caches updating on a cron job every hour in GitHub actions (see backup repo for example)
+- push migration to remove entry views
+- debug why green recent update quirky in list view
+- make plan for cleaning up connected senses and join tables for deleted entries
+- look at missing indexes for dictionary_id and updated_at or created_at
+- Make it better: make entry updated_at change based on any change to all connected tables
+  - audio should change based on speakers
+  - when tables that have join tables, the join tables should be consulted and then all related table rows should be changed
+
 ## Final Migration cleanup
+- remove content-import.interface.ts code after getting new history method working
 - use line-clamp instead of truncateString in SelectedDict.svelte and also look at inline-children-elements purpose
 - show entry history from pop-up entry modal
 - test admin rls, alternative is auth.jwt() read https://supabase.com/docs/guides/database/postgres/row-level-security#authjwt to see if better

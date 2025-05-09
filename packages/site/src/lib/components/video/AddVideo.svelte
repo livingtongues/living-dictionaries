@@ -1,6 +1,6 @@
 <script lang="ts">
   import { Button, Modal, ShowHide } from 'svelte-pieces'
-  import type { EntryView, HostedVideo } from '@living-dictionaries/types'
+  import type { EntryData, HostedVideo } from '@living-dictionaries/types'
   import type { Readable } from 'svelte/motion'
   import SelectVideo from './SelectVideo.svelte'
   import PasteVideoLink from './PasteVideoLink.svelte'
@@ -13,7 +13,7 @@
   $: ({ dbOperations } = $page.data)
 
   export let on_close: () => void
-  export let entry: EntryView
+  export let entry: EntryData
 
   let hosted_video: HostedVideo
   let upload_triggered = false
@@ -44,7 +44,8 @@
         <Button
           onclick={async () => {
             const data = await dbOperations.insert_video({ sense_id: entry.senses[0].id, video: { hosted_elsewhere: hosted_video } })
-            await dbOperations.assign_speaker({ speaker_id, media: 'video', media_id: data.video_id })
+            await dbOperations.assign_speaker({ speaker_id, media: 'video', media_id: data.id })
+            on_close()
           }}
           form="filled">
           {$page.data.t('misc.save')}

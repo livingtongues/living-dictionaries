@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { EntryView, SenseWithSentences, Tables } from '@living-dictionaries/types'
+  import type { EntryData, Tables } from '@living-dictionaries/types'
   import { ShowHide } from 'svelte-pieces'
   import sanitize from 'xss'
   import Audio from '../components/Audio.svelte'
@@ -11,13 +11,11 @@
   import type { DbOperations } from '$lib/dbOperations'
   import AddImage from '$lib/components/image/AddImage.svelte'
 
-  export let entry: EntryView
+  export let entry: EntryData
   export let dictionary: Tables<'dictionaries'>
   export let can_edit = false
   export let dbOperations: DbOperations
   export let on_click: (e: MouseEvent & { currentTarget: EventTarget & HTMLAnchorElement }) => void = undefined
-
-  $: ({ photos, videos, sentences, dialects } = $page.data)
 
   $: glosses = order_glosses({
     glosses: entry.senses?.[0]?.glosses,
@@ -28,11 +26,8 @@
 
   $: updated_within_last_5_minutes = can_edit && new Date(entry.updated_at).getTime() > minutes_ago_in_ms(5)
 
-  $: first_sense = entry.senses?.[0] || {} as SenseWithSentences
-  $: photo_ids = entry?.senses?.map(({ photo_ids }) => photo_ids).flat()
-  $: sense_photos = $photos.filter(photo => photo_ids.includes(photo.id))
-  $: first_video_id = entry?.senses?.[0].video_ids?.[0]
-  $: first_video = (first_video_id && $videos.length) ? $videos.find(video => video.id === first_video_id) : null
+  $: first_sense = entry.senses?.[0] || {} as EntryData['senses'][0]
+  $: first_video = first_sense.videos?.[0]
 </script>
 
 <div
@@ -84,16 +79,15 @@
           {/if}
         {/if}
 
-        {#if entry.dialect_ids?.length}<p class="text-xs">
-          <i class="mr-1">{$page.data.t('entry_field.dialects')}: {$dialects.filter(dialect => entry.dialect_ids.includes(dialect.id)).map(dialect => dialect.name.default).join(', ')}</i>
+        {#if entry.dialects?.length}<p class="text-xs">
+          <i class="mr-1">{$page.data.t('entry_field.dialects')}: {entry.dialects.map(({ name }) => name.default).join(', ')}</i>
         </p>{/if}
 
         {#if dictionary.id === 'jewish-neo-aramaic'}
-          {#if entry.dialect_ids}<p class="text-xs">
-            <i class="mr-1">{$page.data.t('entry_field.dialects')}: {entry.dialect_ids.join(', ')}</i>
+          {#if entry.dialects}<p class="text-xs">
+            <i class="mr-1">{$page.data.t('entry_field.dialects')}: {entry.dialects.map(({ name }) => name.default).join(', ')}</i>
           </p>{/if}
-          {#each first_sense.sentence_ids || [] as sentence_id}
-            {@const sentence = $sentences.length ? $sentences.find(sentence => sentence.id === sentence_id) : null}
+          {#each first_sense.sentences || [] as sentence}
             {#each Object.entries(sentence.text) as [bcp, content]}
               <p>
                 <span class="font-semibold">
@@ -153,16 +147,16 @@
   {/if}
   <!-- {#each sense_photos as photo (photo.id)} -->
 
-  {#if sense_photos.length}
-    {@const [first_photo] = sense_photos}
+  {#if first_sense.photos?.length}
+    {@const [first_photo] = first_sense.photos}
     <div class="media-block bg-gray-300 relative">
       <Image
         square={128}
         title={entry.main.lexeme.default}
         gcs={first_photo.serving_url}
         {can_edit}
-        on_delete_image={() => dbOperations.update_photo({ photo: { deleted: 'true' }, photo_id: first_photo.id })} />
-      {#if sense_photos.length > 1}
+        on_delete_image={() => dbOperations.update_photo({ deleted: new Date().toISOString(), id: first_photo.id })} />
+      {#if first_sense.photos.length > 1}
         <span class="i-fluent-image-stack-20-regular text-white absolute bottom-1 right-1 text-xl" />
       {/if}
     </div>

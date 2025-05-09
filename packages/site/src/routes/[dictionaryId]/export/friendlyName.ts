@@ -1,7 +1,7 @@
-import type { EntryView } from '@living-dictionaries/types'
 import type { DeepPartial } from 'kitbook'
+import type { EntryData } from '@living-dictionaries/types'
 
-export function friendlyName(entry: DeepPartial<EntryView>, path: string) {
+export function friendlyName(entry: DeepPartial<EntryData>, path: string) {
   if (path) {
     let fileTypeSuffix = path.split('.').pop()
     const index = fileTypeSuffix.indexOf('?')

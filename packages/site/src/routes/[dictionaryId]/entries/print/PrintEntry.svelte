@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { EntryView, Tables } from '@living-dictionaries/types'
+  import type { EntryData, Tables } from '@living-dictionaries/types'
   import sanitize from 'xss'
   import { tick } from 'svelte'
   import QrCode from './QrCode.svelte'
@@ -9,7 +9,7 @@
   import { add_periods_and_comma_separate_parts_of_speech } from '$lib/helpers/entry/add_periods_and_comma_separate_parts_of_speech'
   import { get_local_orthographies } from '$lib/helpers/entry/get_local_orthagraphies'
 
-  export let entry: EntryView
+  export let entry: EntryData
   export let selectedFields = defaultPrintFields
   export let imagePercent = 50
   export let fontSize = 12
@@ -18,14 +18,8 @@
   export let showLabels = false
   export let showQrCode = false
 
-  $: ({ photos, sentences, dialects, speakers } = $page.data)
-
-  $: first_sense = entry.senses?.[0]
-  $: first_photo_id = first_sense?.photo_ids?.[0]
-  $: first_photo = (first_photo_id && $photos.length) ? $photos.find(photo => photo.id === first_photo_id) : null
-
+  $: first_photo = entry.senses?.[0].photos?.[0]
   $: first_audio = entry.audios?.[0]
-  $: speaker_name = ($speakers?.length && first_audio?.speaker_ids?.length) ? $speakers.find(speaker => speaker.id === first_audio.speaker_ids[0])?.name : ''
 </script>
 
 <div style="font-size: {fontSize}pt;">
@@ -49,7 +43,7 @@
           glosses: sense.glosses,
           dictionary_gloss_languages: dictionary.gloss_languages,
           t: $page.data.t,
-        }).join(', '))}{selectedFields.example_sentence && sense.sentence_ids?.length > 0 ? ';' : ''}
+        }).join(', '))}{selectedFields.example_sentence && sense.sentences?.length > 0 ? ';' : ''}
       </span>
     {/if}
 
@@ -94,9 +88,9 @@
       </div>
     {/if}
 
-    {#if selectedFields.example_sentence && $sentences}
+    {#if selectedFields.example_sentence && entry.senses?.[0].sentences?.[0]}
       <i>{order_example_sentences({
-        sentence: $sentences?.find(sentence => sentence.id === sense?.sentence_ids?.[0]),
+        sentence: entry.senses[0].sentences[0],
         dictionary_gloss_languages: dictionary.gloss_languages,
       }).join(' / ')}</i>
     {/if}
@@ -111,12 +105,12 @@
     </div>
   {/if}
 
-  {#if selectedFields.dialects && entry.dialect_ids?.length}
+  {#if selectedFields.dialects && entry.dialects?.length}
     <div>
       {#if showLabels}
         <span class="italic text-[80%]">{$page.data.t(`entry_field.dialects`)}:</span>
       {/if}
-      {$dialects.filter(dialect => entry.dialect_ids.includes(dialect.id)).map(dialect => dialect.name.default).join(', ')}
+      {entry.dialects.map(dialect => dialect.name.default).join(', ')}
     </div>
   {/if}
 
@@ -147,12 +141,12 @@
     </div>
   {/if}
 
-  {#if selectedFields.speaker && speaker_name}
+  {#if selectedFields.speaker && first_audio?.speakers?.[0].name}
     <div>
       {#if showLabels}
         <span class="italic text-[80%]">{$page.data.t('entry_field.speaker')}: </span>
       {/if}
-      {speaker_name}
+      {first_audio.speakers[0].name}
     </div>
   {/if}
 </div>
