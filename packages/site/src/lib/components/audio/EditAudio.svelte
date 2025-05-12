@@ -12,6 +12,7 @@
   export let on_close: () => void
   export let entry: EntryData
   export let sound_file: EntryData['audios'][0]
+
   let upload_triggered = false
   $: ({ admin, dbOperations, url_from_storage_path } = $page.data)
   let readyToRecord: boolean

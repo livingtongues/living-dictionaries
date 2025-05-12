@@ -22,7 +22,7 @@
   let ready = false
 
   $: if (!$entries_loading) {
-    const translated_entries = translate_entries({ entries: $entries_data })
+    const translated_entries = translate_entries({ entries: Object.values($entries_data) })
     entryHeaders = getCsvHeaders(translated_entries, dictionary)
     formattedEntries = formatCsvEntries(translated_entries, url_from_storage_path, dictionary)
     // @ts-ignore

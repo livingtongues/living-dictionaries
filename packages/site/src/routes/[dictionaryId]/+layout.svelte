@@ -1,27 +1,13 @@
 <script lang="ts">
   import { Button, ResponsiveSlideover, ShowHide } from 'svelte-pieces'
-  import type { EntryData } from '@living-dictionaries/types'
   import SideMenu from './SideMenu.svelte'
   import { page } from '$app/stores'
   import Header from '$lib/components/shell/Header.svelte'
   import './custom-fonts.css'
-  import { create_index } from '$lib/search'
 
   export let data
-  $: ({ dictionary, is_manager, entries_data, search_index_updated } = data)
+  $: ({ dictionary, is_manager, entries_data } = data)
   $: ({ loading } = entries_data)
-
-  $: if ($entries_data?.length || !$loading) {
-    index_from_entries($entries_data)
-  }
-
-  async function index_from_entries(entries: EntryData[]) {
-    await create_index(entries, dictionary.id)
-    if (!$page.state.entry_id) {
-      search_index_updated.set(true)
-      search_index_updated.set(false)
-    }
-  }
 </script>
 
 <ShowHide let:show let:toggle let:set>
@@ -54,7 +40,7 @@
       open={show}>
       <div
         class="h-full md:h-unset flex flex-col flex-shrink-0 md:top-12 md:sticky md:w-44 lg:w-48 print:hidden">
-        <SideMenu {dictionary} is_manager={$is_manager} entry_count={$entries_data?.length} on_close={() => set(false)} loading={$loading} />
+        <SideMenu {dictionary} is_manager={$is_manager} entry_count={Object.keys($entries_data).length} on_close={() => set(false)} loading={$loading} />
         <hr class="md:hidden" />
         <Button form="menu" class="text-left !md:hidden" onclick={toggle}>
           <i class="far fa-times fa-lg fa-fw" />

@@ -26,7 +26,7 @@
       {$page.data.t('dictionary.entries')}
     </span>
     <span class="flex-grow" />
-    {#if loading}
+    {#if is_manager && loading}
       <span class="i-svg-spinners-3-dots-fade align--4px mx-1" />
     {/if}
     {#if entry_count}

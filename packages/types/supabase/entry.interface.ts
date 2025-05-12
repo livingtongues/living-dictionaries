@@ -1,6 +1,6 @@
 import type { Tables } from './combined.types'
 
-type EntryDataSense = Pick<Tables<'senses'>, 'id' | 'updated_at' | 'definition' | 'glosses' | 'noun_class' | 'parts_of_speech' | 'plural_form' | 'semantic_domains' | 'variant' | 'write_in_semantic_domains'> & {
+type EntryDataSense = Pick<Tables<'senses'>, 'id' | 'updated_at' | 'created_at' | 'definition' | 'glosses' | 'noun_class' | 'parts_of_speech' | 'plural_form' | 'semantic_domains' | 'variant' | 'write_in_semantic_domains'> & {
   sentences?: Pick<Tables<'sentences'>, 'id' | 'updated_at' | 'text' | 'translation'>[]
   photos?: Pick<Tables<'photos'>, 'id' | 'updated_at' | 'photographer' | 'storage_path' | 'serving_url' | 'source'>[]
   videos?: Pick<Tables<'videos'>, 'id' | 'updated_at' | 'hosted_elsewhere' | 'source' | 'storage_path' | 'videographer'>[]

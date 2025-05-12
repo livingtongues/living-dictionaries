@@ -421,13 +421,13 @@ CREATE INDEX idx_entries_updated_at ON entries (updated_at);
 CREATE INDEX idx_entries_dictionary_id ON entries (dictionary_id);
 
 -- Foreign Key Columns
-CREATE INDEX idx_senses_entry_id ON senses (entry_id);
-CREATE INDEX idx_audio_entry_id ON audio (entry_id);
-CREATE INDEX idx_audio_speakers_audio_id ON audio_speakers (audio_id);
-CREATE INDEX idx_entry_dialects_entry_id ON entry_dialects (entry_id);
-CREATE INDEX idx_senses_in_sentences_sense_id ON senses_in_sentences (sense_id);
-CREATE INDEX idx_sense_photos_sense_id ON sense_photos (sense_id);
-CREATE INDEX idx_sense_videos_sense_id ON sense_videos (sense_id);
+CREATE INDEX idx_senses_entry_id ON senses (entry_id); -- TODO: drop
+CREATE INDEX idx_audio_entry_id ON audio (entry_id); -- TODO: drop
+CREATE INDEX idx_audio_speakers_audio_id ON audio_speakers (audio_id); -- TODO: drop
+CREATE INDEX idx_entry_dialects_entry_id ON entry_dialects (entry_id); -- TODO: drop
+CREATE INDEX idx_senses_in_sentences_sense_id ON senses_in_sentences (sense_id); -- TODO: drop
+CREATE INDEX idx_sense_photos_sense_id ON sense_photos (sense_id); -- TODO: drop
+CREATE INDEX idx_sense_videos_sense_id ON sense_videos (sense_id); -- TODO: drop
 
 -- Deleted Columns
 CREATE INDEX idx_senses_non_deleted ON senses (entry_id) WHERE deleted IS NULL;
@@ -1298,6 +1298,42 @@ create trigger handle_updated_at before update on dictionaries
 create trigger handle_updated_at before update on user_data
   for each row execute procedure moddatetime (updated_at);
 
+create trigger handle_updated_at before update on entries
+  for each row execute procedure moddatetime (updated_at);
+
+create trigger handle_updated_at before update on senses
+  for each row execute procedure moddatetime (updated_at);
+
+create trigger handle_updated_at before update on texts
+  for each row execute procedure moddatetime (updated_at);
+
+create trigger handle_updated_at before update on sentences
+  for each row execute procedure moddatetime (updated_at);
+  
+create trigger handle_updated_at before update on photos
+  for each row execute procedure moddatetime (updated_at);
+
+create trigger handle_updated_at before update on videos
+  for each row execute procedure moddatetime (updated_at);
+
+create trigger handle_updated_at before update on audio
+  for each row execute procedure moddatetime (updated_at);
+
+create trigger handle_updated_at before update on speakers
+  for each row execute procedure moddatetime (updated_at);
+
+create trigger handle_updated_at before update on dialects
+  for each row execute procedure moddatetime (updated_at);
+
+create trigger handle_updated_at before update on tags
+  for each row execute procedure moddatetime (updated_at);
+
+create trigger handle_updated_at before update on dictionary_info
+  for each row execute procedure moddatetime (updated_at);
+
+create trigger handle_updated_at before update on dictionary_partners
+  for each row execute procedure moddatetime (updated_at);
+
 CREATE FUNCTION users_for_admin_table()
 RETURNS TABLE (
     id uuid,
@@ -1896,3 +1932,26 @@ USING (
   )
 );
 
+CREATE INDEX IF NOT EXISTS idx_entries_dictionary_id_updated_at ON entries (dictionary_id, updated_at);
+CREATE INDEX IF NOT EXISTS idx_senses_dictionary_id_updated_at ON senses (dictionary_id, updated_at);
+CREATE INDEX IF NOT EXISTS idx_audio_dictionary_id_updated_at ON audio (dictionary_id, updated_at);
+CREATE INDEX IF NOT EXISTS idx_speakers_dictionary_id_updated_at ON speakers (dictionary_id, updated_at);
+CREATE INDEX IF NOT EXISTS idx_tags_dictionary_id_updated_at ON tags (dictionary_id, updated_at);
+CREATE INDEX IF NOT EXISTS idx_dialects_dictionary_id_updated_at ON dialects (dictionary_id, updated_at);
+CREATE INDEX IF NOT EXISTS idx_photos_dictionary_id_updated_at ON photos (dictionary_id, updated_at);
+CREATE INDEX IF NOT EXISTS idx_videos_dictionary_id_updated_at ON videos (dictionary_id, updated_at);
+CREATE INDEX IF NOT EXISTS idx_sentences_dictionary_id_updated_at ON sentences (dictionary_id, updated_at);
+
+CREATE INDEX IF NOT EXISTS idx_audio_speakers_dictionary_id_created_at ON audio_speakers (dictionary_id, created_at);
+CREATE INDEX IF NOT EXISTS idx_video_speakers_dictionary_id_created_at ON video_speakers (dictionary_id, created_at);
+CREATE INDEX IF NOT EXISTS idx_entry_tags_dictionary_id_created_at ON entry_tags (dictionary_id, created_at);
+CREATE INDEX IF NOT EXISTS idx_entry_dialects_dictionary_id_created_at ON entry_dialects (dictionary_id, created_at);
+CREATE INDEX IF NOT EXISTS idx_sense_photos_dictionary_id_created_at ON sense_photos (dictionary_id, created_at);
+CREATE INDEX IF NOT EXISTS idx_sense_videos_dictionary_id_created_at ON sense_videos (dictionary_id, created_at);
+CREATE INDEX IF NOT EXISTS idx_senses_in_sentences_dictionary_id_created_at ON senses_in_sentences (dictionary_id, created_at);
+CREATE INDEX IF NOT EXISTS idx_sentence_photos_dictionary_id_created_at ON sentence_photos (dictionary_id, created_at);
+CREATE INDEX IF NOT EXISTS idx_sentence_videos_dictionary_id_created_at ON sentence_videos (dictionary_id, created_at);
+
+-- Maybe if needed
+-- CREATE INDEX IF NOT EXISTS idx_entries_dict_updated_not_deleted ON entries (dictionary_id, updated_at) WHERE deleted IS NULL;
+-- CREATE INDEX IF NOT EXISTS idx_senses_dict_updated_not_deleted ON senses (dictionary_id, updated_at) WHERE deleted IS NULL;

@@ -1,16 +1,14 @@
 import { error, redirect } from '@sveltejs/kit'
 import type { Tables, TablesUpdate } from '@living-dictionaries/types'
-import { type Readable, derived, get, writable } from 'svelte/store'
+import { type Readable, derived, get } from 'svelte/store'
 import { readable } from 'svelte/store'
 import type { LayoutLoad } from './$types'
 import { MINIMUM_ABOUT_LENGTH, ResponseCodes } from '$lib/constants'
 import { DICTIONARY_UPDATED_LOAD_TRIGGER, dbOperations } from '$lib/dbOperations'
-import { search_entries } from '$lib/search'
 import { url_from_storage_path } from '$lib/helpers/media'
 import { PUBLIC_STORAGE_BUCKET } from '$env/static/public'
 import { invalidate } from '$app/navigation'
-import { create_entries_data_store } from '$lib/supabase/entries-data-store'
-import { browser } from '$app/environment'
+import { create_entries_ui_store } from '$lib/search/entries-ui-store'
 
 export const load: LayoutLoad = async ({ params: { dictionaryId: dictionary_url }, parent, depends }) => {
   depends(DICTIONARY_UPDATED_LOAD_TRIGGER)
@@ -46,9 +44,7 @@ export const load: LayoutLoad = async ({ params: { dictionaryId: dictionary_url 
 
     const default_entries_per_page = 20
 
-    // TODO later: bring in sentence_videos, sentence_photos, texts
-    const entries_data = create_entries_data_store({ dictionary_id, supabase, log: false, can_edit: browser && get(can_edit) })
-    const search_index_updated = writable(false)
+    const entries_ui = create_entries_ui_store({ dictionary_id, can_edit })
 
     const dictionary_info = readable<Tables<'dictionary_info'>>({} as Tables<'dictionary_info'>, (set) => {
       (async () => {
@@ -100,27 +96,25 @@ export const load: LayoutLoad = async ({ params: { dictionaryId: dictionary_url 
 
     return {
       dictionary,
-      dbOperations,
-      url_from_storage_path: (path: string) => url_from_storage_path(path, PUBLIC_STORAGE_BUCKET),
-      entries_data,
-      speakers: entries_data.speakers,
-      tags: entries_data.tags,
-      dialects: entries_data.dialects,
-      photos: entries_data.photos,
-      videos: entries_data.videos,
-      sentences: entries_data.sentences,
-      reset_caches: entries_data.reset_caches,
-      default_entries_per_page,
-      search_entries,
+      dictionary_info,
       is_manager,
-      search_index_updated,
       is_contributor,
       can_edit,
-      dictionary_info,
-      about_is_too_short,
       dictionary_editors,
       load_partners,
+      about_is_too_short,
       update_dictionary,
+      url_from_storage_path: (path: string) => url_from_storage_path(path, PUBLIC_STORAGE_BUCKET),
+      default_entries_per_page,
+      dbOperations,
+
+      entries_data: entries_ui,
+      speakers: entries_ui.speakers,
+      tags: entries_ui.tags,
+      dialects: entries_ui.dialects,
+      reset_caches: entries_ui.reset_caches,
+      search_entries: entries_ui.search_entries,
+      search_index_updated: entries_ui.search_index_updated,
     }
   } catch (err) {
     error(ResponseCodes.INTERNAL_SERVER_ERROR, err)

@@ -1,16 +1,12 @@
-import { readable, writable } from 'svelte/store'
-import { del as del_idb, get as get_idb, set as set_idb } from 'idb-keyval'
-import type { Tables, TablesInsert, TablesUpdate } from '@living-dictionaries/types'
-import type { PostgrestError } from '@supabase/supabase-js'
+import { get as get_idb, set as set_idb } from 'idb-keyval'
+import type { Tables } from '@living-dictionaries/types'
 import type { Supabase } from '.'
-import { browser } from '$app/environment'
 
 interface CachedDataStoreOptions<Name, FieldName> {
   dictionary_id: string
   table: Name
   include: FieldName[]
   supabase: Supabase
-  can_edit?: boolean
   log?: boolean
 }
 
@@ -20,7 +16,6 @@ interface CachedJoinStoreOptions<Name, FieldName> {
   id_field_1: FieldName
   id_field_2: FieldName
   supabase: Supabase
-  can_edit?: boolean
   log?: boolean
 }
 
@@ -28,435 +23,189 @@ type DataTableName = 'entries' | 'senses' | 'audio' | 'speakers' | 'tags' | 'dia
 
 type JoinTableName = 'audio_speakers' | 'video_speakers' | 'entry_tags' | 'entry_dialects' | 'sense_photos' | 'sense_videos' | 'senses_in_sentences'
 
-export function cached_data_store<Name extends DataTableName, T extends Tables<Name>, InsertData extends TablesInsert<Name>, UpdateData extends TablesUpdate<Name>>(options: CachedDataStoreOptions<Name, keyof T>) {
-  const data = writable<T[]>([])
-  const store_error = writable<string>(null)
-  const loading = writable(true)
-  const order_field = 'updated_at'
+export function get_table_cache_key(table: DataTableName | JoinTableName, dictionary_id: string) {
+  const month_year = new Date().toLocaleDateString('default', { month: '2-digit', year: 'numeric' }).replace('/', '.')
+  return `${table}_${dictionary_id}_${month_year}`
+}
 
-  if (!browser)
-    return { subscribe: data.subscribe, error: store_error, loading, refresh: null, reset: null }
-  if (!options.can_edit)
-    return { subscribe: data.subscribe, error: store_error, loading: readable(false), refresh: null, reset: null }
+export async function cached_data_table<Name extends DataTableName, T extends Tables<Name>>(options: CachedDataStoreOptions<Name, keyof T>) {
+  let data: Record<string, T> = {}
+  const order_field = 'updated_at'
 
   const { dictionary_id, table, supabase, log, include } = options
 
-  const month_year = new Date().toLocaleDateString('default', { month: '2-digit', year: 'numeric' }).replace('/', '.')
-  const cache_key = `${table}_${dictionary_id}_${month_year}`
+  const cache_key = get_table_cache_key(table, dictionary_id)
   let timestamp_from_which_to_fetch_data = '1971-01-01T00:00:00Z'
 
-  async function get_data_from_cache_then_db() {
+  if (log)
+    console.info({ cache_key })
+
+  const cached_data = await get_idb<Record<string, T>>(cache_key) || {}
+  const cached_length = Object.keys(cached_data).length
+  if (cached_length) {
+    // Determine the latest timestamp from the cached data
+    timestamp_from_which_to_fetch_data = Object.values(cached_data)
+      .reduce((latest, item) => {
+        const itemTimestamp = item[order_field] as string
+        return itemTimestamp > latest ? itemTimestamp : latest
+      }, timestamp_from_which_to_fetch_data)
     if (log)
-      console.info({ cache_key })
-
-    const cached_data = await get_idb<T[]>(cache_key) || []
-    if (cached_data.length && log) {
-      console.info({ [`from cache: ${cache_key}`]: cached_data.length })
-    }
-
-    let data_coming_in = cached_data
-    let new_data_found = false
-
-    while (true) {
-      if (data_coming_in.length)
-        timestamp_from_which_to_fetch_data = data_coming_in[data_coming_in.length - 1][order_field] as string
-      if (cached_data?.length) {
-        include.push('deleted')
-      }
-      const query = supabase.from(table)
-        .select([...include, 'id', order_field].join(', '))
-        .eq('dictionary_id', dictionary_id)
-        .limit(1000)
-        .order(order_field, { ascending: true })
-        .gt(order_field, timestamp_from_which_to_fetch_data)
-      if (!cached_data?.length) {
-        query.is('deleted', null)
-      }
-
-      const { data: batch, error } = await query
-      if (error) {
-        if (log)
-          console.error(error.message)
-        store_error.set(error.message)
-        loading.set(false)
-        break
-      }
-      if (batch?.length) {
-        new_data_found = true
-
-        if (log)
-          console.info({ [`latest from db: ${cache_key}`]: batch.length })
-        const batch_without_nulls = batch.map((item) => {
-          return Object.fromEntries(
-            Object.entries(item).filter(([_, value]) => value !== null),
-          ) as T
-        })
-
-        data_coming_in = data_coming_in.concat(batch_without_nulls)
-        if (batch.length < 1000) {
-          break
-        }
-      } else {
-        break
-      }
-    }
-
-    if (new_data_found) {
-      if (cached_data?.length) {
-        data_coming_in = data_coming_in
-          .reverse()
-          .filter((value, index, self) => index === self.findIndex(v => v.id === value.id))
-          .filter(value => !value.deleted)
-          .reverse()
-      }
-      set_idb(cache_key, data_coming_in)
-    }
-    data.set(data_coming_in)
-    loading.set(false)
-  }
-  get_data_from_cache_then_db()
-
-  async function reset() {
-    await del_idb(cache_key)
-    data.set([])
-    store_error.set(null)
-    loading.set(true)
-    await get_data_from_cache_then_db()
+      console.info({ [`from cache: ${cache_key}`]: cached_length })
   }
 
-  async function insert(item_to_insert: InsertData): Promise<{ data: T | null, error: PostgrestError | null }> {
-    data.update((items) => {
-      return [...items, item_to_insert as unknown as T]
-    })
+  data = cached_data
+  let new_data_found = false
 
-    const { data: inserted_item, error } = await supabase.from(table)
-      .insert(item_to_insert as any)
-      .select()
-      .single()
+  const select_fields = [...include, 'id', order_field]
+  if (cached_length) {
+    select_fields.push('deleted')
+  }
 
+  while (true) {
+    const query = supabase.from(table)
+      .select(select_fields.join(', '))
+      .eq('dictionary_id', dictionary_id)
+      .limit(1000)
+      .order(order_field, { ascending: true })
+      .gt(order_field, timestamp_from_which_to_fetch_data)
+    if (!cached_length) {
+      query.is('deleted', null)
+    }
+
+    const { data: batch, error } = await query
     if (error) {
       if (log)
         console.error(error.message)
-      store_error.set(error.message)
-      data.update((items) => {
-        return items.filter(item => item.id !== item_to_insert.id)
-      })
-      return { data: null, error }
+      throw new Error(error.message)
     }
+    if (batch?.length) {
+      new_data_found = true
 
-    data.update((items) => {
-      const index = items.findIndex(item => item.id === item_to_insert.id)
-      if (index !== -1) {
-        const inserted = {
-          ...items[index],
-          ...inserted_item as T,
-        }
+      timestamp_from_which_to_fetch_data = batch[batch.length - 1][order_field] as string
 
-        const new_data = [
-          ...items.slice(0, index),
-          ...items.slice(index + 1),
-          inserted,
-        ]
-
-        set_idb(cache_key, new_data)
-        return new_data
-      }
-      return items
-    })
-    return { data: inserted_item as T, error: null }
-  }
-
-  async function update(item_to_update: UpdateData): Promise<{ data: T | null, error: PostgrestError | null }> {
-    if (log)
-      console.info({ item_to_update })
-
-    let current_items: T[]
-
-    data.update((items) => {
-      current_items = items
-      if (item_to_update.deleted) {
-        return items.filter((item) => {
-          if (item.id !== item_to_update.id) {
-            return true
-          }
-          return false
-        })
-      }
-
-      const index = items.findIndex(item => item.id === item_to_update.id)
-      if (index !== -1) {
-        // Create the updated item by merging the original with updates
-        const updated = {
-          ...items[index],
-          ...item_to_update,
-        }
-
-        // Create new array: copy items before target, skip target, copy items after target
-        const new_data = [
-          ...items.slice(0, index),
-          ...items.slice(index + 1),
-          updated,
-        ]
-
-        return new_data
-      }
-
-      return items
-    })
-
-    const { data: updated_item, error } = await supabase.from(table)
-      .update(item_to_update)
-      .eq('id', item_to_update.id)
-      .select()
-      .single()
-    if (error) {
       if (log)
-        console.error(error.message)
-      store_error.set(error.message)
-      data.set(current_items)
-      return { data: null, error }
-    }
+        console.info({ [`latest from db: ${cache_key}`]: batch.length })
 
-    data.update((items) => {
-      const index = items.findIndex(item => item.id === item_to_update.id)
-      if (index !== -1) { // if it was deleted, it won't be found
-        const updated = {
-          ...items[index],
-          ...updated_item as T,
-        }
+      const batch_without_nulls = batch.reduce((acc, item) => {
+        const item_without_nulls = Object.fromEntries(
+          Object.entries(item).filter(([_, value]) => value !== null),
+        ) as T
+        acc[item_without_nulls.id] = item_without_nulls
+        return acc
+      }, {} as Record<string, T>)
 
-        const new_data = [
-          ...items.slice(0, index),
-          ...items.slice(index + 1),
-          updated,
-        ]
-
-        set_idb(cache_key, new_data)
-        return new_data
+      data = { ...data, ...batch_without_nulls }
+      if (batch.length < 1000) {
+        break
       }
-
-      return items
-    })
-    return { data: updated_item as T, error: null }
+    } else {
+      break
+    }
   }
 
-  return { subscribe: data.subscribe, error: store_error, loading, refresh: () => get_data_from_cache_then_db(), reset, insert, update }
+  if (new_data_found && cached_length) {
+    data = Object.fromEntries(
+      Object.entries(data).filter(([_key, item]) => !item.deleted),
+    )
+  }
+
+  if (new_data_found) {
+    set_idb(cache_key, data)
+  }
+
+  return data
 }
 
-export function cached_join_store<Name extends JoinTableName, T extends Tables<Name>, InsertData extends TablesInsert<Name>, UpdateData extends TablesUpdate<Name>>(options: CachedJoinStoreOptions<Name, keyof T>) {
-  const data = writable<T[]>([])
-  const store_error = writable<string>(null)
-  const loading = writable(true)
+export async function cached_join_table<Name extends JoinTableName, T extends Tables<Name>>(options: CachedJoinStoreOptions<Name, keyof T>) {
+  let data: Record<string, T> = {}
   const order_field = 'created_at'
-
-  if (!browser || !options.can_edit)
-    return { subscribe: data.subscribe, error: store_error, loading, refresh: null, reset: null }
-  if (!options.can_edit)
-    return { subscribe: data.subscribe, error: store_error, loading: readable(false), refresh: null, reset: null }
 
   const { dictionary_id, table, supabase, log, id_field_1, id_field_2 } = options
 
-  const month_year = new Date().toLocaleDateString('default', { month: '2-digit', year: 'numeric' }).replace('/', '.')
-  const cache_key = `${table}_${dictionary_id}_${month_year}`
+  const cache_key = get_table_cache_key(table, dictionary_id)
   let timestamp_from_which_to_fetch_data = '1971-01-01T00:00:00Z'
 
-  async function get_data_from_cache_then_db() {
+  if (log)
+    console.info({ cache_key })
+
+  const cached_data = await get_idb<Record<string, T>>(cache_key) || {}
+  const cached_length = Object.keys(cached_data).length
+  if (cached_length) {
+    // Determine the latest timestamp from the cached data
+    timestamp_from_which_to_fetch_data = Object.values(cached_data)
+      .reduce((latest, item) => {
+        const itemTimestamp = item[order_field] as string
+        return itemTimestamp > latest ? itemTimestamp : latest
+      }, timestamp_from_which_to_fetch_data)
     if (log)
-      console.info({ cache_key })
+      console.info({ [`from cache: ${cache_key}`]: cached_length })
+  }
 
-    const cached_data = await get_idb<T[]>(cache_key) || []
-    if (cached_data.length && log) {
-      console.info({ [`from cache: ${cache_key}`]: cached_data.length })
-    }
+  data = cached_data
+  let new_data_found = false
 
-    let data_coming_in = cached_data
-    let new_data_found = false
+  const select_fields = [order_field, id_field_1, id_field_2]
 
-    while (true) {
-      if (data_coming_in.length)
-        timestamp_from_which_to_fetch_data = data_coming_in[data_coming_in.length - 1][order_field] as string
-
-      const query = supabase.from(table)
-        .select([order_field, id_field_1, id_field_2].join(', '))
-        .eq('dictionary_id', dictionary_id)
-        .limit(1000)
-        .order(order_field, { ascending: true })
-        .gt(order_field, timestamp_from_which_to_fetch_data)
-      if (!cached_data?.length) {
-        query.is('deleted', null)
-      }
-
-      const { data: batch, error } = await query
-      if (error) {
-        if (log)
-          console.error(error.message)
-        store_error.set(error.message)
-        loading.set(false)
-        break
-      }
-      if (batch?.length) {
-        new_data_found = true
-
-        if (log)
-          console.info({ [`latest from db: ${cache_key}`]: batch.length })
-
-        data_coming_in = data_coming_in.concat(batch as T[])
-        if (batch.length < 1000) {
-          break
-        }
-      } else {
-        break
-      }
-    }
-
-    const { data: deleted_items, error } = await supabase.from(table)
-      .select()
+  while (true) {
+    const query = supabase.from(table)
+      .select(select_fields.join(', '))
       .eq('dictionary_id', dictionary_id)
-      .not('deleted', 'is', null)
+      .limit(1000)
+      .order(order_field, { ascending: true })
+      .gt(order_field, timestamp_from_which_to_fetch_data)
+    if (!cached_length) {
+      query.is('deleted', null)
+    }
+
+    const { data: batch, error } = await query
     if (error) {
       if (log)
         console.error(error.message)
-      store_error.set(error.message)
+      throw new Error(error.message)
     }
-    if (deleted_items?.length) {
+    if (batch?.length) {
       new_data_found = true
 
-      data_coming_in = data_coming_in.filter(item => !deleted_items.find(deleted_item => (deleted_item as T)[id_field_1] === item[id_field_1] && (deleted_item as T)[id_field_2] === item[id_field_2]))
-    }
+      timestamp_from_which_to_fetch_data = batch[batch.length - 1][order_field] as string
 
-    if (new_data_found) {
-      set_idb(cache_key, data_coming_in)
-    }
-    data.set(data_coming_in)
-    loading.set(false)
-  }
-  get_data_from_cache_then_db()
-
-  async function reset() {
-    await del_idb(cache_key)
-    data.set([])
-    store_error.set(null)
-    loading.set(true)
-    await get_data_from_cache_then_db()
-  }
-
-  async function insert(item_to_insert: InsertData): Promise<{ data: T | null, error: PostgrestError | null }> {
-    data.update((items) => {
-      return [...items, item_to_insert as unknown as T]
-    })
-
-    const { data: inserted_item, error } = await supabase.from(table)
-      .insert(item_to_insert as any)
-      .select()
-      .single()
-
-    if (error) {
       if (log)
-        console.error(error.message)
-      store_error.set(error.message)
-      data.update((items) => {
-        return items.filter(item => !(item[id_field_1] === (item_to_insert as unknown as T)[id_field_1] && item[id_field_2] === (item_to_insert as unknown as T)[id_field_2]))
-      })
-      return { data: null, error }
-    }
+        console.info({ [`latest from db: ${cache_key}`]: batch.length })
 
-    data.update((items) => {
-      const index = items.findIndex(item => (item[id_field_1] === (item_to_insert as unknown as T)[id_field_1] && item[id_field_2] === (item_to_insert as unknown as T)[id_field_2]))
-      if (index !== -1) {
-        const inserted = {
-          ...items[index],
-          ...inserted_item as T,
-        }
-
-        const new_data = [
-          ...items.slice(0, index),
-          ...items.slice(index + 1),
-          inserted,
-        ]
-
-        set_idb(cache_key, new_data)
-        return new_data
+      const batch_object = batch.reduce((acc, item) => {
+        const combined_id = `${(item as T)[id_field_1]}_${(item as T)[id_field_2]}`
+        acc[combined_id] = item as T
+        return acc
+      }, {} as Record<string, T>)
+      data = { ...data, ...batch_object }
+      if (batch.length < 1000) {
+        break
       }
-      return items
-    })
-    return { data: inserted_item as T, error: null }
+    } else {
+      break
+    }
   }
 
-  async function update(item_to_update: UpdateData): Promise<{ data: T | null, error: PostgrestError | null }> {
+  const { data: deleted_items, error } = await supabase.from(table)
+    .select()
+    .eq('dictionary_id', dictionary_id)
+    .not('deleted', 'is', null)
+  if (error) {
     if (log)
-      console.info({ item_to_update })
+      console.error(error.message)
+    throw new Error(error.message)
+  }
+  if (deleted_items?.length) {
+    new_data_found = true
 
-    let current_items: T[]
-
-    data.update((items) => {
-      current_items = items
-
-      if (item_to_update.deleted) {
-        return items.filter((item) => {
-          if (!(item[id_field_1] === (item_to_update as unknown as T)[id_field_1] && item[id_field_2] === (item_to_update as unknown as T)[id_field_2])) {
-            return true
-          }
-          return false
-        })
-      }
-
-      const index = items.findIndex(item => item[id_field_1] === (item_to_update as unknown as T)[id_field_1] && item[id_field_2] === (item_to_update as unknown as T)[id_field_2])
-
-      if (index !== -1) {
-        const updated = {
-          ...items[index],
-          ...item_to_update,
-        }
-
-        const new_data = [
-          ...items.slice(0, index),
-          ...items.slice(index + 1),
-          updated,
-        ]
-
-        return new_data
-      }
-
-      return items
+    deleted_items.forEach((item) => {
+      const combined_id = `${(item as T)[id_field_1]}_${(item as T)[id_field_2]}`
+      delete data[combined_id]
     })
-
-    const { data: updated_item, error } = await supabase.from(table)
-      .update(item_to_update)
-      // @ts-ignore
-      .eq(id_field_1, item_to_update[id_field_1])
-      // @ts-ignore
-      .eq(id_field_2, item_to_update[id_field_2])
-      .single()
-    if (error) {
-      if (log)
-        console.error(error.message)
-      store_error.set(error.message)
-      data.set(current_items)
-      return { data: null, error }
-    }
-
-    data.update((items) => {
-      const index = items.findIndex(item => (item[id_field_1] === (item_to_update as unknown as T)[id_field_1] && item[id_field_2] === (item_to_update as unknown as T)[id_field_2]))
-      if (index !== -1) { // if it was deleted, it won't be found
-        const updated = {
-          ...items[index],
-          ...updated_item as T,
-        }
-
-        const new_data = [
-          ...items.slice(0, index),
-          ...items.slice(index + 1),
-          updated,
-        ]
-
-        set_idb(cache_key, new_data)
-        return new_data
-      }
-
-      return items
-    })
-    return { data: updated_item as T, error: null }
   }
 
-  return { subscribe: data.subscribe, error: store_error, loading, refresh: () => get_data_from_cache_then_db(), reset, insert, update }
+  if (new_data_found) {
+    set_idb(cache_key, data)
+  }
+
+  return data
 }

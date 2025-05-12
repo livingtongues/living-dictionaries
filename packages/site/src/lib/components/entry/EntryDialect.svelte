@@ -11,7 +11,6 @@
 
   $: ({ dialects: dictionary_dialects, dbOperations } = $page.data)
   $: dialect_ids = dialects.map(dialect => dialect.id)
-  $: active_dialects = $dictionary_dialects.filter(dialect => dialect_ids.includes(dialect.id)).map(dialect => dialect.id)
   $: options = $dictionary_dialects.map(dialect => ({ value: dialect.id, name: dialect.name.default })) satisfies SelectOption[]
 
   async function on_update(new_values: string[]) {
@@ -40,7 +39,7 @@
 </script>
 
 <ModalEditableArray
-  values={active_dialects}
+  values={dialect_ids}
   {options}
   {can_edit}
   canWriteIn

@@ -11,7 +11,6 @@
 
   $: ({ tags: dictionary_tags, dbOperations } = $page.data)
   $: tag_ids = tags.map(tag => tag.id)
-  $: active_tags = $dictionary_tags.filter(tag => tag_ids.includes(tag.id)).map(tag => tag.id)
   $: options = $dictionary_tags.map(tag => ({ value: tag.id, name: tag.name })) satisfies SelectOption[]
 
   async function on_update(new_values: string[]) {
@@ -40,7 +39,7 @@
 </script>
 
 <ModalEditableArray
-  values={active_tags}
+  values={tag_ids}
   {options}
   {can_edit}
   canWriteIn

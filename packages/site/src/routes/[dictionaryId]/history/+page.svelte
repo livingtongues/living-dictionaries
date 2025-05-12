@@ -27,8 +27,11 @@
   })
 
   function get_entry(record: Tables<'content_updates'>): EntryData {
-    return $entries_data.find(entry =>
-      entry.id === record.entry_id || entry.senses.some(sense => sense.id === record.sense_id))
+    const entry = $entries_data[record.entry_id]
+    if (entry) return entry
+
+    return Object.values($entries_data).find(entry =>
+      entry.senses.some(sense => sense.id === record.sense_id))
   }
 
   function exportHistoryAsCSV() {

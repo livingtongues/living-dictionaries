@@ -1,5 +1,4 @@
 import { create, insertMultiple, remove, update } from '@orama/orama'
-import { expose } from 'comlink'
 import type { EntryData } from '@living-dictionaries/types'
 import { augment_entry_for_search } from './augment-entry-for-search'
 import { type EntriesIndex, entries_index_schema } from './entries-schema'
@@ -8,7 +7,7 @@ import { createMultilingualTokenizer } from './multilingual-tokenizer'
 
 let orama_index: Record<string, EntriesIndex>
 
-async function create_index(entries: EntryData[], dictionary_id: string) {
+export async function create_index(entries: EntryData[], dictionary_id: string) {
   console.time('Augment Entries Time')
   const entries_augmented_for_search = entries.map(augment_entry_for_search)
   console.timeEnd('Augment Entries Time')
@@ -43,7 +42,7 @@ function get_index(dictionary_id: string): Promise<EntriesIndex> {
 //   await updateMultiple(index, entries.map(({ id }) => id), entries.map(augment_entry_for_search))
 // }
 
-async function update_index_entry(entry: EntryData, dictionary_id: string) {
+export async function update_index_entry(entry: EntryData, dictionary_id: string) {
   const index = await get_index(dictionary_id)
   if (entry.deleted)
     await remove(index, entry.id)
@@ -51,15 +50,7 @@ async function update_index_entry(entry: EntryData, dictionary_id: string) {
     await update(index, entry.id, augment_entry_for_search(entry))
 }
 
-async function _search_entries(options: SearchEntriesOptions) {
+export async function _search_entries(options: SearchEntriesOptions) {
   const index = await get_index(options.dictionary_id)
   return search_entries(options, index)
 }
-
-export const api = {
-  create_index,
-  update_index_entry,
-  search_entries: _search_entries,
-}
-
-expose(api)
