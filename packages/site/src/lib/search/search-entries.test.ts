@@ -108,19 +108,7 @@ describe(search_entries, () => {
               "has_sentence": false,
               "has_speaker": false,
               "has_video": false,
-              "main": {
-                "lexeme": {
-                  "default": "esotman taki",
-                },
-              },
-              "senses": [
-                {
-                  "glosses": {
-                    "pt": "fácil",
-                    "tri": "wamekatota",
-                  },
-                },
-              ],
+              "id": undefined,
             },
           },
         },

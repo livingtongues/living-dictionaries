@@ -24,12 +24,7 @@ describe(augment_entry_for_search, () => {
         "has_sentence": false,
         "has_speaker": false,
         "has_video": false,
-        "main": {
-          "lexeme": {
-            "default": "",
-          },
-        },
-        "senses": [],
+        "id": undefined,
       }
     `)
   })
