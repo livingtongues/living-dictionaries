@@ -49,6 +49,15 @@ export async function load({ params: { entryId: entry_id }, parent }) {
   }
 
   const { entries_data } = await parent()
+  await new Promise((resolve) => {
+    const unsub = entries_data.loading.subscribe((loading) => {
+      if (!loading) {
+        resolve(true)
+        unsub()
+      }
+    })
+  })
+
   const derived_entry = derived([entries_data], ([$entries_data]) => {
     const entry = $entries_data[entry_id]
     if (entry) {

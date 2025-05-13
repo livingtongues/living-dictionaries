@@ -8,7 +8,11 @@ function randomUUID() {
   return window.crypto.randomUUID()
 }
 async function get_pieces() {
-  const { params: { entryId: entry_id_from_url }, state: { entry_id: entry_id_from_state }, data: { dictionary, supabase, entries_data } } = get(page) as any as { params: { entryId: string }, state: { entry_id: string }, data: { dictionary: { id: string }, supabase: Supabase, entries_data: { loading: Writable<boolean> } } }
+  const { params: { entryId: entry_id_from_url }, state: { entry_id: entry_id_from_state }, data: { dictionary, supabase, entries_data } } = get(page) as any as {
+    params: { entryId: string }
+    state: { entry_id: string }
+    data: { dictionary: { id: string }, supabase: Supabase, entries_data: { loading: Writable<boolean> } }
+  }
   const { api } = await import('$lib/search/expose-entry-worker')
   const loading = get(entries_data.loading)
   if (loading) {

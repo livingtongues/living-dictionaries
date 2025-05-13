@@ -1,7 +1,6 @@
 ## Better data sync
-- pnpm check and test
-- solve circular dependencies issues
 - update cloudflare caches
+- solve circular dependencies issues
 - push code
 - push last migration that forces dictionary_id to be set on all tables (but first rerun sql that makes sure all is set)
 - debug why green recent update quirky in list view and make sure all recent indicators are working

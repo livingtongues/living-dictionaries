@@ -452,6 +452,7 @@ export async function init_entries(
   set_speakers(Object.values(speakers))
 
   await create_index(Object.values(processed_data), dictionary_id)
+  mark_search_index_updated()
   set_loading(false)
 }
 
