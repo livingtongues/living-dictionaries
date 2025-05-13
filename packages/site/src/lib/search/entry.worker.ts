@@ -90,9 +90,10 @@ const operations = {
     await process_and_update_entry(entries[entry_id])
   },
   insert_audio: async (audio: TablesInsert<'audio'>) => {
-    audios[audio.id] = audio as Tables<'audio'>
+    const audio_with_temp_updated_at = { ...audio, updated_at: new Date().toISOString() } as Tables<'audio'>
+    audios[audio.id] = audio_with_temp_updated_at
     if (!entry_id_to_audios[audio.entry_id]) entry_id_to_audios[audio.entry_id] = []
-    entry_id_to_audios[audio.entry_id].push(audio as Tables<'audio'>)
+    entry_id_to_audios[audio.entry_id].push(audio_with_temp_updated_at)
     await process_and_update_entry(entries[audio.entry_id])
   },
   update_audio: async (audio: TablesUpdate<'audio'>) => {

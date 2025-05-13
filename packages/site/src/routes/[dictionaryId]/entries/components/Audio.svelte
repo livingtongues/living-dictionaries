@@ -3,19 +3,12 @@
   import type { EntryData } from '@living-dictionaries/types'
   import { page } from '$app/stores'
   import { minutes_ago_in_ms } from '$lib/helpers/time'
-  import { browser } from '$app/environment'
 
   export let entry: EntryData
   export let context: 'list' | 'table' | 'entry'
   export let sound_file: EntryData['audios'][0] = undefined
   export let can_edit = false
-  let updated_within_last_5_minutes = false
   $: ({ url_from_storage_path } = $page.data)
-  $: if (sound_file) {
-    const audio = entry.audios.find(audio => audio.id === sound_file.id)
-    updated_within_last_5_minutes = can_edit && new Date(audio?.updated_at).getTime() > minutes_ago_in_ms(5)
-  }
-  $: show_border = browser && !window.location.pathname.includes('/entries')
 
   let playing = false
 
@@ -32,9 +25,9 @@
 
 <ShowHide let:show let:toggle>
   {#if sound_file}
+    {@const updated_within_last_5_minutes = sound_file.updated_at && can_edit && new Date(sound_file.updated_at).getTime() > minutes_ago_in_ms(5)}
     <div
-      class:border-b-2={updated_within_last_5_minutes && show_border}
-      class:text-green-700={updated_within_last_5_minutes}
+      class:border-b-2={updated_within_last_5_minutes}
       class="{$$props.class} hover:bg-gray-200 flex flex-col items-center
         justify-center cursor-pointer select-none border-green-300"
       title={$page.data.t('audio.listen')}
