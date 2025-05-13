@@ -1,11 +1,11 @@
 <script lang="ts">
-  import type { EntryView, Tables } from '@living-dictionaries/types'
+  import type { EntryData, Tables } from '@living-dictionaries/types'
   import { sortedColumn } from './sortedColumnStore'
   import { supabase_date_to_friendly } from '$lib/helpers/time'
   import { page } from '$app/stores'
 
   export let record: Tables<'content_updates'>
-  export let get_entry: (record: Tables<'content_updates'>) => EntryView
+  export let get_entry: (record: Tables<'content_updates'>) => EntryData
 </script>
 
 <tr>

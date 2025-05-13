@@ -1,7 +1,6 @@
 import * as fs from 'node:fs'
 import { pipeline } from 'node:stream/promises'
 import { GetObjectCommand } from '@aws-sdk/client-s3'
-import type { AudioWithSpeakerIds, EntryMainFields, SenseWithSentences } from '@living-dictionaries/types/supabase/entry.interface'
 import { friendlyName } from '@living-dictionaries/site/src/routes/[dictionaryId]/export/friendlyName'
 import { GCLOUD_MEDIA_BUCKET_S3 } from './gcs'
 import { admin_supabase } from './config-supabase'
@@ -9,11 +8,7 @@ import { admin_supabase } from './config-supabase'
 const directory_path = 'downloaded'
 
 async function download_dictionary_audio(dictionary_id: string) {
-  let entries: {
-    main: EntryMainFields
-    audios?: AudioWithSpeakerIds[]
-    senses?: SenseWithSentences[]
-  }[] = []
+  let entries = []
   let offset = 0
   const limit = 1000
 

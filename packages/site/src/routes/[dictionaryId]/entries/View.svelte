@@ -1,7 +1,7 @@
 <script lang="ts">
-  import type { EntryView } from '@living-dictionaries/types'
   import { Modal } from 'svelte-pieces'
   import { readable } from 'svelte/store'
+  import type { EntryData } from '@living-dictionaries/types'
   import EntryPage from '../entry/[entryId]/+page.svelte'
   import ListEntry from './list/ListEntry.svelte'
   import EntriesTable from './table/EntriesTable.svelte'
@@ -11,11 +11,11 @@
   import { pushState } from '$app/navigation'
   import { page } from '$app/stores'
 
-  export let entries: EntryView[]
+  export let entries: EntryData[]
   export let page_data: EntriesPageData
   $: ({ dictionary, can_edit, preferred_table_columns, dbOperations, search_params } = page_data)
 
-  function handle_entry_click(e: MouseEvent & { currentTarget: EventTarget & HTMLAnchorElement }, entry: EntryView) {
+  function handle_entry_click(e: MouseEvent & { currentTarget: EventTarget & HTMLAnchorElement }, entry: EntryData) {
     // bail if opening a new tab
     if (e.metaKey || e.ctrlKey) return
     e.preventDefault() // prevent navigation
@@ -42,7 +42,7 @@
           <EntryPage
             data={{
               ...page_data,
-              entry,
+              entry_from_page: entry,
               shallow: true,
               entry_history: readable([]),
             }} />

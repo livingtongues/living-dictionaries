@@ -21,7 +21,6 @@
       {can_edit}
       display={$page.data.t('entry_field.example_sentence')}
       on_update={(new_value) => {
-        sentence.text[orthography] = new_value
         if (!sentence.id) {
           dbOperations.insert_sentence({
             sentence: { text: { [orthography]: new_value } },
@@ -29,8 +28,8 @@
           })
         } else {
           dbOperations.update_sentence({
-            sentence: { text: { [orthography]: new_value } },
-            sentence_id: sentence.id,
+            text: { [orthography]: new_value },
+            id: sentence.id,
           })
         }
       }} />
@@ -45,13 +44,12 @@
         {can_edit}
         display="{$page.data.t({ dynamicKey: `gl.${bcp}`, fallback: bcp })}: {$page.data.t('entry_field.example_sentence')}"
         on_update={(new_value) => {
-          sentence.translation = {
-            ...sentence.translation,
-            [bcp]: new_value,
-          }
           dbOperations.update_sentence({
-            sentence: { translation: sentence.translation },
-            sentence_id: sentence.id,
+            translation: {
+              ...sentence.translation,
+              [bcp]: new_value,
+            },
+            id: sentence.id,
           })
         }} />
     {/each}

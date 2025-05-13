@@ -1,9 +1,10 @@
 <script lang="ts">
-  import { type EntryView, type IPrintFields, StandardPrintFields } from '@living-dictionaries/types'
+  import { type EntryData, type IPrintFields, StandardPrintFields } from '@living-dictionaries/types'
+
   import type { createPersistedStore } from 'svelte-pieces'
   import { page } from '$app/stores'
 
-  export let entries: EntryView[]
+  export let entries: EntryData[]
   export let preferredPrintFields: ReturnType<typeof createPersistedStore<IPrintFields>>
   export let showLabels: ReturnType<typeof createPersistedStore<boolean>>
   export let showQrCode: ReturnType<typeof createPersistedStore<boolean>>
@@ -14,14 +15,14 @@
       if (field === 'parts_of_speech') return !!entry.senses?.find(sense => sense.parts_of_speech?.length)
       if (field === 'local_orthography')
         return Object.keys(entry.main.lexeme).length > 1
-      if (field === 'example_sentence') return !!entry.senses?.find(sense => sense.sentence_ids?.length)
+      if (field === 'example_sentence') return !!entry.senses?.find(sense => sense.sentences?.length)
       if (field === 'semantic_domains') return !!entry.senses?.find(sense => sense.semantic_domains?.length || sense.write_in_semantic_domains?.length)
       if (field === 'noun_class') return !!entry.senses?.find(sense => sense.noun_class)
-      if (field === 'photo') return !!entry.senses?.find(sense => sense.photo_ids?.length)
-      if (field === 'speaker') return !!entry.audios?.find(audio => audio.speaker_ids?.length)
+      if (field === 'photo') return !!entry.senses?.find(sense => sense.photos?.length)
+      if (field === 'speaker') return !!entry.audios?.find(audio => audio.speakers?.length)
       if (field === 'plural_form') return !!entry.senses?.find(sense => sense.plural_form?.default)
       if (field === 'variant') return !!entry.senses?.find(sense => sense.variant?.default)
-      if (field === 'dialects') return !!entry.dialect_ids?.length
+      if (field === 'dialects') return !!entry.dialects?.length
       return entry.main[field]
     })
   })

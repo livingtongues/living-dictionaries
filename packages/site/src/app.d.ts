@@ -24,7 +24,7 @@ declare global {
       dictionary?: DictionaryLayoutData['dictionary']
       dbOperations?: DictionaryLayoutData['dbOperations']
       url_from_storage_path?: DictionaryLayoutData['url_from_storage_path']
-      entries?: DictionaryLayoutData['entries']
+      entries_data?: DictionaryLayoutData['entries_data']
       speakers?: DictionaryLayoutData['speakers']
       tags?: DictionaryLayoutData['tags']
       dialects?: DictionaryLayoutData['dialects']

@@ -1,6 +1,6 @@
 <script lang="ts">
   import { ShowHide } from 'svelte-pieces'
-  import type { EntryView, Tables } from '@living-dictionaries/types'
+  import type { EntryData, Tables } from '@living-dictionaries/types'
   import Video from '../../entries/components/Video.svelte'
   import GeoTaggingModal from './GeoTaggingModal.svelte'
   import InitableShowHide from './InitableShowHide.svelte'
@@ -10,17 +10,13 @@
   import type { DbOperations } from '$lib/dbOperations'
   import AddImage from '$lib/components/image/AddImage.svelte'
 
-  export let entry: EntryView
+  export let entry: EntryData
   export let dictionary: Tables<'dictionaries'>
   export let can_edit = false
   export let dbOperations: DbOperations
 
-  $: ({ photos, videos } = $page.data)
-
-  $: photo_ids = entry?.senses?.map(({ photo_ids }) => photo_ids).flat()
-  $: sense_photos = $photos.filter(photo => photo_ids.includes(photo.id))
-  $: video_ids = entry?.senses?.map(({ video_ids }) => video_ids).flat()
-  $: sense_videos = $videos.filter(video => video_ids.includes(video.id))
+  $: photos = entry?.senses?.map(({ photos }) => photos).filter(Boolean).flat()
+  $: videos = entry?.senses?.map(({ videos }) => videos).filter(Boolean).flat()
 </script>
 
 <div class="flex flex-col">
@@ -34,8 +30,7 @@
       <Audio {entry} {can_edit} context="entry" class="h-20 mb-2 rounded-md bg-gray-100 !px-3" />
     {/await}
   {/if}
-
-  {#each sense_photos as photo (photo.id)}
+  {#each photos as photo (photo.id)}
     <div
       class="w-full overflow-hidden rounded relative mb-2"
       style="height: 25vh;">
@@ -44,7 +39,7 @@
         title={entry.main.lexeme.default}
         gcs={photo.serving_url}
         {can_edit}
-        on_delete_image={async () => await dbOperations.update_photo({ photo: { deleted: 'true' }, photo_id: photo.id })} />
+        on_delete_image={async () => await dbOperations.update_photo({ deleted: new Date().toISOString(), id: photo.id })} />
     </div>
   {/each}
   {#if can_edit}
@@ -57,7 +52,7 @@
     </div>
   {/if}
 
-  {#each sense_videos as video (video.id)}
+  {#each videos as video (video.id)}
     <div class="w-full overflow-hidden rounded relative mb-2">
       <Video
         class="bg-gray-100 p-3 border-r-2"
@@ -124,7 +119,7 @@
         coordinates={entry.main.coordinates}
         initialCenter={dictionary.coordinates?.points?.[0]?.coordinates}
         on_close={toggle}
-        on_update={async new_value => await dbOperations.update_entry({ entry: { coordinates: new_value } })} />
+        on_update={async new_value => await dbOperations.update_entry({ coordinates: new_value })} />
     {/if}
   </InitableShowHide>
 </div>

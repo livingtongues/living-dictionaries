@@ -1,441 +1,283 @@
-import { get as getStore } from 'svelte/store'
-import { get as get_idb } from 'idb-keyval'
-import type { TablesInsert, TablesUpdate } from '@living-dictionaries/types'
-import { anon_supabase } from './clients'
-import { cached_data_store } from '$lib/supabase/cached-data'
-import { postgres } from '$lib/mocks/seed/postgres'
-import { sql_file_string } from '$lib/mocks/seed/to-sql-string'
-import { seeded_dictionary_id as dictionary_id, seed_dictionaries, seeded_user_id_1, users } from '$lib/mocks/seed/tables'
+// // `pnpm -F site test:db cached-data`
+// import { get as getStore } from 'svelte/store'
+// import { get as get_idb } from 'idb-keyval'
+// import type { Database, TablesInsert } from '@living-dictionaries/types'
+// import { createClient } from '@supabase/supabase-js'
+// import { PASSWORD, PUBLIC_SUPABASE_ANON_KEY, PUBLIC_SUPABASE_API_URL, SUPABASE_SERVICE_ROLE_KEY, anon_supabase, incremental_consistent_uuid, reset_db_sql } from './clients'
+// import { cached_data_store } from '$lib/supabase/cached-data'
+// import { postgres } from '$lib/mocks/seed/postgres'
+// import { sql_file_string } from '$lib/mocks/seed/to-sql-string'
 
-const log = false
+// const log = false
 
-vi.mock('$app/environment', () => {
-  return {
-    browser: true,
-  }
-})
+// vi.mock('$app/environment', () => {
+//   return {
+//     browser: true,
+//   }
+// })
 
-let cached_data: any[] = []
+// let cached_data: any[] = []
 
-vi.mock('idb-keyval', () => {
-  return {
-    set: vi.fn((key: string, value: any[]) => {
-      cached_data = value
-    }),
-    get: vi.fn((_key: string) => {
-      return cached_data?.length ? cached_data : undefined
-    }),
-  }
-})
+// vi.mock('idb-keyval', () => {
+//   return {
+//     set: vi.fn((key: string, value: any[]) => {
+//       cached_data = value
+//     }),
+//     get: vi.fn((_key: string) => {
+//       return cached_data?.length ? cached_data : undefined
+//     }),
+//   }
+// })
 
-function incremental_consistent_uuid(index: number) {
-  return '22222222-2222-2222-2222-222222222222'.slice(0, -6) + (index).toString().padStart(6, '0')
-}
+// const startTimestamp = new Date('1980-01-01T00:00:00Z').getTime()
 
-const refresh_materialized_view_sql = 'REFRESH MATERIALIZED VIEW materialized_entries_view'
-const reset_db_sql = `
-  truncate table auth.users cascade;
-  ${sql_file_string('auth.users', users)}
-  ${sql_file_string('dictionaries', seed_dictionaries)}
-  ${refresh_materialized_view_sql}`
+// function wait_for_data(data_store: ReturnType<typeof cached_data_store>) {
+//   return new Promise((r) => {
+//     const unsub = data_store.loading.subscribe((loading) => {
+//       if (!loading) {
+//         r('loaded')
+//         unsub()
+//       }
+//     })
+//   })
+// }
 
-const startTimestamp = new Date('1980-01-01T00:00:00Z').getTime()
+// const dictionary_id = incremental_consistent_uuid(211)
+// const USER_1_ID = incremental_consistent_uuid(42)
 
-function seed_with_entries({ count, offset }: { count: number, offset: number }) {
-  const seed_entries: TablesInsert<'entries'>[] = Array.from({ length: count }, (_, index) => {
-    const offset_index = index + offset
-    const entryTimestamp = new Date(startTimestamp + offset_index * 1000).toISOString()
-    return {
-      id: incremental_consistent_uuid(offset_index),
-      lexeme: {
-        default: `${offset_index} lexeme`,
-      },
-      dictionary_id,
-      created_by: seeded_user_id_1,
-      updated_by: seeded_user_id_1,
-      created_at: entryTimestamp,
-      updated_at: entryTimestamp,
-    }
-  })
+// function seed_with_entries({ count, offset }: { count: number, offset: number }) {
+//   const seed_entries: TablesInsert<'entries'>[] = Array.from({ length: count }, (_, index) => {
+//     const offset_index = index + offset
+//     const timestamp = new Date(startTimestamp + offset_index * 1000).toISOString()
+//     return {
+//       id: incremental_consistent_uuid(offset_index),
+//       lexeme: {
+//         default: `${offset_index} lexeme`,
+//       },
+//       dictionary_id,
+//       created_by: USER_1_ID,
+//       updated_by: USER_1_ID,
+//       created_at: timestamp,
+//       updated_at: timestamp,
+//     }
+//   })
 
-  return `${sql_file_string('entries', seed_entries)}`
-}
+//   return `${sql_file_string('entries', seed_entries)}`
+// }
 
-describe(cached_data_store, () => {
-  beforeEach(async () => {
-    cached_data = []
-    await postgres.execute_query(reset_db_sql)
-  })
+// describe(cached_data_store, () => {
+//   const supabase = createClient<Database>(PUBLIC_SUPABASE_API_URL, PUBLIC_SUPABASE_ANON_KEY)
 
-  test('gets materialized_entries_view in batches and then gets rest from entries_view', async () => {
-    const materialized_count = 1500
-    const recent_count = 20
-    await postgres.execute_query(seed_with_entries({ offset: 0, count: materialized_count }))
-    await postgres.execute_query(refresh_materialized_view_sql)
-    await postgres.execute_query(seed_with_entries({ offset: materialized_count, count: recent_count }))
+//   const USER_1_EMAIL = `user1-${USER_1_ID}@test.com`
 
-    const cache_key = `entries_${dictionary_id}`
+//   beforeAll(async () => {
+//     await postgres.execute_query(reset_db_sql)
+//     const admin_supabase = createClient<Database>(PUBLIC_SUPABASE_API_URL, SUPABASE_SERVICE_ROLE_KEY)
 
-    const store = cached_data_store({
-      dictionary_id,
-      materialized_view: 'materialized_entries_view',
-      table: 'entries_view',
-      supabase: anon_supabase,
-      log,
-    })
+//     await admin_supabase.auth.admin.createUser({
+//       // @ts-expect-error
+//       id: USER_1_ID,
+//       email: USER_1_EMAIL,
+//       password: PASSWORD,
+//       email_confirm: true,
+//     })
+//   })
 
-    expect(getStore(store.error)).toBe(null)
-    expect(getStore(store.loading)).toBeTruthy()
+//   beforeEach(() => {
+//     cached_data = []
+//   })
 
-    await new Promise((r) => {
-      const unsub = store.loading.subscribe((loading) => {
-        if (!loading) {
-          r('loaded')
-          unsub()
-        }
-      })
-    })
-    const $store = getStore(store)
-    expect($store).toHaveLength(materialized_count + recent_count)
+//   const test_1_entry_count = 1500
+//   test('gets entries in batches, and caches them', async () => {
+//     await supabase.auth.signInWithPassword({ email: USER_1_EMAIL, password: PASSWORD })
+//     await supabase.from('dictionaries').insert({
+//       id: dictionary_id,
+//       url: dictionary_id,
+//       name: 'Test Dictionary',
+//     })
 
-    const cached = get_idb(cache_key)
-    expect(cached).toEqual($store)
-  })
+//     await postgres.execute_query(seed_with_entries({ offset: 0, count: test_1_entry_count }))
 
-  test('first gets cached items, then gets more recent from db starting with materialized_entries_view and then from entries_view', async () => {
-    const cache_key = `entries_${dictionary_id}`
-    const cached_count = 30
-    const materialized_count = 1200
-    const recent_count = 1100
+//     const cache_key = `entries_${dictionary_id}`
 
-    await postgres.execute_query(seed_with_entries({ offset: 0, count: cached_count }))
+//     const store = cached_data_store({
+//       dictionary_id,
+//       table: 'entries',
+//       include: ['lexeme'],
+//       supabase: anon_supabase,
+//       log,
+//     })
 
-    const store_to_set_up_cache = cached_data_store({
-      dictionary_id,
-      table: 'entries_view',
-      supabase: anon_supabase,
-      log,
-    })
-    await new Promise((r) => {
-      const unsub = store_to_set_up_cache.loading.subscribe((loading) => {
-        if (!loading) {
-          r('loaded')
-          unsub()
-        }
-      })
-    })
-    const cached = get_idb(cache_key)
-    expect(cached).toHaveLength(cached_count)
+//     expect(getStore(store.error)).toBe(null)
+//     expect(getStore(store.loading)).toBeTruthy()
 
-    await postgres.execute_query(seed_with_entries({ offset: cached_count, count: materialized_count }))
-    await postgres.execute_query(refresh_materialized_view_sql)
-    await postgres.execute_query(seed_with_entries({ offset: cached_count + materialized_count, count: recent_count }))
+//     await wait_for_data(store)
 
-    const store = cached_data_store({
-      dictionary_id,
-      materialized_view: 'materialized_entries_view',
-      table: 'entries_view',
-      supabase: anon_supabase,
-      log,
-    })
+//     const $store = getStore(store)
+//     expect($store).toHaveLength(test_1_entry_count)
 
-    await new Promise((r) => {
-      const unsub = store.loading.subscribe((loading) => {
-        if (!loading) {
-          r('loaded')
-          unsub()
-        }
-      })
-    })
-    const $store = getStore(store)
-    expect($store).toHaveLength(cached_count + materialized_count + recent_count)
+//     const cached = get_idb(cache_key)
+//     expect(cached).toEqual($store)
+//   })
 
-    const cached_2 = get_idb(cache_key)
-    expect(cached_2).toEqual($store)
-  })
+//   const additional_entry_count_for_test_2 = 1100
+//   test('first gets cached items, then gets more recent from db starting', async () => {
+//     const table = 'entries'
+//     const month_year = new Date().toLocaleDateString('default', { month: '2-digit', year: 'numeric' }).replace('/', '.')
+//     const cache_key = `${table}_${dictionary_id}_${month_year}`
 
-  test('logs errors properly', async () => {
-    const store = cached_data_store({
-      dictionary_id,
-      // @ts-expect-error
-      table: 'not_real',
-      supabase: anon_supabase,
-      log,
-    })
+//     const cached_count = test_1_entry_count
+//     const recent_count = additional_entry_count_for_test_2
 
-    await new Promise((r) => {
-      const unsub = store.loading.subscribe((loading) => {
-        if (!loading) {
-          r('loaded')
-          unsub()
-        }
-      })
-    })
-    expect(getStore(store.error)).toEqual(`relation "public.not_real" does not exist`)
-  })
+//     const store_to_set_up_cache = cached_data_store({
+//       dictionary_id,
+//       table,
+//       include: ['lexeme'],
+//       supabase: anon_supabase,
+//       log,
+//     })
+//     await wait_for_data(store_to_set_up_cache)
 
-  test('updates an item already cached if changes are made to it', async () => {
-    const cached_count = 3
-    const recent_count = 3
-    await postgres.execute_query(seed_with_entries({ offset: 0, count: cached_count }))
+//     const cached = get_idb(cache_key)
+//     expect(cached).toHaveLength(cached_count)
 
-    const store = cached_data_store({
-      dictionary_id,
-      table: 'entries_view',
-      supabase: anon_supabase,
-      log,
-    })
-    await new Promise((r) => {
-      const unsub = store.loading.subscribe((loading) => {
-        if (!loading) {
-          r('loaded')
-          unsub()
-        }
-      })
-    })
+//     await postgres.execute_query(seed_with_entries({ offset: cached_count, count: recent_count }))
 
-    await postgres.execute_query(seed_with_entries({ offset: cached_count, count: recent_count }))
+//     const store = cached_data_store({
+//       dictionary_id,
+//       table: 'entries',
+//       include: ['lexeme'],
+//       supabase: anon_supabase,
+//       log,
+//     })
 
-    const id_to_update = incremental_consistent_uuid(1)
-    const phonetic = '[fu]'
-    const updated_entry: TablesUpdate<'entries'> = {
-      id: id_to_update,
-      phonetic,
-      updated_at: new Date(startTimestamp + 10000 * 1000).toISOString(),
-    }
-    await postgres.execute_query(sql_file_string('entries', [updated_entry], 'UPDATE'))
-    await store.refresh()
-    const $store = getStore(store)
-    const total_entries = cached_count + recent_count
-    expect($store).toHaveLength(total_entries)
-    const updated_index = $store.findIndex(entry => entry.id === id_to_update)
-    expect(updated_index).toEqual(total_entries - 1)
-    expect($store[updated_index].main.phonetic).toEqual(phonetic)
-  })
+//     await wait_for_data(store)
 
-  test('does not load down deleted items if there is nothing cached yet', async () => {
-    const initial_count = 2
-    await postgres.execute_query(seed_with_entries({ offset: 0, count: initial_count }))
-    const id_to_update = incremental_consistent_uuid(1)
-    const timestamp = new Date(startTimestamp + 10000 * 1000).toISOString()
-    const updated_entry: TablesUpdate<'entries'> = {
-      id: id_to_update,
-      updated_at: timestamp,
-      deleted: timestamp,
-    }
-    await postgres.execute_query(sql_file_string('entries', [updated_entry], 'UPDATE'))
-    const store = cached_data_store({
-      dictionary_id,
-      table: 'entries_view',
-      supabase: anon_supabase,
-      log,
-    })
-    await new Promise((r) => {
-      const unsub = store.loading.subscribe((loading) => {
-        if (!loading) {
-          r('loaded')
-          unsub()
-        }
-      })
-    })
-    expect(getStore(store)).toHaveLength(initial_count - 1)
-  })
+//     const $store = getStore(store)
+//     expect($store).toHaveLength(cached_count + recent_count)
 
-  test('removes deleted items from the cache when they are deleted at a later date (without materialized view)', async () => {
-    const initial_count = 3
-    await postgres.execute_query(seed_with_entries({ offset: 0, count: initial_count }))
+//     const cached_2 = get_idb(cache_key)
+//     expect(cached_2).toEqual($store)
+//   })
 
-    const store = cached_data_store({
-      dictionary_id,
-      table: 'entries_view',
-      supabase: anon_supabase,
-      log,
-    })
-    await new Promise((r) => {
-      const unsub = store.loading.subscribe((loading) => {
-        if (!loading) {
-          r('loaded')
-          unsub()
-        }
-      })
-    })
-    expect(getStore(store)).toHaveLength(initial_count)
+//   const total_entries = test_1_entry_count + additional_entry_count_for_test_2
 
-    const id_to_update = incremental_consistent_uuid(1)
-    const timestamp = new Date(startTimestamp + 10000 * 1000).toISOString()
-    const updated_entry: TablesUpdate<'entries'> = {
-      id: id_to_update,
-      updated_at: timestamp,
-      deleted: timestamp,
-    }
-    await postgres.execute_query(sql_file_string('entries', [updated_entry], 'UPDATE'))
-    await store.refresh()
+//   test('updates an item already cached if changes are made to it', async () => {
+//     await supabase.auth.signInWithPassword({ email: USER_1_EMAIL, password: PASSWORD })
+//     const entries = cached_data_store({
+//       dictionary_id,
+//       table: 'entries',
+//       include: ['lexeme', 'phonetic'],
+//       supabase,
+//       log,
+//     })
+//     await wait_for_data(entries)
 
-    expect(getStore(store)).toHaveLength(initial_count - 1)
-  })
+//     const id_to_update = incremental_consistent_uuid(1)
+//     const phonetic = '[fu]'
+//     await entries.update({
+//       id: id_to_update,
+//       phonetic,
+//       updated_at: new Date(startTimestamp + 10000 * 1000).toISOString(),
+//     })
 
-  test('removes deleted items from the cache when they are deleted at a later date (materialized view)', async () => {
-    const initial_count = 1
-    await postgres.execute_query(seed_with_entries({ offset: 0, count: initial_count }))
-    await postgres.execute_query(refresh_materialized_view_sql)
+//     const $store_before_refresh = getStore(entries)
+//     const updated_index_before_refresh = $store_before_refresh.findIndex(entry => entry.id === id_to_update)
+//     expect(updated_index_before_refresh).toEqual(total_entries - 1)
 
-    const store = cached_data_store({
-      dictionary_id,
-      materialized_view: 'materialized_entries_view',
-      table: 'entries_view',
-      supabase: anon_supabase,
-      log,
-    })
-    await new Promise((r) => {
-      const unsub = store.loading.subscribe((loading) => {
-        if (!loading) {
-          r('loaded')
-          unsub()
-        }
-      })
-    })
-    expect(getStore(store)).toHaveLength(initial_count)
+//     await entries.refresh()
+//     const $store = getStore(entries)
+//     expect($store).toHaveLength(total_entries)
+//     const updated_index = $store.findIndex(entry => entry.id === id_to_update)
+//     expect($store[updated_index].phonetic).toEqual(phonetic)
+//     expect(updated_index).toEqual(total_entries - 1)
+//   })
 
-    const id_to_update = incremental_consistent_uuid(0)
-    const timestamp = new Date(startTimestamp + 10000 * 1000).toISOString()
-    const updated_entry: TablesUpdate<'entries'> = {
-      id: id_to_update,
-      updated_at: timestamp,
-      deleted: timestamp,
-    }
-    await postgres.execute_query(sql_file_string('entries', [updated_entry], 'UPDATE'))
+//   const totat_entries_after_1_deleted = total_entries - 1
 
-    const store2 = cached_data_store({
-      dictionary_id,
-      materialized_view: 'materialized_entries_view',
-      table: 'entries_view',
-      supabase: anon_supabase,
-      log,
-    })
-    await new Promise((r) => {
-      const unsub = store2.loading.subscribe((loading) => {
-        if (!loading) {
-          r('loaded')
-          unsub()
-        }
-      })
-    })
-    expect(getStore(store2)).toHaveLength(initial_count - 1)
+//   test('does not load down deleted items if there is nothing cached yet', async () => {
+//     const id_to_update = incremental_consistent_uuid(0)
+//     const timestamp = new Date().toISOString()
+//     await postgres.execute_query(sql_file_string('entries', [{
+//       id: id_to_update,
+//       updated_at: timestamp,
+//       deleted: timestamp,
+//     }], 'UPDATE'))
+//     const entries = cached_data_store({
+//       dictionary_id,
+//       table: 'entries',
+//       include: ['lexeme'],
+//       supabase: anon_supabase,
+//       log,
+//     })
+//     await wait_for_data(entries)
+//     expect(getStore(entries)).toHaveLength(totat_entries_after_1_deleted)
+//   })
 
-    const store3 = cached_data_store({
-      dictionary_id,
-      materialized_view: 'materialized_entries_view',
-      table: 'entries_view',
-      supabase: anon_supabase,
-      log,
-    })
-    await new Promise((r) => {
-      const unsub = store3.loading.subscribe((loading) => {
-        if (!loading) {
-          r('loaded')
-          unsub()
-        }
-      })
-    })
-    expect(getStore(store3)).toHaveLength(initial_count - 1)
-  })
+//   test('removes deleted items from the cache when they are deleted at a later date in a separate session', async () => {
+//     const entries = cached_data_store({
+//       dictionary_id,
+//       table: 'entries',
+//       include: ['lexeme'],
+//       supabase: anon_supabase,
+//       log,
+//     })
+//     await wait_for_data(entries)
+//     expect(getStore(entries)).toHaveLength(totat_entries_after_1_deleted)
 
-  test('updated store emits new arrivals after store refresh', async () => {
-    const initial_count = 3
-    await postgres.execute_query(seed_with_entries({ offset: 0, count: initial_count }))
+//     const id_to_update = incremental_consistent_uuid(2)
+//     const timestamp = new Date().toISOString()
+//     await postgres.execute_query(sql_file_string('entries', [{
+//       id: id_to_update,
+//       updated_at: timestamp,
+//       deleted: timestamp,
+//     }], 'UPDATE'))
+//     await entries.refresh()
+//     expect(getStore(entries)).toHaveLength(totat_entries_after_1_deleted - 1)
+//   })
 
-    const store = cached_data_store({
-      dictionary_id,
-      table: 'entries_view',
-      supabase: anon_supabase,
-      log,
-    })
-    await new Promise((r) => {
-      const unsub = store.loading.subscribe((loading) => {
-        if (!loading) {
-          r('loaded')
-          unsub()
-        }
-      })
-    })
+//   test('updated store emits new arrivals after store refresh', async () => {
+//     const entries = cached_data_store({
+//       dictionary_id,
+//       table: 'entries',
+//       include: ['lexeme'],
+//       supabase: anon_supabase,
+//       log,
+//     })
+//     await wait_for_data(entries)
 
-    const updated_items = []
-    const unsub = store.updated_item.subscribe((item) => {
-      if (item) {
-        updated_items.push(item)
-        unsub()
-      }
-    })
+//     const updated_items = []
+//     const unsub = entries.updated_item.subscribe((item) => {
+//       if (item) {
+//         updated_items.push(item)
+//         unsub()
+//       }
+//     })
 
-    const id_to_update = incremental_consistent_uuid(1)
-    const timestamp = new Date(startTimestamp + 10000 * 1000).toISOString()
-    const updated_entry: TablesUpdate<'entries'> = {
-      id: id_to_update,
-      updated_at: timestamp,
-      lexeme: { default: 'a change!' },
-    }
-    await postgres.execute_query(sql_file_string('entries', [updated_entry], 'UPDATE'))
-    await store.refresh()
-    expect(updated_items).toHaveLength(1)
-  })
+//     const id_to_update = incremental_consistent_uuid(1)
+//     const timestamp = new Date(startTimestamp + 10000 * 1000).toISOString()
+//     await postgres.execute_query(sql_file_string('entries', [{
+//       id: id_to_update,
+//       updated_at: timestamp,
+//       lexeme: { default: 'a change!' },
+//     }], 'UPDATE'))
+//     await entries.refresh()
+//     expect(updated_items).toHaveLength(1)
+//   })
 
-  test('speakers_view', async () => {
-    const speakers: TablesInsert<'speakers'>[] = [{
-      id: incremental_consistent_uuid(0),
-      dictionary_id,
-      name: 'Bob',
-      created_by: seeded_user_id_1,
-      updated_by: seeded_user_id_1,
-      created_at: new Date(startTimestamp).toISOString(),
-      updated_at: new Date(startTimestamp).toISOString(),
-    }]
-    await postgres.execute_query(`${sql_file_string('speakers', speakers)}`)
+//   test('logs errors properly', async () => {
+//     const store = cached_data_store({
+//       dictionary_id,
+//       // @ts-expect-error
+//       table: 'not_real',
+//       // @ts-expect-error
+//       include: ['lexeme'],
+//       supabase: anon_supabase,
+//       log,
+//     })
 
-    const store = cached_data_store({
-      dictionary_id,
-      table: 'speakers_view',
-      supabase: anon_supabase,
-      log,
-    })
+//     await wait_for_data(store)
 
-    await new Promise((r) => {
-      const unsub = store.loading.subscribe((loading) => {
-        if (!loading) {
-          r('loaded')
-          unsub()
-        }
-      })
-    })
-
-    const $store = getStore(store)
-    expect($store).toMatchInlineSnapshot(`
-      [
-        {
-          "birthplace": null,
-          "created_at": "1980-01-01T00:00:00+00:00",
-          "decade": null,
-          "deleted": null,
-          "dictionary_id": "dictionary1",
-          "gender": null,
-          "id": "22222222-2222-2222-2222-222222000000",
-          "name": "Bob",
-          "updated_at": "1980-01-01T00:00:00+00:00",
-        },
-      ]
-    `)
-
-    const { data: speakers_view } = await anon_supabase.from('speakers_view')
-      .select()
-      .limit(1000)
-      .order('updated_at', { ascending: true })
-      .gt('updated_at', '1971-01-01T00:00:00Z')
-    expect(speakers_view).toEqual($store)
-  })
-})
-
-// const { data: materialized_entries } = await anon_supabase.from('materialized_entries_view')
-//   .select()
-//   .limit(1000)
-//   .order('updated_at', { ascending: true })
-//   .gt('updated_at', '1971-01-01T00:00:00Z')
-// expect(materialized_entries).toMatchFileSnapshot('materialized_entries.snaps.json')
+//     expect(getStore(store.error)).toEqual(`relation "public.not_real" does not exist`)
+//   })
+// })

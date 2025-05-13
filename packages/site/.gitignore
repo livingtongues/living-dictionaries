@@ -1,4 +1,5 @@
 /build
+.vercel
 /.svelte-kit*
 vite.config.ts*
 

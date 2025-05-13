@@ -9,7 +9,7 @@
   export let search_param_key: FilterListKeys
   export let label: string
   export let values: Record<string, number> // keys are item key, numbers are count found
-  export let keys_to_values: Record<string, string>
+  export let keys_to_values: Record<string, string> = undefined
 
   $: count = Object.values(values).length
   let search_value: string
@@ -24,9 +24,9 @@
     $search_params[search_param_key] = $search_params[search_param_key].filter((existing_item: string) => existing_item !== item)
   }
 
-  function make_item_readable(_item: string, keys_to_values: Record<string, string>) {
+  function make_item_readable(_item: string, _keys_to_values: Record<string, string>) {
     const item = restore_spaces_periods_from_underscores(_item)
-    return keys_to_values?.[item] || item
+    return _keys_to_values?.[item] || item
   }
 </script>
 

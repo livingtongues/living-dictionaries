@@ -1,5 +1,5 @@
 import { get } from 'svelte/store'
-import { assign_speaker, insert_photo, insert_video, upsert_audio } from '$lib/supabase/operations'
+import { assign_speaker, insert_audio, insert_photo, insert_video } from '$lib/supabase/operations'
 import { page } from '$app/stores'
 import { upload_image } from '$lib/components/image/upload-image'
 import { upload_audio } from '$lib/components/audio/upload-audio'
@@ -22,8 +22,8 @@ export function addAudio({ entry_id, speaker_id, file }: { entry_id: string, spe
   const status = upload_audio({ file, folder: `${dictionary.id}/audio/${entry_id}` })
   const unsubscribe = status.subscribe(async ({ storage_path }) => {
     if (storage_path) {
-      const audio_id = await upsert_audio({ audio: { storage_path }, entry_id })
-      await assign_speaker({ speaker_id, media: 'audio', media_id: audio_id })
+      const audio = await insert_audio({ storage_path, entry_id })
+      await assign_speaker({ speaker_id, media: 'audio', media_id: audio.id })
       unsubscribe()
     }
   })
@@ -36,7 +36,7 @@ export function uploadVideo({ sense_id, speaker_id, file }: { sense_id: string, 
   const unsubscribe = status.subscribe(async ({ storage_path }) => {
     if (storage_path) {
       const data = await insert_video({ video: { storage_path }, sense_id })
-      await assign_speaker({ speaker_id, media: 'video', media_id: data.video_id })
+      await assign_speaker({ speaker_id, media: 'video', media_id: data.id })
       unsubscribe()
     }
   })

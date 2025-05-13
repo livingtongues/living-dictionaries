@@ -1,15 +1,12 @@
 <script lang="ts">
-  import type { EntryView } from '@living-dictionaries/types'
   import { ShowHide } from 'svelte-pieces'
-  import { page } from '$app/stores'
+  import type { EntryData } from '@living-dictionaries/types'
 
-  export let entry: EntryView
+  export let entry: EntryData
   export let can_edit = false
 
-  $: ({ speakers } = $page.data)
-
   $: first_audio = entry?.audios?.[0]
-  $: speaker_name = ($speakers?.length && first_audio?.speaker_ids?.length) ? $speakers.find(speaker => speaker.id === first_audio.speaker_ids[0])?.name : ''
+  $: speaker_name = first_audio?.speakers?.[0].name || ''
 </script>
 
 <ShowHide let:show let:set let:toggle>

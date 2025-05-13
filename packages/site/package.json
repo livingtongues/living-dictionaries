@@ -33,7 +33,7 @@
     "@playwright/test": "1.41.2",
     "@resvg/resvg-js": "^2.2.0",
     "@sentry/browser": "^6.18.2",
-    "@supabase/supabase-js": "^2.39.7",
+    "@supabase/supabase-js": "^2.49.4",
     "@sveltejs/adapter-vercel": "^5.4.6",
     "@sveltejs/kit": "^2.7.3",
     "@sveltejs/vite-plugin-svelte": "^3.0.0",

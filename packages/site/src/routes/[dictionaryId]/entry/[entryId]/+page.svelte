@@ -9,9 +9,8 @@
 
   export let data
   $: ({
-    entry,
-    photos,
-    dialects,
+    entry_from_page,
+    derived_entry,
     shallow,
     dictionary,
     admin,
@@ -20,8 +19,7 @@
     entry_history,
   } = data)
 
-  $: first_photo_id = entry?.senses?.[0].photo_ids?.[0]
-  $: first_photo = (first_photo_id && $photos.length) ? $photos.find(photo => photo.id === first_photo_id) : null
+  $: entry = entry_from_page || $derived_entry
 </script>
 
 <div
@@ -52,7 +50,7 @@
         color="red"
         form="simple"
         onclick={async () => {
-          await dbOperations.update_entry({ entry: { deleted: 'true' } })
+          await dbOperations.update_entry({ deleted: new Date().toISOString() })
           history.back()
         }}>
 
@@ -82,10 +80,10 @@
 <SeoMetaTags
   norobots={!dictionary.public}
   imageTitle={entry.main.lexeme.default}
-  imageDescription={seo_description({ entry, dialects: $dialects, gloss_languages: dictionary.gloss_languages, t: $page.data.t })}
+  imageDescription={seo_description({ entry, gloss_languages: dictionary.gloss_languages, t: $page.data.t })}
   dictionaryName={dictionary.name}
   lng={dictionary.coordinates?.points?.[0]?.coordinates.longitude}
   lat={dictionary.coordinates?.points?.[0]?.coordinates.latitude}
   url="https://livingdictionaries.app/{dictionary.id}/entry/{entry.id}"
-  gcsPath={first_photo?.serving_url}
+  gcsPath={entry.senses?.[0]?.photos?.[0]?.serving_url}
   keywords="Minority Languages, Indigenous Languages, Language Documentation, Dictionary, Minority Community, Language Analysis, Language Education, Endangered Languages, Language Revitalization, Linguistics, Word Lists, Linguistic Analysis, Dictionaries, Living Dictionaries, Living Tongues, Under-represented Languages, Tech Resources, Language Sustainability, Language Resources, Diaspora Languages, Elicitation, Language Archives, Ancient Languages, World Languages, Obscure Languages, Little Known languages, Digital Dictionary, Dictionary Software, Free Software, Online Dictionary Builder" />

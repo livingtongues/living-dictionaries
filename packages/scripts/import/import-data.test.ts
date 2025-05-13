@@ -177,7 +177,7 @@ describe(import_data, () => {
       { lexeme: 'hi', soundFile: '1.mp3', speakerName: 'speaker 1', speakerHometown: 'Whoville', speakerAge: '12', speakerGender: 'm' },
       { lexeme: 'world', soundFile: '2.mp3', speakerName: 'speaker 1' },
     ])
-    const { data: speakers } = await anon_supabase.from('speakers_view').select()
+    const { data: speakers } = await anon_supabase.from('speakers').select()
     expect(speakers[0]).toMatchInlineSnapshot(`
       {
         "birthplace": "Whoville",

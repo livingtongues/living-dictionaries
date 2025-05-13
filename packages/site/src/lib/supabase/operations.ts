@@ -1,244 +1,209 @@
-import { get } from 'svelte/store'
+import { type Writable, get } from 'svelte/store'
 import type { MultiString, TablesInsert, TablesUpdate } from '@living-dictionaries/types'
+import type { Supabase } from '.'
 import { page } from '$app/stores'
-import { goto, invalidate } from '$app/navigation'
-import { ENTRY_UPDATED_LOAD_TRIGGER } from '$lib/dbOperations'
-import { content_update } from '$api/db/content-update/_call'
+import { goto } from '$app/navigation'
 
 function randomUUID() {
   return window.crypto.randomUUID()
 }
-function get_pieces() {
-  const { params: { entryId: entry_id_from_url }, state: { entry_id: entry_id_from_state }, data: { entries, photos, videos, sentences, tags, dialects, speakers, dictionary } } = get(page)
-  return { dictionary_id: dictionary.id, entry_id_from_url: entry_id_from_url || entry_id_from_state, refresh_entries: entries.refresh, refresh_photos: photos.refresh, refresh_videos: videos.refresh, refresh_sentences: sentences.refresh, refresh_dialects: dialects.refresh, refresh_speakers: speakers.refresh, refresh_tags: tags.refresh }
+async function get_pieces() {
+  const { params: { entryId: entry_id_from_url }, state: { entry_id: entry_id_from_state }, data: { dictionary, supabase, entries_data } } = get(page) as any as {
+    params: { entryId: string }
+    state: { entry_id: string }
+    data: { dictionary: { id: string }, supabase: Supabase, entries_data: { loading: Writable<boolean> } }
+  }
+  const { api } = await import('$lib/search/expose-entry-worker')
+  const loading = get(entries_data.loading)
+  if (loading) {
+    alert('Wait until loading spinner stops to make edits.')
+    throw new Error('db operations not ready yet')
+  }
+
+  return { api, dictionary_id: dictionary.id, entry_id_from_page: entry_id_from_url || entry_id_from_state, supabase }
 }
 
 export async function insert_entry(lexeme: MultiString) {
   try {
-    const { dictionary_id, refresh_entries } = get_pieces()
-    const { data, error } = await content_update({
-      update_id: randomUUID(),
+    const { dictionary_id, api, supabase } = await get_pieces()
+    const entry_id = randomUUID()
+    const entry = {
+      id: entry_id,
       dictionary_id,
-      entry_id: randomUUID(),
-      type: 'insert_entry',
-      data: { lexeme },
-    })
-    if (error)
-      throw new Error(error.message)
-
-    await refresh_entries()
-    const href = `/${dictionary_id}/entry/${data.entry_id}`
-    goto(href)
-  } catch (err) {
-    alert(err)
-    console.error(err)
-  }
-}
-
-export async function update_entry({
-  entry,
-  entry_id: entry_id_from_function,
-}: {
-  entry: TablesUpdate<'entries'>
-  entry_id?: string
-}) {
-  try {
-    const { dictionary_id, entry_id_from_url, refresh_entries } = get_pieces()
-    const { error } = await content_update({
-      update_id: randomUUID(),
-      dictionary_id,
-      entry_id: entry_id_from_function || entry_id_from_url || randomUUID(),
-      type: 'update_entry',
-      data: entry,
-    })
-    if (error)
-      throw new Error(error.message)
-
-    await refresh_entries()
-    await invalidate(ENTRY_UPDATED_LOAD_TRIGGER)
-  } catch (err) {
-    alert(err)
-    console.error(err)
-  }
-}
-
-export async function insert_sense({
-  sense,
-  entry_id,
-  sense_id,
-}: {
-  sense: TablesUpdate<'senses'>
-  entry_id: string
-  sense_id?: string
-}) {
-  try {
-    const { dictionary_id, refresh_entries } = get_pieces()
-
-    const { error } = await content_update({
-      update_id: randomUUID(),
-      dictionary_id,
-      entry_id,
-      sense_id,
-      type: 'insert_sense',
-      data: sense,
-    })
-
-    if (error)
-      throw new Error(error.message)
-
-    await refresh_entries()
-    await invalidate(ENTRY_UPDATED_LOAD_TRIGGER)
-  } catch (err) {
-    alert(err)
-    console.error(err)
-  }
-}
-
-export async function update_sense({
-  sense,
-  sense_id,
-}: {
-  sense: TablesUpdate<'senses'>
-  sense_id: string
-}) {
-  try {
-    const { dictionary_id, refresh_entries } = get_pieces()
-    const { error } = await content_update({
-      update_id: randomUUID(),
-      dictionary_id,
-      sense_id,
-      type: 'update_sense',
-      data: sense,
-    })
-    if (error)
-      throw new Error(error.message)
-
-    await refresh_entries()
-    await invalidate(ENTRY_UPDATED_LOAD_TRIGGER)
-  } catch (err) {
-    alert(err)
-    console.error(err)
-  }
-}
-
-export async function insert_sentence({
-  sentence,
-  sentence_id,
-  sense_id,
-}: {
-  sentence: TablesUpdate<'sentences'>
-  sentence_id?: string
-  sense_id: string
-}) {
-  try {
-    const { dictionary_id, refresh_entries, refresh_sentences } = get_pieces()
-    const { data, error } = await content_update({
-
-      update_id: randomUUID(),
-      dictionary_id,
-      sense_id,
-      sentence_id: sentence_id || randomUUID(),
-      type: 'insert_sentence',
-      data: sentence,
-    })
-    if (error)
-      throw new Error(error.message)
-
-    await refresh_sentences()
-    await refresh_entries()
-    await invalidate(ENTRY_UPDATED_LOAD_TRIGGER)
-    return data
-  } catch (err) {
-    alert(err)
-    console.error(err)
-  }
-}
-
-export async function update_sentence({
-  sentence,
-  sentence_id,
-}: {
-  sentence: TablesUpdate<'sentences'>
-  sentence_id: string
-}) {
-  try {
-    const { dictionary_id, refresh_entries, refresh_sentences } = get_pieces()
-    const { data, error } = await content_update({
-      update_id: randomUUID(),
-      dictionary_id,
-      sentence_id,
-      type: 'update_sentence',
-      data: sentence,
-    })
-    if (error)
-      throw new Error(error.message)
-
-    await refresh_sentences()
-    await refresh_entries()
-    await invalidate(ENTRY_UPDATED_LOAD_TRIGGER)
-    return data
-  } catch (err) {
-    alert(err)
-    console.error(err)
-  }
-}
-
-export async function upsert_audio({
-  audio,
-  audio_id,
-  entry_id,
-  refresh_entry,
-}: {
-  audio: TablesUpdate<'audio'>
-  audio_id?: string
-  entry_id?: string
-  refresh_entry?: boolean
-}) {
-  try {
-    const { dictionary_id, refresh_entries } = get_pieces()
-    const { data, error } = await content_update({
-      update_id: randomUUID(),
-      dictionary_id,
-      entry_id,
-      audio_id: audio_id || randomUUID(),
-      type: 'upsert_audio',
-      data: audio,
-    })
-    if (error)
-      throw new Error(error.message)
-
-    if (refresh_entry) {
-      await refresh_entries()
-      await invalidate(ENTRY_UPDATED_LOAD_TRIGGER)
+      lexeme,
     }
-    return data.audio_id
+    await api.insert_entry(entry)
+    const sense = {
+      id: randomUUID(),
+      entry_id,
+      dictionary_id,
+    }
+    await api.insert_sense(sense)
+
+    goto(`/${dictionary_id}/entry/${entry_id}`)
+
+    const { error } = await supabase.from('entries').insert(entry)
+    if (error)
+      throw new Error(error.message)
+    const { error: sense_error } = await supabase.from('senses').insert(sense)
+    if (sense_error)
+      throw new Error(sense_error.message)
   } catch (err) {
     alert(err)
     console.error(err)
   }
 }
 
-export async function upsert_speaker({
-  speaker,
-  speaker_id,
-}: {
-  speaker: TablesUpdate<'speakers'>
-  speaker_id?: string
+export async function update_entry(entry: TablesUpdate<'entries'>) {
+  try {
+    const { entry_id_from_page, api, supabase } = await get_pieces()
+    const id = entry.id || entry_id_from_page
+    await api.update_entry({
+      id,
+      ...entry,
+    })
+    const { error } = await supabase.from('entries').update(entry).eq('id', id)
+    if (error)
+      throw new Error(error.message)
+  } catch (err) {
+    alert(err)
+    console.error(err)
+  }
+}
+
+export async function insert_sense(entry_id: string) {
+  try {
+    const { dictionary_id, api, supabase } = await get_pieces()
+    const sense = {
+      id: randomUUID(),
+      entry_id,
+      dictionary_id,
+    }
+    await api.insert_sense(sense)
+
+    const { error } = await supabase.from('senses').insert(sense)
+    if (error)
+      throw new Error(error.message)
+  } catch (err) {
+    alert(err)
+    console.error(err)
+  }
+}
+
+export async function update_sense(sense: TablesUpdate<'senses'>) {
+  try {
+    const { api, supabase } = await get_pieces()
+    await api.update_sense(sense)
+    const { error } = await supabase.from('senses').update(sense).eq('id', sense.id)
+    if (error)
+      throw new Error(error.message)
+  } catch (err) {
+    alert(err)
+    console.error(err)
+  }
+}
+
+export async function insert_sentence({ sentence, sense_id }: {
+  sentence: TablesUpdate<'sentences'>
+  sense_id: string
 }) {
   try {
-    const { dictionary_id, refresh_speakers } = get_pieces()
-    const { data, error } = await content_update({
-      update_id: randomUUID(),
+    const { dictionary_id, api, supabase } = await get_pieces()
+    const new_sentence = {
+      id: randomUUID(),
       dictionary_id,
-      speaker_id: speaker_id || randomUUID(),
-      type: 'upsert_speaker',
-      data: speaker,
-    })
+      ...sentence,
+    }
+    await api.insert_sentence(new_sentence, sense_id)
+
+    const { data, error } = await supabase.from('sentences').insert(new_sentence).select().single()
     if (error)
       throw new Error(error.message)
 
-    await refresh_speakers()
-    return data.speaker_id
+    const { error: sense_in_sentence_error } = await supabase.from('senses_in_sentences').upsert({
+      sentence_id: new_sentence.id,
+      sense_id,
+      dictionary_id,
+    })
+    if (sense_in_sentence_error)
+      throw new Error(sense_in_sentence_error.message)
+    return data
+  } catch (err) {
+    alert(err)
+    console.error(err)
+  }
+}
+
+export async function update_sentence(sentence: TablesUpdate<'sentences'>) {
+  try {
+    const { api, supabase } = await get_pieces()
+    await api.update_sentence(sentence)
+    const { data, error } = await supabase.from('sentences').update(sentence).eq('id', sentence.id).select().single()
+    if (error)
+      throw new Error(error.message)
+    return data
+  } catch (err) {
+    alert(err)
+    console.error(err)
+  }
+}
+
+export async function insert_audio({
+  storage_path,
+  entry_id,
+}: {
+  storage_path: string
+  entry_id: string
+}) {
+  try {
+    const { dictionary_id, api, supabase } = await get_pieces()
+    const audio = {
+      dictionary_id,
+      entry_id,
+      id: randomUUID(),
+      storage_path,
+    }
+    await api.insert_audio(audio)
+    const { data, error } = await supabase.from('audio').insert(audio).select().single()
+    if (error)
+      throw new Error(error.message)
+
+    return data
+  } catch (err) {
+    alert(err)
+    console.error(err)
+  }
+}
+
+export async function update_audio(audio: TablesUpdate<'audio'>) {
+  try {
+    const { api, supabase } = await get_pieces()
+    await api.update_audio(audio)
+    const { data, error } = await supabase.from('audio').update(audio).eq('id', audio.id).select().single()
+    if (error)
+      throw new Error(error.message)
+
+    return data
+  } catch (err) {
+    alert(err)
+    console.error(err)
+  }
+}
+
+export async function insert_speaker(_speaker: Omit<TablesInsert<'speakers'>, 'dictionary_id'>) {
+  try {
+    const { dictionary_id, api, supabase } = await get_pieces()
+    const speaker = {
+      id: randomUUID(),
+      dictionary_id,
+      ..._speaker,
+    }
+    await api.insert_speaker(speaker)
+    const { data, error } = await supabase.from('speakers').insert(speaker).select().single()
+    if (error)
+      throw new Error(error.message)
+
+    return data
   } catch (err) {
     alert(err)
     console.error(err)
@@ -257,51 +222,81 @@ export async function assign_speaker({
   remove?: boolean
 }) {
   try {
-    const { dictionary_id, refresh_entries, refresh_videos } = get_pieces()
-    const { data, error } = await content_update({
-      update_id: randomUUID(),
-      dictionary_id,
-      speaker_id,
-      ...(media === 'audio' ? { audio_id: media_id } : { video_id: media_id }),
-      ...(remove ? { data: { deleted: 'true' } } : { }),
-      type: 'assign_speaker',
-    })
-    if (error)
-      throw new Error(error.message)
-
-    if (media === 'video') {
-      await refresh_videos()
+    const { dictionary_id, api, supabase } = await get_pieces()
+    if (media === 'audio') {
+      if (remove) {
+        const audio_speaker = {
+          speaker_id,
+          audio_id: media_id,
+          deleted: new Date().toISOString(),
+        }
+        await api.delete_audio_speaker(audio_speaker)
+        const { error: delete_error } = await supabase.from('audio_speakers').update(audio_speaker)
+          .eq('audio_id', media_id).eq('speaker_id', speaker_id)
+        if (delete_error)
+          throw new Error(delete_error.message)
+      } else {
+        const audio_speaker = {
+          dictionary_id,
+          speaker_id,
+          audio_id: media_id,
+          // to handle upsert over previously deleted connection
+          deleted: null,
+          created_at: new Date().toISOString(),
+        }
+        await api.insert_audio_speaker(audio_speaker)
+        const { data, error } = await supabase.from('audio_speakers').upsert(audio_speaker).select().single()
+        if (error)
+          throw new Error(error.message)
+        return data
+      }
+    } else if (media === 'video') {
+      if (remove) {
+        const video_speaker = {
+          speaker_id,
+          video_id: media_id,
+          deleted: new Date().toISOString(),
+        }
+        await api.delete_video_speaker(video_speaker)
+        const { error: delete_error } = await supabase.from('video_speakers').update(video_speaker)
+          .eq('video_id', media_id).eq('speaker_id', speaker_id)
+        if (delete_error)
+          throw new Error(delete_error.message)
+      } else {
+        const video_speaker = {
+          dictionary_id,
+          speaker_id,
+          video_id: media_id,
+          // to handle upsert over previously deleted connection
+          deleted: null,
+          created_at: new Date().toISOString(),
+        }
+        await api.insert_video_speaker(video_speaker)
+        const { data, error } = await supabase.from('video_speakers').upsert(video_speaker).select().single()
+        if (error)
+          throw new Error(error.message)
+        return data
+      }
     }
-    await refresh_entries()
-    await invalidate(ENTRY_UPDATED_LOAD_TRIGGER)
-
-    return data
   } catch (err) {
     alert(err)
     console.error(err)
   }
 }
 
-export async function insert_tag({
-  tag,
-  tag_id,
-}: {
-  tag: TablesUpdate<'tags'> & Pick<TablesInsert<'tags'>, 'name'>
-  tag_id?: string
-}) {
+export async function insert_tag({ name }: { name: string }) {
   try {
-    const { dictionary_id, refresh_tags } = get_pieces()
-    const { data, error } = await content_update({
-      update_id: randomUUID(),
+    const { dictionary_id, api, supabase } = await get_pieces()
+    const tag = {
       dictionary_id,
-      tag_id: tag_id || randomUUID(),
-      type: 'insert_tag',
-      data: tag,
-    })
+      id: randomUUID(),
+      name,
+    }
+    await api.insert_tag(tag)
+    const { data, error } = await supabase.from('tags').insert(tag).select().single()
     if (error)
       throw new Error(error.message)
 
-    await refresh_tags()
     return data
   } catch (err) {
     alert(err)
@@ -319,48 +314,52 @@ export async function assign_tag({
   remove?: boolean
 }) {
   try {
-    const { dictionary_id, refresh_entries } = get_pieces()
-    const { data, error } = await content_update({
-      update_id: randomUUID(),
-      dictionary_id,
-      tag_id,
-      entry_id,
-      ...(remove ? { data: { deleted: 'true' } } : { }),
-      type: 'assign_tag',
-    })
-    if (error)
-      throw new Error(error.message)
-
-    await refresh_entries()
-    await invalidate(ENTRY_UPDATED_LOAD_TRIGGER)
-
-    return data
+    const { dictionary_id, api, supabase } = await get_pieces()
+    if (remove) {
+      const entry_tag = {
+        tag_id,
+        entry_id,
+        deleted: new Date().toISOString(),
+      }
+      await api.delete_entry_tag(entry_tag)
+      const { error: delete_error } = await supabase.from('entry_tags').update(entry_tag)
+        .eq('tag_id', tag_id).eq('entry_id', entry_id)
+      if (delete_error)
+        throw new Error(delete_error.message)
+    } else {
+      const entry_tag = {
+        dictionary_id,
+        tag_id,
+        entry_id,
+        // to handle upsert over previously deleted connection
+        deleted: null,
+        created_at: new Date().toISOString(),
+      }
+      await api.insert_entry_tag(entry_tag)
+      const { data, error } = await supabase.from('entry_tags').upsert(entry_tag).select().single()
+      if (error)
+        throw new Error(error.message)
+      return data
+    }
   } catch (err) {
     alert(err)
     console.error(err)
   }
 }
 
-export async function insert_dialect({
-  dialect,
-  dialect_id,
-}: {
-  dialect: TablesUpdate<'dialects'> & Pick<TablesInsert<'dialects'>, 'name'>
-  dialect_id?: string
-}) {
+export async function insert_dialect({ name }: { name: MultiString }) {
   try {
-    const { dictionary_id, refresh_dialects } = get_pieces()
-    const { data, error } = await content_update({
-      update_id: randomUUID(),
+    const { dictionary_id, api, supabase } = await get_pieces()
+    const dialect = {
       dictionary_id,
-      dialect_id: dialect_id || randomUUID(),
-      type: 'insert_dialect',
-      data: dialect,
-    })
+      id: randomUUID(),
+      name,
+    }
+    await api.insert_dialect(dialect)
+    const { data, error } = await supabase.from('dialects').insert(dialect).select().single()
     if (error)
       throw new Error(error.message)
 
-    await refresh_dialects()
     return data
   } catch (err) {
     alert(err)
@@ -378,22 +377,33 @@ export async function assign_dialect({
   remove?: boolean
 }) {
   try {
-    const { dictionary_id, refresh_entries } = get_pieces()
-    const { data, error } = await content_update({
-      update_id: randomUUID(),
-      dictionary_id,
-      dialect_id,
-      entry_id,
-      ...(remove ? { data: { deleted: 'true' } } : { }),
-      type: 'assign_dialect',
-    })
-    if (error)
-      throw new Error(error.message)
-
-    await refresh_entries()
-    await invalidate(ENTRY_UPDATED_LOAD_TRIGGER)
-
-    return data
+    const { dictionary_id, api, supabase } = await get_pieces()
+    if (remove) {
+      const entry_dialect = {
+        dialect_id,
+        entry_id,
+        deleted: new Date().toISOString(),
+      }
+      await api.delete_entry_dialect(entry_dialect)
+      const { error: delete_error } = await supabase.from('entry_dialects').update(entry_dialect)
+        .eq('dialect_id', dialect_id).eq('entry_id', entry_id)
+      if (delete_error)
+        throw new Error(delete_error.message)
+    } else {
+      const entry_dialect = {
+        dictionary_id,
+        dialect_id,
+        entry_id,
+        // to handle upsert over previously deleted connection
+        deleted: null,
+        created_at: new Date().toISOString(),
+      }
+      await api.insert_entry_dialect(entry_dialect)
+      const { data, error } = await supabase.from('entry_dialects').upsert(entry_dialect).select().single()
+      if (error)
+        throw new Error(error.message)
+      return data
+    }
   } catch (err) {
     alert(err)
     console.error(err)
@@ -401,30 +411,31 @@ export async function assign_dialect({
 }
 
 export async function insert_photo({
-  photo,
-  photo_id,
+  photo: _photo,
   sense_id,
 }: {
   photo: Omit<TablesInsert<'photos'>, 'created_by' | 'updated_by' | 'dictionary_id' | 'id'>
-  photo_id?: string
   sense_id: string
 }) {
   try {
-    const { dictionary_id, refresh_entries, refresh_photos } = get_pieces()
-    const { data, error } = await content_update({
-      update_id: randomUUID(),
+    const { dictionary_id, api, supabase } = await get_pieces()
+    const photo = {
       dictionary_id,
-      sense_id,
-      photo_id: photo_id || randomUUID(),
-      type: 'insert_photo',
-      data: photo,
-    })
+      id: randomUUID(),
+      ..._photo,
+    }
+    await api.insert_photo(photo, sense_id)
+    const { data, error } = await supabase.from('photos').insert(photo).select().single()
     if (error)
       throw new Error(error.message)
 
-    await refresh_photos()
-    await refresh_entries()
-    await invalidate(ENTRY_UPDATED_LOAD_TRIGGER)
+    const { error: sense_error } = await supabase.from('sense_photos').upsert({
+      photo_id: data.id,
+      sense_id,
+      dictionary_id,
+    })
+    if (sense_error)
+      throw new Error(sense_error.message)
     return data
   } catch (err) {
     alert(err)
@@ -432,28 +443,14 @@ export async function insert_photo({
   }
 }
 
-export async function update_photo({
-  photo,
-  photo_id,
-}: {
-  photo: TablesUpdate<'photos'>
-  photo_id: string
-}) {
+export async function update_photo(photo: TablesUpdate<'photos'>) {
   try {
-    const { dictionary_id, refresh_entries, refresh_photos } = get_pieces()
-    const { data, error } = await content_update({
-      update_id: randomUUID(),
-      dictionary_id,
-      photo_id,
-      type: 'update_photo',
-      data: photo,
-    })
+    const { api, supabase } = await get_pieces()
+    await api.update_photo(photo)
+    const { data, error } = await supabase.from('photos').update(photo).eq('id', photo.id).select().single()
     if (error)
       throw new Error(error.message)
 
-    await refresh_photos()
-    await refresh_entries()
-    await invalidate(ENTRY_UPDATED_LOAD_TRIGGER)
     return data
   } catch (err) {
     alert(err)
@@ -462,28 +459,32 @@ export async function update_photo({
 }
 
 export async function insert_video({
-  video,
+  video: _video,
   sense_id,
 }: {
   video: TablesUpdate<'videos'>
   sense_id: string
 }) {
   try {
-    const { dictionary_id, refresh_entries, refresh_videos } = get_pieces()
-    const { data, error } = await content_update({
-      update_id: randomUUID(),
+    const { dictionary_id, api, supabase } = await get_pieces()
+    const video = {
       dictionary_id,
-      sense_id,
-      video_id: randomUUID(),
-      type: 'insert_video',
-      data: video,
-    })
+      id: randomUUID(),
+      ..._video,
+    }
+    await api.insert_video(video, sense_id)
+    const { data, error } = await supabase.from('videos').insert(video).select().single()
     if (error)
       throw new Error(error.message)
 
-    await refresh_videos()
-    await refresh_entries()
-    await invalidate(ENTRY_UPDATED_LOAD_TRIGGER)
+    const { error: sense_error } = await supabase.from('sense_videos').upsert({
+      video_id: data.id,
+      sense_id,
+      dictionary_id,
+    })
+    if (sense_error)
+      throw new Error(sense_error.message)
+
     return data
   } catch (err) {
     alert(err)
@@ -491,28 +492,14 @@ export async function insert_video({
   }
 }
 
-export async function update_video({
-  video,
-  video_id,
-}: {
-  video: TablesUpdate<'videos'>
-  video_id: string
-}) {
+export async function update_video(video: TablesUpdate<'videos'>) {
   try {
-    const { dictionary_id, refresh_entries, refresh_videos } = get_pieces()
-    const { data, error } = await content_update({
-      update_id: randomUUID(),
-      dictionary_id,
-      video_id,
-      type: 'update_video',
-      data: video,
-    })
+    const { api, supabase } = await get_pieces()
+    await api.update_video(video)
+    const { data, error } = await supabase.from('videos').update(video).eq('id', video.id).select().single()
     if (error)
       throw new Error(error.message)
 
-    await refresh_videos()
-    await refresh_entries()
-    await invalidate(ENTRY_UPDATED_LOAD_TRIGGER)
     return data
   } catch (err) {
     alert(err)
