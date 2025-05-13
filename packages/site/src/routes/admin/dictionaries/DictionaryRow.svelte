@@ -218,6 +218,9 @@
 <td class="whitespace-nowrap">
   {#if dictionary.created_at}{supabase_date_to_friendly(dictionary.created_at)}{/if}
 </td>
+<td class="whitespace-nowrap">
+  {#if dictionary.updated_at}{supabase_date_to_friendly(dictionary.updated_at)}{/if}
+</td>
 <td>{typeof dictionary.language_used_by_community === 'boolean'
   ? dictionary.language_used_by_community
   : ''}</td>
