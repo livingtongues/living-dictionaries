@@ -5,7 +5,7 @@ import { clear } from 'idb-keyval'
 import { _search_entries, create_index, update_index_entry } from './orama.worker'
 import type { Supabase } from '$lib/supabase'
 import { cached_data_table, cached_join_table } from '$lib/supabase/cached-data'
-import { PUBLIC_SUPABASE_ANON_KEY, PUBLIC_SUPABASE_API_URL } from '$env/static/public'
+// import { PUBLIC_SUPABASE_ANON_KEY, PUBLIC_SUPABASE_API_URL } from '$env/static/public'
 
 const log = false
 let supabase: Supabase | undefined
@@ -349,6 +349,8 @@ export async function init_entries(
   }
 
   if (!supabase) {
+    const PUBLIC_SUPABASE_API_URL = 'https://actkqboqpzniojhgtqzw.supabase.co'
+    const PUBLIC_SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFjdGtxYm9xcHpuaW9qaGd0cXp3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MDEzOTQ0MzEsImV4cCI6MjAxNjk3MDQzMX0.KxeGK8Dnyg_BU9_eqtlNqbTyuPpmW6Dwasld1-HOiyE'
     supabase = createClient<Database>(PUBLIC_SUPABASE_API_URL, PUBLIC_SUPABASE_ANON_KEY, { auth: { persistSession: true } })
   }
 
