@@ -2,6 +2,7 @@ import { type Readable, get, writable } from 'svelte/store'
 import type { EntryData, Tables } from '@living-dictionaries/types'
 import { init_entries, reset_caches, search_entries } from '$lib/search'
 import { browser } from '$app/environment'
+import { PUBLIC_SUPABASE_ANON_KEY, PUBLIC_SUPABASE_API_URL } from '$env/static/public'
 
 export function create_entries_ui_store({
   dictionary_id,
@@ -65,6 +66,8 @@ export function create_entries_ui_store({
     init_entries({
       dictionary_id,
       can_edit: is_editor,
+      PUBLIC_SUPABASE_ANON_KEY,
+      PUBLIC_SUPABASE_API_URL,
       set_entries_data,
       upsert_entry_data,
       delete_entry,

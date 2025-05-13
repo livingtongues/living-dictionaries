@@ -5,7 +5,6 @@ import { clear } from 'idb-keyval'
 import { _search_entries, create_index, update_index_entry } from './orama.worker'
 import type { Supabase } from '$lib/supabase'
 import { cached_data_table, cached_join_table } from '$lib/supabase/cached-data'
-// import { PUBLIC_SUPABASE_ANON_KEY, PUBLIC_SUPABASE_API_URL } from '$env/static/public'
 
 const log = false
 let supabase: Supabase | undefined
@@ -301,6 +300,8 @@ async function process_and_update_entry(entry: Tables<'entries'>) {
 export interface InitEntryWorkerOptions {
   dictionary_id: string
   can_edit: boolean
+  PUBLIC_SUPABASE_API_URL: string
+  PUBLIC_SUPABASE_ANON_KEY: string
   set_entries_data: (entries_data: Record<string, EntryData>) => void
   upsert_entry_data: (entries_data: Record<string, EntryData>) => void
   delete_entry: (entry_id: string) => void
@@ -312,7 +313,12 @@ export interface InitEntryWorkerOptions {
 }
 
 export async function init_entries(
-  options: { dictionary_id: string, can_edit: boolean },
+  options: {
+    dictionary_id: string
+    can_edit: boolean
+    PUBLIC_SUPABASE_API_URL: string
+    PUBLIC_SUPABASE_ANON_KEY: string
+  },
   set_entries_data: (entries_data: Record<string, EntryData>) => Promise<void>,
   _upsert_entry_data: (entries_data: Record<string, EntryData>) => Promise<void>,
   _delete_entry: (entry_id: string) => Promise<void>,
@@ -329,8 +335,8 @@ export async function init_entries(
   set_dialects = _set_dialects
   mark_search_index_updated = _mark_search_index_updated
 
-  ;({ dictionary_id } = options as InitEntryWorkerOptions)
-  const { can_edit } = options
+  ;({ dictionary_id } = options)
+  const { can_edit, PUBLIC_SUPABASE_API_URL, PUBLIC_SUPABASE_ANON_KEY } = options
 
   const cached = await load_cache(dictionary_id)
   if (cached) {
@@ -349,8 +355,6 @@ export async function init_entries(
   }
 
   if (!supabase) {
-    const PUBLIC_SUPABASE_API_URL = 'https://actkqboqpzniojhgtqzw.supabase.co'
-    const PUBLIC_SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFjdGtxYm9xcHpuaW9qaGd0cXp3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MDEzOTQ0MzEsImV4cCI6MjAxNjk3MDQzMX0.KxeGK8Dnyg_BU9_eqtlNqbTyuPpmW6Dwasld1-HOiyE'
     supabase = createClient<Database>(PUBLIC_SUPABASE_API_URL, PUBLIC_SUPABASE_ANON_KEY, { auth: { persistSession: true } })
   }
 
@@ -372,7 +376,7 @@ export async function init_entries(
   const sense_videos_promise = cached_join_table({ table: 'sense_videos', id_field_1: 'sense_id', id_field_2: 'video_id', dictionary_id, supabase, log })
   const senses_in_sentences_promise = cached_join_table({ table: 'senses_in_sentences', id_field_1: 'sense_id', id_field_2: 'sentence_id', dictionary_id, supabase, log })
 
-  ;([
+    ;([
     entries,
     senses,
     audios,
