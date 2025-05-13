@@ -19,9 +19,7 @@ const cache_client = new S3Client({
   },
 })
 
-// const date_for_updating_all_caches = '1970-01-01T00:00:00Z'
-// const caches_last_updated = date_for_updating_all_caches
-// const caches_last_updated = '2024-11-15T00:00:00Z' // do this next time
+const date_for_updating_all_caches = '1970-01-01T00:00:00Z'
 
 await write_caches()
 async function write_caches() {
@@ -30,11 +28,13 @@ async function write_caches() {
     const { data: dictionary_ids } = await admin_supabase.from('dictionaries')
       .select('id')
       .order('id')
-      // public
+      // 1st do public
       // .eq('public', true)
-      // private but not conlang (won't cache those)
+      // 2nd do private but not conlang (won't cache those)
       .neq('public', true)
       .is('con_language_description', null)
+
+    console.log(`Writing caches for ${dictionary_ids.length} dictionaries...`)
 
     for (const { id: dictionary_id } of dictionary_ids) {
       const format = 'json'
@@ -42,9 +42,9 @@ async function write_caches() {
       const filename = `${dictionary_id}.${format}`
       const filepath = path.join(__dirname, folder, filename)
 
-      if (await file_exists(filepath)) {
-        continue
-      }
+      // if (await file_exists(filepath)) {
+      //   continue
+      // }
 
       current_dict = dictionary_id
 
@@ -55,24 +55,17 @@ async function write_caches() {
         id_field_2?: keyof T
       }) {
         const order_field = include ? 'updated_at' : 'created_at'
-        const data: T[] = []
-        let timestamp_from_which_to_fetch_data = '1970-01-01T00:00:00Z'
+        let data: Record<string, T> = {}
+        let timestamp_from_which_to_fetch_data = date_for_updating_all_caches
+        let select_fields: (keyof T)[]
+        if (include) {
+          select_fields = ['id', ...include, order_field] as (keyof T)[]
+        } else {
+          select_fields = [order_field, id_field_1, id_field_2] as (keyof T)[]
+        }
+
         while (true) {
-          if (data.length) {
-            const last_item = data[data.length - 1]
-            // @ts-expect-error
-            timestamp_from_which_to_fetch_data = last_item[order_field] as string
-          }
-
-          let select_fields: (keyof T)[]
-          if (include) {
-            select_fields = ['id', ...include, order_field] as (keyof T)[]
-          } else {
-            select_fields = [order_field, id_field_1, id_field_2] as (keyof T)[]
-          }
-
-          const { data: batch, error: batch_error } = await admin_supabase
-            .from(table)
+          const { data: batch, error: batch_error } = await admin_supabase.from(table)
             .select(select_fields.join(', '))
             .eq('dictionary_id', dictionary_id)
             .is('deleted', null)
@@ -86,13 +79,29 @@ async function write_caches() {
           }
 
           if (batch?.length) {
-            const batch_without_nulls = batch.map((item) => {
-              const new_item = Object.fromEntries(
-                Object.entries(item).filter(([_, value]) => value !== null),
-              ) as T
-              return new_item
-            })
-            data.push(...batch_without_nulls)
+            // @ts-expect-error
+            timestamp_from_which_to_fetch_data = batch[batch.length - 1][order_field] as string
+
+            if (id_field_1 && id_field_2) {
+              const batch_object = batch.reduce((acc, item) => {
+                const combined_id = `${(item as T)[id_field_1]}_${(item as T)[id_field_2]}`
+                acc[combined_id] = item as T
+                return acc
+              }, {} as Record<string, T>)
+              data = { ...data, ...batch_object }
+            } else {
+              const batch_without_nulls = batch.reduce((acc, item) => {
+                const item_without_nulls = Object.fromEntries(
+                  Object.entries(item).filter(([_, value]) => value !== null),
+                ) as T
+                // @ts-expect-error
+                acc[item_without_nulls.id] = item_without_nulls
+                return acc
+              }, {} as Record<string, T>)
+
+              data = { ...data, ...batch_without_nulls }
+            }
+
             if (batch.length < 1000) {
               break
             }
@@ -102,18 +111,20 @@ async function write_caches() {
         }
 
         if (table !== 'entries' && order_field === 'updated_at') {
-          return data.map((item) => {
-            // @ts-expect-error
-            const { updated_at, ...rest } = item
-            return rest as T
-          })
+          data = Object.fromEntries(
+            Object.entries(data).map(([key, item]) => {
+              // @ts-expect-error
+              const { updated_at, ...rest } = item
+              return [key, rest] as [string, T]
+            }),
+          )
         }
         return data
       }
 
       const entries_promise = get_table({ table: 'entries', include: ['coordinates', 'elicitation_id', 'interlinearization', 'lexeme', 'morphology', 'notes', 'phonetic', 'scientific_names', 'sources'] })
-      const senses_promise = get_table({ table: 'senses', include: ['entry_id', 'definition', 'glosses', 'noun_class', 'parts_of_speech', 'plural_form', 'semantic_domains', 'variant', 'write_in_semantic_domains'] })
-      const audios_promise = get_table({ table: 'audio', include: ['entry_id', 'source', 'storage_path'] })
+      const senses_promise = get_table({ table: 'senses', include: ['created_at', 'entry_id', 'definition', 'glosses', 'noun_class', 'parts_of_speech', 'plural_form', 'semantic_domains', 'variant', 'write_in_semantic_domains'] })
+      const audios_promise = get_table({ table: 'audio', include: ['created_at', 'entry_id', 'source', 'storage_path'] })
       const speakers_promise = get_table({ table: 'speakers', include: ['birthplace', 'decade', 'gender', 'name'] })
       const tags_promise = get_table({ table: 'tags', include: ['name'] })
       const dialects_promise = get_table({ table: 'dialects', include: ['name'] })
@@ -130,22 +141,22 @@ async function write_caches() {
       const senses_in_sentences_promise = get_table({ table: 'senses_in_sentences', id_field_1: 'sense_id', id_field_2: 'sentence_id' })
 
       const [
-        $entries,
-        $senses,
-        $audios,
-        $speakers,
-        $tags,
-        $dialects,
-        $photos,
-        $videos,
-        $sentences,
-        $audio_speakers,
-        $entry_tags,
-        $entry_dialects,
-        $sense_photos,
-        $video_speakers,
-        $sense_videos,
-        $senses_in_sentences,
+        entries,
+        senses,
+        audios,
+        speakers,
+        tags,
+        dialects,
+        photos,
+        videos,
+        sentences,
+        audio_speakers,
+        entry_tags,
+        entry_dialects,
+        sense_photos,
+        video_speakers,
+        sense_videos,
+        senses_in_sentences,
       ] = await Promise.all([
         entries_promise,
         senses_promise,
@@ -165,66 +176,113 @@ async function write_caches() {
         senses_in_sentences_promise,
       ])
 
-      const entries_data: EntryData[] = $entries.map((entry) => {
-        const senses_for_entry = $senses.filter(sense => sense.entry_id === entry.id)
-          .map((sense) => {
-            const sentence_ids = $senses_in_sentences.filter(sense_in_sentence => sense_in_sentence.sense_id === sense.id).map(sense_in_sentence => sense_in_sentence.sentence_id)
-            const sentences_for_sense = $sentences.filter(sentence => sentence_ids.includes(sentence.id))
-            const photo_ids = $sense_photos.filter(sense_photo => sense_photo.sense_id === sense.id).map(sense_photo => sense_photo.photo_id)
-            const photos_for_sense = $photos.filter(photo => photo_ids.includes(photo.id))
-            const video_ids = $sense_videos.filter(sense_video => sense_video.sense_id === sense.id).map(sense_video => sense_video.video_id)
-            const videos_for_sense = $videos.filter(video => video_ids.includes(video.id))
-              .map((video) => {
-                const speaker_ids = $video_speakers
-                  .filter(vs => vs.video_id === video.id)
-                  .map(vs => vs.speaker_id)
-                const speakers_for_video = $speakers.filter(speaker => speaker_ids.includes(speaker.id))
+      const entry_id_to_tags: Record<string, Tables<'tags'>[]> = {}
+      const entry_id_to_dialects: Record<string, Tables<'dialects'>[]> = {}
+      const entry_id_to_senses: Record<string, Tables<'senses'>[]> = {}
+      const sense_id_to_sentences: Record<string, Tables<'sentences'>[]> = {}
+      const sense_id_to_photos: Record<string, Tables<'photos'>[]> = {}
+      const video_id_to_speakers: Record<string, Tables<'speakers'>[]> = {}
+      const sense_id_to_videos: Record<string, Tables<'videos'>[]> = {}
+      const audio_id_to_speakers: Record<string, Tables<'speakers'>[]> = {}
+      const entry_id_to_audios: Record<string, Tables<'audio'>[]> = {}
 
-                return {
-                  ...video,
-                  ...(speakers_for_video.length ? { speakers: speakers_for_video } : {}),
-                }
-              })
+      for (const entry_tag of Object.values(entry_tags)) {
+        if (!entry_id_to_tags[entry_tag.entry_id]) entry_id_to_tags[entry_tag.entry_id] = []
+        const tag = tags[entry_tag.tag_id]
+        entry_id_to_tags[entry_tag.entry_id].push(tag)
+      }
 
-            const { entry_id, ...sense_to_include } = sense
-            return {
-              ...sense_to_include,
-              ...(sentences_for_sense.length ? { sentences: sentences_for_sense } : {}),
-              ...(photos_for_sense.length ? { photos: photos_for_sense } : {}),
-              ...(videos_for_sense.length ? { videos: videos_for_sense } : {}),
-            }
-          })
-        const audios_for_entry = $audios.filter(audio => audio.entry_id === entry.id)
-          .map((audio) => {
-            const speaker_ids = $audio_speakers
-              .filter(as => as.audio_id === audio.id)
-              .map(as => as.speaker_id)
-            const speakers_for_audio = $speakers.filter(speaker => speaker_ids.includes(speaker.id))
+      for (const entry_dialect of Object.values(entry_dialects)) {
+        if (!entry_id_to_dialects[entry_dialect.entry_id]) entry_id_to_dialects[entry_dialect.entry_id] = []
+        const dialect = dialects[entry_dialect.dialect_id]
+        entry_id_to_dialects[entry_dialect.entry_id].push(dialect)
+      }
 
-            return {
-              ...audio,
-              ...(speakers_for_audio.length ? { speakers: speakers_for_audio } : {}),
-            }
-          })
+      for (const sense of Object.values(senses)) {
+        if (!entry_id_to_senses[sense.entry_id]) entry_id_to_senses[sense.entry_id] = []
+        entry_id_to_senses[sense.entry_id].push(sense)
+        if (entry_id_to_senses[sense.entry_id].length > 1) {
+          entry_id_to_senses[sense.entry_id].sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime())
+        }
+      }
 
-        const tag_ids = $entry_tags.filter(entry_tag => entry_tag.entry_id === entry.id).map(entry_tag => entry_tag.tag_id)
-        const tags_for_entry = $tags.filter(tag => tag_ids.includes(tag.id))
-        const dialect_ids = $entry_dialects.filter(entry_dialect => entry_dialect.entry_id === entry.id).map(entry_dialect => entry_dialect.dialect_id)
-        const dialects_for_entry = $dialects.filter(dialect => dialect_ids.includes(dialect.id))
+      for (const { sense_id, sentence_id } of Object.values(senses_in_sentences)) {
+        if (!sense_id_to_sentences[sense_id]) sense_id_to_sentences[sense_id] = []
+        sense_id_to_sentences[sense_id].push(sentences[sentence_id])
+        // if (!sentence_id_to_sense_ids[sentence_id]) sentence_id_to_sense_ids[sentence_id] = []
+        // sentence_id_to_sense_ids[sentence_id].push(sense_id)
+      }
 
+      for (const { sense_id, photo_id } of Object.values(sense_photos)) {
+        if (!sense_id_to_photos[sense_id]) sense_id_to_photos[sense_id] = []
+        sense_id_to_photos[sense_id].push(photos[photo_id])
+        // if (!photo_id_to_sense_ids[photo_id]) photo_id_to_sense_ids[photo_id] = []
+        // photo_id_to_sense_ids[photo_id].push(sense_id)
+      }
+
+      for (const video_speaker of Object.values(video_speakers)) {
+        if (!video_id_to_speakers[video_speaker.video_id]) video_id_to_speakers[video_speaker.video_id] = []
+        const speaker = speakers[video_speaker.speaker_id]
+        video_id_to_speakers[video_speaker.video_id].push(speaker)
+      }
+      for (const { sense_id, video_id } of Object.values(sense_videos)) {
+        if (!sense_id_to_videos[sense_id]) sense_id_to_videos[sense_id] = []
+        const video = videos[video_id]
+
+        sense_id_to_videos[sense_id].push({
+          ...video,
+          ...(video_id_to_speakers[video_id] ? { speakers: video_id_to_speakers[video_id] } : {}),
+        })
+
+        // if (!video_id_to_sense_ids[video_id]) video_id_to_sense_ids[video_id] = []
+        // video_id_to_sense_ids[video_id].push(sense_id)
+      }
+
+      for (const audio_speaker of Object.values(audio_speakers)) {
+        if (!audio_id_to_speakers[audio_speaker.audio_id]) audio_id_to_speakers[audio_speaker.audio_id] = []
+        const speaker = speakers[audio_speaker.speaker_id]
+        audio_id_to_speakers[audio_speaker.audio_id].push(speaker)
+      }
+      for (const audio of Object.values(audios)) {
+        if (!entry_id_to_audios[audio.entry_id]) entry_id_to_audios[audio.entry_id] = []
+        entry_id_to_audios[audio.entry_id].push({
+          ...audio,
+          ...(audio_id_to_speakers[audio.id] ? { speakers: audio_id_to_speakers[audio.id] } : {}),
+        })
+        if (entry_id_to_audios[audio.entry_id].length > 1) {
+          entry_id_to_audios[audio.entry_id].sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime())
+        }
+      }
+
+      const entries_data: EntryData[] = Object.values(entries).map((entry) => {
+        return process_entry(entry)
+      })
+
+      function process_entry(entry: Tables<'entries'>) {
         const { id, deleted, dictionary_id, created_at, created_by, updated_by, updated_at, ...main } = entry
 
+        const senses_for_entry = entry_id_to_senses[id] || []
+        const senses_with_all = senses_for_entry.map((sense) => {
+          const { entry_id, ...sense_to_include } = sense
+
+          return {
+            ...sense_to_include,
+            ...(sense_id_to_sentences[sense.id] ? { sentences: sense_id_to_sentences[sense.id] } : {}),
+            ...(sense_id_to_photos[sense.id] ? { photos: sense_id_to_photos[sense.id] } : {}),
+            ...(sense_id_to_videos[sense.id] ? { videos: sense_id_to_videos[sense.id] } : {}),
+          }
+        })
         return {
           id,
           main,
           updated_at,
-          senses: senses_for_entry,
-          ...(audios_for_entry.length ? { audios: audios_for_entry } : {}),
-          ...(tags_for_entry.length ? { tags: tags_for_entry } : {}),
-          ...(dialects_for_entry.length ? { dialects: dialects_for_entry } : {}),
+          senses: senses_with_all,
+          ...(entry_id_to_audios[id] ? { audios: entry_id_to_audios[id] } : {}),
+          ...(entry_id_to_tags[id] ? { tags: entry_id_to_tags[id] } : {}),
+          ...(entry_id_to_dialects[id] ? { dialects: entry_id_to_dialects[id] } : {}),
           ...(deleted ? { deleted } : {}),
-        } satisfies EntryData
-      })
+        }
+      }
 
       if (entries_data.length === 0) {
         console.log(`${dictionary_id}: none`)
@@ -233,7 +291,7 @@ async function write_caches() {
 
       const cache_json_string = JSON.stringify(entries_data)
       await writeFile(filepath, cache_json_string)
-      // await upload_to_cloudflare(filename, cache_json_string)
+      await upload_to_cloudflare(filename, cache_json_string)
       console.log({ [dictionary_id]: entries_data.length })
     }
   } catch (err) {

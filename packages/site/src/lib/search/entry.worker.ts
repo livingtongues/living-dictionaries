@@ -356,20 +356,55 @@ export async function init_entries(
   const senses_promise = cached_data_table({ table: 'senses', include: ['created_at', 'entry_id', 'definition', 'glosses', 'noun_class', 'parts_of_speech', 'plural_form', 'semantic_domains', 'variant', 'write_in_semantic_domains'], dictionary_id, supabase, log })
   const audios_promise = cached_data_table({ table: 'audio', include: ['created_at', 'entry_id', 'source', 'storage_path'], dictionary_id, supabase, log })
   const speakers_promise = cached_data_table({ table: 'speakers', include: ['birthplace', 'decade', 'gender', 'name'], dictionary_id, supabase, log })
-  const audio_speakers_promise = cached_join_table({ table: 'audio_speakers', id_field_1: 'audio_id', id_field_2: 'speaker_id', dictionary_id, supabase, log })
   const tags_promise = cached_data_table({ table: 'tags', include: ['name'], dictionary_id, supabase, log })
-  const entry_tags_promise = cached_join_table({ table: 'entry_tags', id_field_1: 'entry_id', id_field_2: 'tag_id', dictionary_id, supabase, log })
   const dialects_promise = cached_data_table({ table: 'dialects', include: ['name'], dictionary_id, supabase, log })
-  const entry_dialects_promise = cached_join_table({ table: 'entry_dialects', id_field_1: 'entry_id', id_field_2: 'dialect_id', dictionary_id, supabase, log })
   const photos_promise = cached_data_table({ table: 'photos', include: ['photographer', 'storage_path', 'serving_url', 'source'], dictionary_id, supabase, log })
-  const sense_photos_promise = cached_join_table({ table: 'sense_photos', id_field_1: 'sense_id', id_field_2: 'photo_id', dictionary_id, supabase, log })
   const videos_promise = cached_data_table({ table: 'videos', include: ['hosted_elsewhere', 'source', 'storage_path', 'videographer'], dictionary_id, supabase, log })
+  const sentences_promise = cached_data_table({ table: 'sentences', include: ['text', 'translation'], dictionary_id, supabase, log })
+
+  const audio_speakers_promise = cached_join_table({ table: 'audio_speakers', id_field_1: 'audio_id', id_field_2: 'speaker_id', dictionary_id, supabase, log })
+  const entry_tags_promise = cached_join_table({ table: 'entry_tags', id_field_1: 'entry_id', id_field_2: 'tag_id', dictionary_id, supabase, log })
+  const entry_dialects_promise = cached_join_table({ table: 'entry_dialects', id_field_1: 'entry_id', id_field_2: 'dialect_id', dictionary_id, supabase, log })
+  const sense_photos_promise = cached_join_table({ table: 'sense_photos', id_field_1: 'sense_id', id_field_2: 'photo_id', dictionary_id, supabase, log })
   const video_speakers_promise = cached_join_table({ table: 'video_speakers', id_field_1: 'video_id', id_field_2: 'speaker_id', dictionary_id, supabase, log })
   const sense_videos_promise = cached_join_table({ table: 'sense_videos', id_field_1: 'sense_id', id_field_2: 'video_id', dictionary_id, supabase, log })
-  const sentences_promise = cached_data_table({ table: 'sentences', include: ['text', 'translation'], dictionary_id, supabase, log })
   const senses_in_sentences_promise = cached_join_table({ table: 'senses_in_sentences', id_field_1: 'sense_id', id_field_2: 'sentence_id', dictionary_id, supabase, log })
 
-  ;([entries, senses, audios, speakers, audio_speakers, tags, entry_tags, dialects, entry_dialects, photos, sense_photos, videos, video_speakers, sense_videos, sentences, senses_in_sentences] = await Promise.all([entries_promise, senses_promise, audios_promise, speakers_promise, audio_speakers_promise, tags_promise, entry_tags_promise, dialects_promise, entry_dialects_promise, photos_promise, sense_photos_promise, videos_promise, video_speakers_promise, sense_videos_promise, sentences_promise, senses_in_sentences_promise]))
+  ;([
+    entries,
+    senses,
+    audios,
+    speakers,
+    tags,
+    dialects,
+    photos,
+    videos,
+    sentences,
+    audio_speakers,
+    entry_tags,
+    entry_dialects,
+    sense_photos,
+    video_speakers,
+    sense_videos,
+    senses_in_sentences,
+  ] = await Promise.all([
+    entries_promise,
+    senses_promise,
+    audios_promise,
+    speakers_promise,
+    tags_promise,
+    dialects_promise,
+    photos_promise,
+    videos_promise,
+    sentences_promise,
+    audio_speakers_promise,
+    entry_tags_promise,
+    entry_dialects_promise,
+    sense_photos_promise,
+    video_speakers_promise,
+    sense_videos_promise,
+    senses_in_sentences_promise,
+  ]))
 
   for (const entry_tag of Object.values(entry_tags)) {
     if (!entry_id_to_tags[entry_tag.entry_id]) entry_id_to_tags[entry_tag.entry_id] = []
