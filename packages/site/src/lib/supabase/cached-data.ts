@@ -25,7 +25,7 @@ type JoinTableName = 'audio_speakers' | 'video_speakers' | 'entry_tags' | 'entry
 
 export function get_table_cache_key(table: DataTableName | JoinTableName, dictionary_id: string) {
   const month_year = new Date().toLocaleDateString('default', { month: '2-digit', year: 'numeric' }).replace('/', '.')
-  return `${table}_${dictionary_id}_${month_year}b`
+  return `${table}_${dictionary_id}_${month_year}c`
 }
 
 export async function cached_data_table<Name extends DataTableName, T extends Tables<Name>>(options: CachedDataStoreOptions<Name, keyof T>) {
@@ -36,6 +36,8 @@ export async function cached_data_table<Name extends DataTableName, T extends Ta
 
   const cache_key = get_table_cache_key(table, dictionary_id)
   let timestamp_from_which_to_fetch_data = '1971-01-01T00:00:00Z'
+  let range_start = 0
+  const limit = 1000
 
   if (log)
     console.info({ cache_key })
@@ -66,10 +68,17 @@ export async function cached_data_table<Name extends DataTableName, T extends Ta
       .select(select_fields.join(', '))
       .eq('dictionary_id', dictionary_id as any)
       .limit(1000)
-      .order(order_field, { ascending: true })
-      .gt(order_field, timestamp_from_which_to_fetch_data)
-    if (!cached_length) {
-      query.is('deleted', null)
+
+    if (cached_length) {
+      query
+        .order(order_field, { ascending: true })
+        .gt(order_field, timestamp_from_which_to_fetch_data)
+    } else {
+      query
+        .order('id', { ascending: true })
+        .range(range_start, range_start + limit)
+        .is('deleted', null)
+      range_start += limit
     }
 
     const { data: batch, error } = await query
@@ -124,6 +133,8 @@ export async function cached_join_table<Name extends JoinTableName, T extends Ta
 
   const cache_key = get_table_cache_key(table, dictionary_id)
   let timestamp_from_which_to_fetch_data = '1971-01-01T00:00:00Z'
+  let range_start = 0
+  const limit = 1000
 
   if (log)
     console.info({ cache_key })
@@ -151,10 +162,17 @@ export async function cached_join_table<Name extends JoinTableName, T extends Ta
       .select(select_fields.join(', '))
       .eq('dictionary_id', dictionary_id as any)
       .limit(1000)
-      .order(order_field, { ascending: true })
-      .gt(order_field, timestamp_from_which_to_fetch_data)
-    if (!cached_length) {
-      query.is('deleted', null)
+
+    if (cached_length) {
+      query
+        .order(order_field, { ascending: true })
+        .gt(order_field, timestamp_from_which_to_fetch_data)
+    } else {
+      query
+        .order(id_field_1 as string, { ascending: true })
+        .range(range_start, range_start + limit)
+        .is('deleted', null)
+      range_start += limit
     }
 
     const { data: batch, error } = await query
