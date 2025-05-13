@@ -17,6 +17,7 @@
     alternate_names = 'Alternate Names',
     orthographies = 'Alternate Orthographies',
     created_at = 'Created At',
+    updated_at = 'Updated At',
     language_used_by_community = 'Language Used by Community',
     community_permission = 'Community Permission',
     author_connection = 'Author Connection',
@@ -77,6 +78,10 @@
       case 'created_at':
         valueA = a.created_at ? new Date(a.created_at).getTime() : keep_null_date_at_end
         valueB = b.created_at ? new Date(b.created_at).getTime() : keep_null_date_at_end
+        break
+      case 'updated_at':
+        valueA = a.updated_at ? new Date(a.updated_at).getTime() : keep_null_date_at_end
+        valueB = b.updated_at ? new Date(b.updated_at).getTime() : keep_null_date_at_end
         break
       case 'conlang':
         valueA = a.con_language_description?.toString() || ''
