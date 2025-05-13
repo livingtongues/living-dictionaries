@@ -11,7 +11,6 @@ describe('users table access', () => {
     await postgres.execute_query(reset_db_sql)
 
     await admin_supabase.auth.admin.createUser({
-      // @ts-expect-error
       id: USER_1_ID,
       email: USER_1_EMAIL,
       password: PASSWORD,

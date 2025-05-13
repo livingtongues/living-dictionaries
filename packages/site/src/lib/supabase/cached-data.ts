@@ -64,7 +64,7 @@ export async function cached_data_table<Name extends DataTableName, T extends Ta
   while (true) {
     const query = supabase.from(table)
       .select(select_fields.join(', '))
-      .eq('dictionary_id', dictionary_id)
+      .eq('dictionary_id', dictionary_id as any)
       .limit(1000)
       .order(order_field, { ascending: true })
       .gt(order_field, timestamp_from_which_to_fetch_data)
@@ -149,7 +149,7 @@ export async function cached_join_table<Name extends JoinTableName, T extends Ta
   while (true) {
     const query = supabase.from(table)
       .select(select_fields.join(', '))
-      .eq('dictionary_id', dictionary_id)
+      .eq('dictionary_id', dictionary_id as any)
       .limit(1000)
       .order(order_field, { ascending: true })
       .gt(order_field, timestamp_from_which_to_fetch_data)
@@ -187,7 +187,7 @@ export async function cached_join_table<Name extends JoinTableName, T extends Ta
 
   const { data: deleted_items, error } = await supabase.from(table)
     .select()
-    .eq('dictionary_id', dictionary_id)
+    .eq('dictionary_id', dictionary_id as any)
     .not('deleted', 'is', null)
   if (error) {
     if (log)

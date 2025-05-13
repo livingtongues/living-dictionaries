@@ -23,7 +23,7 @@ async function get_manager_addresses(dictionary_id: string): Promise<Address[]> 
       dictionary_id,
       user_id,
       role,
-      profile:profiles_view (
+      profile:profiles_view!user_id (
         full_name,
         email
       )

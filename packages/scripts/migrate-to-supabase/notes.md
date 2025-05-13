@@ -1,5 +1,5 @@
 ## Better data sync
-- push code and test live to see if there are any issues with the new flow
+- test live to see if there are any issues with the new flow
 - push last migration that forces dictionary_id to be set on all tables (but first rerun sql that makes sure all is set)
 - get cloudflare caches updating on a cron job every hour in GitHub actions (see backup repo for example)
   - update dictionary updated_at on related table saves and remove trigger to update entry itself. So when updating caches, just get the list of dictionaries updated within the last hour and a half.
