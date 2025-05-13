@@ -1,13 +1,10 @@
 ## Better data sync
-- test live to see if there are any issues with the new flow
-- push last migration that forces dictionary_id to be set on all tables (but first rerun sql that makes sure all is set)
 - get cloudflare caches updating on a cron job every hour in GitHub actions (see backup repo for example)
-  - update dictionary updated_at on related table saves and remove trigger to update entry itself. So when updating caches, just get the list of dictionaries updated within the last hour and a half.
-  - once deployed and dictionary updated_at trigger running successfully, recreate all caches using script
+  - When updating caches, just get the list of dictionaries updated within the last hour and a half.
+  - recreate all caches using script
 - show green recent update in list and table view based on all an entries' updated_at fields
 - solve circular dependencies issues
 - handle entries load errors and saving status
-- push migration to remove entry views
 - make plan for cleaning up connected senses and join tables for deleted entries
 - look at missing indexes for dictionary_id and updated_at or created_at
 - Make it better: make entry updated_at change based on any change to all connected tables
