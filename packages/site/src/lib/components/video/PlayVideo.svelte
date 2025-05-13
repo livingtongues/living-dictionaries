@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { Tables } from '@living-dictionaries/types'
+  import type { EntryData } from '@living-dictionaries/types'
   import { Button } from 'svelte-pieces'
   import VideoThirdParty from './VideoThirdParty.svelte'
   import { page } from '$app/stores'
@@ -7,7 +7,7 @@
   $: ({ dbOperations, url_from_storage_path } = $page.data)
 
   export let lexeme: string
-  export let video: Tables<'videos_view'>
+  export let video: EntryData['senses'][0]['videos'][0]
   export let can_edit = false
   export let on_close: () => void
 </script>
@@ -42,7 +42,7 @@
           class="ml-auto"
           color="red"
           form="filled"
-          onclick={async () => await dbOperations.update_video({ video: { deleted: 'true' }, video_id: video.id })}>
+          onclick={async () => await dbOperations.update_video({ deleted: new Date().toISOString(), id: video.id })}>
           <span class="i-fa-trash-o" style="margin: -1px 0 2px;" />
           {$page.data.t('misc.delete')}
         </Button>

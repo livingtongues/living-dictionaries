@@ -21,6 +21,9 @@ export default defineConfig({
   build: {
     target: 'es2015',
   },
+  worker: {
+    format: 'es', // to allow code-splitted supabase to be imported into the worker
+  },
   define: getReplacements(),
   optimizeDeps: {
     include: [ // if the dependency is large with many internal modules or is CommonJS then include it

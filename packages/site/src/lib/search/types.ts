@@ -15,6 +15,8 @@ export interface QueryParams {
   // Boolean facets
   has_audio?: boolean
   no_audio?: boolean
+  has_sentence?: boolean
+  no_sentence?: boolean
   has_image?: boolean
   no_image?: boolean
   has_video?: boolean
@@ -33,3 +35,5 @@ export interface QueryParams {
 
 type ArrayFilters = 'tags' | 'dialects' | 'parts_of_speech' | 'semantic_domains' | 'speakers'
 export type FilterListKeys = ArrayFilters & keyof QueryParams
+
+// type StoreValue<T> = T extends { subscribe: (run: (value: infer R) => void) => Unsubscriber } ? R : never

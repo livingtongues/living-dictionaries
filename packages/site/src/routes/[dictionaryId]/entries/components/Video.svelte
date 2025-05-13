@@ -1,10 +1,10 @@
 <script lang="ts">
-  import type { Tables } from '@living-dictionaries/types'
+  import type { EntryData } from '@living-dictionaries/types'
   import { ShowHide } from 'svelte-pieces'
   import { page } from '$app/stores'
 
   export let lexeme: string
-  export let video: Tables<'videos_view'>
+  export let video: EntryData['senses'][0]['videos'][0]
   export let can_edit = false
 </script>
 

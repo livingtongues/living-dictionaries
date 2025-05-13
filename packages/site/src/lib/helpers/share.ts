@@ -1,8 +1,8 @@
-import type { EntryView } from '@living-dictionaries/types'
 import { get } from 'svelte/store'
+import type { EntryData } from '@living-dictionaries/types'
 import { page } from '$app/stores'
 
-export async function share(dictionaryId: string, entry: EntryView) {
+export async function share(dictionaryId: string, entry: EntryData) {
   const { data: { t } } = get(page)
   const title = `${dictionaryId} ${t('misc.LD_singular')}`
   const text = `${entry.main.lexeme.default}`

@@ -1,7 +1,7 @@
 <script lang="ts">
   import { Button, JSON, Modal } from 'svelte-pieces'
-  import type { AudioWithSpeakerIds, EntryView } from '@living-dictionaries/types'
   import type { Readable } from 'svelte/motion'
+  import type { EntryData } from '@living-dictionaries/types'
   import type { AudioVideoUploadStatus } from './upload-audio'
   import { page } from '$app/stores'
   import Waveform from '$lib/components/audio/Waveform.svelte'
@@ -10,8 +10,9 @@
   import SelectSpeaker from '$lib/components/media/SelectSpeaker.svelte'
 
   export let on_close: () => void
-  export let entry: EntryView
-  export let sound_file: AudioWithSpeakerIds
+  export let entry: EntryData
+  export let sound_file: EntryData['audios'][0]
+
   let upload_triggered = false
   $: ({ admin, dbOperations, url_from_storage_path } = $page.data)
   let readyToRecord: boolean
@@ -24,7 +25,7 @@
     audioBlob = undefined
   }
 
-  $: initial_speaker_id = sound_file?.speaker_ids?.[0]
+  $: initial_speaker_id = sound_file?.speakers?.[0].id
 
   function startUpload(speaker_id: string): Readable<AudioVideoUploadStatus> {
     const uploadStore = dbOperations.addAudio({
@@ -108,7 +109,7 @@
 
       <Button
         onclick={async () => {
-          await dbOperations.upsert_audio({ audio: { deleted: 'true' }, audio_id: sound_file.id, refresh_entry: true })
+          await dbOperations.update_audio({ deleted: new Date().toISOString(), id: sound_file.id })
           on_close()
         }}
         color="red">
