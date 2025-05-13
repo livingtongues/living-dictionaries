@@ -85,6 +85,7 @@ export async function cached_data_table<Name extends DataTableName, T extends Ta
     if (error) {
       if (log)
         console.error(error.message)
+      console.error({ query })
       throw new Error(error.message)
     }
     if (batch?.length) {
