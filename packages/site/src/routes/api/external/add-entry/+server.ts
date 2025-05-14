@@ -10,7 +10,7 @@ export interface AddEntryRequestBody {
   lexeme: string
 }
 
-export const POST: RequestHandler = async ({ request }) => {
+export const POST: RequestHandler = async ({ request, url }) => {
   const body = await request.json() as AddEntryRequestBody
   const { api_key, dictionary_id, lexeme } = body
 
@@ -72,7 +72,7 @@ export const POST: RequestHandler = async ({ request }) => {
       throw new Error(stats_error.message)
     }
 
-    return json({ entry_id })
+    return json({ entry_id, entry_url: `${url.origin}/${dictionary_id}/entry/${entry_id}` })
   } catch (err) {
     console.error(`External API error reading entries: ${err.message}`)
     kit_error(ResponseCodes.INTERNAL_SERVER_ERROR, `Error getting entries: ${err.message}`)
