@@ -47,7 +47,7 @@ export function translate_entries({ entries }: { entries: EntryData[] }) {
 
     return {
       ...entry,
-      dialects: (entry.dialects).map(({ name }) => name.default),
+      dialects: (entry.dialects || []).map(({ name }) => name.default),
       senses,
     }
   })

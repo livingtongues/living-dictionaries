@@ -3,6 +3,7 @@
   import { onMount } from 'svelte'
   import { Button } from 'svelte-pieces'
   import { supabase_date_to_friendly } from '$lib/helpers/time'
+  import { page } from '$app/stores'
 
   export let data
 
@@ -50,7 +51,7 @@
   {/each}
 
   <pre class="bg-black text-white p-3 mt-2 rounded">Read the first 1,000 entries (cached within the hour) by making a POST request to:
-https://livingdictionaries.app/api/external/read-entries
+{$page.url.origin}/external/read-entries
 
 With a json body:
 dictionary_id: {data.dictionary.id}

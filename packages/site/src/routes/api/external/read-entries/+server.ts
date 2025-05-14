@@ -1,4 +1,5 @@
 import { json, error as kit_error } from '@sveltejs/kit'
+import type { EntryData } from '@living-dictionaries/types'
 import type { RequestHandler } from './$types'
 import { ResponseCodes } from '$lib/constants'
 import { getAdminSupabaseClient } from '$lib/supabase/admin'
@@ -43,24 +44,6 @@ export const POST: RequestHandler = async ({ request }) => {
   }
 
   try {
-    const { data: materialized_entries, error: materialized_entries_error } = await admin_supabase.from('materialized_entries_view')
-      .select()
-      .eq('dictionary_id', dictionary_id)
-      .order('updated_at', { ascending: true })
-    if (materialized_entries_error) {
-      console.error({ materialized_entries_error })
-      throw new Error(materialized_entries_error.message)
-    }
-
-    const { data: latest_entries, error: latest_entries_error } = await admin_supabase.from('entries_view')
-      .select()
-      .eq('dictionary_id', dictionary_id)
-      .gt('updated_at', materialized_entries[materialized_entries.length - 1].updated_at)
-    if (latest_entries_error) {
-      console.error({ latest_entries_error })
-      throw new Error(latest_entries_error.message)
-    }
-
     const { error: stats_error } = await admin_supabase.from('api_keys')
       .update({
         last_read_at: new Date().toISOString(),
@@ -73,15 +56,33 @@ export const POST: RequestHandler = async ({ request }) => {
       throw new Error(stats_error.message)
     }
 
-    const cleaned_entries = [...materialized_entries, ...latest_entries].map((entry) => {
-      delete entry.dictionary_id
-      Object.keys(entry).forEach(key => entry[key] === null && delete entry[key])
-      return entry
-    })
+    const cached = await load_cache(dictionary_id)
+    if (!cached) {
+      throw new Error('No cached entries found for this dictionary_id.')
+    }
 
-    return json({ entries: cleaned_entries })
+    return json({ entries: cached })
   } catch (err) {
     console.error(`External API error reading entries: ${err.message}`)
     kit_error(ResponseCodes.INTERNAL_SERVER_ERROR, `Error getting entries: ${err.message}`)
+  }
+}
+
+async function load_cache(dictionary_id: string) {
+  const url = `https://cache.livingdictionaries.app/entries_data/${dictionary_id}.json`
+  try {
+    console.info('loading cached entries_data')
+    const response = await fetch(url)
+    if (!response.ok) {
+      console.info('cached entries_data not found')
+      return null
+    }
+    const serialized_json = await response.text()
+    console.info('got cached entries_data')
+    const deserialized = JSON.parse(serialized_json) as EntryData[]
+    console.info('parsed cached entries_data')
+    return deserialized
+  } catch (err) {
+    console.error('Error loading cached index', err)
   }
 }

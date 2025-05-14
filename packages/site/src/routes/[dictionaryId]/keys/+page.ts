@@ -22,8 +22,7 @@ export const load = (({ params: { dictionaryId }, parent }) => {
         .insert({
           dictionary_id: dictionaryId,
           can_write,
-        },
-        )
+        })
       if (error) {
         console.error(error)
         throw error.message
