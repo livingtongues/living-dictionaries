@@ -1,13 +1,13 @@
-import type { EntryView } from '@living-dictionaries/types'
+import type { EntryData } from '@living-dictionaries/types'
 
-export function augment_entry_for_search(entry: EntryView) {
+export function augment_entry_for_search(entry: EntryData) {
   const senses = entry.senses || []
 
-  const _tags = entry.tag_ids || []
-  const _dialects = entry.dialect_ids || []
+  const _tags = (entry.tags || []).map(({ name }) => name).filter(Boolean)
+  const _dialects = (entry.dialects || []).flatMap(({ name }) => Object.values(name)).filter(Boolean)
   const _parts_of_speech = senses.map(sense => sense.parts_of_speech || []).flat()
   const _semantic_domains = senses.map(sense => [...(sense.semantic_domains || []), ...(sense.write_in_semantic_domains || [])]).flat()
-  const _speakers = entry.audios?.map(audio => audio.speaker_ids || []).flat() || []
+  const _speakers = (entry.audios || []).flatMap(audio => audio.speakers || []).map(({ name }) => name).filter(Boolean)
 
   const _lexeme = Object.entries(entry.main.lexeme)
     .sort(([key_a], [key_b]) => {
@@ -19,30 +19,29 @@ export function augment_entry_for_search(entry: EntryView) {
     .filter(Boolean)
 
   const _glosses = senses.flatMap(sense => Object.values(sense.glosses || {}).filter(Boolean))
-  // const _sentences = senses.flatMap(sense =>
-  //   sense.example_sentences?.flatMap(sentence => Object.values(sentence).filter(Boolean)) || [],
-  // )
 
+  const sentences = senses.flatMap(sense =>
+    sense.sentences?.flatMap(({ text }) => Object.values(text).filter(Boolean)) || [],
+  )
   const plural_forms = senses.flatMap(sense => Object.values(sense.plural_form || {}).filter(Boolean))
 
-  const _other: string[] = [entry.main.phonetic, Object.values(entry.main.notes || {}), entry.main.scientific_names, entry.main.sources, entry.main.interlinearization, entry.main.morphology, plural_forms, entry.main.elicitation_id].flat().filter(Boolean)
+  const _other: string[] = [entry.main.phonetic, Object.values(entry.main.notes || {}), entry.main.scientific_names, entry.main.sources, entry.main.interlinearization, entry.main.morphology, plural_forms, entry.main.elicitation_id, sentences].flat().filter(Boolean)
 
   return {
-    ...entry,
+    id: entry.id,
     _lexeme,
     _glosses,
     _other,
-    // _sentences, // TODO: search these in a separate interface
     // Filters
     _tags,
     _dialects,
+    _speakers,
     _parts_of_speech: _parts_of_speech.map(use_underscores_for_spaces_periods),
     _semantic_domains: _semantic_domains.map(use_underscores_for_spaces_periods),
-    _speakers,
     has_audio: !!entry.audios?.length,
-    // has_sentences: !!entry.senses?.find(sense => sense.sentence_ids?.length), // not used yet
-    has_image: !!entry.senses?.find(sense => sense.photo_ids?.length),
-    has_video: !!entry.senses?.find(sense => sense.video_ids?.length),
+    has_sentence: !!entry.senses?.find(sense => sense.sentences?.length),
+    has_image: !!entry.senses?.find(sense => sense.photos?.length),
+    has_video: !!entry.senses?.find(sense => sense.videos?.length),
     has_speaker: !!_speakers.length,
     has_noun_class: !!entry.senses?.find(sense => sense.noun_class),
     has_plural_form: !!entry.senses?.find(sense => sense.plural_form),

@@ -22,13 +22,13 @@
   <Form
     let:loading
     onsubmit={async () => {
-      const speaker_id = await dbOperations.upsert_speaker({ speaker: {
+      const speaker = await dbOperations.insert_speaker({
         name: displayName.trim(),
         birthplace: birthplace.trim(),
         decade,
         gender,
-      } })
-      on_speaker_added(speaker_id)
+      })
+      on_speaker_added(speaker.id)
     }}>
     <label for="name" class="block text-sm font-medium leading-5 text-gray-700 mt-4">
       {$page.data.t('speakers.name')}

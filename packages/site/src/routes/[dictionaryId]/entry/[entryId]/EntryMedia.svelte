@@ -1,6 +1,6 @@
 <script lang="ts">
   import { ShowHide } from 'svelte-pieces'
-  import type { EntryView, Tables } from '@living-dictionaries/types'
+  import type { EntryData, Tables } from '@living-dictionaries/types'
   import Video from '../../entries/components/Video.svelte'
   import GeoTaggingModal from './GeoTaggingModal.svelte'
   import InitableShowHide from './InitableShowHide.svelte'
@@ -10,39 +10,39 @@
   import type { DbOperations } from '$lib/dbOperations'
   import AddImage from '$lib/components/image/AddImage.svelte'
 
-  export let entry: EntryView
+  export let entry: EntryData
   export let dictionary: Tables<'dictionaries'>
   export let can_edit = false
   export let dbOperations: DbOperations
 
-  $: ({ photos, videos } = $page.data)
-
-  $: first_sound_file = entry?.audios?.[0]
-  $: first_photo_id = entry?.senses?.[0].photo_ids?.[0]
-  $: first_photo = (first_photo_id && $photos.length) ? $photos.find(photo => photo.id === first_photo_id) : null
-  $: first_video_id = entry?.senses?.[0].video_ids?.[0]
-  $: first_video = (first_video_id && $videos.length) ? $videos.find(video => video.id === first_video_id) : null
+  $: photos = entry?.senses?.map(({ photos }) => photos).filter(Boolean).flat()
+  $: videos = entry?.senses?.map(({ videos }) => videos).filter(Boolean).flat()
 </script>
 
 <div class="flex flex-col">
-  {#if first_sound_file || can_edit}
+  {#if entry.audios?.length > 0 || can_edit}
     {#await import('../../entries/components/Audio.svelte') then { default: Audio }}
+      {#if entry.audios?.length > 0}
+        {#each entry.audios as sound_file}
+          <Audio {entry} {sound_file} {can_edit} context="entry" class="h-20 mb-2 rounded-md bg-gray-100 !px-3" />
+        {/each}
+      {/if}
       <Audio {entry} {can_edit} context="entry" class="h-20 mb-2 rounded-md bg-gray-100 !px-3" />
     {/await}
   {/if}
-
-  {#if first_photo}
+  {#each photos as photo (photo.id)}
     <div
       class="w-full overflow-hidden rounded relative mb-2"
       style="height: 25vh;">
       <Image
         width={400}
         title={entry.main.lexeme.default}
-        gcs={first_photo.serving_url}
+        gcs={photo.serving_url}
         {can_edit}
-        on_delete_image={async () => await dbOperations.update_photo({ photo: { deleted: 'true' }, photo_id: first_photo_id })} />
+        on_delete_image={async () => await dbOperations.update_photo({ deleted: new Date().toISOString(), id: photo.id })} />
     </div>
-  {:else if can_edit}
+  {/each}
+  {#if can_edit}
     <div class="h-20 bg-gray-100 hover:bg-gray-300 mb-2 flex flex-col">
       <AddImage upload_image={file => dbOperations.addImage({ file, sense_id: entry.senses[0].id })}>
         <div class="text-xs">
@@ -52,15 +52,16 @@
     </div>
   {/if}
 
-  {#if first_video}
+  {#each videos as video (video.id)}
     <div class="w-full overflow-hidden rounded relative mb-2">
       <Video
         class="bg-gray-100 p-3 border-r-2"
         lexeme={entry.main.lexeme.default}
-        video={first_video}
+        {video}
         {can_edit} />
     </div>
-  {:else if can_edit}
+  {/each}
+  {#if can_edit}
     <ShowHide let:show let:toggle>
       <button
         type="button"
@@ -118,7 +119,7 @@
         coordinates={entry.main.coordinates}
         initialCenter={dictionary.coordinates?.points?.[0]?.coordinates}
         on_close={toggle}
-        on_update={async new_value => await dbOperations.update_entry({ entry: { coordinates: new_value } })} />
+        on_update={async new_value => await dbOperations.update_entry({ coordinates: new_value })} />
     {/if}
   </InitableShowHide>
 </div>

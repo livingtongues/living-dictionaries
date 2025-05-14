@@ -3,7 +3,6 @@ import type { Coordinates } from '../coordinates.interface'
 import type { DictionaryPhoto } from '../photo.interface'
 import type { HostedVideo, UnsupportedFields } from '../.'
 import type { Change } from './content-update.interface'
-import type { AudioWithSpeakerIds, EntryMainFields, SenseWithSentences } from './entry.interface'
 import type { ImportContentUpdate } from './content-import.interface'
 import type { Orthography } from './orthography.interface'
 import type { DictionaryMetadata } from './dictionary.types'
@@ -139,7 +138,7 @@ export interface Database {
         }
         Insert: {
           created_at?: string
-          created_by: string
+          created_by?: string
           deleted?: string | null
           dictionary_id: string
           entry_id?: string | null
@@ -149,7 +148,7 @@ export interface Database {
           storage_path: string
           text_id?: string | null
           updated_at?: string
-          updated_by: string
+          updated_by?: string
         }
         Update: {
           created_at?: string
@@ -317,13 +316,15 @@ export interface Database {
           created_at: string
           created_by: string
           deleted: string | null
+          dictionary_id: string
           speaker_id: string
         }
         Insert: {
           audio_id: string
           created_at?: string
-          created_by: string
+          created_by?: string
           deleted?: string | null
+          dictionary_id: string
           speaker_id: string
         }
         Update: {
@@ -331,6 +332,7 @@ export interface Database {
           created_at?: string
           created_by?: string
           deleted?: string | null
+          dictionary_id?: string
           speaker_id?: string
         }
         Relationships: [
@@ -379,12 +381,45 @@ export interface Database {
             ]
           },
           {
-            foreignKeyName: 'audio_speakers_speaker_id_fkey'
+            foreignKeyName: 'audio_speakers_dictionary_id_fkey'
             columns: [
-              'speaker_id',
+              'dictionary_id',
             ]
             isOneToOne: false
-            referencedRelation: 'speakers'
+            referencedRelation: 'dictionaries'
+            referencedColumns: [
+              'id',
+            ]
+          },
+          {
+            foreignKeyName: 'audio_speakers_dictionary_id_fkey'
+            columns: [
+              'dictionary_id',
+            ]
+            isOneToOne: false
+            referencedRelation: 'dictionaries_view'
+            referencedColumns: [
+              'id',
+            ]
+          },
+          {
+            foreignKeyName: 'audio_speakers_dictionary_id_fkey'
+            columns: [
+              'dictionary_id',
+            ]
+            isOneToOne: false
+            referencedRelation: 'materialized_admin_dictionaries_view'
+            referencedColumns: [
+              'id',
+            ]
+          },
+          {
+            foreignKeyName: 'audio_speakers_dictionary_id_fkey'
+            columns: [
+              'dictionary_id',
+            ]
+            isOneToOne: false
+            referencedRelation: 'materialized_dictionaries_view'
             referencedColumns: [
               'id',
             ]
@@ -395,7 +430,7 @@ export interface Database {
               'speaker_id',
             ]
             isOneToOne: false
-            referencedRelation: 'speakers_view'
+            referencedRelation: 'speakers'
             referencedColumns: [
               'id',
             ]
@@ -589,17 +624,6 @@ export interface Database {
             ]
           },
           {
-            foreignKeyName: 'content_updates_speaker_id_fkey'
-            columns: [
-              'speaker_id',
-            ]
-            isOneToOne: false
-            referencedRelation: 'speakers_view'
-            referencedColumns: [
-              'id',
-            ]
-          },
-          {
             foreignKeyName: 'content_updates_tag_id_fkey'
             columns: [
               'tag_id',
@@ -665,17 +689,6 @@ export interface Database {
               'id',
             ]
           },
-          {
-            foreignKeyName: 'content_updates_video_id_fkey'
-            columns: [
-              'video_id',
-            ]
-            isOneToOne: false
-            referencedRelation: 'videos_view'
-            referencedColumns: [
-              'id',
-            ]
-          },
         ]
       }
       dialects: {
@@ -691,13 +704,13 @@ export interface Database {
         }
         Insert: {
           created_at?: string
-          created_by: string
+          created_by?: string
           deleted?: string | null
           dictionary_id: string
           id: string
           name: MultiString
           updated_at?: string
-          updated_by: string
+          updated_by?: string
         }
         Update: {
           created_at?: string
@@ -848,6 +861,7 @@ export interface Database {
           public: boolean
           updated_at: string
           updated_by: string
+          url: string
         }
         Insert: {
           alternate_names?: string[] | null
@@ -874,6 +888,7 @@ export interface Database {
           public?: boolean
           updated_at?: string
           updated_by?: string
+          url: string
         }
         Update: {
           alternate_names?: string[] | null
@@ -900,6 +915,7 @@ export interface Database {
           public?: boolean
           updated_at?: string
           updated_by?: string
+          url?: string
         }
         Relationships: [
           {
@@ -1430,7 +1446,7 @@ export interface Database {
         Insert: {
           coordinates?: Coordinates | null
           created_at?: string
-          created_by: string
+          created_by?: string
           deleted?: string | null
           dictionary_id: string
           elicitation_id?: string | null
@@ -1444,7 +1460,7 @@ export interface Database {
           sources?: string[] | null
           unsupported_fields?: UnsupportedFields | null
           updated_at?: string
-          updated_by: string
+          updated_by?: string
         }
         Update: {
           coordinates?: Coordinates | null
@@ -1584,13 +1600,15 @@ export interface Database {
           created_by: string
           deleted: string | null
           dialect_id: string
+          dictionary_id: string
           entry_id: string
         }
         Insert: {
           created_at?: string
-          created_by: string
+          created_by?: string
           deleted?: string | null
           dialect_id: string
+          dictionary_id: string
           entry_id: string
         }
         Update: {
@@ -1598,6 +1616,7 @@ export interface Database {
           created_by?: string
           deleted?: string | null
           dialect_id?: string
+          dictionary_id?: string
           entry_id?: string
         }
         Relationships: [
@@ -1646,6 +1665,50 @@ export interface Database {
             ]
           },
           {
+            foreignKeyName: 'entry_dialects_dictionary_id_fkey'
+            columns: [
+              'dictionary_id',
+            ]
+            isOneToOne: false
+            referencedRelation: 'dictionaries'
+            referencedColumns: [
+              'id',
+            ]
+          },
+          {
+            foreignKeyName: 'entry_dialects_dictionary_id_fkey'
+            columns: [
+              'dictionary_id',
+            ]
+            isOneToOne: false
+            referencedRelation: 'dictionaries_view'
+            referencedColumns: [
+              'id',
+            ]
+          },
+          {
+            foreignKeyName: 'entry_dialects_dictionary_id_fkey'
+            columns: [
+              'dictionary_id',
+            ]
+            isOneToOne: false
+            referencedRelation: 'materialized_admin_dictionaries_view'
+            referencedColumns: [
+              'id',
+            ]
+          },
+          {
+            foreignKeyName: 'entry_dialects_dictionary_id_fkey'
+            columns: [
+              'dictionary_id',
+            ]
+            isOneToOne: false
+            referencedRelation: 'materialized_dictionaries_view'
+            referencedColumns: [
+              'id',
+            ]
+          },
+          {
             foreignKeyName: 'entry_dialects_entry_id_fkey'
             columns: [
               'entry_id',
@@ -1663,13 +1726,15 @@ export interface Database {
           created_at: string
           created_by: string
           deleted: string | null
+          dictionary_id: string
           entry_id: string
           tag_id: string
         }
         Insert: {
           created_at?: string
-          created_by: string
+          created_by?: string
           deleted?: string | null
+          dictionary_id: string
           entry_id: string
           tag_id: string
         }
@@ -1677,6 +1742,7 @@ export interface Database {
           created_at?: string
           created_by?: string
           deleted?: string | null
+          dictionary_id?: string
           entry_id?: string
           tag_id?: string
         }
@@ -1710,6 +1776,50 @@ export interface Database {
             ]
             isOneToOne: false
             referencedRelation: 'users'
+            referencedColumns: [
+              'id',
+            ]
+          },
+          {
+            foreignKeyName: 'entry_tags_dictionary_id_fkey'
+            columns: [
+              'dictionary_id',
+            ]
+            isOneToOne: false
+            referencedRelation: 'dictionaries'
+            referencedColumns: [
+              'id',
+            ]
+          },
+          {
+            foreignKeyName: 'entry_tags_dictionary_id_fkey'
+            columns: [
+              'dictionary_id',
+            ]
+            isOneToOne: false
+            referencedRelation: 'dictionaries_view'
+            referencedColumns: [
+              'id',
+            ]
+          },
+          {
+            foreignKeyName: 'entry_tags_dictionary_id_fkey'
+            columns: [
+              'dictionary_id',
+            ]
+            isOneToOne: false
+            referencedRelation: 'materialized_admin_dictionaries_view'
+            referencedColumns: [
+              'id',
+            ]
+          },
+          {
+            foreignKeyName: 'entry_tags_dictionary_id_fkey'
+            columns: [
+              'dictionary_id',
+            ]
+            isOneToOne: false
+            referencedRelation: 'materialized_dictionaries_view'
             referencedColumns: [
               'id',
             ]
@@ -2047,13 +2157,15 @@ export interface Database {
           created_at: string
           created_by: string
           deleted: string | null
+          dictionary_id: string
           photo_id: string
           sense_id: string
         }
         Insert: {
           created_at?: string
-          created_by: string
+          created_by?: string
           deleted?: string | null
+          dictionary_id: string
           photo_id: string
           sense_id: string
         }
@@ -2061,6 +2173,7 @@ export interface Database {
           created_at?: string
           created_by?: string
           deleted?: string | null
+          dictionary_id?: string
           photo_id?: string
           sense_id?: string
         }
@@ -2094,6 +2207,50 @@ export interface Database {
             ]
             isOneToOne: false
             referencedRelation: 'users'
+            referencedColumns: [
+              'id',
+            ]
+          },
+          {
+            foreignKeyName: 'sense_photos_dictionary_id_fkey'
+            columns: [
+              'dictionary_id',
+            ]
+            isOneToOne: false
+            referencedRelation: 'dictionaries'
+            referencedColumns: [
+              'id',
+            ]
+          },
+          {
+            foreignKeyName: 'sense_photos_dictionary_id_fkey'
+            columns: [
+              'dictionary_id',
+            ]
+            isOneToOne: false
+            referencedRelation: 'dictionaries_view'
+            referencedColumns: [
+              'id',
+            ]
+          },
+          {
+            foreignKeyName: 'sense_photos_dictionary_id_fkey'
+            columns: [
+              'dictionary_id',
+            ]
+            isOneToOne: false
+            referencedRelation: 'materialized_admin_dictionaries_view'
+            referencedColumns: [
+              'id',
+            ]
+          },
+          {
+            foreignKeyName: 'sense_photos_dictionary_id_fkey'
+            columns: [
+              'dictionary_id',
+            ]
+            isOneToOne: false
+            referencedRelation: 'materialized_dictionaries_view'
             referencedColumns: [
               'id',
             ]
@@ -2127,13 +2284,15 @@ export interface Database {
           created_at: string
           created_by: string
           deleted: string | null
+          dictionary_id: string
           sense_id: string
           video_id: string
         }
         Insert: {
           created_at?: string
-          created_by: string
+          created_by?: string
           deleted?: string | null
+          dictionary_id: string
           sense_id: string
           video_id: string
         }
@@ -2141,6 +2300,7 @@ export interface Database {
           created_at?: string
           created_by?: string
           deleted?: string | null
+          dictionary_id?: string
           sense_id?: string
           video_id?: string
         }
@@ -2179,6 +2339,50 @@ export interface Database {
             ]
           },
           {
+            foreignKeyName: 'sense_videos_dictionary_id_fkey'
+            columns: [
+              'dictionary_id',
+            ]
+            isOneToOne: false
+            referencedRelation: 'dictionaries'
+            referencedColumns: [
+              'id',
+            ]
+          },
+          {
+            foreignKeyName: 'sense_videos_dictionary_id_fkey'
+            columns: [
+              'dictionary_id',
+            ]
+            isOneToOne: false
+            referencedRelation: 'dictionaries_view'
+            referencedColumns: [
+              'id',
+            ]
+          },
+          {
+            foreignKeyName: 'sense_videos_dictionary_id_fkey'
+            columns: [
+              'dictionary_id',
+            ]
+            isOneToOne: false
+            referencedRelation: 'materialized_admin_dictionaries_view'
+            referencedColumns: [
+              'id',
+            ]
+          },
+          {
+            foreignKeyName: 'sense_videos_dictionary_id_fkey'
+            columns: [
+              'dictionary_id',
+            ]
+            isOneToOne: false
+            referencedRelation: 'materialized_dictionaries_view'
+            referencedColumns: [
+              'id',
+            ]
+          },
+          {
             foreignKeyName: 'sense_videos_sense_id_fkey'
             columns: [
               'sense_id',
@@ -2200,17 +2404,6 @@ export interface Database {
               'id',
             ]
           },
-          {
-            foreignKeyName: 'sense_videos_video_id_fkey'
-            columns: [
-              'video_id',
-            ]
-            isOneToOne: false
-            referencedRelation: 'videos_view'
-            referencedColumns: [
-              'id',
-            ]
-          },
         ]
       }
       senses: {
@@ -2219,6 +2412,7 @@ export interface Database {
           created_by: string
           definition: MultiString | null
           deleted: string | null
+          dictionary_id: string
           entry_id: string
           glosses: MultiString | null
           id: string
@@ -2233,9 +2427,10 @@ export interface Database {
         }
         Insert: {
           created_at?: string
-          created_by: string
+          created_by?: string
           definition?: MultiString | null
           deleted?: string | null
+          dictionary_id: string
           entry_id: string
           glosses?: MultiString | null
           id: string
@@ -2244,7 +2439,7 @@ export interface Database {
           plural_form?: MultiString | null
           semantic_domains?: string[] | null
           updated_at?: string
-          updated_by: string
+          updated_by?: string
           variant?: MultiString | null
           write_in_semantic_domains?: string[] | null
         }
@@ -2253,6 +2448,7 @@ export interface Database {
           created_by?: string
           definition?: MultiString | null
           deleted?: string | null
+          dictionary_id?: string
           entry_id?: string
           glosses?: MultiString | null
           id?: string
@@ -2277,6 +2473,116 @@ export interface Database {
               'id',
             ]
           },
+          {
+            foreignKeyName: 'senses_created_by_fkey'
+            columns: [
+              'created_by',
+            ]
+            isOneToOne: false
+            referencedRelation: 'profiles_view'
+            referencedColumns: [
+              'id',
+            ]
+          },
+          {
+            foreignKeyName: 'senses_created_by_fkey'
+            columns: [
+              'created_by',
+            ]
+            isOneToOne: false
+            referencedRelation: 'user_emails'
+            referencedColumns: [
+              'id',
+            ]
+          },
+          {
+            foreignKeyName: 'senses_created_by_fkey'
+            columns: [
+              'created_by',
+            ]
+            isOneToOne: false
+            referencedRelation: 'users'
+            referencedColumns: [
+              'id',
+            ]
+          },
+          {
+            foreignKeyName: 'senses_dictionary_id_fkey'
+            columns: [
+              'dictionary_id',
+            ]
+            isOneToOne: false
+            referencedRelation: 'dictionaries'
+            referencedColumns: [
+              'id',
+            ]
+          },
+          {
+            foreignKeyName: 'senses_dictionary_id_fkey'
+            columns: [
+              'dictionary_id',
+            ]
+            isOneToOne: false
+            referencedRelation: 'dictionaries_view'
+            referencedColumns: [
+              'id',
+            ]
+          },
+          {
+            foreignKeyName: 'senses_dictionary_id_fkey'
+            columns: [
+              'dictionary_id',
+            ]
+            isOneToOne: false
+            referencedRelation: 'materialized_admin_dictionaries_view'
+            referencedColumns: [
+              'id',
+            ]
+          },
+          {
+            foreignKeyName: 'senses_dictionary_id_fkey'
+            columns: [
+              'dictionary_id',
+            ]
+            isOneToOne: false
+            referencedRelation: 'materialized_dictionaries_view'
+            referencedColumns: [
+              'id',
+            ]
+          },
+          {
+            foreignKeyName: 'senses_updated_by_fkey'
+            columns: [
+              'updated_by',
+            ]
+            isOneToOne: false
+            referencedRelation: 'profiles_view'
+            referencedColumns: [
+              'id',
+            ]
+          },
+          {
+            foreignKeyName: 'senses_updated_by_fkey'
+            columns: [
+              'updated_by',
+            ]
+            isOneToOne: false
+            referencedRelation: 'user_emails'
+            referencedColumns: [
+              'id',
+            ]
+          },
+          {
+            foreignKeyName: 'senses_updated_by_fkey'
+            columns: [
+              'updated_by',
+            ]
+            isOneToOne: false
+            referencedRelation: 'users'
+            referencedColumns: [
+              'id',
+            ]
+          },
         ]
       }
       senses_in_sentences: {
@@ -2284,13 +2590,15 @@ export interface Database {
           created_at: string
           created_by: string
           deleted: string | null
+          dictionary_id: string
           sense_id: string
           sentence_id: string
         }
         Insert: {
           created_at?: string
-          created_by: string
+          created_by?: string
           deleted?: string | null
+          dictionary_id: string
           sense_id: string
           sentence_id: string
         }
@@ -2298,6 +2606,7 @@ export interface Database {
           created_at?: string
           created_by?: string
           deleted?: string | null
+          dictionary_id?: string
           sense_id?: string
           sentence_id?: string
         }
@@ -2336,6 +2645,50 @@ export interface Database {
             ]
           },
           {
+            foreignKeyName: 'senses_in_sentences_dictionary_id_fkey'
+            columns: [
+              'dictionary_id',
+            ]
+            isOneToOne: false
+            referencedRelation: 'dictionaries'
+            referencedColumns: [
+              'id',
+            ]
+          },
+          {
+            foreignKeyName: 'senses_in_sentences_dictionary_id_fkey'
+            columns: [
+              'dictionary_id',
+            ]
+            isOneToOne: false
+            referencedRelation: 'dictionaries_view'
+            referencedColumns: [
+              'id',
+            ]
+          },
+          {
+            foreignKeyName: 'senses_in_sentences_dictionary_id_fkey'
+            columns: [
+              'dictionary_id',
+            ]
+            isOneToOne: false
+            referencedRelation: 'materialized_admin_dictionaries_view'
+            referencedColumns: [
+              'id',
+            ]
+          },
+          {
+            foreignKeyName: 'senses_in_sentences_dictionary_id_fkey'
+            columns: [
+              'dictionary_id',
+            ]
+            isOneToOne: false
+            referencedRelation: 'materialized_dictionaries_view'
+            referencedColumns: [
+              'id',
+            ]
+          },
+          {
             foreignKeyName: 'senses_in_sentences_sense_id_fkey'
             columns: [
               'sense_id',
@@ -2364,13 +2717,15 @@ export interface Database {
           created_at: string
           created_by: string
           deleted: string | null
+          dictionary_id: string
           photo_id: string
           sentence_id: string
         }
         Insert: {
           created_at?: string
-          created_by: string
+          created_by?: string
           deleted?: string | null
+          dictionary_id: string
           photo_id: string
           sentence_id: string
         }
@@ -2378,6 +2733,7 @@ export interface Database {
           created_at?: string
           created_by?: string
           deleted?: string | null
+          dictionary_id?: string
           photo_id?: string
           sentence_id?: string
         }
@@ -2416,6 +2772,50 @@ export interface Database {
             ]
           },
           {
+            foreignKeyName: 'sentence_photos_dictionary_id_fkey'
+            columns: [
+              'dictionary_id',
+            ]
+            isOneToOne: false
+            referencedRelation: 'dictionaries'
+            referencedColumns: [
+              'id',
+            ]
+          },
+          {
+            foreignKeyName: 'sentence_photos_dictionary_id_fkey'
+            columns: [
+              'dictionary_id',
+            ]
+            isOneToOne: false
+            referencedRelation: 'dictionaries_view'
+            referencedColumns: [
+              'id',
+            ]
+          },
+          {
+            foreignKeyName: 'sentence_photos_dictionary_id_fkey'
+            columns: [
+              'dictionary_id',
+            ]
+            isOneToOne: false
+            referencedRelation: 'materialized_admin_dictionaries_view'
+            referencedColumns: [
+              'id',
+            ]
+          },
+          {
+            foreignKeyName: 'sentence_photos_dictionary_id_fkey'
+            columns: [
+              'dictionary_id',
+            ]
+            isOneToOne: false
+            referencedRelation: 'materialized_dictionaries_view'
+            referencedColumns: [
+              'id',
+            ]
+          },
+          {
             foreignKeyName: 'sentence_photos_photo_id_fkey'
             columns: [
               'photo_id',
@@ -2444,13 +2844,15 @@ export interface Database {
           created_at: string
           created_by: string
           deleted: string | null
+          dictionary_id: string
           sentence_id: string
           video_id: string
         }
         Insert: {
           created_at?: string
-          created_by: string
+          created_by?: string
           deleted?: string | null
+          dictionary_id: string
           sentence_id: string
           video_id: string
         }
@@ -2458,6 +2860,7 @@ export interface Database {
           created_at?: string
           created_by?: string
           deleted?: string | null
+          dictionary_id?: string
           sentence_id?: string
           video_id?: string
         }
@@ -2496,6 +2899,50 @@ export interface Database {
             ]
           },
           {
+            foreignKeyName: 'sentence_videos_dictionary_id_fkey'
+            columns: [
+              'dictionary_id',
+            ]
+            isOneToOne: false
+            referencedRelation: 'dictionaries'
+            referencedColumns: [
+              'id',
+            ]
+          },
+          {
+            foreignKeyName: 'sentence_videos_dictionary_id_fkey'
+            columns: [
+              'dictionary_id',
+            ]
+            isOneToOne: false
+            referencedRelation: 'dictionaries_view'
+            referencedColumns: [
+              'id',
+            ]
+          },
+          {
+            foreignKeyName: 'sentence_videos_dictionary_id_fkey'
+            columns: [
+              'dictionary_id',
+            ]
+            isOneToOne: false
+            referencedRelation: 'materialized_admin_dictionaries_view'
+            referencedColumns: [
+              'id',
+            ]
+          },
+          {
+            foreignKeyName: 'sentence_videos_dictionary_id_fkey'
+            columns: [
+              'dictionary_id',
+            ]
+            isOneToOne: false
+            referencedRelation: 'materialized_dictionaries_view'
+            referencedColumns: [
+              'id',
+            ]
+          },
+          {
             foreignKeyName: 'sentence_videos_sentence_id_fkey'
             columns: [
               'sentence_id',
@@ -2517,17 +2964,6 @@ export interface Database {
               'id',
             ]
           },
-          {
-            foreignKeyName: 'sentence_videos_video_id_fkey'
-            columns: [
-              'video_id',
-            ]
-            isOneToOne: false
-            referencedRelation: 'videos_view'
-            referencedColumns: [
-              'id',
-            ]
-          },
         ]
       }
       sentences: {
@@ -2545,7 +2981,7 @@ export interface Database {
         }
         Insert: {
           created_at?: string
-          created_by: string
+          created_by?: string
           deleted?: string | null
           dictionary_id: string
           id: string
@@ -2553,7 +2989,7 @@ export interface Database {
           text_id?: string | null
           translation?: MultiString | null
           updated_at?: string
-          updated_by: string
+          updated_by?: string
         }
         Update: {
           created_at?: string
@@ -2709,7 +3145,7 @@ export interface Database {
         Insert: {
           birthplace?: string | null
           created_at?: string
-          created_by: string
+          created_by?: string
           decade?: number | null
           deleted?: string | null
           dictionary_id: string
@@ -2717,7 +3153,7 @@ export interface Database {
           id?: string
           name: string
           updated_at?: string
-          updated_by: string
+          updated_by?: string
           user_id?: string | null
         }
         Update: {
@@ -2894,14 +3330,14 @@ export interface Database {
         }
         Insert: {
           created_at?: string
-          created_by: string
+          created_by?: string
           deleted?: string | null
           dictionary_id: string
           id: string
           name: string
           private?: boolean | null
           updated_at?: string
-          updated_by: string
+          updated_by?: string
         }
         Update: {
           created_at?: string
@@ -3041,14 +3477,14 @@ export interface Database {
         }
         Insert: {
           created_at?: string
-          created_by: string
+          created_by?: string
           deleted?: string | null
           dictionary_id: string
           id: string
           sentences: MultiString
           title: MultiString
           updated_at?: string
-          updated_by: string
+          updated_by?: string
         }
         Update: {
           created_at?: string
@@ -3237,13 +3673,15 @@ export interface Database {
           created_at: string
           created_by: string
           deleted: string | null
+          dictionary_id: string
           speaker_id: string
           video_id: string
         }
         Insert: {
           created_at?: string
-          created_by: string
+          created_by?: string
           deleted?: string | null
+          dictionary_id: string
           speaker_id: string
           video_id: string
         }
@@ -3251,6 +3689,7 @@ export interface Database {
           created_at?: string
           created_by?: string
           deleted?: string | null
+          dictionary_id?: string
           speaker_id?: string
           video_id?: string
         }
@@ -3289,6 +3728,50 @@ export interface Database {
             ]
           },
           {
+            foreignKeyName: 'video_speakers_dictionary_id_fkey'
+            columns: [
+              'dictionary_id',
+            ]
+            isOneToOne: false
+            referencedRelation: 'dictionaries'
+            referencedColumns: [
+              'id',
+            ]
+          },
+          {
+            foreignKeyName: 'video_speakers_dictionary_id_fkey'
+            columns: [
+              'dictionary_id',
+            ]
+            isOneToOne: false
+            referencedRelation: 'dictionaries_view'
+            referencedColumns: [
+              'id',
+            ]
+          },
+          {
+            foreignKeyName: 'video_speakers_dictionary_id_fkey'
+            columns: [
+              'dictionary_id',
+            ]
+            isOneToOne: false
+            referencedRelation: 'materialized_admin_dictionaries_view'
+            referencedColumns: [
+              'id',
+            ]
+          },
+          {
+            foreignKeyName: 'video_speakers_dictionary_id_fkey'
+            columns: [
+              'dictionary_id',
+            ]
+            isOneToOne: false
+            referencedRelation: 'materialized_dictionaries_view'
+            referencedColumns: [
+              'id',
+            ]
+          },
+          {
             foreignKeyName: 'video_speakers_speaker_id_fkey'
             columns: [
               'speaker_id',
@@ -3300,34 +3783,12 @@ export interface Database {
             ]
           },
           {
-            foreignKeyName: 'video_speakers_speaker_id_fkey'
-            columns: [
-              'speaker_id',
-            ]
-            isOneToOne: false
-            referencedRelation: 'speakers_view'
-            referencedColumns: [
-              'id',
-            ]
-          },
-          {
             foreignKeyName: 'video_speakers_video_id_fkey'
             columns: [
               'video_id',
             ]
             isOneToOne: false
             referencedRelation: 'videos'
-            referencedColumns: [
-              'id',
-            ]
-          },
-          {
-            foreignKeyName: 'video_speakers_video_id_fkey'
-            columns: [
-              'video_id',
-            ]
-            isOneToOne: false
-            referencedRelation: 'videos_view'
             referencedColumns: [
               'id',
             ]
@@ -3351,7 +3812,7 @@ export interface Database {
         }
         Insert: {
           created_at?: string
-          created_by: string
+          created_by?: string
           deleted?: string | null
           dictionary_id: string
           hosted_elsewhere?: HostedVideo | null
@@ -3360,7 +3821,7 @@ export interface Database {
           storage_path?: string | null
           text_id?: string | null
           updated_at?: string
-          updated_by: string
+          updated_by?: string
           videographer?: string | null
         }
         Update: {
@@ -3528,6 +3989,7 @@ export interface Database {
           public: boolean | null
           updated_at: string | null
           updated_by: string | null
+          url: string | null
         }
         Relationships: [
           {
@@ -3686,22 +4148,6 @@ export interface Database {
           },
         ]
       }
-      entries_view: {
-        Row: {
-          audios: AudioWithSpeakerIds[] | null
-          created_at: string | null
-          deleted: string | null
-          dialect_ids: string[] | null
-          dictionary_id: string | null
-          id: string | null
-          main: EntryMainFields
-          senses: SenseWithSentences[] | null
-          tag_ids: string[] | null
-          updated_at: string | null
-        }
-        Relationships: [
-        ]
-      }
       materialized_admin_dictionaries_view: {
         Row: {
           alternate_names: string[] | null
@@ -3727,6 +4173,7 @@ export interface Database {
           public: boolean | null
           updated_at: string | null
           updated_by: string | null
+          url: string | null
         }
         Relationships: [
           {
@@ -3811,22 +4258,7 @@ export interface Database {
           metadata: DictionaryMetadata | null
           name: string | null
           public: boolean | null
-        }
-        Relationships: [
-        ]
-      }
-      materialized_entries_view: {
-        Row: {
-          audios: AudioWithSpeakerIds[] | null
-          created_at: string | null
-          deleted: string | null
-          dialect_ids: string[] | null
-          dictionary_id: string | null
-          id: string | null
-          main: EntryMainFields
-          senses: SenseWithSentences[] | null
-          tag_ids: string[] | null
-          updated_at: string | null
+          url: string | null
         }
         Relationships: [
         ]
@@ -3853,87 +4285,6 @@ export interface Database {
         Relationships: [
         ]
       }
-      speakers_view: {
-        Row: {
-          birthplace: string | null
-          created_at: string | null
-          decade: number | null
-          deleted: string | null
-          dictionary_id: string | null
-          gender: Database['public']['Enums']['gender'] | null
-          id: string | null
-          name: string | null
-          updated_at: string | null
-        }
-        Insert: {
-          birthplace?: string | null
-          created_at?: string | null
-          decade?: number | null
-          deleted?: string | null
-          dictionary_id?: string | null
-          gender?: Database['public']['Enums']['gender'] | null
-          id?: string | null
-          name?: string | null
-          updated_at?: string | null
-        }
-        Update: {
-          birthplace?: string | null
-          created_at?: string | null
-          decade?: number | null
-          deleted?: string | null
-          dictionary_id?: string | null
-          gender?: Database['public']['Enums']['gender'] | null
-          id?: string | null
-          name?: string | null
-          updated_at?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: 'speakers_dictionary_id_fkey'
-            columns: [
-              'dictionary_id',
-            ]
-            isOneToOne: false
-            referencedRelation: 'dictionaries'
-            referencedColumns: [
-              'id',
-            ]
-          },
-          {
-            foreignKeyName: 'speakers_dictionary_id_fkey'
-            columns: [
-              'dictionary_id',
-            ]
-            isOneToOne: false
-            referencedRelation: 'dictionaries_view'
-            referencedColumns: [
-              'id',
-            ]
-          },
-          {
-            foreignKeyName: 'speakers_dictionary_id_fkey'
-            columns: [
-              'dictionary_id',
-            ]
-            isOneToOne: false
-            referencedRelation: 'materialized_admin_dictionaries_view'
-            referencedColumns: [
-              'id',
-            ]
-          },
-          {
-            foreignKeyName: 'speakers_dictionary_id_fkey'
-            columns: [
-              'dictionary_id',
-            ]
-            isOneToOne: false
-            referencedRelation: 'materialized_dictionaries_view'
-            referencedColumns: [
-              'id',
-            ]
-          },
-        ]
-      }
       user_emails: {
         Row: {
           created_at: string | null
@@ -3956,115 +4307,8 @@ export interface Database {
         Relationships: [
         ]
       }
-      videos_view: {
-        Row: {
-          created_at: string | null
-          deleted: string | null
-          dictionary_id: string | null
-          hosted_elsewhere: HostedVideo | null
-          id: string | null
-          source: string | null
-          speaker_ids: string[] | null
-          storage_path: string | null
-          text_id: string | null
-          updated_at: string | null
-          videographer: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: 'videos_dictionary_id_fkey'
-            columns: [
-              'dictionary_id',
-            ]
-            isOneToOne: false
-            referencedRelation: 'dictionaries'
-            referencedColumns: [
-              'id',
-            ]
-          },
-          {
-            foreignKeyName: 'videos_dictionary_id_fkey'
-            columns: [
-              'dictionary_id',
-            ]
-            isOneToOne: false
-            referencedRelation: 'dictionaries_view'
-            referencedColumns: [
-              'id',
-            ]
-          },
-          {
-            foreignKeyName: 'videos_dictionary_id_fkey'
-            columns: [
-              'dictionary_id',
-            ]
-            isOneToOne: false
-            referencedRelation: 'materialized_admin_dictionaries_view'
-            referencedColumns: [
-              'id',
-            ]
-          },
-          {
-            foreignKeyName: 'videos_dictionary_id_fkey'
-            columns: [
-              'dictionary_id',
-            ]
-            isOneToOne: false
-            referencedRelation: 'materialized_dictionaries_view'
-            referencedColumns: [
-              'id',
-            ]
-          },
-          {
-            foreignKeyName: 'videos_text_id_fkey'
-            columns: [
-              'text_id',
-            ]
-            isOneToOne: false
-            referencedRelation: 'texts'
-            referencedColumns: [
-              'id',
-            ]
-          },
-        ]
-      }
     }
     Functions: {
-      entries_from_timestamp: {
-        Args: {
-          get_newer_than: string
-          dict_id: string
-        }
-        Returns: {
-          id: string
-          dictionary_id: string
-          created_at: string
-          updated_at: string
-          deleted: string
-          main: EntryMainFields
-          senses: SenseWithSentences[] | null
-          audios: AudioWithSpeakerIds[] | null
-          dialect_ids: string[] | null
-          tag_ids: string[] | null
-        }[]
-      }
-      entry_by_id: {
-        Args: {
-          passed_entry_id: string
-        }
-        Returns: {
-          id: string
-          dictionary_id: string
-          created_at: string
-          updated_at: string
-          deleted: string
-          main: EntryMainFields
-          senses: SenseWithSentences[] | null
-          audios: AudioWithSpeakerIds[] | null
-          dialect_ids: string[] | null
-          tag_ids: string[] | null
-        }[]
-      }
       get_my_claim: {
         Args: {
           claim: string

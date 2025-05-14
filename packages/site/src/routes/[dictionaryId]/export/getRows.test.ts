@@ -184,12 +184,12 @@ describe(get_example_sentence, () => {
   test('assigns vernacular and translations', () => {
     // @ts-ignore
     const sentences: Tables<'sentences'> = { dictionary_id: 'example', text: { default: 'vernacular example sentence' }, translation: { en: 'English example sentence', es: 'Oración de ejemplo en español' } }
-    expect(get_example_sentence(sentences, { sense_index: first_sense_index, position: 'header' })).toEqual({
+    expect(get_example_sentence(sentences, { sense_index: first_sense_index, dictionary_id: 'example', position: 'header' })).toEqual({
       vernacular_exampleSentence: 'Example sentence in example',
       en_exampleSentence: 'Example sentence in English',
       es_exampleSentence: 'Example sentence in español',
     })
-    expect(get_example_sentence(sentences, { sense_index: first_sense_index, position: 'value' })).toEqual({
+    expect(get_example_sentence(sentences, { sense_index: first_sense_index, dictionary_id: 'example', position: 'value' })).toEqual({
       vernacular_exampleSentence: 'vernacular example sentence',
       en_exampleSentence: 'English example sentence',
       es_exampleSentence: 'Oración de ejemplo en español',
@@ -199,7 +199,7 @@ describe(get_example_sentence, () => {
     // @ts-ignore
     const sentences: Tables<'sentences'> = { dictionary_id: 'example', text: { default: 'vernacular example sentence' }, translation: { en: 'English example sentence', es: 'Oración de ejemplo en español' } }
     const fourth_sense_index = 3
-    expect(get_example_sentence(sentences, { sense_index: fourth_sense_index, position: 'header' })).toEqual({
+    expect(get_example_sentence(sentences, { sense_index: fourth_sense_index, dictionary_id: 'example', position: 'header' })).toEqual({
       's4.vernacular_exampleSentence': 'Sense 4: Example sentence in example',
       's4.en_exampleSentence': 'Sense 4: Example sentence in English',
       's4.es_exampleSentence': 'Sense 4: Example sentence in español',
@@ -208,12 +208,12 @@ describe(get_example_sentence, () => {
   test('assigns only verncular', () => {
     // @ts-ignore
     const sentences: Tables<'sentences'> = { dictionary_id: 'example', text: { default: 'vernacular example sentence' } }
-    expect(get_example_sentence(sentences, { sense_index: first_sense_index, position: 'header' })).toEqual({
+    expect(get_example_sentence(sentences, { sense_index: first_sense_index, dictionary_id: 'example', position: 'header' })).toEqual({
       vernacular_exampleSentence: 'Example sentence in example',
     })
   })
   test('doesn\'t assign anything if null', () => {
-    expect(get_example_sentence(null, { sense_index: first_sense_index, position: 'header' })).toEqual({})
+    expect(get_example_sentence(null, { sense_index: first_sense_index, dictionary_id: 'example', position: 'header' })).toEqual({})
   })
 })
 

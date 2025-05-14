@@ -11,7 +11,15 @@ export interface ImageUploadStatus {
   serving_url?: string
 }
 
-export function upload_image({ file, folder }: { file: File, folder: string }): Readable<ImageUploadStatus> {
+export function upload_image({
+  file,
+  folder,
+  on_success,
+}: {
+  file: File
+  folder: string
+  on_success?: () => void
+}): Readable<ImageUploadStatus> {
   const preview_url = URL.createObjectURL(file)
   const { set, subscribe } = writable<ImageUploadStatus>({ progress: 0, preview_url });
 
@@ -21,19 +29,20 @@ export function upload_image({ file, folder }: { file: File, folder: string }): 
     if (error) {
       console.error(error)
       set({ preview_url, progress: 0, error: error.message })
-    }
+    } else {
+      await upload_file(file, presigned_upload_url)
 
-    await upload_file(file, presigned_upload_url)
+      const { data, error: serving_url_error } = await api_gcs_serving_url({ storage_path: `${bucket}/${object_key}` })
 
-    const { data, error: serving_url_error } = await api_gcs_serving_url({ storage_path: `${bucket}/${object_key}` })
+      if (serving_url_error) {
+        console.error(serving_url_error)
+        set({ preview_url, progress: 0, error: serving_url_error.message })
+      }
 
-    if (serving_url_error) {
-      console.error(serving_url_error)
-      set({ preview_url, progress: 0, error: serving_url_error.message })
-    }
-
-    if (data) {
-      set({ preview_url, progress: 100, storage_path: object_key, serving_url: data.serving_url })
+      if (data) {
+        set({ preview_url, progress: 100, storage_path: object_key, serving_url: data.serving_url })
+        on_success?.()
+      }
     }
   })()
 
@@ -46,7 +55,7 @@ export function upload_image({ file, folder }: { file: File, folder: string }): 
         if (event.lengthComputable) {
           const progress = Math.round((event.loaded / event.total) * 100)
           console.info(`Upload progress: ${progress}%`)
-          set({ preview_url, progress })
+          set({ preview_url, progress: Math.min(progress, 99) })
         }
       })
 

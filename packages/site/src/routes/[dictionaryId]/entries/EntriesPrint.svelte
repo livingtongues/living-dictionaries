@@ -1,6 +1,6 @@
 <script lang="ts">
   import { Button, type QueryParamStore, createPersistedStore } from 'svelte-pieces'
-  import type { EntryView, IPrintFields, PartnerWithPhoto, Tables } from '@living-dictionaries/types'
+  import type { EntryData, IPrintFields, PartnerWithPhoto, Tables } from '@living-dictionaries/types'
   import { onMount } from 'svelte'
   import { build_citation } from '../contributors/build-citation'
   import PrintEntry from './print/PrintEntry.svelte'
@@ -11,7 +11,7 @@
   import type { QueryParams } from '$lib/search/types'
 
   export let search_params: QueryParamStore<QueryParams>
-  export let entries: EntryView[] = []
+  export let entries: EntryData[] = []
   export let dictionary: Tables<'dictionaries'>
   export let can_edit = false
 

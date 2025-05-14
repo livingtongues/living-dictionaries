@@ -5,8 +5,9 @@ import { inviteHelper } from '$lib/helpers/inviteHelper'
 
 const CONTRIBUTORS_UPDATED_LOAD_TRIGGER = 'contributors:updated'
 
-export const load = (async ({ params: { dictionaryId: dictionary_id }, parent, depends }) => {
-  const { t, load_partners, supabase, update_dictionary } = await parent()
+export const load = (async ({ parent, depends }) => {
+  const { t, load_partners, supabase, update_dictionary, dictionary } = await parent()
+  const { id: dictionary_id } = dictionary
   depends(CONTRIBUTORS_UPDATED_LOAD_TRIGGER)
 
   async function reload_after_operation(operation: () => Promise<any>) {

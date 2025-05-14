@@ -37,7 +37,7 @@
     "peer_review": "Sharhin Tsari na Haruffa",
     "suggestions_from_users": "Shawarwari daga Masu amfani",
     "push_notifications": "Tura Sanarwa zuwa Masu Gudunmawa",
-    "contributor_awards": "Kyautar Al'umma masu Ba da gudummawa",
+    "contributor_awards": "Kyautar Al'umma Mai Ba da gudummawa",
     "question_1": "Da fatan za a ba da wasu bayanan baya game da wannan harshe. A ina ake magana? Wadanne al'ummomi ne ke jin wannan yare? Shin wannan harshe yana cikin haɗari?",
     "question_2": "Menene sunayen mutanen da suka gina wannan ƙamus? Muryoyin wa ke cikin wannan ƙamus?",
     "question_3": "Daga ina bayanan da ke cikin wannan ƙamus suka fito? Da fatan za a kwatanta idan kun tattara bayanan da kanku. Idan kun yi amfani da wasu hanyoyin da aka buga, da fatan za a jera su.",
@@ -93,7 +93,7 @@
     "send_message": "aika sako",
     "message_sent": "Saƙon aika. Za mu amsa da zaran mun iya.",
     "what_is_your_question": "Mene ne tambaya ko comment?",
-    "message_failed": "aika sako ya kasa. Bincika haɗin Intanet ɗin ku ko yi mana imel:",
+    "message_failed": "aika sako ya kasa. Bincika haɗin Intanet ɗinku ko yi mana imel:",
     "delete_dictionary": "Share ƙamus",
     "public_dictionary": "Yi ƙamus na jama'a",
     "import_data": "Shigo da bayanai",
@@ -140,7 +140,8 @@
     "agree_to_cite": "Na yarda in faɗi duk wasu ayyukan da aka buga masu dacewa a cikin shigarwar ƙamus.",
     "agree_for_non-commercial": "Na yarda cewa wannan aikin ba na kasuwanci bane.",
     "source_question": "Daga ina bayanan da ke cikin wannan ƙamus suka fito? Da fatan za a kwatanta idan kun tattara bayanan da kanku. Idan kun yi amfani da wasu hanyoyin da aka buga, da fatan za a jera su nan.",
-    "use_question": "Wanene zai yi amfani da wannan ƙamus? Za a yi amfani da shi a cikin kowane ayyukan ilimi ko na watsa labarai?"
+    "use_question": "Wanene zai yi amfani da wannan ƙamus? Za a yi amfani da shi a cikin kowane ayyukan ilimi ko na watsa labarai?",
+    "conlang_warning": "Idan wannan ƙamus na harshe ne da aka gina (ko na wucin gadi), kuma ba ku nuna hakan ba, muna da haƙƙin cire shi."
   },
   "dictionary": {
     "latitude": "Latitude",

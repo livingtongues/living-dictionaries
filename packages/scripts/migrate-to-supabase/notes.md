@@ -1,4 +1,19 @@
+## Better data sync
+- get cloudflare caches updating on a cron job every hour in GitHub actions (see backup repo for example)
+  - When updating caches, just get the list of dictionaries updated within the last hour and a half.
+  - recreate all caches using script
+- show green recent update in list and table view based on all an entries' updated_at fields
+- solve circular dependencies issues
+- handle entries load errors and saving status
+- make plan for cleaning up connected senses and join tables for deleted entries
+- look at missing indexes for dictionary_id and updated_at or created_at
+- Make it better: make entry updated_at change based on any change to all connected tables
+  - audio should change based on speakers
+  - when tables that have join tables, the join tables should be consulted and then all related table rows should be changed
+- TODO later: bring in sentence_videos, sentence_photos, texts
+
 ## Final Migration cleanup
+- remove content-import.interface.ts code after getting new history method working
 - use line-clamp instead of truncateString in SelectedDict.svelte and also look at inline-children-elements purpose
 - show entry history from pop-up entry modal
 - test admin rls, alternative is auth.jwt() read https://supabase.com/docs/guides/database/postgres/row-level-security#authjwt to see if better

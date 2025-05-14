@@ -9,12 +9,8 @@
   import { dev } from '$app/environment'
 
   export let data
-  $: ({ is_manager, dictionary, admin, entries, speakers, dialects, photos, sentences, url_from_storage_path } = data)
-  $: ({ loading: entries_loading } = entries)
-  $: ({ loading: speakers_loading } = speakers)
-  $: ({ loading: dialects_loading } = dialects)
-  $: ({ loading: photos_loading } = photos)
-  $: ({ loading: sentences_loading } = sentences)
+  $: ({ is_manager, dictionary, admin, entries_data, url_from_storage_path } = data)
+  $: ({ loading: entries_loading } = entries_data)
 
   let includeImages = false
   let includeAudio = false
@@ -26,10 +22,10 @@
 
   let ready = false
 
-  $: if (!$entries_loading && !$speakers_loading && !$dialects_loading && !$photos_loading && !$sentences_loading) {
-    const translated_entries = translate_entries({ entries: $entries, photos: $photos, sentences: $sentences, dialects: $dialects })
+  $: if (!$entries_loading) {
+    const translated_entries = translate_entries({ entries: Object.values($entries_data) })
     entryHeaders = getCsvHeaders(translated_entries, dictionary)
-    formattedEntries = formatCsvEntries(translated_entries, $speakers, url_from_storage_path, dictionary)
+    formattedEntries = formatCsvEntries(translated_entries, url_from_storage_path, dictionary)
     // @ts-ignore
     entriesWithImages = formattedEntries.filter(entry => entry?.photoSource)
     entriesWithAudio = formattedEntries.filter(entry => entry?.soundSource)
@@ -144,6 +140,7 @@
 {/if}
 
 <SeoMetaTags
+  norobots={!dictionary.public}
   title={$page.data.t('misc.export')}
   dictionaryName={dictionary.name}
   description="Dictionary managers can easily export their Living Dictionary\'s text data as a .CSV spreadsheet as well as export their images and audio files in convenient ZIP folders."

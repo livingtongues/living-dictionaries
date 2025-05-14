@@ -194,7 +194,10 @@ export default function (dictionaryName: string, dictionaryId: string) {
                     To conveniently return to your dictionary, add a bookmark to
                     <strong>livingdictionaries.app/${dictionaryId}</strong><br /><br />
 
-                      If you ever have any questions or comments, feel free to reply to this email or or use the "Contact Us" button from within the web app.
+                      If you ever have any questions or comments, feel free to reply to this email or or use the "Contact Us" button from within the web app.<br /><br />
+
+                      We recommend filling out the <a style="color: #546e7a" target="_blank"
+                        href="https://livingdictionaries.app/${dictionaryId}/about">"About section"</a> of your dictionary as soon as possible. Thanks!
                   </td>
                 </tr>
 
@@ -292,5 +295,5 @@ export default function (dictionaryName: string, dictionaryId: string) {
   </table>
 </body>
 
-</html>`;
+</html>`
 }

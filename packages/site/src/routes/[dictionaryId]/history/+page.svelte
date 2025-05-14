@@ -1,6 +1,6 @@
 <script lang="ts">
   import { Button, ResponsiveTable } from 'svelte-pieces'
-  import type { EntryView, Tables } from '@living-dictionaries/types'
+  import type { EntryData, Tables } from '@living-dictionaries/types'
   import { onMount } from 'svelte'
   import RecordRow from './RecordRow.svelte'
   import SortRecords from './sortRecords.svelte'
@@ -12,12 +12,12 @@
 
   export let data: PageData
   let loading_content_updates = true
-  const { entries } = $page.data
+  const { entries_data } = $page.data
   $: ({ dictionary, can_edit, get_content_updates } = data)
 
   let content_updates: Tables<'content_updates'>[] = []
   onMount(() => {
-    const unsub = entries.loading.subscribe(async (loading) => {
+    const unsub = entries_data.loading.subscribe(async (loading) => {
       if (!loading) {
         content_updates = await get_content_updates()
         unsub()
@@ -26,9 +26,12 @@
     })
   })
 
-  function get_entry(record: Tables<'content_updates'>): EntryView {
-    return $entries.find(entry =>
-      entry.id === record.entry_id || entry.senses.some(sense => sense.id === record.sense_id))
+  function get_entry(record: Tables<'content_updates'>): EntryData {
+    const entry = $entries_data[record.entry_id]
+    if (entry) return entry
+
+    return Object.values($entries_data).find(entry =>
+      entry.senses.some(sense => sense.id === record.sense_id))
   }
 
   function exportHistoryAsCSV() {

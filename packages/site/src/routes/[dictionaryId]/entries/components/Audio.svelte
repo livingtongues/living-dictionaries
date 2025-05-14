@@ -1,14 +1,14 @@
 <script lang="ts">
   import { ShowHide, longpress } from 'svelte-pieces'
-  import type { EntryView } from '@living-dictionaries/types'
+  import type { EntryData } from '@living-dictionaries/types'
   import { page } from '$app/stores'
+  import { minutes_ago_in_ms } from '$lib/helpers/time'
 
-  export let entry: EntryView
+  export let entry: EntryData
   export let context: 'list' | 'table' | 'entry'
+  export let sound_file: EntryData['audios'][0] = undefined
   export let can_edit = false
   $: ({ url_from_storage_path } = $page.data)
-
-  $: sound_file = entry.audios?.[0]
 
   let playing = false
 
@@ -25,9 +25,11 @@
 
 <ShowHide let:show let:toggle>
   {#if sound_file}
+    {@const updated_within_last_5_minutes = sound_file.updated_at && can_edit && new Date(sound_file.updated_at).getTime() > minutes_ago_in_ms(5)}
     <div
+      class:border-b-2={updated_within_last_5_minutes}
       class="{$$props.class} hover:bg-gray-200 flex flex-col items-center
-        justify-center cursor-pointer select-none"
+        justify-center cursor-pointer select-none border-green-300"
       title={$page.data.t('audio.listen')}
       use:longpress={800}
       on:longpress={() => initAudio()}
@@ -73,7 +75,7 @@
 
   {#if show}
     {#await import('$lib/components/audio/EditAudio.svelte') then { default: EditAudio }}
-      <EditAudio {entry} sound_file={sound_file} on_close={toggle} />
+      <EditAudio {entry} {sound_file} on_close={toggle} />
     {/await}
   {/if}
 </ShowHide>

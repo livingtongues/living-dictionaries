@@ -38,7 +38,7 @@
         <input
           class="w-full"
           type="range"
-          value={$search_params.tolerance || 1}
+          value={$search_params.tolerance || 0}
           on:input={(e) => {
             // @ts-ignore
             const { value } = e.target
@@ -89,10 +89,6 @@
             {search_params}
             search_param_key="dialects"
             values={result_facets._dialects.values}
-            keys_to_values={$dialects?.reduce((acc, dialect) => {
-              acc[dialect.id] = dialect.name.default
-              return acc
-            }, {})}
             label={$page.data.t('entry_field.dialects')} />
         {/if}
         {#if result_facets._tags.count}
@@ -100,10 +96,6 @@
             {search_params}
             search_param_key="tags"
             values={result_facets._tags.values}
-            keys_to_values={$tags?.reduce((acc, tag) => {
-              acc[tag.id] = tag.name
-              return acc
-            }, {})}
             label={$page.data.t('entry_field.custom_tags')} />
         {/if}
         {#if result_facets._speakers.count}
@@ -111,15 +103,23 @@
             {search_params}
             search_param_key="speakers"
             values={result_facets._speakers.values}
-            keys_to_values={$speakers?.reduce((acc, speaker) => {
-              acc[speaker.id] = speaker.name
-              return acc
-            }, {})}
             label={$page.data.t('entry_field.speaker')} />
         {/if}
 
         <hr />
 
+        {#if result_facets.has_sentence?.values.true}
+          <ToggleFacet
+            bind:checked={$search_params.has_sentence}
+            count={result_facets.has_sentence.values.true}
+            label={`${$page.data.t('entry.has_exists')} ${$page.data.t('entry_field.example_sentence')}`} />
+        {/if}
+        {#if result_facets.has_sentence?.values.false}
+          <ToggleFacet
+            bind:checked={$search_params.no_sentence}
+            count={result_facets.has_sentence.values.false}
+            label={`${$page.data.t('entry.does_not_exist')} ${$page.data.t('entry_field.example_sentence')}`} />
+        {/if}
         {#if $search_params.view !== 'gallery'}
           {#if result_facets.has_image?.values.true}
             <ToggleFacet

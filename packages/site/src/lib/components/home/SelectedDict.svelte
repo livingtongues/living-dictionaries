@@ -83,12 +83,12 @@
     <div class="mb-2 text-sm inline-children-elements">
       {@html sanitize(truncateString(about, 200))}
       {#if about.length > 200}
-        <a class="hover:underline" href={`${dictionary.id}/about`}>
+        <a class="hover:underline" href={`${dictionary.url}/about`}>
           {$page.data.t('home.read_more')}
         </a>
       {/if}
     </div>
-    <Button class="mt-1 w-full" form="filled" color="black" href={dictionary.id}>
+    <Button class="mt-1 w-full" form="filled" color="black" href={dictionary.url}>
       {$page.data.t('home.open_dictionary')}
       <span class="i-fa6-solid-chevron-right rtl-x-flip -mt-1" />
     </Button>

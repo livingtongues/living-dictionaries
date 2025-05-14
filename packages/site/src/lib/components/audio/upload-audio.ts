@@ -8,7 +8,15 @@ export interface AudioVideoUploadStatus {
   storage_path?: string
 }
 
-export function upload_audio({ file, folder }: { file: File | Blob, folder: string }): Readable<AudioVideoUploadStatus> {
+export function upload_audio({
+  file,
+  folder,
+  on_success,
+}: {
+  file: File | Blob
+  folder: string
+  on_success?: () => void
+}): Readable<AudioVideoUploadStatus> {
   const { set, subscribe } = writable<AudioVideoUploadStatus>({ progress: 0 });
 
   (async () => {
@@ -20,11 +28,11 @@ export function upload_audio({ file, folder }: { file: File | Blob, folder: stri
     if (error) {
       console.error(error)
       set({ progress: 0, error: error.message })
+    } else {
+      await upload_file(file, presigned_upload_url)
+      set({ progress: 100, storage_path: object_key })
+      on_success?.()
     }
-
-    await upload_file(file, presigned_upload_url)
-
-    set({ progress: 100, storage_path: object_key })
   })()
 
   function upload_file(file: File | Blob, url: string) {
@@ -36,7 +44,7 @@ export function upload_audio({ file, folder }: { file: File | Blob, folder: stri
         if (event.lengthComputable) {
           const progress = Math.round((event.loaded / event.total) * 100)
           console.info(`Upload progress: ${progress}%`)
-          set({ progress })
+          set({ progress: Math.min(progress, 99) })
         }
       })
 

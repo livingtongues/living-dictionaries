@@ -22,7 +22,11 @@
     <input
       type="search"
       bind:value={$search_params.query}
-      on:input={() => $search_params.page = 1}
+      on:input={() => {
+        if ($search_params.page && $search_params.page > 1) {
+          $search_params.page = 1
+        }
+      }}
       placeholder={$page.data.t('entry.search_entries')}
       class="form-input text-sm w-full pl-10 pr-3 py-2 rounded-none ltr:!rounded-l-md rtl:!rounded-r-md md:!rounded-r-md md:!rounded-l-md" />
   </div>
