@@ -1,26 +1,27 @@
-name: Update Database Cache
+# TODO: add env variables to GitHub and update script to check for updated dictionaries from the last hour and a half to be able to run this
+# name: Update Database Cache
 
-on:
-  workflow_dispatch:
-  schedule:
-    - cron: '0 * * * *' # Runs every hour
+# on:
+#   workflow_dispatch:
+#   schedule:
+#     - cron: '0 * * * *' # Runs every hour
 
-jobs:
-  lint:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
+# jobs:
+#   lint:
+#     runs-on: ubuntu-latest
+#     steps:
+#       - uses: actions/checkout@v4
 
-      - uses: pnpm/action-setup@v2
-        with:
-          version: 9.12.1
+#       - uses: pnpm/action-setup@v4
+#         with:
+#           version: 9.12.1
 
-      - uses: actions/setup-node@v3
-        with:
-          node-version: 20
-          cache: pnpm
+#       - uses: actions/setup-node@v4
+#         with:
+#           node-version: 22
+#           cache: pnpm
 
-      - run: pnpm install
+#       - run: pnpm install
 
-      - name: Update Dictionary Entries Caches
-        run: pnpm --filter scripts update-caches
+#       - name: Update Dictionary Entries Caches
+#         run: pnpm --filter scripts create-entry-caches
