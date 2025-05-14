@@ -1630,7 +1630,16 @@ USING (
     FROM dictionary_roles
     WHERE dictionary_roles.dictionary_id = api_keys.dictionary_id
       AND dictionary_roles.user_id = auth.uid()
-      AND dictionary_roles.role IN ('manager', 'contributor')
+      AND dictionary_roles.role = 'manager'
+  )
+)
+WITH CHECK (
+  EXISTS (
+    SELECT 1
+    FROM dictionary_roles
+    WHERE dictionary_roles.dictionary_id = api_keys.dictionary_id
+      AND dictionary_roles.user_id = auth.uid()
+      AND dictionary_roles.role = 'manager'
   )
 );
 
