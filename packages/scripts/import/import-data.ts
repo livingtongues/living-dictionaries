@@ -1,5 +1,5 @@
 import { writeFileSync } from 'node:fs'
-import { anon_supabase, postgres } from '../config-supabase'
+import { admin_supabase, anon_supabase, postgres } from '../config-supabase'
 import type { Upload_Operations } from './generate-sql-statements'
 import { generate_sql_statements } from './generate-sql-statements'
 import type { Row } from './row.type'
@@ -10,16 +10,23 @@ export async function import_data({
   import_id,
   upload_operations,
   live = false,
+  dev = true,
 }: {
   dictionary_id: string
   rows: Row[]
   import_id: string
   upload_operations: Upload_Operations
   live: boolean
+  dev: boolean
 }) {
   const { data: dialects } = await anon_supabase.from('dialects').select('id, name').eq('dictionary_id', dictionary_id)
   const { data: speakers } = await anon_supabase.from('speakers').select('id, name').eq('dictionary_id', dictionary_id)
   const { data: tags } = await anon_supabase.from('tags').select('id, name').eq('dictionary_id', dictionary_id)
+  let dev_id: string = null
+  if (dev) {
+    const { data: dev_user } = await admin_supabase.from('user_emails').select('id').eq('email', 'manual@mock.com').single()
+    dev_id = dev_user?.id
+  }
 
   const start_index = 0
   const batch_size = 30000
@@ -32,7 +39,7 @@ export async function import_data({
 
     if (index >= start_index && index < end_index) {
       console.info(index)
-      const sql_statements = await generate_sql_statements({ row, dictionary_id, import_id, speakers, dialects, tags, upload_operations })
+      const sql_statements = await generate_sql_statements({ row, dictionary_id, import_id, speakers, dialects, tags, upload_operations, dev_id })
       sql_query += `${sql_statements}\n`
 
       if (index % 500 === 0)

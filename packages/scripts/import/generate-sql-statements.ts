@@ -24,6 +24,7 @@ export async function generate_sql_statements({
     upload_audio,
     // upload_video,
   },
+  dev_id,
 }: {
   row: Row
   dictionary_id: string
@@ -32,6 +33,7 @@ export async function generate_sql_statements({
   dialects: { id: string, name: MultiString }[]
   tags: { id: string, name: string }[]
   upload_operations: Upload_Operations
+  dev_id: string | null
 }) {
   try {
     let sql_statements = ''
@@ -39,7 +41,7 @@ export async function generate_sql_statements({
     const entry_id = randomUUID()
 
     const c_meta = () => ({
-      created_by: diego_ld_user_id,
+      created_by: dev_id || diego_ld_user_id,
       created_at: millisecond_incrementing_timestamp(),
     })
     const c_u_meta = () => {
@@ -93,6 +95,7 @@ export async function generate_sql_statements({
           ...c_meta(),
           dialect_id,
           entry_id,
+          dictionary_id,
         })
       }
     }
@@ -118,6 +121,7 @@ export async function generate_sql_statements({
         ...c_meta(),
         tag_id,
         entry_id,
+        dictionary_id,
       })
     }
 
@@ -145,6 +149,7 @@ export async function generate_sql_statements({
         ...c_u_meta(),
         id: sense_id,
         glosses: {},
+        dictionary_id,
       }
 
       const currently_on_first_sense = sense_label === first_sense_label
@@ -244,6 +249,7 @@ export async function generate_sql_statements({
           ...c_meta(),
           sentence_id,
           sense_id,
+          dictionary_id,
         })
       }
     }
@@ -305,6 +311,7 @@ export async function generate_sql_statements({
           ...c_meta(),
           audio_id,
           speaker_id,
+          dictionary_id,
         })
       }
     }
@@ -332,6 +339,7 @@ export async function generate_sql_statements({
         ...c_meta(),
         photo_id,
         sense_id,
+        dictionary_id,
       }
       sql_statements += sql_file_string('sense_photos', sense_photo)
     }

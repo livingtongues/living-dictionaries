@@ -29,7 +29,7 @@ async function import_from_spreadsheet({ dictionary_id, live }: { dictionary_id:
   const file = readFileSync(`./import/data/${dictionary_id}/${dictionary_id}.csv`, 'utf8')
   const rows = parseCSVFrom<Row>(file)
   if (rows[0].lexeme.includes('word/phrase')) rows.shift() // remove header row
-  await import_data({ dictionary_id, rows, import_id, live, upload_operations: { upload_audio, upload_photo } })
+  await import_data({ dictionary_id, rows, import_id, live, dev: environment === 'dev', upload_operations: { upload_audio, upload_photo } })
 
   console.log(
     `Finished ${live ? 'importing' : 'emulating'} ${rows.length} entries to ${environment === 'dev' ? 'http://localhost:3041/' : 'livingdictionaries.app/'
