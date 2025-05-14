@@ -77,3 +77,8 @@ Other options
 
 - `psql postgresql://postgres:postgres@127.0.0.1:54322/postgres -f live-db-dump.sql`
 - `psql -d database -f data.sql` to restore the data from a dump file obtained from Supabase's automatic backup. -d database: Specifies the name of the database to connect to.
+
+# Debugging Ports are not available error
+
+- On Windows, run `netsh interface ipv4 show excludedportrange protocol=tcp` to check for port exclusions. If 54322 is excluded, you may need to adjust settings by running `netsh int ipv4 set dynamic tcp start=60000 num=5000`
+From https://stackoverflow.com/questions/54010365/how-to-see-what-is-reserving-ephemeral-port-ranges-on-windows/71190107#71190107
