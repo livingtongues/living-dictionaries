@@ -296,7 +296,9 @@ async function write_caches() {
       }
 
       const cache_json_string = JSON.stringify(entries_data)
-      await writeFile(filepath, cache_json_string)
+      if (process.env.CI !== 'true') {
+        await writeFile(filepath, cache_json_string)
+      }
       await upload_to_cloudflare(filename, cache_json_string)
       console.log({ [dictionary_id]: entries_data.length })
     }
