@@ -1,0 +1,33 @@
+name: Update Database Cache
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 * * * *' # Runs every hour
+
+jobs:
+  update-caches:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.12.1
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - run: pnpm install
+
+      - name: Update Dictionary Entries Caches
+        env:
+          CLOUDFLARE_R2_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_R2_ACCOUNT_ID }}
+          CLOUDFLARE_R2_CACHE_ACCESS_KEY_ID: ${{ secrets.CLOUDFLARE_R2_CACHE_ACCESS_KEY_ID }}
+          CLOUDFLARE_R2_CACHE_SECRET_ACCESS_KEY: ${{ secrets.CLOUDFLARE_R2_CACHE_SECRET_ACCESS_KEY }}
+          PUBLIC_SUPABASE_API_URL: ${{ secrets.PUBLIC_SUPABASE_API_URL }}
+          PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.PUBLIC_SUPABASE_ANON_KEY }} # just here to let config load but not used in this script
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: pnpm --filter scripts create-entry-caches

@@ -35,7 +35,7 @@ export function translate_entries({ entries }: { entries: EntryData[] }) {
   const $page = get(page)
 
   return entries.map((entry) => {
-    const senses = entry.senses.map(sense => ({
+    const senses = (entry.senses || []).map(sense => ({
       ...sense,
       parts_of_speech: sense.parts_of_speech?.map(pos => translate_part_of_speech(pos, $page.data.t)),
       parts_of_speech_abbreviations: sense.parts_of_speech?.map(pos => translate_part_of_speech_abbreviation(pos, $page.data.t)),
@@ -47,7 +47,7 @@ export function translate_entries({ entries }: { entries: EntryData[] }) {
 
     return {
       ...entry,
-      dialects: (entry.dialects).map(({ name }) => name.default),
+      dialects: (entry.dialects || []).map(({ name }) => name.default),
       senses,
     }
   })

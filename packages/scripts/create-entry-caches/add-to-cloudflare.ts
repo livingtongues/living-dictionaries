@@ -20,6 +20,9 @@ const cache_client = new S3Client({
 })
 
 const date_for_updating_all_caches = '1970-01-01T00:00:00Z'
+const hours_since_last_update = 1.5
+const milliseconds_since_last_update = hours_since_last_update * 60 * 60 * 1000
+const date_since_last_update = new Date(Date.now() - milliseconds_since_last_update).toISOString()
 
 await write_caches()
 async function write_caches() {
@@ -31,12 +34,15 @@ async function write_caches() {
       // 1st do public
       // .eq('public', true)
       // 2nd do private but not conlang (won't cache those)
-      .neq('public', true)
-      .is('con_language_description', null)
+      // .neq('public', true)
+      // .is('con_language_description', null)
+      .order('updated_at', { ascending: true })
+      .gt('updated_at', date_since_last_update)
 
     console.log(`Writing caches for ${dictionary_ids.length} dictionaries...`)
 
     for (const { id: dictionary_id } of dictionary_ids) {
+      console.log(`Processing ${dictionary_id}`)
       const format = 'json'
       const folder = './caches'
       const filename = `${dictionary_id}.${format}`
@@ -290,7 +296,9 @@ async function write_caches() {
       }
 
       const cache_json_string = JSON.stringify(entries_data)
-      await writeFile(filepath, cache_json_string)
+      if (process.env.CI !== 'true') {
+        await writeFile(filepath, cache_json_string)
+      }
       await upload_to_cloudflare(filename, cache_json_string)
       console.log({ [dictionary_id]: entries_data.length })
     }
@@ -309,15 +317,17 @@ async function file_exists(filepath: string): Promise<boolean> {
 }
 
 async function upload_to_cloudflare(filename: string, cache_json_string: string) {
-  const params = {
-    Bucket: 'cache',
-    Key: `entries_data/${filename}`,
-    Body: cache_json_string,
-    ContentType: 'application/json',
-  }
+  const MINUTES_TO_WAIT_BEFORE_REVALIDATION = 10
 
   try {
-    const command = new PutObjectCommand(params)
+    const command = new PutObjectCommand({
+      Bucket: 'cache',
+      Key: `entries_data/${filename}`,
+      Body: cache_json_string,
+      ContentType: 'application/json',
+      CacheControl: `max-age=${MINUTES_TO_WAIT_BEFORE_REVALIDATION * 60}`,
+    // CacheControl: 'no-cache', // revalidate on every request
+    })
     await cache_client.send(command)
     console.log(`Uploaded ${filename} to Cloudflare R2`)
   } catch (err) {
