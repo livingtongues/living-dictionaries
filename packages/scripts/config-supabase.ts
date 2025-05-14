@@ -14,11 +14,13 @@ program
 export const environment = program.opts().environment === 'prod' ? 'prod' : 'dev'
 console.log(`Supabase running on ${environment}`)
 
-if (environment === 'dev') {
-  dotenv.config({ path: '../site/.env.development' }) // Supabase local service key
-  dotenv.config({ path: '../site/.env.local' }) // for dev cloud storage bucket
-} else {
-  dotenv.config({ path: '../site/.env.production.local' }) // Supabase production service key and cloud storage bucket
+if (process.env.CI !== 'true') {
+  if (environment === 'dev') {
+    dotenv.config({ path: '../site/.env.development' }) // Supabase local service key
+    dotenv.config({ path: '../site/.env.local' }) // for dev cloud storage bucket
+  } else {
+    dotenv.config({ path: '../site/.env.production.local' }) // Supabase production service key and cloud storage bucket
+  }
 }
 
 export const admin_supabase = createClient<Database>(process.env.PUBLIC_SUPABASE_API_URL, process.env.SUPABASE_SERVICE_ROLE_KEY)
