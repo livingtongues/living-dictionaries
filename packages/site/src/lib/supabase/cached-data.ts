@@ -67,16 +67,16 @@ export async function cached_data_table<Name extends DataTableName, T extends Ta
     const query = supabase.from(table)
       .select(select_fields.join(', '))
       .eq('dictionary_id', dictionary_id as any)
-      .limit(1000)
 
     if (cached_length) {
       query
         .order(order_field, { ascending: true })
         .gt(order_field, timestamp_from_which_to_fetch_data)
+        .limit(limit)
     } else {
       query
         .order('id', { ascending: true })
-        .range(range_start, range_start + limit)
+        .range(range_start, range_start + limit - 1)
         .is('deleted', null)
       range_start += limit
     }
@@ -162,16 +162,16 @@ export async function cached_join_table<Name extends JoinTableName, T extends Ta
     const query = supabase.from(table)
       .select(select_fields.join(', '))
       .eq('dictionary_id', dictionary_id as any)
-      .limit(1000)
 
     if (cached_length) {
       query
         .order(order_field, { ascending: true })
         .gt(order_field, timestamp_from_which_to_fetch_data)
+        .limit(limit)
     } else {
       query
         .order(id_field_1 as string, { ascending: true })
-        .range(range_start, range_start + limit)
+        .range(range_start, range_start + limit - 1)
         .is('deleted', null)
       range_start += limit
     }
