@@ -6,7 +6,7 @@ on:
     - cron: '0 * * * *' # Runs every hour
 
 jobs:
-  lint:
+  update-caches:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -28,5 +28,6 @@ jobs:
           CLOUDFLARE_R2_CACHE_ACCESS_KEY_ID: ${{ secrets.CLOUDFLARE_R2_CACHE_ACCESS_KEY_ID }}
           CLOUDFLARE_R2_CACHE_SECRET_ACCESS_KEY: ${{ secrets.CLOUDFLARE_R2_CACHE_SECRET_ACCESS_KEY }}
           PUBLIC_SUPABASE_API_URL: ${{ secrets.PUBLIC_SUPABASE_API_URL }}
+          PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.PUBLIC_SUPABASE_ANON_KEY }} # just here to let config load but not used in this script
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
         run: pnpm --filter scripts create-entry-caches
