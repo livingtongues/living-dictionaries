@@ -31,6 +31,7 @@ async function write_caches() {
     const { data: dictionary_ids } = await admin_supabase.from('dictionaries')
       .select('id')
       .order('id')
+      // .range(1000, 1999)
       // 1st do public
       // .eq('public', true)
       // 2nd do private but not conlang (won't cache those)
@@ -62,7 +63,6 @@ async function write_caches() {
       }) {
         const order_field = include ? 'updated_at' : 'created_at'
         let data: Record<string, T> = {}
-        let timestamp_from_which_to_fetch_data = date_for_updating_all_caches
         let select_fields: (keyof T)[]
         if (include) {
           select_fields = ['id', ...include, order_field] as (keyof T)[]
@@ -70,14 +70,18 @@ async function write_caches() {
           select_fields = [order_field, id_field_1, id_field_2] as (keyof T)[]
         }
 
+        let range_start = 0
+        const limit = 1000
+        const range_field = id_field_1 || 'id'
+
         while (true) {
           const { data: batch, error: batch_error } = await admin_supabase.from(table)
             .select(select_fields.join(', '))
             .eq('dictionary_id', dictionary_id)
             .is('deleted', null)
-            .limit(1000)
-            .order(order_field, { ascending: true })
-            .gt(order_field, timestamp_from_which_to_fetch_data)
+            .order(range_field as string, { ascending: true })
+            .range(range_start, range_start + limit - 1)
+          range_start += limit
 
           if (batch_error) {
             console.error({ batch_error })
@@ -85,9 +89,6 @@ async function write_caches() {
           }
 
           if (batch?.length) {
-            // @ts-expect-error
-            timestamp_from_which_to_fetch_data = batch[batch.length - 1][order_field] as string
-
             if (id_field_1 && id_field_2) {
               const batch_object = batch.reduce((acc, item) => {
                 const combined_id = `${(item as T)[id_field_1]}_${(item as T)[id_field_2]}`
