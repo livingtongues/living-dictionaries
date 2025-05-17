@@ -9,7 +9,7 @@
   import type { QueryParams } from '$lib/search/types'
   import { page } from '$app/stores'
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte'
-  import { browser, dev } from '$app/environment'
+  import { browser } from '$app/environment'
 
   export let data
   $: ({ entries_data, admin, search_entries, default_entries_per_page, search_params, dictionary, can_edit, dbOperations, reset_caches, search_index_updated } = data)
@@ -84,16 +84,17 @@
             0 /
             {entries_length}
           {/if}
-          {#if dev || $admin}
+          {#if $can_edit}
             <div class="grow"></div>
             <Button
               type="button"
               size="sm"
               form="simple"
+              title="Use if some entries are not showing up. Sometimes if you go in and out of internet service while loading entries, some will fail to load."
               onclick={async () => {
                 await reset_caches()
                 location.reload()
-              }}>Reset local caches (admin)</Button>
+              }}>Reset Cache</Button>
           {/if}
         {/if}
         {#if $loading}
