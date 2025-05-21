@@ -78,7 +78,6 @@ export function create_entries_ui_store({
       mark_search_index_updated,
     })
   }
-  // TODO: listen to can_edit store changes and re-init if it changes
 
   return {
     subscribe: entries_data.subscribe,

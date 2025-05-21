@@ -1,8 +1,10 @@
 ## Better data sync
+- send out notice
+- handle entries load errors and saving status
 - show green recent update in list and table view based on all an entries' updated_at fields
 - solve circular dependencies issues
-- handle entries load errors and saving status
 - make plan for cleaning up connected senses and join tables for deleted entries, and for clearing out deleted items over 2 months old
+- listen to can_edit store changes and re-init if it changes
 
 ## Final Migration cleanup
 - remove content-import.interface.ts code after getting new history method working
