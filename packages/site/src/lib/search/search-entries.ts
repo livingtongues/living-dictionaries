@@ -5,6 +5,7 @@ import type { EntriesIndex } from './entries-schema'
 
 type Indexed_Entry = {
   _lexeme: string[]
+  _elicitation_id?: string
 } & EntryData
 
 export interface SearchEntriesOptions {
@@ -24,8 +25,8 @@ export async function search_entries({ query_params, entries_per_page, page_inde
     const [_b_id, _b_score, b_document] = b as [string, number, Indexed_Entry]
 
     if (dictionary_id === 'onondaga') {
-      const a_id = a_document.main.elicitation_id || last_alphabetical
-      const b_id = b_document.main.elicitation_id || last_alphabetical
+      const a_id = a_document._elicitation_id || last_alphabetical
+      const b_id = b_document._elicitation_id || last_alphabetical
       if (a_id !== b_id)
         return a_id.localeCompare(b_id)
     }
