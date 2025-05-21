@@ -250,6 +250,18 @@
     </Button>
   {/if}
 </td>
+<td>
+  <Button
+    color={dictionary.deleted ? 'green' : 'orange'}
+    size="sm"
+    onclick={() => {
+      if (confirm('Toggle to delete status?')) {
+        update_dictionary({ deleted: dictionary.deleted ? null : new Date().toISOString() })
+      }
+    }}>
+    {dictionary.deleted ? 'YES' : 'NO'}
+  </Button>
+</td>
 {#if $admin > 1}
   <td class="cursor-pointer">
     <JSON obj={dictionary} />

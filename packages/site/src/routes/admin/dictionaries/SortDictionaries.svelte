@@ -23,6 +23,7 @@
     author_connection = 'Author Connection',
     con_language_description = 'Conlang Description',
     conlang = 'Conlang',
+    deleted = 'To Delete',
   }
 
   type SortFields = keyof typeof DictionaryFields
@@ -86,6 +87,10 @@
       case 'conlang':
         valueA = a.con_language_description?.toString() || ''
         valueB = b.con_language_description?.toString() || ''
+        break
+      case 'deleted':
+        valueA = a.updated_at ? new Date(a.updated_at).getTime() : keep_null_date_at_end
+        valueB = b.updated_at ? new Date(b.updated_at).getTime() : keep_null_date_at_end
         break
       default:
         valueA = typeof a[sortKey] === 'string' ? (a[sortKey] as string).toUpperCase() : 'zz' // if we ever have missing names or email, then pass 'zz' when the sortKey is undefined
