@@ -630,6 +630,7 @@ SELECT
   language_used_by_community,
   con_language_description,
   copyright,
+  deleted,
   dictionaries.created_at,
   dictionaries.created_by,
   dictionaries.updated_at,
@@ -663,7 +664,8 @@ SELECT
   public,
   metadata,
   con_language_description,
-  entry_count
+  entry_count,
+  deleted
 FROM dictionaries_view;
 -- DROP MATERIALIZED VIEW materialized_dictionaries_view
 
