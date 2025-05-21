@@ -2928,6 +2928,7 @@ export interface Database {
           copyright: string | null
           created_at: string | null
           created_by: string | null
+          deleted: string | null
           entry_count: number | null
           featured_image: Json | null
           gloss_languages: string[] | null
@@ -3060,6 +3061,7 @@ export interface Database {
           copyright: string | null
           created_at: string | null
           created_by: string | null
+          deleted: string | null
           entry_count: number | null
           featured_image: Json | null
           gloss_languages: string[] | null
@@ -3127,6 +3129,7 @@ export interface Database {
           alternate_names: string[] | null
           con_language_description: string | null
           coordinates: Json | null
+          deleted: string | null
           entry_count: number | null
           gloss_languages: string[] | null
           glottocode: string | null
