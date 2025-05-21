@@ -32,6 +32,7 @@ export function augment_entry_for_search(entry: EntryData) {
     _lexeme,
     _glosses,
     _other,
+    ...(entry.main.elicitation_id ? { _elicitation_id: entry.main.elicitation_id } : {}),
     // Filters
     _tags,
     _dialects,
