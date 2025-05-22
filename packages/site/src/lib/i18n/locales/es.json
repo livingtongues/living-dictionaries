@@ -38,11 +38,11 @@
     "suggestions_from_users": "Sugerencias de usuarios",
     "push_notifications": "Notificaciones a colaboradores",
     "contributor_awards": "Premios a la comunidad de colaboradores",
-    "question_1": "Proporcione información general sobre este idioma. ¿Dónde se habla? ¿Qué comunidades hablan este idioma? ¿Está esta lengua en peligro de extinción?",
-    "question_2": "¿Cuáles son los nombres de las personas que construyeron este diccionario? ¿De quién son las voces en este diccionario?",
-    "question_3": "¿De dónde provienen los datos de este diccionario? Describa si recopiló los datos usted mismo. Si utilizó alguna fuente de referencia publicada, indíquela.",
-    "question_4": "¿Quién utilizará este diccionario? ¿Se utilizará en algún proyecto educativo?",
-    "question_5": "Si desea que el público se comunique con usted sobre este proyecto, proporcione su información de contacto o un enlace donde las personas puedan obtener más información. Esto es opcional.",
+    "question_1": "Proporcione información sobre este idioma. ¿Dónde se habla? ¿Qué comunidades lo hablan? ¿Está en peligro de extinción?",
+    "question_2": "¿Cuáles son los nombres de quienes crearon este diccionario? ¿De quiénes son las voces que aparecen en él?",
+    "question_3": "¿De dónde provienen los datos de este diccionario? Por favor, describa si los recopiló usted mismo. Si utilizó alguna fuente de referencia publicada, indíquela.",
+    "question_4": "¿Quién usará este diccionario? ¿Se utilizará en algún proyecto educativo?",
+    "question_5": "Si desea que el público se ponga en contacto con usted para informarle sobre este proyecto, proporcione su información de contacto o un enlace donde puedan obtener más información. Esto es opcional.",
     "message": "Antes de hacer público su diccionario, complete la sección de Acerca de."
   },
   "contributors": {
@@ -67,7 +67,9 @@
   },
   "account": {
     "account_settings": "Configuración",
-    "log_out": "Cerrar sesión"
+    "log_out": "Cerrar sesión",
+    "send_code": "Enviar código",
+    "enter_6_digit_code_sent_to": "Introduzca el código de 6 dígitos enviado a"
   },
   "audio": {
     "tapToStopRecording": "Luego haga clic para terminar de grabar",
@@ -197,14 +199,14 @@
     "notes": "Notas",
     "sources": "Fuente",
     "example_sentence": "Oración de ejemplo",
-    "noun_class": "clase sustantiva",
+    "noun_class": "Clase de sustantivo",
     "variant": "Variante",
     "gloss": "Traducción",
     "plural_form": "Forma plural",
     "scientific_names": "Nombre científico",
     "definition_english": "",
     "video": "Video",
-    "custom_tags": "Etiquetas personalizadas"
+    "custom_tags": "etiquetas personalizadas"
   },
   "error": {
     "run_into_error": "Lo sentimos, hay un error.",
@@ -262,7 +264,8 @@
     "map": "Mapa",
     "guidance": "Guía de uso",
     "out_of_service": "¡Gracias por visitar nuestro sitio web! Esta página está temporalmente en construcción.\nNo estará disponible entre el 3 y el 28 de febrero de 2025.\nVisite esta página nuevamente el 1 de marzo de 2025.\nPodrás crear nuevos Diccionarios Vivientes en ese momento.\nDisculpe las molestias y gracias por su paciencia.\nMientras tanto, el resto de la plataforma funciona con normalidad.\nAtentamente,\nel equipo de Diccionarios Vivientes",
-    "transmitter": "Atentamente, el equipo de Living Dictionaries"
+    "transmitter": "Atentamente, el equipo de Living Dictionaries",
+    "disjunctive": "o"
   },
   "settings": {
     "community_permission": "¿Permite la comunidad lingüística que este idioma esté en línea?",
@@ -354,12 +357,12 @@
     "history": "Historial",
     "entry": "Entrada",
     "editor": "Editor",
-    "entry_history": "Historial de entrada",
+    "entry_history": "Historial de entradas",
     "field": "Campo",
     "date": "Fecha",
     "old_value": "Valor anterior",
     "new_value": "Nuevo valor",
-    "entry_message": "Un usuario editó esta entrada el ",
+    "entry_message": "Un usuario editó esta entrada el",
     "edited": "Última edición el",
     "history_search": "Buscar entradas, editores, campos y valores",
     "download_history": "Descargar historial como CSV",
@@ -370,7 +373,7 @@
   "partnership": {
     "title": "Organizaciones asociadas",
     "button": "Escribir la organización asociada",
-    "name": "Nombre de la organización asociada"
+    "name": "Nombre de la organización socia"
   },
   "synopsis": {
     "translations": "Traducciones",
