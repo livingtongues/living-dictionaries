@@ -67,7 +67,9 @@
   },
   "account": {
     "account_settings": "Mipangilio ya Akaunti",
-    "log_out": "Toka"
+    "log_out": "Toka",
+    "send_code": "Tuma Msimbo",
+    "enter_6_digit_code_sent_to": "Weka msimbo wa tarakimu 6 uliotumwa kwa"
   },
   "audio": {
     "tapToStopRecording": "Kisha utabonyeza ili kuacha kurekodi",
@@ -141,7 +143,7 @@
     "agree_for_non-commercial": "Nakubali kwamba kazi hii si ya kibiashara.",
     "source_question": "Je, data katika kamusi hii ilitoka wapi? Tafadhali eleza ikiwa ulikusanya data mwenyewe. Ikiwa ulitumia vyanzo vyovyote vya marejeleo vilivyochapishwa, tafadhali viorodheshe hapa.",
     "use_question": "Nani atatumia kamusi hii? Je, itatumika katika miradi yoyote ya elimu au vyombo vya habari?",
-    "conlang_warning": "Ikiwa kamusi hii ni ya lugha iliyojengwa (au bandia), na hauonyeshi hivyo, tunahifadhi haki ya kuiondoa."
+    "conlang_warning": "Ikiwa kamusi hii ni ya lugha iliyoundwa (au bandia), na hauonyeshi hivyo, tunahifadhi haki ya kuiondoa."
   },
   "dictionary": {
     "latitude": "Latitudo",
@@ -262,7 +264,8 @@
     "map": "Ramani",
     "guidance": "Mwongozo",
     "out_of_service": "Asante kwa kutembelea tovuti yetu! Ukurasa huu unajengwa kwa muda.\nHaitapatikana kati ya Februari 3 na Februari 28, 2025.\nTafadhali tembelea ukurasa huu tena tarehe 1 Machi 2025.\nUtaweza kuunda Kamusi mpya Hai kwa wakati huo.\nPole kwa usumbufu, na asante kwa uvumilivu wako.\nWakati huo huo, jukwaa lingine linafanya kazi kama kawaida.",
-    "transmitter": "Kwa dhati, timu ya Kamusi Hai"
+    "transmitter": "Kwa dhati, timu ya Kamusi Hai",
+    "disjunctive": "au"
   },
   "settings": {
     "community_permission": "Je, jamii ya wazungumzaji inaruhusu lugha hii kuwekwa mtandaoni?",

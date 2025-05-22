@@ -88,7 +88,7 @@
       <div class="mb-3" bind:this={button_parent}></div>
 
       <div class="mb-3 text-gray-500/80 text-sm font-semibold">
-        OR
+        {$page.data.t('misc.disjunctive').toUpperCase()}
       </div>
     {/if}
     <Form onsubmit={sendCode} let:loading>
