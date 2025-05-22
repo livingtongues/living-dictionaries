@@ -239,27 +239,27 @@
 <td>
   {#if !is_public}
     <Button
-      color={dictionary.con_language_description ? 'green' : 'orange'}
+      color={dictionary?.con_language_description === 'YES' ? 'green' : 'orange'}
       size="sm"
       onclick={() => {
         if (confirm('Toggle con lang status?')) {
-          update_dictionary({ con_language_description: dictionary.con_language_description ? null : 'YES' })
+          update_dictionary({ con_language_description: dictionary?.con_language_description === 'YES' ? null : 'YES' })
         }
       }}>
-      {dictionary.con_language_description ? 'YES' : 'NO'}
+      {dictionary?.con_language_description === 'YES' ? 'YES' : 'NO'}
     </Button>
   {/if}
 </td>
 <td>
   <Button
-    color={dictionary.deleted ? 'green' : 'orange'}
+    color={dictionary?.con_language_description === 'DELETE'? 'green' : 'orange'}
     size="sm"
     onclick={() => {
       if (confirm('Toggle to delete status?')) {
-        update_dictionary({ deleted: dictionary.deleted ? null : new Date().toISOString() })
+        update_dictionary({ con_language_description: dictionary?.con_language_description === 'DELETE'? null : 'DELETE' })
       }
     }}>
-    {dictionary.deleted ? 'YES' : 'NO'}
+    {dictionary?.con_language_description === 'DELETE'? 'YES' : 'NO'}
   </Button>
 </td>
 {#if $admin > 1}
