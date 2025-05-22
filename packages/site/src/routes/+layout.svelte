@@ -12,11 +12,15 @@
   {#if $navigating}
     <LoadingIndicator />
   {/if}
-{/if}
 
-{#await import('$lib/components/ui/Toasts.svelte') then { default: Toasts }}
-  <Toasts />
-{/await}
+  {#await import('./PromptReloadOnUpdate.svelte') then { default: PromptReloadOnUpdate }}
+    <PromptReloadOnUpdate />
+  {/await}
+
+  {#await import('$lib/components/ui/Toasts.svelte') then { default: Toasts }}
+    <Toasts />
+  {/await}
+{/if}
 
 <!-- {#if $user}
   {#await import('./Banner.svelte') then { default: Banner }}
