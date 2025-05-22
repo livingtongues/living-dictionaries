@@ -3,9 +3,10 @@ import { send_email } from '../send-email'
 import { render_component_to_html } from '../render-component-to-html'
 import { jacobAddress, no_reply_address } from '../addresses'
 import type { RequestHandler } from './$types'
-import MigrationClosure from './MigrationClosure.svelte'
+import Announcement from './Announcement.svelte'
 import { ResponseCodes } from '$lib/constants'
 import { dev } from '$app/environment'
+import { getAdminSupabaseClient } from '$lib/supabase/admin'
 
 const batchSize = 50
 
@@ -14,10 +15,31 @@ export const GET: RequestHandler = async () => {
     error(ResponseCodes.INTERNAL_SERVER_ERROR, { message: 'Not allowed' })
 
   try {
-    // const user_emails = users.map(user => ({ email: user.email }))
-    const user_emails = [] // TODO: get from supabase next time using 'user_emails' view
+    const admin_supabase = getAdminSupabaseClient()
 
-    // return json({ emails_to_send: users.map(user => user.email).splice(received) })
+    let user_emails: { email: string }[] = []
+    let from = 0
+    const pageSize = 1000
+
+    while (true) {
+      const { data, error } = await admin_supabase
+        .from('user_emails')
+        .select('email')
+        .order('email', { ascending: true })
+        .range(from, from + pageSize - 1)
+
+      if (error) {
+        throw new Error(error.message)
+      }
+
+      if (data && data.length > 0) {
+        user_emails = user_emails.concat(data)
+        if (data.length < pageSize) break // last page
+        from += pageSize
+      } else {
+        break
+      }
+    }
 
     const email_batches: { email: string }[][] = []
     for (let i = 0; i < user_emails.length; i += batchSize) {
@@ -33,9 +55,9 @@ export const GET: RequestHandler = async () => {
         reply_to: jacobAddress,
         to: [jacobAddress],
         bcc: email_batch,
-        subject: '🔧 Service Announcement: Editing Ability Paused for 24 Hours Next Week',
+        subject: '🔧 Recent Entry Loading Issues Resolved',
         type: 'text/html',
-        body: render_component_to_html({ component: MigrationClosure }),
+        body: render_component_to_html({ component: Announcement }),
       })
       console.info('sent batch')
       await new Promise(resolve => setTimeout(resolve, 5000))

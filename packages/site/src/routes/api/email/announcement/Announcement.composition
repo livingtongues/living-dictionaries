@@ -9,10 +9,10 @@
 
 <script lang="ts">
   import { render_component_to_html } from '../render-component-to-html'
-  import MigrationClosure from './MigrationClosure.svelte'
+  import Announcement from './Announcement.svelte'
 
   const html = render_component_to_html({
-    component: MigrationClosure,
+    component: Announcement,
   })
 </script>
 
