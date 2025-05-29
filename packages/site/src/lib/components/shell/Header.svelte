@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Button, ShowHide } from 'svelte-pieces'
+  import { Button, ResponsiveSlideover, ShowHide } from 'svelte-pieces'
   import User from './User.svelte'
   import { page } from '$app/stores'
   import { mode } from '$lib/supabase'
@@ -89,6 +89,43 @@
           <SelectLanguage on:close={toggle} />
         {/await}
       {/if}
+    </ShowHide>
+
+    <ShowHide let:show let:toggle let:set>
+      <button type="button" class="p-3 md:hidden print:p-0" on:click={toggle}>
+        <i class="far fa-bars print:hidden" />
+      </button>
+      <ResponsiveSlideover
+        side={$page.data.t('page.direction') === 'ltr' ? 'right' : 'left'}
+        widthRem=7
+        on_close={() => set(false)}
+        open={show}>
+        <Button
+          form="text"
+          href="https://www.flipcause.com/secure/cause_pdetails/NTQ3NDQ"
+          target="_blank">
+          <i class="far fa-donate" />
+          <span class="ml-1">{$page.data.t('header.donate')}</span>
+        </Button>
+        <Button href="/about" form="text">
+          <i class="far fa-info-circle" />
+          <span class="ml-1">{$page.data.t('header.about')}</span>
+        </Button>
+        <Button href="/tutorials" form="text">
+          <span class="i-fluent-learning-app-24-regular -mt-2px" />
+          <span class="ml-1">{$page.data.t('header.tutorials')}</span>
+        </Button>
+        <Button
+          form="text"
+          href="https://docs.google.com/document/d/1MZGkBbnCiAch3tWjBOHRYPpjX1MVd7f6x5uVuwbxM-Q/edit?usp=sharing"
+          target="_blank"
+          class="text-gray-600 hover:text-black !lg:block">
+          <i class="far fa-question-circle" />
+          <span class="ml-1">
+            FAQ
+          </span>
+        </Button>
+      </ResponsiveSlideover>
     </ShowHide>
 
     <User />
