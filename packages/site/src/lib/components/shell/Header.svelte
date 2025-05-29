@@ -32,18 +32,18 @@
 
   <div class="print:hidden flex items-center whitespace-nowrap">
     <Button
-      class="!hidden !md:inline"
+      class="!md:inline !px-1 md:!px-4"
       form="text"
       href="https://www.flipcause.com/secure/cause_pdetails/NTQ3NDQ"
       target="_blank">
       <i class="far fa-donate" />
       <span class="ml-1 hidden lg:inline">{$page.data.t('header.donate')}</span>
     </Button>
-    <Button href="/about" form="text" class="!hidden !lg:inline">
+    <Button href="/about" form="text" class="!lg:inline !px-1 md:!px-4">
       <i class="far fa-info-circle" />
       <span class="ml-1 hidden lg:inline">{$page.data.t('header.about')}</span>
     </Button>
-    <Button href="/tutorials" form="text" class="!hidden !md:inline">
+    <Button href="/tutorials" form="text" class="!md:inline !px-1 md:!px-4">
       <span class="i-fluent-learning-app-24-regular -mt-2px" />
       <span class="ml-1 hidden lg:inline">{$page.data.t('header.tutorials')}</span>
     </Button>
@@ -51,22 +51,19 @@
       form="text"
       href="https://docs.google.com/document/d/1MZGkBbnCiAch3tWjBOHRYPpjX1MVd7f6x5uVuwbxM-Q/edit?usp=sharing"
       target="_blank"
-      class="!p-3 text-gray-600 hover:text-black !hidden !lg:block">
+      class="!p-3 text-gray-600 hover:text-black !lg:block !px-1 md:!px-4">
       <i class="far fa-question-circle" />
-      <span class="ml-1">
+      <span class="ml-1 hidden lg:inline">
         FAQ
       </span>
     </Button>
 
     <ShowHide let:show let:toggle>
-      <Button form="text" onclick={toggle}>
-        <span class="hidden lg:inline">
+      <Button form="text" onclick={toggle} class="!px-1 md:!px-4">
+        <span class="lg:inline">
           <i class="far fa-comment" />
         </span>
-        <span class="lg:hidden">
-          <i class="far fa-question-circle" />
-        </span>
-        <span class="ml-1 hidden sm:inline">
+        <span class="ml-1 hidden lg:inline">
           {$page.data.t('header.contact_us')}
         </span>
       </Button>
@@ -78,7 +75,7 @@
     </ShowHide>
 
     <ShowHide let:show let:toggle>
-      <Button form="text" onclick={toggle}>
+      <Button form="text" onclick={toggle} class="!px-1 md:!px-4">
         <i class="far fa-language" />
         <span class="ml-1 hidden lg:inline">
           {$page.data.t('header.language')}
