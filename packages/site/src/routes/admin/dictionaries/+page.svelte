@@ -11,7 +11,8 @@
   import { page } from '$app/stores'
 
   export let data: PageData
-  $: ({ users, dictionary_roles, dictionaries } = data)
+  $: ({ users, dictionary_roles } = data)
+  $: ({ dictionaries } = $page.data)
 
   $: users_with_roles = $users.map((user) => {
     return {

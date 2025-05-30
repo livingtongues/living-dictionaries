@@ -1,4 +1,4 @@
-import type { DictionaryView, Tables } from '@living-dictionaries/types'
+import type { Tables } from '@living-dictionaries/types'
 import type { UserForAdminTable } from '@living-dictionaries/types/supabase/users.types'
 import type { LayoutLoad } from './$types'
 import { inviteHelper } from '$lib/helpers/inviteHelper'
@@ -7,13 +7,14 @@ import { cached_query_data_store } from '$lib/supabase/cached-query-data'
 export const load = (async ({ parent }) => {
   const { supabase } = await parent()
 
-  const dictionaries = cached_query_data_store<DictionaryView>({
-    materialized_query: supabase.from('materialized_admin_dictionaries_view')
-      .select(),
-    live_query: supabase.from('dictionaries_view')
-      .select(),
-    key: 'dictionaries',
-  })
+  // TODO delete this code since now it has been stored in layout root
+  // const dictionaries = cached_query_data_store<DictionaryView>({
+  //   materialized_query: supabase.from('materialized_admin_dictionaries_view')
+  //     .select(),
+  //   live_query: supabase.from('dictionaries_view')
+  //     .select(),
+  //   key: 'dictionaries',
+  // })
 
   const users = cached_query_data_store<UserForAdminTable>({
     live_query: supabase.rpc('users_for_admin_table')
@@ -67,7 +68,7 @@ export const load = (async ({ parent }) => {
   }
 
   return {
-    dictionaries,
+    // dictionaries,
     users,
     dictionary_roles,
     get_invites,
