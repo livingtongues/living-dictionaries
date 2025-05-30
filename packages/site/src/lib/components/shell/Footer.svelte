@@ -1,7 +1,10 @@
 <script lang="ts">
-// import { Button, ShowHide } from 'svelte-pieces'
-  // import User from './User.svelte'
-  // import { mode } from '$lib/supabase'
+  import { page } from '$app/stores'
+
+  $: ({ dictionaries } = $page.data)
+  $: totalDictionaries = $dictionaries?.length
+
+// $: console.log(`dictionaries`, totalDictionaries)
 </script>
 
 <footer class="print:hidden fixed bottom-0 left-0 right-0 flex items-center justify-left bg-white h-14 z-2 whitespace-nowrap border-t border-gray-200">
