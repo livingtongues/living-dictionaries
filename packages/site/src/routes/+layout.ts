@@ -25,7 +25,7 @@ export const load: LayoutLoad = async ({ url: { searchParams }, data: { serverLo
   const columns_key = `table_columns_03.18.2024-${user_id}` // rename when adding more columns to invalidate the user's cache
   const preferred_table_columns = createPersistedStore(columns_key, defaultColumns)
   const mode = import.meta.env.MODE as 'development' | 'production'
-  const dictionaries = create_dictionaries_store({ user_id, supabase })
+  const dictionaries = create_dictionaries_store({ supabase })
 
   return {
     locale,

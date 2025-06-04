@@ -55,7 +55,7 @@
       const { error } = await data.supabase.from('dictionaries').update(change)
         .eq('id', dictionary_id)
       if (error) throw new Error(error.message)
-      await data.dictionaries.refresh()
+      await $page.data.dictionaries.refresh()
     } catch (err) {
       alert(`Error: ${err}`)
     }
