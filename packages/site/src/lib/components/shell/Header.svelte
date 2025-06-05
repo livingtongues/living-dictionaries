@@ -60,12 +60,12 @@
 
     <ShowHide let:show let:toggle>
       <Button form="text" onclick={toggle}>
-        <span class="hidden lg:inline">
+        <span class="inline">
           <i class="far fa-comment" />
         </span>
-        <span class="lg:hidden">
+        <!-- <span class="lg:hidden">
           <i class="far fa-question-circle" />
-        </span>
+        </span> -->
         <span class="ml-1 hidden sm:inline">
           {$page.data.t('header.contact_us')}
         </span>
@@ -100,31 +100,46 @@
         widthRem={9}
         on_close={() => set(false)}
         open={show}>
-        <Button
-          form="text"
-          href="https://www.flipcause.com/secure/cause_pdetails/NTQ3NDQ"
-          target="_blank">
-          <i class="far fa-donate" />
-          <span class="ml-1">{$page.data.t('header.donate')}</span>
-        </Button>
-        <Button href="/about" form="text">
-          <i class="far fa-info-circle" />
-          <span class="ml-1">{$page.data.t('header.about')}</span>
-        </Button>
-        <Button href="/tutorials" form="text">
-          <span class="i-fluent-learning-app-24-regular -mt-2px" />
-          <span class="ml-1">{$page.data.t('header.tutorials')}</span>
-        </Button>
-        <Button
-          form="text"
-          href="https://docs.google.com/document/d/1MZGkBbnCiAch3tWjBOHRYPpjX1MVd7f6x5uVuwbxM-Q/edit?usp=sharing"
-          target="_blank"
-          class="text-gray-600 hover:text-black !lg:block">
-          <i class="far fa-question-circle" />
-          <span class="ml-1">
-            FAQ
-          </span>
-        </Button>
+        <div class="print:hidden h-full flex flex-col">
+          <header>
+            <!-- TODO translate -->
+            <div class="block p-3 text-lg font-semibold mb-3 border-b">Menu</div>
+          </header>
+          <div class="">
+            <Button
+              form="text"
+              href="https://www.flipcause.com/secure/cause_pdetails/NTQ3NDQ"
+              target="_blank">
+              <i class="far fa-donate" />
+              <span class="ml-1">{$page.data.t('header.donate')}</span>
+            </Button>
+            <Button href="/about" form="text">
+              <i class="far fa-info-circle" />
+              <span class="ml-1">{$page.data.t('header.about')}</span>
+            </Button>
+            <Button href="/tutorials" form="text">
+              <span class="i-fluent-learning-app-24-regular -mt-2px" />
+              <span class="ml-1">{$page.data.t('header.tutorials')}</span>
+            </Button>
+            <Button
+              form="text"
+              href="https://docs.google.com/document/d/1MZGkBbnCiAch3tWjBOHRYPpjX1MVd7f6x5uVuwbxM-Q/edit?usp=sharing"
+              target="_blank"
+              class="text-gray-600 hover:text-black !lg:block">
+              <i class="far fa-question-circle" />
+              <span class="ml-1">
+                FAQ
+              </span>
+            </Button>
+          </div>
+          <div class="mt-auto">
+            <hr class="md:hidden" />
+            <Button form="menu" class="text-left !md:hidden" onclick={toggle}>
+              <i class="far fa-times fa-lg fa-fw" />
+              {$page.data.t('misc.close')}
+            </Button>
+          </div>
+        </div>
       </ResponsiveSlideover>
     </ShowHide>
 
