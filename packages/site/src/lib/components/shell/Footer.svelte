@@ -10,15 +10,15 @@
 
 <footer class="print:hidden fixed bottom-0 left-0 right-0 flex items-center justify-left bg-white h-14 z-2 whitespace-nowrap border-t border-gray-200">
   <div class="lg:text-sm text-xs  overflow-x-auto md:overflow-hidden py-6 pl-3">
-    <p>
+    <p class="sm:block inline">
+      <button on:click={() => show_statistics = !show_statistics} type="button" class="i-ion:bar-chart sm:hidden cursor-pointer" />
       <span class:hidden={show_statistics} class="sm:inline hidden">
         Total number of public Living Dictionaries: {public_dictionaries}. Total number of dictionary entries: XX.
       </span>
-      <button on:click={() => show_statistics = !show_statistics} type="button" class="i-fluent-mdl2:chart sm:hidden cursor-pointer" />
     </p>
-    <p>
+    <p class:block={!show_statistics} class="sm:block inline">
       <span class="sm:inline hidden">Living Dictionaries is a project of <a href="https://livingtongues.org/" target="_blank" class="underline">Living Tongues Institute for Endangered Languages.</a> </span>
-      <i class="i-mage:facebook-square" /> <i class="i-f7:logo-instagram" />
+      <i class="i-mage:facebook-square text-[13.4px]" /> <i class="i-f7:logo-instagram" />
     </p>
   </div>
 </footer>
