@@ -7,15 +7,6 @@ import { cached_query_data_store } from '$lib/supabase/cached-query-data'
 export const load = (async ({ parent }) => {
   const { supabase } = await parent()
 
-  // TODO delete this code since now it has been stored in layout root
-  // const dictionaries = cached_query_data_store<DictionaryView>({
-  //   materialized_query: supabase.from('materialized_admin_dictionaries_view')
-  //     .select(),
-  //   live_query: supabase.from('dictionaries_view')
-  //     .select(),
-  //   key: 'dictionaries',
-  // })
-
   const users = cached_query_data_store<UserForAdminTable>({
     live_query: supabase.rpc('users_for_admin_table')
       .select(),
@@ -68,7 +59,6 @@ export const load = (async ({ parent }) => {
   }
 
   return {
-    // dictionaries,
     users,
     dictionary_roles,
     get_invites,
