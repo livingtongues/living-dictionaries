@@ -97,6 +97,7 @@
       </button>
       <ResponsiveSlideover
         side={$page.data.t('page.direction') === 'ltr' ? 'right' : 'left'}
+        showWidth={show ? 'md' : null}
         widthRem={9}
         on_close={() => set(false)}
         open={show}>
