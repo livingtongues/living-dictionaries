@@ -39,11 +39,11 @@
       <i class="far fa-donate" />
       <span class="ml-1 hidden lg:inline">{$page.data.t('header.donate')}</span>
     </Button>
-    <Button href="/about" form="text" class="!hidden !lg:inline">
+    <Button href="/about" form="text" class="!hidden !lg:inline" target="_blank">
       <i class="far fa-info-circle" />
       <span class="ml-1 hidden lg:inline">{$page.data.t('header.about')}</span>
     </Button>
-    <Button href="/tutorials" form="text" class="!hidden !md:inline">
+    <Button href="/tutorials" form="text" class="!hidden !md:inline" target="_blank">
       <span class="i-fluent-learning-app-24-regular -mt-2px" />
       <span class="ml-1 hidden lg:inline">{$page.data.t('header.tutorials')}</span>
     </Button>
@@ -106,7 +106,7 @@
             <!-- TODO translate -->
             <div class="block p-3 text-lg font-semibold mb-3 border-b">Menu</div>
           </header>
-          <div class="">
+          <div>
             <Button
               form="text"
               href="https://www.flipcause.com/secure/cause_pdetails/NTQ3NDQ"
@@ -114,11 +114,11 @@
               <i class="far fa-donate" />
               <span class="ml-1">{$page.data.t('header.donate')}</span>
             </Button>
-            <Button href="/about" form="text">
+            <Button href="/about" form="text" target="_blank">
               <i class="far fa-info-circle" />
               <span class="ml-1">{$page.data.t('header.about')}</span>
             </Button>
-            <Button href="/tutorials" form="text">
+            <Button href="/tutorials" form="text" target="_blank">
               <span class="i-fluent-learning-app-24-regular -mt-2px" />
               <span class="ml-1">{$page.data.t('header.tutorials')}</span>
             </Button>
