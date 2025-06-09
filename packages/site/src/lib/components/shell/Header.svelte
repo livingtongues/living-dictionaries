@@ -103,8 +103,7 @@
         open={show}>
         <div class="print:hidden h-full flex flex-col">
           <header>
-            <!-- TODO translate -->
-            <div class="block p-3 text-lg font-semibold mb-3 border-b">Menu</div>
+            <div class="block p-3 text-lg font-semibold mb-3 border-b">{$page.data.t('header.menu')}</div>
           </header>
           <div>
             <Button
