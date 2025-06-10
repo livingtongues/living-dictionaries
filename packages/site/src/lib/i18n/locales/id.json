@@ -143,7 +143,7 @@
     "agree_for_non-commercial": "Saya setuju bahwa karya ini nonkomersial.",
     "source_question": "Dari mana data dalam kamus ini berasal? Jelaskan jika Anda sendiri yang mengumpulkan data tersebut. Jika Anda menggunakan sumber referensi yang diterbitkan, harap cantumkan di sini.",
     "use_question": "Siapa yang akan menggunakan kamus ini? Apakah akan digunakan dalam proyek pendidikan atau media?",
-    "conlang_warning": "Jika kamus ini ditujukan untuk bahasa buatan (atau buatan), dan Anda tidak menunjukkannya, kami berhak menghapusnya."
+    "conlang_warning": "Jika kamus ini ditujukan untuk bahasa buatan dan Anda tidak menunjukkannya, kami berhak menghapusnya."
   },
   "dictionary": {
     "latitude": "Garis Lintang",
@@ -222,7 +222,8 @@
     "donate": "Berdonasi",
     "about": "Tentang",
     "faq": "Pertanyaan yang Sering Ditanyakan",
-    "tutorials": "Tutorial"
+    "tutorials": "Tutorial",
+    "menu": "Menu"
   },
   "home": {
     "list_of_dictionaries": "Daftar Kamus",
