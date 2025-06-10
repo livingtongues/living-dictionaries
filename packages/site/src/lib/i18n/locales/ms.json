@@ -135,7 +135,7 @@
     "map_instructions": "Klik pada peta untuk menambah koordinat sekunder.",
     "print_access": "Benarkan Penonton Mencetak Kamus",
     "primary_coordinate": "Koordinat utama",
-    "conlang_question": "Adakah ini bahasa yang dibina atau bahasa buatan?",
+    "conlang_question": "Adakah ini bahasa binaan atau bahasa buatan?",
     "conlang_info_1": "Memandangkan misi kami menumpukan pada mendokumentasikan bahasa semula jadi manusia yang terancam dan minoriti, kami tidak menawarkan sokongan teknikal untuk bahasa binaan (konlang) atau bahasa buatan. Disebabkan pasukan kami yang kecil dan waktu operasi yang terhad, kami tidak menawarkan import data untuk conlang.",
     "conlang_info_2": "Kamus Hidup untuk bahasa yang dibina tidak akan didedahkan kepada umum di tapak web kami atau tersedia pada peta halaman utama kami. Jika kami melihat kandungan yang menghina dalam Kamus Hidup ini, kami juga berhak untuk memadamkannya.",
     "agree_above": "Saya bersetuju dengan perkara di atas.",
@@ -143,7 +143,7 @@
     "agree_for_non-commercial": "Saya bersetuju bahawa kerja ini bukan komersial.",
     "source_question": "Dari mana datangnya data dalam kamus ini? Sila terangkan jika anda mengumpul data sendiri. Jika anda menggunakan mana-mana sumber rujukan yang diterbitkan, sila senaraikan di sini.",
     "use_question": "Siapa yang akan menggunakan kamus ini? Adakah ia akan digunakan dalam mana-mana projek pendidikan atau media?",
-    "conlang_warning": "Jika kamus ini adalah untuk bahasa yang dibina (atau tiruan), dan anda tidak menyatakannya, kami berhak untuk mengeluarkannya."
+    "conlang_warning": "Jika kamus ini adalah untuk bahasa yang dibina (atau buatan), dan anda tidak menyatakannya, kami berhak untuk mengalih keluarnya."
   },
   "dictionary": {
     "latitude": "Latitud",
@@ -222,7 +222,8 @@
     "donate": "Sokong Kami",
     "about": "Perihal",
     "faq": "Soalan Lazim",
-    "tutorials": "Tutorial"
+    "tutorials": "Tutorial",
+    "menu": "Menu"
   },
   "home": {
     "list_of_dictionaries": "Senarai Kamus",
@@ -347,7 +348,7 @@
   "import_page": {
     "import": "Import",
     "template_link": "Pautan ke Templat",
-    "instructions_1": "Jika anda sudah mempunyai data linguistik yang ingin anda import ke dalam Kamus anda, sila ikuti langkah di bawah.",
+    "instructions_1": "Jika anda sudah mempunyai data linguistik yang ingin anda import ke dalam Kamus anda, sila ikut langkah di bawah.",
     "instructions_2": "Klik pada butang biru \"Pautan ke Templat\" di bawah. Muat turun templat sebagai fail Excel atau buat salinan pada Dokumen Google. Edit templat mengikut keperluan projek anda. Salin dan tampal data anda ke dalam hamparan.",
     "instructions_3": "Gunakan \"Hubungi Kami\" di bawah untuk menghubungi kami. Beritahu kami bahawa anda mempunyai hamparan baharu yang sedia untuk diimport. Tanya kami apa-apa soalan yang anda ada. Kami akan membalas anda melalui e-mel, dan kemudian anda boleh menghantar fail anda kepada kami.",
     "instructions_4": "Untuk menghantar data yang dieksport kepada kami daripada perisian kamus seperti FLEx, Lexique Pro, Shoebox, sila gunakan butang \"Hubungi Kami\" di bawah dan beritahu kami butiran projek anda.",
@@ -380,7 +381,7 @@
     "name": "Sinopsis"
   },
   "sense": {
-    "sense": "rasa",
+    "sense": "Rasa",
     "add": "Tambah Sense"
   },
   "banner": {
