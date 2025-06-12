@@ -82,11 +82,11 @@
     "def": "Kibainishi bayana",
     "indf": "Kibainishi fiche",
     "indfpro": "Kiwakilishi jumla",
-    "pers": "kiwakilishi cha kibinafsi",
-    "poss": "kiwakilishi kimilikishi",
-    "reflpro": "kiwakilishi rejeshi",
-    "relpro": "kiwakilishi cha jamaa",
-    "vd": "kitenzi kibadilishi",
-    "va": "ambitransitive"
+    "pers": "Pronoun ya kibinafsi",
+    "poss": "Pronoun ya kumiliki",
+    "reflpro": "Matamshi ya kutafakari",
+    "relpro": "Matamshi ya jamaa",
+    "vd": "kitenzi cha ditransitive",
+    "va": "Ambitransitive"
   }
 }

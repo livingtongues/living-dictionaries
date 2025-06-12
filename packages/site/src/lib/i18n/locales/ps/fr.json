@@ -86,7 +86,7 @@
     "poss": "pronom possessif",
     "reflpro": "pronom réfléchi",
     "relpro": "pronom relatif",
-    "vd": "verbe dittransitif",
-    "va": "ambitransitif"
+    "vd": "verbe ditransitif",
+    "va": "ambbitransitif"
   }
 }
