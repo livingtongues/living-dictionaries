@@ -1,8 +1,9 @@
 <script lang="ts">
-  import { page } from '$app/stores';
-  import Header from '$lib/components/shell/Header.svelte';
-  import { Button } from 'svelte-pieces';
-  import SeoMetaTags from '$lib/components/SeoMetaTags.svelte';
+  import { Button } from 'svelte-pieces'
+  import { page } from '$app/stores'
+  import Header from '$lib/components/shell/Header.svelte'
+  import Footer from '$lib/components/shell/Footer.svelte'
+  import SeoMetaTags from '$lib/components/SeoMetaTags.svelte'
 </script>
 
 <Header>
@@ -68,12 +69,12 @@
   <p>
     {$page.data.t('about.import_export')}
   </p>
-  <p>{$page.data.t( 'about.geo_tagging')}</p>
-  <p>{$page.data.t( 'about.flashcard_view')}</p>
-  <p>{$page.data.t( 'about.peer_review')}</p>
-  <p>{$page.data.t( 'about.suggestions_from_users')}</p>
-  <p>{$page.data.t( 'about.push_notifications')}</p>
-  <p>{$page.data.t( 'about.contributor_awards')}</p>
+  <p>{$page.data.t('about.geo_tagging')}</p>
+  <p>{$page.data.t('about.flashcard_view')}</p>
+  <p>{$page.data.t('about.peer_review')}</p>
+  <p>{$page.data.t('about.suggestions_from_users')}</p>
+  <p>{$page.data.t('about.push_notifications')}</p>
+  <p>{$page.data.t('about.contributor_awards')}</p>
 
   <hr style="margin: 40px 0;" />
 
@@ -226,6 +227,8 @@
     {$page.data.t('header.donate')}
   </Button>
 </div>
+
+<Footer />
 
 <SeoMetaTags
   title={$page.data.t('about.about_LD')}
