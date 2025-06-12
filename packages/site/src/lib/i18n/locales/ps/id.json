@@ -82,11 +82,11 @@
     "def": "artikel definit",
     "indf": "artikel indefinit",
     "indfpro": "pronomina indefinit",
-    "pers": "kata ganti pribadi",
+    "pers": "kata ganti orang",
     "poss": "kata ganti posesif",
-    "reflpro": "kata ganti yang mencerminkan",
+    "reflpro": "kata ganti refleksif",
     "relpro": "kata ganti relatif",
-    "vd": "kata kerja ditransitif",
-    "va": "Ambitransitif"
+    "vd": "kata kerja dwitransitif",
+    "va": "ambisius"
   }
 }

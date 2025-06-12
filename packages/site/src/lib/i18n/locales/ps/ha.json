@@ -82,11 +82,11 @@
     "def": "tabbataccen labarin",
     "indf": "m labarin",
     "indfpro": "m wakilin suna",
-    "pers": "Bayanin Keɓaɓɓun",
-    "poss": "Sanarwar",
-    "reflpro": "Bayanin Reflexive",
-    "relpro": "'yar wasan dangi",
-    "vd": "Ditranany Verb",
-    "va": "ambittarinadi"
+    "pers": "suna na sirri",
+    "poss": "mallakar suna",
+    "reflpro": "reflexive karin magana",
+    "relpro": "dangi mai suna",
+    "vd": "fi'ili ditransitive",
+    "va": "ambitransitive"
   }
 }
