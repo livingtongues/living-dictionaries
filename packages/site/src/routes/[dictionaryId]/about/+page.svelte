@@ -6,7 +6,7 @@
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte'
 
   export let data
-  $: ({ is_manager, dictionary, update_about, dictionary_info } = data)
+  $: ({ is_manager, is_contributor, dictionary, update_about, dictionary_info, admin } = data)
   let updated = ''
 
   let editing = false
@@ -32,7 +32,9 @@
     {/if}
   {/if}
 
-  <UserGuide />
+  {#if $is_manager || $is_contributor || $admin > 1}
+    <UserGuide />
+  {/if}
   <div class="flex">
     {#if editing}
       <div class="max-w-screen-md tw-prose prose-lg">
