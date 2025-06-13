@@ -68,6 +68,7 @@ export async function generate_sql_statements({
     }
     if (row.phonetic) entry.phonetic = row.phonetic
     if (row.morphology) entry.morphology = row.morphology
+    if (row.interlinearization) entry.interlinearization = row.interlinearization
     if (row.source) entry.sources = row.source.split('|').map(source => source.trim()).filter(Boolean)
     if (row.scientificName) entry.scientific_names = [row.scientificName]
     if (row.ID) entry.elicitation_id = row.ID
