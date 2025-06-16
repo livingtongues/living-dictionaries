@@ -250,7 +250,7 @@
     "tft": "Ternate",
     "tet": "Tetum / Fehan Tetun",
     "th": "Thaï",
-    "bo": "Tibétain",
+    "bo": "tibétain",
     "tvo": "Tidore",
     "tig": "Tigre",
     "ti": "tigrinya",
@@ -287,18 +287,19 @@
     "yo": "Yoruba",
     "dje": "Zarma",
     "zu": "zoulou",
-    "tri": "Tiriyo",
+    "tri": "Tiriyó",
     "hix": "Hixkaryana",
-    "waw": "Waiwaï",
+    "waw": "Waiwai",
     "way": "Wayana",
     "apy": "Apalaí",
     "jen": "Dza",
     "mko": "Mingang Doso",
     "hbo-hebr": "hébreu",
     "ne-2": "Népalais (romanisation)",
-    "apd": "Arabe soudanais",
+    "apd": "arabe soudanais",
     "hoi": "Holikachuk",
     "mtq": "Muong",
-    "cag": "Nivaclé"
+    "cag": "Nivaclé",
+    "haw": "hawaïen"
   }
 }
