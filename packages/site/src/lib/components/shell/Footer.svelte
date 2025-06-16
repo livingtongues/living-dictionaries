@@ -5,7 +5,6 @@
   $: ({ dictionaries } = $page.data)
   $: public_dictionaries = $dictionaries?.filter(dictionary => dictionary.public).length || 0
   $: public_entries_count = $page.data.public_entries_count?.data.count || 0
-  // $: console.log('public_entries_count', $page.data.public_entries_count)
   let show_statistics = false
 </script>
 
@@ -19,7 +18,7 @@
     </p>
     <p class:block={!show_statistics} class="sm:block inline">
       <span class="sm:inline hidden">Living Dictionaries is a project of <a href="https://livingtongues.org/" target="_blank" class="underline">Living Tongues Institute for Endangered Languages.</a> </span>
-      <i class="i-mage:facebook-square text-[13.4px]" /> <i class="i-f7:logo-instagram" />
+      <a href="https://www.facebook.com/living.tongues" target="_blank"><i class="i-mage:facebook-square text-[13.4px]" /></a> <a href="https://www.instagram.com/livingtongues" target="_blank"><i class="i-f7:logo-instagram" /></a>
     </p>
   </div>
 </footer>
