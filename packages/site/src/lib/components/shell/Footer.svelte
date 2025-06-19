@@ -1,10 +1,10 @@
 <script lang="ts">
   // import { slide } from 'svelte/transition'
   import { page } from '$app/stores'
+  import { public_entries_count_store } from '$lib/supabase/entries-count'
 
   $: ({ dictionaries } = $page.data)
   $: public_dictionaries = $dictionaries?.filter(dictionary => dictionary.public).length || 0
-  $: public_entries_count = $page.data.public_entries_count?.data.count || 0
   let show_statistics = false
 </script>
 
@@ -13,7 +13,7 @@
     <p class="sm:block inline">
       <button on:click={() => show_statistics = !show_statistics} type="button" class="i-ion:bar-chart sm:hidden cursor-pointer" />
       <span class:hidden={show_statistics} class="sm:inline hidden">
-        Total number of public Living Dictionaries: {public_dictionaries}. Total number of dictionary entries: {public_entries_count}.
+        Total number of public Living Dictionaries: {public_dictionaries}. Total number of dictionary entries: {$public_entries_count_store}.
       </span>
     </p>
     <p class:block={!show_statistics} class="sm:block inline">
