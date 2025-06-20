@@ -12,6 +12,7 @@
   import Image from '$lib/components/image/Image.svelte'
   import AddImage from '$lib/components/image/AddImage.svelte'
   import { goto } from '$app/navigation'
+  import { reload_public_entries_count } from '$lib/supabase/entries-count'
 
   export let data
   $: ({ dictionary, admin, is_manager, updateDictionary, remove_gloss_language, add_featured_image, about_is_too_short } = data)
@@ -106,6 +107,7 @@
         await updateDictionary({ public: false })
       } else if ($admin) {
         await updateDictionary({ public: true })
+        reload_public_entries_count()
       } else if (about_is_too_short()) {
         alert($page.data.t('about.message'))
         goto(`/${dictionary.id}/about`)
@@ -113,6 +115,7 @@
         const communityAllowsOnline = confirm($page.data.t('settings.community_permission'))
         if (communityAllowsOnline) alert($page.data.t('header.contact_us'))
       }
+      reload_public_entries_count()
     }} />
   <div class="mb-5" />
 
