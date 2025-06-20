@@ -107,6 +107,8 @@
         await updateDictionary({ public: false })
       } else if ($admin) {
         await updateDictionary({ public: true })
+        dictionary.public = true
+        await $page.data.dictionaries.refresh()
         reload_public_entries_count()
       } else if (about_is_too_short()) {
         alert($page.data.t('about.message'))
@@ -115,6 +117,8 @@
         const communityAllowsOnline = confirm($page.data.t('settings.community_permission'))
         if (communityAllowsOnline) alert($page.data.t('header.contact_us'))
       }
+      dictionary.public = false
+      await $page.data.dictionaries.refresh()
       reload_public_entries_count()
     }} />
   <div class="mb-5" />
