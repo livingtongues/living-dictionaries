@@ -3161,6 +3161,12 @@ export interface Database {
         }
         Relationships: []
       }
+      public_entries_count: {
+        Row: {
+          count: number | null
+        }
+        Relationships: []
+      }
       user_emails: {
         Row: {
           created_at: string | null
