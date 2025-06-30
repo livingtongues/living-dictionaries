@@ -267,8 +267,6 @@ export async function generate_sql_statements({
       sql_statements += sql_file_string('senses_in_sentences', connection)
     }
 
-    const audio_number_suffix = new Set<Number_Suffix>()
-
     for (const [key, value] of row_entries) {
       if (!key.startsWith('soundFile')) continue
       if (!value) continue
