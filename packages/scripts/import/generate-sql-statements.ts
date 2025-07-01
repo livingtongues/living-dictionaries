@@ -268,8 +268,10 @@ export async function generate_sql_statements({
     }
 
     for (const [key, value] of row_entries) {
-      if (!key.includes('soundFile')) continue
+      if (!key.startsWith('soundFile')) continue
       if (!value) continue
+
+      const number_suffix_with_period = key.replace('soundFile', '') as Number_Suffix
 
       const { storage_path, error } = await upload_audio(value, entry_id)
       if (error) {
@@ -287,25 +289,27 @@ export async function generate_sql_statements({
       }
       sql_statements += sql_file_string('audio', audio)
 
-      // TODO: the code above will properly import multiple audio files to the same entry but the code below will only import the metadata from the first audio file. Late on when adding multiple audio import ability, use the next line to get the number suffix from the key
-      // const number_suffix_with_period = key.replace('soundFile', '') as Number_Suffix
-      if (row.speakerName) {
-        let speaker_id = speakers.find(({ name }) => name === row.speakerName)?.id
+      const speakerNameKey = `speakerName${number_suffix_with_period}`
+      const speakerAgeKey = `speakerAge${number_suffix_with_period}`
+      const speakerGenderKey = `speakerGender${number_suffix_with_period}`
+      const speakerHometownKey = `speakerHometown${number_suffix_with_period}`
+
+      const speakerName = row[speakerNameKey as keyof Row]
+      if (speakerName) {
+        let speaker_id = speakers.find(({ name }) => name === speakerName)?.id
         if (!speaker_id) {
           speaker_id = randomUUID()
-
           const speaker: TablesInsert<'speakers'> = {
             ...c_u_meta(),
             id: speaker_id,
             dictionary_id,
-            name: row.speakerName,
-            birthplace: row.speakerHometown || '',
-            decade: Number.parseInt(row.speakerAge) || null,
-            gender: row.speakerGender as 'm' | 'f' | 'o' || null,
+            name: speakerName,
+            birthplace: row[speakerHometownKey as keyof Row] || '',
+            decade: Number.parseInt(row[speakerAgeKey as keyof Row] as string) || null,
+            gender: row[speakerGenderKey as keyof Row] as 'm' | 'f' | 'o' || null,
           }
-
           sql_statements += sql_file_string('speakers', speaker)
-          speakers.push({ id: speaker_id, name: row.speakerName })
+          speakers.push({ id: speaker_id, name: speakerName })
         }
 
         sql_statements += sql_file_string('audio_speakers', {
