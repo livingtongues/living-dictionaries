@@ -67,7 +67,9 @@
   },
   "account": {
     "account_settings": "একাওন্টৰ সংহতিসমূহ",
-    "log_out": "লগ আউট কৰক"
+    "log_out": "লগ আউট কৰক",
+    "send_code": "",
+    "enter_6_digit_code_sent_to": ""
   },
   "audio": {
     "tapToStopRecording": "তাৰ পিছত আপুনি ৰেকৰ্ডিং বন্ধ কৰিবলৈ টিপিব বা টেপ কৰিব",
@@ -220,7 +222,8 @@
     "donate": "দান কৰক",
     "about": "বিষয়ে",
     "faq": "সঘনাই উত্থাপিত কৰা প্ৰশ্নসমূহ",
-    "tutorials": ""
+    "tutorials": "",
+    "menu": ""
   },
   "home": {
     "list_of_dictionaries": "অভিধানসমূহৰ তালিকা",
@@ -262,7 +265,8 @@
     "map": "",
     "guidance": "",
     "out_of_service": "",
-    "transmitter": ""
+    "transmitter": "",
+    "disjunctive": ""
   },
   "settings": {
     "community_permission": "ভাষণ সম্প্ৰদায়ে এই ভাষাটো অনলাইন/ইণ্টাৰনেটত উপলব্ধ হ'বলৈ অনুমতি দিয়ে নেকি?",

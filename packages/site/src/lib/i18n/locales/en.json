@@ -223,7 +223,8 @@
     "donate": "Donate",
     "about": "About",
     "faq": "FAQ",
-    "tutorials": "Tutorials"
+    "tutorials": "Tutorials",
+    "menu": "Menu"
   },
   "home": {
     "list_of_dictionaries": "List of Dictionaries",
@@ -265,7 +266,8 @@
     "map": "Map",
     "guidance": "Guidance",
     "out_of_service": "Thank you for visiting our website! This page is temporarily under construction.\nIt will not be available between February 3 and February 28, 2025.\nPlease visit this page again on March 1, 2025.\nYou will be able to create new Living Dictionaries at that time.\nSorry for the inconvenience, and thank you for your patience.\nIn the meantime, the rest of the platform is working normally.",
-    "transmitter": "Sincerely, the Living Dictionaries team"
+    "transmitter": "Sincerely, the Living Dictionaries team",
+    "disjunctive": "or"
   },
   "settings": {
     "community_permission": "Does the speech community allow this language to be online?",

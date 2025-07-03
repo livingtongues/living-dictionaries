@@ -38,11 +38,11 @@
     "suggestions_from_users": "Phản hồi và góp ý từ người dùng",
     "push_notifications": "Thông báo đẩy (push notification) cho những người đóng góp và cộng tác viên",
     "contributor_awards": "Khen thưởng thành tích",
-    "question_1": "Vui lòng cung cấp một số thông tin cơ bản về ngôn ngữ này. Nó được nói ở đâu? Cộng đồng nào nói ngôn ngữ này? Ngôn ngữ này có bị đe dọa không?",
-    "question_2": "Tên của những người xây dựng từ điển này là gì? Tiếng nói của ai trong từ điển này?",
-    "question_3": "Dữ liệu trong từ điển này đến từ đâu? Vui lòng mô tả nếu bạn tự mình thu thập dữ liệu. Nếu bạn sử dụng bất kỳ nguồn tham khảo nào đã được xuất bản, vui lòng liệt kê chúng.",
-    "question_4": "Ai sẽ sử dụng từ điển này? Nó sẽ được sử dụng trong bất kỳ dự án giáo dục nào?",
-    "question_5": "Nếu bạn muốn công chúng liên hệ với bạn về dự án này, vui lòng cung cấp thông tin liên hệ của bạn hoặc liên kết đến nơi mọi người có thể tìm hiểu thêm. Đây là tùy chọn.",
+    "question_1": "Vui lòng cung cấp một số thông tin cơ bản về ngôn ngữ này. Ngôn ngữ này được nói ở đâu? Những cộng đồng nào nói ngôn ngữ này? Ngôn ngữ này có bị đe dọa không?",
+    "question_2": "Tên của những người xây dựng nên cuốn từ điển này là gì? Giọng nói của ai có trong cuốn từ điển này?",
+    "question_3": "Dữ liệu trong từ điển này đến từ đâu? Vui lòng mô tả nếu bạn tự thu thập dữ liệu. Nếu bạn sử dụng bất kỳ nguồn tham khảo nào đã xuất bản, vui lòng liệt kê chúng.",
+    "question_4": "Ai sẽ sử dụng từ điển này? Nó sẽ được sử dụng trong bất kỳ dự án giáo dục nào không?",
+    "question_5": "Nếu bạn muốn công chúng liên hệ với bạn về dự án này, vui lòng cung cấp thông tin liên lạc của bạn hoặc liên kết đến nơi mọi người có thể tìm hiểu thêm. Điều này là tùy chọn.",
     "message": "Trước khi công khai từ điển của bạn, vui lòng hoàn thành phần Giới thiệu."
   },
   "contributors": {
@@ -67,7 +67,9 @@
   },
   "account": {
     "account_settings": "Cài đặt tài khoản",
-    "log_out": "Đăng xuất"
+    "log_out": "Đăng xuất",
+    "send_code": "Gửi mã",
+    "enter_6_digit_code_sent_to": "Nhập mã 6 chữ số được gửi đến"
   },
   "audio": {
     "tapToStopRecording": "Sau đó, bạn sẽ bấm để ngừng quay",
@@ -94,8 +96,8 @@
     "message_sent": "Tin nhắn đã được gửi đi. Chúng tôi sẽ cố gắng phản hồi trong thời gian sớm nhất có thể.",
     "what_is_your_question": "Bạn có câu hỏi hay nhận xét gì hay không?",
     "message_failed": "Tin nhắn không được gửi. Xin vui lòng kiểm tra kết nối mạng của bạn hoặc gửi email cho chúng tôi tại: ",
-    "delete_dictionary": "Xóa từ điển",
-    "public_dictionary": "Công khai từ điển",
+    "delete_dictionary": "Xóa một từ điển",
+    "public_dictionary": "Công khai một từ điển",
     "import_data": "Nhập dữ liệu",
     "request_access": "Yêu cầu quyền chỉnh sửa",
     "report_problem": "Báo cáo sự cố",
@@ -133,15 +135,15 @@
     "map_instructions": "Nhấp trên bản đồ để thêm tọa độ thứ cấp",
     "print_access": "Cho phép người xem in Từ Điển",
     "primary_coordinate": "Tọa độ chính",
-    "conlang_question": "Đây là ngôn ngữ được xây dựng hay ngôn ngữ nhân tạo?",
-    "conlang_info_1": "Vì sứ mệnh của chúng tôi tập trung vào việc ghi lại các ngôn ngữ tự nhiên của con người có nguy cơ tuyệt chủng và thiểu số nên chúng tôi không cung cấp hỗ trợ kỹ thuật cho các ngôn ngữ được xây dựng (conlang) hoặc ngôn ngữ nhân tạo. Do đội ngũ nhỏ và số giờ hoạt động hạn chế nên chúng tôi không cung cấp tính năng nhập dữ liệu cho conlang.",
-    "conlang_info_2": "Từ điển Sống cho các ngôn ngữ được xây dựng sẽ không được công khai trên trang web của chúng tôi hoặc có sẵn trên bản đồ trang chủ của chúng tôi. Nếu chúng tôi thấy nội dung xúc phạm trong Từ điển sống này, chúng tôi cũng có quyền xóa nội dung đó.",
+    "conlang_question": "Đây có phải là ngôn ngữ được xây dựng hay ngôn ngữ nhân tạo?",
+    "conlang_info_1": "Vì sứ mệnh của chúng tôi tập trung vào việc ghi chép lại các ngôn ngữ tự nhiên của con người đang bị đe dọa và thiểu số, chúng tôi không cung cấp hỗ trợ kỹ thuật cho các ngôn ngữ được xây dựng (conlang) hoặc ngôn ngữ nhân tạo. Do nhóm của chúng tôi nhỏ và giờ hoạt động hạn chế, chúng tôi không cung cấp dịch vụ nhập dữ liệu cho conlang.",
+    "conlang_info_2": "Từ điển Sống cho các ngôn ngữ được xây dựng sẽ không được công khai trên trang web của chúng tôi hoặc có sẵn trên bản đồ trang chủ của chúng tôi. Nếu chúng tôi thấy nội dung mang tính xúc phạm trong Từ điển Sống này, chúng tôi cũng có quyền xóa nội dung đó.",
     "agree_above": "Tôi đồng ý với những điều trên.",
-    "agree_to_cite": "Tôi đồng ý trích dẫn mọi tác phẩm đã xuất bản có liên quan trong các mục từ điển.",
-    "agree_for_non-commercial": "Tôi đồng ý rằng công việc này là phi thương mại.",
-    "source_question": "Dữ liệu trong từ điển này đến từ đâu? Vui lòng mô tả nếu bạn tự mình thu thập dữ liệu. Nếu bạn sử dụng bất kỳ nguồn tham khảo nào đã được xuất bản, vui lòng liệt kê chúng ở đây.",
-    "use_question": "Ai sẽ sử dụng từ điển này? Nó sẽ được sử dụng trong bất kỳ dự án giáo dục hoặc truyền thông nào?",
-    "conlang_warning": "Nếu từ điển này dành cho ngôn ngữ được xây dựng (hoặc nhân tạo) và bạn không chỉ ra điều đó, chúng tôi có quyền xóa nó."
+    "agree_to_cite": "Tôi đồng ý trích dẫn bất kỳ tác phẩm đã xuất bản có liên quan nào trong mục từ điển.",
+    "agree_for_non-commercial": "Tôi đồng ý rằng tác phẩm này không mang tính thương mại.",
+    "source_question": "Dữ liệu trong từ điển này đến từ đâu? Vui lòng mô tả nếu bạn tự thu thập dữ liệu. Nếu bạn sử dụng bất kỳ nguồn tham khảo nào đã xuất bản, vui lòng liệt kê chúng ở đây.",
+    "use_question": "Ai sẽ sử dụng từ điển này? Nó sẽ được sử dụng trong bất kỳ dự án giáo dục hoặc truyền thông nào không?",
+    "conlang_warning": "Nếu từ điển này dành cho ngôn ngữ nhân tạo (hoặc ngôn ngữ được xây dựng) và bạn không ghi rõ điều đó, chúng tôi có quyền xóa nó."
   },
   "dictionary": {
     "latitude": "Vĩ độ",
@@ -220,7 +222,8 @@
     "donate": "Tặng",
     "about": "Về chúng tôi",
     "faq": "Các câu hỏi thường gặp",
-    "tutorials": "Hướng dẫn"
+    "tutorials": "Hướng dẫn",
+    "menu": "Thực đơn"
   },
   "home": {
     "list_of_dictionaries": "Danh sách các Từ Điển",
@@ -260,9 +263,10 @@
     "negation": "Không",
     "clean": "Không lỗi",
     "map": "Bản đồ",
-    "guidance": "hướng dẫn",
-    "out_of_service": "Cảm ơn bạn đã ghé thăm trang web của chúng tôi! Trang này đang tạm thời được xây dựng.\nNó sẽ không có sẵn từ ngày 3 tháng 2 đến ngày 28 tháng 2 năm 2025.\nVui lòng truy cập lại trang này vào ngày 1 tháng 3 năm 2025.\nBạn sẽ có thể tạo Từ điển sống mới vào thời điểm đó.\nXin lỗi vì sự bất tiện này và cảm ơn sự kiên nhẫn của bạn.\nTrong khi đó, phần còn lại của nền tảng vẫn hoạt động bình thường.",
-    "transmitter": "Trân trọng, nhóm Từ Điển Sống"
+    "guidance": "Hướng dẫn",
+    "out_of_service": "Cảm ơn bạn đã ghé thăm trang web của chúng tôi! Trang này hiện đang được xây dựng tạm thời.\nTrang này sẽ không khả dụng trong khoảng thời gian từ ngày 3 tháng 2 đến ngày 28 tháng 2 năm 2025.\nVui lòng truy cập lại trang này vào ngày 1 tháng 3 năm 2025.\nBạn sẽ có thể tạo Từ điển Sống mới vào thời điểm đó.\nXin lỗi vì sự bất tiện này và cảm ơn sự kiên nhẫn của bạn.\nTrong thời gian chờ đợi, phần còn lại của nền tảng vẫn hoạt động bình thường.",
+    "transmitter": "Trân trọng, nhóm Living Dictionaries",
+    "disjunctive": "hoặc"
   },
   "settings": {
     "community_permission": "Cộng đồng có cho phép ngôn ngữ của họ được đăng tải trực tuyến hay không?",
@@ -343,12 +347,12 @@
   },
   "import_page": {
     "import": "Nhập khẩu",
-    "template_link": "Liên kết tới Mẫu",
-    "instructions_1": "Nếu bạn đã có dữ liệu ngôn ngữ muốn nhập vào Từ điển của mình, vui lòng làm theo các bước bên dưới.",
-    "instructions_2": "Nhấp vào nút “Liên kết tới mẫu” màu xanh lam bên dưới. Tải xuống mẫu dưới dạng tệp Excel hoặc tạo bản sao trên Google Docs. Chỉnh sửa mẫu theo nhu cầu dự án của bạn. Sao chép và dán dữ liệu của bạn vào bảng tính.",
-    "instructions_3": "Sử dụng mục “Liên hệ với chúng tôi” bên dưới để liên hệ với chúng tôi. Hãy cho chúng tôi biết rằng bạn có bảng tính mới sẵn sàng để nhập. Hãy hỏi chúng tôi bất kỳ câu hỏi nào bạn có. Chúng tôi sẽ trả lời bạn qua email và sau đó bạn có thể gửi tệp của mình cho chúng tôi.",
+    "template_link": "Liên kết đến Mẫu",
+    "instructions_1": "Nếu bạn đã có dữ liệu ngôn ngữ mà bạn muốn nhập vào Từ điển, vui lòng làm theo các bước dưới đây.",
+    "instructions_2": "Nhấp vào nút \"Liên kết đến Mẫu\" màu xanh bên dưới. Tải xuống mẫu dưới dạng tệp Excel hoặc tạo bản sao trên Google Docs. Chỉnh sửa mẫu theo nhu cầu của dự án. Sao chép và dán dữ liệu của bạn vào bảng tính.",
+    "instructions_3": "Sử dụng “Liên hệ với chúng tôi” bên dưới để liên hệ với chúng tôi. Hãy cho chúng tôi biết rằng bạn có bảng tính mới đã sẵn sàng để nhập. Hãy hỏi chúng tôi bất kỳ câu hỏi nào bạn có. Chúng tôi sẽ trả lời bạn qua email và sau đó bạn có thể gửi tệp của mình cho chúng tôi.",
     "instructions_4": "Để gửi cho chúng tôi dữ liệu được xuất từ ​​các phần mềm từ điển như FLEx, Lexique Pro, Shoebox, vui lòng sử dụng nút “Liên hệ với chúng tôi” bên dưới và cho chúng tôi biết chi tiết về dự án của bạn.",
-    "no_imports": "Chúng tôi hiện đang làm việc với nhiều cộng đồng và tổ chức đối tác để nhập một số lượng lớn mục từ điển vào nền tảng này. Chúng tôi cũng đang thực hiện các cập nhật lớn cho cơ sở dữ liệu của mình. Chúng tôi sẽ chấp nhận hoạt động nhập dữ liệu mới bắt đầu từ ngày 1 tháng 7 năm 2024. Chúng tôi đánh giá cao sự kiên nhẫn của bạn và chúng tôi xin lỗi vì sự bất tiện này."
+    "no_imports": "Hiện tại, chúng tôi đang làm việc với nhiều cộng đồng và tổ chức đối tác để nhập một số lượng lớn mục từ điển vào nền tảng này. Chúng tôi cũng đang thực hiện các bản cập nhật lớn cho cơ sở dữ liệu của mình. Chúng tôi sẽ chấp nhận dữ liệu nhập mới bắt đầu từ ngày 1 tháng 7 năm 2024. Chúng tôi đánh giá cao sự kiên nhẫn của bạn và chúng tôi xin lỗi vì sự bất tiện này."
   },
   "history": {
     "history": "Lịch sử",
@@ -357,19 +361,19 @@
     "entry_history": "Lịch sử nhập cảnh",
     "field": "Cánh đồng",
     "date": "Ngày",
-    "old_value": "Giá trị cũ",
+    "old_value": "Giá trị trước đây",
     "new_value": "Giá trị mới",
-    "entry_message": "Một người dùng đã chỉnh sửa mục này trên ",
-    "edited": "Chỉnh sửa lần cuối vào",
-    "history_search": "Tìm kiếm mục, người chỉnh sửa, trường và giá trị",
+    "entry_message": "Một người dùng đã chỉnh sửa mục nhập này vào",
+    "edited": "Lần chỉnh sửa cuối vào",
+    "history_search": "Tìm kiếm mục nhập, trình soạn thảo, trường và giá trị",
     "download_history": "Tải xuống Lịch sử dưới dạng CSV",
     "empty": "Chưa có lịch sử",
     "type": "kiểu",
-    "change": "lịch sử_thay đổi"
+    "change": "lịch sử_thay_đổi"
   },
   "partnership": {
     "title": "Tổ chức đối tác",
-    "button": "Viết trong Tổ chức đối tác",
+    "button": "Viết trong Tổ chức Đối tác",
     "name": "Tên tổ chức đối tác"
   },
   "synopsis": {
@@ -381,7 +385,7 @@
     "add": "Thêm ý nghĩa"
   },
   "banner": {
-    "message": "Chúng tôi đang cải tiến cơ sở dữ liệu của mình vào ngày 22 tháng 10, bắt đầu lúc 7 giờ tối theo giờ Miền Đông (New York), trong 24 giờ. Khả năng chỉnh sửa sẽ không có sẵn trong thời gian đó. Xin lỗi vì sự bất tiện này.",
+    "message": "Chúng tôi đang cải thiện cơ sở dữ liệu của mình vào ngày 22 tháng 10 bắt đầu từ 7 giờ tối theo giờ miền Đông (New York), trong vòng 24 giờ. Khả năng chỉnh sửa sẽ không khả dụng trong thời gian đó. Xin lỗi vì sự bất tiện này.",
     "attention": "Chú ý"
   }
 }

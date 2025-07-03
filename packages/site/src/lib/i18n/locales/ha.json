@@ -67,7 +67,9 @@
   },
   "account": {
     "account_settings": "account Saituna",
-    "log_out": "log Out"
+    "log_out": "log Out",
+    "send_code": "Aika Lambar",
+    "enter_6_digit_code_sent_to": "Shigar da lambar lambobi 6 da aka aika zuwa gare ta"
   },
   "audio": {
     "tapToStopRecording": "Sa'an nan za ku matsa zuwa tsayar da rikodi",
@@ -93,7 +95,7 @@
     "send_message": "aika sako",
     "message_sent": "Saƙon aika. Za mu amsa da zaran mun iya.",
     "what_is_your_question": "Mene ne tambaya ko comment?",
-    "message_failed": "aika sako ya kasa. Bincika haɗin Intanet ɗinku ko yi mana imel:",
+    "message_failed": "aika sako ya kasa. Bincika haɗin Intanet ɗin ku ko yi mana imel:",
     "delete_dictionary": "Share ƙamus",
     "public_dictionary": "Yi ƙamus na jama'a",
     "import_data": "Shigo da bayanai",
@@ -220,7 +222,8 @@
     "donate": "Ba da kyauta",
     "about": "game da",
     "faq": "FAQ",
-    "tutorials": "Koyawa"
+    "tutorials": "Koyawa",
+    "menu": "Menu"
   },
   "home": {
     "list_of_dictionaries": "List of Dictionaries",
@@ -262,7 +265,8 @@
     "map": "Taswira",
     "guidance": "Jagoranci",
     "out_of_service": "Na gode da ziyartar gidan yanar gizon mu! Ana kan gina wannan shafin na ɗan lokaci.\nBa zai kasance tsakanin Fabrairu 3 da Fabrairu 28, 2025 ba.\nDa fatan za a sake ziyartar wannan shafin a ranar 1 ga Maris, 2025.\nZa ku iya ƙirƙirar sabbin ƙamus na Rayuwa a lokacin.\nYi hakuri da rashin jin daɗi, kuma na gode da haƙurin ku.\nA halin yanzu, sauran dandamali suna aiki akai-akai.",
-    "transmitter": "Da gaske, ƙungiyar Kamus na Rayuwa"
+    "transmitter": "Da gaske, ƙungiyar Kamus na Rayuwa",
+    "disjunctive": "ko"
   },
   "settings": {
     "community_permission": "Shin magana al'umma damar wannan harshe ya zama online?",
