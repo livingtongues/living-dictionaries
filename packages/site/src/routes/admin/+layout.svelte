@@ -3,7 +3,6 @@
   import Tab from './Tab.svelte'
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte'
   import Header from '$lib/components/shell/Header.svelte'
-  import Footer from '$lib/components/shell/Footer.svelte'
   import AdminGuard from '$lib/components/ui/AdminGuard.svelte'
 
   export let data
@@ -37,8 +36,6 @@
     <slot />
   </div>
 </AdminGuard>
-
-<Footer />
 
 <style>
   nav {

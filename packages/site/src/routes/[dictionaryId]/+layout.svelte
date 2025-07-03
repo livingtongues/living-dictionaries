@@ -3,7 +3,6 @@
   import SideMenu from './SideMenu.svelte'
   import { page } from '$app/stores'
   import Header from '$lib/components/shell/Header.svelte'
-  import Footer from '$lib/components/shell/Footer.svelte'
   import './custom-fonts.css'
 
   export let data
@@ -54,5 +53,4 @@
       <slot />
     </div>
   </div>
-  <Footer />
 </ShowHide>

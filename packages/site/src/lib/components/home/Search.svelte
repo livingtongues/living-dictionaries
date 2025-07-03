@@ -1,6 +1,5 @@
 <script lang="ts">
   import type { DictionaryView, IPoint } from '@living-dictionaries/types'
-  import { fly } from 'svelte/transition'
   import { Button, ShowHide } from 'svelte-pieces'
   import { page } from '$app/stores'
 
@@ -64,15 +63,7 @@
 
 <!-- To Consider: for longer dictionaries on mobile, if we want to make the map still show when showing dictionary details, we need to add a media query (less than md) which sets this div's max-height: 75vh and adds overflow-y-auto -->
 
-<div
-  class:h-full={active}
-  class:absolute={!active}
-  class:sm:relative={!active}
-  class:w-full={!active}
-  class:sm:flex={!active}
-  class:z-10={!active}
-  class:max-h-full={!active}
-  class="flex flex-col sm:h-full sm:border-r border-gray-200">
+<div class="flex flex-col max-h-full sm:border-r sm:w-72 border-gray-200">
   {#if !currentDictionary}
     <div class="relative text-xl px-2 mt-2 sm:mb-2">
       <div
@@ -95,13 +86,7 @@
       {/if}
     </div>
 
-    <div
-      class:flex={active}
-      class:hidden={!active}
-      class:sm:flex={!active}
-      class="overflow-y-auto flex-col flex-1"
-      in:fly={{ y: -15, duration: 150 }}
-      on:click={keepSearchOpen}>
+    <div class="overflow-y-auto hidden sm:flex flex-col flex-grow sm:h-50px" on:click={keepSearchOpen}>
       {#if searchString}
         <div class="text-sm text-gray-500 px-3 my-1">
           <i> {filteredDictionaries.length}/{dictionaries.length} </i>

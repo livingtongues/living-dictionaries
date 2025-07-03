@@ -10,7 +10,6 @@
   import { supabase_date_to_friendly } from '$lib/helpers/time'
   import LatLngDisplay from '$lib/components/maps/LatLngDisplay.svelte'
   import { page } from '$app/stores'
-  import { reload_public_entries_count } from '$lib/supabase/entries-count'
 
   export let index: number
   export let is_public: boolean
@@ -38,7 +37,6 @@
         await update_dictionary({
           public: !dictionary.public,
         })
-        reload_public_entries_count()
       }
     }}>
     {dictionary.public ? 'Public' : 'Private'}

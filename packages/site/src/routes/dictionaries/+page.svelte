@@ -8,12 +8,12 @@
   import { dictionary_headers, prepareDictionaryForCsv } from '$lib/export/prepareDictionariesForCsv'
 
   export let data
-  $: ({ admin, dictionaries } = data)
+  $: ({ admin, dictionaries_for_list } = data)
 </script>
 
 <Header>{$page.data.t('home.list_of_dictionaries')}</Header>
 
-<div class="p-3 sticky top-0 relative z-2 h-screen flex flex-col bg-white">
+<div class="p-3 sticky top-0 relative z-2 h-92vh flex flex-col bg-white">
   <div>
     <Button
       form="filled"
@@ -21,7 +21,7 @@
       onclick={() =>
         downloadObjectsAsCSV(
           dictionary_headers,
-          dictionaries.map(prepareDictionaryForCsv),
+          dictionaries_for_list.map(prepareDictionaryForCsv),
           'living-dictionaries-list',
         )}>
       <i class="fas fa-download mr-1" />
@@ -55,7 +55,7 @@
         {$page.data.t('dictionary.longitude')}
       </th>
     </thead>
-    {#each dictionaries as { url, metadata, name, entry_count, iso_639_3, glottocode, location, coordinates }}
+    {#each dictionaries_for_list as { url, metadata, name, entry_count, iso_639_3, glottocode, location, coordinates }}
       {@const first_latitude = coordinates?.points?.[0]?.coordinates.latitude}
       {@const first_longitude = coordinates?.points?.[0]?.coordinates.longitude}
       <tr>

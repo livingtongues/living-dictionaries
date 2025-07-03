@@ -8,7 +8,6 @@ import { getSession, getSupabase } from '$lib/supabase'
 import { createUserStore } from '$lib/supabase/user'
 import { create_my_dictionaries_store } from '$lib/supabase/dictionaries'
 import { create_dictionaries_store } from '$lib/supabase/statistics'
-import { create_public_entries_count_store } from '$lib/supabase/entries-count'
 
 export const load: LayoutLoad = async ({ url: { searchParams }, data: { serverLocale, access_token, refresh_token } }) => {
   const urlLocale = searchParams.get('lang')
@@ -27,7 +26,6 @@ export const load: LayoutLoad = async ({ url: { searchParams }, data: { serverLo
   const preferred_table_columns = createPersistedStore(columns_key, defaultColumns)
   const mode = import.meta.env.MODE as 'development' | 'production'
   const dictionaries = create_dictionaries_store({ supabase })
-  create_public_entries_count_store({ supabase })
 
   return {
     locale,
