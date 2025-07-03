@@ -1,4 +1,4 @@
-// import { DKIM_PRIVATE_KEY, MAILCHANNELS_API_KEY } from '$env/static/private'
+// AWS Limit caps sends at 14 emails per second and 50,000 per day
 import { SESClient, SendEmailCommand, type SendEmailCommandOutput } from '@aws-sdk/client-ses'
 import { dictionary_address, no_reply_address } from './addresses'
 import { AWS_SES_ACCESS_KEY_ID, AWS_SES_REGION, AWS_SES_SECRET_ACCESS_KEY } from '$env/static/private'

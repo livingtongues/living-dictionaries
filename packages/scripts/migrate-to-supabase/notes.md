@@ -1,61 +1,27 @@
-## Better data sync
-- send out notice
-- handle entries load errors and saving status
+## TODO
+- New entry history method
+  - remove content-import.interface.ts
+  - show entry history from pop-up entry modal
+  - remove Entry History i18n
+  - drop entry_updates and content_updates tables
 - show green recent update in list and table view based on all an entries' updated_at fields
+- use line-clamp instead of truncateString in SelectedDict.svelte and also look at inline-children-elements purpose
+- handle entries load errors and saving status
 - solve circular dependencies issues
 - make plan for cleaning up connected senses and join tables for deleted entries, and for clearing out deleted items over 2 months old
 - listen to can_edit store changes and re-init if it changes
-
-## Final Migration cleanup
-- remove content-import.interface.ts code after getting new history method working
-- use line-clamp instead of truncateString in SelectedDict.svelte and also look at inline-children-elements purpose
-- show entry history from pop-up entry modal
-- test admin rls, alternative is auth.jwt() read https://supabase.com/docs/guides/database/postgres/row-level-security#authjwt to see if better
-- Diego: AuthModal.svelte translations
-- review created_by forcers to see which tables need set_created_by
-  - audio_speakers
-  - dictionary_info
-  - dictionary_partners
-  - entry_tags
-  - invites
-  - sense_photos
-- remove Entry History i18n
-- remove import_meta from content update endpoint
-- remove unneeded urls from https://console.cloud.google.com/auth/clients/215143435444-fugm4gpav71r3l89n6i0iath4m436qnv.apps.googleusercontent.com?inv=1&invt=AboyXQ&project=talking-dictionaries-alpha
+- don't show my dictionaries that are private in the public dictionaries listing to avoid confusion
 - move featured images to photos table and make a connection to the dictionary
 - delete dev Firebase project and create new gcs dev bucket
-- adjust user migration to set these fields to empty strings and not null to avoid db errors: `confirmation_token`, `recovery_token`, `email_change_token_new`, `email_change`
-
-# Migrate Entries and Speakers from Firestore to Supabase
-- don't show my dictionaries that are private in the public dictionaries listing to avoid confusion
-- unpack content-update to be handle client-sides after adding RLS policies for photos, audio, video
-- build new Orama indexes every hour offset after materialized view is updated
+- test admin rls, alternative is auth.jwt() read https://supabase.com/docs/guides/database/postgres/row-level-security#authjwt to see if better
 - Remove extra row in dictionary downloads csv and entries download csv
-- deal with content-update and content-import interface differences
 - If an audio file does not have a speaker still let it play even though speaker needs chosen
-- ensure all auth users are brought over
 - Orama: replaceState in createQueryParamStore? look into improving the history to change for view and page changes but not for the others
-- test new db triggers, especially when deleting relationships
-- get failed tests working again
-- bring back in variants and tests that relied on old forms of test data
-- save backup files to cloud bucket instead of github repo (Cloudflare R2 has 10GB free/mo)
-- optimize entries loading error handling
-
-- clean up old history data in content_updates
-- look at deletedEntries to see if they should be saved somewhere
-- cleaner format for content-updates and refactor current ones
 - prefetching dictionary will cause entry store value to download twice at the same time
-- drop content_updates' table column
-- drop entry_updates
 - make alternate writing systems of the sentence translations as different bcp keys (same as for glosses)
-- change old senses created_by/updated_by from firebase ids to user_ids and then connect relationships and change type to uuid
-- add 331 megabytes of content_updates to db, saved sql queries to avoid upgrading to the $25/month
 - think about find-replacing the "pn/v": "prenoun / preverb", and one other pos with dash when filtering by pos
 
 ## Notes
-- 1st manual backup was before any action
-- 11:37 at 50, 13:54 at 100 = 2 min 17 seconds for 50 entries, 387000/50 = 7740 chunks, 7740 * 2:17 = 17492 minutes = 12 days (1440 minutes in a day), 18:30 at 200
-- `pnpm -F scripts run-migration`
 - relocate tip: Google's Magic Image serving url reference: https://medium.com/google-cloud/uploading-resizing-and-serving-images-with-google-cloud-platform-ca9631a2c556
 
 ### No lexeme

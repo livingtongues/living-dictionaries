@@ -25,7 +25,7 @@
     Good news: we recently resolved some bugs on our platform! Over the past 6 weeks, there were entry loading issues, especially for the large Living Dictionaries. Some of you may have seen a "timeout" error message occur on your dictionary homepage. All loading problems have now been resolved.
   </Paragraph>
   <Paragraph row={{ top: 20 }}>
-    If you haven't been on the platform in the last week and notice that loading problems persist for you when you visit next time, please refresh the page once after letting everything load.
+    If you haven't been on the platform in the last two weeks and notice that loading problems persist for you when you visit next time, please refresh the page once after waiting a minute for everything to load.
   </Paragraph>
   <Paragraph row={{ top: 20 }}>
     If you still have trouble accessing your dictionary or experience loading issues, please use the "Contact Us" form to send us a descriptive message of your issue and we will take a look. Keep in mind that our platform is run by a small, dedicated team here at Living Tongues Institute.
