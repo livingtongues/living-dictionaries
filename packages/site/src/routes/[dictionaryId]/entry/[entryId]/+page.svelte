@@ -6,6 +6,7 @@
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte'
   import { page } from '$app/stores'
   import { dev } from '$app/environment'
+  import { public_entries_count_store } from '$lib/supabase/entries-count'
 
   export let data
   $: ({
@@ -51,6 +52,7 @@
         form="simple"
         onclick={async () => {
           await dbOperations.update_entry({ deleted: new Date().toISOString() })
+          if (dictionary.public) public_entries_count_store.update(count => count - 1)
           history.back()
         }}>
 

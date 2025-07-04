@@ -2,6 +2,7 @@
   import { Button, ResponsiveTable } from 'svelte-pieces'
   import { page } from '$app/stores'
   import Header from '$lib/components/shell/Header.svelte'
+  import Footer from '$lib/components/shell/Footer.svelte'
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte'
   import { downloadObjectsAsCSV } from '$lib/export/csv'
   import { dictionary_headers, prepareDictionaryForCsv } from '$lib/export/prepareDictionariesForCsv'
@@ -90,6 +91,8 @@
     {/each}
   </ResponsiveTable>
 </div>
+
+<Footer />
 
 <SeoMetaTags
   title={$page.data.t('home.list_of_dictionaries')}

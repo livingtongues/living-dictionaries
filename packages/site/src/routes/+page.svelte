@@ -11,6 +11,7 @@
   import DictionaryPoints from '$lib/components/home/DictionaryPoints.svelte'
   import Search from '$lib/components/home/Search.svelte'
   import Header from '$lib/components/shell/Header.svelte'
+  import Footer from '$lib/components/shell/Footer.svelte'
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte'
   import { browser } from '$app/environment'
 
@@ -44,7 +45,7 @@
 <Header />
 
 <main
-  class="top-12 fixed bottom-0 right-0 left-0 flex flex-col sm:flex-row border-t border-gray-200">
+  class="top-12 fixed bottom-14 right-0 left-0 flex flex-col sm:flex-row border-t border-gray-200">
   <div class="sm:w-72 max-h-full">
     <Search
       {dictionaries}
@@ -101,6 +102,8 @@
     </Map>
   </div>
 </main>
+
+<Footer />
 
 <SeoMetaTags
   title={$page.data.t('misc.LD')}

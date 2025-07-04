@@ -3,8 +3,11 @@
   import { page } from '$app/stores'
   import EditFieldModal from '$lib/components/entry/EditFieldModal.svelte'
   import type { DbOperations } from '$lib/dbOperations'
+  import { public_entries_count_store } from '$lib/supabase/entries-count'
 
   export let add_entry: DbOperations['insert_entry']
+  $: ({ dictionary } = $page.data)
+
   let online = true
 </script>
 
@@ -26,6 +29,7 @@
       on_update={async (new_value) => {
         if (new_value) {
           await add_entry({ default: new_value })
+          if (dictionary.public) public_entries_count_store.update(count => count + 1)
         }
       }}
       on_close={toggle}

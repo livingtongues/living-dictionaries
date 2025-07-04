@@ -3,6 +3,7 @@
   import Tab from './Tab.svelte'
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte'
   import Header from '$lib/components/shell/Header.svelte'
+  import Footer from '$lib/components/shell/Footer.svelte'
   import AdminGuard from '$lib/components/ui/AdminGuard.svelte'
 
   export let data
@@ -25,7 +26,6 @@
         size="sm"
         form="simple"
         onclick={async () => {
-          await data.dictionaries.reset()
           await data.dictionary_roles.reset()
           await data.users.reset()
         // location.reload()
@@ -37,6 +37,8 @@
     <slot />
   </div>
 </AdminGuard>
+
+<Footer />
 
 <style>
   nav {
