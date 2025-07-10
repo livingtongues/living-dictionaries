@@ -264,7 +264,7 @@
     "clean": "Không lỗi",
     "map": "Bản đồ",
     "guidance": "Hướng dẫn",
-    "out_of_service": "Cảm ơn bạn đã ghé thăm trang web của chúng tôi! Trang này hiện đang được xây dựng tạm thời.\nTrang này sẽ không khả dụng trong khoảng thời gian từ ngày 3 tháng 2 đến ngày 28 tháng 2 năm 2025.\nVui lòng truy cập lại trang này vào ngày 1 tháng 3 năm 2025.\nBạn sẽ có thể tạo Từ điển Sống mới vào thời điểm đó.\nXin lỗi vì sự bất tiện này và cảm ơn sự kiên nhẫn của bạn.\nTrong thời gian chờ đợi, phần còn lại của nền tảng vẫn hoạt động bình thường.",
+    "out_of_service": "Cảm ơn bạn đã ghé thăm trang web của chúng tôi! Trang này đang tạm thời được xây dựng.\nTrang này sẽ không khả dụng từ ngày 3 tháng 2 đến ngày 28 tháng 2 năm 2025.\nVui lòng truy cập lại trang này vào ngày 1 tháng 3 năm 2025.\nBạn sẽ có thể tạo Từ điển Sống mới vào thời điểm đó.\nXin lỗi vì sự bất tiện này và cảm ơn sự kiên nhẫn của bạn.\nTrong thời gian chờ đợi, các chức năng khác của nền tảng vẫn hoạt động bình thường.",
     "transmitter": "Trân trọng, nhóm Living Dictionaries",
     "disjunctive": "hoặc"
   },
@@ -343,7 +343,8 @@
     "max_entries": "Mục từ tối đa",
     "columns": "Cột",
     "headword_size": "Kích thước tiêu đề",
-    "font_size": "Kích cỡ chữ"
+    "font_size": "Kích cỡ chữ",
+    "tags": "Thẻ"
   },
   "import_page": {
     "import": "Nhập khẩu",
@@ -351,7 +352,7 @@
     "instructions_1": "Nếu bạn đã có dữ liệu ngôn ngữ mà bạn muốn nhập vào Từ điển, vui lòng làm theo các bước dưới đây.",
     "instructions_2": "Nhấp vào nút \"Liên kết đến Mẫu\" màu xanh bên dưới. Tải xuống mẫu dưới dạng tệp Excel hoặc tạo bản sao trên Google Docs. Chỉnh sửa mẫu theo nhu cầu của dự án. Sao chép và dán dữ liệu của bạn vào bảng tính.",
     "instructions_3": "Sử dụng “Liên hệ với chúng tôi” bên dưới để liên hệ với chúng tôi. Hãy cho chúng tôi biết rằng bạn có bảng tính mới đã sẵn sàng để nhập. Hãy hỏi chúng tôi bất kỳ câu hỏi nào bạn có. Chúng tôi sẽ trả lời bạn qua email và sau đó bạn có thể gửi tệp của mình cho chúng tôi.",
-    "instructions_4": "Để gửi cho chúng tôi dữ liệu được xuất từ ​​các phần mềm từ điển như FLEx, Lexique Pro, Shoebox, vui lòng sử dụng nút “Liên hệ với chúng tôi” bên dưới và cho chúng tôi biết chi tiết về dự án của bạn.",
+    "instructions_4": "Để gửi cho chúng tôi dữ liệu được xuất từ ​​các phần mềm từ điển như FLEx, Lexique Pro, Shoebox, vui lòng sử dụng nút \"Liên hệ với chúng tôi\" bên dưới và cho chúng tôi biết chi tiết về dự án của bạn.",
     "no_imports": "Hiện tại, chúng tôi đang làm việc với nhiều cộng đồng và tổ chức đối tác để nhập một số lượng lớn mục từ điển vào nền tảng này. Chúng tôi cũng đang thực hiện các bản cập nhật lớn cho cơ sở dữ liệu của mình. Chúng tôi sẽ chấp nhận dữ liệu nhập mới bắt đầu từ ngày 1 tháng 7 năm 2024. Chúng tôi đánh giá cao sự kiên nhẫn của bạn và chúng tôi xin lỗi vì sự bất tiện này."
   },
   "history": {
@@ -363,7 +364,7 @@
     "date": "Ngày",
     "old_value": "Giá trị trước đây",
     "new_value": "Giá trị mới",
-    "entry_message": "Một người dùng đã chỉnh sửa mục nhập này vào",
+    "entry_message": "Một người dùng đã chỉnh sửa mục này vào",
     "edited": "Lần chỉnh sửa cuối vào",
     "history_search": "Tìm kiếm mục nhập, trình soạn thảo, trường và giá trị",
     "download_history": "Tải xuống Lịch sử dưới dạng CSV",
@@ -372,7 +373,7 @@
     "change": "lịch sử_thay_đổi"
   },
   "partnership": {
-    "title": "Tổ chức đối tác",
+    "title": "Các tổ chức đối tác",
     "button": "Viết trong Tổ chức Đối tác",
     "name": "Tên tổ chức đối tác"
   },

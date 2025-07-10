@@ -343,7 +343,8 @@
     "max_entries": "Entradas máximas",
     "columns": "Columnas",
     "headword_size": "Tamaño de la palabra principal",
-    "font_size": "Tamaño de la fuente"
+    "font_size": "Tamaño de la fuente",
+    "tags": "Etiquetas"
   },
   "import_page": {
     "import": "Importar",

@@ -99,8 +99,7 @@
   {#if selectedFields.custom_tags && entry.tags?.length}
     <div>
       {#if showLabels}
-        <!-- TODO translate -->
-        <span class="italic text-[80%]">Tags:</span>
+        <span class="italic text-[80%]">{$page.data.t('print.tags')}:</span>
       {/if}
       {entry.tags.map(tag => tag.name).join(', ')}
     </div>
@@ -109,7 +108,7 @@
   {#if selectedFields.notes && entry.main.notes}
     <div>
       {#if showLabels}
-        <span class="italic text-[80%]">{$page.data.t('entry_field.notes')}: </span>
+        <span class="italic text-[80%]">{$page.data.t('entry_field.notes')}:</span>
       {/if}
       {@html sanitize(entry.main.notes.default)}
     </div>

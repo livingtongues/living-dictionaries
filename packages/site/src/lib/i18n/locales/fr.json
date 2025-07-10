@@ -324,7 +324,7 @@
     "video_url": "URL de la vidéo",
     "video_credit": "Crédit vidéo",
     "prepare_to_record_video": "Préparez-vous à enregistrer avec un microphone et une caméra",
-    "video_info": "Il existe deux façons d'afficher vos vidéos dans un Dictionnaire Vivant : 1) Vous pouvez les enregistrer directement ici ou les télécharger sur notre plateforme. Avantages : simple et idéal pour des enregistrements rapides. Inconvénients : la taille maximale d'une vidéo est de 100 Mo, elle doit donc être courte et en basse résolution. 2) Vous pouvez héberger vos vidéos sur un hébergeur spécialisé et ajouter un lien vers notre site. Avantages : simple (à condition que vos vidéos soient déjà téléchargées sur cette plateforme), vos vidéos peuvent avoir la résolution et la durée souhaitées. Inconvénients : si vous souhaitez enregistrer quelque chose d'inattendu ou de très simple, cette méthode peut être trop complexe, et il est préférable de privilégier la méthode 1.",
+    "video_info": "Il existe deux façons d'afficher vos vidéos dans un Dictionnaire Vivant : 1) Vous pouvez les enregistrer directement ici ou les télécharger sur notre plateforme. Avantages : simple et idéal pour des enregistrements rapides. Inconvénients : la taille maximale d'une vidéo est de 100 Mo, elle doit donc être courte et en basse résolution. 2) Vous pouvez héberger vos vidéos sur un hébergeur spécialisé et indiquer l'URL de votre site. Avantages : simple (à condition que vos vidéos soient déjà téléchargées sur cette plateforme), vos vidéos peuvent avoir la résolution et la durée souhaitées. Inconvénients : si vous souhaitez enregistrer quelque chose d'inattendu ou de très simple, cette méthode peut être trop complexe, et il est préférable de privilégier la méthode 1.",
     "paste_video_url": "Coller le lien YouTube ou Vimeo",
     "record_upload_video": "Enregistrer ou télécharger une vidéo",
     "view": "Voir",
@@ -343,7 +343,8 @@
     "max_entries": "Nombre maximal d'entrées",
     "columns": "Colonnes",
     "headword_size": "Taille du mot-clé",
-    "font_size": "Taille de la police"
+    "font_size": "Taille de la police",
+    "tags": "Mots clés"
   },
   "import_page": {
     "import": "Importer",
