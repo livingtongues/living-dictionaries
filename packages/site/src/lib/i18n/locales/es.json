@@ -338,7 +338,7 @@
   },
   "print": {
     "qr_code": "Mostrar código QR",
-    "labels": "Mostrar etiquetas",
+    "labels": "Mostrar rótulos",
     "availability": "La vista de impresión sólo está disponible para administradores y colaboradores del diccionario",
     "max_entries": "Entradas máximas",
     "columns": "Columnas",
