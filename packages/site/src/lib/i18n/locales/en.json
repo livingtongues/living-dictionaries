@@ -344,7 +344,8 @@
     "max_entries": "Max entries",
     "columns": "Columns",
     "headword_size": "Headword size",
-    "font_size": "Font size"
+    "font_size": "Font size",
+    "tags": "Tags"
   },
   "import_page": {
     "import": "Import",

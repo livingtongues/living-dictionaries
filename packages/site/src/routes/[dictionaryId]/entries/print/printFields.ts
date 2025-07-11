@@ -7,6 +7,7 @@ export const defaultPrintFields: IPrintFields = {
   parts_of_speech: true,
   example_sentence: true,
   semantic_domains: false,
+  custom_tags: false,
   interlinearization: false,
   morphology: false,
   noun_class: false,

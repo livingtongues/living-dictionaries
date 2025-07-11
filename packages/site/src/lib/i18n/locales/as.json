@@ -343,7 +343,8 @@
     "max_entries": "",
     "columns": "",
     "headword_size": "",
-    "font_size": ""
+    "font_size": "",
+    "tags": ""
   },
   "import_page": {
     "import": "",

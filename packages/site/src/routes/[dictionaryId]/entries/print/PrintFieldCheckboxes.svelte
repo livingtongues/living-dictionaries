@@ -23,6 +23,7 @@
       if (field === 'plural_form') return !!entry.senses?.find(sense => sense.plural_form?.default)
       if (field === 'variant') return !!entry.senses?.find(sense => sense.variant?.default)
       if (field === 'dialects') return !!entry.dialects?.length
+      if (field === 'custom_tags') return !!entry.tags?.length
       return entry.main[field]
     })
   })

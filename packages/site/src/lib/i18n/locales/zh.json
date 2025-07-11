@@ -343,7 +343,8 @@
     "max_entries": "最大条目数",
     "columns": "列",
     "headword_size": "词条大小",
-    "font_size": "字体大小"
+    "font_size": "字体大小",
+    "tags": "标签"
   },
   "import_page": {
     "import": "进口",

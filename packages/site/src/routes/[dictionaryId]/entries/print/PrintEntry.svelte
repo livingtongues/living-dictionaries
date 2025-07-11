@@ -18,7 +18,7 @@
   export let showLabels = false
   export let showQrCode = false
 
-  $: first_photo = entry.senses?.[0].photos?.[0]
+  $: first_photo = entry.senses?.[0]?.photos?.[0]
   $: first_audio = entry.audios?.[0]
 </script>
 
@@ -96,10 +96,19 @@
     {/if}
   {/each}
 
+  {#if selectedFields.custom_tags && entry.tags?.length}
+    <div>
+      {#if showLabels}
+        <span class="italic text-[80%]">{$page.data.t('print.tags')}:</span>
+      {/if}
+      {entry.tags.map(tag => tag.name).join(', ')}
+    </div>
+  {/if}
+
   {#if selectedFields.notes && entry.main.notes}
     <div>
       {#if showLabels}
-        <span class="italic text-[80%]">{$page.data.t('entry_field.notes')}: </span>
+        <span class="italic text-[80%]">{$page.data.t('entry_field.notes')}:</span>
       {/if}
       {@html sanitize(entry.main.notes.default)}
     </div>

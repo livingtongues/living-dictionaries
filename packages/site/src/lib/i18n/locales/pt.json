@@ -343,7 +343,8 @@
     "max_entries": "Entradas máximas",
     "columns": "Colunas",
     "headword_size": "Tamanho do cabeçalho",
-    "font_size": "Tamanho da fonte"
+    "font_size": "Tamanho da fonte",
+    "tags": "Etiquetas"
   },
   "import_page": {
     "import": "Importar",
@@ -365,7 +366,7 @@
     "new_value": "Novo Valor",
     "entry_message": "Um usuário editou esta entrada em",
     "edited": "Última edição em",
-    "history_search": "Entradas de pesquisa, editores, campos e valores",
+    "history_search": "Pesquisar entradas, editores, campos e valores",
     "download_history": "Baixar histórico como CSV",
     "empty": "Ainda sem histórico",
     "type": "tipo",
