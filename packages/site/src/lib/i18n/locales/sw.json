@@ -139,11 +139,11 @@
     "conlang_info_1": "Kwa kuwa dhamira yetu inaangazia uhifadhi wa lugha asilia za watu wachache zilizo hatarini kutoweka, hatutoi usaidizi wa kiufundi kwa lugha zilizoundwa (conlangs) au lugha bandia. Kwa sababu ya timu yetu ndogo na saa chache za kazi, hatutoi uagizaji wa data kwa conlangs.",
     "conlang_info_2": "Kamusi Hai za lugha zilizoundwa hazitawekwa hadharani kwenye tovuti yetu au kupatikana kwenye ramani yetu ya ukurasa wa nyumbani. Ikiwa tunaona maudhui ya dharau katika Kamusi hii Hai, tunahifadhi pia haki ya kuifuta.",
     "agree_above": "Nakubaliana na hayo hapo juu.",
-    "agree_to_cite": "Ninakubali kutaja kazi zozote muhimu zilizochapishwa ndani ya maingizo ya kamusi.",
+    "agree_to_cite": "Ninakubali kutaja kazi zozote zinazofaa zilizochapishwa ndani ya maingizo ya kamusi.",
     "agree_for_non-commercial": "Nakubali kwamba kazi hii si ya kibiashara.",
     "source_question": "Je, data katika kamusi hii ilitoka wapi? Tafadhali eleza ikiwa ulikusanya data mwenyewe. Ikiwa ulitumia vyanzo vyovyote vya marejeleo vilivyochapishwa, tafadhali viorodheshe hapa.",
     "use_question": "Nani atatumia kamusi hii? Je, itatumika katika miradi yoyote ya elimu au vyombo vya habari?",
-    "conlang_warning": "Ikiwa kamusi hii ni ya lugha iliyoundwa (au bandia), na hauonyeshi hivyo, tunahifadhi haki ya kuiondoa."
+    "conlang_warning": "Ikiwa kamusi hii ni ya lugha iliyojengwa (au bandia), na hauonyeshi hivyo, tunahifadhi haki ya kuiondoa."
   },
   "dictionary": {
     "latitude": "Latitudo",
@@ -343,7 +343,8 @@
     "max_entries": "Maingizo ya juu zaidi",
     "columns": "Safu",
     "headword_size": "Ukubwa wa neno la kichwa",
-    "font_size": "Ukubwa wa herufi"
+    "font_size": "Ukubwa wa herufi",
+    "tags": "Lebo"
   },
   "import_page": {
     "import": "Ingiza",

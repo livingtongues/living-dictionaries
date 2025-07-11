@@ -16,6 +16,7 @@ enum _CustomPrintFields {
 // displayed with labels, no custom logic
 export enum StandardPrintFields {
   semantic_domains = 'Semantic Domains',
+  custom_tags = 'Custom Tags',
   interlinearization = 'Interlinearization',
   morphology = 'Morphology',
   plural_form = 'Plural Form',
