@@ -9,7 +9,7 @@ import { createUserStore } from '$lib/supabase/user'
 import { create_my_dictionaries_store } from '$lib/supabase/dictionaries'
 import { create_dictionaries_store } from '$lib/supabase/statistics'
 
-export const load: LayoutLoad = async ({ url: { searchParams }, data: { serverLocale, access_token, refresh_token } }) => {
+export const load: LayoutLoad = async ({ url: { searchParams }, data: { serverLocale, access_token, refresh_token, user_latitude, user_longitude } }) => {
   const urlLocale = searchParams.get('lang')
   const locale = getSupportedLocale(urlLocale || serverLocale) || 'en'
   const t = await getTranslator(locale)
@@ -38,5 +38,7 @@ export const load: LayoutLoad = async ({ url: { searchParams }, data: { serverLo
     preferred_table_columns,
     mode,
     dictionaries,
+    user_latitude,
+    user_longitude,
   }
 }

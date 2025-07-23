@@ -14,6 +14,6 @@
   <span class="whitespace-nowrap">Dictionary Entries: <b>{new Intl.NumberFormat().format(public_entries_count)}</b>,</span>
   <span>Living Dictionaries is a project of <a href="https://livingtongues.org/" target="_blank" class="underline hover:text-blue-700">Living Tongues Institute for Endangered Languages.</a>
   </span>
-  <a href="https://www.facebook.com/living.tongues" target="_blank" class="ml-1 p-1 -my-1 hover:text-blue-700"><i class="i-mage:facebook-square text-xl -mt-1" /></a>
-  <a href="https://www.instagram.com/livingtongues" target="_blank" class="p-1 -my-1 hover:text-blue-700"><i class="i-f7:logo-instagram text-xl -mt-1" /></a>
+  <a href="https://www.facebook.com/living.tongues" target="_blank" class="ml-1 p-1 -my-1 hover:text-blue-700"><i class="i-mage:facebook-square text-xl -mt-.5 sm:-mt-1" /></a>
+  <a href="https://www.instagram.com/livingtongues" target="_blank" class="p-1 -my-1 hover:text-blue-700"><i class="i-f7:logo-instagram text-xl -mt-.5 sm:-mt-1" /></a>
 </footer>

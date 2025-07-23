@@ -16,7 +16,7 @@
   import { browser } from '$app/environment'
 
   export let data: PageData
-  $: ({ admin, get_private_dictionaries, get_public_dictionaries, my_dictionaries } = data)
+  $: ({ admin, get_private_dictionaries, get_public_dictionaries, my_dictionaries, user_latitude, user_longitude } = data)
 
   let public_dictionaries: DictionaryView[] = []
   let private_dictionaries: DictionaryView[] = []
@@ -44,65 +44,67 @@
 
 <Header />
 
-<main
-  class="top-12 fixed bottom-0 right-0 left-0 border-t border-gray-200 flex flex-col">
-  <div class="flex flex-col sm:flex-row flex-grow">
-    <Search
-      {dictionaries}
-      my_dictionaries={$my_dictionaries}
-      bind:selectedDictionaryId
-      on_selected_dictionary_point={(point) => {
-        if (point) {
-          mapComponent.setZoom(7)
-          mapComponent.setCenter([point.coordinates.longitude, point.coordinates.latitude])
-        }
-      }} />
-    <div class="relative flex-1">
-      <Map bind:this={mapComponent} style="mapbox://styles/mapbox/light-v10?optimize=true" zoom={2}>
-        {#if selectedDictionary?.coordinates}
-          {#if selectedDictionary.coordinates.points}
-            {#await import('$lib/components/maps/mapbox/map/Marker.svelte') then { default: Marker }}
-              {#each selectedDictionary.coordinates.points as point, index (point)}
-                <Marker lat={point.coordinates.latitude} lng={point.coordinates.longitude} color={index === 0 ? 'blue' : 'black'} />
-              {/each}
-            {/await}
-          {/if}
-          {#if selectedDictionary.coordinates.regions}
-            {#await import('$lib/components/maps/mapbox/map/Region.svelte') then { default: Region }}
-              {#each selectedDictionary.coordinates.regions as region (region)}
-                <Region {region} />
-              {/each}
-            {/await}
-          {/if}
+<div class="flex flex-col sm:flex-row">
+  <Search
+    {dictionaries}
+    my_dictionaries={$my_dictionaries}
+    bind:selectedDictionaryId
+    on_selected_dictionary_point={(point) => {
+      if (point) {
+        mapComponent.setZoom(7)
+        mapComponent.setCenter([point.coordinates.longitude, point.coordinates.latitude])
+      }
+    }} />
+  <div class="relative h-50vh sm:h-70vh sm:flex-grow sm:p-3">
+    <Map bind:this={mapComponent} style="mapbox://styles/mapbox/light-v10?optimize=true" zoom={2} options={{ projection: 'globe' }} lat={user_latitude} lng={user_longitude}>
+      {#if selectedDictionary?.coordinates}
+        {#if selectedDictionary.coordinates.points}
+          {#await import('$lib/components/maps/mapbox/map/Marker.svelte') then { default: Marker }}
+            {#each selectedDictionary.coordinates.points as point, index (point)}
+              <Marker lat={point.coordinates.latitude} lng={point.coordinates.longitude} color={index === 0 ? 'blue' : 'black'} />
+            {/each}
+          {/await}
         {/if}
-        {#if $admin}
-          <ShowHide let:show={hide} let:toggle>
-            <CustomControl position="bottom-right">
-              <button type="button" class="whitespace-nowrap w-90px! px-2" on:click={toggle}>Toggle Private</button>
-            </CustomControl>
+        {#if selectedDictionary.coordinates.regions}
+          {#await import('$lib/components/maps/mapbox/map/Region.svelte') then { default: Region }}
+            {#each selectedDictionary.coordinates.regions as region (region)}
+              <Region {region} />
+            {/each}
+          {/await}
+        {/if}
+      {/if}
+      {#if $admin}
+        <ShowHide let:show={hide} let:toggle>
+          <CustomControl position="bottom-right">
+            <button type="button" class="whitespace-nowrap w-90px! px-2" on:click={toggle}>Toggle Private</button>
+          </CustomControl>
 
-            {#if !hide && private_dictionaries.length}
-              <DictionaryPoints
-                dictionaries={private_dictionaries}
-                type="private"
-                bind:selectedDictionaryId />
-            {/if}
-          </ShowHide>
-        {/if}
-        <DictionaryPoints dictionaries={public_dictionaries} bind:selectedDictionaryId />
-        {#if $my_dictionaries.length}
-          <DictionaryPoints
-            dictionaries={$my_dictionaries}
-            type="personal"
-            bind:selectedDictionaryId />
-        {/if}
-        <NavigationControl position="bottom-right" showCompass={false} />
-        <ToggleStyle />
-      </Map>
-    </div>
+          {#if !hide && private_dictionaries.length}
+            <DictionaryPoints
+              dictionaries={private_dictionaries}
+              type="private"
+              bind:selectedDictionaryId />
+          {/if}
+        </ShowHide>
+      {/if}
+      <DictionaryPoints dictionaries={public_dictionaries} bind:selectedDictionaryId />
+      {#if $my_dictionaries.length}
+        <DictionaryPoints
+          dictionaries={$my_dictionaries}
+          type="personal"
+          bind:selectedDictionaryId />
+      {/if}
+      <NavigationControl position="bottom-right" showCompass={false} />
+      <ToggleStyle />
+    </Map>
   </div>
-  <Footer />
-</main>
+</div>
+
+<div class="border-t border-gray-200"></div>
+<div class="p-3 text-3xl font-semibold">
+  Some big stat about the number of dictionaries, entries, etc. This is a placeholder for future content.
+</div>
+<Footer />
 
 <SeoMetaTags
   title={$page.data.t('misc.LD')}

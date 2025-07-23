@@ -11,7 +11,7 @@
   import { PUBLIC_mapboxAccessToken } from '$env/static/public'
 
   export let map: Map = null
-  export let version = 'v2.9.2'
+  export let version = 'v3.13.0'
   export let customStylesheetUrl: string = undefined
   export let accessToken = PUBLIC_mapboxAccessToken
   export let options: Partial<MapboxOptions> = {}
