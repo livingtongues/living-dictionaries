@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { ShowHide } from 'svelte-pieces'
+  import { Button, ShowHide } from 'svelte-pieces'
   import type { DictionaryView } from '@living-dictionaries/types'
   import { onMount } from 'svelte'
   import type { PageData } from './$types'
@@ -56,7 +56,7 @@
       }
     }} />
   <div class="relative h-50vh sm:h-70vh sm:flex-grow sm:p-3">
-    <Map bind:this={mapComponent} style="mapbox://styles/mapbox/light-v10?optimize=true" zoom={2} options={{ projection: 'globe' }} lat={user_latitude} lng={user_longitude}>
+    <Map bind:this={mapComponent} style="mapbox://styles/mapbox/light-v10?optimize=true" zoom={2.5} options={{ projection: 'globe' }} lat={+user_latitude} lng={+user_longitude}>
       {#if selectedDictionary?.coordinates}
         {#if selectedDictionary.coordinates.points}
           {#await import('$lib/components/maps/mapbox/map/Marker.svelte') then { default: Marker }}
@@ -101,9 +101,31 @@
 </div>
 
 <div class="border-t border-gray-200"></div>
-<div class="p-3 text-3xl font-semibold">
-  Some big stat about the number of dictionaries, entries, etc. This is a placeholder for future content.
+
+<div class="py-5 px-3 sm:px-8 text-3xl font-semibold text-center max-w-6xl mx-auto">
+  Serving 210 language communities around the globe with over 1/4 million published entries, as well as hundreds more dictionaries in progress.
 </div>
+
+<div class="text-center">
+  <Button
+    href="/dictionaries"
+    color="black"
+    size="lg"
+    class="mb-7">
+    <span class="i-fa-solid-list -mt-1" />
+    {$page.data.t('home.list_of_dictionaries')}
+  </Button>
+</div>
+
+<div class="border-t border-gray-200"></div>
+
+<div class="text-center px-3 py-8">
+  <Button href="/create-dictionary" size="lg" color="black" form="filled">
+    <span class="i-fa-solid-plus -mt-1.25" />
+    {$page.data.t('create.create_new_dictionary')}
+  </Button>
+</div>
+
 <Footer />
 
 <SeoMetaTags

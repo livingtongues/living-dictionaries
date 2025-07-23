@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { DictionaryView, IPoint } from '@living-dictionaries/types'
-  import { Button, ShowHide } from 'svelte-pieces'
+  import { ShowHide } from 'svelte-pieces'
   import { page } from '$app/stores'
 
   export let dictionaries: DictionaryView[] = []
@@ -57,8 +57,6 @@
   function clearDictionary() {
     selectedDictionaryId = null
   }
-
-  $: active = searchString || searchFocused || currentDictionary
 </script>
 
 <!-- To Consider: for longer dictionaries on mobile, if we want to make the map still show when showing dictionary details, we need to add a media query (less than md) which sets this div's max-height: 75vh and adds overflow-y-auto -->
@@ -163,24 +161,6 @@
           {/if}
         {/if}
       </ShowHide>
-      {#if !(searchFocused && filteredDictionaries.length > 3)}
-        <Button href="/create-dictionary" class="mt-2" color="black" form="filled">
-          <span class="i-fa-solid-plus -mt-1.25" />
-          {$page.data.t('create.create_new_dictionary')}
-        </Button>
-        <div class="w-2 sm:hidden" />
-
-        <Button
-          href="/dictionaries"
-          color="black"
-          form="simple"
-          class="mt-2 opacity-75 focus:opacity-100
-            sm:opacity-100 bg-white sm:bg-transparent">
-          <span class="i-fa-solid-list -mt-1" />
-          {$page.data.t('home.list_of_dictionaries')}
-        </Button>
-        <div class="w-2 sm:hidden" />
-      {/if}
     </div>
   {:else}
     <div class="p-2 flex flex-col flex-1">
