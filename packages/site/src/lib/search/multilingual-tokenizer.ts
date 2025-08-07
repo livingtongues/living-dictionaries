@@ -7,7 +7,7 @@ function normalizeToken(this: DefaultTokenizer, prop: string, token: string): st
 
 // _withCache is true for user searches and false when indexing
 export function tokenize(input: string, language?: string, prop = '', _withCache = true): string[] {
-  if (typeof input !== 'string') {
+  if (typeof input !== 'string' || prop === '_speakers') {
     return [input]
   }
 
