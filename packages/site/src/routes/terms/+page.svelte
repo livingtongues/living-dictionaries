@@ -287,8 +287,7 @@
         royalty-free, fully-paid, worldwide right, and license to host, use, copy, reproduce,
         disclose, publish, broadcast, retitle, archive, store, cache, publicly
         perform, publicly display, reformat, translate, transmit, excerpt (in whole or in part), and
-        distribute such Contributions (including, without limitation, your image and voice) for any
-        purpose, commercial, advertising, or otherwise, and to prepare derivative works of, or
+        distribute such Contributions (including, without limitation, your image and voice) and to prepare derivative works of, or
         incorporate into other works, such Contributions, and grant and authorize sublicenses of the
         foregoing. The use and distribution may occur in any media formats and through any media
         channels.
@@ -551,7 +550,7 @@
         Attn: Copyright Agent<br />
         4676 Commercial St SE, # 454<br />
         Salem, OR 97302<br />
-        questions@livingtongues.org
+        dictionaries@livingtongues.org
       </p>
       <p />
 
