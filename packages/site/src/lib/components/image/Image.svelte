@@ -89,8 +89,11 @@
             color="red"
             form="filled"
             onclick={async (e) => {
-              e.stopPropagation()
-              await on_delete_image()
+              const confirmation = confirm($page.data.t('entry.delete_entry'))
+              if (confirmation) {
+                e.stopPropagation()
+                await on_delete_image()
+              }
             }}>
             <span class="i-fa-trash-o" style="margin: -1px 0 2px;" />
             {$page.data.t('misc.delete')}
