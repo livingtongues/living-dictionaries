@@ -180,7 +180,10 @@
     "copy_and_share": "নকল কৰক আৰু ভগাই দিয়ক",
     "print": "",
     "id": "",
-    "switch_opposite": ""
+    "switch_opposite": "",
+    "delete_audio": "",
+    "delete_image": "",
+    "delete_video": ""
   },
   "entry_field": {
     "photo": "ফটো বা আলোকচিত্ৰ",

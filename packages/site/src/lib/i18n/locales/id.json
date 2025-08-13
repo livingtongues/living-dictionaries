@@ -36,13 +36,13 @@
     "flashcard_view": "Tampilan Kartu Flash untuk Pembelajar Bahasa",
     "peer_review": "Tinjauan Sejawat tentang Ejaan",
     "suggestions_from_users": "Saran dari Pengguna",
-    "push_notifications": "Pemberitahuan Push kepada Kontributor",
+    "push_notifications": "Pemberitahuan Push ke Kontributor",
     "contributor_awards": "Penghargaan Komunitas Kontributor",
-    "question_1": "Berikan beberapa informasi latar belakang tentang bahasa ini. Di mana bahasa ini digunakan? Komunitas mana yang menggunakan bahasa ini? Apakah bahasa ini terancam punah?",
-    "question_2": "Siapa nama orang-orang yang membuat kamus ini? Suara siapa saja yang ada dalam kamus ini?",
-    "question_3": "Dari mana data dalam kamus ini berasal? Jelaskan jika Anda sendiri yang mengumpulkan data tersebut. Jika Anda menggunakan sumber referensi yang diterbitkan, sebutkan sumbernya.",
-    "question_4": "Siapa yang akan menggunakan kamus ini? Apakah akan digunakan dalam proyek pendidikan?",
-    "question_5": "Jika Anda ingin masyarakat menghubungi Anda mengenai proyek ini, harap berikan informasi kontak Anda, atau tautan tempat orang dapat mempelajari lebih lanjut. Ini bersifat opsional.",
+    "question_1": "Mohon berikan informasi latar belakang tentang bahasa ini. Di mana bahasa ini digunakan? Komunitas mana saja yang menggunakan bahasa ini? Apakah bahasa ini terancam punah?",
+    "question_2": "Siapa nama orang-orang yang membuat kamus ini? Suara siapa saja yang ada di kamus ini?",
+    "question_3": "Dari mana data dalam kamus ini berasal? Jelaskan apakah Anda mengumpulkan datanya sendiri. Jika Anda menggunakan sumber referensi yang diterbitkan, sebutkan.",
+    "question_4": "Siapa saja yang akan menggunakan kamus ini? Apakah akan digunakan dalam proyek pendidikan apa pun?",
+    "question_5": "Jika Anda ingin publik menghubungi Anda mengenai proyek ini, mohon berikan informasi kontak Anda, atau tautan tempat orang-orang dapat mempelajari lebih lanjut. Ini opsional.",
     "message": "Sebelum membuat kamus Anda publik, harap lengkapi bagian Tentang."
   },
   "contributors": {
@@ -127,23 +127,23 @@
     "add_gloss_msg": "Anda dapat menambahkan lebih banyak bahasa glossing nanti di bawah Pengaturan.",
     "language_used_by_community": "Apakah kamus ini untuk bahasa yang digunakan atau diisyaratkan oleh komunitas manusia tertentu?",
     "community_permission": "Apakah komunitas bahasa telah memberi Anda izin untuk membuat kamus ini?",
-    "author_connection": "Jelaskan secara singkat bagaimana Anda mengetahui bahasa ini dan mengapa Anda membuat Kamus Hidup untuk bahasa ini. Apakah Anda bagian dari komunitas yang akan menggunakan Kamus Hidup ini? Jika tidak, bagaimana Anda mengenal komunitas tersebut?",
+    "author_connection": "Jelaskan secara singkat bagaimana Anda mengenal bahasa ini dan mengapa Anda membuat Kamus Hidup untuknya. Apakah Anda bagian dari komunitas yang akan menggunakan Kamus Hidup ini? Jika tidak, bagaimana Anda mengenal komunitas tersebut?",
     "con_lang_description": "Apakah kamus ini untuk bahasa buatan (bahasa yang diciptakan manusia beberapa tahun terakhir, untuk buku atau film)? Jika ya, jelaskan secara singkat.",
     "uncertainty": "Saya tidak tahu",
     "select_region": "Pilih Wilayah",
     "secondary_coordinates": "Koordinat Sekunder",
     "map_instructions": "Klik pada peta untuk menambahkan koordinat sekunder.",
     "print_access": "Izinkan Pemirsa untuk Mencetak Kamus",
-    "primary_coordinate": "Koordinat primer",
+    "primary_coordinate": "Koordinat utama",
     "conlang_question": "Apakah ini bahasa buatan atau bahasa buatan?",
-    "conlang_info_1": "Karena misi kami berfokus pada pendokumentasian bahasa alami manusia yang terancam punah dan bahasa minoritas, kami tidak menawarkan dukungan teknis untuk bahasa buatan (bahasa buatan) atau bahasa buatan. Karena tim kami kecil dan jam operasional terbatas, kami tidak menawarkan impor data untuk bahasa buatan.",
-    "conlang_info_2": "Kamus Hidup untuk bahasa buatan tidak akan dipublikasikan di situs web kami atau tersedia di peta beranda kami. Jika kami melihat konten yang merendahkan dalam Kamus Hidup ini, kami juga berhak menghapusnya.",
+    "conlang_info_1": "Karena misi kami berfokus pada pendokumentasian bahasa alami manusia yang terancam punah dan minoritas, kami tidak menawarkan dukungan teknis untuk bahasa buatan (bahasa buatan) atau bahasa artifisial. Karena tim kami yang kecil dan jam operasional yang terbatas, kami tidak menawarkan impor data untuk bahasa buatan.",
+    "conlang_info_2": "Kamus Hidup untuk bahasa buatan tidak akan dipublikasikan di situs web kami atau tersedia di peta beranda kami. Jika kami menemukan konten yang merendahkan dalam Kamus Hidup ini, kami juga berhak untuk menghapusnya.",
     "agree_above": "Saya setuju dengan hal di atas.",
     "agree_to_cite": "Saya setuju untuk mengutip setiap karya terbitan yang relevan dalam entri kamus.",
     "agree_for_non-commercial": "Saya setuju bahwa karya ini bersifat nonkomersial.",
-    "source_question": "Dari mana data dalam kamus ini berasal? Jelaskan jika Anda sendiri yang mengumpulkan data tersebut. Jika Anda menggunakan sumber referensi yang diterbitkan, harap cantumkan di sini.",
-    "use_question": "Siapa yang akan menggunakan kamus ini? Apakah akan digunakan dalam proyek pendidikan atau media?",
-    "conlang_warning": "Jika kamus ini ditujukan untuk bahasa buatan dan Anda tidak menunjukkannya, kami berhak menghapusnya."
+    "source_question": "Dari mana data dalam kamus ini berasal? Mohon jelaskan apakah Anda mengumpulkan datanya sendiri. Jika Anda menggunakan sumber referensi yang diterbitkan, mohon cantumkan di sini.",
+    "use_question": "Siapa saja yang akan menggunakan kamus ini? Apakah akan digunakan dalam proyek pendidikan atau media apa pun?",
+    "conlang_warning": "Jika kamus ini ditujukan untuk bahasa buatan (atau buatan), dan Anda tidak menunjukkannya, kami berhak menghapusnya."
   },
   "dictionary": {
     "latitude": "Garis Lintang",
@@ -180,7 +180,10 @@
     "copy_and_share": "Menyalin dan Menempel",
     "print": "Mencetak",
     "id": "PENGENAL",
-    "switch_opposite": "Beralih ke yang berlawanan"
+    "switch_opposite": "Beralih ke yang berlawanan",
+    "delete_audio": "Hapus audio?",
+    "delete_image": "Hapus gambar?",
+    "delete_video": "Hapus video?"
   },
   "entry_field": {
     "photo": "Foto",
@@ -264,7 +267,7 @@
     "clean": "Membersihkan",
     "map": "Peta",
     "guidance": "Panduan",
-    "out_of_service": "Terima kasih telah mengunjungi situs web kami! Halaman ini sedang dalam tahap pengembangan sementara.\nHalaman ini tidak akan tersedia antara tanggal 3 Februari dan 28 Februari 2025.\nSilakan kunjungi halaman ini lagi pada tanggal 1 Maret 2025.\nAnda akan dapat membuat Kamus Hidup baru pada saat itu.\nMohon maaf atas ketidaknyamanan ini, dan terima kasih atas kesabaran Anda.\nSementara itu, seluruh platform berfungsi normal.",
+    "out_of_service": "Terima kasih telah mengunjungi situs web kami! Halaman ini sedang dalam pengembangan sementara.\nHalaman ini tidak akan tersedia antara 3 Februari dan 28 Februari 2025.\nSilakan kunjungi kembali halaman ini pada 1 Maret 2025.\nAnda akan dapat membuat Kamus Hidup baru pada saat itu.\nMohon maaf atas ketidaknyamanan ini, dan terima kasih atas kesabaran Anda.\nSementara itu, platform lainnya berfungsi normal.",
     "transmitter": "Hormat kami, tim Living Dictionaries",
     "disjunctive": "atau"
   },
@@ -318,13 +321,13 @@
     "download_csv": "Unduh CSV",
     "availability": "Ekspor hanya tersedia untuk manajer kamus",
     "download_pdf": "Unduh PDF",
-    "spreadsheet": "Lembar Kerja"
+    "spreadsheet": "Lembar kerja"
   },
   "video": {
-    "video_url": "URL videonya",
+    "video_url": "URL Video",
     "video_credit": "Kredit Video",
     "prepare_to_record_video": "Persiapan untuk Merekam dengan Mikrofon & Kamera",
-    "video_info": "Ada dua cara untuk menampilkan video Anda di Living Dictionary: 1) Anda dapat merekam video Anda di sini, atau mengunggah video yang telah Anda rekam sebelumnya ke platform kami. Kelebihan: mudah dan bagus untuk perekaman cepat. Kekurangan: Anda hanya dapat mengunggah video hingga 100MB sehingga harus pendek dan beresolusi rendah. 2) Simpan video Anda di layanan hosting yang mengkhususkan diri dalam penyimpanan video dan tautkan URL ke situs kami. Kelebihan: mudah (selama video Anda sudah diunggah di platform tersebut), video Anda dapat memiliki resolusi dan durasi yang Anda inginkan. Kekurangan: jika Anda ingin merekam sesuatu yang tidak terduga atau sangat sederhana, mungkin akan terlalu banyak upaya untuk melakukannya dengan cara itu, dan Anda mungkin ingin memprioritaskan metode 1.",
+    "video_info": "Ada dua cara untuk menampilkan video Anda di Living Dictionary: 1) Anda dapat merekam video langsung di sini, atau mengunggah video yang telah direkam sebelumnya ke platform kami. Keuntungan: mudah dan cocok untuk perekaman cepat. Kekurangan: Anda hanya dapat mengunggah video hingga 100MB, jadi video tersebut harus pendek dan beresolusi rendah. 2) Simpan video Anda di layanan hosting yang khusus menyediakan penyimpanan video dan tautkan URL ke situs kami. Keuntungan: mudah (selama video Anda sudah diunggah di platform tersebut), video Anda dapat memiliki resolusi dan durasi yang Anda inginkan. Kekurangan: jika Anda ingin merekam sesuatu yang tidak terduga atau sangat sederhana, mungkin akan terlalu banyak upaya untuk melakukannya dengan cara itu, dan Anda mungkin ingin memprioritaskan metode 1.",
     "paste_video_url": "Tempel tautan YouTube atau Vimeo",
     "record_upload_video": "Rekam atau unggah video",
     "view": "Melihat",
@@ -350,10 +353,10 @@
     "import": "Impor",
     "template_link": "Tautan ke Template",
     "instructions_1": "Jika Anda sudah memiliki data linguistik yang ingin diimpor ke Kamus Anda, ikuti langkah-langkah di bawah ini.",
-    "instructions_2": "Klik tombol biru “Link to Template” di bawah. Unduh template sebagai file Excel, atau buat salinannya di Google Docs. Edit template sesuai dengan kebutuhan proyek Anda. Salin dan tempel data Anda ke dalam spreadsheet.",
-    "instructions_3": "Gunakan \"Hubungi Kami\" di bawah ini untuk menghubungi kami. Beri tahu kami bahwa Anda memiliki spreadsheet baru yang siap diimpor. Ajukan pertanyaan apa pun yang Anda miliki. Kami akan menanggapi Anda melalui email, lalu Anda dapat mengirimkan berkas Anda kepada kami.",
-    "instructions_4": "Untuk mengirimkan data yang diekspor dari perangkat lunak kamus seperti FLEx, Lexique Pro, Shoebox, silakan gunakan tombol “Hubungi Kami” di bawah ini dan beri tahu kami detail proyek Anda.",
-    "no_imports": "Saat ini kami tengah bekerja sama dengan banyak komunitas dan organisasi mitra untuk mengimpor sejumlah besar entri kamus ke platform ini. Kami juga tengah melakukan pembaruan besar pada basis data kami. Kami akan menerima impor data baru mulai 1 Juli 2024. Kami menghargai kesabaran Anda, dan kami mohon maaf atas ketidaknyamanan ini."
+    "instructions_2": "Klik tombol biru \"Tautkan ke Templat\" di bawah. Unduh templat sebagai berkas Excel, atau buat salinannya di Google Docs. Edit templat sesuai kebutuhan proyek Anda. Salin dan tempel data Anda ke dalam spreadsheet.",
+    "instructions_3": "Gunakan \"Hubungi Kami\" di bawah ini untuk menghubungi kami. Beri tahu kami bahwa Anda memiliki spreadsheet baru yang siap diimpor. Ajukan pertanyaan apa pun yang Anda miliki. Kami akan membalas email Anda, lalu Anda dapat mengirimkan berkas Anda kepada kami.",
+    "instructions_4": "Untuk mengirimkan data yang diekspor dari perangkat lunak kamus seperti FLEx, Lexique Pro, Shoebox, silakan gunakan tombol \"Hubungi Kami\" di bawah ini dan beri tahu kami detail proyek Anda.",
+    "no_imports": "Saat ini kami sedang bekerja sama dengan banyak komunitas dan organisasi mitra untuk mengimpor sejumlah besar entri kamus ke platform ini. Kami juga sedang melakukan pembaruan besar pada basis data kami. Kami akan menerima impor data baru mulai 1 Juli 2024. Kami menghargai kesabaran Anda, dan mohon maaf atas ketidaknyamanan ini."
   },
   "history": {
     "history": "Sejarah",
@@ -386,7 +389,7 @@
     "add": "Tambahkan Rasa"
   },
   "banner": {
-    "message": "Kami akan melakukan penyempurnaan pada basis data kami pada tanggal 22 Oktober mulai pukul 7 malam Waktu Bagian Timur (New York), selama 24 jam. Kemampuan mengedit tidak akan tersedia selama periode tersebut. Mohon maaf atas ketidaknyamanan ini.",
+    "message": "Kami akan melakukan perbaikan pada basis data kami pada tanggal 22 Oktober, mulai pukul 19.00 Waktu Bagian Timur (New York), selama 24 jam. Fitur penyuntingan tidak akan tersedia selama periode tersebut. Mohon maaf atas ketidaknyamanan ini.",
     "attention": "Perhatian"
   }
 }
