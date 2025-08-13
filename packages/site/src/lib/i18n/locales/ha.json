@@ -136,7 +136,7 @@
     "print_access": "Bada Masu kallo su Buga ƙamus",
     "primary_coordinate": "Haɗin kai na farko",
     "conlang_question": "Shin wannan yaren da aka gina ko na wucin gadi?",
-    "conlang_info_1": "Tun da manufarmu ta mai da hankali kan tattara bayanan da ke cikin haɗari da ƙananan harsunan ɗan adam, ba ma ba da goyan bayan fasaha don ingantattun harsuna (conlang) ko harsunan wucin gadi. Saboda ƙananan ƙungiyar mu da iyakantaccen sa'o'i na aiki, ba mu bayar da shigo da bayanai don haɗin gwiwa.",
+    "conlang_info_1": "Tunda manufarmu ta mai da hankali kan tattara bayanan da ke cikin haɗari da ƙananan harsunan ɗan adam, ba ma ba da goyan bayan fasaha don ingantattun harsuna (conlang) ko harsunan wucin gadi. Saboda ƙananan ƙungiyar mu da iyakantaccen sa'o'i na aiki, ba mu bayar da shigo da bayanai don haɗin gwiwa.",
     "conlang_info_2": "Kamus na Rayayya don ginannun harsuna ba za a bayyana jama'a a gidan yanar gizon mu ba ko kuma a samu a taswirar gidan yanar gizon mu. Idan muka ga abun ciki na wulakanci a cikin wannan Kamus na Rayuwa, muna kuma tanadin haƙƙin share shi.",
     "agree_above": "Na yarda da abin da ke sama.",
     "agree_to_cite": "Na yarda in faɗi duk wasu ayyukan da aka buga masu dacewa a cikin shigarwar ƙamus.",
@@ -180,7 +180,10 @@
     "copy_and_share": "Kwafi da rabo",
     "print": "Buga",
     "id": "ID",
-    "switch_opposite": "Canja zuwa kishiyar"
+    "switch_opposite": "Canja zuwa kishiyar",
+    "delete_audio": "Share audio?",
+    "delete_image": "Share hoto?",
+    "delete_video": "Share bidiyo?"
   },
   "entry_field": {
     "photo": "Photo",
@@ -255,7 +258,7 @@
     "next": "Na gaba",
     "export": "fitarwa",
     "images": "Hotuna",
-    "reset": "Sake saiti",
+    "reset": "Sake saitin",
     "invalid_url": "Wannan ba ingantaccen URL bane",
     "downloading": "Ana saukewa",
     "upload": "Loda",
@@ -274,7 +277,7 @@
     "dict_name": "Dictionary Name",
     "public_private_meaning": "Jama'a nufin kowa zai iya gani da ƙamus da bukatar al'umma yarda. Private kamus ne bayyane ne kawai zuwa gare ku, kuma ku hadin gwiwar.",
     "optional_data_fields": "ZABI Data Fields",
-    "unable_to_delete": "Lura: ba za ku iya share waɗannan yaruka masu haske ba daga baya.",
+    "unable_to_delete": "Lura: ba za ku iya share waɗannan yaruka masu sheki daga baya ba.",
     "print_access_meaning": "Wannan yana ba jama'a ikon saukewa da buga wannan Kamus na Rayuwa a matsayin .PDF",
     "featured_image": "Siffar Hoton"
   },
@@ -311,7 +314,7 @@
   },
   "export": {
     "csv_data": "Bayanai kamar .CSV",
-    "checking_images": "Dubawa idan fayilolin hoto sun wanzu",
+    "checking_images": "Dubawa idan fayilolin hoto suna wanzu",
     "no_images": "Babu fayilolin hoto",
     "checking_audios": "Dubawa idan fayilolin mai jiwuwa sun wanzu",
     "no_audios": "Babu fayilolin mai jiwuwa",
@@ -324,7 +327,7 @@
     "video_url": "URL na bidiyo",
     "video_credit": "Bidiyo bashi",
     "prepare_to_record_video": "Shirya don yin rikodi da Makirufo & Kamara",
-    "video_info": "Akwai hanyoyi guda biyu don nuna bidiyon ku a cikin Kamus na Rayuwa: 1) Kuna iya yin rikodin bidiyonku nan, ko loda bidiyon ku da aka yi rikodi a dandali. Abũbuwan amfãni: mai sauƙi kuma mai girma don rikodin sauri. Hasara: Kuna iya loda bidiyo har zuwa 100MB kawai don haka dole ne ya zama gajere kuma mara nauyi. 2) Samun bidiyon ku akan sabis na talla wanda ya ƙware a ajiyar bidiyo da haɗa URL zuwa rukunin yanar gizon mu. Abũbuwan amfãni: mai sauƙi (idan dai an riga an ɗora bidiyon ku akan wannan dandamali), bidiyon ku na iya samun ƙuduri da tsawon da kuke so. Rashin hasara: idan kuna son yin rikodin wani abu na bazata ko kuma mai sauqi qwarai, yana iya zama ƙoƙari da yawa don yin haka, kuma kuna iya fifita hanya ta 1.",
+    "video_info": "Akwai hanyoyi guda biyu don nuna bidiyon ku a cikin Kamus na Rayuwa: 1) Kuna iya yin rikodin bidiyonku nan, ko loda bidiyon ku da aka yi rikodi a dandali. Abũbuwan amfãni: mai sauƙi kuma mai girma don rikodin sauri. Hasara: Kuna iya loda bidiyo har zuwa 100MB kawai don haka dole ne ya zama gajere kuma mara nauyi. 2) Samun bidiyon ku akan sabis na talla wanda ya ƙware a ajiyar bidiyo da haɗa URL zuwa rukunin yanar gizon mu. Abũbuwan amfãni: mai sauƙi (idan dai an riga an ɗora bidiyon ku akan wannan dandamali), bidiyon ku na iya samun ƙuduri da tsawon da kuke so. Hasara: idan kuna son yin rikodin wani abu na bazata ko kuma mai sauqi qwarai, yana iya zama ƙoƙari da yawa don yin haka, kuma kuna iya fifita hanya ta 1.",
     "paste_video_url": "Manna hanyar haɗin YouTube ko Vimeo",
     "record_upload_video": "Yi rikodin ko loda bidiyo",
     "view": "Duba",
@@ -351,7 +354,7 @@
     "template_link": "Hanyar haɗi zuwa Samfura",
     "instructions_1": "Idan kun riga kuna da bayanan harshe waɗanda kuke son shigo da su cikin ƙamus ɗinku, da fatan za a bi matakan da ke ƙasa.",
     "instructions_2": "Danna maɓallin shuɗin \"Haɗin zuwa Samfura\" a ƙasa. Zazzage samfurin azaman fayil ɗin Excel, ko ƙirƙirar kwafi akan Google Docs. Shirya samfurin bisa ga bukatun aikin ku. Kwafi da liƙa bayanan ku a cikin maƙunsar bayanai.",
-    "instructions_3": "Yi amfani da \"Contact Us\" da ke ƙasa don tuntuɓar mu. Bari mu san cewa kuna da sabon maƙunsar rubutu wanda ke shirye don shigo da kaya. Yi mana duk wata tambaya da kuke da ita. Za mu amsa muku ta imel, sannan za ku iya aiko mana da fayil ɗin ku.",
+    "instructions_3": "Yi amfani da \"Contact Us\" da ke ƙasa don tuntuɓar mu. Bari mu san cewa kuna da sabon maƙunsar rubutu wanda ke shirye don shigo da kaya. Yi mana tambayoyi da kuke da su. Za mu amsa muku ta imel, sannan za ku iya aiko mana da fayil ɗin ku.",
     "instructions_4": "Don aiko mana da bayanan da aka fitar daga manhajojin ƙamus kamar FLEx, Lexique Pro, Shoebox, da fatan za a yi amfani da maɓallin “Contact Us” da ke ƙasa kuma gaya mana cikakkun bayanai na aikin ku.",
     "no_imports": "A halin yanzu muna aiki tare da al'ummomi da yawa da ƙungiyoyin haɗin gwiwa don shigo da adadi mai yawa na shigarwar ƙamus zuwa wannan dandali. Har ila yau, muna yin babban sabuntawa ga bayanan mu. Za mu karɓi sabbin shigo da bayanai daga ranar 1 ga Yuli, 2024. Muna godiya da haƙurin ku, kuma muna ba da hakuri kan rashin jin daɗi."
   },

@@ -50,7 +50,8 @@
         color="red"
         form="simple"
         onclick={async () => {
-          await dbOperations.update_entry({ deleted: new Date().toISOString() })
+          const confirmation = confirm($page.data.t('entry.delete_entry'))
+          if (confirmation) await dbOperations.update_entry({ deleted: new Date().toISOString() })
           history.back()
         }}>
 

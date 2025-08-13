@@ -180,7 +180,10 @@
     "copy_and_share": "Copiar y compartir",
     "print": "Imprimir",
     "id": "ID",
-    "switch_opposite": "Cambiar a lo opuesto"
+    "switch_opposite": "Cambiar a lo opuesto",
+    "delete_audio": "¿Borrar audio?",
+    "delete_image": "¿Borrar imagen?",
+    "delete_video": "¿Borrar el vídeo?"
   },
   "entry_field": {
     "photo": "Foto",

@@ -180,7 +180,10 @@
     "copy_and_share": "Copiar e partilhar",
     "print": "Imprimir",
     "id": "EU IA",
-    "switch_opposite": "Mude para o oposto"
+    "switch_opposite": "Mudar para o oposto",
+    "delete_audio": "Apagar áudio?",
+    "delete_image": "Excluir imagem?",
+    "delete_video": "Excluir vídeo?"
   },
   "entry_field": {
     "photo": "Foto",
@@ -366,7 +369,7 @@
     "new_value": "Novo Valor",
     "entry_message": "Um usuário editou esta entrada em",
     "edited": "Última edição em",
-    "history_search": "Pesquisar entradas, editores, campos e valores",
+    "history_search": "Entradas de pesquisa, editores, campos e valores",
     "download_history": "Baixar histórico como CSV",
     "empty": "Ainda sem histórico",
     "type": "tipo",
@@ -386,7 +389,7 @@
     "add": "Adicionar sentido"
   },
   "banner": {
-    "message": "A partir de 22 de outubro, às 19h (horário do leste dos EUA) (Nova York), faremos melhorias em nosso banco de dados por 24 horas. Os recursos de edição não estarão disponíveis durante esse período. Pedimos desculpas pelo inconveniente.",
+    "message": "Estamos implementando melhorias em nosso banco de dados a partir de 22 de outubro, a partir das 19h (horário do leste dos EUA) por 24 horas. Os recursos de edição não estarão disponíveis durante esse período. Pedimos desculpas pelo inconveniente.",
     "attention": "Atenção"
   }
 }
