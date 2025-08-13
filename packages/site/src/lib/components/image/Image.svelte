@@ -89,7 +89,7 @@
             color="red"
             form="filled"
             onclick={async (e) => {
-              const confirmation = confirm($page.data.t('entry.delete_entry'))
+              const confirmation = confirm($page.data.t('entry.delete_image'))
               if (confirmation) {
                 e.stopPropagation()
                 await on_delete_image()
