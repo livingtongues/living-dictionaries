@@ -303,7 +303,8 @@
     "select_audio_file": "Seleccionar un archivo de audio",
     "success": "Éxito",
     "uploading": "Subiendo",
-    "select_video_file": "Seleccione el archivo de video"
+    "select_video_file": "Seleccione el archivo de video",
+    "format_error": "Formato de audio no compatible"
   },
   "invite": {
     "invitation_claimed": "Invitación aceptada",
