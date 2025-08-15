@@ -40,9 +40,9 @@
     "contributor_awards": "Penghargaan Komunitas Kontributor",
     "question_1": "Mohon berikan informasi latar belakang tentang bahasa ini. Di mana bahasa ini digunakan? Komunitas mana saja yang menggunakan bahasa ini? Apakah bahasa ini terancam punah?",
     "question_2": "Siapa nama orang-orang yang membuat kamus ini? Suara siapa saja yang ada di kamus ini?",
-    "question_3": "Dari mana data dalam kamus ini berasal? Jelaskan apakah Anda mengumpulkan datanya sendiri. Jika Anda menggunakan sumber referensi yang diterbitkan, sebutkan.",
+    "question_3": "Dari mana data dalam kamus ini berasal? Mohon jelaskan apakah Anda mengumpulkan datanya sendiri. Jika Anda menggunakan sumber referensi yang diterbitkan, mohon cantumkan.",
     "question_4": "Siapa saja yang akan menggunakan kamus ini? Apakah akan digunakan dalam proyek pendidikan apa pun?",
-    "question_5": "Jika Anda ingin publik menghubungi Anda mengenai proyek ini, mohon berikan informasi kontak Anda, atau tautan tempat orang-orang dapat mempelajari lebih lanjut. Ini opsional.",
+    "question_5": "Jika Anda ingin publik menghubungi Anda terkait proyek ini, mohon berikan informasi kontak Anda, atau tautan tempat orang-orang dapat mempelajari lebih lanjut. Ini opsional.",
     "message": "Sebelum membuat kamus Anda publik, harap lengkapi bagian Tentang."
   },
   "contributors": {
@@ -303,7 +303,8 @@
     "select_audio_file": "Pilih File Audio",
     "success": "Berhasil",
     "uploading": "Mengunggah",
-    "select_video_file": "Pilih File Video"
+    "select_video_file": "Pilih File Video",
+    "format_error": "Format audio tidak didukung"
   },
   "invite": {
     "invitation_claimed": "Undangan diklaim",

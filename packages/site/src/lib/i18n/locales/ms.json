@@ -34,7 +34,7 @@
     "import_export": "Import/Eksport (FLEx, Format Standard)",
     "geo_tagging": "Entri penandaan geo",
     "flashcard_view": "Paparan Kad Imbas untuk Pelajar Bahasa",
-    "peer_review": "Tinjauan Rakan Sebaya terhadap Ejaan",
+    "peer_review": "Tinjauan Rakan Sebaya Ejaan",
     "suggestions_from_users": "Cadangan daripada Pengguna",
     "push_notifications": "Pemberitahuan Tolak kepada Penyumbang",
     "contributor_awards": "Anugerah Komuniti Penyumbang",
@@ -135,7 +135,7 @@
     "map_instructions": "Klik pada peta untuk menambah koordinat sekunder.",
     "print_access": "Benarkan Penonton Mencetak Kamus",
     "primary_coordinate": "Koordinat utama",
-    "conlang_question": "Adakah ini bahasa binaan atau bahasa buatan?",
+    "conlang_question": "Adakah ini bahasa yang dibina atau bahasa buatan?",
     "conlang_info_1": "Memandangkan misi kami menumpukan pada mendokumentasikan bahasa semula jadi manusia yang terancam dan minoriti, kami tidak menawarkan sokongan teknikal untuk bahasa binaan (konlang) atau bahasa buatan. Disebabkan pasukan kami yang kecil dan waktu operasi yang terhad, kami tidak menawarkan import data untuk conlang.",
     "conlang_info_2": "Kamus Hidup untuk bahasa yang dibina tidak akan didedahkan kepada umum di tapak web kami atau tersedia pada peta halaman utama kami. Jika kami melihat kandungan yang menghina dalam Kamus Hidup ini, kami juga berhak untuk memadamkannya.",
     "agree_above": "Saya bersetuju dengan perkara di atas.",
@@ -143,7 +143,7 @@
     "agree_for_non-commercial": "Saya bersetuju bahawa kerja ini bukan komersial.",
     "source_question": "Dari mana datangnya data dalam kamus ini? Sila terangkan jika anda mengumpul data sendiri. Jika anda menggunakan mana-mana sumber rujukan yang diterbitkan, sila senaraikan di sini.",
     "use_question": "Siapa yang akan menggunakan kamus ini? Adakah ia akan digunakan dalam mana-mana projek pendidikan atau media?",
-    "conlang_warning": "Jika kamus ini adalah untuk bahasa yang dibina (atau buatan), dan anda tidak menyatakannya, kami berhak untuk mengalih keluarnya."
+    "conlang_warning": "Jika kamus ini adalah untuk bahasa yang dibina (atau tiruan), dan anda tidak menyatakannya, kami berhak untuk mengeluarkannya."
   },
   "dictionary": {
     "latitude": "Latitud",
@@ -303,7 +303,8 @@
     "select_audio_file": "Pilih Fail Audio",
     "success": "Berjaya",
     "uploading": "Memuat naik",
-    "select_video_file": "Pilih Fail Video"
+    "select_video_file": "Pilih Fail Video",
+    "format_error": "Format audio tidak disokong"
   },
   "invite": {
     "invitation_claimed": "Undangan diisytiharkan",
@@ -365,7 +366,7 @@
     "entry_history": "sejarah kemasukan",
     "field": "Padang",
     "date": "tarikh",
-    "old_value": "Nilai Dahulu",
+    "old_value": "Nilai Bekas",
     "new_value": "Nilai Baru",
     "entry_message": "Seorang pengguna mengedit entri ini pada ",
     "edited": "Terakhir diedit pada",
@@ -385,7 +386,7 @@
     "name": "Sinopsis"
   },
   "sense": {
-    "sense": "rasa",
+    "sense": "Rasa",
     "add": "Tambah Sense"
   },
   "banner": {

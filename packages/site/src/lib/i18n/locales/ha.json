@@ -40,7 +40,7 @@
     "contributor_awards": "Kyautar Al'umma Mai Ba da gudummawa",
     "question_1": "Da fatan za a ba da wasu bayanan baya game da wannan harshe. A ina ake magana? Wadanne al'ummomi ne ke jin wannan yare? Shin wannan harshe yana cikin haɗari?",
     "question_2": "Menene sunayen mutanen da suka gina wannan ƙamus? Muryoyin wa ke cikin wannan ƙamus?",
-    "question_3": "Daga ina bayanan da ke cikin wannan ƙamus suka fito? Da fatan za a kwatanta idan kun tattara bayanan da kanku. Idan kun yi amfani da wasu hanyoyin da aka buga, da fatan za a jera su.",
+    "question_3": "Daga ina bayanan da ke cikin wannan ƙamus suka fito? Da fatan za a kwatanta idan kun tattara bayanan da kanku. Idan kun yi amfani da wasu hanyoyin bincike da aka buga, da fatan za a lissafa su.",
     "question_4": "Wanene zai yi amfani da wannan ƙamus? Za a yi amfani da shi a cikin kowane ayyukan ilimi?",
     "question_5": "Idan kana son jama'a su tuntube ka game da wannan aikin, da fatan za a ba da bayanan tuntuɓar ku, ko hanyar haɗi zuwa inda mutane za su iya ƙarin koyo. Wannan na zaɓi ne.",
     "message": "Kafin bayyana ƙamus ɗin ku ga jama'a, da fatan za a cika sashin Game da."
@@ -303,7 +303,8 @@
     "select_audio_file": "Zabi Audio fayil",
     "success": "Success",
     "uploading": "Ana aikawa",
-    "select_video_file": "Zaɓi Fayil na Bidiyo"
+    "select_video_file": "Zaɓi Fayil na Bidiyo",
+    "format_error": "Tsarin jiwuwa mara tallafi"
   },
   "invite": {
     "invitation_claimed": "gayyata da'awa",
@@ -314,7 +315,7 @@
   },
   "export": {
     "csv_data": "Bayanai kamar .CSV",
-    "checking_images": "Dubawa idan fayilolin hoto suna wanzu",
+    "checking_images": "Dubawa idan fayilolin hoto sun wanzu",
     "no_images": "Babu fayilolin hoto",
     "checking_audios": "Dubawa idan fayilolin mai jiwuwa sun wanzu",
     "no_audios": "Babu fayilolin mai jiwuwa",
@@ -327,7 +328,7 @@
     "video_url": "URL na bidiyo",
     "video_credit": "Bidiyo bashi",
     "prepare_to_record_video": "Shirya don yin rikodi da Makirufo & Kamara",
-    "video_info": "Akwai hanyoyi guda biyu don nuna bidiyon ku a cikin Kamus na Rayuwa: 1) Kuna iya yin rikodin bidiyonku nan, ko loda bidiyon ku da aka yi rikodi a dandali. Abũbuwan amfãni: mai sauƙi kuma mai girma don rikodin sauri. Hasara: Kuna iya loda bidiyo har zuwa 100MB kawai don haka dole ne ya zama gajere kuma mara nauyi. 2) Samun bidiyon ku akan sabis na talla wanda ya ƙware a ajiyar bidiyo da haɗa URL zuwa rukunin yanar gizon mu. Abũbuwan amfãni: mai sauƙi (idan dai an riga an ɗora bidiyon ku akan wannan dandamali), bidiyon ku na iya samun ƙuduri da tsawon da kuke so. Hasara: idan kuna son yin rikodin wani abu na bazata ko kuma mai sauqi qwarai, yana iya zama ƙoƙari da yawa don yin haka, kuma kuna iya fifita hanya ta 1.",
+    "video_info": "Akwai hanyoyi guda biyu don nuna bidiyon ku a cikin Kamus na Rayuwa: 1) Kuna iya yin rikodin bidiyonku nan, ko loda bidiyon ku da aka yi rikodi a dandali. Abũbuwan amfãni: mai sauƙi kuma mai girma don rikodin sauri. Hasara: Kuna iya loda bidiyo har zuwa 100MB kawai don haka dole ne ya zama gajere kuma mara nauyi. 2) Samun bidiyon ku akan sabis na talla wanda ya ƙware a ajiyar bidiyo da haɗa URL zuwa rukunin yanar gizon mu. Abũbuwan amfãni: mai sauƙi (idan dai an riga an ɗora bidiyon ku akan wannan dandamali), bidiyon ku na iya samun ƙuduri da tsawon da kuke so. Rashin hasara: idan kuna son yin rikodin wani abu na bazata ko kuma mai sauqi qwarai, yana iya zama ƙoƙari da yawa don yin haka, kuma kuna iya fifita hanya ta 1.",
     "paste_video_url": "Manna hanyar haɗin YouTube ko Vimeo",
     "record_upload_video": "Yi rikodin ko loda bidiyo",
     "view": "Duba",
@@ -352,7 +353,7 @@
   "import_page": {
     "import": "Shigo da",
     "template_link": "Hanyar haɗi zuwa Samfura",
-    "instructions_1": "Idan kun riga kuna da bayanan harshe waɗanda kuke son shigo da su cikin ƙamus ɗinku, da fatan za a bi matakan da ke ƙasa.",
+    "instructions_1": "Idan kun riga kuna da bayanan harshe waɗanda kuke son shigo da su cikin ƙamus ɗin ku, da fatan za a bi matakan da ke ƙasa.",
     "instructions_2": "Danna maɓallin shuɗin \"Haɗin zuwa Samfura\" a ƙasa. Zazzage samfurin azaman fayil ɗin Excel, ko ƙirƙirar kwafi akan Google Docs. Shirya samfurin bisa ga bukatun aikin ku. Kwafi da liƙa bayanan ku a cikin maƙunsar bayanai.",
     "instructions_3": "Yi amfani da \"Contact Us\" da ke ƙasa don tuntuɓar mu. Bari mu san cewa kuna da sabon maƙunsar rubutu wanda ke shirye don shigo da kaya. Yi mana tambayoyi da kuke da su. Za mu amsa muku ta imel, sannan za ku iya aiko mana da fayil ɗin ku.",
     "instructions_4": "Don aiko mana da bayanan da aka fitar daga manhajojin ƙamus kamar FLEx, Lexique Pro, Shoebox, da fatan za a yi amfani da maɓallin “Contact Us” da ke ƙasa kuma gaya mana cikakkun bayanai na aikin ku.",

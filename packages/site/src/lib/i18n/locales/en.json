@@ -304,7 +304,8 @@
     "select_audio_file": "Select Audio File",
     "success": "Success",
     "uploading": "Uploading",
-    "select_video_file": "Select Video File"
+    "select_video_file": "Select Video File",
+    "format_error": "Unsupported audio format"
   },
   "invite": {
     "invitation_claimed": "Invitation claimed",
