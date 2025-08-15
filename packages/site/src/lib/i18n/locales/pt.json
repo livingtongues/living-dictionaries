@@ -303,7 +303,8 @@
     "select_audio_file": "Seleccione o ficheiro do Áudio",
     "success": "Sucesso",
     "uploading": "A Enviar",
-    "select_video_file": "Selecione o arquivo de vídeo"
+    "select_video_file": "Selecione o arquivo de vídeo",
+    "format_error": "Formato de áudio não suportado"
   },
   "invite": {
     "invitation_claimed": "Convite reclamado",
@@ -389,7 +390,7 @@
     "add": "Adicionar sentido"
   },
   "banner": {
-    "message": "Estamos implementando melhorias em nosso banco de dados a partir de 22 de outubro, a partir das 19h (horário do leste dos EUA) por 24 horas. Os recursos de edição não estarão disponíveis durante esse período. Pedimos desculpas pelo inconveniente.",
+    "message": "A partir de 22 de outubro, às 19h (horário do leste dos EUA) (Nova York), faremos melhorias em nosso banco de dados por 24 horas. Os recursos de edição não estarão disponíveis durante esse período. Pedimos desculpas pelo inconveniente.",
     "attention": "Atenção"
   }
 }

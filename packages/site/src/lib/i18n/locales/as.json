@@ -303,7 +303,8 @@
     "select_audio_file": "অডিঅ' ফাইল নিৰ্বাচন কৰক",
     "success": "সফলতা",
     "uploading": "আপল'ড হৈ আছে",
-    "select_video_file": ""
+    "select_video_file": "",
+    "format_error": ""
   },
   "invite": {
     "invitation_claimed": "নিমন্ত্ৰণ দাবী কৰা হৈছে",

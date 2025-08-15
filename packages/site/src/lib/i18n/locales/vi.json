@@ -303,7 +303,8 @@
     "select_audio_file": "Chọn tệp âm",
     "success": "Thành công",
     "uploading": "Đang tải lên",
-    "select_video_file": "Chọn tệp video"
+    "select_video_file": "Chọn tệp video",
+    "format_error": "Định dạng âm thanh không được hỗ trợ"
   },
   "invite": {
     "invitation_claimed": "Lời mời đã được nhận",
@@ -356,7 +357,7 @@
     "instructions_2": "Nhấp vào nút \"Liên kết đến Mẫu\" màu xanh lam bên dưới. Tải xuống mẫu dưới dạng tệp Excel hoặc tạo bản sao trên Google Docs. Chỉnh sửa mẫu theo nhu cầu của dự án. Sao chép và dán dữ liệu vào bảng tính.",
     "instructions_3": "Hãy sử dụng mục \"Liên hệ với chúng tôi\" bên dưới để liên hệ với chúng tôi. Hãy cho chúng tôi biết bạn có bảng tính mới đã sẵn sàng để nhập. Hãy hỏi chúng tôi bất kỳ câu hỏi nào bạn có. Chúng tôi sẽ trả lời bạn qua email, sau đó bạn có thể gửi tệp cho chúng tôi.",
     "instructions_4": "Để gửi cho chúng tôi dữ liệu được xuất từ các phần mềm từ điển như FLEx, Lexique Pro, Shoebox, vui lòng sử dụng nút \"Liên hệ với chúng tôi\" bên dưới và cho chúng tôi biết chi tiết về dự án của bạn.",
-    "no_imports": "Hiện tại, chúng tôi đang hợp tác với nhiều cộng đồng và tổ chức đối tác để nhập một lượng lớn mục từ điển vào nền tảng này. Chúng tôi cũng đang thực hiện những cập nhật lớn cho cơ sở dữ liệu. Chúng tôi sẽ chấp nhận dữ liệu nhập mới bắt đầu từ ngày 1 tháng 7 năm 2024. Chúng tôi trân trọng sự kiên nhẫn của bạn và xin lỗi vì sự bất tiện này."
+    "no_imports": "Hiện tại, chúng tôi đang hợp tác với nhiều cộng đồng và tổ chức đối tác để nhập một lượng lớn mục từ điển vào nền tảng này. Chúng tôi cũng đang thực hiện những cập nhật lớn cho cơ sở dữ liệu. Chúng tôi sẽ chấp nhận dữ liệu mới bắt đầu từ ngày 1 tháng 7 năm 2024. Chúng tôi trân trọng sự kiên nhẫn của bạn và xin lỗi vì sự bất tiện này."
   },
   "history": {
     "history": "Lịch sử",
