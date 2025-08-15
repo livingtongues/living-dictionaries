@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { ShowHide } from 'svelte-pieces'
+  import { Button, ShowHide } from 'svelte-pieces'
   import type { DictionaryView } from '@living-dictionaries/types'
   import { onMount } from 'svelte'
   import type { PageData } from './$types'
@@ -11,11 +11,12 @@
   import DictionaryPoints from '$lib/components/home/DictionaryPoints.svelte'
   import Search from '$lib/components/home/Search.svelte'
   import Header from '$lib/components/shell/Header.svelte'
+  import Footer from '$lib/components/shell/Footer.svelte'
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte'
   import { browser } from '$app/environment'
 
   export let data: PageData
-  $: ({ admin, get_private_dictionaries, get_public_dictionaries, my_dictionaries } = data)
+  $: ({ admin, get_private_dictionaries, get_public_dictionaries, my_dictionaries, user_latitude, user_longitude } = data)
 
   let public_dictionaries: DictionaryView[] = []
   let private_dictionaries: DictionaryView[] = []
@@ -43,22 +44,19 @@
 
 <Header />
 
-<main
-  class="top-12 fixed bottom-0 right-0 left-0 flex flex-col sm:flex-row border-t border-gray-200">
-  <div class="sm:w-72 max-h-full">
-    <Search
-      {dictionaries}
-      my_dictionaries={$my_dictionaries}
-      bind:selectedDictionaryId
-      on_selected_dictionary_point={(point) => {
-        if (point) {
-          mapComponent.setZoom(7)
-          mapComponent.setCenter([point.coordinates.longitude, point.coordinates.latitude])
-        }
-      }} />
-  </div>
-  <div class="relative flex-1">
-    <Map bind:this={mapComponent} style="mapbox://styles/mapbox/light-v10?optimize=true" zoom={2}>
+<div class="flex flex-col sm:flex-row">
+  <Search
+    {dictionaries}
+    my_dictionaries={$my_dictionaries}
+    bind:selectedDictionaryId
+    on_selected_dictionary_point={(point) => {
+      if (point) {
+        mapComponent.setZoom(7)
+        mapComponent.setCenter([point.coordinates.longitude, point.coordinates.latitude])
+      }
+    }} />
+  <div class="relative h-50vh sm:h-70vh sm:flex-grow sm:p-3">
+    <Map bind:this={mapComponent} style="mapbox://styles/mapbox/light-v10?optimize=true" zoom={2.5} options={{ projection: 'globe' }} lat={+user_latitude} lng={+user_longitude}>
       {#if selectedDictionary?.coordinates}
         {#if selectedDictionary.coordinates.points}
           {#await import('$lib/components/maps/mapbox/map/Marker.svelte') then { default: Marker }}
@@ -100,7 +98,35 @@
       <ToggleStyle />
     </Map>
   </div>
-</main>
+</div>
+
+<div class="border-t border-gray-200"></div>
+
+<div class="py-5 px-3 sm:px-8 text-3xl font-semibold text-center max-w-6xl mx-auto">
+  Serving 210 language communities around the globe with over 1/4 million published entries, as well as hundreds more dictionaries in progress.
+</div>
+
+<div class="text-center">
+  <Button
+    href="/dictionaries"
+    color="black"
+    size="lg"
+    class="mb-7">
+    <span class="i-fa-solid-list -mt-1" />
+    {$page.data.t('home.list_of_dictionaries')}
+  </Button>
+</div>
+
+<div class="border-t border-gray-200"></div>
+
+<div class="text-center px-3 py-8">
+  <Button href="/create-dictionary" size="lg" color="black" form="filled">
+    <span class="i-fa-solid-plus -mt-1.25" />
+    {$page.data.t('create.create_new_dictionary')}
+  </Button>
+</div>
+
+<Footer />
 
 <SeoMetaTags
   title={$page.data.t('misc.LD')}

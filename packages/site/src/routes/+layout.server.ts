@@ -9,9 +9,14 @@ export const load: LayoutServerLoad = ({ cookies, request }) => {
   const access_token = cookies.get(ACCESS_TOKEN_COOKIE_NAME)
   const refresh_token = cookies.get(REFRESH_TOKEN_COOKIE_NAME)
 
+  const user_latitude = request.headers.get('x-vercel-ip-latitude')
+  const user_longitude = request.headers.get('x-vercel-ip-longitude')
+
   return {
     serverLocale: chosenLocale || acceptedLanguage,
     access_token,
     refresh_token,
+    user_latitude,
+    user_longitude,
   }
 }

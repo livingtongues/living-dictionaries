@@ -64,7 +64,7 @@
   {:else if column.field === 'parts_of_speech'}
     <EntryPartOfSpeech
       {can_edit}
-      value={sense.parts_of_speech}
+      value={sense?.parts_of_speech}
       showPlus={false}
       on_update={(new_value) => {
         sense.parts_of_speech = new_value
@@ -74,8 +74,8 @@
     <EntrySemanticDomains
       {can_edit}
       show_plus={false}
-      semantic_domain_keys={sense.semantic_domains}
-      write_in_semantic_domains={sense.write_in_semantic_domains}
+      semantic_domain_keys={sense?.semantic_domains}
+      write_in_semantic_domains={sense?.write_in_semantic_domains}
       on_update={(new_value) => {
         sense.semantic_domains = new_value
         update_sense({ semantic_domains: new_value })
@@ -107,14 +107,14 @@
   {:else if column.field === 'gloss'}
     <Textbox
       field={column.field}
-      value={sense.glosses?.[column.bcp]}
+      value={sense?.glosses?.[column.bcp]}
       display={column.display}
       on_update={(new_value) => {
         sense.glosses = { ...sense.glosses, [column.bcp]: new_value }
-        update_sense({ glosses: sense.glosses })
+        update_sense({ glosses: sense?.glosses })
       }} />
   {:else if column.field === 'example_sentence'}
-    {@const sentence = sense.sentences?.[0]}
+    {@const sentence = sense?.sentences?.[0]}
     {#if column.bcp === 'vn'}
       <Textbox
         field={column.field}
@@ -124,7 +124,7 @@
           if (!sentence?.id) {
             await dbOperations.insert_sentence({
               sentence: { text: { default: new_value } },
-              sense_id: sense.id,
+              sense_id: sense?.id,
             })
           } else {
             await dbOperations.update_sentence({
@@ -205,7 +205,7 @@
   {:else if column.field === 'noun_class'}
     <Textbox
       field={column.field}
-      value={sense.noun_class}
+      value={sense?.noun_class}
       display={$page.data.t(`entry_field.${column.field}`)}
       on_update={(new_value) => {
         sense.noun_class = new_value
@@ -214,11 +214,11 @@
   {:else if column.field === 'plural_form'}
     <Textbox
       field={column.field}
-      value={sense.plural_form?.default}
+      value={sense?.plural_form?.default}
       display={$page.data.t(`entry_field.${column.field}`)}
       on_update={(new_value) => {
         sense.plural_form = { default: new_value }
-        update_sense({ plural_form: sense.plural_form })
+        update_sense({ plural_form: sense?.plural_form })
       }} />
   {/if}
 </div>

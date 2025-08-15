@@ -46,7 +46,7 @@
     "@types/file-saver": "^2.0.4",
     "@types/geojson": "^7946.0.10",
     "@types/google-one-tap": "^1.2.6",
-    "@types/mapbox-gl": "^2.7.6",
+    "@types/mapbox-gl": "^3.4.1",
     "@types/mapbox__mapbox-gl-geocoder": "^4.7.3",
     "@types/pg": "^8.11.8",
     "@types/recordrtc": "^5.6.10",

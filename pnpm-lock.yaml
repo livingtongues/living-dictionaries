@@ -180,8 +180,8 @@ importers:
         specifier: ^1.2.6
         version: 1.2.6
       '@types/mapbox-gl':
-        specifier: ^2.7.6
-        version: 2.7.6
+        specifier: ^3.4.1
+        version: 3.4.1
       '@types/mapbox__mapbox-gl-geocoder':
         specifier: ^4.7.3
         version: 4.7.3
@@ -2832,8 +2832,8 @@ packages:
   '@types/json-schema@7.0.15':
     resolution: {integrity: sha512-5+fP8P8MFNC+AyZCDxrB2pkZFPGzqQWUzpSeuuVLvm8VMcorNYavBqoFcxK8bQz4Qsbn4oUEEem4wDLfcysGHA==}
 
-  '@types/mapbox-gl@2.7.6':
-    resolution: {integrity: sha512-EPIfNO7WApXaFM7DuJBj+kpXmqffqJHMJ3Q9gbV/nNL23XHR0PC5CCDYbAFa4tKErm0xJd9C5kPLF6KvA/cRcA==}
+  '@types/mapbox-gl@3.4.1':
+    resolution: {integrity: sha512-NsGKKtgW93B+UaLPti6B7NwlxYlES5DpV5Gzj9F75rK5ALKsqSk15CiEHbOnTr09RGbr6ZYiCdI+59NNNcAImg==}
 
   '@types/mapbox__mapbox-gl-geocoder@4.7.3':
     resolution: {integrity: sha512-zGVxbyEnJnVc37KpgCDRh1nTvVwVNTcqIDFgE5aETD2iOGDVVZpVDJRE3TUrTjdHxaq89767U8kxGcc8Pnv/ag==}
@@ -10674,14 +10674,14 @@ snapshots:
 
   '@types/json-schema@7.0.15': {}
 
-  '@types/mapbox-gl@2.7.6':
+  '@types/mapbox-gl@3.4.1':
     dependencies:
       '@types/geojson': 7946.0.10
 
   '@types/mapbox__mapbox-gl-geocoder@4.7.3':
     dependencies:
       '@types/geojson': 7946.0.10
-      '@types/mapbox-gl': 2.7.6
+      '@types/mapbox-gl': 3.4.1
 
   '@types/mdast@3.0.15':
     dependencies:
@@ -11119,7 +11119,7 @@ snapshots:
       sirv: 3.0.0
       tinyglobby: 0.2.10
       tinyrainbow: 1.2.0
-      vitest: 2.1.4(@types/node@22.8.6)(@vitest/ui@2.1.4)
+      vitest: 2.1.4(@types/node@18.11.18)(@vitest/ui@2.1.4)
 
   '@vitest/utils@2.1.4':
     dependencies:
