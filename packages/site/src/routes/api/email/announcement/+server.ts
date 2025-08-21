@@ -8,8 +8,6 @@ import { ResponseCodes } from '$lib/constants'
 import { dev } from '$app/environment'
 import { getAdminSupabaseClient } from '$lib/supabase/admin'
 
-const batchSize = 50
-
 export const GET: RequestHandler = async () => {
   if (!dev)
     error(ResponseCodes.INTERNAL_SERVER_ERROR, { message: 'Not allowed' })
@@ -17,15 +15,17 @@ export const GET: RequestHandler = async () => {
   try {
     const admin_supabase = getAdminSupabaseClient()
 
-    let user_emails: { email: string }[] = []
+    let user_emails: { email: string, last_sign_in_at: string }[] = []
     let from = 0
     const pageSize = 1000
 
     while (true) {
       const { data, error } = await admin_supabase
         .from('user_emails')
-        .select('email')
-        .order('email', { ascending: true })
+        .select('email, last_sign_in_at')
+        .order('last_sign_in_at', { ascending: true })
+        .gt('last_sign_in_at', '2025-02-01T00:00:00Z')
+        // .order('email', { ascending: true })
         .range(from, from + pageSize - 1)
 
       if (error) {
@@ -41,29 +41,19 @@ export const GET: RequestHandler = async () => {
       }
     }
 
-    const email_batches: { email: string }[][] = []
-    for (let i = 0; i < user_emails.length; i += batchSize) {
-      email_batches.push(user_emails.slice(i, i + batchSize))
-    }
-
-    for (let index = 0; index < email_batches.length; index++) {
-      const email_batch = email_batches[index]
-      console.info({ index, emails: email_batch.map(({ email }) => email) })
-
+    const emails = user_emails.map(({ email }) => email)
+    for (const email of emails) {
       await send_email({
         from: no_reply_address, // must use a livingdictionaries.app email for domain verification and not livingdictionaries.org
         reply_to: jacobAddress,
-        to: [jacobAddress],
-        bcc: email_batch,
+        to: [{ email }],
         subject: '🔧 Recent Entry Loading Issues Resolved',
         type: 'text/html',
         body: render_component_to_html({ component: Announcement }),
       })
-      console.info('sent batch')
-      await new Promise(resolve => setTimeout(resolve, 5000))
     }
 
-    return json({ result: 'success', email_count: user_emails.length, email_batches })
+    return json({ result: 'success', email_count: emails.length, user_emails })
   } catch (err) {
     console.error(`Error with email send request: ${err.message}`)
     error(ResponseCodes.INTERNAL_SERVER_ERROR, `Error with email send request: ${err.message}`)
