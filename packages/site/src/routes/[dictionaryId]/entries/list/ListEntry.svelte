@@ -147,28 +147,35 @@
   {/if}
   <!-- {#each sense_photos as photo (photo.id)} -->
 
-  {#if first_sense.photos?.length}
-    {@const [first_photo] = first_sense.photos}
-    <div class="media-block bg-gray-300 relative">
-      <Image
-        square={128}
-        title={entry.main.lexeme.default}
-        gcs={first_photo.serving_url}
-        {can_edit}
-        on_delete_image={() => dbOperations.update_photo({ deleted: new Date().toISOString(), id: first_photo.id })} />
-      {#if first_sense.photos.length > 1}
-        <span class="i-fluent-image-stack-20-regular text-white absolute bottom-1 right-1 text-xl" />
-      {/if}
-    </div>
-  {:else if can_edit}
-    <div class="w-12 bg-gray-100 flex flex-col">
-      <AddImage upload_image={file => dbOperations.addImage({ file, sense_id: first_sense.id })}>
-        <div class="text-xs">
-          {$page.data.t('entry_field.photo')}
-        </div>
-      </AddImage>
-    </div>
-  {/if}
+  <ShowHide let:show let:toggle>
+    {#if first_sense.photos?.length}
+      {@const [first_photo] = first_sense.photos}
+      <div class="media-block bg-gray-300 relative">
+        <Image
+          square={128}
+          title={entry.main.lexeme.default}
+          gcs={first_photo.serving_url}
+          {can_edit}
+          on_delete_image={() => dbOperations.update_photo({ deleted: new Date().toISOString(), id: first_photo.id })} />
+        {#if first_sense.photos.length > 1}
+          <span class="i-fluent-image-stack-20-regular text-white absolute bottom-1 right-1 text-xl" />
+        {/if}
+      </div>
+    {:else if can_edit}
+      <div class="w-12 bg-gray-100 flex flex-col" on:click={toggle}>
+        <AddImage upload_image={file => dbOperations.addImage({ file, sense_id: first_sense.id })}>
+          <div class="text-xs">
+            {$page.data.t('entry_field.photo')}
+          </div>
+        </AddImage>
+      </div>
+    {/if}
+    {#if show}
+      {#await import('$lib/components/image/EditImage.svelte') then { default: EditImage }}
+        <EditImage on_close={toggle} />
+      {/await}
+    {/if}
+  </ShowHide>
 </div>
 
 <style>

@@ -37,14 +37,14 @@
   on:drop|preventDefault={e => handleImage(e.dataTransfer.files)}
   on:dragover|preventDefault={() => (dragging = true)}
   on:dragleave|preventDefault={() => (dragging = false)}>
-  <input
+  <!-- <input
     type="file"
     accept="image/*"
     class="hidden"
     on:input={(e) => {
       // @ts-expect-error
       handleImage(e.target.files)
-    }} />
+    }} /> -->
   <span class="hidden md:inline">
     <span class="i-ic-outline-cloud-upload text-2xl" />
   </span>
