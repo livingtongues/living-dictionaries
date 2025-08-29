@@ -1,9 +1,11 @@
 <script lang="ts">
+  import { getContext } from 'svelte'
   import { page } from '$app/stores'
 
   export let border: boolean
   export let on_file_added: (file: File) => void = undefined
   let dragging = false
+  const applyButtonLabel = getContext('applyButtonLabel')
 
   function handleImage(files: FileList) {
     dragging = false
@@ -30,6 +32,7 @@
 <label
   class:dragging
   class:dashed-border={border}
+  class:button-label={applyButtonLabel}
   class="{$$props.class} text-gray-600
     h-full grow-1 flex flex-col items-center justify-center
     cursor-pointer"
@@ -37,14 +40,14 @@
   on:drop|preventDefault={e => handleImage(e.dataTransfer.files)}
   on:dragover|preventDefault={() => (dragging = true)}
   on:dragleave|preventDefault={() => (dragging = false)}>
-  <!-- <input
+  <input
     type="file"
     accept="image/*"
     class="hidden"
     on:input={(e) => {
       // @ts-expect-error
       handleImage(e.target.files)
-    }} /> -->
+    }} />
   <span class="hidden md:inline">
     <span class="i-ic-outline-cloud-upload text-2xl" />
   </span>
@@ -56,6 +59,13 @@
 </label>
 
 <style>
+  .button-label {
+      --at-apply: flex justify-center items-center px-3 py-2 border font-medium
+    cursor-pointer focus:outline-none border-green-300
+    focus:ring focus:ring-green-300 active:bg-green-200 transition ease-in-out
+    duration-150 rounded hover:bg-green-100 text-green-700;
+  }
+
   .dragging {
     --at-apply: bg-blue-200 border-blue-300 text-blue-700;
   }

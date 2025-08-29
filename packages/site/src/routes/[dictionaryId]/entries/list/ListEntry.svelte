@@ -9,7 +9,6 @@
   import { minutes_ago_in_ms } from '$lib/helpers/time'
   import { page } from '$app/stores'
   import type { DbOperations } from '$lib/dbOperations'
-  import AddImage from '$lib/components/image/AddImage.svelte'
 
   export let entry: EntryData
   export let dictionary: Tables<'dictionaries'>
@@ -162,17 +161,28 @@
         {/if}
       </div>
     {:else if can_edit}
-      <div class="w-12 bg-gray-100 flex flex-col" on:click={toggle}>
-        <AddImage upload_image={file => dbOperations.addImage({ file, sense_id: first_sense.id })}>
+      <div
+        class="w-12 bg-gray-100 flex flex-col text-gray-600 items-center justify-center cursor-pointer"
+        on:click={toggle}>
+        <span class="hidden md:inline">
+          <span class="i-ic-outline-cloud-upload text-2xl" />
+        </span>
+        <span class="md:hidden">
+          <span class="i-ic-outline-camera-alt text-xl" />
+        </span>
+        <div class="text-xs">
+          {$page.data.t('entry_field.photo')}
+        </div>
+        <!-- <AddImage upload_image={file => dbOperations.addImage({ file, sense_id: first_sense.id })}>
           <div class="text-xs">
             {$page.data.t('entry_field.photo')}
           </div>
-        </AddImage>
+        </AddImage> -->
       </div>
     {/if}
     {#if show}
       {#await import('$lib/components/image/EditImage.svelte') then { default: EditImage }}
-        <EditImage on_close={toggle} />
+        <EditImage on_close={toggle} first_sense_id={first_sense.id} />
       {/await}
     {/if}
   </ShowHide>
