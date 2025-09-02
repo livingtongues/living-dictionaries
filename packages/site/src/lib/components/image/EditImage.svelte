@@ -18,7 +18,7 @@
 
 <Modal on:close={on_close}>
   {#if author_connection.length > 10 && rights}
-    <AddImage upload_image={file => dbOperations.addImage({ file, sense_id: first_sense_id })}>
+    <AddImage upload_image={file => dbOperations.addImage({ sense_id: first_sense_id, image_options: { file, source: author_connection, photographer: ai_image ? 'AI-generated' : '' } })}>
       <div class="text-xs">
         {$page.data.t('entry_field.photo')}
       </div>
