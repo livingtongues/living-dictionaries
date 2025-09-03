@@ -1,6 +1,7 @@
 <script lang="ts">
   import { Button, Modal } from 'svelte-pieces'
   import { setContext } from 'svelte'
+  import { get } from 'svelte/store'
   import { page } from '$app/stores'
   import AddImage from '$lib/components/image/AddImage.svelte'
 
@@ -14,11 +15,31 @@
 
   $: ({ dbOperations } = $page.data)
 
+  function handleImageUpload(file: File) {
+    const status = dbOperations.addImage({
+      sense_id: first_sense_id,
+      image_options: {
+        file,
+        source: author_connection,
+      },
+    })
+
+    const checkInterval = setInterval(() => {
+      const currentStatus = get(status)
+      if (currentStatus.progress === 100 && currentStatus.serving_url) {
+        clearInterval(checkInterval)
+        on_close()
+      }
+    }, 100)
+
+    return status
+  }
+
 </script>
 
 <Modal on:close={on_close}>
   {#if author_connection.length > 10 && rights}
-    <AddImage upload_image={file => dbOperations.addImage({ sense_id: first_sense_id, image_options: { file, source: author_connection, photographer: ai_image ? 'AI-generated' : '' } })}>
+    <AddImage upload_image={handleImageUpload}>
       <div class="text-xs">
         {$page.data.t('entry_field.photo')}
       </div>
