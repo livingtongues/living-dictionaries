@@ -173,16 +173,11 @@
         <div class="text-xs">
           {$page.data.t('entry_field.photo')}
         </div>
-        <!-- <AddImage upload_image={file => dbOperations.addImage({ file, sense_id: first_sense.id })}>
-          <div class="text-xs">
-            {$page.data.t('entry_field.photo')}
-          </div>
-        </AddImage> -->
       </div>
     {/if}
     {#if show}
       {#await import('$lib/components/image/EditImage.svelte') then { default: EditImage }}
-        <EditImage on_close={toggle} first_sense_id={first_sense.id} />
+        <EditImage on_close={toggle} sense_id={first_sense.id} />
       {/await}
     {/if}
   </ShowHide>

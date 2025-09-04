@@ -8,7 +8,7 @@
   setContext('applyButtonLabel', true)
 
   export let on_close: () => void
-  export let first_sense_id: string
+  export let sense_id: string
   let photo_source
   let photographer
   let rights = false
@@ -18,7 +18,7 @@
 
   function handleImageUpload(file: File) {
     const status = dbOperations.addImage({
-      sense_id: first_sense_id,
+      sense_id,
       image_options: {
         file,
         source: photo_source,
