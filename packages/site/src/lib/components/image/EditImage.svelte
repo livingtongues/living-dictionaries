@@ -9,7 +9,8 @@
 
   export let on_close: () => void
   export let first_sense_id: string
-  let author_connection = ''
+  let photo_source
+  let photographer
   let rights = false
   let ai_image = false
 
@@ -20,7 +21,8 @@
       sense_id: first_sense_id,
       image_options: {
         file,
-        source: author_connection,
+        source: photo_source,
+        photographer,
       },
     })
 
@@ -38,7 +40,7 @@
 </script>
 
 <Modal on:close={on_close}>
-  {#if author_connection.length > 10 && rights}
+  {#if photo_source?.length > 10 && rights}
     <AddImage upload_image={handleImageUpload}>
       <div class="text-xs">
         {$page.data.t('entry_field.photo')}
@@ -48,20 +50,30 @@
 
   <div class="mb-6" />
 
-  <label class="block mb-2 text-sm font-medium text-gray-700" for="authorConnection">
+  <label class="block mb-2 text-sm font-medium text-gray-700" for="photo_source">
     Image Attribution / Source of the image (required)
   </label>
   <textarea
-    name="authorConnection"
+    name="photo_source"
     required
     rows="4"
     minlength="100"
     maxlength="2500"
-    bind:value={author_connection}
+    bind:value={photo_source}
     class="form-input w-full" />
   <div class="flex text-xs">
-    <div class="text-gray-500 ml-auto">{author_connection.length}/2500</div>
+    <div class="text-gray-500 ml-auto">{photo_source?.length}/2500</div>
   </div>
+  <label class="block mb-2 text-sm font-medium text-gray-700" for="photographer">
+    Photographer
+  </label>
+  <textarea
+    name="photographer"
+    rows="1"
+    minlength="0"
+    maxlength="2500"
+    bind:value={photographer}
+    class="form-input w-full" />
   <div>
     <input bind:checked={rights} type="checkbox" id="rigths" name="rigths" required />
     <label for="rigths">I have the rights to upload this image file</label>
