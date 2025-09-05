@@ -238,7 +238,7 @@ export async function generate_sql_statements({
           if (key.includes('_vernacular_exampleSentence')) {
             const writing_system = key_without_prefix_nor_suffix.replace('_vernacular_exampleSentence', '')
             sentence.text[writing_system] = value
-          } else if (key.endsWith('_exampleSentence')) {
+          } else if (key.endsWith(`_exampleSentence${sentence_suffix}`)) {
             if (!sentence.translation) sentence.translation = {}
             const language = key_without_prefix_nor_suffix.replace('_exampleSentence', '')
             sentence.translation[language] = value
