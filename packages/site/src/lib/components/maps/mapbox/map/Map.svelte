@@ -11,7 +11,7 @@
   import { PUBLIC_mapboxAccessToken } from '$env/static/public'
 
   export let map: Map = null
-  export let version = 'v2.9.2'
+  export let version = 'v3.13.0'
   export let customStylesheetUrl: string = undefined
   export let accessToken = PUBLIC_mapboxAccessToken
   export let options: Partial<MapboxOptions> = {}
@@ -59,7 +59,21 @@
     },
     zoomend: () => dispatch('zoomend', map.getZoom()),
     error: (e: ErrorEvent & EventData) => dispatch('error', e),
-    load: () => dispatch('ready') && (ready = true),
+    load: () => { 
+      // map.fitBounds(
+      //   [
+      //     [-180, -90], // Southwest corner
+      //     [180, 90], // Northeast corner
+      //   ],
+      //   {
+      //     // padding: 0, // Optional padding
+      //     animate: false // Disable animation for smoother transition
+      //   }
+      // );
+      // map.setCenter(center);
+      dispatch('ready');
+      (ready = true);
+    },
   // drag: () => dispatch('drag', map.getCenter()),
   }
   let unbind: () => void
