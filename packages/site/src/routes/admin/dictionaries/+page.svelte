@@ -11,7 +11,8 @@
   import { page } from '$app/stores'
 
   export let data: PageData
-  $: ({ users, dictionary_roles, dictionaries } = data)
+  $: ({ users, dictionary_roles } = data)
+  $: ({ dictionaries } = $page.data)
 
   $: users_with_roles = $users.map((user) => {
     return {
@@ -54,7 +55,7 @@
       const { error } = await data.supabase.from('dictionaries').update(change)
         .eq('id', dictionary_id)
       if (error) throw new Error(error.message)
-      await data.dictionaries.refresh()
+      await $page.data.dictionaries.refresh()
     } catch (err) {
       alert(`Error: ${err}`)
     }

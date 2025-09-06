@@ -3,6 +3,7 @@
   import { Button, ShowHide } from 'svelte-pieces'
   import { page } from '$app/stores'
   import Header from '$lib/components/shell/Header.svelte'
+  import Footer from '$lib/components/shell/Footer.svelte'
   import { dev } from '$app/environment'
 
   onMount(async () => {
@@ -55,3 +56,5 @@
     </div>
   {/if}
 </div>
+
+<Footer />

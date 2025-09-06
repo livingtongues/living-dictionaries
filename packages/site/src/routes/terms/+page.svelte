@@ -1,6 +1,7 @@
 <script lang="ts">
   import { page } from '$app/stores'
   import Header from '$lib/components/shell/Header.svelte'
+  import Footer from '$lib/components/shell/Footer.svelte'
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte'
 </script>
 
@@ -807,6 +808,8 @@
     </div>
   </div>
 </div>
+
+<Footer />
 
 <SeoMetaTags
   title={$page.data.t('dictionary.terms_of_use')}

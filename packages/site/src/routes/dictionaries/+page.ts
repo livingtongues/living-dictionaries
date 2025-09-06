@@ -10,16 +10,16 @@ export const load: PageLoad = async ({ parent }) => {
 
   try {
     if (admin) {
-      const { data: dictionaries, error: dictionaries_error } = await query
+      const { data: dictionaries_for_list, error: dictionaries_error } = await query
       if (dictionaries_error)
         throw new Error (dictionaries_error.message)
-      return { dictionaries }
+      return { dictionaries_for_list }
     }
-    const { data: dictionaries, error: dictionaries_error } = await query
+    const { data: dictionaries_for_list, error: dictionaries_error } = await query
       .eq('public', true)
     if (dictionaries_error)
       throw new Error (dictionaries_error.message)
-    return { dictionaries }
+    return { dictionaries_for_list }
   } catch (err) {
     error(ResponseCodes.INTERNAL_SERVER_ERROR, err)
   }

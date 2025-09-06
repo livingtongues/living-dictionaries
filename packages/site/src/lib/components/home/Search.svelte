@@ -1,6 +1,5 @@
 <script lang="ts">
   import type { DictionaryView, IPoint } from '@living-dictionaries/types'
-  import { fly } from 'svelte/transition'
   import { Button, ShowHide } from 'svelte-pieces'
   import { page } from '$app/stores'
 
@@ -58,23 +57,13 @@
   function clearDictionary() {
     selectedDictionaryId = null
   }
-
-  $: active = searchString || searchFocused || currentDictionary
 </script>
 
 <!-- To Consider: for longer dictionaries on mobile, if we want to make the map still show when showing dictionary details, we need to add a media query (less than md) which sets this div's max-height: 75vh and adds overflow-y-auto -->
 
-<div
-  class:h-full={active}
-  class:absolute={!active}
-  class:sm:relative={!active}
-  class:w-full={!active}
-  class:sm:flex={!active}
-  class:z-10={!active}
-  class:max-h-full={!active}
-  class="flex flex-col sm:h-full sm:border-r border-gray-200">
+<div class="flex flex-col sm:w-72">
   {#if !currentDictionary}
-    <div class="relative text-xl px-2 mt-2 sm:mb-2">
+    <div class="relative text-xl mt-2 sm:mb-2">
       <div
         class="absolute inset-y-0 left-0 pl-5 flex items-center
           pointer-events-none text-gray-500">
@@ -95,13 +84,7 @@
       {/if}
     </div>
 
-    <div
-      class:flex={active}
-      class:hidden={!active}
-      class:sm:flex={!active}
-      class="overflow-y-auto flex-col flex-1"
-      in:fly={{ y: -15, duration: 150 }}
-      on:click={keepSearchOpen}>
+    <div on:click={keepSearchOpen}>
       {#if searchString}
         <div class="text-sm text-gray-500 px-3 my-1">
           <i> {filteredDictionaries.length}/{dictionaries.length} </i>
@@ -109,10 +92,10 @@
       {/if}
 
       {#if !searchString && my_dictionaries?.length}
-        <div class="text-sm font-semibold px-3 my-1">
+        <!-- <div class="text-sm font-semibold px-3 my-1">
           {$page.data.t('home.my_dictionaries')}
-        </div>
-        {#each my_dictionaries as dictionary}
+        </div> -->
+        <!-- {#each my_dictionaries as dictionary}
           <button
             type="button"
             class="text-left px-3 py-1 my-1 hover:bg-gray-200"
@@ -122,17 +105,17 @@
               <small class="-mt-1 text-gray-600">{dictionary.location}</small>
             {/if}
           </button>
-        {/each}
-        <hr class="my-2" />
+        {/each} -->
+        <!-- <hr class="my-2" />
         <div class="text-sm font-semibold px-3 my-1">
           {$page.data.t('home.public_dictionaries')}
           {#if $admin}
             (+ Private)
           {/if}
-        </div>
+        </div> -->
       {/if}
 
-      {#each filteredDictionaries as dictionary}
+      <!-- {#each filteredDictionaries as dictionary}
         <button
           type="button"
           class="text-left px-3 py-1 my-1 hover:bg-gray-200"
@@ -142,7 +125,7 @@
             <small class="-mt-1 text-gray-600">{dictionary.location}</small>
           {/if}
         </button>
-      {/each}
+      {/each} -->
       {#if !filteredDictionaries.length}
         <div class="p-3">
           <i> {$page.data.t('home.no_results')} </i>
@@ -150,7 +133,6 @@
       {/if}
     </div>
 
-    <div class="mt-auto hidden sm:block border-t" />
     <div
       class="flex flex-wrap sm:flex-col overflow-y-auto
         overflow-x-hidden px-2 pb-2">
@@ -158,16 +140,15 @@
         {#if !searchFocused && my_dictionaries}
           {#each my_dictionaries as dictionary, i}
             {#if show || i < 3}
-              <button
-                type="button"
-                class="sm:hidden rounded px-3 py-2 bg-white mt-2"
+              <Button
+                class="mb-1 mr-1"
+                color="black"
                 on:click={() => setCurrentDictionary(dictionary)}>
                 {dictionary?.name}
-              </button>
-              <div class="w-2 sm:hidden" />
+              </Button>
             {/if}
           {/each}
-          {#if my_dictionaries.length > 3 && !show}
+          <!-- {#if my_dictionaries.length > 3 && !show}
             <button
               type="button"
               class="sm:hidden rounded px-3 py-2 bg-white mt-2"
@@ -175,37 +156,9 @@
               {$page.data.t('home.show_all_my_dictionaries')}
             </button>
             <div class="w-2 sm:hidden" />
-          {/if}
+          {/if} -->
         {/if}
       </ShowHide>
-      {#if !(searchFocused && filteredDictionaries.length > 3)}
-        <Button href="/create-dictionary" class="mt-2" color="black" form="filled">
-          <span class="i-fa-solid-plus -mt-1.25" />
-          {$page.data.t('create.create_new_dictionary')}
-        </Button>
-        <div class="w-2 sm:hidden" />
-
-        <Button
-          href="/dictionaries"
-          color="black"
-          form="simple"
-          class="mt-2 opacity-75 focus:opacity-100
-            sm:opacity-100 bg-white sm:bg-transparent">
-          <span class="i-fa-solid-list -mt-1" />
-          {$page.data.t('home.list_of_dictionaries')}
-        </Button>
-        <div class="w-2 sm:hidden" />
-
-        <Button
-          href="/about"
-          color="black"
-          form="simple"
-          class="mt-2 opacity-75 focus:opacity-100
-            sm:opacity-100 bg-white sm:bg-transparent !sm:hidden">
-          <i class="far fa-info-circle" />
-          <span class="ml-1">{$page.data.t('header.about')}</span>
-        </Button>
-      {/if}
     </div>
   {:else}
     <div class="p-2 flex flex-col flex-1">

@@ -7,8 +7,9 @@ import { defaultColumns } from '$lib/stores/columns'
 import { getSession, getSupabase } from '$lib/supabase'
 import { createUserStore } from '$lib/supabase/user'
 import { create_my_dictionaries_store } from '$lib/supabase/dictionaries'
+import { create_dictionaries_store } from '$lib/supabase/statistics'
 
-export const load: LayoutLoad = async ({ url: { searchParams }, data: { serverLocale, access_token, refresh_token } }) => {
+export const load: LayoutLoad = async ({ url: { searchParams }, data: { serverLocale, access_token, refresh_token, user_latitude, user_longitude } }) => {
   const urlLocale = searchParams.get('lang')
   const locale = getSupportedLocale(urlLocale || serverLocale) || 'en'
   const t = await getTranslator(locale)
@@ -24,6 +25,7 @@ export const load: LayoutLoad = async ({ url: { searchParams }, data: { serverLo
   const columns_key = `table_columns_03.18.2024-${user_id}` // rename when adding more columns to invalidate the user's cache
   const preferred_table_columns = createPersistedStore(columns_key, defaultColumns)
   const mode = import.meta.env.MODE as 'development' | 'production'
+  const dictionaries = create_dictionaries_store({ supabase })
 
   return {
     locale,
@@ -35,5 +37,8 @@ export const load: LayoutLoad = async ({ url: { searchParams }, data: { serverLo
     admin,
     preferred_table_columns,
     mode,
+    dictionaries,
+    user_latitude,
+    user_longitude,
   }
 }

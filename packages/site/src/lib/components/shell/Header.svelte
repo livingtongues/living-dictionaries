@@ -39,11 +39,11 @@
       <i class="far fa-donate" />
       <span class="ml-1 hidden lg:inline">{$page.data.t('header.donate')}</span>
     </Button>
-    <Button href="/about" form="text" class="!hidden !lg:inline" target="_blank">
+    <Button href="/about" form="text" class="!hidden !lg:inline">
       <i class="far fa-info-circle" />
       <span class="ml-1 hidden lg:inline">{$page.data.t('header.about')}</span>
     </Button>
-    <Button href="/tutorials" form="text" class="!hidden !md:inline" target="_blank">
+    <Button href="/tutorials" form="text" class="!hidden !md:inline">
       <span class="i-fluent-learning-app-24-regular -mt-2px" />
       <span class="ml-1 hidden lg:inline">{$page.data.t('header.tutorials')}</span>
     </Button>
@@ -113,11 +113,11 @@
               <i class="far fa-donate" />
               <span class="ml-1">{$page.data.t('header.donate')}</span>
             </Button>
-            <Button href="/about" form="text" target="_blank">
+            <Button href="/about" form="text">
               <i class="far fa-info-circle" />
               <span class="ml-1">{$page.data.t('header.about')}</span>
             </Button>
-            <Button href="/tutorials" form="text" target="_blank">
+            <Button href="/tutorials" form="text">
               <span class="i-fluent-learning-app-24-regular -mt-2px" />
               <span class="ml-1">{$page.data.t('header.tutorials')}</span>
             </Button>
