@@ -7,26 +7,26 @@
   export let setCurrentDictionary: (dictionary: DictionaryView) => void
 </script>
 
-  {#if my_dictionaries}
-    <div class="flex flex-wrap sm:flex-col overflow-y-auto overflow-x-hidden py-2 mt-2 border-t">
-      <ShowHide let:show let:toggle>
-        {#each my_dictionaries as dictionary, i}
-          {#if show || i < 3}
-            <Button
-              class="mb-1 lt-sm:mr-1"
-              color="black"
-              onclick={() => setCurrentDictionary(dictionary)}>
-              {dictionary?.name}
-            </Button>
-          {/if}
-        {/each}
-        {#if my_dictionaries.length > 3 && !show}
+{#if my_dictionaries?.length}
+  <div class="flex flex-wrap md:flex-col overflow-y-auto overflow-x-hidden mb-1">
+    <ShowHide let:show let:toggle>
+      {#each my_dictionaries as dictionary, i}
+        {#if show || i < 3}
           <Button
-            form="simple"
-            onclick={toggle}>
-            {$page.data.t('home.show_all_my_dictionaries')}
+            class="mb-1 lt-md:mr-1"
+            color="black"
+            onclick={() => setCurrentDictionary(dictionary)}>
+            {dictionary?.name}
           </Button>
         {/if}
-      </ShowHide>
-    </div>
-  {/if}
+      {/each}
+      {#if my_dictionaries.length > 3 && !show}
+        <Button
+          form="simple"
+          onclick={toggle}>
+          {$page.data.t('home.show_all_my_dictionaries')}
+        </Button>
+      {/if}
+    </ShowHide>
+  </div>
+{/if}

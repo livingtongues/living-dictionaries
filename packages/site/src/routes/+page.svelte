@@ -34,6 +34,9 @@
   else
     selectedDictionary = null
 
+  let featured_dict_names = ['Achi', 'GtaɁ', 'Gutob', 'Kihunde', 'Sora']
+  $: featured_dictionaries = public_dictionaries.filter(d => featured_dict_names.includes(d.name))
+
   $: if (browser && $admin) {
     get_private_dictionaries().then(_dictionaries => private_dictionaries = _dictionaries)
   } else {
@@ -54,15 +57,28 @@
 
 <Header />
 
-<div class="flex flex-col sm:flex-row">
-  <div class="sm:w-72 px-2 pb-2 flex flex-col">
+<div class="flex flex-col md:flex-row">
+  <div class="md:w-72 px-2 flex flex-col">
     {#if !selectedDictionary}
       <SearchDictionaries
         {dictionaries}
         {setCurrentDictionary} />
-      <MyDictionaries
-        my_dictionaries={$my_dictionaries}
-        {setCurrentDictionary} />
+      {#if $my_dictionaries?.length}
+        <MyDictionaries
+          my_dictionaries={$my_dictionaries}
+          {setCurrentDictionary} />
+      {:else}
+        <div class="lt-md:hidden flex flex-col">
+          {#each featured_dictionaries as dictionary}
+            <Button
+              class="mb-1"
+              color="black"
+              onclick={() => setCurrentDictionary(dictionary)}>
+              {dictionary.name}
+            </Button>
+          {/each}
+        </div>
+      {/if}
     {:else}
       <button
         type="button"
@@ -77,7 +93,7 @@
       {/await}
     {/if}
   </div>
-  <div class="relative h-50vh sm:h-70vh sm:flex-grow">
+  <div class="relative h-50vh md:h-70vh md:flex-grow">
     <Map bind:this={mapComponent} style="mapbox://styles/mapbox/light-v10?optimize=true" zoom={2} options={{ projection: 'globe' }} lat={+user_latitude} lng={+user_longitude}>
       {#if selectedDictionary?.coordinates}
         {#if selectedDictionary.coordinates.points}

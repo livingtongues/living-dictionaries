@@ -29,6 +29,8 @@ $: filteredDictionaries = dictionaries
 
 <ShowHide let:show let:toggle>
   <Button form="filled" class="text-lg! font-semibold!" onclick={toggle}><span class="i-carbon-search text-2xl" /> {$page.data.t('home.find_dictionary')}</Button>
+  <div class="border-b mt-2 lt-md:hidden"></div>
+  <div class="mb-2"></div>
 
   {#if show}
     <Modal on:close={toggle} show_x={false}>
