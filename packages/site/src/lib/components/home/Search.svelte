@@ -63,7 +63,7 @@
 
 <div class="flex flex-col sm:w-72">
   {#if !currentDictionary}
-    <div class="relative text-xl px-2 mt-2 sm:mb-2">
+    <div class="relative text-xl mt-2 sm:mb-2">
       <div
         class="absolute inset-y-0 left-0 pl-5 flex items-center
           pointer-events-none text-gray-500">

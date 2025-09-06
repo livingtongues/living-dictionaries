@@ -9,11 +9,12 @@
   import NavigationControl from '$lib/components/maps/mapbox/controls/NavigationControl.svelte'
   import CustomControl from '$lib/components/maps/mapbox/controls/CustomControl.svelte'
   import DictionaryPoints from '$lib/components/home/DictionaryPoints.svelte'
-  import Search from '$lib/components/home/Search.svelte'
   import Header from '$lib/components/shell/Header.svelte'
   import Footer from '$lib/components/shell/Footer.svelte'
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte'
   import { browser } from '$app/environment'
+  import MyDictionaries from '$lib/components/home/MyDictionaries.svelte';
+    import SearchDictionaries from '$lib/components/home/SearchDictionaries.svelte';
 
   export let data: PageData
   $: ({ admin, get_private_dictionaries, get_public_dictionaries, my_dictionaries, user_latitude, user_longitude } = data)
@@ -40,23 +41,44 @@
   }
 
   let mapComponent: Map
+
+  function setCurrentDictionary(dictionary: DictionaryView) {
+    selectedDictionaryId = dictionary.id
+    if (dictionary.coordinates?.points?.[0]) {
+      const point = dictionary.coordinates.points[0]
+      mapComponent.setZoom(7)
+        mapComponent.setCenter([point.coordinates.longitude, point.coordinates.latitude])
+    }
+  }
 </script>
 
 <Header />
 
 <div class="flex flex-col sm:flex-row">
-  <Search
-    {dictionaries}
-    my_dictionaries={$my_dictionaries}
-    bind:selectedDictionaryId
-    on_selected_dictionary_point={(point) => {
-      if (point) {
-        mapComponent.setZoom(7)
-        mapComponent.setCenter([point.coordinates.longitude, point.coordinates.latitude])
-      }
-    }} />
-  <div class="relative h-50vh sm:h-70vh sm:flex-grow sm:p-3">
-    <Map bind:this={mapComponent} style="mapbox://styles/mapbox/light-v10?optimize=true" zoom={2.5} options={{ projection: 'globe' }} lat={+user_latitude} lng={+user_longitude}>
+  <div class="sm:w-72 px-2 pb-2 flex flex-col">
+    {#if !selectedDictionary}
+      <SearchDictionaries
+        {dictionaries}
+        {setCurrentDictionary} />
+      <MyDictionaries
+        my_dictionaries={$my_dictionaries}
+        {setCurrentDictionary} />
+    {:else}
+      <button
+        type="button"
+        class="flex flex-start items-center px-2 py-2 -mx-1 rounded hover:bg-gray-200"
+        on:click={() => (selectedDictionaryId = null)}>
+        <span class="i-fa6-solid-chevron-left rtl-x-flip" />
+        <div class="w-1" />
+        {$page.data.t('misc.back')}
+      </button>
+      {#await import('$lib/components/home/SelectedDict.svelte') then { default: SelectedDict }}
+        <SelectedDict dictionary={selectedDictionary} />
+      {/await}
+    {/if}
+  </div>
+  <div class="relative h-50vh sm:h-70vh sm:flex-grow">
+    <Map bind:this={mapComponent} style="mapbox://styles/mapbox/light-v10?optimize=true" zoom={2} options={{ projection: 'globe' }} lat={+user_latitude} lng={+user_longitude}>
       {#if selectedDictionary?.coordinates}
         {#if selectedDictionary.coordinates.points}
           {#await import('$lib/components/maps/mapbox/map/Marker.svelte') then { default: Marker }}
@@ -74,12 +96,12 @@
         {/if}
       {/if}
       {#if $admin}
-        <ShowHide let:show={hide} let:toggle>
+        <ShowHide let:show let:toggle>
           <CustomControl position="bottom-right">
             <button type="button" class="whitespace-nowrap w-90px! px-2" on:click={toggle}>Toggle Private</button>
           </CustomControl>
 
-          {#if !hide && private_dictionaries.length}
+          {#if show && private_dictionaries.length}
             <DictionaryPoints
               dictionaries={private_dictionaries}
               type="private"
@@ -100,10 +122,10 @@
   </div>
 </div>
 
-<div class="border-t border-gray-200"></div>
+<!-- <div class="border-t border-gray-200"></div> -->
 
-<div class="py-5 px-3 sm:px-8 text-3xl font-semibold text-center max-w-6xl mx-auto">
-  Serving 210 language communities around the globe with over 1/4 million published entries, as well as hundreds more dictionaries in progress.
+<div class="py-6 px-3 sm:px-8 text-3xl font-semibold text-center max-w-6xl mx-auto">
+  Serving 200+ language communities around the globe with over 1/4 million published entries, as well as hundreds more dictionaries in progress.
 </div>
 
 <div class="text-center">

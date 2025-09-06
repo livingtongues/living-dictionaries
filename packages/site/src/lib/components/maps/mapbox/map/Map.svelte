@@ -59,7 +59,21 @@
     },
     zoomend: () => dispatch('zoomend', map.getZoom()),
     error: (e: ErrorEvent & EventData) => dispatch('error', e),
-    load: () => dispatch('ready') && (ready = true),
+    load: () => { 
+      // map.fitBounds(
+      //   [
+      //     [-180, -90], // Southwest corner
+      //     [180, 90], // Northeast corner
+      //   ],
+      //   {
+      //     // padding: 0, // Optional padding
+      //     animate: false // Disable animation for smoother transition
+      //   }
+      // );
+      // map.setCenter(center);
+      dispatch('ready');
+      (ready = true);
+    },
   // drag: () => dispatch('drag', map.getCenter()),
   }
   let unbind: () => void

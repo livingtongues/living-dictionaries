@@ -7,7 +7,8 @@
   const public_entries_count = 254813
 </script>
 
-<footer class="print:hidden sticky bottom-0 z-1 bg-white border-t border-gray-200 p-2 text-sm">
+<!-- sticky bottom-0 z-1 bg-white  -->
+<footer class="print:hidden border-t border-gray-200 p-2 text-sm">
   {#if public_dictionaries}
     <span class="whitespace-nowrap">Public Living Dictionaries: <b>{public_dictionaries}</b>,</span>
   {/if}
