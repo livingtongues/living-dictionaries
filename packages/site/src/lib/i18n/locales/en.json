@@ -181,7 +181,10 @@
     "copy_and_share": "Copy and share",
     "print": "Print",
     "id": "ID",
-    "switch_opposite": "Switch to opposite"
+    "switch_opposite": "Switch to opposite",
+    "delete_audio": "Delete audio?",
+    "delete_image": "Delete image?",
+    "delete_video": "Delete video?"
   },
   "entry_field": {
     "photo": "Photo",
@@ -301,7 +304,8 @@
     "select_audio_file": "Select Audio File",
     "success": "Success",
     "uploading": "Uploading",
-    "select_video_file": "Select Video File"
+    "select_video_file": "Select Video File",
+    "format_error": "Unsupported audio format"
   },
   "invite": {
     "invitation_claimed": "Invitation claimed",
@@ -344,7 +348,8 @@
     "max_entries": "Max entries",
     "columns": "Columns",
     "headword_size": "Headword size",
-    "font_size": "Font size"
+    "font_size": "Font size",
+    "tags": "Tags"
   },
   "import_page": {
     "import": "Import",

@@ -180,7 +180,10 @@
     "copy_and_share": "Copiar e partilhar",
     "print": "Imprimir",
     "id": "EU IA",
-    "switch_opposite": "Mude para o oposto"
+    "switch_opposite": "Mudar para o oposto",
+    "delete_audio": "Apagar áudio?",
+    "delete_image": "Excluir imagem?",
+    "delete_video": "Excluir vídeo?"
   },
   "entry_field": {
     "photo": "Foto",
@@ -300,7 +303,8 @@
     "select_audio_file": "Seleccione o ficheiro do Áudio",
     "success": "Sucesso",
     "uploading": "A Enviar",
-    "select_video_file": "Selecione o arquivo de vídeo"
+    "select_video_file": "Selecione o arquivo de vídeo",
+    "format_error": "Formato de áudio não suportado"
   },
   "invite": {
     "invitation_claimed": "Convite reclamado",
@@ -343,7 +347,8 @@
     "max_entries": "Entradas máximas",
     "columns": "Colunas",
     "headword_size": "Tamanho do cabeçalho",
-    "font_size": "Tamanho da fonte"
+    "font_size": "Tamanho da fonte",
+    "tags": "Etiquetas"
   },
   "import_page": {
     "import": "Importar",

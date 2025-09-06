@@ -180,7 +180,10 @@
     "copy_and_share": "Nakili na ushiriki",
     "print": "Chapisha",
     "id": "ID",
-    "switch_opposite": "Badilisha hadi kinyume"
+    "switch_opposite": "Badilisha hadi kinyume",
+    "delete_audio": "Ungependa kufuta sauti?",
+    "delete_image": "Ungependa kufuta picha?",
+    "delete_video": "Ungependa kufuta video?"
   },
   "entry_field": {
     "photo": "Picha",
@@ -300,7 +303,8 @@
     "select_audio_file": "Chagua sauti",
     "success": "Mafanikio",
     "uploading": "Kupakia",
-    "select_video_file": "Chagua Faili ya Video"
+    "select_video_file": "Chagua Faili ya Video",
+    "format_error": "Umbizo la sauti lisilotumika"
   },
   "invite": {
     "invitation_claimed": "Mwaliko umekubaliwa",
@@ -343,7 +347,8 @@
     "max_entries": "Maingizo ya juu zaidi",
     "columns": "Safu",
     "headword_size": "Ukubwa wa neno la kichwa",
-    "font_size": "Ukubwa wa herufi"
+    "font_size": "Ukubwa wa herufi",
+    "tags": "Lebo"
   },
   "import_page": {
     "import": "Ingiza",

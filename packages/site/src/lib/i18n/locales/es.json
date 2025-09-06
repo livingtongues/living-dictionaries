@@ -180,7 +180,10 @@
     "copy_and_share": "Copiar y compartir",
     "print": "Imprimir",
     "id": "ID",
-    "switch_opposite": "Cambiar a lo opuesto"
+    "switch_opposite": "Cambiar a lo opuesto",
+    "delete_audio": "¿Borrar audio?",
+    "delete_image": "¿Borrar imagen?",
+    "delete_video": "¿Borrar el vídeo?"
   },
   "entry_field": {
     "photo": "Foto",
@@ -300,7 +303,8 @@
     "select_audio_file": "Seleccionar un archivo de audio",
     "success": "Éxito",
     "uploading": "Subiendo",
-    "select_video_file": "Seleccione el archivo de video"
+    "select_video_file": "Seleccione el archivo de video",
+    "format_error": "Formato de audio no compatible"
   },
   "invite": {
     "invitation_claimed": "Invitación aceptada",
@@ -338,12 +342,13 @@
   },
   "print": {
     "qr_code": "Mostrar código QR",
-    "labels": "Mostrar etiquetas",
+    "labels": "Mostrar rótulos",
     "availability": "La vista de impresión sólo está disponible para administradores y colaboradores del diccionario",
     "max_entries": "Entradas máximas",
     "columns": "Columnas",
     "headword_size": "Tamaño de la palabra principal",
-    "font_size": "Tamaño de la fuente"
+    "font_size": "Tamaño de la fuente",
+    "tags": "Etiquetas"
   },
   "import_page": {
     "import": "Importar",

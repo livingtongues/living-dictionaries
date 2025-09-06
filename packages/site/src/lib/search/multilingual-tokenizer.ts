@@ -1,13 +1,15 @@
 import type { DefaultTokenizer } from '@orama/orama'
 import { simplify_lexeme_for_search } from './augment-entry-for-search'
 
+const props_that_should_not_be_split = ['_tags', '_dialects', '_speakers']
+
 function normalizeToken(this: DefaultTokenizer, prop: string, token: string): string {
   return token
 }
 
 // _withCache is true for user searches and false when indexing
 export function tokenize(input: string, language?: string, prop = '', _withCache = true): string[] {
-  if (typeof input !== 'string') {
+  if (typeof input !== 'string' || props_that_should_not_be_split.includes(prop)) {
     return [input]
   }
 

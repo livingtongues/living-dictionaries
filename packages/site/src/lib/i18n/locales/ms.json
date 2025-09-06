@@ -135,7 +135,7 @@
     "map_instructions": "Klik pada peta untuk menambah koordinat sekunder.",
     "print_access": "Benarkan Penonton Mencetak Kamus",
     "primary_coordinate": "Koordinat utama",
-    "conlang_question": "Adakah ini bahasa binaan atau bahasa buatan?",
+    "conlang_question": "Adakah ini bahasa yang dibina atau bahasa buatan?",
     "conlang_info_1": "Memandangkan misi kami menumpukan pada mendokumentasikan bahasa semula jadi manusia yang terancam dan minoriti, kami tidak menawarkan sokongan teknikal untuk bahasa binaan (konlang) atau bahasa buatan. Disebabkan pasukan kami yang kecil dan waktu operasi yang terhad, kami tidak menawarkan import data untuk conlang.",
     "conlang_info_2": "Kamus Hidup untuk bahasa yang dibina tidak akan didedahkan kepada umum di tapak web kami atau tersedia pada peta halaman utama kami. Jika kami melihat kandungan yang menghina dalam Kamus Hidup ini, kami juga berhak untuk memadamkannya.",
     "agree_above": "Saya bersetuju dengan perkara di atas.",
@@ -143,7 +143,7 @@
     "agree_for_non-commercial": "Saya bersetuju bahawa kerja ini bukan komersial.",
     "source_question": "Dari mana datangnya data dalam kamus ini? Sila terangkan jika anda mengumpul data sendiri. Jika anda menggunakan mana-mana sumber rujukan yang diterbitkan, sila senaraikan di sini.",
     "use_question": "Siapa yang akan menggunakan kamus ini? Adakah ia akan digunakan dalam mana-mana projek pendidikan atau media?",
-    "conlang_warning": "Jika kamus ini adalah untuk bahasa yang dibina (atau buatan), dan anda tidak menyatakannya, kami berhak untuk mengalih keluarnya."
+    "conlang_warning": "Jika kamus ini adalah untuk bahasa yang dibina (atau tiruan), dan anda tidak menyatakannya, kami berhak untuk mengeluarkannya."
   },
   "dictionary": {
     "latitude": "Latitud",
@@ -180,7 +180,10 @@
     "copy_and_share": "Salin dan kongsi",
     "print": "Cetak",
     "id": "ID",
-    "switch_opposite": "Beralih kepada bertentangan"
+    "switch_opposite": "Beralih kepada bertentangan",
+    "delete_audio": "Padamkan audio?",
+    "delete_image": "Padamkan imej?",
+    "delete_video": "Padamkan video?"
   },
   "entry_field": {
     "photo": "Foto",
@@ -300,7 +303,8 @@
     "select_audio_file": "Pilih Fail Audio",
     "success": "Berjaya",
     "uploading": "Memuat naik",
-    "select_video_file": "Pilih Fail Video"
+    "select_video_file": "Pilih Fail Video",
+    "format_error": "Format audio tidak disokong"
   },
   "invite": {
     "invitation_claimed": "Undangan diisytiharkan",
@@ -343,7 +347,8 @@
     "max_entries": "Kemasukan maksimum",
     "columns": "Lajur",
     "headword_size": "Saiz kata kepala",
-    "font_size": "Saiz fon"
+    "font_size": "Saiz fon",
+    "tags": "Tag"
   },
   "import_page": {
     "import": "Import",
@@ -385,7 +390,7 @@
     "add": "Tambah Sense"
   },
   "banner": {
-    "message": "Kami sedang membuat penambahbaikan pada pangkalan data kami pada 22 Oktober bermula jam 7 malam Waktu Timur (New York), selama 24 jam. Keupayaan mengedit tidak akan tersedia dalam tempoh tersebut. Maaf atas kesulitan ini.",
+    "message": "Kami sedang membuat penambahbaikan pada pangkalan data kami pada 22 Oktober bermula jam 7 malam Waktu Timur (New York), selama 24 jam. Keupayaan mengedit tidak akan tersedia dalam tempoh tersebut. Maaf atas kesulitan.",
     "attention": "Perhatian"
   }
 }

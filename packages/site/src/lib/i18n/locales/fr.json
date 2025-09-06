@@ -37,7 +37,7 @@
     "peer_review": "Évaluation par les pairs de l'orthographe",
     "suggestions_from_users": "Suggestions des utilisateurs",
     "push_notifications": "Notifications push aux contributeurs",
-    "contributor_awards": "Prix ​​de la communauté des contributeurs",
+    "contributor_awards": "Prix de la communauté des contributeurs",
     "question_1": "Veuillez fournir quelques informations générales sur cette langue. Où est-elle parlée ? Quelles communautés la parlent ? Cette langue est-elle menacée ?",
     "question_2": "Quels sont les noms des personnes qui ont créé ce dictionnaire ? Quelles voix y figurent ?",
     "question_3": "D'où proviennent les données de ce dictionnaire ? Veuillez préciser si vous les avez collectées vous-même. Si vous avez utilisé des sources de référence publiées, veuillez les indiquer.",
@@ -180,7 +180,10 @@
     "copy_and_share": "Copier et partager",
     "print": "Imprimer",
     "id": "IDENTIFIANT",
-    "switch_opposite": "Passer à l'opposé"
+    "switch_opposite": "Passer à l'opposé",
+    "delete_audio": "Supprimer l'audio ?",
+    "delete_image": "Supprimer l'image ?",
+    "delete_video": "Supprimer la vidéo ?"
   },
   "entry_field": {
     "photo": "Photo",
@@ -300,7 +303,8 @@
     "select_audio_file": "Sélectionnez un fichier audio",
     "success": "Réussite",
     "uploading": "Téléchargement en cours",
-    "select_video_file": "Sélectionner un fichier vidéo"
+    "select_video_file": "Sélectionner un fichier vidéo",
+    "format_error": "Format audio non pris en charge"
   },
   "invite": {
     "invitation_claimed": "Invitation acceptée",
@@ -343,7 +347,8 @@
     "max_entries": "Nombre maximal d'entrées",
     "columns": "Colonnes",
     "headword_size": "Taille du mot-clé",
-    "font_size": "Taille de la police"
+    "font_size": "Taille de la police",
+    "tags": "Mots clés"
   },
   "import_page": {
     "import": "Importer",
