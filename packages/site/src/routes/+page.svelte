@@ -65,7 +65,7 @@
         {setCurrentDictionary} />
       {#if $my_dictionaries?.length}
         <MyDictionaries
-          my_dictionaries={$my_dictionaries}
+          my_dictionaries={[...$my_dictionaries,...$my_dictionaries,...$my_dictionaries,...$my_dictionaries,...$my_dictionaries,...$my_dictionaries,...$my_dictionaries,...$my_dictionaries,...$my_dictionaries,...$my_dictionaries]}
           {setCurrentDictionary} />
       {:else}
         <div class="lt-md:hidden flex flex-col">
