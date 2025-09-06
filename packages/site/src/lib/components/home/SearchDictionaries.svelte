@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { DictionaryView, IPoint } from '@living-dictionaries/types'
+  import type { DictionaryView } from '@living-dictionaries/types'
   import { Button, Modal, ShowHide } from 'svelte-pieces'
   import { page } from '$app/stores'
 

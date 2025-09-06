@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { DictionaryView, IPoint } from '@living-dictionaries/types'
+  import type { DictionaryView } from '@living-dictionaries/types'
   import { Button, ShowHide } from 'svelte-pieces'
   import { page } from '$app/stores'
 
@@ -8,7 +8,7 @@
 </script>
 
 {#if my_dictionaries?.length}
-  <div class="flex flex-wrap md:flex-col overflow-y-auto overflow-x-hidden mb-1">
+  <div class="flex lt-md:flex-wrap md:flex-col overflow-y-auto overflow-x-hidden mb-1 md:max-h-70vh">
     <ShowHide let:show let:toggle>
       {#each my_dictionaries as dictionary, i}
         {#if show || i < 3}
