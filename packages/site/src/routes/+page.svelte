@@ -13,8 +13,8 @@
   import Footer from '$lib/components/shell/Footer.svelte'
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte'
   import { browser } from '$app/environment'
-  import MyDictionaries from '$lib/components/home/MyDictionaries.svelte';
-    import SearchDictionaries from '$lib/components/home/SearchDictionaries.svelte';
+  import MyDictionaries from '$lib/components/home/MyDictionaries.svelte'
+  import SearchDictionaries from '$lib/components/home/SearchDictionaries.svelte'
 
   export let data: PageData
   $: ({ admin, get_private_dictionaries, get_public_dictionaries, my_dictionaries, user_latitude, user_longitude } = data)
@@ -34,7 +34,7 @@
   else
     selectedDictionary = null
 
-  let featured_dict_names = ['Achi', 'GtaɁ', 'Gutob', 'Kihunde', 'Sora']
+  const featured_dict_names = ['Achi', 'GtaɁ', 'Gutob', 'Kihunde', 'Sora']
   $: featured_dictionaries = public_dictionaries.filter(d => featured_dict_names.includes(d.name))
 
   $: if (browser && $admin) {
@@ -48,9 +48,9 @@
   function setCurrentDictionary(dictionary: DictionaryView) {
     selectedDictionaryId = dictionary.id
     if (dictionary.coordinates?.points?.[0]) {
-      const point = dictionary.coordinates.points[0]
+      const [point] = dictionary.coordinates.points
       mapComponent.setZoom(7)
-        mapComponent.setCenter([point.coordinates.longitude, point.coordinates.latitude])
+      mapComponent.setCenter([point.coordinates.longitude, point.coordinates.latitude])
     }
   }
 </script>
@@ -139,20 +139,22 @@
 </div>
 
 <!-- <div class="border-t border-gray-200"></div> -->
+<div class="w-full bg-gray-200 text-center">
 
-<div class="py-6 px-3 sm:px-8 text-3xl font-semibold text-center max-w-6xl mx-auto">
-  Serving 200+ language communities around the globe with over 1/4 million published entries, as well as hundreds more dictionaries in progress.
-</div>
+  <div class="m-auto py-6 px-6 sm:px-8 text-2xl font-semibold text-center max-w-6xl">
+    Serving 200+ language communities around the globe with over 1/4 million published entries, as well as hundreds more dictionaries in progress.
+  </div>
 
-<div class="text-center">
-  <Button
-    href="/dictionaries"
-    color="black"
-    size="lg"
-    class="mb-7">
-    <span class="i-fa-solid-list -mt-1" />
-    {$page.data.t('home.list_of_dictionaries')}
-  </Button>
+  <div class="text-center">
+    <Button
+      href="/dictionaries"
+      color="black"
+      size="lg"
+      class="mb-7">
+      <span class="i-fa-solid-list -mt-1" />
+      {$page.data.t('home.list_of_dictionaries')}
+    </Button>
+  </div>
 </div>
 
 <div class="border-t border-gray-200"></div>
