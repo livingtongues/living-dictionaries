@@ -7,6 +7,7 @@
   import SortDictionaries from './SortDictionaries.svelte'
   import { exportAdminDictionariesAsCSV } from './export'
   import type { PageData } from './$types'
+  import type { DictionaryWithHelpers } from './dictionaryWithHelpers.types'
   import Filter from '$lib/components/Filter.svelte'
   import { page } from '$app/stores'
 
@@ -60,6 +61,12 @@
       alert(`Error: ${err}`)
     }
   }
+
+  let filteredDictionaries: DictionaryWithHelpers[] = []
+
+  function handleFilteredItems(event: CustomEvent<DictionaryWithHelpers[]>) {
+    filteredDictionaries = event.detail
+  }
 </script>
 
 <div class="mb-2 text-xs text-gray-600 flex">
@@ -72,9 +79,9 @@
 <div class="sticky top-0 h-[calc(100vh-1.5rem)] z-2 relative flex flex-col">
   <Filter
     items={dictionaries_with_editors_invites || []}
-    let:filteredItems={filteredDictionaries}
+    on:filteredItems={handleFilteredItems}
     placeholder="Search dictionaries and users">
-    <div slot="right" let:filteredItems={filteredDictionaries}>
+    <div slot="right">
       <Button
         form="filled"
         color="black"

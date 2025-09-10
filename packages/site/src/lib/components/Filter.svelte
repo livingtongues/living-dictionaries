@@ -1,7 +1,13 @@
 <script lang="ts">
+  import { createEventDispatcher } from 'svelte'
+
   type T = $$Generic
   export let items: T[]
   export let placeholder = 'Search'
+
+  const dispatch = createEventDispatcher<{
+    filteredItems: T[]
+  }>()
 
   let value = ''
 
@@ -9,6 +15,8 @@
     const itemStr = JSON.stringify(item)
     return itemStr.toLowerCase().includes(value.toLowerCase())
   })
+
+  $: dispatch('filteredItems', filteredItems)
 
   function autofocus(node: HTMLInputElement) {
     setTimeout(() => node.focus(), 15)
@@ -21,7 +29,7 @@
   <slot name="right" {filteredItems} />
 </div>
 
-<slot {filteredItems} />
+<slot />
 
 <style>
   input {
