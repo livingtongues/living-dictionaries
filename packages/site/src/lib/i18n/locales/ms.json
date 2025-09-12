@@ -143,7 +143,7 @@
     "agree_for_non-commercial": "Saya bersetuju bahawa kerja ini bukan komersial.",
     "source_question": "Dari mana datangnya data dalam kamus ini? Sila terangkan jika anda mengumpul data sendiri. Jika anda menggunakan mana-mana sumber rujukan yang diterbitkan, sila senaraikan di sini.",
     "use_question": "Siapa yang akan menggunakan kamus ini? Adakah ia akan digunakan dalam mana-mana projek pendidikan atau media?",
-    "conlang_warning": "Jika kamus ini adalah untuk bahasa yang dibina (atau tiruan), dan anda tidak menyatakannya, kami berhak untuk mengeluarkannya."
+    "conlang_warning": "Jika kamus ini adalah untuk bahasa yang dibina (atau buatan), dan anda tidak menyatakannya, kami berhak untuk mengalih keluarnya."
   },
   "dictionary": {
     "latitude": "Latitud",
@@ -180,7 +180,7 @@
     "copy_and_share": "Salin dan kongsi",
     "print": "Cetak",
     "id": "ID",
-    "switch_opposite": "Beralih kepada bertentangan",
+    "switch_opposite": "Beralih ke bertentangan",
     "delete_audio": "Padamkan audio?",
     "delete_image": "Padamkan imej?",
     "delete_video": "Padamkan video?"
@@ -236,7 +236,8 @@
     "open_dictionary": "Buka Kamus",
     "my_dictionaries": "Kamus Saya",
     "public_dictionaries": "Kamus Umum",
-    "read_more": "Baca Lebih Lanjut"
+    "read_more": "Baca Lebih Lanjut",
+    "main_banner": "Melayan 200+ komuniti bahasa di seluruh dunia dengan lebih 1/4 juta penyertaan yang diterbitkan, serta ratusan lagi kamus sedang dijalankan."
   },
   "misc": {
     "settings": "Tetapan",
@@ -366,7 +367,7 @@
     "entry_history": "sejarah kemasukan",
     "field": "Padang",
     "date": "tarikh",
-    "old_value": "Nilai Bekas",
+    "old_value": "Nilai Dahulu",
     "new_value": "Nilai Baru",
     "entry_message": "Seorang pengguna mengedit entri ini pada ",
     "edited": "Terakhir diedit pada",
@@ -390,7 +391,12 @@
     "add": "Tambah Sense"
   },
   "banner": {
-    "message": "Kami sedang membuat penambahbaikan pada pangkalan data kami pada 22 Oktober bermula jam 7 malam Waktu Timur (New York), selama 24 jam. Keupayaan mengedit tidak akan tersedia dalam tempoh tersebut. Maaf atas kesulitan.",
+    "message": "Kami sedang membuat penambahbaikan pada pangkalan data kami pada 22 Oktober bermula jam 7 malam Waktu Timur (New York), selama 24 jam. Keupayaan menyunting tidak akan tersedia dalam tempoh tersebut. Maaf atas kesulitan.",
     "attention": "Perhatian"
+  },
+  "footer": {
+    "public_LD": "Kamus Kehidupan Awam",
+    "entries": "Entri Kamus",
+    "LD_project": "Kamus Hidup adalah projek"
   }
 }

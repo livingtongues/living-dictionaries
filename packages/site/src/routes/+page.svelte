@@ -142,7 +142,7 @@
 <div class="w-full bg-gray-200 text-center">
 
   <div class="m-auto py-6 px-6 sm:px-8 text-2xl font-semibold text-center max-w-6xl">
-    Serving 200+ language communities around the globe with over 1/4 million published entries, as well as hundreds more dictionaries in progress.
+    {$page.data.t('home.main_banner')}
   </div>
 
   <div class="text-center">
