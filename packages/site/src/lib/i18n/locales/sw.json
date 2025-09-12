@@ -143,7 +143,7 @@
     "agree_for_non-commercial": "Nakubali kwamba kazi hii si ya kibiashara.",
     "source_question": "Je, data katika kamusi hii ilitoka wapi? Tafadhali eleza ikiwa ulikusanya data mwenyewe. Ikiwa ulitumia vyanzo vyovyote vya marejeleo vilivyochapishwa, tafadhali viorodheshe hapa.",
     "use_question": "Nani atatumia kamusi hii? Je, itatumika katika miradi yoyote ya elimu au vyombo vya habari?",
-    "conlang_warning": "Ikiwa kamusi hii ni ya lugha iliyoundwa (au bandia), na hauonyeshi hivyo, tunahifadhi haki ya kuiondoa."
+    "conlang_warning": "Ikiwa kamusi hii ni ya lugha iliyojengwa (au bandia), na hauonyeshi hivyo, tunahifadhi haki ya kuiondoa."
   },
   "dictionary": {
     "latitude": "Latitudo",
@@ -236,7 +236,8 @@
     "open_dictionary": "Fungua Kamusi",
     "my_dictionaries": "Kamusi Zangu",
     "public_dictionaries": "Kamusi za Umma",
-    "read_more": "Soma Zaidi"
+    "read_more": "Soma Zaidi",
+    "main_banner": "Inahudumia jumuiya za lugha 200+ kote ulimwenguni kwa maingizo zaidi ya milioni 1/4 yaliyochapishwa, pamoja na mamia ya kamusi zaidi zinazoendelea."
   },
   "misc": {
     "settings": "Mipangilio  ",
@@ -392,5 +393,10 @@
   "banner": {
     "message": "Tunaboresha hifadhidata yetu tarehe 22 Oktoba kuanzia saa 7PM kwa Saa za Mashariki (New York), kwa saa 24. Uwezo wa kuhariri hautapatikana katika kipindi hicho. Pole kwa usumbufu.",
     "attention": "Tahadhari"
+  },
+  "footer": {
+    "public_LD": "Kamusi za Maisha ya Umma",
+    "entries": "Maingizo ya Kamusi",
+    "LD_project": "Kamusi Hai ni mradi wa"
   }
 }
