@@ -84,7 +84,10 @@
         <span class="i-fa-solid-times p-3 cursor-pointer opacity-75 hover:opacity-100" />
       </div>
       {#if photographer === 'AI'}
-        <span class="i-tabler:ai absolute bottom-1 left-10 text-white text-7xl z-10" />
+        <div class="absolute bottom-1 left-10 text-white z-10">
+          <span class="i-tabler:ai text-7xl"></span>
+          <span class="align-sub text-xl">generated</span>
+        </div>
       {/if}
       <img class="object-contain max-h-full" alt="Image of {title}" src={fullscreenSource} />
       {#if photo_source}
