@@ -41,7 +41,7 @@
     photographer = ''
   }
 
-  $: if (photo_source?.length > 10 && rights) {
+  $: if (photo_source?.length >= 10 && rights) {
     apply_button_label.set({ ready_to_upload: true })
   } else {
     apply_button_label.set({ ready_to_upload: false })
@@ -50,7 +50,7 @@
 
 <Modal on:close={on_close}>
   <label class="block mb-2 text-sm font-medium text-gray-700" for="photo_source">
-    Image Attribution / Source of the image (required)
+    Image Attribution / Source of the image <i class="text-gray-500">If this image comes from the web, please include the link and an image license, if applicable</i> (<span class="text-red-500">required</span>)
   </label>
   <textarea
     name="photo_source"
@@ -61,11 +61,11 @@
     bind:value={photo_source}
     class="form-input w-full" />
   <div class="flex text-xs">
-    <div class="text-gray-500 ml-auto">{photo_source?.length}/2500</div>
+    <div class="text-gray-500 ml-auto">{photo_source?.length || 0}/2500</div>
   </div>
   <div>
     <input bind:checked={rights} type="checkbox" id="rigths" name="rigths" required />
-    <label for="rigths">I have the rights to upload this image file</label>
+    <label for="rigths">I have the rights to upload this image file (<span class="text-red-500 font-medium">required</span>)</label>
   </div>
   <div>
     <input bind:checked={ai_image} type="checkbox" id="ai_image" name="ai_image" />
@@ -73,7 +73,7 @@
   </div>
   {#if !ai_image}
     <label class="block mb-2 text-sm font-medium text-gray-700 mt-3" for="photographer">
-      Photographer
+      Photographer (optional)
     </label>
     <textarea
       name="photographer"
