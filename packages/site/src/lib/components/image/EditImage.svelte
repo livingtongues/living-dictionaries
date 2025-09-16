@@ -1,16 +1,14 @@
 <script lang="ts">
   import { Button, Modal } from 'svelte-pieces'
-  import { setContext } from 'svelte'
   import { get } from 'svelte/store'
+  import { apply_button_label } from './image-store'
   import { page } from '$app/stores'
   import AddImage from '$lib/components/image/AddImage.svelte'
 
-  setContext('applyButtonLabel', true)
-
   export let on_close: () => void
   export let sense_id: string
-  let photo_source
-  let photographer
+  let photo_source: string
+  let photographer: string
   let rights = false
   let ai_image = false
 
@@ -42,19 +40,15 @@
   } else {
     photographer = ''
   }
+
+  $: if (photo_source?.length > 10 && rights) {
+    apply_button_label.set({ ready_to_upload: true })
+  } else {
+    apply_button_label.set({ ready_to_upload: false })
+  }
 </script>
 
 <Modal on:close={on_close}>
-  {#if photo_source?.length > 10 && rights}
-    <AddImage upload_image={handleImageUpload}>
-      <div class="text-xs">
-        {$page.data.t('entry_field.photo')}
-      </div>
-    </AddImage>
-  {/if}
-
-  <div class="mb-6" />
-
   <label class="block mb-2 text-sm font-medium text-gray-700" for="photo_source">
     Image Attribution / Source of the image (required)
   </label>
@@ -89,6 +83,14 @@
       bind:value={photographer}
       class="form-input w-full" />
   {/if}
+
+  <div class="mb-6" />
+
+  <AddImage upload_image={handleImageUpload}>
+    <div class="text-xs">
+      {$page.data.t('entry_field.photo')}
+    </div>
+  </AddImage>
 
   <div class="modal-footer">
     <!-- {#if image_file}
