@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { ShowHide } from 'svelte-pieces'
+  import { Button, ShowHide } from 'svelte-pieces'
   import type { DictionaryView } from '@living-dictionaries/types'
   import { onMount } from 'svelte'
   import type { PageData } from './$types'
@@ -9,13 +9,15 @@
   import NavigationControl from '$lib/components/maps/mapbox/controls/NavigationControl.svelte'
   import CustomControl from '$lib/components/maps/mapbox/controls/CustomControl.svelte'
   import DictionaryPoints from '$lib/components/home/DictionaryPoints.svelte'
-  import Search from '$lib/components/home/Search.svelte'
   import Header from '$lib/components/shell/Header.svelte'
+  import Footer from '$lib/components/shell/Footer.svelte'
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte'
   import { browser } from '$app/environment'
+  import MyDictionaries from '$lib/components/home/MyDictionaries.svelte';
+    import SearchDictionaries from '$lib/components/home/SearchDictionaries.svelte';
 
   export let data: PageData
-  $: ({ admin, get_private_dictionaries, get_public_dictionaries, my_dictionaries } = data)
+  $: ({ admin, get_private_dictionaries, get_public_dictionaries, my_dictionaries, user_latitude, user_longitude } = data)
 
   let public_dictionaries: DictionaryView[] = []
   let private_dictionaries: DictionaryView[] = []
@@ -32,6 +34,9 @@
   else
     selectedDictionary = null
 
+  let featured_dict_names = ['Achi', 'GtaɁ', 'Gutob', 'Kihunde', 'Sora']
+  $: featured_dictionaries = public_dictionaries.filter(d => featured_dict_names.includes(d.name))
+
   $: if (browser && $admin) {
     get_private_dictionaries().then(_dictionaries => private_dictionaries = _dictionaries)
   } else {
@@ -39,26 +44,57 @@
   }
 
   let mapComponent: Map
+
+  function setCurrentDictionary(dictionary: DictionaryView) {
+    selectedDictionaryId = dictionary.id
+    if (dictionary.coordinates?.points?.[0]) {
+      const point = dictionary.coordinates.points[0]
+      mapComponent.setZoom(7)
+        mapComponent.setCenter([point.coordinates.longitude, point.coordinates.latitude])
+    }
+  }
 </script>
 
 <Header />
 
-<main
-  class="top-12 fixed bottom-0 right-0 left-0 flex flex-col sm:flex-row border-t border-gray-200">
-  <div class="sm:w-72 max-h-full">
-    <Search
-      {dictionaries}
-      my_dictionaries={$my_dictionaries}
-      bind:selectedDictionaryId
-      on_selected_dictionary_point={(point) => {
-        if (point) {
-          mapComponent.setZoom(7)
-          mapComponent.setCenter([point.coordinates.longitude, point.coordinates.latitude])
-        }
-      }} />
+<div class="flex flex-col md:flex-row">
+  <div class="md:w-72 px-2 flex flex-col">
+    {#if !selectedDictionary}
+      <SearchDictionaries
+        {dictionaries}
+        {setCurrentDictionary} />
+      {#if $my_dictionaries?.length}
+        <MyDictionaries
+          my_dictionaries={$my_dictionaries}
+          {setCurrentDictionary} />
+      {:else}
+        <div class="lt-md:hidden flex flex-col">
+          {#each featured_dictionaries as dictionary}
+            <Button
+              class="mb-1"
+              color="black"
+              onclick={() => setCurrentDictionary(dictionary)}>
+              {dictionary.name}
+            </Button>
+          {/each}
+        </div>
+      {/if}
+    {:else}
+      <button
+        type="button"
+        class="flex flex-start items-center px-2 py-2 -mx-1 rounded hover:bg-gray-200"
+        on:click={() => (selectedDictionaryId = null)}>
+        <span class="i-fa6-solid-chevron-left rtl-x-flip" />
+        <div class="w-1" />
+        {$page.data.t('misc.back')}
+      </button>
+      {#await import('$lib/components/home/SelectedDict.svelte') then { default: SelectedDict }}
+        <SelectedDict dictionary={selectedDictionary} />
+      {/await}
+    {/if}
   </div>
-  <div class="relative flex-1">
-    <Map bind:this={mapComponent} style="mapbox://styles/mapbox/light-v10?optimize=true" zoom={2}>
+  <div class="relative h-50vh md:h-70vh md:flex-grow">
+    <Map bind:this={mapComponent} style="mapbox://styles/mapbox/light-v10?optimize=true" zoom={2} options={{ projection: 'globe' }} lat={+user_latitude} lng={+user_longitude}>
       {#if selectedDictionary?.coordinates}
         {#if selectedDictionary.coordinates.points}
           {#await import('$lib/components/maps/mapbox/map/Marker.svelte') then { default: Marker }}
@@ -76,12 +112,12 @@
         {/if}
       {/if}
       {#if $admin}
-        <ShowHide let:show={hide} let:toggle>
+        <ShowHide let:show let:toggle>
           <CustomControl position="bottom-right">
             <button type="button" class="whitespace-nowrap w-90px! px-2" on:click={toggle}>Toggle Private</button>
           </CustomControl>
 
-          {#if !hide && private_dictionaries.length}
+          {#if show && private_dictionaries.length}
             <DictionaryPoints
               dictionaries={private_dictionaries}
               type="private"
@@ -100,7 +136,35 @@
       <ToggleStyle />
     </Map>
   </div>
-</main>
+</div>
+
+<!-- <div class="border-t border-gray-200"></div> -->
+
+<div class="py-6 px-3 sm:px-8 text-3xl font-semibold text-center max-w-6xl mx-auto">
+  Serving 200+ language communities around the globe with over 1/4 million published entries, as well as hundreds more dictionaries in progress.
+</div>
+
+<div class="text-center">
+  <Button
+    href="/dictionaries"
+    color="black"
+    size="lg"
+    class="mb-7">
+    <span class="i-fa-solid-list -mt-1" />
+    {$page.data.t('home.list_of_dictionaries')}
+  </Button>
+</div>
+
+<div class="border-t border-gray-200"></div>
+
+<div class="text-center px-3 py-8">
+  <Button href="/create-dictionary" size="lg" color="black" form="filled">
+    <span class="i-fa-solid-plus -mt-1.25" />
+    {$page.data.t('create.create_new_dictionary')}
+  </Button>
+</div>
+
+<Footer />
 
 <SeoMetaTags
   title={$page.data.t('misc.LD')}

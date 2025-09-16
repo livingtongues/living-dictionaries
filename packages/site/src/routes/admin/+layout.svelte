@@ -25,7 +25,6 @@
         size="sm"
         form="simple"
         onclick={async () => {
-          await data.dictionaries.reset()
           await data.dictionary_roles.reset()
           await data.users.reset()
         // location.reload()

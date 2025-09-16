@@ -124,7 +124,7 @@
       display={column.display}
       on_update={(new_value) => {
         sense.glosses = { ...sense.glosses, [column.bcp]: new_value }
-        update_sense({ glosses: sense.glosses })
+        update_sense({ glosses: sense?.glosses })
       }} />
   {:else if column.field === 'example_sentence'}
     {@const sentence = sense?.sentences?.[0]}
@@ -137,7 +137,7 @@
           if (!sentence?.id) {
             await dbOperations.insert_sentence({
               sentence: { text: { default: new_value } },
-              sense_id: sense.id,
+              sense_id: sense?.id,
             })
           } else {
             await dbOperations.update_sentence({
@@ -231,7 +231,7 @@
       display={$page.data.t(`entry_field.${column.field}`)}
       on_update={(new_value) => {
         sense.plural_form = { default: new_value }
-        update_sense({ plural_form: sense.plural_form })
+        update_sense({ plural_form: sense?.plural_form })
       }} />
   {/if}
 </div>

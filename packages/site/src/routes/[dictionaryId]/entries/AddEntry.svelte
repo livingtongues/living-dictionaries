@@ -5,6 +5,7 @@
   import type { DbOperations } from '$lib/dbOperations'
 
   export let add_entry: DbOperations['insert_entry']
+
   let online = true
 </script>
 
