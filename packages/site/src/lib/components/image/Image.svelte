@@ -11,6 +11,7 @@
   export let height: number = undefined
   export let photo_source: string = undefined
   export let photographer: string = undefined
+  export let page_context: string = undefined
   export let on_delete_image: () => Promise<any>
 
   const [send, receive] = crossfade({
@@ -64,7 +65,7 @@
     {#if loading}
       <span class="i-gg-spinner animate-spin absolute bottom-1 right-1 text-white" />
     {:else if photographer === 'AI'}
-      <span class="i-tabler:ai text-white absolute bottom-1 left-1 text-xl" />
+      <span class="i-tabler:ai text-white absolute bottom-1 left-1 {page_context === 'gallery' ? 'text-6xl' : 'text-2xl'}" />
     {/if}
   </div>
 {/if}
