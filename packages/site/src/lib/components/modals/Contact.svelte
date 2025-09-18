@@ -124,72 +124,74 @@
     </Button>
   </div>
 
-  <hr class="my-5" />
+  {#if !dictionary.con_language_description}
+    <hr class="my-5" />
 
-  <h2 class="text-xl mb-3">
-    <i class="far fa-comment" />
-    {$page.data.t('header.contact_us')}
-  </h2>
+    <h2 class="text-xl mb-3">
+      <i class="far fa-comment" />
+      {$page.data.t('header.contact_us')}
+    </h2>
 
-  {#if !status}
-    <Form let:loading onsubmit={send}>
-      <div class="my-2">
-        <select class="w-full" bind:value={subject}>
-          <option disabled selected value="">{$page.data.t('contact.select_topic')}:</option>
-          {#each filteredSubjects as [key, value]}
-            <option value={key}>{$page.data.t(value)}</option>
-          {/each}
-        </select>
-      </div>
-      <label class="block text-gray-700 text-sm font-bold mb-2" for="message">
-        {$page.data.t('contact.what_is_your_question')}
-      </label>
-      <textarea
-        name="message"
-        required
-        rows="4"
-        maxlength="1000"
-        bind:value={message}
-        class="form-input bg-white w-full"
-        placeholder={`${$page.data.t('contact.enter_message')}...`} />
-      <div class="flex text-xs">
-        <div class="text-gray-500 ml-auto">{message.length}/1000</div>
-      </div>
-
-      {#if !$user}
-        <div class="mt-3">
-          <label class="block uppercase text-gray-700 text-xs font-bold mb-2" for="email">
-            {$page.data.t('contact.your_email_address')}
-          </label>
-          <input
-            type="email"
-            required
-            bind:value={email}
-            class="form-input bg-white w-full"
-            placeholder={$page.data.t('contact.email')}
-            style="direction: ltr" />
+    {#if !status}
+      <Form let:loading onsubmit={send}>
+        <div class="my-2">
+          <select class="w-full" bind:value={subject}>
+            <option disabled selected value="">{$page.data.t('contact.select_topic')}:</option>
+            {#each filteredSubjects as [key, value]}
+              <option value={key}>{$page.data.t(value)}</option>
+            {/each}
+          </select>
         </div>
-      {/if}
+        <label class="block text-gray-700 text-sm font-bold mb-2" for="message">
+          {$page.data.t('contact.what_is_your_question')}
+        </label>
+        <textarea
+          name="message"
+          required
+          rows="4"
+          maxlength="1000"
+          bind:value={message}
+          class="form-input bg-white w-full"
+          placeholder={`${$page.data.t('contact.enter_message')}...`} />
+        <div class="flex text-xs">
+          <div class="text-gray-500 ml-auto">{message.length}/1000</div>
+        </div>
 
-      <div class="mt-5">
-        <Button {loading} form="filled" type="submit">
-          {$page.data.t('contact.send_message')}
-        </Button>
-        <Button disabled={loading} onclick={close} form="simple" color="black">
-          {$page.data.t('misc.cancel')}
+        {#if !$user}
+          <div class="mt-3">
+            <label class="block uppercase text-gray-700 text-xs font-bold mb-2" for="email">
+              {$page.data.t('contact.your_email_address')}
+            </label>
+            <input
+              type="email"
+              required
+              bind:value={email}
+              class="form-input bg-white w-full"
+              placeholder={$page.data.t('contact.email')}
+              style="direction: ltr" />
+          </div>
+        {/if}
+
+        <div class="mt-5">
+          <Button {loading} form="filled" type="submit">
+            {$page.data.t('contact.send_message')}
+          </Button>
+          <Button disabled={loading} onclick={close} form="simple" color="black">
+            {$page.data.t('misc.cancel')}
+          </Button>
+        </div>
+      </Form>
+    {:else if status === 'success'}
+      <h4 class="text-lg mt-3 mb-4">
+        <i class="fas fa-check" />
+        {$page.data.t('contact.message_sent')}
+      </h4>
+      <div>
+        <Button onclick={close} color="black">
+          {$page.data.t('misc.close')}
         </Button>
       </div>
-    </Form>
-  {:else if status === 'success'}
-    <h4 class="text-lg mt-3 mb-4">
-      <i class="fas fa-check" />
-      {$page.data.t('contact.message_sent')}
-    </h4>
-    <div>
-      <Button onclick={close} color="black">
-        {$page.data.t('misc.close')}
-      </Button>
-    </div>
+    {/if}
   {:else if status === 'fail'}
     <h4 class="text-xl mt-1 mb-4">
       {$page.data.t('contact.message_failed')}
