@@ -1,11 +1,11 @@
-<script lang="ts">
-  type T = $$Generic
+<script lang="ts" generics="T">
+  // type T = $$Generic
   export let items: T[]
   export let placeholder = 'Search'
 
   let value = ''
 
-  $: filteredItems = items.filter((item) => {
+  $: filteredItems = items.filter((item: T) => {
     const itemStr = JSON.stringify(item)
     return itemStr.toLowerCase().includes(value.toLowerCase())
   })
