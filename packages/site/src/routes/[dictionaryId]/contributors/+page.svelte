@@ -150,58 +150,60 @@
   </Button>
 {/if}
 
-<hr class="my-4" />
-<Partners {partners} can_edit={$is_manager} hideLivingTonguesLogo={dictionary.hide_living_tongues_logo} admin={$admin} {...data.partner_edits} />
+{#if !dictionary.con_language_description}
+  <hr class="my-4" />
+  <Partners {partners} can_edit={$is_manager} hideLivingTonguesLogo={dictionary.hide_living_tongues_logo} admin={$admin} {...data.partner_edits} />
 
-<!-- Not using contributors.request_to_add_manager -->
+  <!-- Not using contributors.request_to_add_manager -->
 
-<hr class="my-4" />
+  <hr class="my-4" />
 
-{#if dictionary.id !== 'onondaga'}
-  <h3 class="font-semibold mb-1 mt-3">
-    {$page.data.t('contributors.LD_team')}
+  {#if dictionary.id !== 'onondaga'}
+    <h3 class="font-semibold mb-1 mt-3">
+      {$page.data.t('contributors.LD_team')}
+    </h3>
+    <div class="mb-4">
+      Gregory D. S. Anderson -
+      <span class="text-sm">
+        {$page.data.t('contributors.LD_founder')}
+      </span>
+      <br />
+      K. David Harrison -
+      <span class="text-sm">
+        {$page.data.t('contributors.LD_founder')}
+      </span>
+      <br />
+      Anna Luisa Daigneault -
+      <span class="text-sm">
+        {$page.data.t('contributors.coordinator_editor')}
+      </span>
+      <br />
+      Jacob Bowdoin -
+      <span class="text-sm">
+        {$page.data.t('contributors.developer_designer')}
+      </span>
+      <br />
+      Diego Córdova Nieto -
+      <span class="text-sm">
+        {$page.data.t('contributors.developer_designer')}
+      </span>
+      <br />
+    </div>
+  {/if}
+
+  <hr class="my-3" />
+  <p class="mb-3 text-sm">
+    {$page.data.t('contributors.all_rights_reserved_permission')}
+  </p>
+
+  <h3 class="font-semibold">
+    {$page.data.t('contributors.how_to_cite_academics')}
   </h3>
-  <div class="mb-4">
-    Gregory D. S. Anderson -
-    <span class="text-sm">
-      {$page.data.t('contributors.LD_founder')}
-    </span>
-    <br />
-    K. David Harrison -
-    <span class="text-sm">
-      {$page.data.t('contributors.LD_founder')}
-    </span>
-    <br />
-    Anna Luisa Daigneault -
-    <span class="text-sm">
-      {$page.data.t('contributors.coordinator_editor')}
-    </span>
-    <br />
-    Jacob Bowdoin -
-    <span class="text-sm">
-      {$page.data.t('contributors.developer_designer')}
-    </span>
-    <br />
-    Diego Córdova Nieto -
-    <span class="text-sm">
-      {$page.data.t('contributors.developer_designer')}
-    </span>
-    <br />
-  </div>
+
+  <CitationComponent isManager={$is_manager} {dictionary} {partners} citation={$dictionary_info.citation} update_citation={data.update_citation} />
+
+  <div class="mb-12" />
 {/if}
-
-<hr class="my-3" />
-<p class="mb-3 text-sm">
-  {$page.data.t('contributors.all_rights_reserved_permission')}
-</p>
-
-<h3 class="font-semibold">
-  {$page.data.t('contributors.how_to_cite_academics')}
-</h3>
-
-<CitationComponent isManager={$is_manager} {dictionary} {partners} citation={$dictionary_info.citation} update_citation={data.update_citation} />
-
-<div class="mb-12" />
 
 <SeoMetaTags
   norobots={!dictionary.public}

@@ -123,27 +123,29 @@
       {/each}
     </div>
   </a>
-  {#if first_video}
-    <Video
-      class="bg-gray-100 p-1.5 border-r-2"
-      lexeme={entry.main.lexeme.default}
-      video={first_video}
-      {can_edit} />
-  {:else if can_edit}
-    <ShowHide let:show let:toggle>
-      <button
-        type="button"
-        class="media-block bg-gray-100 border-r-2 hover:bg-gray-300 flex flex-col items-center
-          justify-center cursor-pointer p-2 text-lg"
-        on:click={toggle}>
-        <span class="i-bi-camera-video text-2xl mt-1  text-blue-800" />
-      </button>
-      {#if show}
-        {#await import('$lib/components/video/AddVideo.svelte') then { default: AddVideo }}
-          <AddVideo {entry} on_close={toggle} />
-        {/await}
-      {/if}
-    </ShowHide>
+  {#if !dictionary.con_language_description}
+    {#if first_video}
+      <Video
+        class="bg-gray-100 p-1.5 border-r-2"
+        lexeme={entry.main.lexeme.default}
+        video={first_video}
+        {can_edit} />
+    {:else if can_edit}
+      <ShowHide let:show let:toggle>
+        <button
+          type="button"
+          class="media-block bg-gray-100 border-r-2 hover:bg-gray-300 flex flex-col items-center
+            justify-center cursor-pointer p-2 text-lg"
+          on:click={toggle}>
+          <span class="i-bi-camera-video text-2xl mt-1  text-blue-800" />
+        </button>
+        {#if show}
+          {#await import('$lib/components/video/AddVideo.svelte') then { default: AddVideo }}
+            <AddVideo {entry} on_close={toggle} />
+          {/await}
+        {/if}
+      </ShowHide>
+    {/if}
   {/if}
   <!-- {#each sense_photos as photo (photo.id)} -->
 

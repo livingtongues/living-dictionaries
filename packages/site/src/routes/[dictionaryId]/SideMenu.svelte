@@ -88,14 +88,16 @@
         {$page.data.t('misc.settings')}
       </span>
     </a>
-    <a
-      href={`/${dictionary.url}/import`}
-      class:active={$page.url.pathname.includes('import')}>
-      <span class="i-fa6-solid-file-import mx-.5" />
-      <span class="font-medium mx-2">
-        {$page.data.t('import_page.import')}
-      </span>
-    </a>
+    {#if !dictionary.con_language_description}
+      <a
+        href={`/${dictionary.url}/import`}
+        class:active={$page.url.pathname.includes('import')}>
+        <span class="i-fa6-solid-file-import mx-.5" />
+        <span class="font-medium mx-2">
+          {$page.data.t('import_page.import')}
+        </span>
+      </a>
+    {/if}
     <a
       href={`/${dictionary.url}/export`}
       class:active={$page.url.pathname.includes('export')}>
