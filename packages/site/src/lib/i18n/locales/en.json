@@ -237,7 +237,8 @@
     "open_dictionary": "Open Dictionary",
     "my_dictionaries": "My Dictionaries",
     "public_dictionaries": "Public Dictionaries",
-    "read_more": "Read More"
+    "read_more": "Read More",
+    "main_banner": "Serving 200+ language communities around the globe with over 1/4 million published entries, as well as hundreds more dictionaries in progress."
   },
   "misc": {
     "settings": "Settings",
@@ -393,5 +394,10 @@
   "banner": {
     "message": "We are making improvements to our database on October 22 starting at 7PM Eastern Time (New York), for 24 hours. Editing capabilities will not be available during that period. Sorry for the inconvenience.",
     "attention": "Attention"
+  },
+  "footer": {
+    "public_LD": "Public Living Dictionaries",
+    "entries": "Dictionary Entries",
+    "LD_project": "Living Dictionaries is a project of"
   }
 }

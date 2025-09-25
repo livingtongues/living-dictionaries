@@ -40,7 +40,7 @@
     "contributor_awards": "Penghargaan Komunitas Kontributor",
     "question_1": "Mohon berikan informasi latar belakang tentang bahasa ini. Di mana bahasa ini digunakan? Komunitas mana saja yang menggunakan bahasa ini? Apakah bahasa ini terancam punah?",
     "question_2": "Siapa nama orang-orang yang membuat kamus ini? Suara siapa saja yang ada di kamus ini?",
-    "question_3": "Dari mana data dalam kamus ini berasal? Mohon jelaskan apakah Anda mengumpulkan datanya sendiri. Jika Anda menggunakan sumber referensi yang diterbitkan, mohon cantumkan.",
+    "question_3": "Dari mana data dalam kamus ini berasal? Jelaskan apakah Anda mengumpulkan datanya sendiri. Jika Anda menggunakan sumber referensi yang diterbitkan, sebutkan.",
     "question_4": "Siapa saja yang akan menggunakan kamus ini? Apakah akan digunakan dalam proyek pendidikan apa pun?",
     "question_5": "Jika Anda ingin publik menghubungi Anda terkait proyek ini, mohon berikan informasi kontak Anda, atau tautan tempat orang-orang dapat mempelajari lebih lanjut. Ini opsional.",
     "message": "Sebelum membuat kamus Anda publik, harap lengkapi bagian Tentang."
@@ -236,7 +236,8 @@
     "open_dictionary": "Buka Kamus",
     "my_dictionaries": "Kamus Saya",
     "public_dictionaries": "Kamus Umum",
-    "read_more": "Baca Lebih Lengkap"
+    "read_more": "Baca Lebih Lengkap",
+    "main_banner": "Melayani 200+ komunitas bahasa di seluruh dunia dengan lebih dari 1/4 juta entri yang diterbitkan, serta ratusan kamus lainnya yang sedang dalam proses."
   },
   "misc": {
     "settings": "Pengaturan",
@@ -392,5 +393,10 @@
   "banner": {
     "message": "Kami akan melakukan perbaikan pada basis data kami pada tanggal 22 Oktober, mulai pukul 19.00 Waktu Bagian Timur (New York), selama 24 jam. Fitur penyuntingan tidak akan tersedia selama periode tersebut. Mohon maaf atas ketidaknyamanan ini.",
     "attention": "Perhatian"
+  },
+  "footer": {
+    "public_LD": "Kamus Kehidupan Publik",
+    "entries": "Entri Kamus",
+    "LD_project": "Kamus Hidup adalah sebuah proyek"
   }
 }

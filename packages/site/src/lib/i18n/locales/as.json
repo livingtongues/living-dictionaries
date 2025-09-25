@@ -236,7 +236,8 @@
     "open_dictionary": "অভিধান খোলক",
     "my_dictionaries": "মোৰ অভিধানসমূহ",
     "public_dictionaries": "ৰাজহুৱা অভিধানসমূহ",
-    "read_more": "অধিক পঢ়ক"
+    "read_more": "অধিক পঢ়ক",
+    "main_banner": ""
   },
   "misc": {
     "settings": "সংহতিসমূহ",
@@ -392,5 +393,10 @@
   "banner": {
     "message": "",
     "attention": ""
+  },
+  "footer": {
+    "public_LD": "",
+    "entries": "",
+    "LD_project": ""
   }
 }

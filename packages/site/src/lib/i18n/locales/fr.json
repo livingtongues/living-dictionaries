@@ -37,7 +37,7 @@
     "peer_review": "Évaluation par les pairs de l'orthographe",
     "suggestions_from_users": "Suggestions des utilisateurs",
     "push_notifications": "Notifications push aux contributeurs",
-    "contributor_awards": "Prix de la communauté des contributeurs",
+    "contributor_awards": "Prix ​​de la communauté des contributeurs",
     "question_1": "Veuillez fournir quelques informations générales sur cette langue. Où est-elle parlée ? Quelles communautés la parlent ? Cette langue est-elle menacée ?",
     "question_2": "Quels sont les noms des personnes qui ont créé ce dictionnaire ? Quelles voix y figurent ?",
     "question_3": "D'où proviennent les données de ce dictionnaire ? Veuillez préciser si vous les avez collectées vous-même. Si vous avez utilisé des sources de référence publiées, veuillez les indiquer.",
@@ -236,7 +236,8 @@
     "open_dictionary": "Ouvrir le dictionnaire",
     "my_dictionaries": "Mes dictionnaires",
     "public_dictionaries": "Dictionnaires publics",
-    "read_more": "Lire la suite"
+    "read_more": "Lire la suite",
+    "main_banner": "Au service de plus de 200 communautés linguistiques à travers le monde avec plus d'un quart de million d'entrées publiées, ainsi que des centaines d'autres dictionnaires en cours de réalisation."
   },
   "misc": {
     "settings": "Configuration",
@@ -392,5 +393,10 @@
   "banner": {
     "message": "Nous apporterons des améliorations à notre base de données le 22 octobre à partir de 19 h, heure de l'Est (New York), pendant 24 heures. Les fonctionnalités de modification ne seront pas disponibles pendant cette période. Veuillez nous excuser pour la gêne occasionnée.",
     "attention": "Attention"
+  },
+  "footer": {
+    "public_LD": "Dictionnaires de la vie publique",
+    "entries": "Entrées du dictionnaire",
+    "LD_project": "Dictionnaires Vivants est un projet de"
   }
 }

@@ -236,7 +236,8 @@
     "open_dictionary": "Abrir Dicionário",
     "my_dictionaries": "Meu Dicionário",
     "public_dictionaries": "Dicionário Público",
-    "read_more": "Ler Mais "
+    "read_more": "Ler Mais ",
+    "main_banner": "Atendendo mais de 200 comunidades linguísticas ao redor do mundo, com mais de 1/4 milhão de entradas publicadas, além de centenas de outros dicionários em andamento."
   },
   "misc": {
     "settings": "Definições ",
@@ -370,7 +371,7 @@
     "new_value": "Novo Valor",
     "entry_message": "Um usuário editou esta entrada em",
     "edited": "Última edição em",
-    "history_search": "Entradas de pesquisa, editores, campos e valores",
+    "history_search": "Pesquisar entradas, editores, campos e valores",
     "download_history": "Baixar histórico como CSV",
     "empty": "Ainda sem histórico",
     "type": "tipo",
@@ -392,5 +393,10 @@
   "banner": {
     "message": "A partir de 22 de outubro, às 19h (horário do leste dos EUA) (Nova York), faremos melhorias em nosso banco de dados por 24 horas. Os recursos de edição não estarão disponíveis durante esse período. Pedimos desculpas pelo inconveniente.",
     "attention": "Atenção"
+  },
+  "footer": {
+    "public_LD": "Dicionários Públicos Vivos",
+    "entries": "Entradas do dicionário",
+    "LD_project": "Dicionários Vivos é um projeto de"
   }
 }
