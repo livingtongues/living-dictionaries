@@ -7,6 +7,7 @@
   import SortDictionaries from './SortDictionaries.svelte'
   import { exportAdminDictionariesAsCSV } from './export'
   import type { PageData } from './$types'
+  import type { DictionaryWithHelpers } from './dictionaryWithHelpers.types'
   import Filter from '$lib/components/Filter.svelte'
   import { page } from '$app/stores'
 
@@ -37,7 +38,7 @@
         ...dictionary,
         editors: users_with_roles.filter(user => user.dictionary_roles.some(role => role.dictionary_id === dictionary.id)),
         invites: $invites.filter(invite => invite.dictionary_id === dictionary.id),
-      }
+      } as DictionaryWithHelpers
     })
 
   onMount(() => {
@@ -60,6 +61,10 @@
       alert(`Error: ${err}`)
     }
   }
+
+  function asDictionaries(items: unknown[]): DictionaryWithHelpers[] {
+    return items as DictionaryWithHelpers[]
+  }
 </script>
 
 <div class="mb-2 text-xs text-gray-600 flex">
@@ -78,14 +83,14 @@
       <Button
         form="filled"
         color="black"
-        onclick={() => exportAdminDictionariesAsCSV(filteredDictionaries, active_section)}>
+        onclick={() => exportAdminDictionariesAsCSV(asDictionaries(filteredDictionaries), active_section)}>
         <i class="fas fa-download mr-1" />
         Download {filteredDictionaries.length} Dictionaries as CSV
       </Button>
     </div>
     <div class="mb-1" />
     <ResponsiveTable stickyHeading stickyColumn>
-      <SortDictionaries dictionaries={filteredDictionaries} let:sortedDictionaries>
+      <SortDictionaries dictionaries={asDictionaries(filteredDictionaries)} let:sortedDictionaries>
         {#each sortedDictionaries as dictionary, index (dictionary.id)}
           <IntersectionObserverShared bottom={4000} let:intersecting once>
             <tr>
