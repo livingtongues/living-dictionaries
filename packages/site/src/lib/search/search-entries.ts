@@ -45,6 +45,7 @@ export async function search_entries({ query_params, entries_per_page, page_inde
     boost: {
       _lexeme: 6,
       _glosses: 2,
+      _other: 1,
     },
     // threshold: 0.8,
     ...query_params.query ? { } : { sortBy },
