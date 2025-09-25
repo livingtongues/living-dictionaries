@@ -236,7 +236,8 @@
     "open_dictionary": "Mở từ điển",
     "my_dictionaries": "Từ điển của tôi",
     "public_dictionaries": "Từ điển công cộng",
-    "read_more": "Đọc thêm"
+    "read_more": "Đọc thêm",
+    "main_banner": "Phục vụ hơn 200 cộng đồng ngôn ngữ trên toàn cầu với hơn 1/4 triệu mục từ đã xuất bản, cũng như hàng trăm cuốn từ điển khác đang được biên soạn."
   },
   "misc": {
     "settings": "Cài đặt",
@@ -356,7 +357,7 @@
     "instructions_1": "Nếu bạn đã có dữ liệu ngôn ngữ mà bạn muốn nhập vào Từ điển, vui lòng làm theo các bước dưới đây.",
     "instructions_2": "Nhấp vào nút \"Liên kết đến Mẫu\" màu xanh lam bên dưới. Tải xuống mẫu dưới dạng tệp Excel hoặc tạo bản sao trên Google Docs. Chỉnh sửa mẫu theo nhu cầu của dự án. Sao chép và dán dữ liệu vào bảng tính.",
     "instructions_3": "Hãy sử dụng mục \"Liên hệ với chúng tôi\" bên dưới để liên hệ với chúng tôi. Hãy cho chúng tôi biết bạn có bảng tính mới đã sẵn sàng để nhập. Hãy hỏi chúng tôi bất kỳ câu hỏi nào bạn có. Chúng tôi sẽ trả lời bạn qua email, sau đó bạn có thể gửi tệp cho chúng tôi.",
-    "instructions_4": "Để gửi cho chúng tôi dữ liệu được xuất từ các phần mềm từ điển như FLEx, Lexique Pro, Shoebox, vui lòng sử dụng nút \"Liên hệ với chúng tôi\" bên dưới và cho chúng tôi biết chi tiết về dự án của bạn.",
+    "instructions_4": "Để gửi cho chúng tôi dữ liệu được xuất từ ​​các phần mềm từ điển như FLEx, Lexique Pro, Shoebox, vui lòng sử dụng nút \"Liên hệ với chúng tôi\" bên dưới và cho chúng tôi biết chi tiết về dự án của bạn.",
     "no_imports": "Hiện tại, chúng tôi đang hợp tác với nhiều cộng đồng và tổ chức đối tác để nhập một lượng lớn mục từ điển vào nền tảng này. Chúng tôi cũng đang thực hiện những cập nhật lớn cho cơ sở dữ liệu. Chúng tôi sẽ chấp nhận dữ liệu mới bắt đầu từ ngày 1 tháng 7 năm 2024. Chúng tôi trân trọng sự kiên nhẫn của bạn và xin lỗi vì sự bất tiện này."
   },
   "history": {
@@ -392,5 +393,10 @@
   "banner": {
     "message": "Chúng tôi sẽ tiến hành cải tiến cơ sở dữ liệu vào ngày 22 tháng 10, bắt đầu từ 7 giờ tối giờ miền Đông (New York), trong vòng 24 giờ. Chức năng chỉnh sửa sẽ không khả dụng trong thời gian đó. Xin lỗi vì sự bất tiện này.",
     "attention": "Chú ý"
+  },
+  "footer": {
+    "public_LD": "Từ điển sống công cộng",
+    "entries": "Mục từ điển",
+    "LD_project": "Từ điển sống là một dự án của"
   }
 }
