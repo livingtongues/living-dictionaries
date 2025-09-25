@@ -9,6 +9,9 @@
   export let square: number = undefined
   export let width: number = undefined
   export let height: number = undefined
+  export let photo_source: string = undefined
+  export let photographer: string = undefined
+  export let page_context: string = undefined
   export let on_delete_image: () => Promise<any>
 
   const [send, receive] = crossfade({
@@ -61,6 +64,8 @@
         : 's0'}" />
     {#if loading}
       <span class="i-gg-spinner animate-spin absolute bottom-1 right-1 text-white" />
+    {:else if photographer === 'AI'}
+      <span class="i-tabler:ai text-white absolute bottom-1 left-1 {page_context === 'gallery' ? 'text-6xl' : 'text-2xl'}" />
     {/if}
   </div>
 {/if}
@@ -79,7 +84,19 @@
         <span on:click|stopPropagation>{title}</span>
         <span class="i-fa-solid-times p-3 cursor-pointer opacity-75 hover:opacity-100" />
       </div>
+      {#if photographer === 'AI'}
+        <div class="absolute bottom-1 left-10 text-white z-10">
+          <span class="i-tabler:ai text-7xl"></span>
+          <span class="align-sub text-xl">generated</span>
+        </div>
+      {/if}
       <img class="object-contain max-h-full" alt="Image of {title}" src={fullscreenSource} />
+      {#if photo_source}
+        <div class="text-white flex justify-between">
+          <span>{photo_source}</span>
+          {#if photographer !== 'AI'}<span>{photographer}</span>{/if}
+        </div>
+      {/if}
       {#if can_edit}
         <div
           class="p-4 flex justify-between

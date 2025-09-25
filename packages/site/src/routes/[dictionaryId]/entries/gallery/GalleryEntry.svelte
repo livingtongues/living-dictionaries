@@ -28,6 +28,9 @@
           square={480}
           title={entry.main.lexeme.default}
           gcs={first_photo.serving_url}
+          photo_source={first_photo.source}
+          photographer={first_photo.photographer}
+          page_context="gallery"
           {can_edit}
           on_delete_image={async () => await dbOperations.update_photo({ deleted: new Date().toISOString(), id: first_photo.id })} />
       </div>
