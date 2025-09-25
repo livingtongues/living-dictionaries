@@ -27,7 +27,7 @@
     "two_decades_experience": "凭借近二十年的实地考察经验，濒危语言振兴协会的研究人员拥有足够的技术和方法来帮助社区记录，保护和促进他们的语言。",
     "help_us_launch_more": "帮助我们推出更多的活字典",
     "with_your_help": "有了您的帮助，我们可以继续改善我们的软件, 使得任何社会群体都可以使用我们的软件并创造他们自己的活字典。今天就献出一份爱心，增添一分影响吧！",
-    "translators": "译员",
+    "translators": "翻译人员",
     "interns": "实习生",
     "video_upload": "视频上传",
     "export_data": "导出数据（CSV、PDF 格式）",
@@ -236,7 +236,8 @@
     "open_dictionary": "打开字典",
     "my_dictionaries": "我的字典",
     "public_dictionaries": "公共字典",
-    "read_more": "阅读更多"
+    "read_more": "阅读更多",
+    "main_banner": "为全球 200 多个语言社区提供服务，已发布超过 25 万个词条，另有数百本词典正在编写中。"
   },
   "misc": {
     "settings": "设置",
@@ -392,5 +393,10 @@
   "banner": {
     "message": "我们将于10月22日美国东部时间（纽约时间）晚上7点开始对数据库进行为期24小时的升级。在此期间，编辑功能将无法使用。不便之处，敬请谅解。",
     "attention": "注意力"
+  },
+  "footer": {
+    "public_LD": "公共生活词典",
+    "entries": "词典条目",
+    "LD_project": "Living Dictionaries 是一个"
   }
 }
