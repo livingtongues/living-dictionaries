@@ -34,7 +34,7 @@
     "import_export": "Import/Eksport (FLEx, Format Standard)",
     "geo_tagging": "Entri penandaan geo",
     "flashcard_view": "Paparan Kad Imbas untuk Pelajar Bahasa",
-    "peer_review": "Tinjauan Rakan Sebaya Ejaan",
+    "peer_review": "Tinjauan Rakan Sebaya terhadap Ejaan",
     "suggestions_from_users": "Cadangan daripada Pengguna",
     "push_notifications": "Pemberitahuan Tolak kepada Penyumbang",
     "contributor_awards": "Anugerah Komuniti Penyumbang",
@@ -135,8 +135,8 @@
     "map_instructions": "Klik pada peta untuk menambah koordinat sekunder.",
     "print_access": "Benarkan Penonton Mencetak Kamus",
     "primary_coordinate": "Koordinat utama",
-    "conlang_question": "Adakah ini bahasa yang dibina atau bahasa buatan?",
-    "conlang_info_1": "Memandangkan misi kami menumpukan pada mendokumentasikan bahasa semula jadi manusia yang terancam dan minoriti, kami tidak menawarkan sokongan teknikal untuk bahasa binaan (konlang) atau bahasa buatan. Disebabkan pasukan kami yang kecil dan waktu operasi yang terhad, kami tidak menawarkan import data untuk conlang.",
+    "conlang_question": "Adakah ini bahasa binaan atau bahasa buatan?",
+    "conlang_info_1": "Memandangkan misi kami tertumpu pada mendokumentasikan bahasa semula jadi manusia yang terancam dan minoriti, kami tidak menawarkan sokongan teknikal untuk bahasa binaan (konlang) atau bahasa buatan. Disebabkan pasukan kami yang kecil dan waktu operasi yang terhad, kami tidak menawarkan import data untuk conlang.",
     "conlang_info_2": "Kamus Hidup untuk bahasa yang dibina tidak akan didedahkan kepada umum di tapak web kami atau tersedia pada peta halaman utama kami. Jika kami melihat kandungan yang menghina dalam Kamus Hidup ini, kami juga berhak untuk memadamkannya.",
     "agree_above": "Saya bersetuju dengan perkara di atas.",
     "agree_to_cite": "Saya bersetuju untuk memetik mana-mana karya yang diterbitkan berkaitan dalam entri kamus.",
@@ -183,7 +183,14 @@
     "switch_opposite": "Beralih ke bertentangan",
     "delete_audio": "Padamkan audio?",
     "delete_image": "Padamkan imej?",
-    "delete_video": "Padamkan video?"
+    "delete_video": "Padamkan video?",
+    "source": "{media} Atribusi / Sumber {media}",
+    "source_message": "Jika {media} datang daripada web, sila sertakan pautan dan lesen {media}, jika berkenaan",
+    "rights": "Saya mempunyai hak untuk memuat naik fail {media}.",
+    "AI_generated": "{media} telah dihasilkan oleh AI",
+    "this_image": "imej ini",
+    "this_audio": "audio ini",
+    "this_video": "video ini"
   },
   "entry_field": {
     "photo": "Foto",
@@ -270,7 +277,9 @@
     "guidance": "Bimbingan",
     "out_of_service": "Terima kasih kerana melawat laman web kami! Halaman ini sedang dalam pembinaan buat sementara waktu.\nIa tidak akan tersedia antara 3 Februari dan 28 Februari 2025.\nSila lawati halaman ini sekali lagi pada 1 Mac 2025.\nAnda akan dapat mencipta Kamus Hidup baharu pada masa itu.\nMaaf atas kesulitan ini, dan terima kasih atas kesabaran anda.\nSementara itu, seluruh platform berfungsi seperti biasa.",
     "transmitter": "Yang benar, pasukan Kamus Hidup",
-    "disjunctive": "atau"
+    "disjunctive": "atau",
+    "required": "diperlukan",
+    "optional": "pilihan"
   },
   "settings": {
     "community_permission": "Adakah masyarakat penutur membenarkan bahasa ini berada dalam talian?",
@@ -339,7 +348,8 @@
     "pause": "jeda",
     "unpause": "Nyahjeda",
     "previously_dismissed_msg": "Jika anda sebelum ini menolak permintaan penyemak imbas, sila muat semula dan klik 'Ya' apabila penyemak imbas anda meminta kebenaran.",
-    "permission_denied": "Kebenaran untuk mengakses media telah ditolak."
+    "permission_denied": "Kebenaran untuk mengakses media telah ditolak.",
+    "videographer": "Juruvideo"
   },
   "print": {
     "qr_code": "Tunjukkan Kod QR",
@@ -354,10 +364,10 @@
   "import_page": {
     "import": "Import",
     "template_link": "Pautan ke Templat",
-    "instructions_1": "Jika anda sudah mempunyai data linguistik yang ingin anda import ke dalam Kamus anda, sila ikut langkah di bawah.",
+    "instructions_1": "Jika anda sudah mempunyai data linguistik yang ingin anda import ke dalam Kamus anda, sila ikuti langkah di bawah.",
     "instructions_2": "Klik pada butang biru \"Pautan ke Templat\" di bawah. Muat turun templat sebagai fail Excel atau buat salinan pada Dokumen Google. Edit templat mengikut keperluan projek anda. Salin dan tampal data anda ke dalam hamparan.",
     "instructions_3": "Gunakan \"Hubungi Kami\" di bawah untuk menghubungi kami. Beritahu kami bahawa anda mempunyai hamparan baharu yang sedia untuk diimport. Tanya kami apa-apa soalan yang anda ada. Kami akan membalas anda melalui e-mel, dan kemudian anda boleh menghantar fail anda kepada kami.",
-    "instructions_4": "Untuk menghantar data yang dieksport kepada kami daripada perisian kamus seperti FLEx, Lexique Pro, Shoebox, sila gunakan butang \"Hubungi Kami\" di bawah dan beritahu kami butiran projek anda.",
+    "instructions_4": "Untuk menghantar data yang dieksport daripada perisian kamus seperti FLEx, Lexique Pro, Shoebox kepada kami, sila gunakan butang \"Hubungi Kami\" di bawah dan beritahu kami butiran projek anda.",
     "no_imports": "Kami sedang bekerjasama dengan banyak komuniti dan organisasi rakan kongsi untuk mengimport sejumlah besar entri kamus ke platform ini. Kami juga membuat kemas kini besar pada pangkalan data kami. Kami akan menerima import data baharu mulai 1 Julai 2024. Kami menghargai kesabaran anda dan kami memohon maaf atas kesulitan tersebut."
   },
   "history": {
@@ -391,12 +401,15 @@
     "add": "Tambah Sense"
   },
   "banner": {
-    "message": "Kami sedang membuat penambahbaikan pada pangkalan data kami pada 22 Oktober bermula jam 7 malam Waktu Timur (New York), selama 24 jam. Keupayaan menyunting tidak akan tersedia dalam tempoh tersebut. Maaf atas kesulitan.",
+    "message": "Kami sedang membuat penambahbaikan pada pangkalan data kami pada 22 Oktober bermula jam 7 malam Waktu Timur (New York), selama 24 jam. Keupayaan mengedit tidak akan tersedia dalam tempoh tersebut. Maaf atas kesulitan.",
     "attention": "Perhatian"
   },
   "footer": {
     "public_LD": "Kamus Kehidupan Awam",
     "entries": "Entri Kamus",
     "LD_project": "Kamus Hidup adalah projek"
+  },
+  "image": {
+    "photographer": "Jurugambar"
   }
 }

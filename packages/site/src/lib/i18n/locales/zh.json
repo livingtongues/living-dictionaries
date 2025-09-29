@@ -38,11 +38,11 @@
     "suggestions_from_users": "用户建议",
     "push_notifications": "向贡献者推送通知",
     "contributor_awards": "贡献者社区奖",
-    "question_1": "请提供一些关于这种语言的背景信息。它在哪里使用？哪些群体使用这种语言？这种语言是否濒临灭绝？",
-    "question_2": "这本词典的编纂者是谁？词典里收录了谁的声音？",
-    "question_3": "这本词典的数据来自哪里？请说明您是否自行收集了数据。如果您使用了任何已出版的参考资料，请列出。",
+    "question_1": "请提供一些关于这种语言的背景信息。它在哪里使用？哪些社区使用这种语言？这种语言是否濒临灭绝？",
+    "question_2": "编纂这本词典的人叫什么名字？词典里收录了谁的声音？",
+    "question_3": "这本词典中的数据来自哪里？请说明您是否自行收集了数据。如果您使用了任何已出版的参考资料，请列出。",
     "question_4": "谁会使用这本词典？它会用于任何教育项目吗？",
-    "question_5": "如果您希望公众就此项目与您联系，请提供您的联系信息或链接，以便人们了解更多信息。此操作为可选操作。",
+    "question_5": "如果您希望公众就此项目与您联系，请提供您的联系方式或链接，以便人们了解更多信息。此操作为可选。",
     "message": "在公开您的词典之前，请完成“关于”部分。"
   },
   "contributors": {
@@ -97,7 +97,7 @@
     "what_is_your_question": "您有什么问题或评论？",
     "message_failed": "消息发送失败。请检查您的网络连接或发送电子邮件给我们：",
     "delete_dictionary": "删除词典",
-    "public_dictionary": "公开词典",
+    "public_dictionary": "公开字典",
     "import_data": "导入数据",
     "request_access": "请求编辑权限",
     "report_problem": "报告问题",
@@ -127,21 +127,21 @@
     "add_gloss_msg": "您可以在“设置”下添加更多语言标注",
     "language_used_by_community": "这本词典是针对特定人类群体所讲或所手写的语言的吗？",
     "community_permission": "语言界是否允许您编写这本词典？",
-    "author_connection": "请简要描述一下您是如何了解这门语言的，以及您为什么要为它创建一本活词典。您是这本活词典的使用者群体吗？如果不是，您是如何认识这个群体的？",
+    "author_connection": "请简要描述一下您是如何了解这门语言的，以及您为什么要为它创建一本“活词典”。您是这本“活词典”的使用者群体吗？如果不是，您是如何认识这个群体的？",
     "con_lang_description": "这本词典是人造语言（近年来人类发明的语言，用于书籍或电影）的词典吗？如果是，请简要描述。",
     "uncertainty": "我不知道",
     "select_region": "选择地区",
     "secondary_coordinates": "二级坐标",
-    "map_instructions": "单击地图添加辅助坐标。",
+    "map_instructions": "单击地图即可添加辅助坐标。",
     "print_access": "允许查看者打印字典",
     "primary_coordinate": "主坐标",
     "conlang_question": "这是一种构造语言还是一种人工语言？",
-    "conlang_info_1": "由于我们的使命是记录濒危和少数自然人类语言，因此我们不为人工语言（conlang）或人造语言提供技术支持。由于我们团队规模较小且运营时间有限，我们不提供人工语言的数据导入服务。",
+    "conlang_info_1": "由于我们的使命是记录濒危和少数自然人类语言，因此我们不为人工语言（conlang）或人工语言提供技术支持。由于我们的团队规模较小且运营时间有限，我们不提供人工语言的数据导入服务。",
     "conlang_info_2": "人造语言的“活词典”不会在我们的网站上公开，也不会在我们的主页地图上显示。如果我们发现本“活词典”中存在贬损内容，我们保留删除的权利。",
     "agree_above": "我同意以上内容。",
     "agree_to_cite": "我同意在词典条目中引用任何相关的已出版作品。",
-    "agree_for_non-commercial": "我同意本作品为非商业作品。",
-    "source_question": "这本词典的数据来自哪里？请说明您是否自行收集了数据。如果您使用了任何已出版的参考资料，请在此处列出。",
+    "agree_for_non-commercial": "我同意该作品不得用于商业用途。",
+    "source_question": "这本词典中的数据来自哪里？请说明您是否自行收集了数据。如果您使用了任何已出版的参考资料，请在此处列出。",
     "use_question": "谁会使用这本词典？它会用于教育或媒体项目吗？",
     "conlang_warning": "如果这本词典适用于人造语言（或人工语言），而您未表明这一点，我们保留删除它的权利。"
   },
@@ -180,10 +180,17 @@
     "copy_and_share": "复制并共享",
     "print": "打印",
     "id": "ID",
-    "switch_opposite": "切换到相反",
+    "switch_opposite": "切换到相反方向",
     "delete_audio": "删除音频？",
     "delete_image": "删除图片？",
-    "delete_video": "删除视频？"
+    "delete_video": "删除视频？",
+    "source": "{media} 的归属/{media} 的来源",
+    "source_message": "如果 {media} 来自网络，请包含链接和 {media} 许可证（如果适用）",
+    "rights": "我有权上传{media}文件",
+    "AI_generated": "{media} 由 AI 生成",
+    "this_image": "这张图片",
+    "this_audio": "此音频",
+    "this_video": "这个视频"
   },
   "entry_field": {
     "photo": "照片",
@@ -270,7 +277,9 @@
     "guidance": "指导",
     "out_of_service": "感谢您访问我们的网站！此页面目前正在建设中。\n2025年2月3日至2月28日期间，此页面将无法使用。\n请于2025年3月1日再次访问此页面。\n届时，您将可以创建新的“生活词典”。\n不便之处，敬请谅解，感谢您的耐心等待。\n在此期间，平台的其他功能正常运行。",
     "transmitter": "此致，Living Dictionaries 团队",
-    "disjunctive": "或者"
+    "disjunctive": "或者",
+    "required": "必需的",
+    "optional": "选修的"
   },
   "settings": {
     "community_permission": "此语言的语言社区允许这种语言通过网络传播吗？",
@@ -328,7 +337,7 @@
   "video": {
     "video_url": "视频网址",
     "video_credit": "视频来自",
-    "prepare_to_record_video": "准备用麦克风和摄像机录音",
+    "prepare_to_record_video": "准备用麦克风和摄像头录音",
     "video_info": "There are two ways to have your videos displayed in a Living Dictionary: 1) You can record your videos right here, or upload your previously recorded videos to our platform. Advantages: easy and great for quick recordings. Disadvantages: You can only upload a video up to 100MB so it must only be short and low resolution. 2) Have your videos on a hosting service that specializes in video storage and link the URL to our site. Advantages: easy (as long as your videos are already uploaded on that platform), your videos can have the resolution and length you want. Disadvantages: if you want to record something unexpected or very simple, it might be too much effort to do it that way, and you may want to prioritize method 1.",
     "paste_video_url": "粘贴 YouTube 或 Vimeo 链接",
     "record_upload_video": "录制或上传视频",
@@ -339,7 +348,8 @@
     "pause": "暂停",
     "unpause": "播放",
     "previously_dismissed_msg": "如果您之前忽略了浏览器的请求，请重新加载并在浏览器请求权限时单击“是”。",
-    "permission_denied": "访问媒体的许可受限"
+    "permission_denied": "访问媒体的许可受限",
+    "videographer": "摄像师"
   },
   "print": {
     "qr_code": "显示二维码",
@@ -356,9 +366,9 @@
     "template_link": "模板链接",
     "instructions_1": "如果您已经有想要导入词典的语言数据，请按照以下步骤操作。",
     "instructions_2": "点击下方蓝色的“链接至模板”按钮。下载模板为 Excel 文件，或在 Google 文档中创建副本。根据项目需求编辑模板。将数据复制并粘贴到电子表格中。",
-    "instructions_3": "使用下方的“联系我们”联系我们。告诉我们您有一个新的电子表格可以导入。如有任何问题，请随时联系我们。我们将通过电子邮件回复您，然后您可以将文件发送给我们。",
+    "instructions_3": "使用下方的“联系我们”联系我们。告诉我们您有新的电子表格可以导入。如有任何问题，请随时咨询。我们将通过电子邮件回复您，然后您可以将文件发送给我们。",
     "instructions_4": "要向我们发送从 FLEx、Lexique Pro、Shoebox 等词典软件导出的数据，请使用下面的“联系我们”按钮并告诉我们您的项目的详细信息。",
-    "no_imports": "我们目前正在与众多社区和合作伙伴组织合作，将大量词典条目导入此平台。我们也在对数据库进行重大更新。我们将于 2024 年 7 月 1 日起接受新的数据导入。感谢您的耐心等待，并对由此造成的不便深表歉意。"
+    "no_imports": "我们目前正在与众多社区和合作伙伴组织合作，将大量词典条目导入此平台。我们也在对数据库进行重大更新。我们将于 2024 年 7 月 1 日起接受新的数据导入。感谢您的耐心等待，对于由此带来的不便，我们深表歉意。"
   },
   "history": {
     "history": "历史",
@@ -369,7 +379,7 @@
     "date": "日期",
     "old_value": "原值",
     "new_value": "新价值",
-    "entry_message": "用户于 编辑了此条目",
+    "entry_message": "一位用户于 编辑了此条目",
     "edited": "最后编辑于",
     "history_search": "搜索条目、编辑器、字段和值",
     "download_history": "将历史记录下载为 CSV",
@@ -391,12 +401,15 @@
     "add": "添加感知"
   },
   "banner": {
-    "message": "我们将于10月22日美国东部时间（纽约时间）晚上7点开始对数据库进行为期24小时的升级。在此期间，编辑功能将无法使用。不便之处，敬请谅解。",
+    "message": "我们将于10月22日美国东部时间（纽约时间）晚上7点开始对数据库进行升级，升级将持续24小时。在此期间，编辑功能将无法使用。不便之处，敬请谅解。",
     "attention": "注意力"
   },
   "footer": {
     "public_LD": "公共生活词典",
     "entries": "词典条目",
     "LD_project": "Living Dictionaries 是一个"
+  },
+  "image": {
+    "photographer": "摄影师"
   }
 }
