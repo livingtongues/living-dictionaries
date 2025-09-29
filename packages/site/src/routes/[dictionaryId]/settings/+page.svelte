@@ -30,19 +30,21 @@
     display={$page.data.t('settings.edit_dict_name')} />
   <div class="mb-5" />
 
-  <EditString
-    value={dictionary.iso_639_3}
-    id="iso6393"
-    save={async iso_639_3 => await updateDictionary({ iso_639_3 })}
-    display="ISO 639-3" />
-  <div class="mb-5" />
+  {#if !dictionary.con_language_description}
+    <EditString
+      value={dictionary.iso_639_3}
+      id="iso6393"
+      save={async iso_639_3 => await updateDictionary({ iso_639_3 })}
+      display="ISO 639-3" />
+    <div class="mb-5" />
 
-  <EditString
-    value={dictionary.glottocode}
-    id="glottocode"
-    save={async glottocode => await updateDictionary({ glottocode })}
-    display="Glottocode" />
-  <div class="mb-5" />
+    <EditString
+      value={dictionary.glottocode}
+      id="glottocode"
+      save={async glottocode => await updateDictionary({ glottocode })}
+      display="Glottocode" />
+    <div class="mb-5" />
+  {/if}
 
   <EditableGlossesField
     minimum={1}
@@ -57,68 +59,72 @@
     on_update={async new_value => await updateDictionary({ alternate_names: new_value })} />
   <div class="mb-5" />
 
-  <WhereSpoken
-    {dictionary}
-    on_update_points={async points => await updateDictionary({ coordinates: {
-      points,
-      regions: dictionary.coordinates?.regions,
-    } })}
-    on_update_regions={async regions => await updateDictionary({ coordinates: {
-      points: dictionary.coordinates?.points,
-      regions,
-    } })} />
-  <div class="mb-5" />
+  {#if !dictionary.con_language_description}
+    <WhereSpoken
+      {dictionary}
+      on_update_points={async points => await updateDictionary({ coordinates: {
+        points,
+        regions: dictionary.coordinates?.regions,
+      } })}
+      on_update_regions={async regions => await updateDictionary({ coordinates: {
+        points: dictionary.coordinates?.points,
+        regions,
+      } })} />
+    <div class="mb-5" />
 
-  <EditString
-    value={dictionary.location}
-    maxlength={100}
-    id="location"
-    save={async location => await updateDictionary({ location })}
-    display={$page.data.t('dictionary.location')} />
-  <div class="mb-5" />
+    <EditString
+      value={dictionary.location}
+      maxlength={100}
+      id="location"
+      save={async location => await updateDictionary({ location })}
+      display={$page.data.t('dictionary.location')} />
+    <div class="mb-5" />
 
-  <div class="text-sm font-medium text-gray-700 mb-2">
-    {$page.data.t('settings.featured_image')}
-  </div>
-  {#if dictionary.featured_image}
-    <Image
-      can_edit
-      height={300}
-      title="{dictionary.name} Featured Image"
-      gcs={dictionary.featured_image.specifiable_image_url}
-      on_delete_image={async () => await updateDictionary({ featured_image: null })} />
-  {:else}
-    <div class="hover:bg-gray-100 min-h-150px flex flex-col">
-      <AddImage border upload_image={add_featured_image} />
+    <div class="text-sm font-medium text-gray-700 mb-2">
+      {$page.data.t('settings.featured_image')}
     </div>
+    {#if dictionary.featured_image}
+      <Image
+        can_edit
+        height={300}
+        title="{dictionary.name} Featured Image"
+        gcs={dictionary.featured_image.specifiable_image_url}
+        on_delete_image={async () => await updateDictionary({ featured_image: null })} />
+    {:else}
+      <div class="hover:bg-gray-100 min-h-150px flex flex-col">
+        <AddImage border upload_image={add_featured_image} />
+      </div>
+    {/if}
+    <div class="mb-5" />
   {/if}
-  <div class="mb-5" />
 
   <PrintAccessCheckbox
     checked={dictionary.print_access}
     on:changed={async ({ detail: { checked } }) => await updateDictionary({ print_access: checked })} />
   <div class="mb-5" />
 
-  <PublicCheckbox
-    checked={dictionary.public}
-    on:changed={async ({ detail: { checked } }) => {
-      if (!checked) {
-        await updateDictionary({ public: false })
-      } else if ($admin) {
-        await updateDictionary({ public: true })
-        dictionary.public = true
+  {#if !dictionary.con_language_description}
+    <PublicCheckbox
+      checked={dictionary.public}
+      on:changed={async ({ detail: { checked } }) => {
+        if (!checked) {
+          await updateDictionary({ public: false })
+        } else if ($admin) {
+          await updateDictionary({ public: true })
+          dictionary.public = true
+          await $page.data.dictionaries.refresh()
+        } else if (about_is_too_short()) {
+          alert($page.data.t('about.message'))
+          goto(`/${dictionary.id}/about`)
+        } else {
+          const communityAllowsOnline = confirm($page.data.t('settings.community_permission'))
+          if (communityAllowsOnline) alert($page.data.t('header.contact_us'))
+        }
+        dictionary.public = false
         await $page.data.dictionaries.refresh()
-      } else if (about_is_too_short()) {
-        alert($page.data.t('about.message'))
-        goto(`/${dictionary.id}/about`)
-      } else {
-        const communityAllowsOnline = confirm($page.data.t('settings.community_permission'))
-        if (communityAllowsOnline) alert($page.data.t('header.contact_us'))
-      }
-      dictionary.public = false
-      await $page.data.dictionaries.refresh()
-    }} />
-  <div class="mb-5" />
+      }} />
+    <div class="mb-5" />
+  {/if}
 
   {#if $is_manager}
     <div>

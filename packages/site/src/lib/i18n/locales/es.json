@@ -236,7 +236,8 @@
     "open_dictionary": "Abrir el diccionario",
     "my_dictionaries": "Mis diccionarios",
     "public_dictionaries": "Diccionarios públicos",
-    "read_more": "Leer más"
+    "read_more": "Leer más",
+    "main_banner": "Al servicio de más de 200 comunidades lingüísticas en todo el mundo, con más de 1/4 millón de entradas publicadas, así como cientos de diccionarios más en proceso."
   },
   "misc": {
     "settings": "Configuración",
@@ -392,5 +393,10 @@
   "banner": {
     "message": "Realizaremos mejoras en nuestra base de datos el 22 de octubre a partir de las 7 p. m., hora del este (Nueva York), durante 24 horas. Las capacidades de edición no estarán disponibles durante ese período. Disculpen los inconvenientes.",
     "attention": "Atención"
+  },
+  "footer": {
+    "public_LD": "Diccionarios Vivos públicos",
+    "entries": "Entradas del diccionario",
+    "LD_project": "Diccionarios Vivos es un proyecto de"
   }
 }
