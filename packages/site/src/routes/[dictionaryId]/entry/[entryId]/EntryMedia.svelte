@@ -8,7 +8,6 @@
   import Image from '$lib/components/image/Image.svelte'
   import { page } from '$app/stores'
   import type { DbOperations } from '$lib/dbOperations'
-  import AddImage from '$lib/components/image/AddImage.svelte'
 
   export let entry: EntryData
   export let dictionary: Tables<'dictionaries'>
@@ -38,18 +37,36 @@
         width={400}
         title={entry.main.lexeme.default}
         gcs={photo.serving_url}
+        photo_source={photo.source}
+        photographer={photo.photographer}
         {can_edit}
         on_delete_image={async () => await dbOperations.update_photo({ deleted: new Date().toISOString(), id: photo.id })} />
     </div>
   {/each}
   {#if can_edit}
-    <div class="h-20 bg-gray-100 hover:bg-gray-300 mb-2 flex flex-col">
-      <AddImage upload_image={file => dbOperations.addImage({ file, sense_id: entry.senses[0].id })}>
-        <div class="text-xs">
-          {$page.data.t('entry.upload_photo')}
+    <ShowHide let:show let:toggle>
+      <div class="h-20 bg-gray-100 hover:bg-gray-300 mb-2 flex flex-col" on:click={toggle}>
+        <div
+          class="text-gray-600
+            h-full grow-1 flex flex-col items-center justify-center
+            cursor-pointer">
+          <span class="hidden md:inline">
+            <span class="i-ic-outline-cloud-upload text-2xl" />
+          </span>
+          <span class="md:hidden">
+            <span class="i-ic-outline-camera-alt text-xl" />
+          </span>
+          <div class="text-xs">
+            {$page.data.t('entry_field.photo')}
+          </div>
         </div>
-      </AddImage>
-    </div>
+        {#if show}
+          {#await import('$lib/components/image/EditImage.svelte') then { default: EditImage }}
+            <EditImage on_close={toggle} sense_id={entry.senses[0].id} />
+          {/await}
+        {/if}
+      </div>
+    </ShowHide>
   {/if}
 
   {#each videos as video (video.id)}

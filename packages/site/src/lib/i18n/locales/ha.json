@@ -33,11 +33,11 @@
     "export_data": "Bayanai na fitarwa (CSV, tsarin PDF)",
     "import_export": "Shigo da Fitarwa (FLEx, Daidaitaccen Tsarin)",
     "geo_tagging": "Geo-tagging shigarwar",
-    "flashcard_view": "Duba Katin Filasha don Masu Koyan Harshe",
+    "flashcard_view": "Duban Katin Flash don Masu Koyan Harshe",
     "peer_review": "Sharhin Tsari na Haruffa",
     "suggestions_from_users": "Shawarwari daga Masu amfani",
     "push_notifications": "Tura Sanarwa zuwa Masu Gudunmawa",
-    "contributor_awards": "Kyautar Al'umma Mai Ba da gudummawa",
+    "contributor_awards": "Kyautar Al'umma masu Ba da gudummawa",
     "question_1": "Da fatan za a ba da wasu bayanan baya game da wannan harshe. A ina ake magana? Wadanne al'ummomi ne ke jin wannan yare? Shin wannan harshe yana cikin haɗari?",
     "question_2": "Menene sunayen mutanen da suka gina wannan ƙamus? Muryoyin wa ke cikin wannan ƙamus?",
     "question_3": "Daga ina bayanan da ke cikin wannan ƙamus suka fito? Da fatan za a kwatanta idan kun tattara bayanan da kanku. Idan kun yi amfani da wasu hanyoyin da aka buga, da fatan za a jera su.",
@@ -95,7 +95,7 @@
     "send_message": "aika sako",
     "message_sent": "Saƙon aika. Za mu amsa da zaran mun iya.",
     "what_is_your_question": "Mene ne tambaya ko comment?",
-    "message_failed": "aika sako ya kasa. Bincika haɗin Intanet ɗin ku ko yi mana imel:",
+    "message_failed": "aika sako ya kasa. Bincika haɗin Intanet ɗinku ko yi mana imel:",
     "delete_dictionary": "Share ƙamus",
     "public_dictionary": "Yi ƙamus na jama'a",
     "import_data": "Shigo da bayanai",
@@ -133,7 +133,7 @@
     "select_region": "Zaɓi Yanki",
     "secondary_coordinates": "Coordinates na Sakandare",
     "map_instructions": "Danna kan taswirar don ƙara daidaitawa na sakandare.",
-    "print_access": "Bada Masu kallo su Buga ƙamus",
+    "print_access": "Ba da damar Masu kallo su Buga ƙamus",
     "primary_coordinate": "Haɗin kai na farko",
     "conlang_question": "Shin wannan yaren da aka gina ko na wucin gadi?",
     "conlang_info_1": "Tunda manufarmu ta mai da hankali kan tattara bayanan da ke cikin haɗari da ƙananan harsunan ɗan adam, ba ma ba da goyan bayan fasaha don ingantattun harsuna (conlang) ko harsunan wucin gadi. Saboda ƙananan ƙungiyar mu da iyakantaccen sa'o'i na aiki, ba mu bayar da shigo da bayanai don haɗin gwiwa.",
@@ -183,7 +183,14 @@
     "switch_opposite": "Canja zuwa kishiyar",
     "delete_audio": "Share audio?",
     "delete_image": "Share hoto?",
-    "delete_video": "Share bidiyo?"
+    "delete_video": "Share bidiyo?",
+    "source": "{kafofin watsa labaru} Halaye / Tushen {kafofin watsa labaru}",
+    "source_message": "Idan {kamar watsa labarai} ta fito daga gidan yanar gizo, da fatan za a haɗa da hanyar haɗin yanar gizo da lasisin {kafofin watsa labarai}, idan an zartar",
+    "rights": "Ina da haƙƙin loda fayil ɗin {media}",
+    "AI_generated": "AI ne ya samar da {media}",
+    "this_image": "wannan hoton",
+    "this_audio": "wannan audio",
+    "this_video": "wannan bidiyo"
   },
   "entry_field": {
     "photo": "Photo",
@@ -268,9 +275,11 @@
     "clean": "Tsaftace",
     "map": "Taswira",
     "guidance": "Jagoranci",
-    "out_of_service": "Na gode da ziyartar gidan yanar gizon mu! Ana kan gina wannan shafin na ɗan lokaci.\nBa zai kasance tsakanin Fabrairu 3 da Fabrairu 28, 2025 ba.\nDa fatan za a sake ziyartar wannan shafin a ranar 1 ga Maris, 2025.\nZa ku iya ƙirƙirar sabbin ƙamus na Rayuwa a lokacin.\nYi hakuri da rashin jin daɗi, kuma na gode da haƙurin ku.\nA halin yanzu, sauran dandamali suna aiki akai-akai.",
+    "out_of_service": "Na gode da ziyartar gidan yanar gizon mu! Ana kan gina wannan shafin na ɗan lokaci.\nBa zai kasance tsakanin Fabrairu 3 da Fabrairu 28, 2025 ba.\nDa fatan za a sake ziyartar wannan shafin a ranar 1 ga Maris, 2025.\nZa ku iya ƙirƙirar sabbin ƙamus na Rayuwa a lokacin.\nYi hakuri da rashin jin dadi, kuma na gode da hakurin ku.\nA halin yanzu, sauran dandamali suna aiki akai-akai.",
     "transmitter": "Da gaske, ƙungiyar Kamus na Rayuwa",
-    "disjunctive": "ko"
+    "disjunctive": "ko",
+    "required": "ake bukata",
+    "optional": "na zaɓi"
   },
   "settings": {
     "community_permission": "Shin magana al'umma damar wannan harshe ya zama online?",
@@ -316,7 +325,7 @@
   },
   "export": {
     "csv_data": "Bayanai kamar .CSV",
-    "checking_images": "Dubawa idan fayilolin hoto sun wanzu",
+    "checking_images": "Dubawa idan fayilolin hoto suna wanzu",
     "no_images": "Babu fayilolin hoto",
     "checking_audios": "Dubawa idan fayilolin mai jiwuwa sun wanzu",
     "no_audios": "Babu fayilolin mai jiwuwa",
@@ -329,7 +338,7 @@
     "video_url": "URL na bidiyo",
     "video_credit": "Bidiyo bashi",
     "prepare_to_record_video": "Shirya don yin rikodi da Makirufo & Kamara",
-    "video_info": "Akwai hanyoyi guda biyu don nuna bidiyon ku a cikin Kamus na Rayuwa: 1) Kuna iya yin rikodin bidiyonku nan, ko loda bidiyon ku da aka yi rikodi a dandali. Abũbuwan amfãni: mai sauƙi kuma mai girma don rikodin sauri. Hasara: Kuna iya loda bidiyo har zuwa 100MB kawai don haka dole ne ya zama gajere kuma mara nauyi. 2) Samun bidiyon ku akan sabis na talla wanda ya ƙware a ajiyar bidiyo da haɗa URL zuwa rukunin yanar gizon mu. Abũbuwan amfãni: mai sauƙi (idan dai an riga an ɗora bidiyon ku akan wannan dandamali), bidiyon ku na iya samun ƙuduri da tsawon da kuke so. Rashin hasara: idan kuna son yin rikodin wani abu na bazata ko kuma mai sauqi qwarai, yana iya zama ƙoƙari da yawa don yin haka, kuma kuna iya fifita hanya ta 1.",
+    "video_info": "Akwai hanyoyi guda biyu don nuna bidiyon ku a cikin Kamus na Rayuwa: 1) Kuna iya yin rikodin bidiyonku nan, ko loda bidiyon ku da aka yi rikodi a dandali. Abũbuwan amfãni: mai sauƙi kuma mai girma don rikodin sauri. Hasara: Kuna iya loda bidiyo har zuwa 100MB kawai don haka dole ne ya zama gajere kuma mara nauyi. 2) Samun bidiyon ku akan sabis na talla wanda ya ƙware a ajiyar bidiyo da haɗa URL zuwa rukunin yanar gizon mu. Abũbuwan amfãni: mai sauƙi (idan dai an riga an ɗora bidiyon ku akan wannan dandamali), bidiyon ku na iya samun ƙuduri da tsawon da kuke so. Hasara: idan kuna son yin rikodin wani abu na bazata ko kuma mai sauqi qwarai, yana iya zama ƙoƙari da yawa don yin haka, kuma kuna iya fifita hanya ta 1.",
     "paste_video_url": "Manna hanyar haɗin YouTube ko Vimeo",
     "record_upload_video": "Yi rikodin ko loda bidiyo",
     "view": "Duba",
@@ -339,7 +348,8 @@
     "pause": "Dakata",
     "unpause": "Kwantar da hankali",
     "previously_dismissed_msg": "Idan a baya ka yi watsi da bukatar mai binciken, da fatan za a sake lodawa kuma ka danna 'Ee' lokacin da mai binciken ka ya nemi izini.",
-    "permission_denied": "An hana izinin shiga kafofin watsa labarai."
+    "permission_denied": "An hana izinin shiga kafofin watsa labarai.",
+    "videographer": "Mai daukar hoto"
   },
   "print": {
     "qr_code": "Nuna lambar QR",
@@ -354,9 +364,9 @@
   "import_page": {
     "import": "Shigo da",
     "template_link": "Hanyar haɗi zuwa Samfura",
-    "instructions_1": "Idan kun riga kuna da bayanan harshe waɗanda kuke son shigo da su cikin ƙamus ɗinku, da fatan za a bi matakan da ke ƙasa.",
-    "instructions_2": "Danna maɓallin shuɗin \"Haɗin zuwa Samfura\" a ƙasa. Zazzage samfurin azaman fayil ɗin Excel, ko ƙirƙirar kwafi akan Google Docs. Shirya samfurin bisa ga bukatun aikin ku. Kwafi da liƙa bayanan ku a cikin maƙunsar bayanai.",
-    "instructions_3": "Yi amfani da \"Contact Us\" da ke ƙasa don tuntuɓar mu. Bari mu san cewa kuna da sabon maƙunsar rubutu wanda ke shirye don shigo da kaya. Yi mana duk wata tambaya da kuke da ita. Za mu amsa muku ta imel, sannan za ku iya aiko mana da fayil ɗin ku.",
+    "instructions_1": "Idan kun riga kuna da bayanan harshe waɗanda kuke son shigo da su cikin ƙamus ɗin ku, da fatan za a bi matakan da ke ƙasa.",
+    "instructions_2": "Danna maballin shuɗin \"Haɗin zuwa Samfura\" da ke ƙasa. Zazzage samfurin azaman fayil ɗin Excel, ko ƙirƙirar kwafi akan Google Docs. Shirya samfurin bisa ga bukatun aikin ku. Kwafi da liƙa bayanan ku a cikin maƙunsar bayanai.",
+    "instructions_3": "Yi amfani da \"Contact Us\" da ke ƙasa don tuntuɓar mu. Bari mu san cewa kuna da sabon maƙunsar rubutu wanda ke shirye don shigo da kaya. Yi mana tambayoyi da kuke da su. Za mu amsa muku ta imel, sannan za ku iya aiko mana da fayil ɗin ku.",
     "instructions_4": "Don aiko mana da bayanan da aka fitar daga manhajojin ƙamus kamar FLEx, Lexique Pro, Shoebox, da fatan za a yi amfani da maɓallin “Contact Us” da ke ƙasa kuma gaya mana cikakkun bayanai na aikin ku.",
     "no_imports": "A halin yanzu muna aiki tare da al'ummomi da yawa da ƙungiyoyin haɗin gwiwa don shigo da adadi mai yawa na shigarwar ƙamus zuwa wannan dandali. Har ila yau, muna yin babban sabuntawa ga bayanan mu. Za mu karɓi sabbin shigo da bayanai daga ranar 1 ga Yuli, 2024. Muna godiya da haƙurin ku, kuma muna ba da hakuri kan rashin jin daɗi."
   },
@@ -398,5 +408,8 @@
     "public_LD": "Kamus na Rayuwar Jama'a",
     "entries": "Shigar da ƙamus",
     "LD_project": "Living Dictionaries aikin ne na"
+  },
+  "image": {
+    "photographer": "Mai daukar hoto"
   }
 }

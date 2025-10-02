@@ -183,7 +183,14 @@
     "switch_opposite": "",
     "delete_audio": "",
     "delete_image": "",
-    "delete_video": ""
+    "delete_video": "",
+    "source": "",
+    "source_message": "",
+    "rights": "",
+    "AI_generated": "",
+    "this_image": "",
+    "this_audio": "",
+    "this_video": ""
   },
   "entry_field": {
     "photo": "ফটো বা আলোকচিত্ৰ",
@@ -270,7 +277,9 @@
     "guidance": "",
     "out_of_service": "",
     "transmitter": "",
-    "disjunctive": ""
+    "disjunctive": "",
+    "required": "",
+    "optional": ""
   },
   "settings": {
     "community_permission": "ভাষণ সম্প্ৰদায়ে এই ভাষাটো অনলাইন/ইণ্টাৰনেটত উপলব্ধ হ'বলৈ অনুমতি দিয়ে নেকি?",
@@ -339,7 +348,8 @@
     "pause": "",
     "unpause": "",
     "previously_dismissed_msg": "",
-    "permission_denied": ""
+    "permission_denied": "",
+    "videographer": ""
   },
   "print": {
     "qr_code": "",
@@ -398,5 +408,8 @@
     "public_LD": "",
     "entries": "",
     "LD_project": ""
+  },
+  "image": {
+    "photographer": ""
   }
 }

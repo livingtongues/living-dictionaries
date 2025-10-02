@@ -151,9 +151,11 @@ export async function update_sentence(sentence: TablesUpdate<'sentences'>) {
 export async function insert_audio({
   storage_path,
   entry_id,
+  source,
 }: {
   storage_path: string
   entry_id: string
+  source: string
 }) {
   try {
     const { dictionary_id, api, supabase } = await get_pieces()
@@ -162,6 +164,7 @@ export async function insert_audio({
       entry_id,
       id: randomUUID(),
       storage_path,
+      source,
     }
     await api.insert_audio(audio)
     const { data, error } = await supabase.from('audio').insert(audio).select().single()

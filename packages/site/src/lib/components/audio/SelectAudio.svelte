@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { apply_button_label } from './audio-store'
   import { page } from '$app/stores'
 
   const unsupported_audio_formats = [
@@ -48,7 +49,8 @@
   class:dragging
   on:drop|preventDefault={e => handleAudio(e.dataTransfer.files)}
   on:dragover|preventDefault={() => (dragging = true)}
-  on:dragleave|preventDefault={() => (dragging = false)}>
+  on:dragleave|preventDefault={() => (dragging = false)}
+  class:blocked={!$apply_button_label.ready_to_upload}>
   <input
     type="file"
     accept="audio/*"
@@ -70,6 +72,10 @@
   cursor-pointer focus:outline-none border-green-300
   focus:ring focus:ring-green-300 active:bg-green-200 transition ease-in-out
   duration-150 rounded hover:bg-green-100 text-green-700;
+  }
+
+  .blocked {
+   --at-apply: pointer-events-none opacity-60 cursor-not-allowed select-none px-3 py-2 border border-gray-500 text-gray-500;
   }
 
   .dragging {
