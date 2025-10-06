@@ -18,12 +18,12 @@ export function addImage({ sense_id, image_options }: { sense_id: string, image_
   return status
 }
 
-export function addAudio({ entry_id, speaker_id, file, source }: { entry_id: string, speaker_id: string, file: File | Blob, source: string }) {
+export function addAudio({ entry_id, speaker_id, file }: { entry_id: string, speaker_id: string, file: File | Blob }) {
   const { data: { dictionary } } = get(page)
   const status = upload_audio({ file, folder: `${dictionary.id}/audio/${entry_id}` })
   const unsubscribe = status.subscribe(async ({ storage_path }) => {
     if (storage_path) {
-      const audio = await insert_audio({ storage_path, entry_id, source })
+      const audio = await insert_audio({ storage_path, entry_id })
       await assign_speaker({ speaker_id, media: 'audio', media_id: audio.id })
       unsubscribe()
     }
