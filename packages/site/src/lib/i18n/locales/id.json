@@ -40,9 +40,9 @@
     "contributor_awards": "Penghargaan Komunitas Kontributor",
     "question_1": "Mohon berikan informasi latar belakang tentang bahasa ini. Di mana bahasa ini digunakan? Komunitas mana saja yang menggunakan bahasa ini? Apakah bahasa ini terancam punah?",
     "question_2": "Siapa nama orang-orang yang membuat kamus ini? Suara siapa saja yang ada di kamus ini?",
-    "question_3": "Dari mana data dalam kamus ini berasal? Jelaskan apakah Anda mengumpulkan datanya sendiri. Jika Anda menggunakan sumber referensi yang diterbitkan, sebutkan.",
+    "question_3": "Dari mana data dalam kamus ini berasal? Mohon jelaskan apakah Anda mengumpulkan datanya sendiri. Jika Anda menggunakan sumber referensi yang diterbitkan, mohon cantumkan.",
     "question_4": "Siapa saja yang akan menggunakan kamus ini? Apakah akan digunakan dalam proyek pendidikan apa pun?",
-    "question_5": "Jika Anda ingin publik menghubungi Anda terkait proyek ini, mohon berikan informasi kontak Anda, atau tautan tempat orang-orang dapat mempelajari lebih lanjut. Ini opsional.",
+    "question_5": "Jika Anda ingin publik menghubungi Anda mengenai proyek ini, mohon berikan informasi kontak Anda, atau tautan tempat orang-orang dapat mempelajari lebih lanjut. Ini opsional.",
     "message": "Sebelum membuat kamus Anda publik, harap lengkapi bagian Tentang."
   },
   "contributors": {
@@ -183,7 +183,14 @@
     "switch_opposite": "Beralih ke yang berlawanan",
     "delete_audio": "Hapus audio?",
     "delete_image": "Hapus gambar?",
-    "delete_video": "Hapus video?"
+    "delete_video": "Hapus video?",
+    "source": "Atribusi / Sumber {media}",
+    "source_message": "Jika {media} berasal dari web, harap sertakan tautan dan lisensi {media}, jika berlaku",
+    "rights": "Saya memiliki hak untuk mengunggah file {media}",
+    "AI_generated": "{media} dihasilkan oleh AI",
+    "this_image": "gambar ini",
+    "this_audio": "audio ini",
+    "this_video": "video ini"
   },
   "entry_field": {
     "photo": "Foto",
@@ -270,7 +277,9 @@
     "guidance": "Panduan",
     "out_of_service": "Terima kasih telah mengunjungi situs web kami! Halaman ini sedang dalam pengembangan sementara.\nHalaman ini tidak akan tersedia antara 3 Februari dan 28 Februari 2025.\nSilakan kunjungi kembali halaman ini pada 1 Maret 2025.\nAnda akan dapat membuat Kamus Hidup baru pada saat itu.\nMohon maaf atas ketidaknyamanan ini, dan terima kasih atas kesabaran Anda.\nSementara itu, platform lainnya berfungsi normal.",
     "transmitter": "Hormat kami, tim Living Dictionaries",
-    "disjunctive": "atau"
+    "disjunctive": "atau",
+    "required": "diperlukan",
+    "optional": "opsional"
   },
   "settings": {
     "community_permission": "Apakah komunitas penutur bahasa mengijinkan bahasa ini online?",
@@ -339,7 +348,8 @@
     "pause": "Berhenti sebentar",
     "unpause": "Bupa",
     "previously_dismissed_msg": "Jika sebelumnya Anda menolak permintaan browser, silakan muat ulang dan klik 'Ya' saat browser Anda meminta izin.",
-    "permission_denied": "Izin untuk mengakses media ditolak."
+    "permission_denied": "Izin untuk mengakses media ditolak.",
+    "videographer": "Videografer"
   },
   "print": {
     "qr_code": "Tampilkan Kode QR",
@@ -398,5 +408,8 @@
     "public_LD": "Kamus Kehidupan Publik",
     "entries": "Entri Kamus",
     "LD_project": "Kamus Hidup adalah sebuah proyek"
+  },
+  "image": {
+    "photographer": "Fotografer"
   }
 }

@@ -183,7 +183,14 @@
     "switch_opposite": "Chuyển sang đối diện",
     "delete_audio": "Xóa âm thanh?",
     "delete_image": "Xóa hình ảnh?",
-    "delete_video": "Xóa video?"
+    "delete_video": "Xóa video?",
+    "source": "{media} Ghi công / Nguồn của {media}",
+    "source_message": "Nếu {media} đến từ web, vui lòng bao gồm liên kết và giấy phép {media}, nếu có",
+    "rights": "Tôi có quyền tải lên tệp {media}",
+    "AI_generated": "{media} được tạo ra bởi AI",
+    "this_image": "hình ảnh này",
+    "this_audio": "âm thanh này",
+    "this_video": "video này"
   },
   "entry_field": {
     "photo": "Hình ảnh",
@@ -270,7 +277,9 @@
     "guidance": "Hướng dẫn",
     "out_of_service": "Cảm ơn bạn đã ghé thăm trang web của chúng tôi! Trang này đang tạm thời được xây dựng.\nTrang này sẽ không khả dụng từ ngày 3 tháng 2 đến ngày 28 tháng 2 năm 2025.\nVui lòng truy cập lại trang này vào ngày 1 tháng 3 năm 2025.\nBạn sẽ có thể tạo Từ điển Sống mới vào thời điểm đó.\nXin lỗi vì sự bất tiện này và cảm ơn sự kiên nhẫn của bạn.\nTrong thời gian chờ đợi, các chức năng khác của nền tảng vẫn hoạt động bình thường.",
     "transmitter": "Trân trọng, nhóm Từ điển Sống",
-    "disjunctive": "hoặc"
+    "disjunctive": "hoặc",
+    "required": "yêu cầu",
+    "optional": "không bắt buộc"
   },
   "settings": {
     "community_permission": "Cộng đồng có cho phép ngôn ngữ của họ được đăng tải trực tuyến hay không?",
@@ -339,7 +348,8 @@
     "pause": "Tạm ngừng",
     "unpause": "Bỏ ngừng",
     "previously_dismissed_msg": "Nếu trước đây bạn bỏ qua yêu cầu của trình duyệt, xin vui lòng tải lại và nhất vào 'Có' (Yes) khi trình duyệt của bạn xin phép.",
-    "permission_denied": "Quyền truy cập các phương tiện truyền thông đã bị từ chối."
+    "permission_denied": "Quyền truy cập các phương tiện truyền thông đã bị từ chối.",
+    "videographer": "Người quay phim"
   },
   "print": {
     "qr_code": "Hiển thị mã QR",
@@ -358,7 +368,7 @@
     "instructions_2": "Nhấp vào nút \"Liên kết đến Mẫu\" màu xanh lam bên dưới. Tải xuống mẫu dưới dạng tệp Excel hoặc tạo bản sao trên Google Docs. Chỉnh sửa mẫu theo nhu cầu của dự án. Sao chép và dán dữ liệu vào bảng tính.",
     "instructions_3": "Hãy sử dụng mục \"Liên hệ với chúng tôi\" bên dưới để liên hệ với chúng tôi. Hãy cho chúng tôi biết bạn có bảng tính mới đã sẵn sàng để nhập. Hãy hỏi chúng tôi bất kỳ câu hỏi nào bạn có. Chúng tôi sẽ trả lời bạn qua email, sau đó bạn có thể gửi tệp cho chúng tôi.",
     "instructions_4": "Để gửi cho chúng tôi dữ liệu được xuất từ ​​các phần mềm từ điển như FLEx, Lexique Pro, Shoebox, vui lòng sử dụng nút \"Liên hệ với chúng tôi\" bên dưới và cho chúng tôi biết chi tiết về dự án của bạn.",
-    "no_imports": "Hiện tại, chúng tôi đang hợp tác với nhiều cộng đồng và tổ chức đối tác để nhập một lượng lớn mục từ điển vào nền tảng này. Chúng tôi cũng đang thực hiện những cập nhật lớn cho cơ sở dữ liệu. Chúng tôi sẽ chấp nhận dữ liệu mới bắt đầu từ ngày 1 tháng 7 năm 2024. Chúng tôi trân trọng sự kiên nhẫn của bạn và xin lỗi vì sự bất tiện này."
+    "no_imports": "Hiện tại, chúng tôi đang hợp tác với nhiều cộng đồng và tổ chức đối tác để nhập một lượng lớn mục từ điển vào nền tảng này. Chúng tôi cũng đang thực hiện những cập nhật lớn cho cơ sở dữ liệu. Chúng tôi sẽ chấp nhận dữ liệu nhập mới bắt đầu từ ngày 1 tháng 7 năm 2024. Chúng tôi trân trọng sự kiên nhẫn của bạn và xin lỗi vì sự bất tiện này."
   },
   "history": {
     "history": "Lịch sử",
@@ -398,5 +408,8 @@
     "public_LD": "Từ điển sống công cộng",
     "entries": "Mục từ điển",
     "LD_project": "Từ điển sống là một dự án của"
+  },
+  "image": {
+    "photographer": "Nhiếp ảnh gia"
   }
 }

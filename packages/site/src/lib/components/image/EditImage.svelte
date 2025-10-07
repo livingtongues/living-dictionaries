@@ -1,0 +1,127 @@
+<script lang="ts">
+  import { Button, Modal } from 'svelte-pieces'
+  import { get } from 'svelte/store'
+  import { apply_button_label } from './image-store'
+  import { page } from '$app/stores'
+  import AddImage from '$lib/components/image/AddImage.svelte'
+
+  export let on_close: () => void
+  export let sense_id: string
+  let photo_source: string
+  let photographer: string
+  let rights = false
+  let ai_image = false
+
+  $: ({ dbOperations } = $page.data)
+
+  function handleImageUpload(file: File) {
+    const status = dbOperations.addImage({
+      sense_id,
+      image_options: {
+        file,
+        source: photo_source,
+        photographer,
+      },
+    })
+
+    const checkInterval = setInterval(() => {
+      const currentStatus = get(status)
+      if (currentStatus.progress === 100 && currentStatus.serving_url) {
+        clearInterval(checkInterval)
+        on_close()
+      }
+    }, 100)
+
+    return status
+  }
+
+  $: if (ai_image) {
+    photographer = 'AI'
+  } else {
+    photographer = ''
+  }
+
+  $: if (photo_source?.length >= 10 && rights) {
+    apply_button_label.set({ ready_to_upload: true })
+  } else {
+    apply_button_label.set({ ready_to_upload: false })
+  }
+</script>
+
+<Modal on:close={on_close}>
+  <label class="block mb-2 text-sm font-medium text-gray-700" for="photo_source">
+    {$page.data.t('entry.source', { values: { media: $page.data.t('entry_field.photo') } })} <i class="text-gray-500">{$page.data.t('entry.source_message', { values: { media: $page.data.t('entry.this_image') } })}</i> (<span class="text-red-500">{$page.data.t('misc.required')}</span>)
+  </label>
+  <textarea
+    name="photo_source"
+    required
+    rows="4"
+    minlength="100"
+    maxlength="2500"
+    bind:value={photo_source}
+    class="form-input w-full" />
+  <div class="flex text-xs">
+    <div class="text-gray-500 ml-auto">{photo_source?.length || 0}/2500</div>
+  </div>
+  <div>
+    <input bind:checked={rights} type="checkbox" id="rigths" name="rigths" required />
+    <label for="rigths">{$page.data.t('entry.rights', { values: { media: $page.data.t('entry.this_image') } })} (<span class="text-red-500 font-medium">{$page.data.t('misc.required')}</span>)</label>
+  </div>
+  <div>
+    <input bind:checked={ai_image} type="checkbox" id="ai_image" name="ai_image" />
+    <label for="ai_image">{$page.data.t('entry.AI_generated', { values: { media: $page.data.t('entry.this_image') } })}</label>
+  </div>
+  {#if !ai_image}
+    <label class="block mb-2 text-sm font-medium text-gray-700 mt-3" for="photographer">
+      {$page.data.t('image.photographer')} ({$page.data.t('misc.optional')})
+    </label>
+    <textarea
+      name="photographer"
+      rows="1"
+      minlength="0"
+      maxlength="2500"
+      bind:value={photographer}
+      class="form-input w-full" />
+  {/if}
+
+  <div class="mb-6" />
+
+  <AddImage upload_image={handleImageUpload}>
+    <div class="text-xs">
+      {$page.data.t('entry_field.photo')}
+    </div>
+  </AddImage>
+
+  <div class="modal-footer">
+    <!-- {#if image_file}
+      {#if $admin > 1}
+        <JSON obj={image_file} />
+        <div class="w-1" />
+      {/if}
+
+      <Button
+        href={url_from_storage_path(image_file.storage_path)}
+        target="_blank">
+        <i class="fas fa-download" />
+        <span class="hidden sm:inline">{$page.data.t('misc.download')}</span>
+      </Button>
+      <div class="w-1" />
+
+      <Button
+        onclick={async () => {
+          const confirmation = confirm($page.data.t('entry.delete_audio'))
+          if (confirmation) await dbOperations.update_audio({ deleted: new Date().toISOString(), id: image_file.id })
+          on_close()
+        }}
+        color="red">
+        <i class="far fa-trash-alt" />&nbsp;
+        <span class="hidden sm:inline">{$page.data.t('misc.delete')}</span>
+      </Button>
+      <div class="w-1" />
+    {/if} -->
+
+    <Button onclick={on_close} color="black">
+      {$page.data.t('misc.close')}
+    </Button>
+  </div>
+</Modal>
