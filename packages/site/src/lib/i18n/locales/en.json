@@ -66,6 +66,7 @@
     "how_to_cite_instructions": "Add the authors of this dictionary to show their names in the citation"
   },
   "account": {
+    "your_name": "Your Name",
     "account_settings": "Account Settings",
     "log_out": "Log Out",
     "send_code": "Send Code",
