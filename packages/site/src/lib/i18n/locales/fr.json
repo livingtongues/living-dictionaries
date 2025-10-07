@@ -124,20 +124,20 @@
     "req_com_consent": "Cela nécessite le consentement de la communauté",
     "create_dictionary": "Créer un dictionnaire",
     "permanent_url_msg": "Le nom de l'URL est permanent et ne peut pas être modifié ultérieurement.",
-    "add_gloss_msg": "Vous pouvez ajouter d'autres langues de glossaire ultérieurement dans les Paramètres.",
+    "add_gloss_msg": "Vous pouvez ajouter d'autres langues de glossation ultérieurement dans les Paramètres.",
     "language_used_by_community": "Ce dictionnaire concerne-t-il une langue parlée ou signée par une communauté humaine spécifique ?",
     "community_permission": "La communauté linguistique vous a-t-elle donné la permission de réaliser ce dictionnaire ?",
-    "author_connection": "Veuillez décrire brièvement comment vous connaissez cette langue et pourquoi vous créez un Dictionnaire vivant pour elle. Faites-vous partie de la communauté qui utilisera ce Dictionnaire vivant ? Sinon, comment connaissez-vous cette communauté ?",
+    "author_connection": "Veuillez décrire brièvement comment vous maîtrisez cette langue et pourquoi vous créez un Dictionnaire vivant pour elle. Faites-vous partie de la communauté qui utilisera ce Dictionnaire vivant ? Sinon, comment connaissez-vous cette communauté ?",
     "con_lang_description": "Ce dictionnaire est-il destiné à une langue construite (une langue inventée par l'homme ces dernières années, pour un livre ou un film) ? Si oui, veuillez le décrire brièvement.",
     "uncertainty": "Je ne sais pas",
     "select_region": "Sélectionnez la région",
     "secondary_coordinates": "Coordonnées secondaires",
     "map_instructions": "Cliquez sur la carte pour ajouter des coordonnées secondaires.",
-    "print_access": "Autoriser les utilisateurs à imprimer le dictionnaire",
+    "print_access": "Autoriser les téléspectateurs à imprimer le dictionnaire",
     "primary_coordinate": "Coordonnée principale",
     "conlang_question": "S'agit-il d'une langue construite ou d'une langue artificielle ?",
     "conlang_info_1": "Notre mission étant axée sur la documentation des langues humaines naturelles menacées et minoritaires, nous n'offrons pas de support technique pour les langues construites (conlangs) ni pour les langues artificielles. En raison de la taille réduite de notre équipe et de nos horaires d'ouverture limités, nous ne proposons pas d'importation de données pour les conlangs.",
-    "conlang_info_2": "Les dictionnaires vivants pour les langues construites ne seront pas publiés sur notre site web ni disponibles sur la carte de notre page d'accueil. Tout contenu désobligeant dans ce dictionnaire vivant sera supprimé.",
+    "conlang_info_2": "Les Dictionnaires vivants des langues construites ne seront pas publiés sur notre site web ni disponibles sur la carte de notre page d'accueil. Tout contenu désobligeant dans ce Dictionnaire vivant sera supprimé.",
     "agree_above": "Je suis d'accord avec ce qui précède.",
     "agree_to_cite": "J'accepte de citer tous les travaux publiés pertinents dans les entrées du dictionnaire.",
     "agree_for_non-commercial": "Je suis d'accord que ce travail n'est pas commercial.",
@@ -183,7 +183,14 @@
     "switch_opposite": "Passer à l'opposé",
     "delete_audio": "Supprimer l'audio ?",
     "delete_image": "Supprimer l'image ?",
-    "delete_video": "Supprimer la vidéo ?"
+    "delete_video": "Supprimer la vidéo ?",
+    "source": "{media} Attribution / Source de {media}",
+    "source_message": "Si {media} provient du Web, veuillez inclure le lien et la licence {media}, le cas échéant",
+    "rights": "J'ai le droit de télécharger le fichier {media}",
+    "AI_generated": "{media} a été généré par l'IA",
+    "this_image": "cette image",
+    "this_audio": "cet audio",
+    "this_video": "cette vidéo"
   },
   "entry_field": {
     "photo": "Photo",
@@ -270,7 +277,9 @@
     "guidance": "Conseils",
     "out_of_service": "Merci d'avoir visité notre site Web! Cette page est temporairement en construction.\nIl ne sera pas disponible entre le 3 et le 28 février 2025.\nVeuillez visiter à nouveau cette page le 1er mars 2025.\nVous pourrez créer de nouveaux dictionnaires vivants à ce moment-là.\nNous sommes désolés des désagréments causés cette pause, et merci pour votre patience.\nEn attendant, le reste de la plateforme fonctionne normalement.",
     "transmitter": "Sincèrement, l'équipe des Dictionnaires Vivants",
-    "disjunctive": "ou"
+    "disjunctive": "ou",
+    "required": "requis",
+    "optional": "facultatif"
   },
   "settings": {
     "community_permission": "La communauté linguistique permet-elle à cette langue d'être en ligne ?",
@@ -329,7 +338,7 @@
     "video_url": "URL de la vidéo",
     "video_credit": "Crédit vidéo",
     "prepare_to_record_video": "Préparez-vous à enregistrer avec un microphone et une caméra",
-    "video_info": "Il existe deux façons d'afficher vos vidéos dans un Dictionnaire Vivant : 1) Vous pouvez les enregistrer directement ici ou les télécharger sur notre plateforme. Avantages : simple et idéal pour des enregistrements rapides. Inconvénients : la taille maximale d'une vidéo est de 100 Mo, elle doit donc être courte et en basse résolution. 2) Vous pouvez héberger vos vidéos sur un hébergeur spécialisé et ajouter un lien vers notre site. Avantages : simple (à condition que vos vidéos soient déjà téléchargées sur cette plateforme), vos vidéos peuvent avoir la résolution et la durée souhaitées. Inconvénients : si vous souhaitez enregistrer quelque chose d'inattendu ou de très simple, cette méthode peut être trop complexe, et il est préférable de privilégier la méthode 1.",
+    "video_info": "Il existe deux façons d'afficher vos vidéos dans un Dictionnaire Vivant : 1) Vous pouvez les enregistrer directement ici ou les télécharger sur notre plateforme. Avantages : simple et idéal pour des enregistrements rapides. Inconvénients : la taille maximale d'une vidéo est de 100 Mo, elle doit donc être courte et en basse résolution. 2) Vous pouvez héberger vos vidéos chez un hébergeur spécialisé et indiquer l'URL de votre choix sur notre site. Avantages : simple (à condition que vos vidéos soient déjà téléchargées sur cette plateforme), vos vidéos peuvent avoir la résolution et la durée souhaitées. Inconvénients : si vous souhaitez enregistrer un contenu inattendu ou très simple, cette méthode peut être trop complexe, et il est préférable de privilégier la première méthode.",
     "paste_video_url": "Coller le lien YouTube ou Vimeo",
     "record_upload_video": "Enregistrer ou télécharger une vidéo",
     "view": "Voir",
@@ -339,7 +348,8 @@
     "pause": "Pause",
     "unpause": "Reprendre la pause",
     "previously_dismissed_msg": "Si vous avez précédemment rejeté la demande du navigateur, veuillez recharger et cliquer sur « Oui » lorsque votre navigateur demande l'autorisation.",
-    "permission_denied": "L'autorisation d'accès aux médias a été refusée."
+    "permission_denied": "L’autorisation d’accès aux médias a été refusée.",
+    "videographer": "Vidéaste"
   },
   "print": {
     "qr_code": "Afficher le code QR",
@@ -349,7 +359,7 @@
     "columns": "Colonnes",
     "headword_size": "Taille du mot-clé",
     "font_size": "Taille de la police",
-    "tags": "Mots clés"
+    "tags": "Mots-clés"
   },
   "import_page": {
     "import": "Importer",
@@ -357,7 +367,7 @@
     "instructions_1": "Si vous disposez déjà de données linguistiques que vous souhaitez importer dans votre dictionnaire, veuillez suivre les étapes ci-dessous.",
     "instructions_2": "Cliquez sur le bouton bleu « Lien vers le modèle » ci-dessous. Téléchargez le modèle au format Excel ou créez-en une copie sur Google Docs. Modifiez-le selon les besoins de votre projet. Copiez et collez vos données dans la feuille de calcul.",
     "instructions_3": "Utilisez la section « Contactez-nous » ci-dessous pour nous contacter. Informez-nous que vous avez une nouvelle feuille de calcul prête à être importée. Posez-nous toutes vos questions. Nous vous répondrons par e-mail ; vous pourrez ensuite nous envoyer votre fichier.",
-    "instructions_4": "Pour nous envoyer des données exportées à partir de logiciels de dictionnaire comme FLEx, Lexique Pro, Shoebox, veuillez utiliser le bouton « Contactez-nous » ci-dessous et nous indiquer les détails de votre projet.",
+    "instructions_4": "Pour nous envoyer des données exportées à partir de logiciels de dictionnaire comme FLEx, Lexique Pro, Shoebox, veuillez utiliser le bouton « Contactez-nous » ci-dessous et indiquez-nous les détails de votre projet.",
     "no_imports": "Nous collaborons actuellement avec de nombreuses communautés et organisations partenaires pour importer un grand nombre d'entrées de dictionnaire sur cette plateforme. Nous procédons également à d'importantes mises à jour de notre base de données. Nous accepterons les nouvelles importations de données à partir du 1er juillet 2024. Nous vous remercions de votre patience et vous prions de nous excuser pour la gêne occasionnée."
   },
   "history": {
@@ -398,5 +408,8 @@
     "public_LD": "Dictionnaires de la vie publique",
     "entries": "Entrées du dictionnaire",
     "LD_project": "Dictionnaires Vivants est un projet de"
+  },
+  "image": {
+    "photographer": "Photographe"
   }
 }

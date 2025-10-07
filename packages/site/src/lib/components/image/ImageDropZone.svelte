@@ -1,9 +1,11 @@
 <script lang="ts">
+  import { apply_button_label } from './image-store'
   import { page } from '$app/stores'
 
   export let border: boolean
   export let on_file_added: (file: File) => void = undefined
   let dragging = false
+  // const applyButtonLabel: any = getContext('applyButtonLabel')
 
   function handleImage(files: FileList) {
     dragging = false
@@ -30,6 +32,8 @@
 <label
   class:dragging
   class:dashed-border={border}
+  class:button-label={$apply_button_label.ready_to_upload}
+  class:blocked={!$apply_button_label.ready_to_upload}
   class="{$$props.class} text-gray-600
     h-full grow-1 flex flex-col items-center justify-center
     cursor-pointer"
@@ -56,6 +60,16 @@
 </label>
 
 <style>
+  .blocked {
+            --at-apply: pointer-events-none opacity-60 cursor-not-allowed select-none px-3 py-2 border border-gray-500;
+  }
+  .button-label {
+      --at-apply: flex justify-center items-center px-3 py-2 border font-medium
+    cursor-pointer focus:outline-none border-green-300
+    focus:ring focus:ring-green-300 active:bg-green-200 transition ease-in-out
+    duration-150 rounded hover:bg-green-100 text-green-700;
+  }
+
   .dragging {
     --at-apply: bg-blue-200 border-blue-300 text-blue-700;
   }

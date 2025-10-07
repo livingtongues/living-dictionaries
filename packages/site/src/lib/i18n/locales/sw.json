@@ -136,7 +136,7 @@
     "print_access": "Ruhusu Watazamaji Kuchapisha Kamusi",
     "primary_coordinate": "Kuratibu msingi",
     "conlang_question": "Je, hii ni lugha iliyoundwa au lugha ya bandia?",
-    "conlang_info_1": "Kwa kuwa dhamira yetu inaangazia uhifadhi wa lugha asilia za watu wachache zilizo hatarini kutoweka, hatutoi usaidizi wa kiufundi kwa lugha zilizoundwa (conlangs) au lugha bandia. Kwa sababu ya timu yetu ndogo na saa chache za kazi, hatutoi uagizaji wa data kwa conlangs.",
+    "conlang_info_1": "Kwa kuwa dhamira yetu inaangazia kurekodi lugha asilia za watu wachache zilizo hatarini kutoweka, hatutoi usaidizi wa kiufundi kwa lugha zilizobuniwa (conlangs) au lugha ghushi. Kwa sababu ya timu yetu ndogo na saa chache za kazi, hatutoi uagizaji wa data kwa conlangs.",
     "conlang_info_2": "Kamusi Hai za lugha zilizoundwa hazitawekwa hadharani kwenye tovuti yetu au kupatikana kwenye ramani yetu ya ukurasa wa nyumbani. Ikiwa tunaona maudhui ya dharau katika Kamusi hii Hai, tunahifadhi pia haki ya kuifuta.",
     "agree_above": "Nakubaliana na hayo hapo juu.",
     "agree_to_cite": "Ninakubali kutaja kazi zozote muhimu zilizochapishwa ndani ya maingizo ya kamusi.",
@@ -183,7 +183,14 @@
     "switch_opposite": "Badilisha hadi kinyume",
     "delete_audio": "Ungependa kufuta sauti?",
     "delete_image": "Ungependa kufuta picha?",
-    "delete_video": "Ungependa kufuta video?"
+    "delete_video": "Ungependa kufuta video?",
+    "source": "{media} Sifa / Chanzo cha {media}",
+    "source_message": "Ikiwa {media} inatoka kwa wavuti, tafadhali jumuisha kiungo na leseni ya {media}, inapohitajika",
+    "rights": "Nina haki ya kupakia faili ya {media}",
+    "AI_generated": "{media} ilitolewa na AI",
+    "this_image": "picha hii",
+    "this_audio": "sauti hii",
+    "this_video": "video hii"
   },
   "entry_field": {
     "photo": "Picha",
@@ -270,7 +277,9 @@
     "guidance": "Mwongozo",
     "out_of_service": "Asante kwa kutembelea tovuti yetu! Ukurasa huu unajengwa kwa muda.\nHaitapatikana kati ya Februari 3 na Februari 28, 2025.\nTafadhali tembelea ukurasa huu tena tarehe 1 Machi 2025.\nUtaweza kuunda Kamusi mpya Hai kwa wakati huo.\nPole kwa usumbufu, na asante kwa uvumilivu wako.\nWakati huo huo, jukwaa lingine linafanya kazi kama kawaida.",
     "transmitter": "Kwa dhati, timu ya Kamusi Hai",
-    "disjunctive": "au"
+    "disjunctive": "au",
+    "required": "inahitajika",
+    "optional": "hiari"
   },
   "settings": {
     "community_permission": "Je, jamii ya wazungumzaji inaruhusu lugha hii kuwekwa mtandaoni?",
@@ -339,7 +348,8 @@
     "pause": "Sitisha",
     "unpause": "Acha kusitisha",
     "previously_dismissed_msg": "Ikiwa hapo awali ulitupilia mbali ombi la kivinjari, tafadhali pakia upya na ubofye 'Ndiyo' kivinjari chako kinapoomba ruhusa.",
-    "permission_denied": "Ruhusa ya kufikia midia ilikataliwa."
+    "permission_denied": "Ruhusa ya kufikia midia ilikataliwa.",
+    "videographer": "Mpiga video"
   },
   "print": {
     "qr_code": "Onyesha Msimbo wa QR",
@@ -355,7 +365,7 @@
     "import": "Ingiza",
     "template_link": "Unganisha kwa Kiolezo",
     "instructions_1": "Ikiwa tayari una data ya kiisimu ambayo ungependa kuingiza kwenye Kamusi yako, tafadhali fuata hatua zilizo hapa chini.",
-    "instructions_2": "Bofya kwenye kitufe cha bluu cha \"Unganisha kwa Kiolezo\" hapa chini. Pakua kiolezo kama faili ya Excel, au unda nakala kwenye Hati za Google. Badilisha kiolezo kulingana na mahitaji ya mradi wako. Nakili na ubandike data yako kwenye lahajedwali.",
+    "instructions_2": "Bofya kitufe cha bluu cha \"Unganisha kwa Kiolezo\" hapa chini. Pakua kiolezo kama faili ya Excel, au unda nakala kwenye Hati za Google. Badilisha kiolezo kulingana na mahitaji ya mradi wako. Nakili na ubandike data yako kwenye lahajedwali.",
     "instructions_3": "Tumia \"Wasiliana Nasi\" hapa chini ili kuwasiliana nasi. Tujulishe kuwa una lahajedwali mpya ambayo iko tayari kuingizwa. Tuulize maswali yoyote uliyo nayo. Tutakujibu kwa barua pepe, na kisha unaweza kututumia faili yako.",
     "instructions_4": "Ili kututumia data iliyosafirishwa kutoka kwa programu za kamusi kama vile FLEx, Lexique Pro, Shoebox, tafadhali tumia kitufe cha \"Wasiliana Nasi\" hapa chini na utuambie maelezo ya mradi wako.",
     "no_imports": "Kwa sasa tunafanya kazi na jumuiya nyingi na mashirika washirika kuleta idadi kubwa ya maingizo ya kamusi kwenye jukwaa hili. Pia tunafanya masasisho makubwa kwenye hifadhidata yetu. Tutakubali uagizaji mpya wa data kuanzia tarehe 1 Julai 2024. Tunashukuru kwa subira yako, na tunaomba radhi kwa usumbufu."
@@ -398,5 +408,8 @@
     "public_LD": "Kamusi za Maisha ya Umma",
     "entries": "Maingizo ya Kamusi",
     "LD_project": "Kamusi Hai ni mradi wa"
+  },
+  "image": {
+    "photographer": "Mpiga picha"
   }
 }
