@@ -10,6 +10,13 @@ export interface AddEntryRequestBody {
   lexeme: string
 }
 
+interface ValidationResult {
+  validatedBody: AddEntryRequestBody
+  warnings: string[]
+}
+
+const EXPECTED_FIELDS = ['api_key', 'dictionary_id', 'lexeme']
+
 function validateLexeme(lexeme: string): string {
   if (typeof lexeme !== 'string') {
     kit_error(ResponseCodes.BAD_REQUEST, 'lexeme must be a string')
@@ -28,8 +35,17 @@ function validateLexeme(lexeme: string): string {
 }
 
 // We can extract this function to another file later
-function validateRequestBody(body: AddEntryRequestBody): AddEntryRequestBody {
-  for (const key of ['api_key', 'dictionary_id', 'lexeme']) {
+function validateRequestBody(body: AddEntryRequestBody): ValidationResult {
+  const warnings: string[] = []
+
+  const bodyKeys = Object.keys(body) as (keyof AddEntryRequestBody)[]
+  const extraFields = bodyKeys.filter(field => !EXPECTED_FIELDS.includes(field))
+
+  if (extraFields.length > 0) {
+    warnings.push(`The following fields were received but ignored: ${extraFields.join(', ')}.`)
+  }
+
+  for (const key of EXPECTED_FIELDS) {
     if (!body[key]) {
       kit_error(ResponseCodes.BAD_REQUEST, `${key} is required`)
     }
@@ -48,9 +64,12 @@ function validateRequestBody(body: AddEntryRequestBody): AddEntryRequestBody {
   const validatedLexeme = validateLexeme(lexeme)
 
   return {
-    api_key: api_key.trim(),
-    dictionary_id: dictionary_id.trim(),
-    lexeme: validatedLexeme,
+    validatedBody: {
+      api_key: api_key.trim(),
+      dictionary_id: dictionary_id.trim(),
+      lexeme: validatedLexeme,
+    },
+    warnings,
   }
 }
 
@@ -64,7 +83,7 @@ export const POST: RequestHandler = async ({ request, url }) => {
       kit_error(ResponseCodes.BAD_REQUEST, 'Invalid JSON in request body')
     }
 
-    const validatedBody = validateRequestBody(body)
+    const { validatedBody, warnings } = validateRequestBody(body)
     const { api_key, dictionary_id, lexeme } = validatedBody
 
     const admin_supabase = getAdminSupabaseClient()
@@ -121,12 +140,25 @@ export const POST: RequestHandler = async ({ request, url }) => {
       console.warn('Failed to update API key stats, but entry was created')
     }
 
-    return json({ entry_id, entry_url: `${url.origin}/${dictionary_id}/entry/${entry_id}` })
+    const response: {
+      entry_id: string
+      entry_url: string
+      warnings?: string[]
+    } = {
+      entry_id,
+      entry_url: `${url.origin}/${dictionary_id}/entry/${entry_id}`,
+    }
+
+    if (warnings.length > 0) {
+      response.warnings = warnings
+    }
+
+    return json(response)
   } catch (err) {
     if (err.status && err.body) {
       throw err
     }
-    console.error('Unexpected error in add-entry API:', err)
+    console.error('External API error reading entries', err)
     kit_error(ResponseCodes.INTERNAL_SERVER_ERROR, 'Internal server error')
   }
 }
