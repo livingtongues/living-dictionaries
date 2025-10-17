@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { BadgeArrayEmit, Button, JSON, ShowHide } from 'svelte-pieces'
+  import { BadgeArrayEmit, Button, JSON, Modal, ShowHide } from 'svelte-pieces'
   import type { TablesUpdate } from '@living-dictionaries/types'
   import type { UserWithDictionaryRoles } from '@living-dictionaries/types/supabase/users.types'
   import DictionaryFieldEdit from './DictionaryFieldEdit.svelte'
@@ -10,6 +10,7 @@
   import { supabase_date_to_friendly } from '$lib/helpers/time'
   import LatLngDisplay from '$lib/components/maps/LatLngDisplay.svelte'
   import { page } from '$app/stores'
+    import { api_delete_dictionary } from '$api/db/delete-dictionary/_call';
 
   export let index: number
   export let is_public: boolean
@@ -251,16 +252,38 @@
   {/if}
 </td>
 <td>
-  <Button
-    color={dictionary?.con_language_description === 'DELETE'? 'green' : 'orange'}
-    size="sm"
-    onclick={() => {
-      if (confirm('Toggle to delete status?')) {
-        update_dictionary({ con_language_description: dictionary?.con_language_description === 'DELETE'? null : 'DELETE' })
-      }
-    }}>
-    {dictionary?.con_language_description === 'DELETE'? 'YES' : 'NO'}
-  </Button>
+  <ShowHide let:show let:toggle>
+    <Button
+      color="red"
+      form="filled"
+      size="sm"
+      onclick={toggle}>
+      Delete
+    </Button>
+    {#if show}
+      <Modal on:close={toggle}>
+        <span slot="heading">Delete {dictionary.name}?</span>
+        <div class="mb-2">
+          id: {dictionary.id}, url: /{dictionary.url}
+        </div>
+        <Button
+          color="red"
+          form="filled"
+          size="sm"
+          class="block!"
+          onclick={async () => {
+            const { error } = await api_delete_dictionary({ dictionary_id: dictionary.id })
+            if (error) {
+              alert(error.message)
+            } else {
+              alert('Dictionary deleted. Please refresh the page.')
+            }
+          }}>
+          Delete
+        </Button>
+      </Modal>
+    {/if}
+  </ShowHide>
 </td>
 {#if $admin > 1}
   <td class="cursor-pointer">
