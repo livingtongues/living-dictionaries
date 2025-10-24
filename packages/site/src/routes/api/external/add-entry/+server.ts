@@ -10,88 +10,26 @@ export interface AddEntryRequestBody {
   lexeme: string
 }
 
-interface ValidationResult {
-  validatedBody: AddEntryRequestBody
-  warnings: string[]
-}
-
-const EXPECTED_FIELDS = ['api_key', 'dictionary_id', 'lexeme']
-
-function validateLexeme(lexeme: string): string {
-  if (typeof lexeme !== 'string') {
-    kit_error(ResponseCodes.BAD_REQUEST, 'lexeme must be a string')
-  }
-
-  const trimmed = lexeme.trim()
-  if (trimmed.length === 0) {
-    kit_error(ResponseCodes.BAD_REQUEST, 'lexeme cannot be empty or whitespace only')
-  }
-
-  if (trimmed.length > 1000) {
-    kit_error(ResponseCodes.BAD_REQUEST, 'lexeme must be less than 1000 characters')
-  }
-
-  return trimmed
-}
-
-// We can extract this function to another file later
-function validateRequestBody(body: AddEntryRequestBody): ValidationResult {
-  const warnings: string[] = []
-
-  const bodyKeys = Object.keys(body) as (keyof AddEntryRequestBody)[]
-  const extraFields = bodyKeys.filter(field => !EXPECTED_FIELDS.includes(field))
-
-  if (extraFields.length > 0) {
-    warnings.push(`The following fields were received but ignored: ${extraFields.join(', ')}.`)
-  }
-
-  for (const key of EXPECTED_FIELDS) {
-    if (!body[key]) {
-      kit_error(ResponseCodes.BAD_REQUEST, `${key} is required`)
-    }
-  }
-
-  const { api_key, dictionary_id, lexeme } = body
-
-  if (typeof api_key !== 'string' || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(api_key)) {
-    kit_error(ResponseCodes.BAD_REQUEST, 'api_key must be a valid UUID')
-  }
-
-  if (typeof dictionary_id !== 'string' || dictionary_id.trim().length === 0) {
-    kit_error(ResponseCodes.BAD_REQUEST, 'dictionary_id must be a non-empty string')
-  }
-
-  const validatedLexeme = validateLexeme(lexeme)
-
-  return {
-    validatedBody: {
-      api_key: api_key.trim(),
-      dictionary_id: dictionary_id.trim(),
-      lexeme: validatedLexeme,
-    },
-    warnings,
-  }
-}
+const EXPECTED_FIELDS = ['api_key', 'dictionary_id', 'lexeme'] as const
 
 export const POST: RequestHandler = async ({ request, url }) => {
   try {
-    let body: AddEntryRequestBody
-
-    try {
-      body = await request.json() as AddEntryRequestBody
-    } catch {
-      kit_error(ResponseCodes.BAD_REQUEST, 'Invalid JSON in request body')
+    const body = await request.json() as AddEntryRequestBody
+    
+    for (const key of EXPECTED_FIELDS) {
+      if (!body[key]) {
+        kit_error(ResponseCodes.BAD_REQUEST, `${key} is required`)
+      }
     }
 
-    const { validatedBody, warnings } = validateRequestBody(body)
-    const { api_key, dictionary_id, lexeme } = validatedBody
+    const { api_key, dictionary_id, lexeme } = body
+    const validated_lexeme = validateLexeme(lexeme)
 
     const admin_supabase = getAdminSupabaseClient()
-
     const { data: key, error } = await admin_supabase.from('api_keys')
       .select()
       .eq('id', api_key)
-      .eq('dictionary_id', dictionary_id)
+      .eq('dictionary_id', dictionary_id.trim())
       .single()
     if (error) {
       console.error({ error })
@@ -115,17 +53,14 @@ export const POST: RequestHandler = async ({ request, url }) => {
     const entry_id = crypto.randomUUID()
     const { error: entries_error } = await admin_supabase.from('entries').insert({
       id: entry_id,
-      dictionary_id,
-      lexeme: { default: lexeme },
+      dictionary_id: dictionary_id.trim(),
+      lexeme: { default: validated_lexeme },
       created_by: key.created_by,
       updated_by: key.created_by,
     })
     if (entries_error) {
       console.error({ entries_error })
-      return json(
-        { error: `Failed to create entry: ${entries_error.message}` },
-        { status: ResponseCodes.INTERNAL_SERVER_ERROR },
-      )
+      return kit_error(ResponseCodes.INTERNAL_SERVER_ERROR, `Failed to create entry: ${entries_error.message}`)
     }
 
     const { error: stats_error } = await admin_supabase.from('api_keys')
@@ -149,10 +84,6 @@ export const POST: RequestHandler = async ({ request, url }) => {
       entry_url: `${url.origin}/${dictionary_id}/entry/${entry_id}`,
     }
 
-    if (warnings.length > 0) {
-      response.warnings = warnings
-    }
-
     return json(response)
   } catch (err) {
     if (err.status && err.body) {
@@ -161,4 +92,21 @@ export const POST: RequestHandler = async ({ request, url }) => {
     console.error('External API error reading entries', err)
     kit_error(ResponseCodes.INTERNAL_SERVER_ERROR, 'Internal server error')
   }
+}
+
+function validateLexeme(lexeme: string): string {
+  if (typeof lexeme !== 'string') {
+    kit_error(ResponseCodes.BAD_REQUEST, 'lexeme must be a string')
+  }
+
+  const trimmed = lexeme.trim()
+  if (trimmed.length === 0) {
+    kit_error(ResponseCodes.BAD_REQUEST, 'lexeme cannot be empty or whitespace only')
+  }
+
+  if (trimmed.length > 1000) {
+    kit_error(ResponseCodes.BAD_REQUEST, 'lexeme must be less than 1000 characters')
+  }
+
+  return trimmed
 }
