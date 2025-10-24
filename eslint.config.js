@@ -2,7 +2,6 @@
 
 // @ts-check
 import { antfu } from '@antfu/eslint-config'
-import jsEslintPlugin from '@eslint/js'
 import tsEslintPlugin from '@typescript-eslint/eslint-plugin'
 import svelteStylistic from 'eslint-plugin-svelte-stylistic'
 
@@ -105,7 +104,6 @@ export default antfu(
     files: ['**/*.svelte', '**/*.composition'],
     rules: {
       // Need to check if duplicates in these
-      ...jsEslintPlugin.configs.recommended.rules,
       // ...tsEslintPlugin.configs.recommended.rules, // cause the rest to break
       ...tsEslintPlugin.configs.stylistic.rules,
 

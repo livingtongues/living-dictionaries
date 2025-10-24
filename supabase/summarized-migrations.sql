@@ -1685,3 +1685,9 @@ CREATE INDEX IF NOT EXISTS idx_senses_in_sentences_dictionary_id_where_not_delet
 CREATE INDEX IF NOT EXISTS idx_sentence_photos_dictionary_id_where_not_deleted ON sentence_photos (dictionary_id, sentence_id) WHERE deleted IS NULL;
 CREATE INDEX IF NOT EXISTS idx_sentence_videos_dictionary_id_where_not_deleted ON sentence_videos (dictionary_id, sentence_id) WHERE deleted IS NULL;
 
+CREATE TABLE IF NOT EXISTS media_to_delete (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  dictionary_id text NOT NULL,
+  storage_path TEXT NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT now() NOT NULL
+);
