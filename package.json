@@ -7,7 +7,6 @@
     "dev:open": "pnpm --filter=site dev --open",
     "build": "pnpm --filter=site build",
     "preview": "pnpm --filter=site preview",
-    "postinstall": "simple-git-hooks",
     "check": "pnpm --filter=site check",
     "test": "vitest",
     "test:db": "pnpm --filter=site test:db",
