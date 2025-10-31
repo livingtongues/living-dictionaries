@@ -1,5 +1,5 @@
 CREATE TABLE IF NOT EXISTS media_to_delete (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT extensions.uuid_generate_v4(),
   dictionary_id text NOT NULL,
   storage_path TEXT NOT NULL,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT now() NOT NULL
@@ -14,7 +14,7 @@ FOREIGN KEY (dictionary_id) REFERENCES dictionaries(id) ON DELETE CASCADE;
 
 -- senses.entry_id
 ALTER TABLE senses
-DROP CONSTRAINT senses_entry_id_fkey;
+DROP CONSTRAINT foreign_key_entries;
 ALTER TABLE senses
 ADD CONSTRAINT senses_entry_id_fkey
 FOREIGN KEY (entry_id) REFERENCES entries(id) ON DELETE CASCADE;

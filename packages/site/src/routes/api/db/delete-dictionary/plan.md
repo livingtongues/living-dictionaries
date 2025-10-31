@@ -33,5 +33,9 @@ dictionary_partners (on photo_id → photos.id)
 
 - Return success message.
 
-Later on our own time, on our local devices, we can run a media delete script.
+TODO: think if we want to refresh the dictionaries_view and materialized_dictionaries_view views here or leave that to a later cron job or manual refresh.
+TODO: Later on our own time, on our local devices, we can run a media delete script.
 - delete items from media_to_delete and remove row from "media_to_delete" table.
+
+TODO: update summarized-migrations.sql to add ON DELETE CASCADE to the relevant foreign key constraints.
+TODO: remove dictionary_partners.photo_id ON DELETE CASCADE

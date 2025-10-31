@@ -1,4 +1,5 @@
 import { json, error as kit_error } from '@sveltejs/kit'
+import type { TablesInsert } from '@living-dictionaries/types'
 import type { RequestHandler } from './$types'
 import { ResponseCodes } from '$lib/constants'
 import { getAdminSupabaseClient } from '$lib/supabase/admin'
@@ -8,7 +9,7 @@ export interface DeleteDictionaryRequestBody {
 }
 
 export const POST: RequestHandler = async ({ request, locals: { getSession } }) => {
-  const { data: session_data, error: _error, supabase } = await getSession()
+  const { data: session_data, error: _error } = await getSession()
   if (_error || !session_data?.user)
     kit_error(ResponseCodes.UNAUTHORIZED, { message: _error.message || 'Unauthorized' })
 
@@ -48,18 +49,23 @@ export const POST: RequestHandler = async ({ request, locals: { getSession } }) 
       ...(video_entries?.map(entry => entry.storage_path) || []),
     ]
 
-    const { error: media_to_delete_error } = await admin_supabase.from('media_to_delete').insert(storage_paths_to_delete.map(storage_path => ({
-      dictionary_id,
-      storage_path,
-      deleted_at: new Date().toISOString(),
-    })))
+    const media_to_delete_entries: TablesInsert<'media_to_delete'>[] = []
+
+    for (const storage_path of storage_paths_to_delete) {
+      media_to_delete_entries.push({
+        dictionary_id,
+        storage_path,
+      })
+    }
+
+    const { error: media_to_delete_error } = await admin_supabase.from('media_to_delete').insert(media_to_delete_entries)
 
     if (media_to_delete_error) {
       console.error({ media_to_delete_error })
       kit_error(ResponseCodes.INTERNAL_SERVER_ERROR, `Error inserting into media_to_delete: ${media_to_delete_error.message}`)
     }
 
-    const { error } = await supabase.from('dictionaries').delete().eq('id', dictionary_id).single()
+    const { error } = await admin_supabase.from('dictionaries').delete().eq('id', dictionary_id).single()
     if (error) {
       console.error({ error })
       throw new Error(error.message)
