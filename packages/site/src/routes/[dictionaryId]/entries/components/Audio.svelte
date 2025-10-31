@@ -1,6 +1,7 @@
 <script lang="ts">
   import { ShowHide, longpress } from 'svelte-pieces'
   import type { EntryData } from '@living-dictionaries/types'
+  import { audioStore, playAudio } from './audio-store'
   import { page } from '$app/stores'
   import { minutes_ago_in_ms } from '$lib/helpers/time'
 
@@ -10,17 +11,11 @@
   export let can_edit = false
   $: ({ url_from_storage_path } = $page.data)
 
-  let playing = false
-
   function initAudio() {
-    const audio = new Audio(url_from_storage_path(sound_file.storage_path))
-    audio.play()
-    playing = true
-    audio.addEventListener('ended', () => {
-      playing = false
-    })
-  // TODO: unsubscribe listener
+    playAudio(url_from_storage_path(sound_file.storage_path))
   }
+
+  $: playing = $audioStore.is_playing && $audioStore.current_audio?.src === url_from_storage_path(sound_file?.storage_path)
 </script>
 
 <ShowHide let:show let:toggle>
