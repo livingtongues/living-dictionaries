@@ -1,7 +1,45 @@
+<script context="module" lang="ts">
+  import { writable } from 'svelte/store'
+
+  interface AudioState {
+    current_audio: HTMLAudioElement | null
+    is_playing: boolean
+  }
+
+  function createAudioStore() {
+    const { subscribe, update, set } = writable<AudioState>({
+      current_audio: null,
+      is_playing: false,
+    })
+
+    return {
+      subscribe,
+      playAudio: (url: string) => {
+        update((store) => {
+          if (store.current_audio) {
+            store.current_audio.pause()
+            store.current_audio = null
+          }
+
+          const audio = new Audio(url)
+          audio.play()
+
+          audio.addEventListener('ended', () => {
+            set({ current_audio: null, is_playing: false })
+          })
+
+          return { current_audio: audio, is_playing: true }
+        })
+      },
+    }
+  }
+
+  const audioStore = createAudioStore()
+</script>
+
 <script lang="ts">
   import { ShowHide, longpress } from 'svelte-pieces'
   import type { EntryData } from '@living-dictionaries/types'
-  import { audioStore, playAudio } from './audio-store'
   import { page } from '$app/stores'
   import { minutes_ago_in_ms } from '$lib/helpers/time'
 
@@ -12,7 +50,7 @@
   $: ({ url_from_storage_path } = $page.data)
 
   function initAudio() {
-    playAudio(url_from_storage_path(sound_file.storage_path))
+    audioStore.playAudio(url_from_storage_path(sound_file.storage_path))
   }
 
   $: playing = $audioStore.is_playing && $audioStore.current_audio?.src === url_from_storage_path(sound_file?.storage_path)
