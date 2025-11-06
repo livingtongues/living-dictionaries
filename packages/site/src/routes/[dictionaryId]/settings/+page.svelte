@@ -24,6 +24,7 @@
   <EditString
     value={dictionary.name}
     minlength={2}
+    maxlength={100}
     required
     id="name"
     save={async name => await updateDictionary({ name })}
