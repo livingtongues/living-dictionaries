@@ -6,35 +6,28 @@
     is_playing: boolean
   }
 
-  function createAudioStore() {
-    const { subscribe, update, set } = writable<AudioState>({
-      current_audio: null,
-      is_playing: false,
+  const audioStore = writable<AudioState>({
+    current_audio: null,
+    is_playing: false,
+  })
+
+  export function playAudio(url: string) {
+    audioStore.update((store) => {
+      if (store.current_audio) {
+        store.current_audio.pause()
+        store.current_audio = null
+      }
+
+      const audio = new Audio(url)
+      audio.play()
+
+      audio.addEventListener('ended', () => {
+        audioStore.set({ current_audio: null, is_playing: false })
+      })
+
+      return { current_audio: audio, is_playing: true }
     })
-
-    return {
-      subscribe,
-      playAudio: (url: string) => {
-        update((store) => {
-          if (store.current_audio) {
-            store.current_audio.pause()
-            store.current_audio = null
-          }
-
-          const audio = new Audio(url)
-          audio.play()
-
-          audio.addEventListener('ended', () => {
-            set({ current_audio: null, is_playing: false })
-          })
-
-          return { current_audio: audio, is_playing: true }
-        })
-      },
-    }
   }
-
-  const audioStore = createAudioStore()
 </script>
 
 <script lang="ts">
@@ -50,7 +43,7 @@
   $: ({ url_from_storage_path } = $page.data)
 
   function initAudio() {
-    audioStore.playAudio(url_from_storage_path(sound_file.storage_path))
+    playAudio(url_from_storage_path(sound_file.storage_path))
   }
 
   $: playing = $audioStore.is_playing && $audioStore.current_audio?.src === url_from_storage_path(sound_file?.storage_path)
