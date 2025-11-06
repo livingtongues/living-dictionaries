@@ -11,7 +11,7 @@
     is_playing: false,
   })
 
-  export function playAudio(url: string) {
+  function playAudio(url: string) {
     audioStore.update((store) => {
       if (store.current_audio) {
         store.current_audio.pause()
