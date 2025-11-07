@@ -19,6 +19,8 @@
   export let update_dictionary: (change: TablesUpdate<'dictionaries'>) => Promise<void>
   export let load_extras: () => Promise<void>
 
+  let typedId = '';
+
   $: ({ admin, supabase, add_editor, remove_editor, inviteHelper } = $page.data as PageData)
 
   $: managers = dictionary.editors.filter(({ dictionary_roles }) => dictionary_roles.some(({ role, dictionary_id }) => role === 'manager' && dictionary_id === dictionary.id))
@@ -266,7 +268,9 @@
         <div class="mb-2">
           id: {dictionary.id}, url: /{dictionary.url}
         </div>
+        <input type="text" bind:value={typedId} placeholder="Type the dictionary ID to confirm deletion" class="mb-2 form-input w-full" />
         <Button
+          disabled={!typedId || typedId !== dictionary.id}
           color="red"
           form="filled"
           size="sm"
@@ -276,7 +280,7 @@
             if (error) {
               alert(error.message)
             } else {
-              alert('Dictionary deleted. Please refresh the page.')
+              alert('Dictionary deleted. Please check your email to confirm it was successful and then close the dialog to continue working (the view will be updated within the day).')
             }
           }}>
           Delete
