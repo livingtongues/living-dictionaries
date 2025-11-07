@@ -2,8 +2,7 @@ import * as fs from 'node:fs'
 import { pipeline } from 'node:stream/promises'
 import { GetObjectCommand } from '@aws-sdk/client-s3'
 import { friendlyName } from '@living-dictionaries/site/src/routes/[dictionaryId]/export/friendlyName'
-import { GCLOUD_MEDIA_BUCKET_S3 } from './gcs'
-import { admin_supabase } from './config-supabase'
+import { GCLOUD_MEDIA_BUCKET_S3, admin_supabase } from './config-supabase'
 
 const directory_path = 'downloaded'
 

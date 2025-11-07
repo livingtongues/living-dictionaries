@@ -11,7 +11,7 @@ export const jacobAddress = { email: 'jacob@livingtongues.org' }
 const gregAddress = { email: 'livingtongues@gmail.com' }
 const languages7000 = { email: 'info@7000.org' }
 
-export function getAdminRecipients(initiatorEmail: string): Address[] {
+export function getAdminRecipients(initiatorEmail?: string): Address[] {
   if (initiatorEmail === 'jacob@livingtongues.org'
     || initiatorEmail === 'diego@livingtongues.org') {
     return [{ email: initiatorEmail }]
