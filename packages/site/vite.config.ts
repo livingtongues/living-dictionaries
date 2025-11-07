@@ -2,12 +2,12 @@ import { readFileSync } from 'node:fs'
 import { sveltekit } from '@sveltejs/kit/vite'
 import { type Plugin, defineConfig } from 'vite'
 import UnoCSS from '@unocss/svelte-scoped/vite'
-import { kitbook } from 'kitbook/plugins/vite'
-import kitbookConfig from './kitbook.config'
+// import { kitbook } from 'kitbook/plugins/vite'
+// import kitbookConfig from './kitbook.config'
 
 export default defineConfig({
   plugins: [
-    kitbook(kitbookConfig),
+    // kitbook(kitbookConfig),
     UnoCSS({
       injectReset: '@unocss/reset/tailwind.css',
     }),
