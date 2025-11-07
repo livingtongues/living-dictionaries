@@ -31,11 +31,8 @@ audio (on entry_id → entries.id, sentence_id → sentences.id, and text_id →
 content_updates (on all its foreign keys: dictionary_id → dictionaries.id, entry_id → entries.id, sense_id → senses.id, sentence_id → sentences.id, text_id → texts.id, audio_id → audio.id, video_id → videos.id, photo_id → photos.id, speaker_id → speakers.id, dialect_id → dialects.id, tag_id → tags.id)
 dictionary_partners (on photo_id → photos.id)
 
-- Return success message.
+- Email admins and return success message.
+- Then later run the delete-media-dictionary script (not time urgent, just a cleanup task).
 
 TODO: think if we want to refresh the dictionaries_view and materialized_dictionaries_view views here or leave that to a later cron job or manual refresh.
-TODO: Later on our own time, on our local devices, we can run a media delete script.
-- delete items from media_to_delete and remove row from "media_to_delete" table.
-
-TODO: update summarized-migrations.sql to add ON DELETE CASCADE to the relevant foreign key constraints.
 TODO: remove dictionary_partners.photo_id ON DELETE CASCADE

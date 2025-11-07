@@ -81,6 +81,7 @@ export const GCLOUD_MEDIA_BUCKET_S3 = new S3Client({
   region: 'us',
   endpoint: `https://storage.googleapis.com`,
   credentials: {
+    // Get these by going to Settings in your bucket > Interoperability and creating a Service Account HMAC (may also require creating a new service account)
     accessKeyId: process.env.GCLOUD_MEDIA_BUCKET_ACCESS_KEY_ID,
     secretAccessKey: process.env.GCLOUD_MEDIA_BUCKET_SECRET_ACCESS_KEY,
   },

@@ -3,6 +3,7 @@ import type { TablesInsert } from '@living-dictionaries/types'
 import type { RequestHandler } from './$types'
 import { ResponseCodes } from '$lib/constants'
 import { getAdminSupabaseClient } from '$lib/supabase/admin'
+import { send_delete_dictionary_admin_notice } from '$api/email/delete_dictionary'
 
 export interface DeleteDictionaryRequestBody {
   dictionary_id: string
@@ -70,6 +71,8 @@ export const POST: RequestHandler = async ({ request, locals: { getSession } }) 
       console.error({ error })
       throw new Error(error.message)
     }
+
+    await send_delete_dictionary_admin_notice(dictionary_id)
 
     return json(`Dictionary ${dictionary_id} deleted successfully`)
   } catch (err) {
