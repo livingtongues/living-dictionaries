@@ -21,6 +21,7 @@
     "update-locales": "tsx locales/update-locales.ts",
     "create-entry-caches": "tsx create-entry-caches/add-to-cloudflare.ts -e prod",
     "get-emails": "tsx refactor/get-email.ts -e prod",
+    "delete-dictionary-media": "tsx delete-dictionary-media/index.ts -e prod",
     "test": "vitest",
     "test:import": "vitest --config ./vitest.config.import.ts",
     "merge-types": "tsx merge-types.ts"

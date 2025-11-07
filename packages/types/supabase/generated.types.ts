@@ -56,13 +56,6 @@ export interface Database {
             referencedColumns: ['id']
           },
           {
-            foreignKeyName: 'api_keys_created_by_fkey'
-            columns: ['created_by']
-            isOneToOne: false
-            referencedRelation: 'users'
-            referencedColumns: ['id']
-          },
-          {
             foreignKeyName: 'api_keys_dictionary_id_fkey'
             columns: ['dictionary_id']
             isOneToOne: false
@@ -151,13 +144,6 @@ export interface Database {
             referencedColumns: ['id']
           },
           {
-            foreignKeyName: 'audio_created_by_fkey'
-            columns: ['created_by']
-            isOneToOne: false
-            referencedRelation: 'users'
-            referencedColumns: ['id']
-          },
-          {
             foreignKeyName: 'audio_dictionary_id_fkey'
             columns: ['dictionary_id']
             isOneToOne: false
@@ -220,13 +206,6 @@ export interface Database {
             referencedRelation: 'user_emails'
             referencedColumns: ['id']
           },
-          {
-            foreignKeyName: 'audio_updated_by_fkey'
-            columns: ['updated_by']
-            isOneToOne: false
-            referencedRelation: 'users'
-            referencedColumns: ['id']
-          },
         ]
       }
       audio_speakers: {
@@ -274,13 +253,6 @@ export interface Database {
             columns: ['created_by']
             isOneToOne: false
             referencedRelation: 'user_emails'
-            referencedColumns: ['id']
-          },
-          {
-            foreignKeyName: 'audio_speakers_created_by_fkey'
-            columns: ['created_by']
-            isOneToOne: false
-            referencedRelation: 'users'
             referencedColumns: ['id']
           },
           {
@@ -491,13 +463,6 @@ export interface Database {
             referencedColumns: ['id']
           },
           {
-            foreignKeyName: 'content_updates_user_id_fkey'
-            columns: ['user_id']
-            isOneToOne: false
-            referencedRelation: 'users'
-            referencedColumns: ['id']
-          },
-          {
             foreignKeyName: 'content_updates_video_id_fkey'
             columns: ['video_id']
             isOneToOne: false
@@ -553,13 +518,6 @@ export interface Database {
             referencedColumns: ['id']
           },
           {
-            foreignKeyName: 'dialects_created_by_fkey'
-            columns: ['created_by']
-            isOneToOne: false
-            referencedRelation: 'users'
-            referencedColumns: ['id']
-          },
-          {
             foreignKeyName: 'dialects_dictionary_id_fkey'
             columns: ['dictionary_id']
             isOneToOne: false
@@ -599,13 +557,6 @@ export interface Database {
             columns: ['updated_by']
             isOneToOne: false
             referencedRelation: 'user_emails'
-            referencedColumns: ['id']
-          },
-          {
-            foreignKeyName: 'dialects_updated_by_fkey'
-            columns: ['updated_by']
-            isOneToOne: false
-            referencedRelation: 'users'
             referencedColumns: ['id']
           },
         ]
@@ -708,13 +659,6 @@ export interface Database {
             referencedColumns: ['id']
           },
           {
-            foreignKeyName: 'dictionaries_created_by_fkey'
-            columns: ['created_by']
-            isOneToOne: false
-            referencedRelation: 'users'
-            referencedColumns: ['id']
-          },
-          {
             foreignKeyName: 'dictionaries_updated_by_fkey'
             columns: ['updated_by']
             isOneToOne: false
@@ -726,13 +670,6 @@ export interface Database {
             columns: ['updated_by']
             isOneToOne: false
             referencedRelation: 'user_emails'
-            referencedColumns: ['id']
-          },
-          {
-            foreignKeyName: 'dictionaries_updated_by_fkey'
-            columns: ['updated_by']
-            isOneToOne: false
-            referencedRelation: 'users'
             referencedColumns: ['id']
           },
         ]
@@ -787,13 +724,6 @@ export interface Database {
             referencedColumns: ['id']
           },
           {
-            foreignKeyName: 'dictionary_info_created_by_fkey'
-            columns: ['created_by']
-            isOneToOne: false
-            referencedRelation: 'users'
-            referencedColumns: ['id']
-          },
-          {
             foreignKeyName: 'dictionary_info_id_fkey'
             columns: ['id']
             isOneToOne: true
@@ -833,13 +763,6 @@ export interface Database {
             columns: ['updated_by']
             isOneToOne: false
             referencedRelation: 'user_emails'
-            referencedColumns: ['id']
-          },
-          {
-            foreignKeyName: 'dictionary_info_updated_by_fkey'
-            columns: ['updated_by']
-            isOneToOne: false
-            referencedRelation: 'users'
             referencedColumns: ['id']
           },
         ]
@@ -891,13 +814,6 @@ export interface Database {
             referencedColumns: ['id']
           },
           {
-            foreignKeyName: 'dictionary_partners_created_by_fkey'
-            columns: ['created_by']
-            isOneToOne: false
-            referencedRelation: 'users'
-            referencedColumns: ['id']
-          },
-          {
             foreignKeyName: 'dictionary_partners_dictionary_id_fkey'
             columns: ['dictionary_id']
             isOneToOne: false
@@ -944,13 +860,6 @@ export interface Database {
             columns: ['updated_by']
             isOneToOne: false
             referencedRelation: 'user_emails'
-            referencedColumns: ['id']
-          },
-          {
-            foreignKeyName: 'dictionary_partners_updated_by_fkey'
-            columns: ['updated_by']
-            isOneToOne: false
-            referencedRelation: 'users'
             referencedColumns: ['id']
           },
         ]
@@ -1021,13 +930,6 @@ export interface Database {
             referencedColumns: ['id']
           },
           {
-            foreignKeyName: 'dictionary_roles_invited_by_fkey'
-            columns: ['invited_by']
-            isOneToOne: false
-            referencedRelation: 'users'
-            referencedColumns: ['id']
-          },
-          {
             foreignKeyName: 'dictionary_roles_user_id_fkey'
             columns: ['user_id']
             isOneToOne: false
@@ -1039,13 +941,6 @@ export interface Database {
             columns: ['user_id']
             isOneToOne: false
             referencedRelation: 'user_emails'
-            referencedColumns: ['id']
-          },
-          {
-            foreignKeyName: 'dictionary_roles_user_id_fkey'
-            columns: ['user_id']
-            isOneToOne: false
-            referencedRelation: 'users'
             referencedColumns: ['id']
           },
         ]
@@ -1124,13 +1019,6 @@ export interface Database {
             referencedColumns: ['id']
           },
           {
-            foreignKeyName: 'entries_created_by_fkey'
-            columns: ['created_by']
-            isOneToOne: false
-            referencedRelation: 'users'
-            referencedColumns: ['id']
-          },
-          {
             foreignKeyName: 'entries_dictionary_id_fkey'
             columns: ['dictionary_id']
             isOneToOne: false
@@ -1170,13 +1058,6 @@ export interface Database {
             columns: ['updated_by']
             isOneToOne: false
             referencedRelation: 'user_emails'
-            referencedColumns: ['id']
-          },
-          {
-            foreignKeyName: 'entries_updated_by_fkey'
-            columns: ['updated_by']
-            isOneToOne: false
-            referencedRelation: 'users'
             referencedColumns: ['id']
           },
         ]
@@ -1219,13 +1100,6 @@ export interface Database {
             columns: ['created_by']
             isOneToOne: false
             referencedRelation: 'user_emails'
-            referencedColumns: ['id']
-          },
-          {
-            foreignKeyName: 'entry_dialects_created_by_fkey'
-            columns: ['created_by']
-            isOneToOne: false
-            referencedRelation: 'users'
             referencedColumns: ['id']
           },
           {
@@ -1310,13 +1184,6 @@ export interface Database {
             columns: ['created_by']
             isOneToOne: false
             referencedRelation: 'user_emails'
-            referencedColumns: ['id']
-          },
-          {
-            foreignKeyName: 'entry_tags_created_by_fkey'
-            columns: ['created_by']
-            isOneToOne: false
-            referencedRelation: 'users'
             referencedColumns: ['id']
           },
           {
@@ -1449,13 +1316,6 @@ export interface Database {
             referencedColumns: ['id']
           },
           {
-            foreignKeyName: 'invites_created_by_fkey'
-            columns: ['created_by']
-            isOneToOne: false
-            referencedRelation: 'users'
-            referencedColumns: ['id']
-          },
-          {
             foreignKeyName: 'invites_dictionary_id_fkey'
             columns: ['dictionary_id']
             isOneToOne: false
@@ -1484,6 +1344,27 @@ export interface Database {
             referencedColumns: ['id']
           },
         ]
+      }
+      media_to_delete: {
+        Row: {
+          created_at: string
+          dictionary_id: string
+          id: string
+          storage_path: string
+        }
+        Insert: {
+          created_at?: string
+          dictionary_id: string
+          id?: string
+          storage_path: string
+        }
+        Update: {
+          created_at?: string
+          dictionary_id?: string
+          id?: string
+          storage_path?: string
+        }
+        Relationships: []
       }
       photos: {
         Row: {
@@ -1541,13 +1422,6 @@ export interface Database {
             referencedColumns: ['id']
           },
           {
-            foreignKeyName: 'photos_created_by_fkey'
-            columns: ['created_by']
-            isOneToOne: false
-            referencedRelation: 'users'
-            referencedColumns: ['id']
-          },
-          {
             foreignKeyName: 'photos_dictionary_id_fkey'
             columns: ['dictionary_id']
             isOneToOne: false
@@ -1587,13 +1461,6 @@ export interface Database {
             columns: ['updated_by']
             isOneToOne: false
             referencedRelation: 'user_emails'
-            referencedColumns: ['id']
-          },
-          {
-            foreignKeyName: 'photos_updated_by_fkey'
-            columns: ['updated_by']
-            isOneToOne: false
-            referencedRelation: 'users'
             referencedColumns: ['id']
           },
         ]
@@ -1636,13 +1503,6 @@ export interface Database {
             columns: ['created_by']
             isOneToOne: false
             referencedRelation: 'user_emails'
-            referencedColumns: ['id']
-          },
-          {
-            foreignKeyName: 'sense_photos_created_by_fkey'
-            columns: ['created_by']
-            isOneToOne: false
-            referencedRelation: 'users'
             referencedColumns: ['id']
           },
           {
@@ -1727,13 +1587,6 @@ export interface Database {
             columns: ['created_by']
             isOneToOne: false
             referencedRelation: 'user_emails'
-            referencedColumns: ['id']
-          },
-          {
-            foreignKeyName: 'sense_videos_created_by_fkey'
-            columns: ['created_by']
-            isOneToOne: false
-            referencedRelation: 'users'
             referencedColumns: ['id']
           },
           {
@@ -1858,13 +1711,6 @@ export interface Database {
             referencedColumns: ['id']
           },
           {
-            foreignKeyName: 'senses_created_by_fkey'
-            columns: ['created_by']
-            isOneToOne: false
-            referencedRelation: 'users'
-            referencedColumns: ['id']
-          },
-          {
             foreignKeyName: 'senses_dictionary_id_fkey'
             columns: ['dictionary_id']
             isOneToOne: false
@@ -1904,13 +1750,6 @@ export interface Database {
             columns: ['updated_by']
             isOneToOne: false
             referencedRelation: 'user_emails'
-            referencedColumns: ['id']
-          },
-          {
-            foreignKeyName: 'senses_updated_by_fkey'
-            columns: ['updated_by']
-            isOneToOne: false
-            referencedRelation: 'users'
             referencedColumns: ['id']
           },
         ]
@@ -1953,13 +1792,6 @@ export interface Database {
             columns: ['created_by']
             isOneToOne: false
             referencedRelation: 'user_emails'
-            referencedColumns: ['id']
-          },
-          {
-            foreignKeyName: 'senses_in_sentences_created_by_fkey'
-            columns: ['created_by']
-            isOneToOne: false
-            referencedRelation: 'users'
             referencedColumns: ['id']
           },
           {
@@ -2047,13 +1879,6 @@ export interface Database {
             referencedColumns: ['id']
           },
           {
-            foreignKeyName: 'sentence_photos_created_by_fkey'
-            columns: ['created_by']
-            isOneToOne: false
-            referencedRelation: 'users'
-            referencedColumns: ['id']
-          },
-          {
             foreignKeyName: 'sentence_photos_dictionary_id_fkey'
             columns: ['dictionary_id']
             isOneToOne: false
@@ -2135,13 +1960,6 @@ export interface Database {
             columns: ['created_by']
             isOneToOne: false
             referencedRelation: 'user_emails'
-            referencedColumns: ['id']
-          },
-          {
-            foreignKeyName: 'sentence_videos_created_by_fkey'
-            columns: ['created_by']
-            isOneToOne: false
-            referencedRelation: 'users'
             referencedColumns: ['id']
           },
           {
@@ -2241,13 +2059,6 @@ export interface Database {
             referencedColumns: ['id']
           },
           {
-            foreignKeyName: 'sentences_created_by_fkey'
-            columns: ['created_by']
-            isOneToOne: false
-            referencedRelation: 'users'
-            referencedColumns: ['id']
-          },
-          {
             foreignKeyName: 'sentences_dictionary_id_fkey'
             columns: ['dictionary_id']
             isOneToOne: false
@@ -2294,13 +2105,6 @@ export interface Database {
             columns: ['updated_by']
             isOneToOne: false
             referencedRelation: 'user_emails'
-            referencedColumns: ['id']
-          },
-          {
-            foreignKeyName: 'sentences_updated_by_fkey'
-            columns: ['updated_by']
-            isOneToOne: false
-            referencedRelation: 'users'
             referencedColumns: ['id']
           },
         ]
@@ -2364,13 +2168,6 @@ export interface Database {
             referencedColumns: ['id']
           },
           {
-            foreignKeyName: 'speakers_created_by_fkey'
-            columns: ['created_by']
-            isOneToOne: false
-            referencedRelation: 'users'
-            referencedColumns: ['id']
-          },
-          {
             foreignKeyName: 'speakers_dictionary_id_fkey'
             columns: ['dictionary_id']
             isOneToOne: false
@@ -2413,13 +2210,6 @@ export interface Database {
             referencedColumns: ['id']
           },
           {
-            foreignKeyName: 'speakers_updated_by_fkey'
-            columns: ['updated_by']
-            isOneToOne: false
-            referencedRelation: 'users'
-            referencedColumns: ['id']
-          },
-          {
             foreignKeyName: 'speakers_user_id_fkey'
             columns: ['user_id']
             isOneToOne: false
@@ -2431,13 +2221,6 @@ export interface Database {
             columns: ['user_id']
             isOneToOne: false
             referencedRelation: 'user_emails'
-            referencedColumns: ['id']
-          },
-          {
-            foreignKeyName: 'speakers_user_id_fkey'
-            columns: ['user_id']
-            isOneToOne: false
-            referencedRelation: 'users'
             referencedColumns: ['id']
           },
         ]
@@ -2492,13 +2275,6 @@ export interface Database {
             referencedColumns: ['id']
           },
           {
-            foreignKeyName: 'tags_created_by_fkey'
-            columns: ['created_by']
-            isOneToOne: false
-            referencedRelation: 'users'
-            referencedColumns: ['id']
-          },
-          {
             foreignKeyName: 'tags_dictionary_id_fkey'
             columns: ['dictionary_id']
             isOneToOne: false
@@ -2538,13 +2314,6 @@ export interface Database {
             columns: ['updated_by']
             isOneToOne: false
             referencedRelation: 'user_emails'
-            referencedColumns: ['id']
-          },
-          {
-            foreignKeyName: 'tags_updated_by_fkey'
-            columns: ['updated_by']
-            isOneToOne: false
-            referencedRelation: 'users'
             referencedColumns: ['id']
           },
         ]
@@ -2599,13 +2368,6 @@ export interface Database {
             referencedColumns: ['id']
           },
           {
-            foreignKeyName: 'texts_created_by_fkey'
-            columns: ['created_by']
-            isOneToOne: false
-            referencedRelation: 'users'
-            referencedColumns: ['id']
-          },
-          {
             foreignKeyName: 'texts_dictionary_id_fkey'
             columns: ['dictionary_id']
             isOneToOne: false
@@ -2647,13 +2409,6 @@ export interface Database {
             referencedRelation: 'user_emails'
             referencedColumns: ['id']
           },
-          {
-            foreignKeyName: 'texts_updated_by_fkey'
-            columns: ['updated_by']
-            isOneToOne: false
-            referencedRelation: 'users'
-            referencedColumns: ['id']
-          },
         ]
       }
       user_data: {
@@ -2691,13 +2446,6 @@ export interface Database {
             columns: ['id']
             isOneToOne: true
             referencedRelation: 'user_emails'
-            referencedColumns: ['id']
-          },
-          {
-            foreignKeyName: 'user_data_id_fkey'
-            columns: ['id']
-            isOneToOne: true
-            referencedRelation: 'users'
             referencedColumns: ['id']
           },
         ]
@@ -2740,13 +2488,6 @@ export interface Database {
             columns: ['created_by']
             isOneToOne: false
             referencedRelation: 'user_emails'
-            referencedColumns: ['id']
-          },
-          {
-            foreignKeyName: 'video_speakers_created_by_fkey'
-            columns: ['created_by']
-            isOneToOne: false
-            referencedRelation: 'users'
             referencedColumns: ['id']
           },
           {
@@ -2852,13 +2593,6 @@ export interface Database {
             referencedColumns: ['id']
           },
           {
-            foreignKeyName: 'videos_created_by_fkey'
-            columns: ['created_by']
-            isOneToOne: false
-            referencedRelation: 'users'
-            referencedColumns: ['id']
-          },
-          {
             foreignKeyName: 'videos_dictionary_id_fkey'
             columns: ['dictionary_id']
             isOneToOne: false
@@ -2907,13 +2641,6 @@ export interface Database {
             referencedRelation: 'user_emails'
             referencedColumns: ['id']
           },
-          {
-            foreignKeyName: 'videos_updated_by_fkey'
-            columns: ['updated_by']
-            isOneToOne: false
-            referencedRelation: 'users'
-            referencedColumns: ['id']
-          },
         ]
       }
     }
@@ -2950,13 +2677,6 @@ export interface Database {
             foreignKeyName: 'dictionaries_created_by_fkey'
             columns: ['created_by']
             isOneToOne: false
-            referencedRelation: 'users'
-            referencedColumns: ['id']
-          },
-          {
-            foreignKeyName: 'dictionaries_created_by_fkey'
-            columns: ['created_by']
-            isOneToOne: false
             referencedRelation: 'profiles_view'
             referencedColumns: ['id']
           },
@@ -2965,13 +2685,6 @@ export interface Database {
             columns: ['created_by']
             isOneToOne: false
             referencedRelation: 'user_emails'
-            referencedColumns: ['id']
-          },
-          {
-            foreignKeyName: 'dictionaries_updated_by_fkey'
-            columns: ['updated_by']
-            isOneToOne: false
-            referencedRelation: 'users'
             referencedColumns: ['id']
           },
           {
@@ -3031,13 +2744,6 @@ export interface Database {
             foreignKeyName: 'dictionary_roles_user_id_fkey'
             columns: ['user_id']
             isOneToOne: false
-            referencedRelation: 'users'
-            referencedColumns: ['id']
-          },
-          {
-            foreignKeyName: 'dictionary_roles_user_id_fkey'
-            columns: ['user_id']
-            isOneToOne: false
             referencedRelation: 'profiles_view'
             referencedColumns: ['id']
           },
@@ -3082,13 +2788,6 @@ export interface Database {
             foreignKeyName: 'dictionaries_created_by_fkey'
             columns: ['created_by']
             isOneToOne: false
-            referencedRelation: 'users'
-            referencedColumns: ['id']
-          },
-          {
-            foreignKeyName: 'dictionaries_created_by_fkey'
-            columns: ['created_by']
-            isOneToOne: false
             referencedRelation: 'profiles_view'
             referencedColumns: ['id']
           },
@@ -3097,13 +2796,6 @@ export interface Database {
             columns: ['created_by']
             isOneToOne: false
             referencedRelation: 'user_emails'
-            referencedColumns: ['id']
-          },
-          {
-            foreignKeyName: 'dictionaries_updated_by_fkey'
-            columns: ['updated_by']
-            isOneToOne: false
-            referencedRelation: 'users'
             referencedColumns: ['id']
           },
           {
@@ -3184,25 +2876,17 @@ export interface Database {
       }
     }
     Functions: {
-      get_my_claim: {
-        Args: {
-          claim: string
-        }
-        Returns: Json
-      }
-      is_admin: {
-        Args: Record<PropertyKey, never>
-        Returns: boolean
-      }
+      get_my_claim: { Args: { claim: string }, Returns: Json }
+      is_admin: { Args: never, Returns: boolean }
       users_for_admin_table: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: {
-          id: string
+          avatar_url: string
+          created_at: string
           email: string
           full_name: string
-          avatar_url: string
+          id: string
           last_sign_in_at: string
-          created_at: string
           unsubscribed_from_emails: string
           updated_at: string
         }[]
@@ -3245,25 +2929,33 @@ export interface Database {
   }
 }
 
+type DatabaseWithoutInternals = Omit<Database, '__InternalSupabase'>
+
+type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, 'public'>]
+
 export type Tables<
-  PublicTableNameOrOptions extends
-  | keyof (Database['public']['Tables'] & Database['public']['Views'])
-  | { schema: keyof Database },
-  TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
-    ? keyof (Database[PublicTableNameOrOptions['schema']]['Tables'] &
-    Database[PublicTableNameOrOptions['schema']]['Views'])
+  DefaultSchemaTableNameOrOptions extends
+  | keyof (DefaultSchema['Tables'] & DefaultSchema['Views'])
+  | { schema: keyof DatabaseWithoutInternals },
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Tables'] &
+    DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Views'])
     : never = never,
-> = PublicTableNameOrOptions extends { schema: keyof Database }
-  ? (Database[PublicTableNameOrOptions['schema']]['Tables'] &
-  Database[PublicTableNameOrOptions['schema']]['Views'])[TableName] extends {
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Tables'] &
+  DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Views'])[TableName] extends {
       Row: infer R
     }
       ? R
       : never
-  : PublicTableNameOrOptions extends keyof (Database['public']['Tables'] &
-  Database['public']['Views'])
-    ? (Database['public']['Tables'] &
-    Database['public']['Views'])[PublicTableNameOrOptions] extends {
+  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema['Tables'] &
+  DefaultSchema['Views'])
+    ? (DefaultSchema['Tables'] &
+    DefaultSchema['Views'])[DefaultSchemaTableNameOrOptions] extends {
         Row: infer R
       }
         ? R
@@ -3271,20 +2963,24 @@ export type Tables<
     : never
 
 export type TablesInsert<
-  PublicTableNameOrOptions extends
-  | keyof Database['public']['Tables']
-  | { schema: keyof Database },
-  TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
-    ? keyof Database[PublicTableNameOrOptions['schema']]['Tables']
+  DefaultSchemaTableNameOrOptions extends
+  | keyof DefaultSchema['Tables']
+  | { schema: keyof DatabaseWithoutInternals },
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Tables']
     : never = never,
-> = PublicTableNameOrOptions extends { schema: keyof Database }
-  ? Database[PublicTableNameOrOptions['schema']]['Tables'][TableName] extends {
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Tables'][TableName] extends {
     Insert: infer I
   }
     ? I
     : never
-  : PublicTableNameOrOptions extends keyof Database['public']['Tables']
-    ? Database['public']['Tables'][PublicTableNameOrOptions] extends {
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema['Tables']
+    ? DefaultSchema['Tables'][DefaultSchemaTableNameOrOptions] extends {
       Insert: infer I
     }
       ? I
@@ -3292,20 +2988,24 @@ export type TablesInsert<
     : never
 
 export type TablesUpdate<
-  PublicTableNameOrOptions extends
-  | keyof Database['public']['Tables']
-  | { schema: keyof Database },
-  TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
-    ? keyof Database[PublicTableNameOrOptions['schema']]['Tables']
+  DefaultSchemaTableNameOrOptions extends
+  | keyof DefaultSchema['Tables']
+  | { schema: keyof DatabaseWithoutInternals },
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Tables']
     : never = never,
-> = PublicTableNameOrOptions extends { schema: keyof Database }
-  ? Database[PublicTableNameOrOptions['schema']]['Tables'][TableName] extends {
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Tables'][TableName] extends {
     Update: infer U
   }
     ? U
     : never
-  : PublicTableNameOrOptions extends keyof Database['public']['Tables']
-    ? Database['public']['Tables'][PublicTableNameOrOptions] extends {
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema['Tables']
+    ? DefaultSchema['Tables'][DefaultSchemaTableNameOrOptions] extends {
       Update: infer U
     }
       ? U
@@ -3313,14 +3013,73 @@ export type TablesUpdate<
     : never
 
 export type Enums<
-  PublicEnumNameOrOptions extends
-  | keyof Database['public']['Enums']
-  | { schema: keyof Database },
-  EnumName extends PublicEnumNameOrOptions extends { schema: keyof Database }
-    ? keyof Database[PublicEnumNameOrOptions['schema']]['Enums']
+  DefaultSchemaEnumNameOrOptions extends
+  | keyof DefaultSchema['Enums']
+  | { schema: keyof DatabaseWithoutInternals },
+  EnumName extends DefaultSchemaEnumNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions['schema']]['Enums']
     : never = never,
-> = PublicEnumNameOrOptions extends { schema: keyof Database }
-  ? Database[PublicEnumNameOrOptions['schema']]['Enums'][EnumName]
-  : PublicEnumNameOrOptions extends keyof Database['public']['Enums']
-    ? Database['public']['Enums'][PublicEnumNameOrOptions]
+> = DefaultSchemaEnumNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions['schema']]['Enums'][EnumName]
+  : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema['Enums']
+    ? DefaultSchema['Enums'][DefaultSchemaEnumNameOrOptions]
     : never
+
+export type CompositeTypes<
+  PublicCompositeTypeNameOrOptions extends
+  | keyof DefaultSchema['CompositeTypes']
+  | { schema: keyof DatabaseWithoutInternals },
+  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions['schema']]['CompositeTypes']
+    : never = never,
+> = PublicCompositeTypeNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions['schema']]['CompositeTypes'][CompositeTypeName]
+  : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema['CompositeTypes']
+    ? DefaultSchema['CompositeTypes'][PublicCompositeTypeNameOrOptions]
+    : never
+
+export const Constants = {
+  public: {
+    Enums: {
+      certainty: ['yes', 'no', 'unknown'],
+      content_tables: [
+        'entries',
+        'senses',
+        'sentences',
+        'senses_in_sentences',
+        'texts',
+        'audio',
+        'video',
+        'photo',
+        'speakers',
+        'audio_speakers',
+        'video_speakers',
+        'sense_videos',
+        'sentence_videos',
+        'sense_photos',
+        'sentence_photos',
+      ],
+      entry_columns: [
+        'deleted',
+        'glosses',
+        'parts_of_speech',
+        'semantic_domains',
+        'write_in_semantic_domains',
+        'noun_class',
+        'definition',
+      ],
+      entry_tables: ['senses'],
+      gender: ['m', 'f', 'o'],
+      role_enum: ['manager', 'contributor'],
+      status_enum: ['queued', 'sent', 'claimed', 'cancelled'],
+    },
+  },
+} as const
