@@ -25,7 +25,7 @@ type JoinTableName = 'audio_speakers' | 'video_speakers' | 'entry_tags' | 'entry
 
 export function get_table_cache_key(table: DataTableName | JoinTableName, dictionary_id: string) {
   const month_year = new Date().toLocaleDateString('default', { month: '2-digit', year: 'numeric' }).replace('/', '.')
-  return `${table}_${dictionary_id}_${month_year}c`
+  return `${table}_${dictionary_id}_${month_year}`
 }
 
 export async function cached_data_table<Name extends DataTableName, T extends Tables<Name>>(options: CachedDataStoreOptions<Name, keyof T>) {

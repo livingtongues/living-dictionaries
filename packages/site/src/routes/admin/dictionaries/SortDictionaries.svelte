@@ -23,7 +23,7 @@
     author_connection = 'Author Connection',
     con_language_description = 'Conlang Description',
     conlang = 'Conlang',
-    deleted = 'To Delete',
+    deleted = 'Delete',
   }
 
   type SortFields = keyof typeof DictionaryFields
