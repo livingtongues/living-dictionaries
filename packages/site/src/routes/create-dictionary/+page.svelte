@@ -101,6 +101,7 @@ Use: ${conlang_use.trim()}`
         spellcheck={false}
         autofocus
         minlength={data.MIN_URL_LENGTH}
+        maxlength="100"
         required
         bind:value={name}
         class="form-input w-full" />
