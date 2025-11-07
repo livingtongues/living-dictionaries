@@ -35,4 +35,4 @@ dictionary_partners (on photo_id → photos.id)
 - Then later run the delete-media-dictionary script (not time urgent, just a cleanup task).
 
 TODO: think if we want to refresh the dictionaries_view and materialized_dictionaries_view views here or leave that to a later cron job or manual refresh.
-TODO: remove dictionary_partners.photo_id ON DELETE CASCADE
+TODO: think through removing dictionary_partners.photo_id media (right now the data has ON DELETE CASCADE)
