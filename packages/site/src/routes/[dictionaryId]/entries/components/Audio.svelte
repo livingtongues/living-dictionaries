@@ -1,3 +1,35 @@
+<script context="module" lang="ts">
+  import { writable } from 'svelte/store'
+
+  interface AudioState {
+    current_audio: HTMLAudioElement | null
+    is_playing: boolean
+  }
+
+  const audioStore = writable<AudioState>({
+    current_audio: null,
+    is_playing: false,
+  })
+
+  function playAudio(url: string) {
+    audioStore.update((store) => {
+      if (store.current_audio) {
+        store.current_audio.pause()
+        store.current_audio = null
+      }
+
+      const audio = new Audio(url)
+      audio.play()
+
+      audio.addEventListener('ended', () => {
+        audioStore.set({ current_audio: null, is_playing: false })
+      })
+
+      return { current_audio: audio, is_playing: true }
+    })
+  }
+</script>
+
 <script lang="ts">
   import { ShowHide, longpress } from 'svelte-pieces'
   import type { EntryData } from '@living-dictionaries/types'
@@ -10,17 +42,11 @@
   export let can_edit = false
   $: ({ url_from_storage_path } = $page.data)
 
-  let playing = false
-
   function initAudio() {
-    const audio = new Audio(url_from_storage_path(sound_file.storage_path))
-    audio.play()
-    playing = true
-    audio.addEventListener('ended', () => {
-      playing = false
-    })
-  // TODO: unsubscribe listener
+    playAudio(url_from_storage_path(sound_file.storage_path))
   }
+
+  $: playing = $audioStore.is_playing && $audioStore.current_audio?.src === url_from_storage_path(sound_file?.storage_path)
 </script>
 
 <ShowHide let:show let:toggle>
