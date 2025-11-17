@@ -281,7 +281,20 @@ Entries support rich multimedia content:
 ### Prerequisites
 - Node.js (version specified in package.json engines)
 - pnpm installed globally: `npm install -g pnpm`
-- VSCode with recommended extensions
+- VSCode with recommended extensions (see `.vscode/extensions.json`):
+  - **Essential**:
+    - `svelte.svelte-vscode` - Svelte language support
+    - `antfu.iconify` - Iconify icon previews
+    - `antfu.unocss` - UnoCSS intellisense
+    - `dbaeumer.vscode-eslint` - ESLint integration
+    - `github.vscode-pull-request-github` - GitHub PR integration
+    - `lokalise.i18n-ally` - i18n management
+    - `yzhang.markdown-all-in-one` - Markdown editing
+    - `foam.foam-vscode` - Markdown wiki features
+  - **Recommended**:
+    - `denoland.vscode-deno` - For Supabase Edge Functions
+    - `usernamehw.errorlens` - Inline error display
+    - `eamodio.gitlens` - Git blame and history
 - Supabase CLI for local database work
 
 ### Getting Started
@@ -471,3 +484,93 @@ Utility scripts for maintenance tasks:
 - Served via Kitbook at `/kitbook/docs`
 - Markdown format
 - Update CONTRIBUTING.md for significant workflow changes
+
+## Common Patterns & Utilities
+
+### Helper Functions (in `lib/helpers`)
+- **cookies.ts** - Cookie management for auth tokens
+- **debounce.ts** - Debouncing user input
+- **glosses.ts** - Working with multi-language glosses
+- **exampleSentences.ts** - Example sentence formatting
+- **media.ts** - Media URL generation and validation
+- **get-post-requests.ts** - HTTP request helpers
+- **inviteHelper.ts** - User invitation logic
+- **prune.ts** - Remove null/undefined values from objects
+
+### SvelteKit Patterns
+- **Load functions** (`+page.ts`, `+layout.ts`): Fetch data before rendering
+- **Server routes** (`+server.ts`): API endpoints and server logic
+- **Server load** (`+page.server.ts`): Server-side data loading with auth
+- **Form actions** (`+page.server.ts`): Handle form submissions
+- **Hooks** (`hooks.server.ts`): Handle auth, set user context
+- **Error boundaries** (`+error.svelte`): Custom error pages
+
+### Store Patterns
+- Use Svelte stores for reactive state
+- `$page` store for accessing page data and URL
+- Custom stores in `lib/stores` for global state
+- Derived stores for computed values
+- Use `readable` for external data sources
+
+### Authentication Patterns
+- Check auth in `hooks.server.ts`
+- Set user in `locals` for server-side access
+- Use `$page.data.user` in components
+- Redirect unauthenticated users in `+page.server.ts` load functions
+- Handle auth state changes reactively
+
+### Database Query Patterns
+- Use typed Supabase client from `lib/supabase`
+- Always use `.select()` with specific columns (not `*`)
+- Chain filters: `.eq()`, `.in()`, `.like()`, etc.
+- Use `.single()` for single row queries
+- Use `.maybeSingle()` when row might not exist
+- Handle errors with try/catch
+- Respect RLS - queries automatically filtered by user permissions
+
+### Component Composition
+- Use slots for flexible content injection
+- Use slot props to pass data to slot content
+- Export event handlers as props
+- Use `$$restProps` for passing through HTML attributes
+- Create reusable UI components in `lib/components/ui`
+
+### Media Upload Pattern
+1. Upload to Supabase Storage via `/api/upload`
+2. Get signed URL or serving URL
+3. Store reference in database
+4. Display with lazy loading
+5. Clean up orphaned files via `media_to_delete` table
+
+### Internationalization Pattern
+1. Add English text to `locales/en.json`
+2. Use descriptive section-based keys
+3. Access via `$page.data.t.section.key`
+4. Interpolate variables with helper function
+5. Human translators add other languages later
+
+### Search Pattern
+1. Load dictionary entries
+2. Index with Orama (lexeme, glosses, phonetic, etc.)
+3. Store index in IndexedDB
+4. Search as user types
+5. Display results reactively
+6. Update index when entries change
+
+### Form Validation Pattern
+- Client-side validation for UX
+- Server-side validation for security
+- Use HTML5 validation attributes
+- Show errors inline near inputs
+- Prevent submission until valid
+- Handle validation errors from server
+
+### Accessibility Checklist
+- Semantic HTML elements
+- Proper heading hierarchy
+- Alt text for images
+- ARIA labels where needed
+- Keyboard navigation support
+- Focus management in modals
+- Color contrast compliance
+- Screen reader testing for critical flows
