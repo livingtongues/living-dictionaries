@@ -10,7 +10,7 @@
   import { supabase_date_to_friendly } from '$lib/helpers/time'
   import LatLngDisplay from '$lib/components/maps/LatLngDisplay.svelte'
   import { page } from '$app/stores'
-    import { api_delete_dictionary } from '$api/db/delete-dictionary/_call';
+  import { api_delete_dictionary } from '$api/db/delete-dictionary/_call'
 
   export let index: number
   export let is_public: boolean
@@ -19,7 +19,7 @@
   export let update_dictionary: (change: TablesUpdate<'dictionaries'>) => Promise<void>
   export let load_extras: () => Promise<void>
 
-  let typedId = '';
+  let typedId = ''
 
   $: ({ admin, supabase, add_editor, remove_editor, inviteHelper } = $page.data as PageData)
 
@@ -280,7 +280,7 @@
             if (error) {
               alert(error.message)
             } else {
-              alert('Dictionary deleted. Please check your email to confirm it was successful and then close the dialog to continue working (the view will be updated within the day).')
+              alert('Dictionary deleted. Please check your email to confirm it was successful and then close the dialog to continue working (the view is updated once a day).')
             }
           }}>
           Delete
