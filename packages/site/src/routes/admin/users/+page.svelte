@@ -8,7 +8,7 @@
   import Filter from '$lib/components/Filter.svelte'
 
   export let data: PageData
-  $: ({ dictionaries, users, dictionary_roles } = data)
+  $: ({ admin_dictionaries, users, dictionary_roles } = data)
 
   $: users_with_roles = $users.map((user) => {
     return {
@@ -53,7 +53,7 @@
                 dictionary_roles.reset(),
               ])
             }}
-            dictionaries={$dictionaries}
+            dictionaries={$admin_dictionaries}
             {user} />
         {/each}
       </SortUsers>

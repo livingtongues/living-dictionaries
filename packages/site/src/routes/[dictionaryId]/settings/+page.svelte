@@ -113,7 +113,6 @@
         } else if ($admin) {
           await updateDictionary({ public: true })
           dictionary.public = true
-          await $page.data.dictionaries.refresh()
         } else if (about_is_too_short()) {
           alert($page.data.t('about.message'))
           goto(`/${dictionary.id}/about`)
@@ -122,7 +121,6 @@
           if (communityAllowsOnline) alert($page.data.t('header.contact_us'))
         }
         dictionary.public = false
-        await $page.data.dictionaries.refresh()
       }} />
     <div class="mb-5" />
   {/if}
