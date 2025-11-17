@@ -1,7 +1,7 @@
 # Architecture Overview
 
 ## Project Structure
-This is a pnpm workspace monorepo containing the Living Dictionaries web application, a mobile-first community-focused dictionary-building platform built by Living Tongues Institute for Endangered Languages. The repository uses SvelteKit 2 for the main application, Supabase for backend services, and is deployed on Vercel with SSR.
+This is a pnpm workspace monorepo containing the Living Dictionaries web application, a mobile-first community-focused dictionary-building platform built by Living Tongues Institute for Endangered Languages. The repository uses SvelteKit 2 for the main application and backend serverless functions hosted on Vercel. Supabase is used for database and authentication.
 
 ### Key Directories
 - `/packages/site` - Main SvelteKit application
@@ -12,14 +12,10 @@ This is a pnpm workspace monorepo containing the Living Dictionaries web applica
     - `/lib/supabase` - Supabase client, operations, and authentication
     - `/lib/helpers` - Utility functions and transformers
     - `/lib/constants.ts` - Application-wide constants (use these instead of magic strings)
-    - `/lib/stores` - Svelte stores for state management
     - `/lib/search` - Orama search integration
     - `/lib/export` - Data export functionality
     - `/lib/mocks` - Test mocks and seed data
-  - `/packages/site/e2e` - Playwright end-to-end tests
-  - `/packages/site/src/db-tests` - Database integration tests
-  - `/packages/site/src/docs` - Documentation (markdown files served via Kitbook)
-  - `/packages/site/static` - Static assets
+  - `/packages/site/src/docs` - Documentation (markdown files served via Kitbook) - out of date
 - `/packages/types` - Shared TypeScript types and interfaces
   - Database types (Supabase generated + custom)
   - Entry, dictionary, and user interfaces
@@ -29,12 +25,9 @@ This is a pnpm workspace monorepo containing the Living Dictionaries web applica
   - Type generation and merging
   - Spreadsheet helpers
   - Locale updates
-- `/packages/ids-import` - IDS (Indigenous language data) import utilities
 - `/supabase` - Supabase configuration
   - `/supabase/migrations` - Database schema migrations (SQL)
-  - `/supabase/functions` - Supabase Edge Functions (minimal usage)
   - `/supabase/config.toml` - Supabase project configuration
-- `/e2e` - Additional end-to-end test setup (workspace package)
 - Root configuration files (ESLint, Vitest workspace, UnoCSS, etc.)
 
 ### Technology Stack
@@ -52,20 +45,12 @@ This is a pnpm workspace monorepo containing the Living Dictionaries web applica
 - **Deployment**: Vercel with SSR (Server-Side Rendering)
 - **Search**: Orama for client-side full-text search
 - **Media Storage**: 
-  - Google Cloud Storage (GCP) for legacy media
-  - Supabase Storage for newer uploads
-  - AWS S3 for certain features
+  - Google Cloud Storage (GCP) for media
 - **Email**: AWS SES (Simple Email Service)
-- **Analytics & Monitoring**:
-  - LogRocket for session replay and debugging
-  - Sentry for error tracking
-  - Web Vitals for performance monitoring
 - **Internationalization**: Custom i18n system with JSON locale files
 - **Package Manager**: pnpm (workspace monorepo)
 - **Testing**:
   - Vitest for unit and integration tests
-  - Playwright for E2E tests
-  - Kitbook for component documentation and visual testing
 - **Build Tools**:
   - Vite (via SvelteKit)
   - TypeScript 5.1.6
@@ -78,8 +63,6 @@ This is a pnpm workspace monorepo containing the Living Dictionaries web applica
   - JSZip for file compression
   - D3 for data visualization (geo)
   - Turf.js for geospatial operations
-  - csvtojson for data import
-  - file-saver for downloads
   - Comlink for Web Workers
   - idb-keyval for IndexedDB storage
 
@@ -116,9 +99,7 @@ Entries support rich multimedia content:
 - Access tokens: `sb-access-token`, `sb-refresh-token`
 
 #### Media Storage Strategy
-- Legacy: Google Cloud Storage with serving URLs
-- Current: Supabase Storage with signed URLs
-- AWS S3 for specific features (exports, etc.)
+- Google Cloud Storage with serving URLs
 - Media files organized by dictionary ID and type
 
 #### Search Implementation
@@ -231,19 +212,15 @@ Entries support rich multimedia content:
 
 ### Component Guidelines
 - Use `.svelte` extension for components
-- Use `.composition` extension for Kitbook composition files
 - Props should be clearly typed with TypeScript
 - Use slot props for flexible component composition
 - Prefer controlled components over uncontrolled when state is important
-- Use `autofocus` action pattern for input focus management
-- Follow Svelte accessibility best practices
 
 ### Forms & Input
 - Use UnoCSS forms preset styling
 - Validate input on both client and server side
 - Provide clear error messages
 - Use appropriate input types (email, url, number, etc.)
-- Implement proper ARIA labels and accessibility
 
 ### Error Handling
 - Use try/catch for async operations
@@ -278,44 +255,15 @@ Entries support rich multimedia content:
 
 ## Development Workflow
 
-### Prerequisites
-- Node.js (version specified in package.json engines)
-- pnpm installed globally: `npm install -g pnpm`
-- VSCode with recommended extensions (see `.vscode/extensions.json`):
-  - **Essential**:
-    - `svelte.svelte-vscode` - Svelte language support
-    - `antfu.iconify` - Iconify icon previews
-    - `antfu.unocss` - UnoCSS intellisense
-    - `dbaeumer.vscode-eslint` - ESLint integration
-    - `github.vscode-pull-request-github` - GitHub PR integration
-    - `lokalise.i18n-ally` - i18n management
-    - `yzhang.markdown-all-in-one` - Markdown editing
-    - `foam.foam-vscode` - Markdown wiki features
-  - **Recommended**:
-    - `denoland.vscode-deno` - For Supabase Edge Functions
-    - `usernamehw.errorlens` - Inline error display
-    - `eamodio.gitlens` - Git blame and history
-- Supabase CLI for local database work
-
-### Getting Started
-1. Clone repository: `git clone https://github.com/livingtongues/living-dictionaries.git`
-2. Install dependencies: `pnpm i`
-3. Set up environment variables (see `.env.development` in packages/site)
-4. Start dev server: `pnpm dev` (runs on localhost:3041)
-5. Access Kitbook documentation: http://localhost:3041/kitbook
-
 ### Development Commands (from root)
 - `pnpm dev` - Start development server
 - `pnpm build` - Build for production
 - `pnpm preview` - Preview production build
 - `pnpm test` - Run all unit tests with Vitest
-- `pnpm test:e2e` - Run Playwright E2E tests
-- `pnpm test:db` - Run database integration tests
 - `pnpm lint` - Run ESLint
 - `pnpm lint:fix` - Auto-fix linting issues
 - `pnpm check` - Run svelte-check for type errors
 - `pnpm generate-types` - Generate TypeScript types from Supabase schema
-- `pnpm reset-db` - Reset local database to seed state
 
 ### Git Workflow
 - Follow GitHub Flow methodology
@@ -326,23 +274,12 @@ Entries support rich multimedia content:
 - Use feature branches for all development work
 - Keep branches up to date with main
 
-### Environment Variables
-- `.env.development` - Local development configuration
-- `.env` - Production secrets (never commit)
-- Required variables documented in env.md
-
 ### Local Database
 - Supabase local instance for development
 - Migrations in `/supabase/migrations`
 - Seed data in `/supabase/seed.sql`
 - Reset with `pnpm reset-db`
 - Generate types after schema changes: `pnpm generate-types`
-
-### Hot Reload
-- Vite provides instant hot module replacement (HMR)
-- Changes to Svelte files reload immediately
-- Enable auto-save in VSCode for best experience
-- Server routes may require manual refresh
 
 ## Testing Guidelines
 
@@ -354,30 +291,6 @@ Entries support rich multimedia content:
 - Use `describe` and `test`/`it` blocks
 - Mock external dependencies appropriately
 - Test pure functions and business logic
-
-### Database Tests
-- Located in `packages/site/src/db-tests`
-- Require local Supabase instance running
-- Run with `pnpm test:db`
-- Test database operations and RLS policies
-- Use seed data for consistent test state
-- Clean up test data after tests
-
-### E2E Tests (Playwright)
-- Located in `packages/site/e2e`
-- Run with `pnpm test:e2e`
-- Test critical user flows
-- Use page object pattern when appropriate
-- Run against local dev server (auto-started)
-- Screenshots and videos captured on failure
-
-### Component Tests (Kitbook)
-- Visual regression testing with Playwright
-- Component documentation and examples
-- Located alongside components with `.composition` extension
-- Run with `pnpm test:components`
-- Update snapshots: `pnpm test:components:update`
-- Accessible at `/kitbook` route during development
 
 ### Testing Best Practices
 - Write tests for bug fixes to prevent regression
@@ -398,40 +311,7 @@ Entries support rich multimedia content:
 4. Static assets processed and fingerprinted
 5. Server endpoints bundled as serverless functions
 
-### Production Environment
-- **Hosting**: Vercel with SSR
-- **Database**: Supabase production instance
-- **CDN**: Vercel Edge Network
-- **Environment**: Node.js serverless functions
-- **Monitoring**: LogRocket, Sentry, Web Vitals
-
-### Deployment Strategy
-- **Main branch** → Automatic deployment to production
-- **Pull requests** → Preview deployments on Vercel
-- **Environment variables** → Configured in Vercel dashboard
-- **Database migrations** → Applied manually to Supabase production
-- **Zero-downtime deployments** → Vercel handles gracefully
-
-### Performance Optimization
-- Server-side rendering for initial page load
-- Code splitting by route
-- Image optimization with responsive serving URLs
-- Asset preloading for critical resources
-- Service worker for offline functionality
-- Bundle size monitoring
-
-### CI/CD
-- GitHub Actions (if configured)
-- Automated linting and type checking
-- Test suite runs on pull requests
-- Vercel deployment previews
-- Production deployment on main branch merge
-
 ## Project-Specific Notes
-
-### Special Dictionaries
-Some dictionaries have variant support (see `DICTIONARIES_WITH_VARIANTS` in constants.ts):
-- babanki, torwali, ksingmul, tutelo-saponi, tseltal, namtrik-de-totoro, werikyana, woleaia, guwar
 
 ### API Endpoints
 - `/api/db/*` - Database operations (authenticated)
@@ -475,27 +355,10 @@ Utility scripts for maintenance tasks:
 
 ### Known Limitations
 - Don't run bash commands for dev, lint, etc. (use pnpm scripts)
-- Some legacy code may not follow current conventions
-- GCS integration is legacy - prefer Supabase Storage for new features
-- Firebase Functions package exists but is minimal usage
-
-### Contributing Documentation
-- Main docs in `packages/site/src/docs`
-- Served via Kitbook at `/kitbook/docs`
-- Markdown format
-- Update CONTRIBUTING.md for significant workflow changes
 
 ## Common Patterns & Utilities
 
 ### Helper Functions (in `lib/helpers`)
-- **cookies.ts** - Cookie management for auth tokens
-- **debounce.ts** - Debouncing user input
-- **glosses.ts** - Working with multi-language glosses
-- **exampleSentences.ts** - Example sentence formatting
-- **media.ts** - Media URL generation and validation
-- **get-post-requests.ts** - HTTP request helpers
-- **inviteHelper.ts** - User invitation logic
-- **prune.ts** - Remove null/undefined values from objects
 
 ### SvelteKit Patterns
 - **Load functions** (`+page.ts`, `+layout.ts`): Fetch data before rendering
@@ -504,20 +367,6 @@ Utility scripts for maintenance tasks:
 - **Form actions** (`+page.server.ts`): Handle form submissions
 - **Hooks** (`hooks.server.ts`): Handle auth, set user context
 - **Error boundaries** (`+error.svelte`): Custom error pages
-
-### Store Patterns
-- Use Svelte stores for reactive state
-- `$page` store for accessing page data and URL
-- Custom stores in `lib/stores` for global state
-- Derived stores for computed values
-- Use `readable` for external data sources
-
-### Authentication Patterns
-- Check auth in `hooks.server.ts`
-- Set user in `locals` for server-side access
-- Use `$page.data.user` in components
-- Redirect unauthenticated users in `+page.server.ts` load functions
-- Handle auth state changes reactively
 
 ### Database Query Patterns
 - Use typed Supabase client from `lib/supabase`
@@ -535,42 +384,9 @@ Utility scripts for maintenance tasks:
 - Use `$$restProps` for passing through HTML attributes
 - Create reusable UI components in `lib/components/ui`
 
-### Media Upload Pattern
-1. Upload to Supabase Storage via `/api/upload`
-2. Get signed URL or serving URL
-3. Store reference in database
-4. Display with lazy loading
-5. Clean up orphaned files via `media_to_delete` table
-
 ### Internationalization Pattern
 1. Add English text to `locales/en.json`
 2. Use descriptive section-based keys
 3. Access via `$page.data.t.section.key`
 4. Interpolate variables with helper function
 5. Human translators add other languages later
-
-### Search Pattern
-1. Load dictionary entries
-2. Index with Orama (lexeme, glosses, phonetic, etc.)
-3. Store index in IndexedDB
-4. Search as user types
-5. Display results reactively
-6. Update index when entries change
-
-### Form Validation Pattern
-- Client-side validation for UX
-- Server-side validation for security
-- Use HTML5 validation attributes
-- Show errors inline near inputs
-- Prevent submission until valid
-- Handle validation errors from server
-
-### Accessibility Checklist
-- Semantic HTML elements
-- Proper heading hierarchy
-- Alt text for images
-- ARIA labels where needed
-- Keyboard navigation support
-- Focus management in modals
-- Color contrast compliance
-- Screen reader testing for critical flows
