@@ -12,8 +12,7 @@
   import { page } from '$app/stores'
 
   export let data: PageData
-  $: ({ users, dictionary_roles } = data)
-  $: ({ dictionaries } = $page.data)
+  $: ({ users, dictionary_roles, admin_dictionaries } = data)
 
   $: users_with_roles = $users.map((user) => {
     return {
@@ -26,7 +25,7 @@
 
   const invites = writable<Tables<'invites'>[]>([])
 
-  $: dictionaries_with_editors_invites = $dictionaries
+  $: dictionaries_with_editors_invites = $admin_dictionaries
     // eslint-disable-next-line array-callback-return
     .filter((dictionary) => {
       if (active_section === 'public') return dictionary.public
@@ -56,7 +55,7 @@
       const { error } = await data.supabase.from('dictionaries').update(change)
         .eq('id', dictionary_id)
       if (error) throw new Error(error.message)
-      await $page.data.dictionaries.refresh()
+      await admin_dictionaries.refresh()
     } catch (err) {
       alert(`Error: ${err}`)
     }
