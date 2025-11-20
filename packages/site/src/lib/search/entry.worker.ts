@@ -363,7 +363,7 @@ export async function init_entries(
   const senses_promise = cached_data_table({ table: 'senses', include: ['created_at', 'entry_id', 'definition', 'glosses', 'noun_class', 'parts_of_speech', 'plural_form', 'semantic_domains', 'variant', 'write_in_semantic_domains'], dictionary_id, supabase, log })
   const audios_promise = cached_data_table({ table: 'audio', include: ['created_at', 'entry_id', 'source', 'storage_path'], dictionary_id, supabase, log })
   const speakers_promise = cached_data_table({ table: 'speakers', include: ['birthplace', 'decade', 'gender', 'name'], dictionary_id, supabase, log })
-  const tags_promise = cached_data_table({ table: 'tags', include: ['name'], dictionary_id, supabase, log })
+  const tags_promise = cached_data_table({ table: 'tags', include: ['name', 'private'], dictionary_id, supabase, log })
   const dialects_promise = cached_data_table({ table: 'dialects', include: ['name'], dictionary_id, supabase, log })
   const photos_promise = cached_data_table({ table: 'photos', include: ['photographer', 'storage_path', 'serving_url', 'source'], dictionary_id, supabase, log })
   const videos_promise = cached_data_table({ table: 'videos', include: ['hosted_elsewhere', 'source', 'storage_path', 'videographer'], dictionary_id, supabase, log })
