@@ -11,7 +11,7 @@
 
   $: ({ tags: dictionary_tags, dbOperations } = $page.data)
   $: tag_ids = tags.map(tag => tag.id)
-  $: options = $dictionary_tags.filter(tag => !tag.private).map(tag => ({ value: tag.id, name: tag.name })) satisfies SelectOption[]
+  $: options = $dictionary_tags.map(tag => ({ value: tag.id, name: tag.name })) satisfies SelectOption[]
 
   async function on_update(new_values: string[]) {
     // go through current tag_ids and check if they are in the new_values, if not remove them

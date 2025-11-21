@@ -112,7 +112,7 @@
         <EntryTag
           entry_id={entry.id}
           {can_edit}
-          tags={(entry.tags || []).filter(tag => tag.private !== true)} />
+          tags={entry.tags || []} />
         <div class="border-b-2 pb-1 mb-2 border-dashed" />
       </div>
     {/if}
