@@ -16,7 +16,7 @@ export interface EntryData {
   senses: EntryDataSense[]
   audios?: EntryDataAudio[]
   dialects?: Pick<Tables<'dialects'>, 'id' | 'updated_at' | 'name'>[]
-  tags?: Pick<Tables<'tags'>, 'id' | 'updated_at' | 'name'>[]
+  tags?: Pick<Tables<'tags'>, 'id' | 'updated_at' | 'name' | 'private'>[]
   updated_at: string
   deleted?: string
 }
