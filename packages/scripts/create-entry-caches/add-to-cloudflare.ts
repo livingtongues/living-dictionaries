@@ -19,6 +19,8 @@ const cache_client = new S3Client({
   },
 })
 
+// How to update all caches (3 steps):
+// 1. Use date_for_updating_all_caches instead date_since_last_update
 const date_for_updating_all_caches = '1970-01-01T00:00:00Z'
 const hours_since_last_update = 1.5
 const milliseconds_since_last_update = hours_since_last_update * 60 * 60 * 1000
@@ -31,12 +33,13 @@ async function write_caches() {
     const { data: dictionary_ids } = await admin_supabase.from('dictionaries')
       .select('id')
       .order('id')
-      // .range(1000, 1999)
-      // 1st do public
+      // 2. Uncomment this line to do the first >1000 public dictionaries with `pnpm -F scripts create-entry-caches`
       // .eq('public', true)
-      // 2nd do private but not conlang (won't cache those)
+      // 3. Then comment the above and then uncomment these 2 lines to do the first >1000 private dictionaries but not conlang (won't cache those). Run `pnpm -F scripts create-entry-caches`, check everything online, and then ditch this file's changes.
       // .neq('public', true)
       // .is('con_language_description', null)
+      // Don't need range yet, but will if private dictionaries exceeds 1,000 (currently 782, Nov 2025)
+      // .range(1000, 1999)
       .order('updated_at', { ascending: true })
       .gt('updated_at', date_since_last_update)
 
