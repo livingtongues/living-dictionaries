@@ -348,15 +348,21 @@ export async function init_entries(
     await create_index(cached, dictionary_id)
     mark_search_index_updated()
     console.info('can search using cached entries_data')
-
-    if (!can_edit) {
-      set_loading(false)
-      return
-    }
   }
 
   if (!supabase) {
     supabase = createClient<Database>(PUBLIC_SUPABASE_API_URL, PUBLIC_SUPABASE_ANON_KEY, { auth: { persistSession: true } })
+  }
+
+  if (cached && !can_edit) {
+    const tags_promise = cached_data_table({ table: 'tags', include: ['name'], dictionary_id, supabase, log })
+    const dialects_promise = cached_data_table({ table: 'dialects', include: ['name'], dictionary_id, supabase, log });
+    ([tags, dialects] = await Promise.all([tags_promise, dialects_promise]))
+    set_tags(Object.values(tags))
+    set_dialects(Object.values(dialects))
+
+    set_loading(false)
+    return
   }
 
   const entries_promise = cached_data_table({ table: 'entries', include: ['coordinates', 'elicitation_id', 'interlinearization', 'lexeme', 'morphology', 'notes', 'phonetic', 'scientific_names', 'sources'], dictionary_id, supabase, log })
