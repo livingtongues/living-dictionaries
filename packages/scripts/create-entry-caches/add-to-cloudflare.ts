@@ -336,4 +336,8 @@ async function upload_to_cloudflare(filename: string, cache_json_string: string)
   }
 }
 
-type TableNames = 'entries' | 'senses' | 'audio' | 'speakers' | 'tags' | 'dialects' | 'photos' | 'videos' | 'sentences' | 'audio_speakers' | 'video_speakers' | 'entry_tags' | 'entry_dialects' | 'sense_photos' | 'sense_videos' | 'senses_in_sentences'
+type TableNames = DataTableName | JoinTableName
+
+type DataTableName = 'entries' | 'senses' | 'audio' | 'speakers' | 'tags' | 'dialects' | 'photos' | 'videos' | 'sentences'
+
+type JoinTableName = 'audio_speakers' | 'video_speakers' | 'entry_tags' | 'entry_dialects' | 'sense_photos' | 'sense_videos' | 'senses_in_sentences'
