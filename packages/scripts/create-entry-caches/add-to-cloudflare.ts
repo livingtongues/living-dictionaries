@@ -196,7 +196,8 @@ async function write_caches() {
       for (const entry_tag of Object.values(entry_tags)) {
         if (!entry_id_to_tags[entry_tag.entry_id]) entry_id_to_tags[entry_tag.entry_id] = []
         const tag = tags[entry_tag.tag_id]
-        entry_id_to_tags[entry_tag.entry_id].push(tag)
+        if (!tag.private)
+          entry_id_to_tags[entry_tag.entry_id].push(tag)
       }
 
       for (const entry_dialect of Object.values(entry_dialects)) {
