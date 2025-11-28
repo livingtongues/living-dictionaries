@@ -1,7 +1,7 @@
 // pnpm -F scripts create-entry-caches
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { access, constants, writeFile } from 'node:fs/promises'
+import { access, constants, mkdir, writeFile } from 'node:fs/promises'
 import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3'
 import type { EntryData, Tables } from '@living-dictionaries/types'
 import { admin_supabase } from '../config-supabase'
@@ -19,6 +19,8 @@ const cache_client = new S3Client({
   },
 })
 
+// How to update all caches (3 steps):
+// 1. Use date_for_updating_all_caches instead date_since_last_update
 const date_for_updating_all_caches = '1970-01-01T00:00:00Z'
 const hours_since_last_update = 1.5
 const milliseconds_since_last_update = hours_since_last_update * 60 * 60 * 1000
@@ -28,24 +30,35 @@ await write_caches()
 async function write_caches() {
   let current_dict = ''
   try {
+    // Ensure caches folder exists before processing dictionaries
+    const folder = './caches'
+    const folder_path = path.join(__dirname, folder)
+    await mkdir(folder_path, { recursive: true })
+
     const { data: dictionary_ids } = await admin_supabase.from('dictionaries')
       .select('id')
       .order('id')
-      // .range(1000, 1999)
-      // 1st do public
+      // 2. Uncomment this line to do the first >1000 public dictionaries with `pnpm -F scripts create-entry-caches`
       // .eq('public', true)
-      // 2nd do private but not conlang (won't cache those)
+      // 3. Then comment the above and then uncomment these 2 lines to do the first >1000 private dictionaries but not conlang (won't cache those). Run `pnpm -F scripts create-entry-caches`, check everything online, and then ditch this file's changes.
       // .neq('public', true)
       // .is('con_language_description', null)
+      // Don't need range yet, but will if private dictionaries exceeds 1,000 (currently 782, Nov 2025)
+      // .range(1000, 1999)
       .order('updated_at', { ascending: true })
       .gt('updated_at', date_since_last_update)
 
     console.log(`Writing caches for ${dictionary_ids.length} dictionaries...`)
 
     for (const { id: dictionary_id } of dictionary_ids) {
+      // Add the name of the dictionary to start on, if needed to start partway through. If mazahua errored, put in mazahua.
+      // if (dictionary_id < 'mazahua') {
+      //   console.log(`Skipping ${dictionary_id}`)
+      //   continue
+      // }
+
       console.log(`Processing ${dictionary_id}`)
       const format = 'json'
-      const folder = './caches'
       const filename = `${dictionary_id}.${format}`
       const filepath = path.join(__dirname, folder, filename)
 
@@ -133,7 +146,7 @@ async function write_caches() {
       const senses_promise = get_table({ table: 'senses', include: ['created_at', 'entry_id', 'definition', 'glosses', 'noun_class', 'parts_of_speech', 'plural_form', 'semantic_domains', 'variant', 'write_in_semantic_domains'] })
       const audios_promise = get_table({ table: 'audio', include: ['created_at', 'entry_id', 'source', 'storage_path'] })
       const speakers_promise = get_table({ table: 'speakers', include: ['birthplace', 'decade', 'gender', 'name'] })
-      const tags_promise = get_table({ table: 'tags', include: ['name'] })
+      const tags_promise = get_table({ table: 'tags', include: ['name', 'private'] })
       const dialects_promise = get_table({ table: 'dialects', include: ['name'] })
       const photos_promise = get_table({ table: 'photos', include: ['photographer', 'storage_path', 'serving_url', 'source'] })
       const videos_promise = get_table({ table: 'videos', include: ['hosted_elsewhere', 'source', 'storage_path', 'videographer'] })
@@ -196,7 +209,8 @@ async function write_caches() {
       for (const entry_tag of Object.values(entry_tags)) {
         if (!entry_id_to_tags[entry_tag.entry_id]) entry_id_to_tags[entry_tag.entry_id] = []
         const tag = tags[entry_tag.tag_id]
-        entry_id_to_tags[entry_tag.entry_id].push(tag)
+        if (!tag.private)
+          entry_id_to_tags[entry_tag.entry_id].push(tag)
       }
 
       for (const entry_dialect of Object.values(entry_dialects)) {

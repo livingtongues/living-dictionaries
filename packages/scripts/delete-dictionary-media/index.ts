@@ -32,10 +32,20 @@ async function delete_dictionary_media({ live }: { live: boolean }) {
   for (const media of media_to_delete) {
     if (live) {
       console.log(`Deleting media from ${media.dictionary_id}: ${media.storage_path}`)
-      await GCLOUD_MEDIA_BUCKET_S3.send(new DeleteObjectCommand({
-        Bucket: storage_bucket,
-        Key: media.storage_path,
-      }))
+      try {
+        await GCLOUD_MEDIA_BUCKET_S3.send(new DeleteObjectCommand({
+          Bucket: storage_bucket,
+          Key: media.storage_path,
+        }))
+      } catch (error) {
+        // @ts-expect-error
+        if (error.Code === 'NoSuchKey') {
+          console.log(`Media file not found, may have already been deleted: ${media.storage_path}`)
+        } else {
+          console.error(`Error deleting media from ${media.dictionary_id}: ${media.storage_path}`, error)
+          throw error
+        }
+      }
       await admin_supabase.from('media_to_delete').delete().eq('id', media.id)
     } else {
       console.log(`Would delete from ${media.dictionary_id}: ${media.storage_path}`)
