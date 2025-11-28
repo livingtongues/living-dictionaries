@@ -39,14 +39,14 @@ async function write_caches() {
       .select('id')
       .order('id')
       // 2. Uncomment this line to do the first >1000 public dictionaries with `pnpm -F scripts create-entry-caches`
-      .eq('public', true)
+      // .eq('public', true)
       // 3. Then comment the above and then uncomment these 2 lines to do the first >1000 private dictionaries but not conlang (won't cache those). Run `pnpm -F scripts create-entry-caches`, check everything online, and then ditch this file's changes.
       // .neq('public', true)
       // .is('con_language_description', null)
       // Don't need range yet, but will if private dictionaries exceeds 1,000 (currently 782, Nov 2025)
       // .range(1000, 1999)
       .order('updated_at', { ascending: true })
-      .gt('updated_at', date_for_updating_all_caches)
+      .gt('updated_at', date_since_last_update)
 
     console.log(`Writing caches for ${dictionary_ids.length} dictionaries...`)
 
