@@ -51,6 +51,12 @@ async function write_caches() {
     console.log(`Writing caches for ${dictionary_ids.length} dictionaries...`)
 
     for (const { id: dictionary_id } of dictionary_ids) {
+      // Add the name of the dictionary to start on, if needed to start partway through. If mazahua errored, put in mazahua.
+      // if (dictionary_id < 'mazahua') {
+      //   console.log(`Skipping ${dictionary_id}`)
+      //   continue
+      // }
+
       console.log(`Processing ${dictionary_id}`)
       const format = 'json'
       const filename = `${dictionary_id}.${format}`
@@ -140,7 +146,7 @@ async function write_caches() {
       const senses_promise = get_table({ table: 'senses', include: ['created_at', 'entry_id', 'definition', 'glosses', 'noun_class', 'parts_of_speech', 'plural_form', 'semantic_domains', 'variant', 'write_in_semantic_domains'] })
       const audios_promise = get_table({ table: 'audio', include: ['created_at', 'entry_id', 'source', 'storage_path'] })
       const speakers_promise = get_table({ table: 'speakers', include: ['birthplace', 'decade', 'gender', 'name'] })
-      const tags_promise = get_table({ table: 'tags', include: ['name'] })
+      const tags_promise = get_table({ table: 'tags', include: ['name', 'private'] })
       const dialects_promise = get_table({ table: 'dialects', include: ['name'] })
       const photos_promise = get_table({ table: 'photos', include: ['photographer', 'storage_path', 'serving_url', 'source'] })
       const videos_promise = get_table({ table: 'videos', include: ['hosted_elsewhere', 'source', 'storage_path', 'videographer'] })
