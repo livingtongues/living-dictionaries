@@ -422,7 +422,7 @@ export async function init_entries(
   for (const entry_tag of Object.values(entry_tags)) {
     if (!entry_id_to_tags[entry_tag.entry_id]) entry_id_to_tags[entry_tag.entry_id] = []
     const tag = tags[entry_tag.tag_id]
-    if (tag.name.startsWith('v4')) continue // don't show import tags in frontend
+    // if (tag.name.startsWith('v4')) continue // don't show import tags in frontend
     entry_id_to_tags[entry_tag.entry_id].push(tag)
   }
 

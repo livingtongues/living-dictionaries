@@ -13,7 +13,18 @@
   export let on_close: () => void
   export let result_facets: FacetResult
 
-  $: ({ tags, dialects, speakers } = $page.data)
+  $: ({ tags, dialects, speakers, admin } = $page.data)
+
+  $: public_tags = $tags.filter(tag => !tag.private)
+  $: public_tag_names = new Set(public_tags.map(tag => tag.name))
+  $: public_tag_facets = result_facets?._tags?.values
+    ? Object.fromEntries(
+      Object.entries(result_facets._tags.values).filter(([tagName]) => public_tag_names.has(tagName)),
+    )
+    : {}
+  $: show_tags_filter = $admin > 1
+    ? result_facets._tags?.count
+    : Object.keys(public_tag_facets).length > 0
 </script>
 
 <ResponsiveSlideover
@@ -91,11 +102,11 @@
             values={result_facets._dialects.values}
             label={$page.data.t('entry_field.dialects')} />
         {/if}
-        {#if result_facets._tags.count}
+        {#if show_tags_filter}
           <FilterList
             {search_params}
             search_param_key="tags"
-            values={result_facets._tags.values}
+            values={$admin > 1 ? result_facets._tags.values : public_tag_facets}
             label={$page.data.t('entry_field.custom_tags')} />
         {/if}
         {#if result_facets._speakers.count}

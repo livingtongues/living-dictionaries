@@ -18,6 +18,8 @@
 
   const text_fields = ['morphology', 'interlinearization'] satisfies EntryFieldValue[]
 
+  $: ({ admin } = $page.data)
+
   function update_entry(update: TablesUpdate<'entries'>) {
     dbOperations.update_entry(update)
   }
@@ -106,7 +108,7 @@
       </div>
     {/if}
 
-    {#if entry.tags?.length || can_edit}
+    {#if (entry.tags?.length || can_edit) && $admin > 1}
       <div class="md:px-2" class:order-2={!entry.tags?.length}>
         <div class="rounded text-xs text-gray-500 mt-1 mb-2">{$page.data.t('entry_field.custom_tags')}</div>
         <EntryTag
