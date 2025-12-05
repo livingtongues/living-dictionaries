@@ -24,10 +24,6 @@
 
   $: sense = entry.senses?.[0]
   $: first_photo = entry.senses?.[0]?.photos?.[0]
-  $: ({ admin } = $page.data)
-  $: displayed_tags = $admin > 1
-    ? entry.tags || []
-    : (entry.tags || []).filter(tag => !tag.private)
 
   function update_entry(update: TablesUpdate<'entries'>) {
     dbOperations.update_entry({ ...update, id: entry.id })
@@ -112,7 +108,7 @@
       entry_id={entry.id}
       {can_edit}
       showPlus={false}
-      tags={displayed_tags} />
+      tags={entry.tags || []} />
   {:else if column.field === 'sources'}
     <EntrySource
       {can_edit}

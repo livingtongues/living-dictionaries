@@ -10,6 +10,7 @@ const log = false
 let supabase: Supabase | undefined
 
 let dictionary_id: string
+let admin: number
 let upsert_entry_data: (entries_data: Record<string, EntryData>) => Promise<void>
 let delete_entry: (entry_id: string) => Promise<void>
 let set_speakers: (speakers: Tables<'speakers'>[]) => Promise<void>
@@ -301,6 +302,7 @@ async function process_and_update_entry(entry: Tables<'entries'>) {
 export interface InitEntryWorkerOptions {
   dictionary_id: string
   can_edit: boolean
+  admin: number
   PUBLIC_SUPABASE_API_URL: string
   PUBLIC_SUPABASE_ANON_KEY: string
   set_entries_data: (entries_data: Record<string, EntryData>) => void
@@ -317,6 +319,7 @@ export async function init_entries(
   options: {
     dictionary_id: string
     can_edit: boolean
+    admin: number
     PUBLIC_SUPABASE_API_URL: string
     PUBLIC_SUPABASE_ANON_KEY: string
   },
@@ -336,7 +339,7 @@ export async function init_entries(
   set_dialects = _set_dialects
   mark_search_index_updated = _mark_search_index_updated
 
-  ;({ dictionary_id } = options)
+  ;({ dictionary_id, admin } = options)
   const { can_edit, PUBLIC_SUPABASE_API_URL, PUBLIC_SUPABASE_ANON_KEY } = options
 
   const cached = await load_cache(dictionary_id)
@@ -422,7 +425,7 @@ export async function init_entries(
   for (const entry_tag of Object.values(entry_tags)) {
     if (!entry_id_to_tags[entry_tag.entry_id]) entry_id_to_tags[entry_tag.entry_id] = []
     const tag = tags[entry_tag.tag_id]
-    // if (tag.name.startsWith('v4')) continue // don't show import tags in frontend
+    if (tag.name.startsWith('v4') && !admin) continue // don't show import tags in frontend unless admin
     entry_id_to_tags[entry_tag.entry_id].push(tag)
   }
 
