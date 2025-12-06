@@ -1,10 +1,13 @@
 import { redirect } from '@sveltejs/kit'
-import { derived, readable } from 'svelte/store'
+import { derived, readable, get } from 'svelte/store'
 import type { EntryData, Tables } from '@living-dictionaries/types'
 import { ResponseCodes } from '$lib/constants'
+import { should_include_tag } from '$lib/helpers/tag-visibility'
 import { browser } from '$app/environment'
 
 export async function load({ params: { entryId: entry_id }, parent }) {
+  const { admin } = await parent()
+  const is_admin = get(admin)
   const entry_history = readable<Tables<'content_updates'>[]>([], (set) => {
     (async () => {
       const { supabase } = await parent()
@@ -28,6 +31,10 @@ export async function load({ params: { entryId: entry_id }, parent }) {
     if (cached) {
       const entry = cached.find(entry => entry.id === entry_id)
       if (entry) {
+        // Filter out v4 tags for non-admins and private tags for casual users
+        if (entry.tags) {
+          entry.tags = entry.tags.filter(tag => should_include_tag(tag, is_admin))
+        }
         return {
           entry_from_page: entry,
           shallow: false,

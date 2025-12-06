@@ -1,6 +1,7 @@
 import { expose } from 'comlink'
 import type { Database, EntryData, Tables, TablesInsert, TablesUpdate } from '@living-dictionaries/types'
 import { createClient } from '@supabase/supabase-js'
+import { should_include_tag } from '$lib/helpers/tag-visibility'
 import { clear } from 'idb-keyval'
 import { _search_entries, create_index, update_index_entry } from './orama.worker'
 import type { Supabase } from '$lib/supabase'
@@ -344,11 +345,17 @@ export async function init_entries(
 
   const cached = await load_cache(dictionary_id)
   if (cached) {
-    set_entries_data(cached.reduce((acc, entry) => {
+    const filtered_cached = cached.map(entry => {
+      if (entry.tags) {
+        entry.tags = entry.tags.filter(tag => should_include_tag(tag, admin))
+      }
+      return entry
+    })
+    set_entries_data(filtered_cached.reduce((acc, entry) => {
       acc[entry.id] = entry
       return acc
     }, {}))
-    await create_index(cached, dictionary_id)
+    await create_index(filtered_cached, dictionary_id)
     mark_search_index_updated()
     console.info('can search using cached entries_data')
   }
@@ -425,8 +432,7 @@ export async function init_entries(
   for (const entry_tag of Object.values(entry_tags)) {
     if (!entry_id_to_tags[entry_tag.entry_id]) entry_id_to_tags[entry_tag.entry_id] = []
     const tag = tags[entry_tag.tag_id]
-    if (tag.name.startsWith('v4') && !admin) continue // don't show import tags in frontend unless admin
-    entry_id_to_tags[entry_tag.entry_id].push(tag)
+    if (should_include_tag(tag, admin)) entry_id_to_tags[entry_tag.entry_id].push(tag)
   }
 
   for (const entry_dialect of Object.values(entry_dialects)) {
