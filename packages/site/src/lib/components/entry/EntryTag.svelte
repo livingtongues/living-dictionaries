@@ -3,15 +3,17 @@
   import type { SelectOption } from '$lib/components/ui/array/select-options.interface'
   import ModalEditableArray from '$lib/components/ui/array/ModalEditableArray.svelte'
   import { page } from '$app/stores'
+  import { should_include_tag } from '$lib/helpers/tag-visibility'
 
   export let tags: EntryData['tags']
   export let entry_id: string
   export let can_edit = false
   export let showPlus = true
 
-  $: ({ tags: dictionary_tags, dbOperations } = $page.data)
+  $: ({ tags: dictionary_tags, dbOperations, admin } = $page.data)
   $: tag_ids = tags.map(tag => tag.id)
-  $: options = $dictionary_tags.map(tag => ({ value: tag.id, name: tag.name })) satisfies SelectOption[]
+  $: visible_tags = $dictionary_tags.filter(tag => should_include_tag(tag, $admin))
+  $: options = visible_tags.map(tag => ({ value: tag.id, name: tag.name })) satisfies SelectOption[]
 
   async function on_update(new_values: string[]) {
     // go through current tag_ids and check if they are in the new_values, if not remove them

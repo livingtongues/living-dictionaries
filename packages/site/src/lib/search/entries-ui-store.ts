@@ -7,9 +7,11 @@ import { PUBLIC_SUPABASE_ANON_KEY, PUBLIC_SUPABASE_API_URL } from '$env/static/p
 export function create_entries_ui_store({
   dictionary_id,
   can_edit,
+  admin,
 }: {
   dictionary_id: string
   can_edit: Readable<boolean>
+  admin: Readable<number>
 }) {
   const entries_data = writable<Record<string, EntryData>>({})
   const speakers = writable<Tables<'speakers'>[]>([])
@@ -61,11 +63,13 @@ export function create_entries_ui_store({
   }
 
   const is_editor = get(can_edit)
+  const is_admin = get(admin)
 
   if (browser) {
     init_entries({
       dictionary_id,
       can_edit: is_editor,
+      admin: is_admin,
       PUBLIC_SUPABASE_ANON_KEY,
       PUBLIC_SUPABASE_API_URL,
       set_entries_data,
