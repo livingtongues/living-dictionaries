@@ -44,7 +44,7 @@ export const load: LayoutLoad = async ({ params: { dictionaryId: dictionary_url 
 
     const default_entries_per_page = 20
 
-    const entries_ui = create_entries_ui_store({ dictionary_id, can_edit })
+    const entries_ui = create_entries_ui_store({ dictionary_id, can_edit, admin })
 
     const dictionary_info = readable<Tables<'dictionary_info'>>({} as Tables<'dictionary_info'>, (set) => {
       (async () => {
