@@ -1,7 +1,4 @@
 <script lang="ts">
-  import { createBubbler, stopPropagation } from 'svelte/legacy';
-
-  const bubble = createBubbler();
   import type { EntryData } from '@living-dictionaries/types'
   import { Button } from '$lib/svelte-pieces'
   import VideoThirdParty from './VideoThirdParty.svelte'
@@ -32,7 +29,7 @@
     <div
       class="font-semibold text-white p-4 flex justify-between items-center
         absolute top-0 inset-x-0 bg-opacity-25 bg-black">
-      <span onclick={stopPropagation(bubble('click'))}>{lexeme}</span>
+      <span onclick={(e) => e.stopPropagation()}>{lexeme}</span>
       <span class="i-fa-solid-times p-3 cursor-pointer"></span>
     </div>
     {#if video.storage_path}

@@ -1,6 +1,4 @@
 <script lang="ts">
-  import { run } from 'svelte/legacy';
-
   import { Button, ShowHide } from '$lib/svelte-pieces'
   import type { DictionaryView } from '@living-dictionaries/types'
   import { onMount } from 'svelte'
@@ -35,7 +33,7 @@
   let selectedDictionaryId: string = $state()
   let selectedDictionary: DictionaryView = $state()
   let dictionaries = $derived([...public_dictionaries, ...private_dictionaries, ...$my_dictionaries])
-  run(() => {
+  $effect(() => {
     if (selectedDictionaryId)
       selectedDictionary = dictionaries.find(d => d.id === selectedDictionaryId)
     else
@@ -45,7 +43,7 @@
   const featured_dict_names = ['Achi', 'GtaɁ', 'Gutob', 'Kihunde', 'Sora']
   let featured_dictionaries = $derived(public_dictionaries.filter(d => featured_dict_names.includes(d.name)))
 
-  run(() => {
+  $effect(() => {
     if (browser && $admin) {
       get_private_dictionaries().then(_dictionaries => private_dictionaries = _dictionaries)
     } else {

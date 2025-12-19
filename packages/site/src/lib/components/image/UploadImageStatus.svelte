@@ -1,6 +1,4 @@
 <script lang="ts">
-  import { run } from 'svelte/legacy';
-
   import type { Readable } from 'svelte/store'
   import type { ImageUploadStatus } from './upload-image'
   import { page } from '$app/stores'
@@ -11,7 +9,7 @@
   }
 
   let { upload_status, on_finish }: Props = $props();
-  run(() => {
+  $effect(() => {
     if ($upload_status.storage_path) {
       on_finish()
     }

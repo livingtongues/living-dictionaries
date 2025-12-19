@@ -1,6 +1,4 @@
 <script lang="ts">
-  import { run } from 'svelte/legacy';
-
   import { getContext } from 'svelte';
   import { mapKey, type MapKeyContext } from '../context';
 
@@ -30,7 +28,7 @@
 
   let { bcp = 'en' }: Props = $props();
 
-  run(() => {
+  $effect(() => {
     if (bcp !== 'en')
       map.setLayoutProperty('country-label', 'text-field', ['get', `name_${bcp}`]);
   });

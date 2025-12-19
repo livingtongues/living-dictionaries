@@ -1,6 +1,4 @@
 <script lang="ts">
-  import { preventDefault } from 'svelte/legacy';
-
   import { page } from '$app/stores'
 
   const unsupported_audio_formats = [
@@ -52,9 +50,9 @@
 
 <label
   class:dragging
-  ondrop={preventDefault(e => handleAudio((e as DragEvent).dataTransfer.files))}
-  ondragover={preventDefault(() => (dragging = true))}
-  ondragleave={preventDefault(() => (dragging = false))}>
+  ondrop={(e) => { e.preventDefault(); handleAudio((e as DragEvent).dataTransfer.files) }}
+  ondragover={(e) => { e.preventDefault(); dragging = true }}
+  ondragleave={(e) => { e.preventDefault(); dragging = false }}>
   <input
     type="file"
     accept="audio/*"

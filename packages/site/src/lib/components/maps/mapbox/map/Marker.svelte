@@ -12,8 +12,6 @@
 </script>
 
 <script lang="ts">
-  import { run } from 'svelte/legacy';
-
   import { getContext, onMount, setContext } from 'svelte'
   import type { LngLat, Marker, MarkerOptions } from 'mapbox-gl'
   import { type MapKeyContext, type MarkerKeyContext, mapKey, markerKey } from '../context'
@@ -52,7 +50,7 @@
     getMarker: () => marker,
   })
 
-  run(() => {
+  $effect(() => {
     marker?.setLngLat({ lng, lat })
   });
 

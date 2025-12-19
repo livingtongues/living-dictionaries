@@ -1,6 +1,4 @@
 <script lang="ts">
-  import { run } from 'svelte/legacy';
-
   // https://docs.mapbox.com/api/maps/static-images
   // https://stackoverflow.com/questions/69287390/request-static-image-from-mapbox-with-polygon-via-url // use decodeURIComponent to read example
 
@@ -37,7 +35,7 @@
 
   let src = $state('');
   let isSinglePoint = $derived(points?.length === 1 && !regions?.length);
-  run(() => {
+  $effect(() => {
     if (isSinglePoint) {
       const [{ coordinates: firstPoint }] = points
       const { longitude } = firstPoint;
