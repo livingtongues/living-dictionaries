@@ -1,3 +1,4 @@
+// @ts-nocheck
 // import type { Variant, Viewport } from 'kitbook'
 // import type { Change } from '@living-dictionaries/types'
 // import type Component from './+page.svelte'

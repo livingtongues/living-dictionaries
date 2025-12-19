@@ -52,7 +52,7 @@
 
 <label
   class:dragging
-  ondrop={preventDefault(e => handleAudio(e.dataTransfer.files))}
+  ondrop={preventDefault(e => handleAudio((e as DragEvent).dataTransfer.files))}
   ondragover={preventDefault(() => (dragging = true))}
   ondragleave={preventDefault(() => (dragging = false))}>
   <input
@@ -60,8 +60,7 @@
     accept="audio/*"
     class="hidden"
     oninput={(e) => {
-      // @ts-ignore
-      handleAudio(e.target.files)
+      handleAudio((e.target as HTMLInputElement).files)
     }} />
 
   <i class="far fa-upload"></i>&nbsp;

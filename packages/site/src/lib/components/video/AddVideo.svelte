@@ -1,7 +1,7 @@
 <script lang="ts">
   import { Button, Modal, ShowHide } from 'svelte-pieces'
   import type { EntryData, HostedVideo } from '@living-dictionaries/types'
-  import type { Readable } from 'svelte/motion'
+  import type { Readable } from 'svelte/store'
   import SelectVideo from './SelectVideo.svelte'
   import PasteVideoLink from './PasteVideoLink.svelte'
   import type { VideoUploadStatus } from './upload-video'

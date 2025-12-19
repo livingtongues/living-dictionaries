@@ -1,3 +1,4 @@
+// @ts-nocheck
 // import type { Variant } from 'kitbook'
 // import type { IPrintFields } from '@living-dictionaries/types'
 // import type Component from './PrintEntry.svelte'

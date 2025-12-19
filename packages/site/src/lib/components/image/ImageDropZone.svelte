@@ -1,11 +1,13 @@
-<!-- @migration-task Error while migrating Svelte code: $$props is used together with named props in a way that cannot be automatically migrated. -->
 <script lang="ts">
   import { apply_button_label } from './image-store'
   import { page } from '$app/stores'
 
-  export let border: boolean
-  export let on_file_added: (file: File) => void = undefined
-  let dragging = false
+  const { border, on_file_added = undefined, class: class_prop = '' }: {
+    border: boolean
+    on_file_added?: (file: File) => void
+    class?: string
+  } = $props()
+  let dragging = $state(false)
   // const applyButtonLabel: any = getContext('applyButtonLabel')
 
   function handleImage(files: FileList) {
@@ -35,20 +37,19 @@
   class:dashed-border={border}
   class:button-label={$apply_button_label.ready_to_upload}
   class:blocked={!$apply_button_label.ready_to_upload}
-  class="{$$props.class} text-gray-600
+  class="{class_prop} text-gray-600
     h-full grow-1 flex flex-col items-center justify-center
     cursor-pointer"
   title="Add Photo"
-  on:drop|preventDefault={e => handleImage(e.dataTransfer.files)}
-  on:dragover|preventDefault={() => (dragging = true)}
-  on:dragleave|preventDefault={() => (dragging = false)}>
+  ondrop={(e) => { e.preventDefault(); handleImage(e.dataTransfer.files) }}
+  ondragover={(e) => { e.preventDefault(); dragging = true }}
+  ondragleave={(e) => { e.preventDefault(); dragging = false }}>
   <input
     type="file"
     accept="image/*"
     class="hidden"
-    on:input={(e) => {
-      // @ts-expect-error
-      handleImage(e.target.files)
+    oninput={(e) => {
+      handleImage((e.target as HTMLInputElement).files)
     }} />
   <span class="hidden md:inline">
     <span class="i-ic-outline-cloud-upload text-2xl" />

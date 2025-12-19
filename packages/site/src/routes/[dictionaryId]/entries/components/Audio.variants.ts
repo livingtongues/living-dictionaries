@@ -1,3 +1,4 @@
+// @ts-nocheck
 // import type { DeprecatedVariant, Viewport } from 'kitbook'
 // import type { ExpandedEntry } from '@living-dictionaries/types'
 // import type Component from './Audio.svelte'

@@ -1,3 +1,4 @@
+// @ts-nocheck
 // import type { DeprecatedVariant } from 'kitbook'
 // import type { IRegion } from '@living-dictionaries/types'
 // import type Component from './GeoTaggingModal.svelte'

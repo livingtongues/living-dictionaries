@@ -1,3 +1,4 @@
+// @ts-nocheck
 // import type { Variant } from 'kitbook';
 // import type Component from './EntryHistory.svelte';
 // import type { Change } from '@living-dictionaries/types';

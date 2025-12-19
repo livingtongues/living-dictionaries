@@ -1,3 +1,4 @@
+// @ts-nocheck
 // import WhereSpoken from './WhereSpoken.svelte';
 
 // const dictWithMain: Partial<DictionaryView> = {

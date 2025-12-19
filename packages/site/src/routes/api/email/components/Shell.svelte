@@ -1,21 +1,21 @@
 <script lang="ts">
+  import Body from './Body.svelte'
   import Head from './Head.svelte'
   import Html from './Html.svelte'
-  import Body from './Body.svelte'
 
   interface Props {
-    dark?: boolean;
-    preview: string;
-    title: string;
-    children?: import('svelte').Snippet;
+    dark?: boolean
+    preview: string
+    title: string
+    children?: import('svelte').Snippet
   }
 
   let {
     dark = false,
     preview,
     title,
-    children
-  }: Props = $props();
+    children,
+  }: Props = $props()
 </script>
 
 <Html>

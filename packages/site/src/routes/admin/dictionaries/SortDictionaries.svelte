@@ -8,36 +8,37 @@
 
   let { dictionaries = [], children }: Props = $props();
 
-  enum DictionaryFields {
-    name = 'Dictionary Name',
-    public = 'Public',
-    entry_count = 'Entries',
-    managers = 'Managers',
-    contributors = 'Contributors',
-    iso_639_3 = 'ISO 639-3',
-    glottocode = 'Glottocode',
-    coordinates = 'Coordinates',
-    location = 'Location',
-    gloss_languages = 'Gloss Languages',
-    alternate_names = 'Alternate Names',
-    orthographies = 'Alternate Orthographies',
-    created_at = 'Created At',
-    updated_at = 'Updated At',
-    language_used_by_community = 'Language Used by Community',
-    community_permission = 'Community Permission',
-    author_connection = 'Author Connection',
-    con_language_description = 'Conlang Description',
-    conlang = 'Conlang',
-    deleted = 'Delete',
-  }
+  const DictionaryFields = {
+    name: 'Dictionary Name',
+    public: 'Public',
+    entry_count: 'Entries',
+    managers: 'Managers',
+    contributors: 'Contributors',
+    iso_639_3: 'ISO 639-3',
+    glottocode: 'Glottocode',
+    coordinates: 'Coordinates',
+    location: 'Location',
+    gloss_languages: 'Gloss Languages',
+    alternate_names: 'Alternate Names',
+    orthographies: 'Alternate Orthographies',
+    created_at: 'Created At',
+    updated_at: 'Updated At',
+    language_used_by_community: 'Language Used by Community',
+    community_permission: 'Community Permission',
+    author_connection: 'Author Connection',
+    con_language_description: 'Conlang Description',
+    conlang: 'Conlang',
+    deleted: 'Delete',
+  } as const
 
   type SortFields = keyof typeof DictionaryFields
+  type DictionaryFieldValue = typeof DictionaryFields[SortFields]
   // @ts-ignore
   const dictionary_fields: {
     key: SortFields
-    value: DictionaryFields
+    value: DictionaryFieldValue
   }[] = Object.entries(DictionaryFields).map(([key, value]) => {
-    return { key, value }
+    return { key: key as SortFields, value }
   })
 
   let sortKey: SortFields = $state('name')

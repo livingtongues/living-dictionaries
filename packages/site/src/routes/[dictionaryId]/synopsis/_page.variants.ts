@@ -1,3 +1,4 @@
+// @ts-nocheck
 import type { Variant, VariantMeta } from 'kitbook'
 import type Component from './+page.svelte'
 import { mockDictionaryLayoutData } from '$lib/mocks/layout'

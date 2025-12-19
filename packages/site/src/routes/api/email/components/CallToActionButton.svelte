@@ -1,43 +1,54 @@
-<!-- @migration-task Error while migrating Svelte code: `<tr>` cannot be a child of `<table>`. `<table>` only allows these children: `<caption>`, `<colgroup>`, `<tbody>`, `<thead>`, `<tfoot>`, `<style>`, `<script>`, `<template>`. The browser will 'repair' the HTML (by moving, removing, or inserting elements) which breaks Svelte's assumptions about the structure of your components.
-https://svelte.dev/e/node_invalid_placement -->
 <script lang="ts">
-  // @ts-nocheck
   import type { ComponentProps } from 'svelte'
   import Row from './Row.svelte'
 
-  export let row: ComponentProps<Row> = {}
-  export let backgroundColor: string
-  export let href: string
+  interface Props {
+    row?: ComponentProps<typeof Row>
+    backgroundColor: string
+    href: string
+    children?: import('svelte').Snippet
+  }
+
+  let {
+    row = {},
+    backgroundColor,
+    href,
+    children,
+  }: Props = $props()
 </script>
 
 <Row {...row}>
   <td align="center">
     <table width="100%" border="0" cellspacing="0" cellpadding="0">
-      <tr>
-        <td align="center">
-          <table border="0" cellspacing="0" cellpadding="0" class="mobile-button-container">
-            <tr>
-              <td align="center" style="border-radius: 3px;" bgcolor={backgroundColor}>
-                <a target="_blank" {href} style="font-size: 16px; font-family: Helvetica, Arial, sans-serif; color: #ffffff; text-decoration: none; border-radius: 3px; padding: 15px 25px; border: 1px solid {backgroundColor}; display: inline-block;" class="mobile-button">
-                  <slot />
-                </a>
-              </td>
-            </tr>
-          </table>
-        </td>
-      </tr>
+      <tbody>
+        <tr>
+          <td align="center">
+            <table border="0" cellspacing="0" cellpadding="0" class="mobile-button-container">
+              <tbody>
+                <tr>
+                  <td align="center" style="border-radius: 3px;" bgcolor={backgroundColor}>
+                    <a target="_blank" {href} style="font-size: 16px; font-family: Helvetica, Arial, sans-serif; color: #ffffff; text-decoration: none; border-radius: 3px; padding: 15px 25px; border: 1px solid {backgroundColor}; display: inline-block;" class="mobile-button">
+                      {@render children?.()}
+                    </a>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </td>
+        </tr>
+      </tbody>
     </table>
   </td>
 </Row>
 
 <style>
   @media screen and (max-width: 525px) {
-    .mobile-button-container {
+    :global(.mobile-button-container) {
       margin: 0 auto;
       width: 100% !important;
     }
 
-    .mobile-button {
+    :global(.mobile-button) {
       padding: 15px !important;
       border: 0 !important;
       font-size: 16px !important;
@@ -45,3 +56,5 @@ https://svelte.dev/e/node_invalid_placement -->
     }
   }
 </style>
+
+<svelte:options css="injected" />

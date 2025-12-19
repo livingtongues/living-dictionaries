@@ -3,12 +3,12 @@
   import Row from './Row.svelte'
 
   interface Props {
-    row?: ComponentProps<Row>;
-    text: string;
-    fontSize?: number;
+    row?: ComponentProps<typeof Row>
+    text: string
+    fontSize?: number
   }
 
-  let { row = {}, text, fontSize = 28 }: Props = $props();
+  let { row = {}, text, fontSize = 28 }: Props = $props()
 </script>
 
 <Row {...row}>

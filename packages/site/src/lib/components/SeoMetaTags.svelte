@@ -1,31 +1,30 @@
 <script lang="ts">
-  import { compressToEncodedURIComponent as encode } from 'kitbook'
-  import { seoTitle } from './seo-title'
   import { page } from '$app/stores'
+  import { compressToEncodedURIComponent as encode } from '$lib/lz/lz-string'
+  import { seoTitle } from './seo-title'
 
   const IMAGE_API = '/og'
   const DEFAULT_IMAGE
     = 'https://firebasestorage.googleapis.com/v0/b/talking-dictionaries-alpha.appspot.com/o/livingdictionary%2Fimages%2FNEW_Living_Tongues_logo_with_white_around_it.png?alt=media' // 1484 x 729
   const OG_IMAGE_VERSION = 4
 
-
   interface Props {
-    admin?: boolean;
-    dictionaryName?: string;
-    title?: string;
-    imageTitle?: string;
-    description?: string;
-    imageDescription?: string;
-    keywords?: string;
-    type?: 'video' | 'website'; // https://ogp.me/#types
-    norobots?: boolean;
-    handle?: string;
-    url?: any;
-    width?: number;
-    height?: number;
-    gcsPath?: string;
-    lng?: number;
-    lat?: number;
+    admin?: boolean
+    dictionaryName?: string
+    title?: string
+    imageTitle?: string
+    description?: string
+    imageDescription?: string
+    keywords?: string
+    type?: 'video' | 'website' // https://ogp.me/#types
+    norobots?: boolean
+    handle?: string
+    url?: any
+    width?: number
+    height?: number
+    gcsPath?: string
+    lng?: number
+    lat?: number
   }
 
   let {
@@ -44,8 +43,8 @@
     height = 600,
     gcsPath = undefined,
     lng = undefined,
-    lat = undefined
-  }: Props = $props();
+    lat = undefined,
+  }: Props = $props()
 
   let expandedDictionaryName = $derived(dictionaryName
     ? `${dictionaryName} ${$page.data.t('misc.LD_singular')}`

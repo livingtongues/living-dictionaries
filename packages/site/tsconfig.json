@@ -38,5 +38,12 @@
     "forceConsistentCasingInFileNames": true,
     "ignoreDeprecations": "5.0",
     "skipLibCheck": true
-  }
+  },
+  "exclude": [
+    "**/*.variants.ts",
+    "**/*.composition",
+    "**/*.svx",
+    "kitbook.config.ts",
+    "e2e/kitbook.spec.ts"
+  ]
 }

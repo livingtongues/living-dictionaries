@@ -1,3 +1,4 @@
+// @ts-nocheck
 // import type { Variant, VariantMeta } from 'kitbook'
 // import { readable } from 'svelte/store'
 // import type Component from './+page.svelte'

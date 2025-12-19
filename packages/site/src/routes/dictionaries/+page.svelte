@@ -1,5 +1,3 @@
-<!-- @migration-task Error while migrating Svelte code: `<th>` cannot be a child of `<thead>`. `<thead>` only allows these children: `<tr>`, `<style>`, `<script>`, `<template>`. The browser will 'repair' the HTML (by moving, removing, or inserting elements) which breaks Svelte's assumptions about the structure of your components.
-https://svelte.dev/e/node_invalid_placement -->
 <script lang="ts">
   import { Button, ResponsiveTable } from 'svelte-pieces'
   import { page } from '$app/stores'
@@ -43,22 +41,24 @@ https://svelte.dev/e/node_invalid_placement -->
   </div>
   <ResponsiveTable stickyColumn stickyHeading class="my-1">
     <thead>
-      <th>
-        {$page.data.t('dictionary.name_of_language')}
-      </th>
-      <th> {$page.data.t('about.entry_count')} </th>
-      <th> URL </th>
-      <th> ISO 639-3 </th>
-      <th> Glottocode </th>
-      <th>
-        {$page.data.t('dictionary.location')}
-      </th>
-      <th>
-        {$page.data.t('dictionary.latitude')}
-      </th>
-      <th>
-        {$page.data.t('dictionary.longitude')}
-      </th>
+      <tr>
+        <th>
+          {$page.data.t('dictionary.name_of_language')}
+        </th>
+        <th> {$page.data.t('about.entry_count')} </th>
+        <th> URL </th>
+        <th> ISO 639-3 </th>
+        <th> Glottocode </th>
+        <th>
+          {$page.data.t('dictionary.location')}
+        </th>
+        <th>
+          {$page.data.t('dictionary.latitude')}
+        </th>
+        <th>
+          {$page.data.t('dictionary.longitude')}
+        </th>
+      </tr>
     </thead>
     {#each filtered_dictionaries as { url, metadata, name, entry_count, iso_639_3, glottocode, location, coordinates }}
       {@const first_latitude = coordinates?.points?.[0]?.coordinates.latitude}
