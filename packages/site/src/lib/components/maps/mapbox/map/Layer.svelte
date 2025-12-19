@@ -1,6 +1,4 @@
 <script lang="ts">
-  import { run } from 'svelte/legacy';
-
   // from https://gitlab.com/jailbreak/svelte-mapbox-gl
   import { getContext, onDestroy } from 'svelte';
   import { mapKey, sourceKey, type MapKeyContext, type SourceKeyContext } from '../context';
@@ -104,7 +102,7 @@
   // and source is not defined when the first one occurs, then re-create the layer
   const handleStyledata = () => !map.getLayer(id) && map.getSource(sourceId) && addLayer();
 
-  run(() => {
+  $effect(() => {
     const layer = map.getLayer(id);
     if (layer) {
       map.setLayerZoomRange(id, minzoom || 0, maxzoom || 24);

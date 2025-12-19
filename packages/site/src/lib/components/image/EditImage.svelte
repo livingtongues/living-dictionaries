@@ -3,7 +3,6 @@
 
   import AddImage from '$lib/components/image/AddImage.svelte'
   import { Button, Modal } from '$lib/svelte-pieces'
-  import { run } from 'svelte/legacy'
   import { get } from 'svelte/store'
   import { apply_button_label } from './image-store'
 
@@ -41,7 +40,7 @@
     return status
   }
 
-  run(() => {
+  $effect(() => {
     if (ai_image) {
       photographer = 'AI'
     } else {
@@ -49,7 +48,7 @@
     }
   })
 
-  run(() => {
+  $effect(() => {
     if (photo_source?.length >= 10 && rights) {
       apply_button_label.set({ ready_to_upload: true })
     } else {

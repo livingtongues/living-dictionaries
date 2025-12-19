@@ -1,6 +1,4 @@
 <script lang="ts">
-  import { run } from 'svelte/legacy';
-
   import { Button, ShowHide } from '$lib/svelte-pieces'
   import type { PartnerWithPhoto, Tables } from '@living-dictionaries/types'
   import CitationComponent from './Citation.svelte'
@@ -16,14 +14,14 @@
   let contributors = $derived($dictionary_editors.filter(editor => editor.role === 'contributor'))
 
   let invites: Tables<'invites'>[] = $state([])
-  run(() => {
+  $effect(() => {
     data.invites_promise.then(_invites => invites = _invites)
   });
   let manager_invites = $derived(invites.filter(invite => invite.role === 'manager'))
   let contributor_invites = $derived(invites.filter(invite => invite.role === 'contributor'))
 
   let partners: PartnerWithPhoto[] = $state([])
-  run(() => {
+  $effect(() => {
     data.partners_promise.then(_partners => partners = _partners)
   });
 </script>

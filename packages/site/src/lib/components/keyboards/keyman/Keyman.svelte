@@ -10,7 +10,6 @@
 
   import { Button, loadScriptOnce, Modal, ShowHide } from '$lib/svelte-pieces'
   import { onDestroy, onMount, tick } from 'svelte'
-  import { run } from 'svelte/legacy'
   import { additionalKeyboards, glossingLanguages } from '../../../glosses/glossing-languages'
   import './keyman.css'
 
@@ -97,7 +96,7 @@
   let keyboardBcp = $derived(glossLanguage?.useKeyboard ? glossLanguage.useKeyboard : currentBcp)
   let keyboardId = $derived(`${internalName}@${keyboardBcp}`)
 
-  run(() => {
+  $effect(() => {
     if (kmw && show && internalName) {
       (async () => {
         await kmw.addKeyboards(keyboardId)
@@ -117,7 +116,7 @@
     }
   })
 
-  run(() => {
+  $effect(() => {
     if (show)
       inputEl?.classList.remove('kmw-disabled')
     else

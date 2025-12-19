@@ -9,7 +9,6 @@
   import Waveform from '$lib/components/audio/Waveform.svelte'
   import SelectSpeaker from '$lib/components/media/SelectSpeaker.svelte'
   import { Button, JSON, Modal } from '$lib/svelte-pieces'
-  import { run } from 'svelte/legacy'
 
   interface Props {
     on_close: () => void
@@ -26,7 +25,7 @@
   let file: File = $state()
   let audioBlob: Blob = $state()
 
-  run(() => {
+  $effect(() => {
     if (sound_file) {
       file = undefined
       audioBlob = undefined

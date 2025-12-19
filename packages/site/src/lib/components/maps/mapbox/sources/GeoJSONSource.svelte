@@ -1,6 +1,4 @@
 <script lang="ts">
-  import { run } from 'svelte/legacy';
-
   import { getContext, onDestroy, setContext } from 'svelte'
   import type { GeoJSONSource, GeoJSONSourceOptions, GeoJSONSourceRaw } from 'mapbox-gl'
   import { type MapKeyContext, type SourceKeyContext, mapKey, sourceKey } from '../context'
@@ -50,7 +48,7 @@
       addSource()
   }
 
-  run(() => {
+  $effect(() => {
     source = map.getSource(id) as GeoJSONSource
     if (source) {
       // @ts-expect-error

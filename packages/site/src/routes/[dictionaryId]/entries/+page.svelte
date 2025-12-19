@@ -1,6 +1,4 @@
 <script lang="ts">
-  import { run } from 'svelte/legacy';
-
   import { Button, ShowHide } from '$lib/svelte-pieces'
   import type { FacetResult } from '@orama/orama'
   import Pagination from './Pagination.svelte'
@@ -50,7 +48,7 @@
     if (!count) return 0
     return Math.ceil(count / entries_per_page)
   })())
-  run(() => {
+  $effect(() => {
     if (browser || $search_index_updated) {
       search($search_params, current_page_index)
     }

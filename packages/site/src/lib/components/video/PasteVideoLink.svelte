@@ -1,6 +1,4 @@
 <script lang="ts">
-  import { preventDefault } from 'svelte/legacy';
-
   import { Button } from '$lib/svelte-pieces'
   import type { HostedVideo } from '@living-dictionaries/types'
   import { parse_hosted_video_url } from './parse-hosted-video-url'
@@ -23,7 +21,7 @@
   }
 </script>
 
-<form class="mb-4" onsubmit={preventDefault(handle)}>
+<form class="mb-4" onsubmit={(e) => { e.preventDefault(); handle() }}>
   <label for="vURL" class="block text-sm font-medium leading-5 text-gray-700 mb-2">
     <i class="far fa-link"></i>
     {$page.data.t('video.video_url')}

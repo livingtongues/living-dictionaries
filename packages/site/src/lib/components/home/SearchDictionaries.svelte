@@ -3,7 +3,6 @@
 
   import { page } from '$app/stores'
   import { Button, Modal, ShowHide } from '$lib/svelte-pieces'
-  import { run } from 'svelte/legacy'
 
   interface Props {
     dictionaries?: DictionaryView[]
@@ -15,7 +14,7 @@
   let searchString = $state('')
 
   let filteredDictionaries: DictionaryView[] = $state([])
-  run(() => {
+  $effect(() => {
     filteredDictionaries = dictionaries
       .filter((dictionary) => {
         return Object.keys(dictionary).some((k) => {
