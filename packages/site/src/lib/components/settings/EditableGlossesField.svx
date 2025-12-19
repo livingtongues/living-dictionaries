@@ -19,10 +19,13 @@ There must always be at least one glossing language (or however many the
     {minimum}
     {selectedLanguages}
     availableLanguages={glossingLanguages}
-    on:add={(e) => (selectedLanguages = [...selectedLanguages, e.detail.languageId])}
-    on:remove={(e) => {
-      selectedLanguages.splice(e.detail.index, 1);
-      selectedLanguages = selectedLanguages;
+    add_language={(languageId) => (selectedLanguages = [...selectedLanguages, languageId])}
+    remove_language={(languageId) => {
+      const index = selectedLanguages.indexOf(languageId);
+      if (index > -1) {
+        selectedLanguages.splice(index, 1);
+        selectedLanguages = selectedLanguages;
+      }
     }} />
 </Story>
 
@@ -42,14 +45,14 @@ display a message asking to Contact Us. Toggle the admin status and remove langu
     <EditableGlossesField
       selectedLanguages={scopedLanguages}
       availableLanguages={glossingLanguages}
-      on:add={(e) => add(e.detail.languageId)}
-      on:remove={(e) => {
+      add_language={(languageId) => add(languageId)}
+      remove_language={(languageId) => {
         console.log(admin);
         if (admin) {
           if (
             confirm('Remove as admin? Know that regular editors get a message saying "Contact Us"')
           ) {
-            remove(e.detail.languageId);
+            remove(languageId);
           }
         } else {
           alert('Contact Us');
@@ -63,5 +66,5 @@ display a message asking to Contact Us. Toggle the admin status and remove langu
   <EditableGlossesField
     selectedLanguages={[]}
     availableLanguages={glossingLanguages}
-    on:add={(e) => alert(`Add a new Id: ${e.detail.languageId}`)} />
+    add_language={(languageId) => alert(`Add a new Id: ${languageId}`)} />
 </Story>

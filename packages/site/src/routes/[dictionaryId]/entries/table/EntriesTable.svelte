@@ -33,7 +33,7 @@
       <tr class="text-left">
         {#each columns as column, i}
           <th
-            on:click={() => {
+            onclick={() => {
               selectedColumn = column
             }}
             class:z-10={column.sticky}

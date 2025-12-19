@@ -52,8 +52,8 @@
           ],
         },
       }}
-      on:click={({ detail }) => {
-        const features = map.queryRenderedFeatures(detail.point, {
+      onclick={(e) => {
+        const features = map.queryRenderedFeatures(e.point, {
           layers: [clustersId],
         })
         const clusterId = features[0].properties.cluster_id
@@ -66,8 +66,8 @@
           })
         })
       }}
-      on:mouseenter={() => (map.getCanvas().style.cursor = 'pointer')}
-      on:mouseleave={() => (map.getCanvas().style.cursor = '')} />
+      onmouseenter={() => (map.getCanvas().style.cursor = 'pointer')}
+      onmouseleave={() => (map.getCanvas().style.cursor = '')} />
     <Layer
       options={{
         type: 'symbol',
@@ -106,23 +106,23 @@
           'text-halo-width': type === 'private' ? 0 : 2,
         },
       }}
-      on:click={({ detail }) => {
-        // const point = detail.features[0].geometry as Point;
+      onclick={(e) => {
+        // const point = e.features[0].geometry as Point;
         // @ts-expect-error
-        const coordinates = detail.features[0].geometry.coordinates.slice()
+        const coordinates = e.features[0].geometry.coordinates.slice()
 
         // Ensure that if the map is zoomed out such that multiple
         // copies of the feature are visible, the popup appears
         // over the copy being pointed to.
-        while (Math.abs(detail.lngLat.lng - coordinates[0]) > 180)
-          coordinates[0] += detail.lngLat.lng > coordinates[0] ? 360 : -360
+        while (Math.abs(e.lngLat.lng - coordinates[0]) > 180)
+          coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360
 
         map.setCenter(coordinates)
 
-        const { id } = detail.features[0].properties
+        const { id } = e.features[0].properties
         selectedDictionaryId = id
       }}
-      on:mouseenter={() => (map.getCanvas().style.cursor = 'pointer')}
-      on:mouseleave={() => (map.getCanvas().style.cursor = '')} />
+      onmouseenter={() => (map.getCanvas().style.cursor = 'pointer')}
+      onmouseleave={() => (map.getCanvas().style.cursor = '')} />
   {/snippet}
 </GeoJSONSource>

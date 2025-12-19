@@ -79,7 +79,7 @@
     onclick={() => (activeTable = 'coarticulated')}>Co-Articulated Consonants</Button>
 </div>
 
-<div class="overflow-x-auto" on:click={addSelectedLetter}>
+<div class="overflow-x-auto" onclick={addSelectedLetter}>
   {#if activeTable === 'consonants'}
     <table cellspacing="0">
       <thead>

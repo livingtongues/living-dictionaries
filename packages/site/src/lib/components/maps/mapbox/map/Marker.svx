@@ -13,9 +13,9 @@ Markers can be `draggable` (red marker) and update their position if changed ext
   <Map
     {lng}
     {lat}
-    on:click={(e) => {
-      set('lng', e.detail.lng);
-      set('lat', e.detail.lat);
+    on_click={(lngLat) => {
+      set('lng', lngLat.lng);
+      set('lat', lngLat.lat);
     }}>
     <Marker {lng} {lat} />
     <Marker color="red" draggable lng={-90} lat={39} />

@@ -39,7 +39,7 @@
     {#if editing}
       <div class="max-w-screen-md tw-prose prose-lg">
         {#await import('$lib/components/editor/ClassicCustomized.svelte') then { default: ClassicCustomized }}
-          <ClassicCustomized html={$dictionary_info.about} on:update={({ detail }) => (updated = detail)} />
+          <ClassicCustomized html={$dictionary_info.about} on_update={(detail) => (updated = detail)} />
         {/await}
       </div>
     {/if}

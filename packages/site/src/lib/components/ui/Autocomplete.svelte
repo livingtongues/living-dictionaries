@@ -2,8 +2,6 @@
   import { run, createBubbler, stopPropagation } from 'svelte/legacy';
 
   const bubble = createBubbler();
-  import { createEventDispatcher } from 'svelte';
-  const dispatch = createEventDispatcher();
 
   interface Props {
     items?: any[];
@@ -11,6 +9,7 @@
     keyField?: string;
     labelField?: string;
     value?: string;
+    on_selected_result?: (result: { value: string }) => void;
   }
 
   let {
@@ -18,7 +17,8 @@
     placeholder = 'CHANGE',
     keyField = 'key',
     labelField = 'name',
-    value = $bindable('')
+    value = $bindable(''),
+    on_selected_result
   }: Props = $props();
 
   let search = $state('');
@@ -52,7 +52,7 @@
   });
   run(() => {
     if (value.length)
-      dispatch('selectedResult', { value });
+      on_selected_result?.({ value });
   });
 </script>
 

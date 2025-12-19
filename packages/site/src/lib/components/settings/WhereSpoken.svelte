@@ -43,7 +43,7 @@
     <Map
       lng={first_longitude}
       lat={first_latitude}
-      on:click={({ detail }) => (mapClickCoordinates = detail)}>
+      on_click={(lngLat) => (mapClickCoordinates = lngLat)}>
       <NavigationControl />
       {#if mapClickCoordinates}
         <CoordinatesModal

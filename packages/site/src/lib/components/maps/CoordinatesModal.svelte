@@ -47,11 +47,11 @@
     }
   })
 
-  function handleGeocoderResult({ detail }) {
-    if (detail?.user_coordinates?.[0])
-      setMarker(detail.user_coordinates[0], detail.user_coordinates[1])
+  function handleGeocoderResult(result) {
+    if (result?.user_coordinates?.[0])
+      setMarker(result.user_coordinates[0], result.user_coordinates[1])
     else
-      setMarker(detail.center[0], detail.center[1])
+      setMarker(result.center[0], result.center[1])
   }
 
   function update() {
@@ -70,7 +70,7 @@
       {$page.data.t('create.select_coordinates')}
     </span>
   {/snippet}
-  <form on:submit|preventDefault={update}>
+  <form onsubmit={(e) => { e.preventDefault(); update(); }}>
     <div class="flex flex-wrap items-center mb-2">
       <div class="flex flex-grow">
         <div class="relative">
@@ -115,18 +115,18 @@
         lng={centerLng}
         lat={centerLat}
         {zoom}
-        on:click={({ detail }) => ({ lng, lat } = setMarker(detail.lng, detail.lat))}>
+        on_click={(lngLat) => ({ lng, lat } = setMarker(lngLat.lng, lngLat.lat))}>
         <slot />
         <NavigationControl />
         <Geocoder
           options={{ marker: false }}
           placeholder={$page.data.t('about.search')}
-          on:result={handleGeocoderResult}
-          on:error={e => console.error(e.detail)} />
+          on_result={handleGeocoderResult}
+          on_error={e => console.error(e)} />
         {#if lng && lat}
           <Marker
             draggable
-            on:dragend={({ detail }) => ({ lng, lat } = setMarker(detail.lng, detail.lat))}
+            on_dragend={(lngLat) => ({ lng, lat } = setMarker(lngLat.lng, lngLat.lat))}
             {lng}
             {lat} />
         {/if}

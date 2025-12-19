@@ -1,14 +1,12 @@
 <script lang="ts">
-  import { createEventDispatcher } from 'svelte'
   import { page } from '$app/stores'
 
   interface Props {
     checked: boolean;
+    on_changed?: (payload: { checked: boolean }) => void;
   }
 
-  let { checked }: Props = $props();
-
-  const dispatch = createEventDispatcher<{ changed: { checked: boolean } }>()
+  let { checked, on_changed }: Props = $props();
 </script>
 
 <div class="flex items-center">
@@ -16,9 +14,8 @@
     id="public"
     type="checkbox"
     {checked}
-    onchange={(e) => {
-      // @ts-ignore
-      dispatch('changed', { checked: e.target.checked })
+    onchange={(e: Event & { currentTarget: HTMLInputElement }) => {
+      on_changed?.({ checked: e.currentTarget.checked })
     }} />
   <label for="public" class="mx-2 block text-sm font-medium text-gray-700">
     {$page.data.t('create.visible_to_public')}

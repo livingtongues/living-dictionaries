@@ -40,9 +40,8 @@
       type="file"
       accept="video/*"
       class="hidden"
-      oninput={(e) => {
-        // @ts-ignore
-        checkVideo(e.target.files);
+      oninput={(e: Event & { currentTarget: HTMLInputElement }) => {
+        checkVideo(e.currentTarget.files);
       }} />
 
     <div>
