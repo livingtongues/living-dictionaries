@@ -1,6 +1,11 @@
 <script lang="ts">
-  // @ts-nocheck
-  export let src: string
+  
+  interface Props {
+    // @ts-nocheck
+    src: string;
+  }
+
+  let { src }: Props = $props();
 </script>
 
 <img

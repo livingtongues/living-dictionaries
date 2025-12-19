@@ -5,8 +5,12 @@
   import { onMount } from 'svelte'
   import { page } from '$app/stores'
 
-  export let dictionary: DictionaryView
-  let about = ''
+  interface Props {
+    dictionary: DictionaryView;
+  }
+
+  let { dictionary }: Props = $props();
+  let about = $state('')
 
   function truncateString(str: string, num: number) {
     if (!str) return ''
@@ -37,14 +41,14 @@
 
   {#if dictionary.location}
     <div class="mb-2">
-      <i class="far fa-globe-asia fa-fw" />
+      <i class="far fa-globe-asia fa-fw"></i>
       {dictionary.location}
     </div>
   {/if}
 
   {#if dictionary.gloss_languages}
     <div class="mb-2">
-      <i class="far fa-info-circle fa-fw" />
+      <i class="far fa-info-circle fa-fw"></i>
       {dictionary.gloss_languages.map(bcp => $page.data.t({ dynamicKey: `gl.${bcp}`, fallback: bcp })).join(', ')}
     </div>
   {/if}
@@ -90,7 +94,7 @@
     </div>
     <Button class="mt-1 w-full" form="filled" color="black" href={dictionary.url}>
       {$page.data.t('home.open_dictionary')}
-      <span class="i-fa6-solid-chevron-right rtl-x-flip -mt-1" />
+      <span class="i-fa6-solid-chevron-right rtl-x-flip -mt-1"></span>
     </Button>
   {/if}
   <!-- {#if lastFieldUpdatedAt}<p class="mt-3 text-xs text-gray-500">This dictionary was last updated on {new Date(lastFieldUpdatedAt).toString()}</p>{/if} -->

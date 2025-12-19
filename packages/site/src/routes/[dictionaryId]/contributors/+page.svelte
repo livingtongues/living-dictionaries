@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { run } from 'svelte/legacy';
+
   import { Button, ShowHide } from 'svelte-pieces'
   import type { PartnerWithPhoto, Tables } from '@living-dictionaries/types'
   import CitationComponent from './Citation.svelte'
@@ -7,19 +9,23 @@
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte'
   import { page } from '$app/stores'
 
-  export let data
-  $: ({ dictionary, is_manager, is_contributor, admin, editor_edits, dictionary_info, dictionary_editors } = data)
+  let { data } = $props();
+  let { dictionary, is_manager, is_contributor, admin, editor_edits, dictionary_info, dictionary_editors } = $derived(data)
 
-  $: managers = $dictionary_editors.filter(editor => editor.role === 'manager')
-  $: contributors = $dictionary_editors.filter(editor => editor.role === 'contributor')
+  let managers = $derived($dictionary_editors.filter(editor => editor.role === 'manager'))
+  let contributors = $derived($dictionary_editors.filter(editor => editor.role === 'contributor'))
 
-  let invites: Tables<'invites'>[] = []
-  $: data.invites_promise.then(_invites => invites = _invites)
-  $: manager_invites = invites.filter(invite => invite.role === 'manager')
-  $: contributor_invites = invites.filter(invite => invite.role === 'contributor')
+  let invites: Tables<'invites'>[] = $state([])
+  run(() => {
+    data.invites_promise.then(_invites => invites = _invites)
+  });
+  let manager_invites = $derived(invites.filter(invite => invite.role === 'manager'))
+  let contributor_invites = $derived(invites.filter(invite => invite.role === 'contributor'))
 
-  let partners: PartnerWithPhoto[] = []
-  $: data.partners_promise.then(_partners => partners = _partners)
+  let partners: PartnerWithPhoto[] = $state([])
+  run(() => {
+    data.partners_promise.then(_partners => partners = _partners)
+  });
 </script>
 
 <p class="mb-2">
@@ -49,7 +55,9 @@
           admin={$admin > 0}
           {invite}
           on_delete_invite={editor_edits.cancelInvite(invite.id)}>
-          <i slot="prefix">{$page.data.t('contributors.invitation_sent')}:</i>
+          {#snippet prefix()}
+                    <i >{$page.data.t('contributors.invitation_sent')}:</i>
+                  {/snippet}
         </ContributorInvitationStatus>
       </div>
     {/each}
@@ -57,7 +65,7 @@
 </div>
 {#if $is_manager}
   <Button onclick={editor_edits.inviteHelper('manager')} form="filled">
-    <i class="far fa-envelope" />
+    <i class="far fa-envelope"></i>
     {$page.data.t('contributors.invite_manager')}
   </Button>
 {/if}
@@ -77,13 +85,13 @@
         {/if}
       </div>
       {#if $is_manager}
-        <div class="w-1" />
+        <div class="w-1"></div>
         <Button
           onclick={editor_edits.removeContributor(contributor.user_id)}
           color="red"
           size="sm">
           {$page.data.t('misc.delete')}
-          <i class="fas fa-times" />
+          <i class="fas fa-times"></i>
         </Button>
       {/if}
     </div>
@@ -95,25 +103,29 @@
           admin={$admin > 0}
           {invite}
           on_delete_invite={editor_edits.cancelInvite(invite.id)}>
-          <i slot="prefix">{$page.data.t('contributors.invitation_sent')}:</i>
+          {#snippet prefix()}
+                    <i >{$page.data.t('contributors.invitation_sent')}:</i>
+                  {/snippet}
         </ContributorInvitationStatus>
       </div>
     {/each}
     <Button onclick={editor_edits.inviteHelper('contributor')} form="filled">
-      <i class="far fa-envelope" />
+      <i class="far fa-envelope"></i>
       {$page.data.t('contributors.invite_contributors')}
     </Button>
   {:else if !$is_contributor}
-    <ShowHide let:show let:toggle>
-      <Button onclick={toggle} form="filled">
-        {$page.data.t('contributors.request_access')}
-      </Button>
-      {#if show}
-        {#await import('$lib/components/modals/Contact.svelte') then { default: Contact }}
-          <Contact subject="request_access" on:close={toggle} />
-        {/await}
-      {/if}
-    </ShowHide>
+    <ShowHide  >
+      {#snippet children({ show, toggle })}
+                <Button onclick={toggle} form="filled">
+          {$page.data.t('contributors.request_access')}
+        </Button>
+        {#if show}
+          {#await import('$lib/components/modals/Contact.svelte') then { default: Contact }}
+            <Contact subject="request_access" on:close={toggle} />
+          {/await}
+        {/if}
+                    {/snippet}
+            </ShowHide>
   {/if}
 </div>
 
@@ -128,12 +140,12 @@
         {collaborator}
       </div>
       {#if $is_manager}
-        <div class="w-1" />
+        <div class="w-1"></div>
         <Button
           color="red"
           size="sm"
           onclick={editor_edits.removeWriteInCollaborator($dictionary_info?.write_in_collaborators || [], collaborator)}>{$page.data.t('misc.delete')}
-          <i class="fas fa-times" /></Button>
+          <i class="fas fa-times"></i></Button>
       {/if}
     </div>
   {/each}
@@ -145,7 +157,7 @@
 
 {#if $is_manager}
   <Button onclick={async () => await editor_edits.writeInCollaborator($dictionary_info?.write_in_collaborators || [])} form="filled">
-    <i class="far fa-pencil" />
+    <i class="far fa-pencil"></i>
     {$page.data.t('contributors.write_in_contributor')}
   </Button>
 {/if}
@@ -202,7 +214,7 @@
 
   <CitationComponent isManager={$is_manager} {dictionary} {partners} citation={$dictionary_info.citation} update_citation={data.update_citation} />
 
-  <div class="mb-12" />
+  <div class="mb-12"></div>
 {/if}
 
 <SeoMetaTags

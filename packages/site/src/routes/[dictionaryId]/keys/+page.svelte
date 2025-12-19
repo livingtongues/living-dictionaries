@@ -5,9 +5,9 @@
   import { supabase_date_to_friendly } from '$lib/helpers/time'
   import { page } from '$app/stores'
 
-  export let data
+  let { data } = $props();
 
-  let keys: Tables<'api_keys'>[]
+  let keys: Tables<'api_keys'>[] = $state()
 
   onMount(async () => {
     keys = await data.get_keys()

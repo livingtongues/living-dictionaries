@@ -5,15 +5,24 @@
   import { page } from '$app/stores'
   import { should_include_tag } from '$lib/helpers/tag-visibility'
 
-  export let tags: EntryData['tags']
-  export let entry_id: string
-  export let can_edit = false
-  export let showPlus = true
+  interface Props {
+    tags: EntryData['tags'];
+    entry_id: string;
+    can_edit?: boolean;
+    showPlus?: boolean;
+  }
 
-  $: ({ tags: dictionary_tags, dbOperations, admin } = $page.data)
-  $: tag_ids = tags.map(tag => tag.id)
-  $: visible_tags = $dictionary_tags.filter(tag => should_include_tag(tag, $admin))
-  $: options = visible_tags.map(tag => ({ value: tag.id, name: tag.name })) satisfies SelectOption[]
+  let {
+    tags,
+    entry_id,
+    can_edit = false,
+    showPlus = true
+  }: Props = $props();
+
+  let { tags: dictionary_tags, dbOperations, admin } = $derived($page.data)
+  let tag_ids = $derived(tags.map(tag => tag.id))
+  let visible_tags = $derived($dictionary_tags.filter(tag => should_include_tag(tag, $admin)))
+  let options = $derived(visible_tags.map(tag => ({ value: tag.id, name: tag.name })) satisfies SelectOption[])
 
   async function on_update(new_values: string[]) {
     // go through current tag_ids and check if they are in the new_values, if not remove them
@@ -48,5 +57,7 @@
   {showPlus}
   placeholder={$page.data.t('entry_field.custom_tags')}
   {on_update}>
-  <span slot="heading">{$page.data.t('entry_field.custom_tags')}</span>
+  {#snippet heading()}
+    <span >{$page.data.t('entry_field.custom_tags')}</span>
+  {/snippet}
 </ModalEditableArray>

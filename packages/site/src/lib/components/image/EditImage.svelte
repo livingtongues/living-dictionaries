@@ -1,18 +1,24 @@
 <script lang="ts">
+  import { run } from 'svelte/legacy';
+
   import { Button, Modal } from 'svelte-pieces'
   import { get } from 'svelte/store'
   import { apply_button_label } from './image-store'
   import { page } from '$app/stores'
   import AddImage from '$lib/components/image/AddImage.svelte'
 
-  export let on_close: () => void
-  export let sense_id: string
-  let photo_source: string
-  let photographer: string
-  let rights = false
-  let ai_image = false
+  interface Props {
+    on_close: () => void;
+    sense_id: string;
+  }
 
-  $: ({ dbOperations } = $page.data)
+  let { on_close, sense_id }: Props = $props();
+  let photo_source: string = $state()
+  let photographer: string = $state()
+  let rights = $state(false)
+  let ai_image = $state(false)
+
+  let { dbOperations } = $derived($page.data)
 
   function handleImageUpload(file: File) {
     const status = dbOperations.addImage({
@@ -35,17 +41,21 @@
     return status
   }
 
-  $: if (ai_image) {
-    photographer = 'AI'
-  } else {
-    photographer = ''
-  }
+  run(() => {
+    if (ai_image) {
+      photographer = 'AI'
+    } else {
+      photographer = ''
+    }
+  });
 
-  $: if (photo_source?.length >= 10 && rights) {
-    apply_button_label.set({ ready_to_upload: true })
-  } else {
-    apply_button_label.set({ ready_to_upload: false })
-  }
+  run(() => {
+    if (photo_source?.length >= 10 && rights) {
+      apply_button_label.set({ ready_to_upload: true })
+    } else {
+      apply_button_label.set({ ready_to_upload: false })
+    }
+  });
 </script>
 
 <Modal on:close={on_close}>
@@ -59,7 +69,7 @@
     minlength="100"
     maxlength="2500"
     bind:value={photo_source}
-    class="form-input w-full" />
+    class="form-input w-full"></textarea>
   <div class="flex text-xs">
     <div class="text-gray-500 ml-auto">{photo_source?.length || 0}/2500</div>
   </div>
@@ -81,10 +91,10 @@
       minlength="0"
       maxlength="2500"
       bind:value={photographer}
-      class="form-input w-full" />
+      class="form-input w-full"></textarea>
   {/if}
 
-  <div class="mb-6" />
+  <div class="mb-6"></div>
 
   <AddImage upload_image={handleImageUpload}>
     <div class="text-xs">

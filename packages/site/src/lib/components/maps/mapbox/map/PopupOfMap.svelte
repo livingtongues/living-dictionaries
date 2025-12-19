@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { run } from 'svelte/legacy';
+
   // from https://gitlab.com/jailbreak/svelte-mapbox-gl
   import { onMount, getContext } from 'svelte';
   import { mapKey, type MapKeyContext } from '../context';
@@ -8,19 +10,36 @@
   const map = getMap();
   const mapbox = getMapbox();
 
-  export let closeButton = false;
-  export let closeOnClick = true;
-  export let closeOnMove = true;
-  export let options: PopupOptions = {};
-  export let label = 'Popup';
-  export let open = true;
-  export let lng: number;
-  export let lat: number;
+  interface Props {
+    closeButton?: boolean;
+    closeOnClick?: boolean;
+    closeOnMove?: boolean;
+    options?: PopupOptions;
+    label?: string;
+    open?: boolean;
+    lng: number;
+    lat: number;
+    children?: import('svelte').Snippet;
+  }
 
-  let popup: Popup;
-  let container: HTMLDivElement;
+  let {
+    closeButton = false,
+    closeOnClick = true,
+    closeOnMove = true,
+    options = {},
+    label = 'Popup',
+    open = true,
+    lng,
+    lat,
+    children
+  }: Props = $props();
 
-  $: popup?.setLngLat({ lng, lat });
+  let popup: Popup = $state();
+  let container: HTMLDivElement = $state();
+
+  run(() => {
+    popup?.setLngLat({ lng, lat });
+  });
 
   onMount(() => {
     popup = new mapbox.Popup({
@@ -41,17 +60,19 @@
     };
   });
 
-  $: if (popup) {
-    if (open)
-      popup.addTo(map);
-    else
-      popup.remove();
+  run(() => {
+    if (popup) {
+      if (open)
+        popup.addTo(map);
+      else
+        popup.remove();
 
-  }
+    }
+  });
 </script>
 
 <div bind:this={container}>
-  <slot />
+  {@render children?.()}
 </div>
 
 <style>

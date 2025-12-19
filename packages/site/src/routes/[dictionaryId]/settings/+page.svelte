@@ -13,8 +13,8 @@
   import AddImage from '$lib/components/image/AddImage.svelte'
   import { goto } from '$app/navigation'
 
-  export let data
-  $: ({ dictionary, admin, is_manager, updateDictionary, remove_gloss_language, add_featured_image, about_is_too_short } = data)
+  let { data } = $props();
+  let { dictionary, admin, is_manager, updateDictionary, remove_gloss_language, add_featured_image, about_is_too_short } = $derived(data)
 
 </script>
 
@@ -29,7 +29,7 @@
     id="name"
     save={async name => await updateDictionary({ name })}
     display={$page.data.t('settings.edit_dict_name')} />
-  <div class="mb-5" />
+  <div class="mb-5"></div>
 
   {#if !dictionary.con_language_description}
     <EditString
@@ -37,14 +37,14 @@
       id="iso6393"
       save={async iso_639_3 => await updateDictionary({ iso_639_3 })}
       display="ISO 639-3" />
-    <div class="mb-5" />
+    <div class="mb-5"></div>
 
     <EditString
       value={dictionary.glottocode}
       id="glottocode"
       save={async glottocode => await updateDictionary({ glottocode })}
       display="Glottocode" />
-    <div class="mb-5" />
+    <div class="mb-5"></div>
   {/if}
 
   <EditableGlossesField
@@ -53,12 +53,12 @@
     selectedLanguages={dictionary.gloss_languages}
     add_language={async languageId => await updateDictionary({ gloss_languages: [...dictionary.gloss_languages, languageId] })}
     remove_language={async languageId => await remove_gloss_language(languageId)} />
-  <div class="mb-5" />
+  <div class="mb-5"></div>
 
   <EditableAlternateNames
     alternateNames={dictionary.alternate_names}
     on_update={async new_value => await updateDictionary({ alternate_names: new_value })} />
-  <div class="mb-5" />
+  <div class="mb-5"></div>
 
   {#if !dictionary.con_language_description}
     <WhereSpoken
@@ -71,7 +71,7 @@
         points: dictionary.coordinates?.points,
         regions,
       } })} />
-    <div class="mb-5" />
+    <div class="mb-5"></div>
 
     <EditString
       value={dictionary.location}
@@ -79,7 +79,7 @@
       id="location"
       save={async location => await updateDictionary({ location })}
       display={$page.data.t('dictionary.location')} />
-    <div class="mb-5" />
+    <div class="mb-5"></div>
 
     <div class="text-sm font-medium text-gray-700 mb-2">
       {$page.data.t('settings.featured_image')}
@@ -96,13 +96,13 @@
         <AddImage border upload_image={add_featured_image} />
       </div>
     {/if}
-    <div class="mb-5" />
+    <div class="mb-5"></div>
   {/if}
 
   <PrintAccessCheckbox
     checked={dictionary.print_access}
     on:changed={async ({ detail: { checked } }) => await updateDictionary({ print_access: checked })} />
-  <div class="mb-5" />
+  <div class="mb-5"></div>
 
   {#if !dictionary.con_language_description}
     <PublicCheckbox
@@ -122,22 +122,24 @@
         }
         dictionary.public = false
       }} />
-    <div class="mb-5" />
+    <div class="mb-5"></div>
   {/if}
 
   {#if $is_manager}
     <div>
-      <ShowHide let:show let:toggle>
-        <Button onclick={toggle} class="mb-5" color="red">
-          {$page.data.t('misc.delete')}:
-          {$page.data.t('header.contact_us')}
-        </Button>
-        {#if show}
-          {#await import('$lib/components/modals/Contact.svelte') then { default: Contact }}
-            <Contact subject="delete_dictionary" on:close={toggle} />
-          {/await}
-        {/if}
-      </ShowHide>
+      <ShowHide  >
+        {#snippet children({ show, toggle })}
+                <Button onclick={toggle} class="mb-5" color="red">
+            {$page.data.t('misc.delete')}:
+            {$page.data.t('header.contact_us')}
+          </Button>
+          {#if show}
+            {#await import('$lib/components/modals/Contact.svelte') then { default: Contact }}
+              <Contact subject="delete_dictionary" on:close={toggle} />
+            {/await}
+          {/if}
+                      {/snippet}
+            </ShowHide>
     </div>
   {/if}
 

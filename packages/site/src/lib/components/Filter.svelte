@@ -1,14 +1,26 @@
 <script lang="ts" generics="T">
-  // type T = $$Generic
-  export let items: T[]
-  export let placeholder = 'Search'
+  
+  interface Props {
+    // type T = $$Generic
+    items: T[];
+    placeholder?: string;
+    right?: import('svelte').Snippet<[any]>;
+    children?: import('svelte').Snippet<[any]>;
+  }
 
-  let value = ''
+  let {
+    items,
+    placeholder = 'Search',
+    right,
+    children
+  }: Props = $props();
 
-  $: filteredItems = items.filter((item: T) => {
+  let value = $state('')
+
+  let filteredItems = $derived(items.filter((item: T) => {
     const itemStr = JSON.stringify(item)
     return itemStr.toLowerCase().includes(value.toLowerCase())
-  })
+  }))
 
   function autofocus(node: HTMLInputElement) {
     setTimeout(() => node.focus(), 15)
@@ -17,11 +29,11 @@
 
 <div class="flex items-center mb-2">
   <input type="search" bind:value use:autofocus placeholder={`${placeholder} (${items.length})`} />
-  <div class="mr-1" />
-  <slot name="right" {filteredItems} />
+  <div class="mr-1"></div>
+  {@render right?.({ filteredItems, })}
 </div>
 
-<slot {filteredItems} />
+{@render children?.({ filteredItems, })}
 
 <style>
   input {

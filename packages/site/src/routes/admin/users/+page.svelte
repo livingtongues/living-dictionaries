@@ -7,15 +7,19 @@
   import { downloadObjectsAsCSV } from '$lib/export/csv'
   import Filter from '$lib/components/Filter.svelte'
 
-  export let data: PageData
-  $: ({ admin_dictionaries, users, dictionary_roles } = data)
+  interface Props {
+    data: PageData;
+  }
 
-  $: users_with_roles = $users.map((user) => {
+  let { data }: Props = $props();
+  let { admin_dictionaries, users, dictionary_roles } = $derived(data)
+
+  let users_with_roles = $derived($users.map((user) => {
     return {
       ...user,
       dictionary_roles: $dictionary_roles.filter(role => role.user_id === user.id),
     }
-  })
+  }))
 
   function exportUsersAsCSV(users: UserWithDictionaryRoles[]) {
     const headers = {
@@ -35,28 +39,34 @@
 </script>
 
 <div class="sticky top-0 h-[calc(100vh-1.5rem)] z-2 relative flex flex-col">
-  <Filter items={users_with_roles} let:filteredItems={filteredUsers} placeholder="Search names, emails, and dictionary ids">
-    <div slot="right" let:filteredItems={filteredUsers}>
-      <Button form="filled" color="black" onclick={() => exportUsersAsCSV(filteredUsers)}>
-        <i class="fas fa-download mr-1" />
-        Download {filteredUsers.length} Users as CSV
-      </Button>
-    </div>
-    <div class="mb-1" />
-    <ResponsiveTable stickyColumn stickyHeading>
-      <SortUsers users={filteredUsers} let:sortedUsers>
-        {#each sortedUsers as user (user.id)}
-          <UserRow
-            load_data={async () => {
-              await Promise.all([
-                users.refresh(),
-                dictionary_roles.reset(),
-              ])
-            }}
-            dictionaries={$admin_dictionaries}
-            {user} />
-        {/each}
-      </SortUsers>
-    </ResponsiveTable>
-  </Filter>
+  <Filter items={users_with_roles}  placeholder="Search names, emails, and dictionary ids">
+    {#snippet right({ filteredItems: filteredUsers })}
+        <div  >
+        <Button form="filled" color="black" onclick={() => exportUsersAsCSV(filteredUsers)}>
+          <i class="fas fa-download mr-1"></i>
+          Download {filteredUsers.length} Users as CSV
+        </Button>
+      </div>
+      {/snippet}
+    {#snippet children({ filteredItems: filteredUsers })}
+        <div class="mb-1"></div>
+      <ResponsiveTable stickyColumn stickyHeading>
+        <SortUsers users={filteredUsers} >
+          {#snippet children({ sortedUsers })}
+                {#each sortedUsers as user (user.id)}
+              <UserRow
+                load_data={async () => {
+                  await Promise.all([
+                    users.refresh(),
+                    dictionary_roles.reset(),
+                  ])
+                }}
+                dictionaries={$admin_dictionaries}
+                {user} />
+            {/each}
+                        {/snippet}
+            </SortUsers>
+      </ResponsiveTable>
+          {/snippet}
+    </Filter>
 </div>

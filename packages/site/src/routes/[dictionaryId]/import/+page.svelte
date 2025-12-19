@@ -2,8 +2,8 @@
   import { Button, ShowHide } from 'svelte-pieces'
   import { page } from '$app/stores'
 
-  export let data
-  $: ({ dictionary } = data)
+  let { data } = $props();
+  let { dictionary } = $derived(data)
 </script>
 
 <div class="max-w-screen-md ml-4">
@@ -29,21 +29,23 @@
     <Button form="filled" type="button" target="_blank" href="https://docs.google.com/spreadsheets/d/1Bqy1q_XZzlZLDM_glTxQ9gw0Pb5JEUssqQFtINxbwzY/edit#gid=1392642957">
       {$page.data.t('import_page.template_link')}
     </Button>
-    <ShowHide let:show let:toggle>
-      <Button onclick={toggle}>
-        <span class="lg:inline">
-          <i class="far fa-comment" />
-        </span>
-        <span class="ml-1 sm:inline">
-          {$page.data.t('header.contact_us')}
-        </span>
-      </Button>
-      {#if show}
-        {#await import('$lib/components/modals/Contact.svelte') then { default: Contact }}
-          <Contact subject="import_data" on:close={toggle} />
-        {/await}
-      {/if}
-    </ShowHide>
+    <ShowHide  >
+      {#snippet children({ show, toggle })}
+            <Button onclick={toggle}>
+          <span class="lg:inline">
+            <i class="far fa-comment"></i>
+          </span>
+          <span class="ml-1 sm:inline">
+            {$page.data.t('header.contact_us')}
+          </span>
+        </Button>
+        {#if show}
+          {#await import('$lib/components/modals/Contact.svelte') then { default: Contact }}
+            <Contact subject="import_data" on:close={toggle} />
+          {/await}
+        {/if}
+                {/snippet}
+        </ShowHide>
   </div>
   <!-- <p class="m-10 text-xl font-semibold">{$page.data.t('import_page.no_imports')}</p> -->
 </div>

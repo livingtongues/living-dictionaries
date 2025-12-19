@@ -4,11 +4,15 @@
   import type { Editor } from '@ckeditor/ckeditor5-core'
   import type { EditorConfig } from '@ckeditor/ckeditor5-core/src/editor/editorconfig'
 
-  export let editor: typeof Editor
-  export let editorConfig: EditorConfig
-  export let value = ''
+  interface Props {
+    editor: typeof Editor;
+    editorConfig: EditorConfig;
+    value?: string;
+  }
 
-  let editorEl: HTMLDivElement
+  let { editor, editorConfig, value = $bindable('') }: Props = $props();
+
+  let editorEl: HTMLDivElement = $state()
   let instance: Editor
 
   const dispatch = createEventDispatcher<{
@@ -51,4 +55,4 @@
   })
 </script>
 
-<div bind:this={editorEl} contenteditable bind:innerHTML={value} />
+<div bind:this={editorEl} contenteditable bind:innerHTML={value}></div>

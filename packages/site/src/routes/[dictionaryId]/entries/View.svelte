@@ -11,9 +11,13 @@
   import { pushState } from '$app/navigation'
   import { page } from '$app/stores'
 
-  export let entries: EntryData[]
-  export let page_data: EntriesPageData
-  $: ({ dictionary, can_edit, preferred_table_columns, dbOperations, search_params } = page_data)
+  interface Props {
+    entries: EntryData[];
+    page_data: EntriesPageData;
+  }
+
+  let { entries, page_data }: Props = $props();
+  let { dictionary, can_edit, preferred_table_columns, dbOperations, search_params } = $derived(page_data)
 
   function handle_entry_click(e: MouseEvent & { currentTarget: EventTarget & HTMLAnchorElement }, entry: EntryData) {
     // bail if opening a new tab

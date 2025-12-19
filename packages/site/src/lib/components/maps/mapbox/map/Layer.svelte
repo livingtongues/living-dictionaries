@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { run } from 'svelte/legacy';
+
   // from https://gitlab.com/jailbreak/svelte-mapbox-gl
   import { createEventDispatcher, getContext, onDestroy } from 'svelte';
   import { mapKey, sourceKey, type MapKeyContext, type SourceKeyContext } from '../context';
@@ -15,19 +17,30 @@
   const { getSourceId, addChildLayer } = getContext<SourceKeyContext>(sourceKey);
   const sourceId = getSourceId();
 
-  export let id = randomId();
-  // see https://docs.mapbox.com/mapbox-gl-js/style-spec/layers
-  export let options: Partial<AnyLayer> = {
+  
+
+  interface Props {
+    id?: any;
+    // see https://docs.mapbox.com/mapbox-gl-js/style-spec/layers
+    options?: Partial<AnyLayer>;
+    minzoom?: number; // 0-24
+    maxzoom?: number; // 0-24
+    beforeLayerId?: string; // see https://docs.mapbox.com/mapbox-gl-js/example/geojson-layer-in-stack/ to create a FindFirstSymbolLayer component.
+  }
+
+  let {
+    id = randomId(),
+    options = {
     type: 'fill',
     paint: {
       'fill-color': '#f08',
       'fill-opacity': 0.4,
     },
-  };
-
-  export let minzoom: number = undefined; // 0-24
-  export let maxzoom: number = undefined; // 0-24
-  export let beforeLayerId: string = undefined; // see https://docs.mapbox.com/mapbox-gl-js/example/geojson-layer-in-stack/ to create a FindFirstSymbolLayer component.
+  },
+    minzoom = undefined,
+    maxzoom = undefined,
+    beforeLayerId = undefined
+  }: Props = $props();
 
   function addLayer() {
     map.addLayer(
@@ -80,7 +93,7 @@
   // and source is not defined when the first one occurs, then re-create the layer
   const handleStyledata = () => !map.getLayer(id) && map.getSource(sourceId) && addLayer();
 
-  $: {
+  run(() => {
     const layer = map.getLayer(id);
     if (layer) {
       map.setLayerZoomRange(id, minzoom || 0, maxzoom || 24);
@@ -108,7 +121,7 @@
       map.on('styledata', handleStyledata);
       addChildLayer(id);
     }
-  }
+  });
 
   onDestroy(() => {
     for (const [name, handler] of handlers)

@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { preventDefault } from 'svelte/legacy';
+
   import { page } from '$app/stores'
 
   const unsupported_audio_formats = [
@@ -16,8 +18,12 @@
     '.ac3',
     '.wma',
   ]
-  let dragging = false
-  export let file: File
+  let dragging = $state(false)
+  interface Props {
+    file: File;
+  }
+
+  let { file = $bindable() }: Props = $props();
 
   function handleAudio(files: FileList) {
     dragging = false
@@ -46,19 +52,19 @@
 
 <label
   class:dragging
-  on:drop|preventDefault={e => handleAudio(e.dataTransfer.files)}
-  on:dragover|preventDefault={() => (dragging = true)}
-  on:dragleave|preventDefault={() => (dragging = false)}>
+  ondrop={preventDefault(e => handleAudio(e.dataTransfer.files))}
+  ondragover={preventDefault(() => (dragging = true))}
+  ondragleave={preventDefault(() => (dragging = false))}>
   <input
     type="file"
     accept="audio/*"
     class="hidden"
-    on:input={(e) => {
+    oninput={(e) => {
       // @ts-ignore
       handleAudio(e.target.files)
     }} />
 
-  <i class="far fa-upload" />&nbsp;
+  <i class="far fa-upload"></i>&nbsp;
   {dragging
     ? $page.data.t('upload.drop_to_upload')
     : $page.data.t('upload.select_audio_file')}

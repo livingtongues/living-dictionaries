@@ -1,5 +1,10 @@
 <script lang="ts">
-  export let language = 'en'
+  interface Props {
+    language?: string;
+    children?: import('svelte').Snippet;
+  }
+
+  let { language = 'en', children }: Props = $props();
 
   // use spread to avoid type errors
   const xml_properties = {
@@ -11,5 +16,5 @@
 </script>
 
 <html lang={language} {...xml_properties}>
-  <slot />
+  {@render children?.()}
 </html>

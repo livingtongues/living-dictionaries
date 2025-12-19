@@ -9,17 +9,30 @@
   import { add_periods_and_comma_separate_parts_of_speech } from '$lib/helpers/entry/add_periods_and_comma_separate_parts_of_speech'
   import { get_local_orthographies } from '$lib/helpers/entry/get_local_orthagraphies'
 
-  export let entry: EntryData
-  export let selectedFields = defaultPrintFields
-  export let imagePercent = 50
-  export let fontSize = 12
-  export let headwordSize = 12
-  export let dictionary: Tables<'dictionaries'>
-  export let showLabels = false
-  export let showQrCode = false
+  interface Props {
+    entry: EntryData;
+    selectedFields?: any;
+    imagePercent?: number;
+    fontSize?: number;
+    headwordSize?: number;
+    dictionary: Tables<'dictionaries'>;
+    showLabels?: boolean;
+    showQrCode?: boolean;
+  }
 
-  $: first_photo = entry.senses?.[0]?.photos?.[0]
-  $: first_audio = entry.audios?.[0]
+  let {
+    entry,
+    selectedFields = defaultPrintFields,
+    imagePercent = 50,
+    fontSize = 12,
+    headwordSize = 12,
+    dictionary,
+    showLabels = false,
+    showQrCode = false
+  }: Props = $props();
+
+  let first_photo = $derived(entry.senses?.[0]?.photos?.[0])
+  let first_audio = $derived(entry.audios?.[0])
 </script>
 
 <div style="font-size: {fontSize}pt;">
@@ -34,7 +47,7 @@
   {/if}
 
   {#each entry.senses || [] as sense, index}
-    <div />
+    <div></div>
     {#if entry.senses.length > 1}<span class="text-sm">{index + 1}.</span>{/if}
     {#if selectedFields.parts_of_speech && sense.parts_of_speech}<i>{add_periods_and_comma_separate_parts_of_speech(sense.parts_of_speech)}</i>{/if}
     {#if selectedFields.gloss && sense.glosses}

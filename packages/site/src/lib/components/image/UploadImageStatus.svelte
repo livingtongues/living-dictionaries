@@ -1,13 +1,21 @@
 <script lang="ts">
+  import { run } from 'svelte/legacy';
+
   import type { Readable } from 'svelte/store'
   import type { ImageUploadStatus } from './upload-image'
   import { page } from '$app/stores'
 
-  export let upload_status: Readable<ImageUploadStatus>
-  export let on_finish: () => void
-  $: if ($upload_status.storage_path) {
-    on_finish()
+  interface Props {
+    upload_status: Readable<ImageUploadStatus>;
+    on_finish: () => void;
   }
+
+  let { upload_status, on_finish }: Props = $props();
+  run(() => {
+    if ($upload_status.storage_path) {
+      on_finish()
+    }
+  });
 </script>
 
 <div
@@ -15,13 +23,13 @@
     overflow-hidden">
   {#if $upload_status.error}
     <div class="p-2 text-red-600 text-center">
-      <div><span class="i-fa-solid-times" /></div>
+      <div><span class="i-fa-solid-times"></span></div>
       {$page.data.t('misc.error')}: {$upload_status.error}
     </div>
   {:else}
     {#if $upload_status.serving_url}
       <div class="w-12 text-dark-shadow text-white text-3xl z-10 text-center">
-        <span class="i-fa6-solid-check" />
+        <span class="i-fa6-solid-check"></span>
       </div>
     {:else}
       <div
@@ -35,7 +43,7 @@
     {/if}
     <div
       style="height:{100 - $upload_status.progress}%"
-      class="bg-gray-200 opacity-75 absolute top-0 w-full smooth-height-transition" />
+      class="bg-gray-200 opacity-75 absolute top-0 w-full smooth-height-transition"></div>
   {/if}
 </div>
 
