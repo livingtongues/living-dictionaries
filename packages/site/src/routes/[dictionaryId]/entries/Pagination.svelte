@@ -1,6 +1,4 @@
 <script lang="ts">
-  import { run } from 'svelte/legacy';
-
   import PaginationButtons from './PaginationButtons.svelte'
   import type { DbOperations } from '$lib/dbOperations'
 
@@ -23,7 +21,7 @@
     window.scrollTo({ top: 0 })
   }
 
-  run(() => {
+  $effect(() => {
     if (page_from_url === 1)
       page_from_url = null
   });

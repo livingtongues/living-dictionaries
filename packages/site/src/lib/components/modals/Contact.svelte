@@ -1,6 +1,4 @@
 <script lang="ts">
-  import { run } from 'svelte/legacy';
-
   import { Button, Form, Modal } from '$lib/svelte-pieces'
   import { page } from '$app/stores'
   import { goto } from '$app/navigation'
@@ -90,7 +88,7 @@
     status = 'success'
   }
   let { dictionary, user, about_is_too_short } = $derived($page.data)
-  run(() => {
+  $effect(() => {
     if (dictionary && subject === 'public_dictionary') warn_if_about_too_short()
   });
   let filteredSubjects = $derived(typedSubjects.filter((subjects) => {

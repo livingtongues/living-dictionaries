@@ -1,6 +1,4 @@
 <script lang="ts">
-  import { run } from 'svelte/legacy';
-
   // from https://github.com/beyonk-adventures/svelte-mapbox
   import { onDestroy, onMount, setContext, tick } from 'svelte'
   import { loadScriptOnce, loadStylesOnce } from '$lib/svelte-pieces'
@@ -175,16 +173,16 @@
       maxZoom: 6,
     })
   }
-  run(() => {
+  $effect(() => {
     center = lng && lat ? [lng, lat] : [getTimeZoneLongitude() || -80, 10]
   });
-  run(() => {
+  $effect(() => {
     if (zoom) setZoom(zoom)
   });
-  run(() => {
+  $effect(() => {
     if (center) setCenter(center)
   });
-  run(() => {
+  $effect(() => {
     if (pointsToFit?.length) fitPoints()
   });
 </script>

@@ -1,6 +1,4 @@
 <script lang="ts">
-  import { run } from 'svelte/legacy';
-
   import { page } from '$app/stores';
   import { tweened } from 'svelte/motion';
   import { cubicOut } from 'svelte/easing';
@@ -14,7 +12,7 @@
     duration: 2000,
     easing: cubicOut,
   });
-  run(() => {
+  $effect(() => {
     tweenedProgress.set(progress);
   });
   let percentage = $derived(Math.floor($tweenedProgress * 100));

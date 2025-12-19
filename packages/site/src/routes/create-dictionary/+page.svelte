@@ -1,6 +1,4 @@
 <script lang="ts">
-  import { run } from 'svelte/legacy';
-
   import { Button, Form } from '$lib/svelte-pieces'
   import type { IPoint, IRegion } from '@living-dictionaries/types'
   import { onMount } from 'svelte'
@@ -42,7 +40,7 @@
   let isUniqueURL = $state(true)
 
   const debouncedCheckIfUniqueUrl = debounce(checkIfUniqueUrl, 500)
-  run(() => {
+  $effect(() => {
     if (urlToUse.length >= data.MIN_URL_LENGTH) debouncedCheckIfUniqueUrl(urlToUse)
   });
 

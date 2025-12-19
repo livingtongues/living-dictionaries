@@ -1,6 +1,4 @@
 <script lang="ts">
-  import { run } from 'svelte/legacy';
-
   import type { EntryData, Tables } from '@living-dictionaries/types'
   import { sortedColumn } from './sortedColumnStore'
   import { HistoryFields } from './historyFields'
@@ -26,7 +24,7 @@
   let sortKey: SortFields = $state('date')
   let sortDescending = $state(true)
 
-  run(() => {
+  $effect(() => {
     sortedColumn.set(sortKey)
   });
 

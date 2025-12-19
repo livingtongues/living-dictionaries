@@ -1,6 +1,4 @@
 <script lang="ts">
-  import { run, preventDefault } from 'svelte/legacy';
-
   import { Button, Modal, ShowHide } from '$lib/svelte-pieces'
   import MultiSelect from './MultiSelect.svelte'
   import type { SelectOption } from './select-options.interface'
@@ -41,7 +39,7 @@
       return accumlator
     }, {})
   }
-  run(() => {
+  $effect(() => {
     prepareSelected(values, options)
   });
 
@@ -83,10 +81,11 @@
           {/snippet}
 
         <form
-          onsubmit={preventDefault(() => {
+          onsubmit={(e) => {
+            e.preventDefault()
             on_update(Object.keys(selectedOptions))
             toggle()
-          })}>
+          }}>
           <MultiSelect bind:selectedOptions {options} {placeholder} {canWriteIn} />
           <div class="min-h-[50vh]"></div>
 

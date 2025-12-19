@@ -1,6 +1,4 @@
 <script lang="ts">
-  import { run } from 'svelte/legacy';
-
   import { onMount, tick } from 'svelte';
   
   
@@ -111,7 +109,7 @@
   });
   
   // whenever `items` changes, invalidate the current heightmap
-  run(() => {
+  $effect(() => {
     if (mounted) refresh(items, viewport_height, itemHeight);
   });
 </script>

@@ -1,6 +1,4 @@
 <script lang="ts">
-  import { run } from 'svelte/legacy';
-
   import { Button, Form, Modal } from '$lib/svelte-pieces'
   import { onMount } from 'svelte'
   import { toast } from '../ui/Toasts.svelte'
@@ -55,7 +53,7 @@
   }
 
   let code_is_6_digits = $derived(/^\d{6}$/.test(sixDigitCode))
-  run(() => {
+  $effect(() => {
     if (code_is_6_digits && !submitting_code) {
       handleOTP(sixDigitCode)
     }

@@ -1,7 +1,4 @@
 <script lang="ts">
-  import { createBubbler, stopPropagation } from 'svelte/legacy'
-
-  const bubble = createBubbler()
   import { page } from '$app/stores'
   import { Button } from '$lib/svelte-pieces'
   import { crossfade, scale } from 'svelte/transition'
@@ -99,7 +96,7 @@
       <div
         class="font-semibold text-white p-4 flex justify-between items-center
           absolute top-0 inset-x-0 bg-opacity-25 bg-black">
-        <span onclick={stopPropagation(bubble('click'))}>{title}</span>
+        <span onclick={(e) => e.stopPropagation()}>{title}</span>
         <span class="i-fa-solid-times p-3 cursor-pointer opacity-75 hover:opacity-100"></span>
       </div>
       {#if photographer === 'AI'}

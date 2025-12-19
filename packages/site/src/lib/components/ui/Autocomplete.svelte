@@ -1,8 +1,4 @@
 <script lang="ts">
-  import { run, createBubbler, stopPropagation } from 'svelte/legacy';
-
-  const bubble = createBubbler();
-
   interface Props {
     items?: any[];
     placeholder?: string;
@@ -32,7 +28,7 @@
 
 
 
-  run(() => {
+  $effect(() => {
     const matchingItems = items.filter(
       (item) => search.length && JSON.stringify(item).toLowerCase().includes(search.toLowerCase())
     );
@@ -44,13 +40,13 @@
       return { value: item[keyField], boldedLabel, label: item[labelField] };
     });
   });
-  run(() => {
+  $effect(() => {
     if (results.length === 1)
       [{value}] = results;
     else
       value = '';
   });
-  run(() => {
+  $effect(() => {
     if (value.length)
       on_selected_result?.({ value });
   });
@@ -58,7 +54,7 @@
 
 <svelte:window onclick={() => (active = false)} />
 
-<div onclick={stopPropagation(bubble('click'))} class="relative w-56">
+<div onclick={(e) => e.stopPropagation()} class="relative w-56">
   <input
     type="search"
     {placeholder}

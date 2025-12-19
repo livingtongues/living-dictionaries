@@ -1,6 +1,4 @@
 <script lang="ts">
-  import { run } from 'svelte/legacy';
-
   import { Button, ShowHide } from '$lib/svelte-pieces'
   import DownloadMedia from './DownloadMedia.svelte'
   import { type EntryForCSV, formatCsvEntries, getCsvHeaders, translate_entries } from './prepareEntriesForCsv'
@@ -24,7 +22,7 @@
 
   let ready = $state(false)
 
-  run(() => {
+  $effect(() => {
     if (!$entries_loading) {
       const translated_entries = translate_entries({ entries: Object.values($entries_data) })
       entryHeaders = getCsvHeaders(translated_entries, dictionary)
