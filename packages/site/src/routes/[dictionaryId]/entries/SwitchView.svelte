@@ -56,9 +56,9 @@
 
 <style>
   button {
-    --at-apply: hover:bg-gray-100 px-2 py-2 rounded;
+    @apply hover:bg-gray-100 px-2 py-2 rounded;
   }
   .active {
-    --at-apply: bg-gray-200 border;
+    @apply bg-gray-200 border;
   }
 </style>

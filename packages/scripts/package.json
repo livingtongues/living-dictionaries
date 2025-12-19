@@ -44,8 +44,8 @@
     "pg": "^8.13.1",
     "stream-chain": "^2.2.5",
     "stream-json": "^1.8.0",
-    "tsx": "^4.19.0",
-    "typescript": "~5.7.2",
+    "tsx": "^4.21.0",
+    "typescript": "~5.9.3",
     "vitest": "^4.0.0"
   }
 }
