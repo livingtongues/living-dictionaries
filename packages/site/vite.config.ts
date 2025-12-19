@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs'
 import { sveltekit } from '@sveltejs/kit/vite'
-import { type Plugin, defineConfig } from 'vite'
+import { type Plugin, type PluginOption, defineConfig } from 'vite'
 import UnoCSS from '@unocss/svelte-scoped/vite'
 // import { kitbook } from 'kitbook/plugins/vite'
 // import kitbookConfig from './kitbook.config'
@@ -10,7 +10,7 @@ export default defineConfig({
     // kitbook(kitbookConfig),
     UnoCSS({
       injectReset: '@unocss/reset/tailwind.css',
-    }),
+    }) as unknown as PluginOption,
     sveltekit(),
     rawFonts(['.ttf']),
   ],
@@ -28,7 +28,7 @@ export default defineConfig({
   optimizeDeps: {
     include: [ // if the dependency is large with many internal modules or is CommonJS then include it
       'xss',
-      'typescript', // bc kitbook uses it
+      // 'typescript', // bc kitbook uses it
       // 'kitbook',
       // 'kitbook/viewer/load-viewer',
       // '@turf/turf',

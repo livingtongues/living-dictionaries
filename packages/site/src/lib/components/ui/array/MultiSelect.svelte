@@ -3,7 +3,6 @@
 
   import { fly } from 'svelte/transition'
   import { onMount } from 'svelte'
-  import { clickoutside } from 'svelte-pieces'
   import type { SelectOption } from './select-options.interface'
 
   interface Props {
@@ -20,6 +19,7 @@
     canWriteIn = false
   }: Props = $props();
 
+  let container: HTMLDivElement = $state()
   let input: HTMLInputElement = $state()
   let inputValue: string = $state()
   let activeOption: SelectOption = $state()
@@ -27,6 +27,16 @@
 
   onMount(() => {
     input.focus()
+
+    function handleClickOutside(event: MouseEvent) {
+      if (container && !container.contains(event.target as Node)) {
+        inputValue = ''
+        setShowOptions(false)
+      }
+    }
+
+    document.addEventListener('click', handleClickOutside, true)
+    return () => document.removeEventListener('click', handleClickOutside, true)
   })
 
 
@@ -104,11 +114,7 @@
 
 <div
   class="multiselect"
-  use:clickoutside
-  onclickoutside={() => {
-    inputValue = ''
-    setShowOptions(false)
-  }}>
+  bind:this={container}>
   <div class="tokens" class:showOptions onclick={() => setShowOptions(true)}>
     {#each Object.values(selectedOptions) as option}
       <div

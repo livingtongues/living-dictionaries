@@ -1,15 +1,15 @@
 <script lang="ts">
-  import Header from '../components/Header.svelte'
-  import Title from '../components/Title.svelte'
-  import Shell from '../components/Shell.svelte'
-  import Paragraph from '../components/Paragraph.svelte'
   import Footer from '../components/Footer.svelte'
+  import Header from '../components/Header.svelte'
+  import Paragraph from '../components/Paragraph.svelte'
+  import Shell from '../components/Shell.svelte'
+  import Title from '../components/Title.svelte'
 
   interface Props {
-    preview?: string;
+    preview?: string
   }
 
-  let { preview = 'Recent entry loading issues have been resolved' }: Props = $props();
+  let { preview = 'Recent entry loading issues have been resolved' }: Props = $props()
 
   const title = 'Improved Entry Loading'
   const theme_color = '#546e7a'
@@ -44,5 +44,5 @@
     The Living Dictionaries team (Anna, Diego, Greg and Jacob)
   </Paragraph>
 
-  <Footer {brand} href={home_url} address="4676 Commercial St SE, # 454 | Salem, Oregon, OR 97302 | USA" reason_for_email="You're receiving this email because you have a Living Dictionaries account." show_unsubscribe={false} row={{ backgroundColor: '#dddddd', space: 20 }} />
+  <Footer {brand} href={home_url} address="4676 Commercial St SE, # 454 | Salem, Oregon, OR 97302 | USA" reason_for_email="You're receiving this email because you have a Living Dictionaries account." row={{ backgroundColor: '#dddddd', space: 20 }} />
 </Shell>

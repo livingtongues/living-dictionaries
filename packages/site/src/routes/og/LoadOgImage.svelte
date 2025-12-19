@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount } from 'svelte'
-  import { compressToEncodedURIComponent as encode } from 'kitbook'
+  import { compressToEncodedURIComponent as encode } from '$lib/lz/lz-string'
   import { dev } from '$app/environment'
 
   interface Props {

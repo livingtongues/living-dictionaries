@@ -34,7 +34,7 @@
   {/await}
 {/if} -->
 
-<div id="direction" dir={page.data.t('page.direction')}>
+<div id="direction" dir={page.data.t('page.direction') as 'ltr' | 'rtl' | 'auto'}>
   {@render children?.()}
 </div>
 

@@ -1,3 +1,4 @@
+// @ts-nocheck
 // import type { DeprecatedVariant, Viewport } from 'kitbook'
 // import { writable } from 'svelte/store'
 // import type { QueryParamStore } from 'svelte-pieces'

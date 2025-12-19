@@ -52,7 +52,7 @@
         dispatch('submit');
 
     }}
-    autocomplete="false"></textarea>
+    autocomplete="off"></textarea>
   <!-- svelte-ignore a11y_label_has_associated_control -->
   <label>{name}</label>
 </div>

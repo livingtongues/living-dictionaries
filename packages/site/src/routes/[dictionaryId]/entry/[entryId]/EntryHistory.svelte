@@ -1,16 +1,18 @@
-<!-- @migration-task Error while migrating Svelte code: $$props is used together with named props in a way that cannot be automatically migrated. -->
 <script lang="ts">
   import type { Tables } from '@living-dictionaries/types'
   import { page } from '$app/stores'
   import { supabase_date_to_friendly } from '$lib/helpers/time'
 
-  export let can_edit = false
-  export let entry_history: Tables<'content_updates'>[]
+  let { can_edit = false, entry_history, class: class_prop = '' }: {
+    can_edit?: boolean
+    entry_history: Tables<'content_updates'>[]
+    class?: string
+  } = $props()
 
-  $: ({ dictionary_editors } = $page.data)
+  let { dictionary_editors } = $derived($page.data)
 </script>
 
-<div class="{$$props.class} text-gray-500">
+<div class="{class_prop} text-gray-500">
   <div class="font-semibold mb-2 border-b pb-1">{$page.data.t('history.history')} (work in progress)</div>
   {#if can_edit}
     {#each entry_history as record}

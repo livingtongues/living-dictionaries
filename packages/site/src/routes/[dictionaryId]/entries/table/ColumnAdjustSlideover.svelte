@@ -44,9 +44,7 @@
 </script>
 
 <Slideover on:close>
-  {#snippet title()}
-    <span >{$page.data.t('column.adjust_columns')}</span>
-  {/snippet}
+  <span slot="title">{$page.data.t('column.adjust_columns')}</span>
 
   <ul class="divide-y divid-gray-200">
     {#each $preferred_table_columns as column, i (column.field)}

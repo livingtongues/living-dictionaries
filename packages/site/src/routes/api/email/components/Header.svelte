@@ -3,18 +3,18 @@
   import Row from './Row.svelte'
 
   interface Props {
-    row?: ComponentProps<Row>;
-    brand: string;
-    href: string;
-    src?: string;
+    row?: ComponentProps<typeof Row>
+    brand: string
+    href: string
+    src?: string
   }
 
   let {
     row = {},
     brand,
     href,
-    src = undefined
-  }: Props = $props();
+    src = undefined,
+  }: Props = $props()
 </script>
 
 <Row {...row} space={12}>

@@ -1,3 +1,4 @@
+// @ts-nocheck
 // import type { Variant, VariantMeta } from 'kitbook'
 // import type Component from './ListEntry.svelte'
 // import { basic_mock_dictionary } from '$lib/mocks/dictionaries'

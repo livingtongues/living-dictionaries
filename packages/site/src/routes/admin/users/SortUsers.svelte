@@ -7,23 +7,25 @@
   }
 
   let { users = [], children }: Props = $props();
-  enum UserFields {
-    email = 'Email',
-    full_name = 'Name',
-    manager = 'Manager',
-    contributor = 'Contributor',
-    last_sign_in_at = 'Last Visit',
-    created_at = 'Created At',
-    unsubscribed_from_emails = 'Unsubscribed',
-  }
+
+  const UserFields = {
+    email: 'Email',
+    full_name: 'Name',
+    manager: 'Manager',
+    contributor: 'Contributor',
+    last_sign_in_at: 'Last Visit',
+    created_at: 'Created At',
+    unsubscribed_from_emails: 'Unsubscribed',
+  } as const
 
   type SortFields = keyof typeof UserFields
+  type UserFieldValue = typeof UserFields[SortFields]
   // @ts-ignore
   const userFields: {
     key: SortFields
-    value: UserFields
+    value: UserFieldValue
   }[] = Object.entries(UserFields).map(([key, value]) => {
-    return { key, value }
+    return { key: key as SortFields, value }
   })
 
   let sortKey: SortFields = $state('email')
