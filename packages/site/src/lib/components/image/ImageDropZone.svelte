@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { apply_button_label } from './image-store'
   import { page } from '$app/stores'
+  import { apply_button_label } from './image-store'
 
   const { border, on_file_added = undefined, class: class_prop = '' }: {
     border: boolean
@@ -63,19 +63,16 @@
 
 <style>
   .blocked {
-            --at-apply: pointer-events-none opacity-60 cursor-not-allowed select-none px-3 py-2 border border-gray-500;
+    @apply pointer-events-none opacity-60 cursor-not-allowed select-none px-3 py-2 border border-gray-500;
   }
   .button-label {
-      --at-apply: flex justify-center items-center px-3 py-2 border font-medium
-    cursor-pointer focus:outline-none border-green-300
-    focus:ring focus:ring-green-300 active:bg-green-200 transition ease-in-out
-    duration-150 rounded hover:bg-green-100 text-green-700;
+    @apply flex justify-center items-center px-3 py-2 border font-medium cursor-pointer focus:outline-none border-green-300 focus:ring focus:ring-green-300 active:bg-green-200 transition ease-in-out duration-150 rounded hover:bg-green-100 text-green-700;
   }
 
   .dragging {
-    --at-apply: bg-blue-200 border-blue-300 text-blue-700;
+    @apply bg-blue-200 border-blue-300 text-blue-700;
   }
   .dashed-border {
-    --at-apply: border-2 border-dashed;
+    @apply border-2 border-dashed;
   }
 </style>

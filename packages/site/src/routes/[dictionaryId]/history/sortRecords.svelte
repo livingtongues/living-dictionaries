@@ -84,6 +84,6 @@
 
 <style>
   th {
-    --at-apply: text-xs font-semibold text-gray-600 uppercase tracking-wider;
+    @apply text-xs font-semibold text-gray-600 uppercase tracking-wider;
   }
 </style>

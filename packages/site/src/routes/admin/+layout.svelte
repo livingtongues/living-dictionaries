@@ -40,6 +40,6 @@
 
 <style>
   nav {
-    --at-apply: -mb-px flex overflow-x-auto;
+    @apply -mb-px flex overflow-x-auto;
   }
 </style>
