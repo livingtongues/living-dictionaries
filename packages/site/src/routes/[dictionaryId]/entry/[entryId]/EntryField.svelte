@@ -1,22 +1,24 @@
-<!-- @migration-task Error while migrating Svelte code: $$props is used together with named props in a way that cannot be automatically migrated. -->
 <script lang="ts">
   import type { EntryFieldValue } from '@living-dictionaries/types'
   import { ShowHide } from 'svelte-pieces'
   import sanitize from 'xss'
 
-  export let value: string
-  export let field: EntryFieldValue
-  export let bcp: string = undefined
-  export let display: string
-  export let can_edit = false
-  export let on_update: (new_value: string) => void
+  let { value, field, bcp = undefined, display, can_edit = false, on_update, class: class_prop = '' }: {
+    value: string
+    field: EntryFieldValue
+    bcp?: string
+    display: string
+    can_edit?: boolean
+    on_update: (new_value: string) => void
+    class?: string
+  } = $props()
 </script>
 
 {#if value || can_edit}
   <ShowHide let:show let:set let:toggle>
     <div
-      class="md:px-2 rounded {$$props.class}"
-      on:click={() => set(can_edit)}
+      class="md:px-2 rounded {class_prop}"
+      onclick={() => set(can_edit)}
       class:hover:bg-gray-100={can_edit}
       class:cursor-pointer={can_edit}
       class:order-2={!value}>

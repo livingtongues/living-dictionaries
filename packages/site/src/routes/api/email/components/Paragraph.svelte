@@ -3,11 +3,11 @@
   import Row from './Row.svelte'
 
   interface Props {
-    row?: ComponentProps<Row>;
-    children?: import('svelte').Snippet;
+    row?: ComponentProps<typeof Row>
+    children?: import('svelte').Snippet
   }
 
-  let { row = {}, children }: Props = $props();
+  let { row = {}, children }: Props = $props()
 </script>
 
 <Row {...row}>

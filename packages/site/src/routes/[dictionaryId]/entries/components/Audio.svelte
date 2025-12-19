@@ -1,4 +1,3 @@
-<!-- @migration-task Error while migrating Svelte code: $$props is used together with named props in a way that cannot be automatically migrated. -->
 <script context="module" lang="ts">
   import { writable } from 'svelte/store'
 
@@ -37,17 +36,32 @@
   import { page } from '$app/stores'
   import { minutes_ago_in_ms } from '$lib/helpers/time'
 
-  export let entry: EntryData
-  export let context: 'list' | 'table' | 'entry'
-  export let sound_file: EntryData['audios'][0] = undefined
-  export let can_edit = false
-  $: ({ url_from_storage_path } = $page.data)
+  let { entry, context, sound_file = undefined, can_edit = false, class: class_prop = '' }: {
+    entry: EntryData
+    context: 'list' | 'table' | 'entry'
+    sound_file?: EntryData['audios'][0]
+    can_edit?: boolean
+    class?: string
+  } = $props()
+  let { url_from_storage_path } = $derived($page.data)
 
   function initAudio() {
     playAudio(url_from_storage_path(sound_file.storage_path))
   }
 
-  $: playing = $audioStore.is_playing && $audioStore.current_audio?.src === url_from_storage_path(sound_file?.storage_path)
+  let playing = $derived($audioStore.is_playing && $audioStore.current_audio?.src === url_from_storage_path(sound_file?.storage_path))
+
+  function longpress_action(node: HTMLElement, duration = 800) {
+    const action = longpress(node, duration)
+    node.addEventListener('longpress', initAudio)
+    return {
+      update: action.update,
+      destroy() {
+        node.removeEventListener('longpress', initAudio)
+        action.destroy()
+      },
+    }
+  }
 </script>
 
 <ShowHide let:show let:toggle>
@@ -55,12 +69,11 @@
     {@const updated_within_last_5_minutes = sound_file.updated_at && can_edit && new Date(sound_file.updated_at).getTime() > minutes_ago_in_ms(5)}
     <div
       class:border-b-2={updated_within_last_5_minutes}
-      class="{$$props.class} hover:bg-gray-200 flex flex-col items-center
+      class="{class_prop} hover:bg-gray-200 flex flex-col items-center
         justify-center cursor-pointer select-none border-green-300"
       title={$page.data.t('audio.listen')}
-      use:longpress={800}
-      on:longpress={() => initAudio()}
-      on:click={() => {
+      use:longpress_action={800}
+      onclick={() => {
         if (can_edit)
           toggle()
         else
@@ -88,9 +101,9 @@
     </div>
   {:else if can_edit}
     <div
-      class="{$$props.class} hover:bg-gray-300 flex flex-col items-center
+      class="{class_prop} hover:bg-gray-300 flex flex-col items-center
         justify-center cursor-pointer select-none"
-      on:click={toggle}>
+      onclick={toggle}>
       <span class="i-uil-microphone text-lg m-1" class:text-blue-800={context === 'list' || context === 'table'} />
       {#if context === 'entry'}
         <div class="text-xs">

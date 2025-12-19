@@ -1,3 +1,4 @@
+// @ts-nocheck
 // import type { DeprecatedVariant, Viewport } from 'kitbook'
 // import type Component from './GalleryEntry.svelte'
 // import { butterfly_google_storage_url } from '$lib/mocks/entries'

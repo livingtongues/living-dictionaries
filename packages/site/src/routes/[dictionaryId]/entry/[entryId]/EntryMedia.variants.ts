@@ -1,3 +1,4 @@
+// @ts-nocheck
 // import type { DeprecatedVariant, Viewport } from 'kitbook'
 // import type Component from './EntryMedia.svelte'
 // import { logDbOperations } from '$lib/mocks/db'

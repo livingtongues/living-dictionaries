@@ -1,10 +1,10 @@
 <script lang="ts">
   interface Props {
-    language?: string;
-    children?: import('svelte').Snippet;
+    language?: string
+    children?: import('svelte').Snippet
   }
 
-  let { language = 'en', children }: Props = $props();
+  let { language = 'en', children }: Props = $props()
 
   // use spread to avoid type errors
   const xml_properties = {

@@ -25,9 +25,9 @@
   }: Props = $props();
   // local state
   const height_map = [];
-  let rows;
-  let viewport = $state();
-  let contents = $state();
+  let rows: HTMLCollectionOf<HTMLElement>;
+  let viewport: HTMLElement = $state();
+  let contents: HTMLElement = $state();
   let viewport_height = $state(0);
   let visible: { index: number; data: any }[] = $derived(items.slice(start, end).map((data, i) => {
     return { index: i + start, data };
@@ -106,7 +106,7 @@
   }
   // trigger initial refresh
   onMount(() => {
-    rows = contents.getElementsByTagName('svelte-virtual-list-row');
+    rows = contents.getElementsByTagName('svelte-virtual-list-row') as HTMLCollectionOf<HTMLElement>;
     mounted = true;
   });
   

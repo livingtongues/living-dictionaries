@@ -3,10 +3,10 @@
   import Row from './Row.svelte'
 
   interface Props {
-    row?: ComponentProps<Row>;
+    row?: ComponentProps<typeof Row>
   }
 
-  let { row = {} }: Props = $props();
+  let { row = {} }: Props = $props()
 </script>
 
 <Row {...row}>

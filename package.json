@@ -23,15 +23,14 @@
     "check-packages": "pnpm update --interactive --recursive --latest"
   },
   "devDependencies": {
-    "@antfu/eslint-config": "^2.27.3",
-    "@typescript-eslint/eslint-plugin": "8.3.0",
-    "eslint": "^9.9.1",
-    "eslint-plugin-svelte": "^2.43.0",
+    "@antfu/eslint-config": "^3.11.1",
+    "@typescript-eslint/eslint-plugin": "^8.50.0",
+    "eslint": "^9.39.2",
+    "eslint-plugin-svelte": "^3.13.1",
     "eslint-plugin-svelte-stylistic": "^0.0.4",
     "start-server-and-test": "^2.0.5",
     "supabase": "^1.145.4",
-    "svelte": "^4.2.12",
-    "typescript": "~5.1.6",
-    "vitest": "^2.1.4"
+    "typescript": "~5.7.3",
+    "vitest": "^4.0.0"
   }
 }

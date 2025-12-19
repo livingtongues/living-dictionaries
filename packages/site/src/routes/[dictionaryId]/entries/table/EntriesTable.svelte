@@ -1,5 +1,3 @@
-<!-- @migration-task Error while migrating Svelte code: `<tr>` cannot be a child of `<table>`. `<table>` only allows these children: `<caption>`, `<colgroup>`, `<tbody>`, `<thead>`, `<tfoot>`, `<style>`, `<script>`, `<template>`. The browser will 'repair' the HTML (by moving, removing, or inserting elements) which breaks Svelte's assumptions about the structure of your components.
-https://svelte.dev/e/node_invalid_placement -->
 <script lang="ts">
   import type { EntryData, IColumn, Tables } from '@living-dictionaries/types'
   import ColumnTitle from './ColumnTitle.svelte'
@@ -31,22 +29,25 @@ https://svelte.dev/e/node_invalid_placement -->
     overflow-auto relative"
   style="height: calc(100vh - 189px);">
   <table class="relative">
-    <tr class="text-left">
-      {#each columns as column, i}
-        <th
-          on:click={() => {
-            selectedColumn = column
-          }}
-          class:z-10={column.sticky}
-          class="cursor-pointer bg-gray-100 top-0 sticky z-1
-            hover:bg-gray-200 active:bg-gray-300 text-xs font-semibold"
-          style="{column.sticky
-            ? `left:${getLeftValue(i)}px; --border-right-width: 3px;`
-            : ''} --col-width: {column.width}px;">
-          <ColumnTitle {column} />
-        </th>
-      {/each}
-    </tr>
+    <thead>
+      <tr class="text-left">
+        {#each columns as column, i}
+          <th
+            on:click={() => {
+              selectedColumn = column
+            }}
+            class:z-10={column.sticky}
+            class="cursor-pointer bg-gray-100 top-0 sticky z-1
+              hover:bg-gray-200 active:bg-gray-300 text-xs font-semibold"
+            style="{column.sticky
+              ? `left:${getLeftValue(i)}px; --border-right-width: 3px;`
+              : ''} --col-width: {column.width}px;">
+            <ColumnTitle {column} />
+          </th>
+        {/each}
+      </tr>
+    </thead>
+    <tbody>
     {#each entries as entry (entry.id)}
       {@const updated_within_last_5_minutes = can_edit && new Date(entry.updated_at).getTime() > minutes_ago_in_ms(5)}
       <tr class="row-hover">
@@ -66,6 +67,7 @@ https://svelte.dev/e/node_invalid_placement -->
         {/each}
       </tr>
     {/each}
+    </tbody>
   </table>
 </div>
 
