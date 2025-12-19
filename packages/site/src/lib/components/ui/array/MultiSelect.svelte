@@ -1,30 +1,35 @@
 <script lang="ts">
+  import { run, stopPropagation, preventDefault } from 'svelte/legacy';
+
   import { fly } from 'svelte/transition'
   import { onMount } from 'svelte'
   import { clickoutside } from 'svelte-pieces'
   import type { SelectOption } from './select-options.interface'
 
-  export let selectedOptions: Record<string, SelectOption>
-  export let options: SelectOption[]
-  export let placeholder = 'Select...'
-  export let canWriteIn = false
+  interface Props {
+    selectedOptions: Record<string, SelectOption>;
+    options: SelectOption[];
+    placeholder?: string;
+    canWriteIn?: boolean;
+  }
 
-  let input: HTMLInputElement
-  let inputValue: string
-  let activeOption: SelectOption
-  let showOptions = false
+  let {
+    selectedOptions = $bindable(),
+    options,
+    placeholder = 'Select...',
+    canWriteIn = false
+  }: Props = $props();
+
+  let input: HTMLInputElement = $state()
+  let inputValue: string = $state()
+  let activeOption: SelectOption = $state()
+  let showOptions = $state(false)
 
   onMount(() => {
     input.focus()
   })
 
-  $: filtered = options.filter(o =>
-    inputValue ? o.name.toLowerCase().includes(inputValue.trim().toLowerCase()) : o,
-  )
-  $: if ((activeOption && !filtered.includes(activeOption)) || (!activeOption && inputValue))
-    [activeOption] = filtered
 
-  $: if (!showOptions && inputValue) setShowOptions(true)
 
   function add(option: SelectOption) {
     selectedOptions[option.value] = option
@@ -85,27 +90,37 @@
     else
       add(option)
   }
+  let filtered = $derived(options.filter(o =>
+    inputValue ? o.name.toLowerCase().includes(inputValue.trim().toLowerCase()) : o,
+  ))
+  run(() => {
+    if ((activeOption && !filtered.includes(activeOption)) || (!activeOption && inputValue))
+      [activeOption] = filtered
+  });
+  run(() => {
+    if (!showOptions && inputValue) setShowOptions(true)
+  });
 </script>
 
 <div
   class="multiselect"
   use:clickoutside
-  on:clickoutside={() => {
+  onclickoutside={() => {
     inputValue = ''
     setShowOptions(false)
   }}>
-  <div class="tokens" class:showOptions on:click={() => setShowOptions(true)}>
+  <div class="tokens" class:showOptions onclick={() => setShowOptions(true)}>
     {#each Object.values(selectedOptions) as option}
       <div
         class="items-center flex rounded-lg px-2 py-1 whitespace-nowrap
           text-sm font-medium leading-4 bg-blue-100 text-blue-800 mr-2 my-1">
         <span>{option.name}</span>
         <div
-          on:click|stopPropagation={() => remove(option.value)}
+          onclick={stopPropagation(() => remove(option.value))}
           class="cursor-pointer justify-center items-center flex
             bg-blue-300 hover:bg-blue-400 rounded-full h-4 w-4 ml-1"
           title="Remove {option.name}">
-          <span class="i-la-times" />
+          <span class="i-la-times"></span>
         </div>
       </div>
     {/each}
@@ -115,11 +130,11 @@
         autocomplete="off"
         bind:value={inputValue}
         bind:this={input}
-        on:keydown={handleKeydown}
-        on:focus={() => setShowOptions(true)}
-        on:blur={addWriteInIfApplicable}
+        onkeydown={handleKeydown}
+        onfocus={() => setShowOptions(true)}
+        onblur={addWriteInIfApplicable}
         placeholder={Object.keys(selectedOptions).length ? '' : placeholder} />
-      <span class="i-carbon-caret-down opacity-50" />
+      <span class="i-carbon-caret-down opacity-50"></span>
     </div>
   </div>
 
@@ -131,7 +146,7 @@
         <li
           class:selected={selectedOptions[option.value]}
           class:active={activeOption === option}
-          on:click|preventDefault={() => selectOption(option)}>
+          onclick={preventDefault(() => selectOption(option))}>
           {option.name}
         </li>
       {/each}

@@ -1,18 +1,38 @@
 <script lang="ts">
+  import { run, createBubbler, stopPropagation } from 'svelte/legacy';
+
+  const bubble = createBubbler();
   import { createEventDispatcher } from 'svelte';
   const dispatch = createEventDispatcher();
 
-  export let items: any[] = [];
-  export let placeholder = 'CHANGE';
-  export let keyField = 'key';
-  export let labelField = 'name';
-  export let value = '';
+  interface Props {
+    items?: any[];
+    placeholder?: string;
+    keyField?: string;
+    labelField?: string;
+    value?: string;
+  }
 
-  let search = '';
-  let active = false;
-  let results: { value: string; boldedLabel: string; label: string }[] = [];
+  let {
+    items = [],
+    placeholder = 'CHANGE',
+    keyField = 'key',
+    labelField = 'name',
+    value = $bindable('')
+  }: Props = $props();
 
-  $: {
+  let search = $state('');
+  let active = $state(false);
+  let results: { value: string; boldedLabel: string; label: string }[] = $state([]);
+
+
+  const regExpEscape = (s) => {
+    return s.replace(/[-\\^$*+?.()|[\]{}]/g, '\\$&');
+  };
+
+
+
+  run(() => {
     const matchingItems = items.filter(
       (item) => search.length && JSON.stringify(item).toLowerCase().includes(search.toLowerCase())
     );
@@ -23,29 +43,26 @@
       );
       return { value: item[keyField], boldedLabel, label: item[labelField] };
     });
-  }
-
-  const regExpEscape = (s) => {
-    return s.replace(/[-\\^$*+?.()|[\]{}]/g, '\\$&');
-  };
-
-  $: if (results.length === 1)
-    [{value}] = results;
-  else
-    value = '';
-
-  $: if (value.length)
-    dispatch('selectedResult', { value });
-
+  });
+  run(() => {
+    if (results.length === 1)
+      [{value}] = results;
+    else
+      value = '';
+  });
+  run(() => {
+    if (value.length)
+      dispatch('selectedResult', { value });
+  });
 </script>
 
-<svelte:window on:click={() => (active = false)} />
+<svelte:window onclick={() => (active = false)} />
 
-<div on:click|stopPropagation class="relative w-56">
+<div onclick={stopPropagation(bubble('click'))} class="relative w-56">
   <input
     type="search"
     {placeholder}
-    on:focus={() => (active = true)}
+    onfocus={() => (active = true)}
     class="form-input block border border-gray-300 rounded w-full
       focus:outline-none focus:shadow-outline-blue focus:border-blue-300 text-sm
       md:text-xs md:leading-5 transition ease-in-out duration-150 py-1 px-3"
@@ -55,7 +72,7 @@
     class="border absolute w-full bg-white overflow-auto 6rem z-10 shadow-lg">
     {#each results as result}
       <li
-        on:click={() => {
+        onclick={() => {
           search = result.label;
           ({value} = result);
           active = false;

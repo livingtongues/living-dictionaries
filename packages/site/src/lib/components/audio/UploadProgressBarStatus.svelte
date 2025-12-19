@@ -3,7 +3,11 @@
   import type { AudioVideoUploadStatus } from './upload-audio'
   import { page } from '$app/stores'
 
-  export let upload_status: Readable<AudioVideoUploadStatus>
+  interface Props {
+    upload_status: Readable<AudioVideoUploadStatus>;
+  }
+
+  let { upload_status }: Props = $props();
 </script>
 
 {#if $upload_status.error}
@@ -16,7 +20,7 @@
   <span
     class="text-xs font-semibold inline-block py-1 px-2 uppercase rounded-full
       text-green-600 bg-green-200">
-    <i class="far fa-check" />
+    <i class="far fa-check"></i>
     {$page.data.t('upload.success')}
   </span>
 {:else}
@@ -38,7 +42,7 @@
     <div class="overflow-hidden h-2 mb-4 text-xs flex rounded bg-blue-200">
       <div
         style="width:{$upload_status.progress}%"
-        class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-blue-500 smooth-width-transition" />
+        class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-blue-500 smooth-width-transition"></div>
     </div>
   </div>
 {/if}

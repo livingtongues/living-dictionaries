@@ -1,12 +1,12 @@
 <script lang="ts">
-  import { page } from '$app/stores'
+  import { page } from '$app/state'
   import Header from '$lib/components/shell/Header.svelte'
   import Footer from '$lib/components/shell/Footer.svelte'
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte'
 </script>
 
 <Header>
-  {$page.data.t('header.tutorials')}
+  {page.data.t('header.tutorials')}
 </Header>
 
 <div class="max-w-screen-md mx-auto p-3">
@@ -17,7 +17,7 @@
     title="Project overview"
     frameborder="0"
     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-    allowfullscreen />
+    allowfullscreen></iframe>
 </div>
 
 <div class="max-w-screen-md mx-auto p-3">
@@ -28,7 +28,7 @@
     title="Tutorial 1 - How to create an account and a new Living Dictionary"
     frameborder="0"
     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-    allowfullscreen />
+    allowfullscreen></iframe>
 
   <iframe
     class="video mb-3"
@@ -36,7 +36,7 @@
     title="Tutorial 2 - How to Add and Edit Entries in a Living Dictionary"
     frameborder="0"
     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-    allowfullscreen />
+    allowfullscreen></iframe>
 </div>
 
 <div class="max-w-screen-md mx-auto p-3">
@@ -47,7 +47,7 @@
     title="Seminario 1 - Como iniciar una cuenta y crear un Diccionario Vivo"
     frameborder="0"
     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-    allowfullscreen />
+    allowfullscreen></iframe>
 
   <iframe
     class="video mb-3"
@@ -55,13 +55,13 @@
     title="Seminario 2 - Como agregar y editar entradas en un Diccionario Vivo"
     frameborder="0"
     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-    allowfullscreen />
+    allowfullscreen></iframe>
 </div>
 
 <Footer />
 
 <SeoMetaTags
-  title={$page.data.t('header.tutorials')}
+  title={page.data.t('header.tutorials')}
   type="video"
   description="We offer video tutorials narrated in English and Spanish for dictionary managers seeking to learn how to create a Living Dictionary on the platform, as well as how to add entries with multimedia. Living Dictionaries are language documentation tools that support endangered and under-represented languages. This online platform was created by Living Tongues Institute for Endangered Languages as a free multimedia resource for community activists and linguists who want to build digital dictionaries and phrasebooks."
   keywords="Minority Languages, Indigenous Languages, Language Documentation, Dictionary, Minority Community, Language Analysis, Language Education, Endangered Languages, Language Revitalization, Linguistics, Word Lists, Linguistic Analysis, Dictionaries, Living Dictionaries, Living Tongues, Under-represented Languages, Tech Resources, Language Sustainability, Language Resources, Diaspora Languages, Elicitation, Language Archives, Ancient Languages, World Languages, Obscure Languages, Little Known languages, Digital Dictionary, Dictionary Software, Free Software, Online Dictionary Builder, Tutorials, Lesson, Seminarios, Videos, Masterclass" />

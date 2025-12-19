@@ -2,8 +2,8 @@
   import { Button, ShowHide } from 'svelte-pieces'
   import { page } from '$app/stores'
 
-  export let data
-  $: ({ user, dictionary, is_manager, is_contributor, invite, accept_invite } = data)
+  let { data } = $props();
+  let { user, dictionary, is_manager, is_contributor, invite, accept_invite } = $derived(data)
 </script>
 
 {#if invite?.status === 'sent'}
@@ -20,7 +20,7 @@
       </p>
       <Button href={`/${dictionary.id}/entries`}>
         {$page.data.t('dictionary.entries')}
-        <span class="i-fa6-solid-chevron-right rtl-x-flip -mt-1" />
+        <span class="i-fa6-solid-chevron-right rtl-x-flip -mt-1"></span>
       </Button>
     {:else if $is_contributor && invite.role === 'contributor'}
       <p class="mb-2">
@@ -28,7 +28,7 @@
       </p>
       <Button href={`/${dictionary.id}/entries`}>
         {$page.data.t('dictionary.entries')}
-        <span class="i-fa6-solid-chevron-right rtl-x-flip -mt-1" />
+        <span class="i-fa6-solid-chevron-right rtl-x-flip -mt-1"></span>
       </Button>
     {:else}
       <Button form="filled" onclick={accept_invite}>{$page.data.t('invite.accept_invitation')}</Button>
@@ -42,19 +42,21 @@
       </div>
     {/if}
   {:else}
-    <ShowHide let:show let:toggle>
-      <Button form="text" onclick={toggle}>
-        <i class="far fa-sign-in" />
-        <span class="ml-1">
-          {$page.data.t('header.login')}
-        </span>
-      </Button>
-      {#if show}
-        {#await import('$lib/components/shell/AuthModal.svelte') then { default: AuthModal }}
-          <AuthModal on_close={toggle} />
-        {/await}
-      {/if}
-    </ShowHide>
+    <ShowHide  >
+      {#snippet children({ show, toggle })}
+            <Button form="text" onclick={toggle}>
+          <i class="far fa-sign-in"></i>
+          <span class="ml-1">
+            {$page.data.t('header.login')}
+          </span>
+        </Button>
+        {#if show}
+          {#await import('$lib/components/shell/AuthModal.svelte') then { default: AuthModal }}
+            <AuthModal on_close={toggle} />
+          {/await}
+        {/if}
+                {/snippet}
+        </ShowHide>
   {/if}
 {:else if invite?.status === 'claimed'}
   <p class="font-semibold mb-2">
@@ -63,19 +65,21 @@
 
   <Button href={`/${dictionary.id}/entries`}>
     {$page.data.t('dictionary.entries')}
-    <span class="i-fa6-solid-chevron-right rtl-x-flip -mt-1" />
+    <span class="i-fa6-solid-chevron-right rtl-x-flip -mt-1"></span>
   </Button>
 {:else if !$user}
   {$page.data.t('header.please_create_account')}
-  <ShowHide let:show={hide} let:toggle>
-    {#if !hide}
-      {#await import('$lib/components/shell/AuthModal.svelte') then { default: AuthModal }}
-        <AuthModal
-          context="force"
-          on_close={toggle} />
-      {/await}
-    {/if}
-  </ShowHide>
+  <ShowHide  >
+    {#snippet children({ show: hide, toggle })}
+                {#if !hide}
+        {#await import('$lib/components/shell/AuthModal.svelte') then { default: AuthModal }}
+          <AuthModal
+            context="force"
+            on_close={toggle} />
+        {/await}
+      {/if}
+                  {/snippet}
+            </ShowHide>
 {:else}
   <p class="font-semibold">
     {$page.data.t('invite.invalid_invitation')}

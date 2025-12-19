@@ -2,7 +2,12 @@
   import DarkModeSupport from '../components/DarkModeSupport.svelte'
   import style from './client-specific-styles.css?inline'
 
-  export let dark: boolean
+  interface Props {
+    dark: boolean;
+    children?: import('svelte').Snippet;
+  }
+
+  let { dark, children }: Props = $props();
 </script>
 
 <head>
@@ -33,5 +38,5 @@
 
   <DarkModeSupport emulateEmailAddingDarkClasses={dark} />
 
-  <slot />
+  {@render children?.()}
 </head>

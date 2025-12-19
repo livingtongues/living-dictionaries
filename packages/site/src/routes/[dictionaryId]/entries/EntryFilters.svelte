@@ -8,12 +8,21 @@
   import { page } from '$app/stores'
   import { restore_spaces_periods_from_underscores } from '$lib/search/augment-entry-for-search'
 
-  export let search_params: QueryParamStore<QueryParams>
-  export let show_mobile_filters = false
-  export let on_close: () => void
-  export let result_facets: FacetResult
+  interface Props {
+    search_params: QueryParamStore<QueryParams>;
+    show_mobile_filters?: boolean;
+    on_close: () => void;
+    result_facets: FacetResult;
+  }
 
-  $: ({ tags, dialects, speakers } = $page.data)
+  let {
+    search_params,
+    show_mobile_filters = false,
+    on_close,
+    result_facets
+  }: Props = $props();
+
+  let { tags, dialects, speakers } = $derived($page.data)
 </script>
 
 <ResponsiveSlideover
@@ -39,7 +48,7 @@
           class="w-full"
           type="range"
           value={$search_params.tolerance || 0}
-          on:input={(e) => {
+          oninput={(e) => {
             // @ts-ignore
             const { value } = e.target
             $search_params.tolerance = value === '1' ? null : value

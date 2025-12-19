@@ -2,11 +2,15 @@
   import { onDestroy, onMount } from 'svelte'
   import { Button } from 'svelte-pieces'
 
-  export let audioUrl: string = undefined
-  export let audioBlob = undefined
+  interface Props {
+    audioUrl?: string;
+    audioBlob?: any;
+  }
+
+  let { audioUrl = undefined, audioBlob = undefined }: Props = $props();
   let wavesurfer
-  let waveform
-  let playing = false
+  let waveform = $state()
+  let playing = $state(false)
 
   onMount(async () => {
     const WaveSurfer = (await import('wavesurfer.js')).default
@@ -54,9 +58,9 @@
     color={playing ? 'green' : 'primary'}
     form="filled"
     onclick={startStop}>
-    <span class="i-material-symbols-hearing my-1" style="width: 2em; height: 2em;" />
+    <span class="i-material-symbols-hearing my-1" style="width: 2em; height: 2em;"></span>
   </Button>
-  <div class="flex-grow" bind:this={waveform} />
+  <div class="flex-grow" bind:this={waveform}></div>
 </div>
 
 <!-- wavesurfer.playPause(); -->

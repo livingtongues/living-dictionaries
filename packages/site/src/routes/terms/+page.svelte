@@ -486,7 +486,7 @@
         the requisite and verifiable parental consent, we will delete that information from the Site
         as quickly as is reasonably practical.
       </p>
-      <p />
+      <p></p>
 
       <h2>DIGITAL MILLENNIUM COPYRIGHT ACT (DMCA) NOTICE AND POLICY</h2>
       <h3>Notifications</h3>
@@ -553,7 +553,7 @@
         Salem, OR 97302<br />
         dictionaries@livingtongues.org
       </p>
-      <p />
+      <p></p>
 
       <h2>TERM AND TERMINATION</h2>
       <p>

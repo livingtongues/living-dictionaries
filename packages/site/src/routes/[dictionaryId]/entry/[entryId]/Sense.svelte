@@ -8,18 +8,22 @@
   import EntrySemanticDomains from '$lib/components/entry/EntrySemanticDomains.svelte'
   import { DICTIONARIES_WITH_VARIANTS } from '$lib/constants'
 
-  export let sense: EntryData['senses'][0]
-  export let glossLanguages: Tables<'dictionaries'>['gloss_languages']
-  export let can_edit = false
+  interface Props {
+    sense: EntryData['senses'][0];
+    glossLanguages: Tables<'dictionaries'>['gloss_languages'];
+    can_edit?: boolean;
+  }
 
-  $: ({ dictionary, dbOperations } = $page.data)
+  let { sense, glossLanguages, can_edit = false }: Props = $props();
+
+  let { dictionary, dbOperations } = $derived($page.data)
 
   function update_sense(update: TablesUpdate<'senses'>) {
     dbOperations.update_sense({ ...update, id: sense.id })
   }
 
-  $: glossingLanguages = order_entry_and_dictionary_gloss_languages(sense.glosses, glossLanguages)
-  $: hasSemanticDomain = sense.semantic_domains?.length || sense.write_in_semantic_domains?.length
+  let glossingLanguages = $derived(order_entry_and_dictionary_gloss_languages(sense.glosses, glossLanguages))
+  let hasSemanticDomain = $derived(sense.semantic_domains?.length || sense.write_in_semantic_domains?.length)
 </script>
 
 {#each glossingLanguages as bcp}
@@ -57,7 +61,7 @@
       on_update={(new_value) => {
         update_sense({ parts_of_speech: new_value })
       }} />
-    <div class="border-b-2 pb-1 mb-2 border-dashed" />
+    <div class="border-b-2 pb-1 mb-2 border-dashed"></div>
   </div>
 {/if}
 
@@ -74,7 +78,7 @@
       on_update_write_in={(new_value) => {
         update_sense({ write_in_semantic_domains: new_value })
       }} />
-    <div class="border-b-2 pb-1 mb-2 border-dashed" />
+    <div class="border-b-2 pb-1 mb-2 border-dashed"></div>
   </div>
 {/if}
 

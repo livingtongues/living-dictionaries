@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { run } from 'svelte/legacy';
+
   // https://docs.mapbox.com/api/maps/static-images
   // https://stackoverflow.com/questions/69287390/request-static-image-from-mapbox-with-polygon-via-url // use decodeURIComponent to read example
 
@@ -6,30 +8,45 @@
   import { shapeGeoJson } from './shapeGeoJson';
   import { PUBLIC_mapboxAccessToken } from '$env/static/public';
 
-  export let points: IPoint[] = [];
-  export let regions: IRegion[] = [];
-  export let width = 300;
-  export let height = 200;
-  export let accessToken = PUBLIC_mapboxAccessToken;
-  export let style = 'streets-v11';
-  export let highDef = true;
-  export let singlePointZoom = 3;
-
-  $: geoJson = shapeGeoJson(points, regions);
-  $: urlFriendlyGeoJson = encodeURIComponent(JSON.stringify(geoJson));
-  $: urlPrefix = `https://api.mapbox.com/styles/v1/mapbox/${style}/static/geojson(${urlFriendlyGeoJson})`;
-  $: urlSuffix = `${width}x${height}${highDef ? '@2x' : ''}?logo=false&access_token=${accessToken}`
-
-  let src = '';
-  $: isSinglePoint = points?.length === 1 && !regions?.length;
-  $: if (isSinglePoint) {
-    const [{ coordinates: firstPoint }] = points
-    const { longitude } = firstPoint;
-    const { latitude } = firstPoint;
-    src = `${urlPrefix}/${longitude},${latitude},${singlePointZoom}/${urlSuffix}`
-  } else {
-    src = `${urlPrefix}/auto/${urlSuffix}`
+  interface Props {
+    points?: IPoint[];
+    regions?: IRegion[];
+    width?: number;
+    height?: number;
+    accessToken?: any;
+    style?: string;
+    highDef?: boolean;
+    singlePointZoom?: number;
   }
+
+  let {
+    points = [],
+    regions = [],
+    width = 300,
+    height = 200,
+    accessToken = PUBLIC_mapboxAccessToken,
+    style = 'streets-v11',
+    highDef = true,
+    singlePointZoom = 3
+  }: Props = $props();
+
+  let geoJson = $derived(shapeGeoJson(points, regions));
+  let urlFriendlyGeoJson = $derived(encodeURIComponent(JSON.stringify(geoJson)));
+  let urlPrefix = $derived(`https://api.mapbox.com/styles/v1/mapbox/${style}/static/geojson(${urlFriendlyGeoJson})`);
+  let urlSuffix = $derived(`${width}x${height}${highDef ? '@2x' : ''}?logo=false&access_token=${accessToken}`)
+
+  let src = $state('');
+  let isSinglePoint = $derived(points?.length === 1 && !regions?.length);
+  run(() => {
+    if (isSinglePoint) {
+      const [{ coordinates: firstPoint }] = points
+      const { longitude } = firstPoint;
+      const { latitude } = firstPoint;
+      src = `${urlPrefix}/${longitude},${latitude},${singlePointZoom}/${urlSuffix}`
+    } else {
+      src = `${urlPrefix}/auto/${urlSuffix}`
+    }
+  });
 </script>
 
 {#if src}

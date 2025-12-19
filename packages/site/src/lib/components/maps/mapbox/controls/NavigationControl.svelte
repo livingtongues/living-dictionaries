@@ -6,10 +6,19 @@
   const map = getMap();
   const mapbox = getMapbox();
 
-  export let position: 'top-left' | 'top-right' | 'bottom-right' | 'bottom-left' = 'top-right';
-  export let showCompass = true;
-  export let showZoom = true;
-  export let visualizePitch = true;
+  interface Props {
+    position?: 'top-left' | 'top-right' | 'bottom-right' | 'bottom-left';
+    showCompass?: boolean;
+    showZoom?: boolean;
+    visualizePitch?: boolean;
+  }
+
+  let {
+    position = 'top-right',
+    showCompass = true,
+    showZoom = true,
+    visualizePitch = true
+  }: Props = $props();
 
   const nav = new mapbox.NavigationControl({
     showCompass,

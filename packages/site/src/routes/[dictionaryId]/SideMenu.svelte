@@ -2,11 +2,21 @@
   import type { Tables } from '@living-dictionaries/types'
   import { page } from '$app/stores'
 
-  export let dictionary: Tables<'dictionaries'>
-  export let entry_count: number
-  export let on_close: () => void
-  export let is_manager: boolean
-  export let loading: boolean
+  interface Props {
+    dictionary: Tables<'dictionaries'>;
+    entry_count: number;
+    on_close: () => void;
+    is_manager: boolean;
+    loading: boolean;
+  }
+
+  let {
+    dictionary,
+    entry_count,
+    on_close,
+    is_manager,
+    loading
+  }: Props = $props();
 </script>
 
 <div class="md:hidden">
@@ -17,17 +27,17 @@
     {dictionary.name}
   </h5>
 </div>
-<div on:click={on_close}>
+<div onclick={on_close}>
   <a
     class:active={$page.url.pathname.match(/entry|entries/)}
     href={`/${dictionary.url}/entries`}>
-    <span class="i-fa-solid-list" />
+    <span class="i-fa-solid-list"></span>
     <span class="font-medium mx-2">
       {$page.data.t('dictionary.entries')}
     </span>
-    <span class="flex-grow" />
+    <span class="flex-grow"></span>
     {#if is_manager && loading}
-      <span class="i-svg-spinners-3-dots-fade align--4px mx-1" />
+      <span class="i-svg-spinners-3-dots-fade align--4px mx-1"></span>
     {/if}
     {#if entry_count}
       <span
@@ -41,7 +51,7 @@
     <a
       href={`/${dictionary.url}/synopsis`}
       class:active={$page.url.pathname.includes('synopsis')}>
-      <span class="i-fa6-solid-file-lines" />
+      <span class="i-fa6-solid-file-lines"></span>
       <span class="font-medium mx-2">
         {$page.data.t('synopsis.name')}
       </span>
@@ -50,7 +60,7 @@
   <a
     href={`/${dictionary.url}/about`}
     class:active={$page.url.pathname.includes('about')}>
-    <span class="i-fa6-solid-circle-info mx-.25" />
+    <span class="i-fa6-solid-circle-info mx-.25"></span>
     <span class="font-medium mx-2">
       {$page.data.t('header.about')}
     </span>
@@ -58,7 +68,7 @@
   <a
     href={`/${dictionary.url}/grammar`}
     class:active={$page.url.pathname.includes('grammar')}>
-    <span class="i-tabler-text-grammar text-lg" />
+    <span class="i-tabler-text-grammar text-lg"></span>
     <span class="font-medium mx-2">
       {$page.data.t('dictionary.grammar')}
     </span>
@@ -66,7 +76,7 @@
   <a
     href={`/${dictionary.url}/contributors`}
     class:active={$page.url.pathname.includes('contributors')}>
-    <span class="i-fa6-solid-users text-lg" />
+    <span class="i-fa6-solid-users text-lg"></span>
     <span class="font-medium mx-2">
       {$page.data.t('dictionary.contributors')}
     </span>
@@ -75,7 +85,7 @@
     <a
       href={`/${dictionary.url}/history`}
       class:active={$page.url.pathname.includes('history')}>
-      <span class="i-mdi-history text-xl" />
+      <span class="i-mdi-history text-xl"></span>
       <span class="font-medium mx-2">
         {$page.data.t('history.history')}
       </span>
@@ -83,7 +93,7 @@
     <a
       href={`/${dictionary.url}/settings`}
       class:active={$page.url.pathname.includes('settings')}>
-      <span class="i-fa6-solid-gear mx-.5" />
+      <span class="i-fa6-solid-gear mx-.5"></span>
       <span class="font-medium mx-2">
         {$page.data.t('misc.settings')}
       </span>
@@ -92,7 +102,7 @@
       <a
         href={`/${dictionary.url}/import`}
         class:active={$page.url.pathname.includes('import')}>
-        <span class="i-fa6-solid-file-import mx-.5" />
+        <span class="i-fa6-solid-file-import mx-.5"></span>
         <span class="font-medium mx-2">
           {$page.data.t('import_page.import')}
         </span>
@@ -101,7 +111,7 @@
     <a
       href={`/${dictionary.url}/export`}
       class:active={$page.url.pathname.includes('export')}>
-      <span class="i-fa6-solid-file-export ml-1" />
+      <span class="i-fa6-solid-file-export ml-1"></span>
       <span class="font-medium mx-2">
         {$page.data.t('misc.export')}
       </span>
@@ -109,7 +119,7 @@
   {/if}
 </div>
 
-<div class="mt-auto" />
+<div class="mt-auto"></div>
 
 <a href="/terms" target="_blank" class="link">
   {$page.data.t('dictionary.terms_of_use')}

@@ -1,8 +1,8 @@
 <script lang="ts">
   import { onMount } from 'svelte';
 
-  let progress = 0;
-  let visible = false;
+  let progress = $state(0);
+  let visible = $state(false);
 
   onMount(() => {
     function next() {
@@ -17,7 +17,7 @@
 
 {#if visible}
   <div class="progress-container">
-    <div class="progress" style="width: {progress * 100}%" />
+    <div class="progress" style="width: {progress * 100}%"></div>
   </div>
 {/if}
 

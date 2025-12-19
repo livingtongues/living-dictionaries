@@ -1,21 +1,31 @@
 <script lang="ts">
   import { QrCode, QrCodeEcc } from './qrcodegen'
 
-  export let value: string
-  export let pixelsPerModule = 4
-  export let errorCorrection: 'low' | 'medium' | 'quartile' | 'high' = 'high'
-  export let bgColor = '#FFFFFF'
-  export let fgColor = '#000000'
+  interface Props {
+    value: string;
+    pixelsPerModule?: number;
+    errorCorrection?: 'low' | 'medium' | 'quartile' | 'high';
+    bgColor?: string;
+    fgColor?: string;
+  }
 
-  $: ecl = (() => {
+  let {
+    value,
+    pixelsPerModule = 4,
+    errorCorrection = 'high',
+    bgColor = '#FFFFFF',
+    fgColor = '#000000'
+  }: Props = $props();
+
+  let ecl = $derived((() => {
     if (errorCorrection === 'high') return QrCodeEcc.HIGH
     else if (errorCorrection === 'quartile') return QrCodeEcc.QUARTILE
     else if (errorCorrection === 'medium') return QrCodeEcc.MEDIUM
     return QrCodeEcc.LOW
-  })()
-  $: qr = QrCode.encodeText(value, ecl)
+  })())
+  let qr = $derived(QrCode.encodeText(value, ecl))
 
-  $: fgPath = (() => {
+  let fgPath = $derived((() => {
     const parts: string[] = []
     for (let y = 0; y < qr.size; y++) {
       for (let x = 0; x < qr.size; x++) {
@@ -23,7 +33,7 @@
       }
     }
     return parts.join(' ')
-  })()
+  })())
 </script>
 
 <svg height={qr.size * pixelsPerModule} width={qr.size * pixelsPerModule} viewBox={`0 0 ${qr.size} ${qr.size}`} stroke="none">

@@ -4,18 +4,22 @@
   import { onMount } from 'svelte';
   import type { StereoAudioRecorder, Options } from 'recordrtc';
 
-  export let audioBlob: Blob = null;
-  export let permissionGranted = false;
+  interface Props {
+    audioBlob?: Blob;
+    permissionGranted?: boolean;
+  }
+
+  let { audioBlob = $bindable(null), permissionGranted = $bindable(false) }: Props = $props();
   const permissionDenied = false;
 
-  let RecordRTC: typeof import('recordrtc');
+  let RecordRTC: typeof import('recordrtc') = $state();
   onMount(async () => {
     RecordRTC = (await import('recordrtc')).default;
   // Could also use `await loadScriptOnce('https://cdnjs.cloudflare.com/ajax/libs/RecordRTC/5.5.6/RecordRTC.js');` in context module block
   });
 
   // let recorder: StereoAudioRecorder = null;
-  let recorder: StereoAudioRecorder = null;
+  let recorder: StereoAudioRecorder = $state(null);
   let stream = null;
 
   async function checkAudioPermissions() {
@@ -31,7 +35,7 @@
     }
   }
 
-  let recordingTime = 0;
+  let recordingTime = $state(0);
   let interval;
 
   async function record() {
@@ -118,7 +122,7 @@
       </div>
     {:else}
       <Button onclick={checkAudioPermissions} class="w-full">
-        <span class="i-uil-microphone" />
+        <span class="i-uil-microphone"></span>
         {$page.data.t('audio.prepare_to_record')}
       </Button>
     {/if}

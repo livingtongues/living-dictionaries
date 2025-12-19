@@ -10,12 +10,16 @@
   import { downloadObjectsAsCSV } from '$lib/export/csv'
   import { supabase_date_to_friendly } from '$lib/helpers/time'
 
-  export let data: PageData
-  let loading_content_updates = true
-  const { entries_data } = $page.data
-  $: ({ dictionary, can_edit, get_content_updates } = data)
+  interface Props {
+    data: PageData;
+  }
 
-  let content_updates: Tables<'content_updates'>[] = []
+  let { data }: Props = $props();
+  let loading_content_updates = $state(true)
+  const { entries_data } = $page.data
+  let { dictionary, can_edit, get_content_updates } = $derived(data)
+
+  let content_updates: Tables<'content_updates'>[] = $state([])
   onMount(() => {
     const unsub = entries_data.loading.subscribe(async (loading) => {
       if (!loading) {
@@ -58,22 +62,28 @@
 {#if $can_edit}
   {#if content_updates?.length > 0}
     <div class="sticky top-0 h-[calc(100vh-1.5rem)] flex flex-col">
-      <Filter items={content_updates} let:filteredItems={filteredRecords} placeholder={$page.data.t('history.history_search')}>
-        <div slot="right">
-          <Button form="filled" color="black" class="flex items-center space-x-1" onclick={() => exportHistoryAsCSV()}>
-            <i class="fas fa-download" />
-            <span class="hidden sm:inline">{$page.data.t('history.download_history')}</span>
-          </Button>
-        </div>
-        <div class="mb-1" />
-        <ResponsiveTable stickyColumn stickyHeading>
-          <SortRecords history={filteredRecords} let:sortedRecords {get_entry}>
-            {#each sortedRecords as record}
-              <RecordRow {record} {get_entry} />
-            {/each}
-          </SortRecords>
-        </ResponsiveTable>
-      </Filter>
+      <Filter items={content_updates}  placeholder={$page.data.t('history.history_search')}>
+        {#snippet right()}
+                <div >
+            <Button form="filled" color="black" class="flex items-center space-x-1" onclick={() => exportHistoryAsCSV()}>
+              <i class="fas fa-download"></i>
+              <span class="hidden sm:inline">{$page.data.t('history.download_history')}</span>
+            </Button>
+          </div>
+              {/snippet}
+        {#snippet children({ filteredItems: filteredRecords })}
+                <div class="mb-1"></div>
+          <ResponsiveTable stickyColumn stickyHeading>
+            <SortRecords history={filteredRecords}  {get_entry}>
+              {#snippet children({ sortedRecords })}
+                        {#each sortedRecords as record}
+                  <RecordRow {record} {get_entry} />
+                {/each}
+                                    {/snippet}
+                    </SortRecords>
+          </ResponsiveTable>
+                      {/snippet}
+            </Filter>
     </div>
   {:else if loading_content_updates}
     {$page.data.t('misc.loading')}...

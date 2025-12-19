@@ -2,10 +2,19 @@
   import type { ComponentProps } from 'svelte'
   import Row from './Row.svelte'
 
-  export let row: ComponentProps<Row> = {}
-  export let brand: string
-  export let href: string
-  export let src: string = undefined
+  interface Props {
+    row?: ComponentProps<Row>;
+    brand: string;
+    href: string;
+    src?: string;
+  }
+
+  let {
+    row = {},
+    brand,
+    href,
+    src = undefined
+  }: Props = $props();
 </script>
 
 <Row {...row} space={12}>

@@ -10,11 +10,21 @@
   import type { DbOperations } from '$lib/dbOperations'
   import EntryTag from '$lib/components/entry/EntryTag.svelte'
 
-  export let entry: EntryData
-  export let dictionary: Tables<'dictionaries'>
-  export let can_edit = false
-  export let dbOperations: DbOperations
-  export let entry_history: Tables<'content_updates'>[]
+  interface Props {
+    entry: EntryData;
+    dictionary: Tables<'dictionaries'>;
+    can_edit?: boolean;
+    dbOperations: DbOperations;
+    entry_history: Tables<'content_updates'>[];
+  }
+
+  let {
+    entry,
+    dictionary,
+    can_edit = false,
+    dbOperations,
+    entry_history
+  }: Props = $props();
 
   const text_fields = ['morphology', 'interlinearization'] satisfies EntryFieldValue[]
 
@@ -73,7 +83,7 @@
         <Sense {sense} glossLanguages={dictionary.gloss_languages} {can_edit} />
 
         {#if can_edit}
-          <Button class="text-start p-2! mb-2 rounded order-2 hover:bg-gray-100! text-gray-600 text-start!" form="menu" onclick={async () => await dbOperations.insert_sense(entry.id)}><span class="i-system-uicons-versions text-xl" /> {$page.data.t('sense.add')}</Button>
+          <Button class="text-start p-2! mb-2 rounded order-2 hover:bg-gray-100! text-gray-600 text-start!" form="menu" onclick={async () => await dbOperations.insert_sense(entry.id)}><span class="i-system-uicons-versions text-xl"></span> {$page.data.t('sense.add')}</Button>
         {/if}
       {:else}
         <div class="p-2 hover:bg-gray-50 rounded">
@@ -81,10 +91,10 @@
             <div class="font-semibold">
               {$page.data.t('sense.sense')} {index + 1}
             </div>
-            <div class="mx-auto" />
+            <div class="mx-auto"></div>
             {#if can_edit}
-              <Button class="text-gray-500!" size="sm" form="menu" onclick={async () => await dbOperations.update_sense({ deleted: new Date().toISOString(), id: sense.id })}><span class="i-fa-solid-times -mt-1" /></Button>
-              <Button class="text-gray-500!" size="sm" form="menu" onclick={async () => await dbOperations.insert_sense(entry.id)}><span class="i-fa-solid-plus -mt-1" /></Button>
+              <Button class="text-gray-500!" size="sm" form="menu" onclick={async () => await dbOperations.update_sense({ deleted: new Date().toISOString(), id: sense.id })}><span class="i-fa-solid-times -mt-1"></span></Button>
+              <Button class="text-gray-500!" size="sm" form="menu" onclick={async () => await dbOperations.insert_sense(entry.id)}><span class="i-fa-solid-plus -mt-1"></span></Button>
             {/if}
           </div>
 
@@ -102,7 +112,7 @@
           entry_id={entry.id}
           {can_edit}
           dialects={entry.dialects || []} />
-        <div class="border-b-2 pb-1 mb-2 border-dashed" />
+        <div class="border-b-2 pb-1 mb-2 border-dashed"></div>
       </div>
     {/if}
 
@@ -113,7 +123,7 @@
           entry_id={entry.id}
           {can_edit}
           tags={entry.tags || []} />
-        <div class="border-b-2 pb-1 mb-2 border-dashed" />
+        <div class="border-b-2 pb-1 mb-2 border-dashed"></div>
       </div>
     {/if}
 
@@ -155,7 +165,7 @@
           on_update={(new_value) => {
             update_entry({ sources: new_value })
           }} />
-        <div class="border-b-2 pb-1 mb-2 border-dashed" />
+        <div class="border-b-2 pb-1 mb-2 border-dashed"></div>
       </div>
     {/if}
 

@@ -1,11 +1,17 @@
 <script lang="ts">
+  import { preventDefault } from 'svelte/legacy';
+
   import { Button } from 'svelte-pieces'
   import type { HostedVideo } from '@living-dictionaries/types'
   import { parse_hosted_video_url } from './parse-hosted-video-url'
   import { page } from '$app/stores'
 
-  let url: string
-  export let on_pasted_valid_url: (hosted_video: HostedVideo) => void
+  let url: string = $state()
+  interface Props {
+    on_pasted_valid_url: (hosted_video: HostedVideo) => void;
+  }
+
+  let { on_pasted_valid_url }: Props = $props();
 
   function handle() {
     const video = parse_hosted_video_url(url)
@@ -17,9 +23,9 @@
   }
 </script>
 
-<form class="mb-4" on:submit|preventDefault={handle}>
+<form class="mb-4" onsubmit={preventDefault(handle)}>
   <label for="vURL" class="block text-sm font-medium leading-5 text-gray-700 mb-2">
-    <i class="far fa-link" />
+    <i class="far fa-link"></i>
     {$page.data.t('video.video_url')}
   </label>
   <div class="flex">
@@ -32,7 +38,7 @@
         bind:value={url}
         class="form-input block w-full" />
     </div>
-    <div class="w-1" />
+    <div class="w-1"></div>
     <Button type="submit" form={url ? 'filled' : 'outline'}>
       {$page.data.t('misc.add')}
     </Button>

@@ -1,15 +1,21 @@
+<!-- @migration task: review uses of `navigating` -->
 <script lang="ts">
   import './global.css'
   import LoadingIndicator from './LoadingIndicator.svelte'
-  import { navigating, page } from '$app/stores'
+  import { navigating, page } from '$app/state'
   import { browser } from '$app/environment'
+  interface Props {
+    children?: import('svelte').Snippet;
+  }
+
+  let { children }: Props = $props();
 
 // export let data
   // $: ({ user } = data)
 </script>
 
 {#if browser}
-  {#if $navigating}
+  {#if navigating}
     <LoadingIndicator />
   {/if}
 
@@ -28,8 +34,8 @@
   {/await}
 {/if} -->
 
-<div id="direction" dir={$page.data.t('page.direction')}>
-  <slot />
+<div id="direction" dir={page.data.t('page.direction')}>
+  {@render children?.()}
 </div>
 
 {#if browser}

@@ -4,8 +4,12 @@
   import { supabase_date_to_friendly } from '$lib/helpers/time'
   import { page } from '$app/stores'
 
-  export let record: Tables<'content_updates'>
-  export let get_entry: (record: Tables<'content_updates'>) => EntryData
+  interface Props {
+    record: Tables<'content_updates'>;
+    get_entry: (record: Tables<'content_updates'>) => EntryData;
+  }
+
+  let { record, get_entry }: Props = $props();
 </script>
 
 <tr>

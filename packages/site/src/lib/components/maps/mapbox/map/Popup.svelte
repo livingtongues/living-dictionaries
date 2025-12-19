@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { run } from 'svelte/legacy';
+
   // from https://gitlab.com/jailbreak/svelte-mapbox-gl
   import { onMount, getContext } from 'svelte';
   import { mapKey, markerKey } from '../context';
@@ -10,17 +12,31 @@
   const { getMarker } = getContext<{ getMarker: () => Marker }>(markerKey);
   const marker = getMarker();
 
-  export let closeButton = false;
-  export let closeOnClick = true;
-  export let closeOnMove = true;
-  export let options: PopupOptions = {};
-  export let offset = 15;
-  export let label = 'Marker';
-  export let open = false;
+  interface Props {
+    closeButton?: boolean;
+    closeOnClick?: boolean;
+    closeOnMove?: boolean;
+    options?: PopupOptions;
+    offset?: number;
+    label?: string;
+    open?: boolean;
+    children?: import('svelte').Snippet;
+  }
+
+  let {
+    closeButton = false,
+    closeOnClick = true,
+    closeOnMove = true,
+    options = {},
+    offset = 15,
+    label = 'Marker',
+    open = false,
+    children
+  }: Props = $props();
   // make my own close button
 
-  let popup: Popup;
-  let container: HTMLDivElement;
+  let popup: Popup = $state();
+  let container: HTMLDivElement = $state();
 
   onMount(() => {
     popup = new mapbox.Popup({
@@ -44,15 +60,17 @@
     };
   });
 
-  $: if (popup) {
-    if (open !== popup.isOpen())
-      marker.togglePopup();
+  run(() => {
+    if (popup) {
+      if (open !== popup.isOpen())
+        marker.togglePopup();
 
-  }
+    }
+  });
 </script>
 
 <div bind:this={container}>
-  <slot />
+  {@render children?.()}
 </div>
 
 <style>

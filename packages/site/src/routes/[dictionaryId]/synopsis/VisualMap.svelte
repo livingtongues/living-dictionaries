@@ -5,7 +5,11 @@
   import NavigationControl from '$lib/components/maps/mapbox/controls/NavigationControl.svelte'
   import { page } from '$app/stores'
 
-  export let coordinates: Tables<'dictionaries'>['coordinates']
+  interface Props {
+    coordinates: Tables<'dictionaries'>['coordinates'];
+  }
+
+  let { coordinates }: Props = $props();
 </script>
 
 {#if coordinates?.points?.[0]}

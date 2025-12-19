@@ -7,8 +7,8 @@
   import { page } from '$app/stores'
   import { dev } from '$app/environment'
 
-  export let data
-  $: ({
+  let { data } = $props();
+  let {
     entry_from_page,
     derived_entry,
     shallow,
@@ -17,9 +17,9 @@
     can_edit,
     dbOperations,
     entry_history,
-  } = data)
+  } = $derived(data)
 
-  $: entry = entry_from_page || $derived_entry
+  let entry = $derived(entry_from_page || $derived_entry)
 </script>
 
 <div
@@ -37,7 +37,7 @@
         window.location.href = `/${dictionary.id}/entries`
       }
     }}>
-    <i class="fas fa-arrow-left rtl-x-flip" />
+    <i class="fas fa-arrow-left rtl-x-flip"></i>
     {$page.data.t('misc.back')}
   </Button>
 
@@ -58,14 +58,14 @@
         <span class="hidden md:inline">
           {$page.data.t('misc.delete')}
         </span>
-        <i class="fas fa-trash ml-1" />
+        <i class="fas fa-trash ml-1"></i>
       </Button>
     {/if}
     {#if !shallow}
       <Button class="inline-flex! items-center" form="simple" onclick={() => share(dictionary.id, entry)}>
         <span>{$page.data.t('misc.share')}</span>
         <div class="w-2"></div>
-        <i class="fas fa-share-square rtl-x-flip" />
+        <i class="fas fa-share-square rtl-x-flip"></i>
       </Button>
     {/if}
   </div>
