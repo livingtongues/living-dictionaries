@@ -79,35 +79,33 @@
   a,
   button:not(.badge-x),
   div {
-    --at-apply: inline-flex items-center py-1 px-2 rounded-md text-xs font-medium;
-    --at-apply: bg-blue-100 text-blue-800;
+    @apply inline-flex items-center py-1 px-2 rounded-md text-xs font-medium bg-blue-100 text-blue-800;
   }
   .red {
-    --at-apply: bg-red-100 text-red-800;
+    @apply bg-red-100 text-red-800;
   }
   .orange {
-    --at-apply: bg-orange-100 text-orange-800;
+    @apply bg-orange-100 text-orange-800;
   }
   .green {
-    --at-apply: bg-green-100 text-green-800;
+    @apply bg-green-100 text-green-800;
   }
   .gray {
-    --at-apply: bg-gray-100 text-gray-800;
+    @apply bg-gray-100 text-gray-800;
   }
   .badge-x {
-    --at-apply: text-blue-400 hover:bg-blue-200 hover:text-blue-500 focus:bg-blue-500;
-    --at-apply: flex-shrink-0 h-4 w-4 rounded-full inline-flex items-center justify-center focus:outline-none focus:text-white -mx-1;
+    @apply text-blue-400 hover:bg-blue-200 hover:text-blue-500 focus:bg-blue-500 flex-shrink-0 h-4 w-4 rounded-full inline-flex items-center justify-center focus:outline-none focus:text-white -mx-1;
   }
   .red .badge-x {
-    --at-apply: text-red-400 hover:bg-red-200 hover:text-red-500 focus:bg-red-500 focus:text-white;
+    @apply text-red-400 hover:bg-red-200 hover:text-red-500 focus:bg-red-500 focus:text-white;
   }
   .orange .badge-x {
-    --at-apply: text-orange-400 hover:bg-orange-200 hover:text-orange-500 focus:bg-orange-500 focus:text-white;
+    @apply text-orange-400 hover:bg-orange-200 hover:text-orange-500 focus:bg-orange-500 focus:text-white;
   }
   .green .badge-x {
-    --at-apply: text-green-400 hover:bg-green-200 hover:text-green-500 focus:bg-green-500 focus:text-white;
+    @apply text-green-400 hover:bg-green-200 hover:text-green-500 focus:bg-green-500 focus:text-white;
   }
   .gray .badge-x {
-    --at-apply: text-gray-400 hover:bg-gray-200 hover:text-gray-500 focus:bg-gray-500 focus:text-white;
+    @apply text-gray-400 hover:bg-gray-200 hover:text-gray-500 focus:bg-gray-500 focus:text-white;
   }
 </style>

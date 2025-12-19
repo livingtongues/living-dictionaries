@@ -222,6 +222,6 @@
 
 <style>
   :global(.ck-editor__editable_inline) {
-    --at-apply: md:min-h-50vh;
+    @apply md:min-h-50vh;
   }
 </style>

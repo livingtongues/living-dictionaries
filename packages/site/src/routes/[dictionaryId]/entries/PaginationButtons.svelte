@@ -93,13 +93,13 @@
 
 <style>
   button {
-    --at-apply: rounded py-2 px-3 text-sm leading-5 font-medium text-gray-500 hover:text-gray-700 hover:bg-gray-100 focus:text-gray-800 focus:outline-none transition ease-in-out duration-150;
+    @apply rounded py-2 px-3 text-sm leading-5 font-medium text-gray-500 hover:text-gray-700 hover:bg-gray-100 focus:text-gray-800 focus:outline-none transition ease-in-out duration-150;
   }
   .current {
-    --at-apply: bg-blue-100 text-blue-700 focus:bg-blue-200 focus:text-blue-800;
+    @apply bg-blue-100 text-blue-700 focus:bg-blue-200 focus:text-blue-800;
   }
   span {
-    --at-apply: -mt-1;
+    @apply -mt-1;
   }
 
   .no-scrollbar::-webkit-scrollbar {

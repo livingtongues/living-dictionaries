@@ -133,13 +133,13 @@
 
 <style>
   a:not(.link) {
-    --at-apply: text-gray-600 hover:bg-gray-200 px-3 py-2 flex items-center md:rounded-lg mb-2;
+    @apply text-gray-600 hover:bg-gray-200 px-3 py-2 flex items-center md:rounded-lg mb-2;
   }
   .active {
-    --at-apply: bg-gray-200 text-gray-900;
+    @apply bg-gray-200 text-gray-900;
   }
   .link {
-    --at-apply: block text-sm pl-3 font-medium text-gray-700 hover:underline py-1;
+    @apply block text-sm pl-3 font-medium text-gray-700 hover:underline py-1;
     font-size: 0.78em;
   }
 </style>
