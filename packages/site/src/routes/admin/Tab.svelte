@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { page } from '$app/stores'
+  import { page } from '$app/state'
 
   interface Props {
     link: string;
@@ -11,7 +11,7 @@
 
 <a
   href={`/admin/${link}`}
-  class={$page.url.href.split('/').pop() === link ? 'active' : 'inactive'}>
+  class={page.url.href.split('/').pop() === link ? 'active' : 'inactive'}>
   {label}
 </a>
 

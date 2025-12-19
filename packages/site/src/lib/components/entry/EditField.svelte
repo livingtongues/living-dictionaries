@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { EntryFieldValue } from '@living-dictionaries/types'
-  import { page } from '$app/stores'
+  import { page } from '$app/state'
   import Keyman from '$lib/components/keyboards/keyman/Keyman.svelte'
   import { Button, Form } from '$lib/svelte-pieces'
   import sanitize from 'xss'
@@ -203,17 +203,17 @@
 
     <div class="modal-footer">
       <Button disabled={loading} onclick={on_close} form="simple" color="black">
-        {$page.data.t('misc.cancel')}
+        {page.data.t('misc.cancel')}
       </Button>
       <div class="w-1"></div>
       {#if addingLexeme}
         <Button {loading} type="submit" form="filled">
-          {$page.data.t('misc.next')}
+          {page.data.t('misc.next')}
           <span class="i-fa6-solid-chevron-right rtl-x-flip -mt-.5"></span>
         </Button>
       {:else}
         <Button {loading} type="submit" form="filled">
-          {$page.data.t('misc.save')}
+          {page.data.t('misc.save')}
         </Button>
       {/if}
     </div>

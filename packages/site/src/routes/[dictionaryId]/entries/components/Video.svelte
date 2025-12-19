@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { EntryData } from '@living-dictionaries/types'
   import { ShowHide } from '$lib/svelte-pieces'
-  import { page } from '$app/stores'
+  import { page } from '$app/state'
 
   let { lexeme, video, can_edit = false, class: class_prop = '' }: {
     lexeme: string
@@ -18,7 +18,7 @@
     onclick={toggle}>
     <span class="i-bi-camera-video text-xl mt-1" />
     <div class="text-sm">
-      {$page.data.t('video.view')}
+      {page.data.t('video.view')}
     </div>
   </div>
   {#if show}

@@ -1,6 +1,6 @@
 <script lang="ts">
   import { Button, Form } from '$lib/svelte-pieces'
-  import { page } from '$app/stores'
+  import { page } from '$app/state'
 
 
   interface Props {
@@ -44,7 +44,7 @@
         placeholder={display} />
       <div class="w-1"></div>
       <Button class="shrink-0" {loading} type="submit">
-        {$page.data.t('misc.save')}
+        {page.data.t('misc.save')}
       </Button>
     </div>
   {/snippet}

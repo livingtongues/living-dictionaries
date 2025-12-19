@@ -3,7 +3,7 @@
 
   import type { Readable } from 'svelte/store'
   import type { AudioVideoUploadStatus } from './upload-audio'
-  import { page } from '$app/stores'
+  import { page } from '$app/state'
   import RecordAudio from '$lib/components/audio/RecordAudio.svelte'
   import SelectAudio from '$lib/components/audio/SelectAudio.svelte'
   import Waveform from '$lib/components/audio/Waveform.svelte'
@@ -19,7 +19,7 @@
   let { on_close, entry, sound_file }: Props = $props()
 
   let upload_triggered = $state(false)
-  let { admin, dbOperations, url_from_storage_path } = $derived($page.data)
+  let { admin, dbOperations, url_from_storage_path } = $derived(page.data)
   let readyToRecord: boolean = $state()
 
   let file: File = $state()
@@ -114,25 +114,25 @@
         href={url_from_storage_path(sound_file.storage_path)}
         target="_blank">
         <i class="fas fa-download"></i>
-        <span class="hidden sm:inline">{$page.data.t('misc.download')}</span>
+        <span class="hidden sm:inline">{page.data.t('misc.download')}</span>
       </Button>
       <div class="w-1"></div>
 
       <Button
         onclick={async () => {
-          const confirmation = confirm($page.data.t('entry.delete_audio'))
+          const confirmation = confirm(page.data.t('entry.delete_audio'))
           if (confirmation) await dbOperations.update_audio({ deleted: new Date().toISOString(), id: sound_file.id })
           on_close()
         }}
         color="red">
         <i class="far fa-trash-alt"></i>&nbsp;
-        <span class="hidden sm:inline">{$page.data.t('misc.delete')}</span>
+        <span class="hidden sm:inline">{page.data.t('misc.delete')}</span>
       </Button>
       <div class="w-1"></div>
     {/if}
 
     <Button onclick={on_close} color="black">
-      {$page.data.t('misc.close')}
+      {page.data.t('misc.close')}
     </Button>
   </div>
 </Modal>

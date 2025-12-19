@@ -2,7 +2,7 @@
   import type { IRegion } from '@living-dictionaries/types'
   import type { LngLatFull } from '@living-dictionaries/types/coordinates.interface'
   import type { Snippet } from 'svelte'
-  import { page } from '$app/stores'
+  import { page } from '$app/state'
   import { Button, Modal, ReactiveSet } from '$lib/svelte-pieces'
   import center from '@turf/center'
   import { points } from '@turf/helpers'
@@ -86,7 +86,7 @@
     <Modal {on_close} noscroll>
       {#snippet heading()}
         <span>
-          {$page.data.t('create.select_region')}
+          {page.data.t('create.select_region')}
         </span>
       {/snippet}
       <form onsubmit={(e) => { e.preventDefault(); update(regionPoints) }}>
@@ -103,7 +103,7 @@
             <NavigationControl />
             <Geocoder
               options={{ marker: false }}
-              placeholder={$page.data.t('about.search')}
+              placeholder={page.data.t('about.search')}
               on_result={result => handleGeocoderResult(result, add)}
               on_error={e => console.error(e)} />
             {#each regionPoints as point (point)}
@@ -158,13 +158,13 @@
 
         <div class="modal-footer">
           <Button onclick={on_close} form="simple" color="black">
-            {$page.data.t('misc.cancel')}
+            {page.data.t('misc.cancel')}
           </Button>
           <Button onclick={removeRegion} form="simple" color="red">
-            {$page.data.t('misc.remove')}
+            {page.data.t('misc.remove')}
           </Button>
           <Button type="submit" form="filled" disabled={size < 3}>
-            {$page.data.t('misc.save')}
+            {page.data.t('misc.save')}
           </Button>
         </div>
       </form>

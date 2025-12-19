@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { SelectOption } from '$lib/components/ui/array/select-options.interface'
   import ModalEditableArray from '$lib/components/ui/array/ModalEditableArray.svelte'
-  import { page } from '$app/stores'
+  import { page } from '$app/state'
   import { mayanDictionaries, mayanPOS, partsOfSpeech } from '$lib/mappings/parts-of-speech'
 
   interface Props {
@@ -22,7 +22,7 @@
 
   let parts_of_speech_options = $derived(partsOfSpeech.map(part => ({
     value: part.enAbbrev,
-    name: $page.data.t({ dynamicKey: `ps.${part.enAbbrev}`, fallback: part.enName }),
+    name: page.data.t({ dynamicKey: `ps.${part.enAbbrev}`, fallback: part.enName }),
   })) satisfies SelectOption[])
 
   const mayan_pos_options: SelectOption[] = mayanPOS.map((pos) => {
@@ -42,9 +42,9 @@
   {options}
   {can_edit}
   {showPlus}
-  placeholder={$page.data.t('entry_field.parts_of_speech')}
+  placeholder={page.data.t('entry_field.parts_of_speech')}
   {on_update}>
   {#snippet heading()}
-    <span >{$page.data.t('entry_field.parts_of_speech')}</span>
+    <span >{page.data.t('entry_field.parts_of_speech')}</span>
   {/snippet}
 </ModalEditableArray>

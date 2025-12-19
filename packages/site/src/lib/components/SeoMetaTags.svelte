@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { page } from '$app/stores'
+  import { page } from '$app/state'
   import { compressToEncodedURIComponent as encode } from '$lib/lz/lz-string'
   import { seoTitle } from './seo-title'
 
@@ -38,7 +38,7 @@
     type = 'website',
     norobots = false,
     handle = 'livingtongues',
-    url = $page.url.toString(),
+    url = page.url.toString(),
     width = 1200,
     height = 600,
     gcsPath = undefined,
@@ -47,7 +47,7 @@
   }: Props = $props()
 
   let expandedDictionaryName = $derived(dictionaryName
-    ? `${dictionaryName} ${$page.data.t('misc.LD_singular')}`
+    ? `${dictionaryName} ${page.data.t('misc.LD_singular')}`
     : null)
   let textTitle = $derived(seoTitle({ title: title || imageTitle, dictionaryName: expandedDictionaryName, admin }))
   let textDescription = $derived(description || imageDescription || 'Language Documentation Web App - Speeding the availability of language resources for endangered languages. Using technology to shift how we think about endangered languages. Rather than perceiving them as being antiquated, difficult to learn and on the brink of vanishing, we see them as modern and easily accessible for learning online in text and audio formats.')
@@ -105,6 +105,6 @@
 </svelte:head>
 
 <!--
-  Once refactored to an initial language route url schema, update title to use proper one: {$page.data.t('misc.LD')}
+  Once refactored to an initial language route url schema, update title to use proper one: {page.data.t('misc.LD')}
   Can offer alternate language urls when this is a feature: <link rel="alternate" hrefLang={languageAlternate.hrefLang} href={languageAlternate.href} />
  -->

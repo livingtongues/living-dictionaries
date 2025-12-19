@@ -1,6 +1,6 @@
 <script lang="ts">
   import { Button, Form, Modal } from '$lib/svelte-pieces'
-  import { page } from '$app/stores'
+  import { page } from '$app/state'
   import { goto } from '$app/navigation'
   import type { SupportRequestBody } from '$api/email/support/+server'
   import type { LearningMaterialsRequestBody } from '$api/email/learning_materials/+server'
@@ -18,7 +18,7 @@
   function warn_if_about_too_short() {
     if (about_is_too_short()) {
       on_close()
-      alert($page.data.t('about.message'))
+      alert(page.data.t('about.message'))
       goto(`/${dictionary.id}/about`)
     }
   }
@@ -55,7 +55,7 @@
 
       if (error) {
         status = 'fail'
-        return alert(`${$page.data.t('misc.error')}: ${error.message}`)
+        return alert(`${page.data.t('misc.error')}: ${error.message}`)
       }
     } else if (subject === 'learning_materials') {
       const { error } = await post_request<LearningMaterialsRequestBody, null>('/api/email/learning_materials', {
@@ -68,7 +68,7 @@
 
       if (error) {
         status = 'fail'
-        return alert(`${$page.data.t('misc.error')}: ${error.message}`)
+        return alert(`${page.data.t('misc.error')}: ${error.message}`)
       }
     } else {
       const { error } = await post_request<SupportRequestBody, null>('/api/email/support', {
@@ -81,13 +81,13 @@
 
       if (error) {
         status = 'fail'
-        return alert(`${$page.data.t('misc.error')}: ${error.message}`)
+        return alert(`${page.data.t('misc.error')}: ${error.message}`)
       }
     }
 
     status = 'success'
   }
-  let { dictionary, user, about_is_too_short } = $derived($page.data)
+  let { dictionary, user, about_is_too_short } = $derived(page.data)
   $effect(() => {
     if (dictionary && subject === 'public_dictionary') warn_if_about_too_short()
   });
@@ -113,7 +113,7 @@
       }}
       class="mb-2">
       <span class="i-fluent-learning-app-24-regular -mt-2px"></span>
-      {$page.data.t('header.tutorials')}
+      {page.data.t('header.tutorials')}
     </Button>
     <Button
       href="https://docs.google.com/document/d/1MZGkBbnCiAch3tWjBOHRYPpjX1MVd7f6x5uVuwbxM-Q/edit?usp=sharing"
@@ -121,7 +121,7 @@
       <i class="far fa-question-circle"></i>
       <span class="ml-1">
         FAQ
-        <!-- {$page.data.t('header.faq')} -->
+        <!-- {page.data.t('header.faq')} -->
       </span>
     </Button>
   </div>
@@ -131,7 +131,7 @@
 
     <h2 class="text-xl mb-3">
       <i class="far fa-comment"></i>
-      {$page.data.t('header.contact_us')}
+      {page.data.t('header.contact_us')}
     </h2>
 
     {#if !status}
@@ -139,14 +139,14 @@
         {#snippet children({ loading })}
                 <div class="my-2">
             <select class="w-full" bind:value={subject}>
-              <option disabled selected value="">{$page.data.t('contact.select_topic')}:</option>
+              <option disabled selected value="">{page.data.t('contact.select_topic')}:</option>
               {#each filteredSubjects as [key, value]}
-                <option value={key}>{$page.data.t(value)}</option>
+                <option value={key}>{page.data.t(value)}</option>
               {/each}
             </select>
           </div>
           <label class="block text-gray-700 text-sm font-bold mb-2" for="message">
-            {$page.data.t('contact.what_is_your_question')}
+            {page.data.t('contact.what_is_your_question')}
           </label>
           <textarea
             name="message"
@@ -155,7 +155,7 @@
             maxlength="1000"
             bind:value={message}
             class="form-input bg-white w-full"
-            placeholder={`${$page.data.t('contact.enter_message')}...`}></textarea>
+            placeholder={`${page.data.t('contact.enter_message')}...`}></textarea>
           <div class="flex text-xs">
             <div class="text-gray-500 ml-auto">{message.length}/1000</div>
           </div>
@@ -163,24 +163,24 @@
           {#if !$user}
             <div class="mt-3">
               <label class="block uppercase text-gray-700 text-xs font-bold mb-2" for="email">
-                {$page.data.t('contact.your_email_address')}
+                {page.data.t('contact.your_email_address')}
               </label>
               <input
                 type="email"
                 required
                 bind:value={email}
                 class="form-input bg-white w-full"
-                placeholder={$page.data.t('contact.email')}
+                placeholder={page.data.t('contact.email')}
                 style="direction: ltr" />
             </div>
           {/if}
 
           <div class="mt-5">
             <Button {loading} form="filled" type="submit">
-              {$page.data.t('contact.send_message')}
+              {page.data.t('contact.send_message')}
             </Button>
             <Button disabled={loading} onclick={close} form="simple" color="black">
-              {$page.data.t('misc.cancel')}
+              {page.data.t('misc.cancel')}
             </Button>
           </div>
                       {/snippet}
@@ -188,17 +188,17 @@
     {:else if status === 'success'}
       <h4 class="text-lg mt-3 mb-4">
         <i class="fas fa-check"></i>
-        {$page.data.t('contact.message_sent')}
+        {page.data.t('contact.message_sent')}
       </h4>
       <div>
         <Button onclick={close} color="black">
-          {$page.data.t('misc.close')}
+          {page.data.t('misc.close')}
         </Button>
       </div>
     {/if}
   {:else if status === 'fail'}
     <h4 class="text-xl mt-1 mb-4">
-      {$page.data.t('contact.message_failed')}
+      {page.data.t('contact.message_failed')}
       <a class="underline ml-1" href="mailto:dictionaries@livingtongues.org">
         dictionaries@livingtongues.org
       </a>

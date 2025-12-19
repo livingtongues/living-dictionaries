@@ -3,7 +3,7 @@
   import type { IPoint, IRegion } from '@living-dictionaries/types'
   import { onMount } from 'svelte'
   import { convertToFriendlyUrl } from './convertToFriendlyUrl'
-  import { page } from '$app/stores'
+  import { page } from '$app/state'
   import Header from '$lib/components/shell/Header.svelte'
   import Footer from '$lib/components/shell/Footer.svelte'
   import EditableGlossesField from '$lib/components/settings/EditableGlossesField.svelte'
@@ -65,7 +65,7 @@
   })
 </script>
 
-<Header>{$page.data.t('create.create_new_dictionary')}</Header>
+<Header>{page.data.t('create.create_new_dictionary')}</Header>
 
 <Form
   
@@ -93,7 +93,7 @@ Use: ${conlang_use.trim()}`
   {#snippet children({ loading })}
     <div class="flex-col justify-center p-4 max-w-md mx-auto">
       <label for="name" class="block text-xl font-medium text-gray-700">
-        {$page.data.t('dictionary.name_of_language')}*
+        {page.data.t('dictionary.name_of_language')}*
       </label>
       <div class="mt-2 rounded-md shadow-sm">
         <input
@@ -110,7 +110,7 @@ Use: ${conlang_use.trim()}`
           class="form-input w-full" />
       </div>
       <div class="text-xs text-gray-600 mt-1">
-        {$page.data.t('create.name_clarification')}
+        {page.data.t('create.name_clarification')}
       </div>
       <div class="mb-6"></div>
 
@@ -145,18 +145,18 @@ Use: ${conlang_use.trim()}`
             placeholder="url" />
         </div>
         <div class="text-xs text-gray-600 mt-1">
-          {$page.data.t('create.permanent_url_msg')}
-          {$page.data.t('create.only_letters_numbers')}
+          {page.data.t('create.permanent_url_msg')}
+          {page.data.t('create.only_letters_numbers')}
         </div>
         {#if urlToUse.length >= data.MIN_URL_LENGTH && !isUniqueURL}
           <div class="text-xs text-red-600 mt-1">
-            {$page.data.t('create.choose_different_url')}
+            {page.data.t('create.choose_different_url')}
           </div>
         {/if}
         <div class="mb-6"></div>
 
         <div class="mb-2 text-sm font-medium text-gray-700">
-          {$page.data.t('create.conlang_question')}
+          {page.data.t('create.conlang_question')}
         </div>
 
         <label class="block">
@@ -166,7 +166,7 @@ Use: ${conlang_use.trim()}`
             bind:group={conlang}
             value={true}
             required />
-          {$page.data.t('misc.assertion')}
+          {page.data.t('misc.assertion')}
         </label>
 
         <label class="block">
@@ -175,41 +175,41 @@ Use: ${conlang_use.trim()}`
             name="conlang"
             bind:group={conlang}
             value={false} />
-          {$page.data.t('misc.negation')}
+          {page.data.t('misc.negation')}
         </label>
         <div class="mb-6"></div>
 
         {#if !conlang}
           <div class="mb-3 font-semibold">
-            {$page.data.t('create.conlang_warning')}
+            {page.data.t('create.conlang_warning')}
           </div>
           <div class="mb-6"></div>
         {/if}
 
         {#if conlang === true}
           <div class="mb-3 font-italic">
-            {$page.data.t('create.conlang_info_1')}
+            {page.data.t('create.conlang_info_1')}
           </div>
           <div class="mb-3 font-italic">
-            {$page.data.t('create.conlang_info_2')}
+            {page.data.t('create.conlang_info_2')}
           </div>
           <div class="mb-6"></div>
           <div>
             <input type="checkbox" id="agreement" name="agreement" required />
-            <label for="agreement">{$page.data.t('create.agree_above')}</label>
+            <label for="agreement">{page.data.t('create.agree_above')}</label>
           </div>
           <div>
             <input type="checkbox" id="citeAgreement" name="citeAgreement" required />
-            <label for="citeAgreement">{$page.data.t('create.agree_to_cite')}</label>
+            <label for="citeAgreement">{page.data.t('create.agree_to_cite')}</label>
           </div>
           <div>
             <input type="checkbox" id="non-commercialAgreement" name="non-commercialAgreement" required />
-            <label for="non-commercialAgreement">{$page.data.t('create.agree_for_non-commercial')}</label>
+            <label for="non-commercialAgreement">{page.data.t('create.agree_for_non-commercial')}</label>
           </div>
           <div class="mb-6"></div>
 
           <label class="block mb-2 text-sm font-medium text-gray-700" for="conlangInfo">
-            {$page.data.t('create.source_question')}
+            {page.data.t('create.source_question')}
           </label>
           <textarea
             name="conlangInfo"
@@ -225,7 +225,7 @@ Use: ${conlang_use.trim()}`
           <div class="mb-6"></div>
 
           <label class="block mb-2 text-sm font-medium text-gray-700" for="conlangUse">
-            {$page.data.t('create.use_question')}
+            {page.data.t('create.use_question')}
           </label>
           <textarea
             name="conlangUse"
@@ -262,7 +262,7 @@ Use: ${conlang_use.trim()}`
           <div class="mb-6"></div>
 
           <!-- <div class="mb-2 text-sm font-medium text-gray-700">
-            {$page.data.t('create.language_used_by_community')}*
+            {page.data.t('create.language_used_by_community')}*
           </div>
 
           <label class="block">
@@ -272,7 +272,7 @@ Use: ${conlang_use.trim()}`
               bind:group={language_used_by_community}
               value={true}
               required />
-            {$page.data.t('misc.assertion')}
+            {page.data.t('misc.assertion')}
           </label>
 
           <label class="block">
@@ -281,7 +281,7 @@ Use: ${conlang_use.trim()}`
               name="languageUsedByCommunity"
               bind:group={language_used_by_community}
               value={false} />
-            {$page.data.t('misc.negation')}
+            {page.data.t('misc.negation')}
           </label>
           <div class="mb-6" /> -->
         {/if}
@@ -347,7 +347,7 @@ Use: ${conlang_use.trim()}`
           <div class="mb-6"></div>
 
           <div class="mb-2 text-sm font-medium text-gray-700">
-            {$page.data.t('create.community_permission')}*
+            {page.data.t('create.community_permission')}*
           </div>
           <label class="block">
             <input
@@ -356,7 +356,7 @@ Use: ${conlang_use.trim()}`
               bind:group={community_permission}
               value="yes"
               required />
-            {$page.data.t('misc.assertion')}
+            {page.data.t('misc.assertion')}
           </label>
 
           <label class="block">
@@ -365,7 +365,7 @@ Use: ${conlang_use.trim()}`
               name="communityPermission"
               bind:group={community_permission}
               value="no" />
-            {$page.data.t('misc.negation')}
+            {page.data.t('misc.negation')}
           </label>
 
           <label class="block">
@@ -374,12 +374,12 @@ Use: ${conlang_use.trim()}`
               name="communityPermission"
               bind:group={community_permission}
               value="unknown" />
-            {$page.data.t('create.uncertainty')}
+            {page.data.t('create.uncertainty')}
           </label>
           <div class="mb-6"></div>
 
           <label class="block mb-2 text-sm font-medium text-gray-700" for="authorConnection">
-            {$page.data.t('create.author_connection')}*
+            {page.data.t('create.author_connection')}*
           </label>
           <textarea
             name="authorConnection"
@@ -396,22 +396,22 @@ Use: ${conlang_use.trim()}`
 
           <div>
             <input type="checkbox" id="citeAgreement" name="citeAgreement" required />
-            <label for="citeAgreement">{$page.data.t('create.agree_to_cite')}</label>
+            <label for="citeAgreement">{page.data.t('create.agree_to_cite')}</label>
           </div>
           <div>
             <input type="checkbox" id="non-commercialAgreement" name="non-commercialAgreement" required />
-            <label for="non-commercialAgreement">{$page.data.t('create.agree_for_non-commercial')}</label>
+            <label for="non-commercialAgreement">{page.data.t('create.agree_for_non-commercial')}</label>
           </div>
           <div class="mb-6"></div>
         {/if}
 
         <Button type="submit" class="w-full" form="filled" {loading}>
-          {$page.data.t('create.create_dictionary')}
+          {page.data.t('create.create_dictionary')}
         </Button>
 
         <div class="mt-2 text-sm text-gray-600">
-          {$page.data.t('terms.agree_by_submit')}
-          <a href="/terms" class="underline" target="_blank">{$page.data.t('dictionary.terms_of_use')}</a>.
+          {page.data.t('terms.agree_by_submit')}
+          <a href="/terms" class="underline" target="_blank">{page.data.t('dictionary.terms_of_use')}</a>.
         </div>
         <div class="mb-6"></div>
       {/if}
@@ -432,6 +432,6 @@ Use: ${conlang_use.trim()}`
 <Footer />
 
 <SeoMetaTags
-  title={$page.data.t('create.create_new_dictionary')}
+  title={page.data.t('create.create_new_dictionary')}
   description="Build a new Living Dictionary in a few short steps. Create a title and set the URL, and then configure the settings. Living Dictionaries are comprehensive, free, online technological tools integrating audio, images and video."
   keywords="Endangered Languages, Language Documentation, Language Revitalization, Build a Dictionary, Online Dictionary, Digital Dictionary, Dictionary Software, Free Software, Online Dictionary Builder, Living Dictionaries, Living Dictionary" />

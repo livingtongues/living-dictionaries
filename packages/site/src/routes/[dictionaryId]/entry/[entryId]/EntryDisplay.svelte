@@ -4,7 +4,7 @@
   import EntryField from './EntryField.svelte'
   import EntryMedia from './EntryMedia.svelte'
   import Sense from './Sense.svelte'
-  import { page } from '$app/stores'
+  import { page } from '$app/state'
   import EntryDialect from '$lib/components/entry/EntryDialect.svelte'
   import EntrySource from '$lib/components/entry/EntrySource.svelte'
   import type { DbOperations } from '$lib/dbOperations'
@@ -39,7 +39,7 @@
       value={entry.main.lexeme.default}
       field="lexeme"
       {can_edit}
-      display={$page.data.t('entry_field.lexeme')}
+      display={page.data.t('entry_field.lexeme')}
       on_update={(new_value) => {
         if (new_value) {
           update_entry({ lexeme: { ...entry.main.lexeme, default: new_value } })
@@ -73,7 +73,7 @@
       value={entry.main.phonetic}
       field="phonetic"
       {can_edit}
-      display={$page.data.t('entry_field.phonetic')}
+      display={page.data.t('entry_field.phonetic')}
       on_update={(new_value) => {
         update_entry({ phonetic: new_value })
       }} />
@@ -83,13 +83,13 @@
         <Sense {sense} glossLanguages={dictionary.gloss_languages} {can_edit} />
 
         {#if can_edit}
-          <Button class="text-start p-2! mb-2 rounded order-2 hover:bg-gray-100! text-gray-600 text-start!" form="menu" onclick={async () => await dbOperations.insert_sense(entry.id)}><span class="i-system-uicons-versions text-xl"></span> {$page.data.t('sense.add')}</Button>
+          <Button class="text-start p-2! mb-2 rounded order-2 hover:bg-gray-100! text-gray-600 text-start!" form="menu" onclick={async () => await dbOperations.insert_sense(entry.id)}><span class="i-system-uicons-versions text-xl"></span> {page.data.t('sense.add')}</Button>
         {/if}
       {:else}
         <div class="p-2 hover:bg-gray-50 rounded">
           <div class="font-semibold mb-2 flex">
             <div class="font-semibold">
-              {$page.data.t('sense.sense')} {index + 1}
+              {page.data.t('sense.sense')} {index + 1}
             </div>
             <div class="mx-auto"></div>
             {#if can_edit}
@@ -107,7 +107,7 @@
 
     {#if entry.dialects?.length || can_edit}
       <div class="md:px-2" class:order-2={!entry.dialects?.length}>
-        <div class="rounded text-xs text-gray-500 mt-1 mb-2">{$page.data.t('entry_field.dialects')}</div>
+        <div class="rounded text-xs text-gray-500 mt-1 mb-2">{page.data.t('entry_field.dialects')}</div>
         <EntryDialect
           entry_id={entry.id}
           {can_edit}
@@ -118,7 +118,7 @@
 
     {#if entry.tags?.length || can_edit}
       <div class="md:px-2" class:order-2={!entry.tags?.length}>
-        <div class="rounded text-xs text-gray-500 mt-1 mb-2">{$page.data.t('entry_field.custom_tags')}</div>
+        <div class="rounded text-xs text-gray-500 mt-1 mb-2">{page.data.t('entry_field.custom_tags')}</div>
         <EntryTag
           entry_id={entry.id}
           {can_edit}
@@ -131,7 +131,7 @@
       value={entry.main.scientific_names?.[0]}
       field="scientific_names"
       {can_edit}
-      display={$page.data.t('entry_field.scientific_names')}
+      display={page.data.t('entry_field.scientific_names')}
       on_update={(new_value) => {
         update_entry({ scientific_names: [new_value] })
       }} />
@@ -141,7 +141,7 @@
         value={entry.main[field]}
         {field}
         {can_edit}
-        display={$page.data.t(`entry_field.${field}`)}
+        display={page.data.t(`entry_field.${field}`)}
         on_update={(new_value) => {
           update_entry({ [field]: new_value })
         }} />
@@ -151,14 +151,14 @@
       value={entry.main.notes?.default}
       field="notes"
       {can_edit}
-      display={$page.data.t('entry_field.notes')}
+      display={page.data.t('entry_field.notes')}
       on_update={(new_value) => {
         update_entry({ notes: { default: new_value } })
       }} />
 
     {#if entry.main.sources?.length || can_edit}
       <div class="md:px-2" class:order-2={!entry.main.sources?.length}>
-        <div class="rounded text-xs text-gray-500 mt-1 mb-2">{$page.data.t('entry_field.sources')}</div>
+        <div class="rounded text-xs text-gray-500 mt-1 mb-2">{page.data.t('entry_field.sources')}</div>
         <EntrySource
           {can_edit}
           value={entry.main.sources}

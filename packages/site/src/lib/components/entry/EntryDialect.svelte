@@ -2,7 +2,7 @@
   import type { EntryData } from '@living-dictionaries/types'
   import type { SelectOption } from '$lib/components/ui/array/select-options.interface'
   import ModalEditableArray from '$lib/components/ui/array/ModalEditableArray.svelte'
-  import { page } from '$app/stores'
+  import { page } from '$app/state'
 
   interface Props {
     dialects: EntryData['dialects'];
@@ -18,7 +18,7 @@
     showPlus = true
   }: Props = $props();
 
-  let { dialects: dictionary_dialects, dbOperations } = $derived($page.data)
+  let { dialects: dictionary_dialects, dbOperations } = $derived(page.data)
   let dialect_ids = $derived(dialects.map(dialect => dialect.id))
   let options = $derived($dictionary_dialects.map(dialect => ({ value: dialect.id, name: dialect.name.default })) satisfies SelectOption[])
 
@@ -53,9 +53,9 @@
   {can_edit}
   canWriteIn
   {showPlus}
-  placeholder={$page.data.t('entry_field.dialects')}
+  placeholder={page.data.t('entry_field.dialects')}
   {on_update}>
   {#snippet heading()}
-    <span >{$page.data.t('entry_field.dialects')}</span>
+    <span >{page.data.t('entry_field.dialects')}</span>
   {/snippet}
 </ModalEditableArray>

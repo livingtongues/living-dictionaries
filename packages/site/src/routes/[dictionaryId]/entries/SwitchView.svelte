@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { page } from '$app/stores'
+  import { page } from '$app/state'
   import type { View } from '$lib/search/types'
 
   interface Props {
@@ -17,7 +17,7 @@
     class:active={!view}>
     <span class="i-fa-solid-list -mt-1"></span>
     <span class="hidden md:inline">
-      {$page.data.t('entry.list')}
+      {page.data.t('entry.list')}
     </span>
   </button>
   <div class="hidden md:block w-1"></div>
@@ -27,7 +27,7 @@
     class:active={view === 'table'}>
     <span class="i-fa-table -mt-1"></span>
     <span class="hidden md:inline">
-      {$page.data.t('entry.table')}
+      {page.data.t('entry.table')}
     </span>
   </button>
   <div class="hidden md:block w-1"></div>
@@ -37,7 +37,7 @@
     class:active={view === 'gallery'}>
     <span class="i-ic-outline-image -mt-1 text-lg"></span>
     <span class="hidden md:inline">
-      {$page.data.t('entry.gallery')}
+      {page.data.t('entry.gallery')}
     </span>
   </button>
   {#if can_print}
@@ -48,7 +48,7 @@
       class:active={view === 'print'}>
       <span class="i-fa-print -mt-1"></span>
       <span class="hidden md:inline">
-        {$page.data.t('entry.print')}
+        {page.data.t('entry.print')}
       </span>
     </button>
   {/if}

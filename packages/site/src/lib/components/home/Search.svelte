@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { DictionaryView, IPoint } from '@living-dictionaries/types'
 
-  import { page } from '$app/stores'
+  import { page } from '$app/state'
   import { Button, ShowHide } from '$lib/svelte-pieces'
 
   interface Props {
@@ -19,7 +19,7 @@
   }: Props = $props()
 
   let currentDictionary: DictionaryView = $state()
-  let { admin } = $derived($page.data)
+  let { admin } = $derived(page.data)
 
   $effect(() => {
     if (selectedDictionaryId) {
@@ -88,7 +88,7 @@
         bind:value={searchString}
         class="form-input w-full pl-10 pr-8 py-1 rounded-lg
           text-gray-900 placeholder-gray-500 shadow"
-        placeholder={$page.data.t('home.find_dictionary')}
+        placeholder={page.data.t('home.find_dictionary')}
         onfocus={() => (searchFocused = true)}
         onblur={delayedSearchClose} />
       {#if searchString || searchFocused}
@@ -107,7 +107,7 @@
 
       {#if !searchString && my_dictionaries?.length}
         <!-- <div class="text-sm font-semibold px-3 my-1">
-          {$page.data.t('home.my_dictionaries')}
+          {page.data.t('home.my_dictionaries')}
         </div> -->
         <!-- {#each my_dictionaries as dictionary}
           <button
@@ -122,7 +122,7 @@
         {/each} -->
         <!-- <hr class="my-2" />
         <div class="text-sm font-semibold px-3 my-1">
-          {$page.data.t('home.public_dictionaries')}
+          {page.data.t('home.public_dictionaries')}
           {#if $admin}
             (+ Private)
           {/if}
@@ -142,7 +142,7 @@
       {/each} -->
       {#if !filteredDictionaries.length}
         <div class="p-3">
-          <i> {$page.data.t('home.no_results')} </i>
+          <i> {page.data.t('home.no_results')} </i>
         </div>
       {/if}
     </div>
@@ -168,7 +168,7 @@
                 type="button"
                 class="sm:hidden rounded px-3 py-2 bg-white mt-2"
                 on:click={toggle}>
-                {$page.data.t('home.show_all_my_dictionaries')}
+                {page.data.t('home.show_all_my_dictionaries')}
               </button>
               <div class="w-2 sm:hidden" />
             {/if} -->
@@ -184,7 +184,7 @@
         onclick={clearDictionary}>
         <span class="i-fa6-solid-chevron-left rtl-x-flip"></span>
         <div class="w-1"></div>
-        {$page.data.t('misc.back')}
+        {page.data.t('misc.back')}
       </button>
       {#await import('./SelectedDict.svelte') then { default: SelectedDict }}
         <SelectedDict dictionary={currentDictionary} />

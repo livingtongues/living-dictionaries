@@ -2,7 +2,7 @@
   import type { EntryFieldValue } from '@living-dictionaries/types'
   import { ShowHide } from '$lib/svelte-pieces'
   import sanitize from 'xss'
-  import { page } from '$app/stores'
+  import { page } from '$app/state'
 
   interface Props {
     value: string;
@@ -21,7 +21,7 @@
     display,
     on_update
   }: Props = $props();
-  let { can_edit } = $derived($page.data)
+  let { can_edit } = $derived(page.data)
 
   let sanitizedHtml = $derived(sanitize(htmlValue || value) || '')
 </script>
@@ -29,11 +29,11 @@
 <ShowHide   >
   {#snippet children({ show, toggle, set })}
     <div
-      class:cursor-pointer={$can_edit}
+      class:cursor-pointer={can_edit}
       class:italic={field === 'scientific_names' && !value?.includes('<i>')}
       class="h-full"
       style="padding: 0.1em 0.25em"
-      onclick={() => set($can_edit)}>
+      onclick={() => set(can_edit)}>
       {@html sanitizedHtml}
       &nbsp;
     </div>

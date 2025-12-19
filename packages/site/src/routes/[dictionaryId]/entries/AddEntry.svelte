@@ -1,6 +1,6 @@
 <script lang="ts">
   import { Button, ShowHide } from '$lib/svelte-pieces'
-  import { page } from '$app/stores'
+  import { page } from '$app/state'
   import EditFieldModal from '$lib/components/entry/EditFieldModal.svelte'
   import type { DbOperations } from '$lib/dbOperations'
 
@@ -24,12 +24,12 @@
       {:else}
         Return online to
       {/if}
-      {$page.data.t('entry.add_entry')}
+      {page.data.t('entry.add_entry')}
     </Button>
     {#if show}
       <EditFieldModal
         field="lexeme"
-        display={$page.data.t('entry_field.lexeme')}
+        display={page.data.t('entry_field.lexeme')}
         on_update={async (new_value) => {
           if (new_value) {
             await props.add_entry({ default: new_value })

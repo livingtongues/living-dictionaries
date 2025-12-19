@@ -5,7 +5,7 @@
   import { Slideover } from '$lib/svelte-pieces'
   import type { IColumn } from '@living-dictionaries/types'
   import ColumnTitle from './ColumnTitle.svelte'
-  import { page } from '$app/stores'
+  import { page } from '$app/state'
 
   interface Props {
     selectedColumn: IColumn;
@@ -13,7 +13,7 @@
   }
 
   let { selectedColumn, on_close }: Props = $props();
-  let { preferred_table_columns } = $derived($page.data)
+  let { preferred_table_columns } = $derived(page.data)
 
   let selectedColumnElement: HTMLElement = $state()
   let widthToDisplay: string = $state()
@@ -45,7 +45,7 @@
 </script>
 
 <Slideover {on_close}>
-  {#snippet title()}{$page.data.t('column.adjust_columns')}{/snippet}
+  {#snippet title()}{page.data.t('column.adjust_columns')}{/snippet}
 
   <ul class="divide-y divid-gray-200">
     {#each $preferred_table_columns as column, i (column.field)}
@@ -125,7 +125,7 @@
     transition:fade
     class="fixed inset-x-0 top-0 flex flex-col items-center p-1 pointer-events-none z-60">
     <div class="bg-black bg-opacity-75 text-white mt-2 p-3 rounded max-w-sm">
-      {$page.data.t('column.width')}:
+      {page.data.t('column.width')}:
       {widthToDisplay}
     </div>
   </div>

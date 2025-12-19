@@ -2,13 +2,13 @@
   import { Button, Menu, ShowHide } from '$lib/svelte-pieces'
   import { onMount } from 'svelte'
   import { display_one_tap_popover, sign_out } from '$lib/supabase/auth'
-  import { page } from '$app/stores'
+  import { page } from '$app/state'
   import { mode } from '$lib/supabase'
   import { api_update_dev_admin_role } from '$api/db/update-dev-admin-role/_call'
   import { invalidateAll } from '$app/navigation'
   import { dev } from '$app/environment'
 
-  let { user, admin } = $derived($page.data)
+  let { user, admin } = $derived(page.data)
   let show_menu = $state(false)
   function toggle_menu() {
     const state = show_menu
@@ -35,7 +35,7 @@
       return
     if ($user)
       return
-    if (!$page.data.supabase)
+    if (!page.data.supabase)
       return
     display_one_tap_popover()
   })
@@ -71,8 +71,8 @@
             <i class="fas fa-key"></i>
           </a>
         {/if}
-        <a href="/account"> {$page.data.t('account.account_settings')} </a>
-        <button type="button" onclick={sign_out}>{$page.data.t('account.log_out')}</button>
+        <a href="/account"> {page.data.t('account.account_settings')} </a>
+        <button type="button" onclick={sign_out}>{page.data.t('account.log_out')}</button>
         {#if dev || mode === 'development'}
           <button
             type="button"
@@ -89,7 +89,7 @@
         <Button form="text" onclick={toggle}>
         <i class="far fa-sign-in"></i>
         <span class="ml-1 hidden sm:inline">
-          {$page.data.t('header.login')}
+          {page.data.t('header.login')}
         </span>
       </Button>
       {#if show}

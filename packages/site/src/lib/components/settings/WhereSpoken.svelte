@@ -2,7 +2,7 @@
   import { Button, ShowHide } from '$lib/svelte-pieces'
   import type { DictionaryView, IPoint, IRegion } from '@living-dictionaries/types'
   import type { LngLat } from 'mapbox-gl'
-  import { page } from '$app/stores'
+  import { page } from '$app/state'
   import Map from '$lib/components/maps/mapbox/map/Map.svelte'
   import Marker from '$lib/components/maps/mapbox/map/Marker.svelte'
   import Popup from '$lib/components/maps/mapbox/map/Popup.svelte'
@@ -32,12 +32,12 @@
 </script>
 
 <div class="text-sm font-medium text-gray-700 mb-2">
-  {$page.data.t('create.where_spoken')}
+  {page.data.t('create.where_spoken')}
 </div>
 
 {#if first_longitude}
   <div class="text-xs text-gray-600 mb-2">
-    {$page.data.t('create.map_instructions')}
+    {page.data.t('create.map_instructions')}
   </div>
   <div class="h-240px">
     <Map
@@ -65,7 +65,7 @@
                             <Button form="simple" size="sm" onclick={toggle}>
                   <span class="i-octicon-pencil"></span>
                   {#if index === 0}
-                    {$page.data.t('create.primary_coordinate')}
+                    {page.data.t('create.primary_coordinate')}
                   {/if}
                 </Button>
                 {#if show}
@@ -132,7 +132,7 @@
         color={first_longitude ? 'black' : 'primary'}
         size={first_longitude ? 'sm' : 'md'}>
         <span class="i-mdi-map-marker-plus mr-1" style="margin-top: -3px;"></span>
-        {$page.data.t('create.select_coordinates')}
+        {page.data.t('create.select_coordinates')}
       </Button>
       {#if show}
         <CoordinatesModal
@@ -148,7 +148,7 @@
       {#snippet children({ show, toggle })}
             <Button onclick={toggle} color="black" size="sm">
           <span class="i-mdi-map-marker-path mr-1" style="margin-top: -2px;"></span>
-          {$page.data.t('create.select_region')}
+          {page.data.t('create.select_region')}
         </Button>
         {#if show}
           <RegionModal
