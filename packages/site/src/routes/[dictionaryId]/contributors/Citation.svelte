@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Button, Form } from 'svelte-pieces'
+  import { Button, Form } from '$lib/svelte-pieces'
   import type { PartnerWithPhoto, Tables } from '@living-dictionaries/types'
   import { build_citation } from './build-citation'
   import { page } from '$app/stores'

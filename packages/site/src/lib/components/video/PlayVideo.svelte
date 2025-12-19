@@ -3,7 +3,7 @@
 
   const bubble = createBubbler();
   import type { EntryData } from '@living-dictionaries/types'
-  import { Button } from 'svelte-pieces'
+  import { Button } from '$lib/svelte-pieces'
   import VideoThirdParty from './VideoThirdParty.svelte'
   import { page } from '$app/stores'
 

@@ -1,13 +1,13 @@
 <script lang="ts">
+  import { Button } from '$lib/svelte-pieces'
   import { onDestroy, onMount } from 'svelte'
-  import { Button } from 'svelte-pieces'
 
   interface Props {
-    audioUrl?: string;
-    audioBlob?: any;
+    audioUrl?: string
+    audioBlob?: any
   }
 
-  let { audioUrl = undefined, audioBlob = undefined }: Props = $props();
+  let { audioUrl = undefined, audioBlob = undefined }: Props = $props()
   let wavesurfer
   let waveform = $state()
   let playing = $state(false)

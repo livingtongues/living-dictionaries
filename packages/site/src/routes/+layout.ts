@@ -1,5 +1,5 @@
 import { derived } from 'svelte/store'
-import { createPersistedStore } from 'svelte-pieces'
+import { createPersistedStore } from '$lib/svelte-pieces'
 import type { LayoutLoad } from './$types'
 import { getSupportedLocale } from '$lib/i18n/locales'
 import { getTranslator } from '$lib/i18n'

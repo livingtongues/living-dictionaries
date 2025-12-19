@@ -1,7 +1,7 @@
 <script lang="ts">
   import { run } from 'svelte/legacy';
 
-  import { Button, Form } from 'svelte-pieces'
+  import { Button, Form } from '$lib/svelte-pieces'
   import type { IPoint, IRegion } from '@living-dictionaries/types'
   import { onMount } from 'svelte'
   import { convertToFriendlyUrl } from './convertToFriendlyUrl'

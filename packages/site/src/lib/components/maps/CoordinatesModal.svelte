@@ -1,66 +1,75 @@
 <script lang="ts">
-  import { page } from '$app/stores';
-  import { onMount, createEventDispatcher } from 'svelte';
-  import { Button, Modal } from 'svelte-pieces';
-  import Map from './mapbox/map/Map.svelte';
-  import Geocoder from './mapbox/geocoder/Geocoder.svelte';
-  import Marker from './mapbox/map/Marker.svelte';
-  import ToggleStyle from './mapbox/controls/ToggleStyle.svelte';
-  import NavigationControl from './mapbox/controls/NavigationControl.svelte';
-  import { setMarker } from './utils/setCoordinatesToMarker';
-  import type { LngLatFull } from '@living-dictionaries/types/coordinates.interface';
+  import type { LngLatFull } from '@living-dictionaries/types/coordinates.interface'
+  import { page } from '$app/stores'
+  import { Button, Modal } from '$lib/svelte-pieces'
+  import { onMount } from 'svelte'
+  import NavigationControl from './mapbox/controls/NavigationControl.svelte'
+  import ToggleStyle from './mapbox/controls/ToggleStyle.svelte'
+  import Geocoder from './mapbox/geocoder/Geocoder.svelte'
+  import Map from './mapbox/map/Map.svelte'
+  import Marker from './mapbox/map/Marker.svelte'
+  import { setMarker } from './utils/setCoordinatesToMarker'
 
-  export let initialCenter: LngLatFull = undefined;
-  export let lng: number = undefined;
-  export let lat: number = undefined;
-  export let canRemove = true;
+  interface Props {
+    initialCenter?: LngLatFull
+    lng?: number
+    lat?: number
+    canRemove?: boolean
+    on_update?: (detail: { lat: number, lng: number }) => void
+    on_remove?: () => void
+    on_close: () => void
+  }
 
-  let centerLng = lng;
-  let centerLat = lat;
+  let {
+    initialCenter = undefined,
+    lng = $bindable(undefined),
+    lat = $bindable(undefined),
+    canRemove = true,
+    on_update = undefined,
+    on_remove = undefined,
+    on_close,
+  }: Props = $props()
 
-  const zoom = lng && lat ? 6 : 3;
+  let centerLng = lng
+  let centerLat = lat
+
+  const zoom = lng && lat ? 6 : 3
 
   onMount(() => {
-    if (lng && lat) return;
+    if (lng && lat) return
     if (initialCenter) {
-      ({longitude: centerLng, latitude: centerLat} = initialCenter);
+      ({ longitude: centerLng, latitude: centerLat } = initialCenter)
     } else if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition((position) => {
-        centerLng = position.coords.longitude;
-        centerLat = position.coords.latitude;
-      });
+        centerLng = position.coords.longitude
+        centerLat = position.coords.latitude
+      })
     }
-  });
+  })
 
   function handleGeocoderResult({ detail }) {
     if (detail?.user_coordinates?.[0])
-      setMarker(detail.user_coordinates[0], detail.user_coordinates[1]);
+      setMarker(detail.user_coordinates[0], detail.user_coordinates[1])
     else
-      setMarker(detail.center[0], detail.center[1]);
+      setMarker(detail.center[0], detail.center[1])
   }
 
-  const dispatch = createEventDispatcher<{
-    update: { lat: number; lng: number };
-    remove: boolean;
-    close: boolean;
-  }>();
   function update() {
-    dispatch('update', {
-      lat,
-      lng,
-    });
-    dispatch('close');
+    on_update?.({ lat, lng })
+    on_close()
   }
   function remove() {
-    dispatch('remove');
-    dispatch('close');
+    on_remove?.()
+    on_close()
   }
 </script>
 
-<Modal on:close noscroll>
-  <span slot="heading">
-    {$page.data.t('create.select_coordinates')}
-  </span>
+<Modal {on_close} noscroll>
+  {#snippet heading()}
+    <span>
+      {$page.data.t('create.select_coordinates')}
+    </span>
+  {/snippet}
   <form on:submit|preventDefault={update}>
     <div class="flex flex-wrap items-center mb-2">
       <div class="flex flex-grow">
@@ -106,18 +115,18 @@
         lng={centerLng}
         lat={centerLat}
         {zoom}
-        on:click={({ detail }) => ({lng, lat} = setMarker(detail.lng, detail.lat))}>
+        on:click={({ detail }) => ({ lng, lat } = setMarker(detail.lng, detail.lat))}>
         <slot />
         <NavigationControl />
         <Geocoder
           options={{ marker: false }}
           placeholder={$page.data.t('about.search')}
           on:result={handleGeocoderResult}
-          on:error={(e) => console.error(e.detail)} />
+          on:error={e => console.error(e.detail)} />
         {#if lng && lat}
           <Marker
             draggable
-            on:dragend={({ detail }) => ({lng, lat} = setMarker(detail.lng, detail.lat))}
+            on:dragend={({ detail }) => ({ lng, lat } = setMarker(detail.lng, detail.lat))}
             {lng}
             {lat} />
         {/if}
@@ -126,7 +135,7 @@
     </div>
 
     <div class="modal-footer">
-      <Button onclick={() => dispatch('close')} form="simple" color="black">
+      <Button onclick={on_close} form="simple" color="black">
         {$page.data.t('misc.cancel')}
       </Button>
       {#if canRemove}

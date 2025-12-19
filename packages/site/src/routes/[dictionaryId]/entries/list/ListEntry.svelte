@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { EntryData, Tables } from '@living-dictionaries/types'
-  import { ShowHide } from 'svelte-pieces'
+  import { ShowHide } from '$lib/svelte-pieces'
   import sanitize from 'xss'
   import Audio from '../components/Audio.svelte'
   import Video from '../components/Video.svelte'

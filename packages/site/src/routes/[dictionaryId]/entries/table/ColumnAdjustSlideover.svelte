@@ -2,16 +2,17 @@
   import { onMount } from 'svelte'
   import { flip } from 'svelte/animate'
   import { fade } from 'svelte/transition'
-  import { Slideover } from 'svelte-pieces'
+  import { Slideover } from '$lib/svelte-pieces'
   import type { IColumn } from '@living-dictionaries/types'
   import ColumnTitle from './ColumnTitle.svelte'
   import { page } from '$app/stores'
 
   interface Props {
     selectedColumn: IColumn;
+    on_close: () => void;
   }
 
-  let { selectedColumn }: Props = $props();
+  let { selectedColumn, on_close }: Props = $props();
   let { preferred_table_columns } = $derived($page.data)
 
   let selectedColumnElement: HTMLElement = $state()
@@ -43,8 +44,8 @@
   }
 </script>
 
-<Slideover on:close>
-  <span slot="title">{$page.data.t('column.adjust_columns')}</span>
+<Slideover {on_close}>
+  {#snippet title()}{$page.data.t('column.adjust_columns')}{/snippet}
 
   <ul class="divide-y divid-gray-200">
     {#each $preferred_table_columns as column, i (column.field)}

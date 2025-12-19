@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Button, Form, Modal } from 'svelte-pieces'
+  import { Button, Form, Modal } from '$lib/svelte-pieces'
   import type { Tables } from '@living-dictionaries/types'
   import { decades } from './ages'
   import { page } from '$app/stores'
@@ -19,7 +19,7 @@
   let agreeToBeOnline = $state(true)
 </script>
 
-<Modal on:close={on_close}>
+<Modal {on_close}>
   {#snippet heading()}
     <span >{$page.data.t('speakers.add_new_speaker')}
     </span>

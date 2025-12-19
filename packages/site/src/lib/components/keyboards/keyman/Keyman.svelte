@@ -6,27 +6,26 @@
 </script>
 
 <script lang="ts">
-  import { run } from 'svelte/legacy';
-
-  import './keyman.css'
-  import { onDestroy, onMount, tick } from 'svelte'
-  import { Button, Modal, ShowHide, loadScriptOnce } from 'svelte-pieces'
-  import { additionalKeyboards, glossingLanguages } from '../../../glosses/glossing-languages'
   import { browser } from '$app/environment'
 
-  
+  import { Button, loadScriptOnce, Modal, ShowHide } from '$lib/svelte-pieces'
+  import { onDestroy, onMount, tick } from 'svelte'
+  import { run } from 'svelte/legacy'
+  import { additionalKeyboards, glossingLanguages } from '../../../glosses/glossing-languages'
+  import './keyman.css'
+
   interface Props {
     /**
-   * When using keyboard inside a fixed context like a modal, set fixed to true to use fixed positioning instead of absolute positioning to keep keyboard with fixed input, otherwise it will match page scroll height
-   */
-    fixed?: boolean;
-    bcp?: string;
-    canChooseKeyboard?: boolean;
-    target?: string;
-    show?: boolean;
-    position?: 'top' | 'bottom';
-    version?: string; // https://keyman.com/developer/keymanweb/, https://keyman.com/downloads/pre-release/, https://help.keyman.com/developer/engine/web/history
-    children?: import('svelte').Snippet;
+     * When using keyboard inside a fixed context like a modal, set fixed to true to use fixed positioning instead of absolute positioning to keep keyboard with fixed input, otherwise it will match page scroll height
+     */
+    fixed?: boolean
+    bcp?: string
+    canChooseKeyboard?: boolean
+    target?: string
+    show?: boolean
+    position?: 'top' | 'bottom'
+    version?: string // https://keyman.com/developer/keymanweb/, https://keyman.com/downloads/pre-release/, https://help.keyman.com/developer/engine/web/history
+    children?: import('svelte').Snippet
   }
 
   let {
@@ -37,8 +36,8 @@
     show = $bindable(false),
     position = 'top',
     version = '16.0.141',
-    children
-  }: Props = $props();
+    children,
+  }: Props = $props()
 
   let kmw: KeymanWeb = $state()
   let wrapperEl: HTMLDivElement = $state()
@@ -116,20 +115,19 @@
         }
       })()
     }
-  });
+  })
 
   run(() => {
     if (show)
       inputEl?.classList.remove('kmw-disabled')
     else
       inputEl?.classList.add('kmw-disabled')
-  });
+  })
 
-
-  const children_render = $derived(children);
+  const children_render = $derived(children)
 </script>
 
-<ShowHide  >
+<ShowHide>
   {#snippet children({ show: showKeyboardOptions, toggle })}
     <div bind:this={wrapperEl} class="w-full relative" class:sompeng={currentBcp === 'srb-sora'}>
       {@render children_render?.()}
@@ -166,10 +164,10 @@
     </div>
 
     {#if showKeyboardOptions}
-      <Modal on:close={toggle} noscroll>
+      <Modal on_close={toggle} noscroll>
         {#snippet heading()}
-            <span >Select Keyboard</span>
-          {/snippet}
+          <span>Select Keyboard</span>
+        {/snippet}
         {#each [...Object.entries(glossingLanguages), ...Object.entries(additionalKeyboards)] as [_bcp, languageDefinition]}
           {#if languageDefinition.showKeyboard}
             <Button

@@ -4,7 +4,7 @@
     IColumn,
     TablesUpdate,
   } from '@living-dictionaries/types'
-  import { ShowHide } from 'svelte-pieces'
+  import { ShowHide } from '$lib/svelte-pieces'
   import Audio from '../components/Audio.svelte'
   import Textbox from './cells/Textbox.svelte'
   import SelectSpeakerCell from './cells/SelectSpeakerCell.svelte'

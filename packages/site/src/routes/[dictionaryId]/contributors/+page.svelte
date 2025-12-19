@@ -1,7 +1,7 @@
 <script lang="ts">
   import { run } from 'svelte/legacy';
 
-  import { Button, ShowHide } from 'svelte-pieces'
+  import { Button, ShowHide } from '$lib/svelte-pieces'
   import type { PartnerWithPhoto, Tables } from '@living-dictionaries/types'
   import CitationComponent from './Citation.svelte'
   import Partners from './Partners.svelte'
@@ -121,7 +121,7 @@
         </Button>
         {#if show}
           {#await import('$lib/components/modals/Contact.svelte') then { default: Contact }}
-            <Contact subject="request_access" on:close={toggle} />
+            <Contact subject="request_access" on_close={toggle} />
           {/await}
         {/if}
                     {/snippet}

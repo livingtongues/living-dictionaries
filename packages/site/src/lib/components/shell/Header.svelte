@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Button, ResponsiveSlideover, ShowHide } from 'svelte-pieces'
+  import { Button, ResponsiveSlideover, ShowHide } from '$lib/svelte-pieces'
   import User from './User.svelte'
   import { page } from '$app/state'
   import { mode } from '$lib/supabase'
@@ -79,7 +79,7 @@
         </Button>
         {#if show}
           {#await import('$lib/components/modals/Contact.svelte') then { default: Contact }}
-            <Contact on:close={toggle} />
+            <Contact on_close={toggle} />
           {/await}
         {/if}
                 {/snippet}
@@ -95,7 +95,7 @@
         </Button>
         {#if show}
           {#await import('$lib/components/modals/SelectLanguage.svelte') then { default: SelectLanguage }}
-            <SelectLanguage on:close={toggle} />
+            <SelectLanguage on_close={toggle} />
           {/await}
         {/if}
                 {/snippet}

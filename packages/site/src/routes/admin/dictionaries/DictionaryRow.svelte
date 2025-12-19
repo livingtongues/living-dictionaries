@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { BadgeArrayEmit, Button, JSON, Modal, ShowHide } from 'svelte-pieces'
+  import { BadgeArrayEmit, Button, JSON, Modal, ShowHide } from '$lib/svelte-pieces'
   import type { TablesUpdate } from '@living-dictionaries/types'
   import type { UserWithDictionaryRoles } from '@living-dictionaries/types/supabase/users.types'
   import DictionaryFieldEdit from './DictionaryFieldEdit.svelte'
@@ -173,7 +173,7 @@
           <CoordinatesModal
             lat={dictionary.coordinates?.points?.length ? dictionary.coordinates.points[0].coordinates.latitude : undefined}
             lng={dictionary.coordinates?.points?.length ? dictionary.coordinates.points[0].coordinates.longitude : undefined}
-            on:update={({ detail: { lat, lng } }) => {
+            on_update={({ lat, lng }) => {
               const [, ...rest] = dictionary.coordinates?.points || []
               update_dictionary({
                 coordinates: {
@@ -182,7 +182,7 @@
                 },
               })
             }}
-            on:remove={() => {
+            on_remove={() => {
               const [, ...rest] = dictionary.coordinates?.points || []
               update_dictionary({
                 coordinates: {
@@ -191,7 +191,7 @@
                 },
               })
             }}
-            on:close={toggle} />
+            on_close={toggle} />
         {/await}
       {/if}
           {/snippet}
@@ -215,7 +215,7 @@
     canEdit
     addMessage="Add"
     strings={dictionary.alternate_names?.slice(0, 8)}
-    on:additem={() => {
+    onadditem={() => {
       const name = prompt('Enter alternate name:')
       if (name) {
         update_dictionary({
@@ -223,7 +223,7 @@
         })
       }
     }}
-    on:itemremoved={({ detail: { value } }) => {
+    onitemremoved={({ value }) => {
       update_dictionary({
         alternate_names: dictionary.alternate_names.filter(name => name !== value),
       })
@@ -281,7 +281,7 @@
         Delete
       </Button>
       {#if show}
-        <Modal on:close={toggle}>
+        <Modal on_close={toggle}>
           {#snippet heading()}
                 <span >Delete {dictionary.name}?</span>
               {/snippet}

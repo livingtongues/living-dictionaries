@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { BadgeArrayEmit, ShowHide } from 'svelte-pieces'
+  import { BadgeArrayEmit, ShowHide } from '$lib/svelte-pieces'
   import type { UserWithDictionaryRoles } from '@living-dictionaries/types/supabase/users.types'
 
   interface Props {
@@ -25,9 +25,9 @@
       strings={editors.map(({ full_name, email }) => full_name || email)}
       canEdit
       addMessage="Add"
-      on:itemclicked={e => alert(`email: ${editors[e.detail.index].email}, id: ${editors[e.detail.index].id}`)}
-      on:itemremoved={async e => await remove_editor(editors[e.detail.index].id)}
-      on:additem={toggle} />
+      onitemclicked={({ index }) => alert(`email: ${editors[index].email}, id: ${editors[index].id}`)}
+      onitemremoved={async ({ index }) => await remove_editor(editors[index].id)}
+      onadditem={toggle} />
 
     {#if show}
       {@const users_without_editors = users.filter(({ id: user_id }) => !editors.some(({ id: editor_id }) => editor_id === user_id))}

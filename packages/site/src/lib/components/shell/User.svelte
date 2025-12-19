@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Button, Menu, ShowHide } from 'svelte-pieces'
+  import { Button, Menu, ShowHide } from '$lib/svelte-pieces'
   import { onMount } from 'svelte'
   import { display_one_tap_popover, sign_out } from '$lib/supabase/auth'
   import { page } from '$app/stores'

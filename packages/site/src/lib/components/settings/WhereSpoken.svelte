@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Button, ShowHide } from 'svelte-pieces'
+  import { Button, ShowHide } from '$lib/svelte-pieces'
   import type { DictionaryView, IPoint, IRegion } from '@living-dictionaries/types'
   import type { LngLat } from 'mapbox-gl'
   import { page } from '$app/stores'
@@ -49,8 +49,8 @@
         <CoordinatesModal
           lng={+mapClickCoordinates.lng.toFixed(4)}
           lat={+mapClickCoordinates.lat.toFixed(4)}
-          on:update={addCoordinates}
-          on:close={() => (mapClickCoordinates = null)}>
+          on_update={({ lat, lng }) => addCoordinates({ detail: { lng, lat } })}
+          on_close={() => (mapClickCoordinates = null)}>
         </CoordinatesModal>
       {/if}
 
@@ -72,19 +72,19 @@
                   <CoordinatesModal
                     lng={point.coordinates.longitude}
                     lat={point.coordinates.latitude}
-                    on:update={({ detail }) => {
+                    on_update={({ lat, lng }) => {
                       const { points } = dictionary.coordinates
                       points[index] = {
-                        coordinates: { longitude: detail.lng, latitude: detail.lat },
+                        coordinates: { longitude: lng, latitude: lat },
                       }
                       on_update_points(points)
                     }}
-                    on:remove={() => {
+                    on_remove={() => {
                       const { points } = dictionary.coordinates
                       points.splice(index, 1)
                       on_update_points(points)
                     }}
-                    on:close={toggle}>
+                    on_close={toggle}>
                   </CoordinatesModal>
                 {/if}
                                         {/snippet}
@@ -103,17 +103,17 @@
               {#if show}
                 <RegionModal
                   {region}
-                  on:update={({ detail }) => {
+                  on_update={(detail) => {
                     const { regions } = dictionary.coordinates
                     regions[index] = detail
                     on_update_regions(regions)
                   }}
-                  on:remove={() => {
+                  on_remove={() => {
                     const { regions } = dictionary.coordinates
                     regions.splice(index, 1)
                     on_update_regions(regions)
                   }}
-                  on:close={toggle}>
+                  on_close={toggle}>
                 </RegionModal>
               {/if}
                                   {/snippet}
@@ -137,8 +137,8 @@
       {#if show}
         <CoordinatesModal
           initialCenter={{ ...(first_longitude && { longitude: first_longitude, latitude: first_latitude }) }}
-          on:update={addCoordinates}
-          on:close={toggle} />
+          on_update={({ lat, lng }) => addCoordinates({ detail: { lng, lat } })}
+          on_close={toggle} />
       {/if}
           {/snippet}
     </ShowHide>
@@ -154,11 +154,11 @@
           <RegionModal
             initialCenter={{ longitude: first_longitude, latitude: first_latitude }}
             region={null}
-            on:update={({ detail }) => {
+            on_update={(detail) => {
               const regions = (dictionary.coordinates.regions && [...dictionary.coordinates.regions, detail]) || [detail]
               on_update_regions(regions)
             }}
-            on:close={toggle} />
+            on_close={toggle} />
         {/if}
                 {/snippet}
         </ShowHide>

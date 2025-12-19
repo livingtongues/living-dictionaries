@@ -1,18 +1,18 @@
 <script lang="ts">
-  import { Button, Form } from 'svelte-pieces'
-  import sanitize from 'xss'
   import type { EntryFieldValue } from '@living-dictionaries/types'
-  import Keyman from '$lib/components/keyboards/keyman/Keyman.svelte'
   import { page } from '$app/stores'
+  import Keyman from '$lib/components/keyboards/keyman/Keyman.svelte'
+  import { Button, Form } from '$lib/svelte-pieces'
+  import sanitize from 'xss'
 
   interface Props {
-    value?: string;
-    field: EntryFieldValue;
-    isSompeng?: boolean;
-    addingLexeme?: boolean;
-    bcp?: string;
-    on_update: (new_value: string) => void | Promise<void>;
-    on_close: () => void;
+    value?: string
+    field: EntryFieldValue
+    isSompeng?: boolean
+    addingLexeme?: boolean
+    bcp?: string
+    on_update: (new_value: string) => void | Promise<void>
+    on_close: () => void
   }
 
   let {
@@ -22,8 +22,8 @@
     addingLexeme = false,
     bcp = undefined,
     on_update,
-    on_close
-  }: Props = $props();
+    on_close,
+  }: Props = $props()
 
   let inputEl: HTMLInputElement = $state()
 
@@ -123,7 +123,7 @@
   }
 </script>
 
-<Form  onsubmit={save}>
+<Form onsubmit={save}>
   {#snippet children({ loading })}
     <div class="rounded-md shadow-sm">
       {#if field === 'notes'}

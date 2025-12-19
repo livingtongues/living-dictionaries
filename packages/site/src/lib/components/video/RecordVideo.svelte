@@ -1,6 +1,6 @@
 <script lang="ts">
   import { page } from '$app/state';
-  import { Button } from 'svelte-pieces';
+  import { Button } from '$lib/svelte-pieces';
   import MediaStream from '../record/MediaStream.svelte';
   import Recorder from '../record/Recorder.svelte';
   import { srcObject } from './srcObject';

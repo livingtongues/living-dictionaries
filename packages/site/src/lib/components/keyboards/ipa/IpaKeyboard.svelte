@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Button } from 'svelte-pieces'
+  import { Button } from '$lib/svelte-pieces'
   import vowelTrapezoid from './vowel-trapezoid.gif'
 
   export let on_ipa_change: (new_value: string) => void

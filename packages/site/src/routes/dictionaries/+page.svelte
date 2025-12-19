@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Button, ResponsiveTable } from 'svelte-pieces'
+  import { Button, ResponsiveTable } from '$lib/svelte-pieces'
   import { page } from '$app/stores'
   import Header from '$lib/components/shell/Header.svelte'
   import Footer from '$lib/components/shell/Footer.svelte'
