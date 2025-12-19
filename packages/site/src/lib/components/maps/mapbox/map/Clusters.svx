@@ -35,8 +35,8 @@ From https://gitlab.com/jailbreak/svelte-mapbox-gl
             'circle-radius': ['step', ['get', 'point_count'], 20, 100, 30, 750, 40],
           },
         }}
-        on:click={({ detail }) => {
-          const features = map.queryRenderedFeatures(detail.point, {
+        onclick={(e) => {
+          const features = map.queryRenderedFeatures(e.point, {
             layers: [clustersId],
           });
           const clusterId = features[0].properties.cluster_id;
@@ -49,8 +49,8 @@ From https://gitlab.com/jailbreak/svelte-mapbox-gl
             });
           });
         }}
-        on:mouseenter={() => (map.getCanvas().style.cursor = 'pointer')}
-        on:mouseleave={() => (map.getCanvas().style.cursor = '')} />
+        onmouseenter={() => (map.getCanvas().style.cursor = 'pointer')}
+        onmouseleave={() => (map.getCanvas().style.cursor = '')} />
       <Layer
         options={{
           type: 'symbol',
@@ -72,9 +72,9 @@ From https://gitlab.com/jailbreak/svelte-mapbox-gl
             'circle-stroke-color': '#fff',
           },
         }}
-        on:click={() => alert('point clicked')}
-        on:mouseenter={() => (map.getCanvas().style.cursor = 'pointer')}
-        on:mouseleave={() => (map.getCanvas().style.cursor = '')} />
+        onclick={() => alert('point clicked')}
+        onmouseenter={() => (map.getCanvas().style.cursor = 'pointer')}
+        onmouseleave={() => (map.getCanvas().style.cursor = '')} />
     </GeoJSONSource>
   </Map>
 </Story>

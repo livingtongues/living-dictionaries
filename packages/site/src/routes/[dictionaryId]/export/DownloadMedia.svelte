@@ -1,7 +1,7 @@
 <script lang="ts">
   import JSZip from 'jszip'
   import type { Tables } from '@living-dictionaries/types'
-  import { createEventDispatcher, onDestroy, onMount } from 'svelte'
+  import { onDestroy, onMount } from 'svelte'
   import type { EntryForCSV } from './prepareEntriesForCsv'
   import { objectsToCsvByHeaders } from '$lib/export/csv'
   import { downloadBlob } from '$lib/export/downloadBlob'
@@ -12,6 +12,7 @@
     finalizedEntries: EntryForCSV[];
     entriesWithImages?: EntryForCSV[];
     entriesWithAudio?: EntryForCSV[];
+    on_completed?: () => void;
     children?: import('svelte').Snippet<[any]>;
   }
 
@@ -21,10 +22,9 @@
     finalizedEntries,
     entriesWithImages = [],
     entriesWithAudio = [],
+    on_completed,
     children
   }: Props = $props();
-
-  const dispatch = createEventDispatcher<{ completed: null }>()
 
   let fetched = $state(0)
   let progress = $derived(fetched / (entriesWithImages.length + entriesWithAudio.length))
@@ -85,7 +85,7 @@
     if (destroyed) return
     downloadBlob(blob, dictionary.id, '.zip')
     if (!errors.length)
-      dispatch('completed')
+      on_completed?.()
   })
 
   onDestroy(() => {

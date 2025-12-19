@@ -59,14 +59,14 @@
     }
   })
 
-  function handleGeocoderResult({ detail }: { detail: any }, add: (item: LngLatFull) => void) {
-    if (detail?.user_coordinates?.[0]) {
+  function handleGeocoderResult(result: any, add: (item: LngLatFull) => void) {
+    if (result?.user_coordinates?.[0]) {
       add({
-        longitude: detail.user_coordinates[0],
-        latitude: detail.user_coordinates[1],
+        longitude: result.user_coordinates[0],
+        latitude: result.user_coordinates[1],
       })
     } else {
-      add({ longitude: detail.center[0], latitude: detail.center[1] })
+      add({ longitude: result.center[0], latitude: result.center[1] })
     }
   }
 
@@ -95,7 +95,7 @@
             lng={centerLng}
             lat={centerLat}
             {zoom}
-            on:click={({ detail: { lng, lat } }) =>
+            on_click={({ lng, lat }) =>
               add({ longitude: lng, latitude: lat })}>
             {#if childrenSnippet}
               {@render childrenSnippet()}
@@ -104,12 +104,12 @@
             <Geocoder
               options={{ marker: false }}
               placeholder={$page.data.t('about.search')}
-              on:result={e => handleGeocoderResult(e, add)}
-              on:error={e => console.error(e.detail)} />
+              on_result={result => handleGeocoderResult(result, add)}
+              on_error={e => console.error(e)} />
             {#each regionPoints as point (point)}
               <Marker
                 draggable
-                on:dragend={({ detail: { lng, lat } }) => {
+                on_dragend={({ lng, lat }) => {
                   remove(point)
                   add({ longitude: lng, latitude: lat })
                 }}

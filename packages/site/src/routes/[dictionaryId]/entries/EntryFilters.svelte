@@ -48,10 +48,9 @@
           class="w-full"
           type="range"
           value={$search_params.tolerance || 0}
-          oninput={(e) => {
-            // @ts-ignore
-            const { value } = e.target
-            $search_params.tolerance = value === '1' ? null : value
+          oninput={(e: Event & { currentTarget: HTMLInputElement }) => {
+            const value = Number(e.currentTarget.value)
+            $search_params.tolerance = value === 1 ? null : value
           }}
           min="0"
           max="5"

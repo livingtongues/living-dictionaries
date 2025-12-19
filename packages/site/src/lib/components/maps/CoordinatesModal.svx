@@ -26,15 +26,15 @@ For more info: https://gis.stackexchange.com/questions/8650/measuring-accuracy-o
       <CoordinatesModal
         lng={+lng}
         lat={+lat}
-        on:update={(event) => {
-          set('lat', event.detail.lat);
-          set('lng', event.detail.lng);
+        on_update={({ lat, lng }) => {
+          set('lat', lat);
+          set('lng', lng);
         }}
-        on:remove={() => {
+        on_remove={() => {
           set('lat', 0);
           set('lng', 0);
         }}
-        on:close={toggle} />
+        on_close={toggle} />
     {/if}
   </ShowHide>
 </Story>
@@ -46,8 +46,8 @@ For more info: https://gis.stackexchange.com/questions/8650/measuring-accuracy-o
       <CoordinatesModal
         lng={undefined}
         lat={undefined}
-        on:update={(event) => alert(`set: ${event.detail.lat}, ${event.detail.lng}`)}
-        on:close={toggle} />
+        on_update={({ lat, lng }) => alert(`set: ${lat}, ${lng}`)}
+        on_close={toggle} />
     {/if}
   </ShowHide>
 </Story>

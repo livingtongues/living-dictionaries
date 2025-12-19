@@ -5,6 +5,7 @@
   interface Props {
     html: string;
     editorConfig?: EditorConfig;
+    on_update?: (value: string) => void;
   }
 
   let { html, editorConfig = {
@@ -31,15 +32,10 @@
       'undo',
       'redo',
     ],
-  } }: Props = $props();
-
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  interface $$Events {
-    update: CustomEvent<string>;
-  }
+  }, on_update }: Props = $props();
 
 </script>
 
 {#await import('ckeditor5-build-classic-with-alignment-underline-smallcaps') then editor}
-  <CKEditor editor={editor.default} value={html} {editorConfig} on:update />
+  <CKEditor editor={editor.default} value={html} {editorConfig} {on_update} />
 {/await}
