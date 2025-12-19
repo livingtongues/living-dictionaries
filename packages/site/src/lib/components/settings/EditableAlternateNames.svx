@@ -7,11 +7,11 @@
 
 # Edit Alternate Names
 
-Listen to the `update` event when adding or removing alternate names.
+Listen to the `on_update` event when adding or removing alternate names.
 
 <Story>
   <ReactiveSet input={['Lengua materna']} let:value={alternateNames} let:update>
-    <EditableAlternateNames {alternateNames} on:update={(e) => update(e.detail.alternateNames)} />
+    <EditableAlternateNames {alternateNames} on_update={(alternateNames) => update(alternateNames)} />
     <div>
       Array state:
       <pre>{alternateNames}</pre>

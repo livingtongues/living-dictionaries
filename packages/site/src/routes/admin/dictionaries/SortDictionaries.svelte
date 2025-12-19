@@ -1,45 +1,51 @@
 <script lang="ts">
   import type { DictionaryWithHelpers } from './dictionaryWithHelpers.types'
 
-  export let dictionaries: DictionaryWithHelpers[] = []
-
-  enum DictionaryFields {
-    name = 'Dictionary Name',
-    public = 'Public',
-    entry_count = 'Entries',
-    managers = 'Managers',
-    contributors = 'Contributors',
-    iso_639_3 = 'ISO 639-3',
-    glottocode = 'Glottocode',
-    coordinates = 'Coordinates',
-    location = 'Location',
-    gloss_languages = 'Gloss Languages',
-    alternate_names = 'Alternate Names',
-    orthographies = 'Alternate Orthographies',
-    created_at = 'Created At',
-    updated_at = 'Updated At',
-    language_used_by_community = 'Language Used by Community',
-    community_permission = 'Community Permission',
-    author_connection = 'Author Connection',
-    con_language_description = 'Conlang Description',
-    conlang = 'Conlang',
-    deleted = 'Delete',
+  interface Props {
+    dictionaries?: DictionaryWithHelpers[];
+    children?: import('svelte').Snippet<[any]>;
   }
 
+  let { dictionaries = [], children }: Props = $props();
+
+  const DictionaryFields = {
+    name: 'Dictionary Name',
+    public: 'Public',
+    entry_count: 'Entries',
+    managers: 'Managers',
+    contributors: 'Contributors',
+    iso_639_3: 'ISO 639-3',
+    glottocode: 'Glottocode',
+    coordinates: 'Coordinates',
+    location: 'Location',
+    gloss_languages: 'Gloss Languages',
+    alternate_names: 'Alternate Names',
+    orthographies: 'Alternate Orthographies',
+    created_at: 'Created At',
+    updated_at: 'Updated At',
+    language_used_by_community: 'Language Used by Community',
+    community_permission: 'Community Permission',
+    author_connection: 'Author Connection',
+    con_language_description: 'Conlang Description',
+    conlang: 'Conlang',
+    deleted: 'Delete',
+  } as const
+
   type SortFields = keyof typeof DictionaryFields
+  type DictionaryFieldValue = typeof DictionaryFields[SortFields]
   // @ts-ignore
   const dictionary_fields: {
     key: SortFields
-    value: DictionaryFields
+    value: DictionaryFieldValue
   }[] = Object.entries(DictionaryFields).map(([key, value]) => {
-    return { key, value }
+    return { key: key as SortFields, value }
   })
 
-  let sortKey: SortFields = 'name'
-  let sortDescending = true
-  $: keep_null_date_at_end = sortDescending ? Number.MAX_SAFE_INTEGER : Number.MIN_SAFE_INTEGER
+  let sortKey: SortFields = $state('name')
+  let sortDescending = $state(true)
+  let keep_null_date_at_end = $derived(sortDescending ? Number.MAX_SAFE_INTEGER : Number.MIN_SAFE_INTEGER)
 
-  $: sortedDictionaries = dictionaries.sort((a, b) => {
+  let sortedDictionaries = $derived(dictionaries.sort((a, b) => {
     let valueA: string | number
     let valueB: string | number
     // prettier-ignore
@@ -96,7 +102,7 @@
       return sortDescending ? 1 : -1
 
     return 0
-  })
+  }))
 
   function setSortSettings(paraSortKey: SortFields) {
     // Changes the key if the sort wasn't based on the button before, and if it was, change the direction
@@ -111,24 +117,24 @@
   {#each dictionary_fields as field}
     <th
       class="cursor-pointer"
-      on:click={() => setSortSettings(field.key)}
+      onclick={() => setSortSettings(field.key)}
       title="Click to sort asc/desc">
       {field.value}
       {#if sortKey === field.key}
         {#if sortDescending}
-          <i class="fas fa-sort-amount-down" />
+          <i class="fas fa-sort-amount-down"></i>
         {:else}
-          <i class="fas fa-sort-amount-up" />
+          <i class="fas fa-sort-amount-up"></i>
         {/if}
       {/if}
     </th>
   {/each}
 </thead>
 
-<slot {sortedDictionaries} />
+{@render children?.({ sortedDictionaries, })}
 
 <style>
   th {
-    --at-apply: text-xs font-semibold text-gray-600 uppercase tracking-wider;
+    @apply text-xs font-semibold text-gray-600 uppercase tracking-wider;
   }
 </style>

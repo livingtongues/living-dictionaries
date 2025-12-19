@@ -2,9 +2,13 @@
   import type { EntryData, Tables } from '@living-dictionaries/types'
   import GalleryEntry from './gallery/GalleryEntry.svelte'
 
-  export let entries: EntryData[] = []
-  export let dictionary: Tables<'dictionaries'>
-  export let can_edit = false
+  interface Props {
+    entries?: EntryData[];
+    dictionary: Tables<'dictionaries'>;
+    can_edit?: boolean;
+  }
+
+  let { entries = [], dictionary, can_edit = false }: Props = $props();
 </script>
 
 <div class="gallery">

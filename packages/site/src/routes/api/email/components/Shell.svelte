@@ -1,11 +1,21 @@
 <script lang="ts">
+  import Body from './Body.svelte'
   import Head from './Head.svelte'
   import Html from './Html.svelte'
-  import Body from './Body.svelte'
 
-  export let dark = false
-  export let preview: string
-  export let title: string
+  interface Props {
+    dark?: boolean
+    preview: string
+    title: string
+    children?: import('svelte').Snippet
+  }
+
+  let {
+    dark = false,
+    preview,
+    title,
+    children,
+  }: Props = $props()
 </script>
 
 <Html>
@@ -13,6 +23,6 @@
     <title>{title}</title>
   </Head>
   <Body {preview}>
-    <slot />
+    {@render children?.()}
   </Body>
 </Html>

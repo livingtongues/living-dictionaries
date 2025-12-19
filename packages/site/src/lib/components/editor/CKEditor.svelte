@@ -1,26 +1,25 @@
 <!-- From: https://github.com/techlab23/ckeditor5-svelte -->
 <script lang="ts">
-  import { createEventDispatcher, onDestroy, onMount } from 'svelte'
+  import { onDestroy, onMount } from 'svelte'
   import type { Editor } from '@ckeditor/ckeditor5-core'
   import type { EditorConfig } from '@ckeditor/ckeditor5-core/src/editor/editorconfig'
 
-  export let editor: typeof Editor
-  export let editorConfig: EditorConfig
-  export let value = ''
+  interface Props {
+    editor: typeof Editor;
+    editorConfig: EditorConfig;
+    value?: string;
+    on_update?: (value: string) => void;
+  }
 
-  let editorEl: HTMLDivElement
+  let { editor, editorConfig, value = $bindable(''), on_update }: Props = $props();
+
+  let editorEl: HTMLDivElement = $state()
   let instance: Editor
-
-  const dispatch = createEventDispatcher<{
-    update: string
-  // focus: { evt: any; instance: Editor };
-    // blur: { evt: any; instance: Editor };
-  }>()
 
   const emitInputEvent = () => {
     // @ts-expect-error
     value = instance.getData()
-    dispatch('update', value)
+    on_update?.(value)
   }
 
   onMount(() => {
@@ -51,4 +50,4 @@
   })
 </script>
 
-<div bind:this={editorEl} contenteditable bind:innerHTML={value} />
+<div bind:this={editorEl} contenteditable bind:innerHTML={value}></div>

@@ -6,9 +6,14 @@
   const { getMap } = getContext<MapKeyContext>(mapKey);
   const map = getMap();
 
-  export let position: 'top-left' | 'top-right' | 'bottom-right' | 'bottom-left' = 'top-right';
+  interface Props {
+    position?: 'top-left' | 'top-right' | 'bottom-right' | 'bottom-left';
+    children?: import('svelte').Snippet<[any]>;
+  }
 
-  let el: HTMLDivElement;
+  let { position = 'top-right', children }: Props = $props();
+
+  let el: HTMLDivElement = $state();
 
   onMount(() => {
     const customControl: IControl = {
@@ -25,5 +30,5 @@
 </script>
 
 <div bind:this={el} class="mapboxgl-ctrl mapboxgl-ctrl-group">
-  <slot {map} />
+  {@render children?.({ map, })}
 </div>

@@ -1,9 +1,14 @@
 # Local [Supabase](https://supabase.com/docs) dev
 
+## Schema
+https://drawsql.app/teams/ld-4/diagrams/entries-sentences-texts
+https://supabase.com/dashboard/project/actkqboqpzniojhgtqzw/database/schemas
+http://127.0.0.1:54323/project/default/database/schemas
+
 ## Setup
 
 1. [Install supabase cli locally](https://supabase.com/docs/guides/cli) *- you can skip this the first few times and just prepend `pnpx ` to the commands below, but after awhile you will tire of waiting for pnpx on each command*
-2. Install [Docker Desktop](https://www.docker.com/products/docker-desktop/) and make sure it is running
+2. Install Docker according to your system and make sure it is running
 
 ## Development
 
@@ -24,24 +29,19 @@ Local:
 Deployed (we don't use this):
 - `supabase gen types typescript --project-id=actkqboqpzniojhgtqzw --schema public > packages/site/src/lib/supabase/generated.types.ts`
 
+## Functions
+
+- `supabase functions new hello-world`
+- `supabase functions serve hello-world` to run locally
+- `supabase functions deploy` to deploy all `supabase functions deploy hello-world` to deploy individually. Add `--no-verify-jwt` if you want to skip jwt verification for `supabase functions deploy email-otp --no-verify-jwt` or for things like Stripe webhooks.
+- `supabase start` auto picks up `.env` file for local function environment variables. For production you can set them by running `supabase secrets set --env-file supabase/functions/.env` and viewing them at https://supabase.com/dashboard/project/kzpjbybmdsjwblubdflo/functions/secrets
+-
 ## Push config changes and new migrations to cloud project
 You can check current prod migrations at https://supabase.com/dashboard/project/actkqboqpzniojhgtqzw/database/migrations
 
 - `supabase login`
 - `supabase link --project-ref=actkqboqpzniojhgtqzw --password=<DB password>`
 - `supabase db push`
-
-## Schema
-https://drawsql.app/teams/ld-4/diagrams/entries-sentences-texts
-https://supabase.com/dashboard/project/actkqboqpzniojhgtqzw/database/schemas
-http://127.0.0.1:54323/project/default/database/schemas
-
-## Tests
-
-See [pgTAP docs](https://pgtap.org/documentation.html) and https://supabase.com/docs/guides/database/extensions/pgtap
-
-- `supabase test new <name>` to create a new test file
-- `supabase test db` to run tests
 
 ## Use data from a `pg_dump` backup locally
 

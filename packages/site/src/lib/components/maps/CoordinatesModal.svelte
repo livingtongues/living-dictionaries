@@ -1,67 +1,76 @@
 <script lang="ts">
-  import { page } from '$app/stores';
-  import { onMount, createEventDispatcher } from 'svelte';
-  import { Button, Modal } from 'svelte-pieces';
-  import Map from './mapbox/map/Map.svelte';
-  import Geocoder from './mapbox/geocoder/Geocoder.svelte';
-  import Marker from './mapbox/map/Marker.svelte';
-  import ToggleStyle from './mapbox/controls/ToggleStyle.svelte';
-  import NavigationControl from './mapbox/controls/NavigationControl.svelte';
-  import { setMarker } from './utils/setCoordinatesToMarker';
-  import type { LngLatFull } from '@living-dictionaries/types/coordinates.interface';
+  import type { LngLatFull } from '@living-dictionaries/types/coordinates.interface'
+  import { page } from '$app/state'
+  import { Button, Modal } from '$lib/svelte-pieces'
+  import { onMount } from 'svelte'
+  import NavigationControl from './mapbox/controls/NavigationControl.svelte'
+  import ToggleStyle from './mapbox/controls/ToggleStyle.svelte'
+  import Geocoder from './mapbox/geocoder/Geocoder.svelte'
+  import Map from './mapbox/map/Map.svelte'
+  import Marker from './mapbox/map/Marker.svelte'
+  import { setMarker } from './utils/setCoordinatesToMarker'
 
-  export let initialCenter: LngLatFull = undefined;
-  export let lng: number = undefined;
-  export let lat: number = undefined;
-  export let canRemove = true;
+  interface Props {
+    initialCenter?: LngLatFull
+    lng?: number
+    lat?: number
+    canRemove?: boolean
+    on_update?: (detail: { lat: number, lng: number }) => void
+    on_remove?: () => void
+    on_close: () => void
+  }
 
-  let centerLng = lng;
-  let centerLat = lat;
+  let {
+    initialCenter = undefined,
+    lng = $bindable(undefined),
+    lat = $bindable(undefined),
+    canRemove = true,
+    on_update = undefined,
+    on_remove = undefined,
+    on_close,
+  }: Props = $props()
 
-  const zoom = lng && lat ? 6 : 3;
+  let centerLng = lng
+  let centerLat = lat
+
+  const zoom = lng && lat ? 6 : 3
 
   onMount(() => {
-    if (lng && lat) return;
+    if (lng && lat) return
     if (initialCenter) {
-      ({longitude: centerLng, latitude: centerLat} = initialCenter);
+      ({ longitude: centerLng, latitude: centerLat } = initialCenter)
     } else if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition((position) => {
-        centerLng = position.coords.longitude;
-        centerLat = position.coords.latitude;
-      });
+        centerLng = position.coords.longitude
+        centerLat = position.coords.latitude
+      })
     }
-  });
+  })
 
-  function handleGeocoderResult({ detail }) {
-    if (detail?.user_coordinates?.[0])
-      setMarker(detail.user_coordinates[0], detail.user_coordinates[1]);
+  function handleGeocoderResult(result) {
+    if (result?.user_coordinates?.[0])
+      setMarker(result.user_coordinates[0], result.user_coordinates[1])
     else
-      setMarker(detail.center[0], detail.center[1]);
+      setMarker(result.center[0], result.center[1])
   }
 
-  const dispatch = createEventDispatcher<{
-    update: { lat: number; lng: number };
-    remove: boolean;
-    close: boolean;
-  }>();
   function update() {
-    dispatch('update', {
-      lat,
-      lng,
-    });
-    dispatch('close');
+    on_update?.({ lat, lng })
+    on_close()
   }
   function remove() {
-    dispatch('remove');
-    dispatch('close');
+    on_remove?.()
+    on_close()
   }
 </script>
 
-<Modal on:close noscroll>
-  <span slot="heading">
-    {$page.data.t('create.select_coordinates')}
-  </span>
-  <form on:submit|preventDefault={update}>
+<Modal {on_close} noscroll>
+  {#snippet heading()}
+    <span>
+      {page.data.t('create.select_coordinates')}
+    </span>
+  {/snippet}
+  <form onsubmit={(e) => { e.preventDefault(); update(); }}>
     <div class="flex flex-wrap items-center mb-2">
       <div class="flex flex-grow">
         <div class="relative">
@@ -78,7 +87,7 @@
             min="-90"
             bind:value={lat}
             class="w-32 pl-10 pr-3 py-2 form-input"
-            placeholder={$page.data.t('dictionary.latitude')} />
+            placeholder={page.data.t('dictionary.latitude')} />
         </div>
         <div class="w-1" />
 
@@ -96,46 +105,46 @@
             min="-180"
             bind:value={lng}
             class="w-32 md:w-36 pl-10 pr-3 py-2 form-input"
-            placeholder={$page.data.t('dictionary.longitude')} />
+            placeholder={page.data.t('dictionary.longitude')} />
         </div>
       </div>
     </div>
 
-    <form on:submit={(e) => e.preventDefault()} style="height: 50vh;">
+    <div style="height: 50vh;">
       <Map
         lng={centerLng}
         lat={centerLat}
         {zoom}
-        on:click={({ detail }) => ({lng, lat} = setMarker(detail.lng, detail.lat))}>
+        on_click={(lngLat) => ({ lng, lat } = setMarker(lngLat.lng, lngLat.lat))}>
         <slot />
         <NavigationControl />
         <Geocoder
           options={{ marker: false }}
-          placeholder={$page.data.t('about.search')}
-          on:result={handleGeocoderResult}
-          on:error={(e) => console.error(e.detail)} />
+          placeholder={page.data.t('about.search')}
+          on_result={handleGeocoderResult}
+          on_error={e => console.error(e)} />
         {#if lng && lat}
           <Marker
             draggable
-            on:dragend={({ detail }) => ({lng, lat} = setMarker(detail.lng, detail.lat))}
+            on_dragend={(lngLat) => ({ lng, lat } = setMarker(lngLat.lng, lngLat.lat))}
             {lng}
             {lat} />
         {/if}
         <ToggleStyle />
       </Map>
-    </form>
+    </div>
 
     <div class="modal-footer">
-      <Button onclick={() => dispatch('close')} form="simple" color="black">
-        {$page.data.t('misc.cancel')}
+      <Button onclick={on_close} form="simple" color="black">
+        {page.data.t('misc.cancel')}
       </Button>
       {#if canRemove}
         <Button onclick={remove} form="simple" color="red">
-          {$page.data.t('misc.remove')}
+          {page.data.t('misc.remove')}
         </Button>
       {/if}
       <Button type="submit" form="filled">
-        {$page.data.t('misc.save')}
+        {page.data.t('misc.save')}
       </Button>
     </div>
   </form>

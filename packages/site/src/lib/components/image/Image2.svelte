@@ -1,17 +1,21 @@
 <script lang="ts">
   // learning from https://github.com/pngwn/peng-move/blob/main/src/lib/Animal.svelte
   import { spring } from 'svelte/motion';
-  export let gcs: string;
-  export let length: number;
-  export let dimensionType: 'square' | 'width' | 'height' = 'width';
+  interface Props {
+    gcs: string;
+    length: number;
+    dimensionType?: 'square' | 'width' | 'height';
+  }
 
-  let imageEl: HTMLImageElement;
+  let { gcs, length, dimensionType = 'width' }: Props = $props();
 
-  let ww = 0;
-  let wh = 0;
+  let imageEl: HTMLImageElement = $state();
+
+  let ww = $state(0);
+  let wh = $state(0);
   const scale = spring(1);
   const opacity = spring(0, { stiffness: 0.2, damping: 1 });
-  let viewing = false;
+  let viewing = $state(false);
 
   function handle_click() {
     if (imageEl === null) return;
@@ -45,7 +49,7 @@
     });
   }
 
-  $: src = `https://lh3.googleusercontent.com/${gcs}=${
+  let src = $derived(`https://lh3.googleusercontent.com/${gcs}=${
     dimensionType === 'square'
       ? `s${length}-p`
       : dimensionType === 'width'
@@ -53,23 +57,23 @@
       : dimensionType === 'height'
       ? `h${length}`
       : 's0'
-  }`;
+  }`);
 </script>
 
 <img
   bind:this={imageEl}
-  on:click={handle_click}
+  onclick={handle_click}
   class="h-full w-full object-cover cursor-pointer"
   alt=""
   {src} />
 
 <div
   class="overlay"
-  on:click={clear}
+  onclick={clear}
   style:opacity={$opacity}
   style:pointer-events={viewing ? 'auto' : 'none'}
   bind:clientWidth={ww}
-  bind:clientHeight={wh} />
+  bind:clientHeight={wh}></div>
 
 <style>
   .overlay {

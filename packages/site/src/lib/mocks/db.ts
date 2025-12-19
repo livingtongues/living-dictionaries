@@ -1,9 +1,9 @@
-import { readable, writable } from 'svelte/store'
-import { sleep } from 'kitbook'
-import type { DbOperations } from '$lib/dbOperations'
 import type { AudioVideoUploadStatus } from '$lib/components/audio/upload-audio'
+import type { DbOperations } from '$lib/dbOperations'
+import { readable, writable } from 'svelte/store'
 
 const log_args = (args: any) => console.info({ args }) as unknown as Promise<any>
+const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
 
 export const logDbOperations: DbOperations = {
   addImage: ({ sense_id, image_options }) => {

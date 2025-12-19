@@ -3,10 +3,21 @@
   import { mapKey, sourceKey, type MapKeyContext, type SourceKeyContext } from '../context.js';
   import type { VectorSource, VectorSourceImpl } from 'mapbox-gl';
 
-  // Cf https://docs.mapbox.com/mapbox-gl-js/style-spec/sources/#vector
-  export let id: string;
-  export let url: string;
-  export let options: Partial<VectorSource> = {};
+  
+  interface Props {
+    // Cf https://docs.mapbox.com/mapbox-gl-js/style-spec/sources/#vector
+    id: string;
+    url: string;
+    options?: Partial<VectorSource>;
+    children?: import('svelte').Snippet;
+  }
+
+  let {
+    id,
+    url,
+    options = {},
+    children
+  }: Props = $props();
 
   const { getMap } = getContext<MapKeyContext>(mapKey);
   const map = getMap();
@@ -35,7 +46,7 @@
 
   }
 
-  $: {
+  $effect(() => {
     const source = map.getSource(id) as VectorSourceImpl;
     if (source) {
       source.setUrl(url);
@@ -46,7 +57,7 @@
       // Listen to "styledata" event to re-create the source if the style changes.
       map.on('styledata', handleStyledata);
     }
-  }
+  });
 
   onDestroy(() => {
     map.off('styledata', handleStyledata);
@@ -64,4 +75,4 @@
   });
 </script>
 
-<slot />
+{@render children?.()}

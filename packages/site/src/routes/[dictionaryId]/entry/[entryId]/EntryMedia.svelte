@@ -1,21 +1,30 @@
 <script lang="ts">
-  import { ShowHide } from 'svelte-pieces'
+  import { ShowHide } from '$lib/svelte-pieces'
   import type { EntryData, Tables } from '@living-dictionaries/types'
   import Video from '../../entries/components/Video.svelte'
   import GeoTaggingModal from './GeoTaggingModal.svelte'
   import InitableShowHide from './InitableShowHide.svelte'
   import MapboxStatic from '$lib/components/maps/mapbox/static/MapboxStatic.svelte'
   import Image from '$lib/components/image/Image.svelte'
-  import { page } from '$app/stores'
+  import { page } from '$app/state'
   import type { DbOperations } from '$lib/dbOperations'
 
-  export let entry: EntryData
-  export let dictionary: Tables<'dictionaries'>
-  export let can_edit = false
-  export let dbOperations: DbOperations
+  interface Props {
+    entry: EntryData;
+    dictionary: Tables<'dictionaries'>;
+    can_edit?: boolean;
+    dbOperations: DbOperations;
+  }
 
-  $: photos = entry?.senses?.map(({ photos }) => photos).filter(Boolean).flat()
-  $: videos = entry?.senses?.map(({ videos }) => videos).filter(Boolean).flat()
+  let {
+    entry,
+    dictionary,
+    can_edit = false,
+    dbOperations
+  }: Props = $props();
+
+  let photos = $derived(entry?.senses?.map(({ photos }) => photos).filter(Boolean).flat())
+  let videos = $derived(entry?.senses?.map(({ videos }) => videos).filter(Boolean).flat())
 </script>
 
 <div class="flex flex-col">
@@ -44,29 +53,31 @@
     </div>
   {/each}
   {#if can_edit}
-    <ShowHide let:show let:toggle>
-      <div class="h-20 bg-gray-100 hover:bg-gray-300 mb-2 flex flex-col" on:click={toggle}>
-        <div
-          class="text-gray-600
-            h-full grow-1 flex flex-col items-center justify-center
-            cursor-pointer">
-          <span class="hidden md:inline">
-            <span class="i-ic-outline-cloud-upload text-2xl" />
-          </span>
-          <span class="md:hidden">
-            <span class="i-ic-outline-camera-alt text-xl" />
-          </span>
-          <div class="text-xs">
-            {$page.data.t('entry_field.photo')}
+    <ShowHide  >
+      {#snippet children({ show, toggle })}
+            <div class="h-20 bg-gray-100 hover:bg-gray-300 mb-2 flex flex-col" onclick={toggle}>
+          <div
+            class="text-gray-600
+              h-full grow-1 flex flex-col items-center justify-center
+              cursor-pointer">
+            <span class="hidden md:inline">
+              <span class="i-ic-outline-cloud-upload text-2xl"></span>
+            </span>
+            <span class="md:hidden">
+              <span class="i-ic-outline-camera-alt text-xl"></span>
+            </span>
+            <div class="text-xs">
+              {page.data.t('entry_field.photo')}
+            </div>
           </div>
+          {#if show}
+            {#await import('$lib/components/image/EditImage.svelte') then { default: EditImage }}
+              <EditImage on_close={toggle} sense_id={entry.senses[0].id} />
+            {/await}
+          {/if}
         </div>
-        {#if show}
-          {#await import('$lib/components/image/EditImage.svelte') then { default: EditImage }}
-            <EditImage on_close={toggle} sense_id={entry.senses[0].id} />
-          {/await}
-        {/if}
-      </div>
-    </ShowHide>
+                {/snippet}
+        </ShowHide>
   {/if}
 
   {#each videos as video (video.id)}
@@ -79,64 +90,68 @@
     </div>
   {/each}
   {#if can_edit}
-    <ShowHide let:show let:toggle>
-      <button
-        type="button"
-        class="rounded bg-gray-100 border-r-2 hover:bg-gray-300 flex flex-col items-center
-          justify-center cursor-pointer p-6 mb-2"
-        on:click={toggle}>
-        <span class="i-bi-camera-video text-xl" />
-        <span class="text-xs">
-          {$page.data.t('video.add_video')}
-        </span>
-      </button>
-      {#if show}
-        {#await import('$lib/components/video/AddVideo.svelte') then { default: AddVideo }}
-          <AddVideo {entry} on_close={toggle} />
-        {/await}
-      {/if}
-    </ShowHide>
+    <ShowHide  >
+      {#snippet children({ show, toggle })}
+            <button
+          type="button"
+          class="rounded bg-gray-100 border-r-2 hover:bg-gray-300 flex flex-col items-center
+            justify-center cursor-pointer p-6 mb-2"
+          onclick={toggle}>
+          <span class="i-bi-camera-video text-xl"></span>
+          <span class="text-xs">
+            {page.data.t('video.add_video')}
+          </span>
+        </button>
+        {#if show}
+          {#await import('$lib/components/video/AddVideo.svelte') then { default: AddVideo }}
+            <AddVideo {entry} on_close={toggle} />
+          {/await}
+        {/if}
+                {/snippet}
+        </ShowHide>
   {/if}
 
-  <InitableShowHide let:show let:toggle let:set>
-    {#if entry?.main.coordinates?.points?.length || entry?.main.coordinates?.regions?.length}
-      <div
-        class="rounded overflow-hidden cursor-pointer"
-        on:click={() => set(can_edit)}>
-        <MapboxStatic
-          points={entry.main.coordinates.points}
-          regions={entry.main.coordinates.regions} />
-      </div>
-    {:else if can_edit}
-      <button
-        on:click={() => set('point')}
-        type="button"
-        class="rounded bg-gray-100 border-r-2 hover:bg-gray-300 flex flex-col items-center
-          justify-center cursor-pointer p-6 mb-2">
-        <span class="i-mdi-map-marker-plus mr-1" style="margin-top: -3px;" />
-        <span class="text-xs">
-          {$page.data.t('create.select_coordinates')}
-        </span>
-      </button>
-      <button
-        on:click={() => set('region')}
-        type="button"
-        class="rounded bg-gray-100 border-r-2 hover:bg-gray-300 flex flex-col items-center
-          justify-center cursor-pointer p-6 mb-2">
-        <span class="i-mdi-map-marker-path mr-1" style="margin-top: -2px;" />
-        <span class="text-xs">
-          {$page.data.t('create.select_region')}
-        </span>
-      </button>
-    {/if}
-    {#if show}
-      <GeoTaggingModal
-        addPoint={show === 'point'}
-        addRegion={show === 'region'}
-        coordinates={entry.main.coordinates}
-        initialCenter={dictionary.coordinates?.points?.[0]?.coordinates}
-        on_close={toggle}
-        on_update={async new_value => await dbOperations.update_entry({ coordinates: new_value })} />
-    {/if}
-  </InitableShowHide>
+  <InitableShowHide   >
+    {#snippet children({ show, toggle, set })}
+        {#if entry?.main.coordinates?.points?.length || entry?.main.coordinates?.regions?.length}
+        <div
+          class="rounded overflow-hidden cursor-pointer"
+          onclick={() => set(can_edit)}>
+          <MapboxStatic
+            points={entry.main.coordinates.points}
+            regions={entry.main.coordinates.regions} />
+        </div>
+      {:else if can_edit}
+        <button
+          onclick={() => set('point')}
+          type="button"
+          class="rounded bg-gray-100 border-r-2 hover:bg-gray-300 flex flex-col items-center
+            justify-center cursor-pointer p-6 mb-2">
+          <span class="i-mdi-map-marker-plus mr-1" style="margin-top: -3px;"></span>
+          <span class="text-xs">
+            {page.data.t('create.select_coordinates')}
+          </span>
+        </button>
+        <button
+          onclick={() => set('region')}
+          type="button"
+          class="rounded bg-gray-100 border-r-2 hover:bg-gray-300 flex flex-col items-center
+            justify-center cursor-pointer p-6 mb-2">
+          <span class="i-mdi-map-marker-path mr-1" style="margin-top: -2px;"></span>
+          <span class="text-xs">
+            {page.data.t('create.select_region')}
+          </span>
+        </button>
+      {/if}
+      {#if show}
+        <GeoTaggingModal
+          addPoint={show === 'point'}
+          addRegion={show === 'region'}
+          coordinates={entry.main.coordinates}
+          initialCenter={dictionary.coordinates?.points?.[0]?.coordinates}
+          on_close={toggle}
+          on_update={async new_value => await dbOperations.update_entry({ coordinates: new_value })} />
+      {/if}
+          {/snippet}
+    </InitableShowHide>
 </div>
