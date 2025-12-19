@@ -3,10 +3,19 @@
   import type { ComponentProps } from 'svelte'
   import Row from './Row.svelte'
 
-  export let row: ComponentProps<Row> = {}
-  export let href: string
-  export let src: string
-  export let alt: string
+  interface Props {
+    row?: ComponentProps<Row>;
+    href: string;
+    src: string;
+    alt: string;
+  }
+
+  let {
+    row = {},
+    href,
+    src,
+    alt
+  }: Props = $props();
 </script>
 
 <Row {...row}>

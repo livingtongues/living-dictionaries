@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { run } from 'svelte/legacy';
+
   import { Button, ShowHide } from 'svelte-pieces'
   import type { DictionaryView } from '@living-dictionaries/types'
   import { onMount } from 'svelte'
@@ -16,34 +18,42 @@
   import MyDictionaries from '$lib/components/home/MyDictionaries.svelte'
   import SearchDictionaries from '$lib/components/home/SearchDictionaries.svelte'
 
-  export let data: PageData
-  $: ({ admin, get_private_dictionaries, get_public_dictionaries, my_dictionaries, user_latitude, user_longitude } = data)
+  interface Props {
+    data: PageData;
+  }
 
-  let public_dictionaries: DictionaryView[] = []
-  let private_dictionaries: DictionaryView[] = []
+  let { data }: Props = $props();
+  let { admin, get_private_dictionaries, get_public_dictionaries, my_dictionaries, user_latitude, user_longitude } = $derived(data)
+
+  let public_dictionaries: DictionaryView[] = $state([])
+  let private_dictionaries: DictionaryView[] = $state([])
 
   onMount(() => {
     get_public_dictionaries().then(_dictionaries => public_dictionaries = _dictionaries)
   })
 
-  let selectedDictionaryId: string
-  let selectedDictionary: DictionaryView
-  $: dictionaries = [...public_dictionaries, ...private_dictionaries, ...$my_dictionaries]
-  $: if (selectedDictionaryId)
-    selectedDictionary = dictionaries.find(d => d.id === selectedDictionaryId)
-  else
-    selectedDictionary = null
+  let selectedDictionaryId: string = $state()
+  let selectedDictionary: DictionaryView = $state()
+  let dictionaries = $derived([...public_dictionaries, ...private_dictionaries, ...$my_dictionaries])
+  run(() => {
+    if (selectedDictionaryId)
+      selectedDictionary = dictionaries.find(d => d.id === selectedDictionaryId)
+    else
+      selectedDictionary = null
+  });
 
   const featured_dict_names = ['Achi', 'GtaɁ', 'Gutob', 'Kihunde', 'Sora']
-  $: featured_dictionaries = public_dictionaries.filter(d => featured_dict_names.includes(d.name))
+  let featured_dictionaries = $derived(public_dictionaries.filter(d => featured_dict_names.includes(d.name)))
 
-  $: if (browser && $admin) {
-    get_private_dictionaries().then(_dictionaries => private_dictionaries = _dictionaries)
-  } else {
-    private_dictionaries = []
-  }
+  run(() => {
+    if (browser && $admin) {
+      get_private_dictionaries().then(_dictionaries => private_dictionaries = _dictionaries)
+    } else {
+      private_dictionaries = []
+    }
+  });
 
-  let mapComponent: Map
+  let mapComponent: Map = $state()
 
   function setCurrentDictionary(dictionary: DictionaryView) {
     selectedDictionaryId = dictionary.id
@@ -83,9 +93,9 @@
       <button
         type="button"
         class="flex flex-start items-center px-2 py-2 -mx-1 rounded hover:bg-gray-200"
-        on:click={() => (selectedDictionaryId = null)}>
-        <span class="i-fa6-solid-chevron-left rtl-x-flip" />
-        <div class="w-1" />
+        onclick={() => (selectedDictionaryId = null)}>
+        <span class="i-fa6-solid-chevron-left rtl-x-flip"></span>
+        <div class="w-1"></div>
         {$page.data.t('misc.back')}
       </button>
       {#await import('$lib/components/home/SelectedDict.svelte') then { default: SelectedDict }}
@@ -112,18 +122,20 @@
         {/if}
       {/if}
       {#if $admin}
-        <ShowHide let:show let:toggle>
-          <CustomControl position="bottom-right">
-            <button type="button" class="whitespace-nowrap w-90px! px-2" on:click={toggle}>Toggle Private</button>
-          </CustomControl>
+        <ShowHide  >
+          {#snippet children({ show, toggle })}
+                    <CustomControl position="bottom-right">
+              <button type="button" class="whitespace-nowrap w-90px! px-2" onclick={toggle}>Toggle Private</button>
+            </CustomControl>
 
-          {#if show && private_dictionaries.length}
-            <DictionaryPoints
-              dictionaries={private_dictionaries}
-              type="private"
-              bind:selectedDictionaryId />
-          {/if}
-        </ShowHide>
+            {#if show && private_dictionaries.length}
+              <DictionaryPoints
+                dictionaries={private_dictionaries}
+                type="private"
+                bind:selectedDictionaryId />
+            {/if}
+                            {/snippet}
+                </ShowHide>
       {/if}
       <DictionaryPoints dictionaries={public_dictionaries} bind:selectedDictionaryId />
       {#if $my_dictionaries.length}
@@ -151,7 +163,7 @@
       color="black"
       size="lg"
       class="mb-7">
-      <span class="i-fa-solid-list -mt-1" />
+      <span class="i-fa-solid-list -mt-1"></span>
       {$page.data.t('home.list_of_dictionaries')}
     </Button>
   </div>
@@ -161,7 +173,7 @@
 
 <div class="text-center px-3 py-8">
   <Button href="/create-dictionary" size="lg" color="black" form="filled">
-    <span class="i-fa-solid-plus -mt-1.25" />
+    <span class="i-fa-solid-plus -mt-1.25"></span>
     {$page.data.t('create.create_new_dictionary')}
   </Button>
 </div>

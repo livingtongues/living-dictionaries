@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { run } from 'svelte/legacy';
+
   import { Button, JSON, Modal } from 'svelte-pieces'
   import type { Readable } from 'svelte/motion'
   import type { EntryData } from '@living-dictionaries/types'
@@ -9,23 +11,29 @@
   import RecordAudio from '$lib/components/audio/RecordAudio.svelte'
   import SelectSpeaker from '$lib/components/media/SelectSpeaker.svelte'
 
-  export let on_close: () => void
-  export let entry: EntryData
-  export let sound_file: EntryData['audios'][0]
-
-  let upload_triggered = false
-  $: ({ admin, dbOperations, url_from_storage_path } = $page.data)
-  let readyToRecord: boolean
-
-  let file: File
-  let audioBlob: Blob
-
-  $: if (sound_file) {
-    file = undefined
-    audioBlob = undefined
+  interface Props {
+    on_close: () => void;
+    entry: EntryData;
+    sound_file: EntryData['audios'][0];
   }
 
-  $: initial_speaker_id = sound_file?.speakers?.[0].id
+  let { on_close, entry, sound_file }: Props = $props();
+
+  let upload_triggered = $state(false)
+  let { admin, dbOperations, url_from_storage_path } = $derived($page.data)
+  let readyToRecord: boolean = $state()
+
+  let file: File = $state()
+  let audioBlob: Blob = $state()
+
+  run(() => {
+    if (sound_file) {
+      file = undefined
+      audioBlob = undefined
+    }
+  });
+
+  let initial_speaker_id = $derived(sound_file?.speakers?.[0].id)
 
   function startUpload(speaker_id: string): Readable<AudioVideoUploadStatus> {
     const uploadStore = dbOperations.addAudio({
@@ -55,57 +63,61 @@
 </script>
 
 <Modal on:close={on_close}>
-  <span slot="heading"> <span class="i-material-symbols-hearing text-lg text-sm" /> {entry.main.lexeme.default} </span>
+  {#snippet heading()}
+    <span > <span class="i-material-symbols-hearing text-lg text-sm"></span> {entry.main.lexeme.default} </span>
+  {/snippet}
 
   <SelectSpeaker
     initialSpeakerId={initial_speaker_id}
-    let:speaker_id
+    
     {select_speaker}>
-    {#if sound_file}
-      <div class="px-1">
-        <Waveform audioUrl={url_from_storage_path(sound_file.storage_path)} />
-      </div>
-    {:else if speaker_id}
-      {#if file || audioBlob}
-        {#if file}
-          <Waveform audioUrl={URL.createObjectURL(file)} />
-        {:else}
-          <Waveform {audioBlob} />
-        {/if}
-        <div class="mb-3" />
-        {#if !upload_triggered && (file || audioBlob)}
-          {@const upload_status = startUpload(speaker_id)}
-          {#await import('$lib/components/audio/UploadProgressBarStatus.svelte') then { default: UploadProgressBarStatus }}
-            <UploadProgressBarStatus {upload_status} />
-          {/await}
-        {/if}
-      {:else}
-        <div class="flex flex-col">
-          <div class="mb-2">
-            <RecordAudio bind:audioBlob bind:permissionGranted={readyToRecord} />
-          </div>
-          {#if !readyToRecord}
-            <SelectAudio bind:file />
-          {/if}
+    {#snippet children({ speaker_id })}
+        {#if sound_file}
+        <div class="px-1">
+          <Waveform audioUrl={url_from_storage_path(sound_file.storage_path)} />
         </div>
+      {:else if speaker_id}
+        {#if file || audioBlob}
+          {#if file}
+            <Waveform audioUrl={URL.createObjectURL(file)} />
+          {:else}
+            <Waveform {audioBlob} />
+          {/if}
+          <div class="mb-3"></div>
+          {#if !upload_triggered && (file || audioBlob)}
+            {@const upload_status = startUpload(speaker_id)}
+            {#await import('$lib/components/audio/UploadProgressBarStatus.svelte') then { default: UploadProgressBarStatus }}
+              <UploadProgressBarStatus {upload_status} />
+            {/await}
+          {/if}
+        {:else}
+          <div class="flex flex-col">
+            <div class="mb-2">
+              <RecordAudio bind:audioBlob bind:permissionGranted={readyToRecord} />
+            </div>
+            {#if !readyToRecord}
+              <SelectAudio bind:file />
+            {/if}
+          </div>
+        {/if}
       {/if}
-    {/if}
-  </SelectSpeaker>
+          {/snippet}
+    </SelectSpeaker>
 
   <div class="modal-footer">
     {#if sound_file}
       {#if $admin > 1}
         <JSON obj={sound_file} />
-        <div class="w-1" />
+        <div class="w-1"></div>
       {/if}
 
       <Button
         href={url_from_storage_path(sound_file.storage_path)}
         target="_blank">
-        <i class="fas fa-download" />
+        <i class="fas fa-download"></i>
         <span class="hidden sm:inline">{$page.data.t('misc.download')}</span>
       </Button>
-      <div class="w-1" />
+      <div class="w-1"></div>
 
       <Button
         onclick={async () => {
@@ -114,10 +126,10 @@
           on_close()
         }}
         color="red">
-        <i class="far fa-trash-alt" />&nbsp;
+        <i class="far fa-trash-alt"></i>&nbsp;
         <span class="hidden sm:inline">{$page.data.t('misc.delete')}</span>
       </Button>
-      <div class="w-1" />
+      <div class="w-1"></div>
     {/if}
 
     <Button onclick={on_close} color="black">

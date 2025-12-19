@@ -7,8 +7,12 @@
   const map = getMap();
   const mapbox = getMapbox();
 
-  export let position: 'top-left' | 'top-right' | 'bottom-right' | 'bottom-left' = 'top-right';
-  export let options = {};
+  interface Props {
+    position?: 'top-left' | 'top-right' | 'bottom-right' | 'bottom-left';
+    options?: any;
+  }
+
+  let { position = 'top-right', options = {} }: Props = $props();
 
   const geolocate = new mapbox.GeolocateControl(options);
   map.addControl(geolocate, position);

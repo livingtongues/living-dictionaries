@@ -1,13 +1,13 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { page } from '$app/stores';
+  import { page } from '$app/state';
 
   const analyticsId = 'REPLACED_WITH_VERCEL_ANALYTICS_ID';
 
   onMount(async () => {
     if (!analyticsId.startsWith('REPLACED')) {
       const { measureWebVitals } = await import('$lib/webvitals');
-      measureWebVitals({ path: $page.url.pathname, params: $page.params, analyticsId });
+      measureWebVitals({ path: page.url.pathname, params: page.params, analyticsId });
     }
 
     const { init } = await import('@sentry/browser');
@@ -22,7 +22,7 @@
   });
 </script>
 
-{#if $page.url.host.includes('livingdictionaries.app')}
+{#if page.url.host.includes('livingdictionaries.app')}
   {#await import('$lib/components/shell/LogRocket.svelte') then { default: LogRocket }}
     <LogRocket />
   {/await}

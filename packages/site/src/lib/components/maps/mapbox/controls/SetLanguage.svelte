@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { run } from 'svelte/legacy';
+
   import { getContext } from 'svelte';
   import { mapKey, type MapKeyContext } from '../context';
 
@@ -22,9 +24,15 @@
   ] as const;
 
   type SupportedLanguages = typeof supportedLanguages[number]
-  export let bcp: SupportedLanguages = 'en';
+  interface Props {
+    bcp?: SupportedLanguages;
+  }
 
-  $: if (bcp !== 'en')
-    map.setLayoutProperty('country-label', 'text-field', ['get', `name_${bcp}`]);
+  let { bcp = 'en' }: Props = $props();
+
+  run(() => {
+    if (bcp !== 'en')
+      map.setLayoutProperty('country-label', 'text-field', ['get', `name_${bcp}`]);
+  });
 
 </script>

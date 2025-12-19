@@ -4,20 +4,24 @@
   import { order_glosses } from '$lib/helpers/glosses'
   import { page } from '$app/stores'
 
-  export let entry: EntryData
-  export let can_edit = false
-  export let dictionary: Tables<'dictionaries'>
+  interface Props {
+    entry: EntryData;
+    can_edit?: boolean;
+    dictionary: Tables<'dictionaries'>;
+  }
 
-  $: ({ dbOperations } = $page.data)
+  let { entry, can_edit = false, dictionary }: Props = $props();
 
-  $: glosses = order_glosses({
+  let { dbOperations } = $derived($page.data)
+
+  let glosses = $derived(order_glosses({
     glosses: entry.senses?.[0]?.glosses,
     dictionary_gloss_languages: dictionary.gloss_languages,
     t: $page.data.t,
     label: true,
-  })
+  }))
 
-  $: first_photo = entry.senses?.[0]?.photos?.[0]
+  let first_photo = $derived(entry.senses?.[0]?.photos?.[0])
 </script>
 
 {#if first_photo}

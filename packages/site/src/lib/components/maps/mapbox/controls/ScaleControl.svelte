@@ -6,10 +6,19 @@
   const map = getMap();
   const mapbox = getMapbox();
 
-  export let position: 'top-left' | 'top-right' | 'bottom-right' | 'bottom-left' = 'bottom-right';
-  export let maxWidth = 80;
-  export let unit = 'metric';
-  export let options = {};
+  interface Props {
+    position?: 'top-left' | 'top-right' | 'bottom-right' | 'bottom-left';
+    maxWidth?: number;
+    unit?: string;
+    options?: any;
+  }
+
+  let {
+    position = 'bottom-right',
+    maxWidth = 80,
+    unit = 'metric',
+    options = {}
+  }: Props = $props();
 
   const scale = new mapbox.ScaleControl({
     ...options,

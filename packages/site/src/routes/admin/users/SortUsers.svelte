@@ -1,7 +1,12 @@
 <script lang="ts">
   import type { UserWithDictionaryRoles } from '@living-dictionaries/types/supabase/users.types'
 
-  export let users: UserWithDictionaryRoles[] = []
+  interface Props {
+    users?: UserWithDictionaryRoles[];
+    children?: import('svelte').Snippet<[any]>;
+  }
+
+  let { users = [], children }: Props = $props();
   enum UserFields {
     email = 'Email',
     full_name = 'Name',
@@ -21,11 +26,11 @@
     return { key, value }
   })
 
-  let sortKey: SortFields = 'email'
-  let sortDescending = true
-  $: keep_null_date_at_end = sortDescending ? Number.MAX_SAFE_INTEGER : Number.MIN_SAFE_INTEGER
+  let sortKey: SortFields = $state('email')
+  let sortDescending = $state(true)
+  let keep_null_date_at_end = $derived(sortDescending ? Number.MAX_SAFE_INTEGER : Number.MIN_SAFE_INTEGER)
 
-  $: sortedUsers = users.sort((a, b) => {
+  let sortedUsers = $derived(users.sort((a, b) => {
     let valueA: string | number
     let valueB: string | number
     // prettier-ignore
@@ -62,7 +67,7 @@
       return sortDescending ? 1 : -1
 
     return 0
-  })
+  }))
 
   function setSortSettings(paraSortKey: SortFields) {
     // Changes the key if the sort wasn't based on the button before, and if it was, change the direction
@@ -77,21 +82,21 @@
   {#each userFields as field}
     <th
       class="cursor-pointer"
-      on:click={() => setSortSettings(field.key)}
+      onclick={() => setSortSettings(field.key)}
       title="Click to sort asc/desc">
       {field.value}
       {#if sortKey === field.key}
         {#if sortDescending}
-          <i class="fas fa-sort-amount-down" />
+          <i class="fas fa-sort-amount-down"></i>
         {:else}
-          <i class="fas fa-sort-amount-up" />
+          <i class="fas fa-sort-amount-up"></i>
         {/if}
       {/if}
     </th>
   {/each}
 </thead>
 
-<slot {sortedUsers} />
+{@render children?.({ sortedUsers, })}
 
 <style>
   th {

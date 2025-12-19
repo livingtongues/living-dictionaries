@@ -2,8 +2,12 @@
   import { BadgeArray } from 'svelte-pieces'
   import { page } from '$app/stores'
 
-  export let alternateNames: string[]
-  export let on_update: (new_value: string[]) => void
+  interface Props {
+    alternateNames: string[];
+    on_update: (new_value: string[]) => void;
+  }
+
+  let { alternateNames, on_update }: Props = $props();
 </script>
 
 <div class="text-sm font-medium text-gray-700 mb-1">

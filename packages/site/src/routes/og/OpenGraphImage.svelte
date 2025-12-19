@@ -1,24 +1,37 @@
 <script lang="ts">
   import SvgGlobe from './SvgGlobe.svelte';
 
-  export let title: string;
-  export let description: string;
 
-  export let dictionaryName: string;
-  export let lat: number = undefined;
-  export let lng: number = undefined;
 
-  export let height: number;
-  export let width: number;
 
-  export let gcsPath: string = undefined;
-  $: src = gcsPath ? `https://lh3.googleusercontent.com/${gcsPath}=w${width}-h${height}-c` : null;
+  interface Props {
+    title: string;
+    description: string;
+    dictionaryName: string;
+    lat?: number;
+    lng?: number;
+    height: number;
+    width: number;
+    gcsPath?: string;
+  }
+
+  let {
+    title,
+    description,
+    dictionaryName,
+    lat = undefined,
+    lng = undefined,
+    height,
+    width,
+    gcsPath = undefined
+  }: Props = $props();
+  let src = $derived(gcsPath ? `https://lh3.googleusercontent.com/${gcsPath}=w${width}-h${height}-c` : null);
 
   const MAX_TITLE_LENGTH = 90;
   const xPADDING = 48;
   const yPADDING = 36;
 
-  $: globeSize = src ? 200 : 400;
+  let globeSize = $derived(src ? 200 : 400);
 </script>
 
 <!-- https://cssgradient.io/ is helpful with making gradients -->

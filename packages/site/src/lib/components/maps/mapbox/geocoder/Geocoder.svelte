@@ -11,10 +11,22 @@
   const map = getMap()
   const mapbox = getMapbox()
 
-  export let position: 'top-left' | 'top-right' | 'bottom-right' | 'bottom-left' = 'top-left'
-  export let options: Partial<GeocoderOptions> = {}
-  export let version = 'v5.0.0' // 4.7.4 or 5.0.0 https://github.com/mapbox/mapbox-gl-geocoder/releases
-  export let types = [
+  interface Props {
+    position?: 'top-left' | 'top-right' | 'bottom-right' | 'bottom-left';
+    options?: Partial<GeocoderOptions>;
+    version?: string; // 4.7.4 or 5.0.0 https://github.com/mapbox/mapbox-gl-geocoder/releases
+    types?: any; // https://docs.mapbox.com/api/search/#data-types
+    placeholder?: string;
+    value?: any;
+    customStylesheetUrl?: string;
+    children?: import('svelte').Snippet<[any]>;
+  }
+
+  let {
+    position = 'top-left',
+    options = {},
+    version = 'v5.0.0',
+    types = [
     'country',
     'region',
     'postcode',
@@ -24,10 +36,12 @@
     'neighborhood',
     'address',
     'poi', // must include map to search points of interest
-  ] // https://docs.mapbox.com/api/search/#data-types
-  export let placeholder = 'Search'
-  export let value = null
-  export let customStylesheetUrl: string = undefined
+  ],
+    placeholder = 'Search',
+    value = null,
+    customStylesheetUrl = undefined,
+    children
+  }: Props = $props();
 
   type ResultOrUserCoordinates = Result | { user_coordinates: [number, number] }
 
@@ -59,7 +73,7 @@
   }
 
   let unbind: () => void
-  let geocoder: MapboxGeocoder
+  let geocoder: MapboxGeocoder = $state()
 
   onMount(async () => {
     await loadScriptOnce(
@@ -97,4 +111,4 @@
   })
 </script>
 
-<slot {geocoder} />
+{@render children?.({ geocoder, })}

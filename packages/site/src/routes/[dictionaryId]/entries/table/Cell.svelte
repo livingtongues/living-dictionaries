@@ -17,13 +17,22 @@
   import type { DbOperations } from '$lib/dbOperations'
   import EntryTag from '$lib/components/entry/EntryTag.svelte'
 
-  export let column: IColumn
-  export let entry: EntryData
-  export let can_edit = false
-  export let dbOperations: DbOperations
+  interface Props {
+    column: IColumn;
+    entry: EntryData;
+    can_edit?: boolean;
+    dbOperations: DbOperations;
+  }
 
-  $: sense = entry.senses?.[0]
-  $: first_photo = entry.senses?.[0]?.photos?.[0]
+  let {
+    column,
+    entry = $bindable(),
+    can_edit = false,
+    dbOperations
+  }: Props = $props();
+
+  let sense = $derived(entry.senses?.[0])
+  let first_photo = $derived(entry.senses?.[0]?.photos?.[0])
 
   function update_entry(update: TablesUpdate<'entries'>) {
     dbOperations.update_entry({ ...update, id: entry.id })
@@ -54,22 +63,24 @@
           })} />
     {:else if can_edit}
       <!-- <div class="h-20 bg-gray-100 hover:bg-gray-300 mb-2 flex flex-col"> -->
-      <ShowHide let:show let:toggle>
-        <div class="text-gray-600 text-center cursor-pointer" on:click={toggle}>
-          <span class="hidden md:inline">
-            <span class="i-ic-outline-cloud-upload text-2xl" />
-          </span>
-          <span class="md:hidden">
-            <span class="i-ic-outline-camera-alt text-xl" />
-          </span>
-        </div>
+      <ShowHide  >
+        {#snippet children({ show, toggle })}
+                        <div class="text-gray-600 text-center cursor-pointer" onclick={toggle}>
+            <span class="hidden md:inline">
+              <span class="i-ic-outline-cloud-upload text-2xl"></span>
+            </span>
+            <span class="md:hidden">
+              <span class="i-ic-outline-camera-alt text-xl"></span>
+            </span>
+          </div>
 
-        {#if show}
-          {#await import('$lib/components/image/EditImage.svelte') then { default: EditImage }}
-            <EditImage on_close={toggle} sense_id={sense.id} />
-          {/await}
-        {/if}
-      </ShowHide>
+          {#if show}
+            {#await import('$lib/components/image/EditImage.svelte') then { default: EditImage }}
+              <EditImage on_close={toggle} sense_id={sense.id} />
+            {/await}
+          {/if}
+                              {/snippet}
+                    </ShowHide>
       <!-- </div> -->
     {/if}
   {:else if column.field === 'speaker'}
@@ -162,7 +173,7 @@
             })
           }} />
       {:else}
-        <div on:click={() => alert('First add example sentence.')} class="h-full"></div>
+        <div onclick={() => alert('First add example sentence.')} class="h-full"></div>
       {/if}
     {/if}
   {:else if column.field === 'scientific_names'}

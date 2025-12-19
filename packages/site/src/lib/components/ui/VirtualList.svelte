@@ -1,28 +1,41 @@
 <script lang="ts">
+  import { run } from 'svelte/legacy';
+
   import { onMount, tick } from 'svelte';
-  // props
-  export let items;
-  export let height = '100%';
-  export let itemHeight = undefined;
-  // read-only, but visible to consumers via bind:start
-  export let start = 0;
-  export let end = 15;
+  
+  
+  interface Props {
+    // props
+    items: any;
+    height?: string;
+    itemHeight?: any;
+    // read-only, but visible to consumers via bind:start
+    start?: number;
+    end?: number;
+    children?: import('svelte').Snippet<[any]>;
+  }
+
+  let {
+    items,
+    height = '100%',
+    itemHeight = undefined,
+    start = $bindable(0),
+    end = $bindable(15),
+    children
+  }: Props = $props();
   // local state
   const height_map = [];
   let rows;
-  let viewport;
-  let contents;
-  let viewport_height = 0;
-  let visible: { index: number; data: any }[];
-  let mounted;
-  let top = 0;
-  let bottom = 0;
-  let average_height;
-  $: visible = items.slice(start, end).map((data, i) => {
+  let viewport = $state();
+  let contents = $state();
+  let viewport_height = $state(0);
+  let visible: { index: number; data: any }[] = $derived(items.slice(start, end).map((data, i) => {
     return { index: i + start, data };
-  });
-  // whenever `items` changes, invalidate the current heightmap
-  $: if (mounted) refresh(items, viewport_height, itemHeight);
+  }));
+  let mounted = $state();
+  let top = $state(0);
+  let bottom = $state(0);
+  let average_height;
   async function refresh(items, viewport_height, itemHeight) {
     const { scrollTop } = viewport;
     await tick(); // wait until the DOM is up to date
@@ -96,20 +109,25 @@
     rows = contents.getElementsByTagName('svelte-virtual-list-row');
     mounted = true;
   });
+  
+  // whenever `items` changes, invalidate the current heightmap
+  run(() => {
+    if (mounted) refresh(items, viewport_height, itemHeight);
+  });
 </script>
 
 <svelte-virtual-list-viewport
   class="mr-3"
   bind:this={viewport}
   bind:offsetHeight={viewport_height}
-  on:scroll={handle_scroll}
+  onscroll={handle_scroll}
   style="height: {height};">
   <svelte-virtual-list-contents
     bind:this={contents}
     style="padding-top: {top}px; padding-bottom: {bottom}px;">
     {#each visible as row (row.index)}
       <svelte-virtual-list-row>
-        <slot item={row.data} index={row.index}>Missing template</slot>
+        {#if children}{@render children({ item: row.data, index: row.index, })}{:else}Missing template{/if}
       </svelte-virtual-list-row>
     {/each}
   </svelte-virtual-list-contents>

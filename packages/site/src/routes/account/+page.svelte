@@ -5,10 +5,10 @@
   import Header from '$lib/components/shell/Header.svelte'
   import { sign_out } from '$lib/supabase/auth'
 
-  export let data
-  $: ({ user } = data)
+  let { data } = $props();
+  let { user } = $derived(data)
 
-  let broken_avatar_image = false
+  let broken_avatar_image = $state(false)
 
   async function update_name(full_name: string) {
     const { error } = await data.supabase.auth.updateUser({
@@ -32,7 +32,7 @@
 <div class="max-w-screen-md mx-auto p-3">
   {#if $user}
     {#if $user.user_metadata.avatar_url && !broken_avatar_image}
-      <img alt="Account Profile" class="mb-2 w-24 h-24 rounded" src={$user.user_metadata.avatar_url} on:error={() => broken_avatar_image = true} />
+      <img alt="Account Profile" class="mb-2 w-24 h-24 rounded" src={$user.user_metadata.avatar_url} onerror={() => broken_avatar_image = true} />
     {/if}
 
     <EditString

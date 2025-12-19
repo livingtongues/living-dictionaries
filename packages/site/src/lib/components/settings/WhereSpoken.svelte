@@ -11,12 +11,16 @@
   import RegionModal from '$lib/components/maps/RegionModal.svelte'
   import NavigationControl from '$lib/components/maps/mapbox/controls/NavigationControl.svelte'
 
-  export let on_update_points: (points: IPoint[]) => void
-  export let on_update_regions: (regions: IRegion[]) => void
-  export let dictionary: Partial<DictionaryView>
+  interface Props {
+    on_update_points: (points: IPoint[]) => void;
+    on_update_regions: (regions: IRegion[]) => void;
+    dictionary: Partial<DictionaryView>;
+  }
 
-  $: first_longitude = dictionary.coordinates?.points?.[0]?.coordinates?.longitude
-  $: first_latitude = dictionary.coordinates?.points?.[0]?.coordinates?.latitude
+  let { on_update_points, on_update_regions, dictionary }: Props = $props();
+
+  let first_longitude = $derived(dictionary.coordinates?.points?.[0]?.coordinates?.longitude)
+  let first_latitude = $derived(dictionary.coordinates?.points?.[0]?.coordinates?.latitude)
 
   function addCoordinates({ detail: { lng, lat } }: { detail: { lng: number, lat: number } }) {
     const point: IPoint = { coordinates: { longitude: lng, latitude: lat } }
@@ -24,7 +28,7 @@
     on_update_points(points)
   }
 
-  let mapClickCoordinates: LngLat
+  let mapClickCoordinates: LngLat = $state()
 </script>
 
 <div class="text-sm font-medium text-gray-700 mb-2">
@@ -56,60 +60,64 @@
           lat={point.coordinates.latitude}
           lng={point.coordinates.longitude}>
           <Popup>
-            <ShowHide let:show let:toggle>
-              <Button form="simple" size="sm" onclick={toggle}>
-                <span class="i-octicon-pencil" />
-                {#if index === 0}
-                  {$page.data.t('create.primary_coordinate')}
+            <ShowHide  >
+              {#snippet children({ show, toggle })}
+                            <Button form="simple" size="sm" onclick={toggle}>
+                  <span class="i-octicon-pencil"></span>
+                  {#if index === 0}
+                    {$page.data.t('create.primary_coordinate')}
+                  {/if}
+                </Button>
+                {#if show}
+                  <CoordinatesModal
+                    lng={point.coordinates.longitude}
+                    lat={point.coordinates.latitude}
+                    on:update={({ detail }) => {
+                      const { points } = dictionary.coordinates
+                      points[index] = {
+                        coordinates: { longitude: detail.lng, latitude: detail.lat },
+                      }
+                      on_update_points(points)
+                    }}
+                    on:remove={() => {
+                      const { points } = dictionary.coordinates
+                      points.splice(index, 1)
+                      on_update_points(points)
+                    }}
+                    on:close={toggle}>
+                  </CoordinatesModal>
                 {/if}
-              </Button>
-              {#if show}
-                <CoordinatesModal
-                  lng={point.coordinates.longitude}
-                  lat={point.coordinates.latitude}
-                  on:update={({ detail }) => {
-                    const { points } = dictionary.coordinates
-                    points[index] = {
-                      coordinates: { longitude: detail.lng, latitude: detail.lat },
-                    }
-                    on_update_points(points)
-                  }}
-                  on:remove={() => {
-                    const { points } = dictionary.coordinates
-                    points.splice(index, 1)
-                    on_update_points(points)
-                  }}
-                  on:close={toggle}>
-                </CoordinatesModal>
-              {/if}
-            </ShowHide>
+                                        {/snippet}
+                        </ShowHide>
           </Popup>
         </Marker>
       {/each}
 
       {#each dictionary.coordinates.regions || [] as region, index (region)}
         <Region {region}>
-          <ShowHide let:show let:toggle>
-            <Button form="simple" size="sm" onclick={toggle}>
-              <span class="i-octicon-pencil" />
-            </Button>
-            {#if show}
-              <RegionModal
-                {region}
-                on:update={({ detail }) => {
-                  const { regions } = dictionary.coordinates
-                  regions[index] = detail
-                  on_update_regions(regions)
-                }}
-                on:remove={() => {
-                  const { regions } = dictionary.coordinates
-                  regions.splice(index, 1)
-                  on_update_regions(regions)
-                }}
-                on:close={toggle}>
-              </RegionModal>
-            {/if}
-          </ShowHide>
+          <ShowHide  >
+            {#snippet children({ show, toggle })}
+                        <Button form="simple" size="sm" onclick={toggle}>
+                <span class="i-octicon-pencil"></span>
+              </Button>
+              {#if show}
+                <RegionModal
+                  {region}
+                  on:update={({ detail }) => {
+                    const { regions } = dictionary.coordinates
+                    regions[index] = detail
+                    on_update_regions(regions)
+                  }}
+                  on:remove={() => {
+                    const { regions } = dictionary.coordinates
+                    regions.splice(index, 1)
+                    on_update_regions(regions)
+                  }}
+                  on:close={toggle}>
+                </RegionModal>
+              {/if}
+                                  {/snippet}
+                    </ShowHide>
         </Region>
       {/each}
     </Map>
@@ -117,38 +125,42 @@
 {/if}
 
 <div class="mt-1">
-  <ShowHide let:show let:toggle>
-    <Button
-      onclick={toggle}
-      color={first_longitude ? 'black' : 'primary'}
-      size={first_longitude ? 'sm' : 'md'}>
-      <span class="i-mdi-map-marker-plus mr-1" style="margin-top: -3px;" />
-      {$page.data.t('create.select_coordinates')}
-    </Button>
-    {#if show}
-      <CoordinatesModal
-        initialCenter={{ ...(first_longitude && { longitude: first_longitude, latitude: first_latitude }) }}
-        on:update={addCoordinates}
-        on:close={toggle} />
-    {/if}
-  </ShowHide>
-
-  {#if first_longitude}
-    <ShowHide let:show let:toggle>
-      <Button onclick={toggle} color="black" size="sm">
-        <span class="i-mdi-map-marker-path mr-1" style="margin-top: -2px;" />
-        {$page.data.t('create.select_region')}
+  <ShowHide  >
+    {#snippet children({ show, toggle })}
+        <Button
+        onclick={toggle}
+        color={first_longitude ? 'black' : 'primary'}
+        size={first_longitude ? 'sm' : 'md'}>
+        <span class="i-mdi-map-marker-plus mr-1" style="margin-top: -3px;"></span>
+        {$page.data.t('create.select_coordinates')}
       </Button>
       {#if show}
-        <RegionModal
-          initialCenter={{ longitude: first_longitude, latitude: first_latitude }}
-          region={null}
-          on:update={({ detail }) => {
-            const regions = (dictionary.coordinates.regions && [...dictionary.coordinates.regions, detail]) || [detail]
-            on_update_regions(regions)
-          }}
+        <CoordinatesModal
+          initialCenter={{ ...(first_longitude && { longitude: first_longitude, latitude: first_latitude }) }}
+          on:update={addCoordinates}
           on:close={toggle} />
       {/if}
+          {/snippet}
     </ShowHide>
+
+  {#if first_longitude}
+    <ShowHide  >
+      {#snippet children({ show, toggle })}
+            <Button onclick={toggle} color="black" size="sm">
+          <span class="i-mdi-map-marker-path mr-1" style="margin-top: -2px;"></span>
+          {$page.data.t('create.select_region')}
+        </Button>
+        {#if show}
+          <RegionModal
+            initialCenter={{ longitude: first_longitude, latitude: first_latitude }}
+            region={null}
+            on:update={({ detail }) => {
+              const regions = (dictionary.coordinates.regions && [...dictionary.coordinates.regions, detail]) || [detail]
+              on_update_regions(regions)
+            }}
+            on:close={toggle} />
+        {/if}
+                {/snippet}
+        </ShowHide>
   {/if}
 </div>

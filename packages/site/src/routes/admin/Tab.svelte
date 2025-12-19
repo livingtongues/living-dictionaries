@@ -1,8 +1,12 @@
 <script lang="ts">
   import { page } from '$app/stores'
 
-  export let link: string
-  export let label: string
+  interface Props {
+    link: string;
+    label: string;
+  }
+
+  let { link, label }: Props = $props();
 </script>
 
 <a

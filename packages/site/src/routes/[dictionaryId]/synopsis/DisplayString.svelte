@@ -1,6 +1,10 @@
 <script lang="ts">
-  export let display: string
-  export let value: string | string[]
+  interface Props {
+    display: string;
+    value: string | string[];
+  }
+
+  let { display, value }: Props = $props();
 </script>
 
 {#if value?.length > 0}

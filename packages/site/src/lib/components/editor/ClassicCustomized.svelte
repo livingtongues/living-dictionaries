@@ -2,8 +2,12 @@
   import CKEditor from './CKEditor.svelte';
   import type { EditorConfig } from '@ckeditor/ckeditor5-core/src/editor/editorconfig';
 
-  export let html: string;
-  export let editorConfig: EditorConfig = {
+  interface Props {
+    html: string;
+    editorConfig?: EditorConfig;
+  }
+
+  let { html, editorConfig = {
     // TODO: figure out which plugins to remove related to photos to speed up
     // removePlugins: ['MediaEmbed'],
     // Available plugins for ClassicEditor: Essentials, CKFinderUploadAdapter, Autoformat, Bold, Italic, BlockQuote, CKFinder, EasyImage, Heading, Image, ImageCaption, ImageStyle, ImageToolbar, ImageUpload, Link, List, MediaEmbed, Paragraph, PasteFromOffice, Table, TableToolbar, ++ Alignment
@@ -27,7 +31,7 @@
       'undo',
       'redo',
     ],
-  };
+  } }: Props = $props();
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   interface $$Events {

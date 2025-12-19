@@ -7,13 +7,17 @@
   import { supabase_date_to_friendly } from '$lib/helpers/time'
   import { page } from '$app/stores'
 
-  export let user: UserWithDictionaryRoles
-  export let dictionaries: DictionaryView[]
-  export let load_data: () => Promise<void>
+  interface Props {
+    user: UserWithDictionaryRoles;
+    dictionaries: DictionaryView[];
+    load_data: () => Promise<void>;
+  }
 
-  $: ({ admin, supabase, add_editor, remove_editor } = $page.data as PageData)
-  $: managing_dictionary_ids = user.dictionary_roles.filter(({ role }) => role === 'manager').map(({ dictionary_id }) => dictionary_id) || []
-  $: contributing_dictionary_ids = user.dictionary_roles.filter(({ role }) => role === 'contributor').map(({ dictionary_id }) => dictionary_id) || []
+  let { user, dictionaries, load_data }: Props = $props();
+
+  let { admin, supabase, add_editor, remove_editor } = $derived($page.data as PageData)
+  let managing_dictionary_ids = $derived(user.dictionary_roles.filter(({ role }) => role === 'manager').map(({ dictionary_id }) => dictionary_id) || [])
+  let contributing_dictionary_ids = $derived(user.dictionary_roles.filter(({ role }) => role === 'contributor').map(({ dictionary_id }) => dictionary_id) || [])
 </script>
 
 <tr title={$admin > 1 && JSON.stringify(user, null, 1)}>

@@ -1,15 +1,23 @@
 <script lang="ts">
+  import { run } from 'svelte/legacy';
+
   import { page } from '$app/stores';
   import { tweened } from 'svelte/motion';
   import { cubicOut } from 'svelte/easing';
 
-  export let progress = 0;
+  interface Props {
+    progress?: number;
+  }
+
+  let { progress = 0 }: Props = $props();
   const tweenedProgress = tweened(0, {
     duration: 2000,
     easing: cubicOut,
   });
-  $: tweenedProgress.set(progress);
-  $: percentage = Math.floor($tweenedProgress * 100);
+  run(() => {
+    tweenedProgress.set(progress);
+  });
+  let percentage = $derived(Math.floor($tweenedProgress * 100));
 </script>
 
 <div class="relative pt-1">
@@ -31,6 +39,6 @@
     <div
       style="width:{percentage}%"
       class="shadow-none flex flex-col text-center whitespace-nowrap
-        text-white justify-center bg-blue-500" />
+        text-white justify-center bg-blue-500"></div>
   </div>
 </div>

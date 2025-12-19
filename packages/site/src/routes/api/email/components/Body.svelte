@@ -2,9 +2,19 @@
   // @ts-nocheck
   import Preview from './Preview.svelte'
 
-  export let preview: string
-  export let backgroundColor = '#f8f9fc'
-  export let fontFamily = '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Ubuntu,sans-serif'
+  interface Props {
+    preview: string;
+    backgroundColor?: string;
+    fontFamily?: string;
+    children?: import('svelte').Snippet;
+  }
+
+  let {
+    preview,
+    backgroundColor = '#f8f9fc',
+    fontFamily = '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Ubuntu,sans-serif',
+    children
+  }: Props = $props();
 </script>
 
 <body
@@ -21,6 +31,6 @@
   <Preview {preview} />
 
   <table border="0" cellpadding="0" cellspacing="0" width="100%">
-    <slot />
+    {@render children?.()}
   </table>
 </body>

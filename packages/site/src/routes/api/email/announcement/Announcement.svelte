@@ -5,7 +5,11 @@
   import Paragraph from '../components/Paragraph.svelte'
   import Footer from '../components/Footer.svelte'
 
-  export let preview = 'Recent entry loading issues have been resolved'
+  interface Props {
+    preview?: string;
+  }
+
+  let { preview = 'Recent entry loading issues have been resolved' }: Props = $props();
 
   const title = 'Improved Entry Loading'
   const theme_color = '#546e7a'

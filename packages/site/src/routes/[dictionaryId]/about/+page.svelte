@@ -5,11 +5,11 @@
   import { page } from '$app/stores'
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte'
 
-  export let data
-  $: ({ is_manager, is_contributor, dictionary, update_about, dictionary_info, admin } = data)
-  let updated = ''
+  let { data } = $props();
+  let { is_manager, is_contributor, dictionary, update_about, dictionary_info, admin } = $derived(data)
+  let updated = $state('')
 
-  let editing = false
+  let editing = $state(false)
 </script>
 
 <div class="about">

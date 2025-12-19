@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { run } from 'svelte/legacy';
+
   // from https://github.com/beyonk-adventures/svelte-mapbox
   import { createEventDispatcher, onDestroy, onMount, setContext, tick } from 'svelte'
   import { loadScriptOnce, loadStylesOnce } from 'svelte-pieces'
@@ -10,24 +12,40 @@
   import { ADDED_FEATURE_ID_PREFIX } from '../../utils/randomId'
   import { PUBLIC_mapboxAccessToken } from '$env/static/public'
 
-  export let map: Map = null
-  export let version = 'v3.13.0'
-  export let customStylesheetUrl: string = undefined
-  export let accessToken = PUBLIC_mapboxAccessToken
-  export let options: Partial<MapboxOptions> = {}
-  export let zoom = 4
-  export let style = 'mapbox://styles/mapbox/streets-v11?optimize=true' // 'Mapbox Streets' // light-v8, light-v9, light-v10, dark-v10, satellite-v9, streets-v11
-  export let lng: number = undefined
-  export let lat: number = undefined
-  export let pointsToFit: number[][] = undefined
+  interface Props {
+    map?: Map;
+    version?: string;
+    customStylesheetUrl?: string;
+    accessToken?: any;
+    options?: Partial<MapboxOptions>;
+    zoom?: number;
+    style?: string; // 'Mapbox Streets' // light-v8, light-v9, light-v10, dark-v10, satellite-v9, streets-v11
+    lng?: number;
+    lat?: number;
+    pointsToFit?: number[][];
+    children?: import('svelte').Snippet<[any]>;
+  }
 
-  let center: LngLatLike
-  $: center = lng && lat ? [lng, lat] : [getTimeZoneLongitude() || -80, 10]
+  let {
+    map = $bindable(null),
+    version = 'v3.13.0',
+    customStylesheetUrl = undefined,
+    accessToken = PUBLIC_mapboxAccessToken,
+    options = {},
+    zoom = 4,
+    style = 'mapbox://styles/mapbox/streets-v11?optimize=true',
+    lng = undefined,
+    lat = undefined,
+    pointsToFit = undefined,
+    children
+  }: Props = $props();
 
-  let container: HTMLDivElement
+  let center: LngLatLike = $state()
+
+  let container: HTMLDivElement = $state()
   let mapbox: typeof import('mapbox-gl')
   const queue = new EventQueue()
-  let ready = false
+  let ready = $state(false)
 
   setContext(mapKey, {
     getMap: () => map,
@@ -140,9 +158,6 @@
     return mapbox
   }
 
-  $: if (zoom) setZoom(zoom)
-  $: if (center) setCenter(center)
-  $: if (pointsToFit?.length) fitPoints()
 
   async function fitPoints() {
     if (pointsToFit.length === 1) {
@@ -157,14 +172,26 @@
       maxZoom: 6,
     })
   }
+  run(() => {
+    center = lng && lat ? [lng, lat] : [getTimeZoneLongitude() || -80, 10]
+  });
+  run(() => {
+    if (zoom) setZoom(zoom)
+  });
+  run(() => {
+    if (center) setCenter(center)
+  });
+  run(() => {
+    if (pointsToFit?.length) fitPoints()
+  });
 </script>
 
 <div bind:this={container}>
   {#if ready}
-    <slot {map} />
+    {@render children?.({ map, })}
   {:else}
     <div class="w-full h-full bg-gray-100 flex items-center justify-center">
-      <span class="i-fa-solid-globe-asia text-6xl text-gray-300 animate-pulse" />
+      <span class="i-fa-solid-globe-asia text-6xl text-gray-300 animate-pulse"></span>
     </div>
   {/if}
 </div>

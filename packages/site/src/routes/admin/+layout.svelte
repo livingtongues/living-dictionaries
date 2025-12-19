@@ -5,7 +5,7 @@
   import Header from '$lib/components/shell/Header.svelte'
   import AdminGuard from '$lib/components/ui/AdminGuard.svelte'
 
-  export let data
+  let { data, children } = $props();
 </script>
 
 <SeoMetaTags title="Admin Panel" />
@@ -34,7 +34,7 @@
   </div>
 
   <div class="p-3">
-    <slot />
+    {@render children?.()}
   </div>
 </AdminGuard>
 

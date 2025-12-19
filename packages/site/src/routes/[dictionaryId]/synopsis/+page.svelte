@@ -6,13 +6,13 @@
   import { page } from '$app/stores'
   import { glossingLanguages } from '$lib/glosses/glossing-languages'
 
-  export let data
+  let { data } = $props();
   const { dictionary } = data
-  $: activeGlossingBcps = Array.isArray(dictionary.gloss_languages)
+  let activeGlossingBcps = $derived(Array.isArray(dictionary.gloss_languages)
     ? dictionary.gloss_languages.map(bcp =>
       $page.data.t({ dynamicKey: `gl.${bcp}`, fallback: glossingLanguages[bcp].vernacularName }),
     )
-    : []
+    : [])
 
   const { name, iso_639_3, glottocode, alternate_names, location, coordinates, featured_image } = dictionary
 </script>
@@ -28,7 +28,7 @@
   {#if !dictionary.con_language_description}
     <DisplayString display={$page.data.t('dictionary.location')} value={location} />
     <VisualMap {coordinates} />
-    <div class="mb-5" />
+    <div class="mb-5"></div>
     {#if featured_image}
       <div class="text-sm font-medium text-gray-700 mb-2">
         {$page.data.t('settings.featured_image')}
@@ -44,7 +44,7 @@
   {#if !iso_639_3 && !glottocode && activeGlossingBcps?.length === 0 && !alternate_names && !location && !coordinates && !featured_image}
     <i> {$page.data.t('home.no_results')} </i>
   {/if}
-  <div class="mb-5" />
+  <div class="mb-5"></div>
 </div>
 
 <SeoMetaTags
