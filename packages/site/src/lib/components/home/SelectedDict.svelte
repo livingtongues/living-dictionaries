@@ -1,15 +1,15 @@
 <script lang="ts">
   import type { DictionaryView } from '@living-dictionaries/types'
-  import { Button } from 'svelte-pieces'
-  import sanitize from 'xss'
-  import { onMount } from 'svelte'
   import { page } from '$app/stores'
+  import { Button } from '$lib/svelte-pieces'
+  import { onMount } from 'svelte'
+  import sanitize from 'xss'
 
   interface Props {
-    dictionary: DictionaryView;
+    dictionary: DictionaryView
   }
 
-  let { dictionary }: Props = $props();
+  let { dictionary }: Props = $props()
   let about = $state('')
 
   function truncateString(str: string, num: number) {

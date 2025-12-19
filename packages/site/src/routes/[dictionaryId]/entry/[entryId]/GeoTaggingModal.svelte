@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Button, Modal, ShowHide } from 'svelte-pieces'
+  import { Button, Modal, ShowHide } from '$lib/svelte-pieces'
   import type { Coordinates, IPoint, IRegion } from '@living-dictionaries/types'
   import { onMount } from 'svelte'
   import type { LngLatFull } from '@living-dictionaries/types/coordinates.interface'
@@ -67,7 +67,7 @@
   })
 </script>
 
-<Modal on:close={on_close} noscroll>
+<Modal {on_close} noscroll>
   <div class="h-sm">
     <Map pointsToFit={flattenCoordinates(coordinates)} {lng} {lat} zoom={6}>
       <NavigationControl />
@@ -85,7 +85,7 @@
                   <CoordinatesModal
                     lng={point.coordinates.longitude}
                     lat={point.coordinates.latitude}
-                    on:update={({ detail }) => {
+                    on_update={(detail) => {
                       const { points } = coordinates
                       points[index] = {
                         coordinates: {
@@ -95,12 +95,12 @@
                       }
                       savePoints(points)
                     }}
-                    on:remove={() => {
+                    on_remove={() => {
                       const { points } = coordinates
                       points.splice(index, 1)
                       savePoints(points)
                     }}
-                    on:close={toggle} />
+                    on_close={toggle} />
                 {/if}
                                         {/snippet}
                         </ShowHide>
@@ -119,17 +119,17 @@
                 <RegionModal
                   initialCenter={initialCenter}
                   {region}
-                  on:update={({ detail }) => {
+                  on_update={(detail) => {
                     const { regions } = coordinates
                     regions[index] = detail
                     saveRegions(regions)
                   }}
-                  on:remove={() => {
+                  on_remove={() => {
                     const { regions } = coordinates
                     regions.splice(index, 1)
                     saveRegions(regions)
                   }}
-                  on:close={toggle} />
+                  on_close={toggle} />
               {/if}
                                   {/snippet}
                     </ShowHide>
@@ -149,14 +149,14 @@
             {#if show}
               <CoordinatesModal
                 {initialCenter}
-                on:update={({ detail }) => {
+                on_update={(detail) => {
                   const newPoint = {
                     coordinates: { longitude: detail.lng, latitude: detail.lat },
                   }
                   const points = [...(coordinates?.points || []), newPoint]
                   savePoints(points)
                 }}
-                on:close={toggle} />
+                on_close={toggle} />
             {/if}
                             {/snippet}
                 </InitableShowHide>
@@ -171,11 +171,11 @@
               <RegionModal
                 initialCenter={initialCenter}
                 region={null}
-                on:update={({ detail }) => {
+                on_update={(detail) => {
                   const regions = [...(coordinates?.regions || []), detail]
                   saveRegions(regions)
                 }}
-                on:close={toggle} />
+                on_close={toggle} />
             {/if}
                             {/snippet}
                 </InitableShowHide>

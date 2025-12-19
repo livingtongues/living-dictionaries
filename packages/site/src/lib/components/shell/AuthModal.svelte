@@ -1,7 +1,7 @@
 <script lang="ts">
   import { run } from 'svelte/legacy';
 
-  import { Button, Form, Modal } from 'svelte-pieces'
+  import { Button, Form, Modal } from '$lib/svelte-pieces'
   import { onMount } from 'svelte'
   import { toast } from '../ui/Toasts.svelte'
   import { handle_sign_in_response } from '../../supabase/sign_in'
@@ -79,7 +79,7 @@
   {/if}
 </svelte:head>
 
-<Modal on:close={on_close}>
+<Modal {on_close}>
   {#snippet heading()}
     <span >{$page.data.t('header.login')}
       {#if submitting_code}

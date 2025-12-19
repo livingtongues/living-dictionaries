@@ -1,18 +1,18 @@
 <script lang="ts">
-  import { run } from 'svelte/legacy';
+  import { page } from '$app/stores'
 
-  import { Button, Modal } from 'svelte-pieces'
+  import AddImage from '$lib/components/image/AddImage.svelte'
+  import { Button, Modal } from '$lib/svelte-pieces'
+  import { run } from 'svelte/legacy'
   import { get } from 'svelte/store'
   import { apply_button_label } from './image-store'
-  import { page } from '$app/stores'
-  import AddImage from '$lib/components/image/AddImage.svelte'
 
   interface Props {
-    on_close: () => void;
-    sense_id: string;
+    on_close: () => void
+    sense_id: string
   }
 
-  let { on_close, sense_id }: Props = $props();
+  let { on_close, sense_id }: Props = $props()
   let photo_source: string = $state()
   let photographer: string = $state()
   let rights = $state(false)
@@ -47,7 +47,7 @@
     } else {
       photographer = ''
     }
-  });
+  })
 
   run(() => {
     if (photo_source?.length >= 10 && rights) {
@@ -55,10 +55,10 @@
     } else {
       apply_button_label.set({ ready_to_upload: false })
     }
-  });
+  })
 </script>
 
-<Modal on:close={on_close}>
+<Modal {on_close}>
   <label class="block mb-2 text-sm font-medium text-gray-700" for="photo_source">
     {$page.data.t('entry.source', { values: { media: $page.data.t('entry_field.photo') } })} <i class="text-gray-500">{$page.data.t('entry.source_message', { values: { media: $page.data.t('entry.this_image') } })}</i> (<span class="text-red-500">{$page.data.t('misc.required')}</span>)
   </label>

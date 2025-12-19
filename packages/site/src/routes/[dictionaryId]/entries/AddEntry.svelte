@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Button, ShowHide } from 'svelte-pieces'
+  import { Button, ShowHide } from '$lib/svelte-pieces'
   import { page } from '$app/stores'
   import EditFieldModal from '$lib/components/entry/EditFieldModal.svelte'
   import type { DbOperations } from '$lib/dbOperations'

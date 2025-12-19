@@ -1,23 +1,23 @@
 <script lang="ts">
-  import { run } from 'svelte/legacy';
-
   import type { DictionaryView, IPoint } from '@living-dictionaries/types'
-  import { Button, ShowHide } from 'svelte-pieces'
+
   import { page } from '$app/stores'
+  import { Button, ShowHide } from '$lib/svelte-pieces'
+  import { run } from 'svelte/legacy'
 
   interface Props {
-    dictionaries?: DictionaryView[];
-    my_dictionaries?: DictionaryView[];
-    selectedDictionaryId: string;
-    on_selected_dictionary_point: (point: IPoint) => void;
+    dictionaries?: DictionaryView[]
+    my_dictionaries?: DictionaryView[]
+    selectedDictionaryId: string
+    on_selected_dictionary_point: (point: IPoint) => void
   }
 
   let {
     dictionaries = [],
     my_dictionaries = [],
     selectedDictionaryId = $bindable(),
-    on_selected_dictionary_point
-  }: Props = $props();
+    on_selected_dictionary_point,
+  }: Props = $props()
 
   let currentDictionary: DictionaryView = $state()
   let { admin } = $derived($page.data)
@@ -30,7 +30,7 @@
     } else {
       currentDictionary = null
     }
-  });
+  })
 
   let searchFocused = $state(false)
   let searchString = $state('')
@@ -49,7 +49,7 @@
       .reduce((acc, dictionary) => {
         return acc.find(e => e.id === dictionary.id) ? [...acc] : [...acc, dictionary]
       }, [])
-  });
+  })
 
   let searchBlurTimeout
   function delayedSearchClose() {
@@ -151,15 +151,15 @@
     <div
       class="flex flex-wrap sm:flex-col overflow-y-auto
         overflow-x-hidden px-2 pb-2">
-      <ShowHide  >
+      <ShowHide>
         {#snippet children({ show, toggle })}
-                {#if !searchFocused && my_dictionaries}
+          {#if !searchFocused && my_dictionaries}
             {#each my_dictionaries as dictionary, i}
               {#if show || i < 3}
                 <Button
                   class="mb-1 mr-1"
                   color="black"
-                  on:click={() => setCurrentDictionary(dictionary)}>
+                  onclick={() => setCurrentDictionary(dictionary)}>
                   {dictionary?.name}
                 </Button>
               {/if}
@@ -174,8 +174,8 @@
               <div class="w-2 sm:hidden" />
             {/if} -->
           {/if}
-                      {/snippet}
-            </ShowHide>
+        {/snippet}
+      </ShowHide>
     </div>
   {:else}
     <div class="p-2 flex flex-col flex-1">

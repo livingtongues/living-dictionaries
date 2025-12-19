@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Button } from 'svelte-pieces'
+  import { Button } from '$lib/svelte-pieces'
   import EditString from '../[dictionaryId]/EditString.svelte'
   import { page } from '$app/stores'
   import Header from '$lib/components/shell/Header.svelte'

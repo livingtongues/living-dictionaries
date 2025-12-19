@@ -1,8 +1,7 @@
 <script lang="ts">
   import { run } from 'svelte/legacy';
 
-  import { Button, Form, Modal } from 'svelte-pieces'
-  import { createEventDispatcher } from 'svelte'
+  import { Button, Form, Modal } from '$lib/svelte-pieces'
   import { page } from '$app/stores'
   import { goto } from '$app/navigation'
   import type { SupportRequestBody } from '$api/email/support/+server'
@@ -13,13 +12,14 @@
 
   interface Props {
     subject?: Subjects;
+    on_close: () => void;
   }
 
-  let { subject = $bindable(undefined) }: Props = $props();
+  let { subject = $bindable(undefined), on_close }: Props = $props();
 
   function warn_if_about_too_short() {
     if (about_is_too_short()) {
-      close()
+      on_close()
       alert($page.data.t('about.message'))
       goto(`/${dictionary.id}/about`)
     }
@@ -38,12 +38,6 @@
   type Subjects = keyof typeof subjects
   type SubjectValues = typeof subjects[Subjects]
   const typedSubjects = Object.entries(subjects) as [Subjects, SubjectValues][]
-
-  const dispatch = createEventDispatcher<{ close: boolean }>()
-
-  function close() {
-    dispatch('close')
-  }
 
   let message = $state('')
   let email = $state('')
@@ -107,7 +101,7 @@
   }))
 </script>
 
-<Modal on:close class="bg-gray-100">
+<Modal {on_close} class="bg-gray-100">
   {#snippet heading()}
     <span >
       <i class="far fa-question-circle"></i>
@@ -117,7 +111,7 @@
     <Button
       onclick={() => {
         goto('/tutorials')
-        close()
+        on_close()
       }}
       class="mb-2">
       <span class="i-fluent-learning-app-24-regular -mt-2px"></span>

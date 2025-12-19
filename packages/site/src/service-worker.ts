@@ -56,7 +56,6 @@ _self.addEventListener('fetch', (event) => {
 
   // always serve static files and bundler-generated assets from cache
   if (url.host === _self.location.host && cached.has(url.pathname)) {
-    // @ts-expect-error
     event.respondWith(caches.match(event.request))
     return
   }

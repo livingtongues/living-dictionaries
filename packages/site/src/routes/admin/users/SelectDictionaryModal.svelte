@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { DictionaryView } from '@living-dictionaries/types'
-  import { Button, Modal } from 'svelte-pieces'
+  import { Button, Modal } from '$lib/svelte-pieces'
   import Filter from '$lib/components/Filter.svelte'
 
   interface Props {
@@ -12,7 +12,7 @@
   let { on_close, add_dictionary, dictionaries }: Props = $props();
 </script>
 
-<Modal on:close={on_close}>
+<Modal {on_close}>
   {#snippet heading()}
     <span >
       Select Dictionary

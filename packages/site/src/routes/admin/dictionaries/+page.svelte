@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { Tables, TablesUpdate } from '@living-dictionaries/types'
-  import { Button, IntersectionObserverShared, ResponsiveTable } from 'svelte-pieces'
+  import { Button, IntersectionObserverShared, ResponsiveTable } from '$lib/svelte-pieces'
   import { writable } from 'svelte/store'
   import { onMount } from 'svelte'
   import DictionaryRow from './DictionaryRow.svelte'

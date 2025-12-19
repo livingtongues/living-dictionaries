@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Button } from 'svelte-pieces'
+  import { Button } from '$lib/svelte-pieces'
   import sanitize from 'xss'
   import UserGuide from './UserGuide.svelte'
   import { page } from '$app/stores'

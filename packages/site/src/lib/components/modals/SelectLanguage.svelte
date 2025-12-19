@@ -1,11 +1,17 @@
 <script lang="ts">
-  import { Button, Modal } from 'svelte-pieces';
+  import { Button, Modal } from '$lib/svelte-pieces';
   import { page } from '$app/stores'
   import { changeLocale, locales, unpublishedLocales } from '$lib/i18n/changeLocale';
+
+  interface Props {
+    on_close: () => void;
+  }
+
+  let { on_close }: Props = $props();
   let {admin} = $derived($page.data)
 </script>
 
-<Modal on:close>
+<Modal {on_close}>
   {#snippet heading()}
     <span >
       {$page.data.t('header.select_language')}

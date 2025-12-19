@@ -1,7 +1,7 @@
 <script lang="ts">
   import { preventDefault } from 'svelte/legacy';
 
-  import { Button } from 'svelte-pieces'
+  import { Button } from '$lib/svelte-pieces'
   import type { HostedVideo } from '@living-dictionaries/types'
   import { parse_hosted_video_url } from './parse-hosted-video-url'
   import { page } from '$app/stores'

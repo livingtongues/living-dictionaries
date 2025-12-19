@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { BadgeArray } from 'svelte-pieces'
+  import { BadgeArray } from '$lib/svelte-pieces'
   import { page } from '$app/stores'
 
   interface Props {
@@ -19,4 +19,4 @@
   canEdit
   promptMessage={$page.data.t('create.enter_alternate_name')}
   addMessage={$page.data.t('misc.add')}
-  on:valueupdated={e => on_update(e.detail)} />
+  onvalueupdated={value => on_update(value)} />

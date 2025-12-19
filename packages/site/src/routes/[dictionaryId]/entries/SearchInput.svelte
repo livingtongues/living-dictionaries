@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { QueryParamStore } from 'svelte-pieces'
+  import type { QueryParamStore } from '$lib/svelte-pieces'
   import { page } from '$app/stores'
   import type { QueryParams } from '$lib/search/types'
 

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Button, Form } from 'svelte-pieces'
+  import { Button, Form } from '$lib/svelte-pieces'
   import { page } from '$app/stores'
 
 
