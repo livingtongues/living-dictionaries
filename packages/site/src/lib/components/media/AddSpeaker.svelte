@@ -2,7 +2,7 @@
   import { Button, Form, Modal } from '$lib/svelte-pieces'
   import type { Tables } from '@living-dictionaries/types'
   import { decades } from './ages'
-  import { page } from '$app/stores'
+  import { page } from '$app/state'
 
   interface Props {
     on_close: () => void;
@@ -10,7 +10,7 @@
   }
 
   let { on_close, on_speaker_added }: Props = $props();
-  let { dbOperations } = $derived($page.data)
+  let { dbOperations } = $derived(page.data)
 
   let displayName = $state('')
   let birthplace = $state('')
@@ -21,7 +21,7 @@
 
 <Modal {on_close}>
   {#snippet heading()}
-    <span >{$page.data.t('speakers.add_new_speaker')}
+    <span >{page.data.t('speakers.add_new_speaker')}
     </span>
   {/snippet}
 
@@ -38,7 +38,7 @@
     }}>
     {#snippet children({ loading })}
         <label for="name" class="block text-sm font-medium leading-5 text-gray-700 mt-4">
-        {$page.data.t('speakers.name')}
+        {page.data.t('speakers.name')}
       </label>
       <div class="mt-1 rounded-md shadow-sm">
         <input
@@ -50,7 +50,7 @@
       </div>
 
       <label for="birthplace" class="block text-sm font-medium leading-5 text-gray-700 mt-4">
-        {$page.data.t('speakers.birthplace')}
+        {page.data.t('speakers.birthplace')}
       </label>
       <div class="mt-1 rounded-md shadow-sm">
         <input
@@ -62,7 +62,7 @@
       </div>
 
       <label for="age" class="block text-sm font-medium leading-5 text-gray-700 mt-4">
-        {$page.data.t('speakers.age_range')}
+        {page.data.t('speakers.age_range')}
       </label>
       <div class="mt-1 rounded-md shadow-sm">
         <select id="age" bind:value={decade} class="form-input block w-full">
@@ -73,7 +73,7 @@
       </div>
 
       <div class="font-medium text-sm text-gray-700 mt-4">
-        {$page.data.t('speakers.gender')}
+        {page.data.t('speakers.gender')}
       </div>
       <div class="flex">
         <div class="mt-2 flex items-center">
@@ -81,7 +81,7 @@
           <div class="w-2"></div>
           <label for="male">
             <span class="block text-sm leading-5 font-medium text-gray-700">
-              {$page.data.t('speakers.male')}
+              {page.data.t('speakers.male')}
             </span>
           </label>
         </div>
@@ -91,7 +91,7 @@
           <div class="w-2"></div>
           <label for="female">
             <span class="block text-sm leading-5 font-medium text-gray-700">
-              {$page.data.t('speakers.female')}
+              {page.data.t('speakers.female')}
             </span>
           </label>
         </div>
@@ -101,7 +101,7 @@
           <div class="w-2"></div>
           <label for="other">
             <span class="block text-sm leading-5 font-medium text-gray-700">
-              {$page.data.t('speakers.other')}
+              {page.data.t('speakers.other')}
             </span>
           </label>
         </div>
@@ -111,7 +111,7 @@
         <input id="agree" type="checkbox" required bind:checked={agreeToBeOnline} />
         <div class="w-2"></div>
         <label for="agree" class="block text-sm leading-5 text-gray-900">
-          {$page.data.t('speakers.speaker_agrees')}
+          {page.data.t('speakers.speaker_agrees')}
         </label>
       </div>
 
@@ -119,10 +119,10 @@
 
       <div class="modal-footer space-x-1">
         <Button disabled={loading} onclick={on_close} form="simple" color="black">
-          {$page.data.t('misc.cancel')}
+          {page.data.t('misc.cancel')}
         </Button>
         <Button type="submit" form="filled" {loading}>
-          {$page.data.t('misc.save')}
+          {page.data.t('misc.save')}
         </Button>
       </div>
           {/snippet}

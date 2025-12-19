@@ -2,7 +2,7 @@
   import { Button } from '$lib/svelte-pieces'
   import type { Readable } from 'svelte/store'
   import type { PartnerWithPhoto } from '@living-dictionaries/types'
-  import { page } from '$app/stores'
+  import { page } from '$app/state'
   import Image from '$lib/components/image/Image.svelte'
   import AddImage from '$lib/components/image/AddImage.svelte'
 
@@ -34,14 +34,14 @@
     = 'https://firebasestorage.googleapis.com/v0/b/talking-dictionaries-alpha.appspot.com/o/livingdictionary%2Fimages%2FLiving_Tongues_Logo_transparent%20300dpi.png?alt=media'
 
   async function ask_partner_name() {
-    const name = prompt($page.data.t('partnership.name'))?.trim()
+    const name = prompt(page.data.t('partnership.name'))?.trim()
     if (name)
       await add_partner_name(name)
   }
 </script>
 
 <h3 class="font-semibold text-lg mb-1 mt-3">
-  {$page.data.t('partnership.title')}
+  {page.data.t('partnership.title')}
 </h3>
 
 <div>
@@ -57,7 +57,7 @@
           size="sm"
           onclick={async () => {
             await hide_living_tongues_logo(true)
-          }}>{$page.data.t('misc.delete')}
+          }}>{page.data.t('misc.delete')}
           <i class="fas fa-times"></i></Button>
       {/if}
     </div>
@@ -84,13 +84,13 @@
           color="red"
           size="sm"
           onclick={async () => {
-            if (confirm(`${$page.data.t('misc.delete')}?`)) {
+            if (confirm(`${page.data.t('misc.delete')}?`)) {
               if (partner.photo) {
                 await delete_partner_image({ photo_id: partner.photo.id, partner_id: partner.id })
               }
               await delete_partner(partner.id)
             }
-          }}>{$page.data.t('misc.delete')}
+          }}>{page.data.t('misc.delete')}
           <i class="fas fa-times"></i></Button>
       {/if}
     </div>
@@ -114,7 +114,7 @@
   {#if can_edit}
     <Button class="mt-2" onclick={ask_partner_name} form="filled">
       <i class="far fa-pencil"></i>
-      {$page.data.t('partnership.button')}
+      {page.data.t('partnership.button')}
     </Button>
   {/if}
 </div>

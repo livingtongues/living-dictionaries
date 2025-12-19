@@ -1,7 +1,7 @@
 <script lang="ts">
   import { Button } from '$lib/svelte-pieces'
   import sanitize from 'xss'
-  import { page } from '$app/stores'
+  import { page } from '$app/state'
   import SeoMetaTags from '$lib/components/SeoMetaTags.svelte'
 
   let { data } = $props();
@@ -13,21 +13,21 @@
 
 <div class="grammar">
   <h3 class="text-xl font-semibold mb-3">
-    {$page.data.t('dictionary.grammar')}
+    {page.data.t('dictionary.grammar')}
   </h3>
 
   {#if $is_manager}
     {#if editing}
-      <Button class="mb-2" onclick={() => (editing = false)}>{$page.data.t('misc.cancel')}</Button>
+      <Button class="mb-2" onclick={() => (editing = false)}>{page.data.t('misc.cancel')}</Button>
       <Button
         class="mb-2"
         form="filled"
         onclick={async () => {
           await update_grammar(updated)
           editing = false
-        }}>{$page.data.t('misc.save')}</Button>
+        }}>{page.data.t('misc.save')}</Button>
     {:else}
-      <Button class="mb-2" onclick={() => (editing = true)}>{$page.data.t('misc.edit')}</Button>
+      <Button class="mb-2" onclick={() => (editing = true)}>{page.data.t('misc.edit')}</Button>
     {/if}
   {/if}
 
@@ -43,7 +43,7 @@
       {#if updated || $dictionary_info.grammar}
         {@html sanitize(updated || $dictionary_info.grammar)}
       {:else}
-        <i>{$page.data.t('dictionary.no_info_yet')}</i>
+        <i>{page.data.t('dictionary.no_info_yet')}</i>
       {/if}
     </div>
   </div>
@@ -51,7 +51,7 @@
 
 <SeoMetaTags
   norobots={!dictionary.public}
-  title={$page.data.t('dictionary.grammar')}
+  title={page.data.t('dictionary.grammar')}
   dictionaryName={dictionary.name}
   description="Learn about the grammar of the language in this Living Dictionary."
   keywords="Grammar of a language, grammatical, Endangered Languages, Language Documentation, Language Revitalization, Build a Dictionary, Online Dictionary, Digital Dictionary, Dictionary Software, Free Software, Online Dictionary Builder, Living Dictionaries, Living Dictionary, Bibliography" />

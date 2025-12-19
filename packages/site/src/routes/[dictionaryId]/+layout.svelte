@@ -1,7 +1,7 @@
 <script lang="ts">
   import { Button, ResponsiveSlideover, ShowHide } from '$lib/svelte-pieces'
   import SideMenu from './SideMenu.svelte'
-  import { page } from '$app/stores'
+  import { page } from '$app/state'
   import Header from '$lib/components/shell/Header.svelte'
   import './custom-fonts.css'
 
@@ -39,17 +39,17 @@
 
     <div class="flex px-3 print:px-0">
       <ResponsiveSlideover
-        side={$page.data.t('page.direction') === 'rtl' ? 'right' : 'left'}
+        side={page.data.t('page.direction') === 'rtl' ? 'right' : 'left'}
         showWidth="md"
         on_close={() => set(false)}
         open={show}>
         <div
           class="h-full md:h-unset flex flex-col flex-shrink-0 md:top-12 md:sticky md:w-44 lg:w-48 print:hidden">
-          <SideMenu {dictionary} is_manager={$is_manager} entry_count={Object.keys($entries_data).length} on_close={() => set(false)} loading={$loading} />
+          <SideMenu {dictionary} is_manager={$is_manager} entry_count={Object.keys(entries_data).length} on_close={() => set(false)} loading={$loading} />
           <hr class="md:hidden" />
           <Button form="menu" class="text-left !md:hidden" onclick={toggle}>
             <i class="far fa-times fa-lg fa-fw"></i>
-            {$page.data.t('misc.close')}
+            {page.data.t('misc.close')}
           </Button>
         </div>
       </ResponsiveSlideover>

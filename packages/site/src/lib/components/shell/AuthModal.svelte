@@ -4,7 +4,7 @@
   import { toast } from '../ui/Toasts.svelte'
   import { handle_sign_in_response } from '../../supabase/sign_in'
   import { display_one_tap_button } from '$lib/supabase/auth'
-  import { page } from '$app/stores'
+  import { page } from '$app/state'
   import { dev } from '$app/environment'
   import { api_email_otp } from '$api/email/otp/_call'
 
@@ -39,7 +39,7 @@
   let submitting_code = $state(false)
   async function handleOTP(code: string) {
     submitting_code = true
-    const { data, error } = await $page.data.supabase.auth.verifyOtp({
+    const { data, error } = await page.data.supabase.auth.verifyOtp({
       email,
       token: code.toString(),
       type: 'email',
@@ -47,7 +47,7 @@
 
     sixDigitCode = null
     submitting_code = false
-    handle_sign_in_response({ user: data?.user, error, supabase: $page.data.supabase })
+    handle_sign_in_response({ user: data?.user, error, supabase: page.data.supabase })
     if (!error)
       on_close()
   }
@@ -79,7 +79,7 @@
 
 <Modal {on_close}>
   {#snippet heading()}
-    <span >{$page.data.t('header.login')}
+    <span >{page.data.t('header.login')}
       {#if submitting_code}
         <span class="i-svg-spinners-3-dots-fade align--4px"></span>
       {/if}
@@ -87,7 +87,7 @@
   {/snippet}
   {#if context === 'force'}
     <h4 class="text-green-700 mb-4">
-      {$page.data.t('header.please_create_account')}
+      {page.data.t('header.please_create_account')}
     </h4>
   {/if}
 
@@ -96,7 +96,7 @@
       <div class="mb-3" bind:this={button_parent}></div>
 
       <div class="mb-3 text-gray-500/80 text-sm font-semibold">
-        {$page.data.t('misc.disjunctive').toUpperCase()}
+        {page.data.t('misc.disjunctive').toUpperCase()}
       </div>
     {/if}
     <Form onsubmit={sendCode} >
@@ -105,17 +105,17 @@
           <input
             type="email"
             use:autofocus
-            placeholder={$page.data.t('contact.email')}
+            placeholder={page.data.t('contact.email')}
             class="border border-gray-400 p-2 rounded w-full"
             required
             bind:value={email} />
-          <Button class="text-nowrap ml-1" {loading} form="filled" type="submit">{$page.data.t('account.send_code')}</Button>
+          <Button class="text-nowrap ml-1" {loading} form="filled" type="submit">{page.data.t('account.send_code')}</Button>
         </div>
                 {/snippet}
         </Form>
   {:else}
     <div class="mb-2">
-      {$page.data.t('account.enter_6_digit_code_sent_to')}: {email}
+      {page.data.t('account.enter_6_digit_code_sent_to')}: {email}
     </div>
     <input
       type="text"

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { page } from '$app/stores'
+  import { page } from '$app/state'
   import { Button } from '$lib/svelte-pieces'
   import { crossfade, scale } from 'svelte/transition'
 
@@ -121,14 +121,14 @@
             color="red"
             form="filled"
             onclick={async (e) => {
-              const confirmation = confirm($page.data.t('entry.delete_image'))
+              const confirmation = confirm(page.data.t('entry.delete_image'))
               if (confirmation) {
                 e.stopPropagation()
                 await on_delete_image()
               }
             }}>
             <span class="i-fa-trash-o" style="margin: -1px 0 2px;"></span>
-            {$page.data.t('misc.delete')}
+            {page.data.t('misc.delete')}
           </Button>
         </div>
       {/if}

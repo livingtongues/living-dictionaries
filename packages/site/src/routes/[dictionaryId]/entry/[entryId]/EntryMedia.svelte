@@ -6,7 +6,7 @@
   import InitableShowHide from './InitableShowHide.svelte'
   import MapboxStatic from '$lib/components/maps/mapbox/static/MapboxStatic.svelte'
   import Image from '$lib/components/image/Image.svelte'
-  import { page } from '$app/stores'
+  import { page } from '$app/state'
   import type { DbOperations } from '$lib/dbOperations'
 
   interface Props {
@@ -67,7 +67,7 @@
               <span class="i-ic-outline-camera-alt text-xl"></span>
             </span>
             <div class="text-xs">
-              {$page.data.t('entry_field.photo')}
+              {page.data.t('entry_field.photo')}
             </div>
           </div>
           {#if show}
@@ -99,7 +99,7 @@
           onclick={toggle}>
           <span class="i-bi-camera-video text-xl"></span>
           <span class="text-xs">
-            {$page.data.t('video.add_video')}
+            {page.data.t('video.add_video')}
           </span>
         </button>
         {#if show}
@@ -129,7 +129,7 @@
             justify-center cursor-pointer p-6 mb-2">
           <span class="i-mdi-map-marker-plus mr-1" style="margin-top: -3px;"></span>
           <span class="text-xs">
-            {$page.data.t('create.select_coordinates')}
+            {page.data.t('create.select_coordinates')}
           </span>
         </button>
         <button
@@ -139,7 +139,7 @@
             justify-center cursor-pointer p-6 mb-2">
           <span class="i-mdi-map-marker-path mr-1" style="margin-top: -2px;"></span>
           <span class="text-xs">
-            {$page.data.t('create.select_region')}
+            {page.data.t('create.select_region')}
           </span>
         </button>
       {/if}

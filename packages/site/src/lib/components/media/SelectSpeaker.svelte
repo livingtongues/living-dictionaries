@@ -4,7 +4,7 @@
 
 <script lang="ts">
   import { Button } from '$lib/svelte-pieces'
-  import { page } from '$app/stores'
+  import { page } from '$app/state'
 
   interface Props {
     select_speaker?: (speaker_id: string) => Promise<void>;
@@ -14,7 +14,7 @@
 
   let { select_speaker = undefined, initialSpeakerId = undefined, children }: Props = $props();
 
-  let { speakers } = $derived($page.data)
+  let { speakers } = $derived(page.data)
 
   const addSpeaker = 'AddSpeaker'
   let speaker_id = $derived(initialSpeakerId || last_selected_speaker_id)
@@ -26,19 +26,19 @@
 
 {#if !speaker_id}
   <div class="text-sm font-medium leading-5 text-gray-600 mb-2">
-    {$page.data.t('audio.select_speaker')}
+    {page.data.t('audio.select_speaker')}
   </div>
 {/if}
 
 {#if !$speakers?.length}
-  <Button onclick={() => speaker_id = addSpeaker} form="filled"><span class="i-fa-solid-plus -mt-1"></span> {$page.data.t('misc.add')}</Button>
+  <Button onclick={() => speaker_id = addSpeaker} form="filled"><span class="i-fa-solid-plus -mt-1"></span> {page.data.t('misc.add')}</Button>
 {:else}
   <div class="flex rounded-md shadow-sm mb-4">
     <label
       for="speaker"
       class="inline-flex items-center px-3 ltr:rounded-l-md rtl:rounded-r-md border
         border-gray-300 bg-gray-50 text-gray-500">
-      {$page.data.t('entry_field.speaker')}
+      {page.data.t('entry_field.speaker')}
     </label>
     <select
       use:autofocus
@@ -61,7 +61,7 @@
       {/each}
       <option value={addSpeaker}>
         +
-        {$page.data.t('misc.add')}
+        {page.data.t('misc.add')}
       </option>
     </select>
   </div>

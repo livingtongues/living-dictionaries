@@ -2,9 +2,9 @@
   import type { EntryData } from '@living-dictionaries/types'
   import { Button } from '$lib/svelte-pieces'
   import VideoThirdParty from './VideoThirdParty.svelte'
-  import { page } from '$app/stores'
+  import { page } from '$app/state'
 
-  let { dbOperations, url_from_storage_path } = $derived($page.data)
+  let { dbOperations, url_from_storage_path } = $derived(page.data)
 
   interface Props {
     lexeme: string;
@@ -52,11 +52,11 @@
           color="red"
           form="filled"
           onclick={async () => {
-            const confirmation = confirm($page.data.t('entry.delete_video'))
+            const confirmation = confirm(page.data.t('entry.delete_video'))
             if (confirmation) await dbOperations.update_video({ deleted: new Date().toISOString(), id: video.id })
           }}>
           <span class="i-fa-trash-o" style="margin: -1px 0 2px;"></span>
-          {$page.data.t('misc.delete')}
+          {page.data.t('misc.delete')}
         </Button>
       </div>
     {/if}
@@ -69,7 +69,7 @@
           target="_blank">
           <i class="fas fa-download" />
           <span class="hidden sm:inline"
-            >{$page.data.t('misc.download', {
+            >{page.data.t('misc.download', {
               default: 'Download',
             })}</span>
         </Button>

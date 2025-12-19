@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { DictionaryView } from '@living-dictionaries/types'
 
-  import { page } from '$app/stores'
+  import { page } from '$app/state'
   import { Button, Modal, ShowHide } from '$lib/svelte-pieces'
 
   interface Props {
@@ -36,7 +36,7 @@
 
 <ShowHide>
   {#snippet children({ show, toggle })}
-    <Button form="filled" class="text-lg! font-semibold!" onclick={toggle}><span class="i-carbon-search text-2xl"></span> {$page.data.t('home.find_dictionary')}</Button>
+    <Button form="filled" class="text-lg! font-semibold!" onclick={toggle}><span class="i-carbon-search text-2xl"></span> {page.data.t('home.find_dictionary')}</Button>
     <div class="border-b mt-2 lt-md:hidden"></div>
     <div class="mb-2"></div>
 
@@ -54,7 +54,7 @@
             bind:value={searchString}
             class="form-input w-full pl-10 pr-8 py-1 rounded-lg
               text-gray-900 placeholder-gray-500 border-gray-600! shadow"
-            placeholder={$page.data.t('home.find_dictionary')} />
+            placeholder={page.data.t('home.find_dictionary')} />
           <button type="button" onclick={toggle} class="absolute inset-y-0 right-0 px-4 flex items-center focus:outline-none">
             <span class="i-la-times text-gray-400"></span>
           </button>

@@ -9,7 +9,7 @@
   import EntriesGallery from './EntriesGallery.svelte'
   import EntriesPrint from './EntriesPrint.svelte'
   import { pushState } from '$app/navigation'
-  import { page } from '$app/stores'
+  import { page } from '$app/state'
 
   interface Props {
     entries: EntryData[];
@@ -41,7 +41,7 @@
         on_click={(e) => { handle_entry_click(e, entry) }}
         {dbOperations} />
 
-      {#if $page.state.entry_id === entry.id}
+      {#if page.state.entry_id === entry.id}
         <Modal noscroll class="sm:max-w-95vw xl:max-w-1100px" on_close={() => history.back()} show_x={false}>
           <EntryPage
             data={{

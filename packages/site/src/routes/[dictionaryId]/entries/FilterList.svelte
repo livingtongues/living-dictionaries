@@ -1,7 +1,7 @@
 <script lang="ts">
   import { type QueryParamStore, ShowHide } from '$lib/svelte-pieces'
   import { slide } from 'svelte/transition'
-  import { page } from '$app/stores'
+  import { page } from '$app/state'
   import { restore_spaces_periods_from_underscores } from '$lib/search/augment-entry-for-search'
   import type { FilterListKeys, QueryParams } from '$lib/search/types'
 
@@ -48,7 +48,7 @@
       shadow-sm">
     <input
       type="search"
-      placeholder="{$page.data.t('about.search')} {label}"
+      placeholder="{page.data.t('about.search')} {label}"
       class="form-input block w-full text-sm md:text-xs md:leading-5 transition py-1 px-3"
       bind:value={search_value} />
   </div>
@@ -87,10 +87,10 @@
       <button type="button" class="p-1 mb-1 ml-1 text-xs text-gray-600" onclick={toggle}>
         {#if show}
           <span class="i-fa6-solid-chevron-up"></span>
-          {$page.data.t('entry.show_less')}
+          {page.data.t('entry.show_less')}
         {:else}
           <span class="i-fa6-solid-chevron-down -mt-1"></span>
-          {$page.data.t('entry.show_more')}
+          {page.data.t('entry.show_more')}
         {/if}
       </button>
     {/if}

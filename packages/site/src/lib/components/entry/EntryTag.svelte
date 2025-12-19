@@ -2,7 +2,7 @@
   import type { EntryData } from '@living-dictionaries/types'
   import type { SelectOption } from '$lib/components/ui/array/select-options.interface'
   import ModalEditableArray from '$lib/components/ui/array/ModalEditableArray.svelte'
-  import { page } from '$app/stores'
+  import { page } from '$app/state'
   import { should_include_tag } from '$lib/helpers/tag-visibility'
 
   interface Props {
@@ -19,7 +19,7 @@
     showPlus = true
   }: Props = $props();
 
-  let { tags: dictionary_tags, dbOperations, admin } = $derived($page.data)
+  let { tags: dictionary_tags, dbOperations, admin } = $derived(page.data)
   let tag_ids = $derived(tags.map(tag => tag.id))
   let visible_tags = $derived($dictionary_tags.filter(tag => should_include_tag(tag, $admin)))
   let options = $derived(visible_tags.map(tag => ({ value: tag.id, name: tag.name })) satisfies SelectOption[])
@@ -55,9 +55,9 @@
   {can_edit}
   canWriteIn
   {showPlus}
-  placeholder={$page.data.t('entry_field.custom_tags')}
+  placeholder={page.data.t('entry_field.custom_tags')}
   {on_update}>
   {#snippet heading()}
-    <span >{$page.data.t('entry_field.custom_tags')}</span>
+    <span >{page.data.t('entry_field.custom_tags')}</span>
   {/snippet}
 </ModalEditableArray>

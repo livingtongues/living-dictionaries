@@ -5,7 +5,7 @@
   import DictionariesHelping from './DictionariesHelping.svelte'
   import type { PageData } from './$types'
   import { supabase_date_to_friendly } from '$lib/helpers/time'
-  import { page } from '$app/stores'
+  import { page } from '$app/state'
 
   interface Props {
     user: UserWithDictionaryRoles;
@@ -15,7 +15,7 @@
 
   let { user, dictionaries, load_data }: Props = $props();
 
-  let { admin, supabase, add_editor, remove_editor } = $derived($page.data as PageData)
+  let { admin, supabase, add_editor, remove_editor } = $derived(page.data as PageData)
   let managing_dictionary_ids = $derived(user.dictionary_roles.filter(({ role }) => role === 'manager').map(({ dictionary_id }) => dictionary_id) || [])
   let contributing_dictionary_ids = $derived(user.dictionary_roles.filter(({ role }) => role === 'contributor').map(({ dictionary_id }) => dictionary_id) || [])
 </script>
