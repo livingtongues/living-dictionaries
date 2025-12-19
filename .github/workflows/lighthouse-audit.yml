@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Lighthouse Audit
         uses: treosh/lighthouse-ci-action@v9 # https://github.com/treosh/lighthouse-ci-action
