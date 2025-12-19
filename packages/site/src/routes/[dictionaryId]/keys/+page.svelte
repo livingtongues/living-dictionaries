@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { Tables } from '@living-dictionaries/types'
   import { onMount } from 'svelte'
-  import { Button } from 'svelte-pieces'
+  import { Button } from '$lib/svelte-pieces'
   import { supabase_date_to_friendly } from '$lib/helpers/time'
   import { page } from '$app/stores'
 

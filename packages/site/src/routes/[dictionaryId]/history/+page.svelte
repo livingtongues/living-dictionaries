@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Button, ResponsiveTable } from 'svelte-pieces'
+  import { Button, ResponsiveTable } from '$lib/svelte-pieces'
   import type { EntryData, Tables } from '@living-dictionaries/types'
   import { onMount } from 'svelte'
   import RecordRow from './RecordRow.svelte'

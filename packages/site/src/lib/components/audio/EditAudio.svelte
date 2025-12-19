@@ -1,23 +1,23 @@
 <script lang="ts">
-  import { run } from 'svelte/legacy';
-
-  import { Button, JSON, Modal } from 'svelte-pieces'
-  import type { Readable } from 'svelte/store'
   import type { EntryData } from '@living-dictionaries/types'
+
+  import type { Readable } from 'svelte/store'
   import type { AudioVideoUploadStatus } from './upload-audio'
   import { page } from '$app/stores'
-  import Waveform from '$lib/components/audio/Waveform.svelte'
-  import SelectAudio from '$lib/components/audio/SelectAudio.svelte'
   import RecordAudio from '$lib/components/audio/RecordAudio.svelte'
+  import SelectAudio from '$lib/components/audio/SelectAudio.svelte'
+  import Waveform from '$lib/components/audio/Waveform.svelte'
   import SelectSpeaker from '$lib/components/media/SelectSpeaker.svelte'
+  import { Button, JSON, Modal } from '$lib/svelte-pieces'
+  import { run } from 'svelte/legacy'
 
   interface Props {
-    on_close: () => void;
-    entry: EntryData;
-    sound_file: EntryData['audios'][0];
+    on_close: () => void
+    entry: EntryData
+    sound_file: EntryData['audios'][0]
   }
 
-  let { on_close, entry, sound_file }: Props = $props();
+  let { on_close, entry, sound_file }: Props = $props()
 
   let upload_triggered = $state(false)
   let { admin, dbOperations, url_from_storage_path } = $derived($page.data)
@@ -31,7 +31,7 @@
       file = undefined
       audioBlob = undefined
     }
-  });
+  })
 
   let initial_speaker_id = $derived(sound_file?.speakers?.[0].id)
 
@@ -62,17 +62,17 @@
   }
 </script>
 
-<Modal on:close={on_close}>
+<Modal {on_close}>
   {#snippet heading()}
-    <span > <span class="i-material-symbols-hearing text-lg text-sm"></span> {entry.main.lexeme.default} </span>
+    <span> <span class="i-material-symbols-hearing text-lg text-sm"></span> {entry.main.lexeme.default} </span>
   {/snippet}
 
   <SelectSpeaker
     initialSpeakerId={initial_speaker_id}
-    
+
     {select_speaker}>
     {#snippet children({ speaker_id })}
-        {#if sound_file}
+      {#if sound_file}
         <div class="px-1">
           <Waveform audioUrl={url_from_storage_path(sound_file.storage_path)} />
         </div>
@@ -101,8 +101,8 @@
           </div>
         {/if}
       {/if}
-          {/snippet}
-    </SelectSpeaker>
+    {/snippet}
+  </SelectSpeaker>
 
   <div class="modal-footer">
     {#if sound_file}

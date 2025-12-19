@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Button, Modal } from 'svelte-pieces'
+  import { Button, Modal } from '$lib/svelte-pieces'
   import type { UserWithDictionaryRoles } from '@living-dictionaries/types/supabase/users.types'
   import Filter from '$lib/components/Filter.svelte'
 
@@ -18,7 +18,7 @@
   }: Props = $props();
 </script>
 
-<Modal on:close={on_close}>
+<Modal {on_close}>
   {#snippet heading()}
     <span > Select a user to add role to</span>
   {/snippet}

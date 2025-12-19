@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { type QueryParamStore, ShowHide } from 'svelte-pieces'
+  import { type QueryParamStore, ShowHide } from '$lib/svelte-pieces'
   import { slide } from 'svelte/transition'
   import { page } from '$app/stores'
   import { restore_spaces_periods_from_underscores } from '$lib/search/augment-entry-for-search'

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Button, JSON, ShowHide } from 'svelte-pieces'
+  import { Button, JSON, ShowHide } from '$lib/svelte-pieces'
   import EditString from '../EditString.svelte'
   import { page } from '$app/stores'
   import EditableGlossesField from '$lib/components/settings/EditableGlossesField.svelte'
@@ -135,7 +135,7 @@
           </Button>
           {#if show}
             {#await import('$lib/components/modals/Contact.svelte') then { default: Contact }}
-              <Contact subject="delete_dictionary" on:close={toggle} />
+              <Contact subject="delete_dictionary" on_close={toggle} />
             {/await}
           {/if}
                       {/snippet}

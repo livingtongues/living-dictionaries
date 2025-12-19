@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Button, ResponsiveTable } from 'svelte-pieces'
+  import { Button, ResponsiveTable } from '$lib/svelte-pieces'
   import type { UserWithDictionaryRoles } from '@living-dictionaries/types/supabase/users.types'
   import UserRow from './UserRow.svelte'
   import SortUsers from './SortUsers.svelte'

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Button, ShowHide } from 'svelte-pieces'
+  import { Button, ShowHide } from '$lib/svelte-pieces'
   import { page } from '$app/stores'
 
   let { data } = $props();
@@ -41,7 +41,7 @@
         </Button>
         {#if show}
           {#await import('$lib/components/modals/Contact.svelte') then { default: Contact }}
-            <Contact subject="import_data" on:close={toggle} />
+            <Contact subject="import_data" on_close={toggle} />
           {/await}
         {/if}
                 {/snippet}

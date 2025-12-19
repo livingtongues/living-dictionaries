@@ -75,7 +75,7 @@
   {#await import('./ColumnAdjustSlideover.svelte') then { default: ColumnAdjustSlideover }}
     <ColumnAdjustSlideover
       {selectedColumn}
-      on:close={() => {
+      on_close={() => {
         selectedColumn = null
       }} />
   {/await}

@@ -3,7 +3,7 @@
 </script>
 
 <script lang="ts">
-  import { Button } from 'svelte-pieces'
+  import { Button } from '$lib/svelte-pieces'
   import { page } from '$app/stores'
 
   interface Props {

@@ -1,22 +1,22 @@
 <script lang="ts">
-  import { createBubbler, stopPropagation } from 'svelte/legacy';
+  import { createBubbler, stopPropagation } from 'svelte/legacy'
 
-  const bubble = createBubbler();
-  import { crossfade, scale } from 'svelte/transition'
-  import { Button } from 'svelte-pieces'
+  const bubble = createBubbler()
   import { page } from '$app/stores'
+  import { Button } from '$lib/svelte-pieces'
+  import { crossfade, scale } from 'svelte/transition'
 
   interface Props {
-    title: string;
-    gcs: string;
-    can_edit?: boolean;
-    square?: number;
-    width?: number;
-    height?: number;
-    photo_source?: string;
-    photographer?: string;
-    page_context?: string;
-    on_delete_image: () => Promise<any>;
+    title: string
+    gcs: string
+    can_edit?: boolean
+    square?: number
+    width?: number
+    height?: number
+    photo_source?: string
+    photographer?: string
+    page_context?: string
+    on_delete_image: () => Promise<any>
   }
 
   let {
@@ -29,8 +29,8 @@
     photo_source = undefined,
     photographer = undefined,
     page_context = undefined,
-    on_delete_image
-  }: Props = $props();
+    on_delete_image,
+  }: Props = $props()
 
   const [send, receive] = crossfade({
     duration: 200,

@@ -1,7 +1,7 @@
 <script lang="ts">
   import { run, preventDefault } from 'svelte/legacy';
 
-  import { Button, Modal, ShowHide } from 'svelte-pieces'
+  import { Button, Modal, ShowHide } from '$lib/svelte-pieces'
   import MultiSelect from './MultiSelect.svelte'
   import type { SelectOption } from './select-options.interface'
   import { page } from '$app/stores'
@@ -74,7 +74,7 @@
     {#if show}
       <Modal
         noscroll
-        on:close={() => {
+        on_close={() => {
           prepareSelected(values, options)
           toggle()
         }}>

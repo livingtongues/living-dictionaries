@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { DictionaryView } from '@living-dictionaries/types'
-  import { BadgeArrayEmit, Button, ShowHide } from 'svelte-pieces'
+  import { BadgeArrayEmit, Button, ShowHide } from '$lib/svelte-pieces'
 
   interface Props {
     dictionaries: DictionaryView[];
@@ -25,9 +25,9 @@
           strings={dictionary_ids.slice(0, show_all ? 1000 : 8)}
           canEdit
           addMessage="Add"
-          on:itemclicked={e => window.open(`/${e.detail.value}`, '_blank')}
-          on:itemremoved={async e => await remove_dictionary(e.detail.value)}
-          on:additem={toggle} />
+          onitemclicked={({ value }) => window.open(`/${value}`, '_blank')}
+          onitemremoved={async ({ value }) => await remove_dictionary(value)}
+          onadditem={toggle} />
         {#if dictionary_ids.length > 8}
           <Button
             color="black"

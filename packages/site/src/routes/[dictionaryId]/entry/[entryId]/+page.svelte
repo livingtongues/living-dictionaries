@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Button, JSON } from 'svelte-pieces'
+  import { Button, JSON } from '$lib/svelte-pieces'
   import EntryDisplay from './EntryDisplay.svelte'
   import { seo_description } from './seo_description'
   import { share } from '$lib/helpers/share'

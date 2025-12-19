@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { EntryFieldValue } from '@living-dictionaries/types'
-  import { ShowHide } from 'svelte-pieces'
+  import { ShowHide } from '$lib/svelte-pieces'
   import sanitize from 'xss'
 
   let { value, field, bcp = undefined, display, can_edit = false, on_update, class: class_prop = '' }: {

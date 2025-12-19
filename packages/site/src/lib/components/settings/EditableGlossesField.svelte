@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { IGlossLanguages } from '@living-dictionaries/types'
-  import { BadgeArrayEmit, Button, Modal, ShowHide } from 'svelte-pieces'
+  import { BadgeArrayEmit, Button, Modal, ShowHide } from '$lib/svelte-pieces'
   import { page } from '$app/stores'
   import Filter from '$lib/components/Filter.svelte'
 
@@ -44,10 +44,10 @@
       {minimum}
       canEdit
       addMessage={$page.data.t('misc.add')}
-      on:itemremoved={({ detail: { index } }) => remove_language(selectedLanguages[index])}
-      on:additem={toggle} />
+      onitemremoved={({ index }) => remove_language(selectedLanguages[index])}
+      onadditem={toggle} />
     {#if show}
-      <Modal on:close={toggle}>
+      <Modal on_close={toggle}>
         {#snippet heading()}
             <span >
             {$page.data.t('create.gloss_dictionary_in')}

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Button, ResponsiveSlideover, ShowHide } from 'svelte-pieces'
+  import { Button, ResponsiveSlideover, ShowHide } from '$lib/svelte-pieces'
   import SideMenu from './SideMenu.svelte'
   import { page } from '$app/stores'
   import Header from '$lib/components/shell/Header.svelte'

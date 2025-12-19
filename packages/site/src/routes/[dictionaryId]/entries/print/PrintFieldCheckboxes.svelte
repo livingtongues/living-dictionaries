@@ -1,7 +1,7 @@
 <script lang="ts">
   import { type EntryData, type IPrintFields, StandardPrintFields } from '@living-dictionaries/types'
 
-  import type { createPersistedStore } from 'svelte-pieces'
+  import type { createPersistedStore } from '$lib/svelte-pieces'
   import { page } from '$app/stores'
 
   interface Props {

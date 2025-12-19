@@ -3,7 +3,7 @@
 
   // from https://github.com/beyonk-adventures/svelte-mapbox
   import { createEventDispatcher, onDestroy, onMount, setContext, tick } from 'svelte'
-  import { loadScriptOnce, loadStylesOnce } from 'svelte-pieces'
+  import { loadScriptOnce, loadStylesOnce } from '$lib/svelte-pieces'
   import type { ErrorEvent, EventData, LngLat, LngLatBoundsLike, LngLatLike, Map, MapboxOptions } from 'mapbox-gl'
   import { mapKey } from '../context'
   import { EventQueue } from '../queue'

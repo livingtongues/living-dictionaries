@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { EntryData } from '@living-dictionaries/types'
-  import { ShowHide } from 'svelte-pieces'
+  import { ShowHide } from '$lib/svelte-pieces'
   import { page } from '$app/stores'
 
   let { lexeme, video, can_edit = false, class: class_prop = '' }: {

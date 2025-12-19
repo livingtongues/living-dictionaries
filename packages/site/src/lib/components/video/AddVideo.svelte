@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Button, Modal, ShowHide } from 'svelte-pieces'
+  import { Button, Modal, ShowHide } from '$lib/svelte-pieces'
   import type { EntryData, HostedVideo } from '@living-dictionaries/types'
   import type { Readable } from 'svelte/store'
   import SelectVideo from './SelectVideo.svelte'
@@ -34,7 +34,7 @@
   }
 </script>
 
-<Modal on:close={on_close}>
+<Modal {on_close}>
   {#snippet heading()}
     <span > <i class="far fa-film-alt text-sm"></i> {entry.main.lexeme.default} </span>
   {/snippet}
