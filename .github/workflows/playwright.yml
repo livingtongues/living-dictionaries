@@ -1,6 +1,6 @@
 name: Playwright E2E Tests
-on:
-  deployment_status
+# on:
+#   deployment_status
 
 jobs:
   run-e2e:
